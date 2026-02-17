@@ -1,5 +1,5 @@
 {
-  "extends": "@nzila/config/tsconfig/base",
+  "extends": "../config/tsconfig.base.json",
   "compilerOptions": {
     "jsx": "react-jsx",
     "outDir": "./dist",

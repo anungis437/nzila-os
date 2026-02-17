@@ -14,7 +14,8 @@
     "typecheck": "turbo typecheck",
     "clean": "turbo clean",
     "format": "prettier --write \"**/*.{ts,tsx,js,jsx,json,md}\"",
-    "format:check": "prettier --check \"**/*.{ts,tsx,js,jsx,json,md}\""
+    "format:check": "prettier --check \"**/*.{ts,tsx,js,jsx,json,md}\"",
+    "link": "pwsh -NoProfile -File scripts/link-workspaces.ps1"
   },
   "devDependencies": {
     "prettier": "^3.4.2",
