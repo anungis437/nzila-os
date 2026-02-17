@@ -1,0 +1,35 @@
+{
+  "template_version": "1.0.0",
+  "product_name": "CourtLens",
+  "repo_name": "courtlens-platform",
+  "owner_github": "anungis437",
+  "primary_app_path": "apps/web",
+  "app_port": 3000,
+  "tenant_key": "orgId",
+  "image_repo": "courtlens-web",
+  "auth_provider": "clerk",
+  "db_provider": "azure_postgresql",
+  "deploy_provider": "azure_container_apps",
+  "environments": {
+    "staging_url": "https://courtlens-staging.azurecontainerapps.io",
+    "production_url": "https://courtlens.azurecontainerapps.io"
+  },
+  "profile": "nextjs-aca-azurepg-clerk",
+  "modules": [
+    "core-governance",
+    "repo-bootstrap",
+    "monorepo-pnpm-turbo",
+    "auth-clerk",
+    "db-azurepg",
+    "deploy-aca-oidc",
+    "security-baseline",
+    "observability-audit",
+    "exports-compliance"
+  ],
+  "options": {
+    "enable_ci": true,
+    "enable_deploy_workflows": true,
+    "enable_ai_ops": false,
+    "strict_parity": true
+  }
+}

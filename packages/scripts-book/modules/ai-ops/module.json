@@ -1,0 +1,7 @@
+{
+  "name": "ai-ops",
+  "description": "AI/ML operations patterns (optional)",
+  "chapters": ["11-ai-ml-operations"],
+  "docs": [],
+  "optional": true
+}

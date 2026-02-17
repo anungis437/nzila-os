@@ -1,0 +1,509 @@
+{
+  "dashboard_id": "government_funding_analytics",
+  "name": "Government Funding Analytics",
+  "description": "Track government funding opportunities, applications, and ROI across SR&ED, IRAP, SDTC, MITACS programs",
+  "version": "1.0.0",
+  "last_updated": "2026-02-17",
+  "refresh_rate": "weekly",
+  "audience": ["CEO", "CFO", "CTO", "Finance Team"],
+  
+  "sections": [
+    {
+      "section_id": "funding_overview",
+      "name": "Funding Overview",
+      "type": "kpi_grid",
+      "layout": "2x3",
+      "widgets": [
+        {
+          "widget_id": "total_funding_2026",
+          "name": "Total Funding 2026 (Projected)",
+          "type": "kpi",
+          "value": 680000,
+          "unit": "currency",
+          "target": 1100000,
+          "status": "approaching",
+          "breakdown": {
+            "sred_tax_credit": 80000,
+            "irap_grants": 350000,
+            "mitacs_internships": 60000,
+            "sdtc_pending": 0,
+            "other": 190000
+          }
+        },
+        {
+          "widget_id": "total_funding_2027",
+          "name": "Total Funding 2027 (Projected)",
+          "type": "kpi",
+          "value": 2760000,
+          "unit": "currency",
+          "target": 3000000,
+          "status": "on-track",
+          "breakdown": {
+            "sred_tax_credit": 380000,
+            "irap_grants": 300000,
+            "sdtc_climate": 1000000,
+            "mitacs_internships": 120000,
+            "strategic_innovation_fund": 960000
+          }
+        },
+        {
+          "widget_id": "active_applications",
+          "name": "Active Applications",
+          "type": "kpi",
+          "value": 7,
+          "target": 10,
+          "status": "on-track",
+          "breakdown": {
+            "pending_review": 3,
+            "approved_not_disbursed": 2,
+            "in_preparation": 2
+          }
+        },
+        {
+          "widget_id": "success_rate",
+          "name": "Success Rate (2024-2026)",
+          "type": "kpi",
+          "value": 67,
+          "unit": "percent",
+          "target": 75,
+          "status": "approaching",
+          "calculation": "6 approved / 9 total applications"
+        },
+        {
+          "widget_id": "roi_on_application_effort",
+          "name": "ROI on Application Effort",
+          "type": "kpi",
+          "value": 8.5,
+          "unit": "ratio",
+          "target": 10,
+          "status": "on-track",
+          "calculation": "$680K funding / $80K application effort = 8.5x"
+        },
+        {
+          "widget_id": "compliance_status",
+          "name": "Compliance Status",
+          "type": "kpi",
+          "value": 92,
+          "unit": "percent",
+          "target": 100,
+          "status": "on-track",
+          "breakdown": {
+            "sred_documentation": 95,
+            "milestone_reporting": 88,
+            "audit_readiness": 93
+          }
+        }
+      ]
+    },
+    
+    {
+      "section_id": "sred_tax_credits",
+      "name": "SR&ED Tax Credits",
+      "type": "table_with_timeline",
+      "description": "Scientific Research & Experimental Development tax credit tracking (35-40% of qualified R&D expenditures)",
+      "table": {
+        "columns": ["year", "qualified_expenditure", "tax_credit_rate", "credit_amount", "filing_status", "disbursement_date"],
+        "rows": [
+          {
+            "year": "2025",
+            "qualified_expenditure": 200000,
+            "tax_credit_rate": 0.40,
+            "credit_amount": 80000,
+            "filing_status": "Filed (Q2 2026)",
+            "disbursement_date": "2026-09-15",
+            "notes": "3 engineers' salaries (60%) + cloud infrastructure (20%) + AI model training (20%)"
+          },
+          {
+            "year": "2026",
+            "qualified_expenditure": 950000,
+            "tax_credit_rate": 0.40,
+            "credit_amount": 380000,
+            "filing_status": "To File (Q2 2027)",
+            "disbursement_date": "2027-09-15",
+            "notes": "Backbone architecture (35%) + Union Eyes migration (25%) + AI Companion (20%) + Patent filings (20%)"
+          },
+          {
+            "year": "2027",
+            "qualified_expenditure": 1400000,
+            "tax_credit_rate": 0.35,
+            "credit_amount": 490000,
+            "filing_status": "Projected",
+            "disbursement_date": "2028-09-15",
+            "notes": "Platform migrations (40%) + AI/ML research (30%) + Security/compliance (30%)"
+          }
+        ]
+      },
+      "timeline": {
+        "milestones": [
+          {"date": "2026-04-30", "event": "File SR&ED 2025 claim", "status": "pending"},
+          {"date": "2026-09-15", "event": "Receive SR&ED 2025 refund ($80K)", "status": "pending"},
+          {"date": "2027-04-30", "event": "File SR&ED 2026 claim", "status": "projected"},
+          {"date": "2027-09-15", "event": "Receive SR&ED 2026 refund ($380K)", "status": "projected"}
+        ]
+      }
+    },
+    
+    {
+      "section_id": "irap_grants",
+      "name": "IRAP Grants (NRC)",
+      "type": "pipeline_table",
+      "description": "Industrial Research Assistance Program funding pipeline",
+      "table": {
+        "columns": ["platform", "project", "funding_requested", "status", "probability", "expected_value", "timeline"],
+        "rows": [
+          {
+            "platform": "Memora",
+            "project": "AI Companion for Elderly Care",
+            "funding_requested": 150000,
+            "status": "Pending Review",
+            "probability": 0.70,
+            "expected_value": 105000,
+            "timeline": "Decision Q2 2026, Disbursement 12 months",
+            "notes": "IRAP advisor meeting Feb 2026, strong fit with healthcare mandate"
+          },
+          {
+            "platform": "CORA",
+            "project": "AgTech Climate Adaptation",
+            "funding_requested": 200000,
+            "status": "Pending Review",
+            "probability": 0.65,
+            "expected_value": 130000,
+            "timeline": "Decision Q3 2026, Disbursement 18 months",
+            "notes": "Synergy with SDTC climate application"
+          },
+          {
+            "platform": "Union Eyes",
+            "project": "Pension Forecasting AI",
+            "funding_requested": 180000,
+            "status": "Planned (Q3 2026)",
+            "probability": 0.60,
+            "expected_value": 108000,
+            "timeline": "Application Q3 2026, Decision Q4 2026",
+            "notes": "Patent pending Q2 2026, strong IP signal"
+          },
+          {
+            "platform": "ABR Insights",
+            "project": "Bias Detection in EdTech",
+            "funding_requested": 120000,
+            "status": "Planned (Q4 2026)",
+            "probability": 0.55,
+            "expected_value": 66000,
+            "timeline": "Application Q4 2026, Decision Q1 2027",
+            "notes": "DEI Tech mandate alignment"
+          }
+        ],
+        "summary": {
+          "total_requested": 650000,
+          "total_expected_value": 409000,
+          "weighted_probability": 0.63
+        }
+      }
+    },
+    
+    {
+      "section_id": "sdtc_climate_tech",
+      "name": "SDTC Climate Technology",
+      "type": "application_tracker",
+      "description": "Sustainable Development Technology Canada funding for CORA climate adaptation",
+      "application": {
+        "program": "SDTC Seed Fund",
+        "platform": "CORA",
+        "project_title": "AI-Powered Climate Adaptation for African Agriculture",
+        "funding_requested": 1000000,
+        "funding_stage": "Seed",
+        "application_status": "Expression of Interest (Q3 2026)",
+        "decision_timeline": "EOI Review Q4 2026, Full Application Q1 2027, Decision Q2 2027",
+        "disbursement_schedule": "Milestone-based over 24 months (Q3 2027 - Q3 2029)",
+        "key_milestones": [
+          {"milestone": "Climate risk modeling AI", "timeline": "Month 0-6", "funding": 200000},
+          {"milestone": "Crop adaptation recommendations", "timeline": "Month 6-12", "funding": 300000},
+          {"milestone": "Farmer network expansion (1000 farms)", "timeline": "Month 12-18", "funding": 300000},
+          {"milestone": "Carbon credit marketplace beta", "timeline": "Month 18-24", "funding": 200000}
+        ],
+        "eligibility_strengths": [
+          "Climate adaptation focus (CORA weather/climate data)",
+          "African market focus (SDTC international mandate)",
+          "Technology readiness (CORA MVP operational)",
+          "Economic impact (1000 farms, 10,000 livelihoods)"
+        ],
+        "competitive_positioning": "Strong (climate + agriculture + AI + African diaspora market = unique)",
+        "probability": 0.45,
+        "expected_value": 450000
+      }
+    },
+    
+    {
+      "section_id": "mitacs_internships",
+      "name": "MITACS Internships",
+      "type": "resource_tracker",
+      "description": "MITACS internship program for R&D talent",
+      "internships": [
+        {
+          "year": "2026",
+          "interns_planned": 2,
+          "funding_per_intern": 30000,
+          "total_funding": 60000,
+          "projects": [
+            {"intern": "AI/ML Researcher (Memora)", "university": "UBC", "focus": "Conversational AI for health reminders", "duration": "12 months"},
+            {"intern": "Data Scientist (Union Eyes)", "university": "University of Toronto", "focus": "Pension forecasting algorithms", "duration": "12 months"}
+          ],
+          "application_status": "Planned (Q2 2026)",
+          "probability": 0.80
+        },
+        {
+          "year": "2027",
+          "interns_planned": 4,
+          "funding_per_intern": 30000,
+          "total_funding": 120000,
+          "projects": [
+            {"intern": "AI/ML Researcher (ABR)", "university": "McGill", "focus": "Bias detection in gamified learning", "duration": "12 months"},
+            {"intern": "Data Scientist (CORA)", "university": "University of Waterloo", "focus": "Climate adaptation ML models", "duration": "12 months"},
+            {"intern": "Software Engineer (Backbone)", "university": "UBC", "focus": "Multi-tenant architecture optimization", "duration": "12 months"},
+            {"intern": "Security Researcher (Compliance)", "university": "University of Toronto", "focus": "SOC 2 automation & monitoring", "duration": "12 months"}
+          ],
+          "application_status": "Projected",
+          "probability": 0.75
+        }
+      ],
+      "total_2026": 60000,
+      "total_2027": 120000
+    },
+    
+    {
+      "section_id": "strategic_innovation_fund",
+      "name": "Strategic Innovation Fund",
+      "type": "opportunity_tracker",
+      "description": "Long-term strategic funding opportunities (2027-2030)",
+      "opportunities": [
+        {
+          "program": "Innovation Superclusters Initiative",
+          "focus_area": "Digital Technology Supercluster",
+          "project_concept": "Multi-Platform AI Companion Ecosystem",
+          "funding_potential": 2000000,
+          "timeline": "Application Q1 2027, Decision Q3 2027",
+          "readiness": "APPROACHING",
+          "requirements": [
+            "Consortium partners (3+ organizations)",
+            "Economic impact projections (jobs, GDP)",
+            "IP commercialization plan",
+            "Technology demonstration (PoC operational)"
+          ],
+          "probability": 0.30,
+          "expected_value": 600000,
+          "notes": "Requires Union Eyes + ABR + Memora operational, strong AI IP portfolio"
+        },
+        {
+          "program": "Canada-Africa Partnership Platform",
+          "focus_area": "African Market Expansion",
+          "project_concept": "CORA + DiasporaCore African Expansion",
+          "funding_potential": 1500000,
+          "timeline": "Application Q2 2027, Decision Q4 2027",
+          "readiness": "EARLY",
+          "requirements": [
+            "African government partnerships",
+            "Financial inclusion impact metrics",
+            "Climate adaptation outcomes",
+            "Local job creation projections"
+          ],
+          "probability": 0.25,
+          "expected_value": 375000,
+          "notes": "Synergy with CORA SDTC application, DiasporaCore remittance growth"
+        }
+      ]
+    },
+    
+    {
+      "section_id": "funding_roi_analysis",
+      "name": "Funding ROI Analysis",
+      "type": "chart_with_table",
+      "chart": {
+        "type": "waterfall",
+        "title": "Government Funding Impact on Runway (2026-2027)",
+        "data": [
+          {"category": "Baseline Runway (18 months)", "value": 18},
+          {"category": "SR&ED 2025 Refund (+2 months)", "value": 2},
+          {"category": "IRAP Memora (+3 months)", "value": 3},
+          {"category": "IRAP CORA (+4 months)", "value": 4},
+          {"category": "MITACS Internships (+1 month)", "value": 1},
+          {"category": "SDTC CORA (+10 months)", "value": 10},
+          {"category": "SR&ED 2026 Refund (+5 months)", "value": 5},
+          {"category": "Extended Runway (43 months)", "value": 43}
+        ]
+      },
+      "table": {
+        "columns": ["program", "funding_2026", "funding_2027", "total_funding", "runway_extension_months", "cost_of_capital_saved"],
+        "rows": [
+          {
+            "program": "SR&ED Tax Credits",
+            "funding_2026": 80000,
+            "funding_2027": 380000,
+            "total_funding": 460000,
+            "runway_extension_months": 7,
+            "cost_of_capital_saved": 92000,
+            "notes": "Non-dilutive, recurring annual program"
+          },
+          {
+            "program": "IRAP Grants",
+            "funding_2026": 350000,
+            "funding_2027": 300000,
+            "total_funding": 650000,
+            "runway_extension_months": 10,
+            "cost_of_capital_saved": 130000,
+            "notes": "Project-based, milestone-driven"
+          },
+          {
+            "program": "SDTC Climate",
+            "funding_2026": 0,
+            "funding_2027": 1000000,
+            "total_funding": 1000000,
+            "runway_extension_months": 15,
+            "cost_of_capital_saved": 200000,
+            "notes": "Competitive, climate-focused"
+          },
+          {
+            "program": "MITACS Internships",
+            "funding_2026": 60000,
+            "funding_2027": 120000,
+            "total_funding": 180000,
+            "runway_extension_months": 3,
+            "cost_of_capital_saved": 36000,
+            "notes": "Talent acquisition + R&D funding"
+          },
+          {
+            "program": "Strategic Innovation Fund",
+            "funding_2026": 0,
+            "funding_2027": 960000,
+            "total_funding": 960000,
+            "runway_extension_months": 14,
+            "cost_of_capital_saved": 192000,
+            "notes": "Long-term, consortium-based"
+          }
+        ],
+        "summary": {
+          "total_funding_2026": 490000,
+          "total_funding_2027": 2760000,
+          "total_funding": 3250000,
+          "total_runway_extension_months": 49,
+          "total_cost_of_capital_saved": 650000
+        }
+      }
+    },
+    
+    {
+      "section_id": "compliance_calendar",
+      "name": "Compliance & Reporting Calendar",
+      "type": "calendar",
+      "description": "Quarterly reporting deadlines, milestone tracking, audit schedules",
+      "calendar": [
+        {
+          "date": "2026-02-28",
+          "event": "IRAP Memora - Quarterly Report Q1",
+          "type": "milestone_report",
+          "owner": "CTO",
+          "status": "upcoming"
+        },
+        {
+          "date": "2026-04-30",
+          "event": "SR&ED 2025 Tax Filing Deadline",
+          "type": "tax_filing",
+          "owner": "CFO",
+          "status": "upcoming"
+        },
+        {
+          "date": "2026-05-31",
+          "event": "IRAP Memora - Quarterly Report Q2",
+          "type": "milestone_report",
+          "owner": "CTO",
+          "status": "pending"
+        },
+        {
+          "date": "2026-06-30",
+          "event": "MITACS Intern Progress Review",
+          "type": "progress_review",
+          "owner": "CTO",
+          "status": "pending"
+        },
+        {
+          "date": "2026-08-31",
+          "event": "SDTC EOI Submission",
+          "type": "application",
+          "owner": "CEO",
+          "status": "pending"
+        },
+        {
+          "date": "2026-09-15",
+          "event": "SR&ED 2025 Refund Disbursement (Expected)",
+          "type": "disbursement",
+          "owner": "CFO",
+          "status": "pending"
+        },
+        {
+          "date": "2026-11-30",
+          "event": "IRAP CORA - Application Submission",
+          "type": "application",
+          "owner": "CEO",
+          "status": "pending"
+        },
+        {
+          "date": "2027-01-31",
+          "event": "SDTC Full Application Submission",
+          "type": "application",
+          "owner": "CEO",
+          "status": "projected"
+        },
+        {
+          "date": "2027-04-30",
+          "event": "SR&ED 2026 Tax Filing Deadline",
+          "type": "tax_filing",
+          "owner": "CFO",
+          "status": "projected"
+        }
+      ]
+    }
+  ],
+  
+  "filters": {
+    "program": {
+      "type": "multi-select",
+      "options": ["SR&ED", "IRAP", "SDTC", "MITACS", "Strategic Innovation Fund", "All"],
+      "default": "All"
+    },
+    "status": {
+      "type": "multi-select",
+      "options": ["Approved", "Pending", "Planned", "Projected", "All"],
+      "default": "All"
+    },
+    "year": {
+      "type": "single-select",
+      "options": [2026, 2027, 2028],
+      "default": 2026
+    }
+  },
+  
+  "alerts": [
+    {
+      "alert_id": "deadline_approaching",
+      "condition": "event.date <= today + 30 days AND event.status = 'upcoming'",
+      "severity": "warning",
+      "message": "Upcoming deadline: {event.event} on {event.date}"
+    },
+    {
+      "alert_id": "application_overdue",
+      "condition": "event.date < today AND event.status = 'upcoming' AND event.type = 'application'",
+      "severity": "critical",
+      "message": "Overdue application: {event.event}"
+    },
+    {
+      "alert_id": "funding_gap",
+      "condition": "total_funding_2026 < 800000",
+      "severity": "warning",
+      "message": "2026 funding below target ($800K). Accelerate IRAP applications."
+    }
+  ],
+  
+  "dependencies": [
+    "business/funding-strategy/government-funding-strategy.md",
+    "business/financial-models/5-year-projections.md",
+    "corporate/compliance/sred-documentation.md"
+  ]
+}

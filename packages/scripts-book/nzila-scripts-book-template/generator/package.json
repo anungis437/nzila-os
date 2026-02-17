@@ -1,0 +1,27 @@
+{
+  "name": "@nzila/scripts-book-generator",
+  "version": "1.0.0",
+  "description": "CLI generator for Nzila Scripts Book Template Kit",
+  "private": true,
+  "type": "module",
+  "main": "dist/index.js",
+  "bin": {
+    "scripts-book": "dist/index.js"
+  },
+  "scripts": {
+    "build": "tsc",
+    "dev": "tsc --watch"
+  },
+  "dependencies": {
+    "commander": "^12.1.0",
+    "fast-glob": "^3.3.2",
+    "fs-extra": "^11.2.0",
+    "picocolors": "^1.1.1",
+    "zod": "^3.24.1"
+  },
+  "devDependencies": {
+    "@types/fs-extra": "^11.0.4",
+    "@types/node": "^20.17.0",
+    "typescript": "^5.6.0"
+  }
+}

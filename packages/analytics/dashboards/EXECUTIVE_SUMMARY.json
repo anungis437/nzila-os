@@ -1,0 +1,210 @@
+{
+  "dashboard_id": "executive_summary",
+  "name": "Executive Summary Dashboard",
+  "description": "High-level portfolio health metrics for C-suite and board members",
+  "version": "1.0.0",
+  "last_updated": "2026-02-17",
+  "refresh_rate": "daily",
+  "audience": ["CEO", "CFO", "CTO", "Board"],
+  "sections": [
+    {
+      "section_id": "portfolio_overview",
+      "title": "Portfolio Overview",
+      "layout": "2x2",
+      "widgets": [
+        {
+          "widget_id": "total_platforms",
+          "type": "kpi",
+          "title": "Total Platforms",
+          "value": 15,
+          "change": "+3",
+          "change_period": "quarter",
+          "target": 15,
+          "format": "number",
+          "color": "green"
+        },
+        {
+          "widget_id": "business_verticals",
+          "type": "kpi",
+          "title": "Business Verticals",
+          "value": 10,
+          "change": "+2",
+          "change_period": "quarter",
+          "target": 10,
+          "format": "number",
+          "color": "green"
+        },
+        {
+          "widget_id": "total_entities",
+          "type": "kpi",
+          "title": "Total Entities",
+          "value": 12000,
+          "change": "+4000",
+          "change_period": "quarter",
+          "target": 12000,
+          "format": "number",
+          "color": "green"
+        },
+        {
+          "widget_id": "engineering_investment",
+          "type": "kpi",
+          "title": "Engineering Investment",
+          "value": 4000000,
+          "change": "+2050000",
+          "change_period": "correction",
+          "target": 4000000,
+          "format": "currency",
+          "color": "green"
+        }
+      ]
+    },
+    {
+      "section_id": "financial_health",
+      "title": "Financial Health",
+      "layout": "2x2",
+      "widgets": [
+        {
+          "widget_id": "arr_target_2026",
+          "type": "kpi",
+          "title": "2026 ARR Target",
+          "value": 350000,
+          "progress": 0,
+          "target": 350000,
+          "format": "currency",
+          "color": "blue"
+        },
+        {
+          "widget_id": "arr_target_2030",
+          "type": "kpi",
+          "title": "2030 ARR Target",
+          "value": 6000000,
+          "progress": 5.8,
+          "target": 6000000,
+          "format": "currency",
+          "color": "blue"
+        },
+        {
+          "widget_id": "customer_count",
+          "type": "kpi",
+          "title": "Customer Target",
+          "value": 25,
+          "progress": 0,
+          "target": 25,
+          "format": "number",
+          "color": "blue"
+        },
+        {
+          "widget_id": "runway_months",
+          "type": "kpi",
+          "title": "Funding Runway",
+          "value": 18,
+          "target": 18,
+          "format": "months",
+          "color": "green"
+        }
+      ]
+    },
+    {
+      "section_id": "platform_maturity",
+      "title": "Platform Maturity",
+      "layout": "bar_chart",
+      "widgets": [
+        {
+          "widget_id": "production_readiness",
+          "type": "horizontal_bar",
+          "title": "Production Readiness by Platform",
+          "data": [
+            {"label": "ABR Insights", "value": 9.1, "max": 10},
+            {"label": "CongoWave", "value": 10.0, "max": 10},
+            {"label": "Union Eyes", "value": 9.5, "max": 10},
+            {"label": "CyberLearn", "value": 7.5, "max": 10},
+            {"label": "Shop Quoter", "value": 7.0, "max": 10},
+            {"label": "eExports", "value": 8.0, "max": 10},
+            {"label": "Trade OS", "value": 6.5, "max": 10},
+            {"label": "Court Lens", "value": 6.0, "max": 10}
+          ]
+        }
+      ]
+    },
+    {
+      "section_id": "risk_summary",
+      "title": "Risk Summary",
+      "layout": "table",
+      "widgets": [
+        {
+          "widget_id": "risk_overview",
+          "type": "table",
+          "title": "Platform Risk Assessment",
+          "columns": ["Platform", "Complexity", "Risk Level", "Migration Weeks"],
+          "data": [
+            {"platform": "Union Eyes", "complexity": "EXTREME", "risk": "HIGH", "weeks": "10-12"},
+            {"platform": "C3UO/DiasporaCore", "complexity": "EXTREME", "risk": "HIGH", "weeks": "12-14"},
+            {"platform": "ABR Insights", "complexity": "EXTREME", "risk": "MEDIUM", "weeks": "12-14"},
+            {"platform": "CongoWave", "complexity": "HIGH-EXTREME", "risk": "MEDIUM", "weeks": "12-14"},
+            {"platform": "SentryIQ", "complexity": "HIGH-EXTREME", "risk": "HIGH", "weeks": "10-12"},
+            {"platform": "Shop Quoter", "complexity": "HIGH-EXTREME", "risk": "MEDIUM", "weeks": "12-14"}
+          ]
+        }
+      ]
+    },
+    {
+      "section_id": "strategic_priorities",
+      "title": "Strategic Priorities",
+      "layout": "list",
+      "widgets": [
+        {
+          "widget_id": "priority_list",
+          "type": "checklist",
+          "title": "Q1 2026 Priorities",
+          "items": [
+            {"text": "Complete Backbone Phase 1 (Foundation)", "status": "in_progress", "owner": "CTO"},
+            {"text": "Launch Union Eyes MVP", "status": "in_progress", "owner": "Product Lead"},
+            {"text": "Launch ABR Insights to production", "status": "in_progress", "owner": "Product Lead"},
+            {"text": "Close Series A ($3-5M)", "status": "pending", "owner": "CEO/CFO"},
+            {"text": "Establish 25 pilot customers", "status": "pending", "owner": "CRO"},
+            {"text": "Complete CORA beta", "status": "pending", "owner": "Product Lead"}
+          ]
+        }
+      ]
+    },
+    {
+      "section_id": "key_milestones",
+      "title": "Key Milestones Timeline",
+      "layout": "timeline",
+      "widgets": [
+        {
+          "widget_id": "milestone_timeline",
+          "type": "timeline",
+          "title": "2026 Milestones",
+          "data": [
+            {"date": "2026-01", "title": "Backbone Phase 0", "status": "completed"},
+            {"date": "2026-02", "title": "Backbone Phase 1", "status": "in_progress"},
+            {"date": "2026-04", "title": "eExports Migration PoC", "status": "pending"},
+            {"date": "2026-06", "title": "Union Eyes Launch", "status": "pending"},
+            {"date": "2026-09", "title": "ABR Insights Launch", "status": "pending"},
+            {"date": "2026-12", "title": "Series A Close", "status": "pending"}
+          ]
+        }
+      ]
+    }
+  ],
+  "filters": {
+    "date_range": "quarter",
+    "platform": "all",
+    "vertical": "all"
+  },
+  "alerts": [
+    {
+      "id": "migration_risk",
+      "condition": "migration_weeks > 12 AND risk_level = HIGH",
+      "severity": "warning",
+      "message": "Platform migration exceeds 12 weeks with high risk"
+    },
+    {
+      "id": "arr_shortfall",
+      "condition": "arr_progress < 50 AND quarter = Q2",
+      "severity": "critical",
+      "message": "ARR target at risk for current quarter"
+    }
+  ]
+}

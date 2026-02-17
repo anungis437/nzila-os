@@ -1,0 +1,41 @@
+# {{PRODUCT_NAME}} — Scripts-Book Overview
+
+This scripts-book is the single-source runbook for **{{PRODUCT_NAME}}**
+(repository: `{{REPO_NAME}}`). Every chapter pairs human-readable documentation
+with executable scripts so that any engineer can bootstrap, build, test, deploy,
+and operate the application without tribal knowledge.
+
+## How to use this book
+
+1. Read chapters in order for a first-time setup.
+2. Jump to any chapter as a reference once you are familiar with the stack.
+3. Run the companion `.sh` (Unix), `.ps1` (Windows), or `.py` (Python/cross-platform) scripts directly — they are kept in strict triplet parity.
+
+## Chapter index
+
+- **00-overview** — You are here.
+- **01-repo-bootstrap** — Clone, install, configure environment.
+- **02-monorepo-structure** — Workspace layout and turbo tasks.
+- **03-auth-and-tenancy** — Authentication provider and multi-tenant model.
+- **04-database-azure-postgresql** — Database provisioning, migrations, pooling.
+- **05-api-layer** — API route patterns and middleware.
+- **06-testing-quality** — Unit, integration, and e2e testing strategy.
+- **07-ci-cd-azure** — Continuous integration and deployment pipelines.
+- **08-security-hardening** — Security baseline and vulnerability management.
+- **09-observability** — Logging, monitoring, alerting, health checks.
+- **10-exports-compliance** — Export controls and data-residency compliance.
+- **11-ai-ml-operations** — AI/ML operational patterns (optional).
+
+## Conventions
+
+- All app-specific values use `{{PLACEHOLDER}}` syntax for easy templating.
+- Every chapter contains a `README.md` explaining its purpose.
+- Script files always come in `.sh` / `.ps1` / `.py` triplets to guarantee cross-platform parity.
+
+## Repository
+
+| Field      | Value            |
+| ---------- | ---------------- |
+| Product    | {{PRODUCT_NAME}} |
+| Repository | {{REPO_NAME}}    |
+| Owner      | {{OWNER_GITHUB}} |

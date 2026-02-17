@@ -1,0 +1,6 @@
+{
+  "name": "security-baseline",
+  "description": "Security hardening baseline and audit controls",
+  "chapters": ["08-security-hardening"],
+  "docs": ["security.md"]
+}

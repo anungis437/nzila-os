@@ -1,0 +1,176 @@
+{
+  "report_id": "regulatory_compliance",
+  "name": "Regulatory Compliance Report",
+  "description": "Compliance status across regulatory frameworks for all platforms",
+  "version": "1.0.0",
+  "last_updated": "2026-02-17",
+  "refresh_rate": "monthly",
+  "audience": ["Legal", "Compliance", "CTO", "Board"],
+  "compliance_frameworks": [
+    {
+      "framework": "SOC 2 Type II",
+      "status": "in_progress",
+      "target_date": "2026-Q3",
+      "coverage": "All platforms",
+      "owner": "CTO",
+      "controls_total": 64,
+      "controls_implemented": 28,
+      "percentage_complete": 43.8
+    },
+    {
+      "framework": "PIPEDA",
+      "status": "compliant",
+      "target_date": "2026-Q1",
+      "coverage": "All Canadian operations",
+      "owner": "Legal",
+      "controls_total": 20,
+      "controls_implemented": 20,
+      "percentage_complete": 100
+    },
+    {
+      "framework": "GDPR",
+      "status": "partial",
+      "target_date": "2026-Q4",
+      "coverage": "Platforms with EU users",
+      "owner": "Legal",
+      "controls_total": 42,
+      "controls_implemented": 18,
+      "percentage_complete": 42.9
+    },
+    {
+      "framework": "PCI-DSS",
+      "status": "in_progress",
+      "target_date": "2026-Q2",
+      "coverage": "DiasporaCore, Trade OS, Shop Quoter, CongoWave",
+      "owner": "CTO",
+      "controls_total": 12,
+      "controls_implemented": 5,
+      "percentage_complete": 41.7
+    },
+    {
+      "framework": "HIPAA",
+      "status": "planned",
+      "target_date": "2027-Q1",
+      "coverage": "Memora (Healthtech)",
+      "owner": "CTO",
+      "controls_total": 18,
+      "controls_implemented": 0,
+      "percentage_complete": 0
+    },
+    {
+      "framework": "ITAR",
+      "status": "compliant",
+      "target_date": "2026-Q1",
+      "coverage": "eExports",
+      "owner": "Legal",
+      "controls_total": 8,
+      "controls_implemented": 8,
+      "percentage_complete": 100
+    }
+  ],
+  "platform_compliance": [
+    {
+      "platform": "Union Eyes",
+      "frameworks": ["SOC 2", "PIPEDA"],
+      "data_sensitivity": "HIGH",
+      "pii_categories": ["SIN", "Pension Data", "Member Info"],
+      "encryption": "AES-256 at rest, TLS 1.3 in transit",
+      "rls_policies": 238,
+      "audit_logging": true,
+      "status": "COMPLIANT"
+    },
+    {
+      "platform": "ABR Insights",
+      "frameworks": ["SOC 2", "PIPEDA"],
+      "data_sensitivity": "HIGH",
+      "pii_categories": ["Employee Records", "Tribunal Data"],
+      "encryption": "Supabase managed (AES-256)",
+      "rls_policies": 106,
+      "audit_logging": true,
+      "status": "COMPLIANT"
+    },
+    {
+      "platform": "DiasporaCore V2",
+      "frameworks": ["SOC 2", "PCI-DSS", "FINTRAC"],
+      "data_sensitivity": "CRITICAL",
+      "pii_categories": ["KYC Documents", "Financial Data", "ID Verification"],
+      "encryption": "AES-256 at rest, TLS 1.3 in transit",
+      "rls_policies": 0,
+      "audit_logging": true,
+      "status": "IN_PROGRESS"
+    },
+    {
+      "platform": "Court Lens",
+      "frameworks": ["SOC 2", "PIPEDA"],
+      "data_sensitivity": "HIGH",
+      "pii_categories": ["Attorney-Client Privilege", "Case Documents"],
+      "encryption": "AES-256 at rest, TLS 1.3 in transit",
+      "rls_policies": 0,
+      "audit_logging": false,
+      "status": "PARTIAL"
+    },
+    {
+      "platform": "SentryIQ360",
+      "frameworks": ["SOC 2", "Insurance Regulations"],
+      "data_sensitivity": "HIGH",
+      "pii_categories": ["Claims Data", "Policy Holder Info"],
+      "encryption": "AES-256 at rest, TLS 1.3 in transit",
+      "rls_policies": 0,
+      "audit_logging": true,
+      "status": "IN_PROGRESS"
+    },
+    {
+      "platform": "eExports",
+      "frameworks": ["ITAR", "SOC 2"],
+      "data_sensitivity": "HIGH",
+      "pii_categories": ["Customs Forms", "Shipment Data"],
+      "encryption": "Django default + TLS",
+      "rls_policies": 0,
+      "audit_logging": false,
+      "status": "COMPLIANT"
+    },
+    {
+      "platform": "CORA",
+      "frameworks": ["PIPEDA"],
+      "data_sensitivity": "MEDIUM",
+      "pii_categories": ["Farm Owner Data"],
+      "encryption": "Base44 managed",
+      "rls_policies": 0,
+      "audit_logging": false,
+      "status": "PARTIAL"
+    },
+    {
+      "platform": "CongoWave",
+      "frameworks": ["PIPEDA", "SOCAN"],
+      "data_sensitivity": "MEDIUM",
+      "pii_categories": ["Artist Profiles", "Payment Info"],
+      "encryption": "AES-256 at rest, TLS 1.3 in transit",
+      "rls_policies": 0,
+      "audit_logging": true,
+      "status": "COMPLIANT"
+    }
+  ],
+  "data_retention_policies": {
+    "default_retention_period": "7 years",
+    "pii_retention": "As required by regulation or 3 years post-termination",
+    "financial_data": "7 years (tax/audit requirements)",
+    "log_data": "90 days (operational), 1 year (security)",
+    "deletion_process": "Automated via backbone compliance module"
+  },
+  "upcoming_audits": [
+    {
+      "audit_type": "SOC 2 Type II",
+      "scheduled_date": "2026-09-01",
+      "auditor": "TBD",
+      "scope": "Backbone infrastructure + flagship platforms",
+      "status": "planning"
+    },
+    {
+      "audit_type": "PCI-DSS Assessment",
+      "scheduled_date": "2026-06-01",
+      "auditor": "TBD",
+      "scope": "DiasporaCore payment processing",
+      "status": "planning"
+    }
+  ]
+}

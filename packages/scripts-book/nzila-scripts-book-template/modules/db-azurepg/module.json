@@ -1,0 +1,6 @@
+{
+  "name": "db-azurepg",
+  "description": "Azure Database for PostgreSQL setup and migrations",
+  "chapters": ["04-database-azure-postgresql"],
+  "docs": []
+}

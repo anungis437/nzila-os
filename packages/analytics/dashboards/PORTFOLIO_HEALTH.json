@@ -1,0 +1,210 @@
+{
+  "dashboard_id": "portfolio_health",
+  "name": "Portfolio Health Dashboard",
+  "description": "Cross-platform metrics and portfolio-wide health indicators",
+  "version": "1.0.0",
+  "last_updated": "2026-02-17",
+  "refresh_rate": "daily",
+  "audience": ["Leadership", "Product", "Engineering"],
+  "sections": [
+    {
+      "section_id": "vertical_distribution",
+      "title": "Vertical Distribution",
+      "layout": "pie_chart",
+      "widgets": [
+        {
+          "widget_id": "vertical_chart",
+          "type": "pie",
+          "title": "Platforms by Vertical",
+          "data": [
+            {"label": "Fintech", "value": 3, "color": "#3B82F6"},
+            {"label": "Agrotech", "value": 2, "color": "#10B981"},
+            {"label": "Trade & Commerce", "value": 3, "color": "#F59E0B"},
+            {"label": "Legaltech", "value": 2, "color": "#8B5CF6"},
+            {"label": "EdTech", "value": 2, "color": "#EC4899"},
+            {"label": "Uniontech", "value": 1, "color": "#06B6D4"},
+            {"label": "Insurtech", "value": 1, "color": "#EF4444"},
+            {"label": "Entertainment", "value": 1, "color": "#84CC16"}
+          ]
+        }
+      ]
+    },
+    {
+      "section_id": "entity_analysis",
+      "title": "Entity Analysis",
+      "layout": "bar_chart",
+      "widgets": [
+        {
+          "widget_id": "entity_by_platform",
+          "type": "vertical_bar",
+          "title": "Database Entities by Platform",
+          "data": [
+            {"label": "Union Eyes", "value": 4773},
+            {"label": "C3UO", "value": 485},
+            {"label": "Court Lens", "value": 682},
+            {"label": "Trade OS", "value": 337},
+            {"label": "Shop Quoter", "value": 93},
+            {"label": "CORA", "value": 80},
+            {"label": "eExports", "value": 78},
+            {"label": "SentryIQ", "value": 79},
+            {"label": "Insight CFO", "value": 37}
+          ]
+        }
+      ]
+    },
+    {
+      "section_id": "technology_stack",
+      "title": "Technology Stack Distribution",
+      "layout": "stacked_bar",
+      "widgets": [
+        {
+          "widget_id": "frontend_stack",
+          "type": "stacked_bar",
+          "title": "Frontend Frameworks",
+          "data": [
+            {"label": "Next.js 14-15", "value": 6, "percentage": 40},
+            {"label": "Base44", "value": 4, "percentage": 27},
+            {"label": "React standalone", "value": 2, "percentage": 13},
+            {"label": "Django templates", "value": 2, "percentage": 13},
+            {"label": "Unknown", "value": 1, "percentage": 7}
+          ]
+        },
+        {
+          "widget_id": "backend_stack",
+          "type": "stacked_bar",
+          "title": "Backend Frameworks",
+          "data": [
+            {"label": "Django/DRF", "value": 3},
+            {"label": "Fastify", "value": 1},
+            {"label": "Base44 Managed", "value": 4},
+            {"label": "Turborepo Monorepo", "value": 4},
+            {"label": "Supabase (BaaS)", "value": 3}
+          ]
+        }
+      ]
+    },
+    {
+      "section_id": "complexity_distribution",
+      "title": "Complexity Distribution",
+      "layout": "gauge",
+      "widgets": [
+        {
+          "widget_id": "complexity_gauge",
+          "type": "gauge",
+          "title": "Average Platform Complexity",
+          "value": 72,
+          "max": 100,
+          "thresholds": [
+            {"min": 0, "max": 40, "color": "green", "label": "Low"},
+            {"min": 40, "max": 60, "color": "yellow", "label": "Medium"},
+            {"min": 60, "max": 80, "color": "orange", "label": "High"},
+            {"min": 80, "max": 100, "color": "red", "label": "Extreme"}
+          ]
+        },
+        {
+          "widget_id": "complexity_breakdown",
+          "type": "donut",
+          "title": "Complexity Categories",
+          "data": [
+            {"label": "EXTREME", "value": 4, "color": "#EF4444"},
+            {"label": "HIGH-EXTREME", "value": 2, "color": "#F97316"},
+            {"label": "HIGH", "value": 6, "color": "#F59E0B"},
+            {"label": "MEDIUM-HIGH", "value": 2, "color": "#EAB308"},
+            {"label": "MEDIUM", "value": 1, "color": "#84CC16"}
+          ]
+        }
+      ]
+    },
+    {
+      "section_id": "migration_readiness",
+      "title": "Migration Readiness",
+      "layout": "radar",
+      "widgets": [
+        {
+          "widget_id": "migration_factors",
+          "type": "radar",
+          "title": "Migration Readiness Factors",
+          "data": [
+            {"axis": "Documentation", "value": 85},
+            {"axis": "Code Quality", "value": 70},
+            {"axis": "Test Coverage", "value": 60},
+            {"axis": "Security", "value": 90},
+            {"axis": "API Design", "value": 75},
+            {"axis": "Database Schema", "value": 65}
+          ]
+        }
+      ]
+    },
+    {
+      "section_id": "integration_health",
+      "title": "Integration Ecosystem",
+      "layout": "matrix",
+      "widgets": [
+        {
+          "widget_id": "payment_integrations",
+          "type": "matrix",
+          "title": "Payment Processors by Platform",
+          "data": [
+            {"platform": "ABR Insights", "stripe": true, "paypal": false, "mobile_money": false},
+            {"platform": "CyberLearn", "stripe": true, "paypal": false, "mobile_money": false},
+            {"platform": "CongoWave", "stripe": true, "paypal": false, "mobile_money": true},
+            {"platform": "Shop Quoter", "stripe": false, "paypal": true, "mobile_money": false},
+            {"platform": "Union Eyes", "stripe": false, "paypal": false, "mobile_money": false}
+          ]
+        }
+      ]
+    },
+    {
+      "section_id": "ai_capabilities",
+      "title": "AI/ML Capabilities",
+      "layout": "heatmap",
+      "widgets": [
+        {
+          "widget_id": "ai_platform_matrix",
+          "type": "heatmap",
+          "title": "AI Features by Platform",
+          "axes": {
+            "x": ["Azure OpenAI", "ML Pipeline", "Vector Search", "Legal AI", "Financial AI", "Recommendations"],
+            "y": ["ABR Insights", "Union Eyes", "Court Lens", "CongoWave", "Insight CFO", "CyberLearn"]
+          },
+          "data": [
+            [true, false, true, false, false, true],
+            [false, true, false, false, true, false],
+            [true, false, false, true, false, false],
+            [true, true, false, false, false, true],
+            [true, false, false, false, true, false],
+            [false, true, false, false, false, false]
+          ]
+        }
+      ]
+    }
+  ],
+  "kpis": [
+    {
+      "id": "avg_production_readiness",
+      "name": "Average Production Readiness",
+      "value": 7.8,
+      "target": 9.0,
+      "unit": "/10"
+    },
+    {
+      "id": "platforms_production",
+      "name": "Production Platforms",
+      "value": 3,
+      "target": 5
+    },
+    {
+      "id": "platforms_beta",
+      "name": "Beta Platforms",
+      "value": 2,
+      "target": 4
+    },
+    {
+      "id": "code_reuse_potential",
+      "name": "Estimated Code Reuse",
+      "value": 65,
+      "target": 80,
+      "unit": "%"
+    }
+  ]
+}

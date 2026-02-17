@@ -1,0 +1,7 @@
+{
+  "name": "deploy-aca-oidc",
+  "description": "Azure Container Apps deployment with OIDC authentication",
+  "chapters": ["07-ci-cd-azure"],
+  "docs": ["deployment.md"],
+  "workflows": true
+}

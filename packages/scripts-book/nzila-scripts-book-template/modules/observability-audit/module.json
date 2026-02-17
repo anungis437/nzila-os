@@ -1,0 +1,6 @@
+{
+  "name": "observability-audit",
+  "description": "Observability, logging, and audit trail setup",
+  "chapters": ["09-observability"],
+  "docs": []
+}

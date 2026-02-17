@@ -1,0 +1,317 @@
+{
+  "dashboard_id": "risk_dashboard",
+  "name": "Risk Management Dashboard",
+  "description": "Real-time risk monitoring and mitigation tracking across portfolio",
+  "version": "1.0.0",
+  "last_updated": "2026-02-17",
+  "refresh_rate": "realtime",
+  "audience": ["CEO", "CFO", "CTO", "Legal", "Compliance", "Board"],
+  "sections": [
+    {
+      "section_id": "risk_summary",
+      "title": "Risk Summary",
+      "layout": "2x2",
+      "widgets": [
+        {
+          "widget_id": "total_risks",
+          "type": "kpi",
+          "title": "Total Active Risks",
+          "value": 18,
+          "change": "-2",
+          "change_period": "month",
+          "target": 10,
+          "format": "number",
+          "color": "orange"
+        },
+        {
+          "widget_id": "critical_risks",
+          "type": "kpi",
+          "title": "Critical Risks",
+          "value": 3,
+          "change": "0",
+          "change_period": "month",
+          "target": 0,
+          "format": "number",
+          "color": "red"
+        },
+        {
+          "widget_id": "high_risks",
+          "type": "kpi",
+          "title": "High Risks",
+          "value": 7,
+          "change": "-1",
+          "change_period": "month",
+          "target": 3,
+          "format": "number",
+          "color": "orange"
+        },
+        {
+          "widget_id": "mitigated_risks",
+          "type": "kpi",
+          "title": "Risks Mitigated (MTD)",
+          "value": 5,
+          "change": "+3",
+          "change_period": "month",
+          "target": 8,
+          "format": "number",
+          "color": "green"
+        }
+      ]
+    },
+    {
+      "section_id": "risk_categories",
+      "title": "Risk by Category",
+      "layout": "pie_chart",
+      "widgets": [
+        {
+          "widget_id": "risk_category_pie",
+          "type": "pie",
+          "title": "Active Risks by Category",
+          "data": [
+            {"label": "Technical/Migration", "value": 6, "color": "#EF4444"},
+            {"label": "Financial/Runway", "value": 4, "color": "#F59E0B"},
+            {"label": "Market/Competition", "value": 3, "color": "#3B82F6"},
+            {"label": "Legal/Compliance", "value": 2, "color": "#8B5CF6"},
+            {"label": "Operational", "value": 2, "color": "#10B981"},
+            {"label": "Talent/Team", "value": 1, "color": "#EC4899"}
+          ]
+        }
+      ]
+    },
+    {
+      "section_id": "critical_risks",
+      "title": "Critical Risks",
+      "layout": "table",
+      "widgets": [
+        {
+          "widget_id": "critical_risk_table",
+          "type": "table",
+          "title": "Critical Risk Register",
+          "columns": ["Risk ID", "Category", "Description", "Impact", "Probability", "Owner", "Status"],
+          "data": [
+            {
+              "risk_id": "TECH-001",
+              "category": "Technical",
+              "description": "Union Eyes migration failure (4,773 entities, 238 RLS policies)",
+              "impact": "CRITICAL",
+              "probability": "MEDIUM",
+              "owner": "CTO",
+              "status": "Monitored",
+              "mitigation": "Phased migration, data backup, rollback plan"
+            },
+            {
+              "risk_id": "FIN-001",
+              "category": "Financial",
+              "description": "Series A fundraising delayed beyond Q3 2026 (runway risk)",
+              "impact": "CRITICAL",
+              "probability": "MEDIUM",
+              "owner": "CFO",
+              "status": "Active",
+              "mitigation": "Bridge financing ($500K-$1M), BDC venture debt, cost reduction"
+            },
+            {
+              "risk_id": "COMP-001",
+              "category": "Compliance",
+              "description": "SR&ED audit clawback ($50K-$150K tax credit reversal)",
+              "impact": "HIGH",
+              "probability": "LOW",
+              "owner": "CFO + Legal",
+              "status": "Monitored",
+              "mitigation": "Professional SR&ED consultant, detailed documentation, quarterly audits"
+            }
+          ]
+        }
+      ]
+    },
+    {
+      "section_id": "high_risks",
+      "title": "High Risks",
+      "layout": "table",
+      "widgets": [
+        {
+          "widget_id": "high_risk_table",
+          "type": "table",
+          "title": "High Risk Register",
+          "columns": ["Risk ID", "Category", "Description", "Impact", "Probability", "Mitigation"],
+          "data": [
+            {
+              "risk_id": "TECH-002",
+              "category": "Technical",
+              "description": "DiasporaCore V2 data migration (485 entities, KYC/AML compliance)",
+              "impact": "HIGH",
+              "probability": "MEDIUM",
+              "mitigation": "Compliance audit, third-party validation, phased rollout"
+            },
+            {
+              "risk_id": "TECH-003",
+              "category": "Technical",
+              "description": "Backbone Phase 2 delay (AI Core + Compliance module)",
+              "impact": "HIGH",
+              "probability": "MEDIUM",
+              "mitigation": "Hire AI engineer, extend timeline 2 weeks, parallel development"
+            },
+            {
+              "risk_id": "MKT-001",
+              "category": "Market",
+              "description": "Union Eyes pilot customer churn (if MVP underdelivers)",
+              "impact": "HIGH",
+              "probability": "MEDIUM",
+              "mitigation": "Customer success program, NPS tracking, rapid iteration"
+            },
+            {
+              "risk_id": "FIN-002",
+              "category": "Financial",
+              "description": "IRAP applications rejected (Memora $150K + CORA $200K)",
+              "impact": "MEDIUM",
+              "probability": "MEDIUM-HIGH",
+              "mitigation": "Diversify across 4+ programs, strengthen ITA relationship, backup with SDTC"
+            },
+            {
+              "risk_id": "LEGAL-001",
+              "category": "Legal",
+              "description": "IP protection gaps (2 trademarks not filed, 3 patents pending)",
+              "impact": "MEDIUM",
+              "probability": "LOW",
+              "mitigation": "File DiasporaCore + SentryIQ trademarks Q2 2026, patent filing Q2-Q3 2026"
+            },
+            {
+              "risk_id": "OPS-001",
+              "category": "Operational",
+              "description": "Key person dependency (CTO sole owner of Backbone architecture)",
+              "impact": "HIGH",
+              "probability": "LOW",
+              "mitigation": "Hire Senior Engineer Q2 2026, document architecture, cross-train"
+            },
+            {
+              "risk_id": "TALENT-001",
+              "category": "Talent",
+              "description": "Engineering attrition during migration (15+ engineers required)",
+              "impact": "MEDIUM",
+              "probability": "MEDIUM",
+              "mitigation": "Competitive comp, ESOP grants, milestone bonuses, career pathing"
+            }
+          ]
+        }
+      ]
+    },
+    {
+      "section_id": "risk_heat_map",
+      "title": "Risk Heat Map",
+      "layout": "heat_map",
+      "widgets": [
+        {
+          "widget_id": "risk_matrix",
+          "type": "heat_map",
+          "title": "Impact vs Probability Matrix",
+          "x_axis": "Probability",
+          "y_axis": "Impact",
+          "data": [
+            {"x": "MEDIUM", "y": "CRITICAL", "count": 2, "risks": ["TECH-001", "FIN-001"]},
+            {"x": "LOW", "y": "CRITICAL", "count": 0, "risks": []},
+            {"x": "HIGH", "y": "HIGH", "count": 0, "risks": []},
+            {"x": "MEDIUM", "y": "HIGH", "count": 4, "risks": ["TECH-002", "TECH-003", "MKT-001", "OPS-001"]},
+            {"x": "LOW", "y": "HIGH", "count": 2, "risks": ["COMP-001", "LEGAL-001"]},
+            {"x": "MEDIUM-HIGH", "y": "MEDIUM", "count": 1, "risks": ["FIN-002"]},
+            {"x": "MEDIUM", "y": "MEDIUM", "count": 1, "risks": ["TALENT-001"]}
+          ]
+        }
+      ]
+    },
+    {
+      "section_id": "mitigation_timeline",
+      "title": "Mitigation Timeline",
+      "layout": "timeline",
+      "widgets": [
+        {
+          "widget_id": "mitigation_schedule",
+          "type": "timeline",
+          "title": "Risk Mitigation Schedule",
+          "data": [
+            {"date": "2026-02", "milestone": "Hire Senior Engineer (OPS-001)", "status": "in_progress"},
+            {"date": "2026-03", "milestone": "File DiasporaCore trademark (LEGAL-001)", "status": "pending"},
+            {"date": "2026-04", "milestone": "Initiate bridge financing (FIN-001)", "status": "pending"},
+            {"date": "2026-05", "milestone": "File 3 patent applications (LEGAL-001)", "status": "pending"},
+            {"date": "2026-06", "milestone": "Union Eyes pilot launch (MKT-001)", "status": "pending"},
+            {"date": "2026-07", "milestone": "Series A close target (FIN-001)", "status": "pending"}
+          ]
+        }
+      ]
+    },
+    {
+      "section_id": "risk_trend",
+      "title": "Risk Trend Analysis",
+      "layout": "line_chart",
+      "widgets": [
+        {
+          "widget_id": "risk_trend_chart",
+          "type": "line",
+          "title": "Active Risks Over Time",
+          "x_axis": "Month",
+          "y_axis": "Risk Count",
+          "data": [
+            {"month": "2025-10", "critical": 4, "high": 9, "medium": 12, "low": 5},
+            {"month": "2025-11", "critical": 4, "high": 8, "medium": 10, "low": 6},
+            {"month": "2025-12", "critical": 3, "high": 8, "medium": 9, "low": 5},
+            {"month": "2026-01", "critical": 3, "high": 8, "medium": 8, "low": 4},
+            {"month": "2026-02", "critical": 3, "high": 7, "medium": 6, "low": 2}
+          ]
+        }
+      ]
+    },
+    {
+      "section_id": "compliance_risks",
+      "title": "Compliance & Regulatory Risks",
+      "layout": "list",
+      "widgets": [
+        {
+          "widget_id": "compliance_checklist",
+          "type": "checklist",
+          "title": "Compliance Risk Monitoring",
+          "items": [
+            {"text": "PIPEDA compliance (Union Eyes PII encryption)", "status": "compliant", "owner": "Legal"},
+            {"text": "GDPR compliance (DiasporaCore EU transfers)", "status": "compliant", "owner": "Legal + CTO"},
+            {"text": "HIPAA compliance (Memora healthcare data)", "status": "in_progress", "owner": "Product Lead"},
+            {"text": "SOC 2 Type II certification", "status": "pending", "owner": "CTO + Security"},
+            {"text": "SR&ED audit preparedness", "status": "monitored", "owner": "CFO"},
+            {"text": "IRAP grant reporting compliance", "status": "compliant", "owner": "CFO + Grant Manager"},
+            {"text": "KYC/AML regulations (DiasporaCore)", "status": "compliant", "owner": "Product + Legal"}
+          ]
+        }
+      ]
+    }
+  ],
+  "filters": {
+    "severity": "all",
+    "category": "all",
+    "status": "all",
+    "owner": "all"
+  },
+  "alerts": [
+    {
+      "id": "new_critical_risk",
+      "condition": "severity = CRITICAL AND created_date < 7 days",
+      "severity": "critical",
+      "notification": ["CEO", "CFO", "CTO", "Board"],
+      "message": "New critical risk identified requiring immediate attention"
+    },
+    {
+      "id": "risk_aging",
+      "condition": "status = active AND days_open > 90",
+      "severity": "warning",
+      "notification": ["Risk Owner", "CFO"],
+      "message": "Risk open for 90+ days without mitigation progress"
+    },
+    {
+      "id": "mitigation_overdue",
+      "condition": "mitigation_due_date < today AND mitigation_progress < 100",
+      "severity": "warning",
+      "notification": ["Risk Owner"],
+      "message": "Risk mitigation overdue"
+    }
+  ],
+  "notes": {
+    "risk_appetite": "Conservative risk appetite during migration phase; zero tolerance for critical risks > 30 days",
+    "escalation": "Critical risks escalated to CEO/Board within 24 hours; High risks reviewed weekly",
+    "review_cycle": "Risk register reviewed weekly (Leadership), monthly (Board)"
+  }
+}

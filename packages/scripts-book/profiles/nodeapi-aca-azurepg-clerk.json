@@ -1,0 +1,22 @@
+{
+  "name": "nodeapi-aca-azurepg-clerk",
+  "description": "Node.js API deployed to Azure Container Apps with Azure PostgreSQL and Clerk auth",
+  "expected_paths": ["apps/api", "services/api"],
+  "default_app_port": 4000,
+  "docker_template": "Dockerfile.nodeapi",
+  "docker_placement": "root",
+  "default_modules": [
+    "core-governance",
+    "repo-bootstrap",
+    "db-azurepg",
+    "deploy-aca-oidc",
+    "security-baseline",
+    "observability-audit"
+  ],
+  "generated_files": {
+    "scripts-book": true,
+    "docs": true,
+    "workflows": true,
+    "dockerfile": true
+  }
+}

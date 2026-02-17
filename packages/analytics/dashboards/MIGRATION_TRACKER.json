@@ -1,0 +1,376 @@
+{
+  "dashboard_id": "migration_tracker",
+  "name": "Backbone Migration Tracker",
+  "description": "Real-time tracking of platform migrations to standardized backbone architecture",
+  "version": "1.0.0",
+  "last_updated": "2026-02-17",
+  "refresh_rate": "daily",
+  "audience": ["CTO", "Engineering", "Product", "Board"],
+  "sections": [
+    {
+      "section_id": "migration_overview",
+      "title": "Migration Overview",
+      "layout": "2x2",
+      "widgets": [
+        {
+          "widget_id": "total_platforms",
+          "type": "kpi",
+          "title": "Total Platforms",
+          "value": 15,
+          "target": 15,
+          "format": "number",
+          "color": "blue"
+        },
+        {
+          "widget_id": "migrated_platforms",
+          "type": "kpi",
+          "title": "Migrated",
+          "value": 0,
+          "target": 15,
+          "format": "number",
+          "color": "green",
+          "progress": 0
+        },
+        {
+          "widget_id": "in_progress",
+          "type": "kpi",
+          "title": "In Progress",
+          "value": 0,
+          "target": 2,
+          "format": "number",
+          "color": "orange"
+        },
+        {
+          "widget_id": "weeks_saved",
+          "type": "kpi",
+          "title": "Weeks Saved (vs. Sequential)",
+          "value": 0,
+          "target": 46,
+          "format": "number",
+          "color": "green",
+          "suffix": " weeks"
+        }
+      ]
+    },
+    {
+      "section_id": "backbone_progress",
+      "title": "Backbone Build Progress",
+      "layout": "progress_bars",
+      "widgets": [
+        {
+          "widget_id": "backbone_phases",
+          "type": "phase_tracker",
+          "title": "Backbone Phases (16 weeks total)",
+          "data": [
+            {
+              "phase": "Phase 0: Foundation",
+              "duration": "4 weeks",
+              "status": "completed",
+              "completion": 100,
+              "deliverables": ["Azure infrastructure", "PostgreSQL setup", "CI/CD pipeline"]
+            },
+            {
+              "phase": "Phase 1: Multi-Tenant + Auth",
+              "duration": "4 weeks",
+              "status": "in_progress",
+              "completion": 60,
+              "deliverables": ["Clerk integration", "Tenant isolation", "RLS policies"]
+            },
+            {
+              "phase": "Phase 2: AI Core + Compliance",
+              "duration": "4 weeks",
+              "status": "pending",
+              "completion": 0,
+              "deliverables": ["Companion Engine", "Compliance module", "Audit logging"]
+            },
+            {
+              "phase": "Phase 3: Billing + Analytics",
+              "duration": "2 weeks",
+              "status": "pending",
+              "completion": 0,
+              "deliverables": ["Stripe integration", "Analytics dashboard", "Usage tracking"]
+            },
+            {
+              "phase": "Phase 4: Notifications + Integrations",
+              "duration": "2 weeks",
+              "status": "pending",
+              "completion": 0,
+              "deliverables": ["Email/SMS", "Webhooks", "Third-party APIs"]
+            }
+          ]
+        }
+      ]
+    },
+    {
+      "section_id": "platform_migration_status",
+      "title": "Platform Migration Status",
+      "layout": "table",
+      "widgets": [
+        {
+          "widget_id": "migration_table",
+          "type": "table",
+          "title": "Migration Timeline & Status",
+          "columns": ["Platform", "Complexity", "Profile", "Batch", "Weeks", "Start Date", "Status"],
+          "data": [
+            {
+              "platform": "eEXPORTS",
+              "complexity": "HIGH",
+              "profile": "nextjs-aca-azurepg-clerk",
+              "batch": "Batch 1 (POC)",
+              "weeks": "8",
+              "start_date": "2026-04-01",
+              "status": "pending"
+            },
+            {
+              "platform": "Shop Quoter",
+              "complexity": "HIGH-EXTREME",
+              "profile": "nextjs-aca-azurepg-clerk",
+              "batch": "Batch 1 (POC)",
+              "weeks": "12-14",
+              "start_date": "2026-04-01",
+              "status": "pending"
+            },
+            {
+              "platform": "Trade OS",
+              "complexity": "HIGH",
+              "profile": "nodeapi-aca-azurepg-clerk",
+              "batch": "Batch 1 (POC)",
+              "weeks": "6-8",
+              "start_date": "2026-05-01",
+              "status": "pending"
+            },
+            {
+              "platform": "Union Eyes",
+              "complexity": "EXTREME",
+              "profile": "nextjs-aca-azurepg-clerk",
+              "batch": "Batch 2",
+              "weeks": "10-12",
+              "start_date": "2026-08-01",
+              "status": "pending"
+            },
+            {
+              "platform": "ABR Insights",
+              "complexity": "EXTREME",
+              "profile": "django-aca-azurepg",
+              "batch": "Batch 2",
+              "weeks": "12-14",
+              "start_date": "2026-08-01",
+              "status": "pending"
+            },
+            {
+              "platform": "CORA",
+              "complexity": "HIGH",
+              "profile": "django-aca-azurepg",
+              "batch": "Batch 2",
+              "weeks": "6-8",
+              "start_date": "2026-09-01",
+              "status": "pending"
+            },
+            {
+              "platform": "DiasporaCore V2",
+              "complexity": "EXTREME",
+              "profile": "nextjs-aca-azurepg-clerk",
+              "batch": "Batch 2",
+              "weeks": "12-14",
+              "start_date": "2026-09-01",
+              "status": "pending"
+            },
+            {
+              "platform": "SentryIQ360",
+              "complexity": "HIGH-EXTREME",
+              "profile": "nextjs-aca-azurepg-clerk",
+              "batch": "Batch 2",
+              "weeks": "10-12",
+              "start_date": "2026-10-01",
+              "status": "pending"
+            },
+            {
+              "platform": "CongoWave",
+              "complexity": "HIGH-EXTREME",
+              "profile": "django-aca-azurepg",
+              "batch": "Batch 2",
+              "weeks": "12-14",
+              "start_date": "2026-10-01",
+              "status": "pending"
+            },
+            {
+              "platform": "Court Lens",
+              "complexity": "HIGH",
+              "profile": "nextjs-aca-azurepg-clerk",
+              "batch": "Batch 2",
+              "weeks": "8-10",
+              "start_date": "2026-11-01",
+              "status": "pending"
+            },
+            {
+              "platform": "CyberLearn",
+              "complexity": "MEDIUM",
+              "profile": "nextjs-aca-azurepg-clerk",
+              "batch": "Batch 2",
+              "weeks": "4-6",
+              "start_date": "2026-11-01",
+              "status": "pending"
+            },
+            {
+              "platform": "PonduOps",
+              "complexity": "HIGH",
+              "profile": "django-aca-azurepg",
+              "batch": "Batch 2",
+              "weeks": "8-10",
+              "start_date": "2026-12-01",
+              "status": "pending"
+            },
+            {
+              "platform": "Insight CFO",
+              "complexity": "MEDIUM",
+              "profile": "nextjs-aca-azurepg-clerk",
+              "batch": "Batch 2",
+              "weeks": "4-6",
+              "start_date": "2026-12-01",
+              "status": "pending"
+            },
+            {
+              "platform": "STSA",
+              "complexity": "MEDIUM-HIGH",
+              "profile": "nodeapi-aca-azurepg-clerk",
+              "batch": "Batch 2",
+              "weeks": "6-8",
+              "start_date": "2027-01-01",
+              "status": "pending"
+            },
+            {
+              "platform": "Memora",
+              "complexity": "HIGH",
+              "profile": "nextjs-aca-azurepg-clerk",
+              "batch": "Batch 2",
+              "weeks": "6-8",
+              "start_date": "2027-01-01",
+              "status": "pending"
+            }
+          ]
+        }
+      ]
+    },
+    {
+      "section_id": "risk_metrics",
+      "title": "Migration Risk Metrics",
+      "layout": "2x2",
+      "widgets": [
+        {
+          "widget_id": "extreme_complexity",
+          "type": "kpi",
+          "title": "EXTREME Complexity Platforms",
+          "value": 4,
+          "format": "number",
+          "color": "red",
+          "platforms": ["Union Eyes", "DiasporaCore V2", "ABR Insights", "SentryIQ360 (partial)"]
+        },
+        {
+          "widget_id": "high_extreme",
+          "type": "kpi",
+          "title": "HIGH-EXTREME Platforms",
+          "value": 3,
+          "format": "number",
+          "color": "orange",
+          "platforms": ["CongoWave", "SentryIQ360", "Shop Quoter"]
+        },
+        {
+          "widget_id": "data_migration_tb",
+          "type": "kpi",
+          "title": "Total Data Volume",
+          "value": 814.5,
+          "format": "number",
+          "color": "blue",
+          "suffix": " MB"
+        },
+        {
+          "widget_id": "total_entities",
+          "type": "kpi",
+          "title": "Total Entities to Migrate",
+          "value": 12000,
+          "format": "number",
+          "color": "purple",
+          "suffix": "+ entities"
+        }
+      ]
+    },
+    {
+      "section_id": "code_reuse",
+      "title": "Code Reuse Opportunities",
+      "layout": "bar_chart",
+      "widgets": [
+        {
+          "widget_id": "reuse_metrics",
+          "type": "horizontal_bar",
+          "title": "Backbone Reuse Percentage by Platform",
+          "data": [
+            {"label": "CyberLearn", "value": 80, "max": 100, "complexity": "MEDIUM"},
+            {"label": "Insight CFO", "value": 75, "max": 100, "complexity": "MEDIUM"},
+            {"label": "eEXPORTS", "value": 70, "max": 100, "complexity": "HIGH"},
+            {"label": "Trade OS", "value": 65, "max": 100, "complexity": "HIGH"},
+            {"label": "Court Lens", "value": 60, "max": 100, "complexity": "HIGH"},
+            {"label": "CORA", "value": 55, "max": 100, "complexity": "HIGH"},
+            {"label": "PonduOps", "value": 50, "max": 100, "complexity": "HIGH"},
+            {"label": "Shop Quoter", "value": 45, "max": 100, "complexity": "HIGH-EXTREME"},
+            {"label": "SentryIQ360", "value": 40, "max": 100, "complexity": "HIGH-EXTREME"},
+            {"label": "CongoWave", "value": 35, "max": 100, "complexity": "HIGH-EXTREME"},
+            {"label": "Union Eyes", "value": 30, "max": 100, "complexity": "EXTREME"},
+            {"label": "DiasporaCore V2", "value": 30, "max": 100, "complexity": "EXTREME"},
+            {"label": "ABR Insights", "value": 25, "max": 100, "complexity": "EXTREME"}
+          ]
+        }
+      ]
+    },
+    {
+      "section_id": "timeline_gantt",
+      "title": "Migration Timeline (Gantt View)",
+      "layout": "gantt",
+      "widgets": [
+        {
+          "widget_id": "gantt_chart",
+          "type": "gantt",
+          "title": "2026-2027 Migration Schedule",
+          "data": [
+            {"task": "Backbone Phase 0", "start": "2026-01-01", "end": "2026-01-31", "status": "completed"},
+            {"task": "Backbone Phase 1", "start": "2026-02-01", "end": "2026-02-28", "status": "in_progress"},
+            {"task": "Backbone Phase 2", "start": "2026-03-01", "end": "2026-03-31", "status": "pending"},
+            {"task": "Backbone Phase 3-4", "start": "2026-04-01", "end": "2026-04-30", "status": "pending"},
+            {"task": "Batch 1 POC (3 platforms)", "start": "2026-04-01", "end": "2026-07-31", "status": "pending"},
+            {"task": "Batch 2 (12 platforms, parallel)", "start": "2026-08-01", "end": "2027-02-28", "status": "pending"}
+          ]
+        }
+      ]
+    }
+  ],
+  "filters": {
+    "batch": "all",
+    "complexity": "all",
+    "profile": "all",
+    "status": "all"
+  },
+  "alerts": [
+    {
+      "id": "extreme_platform_delay",
+      "condition": "complexity = EXTREME AND weeks_elapsed > planned_weeks",
+      "severity": "critical",
+      "message": "EXTREME complexity platform exceeding timeline"
+    },
+    {
+      "id": "backbone_delay",
+      "condition": "backbone_phase_elapsed > 4 weeks",
+      "severity": "warning",
+      "message": "Backbone phase delay detected"
+    },
+    {
+      "id": "data_migration_risk",
+      "condition": "total_entities > 1000 AND data_volume_mb > 100",
+      "severity": "warning",
+      "message": "Large-scale data migration requires additional planning"
+    }
+  ],
+  "notes": {
+    "time_savings": "Parallel Backbone + 2-batch migration saves 46 weeks vs. sequential (54 weeks → 8 weeks)",
+    "code_reuse": "Average 60% code reuse across platforms via shared backbone components",
+    "profiles": "3 standardized profiles: django-aca-azurepg, nextjs-aca-azurepg-clerk, nodeapi-aca-azurepg-clerk"
+  }
+}

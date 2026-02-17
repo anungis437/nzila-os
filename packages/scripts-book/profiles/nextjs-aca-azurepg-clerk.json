@@ -1,0 +1,25 @@
+{
+  "name": "nextjs-aca-azurepg-clerk",
+  "description": "Next.js app deployed to Azure Container Apps with Azure PostgreSQL and Clerk auth",
+  "expected_paths": ["apps/web"],
+  "default_app_port": 3000,
+  "docker_template": "Dockerfile.nextjs",
+  "docker_placement": "root",
+  "default_modules": [
+    "core-governance",
+    "repo-bootstrap",
+    "monorepo-pnpm-turbo",
+    "auth-clerk",
+    "db-azurepg",
+    "deploy-aca-oidc",
+    "security-baseline",
+    "observability-audit",
+    "exports-compliance"
+  ],
+  "generated_files": {
+    "scripts-book": true,
+    "docs": true,
+    "workflows": true,
+    "dockerfile": true
+  }
+}

@@ -1,0 +1,129 @@
+{
+  "template_version": "1.0.0",
+  "applied_modules": [
+    "core-governance",
+    "repo-bootstrap",
+    "monorepo-pnpm-turbo",
+    "auth-clerk",
+    "db-azurepg",
+    "deploy-aca-oidc",
+    "security-baseline",
+    "observability-audit",
+    "exports-compliance"
+  ],
+  "timestamp": "2026-02-16T15:16:56.913Z",
+  "files": [
+    {
+      "hash": "6a49dc1d084fdad33f5c41032219ddea8be41762ccc938de6403599a26d7cb08",
+      "relativePath": "scripts-book/00-overview/README.md"
+    },
+    {
+      "hash": "01453124856c3caede925503dfd9eb704ffe27db8e1f7f79517b4f160eb1bee2",
+      "relativePath": "scripts-book/01-repo-bootstrap/README.md"
+    },
+    {
+      "hash": "363dade0643c9ccae331ea9d7da63d87e0eed7363cc68a631aee0e5f6b3b42bd",
+      "relativePath": "scripts-book/01-repo-bootstrap/parity-check.ps1"
+    },
+    {
+      "hash": "30930b01fd5b186cd8d75f5124b13bb53c0696144e2413a6572259b7166ccacc",
+      "relativePath": "scripts-book/01-repo-bootstrap/parity-check.py"
+    },
+    {
+      "hash": "92fadd73bc44f855d51b0b8b9e5f2ca41d64bf0ee22be13a5b31f26a9a503feb",
+      "relativePath": "scripts-book/01-repo-bootstrap/parity-check.sh"
+    },
+    {
+      "hash": "2d8a6aa179adda2715e0b91463c2dc0a58e511bcd5d3096325a227bd8bf9f81b",
+      "relativePath": "scripts-book/01-repo-bootstrap/setup.ps1"
+    },
+    {
+      "hash": "b95614127baaa56b68257d994c6f31d9e4d4057e0617ba15c3d8ba7e9cee9268",
+      "relativePath": "scripts-book/01-repo-bootstrap/setup.py"
+    },
+    {
+      "hash": "f6898183f92505f4aca086b8876c04c0394203b9acfc905606397814fc3b349f",
+      "relativePath": "scripts-book/01-repo-bootstrap/setup.sh"
+    },
+    {
+      "hash": "efa483dec5b4c42b998b3756789c28fae228e6bc42a59324c21aa75468d31a27",
+      "relativePath": "scripts-book/02-monorepo-structure/README.md"
+    },
+    {
+      "hash": "91256c328007a8916e4dc59da5eacb0ff94dcf3ee1c1c1529d7cb59c3a54c85e",
+      "relativePath": "scripts-book/03-auth-and-tenancy/README.md"
+    },
+    {
+      "hash": "ba5b95f436627e6fc6e05697cfaff634b15af04b61d41d5ddc47ae2eec31e854",
+      "relativePath": "scripts-book/04-database-azure-postgresql/README.md"
+    },
+    {
+      "hash": "576ff97a014be108505b8e9099e274c355dfa6368f3e65d6de942e2218a86c03",
+      "relativePath": "scripts-book/04-database-azure-postgresql/migrate.ps1"
+    },
+    {
+      "hash": "d56df384ac67a121e83c110cef5be6c549f46faedbb257f7b037a0290154a816",
+      "relativePath": "scripts-book/04-database-azure-postgresql/migrate.py"
+    },
+    {
+      "hash": "55b8f3c01252f5648ad03ebd122d6a952a06d05bf0bbbb8845d413c01170e508",
+      "relativePath": "scripts-book/04-database-azure-postgresql/migrate.sh"
+    },
+    {
+      "hash": "243c0194a2e36ff47ef7334ff738f93e6a563118a657a198128b7e3aa0c4d90f",
+      "relativePath": "scripts-book/07-ci-cd-azure/README.md"
+    },
+    {
+      "hash": "b3db2412e50df9105d6779f35f229e4a1aaac0ce63d0af21e2922e611c3e2dde",
+      "relativePath": "scripts-book/08-security-hardening/README.md"
+    },
+    {
+      "hash": "21098be7f9042888a4127bc7f8e2390141f0d0998555ec917b4d094d77bdd698",
+      "relativePath": "scripts-book/09-observability/README.md"
+    },
+    {
+      "hash": "e4e239efbd2c330cf36f42e90a1ffaf41df95856c44da36c0f9f974f597678a4",
+      "relativePath": "scripts-book/10-exports-compliance/README.md"
+    },
+    {
+      "hash": "8aacd88c7cfde24d0f4d58991569452ddca0710b089329a6f2e14c9ea9582737",
+      "relativePath": "scripts-book/REBUILD.md"
+    },
+    {
+      "hash": "db2cb0f7495acd5a44c60c9f9d8075307c3b18c97bcc881a98201fcd6d7a5542",
+      "relativePath": "docs/governance.md"
+    },
+    {
+      "hash": "547a19571de90461ffec1b3c735c80d134fe06f6c7b09320f2b5d1b9760dda70",
+      "relativePath": "docs/contributing.md"
+    },
+    {
+      "hash": "03abf7125cd32a4d8f8dea55b91e33c229b56428f0d05cdda47e32b0937edf3d",
+      "relativePath": "docs/deployment.md"
+    },
+    {
+      "hash": "21fa24a57d7b313b59cb776ccbb4fad45aaf4ce8ad4ed8b2bd37890d8c1d17ea",
+      "relativePath": "docs/security.md"
+    },
+    {
+      "hash": "ec6e4bcdb0288c52fd0d1cef39cc7e77a31dc6ee7bb89e40f9de190a2489e51d",
+      "relativePath": ".github/workflows/verify.yml"
+    },
+    {
+      "hash": "2fdb152c7b4a952d9802f2cecb403bf6d6ce3ac9b2acf5dd90042b0d0e73531b",
+      "relativePath": ".github/workflows/deploy-staging.yml"
+    },
+    {
+      "hash": "fdc6fed62b0b20568e1226312964aaebcd358679e84da8a6840d293cd432986d",
+      "relativePath": ".github/workflows/deploy-production.yml"
+    },
+    {
+      "hash": "f0182363c0f27b54bd855951601eef7d8a216c55ac8f53942c170dad622573e9",
+      "relativePath": "Dockerfile.nextjs"
+    },
+    {
+      "hash": "9bf2833c3c35b7659d07602f24800c076bff4a03b200a8f7e0c0cd87ed62d2e4",
+      "relativePath": ".dockerignore"
+    }
+  ]
+}

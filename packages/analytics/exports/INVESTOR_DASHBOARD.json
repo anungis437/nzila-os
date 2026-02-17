@@ -1,0 +1,168 @@
+{
+  "dashboard_id": "investor_dashboard",
+  "name": "Investor Dashboard",
+  "description": "Key metrics and KPIs for investor-facing reporting",
+  "version": "1.0.0",
+  "last_updated": "2026-02-17",
+  "refresh_rate": "monthly",
+  "audience": ["Investors", "Board", "CFO"],
+  "sections": [
+    {
+      "section_id": "company_overview",
+      "title": "Company Overview",
+      "layout": "2x2",
+      "widgets": [
+        {
+          "widget_id": "portfolio_size",
+          "type": "kpi",
+          "title": "Portfolio Platforms",
+          "value": 15,
+          "format": "number",
+          "color": "blue"
+        },
+        {
+          "widget_id": "verticals",
+          "type": "kpi",
+          "title": "Business Verticals",
+          "value": 10,
+          "format": "number",
+          "color": "blue"
+        },
+        {
+          "widget_id": "engineering_investment",
+          "type": "kpi",
+          "title": "Engineering Investment",
+          "value": 4000000,
+          "format": "currency",
+          "color": "green"
+        },
+        {
+          "widget_id": "total_tam",
+          "type": "kpi",
+          "title": "Combined TAM",
+          "value": 142100000000,
+          "format": "currency",
+          "suffix": "$142.1B",
+          "color": "green"
+        }
+      ]
+    },
+    {
+      "section_id": "revenue_growth",
+      "title": "Revenue Growth Trajectory",
+      "layout": "line_chart",
+      "widgets": [
+        {
+          "widget_id": "arr_trajectory",
+          "type": "line",
+          "title": "ARR Projection (2026-2030)",
+          "data": [
+            {"year": "2026", "target": 350000},
+            {"year": "2027", "target": 1200000},
+            {"year": "2028", "target": 2800000},
+            {"year": "2029", "target": 4500000},
+            {"year": "2030", "target": 6000000}
+          ]
+        }
+      ]
+    },
+    {
+      "section_id": "revenue_streams",
+      "title": "Revenue Streams",
+      "layout": "stacked_bar",
+      "widgets": [
+        {
+          "widget_id": "revenue_by_stream",
+          "type": "stacked_bar",
+          "title": "Revenue by Stream (2030 Target)",
+          "data": [
+            {"stream": "B2B SaaS", "percentage": 75, "value": 4500000},
+            {"stream": "Transaction Fees", "percentage": 15, "value": 900000},
+            {"stream": "IP Licensing", "percentage": 10, "value": 600000}
+          ]
+        }
+      ]
+    },
+    {
+      "section_id": "unit_economics",
+      "title": "Unit Economics",
+      "layout": "table",
+      "widgets": [
+        {
+          "widget_id": "flagship_economics",
+          "type": "table",
+          "title": "Flagship Platform Economics",
+          "columns": ["Platform", "ACV", "CAC", "LTV", "LTV/CAC", "Payback (months)"],
+          "data": [
+            {"platform": "Union Eyes", "acv": 15000, "cac": 3500, "ltv": 135000, "ltv_cac": "38.6x", "payback": 8},
+            {"platform": "ABR Insights", "acv": 12000, "cac": 2800, "ltv": 108000, "ltv_cac": "38.6x", "payback": 8},
+            {"platform": "CORA", "acv": 10000, "cac": 2200, "ltv": 90000, "ltv_cac": "40.9x", "payback": 7},
+            {"platform": "DiasporaCore", "acv": 15000, "cac": 3000, "ltv": 150000, "ltv_cac": "50.0x", "payback": 6},
+            {"platform": "SentryIQ", "acv": 9000, "cac": 2500, "ltv": 81000, "ltv_cac": "32.4x", "payback": 10}
+          ]
+        }
+      ]
+    },
+    {
+      "section_id": "customer_growth",
+      "title": "Customer Growth",
+      "layout": "line_chart",
+      "widgets": [
+        {
+          "widget_id": "customer_trajectory",
+          "type": "line",
+          "title": "Total Customer Growth",
+          "data": [
+            {"year": "2026", "target": 25},
+            {"year": "2027", "target": 80},
+            {"year": "2028", "target": 180},
+            {"year": "2029", "target": 350},
+            {"year": "2030", "target": 500}
+          ]
+        }
+      ]
+    },
+    {
+      "section_id": "funding",
+      "title": "Funding & Use of Proceeds",
+      "layout": "comparison",
+      "widgets": [
+        {
+          "widget_id": "series_a",
+          "type": "comparison",
+          "title": "Series A Details",
+          "data": {
+            "target_raise": 4000000,
+            "pre_money_valuation": 16000000,
+            "use_of_proceeds": [
+              {"category": "Engineering", "percentage": 45, "amount": 1800000},
+              {"category": "Sales & Marketing", "percentage": 25, "amount": 1000000},
+              {"category": "Operations", "percentage": 15, "amount": 600000},
+              {"category": "Legal & Compliance", "percentage": 10, "amount": 400000},
+              {"category": "Reserve", "percentage": 5, "amount": 200000}
+            ]
+          }
+        }
+      ]
+    },
+    {
+      "section_id": "competitive_position",
+      "title": "Competitive Differentiation",
+      "layout": "list",
+      "widgets": [
+        {
+          "widget_id": "differentiators",
+          "type": "list",
+          "title": "Key Differentiators",
+          "data": [
+            "Multi-vertical platform with shared backbone (65% code reuse)",
+            "AI Companion Engine (200+ domain-specific prompts)",
+            "African diaspora market focus (underserved TAM)",
+            "15 platforms generating cross-vertical network effects",
+            "Enterprise-grade compliance (SOC2, HIPAA-ready, PCI-DSS)"
+          ]
+        }
+      ]
+    }
+  ]
+}

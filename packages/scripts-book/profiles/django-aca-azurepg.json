@@ -1,0 +1,23 @@
+{
+  "name": "django-aca-azurepg",
+  "description": "Django app deployed to Azure Container Apps with Azure PostgreSQL (no Clerk)",
+  "expected_paths": ["src", "app"],
+  "default_app_port": 8000,
+  "docker_template": null,
+  "docker_placement": "root",
+  "default_modules": [
+    "core-governance",
+    "repo-bootstrap",
+    "db-azurepg",
+    "deploy-aca-oidc",
+    "security-baseline",
+    "observability-audit"
+  ],
+  "generated_files": {
+    "scripts-book": true,
+    "docs": true,
+    "workflows": true,
+    "dockerfile": false
+  },
+  "notes": "Django Dockerfile is not included in the template. Create your own Dockerfile or use a community template."
+}

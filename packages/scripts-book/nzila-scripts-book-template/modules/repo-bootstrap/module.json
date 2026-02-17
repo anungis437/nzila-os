@@ -1,0 +1,7 @@
+{
+  "name": "repo-bootstrap",
+  "description": "Repository bootstrap scripts and setup",
+  "chapters": ["01-repo-bootstrap"],
+  "docs": [],
+  "required": true
+}

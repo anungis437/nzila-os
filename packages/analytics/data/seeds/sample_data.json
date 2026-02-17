@@ -1,0 +1,127 @@
+{
+  "description": "Seed data for analytics development and testing",
+  "generated_at": "2026-02-17",
+  "platforms": [
+    {
+      "platform_id": "union_eyes",
+      "name": "Union Eyes",
+      "vertical": "Uniontech",
+      "entity_count": 4773,
+      "complexity": "EXTREME",
+      "production_readiness": 9.5,
+      "security_score": 10.0,
+      "rls_policies": 238,
+      "arr_target_2026": 105000,
+      "arr_target_2030": 1800000,
+      "customers_target_2026": 25
+    },
+    {
+      "platform_id": "abr_insights",
+      "name": "ABR Insights",
+      "vertical": "EdTech/Legaltech",
+      "entity_count": 132,
+      "complexity": "EXTREME",
+      "production_readiness": 9.1,
+      "security_score": 8.5,
+      "rls_policies": 106,
+      "arr_target_2026": 126000,
+      "arr_target_2030": 1200000,
+      "customers_target_2026": 50
+    },
+    {
+      "platform_id": "cora",
+      "name": "CORA",
+      "vertical": "Agrotech",
+      "entity_count": 80,
+      "complexity": "HIGH",
+      "production_readiness": 7.0,
+      "security_score": 7.0,
+      "rls_policies": 0,
+      "arr_target_2026": 30000,
+      "arr_target_2030": 900000,
+      "customers_target_2026": 100
+    },
+    {
+      "platform_id": "congowave",
+      "name": "CongoWave",
+      "vertical": "Entertainment",
+      "entity_count": 83,
+      "complexity": "HIGH-EXTREME",
+      "production_readiness": 10.0,
+      "security_score": 8.0,
+      "rls_policies": 0,
+      "arr_target_2026": 20000,
+      "arr_target_2030": 600000,
+      "customers_target_2026": 200
+    },
+    {
+      "platform_id": "c3uo",
+      "name": "DiasporaCore V2",
+      "vertical": "Fintech",
+      "entity_count": 485,
+      "complexity": "EXTREME",
+      "production_readiness": 6.0,
+      "security_score": 7.5,
+      "rls_policies": 0,
+      "arr_target_2026": 50000,
+      "arr_target_2030": 600000,
+      "customers_target_2026": 1000
+    },
+    {
+      "platform_id": "sentryiq",
+      "name": "SentryIQ360",
+      "vertical": "Insurtech",
+      "entity_count": 79,
+      "complexity": "HIGH-EXTREME",
+      "production_readiness": 6.5,
+      "security_score": 7.0,
+      "rls_policies": 0,
+      "arr_target_2026": 45000,
+      "arr_target_2030": 450000,
+      "customers_target_2026": 5
+    },
+    {
+      "platform_id": "court_lens",
+      "name": "Court Lens",
+      "vertical": "Legaltech",
+      "entity_count": 682,
+      "complexity": "HIGH",
+      "production_readiness": 7.5,
+      "security_score": 8.0,
+      "rls_policies": 0,
+      "arr_target_2026": 54000,
+      "arr_target_2030": 300000,
+      "customers_target_2026": 30
+    },
+    {
+      "platform_id": "trade_os",
+      "name": "Trade OS",
+      "vertical": "Trade",
+      "entity_count": 337,
+      "complexity": "HIGH",
+      "production_readiness": 6.0,
+      "security_score": 6.5,
+      "rls_policies": 0,
+      "arr_target_2026": 36000,
+      "arr_target_2030": 350000,
+      "customers_target_2026": 60
+    }
+  ],
+  "financial_seed": {
+    "arr_targets": {
+      "2025": 0,
+      "2026": 350000,
+      "2027": 1200000,
+      "2028": 2800000,
+      "2029": 4500000,
+      "2030": 6000000
+    },
+    "revenue_streams": {
+      "saas": 0.75,
+      "transaction_fees": 0.15,
+      "ip_licensing": 0.10
+    },
+    "series_a_target": 4000000,
+    "runway_months": 24
+  }
+}

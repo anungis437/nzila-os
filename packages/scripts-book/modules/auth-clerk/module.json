@@ -1,0 +1,6 @@
+{
+  "name": "auth-clerk",
+  "description": "Clerk authentication and multi-tenancy setup",
+  "chapters": ["03-auth-and-tenancy"],
+  "docs": []
+}

@@ -1,0 +1,18 @@
+{
+  "name": "nzila-scripts-book-template",
+  "version": "1.0.0",
+  "description": "Nzila-wide Scripts Book Template Kit — standardizes governance, CI/CD, Azure Postgres, Azure Container Apps, Clerk auth, security, observability, and Bash+PowerShell parity across repos.",
+  "private": true,
+  "packageManager": "pnpm@9.15.4",
+  "scripts": {
+    "sb:validate": "node generator/dist/index.js validate",
+    "sb:apply": "node generator/dist/index.js apply",
+    "sb:diff": "node generator/dist/index.js diff",
+    "sb:doctor": "node generator/dist/index.js doctor",
+    "sb:test-example": "node generator/dist/index.js apply --target examples/nextjs-aca-azurepg-clerk/generated && node generator/dist/index.js validate",
+    "sb:format": "prettier --write \"generator/src/**/*.ts\"",
+    "build": "pnpm --filter @nzila/scripts-book-generator build"
+  },
+  "keywords": ["nzila", "scripts-book", "template", "governance", "azure"],
+  "license": "UNLICENSED"
+}

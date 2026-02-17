@@ -1,0 +1,61 @@
+# Chapter 02 — Monorepo Structure
+
+This chapter describes the workspace layout of **{{PRODUCT_NAME}}** and how
+pnpm workspaces and Turborepo orchestrate builds across packages.
+
+## Workspace layout
+
+```
+{{REPO_NAME}}/
+├── {{PRIMARY_APP_PATH}}/   # Main Next.js application
+├── packages/               # Shared libraries and configs
+│   ├── ui/                 # Design-system components
+│   ├── db/                 # Database schema and client
+│   └── config/             # Shared ESLint / TypeScript configs
+├── pnpm-workspace.yaml
+└── turbo.json
+```
+
+## pnpm workspaces
+
+All packages are declared in `pnpm-workspace.yaml`. Dependencies between
+workspace packages use the `workspace:*` protocol so that pnpm resolves them
+locally rather than fetching from the registry.
+
+## Turborepo tasks
+
+The `turbo.json` file at the repo root defines the task graph:
+
+- **build** — Compiles every package in dependency order.
+- **dev** — Starts the dev server for `{{PRIMARY_APP_PATH}}`.
+- **lint** — Runs ESLint across all workspaces.
+- **test** — Runs Vitest / Playwright in each package.
+- **typecheck** — Runs `tsc --noEmit` across all packages.
+
+### Running tasks
+
+```bash
+# Build everything
+pnpm turbo build
+
+# Dev server for the primary app
+pnpm --filter {{PRIMARY_APP_PATH}} dev
+
+# Lint a single package
+pnpm --filter packages/ui lint
+```
+
+## Adding a new package
+
+1. Create a directory under `packages/`.
+2. Add a `package.json` with a unique `name` field.
+3. Reference it from consuming packages via `workspace:*`.
+4. Register any new turbo tasks in `turbo.json` if needed.
+
+## Key files
+
+| File                   | Purpose                          |
+| ---------------------- | -------------------------------- |
+| `pnpm-workspace.yaml`  | Declares workspace packages      |
+| `turbo.json`            | Defines the Turborepo task graph |
+| `tsconfig.base.json`   | Shared TypeScript configuration  |

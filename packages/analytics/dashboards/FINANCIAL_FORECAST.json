@@ -1,0 +1,227 @@
+{
+  "dashboard_id": "FINANCIAL_FORECAST",
+  "name": "Financial Forecast Dashboard",
+  "description": "Revenue projections, cost structure, and financial modeling",
+  "version": "1.0.0",
+  "last_updated": "2026-02-17",
+  "refresh_rate": "weekly",
+  "audience": ["CFO", "CEO", "Board", "Investors"],
+  "sections": [
+    {
+      "section_id": "revenue_projections",
+      "title": "5-Year Revenue Projections",
+      "layout": "line_chart",
+      "widgets": [
+        {
+          "widget_id": "arr_projection",
+          "type": "line",
+          "title": "ARR Projection (2026-2030)",
+          "x_axis": "year",
+          "y_axis": "arr",
+          "data": [
+            {"year": "2025", "actual": 0, "target": 0},
+            {"year": "2026", "actual": 0, "target": 350000},
+            {"year": "2027", "actual": 0, "target": 1200000},
+            {"year": "2028", "actual": 0, "target": 2800000},
+            {"year": "2029", "actual": 0, "target": 4500000},
+            {"year": "2030", "actual": 0, "target": 6000000}
+          ]
+        },
+        {
+          "widget_id": "mrr_projection",
+          "type": "line",
+          "title": "MRR Projection (2026-2030)",
+          "x_axis": "month",
+          "y_axis": "mrr",
+          "data": [
+            {"month": "2026-01", "mrr": 0},
+            {"month": "2026-06", "mrr": 15000},
+            {"month": "2026-12", "mrr": 29000},
+            {"month": "2027-06", "mrr": 60000},
+            {"month": "2027-12", "mrr": 100000},
+            {"month": "2028-12", "mrr": 233000},
+            {"month": "2029-12", "mrr": 375000},
+            {"month": "2030-12", "mrr": 500000}
+          ]
+        }
+      ]
+    },
+    {
+      "section_id": "revenue_by_stream",
+      "title": "Revenue by Stream",
+      "layout": "stacked_bar",
+      "widgets": [
+        {
+          "widget_id": "revenue_streams",
+          "type": "stacked_bar",
+          "title": "Revenue by Stream (2030)",
+          "data": [
+            {"stream": "B2B SaaS", "2026": 262500, "2027": 900000, "2028": 2100000, "2029": 3375000, "2030": 4500000},
+            {"stream": "Transaction Fees", "2026": 52500, "2027": 180000, "2028": 420000, "2029": 675000, "2030": 900000},
+            {"stream": "IP Licensing", "2026": 35000, "2027": 120000, "2028": 280000, "2029": 450000, "2030": 600000}
+          ]
+        }
+      ]
+    },
+    {
+      "section_id": "revenue_by_platform",
+      "title": "Revenue by Platform",
+      "layout": "table",
+      "widgets": [
+        {
+          "widget_id": "platform_revenue",
+          "type": "table",
+          "title": "2030 Revenue by Platform",
+          "columns": ["Platform", "Vertical", "ARR Target", "Customers", "ACV"],
+          "data": [
+            {"platform": "Union Eyes", "vertical": "Uniontech", "arr": 1800000, "customers": 120, "acv": "$15K"},
+            {"platform": "ABR Insights", "vertical": "Justice-Equity", "arr": 1200000, "customers": 100, "acv": "$12K"},
+            {"platform": "CORA", "vertical": "AgTech", "arr": 900000, "customers": 90, "acv": "$10K"},
+            {"platform": "DiasporaCore", "vertical": "Fintech", "arr": 600000, "customers": 40, "acv": "$15K"},
+            {"platform": "SentryIQ", "vertical": "Insurtech", "arr": 450000, "customers": 50, "acv": "$9K"},
+            {"platform": "Trade OS", "vertical": "Trade", "arr": 350000, "customers": 60, "acv": "$5.8K"},
+            {"platform": "Court Lens", "vertical": "Legaltech", "arr": 300000, "customers": 30, "acv": "$10K"},
+            {"platform": "Shop Quoter", "vertical": "Commerce", "arr": 180000, "customers": 40, "acv": "$4.5K"},
+            {"platform": "Others", "vertical": "Various", "arr": 220000, "customers": 70, "acv": "$3.1K"}
+          ]
+        }
+      ]
+    },
+    {
+      "section_id": "customer_economics",
+      "title": "Customer Economics",
+      "layout": "comparison",
+      "widgets": [
+        {
+          "widget_id": "unit_economics",
+          "type": "comparison",
+          "title": "Unit Economics by Flagship",
+          "data": [
+            {
+              "platform": "Union Eyes",
+              "cac": 10000,
+              "ltv": 70000,
+              "ltv_cac": 7.0,
+              "payback_months": 18,
+              "churn_rate": 10
+            },
+            {
+              "platform": "ABR Insights",
+              "cac": 7000,
+              "ltv": 50000,
+              "ltv_cac": 7.1,
+              "payback_months": 9,
+              "churn_rate": 15
+            },
+            {
+              "platform": "CORA",
+              "cac": 650,
+              "ltv": 75000,
+              "ltv_cac": 115.4,
+              "payback_months": 3,
+              "churn_rate": 5
+            }
+          ]
+        }
+      ]
+    },
+    {
+      "section_id": "cost_structure",
+      "title": "Cost Structure & OPEX",
+      "layout": "stacked_area",
+      "widgets": [
+        {
+          "widget_id": "opex_breakdown",
+          "type": "stacked_area",
+          "title": "OPEX by Category (2026-2030)",
+          "x_axis": "year",
+          "y_axis": "amount",
+          "data": [
+            {"year": "2026", "salaries": 450000, "cloud": 80000, "sales_marketing": 120000, "legal": 50000, "third_party": 60000, "office": 30000},
+            {"year": "2027", "salaries": 950000, "cloud": 140000, "sales_marketing": 300000, "legal": 70000, "third_party": 100000, "office": 50000},
+            {"year": "2028", "salaries": 1800000, "cloud": 220000, "sales_marketing": 550000, "legal": 90000, "third_party": 150000, "office": 80000},
+            {"year": "2029", "salaries": 2700000, "cloud": 320000, "sales_marketing": 850000, "legal": 110000, "third_party": 200000, "office": 110000},
+            {"year": "2030", "salaries": 3500000, "cloud": 420000, "sales_marketing": 1100000, "legal": 130000, "third_party": 250000, "office": 140000}
+          ]
+        }
+      ]
+    },
+    {
+      "section_id": "profitability",
+      "title": "Profitability Roadmap",
+      "layout": "line_chart",
+      "widgets": [
+        {
+          "widget_id": "profitability_projection",
+          "type": "line",
+          "title": "Gross Margin & EBITDA (2026-2030)",
+          "x_axis": "year",
+          "y_axis": "percentage",
+          "data": [
+            {"year": "2026", "gross_margin": 75, "ebitda": -35},
+            {"year": "2027", "gross_margin": 78, "ebitda": -20},
+            {"year": "2028", "gross_margin": 80, "ebitda": -5},
+            {"year": "2029", "gross_margin": 82, "ebitda": 10},
+            {"year": "2030", "gross_margin": 85, "ebitda": 25}
+          ]
+        }
+      ]
+    },
+    {
+      "section_id": "funding_requirements",
+      "title": "Funding Requirements",
+      "layout": "kpi",
+      "widgets": [
+        {
+          "widget_id": "series_a_target",
+          "type": "kpi",
+          "title": "Series A Target",
+          "value": 4000000,
+          "range": "3000000-5000000",
+          "timing": "Q2 2026",
+          "runway_months": 24
+        },
+        {
+          "widget_id": "bridge_to_profitability",
+          "type": "kpi",
+          "title": "Months to Breakeven",
+          "value": 27,
+          "target": "Q2 2028"
+        }
+      ]
+    }
+  ],
+  "key_metrics": [
+    {
+      "id": "arr_cagr",
+      "name": "ARR CAGR (2026-2030)",
+      "value": 106,
+      "unit": "%"
+    },
+    {
+      "id": "gross_margin_2030",
+      "name": "2030 Gross Margin Target",
+      "value": 85,
+      "unit": "%"
+    },
+    {
+      "id": "ltv_cac_avg",
+      "name": "Avg LTV/CAC (Flagships)",
+      "value": 43.2,
+      "unit": "x"
+    },
+    {
+      "id": "payback_avg",
+      "name": "Avg Payback Period",
+      "value": 10,
+      "unit": "months"
+    }
+  ],
+  "assumptions": [
+    "Series A closes Q2 2026 with $4M",
+    "3 flagship platforms launch in 2026",
+    "Sales team scales from 2 AEs (2026) to 8 AEs (2030)",
+    "Customer retention: 85-95% annually",
+    "Gross margin improves 10% through economies of scale"
+  ]
+}

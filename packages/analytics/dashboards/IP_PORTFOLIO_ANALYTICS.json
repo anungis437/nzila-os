@@ -1,0 +1,730 @@
+{
+  "dashboard_id": "ip_portfolio_analytics",
+  "name": "IP Portfolio Analytics Dashboard",
+  "description": "Track intellectual property portfolio valuation, patent filings, trademark status, trade secrets, and licensing revenue potential",
+  "version": "1.0.0",
+  "last_updated": "2026-02-17",
+  "refresh_rate": "weekly",
+  "audience": ["CEO", "CTO", "CFO", "Legal Team", "Board"],
+  
+  "sections": [
+    {
+      "section_id": "ip_portfolio_overview",
+      "name": "IP Portfolio Overview",
+      "type": "kpi_grid",
+      "layout": "2x3",
+      "widgets": [
+        {
+          "widget_id": "total_portfolio_value",
+          "name": "Total IP Portfolio Valuation",
+          "type": "kpi",
+          "value": 5500000,
+          "value_range": {
+            "low": 5000000,
+            "high": 6000000
+          },
+          "unit": "currency",
+          "target": 8000000,
+          "status": "on-track",
+          "breakdown": {
+            "source_code": 4000000,
+            "algorithms_ai_models": 800000,
+            "trademarks_brand": 250000,
+            "trade_secrets": 450000
+          }
+        },
+        {
+          "widget_id": "patents_filed",
+          "name": "Patents Filed",
+          "type": "kpi",
+          "value": 3,
+          "target": 5,
+          "status": "on-track",
+          "breakdown": {
+            "pending": 3,
+            "granted": 0,
+            "rejected": 0
+          }
+        },
+        {
+          "widget_id": "trademarks_registered",
+          "name": "Trademarks",
+          "type": "kpi",
+          "value": 7,
+          "target": 10,
+          "status": "on-track",
+          "breakdown": {
+            "registered": 1,
+            "pending": 4,
+            "to_file": 2,
+            "planned": 3
+          }
+        },
+        {
+          "widget_id": "trade_secrets_protected",
+          "name": "Trade Secrets Protected",
+          "type": "kpi",
+          "value": 7,
+          "target": 10,
+          "status": "healthy",
+          "breakdown": {
+            "high_protection": 4,
+            "medium_protection": 2,
+            "action_required": 1
+          }
+        },
+        {
+          "widget_id": "licensing_revenue_potential",
+          "name": "Licensing Revenue Potential",
+          "type": "kpi",
+          "value": 450000,
+          "unit": "currency",
+          "target": 600000,
+          "status": "approaching",
+          "calculation": "Annual licensing revenue if all patents granted + trade secrets licensed"
+        },
+        {
+          "widget_id": "ip_protection_status",
+          "name": "IP Protection Status",
+          "type": "kpi",
+          "value": 75,
+          "unit": "percent",
+          "target": 90,
+          "status": "approaching",
+          "calculation": "Protected IP / Total IP assets"
+        }
+      ]
+    },
+    
+    {
+      "section_id": "patent_portfolio",
+      "name": "Patent Portfolio",
+      "type": "table_with_timeline",
+      "description": "Patent filings, status, and revenue potential",
+      "table": {
+        "columns": ["patent_title", "platform", "filing_date", "status", "jurisdiction", "valuation", "licensing_potential", "strategic_value"],
+        "rows": [
+          {
+            "patent_title": "AI-Powered Pension Forecasting System",
+            "platform": "Union Eyes",
+            "filing_date": "2026-04-15",
+            "status": "Pending",
+            "jurisdiction": "Canada (CIPO)",
+            "valuation": 250000,
+            "licensing_potential": 150000,
+            "strategic_value": "HIGH",
+            "notes": "Unique pension forecasting algorithm, 88% accuracy, trade union market (450K potential users in Canada)",
+            "patent_claims": [
+              "AI model for pension calculation using historical union contract data",
+              "Interactive dashboard for member self-service pension forecasting",
+              "Integration with census data + actuarial tables"
+            ]
+          },
+          {
+            "patent_title": "Grievance Resolution Prediction Algorithm",
+            "platform": "Union Eyes",
+            "filing_date": "2026-05-20",
+            "status": "Pending",
+            "jurisdiction": "Canada (CIPO)",
+            "valuation": 180000,
+            "licensing_potential": 100000,
+            "strategic_value": "MEDIUM",
+            "notes": "Predictive model for grievance outcomes (win/loss/settlement), currently 65% accuracy (needs improvement)",
+            "patent_claims": [
+              "ML model trained on grievance outcomes",
+              "Natural language processing for grievance text analysis",
+              "Recommendation engine for resolution strategies"
+            ]
+          },
+          {
+            "patent_title": "Bias Detection in Gamified Educational Assessments",
+            "platform": "ABR Insights",
+            "filing_date": "2026-08-30",
+            "status": "Pending",
+            "jurisdiction": "Canada (CIPO)",
+            "valuation": 320000,
+            "licensing_potential": 120000,
+            "strategic_value": "HIGH",
+            "notes": "Novel bias detection algorithm (gender, race, socioeconomic) in gamified learning, 78% accuracy, EdTech + DEI market",
+            "patent_claims": [
+              "AI model for detecting bias in assessment question text + images",
+              "Gamification bias risk scoring (fairness across demographic groups)",
+              "Automated bias remediation recommendations"
+            ]
+          }
+        ],
+        "summary": {
+          "total_patents": 3,
+          "total_valuation": 750000,
+          "total_licensing_potential": 370000,
+          "high_strategic_value_count": 2
+        }
+      },
+      "timeline": {
+        "milestones": [
+          {"date": "2026-04-15", "event": "File Union Eyes Pension Patent (CIPO)", "status": "pending"},
+          {"date": "2026-05-20", "event": "File Union Eyes Grievance Patent (CIPO)", "status": "pending"},
+          {"date": "2026-08-30", "event": "File ABR Bias Detection Patent (CIPO)", "status": "pending"},
+          {"date": "2027-04-15", "event": "Expected CIPO Examination Report (Pension Patent)", "status": "projected"},
+          {"date": "2027-10-15", "event": "Expected Patent Grant (Pension Patent - optimistic)", "status": "projected"}
+        ]
+      }
+    },
+    
+    {
+      "section_id": "trademark_portfolio",
+      "name": "Trademark Portfolio",
+      "type": "table_with_status",
+      "description": "Trademark registrations, applications, and brand protection",
+      "table": {
+        "columns": ["trademark", "class", "filing_date", "status", "jurisdiction", "valuation", "renewal_date", "priority"],
+        "rows": [
+          {
+            "trademark": "Nzila Ventures",
+            "class": "Class 42 (Software/Technology Services)",
+            "filing_date": "2024-03-10",
+            "status": "Registered",
+            "jurisdiction": "Canada (CIPO)",
+            "registration_number": "TMA1234567",
+            "valuation": 80000,
+            "renewal_date": "2034-03-10",
+            "priority": "HIGH",
+            "notes": "Holding company brand, registered in Canada"
+          },
+          {
+            "trademark": "Memora",
+            "class": "Class 44 (Medical/Health Services), Class 9 (Software)",
+            "filing_date": "2026-01-15",
+            "status": "Pending",
+            "jurisdiction": "Canada (CIPO)",
+            "valuation": 50000,
+            "expected_registration": "2026-07-15",
+            "priority": "HIGH",
+            "notes": "AI Companion for elderly care, strong brand recognition potential"
+          },
+          {
+            "trademark": "Union Eyes",
+            "class": "Class 42 (Software/Technology Services)",
+            "filing_date": "2026-02-20",
+            "status": "Pending",
+            "jurisdiction": "Canada (CIPO)",
+            "valuation": 40000,
+            "expected_registration": "2026-08-20",
+            "priority": "HIGH",
+            "notes": "Union management platform, synergy with pension + grievance patents"
+          },
+          {
+            "trademark": "ABR Insights",
+            "class": "Class 41 (Education Services), Class 9 (Software)",
+            "filing_date": "2026-03-10",
+            "status": "Pending",
+            "jurisdiction": "Canada (CIPO)",
+            "valuation": 35000,
+            "expected_registration": "2026-09-10",
+            "priority": "MEDIUM",
+            "notes": "EdTech + DEI platform, synergy with bias detection patent"
+          },
+          {
+            "trademark": "CORA",
+            "class": "Class 42 (Software/Technology Services), Class 44 (Agriculture Services)",
+            "filing_date": "2026-04-15",
+            "status": "Pending",
+            "jurisdiction": "Canada (CIPO)",
+            "valuation": 45000,
+            "expected_registration": "2026-10-15",
+            "priority": "HIGH",
+            "notes": "AgTech platform, synergy with SDTC climate application"
+          },
+          {
+            "trademark": "DiasporaCore",
+            "class": "Class 36 (Financial Services), Class 9 (Software)",
+            "filing_date": null,
+            "status": "To File (Q2 2026)",
+            "jurisdiction": "Canada (CIPO)",
+            "valuation": 30000,
+            "expected_filing": "2026-05-30",
+            "priority": "MEDIUM",
+            "notes": "Fintech remittance platform"
+          },
+          {
+            "trademark": "SentryIQ360",
+            "class": "Class 36 (Insurance Services), Class 9 (Software)",
+            "filing_date": null,
+            "status": "To File (Q3 2026)",
+            "jurisdiction": "Canada (CIPO)",
+            "valuation": 25000,
+            "expected_filing": "2026-08-30",
+            "priority": "LOW",
+            "notes": "Insurtech platform"
+          }
+        ],
+        "summary": {
+          "total_trademarks": 7,
+          "registered": 1,
+          "pending": 4,
+          "to_file": 2,
+          "total_valuation": 305000,
+          "high_priority_count": 4
+        }
+      }
+    },
+    
+    {
+      "section_id": "trade_secrets",
+      "name": "Trade Secrets Inventory",
+      "type": "table_with_audit_schedule",
+      "description": "Trade secret identification, protection status, and audit schedules",
+      "table": {
+        "columns": ["trade_secret", "platform", "category", "valuation", "protection_level", "last_audit", "next_audit", "access_control"],
+        "rows": [
+          {
+            "trade_secret": "Companion Engine Personality Graph Algorithm",
+            "platform": "Cross-Platform (Memora, ABR, Union Eyes, CourtLens, CORA)",
+            "category": "Algorithm",
+            "valuation": 150000,
+            "protection_level": "HIGH",
+            "last_audit": "2026-01-15",
+            "next_audit": "2026-04-15",
+            "access_control": "CTO + 2 senior engineers only",
+            "protection_measures": [
+              "Non-disclosure agreements (NDAs)",
+              "Code obfuscation",
+              "Access logging + monitoring",
+              "Quarterly audit of code access"
+            ],
+            "notes": "Proprietary algorithm for tuning AI personality (warmth, formality, humor, empathy, technical depth)"
+          },
+          {
+            "trade_secret": "Multi-Tenant Data Isolation Architecture",
+            "platform": "Backbone (Cross-Platform)",
+            "category": "Architecture",
+            "valuation": 100000,
+            "protection_level": "HIGH",
+            "last_audit": "2025-12-20",
+            "next_audit": "2026-03-20",
+            "access_control": "CTO + 3 backend engineers",
+            "protection_measures": [
+              "NDAs",
+              "Row-level security (RLS) implementation details",
+              "Architecture documentation access control",
+              "Quarterly security audit"
+            ],
+            "notes": "Proprietary RLS + connection pooling patterns for 15-platform consolidation"
+          },
+          {
+            "trade_secret": "Pension Forecasting Training Dataset",
+            "platform": "Union Eyes",
+            "category": "Dataset",
+            "valuation": 80000,
+            "protection_level": "HIGH",
+            "last_audit": "2026-02-01",
+            "next_audit": "2026-08-01",
+            "access_control": "CTO + 1 data scientist",
+            "protection_measures": [
+              "NDAs",
+              "Encrypted storage (Azure Blob)",
+              "Access logging",
+              "Bi-annual audit"
+            ],
+            "notes": "500+ historical pension calculations, 88% model accuracy enabler"
+          },
+          {
+            "trade_secret": "Bias Detection Training Dataset",
+            "platform": "ABR Insights",
+            "category": "Dataset",
+            "valuation": 70000,
+            "protection_level": "MEDIUM",
+            "last_audit": "2026-01-10",
+            "next_audit": "2026-07-10",
+            "access_control": "CTO + 2 data scientists",
+            "protection_measures": [
+              "NDAs",
+              "Encrypted storage",
+              "Access logging",
+              "Bi-annual audit"
+            ],
+            "notes": "300+ bias-reviewed assessment questions, 78% model accuracy enabler"
+          },
+          {
+            "trade_secret": "Customer Acquisition Playbooks (15 platforms)",
+            "platform": "Cross-Platform",
+            "category": "Business Process",
+            "valuation": 50000,
+            "protection_level": "MEDIUM",
+            "last_audit": "2025-11-15",
+            "next_audit": "2026-05-15",
+            "access_control": "CEO + Sales Team",
+            "protection_measures": [
+              "NDAs",
+              "Restricted SharePoint access",
+              "Bi-annual review"
+            ],
+            "notes": "Vertical-specific sales strategies, pricing models, positioning"
+          },
+          {
+            "trade_secret": "CORA Climate Adaptation Algorithm",
+            "platform": "CORA",
+            "category": "Algorithm",
+            "valuation": 90000,
+            "protection_level": "HIGH",
+            "last_audit": "2026-01-20",
+            "next_audit": "2026-04-20",
+            "access_control": "CTO + 1 data scientist",
+            "protection_measures": [
+              "NDAs",
+              "Code obfuscation",
+              "Encrypted model storage",
+              "Quarterly audit"
+            ],
+            "notes": "Crop recommendation algorithm (climate + soil + market), 72% adoption rate, synergy with SDTC"
+          },
+          {
+            "trade_secret": "Backbone Migration Sequencing Algorithm",
+            "platform": "Backbone",
+            "category": "Algorithm",
+            "valuation": 60000,
+            "protection_level": "MEDIUM",
+            "last_audit": "2025-10-15",
+            "next_audit": "2026-04-15",
+            "access_control": "CTO + 2 migration engineers",
+            "protection_measures": [
+              "NDAs",
+              "Internal documentation only",
+              "Bi-annual review"
+            ],
+            "notes": "Platform migration prioritization algorithm (risk, complexity, ROI), 325 engineering hours savings"
+          }
+        ],
+        "summary": {
+          "total_trade_secrets": 7,
+          "total_valuation": 600000,
+          "high_protection": 4,
+          "medium_protection": 3,
+          "action_required": 0
+        }
+      },
+      "audit_schedule": [
+        {"date": "2026-03-20", "trade_secret": "Multi-Tenant Data Isolation Architecture", "type": "Quarterly Security Audit", "owner": "CTO"},
+        {"date": "2026-04-15", "trade_secret": "Companion Engine Personality Graph Algorithm", "type": "Quarterly Code Access Audit", "owner": "CTO"},
+        {"date": "2026-04-15", "trade_secret": "Backbone Migration Sequencing Algorithm", "type": "Bi-Annual Review", "owner": "CTO"},
+        {"date": "2026-04-20", "trade_secret": "CORA Climate Adaptation Algorithm", "type": "Quarterly Audit", "owner": "CTO"},
+        {"date": "2026-05-15", "trade_secret": "Customer Acquisition Playbooks", "type": "Bi-Annual Review", "owner": "CEO"},
+        {"date": "2026-07-10", "trade_secret": "Bias Detection Training Dataset", "type": "Bi-Annual Audit", "owner": "CTO"},
+        {"date": "2026-08-01", "trade_secret": "Pension Forecasting Training Dataset", "type": "Bi-Annual Audit", "owner": "CTO"}
+      ]
+    },
+    
+    {
+      "section_id": "source_code_valuation",
+      "name": "Source Code Valuation",
+      "type": "table_with_breakdown",
+      "description": "Platform source code valuation by engineering hours invested",
+      "table": {
+        "columns": ["platform", "engineering_hours", "hourly_rate", "valuation", "status", "ownership"],
+        "rows": [
+          {
+            "platform": "Union Eyes",
+            "engineering_hours": 4200,
+            "hourly_rate": 150,
+            "valuation": 630000,
+            "status": "Production-ready (60%)",
+            "ownership": "100% Nzila Ventures",
+            "notes": "Most complex platform, pension + grievance AI"
+          },
+          {
+            "platform": "C3UO",
+            "engineering_hours": 3800,
+            "hourly_rate": 150,
+            "valuation": 570000,
+            "status": "Production-ready (70%)",
+            "ownership": "100% Nzila Ventures",
+            "notes": "Pension forecasting, multi-union support"
+          },
+          {
+            "platform": "ABR Insights",
+            "engineering_hours": 3500,
+            "hourly_rate": 150,
+            "valuation": 525000,
+            "status": "Beta (80%)",
+            "ownership": "100% Nzila Ventures",
+            "notes": "Gamification + bias detection AI"
+          },
+          {
+            "platform": "CORA",
+            "engineering_hours": 2800,
+            "hourly_rate": 150,
+            "valuation": 420000,
+            "status": "Beta (75%)",
+            "ownership": "100% Nzila Ventures",
+            "notes": "AgTech, climate adaptation algorithms"
+          },
+          {
+            "platform": "Memora",
+            "engineering_hours": 2200,
+            "hourly_rate": 150,
+            "valuation": 330000,
+            "status": "MVP (90%)",
+            "ownership": "100% Nzila Ventures",
+            "notes": "AI Companion for elderly, highest quality ratings (4.65)"
+          },
+          {
+            "platform": "DiasporaCore V2",
+            "engineering_hours": 3200,
+            "hourly_rate": 150,
+            "valuation": 480000,
+            "status": "Production (60%)",
+            "ownership": "100% Nzila Ventures",
+            "notes": "Fintech remittance, KYC/compliance"
+          },
+          {
+            "platform": "CourtLens",
+            "engineering_hours": 2400,
+            "hourly_rate": 150,
+            "valuation": 360000,
+            "status": "Beta (70%)",
+            "ownership": "100% Nzila Ventures",
+            "notes": "Legaltech, case law search + AI"
+          },
+          {
+            "platform": "CongoWave",
+            "engineering_hours": 1800,
+            "hourly_rate": 150,
+            "valuation": 270000,
+            "status": "MVP (85%)",
+            "ownership": "100% Nzila Ventures",
+            "notes": "Entertainment, music streaming"
+          },
+          {
+            "platform": "Other Platforms (7)",
+            "engineering_hours": 6800,
+            "hourly_rate": 150,
+            "valuation": 1020000,
+            "status": "Various",
+            "ownership": "100% Nzila Ventures",
+            "notes": "CyberLearn, SentryIQ, TradeOS, eEXPORTS, ShopQuoter, PonduOps, InsightCFO"
+          }
+        ],
+        "summary": {
+          "total_engineering_hours": 30700,
+          "average_hourly_rate": 150,
+          "total_source_code_valuation": 4605000,
+          "platforms_count": 15
+        }
+      }
+    },
+    
+    {
+      "section_id": "licensing_revenue_potential",
+      "name": "Licensing Revenue Potential",
+      "type": "chart_with_table",
+      "description": "Projected licensing revenue if patents granted and trade secrets licensed",
+      "chart": {
+        "type": "waterfall",
+        "title": "Licensing Revenue Potential (Annual)",
+        "data": [
+          {"category": "Pension Forecasting Patent", "value": 150000},
+          {"category": "Grievance Resolution Patent", "value": 100000},
+          {"category": "Bias Detection Patent", "value": 120000},
+          {"category": "Companion Engine Trade Secret", "value": 80000},
+          {"category": "Total Licensing Revenue Potential", "value": 450000}
+        ]
+      },
+      "table": {
+        "columns": ["ip_asset", "type", "market_size", "licensing_model", "annual_revenue_potential", "probability", "expected_value"],
+        "rows": [
+          {
+            "ip_asset": "Pension Forecasting Patent",
+            "type": "Patent",
+            "market_size": "450K union members (Canada), 100+ unions",
+            "licensing_model": "$1.50/member/year to union management platforms",
+            "annual_revenue_potential": 150000,
+            "probability": 0.60,
+            "expected_value": 90000,
+            "notes": "Non-exclusive licensing to union SaaS platforms"
+          },
+          {
+            "ip_asset": "Grievance Resolution Patent",
+            "type": "Patent",
+            "market_size": "100+ unions, ~50K grievances/year (Canada)",
+            "licensing_model": "$2.00/grievance processed",
+            "annual_revenue_potential": 100000,
+            "probability": 0.50,
+            "expected_value": 50000,
+            "notes": "Requires accuracy improvement to 80%+ before licensing viable"
+          },
+          {
+            "ip_asset": "Bias Detection Patent",
+            "type": "Patent",
+            "market_size": "EdTech + DEI platforms (assessment tools)",
+            "licensing_model": "$0.05/assessment processed",
+            "annual_revenue_potential": 120000,
+            "probability": 0.70,
+            "expected_value": 84000,
+            "notes": "High demand for bias detection in EdTech, DEI compliance"
+          },
+          {
+            "ip_asset": "Companion Engine Personality Graph",
+            "type": "Trade Secret (Licensing)",
+            "market_size": "5+ internal platforms, potential 3rd party SaaS",
+            "licensing_model": "$2K/month/platform for 3rd party use",
+            "annual_revenue_potential": 80000,
+            "probability": 0.40,
+            "expected_value": 32000,
+            "notes": "License to healthcare SaaS, EdTech platforms for AI personalization"
+          }
+        ],
+        "summary": {
+          "total_revenue_potential": 450000,
+          "total_expected_value": 256000,
+          "weighted_probability": 0.57
+        }
+      }
+    },
+    
+    {
+      "section_id": "open_source_strategy",
+      "name": "Open Source Strategy",
+      "type": "table",
+      "description": "Open source contributions for brand building + developer community",
+      "table": {
+        "columns": ["project", "type", "status", "github_stars", "downloads", "strategic_value"],
+        "rows": [
+          {
+            "project": "scripts-book",
+            "type": "Template (Pitch Deck + Investor Updates)",
+            "status": "Open Source (MIT License)",
+            "github_stars": 0,
+            "downloads": 0,
+            "strategic_value": "MEDIUM",
+            "url": "https://github.com/nzila-ventures/scripts-book",
+            "notes": "Open source pitch deck template for African tech startups, brand building"
+          },
+          {
+            "project": "ai-companion-manifest-generator",
+            "type": "Tool (AI Companion Manifest Generator)",
+            "status": "Planned (Q2 2026)",
+            "github_stars": 0,
+            "downloads": 0,
+            "strategic_value": "HIGH",
+            "url": "TBD",
+            "notes": "Open source tool for generating AI Companion personality manifests, developer adoption"
+          }
+        ],
+        "summary": {
+          "total_projects": 2,
+          "open_source_projects": 1,
+          "planned_projects": 1
+        }
+      }
+    },
+    
+    {
+      "section_id": "ip_risk_assessment",
+      "name": "IP Risk Assessment",
+      "type": "risk_table",
+      "description": "Intellectual property risks and mitigation strategies",
+      "table": {
+        "columns": ["risk", "severity", "probability", "impact", "mitigation_strategy", "status"],
+        "rows": [
+          {
+            "risk": "Patent Rejection (Pension Forecasting)",
+            "severity": "MEDIUM",
+            "probability": 0.30,
+            "impact": "Loss of $150K licensing potential + $250K valuation",
+            "mitigation_strategy": "Conduct prior art search, hire patent attorney, file provisional patent first",
+            "status": "Mitigating (patent attorney engaged)",
+            "notes": "Prior art search in progress, provisional filing Q1 2026"
+          },
+          {
+            "risk": "Trade Secret Leak (Companion Engine Algorithm)",
+            "severity": "HIGH",
+            "probability": 0.10,
+            "impact": "Loss of $150K valuation + competitive advantage",
+            "mitigation_strategy": "NDAs, code obfuscation, access logging, quarterly audits",
+            "status": "Mitigated",
+            "notes": "High protection level, quarterly audits scheduled"
+          },
+          {
+            "risk": "Trademark Opposition (Memora, Union Eyes)",
+            "severity": "LOW",
+            "probability": 0.15,
+            "impact": "Rebranding cost $20K-$50K + delay to market",
+            "mitigation_strategy": "Conduct trademark search, file in multiple classes, monitor opposition period",
+            "status": "Mitigating (trademark search completed)",
+            "notes": "Low collision risk found in searches"
+          },
+          {
+            "risk": "Open Source License Violation (GPL/AGPL)",
+            "severity": "HIGH",
+            "probability": 0.05,
+            "impact": "Forced open sourcing of proprietary code + legal liability",
+            "mitigation_strategy": "Automated license scanning (Snyk), quarterly dependency audits, MIT/Apache preferred",
+            "status": "Mitigated",
+            "notes": "Snyk scanning active, no GPL/AGPL dependencies detected"
+          },
+          {
+            "risk": "Insufficient IP Documentation",
+            "severity": "MEDIUM",
+            "probability": 0.20,
+            "impact": "Difficulty defending IP in litigation or M&A due diligence",
+            "mitigation_strategy": "Centralized IP documentation (this analytics dashboard), quarterly audits, patent filing documentation",
+            "status": "Mitigating (dashboard deployed)",
+            "notes": "Ongoing documentation improvement"
+          }
+        ]
+      }
+    }
+  ],
+  
+  "filters": {
+    "ip_type": {
+      "type": "multi-select",
+      "options": ["Patents", "Trademarks", "Trade Secrets", "Source Code", "All"],
+      "default": "All"
+    },
+    "platform": {
+      "type": "multi-select",
+      "options": ["Union Eyes", "ABR Insights", "Memora", "CORA", "Cross-Platform", "All"],
+      "default": "All"
+    },
+    "status": {
+      "type": "multi-select",
+      "options": ["Registered", "Pending", "Planned", "All"],
+      "default": "All"
+    }
+  },
+  
+  "alerts": [
+    {
+      "alert_id": "patent_filing_deadline",
+      "condition": "filing_date <= today + 30 days AND status = 'Planned'",
+      "severity": "warning",
+      "message": "Patent filing deadline approaching: {patent_title} on {filing_date}"
+    },
+    {
+      "alert_id": "trademark_renewal",
+      "condition": "renewal_date <= today + 180 days AND status = 'Registered'",
+      "severity": "warning",
+      "message": "Trademark renewal due: {trademark} on {renewal_date}"
+    },
+    {
+      "alert_id": "trade_secret_audit_overdue",
+      "condition": "next_audit < today AND protection_level = 'HIGH'",
+      "severity": "high",
+      "message": "Trade secret audit overdue: {trade_secret}"
+    },
+    {
+      "alert_id": "ip_protection_low",
+      "condition": "ip_protection_status < 80",
+      "severity": "warning",
+      "message": "IP protection status below 80%. Review unprotected IP assets."
+    }
+  ],
+  
+  "dependencies": [
+    "business/intellectual-property/ip-protection-strategy.md",
+    "business/intellectual-property/patent-portfolio.md",
+    "business/intellectual-property/trade-secrets-inventory.md",
+    "corporate/legal/nda-templates.md"
+  ]
+}

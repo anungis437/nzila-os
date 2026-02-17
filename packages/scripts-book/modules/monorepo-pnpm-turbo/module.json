@@ -1,0 +1,6 @@
+{
+  "name": "monorepo-pnpm-turbo",
+  "description": "Monorepo structure with pnpm workspaces and Turborepo",
+  "chapters": ["02-monorepo-structure"],
+  "docs": []
+}

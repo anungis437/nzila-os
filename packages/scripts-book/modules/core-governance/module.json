@@ -1,0 +1,7 @@
+{
+  "name": "core-governance",
+  "description": "Core governance documentation and controls",
+  "chapters": ["00-overview"],
+  "docs": ["governance.md", "contributing.md"],
+  "required": true
+}

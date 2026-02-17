@@ -1,0 +1,157 @@
+{
+  "$schema": "http://json-schema.org/draft-07/schema#",
+  "$id": "https://nzila.dev/schemas/scripts-book.manifest.schema.json",
+  "title": "Nzila Scripts Book Manifest",
+  "description": "Configuration manifest for generating a scripts-book in a target repository.",
+  "type": "object",
+  "required": [
+    "template_version",
+    "product_name",
+    "repo_name",
+    "owner_github",
+    "primary_app_path",
+    "app_port",
+    "tenant_key",
+    "image_repo",
+    "auth_provider",
+    "db_provider",
+    "deploy_provider",
+    "environments",
+    "profile",
+    "modules",
+    "options"
+  ],
+  "properties": {
+    "template_version": {
+      "type": "string",
+      "pattern": "^\\d+\\.\\d+\\.\\d+$",
+      "description": "Semantic version of the template being used."
+    },
+    "product_name": {
+      "type": "string",
+      "minLength": 1,
+      "description": "Human-readable product name (e.g., UnionEyes, CourtLens)."
+    },
+    "repo_name": {
+      "type": "string",
+      "minLength": 1,
+      "description": "GitHub repository name."
+    },
+    "owner_github": {
+      "type": "string",
+      "minLength": 1,
+      "description": "GitHub owner (user or organization)."
+    },
+    "primary_app_path": {
+      "type": "string",
+      "minLength": 1,
+      "description": "Path to the primary application (e.g., apps/web)."
+    },
+    "app_port": {
+      "type": "integer",
+      "minimum": 1,
+      "maximum": 65535,
+      "description": "Application port number."
+    },
+    "tenant_key": {
+      "type": "string",
+      "minLength": 1,
+      "description": "Multi-tenancy key field name (e.g., orgId)."
+    },
+    "image_repo": {
+      "type": "string",
+      "minLength": 1,
+      "description": "Docker image repository name."
+    },
+    "auth_provider": {
+      "type": "string",
+      "enum": ["clerk", "none"],
+      "description": "Authentication provider."
+    },
+    "db_provider": {
+      "type": "string",
+      "enum": ["azure_postgresql"],
+      "description": "Database provider (Azure Database for PostgreSQL)."
+    },
+    "deploy_provider": {
+      "type": "string",
+      "enum": ["azure_container_apps"],
+      "description": "Deployment target provider."
+    },
+    "environments": {
+      "type": "object",
+      "required": ["staging_url", "production_url"],
+      "properties": {
+        "staging_url": {
+          "type": "string",
+          "format": "uri",
+          "description": "Staging environment URL."
+        },
+        "production_url": {
+          "type": "string",
+          "format": "uri",
+          "description": "Production environment URL."
+        }
+      },
+      "additionalProperties": false
+    },
+    "profile": {
+      "type": "string",
+      "enum": [
+        "nextjs-aca-azurepg-clerk",
+        "nodeapi-aca-azurepg-clerk",
+        "django-aca-azurepg"
+      ],
+      "description": "Stack profile to use for generation."
+    },
+    "modules": {
+      "type": "array",
+      "items": {
+        "type": "string",
+        "enum": [
+          "core-governance",
+          "repo-bootstrap",
+          "monorepo-pnpm-turbo",
+          "auth-clerk",
+          "db-azurepg",
+          "deploy-aca-oidc",
+          "security-baseline",
+          "observability-audit",
+          "exports-compliance",
+          "ai-ops"
+        ]
+      },
+      "uniqueItems": true,
+      "description": "List of modules to include in generation."
+    },
+    "options": {
+      "type": "object",
+      "required": [
+        "enable_ci",
+        "enable_deploy_workflows",
+        "enable_ai_ops",
+        "strict_parity"
+      ],
+      "properties": {
+        "enable_ci": {
+          "type": "boolean",
+          "description": "Generate CI verification workflow."
+        },
+        "enable_deploy_workflows": {
+          "type": "boolean",
+          "description": "Generate deployment workflows."
+        },
+        "enable_ai_ops": {
+          "type": "boolean",
+          "description": "Include AI/ML operations module."
+        },
+        "strict_parity": {
+          "type": "boolean",
+          "description": "Fail if script parity (sh/ps1/py) is not met."
+        }
+      },
+      "additionalProperties": false
+    }
+  },
+  "additionalProperties": false
+}

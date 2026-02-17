@@ -1,0 +1,4 @@
+# Cache Directory
+
+Stores cached analytics results to improve dashboard load times.
+Files in this directory are auto-generated and can be safely deleted.

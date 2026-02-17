@@ -1,0 +1,26 @@
+Set-StrictMode -Version Latest
+$ErrorActionPreference = "Stop"
+
+# -----------------------------------------------------------------------------
+# migrate.ps1 — Run pending database migrations (Windows)
+# -----------------------------------------------------------------------------
+
+$ScriptDir = Split-Path -Parent $MyInvocation.MyCommand.Definition
+$RepoRoot  = Resolve-Path (Join-Path $ScriptDir "../..")
+
+# Ensure DATABASE_URL is set
+if (-not $env:DATABASE_URL) {
+    Write-Error "DATABASE_URL is not set. Export it or add it to .env.local."
+    exit 1
+}
+
+Write-Host "==> Running database migrations ..."
+
+Push-Location $RepoRoot
+try {
+    pnpm --filter {{PRIMARY_APP_PATH}} run db:migrate
+} finally {
+    Pop-Location
+}
+
+Write-Host "==> Migrations applied successfully."

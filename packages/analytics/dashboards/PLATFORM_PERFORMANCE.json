@@ -1,0 +1,266 @@
+{
+  "dashboard_id": "PLATFORM_PERFORMANCE",
+  "name": "Platform Performance Dashboard",
+  "description": "Individual platform KPIs and performance metrics",
+  "version": "1.0.0",
+  "last_updated": "2026-02-17",
+  "refresh_rate": "realtime",
+  "audience": ["Product Teams", "Engineering", "Leadership"],
+  "platforms": [
+    {
+      "platform_id": "union_eyes",
+      "name": "Union Eyes",
+      "vertical": "Uniontech",
+      "metrics": {
+        "entity_count": 4773,
+        "complexity": "EXTREME",
+        "production_readiness": 9.5,
+        "security_score": 10,
+        "rls_policies": 238,
+        "migration_weeks": "10-12",
+        "tech_stack": {
+          "frontend": "Next.js 14.2",
+          "backend": "Drizzle ORM",
+          "database": "PostgreSQL"
+        },
+        "key_features": [
+          "Pension Fund Forecasting",
+          "Grievance Management",
+          "CBA Intelligence",
+          "Campaign Tools",
+          "ML Pipeline"
+        ],
+        "tam": "$50B",
+        "target_customers": 120,
+        "acv_target": "$15K"
+      }
+    },
+    {
+      "platform_id": "abr_insights",
+      "name": "ABR Insights",
+      "vertical": "EdTech/Legaltech",
+      "metrics": {
+        "entity_count": 132,
+        "complexity": "EXTREME",
+        "production_readiness": 9.1,
+        "security_score": 8.5,
+        "rls_policies": 106,
+        "migration_weeks": "12-14",
+        "tech_stack": {
+          "frontend": "Next.js 15",
+          "backend": "Supabase",
+          "database": "PostgreSQL"
+        },
+        "key_features": [
+          "LMS (50+ courses)",
+          "Tribunal Case Database",
+          "AI Coach (Azure OpenAI)",
+          "Gamification Engine",
+          "SAML SSO"
+        ],
+        "tam": "$1.5B",
+        "target_customers": 100,
+        "acv_target": "$12K"
+      }
+    },
+    {
+      "platform_id": "cora",
+      "name": "CORA",
+      "vertical": "Agrotech",
+      "metrics": {
+        "entity_count": 80,
+        "complexity": "HIGH",
+        "production_readiness": 7.0,
+        "security_score": 7.0,
+        "rls_policies": 0,
+        "migration_weeks": "8-9",
+        "tech_stack": {
+          "frontend": "React 18 + Vite",
+          "backend": "Base44",
+          "database": "Base44 Managed"
+        },
+        "key_features": [
+          "Farm Management",
+          "Supply Chain",
+          "Market Intelligence",
+          "Compliance",
+          "IoT Integration"
+        ],
+        "tam": "$8.6B",
+        "target_customers": 90,
+        "acv_target": "$10K"
+      }
+    },
+    {
+      "platform_id": "congowave",
+      "name": "CongoWave",
+      "vertical": "Entertainment",
+      "metrics": {
+        "entity_count": 83,
+        "complexity": "HIGH-EXTREME",
+        "production_readiness": 10.0,
+        "security_score": 8.0,
+        "rls_policies": 0,
+        "migration_weeks": "12-14",
+        "tech_stack": {
+          "frontend": "Next.js 14.2",
+          "backend": "Django 5.1",
+          "database": "PostgreSQL + PostGIS"
+        },
+        "key_features": [
+          "Music Streaming",
+          "Royalty Management",
+          "Event Ticketing",
+          "ML Recommendations",
+          "Real-time Features"
+        ],
+        "tam": "$50B (streaming)",
+        "target_customers": 70,
+        "acv_target": "Free + Premium"
+      }
+    },
+    {
+      "platform_id": "cyberlearn",
+      "name": "CyberLearn",
+      "vertical": "EdTech",
+      "metrics": {
+        "entity_count": 30,
+        "complexity": "HIGH",
+        "production_readiness": 7.5,
+        "security_score": 8.0,
+        "rls_policies": 0,
+        "migration_weeks": "9-10",
+        "tech_stack": {
+          "frontend": "Next.js 14",
+          "backend": "Supabase",
+          "database": "PostgreSQL"
+        },
+        "key_features": [
+          "Docker Labs (50+)",
+          "CTF Challenges",
+          "Gamification",
+          "Mobile App (React Native)",
+          "Team Management"
+        ],
+        "tam": "$8B (cybersecurity training)",
+        "target_customers": 50,
+        "acv_target": "$8K"
+      }
+    },
+    {
+      "platform_id": "court_lens",
+      "name": "Court Lens",
+      "vertical": "Legaltech",
+      "metrics": {
+        "entity_count": 682,
+        "complexity": "HIGH",
+        "production_readiness": 6.0,
+        "security_score": 8.5,
+        "rls_policies": 0,
+        "migration_weeks": "8-9",
+        "tech_stack": {
+          "frontend": "React + Radix UI",
+          "backend": "Node.js/Express",
+          "database": "PostgreSQL"
+        },
+        "key_features": [
+          "Case Management",
+          "Argument Builder (AI)",
+          "Precedent Search",
+          "Document Assembly",
+          "eDiscovery"
+        ],
+        "tam": "$12B (legaltech)",
+        "target_customers": 30,
+        "acv_target": "$10K"
+      }
+    },
+    {
+      "platform_id": "c3uo",
+      "name": "C3UO/DiasporaCore",
+      "vertical": "Fintech",
+      "metrics": {
+        "entity_count": 485,
+        "complexity": "EXTREME",
+        "production_readiness": 6.5,
+        "security_score": 9.0,
+        "rls_policies": 0,
+        "migration_weeks": "12-14",
+        "tech_stack": {
+          "frontend": "Next.js 15",
+          "backend": "Turborepo",
+          "database": "PostgreSQL"
+        },
+        "key_features": [
+          "Core Banking",
+          "KYC/AML Compliance",
+          "International Transfers",
+          "Multi-Currency",
+          "Card Services"
+        ],
+        "tam": "$100B (diaspora banking)",
+        "target_customers": 40,
+        "acv_target": "$15K"
+      }
+    },
+    {
+      "platform_id": "sentryiq",
+      "name": "SentryIQ360",
+      "vertical": "Insurtech",
+      "metrics": {
+        "entity_count": 79,
+        "complexity": "HIGH-EXTREME",
+        "production_readiness": 7.0,
+        "security_score": 8.0,
+        "rls_policies": 0,
+        "migration_weeks": "10-12",
+        "tech_stack": {
+          "frontend": "Next.js 14.2",
+          "backend": "Fastify",
+          "database": "PostgreSQL"
+        },
+        "key_features": [
+          "Insurance Arbitrage",
+          "Policy Lifecycle",
+          "Claims Intelligence",
+          "Underwriting AI",
+          "Multi-state Compliance"
+        ],
+        "tam": "$30B (insurtech)",
+        "target_customers": 50,
+        "acv_target": "$9K"
+      }
+    }
+  ],
+  "comparison_metrics": [
+    {
+      "metric": "avg_production_readiness",
+      "best": "CongoWave (10.0)",
+      "worst": "Court Lens (6.0)",
+      "portfolio_avg": 7.8
+    },
+    {
+      "metric": "security_score",
+      "best": "Union Eyes (10.0)",
+      "worst": "CORA (7.0)",
+      "portfolio_avg": 8.3
+    },
+    {
+      "metric": "entity_count",
+      "best": "Union Eyes (4,773)",
+      "worst": "CyberLearn (30)",
+      "portfolio_total": 6642
+    },
+    {
+      "metric": "migration_complexity",
+      "highest": "Union Eyes, C3UO, ABR, CongoWave",
+      "lowest": "CORA, Court Lens"
+    }
+  ],
+  "performance_trends": {
+    "monthly_improvement": [
+      {"month": "2026-01", "avg_readiness": 7.5},
+      {"month": "2026-02", "avg_readiness": 7.8}
+    ]
+  }
+}
