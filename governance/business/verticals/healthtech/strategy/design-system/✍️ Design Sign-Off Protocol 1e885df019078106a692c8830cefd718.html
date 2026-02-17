@@ -1,0 +1,713 @@
+<html><head><meta http-equiv="Content-Type" content="text/html; charset=utf-8"/><title>✍️ Design Sign-Off Protocol</title><style>
+/* cspell:disable-file */
+/* webkit printing magic: print all background colors */
+html {
+	-webkit-print-color-adjust: exact;
+}
+* {
+	box-sizing: border-box;
+	-webkit-print-color-adjust: exact;
+}
+
+html,
+body {
+	margin: 0;
+	padding: 0;
+}
+@media only screen {
+	body {
+		margin: 2em auto;
+		max-width: 900px;
+		color: rgb(55, 53, 47);
+	}
+}
+
+body {
+	line-height: 1.5;
+	white-space: pre-wrap;
+}
+
+a,
+a.visited {
+	color: inherit;
+	text-decoration: underline;
+}
+
+.pdf-relative-link-path {
+	font-size: 80%;
+	color: #444;
+}
+
+h1,
+h2,
+h3 {
+	letter-spacing: -0.01em;
+	line-height: 1.2;
+	font-weight: 600;
+	margin-bottom: 0;
+}
+
+/* Override strong tags inside headings to maintain consistent weight */
+h1 strong,
+h2 strong,
+h3 strong {
+	font-weight: 600;
+}
+
+.page-title {
+	font-size: 2.5rem;
+	font-weight: 700;
+	margin-top: 0;
+	margin-bottom: 0.75em;
+}
+
+h1 {
+	font-size: 1.875rem;
+	margin-top: 1.875rem;
+}
+
+h2 {
+	font-size: 1.5rem;
+	margin-top: 1.5rem;
+}
+
+h3 {
+	font-size: 1.25rem;
+	margin-top: 1.25rem;
+}
+
+.source {
+	border: 1px solid #ddd;
+	border-radius: 3px;
+	padding: 1.5em;
+	word-break: break-all;
+}
+
+.callout {
+	border-radius: 10px;
+	padding: 1rem;
+}
+
+figure {
+	margin: 1.25em 0;
+	page-break-inside: avoid;
+}
+
+figcaption {
+	opacity: 0.5;
+	font-size: 85%;
+	margin-top: 0.5em;
+}
+
+mark {
+	background-color: transparent;
+}
+
+.indented {
+	padding-left: 1.5em;
+}
+
+hr {
+	background: transparent;
+	display: block;
+	width: 100%;
+	height: 1px;
+	visibility: visible;
+	border: none;
+	border-bottom: 1px solid rgba(55, 53, 47, 0.09);
+}
+
+img {
+	max-width: 100%;
+}
+
+@media only print {
+	img {
+		max-height: 100vh;
+		object-fit: contain;
+	}
+}
+
+@page {
+	margin: 1in;
+}
+
+.collection-content {
+	font-size: 0.875rem;
+}
+
+.collection-content td {
+	white-space: pre-wrap;
+	word-break: break-word;
+}
+
+.column-list {
+	display: flex;
+	justify-content: space-between;
+}
+
+.column {
+	padding: 0 1em;
+}
+
+.column:first-child {
+	padding-left: 0;
+}
+
+.column:last-child {
+	padding-right: 0;
+}
+
+.table_of_contents-item {
+	display: block;
+	font-size: 0.875rem;
+	line-height: 1.3;
+	padding: 0.125rem;
+}
+
+.table_of_contents-indent-1 {
+	margin-left: 1.5rem;
+}
+
+.table_of_contents-indent-2 {
+	margin-left: 3rem;
+}
+
+.table_of_contents-indent-3 {
+	margin-left: 4.5rem;
+}
+
+.table_of_contents-link {
+	text-decoration: none;
+	opacity: 0.7;
+	border-bottom: 1px solid rgba(55, 53, 47, 0.18);
+}
+
+table,
+th,
+td {
+	border: 1px solid rgba(55, 53, 47, 0.09);
+	border-collapse: collapse;
+}
+
+table {
+	border-left: none;
+	border-right: none;
+}
+
+th,
+td {
+	font-weight: normal;
+	padding: 0.25em 0.5em;
+	line-height: 1.5;
+	min-height: 1.5em;
+	text-align: left;
+}
+
+th {
+	color: rgba(55, 53, 47, 0.6);
+}
+
+ol,
+ul {
+	margin: 0;
+	margin-block-start: 0.6em;
+	margin-block-end: 0.6em;
+}
+
+li > ol:first-child,
+li > ul:first-child {
+	margin-block-start: 0.6em;
+}
+
+ul > li {
+	list-style: disc;
+}
+
+ul.to-do-list {
+	padding-inline-start: 0;
+}
+
+ul.to-do-list > li {
+	list-style: none;
+}
+
+.to-do-children-checked {
+	text-decoration: line-through;
+	opacity: 0.375;
+}
+
+ul.toggle > li {
+	list-style: none;
+}
+
+ul {
+	padding-inline-start: 1.7em;
+}
+
+ul > li {
+	padding-left: 0.1em;
+}
+
+ol {
+	padding-inline-start: 1.6em;
+}
+
+ol > li {
+	padding-left: 0.2em;
+}
+
+.mono ol {
+	padding-inline-start: 2em;
+}
+
+.mono ol > li {
+	text-indent: -0.4em;
+}
+
+.toggle {
+	padding-inline-start: 0em;
+	list-style-type: none;
+}
+
+/* Indent toggle children */
+.toggle > li > details {
+	padding-left: 1.7em;
+}
+
+.toggle > li > details > summary {
+	margin-left: -1.1em;
+}
+
+.selected-value {
+	display: inline-block;
+	padding: 0 0.5em;
+	background: rgba(206, 205, 202, 0.5);
+	border-radius: 3px;
+	margin-right: 0.5em;
+	margin-top: 0.3em;
+	margin-bottom: 0.3em;
+	white-space: nowrap;
+}
+
+.collection-title {
+	display: inline-block;
+	margin-right: 1em;
+}
+
+.page-description {
+	margin-bottom: 2em;
+}
+
+.simple-table {
+	margin-top: 1em;
+	font-size: 0.875rem;
+	empty-cells: show;
+}
+.simple-table td {
+	height: 29px;
+	min-width: 120px;
+}
+
+.simple-table th {
+	height: 29px;
+	min-width: 120px;
+}
+
+.simple-table-header-color {
+	background: rgb(247, 246, 243);
+	color: black;
+}
+.simple-table-header {
+	font-weight: 500;
+}
+
+time {
+	opacity: 0.5;
+}
+
+.icon {
+	display: inline-flex;
+	align-items: center;
+	justify-content: center;
+	max-width: 1.2em;
+	max-height: 1.2em;
+	text-decoration: none;
+	vertical-align: text-bottom;
+	margin-right: 0.5em;
+}
+
+img.icon {
+	border-radius: 3px;
+}
+
+.callout img.notion-static-icon {
+	width: 1em;
+	height: 1em;
+}
+
+.callout p {
+	margin: 0;
+}
+
+.callout h1,
+.callout h2,
+.callout h3 {
+	margin: 0 0 0.6rem;
+}
+
+.user-icon {
+	width: 1.5em;
+	height: 1.5em;
+	border-radius: 100%;
+	margin-right: 0.5rem;
+}
+
+.user-icon-inner {
+	font-size: 0.8em;
+}
+
+.text-icon {
+	border: 1px solid #000;
+	text-align: center;
+}
+
+.page-cover-image {
+	display: block;
+	object-fit: cover;
+	width: 100%;
+	max-height: 30vh;
+}
+
+.page-header-icon {
+	font-size: 3rem;
+	margin-bottom: 1rem;
+}
+
+.page-header-icon-with-cover {
+	margin-top: -0.72em;
+	margin-left: 0.07em;
+}
+
+.page-header-icon img {
+	border-radius: 3px;
+}
+
+.link-to-page {
+	margin: 1em 0;
+	padding: 0;
+	border: none;
+	font-weight: 500;
+}
+
+p > .user {
+	opacity: 0.5;
+}
+
+td > .user,
+td > time {
+	white-space: nowrap;
+}
+
+input[type="checkbox"] {
+	transform: scale(1.5);
+	margin-right: 0.6em;
+	vertical-align: middle;
+}
+
+p {
+	margin-top: 0.5em;
+	margin-bottom: 0.5em;
+}
+
+.image {
+	border: none;
+	margin: 1.5em 0;
+	padding: 0;
+	border-radius: 0;
+	text-align: center;
+}
+
+.code,
+code {
+	background: rgba(135, 131, 120, 0.15);
+	border-radius: 3px;
+	padding: 0.2em 0.4em;
+	border-radius: 3px;
+	font-size: 85%;
+	tab-size: 2;
+}
+
+code {
+	color: #eb5757;
+}
+
+.code {
+	padding: 1.5em 1em;
+}
+
+.code-wrap {
+	white-space: pre-wrap;
+	word-break: break-all;
+}
+
+.code > code {
+	background: none;
+	padding: 0;
+	font-size: 100%;
+	color: inherit;
+}
+
+blockquote {
+	font-size: 1em;
+	margin: 1em 0;
+	padding-left: 1em;
+	border-left: 3px solid rgb(55, 53, 47);
+}
+
+blockquote.quote-large {
+	font-size: 1.25em;
+}
+
+.bookmark {
+	text-decoration: none;
+	max-height: 8em;
+	padding: 0;
+	display: flex;
+	width: 100%;
+	align-items: stretch;
+}
+
+.bookmark-title {
+	font-size: 0.85em;
+	overflow: hidden;
+	text-overflow: ellipsis;
+	height: 1.75em;
+	white-space: nowrap;
+}
+
+.bookmark-text {
+	display: flex;
+	flex-direction: column;
+}
+
+.bookmark-info {
+	flex: 4 1 180px;
+	padding: 12px 14px 14px;
+	display: flex;
+	flex-direction: column;
+	justify-content: space-between;
+}
+
+.bookmark-image {
+	width: 33%;
+	flex: 1 1 180px;
+	display: block;
+	position: relative;
+	object-fit: cover;
+	border-radius: 1px;
+}
+
+.bookmark-description {
+	color: rgba(55, 53, 47, 0.6);
+	font-size: 0.75em;
+	overflow: hidden;
+	max-height: 4.5em;
+	word-break: break-word;
+}
+
+.bookmark-href {
+	font-size: 0.75em;
+	margin-top: 0.25em;
+}
+
+.sans { font-family: ui-sans-serif, -apple-system, BlinkMacSystemFont, "Segoe UI Variable Display", "Segoe UI", Helvetica, "Apple Color Emoji", "Noto Sans Arabic", "Noto Sans Hebrew", Arial, sans-serif, "Segoe UI Emoji", "Segoe UI Symbol"; }
+.code { font-family: "SFMono-Regular", Menlo, Consolas, "PT Mono", "Liberation Mono", Courier, monospace; }
+.serif { font-family: Lyon-Text, Georgia, ui-serif, serif; }
+.mono { font-family: iawriter-mono, Nitti, Menlo, Courier, monospace; }
+.pdf .sans { font-family: Inter, ui-sans-serif, -apple-system, BlinkMacSystemFont, "Segoe UI Variable Display", "Segoe UI", Helvetica, "Apple Color Emoji", "Noto Sans Arabic", "Noto Sans Hebrew", Arial, sans-serif, "Segoe UI Emoji", "Segoe UI Symbol", 'Twemoji', 'Noto Color Emoji', 'Noto Sans CJK JP'; }
+.pdf:lang(zh-CN) .sans { font-family: Inter, ui-sans-serif, -apple-system, BlinkMacSystemFont, "Segoe UI Variable Display", "Segoe UI", Helvetica, "Apple Color Emoji", "Noto Sans Arabic", "Noto Sans Hebrew", Arial, sans-serif, "Segoe UI Emoji", "Segoe UI Symbol", 'Twemoji', 'Noto Color Emoji', 'Noto Sans CJK SC'; }
+.pdf:lang(zh-TW) .sans { font-family: Inter, ui-sans-serif, -apple-system, BlinkMacSystemFont, "Segoe UI Variable Display", "Segoe UI", Helvetica, "Apple Color Emoji", "Noto Sans Arabic", "Noto Sans Hebrew", Arial, sans-serif, "Segoe UI Emoji", "Segoe UI Symbol", 'Twemoji', 'Noto Color Emoji', 'Noto Sans CJK TC'; }
+.pdf:lang(ko-KR) .sans { font-family: Inter, ui-sans-serif, -apple-system, BlinkMacSystemFont, "Segoe UI Variable Display", "Segoe UI", Helvetica, "Apple Color Emoji", "Noto Sans Arabic", "Noto Sans Hebrew", Arial, sans-serif, "Segoe UI Emoji", "Segoe UI Symbol", 'Twemoji', 'Noto Color Emoji', 'Noto Sans CJK KR'; }
+.pdf .code { font-family: Source Code Pro, "SFMono-Regular", Menlo, Consolas, "PT Mono", "Liberation Mono", Courier, monospace, 'Twemoji', 'Noto Color Emoji', 'Noto Sans Mono CJK JP'; }
+.pdf:lang(zh-CN) .code { font-family: Source Code Pro, "SFMono-Regular", Menlo, Consolas, "PT Mono", "Liberation Mono", Courier, monospace, 'Twemoji', 'Noto Color Emoji', 'Noto Sans Mono CJK SC'; }
+.pdf:lang(zh-TW) .code { font-family: Source Code Pro, "SFMono-Regular", Menlo, Consolas, "PT Mono", "Liberation Mono", Courier, monospace, 'Twemoji', 'Noto Color Emoji', 'Noto Sans Mono CJK TC'; }
+.pdf:lang(ko-KR) .code { font-family: Source Code Pro, "SFMono-Regular", Menlo, Consolas, "PT Mono", "Liberation Mono", Courier, monospace, 'Twemoji', 'Noto Color Emoji', 'Noto Sans Mono CJK KR'; }
+.pdf .serif { font-family: PT Serif, Lyon-Text, Georgia, ui-serif, serif, 'Twemoji', 'Noto Color Emoji', 'Noto Serif CJK JP'; }
+.pdf:lang(zh-CN) .serif { font-family: PT Serif, Lyon-Text, Georgia, ui-serif, serif, 'Twemoji', 'Noto Color Emoji', 'Noto Serif CJK SC'; }
+.pdf:lang(zh-TW) .serif { font-family: PT Serif, Lyon-Text, Georgia, ui-serif, serif, 'Twemoji', 'Noto Color Emoji', 'Noto Serif CJK TC'; }
+.pdf:lang(ko-KR) .serif { font-family: PT Serif, Lyon-Text, Georgia, ui-serif, serif, 'Twemoji', 'Noto Color Emoji', 'Noto Serif CJK KR'; }
+.pdf .mono { font-family: PT Mono, iawriter-mono, Nitti, Menlo, Courier, monospace, 'Twemoji', 'Noto Color Emoji', 'Noto Sans Mono CJK JP'; }
+.pdf:lang(zh-CN) .mono { font-family: PT Mono, iawriter-mono, Nitti, Menlo, Courier, monospace, 'Twemoji', 'Noto Color Emoji', 'Noto Sans Mono CJK SC'; }
+.pdf:lang(zh-TW) .mono { font-family: PT Mono, iawriter-mono, Nitti, Menlo, Courier, monospace, 'Twemoji', 'Noto Color Emoji', 'Noto Sans Mono CJK TC'; }
+.pdf:lang(ko-KR) .mono { font-family: PT Mono, iawriter-mono, Nitti, Menlo, Courier, monospace, 'Twemoji', 'Noto Color Emoji', 'Noto Sans Mono CJK KR'; }
+.highlight-default {
+	color: rgba(44, 44, 43, 1);
+}
+.highlight-gray {
+	color: rgba(125, 122, 117, 1);
+	fill: rgba(125, 122, 117, 1);
+}
+.highlight-brown {
+	color: rgba(159, 118, 90, 1);
+	fill: rgba(159, 118, 90, 1);
+}
+.highlight-orange {
+	color: rgba(210, 123, 45, 1);
+	fill: rgba(210, 123, 45, 1);
+}
+.highlight-yellow {
+	color: rgba(203, 148, 52, 1);
+	fill: rgba(203, 148, 52, 1);
+}
+.highlight-teal {
+	color: rgba(80, 148, 110, 1);
+	fill: rgba(80, 148, 110, 1);
+}
+.highlight-blue {
+	color: rgba(56, 125, 201, 1);
+	fill: rgba(56, 125, 201, 1);
+}
+.highlight-purple {
+	color: rgba(154, 107, 180, 1);
+	fill: rgba(154, 107, 180, 1);
+}
+.highlight-pink {
+	color: rgba(193, 76, 138, 1);
+	fill: rgba(193, 76, 138, 1);
+}
+.highlight-red {
+	color: rgba(207, 81, 72, 1);
+	fill: rgba(207, 81, 72, 1);
+}
+.highlight-default_background {
+	color: rgba(44, 44, 43, 1);
+}
+.highlight-gray_background {
+	background: rgba(42, 28, 0, 0.07);
+}
+.highlight-brown_background {
+	background: rgba(139, 46, 0, 0.086);
+}
+.highlight-orange_background {
+	background: rgba(224, 101, 1, 0.129);
+}
+.highlight-yellow_background {
+	background: rgba(211, 168, 0, 0.137);
+}
+.highlight-teal_background {
+	background: rgba(0, 100, 45, 0.09);
+}
+.highlight-blue_background {
+	background: rgba(0, 124, 215, 0.094);
+}
+.highlight-purple_background {
+	background: rgba(102, 0, 178, 0.078);
+}
+.highlight-pink_background {
+	background: rgba(197, 0, 93, 0.086);
+}
+.highlight-red_background {
+	background: rgba(223, 22, 0, 0.094);
+}
+.block-color-default {
+	color: inherit;
+	fill: inherit;
+}
+.block-color-gray {
+	color: rgba(125, 122, 117, 1);
+	fill: rgba(125, 122, 117, 1);
+}
+.block-color-brown {
+	color: rgba(159, 118, 90, 1);
+	fill: rgba(159, 118, 90, 1);
+}
+.block-color-orange {
+	color: rgba(210, 123, 45, 1);
+	fill: rgba(210, 123, 45, 1);
+}
+.block-color-yellow {
+	color: rgba(203, 148, 52, 1);
+	fill: rgba(203, 148, 52, 1);
+}
+.block-color-teal {
+	color: rgba(80, 148, 110, 1);
+	fill: rgba(80, 148, 110, 1);
+}
+.block-color-blue {
+	color: rgba(56, 125, 201, 1);
+	fill: rgba(56, 125, 201, 1);
+}
+.block-color-purple {
+	color: rgba(154, 107, 180, 1);
+	fill: rgba(154, 107, 180, 1);
+}
+.block-color-pink {
+	color: rgba(193, 76, 138, 1);
+	fill: rgba(193, 76, 138, 1);
+}
+.block-color-red {
+	color: rgba(207, 81, 72, 1);
+	fill: rgba(207, 81, 72, 1);
+}
+.block-color-default_background {
+	color: inherit;
+	fill: inherit;
+}
+.block-color-gray_background {
+	background: rgba(240, 239, 237, 1);
+}
+.block-color-brown_background {
+	background: rgba(245, 237, 233, 1);
+}
+.block-color-orange_background {
+	background: rgba(251, 235, 222, 1);
+}
+.block-color-yellow_background {
+	background: rgba(249, 243, 220, 1);
+}
+.block-color-teal_background {
+	background: rgba(232, 241, 236, 1);
+}
+.block-color-blue_background {
+	background: rgba(229, 242, 252, 1);
+}
+.block-color-purple_background {
+	background: rgba(243, 235, 249, 1);
+}
+.block-color-pink_background {
+	background: rgba(250, 233, 241, 1);
+}
+.block-color-red_background {
+	background: rgba(252, 233, 231, 1);
+}
+.select-value-color-default { background-color: rgba(42, 28, 0, 0.07); }
+.select-value-color-gray { background-color: rgba(28, 19, 1, 0.11); }
+.select-value-color-brown { background-color: rgba(127, 51, 0, 0.156); }
+.select-value-color-orange { background-color: rgba(196, 88, 0, 0.203); }
+.select-value-color-yellow { background-color: rgba(209, 156, 0, 0.282); }
+.select-value-color-green { background-color: rgba(0, 96, 38, 0.156); }
+.select-value-color-blue { background-color: rgba(0, 118, 217, 0.203); }
+.select-value-color-purple { background-color: rgba(92, 0, 163, 0.141); }
+.select-value-color-pink { background-color: rgba(183, 0, 78, 0.152); }
+.select-value-color-red { background-color: rgba(206, 24, 0, 0.164); }
+
+.checkbox {
+	display: inline-flex;
+	vertical-align: text-bottom;
+	width: 16;
+	height: 16;
+	background-size: 16px;
+	margin-left: 2px;
+	margin-right: 5px;
+}
+
+.checkbox-on {
+	background-image: url("data:image/svg+xml;charset=UTF-8,%3Csvg%20width%3D%2216%22%20height%3D%2216%22%20viewBox%3D%220%200%2016%2016%22%20fill%3D%22none%22%20xmlns%3D%22http%3A%2F%2Fwww.w3.org%2F2000%2Fsvg%22%3E%0A%3Crect%20width%3D%2216%22%20height%3D%2216%22%20fill%3D%22%2358A9D7%22%2F%3E%0A%3Cpath%20d%3D%22M6.71429%2012.2852L14%204.9995L12.7143%203.71436L6.71429%209.71378L3.28571%206.2831L2%207.57092L6.71429%2012.2852Z%22%20fill%3D%22white%22%2F%3E%0A%3C%2Fsvg%3E");
+}
+
+.checkbox-off {
+	background-image: url("data:image/svg+xml;charset=UTF-8,%3Csvg%20width%3D%2216%22%20height%3D%2216%22%20viewBox%3D%220%200%2016%2016%22%20fill%3D%22none%22%20xmlns%3D%22http%3A%2F%2Fwww.w3.org%2F2000%2Fsvg%22%3E%0A%3Crect%20x%3D%220.75%22%20y%3D%220.75%22%20width%3D%2214.5%22%20height%3D%2214.5%22%20fill%3D%22white%22%20stroke%3D%22%2336352F%22%20stroke-width%3D%221.5%22%2F%3E%0A%3C%2Fsvg%3E");
+}
+	
+</style></head><body><article id="1e885df0-1907-8106-a692-c8830cefd718" class="page sans"><header><h1 class="page-title" dir="auto">✍️ <strong>Design Sign-Off Protocol</strong></h1><p class="page-description" dir="auto"></p><table class="properties"><tbody><tr class="property-row property-row-person"><th><span class="icon property-icon"><img src="https://www.notion.so/icons/friends_gray.svg" style="width:14px;height:14px;display:block"/></span>Owner</th><td><span class="user"><span class="icon text-icon user-icon"><span class="user-icon-inner">A</span></span>Aubert</span></td></tr><tr class="property-row property-row-multi_select"><th><span class="icon property-icon"><img src="https://www.notion.so/icons/list_gray.svg" style="width:14px;height:14px;display:block"/></span>Tags</th><td></td></tr></tbody></table></header><div class="page-body"><div style="display:contents" dir="auto"><h3 id="1e885df0-1907-81fd-bca5-fe7809791821" class=""><strong>1. Purpose</strong></h3></div><div style="display:contents" dir="auto"><p id="1e885df0-1907-81c6-a231-e7d6e08c49ee" class="">This protocol formalizes the process of <strong>reviewing, approving, and locking UI/UX designs</strong> across Memora’s patient, caregiver, and clinic platforms. It ensures:</p></div><div style="display:contents" dir="auto"><ul id="1e885df0-1907-81ab-a06a-f89806916379" class="bulleted-list"><li style="list-style-type:disc">Designs are <strong>aligned with accessibility</strong>, <strong>tone</strong>, and <strong>functionality expectations</strong></li></ul></div><div style="display:contents" dir="auto"><ul id="1e885df0-1907-819e-98a1-ecc3da3fb004" class="bulleted-list"><li style="list-style-type:disc"><strong>Cross-team visibility</strong> on final designs (Product, Engineering, QA, Clinical, Legal)</li></ul></div><div style="display:contents" dir="auto"><ul id="1e885df0-1907-817b-8a76-f6039d884af3" class="bulleted-list"><li style="list-style-type:disc">Each release is governed by a <strong>repeatable, defensible design lifecycle</strong></li></ul></div><div style="display:contents" dir="auto"><hr id="1e885df0-1907-8197-9e9b-ef5187660bc0"/></div><div style="display:contents" dir="auto"><h3 id="1e885df0-1907-81c1-9641-c785950c50ba" class=""><strong>2. Applicable Scope</strong></h3></div><div style="display:contents" dir="ltr"><table id="1e885df0-1907-819a-a069-fa0ed4002c48" class="simple-table"><tbody><div style="display:contents" dir="ltr"><tr id="1e885df0-1907-818b-b759-f18960fe6ae8"><td id="`Ps|" class="" style="width:290.25px">Scope Area</td><td id="lQq:" class="" style="width:409px">Applies To</td></tr></div><div style="display:contents" dir="ltr"><tr id="1e885df0-1907-81b0-b199-d81210da4e7e"><td id="`Ps|" class="" style="width:290.25px">All MVP features</td><td id="lQq:" class="" style="width:409px">✅ Core game flows, Companion UI, Settings, Dashboard</td></tr></div><div style="display:contents" dir="ltr"><tr id="1e885df0-1907-819f-ab92-ca8d518152d0"><td id="`Ps|" class="" style="width:290.25px">Phase 2+ Enhancements</td><td id="lQq:" class="" style="width:409px">✅ Post-launch features (badges v2, fatigue recovery, narration)</td></tr></div><div style="display:contents" dir="ltr"><tr id="1e885df0-1907-8112-b74f-fead9b723492"><td id="`Ps|" class="" style="width:290.25px">Language Localization</td><td id="lQq:" class="" style="width:409px">✅ English and French screens</td></tr></div><div style="display:contents" dir="ltr"><tr id="1e885df0-1907-816d-8804-fadaf75f39f7"><td id="`Ps|" class="" style="width:290.25px">Accessibility &amp; Compliance</td><td id="lQq:" class="" style="width:409px">✅ WCAG 2.1 AA, Law 25, PIPEDA</td></tr></div><div style="display:contents" dir="ltr"><tr id="1e885df0-1907-8108-a926-c51a2b48b135"><td id="`Ps|" class="" style="width:290.25px">Visual &amp; Interaction Design</td><td id="lQq:" class="" style="width:409px">✅ Typography, layout, motion, tone</td></tr></div></tbody></table></div><div style="display:contents" dir="auto"><hr id="1e885df0-1907-81b7-a9ac-fb01a88dca21"/></div><div style="display:contents" dir="auto"><h3 id="1e885df0-1907-8193-b7d3-fca40a123e15" class=""><strong>3. Sign-Off Stages</strong></h3></div><div style="display:contents" dir="auto"><hr id="1e885df0-1907-81de-a963-ed6c57104a1f"/></div><div style="display:contents" dir="auto"><h3 id="1e885df0-1907-813d-9333-e89a437346de" class=""><strong>Stage 1: Design Finalization</strong></h3></div><div style="display:contents" dir="ltr"><table id="1e885df0-1907-8102-a515-f8ff7cc20d89" class="simple-table"><tbody><div style="display:contents" dir="ltr"><tr id="1e885df0-1907-8122-a6a6-fea373244baa"><td id="DXH;" class="">Action</td><td id=":A}l" class="">Owner</td></tr></div><div style="display:contents" dir="ltr"><tr id="1e885df0-1907-81a1-8e82-e4d7770a6c94"><td id="DXH;" class="">High-fidelity mockups complete in Figma</td><td id=":A}l" class="">Lead Designer</td></tr></div><div style="display:contents" dir="ltr"><tr id="1e885df0-1907-8199-b94d-f4927adbfb77"><td id="DXH;" class="">All components reference Design Tokens</td><td id=":A}l" class="">Designer + Engineer</td></tr></div><div style="display:contents" dir="ltr"><tr id="1e885df0-1907-8153-9341-e05feac28202"><td id="DXH;" class="">Edge cases and states documented</td><td id=":A}l" class="">UX Writer + QA</td></tr></div><div style="display:contents" dir="ltr"><tr id="1e885df0-1907-8116-a6c9-c486ed864a6c"><td id="DXH;" class="">Localization review (EN/FR copy locked)</td><td id=":A}l" class="">Bilingual UX Reviewer</td></tr></div><div style="display:contents" dir="ltr"><tr id="1e885df0-1907-812a-943e-e0a9684d1e72"><td id="DXH;" class="">Companion prompts approved for tone</td><td id=":A}l" class="">Content Lead</td></tr></div></tbody></table></div><div style="display:contents" dir="auto"><p id="1e885df0-1907-8100-acf2-f88483f030ee" class="">✅ <em>Checklist:</em></p></div><div style="display:contents" dir="auto"><ul id="1e885df0-1907-81c9-9da5-ce4b83bf2dcc" class="to-do-list"><li><div class="checkbox checkbox-off"></div> <span class="to-do-children-unchecked">All components documented in Notion or Figma Spec</span><div class="indented"></div></li></ul></div><div style="display:contents" dir="auto"><ul id="1e885df0-1907-816a-a986-de6d4db95656" class="to-do-list"><li><div class="checkbox checkbox-off"></div> <span class="to-do-children-unchecked">Copy tone validated by Content</span><div class="indented"></div></li></ul></div><div style="display:contents" dir="auto"><ul id="1e885df0-1907-81c8-846b-df56241af49e" class="to-do-list"><li><div class="checkbox checkbox-off"></div> <span class="to-do-children-unchecked">i18n string IDs present</span><div class="indented"></div></li></ul></div><div style="display:contents" dir="auto"><ul id="1e885df0-1907-8157-b254-da21debf21e1" class="to-do-list"><li><div class="checkbox checkbox-off"></div> <span class="to-do-children-unchecked">Accessibility labels defined</span><div class="indented"></div></li></ul></div><div style="display:contents" dir="auto"><hr id="1e885df0-1907-8142-b60a-ea62b6a418ba"/></div><div style="display:contents" dir="auto"><h3 id="1e885df0-1907-8113-ba8c-cc94c887183e" class=""><strong>Stage 2: Cross-Functional Review</strong></h3></div><div style="display:contents" dir="ltr"><table id="1e885df0-1907-81bb-8dc4-fe305dedb43b" class="simple-table"><tbody><div style="display:contents" dir="ltr"><tr id="1e885df0-1907-8155-bd7a-f245cf9e428b"><td id="&gt;Z\l" class="">Review Area</td><td id="bJHm" class="">Stakeholder</td></tr></div><div style="display:contents" dir="ltr"><tr id="1e885df0-1907-8143-9481-d125fd195262"><td id="&gt;Z\l" class="">Product consistency &amp; feature alignment</td><td id="bJHm" class="">Product Owner</td></tr></div><div style="display:contents" dir="ltr"><tr id="1e885df0-1907-8192-8e7b-eedea0ac2f8c"><td id="&gt;Z\l" class="">Technical feasibility</td><td id="bJHm" class="">Frontend Engineer</td></tr></div><div style="display:contents" dir="ltr"><tr id="1e885df0-1907-8108-bea0-c75dd91a5322"><td id="&gt;Z\l" class="">Accessibility audit (WCAG 2.1 AA, VoiceOver/TalkBack)</td><td id="bJHm" class="">A11y Reviewer</td></tr></div><div style="display:contents" dir="ltr"><tr id="1e885df0-1907-8150-9d01-cbb867e650ed"><td id="&gt;Z\l" class="">Privacy, consent, and legal language</td><td id="bJHm" class="">Legal/Privacy Lead</td></tr></div><div style="display:contents" dir="ltr"><tr id="1e885df0-1907-813d-9ae3-d417016cec46"><td id="&gt;Z\l" class="">Clinical review (if applicable)</td><td id="bJHm" class="">Clinical Partner (e.g., RNH)</td></tr></div></tbody></table></div><div style="display:contents" dir="auto"><p id="1e885df0-1907-817a-8d1f-f2e9d1010aa5" class="">✅ <em>Checklist:</em></p></div><div style="display:contents" dir="auto"><ul id="1e885df0-1907-810f-a75c-f13f377225c6" class="to-do-list"><li><div class="checkbox checkbox-off"></div> <span class="to-do-children-unchecked">Screens reviewed on mobile + tablet</span><div class="indented"></div></li></ul></div><div style="display:contents" dir="auto"><ul id="1e885df0-1907-8138-a9d5-f959c8812a9f" class="to-do-list"><li><div class="checkbox checkbox-off"></div> <span class="to-do-children-unchecked">Contrast and tap target tests passed</span><div class="indented"></div></li></ul></div><div style="display:contents" dir="auto"><ul id="1e885df0-1907-81f6-bfde-cd55c9a335b8" class="to-do-list"><li><div class="checkbox checkbox-off"></div> <span class="to-do-children-unchecked">Consent UI matches Law 25 checklist</span><div class="indented"></div></li></ul></div><div style="display:contents" dir="auto"><ul id="1e885df0-1907-81dd-a23e-c2ec800c8965" class="to-do-list"><li><div class="checkbox checkbox-off"></div> <span class="to-do-children-unchecked">Companion logic represented accurately</span><div class="indented"></div></li></ul></div><div style="display:contents" dir="auto"><hr id="1e885df0-1907-81e1-b507-c169db57b21c"/></div><div style="display:contents" dir="auto"><h3 id="1e885df0-1907-819b-b8b0-cf81f37e8991" class=""><strong>Stage 3: QA Readiness</strong></h3></div><div style="display:contents" dir="ltr"><table id="1e885df0-1907-8120-97f4-c979a01355ec" class="simple-table"><tbody><div style="display:contents" dir="ltr"><tr id="1e885df0-1907-814e-8d10-c9e3bfbee202"><td id="sku}" class="">Requirement</td><td id="jzB\" class="">Outcome</td></tr></div><div style="display:contents" dir="ltr"><tr id="1e885df0-1907-8191-a262-f5c540d3b724"><td id="sku}" class="">Hand-off via Figma + Notion</td><td id="jzB\" class="">Final design spec shared with Dev &amp; QA</td></tr></div><div style="display:contents" dir="ltr"><tr id="1e885df0-1907-8156-801f-fe5b1aef007e"><td id="sku}" class="">All flows mapped to QA Checklist Template</td><td id="jzB\" class="">QA Lead confirms readiness</td></tr></div><div style="display:contents" dir="ltr"><tr id="1e885df0-1907-8193-8071-f5f5a2e8ac70"><td id="sku}" class="">UI/UX QA sessions scheduled</td><td id="jzB\" class="">Product + QA coordination</td></tr></div><div style="display:contents" dir="ltr"><tr id="1e885df0-1907-815c-9933-c5f7161bbf59"><td id="sku}" class="">Visual regression baselines created</td><td id="jzB\" class="">DevOps / QA tool setup (e.g., Percy/Chromatic)</td></tr></div></tbody></table></div><div style="display:contents" dir="auto"><p id="1e885df0-1907-81a2-810a-db8978693c9c" class="">✅ <em>Checklist:</em></p></div><div style="display:contents" dir="auto"><ul id="1e885df0-1907-81a3-9ab0-f53262e7b07a" class="to-do-list"><li><div class="checkbox checkbox-off"></div> <span class="to-do-children-unchecked">Designs marked “READY FOR DEV” in Figma</span><div class="indented"></div></li></ul></div><div style="display:contents" dir="auto"><ul id="1e885df0-1907-8117-af53-c34bfdc4b274" class="to-do-list"><li><div class="checkbox checkbox-off"></div> <span class="to-do-children-unchecked">Jira or task system linked to final screens</span><div class="indented"></div></li></ul></div><div style="display:contents" dir="auto"><ul id="1e885df0-1907-8114-96a7-c46ca495692c" class="to-do-list"><li><div class="checkbox checkbox-off"></div> <span class="to-do-children-unchecked">QA tags scenarios by screen</span><div class="indented"></div></li></ul></div><div style="display:contents" dir="auto"><ul id="1e885df0-1907-81ba-b7c0-fd4b09c71472" class="to-do-list"><li><div class="checkbox checkbox-off"></div> <span class="to-do-children-unchecked">Testable states documented</span><div class="indented"></div></li></ul></div><div style="display:contents" dir="auto"><hr id="1e885df0-1907-810c-adb9-e1138d3cf3ae"/></div><div style="display:contents" dir="auto"><h3 id="1e885df0-1907-8185-912e-c0b8724d12e3" class=""><strong>Stage 4: Design Sign-Off Ceremony</strong></h3></div><div style="display:contents" dir="ltr"><table id="1e885df0-1907-819b-a447-d59b0c1e17b2" class="simple-table"><tbody><div style="display:contents" dir="ltr"><tr id="1e885df0-1907-81d6-ae73-d30ea9f0691f"><td id="\=Z{" class="">Format</td><td id="&gt;_et" class="">Action</td></tr></div><div style="display:contents" dir="ltr"><tr id="1e885df0-1907-81f9-9419-c236e1b29e97"><td id="\=Z{" class="">Notion Checklist / Shared Doc</td><td id="&gt;_et" class="">All stakeholders digitally confirm sign-off</td></tr></div><div style="display:contents" dir="ltr"><tr id="1e885df0-1907-81a8-a015-d9877b7bc4f3"><td id="\=Z{" class="">Optional async review</td><td id="&gt;_et" class="">If stakeholders unavailable live</td></tr></div><div style="display:contents" dir="ltr"><tr id="1e885df0-1907-8165-8f3b-e42001fc9680"><td id="\=Z{" class="">Final Figma file version locked</td><td id="&gt;_et" class="">Marked as “Approved” with date</td></tr></div><div style="display:contents" dir="ltr"><tr id="1e885df0-1907-81be-9c38-fe821bd1b06a"><td id="\=Z{" class="">Slack/email summary posted</td><td id="&gt;_et" class="">Recap with version number + stakeholder approvals</td></tr></div></tbody></table></div><div style="display:contents" dir="auto"><p id="1e885df0-1907-8178-8145-e2a37f65a74f" class="">✅ <em>Checklist:</em></p></div><div style="display:contents" dir="auto"><ul id="1e885df0-1907-8170-9818-ff3d3a4c2b3a" class="to-do-list"><li><div class="checkbox checkbox-off"></div> <span class="to-do-children-unchecked">All checkboxes marked complete</span><div class="indented"></div></li></ul></div><div style="display:contents" dir="auto"><ul id="1e885df0-1907-81ce-8dd5-e43c3e50ec81" class="to-do-list"><li><div class="checkbox checkbox-off"></div> <span class="to-do-children-unchecked">Approvals recorded with initials/date</span><div class="indented"></div></li></ul></div><div style="display:contents" dir="auto"><ul id="1e885df0-1907-814b-988e-fb4e5530e26c" class="to-do-list"><li><div class="checkbox checkbox-off"></div> <span class="to-do-children-unchecked">Screens archived for future reference</span><div class="indented"></div></li></ul></div><div style="display:contents" dir="auto"><ul id="1e885df0-1907-81a3-8f39-f0fa094e3167" class="to-do-list"><li><div class="checkbox checkbox-off"></div> <span class="to-do-children-unchecked">“Design Debt” items (if any) recorded in backlog</span><div class="indented"></div></li></ul></div><div style="display:contents" dir="auto"><hr id="1e885df0-1907-81fe-acd4-f92afd95733e"/></div><div style="display:contents" dir="auto"><h3 id="1e885df0-1907-812c-a3a8-fe18e7c2349f" class=""><strong>4. Design Sign-Off Template (Summary Table)</strong></h3></div><div style="display:contents" dir="ltr"><table id="1e885df0-1907-8185-ad25-ff0ba09ff8e9" class="simple-table"><tbody><div style="display:contents" dir="ltr"><tr id="1e885df0-1907-810d-8401-e2579d5bda1b"><td id="&lt;oMk" class="">Reviewer</td><td id="XDZZ" class="">Area</td><td id="H=eD" class="">Approval</td><td id="F]eB" class="">Date</td><td id="fxYc" class="">Notes</td></tr></div><div style="display:contents" dir="ltr"><tr id="1e885df0-1907-81f8-b7e1-d19c5031be35"><td id="&lt;oMk" class="">Product Owner</td><td id="XDZZ" class="">Feature Scope</td><td id="H=eD" class="">✅</td><td id="F]eB" class="">[ ]</td><td id="fxYc" class=""></td></tr></div><div style="display:contents" dir="ltr"><tr id="1e885df0-1907-8164-9bee-d1cfe09ef6bd"><td id="&lt;oMk" class="">UX Lead</td><td id="XDZZ" class="">Layout + Flow</td><td id="H=eD" class="">✅</td><td id="F]eB" class="">[ ]</td><td id="fxYc" class=""></td></tr></div><div style="display:contents" dir="ltr"><tr id="1e885df0-1907-81bb-915b-f44f80b4d2f5"><td id="&lt;oMk" class="">Engineer</td><td id="XDZZ" class="">Feasibility</td><td id="H=eD" class="">✅</td><td id="F]eB" class="">[ ]</td><td id="fxYc" class=""></td></tr></div><div style="display:contents" dir="ltr"><tr id="1e885df0-1907-8151-b091-c53e11cf24cb"><td id="&lt;oMk" class="">QA</td><td id="XDZZ" class="">Testability</td><td id="H=eD" class="">✅</td><td id="F]eB" class="">[ ]</td><td id="fxYc" class=""></td></tr></div><div style="display:contents" dir="ltr"><tr id="1e885df0-1907-815f-9293-ca551d445f84"><td id="&lt;oMk" class="">Content/Tone</td><td id="XDZZ" class="">Companion Voice + Copy</td><td id="H=eD" class="">✅</td><td id="F]eB" class="">[ ]</td><td id="fxYc" class=""></td></tr></div><div style="display:contents" dir="ltr"><tr id="1e885df0-1907-817c-ab63-f55bc75de688"><td id="&lt;oMk" class="">Privacy/Legal</td><td id="XDZZ" class="">Consent + PII UX</td><td id="H=eD" class="">✅</td><td id="F]eB" class="">[ ]</td><td id="fxYc" class=""></td></tr></div><div style="display:contents" dir="ltr"><tr id="1e885df0-1907-817e-9c8f-c8e7311186ef"><td id="&lt;oMk" class="">Clinical (if needed)</td><td id="XDZZ" class="">UX Alignment</td><td id="H=eD" class="">✅</td><td id="F]eB" class="">[ ]</td><td id="fxYc" class=""></td></tr></div></tbody></table></div><div style="display:contents" dir="auto"><hr id="1e885df0-1907-81f3-b263-f1a267e809e5"/></div><div style="display:contents" dir="auto"><h3 id="1e885df0-1907-8116-91f4-c707b406e2b6" class=""><strong>5. Linked Documents</strong></h3></div><div style="display:contents" dir="auto"><ul id="1e885df0-1907-8166-911f-f87e7fc70782" class="bulleted-list"><li style="list-style-type:disc">🧪 [UI/UX QA Checklist Template]</li></ul></div><div style="display:contents" dir="auto"><ul id="1e885df0-1907-8105-82ed-ca246d1ac787" class="bulleted-list"><li style="list-style-type:disc">📋 [Accessibility Implementation Guide]</li></ul></div><div style="display:contents" dir="auto"><ul id="1e885df0-1907-817c-8e00-dd941926002b" class="bulleted-list"><li style="list-style-type:disc">✅ [Consent UI Flows]</li></ul></div><div style="display:contents" dir="auto"><ul id="1e885df0-1907-81e2-8bd1-c4fdb15d5f77" class="bulleted-list"><li style="list-style-type:disc">📘 [Language &amp; Tone Guidelines]</li></ul></div><div style="display:contents" dir="auto"><ul id="1e885df0-1907-819c-9d6b-c5bd9e19f3b1" class="bulleted-list"><li style="list-style-type:disc">🧱 [Component Library Reference]</li></ul></div><div style="display:contents" dir="auto"><ul id="1e885df0-1907-81b2-83a6-d853f7b558d4" class="bulleted-list"><li style="list-style-type:disc">🖼 [Screen Reader Path Maps]</li></ul></div><div style="display:contents" dir="auto"><ul id="1e885df0-1907-8159-87f3-ca292b01241a" class="bulleted-list"><li style="list-style-type:disc">🧯 [Edge Cases &amp; Fail-Safes]</li></ul></div></div></article><span class="sans" style="font-size:14px;padding-top:2em"></span></body></html>

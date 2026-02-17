@@ -1,0 +1,713 @@
+<html><head><meta http-equiv="Content-Type" content="text/html; charset=utf-8"/><title>💼 Revenue Model V1 (2025–2027)</title><style>
+/* cspell:disable-file */
+/* webkit printing magic: print all background colors */
+html {
+	-webkit-print-color-adjust: exact;
+}
+* {
+	box-sizing: border-box;
+	-webkit-print-color-adjust: exact;
+}
+
+html,
+body {
+	margin: 0;
+	padding: 0;
+}
+@media only screen {
+	body {
+		margin: 2em auto;
+		max-width: 900px;
+		color: rgb(55, 53, 47);
+	}
+}
+
+body {
+	line-height: 1.5;
+	white-space: pre-wrap;
+}
+
+a,
+a.visited {
+	color: inherit;
+	text-decoration: underline;
+}
+
+.pdf-relative-link-path {
+	font-size: 80%;
+	color: #444;
+}
+
+h1,
+h2,
+h3 {
+	letter-spacing: -0.01em;
+	line-height: 1.2;
+	font-weight: 600;
+	margin-bottom: 0;
+}
+
+/* Override strong tags inside headings to maintain consistent weight */
+h1 strong,
+h2 strong,
+h3 strong {
+	font-weight: 600;
+}
+
+.page-title {
+	font-size: 2.5rem;
+	font-weight: 700;
+	margin-top: 0;
+	margin-bottom: 0.75em;
+}
+
+h1 {
+	font-size: 1.875rem;
+	margin-top: 1.875rem;
+}
+
+h2 {
+	font-size: 1.5rem;
+	margin-top: 1.5rem;
+}
+
+h3 {
+	font-size: 1.25rem;
+	margin-top: 1.25rem;
+}
+
+.source {
+	border: 1px solid #ddd;
+	border-radius: 3px;
+	padding: 1.5em;
+	word-break: break-all;
+}
+
+.callout {
+	border-radius: 10px;
+	padding: 1rem;
+}
+
+figure {
+	margin: 1.25em 0;
+	page-break-inside: avoid;
+}
+
+figcaption {
+	opacity: 0.5;
+	font-size: 85%;
+	margin-top: 0.5em;
+}
+
+mark {
+	background-color: transparent;
+}
+
+.indented {
+	padding-left: 1.5em;
+}
+
+hr {
+	background: transparent;
+	display: block;
+	width: 100%;
+	height: 1px;
+	visibility: visible;
+	border: none;
+	border-bottom: 1px solid rgba(55, 53, 47, 0.09);
+}
+
+img {
+	max-width: 100%;
+}
+
+@media only print {
+	img {
+		max-height: 100vh;
+		object-fit: contain;
+	}
+}
+
+@page {
+	margin: 1in;
+}
+
+.collection-content {
+	font-size: 0.875rem;
+}
+
+.collection-content td {
+	white-space: pre-wrap;
+	word-break: break-word;
+}
+
+.column-list {
+	display: flex;
+	justify-content: space-between;
+}
+
+.column {
+	padding: 0 1em;
+}
+
+.column:first-child {
+	padding-left: 0;
+}
+
+.column:last-child {
+	padding-right: 0;
+}
+
+.table_of_contents-item {
+	display: block;
+	font-size: 0.875rem;
+	line-height: 1.3;
+	padding: 0.125rem;
+}
+
+.table_of_contents-indent-1 {
+	margin-left: 1.5rem;
+}
+
+.table_of_contents-indent-2 {
+	margin-left: 3rem;
+}
+
+.table_of_contents-indent-3 {
+	margin-left: 4.5rem;
+}
+
+.table_of_contents-link {
+	text-decoration: none;
+	opacity: 0.7;
+	border-bottom: 1px solid rgba(55, 53, 47, 0.18);
+}
+
+table,
+th,
+td {
+	border: 1px solid rgba(55, 53, 47, 0.09);
+	border-collapse: collapse;
+}
+
+table {
+	border-left: none;
+	border-right: none;
+}
+
+th,
+td {
+	font-weight: normal;
+	padding: 0.25em 0.5em;
+	line-height: 1.5;
+	min-height: 1.5em;
+	text-align: left;
+}
+
+th {
+	color: rgba(55, 53, 47, 0.6);
+}
+
+ol,
+ul {
+	margin: 0;
+	margin-block-start: 0.6em;
+	margin-block-end: 0.6em;
+}
+
+li > ol:first-child,
+li > ul:first-child {
+	margin-block-start: 0.6em;
+}
+
+ul > li {
+	list-style: disc;
+}
+
+ul.to-do-list {
+	padding-inline-start: 0;
+}
+
+ul.to-do-list > li {
+	list-style: none;
+}
+
+.to-do-children-checked {
+	text-decoration: line-through;
+	opacity: 0.375;
+}
+
+ul.toggle > li {
+	list-style: none;
+}
+
+ul {
+	padding-inline-start: 1.7em;
+}
+
+ul > li {
+	padding-left: 0.1em;
+}
+
+ol {
+	padding-inline-start: 1.6em;
+}
+
+ol > li {
+	padding-left: 0.2em;
+}
+
+.mono ol {
+	padding-inline-start: 2em;
+}
+
+.mono ol > li {
+	text-indent: -0.4em;
+}
+
+.toggle {
+	padding-inline-start: 0em;
+	list-style-type: none;
+}
+
+/* Indent toggle children */
+.toggle > li > details {
+	padding-left: 1.7em;
+}
+
+.toggle > li > details > summary {
+	margin-left: -1.1em;
+}
+
+.selected-value {
+	display: inline-block;
+	padding: 0 0.5em;
+	background: rgba(206, 205, 202, 0.5);
+	border-radius: 3px;
+	margin-right: 0.5em;
+	margin-top: 0.3em;
+	margin-bottom: 0.3em;
+	white-space: nowrap;
+}
+
+.collection-title {
+	display: inline-block;
+	margin-right: 1em;
+}
+
+.page-description {
+	margin-bottom: 2em;
+}
+
+.simple-table {
+	margin-top: 1em;
+	font-size: 0.875rem;
+	empty-cells: show;
+}
+.simple-table td {
+	height: 29px;
+	min-width: 120px;
+}
+
+.simple-table th {
+	height: 29px;
+	min-width: 120px;
+}
+
+.simple-table-header-color {
+	background: rgb(247, 246, 243);
+	color: black;
+}
+.simple-table-header {
+	font-weight: 500;
+}
+
+time {
+	opacity: 0.5;
+}
+
+.icon {
+	display: inline-flex;
+	align-items: center;
+	justify-content: center;
+	max-width: 1.2em;
+	max-height: 1.2em;
+	text-decoration: none;
+	vertical-align: text-bottom;
+	margin-right: 0.5em;
+}
+
+img.icon {
+	border-radius: 3px;
+}
+
+.callout img.notion-static-icon {
+	width: 1em;
+	height: 1em;
+}
+
+.callout p {
+	margin: 0;
+}
+
+.callout h1,
+.callout h2,
+.callout h3 {
+	margin: 0 0 0.6rem;
+}
+
+.user-icon {
+	width: 1.5em;
+	height: 1.5em;
+	border-radius: 100%;
+	margin-right: 0.5rem;
+}
+
+.user-icon-inner {
+	font-size: 0.8em;
+}
+
+.text-icon {
+	border: 1px solid #000;
+	text-align: center;
+}
+
+.page-cover-image {
+	display: block;
+	object-fit: cover;
+	width: 100%;
+	max-height: 30vh;
+}
+
+.page-header-icon {
+	font-size: 3rem;
+	margin-bottom: 1rem;
+}
+
+.page-header-icon-with-cover {
+	margin-top: -0.72em;
+	margin-left: 0.07em;
+}
+
+.page-header-icon img {
+	border-radius: 3px;
+}
+
+.link-to-page {
+	margin: 1em 0;
+	padding: 0;
+	border: none;
+	font-weight: 500;
+}
+
+p > .user {
+	opacity: 0.5;
+}
+
+td > .user,
+td > time {
+	white-space: nowrap;
+}
+
+input[type="checkbox"] {
+	transform: scale(1.5);
+	margin-right: 0.6em;
+	vertical-align: middle;
+}
+
+p {
+	margin-top: 0.5em;
+	margin-bottom: 0.5em;
+}
+
+.image {
+	border: none;
+	margin: 1.5em 0;
+	padding: 0;
+	border-radius: 0;
+	text-align: center;
+}
+
+.code,
+code {
+	background: rgba(135, 131, 120, 0.15);
+	border-radius: 3px;
+	padding: 0.2em 0.4em;
+	border-radius: 3px;
+	font-size: 85%;
+	tab-size: 2;
+}
+
+code {
+	color: #eb5757;
+}
+
+.code {
+	padding: 1.5em 1em;
+}
+
+.code-wrap {
+	white-space: pre-wrap;
+	word-break: break-all;
+}
+
+.code > code {
+	background: none;
+	padding: 0;
+	font-size: 100%;
+	color: inherit;
+}
+
+blockquote {
+	font-size: 1em;
+	margin: 1em 0;
+	padding-left: 1em;
+	border-left: 3px solid rgb(55, 53, 47);
+}
+
+blockquote.quote-large {
+	font-size: 1.25em;
+}
+
+.bookmark {
+	text-decoration: none;
+	max-height: 8em;
+	padding: 0;
+	display: flex;
+	width: 100%;
+	align-items: stretch;
+}
+
+.bookmark-title {
+	font-size: 0.85em;
+	overflow: hidden;
+	text-overflow: ellipsis;
+	height: 1.75em;
+	white-space: nowrap;
+}
+
+.bookmark-text {
+	display: flex;
+	flex-direction: column;
+}
+
+.bookmark-info {
+	flex: 4 1 180px;
+	padding: 12px 14px 14px;
+	display: flex;
+	flex-direction: column;
+	justify-content: space-between;
+}
+
+.bookmark-image {
+	width: 33%;
+	flex: 1 1 180px;
+	display: block;
+	position: relative;
+	object-fit: cover;
+	border-radius: 1px;
+}
+
+.bookmark-description {
+	color: rgba(55, 53, 47, 0.6);
+	font-size: 0.75em;
+	overflow: hidden;
+	max-height: 4.5em;
+	word-break: break-word;
+}
+
+.bookmark-href {
+	font-size: 0.75em;
+	margin-top: 0.25em;
+}
+
+.sans { font-family: ui-sans-serif, -apple-system, BlinkMacSystemFont, "Segoe UI Variable Display", "Segoe UI", Helvetica, "Apple Color Emoji", "Noto Sans Arabic", "Noto Sans Hebrew", Arial, sans-serif, "Segoe UI Emoji", "Segoe UI Symbol"; }
+.code { font-family: "SFMono-Regular", Menlo, Consolas, "PT Mono", "Liberation Mono", Courier, monospace; }
+.serif { font-family: Lyon-Text, Georgia, ui-serif, serif; }
+.mono { font-family: iawriter-mono, Nitti, Menlo, Courier, monospace; }
+.pdf .sans { font-family: Inter, ui-sans-serif, -apple-system, BlinkMacSystemFont, "Segoe UI Variable Display", "Segoe UI", Helvetica, "Apple Color Emoji", "Noto Sans Arabic", "Noto Sans Hebrew", Arial, sans-serif, "Segoe UI Emoji", "Segoe UI Symbol", 'Twemoji', 'Noto Color Emoji', 'Noto Sans CJK JP'; }
+.pdf:lang(zh-CN) .sans { font-family: Inter, ui-sans-serif, -apple-system, BlinkMacSystemFont, "Segoe UI Variable Display", "Segoe UI", Helvetica, "Apple Color Emoji", "Noto Sans Arabic", "Noto Sans Hebrew", Arial, sans-serif, "Segoe UI Emoji", "Segoe UI Symbol", 'Twemoji', 'Noto Color Emoji', 'Noto Sans CJK SC'; }
+.pdf:lang(zh-TW) .sans { font-family: Inter, ui-sans-serif, -apple-system, BlinkMacSystemFont, "Segoe UI Variable Display", "Segoe UI", Helvetica, "Apple Color Emoji", "Noto Sans Arabic", "Noto Sans Hebrew", Arial, sans-serif, "Segoe UI Emoji", "Segoe UI Symbol", 'Twemoji', 'Noto Color Emoji', 'Noto Sans CJK TC'; }
+.pdf:lang(ko-KR) .sans { font-family: Inter, ui-sans-serif, -apple-system, BlinkMacSystemFont, "Segoe UI Variable Display", "Segoe UI", Helvetica, "Apple Color Emoji", "Noto Sans Arabic", "Noto Sans Hebrew", Arial, sans-serif, "Segoe UI Emoji", "Segoe UI Symbol", 'Twemoji', 'Noto Color Emoji', 'Noto Sans CJK KR'; }
+.pdf .code { font-family: Source Code Pro, "SFMono-Regular", Menlo, Consolas, "PT Mono", "Liberation Mono", Courier, monospace, 'Twemoji', 'Noto Color Emoji', 'Noto Sans Mono CJK JP'; }
+.pdf:lang(zh-CN) .code { font-family: Source Code Pro, "SFMono-Regular", Menlo, Consolas, "PT Mono", "Liberation Mono", Courier, monospace, 'Twemoji', 'Noto Color Emoji', 'Noto Sans Mono CJK SC'; }
+.pdf:lang(zh-TW) .code { font-family: Source Code Pro, "SFMono-Regular", Menlo, Consolas, "PT Mono", "Liberation Mono", Courier, monospace, 'Twemoji', 'Noto Color Emoji', 'Noto Sans Mono CJK TC'; }
+.pdf:lang(ko-KR) .code { font-family: Source Code Pro, "SFMono-Regular", Menlo, Consolas, "PT Mono", "Liberation Mono", Courier, monospace, 'Twemoji', 'Noto Color Emoji', 'Noto Sans Mono CJK KR'; }
+.pdf .serif { font-family: PT Serif, Lyon-Text, Georgia, ui-serif, serif, 'Twemoji', 'Noto Color Emoji', 'Noto Serif CJK JP'; }
+.pdf:lang(zh-CN) .serif { font-family: PT Serif, Lyon-Text, Georgia, ui-serif, serif, 'Twemoji', 'Noto Color Emoji', 'Noto Serif CJK SC'; }
+.pdf:lang(zh-TW) .serif { font-family: PT Serif, Lyon-Text, Georgia, ui-serif, serif, 'Twemoji', 'Noto Color Emoji', 'Noto Serif CJK TC'; }
+.pdf:lang(ko-KR) .serif { font-family: PT Serif, Lyon-Text, Georgia, ui-serif, serif, 'Twemoji', 'Noto Color Emoji', 'Noto Serif CJK KR'; }
+.pdf .mono { font-family: PT Mono, iawriter-mono, Nitti, Menlo, Courier, monospace, 'Twemoji', 'Noto Color Emoji', 'Noto Sans Mono CJK JP'; }
+.pdf:lang(zh-CN) .mono { font-family: PT Mono, iawriter-mono, Nitti, Menlo, Courier, monospace, 'Twemoji', 'Noto Color Emoji', 'Noto Sans Mono CJK SC'; }
+.pdf:lang(zh-TW) .mono { font-family: PT Mono, iawriter-mono, Nitti, Menlo, Courier, monospace, 'Twemoji', 'Noto Color Emoji', 'Noto Sans Mono CJK TC'; }
+.pdf:lang(ko-KR) .mono { font-family: PT Mono, iawriter-mono, Nitti, Menlo, Courier, monospace, 'Twemoji', 'Noto Color Emoji', 'Noto Sans Mono CJK KR'; }
+.highlight-default {
+	color: rgba(44, 44, 43, 1);
+}
+.highlight-gray {
+	color: rgba(125, 122, 117, 1);
+	fill: rgba(125, 122, 117, 1);
+}
+.highlight-brown {
+	color: rgba(159, 118, 90, 1);
+	fill: rgba(159, 118, 90, 1);
+}
+.highlight-orange {
+	color: rgba(210, 123, 45, 1);
+	fill: rgba(210, 123, 45, 1);
+}
+.highlight-yellow {
+	color: rgba(203, 148, 52, 1);
+	fill: rgba(203, 148, 52, 1);
+}
+.highlight-teal {
+	color: rgba(80, 148, 110, 1);
+	fill: rgba(80, 148, 110, 1);
+}
+.highlight-blue {
+	color: rgba(56, 125, 201, 1);
+	fill: rgba(56, 125, 201, 1);
+}
+.highlight-purple {
+	color: rgba(154, 107, 180, 1);
+	fill: rgba(154, 107, 180, 1);
+}
+.highlight-pink {
+	color: rgba(193, 76, 138, 1);
+	fill: rgba(193, 76, 138, 1);
+}
+.highlight-red {
+	color: rgba(207, 81, 72, 1);
+	fill: rgba(207, 81, 72, 1);
+}
+.highlight-default_background {
+	color: rgba(44, 44, 43, 1);
+}
+.highlight-gray_background {
+	background: rgba(42, 28, 0, 0.07);
+}
+.highlight-brown_background {
+	background: rgba(139, 46, 0, 0.086);
+}
+.highlight-orange_background {
+	background: rgba(224, 101, 1, 0.129);
+}
+.highlight-yellow_background {
+	background: rgba(211, 168, 0, 0.137);
+}
+.highlight-teal_background {
+	background: rgba(0, 100, 45, 0.09);
+}
+.highlight-blue_background {
+	background: rgba(0, 124, 215, 0.094);
+}
+.highlight-purple_background {
+	background: rgba(102, 0, 178, 0.078);
+}
+.highlight-pink_background {
+	background: rgba(197, 0, 93, 0.086);
+}
+.highlight-red_background {
+	background: rgba(223, 22, 0, 0.094);
+}
+.block-color-default {
+	color: inherit;
+	fill: inherit;
+}
+.block-color-gray {
+	color: rgba(125, 122, 117, 1);
+	fill: rgba(125, 122, 117, 1);
+}
+.block-color-brown {
+	color: rgba(159, 118, 90, 1);
+	fill: rgba(159, 118, 90, 1);
+}
+.block-color-orange {
+	color: rgba(210, 123, 45, 1);
+	fill: rgba(210, 123, 45, 1);
+}
+.block-color-yellow {
+	color: rgba(203, 148, 52, 1);
+	fill: rgba(203, 148, 52, 1);
+}
+.block-color-teal {
+	color: rgba(80, 148, 110, 1);
+	fill: rgba(80, 148, 110, 1);
+}
+.block-color-blue {
+	color: rgba(56, 125, 201, 1);
+	fill: rgba(56, 125, 201, 1);
+}
+.block-color-purple {
+	color: rgba(154, 107, 180, 1);
+	fill: rgba(154, 107, 180, 1);
+}
+.block-color-pink {
+	color: rgba(193, 76, 138, 1);
+	fill: rgba(193, 76, 138, 1);
+}
+.block-color-red {
+	color: rgba(207, 81, 72, 1);
+	fill: rgba(207, 81, 72, 1);
+}
+.block-color-default_background {
+	color: inherit;
+	fill: inherit;
+}
+.block-color-gray_background {
+	background: rgba(240, 239, 237, 1);
+}
+.block-color-brown_background {
+	background: rgba(245, 237, 233, 1);
+}
+.block-color-orange_background {
+	background: rgba(251, 235, 222, 1);
+}
+.block-color-yellow_background {
+	background: rgba(249, 243, 220, 1);
+}
+.block-color-teal_background {
+	background: rgba(232, 241, 236, 1);
+}
+.block-color-blue_background {
+	background: rgba(229, 242, 252, 1);
+}
+.block-color-purple_background {
+	background: rgba(243, 235, 249, 1);
+}
+.block-color-pink_background {
+	background: rgba(250, 233, 241, 1);
+}
+.block-color-red_background {
+	background: rgba(252, 233, 231, 1);
+}
+.select-value-color-default { background-color: rgba(42, 28, 0, 0.07); }
+.select-value-color-gray { background-color: rgba(28, 19, 1, 0.11); }
+.select-value-color-brown { background-color: rgba(127, 51, 0, 0.156); }
+.select-value-color-orange { background-color: rgba(196, 88, 0, 0.203); }
+.select-value-color-yellow { background-color: rgba(209, 156, 0, 0.282); }
+.select-value-color-green { background-color: rgba(0, 96, 38, 0.156); }
+.select-value-color-blue { background-color: rgba(0, 118, 217, 0.203); }
+.select-value-color-purple { background-color: rgba(92, 0, 163, 0.141); }
+.select-value-color-pink { background-color: rgba(183, 0, 78, 0.152); }
+.select-value-color-red { background-color: rgba(206, 24, 0, 0.164); }
+
+.checkbox {
+	display: inline-flex;
+	vertical-align: text-bottom;
+	width: 16;
+	height: 16;
+	background-size: 16px;
+	margin-left: 2px;
+	margin-right: 5px;
+}
+
+.checkbox-on {
+	background-image: url("data:image/svg+xml;charset=UTF-8,%3Csvg%20width%3D%2216%22%20height%3D%2216%22%20viewBox%3D%220%200%2016%2016%22%20fill%3D%22none%22%20xmlns%3D%22http%3A%2F%2Fwww.w3.org%2F2000%2Fsvg%22%3E%0A%3Crect%20width%3D%2216%22%20height%3D%2216%22%20fill%3D%22%2358A9D7%22%2F%3E%0A%3Cpath%20d%3D%22M6.71429%2012.2852L14%204.9995L12.7143%203.71436L6.71429%209.71378L3.28571%206.2831L2%207.57092L6.71429%2012.2852Z%22%20fill%3D%22white%22%2F%3E%0A%3C%2Fsvg%3E");
+}
+
+.checkbox-off {
+	background-image: url("data:image/svg+xml;charset=UTF-8,%3Csvg%20width%3D%2216%22%20height%3D%2216%22%20viewBox%3D%220%200%2016%2016%22%20fill%3D%22none%22%20xmlns%3D%22http%3A%2F%2Fwww.w3.org%2F2000%2Fsvg%22%3E%0A%3Crect%20x%3D%220.75%22%20y%3D%220.75%22%20width%3D%2214.5%22%20height%3D%2214.5%22%20fill%3D%22white%22%20stroke%3D%22%2336352F%22%20stroke-width%3D%221.5%22%2F%3E%0A%3C%2Fsvg%3E");
+}
+	
+</style></head><body><article id="1e585df0-1907-8001-8fa4-d6f9c4b4e2ab" class="page sans"><header><h1 class="page-title" dir="auto">💼 Revenue Model V1 (2025–2027)</h1><p class="page-description" dir="auto"></p><table class="properties"><tbody><tr class="property-row property-row-person"><th><span class="icon property-icon"><img src="https://www.notion.so/icons/friends_gray.svg" style="width:14px;height:14px;display:block"/></span>Owner</th><td><span class="user"><span class="icon text-icon user-icon"><span class="user-icon-inner">A</span></span>Aubert</span></td></tr><tr class="property-row property-row-multi_select"><th><span class="icon property-icon"><img src="https://www.notion.so/icons/list_gray.svg" style="width:14px;height:14px;display:block"/></span>Tags</th><td></td></tr></tbody></table></header><div class="page-body"><div style="display:contents" dir="auto"><h3 id="1e885df0-1907-8049-9d70-d1a49ad6ad1d" class="">🔹 1. Purpose</h3></div><div style="display:contents" dir="auto"><p id="1e885df0-1907-80f9-a759-c3002827aef2" class="">This document defines Memora’s revenue strategy across <strong>B2C, B2B, and SDK channels</strong>, including monetization assumptions, volume projections, risk dynamics, and breakeven path. It underpins investor decks, pilot partnership terms, and licensing decisions.</p></div><div style="display:contents" dir="auto"><hr id="1e885df0-1907-802a-b4cd-f44b2ca207fa"/></div><div style="display:contents" dir="auto"><h3 id="1e885df0-1907-8084-b7f1-f771b29f5028" class="">🔹 2. Revenue Channels</h3></div><div style="display:contents" dir="ltr"><table id="1e885df0-1907-804c-a8ba-ebd2a536c458" class="simple-table"><tbody><div style="display:contents" dir="ltr"><tr id="1e885df0-1907-80b5-8232-e23a49cbc40a"><td id=":\YI" class="">Stream</td><td id="\dn]" class="">Description</td><td id="Xz@c" class="">Pricing</td><td id="o}|&lt;" class="">Volume Assumptions</td></tr></div><div style="display:contents" dir="ltr"><tr id="1e885df0-1907-808e-b6ee-ddf9bb8b6443"><td id=":\YI" class=""><strong>B2C Subscriptions</strong></td><td id="\dn]" class="">Direct-to-caregiver plans for Companion access</td><td id="Xz@c" class="">$6.99/month CAD</td><td id="o}|&lt;" class="">500 → 25,000 users</td></tr></div><div style="display:contents" dir="ltr"><tr id="1e885df0-1907-808f-b1b3-d3210032e065"><td id=":\YI" class=""><strong>B2B Clinic Licensing</strong></td><td id="\dn]" class="">Monthly license per clinic for multi-patient Companion + dashboard</td><td id="Xz@c" class="">$500/month/site</td><td id="o}|&lt;" class="">5 → 200 clinics</td></tr></div><div style="display:contents" dir="ltr"><tr id="1e885df0-1907-804f-9344-f467bf1150dd"><td id=":\YI" class=""><strong>SDK / Research Licensing</strong></td><td id="\dn]" class="">White-label Companion exports or telemetry sharing for studies</td><td id="Xz@c" class="">Flat $10–25K/license</td><td id="o}|&lt;" class="">1–2 per year</td></tr></div></tbody></table></div><div style="display:contents" dir="auto"><hr id="1e885df0-1907-8092-b87e-ff848b570ead"/></div><div style="display:contents" dir="auto"><h3 id="1e885df0-1907-80b1-b18e-eb1fbb997aa4" class="">🔹 3. Revenue Timeline Snapshot</h3></div><div style="display:contents" dir="ltr"><table id="1e885df0-1907-806f-9076-f80c7b8ce38a" class="simple-table"><tbody><div style="display:contents" dir="ltr"><tr id="1e885df0-1907-8026-ac03-c08ca59bae0e"><td id="WrOP" class="">Month</td><td id="d^Rm" class="">B2C Users</td><td id="zs^y" class="">B2C Rev</td><td id="&gt;C;g" class="">Clinics</td><td id="iCcK" class="">B2B Rev</td><td id="bqUD" class="">SDK</td><td id="pGFE" class="">Total Rev</td></tr></div><div style="display:contents" dir="ltr"><tr id="1e885df0-1907-805d-a26b-c8cca06799fa"><td id="WrOP" class="">Apr-2025</td><td id="d^Rm" class="">500</td><td id="zs^y" class="">$3,495</td><td id="&gt;C;g" class="">5</td><td id="iCcK" class="">$2,500</td><td id="bqUD" class="">$10,000</td><td id="pGFE" class="">$15,995</td></tr></div><div style="display:contents" dir="ltr"><tr id="1e885df0-1907-80f5-98f6-ef35c2717c82"><td id="WrOP" class="">Jun-2025</td><td id="d^Rm" class="">2,000</td><td id="zs^y" class="">$13,980</td><td id="&gt;C;g" class="">12</td><td id="iCcK" class="">$6,000</td><td id="bqUD" class="">—</td><td id="pGFE" class="">$19,980</td></tr></div><div style="display:contents" dir="ltr"><tr id="1e885df0-1907-8093-8693-d0a882e54c5f"><td id="WrOP" class="">Sep-2025</td><td id="d^Rm" class="">5,000</td><td id="zs^y" class="">$34,950</td><td id="&gt;C;g" class="">30</td><td id="iCcK" class="">$15,000</td><td id="bqUD" class="">—</td><td id="pGFE" class="">$49,950</td></tr></div><div style="display:contents" dir="ltr"><tr id="1e885df0-1907-80f7-9c49-fbc07332a675"><td id="WrOP" class="">Jan-2026</td><td id="d^Rm" class="">10,000</td><td id="zs^y" class="">$69,900</td><td id="&gt;C;g" class="">60</td><td id="iCcK" class="">$30,000</td><td id="bqUD" class="">$20,000</td><td id="pGFE" class="">$119,900</td></tr></div><div style="display:contents" dir="ltr"><tr id="1e885df0-1907-804c-b9e7-febbd6868f43"><td id="WrOP" class="">Jul-2026</td><td id="d^Rm" class="">18,000</td><td id="zs^y" class="">$125,820</td><td id="&gt;C;g" class="">120</td><td id="iCcK" class="">$60,000</td><td id="bqUD" class="">—</td><td id="pGFE" class="">$185,820</td></tr></div><div style="display:contents" dir="ltr"><tr id="1e885df0-1907-80e0-9b58-d427d4670e3c"><td id="WrOP" class="">Mar-2027</td><td id="d^Rm" class="">25,000</td><td id="zs^y" class="">$174,750</td><td id="&gt;C;g" class="">200</td><td id="iCcK" class="">$100,000</td><td id="bqUD" class="">$25,000</td><td id="pGFE" class="">$299,750</td></tr></div></tbody></table></div><div style="display:contents" dir="auto"><blockquote id="1e885df0-1907-80c4-ba3b-dacfe38f2324" class="">Cumulative revenue crosses $1.5M by Q1 2027 with an average blended monthly growth rate of ~11% from Q2 2025.</blockquote></div><div style="display:contents" dir="auto"><hr id="1e885df0-1907-803b-b379-cb1ab439cc8e"/></div><div style="display:contents" dir="auto"><h3 id="1e885df0-1907-80fe-978d-d28c102f978d" class="">🔹 4. Key Assumptions</h3></div><div style="display:contents" dir="ltr"><table id="1e885df0-1907-804a-b270-d1553c938e96" class="simple-table"><tbody><div style="display:contents" dir="ltr"><tr id="1e885df0-1907-80f0-8671-ff59dd9500b4"><td id="@JbJ" class="">Area</td><td id="iAnX" class="">Assumption</td></tr></div><div style="display:contents" dir="ltr"><tr id="1e885df0-1907-80de-8564-fe2c2ee801f5"><td id="@JbJ" class=""><strong>B2C CAC</strong></td><td id="iAnX" class="">$9.25 average per user (social, org partners, paid ads)</td></tr></div><div style="display:contents" dir="ltr"><tr id="1e885df0-1907-8000-a6ea-c75b433c853e"><td id="@JbJ" class=""><strong>B2B CAC</strong></td><td id="iAnX" class="">$1,800 per clinic (via pilot conversion flow)</td></tr></div><div style="display:contents" dir="ltr"><tr id="1e885df0-1907-80dd-9cf8-e69ac4d5d27c"><td id="@JbJ" class=""><strong>Churn (B2C)</strong></td><td id="iAnX" class="">~4% monthly (improves with streak gamification)</td></tr></div><div style="display:contents" dir="ltr"><tr id="1e885df0-1907-80b8-97b1-d24c9cff1059"><td id="@JbJ" class=""><strong>Gross Margin</strong></td><td id="iAnX" class="">84% blended margin (cloud cost, support, R&amp;D amortized)</td></tr></div><div style="display:contents" dir="ltr"><tr id="1e885df0-1907-8094-b5aa-c93ade0c7739"><td id="@JbJ" class=""><strong>SDK Risk</strong></td><td id="iAnX" class="">Unpredictable cadence, but 80–90% margin on delivery</td></tr></div></tbody></table></div><div style="display:contents" dir="auto"><hr id="1e885df0-1907-80e4-a122-dc4a0d6fb609"/></div><div style="display:contents" dir="auto"><h3 id="1e885df0-1907-80a4-9593-cf15fcd8ce1a" class="">🔹 5. Strategic Insights &amp; Levers</h3></div><div style="display:contents" dir="ltr"><table id="1e885df0-1907-802e-b6c8-c67c9863e6ff" class="simple-table"><tbody><div style="display:contents" dir="ltr"><tr id="1e885df0-1907-80f5-8b3f-d8d17e429bb2"><td id="&lt;Xj}" class="">Insight</td><td id="SZwe" class="">Implication</td></tr></div><div style="display:contents" dir="ltr"><tr id="1e885df0-1907-8068-8ae0-ea387796b076"><td id="&lt;Xj}" class=""><strong>Clinic revenue is predictable</strong></td><td id="SZwe" class="">Prioritize 6-month pilots with built-in conversion path</td></tr></div><div style="display:contents" dir="ltr"><tr id="1e885df0-1907-8024-9930-fe996010be08"><td id="&lt;Xj}" class=""><strong>B2C scales via networks</strong></td><td id="SZwe" class="">Focus on Caregiver Org, Alzheimer’s Society, and church group funnels</td></tr></div><div style="display:contents" dir="ltr"><tr id="1e885df0-1907-80b9-ae72-e010c4ddd1e7"><td id="&lt;Xj}" class=""><strong>SDK offsets dev cost</strong></td><td id="SZwe" class="">Reinvest SDK revenue into Companion updates or IRB prep</td></tr></div><div style="display:contents" dir="ltr"><tr id="1e885df0-1907-804f-a622-ca8eb3c063ef"><td id="&lt;Xj}" class=""><strong>25K subs = breakeven ops</strong></td><td id="SZwe" class="">Hit by Q1 2027 with minimal B2B dependency if CAC is controlled</td></tr></div></tbody></table></div><div style="display:contents" dir="auto"><hr id="1e885df0-1907-80fc-9732-ed3eee1d13a8"/></div><div style="display:contents" dir="auto"><h3 id="1e885df0-1907-8004-8224-fcec739d1e10" class="">🔹 6. Strategic Scenarios</h3></div><div style="display:contents" dir="ltr"><table id="1e885df0-1907-8082-8aaa-c0bd802825ab" class="simple-table"><tbody><div style="display:contents" dir="ltr"><tr id="1e885df0-1907-8084-a593-ea64d93273a0"><td id="LA^y" class="">Scenario</td><td id="U^xh" class="">Revenue Mix</td><td id="X\rt" class="">Notes</td></tr></div><div style="display:contents" dir="ltr"><tr id="1e885df0-1907-805f-a918-f17a90420a35"><td id="LA^y" class=""><strong>Base Case</strong></td><td id="U^xh" class="">65% B2C, 30% B2B, 5% SDK</td><td id="X\rt" class="">Current go-to-market plan</td></tr></div><div style="display:contents" dir="ltr"><tr id="1e885df0-1907-8096-9bc2-ce877aab0edf"><td id="LA^y" class=""><strong>Clinic-Heavy</strong></td><td id="U^xh" class="">45% B2C, 50% B2B, 5% SDK</td><td id="X\rt" class="">Adds hospital networks and EMR integration</td></tr></div><div style="display:contents" dir="ltr"><tr id="1e885df0-1907-80cf-beea-d7837be33cd6"><td id="LA^y" class=""><strong>B2C-Driven</strong></td><td id="U^xh" class="">80% B2C, 15% B2B, 5% SDK</td><td id="X\rt" class="">Leverages community ambassadors, influencer channels</td></tr></div><div style="display:contents" dir="ltr"><tr id="1e885df0-1907-8081-9f66-ddf5dd1149f0"><td id="LA^y" class=""><strong>SDK-Offset</strong></td><td id="U^xh" class="">60% B2C, 25% B2B, 15% SDK</td><td id="X\rt" class="">Aligns with grant and R&amp;D partnership cycles</td></tr></div></tbody></table></div><div style="display:contents" dir="auto"><hr id="1e885df0-1907-8016-b76f-c05e20035129"/></div><div style="display:contents" dir="auto"><h3 id="1e885df0-1907-80cb-8351-cb06987b2bcd" class="">🔹 7. Governance &amp; Links</h3></div><div style="display:contents" dir="ltr"><table id="1e885df0-1907-8042-a029-df9bc8f1a11b" class="simple-table"><tbody><div style="display:contents" dir="ltr"><tr id="1e885df0-1907-8075-a1d9-e8ecb9a2abb4"><td id="ouF^" class="">Area</td><td id="@Y&lt;s" class="">Linked Resource</td></tr></div><div style="display:contents" dir="ltr"><tr id="1e885df0-1907-80ad-924c-f14cbc1a4fc9"><td id="ouF^" class="">CAC + LTV Models</td><td id="@Y&lt;s" class="">📐 [CAC/LTV Forecast – Clinics &amp; B2C]</td></tr></div><div style="display:contents" dir="ltr"><tr id="1e885df0-1907-8081-99f5-ebb61c9f9eba"><td id="ouF^" class="">Forecasts</td><td id="@Y&lt;s" class="">📈 [18–24mo Model – Memora]</td></tr></div><div style="display:contents" dir="ltr"><tr id="1e885df0-1907-8077-acb2-e083721417ba"><td id="ouF^" class="">Strategic Planning</td><td id="@Y&lt;s" class="">🧭 [Memora GTM + Revenue Risks]</td></tr></div><div style="display:contents" dir="ltr"><tr id="1e885df0-1907-8003-abac-df355e27dbcc"><td id="ouF^" class="">Compliance</td><td id="@Y&lt;s" class="">🔐 [Grant-Linked Revenue Rules]</td></tr></div><div style="display:contents" dir="ltr"><tr id="1e885df0-1907-809f-ba8f-dab24f8b87c5"><td id="ouF^" class="">Subscription Scenarios</td><td id="@Y&lt;s" class="">💬 [B2C Volume Forecasting Slides]</td></tr></div></tbody></table></div></div></article><span class="sans" style="font-size:14px;padding-top:2em"></span></body></html>

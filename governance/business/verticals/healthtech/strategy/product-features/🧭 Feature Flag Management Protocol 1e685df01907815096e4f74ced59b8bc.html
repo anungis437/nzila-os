@@ -1,0 +1,714 @@
+<html><head><meta http-equiv="Content-Type" content="text/html; charset=utf-8"/><title>
+🧭 Feature Flag Management Protocol</title><style>
+/* cspell:disable-file */
+/* webkit printing magic: print all background colors */
+html {
+	-webkit-print-color-adjust: exact;
+}
+* {
+	box-sizing: border-box;
+	-webkit-print-color-adjust: exact;
+}
+
+html,
+body {
+	margin: 0;
+	padding: 0;
+}
+@media only screen {
+	body {
+		margin: 2em auto;
+		max-width: 900px;
+		color: rgb(55, 53, 47);
+	}
+}
+
+body {
+	line-height: 1.5;
+	white-space: pre-wrap;
+}
+
+a,
+a.visited {
+	color: inherit;
+	text-decoration: underline;
+}
+
+.pdf-relative-link-path {
+	font-size: 80%;
+	color: #444;
+}
+
+h1,
+h2,
+h3 {
+	letter-spacing: -0.01em;
+	line-height: 1.2;
+	font-weight: 600;
+	margin-bottom: 0;
+}
+
+/* Override strong tags inside headings to maintain consistent weight */
+h1 strong,
+h2 strong,
+h3 strong {
+	font-weight: 600;
+}
+
+.page-title {
+	font-size: 2.5rem;
+	font-weight: 700;
+	margin-top: 0;
+	margin-bottom: 0.75em;
+}
+
+h1 {
+	font-size: 1.875rem;
+	margin-top: 1.875rem;
+}
+
+h2 {
+	font-size: 1.5rem;
+	margin-top: 1.5rem;
+}
+
+h3 {
+	font-size: 1.25rem;
+	margin-top: 1.25rem;
+}
+
+.source {
+	border: 1px solid #ddd;
+	border-radius: 3px;
+	padding: 1.5em;
+	word-break: break-all;
+}
+
+.callout {
+	border-radius: 10px;
+	padding: 1rem;
+}
+
+figure {
+	margin: 1.25em 0;
+	page-break-inside: avoid;
+}
+
+figcaption {
+	opacity: 0.5;
+	font-size: 85%;
+	margin-top: 0.5em;
+}
+
+mark {
+	background-color: transparent;
+}
+
+.indented {
+	padding-left: 1.5em;
+}
+
+hr {
+	background: transparent;
+	display: block;
+	width: 100%;
+	height: 1px;
+	visibility: visible;
+	border: none;
+	border-bottom: 1px solid rgba(55, 53, 47, 0.09);
+}
+
+img {
+	max-width: 100%;
+}
+
+@media only print {
+	img {
+		max-height: 100vh;
+		object-fit: contain;
+	}
+}
+
+@page {
+	margin: 1in;
+}
+
+.collection-content {
+	font-size: 0.875rem;
+}
+
+.collection-content td {
+	white-space: pre-wrap;
+	word-break: break-word;
+}
+
+.column-list {
+	display: flex;
+	justify-content: space-between;
+}
+
+.column {
+	padding: 0 1em;
+}
+
+.column:first-child {
+	padding-left: 0;
+}
+
+.column:last-child {
+	padding-right: 0;
+}
+
+.table_of_contents-item {
+	display: block;
+	font-size: 0.875rem;
+	line-height: 1.3;
+	padding: 0.125rem;
+}
+
+.table_of_contents-indent-1 {
+	margin-left: 1.5rem;
+}
+
+.table_of_contents-indent-2 {
+	margin-left: 3rem;
+}
+
+.table_of_contents-indent-3 {
+	margin-left: 4.5rem;
+}
+
+.table_of_contents-link {
+	text-decoration: none;
+	opacity: 0.7;
+	border-bottom: 1px solid rgba(55, 53, 47, 0.18);
+}
+
+table,
+th,
+td {
+	border: 1px solid rgba(55, 53, 47, 0.09);
+	border-collapse: collapse;
+}
+
+table {
+	border-left: none;
+	border-right: none;
+}
+
+th,
+td {
+	font-weight: normal;
+	padding: 0.25em 0.5em;
+	line-height: 1.5;
+	min-height: 1.5em;
+	text-align: left;
+}
+
+th {
+	color: rgba(55, 53, 47, 0.6);
+}
+
+ol,
+ul {
+	margin: 0;
+	margin-block-start: 0.6em;
+	margin-block-end: 0.6em;
+}
+
+li > ol:first-child,
+li > ul:first-child {
+	margin-block-start: 0.6em;
+}
+
+ul > li {
+	list-style: disc;
+}
+
+ul.to-do-list {
+	padding-inline-start: 0;
+}
+
+ul.to-do-list > li {
+	list-style: none;
+}
+
+.to-do-children-checked {
+	text-decoration: line-through;
+	opacity: 0.375;
+}
+
+ul.toggle > li {
+	list-style: none;
+}
+
+ul {
+	padding-inline-start: 1.7em;
+}
+
+ul > li {
+	padding-left: 0.1em;
+}
+
+ol {
+	padding-inline-start: 1.6em;
+}
+
+ol > li {
+	padding-left: 0.2em;
+}
+
+.mono ol {
+	padding-inline-start: 2em;
+}
+
+.mono ol > li {
+	text-indent: -0.4em;
+}
+
+.toggle {
+	padding-inline-start: 0em;
+	list-style-type: none;
+}
+
+/* Indent toggle children */
+.toggle > li > details {
+	padding-left: 1.7em;
+}
+
+.toggle > li > details > summary {
+	margin-left: -1.1em;
+}
+
+.selected-value {
+	display: inline-block;
+	padding: 0 0.5em;
+	background: rgba(206, 205, 202, 0.5);
+	border-radius: 3px;
+	margin-right: 0.5em;
+	margin-top: 0.3em;
+	margin-bottom: 0.3em;
+	white-space: nowrap;
+}
+
+.collection-title {
+	display: inline-block;
+	margin-right: 1em;
+}
+
+.page-description {
+	margin-bottom: 2em;
+}
+
+.simple-table {
+	margin-top: 1em;
+	font-size: 0.875rem;
+	empty-cells: show;
+}
+.simple-table td {
+	height: 29px;
+	min-width: 120px;
+}
+
+.simple-table th {
+	height: 29px;
+	min-width: 120px;
+}
+
+.simple-table-header-color {
+	background: rgb(247, 246, 243);
+	color: black;
+}
+.simple-table-header {
+	font-weight: 500;
+}
+
+time {
+	opacity: 0.5;
+}
+
+.icon {
+	display: inline-flex;
+	align-items: center;
+	justify-content: center;
+	max-width: 1.2em;
+	max-height: 1.2em;
+	text-decoration: none;
+	vertical-align: text-bottom;
+	margin-right: 0.5em;
+}
+
+img.icon {
+	border-radius: 3px;
+}
+
+.callout img.notion-static-icon {
+	width: 1em;
+	height: 1em;
+}
+
+.callout p {
+	margin: 0;
+}
+
+.callout h1,
+.callout h2,
+.callout h3 {
+	margin: 0 0 0.6rem;
+}
+
+.user-icon {
+	width: 1.5em;
+	height: 1.5em;
+	border-radius: 100%;
+	margin-right: 0.5rem;
+}
+
+.user-icon-inner {
+	font-size: 0.8em;
+}
+
+.text-icon {
+	border: 1px solid #000;
+	text-align: center;
+}
+
+.page-cover-image {
+	display: block;
+	object-fit: cover;
+	width: 100%;
+	max-height: 30vh;
+}
+
+.page-header-icon {
+	font-size: 3rem;
+	margin-bottom: 1rem;
+}
+
+.page-header-icon-with-cover {
+	margin-top: -0.72em;
+	margin-left: 0.07em;
+}
+
+.page-header-icon img {
+	border-radius: 3px;
+}
+
+.link-to-page {
+	margin: 1em 0;
+	padding: 0;
+	border: none;
+	font-weight: 500;
+}
+
+p > .user {
+	opacity: 0.5;
+}
+
+td > .user,
+td > time {
+	white-space: nowrap;
+}
+
+input[type="checkbox"] {
+	transform: scale(1.5);
+	margin-right: 0.6em;
+	vertical-align: middle;
+}
+
+p {
+	margin-top: 0.5em;
+	margin-bottom: 0.5em;
+}
+
+.image {
+	border: none;
+	margin: 1.5em 0;
+	padding: 0;
+	border-radius: 0;
+	text-align: center;
+}
+
+.code,
+code {
+	background: rgba(135, 131, 120, 0.15);
+	border-radius: 3px;
+	padding: 0.2em 0.4em;
+	border-radius: 3px;
+	font-size: 85%;
+	tab-size: 2;
+}
+
+code {
+	color: #eb5757;
+}
+
+.code {
+	padding: 1.5em 1em;
+}
+
+.code-wrap {
+	white-space: pre-wrap;
+	word-break: break-all;
+}
+
+.code > code {
+	background: none;
+	padding: 0;
+	font-size: 100%;
+	color: inherit;
+}
+
+blockquote {
+	font-size: 1em;
+	margin: 1em 0;
+	padding-left: 1em;
+	border-left: 3px solid rgb(55, 53, 47);
+}
+
+blockquote.quote-large {
+	font-size: 1.25em;
+}
+
+.bookmark {
+	text-decoration: none;
+	max-height: 8em;
+	padding: 0;
+	display: flex;
+	width: 100%;
+	align-items: stretch;
+}
+
+.bookmark-title {
+	font-size: 0.85em;
+	overflow: hidden;
+	text-overflow: ellipsis;
+	height: 1.75em;
+	white-space: nowrap;
+}
+
+.bookmark-text {
+	display: flex;
+	flex-direction: column;
+}
+
+.bookmark-info {
+	flex: 4 1 180px;
+	padding: 12px 14px 14px;
+	display: flex;
+	flex-direction: column;
+	justify-content: space-between;
+}
+
+.bookmark-image {
+	width: 33%;
+	flex: 1 1 180px;
+	display: block;
+	position: relative;
+	object-fit: cover;
+	border-radius: 1px;
+}
+
+.bookmark-description {
+	color: rgba(55, 53, 47, 0.6);
+	font-size: 0.75em;
+	overflow: hidden;
+	max-height: 4.5em;
+	word-break: break-word;
+}
+
+.bookmark-href {
+	font-size: 0.75em;
+	margin-top: 0.25em;
+}
+
+.sans { font-family: ui-sans-serif, -apple-system, BlinkMacSystemFont, "Segoe UI Variable Display", "Segoe UI", Helvetica, "Apple Color Emoji", "Noto Sans Arabic", "Noto Sans Hebrew", Arial, sans-serif, "Segoe UI Emoji", "Segoe UI Symbol"; }
+.code { font-family: "SFMono-Regular", Menlo, Consolas, "PT Mono", "Liberation Mono", Courier, monospace; }
+.serif { font-family: Lyon-Text, Georgia, ui-serif, serif; }
+.mono { font-family: iawriter-mono, Nitti, Menlo, Courier, monospace; }
+.pdf .sans { font-family: Inter, ui-sans-serif, -apple-system, BlinkMacSystemFont, "Segoe UI Variable Display", "Segoe UI", Helvetica, "Apple Color Emoji", "Noto Sans Arabic", "Noto Sans Hebrew", Arial, sans-serif, "Segoe UI Emoji", "Segoe UI Symbol", 'Twemoji', 'Noto Color Emoji', 'Noto Sans CJK JP'; }
+.pdf:lang(zh-CN) .sans { font-family: Inter, ui-sans-serif, -apple-system, BlinkMacSystemFont, "Segoe UI Variable Display", "Segoe UI", Helvetica, "Apple Color Emoji", "Noto Sans Arabic", "Noto Sans Hebrew", Arial, sans-serif, "Segoe UI Emoji", "Segoe UI Symbol", 'Twemoji', 'Noto Color Emoji', 'Noto Sans CJK SC'; }
+.pdf:lang(zh-TW) .sans { font-family: Inter, ui-sans-serif, -apple-system, BlinkMacSystemFont, "Segoe UI Variable Display", "Segoe UI", Helvetica, "Apple Color Emoji", "Noto Sans Arabic", "Noto Sans Hebrew", Arial, sans-serif, "Segoe UI Emoji", "Segoe UI Symbol", 'Twemoji', 'Noto Color Emoji', 'Noto Sans CJK TC'; }
+.pdf:lang(ko-KR) .sans { font-family: Inter, ui-sans-serif, -apple-system, BlinkMacSystemFont, "Segoe UI Variable Display", "Segoe UI", Helvetica, "Apple Color Emoji", "Noto Sans Arabic", "Noto Sans Hebrew", Arial, sans-serif, "Segoe UI Emoji", "Segoe UI Symbol", 'Twemoji', 'Noto Color Emoji', 'Noto Sans CJK KR'; }
+.pdf .code { font-family: Source Code Pro, "SFMono-Regular", Menlo, Consolas, "PT Mono", "Liberation Mono", Courier, monospace, 'Twemoji', 'Noto Color Emoji', 'Noto Sans Mono CJK JP'; }
+.pdf:lang(zh-CN) .code { font-family: Source Code Pro, "SFMono-Regular", Menlo, Consolas, "PT Mono", "Liberation Mono", Courier, monospace, 'Twemoji', 'Noto Color Emoji', 'Noto Sans Mono CJK SC'; }
+.pdf:lang(zh-TW) .code { font-family: Source Code Pro, "SFMono-Regular", Menlo, Consolas, "PT Mono", "Liberation Mono", Courier, monospace, 'Twemoji', 'Noto Color Emoji', 'Noto Sans Mono CJK TC'; }
+.pdf:lang(ko-KR) .code { font-family: Source Code Pro, "SFMono-Regular", Menlo, Consolas, "PT Mono", "Liberation Mono", Courier, monospace, 'Twemoji', 'Noto Color Emoji', 'Noto Sans Mono CJK KR'; }
+.pdf .serif { font-family: PT Serif, Lyon-Text, Georgia, ui-serif, serif, 'Twemoji', 'Noto Color Emoji', 'Noto Serif CJK JP'; }
+.pdf:lang(zh-CN) .serif { font-family: PT Serif, Lyon-Text, Georgia, ui-serif, serif, 'Twemoji', 'Noto Color Emoji', 'Noto Serif CJK SC'; }
+.pdf:lang(zh-TW) .serif { font-family: PT Serif, Lyon-Text, Georgia, ui-serif, serif, 'Twemoji', 'Noto Color Emoji', 'Noto Serif CJK TC'; }
+.pdf:lang(ko-KR) .serif { font-family: PT Serif, Lyon-Text, Georgia, ui-serif, serif, 'Twemoji', 'Noto Color Emoji', 'Noto Serif CJK KR'; }
+.pdf .mono { font-family: PT Mono, iawriter-mono, Nitti, Menlo, Courier, monospace, 'Twemoji', 'Noto Color Emoji', 'Noto Sans Mono CJK JP'; }
+.pdf:lang(zh-CN) .mono { font-family: PT Mono, iawriter-mono, Nitti, Menlo, Courier, monospace, 'Twemoji', 'Noto Color Emoji', 'Noto Sans Mono CJK SC'; }
+.pdf:lang(zh-TW) .mono { font-family: PT Mono, iawriter-mono, Nitti, Menlo, Courier, monospace, 'Twemoji', 'Noto Color Emoji', 'Noto Sans Mono CJK TC'; }
+.pdf:lang(ko-KR) .mono { font-family: PT Mono, iawriter-mono, Nitti, Menlo, Courier, monospace, 'Twemoji', 'Noto Color Emoji', 'Noto Sans Mono CJK KR'; }
+.highlight-default {
+	color: rgba(44, 44, 43, 1);
+}
+.highlight-gray {
+	color: rgba(125, 122, 117, 1);
+	fill: rgba(125, 122, 117, 1);
+}
+.highlight-brown {
+	color: rgba(159, 118, 90, 1);
+	fill: rgba(159, 118, 90, 1);
+}
+.highlight-orange {
+	color: rgba(210, 123, 45, 1);
+	fill: rgba(210, 123, 45, 1);
+}
+.highlight-yellow {
+	color: rgba(203, 148, 52, 1);
+	fill: rgba(203, 148, 52, 1);
+}
+.highlight-teal {
+	color: rgba(80, 148, 110, 1);
+	fill: rgba(80, 148, 110, 1);
+}
+.highlight-blue {
+	color: rgba(56, 125, 201, 1);
+	fill: rgba(56, 125, 201, 1);
+}
+.highlight-purple {
+	color: rgba(154, 107, 180, 1);
+	fill: rgba(154, 107, 180, 1);
+}
+.highlight-pink {
+	color: rgba(193, 76, 138, 1);
+	fill: rgba(193, 76, 138, 1);
+}
+.highlight-red {
+	color: rgba(207, 81, 72, 1);
+	fill: rgba(207, 81, 72, 1);
+}
+.highlight-default_background {
+	color: rgba(44, 44, 43, 1);
+}
+.highlight-gray_background {
+	background: rgba(42, 28, 0, 0.07);
+}
+.highlight-brown_background {
+	background: rgba(139, 46, 0, 0.086);
+}
+.highlight-orange_background {
+	background: rgba(224, 101, 1, 0.129);
+}
+.highlight-yellow_background {
+	background: rgba(211, 168, 0, 0.137);
+}
+.highlight-teal_background {
+	background: rgba(0, 100, 45, 0.09);
+}
+.highlight-blue_background {
+	background: rgba(0, 124, 215, 0.094);
+}
+.highlight-purple_background {
+	background: rgba(102, 0, 178, 0.078);
+}
+.highlight-pink_background {
+	background: rgba(197, 0, 93, 0.086);
+}
+.highlight-red_background {
+	background: rgba(223, 22, 0, 0.094);
+}
+.block-color-default {
+	color: inherit;
+	fill: inherit;
+}
+.block-color-gray {
+	color: rgba(125, 122, 117, 1);
+	fill: rgba(125, 122, 117, 1);
+}
+.block-color-brown {
+	color: rgba(159, 118, 90, 1);
+	fill: rgba(159, 118, 90, 1);
+}
+.block-color-orange {
+	color: rgba(210, 123, 45, 1);
+	fill: rgba(210, 123, 45, 1);
+}
+.block-color-yellow {
+	color: rgba(203, 148, 52, 1);
+	fill: rgba(203, 148, 52, 1);
+}
+.block-color-teal {
+	color: rgba(80, 148, 110, 1);
+	fill: rgba(80, 148, 110, 1);
+}
+.block-color-blue {
+	color: rgba(56, 125, 201, 1);
+	fill: rgba(56, 125, 201, 1);
+}
+.block-color-purple {
+	color: rgba(154, 107, 180, 1);
+	fill: rgba(154, 107, 180, 1);
+}
+.block-color-pink {
+	color: rgba(193, 76, 138, 1);
+	fill: rgba(193, 76, 138, 1);
+}
+.block-color-red {
+	color: rgba(207, 81, 72, 1);
+	fill: rgba(207, 81, 72, 1);
+}
+.block-color-default_background {
+	color: inherit;
+	fill: inherit;
+}
+.block-color-gray_background {
+	background: rgba(240, 239, 237, 1);
+}
+.block-color-brown_background {
+	background: rgba(245, 237, 233, 1);
+}
+.block-color-orange_background {
+	background: rgba(251, 235, 222, 1);
+}
+.block-color-yellow_background {
+	background: rgba(249, 243, 220, 1);
+}
+.block-color-teal_background {
+	background: rgba(232, 241, 236, 1);
+}
+.block-color-blue_background {
+	background: rgba(229, 242, 252, 1);
+}
+.block-color-purple_background {
+	background: rgba(243, 235, 249, 1);
+}
+.block-color-pink_background {
+	background: rgba(250, 233, 241, 1);
+}
+.block-color-red_background {
+	background: rgba(252, 233, 231, 1);
+}
+.select-value-color-default { background-color: rgba(42, 28, 0, 0.07); }
+.select-value-color-gray { background-color: rgba(28, 19, 1, 0.11); }
+.select-value-color-brown { background-color: rgba(127, 51, 0, 0.156); }
+.select-value-color-orange { background-color: rgba(196, 88, 0, 0.203); }
+.select-value-color-yellow { background-color: rgba(209, 156, 0, 0.282); }
+.select-value-color-green { background-color: rgba(0, 96, 38, 0.156); }
+.select-value-color-blue { background-color: rgba(0, 118, 217, 0.203); }
+.select-value-color-purple { background-color: rgba(92, 0, 163, 0.141); }
+.select-value-color-pink { background-color: rgba(183, 0, 78, 0.152); }
+.select-value-color-red { background-color: rgba(206, 24, 0, 0.164); }
+
+.checkbox {
+	display: inline-flex;
+	vertical-align: text-bottom;
+	width: 16;
+	height: 16;
+	background-size: 16px;
+	margin-left: 2px;
+	margin-right: 5px;
+}
+
+.checkbox-on {
+	background-image: url("data:image/svg+xml;charset=UTF-8,%3Csvg%20width%3D%2216%22%20height%3D%2216%22%20viewBox%3D%220%200%2016%2016%22%20fill%3D%22none%22%20xmlns%3D%22http%3A%2F%2Fwww.w3.org%2F2000%2Fsvg%22%3E%0A%3Crect%20width%3D%2216%22%20height%3D%2216%22%20fill%3D%22%2358A9D7%22%2F%3E%0A%3Cpath%20d%3D%22M6.71429%2012.2852L14%204.9995L12.7143%203.71436L6.71429%209.71378L3.28571%206.2831L2%207.57092L6.71429%2012.2852Z%22%20fill%3D%22white%22%2F%3E%0A%3C%2Fsvg%3E");
+}
+
+.checkbox-off {
+	background-image: url("data:image/svg+xml;charset=UTF-8,%3Csvg%20width%3D%2216%22%20height%3D%2216%22%20viewBox%3D%220%200%2016%2016%22%20fill%3D%22none%22%20xmlns%3D%22http%3A%2F%2Fwww.w3.org%2F2000%2Fsvg%22%3E%0A%3Crect%20x%3D%220.75%22%20y%3D%220.75%22%20width%3D%2214.5%22%20height%3D%2214.5%22%20fill%3D%22white%22%20stroke%3D%22%2336352F%22%20stroke-width%3D%221.5%22%2F%3E%0A%3C%2Fsvg%3E");
+}
+	
+</style></head><body><article id="1e685df0-1907-8150-96e4-f74ced59b8bc" class="page sans"><header><h1 class="page-title" dir="auto"><br/>🧭 <strong>Feature Flag Management Protocol</strong></h1><p class="page-description" dir="auto"></p><table class="properties"><tbody><tr class="property-row property-row-person"><th><span class="icon property-icon"><img src="https://www.notion.so/icons/friends_gray.svg" style="width:14px;height:14px;display:block"/></span>Owner</th><td><span class="user"><span class="icon text-icon user-icon"><span class="user-icon-inner">A</span></span>Aubert</span></td></tr><tr class="property-row property-row-multi_select"><th><span class="icon property-icon"><img src="https://www.notion.so/icons/list_gray.svg" style="width:14px;height:14px;display:block"/></span>Tags</th><td></td></tr></tbody></table></header><div class="page-body"><div style="display:contents" dir="auto"><h3 id="1e685df0-1907-8167-a1b7-fc62af4622a3" class=""><strong>1. Purpose</strong></h3></div><div style="display:contents" dir="auto"><p id="1e685df0-1907-8145-aad1-f150b804b341" class="">This protocol defines how Memora uses <strong>feature flags</strong> to:</p></div><div style="display:contents" dir="auto"><ul id="1e685df0-1907-81aa-97b6-f2a318e79b97" class="bulleted-list"><li style="list-style-type:disc">Deploy new features to controlled user groups (e.g., pilot clinics, caregivers)</li></ul></div><div style="display:contents" dir="auto"><ul id="1e685df0-1907-8141-a22a-f6a307964941" class="bulleted-list"><li style="list-style-type:disc">Isolate <strong>risky or evolving components</strong> like Companion modes, gamification UX, or dashboard exports</li></ul></div><div style="display:contents" dir="auto"><ul id="1e685df0-1907-81e7-97aa-eea2e01bc5e0" class="bulleted-list"><li style="list-style-type:disc">Support <strong>A/B testing</strong>, <strong>regression safety</strong>, and <strong>phased rollout</strong></li></ul></div><div style="display:contents" dir="auto"><ul id="1e685df0-1907-81cb-b9f3-d456d280d882" class="bulleted-list"><li style="list-style-type:disc">Ensure compliance with Law 25, PIPEDA, and accessibility standards by enabling <strong>per-role and per-region control</strong></li></ul></div><div style="display:contents" dir="auto"><hr id="1e685df0-1907-8148-82df-faac257bdb99"/></div><div style="display:contents" dir="auto"><h3 id="1e685df0-1907-81c7-a8d5-c380b54058c1" class=""><strong>2. Feature Flag Types</strong></h3></div><div style="display:contents" dir="ltr"><table id="1e685df0-1907-8173-af77-dcebd77813d3" class="simple-table"><tbody><div style="display:contents" dir="ltr"><tr id="1e685df0-1907-815a-a38e-fab0b028ba36"><td id="PT}&lt;" class="">Type</td><td id="&gt;s;l" class="">Description</td><td id="^nci" class="">Use Case</td></tr></div><div style="display:contents" dir="ltr"><tr id="1e685df0-1907-81e6-8fa2-c80f6896b7c4"><td id="PT}&lt;" class=""><strong>Release Flags</strong></td><td id="&gt;s;l" class="">Hide incomplete features in production</td><td id="^nci" class="">Companion v2 personalization</td></tr></div><div style="display:contents" dir="ltr"><tr id="1e685df0-1907-8151-a6f1-d91833c2f4f1"><td id="PT}&lt;" class=""><strong>Operational Flags</strong></td><td id="&gt;s;l" class="">Control behavior across environments</td><td id="^nci" class="">Enable dashboard sync for pilot only</td></tr></div><div style="display:contents" dir="ltr"><tr id="1e685df0-1907-813c-a234-c02dd32755fd"><td id="PT}&lt;" class=""><strong>Role-Based Flags</strong></td><td id="&gt;s;l" class="">Activate features by user type</td><td id="^nci" class="">Caregiver-only prompt previews</td></tr></div><div style="display:contents" dir="ltr"><tr id="1e685df0-1907-81d0-add0-d99902e8554c"><td id="PT}&lt;" class=""><strong>Region-Based Flags</strong></td><td id="&gt;s;l" class="">Target language or jurisdiction</td><td id="^nci" class="">Quebec-only consent variant</td></tr></div><div style="display:contents" dir="ltr"><tr id="1e685df0-1907-8127-bf13-cdbc4f54f839"><td id="PT}&lt;" class=""><strong>Kill Switches</strong></td><td id="&gt;s;l" class="">Emergency disable toggle</td><td id="^nci" class="">Companion nudge engine pause</td></tr></div><div style="display:contents" dir="ltr"><tr id="1e685df0-1907-81e5-969a-df56c380772a"><td id="PT}&lt;" class=""><strong>Gradual Rollout Flags</strong></td><td id="&gt;s;l" class="">Enable for % of users</td><td id="^nci" class="">Game Set v2 A/B test (Phase 2)</td></tr></div></tbody></table></div><div style="display:contents" dir="auto"><hr id="1e685df0-1907-8187-842a-d9863fdc3e27"/></div><div style="display:contents" dir="auto"><h3 id="1e685df0-1907-81fb-9038-e0bf7fe45985" class=""><strong>3. Flag Infrastructure</strong></h3></div><div style="display:contents" dir="ltr"><table id="1e685df0-1907-8186-89e1-c9c41cf40cb4" class="simple-table"><tbody><div style="display:contents" dir="ltr"><tr id="1e685df0-1907-81f9-a214-d35554a58959"><td id="H{d{" class="">Component</td><td id="ky__" class="">Tool</td></tr></div><div style="display:contents" dir="ltr"><tr id="1e685df0-1907-8145-b1d9-da05f8066fd1"><td id="H{d{" class=""><strong>Feature Flag Service</strong></td><td id="ky__" class="">Supabase Remote Config or LaunchDarkly (planned Phase 2)</td></tr></div><div style="display:contents" dir="ltr"><tr id="1e685df0-1907-817a-a430-c653d7add1a0"><td id="H{d{" class=""><strong>Storage</strong></td><td id="ky__" class="">Encrypted JSON config + backend cache</td></tr></div><div style="display:contents" dir="ltr"><tr id="1e685df0-1907-814d-ab9f-d70ee46e6c19"><td id="H{d{" class=""><strong>Evaluation Layer</strong></td><td id="ky__" class="">Backend API → role-based check before rendering</td></tr></div><div style="display:contents" dir="ltr"><tr id="1e685df0-1907-8112-9b73-f7b7f1c7df71"><td id="H{d{" class=""><strong>Refresh Interval</strong></td><td id="ky__" class="">Cached per session, rechecked on login or dashboard load</td></tr></div><div style="display:contents" dir="ltr"><tr id="1e685df0-1907-81f9-a28c-f839d4e35ada"><td id="H{d{" class=""><strong>Fallback Handling</strong></td><td id="ky__" class="">All flags must include <code>default: false</code> and <code>fail-safe path</code></td></tr></div></tbody></table></div><div style="display:contents" dir="auto"><hr id="1e685df0-1907-81dd-a783-d4fbffe1ba86"/></div><div style="display:contents" dir="auto"><h3 id="1e685df0-1907-8194-9973-ddf07d4968d7" class=""><strong>4. Flag Naming Conventions</strong></h3></div><div style="display:contents" dir="ltr"><table id="1e685df0-1907-814f-8322-e95dcdda8524" class="simple-table"><tbody><div style="display:contents" dir="ltr"><tr id="1e685df0-1907-815d-841d-eae8d2a61163"><td id="d@lI" class="">Format</td><td id="S&lt;Y]" class="">Example</td></tr></div><div style="display:contents" dir="ltr"><tr id="1e685df0-1907-81a2-8aef-cdf31e36ff1e"><td id="d@lI" class=""><code>scope.feature.version</code></td><td id="S&lt;Y]" class=""><code>companion.streak_praise.v1</code></td></tr></div><div style="display:contents" dir="ltr"><tr id="1e685df0-1907-8136-9097-d2bf4ab47547"><td id="d@lI" class=""><code>region.scope.toggle</code></td><td id="S&lt;Y]" class=""><code>qc.consent.notice_v2</code></td></tr></div><div style="display:contents" dir="ltr"><tr id="1e685df0-1907-812c-876a-f2a8535e5673"><td id="d@lI" class=""><code>role.feature.experiment</code></td><td id="S&lt;Y]" class=""><code>caregiver.prompt_reactions.a</code></td></tr></div><div style="display:contents" dir="ltr"><tr id="1e685df0-1907-8148-a410-d6721219a034"><td id="d@lI" class=""><code>infra.emergency.kill</code></td><td id="S&lt;Y]" class=""><code>companion.queue.halt</code></td></tr></div></tbody></table></div><div style="display:contents" dir="auto"><hr id="1e685df0-1907-8133-8bec-c5124476c2d8"/></div><div style="display:contents" dir="auto"><h3 id="1e685df0-1907-813f-96a0-fe99c2475cc1" class=""><strong>5. Roles That Can Use Flags</strong></h3></div><div style="display:contents" dir="ltr"><table id="1e685df0-1907-81aa-9146-fc6492c0b2f5" class="simple-table"><tbody><div style="display:contents" dir="ltr"><tr id="1e685df0-1907-81d3-9049-e0d502223c78"><td id="VER[" class="">User Role</td><td id="NWif" class="">Access</td></tr></div><div style="display:contents" dir="ltr"><tr id="1e685df0-1907-81ed-8fba-d199532b407a"><td id="VER[" class=""><strong>Super Admin (Internal)</strong></td><td id="NWif" class="">Full access to toggle/edit/test</td></tr></div><div style="display:contents" dir="ltr"><tr id="1e685df0-1907-814c-bf9d-e0a9db148e70"><td id="VER[" class=""><strong>Pilot QA (Pre-Prod)</strong></td><td id="NWif" class="">Can view/test gated features</td></tr></div><div style="display:contents" dir="ltr"><tr id="1e685df0-1907-810e-af98-dc7294f7a9b7"><td id="VER[" class=""><strong>Clinic Admin / Caregiver</strong></td><td id="NWif" class="">Can only receive flags scoped to their role</td></tr></div><div style="display:contents" dir="ltr"><tr id="1e685df0-1907-8114-ac33-dd8ae6a98762"><td id="VER[" class=""><strong>Patient</strong></td><td id="NWif" class="">Never sees flag toggle — receives filtered experience only</td></tr></div></tbody></table></div><div style="display:contents" dir="auto"><hr id="1e685df0-1907-81ca-bf74-c893818fa927"/></div><div style="display:contents" dir="auto"><h3 id="1e685df0-1907-81d4-b15e-ce36239e7448" class=""><strong>6. Deployment Protocol</strong></h3></div><div style="display:contents" dir="ltr"><table id="1e685df0-1907-8196-be7e-cf967300a808" class="simple-table"><tbody><div style="display:contents" dir="ltr"><tr id="1e685df0-1907-81cb-9622-de05f4dce193"><td id="?]FT" class="">Stage</td><td id="|mek" class="">Action</td></tr></div><div style="display:contents" dir="ltr"><tr id="1e685df0-1907-8134-bcd7-e6e27795d924"><td id="?]FT" class=""><strong>Dev</strong></td><td id="|mek" class="">Flags tested locally, always set <code>default=false</code></td></tr></div><div style="display:contents" dir="ltr"><tr id="1e685df0-1907-81d6-b7e6-ff18e69f96b1"><td id="?]FT" class=""><strong>Staging</strong></td><td id="|mek" class="">Enabled for test roles (QA, bilingual audit)</td></tr></div><div style="display:contents" dir="ltr"><tr id="1e685df0-1907-81e9-abdf-e0e770fd206f"><td id="?]FT" class=""><strong>Pilot</strong></td><td id="|mek" class="">Gradually enabled for designated clinic IDs</td></tr></div><div style="display:contents" dir="ltr"><tr id="1e685df0-1907-8157-8099-fc3c7a6d4a30"><td id="?]FT" class=""><strong>Production</strong></td><td id="|mek" class="">Requires manual approval, rollback path, and audit log entry</td></tr></div></tbody></table></div><div style="display:contents" dir="auto"><hr id="1e685df0-1907-816b-b94f-c21b44d35fc7"/></div><div style="display:contents" dir="auto"><h3 id="1e685df0-1907-8169-8060-e6fae7b7b7c1" class=""><strong>7. Flag Lifecycle Management</strong></h3></div><div style="display:contents" dir="ltr"><table id="1e685df0-1907-81d7-a57d-dc015cc66c06" class="simple-table"><tbody><div style="display:contents" dir="ltr"><tr id="1e685df0-1907-81bf-8865-ccd4ab6692f6"><td id="etzF" class="">Phase</td><td id="lk[?" class="">Protocol</td></tr></div><div style="display:contents" dir="ltr"><tr id="1e685df0-1907-816f-83c5-ddd9ecf99b95"><td id="etzF" class=""><strong>Create</strong></td><td id="lk[?" class="">Document in Notion + add fallback</td></tr></div><div style="display:contents" dir="ltr"><tr id="1e685df0-1907-81cb-8816-f943fd444f87"><td id="etzF" class=""><strong>Test</strong></td><td id="lk[?" class="">Add QA case with <code>enabled/disabled</code> states</td></tr></div><div style="display:contents" dir="ltr"><tr id="1e685df0-1907-8155-badf-f902395ab0d3"><td id="etzF" class=""><strong>Rollout</strong></td><td id="lk[?" class="">Announce in changelog, update dashboard if applicable</td></tr></div><div style="display:contents" dir="ltr"><tr id="1e685df0-1907-81d8-bb9d-c7fb5303b7ff"><td id="etzF" class=""><strong>Monitor</strong></td><td id="lk[?" class="">Flag metrics logged if applicable (Phase 2 SDK)</td></tr></div><div style="display:contents" dir="ltr"><tr id="1e685df0-1907-8174-9ce8-fbe77fc575f1"><td id="etzF" class=""><strong>Retire</strong></td><td id="lk[?" class="">Remove flag from code within 1 release cycle of finalization</td></tr></div></tbody></table></div><div style="display:contents" dir="auto"><hr id="1e685df0-1907-8168-aebe-deafdb5f6dfe"/></div><div style="display:contents" dir="auto"><h3 id="1e685df0-1907-8193-8878-e9fedd1ddbc6" class=""><strong>8. Sample Feature Flags (Live or Planned)</strong></h3></div><div style="display:contents" dir="ltr"><table id="1e685df0-1907-815c-83dc-f52ffb2f83b7" class="simple-table"><tbody><div style="display:contents" dir="ltr"><tr id="1e685df0-1907-8134-afba-fafe33df5df0"><td id="Y@GM" class="">Flag</td><td id="{~~w" class="">Type</td><td id="m^&lt;h" class="">Status</td></tr></div><div style="display:contents" dir="ltr"><tr id="1e685df0-1907-8106-8526-e2abd87ae4a3"><td id="Y@GM" class=""><code>companion.streak_praise.v1</code></td><td id="{~~w" class="">Release</td><td id="m^&lt;h" class="">✅ Live (pilot only)</td></tr></div><div style="display:contents" dir="ltr"><tr id="1e685df0-1907-8196-a17a-e056bc09468c"><td id="Y@GM" class=""><code>dashboard.export_toggle.v1</code></td><td id="{~~w" class="">Role-Based</td><td id="m^&lt;h" class="">✅ Staging</td></tr></div><div style="display:contents" dir="ltr"><tr id="1e685df0-1907-8189-aa3a-f23ee1c656e5"><td id="Y@GM" class=""><code>qc.consent.notice_v2</code></td><td id="{~~w" class="">Region-Based</td><td id="m^&lt;h" class="">✅ Live</td></tr></div><div style="display:contents" dir="ltr"><tr id="1e685df0-1907-81ac-ad8a-c987f4bcc0ab"><td id="Y@GM" class=""><code>companion.memory_ref.v2</code></td><td id="{~~w" class="">Release</td><td id="m^&lt;h" class="">⏳ Phase 2</td></tr></div><div style="display:contents" dir="ltr"><tr id="1e685df0-1907-8111-92e5-c43fd80a6e9f"><td id="Y@GM" class=""><code>caregiver.prompt_reactions.a</code></td><td id="{~~w" class="">Experiment</td><td id="m^&lt;h" class="">⏳ Phase 2</td></tr></div><div style="display:contents" dir="ltr"><tr id="1e685df0-1907-8176-873a-fadf6c6dcc47"><td id="Y@GM" class=""><code>infra.companion_engine.halt</code></td><td id="{~~w" class="">Kill Switch</td><td id="m^&lt;h" class="">✅ Defined</td></tr></div></tbody></table></div><div style="display:contents" dir="auto"><hr id="1e685df0-1907-81fb-b76c-dba0640e95dc"/></div><div style="display:contents" dir="auto"><h3 id="1e685df0-1907-81d0-a61e-c35b62c64e79" class=""><strong>9. Monitoring &amp; Logging</strong></h3></div><div style="display:contents" dir="ltr"><table id="1e685df0-1907-8175-84e5-e62c8a6115ae" class="simple-table"><tbody><div style="display:contents" dir="ltr"><tr id="1e685df0-1907-8111-9e34-e6229e418d40"><td id="[z&gt;r" class="">Log Type</td><td id="zVLk" class="">Fields Captured</td></tr></div><div style="display:contents" dir="ltr"><tr id="1e685df0-1907-81c8-9b0d-df2fed6230ca"><td id="[z&gt;r" class="">Flag evaluation</td><td id="zVLk" class=""><code>flag_name</code>, <code>user_id</code>, <code>role</code>, <code>env</code>, <code>value</code></td></tr></div><div style="display:contents" dir="ltr"><tr id="1e685df0-1907-81d4-824b-fc9ad36439e6"><td id="[z&gt;r" class="">Flag override</td><td id="zVLk" class="">Admin ID, timestamp, previous + new state</td></tr></div><div style="display:contents" dir="ltr"><tr id="1e685df0-1907-81eb-a008-f71b96f5cfb3"><td id="[z&gt;r" class="">Emergency toggle</td><td id="zVLk" class="">Justification, rollback plan, email to compliance</td></tr></div><div style="display:contents" dir="ltr"><tr id="1e685df0-1907-81c6-b73e-ca2b14cd8c50"><td id="[z&gt;r" class="">A/B path (Phase 2)</td><td id="zVLk" class="">Experiment group, outcome ID, companion state</td></tr></div></tbody></table></div><div style="display:contents" dir="auto"><hr id="1e685df0-1907-8156-b8f8-f6a5a562815a"/></div><div style="display:contents" dir="auto"><h3 id="1e685df0-1907-8148-94ec-c5a562848019" class=""><strong>10. Governance &amp; Compliance</strong></h3></div><div style="display:contents" dir="ltr"><table id="1e685df0-1907-8134-b9bc-f80a10c72cb3" class="simple-table"><tbody><div style="display:contents" dir="ltr"><tr id="1e685df0-1907-816c-ad3d-e69732b9c5d7"><td id="RY:H" class="">Requirement</td><td id="ah=k" class="">Enforcement</td></tr></div><div style="display:contents" dir="ltr"><tr id="1e685df0-1907-8192-bf92-c4bb24f861a8"><td id="RY:H" class="">Law 25 alignment</td><td id="ah=k" class="">Consent flags gated by jurisdiction</td></tr></div><div style="display:contents" dir="ltr"><tr id="1e685df0-1907-8105-a8d2-dd03c832c6ca"><td id="RY:H" class="">Accessibility control</td><td id="ah=k" class="">Animation, narration flags are scoped to preference &amp; region</td></tr></div><div style="display:contents" dir="ltr"><tr id="1e685df0-1907-8198-9d1a-ca401e322d5b"><td id="RY:H" class="">Audit trail</td><td id="ah=k" class="">Flag changes logged in system + Notion</td></tr></div><div style="display:contents" dir="ltr"><tr id="1e685df0-1907-8116-b81e-f2b46f790267"><td id="RY:H" class="">Pilot role separation</td><td id="ah=k" class="">Only pre-approved roles receive beta flags</td></tr></div><div style="display:contents" dir="ltr"><tr id="1e685df0-1907-810f-908e-d75ecc9e6e53"><td id="RY:H" class="">Security</td><td id="ah=k" class="">No flag data embedded in mobile bundle; evaluated via secure API only</td></tr></div></tbody></table></div><div style="display:contents" dir="auto"><hr id="1e685df0-1907-81eb-a660-c227f064d0b7"/></div><div style="display:contents" dir="auto"><h3 id="1e685df0-1907-8163-8c02-f31ec69f7ab2" class=""><strong>11. Linked Documentation</strong></h3></div><div style="display:contents" dir="auto"><ul id="1e685df0-1907-8123-a998-f5313d24627d" class="bulleted-list"><li style="list-style-type:disc">🧪 <a href="%F0%9F%A7%AD%20Feature%20Flag%20Management%20Protocol%201e685df01907815096e4f74ced59b8bc.html">Testing &amp; QA Strategy</a></li></ul></div><div style="display:contents" dir="auto"><ul id="1e685df0-1907-816b-bbfb-eec5902b7576" class="bulleted-list"><li style="list-style-type:disc">🧠 <a href="%F0%9F%A7%AD%20Feature%20Flag%20Management%20Protocol%201e685df01907815096e4f74ced59b8bc.html">Companion Logic Engine Spec</a></li></ul></div><div style="display:contents" dir="auto"><ul id="1e685df0-1907-8174-be38-fb5c5cce69ec" class="bulleted-list"><li style="list-style-type:disc">🔐 <a href="%F0%9F%A7%AD%20Feature%20Flag%20Management%20Protocol%201e685df01907815096e4f74ced59b8bc.html">Auth &amp; Permissions Model</a></li></ul></div><div style="display:contents" dir="auto"><ul id="1e685df0-1907-81ae-a11b-c6d1b7b64433" class="bulleted-list"><li style="list-style-type:disc">🛠️ [Monitoring &amp; Incident Response Plan]</li></ul></div><div style="display:contents" dir="auto"><ul id="1e685df0-1907-81ee-9f4b-cbdbd722713c" class="bulleted-list"><li style="list-style-type:disc">📊 [Clinic Dashboard Pipeline Spec]</li></ul></div><div style="display:contents" dir="auto"><ul id="1e685df0-1907-8164-a9cb-d41bfbe9175b" class="bulleted-list"><li style="list-style-type:disc">♿ [Accessibility Implementation Guide]</li></ul></div><div style="display:contents" dir="auto"><ul id="1e685df0-1907-81bc-b8e0-dab23e12d652" class="bulleted-list"><li style="list-style-type:disc">🔌 [Developer SDK / API Reference]</li></ul></div></div></article><span class="sans" style="font-size:14px;padding-top:2em"></span></body></html>

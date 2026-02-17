@@ -1,0 +1,739 @@
+<html><head><meta http-equiv="Content-Type" content="text/html; charset=utf-8"/><title>
+🧩 Privacy-Respecting Inference Architecture</title><style>
+/* cspell:disable-file */
+/* webkit printing magic: print all background colors */
+html {
+	-webkit-print-color-adjust: exact;
+}
+* {
+	box-sizing: border-box;
+	-webkit-print-color-adjust: exact;
+}
+
+html,
+body {
+	margin: 0;
+	padding: 0;
+}
+@media only screen {
+	body {
+		margin: 2em auto;
+		max-width: 900px;
+		color: rgb(55, 53, 47);
+	}
+}
+
+body {
+	line-height: 1.5;
+	white-space: pre-wrap;
+}
+
+a,
+a.visited {
+	color: inherit;
+	text-decoration: underline;
+}
+
+.pdf-relative-link-path {
+	font-size: 80%;
+	color: #444;
+}
+
+h1,
+h2,
+h3 {
+	letter-spacing: -0.01em;
+	line-height: 1.2;
+	font-weight: 600;
+	margin-bottom: 0;
+}
+
+/* Override strong tags inside headings to maintain consistent weight */
+h1 strong,
+h2 strong,
+h3 strong {
+	font-weight: 600;
+}
+
+.page-title {
+	font-size: 2.5rem;
+	font-weight: 700;
+	margin-top: 0;
+	margin-bottom: 0.75em;
+}
+
+h1 {
+	font-size: 1.875rem;
+	margin-top: 1.875rem;
+}
+
+h2 {
+	font-size: 1.5rem;
+	margin-top: 1.5rem;
+}
+
+h3 {
+	font-size: 1.25rem;
+	margin-top: 1.25rem;
+}
+
+.source {
+	border: 1px solid #ddd;
+	border-radius: 3px;
+	padding: 1.5em;
+	word-break: break-all;
+}
+
+.callout {
+	border-radius: 10px;
+	padding: 1rem;
+}
+
+figure {
+	margin: 1.25em 0;
+	page-break-inside: avoid;
+}
+
+figcaption {
+	opacity: 0.5;
+	font-size: 85%;
+	margin-top: 0.5em;
+}
+
+mark {
+	background-color: transparent;
+}
+
+.indented {
+	padding-left: 1.5em;
+}
+
+hr {
+	background: transparent;
+	display: block;
+	width: 100%;
+	height: 1px;
+	visibility: visible;
+	border: none;
+	border-bottom: 1px solid rgba(55, 53, 47, 0.09);
+}
+
+img {
+	max-width: 100%;
+}
+
+@media only print {
+	img {
+		max-height: 100vh;
+		object-fit: contain;
+	}
+}
+
+@page {
+	margin: 1in;
+}
+
+.collection-content {
+	font-size: 0.875rem;
+}
+
+.collection-content td {
+	white-space: pre-wrap;
+	word-break: break-word;
+}
+
+.column-list {
+	display: flex;
+	justify-content: space-between;
+}
+
+.column {
+	padding: 0 1em;
+}
+
+.column:first-child {
+	padding-left: 0;
+}
+
+.column:last-child {
+	padding-right: 0;
+}
+
+.table_of_contents-item {
+	display: block;
+	font-size: 0.875rem;
+	line-height: 1.3;
+	padding: 0.125rem;
+}
+
+.table_of_contents-indent-1 {
+	margin-left: 1.5rem;
+}
+
+.table_of_contents-indent-2 {
+	margin-left: 3rem;
+}
+
+.table_of_contents-indent-3 {
+	margin-left: 4.5rem;
+}
+
+.table_of_contents-link {
+	text-decoration: none;
+	opacity: 0.7;
+	border-bottom: 1px solid rgba(55, 53, 47, 0.18);
+}
+
+table,
+th,
+td {
+	border: 1px solid rgba(55, 53, 47, 0.09);
+	border-collapse: collapse;
+}
+
+table {
+	border-left: none;
+	border-right: none;
+}
+
+th,
+td {
+	font-weight: normal;
+	padding: 0.25em 0.5em;
+	line-height: 1.5;
+	min-height: 1.5em;
+	text-align: left;
+}
+
+th {
+	color: rgba(55, 53, 47, 0.6);
+}
+
+ol,
+ul {
+	margin: 0;
+	margin-block-start: 0.6em;
+	margin-block-end: 0.6em;
+}
+
+li > ol:first-child,
+li > ul:first-child {
+	margin-block-start: 0.6em;
+}
+
+ul > li {
+	list-style: disc;
+}
+
+ul.to-do-list {
+	padding-inline-start: 0;
+}
+
+ul.to-do-list > li {
+	list-style: none;
+}
+
+.to-do-children-checked {
+	text-decoration: line-through;
+	opacity: 0.375;
+}
+
+ul.toggle > li {
+	list-style: none;
+}
+
+ul {
+	padding-inline-start: 1.7em;
+}
+
+ul > li {
+	padding-left: 0.1em;
+}
+
+ol {
+	padding-inline-start: 1.6em;
+}
+
+ol > li {
+	padding-left: 0.2em;
+}
+
+.mono ol {
+	padding-inline-start: 2em;
+}
+
+.mono ol > li {
+	text-indent: -0.4em;
+}
+
+.toggle {
+	padding-inline-start: 0em;
+	list-style-type: none;
+}
+
+/* Indent toggle children */
+.toggle > li > details {
+	padding-left: 1.7em;
+}
+
+.toggle > li > details > summary {
+	margin-left: -1.1em;
+}
+
+.selected-value {
+	display: inline-block;
+	padding: 0 0.5em;
+	background: rgba(206, 205, 202, 0.5);
+	border-radius: 3px;
+	margin-right: 0.5em;
+	margin-top: 0.3em;
+	margin-bottom: 0.3em;
+	white-space: nowrap;
+}
+
+.collection-title {
+	display: inline-block;
+	margin-right: 1em;
+}
+
+.page-description {
+	margin-bottom: 2em;
+}
+
+.simple-table {
+	margin-top: 1em;
+	font-size: 0.875rem;
+	empty-cells: show;
+}
+.simple-table td {
+	height: 29px;
+	min-width: 120px;
+}
+
+.simple-table th {
+	height: 29px;
+	min-width: 120px;
+}
+
+.simple-table-header-color {
+	background: rgb(247, 246, 243);
+	color: black;
+}
+.simple-table-header {
+	font-weight: 500;
+}
+
+time {
+	opacity: 0.5;
+}
+
+.icon {
+	display: inline-flex;
+	align-items: center;
+	justify-content: center;
+	max-width: 1.2em;
+	max-height: 1.2em;
+	text-decoration: none;
+	vertical-align: text-bottom;
+	margin-right: 0.5em;
+}
+
+img.icon {
+	border-radius: 3px;
+}
+
+.callout img.notion-static-icon {
+	width: 1em;
+	height: 1em;
+}
+
+.callout p {
+	margin: 0;
+}
+
+.callout h1,
+.callout h2,
+.callout h3 {
+	margin: 0 0 0.6rem;
+}
+
+.user-icon {
+	width: 1.5em;
+	height: 1.5em;
+	border-radius: 100%;
+	margin-right: 0.5rem;
+}
+
+.user-icon-inner {
+	font-size: 0.8em;
+}
+
+.text-icon {
+	border: 1px solid #000;
+	text-align: center;
+}
+
+.page-cover-image {
+	display: block;
+	object-fit: cover;
+	width: 100%;
+	max-height: 30vh;
+}
+
+.page-header-icon {
+	font-size: 3rem;
+	margin-bottom: 1rem;
+}
+
+.page-header-icon-with-cover {
+	margin-top: -0.72em;
+	margin-left: 0.07em;
+}
+
+.page-header-icon img {
+	border-radius: 3px;
+}
+
+.link-to-page {
+	margin: 1em 0;
+	padding: 0;
+	border: none;
+	font-weight: 500;
+}
+
+p > .user {
+	opacity: 0.5;
+}
+
+td > .user,
+td > time {
+	white-space: nowrap;
+}
+
+input[type="checkbox"] {
+	transform: scale(1.5);
+	margin-right: 0.6em;
+	vertical-align: middle;
+}
+
+p {
+	margin-top: 0.5em;
+	margin-bottom: 0.5em;
+}
+
+.image {
+	border: none;
+	margin: 1.5em 0;
+	padding: 0;
+	border-radius: 0;
+	text-align: center;
+}
+
+.code,
+code {
+	background: rgba(135, 131, 120, 0.15);
+	border-radius: 3px;
+	padding: 0.2em 0.4em;
+	border-radius: 3px;
+	font-size: 85%;
+	tab-size: 2;
+}
+
+code {
+	color: #eb5757;
+}
+
+.code {
+	padding: 1.5em 1em;
+}
+
+.code-wrap {
+	white-space: pre-wrap;
+	word-break: break-all;
+}
+
+.code > code {
+	background: none;
+	padding: 0;
+	font-size: 100%;
+	color: inherit;
+}
+
+blockquote {
+	font-size: 1em;
+	margin: 1em 0;
+	padding-left: 1em;
+	border-left: 3px solid rgb(55, 53, 47);
+}
+
+blockquote.quote-large {
+	font-size: 1.25em;
+}
+
+.bookmark {
+	text-decoration: none;
+	max-height: 8em;
+	padding: 0;
+	display: flex;
+	width: 100%;
+	align-items: stretch;
+}
+
+.bookmark-title {
+	font-size: 0.85em;
+	overflow: hidden;
+	text-overflow: ellipsis;
+	height: 1.75em;
+	white-space: nowrap;
+}
+
+.bookmark-text {
+	display: flex;
+	flex-direction: column;
+}
+
+.bookmark-info {
+	flex: 4 1 180px;
+	padding: 12px 14px 14px;
+	display: flex;
+	flex-direction: column;
+	justify-content: space-between;
+}
+
+.bookmark-image {
+	width: 33%;
+	flex: 1 1 180px;
+	display: block;
+	position: relative;
+	object-fit: cover;
+	border-radius: 1px;
+}
+
+.bookmark-description {
+	color: rgba(55, 53, 47, 0.6);
+	font-size: 0.75em;
+	overflow: hidden;
+	max-height: 4.5em;
+	word-break: break-word;
+}
+
+.bookmark-href {
+	font-size: 0.75em;
+	margin-top: 0.25em;
+}
+
+.sans { font-family: ui-sans-serif, -apple-system, BlinkMacSystemFont, "Segoe UI Variable Display", "Segoe UI", Helvetica, "Apple Color Emoji", "Noto Sans Arabic", "Noto Sans Hebrew", Arial, sans-serif, "Segoe UI Emoji", "Segoe UI Symbol"; }
+.code { font-family: "SFMono-Regular", Menlo, Consolas, "PT Mono", "Liberation Mono", Courier, monospace; }
+.serif { font-family: Lyon-Text, Georgia, ui-serif, serif; }
+.mono { font-family: iawriter-mono, Nitti, Menlo, Courier, monospace; }
+.pdf .sans { font-family: Inter, ui-sans-serif, -apple-system, BlinkMacSystemFont, "Segoe UI Variable Display", "Segoe UI", Helvetica, "Apple Color Emoji", "Noto Sans Arabic", "Noto Sans Hebrew", Arial, sans-serif, "Segoe UI Emoji", "Segoe UI Symbol", 'Twemoji', 'Noto Color Emoji', 'Noto Sans CJK JP'; }
+.pdf:lang(zh-CN) .sans { font-family: Inter, ui-sans-serif, -apple-system, BlinkMacSystemFont, "Segoe UI Variable Display", "Segoe UI", Helvetica, "Apple Color Emoji", "Noto Sans Arabic", "Noto Sans Hebrew", Arial, sans-serif, "Segoe UI Emoji", "Segoe UI Symbol", 'Twemoji', 'Noto Color Emoji', 'Noto Sans CJK SC'; }
+.pdf:lang(zh-TW) .sans { font-family: Inter, ui-sans-serif, -apple-system, BlinkMacSystemFont, "Segoe UI Variable Display", "Segoe UI", Helvetica, "Apple Color Emoji", "Noto Sans Arabic", "Noto Sans Hebrew", Arial, sans-serif, "Segoe UI Emoji", "Segoe UI Symbol", 'Twemoji', 'Noto Color Emoji', 'Noto Sans CJK TC'; }
+.pdf:lang(ko-KR) .sans { font-family: Inter, ui-sans-serif, -apple-system, BlinkMacSystemFont, "Segoe UI Variable Display", "Segoe UI", Helvetica, "Apple Color Emoji", "Noto Sans Arabic", "Noto Sans Hebrew", Arial, sans-serif, "Segoe UI Emoji", "Segoe UI Symbol", 'Twemoji', 'Noto Color Emoji', 'Noto Sans CJK KR'; }
+.pdf .code { font-family: Source Code Pro, "SFMono-Regular", Menlo, Consolas, "PT Mono", "Liberation Mono", Courier, monospace, 'Twemoji', 'Noto Color Emoji', 'Noto Sans Mono CJK JP'; }
+.pdf:lang(zh-CN) .code { font-family: Source Code Pro, "SFMono-Regular", Menlo, Consolas, "PT Mono", "Liberation Mono", Courier, monospace, 'Twemoji', 'Noto Color Emoji', 'Noto Sans Mono CJK SC'; }
+.pdf:lang(zh-TW) .code { font-family: Source Code Pro, "SFMono-Regular", Menlo, Consolas, "PT Mono", "Liberation Mono", Courier, monospace, 'Twemoji', 'Noto Color Emoji', 'Noto Sans Mono CJK TC'; }
+.pdf:lang(ko-KR) .code { font-family: Source Code Pro, "SFMono-Regular", Menlo, Consolas, "PT Mono", "Liberation Mono", Courier, monospace, 'Twemoji', 'Noto Color Emoji', 'Noto Sans Mono CJK KR'; }
+.pdf .serif { font-family: PT Serif, Lyon-Text, Georgia, ui-serif, serif, 'Twemoji', 'Noto Color Emoji', 'Noto Serif CJK JP'; }
+.pdf:lang(zh-CN) .serif { font-family: PT Serif, Lyon-Text, Georgia, ui-serif, serif, 'Twemoji', 'Noto Color Emoji', 'Noto Serif CJK SC'; }
+.pdf:lang(zh-TW) .serif { font-family: PT Serif, Lyon-Text, Georgia, ui-serif, serif, 'Twemoji', 'Noto Color Emoji', 'Noto Serif CJK TC'; }
+.pdf:lang(ko-KR) .serif { font-family: PT Serif, Lyon-Text, Georgia, ui-serif, serif, 'Twemoji', 'Noto Color Emoji', 'Noto Serif CJK KR'; }
+.pdf .mono { font-family: PT Mono, iawriter-mono, Nitti, Menlo, Courier, monospace, 'Twemoji', 'Noto Color Emoji', 'Noto Sans Mono CJK JP'; }
+.pdf:lang(zh-CN) .mono { font-family: PT Mono, iawriter-mono, Nitti, Menlo, Courier, monospace, 'Twemoji', 'Noto Color Emoji', 'Noto Sans Mono CJK SC'; }
+.pdf:lang(zh-TW) .mono { font-family: PT Mono, iawriter-mono, Nitti, Menlo, Courier, monospace, 'Twemoji', 'Noto Color Emoji', 'Noto Sans Mono CJK TC'; }
+.pdf:lang(ko-KR) .mono { font-family: PT Mono, iawriter-mono, Nitti, Menlo, Courier, monospace, 'Twemoji', 'Noto Color Emoji', 'Noto Sans Mono CJK KR'; }
+.highlight-default {
+	color: rgba(44, 44, 43, 1);
+}
+.highlight-gray {
+	color: rgba(125, 122, 117, 1);
+	fill: rgba(125, 122, 117, 1);
+}
+.highlight-brown {
+	color: rgba(159, 118, 90, 1);
+	fill: rgba(159, 118, 90, 1);
+}
+.highlight-orange {
+	color: rgba(210, 123, 45, 1);
+	fill: rgba(210, 123, 45, 1);
+}
+.highlight-yellow {
+	color: rgba(203, 148, 52, 1);
+	fill: rgba(203, 148, 52, 1);
+}
+.highlight-teal {
+	color: rgba(80, 148, 110, 1);
+	fill: rgba(80, 148, 110, 1);
+}
+.highlight-blue {
+	color: rgba(56, 125, 201, 1);
+	fill: rgba(56, 125, 201, 1);
+}
+.highlight-purple {
+	color: rgba(154, 107, 180, 1);
+	fill: rgba(154, 107, 180, 1);
+}
+.highlight-pink {
+	color: rgba(193, 76, 138, 1);
+	fill: rgba(193, 76, 138, 1);
+}
+.highlight-red {
+	color: rgba(207, 81, 72, 1);
+	fill: rgba(207, 81, 72, 1);
+}
+.highlight-default_background {
+	color: rgba(44, 44, 43, 1);
+}
+.highlight-gray_background {
+	background: rgba(42, 28, 0, 0.07);
+}
+.highlight-brown_background {
+	background: rgba(139, 46, 0, 0.086);
+}
+.highlight-orange_background {
+	background: rgba(224, 101, 1, 0.129);
+}
+.highlight-yellow_background {
+	background: rgba(211, 168, 0, 0.137);
+}
+.highlight-teal_background {
+	background: rgba(0, 100, 45, 0.09);
+}
+.highlight-blue_background {
+	background: rgba(0, 124, 215, 0.094);
+}
+.highlight-purple_background {
+	background: rgba(102, 0, 178, 0.078);
+}
+.highlight-pink_background {
+	background: rgba(197, 0, 93, 0.086);
+}
+.highlight-red_background {
+	background: rgba(223, 22, 0, 0.094);
+}
+.block-color-default {
+	color: inherit;
+	fill: inherit;
+}
+.block-color-gray {
+	color: rgba(125, 122, 117, 1);
+	fill: rgba(125, 122, 117, 1);
+}
+.block-color-brown {
+	color: rgba(159, 118, 90, 1);
+	fill: rgba(159, 118, 90, 1);
+}
+.block-color-orange {
+	color: rgba(210, 123, 45, 1);
+	fill: rgba(210, 123, 45, 1);
+}
+.block-color-yellow {
+	color: rgba(203, 148, 52, 1);
+	fill: rgba(203, 148, 52, 1);
+}
+.block-color-teal {
+	color: rgba(80, 148, 110, 1);
+	fill: rgba(80, 148, 110, 1);
+}
+.block-color-blue {
+	color: rgba(56, 125, 201, 1);
+	fill: rgba(56, 125, 201, 1);
+}
+.block-color-purple {
+	color: rgba(154, 107, 180, 1);
+	fill: rgba(154, 107, 180, 1);
+}
+.block-color-pink {
+	color: rgba(193, 76, 138, 1);
+	fill: rgba(193, 76, 138, 1);
+}
+.block-color-red {
+	color: rgba(207, 81, 72, 1);
+	fill: rgba(207, 81, 72, 1);
+}
+.block-color-default_background {
+	color: inherit;
+	fill: inherit;
+}
+.block-color-gray_background {
+	background: rgba(240, 239, 237, 1);
+}
+.block-color-brown_background {
+	background: rgba(245, 237, 233, 1);
+}
+.block-color-orange_background {
+	background: rgba(251, 235, 222, 1);
+}
+.block-color-yellow_background {
+	background: rgba(249, 243, 220, 1);
+}
+.block-color-teal_background {
+	background: rgba(232, 241, 236, 1);
+}
+.block-color-blue_background {
+	background: rgba(229, 242, 252, 1);
+}
+.block-color-purple_background {
+	background: rgba(243, 235, 249, 1);
+}
+.block-color-pink_background {
+	background: rgba(250, 233, 241, 1);
+}
+.block-color-red_background {
+	background: rgba(252, 233, 231, 1);
+}
+.select-value-color-default { background-color: rgba(42, 28, 0, 0.07); }
+.select-value-color-gray { background-color: rgba(28, 19, 1, 0.11); }
+.select-value-color-brown { background-color: rgba(127, 51, 0, 0.156); }
+.select-value-color-orange { background-color: rgba(196, 88, 0, 0.203); }
+.select-value-color-yellow { background-color: rgba(209, 156, 0, 0.282); }
+.select-value-color-green { background-color: rgba(0, 96, 38, 0.156); }
+.select-value-color-blue { background-color: rgba(0, 118, 217, 0.203); }
+.select-value-color-purple { background-color: rgba(92, 0, 163, 0.141); }
+.select-value-color-pink { background-color: rgba(183, 0, 78, 0.152); }
+.select-value-color-red { background-color: rgba(206, 24, 0, 0.164); }
+
+.checkbox {
+	display: inline-flex;
+	vertical-align: text-bottom;
+	width: 16;
+	height: 16;
+	background-size: 16px;
+	margin-left: 2px;
+	margin-right: 5px;
+}
+
+.checkbox-on {
+	background-image: url("data:image/svg+xml;charset=UTF-8,%3Csvg%20width%3D%2216%22%20height%3D%2216%22%20viewBox%3D%220%200%2016%2016%22%20fill%3D%22none%22%20xmlns%3D%22http%3A%2F%2Fwww.w3.org%2F2000%2Fsvg%22%3E%0A%3Crect%20width%3D%2216%22%20height%3D%2216%22%20fill%3D%22%2358A9D7%22%2F%3E%0A%3Cpath%20d%3D%22M6.71429%2012.2852L14%204.9995L12.7143%203.71436L6.71429%209.71378L3.28571%206.2831L2%207.57092L6.71429%2012.2852Z%22%20fill%3D%22white%22%2F%3E%0A%3C%2Fsvg%3E");
+}
+
+.checkbox-off {
+	background-image: url("data:image/svg+xml;charset=UTF-8,%3Csvg%20width%3D%2216%22%20height%3D%2216%22%20viewBox%3D%220%200%2016%2016%22%20fill%3D%22none%22%20xmlns%3D%22http%3A%2F%2Fwww.w3.org%2F2000%2Fsvg%22%3E%0A%3Crect%20x%3D%220.75%22%20y%3D%220.75%22%20width%3D%2214.5%22%20height%3D%2214.5%22%20fill%3D%22white%22%20stroke%3D%22%2336352F%22%20stroke-width%3D%221.5%22%2F%3E%0A%3C%2Fsvg%3E");
+}
+	
+</style></head><body><article id="1e885df0-1907-8124-bb6a-cc5e8a818df2" class="page sans"><header><h1 class="page-title" dir="auto"><br/>🧩 <strong>Privacy-Respecting Inference Architecture</strong></h1><p class="page-description" dir="auto"></p><table class="properties"><tbody><tr class="property-row property-row-person"><th><span class="icon property-icon"><img src="https://www.notion.so/icons/friends_gray.svg" style="width:14px;height:14px;display:block"/></span>Owner</th><td><span class="user"><span class="icon text-icon user-icon"><span class="user-icon-inner">A</span></span>Aubert</span></td></tr><tr class="property-row property-row-multi_select"><th><span class="icon property-icon"><img src="https://www.notion.so/icons/list_gray.svg" style="width:14px;height:14px;display:block"/></span>Tags</th><td></td></tr></tbody></table></header><div class="page-body"><div style="display:contents" dir="auto"><h3 id="1e885df0-1907-81ce-8375-cf398dd6065f" class=""><strong>1. Purpose</strong></h3></div><div style="display:contents" dir="auto"><p id="1e885df0-1907-811c-835c-c40855c3d134" class="">This architecture ensures that any AI- or ML-based inference (e.g., Companion tone adaptation, gameplay pacing, engagement risk scoring):</p></div><div style="display:contents" dir="auto"><ul id="1e885df0-1907-81d2-a295-ca7e0228f372" class="bulleted-list"><li style="list-style-type:disc">Operates within a <strong>clearly defined privacy boundary</strong></li></ul></div><div style="display:contents" dir="auto"><ul id="1e885df0-1907-81a3-ab21-cc112cec49bb" class="bulleted-list"><li style="list-style-type:disc"><strong>Never exposes identifiable data</strong> to model layers or third-party systems</li></ul></div><div style="display:contents" dir="auto"><ul id="1e885df0-1907-81ec-90fa-f307f856fd7c" class="bulleted-list"><li style="list-style-type:disc">Runs under strict <strong>consent, explainability, and fallback controls</strong></li></ul></div><div style="display:contents" dir="auto"><ul id="1e885df0-1907-81ea-ae89-e67f1cc56a02" class="bulleted-list"><li style="list-style-type:disc">Supports <strong>future learning loops</strong> without compromising user autonomy</li></ul></div><div style="display:contents" dir="auto"><hr id="1e885df0-1907-81b6-8fa4-e646d3884b8a"/></div><div style="display:contents" dir="auto"><h3 id="1e885df0-1907-8189-bdc5-d78d213f4ac0" class=""><strong>2. Inference Principles</strong></h3></div><div style="display:contents" dir="ltr"><table id="1e885df0-1907-81ea-a82e-fc2872e90660" class="simple-table"><tbody><div style="display:contents" dir="ltr"><tr id="1e885df0-1907-81c1-aa2a-d1445cc74e47"><td id="p:w[" class="">Principle</td><td id="{V:P" class="" style="width:490px">Enforcement</td></tr></div><div style="display:contents" dir="ltr"><tr id="1e885df0-1907-81b2-8222-d9bf994e41da"><td id="p:w[" class=""><strong>Anonymized Signals Only</strong></td><td id="{V:P" class="" style="width:490px">No personal identifiers or freeform inputs ever reach ML inference functions</td></tr></div><div style="display:contents" dir="ltr"><tr id="1e885df0-1907-8158-954f-f407fc80200a"><td id="p:w[" class=""><strong>On-Device or Isolated Processing</strong></td><td id="{V:P" class="" style="width:490px">Local or containerized logic where possible, never shared context across users</td></tr></div><div style="display:contents" dir="ltr"><tr id="1e885df0-1907-8113-8dbd-edd4567ae929"><td id="p:w[" class=""><strong>Consent-Bound Activation</strong></td><td id="{V:P" class="" style="width:490px">Only perform inference if user has explicitly opted into adaptive behavior</td></tr></div><div style="display:contents" dir="ltr"><tr id="1e885df0-1907-817c-b289-cb7e27650f1f"><td id="p:w[" class=""><strong>Non-Diagnostic, Non-Emotive</strong></td><td id="{V:P" class="" style="width:490px">Models may not classify mental state, emotions, or health risk</td></tr></div><div style="display:contents" dir="ltr"><tr id="1e885df0-1907-81ce-af9c-cb8994c052aa"><td id="p:w[" class=""><strong>Explainable Output Path</strong></td><td id="{V:P" class="" style="width:490px">All model-driven changes must have a user-visible rationale (via Companion or UI badge)</td></tr></div></tbody></table></div><div style="display:contents" dir="auto"><hr id="1e885df0-1907-8150-81c8-fe716faa6ebe"/></div><div style="display:contents" dir="auto"><h3 id="1e885df0-1907-811e-82ce-c9abd1853f5b" class=""><strong>3. Inference Use Cases (Phase 2+ Candidates)</strong></h3></div><div style="display:contents" dir="ltr"><table id="1e885df0-1907-813e-815b-c530fb45a272" class="simple-table"><tbody><div style="display:contents" dir="ltr"><tr id="1e885df0-1907-8179-9fc7-f11de928c2ed"><td id="[nWX" class="" style="width:190.59375px">Use Case</td><td id="cGf&gt;" class="" style="width:224.40625px">Inference Type</td><td id="Jl:;" class="" style="width:287px">Trigger Model</td></tr></div><div style="display:contents" dir="ltr"><tr id="1e885df0-1907-81fc-a1a3-f68753548e36"><td id="[nWX" class="" style="width:190.59375px">Adaptive grid sizing (games)</td><td id="cGf&gt;" class="" style="width:224.40625px">Rule-based scaler or RL-lite</td><td id="Jl:;" class="" style="width:287px">Played sessions, mistake count, streak pattern</td></tr></div><div style="display:contents" dir="ltr"><tr id="1e885df0-1907-8104-b10d-eca4543bfcbb"><td id="[nWX" class="" style="width:190.59375px">Companion tone suggestion</td><td id="cGf&gt;" class="" style="width:224.40625px">Memory vector + tone matcher</td><td id="Jl:;" class="" style="width:287px">Past tone preference, engagement state</td></tr></div><div style="display:contents" dir="ltr"><tr id="1e885df0-1907-8198-ac7e-e9e80869c6d7"><td id="[nWX" class="" style="width:190.59375px">Fatigue detection</td><td id="cGf&gt;" class="" style="width:224.40625px">Lightweight behavior classifier</td><td id="Jl:;" class="" style="width:287px">Time of day, session length, prompt dismissals</td></tr></div><div style="display:contents" dir="ltr"><tr id="1e885df0-1907-81e7-97a7-cb454067cfc1"><td id="[nWX" class="" style="width:190.59375px">Prompt pacing</td><td id="cGf&gt;" class="" style="width:224.40625px">Cooldown optimizer</td><td id="Jl:;" class="" style="width:287px">Skip rate, past engagement</td></tr></div><div style="display:contents" dir="ltr"><tr id="1e885df0-1907-8190-8110-e2081212a3ea"><td id="[nWX" class="" style="width:190.59375px">Caregiver prompt match</td><td id="cGf&gt;" class="" style="width:224.40625px">Template recommender</td><td id="Jl:;" class="" style="width:287px">Recent patient activity + caregiver input style</td></tr></div></tbody></table></div><div style="display:contents" dir="auto"><blockquote id="1e885df0-1907-8134-9c8e-e8216f4d3dea" class="">❗ No inference may produce outputs related to cognitive ability, emotional state, or risk prediction.</blockquote></div><div style="display:contents" dir="auto"><hr id="1e885df0-1907-81c5-ab76-dfaeb908abd2"/></div><div style="display:contents" dir="auto"><h3 id="1e885df0-1907-8181-a855-fec4cfee9f58" class=""><strong>4. Architecture Overview</strong></h3></div><div style="display:contents" dir="auto"><script src="https://cdnjs.cloudflare.com/ajax/libs/prism/1.29.0/prism.min.js" integrity="sha512-7Z9J3l1+EYfeaPKcGXu3MS/7T+w19WtKQY/n+xzmw4hZhJ9tyYmcUS+4QqAlzhicE5LAfMQSF3iFTK9bQdTxXg==" crossorigin="anonymous" referrerPolicy="no-referrer"></script><link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/prism/1.29.0/themes/prism.min.css" integrity="sha512-tN7Ec6zAFaVSG3TpNAKtk4DOHNpSwKHxxrsiw4GHKESGPs5njn/0sMCUMl2svV4wo4BK/rCP7juYz+zx+l6oeQ==" crossorigin="anonymous" referrerPolicy="no-referrer"/><pre id="1e885df0-1907-8140-b33f-cb8761648a8b" class="code code-wrap"><code class="language-Plain Text" style="white-space:pre-wrap;word-break:break-all">pgsql
+CopyEdit
+plaintext
++-----------------------------+
+|     Consent-Enforced Data  |
+| - session logs             |
+| - streak history           |
+| - dismissed prompts        |
+| - tone selection (manual)  |
++-------------|---------------+
+              ↓
++-----------------------------+
+|    Inference Layer (Scoped) |
+| - Rule engine + ML module   |
+| - Memory state &amp; streak map |
+| - Adaptive behavior trigger |
++-------------|---------------+
+              ↓
++-----------------------------+
+|    Output Control Layer     |
+| - Companion message renderer|
+| - Game config modifier      |
+| - Dashboard flag adjuster   |
++-----------------------------+
+
+</code></pre></div><div style="display:contents" dir="auto"><hr id="1e885df0-1907-817e-967e-e84a8ae6074e"/></div><div style="display:contents" dir="auto"><h3 id="1e885df0-1907-81b0-8a5e-e6b7c792ae31" class=""><strong>5. Isolation &amp; Execution Strategy</strong></h3></div><div style="display:contents" dir="ltr"><table id="1e885df0-1907-8183-b3ee-cbf8311f297d" class="simple-table"><tbody><div style="display:contents" dir="ltr"><tr id="1e885df0-1907-8106-95b8-d76f9776a12f"><td id="S\Af" class="">Model Type</td><td id="XzQM" class="">Execution Environment</td><td id="&lt;bhC" class="">Notes</td></tr></div><div style="display:contents" dir="ltr"><tr id="1e885df0-1907-819d-8aca-de490e19221e"><td id="S\Af" class="">Rules-based adaptation</td><td id="XzQM" class="">In-app (Companion runtime logic)</td><td id="&lt;bhC" class="">No inference engine needed</td></tr></div><div style="display:contents" dir="ltr"><tr id="1e885df0-1907-81d0-b4a2-f79add805d46"><td id="S\Af" class="">Small models (e.g., tone suggestion)</td><td id="XzQM" class="">Backend microservice, single-user scope</td><td id="&lt;bhC" class="">No multi-user context, batched scoring disallowed</td></tr></div><div style="display:contents" dir="ltr"><tr id="1e885df0-1907-817d-a988-f40b835cf91c"><td id="S\Af" class="">Future embeddings (memory recall)</td><td id="XzQM" class="">Indexed per-user in scoped DB</td><td id="&lt;bhC" class="">Never exposed to shared vector space</td></tr></div><div style="display:contents" dir="ltr"><tr id="1e885df0-1907-81b7-aa40-de4281b70010"><td id="S\Af" class="">Offline learning jobs</td><td id="XzQM" class="">Aggregated, anonymized dataset only</td><td id="&lt;bhC" class="">Requires board approval, audit logging</td></tr></div></tbody></table></div><div style="display:contents" dir="auto"><hr id="1e885df0-1907-8167-b626-c090fa520263"/></div><div style="display:contents" dir="auto"><h3 id="1e885df0-1907-8192-9977-f258e91e42f1" class=""><strong>6. Privacy Boundaries</strong></h3></div><div style="display:contents" dir="ltr"><table id="1e885df0-1907-8199-9cb3-d5368257d432" class="simple-table"><tbody><div style="display:contents" dir="ltr"><tr id="1e885df0-1907-81f5-8791-e6895cfdecb5"><td id="Jo;d" class="">Protection Layer</td><td id="}Y;K" class="" style="width:489px">Control</td></tr></div><div style="display:contents" dir="ltr"><tr id="1e885df0-1907-81b3-b4b7-c161fc602dcb"><td id="Jo;d" class=""><strong>Session anonymization</strong></td><td id="}Y;K" class="" style="width:489px">UUID-based signals only; decoupled from PII tables</td></tr></div><div style="display:contents" dir="ltr"><tr id="1e885df0-1907-810d-8144-d3273b64f70c"><td id="Jo;d" class=""><strong>Inference sandboxing</strong></td><td id="}Y;K" class="" style="width:489px">Each model operates per user; shared inference prohibited</td></tr></div><div style="display:contents" dir="ltr"><tr id="1e885df0-1907-81da-8bd8-e34660ecfd7e"><td id="Jo;d" class=""><strong>Token-scoped inputs</strong></td><td id="}Y;K" class="" style="width:489px">Inference requests include session token, consent flag, model version</td></tr></div><div style="display:contents" dir="ltr"><tr id="1e885df0-1907-8199-a247-ca1dd6cb05a5"><td id="Jo;d" class=""><strong>Output filtering</strong></td><td id="}Y;K" class="" style="width:489px">Every suggestion must pass content filter before delivery (no LLM freeform)</td></tr></div></tbody></table></div><div style="display:contents" dir="auto"><hr id="1e885df0-1907-81ae-90de-c27bb80a45de"/></div><div style="display:contents" dir="auto"><h3 id="1e885df0-1907-8198-bb14-eb5a0e79c978" class=""><strong>7. Consent Hooks (Enforced)</strong></h3></div><div style="display:contents" dir="ltr"><table id="1e885df0-1907-8112-9ad9-f48bc8e42a7a" class="simple-table"><tbody><div style="display:contents" dir="ltr"><tr id="1e885df0-1907-815e-8579-ce5c3e47f896"><td id="rfsN" class="">Action</td><td id="I&lt;fE" class="">Consent Flag Required</td></tr></div><div style="display:contents" dir="ltr"><tr id="1e885df0-1907-81a8-a8bb-cd3d1cf10583"><td id="rfsN" class="">Run any personalization model</td><td id="I&lt;fE" class=""><code>ml_personalization_enabled: true</code></td></tr></div><div style="display:contents" dir="ltr"><tr id="1e885df0-1907-8118-96a5-f813fe4e3139"><td id="rfsN" class="">Companion reference to past behavior</td><td id="I&lt;fE" class=""><code>memory_mode_enabled: true</code></td></tr></div><div style="display:contents" dir="ltr"><tr id="1e885df0-1907-8157-a8b3-dc8ef9dcbdbd"><td id="rfsN" class="">Adaptive game difficulty</td><td id="I&lt;fE" class=""><code>adaptive_difficulty_enabled: true</code></td></tr></div><div style="display:contents" dir="ltr"><tr id="1e885df0-1907-81cb-8af1-f4a02fefd5b5"><td id="rfsN" class="">Export for aggregate research</td><td id="I&lt;fE" class=""><code>allow_anonymized_research: true</code></td></tr></div></tbody></table></div><div style="display:contents" dir="auto"><p id="1e885df0-1907-81a0-bdfd-da75852a7f24" class="">All flags default to <code>false</code>. Consent must be collected with timestamp, user UUID, language, and interface used.</p></div><div style="display:contents" dir="auto"><hr id="1e885df0-1907-810d-bd8f-e1df516ae564"/></div><div style="display:contents" dir="auto"><h3 id="1e885df0-1907-81e1-b2d2-d9dbe0f838e8" class=""><strong>8. Logging &amp; Explainability Enforcement</strong></h3></div><div style="display:contents" dir="ltr"><table id="1e885df0-1907-81a1-95ee-cac8fc9ede98" class="simple-table"><tbody><div style="display:contents" dir="ltr"><tr id="1e885df0-1907-815b-8abb-eba180389ae6"><td id="_kpK" class="">Log Type</td><td id="IR@^" class="">Fields</td></tr></div><div style="display:contents" dir="ltr"><tr id="1e885df0-1907-8157-a067-e3dbda2aacb3"><td id="_kpK" class="">Inference executed</td><td id="IR@^" class=""><code>user_id</code>, <code>model_version</code>, <code>timestamp</code>, <code>inference_type</code>, <code>signal_used</code></td></tr></div><div style="display:contents" dir="ltr"><tr id="1e885df0-1907-8187-9a07-d8290dfc8bbb"><td id="_kpK" class="">Companion message rendered</td><td id="IR@^" class=""><code>prompt_key</code>, <code>trigger_context</code>, <code>explanation_visible: true/false</code></td></tr></div><div style="display:contents" dir="ltr"><tr id="1e885df0-1907-81e4-adbc-ee68fdfd401c"><td id="_kpK" class="">Consent verification</td><td id="IR@^" class=""><code>consent_flag</code>, <code>enabled_at</code>, <code>triggered_by</code></td></tr></div><div style="display:contents" dir="ltr"><tr id="1e885df0-1907-8130-884f-de972c115e69"><td id="_kpK" class="">Model fallback</td><td id="IR@^" class="">If model fails or is turned off, log <code>default_output_used: true</code></td></tr></div></tbody></table></div><div style="display:contents" dir="auto"><hr id="1e885df0-1907-812e-b330-fc0a05f24b1c"/></div><div style="display:contents" dir="auto"><h3 id="1e885df0-1907-812e-9c1c-ebb32242a51e" class=""><strong>9. Compliance Mapping</strong></h3></div><div style="display:contents" dir="ltr"><table id="1e885df0-1907-8152-87fa-fcc3fa428625" class="simple-table"><tbody><div style="display:contents" dir="ltr"><tr id="1e885df0-1907-8152-b821-e1b338069135"><td id="&lt;~~s" class="">Law</td><td id="ysAE" class="">Enforcement</td></tr></div><div style="display:contents" dir="ltr"><tr id="1e885df0-1907-819f-aeb1-c749283e2571"><td id="&lt;~~s" class=""><strong>Law 25</strong></td><td id="ysAE" class="">Consent-bound inference, right to revoke, storage in Canada</td></tr></div><div style="display:contents" dir="ltr"><tr id="1e885df0-1907-8156-a35d-d4c63013c43b"><td id="&lt;~~s" class=""><strong>PIPEDA</strong></td><td id="ysAE" class="">No unjustified profiling or algorithmic exposure</td></tr></div><div style="display:contents" dir="ltr"><tr id="1e885df0-1907-81bb-a81e-cb20973169e0"><td id="&lt;~~s" class=""><strong>GDPR (Research)</strong></td><td id="ysAE" class="">Anonymization at collection, no re-identification risk</td></tr></div><div style="display:contents" dir="ltr"><tr id="1e885df0-1907-811d-a077-e4ae9dec2874"><td id="&lt;~~s" class=""><strong>Internal Charter</strong></td><td id="ysAE" class="">AI Governance Board required to approve all new inference models</td></tr></div></tbody></table></div><div style="display:contents" dir="auto"><hr id="1e885df0-1907-81c6-b27e-ce1661ebc3ee"/></div><div style="display:contents" dir="auto"><h3 id="1e885df0-1907-8114-9576-f93003a42872" class=""><strong>10. Future Safeguards &amp; Research Controls</strong></h3></div><div style="display:contents" dir="ltr"><table id="1e885df0-1907-8127-a912-c8775c47cbdd" class="simple-table"><tbody><div style="display:contents" dir="ltr"><tr id="1e885df0-1907-817a-b56c-cdc88f122137"><td id="rb[l" class="">Capability</td><td id="tshq" class="">Status</td></tr></div><div style="display:contents" dir="ltr"><tr id="1e885df0-1907-810d-83fc-d86b5d8ae7d6"><td id="rb[l" class="">Model registry + versioning</td><td id="tshq" class="">Planned Phase 2</td></tr></div><div style="display:contents" dir="ltr"><tr id="1e885df0-1907-8100-b070-c5a2a4e8da99"><td id="rb[l" class="">Shadow inference testing</td><td id="tshq" class="">Planned Phase 3</td></tr></div><div style="display:contents" dir="ltr"><tr id="1e885df0-1907-81b9-8d3e-cd26b28149c1"><td id="rb[l" class="">Model fairness audit logs</td><td id="tshq" class="">Optional for clinic/research phase</td></tr></div><div style="display:contents" dir="ltr"><tr id="1e885df0-1907-81a2-b372-dd60548b952c"><td id="rb[l" class="">Third-party model review policy</td><td id="tshq" class="">Under Governance Board discretion</td></tr></div></tbody></table></div><div style="display:contents" dir="auto"><hr id="1e885df0-1907-81f6-9ecb-d7199a4644f6"/></div><div style="display:contents" dir="auto"><h3 id="1e885df0-1907-813b-a5f7-c4034cdda280" class=""><strong>11. Linked Documents</strong></h3></div><div style="display:contents" dir="auto"><ul id="1e885df0-1907-8166-bc6f-f9c5ac252a93" class="bulleted-list"><li style="list-style-type:disc">🧠 <a href="%F0%9F%A7%A9%20Privacy-Respecting%20Inference%20Architecture%201e885df019078124bb6acc5e8a818df2.html">AI/ML Model Strategy</a></li></ul></div><div style="display:contents" dir="auto"><ul id="1e885df0-1907-81aa-941d-fca37d41c2f9" class="bulleted-list"><li style="list-style-type:disc">🧬 <a href="%F0%9F%A7%A9%20Privacy-Respecting%20Inference%20Architecture%201e885df019078124bb6acc5e8a818df2.html">Personalization Engine Specification</a></li></ul></div><div style="display:contents" dir="auto"><ul id="1e885df0-1907-817d-bcae-f6eade1a7c4f" class="bulleted-list"><li style="list-style-type:disc">📋 <a href="%F0%9F%A7%A9%20Privacy-Respecting%20Inference%20Architecture%201e885df019078124bb6acc5e8a818df2.html">AI Governance &amp; Ethics Charter</a></li></ul></div><div style="display:contents" dir="auto"><ul id="1e885df0-1907-8111-9fbd-e0ac63b7587b" class="bulleted-list"><li style="list-style-type:disc">🔐 [Consent &amp; Privacy Flow]</li></ul></div><div style="display:contents" dir="auto"><ul id="1e885df0-1907-811b-b582-f15482a7cf37" class="bulleted-list"><li style="list-style-type:disc">📊 [Data Schema Overview]</li></ul></div><div style="display:contents" dir="auto"><ul id="1e885df0-1907-81d6-b7dd-d041e8e6c0b4" class="bulleted-list"><li style="list-style-type:disc">🧠 [Explainability &amp; Control UX Plan]</li></ul></div><div style="display:contents" dir="auto"><ul id="1e885df0-1907-8137-bdfe-dfddc4afa5a8" class="bulleted-list"><li style="list-style-type:disc">🛠️ [Monitoring &amp; Incident Response Plan]</li></ul></div></div></article><span class="sans" style="font-size:14px;padding-top:2em"></span></body></html>

@@ -1,0 +1,713 @@
+<html><head><meta http-equiv="Content-Type" content="text/html; charset=utf-8"/><title>💬 Donor Impact Reporting Generator Guide</title><style>
+/* cspell:disable-file */
+/* webkit printing magic: print all background colors */
+html {
+	-webkit-print-color-adjust: exact;
+}
+* {
+	box-sizing: border-box;
+	-webkit-print-color-adjust: exact;
+}
+
+html,
+body {
+	margin: 0;
+	padding: 0;
+}
+@media only screen {
+	body {
+		margin: 2em auto;
+		max-width: 900px;
+		color: rgb(55, 53, 47);
+	}
+}
+
+body {
+	line-height: 1.5;
+	white-space: pre-wrap;
+}
+
+a,
+a.visited {
+	color: inherit;
+	text-decoration: underline;
+}
+
+.pdf-relative-link-path {
+	font-size: 80%;
+	color: #444;
+}
+
+h1,
+h2,
+h3 {
+	letter-spacing: -0.01em;
+	line-height: 1.2;
+	font-weight: 600;
+	margin-bottom: 0;
+}
+
+/* Override strong tags inside headings to maintain consistent weight */
+h1 strong,
+h2 strong,
+h3 strong {
+	font-weight: 600;
+}
+
+.page-title {
+	font-size: 2.5rem;
+	font-weight: 700;
+	margin-top: 0;
+	margin-bottom: 0.75em;
+}
+
+h1 {
+	font-size: 1.875rem;
+	margin-top: 1.875rem;
+}
+
+h2 {
+	font-size: 1.5rem;
+	margin-top: 1.5rem;
+}
+
+h3 {
+	font-size: 1.25rem;
+	margin-top: 1.25rem;
+}
+
+.source {
+	border: 1px solid #ddd;
+	border-radius: 3px;
+	padding: 1.5em;
+	word-break: break-all;
+}
+
+.callout {
+	border-radius: 10px;
+	padding: 1rem;
+}
+
+figure {
+	margin: 1.25em 0;
+	page-break-inside: avoid;
+}
+
+figcaption {
+	opacity: 0.5;
+	font-size: 85%;
+	margin-top: 0.5em;
+}
+
+mark {
+	background-color: transparent;
+}
+
+.indented {
+	padding-left: 1.5em;
+}
+
+hr {
+	background: transparent;
+	display: block;
+	width: 100%;
+	height: 1px;
+	visibility: visible;
+	border: none;
+	border-bottom: 1px solid rgba(55, 53, 47, 0.09);
+}
+
+img {
+	max-width: 100%;
+}
+
+@media only print {
+	img {
+		max-height: 100vh;
+		object-fit: contain;
+	}
+}
+
+@page {
+	margin: 1in;
+}
+
+.collection-content {
+	font-size: 0.875rem;
+}
+
+.collection-content td {
+	white-space: pre-wrap;
+	word-break: break-word;
+}
+
+.column-list {
+	display: flex;
+	justify-content: space-between;
+}
+
+.column {
+	padding: 0 1em;
+}
+
+.column:first-child {
+	padding-left: 0;
+}
+
+.column:last-child {
+	padding-right: 0;
+}
+
+.table_of_contents-item {
+	display: block;
+	font-size: 0.875rem;
+	line-height: 1.3;
+	padding: 0.125rem;
+}
+
+.table_of_contents-indent-1 {
+	margin-left: 1.5rem;
+}
+
+.table_of_contents-indent-2 {
+	margin-left: 3rem;
+}
+
+.table_of_contents-indent-3 {
+	margin-left: 4.5rem;
+}
+
+.table_of_contents-link {
+	text-decoration: none;
+	opacity: 0.7;
+	border-bottom: 1px solid rgba(55, 53, 47, 0.18);
+}
+
+table,
+th,
+td {
+	border: 1px solid rgba(55, 53, 47, 0.09);
+	border-collapse: collapse;
+}
+
+table {
+	border-left: none;
+	border-right: none;
+}
+
+th,
+td {
+	font-weight: normal;
+	padding: 0.25em 0.5em;
+	line-height: 1.5;
+	min-height: 1.5em;
+	text-align: left;
+}
+
+th {
+	color: rgba(55, 53, 47, 0.6);
+}
+
+ol,
+ul {
+	margin: 0;
+	margin-block-start: 0.6em;
+	margin-block-end: 0.6em;
+}
+
+li > ol:first-child,
+li > ul:first-child {
+	margin-block-start: 0.6em;
+}
+
+ul > li {
+	list-style: disc;
+}
+
+ul.to-do-list {
+	padding-inline-start: 0;
+}
+
+ul.to-do-list > li {
+	list-style: none;
+}
+
+.to-do-children-checked {
+	text-decoration: line-through;
+	opacity: 0.375;
+}
+
+ul.toggle > li {
+	list-style: none;
+}
+
+ul {
+	padding-inline-start: 1.7em;
+}
+
+ul > li {
+	padding-left: 0.1em;
+}
+
+ol {
+	padding-inline-start: 1.6em;
+}
+
+ol > li {
+	padding-left: 0.2em;
+}
+
+.mono ol {
+	padding-inline-start: 2em;
+}
+
+.mono ol > li {
+	text-indent: -0.4em;
+}
+
+.toggle {
+	padding-inline-start: 0em;
+	list-style-type: none;
+}
+
+/* Indent toggle children */
+.toggle > li > details {
+	padding-left: 1.7em;
+}
+
+.toggle > li > details > summary {
+	margin-left: -1.1em;
+}
+
+.selected-value {
+	display: inline-block;
+	padding: 0 0.5em;
+	background: rgba(206, 205, 202, 0.5);
+	border-radius: 3px;
+	margin-right: 0.5em;
+	margin-top: 0.3em;
+	margin-bottom: 0.3em;
+	white-space: nowrap;
+}
+
+.collection-title {
+	display: inline-block;
+	margin-right: 1em;
+}
+
+.page-description {
+	margin-bottom: 2em;
+}
+
+.simple-table {
+	margin-top: 1em;
+	font-size: 0.875rem;
+	empty-cells: show;
+}
+.simple-table td {
+	height: 29px;
+	min-width: 120px;
+}
+
+.simple-table th {
+	height: 29px;
+	min-width: 120px;
+}
+
+.simple-table-header-color {
+	background: rgb(247, 246, 243);
+	color: black;
+}
+.simple-table-header {
+	font-weight: 500;
+}
+
+time {
+	opacity: 0.5;
+}
+
+.icon {
+	display: inline-flex;
+	align-items: center;
+	justify-content: center;
+	max-width: 1.2em;
+	max-height: 1.2em;
+	text-decoration: none;
+	vertical-align: text-bottom;
+	margin-right: 0.5em;
+}
+
+img.icon {
+	border-radius: 3px;
+}
+
+.callout img.notion-static-icon {
+	width: 1em;
+	height: 1em;
+}
+
+.callout p {
+	margin: 0;
+}
+
+.callout h1,
+.callout h2,
+.callout h3 {
+	margin: 0 0 0.6rem;
+}
+
+.user-icon {
+	width: 1.5em;
+	height: 1.5em;
+	border-radius: 100%;
+	margin-right: 0.5rem;
+}
+
+.user-icon-inner {
+	font-size: 0.8em;
+}
+
+.text-icon {
+	border: 1px solid #000;
+	text-align: center;
+}
+
+.page-cover-image {
+	display: block;
+	object-fit: cover;
+	width: 100%;
+	max-height: 30vh;
+}
+
+.page-header-icon {
+	font-size: 3rem;
+	margin-bottom: 1rem;
+}
+
+.page-header-icon-with-cover {
+	margin-top: -0.72em;
+	margin-left: 0.07em;
+}
+
+.page-header-icon img {
+	border-radius: 3px;
+}
+
+.link-to-page {
+	margin: 1em 0;
+	padding: 0;
+	border: none;
+	font-weight: 500;
+}
+
+p > .user {
+	opacity: 0.5;
+}
+
+td > .user,
+td > time {
+	white-space: nowrap;
+}
+
+input[type="checkbox"] {
+	transform: scale(1.5);
+	margin-right: 0.6em;
+	vertical-align: middle;
+}
+
+p {
+	margin-top: 0.5em;
+	margin-bottom: 0.5em;
+}
+
+.image {
+	border: none;
+	margin: 1.5em 0;
+	padding: 0;
+	border-radius: 0;
+	text-align: center;
+}
+
+.code,
+code {
+	background: rgba(135, 131, 120, 0.15);
+	border-radius: 3px;
+	padding: 0.2em 0.4em;
+	border-radius: 3px;
+	font-size: 85%;
+	tab-size: 2;
+}
+
+code {
+	color: #eb5757;
+}
+
+.code {
+	padding: 1.5em 1em;
+}
+
+.code-wrap {
+	white-space: pre-wrap;
+	word-break: break-all;
+}
+
+.code > code {
+	background: none;
+	padding: 0;
+	font-size: 100%;
+	color: inherit;
+}
+
+blockquote {
+	font-size: 1em;
+	margin: 1em 0;
+	padding-left: 1em;
+	border-left: 3px solid rgb(55, 53, 47);
+}
+
+blockquote.quote-large {
+	font-size: 1.25em;
+}
+
+.bookmark {
+	text-decoration: none;
+	max-height: 8em;
+	padding: 0;
+	display: flex;
+	width: 100%;
+	align-items: stretch;
+}
+
+.bookmark-title {
+	font-size: 0.85em;
+	overflow: hidden;
+	text-overflow: ellipsis;
+	height: 1.75em;
+	white-space: nowrap;
+}
+
+.bookmark-text {
+	display: flex;
+	flex-direction: column;
+}
+
+.bookmark-info {
+	flex: 4 1 180px;
+	padding: 12px 14px 14px;
+	display: flex;
+	flex-direction: column;
+	justify-content: space-between;
+}
+
+.bookmark-image {
+	width: 33%;
+	flex: 1 1 180px;
+	display: block;
+	position: relative;
+	object-fit: cover;
+	border-radius: 1px;
+}
+
+.bookmark-description {
+	color: rgba(55, 53, 47, 0.6);
+	font-size: 0.75em;
+	overflow: hidden;
+	max-height: 4.5em;
+	word-break: break-word;
+}
+
+.bookmark-href {
+	font-size: 0.75em;
+	margin-top: 0.25em;
+}
+
+.sans { font-family: ui-sans-serif, -apple-system, BlinkMacSystemFont, "Segoe UI Variable Display", "Segoe UI", Helvetica, "Apple Color Emoji", "Noto Sans Arabic", "Noto Sans Hebrew", Arial, sans-serif, "Segoe UI Emoji", "Segoe UI Symbol"; }
+.code { font-family: "SFMono-Regular", Menlo, Consolas, "PT Mono", "Liberation Mono", Courier, monospace; }
+.serif { font-family: Lyon-Text, Georgia, ui-serif, serif; }
+.mono { font-family: iawriter-mono, Nitti, Menlo, Courier, monospace; }
+.pdf .sans { font-family: Inter, ui-sans-serif, -apple-system, BlinkMacSystemFont, "Segoe UI Variable Display", "Segoe UI", Helvetica, "Apple Color Emoji", "Noto Sans Arabic", "Noto Sans Hebrew", Arial, sans-serif, "Segoe UI Emoji", "Segoe UI Symbol", 'Twemoji', 'Noto Color Emoji', 'Noto Sans CJK JP'; }
+.pdf:lang(zh-CN) .sans { font-family: Inter, ui-sans-serif, -apple-system, BlinkMacSystemFont, "Segoe UI Variable Display", "Segoe UI", Helvetica, "Apple Color Emoji", "Noto Sans Arabic", "Noto Sans Hebrew", Arial, sans-serif, "Segoe UI Emoji", "Segoe UI Symbol", 'Twemoji', 'Noto Color Emoji', 'Noto Sans CJK SC'; }
+.pdf:lang(zh-TW) .sans { font-family: Inter, ui-sans-serif, -apple-system, BlinkMacSystemFont, "Segoe UI Variable Display", "Segoe UI", Helvetica, "Apple Color Emoji", "Noto Sans Arabic", "Noto Sans Hebrew", Arial, sans-serif, "Segoe UI Emoji", "Segoe UI Symbol", 'Twemoji', 'Noto Color Emoji', 'Noto Sans CJK TC'; }
+.pdf:lang(ko-KR) .sans { font-family: Inter, ui-sans-serif, -apple-system, BlinkMacSystemFont, "Segoe UI Variable Display", "Segoe UI", Helvetica, "Apple Color Emoji", "Noto Sans Arabic", "Noto Sans Hebrew", Arial, sans-serif, "Segoe UI Emoji", "Segoe UI Symbol", 'Twemoji', 'Noto Color Emoji', 'Noto Sans CJK KR'; }
+.pdf .code { font-family: Source Code Pro, "SFMono-Regular", Menlo, Consolas, "PT Mono", "Liberation Mono", Courier, monospace, 'Twemoji', 'Noto Color Emoji', 'Noto Sans Mono CJK JP'; }
+.pdf:lang(zh-CN) .code { font-family: Source Code Pro, "SFMono-Regular", Menlo, Consolas, "PT Mono", "Liberation Mono", Courier, monospace, 'Twemoji', 'Noto Color Emoji', 'Noto Sans Mono CJK SC'; }
+.pdf:lang(zh-TW) .code { font-family: Source Code Pro, "SFMono-Regular", Menlo, Consolas, "PT Mono", "Liberation Mono", Courier, monospace, 'Twemoji', 'Noto Color Emoji', 'Noto Sans Mono CJK TC'; }
+.pdf:lang(ko-KR) .code { font-family: Source Code Pro, "SFMono-Regular", Menlo, Consolas, "PT Mono", "Liberation Mono", Courier, monospace, 'Twemoji', 'Noto Color Emoji', 'Noto Sans Mono CJK KR'; }
+.pdf .serif { font-family: PT Serif, Lyon-Text, Georgia, ui-serif, serif, 'Twemoji', 'Noto Color Emoji', 'Noto Serif CJK JP'; }
+.pdf:lang(zh-CN) .serif { font-family: PT Serif, Lyon-Text, Georgia, ui-serif, serif, 'Twemoji', 'Noto Color Emoji', 'Noto Serif CJK SC'; }
+.pdf:lang(zh-TW) .serif { font-family: PT Serif, Lyon-Text, Georgia, ui-serif, serif, 'Twemoji', 'Noto Color Emoji', 'Noto Serif CJK TC'; }
+.pdf:lang(ko-KR) .serif { font-family: PT Serif, Lyon-Text, Georgia, ui-serif, serif, 'Twemoji', 'Noto Color Emoji', 'Noto Serif CJK KR'; }
+.pdf .mono { font-family: PT Mono, iawriter-mono, Nitti, Menlo, Courier, monospace, 'Twemoji', 'Noto Color Emoji', 'Noto Sans Mono CJK JP'; }
+.pdf:lang(zh-CN) .mono { font-family: PT Mono, iawriter-mono, Nitti, Menlo, Courier, monospace, 'Twemoji', 'Noto Color Emoji', 'Noto Sans Mono CJK SC'; }
+.pdf:lang(zh-TW) .mono { font-family: PT Mono, iawriter-mono, Nitti, Menlo, Courier, monospace, 'Twemoji', 'Noto Color Emoji', 'Noto Sans Mono CJK TC'; }
+.pdf:lang(ko-KR) .mono { font-family: PT Mono, iawriter-mono, Nitti, Menlo, Courier, monospace, 'Twemoji', 'Noto Color Emoji', 'Noto Sans Mono CJK KR'; }
+.highlight-default {
+	color: rgba(44, 44, 43, 1);
+}
+.highlight-gray {
+	color: rgba(125, 122, 117, 1);
+	fill: rgba(125, 122, 117, 1);
+}
+.highlight-brown {
+	color: rgba(159, 118, 90, 1);
+	fill: rgba(159, 118, 90, 1);
+}
+.highlight-orange {
+	color: rgba(210, 123, 45, 1);
+	fill: rgba(210, 123, 45, 1);
+}
+.highlight-yellow {
+	color: rgba(203, 148, 52, 1);
+	fill: rgba(203, 148, 52, 1);
+}
+.highlight-teal {
+	color: rgba(80, 148, 110, 1);
+	fill: rgba(80, 148, 110, 1);
+}
+.highlight-blue {
+	color: rgba(56, 125, 201, 1);
+	fill: rgba(56, 125, 201, 1);
+}
+.highlight-purple {
+	color: rgba(154, 107, 180, 1);
+	fill: rgba(154, 107, 180, 1);
+}
+.highlight-pink {
+	color: rgba(193, 76, 138, 1);
+	fill: rgba(193, 76, 138, 1);
+}
+.highlight-red {
+	color: rgba(207, 81, 72, 1);
+	fill: rgba(207, 81, 72, 1);
+}
+.highlight-default_background {
+	color: rgba(44, 44, 43, 1);
+}
+.highlight-gray_background {
+	background: rgba(42, 28, 0, 0.07);
+}
+.highlight-brown_background {
+	background: rgba(139, 46, 0, 0.086);
+}
+.highlight-orange_background {
+	background: rgba(224, 101, 1, 0.129);
+}
+.highlight-yellow_background {
+	background: rgba(211, 168, 0, 0.137);
+}
+.highlight-teal_background {
+	background: rgba(0, 100, 45, 0.09);
+}
+.highlight-blue_background {
+	background: rgba(0, 124, 215, 0.094);
+}
+.highlight-purple_background {
+	background: rgba(102, 0, 178, 0.078);
+}
+.highlight-pink_background {
+	background: rgba(197, 0, 93, 0.086);
+}
+.highlight-red_background {
+	background: rgba(223, 22, 0, 0.094);
+}
+.block-color-default {
+	color: inherit;
+	fill: inherit;
+}
+.block-color-gray {
+	color: rgba(125, 122, 117, 1);
+	fill: rgba(125, 122, 117, 1);
+}
+.block-color-brown {
+	color: rgba(159, 118, 90, 1);
+	fill: rgba(159, 118, 90, 1);
+}
+.block-color-orange {
+	color: rgba(210, 123, 45, 1);
+	fill: rgba(210, 123, 45, 1);
+}
+.block-color-yellow {
+	color: rgba(203, 148, 52, 1);
+	fill: rgba(203, 148, 52, 1);
+}
+.block-color-teal {
+	color: rgba(80, 148, 110, 1);
+	fill: rgba(80, 148, 110, 1);
+}
+.block-color-blue {
+	color: rgba(56, 125, 201, 1);
+	fill: rgba(56, 125, 201, 1);
+}
+.block-color-purple {
+	color: rgba(154, 107, 180, 1);
+	fill: rgba(154, 107, 180, 1);
+}
+.block-color-pink {
+	color: rgba(193, 76, 138, 1);
+	fill: rgba(193, 76, 138, 1);
+}
+.block-color-red {
+	color: rgba(207, 81, 72, 1);
+	fill: rgba(207, 81, 72, 1);
+}
+.block-color-default_background {
+	color: inherit;
+	fill: inherit;
+}
+.block-color-gray_background {
+	background: rgba(240, 239, 237, 1);
+}
+.block-color-brown_background {
+	background: rgba(245, 237, 233, 1);
+}
+.block-color-orange_background {
+	background: rgba(251, 235, 222, 1);
+}
+.block-color-yellow_background {
+	background: rgba(249, 243, 220, 1);
+}
+.block-color-teal_background {
+	background: rgba(232, 241, 236, 1);
+}
+.block-color-blue_background {
+	background: rgba(229, 242, 252, 1);
+}
+.block-color-purple_background {
+	background: rgba(243, 235, 249, 1);
+}
+.block-color-pink_background {
+	background: rgba(250, 233, 241, 1);
+}
+.block-color-red_background {
+	background: rgba(252, 233, 231, 1);
+}
+.select-value-color-default { background-color: rgba(42, 28, 0, 0.07); }
+.select-value-color-gray { background-color: rgba(28, 19, 1, 0.11); }
+.select-value-color-brown { background-color: rgba(127, 51, 0, 0.156); }
+.select-value-color-orange { background-color: rgba(196, 88, 0, 0.203); }
+.select-value-color-yellow { background-color: rgba(209, 156, 0, 0.282); }
+.select-value-color-green { background-color: rgba(0, 96, 38, 0.156); }
+.select-value-color-blue { background-color: rgba(0, 118, 217, 0.203); }
+.select-value-color-purple { background-color: rgba(92, 0, 163, 0.141); }
+.select-value-color-pink { background-color: rgba(183, 0, 78, 0.152); }
+.select-value-color-red { background-color: rgba(206, 24, 0, 0.164); }
+
+.checkbox {
+	display: inline-flex;
+	vertical-align: text-bottom;
+	width: 16;
+	height: 16;
+	background-size: 16px;
+	margin-left: 2px;
+	margin-right: 5px;
+}
+
+.checkbox-on {
+	background-image: url("data:image/svg+xml;charset=UTF-8,%3Csvg%20width%3D%2216%22%20height%3D%2216%22%20viewBox%3D%220%200%2016%2016%22%20fill%3D%22none%22%20xmlns%3D%22http%3A%2F%2Fwww.w3.org%2F2000%2Fsvg%22%3E%0A%3Crect%20width%3D%2216%22%20height%3D%2216%22%20fill%3D%22%2358A9D7%22%2F%3E%0A%3Cpath%20d%3D%22M6.71429%2012.2852L14%204.9995L12.7143%203.71436L6.71429%209.71378L3.28571%206.2831L2%207.57092L6.71429%2012.2852Z%22%20fill%3D%22white%22%2F%3E%0A%3C%2Fsvg%3E");
+}
+
+.checkbox-off {
+	background-image: url("data:image/svg+xml;charset=UTF-8,%3Csvg%20width%3D%2216%22%20height%3D%2216%22%20viewBox%3D%220%200%2016%2016%22%20fill%3D%22none%22%20xmlns%3D%22http%3A%2F%2Fwww.w3.org%2F2000%2Fsvg%22%3E%0A%3Crect%20x%3D%220.75%22%20y%3D%220.75%22%20width%3D%2214.5%22%20height%3D%2214.5%22%20fill%3D%22white%22%20stroke%3D%22%2336352F%22%20stroke-width%3D%221.5%22%2F%3E%0A%3C%2Fsvg%3E");
+}
+	
+</style></head><body><article id="1e985df0-1907-80e0-b2e7-cd0bc4cdba20" class="page sans"><header><h1 class="page-title" dir="auto">💬 Donor Impact Reporting Generator Guide</h1><p class="page-description" dir="auto"></p><table class="properties"><tbody><tr class="property-row property-row-person"><th><span class="icon property-icon"><img src="https://www.notion.so/icons/friends_gray.svg" style="width:14px;height:14px;display:block"/></span>Owner</th><td><span class="user"><span class="icon text-icon user-icon"><span class="user-icon-inner">A</span></span>Aubert</span></td></tr><tr class="property-row property-row-multi_select"><th><span class="icon property-icon"><img src="https://www.notion.so/icons/list_gray.svg" style="width:14px;height:14px;display:block"/></span>Tags</th><td></td></tr></tbody></table></header><div class="page-body"><div style="display:contents" dir="auto"><p id="1e985df0-1907-80e8-a4dd-f232bdda8d75" class="">This guide supports teams in generating donor-ready impact reports that balance <strong>qualitative insight</strong>, <strong>quantitative outcome data</strong>, and <strong>community-authored narratives</strong> — without compromising user privacy or ethical boundaries. Each section includes templates, redaction guidance, and storytelling scaffolds tailored to Memora’s core use cases.</p></div><div style="display:contents" dir="auto"><hr id="1e985df0-1907-8016-8c9d-ef339a47a4ee"/></div><div style="display:contents" dir="auto"><h2 id="1e985df0-1907-8084-9b8f-f3c8897619bb" class="">🎯 Goals of the Generator</h2></div><div style="display:contents" dir="auto"><ul id="1e985df0-1907-809d-8a46-df05c31caebd" class="bulleted-list"><li style="list-style-type:disc">Showcase <strong>real-world Memora outcomes</strong> across emotional, educational, or cognitive domains</li></ul></div><div style="display:contents" dir="auto"><ul id="1e985df0-1907-8003-85d1-fc89993c53a0" class="bulleted-list"><li style="list-style-type:disc">Enable NGOs and clinics to share stories without risking <strong>consent violations</strong> or <strong>memory misuse</strong></li></ul></div><div style="display:contents" dir="auto"><ul id="1e985df0-1907-8023-8179-d1b2a74a9af7" class="bulleted-list"><li style="list-style-type:disc">Provide <strong>donor-friendly dashboards</strong> and <strong>monthly/quarterly summaries</strong> from the field</li></ul></div><div style="display:contents" dir="auto"><ul id="1e985df0-1907-809b-8882-c315631dc6f8" class="bulleted-list"><li style="list-style-type:disc">Standardize reports across multiple deployments while leaving room for <strong>local voice</strong></li></ul></div><div style="display:contents" dir="auto"><ul id="1e985df0-1907-8021-ab1c-c392047cb830" class="bulleted-list"><li style="list-style-type:disc">Ensure every story uplifts the dignity of the user, <strong>not extract their trauma</strong></li></ul></div><div style="display:contents" dir="auto"><hr id="1e985df0-1907-801b-8110-c3fc24540e88"/></div><div style="display:contents" dir="auto"><h2 id="1e985df0-1907-808f-9b69-ce854171d91f" class="">🧰 Included Templates</h2></div><div style="display:contents" dir="ltr"><table id="1e985df0-1907-8086-ad49-f677041fe8c7" class="simple-table"><tbody><div style="display:contents" dir="ltr"><tr id="1e985df0-1907-8045-a595-dae49e332c03"><td id="~&lt;lS" class="">Tool</td><td id="kDOI" class="">Purpose</td></tr></div><div style="display:contents" dir="ltr"><tr id="1e985df0-1907-80ca-b17b-d4404d99aa27"><td id="~&lt;lS" class="">📄 Donor Impact Brief Template</td><td id="kDOI" class="">1–2 page field story + data insight snapshot</td></tr></div><div style="display:contents" dir="ltr"><tr id="1e985df0-1907-8053-b8e6-fadc6a9092bd"><td id="~&lt;lS" class="">📊 Quarterly Impact Dashboard</td><td id="kDOI" class="">Charts + indicators with narrative overlay</td></tr></div><div style="display:contents" dir="ltr"><tr id="1e985df0-1907-8004-8538-d4d83587ca21"><td id="~&lt;lS" class="">🧾 Redacted Reflection Storyboard</td><td id="kDOI" class="">Visual or text snapshots of user journey (ethically filtered)</td></tr></div><div style="display:contents" dir="ltr"><tr id="1e985df0-1907-80b2-b971-f4706532ae0f"><td id="~&lt;lS" class="">🎙 Community Voice Spotlight</td><td id="kDOI" class="">Local staff or caregiver quote log</td></tr></div><div style="display:contents" dir="ltr"><tr id="1e985df0-1907-80c0-a97b-db710baf67cb"><td id="~&lt;lS" class="">🔐 Consent Confirmation Log</td><td id="kDOI" class="">Verifies each quoted or visualized case was opt-in</td></tr></div><div style="display:contents" dir="ltr"><tr id="1e985df0-1907-80b6-9d59-d538a94e47da"><td id="~&lt;lS" class="">💬 Donor Thank You Script</td><td id="kDOI" class="">Printable / email-ready messages for attribution or update loops</td></tr></div></tbody></table></div><div style="display:contents" dir="auto"><hr id="1e985df0-1907-80dc-81a8-dd38bc371549"/></div><div style="display:contents" dir="auto"><h2 id="1e985df0-1907-80ec-922e-f8bc0a4f3e63" class="">🪞 Core Report Structure</h2></div><div style="display:contents" dir="ltr"><table id="1e985df0-1907-8048-87f1-e2b060a299d3" class="simple-table"><tbody><div style="display:contents" dir="ltr"><tr id="1e985df0-1907-80bb-bb65-c2e8916d0440"><td id=":X]{" class="">Section</td><td id="|\Vm" class="">Content</td></tr></div><div style="display:contents" dir="ltr"><tr id="1e985df0-1907-8092-8228-e8c223d319d4"><td id=":X]{" class="">1. Cover Page</td><td id="|\Vm" class="">Partner name, reporting period, donor name</td></tr></div><div style="display:contents" dir="ltr"><tr id="1e985df0-1907-8084-b727-f7e3314e79ee"><td id=":X]{" class="">2. Executive Summary</td><td id="|\Vm" class="">2–3 sentence high-level impact</td></tr></div><div style="display:contents" dir="ltr"><tr id="1e985df0-1907-80e9-ae01-f5a32f791829"><td id=":X]{" class="">3. Deployment Footprint</td><td id="|\Vm" class="">Region, # users, kit count, facilitator count</td></tr></div><div style="display:contents" dir="ltr"><tr id="1e985df0-1907-80b6-898f-fff5e31ddfb9"><td id=":X]{" class="">4. Highlights &amp; Breakthroughs</td><td id="|\Vm" class="">Top 3 data points + 1 emotional story</td></tr></div><div style="display:contents" dir="ltr"><tr id="1e985df0-1907-8031-a6ce-e73a3409411c"><td id=":X]{" class="">5. User Journeys (Redacted)</td><td id="|\Vm" class="">1–2 stories using storyboard or quote method</td></tr></div><div style="display:contents" dir="ltr"><tr id="1e985df0-1907-80f8-be51-f770e9c4b3ff"><td id=":X]{" class="">6. Quantitative Outcomes</td><td id="|\Vm" class="">Tables/charts from dashboard or templates</td></tr></div><div style="display:contents" dir="ltr"><tr id="1e985df0-1907-80b4-bf08-ca695587c572"><td id=":X]{" class="">7. Partner Voice</td><td id="|\Vm" class="">Field coordinator or caregiver reflection</td></tr></div><div style="display:contents" dir="ltr"><tr id="1e985df0-1907-80c9-85f9-d738db829eff"><td id=":X]{" class="">8. Thank You + Next Steps</td><td id="|\Vm" class="">How continued support extends the impact</td></tr></div></tbody></table></div><div style="display:contents" dir="auto"><hr id="1e985df0-1907-808c-baf3-df87b0277470"/></div><div style="display:contents" dir="auto"><h2 id="1e985df0-1907-8030-904c-e660aba0bbe6" class="">📊 Suggested Indicators for Donor Reports</h2></div><div style="display:contents" dir="ltr"><table id="1e985df0-1907-805d-b052-f1127b2b83d5" class="simple-table"><tbody><div style="display:contents" dir="ltr"><tr id="1e985df0-1907-8077-93d0-d7d011d49e91"><td id="&gt;Ut}" class="">Domain</td><td id="EfxA" class="">Metric</td></tr></div><div style="display:contents" dir="ltr"><tr id="1e985df0-1907-807c-9817-d66cca72b14e"><td id="&gt;Ut}" class="">Emotional Resilience</td><td id="EfxA" class="">Reflection completion % / tone shift logs</td></tr></div><div style="display:contents" dir="ltr"><tr id="1e985df0-1907-80e9-8eea-e600e24622a9"><td id="&gt;Ut}" class="">Learning Confidence</td><td id="EfxA" class="">Caregiver-reported change / prompt match rate</td></tr></div><div style="display:contents" dir="ltr"><tr id="1e985df0-1907-80e0-8e1b-fa8e1cf40f5f"><td id="&gt;Ut}" class="">Cognitive Stimulation</td><td id="EfxA" class="">Session engagement over time / prompt novelty</td></tr></div><div style="display:contents" dir="ltr"><tr id="1e985df0-1907-8003-82c1-d208249a0aa1"><td id="&gt;Ut}" class="">Safeguarding Sensitivity</td><td id="EfxA" class="">Flags triggered / resolution %</td></tr></div><div style="display:contents" dir="ltr"><tr id="1e985df0-1907-80ac-8e3b-eda0397362ab"><td id="&gt;Ut}" class="">Offline Equity</td><td id="EfxA" class="">Devices used in zero-connectivity zones</td></tr></div><div style="display:contents" dir="ltr"><tr id="1e985df0-1907-8053-a36b-ca99299a450c"><td id="&gt;Ut}" class="">Localization Success</td><td id="EfxA" class="">% prompt usage in local language</td></tr></div></tbody></table></div><div style="display:contents" dir="auto"><hr id="1e985df0-1907-80c4-8936-f1b688426e30"/></div><div style="display:contents" dir="auto"><h2 id="1e985df0-1907-806b-a62f-dd3cec668035" class="">🎙 Storytelling Format Options</h2></div><div style="display:contents" dir="ltr"><table id="1e985df0-1907-8047-8f43-c7e09114d2d5" class="simple-table"><tbody><div style="display:contents" dir="ltr"><tr id="1e985df0-1907-806f-a630-e519472904dc"><td id="Mwiy" class="">Option</td><td id="cqOl" class="">Notes</td></tr></div><div style="display:contents" dir="ltr"><tr id="1e985df0-1907-80bc-b911-f9ee71d17f02"><td id="Mwiy" class="">✍️ Written Vignette</td><td id="cqOl" class="">Excerpt of redacted Companion interaction w/ caregiver context</td></tr></div><div style="display:contents" dir="ltr"><tr id="1e985df0-1907-80a8-8d3f-f2d5ad51db75"><td id="Mwiy" class="">🖼 Visual Storyboard</td><td id="cqOl" class="">3–4 screen mockups + text overlays (no faces, no IDs)</td></tr></div><div style="display:contents" dir="ltr"><tr id="1e985df0-1907-80ca-8fe1-f0ba6af98029"><td id="Mwiy" class="">🧏 Caregiver Quote</td><td id="cqOl" class="">“Companion helped my child…” — verified consent only</td></tr></div><div style="display:contents" dir="ltr"><tr id="1e985df0-1907-806b-a04d-f0e2fd177977"><td id="Mwiy" class="">🎓 Field Lead Diary</td><td id="cqOl" class="">NGO worker logs 1–week deployment journey</td></tr></div><div style="display:contents" dir="ltr"><tr id="1e985df0-1907-802b-80b5-dc9e7030bfb9"><td id="Mwiy" class="">🗣 Youth Metaphor</td><td id="cqOl" class="">“It felt like Memora was a friend I could whisper to” — use with framing note</td></tr></div></tbody></table></div><div style="display:contents" dir="auto"><blockquote id="1e985df0-1907-803e-871d-dbcc230e147c" class="">Every story must be cleared via the Consent Log and approved by field QA.</blockquote></div><div style="display:contents" dir="auto"><hr id="1e985df0-1907-80ef-916e-c8a06f560e76"/></div><div style="display:contents" dir="auto"><h2 id="1e985df0-1907-80fa-b332-facb5acbd3b3" class="">🛡 Ethical Safeguards</h2></div><div style="display:contents" dir="ltr"><table id="1e985df0-1907-80e7-a83e-d0ec9af8ebf7" class="simple-table"><tbody><div style="display:contents" dir="ltr"><tr id="1e985df0-1907-8075-b836-d8ccf4b81880"><td id="^liw" class="">Rule</td><td id="N&gt;a;" class="">Action</td></tr></div><div style="display:contents" dir="ltr"><tr id="1e985df0-1907-8075-ad44-ce338bac37e2"><td id="^liw" class="">✅ No real names unless approved in writing</td><td id="N&gt;a;" class="">Use initials, hash, or role (“13yo girl in Kisangani”)</td></tr></div><div style="display:contents" dir="ltr"><tr id="1e985df0-1907-80a1-98ea-ce7851bdc12d"><td id="^liw" class="">✅ Reflections cannot be quoted verbatim if memory was off</td><td id="N&gt;a;" class="">Paraphrase only</td></tr></div><div style="display:contents" dir="ltr"><tr id="1e985df0-1907-8050-84f8-d88481d08633"><td id="^liw" class="">✅ Companion voice transcripts may not be used</td><td id="N&gt;a;" class="">Use prompt ID and tone label instead</td></tr></div><div style="display:contents" dir="ltr"><tr id="1e985df0-1907-80e1-bb02-f2a52e76f773"><td id="^liw" class="">✅ All quotes must have a corresponding opt-in log</td><td id="N&gt;a;" class="">Required for donor visibility</td></tr></div><div style="display:contents" dir="ltr"><tr id="1e985df0-1907-80a4-9ce1-fced34bc13ea"><td id="^liw" class="">✅ No photo may include faces or clinic branding without prior consent</td><td id="N&gt;a;" class="">Blurred or illustrative stock permitted only</td></tr></div></tbody></table></div><div style="display:contents" dir="auto"><hr id="1e985df0-1907-80db-852f-fddcc4971a79"/></div><div style="display:contents" dir="auto"><h2 id="1e985df0-1907-804a-b778-dd3284355092" class="">🧾 Donor Dialogue Prompts</h2></div><div style="display:contents" dir="auto"><p id="1e985df0-1907-800a-9e64-efa5171006dc" class=""><em>For thank you loops, attribution messages, or sponsor updates.</em></p></div><div style="display:contents" dir="ltr"><table id="1e985df0-1907-80f0-8981-e202ac15ae3e" class="simple-table"><tbody><div style="display:contents" dir="ltr"><tr id="1e985df0-1907-8006-9fa3-cc52b62ceaba"><td id="goL?" class="">Purpose</td><td id="dggR" class="">Message Example</td></tr></div><div style="display:contents" dir="ltr"><tr id="1e985df0-1907-8002-b85d-d2bbce1b5ef4"><td id="goL?" class="">🌱 Early-stage pilot</td><td id="dggR" class="">“Thanks to your support, we deployed 35 Companions across 3 communities this quarter — helping children find their voice and elders reconnect with memory.”</td></tr></div><div style="display:contents" dir="ltr"><tr id="1e985df0-1907-803f-8280-c1fadcc2361b"><td id="goL?" class="">💡 Insight loop</td><td id="dggR" class="">“Here’s what we’re learning: when Memora pauses mid-session to reflect, it helps users regain emotional balance. Your support makes this adaptation possible.”</td></tr></div><div style="display:contents" dir="ltr"><tr id="1e985df0-1907-80e8-b886-ccf539a159af"><td id="goL?" class="">🌍 Expansion ask</td><td id="dggR" class="">“With just 10 more kits, we can bring Memora to an entire village-based caregiver network. The impact grows with you.”</td></tr></div></tbody></table></div><div style="display:contents" dir="auto"><hr id="1e985df0-1907-8029-9524-d489c4d7b2e0"/></div><div style="display:contents" dir="auto"><h2 id="1e985df0-1907-804c-a912-fb36ab816f07" class="">🗂 Output Formats</h2></div><div style="display:contents" dir="ltr"><table id="1e985df0-1907-8072-9581-ff1f1c904f81" class="simple-table"><tbody><div style="display:contents" dir="ltr"><tr id="1e985df0-1907-808a-a7a5-eb126d8b53c6"><td id="f[Na" class="">Format</td><td id="TemM" class="">Purpose</td></tr></div><div style="display:contents" dir="ltr"><tr id="1e985df0-1907-80af-8c43-ee9ef7aef5ef"><td id="f[Na" class="">📄 Printable PDF Brief</td><td id="TemM" class="">1–2 pages for individual donor or event deck</td></tr></div><div style="display:contents" dir="ltr"><tr id="1e985df0-1907-800e-87b1-d05488b1709c"><td id="f[Na" class="">📊 Embedded HTML Summary</td><td id="TemM" class="">For newsletters or partner websites</td></tr></div><div style="display:contents" dir="ltr"><tr id="1e985df0-1907-80da-a50f-f95af3e068b6"><td id="f[Na" class="">🧾 Quarterly Donor Dashboard (Notion)</td><td id="TemM" class="">Internal tracking &amp; unified report generation</td></tr></div><div style="display:contents" dir="ltr"><tr id="1e985df0-1907-8068-a2df-cfc4f7d19fce"><td id="f[Na" class="">📘 Annual Impact Compendium</td><td id="TemM" class="">Compiled year-long stories + meta-analysis</td></tr></div></tbody></table></div><div style="display:contents" dir="auto"><hr id="1e985df0-1907-8017-acd6-c8c395fa82d4"/></div><div style="display:contents" dir="auto"><h2 id="1e985df0-1907-8057-bc9f-ed08a271da3f" class="">🔁 Cross-Linked Tools</h2></div><div style="display:contents" dir="auto"><ul id="1e985df0-1907-80e8-aa76-f2c0c14cb256" class="bulleted-list"><li style="list-style-type:disc">🧾 Consent Ledger + Visual Asset Use Tracker</li></ul></div><div style="display:contents" dir="auto"><ul id="1e985df0-1907-8095-a367-cbb00cc9c4a6" class="bulleted-list"><li style="list-style-type:disc">🔁 Data Feedback &amp; Learning Loop</li></ul></div><div style="display:contents" dir="auto"><ul id="1e985df0-1907-802f-a29f-e3ea6f09b2ec" class="bulleted-list"><li style="list-style-type:disc">📘 Storyboard Generator Template</li></ul></div><div style="display:contents" dir="auto"><ul id="1e985df0-1907-80d7-9415-c6b7c286f28d" class="bulleted-list"><li style="list-style-type:disc">📄 Donor Relationship Tracker (CRM-ready)</li></ul></div><div style="display:contents" dir="auto"><ul id="1e985df0-1907-80ae-a064-cab91fadb397" class="bulleted-list"><li style="list-style-type:disc">📊 Deployment Console → Export Snapshot</li></ul></div><div style="display:contents" dir="auto"><ul id="1e985df0-1907-8015-9610-e673b16861b8" class="bulleted-list"><li style="list-style-type:disc">🔐 Data Redaction &amp; Report QA Checklist</li></ul></div><div style="display:contents" dir="auto"><hr id="1e985df0-1907-8008-92ec-d20df22c8561"/></div><div style="display:contents" dir="auto"><h2 id="1e985df0-1907-8028-b809-f76fca9d727c" class="">✅ Quick Readiness Checklist (Before Report Submission)</h2></div><div style="display:contents" dir="ltr"><table id="1e985df0-1907-800e-9842-dd06fddd27fe" class="simple-table"><tbody><div style="display:contents" dir="ltr"><tr id="1e985df0-1907-8022-b1d7-d5c2b427c5cc"><td id=":iKC" class="">Requirement</td><td id="DzKr" class="">Complete?</td></tr></div><div style="display:contents" dir="ltr"><tr id="1e985df0-1907-80e1-b898-ece51c7d787d"><td id=":iKC" class="">Opt-in verified for every quote or image</td><td id="DzKr" class="">✅</td></tr></div><div style="display:contents" dir="ltr"><tr id="1e985df0-1907-802e-aca0-c03adc1d32f0"><td id=":iKC" class="">Reflection text redacted or paraphrased</td><td id="DzKr" class="">✅</td></tr></div><div style="display:contents" dir="ltr"><tr id="1e985df0-1907-8052-a91e-fbe1fc102b14"><td id=":iKC" class="">Regional deployment data accurate</td><td id="DzKr" class="">✅</td></tr></div><div style="display:contents" dir="ltr"><tr id="1e985df0-1907-8093-8462-e1dab16f914e"><td id=":iKC" class="">Partner/NGO voice included</td><td id="DzKr" class="">✅</td></tr></div><div style="display:contents" dir="ltr"><tr id="1e985df0-1907-802f-b816-e887cd6d3ea6"><td id=":iKC" class="">Donor CTA or gratitude message present</td><td id="DzKr" class="">✅</td></tr></div><div style="display:contents" dir="ltr"><tr id="1e985df0-1907-80e8-ab42-c339f963e34c"><td id=":iKC" class="">Visual content stripped of identifiers</td><td id="DzKr" class="">✅</td></tr></div></tbody></table></div></div></article><span class="sans" style="font-size:14px;padding-top:2em"></span></body></html>

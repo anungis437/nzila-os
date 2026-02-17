@@ -1,0 +1,713 @@
+<html><head><meta http-equiv="Content-Type" content="text/html; charset=utf-8"/><title>🎮 Gamified Experiences</title><style>
+/* cspell:disable-file */
+/* webkit printing magic: print all background colors */
+html {
+	-webkit-print-color-adjust: exact;
+}
+* {
+	box-sizing: border-box;
+	-webkit-print-color-adjust: exact;
+}
+
+html,
+body {
+	margin: 0;
+	padding: 0;
+}
+@media only screen {
+	body {
+		margin: 2em auto;
+		max-width: 900px;
+		color: rgb(55, 53, 47);
+	}
+}
+
+body {
+	line-height: 1.5;
+	white-space: pre-wrap;
+}
+
+a,
+a.visited {
+	color: inherit;
+	text-decoration: underline;
+}
+
+.pdf-relative-link-path {
+	font-size: 80%;
+	color: #444;
+}
+
+h1,
+h2,
+h3 {
+	letter-spacing: -0.01em;
+	line-height: 1.2;
+	font-weight: 600;
+	margin-bottom: 0;
+}
+
+/* Override strong tags inside headings to maintain consistent weight */
+h1 strong,
+h2 strong,
+h3 strong {
+	font-weight: 600;
+}
+
+.page-title {
+	font-size: 2.5rem;
+	font-weight: 700;
+	margin-top: 0;
+	margin-bottom: 0.75em;
+}
+
+h1 {
+	font-size: 1.875rem;
+	margin-top: 1.875rem;
+}
+
+h2 {
+	font-size: 1.5rem;
+	margin-top: 1.5rem;
+}
+
+h3 {
+	font-size: 1.25rem;
+	margin-top: 1.25rem;
+}
+
+.source {
+	border: 1px solid #ddd;
+	border-radius: 3px;
+	padding: 1.5em;
+	word-break: break-all;
+}
+
+.callout {
+	border-radius: 10px;
+	padding: 1rem;
+}
+
+figure {
+	margin: 1.25em 0;
+	page-break-inside: avoid;
+}
+
+figcaption {
+	opacity: 0.5;
+	font-size: 85%;
+	margin-top: 0.5em;
+}
+
+mark {
+	background-color: transparent;
+}
+
+.indented {
+	padding-left: 1.5em;
+}
+
+hr {
+	background: transparent;
+	display: block;
+	width: 100%;
+	height: 1px;
+	visibility: visible;
+	border: none;
+	border-bottom: 1px solid rgba(55, 53, 47, 0.09);
+}
+
+img {
+	max-width: 100%;
+}
+
+@media only print {
+	img {
+		max-height: 100vh;
+		object-fit: contain;
+	}
+}
+
+@page {
+	margin: 1in;
+}
+
+.collection-content {
+	font-size: 0.875rem;
+}
+
+.collection-content td {
+	white-space: pre-wrap;
+	word-break: break-word;
+}
+
+.column-list {
+	display: flex;
+	justify-content: space-between;
+}
+
+.column {
+	padding: 0 1em;
+}
+
+.column:first-child {
+	padding-left: 0;
+}
+
+.column:last-child {
+	padding-right: 0;
+}
+
+.table_of_contents-item {
+	display: block;
+	font-size: 0.875rem;
+	line-height: 1.3;
+	padding: 0.125rem;
+}
+
+.table_of_contents-indent-1 {
+	margin-left: 1.5rem;
+}
+
+.table_of_contents-indent-2 {
+	margin-left: 3rem;
+}
+
+.table_of_contents-indent-3 {
+	margin-left: 4.5rem;
+}
+
+.table_of_contents-link {
+	text-decoration: none;
+	opacity: 0.7;
+	border-bottom: 1px solid rgba(55, 53, 47, 0.18);
+}
+
+table,
+th,
+td {
+	border: 1px solid rgba(55, 53, 47, 0.09);
+	border-collapse: collapse;
+}
+
+table {
+	border-left: none;
+	border-right: none;
+}
+
+th,
+td {
+	font-weight: normal;
+	padding: 0.25em 0.5em;
+	line-height: 1.5;
+	min-height: 1.5em;
+	text-align: left;
+}
+
+th {
+	color: rgba(55, 53, 47, 0.6);
+}
+
+ol,
+ul {
+	margin: 0;
+	margin-block-start: 0.6em;
+	margin-block-end: 0.6em;
+}
+
+li > ol:first-child,
+li > ul:first-child {
+	margin-block-start: 0.6em;
+}
+
+ul > li {
+	list-style: disc;
+}
+
+ul.to-do-list {
+	padding-inline-start: 0;
+}
+
+ul.to-do-list > li {
+	list-style: none;
+}
+
+.to-do-children-checked {
+	text-decoration: line-through;
+	opacity: 0.375;
+}
+
+ul.toggle > li {
+	list-style: none;
+}
+
+ul {
+	padding-inline-start: 1.7em;
+}
+
+ul > li {
+	padding-left: 0.1em;
+}
+
+ol {
+	padding-inline-start: 1.6em;
+}
+
+ol > li {
+	padding-left: 0.2em;
+}
+
+.mono ol {
+	padding-inline-start: 2em;
+}
+
+.mono ol > li {
+	text-indent: -0.4em;
+}
+
+.toggle {
+	padding-inline-start: 0em;
+	list-style-type: none;
+}
+
+/* Indent toggle children */
+.toggle > li > details {
+	padding-left: 1.7em;
+}
+
+.toggle > li > details > summary {
+	margin-left: -1.1em;
+}
+
+.selected-value {
+	display: inline-block;
+	padding: 0 0.5em;
+	background: rgba(206, 205, 202, 0.5);
+	border-radius: 3px;
+	margin-right: 0.5em;
+	margin-top: 0.3em;
+	margin-bottom: 0.3em;
+	white-space: nowrap;
+}
+
+.collection-title {
+	display: inline-block;
+	margin-right: 1em;
+}
+
+.page-description {
+	margin-bottom: 2em;
+}
+
+.simple-table {
+	margin-top: 1em;
+	font-size: 0.875rem;
+	empty-cells: show;
+}
+.simple-table td {
+	height: 29px;
+	min-width: 120px;
+}
+
+.simple-table th {
+	height: 29px;
+	min-width: 120px;
+}
+
+.simple-table-header-color {
+	background: rgb(247, 246, 243);
+	color: black;
+}
+.simple-table-header {
+	font-weight: 500;
+}
+
+time {
+	opacity: 0.5;
+}
+
+.icon {
+	display: inline-flex;
+	align-items: center;
+	justify-content: center;
+	max-width: 1.2em;
+	max-height: 1.2em;
+	text-decoration: none;
+	vertical-align: text-bottom;
+	margin-right: 0.5em;
+}
+
+img.icon {
+	border-radius: 3px;
+}
+
+.callout img.notion-static-icon {
+	width: 1em;
+	height: 1em;
+}
+
+.callout p {
+	margin: 0;
+}
+
+.callout h1,
+.callout h2,
+.callout h3 {
+	margin: 0 0 0.6rem;
+}
+
+.user-icon {
+	width: 1.5em;
+	height: 1.5em;
+	border-radius: 100%;
+	margin-right: 0.5rem;
+}
+
+.user-icon-inner {
+	font-size: 0.8em;
+}
+
+.text-icon {
+	border: 1px solid #000;
+	text-align: center;
+}
+
+.page-cover-image {
+	display: block;
+	object-fit: cover;
+	width: 100%;
+	max-height: 30vh;
+}
+
+.page-header-icon {
+	font-size: 3rem;
+	margin-bottom: 1rem;
+}
+
+.page-header-icon-with-cover {
+	margin-top: -0.72em;
+	margin-left: 0.07em;
+}
+
+.page-header-icon img {
+	border-radius: 3px;
+}
+
+.link-to-page {
+	margin: 1em 0;
+	padding: 0;
+	border: none;
+	font-weight: 500;
+}
+
+p > .user {
+	opacity: 0.5;
+}
+
+td > .user,
+td > time {
+	white-space: nowrap;
+}
+
+input[type="checkbox"] {
+	transform: scale(1.5);
+	margin-right: 0.6em;
+	vertical-align: middle;
+}
+
+p {
+	margin-top: 0.5em;
+	margin-bottom: 0.5em;
+}
+
+.image {
+	border: none;
+	margin: 1.5em 0;
+	padding: 0;
+	border-radius: 0;
+	text-align: center;
+}
+
+.code,
+code {
+	background: rgba(135, 131, 120, 0.15);
+	border-radius: 3px;
+	padding: 0.2em 0.4em;
+	border-radius: 3px;
+	font-size: 85%;
+	tab-size: 2;
+}
+
+code {
+	color: #eb5757;
+}
+
+.code {
+	padding: 1.5em 1em;
+}
+
+.code-wrap {
+	white-space: pre-wrap;
+	word-break: break-all;
+}
+
+.code > code {
+	background: none;
+	padding: 0;
+	font-size: 100%;
+	color: inherit;
+}
+
+blockquote {
+	font-size: 1em;
+	margin: 1em 0;
+	padding-left: 1em;
+	border-left: 3px solid rgb(55, 53, 47);
+}
+
+blockquote.quote-large {
+	font-size: 1.25em;
+}
+
+.bookmark {
+	text-decoration: none;
+	max-height: 8em;
+	padding: 0;
+	display: flex;
+	width: 100%;
+	align-items: stretch;
+}
+
+.bookmark-title {
+	font-size: 0.85em;
+	overflow: hidden;
+	text-overflow: ellipsis;
+	height: 1.75em;
+	white-space: nowrap;
+}
+
+.bookmark-text {
+	display: flex;
+	flex-direction: column;
+}
+
+.bookmark-info {
+	flex: 4 1 180px;
+	padding: 12px 14px 14px;
+	display: flex;
+	flex-direction: column;
+	justify-content: space-between;
+}
+
+.bookmark-image {
+	width: 33%;
+	flex: 1 1 180px;
+	display: block;
+	position: relative;
+	object-fit: cover;
+	border-radius: 1px;
+}
+
+.bookmark-description {
+	color: rgba(55, 53, 47, 0.6);
+	font-size: 0.75em;
+	overflow: hidden;
+	max-height: 4.5em;
+	word-break: break-word;
+}
+
+.bookmark-href {
+	font-size: 0.75em;
+	margin-top: 0.25em;
+}
+
+.sans { font-family: ui-sans-serif, -apple-system, BlinkMacSystemFont, "Segoe UI Variable Display", "Segoe UI", Helvetica, "Apple Color Emoji", "Noto Sans Arabic", "Noto Sans Hebrew", Arial, sans-serif, "Segoe UI Emoji", "Segoe UI Symbol"; }
+.code { font-family: "SFMono-Regular", Menlo, Consolas, "PT Mono", "Liberation Mono", Courier, monospace; }
+.serif { font-family: Lyon-Text, Georgia, ui-serif, serif; }
+.mono { font-family: iawriter-mono, Nitti, Menlo, Courier, monospace; }
+.pdf .sans { font-family: Inter, ui-sans-serif, -apple-system, BlinkMacSystemFont, "Segoe UI Variable Display", "Segoe UI", Helvetica, "Apple Color Emoji", "Noto Sans Arabic", "Noto Sans Hebrew", Arial, sans-serif, "Segoe UI Emoji", "Segoe UI Symbol", 'Twemoji', 'Noto Color Emoji', 'Noto Sans CJK JP'; }
+.pdf:lang(zh-CN) .sans { font-family: Inter, ui-sans-serif, -apple-system, BlinkMacSystemFont, "Segoe UI Variable Display", "Segoe UI", Helvetica, "Apple Color Emoji", "Noto Sans Arabic", "Noto Sans Hebrew", Arial, sans-serif, "Segoe UI Emoji", "Segoe UI Symbol", 'Twemoji', 'Noto Color Emoji', 'Noto Sans CJK SC'; }
+.pdf:lang(zh-TW) .sans { font-family: Inter, ui-sans-serif, -apple-system, BlinkMacSystemFont, "Segoe UI Variable Display", "Segoe UI", Helvetica, "Apple Color Emoji", "Noto Sans Arabic", "Noto Sans Hebrew", Arial, sans-serif, "Segoe UI Emoji", "Segoe UI Symbol", 'Twemoji', 'Noto Color Emoji', 'Noto Sans CJK TC'; }
+.pdf:lang(ko-KR) .sans { font-family: Inter, ui-sans-serif, -apple-system, BlinkMacSystemFont, "Segoe UI Variable Display", "Segoe UI", Helvetica, "Apple Color Emoji", "Noto Sans Arabic", "Noto Sans Hebrew", Arial, sans-serif, "Segoe UI Emoji", "Segoe UI Symbol", 'Twemoji', 'Noto Color Emoji', 'Noto Sans CJK KR'; }
+.pdf .code { font-family: Source Code Pro, "SFMono-Regular", Menlo, Consolas, "PT Mono", "Liberation Mono", Courier, monospace, 'Twemoji', 'Noto Color Emoji', 'Noto Sans Mono CJK JP'; }
+.pdf:lang(zh-CN) .code { font-family: Source Code Pro, "SFMono-Regular", Menlo, Consolas, "PT Mono", "Liberation Mono", Courier, monospace, 'Twemoji', 'Noto Color Emoji', 'Noto Sans Mono CJK SC'; }
+.pdf:lang(zh-TW) .code { font-family: Source Code Pro, "SFMono-Regular", Menlo, Consolas, "PT Mono", "Liberation Mono", Courier, monospace, 'Twemoji', 'Noto Color Emoji', 'Noto Sans Mono CJK TC'; }
+.pdf:lang(ko-KR) .code { font-family: Source Code Pro, "SFMono-Regular", Menlo, Consolas, "PT Mono", "Liberation Mono", Courier, monospace, 'Twemoji', 'Noto Color Emoji', 'Noto Sans Mono CJK KR'; }
+.pdf .serif { font-family: PT Serif, Lyon-Text, Georgia, ui-serif, serif, 'Twemoji', 'Noto Color Emoji', 'Noto Serif CJK JP'; }
+.pdf:lang(zh-CN) .serif { font-family: PT Serif, Lyon-Text, Georgia, ui-serif, serif, 'Twemoji', 'Noto Color Emoji', 'Noto Serif CJK SC'; }
+.pdf:lang(zh-TW) .serif { font-family: PT Serif, Lyon-Text, Georgia, ui-serif, serif, 'Twemoji', 'Noto Color Emoji', 'Noto Serif CJK TC'; }
+.pdf:lang(ko-KR) .serif { font-family: PT Serif, Lyon-Text, Georgia, ui-serif, serif, 'Twemoji', 'Noto Color Emoji', 'Noto Serif CJK KR'; }
+.pdf .mono { font-family: PT Mono, iawriter-mono, Nitti, Menlo, Courier, monospace, 'Twemoji', 'Noto Color Emoji', 'Noto Sans Mono CJK JP'; }
+.pdf:lang(zh-CN) .mono { font-family: PT Mono, iawriter-mono, Nitti, Menlo, Courier, monospace, 'Twemoji', 'Noto Color Emoji', 'Noto Sans Mono CJK SC'; }
+.pdf:lang(zh-TW) .mono { font-family: PT Mono, iawriter-mono, Nitti, Menlo, Courier, monospace, 'Twemoji', 'Noto Color Emoji', 'Noto Sans Mono CJK TC'; }
+.pdf:lang(ko-KR) .mono { font-family: PT Mono, iawriter-mono, Nitti, Menlo, Courier, monospace, 'Twemoji', 'Noto Color Emoji', 'Noto Sans Mono CJK KR'; }
+.highlight-default {
+	color: rgba(44, 44, 43, 1);
+}
+.highlight-gray {
+	color: rgba(125, 122, 117, 1);
+	fill: rgba(125, 122, 117, 1);
+}
+.highlight-brown {
+	color: rgba(159, 118, 90, 1);
+	fill: rgba(159, 118, 90, 1);
+}
+.highlight-orange {
+	color: rgba(210, 123, 45, 1);
+	fill: rgba(210, 123, 45, 1);
+}
+.highlight-yellow {
+	color: rgba(203, 148, 52, 1);
+	fill: rgba(203, 148, 52, 1);
+}
+.highlight-teal {
+	color: rgba(80, 148, 110, 1);
+	fill: rgba(80, 148, 110, 1);
+}
+.highlight-blue {
+	color: rgba(56, 125, 201, 1);
+	fill: rgba(56, 125, 201, 1);
+}
+.highlight-purple {
+	color: rgba(154, 107, 180, 1);
+	fill: rgba(154, 107, 180, 1);
+}
+.highlight-pink {
+	color: rgba(193, 76, 138, 1);
+	fill: rgba(193, 76, 138, 1);
+}
+.highlight-red {
+	color: rgba(207, 81, 72, 1);
+	fill: rgba(207, 81, 72, 1);
+}
+.highlight-default_background {
+	color: rgba(44, 44, 43, 1);
+}
+.highlight-gray_background {
+	background: rgba(42, 28, 0, 0.07);
+}
+.highlight-brown_background {
+	background: rgba(139, 46, 0, 0.086);
+}
+.highlight-orange_background {
+	background: rgba(224, 101, 1, 0.129);
+}
+.highlight-yellow_background {
+	background: rgba(211, 168, 0, 0.137);
+}
+.highlight-teal_background {
+	background: rgba(0, 100, 45, 0.09);
+}
+.highlight-blue_background {
+	background: rgba(0, 124, 215, 0.094);
+}
+.highlight-purple_background {
+	background: rgba(102, 0, 178, 0.078);
+}
+.highlight-pink_background {
+	background: rgba(197, 0, 93, 0.086);
+}
+.highlight-red_background {
+	background: rgba(223, 22, 0, 0.094);
+}
+.block-color-default {
+	color: inherit;
+	fill: inherit;
+}
+.block-color-gray {
+	color: rgba(125, 122, 117, 1);
+	fill: rgba(125, 122, 117, 1);
+}
+.block-color-brown {
+	color: rgba(159, 118, 90, 1);
+	fill: rgba(159, 118, 90, 1);
+}
+.block-color-orange {
+	color: rgba(210, 123, 45, 1);
+	fill: rgba(210, 123, 45, 1);
+}
+.block-color-yellow {
+	color: rgba(203, 148, 52, 1);
+	fill: rgba(203, 148, 52, 1);
+}
+.block-color-teal {
+	color: rgba(80, 148, 110, 1);
+	fill: rgba(80, 148, 110, 1);
+}
+.block-color-blue {
+	color: rgba(56, 125, 201, 1);
+	fill: rgba(56, 125, 201, 1);
+}
+.block-color-purple {
+	color: rgba(154, 107, 180, 1);
+	fill: rgba(154, 107, 180, 1);
+}
+.block-color-pink {
+	color: rgba(193, 76, 138, 1);
+	fill: rgba(193, 76, 138, 1);
+}
+.block-color-red {
+	color: rgba(207, 81, 72, 1);
+	fill: rgba(207, 81, 72, 1);
+}
+.block-color-default_background {
+	color: inherit;
+	fill: inherit;
+}
+.block-color-gray_background {
+	background: rgba(240, 239, 237, 1);
+}
+.block-color-brown_background {
+	background: rgba(245, 237, 233, 1);
+}
+.block-color-orange_background {
+	background: rgba(251, 235, 222, 1);
+}
+.block-color-yellow_background {
+	background: rgba(249, 243, 220, 1);
+}
+.block-color-teal_background {
+	background: rgba(232, 241, 236, 1);
+}
+.block-color-blue_background {
+	background: rgba(229, 242, 252, 1);
+}
+.block-color-purple_background {
+	background: rgba(243, 235, 249, 1);
+}
+.block-color-pink_background {
+	background: rgba(250, 233, 241, 1);
+}
+.block-color-red_background {
+	background: rgba(252, 233, 231, 1);
+}
+.select-value-color-default { background-color: rgba(42, 28, 0, 0.07); }
+.select-value-color-gray { background-color: rgba(28, 19, 1, 0.11); }
+.select-value-color-brown { background-color: rgba(127, 51, 0, 0.156); }
+.select-value-color-orange { background-color: rgba(196, 88, 0, 0.203); }
+.select-value-color-yellow { background-color: rgba(209, 156, 0, 0.282); }
+.select-value-color-green { background-color: rgba(0, 96, 38, 0.156); }
+.select-value-color-blue { background-color: rgba(0, 118, 217, 0.203); }
+.select-value-color-purple { background-color: rgba(92, 0, 163, 0.141); }
+.select-value-color-pink { background-color: rgba(183, 0, 78, 0.152); }
+.select-value-color-red { background-color: rgba(206, 24, 0, 0.164); }
+
+.checkbox {
+	display: inline-flex;
+	vertical-align: text-bottom;
+	width: 16;
+	height: 16;
+	background-size: 16px;
+	margin-left: 2px;
+	margin-right: 5px;
+}
+
+.checkbox-on {
+	background-image: url("data:image/svg+xml;charset=UTF-8,%3Csvg%20width%3D%2216%22%20height%3D%2216%22%20viewBox%3D%220%200%2016%2016%22%20fill%3D%22none%22%20xmlns%3D%22http%3A%2F%2Fwww.w3.org%2F2000%2Fsvg%22%3E%0A%3Crect%20width%3D%2216%22%20height%3D%2216%22%20fill%3D%22%2358A9D7%22%2F%3E%0A%3Cpath%20d%3D%22M6.71429%2012.2852L14%204.9995L12.7143%203.71436L6.71429%209.71378L3.28571%206.2831L2%207.57092L6.71429%2012.2852Z%22%20fill%3D%22white%22%2F%3E%0A%3C%2Fsvg%3E");
+}
+
+.checkbox-off {
+	background-image: url("data:image/svg+xml;charset=UTF-8,%3Csvg%20width%3D%2216%22%20height%3D%2216%22%20viewBox%3D%220%200%2016%2016%22%20fill%3D%22none%22%20xmlns%3D%22http%3A%2F%2Fwww.w3.org%2F2000%2Fsvg%22%3E%0A%3Crect%20x%3D%220.75%22%20y%3D%220.75%22%20width%3D%2214.5%22%20height%3D%2214.5%22%20fill%3D%22white%22%20stroke%3D%22%2336352F%22%20stroke-width%3D%221.5%22%2F%3E%0A%3C%2Fsvg%3E");
+}
+	
+</style></head><body><article id="1e885df0-1907-8023-a4f9-c058840fd0b5" class="page sans"><header><h1 class="page-title" dir="auto">🎮 <strong>Gamified Experiences</strong></h1><p class="page-description" dir="auto"></p><table class="properties"><tbody><tr class="property-row property-row-person"><th><span class="icon property-icon"><img src="https://www.notion.so/icons/friends_gray.svg" style="width:14px;height:14px;display:block"/></span>Owner</th><td><span class="user"><span class="icon text-icon user-icon"><span class="user-icon-inner">A</span></span>Aubert</span></td></tr><tr class="property-row property-row-multi_select"><th><span class="icon property-icon"><img src="https://www.notion.so/icons/list_gray.svg" style="width:14px;height:14px;display:block"/></span>Tags</th><td></td></tr></tbody></table></header><div class="page-body"><div style="display:contents" dir="auto"><h3 id="1e885df0-1907-800c-9f05-c52e119d6139" class=""><strong>. Purpose</strong></h3></div><div style="display:contents" dir="auto"><p id="1e885df0-1907-8017-8abc-c8d86c328a0b" class="">This document defines Memora’s approach to <strong>non-coercive, cognition-friendly gamification</strong>. Games and mechanics are designed to:</p></div><div style="display:contents" dir="auto"><ul id="1e885df0-1907-80b6-ab39-ea60a71cf666" class="bulleted-list"><li style="list-style-type:disc">Encourage <strong>gentle routine-building</strong>, not performance pressure</li></ul></div><div style="display:contents" dir="auto"><ul id="1e885df0-1907-803a-b275-d4b5d35402da" class="bulleted-list"><li style="list-style-type:disc">Support <strong>adaptive pacing</strong> and rest</li></ul></div><div style="display:contents" dir="auto"><ul id="1e885df0-1907-80b6-b1c1-db6c0bf320e8" class="bulleted-list"><li style="list-style-type:disc">Respect cognitive load, age, and accessibility</li></ul></div><div style="display:contents" dir="auto"><ul id="1e885df0-1907-8097-b1ec-ee9e21e12881" class="bulleted-list"><li style="list-style-type:disc">Remain fully <strong>explainable</strong>, <strong>consent-gated</strong>, and <strong>tone-moderated</strong></li></ul></div><div style="display:contents" dir="auto"><p id="1e885df0-1907-809b-87c4-f5f7c4b59504" class="">Gamification in Memora is <strong>fatigue-aware</strong> and governed by our AI &amp; Ethics Charter, Accessibility Implementation Guide, and Prompt Library.</p></div><div style="display:contents" dir="auto"><hr id="1e885df0-1907-80de-9579-da19b17d0d3e"/></div><div style="display:contents" dir="auto"><h3 id="1e885df0-1907-80e1-b237-dc20eb33691b" class=""><strong>2. Gamification Philosophy</strong></h3></div><div style="display:contents" dir="ltr"><table id="1e885df0-1907-80da-a606-c276b92b426c" class="simple-table"><tbody><div style="display:contents" dir="ltr"><tr id="1e885df0-1907-807c-b235-ff2b349f51a7"><td id="z[c_" class="">Principle</td><td id="VAMP" class="" style="width:515px">Practice</td></tr></div><div style="display:contents" dir="ltr"><tr id="1e885df0-1907-800a-a833-d6b5ec3770ec"><td id="z[c_" class=""><strong>Non-punitive</strong></td><td id="VAMP" class="" style="width:515px">No failure states, no streak loss notification</td></tr></div><div style="display:contents" dir="ltr"><tr id="1e885df0-1907-80fd-86b9-d55e3e53ee22"><td id="z[c_" class=""><strong>Cognitively supportive</strong></td><td id="VAMP" class="" style="width:515px">Exercises focus, memory, and pattern skills in short sessions</td></tr></div><div style="display:contents" dir="ltr"><tr id="1e885df0-1907-800a-adb5-ea900208fdf1"><td id="z[c_" class=""><strong>Voluntary</strong></td><td id="VAMP" class="" style="width:515px">Games are never forced; suggested softly</td></tr></div><div style="display:contents" dir="ltr"><tr id="1e885df0-1907-8015-8054-fd1f0b77517c"><td id="z[c_" class=""><strong>Inclusive</strong></td><td id="VAMP" class="" style="width:515px">Designed with aging adults, accessibility users, and caregivers in mind</td></tr></div><div style="display:contents" dir="ltr"><tr id="1e885df0-1907-8025-a625-cfcc413e81aa"><td id="z[c_" class=""><strong>Tone-calibrated</strong></td><td id="VAMP" class="" style="width:515px">Companion uses affirming tone only; no pressure-based triggers</td></tr></div></tbody></table></div><div style="display:contents" dir="auto"><hr id="1e885df0-1907-8027-aa32-d5067848cf5c"/></div><div style="display:contents" dir="auto"><h3 id="1e885df0-1907-8099-af52-ccfeece01cb5" class=""><strong>3. Game Library (MVP)</strong></h3></div><div style="display:contents" dir="ltr"><table id="1e885df0-1907-8041-92b4-fcfd940e6089" class="simple-table"><tbody><div style="display:contents" dir="ltr"><tr id="1e885df0-1907-80f1-8673-ce963a6b0876"><td id="&gt;&gt;v|" class="">Game</td><td id="cYzr" class="">Cognitive Focus</td><td id="HHX_" class="">Description</td></tr></div><div style="display:contents" dir="ltr"><tr id="1e885df0-1907-80a0-af6a-d84323475741"><td id="&gt;&gt;v|" class=""><strong>Memory Match</strong></td><td id="cYzr" class="">Recall</td><td id="HHX_" class="">Match paired icons in a grid with limited turns</td></tr></div><div style="display:contents" dir="ltr"><tr id="1e885df0-1907-80a2-bac8-f4c28d3a31ed"><td id="&gt;&gt;v|" class=""><strong>Sequence Builder</strong></td><td id="cYzr" class="">Pattern recognition</td><td id="HHX_" class="">Tap icons in a shown order after a short display</td></tr></div><div style="display:contents" dir="ltr"><tr id="1e885df0-1907-8004-add8-c71925f248f9"><td id="&gt;&gt;v|" class=""><strong>Category Sorter</strong></td><td id="cYzr" class="">Semantic association</td><td id="HHX_" class="">Drag and drop words/images into logical groups</td></tr></div></tbody></table></div><div style="display:contents" dir="auto"><p id="1e885df0-1907-8033-92ff-eccd40fbd7dc" class="">Each game is localized, accessible (44px+ targets), and &lt;5 minutes to complete.</p></div><div style="display:contents" dir="auto"><hr id="1e885df0-1907-80cb-9876-ff82ab1beb51"/></div><div style="display:contents" dir="auto"><h3 id="1e885df0-1907-80be-b188-d01eb214e11b" class=""><strong>4. Companion Integration</strong></h3></div><div style="display:contents" dir="ltr"><table id="1e885df0-1907-8054-a4fb-f30f3eebacff" class="simple-table"><tbody><div style="display:contents" dir="ltr"><tr id="1e885df0-1907-8037-bbe0-ec12ab5c39e1"><td id="xcz;" class="">Moment</td><td id="v&gt;Yt" class="" style="width:382px">Behavior</td></tr></div><div style="display:contents" dir="ltr"><tr id="1e885df0-1907-8081-883e-fac02581b91e"><td id="xcz;" class="">Pre-game</td><td id="v&gt;Yt" class="" style="width:382px">Suggestion: “Let’s sharpen our memory — want to try Sequence Builder today?” [<code>neutral</code>]</td></tr></div><div style="display:contents" dir="ltr"><tr id="1e885df0-1907-804c-8453-e60426fdbcec"><td id="xcz;" class="">In-game</td><td id="v&gt;Yt" class="" style="width:382px">Companion remains silent; no interruption</td></tr></div><div style="display:contents" dir="ltr"><tr id="1e885df0-1907-8086-9b5b-f63a0fffad66"><td id="xcz;" class="">Post-game</td><td id="v&gt;Yt" class="" style="width:382px">“That was focused time well spent!” [<code>warm</code>] if engagement was ≥60 seconds</td></tr></div></tbody></table></div><div style="display:contents" dir="auto"><p id="1e885df0-1907-8031-8e42-c61878d8aa0e" class="">Companion tone adapts to streaks, fatigue, and prior dismissals.</p></div><div style="display:contents" dir="auto"><hr id="1e885df0-1907-8020-a577-c67f913aaafe"/></div><div style="display:contents" dir="auto"><h3 id="1e885df0-1907-806d-b59e-d69b525e9f7e" class=""><strong>5. Motivation Systems (Phase 1)</strong></h3></div><div style="display:contents" dir="ltr"><table id="1e885df0-1907-80c1-aa78-cbf16d0a5edf" class="simple-table"><tbody><div style="display:contents" dir="ltr"><tr id="1e885df0-1907-80a9-aa8d-c5a15587abf8"><td id="OpGn" class="">Feature</td><td id="~QgC" class="" style="width:360px">Description</td></tr></div><div style="display:contents" dir="ltr"><tr id="1e885df0-1907-8024-ba4c-c60bfe2bfcfc"><td id="OpGn" class=""><strong>Daily streaks</strong></td><td id="~QgC" class="" style="width:360px">Track of consecutive days with any game activity (max 7)</td></tr></div><div style="display:contents" dir="ltr"><tr id="1e885df0-1907-80c6-8756-dba8a35f5204"><td id="OpGn" class=""><strong>Progress bar</strong></td><td id="~QgC" class="" style="width:360px">Visual indicator of completion per game</td></tr></div><div style="display:contents" dir="ltr"><tr id="1e885df0-1907-803b-b605-fe1b09f0e876"><td id="OpGn" class=""><strong>Badges (non-public)</strong></td><td id="~QgC" class="" style="width:360px">Local-only icons shown for 3-, 5-, 7-day milestones</td></tr></div><div style="display:contents" dir="ltr"><tr id="1e885df0-1907-8009-8488-e9ac50503ec7"><td id="OpGn" class=""><strong>Session recap</strong></td><td id="~QgC" class="" style="width:360px">Light summary of games played and minutes engaged</td></tr></div></tbody></table></div><div style="display:contents" dir="auto"><p id="1e885df0-1907-8088-b716-d857e2be4e6b" class="">No rewards are ever shared or compared between users. All gamification is private and purpose-driven.</p></div><div style="display:contents" dir="auto"><hr id="1e885df0-1907-80cf-97b8-f73f01bb9593"/></div><div style="display:contents" dir="auto"><h3 id="1e885df0-1907-8082-8f11-d861ccdb5b53" class=""><strong>6. Fatigue Safeguards</strong></h3></div><div style="display:contents" dir="ltr"><table id="1e885df0-1907-80fc-b630-e6b88211ff62" class="simple-table"><tbody><div style="display:contents" dir="ltr"><tr id="1e885df0-1907-8064-b3eb-ee33982b5b8f"><td id="v@kh" class="">Trigger</td><td id="C:GA" class="">Response</td></tr></div><div style="display:contents" dir="ltr"><tr id="1e885df0-1907-80d0-ad3f-e31b3d2fa19a"><td id="v@kh" class="">3+ sessions in &lt;6 hours</td><td id="C:GA" class="">“You’ve been very active — feel like taking a break?” [<code>gentle</code>]</td></tr></div><div style="display:contents" dir="ltr"><tr id="1e885df0-1907-808d-8b65-dab90d2156fc"><td id="v@kh" class="">High dismissals of Companion prompts</td><td id="C:GA" class="">Pause gamified nudges for 48h</td></tr></div><div style="display:contents" dir="ltr"><tr id="1e885df0-1907-80b5-91e4-e726e2349f26"><td id="v@kh" class="">Rapid reset of Companion or config</td><td id="C:GA" class="">All badge systems suspended</td></tr></div></tbody></table></div><div style="display:contents" dir="auto"><p id="1e885df0-1907-80e8-84ce-cb739fbf1581" class="">Rest is always encouraged after streaks. No messages imply failure.</p></div><div style="display:contents" dir="auto"><hr id="1e885df0-1907-80f3-ba57-ffca7486fbd6"/></div><div style="display:contents" dir="auto"><h3 id="1e885df0-1907-80d9-a476-fb7c7c6147f6" class=""><strong>7. Consent &amp; Memory Governance</strong></h3></div><div style="display:contents" dir="ltr"><table id="1e885df0-1907-8024-ad0a-ef13598395ea" class="simple-table"><tbody><div style="display:contents" dir="ltr"><tr id="1e885df0-1907-806a-9e02-ea92e0f8fa75"><td id="YLqG" class="">Area</td><td id="&lt;VMh" class="">Rule</td></tr></div><div style="display:contents" dir="ltr"><tr id="1e885df0-1907-8064-9bd3-c19f9dd6bd91"><td id="YLqG" class="">Streaks</td><td id="&lt;VMh" class="">Only shown if <code>memory_enabled = true</code></td></tr></div><div style="display:contents" dir="ltr"><tr id="1e885df0-1907-80d4-9568-ec55e6df2cd0"><td id="YLqG" class="">Companion suggestions</td><td id="&lt;VMh" class="">Require <code>companion_active = true</code></td></tr></div><div style="display:contents" dir="ltr"><tr id="1e885df0-1907-80da-880c-f86f92cc38b9"><td id="YLqG" class="">Badge display</td><td id="&lt;VMh" class="">Suppressed if Companion is muted, reset, or fatigue detected</td></tr></div><div style="display:contents" dir="ltr"><tr id="1e885df0-1907-8078-bdd2-ec5807249a0b"><td id="YLqG" class="">Caregiver visibility</td><td id="&lt;VMh" class="">Never includes streaks, scores, or badge data</td></tr></div></tbody></table></div><div style="display:contents" dir="auto"><hr id="1e885df0-1907-805b-b17b-d5c9345456e9"/></div><div style="display:contents" dir="auto"><h3 id="1e885df0-1907-80a3-8ca3-fdeb7d72d6b2" class=""><strong>8. Accessibility &amp; Bilingual Implementation</strong></h3></div><div style="display:contents" dir="ltr"><table id="1e885df0-1907-8070-af0b-e519b82c03e1" class="simple-table"><tbody><div style="display:contents" dir="ltr"><tr id="1e885df0-1907-8003-b668-ddd2dc4e6873"><td id="ZwGa" class="">Element</td><td id="el{;" class="">Safeguard</td></tr></div><div style="display:contents" dir="ltr"><tr id="1e885df0-1907-8058-aa85-dd6cc57ac08b"><td id="ZwGa" class="">Screen reader support</td><td id="el{;" class="">ARIA labels and narration-ready UI</td></tr></div><div style="display:contents" dir="ltr"><tr id="1e885df0-1907-80af-b7ba-c7aabb873fd6"><td id="ZwGa" class="">Contrast &amp; sizing</td><td id="el{;" class="">Meets WCAG 2.1 AA, tested in light/dark themes</td></tr></div><div style="display:contents" dir="ltr"><tr id="1e885df0-1907-80ed-a5d7-e7ea4bfe0c8f"><td id="ZwGa" class="">Language parity</td><td id="el{;" class="">French game instructions match tone, brevity, and clarity</td></tr></div><div style="display:contents" dir="ltr"><tr id="1e885df0-1907-8067-90fc-cc0af8bbe473"><td id="ZwGa" class="">Timer elements</td><td id="el{;" class="">Optional or disabled by default</td></tr></div></tbody></table></div><div style="display:contents" dir="auto"><p id="1e885df0-1907-80f6-b42c-ca93399f95fc" class="">Game mechanics are tested with screen reader and keyboard-only sessions (pilot clinics).</p></div><div style="display:contents" dir="auto"><hr id="1e885df0-1907-8072-8d7d-d6c2320535d4"/></div><div style="display:contents" dir="auto"><h3 id="1e885df0-1907-8047-a4e4-dd621abcb60e" class=""><strong>9. Future Expansion (Phase 2+)</strong></h3></div><div style="display:contents" dir="ltr"><table id="1e885df0-1907-8064-8c5c-c3d647258ce4" class="simple-table"><tbody><div style="display:contents" dir="ltr"><tr id="1e885df0-1907-806e-9c5b-d2800b72fa8e"><td id="NEzS" class="">Feature</td><td id="Xv==" class="">Notes</td></tr></div><div style="display:contents" dir="ltr"><tr id="1e885df0-1907-80ac-bff7-f476c5d5755e"><td id="NEzS" class=""><strong>Challenge Sets</strong></td><td id="Xv==" class="">Weekly goal: “Try all 3 games this week”</td></tr></div><div style="display:contents" dir="ltr"><tr id="1e885df0-1907-8097-9b72-ebfed73066a3"><td id="NEzS" class=""><strong>Story Mode</strong></td><td id="Xv==" class="">Guided sequences based on narrative arcs (with fatigue safeguards)</td></tr></div><div style="display:contents" dir="ltr"><tr id="1e885df0-1907-801a-8fd9-e02c4f790588"><td id="NEzS" class=""><strong>Game Progress Memory</strong></td><td id="Xv==" class="">Consent-based reference: “You last enjoyed Sequence Builder”</td></tr></div><div style="display:contents" dir="ltr"><tr id="1e885df0-1907-80d2-87f1-fe1ebc93f730"><td id="NEzS" class=""><strong>Game Tone Adaptation</strong></td><td id="Xv==" class="">Prompt tone matched to session energy level (if consented)</td></tr></div></tbody></table></div><div style="display:contents" dir="auto"><p id="1e885df0-1907-80f0-8bbd-c433774faefe" class="">All new features will be behind <strong>feature flags</strong> and reviewed by QA, Bilingual, and Compliance.</p></div><div style="display:contents" dir="auto"><hr id="1e885df0-1907-800d-92ed-cbc20d535ea9"/></div><div style="display:contents" dir="auto"><h3 id="1e885df0-1907-8017-960c-fdf6ca522b34" class=""><strong>10. Governance Links</strong></h3></div><div style="display:contents" dir="auto"><ul id="1e885df0-1907-8032-97b4-cac691d9a29a" class="bulleted-list"><li style="list-style-type:disc">🧠 [Companion Behavioral System]</li></ul></div><div style="display:contents" dir="auto"><ul id="1e885df0-1907-8036-a5c0-ce48554d2968" class="bulleted-list"><li style="list-style-type:disc">🧬 [Memory Graph Reference]</li></ul></div><div style="display:contents" dir="auto"><ul id="1e885df0-1907-8043-b3db-d97fe399afbe" class="bulleted-list"><li style="list-style-type:disc">🗣️ [Prompt Library]</li></ul></div><div style="display:contents" dir="auto"><ul id="1e885df0-1907-80a5-9964-efc752ff95e4" class="bulleted-list"><li style="list-style-type:disc">🔐 [Consent &amp; Privacy Flow]</li></ul></div><div style="display:contents" dir="auto"><ul id="1e885df0-1907-80ae-8547-d3ade497bdfc" class="bulleted-list"><li style="list-style-type:disc">🎯 [Scenario Playbooks]</li></ul></div><div style="display:contents" dir="auto"><ul id="1e885df0-1907-805d-bfa7-dc6f8313e39f" class="bulleted-list"><li style="list-style-type:disc">🧯 [Edge Cases &amp; Fail-Safes]</li></ul></div><div style="display:contents" dir="auto"><ul id="1e885df0-1907-80be-a0bf-fcac646c36e4" class="bulleted-list"><li style="list-style-type:disc">📋 [Accessibility Implementation Guide]</li></ul></div><div style="display:contents" dir="auto"><ul id="1e885df0-1907-80b9-9955-c642654cce42" class="bulleted-list"><li style="list-style-type:disc">📊 [Data Schema Overview]</li></ul></div></div></article><span class="sans" style="font-size:14px;padding-top:2em"></span></body></html>

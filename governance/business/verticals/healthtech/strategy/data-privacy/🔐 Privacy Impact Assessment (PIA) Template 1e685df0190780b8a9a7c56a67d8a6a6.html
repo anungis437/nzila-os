@@ -1,0 +1,713 @@
+<html><head><meta http-equiv="Content-Type" content="text/html; charset=utf-8"/><title>🔐 Privacy Impact Assessment (PIA) Template</title><style>
+/* cspell:disable-file */
+/* webkit printing magic: print all background colors */
+html {
+	-webkit-print-color-adjust: exact;
+}
+* {
+	box-sizing: border-box;
+	-webkit-print-color-adjust: exact;
+}
+
+html,
+body {
+	margin: 0;
+	padding: 0;
+}
+@media only screen {
+	body {
+		margin: 2em auto;
+		max-width: 900px;
+		color: rgb(55, 53, 47);
+	}
+}
+
+body {
+	line-height: 1.5;
+	white-space: pre-wrap;
+}
+
+a,
+a.visited {
+	color: inherit;
+	text-decoration: underline;
+}
+
+.pdf-relative-link-path {
+	font-size: 80%;
+	color: #444;
+}
+
+h1,
+h2,
+h3 {
+	letter-spacing: -0.01em;
+	line-height: 1.2;
+	font-weight: 600;
+	margin-bottom: 0;
+}
+
+/* Override strong tags inside headings to maintain consistent weight */
+h1 strong,
+h2 strong,
+h3 strong {
+	font-weight: 600;
+}
+
+.page-title {
+	font-size: 2.5rem;
+	font-weight: 700;
+	margin-top: 0;
+	margin-bottom: 0.75em;
+}
+
+h1 {
+	font-size: 1.875rem;
+	margin-top: 1.875rem;
+}
+
+h2 {
+	font-size: 1.5rem;
+	margin-top: 1.5rem;
+}
+
+h3 {
+	font-size: 1.25rem;
+	margin-top: 1.25rem;
+}
+
+.source {
+	border: 1px solid #ddd;
+	border-radius: 3px;
+	padding: 1.5em;
+	word-break: break-all;
+}
+
+.callout {
+	border-radius: 10px;
+	padding: 1rem;
+}
+
+figure {
+	margin: 1.25em 0;
+	page-break-inside: avoid;
+}
+
+figcaption {
+	opacity: 0.5;
+	font-size: 85%;
+	margin-top: 0.5em;
+}
+
+mark {
+	background-color: transparent;
+}
+
+.indented {
+	padding-left: 1.5em;
+}
+
+hr {
+	background: transparent;
+	display: block;
+	width: 100%;
+	height: 1px;
+	visibility: visible;
+	border: none;
+	border-bottom: 1px solid rgba(55, 53, 47, 0.09);
+}
+
+img {
+	max-width: 100%;
+}
+
+@media only print {
+	img {
+		max-height: 100vh;
+		object-fit: contain;
+	}
+}
+
+@page {
+	margin: 1in;
+}
+
+.collection-content {
+	font-size: 0.875rem;
+}
+
+.collection-content td {
+	white-space: pre-wrap;
+	word-break: break-word;
+}
+
+.column-list {
+	display: flex;
+	justify-content: space-between;
+}
+
+.column {
+	padding: 0 1em;
+}
+
+.column:first-child {
+	padding-left: 0;
+}
+
+.column:last-child {
+	padding-right: 0;
+}
+
+.table_of_contents-item {
+	display: block;
+	font-size: 0.875rem;
+	line-height: 1.3;
+	padding: 0.125rem;
+}
+
+.table_of_contents-indent-1 {
+	margin-left: 1.5rem;
+}
+
+.table_of_contents-indent-2 {
+	margin-left: 3rem;
+}
+
+.table_of_contents-indent-3 {
+	margin-left: 4.5rem;
+}
+
+.table_of_contents-link {
+	text-decoration: none;
+	opacity: 0.7;
+	border-bottom: 1px solid rgba(55, 53, 47, 0.18);
+}
+
+table,
+th,
+td {
+	border: 1px solid rgba(55, 53, 47, 0.09);
+	border-collapse: collapse;
+}
+
+table {
+	border-left: none;
+	border-right: none;
+}
+
+th,
+td {
+	font-weight: normal;
+	padding: 0.25em 0.5em;
+	line-height: 1.5;
+	min-height: 1.5em;
+	text-align: left;
+}
+
+th {
+	color: rgba(55, 53, 47, 0.6);
+}
+
+ol,
+ul {
+	margin: 0;
+	margin-block-start: 0.6em;
+	margin-block-end: 0.6em;
+}
+
+li > ol:first-child,
+li > ul:first-child {
+	margin-block-start: 0.6em;
+}
+
+ul > li {
+	list-style: disc;
+}
+
+ul.to-do-list {
+	padding-inline-start: 0;
+}
+
+ul.to-do-list > li {
+	list-style: none;
+}
+
+.to-do-children-checked {
+	text-decoration: line-through;
+	opacity: 0.375;
+}
+
+ul.toggle > li {
+	list-style: none;
+}
+
+ul {
+	padding-inline-start: 1.7em;
+}
+
+ul > li {
+	padding-left: 0.1em;
+}
+
+ol {
+	padding-inline-start: 1.6em;
+}
+
+ol > li {
+	padding-left: 0.2em;
+}
+
+.mono ol {
+	padding-inline-start: 2em;
+}
+
+.mono ol > li {
+	text-indent: -0.4em;
+}
+
+.toggle {
+	padding-inline-start: 0em;
+	list-style-type: none;
+}
+
+/* Indent toggle children */
+.toggle > li > details {
+	padding-left: 1.7em;
+}
+
+.toggle > li > details > summary {
+	margin-left: -1.1em;
+}
+
+.selected-value {
+	display: inline-block;
+	padding: 0 0.5em;
+	background: rgba(206, 205, 202, 0.5);
+	border-radius: 3px;
+	margin-right: 0.5em;
+	margin-top: 0.3em;
+	margin-bottom: 0.3em;
+	white-space: nowrap;
+}
+
+.collection-title {
+	display: inline-block;
+	margin-right: 1em;
+}
+
+.page-description {
+	margin-bottom: 2em;
+}
+
+.simple-table {
+	margin-top: 1em;
+	font-size: 0.875rem;
+	empty-cells: show;
+}
+.simple-table td {
+	height: 29px;
+	min-width: 120px;
+}
+
+.simple-table th {
+	height: 29px;
+	min-width: 120px;
+}
+
+.simple-table-header-color {
+	background: rgb(247, 246, 243);
+	color: black;
+}
+.simple-table-header {
+	font-weight: 500;
+}
+
+time {
+	opacity: 0.5;
+}
+
+.icon {
+	display: inline-flex;
+	align-items: center;
+	justify-content: center;
+	max-width: 1.2em;
+	max-height: 1.2em;
+	text-decoration: none;
+	vertical-align: text-bottom;
+	margin-right: 0.5em;
+}
+
+img.icon {
+	border-radius: 3px;
+}
+
+.callout img.notion-static-icon {
+	width: 1em;
+	height: 1em;
+}
+
+.callout p {
+	margin: 0;
+}
+
+.callout h1,
+.callout h2,
+.callout h3 {
+	margin: 0 0 0.6rem;
+}
+
+.user-icon {
+	width: 1.5em;
+	height: 1.5em;
+	border-radius: 100%;
+	margin-right: 0.5rem;
+}
+
+.user-icon-inner {
+	font-size: 0.8em;
+}
+
+.text-icon {
+	border: 1px solid #000;
+	text-align: center;
+}
+
+.page-cover-image {
+	display: block;
+	object-fit: cover;
+	width: 100%;
+	max-height: 30vh;
+}
+
+.page-header-icon {
+	font-size: 3rem;
+	margin-bottom: 1rem;
+}
+
+.page-header-icon-with-cover {
+	margin-top: -0.72em;
+	margin-left: 0.07em;
+}
+
+.page-header-icon img {
+	border-radius: 3px;
+}
+
+.link-to-page {
+	margin: 1em 0;
+	padding: 0;
+	border: none;
+	font-weight: 500;
+}
+
+p > .user {
+	opacity: 0.5;
+}
+
+td > .user,
+td > time {
+	white-space: nowrap;
+}
+
+input[type="checkbox"] {
+	transform: scale(1.5);
+	margin-right: 0.6em;
+	vertical-align: middle;
+}
+
+p {
+	margin-top: 0.5em;
+	margin-bottom: 0.5em;
+}
+
+.image {
+	border: none;
+	margin: 1.5em 0;
+	padding: 0;
+	border-radius: 0;
+	text-align: center;
+}
+
+.code,
+code {
+	background: rgba(135, 131, 120, 0.15);
+	border-radius: 3px;
+	padding: 0.2em 0.4em;
+	border-radius: 3px;
+	font-size: 85%;
+	tab-size: 2;
+}
+
+code {
+	color: #eb5757;
+}
+
+.code {
+	padding: 1.5em 1em;
+}
+
+.code-wrap {
+	white-space: pre-wrap;
+	word-break: break-all;
+}
+
+.code > code {
+	background: none;
+	padding: 0;
+	font-size: 100%;
+	color: inherit;
+}
+
+blockquote {
+	font-size: 1em;
+	margin: 1em 0;
+	padding-left: 1em;
+	border-left: 3px solid rgb(55, 53, 47);
+}
+
+blockquote.quote-large {
+	font-size: 1.25em;
+}
+
+.bookmark {
+	text-decoration: none;
+	max-height: 8em;
+	padding: 0;
+	display: flex;
+	width: 100%;
+	align-items: stretch;
+}
+
+.bookmark-title {
+	font-size: 0.85em;
+	overflow: hidden;
+	text-overflow: ellipsis;
+	height: 1.75em;
+	white-space: nowrap;
+}
+
+.bookmark-text {
+	display: flex;
+	flex-direction: column;
+}
+
+.bookmark-info {
+	flex: 4 1 180px;
+	padding: 12px 14px 14px;
+	display: flex;
+	flex-direction: column;
+	justify-content: space-between;
+}
+
+.bookmark-image {
+	width: 33%;
+	flex: 1 1 180px;
+	display: block;
+	position: relative;
+	object-fit: cover;
+	border-radius: 1px;
+}
+
+.bookmark-description {
+	color: rgba(55, 53, 47, 0.6);
+	font-size: 0.75em;
+	overflow: hidden;
+	max-height: 4.5em;
+	word-break: break-word;
+}
+
+.bookmark-href {
+	font-size: 0.75em;
+	margin-top: 0.25em;
+}
+
+.sans { font-family: ui-sans-serif, -apple-system, BlinkMacSystemFont, "Segoe UI Variable Display", "Segoe UI", Helvetica, "Apple Color Emoji", "Noto Sans Arabic", "Noto Sans Hebrew", Arial, sans-serif, "Segoe UI Emoji", "Segoe UI Symbol"; }
+.code { font-family: "SFMono-Regular", Menlo, Consolas, "PT Mono", "Liberation Mono", Courier, monospace; }
+.serif { font-family: Lyon-Text, Georgia, ui-serif, serif; }
+.mono { font-family: iawriter-mono, Nitti, Menlo, Courier, monospace; }
+.pdf .sans { font-family: Inter, ui-sans-serif, -apple-system, BlinkMacSystemFont, "Segoe UI Variable Display", "Segoe UI", Helvetica, "Apple Color Emoji", "Noto Sans Arabic", "Noto Sans Hebrew", Arial, sans-serif, "Segoe UI Emoji", "Segoe UI Symbol", 'Twemoji', 'Noto Color Emoji', 'Noto Sans CJK JP'; }
+.pdf:lang(zh-CN) .sans { font-family: Inter, ui-sans-serif, -apple-system, BlinkMacSystemFont, "Segoe UI Variable Display", "Segoe UI", Helvetica, "Apple Color Emoji", "Noto Sans Arabic", "Noto Sans Hebrew", Arial, sans-serif, "Segoe UI Emoji", "Segoe UI Symbol", 'Twemoji', 'Noto Color Emoji', 'Noto Sans CJK SC'; }
+.pdf:lang(zh-TW) .sans { font-family: Inter, ui-sans-serif, -apple-system, BlinkMacSystemFont, "Segoe UI Variable Display", "Segoe UI", Helvetica, "Apple Color Emoji", "Noto Sans Arabic", "Noto Sans Hebrew", Arial, sans-serif, "Segoe UI Emoji", "Segoe UI Symbol", 'Twemoji', 'Noto Color Emoji', 'Noto Sans CJK TC'; }
+.pdf:lang(ko-KR) .sans { font-family: Inter, ui-sans-serif, -apple-system, BlinkMacSystemFont, "Segoe UI Variable Display", "Segoe UI", Helvetica, "Apple Color Emoji", "Noto Sans Arabic", "Noto Sans Hebrew", Arial, sans-serif, "Segoe UI Emoji", "Segoe UI Symbol", 'Twemoji', 'Noto Color Emoji', 'Noto Sans CJK KR'; }
+.pdf .code { font-family: Source Code Pro, "SFMono-Regular", Menlo, Consolas, "PT Mono", "Liberation Mono", Courier, monospace, 'Twemoji', 'Noto Color Emoji', 'Noto Sans Mono CJK JP'; }
+.pdf:lang(zh-CN) .code { font-family: Source Code Pro, "SFMono-Regular", Menlo, Consolas, "PT Mono", "Liberation Mono", Courier, monospace, 'Twemoji', 'Noto Color Emoji', 'Noto Sans Mono CJK SC'; }
+.pdf:lang(zh-TW) .code { font-family: Source Code Pro, "SFMono-Regular", Menlo, Consolas, "PT Mono", "Liberation Mono", Courier, monospace, 'Twemoji', 'Noto Color Emoji', 'Noto Sans Mono CJK TC'; }
+.pdf:lang(ko-KR) .code { font-family: Source Code Pro, "SFMono-Regular", Menlo, Consolas, "PT Mono", "Liberation Mono", Courier, monospace, 'Twemoji', 'Noto Color Emoji', 'Noto Sans Mono CJK KR'; }
+.pdf .serif { font-family: PT Serif, Lyon-Text, Georgia, ui-serif, serif, 'Twemoji', 'Noto Color Emoji', 'Noto Serif CJK JP'; }
+.pdf:lang(zh-CN) .serif { font-family: PT Serif, Lyon-Text, Georgia, ui-serif, serif, 'Twemoji', 'Noto Color Emoji', 'Noto Serif CJK SC'; }
+.pdf:lang(zh-TW) .serif { font-family: PT Serif, Lyon-Text, Georgia, ui-serif, serif, 'Twemoji', 'Noto Color Emoji', 'Noto Serif CJK TC'; }
+.pdf:lang(ko-KR) .serif { font-family: PT Serif, Lyon-Text, Georgia, ui-serif, serif, 'Twemoji', 'Noto Color Emoji', 'Noto Serif CJK KR'; }
+.pdf .mono { font-family: PT Mono, iawriter-mono, Nitti, Menlo, Courier, monospace, 'Twemoji', 'Noto Color Emoji', 'Noto Sans Mono CJK JP'; }
+.pdf:lang(zh-CN) .mono { font-family: PT Mono, iawriter-mono, Nitti, Menlo, Courier, monospace, 'Twemoji', 'Noto Color Emoji', 'Noto Sans Mono CJK SC'; }
+.pdf:lang(zh-TW) .mono { font-family: PT Mono, iawriter-mono, Nitti, Menlo, Courier, monospace, 'Twemoji', 'Noto Color Emoji', 'Noto Sans Mono CJK TC'; }
+.pdf:lang(ko-KR) .mono { font-family: PT Mono, iawriter-mono, Nitti, Menlo, Courier, monospace, 'Twemoji', 'Noto Color Emoji', 'Noto Sans Mono CJK KR'; }
+.highlight-default {
+	color: rgba(44, 44, 43, 1);
+}
+.highlight-gray {
+	color: rgba(125, 122, 117, 1);
+	fill: rgba(125, 122, 117, 1);
+}
+.highlight-brown {
+	color: rgba(159, 118, 90, 1);
+	fill: rgba(159, 118, 90, 1);
+}
+.highlight-orange {
+	color: rgba(210, 123, 45, 1);
+	fill: rgba(210, 123, 45, 1);
+}
+.highlight-yellow {
+	color: rgba(203, 148, 52, 1);
+	fill: rgba(203, 148, 52, 1);
+}
+.highlight-teal {
+	color: rgba(80, 148, 110, 1);
+	fill: rgba(80, 148, 110, 1);
+}
+.highlight-blue {
+	color: rgba(56, 125, 201, 1);
+	fill: rgba(56, 125, 201, 1);
+}
+.highlight-purple {
+	color: rgba(154, 107, 180, 1);
+	fill: rgba(154, 107, 180, 1);
+}
+.highlight-pink {
+	color: rgba(193, 76, 138, 1);
+	fill: rgba(193, 76, 138, 1);
+}
+.highlight-red {
+	color: rgba(207, 81, 72, 1);
+	fill: rgba(207, 81, 72, 1);
+}
+.highlight-default_background {
+	color: rgba(44, 44, 43, 1);
+}
+.highlight-gray_background {
+	background: rgba(42, 28, 0, 0.07);
+}
+.highlight-brown_background {
+	background: rgba(139, 46, 0, 0.086);
+}
+.highlight-orange_background {
+	background: rgba(224, 101, 1, 0.129);
+}
+.highlight-yellow_background {
+	background: rgba(211, 168, 0, 0.137);
+}
+.highlight-teal_background {
+	background: rgba(0, 100, 45, 0.09);
+}
+.highlight-blue_background {
+	background: rgba(0, 124, 215, 0.094);
+}
+.highlight-purple_background {
+	background: rgba(102, 0, 178, 0.078);
+}
+.highlight-pink_background {
+	background: rgba(197, 0, 93, 0.086);
+}
+.highlight-red_background {
+	background: rgba(223, 22, 0, 0.094);
+}
+.block-color-default {
+	color: inherit;
+	fill: inherit;
+}
+.block-color-gray {
+	color: rgba(125, 122, 117, 1);
+	fill: rgba(125, 122, 117, 1);
+}
+.block-color-brown {
+	color: rgba(159, 118, 90, 1);
+	fill: rgba(159, 118, 90, 1);
+}
+.block-color-orange {
+	color: rgba(210, 123, 45, 1);
+	fill: rgba(210, 123, 45, 1);
+}
+.block-color-yellow {
+	color: rgba(203, 148, 52, 1);
+	fill: rgba(203, 148, 52, 1);
+}
+.block-color-teal {
+	color: rgba(80, 148, 110, 1);
+	fill: rgba(80, 148, 110, 1);
+}
+.block-color-blue {
+	color: rgba(56, 125, 201, 1);
+	fill: rgba(56, 125, 201, 1);
+}
+.block-color-purple {
+	color: rgba(154, 107, 180, 1);
+	fill: rgba(154, 107, 180, 1);
+}
+.block-color-pink {
+	color: rgba(193, 76, 138, 1);
+	fill: rgba(193, 76, 138, 1);
+}
+.block-color-red {
+	color: rgba(207, 81, 72, 1);
+	fill: rgba(207, 81, 72, 1);
+}
+.block-color-default_background {
+	color: inherit;
+	fill: inherit;
+}
+.block-color-gray_background {
+	background: rgba(240, 239, 237, 1);
+}
+.block-color-brown_background {
+	background: rgba(245, 237, 233, 1);
+}
+.block-color-orange_background {
+	background: rgba(251, 235, 222, 1);
+}
+.block-color-yellow_background {
+	background: rgba(249, 243, 220, 1);
+}
+.block-color-teal_background {
+	background: rgba(232, 241, 236, 1);
+}
+.block-color-blue_background {
+	background: rgba(229, 242, 252, 1);
+}
+.block-color-purple_background {
+	background: rgba(243, 235, 249, 1);
+}
+.block-color-pink_background {
+	background: rgba(250, 233, 241, 1);
+}
+.block-color-red_background {
+	background: rgba(252, 233, 231, 1);
+}
+.select-value-color-default { background-color: rgba(42, 28, 0, 0.07); }
+.select-value-color-gray { background-color: rgba(28, 19, 1, 0.11); }
+.select-value-color-brown { background-color: rgba(127, 51, 0, 0.156); }
+.select-value-color-orange { background-color: rgba(196, 88, 0, 0.203); }
+.select-value-color-yellow { background-color: rgba(209, 156, 0, 0.282); }
+.select-value-color-green { background-color: rgba(0, 96, 38, 0.156); }
+.select-value-color-blue { background-color: rgba(0, 118, 217, 0.203); }
+.select-value-color-purple { background-color: rgba(92, 0, 163, 0.141); }
+.select-value-color-pink { background-color: rgba(183, 0, 78, 0.152); }
+.select-value-color-red { background-color: rgba(206, 24, 0, 0.164); }
+
+.checkbox {
+	display: inline-flex;
+	vertical-align: text-bottom;
+	width: 16;
+	height: 16;
+	background-size: 16px;
+	margin-left: 2px;
+	margin-right: 5px;
+}
+
+.checkbox-on {
+	background-image: url("data:image/svg+xml;charset=UTF-8,%3Csvg%20width%3D%2216%22%20height%3D%2216%22%20viewBox%3D%220%200%2016%2016%22%20fill%3D%22none%22%20xmlns%3D%22http%3A%2F%2Fwww.w3.org%2F2000%2Fsvg%22%3E%0A%3Crect%20width%3D%2216%22%20height%3D%2216%22%20fill%3D%22%2358A9D7%22%2F%3E%0A%3Cpath%20d%3D%22M6.71429%2012.2852L14%204.9995L12.7143%203.71436L6.71429%209.71378L3.28571%206.2831L2%207.57092L6.71429%2012.2852Z%22%20fill%3D%22white%22%2F%3E%0A%3C%2Fsvg%3E");
+}
+
+.checkbox-off {
+	background-image: url("data:image/svg+xml;charset=UTF-8,%3Csvg%20width%3D%2216%22%20height%3D%2216%22%20viewBox%3D%220%200%2016%2016%22%20fill%3D%22none%22%20xmlns%3D%22http%3A%2F%2Fwww.w3.org%2F2000%2Fsvg%22%3E%0A%3Crect%20x%3D%220.75%22%20y%3D%220.75%22%20width%3D%2214.5%22%20height%3D%2214.5%22%20fill%3D%22white%22%20stroke%3D%22%2336352F%22%20stroke-width%3D%221.5%22%2F%3E%0A%3C%2Fsvg%3E");
+}
+	
+</style></head><body><article id="1e685df0-1907-80b8-a9a7-c56a67d8a6a6" class="page sans"><header><h1 class="page-title" dir="auto">🔐 Privacy Impact Assessment (PIA) Template</h1><p class="page-description" dir="auto"></p><table class="properties"><tbody><tr class="property-row property-row-person"><th><span class="icon property-icon"><img src="https://www.notion.so/icons/friends_gray.svg" style="width:14px;height:14px;display:block"/></span>Owner</th><td><span class="user"><span class="icon text-icon user-icon"><span class="user-icon-inner">A</span></span>Aubert</span></td></tr><tr class="property-row property-row-multi_select"><th><span class="icon property-icon"><img src="https://www.notion.so/icons/list_gray.svg" style="width:14px;height:14px;display:block"/></span>Tags</th><td></td></tr></tbody></table></header><div class="page-body"><div style="display:contents" dir="auto"><p id="1e685df0-1907-8080-ae7d-f29aaaf16b02" class=""><strong>Version:</strong> 1.0</p></div><div style="display:contents" dir="auto"><p id="1e685df0-1907-8043-8dda-d43592ad0c69" class=""><strong>Maintained By:</strong> Legal &amp; Data Governance Team</p></div><div style="display:contents" dir="auto"><p id="1e685df0-1907-804b-864b-e78d9b3827ed" class=""><strong>Required For:</strong></p></div><div style="display:contents" dir="auto"><ul id="1e685df0-1907-804b-885e-f2f45cf48012" class="bulleted-list"><li style="list-style-type:disc">Any new data collection feature</li></ul></div><div style="display:contents" dir="auto"><ul id="1e685df0-1907-806a-a59a-facd31b3cc7d" class="bulleted-list"><li style="list-style-type:disc">Clinical integrations</li></ul></div><div style="display:contents" dir="auto"><ul id="1e685df0-1907-80c4-829d-d56762c64c48" class="bulleted-list"><li style="list-style-type:disc">Third-party data sharing or vendor onboarding</li></ul></div><div style="display:contents" dir="auto"><ul id="1e685df0-1907-805c-8664-d41eefcbaf66" class="bulleted-list"><li style="list-style-type:disc">Use of AI models that interact with user data</li></ul></div><div style="display:contents" dir="auto"><hr id="1e685df0-1907-80ed-a7b6-da3434a9b1ef"/></div><div style="display:contents" dir="auto"><h3 id="1e685df0-1907-80b6-9db5-eb7b524d77dc" class="">📘 1. Project &amp; Owner Details</h3></div><div style="display:contents" dir="ltr"><table id="1e685df0-1907-80cb-a744-e1aeb9c4c4e7" class="simple-table"><tbody><div style="display:contents" dir="ltr"><tr id="1e685df0-1907-8098-8537-e9c01323bb85"><td id="^^Xz" class="">Field</td><td id="&lt;AT}" class="">Value</td></tr></div><div style="display:contents" dir="ltr"><tr id="1e685df0-1907-804e-bba5-cd1496918b7c"><td id="^^Xz" class="">Project Name</td><td id="&lt;AT}" class="">[Insert Name]</td></tr></div><div style="display:contents" dir="ltr"><tr id="1e685df0-1907-803e-93fd-ca0bd1cb4710"><td id="^^Xz" class="">Product or Venture</td><td id="&lt;AT}" class="">[Memora / Optiva / Other]</td></tr></div><div style="display:contents" dir="ltr"><tr id="1e685df0-1907-80fa-b41a-d4f1561fa45c"><td id="^^Xz" class="">Requester</td><td id="&lt;AT}" class="">[Name, Role]</td></tr></div><div style="display:contents" dir="ltr"><tr id="1e685df0-1907-8043-8fbe-cc831d424150"><td id="^^Xz" class="">DPO Reviewer</td><td id="&lt;AT}" class="">[Name, Role]</td></tr></div><div style="display:contents" dir="ltr"><tr id="1e685df0-1907-8036-8f0d-d31b890cab3f"><td id="^^Xz" class="">PIA Status</td><td id="&lt;AT}" class="">[Draft / In Review / Approved]</td></tr></div><div style="display:contents" dir="ltr"><tr id="1e685df0-1907-80df-a657-d326220a1f1a"><td id="^^Xz" class="">Date Submitted</td><td id="&lt;AT}" class="">[YYYY-MM-DD]</td></tr></div></tbody></table></div><div style="display:contents" dir="auto"><hr id="1e685df0-1907-804e-8736-dd47bde9745d"/></div><div style="display:contents" dir="auto"><h3 id="1e685df0-1907-8067-871c-eed44dc27715" class="">🔍 2. Summary of Initiative</h3></div><div style="display:contents" dir="auto"><p id="1e685df0-1907-80b4-95c7-ec91eabc2edf" class="">Provide a brief summary of what this project or feature does, and why it requires the collection or processing of personal data.</p></div><div style="display:contents" dir="auto"><blockquote id="1e685df0-1907-8047-88c0-f85053ddad12" class="">E.g.: “Memora’s Caregiver Encouragement Tool enables linked caregivers to receive nudges to engage their matched user. It uses Companion session telemetry and stores encouragement events for reporting.”</blockquote></div><div style="display:contents" dir="auto"><hr id="1e685df0-1907-8099-b925-c2642da9a6e6"/></div><div style="display:contents" dir="auto"><h3 id="1e685df0-1907-80a3-af76-ee38f462e33f" class="">📊 3. Data Inventory</h3></div><div style="display:contents" dir="ltr"><table id="1e685df0-1907-8054-84c4-c35fde417f9b" class="simple-table"><tbody><div style="display:contents" dir="ltr"><tr id="1e685df0-1907-8086-a270-d00e8f8914ad"><td id="=wg\" class="">Data Type</td><td id="Lufo" class="">Examples</td><td id="Qmin" class="">Collected?</td><td id="K:Vo" class="">Shared?</td><td id="qo{i" class="">Storage Location</td></tr></div><div style="display:contents" dir="ltr"><tr id="1e685df0-1907-80a5-9796-df169128c09b"><td id="=wg\" class="">User Identifiers</td><td id="Lufo" class="">Email, device ID, caregiver links</td><td id="Qmin" class="">✅ / ❌</td><td id="K:Vo" class="">✅ / ❌</td><td id="qo{i" class="">[e.g., Supabase CA region]</td></tr></div><div style="display:contents" dir="ltr"><tr id="1e685df0-1907-8095-a59a-dbc064f08266"><td id="=wg\" class="">Health-Adjacent Data</td><td id="Lufo" class="">Game session logs, prompt response time</td><td id="Qmin" class="">✅ / ❌</td><td id="K:Vo" class="">✅ / ❌</td><td id="qo{i" class=""></td></tr></div><div style="display:contents" dir="ltr"><tr id="1e685df0-1907-8026-9444-e4a22c44088d"><td id="=wg\" class="">Consent Logs</td><td id="Lufo" class="">Timestamped user approvals</td><td id="Qmin" class="">✅</td><td id="K:Vo" class="">✅ (internally)</td><td id="qo{i" class=""></td></tr></div><div style="display:contents" dir="ltr"><tr id="1e685df0-1907-8077-97aa-dd7b3cf8c97a"><td id="=wg\" class="">AI Inputs / Outputs</td><td id="Lufo" class="">Companion prompt triggers, NLP content</td><td id="Qmin" class="">✅ / ❌</td><td id="K:Vo" class="">✅ / ❌</td><td id="qo{i" class=""></td></tr></div><div style="display:contents" dir="ltr"><tr id="1e685df0-1907-8069-9ecf-daf0984ea3c1"><td id="=wg\" class="">Location Data</td><td id="Lufo" class="">IP region (approximate)</td><td id="Qmin" class="">✅ / ❌</td><td id="K:Vo" class="">❌</td><td id="qo{i" class=""></td></tr></div></tbody></table></div><div style="display:contents" dir="auto"><hr id="1e685df0-1907-8050-9718-ecd245a0ec5b"/></div><div style="display:contents" dir="auto"><h3 id="1e685df0-1907-804d-810a-ef77227ffef7" class="">⚖️ 4. Legal Basis for Collection</h3></div><div style="display:contents" dir="ltr"><table id="1e685df0-1907-802d-9d57-e61f3ce1d2d5" class="simple-table"><tbody><div style="display:contents" dir="ltr"><tr id="1e685df0-1907-8063-b439-cede5e1328c8"><td id="|o{\" class="">Legal Justification</td><td id="m?NA" class="">Applied?</td></tr></div><div style="display:contents" dir="ltr"><tr id="1e685df0-1907-80d1-b783-d90e2fce8301"><td id="|o{\" class="">User Consent (explicit)</td><td id="m?NA" class="">✅ / ❌</td></tr></div><div style="display:contents" dir="ltr"><tr id="1e685df0-1907-8012-b59c-c61585282e36"><td id="|o{\" class="">Contractual Necessity</td><td id="m?NA" class="">✅ / ❌</td></tr></div><div style="display:contents" dir="ltr"><tr id="1e685df0-1907-801b-9db2-d2d43db84cdf"><td id="|o{\" class="">Legitimate Interest (internal use only)</td><td id="m?NA" class="">✅ / ❌</td></tr></div><div style="display:contents" dir="ltr"><tr id="1e685df0-1907-8035-90de-db544b2ce1b7"><td id="|o{\" class="">Public Interest (research only)</td><td id="m?NA" class="">✅ / ❌</td></tr></div></tbody></table></div><div style="display:contents" dir="auto"><p id="1e685df0-1907-80c2-98cb-ee06641c300d" class="">Provide a short rationale:</p></div><div style="display:contents" dir="auto"><blockquote id="1e685df0-1907-80a0-a528-d7e4d77e0c4a" class="">“User consent is collected at onboarding, including for Companion interaction and caregiver linkage.”</blockquote></div><div style="display:contents" dir="auto"><hr id="1e685df0-1907-808a-afd3-e018c01cd814"/></div><div style="display:contents" dir="auto"><h3 id="1e685df0-1907-80d6-a4e7-c5b5825a12e0" class="">🧾 5. Consent Mechanics</h3></div><div style="display:contents" dir="ltr"><table id="1e685df0-1907-8022-878d-c331adb0b9d8" class="simple-table"><tbody><div style="display:contents" dir="ltr"><tr id="1e685df0-1907-80d4-8d27-de0733ed21a4"><td id="Fh~Z" class="">Element</td><td id="\c~|" class="">Mechanism</td></tr></div><div style="display:contents" dir="ltr"><tr id="1e685df0-1907-808d-9bb4-d81692803e68"><td id="Fh~Z" class="">Consent Collection Method</td><td id="\c~|" class="">[Checkbox / Toggle / Verbal / API-based]</td></tr></div><div style="display:contents" dir="ltr"><tr id="1e685df0-1907-80a6-834a-c9a31f999f7e"><td id="Fh~Z" class="">Consent Interface</td><td id="\c~|" class="">[Onboarding screen / Settings panel]</td></tr></div><div style="display:contents" dir="ltr"><tr id="1e685df0-1907-8034-a6fb-e02c5034a9d5"><td id="Fh~Z" class="">Withdrawal Mechanism</td><td id="\c~|" class="">[Settings &gt; Privacy Panel / Email support]</td></tr></div><div style="display:contents" dir="ltr"><tr id="1e685df0-1907-8041-9da5-d43189b07ad9"><td id="Fh~Z" class="">Consent Logging</td><td id="\c~|" class="">[Stored in Consent Log Table with UUID &amp; timestamp]</td></tr></div></tbody></table></div><div style="display:contents" dir="auto"><hr id="1e685df0-1907-80a8-b2ab-c3040b3e1657"/></div><div style="display:contents" dir="auto"><h3 id="1e685df0-1907-80ce-8c7d-e94f056c8ddb" class="">🔐 6. Security &amp; Access Controls</h3></div><div style="display:contents" dir="ltr"><table id="1e685df0-1907-80c0-a670-f35169173d5d" class="simple-table"><tbody><div style="display:contents" dir="ltr"><tr id="1e685df0-1907-8016-9f94-d098c45a8455"><td id="EB}k" class="">Control</td><td id="K|=}" class="">Status</td></tr></div><div style="display:contents" dir="ltr"><tr id="1e685df0-1907-80fa-882d-e3a54e0ff67a"><td id="EB}k" class="">Encryption (at rest / in transit)</td><td id="K|=}" class="">✅</td></tr></div><div style="display:contents" dir="ltr"><tr id="1e685df0-1907-8063-beb2-f8f150a7972e"><td id="EB}k" class="">RBAC (Role-Based Access Control)</td><td id="K|=}" class="">✅</td></tr></div><div style="display:contents" dir="ltr"><tr id="1e685df0-1907-807b-9860-c03f144976e1"><td id="EB}k" class="">Data residency (Canada)</td><td id="K|=}" class="">✅ / ❌</td></tr></div><div style="display:contents" dir="ltr"><tr id="1e685df0-1907-805b-ba34-ecfc4a92ecba"><td id="EB}k" class="">Audit logging for sensitive views</td><td id="K|=}" class="">✅</td></tr></div><div style="display:contents" dir="ltr"><tr id="1e685df0-1907-802f-a6b6-f0e050f4eb90"><td id="EB}k" class="">Breach response plan in place</td><td id="K|=}" class="">✅</td></tr></div></tbody></table></div><div style="display:contents" dir="auto"><hr id="1e685df0-1907-804d-981c-e3ddb68bfbf7"/></div><div style="display:contents" dir="auto"><h3 id="1e685df0-1907-801d-af81-e0d999732037" class="">📤 7. Data Sharing</h3></div><div style="display:contents" dir="ltr"><table id="1e685df0-1907-80b7-a41d-fc72cbea5585" class="simple-table"><tbody><div style="display:contents" dir="ltr"><tr id="1e685df0-1907-805c-ae63-db6284755a46"><td id="oiuf" class="">Shared With</td><td id="Fq&gt;Q" class="">Type</td><td id="@_ET" class="">Consent Needed?</td><td id="PrM[" class="">Terms in Place?</td></tr></div><div style="display:contents" dir="ltr"><tr id="1e685df0-1907-8019-8e61-f1fd458228f1"><td id="oiuf" class="">Internal Analytics</td><td id="Fq&gt;Q" class="">Aggregate use only</td><td id="@_ET" class="">❌</td><td id="PrM[" class="">✅</td></tr></div><div style="display:contents" dir="ltr"><tr id="1e685df0-1907-8061-9db3-d3d28ad70143"><td id="oiuf" class="">Clinical Partner</td><td id="Fq&gt;Q" class="">De-identified only</td><td id="@_ET" class="">✅</td><td id="PrM[" class="">✅ (MoU or DPA)</td></tr></div><div style="display:contents" dir="ltr"><tr id="1e685df0-1907-8099-a2b5-d383a91e70ca"><td id="oiuf" class="">Research Institution</td><td id="Fq&gt;Q" class="">Consent-backed cohort export</td><td id="@_ET" class="">✅</td><td id="PrM[" class="">⏳ (IRB review)</td></tr></div></tbody></table></div><div style="display:contents" dir="auto"><p id="1e685df0-1907-80bf-86ea-f9c8772d765f" class="">Attach related <strong>DPA</strong>, <strong>MoU</strong>, or <strong>IRB memo</strong> if applicable.</p></div><div style="display:contents" dir="auto"><hr id="1e685df0-1907-8078-9945-c2f0512ba27f"/></div><div style="display:contents" dir="auto"><h3 id="1e685df0-1907-800e-9cc4-de193884f696" class="">📅 8. Retention &amp; Deletion</h3></div><div style="display:contents" dir="ltr"><table id="1e685df0-1907-80cd-b691-ef76ab940b18" class="simple-table"><tbody><div style="display:contents" dir="ltr"><tr id="1e685df0-1907-80a0-9674-c4f128e03d63"><td id="dx;y" class="">Policy</td><td id="^JNX" class="">Details</td></tr></div><div style="display:contents" dir="ltr"><tr id="1e685df0-1907-80c1-8dba-eac74d1a7962"><td id="dx;y" class="">Data Retention Duration</td><td id="^JNX" class="">[e.g., 2 years from session]</td></tr></div><div style="display:contents" dir="ltr"><tr id="1e685df0-1907-80a5-8b01-f4bbd55cd8b9"><td id="dx;y" class="">Deletion Request Handling</td><td id="^JNX" class="">[30-day compliance SLA]</td></tr></div><div style="display:contents" dir="ltr"><tr id="1e685df0-1907-80b8-8d5b-f4098cdd7518"><td id="dx;y" class="">Anonymization or Pseudonymization Steps</td><td id="^JNX" class="">[Hashing / tokenization for sessions, redaction of IDs]</td></tr></div></tbody></table></div><div style="display:contents" dir="auto"><hr id="1e685df0-1907-802b-a6f5-cdd1c4cdc3e1"/></div><div style="display:contents" dir="auto"><h3 id="1e685df0-1907-8094-bf4d-c219909ea806" class="">🧠 9. AI Use Disclosure (If Applicable)</h3></div><div style="display:contents" dir="ltr"><table id="1e685df0-1907-80d8-a853-c75ef70951a6" class="simple-table"><tbody><div style="display:contents" dir="ltr"><tr id="1e685df0-1907-80f2-936e-d5a8033e18d7"><td id="=ZMw" class="">Model Purpose</td><td id="[aqX" class="">Data Used</td><td id="TJY`" class="">Human in Loop?</td><td id="N^Fj" class="">Explanation Mechanism</td></tr></div><div style="display:contents" dir="ltr"><tr id="1e685df0-1907-809f-afa5-f73d316f6c26"><td id="=ZMw" class="">[e.g., Prompt Timing Optimizer]</td><td id="[aqX" class="">Game session metadata</td><td id="TJY`" class="">✅ / ❌</td><td id="N^Fj" class="">Companion shares simplified version</td></tr></div></tbody></table></div><div style="display:contents" dir="auto"><hr id="1e685df0-1907-8035-bc40-f9e04e6a3b3a"/></div><div style="display:contents" dir="auto"><h3 id="1e685df0-1907-8022-8a6a-dc0629b12910" class="">📋 10. Risk Assessment &amp; Mitigation</h3></div><div style="display:contents" dir="ltr"><table id="1e685df0-1907-8067-8873-f2f486f601ef" class="simple-table"><tbody><div style="display:contents" dir="ltr"><tr id="1e685df0-1907-800d-808a-e5ce95e25301"><td id=":Gu{" class="">Risk</td><td id="_VSZ" class="">Severity</td><td id="nI;E" class="">Mitigation</td></tr></div><div style="display:contents" dir="ltr"><tr id="1e685df0-1907-80c9-996a-f74a2c6ffb0a"><td id=":Gu{" class="">Unauthorized caregiver access</td><td id="_VSZ" class="">Medium</td><td id="nI;E" class="">Consent gating + RBAC</td></tr></div><div style="display:contents" dir="ltr"><tr id="1e685df0-1907-8008-b5c1-fdd1b38c30f4"><td id=":Gu{" class="">Prompt personalization revealing sensitive patterns</td><td id="_VSZ" class="">Low</td><td id="nI;E" class="">Tone control + no emotional inference</td></tr></div><div style="display:contents" dir="ltr"><tr id="1e685df0-1907-800a-b5bf-ec83349b3956"><td id=":Gu{" class="">Data breach</td><td id="_VSZ" class="">High</td><td id="nI;E" class="">Encrypted infra + breach response SOP</td></tr></div></tbody></table></div><div style="display:contents" dir="auto"><hr id="1e685df0-1907-80e7-ba68-cb0927f5c657"/></div><div style="display:contents" dir="auto"><h3 id="1e685df0-1907-8095-b46a-c63f4591b4de" class="">✅ 11. Final Approvals</h3></div><div style="display:contents" dir="ltr"><table id="1e685df0-1907-8001-8266-d128fc1373da" class="simple-table"><tbody><div style="display:contents" dir="ltr"><tr id="1e685df0-1907-80bf-807c-e12805f17b06"><td id="L?UF" class="">Approver</td><td id="zNMi" class="">Role</td><td id="j`dQ" class="">Signature</td><td id="~;fz" class="">Date</td></tr></div><div style="display:contents" dir="ltr"><tr id="1e685df0-1907-80d3-9443-d8124e97f04a"><td id="L?UF" class="">[Insert Name]</td><td id="zNMi" class="">Legal / DPO</td><td id="j`dQ" class=""></td><td id="~;fz" class=""></td></tr></div><div style="display:contents" dir="ltr"><tr id="1e685df0-1907-80f9-8726-d41ab6556b7d"><td id="L?UF" class="">[Insert Name]</td><td id="zNMi" class="">Product Owner</td><td id="j`dQ" class=""></td><td id="~;fz" class=""></td></tr></div></tbody></table></div><div style="display:contents" dir="auto"><hr id="1e685df0-1907-80c2-8179-d1d396d140b5"/></div><div style="display:contents" dir="auto"><h3 id="1e685df0-1907-80fc-b579-dc077f7e77a9" class="">📁 Attachments &amp; Linked Docs</h3></div><div style="display:contents" dir="auto"><ul id="1e685df0-1907-8011-b847-ed8564ad51ae" class="bulleted-list"><li style="list-style-type:disc">[Consent &amp; Privacy Flow Diagram]</li></ul></div><div style="display:contents" dir="auto"><ul id="1e685df0-1907-8008-8998-ffce0154efb1" class="bulleted-list"><li style="list-style-type:disc">[Data Schema Overview]</li></ul></div><div style="display:contents" dir="auto"><ul id="1e685df0-1907-808d-af89-e4b025a55ce0" class="bulleted-list"><li style="list-style-type:disc">[Anonymization Policy]</li></ul></div><div style="display:contents" dir="auto"><ul id="1e685df0-1907-8035-9419-cc40045a5f4e" class="bulleted-list"><li style="list-style-type:disc">[DPA / IRB / Clinical MoU (if applicable)]</li></ul></div><div style="display:contents" dir="auto"><ul id="1e685df0-1907-8004-84f5-da9ff6938453" class="bulleted-list"><li style="list-style-type:disc">[Risk Register Entry]</li></ul></div></div></article><span class="sans" style="font-size:14px;padding-top:2em"></span></body></html>

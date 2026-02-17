@@ -1,0 +1,714 @@
+<html><head><meta http-equiv="Content-Type" content="text/html; charset=utf-8"/><title>
+🗂️ Engineering &amp; Technical Documentation Index</title><style>
+/* cspell:disable-file */
+/* webkit printing magic: print all background colors */
+html {
+	-webkit-print-color-adjust: exact;
+}
+* {
+	box-sizing: border-box;
+	-webkit-print-color-adjust: exact;
+}
+
+html,
+body {
+	margin: 0;
+	padding: 0;
+}
+@media only screen {
+	body {
+		margin: 2em auto;
+		max-width: 900px;
+		color: rgb(55, 53, 47);
+	}
+}
+
+body {
+	line-height: 1.5;
+	white-space: pre-wrap;
+}
+
+a,
+a.visited {
+	color: inherit;
+	text-decoration: underline;
+}
+
+.pdf-relative-link-path {
+	font-size: 80%;
+	color: #444;
+}
+
+h1,
+h2,
+h3 {
+	letter-spacing: -0.01em;
+	line-height: 1.2;
+	font-weight: 600;
+	margin-bottom: 0;
+}
+
+/* Override strong tags inside headings to maintain consistent weight */
+h1 strong,
+h2 strong,
+h3 strong {
+	font-weight: 600;
+}
+
+.page-title {
+	font-size: 2.5rem;
+	font-weight: 700;
+	margin-top: 0;
+	margin-bottom: 0.75em;
+}
+
+h1 {
+	font-size: 1.875rem;
+	margin-top: 1.875rem;
+}
+
+h2 {
+	font-size: 1.5rem;
+	margin-top: 1.5rem;
+}
+
+h3 {
+	font-size: 1.25rem;
+	margin-top: 1.25rem;
+}
+
+.source {
+	border: 1px solid #ddd;
+	border-radius: 3px;
+	padding: 1.5em;
+	word-break: break-all;
+}
+
+.callout {
+	border-radius: 10px;
+	padding: 1rem;
+}
+
+figure {
+	margin: 1.25em 0;
+	page-break-inside: avoid;
+}
+
+figcaption {
+	opacity: 0.5;
+	font-size: 85%;
+	margin-top: 0.5em;
+}
+
+mark {
+	background-color: transparent;
+}
+
+.indented {
+	padding-left: 1.5em;
+}
+
+hr {
+	background: transparent;
+	display: block;
+	width: 100%;
+	height: 1px;
+	visibility: visible;
+	border: none;
+	border-bottom: 1px solid rgba(55, 53, 47, 0.09);
+}
+
+img {
+	max-width: 100%;
+}
+
+@media only print {
+	img {
+		max-height: 100vh;
+		object-fit: contain;
+	}
+}
+
+@page {
+	margin: 1in;
+}
+
+.collection-content {
+	font-size: 0.875rem;
+}
+
+.collection-content td {
+	white-space: pre-wrap;
+	word-break: break-word;
+}
+
+.column-list {
+	display: flex;
+	justify-content: space-between;
+}
+
+.column {
+	padding: 0 1em;
+}
+
+.column:first-child {
+	padding-left: 0;
+}
+
+.column:last-child {
+	padding-right: 0;
+}
+
+.table_of_contents-item {
+	display: block;
+	font-size: 0.875rem;
+	line-height: 1.3;
+	padding: 0.125rem;
+}
+
+.table_of_contents-indent-1 {
+	margin-left: 1.5rem;
+}
+
+.table_of_contents-indent-2 {
+	margin-left: 3rem;
+}
+
+.table_of_contents-indent-3 {
+	margin-left: 4.5rem;
+}
+
+.table_of_contents-link {
+	text-decoration: none;
+	opacity: 0.7;
+	border-bottom: 1px solid rgba(55, 53, 47, 0.18);
+}
+
+table,
+th,
+td {
+	border: 1px solid rgba(55, 53, 47, 0.09);
+	border-collapse: collapse;
+}
+
+table {
+	border-left: none;
+	border-right: none;
+}
+
+th,
+td {
+	font-weight: normal;
+	padding: 0.25em 0.5em;
+	line-height: 1.5;
+	min-height: 1.5em;
+	text-align: left;
+}
+
+th {
+	color: rgba(55, 53, 47, 0.6);
+}
+
+ol,
+ul {
+	margin: 0;
+	margin-block-start: 0.6em;
+	margin-block-end: 0.6em;
+}
+
+li > ol:first-child,
+li > ul:first-child {
+	margin-block-start: 0.6em;
+}
+
+ul > li {
+	list-style: disc;
+}
+
+ul.to-do-list {
+	padding-inline-start: 0;
+}
+
+ul.to-do-list > li {
+	list-style: none;
+}
+
+.to-do-children-checked {
+	text-decoration: line-through;
+	opacity: 0.375;
+}
+
+ul.toggle > li {
+	list-style: none;
+}
+
+ul {
+	padding-inline-start: 1.7em;
+}
+
+ul > li {
+	padding-left: 0.1em;
+}
+
+ol {
+	padding-inline-start: 1.6em;
+}
+
+ol > li {
+	padding-left: 0.2em;
+}
+
+.mono ol {
+	padding-inline-start: 2em;
+}
+
+.mono ol > li {
+	text-indent: -0.4em;
+}
+
+.toggle {
+	padding-inline-start: 0em;
+	list-style-type: none;
+}
+
+/* Indent toggle children */
+.toggle > li > details {
+	padding-left: 1.7em;
+}
+
+.toggle > li > details > summary {
+	margin-left: -1.1em;
+}
+
+.selected-value {
+	display: inline-block;
+	padding: 0 0.5em;
+	background: rgba(206, 205, 202, 0.5);
+	border-radius: 3px;
+	margin-right: 0.5em;
+	margin-top: 0.3em;
+	margin-bottom: 0.3em;
+	white-space: nowrap;
+}
+
+.collection-title {
+	display: inline-block;
+	margin-right: 1em;
+}
+
+.page-description {
+	margin-bottom: 2em;
+}
+
+.simple-table {
+	margin-top: 1em;
+	font-size: 0.875rem;
+	empty-cells: show;
+}
+.simple-table td {
+	height: 29px;
+	min-width: 120px;
+}
+
+.simple-table th {
+	height: 29px;
+	min-width: 120px;
+}
+
+.simple-table-header-color {
+	background: rgb(247, 246, 243);
+	color: black;
+}
+.simple-table-header {
+	font-weight: 500;
+}
+
+time {
+	opacity: 0.5;
+}
+
+.icon {
+	display: inline-flex;
+	align-items: center;
+	justify-content: center;
+	max-width: 1.2em;
+	max-height: 1.2em;
+	text-decoration: none;
+	vertical-align: text-bottom;
+	margin-right: 0.5em;
+}
+
+img.icon {
+	border-radius: 3px;
+}
+
+.callout img.notion-static-icon {
+	width: 1em;
+	height: 1em;
+}
+
+.callout p {
+	margin: 0;
+}
+
+.callout h1,
+.callout h2,
+.callout h3 {
+	margin: 0 0 0.6rem;
+}
+
+.user-icon {
+	width: 1.5em;
+	height: 1.5em;
+	border-radius: 100%;
+	margin-right: 0.5rem;
+}
+
+.user-icon-inner {
+	font-size: 0.8em;
+}
+
+.text-icon {
+	border: 1px solid #000;
+	text-align: center;
+}
+
+.page-cover-image {
+	display: block;
+	object-fit: cover;
+	width: 100%;
+	max-height: 30vh;
+}
+
+.page-header-icon {
+	font-size: 3rem;
+	margin-bottom: 1rem;
+}
+
+.page-header-icon-with-cover {
+	margin-top: -0.72em;
+	margin-left: 0.07em;
+}
+
+.page-header-icon img {
+	border-radius: 3px;
+}
+
+.link-to-page {
+	margin: 1em 0;
+	padding: 0;
+	border: none;
+	font-weight: 500;
+}
+
+p > .user {
+	opacity: 0.5;
+}
+
+td > .user,
+td > time {
+	white-space: nowrap;
+}
+
+input[type="checkbox"] {
+	transform: scale(1.5);
+	margin-right: 0.6em;
+	vertical-align: middle;
+}
+
+p {
+	margin-top: 0.5em;
+	margin-bottom: 0.5em;
+}
+
+.image {
+	border: none;
+	margin: 1.5em 0;
+	padding: 0;
+	border-radius: 0;
+	text-align: center;
+}
+
+.code,
+code {
+	background: rgba(135, 131, 120, 0.15);
+	border-radius: 3px;
+	padding: 0.2em 0.4em;
+	border-radius: 3px;
+	font-size: 85%;
+	tab-size: 2;
+}
+
+code {
+	color: #eb5757;
+}
+
+.code {
+	padding: 1.5em 1em;
+}
+
+.code-wrap {
+	white-space: pre-wrap;
+	word-break: break-all;
+}
+
+.code > code {
+	background: none;
+	padding: 0;
+	font-size: 100%;
+	color: inherit;
+}
+
+blockquote {
+	font-size: 1em;
+	margin: 1em 0;
+	padding-left: 1em;
+	border-left: 3px solid rgb(55, 53, 47);
+}
+
+blockquote.quote-large {
+	font-size: 1.25em;
+}
+
+.bookmark {
+	text-decoration: none;
+	max-height: 8em;
+	padding: 0;
+	display: flex;
+	width: 100%;
+	align-items: stretch;
+}
+
+.bookmark-title {
+	font-size: 0.85em;
+	overflow: hidden;
+	text-overflow: ellipsis;
+	height: 1.75em;
+	white-space: nowrap;
+}
+
+.bookmark-text {
+	display: flex;
+	flex-direction: column;
+}
+
+.bookmark-info {
+	flex: 4 1 180px;
+	padding: 12px 14px 14px;
+	display: flex;
+	flex-direction: column;
+	justify-content: space-between;
+}
+
+.bookmark-image {
+	width: 33%;
+	flex: 1 1 180px;
+	display: block;
+	position: relative;
+	object-fit: cover;
+	border-radius: 1px;
+}
+
+.bookmark-description {
+	color: rgba(55, 53, 47, 0.6);
+	font-size: 0.75em;
+	overflow: hidden;
+	max-height: 4.5em;
+	word-break: break-word;
+}
+
+.bookmark-href {
+	font-size: 0.75em;
+	margin-top: 0.25em;
+}
+
+.sans { font-family: ui-sans-serif, -apple-system, BlinkMacSystemFont, "Segoe UI Variable Display", "Segoe UI", Helvetica, "Apple Color Emoji", "Noto Sans Arabic", "Noto Sans Hebrew", Arial, sans-serif, "Segoe UI Emoji", "Segoe UI Symbol"; }
+.code { font-family: "SFMono-Regular", Menlo, Consolas, "PT Mono", "Liberation Mono", Courier, monospace; }
+.serif { font-family: Lyon-Text, Georgia, ui-serif, serif; }
+.mono { font-family: iawriter-mono, Nitti, Menlo, Courier, monospace; }
+.pdf .sans { font-family: Inter, ui-sans-serif, -apple-system, BlinkMacSystemFont, "Segoe UI Variable Display", "Segoe UI", Helvetica, "Apple Color Emoji", "Noto Sans Arabic", "Noto Sans Hebrew", Arial, sans-serif, "Segoe UI Emoji", "Segoe UI Symbol", 'Twemoji', 'Noto Color Emoji', 'Noto Sans CJK JP'; }
+.pdf:lang(zh-CN) .sans { font-family: Inter, ui-sans-serif, -apple-system, BlinkMacSystemFont, "Segoe UI Variable Display", "Segoe UI", Helvetica, "Apple Color Emoji", "Noto Sans Arabic", "Noto Sans Hebrew", Arial, sans-serif, "Segoe UI Emoji", "Segoe UI Symbol", 'Twemoji', 'Noto Color Emoji', 'Noto Sans CJK SC'; }
+.pdf:lang(zh-TW) .sans { font-family: Inter, ui-sans-serif, -apple-system, BlinkMacSystemFont, "Segoe UI Variable Display", "Segoe UI", Helvetica, "Apple Color Emoji", "Noto Sans Arabic", "Noto Sans Hebrew", Arial, sans-serif, "Segoe UI Emoji", "Segoe UI Symbol", 'Twemoji', 'Noto Color Emoji', 'Noto Sans CJK TC'; }
+.pdf:lang(ko-KR) .sans { font-family: Inter, ui-sans-serif, -apple-system, BlinkMacSystemFont, "Segoe UI Variable Display", "Segoe UI", Helvetica, "Apple Color Emoji", "Noto Sans Arabic", "Noto Sans Hebrew", Arial, sans-serif, "Segoe UI Emoji", "Segoe UI Symbol", 'Twemoji', 'Noto Color Emoji', 'Noto Sans CJK KR'; }
+.pdf .code { font-family: Source Code Pro, "SFMono-Regular", Menlo, Consolas, "PT Mono", "Liberation Mono", Courier, monospace, 'Twemoji', 'Noto Color Emoji', 'Noto Sans Mono CJK JP'; }
+.pdf:lang(zh-CN) .code { font-family: Source Code Pro, "SFMono-Regular", Menlo, Consolas, "PT Mono", "Liberation Mono", Courier, monospace, 'Twemoji', 'Noto Color Emoji', 'Noto Sans Mono CJK SC'; }
+.pdf:lang(zh-TW) .code { font-family: Source Code Pro, "SFMono-Regular", Menlo, Consolas, "PT Mono", "Liberation Mono", Courier, monospace, 'Twemoji', 'Noto Color Emoji', 'Noto Sans Mono CJK TC'; }
+.pdf:lang(ko-KR) .code { font-family: Source Code Pro, "SFMono-Regular", Menlo, Consolas, "PT Mono", "Liberation Mono", Courier, monospace, 'Twemoji', 'Noto Color Emoji', 'Noto Sans Mono CJK KR'; }
+.pdf .serif { font-family: PT Serif, Lyon-Text, Georgia, ui-serif, serif, 'Twemoji', 'Noto Color Emoji', 'Noto Serif CJK JP'; }
+.pdf:lang(zh-CN) .serif { font-family: PT Serif, Lyon-Text, Georgia, ui-serif, serif, 'Twemoji', 'Noto Color Emoji', 'Noto Serif CJK SC'; }
+.pdf:lang(zh-TW) .serif { font-family: PT Serif, Lyon-Text, Georgia, ui-serif, serif, 'Twemoji', 'Noto Color Emoji', 'Noto Serif CJK TC'; }
+.pdf:lang(ko-KR) .serif { font-family: PT Serif, Lyon-Text, Georgia, ui-serif, serif, 'Twemoji', 'Noto Color Emoji', 'Noto Serif CJK KR'; }
+.pdf .mono { font-family: PT Mono, iawriter-mono, Nitti, Menlo, Courier, monospace, 'Twemoji', 'Noto Color Emoji', 'Noto Sans Mono CJK JP'; }
+.pdf:lang(zh-CN) .mono { font-family: PT Mono, iawriter-mono, Nitti, Menlo, Courier, monospace, 'Twemoji', 'Noto Color Emoji', 'Noto Sans Mono CJK SC'; }
+.pdf:lang(zh-TW) .mono { font-family: PT Mono, iawriter-mono, Nitti, Menlo, Courier, monospace, 'Twemoji', 'Noto Color Emoji', 'Noto Sans Mono CJK TC'; }
+.pdf:lang(ko-KR) .mono { font-family: PT Mono, iawriter-mono, Nitti, Menlo, Courier, monospace, 'Twemoji', 'Noto Color Emoji', 'Noto Sans Mono CJK KR'; }
+.highlight-default {
+	color: rgba(44, 44, 43, 1);
+}
+.highlight-gray {
+	color: rgba(125, 122, 117, 1);
+	fill: rgba(125, 122, 117, 1);
+}
+.highlight-brown {
+	color: rgba(159, 118, 90, 1);
+	fill: rgba(159, 118, 90, 1);
+}
+.highlight-orange {
+	color: rgba(210, 123, 45, 1);
+	fill: rgba(210, 123, 45, 1);
+}
+.highlight-yellow {
+	color: rgba(203, 148, 52, 1);
+	fill: rgba(203, 148, 52, 1);
+}
+.highlight-teal {
+	color: rgba(80, 148, 110, 1);
+	fill: rgba(80, 148, 110, 1);
+}
+.highlight-blue {
+	color: rgba(56, 125, 201, 1);
+	fill: rgba(56, 125, 201, 1);
+}
+.highlight-purple {
+	color: rgba(154, 107, 180, 1);
+	fill: rgba(154, 107, 180, 1);
+}
+.highlight-pink {
+	color: rgba(193, 76, 138, 1);
+	fill: rgba(193, 76, 138, 1);
+}
+.highlight-red {
+	color: rgba(207, 81, 72, 1);
+	fill: rgba(207, 81, 72, 1);
+}
+.highlight-default_background {
+	color: rgba(44, 44, 43, 1);
+}
+.highlight-gray_background {
+	background: rgba(42, 28, 0, 0.07);
+}
+.highlight-brown_background {
+	background: rgba(139, 46, 0, 0.086);
+}
+.highlight-orange_background {
+	background: rgba(224, 101, 1, 0.129);
+}
+.highlight-yellow_background {
+	background: rgba(211, 168, 0, 0.137);
+}
+.highlight-teal_background {
+	background: rgba(0, 100, 45, 0.09);
+}
+.highlight-blue_background {
+	background: rgba(0, 124, 215, 0.094);
+}
+.highlight-purple_background {
+	background: rgba(102, 0, 178, 0.078);
+}
+.highlight-pink_background {
+	background: rgba(197, 0, 93, 0.086);
+}
+.highlight-red_background {
+	background: rgba(223, 22, 0, 0.094);
+}
+.block-color-default {
+	color: inherit;
+	fill: inherit;
+}
+.block-color-gray {
+	color: rgba(125, 122, 117, 1);
+	fill: rgba(125, 122, 117, 1);
+}
+.block-color-brown {
+	color: rgba(159, 118, 90, 1);
+	fill: rgba(159, 118, 90, 1);
+}
+.block-color-orange {
+	color: rgba(210, 123, 45, 1);
+	fill: rgba(210, 123, 45, 1);
+}
+.block-color-yellow {
+	color: rgba(203, 148, 52, 1);
+	fill: rgba(203, 148, 52, 1);
+}
+.block-color-teal {
+	color: rgba(80, 148, 110, 1);
+	fill: rgba(80, 148, 110, 1);
+}
+.block-color-blue {
+	color: rgba(56, 125, 201, 1);
+	fill: rgba(56, 125, 201, 1);
+}
+.block-color-purple {
+	color: rgba(154, 107, 180, 1);
+	fill: rgba(154, 107, 180, 1);
+}
+.block-color-pink {
+	color: rgba(193, 76, 138, 1);
+	fill: rgba(193, 76, 138, 1);
+}
+.block-color-red {
+	color: rgba(207, 81, 72, 1);
+	fill: rgba(207, 81, 72, 1);
+}
+.block-color-default_background {
+	color: inherit;
+	fill: inherit;
+}
+.block-color-gray_background {
+	background: rgba(240, 239, 237, 1);
+}
+.block-color-brown_background {
+	background: rgba(245, 237, 233, 1);
+}
+.block-color-orange_background {
+	background: rgba(251, 235, 222, 1);
+}
+.block-color-yellow_background {
+	background: rgba(249, 243, 220, 1);
+}
+.block-color-teal_background {
+	background: rgba(232, 241, 236, 1);
+}
+.block-color-blue_background {
+	background: rgba(229, 242, 252, 1);
+}
+.block-color-purple_background {
+	background: rgba(243, 235, 249, 1);
+}
+.block-color-pink_background {
+	background: rgba(250, 233, 241, 1);
+}
+.block-color-red_background {
+	background: rgba(252, 233, 231, 1);
+}
+.select-value-color-default { background-color: rgba(42, 28, 0, 0.07); }
+.select-value-color-gray { background-color: rgba(28, 19, 1, 0.11); }
+.select-value-color-brown { background-color: rgba(127, 51, 0, 0.156); }
+.select-value-color-orange { background-color: rgba(196, 88, 0, 0.203); }
+.select-value-color-yellow { background-color: rgba(209, 156, 0, 0.282); }
+.select-value-color-green { background-color: rgba(0, 96, 38, 0.156); }
+.select-value-color-blue { background-color: rgba(0, 118, 217, 0.203); }
+.select-value-color-purple { background-color: rgba(92, 0, 163, 0.141); }
+.select-value-color-pink { background-color: rgba(183, 0, 78, 0.152); }
+.select-value-color-red { background-color: rgba(206, 24, 0, 0.164); }
+
+.checkbox {
+	display: inline-flex;
+	vertical-align: text-bottom;
+	width: 16;
+	height: 16;
+	background-size: 16px;
+	margin-left: 2px;
+	margin-right: 5px;
+}
+
+.checkbox-on {
+	background-image: url("data:image/svg+xml;charset=UTF-8,%3Csvg%20width%3D%2216%22%20height%3D%2216%22%20viewBox%3D%220%200%2016%2016%22%20fill%3D%22none%22%20xmlns%3D%22http%3A%2F%2Fwww.w3.org%2F2000%2Fsvg%22%3E%0A%3Crect%20width%3D%2216%22%20height%3D%2216%22%20fill%3D%22%2358A9D7%22%2F%3E%0A%3Cpath%20d%3D%22M6.71429%2012.2852L14%204.9995L12.7143%203.71436L6.71429%209.71378L3.28571%206.2831L2%207.57092L6.71429%2012.2852Z%22%20fill%3D%22white%22%2F%3E%0A%3C%2Fsvg%3E");
+}
+
+.checkbox-off {
+	background-image: url("data:image/svg+xml;charset=UTF-8,%3Csvg%20width%3D%2216%22%20height%3D%2216%22%20viewBox%3D%220%200%2016%2016%22%20fill%3D%22none%22%20xmlns%3D%22http%3A%2F%2Fwww.w3.org%2F2000%2Fsvg%22%3E%0A%3Crect%20x%3D%220.75%22%20y%3D%220.75%22%20width%3D%2214.5%22%20height%3D%2214.5%22%20fill%3D%22white%22%20stroke%3D%22%2336352F%22%20stroke-width%3D%221.5%22%2F%3E%0A%3C%2Fsvg%3E");
+}
+	
+</style></head><body><article id="1e885df0-1907-81a6-83ae-d36c04c8f7a5" class="page sans"><header><h1 class="page-title" dir="auto"><br/>🗂️ <strong>Engineering &amp; Technical Documentation Index</strong></h1><p class="page-description" dir="auto"></p><table class="properties"><tbody><tr class="property-row property-row-person"><th><span class="icon property-icon"><img src="https://www.notion.so/icons/friends_gray.svg" style="width:14px;height:14px;display:block"/></span>Owner</th><td><span class="user"><span class="icon text-icon user-icon"><span class="user-icon-inner">A</span></span>Aubert</span></td></tr><tr class="property-row property-row-multi_select"><th><span class="icon property-icon"><img src="https://www.notion.so/icons/list_gray.svg" style="width:14px;height:14px;display:block"/></span>Tags</th><td></td></tr></tbody></table></header><div class="page-body"><div style="display:contents" dir="auto"><h3 id="1e885df0-1907-8120-bb0c-fda9dd6a6da5" class="">⚙️ <strong>CORE INFRASTRUCTURE &amp; ARCHITECTURE</strong></h3></div><div style="display:contents" dir="ltr"><table id="1e885df0-1907-81e2-9366-dffd55655c14" class="simple-table"><tbody><div style="display:contents" dir="ltr"><tr id="1e885df0-1907-81bc-b035-d8a77c4715b7"><td id="ms?z" class="">Document</td><td id="RQbQ" class="">Summary</td><td id="jveU" class="">Owner</td></tr></div><div style="display:contents" dir="ltr"><tr id="1e885df0-1907-813e-9df3-de083855751e"><td id="ms?z" class=""><strong><a href="%F0%9F%A7%A9%20Technical%20Architecture%20Diagram%201e885df0190781a5a379d0c4bf633a95.html">Technical Architecture Diagram</a></strong></td><td id="RQbQ" class="">End-to-end system layout covering app clients, backend, storage, and dashboard layers</td><td id="jveU" class="">CTO</td></tr></div><div style="display:contents" dir="ltr"><tr id="1e885df0-1907-8134-bb9d-edb1835069e3"><td id="ms?z" class=""><strong><a href="%F0%9F%8F%97%EF%B8%8F%20Infrastructure%20&amp;%20Hosting%20Specification%201e885df019078127ab05c73094c53767.html">Infrastructure &amp; Hosting Specification</a></strong></td><td id="RQbQ" class="">Details on AWS-based deployment, container use, uptime controls, and cloud boundary enforcement</td><td id="jveU" class="">CTO</td></tr></div><div style="display:contents" dir="ltr"><tr id="1e885df0-1907-819d-96e6-e73334c77cc4"><td id="ms?z" class=""><strong><a href="%F0%9F%9A%80%20CI%20CD%20Pipeline%20Overview%201e885df0190781a1beeae7a9e37c335b.html">CI/CD Pipeline Overview</a></strong></td><td id="RQbQ" class="">GitHub Actions–based release flow with QA gates, blue/green deploy, and rollback support</td><td id="jveU" class="">Engineering</td></tr></div><div style="display:contents" dir="ltr"><tr id="1e885df0-1907-8130-9fc4-eac79aaf80f1"><td id="ms?z" class=""><strong><a href="%F0%9F%94%90%20Data%20Encryption%20&amp;%20Key%20Management%20Overview%201e885df01907819c8af8f2b1ef1ef537.html">Data Encryption &amp; Key Management Overview</a></strong></td><td id="RQbQ" class="">AES-256 encryption layers, KMS policy, token handling, and secrets management across environments</td><td id="jveU" class="">Security / CTO</td></tr></div></tbody></table></div><div style="display:contents" dir="auto"><hr id="1e885df0-1907-812b-b7dd-d485ff75f522"/></div><div style="display:contents" dir="auto"><h3 id="1e885df0-1907-81bf-affb-ce817ad3e2d2" class="">🔐 <strong>SECURITY, PRIVACY &amp; COMPLIANCE</strong></h3></div><div style="display:contents" dir="ltr"><table id="1e885df0-1907-8184-8287-e9a899a5085e" class="simple-table"><tbody><div style="display:contents" dir="ltr"><tr id="1e885df0-1907-81b2-88bd-d19a2858af42"><td id="[&lt;MA" class="">Document</td><td id=";lbo" class="">Summary</td><td id="?gz@" class="">Owner</td></tr></div><div style="display:contents" dir="ltr"><tr id="1e885df0-1907-81d4-907b-cf0eeb492c2e"><td id="[&lt;MA" class=""><strong><a href="%F0%9F%9B%A1%EF%B8%8F%20Consent%20&amp;%20Privacy%20Flow%201e885df0190781e5944ffdb073f8921b.html">Consent &amp; Privacy Flow</a></strong></td><td id=";lbo" class="">Law 25–compliant user journey for consent, revocation, and caregiver/clinic relationships</td><td id="?gz@" class="">Privacy Officer</td></tr></div><div style="display:contents" dir="ltr"><tr id="1e885df0-1907-81c7-ada7-f97eea7948b3"><td id="[&lt;MA" class=""><strong><a href="%F0%9F%94%90%20Auth%20&amp;%20Permissions%20Model%201e885df0190781db838dff4206693619.html">Auth &amp; Permissions Model</a></strong></td><td id=";lbo" class="">Role-based access structure with consent-tied account linking and clinic data segregation</td><td id="?gz@" class="">CTO</td></tr></div><div style="display:contents" dir="ltr"><tr id="1e885df0-1907-81c3-aaa0-d3a9f6c48b16"><td id="[&lt;MA" class=""><strong><a href="%F0%9F%A7%BC%20Anonymization%20&amp;%20Data%20Lifecycle%20Policy%201e885df01907817cb947c3a6bfed9b61.html">Anonymization &amp; Data Lifecycle Policy</a></strong></td><td id=";lbo" class="">Data minimization schema, user data purging, and research-compatible anonymization protocols</td><td id="?gz@" class="">Privacy Officer</td></tr></div><div style="display:contents" dir="ltr"><tr id="1e885df0-1907-8156-8922-f644d61d97cf"><td id="[&lt;MA" class=""><strong><a href="%F0%9F%9B%A0%EF%B8%8F%20Monitoring,%20Logging%20&amp;%20Incident%20Response%20Plan%201e885df0190781279f96c1f9e6567819.html">Monitoring, Logging &amp; Incident Response Plan</a></strong></td><td id=";lbo" class="">Log coverage, Sentry/CloudWatch integration, escalation workflows, and breach response SOP</td><td id="?gz@" class="">Security / Engineering</td></tr></div><div style="display:contents" dir="ltr"><tr id="1e885df0-1907-819c-aad6-c3a65ed3505d"><td id="[&lt;MA" class=""><strong><a href="%F0%9F%9B%A1%EF%B8%8F%20Rate%20Limiting%20&amp;%20Abuse%20Prevention%20Ruleset%201e885df0190781828870c3be429a4c60.html">Rate Limiting &amp; Abuse Prevention Ruleset</a></strong></td><td id=";lbo" class="">Protection against Companion spam, dashboard scraping, and token misuse</td><td id="?gz@" class="">Engineering</td></tr></div><div style="display:contents" dir="ltr"><tr id="1e885df0-1907-815a-b59b-c7ffa3d94f32"><td id="[&lt;MA" class=""><strong><a href="%F0%9F%A7%A9%20Privacy-Respecting%20Inference%20Architecture%201e885df01907819da0e7ce7e3528bfa4.html">Privacy-Respecting Inference Architecture</a></strong></td><td id=";lbo" class="">Defines safe, per-user inference for future ML without PII exposure or cross-context scoring</td><td id="?gz@" class="">CTO / ML Lead</td></tr></div></tbody></table></div><div style="display:contents" dir="auto"><hr id="1e885df0-1907-8110-a647-fcc47c428a03"/></div><div style="display:contents" dir="auto"><h3 id="1e885df0-1907-81a9-adba-d814ee36702d" class="">🧠 <strong>AI / ML &amp; PERSONALIZATION</strong></h3></div><div style="display:contents" dir="ltr"><table id="1e885df0-1907-8176-bc1e-daf21fd9ac49" class="simple-table"><tbody><div style="display:contents" dir="ltr"><tr id="1e885df0-1907-818e-b66f-d26c3da92491"><td id="ZzYJ" class="">Document</td><td id="ivXP" class="">Summary</td><td id=":{IP" class="">Owner</td></tr></div><div style="display:contents" dir="ltr"><tr id="1e885df0-1907-81ae-869f-e9c910126106"><td id="ZzYJ" class=""><strong><a href="%F0%9F%A7%A0%20AI%20ML%20Model%20Strategy%201e885df019078184b2dcec958084757f.html">AI/ML Model Strategy Document</a></strong></td><td id="ivXP" class="">Enterprise stance on where ML is used, where it is not, and ethical boundaries for adoption</td><td id=":{IP" class="">CTO / Product</td></tr></div><div style="display:contents" dir="ltr"><tr id="1e885df0-1907-8178-9ed3-e4718ca1c35c"><td id="ZzYJ" class=""><strong><a href="%F0%9F%A7%AC%20Personalization%20Engine%20Specification%201e885df019078181b318c179b29417c4.html">Personalization Engine Specification</a></strong></td><td id="ivXP" class="">Phase 2 roadmap for game difficulty adaptation, Companion memory, and engagement modeling</td><td id=":{IP" class="">ML Lead / Product</td></tr></div><div style="display:contents" dir="ltr"><tr id="1e885df0-1907-8172-a95c-d7e243471826"><td id="ZzYJ" class=""><strong><a href="%E2%9A%96%EF%B8%8F%20AI%20Governance%20&amp;%20Ethics%20Charter%201e885df0190781228536f11ef1b899b7.html">AI Governance &amp; Ethics Charter</a></strong></td><td id="ivXP" class="">AI use cases classified by Allow / Restrict / Prohibit, with board approval flow and audit rules</td><td id=":{IP" class="">Governance Board</td></tr></div><div style="display:contents" dir="ltr"><tr id="1e885df0-1907-8128-ba84-da2ca1e0bc46"><td id="ZzYJ" class=""><strong><a href="%F0%9F%A7%A0%F0%9F%A7%BE%20Explainability%20&amp;%20Control%20UX%20Plan%201e885df019078176a835f2b9049bd319.html">Explainability &amp; Control UX Plan</a></strong></td><td id="ivXP" class="">UX transparency controls for every adaptive behavior, with opt-out and Companion memory reset</td><td id=":{IP" class="">Product / UX</td></tr></div></tbody></table></div><div style="display:contents" dir="auto"><hr id="1e885df0-1907-81fb-a203-ee5e8ab951fb"/></div><div style="display:contents" dir="auto"><h3 id="1e885df0-1907-8112-948a-d7f3f2b41dbb" class="">🧩 <strong>DATA &amp; APPLICATION LAYER</strong></h3></div><div style="display:contents" dir="ltr"><table id="1e885df0-1907-81d7-99a5-ea3d02a6a6e9" class="simple-table"><tbody><div style="display:contents" dir="ltr"><tr id="1e885df0-1907-8116-8826-d23a123bad07"><td id="YeI[" class="">Document</td><td id="zvz\" class="">Summary</td><td id="Opf;" class="">Owner</td></tr></div><div style="display:contents" dir="ltr"><tr id="1e885df0-1907-81ee-8cfd-d56b2857262b"><td id="YeI[" class=""><strong><a href="%F0%9F%8E%AE%20Game%20Engine%20Specifications%201e885df0190781eab760eca139b38a28.html">Game Engine Specifications</a></strong></td><td id="zvz\" class="">MVP game logic, telemetry hooks, difficulty controller, and Companion event integration</td><td id="Opf;" class="">Engineering</td></tr></div><div style="display:contents" dir="ltr"><tr id="1e885df0-1907-819a-abe9-fac8626fb16d"><td id="YeI[" class=""><strong><a href="%F0%9F%A4%96%20Companion%20Logic%20Engine%20Specification%201e885df01907819daa71e15a7f2b03ac.html">Companion Logic Engine Specification</a></strong></td><td id="zvz\" class="">Prompt scheduler, tone modulation, cooldowns, and consent-based behavior model</td><td id="Opf;" class="">UX / Engineering</td></tr></div><div style="display:contents" dir="ltr"><tr id="1e885df0-1907-81cd-b2ba-d712b53db8f4"><td id="YeI[" class=""><strong><a href="%F0%9F%A9%BA%20Clinic%20Dashboard%20Data%20Pipeline%20Specification%201e885df01907814b8f42f314b8c22fcb.html">Clinic Dashboard Data Pipeline Specification</a></strong></td><td id="zvz\" class="">Engagement scoring logic, inactivity flags, and data aggregation for clinic reporting</td><td id="Opf;" class="">Engineering / Product</td></tr></div><div style="display:contents" dir="ltr"><tr id="1e885df0-1907-813c-a1c8-e736f76a7325"><td id="YeI[" class=""><strong><a href="%F0%9F%A7%A9%20Data%20Schema%20Overview%201e885df0190781ab902ccf8a92c1daec.html">Data Schema Overview</a></strong></td><td id="zvz\" class="">Entity-by-entity database structure with consent hooks, role segmentation, and compliance tagging</td><td id="Opf;" class="">Engineering / Privacy</td></tr></div></tbody></table></div><div style="display:contents" dir="auto"><hr id="1e885df0-1907-81f2-aa95-f8d18a05dd16"/></div><div style="display:contents" dir="auto"><h3 id="1e885df0-1907-814b-9a36-ceedc55d51e5" class="">🧰 <strong>PLATFORM CONTROLS</strong></h3></div><div style="display:contents" dir="ltr"><table id="1e885df0-1907-8112-b0e6-e0e098bae907" class="simple-table"><tbody><div style="display:contents" dir="ltr"><tr id="1e885df0-1907-81d5-b5ff-d845cbdf6c28"><td id="lh&lt;v" class="">Document</td><td id="FxvR" class="">Summary</td><td id="}btj" class="">Owner</td></tr></div><div style="display:contents" dir="ltr"><tr id="1e885df0-1907-8117-a0fc-d2ff1d795583"><td id="lh&lt;v" class=""><strong><a href="%F0%9F%94%94%20Notification%20System%20Specification%201e885df019078121bf5cd951b48fcfbd.html">Notification System Specification</a></strong></td><td id="FxvR" class="">Companion nudge logic, reminder cooldowns, clinic dashboard alerts, and in-app delivery architecture</td><td id="}btj" class="">Product / Engineering</td></tr></div><div style="display:contents" dir="ltr"><tr id="1e885df0-1907-810a-bf96-d3a52824eee5"><td id="lh&lt;v" class=""><strong><a href="%F0%9F%A7%AD%20Feature%20Flag%20Management%20Protocol%201e885df01907818b9033e82fb1a13742.html">Feature Flag Management Protocol</a></strong></td><td id="FxvR" class="">Release toggles, kill switches, region- and role-specific flags for phased feature rollout</td><td id="}btj" class="">Engineering</td></tr></div><div style="display:contents" dir="ltr"><tr id="1e885df0-1907-8185-bdc1-eec21c719287"><td id="lh&lt;v" class=""><strong><a href="%F0%9F%94%8C%20Developer%20SDK%20API%20Reference%201e885df019078188ad04cd1fe1391d0f.html">Developer SDK / API Reference</a></strong></td><td id="FxvR" class="">External integration documentation (current + future) for clinics, research, or partners</td><td id="}btj" class="">CTO / Product</td></tr></div></tbody></table></div><div style="display:contents" dir="auto"><hr id="1e885df0-1907-81aa-9a9e-cd4c2a4fbf3c"/></div><div style="display:contents" dir="auto"><h3 id="1e885df0-1907-81a5-8803-cd2a3b2c3703" class="">🧪 <strong>QA, UX &amp; ACCESSIBILITY</strong></h3></div><div style="display:contents" dir="ltr"><table id="1e885df0-1907-815a-abff-cfc17482fd03" class="simple-table"><tbody><div style="display:contents" dir="ltr"><tr id="1e885df0-1907-8193-b6a4-f37f433e9990"><td id="cCts" class="">Document</td><td id="o_zH" class="">Summary</td><td id="^=mO" class="">Owner</td></tr></div><div style="display:contents" dir="ltr"><tr id="1e885df0-1907-81bb-9601-c09ae2a7f97b"><td id="cCts" class=""><strong><a href="%E2%9C%85%20Testing%20&amp;%20QA%20Strategy%201e885df0190781cda009da618f30956b.html">Testing &amp; QA Strategy</a></strong></td><td id="o_zH" class="">Unit, integration, localization, and accessibility testing protocol with regression coverage</td><td id="^=mO" class="">QA / Engineering</td></tr></div><div style="display:contents" dir="ltr"><tr id="1e885df0-1907-8178-bb43-cc6173742600"><td id="cCts" class=""><strong><a href="%E2%99%BF%20Accessibility%20Implementation%20Guide%201e885df01907813a9543f51c6462f125.html">Accessibility Implementation Guide</a></strong></td><td id="o_zH" class="">WCAG 2.1 AA–aligned interface, narration-readiness, contrast toggles, and keyboard navigation</td><td id="^=mO" class="">UX / Product</td></tr></div></tbody></table></div></div></article><span class="sans" style="font-size:14px;padding-top:2em"></span></body></html>

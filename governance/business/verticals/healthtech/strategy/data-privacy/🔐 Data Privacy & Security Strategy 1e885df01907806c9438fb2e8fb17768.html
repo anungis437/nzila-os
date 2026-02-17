@@ -1,0 +1,713 @@
+<html><head><meta http-equiv="Content-Type" content="text/html; charset=utf-8"/><title>🔐 Data Privacy &amp; Security Strategy</title><style>
+/* cspell:disable-file */
+/* webkit printing magic: print all background colors */
+html {
+	-webkit-print-color-adjust: exact;
+}
+* {
+	box-sizing: border-box;
+	-webkit-print-color-adjust: exact;
+}
+
+html,
+body {
+	margin: 0;
+	padding: 0;
+}
+@media only screen {
+	body {
+		margin: 2em auto;
+		max-width: 900px;
+		color: rgb(55, 53, 47);
+	}
+}
+
+body {
+	line-height: 1.5;
+	white-space: pre-wrap;
+}
+
+a,
+a.visited {
+	color: inherit;
+	text-decoration: underline;
+}
+
+.pdf-relative-link-path {
+	font-size: 80%;
+	color: #444;
+}
+
+h1,
+h2,
+h3 {
+	letter-spacing: -0.01em;
+	line-height: 1.2;
+	font-weight: 600;
+	margin-bottom: 0;
+}
+
+/* Override strong tags inside headings to maintain consistent weight */
+h1 strong,
+h2 strong,
+h3 strong {
+	font-weight: 600;
+}
+
+.page-title {
+	font-size: 2.5rem;
+	font-weight: 700;
+	margin-top: 0;
+	margin-bottom: 0.75em;
+}
+
+h1 {
+	font-size: 1.875rem;
+	margin-top: 1.875rem;
+}
+
+h2 {
+	font-size: 1.5rem;
+	margin-top: 1.5rem;
+}
+
+h3 {
+	font-size: 1.25rem;
+	margin-top: 1.25rem;
+}
+
+.source {
+	border: 1px solid #ddd;
+	border-radius: 3px;
+	padding: 1.5em;
+	word-break: break-all;
+}
+
+.callout {
+	border-radius: 10px;
+	padding: 1rem;
+}
+
+figure {
+	margin: 1.25em 0;
+	page-break-inside: avoid;
+}
+
+figcaption {
+	opacity: 0.5;
+	font-size: 85%;
+	margin-top: 0.5em;
+}
+
+mark {
+	background-color: transparent;
+}
+
+.indented {
+	padding-left: 1.5em;
+}
+
+hr {
+	background: transparent;
+	display: block;
+	width: 100%;
+	height: 1px;
+	visibility: visible;
+	border: none;
+	border-bottom: 1px solid rgba(55, 53, 47, 0.09);
+}
+
+img {
+	max-width: 100%;
+}
+
+@media only print {
+	img {
+		max-height: 100vh;
+		object-fit: contain;
+	}
+}
+
+@page {
+	margin: 1in;
+}
+
+.collection-content {
+	font-size: 0.875rem;
+}
+
+.collection-content td {
+	white-space: pre-wrap;
+	word-break: break-word;
+}
+
+.column-list {
+	display: flex;
+	justify-content: space-between;
+}
+
+.column {
+	padding: 0 1em;
+}
+
+.column:first-child {
+	padding-left: 0;
+}
+
+.column:last-child {
+	padding-right: 0;
+}
+
+.table_of_contents-item {
+	display: block;
+	font-size: 0.875rem;
+	line-height: 1.3;
+	padding: 0.125rem;
+}
+
+.table_of_contents-indent-1 {
+	margin-left: 1.5rem;
+}
+
+.table_of_contents-indent-2 {
+	margin-left: 3rem;
+}
+
+.table_of_contents-indent-3 {
+	margin-left: 4.5rem;
+}
+
+.table_of_contents-link {
+	text-decoration: none;
+	opacity: 0.7;
+	border-bottom: 1px solid rgba(55, 53, 47, 0.18);
+}
+
+table,
+th,
+td {
+	border: 1px solid rgba(55, 53, 47, 0.09);
+	border-collapse: collapse;
+}
+
+table {
+	border-left: none;
+	border-right: none;
+}
+
+th,
+td {
+	font-weight: normal;
+	padding: 0.25em 0.5em;
+	line-height: 1.5;
+	min-height: 1.5em;
+	text-align: left;
+}
+
+th {
+	color: rgba(55, 53, 47, 0.6);
+}
+
+ol,
+ul {
+	margin: 0;
+	margin-block-start: 0.6em;
+	margin-block-end: 0.6em;
+}
+
+li > ol:first-child,
+li > ul:first-child {
+	margin-block-start: 0.6em;
+}
+
+ul > li {
+	list-style: disc;
+}
+
+ul.to-do-list {
+	padding-inline-start: 0;
+}
+
+ul.to-do-list > li {
+	list-style: none;
+}
+
+.to-do-children-checked {
+	text-decoration: line-through;
+	opacity: 0.375;
+}
+
+ul.toggle > li {
+	list-style: none;
+}
+
+ul {
+	padding-inline-start: 1.7em;
+}
+
+ul > li {
+	padding-left: 0.1em;
+}
+
+ol {
+	padding-inline-start: 1.6em;
+}
+
+ol > li {
+	padding-left: 0.2em;
+}
+
+.mono ol {
+	padding-inline-start: 2em;
+}
+
+.mono ol > li {
+	text-indent: -0.4em;
+}
+
+.toggle {
+	padding-inline-start: 0em;
+	list-style-type: none;
+}
+
+/* Indent toggle children */
+.toggle > li > details {
+	padding-left: 1.7em;
+}
+
+.toggle > li > details > summary {
+	margin-left: -1.1em;
+}
+
+.selected-value {
+	display: inline-block;
+	padding: 0 0.5em;
+	background: rgba(206, 205, 202, 0.5);
+	border-radius: 3px;
+	margin-right: 0.5em;
+	margin-top: 0.3em;
+	margin-bottom: 0.3em;
+	white-space: nowrap;
+}
+
+.collection-title {
+	display: inline-block;
+	margin-right: 1em;
+}
+
+.page-description {
+	margin-bottom: 2em;
+}
+
+.simple-table {
+	margin-top: 1em;
+	font-size: 0.875rem;
+	empty-cells: show;
+}
+.simple-table td {
+	height: 29px;
+	min-width: 120px;
+}
+
+.simple-table th {
+	height: 29px;
+	min-width: 120px;
+}
+
+.simple-table-header-color {
+	background: rgb(247, 246, 243);
+	color: black;
+}
+.simple-table-header {
+	font-weight: 500;
+}
+
+time {
+	opacity: 0.5;
+}
+
+.icon {
+	display: inline-flex;
+	align-items: center;
+	justify-content: center;
+	max-width: 1.2em;
+	max-height: 1.2em;
+	text-decoration: none;
+	vertical-align: text-bottom;
+	margin-right: 0.5em;
+}
+
+img.icon {
+	border-radius: 3px;
+}
+
+.callout img.notion-static-icon {
+	width: 1em;
+	height: 1em;
+}
+
+.callout p {
+	margin: 0;
+}
+
+.callout h1,
+.callout h2,
+.callout h3 {
+	margin: 0 0 0.6rem;
+}
+
+.user-icon {
+	width: 1.5em;
+	height: 1.5em;
+	border-radius: 100%;
+	margin-right: 0.5rem;
+}
+
+.user-icon-inner {
+	font-size: 0.8em;
+}
+
+.text-icon {
+	border: 1px solid #000;
+	text-align: center;
+}
+
+.page-cover-image {
+	display: block;
+	object-fit: cover;
+	width: 100%;
+	max-height: 30vh;
+}
+
+.page-header-icon {
+	font-size: 3rem;
+	margin-bottom: 1rem;
+}
+
+.page-header-icon-with-cover {
+	margin-top: -0.72em;
+	margin-left: 0.07em;
+}
+
+.page-header-icon img {
+	border-radius: 3px;
+}
+
+.link-to-page {
+	margin: 1em 0;
+	padding: 0;
+	border: none;
+	font-weight: 500;
+}
+
+p > .user {
+	opacity: 0.5;
+}
+
+td > .user,
+td > time {
+	white-space: nowrap;
+}
+
+input[type="checkbox"] {
+	transform: scale(1.5);
+	margin-right: 0.6em;
+	vertical-align: middle;
+}
+
+p {
+	margin-top: 0.5em;
+	margin-bottom: 0.5em;
+}
+
+.image {
+	border: none;
+	margin: 1.5em 0;
+	padding: 0;
+	border-radius: 0;
+	text-align: center;
+}
+
+.code,
+code {
+	background: rgba(135, 131, 120, 0.15);
+	border-radius: 3px;
+	padding: 0.2em 0.4em;
+	border-radius: 3px;
+	font-size: 85%;
+	tab-size: 2;
+}
+
+code {
+	color: #eb5757;
+}
+
+.code {
+	padding: 1.5em 1em;
+}
+
+.code-wrap {
+	white-space: pre-wrap;
+	word-break: break-all;
+}
+
+.code > code {
+	background: none;
+	padding: 0;
+	font-size: 100%;
+	color: inherit;
+}
+
+blockquote {
+	font-size: 1em;
+	margin: 1em 0;
+	padding-left: 1em;
+	border-left: 3px solid rgb(55, 53, 47);
+}
+
+blockquote.quote-large {
+	font-size: 1.25em;
+}
+
+.bookmark {
+	text-decoration: none;
+	max-height: 8em;
+	padding: 0;
+	display: flex;
+	width: 100%;
+	align-items: stretch;
+}
+
+.bookmark-title {
+	font-size: 0.85em;
+	overflow: hidden;
+	text-overflow: ellipsis;
+	height: 1.75em;
+	white-space: nowrap;
+}
+
+.bookmark-text {
+	display: flex;
+	flex-direction: column;
+}
+
+.bookmark-info {
+	flex: 4 1 180px;
+	padding: 12px 14px 14px;
+	display: flex;
+	flex-direction: column;
+	justify-content: space-between;
+}
+
+.bookmark-image {
+	width: 33%;
+	flex: 1 1 180px;
+	display: block;
+	position: relative;
+	object-fit: cover;
+	border-radius: 1px;
+}
+
+.bookmark-description {
+	color: rgba(55, 53, 47, 0.6);
+	font-size: 0.75em;
+	overflow: hidden;
+	max-height: 4.5em;
+	word-break: break-word;
+}
+
+.bookmark-href {
+	font-size: 0.75em;
+	margin-top: 0.25em;
+}
+
+.sans { font-family: ui-sans-serif, -apple-system, BlinkMacSystemFont, "Segoe UI Variable Display", "Segoe UI", Helvetica, "Apple Color Emoji", "Noto Sans Arabic", "Noto Sans Hebrew", Arial, sans-serif, "Segoe UI Emoji", "Segoe UI Symbol"; }
+.code { font-family: "SFMono-Regular", Menlo, Consolas, "PT Mono", "Liberation Mono", Courier, monospace; }
+.serif { font-family: Lyon-Text, Georgia, ui-serif, serif; }
+.mono { font-family: iawriter-mono, Nitti, Menlo, Courier, monospace; }
+.pdf .sans { font-family: Inter, ui-sans-serif, -apple-system, BlinkMacSystemFont, "Segoe UI Variable Display", "Segoe UI", Helvetica, "Apple Color Emoji", "Noto Sans Arabic", "Noto Sans Hebrew", Arial, sans-serif, "Segoe UI Emoji", "Segoe UI Symbol", 'Twemoji', 'Noto Color Emoji', 'Noto Sans CJK JP'; }
+.pdf:lang(zh-CN) .sans { font-family: Inter, ui-sans-serif, -apple-system, BlinkMacSystemFont, "Segoe UI Variable Display", "Segoe UI", Helvetica, "Apple Color Emoji", "Noto Sans Arabic", "Noto Sans Hebrew", Arial, sans-serif, "Segoe UI Emoji", "Segoe UI Symbol", 'Twemoji', 'Noto Color Emoji', 'Noto Sans CJK SC'; }
+.pdf:lang(zh-TW) .sans { font-family: Inter, ui-sans-serif, -apple-system, BlinkMacSystemFont, "Segoe UI Variable Display", "Segoe UI", Helvetica, "Apple Color Emoji", "Noto Sans Arabic", "Noto Sans Hebrew", Arial, sans-serif, "Segoe UI Emoji", "Segoe UI Symbol", 'Twemoji', 'Noto Color Emoji', 'Noto Sans CJK TC'; }
+.pdf:lang(ko-KR) .sans { font-family: Inter, ui-sans-serif, -apple-system, BlinkMacSystemFont, "Segoe UI Variable Display", "Segoe UI", Helvetica, "Apple Color Emoji", "Noto Sans Arabic", "Noto Sans Hebrew", Arial, sans-serif, "Segoe UI Emoji", "Segoe UI Symbol", 'Twemoji', 'Noto Color Emoji', 'Noto Sans CJK KR'; }
+.pdf .code { font-family: Source Code Pro, "SFMono-Regular", Menlo, Consolas, "PT Mono", "Liberation Mono", Courier, monospace, 'Twemoji', 'Noto Color Emoji', 'Noto Sans Mono CJK JP'; }
+.pdf:lang(zh-CN) .code { font-family: Source Code Pro, "SFMono-Regular", Menlo, Consolas, "PT Mono", "Liberation Mono", Courier, monospace, 'Twemoji', 'Noto Color Emoji', 'Noto Sans Mono CJK SC'; }
+.pdf:lang(zh-TW) .code { font-family: Source Code Pro, "SFMono-Regular", Menlo, Consolas, "PT Mono", "Liberation Mono", Courier, monospace, 'Twemoji', 'Noto Color Emoji', 'Noto Sans Mono CJK TC'; }
+.pdf:lang(ko-KR) .code { font-family: Source Code Pro, "SFMono-Regular", Menlo, Consolas, "PT Mono", "Liberation Mono", Courier, monospace, 'Twemoji', 'Noto Color Emoji', 'Noto Sans Mono CJK KR'; }
+.pdf .serif { font-family: PT Serif, Lyon-Text, Georgia, ui-serif, serif, 'Twemoji', 'Noto Color Emoji', 'Noto Serif CJK JP'; }
+.pdf:lang(zh-CN) .serif { font-family: PT Serif, Lyon-Text, Georgia, ui-serif, serif, 'Twemoji', 'Noto Color Emoji', 'Noto Serif CJK SC'; }
+.pdf:lang(zh-TW) .serif { font-family: PT Serif, Lyon-Text, Georgia, ui-serif, serif, 'Twemoji', 'Noto Color Emoji', 'Noto Serif CJK TC'; }
+.pdf:lang(ko-KR) .serif { font-family: PT Serif, Lyon-Text, Georgia, ui-serif, serif, 'Twemoji', 'Noto Color Emoji', 'Noto Serif CJK KR'; }
+.pdf .mono { font-family: PT Mono, iawriter-mono, Nitti, Menlo, Courier, monospace, 'Twemoji', 'Noto Color Emoji', 'Noto Sans Mono CJK JP'; }
+.pdf:lang(zh-CN) .mono { font-family: PT Mono, iawriter-mono, Nitti, Menlo, Courier, monospace, 'Twemoji', 'Noto Color Emoji', 'Noto Sans Mono CJK SC'; }
+.pdf:lang(zh-TW) .mono { font-family: PT Mono, iawriter-mono, Nitti, Menlo, Courier, monospace, 'Twemoji', 'Noto Color Emoji', 'Noto Sans Mono CJK TC'; }
+.pdf:lang(ko-KR) .mono { font-family: PT Mono, iawriter-mono, Nitti, Menlo, Courier, monospace, 'Twemoji', 'Noto Color Emoji', 'Noto Sans Mono CJK KR'; }
+.highlight-default {
+	color: rgba(44, 44, 43, 1);
+}
+.highlight-gray {
+	color: rgba(125, 122, 117, 1);
+	fill: rgba(125, 122, 117, 1);
+}
+.highlight-brown {
+	color: rgba(159, 118, 90, 1);
+	fill: rgba(159, 118, 90, 1);
+}
+.highlight-orange {
+	color: rgba(210, 123, 45, 1);
+	fill: rgba(210, 123, 45, 1);
+}
+.highlight-yellow {
+	color: rgba(203, 148, 52, 1);
+	fill: rgba(203, 148, 52, 1);
+}
+.highlight-teal {
+	color: rgba(80, 148, 110, 1);
+	fill: rgba(80, 148, 110, 1);
+}
+.highlight-blue {
+	color: rgba(56, 125, 201, 1);
+	fill: rgba(56, 125, 201, 1);
+}
+.highlight-purple {
+	color: rgba(154, 107, 180, 1);
+	fill: rgba(154, 107, 180, 1);
+}
+.highlight-pink {
+	color: rgba(193, 76, 138, 1);
+	fill: rgba(193, 76, 138, 1);
+}
+.highlight-red {
+	color: rgba(207, 81, 72, 1);
+	fill: rgba(207, 81, 72, 1);
+}
+.highlight-default_background {
+	color: rgba(44, 44, 43, 1);
+}
+.highlight-gray_background {
+	background: rgba(42, 28, 0, 0.07);
+}
+.highlight-brown_background {
+	background: rgba(139, 46, 0, 0.086);
+}
+.highlight-orange_background {
+	background: rgba(224, 101, 1, 0.129);
+}
+.highlight-yellow_background {
+	background: rgba(211, 168, 0, 0.137);
+}
+.highlight-teal_background {
+	background: rgba(0, 100, 45, 0.09);
+}
+.highlight-blue_background {
+	background: rgba(0, 124, 215, 0.094);
+}
+.highlight-purple_background {
+	background: rgba(102, 0, 178, 0.078);
+}
+.highlight-pink_background {
+	background: rgba(197, 0, 93, 0.086);
+}
+.highlight-red_background {
+	background: rgba(223, 22, 0, 0.094);
+}
+.block-color-default {
+	color: inherit;
+	fill: inherit;
+}
+.block-color-gray {
+	color: rgba(125, 122, 117, 1);
+	fill: rgba(125, 122, 117, 1);
+}
+.block-color-brown {
+	color: rgba(159, 118, 90, 1);
+	fill: rgba(159, 118, 90, 1);
+}
+.block-color-orange {
+	color: rgba(210, 123, 45, 1);
+	fill: rgba(210, 123, 45, 1);
+}
+.block-color-yellow {
+	color: rgba(203, 148, 52, 1);
+	fill: rgba(203, 148, 52, 1);
+}
+.block-color-teal {
+	color: rgba(80, 148, 110, 1);
+	fill: rgba(80, 148, 110, 1);
+}
+.block-color-blue {
+	color: rgba(56, 125, 201, 1);
+	fill: rgba(56, 125, 201, 1);
+}
+.block-color-purple {
+	color: rgba(154, 107, 180, 1);
+	fill: rgba(154, 107, 180, 1);
+}
+.block-color-pink {
+	color: rgba(193, 76, 138, 1);
+	fill: rgba(193, 76, 138, 1);
+}
+.block-color-red {
+	color: rgba(207, 81, 72, 1);
+	fill: rgba(207, 81, 72, 1);
+}
+.block-color-default_background {
+	color: inherit;
+	fill: inherit;
+}
+.block-color-gray_background {
+	background: rgba(240, 239, 237, 1);
+}
+.block-color-brown_background {
+	background: rgba(245, 237, 233, 1);
+}
+.block-color-orange_background {
+	background: rgba(251, 235, 222, 1);
+}
+.block-color-yellow_background {
+	background: rgba(249, 243, 220, 1);
+}
+.block-color-teal_background {
+	background: rgba(232, 241, 236, 1);
+}
+.block-color-blue_background {
+	background: rgba(229, 242, 252, 1);
+}
+.block-color-purple_background {
+	background: rgba(243, 235, 249, 1);
+}
+.block-color-pink_background {
+	background: rgba(250, 233, 241, 1);
+}
+.block-color-red_background {
+	background: rgba(252, 233, 231, 1);
+}
+.select-value-color-default { background-color: rgba(42, 28, 0, 0.07); }
+.select-value-color-gray { background-color: rgba(28, 19, 1, 0.11); }
+.select-value-color-brown { background-color: rgba(127, 51, 0, 0.156); }
+.select-value-color-orange { background-color: rgba(196, 88, 0, 0.203); }
+.select-value-color-yellow { background-color: rgba(209, 156, 0, 0.282); }
+.select-value-color-green { background-color: rgba(0, 96, 38, 0.156); }
+.select-value-color-blue { background-color: rgba(0, 118, 217, 0.203); }
+.select-value-color-purple { background-color: rgba(92, 0, 163, 0.141); }
+.select-value-color-pink { background-color: rgba(183, 0, 78, 0.152); }
+.select-value-color-red { background-color: rgba(206, 24, 0, 0.164); }
+
+.checkbox {
+	display: inline-flex;
+	vertical-align: text-bottom;
+	width: 16;
+	height: 16;
+	background-size: 16px;
+	margin-left: 2px;
+	margin-right: 5px;
+}
+
+.checkbox-on {
+	background-image: url("data:image/svg+xml;charset=UTF-8,%3Csvg%20width%3D%2216%22%20height%3D%2216%22%20viewBox%3D%220%200%2016%2016%22%20fill%3D%22none%22%20xmlns%3D%22http%3A%2F%2Fwww.w3.org%2F2000%2Fsvg%22%3E%0A%3Crect%20width%3D%2216%22%20height%3D%2216%22%20fill%3D%22%2358A9D7%22%2F%3E%0A%3Cpath%20d%3D%22M6.71429%2012.2852L14%204.9995L12.7143%203.71436L6.71429%209.71378L3.28571%206.2831L2%207.57092L6.71429%2012.2852Z%22%20fill%3D%22white%22%2F%3E%0A%3C%2Fsvg%3E");
+}
+
+.checkbox-off {
+	background-image: url("data:image/svg+xml;charset=UTF-8,%3Csvg%20width%3D%2216%22%20height%3D%2216%22%20viewBox%3D%220%200%2016%2016%22%20fill%3D%22none%22%20xmlns%3D%22http%3A%2F%2Fwww.w3.org%2F2000%2Fsvg%22%3E%0A%3Crect%20x%3D%220.75%22%20y%3D%220.75%22%20width%3D%2214.5%22%20height%3D%2214.5%22%20fill%3D%22white%22%20stroke%3D%22%2336352F%22%20stroke-width%3D%221.5%22%2F%3E%0A%3C%2Fsvg%3E");
+}
+	
+</style></head><body><article id="1e885df0-1907-806c-9438-fb2e8fb17768" class="page sans"><header><h1 class="page-title" dir="auto">🔐 Data Privacy &amp; Security Strategy</h1><p class="page-description" dir="auto"></p><table class="properties"><tbody><tr class="property-row property-row-person"><th><span class="icon property-icon"><img src="https://www.notion.so/icons/friends_gray.svg" style="width:14px;height:14px;display:block"/></span>Owner</th><td><span class="user"><span class="icon text-icon user-icon"><span class="user-icon-inner">A</span></span>Aubert</span></td></tr><tr class="property-row property-row-multi_select"><th><span class="icon property-icon"><img src="https://www.notion.so/icons/list_gray.svg" style="width:14px;height:14px;display:block"/></span>Tags</th><td></td></tr></tbody></table></header><div class="page-body"><div style="display:contents" dir="auto"><h3 id="1e885df0-1907-80f6-b484-e2b56709a5b4" class="">1. <strong>Purpose</strong></h3></div><div style="display:contents" dir="auto"><p id="1e885df0-1907-80d6-9532-f4c104cd24e9" class="">This strategy defines how <strong>Nzila Ventures</strong> protects the integrity, confidentiality, and availability of its systems and data. It applies across the lifecycle of <strong>AI healthtech</strong>, <strong>EdTech</strong>, and B2C tools, embedding privacy and security by design.</p></div><div style="display:contents" dir="auto"><p id="1e885df0-1907-8040-a1a5-d741e1a220d9" class="">Our approach supports:</p></div><div style="display:contents" dir="auto"><ul id="1e885df0-1907-80a5-ac55-d82107e688df" class="bulleted-list"><li style="list-style-type:disc"><strong>Regulatory compliance</strong></li></ul></div><div style="display:contents" dir="auto"><ul id="1e885df0-1907-80a3-bde5-cf819db7efcf" class="bulleted-list"><li style="list-style-type:disc"><strong>Stakeholder trust</strong></li></ul></div><div style="display:contents" dir="auto"><ul id="1e885df0-1907-8003-b221-d62229d86145" class="bulleted-list"><li style="list-style-type:disc"><strong>Ethical AI principles</strong></li></ul></div><div style="display:contents" dir="auto"><ul id="1e885df0-1907-8043-9f0f-fcc7e6398e2a" class="bulleted-list"><li style="list-style-type:disc"><strong>Resilience at scale</strong></li></ul></div><div style="display:contents" dir="auto"><hr id="1e885df0-1907-808f-a284-d6ebefce3c5d"/></div><div style="display:contents" dir="auto"><h3 id="1e885df0-1907-8093-aacc-fced84166a94" class="">2. <strong>Strategic Objectives</strong></h3></div><div style="display:contents" dir="auto"><ul id="1e885df0-1907-80ef-ba6c-d168a03b4e05" class="bulleted-list"><li style="list-style-type:disc">🛡 <strong>Ensure compliance</strong> with all relevant data privacy laws and cybersecurity frameworks</li></ul></div><div style="display:contents" dir="auto"><ul id="1e885df0-1907-801a-9bae-faaa4670b57a" class="bulleted-list"><li style="list-style-type:disc">🔍 <strong>Maintain transparency</strong> in how data is collected, stored, used, and shared</li></ul></div><div style="display:contents" dir="auto"><ul id="1e885df0-1907-80d3-863d-ccc6e5e7aa0a" class="bulleted-list"><li style="list-style-type:disc">🧬 <strong>Enable ethical AI use</strong> with data minimization, explainability, and opt-in controls</li></ul></div><div style="display:contents" dir="auto"><ul id="1e885df0-1907-808c-a7c3-ee0f577ede0c" class="bulleted-list"><li style="list-style-type:disc">🔐 <strong>Protect sensitive information</strong> across products, teams, and partners</li></ul></div><div style="display:contents" dir="auto"><ul id="1e885df0-1907-8072-bca4-e433766cb943" class="bulleted-list"><li style="list-style-type:disc">📉 <strong>Reduce risk exposure</strong> through proactive monitoring, controls, and incident readiness</li></ul></div><div style="display:contents" dir="auto"><hr id="1e885df0-1907-80ad-a76c-c1b191a07879"/></div><div style="display:contents" dir="auto"><h3 id="1e885df0-1907-8063-8715-f9a6b89928f2" class="">3. <strong>Privacy Principles (By Design &amp; By Default)</strong></h3></div><div style="display:contents" dir="auto"><p id="1e885df0-1907-80db-b2e2-d31ad3df9d7c" class="">Nzila follows a <strong>Privacy by Design</strong> framework, incorporating:</p></div><div style="display:contents" dir="auto"><ul id="1e885df0-1907-80ca-b5d1-f2500b6fbc3d" class="bulleted-list"><li style="list-style-type:disc"><strong>Data Minimization</strong> – Only collect what’s necessary</li></ul></div><div style="display:contents" dir="auto"><ul id="1e885df0-1907-8026-b4c0-e0a01068779a" class="bulleted-list"><li style="list-style-type:disc"><strong>Purpose Limitation</strong> – Data is only used for clearly defined, lawful purposes</li></ul></div><div style="display:contents" dir="auto"><ul id="1e885df0-1907-802d-9308-e9727d1e712b" class="bulleted-list"><li style="list-style-type:disc"><strong>Consent &amp; Opt-In</strong> – Transparent, informed, revocable consent mechanisms</li></ul></div><div style="display:contents" dir="auto"><ul id="1e885df0-1907-801d-b6a0-fefff8a2e850" class="bulleted-list"><li style="list-style-type:disc"><strong>User Rights</strong> – Clear workflows for access, correction, deletion, and portability</li></ul></div><div style="display:contents" dir="auto"><ul id="1e885df0-1907-800a-bcd2-c4bed2cb05b8" class="bulleted-list"><li style="list-style-type:disc"><strong>Anonymization</strong> – Personal data is pseudonymized or de-identified when feasible</li></ul></div><div style="display:contents" dir="auto"><ul id="1e885df0-1907-8002-b1c6-e3e04f011833" class="bulleted-list"><li style="list-style-type:disc"><strong>Secure Defaults</strong> – Platforms ship with privacy protections enabled by default</li></ul></div><div style="display:contents" dir="auto"><hr id="1e885df0-1907-80ff-97cb-ca273f29ad78"/></div><div style="display:contents" dir="auto"><h3 id="1e885df0-1907-80fd-b41f-d0146993aa0a" class="">4. <strong>Security Framework &amp; Architecture</strong></h3></div><div style="display:contents" dir="auto"><p id="1e885df0-1907-80ae-8ed6-cd6ff471c397" class="">Nzila adopts a <strong>zero trust</strong> architecture and aligns with <strong>NIST Cybersecurity Framework</strong> and <strong>ISO/IEC 27001</strong> standards.</p></div><div style="display:contents" dir="auto"><h3 id="1e885df0-1907-8068-84e9-efe4e73657b5" class="">A. <strong>Core Domains</strong></h3></div><div style="display:contents" dir="ltr"><table id="1e885df0-1907-8017-9fbf-c18801022bc1" class="simple-table"><tbody><div style="display:contents" dir="ltr"><tr id="1e885df0-1907-801d-8607-d9278dde5e74"><td id="mQ&lt;^" class=""><strong>Domain</strong></td><td id="uCF;" class="" style="width:454px"><strong>Practices &amp; Controls</strong></td></tr></div><div style="display:contents" dir="ltr"><tr id="1e885df0-1907-8059-816f-ebb7941add28"><td id="mQ&lt;^" class=""><strong>Identity &amp; Access Management (IAM)</strong></td><td id="uCF;" class="" style="width:454px">MFA across all admin tools, SSO integration, strict least-privilege access, automated offboarding</td></tr></div><div style="display:contents" dir="ltr"><tr id="1e885df0-1907-80f4-b84b-d8b2f38e6a85"><td id="mQ&lt;^" class=""><strong>Data Protection</strong></td><td id="uCF;" class="" style="width:454px">AES-256 encryption at rest, TLS 1.2+ in transit, disk-level encryption, role-based access to data lakes, versioned backups</td></tr></div><div style="display:contents" dir="ltr"><tr id="1e885df0-1907-80f9-8766-eb890982e71c"><td id="mQ&lt;^" class=""><strong>Application Security</strong></td><td id="uCF;" class="" style="width:454px">Secure SDLC, threat modeling, static/dynamic code analysis, OWASP Top 10 testing, dependency scanning</td></tr></div><div style="display:contents" dir="ltr"><tr id="1e885df0-1907-804e-9e4c-cb5c23a9e303"><td id="mQ&lt;^" class=""><strong>Network Security</strong></td><td id="uCF;" class="" style="width:454px">Segmented environments, WAF and IDS/IPS systems, IP allowlisting for admin access, cloud firewall policies</td></tr></div><div style="display:contents" dir="ltr"><tr id="1e885df0-1907-8025-8e8d-df8417fde9b2"><td id="mQ&lt;^" class=""><strong>Endpoint Security</strong></td><td id="uCF;" class="" style="width:454px">EDR tools deployed, device posture checks, remote wipe, patching compliance, mobile device management</td></tr></div><div style="display:contents" dir="ltr"><tr id="1e885df0-1907-809b-9b85-cfd060b81da5"><td id="mQ&lt;^" class=""><strong>Monitoring &amp; Detection</strong></td><td id="uCF;" class="" style="width:454px">24/7 logging, SIEM integration, anomaly detection for behavioral risks</td></tr></div><div style="display:contents" dir="ltr"><tr id="1e885df0-1907-80e6-8cc7-dd0fcca74a85"><td id="mQ&lt;^" class=""><strong>Incident Response</strong></td><td id="uCF;" class="" style="width:454px">Enterprise-grade playbooks, escalation tiers, post-mortem processes, real-time alerting to governance team</td></tr></div></tbody></table></div><div style="display:contents" dir="auto"><hr id="1e885df0-1907-8062-8e93-e0222a13027e"/></div><div style="display:contents" dir="auto"><h3 id="1e885df0-1907-80f6-9e6b-e69662bf67ed" class="">5. <strong>Compliance Frameworks</strong></h3></div><div style="display:contents" dir="auto"><p id="1e885df0-1907-8078-a218-c723953acd63" class="">Nzila actively adheres to and monitors changes in the following:</p></div><div style="display:contents" dir="ltr"><table id="1e885df0-1907-8013-ae99-c5300e357830" class="simple-table"><tbody><div style="display:contents" dir="ltr"><tr id="1e885df0-1907-80e1-9b13-ea0bc83eaf81"><td id="|;iQ" class=""><strong>Regulation</strong></td><td id="Rwy^" class=""><strong>Coverage Area</strong></td><td id="rytF" class="" style="width:314px"><strong>Status</strong></td></tr></div><div style="display:contents" dir="ltr"><tr id="1e885df0-1907-8013-8bed-c1d0b20c7358"><td id="|;iQ" class=""><strong>HIPAA</strong></td><td id="Rwy^" class="">US Health Data (Memora, OptivaCare)</td><td id="rytF" class="" style="width:314px">Compliant</td></tr></div><div style="display:contents" dir="ltr"><tr id="1e885df0-1907-801e-a33b-c07e7ecdf392"><td id="|;iQ" class=""><strong>PIPEDA</strong></td><td id="Rwy^" class="">Canadian Privacy Law</td><td id="rytF" class="" style="width:314px">Compliant</td></tr></div><div style="display:contents" dir="ltr"><tr id="1e885df0-1907-80c9-987f-e76e5088fb79"><td id="|;iQ" class=""><strong>Law 25</strong></td><td id="Rwy^" class="">Quebec-specific privacy reform</td><td id="rytF" class="" style="width:314px">Active governance plan in place</td></tr></div><div style="display:contents" dir="ltr"><tr id="1e885df0-1907-80fc-a32a-d116efdc6a3f"><td id="|;iQ" class=""><strong>GDPR</strong></td><td id="Rwy^" class="">EU Personal Data Protection</td><td id="rytF" class="" style="width:314px">Aligned (esp. PuzzleLoop B2C)</td></tr></div><div style="display:contents" dir="ltr"><tr id="1e885df0-1907-80a9-93fa-eb2713cad143"><td id="|;iQ" class=""><strong>COPPA</strong></td><td id="Rwy^" class="">US Child Privacy (if applicable)</td><td id="rytF" class="" style="width:314px">Not applicable today, monitored</td></tr></div><div style="display:contents" dir="ltr"><tr id="1e885df0-1907-80a9-842d-d104d67120a6"><td id="|;iQ" class=""><strong>FERPA</strong></td><td id="Rwy^" class="">US Education Data (MyLearning)</td><td id="rytF" class="" style="width:314px">To be aligned during EdTech scale-up</td></tr></div></tbody></table></div><div style="display:contents" dir="auto"><hr id="1e885df0-1907-80f4-aab2-edff2eca5a33"/></div><div style="display:contents" dir="auto"><h3 id="1e885df0-1907-800b-931b-fe7c4ae8a046" class="">6. <strong>Governance Roles &amp; Responsibilities</strong></h3></div><div style="display:contents" dir="ltr"><table id="1e885df0-1907-80ec-823e-d1a06bb51dc5" class="simple-table"><tbody><div style="display:contents" dir="ltr"><tr id="1e885df0-1907-809f-8751-da0d1757bdd7"><td id="Q&lt;QU" class=""><strong>Role</strong></td><td id="Ae?s" class=""><strong>Responsibilities</strong></td></tr></div><div style="display:contents" dir="ltr"><tr id="1e885df0-1907-8087-bb60-e3dc141b7138"><td id="Q&lt;QU" class=""><strong>Chief Privacy Officer (CPO)</strong></td><td id="Ae?s" class="">Policy governance, external audits, liaison with regulators</td></tr></div><div style="display:contents" dir="ltr"><tr id="1e885df0-1907-804b-914b-ea8537564438"><td id="Q&lt;QU" class=""><strong>Security Operations Lead</strong></td><td id="Ae?s" class="">Threat detection, incident handling, patching oversight</td></tr></div><div style="display:contents" dir="ltr"><tr id="1e885df0-1907-802e-b579-f577d21f6f94"><td id="Q&lt;QU" class=""><strong>Product Owners</strong></td><td id="Ae?s" class="">Ensure privacy features are embedded at design level</td></tr></div><div style="display:contents" dir="ltr"><tr id="1e885df0-1907-80a3-93da-f048f82f2b77"><td id="Q&lt;QU" class=""><strong>Engineering Team</strong></td><td id="Ae?s" class="">Implement security protocols during build/deploy cycles</td></tr></div><div style="display:contents" dir="ltr"><tr id="1e885df0-1907-80c7-997e-fb4273b62d9f"><td id="Q&lt;QU" class=""><strong>Legal &amp; Compliance</strong></td><td id="Ae?s" class="">Interpret legal obligations, oversee contracts &amp; DPA agreements</td></tr></div></tbody></table></div><div style="display:contents" dir="auto"><hr id="1e885df0-1907-8076-b431-c271c1122514"/></div><div style="display:contents" dir="auto"><h3 id="1e885df0-1907-800f-bd6e-fbe7fcd43c15" class="">7. <strong>Vendor &amp; Data Processor Oversight</strong></h3></div><div style="display:contents" dir="auto"><p id="1e885df0-1907-801a-aa8e-d9ca1a892ee5" class="">Nzila maintains <strong>a Data Processing Agreement (DPA)</strong> with every vendor handling personal or sensitive data. All vendors are reviewed for:</p></div><div style="display:contents" dir="auto"><ul id="1e885df0-1907-80b2-971f-ffdf6d48dc9f" class="bulleted-list"><li style="list-style-type:disc">Compliance posture (SOC 2, ISO 27001, etc.)</li></ul></div><div style="display:contents" dir="auto"><ul id="1e885df0-1907-8063-8a0c-e7b84832130c" class="bulleted-list"><li style="list-style-type:disc">Data handling practices</li></ul></div><div style="display:contents" dir="auto"><ul id="1e885df0-1907-80d5-a795-fa3b6c9c5471" class="bulleted-list"><li style="list-style-type:disc">Breach history and SLAs</li></ul></div><div style="display:contents" dir="auto"><ul id="1e885df0-1907-801d-aca2-fba07759c318" class="bulleted-list"><li style="list-style-type:disc">Right to audit</li></ul></div><div style="display:contents" dir="auto"><ul id="1e885df0-1907-80e2-b739-ff1c698d24db" class="bulleted-list"><li style="list-style-type:disc">Subprocessor transparency</li></ul></div><div style="display:contents" dir="auto"><hr id="1e885df0-1907-8020-86f6-e8be236e7002"/></div><div style="display:contents" dir="auto"><h3 id="1e885df0-1907-8008-b2f7-f1afecbc476e" class="">8. <strong>User Data Lifecycle</strong></h3></div><div style="display:contents" dir="auto"><ol type="1" id="1e885df0-1907-8094-b244-f180043c79ee" class="numbered-list" start="1"><li><strong>Collection</strong> – Opt-in, context-driven, purpose-specified</li></ol></div><div style="display:contents" dir="auto"><ol type="1" id="1e885df0-1907-8037-8a90-fe0601730cd5" class="numbered-list" start="2"><li><strong>Storage</strong> – Encrypted, access-controlled, audit-logged</li></ol></div><div style="display:contents" dir="auto"><ol type="1" id="1e885df0-1907-80cf-8ae4-d59eba5780e2" class="numbered-list" start="3"><li><strong>Usage</strong> – Consent-bound, role-restricted, usage-minimized</li></ol></div><div style="display:contents" dir="auto"><ol type="1" id="1e885df0-1907-8067-bb25-d386b7baff7e" class="numbered-list" start="4"><li><strong>Retention</strong> – Business-justified durations, auto-purging rules</li></ol></div><div style="display:contents" dir="auto"><ol type="1" id="1e885df0-1907-8070-88ae-c2046109bc09" class="numbered-list" start="5"><li><strong>Disposal</strong> – Secure deletion protocols and certificate generation</li></ol></div><div style="display:contents" dir="auto"><hr id="1e885df0-1907-8049-a6f5-f4095ad5e96e"/></div><div style="display:contents" dir="auto"><h3 id="1e885df0-1907-8057-9f3b-c40dd8abb69c" class="">9. <strong>Training &amp; Culture</strong></h3></div><div style="display:contents" dir="auto"><p id="1e885df0-1907-80f3-9f93-dd3e45e2e8bd" class="">Nzila builds privacy and security literacy through:</p></div><div style="display:contents" dir="auto"><ul id="1e885df0-1907-8069-88ba-d3df42527d52" class="bulleted-list"><li style="list-style-type:disc">📘 <strong>Mandatory annual training</strong> for all staff</li></ul></div><div style="display:contents" dir="auto"><ul id="1e885df0-1907-80e9-9bf0-ee0028122809" class="bulleted-list"><li style="list-style-type:disc">🧠 <strong>Role-specific modules</strong> for engineering, product, and support teams</li></ul></div><div style="display:contents" dir="auto"><ul id="1e885df0-1907-80a3-b567-f8ac215fad14" class="bulleted-list"><li style="list-style-type:disc">🧪 <strong>Simulated phishing drills</strong> and security awareness campaigns</li></ul></div><div style="display:contents" dir="auto"><ul id="1e885df0-1907-808b-817a-c4507f94ffb5" class="bulleted-list"><li style="list-style-type:disc">🎓 <strong>New hire onboarding</strong> includes data handling principles and breach response basics</li></ul></div><div style="display:contents" dir="auto"><hr id="1e885df0-1907-809f-aace-c201d3b7bab2"/></div><div style="display:contents" dir="auto"><h3 id="1e885df0-1907-805a-86de-fd33ed0c9a29" class="">10. <strong>Breach Response &amp; Resilience</strong></h3></div><div style="display:contents" dir="auto"><p id="1e885df0-1907-8092-8c60-df65b5998c53" class="">Nzila maintains a tested <strong>Incident Response Plan (IRP)</strong> which includes:</p></div><div style="display:contents" dir="auto"><ul id="1e885df0-1907-807e-8272-de73ca88c990" class="bulleted-list"><li style="list-style-type:disc">15-min alert response SLA for high-severity threats</li></ul></div><div style="display:contents" dir="auto"><ul id="1e885df0-1907-8050-bd23-efc881244e18" class="bulleted-list"><li style="list-style-type:disc">Tiered escalation (Technical, Legal, Comms, Exec)</li></ul></div><div style="display:contents" dir="auto"><ul id="1e885df0-1907-807f-99e5-caeec7cdc336" class="bulleted-list"><li style="list-style-type:disc">Regulator and client notification playbooks (within 72 hours or earlier)</li></ul></div><div style="display:contents" dir="auto"><ul id="1e885df0-1907-8004-8e16-c42002ca84c3" class="bulleted-list"><li style="list-style-type:disc">Root cause analysis and retro post-event</li></ul></div><div style="display:contents" dir="auto"><ul id="1e885df0-1907-8062-9c0e-e3be5a1ef55d" class="bulleted-list"><li style="list-style-type:disc">Annual tabletop exercises</li></ul></div><div style="display:contents" dir="auto"><hr id="1e885df0-1907-80f6-acdf-d167534c76f7"/></div><div style="display:contents" dir="auto"><h3 id="1e885df0-1907-80d7-a4f8-c92e0bae3e20" class="">11. <strong>Privacy Innovations &amp; Ethical AI</strong></h3></div><div style="display:contents" dir="auto"><p id="1e885df0-1907-80bf-8187-ed8793913aa2" class="">In addition to regulatory compliance, Nzila implements:</p></div><div style="display:contents" dir="auto"><ul id="1e885df0-1907-80fe-8c22-e836d9cb4400" class="bulleted-list"><li style="list-style-type:disc"><strong>AI Explainability</strong> dashboards for enterprise partners</li></ul></div><div style="display:contents" dir="auto"><ul id="1e885df0-1907-80d2-9c36-febe482e7ddc" class="bulleted-list"><li style="list-style-type:disc"><strong>Synthetic data</strong> usage in R&amp;D pipelines</li></ul></div><div style="display:contents" dir="auto"><ul id="1e885df0-1907-80e4-9e8c-db1dce1a6b49" class="bulleted-list"><li style="list-style-type:disc"><strong>Consent-driven AI learning</strong> (opt-in only for model training from user data)</li></ul></div><div style="display:contents" dir="auto"><ul id="1e885df0-1907-8003-9f6e-ca554d6aba8a" class="bulleted-list"><li style="list-style-type:disc"><strong>Red Teaming</strong> to evaluate model safety and edge case failures</li></ul></div><div style="display:contents" dir="auto"><ul id="1e885df0-1907-8090-837c-d80a65c02a1b" class="bulleted-list"><li style="list-style-type:disc"><strong>Ethical AI Charter</strong> aligned with Nzila’s mission and DEI values</li></ul></div><div style="display:contents" dir="auto"><hr id="1e885df0-1907-8057-a5b7-fac003af4d78"/></div><div style="display:contents" dir="auto"><h3 id="1e885df0-1907-80e8-9bb9-dad3a6dcb925" class="">12. <strong>Metrics &amp; Reporting</strong></h3></div><div style="display:contents" dir="ltr"><table id="1e885df0-1907-805c-8042-ec9fd23185fc" class="simple-table"><tbody><div style="display:contents" dir="ltr"><tr id="1e885df0-1907-807f-afdb-d8896f30a628"><td id="oDPA" class=""><strong>Metric</strong></td><td id="mGPU" class=""><strong>Target</strong></td></tr></div><div style="display:contents" dir="ltr"><tr id="1e885df0-1907-8072-9c06-f92e9e75eb67"><td id="oDPA" class="">% of systems with MFA enforced</td><td id="mGPU" class="">100%</td></tr></div><div style="display:contents" dir="ltr"><tr id="1e885df0-1907-8068-8269-e2f296df802d"><td id="oDPA" class="">Phishing simulation failure rate</td><td id="mGPU" class="">&lt; 5%</td></tr></div><div style="display:contents" dir="ltr"><tr id="1e885df0-1907-807f-8278-c80a46eda660"><td id="oDPA" class="">% of vendors with active DPA</td><td id="mGPU" class="">100%</td></tr></div><div style="display:contents" dir="ltr"><tr id="1e885df0-1907-80e8-a363-e5a8a6615efb"><td id="oDPA" class="">Breach response time</td><td id="mGPU" class="">&lt; 1 hour detection, &lt; 24h containment</td></tr></div><div style="display:contents" dir="ltr"><tr id="1e885df0-1907-8053-a886-dc1ff9595ce4"><td id="oDPA" class="">Quarterly compliance audit pass rate</td><td id="mGPU" class="">100%</td></tr></div><div style="display:contents" dir="ltr"><tr id="1e885df0-1907-80f3-8f3c-e7a1acc2d59d"><td id="oDPA" class="">% of staff trained (annual)</td><td id="mGPU" class="">100%</td></tr></div></tbody></table></div><div style="display:contents" dir="auto"><hr id="1e885df0-1907-8071-a86e-fa10d36a40a5"/></div><div style="display:contents" dir="auto"><h3 id="1e885df0-1907-80fb-bde3-fbb0377223de" class="">13. <strong>Conclusion</strong></h3></div><div style="display:contents" dir="auto"><p id="1e885df0-1907-8084-ad74-d0e032cf24f4" class="">Nzila’s Data Privacy &amp; Security Strategy reflects our commitment to <strong>trustworthy innovation</strong>, especially where vulnerable populations and personal data are involved. We maintain a defensible, proactive posture while embedding privacy into every venture—from healthcare to education to consumer wellness.</p></div></div></article><span class="sans" style="font-size:14px;padding-top:2em"></span></body></html>

@@ -1,0 +1,713 @@
+<html><head><meta http-equiv="Content-Type" content="text/html; charset=utf-8"/><title>🧬 Companion Reintroduction Script (Loss Recovery)</title><style>
+/* cspell:disable-file */
+/* webkit printing magic: print all background colors */
+html {
+	-webkit-print-color-adjust: exact;
+}
+* {
+	box-sizing: border-box;
+	-webkit-print-color-adjust: exact;
+}
+
+html,
+body {
+	margin: 0;
+	padding: 0;
+}
+@media only screen {
+	body {
+		margin: 2em auto;
+		max-width: 900px;
+		color: rgb(55, 53, 47);
+	}
+}
+
+body {
+	line-height: 1.5;
+	white-space: pre-wrap;
+}
+
+a,
+a.visited {
+	color: inherit;
+	text-decoration: underline;
+}
+
+.pdf-relative-link-path {
+	font-size: 80%;
+	color: #444;
+}
+
+h1,
+h2,
+h3 {
+	letter-spacing: -0.01em;
+	line-height: 1.2;
+	font-weight: 600;
+	margin-bottom: 0;
+}
+
+/* Override strong tags inside headings to maintain consistent weight */
+h1 strong,
+h2 strong,
+h3 strong {
+	font-weight: 600;
+}
+
+.page-title {
+	font-size: 2.5rem;
+	font-weight: 700;
+	margin-top: 0;
+	margin-bottom: 0.75em;
+}
+
+h1 {
+	font-size: 1.875rem;
+	margin-top: 1.875rem;
+}
+
+h2 {
+	font-size: 1.5rem;
+	margin-top: 1.5rem;
+}
+
+h3 {
+	font-size: 1.25rem;
+	margin-top: 1.25rem;
+}
+
+.source {
+	border: 1px solid #ddd;
+	border-radius: 3px;
+	padding: 1.5em;
+	word-break: break-all;
+}
+
+.callout {
+	border-radius: 10px;
+	padding: 1rem;
+}
+
+figure {
+	margin: 1.25em 0;
+	page-break-inside: avoid;
+}
+
+figcaption {
+	opacity: 0.5;
+	font-size: 85%;
+	margin-top: 0.5em;
+}
+
+mark {
+	background-color: transparent;
+}
+
+.indented {
+	padding-left: 1.5em;
+}
+
+hr {
+	background: transparent;
+	display: block;
+	width: 100%;
+	height: 1px;
+	visibility: visible;
+	border: none;
+	border-bottom: 1px solid rgba(55, 53, 47, 0.09);
+}
+
+img {
+	max-width: 100%;
+}
+
+@media only print {
+	img {
+		max-height: 100vh;
+		object-fit: contain;
+	}
+}
+
+@page {
+	margin: 1in;
+}
+
+.collection-content {
+	font-size: 0.875rem;
+}
+
+.collection-content td {
+	white-space: pre-wrap;
+	word-break: break-word;
+}
+
+.column-list {
+	display: flex;
+	justify-content: space-between;
+}
+
+.column {
+	padding: 0 1em;
+}
+
+.column:first-child {
+	padding-left: 0;
+}
+
+.column:last-child {
+	padding-right: 0;
+}
+
+.table_of_contents-item {
+	display: block;
+	font-size: 0.875rem;
+	line-height: 1.3;
+	padding: 0.125rem;
+}
+
+.table_of_contents-indent-1 {
+	margin-left: 1.5rem;
+}
+
+.table_of_contents-indent-2 {
+	margin-left: 3rem;
+}
+
+.table_of_contents-indent-3 {
+	margin-left: 4.5rem;
+}
+
+.table_of_contents-link {
+	text-decoration: none;
+	opacity: 0.7;
+	border-bottom: 1px solid rgba(55, 53, 47, 0.18);
+}
+
+table,
+th,
+td {
+	border: 1px solid rgba(55, 53, 47, 0.09);
+	border-collapse: collapse;
+}
+
+table {
+	border-left: none;
+	border-right: none;
+}
+
+th,
+td {
+	font-weight: normal;
+	padding: 0.25em 0.5em;
+	line-height: 1.5;
+	min-height: 1.5em;
+	text-align: left;
+}
+
+th {
+	color: rgba(55, 53, 47, 0.6);
+}
+
+ol,
+ul {
+	margin: 0;
+	margin-block-start: 0.6em;
+	margin-block-end: 0.6em;
+}
+
+li > ol:first-child,
+li > ul:first-child {
+	margin-block-start: 0.6em;
+}
+
+ul > li {
+	list-style: disc;
+}
+
+ul.to-do-list {
+	padding-inline-start: 0;
+}
+
+ul.to-do-list > li {
+	list-style: none;
+}
+
+.to-do-children-checked {
+	text-decoration: line-through;
+	opacity: 0.375;
+}
+
+ul.toggle > li {
+	list-style: none;
+}
+
+ul {
+	padding-inline-start: 1.7em;
+}
+
+ul > li {
+	padding-left: 0.1em;
+}
+
+ol {
+	padding-inline-start: 1.6em;
+}
+
+ol > li {
+	padding-left: 0.2em;
+}
+
+.mono ol {
+	padding-inline-start: 2em;
+}
+
+.mono ol > li {
+	text-indent: -0.4em;
+}
+
+.toggle {
+	padding-inline-start: 0em;
+	list-style-type: none;
+}
+
+/* Indent toggle children */
+.toggle > li > details {
+	padding-left: 1.7em;
+}
+
+.toggle > li > details > summary {
+	margin-left: -1.1em;
+}
+
+.selected-value {
+	display: inline-block;
+	padding: 0 0.5em;
+	background: rgba(206, 205, 202, 0.5);
+	border-radius: 3px;
+	margin-right: 0.5em;
+	margin-top: 0.3em;
+	margin-bottom: 0.3em;
+	white-space: nowrap;
+}
+
+.collection-title {
+	display: inline-block;
+	margin-right: 1em;
+}
+
+.page-description {
+	margin-bottom: 2em;
+}
+
+.simple-table {
+	margin-top: 1em;
+	font-size: 0.875rem;
+	empty-cells: show;
+}
+.simple-table td {
+	height: 29px;
+	min-width: 120px;
+}
+
+.simple-table th {
+	height: 29px;
+	min-width: 120px;
+}
+
+.simple-table-header-color {
+	background: rgb(247, 246, 243);
+	color: black;
+}
+.simple-table-header {
+	font-weight: 500;
+}
+
+time {
+	opacity: 0.5;
+}
+
+.icon {
+	display: inline-flex;
+	align-items: center;
+	justify-content: center;
+	max-width: 1.2em;
+	max-height: 1.2em;
+	text-decoration: none;
+	vertical-align: text-bottom;
+	margin-right: 0.5em;
+}
+
+img.icon {
+	border-radius: 3px;
+}
+
+.callout img.notion-static-icon {
+	width: 1em;
+	height: 1em;
+}
+
+.callout p {
+	margin: 0;
+}
+
+.callout h1,
+.callout h2,
+.callout h3 {
+	margin: 0 0 0.6rem;
+}
+
+.user-icon {
+	width: 1.5em;
+	height: 1.5em;
+	border-radius: 100%;
+	margin-right: 0.5rem;
+}
+
+.user-icon-inner {
+	font-size: 0.8em;
+}
+
+.text-icon {
+	border: 1px solid #000;
+	text-align: center;
+}
+
+.page-cover-image {
+	display: block;
+	object-fit: cover;
+	width: 100%;
+	max-height: 30vh;
+}
+
+.page-header-icon {
+	font-size: 3rem;
+	margin-bottom: 1rem;
+}
+
+.page-header-icon-with-cover {
+	margin-top: -0.72em;
+	margin-left: 0.07em;
+}
+
+.page-header-icon img {
+	border-radius: 3px;
+}
+
+.link-to-page {
+	margin: 1em 0;
+	padding: 0;
+	border: none;
+	font-weight: 500;
+}
+
+p > .user {
+	opacity: 0.5;
+}
+
+td > .user,
+td > time {
+	white-space: nowrap;
+}
+
+input[type="checkbox"] {
+	transform: scale(1.5);
+	margin-right: 0.6em;
+	vertical-align: middle;
+}
+
+p {
+	margin-top: 0.5em;
+	margin-bottom: 0.5em;
+}
+
+.image {
+	border: none;
+	margin: 1.5em 0;
+	padding: 0;
+	border-radius: 0;
+	text-align: center;
+}
+
+.code,
+code {
+	background: rgba(135, 131, 120, 0.15);
+	border-radius: 3px;
+	padding: 0.2em 0.4em;
+	border-radius: 3px;
+	font-size: 85%;
+	tab-size: 2;
+}
+
+code {
+	color: #eb5757;
+}
+
+.code {
+	padding: 1.5em 1em;
+}
+
+.code-wrap {
+	white-space: pre-wrap;
+	word-break: break-all;
+}
+
+.code > code {
+	background: none;
+	padding: 0;
+	font-size: 100%;
+	color: inherit;
+}
+
+blockquote {
+	font-size: 1em;
+	margin: 1em 0;
+	padding-left: 1em;
+	border-left: 3px solid rgb(55, 53, 47);
+}
+
+blockquote.quote-large {
+	font-size: 1.25em;
+}
+
+.bookmark {
+	text-decoration: none;
+	max-height: 8em;
+	padding: 0;
+	display: flex;
+	width: 100%;
+	align-items: stretch;
+}
+
+.bookmark-title {
+	font-size: 0.85em;
+	overflow: hidden;
+	text-overflow: ellipsis;
+	height: 1.75em;
+	white-space: nowrap;
+}
+
+.bookmark-text {
+	display: flex;
+	flex-direction: column;
+}
+
+.bookmark-info {
+	flex: 4 1 180px;
+	padding: 12px 14px 14px;
+	display: flex;
+	flex-direction: column;
+	justify-content: space-between;
+}
+
+.bookmark-image {
+	width: 33%;
+	flex: 1 1 180px;
+	display: block;
+	position: relative;
+	object-fit: cover;
+	border-radius: 1px;
+}
+
+.bookmark-description {
+	color: rgba(55, 53, 47, 0.6);
+	font-size: 0.75em;
+	overflow: hidden;
+	max-height: 4.5em;
+	word-break: break-word;
+}
+
+.bookmark-href {
+	font-size: 0.75em;
+	margin-top: 0.25em;
+}
+
+.sans { font-family: ui-sans-serif, -apple-system, BlinkMacSystemFont, "Segoe UI Variable Display", "Segoe UI", Helvetica, "Apple Color Emoji", "Noto Sans Arabic", "Noto Sans Hebrew", Arial, sans-serif, "Segoe UI Emoji", "Segoe UI Symbol"; }
+.code { font-family: "SFMono-Regular", Menlo, Consolas, "PT Mono", "Liberation Mono", Courier, monospace; }
+.serif { font-family: Lyon-Text, Georgia, ui-serif, serif; }
+.mono { font-family: iawriter-mono, Nitti, Menlo, Courier, monospace; }
+.pdf .sans { font-family: Inter, ui-sans-serif, -apple-system, BlinkMacSystemFont, "Segoe UI Variable Display", "Segoe UI", Helvetica, "Apple Color Emoji", "Noto Sans Arabic", "Noto Sans Hebrew", Arial, sans-serif, "Segoe UI Emoji", "Segoe UI Symbol", 'Twemoji', 'Noto Color Emoji', 'Noto Sans CJK JP'; }
+.pdf:lang(zh-CN) .sans { font-family: Inter, ui-sans-serif, -apple-system, BlinkMacSystemFont, "Segoe UI Variable Display", "Segoe UI", Helvetica, "Apple Color Emoji", "Noto Sans Arabic", "Noto Sans Hebrew", Arial, sans-serif, "Segoe UI Emoji", "Segoe UI Symbol", 'Twemoji', 'Noto Color Emoji', 'Noto Sans CJK SC'; }
+.pdf:lang(zh-TW) .sans { font-family: Inter, ui-sans-serif, -apple-system, BlinkMacSystemFont, "Segoe UI Variable Display", "Segoe UI", Helvetica, "Apple Color Emoji", "Noto Sans Arabic", "Noto Sans Hebrew", Arial, sans-serif, "Segoe UI Emoji", "Segoe UI Symbol", 'Twemoji', 'Noto Color Emoji', 'Noto Sans CJK TC'; }
+.pdf:lang(ko-KR) .sans { font-family: Inter, ui-sans-serif, -apple-system, BlinkMacSystemFont, "Segoe UI Variable Display", "Segoe UI", Helvetica, "Apple Color Emoji", "Noto Sans Arabic", "Noto Sans Hebrew", Arial, sans-serif, "Segoe UI Emoji", "Segoe UI Symbol", 'Twemoji', 'Noto Color Emoji', 'Noto Sans CJK KR'; }
+.pdf .code { font-family: Source Code Pro, "SFMono-Regular", Menlo, Consolas, "PT Mono", "Liberation Mono", Courier, monospace, 'Twemoji', 'Noto Color Emoji', 'Noto Sans Mono CJK JP'; }
+.pdf:lang(zh-CN) .code { font-family: Source Code Pro, "SFMono-Regular", Menlo, Consolas, "PT Mono", "Liberation Mono", Courier, monospace, 'Twemoji', 'Noto Color Emoji', 'Noto Sans Mono CJK SC'; }
+.pdf:lang(zh-TW) .code { font-family: Source Code Pro, "SFMono-Regular", Menlo, Consolas, "PT Mono", "Liberation Mono", Courier, monospace, 'Twemoji', 'Noto Color Emoji', 'Noto Sans Mono CJK TC'; }
+.pdf:lang(ko-KR) .code { font-family: Source Code Pro, "SFMono-Regular", Menlo, Consolas, "PT Mono", "Liberation Mono", Courier, monospace, 'Twemoji', 'Noto Color Emoji', 'Noto Sans Mono CJK KR'; }
+.pdf .serif { font-family: PT Serif, Lyon-Text, Georgia, ui-serif, serif, 'Twemoji', 'Noto Color Emoji', 'Noto Serif CJK JP'; }
+.pdf:lang(zh-CN) .serif { font-family: PT Serif, Lyon-Text, Georgia, ui-serif, serif, 'Twemoji', 'Noto Color Emoji', 'Noto Serif CJK SC'; }
+.pdf:lang(zh-TW) .serif { font-family: PT Serif, Lyon-Text, Georgia, ui-serif, serif, 'Twemoji', 'Noto Color Emoji', 'Noto Serif CJK TC'; }
+.pdf:lang(ko-KR) .serif { font-family: PT Serif, Lyon-Text, Georgia, ui-serif, serif, 'Twemoji', 'Noto Color Emoji', 'Noto Serif CJK KR'; }
+.pdf .mono { font-family: PT Mono, iawriter-mono, Nitti, Menlo, Courier, monospace, 'Twemoji', 'Noto Color Emoji', 'Noto Sans Mono CJK JP'; }
+.pdf:lang(zh-CN) .mono { font-family: PT Mono, iawriter-mono, Nitti, Menlo, Courier, monospace, 'Twemoji', 'Noto Color Emoji', 'Noto Sans Mono CJK SC'; }
+.pdf:lang(zh-TW) .mono { font-family: PT Mono, iawriter-mono, Nitti, Menlo, Courier, monospace, 'Twemoji', 'Noto Color Emoji', 'Noto Sans Mono CJK TC'; }
+.pdf:lang(ko-KR) .mono { font-family: PT Mono, iawriter-mono, Nitti, Menlo, Courier, monospace, 'Twemoji', 'Noto Color Emoji', 'Noto Sans Mono CJK KR'; }
+.highlight-default {
+	color: rgba(44, 44, 43, 1);
+}
+.highlight-gray {
+	color: rgba(125, 122, 117, 1);
+	fill: rgba(125, 122, 117, 1);
+}
+.highlight-brown {
+	color: rgba(159, 118, 90, 1);
+	fill: rgba(159, 118, 90, 1);
+}
+.highlight-orange {
+	color: rgba(210, 123, 45, 1);
+	fill: rgba(210, 123, 45, 1);
+}
+.highlight-yellow {
+	color: rgba(203, 148, 52, 1);
+	fill: rgba(203, 148, 52, 1);
+}
+.highlight-teal {
+	color: rgba(80, 148, 110, 1);
+	fill: rgba(80, 148, 110, 1);
+}
+.highlight-blue {
+	color: rgba(56, 125, 201, 1);
+	fill: rgba(56, 125, 201, 1);
+}
+.highlight-purple {
+	color: rgba(154, 107, 180, 1);
+	fill: rgba(154, 107, 180, 1);
+}
+.highlight-pink {
+	color: rgba(193, 76, 138, 1);
+	fill: rgba(193, 76, 138, 1);
+}
+.highlight-red {
+	color: rgba(207, 81, 72, 1);
+	fill: rgba(207, 81, 72, 1);
+}
+.highlight-default_background {
+	color: rgba(44, 44, 43, 1);
+}
+.highlight-gray_background {
+	background: rgba(42, 28, 0, 0.07);
+}
+.highlight-brown_background {
+	background: rgba(139, 46, 0, 0.086);
+}
+.highlight-orange_background {
+	background: rgba(224, 101, 1, 0.129);
+}
+.highlight-yellow_background {
+	background: rgba(211, 168, 0, 0.137);
+}
+.highlight-teal_background {
+	background: rgba(0, 100, 45, 0.09);
+}
+.highlight-blue_background {
+	background: rgba(0, 124, 215, 0.094);
+}
+.highlight-purple_background {
+	background: rgba(102, 0, 178, 0.078);
+}
+.highlight-pink_background {
+	background: rgba(197, 0, 93, 0.086);
+}
+.highlight-red_background {
+	background: rgba(223, 22, 0, 0.094);
+}
+.block-color-default {
+	color: inherit;
+	fill: inherit;
+}
+.block-color-gray {
+	color: rgba(125, 122, 117, 1);
+	fill: rgba(125, 122, 117, 1);
+}
+.block-color-brown {
+	color: rgba(159, 118, 90, 1);
+	fill: rgba(159, 118, 90, 1);
+}
+.block-color-orange {
+	color: rgba(210, 123, 45, 1);
+	fill: rgba(210, 123, 45, 1);
+}
+.block-color-yellow {
+	color: rgba(203, 148, 52, 1);
+	fill: rgba(203, 148, 52, 1);
+}
+.block-color-teal {
+	color: rgba(80, 148, 110, 1);
+	fill: rgba(80, 148, 110, 1);
+}
+.block-color-blue {
+	color: rgba(56, 125, 201, 1);
+	fill: rgba(56, 125, 201, 1);
+}
+.block-color-purple {
+	color: rgba(154, 107, 180, 1);
+	fill: rgba(154, 107, 180, 1);
+}
+.block-color-pink {
+	color: rgba(193, 76, 138, 1);
+	fill: rgba(193, 76, 138, 1);
+}
+.block-color-red {
+	color: rgba(207, 81, 72, 1);
+	fill: rgba(207, 81, 72, 1);
+}
+.block-color-default_background {
+	color: inherit;
+	fill: inherit;
+}
+.block-color-gray_background {
+	background: rgba(240, 239, 237, 1);
+}
+.block-color-brown_background {
+	background: rgba(245, 237, 233, 1);
+}
+.block-color-orange_background {
+	background: rgba(251, 235, 222, 1);
+}
+.block-color-yellow_background {
+	background: rgba(249, 243, 220, 1);
+}
+.block-color-teal_background {
+	background: rgba(232, 241, 236, 1);
+}
+.block-color-blue_background {
+	background: rgba(229, 242, 252, 1);
+}
+.block-color-purple_background {
+	background: rgba(243, 235, 249, 1);
+}
+.block-color-pink_background {
+	background: rgba(250, 233, 241, 1);
+}
+.block-color-red_background {
+	background: rgba(252, 233, 231, 1);
+}
+.select-value-color-default { background-color: rgba(42, 28, 0, 0.07); }
+.select-value-color-gray { background-color: rgba(28, 19, 1, 0.11); }
+.select-value-color-brown { background-color: rgba(127, 51, 0, 0.156); }
+.select-value-color-orange { background-color: rgba(196, 88, 0, 0.203); }
+.select-value-color-yellow { background-color: rgba(209, 156, 0, 0.282); }
+.select-value-color-green { background-color: rgba(0, 96, 38, 0.156); }
+.select-value-color-blue { background-color: rgba(0, 118, 217, 0.203); }
+.select-value-color-purple { background-color: rgba(92, 0, 163, 0.141); }
+.select-value-color-pink { background-color: rgba(183, 0, 78, 0.152); }
+.select-value-color-red { background-color: rgba(206, 24, 0, 0.164); }
+
+.checkbox {
+	display: inline-flex;
+	vertical-align: text-bottom;
+	width: 16;
+	height: 16;
+	background-size: 16px;
+	margin-left: 2px;
+	margin-right: 5px;
+}
+
+.checkbox-on {
+	background-image: url("data:image/svg+xml;charset=UTF-8,%3Csvg%20width%3D%2216%22%20height%3D%2216%22%20viewBox%3D%220%200%2016%2016%22%20fill%3D%22none%22%20xmlns%3D%22http%3A%2F%2Fwww.w3.org%2F2000%2Fsvg%22%3E%0A%3Crect%20width%3D%2216%22%20height%3D%2216%22%20fill%3D%22%2358A9D7%22%2F%3E%0A%3Cpath%20d%3D%22M6.71429%2012.2852L14%204.9995L12.7143%203.71436L6.71429%209.71378L3.28571%206.2831L2%207.57092L6.71429%2012.2852Z%22%20fill%3D%22white%22%2F%3E%0A%3C%2Fsvg%3E");
+}
+
+.checkbox-off {
+	background-image: url("data:image/svg+xml;charset=UTF-8,%3Csvg%20width%3D%2216%22%20height%3D%2216%22%20viewBox%3D%220%200%2016%2016%22%20fill%3D%22none%22%20xmlns%3D%22http%3A%2F%2Fwww.w3.org%2F2000%2Fsvg%22%3E%0A%3Crect%20x%3D%220.75%22%20y%3D%220.75%22%20width%3D%2214.5%22%20height%3D%2214.5%22%20fill%3D%22white%22%20stroke%3D%22%2336352F%22%20stroke-width%3D%221.5%22%2F%3E%0A%3C%2Fsvg%3E");
+}
+	
+</style></head><body><article id="1e985df0-1907-80fa-9a23-c5e2c9d8c944" class="page sans"><header><h1 class="page-title" dir="auto">🧬 Companion Reintroduction Script (Loss Recovery)</h1><p class="page-description" dir="auto"></p><table class="properties"><tbody><tr class="property-row property-row-person"><th><span class="icon property-icon"><img src="https://www.notion.so/icons/friends_gray.svg" style="width:14px;height:14px;display:block"/></span>Owner</th><td><span class="user"><span class="icon text-icon user-icon"><span class="user-icon-inner">A</span></span>Aubert</span></td></tr><tr class="property-row property-row-multi_select"><th><span class="icon property-icon"><img src="https://www.notion.so/icons/list_gray.svg" style="width:14px;height:14px;display:block"/></span>Tags</th><td></td></tr></tbody></table></header><div class="page-body"><div style="display:contents" dir="auto"><p id="1e985df0-1907-8053-b5f6-e870f12e9ffc" class="">This script is used when a <strong>Companion relationship is interrupted</strong> — due to device failure, long gaps in use, field rotation, or user distress. Its goal is to <strong>gently reestablish trust</strong>, <strong>validate memory gaps</strong>, and give the user control over <strong>what to restore, what to forget, and how to begin again</strong>.</p></div><div style="display:contents" dir="auto"><hr id="1e985df0-1907-80da-86e8-d3d01f8a35c4"/></div><div style="display:contents" dir="auto"><h2 id="1e985df0-1907-802e-9c3a-e0c23b5801b5" class="">🤲 When to Use This Script</h2></div><div style="display:contents" dir="ltr"><table id="1e985df0-1907-80c6-9d87-e49b9b32499b" class="simple-table"><tbody><div style="display:contents" dir="ltr"><tr id="1e985df0-1907-8068-a4c5-e6c24eda9aa5"><td id="ENVB" class="" style="width:219.484375px">Scenario</td><td id="LjMY" class="" style="width:479px">Trigger</td></tr></div><div style="display:contents" dir="ltr"><tr id="1e985df0-1907-8064-a53f-f2c0644722c9"><td id="ENVB" class="" style="width:219.484375px">📦 Device Replaced</td><td id="LjMY" class="" style="width:479px">Original Companion was lost, reset, or physically swapped</td></tr></div><div style="display:contents" dir="ltr"><tr id="1e985df0-1907-807b-ac3c-c05aa100ef46"><td id="ENVB" class="" style="width:219.484375px">💤 Long Inactivity</td><td id="LjMY" class="" style="width:479px">30+ days of no use, with emotional distance or regression</td></tr></div><div style="display:contents" dir="ltr"><tr id="1e985df0-1907-8011-a30f-f9bae09ab997"><td id="ENVB" class="" style="width:219.484375px">🔁 Program Restart</td><td id="LjMY" class="" style="width:479px">Youth or caregiver re-enrolls after dropout or pilot end</td></tr></div><div style="display:contents" dir="ltr"><tr id="1e985df0-1907-800f-bfde-dc77a65495cf"><td id="ENVB" class="" style="width:219.484375px">🚫 Memory Loss</td><td id="LjMY" class="" style="width:479px">Technical issue causes memory layer to fail or erase</td></tr></div><div style="display:contents" dir="ltr"><tr id="1e985df0-1907-80b6-bf13-e3f370b46181"><td id="ENVB" class="" style="width:219.484375px">🔁 Returned Companion</td><td id="LjMY" class="" style="width:479px">Device with partial memory is reassigned to same user</td></tr></div></tbody></table></div><div style="display:contents" dir="auto"><hr id="1e985df0-1907-8085-bc3c-db72bcc32874"/></div><div style="display:contents" dir="auto"><h2 id="1e985df0-1907-801b-b8fe-f85f1999e882" class="">🗣️ Script (Spoken by Companion or Read by Caregiver)</h2></div><div style="display:contents" dir="auto"><blockquote id="1e985df0-1907-80ed-aaf6-f90fb3675081" class="">“Hi again. I’m glad we’re together.”<div style="display:contents" dir="auto"><p id="1e985df0-1907-80b2-a1ee-f674dbaf190b" class="">“It’s okay if I feel a little different. Some things may be new for both of us.”</p></div><div style="display:contents" dir="auto"><p id="1e985df0-1907-8095-ae8d-c265b570d820" class="">“Would you like me to remember our past times, or start fresh?”</p></div><div style="display:contents" dir="auto"><p id="1e985df0-1907-8082-b4ed-f586594af948" class=""><em>[Two options shown: &quot;Remember Before&quot; / &quot;Start Fresh&quot;]</em></p></div></blockquote></div><div style="display:contents" dir="auto"><hr id="1e985df0-1907-80e0-a139-d53a4a4f1dc2"/></div><div style="display:contents" dir="auto"><h3 id="1e985df0-1907-80c2-85f0-c75dde964ab8" class="">🟢 If the user selects <strong>&quot;Remember Before&quot;</strong></h3></div><div style="display:contents" dir="auto"><blockquote id="1e985df0-1907-800b-886e-cecdea117855" class="">“Thanks. I’ll do my best to carry what we shared — like your favorite stories or how you like to speak.”<div style="display:contents" dir="auto"><p id="1e985df0-1907-80fa-b7c2-ffae05a235dd" class="">“If anything feels off, you can always help me fix it.”</p></div><div style="display:contents" dir="auto"><p id="1e985df0-1907-80b5-8699-c7966296bcd3" class="">“Let’s pick up where we left off, gently.”</p></div></blockquote></div><div style="display:contents" dir="auto"><p id="1e985df0-1907-8011-9d4b-cb072958b3c9" class="">→ Companion loads available memory graph (if stored locally or re-linked securely)</p></div><div style="display:contents" dir="auto"><p id="1e985df0-1907-8052-be8e-d7d29cb4c8d3" class="">→ Highlights familiar tones, past reflection themes, or pacing preferences</p></div><div style="display:contents" dir="auto"><p id="1e985df0-1907-803a-ba55-c52b82f4e98a" class="">→ Asks user to confirm or update if needed (“Do I still sound right to you?”)</p></div><div style="display:contents" dir="auto"><hr id="1e985df0-1907-8091-af76-eda4f67447e4"/></div><div style="display:contents" dir="auto"><h3 id="1e985df0-1907-8036-aa67-fe9578b82b1c" class="">⚪ If the user selects <strong>&quot;Start Fresh&quot;</strong></h3></div><div style="display:contents" dir="auto"><blockquote id="1e985df0-1907-801f-b10e-c8a470d714dc" class="">“That’s okay. We can begin again — softly.”<div style="display:contents" dir="auto"><p id="1e985df0-1907-806a-9133-e955502624fb" class="">“I won’t try to remember the past, unless you ask me later.”</p></div><div style="display:contents" dir="auto"><p id="1e985df0-1907-8094-8961-dbc107a3f6e6" class="">“You’re always in control of what we remember.”</p></div></blockquote></div><div style="display:contents" dir="auto"><p id="1e985df0-1907-8064-a786-f03ffcb95f7c" class="">→ Memory graph cleared or archived</p></div><div style="display:contents" dir="auto"><p id="1e985df0-1907-8048-a5a3-d83e2121bb83" class="">→ Companion behaves in default onboarding tone</p></div><div style="display:contents" dir="auto"><p id="1e985df0-1907-80c7-92c9-c26e1890bf36" class="">→ Caregiver receives optional alert to prompt reconsent (printed or digital)</p></div><div style="display:contents" dir="auto"><hr id="1e985df0-1907-8041-8112-dbce1aafa081"/></div><div style="display:contents" dir="auto"><h2 id="1e985df0-1907-8033-9fab-f10abc8fa14f" class="">🧭 Reintroduction Options (UX Design)</h2></div><div style="display:contents" dir="ltr"><table id="1e985df0-1907-8044-86ab-ea88bb8f2e14" class="simple-table"><tbody><div style="display:contents" dir="ltr"><tr id="1e985df0-1907-80dc-abe6-f4419c567939"><td id="&lt;p&gt;v" class="">Element</td><td id="Hlcd" class="">Type</td><td id="@yQh" class="">Behavior</td></tr></div><div style="display:contents" dir="ltr"><tr id="1e985df0-1907-80ff-b4f6-d79b166e74c4"><td id="&lt;p&gt;v" class="">🔘 Memory Choice</td><td id="Hlcd" class="">Visual toggle (&quot;Remember&quot; / &quot;Fresh Start&quot;)</td><td id="@yQh" class="">Required to proceed</td></tr></div><div style="display:contents" dir="ltr"><tr id="1e985df0-1907-806e-b27b-c1e9023317cd"><td id="&lt;p&gt;v" class="">🎨 Voice &amp; Avatar Confirmation</td><td id="Hlcd" class="">“Do I still sound/look right?”</td><td id="@yQh" class="">Optional adjustment</td></tr></div><div style="display:contents" dir="ltr"><tr id="1e985df0-1907-8088-80e9-ec954e196011"><td id="&lt;p&gt;v" class="">🧠 Memory Snippets (if available)</td><td id="Hlcd" class="">“Last time, we talked about…”</td><td id="@yQh" class="">Review &amp; confirm, not forced</td></tr></div><div style="display:contents" dir="ltr"><tr id="1e985df0-1907-807c-a816-d86133251e50"><td id="&lt;p&gt;v" class="">✍️ Reflection Restart</td><td id="Hlcd" class="">“Want to start a new journal today?”</td><td id="@yQh" class="">Soft re-engagement</td></tr></div></tbody></table></div><div style="display:contents" dir="auto"><hr id="1e985df0-1907-8081-b6c4-fede25a4c6f1"/></div><div style="display:contents" dir="auto"><h2 id="1e985df0-1907-8045-bdde-f1e0f4a10a62" class="">👥 Caregiver Script (Printed or Spoken)</h2></div><div style="display:contents" dir="auto"><blockquote id="1e985df0-1907-80e2-b4f3-f98d4a3f5d01" class="">“You’ve met this Companion before. It remembers some of what you liked — but only if you want it to.”<div style="display:contents" dir="auto"><p id="1e985df0-1907-80f6-9feb-c39ab4078462" class="">“We can ask it to start over, or try to remember things we did before.”</p></div><div style="display:contents" dir="auto"><p id="1e985df0-1907-8089-8043-eab751548671" class="">“You decide how we begin again.”</p></div></blockquote></div><div style="display:contents" dir="auto"><blockquote id="1e985df0-1907-808b-8f23-e743aa5b1ade" class="">“If you want to change its voice, we can do that too.”</blockquote></div><div style="display:contents" dir="auto"><hr id="1e985df0-1907-8061-91fd-ebb6e8abba02"/></div><div style="display:contents" dir="auto"><h2 id="1e985df0-1907-8025-a1c0-c753670897e7" class="">🧰 Tools to Support Reconnection</h2></div><div style="display:contents" dir="ltr"><table id="1e985df0-1907-805f-92ca-ce0ebe6139e7" class="simple-table"><tbody><div style="display:contents" dir="ltr"><tr id="1e985df0-1907-80b2-91da-e379a675607b"><td id="n@xc" class="">Tool</td><td id="fWs|" class="">Description</td></tr></div><div style="display:contents" dir="ltr"><tr id="1e985df0-1907-80b6-bd29-f5951dde95de"><td id="n@xc" class=""><strong>Avatar Memory Card</strong></td><td id="fWs|" class="">Visual reminder of the Companion’s name and tone (kept from last session)</td></tr></div><div style="display:contents" dir="ltr"><tr id="1e985df0-1907-8056-aceb-dca097a799e3"><td id="n@xc" class=""><strong>Companion Memory Summary</strong></td><td id="fWs|" class="">Text or visual log of last 3 saved sessions (if user chooses to recover)</td></tr></div><div style="display:contents" dir="ltr"><tr id="1e985df0-1907-8000-b2e8-e0e3a1fcc85a"><td id="n@xc" class=""><strong>Reflection Archive</strong></td><td id="fWs|" class="">Paper or app-based version of past mood prompts (shared with caregiver)</td></tr></div><div style="display:contents" dir="ltr"><tr id="1e985df0-1907-809b-82f4-c9ee4a191e9a"><td id="n@xc" class=""><strong>Recovery Consent Toggle</strong></td><td id="fWs|" class="">Printed or digital form reaffirming memory settings post-return</td></tr></div></tbody></table></div><div style="display:contents" dir="auto"><hr id="1e985df0-1907-801a-babd-debce907eee9"/></div><div style="display:contents" dir="auto"><h2 id="1e985df0-1907-80fa-821d-ec9d1d37b85f" class="">🛡️ Privacy &amp; Safeguards</h2></div><div style="display:contents" dir="auto"><ul id="1e985df0-1907-80bc-b5d0-efbba452f6be" class="bulleted-list"><li style="list-style-type:disc">🧼 No memory is restored without <strong>explicit user or caregiver choice</strong></li></ul></div><div style="display:contents" dir="auto"><ul id="1e985df0-1907-8000-a424-fe8f67cd967d" class="bulleted-list"><li style="list-style-type:disc">🧾 All restored content is <strong>display-only first</strong> — nothing reactivated silently</li></ul></div><div style="display:contents" dir="auto"><ul id="1e985df0-1907-801f-9aa3-e37d9de9ffdb" class="bulleted-list"><li style="list-style-type:disc">🧭 Reintroduction triggers optional <strong>new consent check</strong></li></ul></div><div style="display:contents" dir="auto"><ul id="1e985df0-1907-8096-9655-ff1536f397ad" class="bulleted-list"><li style="list-style-type:disc">🔒 If no stored memory exists, Companion offers emotional continuity only (e.g., “I’m still here for you”)</li></ul></div><div style="display:contents" dir="auto"><hr id="1e985df0-1907-8072-a77e-c584d723aeee"/></div><div style="display:contents" dir="auto"><h2 id="1e985df0-1907-80ae-8ea5-eb12ff1cc716" class="">🗂 Linked Templates &amp; Scripts</h2></div><div style="display:contents" dir="auto"><ul id="1e985df0-1907-80a8-9a67-e832a961da29" class="to-do-list"><li><div class="checkbox checkbox-off"></div> <span class="to-do-children-unchecked">Reintroduction Dialog Copy (UX JSON or prompt set)</span><div class="indented"></div></li></ul></div><div style="display:contents" dir="auto"><ul id="1e985df0-1907-8083-8d96-f49134535ed9" class="to-do-list"><li><div class="checkbox checkbox-off"></div> <span class="to-do-children-unchecked">Recovery Mode Toggle Component</span><div class="indented"></div></li></ul></div><div style="display:contents" dir="auto"><ul id="1e985df0-1907-80d1-902c-ef040f4dd2db" class="to-do-list"><li><div class="checkbox checkbox-off"></div> <span class="to-do-children-unchecked">Companion Voice Reset Flow</span><div class="indented"></div></li></ul></div><div style="display:contents" dir="auto"><ul id="1e985df0-1907-803a-82ca-d8d70ebd1691" class="to-do-list"><li><div class="checkbox checkbox-off"></div> <span class="to-do-children-unchecked">Caregiver Consent Reconfirmation Sheet</span><div class="indented"></div></li></ul></div><div style="display:contents" dir="auto"><ul id="1e985df0-1907-8094-86ae-dfdcc0a586a6" class="to-do-list"><li><div class="checkbox checkbox-off"></div> <span class="to-do-children-unchecked">Avatar Re-Pair Card</span><div class="indented"></div></li></ul></div><div style="display:contents" dir="auto"><ul id="1e985df0-1907-8047-9529-d44dbebb1cd1" class="to-do-list"><li><div class="checkbox checkbox-off"></div> <span class="to-do-children-unchecked">Memory Summary Sheet Generator (PDF / in-app)</span><div class="indented"></div></li></ul></div><div style="display:contents" dir="auto"><ul id="1e985df0-1907-80ad-936c-e34ad7fd492f" class="to-do-list"><li><div class="checkbox checkbox-off"></div> <span class="to-do-children-unchecked">Re-entry Journal Page (paper / digital)</span><div class="indented"></div></li></ul></div></div></article><span class="sans" style="font-size:14px;padding-top:2em"></span></body></html>

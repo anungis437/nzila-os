@@ -1,0 +1,713 @@
+<html><head><meta http-equiv="Content-Type" content="text/html; charset=utf-8"/><title>💰 Revenue Model Framework (2025–2027)</title><style>
+/* cspell:disable-file */
+/* webkit printing magic: print all background colors */
+html {
+	-webkit-print-color-adjust: exact;
+}
+* {
+	box-sizing: border-box;
+	-webkit-print-color-adjust: exact;
+}
+
+html,
+body {
+	margin: 0;
+	padding: 0;
+}
+@media only screen {
+	body {
+		margin: 2em auto;
+		max-width: 900px;
+		color: rgb(55, 53, 47);
+	}
+}
+
+body {
+	line-height: 1.5;
+	white-space: pre-wrap;
+}
+
+a,
+a.visited {
+	color: inherit;
+	text-decoration: underline;
+}
+
+.pdf-relative-link-path {
+	font-size: 80%;
+	color: #444;
+}
+
+h1,
+h2,
+h3 {
+	letter-spacing: -0.01em;
+	line-height: 1.2;
+	font-weight: 600;
+	margin-bottom: 0;
+}
+
+/* Override strong tags inside headings to maintain consistent weight */
+h1 strong,
+h2 strong,
+h3 strong {
+	font-weight: 600;
+}
+
+.page-title {
+	font-size: 2.5rem;
+	font-weight: 700;
+	margin-top: 0;
+	margin-bottom: 0.75em;
+}
+
+h1 {
+	font-size: 1.875rem;
+	margin-top: 1.875rem;
+}
+
+h2 {
+	font-size: 1.5rem;
+	margin-top: 1.5rem;
+}
+
+h3 {
+	font-size: 1.25rem;
+	margin-top: 1.25rem;
+}
+
+.source {
+	border: 1px solid #ddd;
+	border-radius: 3px;
+	padding: 1.5em;
+	word-break: break-all;
+}
+
+.callout {
+	border-radius: 10px;
+	padding: 1rem;
+}
+
+figure {
+	margin: 1.25em 0;
+	page-break-inside: avoid;
+}
+
+figcaption {
+	opacity: 0.5;
+	font-size: 85%;
+	margin-top: 0.5em;
+}
+
+mark {
+	background-color: transparent;
+}
+
+.indented {
+	padding-left: 1.5em;
+}
+
+hr {
+	background: transparent;
+	display: block;
+	width: 100%;
+	height: 1px;
+	visibility: visible;
+	border: none;
+	border-bottom: 1px solid rgba(55, 53, 47, 0.09);
+}
+
+img {
+	max-width: 100%;
+}
+
+@media only print {
+	img {
+		max-height: 100vh;
+		object-fit: contain;
+	}
+}
+
+@page {
+	margin: 1in;
+}
+
+.collection-content {
+	font-size: 0.875rem;
+}
+
+.collection-content td {
+	white-space: pre-wrap;
+	word-break: break-word;
+}
+
+.column-list {
+	display: flex;
+	justify-content: space-between;
+}
+
+.column {
+	padding: 0 1em;
+}
+
+.column:first-child {
+	padding-left: 0;
+}
+
+.column:last-child {
+	padding-right: 0;
+}
+
+.table_of_contents-item {
+	display: block;
+	font-size: 0.875rem;
+	line-height: 1.3;
+	padding: 0.125rem;
+}
+
+.table_of_contents-indent-1 {
+	margin-left: 1.5rem;
+}
+
+.table_of_contents-indent-2 {
+	margin-left: 3rem;
+}
+
+.table_of_contents-indent-3 {
+	margin-left: 4.5rem;
+}
+
+.table_of_contents-link {
+	text-decoration: none;
+	opacity: 0.7;
+	border-bottom: 1px solid rgba(55, 53, 47, 0.18);
+}
+
+table,
+th,
+td {
+	border: 1px solid rgba(55, 53, 47, 0.09);
+	border-collapse: collapse;
+}
+
+table {
+	border-left: none;
+	border-right: none;
+}
+
+th,
+td {
+	font-weight: normal;
+	padding: 0.25em 0.5em;
+	line-height: 1.5;
+	min-height: 1.5em;
+	text-align: left;
+}
+
+th {
+	color: rgba(55, 53, 47, 0.6);
+}
+
+ol,
+ul {
+	margin: 0;
+	margin-block-start: 0.6em;
+	margin-block-end: 0.6em;
+}
+
+li > ol:first-child,
+li > ul:first-child {
+	margin-block-start: 0.6em;
+}
+
+ul > li {
+	list-style: disc;
+}
+
+ul.to-do-list {
+	padding-inline-start: 0;
+}
+
+ul.to-do-list > li {
+	list-style: none;
+}
+
+.to-do-children-checked {
+	text-decoration: line-through;
+	opacity: 0.375;
+}
+
+ul.toggle > li {
+	list-style: none;
+}
+
+ul {
+	padding-inline-start: 1.7em;
+}
+
+ul > li {
+	padding-left: 0.1em;
+}
+
+ol {
+	padding-inline-start: 1.6em;
+}
+
+ol > li {
+	padding-left: 0.2em;
+}
+
+.mono ol {
+	padding-inline-start: 2em;
+}
+
+.mono ol > li {
+	text-indent: -0.4em;
+}
+
+.toggle {
+	padding-inline-start: 0em;
+	list-style-type: none;
+}
+
+/* Indent toggle children */
+.toggle > li > details {
+	padding-left: 1.7em;
+}
+
+.toggle > li > details > summary {
+	margin-left: -1.1em;
+}
+
+.selected-value {
+	display: inline-block;
+	padding: 0 0.5em;
+	background: rgba(206, 205, 202, 0.5);
+	border-radius: 3px;
+	margin-right: 0.5em;
+	margin-top: 0.3em;
+	margin-bottom: 0.3em;
+	white-space: nowrap;
+}
+
+.collection-title {
+	display: inline-block;
+	margin-right: 1em;
+}
+
+.page-description {
+	margin-bottom: 2em;
+}
+
+.simple-table {
+	margin-top: 1em;
+	font-size: 0.875rem;
+	empty-cells: show;
+}
+.simple-table td {
+	height: 29px;
+	min-width: 120px;
+}
+
+.simple-table th {
+	height: 29px;
+	min-width: 120px;
+}
+
+.simple-table-header-color {
+	background: rgb(247, 246, 243);
+	color: black;
+}
+.simple-table-header {
+	font-weight: 500;
+}
+
+time {
+	opacity: 0.5;
+}
+
+.icon {
+	display: inline-flex;
+	align-items: center;
+	justify-content: center;
+	max-width: 1.2em;
+	max-height: 1.2em;
+	text-decoration: none;
+	vertical-align: text-bottom;
+	margin-right: 0.5em;
+}
+
+img.icon {
+	border-radius: 3px;
+}
+
+.callout img.notion-static-icon {
+	width: 1em;
+	height: 1em;
+}
+
+.callout p {
+	margin: 0;
+}
+
+.callout h1,
+.callout h2,
+.callout h3 {
+	margin: 0 0 0.6rem;
+}
+
+.user-icon {
+	width: 1.5em;
+	height: 1.5em;
+	border-radius: 100%;
+	margin-right: 0.5rem;
+}
+
+.user-icon-inner {
+	font-size: 0.8em;
+}
+
+.text-icon {
+	border: 1px solid #000;
+	text-align: center;
+}
+
+.page-cover-image {
+	display: block;
+	object-fit: cover;
+	width: 100%;
+	max-height: 30vh;
+}
+
+.page-header-icon {
+	font-size: 3rem;
+	margin-bottom: 1rem;
+}
+
+.page-header-icon-with-cover {
+	margin-top: -0.72em;
+	margin-left: 0.07em;
+}
+
+.page-header-icon img {
+	border-radius: 3px;
+}
+
+.link-to-page {
+	margin: 1em 0;
+	padding: 0;
+	border: none;
+	font-weight: 500;
+}
+
+p > .user {
+	opacity: 0.5;
+}
+
+td > .user,
+td > time {
+	white-space: nowrap;
+}
+
+input[type="checkbox"] {
+	transform: scale(1.5);
+	margin-right: 0.6em;
+	vertical-align: middle;
+}
+
+p {
+	margin-top: 0.5em;
+	margin-bottom: 0.5em;
+}
+
+.image {
+	border: none;
+	margin: 1.5em 0;
+	padding: 0;
+	border-radius: 0;
+	text-align: center;
+}
+
+.code,
+code {
+	background: rgba(135, 131, 120, 0.15);
+	border-radius: 3px;
+	padding: 0.2em 0.4em;
+	border-radius: 3px;
+	font-size: 85%;
+	tab-size: 2;
+}
+
+code {
+	color: #eb5757;
+}
+
+.code {
+	padding: 1.5em 1em;
+}
+
+.code-wrap {
+	white-space: pre-wrap;
+	word-break: break-all;
+}
+
+.code > code {
+	background: none;
+	padding: 0;
+	font-size: 100%;
+	color: inherit;
+}
+
+blockquote {
+	font-size: 1em;
+	margin: 1em 0;
+	padding-left: 1em;
+	border-left: 3px solid rgb(55, 53, 47);
+}
+
+blockquote.quote-large {
+	font-size: 1.25em;
+}
+
+.bookmark {
+	text-decoration: none;
+	max-height: 8em;
+	padding: 0;
+	display: flex;
+	width: 100%;
+	align-items: stretch;
+}
+
+.bookmark-title {
+	font-size: 0.85em;
+	overflow: hidden;
+	text-overflow: ellipsis;
+	height: 1.75em;
+	white-space: nowrap;
+}
+
+.bookmark-text {
+	display: flex;
+	flex-direction: column;
+}
+
+.bookmark-info {
+	flex: 4 1 180px;
+	padding: 12px 14px 14px;
+	display: flex;
+	flex-direction: column;
+	justify-content: space-between;
+}
+
+.bookmark-image {
+	width: 33%;
+	flex: 1 1 180px;
+	display: block;
+	position: relative;
+	object-fit: cover;
+	border-radius: 1px;
+}
+
+.bookmark-description {
+	color: rgba(55, 53, 47, 0.6);
+	font-size: 0.75em;
+	overflow: hidden;
+	max-height: 4.5em;
+	word-break: break-word;
+}
+
+.bookmark-href {
+	font-size: 0.75em;
+	margin-top: 0.25em;
+}
+
+.sans { font-family: ui-sans-serif, -apple-system, BlinkMacSystemFont, "Segoe UI Variable Display", "Segoe UI", Helvetica, "Apple Color Emoji", "Noto Sans Arabic", "Noto Sans Hebrew", Arial, sans-serif, "Segoe UI Emoji", "Segoe UI Symbol"; }
+.code { font-family: "SFMono-Regular", Menlo, Consolas, "PT Mono", "Liberation Mono", Courier, monospace; }
+.serif { font-family: Lyon-Text, Georgia, ui-serif, serif; }
+.mono { font-family: iawriter-mono, Nitti, Menlo, Courier, monospace; }
+.pdf .sans { font-family: Inter, ui-sans-serif, -apple-system, BlinkMacSystemFont, "Segoe UI Variable Display", "Segoe UI", Helvetica, "Apple Color Emoji", "Noto Sans Arabic", "Noto Sans Hebrew", Arial, sans-serif, "Segoe UI Emoji", "Segoe UI Symbol", 'Twemoji', 'Noto Color Emoji', 'Noto Sans CJK JP'; }
+.pdf:lang(zh-CN) .sans { font-family: Inter, ui-sans-serif, -apple-system, BlinkMacSystemFont, "Segoe UI Variable Display", "Segoe UI", Helvetica, "Apple Color Emoji", "Noto Sans Arabic", "Noto Sans Hebrew", Arial, sans-serif, "Segoe UI Emoji", "Segoe UI Symbol", 'Twemoji', 'Noto Color Emoji', 'Noto Sans CJK SC'; }
+.pdf:lang(zh-TW) .sans { font-family: Inter, ui-sans-serif, -apple-system, BlinkMacSystemFont, "Segoe UI Variable Display", "Segoe UI", Helvetica, "Apple Color Emoji", "Noto Sans Arabic", "Noto Sans Hebrew", Arial, sans-serif, "Segoe UI Emoji", "Segoe UI Symbol", 'Twemoji', 'Noto Color Emoji', 'Noto Sans CJK TC'; }
+.pdf:lang(ko-KR) .sans { font-family: Inter, ui-sans-serif, -apple-system, BlinkMacSystemFont, "Segoe UI Variable Display", "Segoe UI", Helvetica, "Apple Color Emoji", "Noto Sans Arabic", "Noto Sans Hebrew", Arial, sans-serif, "Segoe UI Emoji", "Segoe UI Symbol", 'Twemoji', 'Noto Color Emoji', 'Noto Sans CJK KR'; }
+.pdf .code { font-family: Source Code Pro, "SFMono-Regular", Menlo, Consolas, "PT Mono", "Liberation Mono", Courier, monospace, 'Twemoji', 'Noto Color Emoji', 'Noto Sans Mono CJK JP'; }
+.pdf:lang(zh-CN) .code { font-family: Source Code Pro, "SFMono-Regular", Menlo, Consolas, "PT Mono", "Liberation Mono", Courier, monospace, 'Twemoji', 'Noto Color Emoji', 'Noto Sans Mono CJK SC'; }
+.pdf:lang(zh-TW) .code { font-family: Source Code Pro, "SFMono-Regular", Menlo, Consolas, "PT Mono", "Liberation Mono", Courier, monospace, 'Twemoji', 'Noto Color Emoji', 'Noto Sans Mono CJK TC'; }
+.pdf:lang(ko-KR) .code { font-family: Source Code Pro, "SFMono-Regular", Menlo, Consolas, "PT Mono", "Liberation Mono", Courier, monospace, 'Twemoji', 'Noto Color Emoji', 'Noto Sans Mono CJK KR'; }
+.pdf .serif { font-family: PT Serif, Lyon-Text, Georgia, ui-serif, serif, 'Twemoji', 'Noto Color Emoji', 'Noto Serif CJK JP'; }
+.pdf:lang(zh-CN) .serif { font-family: PT Serif, Lyon-Text, Georgia, ui-serif, serif, 'Twemoji', 'Noto Color Emoji', 'Noto Serif CJK SC'; }
+.pdf:lang(zh-TW) .serif { font-family: PT Serif, Lyon-Text, Georgia, ui-serif, serif, 'Twemoji', 'Noto Color Emoji', 'Noto Serif CJK TC'; }
+.pdf:lang(ko-KR) .serif { font-family: PT Serif, Lyon-Text, Georgia, ui-serif, serif, 'Twemoji', 'Noto Color Emoji', 'Noto Serif CJK KR'; }
+.pdf .mono { font-family: PT Mono, iawriter-mono, Nitti, Menlo, Courier, monospace, 'Twemoji', 'Noto Color Emoji', 'Noto Sans Mono CJK JP'; }
+.pdf:lang(zh-CN) .mono { font-family: PT Mono, iawriter-mono, Nitti, Menlo, Courier, monospace, 'Twemoji', 'Noto Color Emoji', 'Noto Sans Mono CJK SC'; }
+.pdf:lang(zh-TW) .mono { font-family: PT Mono, iawriter-mono, Nitti, Menlo, Courier, monospace, 'Twemoji', 'Noto Color Emoji', 'Noto Sans Mono CJK TC'; }
+.pdf:lang(ko-KR) .mono { font-family: PT Mono, iawriter-mono, Nitti, Menlo, Courier, monospace, 'Twemoji', 'Noto Color Emoji', 'Noto Sans Mono CJK KR'; }
+.highlight-default {
+	color: rgba(44, 44, 43, 1);
+}
+.highlight-gray {
+	color: rgba(125, 122, 117, 1);
+	fill: rgba(125, 122, 117, 1);
+}
+.highlight-brown {
+	color: rgba(159, 118, 90, 1);
+	fill: rgba(159, 118, 90, 1);
+}
+.highlight-orange {
+	color: rgba(210, 123, 45, 1);
+	fill: rgba(210, 123, 45, 1);
+}
+.highlight-yellow {
+	color: rgba(203, 148, 52, 1);
+	fill: rgba(203, 148, 52, 1);
+}
+.highlight-teal {
+	color: rgba(80, 148, 110, 1);
+	fill: rgba(80, 148, 110, 1);
+}
+.highlight-blue {
+	color: rgba(56, 125, 201, 1);
+	fill: rgba(56, 125, 201, 1);
+}
+.highlight-purple {
+	color: rgba(154, 107, 180, 1);
+	fill: rgba(154, 107, 180, 1);
+}
+.highlight-pink {
+	color: rgba(193, 76, 138, 1);
+	fill: rgba(193, 76, 138, 1);
+}
+.highlight-red {
+	color: rgba(207, 81, 72, 1);
+	fill: rgba(207, 81, 72, 1);
+}
+.highlight-default_background {
+	color: rgba(44, 44, 43, 1);
+}
+.highlight-gray_background {
+	background: rgba(42, 28, 0, 0.07);
+}
+.highlight-brown_background {
+	background: rgba(139, 46, 0, 0.086);
+}
+.highlight-orange_background {
+	background: rgba(224, 101, 1, 0.129);
+}
+.highlight-yellow_background {
+	background: rgba(211, 168, 0, 0.137);
+}
+.highlight-teal_background {
+	background: rgba(0, 100, 45, 0.09);
+}
+.highlight-blue_background {
+	background: rgba(0, 124, 215, 0.094);
+}
+.highlight-purple_background {
+	background: rgba(102, 0, 178, 0.078);
+}
+.highlight-pink_background {
+	background: rgba(197, 0, 93, 0.086);
+}
+.highlight-red_background {
+	background: rgba(223, 22, 0, 0.094);
+}
+.block-color-default {
+	color: inherit;
+	fill: inherit;
+}
+.block-color-gray {
+	color: rgba(125, 122, 117, 1);
+	fill: rgba(125, 122, 117, 1);
+}
+.block-color-brown {
+	color: rgba(159, 118, 90, 1);
+	fill: rgba(159, 118, 90, 1);
+}
+.block-color-orange {
+	color: rgba(210, 123, 45, 1);
+	fill: rgba(210, 123, 45, 1);
+}
+.block-color-yellow {
+	color: rgba(203, 148, 52, 1);
+	fill: rgba(203, 148, 52, 1);
+}
+.block-color-teal {
+	color: rgba(80, 148, 110, 1);
+	fill: rgba(80, 148, 110, 1);
+}
+.block-color-blue {
+	color: rgba(56, 125, 201, 1);
+	fill: rgba(56, 125, 201, 1);
+}
+.block-color-purple {
+	color: rgba(154, 107, 180, 1);
+	fill: rgba(154, 107, 180, 1);
+}
+.block-color-pink {
+	color: rgba(193, 76, 138, 1);
+	fill: rgba(193, 76, 138, 1);
+}
+.block-color-red {
+	color: rgba(207, 81, 72, 1);
+	fill: rgba(207, 81, 72, 1);
+}
+.block-color-default_background {
+	color: inherit;
+	fill: inherit;
+}
+.block-color-gray_background {
+	background: rgba(240, 239, 237, 1);
+}
+.block-color-brown_background {
+	background: rgba(245, 237, 233, 1);
+}
+.block-color-orange_background {
+	background: rgba(251, 235, 222, 1);
+}
+.block-color-yellow_background {
+	background: rgba(249, 243, 220, 1);
+}
+.block-color-teal_background {
+	background: rgba(232, 241, 236, 1);
+}
+.block-color-blue_background {
+	background: rgba(229, 242, 252, 1);
+}
+.block-color-purple_background {
+	background: rgba(243, 235, 249, 1);
+}
+.block-color-pink_background {
+	background: rgba(250, 233, 241, 1);
+}
+.block-color-red_background {
+	background: rgba(252, 233, 231, 1);
+}
+.select-value-color-default { background-color: rgba(42, 28, 0, 0.07); }
+.select-value-color-gray { background-color: rgba(28, 19, 1, 0.11); }
+.select-value-color-brown { background-color: rgba(127, 51, 0, 0.156); }
+.select-value-color-orange { background-color: rgba(196, 88, 0, 0.203); }
+.select-value-color-yellow { background-color: rgba(209, 156, 0, 0.282); }
+.select-value-color-green { background-color: rgba(0, 96, 38, 0.156); }
+.select-value-color-blue { background-color: rgba(0, 118, 217, 0.203); }
+.select-value-color-purple { background-color: rgba(92, 0, 163, 0.141); }
+.select-value-color-pink { background-color: rgba(183, 0, 78, 0.152); }
+.select-value-color-red { background-color: rgba(206, 24, 0, 0.164); }
+
+.checkbox {
+	display: inline-flex;
+	vertical-align: text-bottom;
+	width: 16;
+	height: 16;
+	background-size: 16px;
+	margin-left: 2px;
+	margin-right: 5px;
+}
+
+.checkbox-on {
+	background-image: url("data:image/svg+xml;charset=UTF-8,%3Csvg%20width%3D%2216%22%20height%3D%2216%22%20viewBox%3D%220%200%2016%2016%22%20fill%3D%22none%22%20xmlns%3D%22http%3A%2F%2Fwww.w3.org%2F2000%2Fsvg%22%3E%0A%3Crect%20width%3D%2216%22%20height%3D%2216%22%20fill%3D%22%2358A9D7%22%2F%3E%0A%3Cpath%20d%3D%22M6.71429%2012.2852L14%204.9995L12.7143%203.71436L6.71429%209.71378L3.28571%206.2831L2%207.57092L6.71429%2012.2852Z%22%20fill%3D%22white%22%2F%3E%0A%3C%2Fsvg%3E");
+}
+
+.checkbox-off {
+	background-image: url("data:image/svg+xml;charset=UTF-8,%3Csvg%20width%3D%2216%22%20height%3D%2216%22%20viewBox%3D%220%200%2016%2016%22%20fill%3D%22none%22%20xmlns%3D%22http%3A%2F%2Fwww.w3.org%2F2000%2Fsvg%22%3E%0A%3Crect%20x%3D%220.75%22%20y%3D%220.75%22%20width%3D%2214.5%22%20height%3D%2214.5%22%20fill%3D%22white%22%20stroke%3D%22%2336352F%22%20stroke-width%3D%221.5%22%2F%3E%0A%3C%2Fsvg%3E");
+}
+	
+</style></head><body><article id="1e485df0-1907-8040-8a77-c59055098d60" class="page sans"><header><h1 class="page-title" dir="auto">💰 Revenue Model Framework (2025–2027)</h1><p class="page-description" dir="auto"></p><table class="properties"><tbody><tr class="property-row property-row-person"><th><span class="icon property-icon"><img src="https://www.notion.so/icons/friends_gray.svg" style="width:14px;height:14px;display:block"/></span>Owner</th><td><span class="user"><span class="icon text-icon user-icon"><span class="user-icon-inner">A</span></span>Aubert</span></td></tr><tr class="property-row property-row-multi_select"><th><span class="icon property-icon"><img src="https://www.notion.so/icons/list_gray.svg" style="width:14px;height:14px;display:block"/></span>Tags</th><td></td></tr></tbody></table></header><div class="page-body"><div style="display:contents" dir="auto"><h3 id="1e885df0-1907-805e-b24f-f98a260d5e6d" class="">🔑 1. Core Revenue Streams – <em>Memora Suite</em></h3></div><div style="display:contents" dir="ltr"><table id="1e885df0-1907-80cd-ab3d-f4c7ac802bde" class="simple-table"><tbody><div style="display:contents" dir="ltr"><tr id="1e885df0-1907-805f-a61f-c58183caacf5"><td id="tP|f" class="">Stream</td><td id="lMuV" class="">Description</td><td id="mq:c" class="">Type</td><td id="Ym&gt;{" class="">Lifecycle Stage</td></tr></div><div style="display:contents" dir="ltr"><tr id="1e885df0-1907-8035-93d8-e33149807408"><td id="tP|f" class=""><strong>Clinic SaaS Licensing</strong></td><td id="lMuV" class="">Monthly dashboard fees for ClinicConnect + Companion integration</td><td id="mq:c" class="">B2B Subscription</td><td id="Ym&gt;{" class="">MVP → Scale</td></tr></div><div style="display:contents" dir="ltr"><tr id="1e885df0-1907-80ce-b283-f1e6853d2c9a"><td id="tP|f" class=""><strong>Caregiver Premium Plan</strong></td><td id="lMuV" class="">Paid upgrade unlocking multi-profile sync, insights, personalization</td><td id="mq:c" class="">B2C Freemium-to-Paid</td><td id="Ym&gt;{" class="">MVP</td></tr></div><div style="display:contents" dir="ltr"><tr id="1e885df0-1907-80de-97fe-e45523651136"><td id="tP|f" class=""><strong>Public Grant Funding</strong></td><td id="lMuV" class="">IRAP, AGE-WELL, and research-aligned non-dilutive capital</td><td id="mq:c" class="">Non-Dilutive</td><td id="Ym&gt;{" class="">Active</td></tr></div><div style="display:contents" dir="ltr"><tr id="1e885df0-1907-80c7-a31f-ef1b0df3a877"><td id="tP|f" class=""><strong>Clinic Onboarding &amp; Support</strong></td><td id="lMuV" class="">Implementation, training, or API setup</td><td id="mq:c" class="">Services Revenue</td><td id="Ym&gt;{" class="">Phase 2–3</td></tr></div><div style="display:contents" dir="ltr"><tr id="1e885df0-1907-80be-b998-fb473b604ba9"><td id="tP|f" class=""><strong>White-label Companion Licensing</strong></td><td id="lMuV" class="">Clinics and orgs apply their branding to Memora tools</td><td id="mq:c" class="">Platform Licensing</td><td id="Ym&gt;{" class="">Phase 3</td></tr></div><div style="display:contents" dir="ltr"><tr id="1e885df0-1907-800f-ade2-ffc8b8368d9a"><td id="tP|f" class=""><strong>Insight-as-a-Service</strong></td><td id="lMuV" class="">Secure, de-identified analytics for partner clinics</td><td id="mq:c" class="">B2B Add-On</td><td id="Ym&gt;{" class="">Phase 3–4</td></tr></div><div style="display:contents" dir="ltr"><tr id="1e885df0-1907-80e4-99fe-e1a34ad62d31"><td id="tP|f" class=""><strong>Companion API (3rd Party)</strong></td><td id="lMuV" class="">Licensed external use of Companion engine (e.g., for SDK or platform)</td><td id="mq:c" class="">Developer/API Revenue</td><td id="Ym&gt;{" class="">Platform</td></tr></div></tbody></table></div><div style="display:contents" dir="auto"><hr id="1e885df0-1907-803e-b699-f32c8212f1ce"/></div><div style="display:contents" dir="auto"><h3 id="1e885df0-1907-80fb-bcf4-db0535cfeea6" class="">💸 2. Pricing Structure (v1 – Proposed)</h3></div><div style="display:contents" dir="ltr"><table id="1e885df0-1907-80a2-9e3d-c3d45b357564" class="simple-table"><tbody><div style="display:contents" dir="ltr"><tr id="1e885df0-1907-805f-bc24-ecdd5e7ef954"><td id="wkSi" class="">Tier</td><td id="qfyY" class="">Monthly Price</td><td id="|q\}" class="">Target</td><td id="N&lt;&gt;N" class="">Features</td></tr></div><div style="display:contents" dir="ltr"><tr id="1e885df0-1907-8087-9dee-f3c2a47ebb76"><td id="wkSi" class=""><strong>Free</strong></td><td id="qfyY" class="">$0</td><td id="|q\}" class="">General caregivers, patients</td><td id="N&lt;&gt;N" class="">1 profile, daily game, Companion Lite</td></tr></div><div style="display:contents" dir="ltr"><tr id="1e885df0-1907-8048-87d9-c7e081f7e4b1"><td id="wkSi" class=""><strong>Premium</strong></td><td id="qfyY" class="">$6.99</td><td id="|q\}" class="">Dedicated caregivers</td><td id="N&lt;&gt;N" class="">Multi-profile, custom nudges, shared caregiver access</td></tr></div><div style="display:contents" dir="ltr"><tr id="1e885df0-1907-80c2-8a7b-d67f1a629cd2"><td id="wkSi" class=""><strong>Clinic Tier 1</strong></td><td id="qfyY" class="">$59</td><td id="|q\}" class="">Small clinics (1–3 admins)</td><td id="N&lt;&gt;N" class="">10 users, basic dashboard</td></tr></div><div style="display:contents" dir="ltr"><tr id="1e885df0-1907-8023-ae96-fe7e03f8ad7e"><td id="wkSi" class=""><strong>Clinic Tier 2</strong></td><td id="qfyY" class="">$99</td><td id="|q\}" class="">Medium clinics</td><td id="N&lt;&gt;N" class="">25 users, clinical notes, protocol triggers</td></tr></div><div style="display:contents" dir="ltr"><tr id="1e885df0-1907-8028-845e-db66216d6f46"><td id="wkSi" class=""><strong>Clinic Tier 3</strong></td><td id="qfyY" class="">Custom</td><td id="|q\}" class="">Multi-site, enterprise</td><td id="N&lt;&gt;N" class="">White-label, Companion API, audit logs, premium support</td></tr></div></tbody></table></div><div style="display:contents" dir="auto"><blockquote id="1e885df0-1907-8011-b456-fd41b152ec00" class="">🎯 Primary monetization at launch is through ClinicConnect licenses while B2C Premium adoption scales steadily.</blockquote></div><div style="display:contents" dir="auto"><hr id="1e885df0-1907-805e-8b3e-f4003e7f5f2c"/></div><div style="display:contents" dir="auto"><h3 id="1e885df0-1907-808f-9fab-ed59addd4355" class="">📊 3. Unit Economics (2025 Assumptions)</h3></div><div style="display:contents" dir="ltr"><table id="1e885df0-1907-806c-ad83-db154354e927" class="simple-table"><tbody><div style="display:contents" dir="ltr"><tr id="1e885df0-1907-80f1-aea7-fc9d2ba231f4"><td id="PfKz" class="">Metric</td><td id="gWNS" class="">Estimate</td><td id="mW?&lt;" class="">Notes</td></tr></div><div style="display:contents" dir="ltr"><tr id="1e885df0-1907-807f-86e7-f71c0fd265e8"><td id="PfKz" class="">B2C Conversion Rate</td><td id="gWNS" class="">6%</td><td id="mW?&lt;" class="">Free → Paid Premium</td></tr></div><div style="display:contents" dir="ltr"><tr id="1e885df0-1907-8073-97d9-cb155707337a"><td id="PfKz" class="">B2C CAC</td><td id="gWNS" class="">$12 CAD</td><td id="mW?&lt;" class="">Influencer-led campaigns + content SEO</td></tr></div><div style="display:contents" dir="ltr"><tr id="1e885df0-1907-80c2-89e8-f2a4bb56caf5"><td id="PfKz" class="">B2C LTV</td><td id="gWNS" class="">$50 CAD</td><td id="mW?&lt;" class="">~7 months retention baseline</td></tr></div><div style="display:contents" dir="ltr"><tr id="1e885df0-1907-8029-a91c-c39caca58e50"><td id="PfKz" class="">B2B CAC</td><td id="gWNS" class="">$250 CAD</td><td id="mW?&lt;" class="">Demo, onboarding support, pilot process</td></tr></div><div style="display:contents" dir="ltr"><tr id="1e885df0-1907-801d-83f1-c7f091756831"><td id="PfKz" class="">B2B LTV</td><td id="gWNS" class="">$800–1,200 CAD</td><td id="mW?&lt;" class="">Based on 12–18 months retention</td></tr></div></tbody></table></div><div style="display:contents" dir="auto"><blockquote id="1e885df0-1907-8003-a94a-e6f2435bdd08" class="">🧠 Referral loops, caregiver-clinic linkage, and bundled upgrades will improve CAC/LTV ratios post-pilot.</blockquote></div><div style="display:contents" dir="auto"><hr id="1e885df0-1907-8067-a85b-fecc3ff2468a"/></div><div style="display:contents" dir="auto"><h3 id="1e885df0-1907-80df-b405-f14b5f85a627" class="">🚀 4. Revenue Scenarios (2025–2026)</h3></div><div style="display:contents" dir="ltr"><table id="1e885df0-1907-80bd-b4e2-ceffab22d8ae" class="simple-table"><tbody><div style="display:contents" dir="ltr"><tr id="1e885df0-1907-8085-b07a-df1b4f08da8e"><td id="?fhP" class="">Rollout Stage</td><td id="{DtD" class="">Paid B2C Users</td><td id="&gt;:Mj" class="">Active Clinics</td><td id="QOpE" class="">Est. MRR</td><td id="ySF&lt;" class="">Projected 12-mo Revenue</td></tr></div><div style="display:contents" dir="ltr"><tr id="1e885df0-1907-80ca-9a6c-cba73c3a9dac"><td id="?fhP" class=""><strong>Soft Launch</strong></td><td id="{DtD" class="">30</td><td id="&gt;:Mj" class="">5</td><td id="QOpE" class="">$500</td><td id="ySF&lt;" class="">~$6,000</td></tr></div><div style="display:contents" dir="ltr"><tr id="1e885df0-1907-8029-9478-e7d7890c38e1"><td id="?fhP" class=""><strong>Canada National</strong></td><td id="{DtD" class="">200</td><td id="&gt;:Mj" class="">25</td><td id="QOpE" class="">~$3,500</td><td id="ySF&lt;" class="">~$42,000</td></tr></div><div style="display:contents" dir="ltr"><tr id="1e885df0-1907-80b0-96f2-f87de0911fdf"><td id="?fhP" class=""><strong>Growth Phase</strong></td><td id="{DtD" class="">700</td><td id="&gt;:Mj" class="">75+</td><td id="QOpE" class="">~$12,000</td><td id="ySF&lt;" class="">~$140,000</td></tr></div><div style="display:contents" dir="ltr"><tr id="1e885df0-1907-8044-ac6f-f4a25811558d"><td id="?fhP" class=""><strong>Ecosystem Activation</strong></td><td id="{DtD" class="">2,000+</td><td id="&gt;:Mj" class="">150+</td><td id="QOpE" class="">&gt;$30,000</td><td id="ySF&lt;" class="">&gt;$350,000</td></tr></div></tbody></table></div><div style="display:contents" dir="auto"><blockquote id="1e885df0-1907-80b2-8615-c8d56d365448" class="">📌 These are low-penetration models; Canadian caregiver TAM exceeds 1.5M.</blockquote></div><div style="display:contents" dir="auto"><hr id="1e885df0-1907-80fb-bf20-e01d48608110"/></div><div style="display:contents" dir="auto"><h3 id="1e885df0-1907-8094-ae05-d681c141fba4" class="">🛠️ 5. Ops &amp; Analytics Tooling</h3></div><div style="display:contents" dir="ltr"><table id="1e885df0-1907-80be-b58a-f1be9c720902" class="simple-table"><tbody><div style="display:contents" dir="ltr"><tr id="1e885df0-1907-80d7-807f-c80094501797"><td id="Y&gt;XX" class="">Tool</td><td id="ngmP" class="">Use Case</td></tr></div><div style="display:contents" dir="ltr"><tr id="1e885df0-1907-8000-926d-ffd4e00c2cd7"><td id="Y&gt;XX" class=""><strong>Stripe</strong></td><td id="ngmP" class="">Subscription billing, metered SaaS invoicing</td></tr></div><div style="display:contents" dir="ltr"><tr id="1e885df0-1907-8066-b33c-cc2273699cca"><td id="Y&gt;XX" class=""><strong>Brevo + HubSpot</strong></td><td id="ngmP" class="">Funnel tracking, caregiver lifecycle messaging</td></tr></div><div style="display:contents" dir="ltr"><tr id="1e885df0-1907-8051-92b7-cd37c588e638"><td id="Y&gt;XX" class=""><strong>QuickBooks</strong></td><td id="ngmP" class="">Financial sync, invoice tracking, grant tagging</td></tr></div><div style="display:contents" dir="ltr"><tr id="1e885df0-1907-80f1-8858-c5ba2bed0a9a"><td id="Y&gt;XX" class=""><strong>Notion</strong></td><td id="ngmP" class="">Revenue ops documentation + cross-team CRM logic</td></tr></div><div style="display:contents" dir="ltr"><tr id="1e885df0-1907-8003-b7fa-e92597e238aa"><td id="Y&gt;XX" class=""><strong>DOMO (Planned)</strong></td><td id="ngmP" class="">Live dashboards: MRR, churn, LTV/CAC, growth cohorts</td></tr></div><div style="display:contents" dir="ltr"><tr id="1e885df0-1907-8072-b702-c8528801e9e8"><td id="Y&gt;XX" class=""><strong>Google Sheets (v1)</strong></td><td id="ngmP" class="">Manual revenue simulator, ARR forecast logic</td></tr></div></tbody></table></div><div style="display:contents" dir="auto"><hr id="1e885df0-1907-80b3-aabd-eb84234b782f"/></div><div style="display:contents" dir="auto"><h3 id="1e885df0-1907-80e4-8080-e237cb28defa" class="">🔄 6. Revenue Governance Cadence</h3></div><div style="display:contents" dir="ltr"><table id="1e885df0-1907-8062-a2fc-d3788cdeb2bb" class="simple-table"><tbody><div style="display:contents" dir="ltr"><tr id="1e885df0-1907-8051-bc50-fe47c62ff19e"><td id="b={^" class="">Activity</td><td id="^{Pz" class="">Frequency</td><td id="Nicr" class="">Owner(s)</td></tr></div><div style="display:contents" dir="ltr"><tr id="1e885df0-1907-8004-a1e6-e34618b3cdf3"><td id="b={^" class="">Revenue Performance Review</td><td id="^{Pz" class="">Monthly</td><td id="Nicr" class="">CFO</td></tr></div><div style="display:contents" dir="ltr"><tr id="1e885df0-1907-8097-a5ca-d1475220da8b"><td id="b={^" class="">B2C Conversion Funnel Audit</td><td id="^{Pz" class="">Bi-weekly</td><td id="Nicr" class="">Growth</td></tr></div><div style="display:contents" dir="ltr"><tr id="1e885df0-1907-80ae-9d9d-f3deb47f7728"><td id="b={^" class="">B2B Pipeline Status Check</td><td id="^{Pz" class="">Monthly</td><td id="Nicr" class="">CMO + Sales Lead</td></tr></div><div style="display:contents" dir="ltr"><tr id="1e885df0-1907-8053-8f24-f4a7796b5ab8"><td id="b={^" class="">Pricing Strategy Review</td><td id="^{Pz" class="">Quarterly</td><td id="Nicr" class="">CEO + Product</td></tr></div><div style="display:contents" dir="ltr"><tr id="1e885df0-1907-8054-a7f5-d8994cb35274"><td id="b={^" class="">Stakeholder Updates</td><td id="^{Pz" class="">Quarterly</td><td id="Nicr" class="">Finance + Strategy</td></tr></div></tbody></table></div><div style="display:contents" dir="auto"><hr id="1e885df0-1907-8008-b262-e5a422071d7a"/></div><div style="display:contents" dir="auto"><h3 id="1e885df0-1907-80f7-a899-f8c128a66c0b" class="">📌 7. Immediate Action Items</h3></div><div style="display:contents" dir="auto"><ol type="1" id="1e885df0-1907-80db-868d-fe007fe090d7" class="numbered-list" start="1"><li><strong>Validate Tiered Pricing</strong> — via caregiver interviews, clinic pilot feedback</li></ol></div><div style="display:contents" dir="auto"><ol type="1" id="1e885df0-1907-800f-8473-c558cb8ff09d" class="numbered-list" start="2"><li><strong>Trigger-Based A/B Tests</strong> — unlock timing for Premium conversion (nudges, feature gating)</li></ol></div><div style="display:contents" dir="auto"><ol type="1" id="1e885df0-1907-8049-a058-cd3c3db720d0" class="numbered-list" start="3"><li><strong>Clinic Bundles</strong> — test Companion + Dashboard + Onboarding package offers</li></ol></div><div style="display:contents" dir="auto"><ol type="1" id="1e885df0-1907-80ab-b0c5-eaef043e77bf" class="numbered-list" start="4"><li><strong>Forecast Simulator (Sheet v1)</strong> — linked to roadmap, staffing, CAC estimates</li></ol></div><div style="display:contents" dir="auto"><ol type="1" id="1e885df0-1907-80d3-b6dd-de296891a408" class="numbered-list" start="5"><li><strong>Define ARR Milestones</strong> — anchor to Phase 2/3 strategic objectives</li></ol></div></div></article><span class="sans" style="font-size:14px;padding-top:2em"></span></body></html>

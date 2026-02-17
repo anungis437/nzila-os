@@ -1,0 +1,713 @@
+<html><head><meta http-equiv="Content-Type" content="text/html; charset=utf-8"/><title>⚖️ Enterprise Risk Management (ERM) Framework</title><style>
+/* cspell:disable-file */
+/* webkit printing magic: print all background colors */
+html {
+	-webkit-print-color-adjust: exact;
+}
+* {
+	box-sizing: border-box;
+	-webkit-print-color-adjust: exact;
+}
+
+html,
+body {
+	margin: 0;
+	padding: 0;
+}
+@media only screen {
+	body {
+		margin: 2em auto;
+		max-width: 900px;
+		color: rgb(55, 53, 47);
+	}
+}
+
+body {
+	line-height: 1.5;
+	white-space: pre-wrap;
+}
+
+a,
+a.visited {
+	color: inherit;
+	text-decoration: underline;
+}
+
+.pdf-relative-link-path {
+	font-size: 80%;
+	color: #444;
+}
+
+h1,
+h2,
+h3 {
+	letter-spacing: -0.01em;
+	line-height: 1.2;
+	font-weight: 600;
+	margin-bottom: 0;
+}
+
+/* Override strong tags inside headings to maintain consistent weight */
+h1 strong,
+h2 strong,
+h3 strong {
+	font-weight: 600;
+}
+
+.page-title {
+	font-size: 2.5rem;
+	font-weight: 700;
+	margin-top: 0;
+	margin-bottom: 0.75em;
+}
+
+h1 {
+	font-size: 1.875rem;
+	margin-top: 1.875rem;
+}
+
+h2 {
+	font-size: 1.5rem;
+	margin-top: 1.5rem;
+}
+
+h3 {
+	font-size: 1.25rem;
+	margin-top: 1.25rem;
+}
+
+.source {
+	border: 1px solid #ddd;
+	border-radius: 3px;
+	padding: 1.5em;
+	word-break: break-all;
+}
+
+.callout {
+	border-radius: 10px;
+	padding: 1rem;
+}
+
+figure {
+	margin: 1.25em 0;
+	page-break-inside: avoid;
+}
+
+figcaption {
+	opacity: 0.5;
+	font-size: 85%;
+	margin-top: 0.5em;
+}
+
+mark {
+	background-color: transparent;
+}
+
+.indented {
+	padding-left: 1.5em;
+}
+
+hr {
+	background: transparent;
+	display: block;
+	width: 100%;
+	height: 1px;
+	visibility: visible;
+	border: none;
+	border-bottom: 1px solid rgba(55, 53, 47, 0.09);
+}
+
+img {
+	max-width: 100%;
+}
+
+@media only print {
+	img {
+		max-height: 100vh;
+		object-fit: contain;
+	}
+}
+
+@page {
+	margin: 1in;
+}
+
+.collection-content {
+	font-size: 0.875rem;
+}
+
+.collection-content td {
+	white-space: pre-wrap;
+	word-break: break-word;
+}
+
+.column-list {
+	display: flex;
+	justify-content: space-between;
+}
+
+.column {
+	padding: 0 1em;
+}
+
+.column:first-child {
+	padding-left: 0;
+}
+
+.column:last-child {
+	padding-right: 0;
+}
+
+.table_of_contents-item {
+	display: block;
+	font-size: 0.875rem;
+	line-height: 1.3;
+	padding: 0.125rem;
+}
+
+.table_of_contents-indent-1 {
+	margin-left: 1.5rem;
+}
+
+.table_of_contents-indent-2 {
+	margin-left: 3rem;
+}
+
+.table_of_contents-indent-3 {
+	margin-left: 4.5rem;
+}
+
+.table_of_contents-link {
+	text-decoration: none;
+	opacity: 0.7;
+	border-bottom: 1px solid rgba(55, 53, 47, 0.18);
+}
+
+table,
+th,
+td {
+	border: 1px solid rgba(55, 53, 47, 0.09);
+	border-collapse: collapse;
+}
+
+table {
+	border-left: none;
+	border-right: none;
+}
+
+th,
+td {
+	font-weight: normal;
+	padding: 0.25em 0.5em;
+	line-height: 1.5;
+	min-height: 1.5em;
+	text-align: left;
+}
+
+th {
+	color: rgba(55, 53, 47, 0.6);
+}
+
+ol,
+ul {
+	margin: 0;
+	margin-block-start: 0.6em;
+	margin-block-end: 0.6em;
+}
+
+li > ol:first-child,
+li > ul:first-child {
+	margin-block-start: 0.6em;
+}
+
+ul > li {
+	list-style: disc;
+}
+
+ul.to-do-list {
+	padding-inline-start: 0;
+}
+
+ul.to-do-list > li {
+	list-style: none;
+}
+
+.to-do-children-checked {
+	text-decoration: line-through;
+	opacity: 0.375;
+}
+
+ul.toggle > li {
+	list-style: none;
+}
+
+ul {
+	padding-inline-start: 1.7em;
+}
+
+ul > li {
+	padding-left: 0.1em;
+}
+
+ol {
+	padding-inline-start: 1.6em;
+}
+
+ol > li {
+	padding-left: 0.2em;
+}
+
+.mono ol {
+	padding-inline-start: 2em;
+}
+
+.mono ol > li {
+	text-indent: -0.4em;
+}
+
+.toggle {
+	padding-inline-start: 0em;
+	list-style-type: none;
+}
+
+/* Indent toggle children */
+.toggle > li > details {
+	padding-left: 1.7em;
+}
+
+.toggle > li > details > summary {
+	margin-left: -1.1em;
+}
+
+.selected-value {
+	display: inline-block;
+	padding: 0 0.5em;
+	background: rgba(206, 205, 202, 0.5);
+	border-radius: 3px;
+	margin-right: 0.5em;
+	margin-top: 0.3em;
+	margin-bottom: 0.3em;
+	white-space: nowrap;
+}
+
+.collection-title {
+	display: inline-block;
+	margin-right: 1em;
+}
+
+.page-description {
+	margin-bottom: 2em;
+}
+
+.simple-table {
+	margin-top: 1em;
+	font-size: 0.875rem;
+	empty-cells: show;
+}
+.simple-table td {
+	height: 29px;
+	min-width: 120px;
+}
+
+.simple-table th {
+	height: 29px;
+	min-width: 120px;
+}
+
+.simple-table-header-color {
+	background: rgb(247, 246, 243);
+	color: black;
+}
+.simple-table-header {
+	font-weight: 500;
+}
+
+time {
+	opacity: 0.5;
+}
+
+.icon {
+	display: inline-flex;
+	align-items: center;
+	justify-content: center;
+	max-width: 1.2em;
+	max-height: 1.2em;
+	text-decoration: none;
+	vertical-align: text-bottom;
+	margin-right: 0.5em;
+}
+
+img.icon {
+	border-radius: 3px;
+}
+
+.callout img.notion-static-icon {
+	width: 1em;
+	height: 1em;
+}
+
+.callout p {
+	margin: 0;
+}
+
+.callout h1,
+.callout h2,
+.callout h3 {
+	margin: 0 0 0.6rem;
+}
+
+.user-icon {
+	width: 1.5em;
+	height: 1.5em;
+	border-radius: 100%;
+	margin-right: 0.5rem;
+}
+
+.user-icon-inner {
+	font-size: 0.8em;
+}
+
+.text-icon {
+	border: 1px solid #000;
+	text-align: center;
+}
+
+.page-cover-image {
+	display: block;
+	object-fit: cover;
+	width: 100%;
+	max-height: 30vh;
+}
+
+.page-header-icon {
+	font-size: 3rem;
+	margin-bottom: 1rem;
+}
+
+.page-header-icon-with-cover {
+	margin-top: -0.72em;
+	margin-left: 0.07em;
+}
+
+.page-header-icon img {
+	border-radius: 3px;
+}
+
+.link-to-page {
+	margin: 1em 0;
+	padding: 0;
+	border: none;
+	font-weight: 500;
+}
+
+p > .user {
+	opacity: 0.5;
+}
+
+td > .user,
+td > time {
+	white-space: nowrap;
+}
+
+input[type="checkbox"] {
+	transform: scale(1.5);
+	margin-right: 0.6em;
+	vertical-align: middle;
+}
+
+p {
+	margin-top: 0.5em;
+	margin-bottom: 0.5em;
+}
+
+.image {
+	border: none;
+	margin: 1.5em 0;
+	padding: 0;
+	border-radius: 0;
+	text-align: center;
+}
+
+.code,
+code {
+	background: rgba(135, 131, 120, 0.15);
+	border-radius: 3px;
+	padding: 0.2em 0.4em;
+	border-radius: 3px;
+	font-size: 85%;
+	tab-size: 2;
+}
+
+code {
+	color: #eb5757;
+}
+
+.code {
+	padding: 1.5em 1em;
+}
+
+.code-wrap {
+	white-space: pre-wrap;
+	word-break: break-all;
+}
+
+.code > code {
+	background: none;
+	padding: 0;
+	font-size: 100%;
+	color: inherit;
+}
+
+blockquote {
+	font-size: 1em;
+	margin: 1em 0;
+	padding-left: 1em;
+	border-left: 3px solid rgb(55, 53, 47);
+}
+
+blockquote.quote-large {
+	font-size: 1.25em;
+}
+
+.bookmark {
+	text-decoration: none;
+	max-height: 8em;
+	padding: 0;
+	display: flex;
+	width: 100%;
+	align-items: stretch;
+}
+
+.bookmark-title {
+	font-size: 0.85em;
+	overflow: hidden;
+	text-overflow: ellipsis;
+	height: 1.75em;
+	white-space: nowrap;
+}
+
+.bookmark-text {
+	display: flex;
+	flex-direction: column;
+}
+
+.bookmark-info {
+	flex: 4 1 180px;
+	padding: 12px 14px 14px;
+	display: flex;
+	flex-direction: column;
+	justify-content: space-between;
+}
+
+.bookmark-image {
+	width: 33%;
+	flex: 1 1 180px;
+	display: block;
+	position: relative;
+	object-fit: cover;
+	border-radius: 1px;
+}
+
+.bookmark-description {
+	color: rgba(55, 53, 47, 0.6);
+	font-size: 0.75em;
+	overflow: hidden;
+	max-height: 4.5em;
+	word-break: break-word;
+}
+
+.bookmark-href {
+	font-size: 0.75em;
+	margin-top: 0.25em;
+}
+
+.sans { font-family: ui-sans-serif, -apple-system, BlinkMacSystemFont, "Segoe UI Variable Display", "Segoe UI", Helvetica, "Apple Color Emoji", "Noto Sans Arabic", "Noto Sans Hebrew", Arial, sans-serif, "Segoe UI Emoji", "Segoe UI Symbol"; }
+.code { font-family: "SFMono-Regular", Menlo, Consolas, "PT Mono", "Liberation Mono", Courier, monospace; }
+.serif { font-family: Lyon-Text, Georgia, ui-serif, serif; }
+.mono { font-family: iawriter-mono, Nitti, Menlo, Courier, monospace; }
+.pdf .sans { font-family: Inter, ui-sans-serif, -apple-system, BlinkMacSystemFont, "Segoe UI Variable Display", "Segoe UI", Helvetica, "Apple Color Emoji", "Noto Sans Arabic", "Noto Sans Hebrew", Arial, sans-serif, "Segoe UI Emoji", "Segoe UI Symbol", 'Twemoji', 'Noto Color Emoji', 'Noto Sans CJK JP'; }
+.pdf:lang(zh-CN) .sans { font-family: Inter, ui-sans-serif, -apple-system, BlinkMacSystemFont, "Segoe UI Variable Display", "Segoe UI", Helvetica, "Apple Color Emoji", "Noto Sans Arabic", "Noto Sans Hebrew", Arial, sans-serif, "Segoe UI Emoji", "Segoe UI Symbol", 'Twemoji', 'Noto Color Emoji', 'Noto Sans CJK SC'; }
+.pdf:lang(zh-TW) .sans { font-family: Inter, ui-sans-serif, -apple-system, BlinkMacSystemFont, "Segoe UI Variable Display", "Segoe UI", Helvetica, "Apple Color Emoji", "Noto Sans Arabic", "Noto Sans Hebrew", Arial, sans-serif, "Segoe UI Emoji", "Segoe UI Symbol", 'Twemoji', 'Noto Color Emoji', 'Noto Sans CJK TC'; }
+.pdf:lang(ko-KR) .sans { font-family: Inter, ui-sans-serif, -apple-system, BlinkMacSystemFont, "Segoe UI Variable Display", "Segoe UI", Helvetica, "Apple Color Emoji", "Noto Sans Arabic", "Noto Sans Hebrew", Arial, sans-serif, "Segoe UI Emoji", "Segoe UI Symbol", 'Twemoji', 'Noto Color Emoji', 'Noto Sans CJK KR'; }
+.pdf .code { font-family: Source Code Pro, "SFMono-Regular", Menlo, Consolas, "PT Mono", "Liberation Mono", Courier, monospace, 'Twemoji', 'Noto Color Emoji', 'Noto Sans Mono CJK JP'; }
+.pdf:lang(zh-CN) .code { font-family: Source Code Pro, "SFMono-Regular", Menlo, Consolas, "PT Mono", "Liberation Mono", Courier, monospace, 'Twemoji', 'Noto Color Emoji', 'Noto Sans Mono CJK SC'; }
+.pdf:lang(zh-TW) .code { font-family: Source Code Pro, "SFMono-Regular", Menlo, Consolas, "PT Mono", "Liberation Mono", Courier, monospace, 'Twemoji', 'Noto Color Emoji', 'Noto Sans Mono CJK TC'; }
+.pdf:lang(ko-KR) .code { font-family: Source Code Pro, "SFMono-Regular", Menlo, Consolas, "PT Mono", "Liberation Mono", Courier, monospace, 'Twemoji', 'Noto Color Emoji', 'Noto Sans Mono CJK KR'; }
+.pdf .serif { font-family: PT Serif, Lyon-Text, Georgia, ui-serif, serif, 'Twemoji', 'Noto Color Emoji', 'Noto Serif CJK JP'; }
+.pdf:lang(zh-CN) .serif { font-family: PT Serif, Lyon-Text, Georgia, ui-serif, serif, 'Twemoji', 'Noto Color Emoji', 'Noto Serif CJK SC'; }
+.pdf:lang(zh-TW) .serif { font-family: PT Serif, Lyon-Text, Georgia, ui-serif, serif, 'Twemoji', 'Noto Color Emoji', 'Noto Serif CJK TC'; }
+.pdf:lang(ko-KR) .serif { font-family: PT Serif, Lyon-Text, Georgia, ui-serif, serif, 'Twemoji', 'Noto Color Emoji', 'Noto Serif CJK KR'; }
+.pdf .mono { font-family: PT Mono, iawriter-mono, Nitti, Menlo, Courier, monospace, 'Twemoji', 'Noto Color Emoji', 'Noto Sans Mono CJK JP'; }
+.pdf:lang(zh-CN) .mono { font-family: PT Mono, iawriter-mono, Nitti, Menlo, Courier, monospace, 'Twemoji', 'Noto Color Emoji', 'Noto Sans Mono CJK SC'; }
+.pdf:lang(zh-TW) .mono { font-family: PT Mono, iawriter-mono, Nitti, Menlo, Courier, monospace, 'Twemoji', 'Noto Color Emoji', 'Noto Sans Mono CJK TC'; }
+.pdf:lang(ko-KR) .mono { font-family: PT Mono, iawriter-mono, Nitti, Menlo, Courier, monospace, 'Twemoji', 'Noto Color Emoji', 'Noto Sans Mono CJK KR'; }
+.highlight-default {
+	color: rgba(44, 44, 43, 1);
+}
+.highlight-gray {
+	color: rgba(125, 122, 117, 1);
+	fill: rgba(125, 122, 117, 1);
+}
+.highlight-brown {
+	color: rgba(159, 118, 90, 1);
+	fill: rgba(159, 118, 90, 1);
+}
+.highlight-orange {
+	color: rgba(210, 123, 45, 1);
+	fill: rgba(210, 123, 45, 1);
+}
+.highlight-yellow {
+	color: rgba(203, 148, 52, 1);
+	fill: rgba(203, 148, 52, 1);
+}
+.highlight-teal {
+	color: rgba(80, 148, 110, 1);
+	fill: rgba(80, 148, 110, 1);
+}
+.highlight-blue {
+	color: rgba(56, 125, 201, 1);
+	fill: rgba(56, 125, 201, 1);
+}
+.highlight-purple {
+	color: rgba(154, 107, 180, 1);
+	fill: rgba(154, 107, 180, 1);
+}
+.highlight-pink {
+	color: rgba(193, 76, 138, 1);
+	fill: rgba(193, 76, 138, 1);
+}
+.highlight-red {
+	color: rgba(207, 81, 72, 1);
+	fill: rgba(207, 81, 72, 1);
+}
+.highlight-default_background {
+	color: rgba(44, 44, 43, 1);
+}
+.highlight-gray_background {
+	background: rgba(42, 28, 0, 0.07);
+}
+.highlight-brown_background {
+	background: rgba(139, 46, 0, 0.086);
+}
+.highlight-orange_background {
+	background: rgba(224, 101, 1, 0.129);
+}
+.highlight-yellow_background {
+	background: rgba(211, 168, 0, 0.137);
+}
+.highlight-teal_background {
+	background: rgba(0, 100, 45, 0.09);
+}
+.highlight-blue_background {
+	background: rgba(0, 124, 215, 0.094);
+}
+.highlight-purple_background {
+	background: rgba(102, 0, 178, 0.078);
+}
+.highlight-pink_background {
+	background: rgba(197, 0, 93, 0.086);
+}
+.highlight-red_background {
+	background: rgba(223, 22, 0, 0.094);
+}
+.block-color-default {
+	color: inherit;
+	fill: inherit;
+}
+.block-color-gray {
+	color: rgba(125, 122, 117, 1);
+	fill: rgba(125, 122, 117, 1);
+}
+.block-color-brown {
+	color: rgba(159, 118, 90, 1);
+	fill: rgba(159, 118, 90, 1);
+}
+.block-color-orange {
+	color: rgba(210, 123, 45, 1);
+	fill: rgba(210, 123, 45, 1);
+}
+.block-color-yellow {
+	color: rgba(203, 148, 52, 1);
+	fill: rgba(203, 148, 52, 1);
+}
+.block-color-teal {
+	color: rgba(80, 148, 110, 1);
+	fill: rgba(80, 148, 110, 1);
+}
+.block-color-blue {
+	color: rgba(56, 125, 201, 1);
+	fill: rgba(56, 125, 201, 1);
+}
+.block-color-purple {
+	color: rgba(154, 107, 180, 1);
+	fill: rgba(154, 107, 180, 1);
+}
+.block-color-pink {
+	color: rgba(193, 76, 138, 1);
+	fill: rgba(193, 76, 138, 1);
+}
+.block-color-red {
+	color: rgba(207, 81, 72, 1);
+	fill: rgba(207, 81, 72, 1);
+}
+.block-color-default_background {
+	color: inherit;
+	fill: inherit;
+}
+.block-color-gray_background {
+	background: rgba(240, 239, 237, 1);
+}
+.block-color-brown_background {
+	background: rgba(245, 237, 233, 1);
+}
+.block-color-orange_background {
+	background: rgba(251, 235, 222, 1);
+}
+.block-color-yellow_background {
+	background: rgba(249, 243, 220, 1);
+}
+.block-color-teal_background {
+	background: rgba(232, 241, 236, 1);
+}
+.block-color-blue_background {
+	background: rgba(229, 242, 252, 1);
+}
+.block-color-purple_background {
+	background: rgba(243, 235, 249, 1);
+}
+.block-color-pink_background {
+	background: rgba(250, 233, 241, 1);
+}
+.block-color-red_background {
+	background: rgba(252, 233, 231, 1);
+}
+.select-value-color-default { background-color: rgba(42, 28, 0, 0.07); }
+.select-value-color-gray { background-color: rgba(28, 19, 1, 0.11); }
+.select-value-color-brown { background-color: rgba(127, 51, 0, 0.156); }
+.select-value-color-orange { background-color: rgba(196, 88, 0, 0.203); }
+.select-value-color-yellow { background-color: rgba(209, 156, 0, 0.282); }
+.select-value-color-green { background-color: rgba(0, 96, 38, 0.156); }
+.select-value-color-blue { background-color: rgba(0, 118, 217, 0.203); }
+.select-value-color-purple { background-color: rgba(92, 0, 163, 0.141); }
+.select-value-color-pink { background-color: rgba(183, 0, 78, 0.152); }
+.select-value-color-red { background-color: rgba(206, 24, 0, 0.164); }
+
+.checkbox {
+	display: inline-flex;
+	vertical-align: text-bottom;
+	width: 16;
+	height: 16;
+	background-size: 16px;
+	margin-left: 2px;
+	margin-right: 5px;
+}
+
+.checkbox-on {
+	background-image: url("data:image/svg+xml;charset=UTF-8,%3Csvg%20width%3D%2216%22%20height%3D%2216%22%20viewBox%3D%220%200%2016%2016%22%20fill%3D%22none%22%20xmlns%3D%22http%3A%2F%2Fwww.w3.org%2F2000%2Fsvg%22%3E%0A%3Crect%20width%3D%2216%22%20height%3D%2216%22%20fill%3D%22%2358A9D7%22%2F%3E%0A%3Cpath%20d%3D%22M6.71429%2012.2852L14%204.9995L12.7143%203.71436L6.71429%209.71378L3.28571%206.2831L2%207.57092L6.71429%2012.2852Z%22%20fill%3D%22white%22%2F%3E%0A%3C%2Fsvg%3E");
+}
+
+.checkbox-off {
+	background-image: url("data:image/svg+xml;charset=UTF-8,%3Csvg%20width%3D%2216%22%20height%3D%2216%22%20viewBox%3D%220%200%2016%2016%22%20fill%3D%22none%22%20xmlns%3D%22http%3A%2F%2Fwww.w3.org%2F2000%2Fsvg%22%3E%0A%3Crect%20x%3D%220.75%22%20y%3D%220.75%22%20width%3D%2214.5%22%20height%3D%2214.5%22%20fill%3D%22white%22%20stroke%3D%22%2336352F%22%20stroke-width%3D%221.5%22%2F%3E%0A%3C%2Fsvg%3E");
+}
+	
+</style></head><body><article id="1e885df0-1907-80fd-9dfc-dc1850b17650" class="page sans"><header><h1 class="page-title" dir="auto">⚖️ <strong>Enterprise Risk Management (ERM) Framework</strong></h1><p class="page-description" dir="auto"></p><table class="properties"><tbody><tr class="property-row property-row-person"><th><span class="icon property-icon"><img src="https://www.notion.so/icons/friends_gray.svg" style="width:14px;height:14px;display:block"/></span>Owner</th><td><span class="user"><span class="icon text-icon user-icon"><span class="user-icon-inner">A</span></span>Aubert</span></td></tr><tr class="property-row property-row-multi_select"><th><span class="icon property-icon"><img src="https://www.notion.so/icons/list_gray.svg" style="width:14px;height:14px;display:block"/></span>Tags</th><td></td></tr></tbody></table></header><div class="page-body"><div style="display:contents" dir="auto"><h3 id="1e885df0-1907-80b4-badc-e6fbfff8455d" class="">1. <strong>Introduction</strong></h3></div><div style="display:contents" dir="auto"><p id="1e885df0-1907-803d-8954-e1a9b6b9aa1e" class="">The <strong>Enterprise Risk Management (ERM) Framework</strong> at <strong>Nzila Ventures</strong> is designed to proactively manage risks that may affect our ability to achieve business objectives, create value, and safeguard our assets. The framework takes a holistic approach, integrating risk management into the strategic planning process, operational decision-making, and daily activities across all business units.</p></div><div style="display:contents" dir="auto"><p id="1e885df0-1907-80fd-aa58-f8952e4ed360" class="">As <strong>Nzila Ventures</strong> grows globally in the <strong>healthtech</strong>, <strong>AI</strong>, and <strong>EdTech</strong> sectors, this framework will enable the company to navigate risks effectively and ensure business resilience in an increasingly dynamic environment.</p></div><div style="display:contents" dir="auto"><hr id="1e885df0-1907-8090-a8a6-c46d0ab27a5e"/></div><div style="display:contents" dir="auto"><h3 id="1e885df0-1907-80dd-baf5-d02ee56afcb3" class="">2. <strong>Core Objectives of the ERM Framework</strong></h3></div><div style="display:contents" dir="auto"><ul id="1e885df0-1907-805e-8aa4-f0c7f169738a" class="bulleted-list"><li style="list-style-type:disc"><strong>Risk Identification</strong>:<div style="display:contents" dir="auto"><p id="1e885df0-1907-80ce-91d0-e719c1a5ef9e" class="">Identify all potential risks—strategic, operational, financial, compliance-related, and reputational—that could affect Nzila Ventures.</p></div></li></ul></div><div style="display:contents" dir="auto"><ul id="1e885df0-1907-808e-bd34-d4744afd177a" class="bulleted-list"><li style="list-style-type:disc"><strong>Risk Assessment and Evaluation</strong>:<div style="display:contents" dir="auto"><p id="1e885df0-1907-80c1-9597-d7a72c67ba81" class="">Assess the likelihood and impact of identified risks, prioritizing them based on their potential to disrupt key business functions.</p></div></li></ul></div><div style="display:contents" dir="auto"><ul id="1e885df0-1907-806c-b915-ea35f2dbc410" class="bulleted-list"><li style="list-style-type:disc"><strong>Risk Mitigation</strong>:<div style="display:contents" dir="auto"><p id="1e885df0-1907-806d-a6ef-c5d3ab84c0d8" class="">Develop and implement strategies to mitigate high-priority risks, including risk avoidance, reduction, transfer, or acceptance.</p></div></li></ul></div><div style="display:contents" dir="auto"><ul id="1e885df0-1907-8093-ae12-cbe4bf43597c" class="bulleted-list"><li style="list-style-type:disc"><strong>Continuous Monitoring and Review</strong>:<div style="display:contents" dir="auto"><p id="1e885df0-1907-80f9-955d-c5568be2312e" class="">Monitor risk exposure on an ongoing basis, adjusting mitigation strategies as necessary and ensuring alignment with evolving business goals.</p></div></li></ul></div><div style="display:contents" dir="auto"><ul id="1e885df0-1907-802a-b954-f3ab8ca3bacd" class="bulleted-list"><li style="list-style-type:disc"><strong>Stakeholder Communication</strong>:<div style="display:contents" dir="auto"><p id="1e885df0-1907-8068-a1a1-d8f3b1f3f77f" class="">Ensure timely and transparent communication of risks and mitigation strategies to key stakeholders, including employees, investors, and partners.</p></div></li></ul></div><div style="display:contents" dir="auto"><hr id="1e885df0-1907-80f0-b94d-e7198cb28633"/></div><div style="display:contents" dir="auto"><h3 id="1e885df0-1907-80f1-a06a-cb0d3a00a2b9" class="">3. <strong>Risk Management Process</strong></h3></div><div style="display:contents" dir="auto"><p id="1e885df0-1907-80c3-86ee-c585c3b4b539" class="">The <strong>ERM process</strong> at Nzila Ventures consists of six key steps, which are designed to integrate risk management into every aspect of decision-making.</p></div><div style="display:contents" dir="auto"><h3 id="1e885df0-1907-80a4-a4e3-c4284483c7e2" class="">A. <strong>Risk Identification</strong></h3></div><div style="display:contents" dir="auto"><ol type="1" id="1e885df0-1907-8056-8ab9-c9f8c75563c9" class="numbered-list" start="1"><li><strong>Strategic Risks</strong>:<div style="display:contents" dir="auto"><p id="1e885df0-1907-80a5-bfc5-d60467965abb" class="">Risks that affect the company&#x27;s long-term objectives, such as market entry challenges, changes in regulatory landscapes, and technological advancements.</p></div></li></ol></div><div style="display:contents" dir="auto"><ol type="1" id="1e885df0-1907-8078-bfe3-d2fb865f3ad3" class="numbered-list" start="2"><li><strong>Operational Risks</strong>:<div style="display:contents" dir="auto"><p id="1e885df0-1907-80dd-bd20-c2faf70875aa" class="">Risks associated with internal processes, systems, and human resources. These include supply chain disruptions, IT system failures, and workforce capability gaps.</p></div></li></ol></div><div style="display:contents" dir="auto"><ol type="1" id="1e885df0-1907-80dd-815e-d81b3842a7ad" class="numbered-list" start="3"><li><strong>Financial Risks</strong>:<div style="display:contents" dir="auto"><p id="1e885df0-1907-8026-95b2-e910350a90b4" class="">Risks related to the financial stability of the company, such as liquidity risks, credit risks, market volatility, and risks associated with fundraising efforts.</p></div></li></ol></div><div style="display:contents" dir="auto"><ol type="1" id="1e885df0-1907-8083-b185-dcb7f909e3d3" class="numbered-list" start="4"><li><strong>Compliance and Legal Risks</strong>:<div style="display:contents" dir="auto"><p id="1e885df0-1907-80a6-9df9-fdc96f95d3cc" class="">Risks stemming from non-compliance with local and international regulations, intellectual property disputes, data privacy violations (e.g., GDPR, HIPAA), and contractual breaches.</p></div></li></ol></div><div style="display:contents" dir="auto"><ol type="1" id="1e885df0-1907-8037-a9a6-e6166152e667" class="numbered-list" start="5"><li><strong>Reputational Risks</strong>:<div style="display:contents" dir="auto"><p id="1e885df0-1907-802a-8744-f16f3ae481b2" class="">Risks related to the company’s public image and brand reputation, including negative media coverage, customer dissatisfaction, and public relations missteps.</p></div></li></ol></div><div style="display:contents" dir="auto"><h3 id="1e885df0-1907-807e-bd1b-dfddf6679458" class="">B. <strong>Risk Assessment and Evaluation</strong></h3></div><div style="display:contents" dir="auto"><ol type="1" id="1e885df0-1907-809b-a849-f8caab7c666f" class="numbered-list" start="1"><li><strong>Likelihood and Impact</strong>:<div style="display:contents" dir="auto"><p id="1e885df0-1907-808d-8219-cc4708f6177d" class="">Assess each identified risk on two axes:</p></div><div style="display:contents" dir="auto"><ul id="1e885df0-1907-80ed-9b36-e5cd8bbeb87d" class="bulleted-list"><li style="list-style-type:disc"><strong>Likelihood</strong>: The probability of the risk event occurring.</li></ul></div><div style="display:contents" dir="auto"><ul id="1e885df0-1907-80f8-bfe3-eb22e16fed1d" class="bulleted-list"><li style="list-style-type:disc"><strong>Impact</strong>: The severity of consequences if the risk occurs.</li></ul></div></li></ol></div><div style="display:contents" dir="auto"><ol type="1" id="1e885df0-1907-8001-b5dd-ef56f9134baa" class="numbered-list" start="2"><li><strong>Risk Matrix</strong>:<div style="display:contents" dir="auto"><p id="1e885df0-1907-805b-8b6e-f74014ced5c2" class="">Categorize risks in a matrix, prioritizing them based on their likelihood and impact.</p></div><div style="display:contents" dir="ltr"><table id="1e885df0-1907-8012-a27a-ca5f892da156" class="simple-table"><tbody><div style="display:contents" dir="ltr"><tr id="1e885df0-1907-80a2-9ffc-c5938f735819"><td id="uo{@" class=""><strong>Impact →</strong></td><td id="I^SB" class=""><strong>Low</strong></td><td id="Yiab" class=""><strong>Medium</strong></td><td id="qjhl" class=""><strong>High</strong></td></tr></div><div style="display:contents" dir="ltr"><tr id="1e885df0-1907-8073-b2f7-faad7ccd54c7"><td id="uo{@" class=""><strong>Likelihood ↓</strong></td><td id="I^SB" class=""></td><td id="Yiab" class=""></td><td id="qjhl" class=""></td></tr></div><div style="display:contents" dir="ltr"><tr id="1e885df0-1907-80ee-9be9-c77080526c95"><td id="uo{@" class=""><strong>Low</strong></td><td id="I^SB" class="">Low Risk</td><td id="Yiab" class="">Moderate Risk</td><td id="qjhl" class="">High Risk</td></tr></div><div style="display:contents" dir="ltr"><tr id="1e885df0-1907-80e2-9fac-fdc862f515a9"><td id="uo{@" class=""><strong>Medium</strong></td><td id="I^SB" class="">Moderate Risk</td><td id="Yiab" class="">High Risk</td><td id="qjhl" class="">Critical Risk</td></tr></div><div style="display:contents" dir="ltr"><tr id="1e885df0-1907-80ba-85d0-c5ea2d95da09"><td id="uo{@" class=""><strong>High</strong></td><td id="I^SB" class="">High Risk</td><td id="Yiab" class="">Critical Risk</td><td id="qjhl" class="">Extreme Risk</td></tr></div></tbody></table></div></li></ol></div><div style="display:contents" dir="auto"><ol type="1" id="1e885df0-1907-8058-bd57-c8accc606863" class="numbered-list" start="3"><li><strong>Risk Rating</strong>:<div style="display:contents" dir="auto"><p id="1e885df0-1907-80b4-a235-da978fe8ceaa" class="">Assign a risk rating (e.g., <strong>Low</strong>, <strong>Medium</strong>, <strong>High</strong>, <strong>Critical</strong>) to prioritize risk responses and mitigation plans.</p></div></li></ol></div><div style="display:contents" dir="auto"><h3 id="1e885df0-1907-80c7-a557-e9a5e031d1a8" class="">C. <strong>Risk Mitigation Strategies</strong></h3></div><div style="display:contents" dir="auto"><ol type="1" id="1e885df0-1907-8034-9d7e-d9734305de57" class="numbered-list" start="1"><li><strong>Risk Avoidance</strong>:<div style="display:contents" dir="auto"><p id="1e885df0-1907-8078-8206-f0881728780a" class="">Eliminate the risk entirely by changing business plans, strategies, or processes. For example, ceasing operations in high-risk regions.</p></div></li></ol></div><div style="display:contents" dir="auto"><ol type="1" id="1e885df0-1907-805d-9c22-f29b4f270071" class="numbered-list" start="2"><li><strong>Risk Reduction</strong>:<div style="display:contents" dir="auto"><p id="1e885df0-1907-80d1-bf24-e91b2c51f0e4" class="">Implement measures to reduce the likelihood or impact of the risk. For example, adopting advanced cybersecurity measures to mitigate IT system failures or data breaches.</p></div></li></ol></div><div style="display:contents" dir="auto"><ol type="1" id="1e885df0-1907-80bc-90a9-cd3c33d5f851" class="numbered-list" start="3"><li><strong>Risk Transfer</strong>:<div style="display:contents" dir="auto"><p id="1e885df0-1907-8033-b1d0-dbaa6021b0d5" class="">Transfer the risk to another party, such as through insurance, outsourcing, or strategic partnerships.</p></div></li></ol></div><div style="display:contents" dir="auto"><ol type="1" id="1e885df0-1907-8067-83ce-fd8bce2ea77d" class="numbered-list" start="4"><li><strong>Risk Acceptance</strong>:<div style="display:contents" dir="auto"><p id="1e885df0-1907-80ba-96bc-e7ea3bc8d068" class="">Accept the risk when its impact is minimal or its mitigation cost outweighs the potential damage. For example, accepting minor reputational risks from social media feedback.</p></div></li></ol></div><div style="display:contents" dir="auto"><h3 id="1e885df0-1907-80ea-8b17-d20924522384" class="">D. <strong>Risk Monitoring and Review</strong></h3></div><div style="display:contents" dir="auto"><ol type="1" id="1e885df0-1907-800a-bb13-dd716ec970b0" class="numbered-list" start="1"><li><strong>Risk Dashboard</strong>:<div style="display:contents" dir="auto"><p id="1e885df0-1907-80e5-b1dd-e09421649f4a" class="">Develop a <strong>real-time risk dashboard</strong> that tracks identified risks, their status, and any changes in the risk profile. The dashboard should be reviewed regularly by leadership teams.</p></div></li></ol></div><div style="display:contents" dir="auto"><ol type="1" id="1e885df0-1907-8039-ab05-de1898813b75" class="numbered-list" start="2"><li><strong>Quarterly Risk Review</strong>:<div style="display:contents" dir="auto"><p id="1e885df0-1907-80ee-a034-ccc57554a91e" class="">Conduct <strong>quarterly risk assessments</strong> to reassess identified risks and determine the effectiveness of mitigation strategies.</p></div></li></ol></div><div style="display:contents" dir="auto"><ol type="1" id="1e885df0-1907-80f5-8198-cc096294687c" class="numbered-list" start="3"><li><strong>Key Risk Indicators (KRIs)</strong>:<div style="display:contents" dir="auto"><p id="1e885df0-1907-801c-b9c1-c6fe6e5520cb" class="">Establish <strong>KRIs</strong> to proactively monitor emerging risks. These indicators should be aligned with key business metrics (e.g., revenue targets, customer acquisition rates, regulatory compliance).</p></div></li></ol></div><div style="display:contents" dir="auto"><h3 id="1e885df0-1907-80f3-adc2-d921bb7962b1" class="">E. <strong>Stakeholder Communication</strong></h3></div><div style="display:contents" dir="auto"><ol type="1" id="1e885df0-1907-806e-83ab-d656f753d20d" class="numbered-list" start="1"><li><strong>Internal Communication</strong>:<div style="display:contents" dir="auto"><p id="1e885df0-1907-8047-bdbc-c471b4d485f5" class="">Regularly update internal stakeholders on key risks, mitigation efforts, and any potential impact on operations or strategic goals.</p></div></li></ol></div><div style="display:contents" dir="auto"><ol type="1" id="1e885df0-1907-807a-aa03-c0a1e11180e6" class="numbered-list" start="2"><li><strong>External Communication</strong>:<div style="display:contents" dir="auto"><p id="1e885df0-1907-8001-a0db-fc0fc3e862dc" class="">Communicate with investors, regulatory bodies, and key partners on critical risks and mitigation strategies, ensuring transparency and trust.</p></div></li></ol></div><div style="display:contents" dir="auto"><ol type="1" id="1e885df0-1907-80ee-9ad5-d8a63e82dff3" class="numbered-list" start="3"><li><strong>Crisis Communication Plan</strong>:<div style="display:contents" dir="auto"><p id="1e885df0-1907-808b-a215-d758e572e5a5" class="">Develop a <strong>crisis communication plan</strong> to be used in the event of a significant risk materializing. This plan should include predefined messaging and designated spokespersons.</p></div></li></ol></div><div style="display:contents" dir="auto"><hr id="1e885df0-1907-804c-9fb6-d71a30892da8"/></div><div style="display:contents" dir="auto"><h3 id="1e885df0-1907-8099-a977-f9b5dd04f763" class="">4. <strong>Risk Management Governance</strong></h3></div><div style="display:contents" dir="auto"><h3 id="1e885df0-1907-80a1-a207-ee006e606182" class="">A. <strong>Risk Management Committee</strong></h3></div><div style="display:contents" dir="auto"><ol type="1" id="1e885df0-1907-8039-ab05-c60738f0c990" class="numbered-list" start="1"><li><strong>Role</strong>:<div style="display:contents" dir="auto"><p id="1e885df0-1907-8089-addd-eb3d30c07f40" class="">The <strong>Risk Management Committee</strong> (RMC) will oversee the implementation of the ERM framework, evaluate risk exposures, and provide strategic guidance on risk mitigation.</p></div></li></ol></div><div style="display:contents" dir="auto"><ol type="1" id="1e885df0-1907-8040-82f7-d098bb155e0d" class="numbered-list" start="2"><li><strong>Composition</strong>:<div style="display:contents" dir="auto"><p id="1e885df0-1907-80c1-9c8a-ca0a8e0d142b" class="">The RMC should include representatives from key departments, such as:</p></div><div style="display:contents" dir="auto"><ul id="1e885df0-1907-80c0-b907-c8737cff980b" class="bulleted-list"><li style="list-style-type:disc">Executive leadership (CEO, CFO, CTO)</li></ul></div><div style="display:contents" dir="auto"><ul id="1e885df0-1907-80c3-9cbf-cdd518cad884" class="bulleted-list"><li style="list-style-type:disc">HR, Legal, and Compliance Teams</li></ul></div><div style="display:contents" dir="auto"><ul id="1e885df0-1907-802d-8f54-fc5df9b7aff1" class="bulleted-list"><li style="list-style-type:disc">Product and R&amp;D Teams</li></ul></div><div style="display:contents" dir="auto"><ul id="1e885df0-1907-8069-8367-d72aaa2ab645" class="bulleted-list"><li style="list-style-type:disc">IT and Security Teams</li></ul></div></li></ol></div><div style="display:contents" dir="auto"><h3 id="1e885df0-1907-8086-9d83-f1cf168ef4ad" class="">B. <strong>Responsibilities</strong></h3></div><div style="display:contents" dir="auto"><ol type="1" id="1e885df0-1907-801b-a340-edf49eb7232f" class="numbered-list" start="1"><li><strong>Risk Identification and Evaluation</strong>:<div style="display:contents" dir="auto"><p id="1e885df0-1907-80be-9574-e3ee1d85f046" class="">The RMC will ensure that all significant risks are identified and assessed across the organization.</p></div></li></ol></div><div style="display:contents" dir="auto"><ol type="1" id="1e885df0-1907-804e-aa84-e48ac81f5aab" class="numbered-list" start="2"><li><strong>Mitigation Strategy Approval</strong>:<div style="display:contents" dir="auto"><p id="1e885df0-1907-8061-85c4-c79fbc01d844" class="">The committee will review and approve risk mitigation strategies, ensuring alignment with Nzila’s business objectives.</p></div></li></ol></div><div style="display:contents" dir="auto"><ol type="1" id="1e885df0-1907-802c-87c2-d7adff020c64" class="numbered-list" start="3"><li><strong>Annual ERM Review</strong>:<div style="display:contents" dir="auto"><p id="1e885df0-1907-8056-8995-d289f24b1c88" class="">The RMC will conduct an <strong>annual review</strong> of the ERM framework to ensure it remains effective and aligned with Nzila Ventures&#x27; evolving goals.</p></div></li></ol></div><div style="display:contents" dir="auto"><hr id="1e885df0-1907-80e8-ad56-cbb11edaddca"/></div><div style="display:contents" dir="auto"><h3 id="1e885df0-1907-80aa-b177-f710f0f94c0e" class="">5. <strong>ERM Framework Tools and Resources</strong></h3></div><div style="display:contents" dir="auto"><ol type="1" id="1e885df0-1907-8058-8e78-f7efb23433fb" class="numbered-list" start="1"><li><strong>Risk Register</strong>:<div style="display:contents" dir="auto"><p id="1e885df0-1907-80dd-96b2-f0395c623927" class="">Maintain a comprehensive <strong>risk register</strong> that logs identified risks, their assessment, mitigation plans, and current status.</p></div></li></ol></div><div style="display:contents" dir="auto"><ol type="1" id="1e885df0-1907-809c-8a77-d59ad4949a7c" class="numbered-list" start="2"><li><strong>Risk Management Software</strong>:<div style="display:contents" dir="auto"><p id="1e885df0-1907-80e0-9852-ee774ed185ff" class="">Use <strong>risk management software</strong> or enterprise platforms (e.g., <strong>HALO ITSM</strong>, <strong>RiskWatch</strong>) to monitor and report risks in real-time.</p></div></li></ol></div><div style="display:contents" dir="auto"><ol type="1" id="1e885df0-1907-80ad-ad6d-e0f164d61c2a" class="numbered-list" start="3"><li><strong>Training and Awareness</strong>:<div style="display:contents" dir="auto"><p id="1e885df0-1907-807b-918c-f8b7cad3f9c5" class="">Conduct <strong>annual risk management training</strong> for all employees to raise awareness of key risks and the importance of proactive risk management.</p></div></li></ol></div><div style="display:contents" dir="auto"><hr id="1e885df0-1907-8076-ac25-c328f1e51da6"/></div><div style="display:contents" dir="auto"><h3 id="1e885df0-1907-80e3-9275-cd5ca1c6c077" class="">6. <strong>Key Risk Categories and Examples</strong></h3></div><div style="display:contents" dir="auto"><h3 id="1e885df0-1907-80a8-908c-de6f10977f3f" class="">A. <strong>Strategic Risks</strong></h3></div><div style="display:contents" dir="auto"><ul id="1e885df0-1907-80c6-837b-ed487e722988" class="bulleted-list"><li style="list-style-type:disc"><strong>Market Competition</strong>:<div style="display:contents" dir="auto"><p id="1e885df0-1907-80f1-9e84-e3ca02d69ca1" class="">Intense competition in the <strong>AI healthtech</strong> space could threaten market share.</p></div></li></ul></div><div style="display:contents" dir="auto"><ul id="1e885df0-1907-807a-ab3f-e23baeddfc45" class="bulleted-list"><li style="list-style-type:disc"><strong>Product Adoption</strong>:<div style="display:contents" dir="auto"><p id="1e885df0-1907-80df-b20c-f2eb6e651826" class="">The failure of key products like <strong>Memora</strong> or <strong>OptivaCare</strong> to achieve market adoption.</p></div></li></ul></div><div style="display:contents" dir="auto"><h3 id="1e885df0-1907-802d-8e7a-cccfeb77e198" class="">B. <strong>Operational Risks</strong></h3></div><div style="display:contents" dir="auto"><ul id="1e885df0-1907-8092-b0cc-fa970705ace6" class="bulleted-list"><li style="list-style-type:disc"><strong>Data Breach</strong>:<div style="display:contents" dir="auto"><p id="1e885df0-1907-8083-95f5-f01f157caf94" class="">A breach in <strong>data security</strong> could lead to a loss of customer trust and regulatory fines.</p></div></li></ul></div><div style="display:contents" dir="auto"><ul id="1e885df0-1907-80f7-a0b1-d03a0becd054" class="bulleted-list"><li style="list-style-type:disc"><strong>Technology Failures</strong>:<div style="display:contents" dir="auto"><p id="1e885df0-1907-8014-8acf-c4c4a9c0162d" class="">Critical failures in cloud infrastructure or AI models could disrupt services.</p></div></li></ul></div><div style="display:contents" dir="auto"><h3 id="1e885df0-1907-80cf-95b2-ce4bcc6c595e" class="">C. <strong>Financial Risks</strong></h3></div><div style="display:contents" dir="auto"><ul id="1e885df0-1907-80f5-ab14-f159e493f03d" class="bulleted-list"><li style="list-style-type:disc"><strong>Cash Flow Shortages</strong>:<div style="display:contents" dir="auto"><p id="1e885df0-1907-8039-9d88-e78735343cab" class="">Insufficient cash flow to cover operational expenses during global expansion.</p></div></li></ul></div><div style="display:contents" dir="auto"><ul id="1e885df0-1907-8098-bca2-d50a457a20d3" class="bulleted-list"><li style="list-style-type:disc"><strong>Funding Risks</strong>:<div style="display:contents" dir="auto"><p id="1e885df0-1907-8049-aa13-d09ed684fada" class="">Difficulty in securing follow-up investment or facing a challenging fundraising environment.</p></div></li></ul></div><div style="display:contents" dir="auto"><h3 id="1e885df0-1907-806e-9f85-c9fd689c2496" class="">D. <strong>Compliance Risks</strong></h3></div><div style="display:contents" dir="auto"><ul id="1e885df0-1907-8084-a11c-e41ebe4fefbc" class="bulleted-list"><li style="list-style-type:disc"><strong>Regulatory Changes</strong>:<div style="display:contents" dir="auto"><p id="1e885df0-1907-80c5-b665-f7ef88b2e686" class="">Changes in <strong>healthcare regulations</strong> (e.g., <strong>HIPAA</strong>, <strong>GDPR</strong>) could create compliance challenges.</p></div></li></ul></div><div style="display:contents" dir="auto"><ul id="1e885df0-1907-8029-965d-f478a48a8da3" class="bulleted-list"><li style="list-style-type:disc"><strong>Intellectual Property</strong>:<div style="display:contents" dir="auto"><p id="1e885df0-1907-8015-9ca2-d8f70927aed5" class="">Potential disputes over <strong>intellectual property</strong> rights for AI models and healthcare tools.</p></div></li></ul></div><div style="display:contents" dir="auto"><h3 id="1e885df0-1907-80c6-8bf4-c16018d2c6a4" class="">E. <strong>Reputational Risks</strong></h3></div><div style="display:contents" dir="auto"><ul id="1e885df0-1907-800d-b6d0-d3b14e588b81" class="bulleted-list"><li style="list-style-type:disc"><strong>Customer Dissatisfaction</strong>:<div style="display:contents" dir="auto"><p id="1e885df0-1907-8064-a067-cad1da4e364d" class="">Negative feedback or <strong>public relations issues</strong> related to product performance.</p></div></li></ul></div><div style="display:contents" dir="auto"><hr id="1e885df0-1907-80ba-815d-e853777efc07"/></div><div style="display:contents" dir="auto"><h3 id="1e885df0-1907-800c-a4bc-e769ab574dc9" class="">7. <strong>Conclusion</strong></h3></div><div style="display:contents" dir="auto"><p id="1e885df0-1907-80d6-b643-fe482fc22f85" class="">The <strong>Enterprise Risk Management (ERM) Framework</strong> for <strong>Nzila Ventures</strong> ensures that we proactively manage risks and are prepared to address potential challenges as we scale. By implementing this framework, we aim to safeguard <strong>Nzila Ventures’ reputation</strong>, ensure business continuity, and create a resilient environment that can withstand both expected and unforeseen risks.</p></div></div></article><span class="sans" style="font-size:14px;padding-top:2em"></span></body></html>

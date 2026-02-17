@@ -1,0 +1,713 @@
+<html><head><meta http-equiv="Content-Type" content="text/html; charset=utf-8"/><title>📝 IRB / Research Ethics Planning Template</title><style>
+/* cspell:disable-file */
+/* webkit printing magic: print all background colors */
+html {
+	-webkit-print-color-adjust: exact;
+}
+* {
+	box-sizing: border-box;
+	-webkit-print-color-adjust: exact;
+}
+
+html,
+body {
+	margin: 0;
+	padding: 0;
+}
+@media only screen {
+	body {
+		margin: 2em auto;
+		max-width: 900px;
+		color: rgb(55, 53, 47);
+	}
+}
+
+body {
+	line-height: 1.5;
+	white-space: pre-wrap;
+}
+
+a,
+a.visited {
+	color: inherit;
+	text-decoration: underline;
+}
+
+.pdf-relative-link-path {
+	font-size: 80%;
+	color: #444;
+}
+
+h1,
+h2,
+h3 {
+	letter-spacing: -0.01em;
+	line-height: 1.2;
+	font-weight: 600;
+	margin-bottom: 0;
+}
+
+/* Override strong tags inside headings to maintain consistent weight */
+h1 strong,
+h2 strong,
+h3 strong {
+	font-weight: 600;
+}
+
+.page-title {
+	font-size: 2.5rem;
+	font-weight: 700;
+	margin-top: 0;
+	margin-bottom: 0.75em;
+}
+
+h1 {
+	font-size: 1.875rem;
+	margin-top: 1.875rem;
+}
+
+h2 {
+	font-size: 1.5rem;
+	margin-top: 1.5rem;
+}
+
+h3 {
+	font-size: 1.25rem;
+	margin-top: 1.25rem;
+}
+
+.source {
+	border: 1px solid #ddd;
+	border-radius: 3px;
+	padding: 1.5em;
+	word-break: break-all;
+}
+
+.callout {
+	border-radius: 10px;
+	padding: 1rem;
+}
+
+figure {
+	margin: 1.25em 0;
+	page-break-inside: avoid;
+}
+
+figcaption {
+	opacity: 0.5;
+	font-size: 85%;
+	margin-top: 0.5em;
+}
+
+mark {
+	background-color: transparent;
+}
+
+.indented {
+	padding-left: 1.5em;
+}
+
+hr {
+	background: transparent;
+	display: block;
+	width: 100%;
+	height: 1px;
+	visibility: visible;
+	border: none;
+	border-bottom: 1px solid rgba(55, 53, 47, 0.09);
+}
+
+img {
+	max-width: 100%;
+}
+
+@media only print {
+	img {
+		max-height: 100vh;
+		object-fit: contain;
+	}
+}
+
+@page {
+	margin: 1in;
+}
+
+.collection-content {
+	font-size: 0.875rem;
+}
+
+.collection-content td {
+	white-space: pre-wrap;
+	word-break: break-word;
+}
+
+.column-list {
+	display: flex;
+	justify-content: space-between;
+}
+
+.column {
+	padding: 0 1em;
+}
+
+.column:first-child {
+	padding-left: 0;
+}
+
+.column:last-child {
+	padding-right: 0;
+}
+
+.table_of_contents-item {
+	display: block;
+	font-size: 0.875rem;
+	line-height: 1.3;
+	padding: 0.125rem;
+}
+
+.table_of_contents-indent-1 {
+	margin-left: 1.5rem;
+}
+
+.table_of_contents-indent-2 {
+	margin-left: 3rem;
+}
+
+.table_of_contents-indent-3 {
+	margin-left: 4.5rem;
+}
+
+.table_of_contents-link {
+	text-decoration: none;
+	opacity: 0.7;
+	border-bottom: 1px solid rgba(55, 53, 47, 0.18);
+}
+
+table,
+th,
+td {
+	border: 1px solid rgba(55, 53, 47, 0.09);
+	border-collapse: collapse;
+}
+
+table {
+	border-left: none;
+	border-right: none;
+}
+
+th,
+td {
+	font-weight: normal;
+	padding: 0.25em 0.5em;
+	line-height: 1.5;
+	min-height: 1.5em;
+	text-align: left;
+}
+
+th {
+	color: rgba(55, 53, 47, 0.6);
+}
+
+ol,
+ul {
+	margin: 0;
+	margin-block-start: 0.6em;
+	margin-block-end: 0.6em;
+}
+
+li > ol:first-child,
+li > ul:first-child {
+	margin-block-start: 0.6em;
+}
+
+ul > li {
+	list-style: disc;
+}
+
+ul.to-do-list {
+	padding-inline-start: 0;
+}
+
+ul.to-do-list > li {
+	list-style: none;
+}
+
+.to-do-children-checked {
+	text-decoration: line-through;
+	opacity: 0.375;
+}
+
+ul.toggle > li {
+	list-style: none;
+}
+
+ul {
+	padding-inline-start: 1.7em;
+}
+
+ul > li {
+	padding-left: 0.1em;
+}
+
+ol {
+	padding-inline-start: 1.6em;
+}
+
+ol > li {
+	padding-left: 0.2em;
+}
+
+.mono ol {
+	padding-inline-start: 2em;
+}
+
+.mono ol > li {
+	text-indent: -0.4em;
+}
+
+.toggle {
+	padding-inline-start: 0em;
+	list-style-type: none;
+}
+
+/* Indent toggle children */
+.toggle > li > details {
+	padding-left: 1.7em;
+}
+
+.toggle > li > details > summary {
+	margin-left: -1.1em;
+}
+
+.selected-value {
+	display: inline-block;
+	padding: 0 0.5em;
+	background: rgba(206, 205, 202, 0.5);
+	border-radius: 3px;
+	margin-right: 0.5em;
+	margin-top: 0.3em;
+	margin-bottom: 0.3em;
+	white-space: nowrap;
+}
+
+.collection-title {
+	display: inline-block;
+	margin-right: 1em;
+}
+
+.page-description {
+	margin-bottom: 2em;
+}
+
+.simple-table {
+	margin-top: 1em;
+	font-size: 0.875rem;
+	empty-cells: show;
+}
+.simple-table td {
+	height: 29px;
+	min-width: 120px;
+}
+
+.simple-table th {
+	height: 29px;
+	min-width: 120px;
+}
+
+.simple-table-header-color {
+	background: rgb(247, 246, 243);
+	color: black;
+}
+.simple-table-header {
+	font-weight: 500;
+}
+
+time {
+	opacity: 0.5;
+}
+
+.icon {
+	display: inline-flex;
+	align-items: center;
+	justify-content: center;
+	max-width: 1.2em;
+	max-height: 1.2em;
+	text-decoration: none;
+	vertical-align: text-bottom;
+	margin-right: 0.5em;
+}
+
+img.icon {
+	border-radius: 3px;
+}
+
+.callout img.notion-static-icon {
+	width: 1em;
+	height: 1em;
+}
+
+.callout p {
+	margin: 0;
+}
+
+.callout h1,
+.callout h2,
+.callout h3 {
+	margin: 0 0 0.6rem;
+}
+
+.user-icon {
+	width: 1.5em;
+	height: 1.5em;
+	border-radius: 100%;
+	margin-right: 0.5rem;
+}
+
+.user-icon-inner {
+	font-size: 0.8em;
+}
+
+.text-icon {
+	border: 1px solid #000;
+	text-align: center;
+}
+
+.page-cover-image {
+	display: block;
+	object-fit: cover;
+	width: 100%;
+	max-height: 30vh;
+}
+
+.page-header-icon {
+	font-size: 3rem;
+	margin-bottom: 1rem;
+}
+
+.page-header-icon-with-cover {
+	margin-top: -0.72em;
+	margin-left: 0.07em;
+}
+
+.page-header-icon img {
+	border-radius: 3px;
+}
+
+.link-to-page {
+	margin: 1em 0;
+	padding: 0;
+	border: none;
+	font-weight: 500;
+}
+
+p > .user {
+	opacity: 0.5;
+}
+
+td > .user,
+td > time {
+	white-space: nowrap;
+}
+
+input[type="checkbox"] {
+	transform: scale(1.5);
+	margin-right: 0.6em;
+	vertical-align: middle;
+}
+
+p {
+	margin-top: 0.5em;
+	margin-bottom: 0.5em;
+}
+
+.image {
+	border: none;
+	margin: 1.5em 0;
+	padding: 0;
+	border-radius: 0;
+	text-align: center;
+}
+
+.code,
+code {
+	background: rgba(135, 131, 120, 0.15);
+	border-radius: 3px;
+	padding: 0.2em 0.4em;
+	border-radius: 3px;
+	font-size: 85%;
+	tab-size: 2;
+}
+
+code {
+	color: #eb5757;
+}
+
+.code {
+	padding: 1.5em 1em;
+}
+
+.code-wrap {
+	white-space: pre-wrap;
+	word-break: break-all;
+}
+
+.code > code {
+	background: none;
+	padding: 0;
+	font-size: 100%;
+	color: inherit;
+}
+
+blockquote {
+	font-size: 1em;
+	margin: 1em 0;
+	padding-left: 1em;
+	border-left: 3px solid rgb(55, 53, 47);
+}
+
+blockquote.quote-large {
+	font-size: 1.25em;
+}
+
+.bookmark {
+	text-decoration: none;
+	max-height: 8em;
+	padding: 0;
+	display: flex;
+	width: 100%;
+	align-items: stretch;
+}
+
+.bookmark-title {
+	font-size: 0.85em;
+	overflow: hidden;
+	text-overflow: ellipsis;
+	height: 1.75em;
+	white-space: nowrap;
+}
+
+.bookmark-text {
+	display: flex;
+	flex-direction: column;
+}
+
+.bookmark-info {
+	flex: 4 1 180px;
+	padding: 12px 14px 14px;
+	display: flex;
+	flex-direction: column;
+	justify-content: space-between;
+}
+
+.bookmark-image {
+	width: 33%;
+	flex: 1 1 180px;
+	display: block;
+	position: relative;
+	object-fit: cover;
+	border-radius: 1px;
+}
+
+.bookmark-description {
+	color: rgba(55, 53, 47, 0.6);
+	font-size: 0.75em;
+	overflow: hidden;
+	max-height: 4.5em;
+	word-break: break-word;
+}
+
+.bookmark-href {
+	font-size: 0.75em;
+	margin-top: 0.25em;
+}
+
+.sans { font-family: ui-sans-serif, -apple-system, BlinkMacSystemFont, "Segoe UI Variable Display", "Segoe UI", Helvetica, "Apple Color Emoji", "Noto Sans Arabic", "Noto Sans Hebrew", Arial, sans-serif, "Segoe UI Emoji", "Segoe UI Symbol"; }
+.code { font-family: "SFMono-Regular", Menlo, Consolas, "PT Mono", "Liberation Mono", Courier, monospace; }
+.serif { font-family: Lyon-Text, Georgia, ui-serif, serif; }
+.mono { font-family: iawriter-mono, Nitti, Menlo, Courier, monospace; }
+.pdf .sans { font-family: Inter, ui-sans-serif, -apple-system, BlinkMacSystemFont, "Segoe UI Variable Display", "Segoe UI", Helvetica, "Apple Color Emoji", "Noto Sans Arabic", "Noto Sans Hebrew", Arial, sans-serif, "Segoe UI Emoji", "Segoe UI Symbol", 'Twemoji', 'Noto Color Emoji', 'Noto Sans CJK JP'; }
+.pdf:lang(zh-CN) .sans { font-family: Inter, ui-sans-serif, -apple-system, BlinkMacSystemFont, "Segoe UI Variable Display", "Segoe UI", Helvetica, "Apple Color Emoji", "Noto Sans Arabic", "Noto Sans Hebrew", Arial, sans-serif, "Segoe UI Emoji", "Segoe UI Symbol", 'Twemoji', 'Noto Color Emoji', 'Noto Sans CJK SC'; }
+.pdf:lang(zh-TW) .sans { font-family: Inter, ui-sans-serif, -apple-system, BlinkMacSystemFont, "Segoe UI Variable Display", "Segoe UI", Helvetica, "Apple Color Emoji", "Noto Sans Arabic", "Noto Sans Hebrew", Arial, sans-serif, "Segoe UI Emoji", "Segoe UI Symbol", 'Twemoji', 'Noto Color Emoji', 'Noto Sans CJK TC'; }
+.pdf:lang(ko-KR) .sans { font-family: Inter, ui-sans-serif, -apple-system, BlinkMacSystemFont, "Segoe UI Variable Display", "Segoe UI", Helvetica, "Apple Color Emoji", "Noto Sans Arabic", "Noto Sans Hebrew", Arial, sans-serif, "Segoe UI Emoji", "Segoe UI Symbol", 'Twemoji', 'Noto Color Emoji', 'Noto Sans CJK KR'; }
+.pdf .code { font-family: Source Code Pro, "SFMono-Regular", Menlo, Consolas, "PT Mono", "Liberation Mono", Courier, monospace, 'Twemoji', 'Noto Color Emoji', 'Noto Sans Mono CJK JP'; }
+.pdf:lang(zh-CN) .code { font-family: Source Code Pro, "SFMono-Regular", Menlo, Consolas, "PT Mono", "Liberation Mono", Courier, monospace, 'Twemoji', 'Noto Color Emoji', 'Noto Sans Mono CJK SC'; }
+.pdf:lang(zh-TW) .code { font-family: Source Code Pro, "SFMono-Regular", Menlo, Consolas, "PT Mono", "Liberation Mono", Courier, monospace, 'Twemoji', 'Noto Color Emoji', 'Noto Sans Mono CJK TC'; }
+.pdf:lang(ko-KR) .code { font-family: Source Code Pro, "SFMono-Regular", Menlo, Consolas, "PT Mono", "Liberation Mono", Courier, monospace, 'Twemoji', 'Noto Color Emoji', 'Noto Sans Mono CJK KR'; }
+.pdf .serif { font-family: PT Serif, Lyon-Text, Georgia, ui-serif, serif, 'Twemoji', 'Noto Color Emoji', 'Noto Serif CJK JP'; }
+.pdf:lang(zh-CN) .serif { font-family: PT Serif, Lyon-Text, Georgia, ui-serif, serif, 'Twemoji', 'Noto Color Emoji', 'Noto Serif CJK SC'; }
+.pdf:lang(zh-TW) .serif { font-family: PT Serif, Lyon-Text, Georgia, ui-serif, serif, 'Twemoji', 'Noto Color Emoji', 'Noto Serif CJK TC'; }
+.pdf:lang(ko-KR) .serif { font-family: PT Serif, Lyon-Text, Georgia, ui-serif, serif, 'Twemoji', 'Noto Color Emoji', 'Noto Serif CJK KR'; }
+.pdf .mono { font-family: PT Mono, iawriter-mono, Nitti, Menlo, Courier, monospace, 'Twemoji', 'Noto Color Emoji', 'Noto Sans Mono CJK JP'; }
+.pdf:lang(zh-CN) .mono { font-family: PT Mono, iawriter-mono, Nitti, Menlo, Courier, monospace, 'Twemoji', 'Noto Color Emoji', 'Noto Sans Mono CJK SC'; }
+.pdf:lang(zh-TW) .mono { font-family: PT Mono, iawriter-mono, Nitti, Menlo, Courier, monospace, 'Twemoji', 'Noto Color Emoji', 'Noto Sans Mono CJK TC'; }
+.pdf:lang(ko-KR) .mono { font-family: PT Mono, iawriter-mono, Nitti, Menlo, Courier, monospace, 'Twemoji', 'Noto Color Emoji', 'Noto Sans Mono CJK KR'; }
+.highlight-default {
+	color: rgba(44, 44, 43, 1);
+}
+.highlight-gray {
+	color: rgba(125, 122, 117, 1);
+	fill: rgba(125, 122, 117, 1);
+}
+.highlight-brown {
+	color: rgba(159, 118, 90, 1);
+	fill: rgba(159, 118, 90, 1);
+}
+.highlight-orange {
+	color: rgba(210, 123, 45, 1);
+	fill: rgba(210, 123, 45, 1);
+}
+.highlight-yellow {
+	color: rgba(203, 148, 52, 1);
+	fill: rgba(203, 148, 52, 1);
+}
+.highlight-teal {
+	color: rgba(80, 148, 110, 1);
+	fill: rgba(80, 148, 110, 1);
+}
+.highlight-blue {
+	color: rgba(56, 125, 201, 1);
+	fill: rgba(56, 125, 201, 1);
+}
+.highlight-purple {
+	color: rgba(154, 107, 180, 1);
+	fill: rgba(154, 107, 180, 1);
+}
+.highlight-pink {
+	color: rgba(193, 76, 138, 1);
+	fill: rgba(193, 76, 138, 1);
+}
+.highlight-red {
+	color: rgba(207, 81, 72, 1);
+	fill: rgba(207, 81, 72, 1);
+}
+.highlight-default_background {
+	color: rgba(44, 44, 43, 1);
+}
+.highlight-gray_background {
+	background: rgba(42, 28, 0, 0.07);
+}
+.highlight-brown_background {
+	background: rgba(139, 46, 0, 0.086);
+}
+.highlight-orange_background {
+	background: rgba(224, 101, 1, 0.129);
+}
+.highlight-yellow_background {
+	background: rgba(211, 168, 0, 0.137);
+}
+.highlight-teal_background {
+	background: rgba(0, 100, 45, 0.09);
+}
+.highlight-blue_background {
+	background: rgba(0, 124, 215, 0.094);
+}
+.highlight-purple_background {
+	background: rgba(102, 0, 178, 0.078);
+}
+.highlight-pink_background {
+	background: rgba(197, 0, 93, 0.086);
+}
+.highlight-red_background {
+	background: rgba(223, 22, 0, 0.094);
+}
+.block-color-default {
+	color: inherit;
+	fill: inherit;
+}
+.block-color-gray {
+	color: rgba(125, 122, 117, 1);
+	fill: rgba(125, 122, 117, 1);
+}
+.block-color-brown {
+	color: rgba(159, 118, 90, 1);
+	fill: rgba(159, 118, 90, 1);
+}
+.block-color-orange {
+	color: rgba(210, 123, 45, 1);
+	fill: rgba(210, 123, 45, 1);
+}
+.block-color-yellow {
+	color: rgba(203, 148, 52, 1);
+	fill: rgba(203, 148, 52, 1);
+}
+.block-color-teal {
+	color: rgba(80, 148, 110, 1);
+	fill: rgba(80, 148, 110, 1);
+}
+.block-color-blue {
+	color: rgba(56, 125, 201, 1);
+	fill: rgba(56, 125, 201, 1);
+}
+.block-color-purple {
+	color: rgba(154, 107, 180, 1);
+	fill: rgba(154, 107, 180, 1);
+}
+.block-color-pink {
+	color: rgba(193, 76, 138, 1);
+	fill: rgba(193, 76, 138, 1);
+}
+.block-color-red {
+	color: rgba(207, 81, 72, 1);
+	fill: rgba(207, 81, 72, 1);
+}
+.block-color-default_background {
+	color: inherit;
+	fill: inherit;
+}
+.block-color-gray_background {
+	background: rgba(240, 239, 237, 1);
+}
+.block-color-brown_background {
+	background: rgba(245, 237, 233, 1);
+}
+.block-color-orange_background {
+	background: rgba(251, 235, 222, 1);
+}
+.block-color-yellow_background {
+	background: rgba(249, 243, 220, 1);
+}
+.block-color-teal_background {
+	background: rgba(232, 241, 236, 1);
+}
+.block-color-blue_background {
+	background: rgba(229, 242, 252, 1);
+}
+.block-color-purple_background {
+	background: rgba(243, 235, 249, 1);
+}
+.block-color-pink_background {
+	background: rgba(250, 233, 241, 1);
+}
+.block-color-red_background {
+	background: rgba(252, 233, 231, 1);
+}
+.select-value-color-default { background-color: rgba(42, 28, 0, 0.07); }
+.select-value-color-gray { background-color: rgba(28, 19, 1, 0.11); }
+.select-value-color-brown { background-color: rgba(127, 51, 0, 0.156); }
+.select-value-color-orange { background-color: rgba(196, 88, 0, 0.203); }
+.select-value-color-yellow { background-color: rgba(209, 156, 0, 0.282); }
+.select-value-color-green { background-color: rgba(0, 96, 38, 0.156); }
+.select-value-color-blue { background-color: rgba(0, 118, 217, 0.203); }
+.select-value-color-purple { background-color: rgba(92, 0, 163, 0.141); }
+.select-value-color-pink { background-color: rgba(183, 0, 78, 0.152); }
+.select-value-color-red { background-color: rgba(206, 24, 0, 0.164); }
+
+.checkbox {
+	display: inline-flex;
+	vertical-align: text-bottom;
+	width: 16;
+	height: 16;
+	background-size: 16px;
+	margin-left: 2px;
+	margin-right: 5px;
+}
+
+.checkbox-on {
+	background-image: url("data:image/svg+xml;charset=UTF-8,%3Csvg%20width%3D%2216%22%20height%3D%2216%22%20viewBox%3D%220%200%2016%2016%22%20fill%3D%22none%22%20xmlns%3D%22http%3A%2F%2Fwww.w3.org%2F2000%2Fsvg%22%3E%0A%3Crect%20width%3D%2216%22%20height%3D%2216%22%20fill%3D%22%2358A9D7%22%2F%3E%0A%3Cpath%20d%3D%22M6.71429%2012.2852L14%204.9995L12.7143%203.71436L6.71429%209.71378L3.28571%206.2831L2%207.57092L6.71429%2012.2852Z%22%20fill%3D%22white%22%2F%3E%0A%3C%2Fsvg%3E");
+}
+
+.checkbox-off {
+	background-image: url("data:image/svg+xml;charset=UTF-8,%3Csvg%20width%3D%2216%22%20height%3D%2216%22%20viewBox%3D%220%200%2016%2016%22%20fill%3D%22none%22%20xmlns%3D%22http%3A%2F%2Fwww.w3.org%2F2000%2Fsvg%22%3E%0A%3Crect%20x%3D%220.75%22%20y%3D%220.75%22%20width%3D%2214.5%22%20height%3D%2214.5%22%20fill%3D%22white%22%20stroke%3D%22%2336352F%22%20stroke-width%3D%221.5%22%2F%3E%0A%3C%2Fsvg%3E");
+}
+	
+</style></head><body><article id="1e985df0-1907-80ee-9cf4-dfa820b8a819" class="page sans"><header><h1 class="page-title" dir="auto">📝 IRB / Research Ethics Planning Template</h1><p class="page-description" dir="auto"></p><table class="properties"><tbody><tr class="property-row property-row-person"><th><span class="icon property-icon"><img src="https://www.notion.so/icons/friends_gray.svg" style="width:14px;height:14px;display:block"/></span>Owner</th><td><span class="user"><span class="icon text-icon user-icon"><span class="user-icon-inner">A</span></span>Aubert</span></td></tr><tr class="property-row property-row-multi_select"><th><span class="icon property-icon"><img src="https://www.notion.so/icons/list_gray.svg" style="width:14px;height:14px;display:block"/></span>Tags</th><td></td></tr></tbody></table></header><div class="page-body"><div style="display:contents" dir="auto"><p id="1e985df0-1907-8037-afd2-d1007e8b9e7e" class="">This template provides a structured, modular framework for preparing a submission to an <strong>Institutional Review Board (IRB)</strong> or <strong>ethics committee</strong>. It reflects Memora’s architecture, privacy guarantees, consent mechanisms, and trauma-aware design — enabling transparent, defensible studies across clinical, caregiving, or educational environments.</p></div><div style="display:contents" dir="auto"><hr id="1e985df0-1907-80b2-9c19-f36fa3869489"/></div><div style="display:contents" dir="auto"><h2 id="1e985df0-1907-805e-a40f-d94b2787335a" class="">📌 1. Study Identification</h2></div><div style="display:contents" dir="ltr"><table id="1e985df0-1907-8044-ba6a-e6010338b457" class="simple-table"><tbody><div style="display:contents" dir="ltr"><tr id="1e985df0-1907-80e8-af95-d58bc9612bb4"><td id="z&lt;pi" class="">Field</td><td id="fzmH" class="">Entry</td></tr></div><div style="display:contents" dir="ltr"><tr id="1e985df0-1907-80cc-a592-c48fbb322fa8"><td id="z&lt;pi" class=""><strong>Study Title</strong></td><td id="fzmH" class="">e.g., “Evaluating Cognitive Outcomes with the Memora Companion”</td></tr></div><div style="display:contents" dir="ltr"><tr id="1e985df0-1907-80cd-a2f4-d095c3820f9a"><td id="z&lt;pi" class=""><strong>Principal Investigator</strong></td><td id="fzmH" class="">Name, affiliation, contact</td></tr></div><div style="display:contents" dir="ltr"><tr id="1e985df0-1907-80a0-8685-c6725469998b"><td id="z&lt;pi" class=""><strong>Collaborating Institution(s)</strong></td><td id="fzmH" class="">NGO, clinic, school, or government entity</td></tr></div><div style="display:contents" dir="ltr"><tr id="1e985df0-1907-8097-880f-e75579ac9c3c"><td id="z&lt;pi" class=""><strong>Study Type</strong></td><td id="fzmH" class="">Observational / Interventional / Mixed</td></tr></div><div style="display:contents" dir="ltr"><tr id="1e985df0-1907-80ea-ab25-c790eca797e7"><td id="z&lt;pi" class=""><strong>Target Region</strong></td><td id="fzmH" class="">List country and/or community setting</td></tr></div><div style="display:contents" dir="ltr"><tr id="1e985df0-1907-8039-8e1a-d70be922b20e"><td id="z&lt;pi" class=""><strong>Funding Source</strong></td><td id="fzmH" class="">Internal / NGO / grant / other</td></tr></div></tbody></table></div><div style="display:contents" dir="auto"><hr id="1e985df0-1907-8008-8b2f-c4ed1dbd2fc7"/></div><div style="display:contents" dir="auto"><h2 id="1e985df0-1907-8056-bd7d-eb06234dc745" class="">🧠 2. Study Purpose &amp; Objectives</h2></div><div style="display:contents" dir="auto"><p id="1e985df0-1907-807e-abfb-e09898ca18de" class=""><strong>What are you trying to understand, measure, or improve?</strong></p></div><div style="display:contents" dir="auto"><p id="1e985df0-1907-80c7-a04d-cbec63a1c56c" class="">Outline primary and secondary goals, aligned with Nzila’s care framework (e.g., emotional resilience, memory scaffolding, trauma recovery, educational progress tracking).</p></div><div style="display:contents" dir="auto"><blockquote id="1e985df0-1907-8018-bc7e-e4aeb9213ebc" class="">Example: “To assess whether weekly reflective prompt use improves caregiver-observed emotional self-regulation in children aged 7–11 over 8 weeks in rural field settings.”</blockquote></div><div style="display:contents" dir="auto"><hr id="1e985df0-1907-8003-aef5-c10c4078d618"/></div><div style="display:contents" dir="auto"><h2 id="1e985df0-1907-806d-b73c-d49202da50fb" class="">👥 3. Participant Population</h2></div><div style="display:contents" dir="ltr"><table id="1e985df0-1907-8090-a147-c13587d3bc3f" class="simple-table"><tbody><div style="display:contents" dir="ltr"><tr id="1e985df0-1907-8005-8733-f5c25aac671a"><td id="vPFZ" class="">Detail</td><td id="enbm" class="">Entry</td></tr></div><div style="display:contents" dir="ltr"><tr id="1e985df0-1907-80c1-bd25-dfa28a6636ea"><td id="vPFZ" class=""><strong>Age Range</strong></td><td id="enbm" class="">e.g., 6–12, 65+</td></tr></div><div style="display:contents" dir="ltr"><tr id="1e985df0-1907-8059-8dee-d75a46b2d315"><td id="vPFZ" class=""><strong>Cognitive Status</strong></td><td id="enbm" class="">Neurotypical / Mild Impairment / Dementia stage</td></tr></div><div style="display:contents" dir="ltr"><tr id="1e985df0-1907-80bc-a7d5-e53538e5c1c9"><td id="vPFZ" class=""><strong>Consent Source</strong></td><td id="enbm" class="">Self / Legal Guardian / Caregiver</td></tr></div><div style="display:contents" dir="ltr"><tr id="1e985df0-1907-80fc-b2be-dfad7d436dad"><td id="vPFZ" class=""><strong>Inclusion Criteria</strong></td><td id="enbm" class="">Language, device access, program participation</td></tr></div><div style="display:contents" dir="ltr"><tr id="1e985df0-1907-8031-af0b-ca73e2d876cd"><td id="vPFZ" class=""><strong>Exclusion Criteria</strong></td><td id="enbm" class="">Risk groups, literacy barriers, etc.</td></tr></div><div style="display:contents" dir="ltr"><tr id="1e985df0-1907-80df-9b30-d957a31945d4"><td id="vPFZ" class=""><strong>Sample Size</strong></td><td id="enbm" class="">Total and per region/group</td></tr></div></tbody></table></div><div style="display:contents" dir="auto"><hr id="1e985df0-1907-80db-a489-dfc0f0c1fa27"/></div><div style="display:contents" dir="auto"><h2 id="1e985df0-1907-80de-8865-dcf3718fa945" class="">🛠 4. Intervention or Companion Use</h2></div><div style="display:contents" dir="ltr"><table id="1e985df0-1907-80cd-87cc-efbdc088bdf3" class="simple-table"><tbody><div style="display:contents" dir="ltr"><tr id="1e985df0-1907-8058-b5e9-c5ce5939c33f"><td id="WQFc" class="">Component</td><td id="R\&gt;a" class="">Detail</td></tr></div><div style="display:contents" dir="ltr"><tr id="1e985df0-1907-8002-91d9-c454a54c8495"><td id="WQFc" class=""><strong>Companion Mode Used</strong></td><td id="R\&gt;a" class="">e.g., Youth Learning, Dementia Care, Trauma Recovery</td></tr></div><div style="display:contents" dir="ltr"><tr id="1e985df0-1907-8085-bbbc-db53fc96b53b"><td id="WQFc" class=""><strong>Memory Layer Status</strong></td><td id="R\&gt;a" class="">On / Off / Configurable by caregiver</td></tr></div><div style="display:contents" dir="ltr"><tr id="1e985df0-1907-806f-bf9b-d2b2ab960aa1"><td id="WQFc" class=""><strong>Tone or Language Customizations</strong></td><td id="R\&gt;a" class="">Describe dialect, affect tuning</td></tr></div><div style="display:contents" dir="ltr"><tr id="1e985df0-1907-802d-bfd6-f51e58ea7217"><td id="WQFc" class=""><strong>Offline Mode Usage</strong></td><td id="R\&gt;a" class="">Yes / No — if yes, describe adaptation methods</td></tr></div><div style="display:contents" dir="ltr"><tr id="1e985df0-1907-80cb-a901-c9e17ac05ad3"><td id="WQFc" class=""><strong>Daily/Weekly Flow</strong></td><td id="R\&gt;a" class=""># sessions, average duration, reflective cadence</td></tr></div><div style="display:contents" dir="ltr"><tr id="1e985df0-1907-8052-b139-c255309f6f50"><td id="WQFc" class=""><strong>Any Incentives?</strong></td><td id="R\&gt;a" class="">e.g., honoraria, badges, material tokens</td></tr></div></tbody></table></div><div style="display:contents" dir="auto"><hr id="1e985df0-1907-8088-a847-e2f7e8c73681"/></div><div style="display:contents" dir="auto"><h2 id="1e985df0-1907-8099-a705-ec863225fe70" class="">🧾 5. Consent Strategy</h2></div><div style="display:contents" dir="ltr"><table id="1e985df0-1907-801b-8615-dde3357bee42" class="simple-table"><tbody><div style="display:contents" dir="ltr"><tr id="1e985df0-1907-80c7-9362-d1bd39365992"><td id="Po&gt;E" class="">Mechanism</td><td id="LM|A" class="">Detail</td></tr></div><div style="display:contents" dir="ltr"><tr id="1e985df0-1907-80df-a742-cf1f55d9d019"><td id="Po&gt;E" class=""><strong>Type of Consent</strong></td><td id="LM|A" class="">Verbal, written, digital (QR-based), progressive</td></tr></div><div style="display:contents" dir="ltr"><tr id="1e985df0-1907-80a2-b697-edbd304c24f9"><td id="Po&gt;E" class=""><strong>Consent Materials</strong></td><td id="LM|A" class="">Attach caregiver script, plain language form</td></tr></div><div style="display:contents" dir="ltr"><tr id="1e985df0-1907-8014-836e-f2e67bcfc7f4"><td id="Po&gt;E" class=""><strong>Ongoing Consent</strong></td><td id="LM|A" class="">Reconfirmation prompts, opt-out flows</td></tr></div><div style="display:contents" dir="ltr"><tr id="1e985df0-1907-8030-a606-defca95823d4"><td id="Po&gt;E" class=""><strong>Memory Control Options</strong></td><td id="LM|A" class="">Export / wipe / pause / shadow mode</td></tr></div><div style="display:contents" dir="ltr"><tr id="1e985df0-1907-80e1-b282-dbdd830d0633"><td id="Po&gt;E" class=""><strong>Special Populations</strong></td><td id="LM|A" class="">Describe support for non-literate or cognitively impaired users</td></tr></div></tbody></table></div><div style="display:contents" dir="auto"><blockquote id="1e985df0-1907-80a8-a305-c9d001b11ba0" class="">All Memora studies must respect opt-out by design, with no coercion or consequence.</blockquote></div><div style="display:contents" dir="auto"><hr id="1e985df0-1907-80da-b3fd-d7b7aa32aa6a"/></div><div style="display:contents" dir="auto"><h2 id="1e985df0-1907-8081-8318-f81dd0eda7a7" class="">🧘 6. Risk &amp; Safeguarding Protocol</h2></div><div style="display:contents" dir="ltr"><table id="1e985df0-1907-8044-9b70-c41bf752aaf8" class="simple-table"><tbody><div style="display:contents" dir="ltr"><tr id="1e985df0-1907-80e2-a082-feb727921c8d"><td id="d{Fe" class="">Area</td><td id="|uTM" class="">Description</td></tr></div><div style="display:contents" dir="ltr"><tr id="1e985df0-1907-809c-8c71-f2dd0ef65c73"><td id="d{Fe" class=""><strong>Psychological Risk</strong></td><td id="|uTM" class="">Companion misfire, overexposure to grief topics, tone mismatch</td></tr></div><div style="display:contents" dir="ltr"><tr id="1e985df0-1907-80e9-baaf-cefcf8abbe23"><td id="d{Fe" class=""><strong>Technical Risk</strong></td><td id="|uTM" class="">Data loss, device malfunction</td></tr></div><div style="display:contents" dir="ltr"><tr id="1e985df0-1907-806a-9334-d4c596233cc9"><td id="d{Fe" class=""><strong>Safeguarding Events</strong></td><td id="|uTM" class="">Companion detects distress: trigger escalation flow</td></tr></div><div style="display:contents" dir="ltr"><tr id="1e985df0-1907-8094-a446-f16baaccd268"><td id="d{Fe" class=""><strong>Response Workflow</strong></td><td id="|uTM" class="">Describe pause protocol, flag review, field intervention</td></tr></div><div style="display:contents" dir="ltr"><tr id="1e985df0-1907-808d-b9f3-e985fbca8728"><td id="d{Fe" class=""><strong>IRB Point-of-Contact</strong></td><td id="|uTM" class="">Who responds to ethics alerts locally?</td></tr></div></tbody></table></div><div style="display:contents" dir="auto"><hr id="1e985df0-1907-8069-b3ef-d190df943005"/></div><div style="display:contents" dir="auto"><h2 id="1e985df0-1907-807a-bc28-ee8bd8365ff8" class="">🔐 7. Data Management &amp; Privacy</h2></div><div style="display:contents" dir="ltr"><table id="1e985df0-1907-8068-981b-fb9c5559bc7e" class="simple-table"><tbody><div style="display:contents" dir="ltr"><tr id="1e985df0-1907-8071-9c29-fc88491b7e31"><td id="uLW\" class="">Component</td><td id="jIEK" class="">Description</td></tr></div><div style="display:contents" dir="ltr"><tr id="1e985df0-1907-80f6-9039-feaabcabbbbe"><td id="uLW\" class=""><strong>Data Type Collected</strong></td><td id="jIEK" class="">Reflections, mood tags, engagement logs (no personal info)</td></tr></div><div style="display:contents" dir="ltr"><tr id="1e985df0-1907-8023-93bc-f34b8425ddf8"><td id="uLW\" class=""><strong>Identifiers Stored?</strong></td><td id="jIEK" class="">Never — hashed IDs only</td></tr></div><div style="display:contents" dir="ltr"><tr id="1e985df0-1907-8070-8673-c17d7eab7e4c"><td id="uLW\" class=""><strong>Where Stored</strong></td><td id="jIEK" class="">On-device encrypted first, synced regionally if applicable</td></tr></div><div style="display:contents" dir="ltr"><tr id="1e985df0-1907-8095-b497-c587aa1b0694"><td id="uLW\" class=""><strong>Duration</strong></td><td id="jIEK" class="">How long data will be retained</td></tr></div><div style="display:contents" dir="ltr"><tr id="1e985df0-1907-80c8-bd7d-d1c675bb4390"><td id="uLW\" class=""><strong>Access Control</strong></td><td id="jIEK" class="">Role-based access, local NGO rights, no public exports</td></tr></div><div style="display:contents" dir="ltr"><tr id="1e985df0-1907-80c3-b57b-d29d13f71794"><td id="uLW\" class=""><strong>Memory Review</strong></td><td id="jIEK" class="">Caregiver/participant can request review, wipe, or export</td></tr></div></tbody></table></div><div style="display:contents" dir="auto"><hr id="1e985df0-1907-8069-815b-ccd14c804fbe"/></div><div style="display:contents" dir="auto"><h2 id="1e985df0-1907-80ea-87d1-d7da87fbbc4c" class="">🧪 8. Monitoring &amp; Ethics Oversight</h2></div><div style="display:contents" dir="ltr"><table id="1e985df0-1907-80fa-aa96-cf9c23fc689b" class="simple-table"><tbody><div style="display:contents" dir="ltr"><tr id="1e985df0-1907-808b-aa60-fba80174f6fc"><td id="|`&gt;z" class="">Area</td><td id="HYu@" class="">Strategy</td></tr></div><div style="display:contents" dir="ltr"><tr id="1e985df0-1907-801b-bbe2-cd285d1f2c33"><td id="|`&gt;z" class=""><strong>Monitoring Frequency</strong></td><td id="HYu@" class="">Weekly check-ins, mid-study audit</td></tr></div><div style="display:contents" dir="ltr"><tr id="1e985df0-1907-805e-845e-d386acc5e713"><td id="|`&gt;z" class=""><strong>Ethics Committee Contact</strong></td><td id="HYu@" class="">Local or global IRB representative</td></tr></div><div style="display:contents" dir="ltr"><tr id="1e985df0-1907-8083-8633-c7073b7ca116"><td id="|`&gt;z" class=""><strong>Memora Support Access</strong></td><td id="HYu@" class="">Who handles misfires, memory escalations?</td></tr></div><div style="display:contents" dir="ltr"><tr id="1e985df0-1907-8077-8b49-ef7316b43910"><td id="|`&gt;z" class=""><strong>Participant Withdrawal</strong></td><td id="HYu@" class="">Describe opt-out and data removal flow</td></tr></div><div style="display:contents" dir="ltr"><tr id="1e985df0-1907-8051-bcaa-e35f1bcd7a21"><td id="|`&gt;z" class=""><strong>Audit Trail Maintenance</strong></td><td id="HYu@" class="">How logs will be tracked and filed</td></tr></div></tbody></table></div><div style="display:contents" dir="auto"><hr id="1e985df0-1907-8085-8b57-c876f76cd638"/></div><div style="display:contents" dir="auto"><h2 id="1e985df0-1907-80a9-af91-cea4b71997df" class="">📝 9. Reporting &amp; Publication Plan</h2></div><div style="display:contents" dir="ltr"><table id="1e985df0-1907-80f5-b70a-d9d2c580692d" class="simple-table"><tbody><div style="display:contents" dir="ltr"><tr id="1e985df0-1907-80a2-ab9d-cef085c37d57"><td id="_]{N" class="">Component</td><td id="sufg" class="">Description</td></tr></div><div style="display:contents" dir="ltr"><tr id="1e985df0-1907-80ef-adf7-d269321ed07a"><td id="_]{N" class=""><strong>Dissemination Intent</strong></td><td id="sufg" class="">Internal report / peer-reviewed publication / funder brief</td></tr></div><div style="display:contents" dir="ltr"><tr id="1e985df0-1907-80c0-8db0-c54f8dff22a8"><td id="_]{N" class=""><strong>Data Aggregation</strong></td><td id="sufg" class="">All reporting must be anonymized</td></tr></div><div style="display:contents" dir="ltr"><tr id="1e985df0-1907-80f9-983c-de18b40f3feb"><td id="_]{N" class=""><strong>Return of Results to Participants</strong></td><td id="sufg" class="">Yes / No — if yes, how?</td></tr></div><div style="display:contents" dir="ltr"><tr id="1e985df0-1907-809d-a23e-c6979e189be7"><td id="_]{N" class=""><strong>Community Use</strong></td><td id="sufg" class="">How findings benefit the population served</td></tr></div></tbody></table></div><div style="display:contents" dir="auto"><hr id="1e985df0-1907-8063-8cff-f1f5589c68a9"/></div><div style="display:contents" dir="auto"><h2 id="1e985df0-1907-807f-8554-fc44c9a257b8" class="">📎 Required Attachments</h2></div><div style="display:contents" dir="auto"><ul id="1e985df0-1907-800d-a80d-dc26cccbc40d" class="to-do-list"><li><div class="checkbox checkbox-off"></div> <span class="to-do-children-unchecked">Consent form(s) (youth, caregiver, elder)</span><div class="indented"></div></li></ul></div><div style="display:contents" dir="auto"><ul id="1e985df0-1907-8077-a5ad-c935c04c64b0" class="to-do-list"><li><div class="checkbox checkbox-off"></div> <span class="to-do-children-unchecked">Safeguarding SOP</span><div class="indented"></div></li></ul></div><div style="display:contents" dir="auto"><ul id="1e985df0-1907-8029-aa1b-e2f3487faac8" class="to-do-list"><li><div class="checkbox checkbox-off"></div> <span class="to-do-children-unchecked">Companion Prompt List (study-relevant only)</span><div class="indented"></div></li></ul></div><div style="display:contents" dir="auto"><ul id="1e985df0-1907-80d4-b42b-c7fd3dffe60e" class="to-do-list"><li><div class="checkbox checkbox-off"></div> <span class="to-do-children-unchecked">Misfire Flag &amp; Pause Flow</span><div class="indented"></div></li></ul></div><div style="display:contents" dir="auto"><ul id="1e985df0-1907-80de-b50c-fc97de9c8f1e" class="to-do-list"><li><div class="checkbox checkbox-off"></div> <span class="to-do-children-unchecked">Memory Handling Script</span><div class="indented"></div></li></ul></div><div style="display:contents" dir="auto"><ul id="1e985df0-1907-80f2-8b3b-e265a6a107c4" class="to-do-list"><li><div class="checkbox checkbox-off"></div> <span class="to-do-children-unchecked">Privacy &amp; Data Architecture Overview</span><div class="indented"></div></li></ul></div><div style="display:contents" dir="auto"><ul id="1e985df0-1907-80e1-bac1-de972811a7bb" class="to-do-list"><li><div class="checkbox checkbox-off"></div> <span class="to-do-children-unchecked">Device configuration reference</span><div class="indented"></div></li></ul></div><div style="display:contents" dir="auto"><ul id="1e985df0-1907-806c-b122-e0a299fc5672" class="to-do-list"><li><div class="checkbox checkbox-off"></div> <span class="to-do-children-unchecked">Ethics escalation contacts (local + Memora)</span><div class="indented"></div></li></ul></div><div style="display:contents" dir="auto"><hr id="1e985df0-1907-8013-8d38-f4598a0725c8"/></div><div style="display:contents" dir="auto"><h2 id="1e985df0-1907-80f2-bfb2-d5474f095cb2" class="">✅ Pre-Submission Checklist</h2></div><div style="display:contents" dir="ltr"><table id="1e985df0-1907-80d2-85c4-fe51725d3265" class="simple-table"><tbody><div style="display:contents" dir="ltr"><tr id="1e985df0-1907-8005-bef3-fc77ec1e3dea"><td id="]BKE" class="">Requirement</td><td id="`]}U" class="">Complete?</td></tr></div><div style="display:contents" dir="ltr"><tr id="1e985df0-1907-809a-bb02-e35b51762949"><td id="]BKE" class="">Study objectives defined &amp; aligned with Nzila ethics</td><td id="`]}U" class="">✅</td></tr></div><div style="display:contents" dir="ltr"><tr id="1e985df0-1907-8070-b5d1-f1a757dd2f49"><td id="]BKE" class="">Consent materials accessible, trauma-informed, multilingual</td><td id="`]}U" class="">✅</td></tr></div><div style="display:contents" dir="ltr"><tr id="1e985df0-1907-80bc-869d-de274a4e379f"><td id="]BKE" class="">Misfire &amp; safeguarding SOP integrated</td><td id="`]}U" class="">✅</td></tr></div><div style="display:contents" dir="ltr"><tr id="1e985df0-1907-8017-9df6-d43b7282c124"><td id="]BKE" class="">Memory Layer reviewed by caregivers</td><td id="`]}U" class="">✅</td></tr></div><div style="display:contents" dir="ltr"><tr id="1e985df0-1907-80af-b5e5-c46a2d91f14f"><td id="]BKE" class="">Data plan compliant with local laws</td><td id="`]}U" class="">✅</td></tr></div><div style="display:contents" dir="ltr"><tr id="1e985df0-1907-80d6-ada7-f327d573cd38"><td id="]BKE" class="">Partner staff trained on opt-out &amp; privacy flow</td><td id="`]}U" class="">✅</td></tr></div></tbody></table></div></div></article><span class="sans" style="font-size:14px;padding-top:2em"></span></body></html>

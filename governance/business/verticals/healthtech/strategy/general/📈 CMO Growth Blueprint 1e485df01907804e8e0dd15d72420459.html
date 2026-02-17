@@ -1,0 +1,713 @@
+<html><head><meta http-equiv="Content-Type" content="text/html; charset=utf-8"/><title>📈 CMO Growth Blueprint</title><style>
+/* cspell:disable-file */
+/* webkit printing magic: print all background colors */
+html {
+	-webkit-print-color-adjust: exact;
+}
+* {
+	box-sizing: border-box;
+	-webkit-print-color-adjust: exact;
+}
+
+html,
+body {
+	margin: 0;
+	padding: 0;
+}
+@media only screen {
+	body {
+		margin: 2em auto;
+		max-width: 900px;
+		color: rgb(55, 53, 47);
+	}
+}
+
+body {
+	line-height: 1.5;
+	white-space: pre-wrap;
+}
+
+a,
+a.visited {
+	color: inherit;
+	text-decoration: underline;
+}
+
+.pdf-relative-link-path {
+	font-size: 80%;
+	color: #444;
+}
+
+h1,
+h2,
+h3 {
+	letter-spacing: -0.01em;
+	line-height: 1.2;
+	font-weight: 600;
+	margin-bottom: 0;
+}
+
+/* Override strong tags inside headings to maintain consistent weight */
+h1 strong,
+h2 strong,
+h3 strong {
+	font-weight: 600;
+}
+
+.page-title {
+	font-size: 2.5rem;
+	font-weight: 700;
+	margin-top: 0;
+	margin-bottom: 0.75em;
+}
+
+h1 {
+	font-size: 1.875rem;
+	margin-top: 1.875rem;
+}
+
+h2 {
+	font-size: 1.5rem;
+	margin-top: 1.5rem;
+}
+
+h3 {
+	font-size: 1.25rem;
+	margin-top: 1.25rem;
+}
+
+.source {
+	border: 1px solid #ddd;
+	border-radius: 3px;
+	padding: 1.5em;
+	word-break: break-all;
+}
+
+.callout {
+	border-radius: 10px;
+	padding: 1rem;
+}
+
+figure {
+	margin: 1.25em 0;
+	page-break-inside: avoid;
+}
+
+figcaption {
+	opacity: 0.5;
+	font-size: 85%;
+	margin-top: 0.5em;
+}
+
+mark {
+	background-color: transparent;
+}
+
+.indented {
+	padding-left: 1.5em;
+}
+
+hr {
+	background: transparent;
+	display: block;
+	width: 100%;
+	height: 1px;
+	visibility: visible;
+	border: none;
+	border-bottom: 1px solid rgba(55, 53, 47, 0.09);
+}
+
+img {
+	max-width: 100%;
+}
+
+@media only print {
+	img {
+		max-height: 100vh;
+		object-fit: contain;
+	}
+}
+
+@page {
+	margin: 1in;
+}
+
+.collection-content {
+	font-size: 0.875rem;
+}
+
+.collection-content td {
+	white-space: pre-wrap;
+	word-break: break-word;
+}
+
+.column-list {
+	display: flex;
+	justify-content: space-between;
+}
+
+.column {
+	padding: 0 1em;
+}
+
+.column:first-child {
+	padding-left: 0;
+}
+
+.column:last-child {
+	padding-right: 0;
+}
+
+.table_of_contents-item {
+	display: block;
+	font-size: 0.875rem;
+	line-height: 1.3;
+	padding: 0.125rem;
+}
+
+.table_of_contents-indent-1 {
+	margin-left: 1.5rem;
+}
+
+.table_of_contents-indent-2 {
+	margin-left: 3rem;
+}
+
+.table_of_contents-indent-3 {
+	margin-left: 4.5rem;
+}
+
+.table_of_contents-link {
+	text-decoration: none;
+	opacity: 0.7;
+	border-bottom: 1px solid rgba(55, 53, 47, 0.18);
+}
+
+table,
+th,
+td {
+	border: 1px solid rgba(55, 53, 47, 0.09);
+	border-collapse: collapse;
+}
+
+table {
+	border-left: none;
+	border-right: none;
+}
+
+th,
+td {
+	font-weight: normal;
+	padding: 0.25em 0.5em;
+	line-height: 1.5;
+	min-height: 1.5em;
+	text-align: left;
+}
+
+th {
+	color: rgba(55, 53, 47, 0.6);
+}
+
+ol,
+ul {
+	margin: 0;
+	margin-block-start: 0.6em;
+	margin-block-end: 0.6em;
+}
+
+li > ol:first-child,
+li > ul:first-child {
+	margin-block-start: 0.6em;
+}
+
+ul > li {
+	list-style: disc;
+}
+
+ul.to-do-list {
+	padding-inline-start: 0;
+}
+
+ul.to-do-list > li {
+	list-style: none;
+}
+
+.to-do-children-checked {
+	text-decoration: line-through;
+	opacity: 0.375;
+}
+
+ul.toggle > li {
+	list-style: none;
+}
+
+ul {
+	padding-inline-start: 1.7em;
+}
+
+ul > li {
+	padding-left: 0.1em;
+}
+
+ol {
+	padding-inline-start: 1.6em;
+}
+
+ol > li {
+	padding-left: 0.2em;
+}
+
+.mono ol {
+	padding-inline-start: 2em;
+}
+
+.mono ol > li {
+	text-indent: -0.4em;
+}
+
+.toggle {
+	padding-inline-start: 0em;
+	list-style-type: none;
+}
+
+/* Indent toggle children */
+.toggle > li > details {
+	padding-left: 1.7em;
+}
+
+.toggle > li > details > summary {
+	margin-left: -1.1em;
+}
+
+.selected-value {
+	display: inline-block;
+	padding: 0 0.5em;
+	background: rgba(206, 205, 202, 0.5);
+	border-radius: 3px;
+	margin-right: 0.5em;
+	margin-top: 0.3em;
+	margin-bottom: 0.3em;
+	white-space: nowrap;
+}
+
+.collection-title {
+	display: inline-block;
+	margin-right: 1em;
+}
+
+.page-description {
+	margin-bottom: 2em;
+}
+
+.simple-table {
+	margin-top: 1em;
+	font-size: 0.875rem;
+	empty-cells: show;
+}
+.simple-table td {
+	height: 29px;
+	min-width: 120px;
+}
+
+.simple-table th {
+	height: 29px;
+	min-width: 120px;
+}
+
+.simple-table-header-color {
+	background: rgb(247, 246, 243);
+	color: black;
+}
+.simple-table-header {
+	font-weight: 500;
+}
+
+time {
+	opacity: 0.5;
+}
+
+.icon {
+	display: inline-flex;
+	align-items: center;
+	justify-content: center;
+	max-width: 1.2em;
+	max-height: 1.2em;
+	text-decoration: none;
+	vertical-align: text-bottom;
+	margin-right: 0.5em;
+}
+
+img.icon {
+	border-radius: 3px;
+}
+
+.callout img.notion-static-icon {
+	width: 1em;
+	height: 1em;
+}
+
+.callout p {
+	margin: 0;
+}
+
+.callout h1,
+.callout h2,
+.callout h3 {
+	margin: 0 0 0.6rem;
+}
+
+.user-icon {
+	width: 1.5em;
+	height: 1.5em;
+	border-radius: 100%;
+	margin-right: 0.5rem;
+}
+
+.user-icon-inner {
+	font-size: 0.8em;
+}
+
+.text-icon {
+	border: 1px solid #000;
+	text-align: center;
+}
+
+.page-cover-image {
+	display: block;
+	object-fit: cover;
+	width: 100%;
+	max-height: 30vh;
+}
+
+.page-header-icon {
+	font-size: 3rem;
+	margin-bottom: 1rem;
+}
+
+.page-header-icon-with-cover {
+	margin-top: -0.72em;
+	margin-left: 0.07em;
+}
+
+.page-header-icon img {
+	border-radius: 3px;
+}
+
+.link-to-page {
+	margin: 1em 0;
+	padding: 0;
+	border: none;
+	font-weight: 500;
+}
+
+p > .user {
+	opacity: 0.5;
+}
+
+td > .user,
+td > time {
+	white-space: nowrap;
+}
+
+input[type="checkbox"] {
+	transform: scale(1.5);
+	margin-right: 0.6em;
+	vertical-align: middle;
+}
+
+p {
+	margin-top: 0.5em;
+	margin-bottom: 0.5em;
+}
+
+.image {
+	border: none;
+	margin: 1.5em 0;
+	padding: 0;
+	border-radius: 0;
+	text-align: center;
+}
+
+.code,
+code {
+	background: rgba(135, 131, 120, 0.15);
+	border-radius: 3px;
+	padding: 0.2em 0.4em;
+	border-radius: 3px;
+	font-size: 85%;
+	tab-size: 2;
+}
+
+code {
+	color: #eb5757;
+}
+
+.code {
+	padding: 1.5em 1em;
+}
+
+.code-wrap {
+	white-space: pre-wrap;
+	word-break: break-all;
+}
+
+.code > code {
+	background: none;
+	padding: 0;
+	font-size: 100%;
+	color: inherit;
+}
+
+blockquote {
+	font-size: 1em;
+	margin: 1em 0;
+	padding-left: 1em;
+	border-left: 3px solid rgb(55, 53, 47);
+}
+
+blockquote.quote-large {
+	font-size: 1.25em;
+}
+
+.bookmark {
+	text-decoration: none;
+	max-height: 8em;
+	padding: 0;
+	display: flex;
+	width: 100%;
+	align-items: stretch;
+}
+
+.bookmark-title {
+	font-size: 0.85em;
+	overflow: hidden;
+	text-overflow: ellipsis;
+	height: 1.75em;
+	white-space: nowrap;
+}
+
+.bookmark-text {
+	display: flex;
+	flex-direction: column;
+}
+
+.bookmark-info {
+	flex: 4 1 180px;
+	padding: 12px 14px 14px;
+	display: flex;
+	flex-direction: column;
+	justify-content: space-between;
+}
+
+.bookmark-image {
+	width: 33%;
+	flex: 1 1 180px;
+	display: block;
+	position: relative;
+	object-fit: cover;
+	border-radius: 1px;
+}
+
+.bookmark-description {
+	color: rgba(55, 53, 47, 0.6);
+	font-size: 0.75em;
+	overflow: hidden;
+	max-height: 4.5em;
+	word-break: break-word;
+}
+
+.bookmark-href {
+	font-size: 0.75em;
+	margin-top: 0.25em;
+}
+
+.sans { font-family: ui-sans-serif, -apple-system, BlinkMacSystemFont, "Segoe UI Variable Display", "Segoe UI", Helvetica, "Apple Color Emoji", "Noto Sans Arabic", "Noto Sans Hebrew", Arial, sans-serif, "Segoe UI Emoji", "Segoe UI Symbol"; }
+.code { font-family: "SFMono-Regular", Menlo, Consolas, "PT Mono", "Liberation Mono", Courier, monospace; }
+.serif { font-family: Lyon-Text, Georgia, ui-serif, serif; }
+.mono { font-family: iawriter-mono, Nitti, Menlo, Courier, monospace; }
+.pdf .sans { font-family: Inter, ui-sans-serif, -apple-system, BlinkMacSystemFont, "Segoe UI Variable Display", "Segoe UI", Helvetica, "Apple Color Emoji", "Noto Sans Arabic", "Noto Sans Hebrew", Arial, sans-serif, "Segoe UI Emoji", "Segoe UI Symbol", 'Twemoji', 'Noto Color Emoji', 'Noto Sans CJK JP'; }
+.pdf:lang(zh-CN) .sans { font-family: Inter, ui-sans-serif, -apple-system, BlinkMacSystemFont, "Segoe UI Variable Display", "Segoe UI", Helvetica, "Apple Color Emoji", "Noto Sans Arabic", "Noto Sans Hebrew", Arial, sans-serif, "Segoe UI Emoji", "Segoe UI Symbol", 'Twemoji', 'Noto Color Emoji', 'Noto Sans CJK SC'; }
+.pdf:lang(zh-TW) .sans { font-family: Inter, ui-sans-serif, -apple-system, BlinkMacSystemFont, "Segoe UI Variable Display", "Segoe UI", Helvetica, "Apple Color Emoji", "Noto Sans Arabic", "Noto Sans Hebrew", Arial, sans-serif, "Segoe UI Emoji", "Segoe UI Symbol", 'Twemoji', 'Noto Color Emoji', 'Noto Sans CJK TC'; }
+.pdf:lang(ko-KR) .sans { font-family: Inter, ui-sans-serif, -apple-system, BlinkMacSystemFont, "Segoe UI Variable Display", "Segoe UI", Helvetica, "Apple Color Emoji", "Noto Sans Arabic", "Noto Sans Hebrew", Arial, sans-serif, "Segoe UI Emoji", "Segoe UI Symbol", 'Twemoji', 'Noto Color Emoji', 'Noto Sans CJK KR'; }
+.pdf .code { font-family: Source Code Pro, "SFMono-Regular", Menlo, Consolas, "PT Mono", "Liberation Mono", Courier, monospace, 'Twemoji', 'Noto Color Emoji', 'Noto Sans Mono CJK JP'; }
+.pdf:lang(zh-CN) .code { font-family: Source Code Pro, "SFMono-Regular", Menlo, Consolas, "PT Mono", "Liberation Mono", Courier, monospace, 'Twemoji', 'Noto Color Emoji', 'Noto Sans Mono CJK SC'; }
+.pdf:lang(zh-TW) .code { font-family: Source Code Pro, "SFMono-Regular", Menlo, Consolas, "PT Mono", "Liberation Mono", Courier, monospace, 'Twemoji', 'Noto Color Emoji', 'Noto Sans Mono CJK TC'; }
+.pdf:lang(ko-KR) .code { font-family: Source Code Pro, "SFMono-Regular", Menlo, Consolas, "PT Mono", "Liberation Mono", Courier, monospace, 'Twemoji', 'Noto Color Emoji', 'Noto Sans Mono CJK KR'; }
+.pdf .serif { font-family: PT Serif, Lyon-Text, Georgia, ui-serif, serif, 'Twemoji', 'Noto Color Emoji', 'Noto Serif CJK JP'; }
+.pdf:lang(zh-CN) .serif { font-family: PT Serif, Lyon-Text, Georgia, ui-serif, serif, 'Twemoji', 'Noto Color Emoji', 'Noto Serif CJK SC'; }
+.pdf:lang(zh-TW) .serif { font-family: PT Serif, Lyon-Text, Georgia, ui-serif, serif, 'Twemoji', 'Noto Color Emoji', 'Noto Serif CJK TC'; }
+.pdf:lang(ko-KR) .serif { font-family: PT Serif, Lyon-Text, Georgia, ui-serif, serif, 'Twemoji', 'Noto Color Emoji', 'Noto Serif CJK KR'; }
+.pdf .mono { font-family: PT Mono, iawriter-mono, Nitti, Menlo, Courier, monospace, 'Twemoji', 'Noto Color Emoji', 'Noto Sans Mono CJK JP'; }
+.pdf:lang(zh-CN) .mono { font-family: PT Mono, iawriter-mono, Nitti, Menlo, Courier, monospace, 'Twemoji', 'Noto Color Emoji', 'Noto Sans Mono CJK SC'; }
+.pdf:lang(zh-TW) .mono { font-family: PT Mono, iawriter-mono, Nitti, Menlo, Courier, monospace, 'Twemoji', 'Noto Color Emoji', 'Noto Sans Mono CJK TC'; }
+.pdf:lang(ko-KR) .mono { font-family: PT Mono, iawriter-mono, Nitti, Menlo, Courier, monospace, 'Twemoji', 'Noto Color Emoji', 'Noto Sans Mono CJK KR'; }
+.highlight-default {
+	color: rgba(44, 44, 43, 1);
+}
+.highlight-gray {
+	color: rgba(125, 122, 117, 1);
+	fill: rgba(125, 122, 117, 1);
+}
+.highlight-brown {
+	color: rgba(159, 118, 90, 1);
+	fill: rgba(159, 118, 90, 1);
+}
+.highlight-orange {
+	color: rgba(210, 123, 45, 1);
+	fill: rgba(210, 123, 45, 1);
+}
+.highlight-yellow {
+	color: rgba(203, 148, 52, 1);
+	fill: rgba(203, 148, 52, 1);
+}
+.highlight-teal {
+	color: rgba(80, 148, 110, 1);
+	fill: rgba(80, 148, 110, 1);
+}
+.highlight-blue {
+	color: rgba(56, 125, 201, 1);
+	fill: rgba(56, 125, 201, 1);
+}
+.highlight-purple {
+	color: rgba(154, 107, 180, 1);
+	fill: rgba(154, 107, 180, 1);
+}
+.highlight-pink {
+	color: rgba(193, 76, 138, 1);
+	fill: rgba(193, 76, 138, 1);
+}
+.highlight-red {
+	color: rgba(207, 81, 72, 1);
+	fill: rgba(207, 81, 72, 1);
+}
+.highlight-default_background {
+	color: rgba(44, 44, 43, 1);
+}
+.highlight-gray_background {
+	background: rgba(42, 28, 0, 0.07);
+}
+.highlight-brown_background {
+	background: rgba(139, 46, 0, 0.086);
+}
+.highlight-orange_background {
+	background: rgba(224, 101, 1, 0.129);
+}
+.highlight-yellow_background {
+	background: rgba(211, 168, 0, 0.137);
+}
+.highlight-teal_background {
+	background: rgba(0, 100, 45, 0.09);
+}
+.highlight-blue_background {
+	background: rgba(0, 124, 215, 0.094);
+}
+.highlight-purple_background {
+	background: rgba(102, 0, 178, 0.078);
+}
+.highlight-pink_background {
+	background: rgba(197, 0, 93, 0.086);
+}
+.highlight-red_background {
+	background: rgba(223, 22, 0, 0.094);
+}
+.block-color-default {
+	color: inherit;
+	fill: inherit;
+}
+.block-color-gray {
+	color: rgba(125, 122, 117, 1);
+	fill: rgba(125, 122, 117, 1);
+}
+.block-color-brown {
+	color: rgba(159, 118, 90, 1);
+	fill: rgba(159, 118, 90, 1);
+}
+.block-color-orange {
+	color: rgba(210, 123, 45, 1);
+	fill: rgba(210, 123, 45, 1);
+}
+.block-color-yellow {
+	color: rgba(203, 148, 52, 1);
+	fill: rgba(203, 148, 52, 1);
+}
+.block-color-teal {
+	color: rgba(80, 148, 110, 1);
+	fill: rgba(80, 148, 110, 1);
+}
+.block-color-blue {
+	color: rgba(56, 125, 201, 1);
+	fill: rgba(56, 125, 201, 1);
+}
+.block-color-purple {
+	color: rgba(154, 107, 180, 1);
+	fill: rgba(154, 107, 180, 1);
+}
+.block-color-pink {
+	color: rgba(193, 76, 138, 1);
+	fill: rgba(193, 76, 138, 1);
+}
+.block-color-red {
+	color: rgba(207, 81, 72, 1);
+	fill: rgba(207, 81, 72, 1);
+}
+.block-color-default_background {
+	color: inherit;
+	fill: inherit;
+}
+.block-color-gray_background {
+	background: rgba(240, 239, 237, 1);
+}
+.block-color-brown_background {
+	background: rgba(245, 237, 233, 1);
+}
+.block-color-orange_background {
+	background: rgba(251, 235, 222, 1);
+}
+.block-color-yellow_background {
+	background: rgba(249, 243, 220, 1);
+}
+.block-color-teal_background {
+	background: rgba(232, 241, 236, 1);
+}
+.block-color-blue_background {
+	background: rgba(229, 242, 252, 1);
+}
+.block-color-purple_background {
+	background: rgba(243, 235, 249, 1);
+}
+.block-color-pink_background {
+	background: rgba(250, 233, 241, 1);
+}
+.block-color-red_background {
+	background: rgba(252, 233, 231, 1);
+}
+.select-value-color-default { background-color: rgba(42, 28, 0, 0.07); }
+.select-value-color-gray { background-color: rgba(28, 19, 1, 0.11); }
+.select-value-color-brown { background-color: rgba(127, 51, 0, 0.156); }
+.select-value-color-orange { background-color: rgba(196, 88, 0, 0.203); }
+.select-value-color-yellow { background-color: rgba(209, 156, 0, 0.282); }
+.select-value-color-green { background-color: rgba(0, 96, 38, 0.156); }
+.select-value-color-blue { background-color: rgba(0, 118, 217, 0.203); }
+.select-value-color-purple { background-color: rgba(92, 0, 163, 0.141); }
+.select-value-color-pink { background-color: rgba(183, 0, 78, 0.152); }
+.select-value-color-red { background-color: rgba(206, 24, 0, 0.164); }
+
+.checkbox {
+	display: inline-flex;
+	vertical-align: text-bottom;
+	width: 16;
+	height: 16;
+	background-size: 16px;
+	margin-left: 2px;
+	margin-right: 5px;
+}
+
+.checkbox-on {
+	background-image: url("data:image/svg+xml;charset=UTF-8,%3Csvg%20width%3D%2216%22%20height%3D%2216%22%20viewBox%3D%220%200%2016%2016%22%20fill%3D%22none%22%20xmlns%3D%22http%3A%2F%2Fwww.w3.org%2F2000%2Fsvg%22%3E%0A%3Crect%20width%3D%2216%22%20height%3D%2216%22%20fill%3D%22%2358A9D7%22%2F%3E%0A%3Cpath%20d%3D%22M6.71429%2012.2852L14%204.9995L12.7143%203.71436L6.71429%209.71378L3.28571%206.2831L2%207.57092L6.71429%2012.2852Z%22%20fill%3D%22white%22%2F%3E%0A%3C%2Fsvg%3E");
+}
+
+.checkbox-off {
+	background-image: url("data:image/svg+xml;charset=UTF-8,%3Csvg%20width%3D%2216%22%20height%3D%2216%22%20viewBox%3D%220%200%2016%2016%22%20fill%3D%22none%22%20xmlns%3D%22http%3A%2F%2Fwww.w3.org%2F2000%2Fsvg%22%3E%0A%3Crect%20x%3D%220.75%22%20y%3D%220.75%22%20width%3D%2214.5%22%20height%3D%2214.5%22%20fill%3D%22white%22%20stroke%3D%22%2336352F%22%20stroke-width%3D%221.5%22%2F%3E%0A%3C%2Fsvg%3E");
+}
+	
+</style></head><body><article id="1e485df0-1907-804e-8e0d-d15d72420459" class="page sans"><header><h1 class="page-title" dir="auto">📈 CMO Growth Blueprint</h1><p class="page-description" dir="auto"></p><table class="properties"><tbody><tr class="property-row property-row-person"><th><span class="icon property-icon"><img src="https://www.notion.so/icons/friends_gray.svg" style="width:14px;height:14px;display:block"/></span>Owner</th><td><span class="user"><span class="icon text-icon user-icon"><span class="user-icon-inner">A</span></span>Aubert</span></td></tr><tr class="property-row property-row-multi_select"><th><span class="icon property-icon"><img src="https://www.notion.so/icons/list_gray.svg" style="width:14px;height:14px;display:block"/></span>Tags</th><td></td></tr></tbody></table></header><div class="page-body"><div style="display:contents" dir="auto"><p id="1e885df0-1907-80e1-b54c-cdf5a4b980c4" class=""><strong>Nzila Ventures – Growth Strategy (2025–2028)</strong></p></div><div style="display:contents" dir="auto"><p id="1e885df0-1907-8052-bc24-ee9cb5ba87ff" class=""><em>“Earn trust. Enable behavior change. Embed in care.”</em></p></div><div style="display:contents" dir="auto"><hr id="1e885df0-1907-80ba-923d-e04646a22609"/></div><div style="display:contents" dir="auto"><h3 id="1e885df0-1907-8066-ba23-dc9d36d32827" class="">🧭 1. Growth Vision</h3></div><div style="display:contents" dir="auto"><p id="1e885df0-1907-8073-8514-dcad41875633" class="">Nzila’s growth is <strong>mission-aligned, ecosystem-aware</strong>, and focused on delivering <strong>measurable impact</strong> — not vanity metrics.</p></div><div style="display:contents" dir="auto"><p id="1e885df0-1907-80b5-a7b4-c361da7c2253" class="">We grow by:</p></div><div style="display:contents" dir="auto"><ul id="1e885df0-1907-8063-a9fa-dc7700e98a51" class="bulleted-list"><li style="list-style-type:disc"><strong>Serving caregivers first</strong>, not selling to them</li></ul></div><div style="display:contents" dir="auto"><ul id="1e885df0-1907-808d-b253-d00deebbffdb" class="bulleted-list"><li style="list-style-type:disc"><strong>Co-creating with clinics</strong>, not extracting data from them</li></ul></div><div style="display:contents" dir="auto"><ul id="1e885df0-1907-8092-b525-f66f92024f9a" class="bulleted-list"><li style="list-style-type:disc"><strong>Positioning AI as support</strong>, never replacement</li></ul></div><div style="display:contents" dir="auto"><p id="1e885df0-1907-8008-97e3-f487acc0c68d" class=""><strong>Bottom-up (caregivers) + Top-down (clinics) = Network-powered growth.</strong></p></div><div style="display:contents" dir="auto"><hr id="1e885df0-1907-8026-80fc-fb847a49bd5f"/></div><div style="display:contents" dir="auto"><h3 id="1e885df0-1907-8090-bb2d-ceb7fe843015" class="">🎯 2. Growth Objectives by Stage</h3></div><div style="display:contents" dir="ltr"><table id="1e885df0-1907-8005-9a4a-fdde0b926e1c" class="simple-table"><tbody><div style="display:contents" dir="ltr"><tr id="1e885df0-1907-801d-8b9a-cea86eb68931"><td id="cP`}" class="">Phase</td><td id="HtLP" class="">Objective</td></tr></div><div style="display:contents" dir="ltr"><tr id="1e885df0-1907-80f2-868f-e5685f43198b"><td id="cP`}" class=""><strong>2025 (MVP)</strong></td><td id="HtLP" class="">Validate product-market fit; build waitlist + 3–5 pilot clinics</td></tr></div><div style="display:contents" dir="ltr"><tr id="1e885df0-1907-8052-b2ed-c79fc3544571"><td id="cP`}" class=""><strong>2026 (National)</strong></td><td id="HtLP" class="">Reach 5K caregivers, 25+ clinics, and publish 3+ case studies</td></tr></div><div style="display:contents" dir="ltr"><tr id="1e885df0-1907-806e-82de-fbc4dda1af8d"><td id="cP`}" class=""><strong>2027 (Expansion)</strong></td><td id="HtLP" class="">Launch in U.S. via state-based pilots + 2 new products (CareAI, FamilySync)</td></tr></div><div style="display:contents" dir="ltr"><tr id="1e885df0-1907-80b3-a93c-d5c93feaae49"><td id="cP`}" class=""><strong>2028 (Platformization)</strong></td><td id="HtLP" class="">Establish Nzila as a caretech ecosystem with cross-product retention</td></tr></div></tbody></table></div><div style="display:contents" dir="auto"><hr id="1e885df0-1907-80cf-b3ba-e1edbf9c7f50"/></div><div style="display:contents" dir="auto"><h3 id="1e885df0-1907-80e3-8324-fcd70e814be6" class="">🎯 3. Strategic Audience Profiles</h3></div><div style="display:contents" dir="auto"><h3 id="1e885df0-1907-8043-a291-d071409594e3" class="">🧍 Caregivers</h3></div><div style="display:contents" dir="auto"><ul id="1e885df0-1907-8037-983a-f8d8bef1ff48" class="bulleted-list"><li style="list-style-type:disc">Women aged 35–64 caring for loved ones with cognitive decline</li></ul></div><div style="display:contents" dir="auto"><ul id="1e885df0-1907-800f-8ec5-d510da1ad286" class="bulleted-list"><li style="list-style-type:disc">Trust <strong>peer endorsements, practical tools, and emotional relief</strong></li></ul></div><div style="display:contents" dir="auto"><ul id="1e885df0-1907-80eb-ad2b-dc53e5fe8be7" class="bulleted-list"><li style="list-style-type:disc">High mobile usage, moderate tech literacy</li></ul></div><div style="display:contents" dir="auto"><h3 id="1e885df0-1907-8040-8436-c8d569caa5f0" class="">🏥 Clinics &amp; Researchers</h3></div><div style="display:contents" dir="auto"><ul id="1e885df0-1907-805b-9513-dbfc08e50e18" class="bulleted-list"><li style="list-style-type:disc">Memory clinics, aging programs, and cognitive research sites</li></ul></div><div style="display:contents" dir="auto"><ul id="1e885df0-1907-8079-ad1c-d901876ca9e9" class="bulleted-list"><li style="list-style-type:disc">Seek <strong>adherence improvement</strong>, <strong>low-lift digital support</strong>, and <strong>privacy-compliant tools</strong></li></ul></div><div style="display:contents" dir="auto"><h3 id="1e885df0-1907-803e-bdca-ca6d125fad46" class="">🏛️ Advocacy &amp; Public Orgs</h3></div><div style="display:contents" dir="auto"><ul id="1e885df0-1907-805a-a875-e6434175e6a6" class="bulleted-list"><li style="list-style-type:disc">Alzheimer Societies, care ministries, CIHR/AGE-WELL, NGOs</li></ul></div><div style="display:contents" dir="auto"><ul id="1e885df0-1907-8035-b3f4-de4a5b2604af" class="bulleted-list"><li style="list-style-type:disc">Co-marketing potential and grant-based partnerships</li></ul></div><div style="display:contents" dir="auto"><hr id="1e885df0-1907-8032-9fbb-d4ff47c498e8"/></div><div style="display:contents" dir="auto"><h3 id="1e885df0-1907-805a-9c1a-f9f9a7533871" class="">💡 4. Key Acquisition Channels</h3></div><div style="display:contents" dir="auto"><h3 id="1e885df0-1907-803b-9404-dc771d94b9da" class="">🧍 For Caregivers</h3></div><div style="display:contents" dir="ltr"><table id="1e885df0-1907-8008-98b8-d327c12360da" class="simple-table"><tbody><div style="display:contents" dir="ltr"><tr id="1e885df0-1907-80ed-b20e-ccc861a2c3a1"><td id="_FG~" class="">Channel</td><td id="g@QJ" class="">Tactic</td></tr></div><div style="display:contents" dir="ltr"><tr id="1e885df0-1907-802f-9416-e2a42183ae0a"><td id="_FG~" class=""><strong>Influencer Micro-Networks</strong></td><td id="g@QJ" class="">Partner with 15–20 voices in caregiver burnout and dementia support</td></tr></div><div style="display:contents" dir="ltr"><tr id="1e885df0-1907-8012-bc73-f6de90c93089"><td id="_FG~" class=""><strong>Email Funnel</strong></td><td id="g@QJ" class="">“Cognitive Wellness Kit” → signup journey → Companion use</td></tr></div><div style="display:contents" dir="ltr"><tr id="1e885df0-1907-802e-9cb4-fe6503648777"><td id="_FG~" class=""><strong>SEO &amp; Blog</strong></td><td id="g@QJ" class="">Long-tail topics: “How to help aging parents”, “Memory games for seniors”</td></tr></div><div style="display:contents" dir="ltr"><tr id="1e885df0-1907-80a8-86c2-c7abf73bb21d"><td id="_FG~" class=""><strong>Meta Ads</strong></td><td id="g@QJ" class="">Lookalike audiences + retargeting for downloads</td></tr></div><div style="display:contents" dir="ltr"><tr id="1e885df0-1907-80f5-8de2-d5082b79bed7"><td id="_FG~" class=""><strong>Referral Loops</strong></td><td id="g@QJ" class="">Shareable invites for unlocking Premium or family sync access</td></tr></div></tbody></table></div><div style="display:contents" dir="auto"><h3 id="1e885df0-1907-8043-bbc1-c95d59c96776" class="">🏥 For Clinics</h3></div><div style="display:contents" dir="ltr"><table id="1e885df0-1907-80e3-ac86-c65669b984fe" class="simple-table"><tbody><div style="display:contents" dir="ltr"><tr id="1e885df0-1907-80f2-b7f0-c91354c4973e"><td id="kcnJ" class="">Channel</td><td id="kbN_" class="">Tactic</td></tr></div><div style="display:contents" dir="ltr"><tr id="1e885df0-1907-80f3-8985-edbe7c040af5"><td id="kcnJ" class=""><strong>Warm Intros + Pilots</strong></td><td id="kbN_" class="">Prioritize existing research contacts and Safe Sport networks</td></tr></div><div style="display:contents" dir="ltr"><tr id="1e885df0-1907-80d6-87dd-f98a792c6dda"><td id="kcnJ" class=""><strong>Conference Leads + LinkedIn</strong></td><td id="kbN_" class="">Targeted outreach post-event or abstract submission</td></tr></div><div style="display:contents" dir="ltr"><tr id="1e885df0-1907-8045-98f3-ea5f2c361bd0"><td id="kcnJ" class=""><strong>Co-branded Materials</strong></td><td id="kbN_" class="">Leave-behind flyers, demo decks, consent walkthroughs</td></tr></div><div style="display:contents" dir="ltr"><tr id="1e885df0-1907-802e-be81-cdf8a7aa8fec"><td id="kcnJ" class=""><strong>Zoom Demos</strong></td><td id="kbN_" class="">Rotating “Digital Memory Clinic Toolkit” showcase</td></tr></div><div style="display:contents" dir="ltr"><tr id="1e885df0-1907-8065-a633-d0bfa53369ad"><td id="kcnJ" class=""><strong>Pilot Debriefs → Case Studies</strong></td><td id="kbN_" class="">Create flywheel from clinic success stories</td></tr></div></tbody></table></div><div style="display:contents" dir="auto"><hr id="1e885df0-1907-80b8-97d8-cb2e689a78c2"/></div><div style="display:contents" dir="auto"><h3 id="1e885df0-1907-80f3-8e94-e16102ea7d0a" class="">🧠 5. Brand Pillars &amp; Voice</h3></div><div style="display:contents" dir="ltr"><table id="1e885df0-1907-8004-a399-e96b5fee38e1" class="simple-table"><tbody><div style="display:contents" dir="ltr"><tr id="1e885df0-1907-802d-9106-e963d69b5d55"><td id="~xUS" class="">Pillar</td><td id="Fuu~" class="">Expression</td></tr></div><div style="display:contents" dir="ltr"><tr id="1e885df0-1907-8087-92d8-e5fd73b53fe9"><td id="~xUS" class=""><strong>Care First, Tech Second</strong></td><td id="Fuu~" class="">Companion speaks gently, app feels emotionally aware</td></tr></div><div style="display:contents" dir="ltr"><tr id="1e885df0-1907-8005-8c98-caf58daa3057"><td id="~xUS" class=""><strong>Clinical but Warm</strong></td><td id="Fuu~" class="">Aligned with research, built with empathy</td></tr></div><div style="display:contents" dir="ltr"><tr id="1e885df0-1907-80d1-96e0-d2ab1caec7b7"><td id="~xUS" class=""><strong>Simplicity with Soul</strong></td><td id="Fuu~" class="">Easy to use, meaningful in tone</td></tr></div><div style="display:contents" dir="ltr"><tr id="1e885df0-1907-8040-b46a-e148bec921f6"><td id="~xUS" class=""><strong>Built in Canada, Ready for the World</strong></td><td id="Fuu~" class="">Dual-language, Law 25-first foundation</td></tr></div></tbody></table></div><div style="display:contents" dir="auto"><p id="1e885df0-1907-808c-9b35-fadaa5917ba6" class="">🧩 <strong>Voice</strong>: Calm, compassionate, informative — <strong>Zocdoc meets Headspace</strong>, with a Québecois heartbeat</p></div><div style="display:contents" dir="auto"><hr id="1e885df0-1907-80c8-a2f1-ccefdb35e419"/></div><div style="display:contents" dir="auto"><h3 id="1e885df0-1907-8064-8ff6-ffd5edd3ea76" class="">📊 6. Metrics &amp; KPIs</h3></div><div style="display:contents" dir="ltr"><table id="1e885df0-1907-80a0-9dd4-de09c20f2f46" class="simple-table"><tbody><div style="display:contents" dir="ltr"><tr id="1e885df0-1907-80a2-b4f5-c468d20e8073"><td id="JD&lt;&gt;" class="">Funnel</td><td id="W^Ht" class="">Metric</td></tr></div><div style="display:contents" dir="ltr"><tr id="1e885df0-1907-809e-895b-feb14ff6f3ec"><td id="JD&lt;&gt;" class=""><strong>Awareness</strong></td><td id="W^Ht" class="">Site visits, search impressions, resource downloads</td></tr></div><div style="display:contents" dir="ltr"><tr id="1e885df0-1907-803b-b7a8-f7a3d34f5548"><td id="JD&lt;&gt;" class=""><strong>Acquisition</strong></td><td id="W^Ht" class="">Signups (caregiver/clinic), email opt-ins</td></tr></div><div style="display:contents" dir="ltr"><tr id="1e885df0-1907-8092-b64f-ff961e5a251f"><td id="JD&lt;&gt;" class=""><strong>Activation</strong></td><td id="W^Ht" class="">Companion first-use, dashboard setup</td></tr></div><div style="display:contents" dir="ltr"><tr id="1e885df0-1907-80bb-8d0f-d241dfd15080"><td id="JD&lt;&gt;" class=""><strong>Engagement</strong></td><td id="W^Ht" class="">Games/week, nudge response rate, caregiver feedback</td></tr></div><div style="display:contents" dir="ltr"><tr id="1e885df0-1907-8088-955b-e7e62785a9d8"><td id="JD&lt;&gt;" class=""><strong>Retention</strong></td><td id="W^Ht" class="">30/90-day return rate, dashboard re-logins</td></tr></div><div style="display:contents" dir="ltr"><tr id="1e885df0-1907-80b2-bcd2-db9e14fb03c1"><td id="JD&lt;&gt;" class=""><strong>Referral</strong></td><td id="W^Ht" class="">Invites sent, conversion from shared links</td></tr></div><div style="display:contents" dir="ltr"><tr id="1e885df0-1907-80d7-9bf3-dfe629008cc1"><td id="JD&lt;&gt;" class=""><strong>Revenue</strong></td><td id="W^Ht" class="">Monthly recurring revenue (clinic + B2C)</td></tr></div></tbody></table></div><div style="display:contents" dir="auto"><hr id="1e885df0-1907-8021-a94d-fcc9e697e490"/></div><div style="display:contents" dir="auto"><h3 id="1e885df0-1907-8097-94f1-c5d74fced9c2" class="">🛠️ 7. Growth Stack (Live &amp; Planned)</h3></div><div style="display:contents" dir="ltr"><table id="1e885df0-1907-805a-a867-feaca61a8b6d" class="simple-table"><tbody><div style="display:contents" dir="ltr"><tr id="1e885df0-1907-8026-9111-c46584bef04e"><td id="^BXM" class="">Tool</td><td id="^kR]" class="">Use</td></tr></div><div style="display:contents" dir="ltr"><tr id="1e885df0-1907-80d9-9198-c3b2e2e9c1e1"><td id="^BXM" class=""><strong>Brevo</strong></td><td id="^kR]" class="">Email automation, caregiver nurturing</td></tr></div><div style="display:contents" dir="ltr"><tr id="1e885df0-1907-8031-b2bc-fb424303d572"><td id="^BXM" class=""><strong>Meta + Google Ads</strong></td><td id="^kR]" class="">Paid caregiver acquisition pilots</td></tr></div><div style="display:contents" dir="ltr"><tr id="1e885df0-1907-8037-b31b-e79ecd875e30"><td id="^BXM" class=""><strong>Canva</strong></td><td id="^kR]" class="">Campaign graphics + clinic support collateral</td></tr></div><div style="display:contents" dir="ltr"><tr id="1e885df0-1907-8038-8e11-d915bd43491c"><td id="^BXM" class=""><strong>Notion</strong></td><td id="^kR]" class="">Growth calendar + CRM tagging</td></tr></div><div style="display:contents" dir="ltr"><tr id="1e885df0-1907-8008-9f8f-f513a2166a6b"><td id="^BXM" class=""><strong>Google Analytics</strong></td><td id="^kR]" class="">Page traffic, content funnel conversion</td></tr></div><div style="display:contents" dir="ltr"><tr id="1e885df0-1907-8037-92bb-d050eaf84ab5"><td id="^BXM" class=""><em>(2026+)</em> Intercom or Typeform</td><td id="^kR]" class="">On-site surveys + activation prompts</td></tr></div></tbody></table></div><div style="display:contents" dir="auto"><hr id="1e885df0-1907-8000-8fd7-e58d6816aa62"/></div><div style="display:contents" dir="auto"><h3 id="1e885df0-1907-8097-b029-e25439aab009" class="">🔁 8. Operating Cadence</h3></div><div style="display:contents" dir="ltr"><table id="1e885df0-1907-8062-9a2e-dc420f86abbc" class="simple-table"><tbody><div style="display:contents" dir="ltr"><tr id="1e885df0-1907-8065-a18b-e3e5cee6d80f"><td id="o&lt;;B" class="">Rhythm</td><td id="YoZ{" class="">Focus</td></tr></div><div style="display:contents" dir="ltr"><tr id="1e885df0-1907-805d-ad90-e8debe93a74e"><td id="o&lt;;B" class="">Weekly</td><td id="YoZ{" class="">Content push, caregiver opt-in review</td></tr></div><div style="display:contents" dir="ltr"><tr id="1e885df0-1907-8061-8054-f432e158beac"><td id="o&lt;;B" class="">Bi-weekly</td><td id="YoZ{" class="">Campaign and pilot feedback retro</td></tr></div><div style="display:contents" dir="ltr"><tr id="1e885df0-1907-8077-a612-d67dd3b05b06"><td id="o&lt;;B" class="">Monthly</td><td id="YoZ{" class="">Clinic outreach expansion, case study planning</td></tr></div><div style="display:contents" dir="ltr"><tr id="1e885df0-1907-808c-89c0-f721a3b65903"><td id="o&lt;;B" class="">Quarterly</td><td id="YoZ{" class="">Brand tone audit, performance metrics deep dive</td></tr></div></tbody></table></div><div style="display:contents" dir="auto"><hr id="1e885df0-1907-804a-b132-e009f958e771"/></div><div style="display:contents" dir="auto"><h3 id="1e885df0-1907-80fc-9351-e052716520f3" class="">📅 9. Roadmap Milestones</h3></div><div style="display:contents" dir="ltr"><table id="1e885df0-1907-80b8-b1e8-e58c364f81f9" class="simple-table"><tbody><div style="display:contents" dir="ltr"><tr id="1e885df0-1907-800c-ae0c-cc4a65a60502"><td id="xXaz" class="">Date</td><td id="pW[k" class="">Milestone</td></tr></div><div style="display:contents" dir="ltr"><tr id="1e885df0-1907-8064-8717-eb57194a7256"><td id="xXaz" class=""><strong>Q3 2025</strong></td><td id="pW[k" class="">Launch waitlist landing page + first influencer partnership</td></tr></div><div style="display:contents" dir="ltr"><tr id="1e885df0-1907-80ee-81cc-da6c88f8ddd1"><td id="xXaz" class=""><strong>Q4 2025</strong></td><td id="pW[k" class="">2 active clinic pilots with caregiver onboarding kits</td></tr></div><div style="display:contents" dir="ltr"><tr id="1e885df0-1907-801f-9ca2-c0f541f01ff1"><td id="xXaz" class=""><strong>Q1 2026</strong></td><td id="pW[k" class="">Full caregiver onboarding flow + clinic dashboards live</td></tr></div><div style="display:contents" dir="ltr"><tr id="1e885df0-1907-809d-b2fc-f717047242c4"><td id="xXaz" class=""><strong>Q2 2026</strong></td><td id="pW[k" class="">5,000 caregiver users milestone + national referral launch</td></tr></div><div style="display:contents" dir="ltr"><tr id="1e885df0-1907-8012-8236-ee7ba6c21802"><td id="xXaz" class=""><strong>2027</strong></td><td id="pW[k" class="">U.S. pilot entry + product line expansion (CareAI, FamilySync)</td></tr></div></tbody></table></div></div></article><span class="sans" style="font-size:14px;padding-top:2em"></span></body></html>

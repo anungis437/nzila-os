@@ -1,0 +1,713 @@
+<html><head><meta http-equiv="Content-Type" content="text/html; charset=utf-8"/><title>📜 Founder Succession &amp; Continuity Plan</title><style>
+/* cspell:disable-file */
+/* webkit printing magic: print all background colors */
+html {
+	-webkit-print-color-adjust: exact;
+}
+* {
+	box-sizing: border-box;
+	-webkit-print-color-adjust: exact;
+}
+
+html,
+body {
+	margin: 0;
+	padding: 0;
+}
+@media only screen {
+	body {
+		margin: 2em auto;
+		max-width: 900px;
+		color: rgb(55, 53, 47);
+	}
+}
+
+body {
+	line-height: 1.5;
+	white-space: pre-wrap;
+}
+
+a,
+a.visited {
+	color: inherit;
+	text-decoration: underline;
+}
+
+.pdf-relative-link-path {
+	font-size: 80%;
+	color: #444;
+}
+
+h1,
+h2,
+h3 {
+	letter-spacing: -0.01em;
+	line-height: 1.2;
+	font-weight: 600;
+	margin-bottom: 0;
+}
+
+/* Override strong tags inside headings to maintain consistent weight */
+h1 strong,
+h2 strong,
+h3 strong {
+	font-weight: 600;
+}
+
+.page-title {
+	font-size: 2.5rem;
+	font-weight: 700;
+	margin-top: 0;
+	margin-bottom: 0.75em;
+}
+
+h1 {
+	font-size: 1.875rem;
+	margin-top: 1.875rem;
+}
+
+h2 {
+	font-size: 1.5rem;
+	margin-top: 1.5rem;
+}
+
+h3 {
+	font-size: 1.25rem;
+	margin-top: 1.25rem;
+}
+
+.source {
+	border: 1px solid #ddd;
+	border-radius: 3px;
+	padding: 1.5em;
+	word-break: break-all;
+}
+
+.callout {
+	border-radius: 10px;
+	padding: 1rem;
+}
+
+figure {
+	margin: 1.25em 0;
+	page-break-inside: avoid;
+}
+
+figcaption {
+	opacity: 0.5;
+	font-size: 85%;
+	margin-top: 0.5em;
+}
+
+mark {
+	background-color: transparent;
+}
+
+.indented {
+	padding-left: 1.5em;
+}
+
+hr {
+	background: transparent;
+	display: block;
+	width: 100%;
+	height: 1px;
+	visibility: visible;
+	border: none;
+	border-bottom: 1px solid rgba(55, 53, 47, 0.09);
+}
+
+img {
+	max-width: 100%;
+}
+
+@media only print {
+	img {
+		max-height: 100vh;
+		object-fit: contain;
+	}
+}
+
+@page {
+	margin: 1in;
+}
+
+.collection-content {
+	font-size: 0.875rem;
+}
+
+.collection-content td {
+	white-space: pre-wrap;
+	word-break: break-word;
+}
+
+.column-list {
+	display: flex;
+	justify-content: space-between;
+}
+
+.column {
+	padding: 0 1em;
+}
+
+.column:first-child {
+	padding-left: 0;
+}
+
+.column:last-child {
+	padding-right: 0;
+}
+
+.table_of_contents-item {
+	display: block;
+	font-size: 0.875rem;
+	line-height: 1.3;
+	padding: 0.125rem;
+}
+
+.table_of_contents-indent-1 {
+	margin-left: 1.5rem;
+}
+
+.table_of_contents-indent-2 {
+	margin-left: 3rem;
+}
+
+.table_of_contents-indent-3 {
+	margin-left: 4.5rem;
+}
+
+.table_of_contents-link {
+	text-decoration: none;
+	opacity: 0.7;
+	border-bottom: 1px solid rgba(55, 53, 47, 0.18);
+}
+
+table,
+th,
+td {
+	border: 1px solid rgba(55, 53, 47, 0.09);
+	border-collapse: collapse;
+}
+
+table {
+	border-left: none;
+	border-right: none;
+}
+
+th,
+td {
+	font-weight: normal;
+	padding: 0.25em 0.5em;
+	line-height: 1.5;
+	min-height: 1.5em;
+	text-align: left;
+}
+
+th {
+	color: rgba(55, 53, 47, 0.6);
+}
+
+ol,
+ul {
+	margin: 0;
+	margin-block-start: 0.6em;
+	margin-block-end: 0.6em;
+}
+
+li > ol:first-child,
+li > ul:first-child {
+	margin-block-start: 0.6em;
+}
+
+ul > li {
+	list-style: disc;
+}
+
+ul.to-do-list {
+	padding-inline-start: 0;
+}
+
+ul.to-do-list > li {
+	list-style: none;
+}
+
+.to-do-children-checked {
+	text-decoration: line-through;
+	opacity: 0.375;
+}
+
+ul.toggle > li {
+	list-style: none;
+}
+
+ul {
+	padding-inline-start: 1.7em;
+}
+
+ul > li {
+	padding-left: 0.1em;
+}
+
+ol {
+	padding-inline-start: 1.6em;
+}
+
+ol > li {
+	padding-left: 0.2em;
+}
+
+.mono ol {
+	padding-inline-start: 2em;
+}
+
+.mono ol > li {
+	text-indent: -0.4em;
+}
+
+.toggle {
+	padding-inline-start: 0em;
+	list-style-type: none;
+}
+
+/* Indent toggle children */
+.toggle > li > details {
+	padding-left: 1.7em;
+}
+
+.toggle > li > details > summary {
+	margin-left: -1.1em;
+}
+
+.selected-value {
+	display: inline-block;
+	padding: 0 0.5em;
+	background: rgba(206, 205, 202, 0.5);
+	border-radius: 3px;
+	margin-right: 0.5em;
+	margin-top: 0.3em;
+	margin-bottom: 0.3em;
+	white-space: nowrap;
+}
+
+.collection-title {
+	display: inline-block;
+	margin-right: 1em;
+}
+
+.page-description {
+	margin-bottom: 2em;
+}
+
+.simple-table {
+	margin-top: 1em;
+	font-size: 0.875rem;
+	empty-cells: show;
+}
+.simple-table td {
+	height: 29px;
+	min-width: 120px;
+}
+
+.simple-table th {
+	height: 29px;
+	min-width: 120px;
+}
+
+.simple-table-header-color {
+	background: rgb(247, 246, 243);
+	color: black;
+}
+.simple-table-header {
+	font-weight: 500;
+}
+
+time {
+	opacity: 0.5;
+}
+
+.icon {
+	display: inline-flex;
+	align-items: center;
+	justify-content: center;
+	max-width: 1.2em;
+	max-height: 1.2em;
+	text-decoration: none;
+	vertical-align: text-bottom;
+	margin-right: 0.5em;
+}
+
+img.icon {
+	border-radius: 3px;
+}
+
+.callout img.notion-static-icon {
+	width: 1em;
+	height: 1em;
+}
+
+.callout p {
+	margin: 0;
+}
+
+.callout h1,
+.callout h2,
+.callout h3 {
+	margin: 0 0 0.6rem;
+}
+
+.user-icon {
+	width: 1.5em;
+	height: 1.5em;
+	border-radius: 100%;
+	margin-right: 0.5rem;
+}
+
+.user-icon-inner {
+	font-size: 0.8em;
+}
+
+.text-icon {
+	border: 1px solid #000;
+	text-align: center;
+}
+
+.page-cover-image {
+	display: block;
+	object-fit: cover;
+	width: 100%;
+	max-height: 30vh;
+}
+
+.page-header-icon {
+	font-size: 3rem;
+	margin-bottom: 1rem;
+}
+
+.page-header-icon-with-cover {
+	margin-top: -0.72em;
+	margin-left: 0.07em;
+}
+
+.page-header-icon img {
+	border-radius: 3px;
+}
+
+.link-to-page {
+	margin: 1em 0;
+	padding: 0;
+	border: none;
+	font-weight: 500;
+}
+
+p > .user {
+	opacity: 0.5;
+}
+
+td > .user,
+td > time {
+	white-space: nowrap;
+}
+
+input[type="checkbox"] {
+	transform: scale(1.5);
+	margin-right: 0.6em;
+	vertical-align: middle;
+}
+
+p {
+	margin-top: 0.5em;
+	margin-bottom: 0.5em;
+}
+
+.image {
+	border: none;
+	margin: 1.5em 0;
+	padding: 0;
+	border-radius: 0;
+	text-align: center;
+}
+
+.code,
+code {
+	background: rgba(135, 131, 120, 0.15);
+	border-radius: 3px;
+	padding: 0.2em 0.4em;
+	border-radius: 3px;
+	font-size: 85%;
+	tab-size: 2;
+}
+
+code {
+	color: #eb5757;
+}
+
+.code {
+	padding: 1.5em 1em;
+}
+
+.code-wrap {
+	white-space: pre-wrap;
+	word-break: break-all;
+}
+
+.code > code {
+	background: none;
+	padding: 0;
+	font-size: 100%;
+	color: inherit;
+}
+
+blockquote {
+	font-size: 1em;
+	margin: 1em 0;
+	padding-left: 1em;
+	border-left: 3px solid rgb(55, 53, 47);
+}
+
+blockquote.quote-large {
+	font-size: 1.25em;
+}
+
+.bookmark {
+	text-decoration: none;
+	max-height: 8em;
+	padding: 0;
+	display: flex;
+	width: 100%;
+	align-items: stretch;
+}
+
+.bookmark-title {
+	font-size: 0.85em;
+	overflow: hidden;
+	text-overflow: ellipsis;
+	height: 1.75em;
+	white-space: nowrap;
+}
+
+.bookmark-text {
+	display: flex;
+	flex-direction: column;
+}
+
+.bookmark-info {
+	flex: 4 1 180px;
+	padding: 12px 14px 14px;
+	display: flex;
+	flex-direction: column;
+	justify-content: space-between;
+}
+
+.bookmark-image {
+	width: 33%;
+	flex: 1 1 180px;
+	display: block;
+	position: relative;
+	object-fit: cover;
+	border-radius: 1px;
+}
+
+.bookmark-description {
+	color: rgba(55, 53, 47, 0.6);
+	font-size: 0.75em;
+	overflow: hidden;
+	max-height: 4.5em;
+	word-break: break-word;
+}
+
+.bookmark-href {
+	font-size: 0.75em;
+	margin-top: 0.25em;
+}
+
+.sans { font-family: ui-sans-serif, -apple-system, BlinkMacSystemFont, "Segoe UI Variable Display", "Segoe UI", Helvetica, "Apple Color Emoji", "Noto Sans Arabic", "Noto Sans Hebrew", Arial, sans-serif, "Segoe UI Emoji", "Segoe UI Symbol"; }
+.code { font-family: "SFMono-Regular", Menlo, Consolas, "PT Mono", "Liberation Mono", Courier, monospace; }
+.serif { font-family: Lyon-Text, Georgia, ui-serif, serif; }
+.mono { font-family: iawriter-mono, Nitti, Menlo, Courier, monospace; }
+.pdf .sans { font-family: Inter, ui-sans-serif, -apple-system, BlinkMacSystemFont, "Segoe UI Variable Display", "Segoe UI", Helvetica, "Apple Color Emoji", "Noto Sans Arabic", "Noto Sans Hebrew", Arial, sans-serif, "Segoe UI Emoji", "Segoe UI Symbol", 'Twemoji', 'Noto Color Emoji', 'Noto Sans CJK JP'; }
+.pdf:lang(zh-CN) .sans { font-family: Inter, ui-sans-serif, -apple-system, BlinkMacSystemFont, "Segoe UI Variable Display", "Segoe UI", Helvetica, "Apple Color Emoji", "Noto Sans Arabic", "Noto Sans Hebrew", Arial, sans-serif, "Segoe UI Emoji", "Segoe UI Symbol", 'Twemoji', 'Noto Color Emoji', 'Noto Sans CJK SC'; }
+.pdf:lang(zh-TW) .sans { font-family: Inter, ui-sans-serif, -apple-system, BlinkMacSystemFont, "Segoe UI Variable Display", "Segoe UI", Helvetica, "Apple Color Emoji", "Noto Sans Arabic", "Noto Sans Hebrew", Arial, sans-serif, "Segoe UI Emoji", "Segoe UI Symbol", 'Twemoji', 'Noto Color Emoji', 'Noto Sans CJK TC'; }
+.pdf:lang(ko-KR) .sans { font-family: Inter, ui-sans-serif, -apple-system, BlinkMacSystemFont, "Segoe UI Variable Display", "Segoe UI", Helvetica, "Apple Color Emoji", "Noto Sans Arabic", "Noto Sans Hebrew", Arial, sans-serif, "Segoe UI Emoji", "Segoe UI Symbol", 'Twemoji', 'Noto Color Emoji', 'Noto Sans CJK KR'; }
+.pdf .code { font-family: Source Code Pro, "SFMono-Regular", Menlo, Consolas, "PT Mono", "Liberation Mono", Courier, monospace, 'Twemoji', 'Noto Color Emoji', 'Noto Sans Mono CJK JP'; }
+.pdf:lang(zh-CN) .code { font-family: Source Code Pro, "SFMono-Regular", Menlo, Consolas, "PT Mono", "Liberation Mono", Courier, monospace, 'Twemoji', 'Noto Color Emoji', 'Noto Sans Mono CJK SC'; }
+.pdf:lang(zh-TW) .code { font-family: Source Code Pro, "SFMono-Regular", Menlo, Consolas, "PT Mono", "Liberation Mono", Courier, monospace, 'Twemoji', 'Noto Color Emoji', 'Noto Sans Mono CJK TC'; }
+.pdf:lang(ko-KR) .code { font-family: Source Code Pro, "SFMono-Regular", Menlo, Consolas, "PT Mono", "Liberation Mono", Courier, monospace, 'Twemoji', 'Noto Color Emoji', 'Noto Sans Mono CJK KR'; }
+.pdf .serif { font-family: PT Serif, Lyon-Text, Georgia, ui-serif, serif, 'Twemoji', 'Noto Color Emoji', 'Noto Serif CJK JP'; }
+.pdf:lang(zh-CN) .serif { font-family: PT Serif, Lyon-Text, Georgia, ui-serif, serif, 'Twemoji', 'Noto Color Emoji', 'Noto Serif CJK SC'; }
+.pdf:lang(zh-TW) .serif { font-family: PT Serif, Lyon-Text, Georgia, ui-serif, serif, 'Twemoji', 'Noto Color Emoji', 'Noto Serif CJK TC'; }
+.pdf:lang(ko-KR) .serif { font-family: PT Serif, Lyon-Text, Georgia, ui-serif, serif, 'Twemoji', 'Noto Color Emoji', 'Noto Serif CJK KR'; }
+.pdf .mono { font-family: PT Mono, iawriter-mono, Nitti, Menlo, Courier, monospace, 'Twemoji', 'Noto Color Emoji', 'Noto Sans Mono CJK JP'; }
+.pdf:lang(zh-CN) .mono { font-family: PT Mono, iawriter-mono, Nitti, Menlo, Courier, monospace, 'Twemoji', 'Noto Color Emoji', 'Noto Sans Mono CJK SC'; }
+.pdf:lang(zh-TW) .mono { font-family: PT Mono, iawriter-mono, Nitti, Menlo, Courier, monospace, 'Twemoji', 'Noto Color Emoji', 'Noto Sans Mono CJK TC'; }
+.pdf:lang(ko-KR) .mono { font-family: PT Mono, iawriter-mono, Nitti, Menlo, Courier, monospace, 'Twemoji', 'Noto Color Emoji', 'Noto Sans Mono CJK KR'; }
+.highlight-default {
+	color: rgba(44, 44, 43, 1);
+}
+.highlight-gray {
+	color: rgba(125, 122, 117, 1);
+	fill: rgba(125, 122, 117, 1);
+}
+.highlight-brown {
+	color: rgba(159, 118, 90, 1);
+	fill: rgba(159, 118, 90, 1);
+}
+.highlight-orange {
+	color: rgba(210, 123, 45, 1);
+	fill: rgba(210, 123, 45, 1);
+}
+.highlight-yellow {
+	color: rgba(203, 148, 52, 1);
+	fill: rgba(203, 148, 52, 1);
+}
+.highlight-teal {
+	color: rgba(80, 148, 110, 1);
+	fill: rgba(80, 148, 110, 1);
+}
+.highlight-blue {
+	color: rgba(56, 125, 201, 1);
+	fill: rgba(56, 125, 201, 1);
+}
+.highlight-purple {
+	color: rgba(154, 107, 180, 1);
+	fill: rgba(154, 107, 180, 1);
+}
+.highlight-pink {
+	color: rgba(193, 76, 138, 1);
+	fill: rgba(193, 76, 138, 1);
+}
+.highlight-red {
+	color: rgba(207, 81, 72, 1);
+	fill: rgba(207, 81, 72, 1);
+}
+.highlight-default_background {
+	color: rgba(44, 44, 43, 1);
+}
+.highlight-gray_background {
+	background: rgba(42, 28, 0, 0.07);
+}
+.highlight-brown_background {
+	background: rgba(139, 46, 0, 0.086);
+}
+.highlight-orange_background {
+	background: rgba(224, 101, 1, 0.129);
+}
+.highlight-yellow_background {
+	background: rgba(211, 168, 0, 0.137);
+}
+.highlight-teal_background {
+	background: rgba(0, 100, 45, 0.09);
+}
+.highlight-blue_background {
+	background: rgba(0, 124, 215, 0.094);
+}
+.highlight-purple_background {
+	background: rgba(102, 0, 178, 0.078);
+}
+.highlight-pink_background {
+	background: rgba(197, 0, 93, 0.086);
+}
+.highlight-red_background {
+	background: rgba(223, 22, 0, 0.094);
+}
+.block-color-default {
+	color: inherit;
+	fill: inherit;
+}
+.block-color-gray {
+	color: rgba(125, 122, 117, 1);
+	fill: rgba(125, 122, 117, 1);
+}
+.block-color-brown {
+	color: rgba(159, 118, 90, 1);
+	fill: rgba(159, 118, 90, 1);
+}
+.block-color-orange {
+	color: rgba(210, 123, 45, 1);
+	fill: rgba(210, 123, 45, 1);
+}
+.block-color-yellow {
+	color: rgba(203, 148, 52, 1);
+	fill: rgba(203, 148, 52, 1);
+}
+.block-color-teal {
+	color: rgba(80, 148, 110, 1);
+	fill: rgba(80, 148, 110, 1);
+}
+.block-color-blue {
+	color: rgba(56, 125, 201, 1);
+	fill: rgba(56, 125, 201, 1);
+}
+.block-color-purple {
+	color: rgba(154, 107, 180, 1);
+	fill: rgba(154, 107, 180, 1);
+}
+.block-color-pink {
+	color: rgba(193, 76, 138, 1);
+	fill: rgba(193, 76, 138, 1);
+}
+.block-color-red {
+	color: rgba(207, 81, 72, 1);
+	fill: rgba(207, 81, 72, 1);
+}
+.block-color-default_background {
+	color: inherit;
+	fill: inherit;
+}
+.block-color-gray_background {
+	background: rgba(240, 239, 237, 1);
+}
+.block-color-brown_background {
+	background: rgba(245, 237, 233, 1);
+}
+.block-color-orange_background {
+	background: rgba(251, 235, 222, 1);
+}
+.block-color-yellow_background {
+	background: rgba(249, 243, 220, 1);
+}
+.block-color-teal_background {
+	background: rgba(232, 241, 236, 1);
+}
+.block-color-blue_background {
+	background: rgba(229, 242, 252, 1);
+}
+.block-color-purple_background {
+	background: rgba(243, 235, 249, 1);
+}
+.block-color-pink_background {
+	background: rgba(250, 233, 241, 1);
+}
+.block-color-red_background {
+	background: rgba(252, 233, 231, 1);
+}
+.select-value-color-default { background-color: rgba(42, 28, 0, 0.07); }
+.select-value-color-gray { background-color: rgba(28, 19, 1, 0.11); }
+.select-value-color-brown { background-color: rgba(127, 51, 0, 0.156); }
+.select-value-color-orange { background-color: rgba(196, 88, 0, 0.203); }
+.select-value-color-yellow { background-color: rgba(209, 156, 0, 0.282); }
+.select-value-color-green { background-color: rgba(0, 96, 38, 0.156); }
+.select-value-color-blue { background-color: rgba(0, 118, 217, 0.203); }
+.select-value-color-purple { background-color: rgba(92, 0, 163, 0.141); }
+.select-value-color-pink { background-color: rgba(183, 0, 78, 0.152); }
+.select-value-color-red { background-color: rgba(206, 24, 0, 0.164); }
+
+.checkbox {
+	display: inline-flex;
+	vertical-align: text-bottom;
+	width: 16;
+	height: 16;
+	background-size: 16px;
+	margin-left: 2px;
+	margin-right: 5px;
+}
+
+.checkbox-on {
+	background-image: url("data:image/svg+xml;charset=UTF-8,%3Csvg%20width%3D%2216%22%20height%3D%2216%22%20viewBox%3D%220%200%2016%2016%22%20fill%3D%22none%22%20xmlns%3D%22http%3A%2F%2Fwww.w3.org%2F2000%2Fsvg%22%3E%0A%3Crect%20width%3D%2216%22%20height%3D%2216%22%20fill%3D%22%2358A9D7%22%2F%3E%0A%3Cpath%20d%3D%22M6.71429%2012.2852L14%204.9995L12.7143%203.71436L6.71429%209.71378L3.28571%206.2831L2%207.57092L6.71429%2012.2852Z%22%20fill%3D%22white%22%2F%3E%0A%3C%2Fsvg%3E");
+}
+
+.checkbox-off {
+	background-image: url("data:image/svg+xml;charset=UTF-8,%3Csvg%20width%3D%2216%22%20height%3D%2216%22%20viewBox%3D%220%200%2016%2016%22%20fill%3D%22none%22%20xmlns%3D%22http%3A%2F%2Fwww.w3.org%2F2000%2Fsvg%22%3E%0A%3Crect%20x%3D%220.75%22%20y%3D%220.75%22%20width%3D%2214.5%22%20height%3D%2214.5%22%20fill%3D%22white%22%20stroke%3D%22%2336352F%22%20stroke-width%3D%221.5%22%2F%3E%0A%3C%2Fsvg%3E");
+}
+	
+</style></head><body><article id="1e885df0-1907-80c0-b39b-fb37b4a9b752" class="page sans"><header><h1 class="page-title" dir="auto">📜 <strong>Founder Succession &amp; Continuity Plan</strong></h1><p class="page-description" dir="auto"></p><table class="properties"><tbody><tr class="property-row property-row-person"><th><span class="icon property-icon"><img src="https://www.notion.so/icons/friends_gray.svg" style="width:14px;height:14px;display:block"/></span>Owner</th><td><span class="user"><span class="icon text-icon user-icon"><span class="user-icon-inner">A</span></span>Aubert</span></td></tr><tr class="property-row property-row-multi_select"><th><span class="icon property-icon"><img src="https://www.notion.so/icons/list_gray.svg" style="width:14px;height:14px;display:block"/></span>Tags</th><td></td></tr></tbody></table></header><div class="page-body"><div style="display:contents" dir="auto"><p id="1e885df0-1907-80c3-9d9d-d4b4a4ba9065" class=""><strong>Nzila Ventures Inc.</strong></p></div><div style="display:contents" dir="auto"><p id="1e885df0-1907-80d9-b414-c41323979ea4" class=""><strong>Version:</strong> 1.0 – For Internal Use Only</p></div><div style="display:contents" dir="auto"><p id="1e885df0-1907-8002-8aa7-e3c50dbde1e2" class=""><strong>Prepared By:</strong> Executive Leadership Team</p></div><div style="display:contents" dir="auto"><p id="1e885df0-1907-8007-9578-c2b9e07d58d0" class=""><strong>Last Updated:</strong> [Insert Date]</p></div><div style="display:contents" dir="auto"><hr id="1e885df0-1907-808f-bc03-ca4c5e47745b"/></div><div style="display:contents" dir="auto"><h3 id="1e885df0-1907-8056-993b-ebe7effb4a9d" class="">1. <strong>Objective of the Plan</strong></h3></div><div style="display:contents" dir="auto"><p id="1e885df0-1907-80db-a441-cec023293a1e" class="">The <strong>Founder Succession &amp; Continuity Plan</strong> is designed to ensure that Nzila Ventures&#x27; leadership transitions are managed efficiently, minimizing any disruption to operations, strategic goals, and organizational culture. The plan outlines the necessary steps for founder succession and leadership continuity across various scenarios, such as retirement, incapacity, exit, or other unforeseen circumstances.</p></div><div style="display:contents" dir="auto"><hr id="1e885df0-1907-808e-ac05-dd8fff961750"/></div><div style="display:contents" dir="auto"><h3 id="1e885df0-1907-8011-9175-de3db1a55bbd" class="">2. <strong>Succession Framework Overview</strong></h3></div><div style="display:contents" dir="auto"><p id="1e885df0-1907-803a-94fc-faa0c7db479b" class="">The succession framework will be divided into <strong>phases</strong> that address the <strong>critical roles</strong>, including the <strong>CEO/Chair (Founder)</strong>, <strong>C-suite</strong> executives, and <strong>key leadership positions</strong>. The goal is to ensure that the leadership pipeline is continuously developed, that there is a robust emergency plan, and that the company remains focused on its long-term vision and mission.</p></div><div style="display:contents" dir="auto"><hr id="1e885df0-1907-8090-ad52-efd0ca6b2292"/></div><div style="display:contents" dir="auto"><h3 id="1e885df0-1907-8046-80e7-fe75a82318b4" class="">3. <strong>Key Roles and Responsibilities</strong></h3></div><div style="display:contents" dir="auto"><h3 id="1e885df0-1907-8074-89da-f95401e9c5ab" class="">A. <strong>Founder (CEO/Chair)</strong></h3></div><div style="display:contents" dir="auto"><ul id="1e885df0-1907-80dd-82f0-f5b4ac7db633" class="bulleted-list"><li style="list-style-type:disc"><strong>Key Responsibilities</strong>:<div style="display:contents" dir="auto"><ul id="1e885df0-1907-8034-a80d-fd3fa281d2a7" class="bulleted-list"><li style="list-style-type:circle">Lead strategic vision for Nzila Ventures, including its expansion into new verticals such as <strong>CareTech, EdTech, and LegalTech</strong>.</li></ul></div><div style="display:contents" dir="auto"><ul id="1e885df0-1907-80e5-8335-e6df9c242b9d" class="bulleted-list"><li style="list-style-type:circle">Set corporate goals and long-term strategic objectives.</li></ul></div><div style="display:contents" dir="auto"><ul id="1e885df0-1907-8097-92b6-ec997f91b600" class="bulleted-list"><li style="list-style-type:circle">Oversee product innovation, investments, and partnerships.</li></ul></div><div style="display:contents" dir="auto"><ul id="1e885df0-1907-80eb-827f-fdbc8570436d" class="bulleted-list"><li style="list-style-type:circle">Lead corporate governance and investor relations.</li></ul></div><div style="display:contents" dir="auto"><ul id="1e885df0-1907-804a-8b3b-cac2f0f67998" class="bulleted-list"><li style="list-style-type:circle">Represent Nzila Ventures at industry conferences and key events.</li></ul></div></li></ul></div><div style="display:contents" dir="auto"><ul id="1e885df0-1907-80f8-bb12-feb824b10442" class="bulleted-list"><li style="list-style-type:disc"><strong>Succession Considerations</strong>:<div style="display:contents" dir="auto"><ul id="1e885df0-1907-803b-9d61-dbfc08924c71" class="bulleted-list"><li style="list-style-type:circle"><strong>Interim Leadership</strong>: Should the Founder be unable to fulfill their duties, an <strong>interim CEO</strong> will be appointed from within the executive team, ensuring continuity of the strategic vision.</li></ul></div><div style="display:contents" dir="auto"><ul id="1e885df0-1907-80e0-b4f7-daf003cd5add" class="bulleted-list"><li style="list-style-type:circle"><strong>Permanent Succession</strong>: If the Founder steps down permanently, the board will nominate a new CEO from a pool of internal and external candidates, with the <strong>Founder</strong> being part of the selection process to ensure alignment with Nzila&#x27;s mission and values.</li></ul></div></li></ul></div><div style="display:contents" dir="auto"><h3 id="1e885df0-1907-803a-a395-c3c996367043" class="">B. <strong>Executive Team (C-suite)</strong></h3></div><div style="display:contents" dir="auto"><ul id="1e885df0-1907-80de-b538-c7e6e43141c6" class="bulleted-list"><li style="list-style-type:disc"><strong>Key Roles</strong>:<div style="display:contents" dir="auto"><ul id="1e885df0-1907-801c-bd26-e78136ea8b6a" class="bulleted-list"><li style="list-style-type:circle"><strong>CFO</strong> – Financial management, investor relations, budgeting, and financial strategy.</li></ul></div><div style="display:contents" dir="auto"><ul id="1e885df0-1907-80ab-9c02-dea796e7ee2d" class="bulleted-list"><li style="list-style-type:circle"><strong>COO</strong> – Operational leadership, scaling of ventures, and managing day-to-day operations.</li></ul></div><div style="display:contents" dir="auto"><ul id="1e885df0-1907-8028-825a-f4e0b5945d2d" class="bulleted-list"><li style="list-style-type:circle"><strong>CTO</strong> – Technological leadership, managing R&amp;D, product development, and cybersecurity.</li></ul></div><div style="display:contents" dir="auto"><ul id="1e885df0-1907-8010-b575-d8a77a54449f" class="bulleted-list"><li style="list-style-type:circle"><strong>CMO</strong> – Marketing and communications, brand strategy, and partnerships.</li></ul></div></li></ul></div><div style="display:contents" dir="auto"><ul id="1e885df0-1907-80d1-99b6-d215321c060d" class="bulleted-list"><li style="list-style-type:disc"><strong>Succession Plan</strong>:<div style="display:contents" dir="auto"><ul id="1e885df0-1907-80f9-af3a-f0f30eb2581c" class="bulleted-list"><li style="list-style-type:circle"><strong>Emergency Transition</strong>: In the event of an unexpected vacancy in the C-suite, the <strong>Chief Operating Officer (COO)</strong> or an experienced member of the leadership team will step into an acting role, with a priority to appoint a successor within <strong>30-90 days</strong>.</li></ul></div><div style="display:contents" dir="auto"><ul id="1e885df0-1907-80b8-a783-ea0d000bc760" class="bulleted-list"><li style="list-style-type:circle"><strong>Long-Term Succession</strong>: Key leadership development will be tracked annually through performance reviews, with the intention to have internal candidates ready to step into roles when required. A list of potential candidates will be reviewed and discussed at the <strong>annual board meeting</strong>.</li></ul></div></li></ul></div><div style="display:contents" dir="auto"><hr id="1e885df0-1907-80f8-be9b-f4f1c414534a"/></div><div style="display:contents" dir="auto"><h3 id="1e885df0-1907-806b-9c02-cbe546415988" class="">4. <strong>Succession Process Flow</strong></h3></div><div style="display:contents" dir="auto"><h3 id="1e885df0-1907-80af-a4a5-e495b943f3b1" class="">A. <strong>Step 1: Identification of Potential Successors</strong></h3></div><div style="display:contents" dir="auto"><ul id="1e885df0-1907-8064-90d4-fe04d956c544" class="bulleted-list"><li style="list-style-type:disc"><strong>Internal Candidates</strong>:<div style="display:contents" dir="auto"><ul id="1e885df0-1907-80ef-8540-c28f6f7be0f6" class="bulleted-list"><li style="list-style-type:circle">Identify and mentor potential internal candidates through a <strong>leadership development program</strong> that spans multiple business functions (e.g., product, finance, operations).</li></ul></div><div style="display:contents" dir="auto"><ul id="1e885df0-1907-807a-8535-dad72608fc06" class="bulleted-list"><li style="list-style-type:circle">Key executives will be cross-trained to take on roles in case of an emergency.</li></ul></div><div style="display:contents" dir="auto"><ul id="1e885df0-1907-80e1-a9d6-d4471d49e6a0" class="bulleted-list"><li style="list-style-type:circle"><strong>Training &amp; Development</strong>: Establish mentorship programs, offering internal candidates exposure to higher-level responsibilities, and fast-track leadership training.</li></ul></div></li></ul></div><div style="display:contents" dir="auto"><ul id="1e885df0-1907-8031-b3d7-c9292924f0dd" class="bulleted-list"><li style="list-style-type:disc"><strong>External Candidates</strong>:<div style="display:contents" dir="auto"><ul id="1e885df0-1907-80b0-b977-ecd1702a027c" class="bulleted-list"><li style="list-style-type:circle">Maintain a relationship with an executive search firm for quick access to high-caliber candidates in the event of a leadership vacancy.</li></ul></div><div style="display:contents" dir="auto"><ul id="1e885df0-1907-8062-a3f0-dd3fdd418c33" class="bulleted-list"><li style="list-style-type:circle"><strong>Board Input</strong>: Board members will provide input on the hiring process to ensure a cultural fit and alignment with Nzila’s vision.</li></ul></div></li></ul></div><div style="display:contents" dir="auto"><h3 id="1e885df0-1907-80c6-a5e5-e0458724be38" class="">B. <strong>Step 2: Transition Period</strong></h3></div><div style="display:contents" dir="auto"><ul id="1e885df0-1907-8085-a2ff-f7f655a042ab" class="bulleted-list"><li style="list-style-type:disc"><strong>Interim Leadership</strong>: In the event of a vacancy or emergency:<div style="display:contents" dir="auto"><ul id="1e885df0-1907-8019-9c4c-dc2ab1c31511" class="bulleted-list"><li style="list-style-type:circle">The <strong>Founder (CEO)</strong>, <strong>Board of Directors</strong>, and <strong>Executive Team</strong> will work together to appoint an interim leader from within the company to ensure operational stability.</li></ul></div><div style="display:contents" dir="auto"><ul id="1e885df0-1907-8079-b2d3-ded0936e08fe" class="bulleted-list"><li style="list-style-type:circle">The interim leader will be responsible for carrying out immediate business decisions, keeping stakeholders informed, and managing daily operations without compromising long-term strategy.</li></ul></div></li></ul></div><div style="display:contents" dir="auto"><ul id="1e885df0-1907-8047-828d-fc21e4c1faf3" class="bulleted-list"><li style="list-style-type:disc"><strong>Permanent Leadership</strong>:<div style="display:contents" dir="auto"><ul id="1e885df0-1907-80fc-90b3-e445358f584c" class="bulleted-list"><li style="list-style-type:circle">A selection committee (comprising the Board and key executives) will be established to carry out the permanent transition.</li></ul></div><div style="display:contents" dir="auto"><ul id="1e885df0-1907-8072-bfe9-f5f271907788" class="bulleted-list"><li style="list-style-type:circle">The <strong>Founder</strong> will participate in the interview process to ensure strategic alignment.</li></ul></div><div style="display:contents" dir="auto"><ul id="1e885df0-1907-807c-9f12-ebddf212f3fc" class="bulleted-list"><li style="list-style-type:circle">A formal <strong>transition plan</strong> will be created, including a <strong>handover process</strong> to the new leader, with clearly defined milestones and timelines.</li></ul></div></li></ul></div><div style="display:contents" dir="auto"><h3 id="1e885df0-1907-803d-a5a5-d50aa618ceb6" class="">C. <strong>Step 3: Communication of Transition</strong></h3></div><div style="display:contents" dir="auto"><ul id="1e885df0-1907-80d9-b5dd-c825b3a690a8" class="bulleted-list"><li style="list-style-type:disc"><strong>Internal Communication</strong>:<div style="display:contents" dir="auto"><ul id="1e885df0-1907-803e-b9a9-cc310a9c0fe5" class="bulleted-list"><li style="list-style-type:circle">A <strong>confidential communication plan</strong> will be created to inform the leadership team and staff of the transition. This plan will highlight the reasons for the transition, the succession timeline, and the appointment of an interim or permanent CEO.</li></ul></div><div style="display:contents" dir="auto"><ul id="1e885df0-1907-804a-8a08-ed36684a0453" class="bulleted-list"><li style="list-style-type:circle">Staff will be encouraged to ask questions and voice concerns during the transition period.</li></ul></div></li></ul></div><div style="display:contents" dir="auto"><ul id="1e885df0-1907-804f-b054-ff5afd031aaf" class="bulleted-list"><li style="list-style-type:disc"><strong>External Communication</strong>:<div style="display:contents" dir="auto"><ul id="1e885df0-1907-8067-b893-dabee76c81cd" class="bulleted-list"><li style="list-style-type:circle">A <strong>public announcement</strong> will be made to external stakeholders, including investors, partners, and customers. The communication will reassure external parties that leadership continuity has been ensured and that the strategic goals remain intact.</li></ul></div><div style="display:contents" dir="auto"><ul id="1e885df0-1907-80b9-9026-f06904e1405b" class="bulleted-list"><li style="list-style-type:circle">Clear communication channels will be established to manage any external concerns or inquiries.</li></ul></div></li></ul></div><div style="display:contents" dir="auto"><hr id="1e885df0-1907-8067-8aea-f9f4c515404c"/></div><div style="display:contents" dir="auto"><h3 id="1e885df0-1907-807f-a5d0-e8608e74168b" class="">5. <strong>Key Considerations for Founder Succession</strong></h3></div><div style="display:contents" dir="auto"><h3 id="1e885df0-1907-800a-95ad-c360e1af45a6" class="">A. <strong>Timing of Transition</strong></h3></div><div style="display:contents" dir="auto"><ul id="1e885df0-1907-80a9-b80c-e90032e02b58" class="bulleted-list"><li style="list-style-type:disc"><strong>Voluntary Transition</strong>: If the Founder decides to step down voluntarily, the succession process will begin <strong>at least 12 months in advance</strong> to allow time for leadership development, recruitment, and a smooth handover.</li></ul></div><div style="display:contents" dir="auto"><ul id="1e885df0-1907-8043-9ba9-ff99ae6acaf0" class="bulleted-list"><li style="list-style-type:disc"><strong>Emergency Transition</strong>: If the transition is due to unforeseen circumstances (e.g., health-related), the plan will be enacted immediately, with interim leadership taking charge to maintain stability.</li></ul></div><div style="display:contents" dir="auto"><h3 id="1e885df0-1907-80f7-9e61-fee546c36b57" class="">B. <strong>Preserving Founder’s Legacy</strong></h3></div><div style="display:contents" dir="auto"><ul id="1e885df0-1907-8089-9604-ede20300fd6c" class="bulleted-list"><li style="list-style-type:disc"><strong>Vision Continuity</strong>: Ensure that the new leadership team is aligned with the <strong>Founder’s mission</strong> and <strong>core values</strong> for long-term success. The Founder will play an advisory role in the transition period to maintain the strategic direction.</li></ul></div><div style="display:contents" dir="auto"><ul id="1e885df0-1907-80ee-af41-ef0b992458c2" class="bulleted-list"><li style="list-style-type:disc"><strong>Corporate Culture</strong>: Continue to nurture the <strong>organizational culture</strong> built by the Founder, emphasizing values such as innovation, integrity, and collaboration. The transition plan will include leadership training on cultural preservation.</li></ul></div><div style="display:contents" dir="auto"><hr id="1e885df0-1907-80f6-8100-c3757da3b79a"/></div><div style="display:contents" dir="auto"><h3 id="1e885df0-1907-8061-b2e3-c8706319e7e2" class="">6. <strong>Emergency &amp; Crisis Contingency</strong></h3></div><div style="display:contents" dir="auto"><ul id="1e885df0-1907-80a4-8308-fe9930a25816" class="bulleted-list"><li style="list-style-type:disc"><strong>Crisis Plan</strong>: In the event of a sudden, catastrophic event that disables the Founder or C-suite leaders, a crisis management team will be activated to maintain business continuity. The crisis plan will include:<div style="display:contents" dir="auto"><ul id="1e885df0-1907-8091-8eb5-eb2ece014938" class="bulleted-list"><li style="list-style-type:circle">Immediate <strong>operational leadership delegation</strong>.</li></ul></div><div style="display:contents" dir="auto"><ul id="1e885df0-1907-8029-8538-f876c678a2b7" class="bulleted-list"><li style="list-style-type:circle">Clear <strong>communication pathways</strong> to ensure minimal disruption in day-to-day operations.</li></ul></div><div style="display:contents" dir="auto"><ul id="1e885df0-1907-803d-86f6-e67b5c77fea3" class="bulleted-list"><li style="list-style-type:circle">Activation of the <strong>succession plan</strong> within 24 hours to ensure long-term leadership stability.</li></ul></div></li></ul></div><div style="display:contents" dir="auto"><hr id="1e885df0-1907-8002-b8bc-ce77d284237d"/></div><div style="display:contents" dir="auto"><h3 id="1e885df0-1907-8026-8765-da0dc40016d4" class="">7. <strong>Ongoing Review and Updates</strong></h3></div><div style="display:contents" dir="auto"><ul id="1e885df0-1907-8006-80b1-c1d994b6871f" class="bulleted-list"><li style="list-style-type:disc"><strong>Annual Review</strong>: The succession plan will be reviewed annually by the <strong>Board of Directors</strong> and <strong>Executive Leadership Team</strong>. This review will assess:<div style="display:contents" dir="auto"><ul id="1e885df0-1907-80cb-ae66-c0c5f503af8b" class="bulleted-list"><li style="list-style-type:circle">The effectiveness of current leadership development efforts.</li></ul></div><div style="display:contents" dir="auto"><ul id="1e885df0-1907-80fb-ad21-c174e42fd691" class="bulleted-list"><li style="list-style-type:circle">Readiness of internal candidates.</li></ul></div><div style="display:contents" dir="auto"><ul id="1e885df0-1907-8018-b9e2-c1707da857e3" class="bulleted-list"><li style="list-style-type:circle">Any updates to legal or organizational structures that impact succession.</li></ul></div></li></ul></div><div style="display:contents" dir="auto"><ul id="1e885df0-1907-8055-8188-cfe6e6d59413" class="bulleted-list"><li style="list-style-type:disc"><strong>Update Cycle</strong>: Any major business shifts, market changes, or executive changes will trigger an immediate review and update of the succession plan.</li></ul></div><div style="display:contents" dir="auto"><hr id="1e885df0-1907-80c0-9034-c130a4fb0537"/></div><div style="display:contents" dir="auto"><h3 id="1e885df0-1907-809f-b1e0-e4edd9b7b089" class="">8. <strong>Documentation &amp; Notion Integration</strong></h3></div><div style="display:contents" dir="auto"><p id="1e885df0-1907-8030-ac9e-d3f89e073cee" class="">The <strong>Founder Succession &amp; Continuity Plan</strong> will be stored in <strong>Notion</strong> as part of Nzila Ventures&#x27; internal governance documentation, ensuring that the plan is easily accessible, updated regularly, and reviewed by relevant stakeholders.</p></div><div style="display:contents" dir="auto"><hr id="1e885df0-1907-80e8-bf74-e34438df0bc9"/></div><div style="display:contents" dir="auto"><h3 id="1e885df0-1907-804a-bfe2-d1db91aa71b0" class="">📍 <strong>Next Steps</strong></h3></div><div style="display:contents" dir="auto"><ol type="1" id="1e885df0-1907-805e-b11c-c7089c35e5ff" class="numbered-list" start="1"><li><strong>Review &amp; Approve</strong>: Present the succession plan to the <strong>Board of Directors</strong> for feedback and approval.</li></ol></div><div style="display:contents" dir="auto"><ol type="1" id="1e885df0-1907-807f-9f32-d656e15b7de4" class="numbered-list" start="2"><li><strong>Develop Leadership Pipeline</strong>: Implement leadership development programs and mentorship for key executives.</li></ol></div><div style="display:contents" dir="auto"><ol type="1" id="1e885df0-1907-80ca-a665-ff79c19778c7" class="numbered-list" start="3"><li><strong>Prepare Communication Strategy</strong>: Establish the internal and external communication strategy for potential transitions.</li></ol></div></div></article><span class="sans" style="font-size:14px;padding-top:2em"></span></body></html>

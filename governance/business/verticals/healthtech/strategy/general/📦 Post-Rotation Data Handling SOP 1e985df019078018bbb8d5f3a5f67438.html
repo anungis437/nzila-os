@@ -1,0 +1,713 @@
+<html><head><meta http-equiv="Content-Type" content="text/html; charset=utf-8"/><title>📦 Post-Rotation Data Handling SOP</title><style>
+/* cspell:disable-file */
+/* webkit printing magic: print all background colors */
+html {
+	-webkit-print-color-adjust: exact;
+}
+* {
+	box-sizing: border-box;
+	-webkit-print-color-adjust: exact;
+}
+
+html,
+body {
+	margin: 0;
+	padding: 0;
+}
+@media only screen {
+	body {
+		margin: 2em auto;
+		max-width: 900px;
+		color: rgb(55, 53, 47);
+	}
+}
+
+body {
+	line-height: 1.5;
+	white-space: pre-wrap;
+}
+
+a,
+a.visited {
+	color: inherit;
+	text-decoration: underline;
+}
+
+.pdf-relative-link-path {
+	font-size: 80%;
+	color: #444;
+}
+
+h1,
+h2,
+h3 {
+	letter-spacing: -0.01em;
+	line-height: 1.2;
+	font-weight: 600;
+	margin-bottom: 0;
+}
+
+/* Override strong tags inside headings to maintain consistent weight */
+h1 strong,
+h2 strong,
+h3 strong {
+	font-weight: 600;
+}
+
+.page-title {
+	font-size: 2.5rem;
+	font-weight: 700;
+	margin-top: 0;
+	margin-bottom: 0.75em;
+}
+
+h1 {
+	font-size: 1.875rem;
+	margin-top: 1.875rem;
+}
+
+h2 {
+	font-size: 1.5rem;
+	margin-top: 1.5rem;
+}
+
+h3 {
+	font-size: 1.25rem;
+	margin-top: 1.25rem;
+}
+
+.source {
+	border: 1px solid #ddd;
+	border-radius: 3px;
+	padding: 1.5em;
+	word-break: break-all;
+}
+
+.callout {
+	border-radius: 10px;
+	padding: 1rem;
+}
+
+figure {
+	margin: 1.25em 0;
+	page-break-inside: avoid;
+}
+
+figcaption {
+	opacity: 0.5;
+	font-size: 85%;
+	margin-top: 0.5em;
+}
+
+mark {
+	background-color: transparent;
+}
+
+.indented {
+	padding-left: 1.5em;
+}
+
+hr {
+	background: transparent;
+	display: block;
+	width: 100%;
+	height: 1px;
+	visibility: visible;
+	border: none;
+	border-bottom: 1px solid rgba(55, 53, 47, 0.09);
+}
+
+img {
+	max-width: 100%;
+}
+
+@media only print {
+	img {
+		max-height: 100vh;
+		object-fit: contain;
+	}
+}
+
+@page {
+	margin: 1in;
+}
+
+.collection-content {
+	font-size: 0.875rem;
+}
+
+.collection-content td {
+	white-space: pre-wrap;
+	word-break: break-word;
+}
+
+.column-list {
+	display: flex;
+	justify-content: space-between;
+}
+
+.column {
+	padding: 0 1em;
+}
+
+.column:first-child {
+	padding-left: 0;
+}
+
+.column:last-child {
+	padding-right: 0;
+}
+
+.table_of_contents-item {
+	display: block;
+	font-size: 0.875rem;
+	line-height: 1.3;
+	padding: 0.125rem;
+}
+
+.table_of_contents-indent-1 {
+	margin-left: 1.5rem;
+}
+
+.table_of_contents-indent-2 {
+	margin-left: 3rem;
+}
+
+.table_of_contents-indent-3 {
+	margin-left: 4.5rem;
+}
+
+.table_of_contents-link {
+	text-decoration: none;
+	opacity: 0.7;
+	border-bottom: 1px solid rgba(55, 53, 47, 0.18);
+}
+
+table,
+th,
+td {
+	border: 1px solid rgba(55, 53, 47, 0.09);
+	border-collapse: collapse;
+}
+
+table {
+	border-left: none;
+	border-right: none;
+}
+
+th,
+td {
+	font-weight: normal;
+	padding: 0.25em 0.5em;
+	line-height: 1.5;
+	min-height: 1.5em;
+	text-align: left;
+}
+
+th {
+	color: rgba(55, 53, 47, 0.6);
+}
+
+ol,
+ul {
+	margin: 0;
+	margin-block-start: 0.6em;
+	margin-block-end: 0.6em;
+}
+
+li > ol:first-child,
+li > ul:first-child {
+	margin-block-start: 0.6em;
+}
+
+ul > li {
+	list-style: disc;
+}
+
+ul.to-do-list {
+	padding-inline-start: 0;
+}
+
+ul.to-do-list > li {
+	list-style: none;
+}
+
+.to-do-children-checked {
+	text-decoration: line-through;
+	opacity: 0.375;
+}
+
+ul.toggle > li {
+	list-style: none;
+}
+
+ul {
+	padding-inline-start: 1.7em;
+}
+
+ul > li {
+	padding-left: 0.1em;
+}
+
+ol {
+	padding-inline-start: 1.6em;
+}
+
+ol > li {
+	padding-left: 0.2em;
+}
+
+.mono ol {
+	padding-inline-start: 2em;
+}
+
+.mono ol > li {
+	text-indent: -0.4em;
+}
+
+.toggle {
+	padding-inline-start: 0em;
+	list-style-type: none;
+}
+
+/* Indent toggle children */
+.toggle > li > details {
+	padding-left: 1.7em;
+}
+
+.toggle > li > details > summary {
+	margin-left: -1.1em;
+}
+
+.selected-value {
+	display: inline-block;
+	padding: 0 0.5em;
+	background: rgba(206, 205, 202, 0.5);
+	border-radius: 3px;
+	margin-right: 0.5em;
+	margin-top: 0.3em;
+	margin-bottom: 0.3em;
+	white-space: nowrap;
+}
+
+.collection-title {
+	display: inline-block;
+	margin-right: 1em;
+}
+
+.page-description {
+	margin-bottom: 2em;
+}
+
+.simple-table {
+	margin-top: 1em;
+	font-size: 0.875rem;
+	empty-cells: show;
+}
+.simple-table td {
+	height: 29px;
+	min-width: 120px;
+}
+
+.simple-table th {
+	height: 29px;
+	min-width: 120px;
+}
+
+.simple-table-header-color {
+	background: rgb(247, 246, 243);
+	color: black;
+}
+.simple-table-header {
+	font-weight: 500;
+}
+
+time {
+	opacity: 0.5;
+}
+
+.icon {
+	display: inline-flex;
+	align-items: center;
+	justify-content: center;
+	max-width: 1.2em;
+	max-height: 1.2em;
+	text-decoration: none;
+	vertical-align: text-bottom;
+	margin-right: 0.5em;
+}
+
+img.icon {
+	border-radius: 3px;
+}
+
+.callout img.notion-static-icon {
+	width: 1em;
+	height: 1em;
+}
+
+.callout p {
+	margin: 0;
+}
+
+.callout h1,
+.callout h2,
+.callout h3 {
+	margin: 0 0 0.6rem;
+}
+
+.user-icon {
+	width: 1.5em;
+	height: 1.5em;
+	border-radius: 100%;
+	margin-right: 0.5rem;
+}
+
+.user-icon-inner {
+	font-size: 0.8em;
+}
+
+.text-icon {
+	border: 1px solid #000;
+	text-align: center;
+}
+
+.page-cover-image {
+	display: block;
+	object-fit: cover;
+	width: 100%;
+	max-height: 30vh;
+}
+
+.page-header-icon {
+	font-size: 3rem;
+	margin-bottom: 1rem;
+}
+
+.page-header-icon-with-cover {
+	margin-top: -0.72em;
+	margin-left: 0.07em;
+}
+
+.page-header-icon img {
+	border-radius: 3px;
+}
+
+.link-to-page {
+	margin: 1em 0;
+	padding: 0;
+	border: none;
+	font-weight: 500;
+}
+
+p > .user {
+	opacity: 0.5;
+}
+
+td > .user,
+td > time {
+	white-space: nowrap;
+}
+
+input[type="checkbox"] {
+	transform: scale(1.5);
+	margin-right: 0.6em;
+	vertical-align: middle;
+}
+
+p {
+	margin-top: 0.5em;
+	margin-bottom: 0.5em;
+}
+
+.image {
+	border: none;
+	margin: 1.5em 0;
+	padding: 0;
+	border-radius: 0;
+	text-align: center;
+}
+
+.code,
+code {
+	background: rgba(135, 131, 120, 0.15);
+	border-radius: 3px;
+	padding: 0.2em 0.4em;
+	border-radius: 3px;
+	font-size: 85%;
+	tab-size: 2;
+}
+
+code {
+	color: #eb5757;
+}
+
+.code {
+	padding: 1.5em 1em;
+}
+
+.code-wrap {
+	white-space: pre-wrap;
+	word-break: break-all;
+}
+
+.code > code {
+	background: none;
+	padding: 0;
+	font-size: 100%;
+	color: inherit;
+}
+
+blockquote {
+	font-size: 1em;
+	margin: 1em 0;
+	padding-left: 1em;
+	border-left: 3px solid rgb(55, 53, 47);
+}
+
+blockquote.quote-large {
+	font-size: 1.25em;
+}
+
+.bookmark {
+	text-decoration: none;
+	max-height: 8em;
+	padding: 0;
+	display: flex;
+	width: 100%;
+	align-items: stretch;
+}
+
+.bookmark-title {
+	font-size: 0.85em;
+	overflow: hidden;
+	text-overflow: ellipsis;
+	height: 1.75em;
+	white-space: nowrap;
+}
+
+.bookmark-text {
+	display: flex;
+	flex-direction: column;
+}
+
+.bookmark-info {
+	flex: 4 1 180px;
+	padding: 12px 14px 14px;
+	display: flex;
+	flex-direction: column;
+	justify-content: space-between;
+}
+
+.bookmark-image {
+	width: 33%;
+	flex: 1 1 180px;
+	display: block;
+	position: relative;
+	object-fit: cover;
+	border-radius: 1px;
+}
+
+.bookmark-description {
+	color: rgba(55, 53, 47, 0.6);
+	font-size: 0.75em;
+	overflow: hidden;
+	max-height: 4.5em;
+	word-break: break-word;
+}
+
+.bookmark-href {
+	font-size: 0.75em;
+	margin-top: 0.25em;
+}
+
+.sans { font-family: ui-sans-serif, -apple-system, BlinkMacSystemFont, "Segoe UI Variable Display", "Segoe UI", Helvetica, "Apple Color Emoji", "Noto Sans Arabic", "Noto Sans Hebrew", Arial, sans-serif, "Segoe UI Emoji", "Segoe UI Symbol"; }
+.code { font-family: "SFMono-Regular", Menlo, Consolas, "PT Mono", "Liberation Mono", Courier, monospace; }
+.serif { font-family: Lyon-Text, Georgia, ui-serif, serif; }
+.mono { font-family: iawriter-mono, Nitti, Menlo, Courier, monospace; }
+.pdf .sans { font-family: Inter, ui-sans-serif, -apple-system, BlinkMacSystemFont, "Segoe UI Variable Display", "Segoe UI", Helvetica, "Apple Color Emoji", "Noto Sans Arabic", "Noto Sans Hebrew", Arial, sans-serif, "Segoe UI Emoji", "Segoe UI Symbol", 'Twemoji', 'Noto Color Emoji', 'Noto Sans CJK JP'; }
+.pdf:lang(zh-CN) .sans { font-family: Inter, ui-sans-serif, -apple-system, BlinkMacSystemFont, "Segoe UI Variable Display", "Segoe UI", Helvetica, "Apple Color Emoji", "Noto Sans Arabic", "Noto Sans Hebrew", Arial, sans-serif, "Segoe UI Emoji", "Segoe UI Symbol", 'Twemoji', 'Noto Color Emoji', 'Noto Sans CJK SC'; }
+.pdf:lang(zh-TW) .sans { font-family: Inter, ui-sans-serif, -apple-system, BlinkMacSystemFont, "Segoe UI Variable Display", "Segoe UI", Helvetica, "Apple Color Emoji", "Noto Sans Arabic", "Noto Sans Hebrew", Arial, sans-serif, "Segoe UI Emoji", "Segoe UI Symbol", 'Twemoji', 'Noto Color Emoji', 'Noto Sans CJK TC'; }
+.pdf:lang(ko-KR) .sans { font-family: Inter, ui-sans-serif, -apple-system, BlinkMacSystemFont, "Segoe UI Variable Display", "Segoe UI", Helvetica, "Apple Color Emoji", "Noto Sans Arabic", "Noto Sans Hebrew", Arial, sans-serif, "Segoe UI Emoji", "Segoe UI Symbol", 'Twemoji', 'Noto Color Emoji', 'Noto Sans CJK KR'; }
+.pdf .code { font-family: Source Code Pro, "SFMono-Regular", Menlo, Consolas, "PT Mono", "Liberation Mono", Courier, monospace, 'Twemoji', 'Noto Color Emoji', 'Noto Sans Mono CJK JP'; }
+.pdf:lang(zh-CN) .code { font-family: Source Code Pro, "SFMono-Regular", Menlo, Consolas, "PT Mono", "Liberation Mono", Courier, monospace, 'Twemoji', 'Noto Color Emoji', 'Noto Sans Mono CJK SC'; }
+.pdf:lang(zh-TW) .code { font-family: Source Code Pro, "SFMono-Regular", Menlo, Consolas, "PT Mono", "Liberation Mono", Courier, monospace, 'Twemoji', 'Noto Color Emoji', 'Noto Sans Mono CJK TC'; }
+.pdf:lang(ko-KR) .code { font-family: Source Code Pro, "SFMono-Regular", Menlo, Consolas, "PT Mono", "Liberation Mono", Courier, monospace, 'Twemoji', 'Noto Color Emoji', 'Noto Sans Mono CJK KR'; }
+.pdf .serif { font-family: PT Serif, Lyon-Text, Georgia, ui-serif, serif, 'Twemoji', 'Noto Color Emoji', 'Noto Serif CJK JP'; }
+.pdf:lang(zh-CN) .serif { font-family: PT Serif, Lyon-Text, Georgia, ui-serif, serif, 'Twemoji', 'Noto Color Emoji', 'Noto Serif CJK SC'; }
+.pdf:lang(zh-TW) .serif { font-family: PT Serif, Lyon-Text, Georgia, ui-serif, serif, 'Twemoji', 'Noto Color Emoji', 'Noto Serif CJK TC'; }
+.pdf:lang(ko-KR) .serif { font-family: PT Serif, Lyon-Text, Georgia, ui-serif, serif, 'Twemoji', 'Noto Color Emoji', 'Noto Serif CJK KR'; }
+.pdf .mono { font-family: PT Mono, iawriter-mono, Nitti, Menlo, Courier, monospace, 'Twemoji', 'Noto Color Emoji', 'Noto Sans Mono CJK JP'; }
+.pdf:lang(zh-CN) .mono { font-family: PT Mono, iawriter-mono, Nitti, Menlo, Courier, monospace, 'Twemoji', 'Noto Color Emoji', 'Noto Sans Mono CJK SC'; }
+.pdf:lang(zh-TW) .mono { font-family: PT Mono, iawriter-mono, Nitti, Menlo, Courier, monospace, 'Twemoji', 'Noto Color Emoji', 'Noto Sans Mono CJK TC'; }
+.pdf:lang(ko-KR) .mono { font-family: PT Mono, iawriter-mono, Nitti, Menlo, Courier, monospace, 'Twemoji', 'Noto Color Emoji', 'Noto Sans Mono CJK KR'; }
+.highlight-default {
+	color: rgba(44, 44, 43, 1);
+}
+.highlight-gray {
+	color: rgba(125, 122, 117, 1);
+	fill: rgba(125, 122, 117, 1);
+}
+.highlight-brown {
+	color: rgba(159, 118, 90, 1);
+	fill: rgba(159, 118, 90, 1);
+}
+.highlight-orange {
+	color: rgba(210, 123, 45, 1);
+	fill: rgba(210, 123, 45, 1);
+}
+.highlight-yellow {
+	color: rgba(203, 148, 52, 1);
+	fill: rgba(203, 148, 52, 1);
+}
+.highlight-teal {
+	color: rgba(80, 148, 110, 1);
+	fill: rgba(80, 148, 110, 1);
+}
+.highlight-blue {
+	color: rgba(56, 125, 201, 1);
+	fill: rgba(56, 125, 201, 1);
+}
+.highlight-purple {
+	color: rgba(154, 107, 180, 1);
+	fill: rgba(154, 107, 180, 1);
+}
+.highlight-pink {
+	color: rgba(193, 76, 138, 1);
+	fill: rgba(193, 76, 138, 1);
+}
+.highlight-red {
+	color: rgba(207, 81, 72, 1);
+	fill: rgba(207, 81, 72, 1);
+}
+.highlight-default_background {
+	color: rgba(44, 44, 43, 1);
+}
+.highlight-gray_background {
+	background: rgba(42, 28, 0, 0.07);
+}
+.highlight-brown_background {
+	background: rgba(139, 46, 0, 0.086);
+}
+.highlight-orange_background {
+	background: rgba(224, 101, 1, 0.129);
+}
+.highlight-yellow_background {
+	background: rgba(211, 168, 0, 0.137);
+}
+.highlight-teal_background {
+	background: rgba(0, 100, 45, 0.09);
+}
+.highlight-blue_background {
+	background: rgba(0, 124, 215, 0.094);
+}
+.highlight-purple_background {
+	background: rgba(102, 0, 178, 0.078);
+}
+.highlight-pink_background {
+	background: rgba(197, 0, 93, 0.086);
+}
+.highlight-red_background {
+	background: rgba(223, 22, 0, 0.094);
+}
+.block-color-default {
+	color: inherit;
+	fill: inherit;
+}
+.block-color-gray {
+	color: rgba(125, 122, 117, 1);
+	fill: rgba(125, 122, 117, 1);
+}
+.block-color-brown {
+	color: rgba(159, 118, 90, 1);
+	fill: rgba(159, 118, 90, 1);
+}
+.block-color-orange {
+	color: rgba(210, 123, 45, 1);
+	fill: rgba(210, 123, 45, 1);
+}
+.block-color-yellow {
+	color: rgba(203, 148, 52, 1);
+	fill: rgba(203, 148, 52, 1);
+}
+.block-color-teal {
+	color: rgba(80, 148, 110, 1);
+	fill: rgba(80, 148, 110, 1);
+}
+.block-color-blue {
+	color: rgba(56, 125, 201, 1);
+	fill: rgba(56, 125, 201, 1);
+}
+.block-color-purple {
+	color: rgba(154, 107, 180, 1);
+	fill: rgba(154, 107, 180, 1);
+}
+.block-color-pink {
+	color: rgba(193, 76, 138, 1);
+	fill: rgba(193, 76, 138, 1);
+}
+.block-color-red {
+	color: rgba(207, 81, 72, 1);
+	fill: rgba(207, 81, 72, 1);
+}
+.block-color-default_background {
+	color: inherit;
+	fill: inherit;
+}
+.block-color-gray_background {
+	background: rgba(240, 239, 237, 1);
+}
+.block-color-brown_background {
+	background: rgba(245, 237, 233, 1);
+}
+.block-color-orange_background {
+	background: rgba(251, 235, 222, 1);
+}
+.block-color-yellow_background {
+	background: rgba(249, 243, 220, 1);
+}
+.block-color-teal_background {
+	background: rgba(232, 241, 236, 1);
+}
+.block-color-blue_background {
+	background: rgba(229, 242, 252, 1);
+}
+.block-color-purple_background {
+	background: rgba(243, 235, 249, 1);
+}
+.block-color-pink_background {
+	background: rgba(250, 233, 241, 1);
+}
+.block-color-red_background {
+	background: rgba(252, 233, 231, 1);
+}
+.select-value-color-default { background-color: rgba(42, 28, 0, 0.07); }
+.select-value-color-gray { background-color: rgba(28, 19, 1, 0.11); }
+.select-value-color-brown { background-color: rgba(127, 51, 0, 0.156); }
+.select-value-color-orange { background-color: rgba(196, 88, 0, 0.203); }
+.select-value-color-yellow { background-color: rgba(209, 156, 0, 0.282); }
+.select-value-color-green { background-color: rgba(0, 96, 38, 0.156); }
+.select-value-color-blue { background-color: rgba(0, 118, 217, 0.203); }
+.select-value-color-purple { background-color: rgba(92, 0, 163, 0.141); }
+.select-value-color-pink { background-color: rgba(183, 0, 78, 0.152); }
+.select-value-color-red { background-color: rgba(206, 24, 0, 0.164); }
+
+.checkbox {
+	display: inline-flex;
+	vertical-align: text-bottom;
+	width: 16;
+	height: 16;
+	background-size: 16px;
+	margin-left: 2px;
+	margin-right: 5px;
+}
+
+.checkbox-on {
+	background-image: url("data:image/svg+xml;charset=UTF-8,%3Csvg%20width%3D%2216%22%20height%3D%2216%22%20viewBox%3D%220%200%2016%2016%22%20fill%3D%22none%22%20xmlns%3D%22http%3A%2F%2Fwww.w3.org%2F2000%2Fsvg%22%3E%0A%3Crect%20width%3D%2216%22%20height%3D%2216%22%20fill%3D%22%2358A9D7%22%2F%3E%0A%3Cpath%20d%3D%22M6.71429%2012.2852L14%204.9995L12.7143%203.71436L6.71429%209.71378L3.28571%206.2831L2%207.57092L6.71429%2012.2852Z%22%20fill%3D%22white%22%2F%3E%0A%3C%2Fsvg%3E");
+}
+
+.checkbox-off {
+	background-image: url("data:image/svg+xml;charset=UTF-8,%3Csvg%20width%3D%2216%22%20height%3D%2216%22%20viewBox%3D%220%200%2016%2016%22%20fill%3D%22none%22%20xmlns%3D%22http%3A%2F%2Fwww.w3.org%2F2000%2Fsvg%22%3E%0A%3Crect%20x%3D%220.75%22%20y%3D%220.75%22%20width%3D%2214.5%22%20height%3D%2214.5%22%20fill%3D%22white%22%20stroke%3D%22%2336352F%22%20stroke-width%3D%221.5%22%2F%3E%0A%3C%2Fsvg%3E");
+}
+	
+</style></head><body><article id="1e985df0-1907-8018-bbb8-d5f3a5f67438" class="page sans"><header><h1 class="page-title" dir="auto">📦 Post-Rotation Data Handling SOP</h1><p class="page-description" dir="auto"></p><table class="properties"><tbody><tr class="property-row property-row-person"><th><span class="icon property-icon"><img src="https://www.notion.so/icons/friends_gray.svg" style="width:14px;height:14px;display:block"/></span>Owner</th><td><span class="user"><span class="icon text-icon user-icon"><span class="user-icon-inner">A</span></span>Aubert</span></td></tr><tr class="property-row property-row-multi_select"><th><span class="icon property-icon"><img src="https://www.notion.so/icons/list_gray.svg" style="width:14px;height:14px;display:block"/></span>Tags</th><td></td></tr></tbody></table></header><div class="page-body"><div style="display:contents" dir="auto"><p id="1e985df0-1907-80c2-94fd-c943cd6c2051" class="">This SOP ensures that when a Companion device is rotated to a new user or program, <strong>no unintended data exposure or memory residue</strong> remains — while enabling consented, meaningful export or archival for caregivers, researchers, or future re-engagement.</p></div><div style="display:contents" dir="auto"><hr id="1e985df0-1907-80be-844c-f438b4678d7d"/></div><div style="display:contents" dir="auto"><h2 id="1e985df0-1907-801b-87d9-e8cce05a5c39" class="">🎯 Objectives</h2></div><div style="display:contents" dir="auto"><ul id="1e985df0-1907-80ae-989e-f65f4ae68179" class="bulleted-list"><li style="list-style-type:disc">Prevent unconsented memory retention between users</li></ul></div><div style="display:contents" dir="auto"><ul id="1e985df0-1907-80eb-952d-e7fed70c76bc" class="bulleted-list"><li style="list-style-type:disc">Ensure consistent offboarding of sensitive data</li></ul></div><div style="display:contents" dir="auto"><ul id="1e985df0-1907-807f-8fee-cc0fb819bb06" class="bulleted-list"><li style="list-style-type:disc">Enable optional archival, impact analysis, or re-entry continuity</li></ul></div><div style="display:contents" dir="auto"><ul id="1e985df0-1907-8044-a96e-c2565fbdd877" class="bulleted-list"><li style="list-style-type:disc">Support both offline and online environments</li></ul></div><div style="display:contents" dir="auto"><ul id="1e985df0-1907-80da-9518-cb0b98275516" class="bulleted-list"><li style="list-style-type:disc">Comply with Memora’s privacy, ethics, and sovereignty principles</li></ul></div><div style="display:contents" dir="auto"><hr id="1e985df0-1907-80f3-ad61-f04583b6db3c"/></div><div style="display:contents" dir="auto"><h2 id="1e985df0-1907-80a7-a07e-f2ee080d3204" class="">🧭 Rotation Triggers</h2></div><div style="display:contents" dir="ltr"><table id="1e985df0-1907-80da-a2f5-f5cb03005785" class="simple-table"><tbody><div style="display:contents" dir="ltr"><tr id="1e985df0-1907-800a-998e-e189257b8545"><td id="cinx" class="">Scenario</td><td id="fmXO" class="">Trigger</td></tr></div><div style="display:contents" dir="ltr"><tr id="1e985df0-1907-8071-856f-d9dc346012d9"><td id="cinx" class="">🔁 <strong>Device Reassignment</strong></td><td id="fmXO" class="">Same program, new user (e.g. new youth at clinic)</td></tr></div><div style="display:contents" dir="ltr"><tr id="1e985df0-1907-80e2-9793-c47c2fb4cf40"><td id="cinx" class="">🎓 <strong>User Graduation or Opt-Out</strong></td><td id="fmXO" class="">User completed program or chose to leave</td></tr></div><div style="display:contents" dir="ltr"><tr id="1e985df0-1907-807b-98f9-dc053ac918ab"><td id="cinx" class="">📦 <strong>Field Kit Return</strong></td><td id="fmXO" class="">Device returned to NGO or Memora HQ for reuse</td></tr></div><div style="display:contents" dir="ltr"><tr id="1e985df0-1907-8001-a66a-c1db77e7b015"><td id="cinx" class="">⚠️ <strong>Emotional Mismatch or Reset</strong></td><td id="fmXO" class="">Companion no longer suitable for user tone context</td></tr></div><div style="display:contents" dir="ltr"><tr id="1e985df0-1907-809e-ad6f-f9ebf900bf9c"><td id="cinx" class="">🧯 <strong>Device Lost/Recovered</strong></td><td id="fmXO" class="">Rotation triggered by recovery flow</td></tr></div></tbody></table></div><div style="display:contents" dir="auto"><hr id="1e985df0-1907-80b8-94be-f64b6dfc63fe"/></div><div style="display:contents" dir="auto"><h2 id="1e985df0-1907-8020-b484-cfc4a530b499" class="">📋 Required Pre-Rotation Steps</h2></div><div style="display:contents" dir="ltr"><table id="1e985df0-1907-8053-afe2-d086b6da8b18" class="simple-table"><tbody><div style="display:contents" dir="ltr"><tr id="1e985df0-1907-807b-b589-e93096920cff"><td id="QUfo" class="">Step</td><td id="nzg@" class="">Action</td></tr></div><div style="display:contents" dir="ltr"><tr id="1e985df0-1907-8013-b475-f3dba29000f0"><td id="QUfo" class="">✅ <strong>User Consent Confirmation</strong></td><td id="nzg@" class="">Confirm whether memory should be exported, wiped, or archived</td></tr></div><div style="display:contents" dir="ltr"><tr id="1e985df0-1907-80cd-9b56-da4a09a40a86"><td id="QUfo" class="">🧾 <strong>Graduation Flow Completed</strong></td><td id="nzg@" class="">Ensure companion exit script and memory options are finished</td></tr></div><div style="display:contents" dir="ltr"><tr id="1e985df0-1907-8067-9b54-f8e57b5b5682"><td id="QUfo" class="">🔒 <strong>Memory Offload or Wipe</strong></td><td id="nzg@" class="">Local memory layer purged or securely exported</td></tr></div><div style="display:contents" dir="ltr"><tr id="1e985df0-1907-805b-86fc-f42a808feb3e"><td id="QUfo" class="">🗃️ <strong>Metadata Archived (Optional)</strong></td><td id="nzg@" class="">Session rhythms, tone shifts, prompt flags saved for NGO dashboard</td></tr></div><div style="display:contents" dir="ltr"><tr id="1e985df0-1907-804d-a3ab-ddb83818ee2b"><td id="QUfo" class="">📄 <strong>Rotation Log Initiated</strong></td><td id="nzg@" class="">Unique Rotation ID assigned to device instance</td></tr></div></tbody></table></div><div style="display:contents" dir="auto"><hr id="1e985df0-1907-8002-94bf-e04c79c017c3"/></div><div style="display:contents" dir="auto"><h2 id="1e985df0-1907-80f4-9213-cde3786a3255" class="">🔐 Memory Handling Options</h2></div><div style="display:contents" dir="ltr"><table id="1e985df0-1907-805f-a017-dab91de6926c" class="simple-table"><tbody><div style="display:contents" dir="ltr"><tr id="1e985df0-1907-8085-b788-f02f75db45b3"><td id="bX}[" class="">Option</td><td id="AH~e" class="">Description</td><td id="=xWg" class="">Used When</td></tr></div><div style="display:contents" dir="ltr"><tr id="1e985df0-1907-80b0-aa3a-f9eacf91a2f2"><td id="bX}[" class="">🧼 <strong>Full Wipe</strong></td><td id="AH~e" class="">Erase all memory, reflection history, tone data</td><td id="=xWg" class="">Default for all unconsented or anonymous users</td></tr></div><div style="display:contents" dir="ltr"><tr id="1e985df0-1907-8012-abeb-f5947cab9c79"><td id="bX}[" class="">📥 <strong>Caregiver Export</strong></td><td id="AH~e" class="">Printed or digital copy given to caregiver (or user)</td><td id="=xWg" class="">When exit option selected at graduation</td></tr></div><div style="display:contents" dir="ltr"><tr id="1e985df0-1907-80b7-bd17-fc63d79b3f90"><td id="bX}[" class="">🔒 <strong>Secure Archive</strong></td><td id="AH~e" class="">Memory sealed and stored with re-entry token</td><td id="=xWg" class="">When re-use is planned or user may return</td></tr></div><div style="display:contents" dir="ltr"><tr id="1e985df0-1907-8005-a1f9-deb2b0beed7c"><td id="bX}[" class="">📜 <strong>Narrative Export</strong></td><td id="AH~e" class="">Companion generates printable “story” of journey</td><td id="=xWg" class="">Used in trauma-informed or youth deployments</td></tr></div></tbody></table></div><div style="display:contents" dir="auto"><hr id="1e985df0-1907-8083-97fe-e88159059ca8"/></div><div style="display:contents" dir="auto"><h2 id="1e985df0-1907-80fa-a0fd-cb371d986b6a" class="">📊 Metadata Preservation (Non-identifiable)</h2></div><div style="display:contents" dir="ltr"><table id="1e985df0-1907-8010-973c-fd1b749a4f51" class="simple-table"><tbody><div style="display:contents" dir="ltr"><tr id="1e985df0-1907-806a-8acb-ef10f9c36026"><td id="Hcd~" class="">Type</td><td id="XDuZ" class="">Format</td><td id="LFWX" class="">Use</td></tr></div><div style="display:contents" dir="ltr"><tr id="1e985df0-1907-809f-804c-d9c46f214aad"><td id="Hcd~" class="">Session Count</td><td id="XDuZ" class="">Numeric</td><td id="LFWX" class="">Usage pattern analysis</td></tr></div><div style="display:contents" dir="ltr"><tr id="1e985df0-1907-80e4-8119-da7a6f1624b5"><td id="Hcd~" class="">Prompt Use</td><td id="XDuZ" class="">Prompt ID only</td><td id="LFWX" class="">Prompt effectiveness</td></tr></div><div style="display:contents" dir="ltr"><tr id="1e985df0-1907-8028-bab7-d373d79f0f39"><td id="Hcd~" class="">Tone Adjustments</td><td id="XDuZ" class="">Tag logs</td><td id="LFWX" class="">Companion QA</td></tr></div><div style="display:contents" dir="ltr"><tr id="1e985df0-1907-80c4-a633-f8ab8930e2b9"><td id="Hcd~" class="">Memory Toggle Frequency</td><td id="XDuZ" class="">Count only</td><td id="LFWX" class="">Consent awareness analysis</td></tr></div><div style="display:contents" dir="ltr"><tr id="1e985df0-1907-8031-a0b6-f657f1224851"><td id="Hcd~" class="">Exit Reason (coded)</td><td id="XDuZ" class="">Code only (e.g., opt-out, graduated)</td><td id="LFWX" class="">Deployment metrics</td></tr></div></tbody></table></div><div style="display:contents" dir="auto"><blockquote id="1e985df0-1907-802e-82b7-c6b13a4c3a46" class="">⚠️ No full content is stored unless specifically consented.</blockquote></div><div style="display:contents" dir="auto"><hr id="1e985df0-1907-802d-9293-fdff08d7940e"/></div><div style="display:contents" dir="auto"><h2 id="1e985df0-1907-80a0-855e-d729c368e08e" class="">🧾 Rotation Log Format</h2></div><div style="display:contents" dir="ltr"><table id="1e985df0-1907-808f-be0f-f416e8b73cd5" class="simple-table"><tbody><div style="display:contents" dir="ltr"><tr id="1e985df0-1907-8070-ae58-eb1bc2e89baa"><td id="&gt;qqv" class="">Field</td><td id="h{Lz" class="">Notes</td></tr></div><div style="display:contents" dir="ltr"><tr id="1e985df0-1907-8030-8ea8-e3d9639e8d9d"><td id="&gt;qqv" class="">Device ID</td><td id="h{Lz" class="">Auto-generated or QR-linked</td></tr></div><div style="display:contents" dir="ltr"><tr id="1e985df0-1907-803b-b313-d5415abec8de"><td id="&gt;qqv" class="">Program ID</td><td id="h{Lz" class="">Where device was last used</td></tr></div><div style="display:contents" dir="ltr"><tr id="1e985df0-1907-8059-9bf2-e514c78a8a0c"><td id="&gt;qqv" class="">User Memory Status</td><td id="h{Lz" class="">[Wiped / Archived / Exported / Unknown]</td></tr></div><div style="display:contents" dir="ltr"><tr id="1e985df0-1907-80b0-a1d5-c5afceddd21e"><td id="&gt;qqv" class="">Rotation Timestamp</td><td id="h{Lz" class="">UTC + local time format</td></tr></div><div style="display:contents" dir="ltr"><tr id="1e985df0-1907-8000-a58b-f82c9087a19f"><td id="&gt;qqv" class="">Rotation Reason Code</td><td id="h{Lz" class="">Coded field (graduation, mismatch, error recovery, etc.)</td></tr></div><div style="display:contents" dir="ltr"><tr id="1e985df0-1907-8017-beb2-d7a80c86b575"><td id="&gt;qqv" class="">Rotation Technician / Staff</td><td id="h{Lz" class="">Initials or user ID</td></tr></div><div style="display:contents" dir="ltr"><tr id="1e985df0-1907-801c-823b-c9c7b92f143c"><td id="&gt;qqv" class="">NGO/Clinic Notes</td><td id="h{Lz" class="">Optional free-text (no PII)</td></tr></div></tbody></table></div><div style="display:contents" dir="auto"><hr id="1e985df0-1907-8051-ba2b-d05eb6ef99ac"/></div><div style="display:contents" dir="auto"><h2 id="1e985df0-1907-80d3-b3c1-fc8d4485883c" class="">📄 Offline-First Protocols</h2></div><div style="display:contents" dir="ltr"><table id="1e985df0-1907-806e-8a2f-e1af5d995089" class="simple-table"><tbody><div style="display:contents" dir="ltr"><tr id="1e985df0-1907-8046-9bae-f24cb58891d8"><td id="jxFn" class="">Step</td><td id="_XQz" class="">Tool</td></tr></div><div style="display:contents" dir="ltr"><tr id="1e985df0-1907-80c2-872a-f9fd8d0eb2f8"><td id="jxFn" class="">🖨️ Memory Export</td><td id="_XQz" class="">Printable PDF + Consent Summary</td></tr></div><div style="display:contents" dir="ltr"><tr id="1e985df0-1907-807f-8f39-ef5a2c01940f"><td id="jxFn" class="">📋 Rotation Checklist</td><td id="_XQz" class="">Paper form with QR for re-digitization</td></tr></div><div style="display:contents" dir="ltr"><tr id="1e985df0-1907-80eb-b6b0-ed80d545dfdb"><td id="jxFn" class="">🧾 Device Tag</td><td id="_XQz" class="">Sticker or tag indicating wipe/export status</td></tr></div><div style="display:contents" dir="ltr"><tr id="1e985df0-1907-80b3-bd23-d9732e76fd7d"><td id="jxFn" class="">🧠 Recovery Card</td><td id="_XQz" class="">Paper re-entry code (if memory archived offline)</td></tr></div><div style="display:contents" dir="ltr"><tr id="1e985df0-1907-807f-bf5f-f24be483e18f"><td id="jxFn" class="">🔌 Local Logs</td><td id="_XQz" class="">Exported via USB or SD card (encrypted format)</td></tr></div></tbody></table></div><div style="display:contents" dir="auto"><hr id="1e985df0-1907-80c7-9d9c-e7ea920f14f0"/></div><div style="display:contents" dir="auto"><h2 id="1e985df0-1907-8012-88a4-f53d9c68009a" class="">🔁 Re-entry Compatibility</h2></div><div style="display:contents" dir="auto"><p id="1e985df0-1907-802d-8d39-f5fc466db34d" class="">If user returns:</p></div><div style="display:contents" dir="auto"><ul id="1e985df0-1907-8012-b903-dcc9d230b149" class="bulleted-list"><li style="list-style-type:disc">Archived memory matched to Re-entry ID</li></ul></div><div style="display:contents" dir="auto"><ul id="1e985df0-1907-8070-bbfd-f5ba227857c5" class="bulleted-list"><li style="list-style-type:disc">Consent re-confirmed before reactivation</li></ul></div><div style="display:contents" dir="auto"><ul id="1e985df0-1907-807d-8e60-e90625d3d6d6" class="bulleted-list"><li style="list-style-type:disc">Companion resumes with &quot;Reintroduction Script&quot;</li></ul></div><div style="display:contents" dir="auto"><ul id="1e985df0-1907-804e-9912-fbb7a653acb6" class="bulleted-list"><li style="list-style-type:disc">All prior session trends remain audit-traceable</li></ul></div><div style="display:contents" dir="auto"><hr id="1e985df0-1907-80ac-ad9e-cc67a613d348"/></div><div style="display:contents" dir="auto"><h2 id="1e985df0-1907-8013-8753-ea6f5edec778" class="">📂 Linked Assets &amp; Templates</h2></div><div style="display:contents" dir="auto"><ul id="1e985df0-1907-8045-b261-f87d96a16107" class="to-do-list"><li><div class="checkbox checkbox-off"></div> <span class="to-do-children-unchecked">Rotation Checklist (offline + app-based)</span><div class="indented"></div></li></ul></div><div style="display:contents" dir="auto"><ul id="1e985df0-1907-802d-ab5d-f6961c70a5be" class="to-do-list"><li><div class="checkbox checkbox-off"></div> <span class="to-do-children-unchecked">Graduation Flow Summary Generator</span><div class="indented"></div></li></ul></div><div style="display:contents" dir="auto"><ul id="1e985df0-1907-80e0-ab29-f2614ceda2cf" class="to-do-list"><li><div class="checkbox checkbox-off"></div> <span class="to-do-children-unchecked">Memory Offload Tool (encrypted archive + PDF export)</span><div class="indented"></div></li></ul></div><div style="display:contents" dir="auto"><ul id="1e985df0-1907-80d5-941e-cc7cdd7169a8" class="to-do-list"><li><div class="checkbox checkbox-off"></div> <span class="to-do-children-unchecked">Secure Archive Consent Tracker</span><div class="indented"></div></li></ul></div><div style="display:contents" dir="auto"><ul id="1e985df0-1907-80d7-bae5-f1669c8d9c1e" class="to-do-list"><li><div class="checkbox checkbox-off"></div> <span class="to-do-children-unchecked">Rotation Logbook Template</span><div class="indented"></div></li></ul></div><div style="display:contents" dir="auto"><ul id="1e985df0-1907-80f3-a996-f23c9939c11b" class="to-do-list"><li><div class="checkbox checkbox-off"></div> <span class="to-do-children-unchecked">Field Device Tag Sheet (wipe/export/archive indicators)</span><div class="indented"></div></li></ul></div><div style="display:contents" dir="auto"><ul id="1e985df0-1907-806c-ac64-ff99165dc6d9" class="to-do-list"><li><div class="checkbox checkbox-off"></div> <span class="to-do-children-unchecked">NGO Rotation Dashboard Module</span><div class="indented"></div></li></ul></div><div style="display:contents" dir="auto"><hr id="1e985df0-1907-80f0-9c2a-c425df9dfb70"/></div><div style="display:contents" dir="auto"><h2 id="1e985df0-1907-8012-9f90-dfcef8b6ab5b" class="">✅ Compliance Checklist</h2></div><div style="display:contents" dir="ltr"><table id="1e985df0-1907-8047-8e01-d2ce79b18dc1" class="simple-table"><tbody><div style="display:contents" dir="ltr"><tr id="1e985df0-1907-807a-8404-cff966764ee7"><td id="UJQt" class="">Task</td><td id="I}_e" class="">Required?</td><td id="rvgx" class="">Notes</td></tr></div><div style="display:contents" dir="ltr"><tr id="1e985df0-1907-80ac-8d7b-e938c7ad15e1"><td id="UJQt" class="">Memory wiped or exported</td><td id="I}_e" class="">✅ Always</td><td id="rvgx" class=""></td></tr></div><div style="display:contents" dir="ltr"><tr id="1e985df0-1907-8013-8530-d6e2701b4a45"><td id="UJQt" class="">Graduation flow triggered</td><td id="I}_e" class="">✅ Always</td><td id="rvgx" class=""></td></tr></div><div style="display:contents" dir="ltr"><tr id="1e985df0-1907-8006-83c5-fff9cd092dd3"><td id="UJQt" class="">Consent captured</td><td id="I}_e" class="">✅ If memory is archived or exported</td><td id="rvgx" class=""></td></tr></div><div style="display:contents" dir="ltr"><tr id="1e985df0-1907-8065-b8f3-ede6911f8d7b"><td id="UJQt" class="">Metadata anonymized</td><td id="I}_e" class="">✅ No raw content stored</td><td id="rvgx" class=""></td></tr></div><div style="display:contents" dir="ltr"><tr id="1e985df0-1907-8067-a238-ff217c9dd3e3"><td id="UJQt" class="">Rotation log updated</td><td id="I}_e" class="">✅ Must link to device serial / QR</td><td id="rvgx" class=""></td></tr></div><div style="display:contents" dir="ltr"><tr id="1e985df0-1907-8040-8c25-ff11d245009c"><td id="UJQt" class="">NGO notification</td><td id="I}_e" class="">⬜ Optional unless custom agreement</td><td id="rvgx" class=""></td></tr></div></tbody></table></div></div></article><span class="sans" style="font-size:14px;padding-top:2em"></span></body></html>

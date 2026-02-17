@@ -1,0 +1,713 @@
+<html><head><meta http-equiv="Content-Type" content="text/html; charset=utf-8"/><title>🖥️ Clinic &amp; Caregiver Dashboard UI Specifications</title><style>
+/* cspell:disable-file */
+/* webkit printing magic: print all background colors */
+html {
+	-webkit-print-color-adjust: exact;
+}
+* {
+	box-sizing: border-box;
+	-webkit-print-color-adjust: exact;
+}
+
+html,
+body {
+	margin: 0;
+	padding: 0;
+}
+@media only screen {
+	body {
+		margin: 2em auto;
+		max-width: 900px;
+		color: rgb(55, 53, 47);
+	}
+}
+
+body {
+	line-height: 1.5;
+	white-space: pre-wrap;
+}
+
+a,
+a.visited {
+	color: inherit;
+	text-decoration: underline;
+}
+
+.pdf-relative-link-path {
+	font-size: 80%;
+	color: #444;
+}
+
+h1,
+h2,
+h3 {
+	letter-spacing: -0.01em;
+	line-height: 1.2;
+	font-weight: 600;
+	margin-bottom: 0;
+}
+
+/* Override strong tags inside headings to maintain consistent weight */
+h1 strong,
+h2 strong,
+h3 strong {
+	font-weight: 600;
+}
+
+.page-title {
+	font-size: 2.5rem;
+	font-weight: 700;
+	margin-top: 0;
+	margin-bottom: 0.75em;
+}
+
+h1 {
+	font-size: 1.875rem;
+	margin-top: 1.875rem;
+}
+
+h2 {
+	font-size: 1.5rem;
+	margin-top: 1.5rem;
+}
+
+h3 {
+	font-size: 1.25rem;
+	margin-top: 1.25rem;
+}
+
+.source {
+	border: 1px solid #ddd;
+	border-radius: 3px;
+	padding: 1.5em;
+	word-break: break-all;
+}
+
+.callout {
+	border-radius: 10px;
+	padding: 1rem;
+}
+
+figure {
+	margin: 1.25em 0;
+	page-break-inside: avoid;
+}
+
+figcaption {
+	opacity: 0.5;
+	font-size: 85%;
+	margin-top: 0.5em;
+}
+
+mark {
+	background-color: transparent;
+}
+
+.indented {
+	padding-left: 1.5em;
+}
+
+hr {
+	background: transparent;
+	display: block;
+	width: 100%;
+	height: 1px;
+	visibility: visible;
+	border: none;
+	border-bottom: 1px solid rgba(55, 53, 47, 0.09);
+}
+
+img {
+	max-width: 100%;
+}
+
+@media only print {
+	img {
+		max-height: 100vh;
+		object-fit: contain;
+	}
+}
+
+@page {
+	margin: 1in;
+}
+
+.collection-content {
+	font-size: 0.875rem;
+}
+
+.collection-content td {
+	white-space: pre-wrap;
+	word-break: break-word;
+}
+
+.column-list {
+	display: flex;
+	justify-content: space-between;
+}
+
+.column {
+	padding: 0 1em;
+}
+
+.column:first-child {
+	padding-left: 0;
+}
+
+.column:last-child {
+	padding-right: 0;
+}
+
+.table_of_contents-item {
+	display: block;
+	font-size: 0.875rem;
+	line-height: 1.3;
+	padding: 0.125rem;
+}
+
+.table_of_contents-indent-1 {
+	margin-left: 1.5rem;
+}
+
+.table_of_contents-indent-2 {
+	margin-left: 3rem;
+}
+
+.table_of_contents-indent-3 {
+	margin-left: 4.5rem;
+}
+
+.table_of_contents-link {
+	text-decoration: none;
+	opacity: 0.7;
+	border-bottom: 1px solid rgba(55, 53, 47, 0.18);
+}
+
+table,
+th,
+td {
+	border: 1px solid rgba(55, 53, 47, 0.09);
+	border-collapse: collapse;
+}
+
+table {
+	border-left: none;
+	border-right: none;
+}
+
+th,
+td {
+	font-weight: normal;
+	padding: 0.25em 0.5em;
+	line-height: 1.5;
+	min-height: 1.5em;
+	text-align: left;
+}
+
+th {
+	color: rgba(55, 53, 47, 0.6);
+}
+
+ol,
+ul {
+	margin: 0;
+	margin-block-start: 0.6em;
+	margin-block-end: 0.6em;
+}
+
+li > ol:first-child,
+li > ul:first-child {
+	margin-block-start: 0.6em;
+}
+
+ul > li {
+	list-style: disc;
+}
+
+ul.to-do-list {
+	padding-inline-start: 0;
+}
+
+ul.to-do-list > li {
+	list-style: none;
+}
+
+.to-do-children-checked {
+	text-decoration: line-through;
+	opacity: 0.375;
+}
+
+ul.toggle > li {
+	list-style: none;
+}
+
+ul {
+	padding-inline-start: 1.7em;
+}
+
+ul > li {
+	padding-left: 0.1em;
+}
+
+ol {
+	padding-inline-start: 1.6em;
+}
+
+ol > li {
+	padding-left: 0.2em;
+}
+
+.mono ol {
+	padding-inline-start: 2em;
+}
+
+.mono ol > li {
+	text-indent: -0.4em;
+}
+
+.toggle {
+	padding-inline-start: 0em;
+	list-style-type: none;
+}
+
+/* Indent toggle children */
+.toggle > li > details {
+	padding-left: 1.7em;
+}
+
+.toggle > li > details > summary {
+	margin-left: -1.1em;
+}
+
+.selected-value {
+	display: inline-block;
+	padding: 0 0.5em;
+	background: rgba(206, 205, 202, 0.5);
+	border-radius: 3px;
+	margin-right: 0.5em;
+	margin-top: 0.3em;
+	margin-bottom: 0.3em;
+	white-space: nowrap;
+}
+
+.collection-title {
+	display: inline-block;
+	margin-right: 1em;
+}
+
+.page-description {
+	margin-bottom: 2em;
+}
+
+.simple-table {
+	margin-top: 1em;
+	font-size: 0.875rem;
+	empty-cells: show;
+}
+.simple-table td {
+	height: 29px;
+	min-width: 120px;
+}
+
+.simple-table th {
+	height: 29px;
+	min-width: 120px;
+}
+
+.simple-table-header-color {
+	background: rgb(247, 246, 243);
+	color: black;
+}
+.simple-table-header {
+	font-weight: 500;
+}
+
+time {
+	opacity: 0.5;
+}
+
+.icon {
+	display: inline-flex;
+	align-items: center;
+	justify-content: center;
+	max-width: 1.2em;
+	max-height: 1.2em;
+	text-decoration: none;
+	vertical-align: text-bottom;
+	margin-right: 0.5em;
+}
+
+img.icon {
+	border-radius: 3px;
+}
+
+.callout img.notion-static-icon {
+	width: 1em;
+	height: 1em;
+}
+
+.callout p {
+	margin: 0;
+}
+
+.callout h1,
+.callout h2,
+.callout h3 {
+	margin: 0 0 0.6rem;
+}
+
+.user-icon {
+	width: 1.5em;
+	height: 1.5em;
+	border-radius: 100%;
+	margin-right: 0.5rem;
+}
+
+.user-icon-inner {
+	font-size: 0.8em;
+}
+
+.text-icon {
+	border: 1px solid #000;
+	text-align: center;
+}
+
+.page-cover-image {
+	display: block;
+	object-fit: cover;
+	width: 100%;
+	max-height: 30vh;
+}
+
+.page-header-icon {
+	font-size: 3rem;
+	margin-bottom: 1rem;
+}
+
+.page-header-icon-with-cover {
+	margin-top: -0.72em;
+	margin-left: 0.07em;
+}
+
+.page-header-icon img {
+	border-radius: 3px;
+}
+
+.link-to-page {
+	margin: 1em 0;
+	padding: 0;
+	border: none;
+	font-weight: 500;
+}
+
+p > .user {
+	opacity: 0.5;
+}
+
+td > .user,
+td > time {
+	white-space: nowrap;
+}
+
+input[type="checkbox"] {
+	transform: scale(1.5);
+	margin-right: 0.6em;
+	vertical-align: middle;
+}
+
+p {
+	margin-top: 0.5em;
+	margin-bottom: 0.5em;
+}
+
+.image {
+	border: none;
+	margin: 1.5em 0;
+	padding: 0;
+	border-radius: 0;
+	text-align: center;
+}
+
+.code,
+code {
+	background: rgba(135, 131, 120, 0.15);
+	border-radius: 3px;
+	padding: 0.2em 0.4em;
+	border-radius: 3px;
+	font-size: 85%;
+	tab-size: 2;
+}
+
+code {
+	color: #eb5757;
+}
+
+.code {
+	padding: 1.5em 1em;
+}
+
+.code-wrap {
+	white-space: pre-wrap;
+	word-break: break-all;
+}
+
+.code > code {
+	background: none;
+	padding: 0;
+	font-size: 100%;
+	color: inherit;
+}
+
+blockquote {
+	font-size: 1em;
+	margin: 1em 0;
+	padding-left: 1em;
+	border-left: 3px solid rgb(55, 53, 47);
+}
+
+blockquote.quote-large {
+	font-size: 1.25em;
+}
+
+.bookmark {
+	text-decoration: none;
+	max-height: 8em;
+	padding: 0;
+	display: flex;
+	width: 100%;
+	align-items: stretch;
+}
+
+.bookmark-title {
+	font-size: 0.85em;
+	overflow: hidden;
+	text-overflow: ellipsis;
+	height: 1.75em;
+	white-space: nowrap;
+}
+
+.bookmark-text {
+	display: flex;
+	flex-direction: column;
+}
+
+.bookmark-info {
+	flex: 4 1 180px;
+	padding: 12px 14px 14px;
+	display: flex;
+	flex-direction: column;
+	justify-content: space-between;
+}
+
+.bookmark-image {
+	width: 33%;
+	flex: 1 1 180px;
+	display: block;
+	position: relative;
+	object-fit: cover;
+	border-radius: 1px;
+}
+
+.bookmark-description {
+	color: rgba(55, 53, 47, 0.6);
+	font-size: 0.75em;
+	overflow: hidden;
+	max-height: 4.5em;
+	word-break: break-word;
+}
+
+.bookmark-href {
+	font-size: 0.75em;
+	margin-top: 0.25em;
+}
+
+.sans { font-family: ui-sans-serif, -apple-system, BlinkMacSystemFont, "Segoe UI Variable Display", "Segoe UI", Helvetica, "Apple Color Emoji", "Noto Sans Arabic", "Noto Sans Hebrew", Arial, sans-serif, "Segoe UI Emoji", "Segoe UI Symbol"; }
+.code { font-family: "SFMono-Regular", Menlo, Consolas, "PT Mono", "Liberation Mono", Courier, monospace; }
+.serif { font-family: Lyon-Text, Georgia, ui-serif, serif; }
+.mono { font-family: iawriter-mono, Nitti, Menlo, Courier, monospace; }
+.pdf .sans { font-family: Inter, ui-sans-serif, -apple-system, BlinkMacSystemFont, "Segoe UI Variable Display", "Segoe UI", Helvetica, "Apple Color Emoji", "Noto Sans Arabic", "Noto Sans Hebrew", Arial, sans-serif, "Segoe UI Emoji", "Segoe UI Symbol", 'Twemoji', 'Noto Color Emoji', 'Noto Sans CJK JP'; }
+.pdf:lang(zh-CN) .sans { font-family: Inter, ui-sans-serif, -apple-system, BlinkMacSystemFont, "Segoe UI Variable Display", "Segoe UI", Helvetica, "Apple Color Emoji", "Noto Sans Arabic", "Noto Sans Hebrew", Arial, sans-serif, "Segoe UI Emoji", "Segoe UI Symbol", 'Twemoji', 'Noto Color Emoji', 'Noto Sans CJK SC'; }
+.pdf:lang(zh-TW) .sans { font-family: Inter, ui-sans-serif, -apple-system, BlinkMacSystemFont, "Segoe UI Variable Display", "Segoe UI", Helvetica, "Apple Color Emoji", "Noto Sans Arabic", "Noto Sans Hebrew", Arial, sans-serif, "Segoe UI Emoji", "Segoe UI Symbol", 'Twemoji', 'Noto Color Emoji', 'Noto Sans CJK TC'; }
+.pdf:lang(ko-KR) .sans { font-family: Inter, ui-sans-serif, -apple-system, BlinkMacSystemFont, "Segoe UI Variable Display", "Segoe UI", Helvetica, "Apple Color Emoji", "Noto Sans Arabic", "Noto Sans Hebrew", Arial, sans-serif, "Segoe UI Emoji", "Segoe UI Symbol", 'Twemoji', 'Noto Color Emoji', 'Noto Sans CJK KR'; }
+.pdf .code { font-family: Source Code Pro, "SFMono-Regular", Menlo, Consolas, "PT Mono", "Liberation Mono", Courier, monospace, 'Twemoji', 'Noto Color Emoji', 'Noto Sans Mono CJK JP'; }
+.pdf:lang(zh-CN) .code { font-family: Source Code Pro, "SFMono-Regular", Menlo, Consolas, "PT Mono", "Liberation Mono", Courier, monospace, 'Twemoji', 'Noto Color Emoji', 'Noto Sans Mono CJK SC'; }
+.pdf:lang(zh-TW) .code { font-family: Source Code Pro, "SFMono-Regular", Menlo, Consolas, "PT Mono", "Liberation Mono", Courier, monospace, 'Twemoji', 'Noto Color Emoji', 'Noto Sans Mono CJK TC'; }
+.pdf:lang(ko-KR) .code { font-family: Source Code Pro, "SFMono-Regular", Menlo, Consolas, "PT Mono", "Liberation Mono", Courier, monospace, 'Twemoji', 'Noto Color Emoji', 'Noto Sans Mono CJK KR'; }
+.pdf .serif { font-family: PT Serif, Lyon-Text, Georgia, ui-serif, serif, 'Twemoji', 'Noto Color Emoji', 'Noto Serif CJK JP'; }
+.pdf:lang(zh-CN) .serif { font-family: PT Serif, Lyon-Text, Georgia, ui-serif, serif, 'Twemoji', 'Noto Color Emoji', 'Noto Serif CJK SC'; }
+.pdf:lang(zh-TW) .serif { font-family: PT Serif, Lyon-Text, Georgia, ui-serif, serif, 'Twemoji', 'Noto Color Emoji', 'Noto Serif CJK TC'; }
+.pdf:lang(ko-KR) .serif { font-family: PT Serif, Lyon-Text, Georgia, ui-serif, serif, 'Twemoji', 'Noto Color Emoji', 'Noto Serif CJK KR'; }
+.pdf .mono { font-family: PT Mono, iawriter-mono, Nitti, Menlo, Courier, monospace, 'Twemoji', 'Noto Color Emoji', 'Noto Sans Mono CJK JP'; }
+.pdf:lang(zh-CN) .mono { font-family: PT Mono, iawriter-mono, Nitti, Menlo, Courier, monospace, 'Twemoji', 'Noto Color Emoji', 'Noto Sans Mono CJK SC'; }
+.pdf:lang(zh-TW) .mono { font-family: PT Mono, iawriter-mono, Nitti, Menlo, Courier, monospace, 'Twemoji', 'Noto Color Emoji', 'Noto Sans Mono CJK TC'; }
+.pdf:lang(ko-KR) .mono { font-family: PT Mono, iawriter-mono, Nitti, Menlo, Courier, monospace, 'Twemoji', 'Noto Color Emoji', 'Noto Sans Mono CJK KR'; }
+.highlight-default {
+	color: rgba(44, 44, 43, 1);
+}
+.highlight-gray {
+	color: rgba(125, 122, 117, 1);
+	fill: rgba(125, 122, 117, 1);
+}
+.highlight-brown {
+	color: rgba(159, 118, 90, 1);
+	fill: rgba(159, 118, 90, 1);
+}
+.highlight-orange {
+	color: rgba(210, 123, 45, 1);
+	fill: rgba(210, 123, 45, 1);
+}
+.highlight-yellow {
+	color: rgba(203, 148, 52, 1);
+	fill: rgba(203, 148, 52, 1);
+}
+.highlight-teal {
+	color: rgba(80, 148, 110, 1);
+	fill: rgba(80, 148, 110, 1);
+}
+.highlight-blue {
+	color: rgba(56, 125, 201, 1);
+	fill: rgba(56, 125, 201, 1);
+}
+.highlight-purple {
+	color: rgba(154, 107, 180, 1);
+	fill: rgba(154, 107, 180, 1);
+}
+.highlight-pink {
+	color: rgba(193, 76, 138, 1);
+	fill: rgba(193, 76, 138, 1);
+}
+.highlight-red {
+	color: rgba(207, 81, 72, 1);
+	fill: rgba(207, 81, 72, 1);
+}
+.highlight-default_background {
+	color: rgba(44, 44, 43, 1);
+}
+.highlight-gray_background {
+	background: rgba(42, 28, 0, 0.07);
+}
+.highlight-brown_background {
+	background: rgba(139, 46, 0, 0.086);
+}
+.highlight-orange_background {
+	background: rgba(224, 101, 1, 0.129);
+}
+.highlight-yellow_background {
+	background: rgba(211, 168, 0, 0.137);
+}
+.highlight-teal_background {
+	background: rgba(0, 100, 45, 0.09);
+}
+.highlight-blue_background {
+	background: rgba(0, 124, 215, 0.094);
+}
+.highlight-purple_background {
+	background: rgba(102, 0, 178, 0.078);
+}
+.highlight-pink_background {
+	background: rgba(197, 0, 93, 0.086);
+}
+.highlight-red_background {
+	background: rgba(223, 22, 0, 0.094);
+}
+.block-color-default {
+	color: inherit;
+	fill: inherit;
+}
+.block-color-gray {
+	color: rgba(125, 122, 117, 1);
+	fill: rgba(125, 122, 117, 1);
+}
+.block-color-brown {
+	color: rgba(159, 118, 90, 1);
+	fill: rgba(159, 118, 90, 1);
+}
+.block-color-orange {
+	color: rgba(210, 123, 45, 1);
+	fill: rgba(210, 123, 45, 1);
+}
+.block-color-yellow {
+	color: rgba(203, 148, 52, 1);
+	fill: rgba(203, 148, 52, 1);
+}
+.block-color-teal {
+	color: rgba(80, 148, 110, 1);
+	fill: rgba(80, 148, 110, 1);
+}
+.block-color-blue {
+	color: rgba(56, 125, 201, 1);
+	fill: rgba(56, 125, 201, 1);
+}
+.block-color-purple {
+	color: rgba(154, 107, 180, 1);
+	fill: rgba(154, 107, 180, 1);
+}
+.block-color-pink {
+	color: rgba(193, 76, 138, 1);
+	fill: rgba(193, 76, 138, 1);
+}
+.block-color-red {
+	color: rgba(207, 81, 72, 1);
+	fill: rgba(207, 81, 72, 1);
+}
+.block-color-default_background {
+	color: inherit;
+	fill: inherit;
+}
+.block-color-gray_background {
+	background: rgba(240, 239, 237, 1);
+}
+.block-color-brown_background {
+	background: rgba(245, 237, 233, 1);
+}
+.block-color-orange_background {
+	background: rgba(251, 235, 222, 1);
+}
+.block-color-yellow_background {
+	background: rgba(249, 243, 220, 1);
+}
+.block-color-teal_background {
+	background: rgba(232, 241, 236, 1);
+}
+.block-color-blue_background {
+	background: rgba(229, 242, 252, 1);
+}
+.block-color-purple_background {
+	background: rgba(243, 235, 249, 1);
+}
+.block-color-pink_background {
+	background: rgba(250, 233, 241, 1);
+}
+.block-color-red_background {
+	background: rgba(252, 233, 231, 1);
+}
+.select-value-color-default { background-color: rgba(42, 28, 0, 0.07); }
+.select-value-color-gray { background-color: rgba(28, 19, 1, 0.11); }
+.select-value-color-brown { background-color: rgba(127, 51, 0, 0.156); }
+.select-value-color-orange { background-color: rgba(196, 88, 0, 0.203); }
+.select-value-color-yellow { background-color: rgba(209, 156, 0, 0.282); }
+.select-value-color-green { background-color: rgba(0, 96, 38, 0.156); }
+.select-value-color-blue { background-color: rgba(0, 118, 217, 0.203); }
+.select-value-color-purple { background-color: rgba(92, 0, 163, 0.141); }
+.select-value-color-pink { background-color: rgba(183, 0, 78, 0.152); }
+.select-value-color-red { background-color: rgba(206, 24, 0, 0.164); }
+
+.checkbox {
+	display: inline-flex;
+	vertical-align: text-bottom;
+	width: 16;
+	height: 16;
+	background-size: 16px;
+	margin-left: 2px;
+	margin-right: 5px;
+}
+
+.checkbox-on {
+	background-image: url("data:image/svg+xml;charset=UTF-8,%3Csvg%20width%3D%2216%22%20height%3D%2216%22%20viewBox%3D%220%200%2016%2016%22%20fill%3D%22none%22%20xmlns%3D%22http%3A%2F%2Fwww.w3.org%2F2000%2Fsvg%22%3E%0A%3Crect%20width%3D%2216%22%20height%3D%2216%22%20fill%3D%22%2358A9D7%22%2F%3E%0A%3Cpath%20d%3D%22M6.71429%2012.2852L14%204.9995L12.7143%203.71436L6.71429%209.71378L3.28571%206.2831L2%207.57092L6.71429%2012.2852Z%22%20fill%3D%22white%22%2F%3E%0A%3C%2Fsvg%3E");
+}
+
+.checkbox-off {
+	background-image: url("data:image/svg+xml;charset=UTF-8,%3Csvg%20width%3D%2216%22%20height%3D%2216%22%20viewBox%3D%220%200%2016%2016%22%20fill%3D%22none%22%20xmlns%3D%22http%3A%2F%2Fwww.w3.org%2F2000%2Fsvg%22%3E%0A%3Crect%20x%3D%220.75%22%20y%3D%220.75%22%20width%3D%2214.5%22%20height%3D%2214.5%22%20fill%3D%22white%22%20stroke%3D%22%2336352F%22%20stroke-width%3D%221.5%22%2F%3E%0A%3C%2Fsvg%3E");
+}
+	
+</style></head><body><article id="1e885df0-1907-812e-8d3f-fad5fac36e8a" class="page sans"><header><h1 class="page-title" dir="auto">🖥️ <strong>Clinic &amp; Caregiver Dashboard UI Specifications</strong></h1><p class="page-description" dir="auto"></p><table class="properties"><tbody><tr class="property-row property-row-person"><th><span class="icon property-icon"><img src="https://www.notion.so/icons/friends_gray.svg" style="width:14px;height:14px;display:block"/></span>Owner</th><td><span class="user"><span class="icon text-icon user-icon"><span class="user-icon-inner">A</span></span>Aubert</span></td></tr><tr class="property-row property-row-multi_select"><th><span class="icon property-icon"><img src="https://www.notion.so/icons/list_gray.svg" style="width:14px;height:14px;display:block"/></span>Tags</th><td></td></tr></tbody></table></header><div class="page-body"><div style="display:contents" dir="auto"><h3 id="1e885df0-1907-819f-a70c-f9cf0317a36d" class=""><strong>1. Purpose</strong></h3></div><div style="display:contents" dir="auto"><p id="1e885df0-1907-81d4-84ee-fedc48c9286a" class="">These specifications define the design, behavior, and constraints of the <strong>Clinic Admin</strong> and <strong>Caregiver</strong> dashboards. These views are:</p></div><div style="display:contents" dir="auto"><ul id="1e885df0-1907-81d4-be4d-e0cab1e8011a" class="bulleted-list"><li style="list-style-type:disc"><strong>Summary-only</strong>, never showing raw session content</li></ul></div><div style="display:contents" dir="auto"><ul id="1e885df0-1907-8129-8e61-e415ff727d56" class="bulleted-list"><li style="list-style-type:disc">Structured to promote <strong>empathy and insight</strong>, not control</li></ul></div><div style="display:contents" dir="auto"><ul id="1e885df0-1907-81b9-abcd-ef38ef3f65ed" class="bulleted-list"><li style="list-style-type:disc">Fully aligned with <strong>Law 25</strong>, <strong>PIPEDA</strong>, and <strong>Memora’s privacy ethos</strong></li></ul></div><div style="display:contents" dir="auto"><ul id="1e885df0-1907-8137-9d98-e4a02390851a" class="bulleted-list"><li style="list-style-type:disc">Designed with aging users and healthcare workflows in mind</li></ul></div><div style="display:contents" dir="auto"><ul id="1e885df0-1907-810b-b573-d4413de9a25f" class="bulleted-list"><li style="list-style-type:disc">Optimized for <strong>tablet and web</strong>, responsive for caregivers on mobile</li></ul></div><div style="display:contents" dir="auto"><hr id="1e885df0-1907-81d5-9b65-ce065698f796"/></div><div style="display:contents" dir="auto"><h3 id="1e885df0-1907-81e5-8630-f680a93b2be8" class=""><strong>2. Dashboard Types &amp; Roles</strong></h3></div><div style="display:contents" dir="ltr"><table id="1e885df0-1907-815b-ad9a-d26628630015" class="simple-table"><tbody><div style="display:contents" dir="ltr"><tr id="1e885df0-1907-81c5-8fea-e55f49b62423"><td id="sBIV" class="">Dashboard</td><td id="Y[iv" class="">Target Role</td><td id="k?wP" class="">Access</td></tr></div><div style="display:contents" dir="ltr"><tr id="1e885df0-1907-81c6-8528-dcc22e398b42"><td id="sBIV" class=""><strong>Clinic Dashboard</strong></td><td id="Y[iv" class="">Authorized pilot site staff</td><td id="k?wP" class="">Anonymized, read-only summaries</td></tr></div><div style="display:contents" dir="ltr"><tr id="1e885df0-1907-81b4-b840-d04df7ee3d24"><td id="sBIV" class=""><strong>Caregiver Dashboard</strong></td><td id="Y[iv" class="">Linked caregivers (via consent)</td><td id="k?wP" class="">Shared visibility on routine effort</td></tr></div></tbody></table></div><div style="display:contents" dir="auto"><hr id="1e885df0-1907-81ed-a5e6-f77e8a0141d7"/></div><div style="display:contents" dir="auto"><h3 id="1e885df0-1907-8121-ab83-ff49f5ddcf41" class=""><strong>3. Shared UI Design Standards</strong></h3></div><div style="display:contents" dir="ltr"><table id="1e885df0-1907-81c0-92b1-d2f28599ac97" class="simple-table"><tbody><div style="display:contents" dir="ltr"><tr id="1e885df0-1907-8196-adcd-de436c6b146a"><td id="R;J^" class="">Feature</td><td id="w[KA" class="">Rule</td></tr></div><div style="display:contents" dir="ltr"><tr id="1e885df0-1907-819f-bd8d-ed763d0e4394"><td id="R;J^" class="">Touch targets</td><td id="w[KA" class="">Minimum 44x44px</td></tr></div><div style="display:contents" dir="ltr"><tr id="1e885df0-1907-8160-af13-f3794065d001"><td id="R;J^" class="">Contrast</td><td id="w[KA" class="">Minimum 4.5:1 for all text/data</td></tr></div><div style="display:contents" dir="ltr"><tr id="1e885df0-1907-8153-a896-dbb639105f71"><td id="R;J^" class="">Language support</td><td id="w[KA" class="">Bilingual (EN/FR toggle or browser-locale based)</td></tr></div><div style="display:contents" dir="ltr"><tr id="1e885df0-1907-81a1-98ba-cbc7549c42ec"><td id="R;J^" class="">Data freshness</td><td id="w[KA" class="">Updates every 24 hours</td></tr></div><div style="display:contents" dir="ltr"><tr id="1e885df0-1907-8166-810f-e7849979a1cb"><td id="R;J^" class="">Alert style</td><td id="w[KA" class="">No red/yellow; use blue, purple, green for soft flags</td></tr></div><div style="display:contents" dir="ltr"><tr id="1e885df0-1907-81e3-8ee6-c7463bf03459"><td id="R;J^" class="">Consent indicators</td><td id="w[KA" class="">Must be visible at row-level if revoked/paused</td></tr></div><div style="display:contents" dir="ltr"><tr id="1e885df0-1907-814c-bc8b-d6678bf46703"><td id="R;J^" class="">Data summaries</td><td id="w[KA" class="">Display streaks, session counts — not game types, mistakes, or content</td></tr></div></tbody></table></div><div style="display:contents" dir="auto"><hr id="1e885df0-1907-8143-8352-cf6bcb059218"/></div><div style="display:contents" dir="auto"><h3 id="1e885df0-1907-8132-b81d-c65d34f1ccbf" class=""><strong>4. Clinic Dashboard UI Specifications</strong></h3></div><div style="display:contents" dir="auto"><h3 id="1e885df0-1907-8147-9ed6-ecc14c4fca6a" class="">A. <strong>Structure</strong></h3></div><div style="display:contents" dir="ltr"><table id="1e885df0-1907-8182-8dad-c9d770d910af" class="simple-table"><tbody><div style="display:contents" dir="ltr"><tr id="1e885df0-1907-814c-934c-e4a5d6ce5d37"><td id="MC=z" class="">Area</td><td id="BuQw" class="">Contents</td></tr></div><div style="display:contents" dir="ltr"><tr id="1e885df0-1907-8104-8397-f6b7477442db"><td id="MC=z" class=""><strong>Header</strong></td><td id="BuQw" class="">Clinic name, patient count, last sync, language switch</td></tr></div><div style="display:contents" dir="ltr"><tr id="1e885df0-1907-81c3-919a-d01d9a5925c1"><td id="MC=z" class=""><strong>Tile Summary Row</strong></td><td id="BuQw" class=""></td></tr></div><div style="display:contents" dir="ltr"><tr id="1e885df0-1907-81ee-aac1-ffa60dde722a"><td id="MC=z" class="">• Patients active this week</td><td id="BuQw" class=""></td></tr></div><div style="display:contents" dir="ltr"><tr id="1e885df0-1907-8190-b380-c972db7a0223"><td id="MC=z" class="">• 3+ day streaks</td><td id="BuQw" class=""></td></tr></div><div style="display:contents" dir="ltr"><tr id="1e885df0-1907-81a4-aab1-f1d9e80416c8"><td id="MC=z" class="">• Consent revoked</td><td id="BuQw" class=""></td></tr></div><div style="display:contents" dir="ltr"><tr id="1e885df0-1907-811e-b458-c2ad042a4149"><td id="MC=z" class="">• Caregiver-linked</td><td id="BuQw" class=""></td></tr></div><div style="display:contents" dir="ltr"><tr id="1e885df0-1907-8108-9355-e3247327891c"><td id="MC=z" class="">• Companion muted</td><td id="BuQw" class=""></td></tr></div><div style="display:contents" dir="ltr"><tr id="1e885df0-1907-8144-972e-e26b5a8877db"><td id="MC=z" class=""><strong>Main Table</strong></td><td id="BuQw" class="">Per-patient row (anonymized):</td></tr></div><div style="display:contents" dir="ltr"><tr id="1e885df0-1907-8142-b8ae-e555ed82753b"><td id="MC=z" class="">• Status dot</td><td id="BuQw" class=""></td></tr></div><div style="display:contents" dir="ltr"><tr id="1e885df0-1907-81c8-9716-cfcd46229401"><td id="MC=z" class="">• Sessions this week</td><td id="BuQw" class=""></td></tr></div><div style="display:contents" dir="ltr"><tr id="1e885df0-1907-8109-9e9a-feb1fb7c55aa"><td id="MC=z" class="">• Last active date</td><td id="BuQw" class=""></td></tr></div><div style="display:contents" dir="ltr"><tr id="1e885df0-1907-8128-b7b4-c5aa5d55474f"><td id="MC=z" class="">• Companion state</td><td id="BuQw" class=""></td></tr></div><div style="display:contents" dir="ltr"><tr id="1e885df0-1907-8197-b60c-fc17ca7d416f"><td id="MC=z" class="">• Consent flags</td><td id="BuQw" class=""></td></tr></div><div style="display:contents" dir="ltr"><tr id="1e885df0-1907-8151-90df-eda3d191a705"><td id="MC=z" class="">• “Export summary” (PDF)</td><td id="BuQw" class=""></td></tr></div><div style="display:contents" dir="ltr"><tr id="1e885df0-1907-81d5-aa56-eca0974e50c9"><td id="MC=z" class=""><strong>Filters</strong></td><td id="BuQw" class="">By status, activity range, Companion state</td></tr></div></tbody></table></div><div style="display:contents" dir="auto"><h3 id="1e885df0-1907-8199-96de-db5fda3fee66" class="">B. <strong>Permissions &amp; Visual Cues</strong></h3></div><div style="display:contents" dir="ltr"><table id="1e885df0-1907-818e-8d76-da090e2a809b" class="simple-table"><tbody><div style="display:contents" dir="ltr"><tr id="1e885df0-1907-81e1-9142-f04dc86399fd"><td id="GPjk" class="">Field</td><td id="yjMv" class="">Condition</td><td id="EJ;u" class="">UI Behavior</td></tr></div><div style="display:contents" dir="ltr"><tr id="1e885df0-1907-81c9-81c6-e6098fdc5997"><td id="GPjk" class="">Consent revoked</td><td id="yjMv" class=""><code>status: revoked</code></td><td id="EJ;u" class="">Red outline + lock icon + hover tooltip</td></tr></div><div style="display:contents" dir="ltr"><tr id="1e885df0-1907-8136-99cc-d86aa2dbd813"><td id="GPjk" class="">Companion muted</td><td id="yjMv" class=""><code>muted: true</code></td><td id="EJ;u" class="">Grey icon with alt text: “Companion inactive”</td></tr></div><div style="display:contents" dir="ltr"><tr id="1e885df0-1907-81c0-a16f-e2f68e650b77"><td id="GPjk" class="">Clinic access toggled off by user</td><td id="yjMv" class=""><code>clinic_linked: false</code></td><td id="EJ;u" class="">Row grayed with status: “Access disabled”</td></tr></div><div style="display:contents" dir="ltr"><tr id="1e885df0-1907-81a9-84ce-efe7c69bc309"><td id="GPjk" class="">No caregiver linked</td><td id="yjMv" class=""><code>caregiver_linked: false</code></td><td id="EJ;u" class="">Icon: outline heart with slash</td></tr></div><div style="display:contents" dir="ltr"><tr id="1e885df0-1907-81e9-8581-dd6b4ba5d821"><td id="GPjk" class="">Export allowed</td><td id="yjMv" class=""><code>export_permission: true</code></td><td id="EJ;u" class="">Button: “Download summary” (PDF only, no raw data)</td></tr></div></tbody></table></div><div style="display:contents" dir="auto"><hr id="1e885df0-1907-81b4-9f0a-c1160b0ad6bc"/></div><div style="display:contents" dir="auto"><h3 id="1e885df0-1907-8116-bfac-f1cfd47366fd" class=""><strong>5. Caregiver Dashboard UI Specifications</strong></h3></div><div style="display:contents" dir="auto"><h3 id="1e885df0-1907-8120-a39e-fe420c73b589" class="">A. <strong>Structure</strong></h3></div><div style="display:contents" dir="ltr"><table id="1e885df0-1907-81b0-9e25-d6bf35de7797" class="simple-table"><tbody><div style="display:contents" dir="ltr"><tr id="1e885df0-1907-8177-9143-d93ef0152fd1"><td id="_rwW" class="">Area</td><td id="qnev" class="">Contents</td></tr></div><div style="display:contents" dir="ltr"><tr id="1e885df0-1907-81f2-91f9-e1c32e7c8b9f"><td id="_rwW" class=""><strong>Header</strong></td><td id="qnev" class="">Patient name (if consented), language toggle, Companion status</td></tr></div><div style="display:contents" dir="ltr"><tr id="1e885df0-1907-81cf-850e-d00d08352e5d"><td id="_rwW" class=""><strong>Streak Tracker</strong></td><td id="qnev" class="">Days active this week, soft celebration icons (leaf, sparkle)</td></tr></div><div style="display:contents" dir="ltr"><tr id="1e885df0-1907-8111-952a-cd29d08c6cee"><td id="_rwW" class=""><strong>Session Summary Tile</strong></td><td id="qnev" class=""></td></tr></div><div style="display:contents" dir="ltr"><tr id="1e885df0-1907-81af-aabd-ec14ea931910"><td id="_rwW" class="">• Last played: date + Companion encouragement</td><td id="qnev" class=""></td></tr></div><div style="display:contents" dir="ltr"><tr id="1e885df0-1907-81d0-b77c-f607487d4044"><td id="_rwW" class="">• Weekly recap: “5 sessions completed — great effort!”</td><td id="qnev" class=""></td></tr></div><div style="display:contents" dir="ltr"><tr id="1e885df0-1907-8137-999f-e76da5ad854c"><td id="_rwW" class="">• Encouragement prompt: template picker</td><td id="qnev" class=""></td></tr></div><div style="display:contents" dir="ltr"><tr id="1e885df0-1907-8196-8c85-e17024322b2c"><td id="_rwW" class=""><strong>Encouragement History</strong></td><td id="qnev" class="">“Last message sent: July 4” + log of past 3 interactions</td></tr></div></tbody></table></div><div style="display:contents" dir="auto"><h3 id="1e885df0-1907-8171-af6e-f66831155bb0" class="">B. <strong>Interaction Rules</strong></h3></div><div style="display:contents" dir="ltr"><table id="1e885df0-1907-817d-acf8-c8ccb0fac57b" class="simple-table"><tbody><div style="display:contents" dir="ltr"><tr id="1e885df0-1907-8139-92a0-f6d0b4407f8a"><td id="lZpx" class="">Item</td><td id="dU\[" class="">Behavior</td></tr></div><div style="display:contents" dir="ltr"><tr id="1e885df0-1907-8172-bc28-ebbaf45e9a4c"><td id="lZpx" class="">Encouragement prompt</td><td id="dU\[" class="">Opens modal with prewritten message templates</td></tr></div><div style="display:contents" dir="ltr"><tr id="1e885df0-1907-8131-a687-e399c6589a40"><td id="lZpx" class="">Encouragement limit</td><td id="dU\[" class="">1 per 7 days; Companion suppresses if rejected/muted</td></tr></div><div style="display:contents" dir="ltr"><tr id="1e885df0-1907-8155-8c47-d697a430793e"><td id="lZpx" class="">Consent revoked</td><td id="dU\[" class="">Dashboard greets with: “Access to this view has ended.”</td></tr></div><div style="display:contents" dir="ltr"><tr id="1e885df0-1907-8195-ae04-fd66c5466152"><td id="lZpx" class="">Language toggle</td><td id="dU\[" class="">Changes all content (labels, messages, template previews)</td></tr></div><div style="display:contents" dir="ltr"><tr id="1e885df0-1907-8125-9ef0-c2a9446fd933"><td id="lZpx" class="">Companion tone match</td><td id="dU\[" class="">Message box color adjusts with Companion mood (<code>gentle</code>, <code>warm</code>, etc.)</td></tr></div></tbody></table></div><div style="display:contents" dir="auto"><hr id="1e885df0-1907-810f-9f56-ddecef8db813"/></div><div style="display:contents" dir="auto"><h3 id="1e885df0-1907-81d1-823e-eb575b73de3d" class=""><strong>6. Accessibility Requirements</strong></h3></div><div style="display:contents" dir="ltr"><table id="1e885df0-1907-818b-b45c-cd5837500379" class="simple-table"><tbody><div style="display:contents" dir="ltr"><tr id="1e885df0-1907-8187-85aa-c762a7a3b684"><td id="`&lt;x&lt;" class="">Requirement</td><td id="GKBJ" class="">Dashboard View</td></tr></div><div style="display:contents" dir="ltr"><tr id="1e885df0-1907-817f-80b5-cf4ad4828692"><td id="`&lt;x&lt;" class="">Focus states for all tiles/buttons</td><td id="GKBJ" class="">✅ Both roles</td></tr></div><div style="display:contents" dir="ltr"><tr id="1e885df0-1907-8140-a414-dcf266b7be5a"><td id="`&lt;x&lt;" class="">Screen reader labels for all data rows</td><td id="GKBJ" class="">✅ Both roles</td></tr></div><div style="display:contents" dir="ltr"><tr id="1e885df0-1907-817f-9f4c-dbb9357b9aad"><td id="`&lt;x&lt;" class="">Icons always accompanied by text or tooltips</td><td id="GKBJ" class="">✅ Both roles</td></tr></div><div style="display:contents" dir="ltr"><tr id="1e885df0-1907-81c9-bf79-fbe130439028"><td id="`&lt;x&lt;" class="">Large text toggle support (OS-level dynamic scaling)</td><td id="GKBJ" class="">✅ Caregiver dashboard</td></tr></div><div style="display:contents" dir="ltr"><tr id="1e885df0-1907-81ef-bc0f-cef0afe90e3a"><td id="`&lt;x&lt;" class="">WCAG 2.1 AA compliance (all views)</td><td id="GKBJ" class="">✅ All dashboards</td></tr></div></tbody></table></div><div style="display:contents" dir="auto"><hr id="1e885df0-1907-8110-ba24-e1189fb15bfe"/></div><div style="display:contents" dir="auto"><h3 id="1e885df0-1907-81a7-80f9-e6bc356eb54e" class=""><strong>7. Localization-Specific Behavior</strong></h3></div><div style="display:contents" dir="ltr"><table id="1e885df0-1907-81e9-8942-e2ecab6a2ac1" class="simple-table"><tbody><div style="display:contents" dir="ltr"><tr id="1e885df0-1907-8160-b728-ea57cf290f29"><td id="]x`g" class="">Field</td><td id="VRQq" class="">Rule</td></tr></div><div style="display:contents" dir="ltr"><tr id="1e885df0-1907-8156-851c-dab5a8d50820"><td id="]x`g" class="">Date formats</td><td id="VRQq" class="">EN: July 1, 2025 / FR: 1 juillet 2025</td></tr></div><div style="display:contents" dir="ltr"><tr id="1e885df0-1907-812f-8bae-eb9bf89b82db"><td id="]x`g" class="">Line wrapping</td><td id="VRQq" class="">Labels must wrap gracefully on French views</td></tr></div><div style="display:contents" dir="ltr"><tr id="1e885df0-1907-81c9-b7cd-e5918718e30b"><td id="]x`g" class="">CTA buttons</td><td id="VRQq" class="">Always expand to fit text (min width = 80px mobile, 120px tablet)</td></tr></div><div style="display:contents" dir="ltr"><tr id="1e885df0-1907-81f6-b874-d79b9f38051b"><td id="]x`g" class="">Tooltip copy</td><td id="VRQq" class="">Translated natively, never auto-translated</td></tr></div></tbody></table></div><div style="display:contents" dir="auto"><hr id="1e885df0-1907-810c-811d-cf71536cea1f"/></div><div style="display:contents" dir="auto"><h3 id="1e885df0-1907-815e-a664-f841f83a2467" class=""><strong>8. Consent &amp; Data Boundaries Enforcement</strong></h3></div><div style="display:contents" dir="ltr"><table id="1e885df0-1907-8104-ae76-f5a97db73872" class="simple-table"><tbody><div style="display:contents" dir="ltr"><tr id="1e885df0-1907-8192-bf09-f5599b7b145d"><td id="Wo?E" class="">Scenario</td><td id="|DZI" class="">UI Enforcement</td></tr></div><div style="display:contents" dir="ltr"><tr id="1e885df0-1907-81aa-afc9-ef7565fae294"><td id="Wo?E" class="">Caregiver unlinked</td><td id="|DZI" class="">View becomes inaccessible immediately; Companion log also gated</td></tr></div><div style="display:contents" dir="ltr"><tr id="1e885df0-1907-8195-b572-e4d08941970c"><td id="Wo?E" class="">Clinic revoked</td><td id="|DZI" class="">Row hidden or grayed with reason: “Consent withdrawn”</td></tr></div><div style="display:contents" dir="ltr"><tr id="1e885df0-1907-81b0-abb8-d6cb5881916f"><td id="Wo?E" class="">Silent mode</td><td id="|DZI" class="">Encouragements suppressed, Companion visual removed</td></tr></div><div style="display:contents" dir="ltr"><tr id="1e885df0-1907-8157-92ed-d541f899df55"><td id="Wo?E" class="">Session data export</td><td id="|DZI" class="">Only PDF, only for authorized clinic roles, no row-level logs</td></tr></div></tbody></table></div><div style="display:contents" dir="auto"><hr id="1e885df0-1907-8121-9841-f8583a112413"/></div><div style="display:contents" dir="auto"><h3 id="1e885df0-1907-8152-b7ab-fb873bea827c" class=""><strong>9. Linked Documents</strong></h3></div><div style="display:contents" dir="auto"><ul id="1e885df0-1907-8110-9174-e9de01a61970" class="bulleted-list"><li style="list-style-type:disc">🧠 [Companion Behavioral System]</li></ul></div><div style="display:contents" dir="auto"><ul id="1e885df0-1907-8182-866f-d908cd293d93" class="bulleted-list"><li style="list-style-type:disc">📋 [Consent &amp; Privacy Flow]</li></ul></div><div style="display:contents" dir="auto"><ul id="1e885df0-1907-81fc-ad21-ca286f78dba2" class="bulleted-list"><li style="list-style-type:disc">📘 [Language &amp; Tone Guidelines]</li></ul></div><div style="display:contents" dir="auto"><ul id="1e885df0-1907-8175-a887-ee80e0f4e326" class="bulleted-list"><li style="list-style-type:disc">🧱 [Component Library Reference]</li></ul></div><div style="display:contents" dir="auto"><ul id="1e885df0-1907-81eb-b177-c3f3819da4db" class="bulleted-list"><li style="list-style-type:disc">🧪 [UI/UX QA Checklist Template]</li></ul></div><div style="display:contents" dir="auto"><ul id="1e885df0-1907-81c8-b7a9-d2288f753101" class="bulleted-list"><li style="list-style-type:disc">🖼 [Badge UX Reference]</li></ul></div><div style="display:contents" dir="auto"><ul id="1e885df0-1907-8146-b39e-e0c2a67a3694" class="bulleted-list"><li style="list-style-type:disc">🧯 [Edge Cases &amp; Fail-Safes]</li></ul></div></div></article><span class="sans" style="font-size:14px;padding-top:2em"></span></body></html>

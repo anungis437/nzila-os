@@ -1,0 +1,713 @@
+<html><head><meta http-equiv="Content-Type" content="text/html; charset=utf-8"/><title>🧭 Strategic Positioning Map (2025</title><style>
+/* cspell:disable-file */
+/* webkit printing magic: print all background colors */
+html {
+	-webkit-print-color-adjust: exact;
+}
+* {
+	box-sizing: border-box;
+	-webkit-print-color-adjust: exact;
+}
+
+html,
+body {
+	margin: 0;
+	padding: 0;
+}
+@media only screen {
+	body {
+		margin: 2em auto;
+		max-width: 900px;
+		color: rgb(55, 53, 47);
+	}
+}
+
+body {
+	line-height: 1.5;
+	white-space: pre-wrap;
+}
+
+a,
+a.visited {
+	color: inherit;
+	text-decoration: underline;
+}
+
+.pdf-relative-link-path {
+	font-size: 80%;
+	color: #444;
+}
+
+h1,
+h2,
+h3 {
+	letter-spacing: -0.01em;
+	line-height: 1.2;
+	font-weight: 600;
+	margin-bottom: 0;
+}
+
+/* Override strong tags inside headings to maintain consistent weight */
+h1 strong,
+h2 strong,
+h3 strong {
+	font-weight: 600;
+}
+
+.page-title {
+	font-size: 2.5rem;
+	font-weight: 700;
+	margin-top: 0;
+	margin-bottom: 0.75em;
+}
+
+h1 {
+	font-size: 1.875rem;
+	margin-top: 1.875rem;
+}
+
+h2 {
+	font-size: 1.5rem;
+	margin-top: 1.5rem;
+}
+
+h3 {
+	font-size: 1.25rem;
+	margin-top: 1.25rem;
+}
+
+.source {
+	border: 1px solid #ddd;
+	border-radius: 3px;
+	padding: 1.5em;
+	word-break: break-all;
+}
+
+.callout {
+	border-radius: 10px;
+	padding: 1rem;
+}
+
+figure {
+	margin: 1.25em 0;
+	page-break-inside: avoid;
+}
+
+figcaption {
+	opacity: 0.5;
+	font-size: 85%;
+	margin-top: 0.5em;
+}
+
+mark {
+	background-color: transparent;
+}
+
+.indented {
+	padding-left: 1.5em;
+}
+
+hr {
+	background: transparent;
+	display: block;
+	width: 100%;
+	height: 1px;
+	visibility: visible;
+	border: none;
+	border-bottom: 1px solid rgba(55, 53, 47, 0.09);
+}
+
+img {
+	max-width: 100%;
+}
+
+@media only print {
+	img {
+		max-height: 100vh;
+		object-fit: contain;
+	}
+}
+
+@page {
+	margin: 1in;
+}
+
+.collection-content {
+	font-size: 0.875rem;
+}
+
+.collection-content td {
+	white-space: pre-wrap;
+	word-break: break-word;
+}
+
+.column-list {
+	display: flex;
+	justify-content: space-between;
+}
+
+.column {
+	padding: 0 1em;
+}
+
+.column:first-child {
+	padding-left: 0;
+}
+
+.column:last-child {
+	padding-right: 0;
+}
+
+.table_of_contents-item {
+	display: block;
+	font-size: 0.875rem;
+	line-height: 1.3;
+	padding: 0.125rem;
+}
+
+.table_of_contents-indent-1 {
+	margin-left: 1.5rem;
+}
+
+.table_of_contents-indent-2 {
+	margin-left: 3rem;
+}
+
+.table_of_contents-indent-3 {
+	margin-left: 4.5rem;
+}
+
+.table_of_contents-link {
+	text-decoration: none;
+	opacity: 0.7;
+	border-bottom: 1px solid rgba(55, 53, 47, 0.18);
+}
+
+table,
+th,
+td {
+	border: 1px solid rgba(55, 53, 47, 0.09);
+	border-collapse: collapse;
+}
+
+table {
+	border-left: none;
+	border-right: none;
+}
+
+th,
+td {
+	font-weight: normal;
+	padding: 0.25em 0.5em;
+	line-height: 1.5;
+	min-height: 1.5em;
+	text-align: left;
+}
+
+th {
+	color: rgba(55, 53, 47, 0.6);
+}
+
+ol,
+ul {
+	margin: 0;
+	margin-block-start: 0.6em;
+	margin-block-end: 0.6em;
+}
+
+li > ol:first-child,
+li > ul:first-child {
+	margin-block-start: 0.6em;
+}
+
+ul > li {
+	list-style: disc;
+}
+
+ul.to-do-list {
+	padding-inline-start: 0;
+}
+
+ul.to-do-list > li {
+	list-style: none;
+}
+
+.to-do-children-checked {
+	text-decoration: line-through;
+	opacity: 0.375;
+}
+
+ul.toggle > li {
+	list-style: none;
+}
+
+ul {
+	padding-inline-start: 1.7em;
+}
+
+ul > li {
+	padding-left: 0.1em;
+}
+
+ol {
+	padding-inline-start: 1.6em;
+}
+
+ol > li {
+	padding-left: 0.2em;
+}
+
+.mono ol {
+	padding-inline-start: 2em;
+}
+
+.mono ol > li {
+	text-indent: -0.4em;
+}
+
+.toggle {
+	padding-inline-start: 0em;
+	list-style-type: none;
+}
+
+/* Indent toggle children */
+.toggle > li > details {
+	padding-left: 1.7em;
+}
+
+.toggle > li > details > summary {
+	margin-left: -1.1em;
+}
+
+.selected-value {
+	display: inline-block;
+	padding: 0 0.5em;
+	background: rgba(206, 205, 202, 0.5);
+	border-radius: 3px;
+	margin-right: 0.5em;
+	margin-top: 0.3em;
+	margin-bottom: 0.3em;
+	white-space: nowrap;
+}
+
+.collection-title {
+	display: inline-block;
+	margin-right: 1em;
+}
+
+.page-description {
+	margin-bottom: 2em;
+}
+
+.simple-table {
+	margin-top: 1em;
+	font-size: 0.875rem;
+	empty-cells: show;
+}
+.simple-table td {
+	height: 29px;
+	min-width: 120px;
+}
+
+.simple-table th {
+	height: 29px;
+	min-width: 120px;
+}
+
+.simple-table-header-color {
+	background: rgb(247, 246, 243);
+	color: black;
+}
+.simple-table-header {
+	font-weight: 500;
+}
+
+time {
+	opacity: 0.5;
+}
+
+.icon {
+	display: inline-flex;
+	align-items: center;
+	justify-content: center;
+	max-width: 1.2em;
+	max-height: 1.2em;
+	text-decoration: none;
+	vertical-align: text-bottom;
+	margin-right: 0.5em;
+}
+
+img.icon {
+	border-radius: 3px;
+}
+
+.callout img.notion-static-icon {
+	width: 1em;
+	height: 1em;
+}
+
+.callout p {
+	margin: 0;
+}
+
+.callout h1,
+.callout h2,
+.callout h3 {
+	margin: 0 0 0.6rem;
+}
+
+.user-icon {
+	width: 1.5em;
+	height: 1.5em;
+	border-radius: 100%;
+	margin-right: 0.5rem;
+}
+
+.user-icon-inner {
+	font-size: 0.8em;
+}
+
+.text-icon {
+	border: 1px solid #000;
+	text-align: center;
+}
+
+.page-cover-image {
+	display: block;
+	object-fit: cover;
+	width: 100%;
+	max-height: 30vh;
+}
+
+.page-header-icon {
+	font-size: 3rem;
+	margin-bottom: 1rem;
+}
+
+.page-header-icon-with-cover {
+	margin-top: -0.72em;
+	margin-left: 0.07em;
+}
+
+.page-header-icon img {
+	border-radius: 3px;
+}
+
+.link-to-page {
+	margin: 1em 0;
+	padding: 0;
+	border: none;
+	font-weight: 500;
+}
+
+p > .user {
+	opacity: 0.5;
+}
+
+td > .user,
+td > time {
+	white-space: nowrap;
+}
+
+input[type="checkbox"] {
+	transform: scale(1.5);
+	margin-right: 0.6em;
+	vertical-align: middle;
+}
+
+p {
+	margin-top: 0.5em;
+	margin-bottom: 0.5em;
+}
+
+.image {
+	border: none;
+	margin: 1.5em 0;
+	padding: 0;
+	border-radius: 0;
+	text-align: center;
+}
+
+.code,
+code {
+	background: rgba(135, 131, 120, 0.15);
+	border-radius: 3px;
+	padding: 0.2em 0.4em;
+	border-radius: 3px;
+	font-size: 85%;
+	tab-size: 2;
+}
+
+code {
+	color: #eb5757;
+}
+
+.code {
+	padding: 1.5em 1em;
+}
+
+.code-wrap {
+	white-space: pre-wrap;
+	word-break: break-all;
+}
+
+.code > code {
+	background: none;
+	padding: 0;
+	font-size: 100%;
+	color: inherit;
+}
+
+blockquote {
+	font-size: 1em;
+	margin: 1em 0;
+	padding-left: 1em;
+	border-left: 3px solid rgb(55, 53, 47);
+}
+
+blockquote.quote-large {
+	font-size: 1.25em;
+}
+
+.bookmark {
+	text-decoration: none;
+	max-height: 8em;
+	padding: 0;
+	display: flex;
+	width: 100%;
+	align-items: stretch;
+}
+
+.bookmark-title {
+	font-size: 0.85em;
+	overflow: hidden;
+	text-overflow: ellipsis;
+	height: 1.75em;
+	white-space: nowrap;
+}
+
+.bookmark-text {
+	display: flex;
+	flex-direction: column;
+}
+
+.bookmark-info {
+	flex: 4 1 180px;
+	padding: 12px 14px 14px;
+	display: flex;
+	flex-direction: column;
+	justify-content: space-between;
+}
+
+.bookmark-image {
+	width: 33%;
+	flex: 1 1 180px;
+	display: block;
+	position: relative;
+	object-fit: cover;
+	border-radius: 1px;
+}
+
+.bookmark-description {
+	color: rgba(55, 53, 47, 0.6);
+	font-size: 0.75em;
+	overflow: hidden;
+	max-height: 4.5em;
+	word-break: break-word;
+}
+
+.bookmark-href {
+	font-size: 0.75em;
+	margin-top: 0.25em;
+}
+
+.sans { font-family: ui-sans-serif, -apple-system, BlinkMacSystemFont, "Segoe UI Variable Display", "Segoe UI", Helvetica, "Apple Color Emoji", "Noto Sans Arabic", "Noto Sans Hebrew", Arial, sans-serif, "Segoe UI Emoji", "Segoe UI Symbol"; }
+.code { font-family: "SFMono-Regular", Menlo, Consolas, "PT Mono", "Liberation Mono", Courier, monospace; }
+.serif { font-family: Lyon-Text, Georgia, ui-serif, serif; }
+.mono { font-family: iawriter-mono, Nitti, Menlo, Courier, monospace; }
+.pdf .sans { font-family: Inter, ui-sans-serif, -apple-system, BlinkMacSystemFont, "Segoe UI Variable Display", "Segoe UI", Helvetica, "Apple Color Emoji", "Noto Sans Arabic", "Noto Sans Hebrew", Arial, sans-serif, "Segoe UI Emoji", "Segoe UI Symbol", 'Twemoji', 'Noto Color Emoji', 'Noto Sans CJK JP'; }
+.pdf:lang(zh-CN) .sans { font-family: Inter, ui-sans-serif, -apple-system, BlinkMacSystemFont, "Segoe UI Variable Display", "Segoe UI", Helvetica, "Apple Color Emoji", "Noto Sans Arabic", "Noto Sans Hebrew", Arial, sans-serif, "Segoe UI Emoji", "Segoe UI Symbol", 'Twemoji', 'Noto Color Emoji', 'Noto Sans CJK SC'; }
+.pdf:lang(zh-TW) .sans { font-family: Inter, ui-sans-serif, -apple-system, BlinkMacSystemFont, "Segoe UI Variable Display", "Segoe UI", Helvetica, "Apple Color Emoji", "Noto Sans Arabic", "Noto Sans Hebrew", Arial, sans-serif, "Segoe UI Emoji", "Segoe UI Symbol", 'Twemoji', 'Noto Color Emoji', 'Noto Sans CJK TC'; }
+.pdf:lang(ko-KR) .sans { font-family: Inter, ui-sans-serif, -apple-system, BlinkMacSystemFont, "Segoe UI Variable Display", "Segoe UI", Helvetica, "Apple Color Emoji", "Noto Sans Arabic", "Noto Sans Hebrew", Arial, sans-serif, "Segoe UI Emoji", "Segoe UI Symbol", 'Twemoji', 'Noto Color Emoji', 'Noto Sans CJK KR'; }
+.pdf .code { font-family: Source Code Pro, "SFMono-Regular", Menlo, Consolas, "PT Mono", "Liberation Mono", Courier, monospace, 'Twemoji', 'Noto Color Emoji', 'Noto Sans Mono CJK JP'; }
+.pdf:lang(zh-CN) .code { font-family: Source Code Pro, "SFMono-Regular", Menlo, Consolas, "PT Mono", "Liberation Mono", Courier, monospace, 'Twemoji', 'Noto Color Emoji', 'Noto Sans Mono CJK SC'; }
+.pdf:lang(zh-TW) .code { font-family: Source Code Pro, "SFMono-Regular", Menlo, Consolas, "PT Mono", "Liberation Mono", Courier, monospace, 'Twemoji', 'Noto Color Emoji', 'Noto Sans Mono CJK TC'; }
+.pdf:lang(ko-KR) .code { font-family: Source Code Pro, "SFMono-Regular", Menlo, Consolas, "PT Mono", "Liberation Mono", Courier, monospace, 'Twemoji', 'Noto Color Emoji', 'Noto Sans Mono CJK KR'; }
+.pdf .serif { font-family: PT Serif, Lyon-Text, Georgia, ui-serif, serif, 'Twemoji', 'Noto Color Emoji', 'Noto Serif CJK JP'; }
+.pdf:lang(zh-CN) .serif { font-family: PT Serif, Lyon-Text, Georgia, ui-serif, serif, 'Twemoji', 'Noto Color Emoji', 'Noto Serif CJK SC'; }
+.pdf:lang(zh-TW) .serif { font-family: PT Serif, Lyon-Text, Georgia, ui-serif, serif, 'Twemoji', 'Noto Color Emoji', 'Noto Serif CJK TC'; }
+.pdf:lang(ko-KR) .serif { font-family: PT Serif, Lyon-Text, Georgia, ui-serif, serif, 'Twemoji', 'Noto Color Emoji', 'Noto Serif CJK KR'; }
+.pdf .mono { font-family: PT Mono, iawriter-mono, Nitti, Menlo, Courier, monospace, 'Twemoji', 'Noto Color Emoji', 'Noto Sans Mono CJK JP'; }
+.pdf:lang(zh-CN) .mono { font-family: PT Mono, iawriter-mono, Nitti, Menlo, Courier, monospace, 'Twemoji', 'Noto Color Emoji', 'Noto Sans Mono CJK SC'; }
+.pdf:lang(zh-TW) .mono { font-family: PT Mono, iawriter-mono, Nitti, Menlo, Courier, monospace, 'Twemoji', 'Noto Color Emoji', 'Noto Sans Mono CJK TC'; }
+.pdf:lang(ko-KR) .mono { font-family: PT Mono, iawriter-mono, Nitti, Menlo, Courier, monospace, 'Twemoji', 'Noto Color Emoji', 'Noto Sans Mono CJK KR'; }
+.highlight-default {
+	color: rgba(44, 44, 43, 1);
+}
+.highlight-gray {
+	color: rgba(125, 122, 117, 1);
+	fill: rgba(125, 122, 117, 1);
+}
+.highlight-brown {
+	color: rgba(159, 118, 90, 1);
+	fill: rgba(159, 118, 90, 1);
+}
+.highlight-orange {
+	color: rgba(210, 123, 45, 1);
+	fill: rgba(210, 123, 45, 1);
+}
+.highlight-yellow {
+	color: rgba(203, 148, 52, 1);
+	fill: rgba(203, 148, 52, 1);
+}
+.highlight-teal {
+	color: rgba(80, 148, 110, 1);
+	fill: rgba(80, 148, 110, 1);
+}
+.highlight-blue {
+	color: rgba(56, 125, 201, 1);
+	fill: rgba(56, 125, 201, 1);
+}
+.highlight-purple {
+	color: rgba(154, 107, 180, 1);
+	fill: rgba(154, 107, 180, 1);
+}
+.highlight-pink {
+	color: rgba(193, 76, 138, 1);
+	fill: rgba(193, 76, 138, 1);
+}
+.highlight-red {
+	color: rgba(207, 81, 72, 1);
+	fill: rgba(207, 81, 72, 1);
+}
+.highlight-default_background {
+	color: rgba(44, 44, 43, 1);
+}
+.highlight-gray_background {
+	background: rgba(42, 28, 0, 0.07);
+}
+.highlight-brown_background {
+	background: rgba(139, 46, 0, 0.086);
+}
+.highlight-orange_background {
+	background: rgba(224, 101, 1, 0.129);
+}
+.highlight-yellow_background {
+	background: rgba(211, 168, 0, 0.137);
+}
+.highlight-teal_background {
+	background: rgba(0, 100, 45, 0.09);
+}
+.highlight-blue_background {
+	background: rgba(0, 124, 215, 0.094);
+}
+.highlight-purple_background {
+	background: rgba(102, 0, 178, 0.078);
+}
+.highlight-pink_background {
+	background: rgba(197, 0, 93, 0.086);
+}
+.highlight-red_background {
+	background: rgba(223, 22, 0, 0.094);
+}
+.block-color-default {
+	color: inherit;
+	fill: inherit;
+}
+.block-color-gray {
+	color: rgba(125, 122, 117, 1);
+	fill: rgba(125, 122, 117, 1);
+}
+.block-color-brown {
+	color: rgba(159, 118, 90, 1);
+	fill: rgba(159, 118, 90, 1);
+}
+.block-color-orange {
+	color: rgba(210, 123, 45, 1);
+	fill: rgba(210, 123, 45, 1);
+}
+.block-color-yellow {
+	color: rgba(203, 148, 52, 1);
+	fill: rgba(203, 148, 52, 1);
+}
+.block-color-teal {
+	color: rgba(80, 148, 110, 1);
+	fill: rgba(80, 148, 110, 1);
+}
+.block-color-blue {
+	color: rgba(56, 125, 201, 1);
+	fill: rgba(56, 125, 201, 1);
+}
+.block-color-purple {
+	color: rgba(154, 107, 180, 1);
+	fill: rgba(154, 107, 180, 1);
+}
+.block-color-pink {
+	color: rgba(193, 76, 138, 1);
+	fill: rgba(193, 76, 138, 1);
+}
+.block-color-red {
+	color: rgba(207, 81, 72, 1);
+	fill: rgba(207, 81, 72, 1);
+}
+.block-color-default_background {
+	color: inherit;
+	fill: inherit;
+}
+.block-color-gray_background {
+	background: rgba(240, 239, 237, 1);
+}
+.block-color-brown_background {
+	background: rgba(245, 237, 233, 1);
+}
+.block-color-orange_background {
+	background: rgba(251, 235, 222, 1);
+}
+.block-color-yellow_background {
+	background: rgba(249, 243, 220, 1);
+}
+.block-color-teal_background {
+	background: rgba(232, 241, 236, 1);
+}
+.block-color-blue_background {
+	background: rgba(229, 242, 252, 1);
+}
+.block-color-purple_background {
+	background: rgba(243, 235, 249, 1);
+}
+.block-color-pink_background {
+	background: rgba(250, 233, 241, 1);
+}
+.block-color-red_background {
+	background: rgba(252, 233, 231, 1);
+}
+.select-value-color-default { background-color: rgba(42, 28, 0, 0.07); }
+.select-value-color-gray { background-color: rgba(28, 19, 1, 0.11); }
+.select-value-color-brown { background-color: rgba(127, 51, 0, 0.156); }
+.select-value-color-orange { background-color: rgba(196, 88, 0, 0.203); }
+.select-value-color-yellow { background-color: rgba(209, 156, 0, 0.282); }
+.select-value-color-green { background-color: rgba(0, 96, 38, 0.156); }
+.select-value-color-blue { background-color: rgba(0, 118, 217, 0.203); }
+.select-value-color-purple { background-color: rgba(92, 0, 163, 0.141); }
+.select-value-color-pink { background-color: rgba(183, 0, 78, 0.152); }
+.select-value-color-red { background-color: rgba(206, 24, 0, 0.164); }
+
+.checkbox {
+	display: inline-flex;
+	vertical-align: text-bottom;
+	width: 16;
+	height: 16;
+	background-size: 16px;
+	margin-left: 2px;
+	margin-right: 5px;
+}
+
+.checkbox-on {
+	background-image: url("data:image/svg+xml;charset=UTF-8,%3Csvg%20width%3D%2216%22%20height%3D%2216%22%20viewBox%3D%220%200%2016%2016%22%20fill%3D%22none%22%20xmlns%3D%22http%3A%2F%2Fwww.w3.org%2F2000%2Fsvg%22%3E%0A%3Crect%20width%3D%2216%22%20height%3D%2216%22%20fill%3D%22%2358A9D7%22%2F%3E%0A%3Cpath%20d%3D%22M6.71429%2012.2852L14%204.9995L12.7143%203.71436L6.71429%209.71378L3.28571%206.2831L2%207.57092L6.71429%2012.2852Z%22%20fill%3D%22white%22%2F%3E%0A%3C%2Fsvg%3E");
+}
+
+.checkbox-off {
+	background-image: url("data:image/svg+xml;charset=UTF-8,%3Csvg%20width%3D%2216%22%20height%3D%2216%22%20viewBox%3D%220%200%2016%2016%22%20fill%3D%22none%22%20xmlns%3D%22http%3A%2F%2Fwww.w3.org%2F2000%2Fsvg%22%3E%0A%3Crect%20x%3D%220.75%22%20y%3D%220.75%22%20width%3D%2214.5%22%20height%3D%2214.5%22%20fill%3D%22white%22%20stroke%3D%22%2336352F%22%20stroke-width%3D%221.5%22%2F%3E%0A%3C%2Fsvg%3E");
+}
+	
+</style></head><body><article id="1e585df0-1907-8042-b661-c24d4926c0e8" class="page sans"><header><h1 class="page-title" dir="auto">🧭 <strong>Strategic Positioning Map (2025</strong></h1><p class="page-description" dir="auto"></p><table class="properties"><tbody><tr class="property-row property-row-person"><th><span class="icon property-icon"><img src="https://www.notion.so/icons/friends_gray.svg" style="width:14px;height:14px;display:block"/></span>Owner</th><td><span class="user"><span class="icon text-icon user-icon"><span class="user-icon-inner">A</span></span>Aubert</span></td></tr><tr class="property-row property-row-multi_select"><th><span class="icon property-icon"><img src="https://www.notion.so/icons/list_gray.svg" style="width:14px;height:14px;display:block"/></span>Tags</th><td></td></tr></tbody></table></header><div class="page-body"><div style="display:contents" dir="auto"><h3 id="1e885df0-1907-806a-9b05-ff829b84f49d" class="">1. <strong>Executive Summary</strong></h3></div><div style="display:contents" dir="auto"><p id="1e885df0-1907-807b-9df8-cf441d9681ba" class=""><strong>Nzila Ventures</strong> is a purpose-built studio creating intelligent, ethical technologies for aging, caregiving, and cognitive health. We are solving for the <strong>missing layer</strong>: the human engagement, behavior tracking, and empathy engine that sits between clinics, families, and care recipients.</p></div><div style="display:contents" dir="auto"><p id="1e885df0-1907-80f2-b121-de97bd9b6d21" class="">Our ventures share a <strong>Companion AI core</strong> that adapts across products, enabling each new tool (Memora, Optiva, CareAI, etc.) to solve distinct problems while building toward a unified, secure ecosystem of trust-centered care.</p></div><div style="display:contents" dir="auto"><hr id="1e885df0-1907-80b4-a59c-fd15e459fcab"/></div><div style="display:contents" dir="auto"><h3 id="1e885df0-1907-80cf-aba6-e685bd2c87b0" class="">2. <strong>Core Positioning Pillars</strong></h3></div><div style="display:contents" dir="ltr"><table id="1e885df0-1907-80bb-a9f3-d900afbd768f" class="simple-table"><tbody><div style="display:contents" dir="ltr"><tr id="1e885df0-1907-8025-8eeb-d6610d8bc242"><td id="[VOZ" class="">Pillar</td><td id="BunG" class="" style="width:559px">Description</td></tr></div><div style="display:contents" dir="ltr"><tr id="1e885df0-1907-804a-841e-fbb240aef486"><td id="[VOZ" class="">🧠 <strong>Human-Centered AI</strong></td><td id="BunG" class="" style="width:559px">Adaptive, assistive, and emotionally safe. Not diagnostic, not invasive.</td></tr></div><div style="display:contents" dir="ltr"><tr id="1e885df0-1907-80e2-b0cf-d9c9fc340787"><td id="[VOZ" class="">🌱 <strong>Multi-Product, One Core</strong></td><td id="BunG" class="" style="width:559px">Every product leverages the Companion engine, prompt logic, and design DNA.</td></tr></div><div style="display:contents" dir="ltr"><tr id="1e885df0-1907-8078-a66b-ff6d07a1eaa2"><td id="[VOZ" class="">🏥 <strong>Built With Clinics, Not Over Them</strong></td><td id="BunG" class="" style="width:559px">Tools that <strong>enhance</strong> care workflows without disrupting clinical systems.</td></tr></div><div style="display:contents" dir="ltr"><tr id="1e885df0-1907-802b-8f9a-f8404a3670e1"><td id="[VOZ" class="">👪 <strong>Caregiver Co-Design</strong></td><td id="BunG" class="" style="width:559px">Family members are supported, not sidelined — through simple, affirming tools.</td></tr></div><div style="display:contents" dir="ltr"><tr id="1e885df0-1907-800a-9ab9-ea8de8af3e64"><td id="[VOZ" class="">🔐 <strong>Privacy-Centric Infrastructure</strong></td><td id="BunG" class="" style="width:559px">Governed by Law 25, PIPEDA, and ethical design principles. Every action is opt-in, explainable, and trackable.</td></tr></div></tbody></table></div><div style="display:contents" dir="auto"><hr id="1e885df0-1907-80d9-95f0-f462ed11bbec"/></div><div style="display:contents" dir="auto"><h3 id="1e885df0-1907-8045-853b-c851607afcf1" class="">3. <strong>Positioning Matrix</strong></h3></div><div style="display:contents" dir="ltr"><table id="1e885df0-1907-8036-add3-fa654d165a72" class="simple-table"><tbody><div style="display:contents" dir="ltr"><tr id="1e885df0-1907-8044-990d-c4520c5560d5"><td id="sdCd" class="">Axis</td><td id="&gt;^Ag" class="">Commodity Zone</td><td id="[NeZ" class="">Nzila Position</td><td id="=&lt;d]" class="">Innovation Zone</td></tr></div><div style="display:contents" dir="ltr"><tr id="1e885df0-1907-806e-805e-f84e3d83f66c"><td id="sdCd" class=""><strong>AI Usage</strong></td><td id="&gt;^Ag" class="">Generic chatbot / “nudges”</td><td id="[NeZ" class="">Longitudinal Companion memory and adaptive UX</td><td id="=&lt;d]" class="">Predictive, personalized AI</td></tr></div><div style="display:contents" dir="ltr"><tr id="1e885df0-1907-80dc-82dd-e12b0c303554"><td id="sdCd" class=""><strong>User Lens</strong></td><td id="&gt;^Ag" class="">Admin- or system-first</td><td id="[NeZ" class="">Human-first (caregivers + patients)</td><td id="=&lt;d]" class="">Family-synced &amp; context-aware</td></tr></div><div style="display:contents" dir="ltr"><tr id="1e885df0-1907-8001-b034-c88a198f6580"><td id="sdCd" class=""><strong>Clinical Fit</strong></td><td id="&gt;^Ag" class="">Standalone apps or portals</td><td id="[NeZ" class="">Companion embedded in routines, reporting, reminders</td><td id="=&lt;d]" class="">Full-stack integration</td></tr></div><div style="display:contents" dir="ltr"><tr id="1e885df0-1907-804e-8484-edf8790fe2f2"><td id="sdCd" class=""><strong>Consent &amp; Data Use</strong></td><td id="&gt;^Ag" class="">Dark patterns, inferred profiles</td><td id="[NeZ" class="">Transparent, consent-logged engagement</td><td id="=&lt;d]" class="">AI with patient-owned controls</td></tr></div></tbody></table></div><div style="display:contents" dir="auto"><hr id="1e885df0-1907-8051-8ae7-f1f4a0f5db9a"/></div><div style="display:contents" dir="auto"><h3 id="1e885df0-1907-8099-a75f-d3a090399e55" class="">4. <strong>Strategic Opportunity Spaces</strong></h3></div><div style="display:contents" dir="ltr"><table id="1e885df0-1907-80ba-843e-db311bc79c5f" class="simple-table"><tbody><div style="display:contents" dir="ltr"><tr id="1e885df0-1907-801a-ba23-fc27bea2e9b4"><td id="{BAc" class="">Opportunity</td><td id="deI@" class="">Market Gap</td><td id="Ir&lt;p" class="">Nzila Entry</td></tr></div><div style="display:contents" dir="ltr"><tr id="1e885df0-1907-8072-b853-e16884d664e3"><td id="{BAc" class="">Cognitive Wellness</td><td id="deI@" class="">No behavioral continuity; fragmented games</td><td id="Ir&lt;p" class="">Companion-led daily engagement, tone-matching, fatigue-aware design</td></tr></div><div style="display:contents" dir="ltr"><tr id="1e885df0-1907-8078-99b1-f7011435ced1"><td id="{BAc" class="">Clinic Support</td><td id="deI@" class="">Manual outreach, no insight loop</td><td id="Ir&lt;p" class="">ClinicConnect: dashboards, micro-metrics, passive compliance</td></tr></div><div style="display:contents" dir="ltr"><tr id="1e885df0-1907-80c9-bffd-eeb1c84021fb"><td id="{BAc" class="">Caregiver Enablement</td><td id="deI@" class="">Isolation + no toolset</td><td id="Ir&lt;p" class="">Caregiver portal, encouragement templates, learning content</td></tr></div><div style="display:contents" dir="ltr"><tr id="1e885df0-1907-80c4-9e49-d060e054f6d7"><td id="{BAc" class="">Trial Participation</td><td id="deI@" class="">Dropout + noncompliance</td><td id="Ir&lt;p" class="">Companion prompts linked to study design, adherence memory</td></tr></div><div style="display:contents" dir="ltr"><tr id="1e885df0-1907-80ac-b527-d4d343e42b7f"><td id="{BAc" class="">Cross-System Alignment</td><td id="deI@" class="">Fragmented healthtech stacks</td><td id="Ir&lt;p" class="">Central Companion logic deployed across verticals</td></tr></div></tbody></table></div><div style="display:contents" dir="auto"><hr id="1e885df0-1907-8084-9b35-fb459a78c56c"/></div><div style="display:contents" dir="auto"><h3 id="1e885df0-1907-8075-af15-f7dda0d0c318" class="">5. <strong>Ecosystem Mapping</strong></h3></div><div style="display:contents" dir="auto"><h3 id="1e885df0-1907-8024-820d-d1923690c37c" class="">🧬 Primary Users:</h3></div><div style="display:contents" dir="auto"><ul id="1e885df0-1907-8076-b6df-f7d05349566d" class="bulleted-list"><li style="list-style-type:disc">Individuals with early-stage cognitive challenges</li></ul></div><div style="display:contents" dir="auto"><ul id="1e885df0-1907-8052-b6b2-cccd73082e49" class="bulleted-list"><li style="list-style-type:disc">Caregivers (family and professional)</li></ul></div><div style="display:contents" dir="auto"><ul id="1e885df0-1907-8072-bd35-cbc021d60b35" class="bulleted-list"><li style="list-style-type:disc">Clinics focused on aging, memory, or caregiver engagement</li></ul></div><div style="display:contents" dir="auto"><ul id="1e885df0-1907-80aa-8985-c5d88d39e6d7" class="bulleted-list"><li style="list-style-type:disc">Research groups conducting behavior-linked studies</li></ul></div><div style="display:contents" dir="auto"><ul id="1e885df0-1907-8090-bdaf-e1761ccb1cb4" class="bulleted-list"><li style="list-style-type:disc">Funders and grant bodies aligned with mental and public health</li></ul></div><div style="display:contents" dir="auto"><h3 id="1e885df0-1907-802f-ad7f-fbe4fa6c6bb4" class="">🤝 Strategic Relationship Tiers:</h3></div><div style="display:contents" dir="ltr"><table id="1e885df0-1907-80c8-9ac4-cd53d5cc5ed5" class="simple-table"><tbody><div style="display:contents" dir="ltr"><tr id="1e885df0-1907-80d3-aab4-f60a82d501c5"><td id="N=Q=" class="">Tier</td><td id="^V:Q" class="">Example</td></tr></div><div style="display:contents" dir="ltr"><tr id="1e885df0-1907-801a-9e00-e3ac6e0e5c74"><td id="N=Q=" class=""><strong>Clinical</strong></td><td id="^V:Q" class="">Memory clinics, geriatric research sites</td></tr></div><div style="display:contents" dir="ltr"><tr id="1e885df0-1907-805d-aea3-c0aa35d7d2b8"><td id="N=Q=" class=""><strong>Public Health</strong></td><td id="^V:Q" class="">Alzheimer Societies, CIHR, AGE-WELL</td></tr></div><div style="display:contents" dir="ltr"><tr id="1e885df0-1907-80e4-82ea-fd9c15595b82"><td id="N=Q=" class=""><strong>Digital Infra</strong></td><td id="^V:Q" class="">Telus Medesync, DSQ, EMR-compatible systems</td></tr></div><div style="display:contents" dir="ltr"><tr id="1e885df0-1907-804f-a58a-dcf9830f908c"><td id="N=Q=" class=""><strong>Advocacy &amp; Privacy</strong></td><td id="^V:Q" class="">OpenNorth, CARP, law25-aligned legal groups</td></tr></div><div style="display:contents" dir="ltr"><tr id="1e885df0-1907-809a-bec4-c66d74d0ffe0"><td id="N=Q=" class=""><strong>Future</strong></td><td id="^V:Q" class="">Wearables, smart home, multilingual content partners</td></tr></div></tbody></table></div><div style="display:contents" dir="auto"><hr id="1e885df0-1907-80e5-b481-cd2bf69f53d5"/></div><div style="display:contents" dir="auto"><h3 id="1e885df0-1907-8093-8797-d085dc97b496" class="">6. <strong>Nzila’s Strategic Distinction</strong></h3></div><div style="display:contents" dir="ltr"><table id="1e885df0-1907-800a-bc07-ee0628cd61e7" class="simple-table"><tbody><div style="display:contents" dir="ltr"><tr id="1e885df0-1907-8051-93da-c6651a5aa54d"><td id="c}~q" class="">Competitor</td><td id="r[K[" class="">Market Focus</td><td id="bo&gt;J" class="">Nzila Difference</td></tr></div><div style="display:contents" dir="ltr"><tr id="1e885df0-1907-8074-af15-cd4903c79899"><td id="c}~q" class="">🧠 Brain Health Apps</td><td id="r[K[" class="">Games, short-term scores</td><td id="bo&gt;J" class="">Companion continuity, emotional safety, memory</td></tr></div><div style="display:contents" dir="ltr"><tr id="1e885df0-1907-80d4-9c15-fba8da47008d"><td id="c}~q" class="">🏥 EMR Vendors</td><td id="r[K[" class="">Scheduling, medical data</td><td id="bo&gt;J" class="">Non-medical, behavioral layer; no clinical disruption</td></tr></div><div style="display:contents" dir="ltr"><tr id="1e885df0-1907-80f7-af90-cffd4bb994e0"><td id="c}~q" class="">📱 Wellness Startups</td><td id="r[K[" class="">D2C motivation or meditation</td><td id="bo&gt;J" class="">Co-designed with clinicians and caregivers; B2B2C-ready</td></tr></div><div style="display:contents" dir="ltr"><tr id="1e885df0-1907-8074-bc85-da95e8d02b5e"><td id="c}~q" class="">🤖 Chatbot Platforms</td><td id="r[K[" class="">Transactional Q&amp;A or support</td><td id="bo&gt;J" class="">Tone-aware, fatigue-sensitive, memory-informed Companion</td></tr></div><div style="display:contents" dir="ltr"><tr id="1e885df0-1907-805c-95b6-e940d9e1e1a8"><td id="c}~q" class="">🧪 Trial Tools</td><td id="r[K[" class="">Protocol trackers</td><td id="bo&gt;J" class="">Real-world behavioral reinforcement + Companion prompts</td></tr></div></tbody></table></div><div style="display:contents" dir="auto"><hr id="1e885df0-1907-80f5-a199-daddf6ff6055"/></div><div style="display:contents" dir="auto"><h3 id="1e885df0-1907-8055-92b6-f46e997d97e0" class="">7. <strong>Nzila Strategic Summary Statement</strong></h3></div><div style="display:contents" dir="auto"><blockquote id="1e885df0-1907-8061-84ef-d3602cc944ac" class="">Nzila Ventures is building the connective tissue between clinical care and daily life.<div style="display:contents" dir="auto"><p id="1e885df0-1907-8021-a13c-fc0b1f198289" class="">Our Companion-powered products fill the silent gaps in cognitive and caregiver ecosystems — reinforcing trust, nudging participation, and restoring empathy at scale.</p></div></blockquote></div><div style="display:contents" dir="auto"><hr id="1e885df0-1907-80b2-9005-e06473a52f48"/></div><div style="display:contents" dir="auto"><h3 id="1e885df0-1907-8053-897a-c917321b2eae" class="">8. <strong>Strategic Risks &amp; Safeguards</strong></h3></div><div style="display:contents" dir="ltr"><table id="1e885df0-1907-8084-8cc2-dfc2bf3e11cb" class="simple-table"><tbody><div style="display:contents" dir="ltr"><tr id="1e885df0-1907-8047-b316-e83922b38c4e"><td id="C}pI" class="">Risk</td><td id="n_JZ" class="">Response</td></tr></div><div style="display:contents" dir="ltr"><tr id="1e885df0-1907-8077-b8c5-c652e24ec8df"><td id="C}pI" class="">❗ Market Confusion</td><td id="n_JZ" class="">Clear product naming, Companion as common layer</td></tr></div><div style="display:contents" dir="ltr"><tr id="1e885df0-1907-80d1-b157-e4fd53f0b12e"><td id="C}pI" class="">❗ AI Mistrust</td><td id="n_JZ" class="">Transparent AI UX + explainability toggles</td></tr></div><div style="display:contents" dir="ltr"><tr id="1e885df0-1907-807f-b091-fddae98bcd32"><td id="C}pI" class="">❗ Clinic Adoption</td><td id="n_JZ" class="">Co-design clinics from day one, not after</td></tr></div><div style="display:contents" dir="ltr"><tr id="1e885df0-1907-80f6-9d8f-c60bc189ecaf"><td id="C}pI" class="">❗ Burn Rate Pressure</td><td id="n_JZ" class="">Milestone-based capital deployment model</td></tr></div><div style="display:contents" dir="ltr"><tr id="1e885df0-1907-80b9-b429-d364843b6de5"><td id="C}pI" class="">❗ Regulatory Shifts</td><td id="n_JZ" class="">Law 25/GDPR/HIPAA-aligned consent stack; scenario audits quarterly</td></tr></div></tbody></table></div><div style="display:contents" dir="auto"><hr id="1e885df0-1907-8042-a734-cf37c766cd2d"/></div><div style="display:contents" dir="auto"><h3 id="1e885df0-1907-8089-92ed-f24b52572675" class="">9. <strong>Who Uses This Map?</strong></h3></div><div style="display:contents" dir="ltr"><table id="1e885df0-1907-80f0-a0e2-dd86d9de66e4" class="simple-table"><tbody><div style="display:contents" dir="ltr"><tr id="1e885df0-1907-80e7-a6cc-ef47a8a2ef0a"><td id="&gt;X&gt;b" class="">Audience</td><td id="^R&gt;Q" class="">Usage</td></tr></div><div style="display:contents" dir="ltr"><tr id="1e885df0-1907-80ef-93d5-e3c378582de1"><td id="&gt;X&gt;b" class="">Product Team</td><td id="^R&gt;Q" class="">Prioritize design and feature decisions</td></tr></div><div style="display:contents" dir="ltr"><tr id="1e885df0-1907-8035-abbf-f60b8e0c8eef"><td id="&gt;X&gt;b" class="">Clinical Partners</td><td id="^R&gt;Q" class="">Understand where we fit in their workflow</td></tr></div><div style="display:contents" dir="ltr"><tr id="1e885df0-1907-80ad-9d33-fec61dce7bcd"><td id="&gt;X&gt;b" class="">Investors</td><td id="^R&gt;Q" class="">See defensibility and strategic white space</td></tr></div><div style="display:contents" dir="ltr"><tr id="1e885df0-1907-8064-adf9-d48c7625ea46"><td id="&gt;X&gt;b" class="">Grant Writers</td><td id="^R&gt;Q" class="">Match positioning to non-dilutive fund criteria</td></tr></div><div style="display:contents" dir="ltr"><tr id="1e885df0-1907-80b0-828d-dcd1f5431672"><td id="&gt;X&gt;b" class="">Policy/Privacy Advocates</td><td id="^R&gt;Q" class="">Map AI to governance, not marketing hype</td></tr></div></tbody></table></div></div></article><span class="sans" style="font-size:14px;padding-top:2em"></span></body></html>

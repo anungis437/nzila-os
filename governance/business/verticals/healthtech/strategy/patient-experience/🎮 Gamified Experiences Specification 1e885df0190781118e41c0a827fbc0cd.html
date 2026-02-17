@@ -1,0 +1,713 @@
+<html><head><meta http-equiv="Content-Type" content="text/html; charset=utf-8"/><title>🎮 Gamified Experiences Specification</title><style>
+/* cspell:disable-file */
+/* webkit printing magic: print all background colors */
+html {
+	-webkit-print-color-adjust: exact;
+}
+* {
+	box-sizing: border-box;
+	-webkit-print-color-adjust: exact;
+}
+
+html,
+body {
+	margin: 0;
+	padding: 0;
+}
+@media only screen {
+	body {
+		margin: 2em auto;
+		max-width: 900px;
+		color: rgb(55, 53, 47);
+	}
+}
+
+body {
+	line-height: 1.5;
+	white-space: pre-wrap;
+}
+
+a,
+a.visited {
+	color: inherit;
+	text-decoration: underline;
+}
+
+.pdf-relative-link-path {
+	font-size: 80%;
+	color: #444;
+}
+
+h1,
+h2,
+h3 {
+	letter-spacing: -0.01em;
+	line-height: 1.2;
+	font-weight: 600;
+	margin-bottom: 0;
+}
+
+/* Override strong tags inside headings to maintain consistent weight */
+h1 strong,
+h2 strong,
+h3 strong {
+	font-weight: 600;
+}
+
+.page-title {
+	font-size: 2.5rem;
+	font-weight: 700;
+	margin-top: 0;
+	margin-bottom: 0.75em;
+}
+
+h1 {
+	font-size: 1.875rem;
+	margin-top: 1.875rem;
+}
+
+h2 {
+	font-size: 1.5rem;
+	margin-top: 1.5rem;
+}
+
+h3 {
+	font-size: 1.25rem;
+	margin-top: 1.25rem;
+}
+
+.source {
+	border: 1px solid #ddd;
+	border-radius: 3px;
+	padding: 1.5em;
+	word-break: break-all;
+}
+
+.callout {
+	border-radius: 10px;
+	padding: 1rem;
+}
+
+figure {
+	margin: 1.25em 0;
+	page-break-inside: avoid;
+}
+
+figcaption {
+	opacity: 0.5;
+	font-size: 85%;
+	margin-top: 0.5em;
+}
+
+mark {
+	background-color: transparent;
+}
+
+.indented {
+	padding-left: 1.5em;
+}
+
+hr {
+	background: transparent;
+	display: block;
+	width: 100%;
+	height: 1px;
+	visibility: visible;
+	border: none;
+	border-bottom: 1px solid rgba(55, 53, 47, 0.09);
+}
+
+img {
+	max-width: 100%;
+}
+
+@media only print {
+	img {
+		max-height: 100vh;
+		object-fit: contain;
+	}
+}
+
+@page {
+	margin: 1in;
+}
+
+.collection-content {
+	font-size: 0.875rem;
+}
+
+.collection-content td {
+	white-space: pre-wrap;
+	word-break: break-word;
+}
+
+.column-list {
+	display: flex;
+	justify-content: space-between;
+}
+
+.column {
+	padding: 0 1em;
+}
+
+.column:first-child {
+	padding-left: 0;
+}
+
+.column:last-child {
+	padding-right: 0;
+}
+
+.table_of_contents-item {
+	display: block;
+	font-size: 0.875rem;
+	line-height: 1.3;
+	padding: 0.125rem;
+}
+
+.table_of_contents-indent-1 {
+	margin-left: 1.5rem;
+}
+
+.table_of_contents-indent-2 {
+	margin-left: 3rem;
+}
+
+.table_of_contents-indent-3 {
+	margin-left: 4.5rem;
+}
+
+.table_of_contents-link {
+	text-decoration: none;
+	opacity: 0.7;
+	border-bottom: 1px solid rgba(55, 53, 47, 0.18);
+}
+
+table,
+th,
+td {
+	border: 1px solid rgba(55, 53, 47, 0.09);
+	border-collapse: collapse;
+}
+
+table {
+	border-left: none;
+	border-right: none;
+}
+
+th,
+td {
+	font-weight: normal;
+	padding: 0.25em 0.5em;
+	line-height: 1.5;
+	min-height: 1.5em;
+	text-align: left;
+}
+
+th {
+	color: rgba(55, 53, 47, 0.6);
+}
+
+ol,
+ul {
+	margin: 0;
+	margin-block-start: 0.6em;
+	margin-block-end: 0.6em;
+}
+
+li > ol:first-child,
+li > ul:first-child {
+	margin-block-start: 0.6em;
+}
+
+ul > li {
+	list-style: disc;
+}
+
+ul.to-do-list {
+	padding-inline-start: 0;
+}
+
+ul.to-do-list > li {
+	list-style: none;
+}
+
+.to-do-children-checked {
+	text-decoration: line-through;
+	opacity: 0.375;
+}
+
+ul.toggle > li {
+	list-style: none;
+}
+
+ul {
+	padding-inline-start: 1.7em;
+}
+
+ul > li {
+	padding-left: 0.1em;
+}
+
+ol {
+	padding-inline-start: 1.6em;
+}
+
+ol > li {
+	padding-left: 0.2em;
+}
+
+.mono ol {
+	padding-inline-start: 2em;
+}
+
+.mono ol > li {
+	text-indent: -0.4em;
+}
+
+.toggle {
+	padding-inline-start: 0em;
+	list-style-type: none;
+}
+
+/* Indent toggle children */
+.toggle > li > details {
+	padding-left: 1.7em;
+}
+
+.toggle > li > details > summary {
+	margin-left: -1.1em;
+}
+
+.selected-value {
+	display: inline-block;
+	padding: 0 0.5em;
+	background: rgba(206, 205, 202, 0.5);
+	border-radius: 3px;
+	margin-right: 0.5em;
+	margin-top: 0.3em;
+	margin-bottom: 0.3em;
+	white-space: nowrap;
+}
+
+.collection-title {
+	display: inline-block;
+	margin-right: 1em;
+}
+
+.page-description {
+	margin-bottom: 2em;
+}
+
+.simple-table {
+	margin-top: 1em;
+	font-size: 0.875rem;
+	empty-cells: show;
+}
+.simple-table td {
+	height: 29px;
+	min-width: 120px;
+}
+
+.simple-table th {
+	height: 29px;
+	min-width: 120px;
+}
+
+.simple-table-header-color {
+	background: rgb(247, 246, 243);
+	color: black;
+}
+.simple-table-header {
+	font-weight: 500;
+}
+
+time {
+	opacity: 0.5;
+}
+
+.icon {
+	display: inline-flex;
+	align-items: center;
+	justify-content: center;
+	max-width: 1.2em;
+	max-height: 1.2em;
+	text-decoration: none;
+	vertical-align: text-bottom;
+	margin-right: 0.5em;
+}
+
+img.icon {
+	border-radius: 3px;
+}
+
+.callout img.notion-static-icon {
+	width: 1em;
+	height: 1em;
+}
+
+.callout p {
+	margin: 0;
+}
+
+.callout h1,
+.callout h2,
+.callout h3 {
+	margin: 0 0 0.6rem;
+}
+
+.user-icon {
+	width: 1.5em;
+	height: 1.5em;
+	border-radius: 100%;
+	margin-right: 0.5rem;
+}
+
+.user-icon-inner {
+	font-size: 0.8em;
+}
+
+.text-icon {
+	border: 1px solid #000;
+	text-align: center;
+}
+
+.page-cover-image {
+	display: block;
+	object-fit: cover;
+	width: 100%;
+	max-height: 30vh;
+}
+
+.page-header-icon {
+	font-size: 3rem;
+	margin-bottom: 1rem;
+}
+
+.page-header-icon-with-cover {
+	margin-top: -0.72em;
+	margin-left: 0.07em;
+}
+
+.page-header-icon img {
+	border-radius: 3px;
+}
+
+.link-to-page {
+	margin: 1em 0;
+	padding: 0;
+	border: none;
+	font-weight: 500;
+}
+
+p > .user {
+	opacity: 0.5;
+}
+
+td > .user,
+td > time {
+	white-space: nowrap;
+}
+
+input[type="checkbox"] {
+	transform: scale(1.5);
+	margin-right: 0.6em;
+	vertical-align: middle;
+}
+
+p {
+	margin-top: 0.5em;
+	margin-bottom: 0.5em;
+}
+
+.image {
+	border: none;
+	margin: 1.5em 0;
+	padding: 0;
+	border-radius: 0;
+	text-align: center;
+}
+
+.code,
+code {
+	background: rgba(135, 131, 120, 0.15);
+	border-radius: 3px;
+	padding: 0.2em 0.4em;
+	border-radius: 3px;
+	font-size: 85%;
+	tab-size: 2;
+}
+
+code {
+	color: #eb5757;
+}
+
+.code {
+	padding: 1.5em 1em;
+}
+
+.code-wrap {
+	white-space: pre-wrap;
+	word-break: break-all;
+}
+
+.code > code {
+	background: none;
+	padding: 0;
+	font-size: 100%;
+	color: inherit;
+}
+
+blockquote {
+	font-size: 1em;
+	margin: 1em 0;
+	padding-left: 1em;
+	border-left: 3px solid rgb(55, 53, 47);
+}
+
+blockquote.quote-large {
+	font-size: 1.25em;
+}
+
+.bookmark {
+	text-decoration: none;
+	max-height: 8em;
+	padding: 0;
+	display: flex;
+	width: 100%;
+	align-items: stretch;
+}
+
+.bookmark-title {
+	font-size: 0.85em;
+	overflow: hidden;
+	text-overflow: ellipsis;
+	height: 1.75em;
+	white-space: nowrap;
+}
+
+.bookmark-text {
+	display: flex;
+	flex-direction: column;
+}
+
+.bookmark-info {
+	flex: 4 1 180px;
+	padding: 12px 14px 14px;
+	display: flex;
+	flex-direction: column;
+	justify-content: space-between;
+}
+
+.bookmark-image {
+	width: 33%;
+	flex: 1 1 180px;
+	display: block;
+	position: relative;
+	object-fit: cover;
+	border-radius: 1px;
+}
+
+.bookmark-description {
+	color: rgba(55, 53, 47, 0.6);
+	font-size: 0.75em;
+	overflow: hidden;
+	max-height: 4.5em;
+	word-break: break-word;
+}
+
+.bookmark-href {
+	font-size: 0.75em;
+	margin-top: 0.25em;
+}
+
+.sans { font-family: ui-sans-serif, -apple-system, BlinkMacSystemFont, "Segoe UI Variable Display", "Segoe UI", Helvetica, "Apple Color Emoji", "Noto Sans Arabic", "Noto Sans Hebrew", Arial, sans-serif, "Segoe UI Emoji", "Segoe UI Symbol"; }
+.code { font-family: "SFMono-Regular", Menlo, Consolas, "PT Mono", "Liberation Mono", Courier, monospace; }
+.serif { font-family: Lyon-Text, Georgia, ui-serif, serif; }
+.mono { font-family: iawriter-mono, Nitti, Menlo, Courier, monospace; }
+.pdf .sans { font-family: Inter, ui-sans-serif, -apple-system, BlinkMacSystemFont, "Segoe UI Variable Display", "Segoe UI", Helvetica, "Apple Color Emoji", "Noto Sans Arabic", "Noto Sans Hebrew", Arial, sans-serif, "Segoe UI Emoji", "Segoe UI Symbol", 'Twemoji', 'Noto Color Emoji', 'Noto Sans CJK JP'; }
+.pdf:lang(zh-CN) .sans { font-family: Inter, ui-sans-serif, -apple-system, BlinkMacSystemFont, "Segoe UI Variable Display", "Segoe UI", Helvetica, "Apple Color Emoji", "Noto Sans Arabic", "Noto Sans Hebrew", Arial, sans-serif, "Segoe UI Emoji", "Segoe UI Symbol", 'Twemoji', 'Noto Color Emoji', 'Noto Sans CJK SC'; }
+.pdf:lang(zh-TW) .sans { font-family: Inter, ui-sans-serif, -apple-system, BlinkMacSystemFont, "Segoe UI Variable Display", "Segoe UI", Helvetica, "Apple Color Emoji", "Noto Sans Arabic", "Noto Sans Hebrew", Arial, sans-serif, "Segoe UI Emoji", "Segoe UI Symbol", 'Twemoji', 'Noto Color Emoji', 'Noto Sans CJK TC'; }
+.pdf:lang(ko-KR) .sans { font-family: Inter, ui-sans-serif, -apple-system, BlinkMacSystemFont, "Segoe UI Variable Display", "Segoe UI", Helvetica, "Apple Color Emoji", "Noto Sans Arabic", "Noto Sans Hebrew", Arial, sans-serif, "Segoe UI Emoji", "Segoe UI Symbol", 'Twemoji', 'Noto Color Emoji', 'Noto Sans CJK KR'; }
+.pdf .code { font-family: Source Code Pro, "SFMono-Regular", Menlo, Consolas, "PT Mono", "Liberation Mono", Courier, monospace, 'Twemoji', 'Noto Color Emoji', 'Noto Sans Mono CJK JP'; }
+.pdf:lang(zh-CN) .code { font-family: Source Code Pro, "SFMono-Regular", Menlo, Consolas, "PT Mono", "Liberation Mono", Courier, monospace, 'Twemoji', 'Noto Color Emoji', 'Noto Sans Mono CJK SC'; }
+.pdf:lang(zh-TW) .code { font-family: Source Code Pro, "SFMono-Regular", Menlo, Consolas, "PT Mono", "Liberation Mono", Courier, monospace, 'Twemoji', 'Noto Color Emoji', 'Noto Sans Mono CJK TC'; }
+.pdf:lang(ko-KR) .code { font-family: Source Code Pro, "SFMono-Regular", Menlo, Consolas, "PT Mono", "Liberation Mono", Courier, monospace, 'Twemoji', 'Noto Color Emoji', 'Noto Sans Mono CJK KR'; }
+.pdf .serif { font-family: PT Serif, Lyon-Text, Georgia, ui-serif, serif, 'Twemoji', 'Noto Color Emoji', 'Noto Serif CJK JP'; }
+.pdf:lang(zh-CN) .serif { font-family: PT Serif, Lyon-Text, Georgia, ui-serif, serif, 'Twemoji', 'Noto Color Emoji', 'Noto Serif CJK SC'; }
+.pdf:lang(zh-TW) .serif { font-family: PT Serif, Lyon-Text, Georgia, ui-serif, serif, 'Twemoji', 'Noto Color Emoji', 'Noto Serif CJK TC'; }
+.pdf:lang(ko-KR) .serif { font-family: PT Serif, Lyon-Text, Georgia, ui-serif, serif, 'Twemoji', 'Noto Color Emoji', 'Noto Serif CJK KR'; }
+.pdf .mono { font-family: PT Mono, iawriter-mono, Nitti, Menlo, Courier, monospace, 'Twemoji', 'Noto Color Emoji', 'Noto Sans Mono CJK JP'; }
+.pdf:lang(zh-CN) .mono { font-family: PT Mono, iawriter-mono, Nitti, Menlo, Courier, monospace, 'Twemoji', 'Noto Color Emoji', 'Noto Sans Mono CJK SC'; }
+.pdf:lang(zh-TW) .mono { font-family: PT Mono, iawriter-mono, Nitti, Menlo, Courier, monospace, 'Twemoji', 'Noto Color Emoji', 'Noto Sans Mono CJK TC'; }
+.pdf:lang(ko-KR) .mono { font-family: PT Mono, iawriter-mono, Nitti, Menlo, Courier, monospace, 'Twemoji', 'Noto Color Emoji', 'Noto Sans Mono CJK KR'; }
+.highlight-default {
+	color: rgba(44, 44, 43, 1);
+}
+.highlight-gray {
+	color: rgba(125, 122, 117, 1);
+	fill: rgba(125, 122, 117, 1);
+}
+.highlight-brown {
+	color: rgba(159, 118, 90, 1);
+	fill: rgba(159, 118, 90, 1);
+}
+.highlight-orange {
+	color: rgba(210, 123, 45, 1);
+	fill: rgba(210, 123, 45, 1);
+}
+.highlight-yellow {
+	color: rgba(203, 148, 52, 1);
+	fill: rgba(203, 148, 52, 1);
+}
+.highlight-teal {
+	color: rgba(80, 148, 110, 1);
+	fill: rgba(80, 148, 110, 1);
+}
+.highlight-blue {
+	color: rgba(56, 125, 201, 1);
+	fill: rgba(56, 125, 201, 1);
+}
+.highlight-purple {
+	color: rgba(154, 107, 180, 1);
+	fill: rgba(154, 107, 180, 1);
+}
+.highlight-pink {
+	color: rgba(193, 76, 138, 1);
+	fill: rgba(193, 76, 138, 1);
+}
+.highlight-red {
+	color: rgba(207, 81, 72, 1);
+	fill: rgba(207, 81, 72, 1);
+}
+.highlight-default_background {
+	color: rgba(44, 44, 43, 1);
+}
+.highlight-gray_background {
+	background: rgba(42, 28, 0, 0.07);
+}
+.highlight-brown_background {
+	background: rgba(139, 46, 0, 0.086);
+}
+.highlight-orange_background {
+	background: rgba(224, 101, 1, 0.129);
+}
+.highlight-yellow_background {
+	background: rgba(211, 168, 0, 0.137);
+}
+.highlight-teal_background {
+	background: rgba(0, 100, 45, 0.09);
+}
+.highlight-blue_background {
+	background: rgba(0, 124, 215, 0.094);
+}
+.highlight-purple_background {
+	background: rgba(102, 0, 178, 0.078);
+}
+.highlight-pink_background {
+	background: rgba(197, 0, 93, 0.086);
+}
+.highlight-red_background {
+	background: rgba(223, 22, 0, 0.094);
+}
+.block-color-default {
+	color: inherit;
+	fill: inherit;
+}
+.block-color-gray {
+	color: rgba(125, 122, 117, 1);
+	fill: rgba(125, 122, 117, 1);
+}
+.block-color-brown {
+	color: rgba(159, 118, 90, 1);
+	fill: rgba(159, 118, 90, 1);
+}
+.block-color-orange {
+	color: rgba(210, 123, 45, 1);
+	fill: rgba(210, 123, 45, 1);
+}
+.block-color-yellow {
+	color: rgba(203, 148, 52, 1);
+	fill: rgba(203, 148, 52, 1);
+}
+.block-color-teal {
+	color: rgba(80, 148, 110, 1);
+	fill: rgba(80, 148, 110, 1);
+}
+.block-color-blue {
+	color: rgba(56, 125, 201, 1);
+	fill: rgba(56, 125, 201, 1);
+}
+.block-color-purple {
+	color: rgba(154, 107, 180, 1);
+	fill: rgba(154, 107, 180, 1);
+}
+.block-color-pink {
+	color: rgba(193, 76, 138, 1);
+	fill: rgba(193, 76, 138, 1);
+}
+.block-color-red {
+	color: rgba(207, 81, 72, 1);
+	fill: rgba(207, 81, 72, 1);
+}
+.block-color-default_background {
+	color: inherit;
+	fill: inherit;
+}
+.block-color-gray_background {
+	background: rgba(240, 239, 237, 1);
+}
+.block-color-brown_background {
+	background: rgba(245, 237, 233, 1);
+}
+.block-color-orange_background {
+	background: rgba(251, 235, 222, 1);
+}
+.block-color-yellow_background {
+	background: rgba(249, 243, 220, 1);
+}
+.block-color-teal_background {
+	background: rgba(232, 241, 236, 1);
+}
+.block-color-blue_background {
+	background: rgba(229, 242, 252, 1);
+}
+.block-color-purple_background {
+	background: rgba(243, 235, 249, 1);
+}
+.block-color-pink_background {
+	background: rgba(250, 233, 241, 1);
+}
+.block-color-red_background {
+	background: rgba(252, 233, 231, 1);
+}
+.select-value-color-default { background-color: rgba(42, 28, 0, 0.07); }
+.select-value-color-gray { background-color: rgba(28, 19, 1, 0.11); }
+.select-value-color-brown { background-color: rgba(127, 51, 0, 0.156); }
+.select-value-color-orange { background-color: rgba(196, 88, 0, 0.203); }
+.select-value-color-yellow { background-color: rgba(209, 156, 0, 0.282); }
+.select-value-color-green { background-color: rgba(0, 96, 38, 0.156); }
+.select-value-color-blue { background-color: rgba(0, 118, 217, 0.203); }
+.select-value-color-purple { background-color: rgba(92, 0, 163, 0.141); }
+.select-value-color-pink { background-color: rgba(183, 0, 78, 0.152); }
+.select-value-color-red { background-color: rgba(206, 24, 0, 0.164); }
+
+.checkbox {
+	display: inline-flex;
+	vertical-align: text-bottom;
+	width: 16;
+	height: 16;
+	background-size: 16px;
+	margin-left: 2px;
+	margin-right: 5px;
+}
+
+.checkbox-on {
+	background-image: url("data:image/svg+xml;charset=UTF-8,%3Csvg%20width%3D%2216%22%20height%3D%2216%22%20viewBox%3D%220%200%2016%2016%22%20fill%3D%22none%22%20xmlns%3D%22http%3A%2F%2Fwww.w3.org%2F2000%2Fsvg%22%3E%0A%3Crect%20width%3D%2216%22%20height%3D%2216%22%20fill%3D%22%2358A9D7%22%2F%3E%0A%3Cpath%20d%3D%22M6.71429%2012.2852L14%204.9995L12.7143%203.71436L6.71429%209.71378L3.28571%206.2831L2%207.57092L6.71429%2012.2852Z%22%20fill%3D%22white%22%2F%3E%0A%3C%2Fsvg%3E");
+}
+
+.checkbox-off {
+	background-image: url("data:image/svg+xml;charset=UTF-8,%3Csvg%20width%3D%2216%22%20height%3D%2216%22%20viewBox%3D%220%200%2016%2016%22%20fill%3D%22none%22%20xmlns%3D%22http%3A%2F%2Fwww.w3.org%2F2000%2Fsvg%22%3E%0A%3Crect%20x%3D%220.75%22%20y%3D%220.75%22%20width%3D%2214.5%22%20height%3D%2214.5%22%20fill%3D%22white%22%20stroke%3D%22%2336352F%22%20stroke-width%3D%221.5%22%2F%3E%0A%3C%2Fsvg%3E");
+}
+	
+</style></head><body><article id="1e885df0-1907-8111-8e41-c0a827fbc0cd" class="page sans"><header><h1 class="page-title" dir="auto">🎮 <strong>Gamified Experiences Specification</strong></h1><p class="page-description" dir="auto"></p><table class="properties"><tbody><tr class="property-row property-row-person"><th><span class="icon property-icon"><img src="https://www.notion.so/icons/friends_gray.svg" style="width:14px;height:14px;display:block"/></span>Owner</th><td><span class="user"><span class="icon text-icon user-icon"><span class="user-icon-inner">A</span></span>Aubert</span></td></tr><tr class="property-row property-row-multi_select"><th><span class="icon property-icon"><img src="https://www.notion.so/icons/list_gray.svg" style="width:14px;height:14px;display:block"/></span>Tags</th><td></td></tr></tbody></table></header><div class="page-body"><div style="display:contents" dir="auto"><h3 id="1e885df0-1907-8154-b487-c030813d4919" class=""><strong>1. Purpose</strong></h3></div><div style="display:contents" dir="auto"><p id="1e885df0-1907-8153-b921-e9718fea53c8" class="">This document outlines how Memora implements <strong>lightweight, fatigue-aware gamification</strong> to promote consistent use, cognitive engagement, and emotional affirmation without pressure.</p></div><div style="display:contents" dir="auto"><p id="1e885df0-1907-814e-b21b-fe69bcf7e149" class="">All elements are:</p></div><div style="display:contents" dir="auto"><ul id="1e885df0-1907-81e6-ad50-cec084a3896e" class="bulleted-list"><li style="list-style-type:disc"><strong>Non-competitive</strong>, <strong>non-coercive</strong>, and <strong>non-diagnostic</strong></li></ul></div><div style="display:contents" dir="auto"><ul id="1e885df0-1907-81a7-9a15-c84a823583ea" class="bulleted-list"><li style="list-style-type:disc">Designed to <strong>reinforce effort</strong>, not performance</li></ul></div><div style="display:contents" dir="auto"><ul id="1e885df0-1907-81d5-b9f0-f2e653bc3070" class="bulleted-list"><li style="list-style-type:disc"><strong>Opt-in</strong>, <strong>consent-aware</strong>, and <strong>accessible by design</strong></li></ul></div><div style="display:contents" dir="auto"><ul id="1e885df0-1907-8130-8573-c34e2724f680" class="bulleted-list"><li style="list-style-type:disc">Governed by Companion tone, streak logic, and user preferences</li></ul></div><div style="display:contents" dir="auto"><hr id="1e885df0-1907-81b4-b266-d6dd8c0d2c96"/></div><div style="display:contents" dir="auto"><h3 id="1e885df0-1907-81e5-9aaf-f0aed1a93d8f" class=""><strong>2. Core Gamified Features</strong></h3></div><div style="display:contents" dir="ltr"><table id="1e885df0-1907-81b7-851e-c7f8c304c9ce" class="simple-table"><tbody><div style="display:contents" dir="ltr"><tr id="1e885df0-1907-81da-8fcf-c9259d70461a"><td id="ZM`h" class="">Feature</td><td id="PSYJ" class="">Description</td><td id="XesK" class="">Tone Rules</td></tr></div><div style="display:contents" dir="ltr"><tr id="1e885df0-1907-81fd-a1de-f6111a85cf7b"><td id="ZM`h" class=""><strong>Session Streaks</strong></td><td id="PSYJ" class="">Tracks consecutive daily usage (max 7)</td><td id="XesK" class=""><code>warm</code> tone on Day 3+, silent if missed</td></tr></div><div style="display:contents" dir="ltr"><tr id="1e885df0-1907-8124-8c0a-dd950780a8d9"><td id="ZM`h" class=""><strong>Badge Rewards</strong></td><td id="PSYJ" class="">Unlock visual badges based on effort or streaks</td><td id="XesK" class=""><code>gentle</code> on unlock, only visible to user</td></tr></div><div style="display:contents" dir="ltr"><tr id="1e885df0-1907-81a5-8c9e-d25861569b05"><td id="ZM`h" class=""><strong>Focus Timer</strong></td><td id="PSYJ" class="">Shows time spent in-session (soft visible cue)</td><td id="XesK" class="">Companion may acknowledge if &gt;5 min</td></tr></div><div style="display:contents" dir="ltr"><tr id="1e885df0-1907-81de-8f2d-e488175d5cd9"><td id="ZM`h" class=""><strong>Check-In Tracker</strong></td><td id="PSYJ" class="">Non-calendar-based, visualized streak memory</td><td id="XesK" class="">Used for user self-reflection, not reminders</td></tr></div><div style="display:contents" dir="ltr"><tr id="1e885df0-1907-8136-98f2-c4d4d3975444"><td id="ZM`h" class=""><strong>Effort Affirmation Prompts</strong></td><td id="PSYJ" class="">Companion celebrates effort post-session</td><td id="XesK" class="">Always <code>gentle</code> or <code>warm</code>, never comparative</td></tr></div></tbody></table></div><div style="display:contents" dir="auto"><hr id="1e885df0-1907-818f-a552-d79bb4effd4a"/></div><div style="display:contents" dir="auto"><h3 id="1e885df0-1907-8173-ad03-c6e537146302" class=""><strong>3. Gamification Design Principles</strong></h3></div><div style="display:contents" dir="ltr"><table id="1e885df0-1907-8192-9a08-f6eb33fafd95" class="simple-table"><tbody><div style="display:contents" dir="ltr"><tr id="1e885df0-1907-81f8-89e4-d7ee596da21d"><td id="nZYG" class="">Principle</td><td id="DNmS" class="">Implementation</td></tr></div><div style="display:contents" dir="ltr"><tr id="1e885df0-1907-8121-9926-f7d0870266bb"><td id="nZYG" class=""><strong>Progress, not pressure</strong></td><td id="DNmS" class="">No loss language, no “try harder” tone</td></tr></div><div style="display:contents" dir="ltr"><tr id="1e885df0-1907-813d-b6c6-d822dc1894fb"><td id="nZYG" class=""><strong>Silent fallback</strong></td><td id="DNmS" class="">If gamification not relevant, it stays hidden</td></tr></div><div style="display:contents" dir="ltr"><tr id="1e885df0-1907-8105-a0a4-fa1ef967fc67"><td id="nZYG" class=""><strong>Streaks as optional</strong></td><td id="DNmS" class="">User may disable visual streaks or badges</td></tr></div><div style="display:contents" dir="ltr"><tr id="1e885df0-1907-810c-8ada-f0f09fc77b47"><td id="nZYG" class=""><strong>One reward per session</strong></td><td id="DNmS" class="">No stacking of affirmations to avoid fatigue</td></tr></div><div style="display:contents" dir="ltr"><tr id="1e885df0-1907-816f-9573-dd85852b2b4f"><td id="nZYG" class=""><strong>No leaderboard, no score</strong></td><td id="DNmS" class="">Design intentionally excludes competition</td></tr></div></tbody></table></div><div style="display:contents" dir="auto"><hr id="1e885df0-1907-8127-bba1-cfcc9ea834e7"/></div><div style="display:contents" dir="auto"><h3 id="1e885df0-1907-81e4-b8cf-f7198f6d13ae" class=""><strong>4. Badge Types &amp; Criteria</strong></h3></div><div style="display:contents" dir="ltr"><table id="1e885df0-1907-8116-9032-d745decdb6d3" class="simple-table"><tbody><div style="display:contents" dir="ltr"><tr id="1e885df0-1907-817b-b23c-e6a270a8b8b1"><td id="V@G?" class="">Badge</td><td id=";H`A" class="">Unlock Condition</td><td id="&lt;iBF" class="">Visibility</td></tr></div><div style="display:contents" dir="ltr"><tr id="1e885df0-1907-81b9-9511-e09619dc6a4c"><td id="V@G?" class="">🟡 <strong>Starter</strong></td><td id=";H`A" class="">Complete first session</td><td id="&lt;iBF" class="">Auto-shown to user</td></tr></div><div style="display:contents" dir="ltr"><tr id="1e885df0-1907-8109-bb8c-e088cc9186b3"><td id="V@G?" class="">🟢 <strong>Momentum</strong></td><td id=";H`A" class="">3-day session streak</td><td id="&lt;iBF" class="">In-app only</td></tr></div><div style="display:contents" dir="ltr"><tr id="1e885df0-1907-81d2-8603-f4ed4fd8eafd"><td id="V@G?" class="">🔵 <strong>Focus</strong></td><td id=";H`A" class="">10+ minutes in a session</td><td id="&lt;iBF" class="">Companion may acknowledge</td></tr></div><div style="display:contents" dir="ltr"><tr id="1e885df0-1907-81e6-9a77-f020903ac061"><td id="V@G?" class="">🔴 <strong>Recovery</strong></td><td id=";H`A" class="">Return after 72h absence</td><td id="&lt;iBF" class="">Companion: “Glad you’re back.”</td></tr></div><div style="display:contents" dir="ltr"><tr id="1e885df0-1907-8126-8510-c250fc97a452"><td id="V@G?" class="">⚪ <strong>Reset Fresh Start</strong></td><td id=";H`A" class="">Reset Companion and complete a new session</td><td id="&lt;iBF" class="">Optional encouragement shown</td></tr></div></tbody></table></div><div style="display:contents" dir="auto"><blockquote id="1e885df0-1907-813d-9294-d29236717f74" class="">Badges are private by default and not shared externally unless user opts to show caregiver dashboard insights.</blockquote></div><div style="display:contents" dir="auto"><hr id="1e885df0-1907-81ad-95f1-c47c2b794aee"/></div><div style="display:contents" dir="auto"><h3 id="1e885df0-1907-817d-ac53-ce3c447f523c" class=""><strong>5. Prompt Behavior Integration</strong></h3></div><div style="display:contents" dir="ltr"><table id="1e885df0-1907-8121-ae2a-f1a89d59cdc6" class="simple-table"><tbody><div style="display:contents" dir="ltr"><tr id="1e885df0-1907-81d1-bf88-edd1489c9faa"><td id="zpUx" class="">Trigger</td><td id="Y:Jl" class="">Companion Prompt</td></tr></div><div style="display:contents" dir="ltr"><tr id="1e885df0-1907-8133-a24a-c4c9cc661c51"><td id="zpUx" class="">Badge unlock</td><td id="Y:Jl" class="">“You’ve earned the Momentum badge — steady and strong.” [<code>warm</code>]</td></tr></div><div style="display:contents" dir="ltr"><tr id="1e885df0-1907-81c2-8a68-cf305e310393"><td id="zpUx" class="">Streak day 3</td><td id="Y:Jl" class="">“That’s three in a row. Let’s keep the rhythm.” [<code>warm</code>]</td></tr></div><div style="display:contents" dir="ltr"><tr id="1e885df0-1907-812b-8f0a-d6e3836e27d1"><td id="zpUx" class="">Return from break</td><td id="Y:Jl" class="">“Welcome back. Every step counts.” [<code>gentle</code>]</td></tr></div><div style="display:contents" dir="ltr"><tr id="1e885df0-1907-8107-a817-f787f64f4a3b"><td id="zpUx" class="">Badge muted</td><td id="Y:Jl" class="">No prompt fired; visual badge still appears silently</td></tr></div><div style="display:contents" dir="ltr"><tr id="1e885df0-1907-8153-b5f4-c49cb62df7aa"><td id="zpUx" class="">Companion reset</td><td id="Y:Jl" class="">“Fresh start! Let’s begin again.” [<code>neutral</code>]</td></tr></div></tbody></table></div><div style="display:contents" dir="auto"><hr id="1e885df0-1907-8132-97d3-e256466bc79e"/></div><div style="display:contents" dir="auto"><h3 id="1e885df0-1907-8165-bc4a-df6ddccfede8" class=""><strong>6. Suppression Logic</strong></h3></div><div style="display:contents" dir="ltr"><table id="1e885df0-1907-81e8-8fa9-ee30b219c9af" class="simple-table"><tbody><div style="display:contents" dir="ltr"><tr id="1e885df0-1907-8105-a1c1-e9f19a7a3302"><td id="BxAF" class="">Condition</td><td id="Sgt^" class="">Suppression</td></tr></div><div style="display:contents" dir="ltr"><tr id="1e885df0-1907-8125-90a7-eb0b458d7d52"><td id="BxAF" class="">Companion muted</td><td id="Sgt^" class="">All gamification prompts off; badges still unlock silently</td></tr></div><div style="display:contents" dir="ltr"><tr id="1e885df0-1907-811d-b731-e3a90b02b6a4"><td id="BxAF" class="">Streak broken</td><td id="Sgt^" class="">No prompt on missed day; reset streak invisibly</td></tr></div><div style="display:contents" dir="ltr"><tr id="1e885df0-1907-81bc-8d59-c470d7811fd9"><td id="BxAF" class="">Dismissal rate &gt;80%</td><td id="Sgt^" class="">Badge prompts paused for 5 days</td></tr></div><div style="display:contents" dir="ltr"><tr id="1e885df0-1907-8144-83f4-d830979ad48d"><td id="BxAF" class="">Accessibility error on badge (contrast, alt text)</td><td id="Sgt^" class="">Badge hidden from view until corrected</td></tr></div></tbody></table></div><div style="display:contents" dir="auto"><hr id="1e885df0-1907-81ea-a891-e510d1fbfe8c"/></div><div style="display:contents" dir="auto"><h3 id="1e885df0-1907-8142-adf6-fba8c98426c6" class=""><strong>7. Consent &amp; Opt-Out Controls</strong></h3></div><div style="display:contents" dir="ltr"><table id="1e885df0-1907-81ca-8eb1-d50fecb15fd3" class="simple-table"><tbody><div style="display:contents" dir="ltr"><tr id="1e885df0-1907-81e3-a2bd-d8f494f7c279"><td id="qrR:" class="">Setting</td><td id="SZr_" class="">Effect</td></tr></div><div style="display:contents" dir="ltr"><tr id="1e885df0-1907-81be-bc00-d8616e00f335"><td id="qrR:" class=""><strong>Gamification toggle</strong></td><td id="SZr_" class="">Hides badges, disables all gamified prompts</td></tr></div><div style="display:contents" dir="ltr"><tr id="1e885df0-1907-8120-80cc-de9bdafa25d1"><td id="qrR:" class=""><strong>Caregiver view</strong></td><td id="SZr_" class="">Never shows badge or streak data unless user enables</td></tr></div><div style="display:contents" dir="ltr"><tr id="1e885df0-1907-81e9-b420-e9d8eb6e16be"><td id="qrR:" class=""><strong>Reset Companion</strong></td><td id="SZr_" class="">All gamification state reset alongside memory</td></tr></div><div style="display:contents" dir="ltr"><tr id="1e885df0-1907-8180-86be-ec8319fc9e25"><td id="qrR:" class=""><strong>Disable Companion entirely</strong></td><td id="SZr_" class="">All gamified flows suppressed</td></tr></div></tbody></table></div><div style="display:contents" dir="auto"><hr id="1e885df0-1907-81e7-b487-d23524fcdfe4"/></div><div style="display:contents" dir="auto"><h3 id="1e885df0-1907-817d-84ef-f9e80ffad619" class=""><strong>8. Accessibility &amp; UX Compliance</strong></h3></div><div style="display:contents" dir="ltr"><table id="1e885df0-1907-81d4-be9e-d9903b569ac0" class="simple-table"><tbody><div style="display:contents" dir="ltr"><tr id="1e885df0-1907-8173-8efd-eb995b24aacb"><td id="oWV|" class="">Area</td><td id="{d@E" class="">Rule</td></tr></div><div style="display:contents" dir="ltr"><tr id="1e885df0-1907-8103-8a94-e9164f953a18"><td id="oWV|" class="">Color + shape coding</td><td id="{d@E" class="">No color-only badges</td></tr></div><div style="display:contents" dir="ltr"><tr id="1e885df0-1907-8183-b96b-cfd51ca4b94a"><td id="oWV|" class="">Alt text</td><td id="{d@E" class="">Descriptive for screen readers</td></tr></div><div style="display:contents" dir="ltr"><tr id="1e885df0-1907-819b-92bb-ddfb2b4a046c"><td id="oWV|" class="">Touch target size</td><td id="{d@E" class="">Minimum 44px for mobile badge icons</td></tr></div><div style="display:contents" dir="ltr"><tr id="1e885df0-1907-8153-b02e-d87b16f8eb7b"><td id="oWV|" class="">Readability</td><td id="{d@E" class="">Badges use icons + single-word label</td></tr></div><div style="display:contents" dir="ltr"><tr id="1e885df0-1907-8111-8cc0-e6f175d8e7aa"><td id="oWV|" class="">Motion toggle</td><td id="{d@E" class="">No animated rewards without user setting enabled</td></tr></div></tbody></table></div><div style="display:contents" dir="auto"><hr id="1e885df0-1907-814a-9541-ffca500258e3"/></div><div style="display:contents" dir="auto"><h3 id="1e885df0-1907-8122-86b2-f099391ec606" class=""><strong>9. Governance &amp; QA</strong></h3></div><div style="display:contents" dir="ltr"><table id="1e885df0-1907-81bf-981e-f15e847ec40e" class="simple-table"><tbody><div style="display:contents" dir="ltr"><tr id="1e885df0-1907-81f0-a658-fb5a9c767ee4"><td id="VIqd" class="">Responsibility</td><td id="UjVP" class="">Owner</td></tr></div><div style="display:contents" dir="ltr"><tr id="1e885df0-1907-8190-8cab-c0e7c832cc65"><td id="VIqd" class="">Badge logic QA</td><td id="UjVP" class="">Engineering</td></tr></div><div style="display:contents" dir="ltr"><tr id="1e885df0-1907-81f2-b1ea-c479a9b30b52"><td id="VIqd" class="">Tone review</td><td id="UjVP" class="">UX Content Lead</td></tr></div><div style="display:contents" dir="ltr"><tr id="1e885df0-1907-81c0-bed7-e4c4f1751c20"><td id="VIqd" class="">Accessibility QA</td><td id="UjVP" class="">Inclusive Design Tester</td></tr></div><div style="display:contents" dir="ltr"><tr id="1e885df0-1907-812c-a5ea-e7db575ccde2"><td id="VIqd" class="">Consent control</td><td id="UjVP" class="">Privacy Officer</td></tr></div><div style="display:contents" dir="ltr"><tr id="1e885df0-1907-8156-b593-c6dd1a903e82"><td id="VIqd" class="">Logging &amp; triggers</td><td id="UjVP" class="">Backend Team</td></tr></div></tbody></table></div><div style="display:contents" dir="auto"><hr id="1e885df0-1907-81fd-ac6d-fc2441cb8e57"/></div><div style="display:contents" dir="auto"><h3 id="1e885df0-1907-8121-abeb-ddfe277bf62e" class=""><strong>10. Linked References</strong></h3></div><div style="display:contents" dir="auto"><ul id="1e885df0-1907-8167-96d3-d451125e5844" class="bulleted-list"><li style="list-style-type:disc">✅ [Engagement Design &amp; Gamification]</li></ul></div><div style="display:contents" dir="auto"><ul id="1e885df0-1907-8152-973a-f87320c19d89" class="bulleted-list"><li style="list-style-type:disc">✅ [Badge UX Reference]</li></ul></div><div style="display:contents" dir="auto"><ul id="1e885df0-1907-816b-8d0f-ed6e1cac76a4" class="bulleted-list"><li style="list-style-type:disc">✅ [Companion Behavioral System]</li></ul></div><div style="display:contents" dir="auto"><ul id="1e885df0-1907-816b-8e63-d9aa5974560a" class="bulleted-list"><li style="list-style-type:disc">✅ [Scenario Playbooks]</li></ul></div><div style="display:contents" dir="auto"><ul id="1e885df0-1907-81b0-8715-c44e4288e519" class="bulleted-list"><li style="list-style-type:disc">✅ [Prompt Library]</li></ul></div><div style="display:contents" dir="auto"><ul id="1e885df0-1907-815d-9aaf-c690f703a8d8" class="bulleted-list"><li style="list-style-type:disc">🔐 [Consent &amp; Privacy Flow]</li></ul></div><div style="display:contents" dir="auto"><ul id="1e885df0-1907-811f-b811-f6a610486262" class="bulleted-list"><li style="list-style-type:disc">📋 [Audit Logging Strategy]</li></ul></div></div></article><span class="sans" style="font-size:14px;padding-top:2em"></span></body></html>

@@ -1,0 +1,727 @@
+<html><head><meta http-equiv="Content-Type" content="text/html; charset=utf-8"/><title>🔁 Data Feedback &amp; Learning Loop</title><style>
+/* cspell:disable-file */
+/* webkit printing magic: print all background colors */
+html {
+	-webkit-print-color-adjust: exact;
+}
+* {
+	box-sizing: border-box;
+	-webkit-print-color-adjust: exact;
+}
+
+html,
+body {
+	margin: 0;
+	padding: 0;
+}
+@media only screen {
+	body {
+		margin: 2em auto;
+		max-width: 900px;
+		color: rgb(55, 53, 47);
+	}
+}
+
+body {
+	line-height: 1.5;
+	white-space: pre-wrap;
+}
+
+a,
+a.visited {
+	color: inherit;
+	text-decoration: underline;
+}
+
+.pdf-relative-link-path {
+	font-size: 80%;
+	color: #444;
+}
+
+h1,
+h2,
+h3 {
+	letter-spacing: -0.01em;
+	line-height: 1.2;
+	font-weight: 600;
+	margin-bottom: 0;
+}
+
+/* Override strong tags inside headings to maintain consistent weight */
+h1 strong,
+h2 strong,
+h3 strong {
+	font-weight: 600;
+}
+
+.page-title {
+	font-size: 2.5rem;
+	font-weight: 700;
+	margin-top: 0;
+	margin-bottom: 0.75em;
+}
+
+h1 {
+	font-size: 1.875rem;
+	margin-top: 1.875rem;
+}
+
+h2 {
+	font-size: 1.5rem;
+	margin-top: 1.5rem;
+}
+
+h3 {
+	font-size: 1.25rem;
+	margin-top: 1.25rem;
+}
+
+.source {
+	border: 1px solid #ddd;
+	border-radius: 3px;
+	padding: 1.5em;
+	word-break: break-all;
+}
+
+.callout {
+	border-radius: 10px;
+	padding: 1rem;
+}
+
+figure {
+	margin: 1.25em 0;
+	page-break-inside: avoid;
+}
+
+figcaption {
+	opacity: 0.5;
+	font-size: 85%;
+	margin-top: 0.5em;
+}
+
+mark {
+	background-color: transparent;
+}
+
+.indented {
+	padding-left: 1.5em;
+}
+
+hr {
+	background: transparent;
+	display: block;
+	width: 100%;
+	height: 1px;
+	visibility: visible;
+	border: none;
+	border-bottom: 1px solid rgba(55, 53, 47, 0.09);
+}
+
+img {
+	max-width: 100%;
+}
+
+@media only print {
+	img {
+		max-height: 100vh;
+		object-fit: contain;
+	}
+}
+
+@page {
+	margin: 1in;
+}
+
+.collection-content {
+	font-size: 0.875rem;
+}
+
+.collection-content td {
+	white-space: pre-wrap;
+	word-break: break-word;
+}
+
+.column-list {
+	display: flex;
+	justify-content: space-between;
+}
+
+.column {
+	padding: 0 1em;
+}
+
+.column:first-child {
+	padding-left: 0;
+}
+
+.column:last-child {
+	padding-right: 0;
+}
+
+.table_of_contents-item {
+	display: block;
+	font-size: 0.875rem;
+	line-height: 1.3;
+	padding: 0.125rem;
+}
+
+.table_of_contents-indent-1 {
+	margin-left: 1.5rem;
+}
+
+.table_of_contents-indent-2 {
+	margin-left: 3rem;
+}
+
+.table_of_contents-indent-3 {
+	margin-left: 4.5rem;
+}
+
+.table_of_contents-link {
+	text-decoration: none;
+	opacity: 0.7;
+	border-bottom: 1px solid rgba(55, 53, 47, 0.18);
+}
+
+table,
+th,
+td {
+	border: 1px solid rgba(55, 53, 47, 0.09);
+	border-collapse: collapse;
+}
+
+table {
+	border-left: none;
+	border-right: none;
+}
+
+th,
+td {
+	font-weight: normal;
+	padding: 0.25em 0.5em;
+	line-height: 1.5;
+	min-height: 1.5em;
+	text-align: left;
+}
+
+th {
+	color: rgba(55, 53, 47, 0.6);
+}
+
+ol,
+ul {
+	margin: 0;
+	margin-block-start: 0.6em;
+	margin-block-end: 0.6em;
+}
+
+li > ol:first-child,
+li > ul:first-child {
+	margin-block-start: 0.6em;
+}
+
+ul > li {
+	list-style: disc;
+}
+
+ul.to-do-list {
+	padding-inline-start: 0;
+}
+
+ul.to-do-list > li {
+	list-style: none;
+}
+
+.to-do-children-checked {
+	text-decoration: line-through;
+	opacity: 0.375;
+}
+
+ul.toggle > li {
+	list-style: none;
+}
+
+ul {
+	padding-inline-start: 1.7em;
+}
+
+ul > li {
+	padding-left: 0.1em;
+}
+
+ol {
+	padding-inline-start: 1.6em;
+}
+
+ol > li {
+	padding-left: 0.2em;
+}
+
+.mono ol {
+	padding-inline-start: 2em;
+}
+
+.mono ol > li {
+	text-indent: -0.4em;
+}
+
+.toggle {
+	padding-inline-start: 0em;
+	list-style-type: none;
+}
+
+/* Indent toggle children */
+.toggle > li > details {
+	padding-left: 1.7em;
+}
+
+.toggle > li > details > summary {
+	margin-left: -1.1em;
+}
+
+.selected-value {
+	display: inline-block;
+	padding: 0 0.5em;
+	background: rgba(206, 205, 202, 0.5);
+	border-radius: 3px;
+	margin-right: 0.5em;
+	margin-top: 0.3em;
+	margin-bottom: 0.3em;
+	white-space: nowrap;
+}
+
+.collection-title {
+	display: inline-block;
+	margin-right: 1em;
+}
+
+.page-description {
+	margin-bottom: 2em;
+}
+
+.simple-table {
+	margin-top: 1em;
+	font-size: 0.875rem;
+	empty-cells: show;
+}
+.simple-table td {
+	height: 29px;
+	min-width: 120px;
+}
+
+.simple-table th {
+	height: 29px;
+	min-width: 120px;
+}
+
+.simple-table-header-color {
+	background: rgb(247, 246, 243);
+	color: black;
+}
+.simple-table-header {
+	font-weight: 500;
+}
+
+time {
+	opacity: 0.5;
+}
+
+.icon {
+	display: inline-flex;
+	align-items: center;
+	justify-content: center;
+	max-width: 1.2em;
+	max-height: 1.2em;
+	text-decoration: none;
+	vertical-align: text-bottom;
+	margin-right: 0.5em;
+}
+
+img.icon {
+	border-radius: 3px;
+}
+
+.callout img.notion-static-icon {
+	width: 1em;
+	height: 1em;
+}
+
+.callout p {
+	margin: 0;
+}
+
+.callout h1,
+.callout h2,
+.callout h3 {
+	margin: 0 0 0.6rem;
+}
+
+.user-icon {
+	width: 1.5em;
+	height: 1.5em;
+	border-radius: 100%;
+	margin-right: 0.5rem;
+}
+
+.user-icon-inner {
+	font-size: 0.8em;
+}
+
+.text-icon {
+	border: 1px solid #000;
+	text-align: center;
+}
+
+.page-cover-image {
+	display: block;
+	object-fit: cover;
+	width: 100%;
+	max-height: 30vh;
+}
+
+.page-header-icon {
+	font-size: 3rem;
+	margin-bottom: 1rem;
+}
+
+.page-header-icon-with-cover {
+	margin-top: -0.72em;
+	margin-left: 0.07em;
+}
+
+.page-header-icon img {
+	border-radius: 3px;
+}
+
+.link-to-page {
+	margin: 1em 0;
+	padding: 0;
+	border: none;
+	font-weight: 500;
+}
+
+p > .user {
+	opacity: 0.5;
+}
+
+td > .user,
+td > time {
+	white-space: nowrap;
+}
+
+input[type="checkbox"] {
+	transform: scale(1.5);
+	margin-right: 0.6em;
+	vertical-align: middle;
+}
+
+p {
+	margin-top: 0.5em;
+	margin-bottom: 0.5em;
+}
+
+.image {
+	border: none;
+	margin: 1.5em 0;
+	padding: 0;
+	border-radius: 0;
+	text-align: center;
+}
+
+.code,
+code {
+	background: rgba(135, 131, 120, 0.15);
+	border-radius: 3px;
+	padding: 0.2em 0.4em;
+	border-radius: 3px;
+	font-size: 85%;
+	tab-size: 2;
+}
+
+code {
+	color: #eb5757;
+}
+
+.code {
+	padding: 1.5em 1em;
+}
+
+.code-wrap {
+	white-space: pre-wrap;
+	word-break: break-all;
+}
+
+.code > code {
+	background: none;
+	padding: 0;
+	font-size: 100%;
+	color: inherit;
+}
+
+blockquote {
+	font-size: 1em;
+	margin: 1em 0;
+	padding-left: 1em;
+	border-left: 3px solid rgb(55, 53, 47);
+}
+
+blockquote.quote-large {
+	font-size: 1.25em;
+}
+
+.bookmark {
+	text-decoration: none;
+	max-height: 8em;
+	padding: 0;
+	display: flex;
+	width: 100%;
+	align-items: stretch;
+}
+
+.bookmark-title {
+	font-size: 0.85em;
+	overflow: hidden;
+	text-overflow: ellipsis;
+	height: 1.75em;
+	white-space: nowrap;
+}
+
+.bookmark-text {
+	display: flex;
+	flex-direction: column;
+}
+
+.bookmark-info {
+	flex: 4 1 180px;
+	padding: 12px 14px 14px;
+	display: flex;
+	flex-direction: column;
+	justify-content: space-between;
+}
+
+.bookmark-image {
+	width: 33%;
+	flex: 1 1 180px;
+	display: block;
+	position: relative;
+	object-fit: cover;
+	border-radius: 1px;
+}
+
+.bookmark-description {
+	color: rgba(55, 53, 47, 0.6);
+	font-size: 0.75em;
+	overflow: hidden;
+	max-height: 4.5em;
+	word-break: break-word;
+}
+
+.bookmark-href {
+	font-size: 0.75em;
+	margin-top: 0.25em;
+}
+
+.sans { font-family: ui-sans-serif, -apple-system, BlinkMacSystemFont, "Segoe UI Variable Display", "Segoe UI", Helvetica, "Apple Color Emoji", "Noto Sans Arabic", "Noto Sans Hebrew", Arial, sans-serif, "Segoe UI Emoji", "Segoe UI Symbol"; }
+.code { font-family: "SFMono-Regular", Menlo, Consolas, "PT Mono", "Liberation Mono", Courier, monospace; }
+.serif { font-family: Lyon-Text, Georgia, ui-serif, serif; }
+.mono { font-family: iawriter-mono, Nitti, Menlo, Courier, monospace; }
+.pdf .sans { font-family: Inter, ui-sans-serif, -apple-system, BlinkMacSystemFont, "Segoe UI Variable Display", "Segoe UI", Helvetica, "Apple Color Emoji", "Noto Sans Arabic", "Noto Sans Hebrew", Arial, sans-serif, "Segoe UI Emoji", "Segoe UI Symbol", 'Twemoji', 'Noto Color Emoji', 'Noto Sans CJK JP'; }
+.pdf:lang(zh-CN) .sans { font-family: Inter, ui-sans-serif, -apple-system, BlinkMacSystemFont, "Segoe UI Variable Display", "Segoe UI", Helvetica, "Apple Color Emoji", "Noto Sans Arabic", "Noto Sans Hebrew", Arial, sans-serif, "Segoe UI Emoji", "Segoe UI Symbol", 'Twemoji', 'Noto Color Emoji', 'Noto Sans CJK SC'; }
+.pdf:lang(zh-TW) .sans { font-family: Inter, ui-sans-serif, -apple-system, BlinkMacSystemFont, "Segoe UI Variable Display", "Segoe UI", Helvetica, "Apple Color Emoji", "Noto Sans Arabic", "Noto Sans Hebrew", Arial, sans-serif, "Segoe UI Emoji", "Segoe UI Symbol", 'Twemoji', 'Noto Color Emoji', 'Noto Sans CJK TC'; }
+.pdf:lang(ko-KR) .sans { font-family: Inter, ui-sans-serif, -apple-system, BlinkMacSystemFont, "Segoe UI Variable Display", "Segoe UI", Helvetica, "Apple Color Emoji", "Noto Sans Arabic", "Noto Sans Hebrew", Arial, sans-serif, "Segoe UI Emoji", "Segoe UI Symbol", 'Twemoji', 'Noto Color Emoji', 'Noto Sans CJK KR'; }
+.pdf .code { font-family: Source Code Pro, "SFMono-Regular", Menlo, Consolas, "PT Mono", "Liberation Mono", Courier, monospace, 'Twemoji', 'Noto Color Emoji', 'Noto Sans Mono CJK JP'; }
+.pdf:lang(zh-CN) .code { font-family: Source Code Pro, "SFMono-Regular", Menlo, Consolas, "PT Mono", "Liberation Mono", Courier, monospace, 'Twemoji', 'Noto Color Emoji', 'Noto Sans Mono CJK SC'; }
+.pdf:lang(zh-TW) .code { font-family: Source Code Pro, "SFMono-Regular", Menlo, Consolas, "PT Mono", "Liberation Mono", Courier, monospace, 'Twemoji', 'Noto Color Emoji', 'Noto Sans Mono CJK TC'; }
+.pdf:lang(ko-KR) .code { font-family: Source Code Pro, "SFMono-Regular", Menlo, Consolas, "PT Mono", "Liberation Mono", Courier, monospace, 'Twemoji', 'Noto Color Emoji', 'Noto Sans Mono CJK KR'; }
+.pdf .serif { font-family: PT Serif, Lyon-Text, Georgia, ui-serif, serif, 'Twemoji', 'Noto Color Emoji', 'Noto Serif CJK JP'; }
+.pdf:lang(zh-CN) .serif { font-family: PT Serif, Lyon-Text, Georgia, ui-serif, serif, 'Twemoji', 'Noto Color Emoji', 'Noto Serif CJK SC'; }
+.pdf:lang(zh-TW) .serif { font-family: PT Serif, Lyon-Text, Georgia, ui-serif, serif, 'Twemoji', 'Noto Color Emoji', 'Noto Serif CJK TC'; }
+.pdf:lang(ko-KR) .serif { font-family: PT Serif, Lyon-Text, Georgia, ui-serif, serif, 'Twemoji', 'Noto Color Emoji', 'Noto Serif CJK KR'; }
+.pdf .mono { font-family: PT Mono, iawriter-mono, Nitti, Menlo, Courier, monospace, 'Twemoji', 'Noto Color Emoji', 'Noto Sans Mono CJK JP'; }
+.pdf:lang(zh-CN) .mono { font-family: PT Mono, iawriter-mono, Nitti, Menlo, Courier, monospace, 'Twemoji', 'Noto Color Emoji', 'Noto Sans Mono CJK SC'; }
+.pdf:lang(zh-TW) .mono { font-family: PT Mono, iawriter-mono, Nitti, Menlo, Courier, monospace, 'Twemoji', 'Noto Color Emoji', 'Noto Sans Mono CJK TC'; }
+.pdf:lang(ko-KR) .mono { font-family: PT Mono, iawriter-mono, Nitti, Menlo, Courier, monospace, 'Twemoji', 'Noto Color Emoji', 'Noto Sans Mono CJK KR'; }
+.highlight-default {
+	color: rgba(44, 44, 43, 1);
+}
+.highlight-gray {
+	color: rgba(125, 122, 117, 1);
+	fill: rgba(125, 122, 117, 1);
+}
+.highlight-brown {
+	color: rgba(159, 118, 90, 1);
+	fill: rgba(159, 118, 90, 1);
+}
+.highlight-orange {
+	color: rgba(210, 123, 45, 1);
+	fill: rgba(210, 123, 45, 1);
+}
+.highlight-yellow {
+	color: rgba(203, 148, 52, 1);
+	fill: rgba(203, 148, 52, 1);
+}
+.highlight-teal {
+	color: rgba(80, 148, 110, 1);
+	fill: rgba(80, 148, 110, 1);
+}
+.highlight-blue {
+	color: rgba(56, 125, 201, 1);
+	fill: rgba(56, 125, 201, 1);
+}
+.highlight-purple {
+	color: rgba(154, 107, 180, 1);
+	fill: rgba(154, 107, 180, 1);
+}
+.highlight-pink {
+	color: rgba(193, 76, 138, 1);
+	fill: rgba(193, 76, 138, 1);
+}
+.highlight-red {
+	color: rgba(207, 81, 72, 1);
+	fill: rgba(207, 81, 72, 1);
+}
+.highlight-default_background {
+	color: rgba(44, 44, 43, 1);
+}
+.highlight-gray_background {
+	background: rgba(42, 28, 0, 0.07);
+}
+.highlight-brown_background {
+	background: rgba(139, 46, 0, 0.086);
+}
+.highlight-orange_background {
+	background: rgba(224, 101, 1, 0.129);
+}
+.highlight-yellow_background {
+	background: rgba(211, 168, 0, 0.137);
+}
+.highlight-teal_background {
+	background: rgba(0, 100, 45, 0.09);
+}
+.highlight-blue_background {
+	background: rgba(0, 124, 215, 0.094);
+}
+.highlight-purple_background {
+	background: rgba(102, 0, 178, 0.078);
+}
+.highlight-pink_background {
+	background: rgba(197, 0, 93, 0.086);
+}
+.highlight-red_background {
+	background: rgba(223, 22, 0, 0.094);
+}
+.block-color-default {
+	color: inherit;
+	fill: inherit;
+}
+.block-color-gray {
+	color: rgba(125, 122, 117, 1);
+	fill: rgba(125, 122, 117, 1);
+}
+.block-color-brown {
+	color: rgba(159, 118, 90, 1);
+	fill: rgba(159, 118, 90, 1);
+}
+.block-color-orange {
+	color: rgba(210, 123, 45, 1);
+	fill: rgba(210, 123, 45, 1);
+}
+.block-color-yellow {
+	color: rgba(203, 148, 52, 1);
+	fill: rgba(203, 148, 52, 1);
+}
+.block-color-teal {
+	color: rgba(80, 148, 110, 1);
+	fill: rgba(80, 148, 110, 1);
+}
+.block-color-blue {
+	color: rgba(56, 125, 201, 1);
+	fill: rgba(56, 125, 201, 1);
+}
+.block-color-purple {
+	color: rgba(154, 107, 180, 1);
+	fill: rgba(154, 107, 180, 1);
+}
+.block-color-pink {
+	color: rgba(193, 76, 138, 1);
+	fill: rgba(193, 76, 138, 1);
+}
+.block-color-red {
+	color: rgba(207, 81, 72, 1);
+	fill: rgba(207, 81, 72, 1);
+}
+.block-color-default_background {
+	color: inherit;
+	fill: inherit;
+}
+.block-color-gray_background {
+	background: rgba(240, 239, 237, 1);
+}
+.block-color-brown_background {
+	background: rgba(245, 237, 233, 1);
+}
+.block-color-orange_background {
+	background: rgba(251, 235, 222, 1);
+}
+.block-color-yellow_background {
+	background: rgba(249, 243, 220, 1);
+}
+.block-color-teal_background {
+	background: rgba(232, 241, 236, 1);
+}
+.block-color-blue_background {
+	background: rgba(229, 242, 252, 1);
+}
+.block-color-purple_background {
+	background: rgba(243, 235, 249, 1);
+}
+.block-color-pink_background {
+	background: rgba(250, 233, 241, 1);
+}
+.block-color-red_background {
+	background: rgba(252, 233, 231, 1);
+}
+.select-value-color-default { background-color: rgba(42, 28, 0, 0.07); }
+.select-value-color-gray { background-color: rgba(28, 19, 1, 0.11); }
+.select-value-color-brown { background-color: rgba(127, 51, 0, 0.156); }
+.select-value-color-orange { background-color: rgba(196, 88, 0, 0.203); }
+.select-value-color-yellow { background-color: rgba(209, 156, 0, 0.282); }
+.select-value-color-green { background-color: rgba(0, 96, 38, 0.156); }
+.select-value-color-blue { background-color: rgba(0, 118, 217, 0.203); }
+.select-value-color-purple { background-color: rgba(92, 0, 163, 0.141); }
+.select-value-color-pink { background-color: rgba(183, 0, 78, 0.152); }
+.select-value-color-red { background-color: rgba(206, 24, 0, 0.164); }
+
+.checkbox {
+	display: inline-flex;
+	vertical-align: text-bottom;
+	width: 16;
+	height: 16;
+	background-size: 16px;
+	margin-left: 2px;
+	margin-right: 5px;
+}
+
+.checkbox-on {
+	background-image: url("data:image/svg+xml;charset=UTF-8,%3Csvg%20width%3D%2216%22%20height%3D%2216%22%20viewBox%3D%220%200%2016%2016%22%20fill%3D%22none%22%20xmlns%3D%22http%3A%2F%2Fwww.w3.org%2F2000%2Fsvg%22%3E%0A%3Crect%20width%3D%2216%22%20height%3D%2216%22%20fill%3D%22%2358A9D7%22%2F%3E%0A%3Cpath%20d%3D%22M6.71429%2012.2852L14%204.9995L12.7143%203.71436L6.71429%209.71378L3.28571%206.2831L2%207.57092L6.71429%2012.2852Z%22%20fill%3D%22white%22%2F%3E%0A%3C%2Fsvg%3E");
+}
+
+.checkbox-off {
+	background-image: url("data:image/svg+xml;charset=UTF-8,%3Csvg%20width%3D%2216%22%20height%3D%2216%22%20viewBox%3D%220%200%2016%2016%22%20fill%3D%22none%22%20xmlns%3D%22http%3A%2F%2Fwww.w3.org%2F2000%2Fsvg%22%3E%0A%3Crect%20x%3D%220.75%22%20y%3D%220.75%22%20width%3D%2214.5%22%20height%3D%2214.5%22%20fill%3D%22white%22%20stroke%3D%22%2336352F%22%20stroke-width%3D%221.5%22%2F%3E%0A%3C%2Fsvg%3E");
+}
+	
+</style></head><body><article id="1e985df0-1907-8087-a5a1-c6534e674c66" class="page sans"><header><h1 class="page-title" dir="auto">🔁 Data Feedback &amp; Learning Loop</h1><p class="page-description" dir="auto"></p><table class="properties"><tbody><tr class="property-row property-row-person"><th><span class="icon property-icon"><img src="https://www.notion.so/icons/friends_gray.svg" style="width:14px;height:14px;display:block"/></span>Owner</th><td><span class="user"><span class="icon text-icon user-icon"><span class="user-icon-inner">A</span></span>Aubert</span></td></tr><tr class="property-row property-row-multi_select"><th><span class="icon property-icon"><img src="https://www.notion.so/icons/list_gray.svg" style="width:14px;height:14px;display:block"/></span>Tags</th><td></td></tr></tbody></table></header><div class="page-body"><div style="display:contents" dir="auto"><p id="1e985df0-1907-8027-96e0-f58f2c9f6c21" class="">This framework establishes a <strong>structured pipeline</strong> through which <strong>insights from the field</strong> — including interaction patterns, reflection signals, and caregiver logs — feed back into <strong>prompt refinement, tone tuning, and feature evolution</strong> across all Memora deployments.</p></div><div style="display:contents" dir="auto"><p id="1e985df0-1907-8090-beee-d09acd5cfbdc" class="">It is <strong>modular</strong>, <strong>consent-aware</strong>, and supports both <strong>offline and online environments</strong>.</p></div><div style="display:contents" dir="auto"><hr id="1e985df0-1907-8040-84d1-c4824814c597"/></div><div style="display:contents" dir="auto"><h2 id="1e985df0-1907-8049-9cf6-f14131811f95" class="">🎯 Goals</h2></div><div style="display:contents" dir="auto"><ul id="1e985df0-1907-809b-8616-c3832909ec8d" class="bulleted-list"><li style="list-style-type:disc">Capture meaningful field data without surveillance</li></ul></div><div style="display:contents" dir="auto"><ul id="1e985df0-1907-8028-9c3d-f2158d85a45b" class="bulleted-list"><li style="list-style-type:disc">Guide Companion tone, prompt, and pacing improvements</li></ul></div><div style="display:contents" dir="auto"><ul id="1e985df0-1907-8017-b46f-ca7d46da9c4d" class="bulleted-list"><li style="list-style-type:disc">Enable real-world usage to inform future versions</li></ul></div><div style="display:contents" dir="auto"><ul id="1e985df0-1907-808d-98de-ede9c81b41ce" class="bulleted-list"><li style="list-style-type:disc">Provide NGO/clinic stakeholders with <strong>feedback visibility</strong></li></ul></div><div style="display:contents" dir="auto"><ul id="1e985df0-1907-80db-a97f-e509a8c3dd94" class="bulleted-list"><li style="list-style-type:disc">Preserve user dignity while evolving ethically</li></ul></div><div style="display:contents" dir="auto"><hr id="1e985df0-1907-80af-9811-c1c8ad032ea7"/></div><div style="display:contents" dir="auto"><h2 id="1e985df0-1907-803b-bf03-fd18d0be4d3b" class="">🧭 Loop Stages</h2></div><div style="display:contents" dir="ltr"><table id="1e985df0-1907-8088-ba43-c31e6bab97d3" class="simple-table"><tbody><div style="display:contents" dir="ltr"><tr id="1e985df0-1907-80da-b798-d5b9e891c323"><td id="FBkH" class="">Stage</td><td id="wFjs" class="">Description</td><td id="qYUb" class="">Role</td></tr></div><div style="display:contents" dir="ltr"><tr id="1e985df0-1907-8017-8bcb-c50700937e97"><td id="FBkH" class="">📥 <strong>Capture</strong></td><td id="wFjs" class="">Gather mood check-ins, reflection patterns, session metadata, and caregiver observations</td><td id="qYUb" class="">Companion, Field Staff, or Caregiver</td></tr></div><div style="display:contents" dir="ltr"><tr id="1e985df0-1907-8036-b46c-df0b21504715"><td id="FBkH" class="">🔎 <strong>Curate</strong></td><td id="wFjs" class="">Filter high-signal, consented moments from ambient data</td><td id="qYUb" class="">Local App Layer + Field Review</td></tr></div><div style="display:contents" dir="ltr"><tr id="1e985df0-1907-8065-b23c-e8567ad840a7"><td id="FBkH" class="">🧪 <strong>Analyze</strong></td><td id="wFjs" class="">Detect themes: fatigue cycles, prompt friction, tone mismatch, topic aversion</td><td id="qYUb" class="">Product Ops + Research Team</td></tr></div><div style="display:contents" dir="ltr"><tr id="1e985df0-1907-806d-8bc7-ec5b5bcc3198"><td id="FBkH" class="">🔧 <strong>Adjust</strong></td><td id="wFjs" class="">Refine Companion tone packs, prompt phrasing, reflection logic</td><td id="qYUb" class="">Prompt Library Manager</td></tr></div><div style="display:contents" dir="ltr"><tr id="1e985df0-1907-80dc-8c6b-efa6a87b6465"><td id="FBkH" class="">📤 <strong>Deploy</strong></td><td id="wFjs" class="">Push updated content sets to new kits or field bundles</td><td id="qYUb" class="">Companion Update Pipeline</td></tr></div><div style="display:contents" dir="ltr"><tr id="1e985df0-1907-802f-9aad-f968d9c30dc6"><td id="FBkH" class="">🧾 <strong>Report</strong></td><td id="wFjs" class="">Share trend-based insights with stakeholders (optional)</td><td id="qYUb" class="">NGO, Clinic, Internal</td></tr></div></tbody></table></div><div style="display:contents" dir="auto"><hr id="1e985df0-1907-804f-ac63-de7e3b3dd92b"/></div><div style="display:contents" dir="auto"><h2 id="1e985df0-1907-805a-a2d5-e2291df2a706" class="">📊 Data Types Ingested</h2></div><div style="display:contents" dir="ltr"><table id="1e985df0-1907-805f-a7f9-f55e206649ae" class="simple-table"><tbody><div style="display:contents" dir="ltr"><tr id="1e985df0-1907-808f-b0ba-cf6caef2041a"><td id="AZK|" class="">Type</td><td id=";j@i" class="">Description</td><td id="xdt&gt;" class="">Consent Scope</td></tr></div><div style="display:contents" dir="ltr"><tr id="1e985df0-1907-80ce-9399-f218a6d1ebb2"><td id="AZK|" class="">💬 <strong>Reflection Metadata</strong></td><td id=";j@i" class="">Mood tags, time of day, reflection frequency</td><td id="xdt&gt;" class="">Local-only, optional sync</td></tr></div><div style="display:contents" dir="ltr"><tr id="1e985df0-1907-80e9-9709-d535b840cd61"><td id="AZK|" class="">⏱ <strong>Session Rhythm Logs</strong></td><td id=";j@i" class="">When sessions start, how long they last, number of questions skipped</td><td id="xdt&gt;" class="">Always local; anonymized if synced</td></tr></div><div style="display:contents" dir="ltr"><tr id="1e985df0-1907-807a-864c-c73b8da1b068"><td id="AZK|" class="">❓ <strong>Prompt Friction Flags</strong></td><td id=";j@i" class="">How often prompts are skipped, ignored, or end a session</td><td id="xdt&gt;" class="">Tag-only, not content</td></tr></div><div style="display:contents" dir="ltr"><tr id="1e985df0-1907-80a9-96bb-c6596a7f5825"><td id="AZK|" class="">🧭 <strong>Tone Drift Markers</strong></td><td id=";j@i" class="">Companion tone adjusted by user/caregiver over time</td><td id="xdt&gt;" class="">Used to guide tone pack QA</td></tr></div><div style="display:contents" dir="ltr"><tr id="1e985df0-1907-80c9-99ad-de9e63cecb9c"><td id="AZK|" class="">📋 <strong>Caregiver Observations</strong></td><td id=";j@i" class="">Field notes or caregiver logs from the manual journal or app</td><td id="xdt&gt;" class="">Only used if explicitly submitted</td></tr></div></tbody></table></div><div style="display:contents" dir="auto"><hr id="1e985df0-1907-808a-86e9-c52f7d3ae90d"/></div><div style="display:contents" dir="auto"><h2 id="1e985df0-1907-808e-992f-ce992978d85e" class="">🔐 Privacy Considerations</h2></div><div style="display:contents" dir="auto"><ul id="1e985df0-1907-8042-bbc4-eef51a80018c" class="bulleted-list"><li style="list-style-type:disc">No content is analyzed unless:<div style="display:contents" dir="auto"><p id="1e985df0-1907-8018-bada-c496eebf5d43" class="">✅ Explicit caregiver/user consent is given</p></div><div style="display:contents" dir="auto"><p id="1e985df0-1907-8067-8fab-edc066027045" class="">✅ Memory toggle is enabled</p></div></li></ul></div><div style="display:contents" dir="auto"><ul id="1e985df0-1907-800f-8831-eec827beed8c" class="bulleted-list"><li style="list-style-type:disc">Only <strong>session metadata</strong> (not voice/text logs) is analyzed by default</li></ul></div><div style="display:contents" dir="auto"><ul id="1e985df0-1907-80c2-80c3-eafda1ca46e5" class="bulleted-list"><li style="list-style-type:disc">All feedback cycles are <strong>auditable</strong> and logged per kit or deployment</li></ul></div><div style="display:contents" dir="auto"><ul id="1e985df0-1907-802c-a35f-c6d449bdd86c" class="bulleted-list"><li style="list-style-type:disc">Feedback → refinement is <strong>non-personalized</strong> (benefits all users)</li></ul></div><div style="display:contents" dir="auto"><hr id="1e985df0-1907-8093-a5e4-f82e7379affe"/></div><div style="display:contents" dir="auto"><h2 id="1e985df0-1907-8090-8b1f-ccdc5f5b6dc2" class="">🔄 Feedback Loop Timing</h2></div><div style="display:contents" dir="ltr"><table id="1e985df0-1907-80f4-a6eb-e83b2f813c7a" class="simple-table"><tbody><div style="display:contents" dir="ltr"><tr id="1e985df0-1907-8096-a849-c8f2a00c5f36"><td id="DubZ" class="">Cadence</td><td id="_tYp" class="">Output</td></tr></div><div style="display:contents" dir="ltr"><tr id="1e985df0-1907-8036-beaa-c9cf57917fcf"><td id="DubZ" class="">📆 Monthly</td><td id="_tYp" class="">Prompt tweak pack, tone tuning summary</td></tr></div><div style="display:contents" dir="ltr"><tr id="1e985df0-1907-804e-b3bf-cc7e4215e53f"><td id="DubZ" class="">📆 Quarterly</td><td id="_tYp" class="">Companion behavioral audit + NGO partner feedback rollup</td></tr></div><div style="display:contents" dir="ltr"><tr id="1e985df0-1907-80cb-b8a1-f62cc422b665"><td id="DubZ" class="">📆 Annual</td><td id="_tYp" class="">Product update cycle + tone pack refresh</td></tr></div><div style="display:contents" dir="ltr"><tr id="1e985df0-1907-80dc-bc12-ce47fd23ccad"><td id="DubZ" class="">⏱ As Needed</td><td id="_tYp" class="">Hotfix prompt removals, emergency tone revisions (triggered by Misfire Audit or Ethics team)</td></tr></div></tbody></table></div><div style="display:contents" dir="auto"><hr id="1e985df0-1907-8088-a0c2-f50bed968047"/></div><div style="display:contents" dir="auto"><h2 id="1e985df0-1907-800f-89ae-f22031d7c82e" class="">📁 Outputs &amp; Use Cases</h2></div><div style="display:contents" dir="ltr"><table id="1e985df0-1907-80bb-a243-dc6c0cc9e659" class="simple-table"><tbody><div style="display:contents" dir="ltr"><tr id="1e985df0-1907-8013-bc9d-fb4470b4cb44"><td id="gtwL" class="">Output</td><td id="XlZ[" class="">Used By</td></tr></div><div style="display:contents" dir="ltr"><tr id="1e985df0-1907-8015-82bd-ec44fc3f0811"><td id="gtwL" class="">🎯 Prompt Heatmap</td><td id="XlZ[" class="">Product Ops to track prompt usefulness across cohorts</td></tr></div><div style="display:contents" dir="ltr"><tr id="1e985df0-1907-806b-8490-cedb7d335582"><td id="gtwL" class="">🌡 Tone Sensitivity Chart</td><td id="XlZ[" class="">Companion QA team to prevent fatigue-triggering tones</td></tr></div><div style="display:contents" dir="ltr"><tr id="1e985df0-1907-80ee-b0ec-eb050e5fa159"><td id="gtwL" class="">📉 Drop-Off Pattern Report</td><td id="XlZ[" class="">NGO partner to improve session scheduling or support</td></tr></div><div style="display:contents" dir="ltr"><tr id="1e985df0-1907-807d-b57c-f143998ccd6f"><td id="gtwL" class="">🔁 Reflection Fatigue Tracker</td><td id="XlZ[" class="">Caregivers to monitor emotional overload</td></tr></div><div style="display:contents" dir="ltr"><tr id="1e985df0-1907-8047-9b7f-c600f02b1942"><td id="gtwL" class="">🔧 Tone Pack Auto-Calibrator</td><td id="XlZ[" class="">Used to adjust new deployments in similar regions</td></tr></div></tbody></table></div><div style="display:contents" dir="auto"><hr id="1e985df0-1907-80b1-9a9f-edc25b32785a"/></div><div style="display:contents" dir="auto"><h2 id="1e985df0-1907-80e5-b07c-cc8b3f96e06c" class="">🧰 Toolkit &amp; Templates</h2></div><div style="display:contents" dir="auto"><ul id="1e985df0-1907-80a6-bef2-d2eacb5ebcc3" class="to-do-list"><li><div class="checkbox checkbox-off"></div> <span class="to-do-children-unchecked">Field Feedback Submission Card (QR or printed form)</span><div class="indented"></div></li></ul></div><div style="display:contents" dir="auto"><ul id="1e985df0-1907-808c-85a4-e24ea120499f" class="to-do-list"><li><div class="checkbox checkbox-off"></div> <span class="to-do-children-unchecked">Prompt Flagging Sheet (for caregivers or NGOs)</span><div class="indented"></div></li></ul></div><div style="display:contents" dir="auto"><ul id="1e985df0-1907-802e-ba5f-cdbbc29e2f6c" class="to-do-list"><li><div class="checkbox checkbox-off"></div> <span class="to-do-children-unchecked">Session Metadata Sync Format (offline to cloud export)</span><div class="indented"></div></li></ul></div><div style="display:contents" dir="auto"><ul id="1e985df0-1907-808b-8e8f-e575f669536d" class="to-do-list"><li><div class="checkbox checkbox-off"></div> <span class="to-do-children-unchecked">Tone Calibration Feedback Sheet (UX version)</span><div class="indented"></div></li></ul></div><div style="display:contents" dir="auto"><ul id="1e985df0-1907-8001-9213-ef9cba67ebfb" class="to-do-list"><li><div class="checkbox checkbox-off"></div> <span class="to-do-children-unchecked">NGO Dashboard Feedback Module</span><div class="indented"></div></li></ul></div><div style="display:contents" dir="auto"><ul id="1e985df0-1907-8064-a271-c2bd99f6373b" class="to-do-list"><li><div class="checkbox checkbox-off"></div> <span class="to-do-children-unchecked">Prompt Tuning Tracker (internal)</span><div class="indented"></div></li></ul></div><div style="display:contents" dir="auto"><ul id="1e985df0-1907-807a-9b3f-c416b3d301e4" class="to-do-list"><li><div class="checkbox checkbox-off"></div> <span class="to-do-children-unchecked">Prompt Library QA Log</span><div class="indented"></div></li></ul></div><div style="display:contents" dir="auto"><hr id="1e985df0-1907-803c-922d-ce12e38350be"/></div><div style="display:contents" dir="auto"><h2 id="1e985df0-1907-8094-8846-e9339c72323e" class="">🔄 Visual Model (Simple Flow)</h2></div><div style="display:contents" dir="auto"><script src="https://cdnjs.cloudflare.com/ajax/libs/prism/1.29.0/prism.min.js" integrity="sha512-7Z9J3l1+EYfeaPKcGXu3MS/7T+w19WtKQY/n+xzmw4hZhJ9tyYmcUS+4QqAlzhicE5LAfMQSF3iFTK9bQdTxXg==" crossorigin="anonymous" referrerPolicy="no-referrer"></script><link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/prism/1.29.0/themes/prism.min.css" integrity="sha512-tN7Ec6zAFaVSG3TpNAKtk4DOHNpSwKHxxrsiw4GHKESGPs5njn/0sMCUMl2svV4wo4BK/rCP7juYz+zx+l6oeQ==" crossorigin="anonymous" referrerPolicy="no-referrer"/><pre id="1e985df0-1907-8073-9047-e5c65b6cc960" class="code code-wrap"><code class="language-Plain Text" style="white-space:pre-wrap;word-break:break-all">plaintext
+CopyEdit
+  Field / User Sessions
+        ↓
+    Mood + Prompt Logs
+        ↓
+    Filtered by Consent
+        ↓
+  Trends Analyzed (fatigue, friction, growth)
+        ↓
+   Companion Update: tone, pacing, prompts
+        ↓
+   Next Field Kit includes improved model
+
+</code></pre></div><div style="display:contents" dir="auto"><hr id="1e985df0-1907-8082-a0e0-f71e9fc144f0"/></div><div style="display:contents" dir="auto"><h2 id="1e985df0-1907-80c3-bbe9-c3ceb019cc3d" class="">📎 Linked Frameworks</h2></div><div style="display:contents" dir="auto"><ul id="1e985df0-1907-805d-b85e-c2dd89545f13" class="bulleted-list"><li style="list-style-type:disc">📊 Long-Term Impact Framework</li></ul></div><div style="display:contents" dir="auto"><ul id="1e985df0-1907-800d-b8ae-cb037e0bd651" class="bulleted-list"><li style="list-style-type:disc">🧭 User Journey Lifecycle Map</li></ul></div><div style="display:contents" dir="auto"><ul id="1e985df0-1907-8062-80ec-fcad5c4a0c12" class="bulleted-list"><li style="list-style-type:disc">🧾 Caregiver Script Companion</li></ul></div><div style="display:contents" dir="auto"><ul id="1e985df0-1907-8009-b373-fa2ac0c0f711" class="bulleted-list"><li style="list-style-type:disc">🛠 Prompt Library Architecture</li></ul></div><div style="display:contents" dir="auto"><ul id="1e985df0-1907-80e7-8f31-de832001a678" class="bulleted-list"><li style="list-style-type:disc">🧠 Companion Ethics &amp; Behavioral QA</li></ul></div></div></article><span class="sans" style="font-size:14px;padding-top:2em"></span></body></html>

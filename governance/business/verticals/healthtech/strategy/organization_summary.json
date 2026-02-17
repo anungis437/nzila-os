@@ -1,0 +1,19 @@
+{
+  "total_files": 3350,
+  "categorized": 1162,
+  "uncategorized": 2188,
+  "categories": {
+    "growth-metrics": 121,
+    "design-system": 146,
+    "patient-experience": 75,
+    "technical-architecture": 141,
+    "data-privacy": 237,
+    "partnership-strategy": 86,
+    "user-research": 158,
+    "business-model": 54,
+    "market-strategy": 68,
+    "clinical-workflows": 35,
+    "product-features": 41
+  },
+  "organized_at": "D:\\APPS\\nzila-automation"
+}

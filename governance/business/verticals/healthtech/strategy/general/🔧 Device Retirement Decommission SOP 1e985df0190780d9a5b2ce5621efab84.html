@@ -1,0 +1,713 @@
+<html><head><meta http-equiv="Content-Type" content="text/html; charset=utf-8"/><title>🔧 Device Retirement / Decommission SOP</title><style>
+/* cspell:disable-file */
+/* webkit printing magic: print all background colors */
+html {
+	-webkit-print-color-adjust: exact;
+}
+* {
+	box-sizing: border-box;
+	-webkit-print-color-adjust: exact;
+}
+
+html,
+body {
+	margin: 0;
+	padding: 0;
+}
+@media only screen {
+	body {
+		margin: 2em auto;
+		max-width: 900px;
+		color: rgb(55, 53, 47);
+	}
+}
+
+body {
+	line-height: 1.5;
+	white-space: pre-wrap;
+}
+
+a,
+a.visited {
+	color: inherit;
+	text-decoration: underline;
+}
+
+.pdf-relative-link-path {
+	font-size: 80%;
+	color: #444;
+}
+
+h1,
+h2,
+h3 {
+	letter-spacing: -0.01em;
+	line-height: 1.2;
+	font-weight: 600;
+	margin-bottom: 0;
+}
+
+/* Override strong tags inside headings to maintain consistent weight */
+h1 strong,
+h2 strong,
+h3 strong {
+	font-weight: 600;
+}
+
+.page-title {
+	font-size: 2.5rem;
+	font-weight: 700;
+	margin-top: 0;
+	margin-bottom: 0.75em;
+}
+
+h1 {
+	font-size: 1.875rem;
+	margin-top: 1.875rem;
+}
+
+h2 {
+	font-size: 1.5rem;
+	margin-top: 1.5rem;
+}
+
+h3 {
+	font-size: 1.25rem;
+	margin-top: 1.25rem;
+}
+
+.source {
+	border: 1px solid #ddd;
+	border-radius: 3px;
+	padding: 1.5em;
+	word-break: break-all;
+}
+
+.callout {
+	border-radius: 10px;
+	padding: 1rem;
+}
+
+figure {
+	margin: 1.25em 0;
+	page-break-inside: avoid;
+}
+
+figcaption {
+	opacity: 0.5;
+	font-size: 85%;
+	margin-top: 0.5em;
+}
+
+mark {
+	background-color: transparent;
+}
+
+.indented {
+	padding-left: 1.5em;
+}
+
+hr {
+	background: transparent;
+	display: block;
+	width: 100%;
+	height: 1px;
+	visibility: visible;
+	border: none;
+	border-bottom: 1px solid rgba(55, 53, 47, 0.09);
+}
+
+img {
+	max-width: 100%;
+}
+
+@media only print {
+	img {
+		max-height: 100vh;
+		object-fit: contain;
+	}
+}
+
+@page {
+	margin: 1in;
+}
+
+.collection-content {
+	font-size: 0.875rem;
+}
+
+.collection-content td {
+	white-space: pre-wrap;
+	word-break: break-word;
+}
+
+.column-list {
+	display: flex;
+	justify-content: space-between;
+}
+
+.column {
+	padding: 0 1em;
+}
+
+.column:first-child {
+	padding-left: 0;
+}
+
+.column:last-child {
+	padding-right: 0;
+}
+
+.table_of_contents-item {
+	display: block;
+	font-size: 0.875rem;
+	line-height: 1.3;
+	padding: 0.125rem;
+}
+
+.table_of_contents-indent-1 {
+	margin-left: 1.5rem;
+}
+
+.table_of_contents-indent-2 {
+	margin-left: 3rem;
+}
+
+.table_of_contents-indent-3 {
+	margin-left: 4.5rem;
+}
+
+.table_of_contents-link {
+	text-decoration: none;
+	opacity: 0.7;
+	border-bottom: 1px solid rgba(55, 53, 47, 0.18);
+}
+
+table,
+th,
+td {
+	border: 1px solid rgba(55, 53, 47, 0.09);
+	border-collapse: collapse;
+}
+
+table {
+	border-left: none;
+	border-right: none;
+}
+
+th,
+td {
+	font-weight: normal;
+	padding: 0.25em 0.5em;
+	line-height: 1.5;
+	min-height: 1.5em;
+	text-align: left;
+}
+
+th {
+	color: rgba(55, 53, 47, 0.6);
+}
+
+ol,
+ul {
+	margin: 0;
+	margin-block-start: 0.6em;
+	margin-block-end: 0.6em;
+}
+
+li > ol:first-child,
+li > ul:first-child {
+	margin-block-start: 0.6em;
+}
+
+ul > li {
+	list-style: disc;
+}
+
+ul.to-do-list {
+	padding-inline-start: 0;
+}
+
+ul.to-do-list > li {
+	list-style: none;
+}
+
+.to-do-children-checked {
+	text-decoration: line-through;
+	opacity: 0.375;
+}
+
+ul.toggle > li {
+	list-style: none;
+}
+
+ul {
+	padding-inline-start: 1.7em;
+}
+
+ul > li {
+	padding-left: 0.1em;
+}
+
+ol {
+	padding-inline-start: 1.6em;
+}
+
+ol > li {
+	padding-left: 0.2em;
+}
+
+.mono ol {
+	padding-inline-start: 2em;
+}
+
+.mono ol > li {
+	text-indent: -0.4em;
+}
+
+.toggle {
+	padding-inline-start: 0em;
+	list-style-type: none;
+}
+
+/* Indent toggle children */
+.toggle > li > details {
+	padding-left: 1.7em;
+}
+
+.toggle > li > details > summary {
+	margin-left: -1.1em;
+}
+
+.selected-value {
+	display: inline-block;
+	padding: 0 0.5em;
+	background: rgba(206, 205, 202, 0.5);
+	border-radius: 3px;
+	margin-right: 0.5em;
+	margin-top: 0.3em;
+	margin-bottom: 0.3em;
+	white-space: nowrap;
+}
+
+.collection-title {
+	display: inline-block;
+	margin-right: 1em;
+}
+
+.page-description {
+	margin-bottom: 2em;
+}
+
+.simple-table {
+	margin-top: 1em;
+	font-size: 0.875rem;
+	empty-cells: show;
+}
+.simple-table td {
+	height: 29px;
+	min-width: 120px;
+}
+
+.simple-table th {
+	height: 29px;
+	min-width: 120px;
+}
+
+.simple-table-header-color {
+	background: rgb(247, 246, 243);
+	color: black;
+}
+.simple-table-header {
+	font-weight: 500;
+}
+
+time {
+	opacity: 0.5;
+}
+
+.icon {
+	display: inline-flex;
+	align-items: center;
+	justify-content: center;
+	max-width: 1.2em;
+	max-height: 1.2em;
+	text-decoration: none;
+	vertical-align: text-bottom;
+	margin-right: 0.5em;
+}
+
+img.icon {
+	border-radius: 3px;
+}
+
+.callout img.notion-static-icon {
+	width: 1em;
+	height: 1em;
+}
+
+.callout p {
+	margin: 0;
+}
+
+.callout h1,
+.callout h2,
+.callout h3 {
+	margin: 0 0 0.6rem;
+}
+
+.user-icon {
+	width: 1.5em;
+	height: 1.5em;
+	border-radius: 100%;
+	margin-right: 0.5rem;
+}
+
+.user-icon-inner {
+	font-size: 0.8em;
+}
+
+.text-icon {
+	border: 1px solid #000;
+	text-align: center;
+}
+
+.page-cover-image {
+	display: block;
+	object-fit: cover;
+	width: 100%;
+	max-height: 30vh;
+}
+
+.page-header-icon {
+	font-size: 3rem;
+	margin-bottom: 1rem;
+}
+
+.page-header-icon-with-cover {
+	margin-top: -0.72em;
+	margin-left: 0.07em;
+}
+
+.page-header-icon img {
+	border-radius: 3px;
+}
+
+.link-to-page {
+	margin: 1em 0;
+	padding: 0;
+	border: none;
+	font-weight: 500;
+}
+
+p > .user {
+	opacity: 0.5;
+}
+
+td > .user,
+td > time {
+	white-space: nowrap;
+}
+
+input[type="checkbox"] {
+	transform: scale(1.5);
+	margin-right: 0.6em;
+	vertical-align: middle;
+}
+
+p {
+	margin-top: 0.5em;
+	margin-bottom: 0.5em;
+}
+
+.image {
+	border: none;
+	margin: 1.5em 0;
+	padding: 0;
+	border-radius: 0;
+	text-align: center;
+}
+
+.code,
+code {
+	background: rgba(135, 131, 120, 0.15);
+	border-radius: 3px;
+	padding: 0.2em 0.4em;
+	border-radius: 3px;
+	font-size: 85%;
+	tab-size: 2;
+}
+
+code {
+	color: #eb5757;
+}
+
+.code {
+	padding: 1.5em 1em;
+}
+
+.code-wrap {
+	white-space: pre-wrap;
+	word-break: break-all;
+}
+
+.code > code {
+	background: none;
+	padding: 0;
+	font-size: 100%;
+	color: inherit;
+}
+
+blockquote {
+	font-size: 1em;
+	margin: 1em 0;
+	padding-left: 1em;
+	border-left: 3px solid rgb(55, 53, 47);
+}
+
+blockquote.quote-large {
+	font-size: 1.25em;
+}
+
+.bookmark {
+	text-decoration: none;
+	max-height: 8em;
+	padding: 0;
+	display: flex;
+	width: 100%;
+	align-items: stretch;
+}
+
+.bookmark-title {
+	font-size: 0.85em;
+	overflow: hidden;
+	text-overflow: ellipsis;
+	height: 1.75em;
+	white-space: nowrap;
+}
+
+.bookmark-text {
+	display: flex;
+	flex-direction: column;
+}
+
+.bookmark-info {
+	flex: 4 1 180px;
+	padding: 12px 14px 14px;
+	display: flex;
+	flex-direction: column;
+	justify-content: space-between;
+}
+
+.bookmark-image {
+	width: 33%;
+	flex: 1 1 180px;
+	display: block;
+	position: relative;
+	object-fit: cover;
+	border-radius: 1px;
+}
+
+.bookmark-description {
+	color: rgba(55, 53, 47, 0.6);
+	font-size: 0.75em;
+	overflow: hidden;
+	max-height: 4.5em;
+	word-break: break-word;
+}
+
+.bookmark-href {
+	font-size: 0.75em;
+	margin-top: 0.25em;
+}
+
+.sans { font-family: ui-sans-serif, -apple-system, BlinkMacSystemFont, "Segoe UI Variable Display", "Segoe UI", Helvetica, "Apple Color Emoji", "Noto Sans Arabic", "Noto Sans Hebrew", Arial, sans-serif, "Segoe UI Emoji", "Segoe UI Symbol"; }
+.code { font-family: "SFMono-Regular", Menlo, Consolas, "PT Mono", "Liberation Mono", Courier, monospace; }
+.serif { font-family: Lyon-Text, Georgia, ui-serif, serif; }
+.mono { font-family: iawriter-mono, Nitti, Menlo, Courier, monospace; }
+.pdf .sans { font-family: Inter, ui-sans-serif, -apple-system, BlinkMacSystemFont, "Segoe UI Variable Display", "Segoe UI", Helvetica, "Apple Color Emoji", "Noto Sans Arabic", "Noto Sans Hebrew", Arial, sans-serif, "Segoe UI Emoji", "Segoe UI Symbol", 'Twemoji', 'Noto Color Emoji', 'Noto Sans CJK JP'; }
+.pdf:lang(zh-CN) .sans { font-family: Inter, ui-sans-serif, -apple-system, BlinkMacSystemFont, "Segoe UI Variable Display", "Segoe UI", Helvetica, "Apple Color Emoji", "Noto Sans Arabic", "Noto Sans Hebrew", Arial, sans-serif, "Segoe UI Emoji", "Segoe UI Symbol", 'Twemoji', 'Noto Color Emoji', 'Noto Sans CJK SC'; }
+.pdf:lang(zh-TW) .sans { font-family: Inter, ui-sans-serif, -apple-system, BlinkMacSystemFont, "Segoe UI Variable Display", "Segoe UI", Helvetica, "Apple Color Emoji", "Noto Sans Arabic", "Noto Sans Hebrew", Arial, sans-serif, "Segoe UI Emoji", "Segoe UI Symbol", 'Twemoji', 'Noto Color Emoji', 'Noto Sans CJK TC'; }
+.pdf:lang(ko-KR) .sans { font-family: Inter, ui-sans-serif, -apple-system, BlinkMacSystemFont, "Segoe UI Variable Display", "Segoe UI", Helvetica, "Apple Color Emoji", "Noto Sans Arabic", "Noto Sans Hebrew", Arial, sans-serif, "Segoe UI Emoji", "Segoe UI Symbol", 'Twemoji', 'Noto Color Emoji', 'Noto Sans CJK KR'; }
+.pdf .code { font-family: Source Code Pro, "SFMono-Regular", Menlo, Consolas, "PT Mono", "Liberation Mono", Courier, monospace, 'Twemoji', 'Noto Color Emoji', 'Noto Sans Mono CJK JP'; }
+.pdf:lang(zh-CN) .code { font-family: Source Code Pro, "SFMono-Regular", Menlo, Consolas, "PT Mono", "Liberation Mono", Courier, monospace, 'Twemoji', 'Noto Color Emoji', 'Noto Sans Mono CJK SC'; }
+.pdf:lang(zh-TW) .code { font-family: Source Code Pro, "SFMono-Regular", Menlo, Consolas, "PT Mono", "Liberation Mono", Courier, monospace, 'Twemoji', 'Noto Color Emoji', 'Noto Sans Mono CJK TC'; }
+.pdf:lang(ko-KR) .code { font-family: Source Code Pro, "SFMono-Regular", Menlo, Consolas, "PT Mono", "Liberation Mono", Courier, monospace, 'Twemoji', 'Noto Color Emoji', 'Noto Sans Mono CJK KR'; }
+.pdf .serif { font-family: PT Serif, Lyon-Text, Georgia, ui-serif, serif, 'Twemoji', 'Noto Color Emoji', 'Noto Serif CJK JP'; }
+.pdf:lang(zh-CN) .serif { font-family: PT Serif, Lyon-Text, Georgia, ui-serif, serif, 'Twemoji', 'Noto Color Emoji', 'Noto Serif CJK SC'; }
+.pdf:lang(zh-TW) .serif { font-family: PT Serif, Lyon-Text, Georgia, ui-serif, serif, 'Twemoji', 'Noto Color Emoji', 'Noto Serif CJK TC'; }
+.pdf:lang(ko-KR) .serif { font-family: PT Serif, Lyon-Text, Georgia, ui-serif, serif, 'Twemoji', 'Noto Color Emoji', 'Noto Serif CJK KR'; }
+.pdf .mono { font-family: PT Mono, iawriter-mono, Nitti, Menlo, Courier, monospace, 'Twemoji', 'Noto Color Emoji', 'Noto Sans Mono CJK JP'; }
+.pdf:lang(zh-CN) .mono { font-family: PT Mono, iawriter-mono, Nitti, Menlo, Courier, monospace, 'Twemoji', 'Noto Color Emoji', 'Noto Sans Mono CJK SC'; }
+.pdf:lang(zh-TW) .mono { font-family: PT Mono, iawriter-mono, Nitti, Menlo, Courier, monospace, 'Twemoji', 'Noto Color Emoji', 'Noto Sans Mono CJK TC'; }
+.pdf:lang(ko-KR) .mono { font-family: PT Mono, iawriter-mono, Nitti, Menlo, Courier, monospace, 'Twemoji', 'Noto Color Emoji', 'Noto Sans Mono CJK KR'; }
+.highlight-default {
+	color: rgba(44, 44, 43, 1);
+}
+.highlight-gray {
+	color: rgba(125, 122, 117, 1);
+	fill: rgba(125, 122, 117, 1);
+}
+.highlight-brown {
+	color: rgba(159, 118, 90, 1);
+	fill: rgba(159, 118, 90, 1);
+}
+.highlight-orange {
+	color: rgba(210, 123, 45, 1);
+	fill: rgba(210, 123, 45, 1);
+}
+.highlight-yellow {
+	color: rgba(203, 148, 52, 1);
+	fill: rgba(203, 148, 52, 1);
+}
+.highlight-teal {
+	color: rgba(80, 148, 110, 1);
+	fill: rgba(80, 148, 110, 1);
+}
+.highlight-blue {
+	color: rgba(56, 125, 201, 1);
+	fill: rgba(56, 125, 201, 1);
+}
+.highlight-purple {
+	color: rgba(154, 107, 180, 1);
+	fill: rgba(154, 107, 180, 1);
+}
+.highlight-pink {
+	color: rgba(193, 76, 138, 1);
+	fill: rgba(193, 76, 138, 1);
+}
+.highlight-red {
+	color: rgba(207, 81, 72, 1);
+	fill: rgba(207, 81, 72, 1);
+}
+.highlight-default_background {
+	color: rgba(44, 44, 43, 1);
+}
+.highlight-gray_background {
+	background: rgba(42, 28, 0, 0.07);
+}
+.highlight-brown_background {
+	background: rgba(139, 46, 0, 0.086);
+}
+.highlight-orange_background {
+	background: rgba(224, 101, 1, 0.129);
+}
+.highlight-yellow_background {
+	background: rgba(211, 168, 0, 0.137);
+}
+.highlight-teal_background {
+	background: rgba(0, 100, 45, 0.09);
+}
+.highlight-blue_background {
+	background: rgba(0, 124, 215, 0.094);
+}
+.highlight-purple_background {
+	background: rgba(102, 0, 178, 0.078);
+}
+.highlight-pink_background {
+	background: rgba(197, 0, 93, 0.086);
+}
+.highlight-red_background {
+	background: rgba(223, 22, 0, 0.094);
+}
+.block-color-default {
+	color: inherit;
+	fill: inherit;
+}
+.block-color-gray {
+	color: rgba(125, 122, 117, 1);
+	fill: rgba(125, 122, 117, 1);
+}
+.block-color-brown {
+	color: rgba(159, 118, 90, 1);
+	fill: rgba(159, 118, 90, 1);
+}
+.block-color-orange {
+	color: rgba(210, 123, 45, 1);
+	fill: rgba(210, 123, 45, 1);
+}
+.block-color-yellow {
+	color: rgba(203, 148, 52, 1);
+	fill: rgba(203, 148, 52, 1);
+}
+.block-color-teal {
+	color: rgba(80, 148, 110, 1);
+	fill: rgba(80, 148, 110, 1);
+}
+.block-color-blue {
+	color: rgba(56, 125, 201, 1);
+	fill: rgba(56, 125, 201, 1);
+}
+.block-color-purple {
+	color: rgba(154, 107, 180, 1);
+	fill: rgba(154, 107, 180, 1);
+}
+.block-color-pink {
+	color: rgba(193, 76, 138, 1);
+	fill: rgba(193, 76, 138, 1);
+}
+.block-color-red {
+	color: rgba(207, 81, 72, 1);
+	fill: rgba(207, 81, 72, 1);
+}
+.block-color-default_background {
+	color: inherit;
+	fill: inherit;
+}
+.block-color-gray_background {
+	background: rgba(240, 239, 237, 1);
+}
+.block-color-brown_background {
+	background: rgba(245, 237, 233, 1);
+}
+.block-color-orange_background {
+	background: rgba(251, 235, 222, 1);
+}
+.block-color-yellow_background {
+	background: rgba(249, 243, 220, 1);
+}
+.block-color-teal_background {
+	background: rgba(232, 241, 236, 1);
+}
+.block-color-blue_background {
+	background: rgba(229, 242, 252, 1);
+}
+.block-color-purple_background {
+	background: rgba(243, 235, 249, 1);
+}
+.block-color-pink_background {
+	background: rgba(250, 233, 241, 1);
+}
+.block-color-red_background {
+	background: rgba(252, 233, 231, 1);
+}
+.select-value-color-default { background-color: rgba(42, 28, 0, 0.07); }
+.select-value-color-gray { background-color: rgba(28, 19, 1, 0.11); }
+.select-value-color-brown { background-color: rgba(127, 51, 0, 0.156); }
+.select-value-color-orange { background-color: rgba(196, 88, 0, 0.203); }
+.select-value-color-yellow { background-color: rgba(209, 156, 0, 0.282); }
+.select-value-color-green { background-color: rgba(0, 96, 38, 0.156); }
+.select-value-color-blue { background-color: rgba(0, 118, 217, 0.203); }
+.select-value-color-purple { background-color: rgba(92, 0, 163, 0.141); }
+.select-value-color-pink { background-color: rgba(183, 0, 78, 0.152); }
+.select-value-color-red { background-color: rgba(206, 24, 0, 0.164); }
+
+.checkbox {
+	display: inline-flex;
+	vertical-align: text-bottom;
+	width: 16;
+	height: 16;
+	background-size: 16px;
+	margin-left: 2px;
+	margin-right: 5px;
+}
+
+.checkbox-on {
+	background-image: url("data:image/svg+xml;charset=UTF-8,%3Csvg%20width%3D%2216%22%20height%3D%2216%22%20viewBox%3D%220%200%2016%2016%22%20fill%3D%22none%22%20xmlns%3D%22http%3A%2F%2Fwww.w3.org%2F2000%2Fsvg%22%3E%0A%3Crect%20width%3D%2216%22%20height%3D%2216%22%20fill%3D%22%2358A9D7%22%2F%3E%0A%3Cpath%20d%3D%22M6.71429%2012.2852L14%204.9995L12.7143%203.71436L6.71429%209.71378L3.28571%206.2831L2%207.57092L6.71429%2012.2852Z%22%20fill%3D%22white%22%2F%3E%0A%3C%2Fsvg%3E");
+}
+
+.checkbox-off {
+	background-image: url("data:image/svg+xml;charset=UTF-8,%3Csvg%20width%3D%2216%22%20height%3D%2216%22%20viewBox%3D%220%200%2016%2016%22%20fill%3D%22none%22%20xmlns%3D%22http%3A%2F%2Fwww.w3.org%2F2000%2Fsvg%22%3E%0A%3Crect%20x%3D%220.75%22%20y%3D%220.75%22%20width%3D%2214.5%22%20height%3D%2214.5%22%20fill%3D%22white%22%20stroke%3D%22%2336352F%22%20stroke-width%3D%221.5%22%2F%3E%0A%3C%2Fsvg%3E");
+}
+	
+</style></head><body><article id="1e985df0-1907-80d9-a5b2-ce5621efab84" class="page sans"><header><h1 class="page-title" dir="auto">🔧 Device Retirement / Decommission SOP</h1><p class="page-description" dir="auto"></p><table class="properties"><tbody><tr class="property-row property-row-person"><th><span class="icon property-icon"><img src="https://www.notion.so/icons/friends_gray.svg" style="width:14px;height:14px;display:block"/></span>Owner</th><td><span class="user"><span class="icon text-icon user-icon"><span class="user-icon-inner">A</span></span>Aubert</span></td></tr><tr class="property-row property-row-multi_select"><th><span class="icon property-icon"><img src="https://www.notion.so/icons/list_gray.svg" style="width:14px;height:14px;display:block"/></span>Tags</th><td></td></tr></tbody></table></header><div class="page-body"><div style="display:contents" dir="auto"><p id="1e985df0-1907-80a2-8285-d174a621e483" class="">This SOP governs the process of <strong>retiring, repurposing, or disposing</strong> of Memora Companion devices. It safeguards memory data, prevents unauthorized reuse, ensures environmental responsibility, and maintains <strong>ethical audit trails</strong> for all hardware transitions.</p></div><div style="display:contents" dir="auto"><hr id="1e985df0-1907-8063-8c88-e3eaf26a15f1"/></div><div style="display:contents" dir="auto"><h2 id="1e985df0-1907-80b6-ba8f-eb2c3526aac6" class="">🎯 Objectives</h2></div><div style="display:contents" dir="auto"><ul id="1e985df0-1907-8042-88a3-d38d8d858833" class="bulleted-list"><li style="list-style-type:disc">Ensure <strong>zero residual user data</strong> on retired devices</li></ul></div><div style="display:contents" dir="auto"><ul id="1e985df0-1907-8050-afd0-c1963ceb5a18" class="bulleted-list"><li style="list-style-type:disc">Support <strong>memory export, consent reconfirmation, or erasure</strong> prior to decommission</li></ul></div><div style="display:contents" dir="auto"><ul id="1e985df0-1907-8082-b701-cae3c5343dab" class="bulleted-list"><li style="list-style-type:disc">Maintain a complete <strong>device lifecycle audit log</strong></li></ul></div><div style="display:contents" dir="auto"><ul id="1e985df0-1907-8022-935a-cc9e6368c3b8" class="bulleted-list"><li style="list-style-type:disc">Provide clear workflows for <strong>reuse, recycle, or destroy decisions</strong></li></ul></div><div style="display:contents" dir="auto"><ul id="1e985df0-1907-801e-9967-e46d62c984d3" class="bulleted-list"><li style="list-style-type:disc">Support <strong>field teams, clinics, and NGO partners</strong> in both connected and offline settings</li></ul></div><div style="display:contents" dir="auto"><hr id="1e985df0-1907-8048-bcd5-e2e839374672"/></div><div style="display:contents" dir="auto"><h2 id="1e985df0-1907-8047-83f7-fef0d3625713" class="">🛠️ Valid Retirement Triggers</h2></div><div style="display:contents" dir="ltr"><table id="1e985df0-1907-8048-8df0-e32d6d5c7fba" class="simple-table"><tbody><div style="display:contents" dir="ltr"><tr id="1e985df0-1907-80f7-b5be-f8c8c16db0b3"><td id="tSot" class="">Trigger</td><td id="}XzK" class="" style="width:459px">Examples</td></tr></div><div style="display:contents" dir="ltr"><tr id="1e985df0-1907-8035-90b4-eea836736c5b"><td id="tSot" class="">🧯 <strong>Device Failure</strong></td><td id="}XzK" class="" style="width:459px">Unrecoverable hardware damage, battery failure</td></tr></div><div style="display:contents" dir="ltr"><tr id="1e985df0-1907-80fd-9b5f-d8b200b0b1b9"><td id="tSot" class="">📦 <strong>End of Program Use</strong></td><td id="}XzK" class="" style="width:459px">Device completed its rotation lifecycle</td></tr></div><div style="display:contents" dir="ltr"><tr id="1e985df0-1907-8037-a49a-d5ce5b418fab"><td id="tSot" class="">🧑‍⚕️ <strong>Policy Update</strong></td><td id="}XzK" class="" style="width:459px">Hardware no longer meets compliance or software standards</td></tr></div><div style="display:contents" dir="ltr"><tr id="1e985df0-1907-8046-a81b-c39eaf0bc926"><td id="tSot" class="">🔁 <strong>Redeployment Shift</strong></td><td id="}XzK" class="" style="width:459px">Devices pulled back for imaging and new programming</td></tr></div><div style="display:contents" dir="ltr"><tr id="1e985df0-1907-8047-b682-dd007a7610db"><td id="tSot" class="">🧼 <strong>Mass Memory Wipe Requested</strong></td><td id="}XzK" class="" style="width:459px">Full recall due to trauma event or caregiver policy</td></tr></div></tbody></table></div><div style="display:contents" dir="auto"><hr id="1e985df0-1907-80bc-821a-fde4095dba24"/></div><div style="display:contents" dir="auto"><h2 id="1e985df0-1907-8043-81ad-fba0da06ca3b" class="">📋 Pre-Decommission Checklist</h2></div><div style="display:contents" dir="ltr"><table id="1e985df0-1907-80e3-a1d5-e782258c8510" class="simple-table"><tbody><div style="display:contents" dir="ltr"><tr id="1e985df0-1907-80a8-9b7d-e464f2ca8521"><td id="Avot" class="">Step</td><td id="eRS@" class="">Action</td></tr></div><div style="display:contents" dir="ltr"><tr id="1e985df0-1907-801f-a8c0-ef8513e27742"><td id="Avot" class="">✅ <strong>User Offboarding Complete</strong></td><td id="eRS@" class="">Graduation or opt-out logged</td></tr></div><div style="display:contents" dir="ltr"><tr id="1e985df0-1907-802e-b33d-f1972e557c76"><td id="Avot" class="">🧾 <strong>Memory Layer Actioned</strong></td><td id="eRS@" class="">Exported, archived, or securely wiped</td></tr></div><div style="display:contents" dir="ltr"><tr id="1e985df0-1907-8071-a6a7-f75a12e4df20"><td id="Avot" class="">🔒 <strong>Device Lock Activated</strong></td><td id="eRS@" class="">Companion disabled to prevent post-use memory logging</td></tr></div><div style="display:contents" dir="ltr"><tr id="1e985df0-1907-80c8-9492-ea04f2bbb70a"><td id="Avot" class="">📄 <strong>Rotation + Retirement Log Filed</strong></td><td id="eRS@" class="">Unified audit entry including device ID and reason</td></tr></div><div style="display:contents" dir="ltr"><tr id="1e985df0-1907-8091-a0bc-ec65cc0da3d7"><td id="Avot" class="">🧠 <strong>Consent Ledger Finalized</strong></td><td id="eRS@" class="">All caregiver or program consents attached or sealed</td></tr></div></tbody></table></div><div style="display:contents" dir="auto"><hr id="1e985df0-1907-8046-a393-d67e629212fd"/></div><div style="display:contents" dir="auto"><h2 id="1e985df0-1907-80cc-82dc-f2e444453790" class="">🔐 Data Erasure Protocol</h2></div><div style="display:contents" dir="ltr"><table id="1e985df0-1907-803a-be48-f0247e98179e" class="simple-table"><tbody><div style="display:contents" dir="ltr"><tr id="1e985df0-1907-8056-9692-d12f86fbd0eb"><td id="tEvh" class="">Type</td><td id="h`;H" class="">Action</td></tr></div><div style="display:contents" dir="ltr"><tr id="1e985df0-1907-8023-9f41-f82b731ece5a"><td id="tEvh" class="">Full Memory Layer</td><td id="h`;H" class="">Encrypted overwrite (3-pass or system factory reset)</td></tr></div><div style="display:contents" dir="ltr"><tr id="1e985df0-1907-803e-b086-dc50548dc457"><td id="tEvh" class="">Companion Logs</td><td id="h`;H" class="">Metadata-only logs exported and redacted</td></tr></div><div style="display:contents" dir="ltr"><tr id="1e985df0-1907-8032-8caf-d8503e13d741"><td id="tEvh" class="">Device Storage</td><td id="h`;H" class="">Full wipe or device imaging with blank instance</td></tr></div><div style="display:contents" dir="ltr"><tr id="1e985df0-1907-80f8-b98f-c531fc486d2b"><td id="tEvh" class="">Recovery Block</td><td id="h`;H" class="">Device marked non-redeployable until audit cleared</td></tr></div></tbody></table></div><div style="display:contents" dir="auto"><blockquote id="1e985df0-1907-8098-bf20-ce3932b1f01c" class="">⚠️ All data erasure processes follow GDPR, Law 25, and Nzila Data Sovereignty rules.</blockquote></div><div style="display:contents" dir="auto"><hr id="1e985df0-1907-8080-9802-deb885bdbc1b"/></div><div style="display:contents" dir="auto"><h2 id="1e985df0-1907-80c8-aed6-c85df10d7345" class="">🗃️ Device Retirement Log Format</h2></div><div style="display:contents" dir="ltr"><table id="1e985df0-1907-80ba-a6a7-db4c0a1066da" class="simple-table"><tbody><div style="display:contents" dir="ltr"><tr id="1e985df0-1907-80ca-b6b1-ef237e1b127a"><td id="lRFq" class="">Field</td><td id="dARC" class="">Example</td></tr></div><div style="display:contents" dir="ltr"><tr id="1e985df0-1907-80c3-8110-d7c9379b1958"><td id="lRFq" class="">Device ID</td><td id="dARC" class="">MMR-TAB-09234</td></tr></div><div style="display:contents" dir="ltr"><tr id="1e985df0-1907-80e2-b374-c5b46b36c533"><td id="lRFq" class="">Retirement Type</td><td id="dARC" class="">Recycled / Repurposed / Destroyed</td></tr></div><div style="display:contents" dir="ltr"><tr id="1e985df0-1907-80b1-b115-f55f9e2c2127"><td id="lRFq" class="">Memory State</td><td id="dARC" class="">Wiped / Exported / Archived</td></tr></div><div style="display:contents" dir="ltr"><tr id="1e985df0-1907-8075-bf3e-f4983801c356"><td id="lRFq" class="">Consent Audit Linked</td><td id="dARC" class="">✅ Yes</td></tr></div><div style="display:contents" dir="ltr"><tr id="1e985df0-1907-8094-94b4-d8c33b9387bd"><td id="lRFq" class="">Final Rotation ID</td><td id="dARC" class="">ROT-2025-Q3-041</td></tr></div><div style="display:contents" dir="ltr"><tr id="1e985df0-1907-807d-836e-e4f5d0c1991c"><td id="lRFq" class="">Technician ID</td><td id="dARC" class="">403-Field-NGO</td></tr></div><div style="display:contents" dir="ltr"><tr id="1e985df0-1907-80a9-892b-cca21e5f31c8"><td id="lRFq" class="">Physical Status</td><td id="dARC" class="">Cracked screen, no battery</td></tr></div><div style="display:contents" dir="ltr"><tr id="1e985df0-1907-80f5-85d6-edebc8d1d843"><td id="lRFq" class="">Environmental Plan</td><td id="dARC" class="">Returned to HQ for e-waste handling</td></tr></div></tbody></table></div><div style="display:contents" dir="auto"><hr id="1e985df0-1907-80dd-9f55-c65bf1a16c0f"/></div><div style="display:contents" dir="auto"><h2 id="1e985df0-1907-8032-b3aa-e2121a0e643a" class="">🔄 Retirement Outcomes</h2></div><div style="display:contents" dir="ltr"><table id="1e985df0-1907-808d-884c-f7f226ef06f2" class="simple-table"><tbody><div style="display:contents" dir="ltr"><tr id="1e985df0-1907-80b0-b052-ef11d1fd2c23"><td id="NGOm" class="">Outcome</td><td id="ws[I" class="">Description</td><td id="J[tn" class="">Requirements</td></tr></div><div style="display:contents" dir="ltr"><tr id="1e985df0-1907-8025-9563-fb90f19a30e0"><td id="NGOm" class="">🔁 <strong>Repurposed</strong></td><td id="ws[I" class="">Re-entered into rotation after full audit + imaging</td><td id="J[tn" class="">SOP-005 redeployment prep</td></tr></div><div style="display:contents" dir="ltr"><tr id="1e985df0-1907-805f-bbf5-e85d71c1d4ca"><td id="NGOm" class="">🗑️ <strong>Recycled</strong></td><td id="ws[I" class="">Hardware disassembled or shipped to certified e-waste handler</td><td id="J[tn" class="">Tracked via green compliance log</td></tr></div><div style="display:contents" dir="ltr"><tr id="1e985df0-1907-8056-a8b9-f4e9967d3426"><td id="NGOm" class="">🔥 <strong>Destroyed</strong></td><td id="ws[I" class="">Device physically destroyed (per policy)</td><td id="J[tn" class="">Log entry + photo (if required by regulator)</td></tr></div><div style="display:contents" dir="ltr"><tr id="1e985df0-1907-80ae-82f6-cccd99034836"><td id="NGOm" class="">📦 <strong>Warehouse Hold</strong></td><td id="ws[I" class="">Quarantined until program review or future imaging</td><td id="J[tn" class="">No user data must remain</td></tr></div></tbody></table></div><div style="display:contents" dir="auto"><hr id="1e985df0-1907-80f1-8572-e95193f3565d"/></div><div style="display:contents" dir="auto"><h2 id="1e985df0-1907-80bc-b2b2-d310ea3a7cfa" class="">📦 Physical Handling Guidance</h2></div><div style="display:contents" dir="auto"><ul id="1e985df0-1907-80bb-a184-ff40f87ba2a9" class="bulleted-list"><li style="list-style-type:disc">All devices must be tagged with <strong>retirement QR</strong> or <strong>serial-coded sticker</strong></li></ul></div><div style="display:contents" dir="auto"><ul id="1e985df0-1907-8049-a094-c66b75b15f70" class="bulleted-list"><li style="list-style-type:disc">Use tamper-evident bags for high-risk or trauma-linked device returns</li></ul></div><div style="display:contents" dir="auto"><ul id="1e985df0-1907-80ec-aa04-d89773c24982" class="bulleted-list"><li style="list-style-type:disc">Field kits must include <strong>Decommission Request Form</strong> with caregiver signature if applicable</li></ul></div><div style="display:contents" dir="auto"><ul id="1e985df0-1907-80d9-a5a8-ea43e6404e6e" class="bulleted-list"><li style="list-style-type:disc">Devices held over 30 days post-offboarding must be reviewed for auto-wipe trigger</li></ul></div><div style="display:contents" dir="auto"><hr id="1e985df0-1907-8093-9710-fb6b3f09b34f"/></div><div style="display:contents" dir="auto"><h2 id="1e985df0-1907-8020-a63a-c9c8a9f0bfbb" class="">📘 Tools &amp; Templates</h2></div><div style="display:contents" dir="auto"><ul id="1e985df0-1907-80d9-a8cb-fa1d45c9878e" class="to-do-list"><li><div class="checkbox checkbox-off"></div> <span class="to-do-children-unchecked">📝 Device Retirement Log Template (CSV + offline form)</span><div class="indented"></div></li></ul></div><div style="display:contents" dir="auto"><ul id="1e985df0-1907-8085-906f-fc781315a874" class="to-do-list"><li><div class="checkbox checkbox-off"></div> <span class="to-do-children-unchecked">🧹 Full Memory Wipe Instruction Set (OS-specific)</span><div class="indented"></div></li></ul></div><div style="display:contents" dir="auto"><ul id="1e985df0-1907-80d8-9671-c0cac5c9cc2e" class="to-do-list"><li><div class="checkbox checkbox-off"></div> <span class="to-do-children-unchecked">📦 Decommission Tag Sheet (QR or serial)</span><div class="indented"></div></li></ul></div><div style="display:contents" dir="auto"><ul id="1e985df0-1907-8031-aa79-d9bdfe64a457" class="to-do-list"><li><div class="checkbox checkbox-off"></div> <span class="to-do-children-unchecked">♻️ Green Disposal Tracker (for NGO reporting)</span><div class="indented"></div></li></ul></div><div style="display:contents" dir="auto"><ul id="1e985df0-1907-80a3-b1a5-e7ae56b3fbae" class="to-do-list"><li><div class="checkbox checkbox-off"></div> <span class="to-do-children-unchecked">🧠 Final Consent Ledger Export Sheet</span><div class="indented"></div></li></ul></div><div style="display:contents" dir="auto"><ul id="1e985df0-1907-8003-a3b5-e9ffce85821c" class="to-do-list"><li><div class="checkbox checkbox-off"></div> <span class="to-do-children-unchecked">🔐 Imaging Checklist (for future reuse)</span><div class="indented"></div></li></ul></div><div style="display:contents" dir="auto"><ul id="1e985df0-1907-8019-aa6a-c1af8c46f550" class="to-do-list"><li><div class="checkbox checkbox-off"></div> <span class="to-do-children-unchecked">📄 Certificate of Erasure &amp; Decommission (optional)</span><div class="indented"></div></li></ul></div><div style="display:contents" dir="auto"><hr id="1e985df0-1907-80fc-a738-db222405ddeb"/></div><div style="display:contents" dir="auto"><h2 id="1e985df0-1907-8086-8fd5-cfc38dde149d" class="">✅ Compliance Summary</h2></div><div style="display:contents" dir="ltr"><table id="1e985df0-1907-80fc-91ae-edd3e0e6a833" class="simple-table"><tbody><div style="display:contents" dir="ltr"><tr id="1e985df0-1907-80ee-b34a-ff392b591648"><td id="MkvL" class="">Practice</td><td id="gAru" class="">Status</td></tr></div><div style="display:contents" dir="ltr"><tr id="1e985df0-1907-80f7-8ab6-f6a66917770b"><td id="MkvL" class="">User data fully removed or archived prior to decommission</td><td id="gAru" class="">✅</td></tr></div><div style="display:contents" dir="ltr"><tr id="1e985df0-1907-8070-8517-e98045a14191"><td id="MkvL" class="">Device marked non-redeployable until audit complete</td><td id="gAru" class="">✅</td></tr></div><div style="display:contents" dir="ltr"><tr id="1e985df0-1907-8024-8415-d59e24bfaacd"><td id="MkvL" class="">Physical handling documented with retirement ID</td><td id="gAru" class="">✅</td></tr></div><div style="display:contents" dir="ltr"><tr id="1e985df0-1907-8025-810d-d3b393fcb318"><td id="MkvL" class="">Environmental compliance tracked if recycled</td><td id="gAru" class="">✅</td></tr></div><div style="display:contents" dir="ltr"><tr id="1e985df0-1907-80f7-9fc3-cf1b670de30c"><td id="MkvL" class="">NGOs able to print field retirement packets offline</td><td id="gAru" class="">✅</td></tr></div></tbody></table></div><div style="display:contents" dir="auto"><hr id="1e985df0-1907-8044-828e-fade0e60e0cb"/></div><div style="display:contents" dir="auto"><h2 id="1e985df0-1907-8092-acf1-f1f5a111c045" class="">🧭 Governance Ties</h2></div><div style="display:contents" dir="auto"><ul id="1e985df0-1907-8020-97af-df8a42f30deb" class="bulleted-list"><li style="list-style-type:disc">🧾 Memory Erasure Tracker</li></ul></div><div style="display:contents" dir="auto"><ul id="1e985df0-1907-802e-995c-cc6f59be2e8c" class="bulleted-list"><li style="list-style-type:disc">📦 Post-Rotation Data SOP</li></ul></div><div style="display:contents" dir="auto"><ul id="1e985df0-1907-809e-a493-e00743ae62fa" class="bulleted-list"><li style="list-style-type:disc">🔐 Data Sovereignty Architecture</li></ul></div><div style="display:contents" dir="auto"><ul id="1e985df0-1907-80dd-aaa3-d7bfd3f58a6b" class="bulleted-list"><li style="list-style-type:disc">🧰 Device Imaging &amp; Configuration SOP</li></ul></div><div style="display:contents" dir="auto"><ul id="1e985df0-1907-8089-8c00-dd43cb6289ea" class="bulleted-list"><li style="list-style-type:disc">🔧 Companion Redeployment SOP (if repurposed)</li></ul></div></div></article><span class="sans" style="font-size:14px;padding-top:2em"></span></body></html>

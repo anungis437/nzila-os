@@ -1,0 +1,713 @@
+<html><head><meta http-equiv="Content-Type" content="text/html; charset=utf-8"/><title>🌍 Legacy &amp; Impact Statement</title><style>
+/* cspell:disable-file */
+/* webkit printing magic: print all background colors */
+html {
+	-webkit-print-color-adjust: exact;
+}
+* {
+	box-sizing: border-box;
+	-webkit-print-color-adjust: exact;
+}
+
+html,
+body {
+	margin: 0;
+	padding: 0;
+}
+@media only screen {
+	body {
+		margin: 2em auto;
+		max-width: 900px;
+		color: rgb(55, 53, 47);
+	}
+}
+
+body {
+	line-height: 1.5;
+	white-space: pre-wrap;
+}
+
+a,
+a.visited {
+	color: inherit;
+	text-decoration: underline;
+}
+
+.pdf-relative-link-path {
+	font-size: 80%;
+	color: #444;
+}
+
+h1,
+h2,
+h3 {
+	letter-spacing: -0.01em;
+	line-height: 1.2;
+	font-weight: 600;
+	margin-bottom: 0;
+}
+
+/* Override strong tags inside headings to maintain consistent weight */
+h1 strong,
+h2 strong,
+h3 strong {
+	font-weight: 600;
+}
+
+.page-title {
+	font-size: 2.5rem;
+	font-weight: 700;
+	margin-top: 0;
+	margin-bottom: 0.75em;
+}
+
+h1 {
+	font-size: 1.875rem;
+	margin-top: 1.875rem;
+}
+
+h2 {
+	font-size: 1.5rem;
+	margin-top: 1.5rem;
+}
+
+h3 {
+	font-size: 1.25rem;
+	margin-top: 1.25rem;
+}
+
+.source {
+	border: 1px solid #ddd;
+	border-radius: 3px;
+	padding: 1.5em;
+	word-break: break-all;
+}
+
+.callout {
+	border-radius: 10px;
+	padding: 1rem;
+}
+
+figure {
+	margin: 1.25em 0;
+	page-break-inside: avoid;
+}
+
+figcaption {
+	opacity: 0.5;
+	font-size: 85%;
+	margin-top: 0.5em;
+}
+
+mark {
+	background-color: transparent;
+}
+
+.indented {
+	padding-left: 1.5em;
+}
+
+hr {
+	background: transparent;
+	display: block;
+	width: 100%;
+	height: 1px;
+	visibility: visible;
+	border: none;
+	border-bottom: 1px solid rgba(55, 53, 47, 0.09);
+}
+
+img {
+	max-width: 100%;
+}
+
+@media only print {
+	img {
+		max-height: 100vh;
+		object-fit: contain;
+	}
+}
+
+@page {
+	margin: 1in;
+}
+
+.collection-content {
+	font-size: 0.875rem;
+}
+
+.collection-content td {
+	white-space: pre-wrap;
+	word-break: break-word;
+}
+
+.column-list {
+	display: flex;
+	justify-content: space-between;
+}
+
+.column {
+	padding: 0 1em;
+}
+
+.column:first-child {
+	padding-left: 0;
+}
+
+.column:last-child {
+	padding-right: 0;
+}
+
+.table_of_contents-item {
+	display: block;
+	font-size: 0.875rem;
+	line-height: 1.3;
+	padding: 0.125rem;
+}
+
+.table_of_contents-indent-1 {
+	margin-left: 1.5rem;
+}
+
+.table_of_contents-indent-2 {
+	margin-left: 3rem;
+}
+
+.table_of_contents-indent-3 {
+	margin-left: 4.5rem;
+}
+
+.table_of_contents-link {
+	text-decoration: none;
+	opacity: 0.7;
+	border-bottom: 1px solid rgba(55, 53, 47, 0.18);
+}
+
+table,
+th,
+td {
+	border: 1px solid rgba(55, 53, 47, 0.09);
+	border-collapse: collapse;
+}
+
+table {
+	border-left: none;
+	border-right: none;
+}
+
+th,
+td {
+	font-weight: normal;
+	padding: 0.25em 0.5em;
+	line-height: 1.5;
+	min-height: 1.5em;
+	text-align: left;
+}
+
+th {
+	color: rgba(55, 53, 47, 0.6);
+}
+
+ol,
+ul {
+	margin: 0;
+	margin-block-start: 0.6em;
+	margin-block-end: 0.6em;
+}
+
+li > ol:first-child,
+li > ul:first-child {
+	margin-block-start: 0.6em;
+}
+
+ul > li {
+	list-style: disc;
+}
+
+ul.to-do-list {
+	padding-inline-start: 0;
+}
+
+ul.to-do-list > li {
+	list-style: none;
+}
+
+.to-do-children-checked {
+	text-decoration: line-through;
+	opacity: 0.375;
+}
+
+ul.toggle > li {
+	list-style: none;
+}
+
+ul {
+	padding-inline-start: 1.7em;
+}
+
+ul > li {
+	padding-left: 0.1em;
+}
+
+ol {
+	padding-inline-start: 1.6em;
+}
+
+ol > li {
+	padding-left: 0.2em;
+}
+
+.mono ol {
+	padding-inline-start: 2em;
+}
+
+.mono ol > li {
+	text-indent: -0.4em;
+}
+
+.toggle {
+	padding-inline-start: 0em;
+	list-style-type: none;
+}
+
+/* Indent toggle children */
+.toggle > li > details {
+	padding-left: 1.7em;
+}
+
+.toggle > li > details > summary {
+	margin-left: -1.1em;
+}
+
+.selected-value {
+	display: inline-block;
+	padding: 0 0.5em;
+	background: rgba(206, 205, 202, 0.5);
+	border-radius: 3px;
+	margin-right: 0.5em;
+	margin-top: 0.3em;
+	margin-bottom: 0.3em;
+	white-space: nowrap;
+}
+
+.collection-title {
+	display: inline-block;
+	margin-right: 1em;
+}
+
+.page-description {
+	margin-bottom: 2em;
+}
+
+.simple-table {
+	margin-top: 1em;
+	font-size: 0.875rem;
+	empty-cells: show;
+}
+.simple-table td {
+	height: 29px;
+	min-width: 120px;
+}
+
+.simple-table th {
+	height: 29px;
+	min-width: 120px;
+}
+
+.simple-table-header-color {
+	background: rgb(247, 246, 243);
+	color: black;
+}
+.simple-table-header {
+	font-weight: 500;
+}
+
+time {
+	opacity: 0.5;
+}
+
+.icon {
+	display: inline-flex;
+	align-items: center;
+	justify-content: center;
+	max-width: 1.2em;
+	max-height: 1.2em;
+	text-decoration: none;
+	vertical-align: text-bottom;
+	margin-right: 0.5em;
+}
+
+img.icon {
+	border-radius: 3px;
+}
+
+.callout img.notion-static-icon {
+	width: 1em;
+	height: 1em;
+}
+
+.callout p {
+	margin: 0;
+}
+
+.callout h1,
+.callout h2,
+.callout h3 {
+	margin: 0 0 0.6rem;
+}
+
+.user-icon {
+	width: 1.5em;
+	height: 1.5em;
+	border-radius: 100%;
+	margin-right: 0.5rem;
+}
+
+.user-icon-inner {
+	font-size: 0.8em;
+}
+
+.text-icon {
+	border: 1px solid #000;
+	text-align: center;
+}
+
+.page-cover-image {
+	display: block;
+	object-fit: cover;
+	width: 100%;
+	max-height: 30vh;
+}
+
+.page-header-icon {
+	font-size: 3rem;
+	margin-bottom: 1rem;
+}
+
+.page-header-icon-with-cover {
+	margin-top: -0.72em;
+	margin-left: 0.07em;
+}
+
+.page-header-icon img {
+	border-radius: 3px;
+}
+
+.link-to-page {
+	margin: 1em 0;
+	padding: 0;
+	border: none;
+	font-weight: 500;
+}
+
+p > .user {
+	opacity: 0.5;
+}
+
+td > .user,
+td > time {
+	white-space: nowrap;
+}
+
+input[type="checkbox"] {
+	transform: scale(1.5);
+	margin-right: 0.6em;
+	vertical-align: middle;
+}
+
+p {
+	margin-top: 0.5em;
+	margin-bottom: 0.5em;
+}
+
+.image {
+	border: none;
+	margin: 1.5em 0;
+	padding: 0;
+	border-radius: 0;
+	text-align: center;
+}
+
+.code,
+code {
+	background: rgba(135, 131, 120, 0.15);
+	border-radius: 3px;
+	padding: 0.2em 0.4em;
+	border-radius: 3px;
+	font-size: 85%;
+	tab-size: 2;
+}
+
+code {
+	color: #eb5757;
+}
+
+.code {
+	padding: 1.5em 1em;
+}
+
+.code-wrap {
+	white-space: pre-wrap;
+	word-break: break-all;
+}
+
+.code > code {
+	background: none;
+	padding: 0;
+	font-size: 100%;
+	color: inherit;
+}
+
+blockquote {
+	font-size: 1em;
+	margin: 1em 0;
+	padding-left: 1em;
+	border-left: 3px solid rgb(55, 53, 47);
+}
+
+blockquote.quote-large {
+	font-size: 1.25em;
+}
+
+.bookmark {
+	text-decoration: none;
+	max-height: 8em;
+	padding: 0;
+	display: flex;
+	width: 100%;
+	align-items: stretch;
+}
+
+.bookmark-title {
+	font-size: 0.85em;
+	overflow: hidden;
+	text-overflow: ellipsis;
+	height: 1.75em;
+	white-space: nowrap;
+}
+
+.bookmark-text {
+	display: flex;
+	flex-direction: column;
+}
+
+.bookmark-info {
+	flex: 4 1 180px;
+	padding: 12px 14px 14px;
+	display: flex;
+	flex-direction: column;
+	justify-content: space-between;
+}
+
+.bookmark-image {
+	width: 33%;
+	flex: 1 1 180px;
+	display: block;
+	position: relative;
+	object-fit: cover;
+	border-radius: 1px;
+}
+
+.bookmark-description {
+	color: rgba(55, 53, 47, 0.6);
+	font-size: 0.75em;
+	overflow: hidden;
+	max-height: 4.5em;
+	word-break: break-word;
+}
+
+.bookmark-href {
+	font-size: 0.75em;
+	margin-top: 0.25em;
+}
+
+.sans { font-family: ui-sans-serif, -apple-system, BlinkMacSystemFont, "Segoe UI Variable Display", "Segoe UI", Helvetica, "Apple Color Emoji", "Noto Sans Arabic", "Noto Sans Hebrew", Arial, sans-serif, "Segoe UI Emoji", "Segoe UI Symbol"; }
+.code { font-family: "SFMono-Regular", Menlo, Consolas, "PT Mono", "Liberation Mono", Courier, monospace; }
+.serif { font-family: Lyon-Text, Georgia, ui-serif, serif; }
+.mono { font-family: iawriter-mono, Nitti, Menlo, Courier, monospace; }
+.pdf .sans { font-family: Inter, ui-sans-serif, -apple-system, BlinkMacSystemFont, "Segoe UI Variable Display", "Segoe UI", Helvetica, "Apple Color Emoji", "Noto Sans Arabic", "Noto Sans Hebrew", Arial, sans-serif, "Segoe UI Emoji", "Segoe UI Symbol", 'Twemoji', 'Noto Color Emoji', 'Noto Sans CJK JP'; }
+.pdf:lang(zh-CN) .sans { font-family: Inter, ui-sans-serif, -apple-system, BlinkMacSystemFont, "Segoe UI Variable Display", "Segoe UI", Helvetica, "Apple Color Emoji", "Noto Sans Arabic", "Noto Sans Hebrew", Arial, sans-serif, "Segoe UI Emoji", "Segoe UI Symbol", 'Twemoji', 'Noto Color Emoji', 'Noto Sans CJK SC'; }
+.pdf:lang(zh-TW) .sans { font-family: Inter, ui-sans-serif, -apple-system, BlinkMacSystemFont, "Segoe UI Variable Display", "Segoe UI", Helvetica, "Apple Color Emoji", "Noto Sans Arabic", "Noto Sans Hebrew", Arial, sans-serif, "Segoe UI Emoji", "Segoe UI Symbol", 'Twemoji', 'Noto Color Emoji', 'Noto Sans CJK TC'; }
+.pdf:lang(ko-KR) .sans { font-family: Inter, ui-sans-serif, -apple-system, BlinkMacSystemFont, "Segoe UI Variable Display", "Segoe UI", Helvetica, "Apple Color Emoji", "Noto Sans Arabic", "Noto Sans Hebrew", Arial, sans-serif, "Segoe UI Emoji", "Segoe UI Symbol", 'Twemoji', 'Noto Color Emoji', 'Noto Sans CJK KR'; }
+.pdf .code { font-family: Source Code Pro, "SFMono-Regular", Menlo, Consolas, "PT Mono", "Liberation Mono", Courier, monospace, 'Twemoji', 'Noto Color Emoji', 'Noto Sans Mono CJK JP'; }
+.pdf:lang(zh-CN) .code { font-family: Source Code Pro, "SFMono-Regular", Menlo, Consolas, "PT Mono", "Liberation Mono", Courier, monospace, 'Twemoji', 'Noto Color Emoji', 'Noto Sans Mono CJK SC'; }
+.pdf:lang(zh-TW) .code { font-family: Source Code Pro, "SFMono-Regular", Menlo, Consolas, "PT Mono", "Liberation Mono", Courier, monospace, 'Twemoji', 'Noto Color Emoji', 'Noto Sans Mono CJK TC'; }
+.pdf:lang(ko-KR) .code { font-family: Source Code Pro, "SFMono-Regular", Menlo, Consolas, "PT Mono", "Liberation Mono", Courier, monospace, 'Twemoji', 'Noto Color Emoji', 'Noto Sans Mono CJK KR'; }
+.pdf .serif { font-family: PT Serif, Lyon-Text, Georgia, ui-serif, serif, 'Twemoji', 'Noto Color Emoji', 'Noto Serif CJK JP'; }
+.pdf:lang(zh-CN) .serif { font-family: PT Serif, Lyon-Text, Georgia, ui-serif, serif, 'Twemoji', 'Noto Color Emoji', 'Noto Serif CJK SC'; }
+.pdf:lang(zh-TW) .serif { font-family: PT Serif, Lyon-Text, Georgia, ui-serif, serif, 'Twemoji', 'Noto Color Emoji', 'Noto Serif CJK TC'; }
+.pdf:lang(ko-KR) .serif { font-family: PT Serif, Lyon-Text, Georgia, ui-serif, serif, 'Twemoji', 'Noto Color Emoji', 'Noto Serif CJK KR'; }
+.pdf .mono { font-family: PT Mono, iawriter-mono, Nitti, Menlo, Courier, monospace, 'Twemoji', 'Noto Color Emoji', 'Noto Sans Mono CJK JP'; }
+.pdf:lang(zh-CN) .mono { font-family: PT Mono, iawriter-mono, Nitti, Menlo, Courier, monospace, 'Twemoji', 'Noto Color Emoji', 'Noto Sans Mono CJK SC'; }
+.pdf:lang(zh-TW) .mono { font-family: PT Mono, iawriter-mono, Nitti, Menlo, Courier, monospace, 'Twemoji', 'Noto Color Emoji', 'Noto Sans Mono CJK TC'; }
+.pdf:lang(ko-KR) .mono { font-family: PT Mono, iawriter-mono, Nitti, Menlo, Courier, monospace, 'Twemoji', 'Noto Color Emoji', 'Noto Sans Mono CJK KR'; }
+.highlight-default {
+	color: rgba(44, 44, 43, 1);
+}
+.highlight-gray {
+	color: rgba(125, 122, 117, 1);
+	fill: rgba(125, 122, 117, 1);
+}
+.highlight-brown {
+	color: rgba(159, 118, 90, 1);
+	fill: rgba(159, 118, 90, 1);
+}
+.highlight-orange {
+	color: rgba(210, 123, 45, 1);
+	fill: rgba(210, 123, 45, 1);
+}
+.highlight-yellow {
+	color: rgba(203, 148, 52, 1);
+	fill: rgba(203, 148, 52, 1);
+}
+.highlight-teal {
+	color: rgba(80, 148, 110, 1);
+	fill: rgba(80, 148, 110, 1);
+}
+.highlight-blue {
+	color: rgba(56, 125, 201, 1);
+	fill: rgba(56, 125, 201, 1);
+}
+.highlight-purple {
+	color: rgba(154, 107, 180, 1);
+	fill: rgba(154, 107, 180, 1);
+}
+.highlight-pink {
+	color: rgba(193, 76, 138, 1);
+	fill: rgba(193, 76, 138, 1);
+}
+.highlight-red {
+	color: rgba(207, 81, 72, 1);
+	fill: rgba(207, 81, 72, 1);
+}
+.highlight-default_background {
+	color: rgba(44, 44, 43, 1);
+}
+.highlight-gray_background {
+	background: rgba(42, 28, 0, 0.07);
+}
+.highlight-brown_background {
+	background: rgba(139, 46, 0, 0.086);
+}
+.highlight-orange_background {
+	background: rgba(224, 101, 1, 0.129);
+}
+.highlight-yellow_background {
+	background: rgba(211, 168, 0, 0.137);
+}
+.highlight-teal_background {
+	background: rgba(0, 100, 45, 0.09);
+}
+.highlight-blue_background {
+	background: rgba(0, 124, 215, 0.094);
+}
+.highlight-purple_background {
+	background: rgba(102, 0, 178, 0.078);
+}
+.highlight-pink_background {
+	background: rgba(197, 0, 93, 0.086);
+}
+.highlight-red_background {
+	background: rgba(223, 22, 0, 0.094);
+}
+.block-color-default {
+	color: inherit;
+	fill: inherit;
+}
+.block-color-gray {
+	color: rgba(125, 122, 117, 1);
+	fill: rgba(125, 122, 117, 1);
+}
+.block-color-brown {
+	color: rgba(159, 118, 90, 1);
+	fill: rgba(159, 118, 90, 1);
+}
+.block-color-orange {
+	color: rgba(210, 123, 45, 1);
+	fill: rgba(210, 123, 45, 1);
+}
+.block-color-yellow {
+	color: rgba(203, 148, 52, 1);
+	fill: rgba(203, 148, 52, 1);
+}
+.block-color-teal {
+	color: rgba(80, 148, 110, 1);
+	fill: rgba(80, 148, 110, 1);
+}
+.block-color-blue {
+	color: rgba(56, 125, 201, 1);
+	fill: rgba(56, 125, 201, 1);
+}
+.block-color-purple {
+	color: rgba(154, 107, 180, 1);
+	fill: rgba(154, 107, 180, 1);
+}
+.block-color-pink {
+	color: rgba(193, 76, 138, 1);
+	fill: rgba(193, 76, 138, 1);
+}
+.block-color-red {
+	color: rgba(207, 81, 72, 1);
+	fill: rgba(207, 81, 72, 1);
+}
+.block-color-default_background {
+	color: inherit;
+	fill: inherit;
+}
+.block-color-gray_background {
+	background: rgba(240, 239, 237, 1);
+}
+.block-color-brown_background {
+	background: rgba(245, 237, 233, 1);
+}
+.block-color-orange_background {
+	background: rgba(251, 235, 222, 1);
+}
+.block-color-yellow_background {
+	background: rgba(249, 243, 220, 1);
+}
+.block-color-teal_background {
+	background: rgba(232, 241, 236, 1);
+}
+.block-color-blue_background {
+	background: rgba(229, 242, 252, 1);
+}
+.block-color-purple_background {
+	background: rgba(243, 235, 249, 1);
+}
+.block-color-pink_background {
+	background: rgba(250, 233, 241, 1);
+}
+.block-color-red_background {
+	background: rgba(252, 233, 231, 1);
+}
+.select-value-color-default { background-color: rgba(42, 28, 0, 0.07); }
+.select-value-color-gray { background-color: rgba(28, 19, 1, 0.11); }
+.select-value-color-brown { background-color: rgba(127, 51, 0, 0.156); }
+.select-value-color-orange { background-color: rgba(196, 88, 0, 0.203); }
+.select-value-color-yellow { background-color: rgba(209, 156, 0, 0.282); }
+.select-value-color-green { background-color: rgba(0, 96, 38, 0.156); }
+.select-value-color-blue { background-color: rgba(0, 118, 217, 0.203); }
+.select-value-color-purple { background-color: rgba(92, 0, 163, 0.141); }
+.select-value-color-pink { background-color: rgba(183, 0, 78, 0.152); }
+.select-value-color-red { background-color: rgba(206, 24, 0, 0.164); }
+
+.checkbox {
+	display: inline-flex;
+	vertical-align: text-bottom;
+	width: 16;
+	height: 16;
+	background-size: 16px;
+	margin-left: 2px;
+	margin-right: 5px;
+}
+
+.checkbox-on {
+	background-image: url("data:image/svg+xml;charset=UTF-8,%3Csvg%20width%3D%2216%22%20height%3D%2216%22%20viewBox%3D%220%200%2016%2016%22%20fill%3D%22none%22%20xmlns%3D%22http%3A%2F%2Fwww.w3.org%2F2000%2Fsvg%22%3E%0A%3Crect%20width%3D%2216%22%20height%3D%2216%22%20fill%3D%22%2358A9D7%22%2F%3E%0A%3Cpath%20d%3D%22M6.71429%2012.2852L14%204.9995L12.7143%203.71436L6.71429%209.71378L3.28571%206.2831L2%207.57092L6.71429%2012.2852Z%22%20fill%3D%22white%22%2F%3E%0A%3C%2Fsvg%3E");
+}
+
+.checkbox-off {
+	background-image: url("data:image/svg+xml;charset=UTF-8,%3Csvg%20width%3D%2216%22%20height%3D%2216%22%20viewBox%3D%220%200%2016%2016%22%20fill%3D%22none%22%20xmlns%3D%22http%3A%2F%2Fwww.w3.org%2F2000%2Fsvg%22%3E%0A%3Crect%20x%3D%220.75%22%20y%3D%220.75%22%20width%3D%2214.5%22%20height%3D%2214.5%22%20fill%3D%22white%22%20stroke%3D%22%2336352F%22%20stroke-width%3D%221.5%22%2F%3E%0A%3C%2Fsvg%3E");
+}
+	
+</style></head><body><article id="1e585df0-1907-80e4-b765-e2238cf14e36" class="page sans"><header><h1 class="page-title" dir="auto">🌍 <strong>Legacy &amp; Impact Statement</strong></h1><p class="page-description" dir="auto"></p><table class="properties"><tbody><tr class="property-row property-row-person"><th><span class="icon property-icon"><img src="https://www.notion.so/icons/friends_gray.svg" style="width:14px;height:14px;display:block"/></span>Owner</th><td><span class="user"><span class="icon text-icon user-icon"><span class="user-icon-inner">A</span></span>Aubert</span></td></tr><tr class="property-row property-row-multi_select"><th><span class="icon property-icon"><img src="https://www.notion.so/icons/list_gray.svg" style="width:14px;height:14px;display:block"/></span>Tags</th><td></td></tr></tbody></table></header><div class="page-body"><div style="display:contents" dir="auto"><h3 id="1e885df0-1907-8057-ae19-ee9cf6759de4" class="">1. 🎯 Purpose</h3></div><div style="display:contents" dir="auto"><p id="1e885df0-1907-805a-8dfc-fbc3c2d14f9c" class="">Nzila Ventures exists to <strong>redesign the intersection of care, cognition, and technology</strong> — not to disrupt, but to repair and uplift.</p></div><div style="display:contents" dir="auto"><p id="1e885df0-1907-801a-8e12-c33340051fb8" class="">Our tools are not products; they are <strong>invitations to trust</strong>. This statement serves as a lasting compass: a reminder that every code commit, product release, and policy update must bring us closer to a world where <strong>care is dignified</strong>, <strong>AI is human-centered</strong>, and <strong>equity is built-in, not bolted on</strong>.</p></div><div style="display:contents" dir="auto"><hr id="1e885df0-1907-800b-97f6-d130a4bd38f3"/></div><div style="display:contents" dir="auto"><h3 id="1e885df0-1907-80d3-a5fb-f729ffc0a735" class="">2. 🌄 Legacy Vision</h3></div><div style="display:contents" dir="auto"><p id="1e885df0-1907-803c-81fc-cec4da499f20" class="">Nzila will be remembered as:</p></div><div style="display:contents" dir="auto"><ul id="1e885df0-1907-80bd-a76c-e16bb39450ed" class="bulleted-list"><li style="list-style-type:disc">A venture studio that <strong>championed caregivers</strong>, <strong>co-designed with clinics</strong>, and <strong>respected the intelligence of its users</strong></li></ul></div><div style="display:contents" dir="auto"><ul id="1e885df0-1907-80cb-b739-e2173f88b5b3" class="bulleted-list"><li style="list-style-type:disc">A <strong>Black-founded</strong>, ethics-led force that proved AI can scale without violating people</li></ul></div><div style="display:contents" dir="auto"><ul id="1e885df0-1907-80e8-b916-e2c119eb5dd2" class="bulleted-list"><li style="list-style-type:disc">A builder of <strong>Companion-powered systems</strong> that didn’t chase hype cycles — but engineered hope</li></ul></div><div style="display:contents" dir="auto"><ul id="1e885df0-1907-807f-a907-e033dd5bf231" class="bulleted-list"><li style="list-style-type:disc">A portfolio that <strong>grew responsibly</strong>, licensed thoughtfully, and <strong>shared wins with its community</strong></li></ul></div><div style="display:contents" dir="auto"><ul id="1e885df0-1907-800d-b239-db261439ff2e" class="bulleted-list"><li style="list-style-type:disc">A cultural home where technologists, caregivers, and researchers <strong>built together with purpose</strong></li></ul></div><div style="display:contents" dir="auto"><ul id="1e885df0-1907-80b5-9294-f08fb7902649" class="bulleted-list"><li style="list-style-type:disc">A pioneer in creating <strong>safe, explainable AI for the public good</strong></li></ul></div><div style="display:contents" dir="auto"><hr id="1e885df0-1907-80ad-a7da-fde6e3d5ada6"/></div><div style="display:contents" dir="auto"><h3 id="1e885df0-1907-80bb-9a05-cbb765c4027b" class="">3. 🤝 Impact Commitments by Stakeholder</h3></div><div style="display:contents" dir="ltr"><table id="1e885df0-1907-80c4-bf64-ce77f2b62662" class="simple-table"><tbody><div style="display:contents" dir="ltr"><tr id="1e885df0-1907-8019-bb0e-d4466fc3ec2c"><td id="htMN" class="">Stakeholder</td><td id="q&gt;Cg" class="">Nzila’s Promise</td></tr></div><div style="display:contents" dir="ltr"><tr id="1e885df0-1907-8004-a1c3-cbe8d8f9738a"><td id="htMN" class=""><strong>Caregivers</strong></td><td id="q&gt;Cg" class="">Reduce stress, offer emotional support tools, and honor unpaid labor with empathy-first UX</td></tr></div><div style="display:contents" dir="ltr"><tr id="1e885df0-1907-800b-bc99-d51da90c5cab"><td id="htMN" class=""><strong>Patients &amp; Families</strong></td><td id="q&gt;Cg" class="">Protect autonomy, invite engagement, and simplify routines with compassion</td></tr></div><div style="display:contents" dir="ltr"><tr id="1e885df0-1907-8046-af2b-da4c4fa6be6d"><td id="htMN" class=""><strong>Clinics &amp; Researchers</strong></td><td id="q&gt;Cg" class="">Co-develop non-disruptive interfaces and unlock new insight pipelines with minimal lift</td></tr></div><div style="display:contents" dir="ltr"><tr id="1e885df0-1907-8094-9adb-ea90789d2d7d"><td id="htMN" class=""><strong>Communities</strong></td><td id="q&gt;Cg" class="">Build for underserved regions and identities, including linguistic and digital accessibility</td></tr></div><div style="display:contents" dir="ltr"><tr id="1e885df0-1907-801f-8228-d2fa47e07063"><td id="htMN" class=""><strong>Employees &amp; Contributors</strong></td><td id="q&gt;Cg" class="">Prioritize psychological safety, creative ownership, and equitable leadership pathways</td></tr></div><div style="display:contents" dir="ltr"><tr id="1e885df0-1907-802f-8fba-f316ea3d3b0b"><td id="htMN" class=""><strong>Regulators</strong></td><td id="q&gt;Cg" class="">Be early movers in privacy, AI auditability, and inclusive design frameworks</td></tr></div><div style="display:contents" dir="ltr"><tr id="1e885df0-1907-807c-8e85-fb64efcbca56"><td id="htMN" class=""><strong>Investors &amp; Funders</strong></td><td id="q&gt;Cg" class="">Return value without ethical compromise; share impact as core ROI</td></tr></div></tbody></table></div><div style="display:contents" dir="auto"><hr id="1e885df0-1907-80f9-9c94-e0994e8919f2"/></div><div style="display:contents" dir="auto"><h3 id="1e885df0-1907-809a-b50c-fafe850e20e8" class="">4. 💠 Strategic Impact Areas</h3></div><div style="display:contents" dir="auto"><p id="1e885df0-1907-8084-83a7-faf064979373" class="">Nzila allocates attention and innovation toward five systemic outcomes:</p></div><div style="display:contents" dir="ltr"><table id="1e885df0-1907-800a-ae6a-f3d5692772fe" class="simple-table"><tbody><div style="display:contents" dir="ltr"><tr id="1e885df0-1907-8006-9fa4-d67693ba05eb"><td id="Zz?[" class="">Domain</td><td id="uq}[" class="">What We Build</td></tr></div><div style="display:contents" dir="ltr"><tr id="1e885df0-1907-80f3-9ee5-e20a0993ee93"><td id="Zz?[" class=""><strong>Cognitive Wellness</strong></td><td id="uq}[" class="">Daily nudges, games, and Companion cues to preserve cognitive vitality</td></tr></div><div style="display:contents" dir="ltr"><tr id="1e885df0-1907-80c6-b699-dc5be974ca6d"><td id="Zz?[" class=""><strong>Caregiver Enablement</strong></td><td id="uq}[" class="">Feedback loops, encouragement templates, and role-respecting features</td></tr></div><div style="display:contents" dir="ltr"><tr id="1e885df0-1907-80c9-8199-d62086a6368b"><td id="Zz?[" class=""><strong>Data Ethics &amp; Privacy</strong></td><td id="uq}[" class="">Consent-first AI, optional tracking, and privacy-guardrails by default</td></tr></div><div style="display:contents" dir="ltr"><tr id="1e885df0-1907-8000-9b02-fb06413144f6"><td id="Zz?[" class=""><strong>Clinical Infrastructure</strong></td><td id="uq}[" class="">Seamless dashboards, memory reports, and protocol automation tools</td></tr></div><div style="display:contents" dir="ltr"><tr id="1e885df0-1907-80b8-b3bd-fbde01df4f74"><td id="Zz?[" class=""><strong>Digital Equity</strong></td><td id="uq}[" class="">EN/FR parity, mobile-first UX, and accessibility for aging and low-literacy users</td></tr></div></tbody></table></div><div style="display:contents" dir="auto"><hr id="1e885df0-1907-80b7-8d21-c0a19159e653"/></div><div style="display:contents" dir="auto"><h3 id="1e885df0-1907-800c-baa1-c607e5215170" class="">5. 🔁 Long-Term Ecosystem Intentions</h3></div><div style="display:contents" dir="auto"><p id="1e885df0-1907-80e9-9328-cb8e12b4bb6e" class="">Nzila will reinvest its influence and assets through:</p></div><div style="display:contents" dir="auto"><ul id="1e885df0-1907-8087-97db-d996722279ef" class="bulleted-list"><li style="list-style-type:disc">A <strong>Caregiver Innovation Microgrant Fund</strong> (by 2027) — for community-built ideas</li></ul></div><div style="display:contents" dir="auto"><ul id="1e885df0-1907-8015-875e-ca9dbf47f8a6" class="bulleted-list"><li style="list-style-type:disc"><strong>Open-source SDKs</strong> with explainable Companion logic</li></ul></div><div style="display:contents" dir="auto"><ul id="1e885df0-1907-8036-ae8d-d0dbfbffa1ee" class="bulleted-list"><li style="list-style-type:disc"><strong>Partnership campaigns</strong> with Alzheimer Societies, CIHR, AGE-WELL</li></ul></div><div style="display:contents" dir="auto"><ul id="1e885df0-1907-8092-8ee7-fcebd5785e21" class="bulleted-list"><li style="list-style-type:disc"><strong>Ethics-focused developer residencies</strong> at partner clinics and research labs</li></ul></div><div style="display:contents" dir="auto"><ul id="1e885df0-1907-803a-8355-d07e2e1168ac" class="bulleted-list"><li style="list-style-type:disc">Exploring <strong>B-Corp certification</strong> and structural governance locks to preserve mission fidelity</li></ul></div><div style="display:contents" dir="auto"><hr id="1e885df0-1907-807d-8e88-c299b9747208"/></div><div style="display:contents" dir="auto"><h3 id="1e885df0-1907-8057-9adc-d2d9b0fe5d21" class="">6. 📈 Impact Monitoring Framework</h3></div><div style="display:contents" dir="ltr"><table id="1e885df0-1907-80b8-bfff-d2930bed79c1" class="simple-table"><tbody><div style="display:contents" dir="ltr"><tr id="1e885df0-1907-800f-8010-d998f9785293"><td id="F&gt;tB" class="">Method</td><td id="Sbd=" class="">Cadence</td><td id="B_vn" class="">Ownership</td></tr></div><div style="display:contents" dir="ltr"><tr id="1e885df0-1907-8056-a3dc-c3ef7947fae6"><td id="F&gt;tB" class=""><strong>Caregiver &amp; Clinic NPS</strong></td><td id="Sbd=" class="">Bi-annually</td><td id="B_vn" class="">CMO</td></tr></div><div style="display:contents" dir="ltr"><tr id="1e885df0-1907-80de-a3c2-c12484b13be7"><td id="F&gt;tB" class=""><strong>Inclusion &amp; Representation Audit</strong></td><td id="Sbd=" class="">Annually</td><td id="B_vn" class="">CHRO + 3rd Party</td></tr></div><div style="display:contents" dir="ltr"><tr id="1e885df0-1907-8088-ae4a-c0ca87228265"><td id="F&gt;tB" class=""><strong>Companion Behavior Audit</strong></td><td id="Sbd=" class="">Quarterly</td><td id="B_vn" class="">CTO + AI Ethics Council</td></tr></div><div style="display:contents" dir="ltr"><tr id="1e885df0-1907-80c9-a2dc-f54b414a6cf0"><td id="F&gt;tB" class=""><strong>Legacy Alignment Review</strong></td><td id="Sbd=" class="">Semi-annually</td><td id="B_vn" class="">CEO + External Impact Panel</td></tr></div><div style="display:contents" dir="ltr"><tr id="1e885df0-1907-8054-99f2-fa95e0dc99dc"><td id="F&gt;tB" class=""><strong>Annual Impact Report</strong></td><td id="Sbd=" class="">Optional (but encouraged)</td><td id="B_vn" class="">COO + Strategy + Communications</td></tr></div></tbody></table></div><div style="display:contents" dir="auto"><hr id="1e885df0-1907-80d3-b828-e18501b7a46e"/></div><div style="display:contents" dir="auto"><h3 id="1e885df0-1907-80bb-8be9-e817ddfb21fb" class="">7. 🧬 Enduring Cultural Markers</h3></div><div style="display:contents" dir="auto"><p id="1e885df0-1907-80a7-8509-fa0738f67f61" class="">These are the values Nzila must retain, no matter its size, leadership, or capitalization:</p></div><div style="display:contents" dir="auto"><ul id="1e885df0-1907-8088-bb9c-da8fe8a1edad" class="bulleted-list"><li style="list-style-type:disc"><strong>Ethics over ego</strong></li></ul></div><div style="display:contents" dir="auto"><ul id="1e885df0-1907-80d8-9e34-d0d4eca8ec99" class="bulleted-list"><li style="list-style-type:disc"><strong>Structure with soul</strong></li></ul></div><div style="display:contents" dir="auto"><ul id="1e885df0-1907-80cd-80f2-f14a6b783f72" class="bulleted-list"><li style="list-style-type:disc"><strong>Compassion at the code layer</strong></li></ul></div><div style="display:contents" dir="auto"><ul id="1e885df0-1907-80b2-8edd-e48247e50c12" class="bulleted-list"><li style="list-style-type:disc"><strong>Clear writing as a leadership act</strong></li></ul></div><div style="display:contents" dir="auto"><ul id="1e885df0-1907-80de-b41c-fef998db77e0" class="bulleted-list"><li style="list-style-type:disc"><strong>Product decisions made with — not for — users</strong></li></ul></div><div style="display:contents" dir="auto"><ul id="1e885df0-1907-80e9-818f-e720077ba6a9" class="bulleted-list"><li style="list-style-type:disc"><strong>Trust measured not by downloads, but by daily use</strong></li></ul></div><div style="display:contents" dir="auto"><hr id="1e885df0-1907-80a7-82cb-de292b810c90"/></div><div style="display:contents" dir="auto"><h3 id="1e885df0-1907-80a7-9647-dcd615ad9e1c" class="">8. 🔚 Sunset Clause (Should It Ever End)</h3></div><div style="display:contents" dir="auto"><p id="1e885df0-1907-80d6-be17-d7f00f256f2c" class="">If Nzila winds down, we commit to:</p></div><div style="display:contents" dir="auto"><ul id="1e885df0-1907-8014-8e44-e8949520555f" class="bulleted-list"><li style="list-style-type:disc">Secure deletion or ethical anonymization of all user data</li></ul></div><div style="display:contents" dir="auto"><ul id="1e885df0-1907-80e9-9a1a-e83b0343b9c2" class="bulleted-list"><li style="list-style-type:disc">Companion model weights and prompt systems opened to the public where permitted</li></ul></div><div style="display:contents" dir="auto"><ul id="1e885df0-1907-80df-b4c5-dfc826f71f1a" class="bulleted-list"><li style="list-style-type:disc">Offering IP to a mission-aligned nonprofit or care alliance</li></ul></div><div style="display:contents" dir="auto"><ul id="1e885df0-1907-8023-a5f4-fbc5b0a34cef" class="bulleted-list"><li style="list-style-type:disc">Transparent offboarding of contributors, caregivers, and clinical partners</li></ul></div><div style="display:contents" dir="auto"><ul id="1e885df0-1907-8016-aa9d-f6dcd956c15c" class="bulleted-list"><li style="list-style-type:disc">Public memo of closure and learnings — with dignity, not silence</li></ul></div></div></article><span class="sans" style="font-size:14px;padding-top:2em"></span></body></html>

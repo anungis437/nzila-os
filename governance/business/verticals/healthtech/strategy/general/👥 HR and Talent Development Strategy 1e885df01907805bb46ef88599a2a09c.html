@@ -1,0 +1,713 @@
+<html><head><meta http-equiv="Content-Type" content="text/html; charset=utf-8"/><title>👥 HR and Talent Development Strategy</title><style>
+/* cspell:disable-file */
+/* webkit printing magic: print all background colors */
+html {
+	-webkit-print-color-adjust: exact;
+}
+* {
+	box-sizing: border-box;
+	-webkit-print-color-adjust: exact;
+}
+
+html,
+body {
+	margin: 0;
+	padding: 0;
+}
+@media only screen {
+	body {
+		margin: 2em auto;
+		max-width: 900px;
+		color: rgb(55, 53, 47);
+	}
+}
+
+body {
+	line-height: 1.5;
+	white-space: pre-wrap;
+}
+
+a,
+a.visited {
+	color: inherit;
+	text-decoration: underline;
+}
+
+.pdf-relative-link-path {
+	font-size: 80%;
+	color: #444;
+}
+
+h1,
+h2,
+h3 {
+	letter-spacing: -0.01em;
+	line-height: 1.2;
+	font-weight: 600;
+	margin-bottom: 0;
+}
+
+/* Override strong tags inside headings to maintain consistent weight */
+h1 strong,
+h2 strong,
+h3 strong {
+	font-weight: 600;
+}
+
+.page-title {
+	font-size: 2.5rem;
+	font-weight: 700;
+	margin-top: 0;
+	margin-bottom: 0.75em;
+}
+
+h1 {
+	font-size: 1.875rem;
+	margin-top: 1.875rem;
+}
+
+h2 {
+	font-size: 1.5rem;
+	margin-top: 1.5rem;
+}
+
+h3 {
+	font-size: 1.25rem;
+	margin-top: 1.25rem;
+}
+
+.source {
+	border: 1px solid #ddd;
+	border-radius: 3px;
+	padding: 1.5em;
+	word-break: break-all;
+}
+
+.callout {
+	border-radius: 10px;
+	padding: 1rem;
+}
+
+figure {
+	margin: 1.25em 0;
+	page-break-inside: avoid;
+}
+
+figcaption {
+	opacity: 0.5;
+	font-size: 85%;
+	margin-top: 0.5em;
+}
+
+mark {
+	background-color: transparent;
+}
+
+.indented {
+	padding-left: 1.5em;
+}
+
+hr {
+	background: transparent;
+	display: block;
+	width: 100%;
+	height: 1px;
+	visibility: visible;
+	border: none;
+	border-bottom: 1px solid rgba(55, 53, 47, 0.09);
+}
+
+img {
+	max-width: 100%;
+}
+
+@media only print {
+	img {
+		max-height: 100vh;
+		object-fit: contain;
+	}
+}
+
+@page {
+	margin: 1in;
+}
+
+.collection-content {
+	font-size: 0.875rem;
+}
+
+.collection-content td {
+	white-space: pre-wrap;
+	word-break: break-word;
+}
+
+.column-list {
+	display: flex;
+	justify-content: space-between;
+}
+
+.column {
+	padding: 0 1em;
+}
+
+.column:first-child {
+	padding-left: 0;
+}
+
+.column:last-child {
+	padding-right: 0;
+}
+
+.table_of_contents-item {
+	display: block;
+	font-size: 0.875rem;
+	line-height: 1.3;
+	padding: 0.125rem;
+}
+
+.table_of_contents-indent-1 {
+	margin-left: 1.5rem;
+}
+
+.table_of_contents-indent-2 {
+	margin-left: 3rem;
+}
+
+.table_of_contents-indent-3 {
+	margin-left: 4.5rem;
+}
+
+.table_of_contents-link {
+	text-decoration: none;
+	opacity: 0.7;
+	border-bottom: 1px solid rgba(55, 53, 47, 0.18);
+}
+
+table,
+th,
+td {
+	border: 1px solid rgba(55, 53, 47, 0.09);
+	border-collapse: collapse;
+}
+
+table {
+	border-left: none;
+	border-right: none;
+}
+
+th,
+td {
+	font-weight: normal;
+	padding: 0.25em 0.5em;
+	line-height: 1.5;
+	min-height: 1.5em;
+	text-align: left;
+}
+
+th {
+	color: rgba(55, 53, 47, 0.6);
+}
+
+ol,
+ul {
+	margin: 0;
+	margin-block-start: 0.6em;
+	margin-block-end: 0.6em;
+}
+
+li > ol:first-child,
+li > ul:first-child {
+	margin-block-start: 0.6em;
+}
+
+ul > li {
+	list-style: disc;
+}
+
+ul.to-do-list {
+	padding-inline-start: 0;
+}
+
+ul.to-do-list > li {
+	list-style: none;
+}
+
+.to-do-children-checked {
+	text-decoration: line-through;
+	opacity: 0.375;
+}
+
+ul.toggle > li {
+	list-style: none;
+}
+
+ul {
+	padding-inline-start: 1.7em;
+}
+
+ul > li {
+	padding-left: 0.1em;
+}
+
+ol {
+	padding-inline-start: 1.6em;
+}
+
+ol > li {
+	padding-left: 0.2em;
+}
+
+.mono ol {
+	padding-inline-start: 2em;
+}
+
+.mono ol > li {
+	text-indent: -0.4em;
+}
+
+.toggle {
+	padding-inline-start: 0em;
+	list-style-type: none;
+}
+
+/* Indent toggle children */
+.toggle > li > details {
+	padding-left: 1.7em;
+}
+
+.toggle > li > details > summary {
+	margin-left: -1.1em;
+}
+
+.selected-value {
+	display: inline-block;
+	padding: 0 0.5em;
+	background: rgba(206, 205, 202, 0.5);
+	border-radius: 3px;
+	margin-right: 0.5em;
+	margin-top: 0.3em;
+	margin-bottom: 0.3em;
+	white-space: nowrap;
+}
+
+.collection-title {
+	display: inline-block;
+	margin-right: 1em;
+}
+
+.page-description {
+	margin-bottom: 2em;
+}
+
+.simple-table {
+	margin-top: 1em;
+	font-size: 0.875rem;
+	empty-cells: show;
+}
+.simple-table td {
+	height: 29px;
+	min-width: 120px;
+}
+
+.simple-table th {
+	height: 29px;
+	min-width: 120px;
+}
+
+.simple-table-header-color {
+	background: rgb(247, 246, 243);
+	color: black;
+}
+.simple-table-header {
+	font-weight: 500;
+}
+
+time {
+	opacity: 0.5;
+}
+
+.icon {
+	display: inline-flex;
+	align-items: center;
+	justify-content: center;
+	max-width: 1.2em;
+	max-height: 1.2em;
+	text-decoration: none;
+	vertical-align: text-bottom;
+	margin-right: 0.5em;
+}
+
+img.icon {
+	border-radius: 3px;
+}
+
+.callout img.notion-static-icon {
+	width: 1em;
+	height: 1em;
+}
+
+.callout p {
+	margin: 0;
+}
+
+.callout h1,
+.callout h2,
+.callout h3 {
+	margin: 0 0 0.6rem;
+}
+
+.user-icon {
+	width: 1.5em;
+	height: 1.5em;
+	border-radius: 100%;
+	margin-right: 0.5rem;
+}
+
+.user-icon-inner {
+	font-size: 0.8em;
+}
+
+.text-icon {
+	border: 1px solid #000;
+	text-align: center;
+}
+
+.page-cover-image {
+	display: block;
+	object-fit: cover;
+	width: 100%;
+	max-height: 30vh;
+}
+
+.page-header-icon {
+	font-size: 3rem;
+	margin-bottom: 1rem;
+}
+
+.page-header-icon-with-cover {
+	margin-top: -0.72em;
+	margin-left: 0.07em;
+}
+
+.page-header-icon img {
+	border-radius: 3px;
+}
+
+.link-to-page {
+	margin: 1em 0;
+	padding: 0;
+	border: none;
+	font-weight: 500;
+}
+
+p > .user {
+	opacity: 0.5;
+}
+
+td > .user,
+td > time {
+	white-space: nowrap;
+}
+
+input[type="checkbox"] {
+	transform: scale(1.5);
+	margin-right: 0.6em;
+	vertical-align: middle;
+}
+
+p {
+	margin-top: 0.5em;
+	margin-bottom: 0.5em;
+}
+
+.image {
+	border: none;
+	margin: 1.5em 0;
+	padding: 0;
+	border-radius: 0;
+	text-align: center;
+}
+
+.code,
+code {
+	background: rgba(135, 131, 120, 0.15);
+	border-radius: 3px;
+	padding: 0.2em 0.4em;
+	border-radius: 3px;
+	font-size: 85%;
+	tab-size: 2;
+}
+
+code {
+	color: #eb5757;
+}
+
+.code {
+	padding: 1.5em 1em;
+}
+
+.code-wrap {
+	white-space: pre-wrap;
+	word-break: break-all;
+}
+
+.code > code {
+	background: none;
+	padding: 0;
+	font-size: 100%;
+	color: inherit;
+}
+
+blockquote {
+	font-size: 1em;
+	margin: 1em 0;
+	padding-left: 1em;
+	border-left: 3px solid rgb(55, 53, 47);
+}
+
+blockquote.quote-large {
+	font-size: 1.25em;
+}
+
+.bookmark {
+	text-decoration: none;
+	max-height: 8em;
+	padding: 0;
+	display: flex;
+	width: 100%;
+	align-items: stretch;
+}
+
+.bookmark-title {
+	font-size: 0.85em;
+	overflow: hidden;
+	text-overflow: ellipsis;
+	height: 1.75em;
+	white-space: nowrap;
+}
+
+.bookmark-text {
+	display: flex;
+	flex-direction: column;
+}
+
+.bookmark-info {
+	flex: 4 1 180px;
+	padding: 12px 14px 14px;
+	display: flex;
+	flex-direction: column;
+	justify-content: space-between;
+}
+
+.bookmark-image {
+	width: 33%;
+	flex: 1 1 180px;
+	display: block;
+	position: relative;
+	object-fit: cover;
+	border-radius: 1px;
+}
+
+.bookmark-description {
+	color: rgba(55, 53, 47, 0.6);
+	font-size: 0.75em;
+	overflow: hidden;
+	max-height: 4.5em;
+	word-break: break-word;
+}
+
+.bookmark-href {
+	font-size: 0.75em;
+	margin-top: 0.25em;
+}
+
+.sans { font-family: ui-sans-serif, -apple-system, BlinkMacSystemFont, "Segoe UI Variable Display", "Segoe UI", Helvetica, "Apple Color Emoji", "Noto Sans Arabic", "Noto Sans Hebrew", Arial, sans-serif, "Segoe UI Emoji", "Segoe UI Symbol"; }
+.code { font-family: "SFMono-Regular", Menlo, Consolas, "PT Mono", "Liberation Mono", Courier, monospace; }
+.serif { font-family: Lyon-Text, Georgia, ui-serif, serif; }
+.mono { font-family: iawriter-mono, Nitti, Menlo, Courier, monospace; }
+.pdf .sans { font-family: Inter, ui-sans-serif, -apple-system, BlinkMacSystemFont, "Segoe UI Variable Display", "Segoe UI", Helvetica, "Apple Color Emoji", "Noto Sans Arabic", "Noto Sans Hebrew", Arial, sans-serif, "Segoe UI Emoji", "Segoe UI Symbol", 'Twemoji', 'Noto Color Emoji', 'Noto Sans CJK JP'; }
+.pdf:lang(zh-CN) .sans { font-family: Inter, ui-sans-serif, -apple-system, BlinkMacSystemFont, "Segoe UI Variable Display", "Segoe UI", Helvetica, "Apple Color Emoji", "Noto Sans Arabic", "Noto Sans Hebrew", Arial, sans-serif, "Segoe UI Emoji", "Segoe UI Symbol", 'Twemoji', 'Noto Color Emoji', 'Noto Sans CJK SC'; }
+.pdf:lang(zh-TW) .sans { font-family: Inter, ui-sans-serif, -apple-system, BlinkMacSystemFont, "Segoe UI Variable Display", "Segoe UI", Helvetica, "Apple Color Emoji", "Noto Sans Arabic", "Noto Sans Hebrew", Arial, sans-serif, "Segoe UI Emoji", "Segoe UI Symbol", 'Twemoji', 'Noto Color Emoji', 'Noto Sans CJK TC'; }
+.pdf:lang(ko-KR) .sans { font-family: Inter, ui-sans-serif, -apple-system, BlinkMacSystemFont, "Segoe UI Variable Display", "Segoe UI", Helvetica, "Apple Color Emoji", "Noto Sans Arabic", "Noto Sans Hebrew", Arial, sans-serif, "Segoe UI Emoji", "Segoe UI Symbol", 'Twemoji', 'Noto Color Emoji', 'Noto Sans CJK KR'; }
+.pdf .code { font-family: Source Code Pro, "SFMono-Regular", Menlo, Consolas, "PT Mono", "Liberation Mono", Courier, monospace, 'Twemoji', 'Noto Color Emoji', 'Noto Sans Mono CJK JP'; }
+.pdf:lang(zh-CN) .code { font-family: Source Code Pro, "SFMono-Regular", Menlo, Consolas, "PT Mono", "Liberation Mono", Courier, monospace, 'Twemoji', 'Noto Color Emoji', 'Noto Sans Mono CJK SC'; }
+.pdf:lang(zh-TW) .code { font-family: Source Code Pro, "SFMono-Regular", Menlo, Consolas, "PT Mono", "Liberation Mono", Courier, monospace, 'Twemoji', 'Noto Color Emoji', 'Noto Sans Mono CJK TC'; }
+.pdf:lang(ko-KR) .code { font-family: Source Code Pro, "SFMono-Regular", Menlo, Consolas, "PT Mono", "Liberation Mono", Courier, monospace, 'Twemoji', 'Noto Color Emoji', 'Noto Sans Mono CJK KR'; }
+.pdf .serif { font-family: PT Serif, Lyon-Text, Georgia, ui-serif, serif, 'Twemoji', 'Noto Color Emoji', 'Noto Serif CJK JP'; }
+.pdf:lang(zh-CN) .serif { font-family: PT Serif, Lyon-Text, Georgia, ui-serif, serif, 'Twemoji', 'Noto Color Emoji', 'Noto Serif CJK SC'; }
+.pdf:lang(zh-TW) .serif { font-family: PT Serif, Lyon-Text, Georgia, ui-serif, serif, 'Twemoji', 'Noto Color Emoji', 'Noto Serif CJK TC'; }
+.pdf:lang(ko-KR) .serif { font-family: PT Serif, Lyon-Text, Georgia, ui-serif, serif, 'Twemoji', 'Noto Color Emoji', 'Noto Serif CJK KR'; }
+.pdf .mono { font-family: PT Mono, iawriter-mono, Nitti, Menlo, Courier, monospace, 'Twemoji', 'Noto Color Emoji', 'Noto Sans Mono CJK JP'; }
+.pdf:lang(zh-CN) .mono { font-family: PT Mono, iawriter-mono, Nitti, Menlo, Courier, monospace, 'Twemoji', 'Noto Color Emoji', 'Noto Sans Mono CJK SC'; }
+.pdf:lang(zh-TW) .mono { font-family: PT Mono, iawriter-mono, Nitti, Menlo, Courier, monospace, 'Twemoji', 'Noto Color Emoji', 'Noto Sans Mono CJK TC'; }
+.pdf:lang(ko-KR) .mono { font-family: PT Mono, iawriter-mono, Nitti, Menlo, Courier, monospace, 'Twemoji', 'Noto Color Emoji', 'Noto Sans Mono CJK KR'; }
+.highlight-default {
+	color: rgba(44, 44, 43, 1);
+}
+.highlight-gray {
+	color: rgba(125, 122, 117, 1);
+	fill: rgba(125, 122, 117, 1);
+}
+.highlight-brown {
+	color: rgba(159, 118, 90, 1);
+	fill: rgba(159, 118, 90, 1);
+}
+.highlight-orange {
+	color: rgba(210, 123, 45, 1);
+	fill: rgba(210, 123, 45, 1);
+}
+.highlight-yellow {
+	color: rgba(203, 148, 52, 1);
+	fill: rgba(203, 148, 52, 1);
+}
+.highlight-teal {
+	color: rgba(80, 148, 110, 1);
+	fill: rgba(80, 148, 110, 1);
+}
+.highlight-blue {
+	color: rgba(56, 125, 201, 1);
+	fill: rgba(56, 125, 201, 1);
+}
+.highlight-purple {
+	color: rgba(154, 107, 180, 1);
+	fill: rgba(154, 107, 180, 1);
+}
+.highlight-pink {
+	color: rgba(193, 76, 138, 1);
+	fill: rgba(193, 76, 138, 1);
+}
+.highlight-red {
+	color: rgba(207, 81, 72, 1);
+	fill: rgba(207, 81, 72, 1);
+}
+.highlight-default_background {
+	color: rgba(44, 44, 43, 1);
+}
+.highlight-gray_background {
+	background: rgba(42, 28, 0, 0.07);
+}
+.highlight-brown_background {
+	background: rgba(139, 46, 0, 0.086);
+}
+.highlight-orange_background {
+	background: rgba(224, 101, 1, 0.129);
+}
+.highlight-yellow_background {
+	background: rgba(211, 168, 0, 0.137);
+}
+.highlight-teal_background {
+	background: rgba(0, 100, 45, 0.09);
+}
+.highlight-blue_background {
+	background: rgba(0, 124, 215, 0.094);
+}
+.highlight-purple_background {
+	background: rgba(102, 0, 178, 0.078);
+}
+.highlight-pink_background {
+	background: rgba(197, 0, 93, 0.086);
+}
+.highlight-red_background {
+	background: rgba(223, 22, 0, 0.094);
+}
+.block-color-default {
+	color: inherit;
+	fill: inherit;
+}
+.block-color-gray {
+	color: rgba(125, 122, 117, 1);
+	fill: rgba(125, 122, 117, 1);
+}
+.block-color-brown {
+	color: rgba(159, 118, 90, 1);
+	fill: rgba(159, 118, 90, 1);
+}
+.block-color-orange {
+	color: rgba(210, 123, 45, 1);
+	fill: rgba(210, 123, 45, 1);
+}
+.block-color-yellow {
+	color: rgba(203, 148, 52, 1);
+	fill: rgba(203, 148, 52, 1);
+}
+.block-color-teal {
+	color: rgba(80, 148, 110, 1);
+	fill: rgba(80, 148, 110, 1);
+}
+.block-color-blue {
+	color: rgba(56, 125, 201, 1);
+	fill: rgba(56, 125, 201, 1);
+}
+.block-color-purple {
+	color: rgba(154, 107, 180, 1);
+	fill: rgba(154, 107, 180, 1);
+}
+.block-color-pink {
+	color: rgba(193, 76, 138, 1);
+	fill: rgba(193, 76, 138, 1);
+}
+.block-color-red {
+	color: rgba(207, 81, 72, 1);
+	fill: rgba(207, 81, 72, 1);
+}
+.block-color-default_background {
+	color: inherit;
+	fill: inherit;
+}
+.block-color-gray_background {
+	background: rgba(240, 239, 237, 1);
+}
+.block-color-brown_background {
+	background: rgba(245, 237, 233, 1);
+}
+.block-color-orange_background {
+	background: rgba(251, 235, 222, 1);
+}
+.block-color-yellow_background {
+	background: rgba(249, 243, 220, 1);
+}
+.block-color-teal_background {
+	background: rgba(232, 241, 236, 1);
+}
+.block-color-blue_background {
+	background: rgba(229, 242, 252, 1);
+}
+.block-color-purple_background {
+	background: rgba(243, 235, 249, 1);
+}
+.block-color-pink_background {
+	background: rgba(250, 233, 241, 1);
+}
+.block-color-red_background {
+	background: rgba(252, 233, 231, 1);
+}
+.select-value-color-default { background-color: rgba(42, 28, 0, 0.07); }
+.select-value-color-gray { background-color: rgba(28, 19, 1, 0.11); }
+.select-value-color-brown { background-color: rgba(127, 51, 0, 0.156); }
+.select-value-color-orange { background-color: rgba(196, 88, 0, 0.203); }
+.select-value-color-yellow { background-color: rgba(209, 156, 0, 0.282); }
+.select-value-color-green { background-color: rgba(0, 96, 38, 0.156); }
+.select-value-color-blue { background-color: rgba(0, 118, 217, 0.203); }
+.select-value-color-purple { background-color: rgba(92, 0, 163, 0.141); }
+.select-value-color-pink { background-color: rgba(183, 0, 78, 0.152); }
+.select-value-color-red { background-color: rgba(206, 24, 0, 0.164); }
+
+.checkbox {
+	display: inline-flex;
+	vertical-align: text-bottom;
+	width: 16;
+	height: 16;
+	background-size: 16px;
+	margin-left: 2px;
+	margin-right: 5px;
+}
+
+.checkbox-on {
+	background-image: url("data:image/svg+xml;charset=UTF-8,%3Csvg%20width%3D%2216%22%20height%3D%2216%22%20viewBox%3D%220%200%2016%2016%22%20fill%3D%22none%22%20xmlns%3D%22http%3A%2F%2Fwww.w3.org%2F2000%2Fsvg%22%3E%0A%3Crect%20width%3D%2216%22%20height%3D%2216%22%20fill%3D%22%2358A9D7%22%2F%3E%0A%3Cpath%20d%3D%22M6.71429%2012.2852L14%204.9995L12.7143%203.71436L6.71429%209.71378L3.28571%206.2831L2%207.57092L6.71429%2012.2852Z%22%20fill%3D%22white%22%2F%3E%0A%3C%2Fsvg%3E");
+}
+
+.checkbox-off {
+	background-image: url("data:image/svg+xml;charset=UTF-8,%3Csvg%20width%3D%2216%22%20height%3D%2216%22%20viewBox%3D%220%200%2016%2016%22%20fill%3D%22none%22%20xmlns%3D%22http%3A%2F%2Fwww.w3.org%2F2000%2Fsvg%22%3E%0A%3Crect%20x%3D%220.75%22%20y%3D%220.75%22%20width%3D%2214.5%22%20height%3D%2214.5%22%20fill%3D%22white%22%20stroke%3D%22%2336352F%22%20stroke-width%3D%221.5%22%2F%3E%0A%3C%2Fsvg%3E");
+}
+	
+</style></head><body><article id="1e885df0-1907-805b-b46e-f88599a2a09c" class="page sans"><header><h1 class="page-title" dir="auto">👥 <strong>HR and Talent Development Strategy</strong></h1><p class="page-description" dir="auto"></p><table class="properties"><tbody><tr class="property-row property-row-person"><th><span class="icon property-icon"><img src="https://www.notion.so/icons/friends_gray.svg" style="width:14px;height:14px;display:block"/></span>Owner</th><td><span class="user"><span class="icon text-icon user-icon"><span class="user-icon-inner">A</span></span>Aubert</span></td></tr><tr class="property-row property-row-multi_select"><th><span class="icon property-icon"><img src="https://www.notion.so/icons/list_gray.svg" style="width:14px;height:14px;display:block"/></span>Tags</th><td></td></tr></tbody></table></header><div class="page-body"><div style="display:contents" dir="auto"><p id="1e885df0-1907-8085-b314-e9a145e5a395" class=""><strong>Version</strong>: 1.0</p></div><div style="display:contents" dir="auto"><p id="1e885df0-1907-80aa-a8e3-c59c896b1ba6" class=""><strong>Prepared By</strong>: HR &amp; Strategy Team</p></div><div style="display:contents" dir="auto"><p id="1e885df0-1907-80b7-a573-f23eb579d4e8" class=""><strong>Last Updated</strong>: [Insert Date]</p></div><div style="display:contents" dir="auto"><hr id="1e885df0-1907-80b1-a700-d1e2058f7338"/></div><div style="display:contents" dir="auto"><h3 id="1e885df0-1907-8061-8d69-e0af168b2e85" class="">1. <strong>Introduction</strong></h3></div><div style="display:contents" dir="auto"><p id="1e885df0-1907-80f5-b0a3-c30e0c031be9" class="">The <strong>HR and Talent Development Strategy</strong> of <strong>Nzila Ventures</strong> focuses on attracting, retaining, and developing the best talent across all sectors, including <strong>healthtech</strong>, <strong>AI innovation</strong>, and <strong>EdTech</strong>. With a focus on creating an <strong>inclusive</strong>, <strong>innovative</strong>, and <strong>high-performance</strong> culture, this strategy outlines how Nzila Ventures will build a world-class team that is capable of scaling our transformative products such as <strong>CareAI</strong>, <strong>Memora</strong>, <strong>OptivaCare</strong>, and <strong>NeuroBridge</strong>.</p></div><div style="display:contents" dir="auto"><p id="1e885df0-1907-8015-a13e-c01387c44bbe" class="">Our approach emphasizes <strong>employee growth</strong>, <strong>leadership development</strong>, and <strong>organizational agility</strong> to ensure we remain a market leader in health AI and cognitive technologies.</p></div><div style="display:contents" dir="auto"><hr id="1e885df0-1907-8029-867c-fd599ee7b366"/></div><div style="display:contents" dir="auto"><h3 id="1e885df0-1907-80c8-ad6f-fe745442e94c" class="">2. <strong>Core Objectives of the HR &amp; Talent Development Strategy</strong></h3></div><div style="display:contents" dir="auto"><ul id="1e885df0-1907-8049-92df-deccf98c967d" class="bulleted-list"><li style="list-style-type:disc"><strong>Attract Top Talent</strong>:<div style="display:contents" dir="auto"><p id="1e885df0-1907-8008-9a47-cc1dd093a25b" class="">Identify and recruit high-caliber candidates who align with Nzila Ventures&#x27; <strong>values</strong>, <strong>culture</strong>, and <strong>mission</strong> of creating AI-driven innovations in health and education.</p></div></li></ul></div><div style="display:contents" dir="auto"><ul id="1e885df0-1907-80c3-a8c4-c38f422f8446" class="bulleted-list"><li style="list-style-type:disc"><strong>Develop Leadership</strong>:<div style="display:contents" dir="auto"><p id="1e885df0-1907-80ac-b868-ee2af3a7d97d" class="">Cultivate strong leadership at all levels, with particular emphasis on <strong>executive development</strong>, <strong>succession planning</strong>, and <strong>leadership training</strong> in the context of <strong>rapid growth</strong>.</p></div></li></ul></div><div style="display:contents" dir="auto"><ul id="1e885df0-1907-8072-88d1-da09db104af3" class="bulleted-list"><li style="list-style-type:disc"><strong>Foster a Culture of Innovation and Collaboration</strong>:<div style="display:contents" dir="auto"><p id="1e885df0-1907-80f0-9990-e82b5fb0295e" class="">Build and maintain an <strong>inclusive</strong>, <strong>collaborative</strong>, and <strong>results-driven culture</strong> where employees feel empowered to innovate and contribute meaningfully to Nzila’s mission.</p></div></li></ul></div><div style="display:contents" dir="auto"><ul id="1e885df0-1907-8005-8dd2-d05a32cc2c30" class="bulleted-list"><li style="list-style-type:disc"><strong>Employee Retention &amp; Satisfaction</strong>:<div style="display:contents" dir="auto"><p id="1e885df0-1907-8011-9485-c2749d0af287" class="">Implement initiatives that enhance employee engagement, satisfaction, and long-term retention, ensuring that <strong>Nzila Ventures</strong> becomes a preferred employer in the <strong>tech and healthcare sectors</strong>.</p></div></li></ul></div><div style="display:contents" dir="auto"><ul id="1e885df0-1907-80b3-ab36-e81fc1da965c" class="bulleted-list"><li style="list-style-type:disc"><strong>Align HR with Strategic Objectives</strong>:<div style="display:contents" dir="auto"><p id="1e885df0-1907-8023-8d26-e3d3c87b6058" class="">Ensure that HR strategies support and enable Nzila’s business and operational goals, particularly in <strong>product development</strong>, <strong>expansion</strong>, and <strong>global market entry</strong>.</p></div></li></ul></div><div style="display:contents" dir="auto"><hr id="1e885df0-1907-8096-a3f4-f72d6f9e1df9"/></div><div style="display:contents" dir="auto"><h3 id="1e885df0-1907-80d6-8278-d08ce0007471" class="">3. <strong>Talent Acquisition Strategy</strong></h3></div><div style="display:contents" dir="auto"><h3 id="1e885df0-1907-80eb-b3a3-d0a7db59e124" class="">A. <strong>Key Talent Segments</strong></h3></div><div style="display:contents" dir="auto"><ul id="1e885df0-1907-80e8-b3d8-ccc94975b2f8" class="bulleted-list"><li style="list-style-type:disc"><strong>AI &amp; HealthTech Experts</strong>:<div style="display:contents" dir="auto"><p id="1e885df0-1907-8005-a37a-ec7264b535aa" class="">Recruit highly skilled engineers, <strong>AI researchers</strong>, and <strong>data scientists</strong> who can drive innovation in <strong>CareAI</strong> and <strong>Memora</strong>.</p></div></li></ul></div><div style="display:contents" dir="auto"><ul id="1e885df0-1907-8040-bbaa-daa10a45ce6b" class="bulleted-list"><li style="list-style-type:disc"><strong>Healthcare Industry Specialists</strong>:<div style="display:contents" dir="auto"><p id="1e885df0-1907-8013-af47-d8f27a03751f" class="">Attract professionals with backgrounds in <strong>healthcare systems</strong>, <strong>medical technologies</strong>, and <strong>patient care</strong>, particularly for the development and expansion of <strong>OptivaCare</strong> and <strong>NeuroBridge</strong>.</p></div></li></ul></div><div style="display:contents" dir="auto"><ul id="1e885df0-1907-8056-9578-cf99be4d2d1b" class="bulleted-list"><li style="list-style-type:disc"><strong>Sales &amp; Marketing Professionals</strong>:<div style="display:contents" dir="auto"><p id="1e885df0-1907-8070-afe1-c2b547feb7d7" class="">Build a team capable of driving <strong>global expansion</strong> and <strong>customer acquisition</strong>, particularly in <strong>B2B</strong> SaaS markets for <strong>healthtech solutions</strong>.</p></div></li></ul></div><div style="display:contents" dir="auto"><ul id="1e885df0-1907-800e-83ce-fc0f9cf6bbc5" class="bulleted-list"><li style="list-style-type:disc"><strong>Product &amp; R&amp;D</strong>:<div style="display:contents" dir="auto"><p id="1e885df0-1907-805f-b8a5-d471d0698989" class="">Hire experienced <strong>product managers</strong> and <strong>R&amp;D leaders</strong> to oversee product lifecycle development and manage the scaling of <strong>AI models</strong> for global deployment.</p></div></li></ul></div><div style="display:contents" dir="auto"><h3 id="1e885df0-1907-80a0-bd95-c30775841586" class="">B. <strong>Attraction Channels</strong></h3></div><div style="display:contents" dir="auto"><ul id="1e885df0-1907-804f-8574-dc823a3774c4" class="bulleted-list"><li style="list-style-type:disc"><strong>University Partnerships</strong>:<div style="display:contents" dir="auto"><p id="1e885df0-1907-80f7-8fad-f77f4a30d792" class="">Establish <strong>partnerships with leading universities</strong> to attract <strong>top talent</strong> from AI, tech, and healthcare-focused programs.</p></div></li></ul></div><div style="display:contents" dir="auto"><ul id="1e885df0-1907-80d1-8fb1-e51a0791786f" class="bulleted-list"><li style="list-style-type:disc"><strong>Industry Conferences &amp; Hackathons</strong>:<div style="display:contents" dir="auto"><p id="1e885df0-1907-8027-a36c-f45044ed8420" class="">Attend and sponsor key industry events to engage with potential hires who are experts in <strong>AI health technologies</strong>.</p></div></li></ul></div><div style="display:contents" dir="auto"><ul id="1e885df0-1907-8051-b1b9-f9e61c84e2e6" class="bulleted-list"><li style="list-style-type:disc"><strong>Employee Referral Program</strong>:<div style="display:contents" dir="auto"><p id="1e885df0-1907-801f-a9f5-fb02c1c2e07e" class="">Strengthen <strong>employee referral programs</strong> to leverage the networks of existing staff and attract high-quality talent.</p></div></li></ul></div><div style="display:contents" dir="auto"><h3 id="1e885df0-1907-8068-b82e-dc72bd55793f" class="">C. <strong>Recruitment Process</strong></h3></div><div style="display:contents" dir="auto"><ul id="1e885df0-1907-8096-9044-f23f27339d2d" class="bulleted-list"><li style="list-style-type:disc"><strong>Agile Hiring</strong>:<div style="display:contents" dir="auto"><p id="1e885df0-1907-8051-a666-c92cbbac6561" class="">Adopt an <strong>agile recruitment process</strong> with quick decision-making cycles to reduce hiring time and meet Nzila’s scaling needs.</p></div></li></ul></div><div style="display:contents" dir="auto"><ul id="1e885df0-1907-8075-84a2-c125b989d08f" class="bulleted-list"><li style="list-style-type:disc"><strong>Diversity and Inclusion</strong>:<div style="display:contents" dir="auto"><p id="1e885df0-1907-8019-9638-ec50af5752ee" class="">Ensure that recruitment efforts are <strong>diverse</strong>, promoting an inclusive culture that welcomes talent from a variety of backgrounds.</p></div></li></ul></div><div style="display:contents" dir="auto"><hr id="1e885df0-1907-80bb-9995-cf2e756b0265"/></div><div style="display:contents" dir="auto"><h3 id="1e885df0-1907-809c-8dbf-dcfc28becbc7" class="">4. <strong>Talent Development &amp; Leadership</strong></h3></div><div style="display:contents" dir="auto"><h3 id="1e885df0-1907-80cf-a3f7-eba47f1682c5" class="">A. <strong>Employee Onboarding &amp; Training</strong></h3></div><div style="display:contents" dir="auto"><ul id="1e885df0-1907-80c0-bcb3-e0eecc2a0088" class="bulleted-list"><li style="list-style-type:disc"><strong>Comprehensive Onboarding Program</strong>:<div style="display:contents" dir="auto"><p id="1e885df0-1907-8077-bb18-cca228f9254c" class="">Design a <strong>robust onboarding program</strong> that includes an <strong>introductory phase</strong> to Nzila Ventures&#x27; mission, values, products, and a specialized onboarding experience for roles related to <strong>healthtech</strong>, <strong>AI</strong>, and <strong>R&amp;D</strong>.</p></div></li></ul></div><div style="display:contents" dir="auto"><ul id="1e885df0-1907-80c8-956d-f21e3f0c57ac" class="bulleted-list"><li style="list-style-type:disc"><strong>Ongoing Learning</strong>:<div style="display:contents" dir="auto"><p id="1e885df0-1907-8098-be58-da33f51f68eb" class="">Provide access to <strong>continuous learning</strong> resources, including <strong>certifications</strong>, <strong>workshops</strong>, and <strong>mentorship programs</strong> to ensure that employees grow alongside the company.</p></div></li></ul></div><div style="display:contents" dir="auto"><h3 id="1e885df0-1907-80fd-96b7-e1f33b993401" class="">B. <strong>Leadership Development</strong></h3></div><div style="display:contents" dir="auto"><ul id="1e885df0-1907-8011-8359-f3b8052361da" class="bulleted-list"><li style="list-style-type:disc"><strong>Executive Coaching</strong>:<div style="display:contents" dir="auto"><p id="1e885df0-1907-8093-81a2-ce42fe37f02c" class="">Provide <strong>executive coaching</strong> and <strong>leadership training</strong> to ensure key leaders have the skills to manage scaling challenges and navigate complex business environments.</p></div></li></ul></div><div style="display:contents" dir="auto"><ul id="1e885df0-1907-807a-ac4d-f7cd7d0f656c" class="bulleted-list"><li style="list-style-type:disc"><strong>Succession Planning</strong>:<div style="display:contents" dir="auto"><p id="1e885df0-1907-80d2-ad77-c3d3d489ae3c" class="">Develop a clear <strong>succession planning framework</strong> to ensure continuity of leadership at <strong>Nzila Ventures</strong>, particularly as we grow globally and expand into new markets.</p></div></li></ul></div><div style="display:contents" dir="auto"><ul id="1e885df0-1907-80a3-a731-c016371c166f" class="bulleted-list"><li style="list-style-type:disc"><strong>Cross-Departmental Training</strong>:<div style="display:contents" dir="auto"><p id="1e885df0-1907-8060-aa7e-d4fe122124ab" class="">Encourage leaders across departments (e.g., <strong>R&amp;D</strong>, <strong>Sales</strong>, <strong>Marketing</strong>, <strong>Product</strong>) to engage in <strong>cross-functional leadership training</strong> to improve collaboration and drive business performance.</p></div></li></ul></div><div style="display:contents" dir="auto"><h3 id="1e885df0-1907-80bb-8a31-f84b29502e8e" class="">C. <strong>Employee Growth &amp; Career Pathways</strong></h3></div><div style="display:contents" dir="auto"><ul id="1e885df0-1907-8051-9046-e495c82757a0" class="bulleted-list"><li style="list-style-type:disc"><strong>Career Development Plans</strong>:<div style="display:contents" dir="auto"><p id="1e885df0-1907-8010-a131-f73c040f052f" class="">Develop tailored career development plans that outline growth trajectories for employees in line with their goals and the company’s needs.</p></div></li></ul></div><div style="display:contents" dir="auto"><ul id="1e885df0-1907-80bc-92f7-df4b5e6ce1be" class="bulleted-list"><li style="list-style-type:disc"><strong>Internal Mobility</strong>:<div style="display:contents" dir="auto"><p id="1e885df0-1907-80e1-93d1-e756b5fa69d8" class="">Promote <strong>internal mobility</strong> and career progression to enable high-potential employees to shift roles within the company and grow in new directions.</p></div></li></ul></div><div style="display:contents" dir="auto"><ul id="1e885df0-1907-80f1-b3cf-ff16375404a7" class="bulleted-list"><li style="list-style-type:disc"><strong>Mentorship &amp; Coaching</strong>:<div style="display:contents" dir="auto"><p id="1e885df0-1907-803d-a9c4-ee2302ea46b9" class="">Provide <strong>mentorship programs</strong> that connect emerging leaders with experienced mentors across various business functions.</p></div></li></ul></div><div style="display:contents" dir="auto"><hr id="1e885df0-1907-80f1-87de-e86823cc7c71"/></div><div style="display:contents" dir="auto"><h3 id="1e885df0-1907-8062-8978-cd5aa90426b7" class="">5. <strong>Performance Management &amp; Employee Engagement</strong></h3></div><div style="display:contents" dir="auto"><h3 id="1e885df0-1907-8060-bcc2-fe82cdce3a3b" class="">A. <strong>Performance Reviews</strong></h3></div><div style="display:contents" dir="auto"><ul id="1e885df0-1907-8054-a8ae-fea2ca515480" class="bulleted-list"><li style="list-style-type:disc"><strong>Quarterly Reviews</strong>:<div style="display:contents" dir="auto"><p id="1e885df0-1907-8019-aeb9-c02578a03bb9" class="">Conduct <strong>quarterly performance reviews</strong> with an emphasis on <strong>goal alignment</strong>, <strong>achievement</strong>, and <strong>development opportunities</strong>. Review KPIs aligned with <strong>Nzila Ventures’ strategic goals</strong>.</p></div></li></ul></div><div style="display:contents" dir="auto"><ul id="1e885df0-1907-80b3-9c58-de0e77286362" class="bulleted-list"><li style="list-style-type:disc"><strong>360-Degree Feedback</strong>:<div style="display:contents" dir="auto"><p id="1e885df0-1907-8011-8b85-eb8fa5875887" class="">Introduce <strong>360-degree feedback</strong> mechanisms to promote transparency and enhance employee development through peer insights and self-assessments.</p></div></li></ul></div><div style="display:contents" dir="auto"><h3 id="1e885df0-1907-80ad-bf64-de8be48266fd" class="">B. <strong>Employee Engagement</strong></h3></div><div style="display:contents" dir="auto"><ul id="1e885df0-1907-80fb-9a79-e6506ce8e488" class="bulleted-list"><li style="list-style-type:disc"><strong>Engagement Surveys</strong>:<div style="display:contents" dir="auto"><p id="1e885df0-1907-80a9-9727-d20d375e0259" class="">Regularly conduct <strong>employee engagement surveys</strong> to gauge satisfaction, gather feedback, and identify areas for improvement.</p></div></li></ul></div><div style="display:contents" dir="auto"><ul id="1e885df0-1907-8060-b7c2-e034550c4a8e" class="bulleted-list"><li style="list-style-type:disc"><strong>Recognition &amp; Rewards</strong>:<div style="display:contents" dir="auto"><p id="1e885df0-1907-80aa-9f0f-c179d150da95" class="">Implement recognition programs that celebrate key achievements, milestones, and contributions to Nzila’s growth.</p></div></li></ul></div><div style="display:contents" dir="auto"><ul id="1e885df0-1907-80f0-83c9-e0bff1e905c1" class="bulleted-list"><li style="list-style-type:disc"><strong>Employee Well-being</strong>:<div style="display:contents" dir="auto"><p id="1e885df0-1907-809d-a6bc-dc69cafb6292" class="">Offer <strong>well-being programs</strong> focusing on <strong>mental health</strong>, <strong>work-life balance</strong>, and <strong>physical health</strong> to ensure that employees maintain a positive and sustainable work environment.</p></div></li></ul></div><div style="display:contents" dir="auto"><hr id="1e885df0-1907-8026-828b-db5abeb1d488"/></div><div style="display:contents" dir="auto"><h3 id="1e885df0-1907-8038-b607-f35ff07e023a" class="">6. <strong>Compensation &amp; Benefits</strong></h3></div><div style="display:contents" dir="auto"><h3 id="1e885df0-1907-8067-a3d1-f4994b0ba235" class="">A. <strong>Competitive Compensation</strong></h3></div><div style="display:contents" dir="auto"><ul id="1e885df0-1907-806e-b574-f6199e71cb87" class="bulleted-list"><li style="list-style-type:disc"><strong>Market-Aligned Salaries</strong>:<div style="display:contents" dir="auto"><p id="1e885df0-1907-80d2-90fc-d7e428f5639f" class="">Ensure that salaries are <strong>market-competitive</strong> and aligned with industry standards for <strong>AI</strong>, <strong>healthtech</strong>, and <strong>cognitive health</strong> professionals.</p></div></li></ul></div><div style="display:contents" dir="auto"><h3 id="1e885df0-1907-8077-a00a-d0f602545673" class="">B. <strong>Benefits Package</strong></h3></div><div style="display:contents" dir="auto"><ul id="1e885df0-1907-8010-bf02-e2a5f544e403" class="bulleted-list"><li style="list-style-type:disc"><strong>Health &amp; Wellness</strong>:<div style="display:contents" dir="auto"><p id="1e885df0-1907-806f-a72b-d04b0e5ea587" class="">Provide <strong>comprehensive healthcare plans</strong>, including dental, vision, and mental health support.</p></div></li></ul></div><div style="display:contents" dir="auto"><ul id="1e885df0-1907-80b8-a0e9-c1b7a95b1109" class="bulleted-list"><li style="list-style-type:disc"><strong>Equity Incentives</strong>:<div style="display:contents" dir="auto"><p id="1e885df0-1907-8030-9815-c682ac629d22" class="">Offer <strong>equity options</strong> as part of the compensation package to align employees with the long-term success of <strong>Nzila Ventures</strong>.</p></div></li></ul></div><div style="display:contents" dir="auto"><ul id="1e885df0-1907-8044-aa3d-f69463017da4" class="bulleted-list"><li style="list-style-type:disc"><strong>Flexible Work Arrangements</strong>:<div style="display:contents" dir="auto"><p id="1e885df0-1907-80a3-9cc8-d8c28284716a" class="">Allow for <strong>remote work</strong>, <strong>flexible hours</strong>, and a <strong>results-based approach</strong> to performance.</p></div></li></ul></div><div style="display:contents" dir="auto"><hr id="1e885df0-1907-804a-b275-fbac9f3549be"/></div><div style="display:contents" dir="auto"><h3 id="1e885df0-1907-8084-97bb-c98e386fb077" class="">7. <strong>Diversity, Equity, and Inclusion (DEI)</strong></h3></div><div style="display:contents" dir="auto"><h3 id="1e885df0-1907-805a-9e33-dbc450a2d44b" class="">A. <strong>DEI Strategy</strong></h3></div><div style="display:contents" dir="auto"><ul id="1e885df0-1907-8009-9ec4-f2ee36a91d27" class="bulleted-list"><li style="list-style-type:disc"><strong>Diversity Hiring</strong>:<div style="display:contents" dir="auto"><p id="1e885df0-1907-80f1-af6c-e1e208ab3363" class="">Implement <strong>inclusive hiring practices</strong> that focus on attracting diverse talent across gender, ethnicity, age, and background.</p></div></li></ul></div><div style="display:contents" dir="auto"><ul id="1e885df0-1907-800e-aa42-ec89f4f1c447" class="bulleted-list"><li style="list-style-type:disc"><strong>Inclusive Culture</strong>:<div style="display:contents" dir="auto"><p id="1e885df0-1907-80f3-b997-c8d85b5b4811" class="">Develop an <strong>inclusive company culture</strong> that promotes respect, open communication, and a focus on equality for all employees.</p></div></li></ul></div><div style="display:contents" dir="auto"><ul id="1e885df0-1907-80e1-beab-d0db99edf540" class="bulleted-list"><li style="list-style-type:disc"><strong>Ongoing DEI Education</strong>:<div style="display:contents" dir="auto"><p id="1e885df0-1907-80b7-af20-c0d2ca34fe04" class="">Provide <strong>ongoing DEI training</strong> to staff to ensure that the workplace remains welcoming and respectful to all individuals.</p></div></li></ul></div><div style="display:contents" dir="auto"><hr id="1e885df0-1907-8011-bda4-faf9a59cbee6"/></div><div style="display:contents" dir="auto"><h3 id="1e885df0-1907-80c2-ac58-eb36ac19b9e6" class="">8. <strong>HR Technology &amp; Systems</strong></h3></div><div style="display:contents" dir="auto"><h3 id="1e885df0-1907-80bc-a8c9-d68de1042aa7" class="">A. <strong>HRMS Integration</strong></h3></div><div style="display:contents" dir="auto"><ul id="1e885df0-1907-80e6-bddf-c88b3a11a0bc" class="bulleted-list"><li style="list-style-type:disc"><strong>Human Resource Management Systems (HRMS)</strong>:<div style="display:contents" dir="auto"><p id="1e885df0-1907-80c0-a696-da14d0e62e8d" class="">Utilize a comprehensive HRMS to manage talent acquisition, onboarding, performance tracking, and employee engagement.</p></div></li></ul></div><div style="display:contents" dir="auto"><ul id="1e885df0-1907-80e0-83f7-c0a296235d6c" class="bulleted-list"><li style="list-style-type:disc"><strong>Data-Driven HR Decisions</strong>:<div style="display:contents" dir="auto"><p id="1e885df0-1907-8046-8e4f-d44109df4db8" class="">Leverage <strong>HR analytics</strong> to inform talent management strategies and ensure that hiring, development, and retention decisions are backed by data.</p></div></li></ul></div><div style="display:contents" dir="auto"><hr id="1e885df0-1907-80f4-b1cf-ed7e04ba76c2"/></div><div style="display:contents" dir="auto"><h3 id="1e885df0-1907-800f-8434-cbe37f8bc0f2" class="">9. <strong>Measuring HR Success</strong></h3></div><div style="display:contents" dir="auto"><h3 id="1e885df0-1907-80c2-b291-c7af9826ecbe" class="">A. <strong>HR KPIs</strong></h3></div><div style="display:contents" dir="auto"><ul id="1e885df0-1907-8020-87fe-e6772339cce9" class="bulleted-list"><li style="list-style-type:disc"><strong>Turnover Rate</strong>:<div style="display:contents" dir="auto"><p id="1e885df0-1907-80b3-b592-d79befe2636c" class="">Monitor the <strong>employee turnover rate</strong> and identify the root causes of any departures.</p></div></li></ul></div><div style="display:contents" dir="auto"><ul id="1e885df0-1907-80de-93c4-ff3a6ae245a8" class="bulleted-list"><li style="list-style-type:disc"><strong>Employee Engagement</strong>:<div style="display:contents" dir="auto"><p id="1e885df0-1907-802b-84bb-e57f84705ff1" class="">Track <strong>engagement scores</strong> and assess how well employees feel aligned with Nzila Ventures’ mission and values.</p></div></li></ul></div><div style="display:contents" dir="auto"><ul id="1e885df0-1907-801f-9d24-efd427628d91" class="bulleted-list"><li style="list-style-type:disc"><strong>Leadership Development</strong>:<div style="display:contents" dir="auto"><p id="1e885df0-1907-8090-8757-f3b0e2d1f211" class="">Measure the <strong>success rate</strong> of leadership development programs and the effectiveness of <strong>succession planning</strong>.</p></div></li></ul></div><div style="display:contents" dir="auto"><hr id="1e885df0-1907-8086-b5e1-e5c03a31470f"/></div><div style="display:contents" dir="auto"><h3 id="1e885df0-1907-807f-8b10-ef0baa2595a7" class="">10. <strong>Conclusion</strong></h3></div><div style="display:contents" dir="auto"><p id="1e885df0-1907-8097-910a-ca05a0698aa4" class="">The <strong>HR and Talent Development Strategy</strong> is designed to support <strong>Nzila Ventures’ mission</strong> of becoming a global leader in <strong>AI health technologies</strong> and <strong>EdTech</strong> while fostering an inclusive, innovative, and high-performance culture. By attracting, developing, and retaining the best talent, Nzila Ventures will ensure the successful execution of its business goals and continue to lead innovation in its target sectors.</p></div></div></article><span class="sans" style="font-size:14px;padding-top:2em"></span></body></html>

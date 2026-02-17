@@ -1,0 +1,42 @@
+{
+  "plan_id": "nzila-parallel-migration-2026",
+  "strategy": "parallel",
+  "total_platforms": 14,
+  "estimated_weeks": 8,
+  "sequential_baseline": 54,
+  "time_savings": 46,
+  "batches": [
+    {
+      "batch": 1,
+      "name": "Standard Platforms Batch 1 (Parallel)",
+      "platforms": [
+        "ponduops",
+        "stsa-ac5f24e9",
+        "insight-cfo-bad2ab5f",
+        "nzila_eexports-main",
+        "nzila-trade-os-main",
+        "shop_quoter_tool_v1-main",
+        "abr-insights-app-main"
+      ],
+      "duration_weeks": 4,
+      "goal": "Parallel migration of standard complexity platforms",
+      "parallel": true
+    },
+    {
+      "batch": 2,
+      "name": "Standard Platforms Batch 2 (Parallel)",
+      "platforms": [
+        "cora-platform-fix-tests-model-alignment",
+        "court_lens_app_v1-main",
+        "congowave_app_v1-main",
+        "cyber_learn_app_v1-main",
+        "c3uo-app-v1-main",
+        "SentryIQ-main",
+        "Union_Eyes_app_v1-main"
+      ],
+      "duration_weeks": 4,
+      "goal": "Parallel migration of standard complexity platforms",
+      "parallel": true
+    }
+  ]
+}

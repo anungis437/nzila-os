@@ -1,0 +1,713 @@
+<html><head><meta http-equiv="Content-Type" content="text/html; charset=utf-8"/><title>🛠️ Nzila CTO Technical Strategy Summary</title><style>
+/* cspell:disable-file */
+/* webkit printing magic: print all background colors */
+html {
+	-webkit-print-color-adjust: exact;
+}
+* {
+	box-sizing: border-box;
+	-webkit-print-color-adjust: exact;
+}
+
+html,
+body {
+	margin: 0;
+	padding: 0;
+}
+@media only screen {
+	body {
+		margin: 2em auto;
+		max-width: 900px;
+		color: rgb(55, 53, 47);
+	}
+}
+
+body {
+	line-height: 1.5;
+	white-space: pre-wrap;
+}
+
+a,
+a.visited {
+	color: inherit;
+	text-decoration: underline;
+}
+
+.pdf-relative-link-path {
+	font-size: 80%;
+	color: #444;
+}
+
+h1,
+h2,
+h3 {
+	letter-spacing: -0.01em;
+	line-height: 1.2;
+	font-weight: 600;
+	margin-bottom: 0;
+}
+
+/* Override strong tags inside headings to maintain consistent weight */
+h1 strong,
+h2 strong,
+h3 strong {
+	font-weight: 600;
+}
+
+.page-title {
+	font-size: 2.5rem;
+	font-weight: 700;
+	margin-top: 0;
+	margin-bottom: 0.75em;
+}
+
+h1 {
+	font-size: 1.875rem;
+	margin-top: 1.875rem;
+}
+
+h2 {
+	font-size: 1.5rem;
+	margin-top: 1.5rem;
+}
+
+h3 {
+	font-size: 1.25rem;
+	margin-top: 1.25rem;
+}
+
+.source {
+	border: 1px solid #ddd;
+	border-radius: 3px;
+	padding: 1.5em;
+	word-break: break-all;
+}
+
+.callout {
+	border-radius: 10px;
+	padding: 1rem;
+}
+
+figure {
+	margin: 1.25em 0;
+	page-break-inside: avoid;
+}
+
+figcaption {
+	opacity: 0.5;
+	font-size: 85%;
+	margin-top: 0.5em;
+}
+
+mark {
+	background-color: transparent;
+}
+
+.indented {
+	padding-left: 1.5em;
+}
+
+hr {
+	background: transparent;
+	display: block;
+	width: 100%;
+	height: 1px;
+	visibility: visible;
+	border: none;
+	border-bottom: 1px solid rgba(55, 53, 47, 0.09);
+}
+
+img {
+	max-width: 100%;
+}
+
+@media only print {
+	img {
+		max-height: 100vh;
+		object-fit: contain;
+	}
+}
+
+@page {
+	margin: 1in;
+}
+
+.collection-content {
+	font-size: 0.875rem;
+}
+
+.collection-content td {
+	white-space: pre-wrap;
+	word-break: break-word;
+}
+
+.column-list {
+	display: flex;
+	justify-content: space-between;
+}
+
+.column {
+	padding: 0 1em;
+}
+
+.column:first-child {
+	padding-left: 0;
+}
+
+.column:last-child {
+	padding-right: 0;
+}
+
+.table_of_contents-item {
+	display: block;
+	font-size: 0.875rem;
+	line-height: 1.3;
+	padding: 0.125rem;
+}
+
+.table_of_contents-indent-1 {
+	margin-left: 1.5rem;
+}
+
+.table_of_contents-indent-2 {
+	margin-left: 3rem;
+}
+
+.table_of_contents-indent-3 {
+	margin-left: 4.5rem;
+}
+
+.table_of_contents-link {
+	text-decoration: none;
+	opacity: 0.7;
+	border-bottom: 1px solid rgba(55, 53, 47, 0.18);
+}
+
+table,
+th,
+td {
+	border: 1px solid rgba(55, 53, 47, 0.09);
+	border-collapse: collapse;
+}
+
+table {
+	border-left: none;
+	border-right: none;
+}
+
+th,
+td {
+	font-weight: normal;
+	padding: 0.25em 0.5em;
+	line-height: 1.5;
+	min-height: 1.5em;
+	text-align: left;
+}
+
+th {
+	color: rgba(55, 53, 47, 0.6);
+}
+
+ol,
+ul {
+	margin: 0;
+	margin-block-start: 0.6em;
+	margin-block-end: 0.6em;
+}
+
+li > ol:first-child,
+li > ul:first-child {
+	margin-block-start: 0.6em;
+}
+
+ul > li {
+	list-style: disc;
+}
+
+ul.to-do-list {
+	padding-inline-start: 0;
+}
+
+ul.to-do-list > li {
+	list-style: none;
+}
+
+.to-do-children-checked {
+	text-decoration: line-through;
+	opacity: 0.375;
+}
+
+ul.toggle > li {
+	list-style: none;
+}
+
+ul {
+	padding-inline-start: 1.7em;
+}
+
+ul > li {
+	padding-left: 0.1em;
+}
+
+ol {
+	padding-inline-start: 1.6em;
+}
+
+ol > li {
+	padding-left: 0.2em;
+}
+
+.mono ol {
+	padding-inline-start: 2em;
+}
+
+.mono ol > li {
+	text-indent: -0.4em;
+}
+
+.toggle {
+	padding-inline-start: 0em;
+	list-style-type: none;
+}
+
+/* Indent toggle children */
+.toggle > li > details {
+	padding-left: 1.7em;
+}
+
+.toggle > li > details > summary {
+	margin-left: -1.1em;
+}
+
+.selected-value {
+	display: inline-block;
+	padding: 0 0.5em;
+	background: rgba(206, 205, 202, 0.5);
+	border-radius: 3px;
+	margin-right: 0.5em;
+	margin-top: 0.3em;
+	margin-bottom: 0.3em;
+	white-space: nowrap;
+}
+
+.collection-title {
+	display: inline-block;
+	margin-right: 1em;
+}
+
+.page-description {
+	margin-bottom: 2em;
+}
+
+.simple-table {
+	margin-top: 1em;
+	font-size: 0.875rem;
+	empty-cells: show;
+}
+.simple-table td {
+	height: 29px;
+	min-width: 120px;
+}
+
+.simple-table th {
+	height: 29px;
+	min-width: 120px;
+}
+
+.simple-table-header-color {
+	background: rgb(247, 246, 243);
+	color: black;
+}
+.simple-table-header {
+	font-weight: 500;
+}
+
+time {
+	opacity: 0.5;
+}
+
+.icon {
+	display: inline-flex;
+	align-items: center;
+	justify-content: center;
+	max-width: 1.2em;
+	max-height: 1.2em;
+	text-decoration: none;
+	vertical-align: text-bottom;
+	margin-right: 0.5em;
+}
+
+img.icon {
+	border-radius: 3px;
+}
+
+.callout img.notion-static-icon {
+	width: 1em;
+	height: 1em;
+}
+
+.callout p {
+	margin: 0;
+}
+
+.callout h1,
+.callout h2,
+.callout h3 {
+	margin: 0 0 0.6rem;
+}
+
+.user-icon {
+	width: 1.5em;
+	height: 1.5em;
+	border-radius: 100%;
+	margin-right: 0.5rem;
+}
+
+.user-icon-inner {
+	font-size: 0.8em;
+}
+
+.text-icon {
+	border: 1px solid #000;
+	text-align: center;
+}
+
+.page-cover-image {
+	display: block;
+	object-fit: cover;
+	width: 100%;
+	max-height: 30vh;
+}
+
+.page-header-icon {
+	font-size: 3rem;
+	margin-bottom: 1rem;
+}
+
+.page-header-icon-with-cover {
+	margin-top: -0.72em;
+	margin-left: 0.07em;
+}
+
+.page-header-icon img {
+	border-radius: 3px;
+}
+
+.link-to-page {
+	margin: 1em 0;
+	padding: 0;
+	border: none;
+	font-weight: 500;
+}
+
+p > .user {
+	opacity: 0.5;
+}
+
+td > .user,
+td > time {
+	white-space: nowrap;
+}
+
+input[type="checkbox"] {
+	transform: scale(1.5);
+	margin-right: 0.6em;
+	vertical-align: middle;
+}
+
+p {
+	margin-top: 0.5em;
+	margin-bottom: 0.5em;
+}
+
+.image {
+	border: none;
+	margin: 1.5em 0;
+	padding: 0;
+	border-radius: 0;
+	text-align: center;
+}
+
+.code,
+code {
+	background: rgba(135, 131, 120, 0.15);
+	border-radius: 3px;
+	padding: 0.2em 0.4em;
+	border-radius: 3px;
+	font-size: 85%;
+	tab-size: 2;
+}
+
+code {
+	color: #eb5757;
+}
+
+.code {
+	padding: 1.5em 1em;
+}
+
+.code-wrap {
+	white-space: pre-wrap;
+	word-break: break-all;
+}
+
+.code > code {
+	background: none;
+	padding: 0;
+	font-size: 100%;
+	color: inherit;
+}
+
+blockquote {
+	font-size: 1em;
+	margin: 1em 0;
+	padding-left: 1em;
+	border-left: 3px solid rgb(55, 53, 47);
+}
+
+blockquote.quote-large {
+	font-size: 1.25em;
+}
+
+.bookmark {
+	text-decoration: none;
+	max-height: 8em;
+	padding: 0;
+	display: flex;
+	width: 100%;
+	align-items: stretch;
+}
+
+.bookmark-title {
+	font-size: 0.85em;
+	overflow: hidden;
+	text-overflow: ellipsis;
+	height: 1.75em;
+	white-space: nowrap;
+}
+
+.bookmark-text {
+	display: flex;
+	flex-direction: column;
+}
+
+.bookmark-info {
+	flex: 4 1 180px;
+	padding: 12px 14px 14px;
+	display: flex;
+	flex-direction: column;
+	justify-content: space-between;
+}
+
+.bookmark-image {
+	width: 33%;
+	flex: 1 1 180px;
+	display: block;
+	position: relative;
+	object-fit: cover;
+	border-radius: 1px;
+}
+
+.bookmark-description {
+	color: rgba(55, 53, 47, 0.6);
+	font-size: 0.75em;
+	overflow: hidden;
+	max-height: 4.5em;
+	word-break: break-word;
+}
+
+.bookmark-href {
+	font-size: 0.75em;
+	margin-top: 0.25em;
+}
+
+.sans { font-family: ui-sans-serif, -apple-system, BlinkMacSystemFont, "Segoe UI Variable Display", "Segoe UI", Helvetica, "Apple Color Emoji", "Noto Sans Arabic", "Noto Sans Hebrew", Arial, sans-serif, "Segoe UI Emoji", "Segoe UI Symbol"; }
+.code { font-family: "SFMono-Regular", Menlo, Consolas, "PT Mono", "Liberation Mono", Courier, monospace; }
+.serif { font-family: Lyon-Text, Georgia, ui-serif, serif; }
+.mono { font-family: iawriter-mono, Nitti, Menlo, Courier, monospace; }
+.pdf .sans { font-family: Inter, ui-sans-serif, -apple-system, BlinkMacSystemFont, "Segoe UI Variable Display", "Segoe UI", Helvetica, "Apple Color Emoji", "Noto Sans Arabic", "Noto Sans Hebrew", Arial, sans-serif, "Segoe UI Emoji", "Segoe UI Symbol", 'Twemoji', 'Noto Color Emoji', 'Noto Sans CJK JP'; }
+.pdf:lang(zh-CN) .sans { font-family: Inter, ui-sans-serif, -apple-system, BlinkMacSystemFont, "Segoe UI Variable Display", "Segoe UI", Helvetica, "Apple Color Emoji", "Noto Sans Arabic", "Noto Sans Hebrew", Arial, sans-serif, "Segoe UI Emoji", "Segoe UI Symbol", 'Twemoji', 'Noto Color Emoji', 'Noto Sans CJK SC'; }
+.pdf:lang(zh-TW) .sans { font-family: Inter, ui-sans-serif, -apple-system, BlinkMacSystemFont, "Segoe UI Variable Display", "Segoe UI", Helvetica, "Apple Color Emoji", "Noto Sans Arabic", "Noto Sans Hebrew", Arial, sans-serif, "Segoe UI Emoji", "Segoe UI Symbol", 'Twemoji', 'Noto Color Emoji', 'Noto Sans CJK TC'; }
+.pdf:lang(ko-KR) .sans { font-family: Inter, ui-sans-serif, -apple-system, BlinkMacSystemFont, "Segoe UI Variable Display", "Segoe UI", Helvetica, "Apple Color Emoji", "Noto Sans Arabic", "Noto Sans Hebrew", Arial, sans-serif, "Segoe UI Emoji", "Segoe UI Symbol", 'Twemoji', 'Noto Color Emoji', 'Noto Sans CJK KR'; }
+.pdf .code { font-family: Source Code Pro, "SFMono-Regular", Menlo, Consolas, "PT Mono", "Liberation Mono", Courier, monospace, 'Twemoji', 'Noto Color Emoji', 'Noto Sans Mono CJK JP'; }
+.pdf:lang(zh-CN) .code { font-family: Source Code Pro, "SFMono-Regular", Menlo, Consolas, "PT Mono", "Liberation Mono", Courier, monospace, 'Twemoji', 'Noto Color Emoji', 'Noto Sans Mono CJK SC'; }
+.pdf:lang(zh-TW) .code { font-family: Source Code Pro, "SFMono-Regular", Menlo, Consolas, "PT Mono", "Liberation Mono", Courier, monospace, 'Twemoji', 'Noto Color Emoji', 'Noto Sans Mono CJK TC'; }
+.pdf:lang(ko-KR) .code { font-family: Source Code Pro, "SFMono-Regular", Menlo, Consolas, "PT Mono", "Liberation Mono", Courier, monospace, 'Twemoji', 'Noto Color Emoji', 'Noto Sans Mono CJK KR'; }
+.pdf .serif { font-family: PT Serif, Lyon-Text, Georgia, ui-serif, serif, 'Twemoji', 'Noto Color Emoji', 'Noto Serif CJK JP'; }
+.pdf:lang(zh-CN) .serif { font-family: PT Serif, Lyon-Text, Georgia, ui-serif, serif, 'Twemoji', 'Noto Color Emoji', 'Noto Serif CJK SC'; }
+.pdf:lang(zh-TW) .serif { font-family: PT Serif, Lyon-Text, Georgia, ui-serif, serif, 'Twemoji', 'Noto Color Emoji', 'Noto Serif CJK TC'; }
+.pdf:lang(ko-KR) .serif { font-family: PT Serif, Lyon-Text, Georgia, ui-serif, serif, 'Twemoji', 'Noto Color Emoji', 'Noto Serif CJK KR'; }
+.pdf .mono { font-family: PT Mono, iawriter-mono, Nitti, Menlo, Courier, monospace, 'Twemoji', 'Noto Color Emoji', 'Noto Sans Mono CJK JP'; }
+.pdf:lang(zh-CN) .mono { font-family: PT Mono, iawriter-mono, Nitti, Menlo, Courier, monospace, 'Twemoji', 'Noto Color Emoji', 'Noto Sans Mono CJK SC'; }
+.pdf:lang(zh-TW) .mono { font-family: PT Mono, iawriter-mono, Nitti, Menlo, Courier, monospace, 'Twemoji', 'Noto Color Emoji', 'Noto Sans Mono CJK TC'; }
+.pdf:lang(ko-KR) .mono { font-family: PT Mono, iawriter-mono, Nitti, Menlo, Courier, monospace, 'Twemoji', 'Noto Color Emoji', 'Noto Sans Mono CJK KR'; }
+.highlight-default {
+	color: rgba(44, 44, 43, 1);
+}
+.highlight-gray {
+	color: rgba(125, 122, 117, 1);
+	fill: rgba(125, 122, 117, 1);
+}
+.highlight-brown {
+	color: rgba(159, 118, 90, 1);
+	fill: rgba(159, 118, 90, 1);
+}
+.highlight-orange {
+	color: rgba(210, 123, 45, 1);
+	fill: rgba(210, 123, 45, 1);
+}
+.highlight-yellow {
+	color: rgba(203, 148, 52, 1);
+	fill: rgba(203, 148, 52, 1);
+}
+.highlight-teal {
+	color: rgba(80, 148, 110, 1);
+	fill: rgba(80, 148, 110, 1);
+}
+.highlight-blue {
+	color: rgba(56, 125, 201, 1);
+	fill: rgba(56, 125, 201, 1);
+}
+.highlight-purple {
+	color: rgba(154, 107, 180, 1);
+	fill: rgba(154, 107, 180, 1);
+}
+.highlight-pink {
+	color: rgba(193, 76, 138, 1);
+	fill: rgba(193, 76, 138, 1);
+}
+.highlight-red {
+	color: rgba(207, 81, 72, 1);
+	fill: rgba(207, 81, 72, 1);
+}
+.highlight-default_background {
+	color: rgba(44, 44, 43, 1);
+}
+.highlight-gray_background {
+	background: rgba(42, 28, 0, 0.07);
+}
+.highlight-brown_background {
+	background: rgba(139, 46, 0, 0.086);
+}
+.highlight-orange_background {
+	background: rgba(224, 101, 1, 0.129);
+}
+.highlight-yellow_background {
+	background: rgba(211, 168, 0, 0.137);
+}
+.highlight-teal_background {
+	background: rgba(0, 100, 45, 0.09);
+}
+.highlight-blue_background {
+	background: rgba(0, 124, 215, 0.094);
+}
+.highlight-purple_background {
+	background: rgba(102, 0, 178, 0.078);
+}
+.highlight-pink_background {
+	background: rgba(197, 0, 93, 0.086);
+}
+.highlight-red_background {
+	background: rgba(223, 22, 0, 0.094);
+}
+.block-color-default {
+	color: inherit;
+	fill: inherit;
+}
+.block-color-gray {
+	color: rgba(125, 122, 117, 1);
+	fill: rgba(125, 122, 117, 1);
+}
+.block-color-brown {
+	color: rgba(159, 118, 90, 1);
+	fill: rgba(159, 118, 90, 1);
+}
+.block-color-orange {
+	color: rgba(210, 123, 45, 1);
+	fill: rgba(210, 123, 45, 1);
+}
+.block-color-yellow {
+	color: rgba(203, 148, 52, 1);
+	fill: rgba(203, 148, 52, 1);
+}
+.block-color-teal {
+	color: rgba(80, 148, 110, 1);
+	fill: rgba(80, 148, 110, 1);
+}
+.block-color-blue {
+	color: rgba(56, 125, 201, 1);
+	fill: rgba(56, 125, 201, 1);
+}
+.block-color-purple {
+	color: rgba(154, 107, 180, 1);
+	fill: rgba(154, 107, 180, 1);
+}
+.block-color-pink {
+	color: rgba(193, 76, 138, 1);
+	fill: rgba(193, 76, 138, 1);
+}
+.block-color-red {
+	color: rgba(207, 81, 72, 1);
+	fill: rgba(207, 81, 72, 1);
+}
+.block-color-default_background {
+	color: inherit;
+	fill: inherit;
+}
+.block-color-gray_background {
+	background: rgba(240, 239, 237, 1);
+}
+.block-color-brown_background {
+	background: rgba(245, 237, 233, 1);
+}
+.block-color-orange_background {
+	background: rgba(251, 235, 222, 1);
+}
+.block-color-yellow_background {
+	background: rgba(249, 243, 220, 1);
+}
+.block-color-teal_background {
+	background: rgba(232, 241, 236, 1);
+}
+.block-color-blue_background {
+	background: rgba(229, 242, 252, 1);
+}
+.block-color-purple_background {
+	background: rgba(243, 235, 249, 1);
+}
+.block-color-pink_background {
+	background: rgba(250, 233, 241, 1);
+}
+.block-color-red_background {
+	background: rgba(252, 233, 231, 1);
+}
+.select-value-color-default { background-color: rgba(42, 28, 0, 0.07); }
+.select-value-color-gray { background-color: rgba(28, 19, 1, 0.11); }
+.select-value-color-brown { background-color: rgba(127, 51, 0, 0.156); }
+.select-value-color-orange { background-color: rgba(196, 88, 0, 0.203); }
+.select-value-color-yellow { background-color: rgba(209, 156, 0, 0.282); }
+.select-value-color-green { background-color: rgba(0, 96, 38, 0.156); }
+.select-value-color-blue { background-color: rgba(0, 118, 217, 0.203); }
+.select-value-color-purple { background-color: rgba(92, 0, 163, 0.141); }
+.select-value-color-pink { background-color: rgba(183, 0, 78, 0.152); }
+.select-value-color-red { background-color: rgba(206, 24, 0, 0.164); }
+
+.checkbox {
+	display: inline-flex;
+	vertical-align: text-bottom;
+	width: 16;
+	height: 16;
+	background-size: 16px;
+	margin-left: 2px;
+	margin-right: 5px;
+}
+
+.checkbox-on {
+	background-image: url("data:image/svg+xml;charset=UTF-8,%3Csvg%20width%3D%2216%22%20height%3D%2216%22%20viewBox%3D%220%200%2016%2016%22%20fill%3D%22none%22%20xmlns%3D%22http%3A%2F%2Fwww.w3.org%2F2000%2Fsvg%22%3E%0A%3Crect%20width%3D%2216%22%20height%3D%2216%22%20fill%3D%22%2358A9D7%22%2F%3E%0A%3Cpath%20d%3D%22M6.71429%2012.2852L14%204.9995L12.7143%203.71436L6.71429%209.71378L3.28571%206.2831L2%207.57092L6.71429%2012.2852Z%22%20fill%3D%22white%22%2F%3E%0A%3C%2Fsvg%3E");
+}
+
+.checkbox-off {
+	background-image: url("data:image/svg+xml;charset=UTF-8,%3Csvg%20width%3D%2216%22%20height%3D%2216%22%20viewBox%3D%220%200%2016%2016%22%20fill%3D%22none%22%20xmlns%3D%22http%3A%2F%2Fwww.w3.org%2F2000%2Fsvg%22%3E%0A%3Crect%20x%3D%220.75%22%20y%3D%220.75%22%20width%3D%2214.5%22%20height%3D%2214.5%22%20fill%3D%22white%22%20stroke%3D%22%2336352F%22%20stroke-width%3D%221.5%22%2F%3E%0A%3C%2Fsvg%3E");
+}
+	
+</style></head><body><article id="1e485df0-1907-80d3-91c3-c2e7f27f340f" class="page sans"><header><h1 class="page-title" dir="auto">🛠️ Nzila CTO Technical Strategy Summary</h1><p class="page-description" dir="auto"></p><table class="properties"><tbody><tr class="property-row property-row-person"><th><span class="icon property-icon"><img src="https://www.notion.so/icons/friends_gray.svg" style="width:14px;height:14px;display:block"/></span>Owner</th><td><span class="user"><span class="icon text-icon user-icon"><span class="user-icon-inner">A</span></span>Aubert</span></td></tr><tr class="property-row property-row-multi_select"><th><span class="icon property-icon"><img src="https://www.notion.so/icons/list_gray.svg" style="width:14px;height:14px;display:block"/></span>Tags</th><td></td></tr></tbody></table></header><div class="page-body"><div style="display:contents" dir="auto"><h3 id="1e885df0-1907-807a-a861-ccd6816aed63" class="">🔧 1. Guiding Principles for Nzila’s Technology</h3></div><div style="display:contents" dir="auto"><p id="1e885df0-1907-806d-94ab-c528c93198b9" class="">Nzila’s tech backbone is intentionally <strong>modular, ethical, and fast to iterate</strong>, anchored by five enduring principles:</p></div><div style="display:contents" dir="ltr"><table id="1e885df0-1907-80d1-8135-f91874bde30b" class="simple-table"><tbody><div style="display:contents" dir="ltr"><tr id="1e885df0-1907-806d-a781-f09a169543e3"><td id="yNHc" class="">Principle</td><td id="zNSU" class="">Implication</td></tr></div><div style="display:contents" dir="ltr"><tr id="1e885df0-1907-8038-a5c7-d36672fcc78b"><td id="yNHc" class=""><strong>Modular by Default</strong></td><td id="zNSU" class="">Every product must stand alone but integrate horizontally into the AI Core</td></tr></div><div style="display:contents" dir="ltr"><tr id="1e885df0-1907-8088-9545-c28cdda8005d"><td id="yNHc" class=""><strong>Privacy-by-Architecture</strong></td><td id="zNSU" class="">User trust is enforced at the infrastructure level—not as a UX overlay</td></tr></div><div style="display:contents" dir="ltr"><tr id="1e885df0-1907-80e2-93de-e9b2137aa8e0"><td id="yNHc" class=""><strong>Cloud-Native + Lean DevOps</strong></td><td id="zNSU" class="">Supabase + Vercel-first stack allows fast prototyping, global scale</td></tr></div><div style="display:contents" dir="ltr"><tr id="1e885df0-1907-806c-970d-f0b3ca7768e6"><td id="yNHc" class=""><strong>AI-Assisted, Never AI-Driven</strong></td><td id="zNSU" class="">Companion logic must enhance—not override—user control</td></tr></div><div style="display:contents" dir="ltr"><tr id="1e885df0-1907-8030-9a63-f5c95a736ae8"><td id="yNHc" class=""><strong>Iteration Speed &gt; Over-Engineering</strong></td><td id="zNSU" class="">MVPs should prioritize testability, feedback loops, and shipping clarity</td></tr></div></tbody></table></div><div style="display:contents" dir="auto"><hr id="1e885df0-1907-80af-9f9e-dc168d4e1152"/></div><div style="display:contents" dir="auto"><h3 id="1e885df0-1907-805b-a974-f8320150cb48" class="">🌐 2. Core Tech Stack (Live + Planned)</h3></div><div style="display:contents" dir="ltr"><table id="1e885df0-1907-8054-b1c4-f0b48e87aa1b" class="simple-table"><tbody><div style="display:contents" dir="ltr"><tr id="1e885df0-1907-80a2-98aa-f1d98d174a48"><td id="K{d&gt;" class="">Layer</td><td id="J^@_" class="">Toolset</td><td id="wBsI" class="">Notes</td></tr></div><div style="display:contents" dir="ltr"><tr id="1e885df0-1907-80fd-af27-f4ad0b374a5e"><td id="K{d&gt;" class=""><strong>Frontend (Web)</strong></td><td id="J^@_" class="">React + Tailwind CSS</td><td id="wBsI" class="">Design tokens from Figma; mobile-first</td></tr></div><div style="display:contents" dir="ltr"><tr id="1e885df0-1907-80ed-8775-ca1031f61d53"><td id="K{d&gt;" class=""><strong>Mobile</strong></td><td id="J^@_" class="">React Native (2026)</td><td id="wBsI" class="">Shared base for Companion + Clinic views</td></tr></div><div style="display:contents" dir="ltr"><tr id="1e885df0-1907-8072-acec-d263a37532d3"><td id="K{d&gt;" class=""><strong>Backend</strong></td><td id="J^@_" class="">Node.js + Supabase Functions</td><td id="wBsI" class="">Lightweight, extensible APIs</td></tr></div><div style="display:contents" dir="ltr"><tr id="1e885df0-1907-8040-909a-df5e2265da14"><td id="K{d&gt;" class=""><strong>Database</strong></td><td id="J^@_" class="">PostgreSQL (via Supabase)</td><td id="wBsI" class="">Real-time sync + row-level security</td></tr></div><div style="display:contents" dir="ltr"><tr id="1e885df0-1907-80d9-92fe-c4227d5d44ff"><td id="K{d&gt;" class=""><strong>Auth</strong></td><td id="J^@_" class="">Firebase / Magic Link</td><td id="wBsI" class="">SSO, social logins (Google, Apple)</td></tr></div><div style="display:contents" dir="ltr"><tr id="1e885df0-1907-80d9-b526-c81d30bbf15b"><td id="K{d&gt;" class=""><strong>AI Logic</strong></td><td id="J^@_" class="">OpenAI API + internal model hooks</td><td id="wBsI" class="">NLP, nudging, personalization (future: Claude fallback)</td></tr></div><div style="display:contents" dir="ltr"><tr id="1e885df0-1907-803c-8171-ecf010287b71"><td id="K{d&gt;" class=""><strong>Infra &amp; Hosting</strong></td><td id="J^@_" class="">Vercel + Supabase + Cloudflare</td><td id="wBsI" class="">Staging/production separation + API routing</td></tr></div><div style="display:contents" dir="ltr"><tr id="1e885df0-1907-80e2-9e30-c14f5ba4a103"><td id="K{d&gt;" class=""><strong>Monitoring</strong></td><td id="J^@_" class="">Sentry + LogRocket (Q4 2025)</td><td id="wBsI" class="">Auto-flag regressions in Companion behavior</td></tr></div><div style="display:contents" dir="ltr"><tr id="1e885df0-1907-80a4-a1aa-d957eec7c66c"><td id="K{d&gt;" class=""><strong>CMS/CRM</strong></td><td id="J^@_" class="">Brevo + HubSpot + Notion</td><td id="wBsI" class="">Lifecycle email + internal SOP + light CRM</td></tr></div></tbody></table></div><div style="display:contents" dir="auto"><hr id="1e885df0-1907-8003-96bd-e575270d9cc2"/></div><div style="display:contents" dir="auto"><h3 id="1e885df0-1907-8000-b355-cf5407499162" class="">🧱 3. Platform Architecture: Shared Core, Product-Specific Verticals</h3></div><div style="display:contents" dir="auto"><p id="1e885df0-1907-80ee-a35e-fa0d18215fa3" class="">Nzila operates on a <strong>shared services + vertical pod</strong> model:</p></div><div style="display:contents" dir="auto"><ul id="1e885df0-1907-80ed-8a8f-c1786909852f" class="bulleted-list"><li style="list-style-type:disc">Shared services: AI Core, security/auth, consent, design system, audit logs</li></ul></div><div style="display:contents" dir="auto"><ul id="1e885df0-1907-800f-93a3-fe19cec4d99c" class="bulleted-list"><li style="list-style-type:disc">Product-specific layers: Frontend apps, gamification logic, dashboards</li></ul></div><div style="display:contents" dir="auto"><ul id="1e885df0-1907-808c-a386-ea91f3141988" class="bulleted-list"><li style="list-style-type:disc">CI/CD per vertical, but monitored centrally</li></ul></div><div style="display:contents" dir="auto"><ul id="1e885df0-1907-8064-a110-e95f97e24d35" class="bulleted-list"><li style="list-style-type:disc">Optional: Modular GraphQL API gateway in 2026 for external integrations</li></ul></div><div style="display:contents" dir="auto"><hr id="1e885df0-1907-806a-8f30-e60bdf4fef7d"/></div><div style="display:contents" dir="auto"><h3 id="1e885df0-1907-8071-902f-e0bdc3d089ad" class="">🤖 4. AI Technical Strategy</h3></div><div style="display:contents" dir="ltr"><table id="1e885df0-1907-802a-ac21-fd5aa0ab4af1" class="simple-table"><tbody><div style="display:contents" dir="ltr"><tr id="1e885df0-1907-802e-b2cb-fb9e95e26070"><td id="cilN" class="">Component</td><td id="|Jsk" class="">Role</td><td id="Mebh" class="">Status</td></tr></div><div style="display:contents" dir="ltr"><tr id="1e885df0-1907-80fd-b46a-cb02c75425d6"><td id="cilN" class=""><strong>Companion Engine (NLP)</strong></td><td id="|Jsk" class="">Prompts, nudges, tone</td><td id="Mebh" class="">Live MVP</td></tr></div><div style="display:contents" dir="ltr"><tr id="1e885df0-1907-8009-8518-f3decf3089dd"><td id="cilN" class=""><strong>Personalization Layer</strong></td><td id="|Jsk" class="">Learns user context, timing</td><td id="Mebh" class="">Q1–Q2 2026</td></tr></div><div style="display:contents" dir="ltr"><tr id="1e885df0-1907-80d2-8a5e-ee8b89f68530"><td id="cilN" class=""><strong>Recommendation Engine</strong></td><td id="|Jsk" class="">Content/games/modules</td><td id="Mebh" class="">Phase 2 rollout</td></tr></div><div style="display:contents" dir="ltr"><tr id="1e885df0-1907-8071-97ee-cf69479abfef"><td id="cilN" class=""><strong>Contextual Interpreter</strong></td><td id="|Jsk" class="">Detect mood, fatigue, intent</td><td id="Mebh" class="">Phase 3 (opt-in only)</td></tr></div><div style="display:contents" dir="ltr"><tr id="1e885df0-1907-80ce-b80b-e3eb7e08546d"><td id="cilN" class=""><strong>Nzila AI Core</strong></td><td id="|Jsk" class="">Unified layer across products</td><td id="Mebh" class="">Q4 2026–2027 (buildout)</td></tr></div><div style="display:contents" dir="ltr"><tr id="1e885df0-1907-80b3-9a5e-f31a9ecdacb8"><td id="cilN" class=""><strong>Companion API SDK</strong></td><td id="|Jsk" class="">External usage for partners</td><td id="Mebh" class="">2028</td></tr></div></tbody></table></div><div style="display:contents" dir="auto"><blockquote id="1e885df0-1907-80be-a7cb-d3fd44f7d9d7" class="">Companion logic is always auditable, user-controlled, and tied to Nzila’s [Ethical AI Charter].</blockquote></div><div style="display:contents" dir="auto"><hr id="1e885df0-1907-8011-b9a2-e60ce67e9be6"/></div><div style="display:contents" dir="auto"><h3 id="1e885df0-1907-804f-accf-d37eef82f530" class="">🧪 5. Development Workflow &amp; Engineering Culture</h3></div><div style="display:contents" dir="ltr"><table id="1e885df0-1907-808c-bd9a-cf580a5b1e73" class="simple-table"><tbody><div style="display:contents" dir="ltr"><tr id="1e885df0-1907-80ad-929d-c91d8eaa0a49"><td id="cV`T" class="">Practice</td><td id="qGCb" class="">Description</td></tr></div><div style="display:contents" dir="ltr"><tr id="1e885df0-1907-80b4-97cc-c8734ea458de"><td id="cV`T" class=""><strong>Sprint-Driven Agile</strong></td><td id="qGCb" class="">2-week sprints + retros with clear roadmap visibility</td></tr></div><div style="display:contents" dir="ltr"><tr id="1e885df0-1907-80ab-b467-d86909a480ee"><td id="cV`T" class=""><strong>Contractor-Core Hybrid</strong></td><td id="qGCb" class="">Pre-scoped tasks enable nimble external resource use</td></tr></div><div style="display:contents" dir="ltr"><tr id="1e885df0-1907-8082-a1b6-fcbd3fc42739"><td id="cV`T" class=""><strong>Figma-First Delivery</strong></td><td id="qGCb" class="">UI locked before dev with full component mapping</td></tr></div><div style="display:contents" dir="ltr"><tr id="1e885df0-1907-80e5-a449-ef02569afa9d"><td id="cV`T" class=""><strong>QA Checklist</strong></td><td id="qGCb" class="">Internal pre-release validations (e.g., Companion logic, auth flows)</td></tr></div><div style="display:contents" dir="ltr"><tr id="1e885df0-1907-8072-92c3-dd4a0801a4c5"><td id="cV`T" class=""><strong>Code Standards</strong></td><td id="qGCb" class="">Repo modularization, naming conventions, version tracking enforced</td></tr></div></tbody></table></div><div style="display:contents" dir="auto"><hr id="1e885df0-1907-8035-9a03-dfe03cb7b378"/></div><div style="display:contents" dir="auto"><h3 id="1e885df0-1907-806d-8c1d-f3de4db514ff" class="">🔐 6. Security &amp; Compliance Model</h3></div><div style="display:contents" dir="ltr"><table id="1e885df0-1907-8039-880f-e9f222f853db" class="simple-table"><tbody><div style="display:contents" dir="ltr"><tr id="1e885df0-1907-80dd-919d-ef64c76cf9ca"><td id="yuVi" class="">Layer</td><td id="j[ca" class="">Control</td></tr></div><div style="display:contents" dir="ltr"><tr id="1e885df0-1907-8034-b597-c8486d991820"><td id="yuVi" class=""><strong>Data</strong></td><td id="j[ca" class="">AES-256 encryption; hosted in Canada 🇨🇦</td></tr></div><div style="display:contents" dir="ltr"><tr id="1e885df0-1907-80f1-bd38-e9bc53b96f07"><td id="yuVi" class=""><strong>Access</strong></td><td id="j[ca" class="">RBAC (clinic, caregiver, admin); IP-scoped API keys</td></tr></div><div style="display:contents" dir="ltr"><tr id="1e885df0-1907-80fa-a6a7-ecb5c142c41b"><td id="yuVi" class=""><strong>Logging</strong></td><td id="j[ca" class="">Companion activity, deletions, admin actions tracked</td></tr></div><div style="display:contents" dir="ltr"><tr id="1e885df0-1907-8078-89d5-e6b60481f5b1"><td id="yuVi" class=""><strong>Consent</strong></td><td id="j[ca" class="">Tiered, opt-in, purpose-specific—stored in Supabase ledger</td></tr></div><div style="display:contents" dir="ltr"><tr id="1e885df0-1907-80c8-ae00-d066ceb5ea42"><td id="yuVi" class=""><strong>3rd Party</strong></td><td id="j[ca" class="">API partners (e.g., OpenAI) go through Privacy Officer review</td></tr></div></tbody></table></div><div style="display:contents" dir="auto"><hr id="1e885df0-1907-806a-8727-ffc34228c49f"/></div><div style="display:contents" dir="auto"><h3 id="1e885df0-1907-80c8-88eb-eb3ba7a8e5e0" class="">📈 7. Technical Milestone Roadmap (2025–2028)</h3></div><div style="display:contents" dir="ltr"><table id="1e885df0-1907-8081-b9c9-f0a6ee46eb77" class="simple-table"><tbody><div style="display:contents" dir="ltr"><tr id="1e885df0-1907-805c-83c6-d323f735e5b2"><td id="OAOf" class="">Quarter</td><td id="yc^l" class="">Milestone</td></tr></div><div style="display:contents" dir="ltr"><tr id="1e885df0-1907-804e-89bb-d1eb726192f5"><td id="OAOf" class=""><strong>Q3–Q4 2025</strong></td><td id="yc^l" class="">Memora MVP live; security review complete</td></tr></div><div style="display:contents" dir="ltr"><tr id="1e885df0-1907-809d-b204-f3ec86298cf8"><td id="OAOf" class=""><strong>Q1 2026</strong></td><td id="yc^l" class="">Companion logic enhancements + ClinicConnect alpha</td></tr></div><div style="display:contents" dir="ltr"><tr id="1e885df0-1907-802d-bb47-f3bf4ebb1ebc"><td id="OAOf" class=""><strong>Q2–Q3 2026</strong></td><td id="yc^l" class="">FamilySync DB + multi-profile logic</td></tr></div><div style="display:contents" dir="ltr"><tr id="1e885df0-1907-80b9-aaa1-ebdf230280cd"><td id="OAOf" class=""><strong>Q4 2026</strong></td><td id="yc^l" class="">AI Core v1 launched; NLP optimization phase begins</td></tr></div><div style="display:contents" dir="ltr"><tr id="1e885df0-1907-8038-bfa9-d046d77a34be"><td id="OAOf" class=""><strong>2027</strong></td><td id="yc^l" class="">Companion SDK designed for platform extension</td></tr></div><div style="display:contents" dir="ltr"><tr id="1e885df0-1907-8066-97db-cc26a03986df"><td id="OAOf" class=""><strong>2028</strong></td><td id="yc^l" class="">Optional multi-tenant infrastructure + developer onboarding tools</td></tr></div></tbody></table></div><div style="display:contents" dir="auto"><hr id="1e885df0-1907-80ef-9fde-d5be26d8f7c7"/></div><div style="display:contents" dir="auto"><h3 id="1e885df0-1907-806a-88a9-cd3fb37c2569" class="">🛡️ 8. Risk Mitigation Strategy</h3></div><div style="display:contents" dir="ltr"><table id="1e885df0-1907-80eb-9ccb-d35e320cb437" class="simple-table"><tbody><div style="display:contents" dir="ltr"><tr id="1e885df0-1907-80c1-858d-da54c96cf3ff"><td id="AuF?" class="">Risk</td><td id="eIBg" class="">Mitigation</td></tr></div><div style="display:contents" dir="ltr"><tr id="1e885df0-1907-80d7-9973-d8564bc5f22e"><td id="AuF?" class=""><strong>Vendor lock-in (AI APIs)</strong></td><td id="eIBg" class="">Claude fallback + abstracted logic layer</td></tr></div><div style="display:contents" dir="ltr"><tr id="1e885df0-1907-8032-a3f6-e35fb0eb59ba"><td id="AuF?" class=""><strong>Cross-product performance issues</strong></td><td id="eIBg" class="">Logging + phased microservice rollout</td></tr></div><div style="display:contents" dir="ltr"><tr id="1e885df0-1907-80ae-b6c6-f802eb0c4e51"><td id="AuF?" class=""><strong>Compliance gaps (Law 25, HIPAA)</strong></td><td id="eIBg" class="">Architecture baked with consent logic, data isolation</td></tr></div><div style="display:contents" dir="ltr"><tr id="1e885df0-1907-8030-911e-c1ea75ad0b65"><td id="AuF?" class=""><strong>Dev velocity bottlenecks</strong></td><td id="eIBg" class="">Maintain backlog of pre-scoped external builds</td></tr></div><div style="display:contents" dir="ltr"><tr id="1e885df0-1907-803e-b801-f1564b27753d"><td id="AuF?" class=""><strong>Clinic integration friction</strong></td><td id="eIBg" class="">Build non-invasive dashboard overlays (EMR-agnostic design)</td></tr></div></tbody></table></div><div style="display:contents" dir="auto"><hr id="1e885df0-1907-809a-adf2-e913fc4078a7"/></div><div style="display:contents" dir="auto"><h3 id="1e885df0-1907-8033-978b-c7ba27bd7d39" class="">📅 Governance &amp; Ops</h3></div><div style="display:contents" dir="ltr"><table id="1e885df0-1907-809f-b2d7-e20ba2f3b025" class="simple-table"><tbody><div style="display:contents" dir="ltr"><tr id="1e885df0-1907-8062-9cee-f00182e3ac91"><td id="PSCW" class="">Activity</td><td id=":IRI" class="">Cadence</td></tr></div><div style="display:contents" dir="ltr"><tr id="1e885df0-1907-802b-9c8c-fc0ac4da3edb"><td id="PSCW" class="">Tech Review</td><td id=":IRI" class="">Bi-monthly during MVP, quarterly post-launch</td></tr></div><div style="display:contents" dir="ltr"><tr id="1e885df0-1907-802f-8373-e50804ac61f3"><td id="PSCW" class="">Dev Standups</td><td id=":IRI" class="">Weekly</td></tr></div><div style="display:contents" dir="ltr"><tr id="1e885df0-1907-80e6-920a-c24bac89c7a2"><td id="PSCW" class="">Sprint Planning + Retro</td><td id=":IRI" class="">Every 2 weeks</td></tr></div><div style="display:contents" dir="ltr"><tr id="1e885df0-1907-8053-b0f1-de9d93b2dbe6"><td id="PSCW" class="">Hiring Gate</td><td id=":IRI" class="">$10K/month burn OR &gt;2 live products</td></tr></div><div style="display:contents" dir="ltr"><tr id="1e885df0-1907-80c7-be61-ca337042c7e5"><td id="PSCW" class="">CTO Report to Board</td><td id=":IRI" class="">Quarterly (linked to roadmap + risk log)</td></tr></div></tbody></table></div></div></article><span class="sans" style="font-size:14px;padding-top:2em"></span></body></html>

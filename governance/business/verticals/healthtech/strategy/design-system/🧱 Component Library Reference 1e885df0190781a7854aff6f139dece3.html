@@ -1,0 +1,713 @@
+<html><head><meta http-equiv="Content-Type" content="text/html; charset=utf-8"/><title>🧱 Component Library Reference</title><style>
+/* cspell:disable-file */
+/* webkit printing magic: print all background colors */
+html {
+	-webkit-print-color-adjust: exact;
+}
+* {
+	box-sizing: border-box;
+	-webkit-print-color-adjust: exact;
+}
+
+html,
+body {
+	margin: 0;
+	padding: 0;
+}
+@media only screen {
+	body {
+		margin: 2em auto;
+		max-width: 900px;
+		color: rgb(55, 53, 47);
+	}
+}
+
+body {
+	line-height: 1.5;
+	white-space: pre-wrap;
+}
+
+a,
+a.visited {
+	color: inherit;
+	text-decoration: underline;
+}
+
+.pdf-relative-link-path {
+	font-size: 80%;
+	color: #444;
+}
+
+h1,
+h2,
+h3 {
+	letter-spacing: -0.01em;
+	line-height: 1.2;
+	font-weight: 600;
+	margin-bottom: 0;
+}
+
+/* Override strong tags inside headings to maintain consistent weight */
+h1 strong,
+h2 strong,
+h3 strong {
+	font-weight: 600;
+}
+
+.page-title {
+	font-size: 2.5rem;
+	font-weight: 700;
+	margin-top: 0;
+	margin-bottom: 0.75em;
+}
+
+h1 {
+	font-size: 1.875rem;
+	margin-top: 1.875rem;
+}
+
+h2 {
+	font-size: 1.5rem;
+	margin-top: 1.5rem;
+}
+
+h3 {
+	font-size: 1.25rem;
+	margin-top: 1.25rem;
+}
+
+.source {
+	border: 1px solid #ddd;
+	border-radius: 3px;
+	padding: 1.5em;
+	word-break: break-all;
+}
+
+.callout {
+	border-radius: 10px;
+	padding: 1rem;
+}
+
+figure {
+	margin: 1.25em 0;
+	page-break-inside: avoid;
+}
+
+figcaption {
+	opacity: 0.5;
+	font-size: 85%;
+	margin-top: 0.5em;
+}
+
+mark {
+	background-color: transparent;
+}
+
+.indented {
+	padding-left: 1.5em;
+}
+
+hr {
+	background: transparent;
+	display: block;
+	width: 100%;
+	height: 1px;
+	visibility: visible;
+	border: none;
+	border-bottom: 1px solid rgba(55, 53, 47, 0.09);
+}
+
+img {
+	max-width: 100%;
+}
+
+@media only print {
+	img {
+		max-height: 100vh;
+		object-fit: contain;
+	}
+}
+
+@page {
+	margin: 1in;
+}
+
+.collection-content {
+	font-size: 0.875rem;
+}
+
+.collection-content td {
+	white-space: pre-wrap;
+	word-break: break-word;
+}
+
+.column-list {
+	display: flex;
+	justify-content: space-between;
+}
+
+.column {
+	padding: 0 1em;
+}
+
+.column:first-child {
+	padding-left: 0;
+}
+
+.column:last-child {
+	padding-right: 0;
+}
+
+.table_of_contents-item {
+	display: block;
+	font-size: 0.875rem;
+	line-height: 1.3;
+	padding: 0.125rem;
+}
+
+.table_of_contents-indent-1 {
+	margin-left: 1.5rem;
+}
+
+.table_of_contents-indent-2 {
+	margin-left: 3rem;
+}
+
+.table_of_contents-indent-3 {
+	margin-left: 4.5rem;
+}
+
+.table_of_contents-link {
+	text-decoration: none;
+	opacity: 0.7;
+	border-bottom: 1px solid rgba(55, 53, 47, 0.18);
+}
+
+table,
+th,
+td {
+	border: 1px solid rgba(55, 53, 47, 0.09);
+	border-collapse: collapse;
+}
+
+table {
+	border-left: none;
+	border-right: none;
+}
+
+th,
+td {
+	font-weight: normal;
+	padding: 0.25em 0.5em;
+	line-height: 1.5;
+	min-height: 1.5em;
+	text-align: left;
+}
+
+th {
+	color: rgba(55, 53, 47, 0.6);
+}
+
+ol,
+ul {
+	margin: 0;
+	margin-block-start: 0.6em;
+	margin-block-end: 0.6em;
+}
+
+li > ol:first-child,
+li > ul:first-child {
+	margin-block-start: 0.6em;
+}
+
+ul > li {
+	list-style: disc;
+}
+
+ul.to-do-list {
+	padding-inline-start: 0;
+}
+
+ul.to-do-list > li {
+	list-style: none;
+}
+
+.to-do-children-checked {
+	text-decoration: line-through;
+	opacity: 0.375;
+}
+
+ul.toggle > li {
+	list-style: none;
+}
+
+ul {
+	padding-inline-start: 1.7em;
+}
+
+ul > li {
+	padding-left: 0.1em;
+}
+
+ol {
+	padding-inline-start: 1.6em;
+}
+
+ol > li {
+	padding-left: 0.2em;
+}
+
+.mono ol {
+	padding-inline-start: 2em;
+}
+
+.mono ol > li {
+	text-indent: -0.4em;
+}
+
+.toggle {
+	padding-inline-start: 0em;
+	list-style-type: none;
+}
+
+/* Indent toggle children */
+.toggle > li > details {
+	padding-left: 1.7em;
+}
+
+.toggle > li > details > summary {
+	margin-left: -1.1em;
+}
+
+.selected-value {
+	display: inline-block;
+	padding: 0 0.5em;
+	background: rgba(206, 205, 202, 0.5);
+	border-radius: 3px;
+	margin-right: 0.5em;
+	margin-top: 0.3em;
+	margin-bottom: 0.3em;
+	white-space: nowrap;
+}
+
+.collection-title {
+	display: inline-block;
+	margin-right: 1em;
+}
+
+.page-description {
+	margin-bottom: 2em;
+}
+
+.simple-table {
+	margin-top: 1em;
+	font-size: 0.875rem;
+	empty-cells: show;
+}
+.simple-table td {
+	height: 29px;
+	min-width: 120px;
+}
+
+.simple-table th {
+	height: 29px;
+	min-width: 120px;
+}
+
+.simple-table-header-color {
+	background: rgb(247, 246, 243);
+	color: black;
+}
+.simple-table-header {
+	font-weight: 500;
+}
+
+time {
+	opacity: 0.5;
+}
+
+.icon {
+	display: inline-flex;
+	align-items: center;
+	justify-content: center;
+	max-width: 1.2em;
+	max-height: 1.2em;
+	text-decoration: none;
+	vertical-align: text-bottom;
+	margin-right: 0.5em;
+}
+
+img.icon {
+	border-radius: 3px;
+}
+
+.callout img.notion-static-icon {
+	width: 1em;
+	height: 1em;
+}
+
+.callout p {
+	margin: 0;
+}
+
+.callout h1,
+.callout h2,
+.callout h3 {
+	margin: 0 0 0.6rem;
+}
+
+.user-icon {
+	width: 1.5em;
+	height: 1.5em;
+	border-radius: 100%;
+	margin-right: 0.5rem;
+}
+
+.user-icon-inner {
+	font-size: 0.8em;
+}
+
+.text-icon {
+	border: 1px solid #000;
+	text-align: center;
+}
+
+.page-cover-image {
+	display: block;
+	object-fit: cover;
+	width: 100%;
+	max-height: 30vh;
+}
+
+.page-header-icon {
+	font-size: 3rem;
+	margin-bottom: 1rem;
+}
+
+.page-header-icon-with-cover {
+	margin-top: -0.72em;
+	margin-left: 0.07em;
+}
+
+.page-header-icon img {
+	border-radius: 3px;
+}
+
+.link-to-page {
+	margin: 1em 0;
+	padding: 0;
+	border: none;
+	font-weight: 500;
+}
+
+p > .user {
+	opacity: 0.5;
+}
+
+td > .user,
+td > time {
+	white-space: nowrap;
+}
+
+input[type="checkbox"] {
+	transform: scale(1.5);
+	margin-right: 0.6em;
+	vertical-align: middle;
+}
+
+p {
+	margin-top: 0.5em;
+	margin-bottom: 0.5em;
+}
+
+.image {
+	border: none;
+	margin: 1.5em 0;
+	padding: 0;
+	border-radius: 0;
+	text-align: center;
+}
+
+.code,
+code {
+	background: rgba(135, 131, 120, 0.15);
+	border-radius: 3px;
+	padding: 0.2em 0.4em;
+	border-radius: 3px;
+	font-size: 85%;
+	tab-size: 2;
+}
+
+code {
+	color: #eb5757;
+}
+
+.code {
+	padding: 1.5em 1em;
+}
+
+.code-wrap {
+	white-space: pre-wrap;
+	word-break: break-all;
+}
+
+.code > code {
+	background: none;
+	padding: 0;
+	font-size: 100%;
+	color: inherit;
+}
+
+blockquote {
+	font-size: 1em;
+	margin: 1em 0;
+	padding-left: 1em;
+	border-left: 3px solid rgb(55, 53, 47);
+}
+
+blockquote.quote-large {
+	font-size: 1.25em;
+}
+
+.bookmark {
+	text-decoration: none;
+	max-height: 8em;
+	padding: 0;
+	display: flex;
+	width: 100%;
+	align-items: stretch;
+}
+
+.bookmark-title {
+	font-size: 0.85em;
+	overflow: hidden;
+	text-overflow: ellipsis;
+	height: 1.75em;
+	white-space: nowrap;
+}
+
+.bookmark-text {
+	display: flex;
+	flex-direction: column;
+}
+
+.bookmark-info {
+	flex: 4 1 180px;
+	padding: 12px 14px 14px;
+	display: flex;
+	flex-direction: column;
+	justify-content: space-between;
+}
+
+.bookmark-image {
+	width: 33%;
+	flex: 1 1 180px;
+	display: block;
+	position: relative;
+	object-fit: cover;
+	border-radius: 1px;
+}
+
+.bookmark-description {
+	color: rgba(55, 53, 47, 0.6);
+	font-size: 0.75em;
+	overflow: hidden;
+	max-height: 4.5em;
+	word-break: break-word;
+}
+
+.bookmark-href {
+	font-size: 0.75em;
+	margin-top: 0.25em;
+}
+
+.sans { font-family: ui-sans-serif, -apple-system, BlinkMacSystemFont, "Segoe UI Variable Display", "Segoe UI", Helvetica, "Apple Color Emoji", "Noto Sans Arabic", "Noto Sans Hebrew", Arial, sans-serif, "Segoe UI Emoji", "Segoe UI Symbol"; }
+.code { font-family: "SFMono-Regular", Menlo, Consolas, "PT Mono", "Liberation Mono", Courier, monospace; }
+.serif { font-family: Lyon-Text, Georgia, ui-serif, serif; }
+.mono { font-family: iawriter-mono, Nitti, Menlo, Courier, monospace; }
+.pdf .sans { font-family: Inter, ui-sans-serif, -apple-system, BlinkMacSystemFont, "Segoe UI Variable Display", "Segoe UI", Helvetica, "Apple Color Emoji", "Noto Sans Arabic", "Noto Sans Hebrew", Arial, sans-serif, "Segoe UI Emoji", "Segoe UI Symbol", 'Twemoji', 'Noto Color Emoji', 'Noto Sans CJK JP'; }
+.pdf:lang(zh-CN) .sans { font-family: Inter, ui-sans-serif, -apple-system, BlinkMacSystemFont, "Segoe UI Variable Display", "Segoe UI", Helvetica, "Apple Color Emoji", "Noto Sans Arabic", "Noto Sans Hebrew", Arial, sans-serif, "Segoe UI Emoji", "Segoe UI Symbol", 'Twemoji', 'Noto Color Emoji', 'Noto Sans CJK SC'; }
+.pdf:lang(zh-TW) .sans { font-family: Inter, ui-sans-serif, -apple-system, BlinkMacSystemFont, "Segoe UI Variable Display", "Segoe UI", Helvetica, "Apple Color Emoji", "Noto Sans Arabic", "Noto Sans Hebrew", Arial, sans-serif, "Segoe UI Emoji", "Segoe UI Symbol", 'Twemoji', 'Noto Color Emoji', 'Noto Sans CJK TC'; }
+.pdf:lang(ko-KR) .sans { font-family: Inter, ui-sans-serif, -apple-system, BlinkMacSystemFont, "Segoe UI Variable Display", "Segoe UI", Helvetica, "Apple Color Emoji", "Noto Sans Arabic", "Noto Sans Hebrew", Arial, sans-serif, "Segoe UI Emoji", "Segoe UI Symbol", 'Twemoji', 'Noto Color Emoji', 'Noto Sans CJK KR'; }
+.pdf .code { font-family: Source Code Pro, "SFMono-Regular", Menlo, Consolas, "PT Mono", "Liberation Mono", Courier, monospace, 'Twemoji', 'Noto Color Emoji', 'Noto Sans Mono CJK JP'; }
+.pdf:lang(zh-CN) .code { font-family: Source Code Pro, "SFMono-Regular", Menlo, Consolas, "PT Mono", "Liberation Mono", Courier, monospace, 'Twemoji', 'Noto Color Emoji', 'Noto Sans Mono CJK SC'; }
+.pdf:lang(zh-TW) .code { font-family: Source Code Pro, "SFMono-Regular", Menlo, Consolas, "PT Mono", "Liberation Mono", Courier, monospace, 'Twemoji', 'Noto Color Emoji', 'Noto Sans Mono CJK TC'; }
+.pdf:lang(ko-KR) .code { font-family: Source Code Pro, "SFMono-Regular", Menlo, Consolas, "PT Mono", "Liberation Mono", Courier, monospace, 'Twemoji', 'Noto Color Emoji', 'Noto Sans Mono CJK KR'; }
+.pdf .serif { font-family: PT Serif, Lyon-Text, Georgia, ui-serif, serif, 'Twemoji', 'Noto Color Emoji', 'Noto Serif CJK JP'; }
+.pdf:lang(zh-CN) .serif { font-family: PT Serif, Lyon-Text, Georgia, ui-serif, serif, 'Twemoji', 'Noto Color Emoji', 'Noto Serif CJK SC'; }
+.pdf:lang(zh-TW) .serif { font-family: PT Serif, Lyon-Text, Georgia, ui-serif, serif, 'Twemoji', 'Noto Color Emoji', 'Noto Serif CJK TC'; }
+.pdf:lang(ko-KR) .serif { font-family: PT Serif, Lyon-Text, Georgia, ui-serif, serif, 'Twemoji', 'Noto Color Emoji', 'Noto Serif CJK KR'; }
+.pdf .mono { font-family: PT Mono, iawriter-mono, Nitti, Menlo, Courier, monospace, 'Twemoji', 'Noto Color Emoji', 'Noto Sans Mono CJK JP'; }
+.pdf:lang(zh-CN) .mono { font-family: PT Mono, iawriter-mono, Nitti, Menlo, Courier, monospace, 'Twemoji', 'Noto Color Emoji', 'Noto Sans Mono CJK SC'; }
+.pdf:lang(zh-TW) .mono { font-family: PT Mono, iawriter-mono, Nitti, Menlo, Courier, monospace, 'Twemoji', 'Noto Color Emoji', 'Noto Sans Mono CJK TC'; }
+.pdf:lang(ko-KR) .mono { font-family: PT Mono, iawriter-mono, Nitti, Menlo, Courier, monospace, 'Twemoji', 'Noto Color Emoji', 'Noto Sans Mono CJK KR'; }
+.highlight-default {
+	color: rgba(44, 44, 43, 1);
+}
+.highlight-gray {
+	color: rgba(125, 122, 117, 1);
+	fill: rgba(125, 122, 117, 1);
+}
+.highlight-brown {
+	color: rgba(159, 118, 90, 1);
+	fill: rgba(159, 118, 90, 1);
+}
+.highlight-orange {
+	color: rgba(210, 123, 45, 1);
+	fill: rgba(210, 123, 45, 1);
+}
+.highlight-yellow {
+	color: rgba(203, 148, 52, 1);
+	fill: rgba(203, 148, 52, 1);
+}
+.highlight-teal {
+	color: rgba(80, 148, 110, 1);
+	fill: rgba(80, 148, 110, 1);
+}
+.highlight-blue {
+	color: rgba(56, 125, 201, 1);
+	fill: rgba(56, 125, 201, 1);
+}
+.highlight-purple {
+	color: rgba(154, 107, 180, 1);
+	fill: rgba(154, 107, 180, 1);
+}
+.highlight-pink {
+	color: rgba(193, 76, 138, 1);
+	fill: rgba(193, 76, 138, 1);
+}
+.highlight-red {
+	color: rgba(207, 81, 72, 1);
+	fill: rgba(207, 81, 72, 1);
+}
+.highlight-default_background {
+	color: rgba(44, 44, 43, 1);
+}
+.highlight-gray_background {
+	background: rgba(42, 28, 0, 0.07);
+}
+.highlight-brown_background {
+	background: rgba(139, 46, 0, 0.086);
+}
+.highlight-orange_background {
+	background: rgba(224, 101, 1, 0.129);
+}
+.highlight-yellow_background {
+	background: rgba(211, 168, 0, 0.137);
+}
+.highlight-teal_background {
+	background: rgba(0, 100, 45, 0.09);
+}
+.highlight-blue_background {
+	background: rgba(0, 124, 215, 0.094);
+}
+.highlight-purple_background {
+	background: rgba(102, 0, 178, 0.078);
+}
+.highlight-pink_background {
+	background: rgba(197, 0, 93, 0.086);
+}
+.highlight-red_background {
+	background: rgba(223, 22, 0, 0.094);
+}
+.block-color-default {
+	color: inherit;
+	fill: inherit;
+}
+.block-color-gray {
+	color: rgba(125, 122, 117, 1);
+	fill: rgba(125, 122, 117, 1);
+}
+.block-color-brown {
+	color: rgba(159, 118, 90, 1);
+	fill: rgba(159, 118, 90, 1);
+}
+.block-color-orange {
+	color: rgba(210, 123, 45, 1);
+	fill: rgba(210, 123, 45, 1);
+}
+.block-color-yellow {
+	color: rgba(203, 148, 52, 1);
+	fill: rgba(203, 148, 52, 1);
+}
+.block-color-teal {
+	color: rgba(80, 148, 110, 1);
+	fill: rgba(80, 148, 110, 1);
+}
+.block-color-blue {
+	color: rgba(56, 125, 201, 1);
+	fill: rgba(56, 125, 201, 1);
+}
+.block-color-purple {
+	color: rgba(154, 107, 180, 1);
+	fill: rgba(154, 107, 180, 1);
+}
+.block-color-pink {
+	color: rgba(193, 76, 138, 1);
+	fill: rgba(193, 76, 138, 1);
+}
+.block-color-red {
+	color: rgba(207, 81, 72, 1);
+	fill: rgba(207, 81, 72, 1);
+}
+.block-color-default_background {
+	color: inherit;
+	fill: inherit;
+}
+.block-color-gray_background {
+	background: rgba(240, 239, 237, 1);
+}
+.block-color-brown_background {
+	background: rgba(245, 237, 233, 1);
+}
+.block-color-orange_background {
+	background: rgba(251, 235, 222, 1);
+}
+.block-color-yellow_background {
+	background: rgba(249, 243, 220, 1);
+}
+.block-color-teal_background {
+	background: rgba(232, 241, 236, 1);
+}
+.block-color-blue_background {
+	background: rgba(229, 242, 252, 1);
+}
+.block-color-purple_background {
+	background: rgba(243, 235, 249, 1);
+}
+.block-color-pink_background {
+	background: rgba(250, 233, 241, 1);
+}
+.block-color-red_background {
+	background: rgba(252, 233, 231, 1);
+}
+.select-value-color-default { background-color: rgba(42, 28, 0, 0.07); }
+.select-value-color-gray { background-color: rgba(28, 19, 1, 0.11); }
+.select-value-color-brown { background-color: rgba(127, 51, 0, 0.156); }
+.select-value-color-orange { background-color: rgba(196, 88, 0, 0.203); }
+.select-value-color-yellow { background-color: rgba(209, 156, 0, 0.282); }
+.select-value-color-green { background-color: rgba(0, 96, 38, 0.156); }
+.select-value-color-blue { background-color: rgba(0, 118, 217, 0.203); }
+.select-value-color-purple { background-color: rgba(92, 0, 163, 0.141); }
+.select-value-color-pink { background-color: rgba(183, 0, 78, 0.152); }
+.select-value-color-red { background-color: rgba(206, 24, 0, 0.164); }
+
+.checkbox {
+	display: inline-flex;
+	vertical-align: text-bottom;
+	width: 16;
+	height: 16;
+	background-size: 16px;
+	margin-left: 2px;
+	margin-right: 5px;
+}
+
+.checkbox-on {
+	background-image: url("data:image/svg+xml;charset=UTF-8,%3Csvg%20width%3D%2216%22%20height%3D%2216%22%20viewBox%3D%220%200%2016%2016%22%20fill%3D%22none%22%20xmlns%3D%22http%3A%2F%2Fwww.w3.org%2F2000%2Fsvg%22%3E%0A%3Crect%20width%3D%2216%22%20height%3D%2216%22%20fill%3D%22%2358A9D7%22%2F%3E%0A%3Cpath%20d%3D%22M6.71429%2012.2852L14%204.9995L12.7143%203.71436L6.71429%209.71378L3.28571%206.2831L2%207.57092L6.71429%2012.2852Z%22%20fill%3D%22white%22%2F%3E%0A%3C%2Fsvg%3E");
+}
+
+.checkbox-off {
+	background-image: url("data:image/svg+xml;charset=UTF-8,%3Csvg%20width%3D%2216%22%20height%3D%2216%22%20viewBox%3D%220%200%2016%2016%22%20fill%3D%22none%22%20xmlns%3D%22http%3A%2F%2Fwww.w3.org%2F2000%2Fsvg%22%3E%0A%3Crect%20x%3D%220.75%22%20y%3D%220.75%22%20width%3D%2214.5%22%20height%3D%2214.5%22%20fill%3D%22white%22%20stroke%3D%22%2336352F%22%20stroke-width%3D%221.5%22%2F%3E%0A%3C%2Fsvg%3E");
+}
+	
+</style></head><body><article id="1e885df0-1907-81a7-854a-ff6f139dece3" class="page sans"><header><h1 class="page-title" dir="auto">🧱 <strong>Component Library Reference</strong></h1><p class="page-description" dir="auto"></p><table class="properties"><tbody><tr class="property-row property-row-person"><th><span class="icon property-icon"><img src="https://www.notion.so/icons/friends_gray.svg" style="width:14px;height:14px;display:block"/></span>Owner</th><td><span class="user"><span class="icon text-icon user-icon"><span class="user-icon-inner">A</span></span>Aubert</span></td></tr><tr class="property-row property-row-multi_select"><th><span class="icon property-icon"><img src="https://www.notion.so/icons/list_gray.svg" style="width:14px;height:14px;display:block"/></span>Tags</th><td></td></tr></tbody></table></header><div class="page-body"><div style="display:contents" dir="auto"><h3 id="1e885df0-1907-8113-bbc5-e1070b69f6be" class=""><strong>1. Purpose</strong></h3></div><div style="display:contents" dir="auto"><p id="1e885df0-1907-8151-8f88-e936d41f71b8" class="">This reference defines Memora’s <strong>core UI components</strong> and their required design, behavioral, and accessibility attributes. These components:</p></div><div style="display:contents" dir="auto"><ul id="1e885df0-1907-816e-8f25-c5c56c5ab2bf" class="bulleted-list"><li style="list-style-type:disc">Maintain <strong>visual consistency across user roles</strong> (patient, caregiver, clinic)</li></ul></div><div style="display:contents" dir="auto"><ul id="1e885df0-1907-81e9-ba5f-d6becfee662d" class="bulleted-list"><li style="list-style-type:disc">Support <strong>Companion-driven states and gamified feedback</strong></li></ul></div><div style="display:contents" dir="auto"><ul id="1e885df0-1907-8175-8cd0-ef5b4bbb53e9" class="bulleted-list"><li style="list-style-type:disc">Are designed for <strong>WCAG 2.1 AA accessibility</strong>, <strong>bilingual parity</strong>, and <strong>low cognitive friction</strong></li></ul></div><div style="display:contents" dir="auto"><ul id="1e885df0-1907-81be-9256-cb21d1a00071" class="bulleted-list"><li style="list-style-type:disc">Form the atomic foundation for layouts, dashboards, and Companion flows</li></ul></div><div style="display:contents" dir="auto"><hr id="1e885df0-1907-81c9-9e88-f20b7ed86e72"/></div><div style="display:contents" dir="auto"><h3 id="1e885df0-1907-8107-865f-e6ca9b25a3e5" class=""><strong>2. Core Component Categories</strong></h3></div><div style="display:contents" dir="ltr"><table id="1e885df0-1907-8114-8c2c-efb88a2b241d" class="simple-table"><tbody><div style="display:contents" dir="ltr"><tr id="1e885df0-1907-8110-b882-e8f49ee97d5e"><td id="jJ}v" class="" style="width:228.953125px">Category</td><td id="UYTO" class="" style="width:487px">Description</td></tr></div><div style="display:contents" dir="ltr"><tr id="1e885df0-1907-814c-b5a6-d584b422a60f"><td id="jJ}v" class="" style="width:228.953125px"><strong>Inputs</strong></td><td id="UYTO" class="" style="width:487px">Text fields, toggles, dropdowns, date pickers</td></tr></div><div style="display:contents" dir="ltr"><tr id="1e885df0-1907-81be-9074-e64c4165c1d3"><td id="jJ}v" class="" style="width:228.953125px"><strong>Buttons</strong></td><td id="UYTO" class="" style="width:487px">Primary, secondary, link, icon-only</td></tr></div><div style="display:contents" dir="ltr"><tr id="1e885df0-1907-81c9-a19d-d0a8160d63a2"><td id="jJ}v" class="" style="width:228.953125px"><strong>Cards</strong></td><td id="UYTO" class="" style="width:487px">Used for game entry, reminders, session summaries</td></tr></div><div style="display:contents" dir="ltr"><tr id="1e885df0-1907-8147-97a0-ffda1d9051f0"><td id="jJ}v" class="" style="width:228.953125px"><strong>Modals &amp; Overlays</strong></td><td id="UYTO" class="" style="width:487px">For onboarding, consent, Companion resets</td></tr></div><div style="display:contents" dir="ltr"><tr id="1e885df0-1907-818c-9838-f5fdc02effaa"><td id="jJ}v" class="" style="width:228.953125px"><strong>Badges &amp; Visual Tokens</strong></td><td id="UYTO" class="" style="width:487px">Soft gamification (e.g., “3 Days Strong”)</td></tr></div><div style="display:contents" dir="ltr"><tr id="1e885df0-1907-8166-87fb-e8e6638ab487"><td id="jJ}v" class="" style="width:228.953125px"><strong>Notifications &amp; Toasts</strong></td><td id="UYTO" class="" style="width:487px">Light system messages</td></tr></div><div style="display:contents" dir="ltr"><tr id="1e885df0-1907-814a-9db3-edb5cabe77aa"><td id="jJ}v" class="" style="width:228.953125px"><strong>Navigation</strong></td><td id="UYTO" class="" style="width:487px">Tab bars, drawers, breadcrumb flows</td></tr></div><div style="display:contents" dir="ltr"><tr id="1e885df0-1907-8108-a07b-c265e5a4e9db"><td id="jJ}v" class="" style="width:228.953125px"><strong>Companion Containers</strong></td><td id="UYTO" class="" style="width:487px">Specialized visual framing for Companion prompts</td></tr></div><div style="display:contents" dir="ltr"><tr id="1e885df0-1907-814b-bfa8-c198e0fe0fbf"><td id="jJ}v" class="" style="width:228.953125px"><strong>Accessibility Helpers</strong></td><td id="UYTO" class="" style="width:487px">Skip links, screen reader labels, live regions</td></tr></div></tbody></table></div><div style="display:contents" dir="auto"><hr id="1e885df0-1907-8106-8efc-e35dda5f98ee"/></div><div style="display:contents" dir="auto"><h3 id="1e885df0-1907-813e-a547-e47e312978ba" class=""><strong>3. Sample Component Spec: Primary Button</strong></h3></div><div style="display:contents" dir="ltr"><table id="1e885df0-1907-81af-bc3b-e22e64c1d9fe" class="simple-table"><tbody><div style="display:contents" dir="ltr"><tr id="1e885df0-1907-8174-9957-e313742673bb"><td id="[wyH" class="">Attribute</td><td id="?nhd" class="">Value</td></tr></div><div style="display:contents" dir="ltr"><tr id="1e885df0-1907-8131-a20c-d135843d024a"><td id="[wyH" class=""><strong>Name</strong></td><td id="?nhd" class=""><code>button.primary</code></td></tr></div><div style="display:contents" dir="ltr"><tr id="1e885df0-1907-81b2-ba6d-eadc6b82589c"><td id="[wyH" class=""><strong>Usage</strong></td><td id="?nhd" class="">Main call-to-action in modals, forms, onboarding</td></tr></div><div style="display:contents" dir="ltr"><tr id="1e885df0-1907-8111-b239-ee8adacf0b07"><td id="[wyH" class=""><strong>States</strong></td><td id="?nhd" class=""><code>default</code>, <code>hover</code>, <code>pressed</code>, <code>disabled</code></td></tr></div><div style="display:contents" dir="ltr"><tr id="1e885df0-1907-813b-b399-ff661e98583c"><td id="[wyH" class=""><strong>Padding</strong></td><td id="?nhd" class=""><code>spacing.4</code> vertical × <code>spacing.6</code> horizontal</td></tr></div><div style="display:contents" dir="ltr"><tr id="1e885df0-1907-8136-8faa-f48a2ec694b2"><td id="[wyH" class=""><strong>Font</strong></td><td id="?nhd" class=""><code>typography.size.md</code> + <code>weight.semibold</code></td></tr></div><div style="display:contents" dir="ltr"><tr id="1e885df0-1907-8197-8da2-c4c4ae93f52a"><td id="[wyH" class=""><strong>Corner Radius</strong></td><td id="?nhd" class=""><code>radius.md</code></td></tr></div><div style="display:contents" dir="ltr"><tr id="1e885df0-1907-810d-81e6-f535e08d970d"><td id="[wyH" class=""><strong>Colors</strong></td><td id="?nhd" class=""><code>color.primary</code> background, <code>color.surface</code> text</td></tr></div><div style="display:contents" dir="ltr"><tr id="1e885df0-1907-8174-a013-ed3ccadc94b8"><td id="[wyH" class=""><strong>Accessibility</strong></td><td id="?nhd" class="">4.5:1 contrast, focus ring with <code>shadow.focus</code>, <code>aria-label</code> required for icon variants</td></tr></div><div style="display:contents" dir="ltr"><tr id="1e885df0-1907-81ae-b9bf-e2f3982f03f2"><td id="[wyH" class=""><strong>Multilingual UX</strong></td><td id="?nhd" class="">Auto-expands up to 200% for long French text</td></tr></div><div style="display:contents" dir="ltr"><tr id="1e885df0-1907-81ba-92f4-ee8ee5d1a5b0"><td id="[wyH" class=""><strong>Voice &amp; Narration</strong></td><td id="?nhd" class="">Focusable, screen-reader friendly, no duplicate narration with Companion</td></tr></div><div style="display:contents" dir="ltr"><tr id="1e885df0-1907-815a-9eba-ff01405fcb70"><td id="[wyH" class=""><strong>Disabled State Rule</strong></td><td id="?nhd" class="">Greyed background + tooltip: “Action available after consent” (if gated)</td></tr></div></tbody></table></div><div style="display:contents" dir="auto"><hr id="1e885df0-1907-8178-a0ad-f2e1ca010034"/></div><div style="display:contents" dir="auto"><h3 id="1e885df0-1907-81e5-9c5c-c77675a667e9" class=""><strong>4. Companion-Sensitive Components</strong></h3></div><div style="display:contents" dir="ltr"><table id="1e885df0-1907-811a-a303-febc7097370f" class="simple-table"><tbody><div style="display:contents" dir="ltr"><tr id="1e885df0-1907-812a-a16c-d873ddb7d8f0"><td id="Vp\F" class="">Component</td><td id="p?yX" class="">Companion Awareness</td></tr></div><div style="display:contents" dir="ltr"><tr id="1e885df0-1907-8114-9c0e-c7bba172e954"><td id="Vp\F" class=""><strong>Companion Container</strong></td><td id="p?yX" class="">Renders tone badge (<code>gentle</code>, <code>warm</code>, <code>neutral</code>), adjusts background subtly per state</td></tr></div><div style="display:contents" dir="ltr"><tr id="1e885df0-1907-8106-8e79-c17352722018"><td id="Vp\F" class=""><strong>Badge Card</strong></td><td id="p?yX" class="">Only appears when Companion triggers achievement event; hides during <code>silent_mode</code></td></tr></div><div style="display:contents" dir="ltr"><tr id="1e885df0-1907-8110-a506-c624c9cc272a"><td id="Vp\F" class=""><strong>Encouragement Prompt Box</strong></td><td id="p?yX" class="">Used only for caregiver-ping interactions; suppressed if consent unlinked</td></tr></div><div style="display:contents" dir="ltr"><tr id="1e885df0-1907-81fd-bcea-fc7b68823d4f"><td id="Vp\F" class=""><strong>Companion Reset Modal</strong></td><td id="p?yX" class="">Confirms full memory wipe and shows mute option with accessibility fallback</td></tr></div></tbody></table></div><div style="display:contents" dir="auto"><hr id="1e885df0-1907-81ce-bd9f-ec771a896ce9"/></div><div style="display:contents" dir="auto"><h3 id="1e885df0-1907-81df-98a0-c3a19d6a1ddb" class=""><strong>5. Specialized Views</strong></h3></div><div style="display:contents" dir="auto"><h3 id="1e885df0-1907-8172-9fed-f47fc54d58c8" class="">A. <strong>Caregiver Message Selection</strong></h3></div><div style="display:contents" dir="auto"><ul id="1e885df0-1907-815f-9b95-e704dd7e1f41" class="bulleted-list"><li style="list-style-type:disc">Prewritten template list, card-selectable with tone icon (e.g., 🌱 gentle, 🌞 warm)</li></ul></div><div style="display:contents" dir="auto"><ul id="1e885df0-1907-813e-b201-e9b112b81a61" class="bulleted-list"><li style="list-style-type:disc">Button: <code>Send encouragement</code></li></ul></div><div style="display:contents" dir="auto"><ul id="1e885df0-1907-81f6-bd3b-f676f748af35" class="bulleted-list"><li style="list-style-type:disc">Tooltip: “You’ll see a preview before sending.”</li></ul></div><div style="display:contents" dir="auto"><ul id="1e885df0-1907-810a-a103-d536355bccd7" class="bulleted-list"><li style="list-style-type:disc">WCAG: Keyboard navigable + aria-describedby for each card tone</li></ul></div><div style="display:contents" dir="auto"><h3 id="1e885df0-1907-81ce-89ce-dad425ef8567" class="">B. <strong>Clinic Dashboard Summary Tile</strong></h3></div><div style="display:contents" dir="auto"><ul id="1e885df0-1907-8118-b574-f8fe54fe3a5d" class="bulleted-list"><li style="list-style-type:disc">Visuals: Greyscale + soft blue overlays</li></ul></div><div style="display:contents" dir="auto"><ul id="1e885df0-1907-8192-9468-e4934a8ebf79" class="bulleted-list"><li style="list-style-type:disc">States: <code>engaged</code>, <code>inactive &gt; 3 days</code>, <code>consent revoked</code></li></ul></div><div style="display:contents" dir="auto"><ul id="1e885df0-1907-8171-a59a-fa171138b6e1" class="bulleted-list"><li style="list-style-type:disc">No clickable links; view-only visual hierarchy</li></ul></div><div style="display:contents" dir="auto"><ul id="1e885df0-1907-814c-b88c-d34cd8391a49" class="bulleted-list"><li style="list-style-type:disc">Tooltip: “Based on anonymized session counts only”</li></ul></div><div style="display:contents" dir="auto"><hr id="1e885df0-1907-810b-a6d9-c31190e72539"/></div><div style="display:contents" dir="auto"><h3 id="1e885df0-1907-817c-901f-f24f48de0755" class=""><strong>6. Accessibility Enforcement by Component Type</strong></h3></div><div style="display:contents" dir="ltr"><table id="1e885df0-1907-8159-8e4f-ffd915c64783" class="simple-table"><tbody><div style="display:contents" dir="ltr"><tr id="1e885df0-1907-8170-8554-fe584149439a"><td id="LclH" class="">Component</td><td id="\iV:" class="">Must Include</td></tr></div><div style="display:contents" dir="ltr"><tr id="1e885df0-1907-818f-83ec-c5918b591b24"><td id="LclH" class=""><strong>Text Input</strong></td><td id="\iV:" class="">Visible label + screen reader label + error region</td></tr></div><div style="display:contents" dir="ltr"><tr id="1e885df0-1907-8175-a3e9-fbb44b842db6"><td id="LclH" class=""><strong>Card</strong></td><td id="\iV:" class="">Keyboard focusable wrapper + alt text on icons</td></tr></div><div style="display:contents" dir="ltr"><tr id="1e885df0-1907-81a1-b935-dc43f73e1240"><td id="LclH" class=""><strong>Toggle</strong></td><td id="\iV:" class="">Visual + text state (“On”/“Off”) + aria-pressed</td></tr></div><div style="display:contents" dir="ltr"><tr id="1e885df0-1907-813c-85e2-f23abb9f0f51"><td id="LclH" class=""><strong>Toast/Alert</strong></td><td id="\iV:" class=""><code>role=&quot;alert&quot;</code> + screen-reader live region</td></tr></div><div style="display:contents" dir="ltr"><tr id="1e885df0-1907-816b-bba9-d0006d8235f8"><td id="LclH" class=""><strong>Modal</strong></td><td id="\iV:" class="">Focus trap + ESC dismiss + aria-labelledby</td></tr></div><div style="display:contents" dir="ltr"><tr id="1e885df0-1907-81cf-a058-d8cd257e755c"><td id="LclH" class=""><strong>Navigation Items</strong></td><td id="\iV:" class="">44px minimum touch targets + screen reader announcement</td></tr></div></tbody></table></div><div style="display:contents" dir="auto"><hr id="1e885df0-1907-8191-9125-ceb4a8b311cb"/></div><div style="display:contents" dir="auto"><h3 id="1e885df0-1907-8130-82ba-d472e718ef75" class=""><strong>7. Localization-Ready Patterns</strong></h3></div><div style="display:contents" dir="ltr"><table id="1e885df0-1907-810e-b851-ddc5aeb1ea61" class="simple-table"><tbody><div style="display:contents" dir="ltr"><tr id="1e885df0-1907-817f-9126-d3492f05356e"><td id="dR:@" class="">Pattern</td><td id="LkOm" class="">Application</td></tr></div><div style="display:contents" dir="ltr"><tr id="1e885df0-1907-81b2-bb44-f24b8ad6e3b0"><td id="dR:@" class=""><strong>Expandable buttons</strong></td><td id="LkOm" class="">Layout must support longer FR text (1.3x baseline)</td></tr></div><div style="display:contents" dir="ltr"><tr id="1e885df0-1907-8179-899e-f635db7ce701"><td id="dR:@" class=""><strong>No embedded idioms</strong></td><td id="LkOm" class="">All microcopy authored in EN/FR natively</td></tr></div><div style="display:contents" dir="ltr"><tr id="1e885df0-1907-812d-b567-ffeeef387139"><td id="dR:@" class=""><strong>Tooltip support</strong></td><td id="LkOm" class="">Must be available for both languages, dismissable</td></tr></div><div style="display:contents" dir="ltr"><tr id="1e885df0-1907-818d-bf38-c6a8f9cd3bca"><td id="dR:@" class=""><strong>Date formats</strong></td><td id="LkOm" class="">Locale-aware (<code>DD/MM/YYYY</code> for Canada FR)</td></tr></div><div style="display:contents" dir="ltr"><tr id="1e885df0-1907-81e9-a049-faa4de828ed3"><td id="dR:@" class=""><strong>Label alignment</strong></td><td id="LkOm" class="">Left-aligned in EN, can support right-aligned layout FR if needed (Phase 2)</td></tr></div></tbody></table></div><div style="display:contents" dir="auto"><hr id="1e885df0-1907-81e6-8557-fa5038d62f69"/></div><div style="display:contents" dir="auto"><h3 id="1e885df0-1907-816a-bb5f-e6edfc0be07e" class=""><strong>8. Design Governance &amp; QA</strong></h3></div><div style="display:contents" dir="ltr"><table id="1e885df0-1907-8146-bdca-cf564ec99672" class="simple-table"><tbody><div style="display:contents" dir="ltr"><tr id="1e885df0-1907-81fe-872e-d2574a938cef"><td id="t]gB" class="">Rule</td><td id="KfOo" class="">Application</td></tr></div><div style="display:contents" dir="ltr"><tr id="1e885df0-1907-81b1-affa-d605695da31d"><td id="t]gB" class="">All components defined in Figma master file</td><td id="KfOo" class="">✅</td></tr></div><div style="display:contents" dir="ltr"><tr id="1e885df0-1907-8185-87c7-d2ed3e140759"><td id="t]gB" class="">Paired with Storybook (or equivalent) components</td><td id="KfOo" class="">✅</td></tr></div><div style="display:contents" dir="ltr"><tr id="1e885df0-1907-8118-b4d6-eaee67b76af1"><td id="t]gB" class="">Accessibility QA checklist per component</td><td id="KfOo" class="">✅ Required before release</td></tr></div><div style="display:contents" dir="ltr"><tr id="1e885df0-1907-8177-9b18-f0f63a56d20d"><td id="t]gB" class="">Companion-aware variants flagged</td><td id="KfOo" class="">✅ In design + dev</td></tr></div><div style="display:contents" dir="ltr"><tr id="1e885df0-1907-8166-ace8-ecb18d414d85"><td id="t]gB" class="">Component registry versioned</td><td id="KfOo" class="">✅ Logged with changelog for localization &amp; compliance reviews</td></tr></div></tbody></table></div><div style="display:contents" dir="auto"><hr id="1e885df0-1907-815b-ad09-ecd7d077feed"/></div><div style="display:contents" dir="auto"><h3 id="1e885df0-1907-8108-a70d-d546c324cf75" class=""><strong>9. Linked Documents</strong></h3></div><div style="display:contents" dir="auto"><ul id="1e885df0-1907-81b4-9b94-f08ff25df68a" class="bulleted-list"><li style="list-style-type:disc">🎨 [Design Tokens Specification]</li></ul></div><div style="display:contents" dir="auto"><ul id="1e885df0-1907-81a5-90cd-f6e177e5d534" class="bulleted-list"><li style="list-style-type:disc">📘 [Language &amp; Tone Guidelines]</li></ul></div><div style="display:contents" dir="auto"><ul id="1e885df0-1907-817e-8083-ddbc02e962c1" class="bulleted-list"><li style="list-style-type:disc">🧱 [Badge UX Reference]</li></ul></div><div style="display:contents" dir="auto"><ul id="1e885df0-1907-81bc-a2d7-e6141dfac786" class="bulleted-list"><li style="list-style-type:disc">🧠 [Companion Behavioral System]</li></ul></div><div style="display:contents" dir="auto"><ul id="1e885df0-1907-816a-aaf8-cfedf3882dc5" class="bulleted-list"><li style="list-style-type:disc">📋 [Accessibility Implementation Guide]</li></ul></div><div style="display:contents" dir="auto"><ul id="1e885df0-1907-816b-89dd-ee69b6065d8e" class="bulleted-list"><li style="list-style-type:disc">🧪 [UI/UX QA Checklist Template]</li></ul></div><div style="display:contents" dir="auto"><ul id="1e885df0-1907-81d3-ba42-ca86f9a65264" class="bulleted-list"><li style="list-style-type:disc">📎 [Consent &amp; Privacy Flow]</li></ul></div></div></article><span class="sans" style="font-size:14px;padding-top:2em"></span></body></html>

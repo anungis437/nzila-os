@@ -1,0 +1,713 @@
+<html><head><meta http-equiv="Content-Type" content="text/html; charset=utf-8"/><title>CFO Budget Strategy &amp; Tools</title><style>
+/* cspell:disable-file */
+/* webkit printing magic: print all background colors */
+html {
+	-webkit-print-color-adjust: exact;
+}
+* {
+	box-sizing: border-box;
+	-webkit-print-color-adjust: exact;
+}
+
+html,
+body {
+	margin: 0;
+	padding: 0;
+}
+@media only screen {
+	body {
+		margin: 2em auto;
+		max-width: 900px;
+		color: rgb(55, 53, 47);
+	}
+}
+
+body {
+	line-height: 1.5;
+	white-space: pre-wrap;
+}
+
+a,
+a.visited {
+	color: inherit;
+	text-decoration: underline;
+}
+
+.pdf-relative-link-path {
+	font-size: 80%;
+	color: #444;
+}
+
+h1,
+h2,
+h3 {
+	letter-spacing: -0.01em;
+	line-height: 1.2;
+	font-weight: 600;
+	margin-bottom: 0;
+}
+
+/* Override strong tags inside headings to maintain consistent weight */
+h1 strong,
+h2 strong,
+h3 strong {
+	font-weight: 600;
+}
+
+.page-title {
+	font-size: 2.5rem;
+	font-weight: 700;
+	margin-top: 0;
+	margin-bottom: 0.75em;
+}
+
+h1 {
+	font-size: 1.875rem;
+	margin-top: 1.875rem;
+}
+
+h2 {
+	font-size: 1.5rem;
+	margin-top: 1.5rem;
+}
+
+h3 {
+	font-size: 1.25rem;
+	margin-top: 1.25rem;
+}
+
+.source {
+	border: 1px solid #ddd;
+	border-radius: 3px;
+	padding: 1.5em;
+	word-break: break-all;
+}
+
+.callout {
+	border-radius: 10px;
+	padding: 1rem;
+}
+
+figure {
+	margin: 1.25em 0;
+	page-break-inside: avoid;
+}
+
+figcaption {
+	opacity: 0.5;
+	font-size: 85%;
+	margin-top: 0.5em;
+}
+
+mark {
+	background-color: transparent;
+}
+
+.indented {
+	padding-left: 1.5em;
+}
+
+hr {
+	background: transparent;
+	display: block;
+	width: 100%;
+	height: 1px;
+	visibility: visible;
+	border: none;
+	border-bottom: 1px solid rgba(55, 53, 47, 0.09);
+}
+
+img {
+	max-width: 100%;
+}
+
+@media only print {
+	img {
+		max-height: 100vh;
+		object-fit: contain;
+	}
+}
+
+@page {
+	margin: 1in;
+}
+
+.collection-content {
+	font-size: 0.875rem;
+}
+
+.collection-content td {
+	white-space: pre-wrap;
+	word-break: break-word;
+}
+
+.column-list {
+	display: flex;
+	justify-content: space-between;
+}
+
+.column {
+	padding: 0 1em;
+}
+
+.column:first-child {
+	padding-left: 0;
+}
+
+.column:last-child {
+	padding-right: 0;
+}
+
+.table_of_contents-item {
+	display: block;
+	font-size: 0.875rem;
+	line-height: 1.3;
+	padding: 0.125rem;
+}
+
+.table_of_contents-indent-1 {
+	margin-left: 1.5rem;
+}
+
+.table_of_contents-indent-2 {
+	margin-left: 3rem;
+}
+
+.table_of_contents-indent-3 {
+	margin-left: 4.5rem;
+}
+
+.table_of_contents-link {
+	text-decoration: none;
+	opacity: 0.7;
+	border-bottom: 1px solid rgba(55, 53, 47, 0.18);
+}
+
+table,
+th,
+td {
+	border: 1px solid rgba(55, 53, 47, 0.09);
+	border-collapse: collapse;
+}
+
+table {
+	border-left: none;
+	border-right: none;
+}
+
+th,
+td {
+	font-weight: normal;
+	padding: 0.25em 0.5em;
+	line-height: 1.5;
+	min-height: 1.5em;
+	text-align: left;
+}
+
+th {
+	color: rgba(55, 53, 47, 0.6);
+}
+
+ol,
+ul {
+	margin: 0;
+	margin-block-start: 0.6em;
+	margin-block-end: 0.6em;
+}
+
+li > ol:first-child,
+li > ul:first-child {
+	margin-block-start: 0.6em;
+}
+
+ul > li {
+	list-style: disc;
+}
+
+ul.to-do-list {
+	padding-inline-start: 0;
+}
+
+ul.to-do-list > li {
+	list-style: none;
+}
+
+.to-do-children-checked {
+	text-decoration: line-through;
+	opacity: 0.375;
+}
+
+ul.toggle > li {
+	list-style: none;
+}
+
+ul {
+	padding-inline-start: 1.7em;
+}
+
+ul > li {
+	padding-left: 0.1em;
+}
+
+ol {
+	padding-inline-start: 1.6em;
+}
+
+ol > li {
+	padding-left: 0.2em;
+}
+
+.mono ol {
+	padding-inline-start: 2em;
+}
+
+.mono ol > li {
+	text-indent: -0.4em;
+}
+
+.toggle {
+	padding-inline-start: 0em;
+	list-style-type: none;
+}
+
+/* Indent toggle children */
+.toggle > li > details {
+	padding-left: 1.7em;
+}
+
+.toggle > li > details > summary {
+	margin-left: -1.1em;
+}
+
+.selected-value {
+	display: inline-block;
+	padding: 0 0.5em;
+	background: rgba(206, 205, 202, 0.5);
+	border-radius: 3px;
+	margin-right: 0.5em;
+	margin-top: 0.3em;
+	margin-bottom: 0.3em;
+	white-space: nowrap;
+}
+
+.collection-title {
+	display: inline-block;
+	margin-right: 1em;
+}
+
+.page-description {
+	margin-bottom: 2em;
+}
+
+.simple-table {
+	margin-top: 1em;
+	font-size: 0.875rem;
+	empty-cells: show;
+}
+.simple-table td {
+	height: 29px;
+	min-width: 120px;
+}
+
+.simple-table th {
+	height: 29px;
+	min-width: 120px;
+}
+
+.simple-table-header-color {
+	background: rgb(247, 246, 243);
+	color: black;
+}
+.simple-table-header {
+	font-weight: 500;
+}
+
+time {
+	opacity: 0.5;
+}
+
+.icon {
+	display: inline-flex;
+	align-items: center;
+	justify-content: center;
+	max-width: 1.2em;
+	max-height: 1.2em;
+	text-decoration: none;
+	vertical-align: text-bottom;
+	margin-right: 0.5em;
+}
+
+img.icon {
+	border-radius: 3px;
+}
+
+.callout img.notion-static-icon {
+	width: 1em;
+	height: 1em;
+}
+
+.callout p {
+	margin: 0;
+}
+
+.callout h1,
+.callout h2,
+.callout h3 {
+	margin: 0 0 0.6rem;
+}
+
+.user-icon {
+	width: 1.5em;
+	height: 1.5em;
+	border-radius: 100%;
+	margin-right: 0.5rem;
+}
+
+.user-icon-inner {
+	font-size: 0.8em;
+}
+
+.text-icon {
+	border: 1px solid #000;
+	text-align: center;
+}
+
+.page-cover-image {
+	display: block;
+	object-fit: cover;
+	width: 100%;
+	max-height: 30vh;
+}
+
+.page-header-icon {
+	font-size: 3rem;
+	margin-bottom: 1rem;
+}
+
+.page-header-icon-with-cover {
+	margin-top: -0.72em;
+	margin-left: 0.07em;
+}
+
+.page-header-icon img {
+	border-radius: 3px;
+}
+
+.link-to-page {
+	margin: 1em 0;
+	padding: 0;
+	border: none;
+	font-weight: 500;
+}
+
+p > .user {
+	opacity: 0.5;
+}
+
+td > .user,
+td > time {
+	white-space: nowrap;
+}
+
+input[type="checkbox"] {
+	transform: scale(1.5);
+	margin-right: 0.6em;
+	vertical-align: middle;
+}
+
+p {
+	margin-top: 0.5em;
+	margin-bottom: 0.5em;
+}
+
+.image {
+	border: none;
+	margin: 1.5em 0;
+	padding: 0;
+	border-radius: 0;
+	text-align: center;
+}
+
+.code,
+code {
+	background: rgba(135, 131, 120, 0.15);
+	border-radius: 3px;
+	padding: 0.2em 0.4em;
+	border-radius: 3px;
+	font-size: 85%;
+	tab-size: 2;
+}
+
+code {
+	color: #eb5757;
+}
+
+.code {
+	padding: 1.5em 1em;
+}
+
+.code-wrap {
+	white-space: pre-wrap;
+	word-break: break-all;
+}
+
+.code > code {
+	background: none;
+	padding: 0;
+	font-size: 100%;
+	color: inherit;
+}
+
+blockquote {
+	font-size: 1em;
+	margin: 1em 0;
+	padding-left: 1em;
+	border-left: 3px solid rgb(55, 53, 47);
+}
+
+blockquote.quote-large {
+	font-size: 1.25em;
+}
+
+.bookmark {
+	text-decoration: none;
+	max-height: 8em;
+	padding: 0;
+	display: flex;
+	width: 100%;
+	align-items: stretch;
+}
+
+.bookmark-title {
+	font-size: 0.85em;
+	overflow: hidden;
+	text-overflow: ellipsis;
+	height: 1.75em;
+	white-space: nowrap;
+}
+
+.bookmark-text {
+	display: flex;
+	flex-direction: column;
+}
+
+.bookmark-info {
+	flex: 4 1 180px;
+	padding: 12px 14px 14px;
+	display: flex;
+	flex-direction: column;
+	justify-content: space-between;
+}
+
+.bookmark-image {
+	width: 33%;
+	flex: 1 1 180px;
+	display: block;
+	position: relative;
+	object-fit: cover;
+	border-radius: 1px;
+}
+
+.bookmark-description {
+	color: rgba(55, 53, 47, 0.6);
+	font-size: 0.75em;
+	overflow: hidden;
+	max-height: 4.5em;
+	word-break: break-word;
+}
+
+.bookmark-href {
+	font-size: 0.75em;
+	margin-top: 0.25em;
+}
+
+.sans { font-family: ui-sans-serif, -apple-system, BlinkMacSystemFont, "Segoe UI Variable Display", "Segoe UI", Helvetica, "Apple Color Emoji", "Noto Sans Arabic", "Noto Sans Hebrew", Arial, sans-serif, "Segoe UI Emoji", "Segoe UI Symbol"; }
+.code { font-family: "SFMono-Regular", Menlo, Consolas, "PT Mono", "Liberation Mono", Courier, monospace; }
+.serif { font-family: Lyon-Text, Georgia, ui-serif, serif; }
+.mono { font-family: iawriter-mono, Nitti, Menlo, Courier, monospace; }
+.pdf .sans { font-family: Inter, ui-sans-serif, -apple-system, BlinkMacSystemFont, "Segoe UI Variable Display", "Segoe UI", Helvetica, "Apple Color Emoji", "Noto Sans Arabic", "Noto Sans Hebrew", Arial, sans-serif, "Segoe UI Emoji", "Segoe UI Symbol", 'Twemoji', 'Noto Color Emoji', 'Noto Sans CJK JP'; }
+.pdf:lang(zh-CN) .sans { font-family: Inter, ui-sans-serif, -apple-system, BlinkMacSystemFont, "Segoe UI Variable Display", "Segoe UI", Helvetica, "Apple Color Emoji", "Noto Sans Arabic", "Noto Sans Hebrew", Arial, sans-serif, "Segoe UI Emoji", "Segoe UI Symbol", 'Twemoji', 'Noto Color Emoji', 'Noto Sans CJK SC'; }
+.pdf:lang(zh-TW) .sans { font-family: Inter, ui-sans-serif, -apple-system, BlinkMacSystemFont, "Segoe UI Variable Display", "Segoe UI", Helvetica, "Apple Color Emoji", "Noto Sans Arabic", "Noto Sans Hebrew", Arial, sans-serif, "Segoe UI Emoji", "Segoe UI Symbol", 'Twemoji', 'Noto Color Emoji', 'Noto Sans CJK TC'; }
+.pdf:lang(ko-KR) .sans { font-family: Inter, ui-sans-serif, -apple-system, BlinkMacSystemFont, "Segoe UI Variable Display", "Segoe UI", Helvetica, "Apple Color Emoji", "Noto Sans Arabic", "Noto Sans Hebrew", Arial, sans-serif, "Segoe UI Emoji", "Segoe UI Symbol", 'Twemoji', 'Noto Color Emoji', 'Noto Sans CJK KR'; }
+.pdf .code { font-family: Source Code Pro, "SFMono-Regular", Menlo, Consolas, "PT Mono", "Liberation Mono", Courier, monospace, 'Twemoji', 'Noto Color Emoji', 'Noto Sans Mono CJK JP'; }
+.pdf:lang(zh-CN) .code { font-family: Source Code Pro, "SFMono-Regular", Menlo, Consolas, "PT Mono", "Liberation Mono", Courier, monospace, 'Twemoji', 'Noto Color Emoji', 'Noto Sans Mono CJK SC'; }
+.pdf:lang(zh-TW) .code { font-family: Source Code Pro, "SFMono-Regular", Menlo, Consolas, "PT Mono", "Liberation Mono", Courier, monospace, 'Twemoji', 'Noto Color Emoji', 'Noto Sans Mono CJK TC'; }
+.pdf:lang(ko-KR) .code { font-family: Source Code Pro, "SFMono-Regular", Menlo, Consolas, "PT Mono", "Liberation Mono", Courier, monospace, 'Twemoji', 'Noto Color Emoji', 'Noto Sans Mono CJK KR'; }
+.pdf .serif { font-family: PT Serif, Lyon-Text, Georgia, ui-serif, serif, 'Twemoji', 'Noto Color Emoji', 'Noto Serif CJK JP'; }
+.pdf:lang(zh-CN) .serif { font-family: PT Serif, Lyon-Text, Georgia, ui-serif, serif, 'Twemoji', 'Noto Color Emoji', 'Noto Serif CJK SC'; }
+.pdf:lang(zh-TW) .serif { font-family: PT Serif, Lyon-Text, Georgia, ui-serif, serif, 'Twemoji', 'Noto Color Emoji', 'Noto Serif CJK TC'; }
+.pdf:lang(ko-KR) .serif { font-family: PT Serif, Lyon-Text, Georgia, ui-serif, serif, 'Twemoji', 'Noto Color Emoji', 'Noto Serif CJK KR'; }
+.pdf .mono { font-family: PT Mono, iawriter-mono, Nitti, Menlo, Courier, monospace, 'Twemoji', 'Noto Color Emoji', 'Noto Sans Mono CJK JP'; }
+.pdf:lang(zh-CN) .mono { font-family: PT Mono, iawriter-mono, Nitti, Menlo, Courier, monospace, 'Twemoji', 'Noto Color Emoji', 'Noto Sans Mono CJK SC'; }
+.pdf:lang(zh-TW) .mono { font-family: PT Mono, iawriter-mono, Nitti, Menlo, Courier, monospace, 'Twemoji', 'Noto Color Emoji', 'Noto Sans Mono CJK TC'; }
+.pdf:lang(ko-KR) .mono { font-family: PT Mono, iawriter-mono, Nitti, Menlo, Courier, monospace, 'Twemoji', 'Noto Color Emoji', 'Noto Sans Mono CJK KR'; }
+.highlight-default {
+	color: rgba(44, 44, 43, 1);
+}
+.highlight-gray {
+	color: rgba(125, 122, 117, 1);
+	fill: rgba(125, 122, 117, 1);
+}
+.highlight-brown {
+	color: rgba(159, 118, 90, 1);
+	fill: rgba(159, 118, 90, 1);
+}
+.highlight-orange {
+	color: rgba(210, 123, 45, 1);
+	fill: rgba(210, 123, 45, 1);
+}
+.highlight-yellow {
+	color: rgba(203, 148, 52, 1);
+	fill: rgba(203, 148, 52, 1);
+}
+.highlight-teal {
+	color: rgba(80, 148, 110, 1);
+	fill: rgba(80, 148, 110, 1);
+}
+.highlight-blue {
+	color: rgba(56, 125, 201, 1);
+	fill: rgba(56, 125, 201, 1);
+}
+.highlight-purple {
+	color: rgba(154, 107, 180, 1);
+	fill: rgba(154, 107, 180, 1);
+}
+.highlight-pink {
+	color: rgba(193, 76, 138, 1);
+	fill: rgba(193, 76, 138, 1);
+}
+.highlight-red {
+	color: rgba(207, 81, 72, 1);
+	fill: rgba(207, 81, 72, 1);
+}
+.highlight-default_background {
+	color: rgba(44, 44, 43, 1);
+}
+.highlight-gray_background {
+	background: rgba(42, 28, 0, 0.07);
+}
+.highlight-brown_background {
+	background: rgba(139, 46, 0, 0.086);
+}
+.highlight-orange_background {
+	background: rgba(224, 101, 1, 0.129);
+}
+.highlight-yellow_background {
+	background: rgba(211, 168, 0, 0.137);
+}
+.highlight-teal_background {
+	background: rgba(0, 100, 45, 0.09);
+}
+.highlight-blue_background {
+	background: rgba(0, 124, 215, 0.094);
+}
+.highlight-purple_background {
+	background: rgba(102, 0, 178, 0.078);
+}
+.highlight-pink_background {
+	background: rgba(197, 0, 93, 0.086);
+}
+.highlight-red_background {
+	background: rgba(223, 22, 0, 0.094);
+}
+.block-color-default {
+	color: inherit;
+	fill: inherit;
+}
+.block-color-gray {
+	color: rgba(125, 122, 117, 1);
+	fill: rgba(125, 122, 117, 1);
+}
+.block-color-brown {
+	color: rgba(159, 118, 90, 1);
+	fill: rgba(159, 118, 90, 1);
+}
+.block-color-orange {
+	color: rgba(210, 123, 45, 1);
+	fill: rgba(210, 123, 45, 1);
+}
+.block-color-yellow {
+	color: rgba(203, 148, 52, 1);
+	fill: rgba(203, 148, 52, 1);
+}
+.block-color-teal {
+	color: rgba(80, 148, 110, 1);
+	fill: rgba(80, 148, 110, 1);
+}
+.block-color-blue {
+	color: rgba(56, 125, 201, 1);
+	fill: rgba(56, 125, 201, 1);
+}
+.block-color-purple {
+	color: rgba(154, 107, 180, 1);
+	fill: rgba(154, 107, 180, 1);
+}
+.block-color-pink {
+	color: rgba(193, 76, 138, 1);
+	fill: rgba(193, 76, 138, 1);
+}
+.block-color-red {
+	color: rgba(207, 81, 72, 1);
+	fill: rgba(207, 81, 72, 1);
+}
+.block-color-default_background {
+	color: inherit;
+	fill: inherit;
+}
+.block-color-gray_background {
+	background: rgba(240, 239, 237, 1);
+}
+.block-color-brown_background {
+	background: rgba(245, 237, 233, 1);
+}
+.block-color-orange_background {
+	background: rgba(251, 235, 222, 1);
+}
+.block-color-yellow_background {
+	background: rgba(249, 243, 220, 1);
+}
+.block-color-teal_background {
+	background: rgba(232, 241, 236, 1);
+}
+.block-color-blue_background {
+	background: rgba(229, 242, 252, 1);
+}
+.block-color-purple_background {
+	background: rgba(243, 235, 249, 1);
+}
+.block-color-pink_background {
+	background: rgba(250, 233, 241, 1);
+}
+.block-color-red_background {
+	background: rgba(252, 233, 231, 1);
+}
+.select-value-color-default { background-color: rgba(42, 28, 0, 0.07); }
+.select-value-color-gray { background-color: rgba(28, 19, 1, 0.11); }
+.select-value-color-brown { background-color: rgba(127, 51, 0, 0.156); }
+.select-value-color-orange { background-color: rgba(196, 88, 0, 0.203); }
+.select-value-color-yellow { background-color: rgba(209, 156, 0, 0.282); }
+.select-value-color-green { background-color: rgba(0, 96, 38, 0.156); }
+.select-value-color-blue { background-color: rgba(0, 118, 217, 0.203); }
+.select-value-color-purple { background-color: rgba(92, 0, 163, 0.141); }
+.select-value-color-pink { background-color: rgba(183, 0, 78, 0.152); }
+.select-value-color-red { background-color: rgba(206, 24, 0, 0.164); }
+
+.checkbox {
+	display: inline-flex;
+	vertical-align: text-bottom;
+	width: 16;
+	height: 16;
+	background-size: 16px;
+	margin-left: 2px;
+	margin-right: 5px;
+}
+
+.checkbox-on {
+	background-image: url("data:image/svg+xml;charset=UTF-8,%3Csvg%20width%3D%2216%22%20height%3D%2216%22%20viewBox%3D%220%200%2016%2016%22%20fill%3D%22none%22%20xmlns%3D%22http%3A%2F%2Fwww.w3.org%2F2000%2Fsvg%22%3E%0A%3Crect%20width%3D%2216%22%20height%3D%2216%22%20fill%3D%22%2358A9D7%22%2F%3E%0A%3Cpath%20d%3D%22M6.71429%2012.2852L14%204.9995L12.7143%203.71436L6.71429%209.71378L3.28571%206.2831L2%207.57092L6.71429%2012.2852Z%22%20fill%3D%22white%22%2F%3E%0A%3C%2Fsvg%3E");
+}
+
+.checkbox-off {
+	background-image: url("data:image/svg+xml;charset=UTF-8,%3Csvg%20width%3D%2216%22%20height%3D%2216%22%20viewBox%3D%220%200%2016%2016%22%20fill%3D%22none%22%20xmlns%3D%22http%3A%2F%2Fwww.w3.org%2F2000%2Fsvg%22%3E%0A%3Crect%20x%3D%220.75%22%20y%3D%220.75%22%20width%3D%2214.5%22%20height%3D%2214.5%22%20fill%3D%22white%22%20stroke%3D%22%2336352F%22%20stroke-width%3D%221.5%22%2F%3E%0A%3C%2Fsvg%3E");
+}
+	
+</style></head><body><article id="1e485df0-1907-8060-bd27-d668a6adcba9" class="page sans"><header><h1 class="page-title" dir="auto">CFO Budget Strategy &amp; Tools</h1><p class="page-description" dir="auto"></p><table class="properties"><tbody><tr class="property-row property-row-person"><th><span class="icon property-icon"><img src="https://www.notion.so/icons/friends_gray.svg" style="width:14px;height:14px;display:block"/></span>Owner</th><td><span class="user"><span class="icon text-icon user-icon"><span class="user-icon-inner">A</span></span>Aubert</span></td></tr><tr class="property-row property-row-multi_select"><th><span class="icon property-icon"><img src="https://www.notion.so/icons/list_gray.svg" style="width:14px;height:14px;display:block"/></span>Tags</th><td></td></tr></tbody></table></header><div class="page-body"><div style="display:contents" dir="auto"><h2 id="1e885df0-1907-8061-bb8a-dfe06d1bcb46" class="">🧭 Purpose</h2></div><div style="display:contents" dir="auto"><p id="1e885df0-1907-800e-94a9-d5c7e9a27382" class="">This document outlines Nzila Ventures&#x27; financial strategy across planning, cost control, revenue modeling, and strategic capital deployment. It introduces the budgeting approach, essential tools, cost structures, funding timelines, and governance best practices. It ensures all teams and products operate under a unified financial playbook.</p></div><div style="display:contents" dir="auto"><hr id="1e885df0-1907-802b-ac20-c61a9f17bd9f"/></div><div style="display:contents" dir="auto"><h2 id="1e885df0-1907-808a-b19b-eb6e278664ca" class="">💼 1. Nzila’s Financial Philosophy</h2></div><div style="display:contents" dir="auto"><p id="1e885df0-1907-8062-802f-e5e5b85b41b1" class="">Nzila operates under five foundational finance principles:</p></div><div style="display:contents" dir="auto"><ol type="1" id="1e885df0-1907-80b0-a2b3-e6a155140c02" class="numbered-list" start="1"><li><strong>Every dollar must have an outcome</strong> — tied to traction, learning, or defensibility</li></ol></div><div style="display:contents" dir="auto"><ol type="1" id="1e885df0-1907-807e-9a34-fca9c0f4ce2e" class="numbered-list" start="2"><li><strong>Cash flow is as important as innovation</strong></li></ol></div><div style="display:contents" dir="auto"><ol type="1" id="1e885df0-1907-8046-ac2d-e85efb9a5513" class="numbered-list" start="3"><li><strong>Build lean, scale smart</strong> — invest in automation before headcount</li></ol></div><div style="display:contents" dir="auto"><ol type="1" id="1e885df0-1907-80bb-b97d-e0a20a84b131" class="numbered-list" start="4"><li><strong>Grants &amp; equity funding must work in harmony</strong></li></ol></div><div style="display:contents" dir="auto"><ol type="1" id="1e885df0-1907-803a-8ba4-dd61c70f939c" class="numbered-list" start="5"><li><strong>Financial literacy is cultural, not just operational</strong></li></ol></div><div style="display:contents" dir="auto"><hr id="1e885df0-1907-80a9-a38b-f5b8c6eb9d13"/></div><div style="display:contents" dir="auto"><h2 id="1e885df0-1907-800c-8a5d-d4f3b4a21771" class="">🔧 2. Budgeting Structure by Product Line</h2></div><div style="display:contents" dir="auto"><p id="1e885df0-1907-80f2-8acc-cbc9939802c6" class="">Nzila tracks budgets at three levels:</p></div><div style="display:contents" dir="ltr"><table id="1e885df0-1907-8048-9a75-fe0f73fd7a69" class="simple-table"><tbody><div style="display:contents" dir="ltr"><tr id="1e885df0-1907-8040-8767-d833ddc87106"><td id="kt@q" class="">Layer</td><td id="Kmod" class="">Focus</td></tr></div><div style="display:contents" dir="ltr"><tr id="1e885df0-1907-803f-a943-d72109382b4b"><td id="kt@q" class=""><strong>Corporate (Nzila HQ)</strong></td><td id="Kmod" class="">Legal, HR, admin, compliance, shared tooling, capital raises</td></tr></div><div style="display:contents" dir="ltr"><tr id="1e885df0-1907-8040-a243-f2fd9a91295b"><td id="kt@q" class=""><strong>Product-Specific</strong></td><td id="Kmod" class="">e.g., Memora – dev, design, growth, cloud infra</td></tr></div><div style="display:contents" dir="ltr"><tr id="1e885df0-1907-8042-bc5a-ea04eabfe985"><td id="kt@q" class=""><strong>Project-Specific</strong></td><td id="Kmod" class="">R&amp;D efforts (e.g., Companion Engine), grant deliverables, pilots</td></tr></div></tbody></table></div><div style="display:contents" dir="auto"><p id="1e885df0-1907-8030-a72b-f2fcb233bd39" class="">Each layer rolls into consolidated reporting but is managed by distinct budget holders.</p></div><div style="display:contents" dir="auto"><hr id="1e885df0-1907-80a3-909f-f86e3a4cef31"/></div><div style="display:contents" dir="auto"><h2 id="1e885df0-1907-80b1-be0d-d65207447e47" class="">💵 3. Key Budget Categories (with Monthly Tracking)</h2></div><div style="display:contents" dir="ltr"><table id="1e885df0-1907-804c-be86-e0b2b1fa0b2a" class="simple-table"><tbody><div style="display:contents" dir="ltr"><tr id="1e885df0-1907-803c-b828-ec9403c47e6c"><td id="n|oC" class="">Category</td><td id="wFt|" class="">Notes</td><td id="R&gt;xQ" class="">Frequency</td></tr></div><div style="display:contents" dir="ltr"><tr id="1e885df0-1907-8060-b8d9-fda831a7e0f1"><td id="n|oC" class=""><strong>R&amp;D / Dev</strong></td><td id="wFt|" class="">Dev contractors, testing environments, integrations</td><td id="R&gt;xQ" class="">Monthly</td></tr></div><div style="display:contents" dir="ltr"><tr id="1e885df0-1907-8076-bea6-d2b248ca6c36"><td id="n|oC" class=""><strong>Design &amp; UI/UX</strong></td><td id="wFt|" class="">Figma, design support, asset generation</td><td id="R&gt;xQ" class="">Monthly</td></tr></div><div style="display:contents" dir="ltr"><tr id="1e885df0-1907-8034-92fa-f35d1d0234cb"><td id="n|oC" class=""><strong>Marketing / GTM</strong></td><td id="wFt|" class="">Ads, branding, web hosting, content</td><td id="R&gt;xQ" class="">Monthly</td></tr></div><div style="display:contents" dir="ltr"><tr id="1e885df0-1907-8023-bbe7-ca3e93d131e1"><td id="n|oC" class=""><strong>Cloud &amp; Software</strong></td><td id="wFt|" class="">Notion, Slack, GitHub, Microsoft, Brevo, AI tools</td><td id="R&gt;xQ" class="">Monthly</td></tr></div><div style="display:contents" dir="ltr"><tr id="1e885df0-1907-80e0-9da3-c5419c19d570"><td id="n|oC" class=""><strong>Legal &amp; IP</strong></td><td id="wFt|" class="">Incorporation, NDAs, contract reviews</td><td id="R&gt;xQ" class="">Event-based</td></tr></div><div style="display:contents" dir="ltr"><tr id="1e885df0-1907-8023-b884-cca42faa4163"><td id="n|oC" class=""><strong>Grants &amp; Admin</strong></td><td id="wFt|" class="">Consultants, time-tracking, program compliance</td><td id="R&gt;xQ" class="">Project-based</td></tr></div><div style="display:contents" dir="ltr"><tr id="1e885df0-1907-80d6-a286-e6d21813a781"><td id="n|oC" class=""><strong>Team (future)</strong></td><td id="wFt|" class="">ESOP reserved, contractor fees, fractional hires</td><td id="R&gt;xQ" class="">Quarterly forecast</td></tr></div><div style="display:contents" dir="ltr"><tr id="1e885df0-1907-80ae-af84-d5cd70db99a8"><td id="n|oC" class=""><strong>Fundraising Costs</strong></td><td id="wFt|" class="">Pitch prep, lawyers, commissions (if any)</td><td id="R&gt;xQ" class="">Round-based</td></tr></div></tbody></table></div><div style="display:contents" dir="auto"><hr id="1e885df0-1907-8035-b8f3-c3ad19ce96f6"/></div><div style="display:contents" dir="auto"><h2 id="1e885df0-1907-80fe-986b-f45443d2b663" class="">🛠️ 4. Tools in Use</h2></div><div style="display:contents" dir="ltr"><table id="1e885df0-1907-80ca-b55d-c09d8c2b7890" class="simple-table"><tbody><div style="display:contents" dir="ltr"><tr id="1e885df0-1907-80a3-a9ba-f5e31e4e4c78"><td id="ij@F" class="">Tool</td><td id="bqJ]" class="">Function</td></tr></div><div style="display:contents" dir="ltr"><tr id="1e885df0-1907-8045-ab7f-e1d08900e799"><td id="ij@F" class=""><strong>QuickBooks Online</strong></td><td id="bqJ]" class="">Primary ledger, GL structure, expense classification</td></tr></div><div style="display:contents" dir="ltr"><tr id="1e885df0-1907-80e1-9589-f8e6debf0595"><td id="ij@F" class=""><strong>Excel/Google Sheets</strong></td><td id="bqJ]" class="">Budgeting, forecasting, scenario modeling</td></tr></div><div style="display:contents" dir="ltr"><tr id="1e885df0-1907-8082-aa75-db7787a37853"><td id="ij@F" class=""><strong>Notion</strong></td><td id="bqJ]" class="">Team financial literacy, document repository</td></tr></div><div style="display:contents" dir="ltr"><tr id="1e885df0-1907-80a4-bdbf-e20f7a449bd7"><td id="ij@F" class=""><strong>Slack + Gmail</strong></td><td id="bqJ]" class="">Finance workflows, invoice approvals</td></tr></div><div style="display:contents" dir="ltr"><tr id="1e885df0-1907-80ff-93c7-ccd62a393aa7"><td id="ij@F" class=""><strong>Canva Pro</strong></td><td id="bqJ]" class="">Visualizing investor-ready summaries</td></tr></div><div style="display:contents" dir="ltr"><tr id="1e885df0-1907-8062-87af-f351865c5048"><td id="ij@F" class=""><strong>Brevo</strong></td><td id="bqJ]" class="">Email ops (finance alerts, stakeholder comms)</td></tr></div><div style="display:contents" dir="ltr"><tr id="1e885df0-1907-8043-be66-d0448faf2d93"><td id="ij@F" class=""><strong>HubSpot CRM (Light Use)</strong></td><td id="bqJ]" class="">Tracks investor and grantor status + financial comms</td></tr></div><div style="display:contents" dir="ltr"><tr id="1e885df0-1907-8083-acd7-d26ae56d48c9"><td id="ij@F" class=""><em>(Planned: Carta or Pulley)</em></td><td id="bqJ]" class="">Future equity and cap table tracking</td></tr></div></tbody></table></div><div style="display:contents" dir="auto"><hr id="1e885df0-1907-806a-8d88-db5268226049"/></div><div style="display:contents" dir="auto"><h2 id="1e885df0-1907-80a7-abcb-c3b6cdb2f893" class="">🧮 5. Forecasting Strategy (2025–2027)</h2></div><div style="display:contents" dir="auto"><p id="1e885df0-1907-8023-9e5f-e7d57627fd5d" class="">Forecasts are maintained in quarterly rolling models with the following assumptions:</p></div><div style="display:contents" dir="auto"><ul id="1e885df0-1907-8069-8335-d4f0cfd26790" class="bulleted-list"><li style="list-style-type:disc"><strong>Base Case</strong>: Moderate grant success (IRAP, SDTC, AGE-WELL), MVP traction, light advisory costs</li></ul></div><div style="display:contents" dir="auto"><ul id="1e885df0-1907-8062-a645-edb753d9cb84" class="bulleted-list"><li style="list-style-type:disc"><strong>Aggressive Case</strong>: Early U.S. entry, pilot expansion, soft equity round (500K–1.2M)</li></ul></div><div style="display:contents" dir="auto"><ul id="1e885df0-1907-8006-a79a-ee22acc5bd30" class="bulleted-list"><li style="list-style-type:disc"><strong>Conservative Case</strong>: Grants only, 1 product + 1 pilot running lean, delayed revenue</li></ul></div><div style="display:contents" dir="auto"><h3 id="1e885df0-1907-800b-9a99-e8a183d2028f" class="">Forecasted Benchmarks (Illustrative):</h3></div><div style="display:contents" dir="ltr"><table id="1e885df0-1907-80e6-a3f2-f68e5a797f0f" class="simple-table"><tbody><div style="display:contents" dir="ltr"><tr id="1e885df0-1907-80c5-811f-db1fc01da482"><td id="LAs|" class="">Year</td><td id="Ye?P" class="">Revenue Target</td><td id="DkF[" class="">Burn Rate Cap</td><td id="qQ@p" class="">Team Size</td></tr></div><div style="display:contents" dir="ltr"><tr id="1e885df0-1907-80bd-838a-dbe6e072a100"><td id="LAs|" class="">2025</td><td id="Ye?P" class="">$0 – Pre-revenue</td><td id="DkF[" class="">$12–20K/mo</td><td id="qQ@p" class="">3–4 core contributors</td></tr></div><div style="display:contents" dir="ltr"><tr id="1e885df0-1907-8011-b11a-fcd0860aaed9"><td id="LAs|" class="">2026</td><td id="Ye?P" class="">$100K–250K</td><td id="DkF[" class="">$30K/mo</td><td id="qQ@p" class="">6–8 FTEs or equiv.</td></tr></div><div style="display:contents" dir="ltr"><tr id="1e885df0-1907-80c2-a196-f968662ea67f"><td id="LAs|" class="">2027</td><td id="Ye?P" class="">$500K–1M</td><td id="DkF[" class="">$40–55K/mo</td><td id="qQ@p" class="">8–12 incl. fractional</td></tr></div></tbody></table></div><div style="display:contents" dir="auto"><hr id="1e885df0-1907-80ba-ab99-ebf850ee35fb"/></div><div style="display:contents" dir="auto"><h2 id="1e885df0-1907-80b3-8f4f-fd280271445f" class="">🧰 6. Grant Strategy Alignment</h2></div><div style="display:contents" dir="ltr"><table id="1e885df0-1907-8075-a74d-fe113dd808fd" class="simple-table"><tbody><div style="display:contents" dir="ltr"><tr id="1e885df0-1907-807f-bb40-d0e6564476ba"><td id="^tN;" class="">Program</td><td id="RwnM" class="">Role in Budget</td></tr></div><div style="display:contents" dir="ltr"><tr id="1e885df0-1907-80e4-88c8-edd18a450492"><td id="^tN;" class=""><strong>IRAP Youth or R&amp;D</strong></td><td id="RwnM" class="">Covers dev or technical talent for Memora MVP</td></tr></div><div style="display:contents" dir="ltr"><tr id="1e885df0-1907-80da-80f4-c7980602ad0f"><td id="^tN;" class=""><strong>AGE-WELL or provincial AI grants</strong></td><td id="RwnM" class="">R&amp;D &amp; Companion + data modeling costs</td></tr></div><div style="display:contents" dir="ltr"><tr id="1e885df0-1907-80e3-8a58-d162aed5ff14"><td id="^tN;" class=""><strong>CDAP (Canada Digital Adoption)</strong></td><td id="RwnM" class="">Systems audits, workflow automation</td></tr></div><div style="display:contents" dir="ltr"><tr id="1e885df0-1907-8089-87c5-c3919606e172"><td id="^tN;" class=""><strong>Futurpreneur / BDC</strong></td><td id="RwnM" class="">Bridge funding for launch marketing and ops</td></tr></div><div style="display:contents" dir="ltr"><tr id="1e885df0-1907-80fb-a86d-d0ac0ee969dd"><td id="^tN;" class=""><strong>CIF or SDTC</strong></td><td id="RwnM" class="">Longer-term platform consolidation efforts</td></tr></div></tbody></table></div><div style="display:contents" dir="auto"><p id="1e885df0-1907-80a0-9eca-d2053fb6f93b" class="">🧭 All grants are entered in a <strong>master Grant Calendar</strong> with milestones and audit flags.</p></div><div style="display:contents" dir="auto"><hr id="1e885df0-1907-8004-91c4-c5fe294c4993"/></div><div style="display:contents" dir="auto"><h2 id="1e885df0-1907-80dc-a40d-e37347d5f552" class="">🧱 7. Capital Discipline &amp; Oversight</h2></div><div style="display:contents" dir="auto"><ul id="1e885df0-1907-8032-9001-d5787c6181cf" class="bulleted-list"><li style="list-style-type:disc">Budget accountability is owned <strong>by product owners + finance team</strong></li></ul></div><div style="display:contents" dir="auto"><ul id="1e885df0-1907-800e-bd45-e632592e93eb" class="bulleted-list"><li style="list-style-type:disc"><strong>Quarterly reviews</strong> against actuals</li></ul></div><div style="display:contents" dir="auto"><ul id="1e885df0-1907-8044-8be0-ea0dd285e4f1" class="bulleted-list"><li style="list-style-type:disc">New tool or hire requests go through a <strong>2-step approval</strong>:<div style="display:contents" dir="auto"><ol type="1" id="1e885df0-1907-80d5-ac23-ea0b75b9efd6" class="numbered-list" start="1"><li>Does it align with product growth or defensibility?</li></ol></div><div style="display:contents" dir="auto"><ol type="1" id="1e885df0-1907-8040-ac39-d66d832c3639" class="numbered-list" start="2"><li>Does it create recurring financial obligations?</li></ol></div></li></ul></div><div style="display:contents" dir="auto"><hr id="1e885df0-1907-80be-8a7d-fe7f1939d7cc"/></div><div style="display:contents" dir="auto"><h2 id="1e885df0-1907-803b-8ee4-fbb28c9959a6" class="">🪙 8. Nzila’s Investment Readiness Scorecard</h2></div><div style="display:contents" dir="ltr"><table id="1e885df0-1907-80a7-babb-e3a43765f309" class="simple-table"><tbody><div style="display:contents" dir="ltr"><tr id="1e885df0-1907-8093-8619-d501c9dda72b"><td id="V=nn" class="">Area</td><td id="RRXD" class="">Current Readiness</td><td id=":Aw;" class="">Next Steps</td></tr></div><div style="display:contents" dir="ltr"><tr id="1e885df0-1907-8099-91a8-d7b21e1a400d"><td id="V=nn" class="">Cap Table Cleanliness</td><td id="RRXD" class="">✅ 100% founder-owned</td><td id=":Aw;" class="">Create dilution models</td></tr></div><div style="display:contents" dir="ltr"><tr id="1e885df0-1907-8034-a186-db61d0c6817f"><td id="V=nn" class="">Budgeting System</td><td id="RRXD" class="">✅ Manual + QBO</td><td id=":Aw;" class="">Add visual dashboards</td></tr></div><div style="display:contents" dir="ltr"><tr id="1e885df0-1907-8079-b5b0-fac8188f6fed"><td id="V=nn" class="">Revenue Models</td><td id="RRXD" class="">⚠️ Drafted only</td><td id=":Aw;" class="">Lock Memora pricing &amp; unit metrics</td></tr></div><div style="display:contents" dir="ltr"><tr id="1e885df0-1907-8032-a6fd-d44b322578ce"><td id="V=nn" class="">Financial Storytelling</td><td id="RRXD" class="">⚠️ MVP-level</td><td id=":Aw;" class="">Prep investor-focused financial narratives</td></tr></div><div style="display:contents" dir="ltr"><tr id="1e885df0-1907-807c-8fdb-c0db348c79a1"><td id="V=nn" class="">Grant Auditability</td><td id="RRXD" class="">✅ Centralized tracking</td><td id=":Aw;" class="">Add back-up doc automation</td></tr></div></tbody></table></div><div style="display:contents" dir="auto"><hr id="1e885df0-1907-8048-9935-eb280a62a1bf"/></div><div style="display:contents" dir="auto"><h2 id="1e885df0-1907-80ca-8b6b-ec70256a1d89" class="">🧾 9. Reporting &amp; Board Visibility</h2></div><div style="display:contents" dir="auto"><ul id="1e885df0-1907-8026-91c4-e9d745f3b389" class="bulleted-list"><li style="list-style-type:disc">Monthly budget vs. actuals → shared in Notion + Sheets</li></ul></div><div style="display:contents" dir="auto"><ul id="1e885df0-1907-8015-b8c8-cc6239d9ca55" class="bulleted-list"><li style="list-style-type:disc">Quarterly narrative reports for internal board (can be repurposed for grantors)</li></ul></div><div style="display:contents" dir="auto"><ul id="1e885df0-1907-8095-a659-dd5a8228ac92" class="bulleted-list"><li style="list-style-type:disc">Annual summary decks to support investor pipeline + due diligence rooms</li></ul></div><div style="display:contents" dir="auto"><hr id="1e885df0-1907-8030-93f6-e3869d56f98e"/></div><div style="display:contents" dir="auto"><h2 id="1e885df0-1907-803e-9d81-cd57dba3fe56" class="">📅 10. Review &amp; Maintenance</h2></div><div style="display:contents" dir="auto"><ul id="1e885df0-1907-80ce-9769-d2f094c0d8db" class="bulleted-list"><li style="list-style-type:disc"><strong>Owner:</strong> CFO (or acting Finance Lead)</li></ul></div><div style="display:contents" dir="auto"><ul id="1e885df0-1907-8019-86ba-cd9c307ae651" class="bulleted-list"><li style="list-style-type:disc"><strong>Reviewed:</strong> Monthly budget, quarterly strategy</li></ul></div><div style="display:contents" dir="auto"><ul id="1e885df0-1907-8001-908e-d520b6b07c1b" class="bulleted-list"><li style="list-style-type:disc"><strong>Update Cycle:</strong> Every 2 weeks (Lite); Quarterly (Formal forecast)</li></ul></div><div style="display:contents" dir="auto"><ul id="1e885df0-1907-8073-9b68-fe3726d5512c" class="bulleted-list"><li style="list-style-type:disc"><strong>Aligned To:</strong> Strategic Roadmap + Phase Milestones</li></ul></div></div></article><span class="sans" style="font-size:14px;padding-top:2em"></span></body></html>
