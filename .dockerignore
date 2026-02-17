@@ -1,0 +1,51 @@
+# Dependencies
+node_modules
+**/node_modules
+.pnpm-store
+.pnpm-cache
+
+# Build outputs
+.next
+.turbo
+dist
+out
+build
+coverage
+*.log
+
+# Legacy folders
+legacy
+legacy-codebases
+nzila-website
+nzila-scripts-book-template
+
+# Governance/docs
+governance
+business
+corporate
+
+# Git
+.git
+.gitignore
+
+# IDE
+.vscode
+.idea
+*.swp
+*.swo
+
+# Environment
+.env
+.env.local
+.env*.local
+
+# Python
+__pycache__
+*.pyc
+*.pyo
+*.egg-info
+.pytest_cache
+
+# Other
+.DS_Store
+Thumbs.db

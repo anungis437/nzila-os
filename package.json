@@ -1,0 +1,23 @@
+{
+  "name": "nzila-os",
+  "version": "0.1.0",
+  "private": true,
+  "packageManager": "pnpm@10.11.0",
+  "scripts": {
+    "dev": "turbo dev",
+    "dev:web": "turbo dev --filter=@nzila/web",
+    "dev:console": "turbo dev --filter=@nzila/console",
+    "build": "turbo build",
+    "build:web": "turbo build --filter=@nzila/web",
+    "build:console": "turbo build --filter=@nzila/console",
+    "lint": "turbo lint",
+    "typecheck": "turbo typecheck",
+    "clean": "turbo clean",
+    "format": "prettier --write \"**/*.{ts,tsx,js,jsx,json,md}\"",
+    "format:check": "prettier --check \"**/*.{ts,tsx,js,jsx,json,md}\""
+  },
+  "devDependencies": {
+    "prettier": "^3.4.2",
+    "turbo": "^2.4.4"
+  }
+}
