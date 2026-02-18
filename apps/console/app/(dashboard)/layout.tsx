@@ -6,10 +6,12 @@ import {
   ChartBarIcon,
   CogIcon,
   BookOpenIcon,
+  BuildingOffice2Icon,
 } from '@heroicons/react/24/outline'
 
 const navItems = [
   { name: 'Dashboard', href: '/console', icon: HomeIcon },
+  { name: 'Business OS', href: '/business', icon: BuildingOffice2Icon },
   { name: 'Docs', href: '/docs', icon: DocumentTextIcon },
   { name: 'Analytics', href: '/analytics', icon: ChartBarIcon },
   { name: 'Automation', href: '/automation', icon: CogIcon },

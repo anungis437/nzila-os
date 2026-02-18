@@ -51,10 +51,10 @@ const tiles = [
   },
   {
     name: 'Year-End',
+    href: '/business/yearend',
     icon: DocumentTextIcon,
     description: 'Close checklist, audit packages, and tax readiness.',
     color: 'bg-amber-50 text-amber-600',
-    comingSoon: true,
   },
 ]
 
