@@ -14,11 +14,13 @@
     "typecheck": "turbo typecheck",
     "clean": "turbo clean",
     "format": "prettier --write \"**/*.{ts,tsx,js,jsx,json,md}\"",
+    "test": "turbo test",
     "format:check": "prettier --check \"**/*.{ts,tsx,js,jsx,json,md}\"",
     "link": "pwsh -NoProfile -File scripts/link-workspaces.ps1"
   },
   "devDependencies": {
     "prettier": "^3.4.2",
-    "turbo": "^2.4.4"
+    "turbo": "^2.4.4",
+    "vitest": "^4.0.18"
   }
 }
