@@ -61,6 +61,22 @@ module keyVault 'modules/key-vault.bicep' = {
   }
 }
 
+// ── Storage Account (evidence + minutebook + exports) ──
+module storage 'modules/storage-account.bicep' = {
+  name: 'st-${productName}'
+  params: {
+    name: 'st${productName}${environment}'
+    location: location
+    skuName: environment == 'prod' ? 'Standard_RAGRS' : 'Standard_LRS'
+    enableVersioning: true
+    softDeleteRetentionDays: environment == 'prod' ? 30 : 7
+    tags: {
+      product: productName
+      environment: environment
+    }
+  }
+}
+
 // ── Monitoring ──
 module monitoring 'modules/monitoring.bicep' = {
   name: 'mon-${productName}'

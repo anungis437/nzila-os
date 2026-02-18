@@ -1,0 +1,219 @@
+{
+  "$schema": "http://json-schema.org/draft-07/schema#",
+  "title": "EvidencePackIndex",
+  "description": "Schema for evidence pack index bundles used by incident postmortems, DR tests, period closes, and other auditable events in Nzila OS.",
+  "type": "object",
+  "properties": {
+    "schema_version": {
+      "type": "string",
+      "const": "1.0.0",
+      "description": "Schema version for forward compatibility"
+    },
+    "pack_id": {
+      "type": "string",
+      "description": "Unique identifier for this evidence pack (e.g., IR-2026-001, DR-Q1-2026)"
+    },
+    "entity_id": {
+      "type": "string",
+      "description": "Entity slug or UUID this evidence belongs to"
+    },
+    "control_family": {
+      "type": "string",
+      "enum": [
+        "access",
+        "change-mgmt",
+        "incident-response",
+        "dr-bcp",
+        "integrity",
+        "sdlc",
+        "retention"
+      ],
+      "description": "Control family from the Required Evidence Map"
+    },
+    "event_type": {
+      "type": "string",
+      "enum": [
+        "incident",
+        "dr-test",
+        "access-review",
+        "period-close",
+        "release",
+        "restore-test",
+        "control-test",
+        "audit-request"
+      ],
+      "description": "Type of event this evidence pack documents"
+    },
+    "event_id": {
+      "type": "string",
+      "description": "Identifier of the triggering event (incident ID, release tag, close period, etc.)"
+    },
+    "created_at": {
+      "type": "string",
+      "format": "date-time",
+      "description": "ISO 8601 UTC timestamp when this index was generated"
+    },
+    "created_by": {
+      "type": "string",
+      "description": "Clerk user ID or system identifier that generated this pack"
+    },
+    "run_id": {
+      "type": "string",
+      "description": "Unique run/workflow ID for traceability (UUID)"
+    },
+    "blob_container": {
+      "type": "string",
+      "enum": ["evidence", "minutebook", "exports"],
+      "description": "Azure Blob container where artifacts are stored"
+    },
+    "base_path": {
+      "type": "string",
+      "description": "Common blob path prefix for all artifacts in this pack"
+    },
+    "summary": {
+      "type": "string",
+      "description": "Human-readable summary of what this evidence pack covers"
+    },
+    "controls_covered": {
+      "type": "array",
+      "items": {
+        "type": "string"
+      },
+      "description": "List of control IDs from Required-Evidence-Map.md that this pack provides evidence for (e.g., ['IR-01', 'IR-02', 'IR-03'])"
+    },
+    "artifacts": {
+      "type": "array",
+      "items": {
+        "type": "object",
+        "properties": {
+          "artifact_id": {
+            "type": "string",
+            "description": "Unique identifier for this artifact within the pack"
+          },
+          "artifact_type": {
+            "type": "string",
+            "description": "Artifact category (postmortem, audit-trail, containment-log, etc.)"
+          },
+          "filename": {
+            "type": "string",
+            "description": "Filename with extension"
+          },
+          "blob_path": {
+            "type": "string",
+            "description": "Full blob path within the container"
+          },
+          "sha256": {
+            "type": "string",
+            "pattern": "^[a-f0-9]{64}$",
+            "description": "SHA-256 hex digest of the artifact file"
+          },
+          "content_type": {
+            "type": "string",
+            "description": "MIME type (application/pdf, application/json, text/csv, etc.)"
+          },
+          "size_bytes": {
+            "type": "integer",
+            "minimum": 0,
+            "description": "File size in bytes"
+          },
+          "created_at": {
+            "type": "string",
+            "format": "date-time",
+            "description": "ISO 8601 UTC timestamp when this artifact was uploaded"
+          },
+          "created_by": {
+            "type": "string",
+            "description": "Clerk user ID that uploaded this artifact"
+          },
+          "doc_id": {
+            "type": "string",
+            "description": "FK → documents.id in the database (UUID)"
+          },
+          "audit_event_id": {
+            "type": "string",
+            "description": "FK → audit_events.id for the upload action (UUID)"
+          },
+          "retention_class": {
+            "type": "string",
+            "enum": ["PERMANENT", "7_YEARS", "3_YEARS", "1_YEAR"],
+            "description": "Retention class governing lifecycle"
+          },
+          "classification": {
+            "type": "string",
+            "enum": ["INTERNAL", "CONFIDENTIAL", "RESTRICTED"],
+            "description": "Data classification level"
+          },
+          "description": {
+            "type": "string",
+            "description": "Human-readable description of what this artifact contains"
+          }
+        },
+        "required": [
+          "artifact_id",
+          "artifact_type",
+          "filename",
+          "blob_path",
+          "sha256",
+          "content_type",
+          "size_bytes",
+          "created_at",
+          "created_by",
+          "retention_class"
+        ],
+        "additionalProperties": false
+      },
+      "minItems": 1,
+      "description": "Array of evidence artifacts in this pack"
+    },
+    "verification": {
+      "type": "object",
+      "properties": {
+        "all_hashes_verified": {
+          "type": "boolean",
+          "description": "Whether all artifact SHA-256 hashes were verified at index generation time"
+        },
+        "hash_chain_start": {
+          "type": "string",
+          "description": "audit_events.id of earliest event in the relevant hash chain window"
+        },
+        "hash_chain_end": {
+          "type": "string",
+          "description": "audit_events.id of latest event in the relevant hash chain window"
+        },
+        "chain_integrity": {
+          "type": "string",
+          "enum": ["VERIFIED", "UNVERIFIED", "BROKEN"],
+          "description": "Result of hash chain verification for the event window"
+        },
+        "verified_at": {
+          "type": "string",
+          "format": "date-time",
+          "description": "When verification was performed"
+        },
+        "verified_by": {
+          "type": "string",
+          "description": "Who or what performed verification"
+        }
+      },
+      "required": ["all_hashes_verified"],
+      "additionalProperties": false,
+      "description": "Verification metadata for this evidence pack"
+    }
+  },
+  "required": [
+    "schema_version",
+    "pack_id",
+    "entity_id",
+    "control_family",
+    "event_type",
+    "event_id",
+    "created_at",
+    "created_by",
+    "run_id",
+    "blob_container",
+    "base_path",
+    "artifacts",
+    "verification"
+  ],
+  "additionalProperties": false
+}

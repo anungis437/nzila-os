@@ -100,3 +100,9 @@ secrets/
 *.bak
 *.cache
 docker-build.log
+build-output.txt
+install-err.txt
+install-log.txt
+install-out.txt
+tsc-output.txt
+*.tsbuildinfo

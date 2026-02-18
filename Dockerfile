@@ -15,15 +15,21 @@ FROM base AS deps
 WORKDIR /app
 
 # Copy package files
-COPY package.json pnpm-workspace.yaml pnpm-lock.yaml* .npmrc ./
+COPY package.json pnpm-workspace.yaml pnpm-lock.yaml* ./
 COPY apps/web/package.json ./apps/web/
 COPY apps/console/package.json ./apps/console/
 COPY packages/ui/package.json ./packages/ui/
 COPY packages/config/package.json ./packages/config/
 COPY packages/scripts-book/package.json ./packages/scripts-book/
+COPY packages/db/package.json ./packages/db/
+COPY packages/os-core/package.json ./packages/os-core/
+COPY packages/blob/package.json ./packages/blob/
 
-# Install dependencies
-RUN --mount=type=cache,id=pnpm,target=/pnpm/store pnpm install --frozen-lockfile
+# Override .npmrc — remove exFAT workarounds that are unnecessary on ext4
+RUN echo '' > .npmrc
+
+# Install dependencies (no --frozen-lockfile in case lockfile is stale)
+RUN --mount=type=cache,id=pnpm,target=/pnpm/store pnpm install --no-frozen-lockfile
 
 # ============================================
 # Builder stage
@@ -111,12 +117,18 @@ FROM base AS dev
 WORKDIR /app
 
 # Copy package files
-COPY package.json pnpm-workspace.yaml pnpm-lock.yaml* .npmrc ./
+COPY package.json pnpm-workspace.yaml pnpm-lock.yaml* ./
 COPY apps/web/package.json ./apps/web/
 COPY apps/console/package.json ./apps/console/
 COPY packages/ui/package.json ./packages/ui/
 COPY packages/config/package.json ./packages/config/
 COPY packages/scripts-book/package.json ./packages/scripts-book/
+COPY packages/db/package.json ./packages/db/
+COPY packages/os-core/package.json ./packages/os-core/
+COPY packages/blob/package.json ./packages/blob/
+
+# Override .npmrc — remove exFAT workarounds that are unnecessary on ext4
+RUN echo '' > .npmrc
 
 # Install dependencies
 RUN --mount=type=cache,id=pnpm,target=/pnpm/store pnpm install

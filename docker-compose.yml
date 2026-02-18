@@ -12,11 +12,17 @@ services:
       - /app/apps/console/node_modules
       - /app/packages/ui/node_modules
       - /app/packages/config/node_modules
+      - /app/packages/db/node_modules
+      - /app/packages/os-core/node_modules
+      - /app/packages/blob/node_modules
+      - /app/packages/scripts-book/node_modules
     ports:
       - "3000:3000"
       - "3001:3001"
     environment:
       - NODE_ENV=development
+      - NEXT_PUBLIC_CLERK_PUBLISHABLE_KEY=${NEXT_PUBLIC_CLERK_PUBLISHABLE_KEY:-pk_test_placeholder}
+      - CLERK_SECRET_KEY=${CLERK_SECRET_KEY:-sk_test_placeholder}
     command: pnpm dev
 
   # Public website (production)
