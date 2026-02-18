@@ -1,0 +1,1706 @@
+{
+  "total_files": 79,
+  "files_with_db": 28,
+  "files_without_db": 51,
+  "total_operations": 1812,
+  "services": [
+    {
+      "file": "services\\financial-service\\src\\tests\\workflows.test.ts",
+      "name": "workflows.test",
+      "has_db_import": false,
+      "schema_imports": [],
+      "operations": {
+        "select": 14,
+        "insert": 19,
+        "update": 1,
+        "delete": 11,
+        "from": 14,
+        "where": 26,
+        "orderBy": 1,
+        "limit": 6
+      },
+      "total_operations": 92,
+      "exported_functions": [],
+      "exported_classes": []
+    },
+    {
+      "file": "services\\governance-service.ts",
+      "name": "governance-service",
+      "has_db_import": true,
+      "schema_imports": [
+        {
+          "tables": [
+            "goldenShares",
+            "reservedMatterVotes",
+            "missionAudits",
+            "governanceEvents",
+            "councilElections",
+            "type NewGoldenShare",
+            "type NewReservedMatterVote",
+            "type NewMissionAudit",
+            "type NewGovernanceEvent",
+            "type NewCouncilElection",
+            ""
+          ],
+          "schema_file": "domains/governance"
+        }
+      ],
+      "operations": {
+        "select": 11,
+        "insert": 11,
+        "update": 10,
+        "from": 11,
+        "where": 16,
+        "orderBy": 5,
+        "limit": 10
+      },
+      "total_operations": 74,
+      "exported_functions": [],
+      "exported_classes": [
+        "GovernanceService"
+      ]
+    },
+    {
+      "file": "services\\financial-service\\src\\db\\schema.ts",
+      "name": "schema",
+      "has_db_import": false,
+      "schema_imports": [],
+      "operations": {
+        "where": 24,
+        "sql": 44
+      },
+      "total_operations": 68,
+      "exported_functions": [],
+      "exported_classes": []
+    },
+    {
+      "file": "services\\certification-management-service.ts",
+      "name": "certification-management-service",
+      "has_db_import": true,
+      "schema_imports": [
+        {
+          "tables": [
+            "certificationTypes",
+            "staffCertifications",
+            "continuingEducation",
+            "licenseRenewals",
+            "certificationAlerts",
+            "certificationComplianceReports",
+            "certificationAuditLog",
+            ""
+          ],
+          "schema_file": "certification-management-schema"
+        }
+      ],
+      "operations": {
+        "select": 13,
+        "insert": 8,
+        "update": 3,
+        "from": 13,
+        "where": 15,
+        "orderBy": 3,
+        "limit": 7
+      },
+      "total_operations": 62,
+      "exported_functions": [],
+      "exported_classes": [
+        "CertificationManagementService"
+      ]
+    },
+    {
+      "file": "services\\lmbp-immigration-service.ts",
+      "name": "lmbp-immigration-service",
+      "has_db_import": true,
+      "schema_imports": [
+        {
+          "tables": [
+            "foreignWorkers",
+            "lmbpLetters",
+            "gssApplications",
+            "mentorships",
+            "lmbpComplianceAlerts",
+            "lmbpComplianceReports",
+            "type NewForeignWorker",
+            "type NewLMBPLetter",
+            "type NewGSSApplication",
+            "type NewMentorship",
+            "type NewLMBPComplianceAlert",
+            ""
+          ],
+          "schema_file": "lmbp-immigration-schema"
+        }
+      ],
+      "operations": {
+        "select": 11,
+        "insert": 10,
+        "update": 7,
+        "from": 11,
+        "where": 18,
+        "limit": 4,
+        "sql": 1
+      },
+      "total_operations": 62,
+      "exported_functions": [],
+      "exported_classes": [
+        "LMBPImmigrationService"
+      ]
+    },
+    {
+      "file": "services\\financial-service\\drizzle\\schema.ts",
+      "name": "schema",
+      "has_db_import": false,
+      "schema_imports": [],
+      "operations": {
+        "where": 21,
+        "sql": 41
+      },
+      "total_operations": 62,
+      "exported_functions": [],
+      "exported_classes": []
+    },
+    {
+      "file": "services\\tax-slip-service.ts",
+      "name": "tax-slip-service",
+      "has_db_import": true,
+      "schema_imports": [
+        {
+          "tables": [
+            "strikeFundDisbursements",
+            "t4aTaxSlips",
+            "rl1TaxSlips",
+            "taxYearEndProcessing",
+            "weeklyThresholdTracking",
+            ""
+          ],
+          "schema_file": "domains/finance"
+        },
+        {
+          "tables": [
+            "users"
+          ],
+          "schema_file": "domains/member"
+        },
+        {
+          "tables": [
+            "organizationMembers"
+          ],
+          "schema_file": "organization-members-schema"
+        }
+      ],
+      "operations": {
+        "select": 11,
+        "insert": 5,
+        "update": 5,
+        "from": 11,
+        "where": 16,
+        "limit": 5
+      },
+      "total_operations": 53,
+      "exported_functions": [],
+      "exported_classes": [
+        "TaxSlipService"
+      ]
+    },
+    {
+      "file": "services\\pki\\signature-service.ts",
+      "name": "signature-service",
+      "has_db_import": true,
+      "schema_imports": [
+        {
+          "tables": [
+            "signatureWorkflows",
+            "signers"
+          ],
+          "schema_file": "domains/documents"
+        }
+      ],
+      "operations": {
+        "select": 9,
+        "insert": 4,
+        "update": 9,
+        "from": 10,
+        "where": 16,
+        "orderBy": 1,
+        "limit": 2
+      },
+      "total_operations": 51,
+      "exported_functions": [
+        "hashDocument",
+        "hashDocumentReference",
+        "signDocument",
+        "signDocumentWithKey",
+        "getDocumentSignatures",
+        "rejectSignature",
+        "createSignatureRequest",
+        "getUserSignatureRequests",
+        "completeSignatureRequestStep",
+        "cancelSignatureRequest",
+        "expireOverdueSignatureRequests"
+      ],
+      "exported_classes": []
+    },
+    {
+      "file": "services\\joint-trust-fmv-service.ts",
+      "name": "joint-trust-fmv-service",
+      "has_db_import": true,
+      "schema_imports": [
+        {
+          "tables": [
+            "fmvPolicy",
+            "cpiData",
+            "fmvBenchmarks",
+            "procurementRequests",
+            "procurementBids",
+            "independentAppraisals",
+            "cpiAdjustedPricing",
+            "fmvViolations",
+            "fmvAuditLog",
+            ""
+          ],
+          "schema_file": "joint-trust-fmv-schema"
+        }
+      ],
+      "operations": {
+        "select": 9,
+        "insert": 9,
+        "update": 1,
+        "from": 9,
+        "where": 7,
+        "orderBy": 4,
+        "limit": 7
+      },
+      "total_operations": 46,
+      "exported_functions": [],
+      "exported_classes": [
+        "JointTrustFMVService"
+      ]
+    },
+    {
+      "file": "services\\indigenous-data-service.ts",
+      "name": "indigenous-data-service",
+      "has_db_import": true,
+      "schema_imports": [
+        {
+          "tables": [
+            "bandCouncils",
+            "bandCouncilConsent",
+            "indigenousMemberData",
+            "indigenousDataAccessLog",
+            "indigenousDataSharingAgreements",
+            "traditionalKnowledgeRegistry",
+            ""
+          ],
+          "schema_file": "indigenous-data-schema"
+        }
+      ],
+      "operations": {
+        "select": 10,
+        "insert": 6,
+        "from": 10,
+        "where": 10,
+        "orderBy": 1,
+        "limit": 8
+      },
+      "total_operations": 45,
+      "exported_functions": [],
+      "exported_classes": [
+        "IndigenousDataService"
+      ]
+    },
+    {
+      "file": "services\\financial-service\\src\\routes\\remittances.ts",
+      "name": "remittances",
+      "has_db_import": false,
+      "schema_imports": [],
+      "operations": {
+        "select": 8,
+        "insert": 1,
+        "update": 5,
+        "from": 8,
+        "where": 13,
+        "orderBy": 1,
+        "limit": 5,
+        "sql": 4
+      },
+      "total_operations": 45,
+      "exported_functions": [],
+      "exported_classes": []
+    },
+    {
+      "file": "services\\break-glass-service.ts",
+      "name": "break-glass-service",
+      "has_db_import": true,
+      "schema_imports": [
+        {
+          "tables": [
+            "swissColdStorage",
+            "breakGlassSystem",
+            "breakGlassActivations",
+            "disasterRecoveryDrills",
+            "keyHolderRegistry",
+            "recoveryTimeObjectives",
+            ""
+          ],
+          "schema_file": "force-majeure-schema"
+        }
+      ],
+      "operations": {
+        "select": 7,
+        "insert": 6,
+        "update": 6,
+        "from": 10,
+        "where": 12,
+        "limit": 3
+      },
+      "total_operations": 44,
+      "exported_functions": [],
+      "exported_classes": [
+        "BreakGlassService"
+      ]
+    },
+    {
+      "file": "services\\geofence-privacy-service.ts",
+      "name": "geofence-privacy-service",
+      "has_db_import": true,
+      "schema_imports": [
+        {
+          "tables": [
+            "memberLocationConsent",
+            "locationTracking",
+            "geofences",
+            "geofenceEvents",
+            "locationTrackingAudit",
+            "locationDeletionLog",
+            "locationTrackingConfig",
+            ""
+          ],
+          "schema_file": "geofence-privacy-schema"
+        }
+      ],
+      "operations": {
+        "select": 7,
+        "insert": 8,
+        "update": 2,
+        "delete": 4,
+        "from": 7,
+        "where": 11,
+        "limit": 5
+      },
+      "total_operations": 44,
+      "exported_functions": [],
+      "exported_classes": [
+        "GeofencePrivacyService"
+      ]
+    },
+    {
+      "file": "services\\employer-non-interference-service.ts",
+      "name": "employer-non-interference-service",
+      "has_db_import": true,
+      "schema_imports": [
+        {
+          "tables": [
+            "dataClassificationPolicy",
+            "dataClassificationRegistry",
+            "firewallAccessRules",
+            "employerAccessAttempts",
+            "accessJustificationRequests",
+            "unionOnlyDataTags",
+            "firewallViolations",
+            "firewallComplianceAudit",
+            ""
+          ],
+          "schema_file": "employer-non-interference-schema"
+        }
+      ],
+      "operations": {
+        "select": 9,
+        "insert": 7,
+        "update": 1,
+        "from": 9,
+        "where": 10,
+        "orderBy": 3,
+        "limit": 4
+      },
+      "total_operations": 43,
+      "exported_functions": [],
+      "exported_classes": [
+        "EmployerNonInterferenceService"
+      ]
+    },
+    {
+      "file": "services\\founder-conflict-service.ts",
+      "name": "founder-conflict-service",
+      "has_db_import": true,
+      "schema_imports": [
+        {
+          "tables": [
+            "conflictOfInterestPolicy",
+            "blindTrustRegistry",
+            "conflictDisclosures",
+            "armsLengthVerification",
+            "recusalTracking",
+            "conflictReviewCommittee",
+            "conflictTraining",
+            "conflictAuditLog",
+            ""
+          ],
+          "schema_file": "domains/governance"
+        }
+      ],
+      "operations": {
+        "select": 9,
+        "insert": 6,
+        "update": 2,
+        "from": 9,
+        "where": 10,
+        "orderBy": 3,
+        "limit": 4
+      },
+      "total_operations": 43,
+      "exported_functions": [],
+      "exported_classes": [
+        "FounderConflictService"
+      ]
+    },
+    {
+      "file": "services\\whiplash-prevention-service.ts",
+      "name": "whiplash-prevention-service",
+      "has_db_import": true,
+      "schema_imports": [
+        {
+          "tables": [
+            "stripeConnectAccounts",
+            "paymentClassificationPolicy",
+            "paymentRoutingRules",
+            "separatedPaymentTransactions",
+            "whiplashViolations",
+            "strikeFundPaymentAudit",
+            "accountBalanceReconciliation",
+            "whiplashPreventionAudit",
+            ""
+          ],
+          "schema_file": "whiplash-prevention-schema"
+        }
+      ],
+      "operations": {
+        "select": 9,
+        "insert": 7,
+        "update": 1,
+        "from": 9,
+        "where": 10,
+        "orderBy": 3,
+        "limit": 4
+      },
+      "total_operations": 43,
+      "exported_functions": [],
+      "exported_classes": [
+        "WhiplashPreventionService"
+      ]
+    },
+    {
+      "file": "services\\provincial-privacy-service.ts",
+      "name": "provincial-privacy-service",
+      "has_db_import": true,
+      "schema_imports": [
+        {
+          "tables": [
+            "provincialPrivacyConfig",
+            "provincialConsent",
+            "privacyBreaches",
+            "provincialDataHandling",
+            "dataSubjectAccessRequests",
+            ""
+          ],
+          "schema_file": "provincial-privacy-schema"
+        },
+        {
+          "tables": [
+            "organizationMembers"
+          ],
+          "schema_file": "organization-members-schema"
+        }
+      ],
+      "operations": {
+        "select": 8,
+        "insert": 4,
+        "update": 4,
+        "from": 8,
+        "where": 12,
+        "orderBy": 1,
+        "limit": 5
+      },
+      "total_operations": 42,
+      "exported_functions": [],
+      "exported_classes": [
+        "ProvincialPrivacyService"
+      ]
+    },
+    {
+      "file": "services\\financial-service\\src\\routes\\analytics.ts",
+      "name": "analytics",
+      "has_db_import": false,
+      "schema_imports": [],
+      "operations": {
+        "select": 12,
+        "from": 12,
+        "where": 12,
+        "orderBy": 3,
+        "limit": 1,
+        "sql": 1
+      },
+      "total_operations": 41,
+      "exported_functions": [],
+      "exported_classes": []
+    },
+    {
+      "file": "services\\twilio-sms-service.ts",
+      "name": "twilio-sms-service",
+      "has_db_import": true,
+      "schema_imports": [
+        {
+          "tables": [
+            "smsMessages",
+            "smsTemplates",
+            "smsCampaigns",
+            "smsCampaignRecipients",
+            "smsConversations",
+            "smsOptOuts",
+            "smsRateLimits",
+            "type NewSmsMessage",
+            "type NewSmsConversation",
+            "type SmsCampaign",
+            ""
+          ],
+          "schema_file": "domains/communications"
+        }
+      ],
+      "operations": {
+        "select": 6,
+        "insert": 5,
+        "update": 4,
+        "from": 6,
+        "where": 10,
+        "limit": 5,
+        "sql": 4
+      },
+      "total_operations": 40,
+      "exported_functions": [
+        "validatePhoneNumber",
+        "calculateSmsSegments",
+        "calculateSmsCost",
+        "isPhoneOptedOut",
+        "renderSmsTemplate",
+        "sendSms",
+        "sendBulkSms",
+        "handleTwilioWebhook",
+        "handleInboundSms",
+        "handleOptOut",
+        "getSmsTemplate",
+        "renderSmsFromTemplate"
+      ],
+      "exported_classes": []
+    },
+    {
+      "file": "services\\financial-service\\src\\routes\\arrears.ts",
+      "name": "arrears",
+      "has_db_import": false,
+      "schema_imports": [],
+      "operations": {
+        "select": 7,
+        "insert": 1,
+        "update": 4,
+        "from": 7,
+        "where": 11,
+        "orderBy": 1,
+        "limit": 6,
+        "sql": 1
+      },
+      "total_operations": 38,
+      "exported_functions": [],
+      "exported_classes": []
+    },
+    {
+      "file": "services\\transfer-pricing-service.ts",
+      "name": "transfer-pricing-service",
+      "has_db_import": true,
+      "schema_imports": [
+        {
+          "tables": [
+            "currencyEnforcementPolicy",
+            "bankOfCanadaRates",
+            "transactionCurrencyConversions",
+            "currencyEnforcementViolations",
+            "t106FilingTracking",
+            "transferPricingDocumentation",
+            "fxRateAuditLog",
+            "currencyEnforcementAudit",
+            ""
+          ],
+          "schema_file": "domains/finance"
+        }
+      ],
+      "operations": {
+        "select": 6,
+        "insert": 8,
+        "update": 3,
+        "from": 6,
+        "where": 7,
+        "orderBy": 3,
+        "limit": 4
+      },
+      "total_operations": 37,
+      "exported_functions": [],
+      "exported_classes": [
+        "TransferPricingService"
+      ]
+    },
+    {
+      "file": "services\\financial-service\\src\\services\\subscription-event-tracker.ts",
+      "name": "subscription-event-tracker",
+      "has_db_import": false,
+      "schema_imports": [],
+      "operations": {
+        "select": 6,
+        "insert": 3,
+        "update": 3,
+        "from": 6,
+        "where": 9,
+        "orderBy": 1,
+        "limit": 4,
+        "sql": 4
+      },
+      "total_operations": 36,
+      "exported_functions": [
+        "trackSubscriptionEvent",
+        "calculateMonthlyMrrSnapshot"
+      ],
+      "exported_classes": []
+    },
+    {
+      "file": "services\\clc\\clc-api-integration.ts",
+      "name": "clc-api-integration",
+      "has_db_import": true,
+      "schema_imports": [
+        {
+          "tables": [
+            "clcOrganizationSyncLog",
+            "clcWebhookLog"
+          ],
+          "schema_file": "clc-sync-audit-schema"
+        }
+      ],
+      "operations": {
+        "select": 6,
+        "insert": 3,
+        "update": 4,
+        "from": 8,
+        "where": 9,
+        "limit": 5
+      },
+      "total_operations": 35,
+      "exported_functions": [
+        "syncOrganization",
+        "syncAllOrganizations",
+        "createOrganizationFromCLC",
+        "handleWebhook"
+      ],
+      "exported_classes": []
+    },
+    {
+      "file": "services\\clc\\compliance-reports.ts",
+      "name": "compliance-reports",
+      "has_db_import": true,
+      "schema_imports": [],
+      "operations": {
+        "select": 9,
+        "from": 13,
+        "where": 9,
+        "limit": 3,
+        "sql": 1
+      },
+      "total_operations": 35,
+      "exported_functions": [
+        "generateAnnualComplianceReport",
+        "generateStatCanAnnualReport",
+        "analyzeMultiYearTrends",
+        "analyzeOrganizationPerformance",
+        "analyzePaymentPatterns",
+        "detectComplianceAnomalies",
+        "forecastRemittances"
+      ],
+      "exported_classes": []
+    },
+    {
+      "file": "services\\clc\\remittance-audit.ts",
+      "name": "remittance-audit",
+      "has_db_import": true,
+      "schema_imports": [],
+      "operations": {
+        "select": 7,
+        "insert": 1,
+        "update": 3,
+        "from": 7,
+        "where": 10,
+        "orderBy": 1,
+        "limit": 6
+      },
+      "total_operations": 35,
+      "exported_functions": [
+        "submitForApproval",
+        "approveRemittance",
+        "rejectRemittance",
+        "getApprovalWorkflowState"
+      ],
+      "exported_classes": []
+    },
+    {
+      "file": "services\\fcm-service.ts",
+      "name": "fcm-service",
+      "has_db_import": true,
+      "schema_imports": [],
+      "operations": {
+        "select": 6,
+        "insert": 2,
+        "update": 5,
+        "from": 6,
+        "where": 11,
+        "sql": 2
+      },
+      "total_operations": 32,
+      "exported_functions": [
+        "initializeFirebase",
+        "buildFCMMessage",
+        "sendToDevice",
+        "sendToDevices",
+        "sendToProfile",
+        "sendToUser",
+        "sendToTopic",
+        "subscribeToTopic",
+        "unsubscribeFromTopic",
+        "verifyToken",
+        "cleanupInvalidTokens",
+        "updateDeliveryStatus",
+        "retryFailedDeliveries"
+      ],
+      "exported_classes": []
+    },
+    {
+      "file": "services\\financial-service\\src\\services\\stipend-calculation.ts",
+      "name": "stipend-calculation",
+      "has_db_import": false,
+      "schema_imports": [],
+      "operations": {
+        "select": 7,
+        "insert": 1,
+        "update": 2,
+        "from": 7,
+        "where": 9,
+        "orderBy": 2,
+        "limit": 3,
+        "sql": 1
+      },
+      "total_operations": 32,
+      "exported_functions": [
+        "calculateWeeklyStipends",
+        "createDisbursement",
+        "approveDisbursement",
+        "markDisbursementPaid",
+        "getMemberDisbursements",
+        "getPendingDisbursements",
+        "getStrikeFundDisbursementSummary",
+        "batchCreateDisbursements"
+      ],
+      "exported_classes": []
+    },
+    {
+      "file": "services\\financial-service\\src\\services\\notification-service.ts",
+      "name": "notification-service",
+      "has_db_import": false,
+      "schema_imports": [],
+      "operations": {
+        "select": 6,
+        "insert": 3,
+        "update": 2,
+        "from": 7,
+        "where": 8,
+        "orderBy": 2,
+        "limit": 3
+      },
+      "total_operations": 31,
+      "exported_functions": [
+        "queueNotification",
+        "processPendingNotifications",
+        "sendNotification",
+        "getUserNotificationPreferences",
+        "updateUserNotificationPreferences",
+        "getNotificationHistory",
+        "retryFailedNotifications"
+      ],
+      "exported_classes": []
+    },
+    {
+      "file": "services\\clc\\per-capita-calculator.ts",
+      "name": "per-capita-calculator",
+      "has_db_import": true,
+      "schema_imports": [],
+      "operations": {
+        "select": 6,
+        "insert": 1,
+        "update": 3,
+        "from": 6,
+        "where": 9,
+        "limit": 1,
+        "sql": 3
+      },
+      "total_operations": 29,
+      "exported_functions": [
+        "getMemberStanding",
+        "countGoodStandingMembers",
+        "calculatePerCapita",
+        "calculateAllPerCapita",
+        "savePerCapitaRemittances",
+        "getRemittanceStatusForParent",
+        "getOverdueRemittances",
+        "markOverdueRemittances",
+        "updateLastRemittanceDate",
+        "processMonthlyPerCapita"
+      ],
+      "exported_classes": []
+    },
+    {
+      "file": "services\\financial-service\\src\\services\\payment-processing.ts",
+      "name": "payment-processing",
+      "has_db_import": false,
+      "schema_imports": [],
+      "operations": {
+        "select": 4,
+        "insert": 2,
+        "update": 7,
+        "from": 4,
+        "where": 11,
+        "limit": 1
+      },
+      "total_operations": 29,
+      "exported_functions": [
+        "createDuesPaymentIntent",
+        "confirmDuesPayment",
+        "createStipendPayout",
+        "batchProcessStipendPayouts",
+        "createDonationPaymentIntent",
+        "confirmDonationPayment",
+        "processStripeWebhook",
+        "getPaymentSummary"
+      ],
+      "exported_classes": []
+    },
+    {
+      "file": "services\\force-majeure-integration.ts",
+      "name": "force-majeure-integration",
+      "has_db_import": true,
+      "schema_imports": [
+        {
+          "tables": [
+            "forceMajeureEvents",
+            "forceMajeureActivations"
+          ],
+          "schema_file": "force-majeure-schema"
+        }
+      ],
+      "operations": {
+        "select": 8,
+        "insert": 2,
+        "update": 1,
+        "from": 8,
+        "where": 8,
+        "orderBy": 1
+      },
+      "total_operations": 28,
+      "exported_functions": [],
+      "exported_classes": [
+        "ForceMajeureIntegrationService"
+      ]
+    },
+    {
+      "file": "services\\financial-service\\src\\services\\picket-tracking.ts",
+      "name": "picket-tracking",
+      "has_db_import": false,
+      "schema_imports": [],
+      "operations": {
+        "select": 5,
+        "insert": 2,
+        "update": 1,
+        "from": 7,
+        "where": 6,
+        "orderBy": 2,
+        "limit": 2,
+        "sql": 3
+      },
+      "total_operations": 28,
+      "exported_functions": [
+        "calculateDistance",
+        "verifyGPSLocation",
+        "generateQRCodeData",
+        "validateQRCodeData",
+        "checkIn",
+        "checkOut",
+        "getActiveCheckIns",
+        "getAttendanceHistory",
+        "getAttendanceSummary",
+        "coordinatorOverride"
+      ],
+      "exported_classes": []
+    },
+    {
+      "file": "services\\clc\\chart-of-accounts.ts",
+      "name": "chart-of-accounts",
+      "has_db_import": false,
+      "schema_imports": [
+        {
+          "tables": [
+            "chartOfAccounts as unifiedChartOfAccounts",
+            "accountMappings as unifiedAccountMappings",
+            "type ChartOfAccount"
+          ],
+          "schema_file": "domains/financial/chart-of-accounts"
+        }
+      ],
+      "operations": {
+        "select": 7,
+        "from": 7,
+        "where": 7,
+        "orderBy": 4,
+        "limit": 2
+      },
+      "total_operations": 27,
+      "exported_functions": [],
+      "exported_classes": [
+        "ChartOfAccountsService"
+      ]
+    },
+    {
+      "file": "services\\financial-service\\src\\jobs\\payment-collection-workflow.ts",
+      "name": "payment-collection-workflow",
+      "has_db_import": false,
+      "schema_imports": [],
+      "operations": {
+        "select": 4,
+        "update": 5,
+        "from": 4,
+        "where": 9,
+        "orderBy": 1,
+        "limit": 3
+      },
+      "total_operations": 26,
+      "exported_functions": [
+        "processPaymentCollection",
+        "startPaymentCollectionWorkflow",
+        "stopPaymentCollectionWorkflow",
+        "getPaymentCollectionWorkflowStatus"
+      ],
+      "exported_classes": []
+    },
+    {
+      "file": "services\\currency-enforcement-service.ts",
+      "name": "currency-enforcement-service",
+      "has_db_import": true,
+      "schema_imports": [
+        {
+          "tables": [
+            "crossBorderTransactions",
+            "t106Filings",
+            "type NewCrossBorderTransaction"
+          ],
+          "schema_file": "domains/finance"
+        }
+      ],
+      "operations": {
+        "select": 5,
+        "insert": 2,
+        "update": 2,
+        "from": 5,
+        "where": 6,
+        "orderBy": 1,
+        "limit": 2
+      },
+      "total_operations": 23,
+      "exported_functions": [],
+      "exported_classes": [
+        "CurrencyEnforcementService"
+      ]
+    },
+    {
+      "file": "services\\pki\\certificate-manager.ts",
+      "name": "certificate-manager",
+      "has_db_import": true,
+      "schema_imports": [],
+      "operations": {
+        "select": 3,
+        "insert": 1,
+        "update": 2,
+        "from": 4,
+        "where": 4,
+        "orderBy": 2,
+        "limit": 2,
+        "sql": 4
+      },
+      "total_operations": 22,
+      "exported_functions": [
+        "parseCertificate",
+        "validateCertificate",
+        "storeCertificate",
+        "getUserCertificate",
+        "revokeCertificate",
+        "getExpiringCertificates"
+      ],
+      "exported_classes": []
+    },
+    {
+      "file": "services\\clc\\remittance-notifications.ts",
+      "name": "remittance-notifications",
+      "has_db_import": true,
+      "schema_imports": [],
+      "operations": {
+        "select": 6,
+        "insert": 1,
+        "from": 6,
+        "where": 5,
+        "limit": 3
+      },
+      "total_operations": 21,
+      "exported_functions": [
+        "sendOverdueAlert",
+        "sendPaymentConfirmation",
+        "sendMonthlyReminder",
+        "sendExecutiveEscalation",
+        "sendBulkMonthlyReminders",
+        "processOverdueRemittances"
+      ],
+      "exported_classes": []
+    },
+    {
+      "file": "services\\financial-service\\src\\jobs\\stipend-processing-workflow.ts",
+      "name": "stipend-processing-workflow",
+      "has_db_import": false,
+      "schema_imports": [],
+      "operations": {
+        "select": 4,
+        "insert": 1,
+        "update": 2,
+        "from": 5,
+        "where": 6,
+        "orderBy": 1,
+        "limit": 2
+      },
+      "total_operations": 21,
+      "exported_functions": [
+        "processWeeklyStipends",
+        "processDisbursements",
+        "startStipendProcessingWorkflow",
+        "stopStipendProcessingWorkflow",
+        "getStipendProcessingWorkflowStatus"
+      ],
+      "exported_classes": []
+    },
+    {
+      "file": "services\\financial-service\\src\\services\\burn-rate-predictor.ts",
+      "name": "burn-rate-predictor",
+      "has_db_import": false,
+      "schema_imports": [],
+      "operations": {
+        "select": 6,
+        "from": 7,
+        "where": 6,
+        "limit": 1
+      },
+      "total_operations": 20,
+      "exported_functions": [
+        "getHistoricalBurnRate",
+        "detectSeasonalPatterns",
+        "generateBurnRateForecast",
+        "processAutomatedAlerts",
+        "generateWeeklyForecastReport"
+      ],
+      "exported_classes": []
+    },
+    {
+      "file": "services\\financial-service\\src\\routes\\dues-rules-backup.ts",
+      "name": "dues-rules-backup",
+      "has_db_import": false,
+      "schema_imports": [],
+      "operations": {
+        "select": 3,
+        "insert": 2,
+        "update": 2,
+        "delete": 1,
+        "from": 3,
+        "where": 5,
+        "orderBy": 1,
+        "limit": 2
+      },
+      "total_operations": 19,
+      "exported_functions": [],
+      "exported_classes": []
+    },
+    {
+      "file": "services\\financial-service\\src\\routes\\dues-rules-complete.ts",
+      "name": "dues-rules-complete",
+      "has_db_import": false,
+      "schema_imports": [],
+      "operations": {
+        "select": 3,
+        "insert": 2,
+        "update": 2,
+        "delete": 1,
+        "from": 3,
+        "where": 5,
+        "orderBy": 1,
+        "limit": 2
+      },
+      "total_operations": 19,
+      "exported_functions": [],
+      "exported_classes": []
+    },
+    {
+      "file": "services\\financial-service\\src\\routes\\dues-rules.ts",
+      "name": "dues-rules",
+      "has_db_import": false,
+      "schema_imports": [],
+      "operations": {
+        "select": 3,
+        "insert": 2,
+        "update": 2,
+        "delete": 1,
+        "from": 3,
+        "where": 5,
+        "orderBy": 1,
+        "limit": 2
+      },
+      "total_operations": 19,
+      "exported_functions": [],
+      "exported_classes": []
+    },
+    {
+      "file": "services\\pki\\verification-service.ts",
+      "name": "verification-service",
+      "has_db_import": true,
+      "schema_imports": [],
+      "operations": {
+        "select": 4,
+        "update": 2,
+        "from": 4,
+        "where": 5,
+        "limit": 3
+      },
+      "total_operations": 18,
+      "exported_functions": [
+        "verifySignature",
+        "verifyDocumentIntegrity",
+        "bulkVerifySignatures",
+        "verifyCertificateChain",
+        "isSignatureValid",
+        "getSignatureVerificationHistory"
+      ],
+      "exported_classes": []
+    },
+    {
+      "file": "services\\financial-service\\src\\routes\\dues-assignments.ts",
+      "name": "dues-assignments",
+      "has_db_import": false,
+      "schema_imports": [],
+      "operations": {
+        "select": 3,
+        "insert": 1,
+        "update": 2,
+        "delete": 1,
+        "from": 3,
+        "where": 5,
+        "orderBy": 1,
+        "limit": 2
+      },
+      "total_operations": 18,
+      "exported_functions": [],
+      "exported_classes": []
+    },
+    {
+      "file": "services\\financial-service\\src\\routes\\dues-transactions.ts",
+      "name": "dues-transactions",
+      "has_db_import": false,
+      "schema_imports": [],
+      "operations": {
+        "select": 4,
+        "insert": 1,
+        "from": 4,
+        "where": 4,
+        "orderBy": 1,
+        "limit": 3
+      },
+      "total_operations": 17,
+      "exported_functions": [],
+      "exported_classes": []
+    },
+    {
+      "file": "services\\financial-service\\src\\services\\arrears-detection.ts",
+      "name": "arrears-detection",
+      "has_db_import": false,
+      "schema_imports": [],
+      "operations": {
+        "select": 2,
+        "insert": 1,
+        "update": 2,
+        "from": 3,
+        "where": 4,
+        "limit": 2,
+        "sql": 2
+      },
+      "total_operations": 16,
+      "exported_functions": [
+        "detectOverduePayments",
+        "calculateLateFees",
+        "createArrearsCases",
+        "applyLateFees",
+        "runArrearsDetection"
+      ],
+      "exported_classes": []
+    },
+    {
+      "file": "services\\financial-service\\src\\services\\financial-reports.ts",
+      "name": "financial-reports",
+      "has_db_import": false,
+      "schema_imports": [],
+      "operations": {
+        "sql": 13
+      },
+      "total_operations": 13,
+      "exported_functions": [
+        "getCollectionMetrics",
+        "getArrearsStatistics",
+        "getRevenueAnalysis",
+        "getMemberPaymentPatterns",
+        "getFinancialDashboard"
+      ],
+      "exported_classes": []
+    },
+    {
+      "file": "services\\financial-service\\src\\jobs\\arrears-management-workflow.ts",
+      "name": "arrears-management-workflow",
+      "has_db_import": false,
+      "schema_imports": [],
+      "operations": {
+        "select": 2,
+        "insert": 1,
+        "update": 2,
+        "from": 2,
+        "where": 4,
+        "limit": 1
+      },
+      "total_operations": 12,
+      "exported_functions": [
+        "processArrearsManagement",
+        "startArrearsManagementWorkflow",
+        "stopArrearsManagementWorkflow",
+        "getArrearsManagementWorkflowStatus"
+      ],
+      "exported_classes": []
+    },
+    {
+      "file": "services\\financial-service\\src\\jobs\\dues-calculation-workflow.ts",
+      "name": "dues-calculation-workflow",
+      "has_db_import": false,
+      "schema_imports": [],
+      "operations": {
+        "select": 3,
+        "insert": 1,
+        "from": 3,
+        "where": 3,
+        "limit": 2
+      },
+      "total_operations": 12,
+      "exported_functions": [
+        "processMonthlyDuesCalculation",
+        "startDuesCalculationWorkflow",
+        "stopDuesCalculationWorkflow",
+        "getDuesCalculationWorkflowStatus"
+      ],
+      "exported_classes": []
+    },
+    {
+      "file": "services\\financial-service\\src\\tests\\analytics.test.ts",
+      "name": "analytics.test",
+      "has_db_import": false,
+      "schema_imports": [],
+      "operations": {
+        "insert": 4,
+        "delete": 4,
+        "where": 4
+      },
+      "total_operations": 12,
+      "exported_functions": [],
+      "exported_classes": []
+    },
+    {
+      "file": "services\\clc\\remittance-export.ts",
+      "name": "remittance-export",
+      "has_db_import": false,
+      "schema_imports": [],
+      "operations": {
+        "select": 2,
+        "update": 1,
+        "from": 2,
+        "where": 2,
+        "orderBy": 1,
+        "limit": 1,
+        "sql": 2
+      },
+      "total_operations": 11,
+      "exported_functions": [],
+      "exported_classes": [
+        "RemittanceExportService"
+      ]
+    },
+    {
+      "file": "services\\financial-service\\src\\routes\\strike-funds.ts",
+      "name": "strike-funds",
+      "has_db_import": false,
+      "schema_imports": [],
+      "operations": {
+        "sql": 10
+      },
+      "total_operations": 10,
+      "exported_functions": [],
+      "exported_classes": []
+    },
+    {
+      "file": "services\\financial-service\\src\\routes\\donations.ts",
+      "name": "donations",
+      "has_db_import": false,
+      "schema_imports": [],
+      "operations": {
+        "sql": 9
+      },
+      "total_operations": 9,
+      "exported_functions": [],
+      "exported_classes": []
+    },
+    {
+      "file": "services\\pki\\workflow-engine.ts",
+      "name": "workflow-engine",
+      "has_db_import": true,
+      "schema_imports": [
+        {
+          "tables": [
+            "signatureWorkflows"
+          ],
+          "schema_file": "domains/documents"
+        }
+      ],
+      "operations": {
+        "insert": 1,
+        "update": 1,
+        "from": 3,
+        "where": 1
+      },
+      "total_operations": 6,
+      "exported_functions": [
+        "createWorkflow",
+        "startWorkflow",
+        "recordSignature",
+        "recordRejection",
+        "advanceWorkflow",
+        "getWorkflow",
+        "getDocumentWorkflows",
+        "getUserWorkflows",
+        "getUserPendingWorkflows",
+        "getWorkflowStatus",
+        "cancelWorkflow",
+        "expireOverdueWorkflows",
+        "getNextSigners"
+      ],
+      "exported_classes": []
+    },
+    {
+      "file": "services\\financial-service\\migrate-strike-funds.ts",
+      "name": "migrate-strike-funds",
+      "has_db_import": false,
+      "schema_imports": [],
+      "operations": {
+        "sql": 4
+      },
+      "total_operations": 4,
+      "exported_functions": [],
+      "exported_classes": []
+    },
+    {
+      "file": "services\\clc\\remittance-exporter.ts",
+      "name": "remittance-exporter",
+      "has_db_import": true,
+      "schema_imports": [],
+      "operations": {
+        "sql": 3
+      },
+      "total_operations": 3,
+      "exported_functions": [
+        "generateRemittanceCSV",
+        "generateRemittanceXML",
+        "generateStatCanExport",
+        "generateRemittanceFile"
+      ],
+      "exported_classes": []
+    },
+    {
+      "file": "services\\financial-service\\check-stipend-structure.ts",
+      "name": "check-stipend-structure",
+      "has_db_import": false,
+      "schema_imports": [],
+      "operations": {
+        "sql": 2
+      },
+      "total_operations": 2,
+      "exported_functions": [],
+      "exported_classes": []
+    },
+    {
+      "file": "services\\financial-service\\check-tables.ts",
+      "name": "check-tables",
+      "has_db_import": false,
+      "schema_imports": [],
+      "operations": {
+        "sql": 2
+      },
+      "total_operations": 2,
+      "exported_functions": [],
+      "exported_classes": []
+    },
+    {
+      "file": "services\\financial-service\\add-missing-tables.ts",
+      "name": "add-missing-tables",
+      "has_db_import": false,
+      "schema_imports": [],
+      "operations": {
+        "sql": 1
+      },
+      "total_operations": 1,
+      "exported_functions": [],
+      "exported_classes": []
+    },
+    {
+      "file": "services\\financial-service\\check-donations.ts",
+      "name": "check-donations",
+      "has_db_import": false,
+      "schema_imports": [],
+      "operations": {
+        "sql": 1
+      },
+      "total_operations": 1,
+      "exported_functions": [],
+      "exported_classes": []
+    },
+    {
+      "file": "services\\financial-service\\check-dues-amount-cols.ts",
+      "name": "check-dues-amount-cols",
+      "has_db_import": false,
+      "schema_imports": [],
+      "operations": {
+        "sql": 1
+      },
+      "total_operations": 1,
+      "exported_functions": [],
+      "exported_classes": []
+    },
+    {
+      "file": "services\\financial-service\\check-dues-transactions.ts",
+      "name": "check-dues-transactions",
+      "has_db_import": false,
+      "schema_imports": [],
+      "operations": {
+        "sql": 1
+      },
+      "total_operations": 1,
+      "exported_functions": [],
+      "exported_classes": []
+    },
+    {
+      "file": "services\\financial-service\\check-stipends.ts",
+      "name": "check-stipends",
+      "has_db_import": false,
+      "schema_imports": [],
+      "operations": {
+        "sql": 1
+      },
+      "total_operations": 1,
+      "exported_functions": [],
+      "exported_classes": []
+    },
+    {
+      "file": "services\\carbon-accounting-integration.ts",
+      "name": "carbon-accounting-integration",
+      "has_db_import": false,
+      "schema_imports": [],
+      "operations": {},
+      "total_operations": 0,
+      "exported_functions": [],
+      "exported_classes": [
+        "CarbonAccountingIntegration"
+      ]
+    },
+    {
+      "file": "services\\carbon-accounting-service.ts",
+      "name": "carbon-accounting-service",
+      "has_db_import": true,
+      "schema_imports": [],
+      "operations": {},
+      "total_operations": 0,
+      "exported_functions": [],
+      "exported_classes": [
+        "CarbonAccountingService"
+      ]
+    },
+    {
+      "file": "services\\email.ts",
+      "name": "email",
+      "has_db_import": false,
+      "schema_imports": [],
+      "operations": {},
+      "total_operations": 0,
+      "exported_functions": [
+        "sendEmail"
+      ],
+      "exported_classes": []
+    },
+    {
+      "file": "services\\clc\\remittance-validation.ts",
+      "name": "remittance-validation",
+      "has_db_import": false,
+      "schema_imports": [],
+      "operations": {},
+      "total_operations": 0,
+      "exported_functions": [],
+      "exported_classes": [
+        "RemittanceValidationService"
+      ]
+    },
+    {
+      "file": "services\\compliance\\audit-analysis.ts",
+      "name": "audit-analysis",
+      "has_db_import": false,
+      "schema_imports": [],
+      "operations": {},
+      "total_operations": 0,
+      "exported_functions": [],
+      "exported_classes": []
+    },
+    {
+      "file": "services\\financial-service\\drizzle.config.ts",
+      "name": "drizzle.config",
+      "has_db_import": false,
+      "schema_imports": [],
+      "operations": {},
+      "total_operations": 0,
+      "exported_functions": [],
+      "exported_classes": []
+    },
+    {
+      "file": "services\\financial-service\\jest.config.ts",
+      "name": "jest.config",
+      "has_db_import": false,
+      "schema_imports": [],
+      "operations": {},
+      "total_operations": 0,
+      "exported_functions": [],
+      "exported_classes": []
+    },
+    {
+      "file": "services\\financial-service\\run-migrations.ts",
+      "name": "run-migrations",
+      "has_db_import": false,
+      "schema_imports": [],
+      "operations": {},
+      "total_operations": 0,
+      "exported_functions": [],
+      "exported_classes": []
+    },
+    {
+      "file": "services\\financial-service\\drizzle\\relations.ts",
+      "name": "relations",
+      "has_db_import": false,
+      "schema_imports": [],
+      "operations": {},
+      "total_operations": 0,
+      "exported_functions": [],
+      "exported_classes": []
+    },
+    {
+      "file": "services\\financial-service\\src\\db\\schema-platform-economics.ts",
+      "name": "schema-platform-economics",
+      "has_db_import": false,
+      "schema_imports": [],
+      "operations": {},
+      "total_operations": 0,
+      "exported_functions": [],
+      "exported_classes": []
+    },
+    {
+      "file": "services\\financial-service\\src\\jobs\\analytics-processor.ts",
+      "name": "analytics-processor",
+      "has_db_import": false,
+      "schema_imports": [],
+      "operations": {},
+      "total_operations": 0,
+      "exported_functions": [
+        "startAnalyticsJobs",
+        "stopAnalyticsJobs",
+        "getJobsStatus"
+      ],
+      "exported_classes": []
+    },
+    {
+      "file": "services\\financial-service\\src\\routes\\notifications.ts",
+      "name": "notifications",
+      "has_db_import": false,
+      "schema_imports": [],
+      "operations": {},
+      "total_operations": 0,
+      "exported_functions": [],
+      "exported_classes": []
+    },
+    {
+      "file": "services\\financial-service\\src\\routes\\payments.ts",
+      "name": "payments",
+      "has_db_import": false,
+      "schema_imports": [],
+      "operations": {},
+      "total_operations": 0,
+      "exported_functions": [],
+      "exported_classes": []
+    },
+    {
+      "file": "services\\financial-service\\src\\routes\\picket-tracking.ts",
+      "name": "picket-tracking",
+      "has_db_import": false,
+      "schema_imports": [],
+      "operations": {},
+      "total_operations": 0,
+      "exported_functions": [],
+      "exported_classes": []
+    },
+    {
+      "file": "services\\financial-service\\src\\routes\\reports.ts",
+      "name": "reports",
+      "has_db_import": false,
+      "schema_imports": [],
+      "operations": {},
+      "total_operations": 0,
+      "exported_functions": [],
+      "exported_classes": []
+    },
+    {
+      "file": "services\\financial-service\\src\\routes\\stipends.ts",
+      "name": "stipends",
+      "has_db_import": false,
+      "schema_imports": [],
+      "operations": {},
+      "total_operations": 0,
+      "exported_functions": [],
+      "exported_classes": []
+    }
+  ]
+}

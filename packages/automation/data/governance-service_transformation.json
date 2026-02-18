@@ -1,0 +1,24 @@
+{
+  "service": "governance-service",
+  "timestamp": "2026-02-18",
+  "plan": {
+    "service_name": "governance-service",
+    "file_size": 19082,
+    "imports_to_remove": 2,
+    "drizzle_operations": 11,
+    "operations_by_type": {
+      "insert": 11
+    },
+    "transformation_steps": [
+      "1. Remove database imports (db, schema, drizzle-orm)",
+      "2. Add Django API client import",
+      "3. Transform INSERT operations to API create calls",
+      "4. Transform SELECT operations to API list/get calls",
+      "5. Transform UPDATE operations to API update calls",
+      "6. Transform DELETE operations to API delete calls",
+      "7. Update error handling for API responses",
+      "8. Test service functions with Django backend"
+    ]
+  },
+  "transformations": []
+}
