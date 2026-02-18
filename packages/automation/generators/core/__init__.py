@@ -1,20 +1,11 @@
 """
-Nzila Migration Generators
-===========================
-Code generation, dependency analysis, and progress tracking
-for legacy codebase migration to Django backbone.
-
-Sub-packages
-------------
-core/       – CodeGenerator, DependencyAnalyzer, ProgressTracker
-migration/  – Migration executors, Django project scaffolding
-services/   – Service-view generators (UE, ABR)
-fixers/     – Model & ViewSet fixers (FK, PK, related-names)
-infra/      – Azure resources, Supabase, connection tests
-reports/    – Audit reports, progress updates, repo populator
+Core Pipeline Modules
+======================
+Schema parsing, code generation, dependency analysis, platform analysis,
+and progress tracking for the Nzila migration pipeline.
 """
 
-from .core.code_generator import (
+from .code_generator import (
     CodeGenerator,
     SQLSchemaParser,
     DrizzleSchemaParser,
@@ -25,7 +16,7 @@ from .core.code_generator import (
     run_ue_generation,
 )
 
-from .core.dependency_analyzer import (
+from .dependency_analyzer import (
     DependencyAnalyzer,
     DependencyCategory,
     MigrationTarget,
@@ -35,7 +26,7 @@ from .core.dependency_analyzer import (
     analyze_ue_dependencies,
 )
 
-from .core.progress_tracker import (
+from .progress_tracker import (
     ProgressTracker,
     MigrationPhase,
     PhaseStatus,
@@ -46,7 +37,6 @@ from .core.progress_tracker import (
 )
 
 __all__ = [
-    # Code Generator
     "CodeGenerator",
     "SQLSchemaParser",
     "DrizzleSchemaParser",
@@ -55,7 +45,6 @@ __all__ = [
     "TableDef",
     "run_abr_generation",
     "run_ue_generation",
-    # Dependency Analyzer
     "DependencyAnalyzer",
     "DependencyCategory",
     "MigrationTarget",
@@ -63,7 +52,6 @@ __all__ = [
     "DependencyReport",
     "analyze_abr_dependencies",
     "analyze_ue_dependencies",
-    # Progress Tracker
     "ProgressTracker",
     "MigrationPhase",
     "PhaseStatus",
