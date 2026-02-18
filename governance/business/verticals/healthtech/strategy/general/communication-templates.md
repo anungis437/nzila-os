@@ -1,0 +1,4 @@
+# Communication Templates
+
+**Owner:** Aubert
+
