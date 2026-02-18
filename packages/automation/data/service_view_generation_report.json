@@ -1,0 +1,252 @@
+{
+  "generated_at": "2026-02-18T09:08:35.245862",
+  "target_dir": "D:\\APPS\\nzila-union-eyes\\backend\\services\\api",
+  "dry_run": false,
+  "services": [
+    {
+      "service": "break-glass-service",
+      "file": "break_glass_service_views.py",
+      "class": "BreakGlassServiceViewSet",
+      "app": "compliance",
+      "models": [
+        "BreakGlassSystem",
+        "BreakGlassActivations",
+        "DisasterRecoveryDrills",
+        "KeyHolderRegistry",
+        "RecoveryTimeObjectives",
+        "EmergencyDeclarations"
+      ],
+      "endpoints": 11,
+      "lines": 436
+    },
+    {
+      "service": "carbon-accounting-integration",
+      "file": "carbon_accounting_integration_views.py",
+      "class": "CarbonAccountingIntegrationViewSet",
+      "app": "core",
+      "models": [
+        "IntegrationConfigs",
+        "IntegrationSyncLog"
+      ],
+      "endpoints": 4,
+      "lines": 189
+    },
+    {
+      "service": "carbon-accounting-service",
+      "file": "carbon_accounting_service_views.py",
+      "class": "CarbonAccountingServiceViewSet",
+      "app": "compliance",
+      "models": [],
+      "endpoints": 6,
+      "lines": 175
+    },
+    {
+      "service": "currency-enforcement-service",
+      "file": "currency_enforcement_service_views.py",
+      "class": "CurrencyEnforcementServiceViewSet",
+      "app": "billing",
+      "models": [
+        "CurrencyEnforcementPolicy",
+        "BankOfCanadaRates",
+        "TransactionCurrencyConversions",
+        "CurrencyEnforcementViolations",
+        "FxRateAuditLog",
+        "CurrencyEnforcementAudit",
+        "ExchangeRates"
+      ],
+      "endpoints": 8,
+      "lines": 333
+    },
+    {
+      "service": "email",
+      "file": "email_views.py",
+      "class": "EmailServiceViewSet",
+      "app": "notifications",
+      "models": [
+        "MessageTemplates",
+        "MessageLog",
+        "CommunicationChannels"
+      ],
+      "endpoints": 5,
+      "lines": 222
+    },
+    {
+      "service": "employer-non-interference-service",
+      "file": "employer_non_interference_service_views.py",
+      "class": "EmployerNonInterferenceServiceViewSet",
+      "app": "compliance",
+      "models": [
+        "FirewallAccessRules",
+        "EmployerAccessAttempts",
+        "AccessJustificationRequests",
+        "UnionOnlyDataTags",
+        "FirewallViolations",
+        "FirewallComplianceAudit"
+      ],
+      "endpoints": 10,
+      "lines": 399
+    },
+    {
+      "service": "fcm-service",
+      "file": "fcm_service_views.py",
+      "class": "FcmServiceViewSet",
+      "app": "notifications",
+      "models": [
+        "PushDevices",
+        "PushNotificationTemplates",
+        "PushNotifications",
+        "PushDeliveries"
+      ],
+      "endpoints": 12,
+      "lines": 453
+    },
+    {
+      "service": "force-majeure-integration",
+      "file": "force_majeure_integration_views.py",
+      "class": "ForceMajeureIntegrationViewSet",
+      "app": "compliance",
+      "models": [
+        "EmergencyDeclarations"
+      ],
+      "endpoints": 6,
+      "lines": 220
+    },
+    {
+      "service": "founder-conflict-service",
+      "file": "founder_conflict_service_views.py",
+      "class": "FounderConflictServiceViewSet",
+      "app": "compliance",
+      "models": [
+        "ConflictOfInterestPolicy",
+        "BlindTrustRegistry",
+        "ConflictDisclosures",
+        "ArmsLengthVerification",
+        "RecusalTracking",
+        "ConflictReviewCommittee",
+        "ConflictTraining",
+        "ConflictAuditLog"
+      ],
+      "endpoints": 13,
+      "lines": 506
+    },
+    {
+      "service": "geofence-privacy-service",
+      "file": "geofence_privacy_service_views.py",
+      "class": "GeofencePrivacyServiceViewSet",
+      "app": "compliance",
+      "models": [
+        "LocationTracking",
+        "Geofences",
+        "GeofenceEvents",
+        "LocationTrackingAudit",
+        "LocationDeletionLog",
+        "LocationTrackingConfig"
+      ],
+      "endpoints": 11,
+      "lines": 432
+    },
+    {
+      "service": "indigenous-data-service",
+      "file": "indigenous_data_service_views.py",
+      "class": "IndigenousDataServiceViewSet",
+      "app": "compliance",
+      "models": [
+        "BandCouncils",
+        "BandCouncilConsent",
+        "IndigenousMemberData",
+        "IndigenousDataAccessLog",
+        "IndigenousDataSharingAgreements",
+        "TraditionalKnowledgeRegistry"
+      ],
+      "endpoints": 12,
+      "lines": 469
+    },
+    {
+      "service": "joint-trust-fmv-service",
+      "file": "joint_trust_fmv_service_views.py",
+      "class": "JointTrustFmvServiceViewSet",
+      "app": "billing",
+      "models": [
+        "FmvPolicy",
+        "CpiData",
+        "FmvBenchmarks",
+        "ProcurementRequests",
+        "ProcurementBids",
+        "IndependentAppraisals",
+        "CpiAdjustedPricing",
+        "FmvViolations",
+        "FmvAuditLog"
+      ],
+      "endpoints": 14,
+      "lines": 535
+    },
+    {
+      "service": "provincial-privacy-service",
+      "file": "provincial_privacy_service_views.py",
+      "class": "ProvincialPrivacyServiceViewSet",
+      "app": "compliance",
+      "models": [
+        "ProvincialPrivacyConfig",
+        "ProvincialConsent",
+        "PrivacyBreaches",
+        "ProvincialDataHandling",
+        "DataSubjectAccessRequests"
+      ],
+      "endpoints": 11,
+      "lines": 420
+    },
+    {
+      "service": "transfer-pricing-service",
+      "file": "transfer_pricing_service_views.py",
+      "class": "TransferPricingServiceViewSet",
+      "app": "billing",
+      "models": [
+        "T106FilingTracking",
+        "TransferPricingDocumentation",
+        "CrossBorderTransactions"
+      ],
+      "endpoints": 8,
+      "lines": 301
+    },
+    {
+      "service": "twilio-sms-service",
+      "file": "twilio_sms_service_views.py",
+      "class": "TwilioSmsServiceViewSet",
+      "app": "notifications",
+      "models": [
+        "SmsTemplates",
+        "SmsCampaigns",
+        "SmsMessages",
+        "SmsConversations",
+        "SmsCampaignRecipients",
+        "SmsOptOuts",
+        "SmsRateLimits"
+      ],
+      "endpoints": 12,
+      "lines": 445
+    },
+    {
+      "service": "whiplash-prevention-service",
+      "file": "whiplash_prevention_service_views.py",
+      "class": "WhiplashPreventionServiceViewSet",
+      "app": "billing",
+      "models": [
+        "WhiplashViolations",
+        "WhiplashPreventionAudit",
+        "PaymentClassificationPolicy",
+        "PaymentRoutingRules",
+        "SeparatedPaymentTransactions",
+        "StrikeFundPaymentAudit",
+        "AccountBalanceReconciliation"
+      ],
+      "endpoints": 11,
+      "lines": 428
+    }
+  ],
+  "totals": {
+    "files": 16,
+    "viewsets": 16,
+    "endpoints": 154,
+    "lines": 5963
+  }
+}
