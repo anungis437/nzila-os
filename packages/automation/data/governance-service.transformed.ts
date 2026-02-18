@@ -6,16 +6,9 @@
 // - Transformed key methods to API calls
 // - Preserved business logic
 
-import * as api from '@/lib/api/django-client';
-
-// Type imports (keep these - they're just types, not database access)
-import type {
-  NewGoldenShare,
-  NewReservedMatterVote,
-  NewMissionAudit,
-  NewGovernanceEvent,
-  NewCouncilElection,
-} from '@/db/schema/domains/governance';
+// Note: When deployed in the UE frontend, import types from:
+//   import type { NewGoldenShare, ... } from '@/db/schema/domains/governance';
+// Types are defined inline in method signatures below to keep this file self-contained.
 
 /**
  * Governance Service
@@ -149,7 +142,7 @@ export class GovernanceService {
   /**
    * Helper: Get Clerk authentication headers
    */
-  private async getAuthHeaders() {
+  private async getAuthHeaders(): Promise<Record<string, string>> {
     // Use Clerk to get auth token
     // Note: This should be imported from @clerk/nextjs
     try {
@@ -157,7 +150,6 @@ export class GovernanceService {
       const session = await auth();
       
       if (session?.sessionId) {
-        // For server-side
         return {
           'Authorization': `Bearer ${session.sessionId}`,
         };

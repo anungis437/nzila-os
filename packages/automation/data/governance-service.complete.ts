@@ -9,19 +9,15 @@
 
 import { auth } from '@clerk/nextjs/server';
 
-// Type imports only - no runtime database access
-import type {
-  NewGoldenShare,
-  GoldenShare,
-  NewReservedMatterVote,
-  ReservedMatterVote,
-  NewMissionAudit,
-  MissionAudit,
-  NewGovernanceEvent,
-  GovernanceEvent,
-  NewCouncilElection,
-  CouncilElection,
-} from '@/db/schema/domains/governance';
+// Inline type definitions — avoids dependency on the frontend schema package.
+// When deployed in the UE frontend, replace with:
+//   import type { NewGoldenShare } from '@/db/schema/domains/governance';
+interface NewGoldenShare {
+  certificateNumber: string;
+  issueDate: Date;
+  councilMembers: string[];
+  [key: string]: unknown;
+}
 
 export class GovernanceService {
   private apiBaseUrl = process.env.NEXT_PUBLIC_DJANGO_API_URL || 'http://localhost:8000';
