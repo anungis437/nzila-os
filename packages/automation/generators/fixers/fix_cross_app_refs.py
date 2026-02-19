@@ -156,7 +156,7 @@ def fix_backend(backend_dir: Path):
 
 
 def main():
-    ue_backend = Path(r"D:\APPS\nzila-union-eyes\backend")
+    ue_backend = Path(r"C:\APPS\nzila-union-eyes\backend")
     abr_backend = Path(r"D:\APPS\nzila-abr-insights\backend")
     
     if "--platform" in sys.argv:

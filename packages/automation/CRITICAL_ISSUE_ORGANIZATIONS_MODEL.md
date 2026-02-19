@@ -150,7 +150,7 @@ organization = models.ForeignKey(
 After Organizations model is created:
 ```bash
 # Union Eyes
-cd D:\APPS\nzila-union-eyes\backend
+cd C:\APPS\nzila-union-eyes\backend
 python manage.py check  # Expect: errors drop from 982 → ~340 (related_name only)
 python manage.py makemigrations  # Should work after related_name fix
 python manage.py migrate --run-syncdb  # Create tables
@@ -186,7 +186,7 @@ This issue blocks:
 - Lines 1318, 1378: `"organizations": "auth_core"`
 
 **Generated Models** (need Organizations):
-- `D:\APPS\nzila-union-eyes\backend\**\models.py` (11 apps)
+- `C:\APPS\nzila-union-eyes\backend\**\models.py` (11 apps)
 - `D:\APPS\nzila-abr-insights\backend\**\models.py` (8 apps)
 
 **Reports**:

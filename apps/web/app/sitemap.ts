@@ -14,12 +14,15 @@ export default function sitemap(): MetadataRoute.Sitemap {
     '/platform',
     '/contact',
     '/resources',
+    '/legal/privacy',
+    '/legal/terms',
+    '/legal/ip-governance',
   ];
 
   return routes.map((route) => ({
     url: `${baseUrl}${route}`,
     lastModified,
-    changeFrequency: route === '' ? 'weekly' : 'monthly',
-    priority: route === '' ? 1.0 : route === '/investors' ? 0.9 : 0.8,
+    changeFrequency: route === '' ? 'weekly' : route.startsWith('/legal') ? 'yearly' : 'monthly',
+    priority: route === '' ? 1.0 : route === '/investors' ? 0.9 : route.startsWith('/legal') ? 0.3 : 0.8,
   }));
 }

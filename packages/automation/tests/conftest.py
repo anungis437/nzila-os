@@ -1,13 +1,31 @@
 """
 Pytest configuration and shared fixtures
+
+Path Setup
+----------
+This conftest centralises sys.path so individual test files don't each need
+their own sys.path.insert blocks.  Once the package is installed via
+    pip install -e packages/automation
+all imports resolve automatically and this block becomes unnecessary.
 """
 
+import sys
 import pytest
 import json
 import tempfile
 from pathlib import Path
 from typing import Dict, Any
 import shutil
+
+# ── Path setup ─────────────────────────────────────────────────────────────
+_automation_root = Path(__file__).parent.parent   # packages/automation/
+_generators_root = _automation_root / "generators"
+
+for _p in (_automation_root, _generators_root):
+    if str(_p) not in sys.path:
+        sys.path.insert(0, str(_p))
+# ───────────────────────────────────────────────────────────────────────────
+
 
 
 @pytest.fixture

@@ -6,7 +6,7 @@ Generates production-grade DRF ViewSets for all 38 ABR frontend services.
 Creates the services/ Django app, all view files, and urls.py.
 
 Usage:
-    python generate_abr_service_views.py [--dry-run]
+    python generate_abr_service_views.py [--dry-run] [--backend-dir PATH]
 
 Outputs:
     - services/ Django app in ABR backend
@@ -23,15 +23,55 @@ import argparse
 import textwrap
 from datetime import datetime
 from pathlib import Path
-from typing import Dict, List
+from typing import Dict, List, Optional
+
+# Import path configuration
+import sys
+sys.path.insert(0, str(Path(__file__).parent.parent.parent))
+from config import get_config
 
 # ──────────────────────────────────────────────────────────────────
 # CONFIG
 # ──────────────────────────────────────────────────────────────────
 
-ABR_BACKEND_DIR = r"D:\APPS\nzila-abr-insights\backend"
-SERVICES_DIR = os.path.join(ABR_BACKEND_DIR, "services")
-SERVICES_API_DIR = os.path.join(SERVICES_DIR, "api")
+def get_abr_backend_dir() -> Path:
+    """Get ABR backend directory from environment or use default."""
+    env_path = os.environ.get("ABR_BACKEND_DIR")
+    if env_path:
+        return Path(env_path)
+    # Default fallback - should be configured via environment
+    return Path(r"D:\APPS\nzila-abr-insights\backend")
+
+
+def get_services_dir(backend_dir: Optional[Path] = None) -> Path:
+    """Get services directory path."""
+    if backend_dir is None:
+        backend_dir = get_abr_backend_dir()
+    return backend_dir / "services"
+
+
+def get_services_api_dir(backend_dir: Optional[Path] = None) -> Path:
+    """Get services API directory path."""
+    return get_services_dir(backend_dir) / "api"
+
+
+# Backward compatibility aliases - these will be removed in future versions
+# Use get_config() from config module instead
+def _get_compat_dirs():
+    """Get directory paths for backward compatibility."""
+    cfg = get_config()
+    return {
+        "backend_dir": cfg.abr_backend_dir,
+        "services_dir": cfg.abr_backend_dir / "services",
+        "services_api_dir": cfg.abr_backend_dir / "services" / "api",
+    }
+
+
+# Module-level aliases for backward compatibility
+_compat = _get_compat_dirs()
+SERVICES_DIR = str(_compat["services_dir"])
+SERVICES_API_DIR = str(_compat["services_api_dir"])
+ABR_BACKEND_DIR = str(_compat["backend_dir"])
 
 # ──────────────────────────────────────────────────────────────────
 # SERVICE DEFINITIONS — 38 services mapped to Django models

@@ -11,8 +11,8 @@ from pathlib import Path
 from typing import Dict, List, Set
 from collections import defaultdict
 
-UE_FRONTEND = Path(r"D:\APPS\nzila-union-eyes\frontend")
-OUTPUT_DIR = Path(r"D:\APPS\nzila-automation\packages\automation\data")
+UE_FRONTEND = Path(r"C:\APPS\nzila-union-eyes\frontend")
+OUTPUT_DIR = Path(r"C:\APPS\nzila-automation\packages\automation\data")
 
 
 class ServiceAnalyzer:

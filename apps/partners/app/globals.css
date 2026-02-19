@@ -1,0 +1,29 @@
+@import "tailwindcss";
+
+:root {
+  --background: #f8fafc;
+  --foreground: #0f172a;
+  --sidebar-bg: #ffffff;
+  --sidebar-hover: #f1f5f9;
+  --accent: #2563eb;
+  --accent-light: #dbeafe;
+  --success: #16a34a;
+  --warning: #d97706;
+  --danger: #dc2626;
+  --muted: #64748b;
+  --border: #e2e8f0;
+  --card: #ffffff;
+  --card-hover: #f8fafc;
+}
+
+body {
+  background: var(--background);
+  color: var(--foreground);
+  font-family: system-ui, -apple-system, sans-serif;
+}
+
+/* Tier badge colours */
+.tier-registered { background: #e2e8f0; color: #475569; }
+.tier-select, .tier-certified, .tier-professional { background: #dbeafe; color: #1e40af; }
+.tier-premier, .tier-advanced, .tier-enterprise { background: #fef3c7; color: #92400e; }
+.tier-elite, .tier-strategic { background: #f3e8ff; color: #6b21a8; }

@@ -17,7 +17,7 @@ Successfully transformed the first Phase 1 service from Drizzle ORM to Django RE
 
 ### 1. Django Backend - ViewSet Implementation ✅
 
-**File**: `d:\APPS\nzila-union-eyes\backend\services\api\governance_service_views.py`
+**File**: `c:\APPS\nzila-union-eyes\backend\services\api\governance_service_views.py`
 
 **Implemented Endpoints**:
 
@@ -39,9 +39,9 @@ Successfully transformed the first Phase 1 service from Drizzle ORM to Django RE
 
 ### 2. Frontend - TypeScript Service Transformation ✅
 
-**Original**: `d:\APPS\nzila-union-eyes\frontend\services\governance-service.ts` (557 lines, Drizzle ORM)
+**Original**: `c:\APPS\nzila-union-eyes\frontend\services\governance-service.ts` (557 lines, Drizzle ORM)
 
-**Transformed**: `d:\APPS\nzila-automation\packages\automation\data\governance-service.transformed.ts`
+**Transformed**: `c:\APPS\nzila-automation\packages\automation\data\governance-service.transformed.ts`
 
 **Key Changes**:
 - ❌ Removed: `import { db } from '@/db'`

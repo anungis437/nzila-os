@@ -10,6 +10,7 @@ services:
       - /app/node_modules
       - /app/apps/web/node_modules
       - /app/apps/console/node_modules
+      - /app/apps/partners/node_modules
       - /app/packages/ui/node_modules
       - /app/packages/config/node_modules
       - /app/packages/db/node_modules
@@ -19,6 +20,7 @@ services:
     ports:
       - "3000:3000"
       - "3001:3001"
+      - "3002:3002"
     environment:
       - NODE_ENV=development
       - NEXT_PUBLIC_CLERK_PUBLISHABLE_KEY=${NEXT_PUBLIC_CLERK_PUBLISHABLE_KEY:-pk_test_placeholder}
@@ -53,6 +55,24 @@ services:
       - NEXT_PUBLIC_CLERK_SIGN_UP_URL=/sign-up
       - NEXT_PUBLIC_CLERK_AFTER_SIGN_IN_URL=/console
       - NEXT_PUBLIC_CLERK_AFTER_SIGN_UP_URL=/console
+    restart: unless-stopped
+
+  # Partner Portal (production)
+  partners:
+    build:
+      context: .
+      target: partners
+      dockerfile: Dockerfile
+    ports:
+      - "3002:3002"
+    environment:
+      - NODE_ENV=production
+      - NEXT_PUBLIC_CLERK_PUBLISHABLE_KEY=${NEXT_PUBLIC_CLERK_PUBLISHABLE_KEY}
+      - CLERK_SECRET_KEY=${CLERK_SECRET_KEY}
+      - NEXT_PUBLIC_CLERK_SIGN_IN_URL=/sign-in
+      - NEXT_PUBLIC_CLERK_SIGN_UP_URL=/sign-up
+      - NEXT_PUBLIC_CLERK_AFTER_SIGN_IN_URL=/portal
+      - NEXT_PUBLIC_CLERK_AFTER_SIGN_UP_URL=/portal
     restart: unless-stopped
 
   # Build-only service (for CI/CD)

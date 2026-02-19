@@ -19,7 +19,7 @@ NEW = (
 )
 
 count = 0
-for base in [r'D:\APPS\nzila-union-eyes\backend', r'D:\APPS\nzila-abr-insights\backend']:
+for base in [r'C:\APPS\nzila-union-eyes\backend', r'D:\APPS\nzila-abr-insights\backend']:
     for f in glob.glob(os.path.join(base, '*', 'models.py')):
         with open(f, 'r', encoding='utf-8') as fh:
             content = fh.read()

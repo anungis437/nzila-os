@@ -19,14 +19,17 @@ import sys
 from pathlib import Path
 from typing import List, Dict, Any, Optional
 
-# Add generators directory to path for imports
-sys.path.insert(0, str(Path(__file__).parent / "generators"))
+# Import configuration and constants
+from config import get_config, MigrationConstants
 
-from platform_analyzer import PlatformAnalyzer
-from manifest_generator import ManifestGenerator, ManifestConfig
-from code_generator import CodeGenerator, run_abr_generation, run_ue_generation
-from dependency_analyzer import DependencyAnalyzer, analyze_abr_dependencies, analyze_ue_dependencies
-from progress_tracker import ProgressTracker, MigrationPhase, init_tracking
+# Use package-qualified imports — no sys.path manipulation needed
+from generators.core.platform_analyzer import PlatformAnalyzer
+from generators.core.manifest_generator import ManifestGenerator, ManifestConfig
+from generators import (
+    CodeGenerator, run_abr_generation, run_ue_generation,
+    DependencyAnalyzer, analyze_abr_dependencies, analyze_ue_dependencies,
+    ProgressTracker, MigrationPhase, init_tracking,
+)
 
 
 class MigrationOrchestrator:
@@ -34,10 +37,11 @@ class MigrationOrchestrator:
     
     def __init__(self, workspace_root: Path):
         self.workspace_root = Path(workspace_root)
-        self.legacy_root = self.workspace_root / "legacy-codebases"
-        self.automation_root = self.workspace_root / "automation"
-        self.data_dir = self.automation_root / "data"
-        self.manifests_dir = self.data_dir / "manifests"
+        # Use centralized config instead of hardcoded paths
+        config = get_config()
+        self.legacy_root = config.legacy_root
+        self.data_dir = config.data_dir
+        self.manifests_dir = config.manifests_dir
         self.template_root = self.workspace_root / "nzila-scripts-book-template"
         
         # Ensure directories exist
@@ -140,17 +144,14 @@ class MigrationOrchestrator:
     
     def _sort_by_migration_order(self, profiles: List[Dict[str, Any]]) -> List[Dict[str, Any]]:
         """Sort platforms by optimal migration order"""
-        # Priority order: foundation platforms first, then by complexity
-        priority_map = {
-            "union-eyes": 1,
-            "c3uo": 2,
-            "abr-insights": 3
-        }
+        # Use constants from MigrationConstants instead of hardcoded values
+        priority_map = MigrationConstants.PLATFORM_PRIORITY
+        complexity_scores = MigrationConstants.COMPLEXITY_SCORES
         
         def sort_key(p):
             platform_id = p["platform_id"]
             priority = priority_map.get(platform_id, 100)
-            complexity_score = {"LOW": 1, "MEDIUM": 2, "HIGH": 3, "EXTREME": 4}.get(p["complexity"], 2)
+            complexity_score = complexity_scores.get(p["complexity"], 2)
             return (priority, -complexity_score, -p["entity_count"])
         
         return sorted(profiles, key=sort_key)

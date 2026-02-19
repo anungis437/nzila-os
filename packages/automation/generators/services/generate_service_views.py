@@ -23,13 +23,32 @@ from datetime import datetime
 from pathlib import Path
 from typing import Dict, List, Optional, Tuple
 
+# Import path configuration
+import sys
+sys.path.insert(0, str(Path(__file__).parent.parent.parent))
+from config import get_config
+
 # ──────────────────────────────────────────────────────────────────
 # CONFIG
 # ──────────────────────────────────────────────────────────────────
 
-FRONTEND_SERVICES_DIR = r"D:\APPS\nzila-union-eyes\frontend\services"
-BACKEND_DIR = r"D:\APPS\nzila-union-eyes\backend"
-SERVICES_API_DIR = os.path.join(BACKEND_DIR, "services", "api")
+def _get_ue_dirs():
+    """Get Union Eyes directory paths from environment or defaults."""
+    cfg = get_config()
+    ue_frontend = cfg.ue_frontend_dir or Path(r"C:\APPS\nzila-union-eyes\frontend")
+    ue_backend = cfg.ue_backend_dir or Path(r"C:\APPS\nzila-union-eyes\backend")
+    return {
+        "frontend_services": ue_frontend / "services",
+        "backend": ue_backend,
+        "services_api": ue_backend / "services" / "api",
+    }
+
+
+# Initialize from config
+_ue_dirs = _get_ue_dirs()
+FRONTEND_SERVICES_DIR = str(_ue_dirs["frontend_services"])
+BACKEND_DIR = str(_ue_dirs["backend"])
+SERVICES_API_DIR = str(_ue_dirs["services_api"])
 
 # Services that already have views built — skip these
 EXISTING_VIEWS = {

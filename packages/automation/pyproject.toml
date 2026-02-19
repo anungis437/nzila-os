@@ -1,0 +1,41 @@
+[build-system]
+requires = ["setuptools>=61"]
+build-backend = "setuptools.backends.legacy:build"
+
+[project]
+name = "nzila-automation"
+version = "0.1.0"
+description = "Nzila platform migration automation tooling"
+requires-python = ">=3.11"
+dependencies = [
+    "colorlog",
+    "python-json-logger",
+]
+
+[project.optional-dependencies]
+dev = ["pytest", "pytest-cov", "pytest-asyncio"]
+
+# Install with: pip install -e packages/automation
+# After installation, all imports resolve without sys.path manipulation:
+#   from generators import CodeGenerator
+#   from generators.core.platform_analyzer import PlatformAnalyzer
+#   from config import get_config
+[tool.setuptools.packages.find]
+where = ["."]
+include = [
+    "generators*",
+    "integrations*",
+    "monitoring*",
+    "deployment*",
+    "analyzers*",
+    "reporters*",
+    "organizers*",
+    "validation*",
+    "security*",
+]
+
+[tool.pytest.ini_options]
+testpaths = ["tests"]
+python_files = ["test_*.py"]
+python_classes = ["Test*"]
+python_functions = ["test_*"]

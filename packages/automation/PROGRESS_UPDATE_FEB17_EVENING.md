@@ -23,7 +23,7 @@
 
 **Files Modified**:
 - **Generated Code**: `packages/automation/data/generated/{ue,abr}/*/models.py`
-- **Production Repos**: `D:\APPS\nzila-union-eyes\backend\*\models.py`
+- **Production Repos**: `C:\APPS\nzila-union-eyes\backend\*\models.py`
 - **Production Repos**: `D:\APPS\nzila-abr-insights\backend\*\models.py`
 - **Code Generator**: `packages/automation/generators/code_generator.py`
 
@@ -105,7 +105,7 @@
 - `packages/automation/data/generated/abr/*/models.py` (8 files)
 
 ### Production Repositories (2 repos)
-- `D:\APPS\nzila-union-eyes\backend\*/models.py` (12 files)
+- `C:\APPS\nzila-union-eyes\backend\*/models.py` (12 files)
 - `D:\APPS\nzila-abr-insights\backend\*/models.py` (9 files)
 
 ### Reports Generated
