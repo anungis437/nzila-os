@@ -77,7 +77,7 @@ export default function PlatformPage() {
           className="object-cover"
           sizes="100vw"
         />
-        <div className="absolute inset-0 bg-gradient-to-b from-navy/85 via-navy/75 to-navy/90" />
+        <div className="absolute inset-0 bg-linear-to-b from-navy/85 via-navy/75 to-navy/90" />
         <div className="absolute inset-0 bg-mesh opacity-40" />
 
         <div className="relative z-10 max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-32 text-center">
@@ -129,7 +129,7 @@ export default function PlatformPage() {
                       className="object-cover"
                       sizes="(max-width:640px) 100vw, (max-width:1024px) 50vw, 33vw"
                     />
-                    <div className="absolute inset-0 bg-gradient-to-t from-navy/60 to-transparent" />
+                    <div className="absolute inset-0 bg-linear-to-t from-navy/60 to-transparent" />
                     <h3 className="absolute bottom-3 left-4 text-lg font-bold text-white">{cap.name}</h3>
                   </div>
                   <div className="p-5 flex-1">
@@ -157,7 +157,7 @@ export default function PlatformPage() {
             {layers.map((layer, i) => (
               <ScrollReveal key={layer.name} delay={i * 0.1}>
                 <div className="flex items-center gap-4 bg-white/5 border border-white/10 rounded-xl p-5 backdrop-blur">
-                  <div className={`w-2 h-12 ${layer.color} rounded-full flex-shrink-0`} />
+                  <div className={`w-2 h-12 ${layer.color} rounded-full shrink-0`} />
                   <div className="flex-1">
                     <h3 className="text-white font-bold">{layer.name}</h3>
                     <p className="text-gray-400 text-sm">{layer.tech}</p>

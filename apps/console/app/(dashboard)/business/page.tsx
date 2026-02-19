@@ -241,7 +241,7 @@ export default async function BusinessOSDashboard() {
                   <queue.icon className="h-5 w-5 text-gray-500" />
                   <span className="text-sm font-medium text-gray-700">{queue.name}</span>
                 </div>
-                <span className={`inline-flex items-center justify-center min-w-[24px] h-6 px-2 text-sm font-semibold rounded-full ${
+                <span className={`inline-flex items-center justify-center min-w-6 h-6 px-2 text-sm font-semibold rounded-full ${
                   queue.count > 0 ? 'bg-red-100 text-red-700' : 'bg-gray-200 text-gray-600'
                 }`}>
                   {queue.count}

@@ -64,7 +64,7 @@ export default function About() {
           className="object-cover"
           sizes="100vw"
         />
-        <div className="absolute inset-0 bg-gradient-to-b from-navy/80 via-navy/70 to-navy/90" />
+        <div className="absolute inset-0 bg-linear-to-b from-navy/80 via-navy/70 to-navy/90" />
         <div className="absolute inset-0 bg-mesh opacity-50" />
 
         <div className="relative z-10 max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-32">
@@ -94,7 +94,7 @@ export default function About() {
           <div className="grid lg:grid-cols-2 gap-16">
             <ScrollReveal direction="left">
               <div className="relative">
-                <div className="absolute -left-4 top-0 bottom-0 w-1 rounded-full bg-gradient-to-b from-electric to-violet" />
+                <div className="absolute -left-4 top-0 bottom-0 w-1 rounded-full bg-linear-to-b from-electric to-violet" />
                 <div className="pl-8">
                   <span className="inline-block px-3 py-1 text-xs font-semibold tracking-widest uppercase rounded-full bg-electric/10 text-electric mb-4">
                     Mission
@@ -114,7 +114,7 @@ export default function About() {
 
             <ScrollReveal direction="right">
               <div className="relative">
-                <div className="absolute -left-4 top-0 bottom-0 w-1 rounded-full bg-gradient-to-b from-gold to-gold-light" />
+                <div className="absolute -left-4 top-0 bottom-0 w-1 rounded-full bg-linear-to-b from-gold to-gold-light" />
                 <div className="pl-8">
                   <span className="inline-block px-3 py-1 text-xs font-semibold tracking-widest uppercase rounded-full bg-gold/10 text-gold mb-4">
                     Vision
@@ -148,7 +148,7 @@ export default function About() {
             {values.map((value, i) => (
               <ScrollReveal key={value.title} delay={i * 0.1}>
                 <div className="bg-white rounded-2xl p-8 border border-gray-100 hover-lift">
-                  <div className={`w-12 h-1.5 rounded-full bg-gradient-to-r ${value.color} mb-6`} />
+                  <div className={`w-12 h-1.5 rounded-full bg-linear-to-r ${value.color} mb-6`} />
                   <h3 className="text-xl font-bold text-navy mb-3">{value.title}</h3>
                   <p className="text-gray-600 leading-relaxed">{value.description}</p>
                 </div>
@@ -170,13 +170,13 @@ export default function About() {
           />
 
           <div className="relative">
-            <div className="absolute left-8 top-0 bottom-0 w-px bg-gradient-to-b from-electric via-violet to-gold hidden md:block" />
+            <div className="absolute left-8 top-0 bottom-0 w-px bg-linear-to-b from-electric via-violet to-gold hidden md:block" />
 
             <div className="space-y-10">
               {timeline.map((milestone, i) => (
                 <ScrollReveal key={milestone.year} delay={i * 0.15}>
                   <div className="flex gap-6 md:gap-10 items-start">
-                    <div className="hidden md:flex items-center justify-center w-16 h-16 rounded-full bg-white/5 border border-white/20 flex-shrink-0 z-10">
+                    <div className="hidden md:flex items-center justify-center w-16 h-16 rounded-full bg-white/5 border border-white/20 shrink-0 z-10">
                       <span className="text-xs font-bold text-gold">{milestone.year.slice(0, 4)}</span>
                     </div>
                     <div className="bg-white/5 rounded-2xl p-6 border border-white/10 flex-1 hover-lift">

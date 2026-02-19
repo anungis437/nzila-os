@@ -49,7 +49,7 @@ export default function Contact() {
           className="object-cover"
           sizes="100vw"
         />
-        <div className="absolute inset-0 bg-gradient-to-b from-navy/80 via-navy/70 to-navy/90" />
+        <div className="absolute inset-0 bg-linear-to-b from-navy/80 via-navy/70 to-navy/90" />
         <div className="absolute inset-0 bg-mesh opacity-40" />
 
         <div className="relative z-10 max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-32 text-center">
@@ -176,7 +176,7 @@ export default function Contact() {
                   <ul className="space-y-2 text-sm text-gray-300">
                     {['Platform integration opportunities', 'Vertical-specific solutions', 'Strategic partnerships', 'Investment discussions'].map((item) => (
                       <li key={item} className="flex items-center gap-2">
-                        <span className="w-1.5 h-1.5 bg-gold rounded-full flex-shrink-0" />
+                        <span className="w-1.5 h-1.5 bg-gold rounded-full shrink-0" />
                         {item}
                       </li>
                     ))}
@@ -198,7 +198,7 @@ export default function Contact() {
           className="object-cover"
           sizes="100vw"
         />
-        <div className="absolute inset-0 bg-gradient-to-br from-navy/90 via-navy/85 to-navy/95" />
+        <div className="absolute inset-0 bg-linear-to-br from-navy/90 via-navy/85 to-navy/95" />
 
         <div className="relative z-10 max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
           {/* Section Heading */}

@@ -99,7 +99,7 @@ export default function ProductsPage() {
           className="object-cover"
           sizes="100vw"
         />
-        <div className="absolute inset-0 bg-gradient-to-b from-navy/80 via-navy/70 to-navy/90" />
+        <div className="absolute inset-0 bg-linear-to-b from-navy/80 via-navy/70 to-navy/90" />
         <div className="absolute inset-0 bg-mesh opacity-50" />
 
         <div className="relative z-10 max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-32 text-center">
@@ -132,7 +132,7 @@ export default function ProductsPage() {
             {flagships.map((product, i) => (
               <ScrollReveal key={product.name} delay={i * 0.1}>
                 <div className="grid lg:grid-cols-5 gap-6 bg-gray-50 rounded-2xl overflow-hidden border border-gray-100 hover-lift">
-                  <div className="lg:col-span-2 relative min-h-[250px]">
+                  <div className="lg:col-span-2 relative min-h-62.5">
                     <Image
                       src={product.image}
                       alt={product.alt}
@@ -140,7 +140,7 @@ export default function ProductsPage() {
                       className="object-cover"
                       sizes="(max-width: 1024px) 100vw, 40vw"
                     />
-                    <div className="absolute inset-0 bg-gradient-to-r from-transparent to-black/20 lg:bg-gradient-to-r lg:from-transparent lg:to-gray-50" />
+                    <div className="absolute inset-0 bg-linear-to-r from-transparent to-black/20 lg:bg-linear-to-r lg:from-transparent lg:to-gray-50" />
                   </div>
                   <div className="lg:col-span-3 p-6 lg:p-8 flex flex-col justify-center">
                     <div className="flex items-center gap-3 mb-3">

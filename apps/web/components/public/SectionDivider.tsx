@@ -28,7 +28,7 @@ export default function SectionDivider({ variant = 'gradient', className = '' }:
       <div className={`flex items-center justify-center gap-2 py-8 ${className}`}>
         <span className="w-1.5 h-1.5 rounded-full bg-electric/40" />
         <span className="w-2 h-2 rounded-full bg-electric/60" />
-        <span className="w-8 h-1 rounded-full bg-gradient-to-r from-electric to-violet" />
+        <span className="w-8 h-1 rounded-full bg-linear-to-r from-electric to-violet" />
         <span className="w-2 h-2 rounded-full bg-violet/60" />
         <span className="w-1.5 h-1.5 rounded-full bg-violet/40" />
       </div>
@@ -38,8 +38,8 @@ export default function SectionDivider({ variant = 'gradient', className = '' }:
   if (variant === 'glow') {
     return (
       <div className={`relative h-px ${className}`}>
-        <div className="absolute inset-0 bg-gradient-to-r from-transparent via-electric/40 to-transparent" />
-        <div className="absolute inset-0 bg-gradient-to-r from-transparent via-electric/20 to-transparent blur-sm" />
+        <div className="absolute inset-0 bg-linear-to-r from-transparent via-electric/40 to-transparent" />
+        <div className="absolute inset-0 bg-linear-to-r from-transparent via-electric/20 to-transparent blur-sm" />
       </div>
     );
   }
@@ -47,7 +47,7 @@ export default function SectionDivider({ variant = 'gradient', className = '' }:
   // Default: gradient line
   return (
     <div className={`relative py-1 ${className}`}>
-      <div className="max-w-xs mx-auto h-px bg-gradient-to-r from-transparent via-electric to-transparent" />
+      <div className="max-w-xs mx-auto h-px bg-linear-to-r from-transparent via-electric to-transparent" />
     </div>
   );
 }

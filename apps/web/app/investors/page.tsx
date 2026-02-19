@@ -68,7 +68,7 @@ export default function InvestorsPage() {
           className="object-cover"
           sizes="100vw"
         />
-        <div className="absolute inset-0 bg-gradient-to-b from-navy/80 via-navy/70 to-navy/90" />
+        <div className="absolute inset-0 bg-linear-to-b from-navy/80 via-navy/70 to-navy/90" />
         <div className="absolute inset-0 bg-mesh opacity-50" />
 
         <div className="relative z-10 max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-32">
@@ -144,7 +144,7 @@ export default function InvestorsPage() {
               <div className="space-y-6 mt-8">
                 {moats.map((moat) => (
                   <div key={moat.title} className="flex gap-4">
-                    <div className="w-1.5 rounded-full bg-gradient-to-b from-electric to-violet flex-shrink-0" />
+                    <div className="w-1.5 rounded-full bg-linear-to-b from-electric to-violet shrink-0" />
                     <div>
                       <h3 className="font-bold text-navy text-lg">{moat.title}</h3>
                       <p className="text-gray-600 text-sm">{moat.description}</p>
@@ -155,7 +155,7 @@ export default function InvestorsPage() {
             </ScrollReveal>
 
             <ScrollReveal direction="right">
-              <div className="relative rounded-2xl overflow-hidden aspect-[4/3]">
+              <div className="relative rounded-2xl overflow-hidden aspect-4/3">
                 <Image
                   src="https://images.unsplash.com/photo-1551288049-bebda4e38f71?w=800"
                   alt="Data analytics dashboard with colorful charts showing portfolio performance"
@@ -163,7 +163,7 @@ export default function InvestorsPage() {
                   className="object-cover"
                   sizes="(max-width: 1024px) 100vw, 50vw"
                 />
-                <div className="absolute inset-0 bg-gradient-to-t from-navy/60 to-transparent" />
+                <div className="absolute inset-0 bg-linear-to-t from-navy/60 to-transparent" />
                 <div className="absolute bottom-6 left-6 right-6 glass-card rounded-xl p-4">
                   <div className="flex items-center gap-6 text-white">
                     <div>
@@ -214,7 +214,7 @@ export default function InvestorsPage() {
                       </div>
                       <p className="text-gray-600">{platform.description}</p>
                     </div>
-                    <div className="flex gap-6 md:gap-8 text-center flex-shrink-0">
+                    <div className="flex gap-6 md:gap-8 text-center shrink-0">
                       <div>
                         <div className="text-2xl font-bold text-gold">{platform.tam}</div>
                         <div className="text-xs text-gray-500 uppercase tracking-wider">TAM</div>
@@ -245,13 +245,13 @@ export default function InvestorsPage() {
 
           <div className="relative">
             {/* Timeline line */}
-            <div className="absolute left-8 top-0 bottom-0 w-px bg-gradient-to-b from-electric via-violet to-gold hidden md:block" />
+            <div className="absolute left-8 top-0 bottom-0 w-px bg-linear-to-b from-electric via-violet to-gold hidden md:block" />
 
             <div className="space-y-10">
               {timeline.map((milestone, i) => (
                 <ScrollReveal key={milestone.year} delay={i * 0.15}>
                   <div className="flex gap-6 md:gap-10 items-start">
-                    <div className="hidden md:flex items-center justify-center w-16 h-16 rounded-full bg-white/5 border border-white/20 flex-shrink-0 z-10">
+                    <div className="hidden md:flex items-center justify-center w-16 h-16 rounded-full bg-white/5 border border-white/20 shrink-0 z-10">
                       <span className="text-xs font-bold text-gold">{milestone.year.slice(0, 4)}</span>
                     </div>
                     <div className="bg-white/5 rounded-2xl p-6 border border-white/10 flex-1">
@@ -315,7 +315,7 @@ export default function InvestorsPage() {
           className="object-cover"
           sizes="100vw"
         />
-        <div className="absolute inset-0 bg-gradient-to-r from-navy/90 to-navy/80" />
+        <div className="absolute inset-0 bg-linear-to-r from-navy/90 to-navy/80" />
         <div className="relative z-10 max-w-4xl mx-auto px-4 sm:px-6 lg:px-8 text-center">
           <ScrollReveal>
             <span className="inline-block px-4 py-1.5 text-xs font-semibold tracking-widest uppercase rounded-full bg-gold/20 text-gold mb-6">

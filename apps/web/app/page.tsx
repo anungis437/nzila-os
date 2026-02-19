@@ -60,7 +60,7 @@ export default function Home() {
           className="object-cover"
           sizes="100vw"
         />
-        <div className="absolute inset-0 bg-gradient-to-b from-navy/80 via-navy/70 to-navy/90" />
+        <div className="absolute inset-0 bg-linear-to-b from-navy/80 via-navy/70 to-navy/90" />
         <div className="absolute inset-0 bg-mesh opacity-60" />
 
         <div className="relative z-10 max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-32">
@@ -165,7 +165,7 @@ export default function Home() {
             </ScrollReveal>
 
             <ScrollReveal direction="right">
-              <div className="relative rounded-2xl overflow-hidden aspect-[4/3]">
+              <div className="relative rounded-2xl overflow-hidden aspect-4/3">
                 <Image
                   src="https://images.unsplash.com/photo-1522071820081-009f0129c71c?w=800"
                   alt="Diverse team of engineers collaborating around laptops in a sunlit workspace"
@@ -173,7 +173,7 @@ export default function Home() {
                   className="object-cover"
                   sizes="(max-width: 1024px) 100vw, 50vw"
                 />
-                <div className="absolute inset-0 bg-gradient-to-t from-navy/40 to-transparent" />
+                <div className="absolute inset-0 bg-linear-to-t from-navy/40 to-transparent" />
                 <div className="absolute bottom-6 left-6 right-6 glass-card rounded-xl p-4">
                   <div className="flex items-center gap-6 text-white">
                     <div>
@@ -257,7 +257,7 @@ export default function Home() {
           <div className="grid md:grid-cols-2 lg:grid-cols-4 gap-6">
             {aiCapabilities.map((cap, i) => (
               <ScrollReveal key={cap.name} delay={i * 0.1}>
-                <div className="group relative rounded-2xl overflow-hidden aspect-[3/4] hover-lift">
+                <div className="group relative rounded-2xl overflow-hidden aspect-3/4 hover-lift">
                   <Image
                     src={cap.image}
                     alt={cap.alt}
@@ -265,7 +265,7 @@ export default function Home() {
                     className="object-cover transition-transform duration-700 group-hover:scale-110"
                     sizes="(max-width: 768px) 100vw, 25vw"
                   />
-                  <div className="absolute inset-0 bg-gradient-to-t from-navy via-navy/60 to-transparent" />
+                  <div className="absolute inset-0 bg-linear-to-t from-navy via-navy/60 to-transparent" />
                   <div className="absolute inset-x-0 bottom-0 p-5">
                     <span className="inline-block px-2.5 py-1 text-xs font-semibold rounded-full bg-gold/20 text-gold mb-3">
                       {cap.metric}
@@ -295,7 +295,7 @@ export default function Home() {
             {verticals.map((vertical, i) => (
               <ScrollReveal key={vertical.name} delay={i * 0.05}>
                 <Link href="/verticals">
-                  <div className="group relative rounded-2xl overflow-hidden aspect-[3/4] hover-lift cursor-pointer">
+                  <div className="group relative rounded-2xl overflow-hidden aspect-3/4 hover-lift cursor-pointer">
                     <Image
                       src={vertical.image}
                       alt={vertical.alt}
@@ -303,7 +303,7 @@ export default function Home() {
                       className="object-cover transition-transform duration-700 group-hover:scale-110"
                       sizes="(max-width: 768px) 50vw, 20vw"
                     />
-                    <div className="absolute inset-0 bg-gradient-to-t from-black/80 via-black/30 to-transparent" />
+                    <div className="absolute inset-0 bg-linear-to-t from-black/80 via-black/30 to-transparent" />
                     <div className="absolute inset-x-0 bottom-0 p-4">
                       <h3 className="font-bold text-white text-lg mb-0.5">{vertical.name}</h3>
                       <p className="text-xs text-gray-300">{vertical.description}</p>
@@ -340,7 +340,7 @@ export default function Home() {
             ].map((item, i) => (
               <ScrollReveal key={item.label} delay={i * 0.15}>
                 <div className="relative rounded-2xl p-8 text-center bg-white/5 border border-white/10 hover-lift">
-                  <div className={`text-4xl md:text-5xl font-bold bg-gradient-to-r ${item.color} bg-clip-text text-transparent mb-3`}>
+                  <div className={`text-4xl md:text-5xl font-bold bg-linear-to-r ${item.color} bg-clip-text text-transparent mb-3`}>
                     {item.value}
                   </div>
                   <div className="text-gray-400 font-medium">{item.label}</div>

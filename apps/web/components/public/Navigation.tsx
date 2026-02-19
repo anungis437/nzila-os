@@ -44,7 +44,7 @@ export default function Navigation() {
         <div className="flex justify-between h-16 md:h-20">
           <div className="flex items-center">
             <Link href="/" className="flex items-center gap-3">
-              <div className="w-9 h-9 rounded-lg bg-gradient-to-br from-electric to-violet flex items-center justify-center">
+              <div className="w-9 h-9 rounded-lg bg-linear-to-br from-electric to-violet flex items-center justify-center">
                 <span className="text-white font-bold text-sm">NV</span>
               </div>
               <span

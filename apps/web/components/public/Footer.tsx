@@ -36,7 +36,7 @@ export default function Footer() {
           {/* Brand */}
           <div className="lg:col-span-2">
             <div className="flex items-center gap-3 mb-6">
-              <div className="w-10 h-10 rounded-lg bg-gradient-to-br from-electric to-violet flex items-center justify-center">
+              <div className="w-10 h-10 rounded-lg bg-linear-to-br from-electric to-violet flex items-center justify-center">
                 <span className="text-white font-bold text-sm">NV</span>
               </div>
               <span className="text-2xl font-bold text-white">Nzila Ventures</span>

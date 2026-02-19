@@ -70,7 +70,7 @@ export default function Portfolio() {
           className="object-cover"
           sizes="100vw"
         />
-        <div className="absolute inset-0 bg-gradient-to-b from-navy/80 via-navy/70 to-navy/90" />
+        <div className="absolute inset-0 bg-linear-to-b from-navy/80 via-navy/70 to-navy/90" />
         <div className="absolute inset-0 bg-mesh opacity-50" />
 
         <div className="relative z-10 max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-32 text-center">
@@ -197,7 +197,7 @@ export default function Portfolio() {
               { phase: 'Phase 8', title: 'Complete', weeks: '16 weeks', detail: 'Agrotech, Consolidate', color: 'from-emerald to-green-700' },
             ].map((phase, i) => (
               <ScrollReveal key={phase.phase} delay={i * 0.1}>
-                <div className={`rounded-2xl p-6 bg-gradient-to-br ${phase.color} text-white`}>
+                <div className={`rounded-2xl p-6 bg-linear-to-br ${phase.color} text-white`}>
                   <div className="text-sm font-semibold opacity-80 mb-1">{phase.phase}</div>
                   <div className="text-xl font-bold mb-1">{phase.title}</div>
                   <div className="text-sm opacity-90 mb-2">{phase.weeks}</div>
