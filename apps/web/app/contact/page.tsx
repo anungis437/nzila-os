@@ -188,18 +188,104 @@ export default function Contact() {
         </div>
       </section>
 
-      {/* ═══════════════════════ BOTTOM CTA ═══════════════════════ */}
-      <section className="py-16 bg-gray-50 text-center">
-        <ScrollReveal>
-          <h2 className="text-2xl font-bold text-navy mb-3">Existing Partner?</h2>
-          <p className="text-gray-500 mb-6">Access the corporate dashboard for your team.</p>
-          <a
-            href="/auth/signin"
-            className="inline-flex items-center justify-center px-8 py-4 bg-navy text-white font-bold rounded-xl hover:bg-gray-800 transition text-lg shadow-lg shadow-navy/25 btn-press"
-          >
-            Team Portal Login →
-          </a>
-        </ScrollReveal>
+      {/* ═══════════════════════ PARTNER PORTAL ═══════════════════════ */}
+      <section className="relative py-24 overflow-hidden">
+        {/* Background */}
+        <Image
+          src="https://images.unsplash.com/photo-1522071820081-009f0129c71c?w=1920"
+          alt="Diverse team collaborating around a conference table with laptops and digital dashboards"
+          fill
+          className="object-cover"
+          sizes="100vw"
+        />
+        <div className="absolute inset-0 bg-gradient-to-br from-navy/90 via-navy/85 to-navy/95" />
+
+        <div className="relative z-10 max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
+          {/* Section Heading */}
+          <ScrollReveal>
+            <div className="text-center mb-16">
+              <span className="inline-block px-4 py-1.5 text-xs font-semibold tracking-widest uppercase rounded-full bg-gold/20 text-gold mb-6">
+                Partner Portal
+              </span>
+              <h2 className="text-4xl md:text-5xl font-bold text-white mb-4">
+                Already Building With Us?
+              </h2>
+              <p className="text-lg text-gray-300 max-w-2xl mx-auto">
+                Access your dedicated dashboard, manage deployments, and collaborate with
+                the Nzila Ventures engineering team — all in one place.
+              </p>
+            </div>
+          </ScrollReveal>
+
+          {/* Feature Grid */}
+          <div className="grid md:grid-cols-3 gap-6 mb-14">
+            {[
+              {
+                icon: '📊',
+                title: 'Performance Dashboard',
+                description: 'Real-time metrics across all your deployed verticals — uptime, API calls, revenue attribution, and AI model accuracy.',
+              },
+              {
+                icon: '🔧',
+                title: 'Deployment Management',
+                description: 'One-click staging → production promotion, rollback controls, and environment configuration for every platform.',
+              },
+              {
+                icon: '🤝',
+                title: 'Shared Roadmap',
+                description: 'Collaborative backlog with your dedicated Nzila engineering pod. Vote on features, track sprints, and review release notes.',
+              },
+              {
+                icon: '🔐',
+                title: 'SSO & Team Access',
+                description: 'Enterprise single sign-on with role-based permissions. Manage team members, API keys, and audit logs from one console.',
+              },
+              {
+                icon: '💬',
+                title: 'Priority Support',
+                description: 'Direct Slack channel with your engineering pod, 4-hour SLA for critical issues, and monthly architecture reviews.',
+              },
+              {
+                icon: '📈',
+                title: 'AI & Analytics Lab',
+                description: 'Experiment with custom AI models, run A/B tests on new features, and access detailed analytics on user engagement.',
+              },
+            ].map((feature, i) => (
+              <ScrollReveal key={feature.title} delay={i * 0.08}>
+                <div className="glass-card p-6 rounded-2xl border border-white/10 hover-lift h-full">
+                  <span className="text-3xl block mb-4">{feature.icon}</span>
+                  <h3 className="text-lg font-bold text-white mb-2">{feature.title}</h3>
+                  <p className="text-sm text-gray-400 leading-relaxed">{feature.description}</p>
+                </div>
+              </ScrollReveal>
+            ))}
+          </div>
+
+          {/* CTA Row */}
+          <ScrollReveal delay={0.3}>
+            <div className="flex flex-col sm:flex-row items-center justify-center gap-5">
+              <a
+                href="/auth/signin"
+                className="inline-flex items-center justify-center px-10 py-4 bg-gold text-navy font-bold rounded-xl hover:bg-gold/90 transition-all text-lg shadow-lg shadow-gold/25 btn-press"
+              >
+                Team Portal Login →
+              </a>
+              <a
+                href="mailto:partners@nzilaventures.com"
+                className="inline-flex items-center justify-center px-10 py-4 border-2 border-white/30 text-white font-bold rounded-xl hover:bg-white/10 transition-all text-lg"
+              >
+                Request Partner Access
+              </a>
+            </div>
+            <p className="text-center text-gray-500 text-sm mt-6">
+              Not a partner yet?{' '}
+              <a href="/contact" className="text-gold hover:underline">
+                Apply to our partnership program
+              </a>{' '}
+              — we onboard qualified teams within 48 hours.
+            </p>
+          </ScrollReveal>
+        </div>
       </section>
     </main>
   );
