@@ -65,6 +65,14 @@ export {
   AiActionApproveRequestSchema,
   validateActionProposal,
   validateOutputSchema,
+  ACTION_TYPES,
+  FinanceStripeMonthlyReportsProposalSchema,
+  AiIngestKnowledgeSourceProposalSchema,
+} from './schemas'
+export type {
+  ActionType,
+  FinanceStripeMonthlyReportsProposal,
+  AiIngestKnowledgeSourceProposal,
 } from './schemas'
 
 // Artifacts
@@ -72,3 +80,21 @@ export { storeAiArtifactAsDocument, type StoreAiArtifactInput, type StoredArtifa
 
 // Budgets
 export { ensureBudgetRow as createBudgetRow } from './budgets'
+
+// Policy
+export { checkActionPolicy, type PolicyCheckInput, type PolicyDecision } from './policy/actionsPolicy'
+
+// Actions (Phase C)
+export { executeAction, type ExecuteActionResult } from './actions/executeAction'
+export {
+  createActionAttestation,
+  storeAttestation,
+  type AttestationInput,
+  type AttestationJson,
+  type StoredAttestation,
+} from './actions/attestation'
+export {
+  collectAiActionEvidence,
+  type AiActionEvidence,
+  type AiActionsEvidenceAppendix,
+} from './actions/evidencePack'

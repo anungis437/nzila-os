@@ -2,8 +2,8 @@
  * API — AI Actions: Approve / Reject
  * POST /api/ai/actions/approve
  *
- * RBAC: entity_admin only. Marks an action as approved or rejected.
- * No execution in v1.
+ * RBAC: entity_admin or appropriate approver role.
+ * Moves from awaiting_approval → approved/rejected.
  */
 import { NextRequest, NextResponse } from 'next/server'
 import { db } from '@nzila/db'
@@ -44,14 +44,16 @@ export async function POST(req: NextRequest) {
     })
     if (!access.ok) return access.response
 
-    if (action.status !== 'proposed') {
+    // 3. Validate current status allows approval
+    const approvableStatuses = ['proposed', 'policy_checked', 'awaiting_approval']
+    if (!approvableStatuses.includes(action.status)) {
       return NextResponse.json(
         { error: `Action is in "${action.status}" status, cannot approve/reject` },
         { status: 409 },
       )
     }
 
-    // 3. Update status
+    // 4. Update status
     const newStatus = approved ? 'approved' : 'rejected'
     await db
       .update(aiActions)
@@ -63,7 +65,7 @@ export async function POST(req: NextRequest) {
       })
       .where(eq(aiActions.id, actionId))
 
-    // 4. Audit event
+    // 5. Audit event
     await appendAiAuditEvent({
       entityId: action.entityId,
       actorClerkUserId: access.context.userId,

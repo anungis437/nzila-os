@@ -1,0 +1,31 @@
+{
+  "name": "@nzila/tools-runtime",
+  "version": "0.1.0",
+  "private": true,
+  "main": "./src/index.ts",
+  "types": "./src/index.ts",
+  "exports": {
+    ".": "./src/index.ts",
+    "./blob": "./src/blobTool.ts",
+    "./stripe": "./src/stripeTool.ts",
+    "./knowledge": "./src/knowledgeTool.ts",
+    "./sanitize": "./src/sanitize.ts"
+  },
+  "scripts": {
+    "typecheck": "tsc --noEmit",
+    "test": "vitest run"
+  },
+  "dependencies": {
+    "@nzila/blob": "workspace:*",
+    "@nzila/db": "workspace:*",
+    "@nzila/ai-core": "workspace:*",
+    "@nzila/os-core": "workspace:*",
+    "@nzila/payments-stripe": "workspace:*",
+    "zod": "^3.24.0"
+  },
+  "devDependencies": {
+    "@types/node": "^22",
+    "typescript": "^5",
+    "vitest": "^4.0.18"
+  }
+}

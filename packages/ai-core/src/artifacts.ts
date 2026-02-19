@@ -18,7 +18,7 @@ export interface StoreAiArtifactInput {
   contentType?: string
   entityId: string
   classification: 'public' | 'internal' | 'confidential'
-  category: 'minute_book' | 'filing' | 'resolution' | 'minutes' | 'certificate' | 'year_end' | 'export' | 'other'
+  category: 'minute_book' | 'filing' | 'resolution' | 'minutes' | 'certificate' | 'year_end' | 'export' | 'attestation' | 'ingestion_report' | 'other'
   title: string
   linkedType?: string
   linkedId?: string

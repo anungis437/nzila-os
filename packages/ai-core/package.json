@@ -14,7 +14,11 @@
     "./prompts": "./src/prompts.ts",
     "./schemas": "./src/schemas.ts",
     "./types": "./src/types.ts",
-    "./artifacts": "./src/artifacts.ts"
+    "./artifacts": "./src/artifacts.ts",
+    "./policy": "./src/policy/actionsPolicy.ts",
+    "./actions/execute": "./src/actions/executeAction.ts",
+    "./actions/attestation": "./src/actions/attestation.ts",
+    "./actions/evidence-pack": "./src/actions/evidencePack.ts"
   },
   "scripts": {
     "typecheck": "tsc --noEmit",
@@ -24,6 +28,7 @@
     "@nzila/db": "workspace:*",
     "@nzila/os-core": "workspace:*",
     "@nzila/blob": "workspace:*",
+    "@nzila/tools-runtime": "workspace:*",
     "zod": "^3.24.0"
   },
   "devDependencies": {

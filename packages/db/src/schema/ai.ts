@@ -81,9 +81,34 @@ export const aiKnowledgeSourceStatusEnum = pgEnum('ai_knowledge_source_status', 
 
 export const aiActionStatusEnum = pgEnum('ai_action_status', [
   'proposed',
+  'policy_checked',
+  'awaiting_approval',
   'approved',
+  'executing',
+  'executed',
+  'failed',
   'rejected',
   'expired',
+])
+
+export const aiRiskTierEnum = pgEnum('ai_risk_tier', [
+  'low',
+  'medium',
+  'high',
+])
+
+export const aiActionRunStatusEnum = pgEnum('ai_action_run_status', [
+  'started',
+  'success',
+  'failed',
+])
+
+export const aiKnowledgeIngestionStatusEnum = pgEnum('ai_knowledge_ingestion_status', [
+  'queued',
+  'chunked',
+  'embedded',
+  'stored',
+  'failed',
 ])
 
 // ── 1) ai_apps — registered Nzila apps that use AI ─────────────────────────
@@ -318,7 +343,7 @@ export const aiEmbeddings = pgTable(
   ],
 )
 
-// ── 10) ai_actions — Phase B scaffolding (proposals only in v1) ─────────────
+// ── 10) ai_actions — Phase C execution-grade state machine ──────────────────
 
 export const aiActions = pgTable(
   'ai_actions',
@@ -330,19 +355,76 @@ export const aiActions = pgTable(
     appKey: varchar('app_key', { length: 60 }).notNull(),
     profileKey: varchar('profile_key', { length: 120 }).notNull(),
     actionType: varchar('action_type', { length: 120 }).notNull(),
+    riskTier: aiRiskTierEnum('risk_tier').notNull().default('low'),
     status: aiActionStatusEnum('status').notNull().default('proposed'),
     proposalJson: jsonb('proposal_json').notNull(),
+    policyDecisionJson: jsonb('policy_decision_json'),
+    approvalsRequiredJson: jsonb('approvals_required_json'),
     requestedBy: text('requested_by').notNull(),
     approvedBy: text('approved_by'),
     approvedAt: timestamp('approved_at', { withTimezone: true }),
     relatedDomainType: varchar('related_domain_type', { length: 60 }),
     relatedDomainId: uuid('related_domain_id'),
     aiRequestId: uuid('ai_request_id').references(() => aiRequests.id),
+    evidencePackEligible: boolean('evidence_pack_eligible').notNull().default(false),
     createdAt: timestamp('created_at', { withTimezone: true }).notNull().defaultNow(),
     updatedAt: timestamp('updated_at', { withTimezone: true }).notNull().defaultNow(),
   },
   (table) => [
     index('idx_ai_actions_entity_app').on(table.entityId, table.appKey),
     index('idx_ai_actions_status').on(table.status),
+    index('idx_ai_actions_type').on(table.actionType),
+  ],
+)
+
+// ── 11) ai_action_runs — execution run log per action ───────────────────────
+
+export const aiActionRuns = pgTable(
+  'ai_action_runs',
+  {
+    id: uuid('id').primaryKey().defaultRandom(),
+    actionId: uuid('action_id')
+      .notNull()
+      .references(() => aiActions.id),
+    entityId: uuid('entity_id')
+      .notNull()
+      .references(() => entities.id),
+    status: aiActionRunStatusEnum('status').notNull().default('started'),
+    startedAt: timestamp('started_at', { withTimezone: true }).notNull().defaultNow(),
+    finishedAt: timestamp('finished_at', { withTimezone: true }),
+    toolCallsJson: jsonb('tool_calls_json').default([]),
+    outputArtifactsJson: jsonb('output_artifacts_json').default({}),
+    attestationDocumentId: uuid('attestation_document_id').references(() => documents.id),
+    error: text('error'),
+    createdAt: timestamp('created_at', { withTimezone: true }).notNull().defaultNow(),
+    updatedAt: timestamp('updated_at', { withTimezone: true }).notNull().defaultNow(),
+  },
+  (table) => [
+    index('idx_ai_action_runs_action').on(table.actionId),
+    index('idx_ai_action_runs_entity').on(table.entityId),
+  ],
+)
+
+// ── 12) ai_knowledge_ingestion_runs — RAG ingestion tracking ────────────────
+
+export const aiKnowledgeIngestionRuns = pgTable(
+  'ai_knowledge_ingestion_runs',
+  {
+    id: uuid('id').primaryKey().defaultRandom(),
+    entityId: uuid('entity_id')
+      .notNull()
+      .references(() => entities.id),
+    sourceId: uuid('source_id')
+      .notNull()
+      .references(() => aiKnowledgeSources.id),
+    status: aiKnowledgeIngestionStatusEnum('status').notNull().default('queued'),
+    metricsJson: jsonb('metrics_json').default({}),
+    error: text('error'),
+    createdAt: timestamp('created_at', { withTimezone: true }).notNull().defaultNow(),
+    updatedAt: timestamp('updated_at', { withTimezone: true }).notNull().defaultNow(),
+  },
+  (table) => [
+    index('idx_ai_ingestion_runs_source').on(table.sourceId),
+    index('idx_ai_ingestion_runs_entity').on(table.entityId),
   ],
 )

@@ -101,7 +101,7 @@ importers:
         version: 9.39.2(jiti@2.6.1)
       eslint-config-next:
         specifier: 16.1.6
-        version: 16.1.6(eslint@9.39.2(jiti@2.6.1))(typescript@5.9.3)
+        version: 16.1.6(@typescript-eslint/parser@8.56.0(eslint@9.39.2(jiti@2.6.1))(typescript@5.9.3))(eslint@9.39.2(jiti@2.6.1))(typescript@5.9.3)
       tailwindcss:
         specifier: ^4
         version: 4.2.0
@@ -171,7 +171,7 @@ importers:
         version: 9.39.2(jiti@2.6.1)
       eslint-config-next:
         specifier: 16.1.6
-        version: 16.1.6(@typescript-eslint/parser@8.56.0(eslint@9.39.2(jiti@2.6.1))(typescript@5.9.3))(eslint@9.39.2(jiti@2.6.1))(typescript@5.9.3)
+        version: 16.1.6(eslint@9.39.2(jiti@2.6.1))(typescript@5.9.3)
       tailwindcss:
         specifier: ^4
         version: 4.2.0
@@ -257,6 +257,9 @@ importers:
       '@nzila/os-core':
         specifier: workspace:*
         version: link:../os-core
+      '@nzila/tools-runtime':
+        specifier: workspace:*
+        version: link:../tools-runtime
       zod:
         specifier: ^3.24.0
         version: 3.25.76
@@ -384,6 +387,37 @@ importers:
       drizzle-orm:
         specifier: ^0.39.0
         version: 0.39.3(postgres@3.4.8)
+      zod:
+        specifier: ^3.24.0
+        version: 3.25.76
+    devDependencies:
+      '@types/node':
+        specifier: ^22
+        version: 22.19.11
+      typescript:
+        specifier: ^5
+        version: 5.9.3
+      vitest:
+        specifier: ^4.0.18
+        version: 4.0.18(@types/node@22.19.11)(jiti@2.6.1)(jsdom@28.1.0)(lightningcss@1.31.1)
+
+  packages/tools-runtime:
+    dependencies:
+      '@nzila/ai-core':
+        specifier: workspace:*
+        version: link:../ai-core
+      '@nzila/blob':
+        specifier: workspace:*
+        version: link:../blob
+      '@nzila/db':
+        specifier: workspace:*
+        version: link:../db
+      '@nzila/os-core':
+        specifier: workspace:*
+        version: link:../os-core
+      '@nzila/payments-stripe':
+        specifier: workspace:*
+        version: link:../payments-stripe
       zod:
         specifier: ^3.24.0
         version: 3.25.76
