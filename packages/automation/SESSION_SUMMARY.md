@@ -78,7 +78,7 @@ Continue the flagship refactor work for Union Eyes and ABR Insights platforms, f
 
 **Created 2 production-ready repositories:**
 
-**📁 D:\APPS\nzila-union-eyes\** (Union Eyes)
+**📁 C:\APPS\nzila-union-eyes\** (Union Eyes)
 ```
 nzila-union-eyes/
 ├── .github/              # CI/CD workflows
@@ -400,7 +400,7 @@ nzila-abr-insights/
 **To Get Started:**
 ```bash
 # Union Eyes
-cd D:\APPS\nzila-union-eyes\backend
+cd C:\APPS\nzila-union-eyes\backend
 python -m venv venv
 .\venv\Scripts\activate
 pip install -r requirements.txt

@@ -8,12 +8,39 @@ This is the first implementation focused on governance-service.ts as the pilot t
 
 import re
 from pathlib import Path
-from typing import Dict, List, Tuple
+from typing import Dict, List, Tuple, Optional
 import json
+import os
 
-FRONTEND_DIR = Path(r"D:\APPS\nzila-union-eyes\frontend")
-SERVICES_DIR = FRONTEND_DIR / "services"
-OUTPUT_DIR = Path(r"D:\APPS\nzila-automation\packages\automation\data")
+# Import path configuration
+import sys
+sys.path.insert(0, str(Path(__file__).parent.parent.parent))
+from config import get_config
+
+
+def _get_transform_dirs():
+    """Get directory paths from environment or defaults."""
+    cfg = get_config()
+    
+    # UE Frontend
+    ue_frontend = cfg.ue_frontend_dir or Path(r"C:\APPS\nzila-union-eyes\frontend")
+    
+    # Output directory (can also use OUTPUT_DIR env var)
+    output = Path(os.environ.get("TRANSFORM_OUTPUT_DIR", 
+                   r"C:\APPS\nzila-automation\packages\automation\data"))
+    
+    return {
+        "frontend_dir": ue_frontend,
+        "services_dir": ue_frontend / "services",
+        "output_dir": output,
+    }
+
+
+# Initialize from config
+_transform_dirs = _get_transform_dirs()
+FRONTEND_DIR = _transform_dirs["frontend_dir"]
+SERVICES_DIR = _transform_dirs["services_dir"]
+OUTPUT_DIR = _transform_dirs["output_dir"]
 
 
 class ServiceTransformer:

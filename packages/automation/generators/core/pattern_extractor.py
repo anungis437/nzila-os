@@ -23,7 +23,7 @@ import hashlib
 
 try:
     import sys
-    sys.path.insert(0, str(Path(__file__).parent.parent))
+    sys.path.insert(0, str(Path(__file__).parent.parent.parent))
     from logging_config import MigrationLogger, LogOperation
     logger = MigrationLogger.get_logger(__name__)
 except ImportError:

@@ -1,0 +1,24 @@
+[
+  {
+    "id": "sample-greeting-001",
+    "promptKey": "companion_greeting",
+    "input": "Hello, I need help with my daily routine.",
+    "variables": {},
+    "expectedChecks": {
+      "containsAny": ["Hello", "Hi", "Good", "Welcome"],
+      "maxLength": 500,
+      "isNotEmpty": true
+    }
+  },
+  {
+    "id": "sample-greeting-002",
+    "promptKey": "companion_greeting",
+    "input": "I'm feeling anxious today.",
+    "variables": {},
+    "expectedChecks": {
+      "containsAny": ["understand", "feel", "support", "here for you"],
+      "maxLength": 500,
+      "isNotEmpty": true
+    }
+  }
+]

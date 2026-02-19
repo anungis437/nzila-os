@@ -1,0 +1,13 @@
+[
+  {
+    "id": "extract-invoice-001",
+    "promptKey": "extract_invoice",
+    "input": "Invoice #12345 from ACME Corp dated 2026-01-15 for $1,500.00 USD. Payment due 2026-02-15.",
+    "variables": {},
+    "expectedChecks": {
+      "isValidJson": true,
+      "schemaFields": ["invoiceNumber", "vendor", "amount", "currency", "dueDate"],
+      "isNotEmpty": true
+    }
+  }
+]

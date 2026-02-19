@@ -17,7 +17,7 @@ All required files, configurations, and credentials are in place. Both backends 
 
 ## 📁 Configuration Files Updated
 
-### Union Eyes Backend (`D:\APPS\nzila-union-eyes\backend\`)
+### Union Eyes Backend (`C:\APPS\nzila-union-eyes\backend\`)
 
 | File | Status | Changes |
 |------|--------|---------|
@@ -78,7 +78,7 @@ CLERK_WEBHOOK_SECRET=whsec_configure_this_after_webhook_setup
 redis-server
 
 # 2. Install dependencies
-cd D:\APPS\nzila-union-eyes\backend
+cd C:\APPS\nzila-union-eyes\backend
 pip install -r requirements.txt
 
 # 3. Run migrations (should be already applied)
@@ -305,9 +305,9 @@ Access-Control-Allow-Origin error in browser console
 
 ## 📚 Documentation
 
-- **Union Eyes Setup Guide**: [CLERK_SETUP_COMPLETE.md](d:/APPS/nzila-union-eyes/backend/CLERK_SETUP_COMPLETE.md)
-- **Auth Migration Plan**: [AUTH_MIGRATION_PLAN.md](d:/APPS/nzila-automation/packages/automation/data/AUTH_MIGRATION_PLAN.md)
-- **Implementation Summary**: [AUTH_IMPLEMENTATION_SUMMARY.md](d:/APPS/nzila-automation/packages/automation/data/AUTH_IMPLEMENTATION_SUMMARY.md)
+- **Union Eyes Setup Guide**: [CLERK_SETUP_COMPLETE.md](c:/APPS/nzila-union-eyes/backend/CLERK_SETUP_COMPLETE.md)
+- **Auth Migration Plan**: [AUTH_MIGRATION_PLAN.md](c:/APPS/nzila-automation/packages/automation/data/AUTH_MIGRATION_PLAN.md)
+- **Implementation Summary**: [AUTH_IMPLEMENTATION_SUMMARY.md](c:/APPS/nzila-automation/packages/automation/data/AUTH_IMPLEMENTATION_SUMMARY.md)
 - **Clerk Django Guide**: https://clerk.com/docs/quickstarts/django
 - **Clerk Webhooks**: https://clerk.com/docs/webhooks/overview
 

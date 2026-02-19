@@ -7,7 +7,7 @@ Makes them working stubs by commenting out invalid imports
 from pathlib import Path
 import re
 
-SERVICES_API_DIR = Path(r"D:\APPS\nzila-union-eyes\backend\services\api")
+SERVICES_API_DIR = Path(r"C:\APPS\nzila-union-eyes\backend\services\api")
 
 def fix_viewset_file(file_path: Path):
     """Fix a single ViewSet file"""

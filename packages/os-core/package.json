@@ -12,7 +12,8 @@
     "./hash": "./src/hash.ts",
     "./evidence": "./src/evidence/index.ts",
     "./evidence/types": "./src/evidence/types.ts",
-    "./evidence/builder": "./src/evidence/builder.ts"
+    "./evidence/builder": "./src/evidence/builder.ts",
+    "./ai-env": "./src/ai-env.ts"
   },
   "scripts": {
     "typecheck": "tsc --noEmit",

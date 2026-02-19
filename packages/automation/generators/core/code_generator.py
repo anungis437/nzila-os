@@ -23,7 +23,7 @@ from datetime import datetime
 
 try:
     import sys
-    sys.path.insert(0, str(Path(__file__).parent.parent))
+    sys.path.insert(0, str(Path(__file__).parent.parent.parent))
     from logging_config import MigrationLogger
     logger = MigrationLogger.get_logger(__name__)
 except ImportError:
@@ -142,10 +142,11 @@ class TableDef:
     source_file: str = ""
     domain: str = ""
 
-    def to_django_model_str(self, model_registry: Optional[Dict[str, str]] = None) -> str:
-        """Generate Django model class string"""
-        lines = []
-        # Choices constants
+    # ── TableDef Helpers ─────────────────────────────────────────
+
+    def _choice_constant_lines(self) -> List[str]:
+        """Build class-level CHOICES constant lines for enum fields."""
+        lines: List[str] = []
         for col in self.columns:
             if col.choices:
                 choices_name = col.django_name.upper() + "_CHOICES"
@@ -153,65 +154,30 @@ class TableDef:
                     [f"('{c}', '{c.replace('_', ' ').title()}')" for c in col.choices]
                 )
                 lines.append(f"    {choices_name} = [{choices_tuples}]")
-        if any(c.choices for c in self.columns):
+        if lines:
             lines.append("")
+        return lines
 
-        # Fields
-        has_org_fk = False
-
-        for col in self.columns:
-            if col.is_foreign_key and col.fk_table in ("organizations",):
-                has_org_fk = True
-
-        # Determine base class — always use BaseModel (provides id, created_at, updated_at)
-        if has_org_fk:
-            base_class = "OrganizationModel"
-        else:
-            base_class = "BaseModel"
-
-        # Skip fields handled by base class
-        skip_fields = {"id", "created_at", "updated_at"}
+    def _determine_base_class(self) -> Tuple[str, set]:
+        """Return (base_class, skip_fields) based on FK relationships."""
+        has_org_fk = any(
+            col.is_foreign_key and col.fk_table in ("organizations",)
+            for col in self.columns
+        )
+        base_class = "OrganizationModel" if has_org_fk else "BaseModel"
+        skip_fields: set = {"id", "created_at", "updated_at"}
         if base_class == "OrganizationModel":
             skip_fields.add("organization_id")
+        return base_class, skip_fields
 
-        # Convert non-id primary key fields to unique fields (BaseModel provides the real PK)
-        for col in self.columns:
-            if col.is_primary_key and col.django_name != "id":
-                col.is_primary_key = False
-                col.is_unique = True
-
-        header = f"class {self.django_model_name}({base_class}):"
-        docstring = f'    """Migrated from {self.source_type}: {self.source_file}"""'
-
-        result = [header, docstring]
-        if lines:
-            result.extend(lines)
-
-        field_lines = []
-        for col in self.columns:
-            if col.django_name in skip_fields:
-                continue
-            # Sanitize reserved word field names
-            field_name = _sanitize_field_name(col.django_name)
-            # For FK fields, Django adds _id automatically
-            if col.is_foreign_key:
-                field_name = field_name.replace("_id", "") if field_name.endswith("_id") else field_name
-            field_str = col.to_django_field_str(model_registry=model_registry, 
-                                                current_app=self.django_app)
-            field_lines.append(f"    {field_name} = {field_str}")
-
-        if field_lines:
-            result.extend(field_lines)
-        else:
-            result.append("    pass")
-
-        # Meta class
+    def _meta_class_lines(self) -> List[str]:
+        """Build the inner Meta class lines."""
         meta_lines = ["", "    class Meta:"]
         meta_lines.append(f"        db_table = '{self.name}'")
         meta_lines.append(f"        verbose_name = '{self.django_model_name}'")
         if self.unique_constraints:
             constraints = []
-            for i, uc in enumerate(self.unique_constraints):
+            for uc in self.unique_constraints:
                 fields_str = ", ".join([f"'{f}'" for f in uc])
                 uc_suffix = "_".join(uc)
                 constraint_name = _truncate_index_name(f'unique_{self.name}_{uc_suffix}')
@@ -223,23 +189,49 @@ class TableDef:
                 meta_lines.append("        constraints = [")
                 meta_lines.extend([c + "," for c in constraints])
                 meta_lines.append("        ]")
-        # BaseModel always provides created_at
         meta_lines.append("        ordering = ['-created_at']")
+        return meta_lines
 
-        result.extend(meta_lines)
-
-        # __str__
-        str_field = None
+    def _str_method_lines(self) -> List[str]:
+        """Build __str__ method lines, or empty list if no suitable field exists."""
         for candidate in ("name", "title", "slug", "email", "claim_number",
                           "grievance_number", "cba_number"):
             if any(c.django_name == candidate for c in self.columns):
-                str_field = candidate
-                break
-        if str_field:
-            result.append("")
-            result.append(f"    def __str__(self):")
-            result.append(f"        return str(self.{str_field})")
+                return [
+                    "",
+                    "    def __str__(self):",
+                    f"        return str(self.{candidate})",
+                ]
+        return []
 
+    def to_django_model_str(self, model_registry: Optional[Dict[str, str]] = None) -> str:
+        """Generate Django model class string."""
+        base_class, skip_fields = self._determine_base_class()
+
+        # Convert non-id primary key fields to unique (BaseModel provides the real PK)
+        for col in self.columns:
+            if col.is_primary_key and col.django_name != "id":
+                col.is_primary_key = False
+                col.is_unique = True
+
+        header = f"class {self.django_model_name}({base_class}):"
+        docstring = f'    """Migrated from {self.source_type}: {self.source_file}"""'
+        result = [header, docstring] + self._choice_constant_lines()
+
+        field_lines = []
+        for col in self.columns:
+            if col.django_name in skip_fields:
+                continue
+            field_name = _sanitize_field_name(col.django_name)
+            if col.is_foreign_key:
+                field_name = field_name.replace("_id", "") if field_name.endswith("_id") else field_name
+            field_str = col.to_django_field_str(model_registry=model_registry,
+                                                current_app=self.django_app)
+            field_lines.append(f"    {field_name} = {field_str}")
+
+        result.extend(field_lines) if field_lines else result.append("    pass")
+        result.extend(self._meta_class_lines())
+        result.extend(self._str_method_lines())
         return "\n".join(result)
 
 
@@ -432,9 +424,32 @@ class SQLSchemaParser:
         return result
 
     @classmethod
+    def _parse_sql_array_type(
+        cls, raw_type: str
+    ) -> Tuple[bool, Optional[str], str]:
+        """Detect array markers, returning (is_array, array_base, cleaned_type)."""
+        if raw_type.endswith("[]") or "ARRAY" in raw_type.upper():
+            array_base = raw_type.replace("[]", "").strip()
+            return True, array_base, array_base
+        return False, None, raw_type
+
+    @classmethod
+    def _parse_sql_fk(
+        cls, constraints: str
+    ) -> Tuple[bool, Optional[str], Optional[str], str]:
+        """Extract FK (is_fk, fk_table, fk_column, on_delete) from a constraint string."""
+        fk_match = re.search(
+            r'REFERENCES\s+(\w+)\s*\((\w+)\)(?:\s+ON\s+DELETE\s+(\w+(?:\s+\w+)?))?',
+            constraints, re.IGNORECASE
+        )
+        if fk_match:
+            fk_on_delete = fk_match.group(3).upper() if fk_match.group(3) else "CASCADE"
+            return True, fk_match.group(1), fk_match.group(2), fk_on_delete
+        return False, None, None, "CASCADE"
+
+    @classmethod
     def _parse_column(cls, line: str, table_name: str) -> Optional[ColumnDef]:
-        """Parse a single column definition line"""
-        # Match: column_name TYPE [constraints...]
+        """Parse a single column definition line."""
         col_match = re.match(
             r'(\w+)\s+([\w\s]+(?:\([^)]*\))?)\s*(.*)',
             line.strip(),
@@ -457,41 +472,14 @@ class SQLSchemaParser:
                 django_kwargs={},
             )
 
-        # Detect array types
-        is_array = False
-        array_base = None
-        if raw_type.endswith("[]") or "ARRAY" in raw_type.upper():
-            is_array = True
-            array_base = raw_type.replace("[]", "").strip()
-            raw_type_clean = array_base
-        else:
-            raw_type_clean = raw_type
-
-        # Parse type
+        is_array, array_base, raw_type_clean = cls._parse_sql_array_type(raw_type)
         django_field, kwargs = cls._map_type(raw_type_clean)
 
-        # Parse constraints
         is_pk = "PRIMARY KEY" in constraints.upper() or "PRIMARY KEY" in raw_type.upper()
         is_unique = "UNIQUE" in constraints.upper()
         is_nullable = "NOT NULL" not in constraints.upper() and not is_pk
-        is_fk = False
-        fk_table = None
-        fk_column = None
-        fk_on_delete = "CASCADE"
+        is_fk, fk_table, fk_column, fk_on_delete = cls._parse_sql_fk(constraints)
 
-        # FK detection
-        fk_match = re.search(
-            r'REFERENCES\s+(\w+)\s*\((\w+)\)(?:\s+ON\s+DELETE\s+(\w+(?:\s+\w+)?))?',
-            constraints, re.IGNORECASE
-        )
-        if fk_match:
-            is_fk = True
-            fk_table = fk_match.group(1)
-            fk_column = fk_match.group(2)
-            if fk_match.group(3):
-                fk_on_delete = fk_match.group(3).upper()
-
-        # Default value
         default_val = None
         default_match = re.search(r"DEFAULT\s+(.+?)(?:\s+(?:NOT|CHECK|UNIQUE|REFERENCES|$))",
                                    constraints, re.IGNORECASE)
@@ -499,7 +487,6 @@ class SQLSchemaParser:
             raw_default = default_match.group(1).strip().rstrip(",")
             default_val = cls._parse_default(raw_default, django_field)
 
-        # CHECK enum
         choices = None
         check_match = re.search(
             r"CHECK\s*\(\s*\w+\s+IN\s*\((.+?)\)\s*\)",
@@ -512,7 +499,6 @@ class SQLSchemaParser:
                 django_field = "CharField"
                 kwargs["max_length"] = max(len(c) for c in choices) + 10
 
-        # Handle arrays
         if is_array:
             array_field, array_kwargs = cls._map_type(array_base)
             kwargs_str = ", ".join(f"{k}={v}" for k, v in array_kwargs.items())
@@ -520,14 +506,12 @@ class SQLSchemaParser:
             django_field = "ArrayField"
             kwargs = {"base_field": base_str, "default": "list"}
 
-        # Handle vector type for pgvector
         vector_match = re.match(r'vector\s*\((\d+)\)', raw_type_clean, re.IGNORECASE)
         if vector_match:
-            dims = vector_match.group(1)
             django_field = "VectorField"
-            kwargs = {"dimensions": int(dims)}
+            kwargs = {"dimensions": int(vector_match.group(1))}
 
-        col = ColumnDef(
+        return ColumnDef(
             name=col_name,
             django_name=_sanitize_field_name(_camel_to_snake(col_name)),
             source_type=raw_type,
@@ -545,8 +529,6 @@ class SQLSchemaParser:
             is_array=is_array,
             array_base_type=array_base,
         )
-
-        return col
 
     @classmethod
     def _map_type(cls, raw_type: str) -> Tuple[str, Dict]:
@@ -720,89 +702,77 @@ class DrizzleSchemaParser:
         return table if table.columns else None
 
     @classmethod
-    def _parse_drizzle_field(cls, field_name: str, field_def: str,
-                              table_name: str,
-                              enums: Dict[str, List[str]]) -> Optional[ColumnDef]:
-        """Parse a single Drizzle field definition"""
-        snake_name = _camel_to_snake(field_name)
-
-        # Detect type call: uuid(...), text(...), varchar(...), etc.
-        type_match = re.match(r'(\w+)\s*\(', field_def)
-        if not type_match:
+    def _resolve_enum_choices(
+        cls,
+        field_def: str,
+        enums: Dict[str, List[str]],
+        drizzle_type: str,
+    ) -> Optional[List[str]]:
+        """Return enum choices list if the field references a pgEnum, else None."""
+        if drizzle_type not in enums and not any(en in field_def for en in enums):
             return None
+        for en_name, en_values in enums.items():
+            if en_name in field_def or en_name == drizzle_type:
+                return en_values
+        return None
 
-        drizzle_type = type_match.group(1)
-
-        # Check if it's an enum reference
-        is_enum = drizzle_type in enums or any(
-            en_name in field_def for en_name in enums.keys()
-        )
-        choices = None
-        if is_enum:
-            for en_name, en_values in enums.items():
-                if en_name in field_def or en_name == drizzle_type:
-                    choices = en_values
-                    break
-
-        # Map type
-        django_field, kwargs = cls._map_drizzle_type(drizzle_type, field_def)
-
-        # Override for enum fields
-        if choices:
-            django_field = "CharField"
-            kwargs["max_length"] = max(len(c) for c in choices) + 10
-
-        # Parse chained constraints
-        is_pk = ".primaryKey()" in field_def or "primaryKey" in field_def
-        is_unique = ".unique()" in field_def
-        is_not_null = ".notNull()" in field_def or "NOT NULL" in field_def.upper()
-        is_nullable = not is_not_null and not is_pk
-
-        # Default value
-        default_val = None
-        default_match = re.search(r'\.default\s*\(\s*(.+?)\s*\)', field_def)
-        if default_match:
-            raw_default = default_match.group(1).strip()
-            default_val = cls._parse_drizzle_default(raw_default, django_field)
-
-        # Foreign key
-        is_fk = False
-        fk_table = None
-        fk_column = None
-        fk_on_delete = "CASCADE"
-
+    @classmethod
+    def _parse_drizzle_fk(
+        cls, field_def: str
+    ) -> Tuple[bool, Optional[str], Optional[str], str]:
+        """Extract FK (is_fk, fk_table, fk_column, on_delete) from a Drizzle field."""
         fk_match = re.search(
             r'\.references\s*\(\s*\(\)\s*=>\s*(\w+)\.(\w+)',
             field_def
         )
         if fk_match:
-            is_fk = True
-            fk_table_var = fk_match.group(1)
+            fk_table = _camel_to_snake(fk_match.group(1))
             fk_column = _camel_to_snake(fk_match.group(2))
-            # Convert JS variable to SQL table name
-            fk_table = _camel_to_snake(fk_table_var)
-            if fk_table.endswith("s") and not fk_table.endswith("ss"):
-                pass  # already plural
-            # Check ON DELETE
+            fk_on_delete = "CASCADE"
             if "onDelete" in field_def:
                 od_match = re.search(r'onDelete\s*:\s*["\'](\w+)["\']', field_def)
                 if od_match:
                     fk_on_delete = od_match.group(1).upper()
+            return True, fk_table, fk_column, fk_on_delete
+        # Arrow-notation: FK → table.column
+        fk_match2 = re.search(r'FK\s*→\s*(\w+)\.(\w+)', field_def)
+        if fk_match2:
+            return True, fk_match2.group(1), fk_match2.group(2), "CASCADE"
+        return False, None, None, "CASCADE"
 
-        # Also check FK pattern: FK → table.column
-        if not is_fk:
-            fk_match2 = re.search(
-                r'FK\s*→\s*(\w+)\.(\w+)', field_def
-            )
-            if fk_match2:
-                is_fk = True
-                fk_table = fk_match2.group(1)
-                fk_column = fk_match2.group(2)
+    @classmethod
+    def _parse_drizzle_field(cls, field_name: str, field_def: str,
+                              table_name: str,
+                              enums: Dict[str, List[str]]) -> Optional[ColumnDef]:
+        """Parse a single Drizzle field definition."""
+        snake_name = _camel_to_snake(field_name)
 
-        # Array detection
+        type_match = re.match(r'(\w+)\s*\(', field_def)
+        if not type_match:
+            return None
+
+        drizzle_type = type_match.group(1)
+        choices = cls._resolve_enum_choices(field_def, enums, drizzle_type)
+        django_field, kwargs = cls._map_drizzle_type(drizzle_type, field_def)
+
+        if choices:
+            django_field = "CharField"
+            kwargs["max_length"] = max(len(c) for c in choices) + 10
+
+        is_pk = ".primaryKey()" in field_def or "primaryKey" in field_def
+        is_unique = ".unique()" in field_def
+        is_not_null = ".notNull()" in field_def or "NOT NULL" in field_def.upper()
+        is_nullable = not is_not_null and not is_pk
+
+        default_val = None
+        default_match = re.search(r'\.default\s*\(\s*(.+?)\s*\)', field_def)
+        if default_match:
+            default_val = cls._parse_drizzle_default(default_match.group(1).strip(), django_field)
+
+        is_fk, fk_table, fk_column, fk_on_delete = cls._parse_drizzle_fk(field_def)
         is_array = "[]" in field_def or ".array()" in field_def
 
-        col = ColumnDef(
+        return ColumnDef(
             name=field_name,
             django_name=_sanitize_field_name(snake_name),
             source_type=drizzle_type,
@@ -819,8 +789,6 @@ class DrizzleSchemaParser:
             choices=choices,
             is_array=is_array,
         )
-
-        return col
 
     @classmethod
     def _map_drizzle_type(cls, drizzle_type: str, field_def: str) -> Tuple[str, Dict]:

@@ -1,7 +1,6 @@
 'use client';
 
 import Link from 'next/link';
-import TechStackBar from './TechStackBar';
 
 const footerLinks = {
   Company: [
@@ -17,20 +16,15 @@ const footerLinks = {
     { name: 'Resources', href: '/resources' },
   ],
   Legal: [
-    { name: 'Privacy Policy', href: '#' },
-    { name: 'Terms of Service', href: '#' },
-    { name: 'IP Governance', href: '#' },
+    { name: 'Privacy Policy', href: '/legal/privacy' },
+    { name: 'Terms of Service', href: '/legal/terms' },
+    { name: 'IP Governance', href: '/legal/ip-governance' },
   ],
 };
 
 export default function Footer() {
   return (
     <footer className="bg-navy text-gray-300">
-      {/* Tech Stack */}
-      <div className="border-b border-white/10 py-10">
-        <TechStackBar label="Powered By" />
-      </div>
-
       <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-16">
         <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-5 gap-12">
           {/* Brand */}
@@ -84,9 +78,13 @@ export default function Footer() {
           <p className="text-sm text-gray-500">
             &copy; {new Date().getFullYear()} Nzila Ventures. All rights reserved.
           </p>
-          <p className="text-sm text-gray-500">
-            Built with intentionality, ethics, and impact.
-          </p>
+          <div className="flex items-center gap-4 text-sm text-gray-500">
+            <Link href="/legal/privacy" className="hover:text-gray-300 transition-colors">Privacy</Link>
+            <span>·</span>
+            <Link href="/legal/terms" className="hover:text-gray-300 transition-colors">Terms</Link>
+            <span>·</span>
+            <Link href="/legal/ip-governance" className="hover:text-gray-300 transition-colors">IP Governance</Link>
+          </div>
         </div>
       </div>
     </footer>

@@ -11,9 +11,9 @@ from pathlib import Path
 from typing import Dict, List
 from collections import defaultdict
 
-OUTPUT_DIR = Path(r"D:\APPS\nzila-automation\packages\automation\data")
-UE_BACKEND = Path(r"D:\APPS\nzila-union-eyes\backend")
-UE_FRONTEND = Path(r"D:\APPS\nzila-union-eyes\frontend")
+OUTPUT_DIR = Path(r"C:\APPS\nzila-automation\packages\automation\data")
+UE_BACKEND = Path(r"C:\APPS\nzila-union-eyes\backend")
+UE_FRONTEND = Path(r"C:\APPS\nzila-union-eyes\frontend")
 
 
 class DjangoAPIGenerator:
@@ -478,12 +478,12 @@ Total services to migrate: {len(services)}
 
 ```bash
 # Copy generated ViewSets to Django backend
-cp data/django_api_views/*.py D:/APPS/nzila-union-eyes/backend/union_eyes/views/
+cp data/django_api_views/*.py C:/APPS/nzila-union-eyes/backend/union_eyes/views/
 ```
 
 #### 2. Update Django URLs
 
-Add to `D:/APPS/nzila-union-eyes/backend/union_eyes/urls.py`:
+Add to `C:/APPS/nzila-union-eyes/backend/union_eyes/urls.py`:
 
 ```python
 from django.urls import path, include
@@ -499,7 +499,7 @@ urlpatterns = [
 
 ```bash
 # Copy generated API clients to frontend
-cp data/typescript_api_clients/*.ts D:/APPS/nzila-union-eyes/frontend/lib/api/
+cp data/typescript_api_clients/*.ts C:/APPS/nzila-union-eyes/frontend/lib/api/
 ```
 
 #### 4. Update Service Files
@@ -542,7 +542,7 @@ export async function getSomething() {{
 After all services are migrated:
 
 ```bash
-cd D:/APPS/nzila-union-eyes/frontend
+cd C:/APPS/nzila-union-eyes/frontend
 pnpm remove drizzle-orm drizzle-zod
 pnpm remove --save-dev drizzle-kit
 ```
@@ -550,7 +550,7 @@ pnpm remove --save-dev drizzle-kit
 #### 6. Remove Database Configuration
 
 Delete or comment out:
-- `D:/APPS/nzila-union-eyes/frontend/db/` directory
+- `C:/APPS/nzila-union-eyes/frontend/db/` directory
 - `drizzle.config.ts`
 - Database connection in Next.js config
 
@@ -558,11 +558,11 @@ Delete or comment out:
 
 ```bash
 # Start Django backend
-cd D:/APPS/nzila-union-eyes/backend
+cd C:/APPS/nzila-union-eyes/backend
 python manage.py runserver
 
 # Start Next.js frontend
-cd D:/APPS/nzila-union-eyes/frontend
+cd C:/APPS/nzila-union-eyes/frontend
 pnpm dev
 
 # Run tests

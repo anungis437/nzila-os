@@ -9,7 +9,7 @@ from typing import Dict
 
 try:
     import sys
-    sys.path.insert(0, str(Path(__file__).parent.parent))
+    sys.path.insert(0, str(Path(__file__).parent.parent.parent))
     from logging_config import MigrationLogger
     logger = MigrationLogger.get_logger(__name__)
 except ImportError:
@@ -361,7 +361,7 @@ def main():
     
     # Repository paths
     repos = {
-        "ue": (Path("D:/APPS/nzila-union-eyes"), "Union Eyes"),
+        "ue": (Path("C:/APPS/nzila-union-eyes"), "Union Eyes"),
         "abr": (Path("D:/APPS/nzila-abr-insights"), "ABR Insights"),
     }
     

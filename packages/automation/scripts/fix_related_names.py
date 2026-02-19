@@ -68,7 +68,7 @@ def fix_fk_related_names(file_path: Path) -> Tuple[int, List[str]]:
 def main():
     # Platform configurations
     platforms = [
-        ("Union Eyes", "D:/APPS/nzila-union-eyes/backend", [
+        ("Union Eyes", "C:/APPS/nzila-union-eyes/backend", [
             "ai_core", "analytics", "bargaining", "billing", "compliance",
             "content", "core", "grievances", "notifications", "unions", "auth_core"
         ]),

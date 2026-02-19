@@ -18,12 +18,15 @@ WORKDIR /app
 COPY package.json pnpm-workspace.yaml pnpm-lock.yaml* ./
 COPY apps/web/package.json ./apps/web/
 COPY apps/console/package.json ./apps/console/
+COPY apps/partners/package.json ./apps/partners/
 COPY packages/ui/package.json ./packages/ui/
 COPY packages/config/package.json ./packages/config/
 COPY packages/scripts-book/package.json ./packages/scripts-book/
 COPY packages/db/package.json ./packages/db/
 COPY packages/os-core/package.json ./packages/os-core/
 COPY packages/blob/package.json ./packages/blob/
+COPY packages/payments-stripe/package.json ./packages/payments-stripe/
+COPY packages/tax/package.json ./packages/tax/
 
 # Override .npmrc — remove exFAT workarounds that are unnecessary on ext4
 RUN echo '' > .npmrc
@@ -111,6 +114,32 @@ EXPOSE 3001
 CMD ["node", "apps/console/server.js"]
 
 # ============================================
+# Partners production stage
+# ============================================
+FROM base AS partners
+WORKDIR /app
+
+ENV NODE_ENV=production
+ENV NEXT_TELEMETRY_DISABLED=1
+ENV PORT=3002
+
+# Copy necessary files
+COPY --from=builder /app/apps/partners/.next/standalone ./
+COPY --from=builder /app/apps/partners/.next/static ./apps/partners/.next/static
+COPY --from=builder /app/content ./content
+
+# Create non-root user
+RUN addgroup --system --gid 1001 nodejs && \
+    adduser --system --uid 1001 nextjs && \
+    chown -R nextjs:nodejs /app
+
+USER nextjs
+
+EXPOSE 3002
+
+CMD ["node", "apps/partners/server.js"]
+
+# ============================================
 # Dev stage - for development with hot reload
 # ============================================
 FROM base AS dev
@@ -120,12 +149,15 @@ WORKDIR /app
 COPY package.json pnpm-workspace.yaml pnpm-lock.yaml* ./
 COPY apps/web/package.json ./apps/web/
 COPY apps/console/package.json ./apps/console/
+COPY apps/partners/package.json ./apps/partners/
 COPY packages/ui/package.json ./packages/ui/
 COPY packages/config/package.json ./packages/config/
 COPY packages/scripts-book/package.json ./packages/scripts-book/
 COPY packages/db/package.json ./packages/db/
 COPY packages/os-core/package.json ./packages/os-core/
 COPY packages/blob/package.json ./packages/blob/
+COPY packages/payments-stripe/package.json ./packages/payments-stripe/
+COPY packages/tax/package.json ./packages/tax/
 
 # Override .npmrc — remove exFAT workarounds that are unnecessary on ext4
 RUN echo '' > .npmrc
@@ -136,6 +168,6 @@ RUN --mount=type=cache,id=pnpm,target=/pnpm/store pnpm install
 # Copy everything (volumes will override in docker-compose)
 COPY . .
 
-EXPOSE 3000 3001
+EXPOSE 3000 3001 3002
 
 CMD ["pnpm", "dev"]
