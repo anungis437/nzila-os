@@ -2,7 +2,16 @@
  * Unit tests for blob tool path builders.
  * These are pure functions — no I/O needed.
  */
-import { describe, it, expect } from 'vitest'
+import { describe, it, expect, vi } from 'vitest'
+
+// Mock @nzila/blob to avoid requiring Azure config at import time
+vi.mock('@nzila/blob', () => ({
+  uploadBuffer: vi.fn(),
+  downloadBuffer: vi.fn(),
+  generateSasUrl: vi.fn(),
+  computeSha256: vi.fn(),
+}))
+
 import { buildExportPath, buildEvidencePath, buildAttestationPath } from './blobTool'
 
 describe('buildExportPath', () => {

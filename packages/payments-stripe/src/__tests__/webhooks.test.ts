@@ -1,12 +1,11 @@
 import { describe, it, expect, vi, beforeEach } from 'vitest'
 
-// Mock getStripeClient and getStripeEnv before importing
+// Shared mock instance so tests can configure it reliably
+const mockConstructEvent = vi.fn()
+const mockStripeInstance = { webhooks: { constructEvent: mockConstructEvent } }
+
 vi.mock('../client', () => ({
-  getStripeClient: vi.fn(() => ({
-    webhooks: {
-      constructEvent: vi.fn(),
-    },
-  })),
+  getStripeClient: vi.fn(() => mockStripeInstance),
 }))
 
 vi.mock('../env', () => ({
@@ -20,7 +19,6 @@ vi.mock('../env', () => ({
 }))
 
 import { verifyWebhookSignature, WebhookSignatureError, extractEntityIdFromEvent } from '../webhooks'
-import { getStripeClient } from '../client'
 import type Stripe from 'stripe'
 
 describe('verifyWebhookSignature', () => {
@@ -36,10 +34,7 @@ describe('verifyWebhookSignature', () => {
       created: 1700000000,
     } as unknown as Stripe.Event
 
-    const mockStripe = getStripeClient() as unknown as {
-      webhooks: { constructEvent: ReturnType<typeof vi.fn> }
-    }
-    mockStripe.webhooks.constructEvent.mockReturnValue(mockEvent)
+    mockConstructEvent.mockReturnValue(mockEvent)
 
     const result = verifyWebhookSignature(Buffer.from('body'), 'sig_header')
     expect(result.signatureValid).toBe(true)
@@ -47,10 +42,7 @@ describe('verifyWebhookSignature', () => {
   })
 
   it('throws WebhookSignatureError on invalid signature', () => {
-    const mockStripe = getStripeClient() as unknown as {
-      webhooks: { constructEvent: ReturnType<typeof vi.fn> }
-    }
-    mockStripe.webhooks.constructEvent.mockImplementation(() => {
+    mockConstructEvent.mockImplementation(() => {
       throw new Error('Invalid signature')
     })
 

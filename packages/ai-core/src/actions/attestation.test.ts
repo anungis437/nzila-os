@@ -1,7 +1,22 @@
 /**
  * Unit tests for createActionAttestation (pure function, no DB/Blob).
  */
-import { describe, it, expect } from 'vitest'
+import { describe, it, expect, vi } from 'vitest'
+
+// Mock heavy dependencies so tests run without DATABASE_URL / Azure config
+vi.mock('@nzila/db', () => ({ db: {} }))
+vi.mock('@nzila/db/schema', () => ({ documents: {}, auditEvents: {} }))
+vi.mock('drizzle-orm', () => ({
+  eq: vi.fn(), desc: vi.fn(),
+}))
+vi.mock('@nzila/blob', () => ({
+  uploadBuffer: vi.fn(),
+  computeSha256: vi.fn(() => 'mock-sha256'),
+}))
+vi.mock('@nzila/tools-runtime', () => ({
+  buildAttestationPath: vi.fn(() => 'mock/attestation/path.json'),
+}))
+
 import { createActionAttestation } from './attestation'
 import type { AttestationInput } from './attestation'
 
