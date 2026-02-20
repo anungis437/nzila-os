@@ -57,6 +57,10 @@ describe('API Authorization Contract (INV-04)', () => {
       /withAuth\(/,
       /getAuth\(/,
       /currentUser\(\)/,
+      /requireEntityAccess\(/,
+      /verifyWebhookSignature\(/,
+      /authenticateUser\(/,
+      /requirePlatformRole\(/,
     ]
 
     const violations: string[] = []

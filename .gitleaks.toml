@@ -1,0 +1,80 @@
+# .gitleaks.toml — Gitleaks configuration for Nzila Automation monorepo
+# Extends the default ruleset with monorepo-specific tuning.
+# Docs: https://github.com/gitleaks/gitleaks
+
+title = "Nzila Automation Gitleaks Config"
+
+[extend]
+# Use the default gitleaks rules as base
+useDefault = true
+
+# ──────────────────────────────────────
+# Allowlist: paths and patterns that are
+# known safe (test fixtures, examples)
+# ──────────────────────────────────────
+[allowlist]
+description = "Global allowlist for Nzila monorepo"
+
+# Paths that contain placeholder/test values (not real secrets)
+paths = [
+  '''\.github/workflows/.*\.yml$''',   # CI files use placeholder env vars
+  '''\.env\.example$''',               # Example env files
+  '''\.env\.test$''',                  # Test env files
+  '''pnpm-lock\.yaml$''',             # Lock file hashes
+  '''.*\.snap$''',                     # Jest/Vitest snapshots
+  '''docs/.*\.md$''',                  # Documentation
+  '''content/.*\.md$''',               # Content files
+  '''governance/.*\.md$''',            # Governance docs
+]
+
+# Known placeholder patterns used in tests/CI
+regexes = [
+  '''sk_test_placeholder''',
+  '''pk_test_placeholder''',
+  '''postgresql://postgres:postgres@localhost''',
+  '''NEXT_PUBLIC_.*=pk_test_''',
+]
+
+# ──────────────────────────────────────
+# Custom rules for Nzila-specific secrets
+# ──────────────────────────────────────
+[[rules]]
+id = "nzila-clerk-secret-key"
+description = "Clerk secret key (production)"
+regex = '''sk_live_[A-Za-z0-9]{20,}'''
+tags = ["key", "clerk"]
+keywords = ["sk_live_"]
+
+[[rules]]
+id = "nzila-azure-keyvault-uri"
+description = "Azure Key Vault URI with embedded credentials"
+regex = '''https://[a-zA-Z0-9-]+\.vault\.azure\.net.*[?&]sig=[A-Za-z0-9%+/=]{20,}'''
+tags = ["key", "azure"]
+
+[[rules]]
+id = "nzila-stripe-secret-key"
+description = "Stripe secret key"
+regex = '''sk_live_[A-Za-z0-9]{20,}'''
+tags = ["key", "stripe"]
+keywords = ["sk_live_"]
+
+[[rules]]
+id = "nzila-stripe-webhook-secret"
+description = "Stripe webhook signing secret"
+regex = '''whsec_[A-Za-z0-9]{20,}'''
+tags = ["key", "stripe"]
+keywords = ["whsec_"]
+
+[[rules]]
+id = "nzila-database-url-with-password"
+description = "Database connection string with embedded password (not localhost)"
+regex = '''postgres(ql)?://[^:]+:[^@]+@(?!localhost)[^/]+/'''
+tags = ["database"]
+keywords = ["postgresql://", "postgres://"]
+
+[[rules]]
+id = "nzila-qbo-client-secret"
+description = "QuickBooks Online client secret"
+regex = '''QBO_CLIENT_SECRET\s*=\s*["\']?[A-Za-z0-9]{20,}'''
+tags = ["key", "quickbooks"]
+keywords = ["QBO_CLIENT_SECRET"]

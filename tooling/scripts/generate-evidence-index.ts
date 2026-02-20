@@ -8,7 +8,7 @@
  *   2. Collecting artifact files from disk
  *   3. Building an EvidencePackRequest using os-core types
  *   4. Delegating to processEvidencePack() (upload) or
- *      buildLocalEvidencePackIndex() (local-only, no DB/Blob)
+ *      the local index builder (local-only, no DB/Blob)
  *
  * !! DO NOT add schema building, type definitions, or DB/Blob pipeline
  *    logic here — add it to packages/os-core/src/evidence/ instead. !!
@@ -40,10 +40,10 @@ import type {
 // Types are imported from @nzila/os-core — no local type definitions.
 // See: packages/os-core/src/evidence/types.ts
 
-// Artifact and EvidencePackIndex interfaces removed — use os-core types.
+// Local type definitions removed — use os-core types exclusively.
 
 // ── File helpers (thin CLI layer only) ─────────────────────────────────────
-// computeSha256 removed — hashing is done inside os-core processEvidencePack().
+// Hashing is done inside os-core processEvidencePack().
 
 const MIME_MAP: Record<string, string> = {
   '.json': 'application/json',

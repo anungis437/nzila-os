@@ -1,12 +1,17 @@
 import { describe, it, expect, vi, beforeEach } from 'vitest'
 
-// Mock getStripeClient and getStripeEnv
+// Shared mock instance so tests can configure it reliably
+const mockCustomersCreate = vi.fn()
+const mockSessionsCreate = vi.fn()
+const mockRefundsCreate = vi.fn()
+const mockStripeInstance = {
+  customers: { create: mockCustomersCreate },
+  checkout: { sessions: { create: mockSessionsCreate } },
+  refunds: { create: mockRefundsCreate },
+}
+
 vi.mock('../client', () => ({
-  getStripeClient: vi.fn(() => ({
-    customers: { create: vi.fn() },
-    checkout: { sessions: { create: vi.fn() } },
-    refunds: { create: vi.fn() },
-  })),
+  getStripeClient: vi.fn(() => mockStripeInstance),
 }))
 
 vi.mock('../env', () => ({
@@ -25,7 +30,6 @@ import {
   executeRefund,
   requiresApproval,
 } from '../primitives'
-import { getStripeClient } from '../client'
 
 describe('requiresApproval', () => {
   it('returns true when amount >= threshold', () => {
@@ -45,10 +49,7 @@ describe('createCustomer', () => {
   })
 
   it('calls stripe.customers.create with correct params', async () => {
-    const mockStripe = getStripeClient() as unknown as {
-      customers: { create: ReturnType<typeof vi.fn> }
-    }
-    mockStripe.customers.create.mockResolvedValue({ id: 'cus_test' })
+    mockCustomersCreate.mockResolvedValue({ id: 'cus_test' })
 
     const result = await createCustomer({
       email: 'test@example.com',
@@ -56,7 +57,7 @@ describe('createCustomer', () => {
       entityId: 'entity_123',
     })
 
-    expect(mockStripe.customers.create).toHaveBeenCalledWith({
+    expect(mockCustomersCreate).toHaveBeenCalledWith({
       email: 'test@example.com',
       name: 'Test User',
       metadata: { entity_id: 'entity_123' },
@@ -65,10 +66,7 @@ describe('createCustomer', () => {
   })
 
   it('includes venture_id in metadata when provided', async () => {
-    const mockStripe = getStripeClient() as unknown as {
-      customers: { create: ReturnType<typeof vi.fn> }
-    }
-    mockStripe.customers.create.mockResolvedValue({ id: 'cus_test2' })
+    mockCustomersCreate.mockResolvedValue({ id: 'cus_test2' })
 
     await createCustomer({
       email: 'a@b.com',
@@ -77,7 +75,7 @@ describe('createCustomer', () => {
       ventureId: 'v1',
     })
 
-    expect(mockStripe.customers.create).toHaveBeenCalledWith({
+    expect(mockCustomersCreate).toHaveBeenCalledWith({
       email: 'a@b.com',
       name: 'Name',
       metadata: { entity_id: 'e1', venture_id: 'v1' },
@@ -91,10 +89,7 @@ describe('createCheckoutSession', () => {
   })
 
   it('creates session with price_data for ad-hoc items', async () => {
-    const mockStripe = getStripeClient() as unknown as {
-      checkout: { sessions: { create: ReturnType<typeof vi.fn> } }
-    }
-    mockStripe.checkout.sessions.create.mockResolvedValue({
+    mockSessionsCreate.mockResolvedValue({
       id: 'cs_test',
       url: 'https://checkout.stripe.com/session',
     })
@@ -106,7 +101,7 @@ describe('createCheckoutSession', () => {
       cancelUrl: 'https://example.com/cancel',
     })
 
-    expect(mockStripe.checkout.sessions.create).toHaveBeenCalledWith(
+    expect(mockSessionsCreate).toHaveBeenCalledWith(
       expect.objectContaining({
         mode: 'payment',
         success_url: 'https://example.com/success',
@@ -128,10 +123,7 @@ describe('createCheckoutSession', () => {
   })
 
   it('uses priceId when provided', async () => {
-    const mockStripe = getStripeClient() as unknown as {
-      checkout: { sessions: { create: ReturnType<typeof vi.fn> } }
-    }
-    mockStripe.checkout.sessions.create.mockResolvedValue({ id: 'cs_x' })
+    mockSessionsCreate.mockResolvedValue({ id: 'cs_x' })
 
     await createCheckoutSession({
       entityId: 'ent1',
@@ -140,7 +132,7 @@ describe('createCheckoutSession', () => {
       cancelUrl: 'https://x.com/no',
     })
 
-    const call = mockStripe.checkout.sessions.create.mock.calls[0][0]
+    const call = mockSessionsCreate.mock.calls[0][0]
     expect(call.line_items[0]).toEqual({ price: 'price_abc', quantity: 1 })
   })
 })
@@ -151,24 +143,18 @@ describe('executeRefund', () => {
   })
 
   it('calls stripe.refunds.create with payment_intent', async () => {
-    const mockStripe = getStripeClient() as unknown as {
-      refunds: { create: ReturnType<typeof vi.fn> }
-    }
-    mockStripe.refunds.create.mockResolvedValue({ id: 're_test' })
+    mockRefundsCreate.mockResolvedValue({ id: 're_test' })
 
     const result = await executeRefund({ paymentIntentId: 'pi_abc' })
 
-    expect(mockStripe.refunds.create).toHaveBeenCalledWith({
+    expect(mockRefundsCreate).toHaveBeenCalledWith({
       payment_intent: 'pi_abc',
     })
     expect(result.id).toBe('re_test')
   })
 
   it('includes optional amount and reason', async () => {
-    const mockStripe = getStripeClient() as unknown as {
-      refunds: { create: ReturnType<typeof vi.fn> }
-    }
-    mockStripe.refunds.create.mockResolvedValue({ id: 're_test2' })
+    mockRefundsCreate.mockResolvedValue({ id: 're_test2' })
 
     await executeRefund({
       paymentIntentId: 'pi_xyz',
@@ -176,7 +162,7 @@ describe('executeRefund', () => {
       reason: 'requested_by_customer',
     })
 
-    expect(mockStripe.refunds.create).toHaveBeenCalledWith({
+    expect(mockRefundsCreate).toHaveBeenCalledWith({
       payment_intent: 'pi_xyz',
       amount: 500,
       reason: 'requested_by_customer',

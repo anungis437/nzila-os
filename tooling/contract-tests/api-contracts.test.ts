@@ -86,8 +86,8 @@ describe('Evidence API Contracts', () => {
     expect(canonicalContent).toContain('processEvidencePack')
     expect(canonicalContent).toContain('buildLocalEvidencePackIndex')
 
-    // Tooling is a thin wrapper
-    expect(toolingContent).not.toContain('EvidencePackIndex')
+    // Tooling is a thin wrapper — must not define local types or import DB/Blob
+    expect(toolingContent).not.toMatch(/(?:interface|type)\s+EvidencePackIndex/)
     expect(toolingContent).not.toContain('computeSha256')
     expect(toolingContent).not.toContain('UploadContext')
     expect(toolingContent).not.toContain("from '@nzila/blob'")

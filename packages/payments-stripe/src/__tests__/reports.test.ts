@@ -1,4 +1,17 @@
-import { describe, it, expect } from 'vitest'
+import { describe, it, expect, vi } from 'vitest'
+
+// Mock DB and Blob to avoid requiring DATABASE_URL at import time
+vi.mock('@nzila/db', () => ({ db: {} }))
+vi.mock('@nzila/db/schema', () => ({}))
+vi.mock('@nzila/blob', () => ({ uploadBuffer: vi.fn() }))
+vi.mock('drizzle-orm', () => ({
+  eq: vi.fn(),
+  and: vi.fn(),
+  gte: vi.fn(),
+  lte: vi.fn(),
+  sql: vi.fn(),
+}))
+
 import { buildReportBlobPath } from '../reports'
 
 describe('buildReportBlobPath', () => {

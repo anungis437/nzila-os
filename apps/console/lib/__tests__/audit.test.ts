@@ -1,4 +1,12 @@
 import { describe, it, expect, vi, beforeEach, afterEach } from 'vitest'
+
+// Mock DB to avoid requiring DATABASE_URL at import time
+vi.mock('@nzila/db', () => ({ db: {} }))
+vi.mock('@nzila/db/schema', () => ({ auditEvents: {} }))
+vi.mock('drizzle-orm', () => ({
+  eq: vi.fn(), and: vi.fn(), desc: vi.fn(), sql: vi.fn(), asc: vi.fn(),
+}))
+
 import { auditLog } from '../audit'
 
 describe('auditLog', () => {
@@ -17,7 +25,7 @@ describe('auditLog', () => {
 
     expect(logSpy).toHaveBeenCalledOnce()
     expect(logSpy).toHaveBeenCalledWith(
-      '[AUDIT]',
+      '[AUDIT][LEGACY]',
       expect.stringContaining('"userId":"user-1"'),
     )
   })
