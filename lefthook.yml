@@ -1,0 +1,41 @@
+# lefthook.yml — Pre-commit guardrails for Nzila Automation monorepo
+# Docs: https://github.com/evilmartians/lefthook
+
+pre-commit:
+  parallel: true
+
+  commands:
+    gitleaks:
+      glob: "*.{ts,tsx,js,jsx,json,env,yml,yaml,md,sh,ps1,py}"
+      run: >
+        npx gitleaks@latest detect
+        --source .
+        --config .gitleaks.toml
+        --no-banner
+        --verbose
+        --staged
+      fail_text: |
+        🔒 Gitleaks detected potential secrets in staged files.
+        Review the output above and remove or rotate any exposed credentials.
+        See docs/hardening/secrets.md for guidance.
+
+    lint-staged:
+      glob: "*.{ts,tsx,js,jsx,mjs}"
+      run: pnpm lint --filter "...[HEAD]" --output-logs errors-only
+      fail_text: "Lint errors found. Run `pnpm lint` to see details."
+
+    typecheck-staged:
+      glob: "*.{ts,tsx}"
+      run: pnpm typecheck --filter "...[HEAD]" --output-logs errors-only
+      fail_text: "Type errors found. Run `pnpm typecheck` to see details."
+
+pre-push:
+  commands:
+    contract-tests:
+      run: >
+        npx vitest run
+        --config tooling/contract-tests/vitest.config.ts
+        --dir tooling/contract-tests
+      fail_text: |
+        Contract tests failed. Run `pnpm contract-tests` to see details.
+        Do not push code that violates repo invariants.
