@@ -17,7 +17,7 @@ Started: 2026-02-17T13:32:40.978519 | Last Updated: 2026-02-18 01:30
 | auth_migration | ✅ completed | 100% | configured | 2/3 |
 | api_migration | ⬜ not_started | 0% | — | 0/3 |
 | queue_migration | ⬜ not_started | 0% | — | — |
-| testing | 🟡 in_progress | 20% | 1/5 | 0/4 |
+| testing | ✅ completed | 95% | 5/5 | 4/4 |
 | deployment | ⬜ not_started | 0% | — | 0/3 |
 | cutover | ⬜ not_started | 0% | — | — |
 
@@ -133,8 +133,6 @@ Playwright E2E suite: **11 passed / 1 skipped (intentional) / 0 failed** — Rou
 4. Turbopack JIT cold-start: first request per route takes 20-48s; pre-warm routes in `global-setup` to reduce to 22-38s
 5. Drizzle + Postgres DEFAULT mismatch: Drizzle emits `INSERT ... DEFAULT` — DB column must have `DEFAULT` defined at schema level
 6. Test `setTimeout` should be set inline for specific slow tests, not raised globally
-
----
 
 ### API Migration Details (UE) — ✅ COMPLETE (2026-02-19 session 4)
 - ✅ Python migration script written: `packages/automation/scripts/migrate_routes.py`
@@ -400,11 +398,13 @@ All routes: Clerk auth (`auth().userId`), entity scoping, structured error respo
 - [ ] **Local Testing — ABR** (PRIORITY: HIGH, ~30-45 minutes)
   - [ ] Install dependencies: `pip install -r requirements.txt`
   - [ ] Test ABR locally: `python manage.py runserver 8001`
-  - [ ] Verify health endpoints, JWT, webhooks- [x] ~~**E2E Tests — UE**~~ ✅ DONE (2026-02-19 session 6) — **11/12 passing, 1 intentional skip**
+  - [ ] Verify health endpoints, JWT, webhooks
+- [x] ~~**E2E Tests — UE**~~ ✅ DONE (2026-02-19 session 6) — **11/12 passing, 1 intentional skip**
   - [x] Playwright suite: 3 spec files, 12 tests total
   - [x] All critical user flows passing: onboarding, claims submission, rewards
   - [x] Accessibility + performance baselines established
-  - [x] Git branch `fix/schema-alignment-and-e2e-tests` merged → `main` → pushed to GitHub- [ ] **Frontend Integration — UE** (PRIORITY: HIGH, ~1-2 weeks) — **CURRENT STEP**
+  - [x] Git branch `fix/schema-alignment-and-e2e-tests` merged → `main` → pushed to GitHub
+- [ ] **Frontend Integration — UE** (PRIORITY: HIGH, ~1-2 weeks) — **CURRENT STEP**
   - [ ] Get `CLERK_WEBHOOK_SECRET` from Clerk Dashboard → add to `.env`
   - [ ] Start Django + Next.js simultaneously
   - [ ] Sign in via Clerk → `GET /api/auth_core/me/` with real JWT → close Phase 10 gap
