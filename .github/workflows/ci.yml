@@ -14,7 +14,7 @@ jobs:
     runs-on: ubuntu-latest
     name: Lint & Typecheck
     steps:
-      - uses: actions/checkout@v4
+      - uses: actions/checkout@v6
 
       - name: Setup pnpm
         uses: pnpm/action-setup@v4
@@ -40,7 +40,7 @@ jobs:
     runs-on: ubuntu-latest
     name: Test
     steps:
-      - uses: actions/checkout@v4
+      - uses: actions/checkout@v6
 
       - name: Setup pnpm
         uses: pnpm/action-setup@v4
@@ -68,7 +68,7 @@ jobs:
     name: Build All
     needs: [lint-and-typecheck, test]
     steps:
-      - uses: actions/checkout@v4
+      - uses: actions/checkout@v6
 
       - name: Setup pnpm
         uses: pnpm/action-setup@v4
@@ -95,7 +95,7 @@ jobs:
     runs-on: ubuntu-latest
     name: ML Tooling Gates
     steps:
-      - uses: actions/checkout@v4
+      - uses: actions/checkout@v6
 
       - name: Setup Python
         uses: actions/setup-python@v5
@@ -152,7 +152,7 @@ jobs:
     name: Contract Tests (Architectural Invariants)
     needs: [lint-and-typecheck]
     steps:
-      - uses: actions/checkout@v4
+      - uses: actions/checkout@v6
 
       - uses: pnpm/action-setup@v4
         with:
@@ -174,7 +174,7 @@ jobs:
     runs-on: ubuntu-latest
     name: Ops Documentation Pack
     steps:
-      - uses: actions/checkout@v4
+      - uses: actions/checkout@v6
 
       - uses: pnpm/action-setup@v4
         with:
@@ -196,7 +196,7 @@ jobs:
     runs-on: ubuntu-latest
     name: Schema Drift Detection
     steps:
-      - uses: actions/checkout@v4
+      - uses: actions/checkout@v6
 
       - uses: pnpm/action-setup@v4
         with:
