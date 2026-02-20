@@ -2,6 +2,7 @@
 
 import { Card } from '@nzila/ui'
 import { Badge } from '@nzila/ui'
+import Link from 'next/link'
 import {
   Cog6ToothIcon,
   UserCircleIcon,
@@ -9,6 +10,7 @@ import {
   BellIcon,
   KeyIcon,
   BuildingOfficeIcon,
+  PuzzlePieceIcon,
 } from '@heroicons/react/24/outline'
 
 const sections = [
@@ -17,30 +19,42 @@ const sections = [
     description: 'Update your name, email, and avatar.',
     icon: UserCircleIcon,
     badge: null,
+    href: null,
   },
   {
     title: 'Security',
     description: 'Manage passwords, MFA, and active sessions.',
     icon: KeyIcon,
     badge: null,
+    href: null,
   },
   {
     title: 'Roles & Permissions',
     description: 'View your platform and entity-level roles.',
     icon: ShieldCheckIcon,
     badge: 'RBAC' as const,
+    href: null,
   },
   {
     title: 'Notifications',
     description: 'Configure email and in-app notification preferences.',
     icon: BellIcon,
     badge: null,
+    href: null,
   },
   {
     title: 'Organisation',
     description: 'Manage workspace-level settings and billing.',
     icon: BuildingOfficeIcon,
     badge: null,
+    href: null,
+  },
+  {
+    title: 'Integrations',
+    description: 'Connect QuickBooks Online, Stripe, Plaid, and more.',
+    icon: PuzzlePieceIcon,
+    badge: null,
+    href: '/settings/integrations',
   },
 ]
 
@@ -58,20 +72,27 @@ export default function SettingsPage() {
       </div>
 
       <div className="grid gap-4 md:grid-cols-2">
-        {sections.map((s) => (
-          <Card key={s.title} variant="bordered" className="hover:shadow-sm transition-all cursor-pointer">
-            <Card.Body className="flex items-start gap-4">
-              <s.icon className="h-6 w-6 text-gray-500 mt-0.5 shrink-0" />
-              <div className="flex-1 min-w-0">
-                <div className="flex items-center gap-2">
-                  <p className="font-medium text-gray-900">{s.title}</p>
-                  {s.badge && <Badge variant="info">{s.badge}</Badge>}
+        {sections.map((s) => {
+          const inner = (
+            <Card key={s.title} variant="bordered" className="hover:shadow-sm transition-all cursor-pointer h-full">
+              <Card.Body className="flex items-start gap-4">
+                <s.icon className="h-6 w-6 text-gray-500 mt-0.5 shrink-0" />
+                <div className="flex-1 min-w-0">
+                  <div className="flex items-center gap-2">
+                    <p className="font-medium text-gray-900">{s.title}</p>
+                    {s.badge && <Badge variant="info">{s.badge}</Badge>}
+                  </div>
+                  <p className="text-sm text-gray-500 mt-1">{s.description}</p>
                 </div>
-                <p className="text-sm text-gray-500 mt-1">{s.description}</p>
-              </div>
-            </Card.Body>
-          </Card>
-        ))}
+              </Card.Body>
+            </Card>
+          )
+          return s.href ? (
+            <Link key={s.title} href={s.href} className="block">{inner}</Link>
+          ) : (
+            <div key={s.title}>{inner}</div>
+          )
+        })}
       </div>
     </div>
   )

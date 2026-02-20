@@ -7,6 +7,8 @@ import {
   CogIcon,
   BookOpenIcon,
   BuildingOffice2Icon,
+  PuzzlePieceIcon,
+  Cog6ToothIcon,
 } from '@heroicons/react/24/outline'
 
 const navItems = [
@@ -16,6 +18,8 @@ const navItems = [
   { name: 'Analytics', href: '/analytics', icon: ChartBarIcon },
   { name: 'Automation', href: '/automation', icon: CogIcon },
   { name: 'Standards', href: '/standards', icon: BookOpenIcon },
+  { name: 'Integrations', href: '/settings/integrations', icon: PuzzlePieceIcon },
+  { name: 'Settings', href: '/settings', icon: Cog6ToothIcon },
 ]
 
 export default function ConsoleLayout({ children }: { children: React.ReactNode }) {
