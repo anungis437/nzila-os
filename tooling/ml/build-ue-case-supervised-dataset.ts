@@ -41,8 +41,9 @@
  *   attachment_count int         — number of attachments
  */
 import { parseArgs } from 'node:util'
-import { sql } from 'drizzle-orm'
+import { eq, and, gte, lte } from 'drizzle-orm'
 import { db } from '@nzila/db'
+import { ueCases } from '@nzila/db/schema'
 import {
   buildUECaseFeatures,
   toCsv,
@@ -85,60 +86,48 @@ async function fetchRawCases(
   periodStart: string,
   periodEnd: string,
 ): Promise<RawUECase[]> {
-  // Raw SQL query against the ue_cases table.
-  // Adjust column names if the actual schema differs.
-  const rows = await db.execute<{
-    case_id: string
-    entity_id: string
-    created_at: string
-    updated_at: string | null
-    category: string | null
-    channel: string | null
-    status: string | null
-    assigned_queue: string | null
-    priority: string | null
-    sla_breached: boolean | null
-    reopen_count: number | null
-    message_count: number | null
-    attachment_count: number | null
-  }>(
-    sql`
-      SELECT
-        id                AS case_id,
-        entity_id,
-        created_at,
-        updated_at,
-        category,
-        channel,
-        status,
-        assigned_queue,
-        priority,
-        sla_breached,
-        COALESCE(reopen_count, 0)      AS reopen_count,
-        COALESCE(message_count, 0)     AS message_count,
-        COALESCE(attachment_count, 0)  AS attachment_count
-      FROM ue_cases
-      WHERE entity_id = ${entityId}
-        AND created_at >= ${periodStart + 'T00:00:00Z'}::timestamptz
-        AND created_at <= ${periodEnd + 'T23:59:59Z'}::timestamptz
-      ORDER BY created_at ASC
-    `,
-  )
+  // Use Drizzle ORM against the canonical ueCases schema so column names are
+  // enforced at compile time — no silent runtime failures from schema drift.
+  const rows = await db
+    .select({
+      caseId: ueCases.id,
+      entityId: ueCases.entityId,
+      createdAt: ueCases.createdAt,
+      updatedAt: ueCases.updatedAt,
+      category: ueCases.category,
+      channel: ueCases.channel,
+      currentStatus: ueCases.status,
+      assignedQueue: ueCases.assignedQueue,
+      priority: ueCases.priority,
+      slaBreached: ueCases.slaBreached,
+      reopenCount: ueCases.reopenCount,
+      messageCount: ueCases.messageCount,
+      attachmentCount: ueCases.attachmentCount,
+    })
+    .from(ueCases)
+    .where(
+      and(
+        eq(ueCases.entityId, entityId),
+        gte(ueCases.createdAt, new Date(periodStart + 'T00:00:00Z')),
+        lte(ueCases.createdAt, new Date(periodEnd + 'T23:59:59Z')),
+      ),
+    )
+    .orderBy(ueCases.createdAt)
 
   return rows.map((r) => ({
-    caseId: r.case_id,
-    entityId: r.entity_id,
-    createdAt: new Date(r.created_at),
-    updatedAt: r.updated_at ? new Date(r.updated_at) : null,
+    caseId: r.caseId,
+    entityId: r.entityId,
+    createdAt: r.createdAt,
+    updatedAt: r.updatedAt,
     category: r.category,
     channel: r.channel,
-    currentStatus: r.status,
-    assignedQueue: r.assigned_queue,
+    currentStatus: r.currentStatus,
+    assignedQueue: r.assignedQueue,
     priority: r.priority,
-    slaBreached: r.sla_breached,
-    reopenCount: r.reopen_count,
-    messageCount: r.message_count,
-    attachmentCount: r.attachment_count,
+    slaBreached: r.slaBreached,
+    reopenCount: r.reopenCount ?? 0,
+    messageCount: r.messageCount ?? 0,
+    attachmentCount: r.attachmentCount ?? 0,
   }))
 }
 
