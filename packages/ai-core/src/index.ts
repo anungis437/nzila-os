@@ -35,6 +35,24 @@ export type {
 
 export { AiControlPlaneError } from './types'
 
+// Errors (standard taxonomy)
+export {
+  profileNotFound,
+  profileDisabled,
+  featureNotAllowed,
+  modalityNotAllowed,
+  dataClassNotAllowed,
+  streamingNotAllowed,
+  budgetExceeded,
+  policyDenied,
+  schemaInvalid,
+  providerError,
+  rateLimited,
+  isRetryable,
+  isPolicyError,
+  toErrorResponse,
+} from './errors'
+
 // Gateway (main entry point for requests)
 export {
   generate,
@@ -42,6 +60,7 @@ export {
   chatStream,
   embed,
   resolveProfile,
+  resolveDeployment,
   resolvePrompt,
   checkBudget,
   recordSpend,
@@ -50,6 +69,7 @@ export {
   appendAiAuditEvent,
   redactText,
 } from './gateway'
+export type { ResolvedDeployment } from './gateway'
 
 // Prompts
 export { listPromptVersions, activatePromptVersion } from './prompts'

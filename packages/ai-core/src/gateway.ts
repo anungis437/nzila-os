@@ -5,7 +5,7 @@
  * applies redaction, checks budgets, calls provider, logs everything.
  */
 import { db } from '@nzila/db'
-import { aiCapabilityProfiles } from '@nzila/db/schema'
+import { aiCapabilityProfiles, aiDeploymentRoutes, aiDeployments, aiModels } from '@nzila/db/schema'
 import { eq, and } from 'drizzle-orm'
 import { getAiEnv } from '@nzila/os-core/ai-env'
 import { createAzureOpenAIProvider } from './providers/azure-openai'
@@ -24,6 +24,7 @@ import type {
   AiProviderClient,
   AiControlPlaneError,
   AiFeature,
+  AiProvider,
   DataClass,
   RedactionMode,
 } from './types'
@@ -101,14 +102,78 @@ export async function resolveProfile(opts: {
   }
 }
 
+// ── Deployment route resolution (DB-backed model registry) ─────────────────
+
+export interface ResolvedDeployment {
+  deploymentName: string
+  modelFamily: string
+  modality: 'text' | 'embeddings'
+  provider: AiProvider
+  maxTokens: number
+  defaultTemperature: number
+  costProfile: { costPerKIn?: number; costPerKOut?: number }
+}
+
+/**
+ * Resolve deployment via aiDeploymentRoutes → aiDeployments → aiModels.
+ * Falls back to env vars if no route is configured (backward-compatible).
+ */
+export async function resolveDeployment(opts: {
+  entityId: string
+  appKey: string
+  profileKey: string
+  feature: 'chat' | 'generate' | 'embed' | 'rag' | 'extract'
+}): Promise<ResolvedDeployment | null> {
+  const environment = (process.env.NODE_ENV === 'production' ? 'prod' : 'dev') as 'dev' | 'staging' | 'prod'
+
+  const [route] = await db
+    .select({
+      deploymentName: aiDeployments.deploymentName,
+      maxTokens: aiDeployments.maxTokens,
+      defaultTemperature: aiDeployments.defaultTemperature,
+      costProfile: aiDeployments.costProfile,
+      enabled: aiDeployments.enabled,
+      modelFamily: aiModels.family,
+      modality: aiModels.modality,
+      provider: aiModels.provider,
+    })
+    .from(aiDeploymentRoutes)
+    .innerJoin(aiDeployments, eq(aiDeploymentRoutes.deploymentId, aiDeployments.id))
+    .innerJoin(aiModels, eq(aiDeployments.modelId, aiModels.id))
+    .where(
+      and(
+        eq(aiDeploymentRoutes.entityId, opts.entityId),
+        eq(aiDeploymentRoutes.appKey, opts.appKey),
+        eq(aiDeploymentRoutes.profileKey, opts.profileKey),
+        eq(aiDeploymentRoutes.feature, opts.feature),
+        eq(aiDeployments.environment, environment),
+        eq(aiDeployments.enabled, true),
+      ),
+    )
+    .limit(1)
+
+  if (!route) return null
+
+  return {
+    deploymentName: route.deploymentName,
+    modelFamily: route.modelFamily,
+    modality: route.modality,
+    provider: route.provider as AiProvider,
+    maxTokens: route.maxTokens,
+    defaultTemperature: Number(route.defaultTemperature),
+    costProfile: (route.costProfile ?? {}) as ResolvedDeployment['costProfile'],
+  }
+}
+
 // ── Policy enforcement ──────────────────────────────────────────────────────
 
 function enforcePolicy(
   profile: ResolvedCapabilityProfile,
   feature: AiFeature,
   dataClass: DataClass,
-  streaming = false,
+  opts?: { streaming?: boolean; requiredModality?: 'text' | 'embeddings' },
 ): void {
+  // 1. Feature check
   if (!profile.features.includes(feature)) {
     throw new AiError(
       'feature_not_allowed',
@@ -117,6 +182,16 @@ function enforcePolicy(
     )
   }
 
+  // 2. Modality check
+  if (opts?.requiredModality && !profile.modalities.includes(opts.requiredModality)) {
+    throw new AiError(
+      'modality_not_allowed',
+      `Modality "${opts.requiredModality}" not allowed for profile ${profile.profileKey}`,
+      403,
+    )
+  }
+
+  // 3. Data class check
   if (!profile.dataClassesAllowed.includes(dataClass)) {
     throw new AiError(
       'data_class_not_allowed',
@@ -125,13 +200,33 @@ function enforcePolicy(
     )
   }
 
-  if (streaming && !profile.streamingAllowed) {
+  // 4. Streaming check
+  if (opts?.streaming && !profile.streamingAllowed) {
     throw new AiError(
       'streaming_not_allowed',
       `Streaming not allowed for profile ${profile.profileKey}`,
       403,
     )
   }
+
+  // 5. Tool permissions check (for actions_propose feature)
+  if (feature === 'actions_propose' && profile.toolPermissions.length === 0) {
+    throw new AiError(
+      'policy_denied',
+      `No tool permissions configured for profile ${profile.profileKey} — actions blocked`,
+      403,
+    )
+  }
+}
+
+/**
+ * Resolve per-feature maxTokens override from profile budgets.
+ * Profile budgets JSON may contain: { perFeatureMaxTokens: { "generate": 2000, "chat": 4000 } }
+ */
+function getFeatureMaxTokens(profile: ResolvedCapabilityProfile, feature: AiFeature): number | undefined {
+  const budgets = profile.budgets as Record<string, unknown>
+  const perFeature = budgets?.perFeatureMaxTokens as Record<string, number> | undefined
+  return perFeature?.[feature]
 }
 
 // ── Generate (non-stream) ───────────────────────────────────────────────────
@@ -140,8 +235,8 @@ export async function generate(req: AiGenerateRequest): Promise<AiGenerateRespon
   const env = getAiEnv()
   const profile = await resolveProfile(req)
 
-  // 1. Policy check
-  enforcePolicy(profile, 'generate', req.dataClass)
+  // 1. Policy check (enforce text modality for generate)
+  enforcePolicy(profile, 'generate', req.dataClass, { requiredModality: 'text' })
 
   // 2. Budget check
   await checkBudget({
@@ -184,15 +279,23 @@ export async function generate(req: AiGenerateRequest): Promise<AiGenerateRespon
   })
   messages = redactionResult
 
-  // 5. Select provider + model
-  const providerKey = profile.allowedProviders[0] ?? env.AI_DEFAULT_PROVIDER
+  // 5. Select provider + model via deployment route (DB-backed registry)
+  const deployment = await resolveDeployment({
+    entityId: req.entityId,
+    appKey: req.appKey,
+    profileKey: req.profileKey,
+    feature: 'generate',
+  })
+
+  const providerKey = deployment?.provider ?? profile.allowedProviders[0] ?? env.AI_DEFAULT_PROVIDER
   const provider = getProvider(providerKey)
-  const model = profile.allowedModels[0] ?? env.AZURE_OPENAI_DEPLOYMENT_TEXT
+  const model = deployment?.deploymentName ?? profile.allowedModels[0] ?? env.AZURE_OPENAI_DEPLOYMENT_TEXT
 
   const temperature = profile.determinismRequired
     ? 0
-    : req.params?.temperature ?? env.AI_TEMPERATURE_DEFAULT
-  const maxTokens = req.params?.maxTokens ?? env.AI_MAX_TOKENS_DEFAULT
+    : req.params?.temperature ?? deployment?.defaultTemperature ?? env.AI_TEMPERATURE_DEFAULT
+  const featureMaxTokens = getFeatureMaxTokens(profile, 'generate')
+  const maxTokens = featureMaxTokens ?? req.params?.maxTokens ?? deployment?.maxTokens ?? env.AI_MAX_TOKENS_DEFAULT
 
   // 6. Call provider
   const startTime = Date.now()
@@ -257,7 +360,7 @@ export async function generate(req: AiGenerateRequest): Promise<AiGenerateRespon
 export async function chat(req: AiGenerateRequest): Promise<AiGenerateResponse> {
   // Same as generate but enforces 'chat' feature
   const profile = await resolveProfile(req)
-  enforcePolicy(profile, 'chat', req.dataClass)
+  enforcePolicy(profile, 'chat', req.dataClass, { requiredModality: 'text' })
 
   // Delegate to generate logic with 'chat' feature
   return generate({ ...req })
@@ -271,7 +374,7 @@ export async function* chatStream(
   const env = getAiEnv()
   const profile = await resolveProfile(req)
 
-  enforcePolicy(profile, 'chat', req.dataClass, true)
+  enforcePolicy(profile, 'chat', req.dataClass, { streaming: true, requiredModality: 'text' })
   await checkBudget({ entityId: req.entityId, appKey: req.appKey, profileKey: req.profileKey })
 
   // Build messages
@@ -306,13 +409,21 @@ export async function* chatStream(
     return { ...m, content: r.text }
   })
 
-  const providerKey = profile.allowedProviders[0] ?? env.AI_DEFAULT_PROVIDER
+  const chatDeployment = await resolveDeployment({
+    entityId: req.entityId,
+    appKey: req.appKey,
+    profileKey: req.profileKey,
+    feature: 'chat',
+  })
+
+  const providerKey = chatDeployment?.provider ?? profile.allowedProviders[0] ?? env.AI_DEFAULT_PROVIDER
   const provider = getProvider(providerKey)
-  const model = profile.allowedModels[0] ?? env.AZURE_OPENAI_DEPLOYMENT_TEXT
+  const model = chatDeployment?.deploymentName ?? profile.allowedModels[0] ?? env.AZURE_OPENAI_DEPLOYMENT_TEXT
   const temperature = profile.determinismRequired
     ? 0
-    : req.params?.temperature ?? env.AI_TEMPERATURE_DEFAULT
-  const maxTokens = req.params?.maxTokens ?? env.AI_MAX_TOKENS_DEFAULT
+    : req.params?.temperature ?? chatDeployment?.defaultTemperature ?? env.AI_TEMPERATURE_DEFAULT
+  const chatFeatureMaxTokens = getFeatureMaxTokens(profile, 'chat')
+  const maxTokens = chatFeatureMaxTokens ?? req.params?.maxTokens ?? chatDeployment?.maxTokens ?? env.AI_MAX_TOKENS_DEFAULT
 
   const startTime = Date.now()
   let fullContent = ''
@@ -381,12 +492,19 @@ export async function embed(req: AiEmbedRequest): Promise<AiEmbedResponse> {
     throw new AiError('modality_not_allowed', 'Embeddings modality not allowed for this profile', 403)
   }
 
-  enforcePolicy(profile, 'embed', req.dataClass)
+  enforcePolicy(profile, 'embed', req.dataClass, { requiredModality: 'embeddings' })
   await checkBudget({ entityId: req.entityId, appKey: req.appKey, profileKey: req.profileKey })
 
-  const providerKey = profile.allowedProviders[0] ?? env.AI_DEFAULT_PROVIDER
+  const embedDeployment = await resolveDeployment({
+    entityId: req.entityId,
+    appKey: req.appKey,
+    profileKey: req.profileKey,
+    feature: 'embed',
+  })
+
+  const providerKey = embedDeployment?.provider ?? profile.allowedProviders[0] ?? env.AI_DEFAULT_PROVIDER
   const provider = getProvider(providerKey)
-  const model = env.AZURE_OPENAI_DEPLOYMENT_EMBEDDINGS
+  const model = embedDeployment?.deploymentName ?? env.AZURE_OPENAI_DEPLOYMENT_EMBEDDINGS
 
   const input = typeof req.input === 'string' ? [req.input] : req.input
 

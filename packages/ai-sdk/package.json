@@ -8,7 +8,8 @@
     ".": "./src/index.ts",
     "./client": "./src/client.ts",
     "./streaming": "./src/streaming.ts",
-    "./types": "./src/types.ts"
+    "./types": "./src/types.ts",
+    "./eslint-no-shadow-ai": "./eslint-no-shadow-ai.mjs"
   },
   "scripts": {
     "typecheck": "tsc --noEmit",

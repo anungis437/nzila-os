@@ -12,11 +12,13 @@ import {
   aiKnowledgeIngestionRuns,
   documents,
 } from '@nzila/db/schema'
-import { eq, and } from 'drizzle-orm'
+import { eq, and, inArray } from 'drizzle-orm'
 import { embed } from '@nzila/ai-core/gateway'
+import { appendAiAuditEvent } from '@nzila/ai-core/gateway'
 import { uploadWithLogging, downloadWithLogging } from './blobTool'
 import { createToolCallEntry, type ToolCallEntry } from './sanitize'
 import type { AiIngestKnowledgeSourceProposal } from '@nzila/ai-core/schemas'
+import { createHash } from 'node:crypto'
 
 // ── Deterministic chunker ───────────────────────────────────────────────────
 
@@ -28,6 +30,7 @@ export interface TextChunk {
 
 /**
  * Split text into overlapping chunks deterministically.
+ * Chunk IDs are hash-based: sha256(sourceId + chunkIndex) for determinism.
  * Same input + same params = same chunks every time.
  */
 export function chunkText(
@@ -35,6 +38,7 @@ export function chunkText(
   chunkSize: number,
   chunkOverlap: number,
   maxChunks: number,
+  sourceId?: string,
 ): TextChunk[] {
   const chunks: TextChunk[] = []
   let start = 0
@@ -44,9 +48,14 @@ export function chunkText(
     const end = Math.min(start + chunkSize, text.length)
     const chunkStr = text.slice(start, end)
 
+    // Deterministic chunk ID: hash of sourceId + chunkIndex
+    const chunkId = sourceId
+      ? createHash('sha256').update(`${sourceId}::${index}`).digest('hex').slice(0, 32)
+      : `chunk-${index.toString().padStart(6, '0')}`
+
     chunks.push({
       chunkIndex: index,
-      chunkId: `chunk-${index.toString().padStart(6, '0')}`,
+      chunkId,
       text: chunkStr,
     })
 
@@ -216,13 +225,14 @@ export async function ingestKnowledgeSource(
     const { text: sourceText, toolCall: resolveToolCall } = await resolveSourceText(proposal)
     toolCalls.push(resolveToolCall)
 
-    // 4. Chunk text
+    // 4. Chunk text (deterministic hash-based chunk IDs)
     const chunkStartedAt = new Date()
     const chunks = chunkText(
       sourceText,
       ingestion.chunkSize,
       ingestion.chunkOverlap,
       ingestion.maxChunks,
+      sourceId, // pass sourceId for deterministic hash-based chunk IDs
     )
     const chunkFinishedAt = new Date()
 
@@ -241,18 +251,36 @@ export async function ingestKnowledgeSource(
       }),
     )
 
+    // 5. Dedup: find existing chunk IDs to avoid re-inserting
+    const allChunkIds = chunks.map((c) => c.chunkId)
+    const existingChunks = allChunkIds.length > 0
+      ? await db
+          .select({ chunkId: aiEmbeddings.chunkId })
+          .from(aiEmbeddings)
+          .where(
+            and(
+              eq(aiEmbeddings.sourceId, sourceId),
+              inArray(aiEmbeddings.chunkId, allChunkIds),
+            ),
+          )
+      : []
+
+    const existingChunkIds = new Set(existingChunks.map((c) => c.chunkId))
+    const newChunks = chunks.filter((c) => !existingChunkIds.has(c.chunkId))
+    const skippedCount = chunks.length - newChunks.length
+
     // Update status to chunked
     await db
       .update(aiKnowledgeIngestionRuns)
       .set({ status: 'chunked', updatedAt: new Date() })
       .where(eq(aiKnowledgeIngestionRuns.id, ingestionRun.id))
 
-    // 5. Embed chunks in batches
+    // 6. Embed new chunks only (dedup: skip already-ingested)
     const embedStartedAt = new Date()
     let totalEmbeddings = 0
 
-    for (let i = 0; i < chunks.length; i += ingestion.embeddingBatchSize) {
-      const batch = chunks.slice(i, i + ingestion.embeddingBatchSize)
+    for (let i = 0; i < newChunks.length; i += ingestion.embeddingBatchSize) {
+      const batch = newChunks.slice(i, i + ingestion.embeddingBatchSize)
       const batchTexts = batch.map((c) => c.text)
 
       const embedResult = await embed({
@@ -293,8 +321,8 @@ export async function ingestKnowledgeSource(
         toolName: 'knowledgeTool.embedChunks',
         startedAt: embedStartedAt,
         finishedAt: embedFinishedAt,
-        inputs: { chunkCount: chunks.length, batchSize: ingestion.embeddingBatchSize },
-        outputs: { embeddingCount: totalEmbeddings },
+        inputs: { chunkCount: chunks.length, newChunks: newChunks.length, batchSize: ingestion.embeddingBatchSize },
+        outputs: { embeddingCount: totalEmbeddings, skippedDuplicates: skippedCount },
         status: 'success',
       }),
     )
@@ -320,6 +348,8 @@ export async function ingestKnowledgeSource(
       metrics: {
         textLength: sourceText.length,
         chunkCount: chunks.length,
+        newChunksIngested: newChunks.length,
+        skippedDuplicates: skippedCount,
         chunkSize: ingestion.chunkSize,
         chunkOverlap: ingestion.chunkOverlap,
         embeddingCount: totalEmbeddings,
@@ -335,6 +365,7 @@ export async function ingestKnowledgeSource(
     }
 
     const reportBuffer = Buffer.from(JSON.stringify(report, null, 2), 'utf-8')
+    const reportSha256 = createHash('sha256').update(reportBuffer).digest('hex')
     const reportBlobPath = `exports/${entityId}/ai/ingestion/${sourceId}/${ingestionRun.id}/report.json`
 
     const uploadResult = await uploadWithLogging({
@@ -372,6 +403,25 @@ export async function ingestKnowledgeSource(
         updatedAt: new Date(),
       })
       .where(eq(aiKnowledgeIngestionRuns.id, ingestionRun.id))
+
+    // 9. Write audit event for ingestion
+    await appendAiAuditEvent({
+      entityId,
+      actorClerkUserId,
+      action: 'ai.knowledge_ingested',
+      targetType: 'ai_knowledge_source',
+      targetId: sourceId,
+      afterJson: {
+        sourceId,
+        ingestionRunId: ingestionRun.id,
+        chunkCount: chunks.length,
+        newChunksIngested: newChunks.length,
+        skippedDuplicates: skippedCount,
+        embeddingCount: totalEmbeddings,
+        reportDocumentId: reportDoc.id,
+        reportSha256,
+      },
+    })
 
     return {
       sourceId,

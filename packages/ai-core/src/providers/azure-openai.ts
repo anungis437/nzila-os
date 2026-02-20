@@ -1,6 +1,15 @@
 /**
  * @nzila/ai-core — Azure OpenAI provider
  *
+ * ╔══════════════════════════════════════════════════════════════╗
+ * ║  DO NOT IMPORT IN APPS                                      ║
+ * ║                                                              ║
+ * ║  This module is an internal provider implementation.         ║
+ * ║  All apps MUST use @nzila/ai-sdk for AI capabilities.       ║
+ * ║  Direct provider usage bypasses governance, budgets,         ║
+ * ║  redaction, auditing, and policy enforcement.                ║
+ * ╚══════════════════════════════════════════════════════════════╝
+ *
  * Calls Azure OpenAI REST API directly (no external SDK dep).
  * Supports chat completions and embeddings.
  */

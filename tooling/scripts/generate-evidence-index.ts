@@ -225,6 +225,8 @@ async function main(): Promise<void> {
       artifacts: { type: 'string', multiple: true },
       out: { type: 'string' },
       upload: { type: 'boolean', default: false },
+      'include-ai-actions': { type: 'boolean', default: false },
+      'ai-period': { type: 'string' },
       help: { type: 'boolean', default: false },
     },
     allowPositionals: true,
@@ -253,6 +255,8 @@ Optional:
   --controls         Comma-separated control IDs (e.g., IR-01,IR-02)
   --out              Output file path (default: stdout)
   --upload           Upload artifacts to Azure Blob + create DB rows (requires DATABASE_URL, AZURE_STORAGE_*)
+  --include-ai-actions  Include AI Actions Appendix in the evidence pack
+  --ai-period        Period label for AI actions (e.g., 2026-02). Defaults to current YYYY-MM.
   --help             Show this help
 `)
     process.exit(0)
@@ -356,6 +360,39 @@ Optional:
       verified_at: now,
       verified_by: 'generate-evidence-index.ts',
     },
+  }
+
+  // ── AI Actions Appendix ─────────────────────────────────────────────────
+  const includeAiActions = values['include-ai-actions'] as boolean
+  if (includeAiActions) {
+    const aiPeriod = (values['ai-period'] as string) ?? new Date().toISOString().slice(0, 7)
+    console.error(`⬡ Collecting AI Actions evidence for period ${aiPeriod}...`)
+
+    const { collectAiActionEvidence } = await import('@nzila/ai-core')
+    const appendix = await collectAiActionEvidence(entityId, aiPeriod)
+
+    ;(index as Record<string, unknown>).ai_actions_appendix = {
+      period_label: appendix.periodLabel,
+      collected_at: appendix.collectedAt,
+      summary: appendix.summary,
+      actions: appendix.actions.map((a) => ({
+        action_id: a.actionId,
+        action_type: a.actionType,
+        run_id: a.runId,
+        risk_tier: a.riskTier,
+        status: a.status,
+        attestation_document_id: a.attestationDocumentId,
+        related_documents: a.relatedDocuments.map((d) => ({
+          document_id: d.documentId,
+          category: d.category,
+          title: d.title,
+          sha256: d.sha256,
+          blob_path: `${d.blobContainer}/${d.blobPath}`,
+        })),
+      })),
+    }
+
+    console.error(`  ✔ ${appendix.summary.totalActions} actions, ${appendix.summary.attestationCount} attestations, ${appendix.summary.documentCount} documents`)
   }
 
   // ── Upload mode ───────────────────────────────────────────────────────

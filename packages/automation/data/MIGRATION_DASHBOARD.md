@@ -1,5 +1,5 @@
 # Migration Progress Dashboard
-*Generated: 2026-02-17 18:51 | Updated: 2026-02-19 (session 3 — API migration)*
+*Generated: 2026-02-17 18:51 | Updated: 2026-02-19 (session 5 — Phase C AI Engine)*
 
 ## ABR Insights
 **Overall Progress: 72%**
@@ -223,6 +223,86 @@ Started: 2026-02-17T13:32:40.994605 | Last Updated: 2026-02-19 (session 4)
 - ✅ URL-encoded password parsing via `unquote()`
 - ✅ **Total migrated: 364 tables, 6,981 rows across both platforms**
 - ✅ **Validation: 100% row count match on all 364 tables**
+
+## Phase C — AI Engine (nzila-automation) ✅ COMPLETE (2026-02-19 session 5)
+
+### Overview
+Full AI Action Control Plane built across `packages/`, `apps/console/`, and new `packages/tools-runtime`. All TypeScript errors resolved, branch merged with main and pushed.
+
+### Packages Built
+
+#### `packages/tools-runtime` (NEW — ~800 lines)
+| Module | Description |
+|--------|-------------|
+| `sanitize.ts` | Deep-redact sensitive keys (`password`, `apiKey`, `token`, `secret`, `connectionString`); SHA-256 hash of sanitized payload |
+| `chunker.ts` | Sliding-window text chunker (`chunkSize`, `chunkOverlap`) |
+| `blobTool.ts` | Azure Blob upload/download with content-type inference |
+| `knowledgeTool.ts` | End-to-end knowledge ingestion: chunk → embed → upsert to `aiEmbeddings` + `aiKnowledgeSources` |
+| `stripeTool.ts` | Stripe MRR/revenue report generation, stores to `stripeReports`, returns structured output |
+| `index.ts` | Barrel export |
+
+#### `packages/ai-core` additions (~600 lines new)
+| Module | Description |
+|--------|-------------|
+| `src/schemas.ts` | Zod proposal schemas: `FinanceStripeMonthlyReportsProposal`, `AiIngestKnowledgeSourceProposal`, `ACTION_TYPES` union |
+| `src/policy/actionsPolicy.ts` | Deterministic policy check: risk-tier scoring (`low`/`medium`/`high`/`critical`), SoD gate, auto-approve threshold, structured `PolicyDecision` output |
+| `src/actions/executeAction.ts` | Execution engine: load action from DB → dispatch to correct tool → update run status → return result |
+| `src/actions/attestation.ts` | `createActionAttestation()` — SHA-256 hash-locked evidence record binding proposal + output + metadata |
+| `src/actions/evidencePack.ts` | Pack builder: collects attestation + run metrics → uploads JSON bundle to Blob → inserts `evidencePacks` + `evidencePackArtifacts` DB rows |
+
+#### `packages/db` schema extensions
+| Table/Enum | Change |
+|------------|--------|
+| `aiActionRuns` | New table: run lifecycle per action (`pending` → `running` → `succeeded`/`failed`), stores `inputsHash`, `outputHash`, `metricsJson`, `attestationHash` |
+| `aiKnowledgeSources` | New table: knowledge source registry (`entityId`, `appKey`, `sourceType`, `title`, `chunkCount`, `embeddingModel`) |
+| `aiKnowledgeIngestionRuns` | New table: per-source ingestion run log with status + metricsJson |
+| `riskTier` enum | New: `low`, `medium`, `high`, `critical` |
+| `aiKnowledgeSourceType` | New enum: `manual_text`, `document`, `url`, `file_upload` |
+| Drizzle migration | `0001_phase_c_actions.sql` — applied, `_journal.json` updated |
+
+### API Routes (apps/console)
+| Route | Method | Description |
+|-------|--------|-------------|
+| `/api/ai/actions/propose` | `POST` | Validate proposal via Zod, run policy check, insert `aiActions` row, return `actionId` + `policyDecision` |
+| `/api/ai/actions/approve` | `POST` | Entity-scoped auth, update action to `approved`, record `approvedBy` + `approvedAt` |
+| `/api/ai/actions/execute` | `POST` | Dispatch approved action via `executeAction()`, insert `aiActionRuns`, trigger evidence-pack if eligible |
+| `/api/ai/actions/finance/stripe-monthly-reports` | `POST` | Propose + auto-approve + execute Stripe report in one guarded flow |
+| `/api/ai/actions/knowledge/ingest` | `POST` | Propose + auto-approve + execute knowledge ingestion in one guarded flow |
+
+All routes: Clerk auth (`auth().userId`), entity scoping, structured error responses, Zod input validation.
+
+### Console UI Pages (apps/console)
+| Route | Description |
+|-------|-------------|
+| `/console/ai/actions` | Action log: lists `aiActions` with status badges, risk tier chips, proposal detail drawer |
+| `/console/ai/knowledge` | Knowledge sources: lists `aiKnowledgeSources` with last-run status + chunk count; inline `<IngestButton>` client component for manual text ingestion |
+
+### Test Coverage
+| File | Suite | Tests |
+|------|-------|-------|
+| `packages/ai-core/src/schemas.test.ts` | Zod schema validation | Valid/invalid proposals for both action types; `ACTION_TYPES` array membership |
+| `packages/ai-core/src/actions/attestation.test.ts` | Attestation pure function | Same inputs → same hash; different outputs → different hash; hex-64 format |
+| `packages/tools-runtime/src/sanitize.test.ts` | Redaction + hashing | Sensitive key redaction (password/apiKey/token/secret/connectionString); deep arrays/nesting; primitive passthrough; `createToolCallEntry` shape; redacted inputs produce equal hashes |
+| `packages/tools-runtime/src/chunker.test.ts` | Sliding-window chunker | Exact chunk sizes; overlap; empty input; single-chunk short strings |
+| `packages/tools-runtime/src/blobTool.test.ts` | Blob upload/download | Mock Azure BlobServiceClient; content-type inference; round-trip buffer |
+| `packages/tools-runtime/src/integration.test.ts` | Propose→policy→execute→attest E2E | Mocked DB + Stripe + Blob + OpenAI; full pipeline succeeds; sanitize-hash idempotency |
+
+**Vitest configs**: `packages/ai-core/vitest.config.ts`, `packages/tools-runtime/vitest.config.ts`
+
+### Compile Status
+| Package | `tsc --noEmit` |
+|---------|---------------|
+| `packages/ai-core` | ✅ Exit 0 |
+| `packages/tools-runtime` | ✅ Exit 0 |
+| `apps/console` | ✅ Exit 0 |
+
+### Engineering Notes
+- **Circular dependency** (`tools-runtime` ↔ `ai-core` main barrel) resolved via subpath exports: `@nzila/ai-core/schemas`, `@nzila/ai-core/gateway`
+- **exFAT + `symlink=false`**: pnpm physically copies workspace packages. Phase C required manual sync of all nested `node_modules` copies across 6 locations (`@nzila/db` × 4, `@nzila/ai-core` × 2) after adding new tables/exports
+- **GitGuardian false positive** resolved: `sk-` prefixed test fixtures in `sanitize.test.ts` renamed to `fake-api-key-*` (commit `14e0fd2`)
+- **Branch**: `feat/ai-control-plane-v1` — merged with `main`, pushed (`a72632e` → `14e0fd2`)
+
+---
 
 ## Code Generator Improvements
 - ✅ All models default to `BaseModel` inheritance (no more `models.Model` fallback)
