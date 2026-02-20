@@ -1,4 +1,4 @@
-name: Deploy Console (Azure SWA)
+name: Deploy Console (Azure Container Apps)
 
 on:
   push:
@@ -8,17 +8,13 @@ on:
       - 'packages/ui/**'
       - 'packages/config/**'
       - 'content/internal/**'
-  pull_request:
-    branches: [main]
-    paths:
-      - 'apps/console/**'
-      - 'packages/ui/**'
-      - 'packages/config/**'
-      - 'content/internal/**'
 
 permissions:
   contents: read
-  pull-requests: write
+
+env:
+  APP_NAME: nzila-os-console
+  IMAGE: nzilastagingacr.azurecr.io/nzila-os-console
 
 jobs:
   build-and-deploy:
@@ -27,43 +23,29 @@ jobs:
     steps:
       - uses: actions/checkout@v4
 
-      - name: Setup pnpm
-        uses: pnpm/action-setup@v4
+      - name: Azure login
+        uses: azure/login@v2
         with:
-          version: 10.11.0
+          creds: ${{ secrets.AZURE_CREDENTIALS }}
 
-      - name: Setup Node.js
-        uses: actions/setup-node@v4
-        with:
-          node-version: 22
-          cache: pnpm
+      - name: ACR login
+        run: az acr login --name nzilastagingacr
 
-      - name: Install dependencies
-        run: pnpm install --frozen-lockfile
+      - name: Build & push image
+        run: |
+          docker build \
+            --target console \
+            --build-arg NEXT_PUBLIC_CLERK_PUBLISHABLE_KEY=${{ secrets.CLERK_PUBLISHABLE_KEY }} \
+            --build-arg CLERK_SECRET_KEY=${{ secrets.CLERK_SECRET_KEY }} \
+            -t ${{ env.IMAGE }}:${{ github.sha }} \
+            -t ${{ env.IMAGE }}:latest \
+            .
+          docker push ${{ env.IMAGE }}:${{ github.sha }}
+          docker push ${{ env.IMAGE }}:latest
 
-      - name: Build console app
-        run: pnpm build:console
-        env:
-          NEXT_PUBLIC_CLERK_PUBLISHABLE_KEY: ${{ secrets.CLERK_PUBLISHABLE_KEY }}
-          CLERK_SECRET_KEY: ${{ secrets.CLERK_SECRET_KEY }}
-
-      - name: Deploy to Azure Static Web Apps
-        if: github.event_name == 'push' || (github.event_name == 'pull_request' && github.event.action != 'closed')
-        uses: Azure/static-web-apps-deploy@v1
-        with:
-          azure_static_web_apps_api_token: ${{ secrets.AZURE_SWA_TOKEN_CONSOLE }}
-          repo_token: ${{ secrets.GITHUB_TOKEN }}
-          action: upload
-          app_location: apps/console
-          output_location: .next
-          skip_app_build: true
-
-  close-staging:
-    if: github.event_name == 'pull_request' && github.event.action == 'closed'
-    runs-on: ubuntu-latest
-    name: Close PR staging
-    steps:
-      - uses: Azure/static-web-apps-deploy@v1
-        with:
-          azure_static_web_apps_api_token: ${{ secrets.AZURE_SWA_TOKEN_CONSOLE }}
-          action: close
+      - name: Update Container App
+        run: |
+          az containerapp update \
+            --name ${{ env.APP_NAME }} \
+            --resource-group ${{ secrets.AZURE_RESOURCE_GROUP }} \
+            --image ${{ env.IMAGE }}:${{ github.sha }}
