@@ -1,0 +1,15 @@
+{
+  "extends": "../packages/config/tsconfig.base.json",
+  "compilerOptions": {
+    "paths": {
+      "@nzila/db": ["../packages/db/src/index.ts"],
+      "@nzila/db/schema": ["../packages/db/src/schema/index.ts"],
+      "@nzila/db/client": ["../packages/db/src/client.ts"],
+      "@nzila/blob": ["../packages/blob/src/index.ts"],
+      "@nzila/ai-core": ["../packages/ai-core/src/index.ts"],
+      "@nzila/ml-core": ["../packages/ml-core/src/index.ts"]
+    }
+  },
+  "include": ["**/*.ts"],
+  "exclude": ["node_modules"]
+}
