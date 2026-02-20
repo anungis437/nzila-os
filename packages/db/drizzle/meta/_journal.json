@@ -15,6 +15,13 @@
       "when": 1771572269448,
       "tag": "0001_solid_cargill",
       "breakpoints": true
+    },
+    {
+      "idx": 2,
+      "version": "7",
+      "when": 1771575452501,
+      "tag": "0002_rich_marten_broadcloak",
+      "breakpoints": true
     }
   ]
 }
