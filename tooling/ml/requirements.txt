@@ -1,0 +1,9 @@
+# Nzila ML tooling dependencies
+# Pin for reproducibility; update intentionally
+pandas==2.2.3
+numpy==1.26.4
+scikit-learn==1.5.2
+joblib==1.4.2
+psycopg2-binary==2.9.9
+python-dotenv==1.0.1
+azure-storage-blob==12.24.0

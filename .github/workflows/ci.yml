@@ -90,3 +90,59 @@ jobs:
           NEXT_PUBLIC_CONSOLE_URL: https://console.nzila.app
           NEXT_PUBLIC_CLERK_PUBLISHABLE_KEY: ${{ secrets.CLERK_PUBLISHABLE_KEY }}
           CLERK_SECRET_KEY: ${{ secrets.CLERK_SECRET_KEY }}
+
+  ml-gates:
+    runs-on: ubuntu-latest
+    name: ML Tooling Gates
+    steps:
+      - uses: actions/checkout@v4
+
+      - name: Setup Python
+        uses: actions/setup-python@v5
+        with:
+          python-version: '3.11'
+
+      - name: Verify ML tooling file presence
+        run: |
+          check() { test -f "$1" || { echo "MISSING: $1"; exit 1; }; }
+          check tooling/ml/requirements.txt
+          check tooling/ml/train_daily_iforest.py
+          check tooling/ml/train_txn_iforest.py
+          check tooling/ml/infer_daily_iforest.py
+          check tooling/ml/infer_txn_iforest.py
+          check tooling/ml/lib/io_blob.py
+          check tooling/ml/lib/metrics.py
+          check tooling/ml/lib/thresholds.py
+          check tooling/ml/lib/db_write.py
+          check tooling/ml/lib/stripeFeatureEngineering.ts
+          check tooling/ml/lib/blobDatasetWriter.ts
+          check tooling/ml/build-stripe-daily-dataset.ts
+          check tooling/ml/build-stripe-txn-dataset.ts
+          echo "All ML tooling files present."
+
+      - name: Python syntax check — ML scripts
+        run: |
+          python -m py_compile \
+            tooling/ml/train_daily_iforest.py \
+            tooling/ml/train_txn_iforest.py \
+            tooling/ml/infer_daily_iforest.py \
+            tooling/ml/infer_txn_iforest.py \
+            tooling/ml/lib/io_blob.py \
+            tooling/ml/lib/metrics.py \
+            tooling/ml/lib/thresholds.py \
+            tooling/ml/lib/db_write.py
+          echo "Python syntax check passed."
+
+      - name: Verify ML DB schema exported
+        run: |
+          grep -q "ml_model_status" packages/db/src/schema/ml.ts      || { echo "ml_model_status enum not found"; exit 1; }
+          grep -q "mlScoresStripeTxn" packages/db/src/schema/ml.ts    || { echo "mlScoresStripeTxn table not found"; exit 1; }
+          grep -q "ml" packages/db/src/schema/index.ts                || { echo "ml not exported from schema index"; exit 1; }
+          echo "ML schema checks passed."
+
+      - name: Verify evidence pack --include-ml flag
+        run: |
+          grep -q "include-ml" tooling/scripts/generate-evidence-index.ts         || { echo "--include-ml flag missing"; exit 1; }
+          grep -q "collectMlEvidence" tooling/scripts/generate-evidence-index.ts  || { echo "collectMlEvidence not wired"; exit 1; }
+          echo "Evidence pack ML wiring verified."
+

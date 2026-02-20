@@ -227,6 +227,7 @@ async function main(): Promise<void> {
       out: { type: 'string' },
       upload: { type: 'boolean', default: false },
       'include-ai-actions': { type: 'boolean', default: false },
+      'include-ml': { type: 'boolean', default: false },
       'period-label': { type: 'string' },
       help: { type: 'boolean', default: false },
     },
@@ -257,6 +258,7 @@ Optional:
   --out              Output file path (default: stdout)
   --upload           Upload artifacts to Azure Blob + create DB rows (requires DATABASE_URL, AZURE_STORAGE_*)
   --include-ai-actions  Collect AI action evidence and attach as appendices.ai_actions (requires DATABASE_URL)
+  --include-ml          Collect ML anomaly evidence and attach as appendices.ml (requires DATABASE_URL)
   --period-label     Period label for AI action collection, e.g. 2026-02 (defaults to current month)
   --help             Show this help
 `)
@@ -311,6 +313,7 @@ Optional:
   const runId = randomUUID()
   const doUpload = values.upload as boolean
   const includeAiActions = values['include-ai-actions'] as boolean
+  const includeMl = values['include-ml'] as boolean
   const periodLabel = (values['period-label'] as string | undefined) ?? now.slice(0, 7)
 
   // Build artifacts array (with raw data for upload)
@@ -369,10 +372,22 @@ Optional:
   if (includeAiActions) {
     const { collectAiActionEvidence } = await import('@nzila/ai-core/actions/evidence-pack')
     const aiAppendix = await collectAiActionEvidence(entityId, periodLabel)
-    index.appendices = { ai_actions: aiAppendix }
+    index.appendices = { ...index.appendices, ai_actions: aiAppendix }
     console.error(
       `  ✔ AI actions appendix collected (${aiAppendix.summary.totalActions} actions, ` +
         `${aiAppendix.summary.documentCount} documents, period: ${periodLabel})`,
+    )
+  }
+
+  // ── ML appendix ───────────────────────────────────────────────────────
+  if (includeMl) {
+    const { collectMlEvidence } = await import('@nzila/ml-core')
+    const mlAppendix = await collectMlEvidence(entityId, periodLabel)
+    index.appendices = { ...index.appendices, ml: mlAppendix }
+    console.error(
+      `  ✔ ML appendix collected (${mlAppendix.activeModels.length} active models, ` +
+        `${mlAppendix.anomalySummary.dailyAnomalies} daily anomalies, ` +
+        `${mlAppendix.anomalySummary.txnAnomalies} txn anomalies, period: ${periodLabel})`,
     )
   }
 
