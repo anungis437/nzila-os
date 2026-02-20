@@ -6,13 +6,13 @@
     "esModuleInterop": true,
     "strict": true,
     "skipLibCheck": true,
-    "outDir": "dist",
-    "rootDir": "src",
+    "noEmit": true,
     "resolveJsonModule": true,
-    "declaration": true,
+    "declaration": false,
     "paths": {
       "@nzila/db": ["../../packages/db/src"],
-      "@nzila/db/*": ["../../packages/db/src/*"]
+      "@nzila/db/*": ["../../packages/db/src/*"],
+      "@nzila/db/schema": ["../../packages/db/src/schema/index"]
     }
   },
   "include": ["src/**/*.ts"],

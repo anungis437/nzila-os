@@ -15,6 +15,7 @@
     "@nzila/db": "workspace:*",
     "drizzle-orm": "^0.39.0",
     "fastify": "^5.3.3",
+    "postgres": "^3.4.5",
     "zod": "^3.24.0"
   },
   "devDependencies": {

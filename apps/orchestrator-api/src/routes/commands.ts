@@ -21,7 +21,7 @@ export async function commandRoutes(app: FastifyInstance) {
     const cmd = parse.data
     const id = randomUUID()
 
-    const record = createCommand({
+    const record = await createCommand({
       id,
       correlation_id: cmd.correlation_id,
       playbook: cmd.playbook,
@@ -55,7 +55,7 @@ export async function commandRoutes(app: FastifyInstance) {
    * GET /commands/:id — Retrieve a command by correlation ID.
    */
   app.get<{ Params: { id: string } }>('/:id', async (req, reply) => {
-    const record = getCommand(req.params.id)
+    const record = await getCommand(req.params.id)
     if (!record) {
       return reply.status(404).send({ error: 'Command not found' })
     }
@@ -66,7 +66,7 @@ export async function commandRoutes(app: FastifyInstance) {
    * GET /commands — List all commands (most recent first).
    */
   app.get('/', async () => {
-    return listCommands()
+    return await listCommands()
   })
 
   /**
@@ -74,7 +74,7 @@ export async function commandRoutes(app: FastifyInstance) {
    * (Stub — expand with real approval logic + audit event emission.)
    */
   app.post<{ Params: { id: string } }>('/:id/approve', async (req, reply) => {
-    const record = getCommand(req.params.id)
+    const record = await getCommand(req.params.id)
     if (!record) {
       return reply.status(404).send({ error: 'Command not found' })
     }
@@ -84,7 +84,7 @@ export async function commandRoutes(app: FastifyInstance) {
       })
     }
 
-    const updated = updateCommandStatus(record.correlation_id, 'dispatched')
+    const updated = await updateCommandStatus(record.correlation_id, 'dispatched')
     app.log.info({ correlation_id: record.correlation_id }, 'Command approved')
 
     // Dispatch after approval
