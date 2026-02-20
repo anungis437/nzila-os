@@ -58,6 +58,10 @@ jobs:
 
       - name: Run tests
         run: pnpm test
+        env:
+          DATABASE_URL: postgresql://postgres:postgres@localhost:5432/test_db
+          CLERK_SECRET_KEY: sk_test_placeholder
+          NEXT_PUBLIC_CLERK_PUBLISHABLE_KEY: pk_test_placeholder
 
   build:
     runs-on: ubuntu-latest

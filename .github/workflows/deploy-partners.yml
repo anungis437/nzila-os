@@ -35,7 +35,6 @@ jobs:
           docker build \
             --target partners \
             --build-arg NEXT_PUBLIC_CLERK_PUBLISHABLE_KEY=${{ secrets.CLERK_PUBLISHABLE_KEY }} \
-            --build-arg CLERK_SECRET_KEY=${{ secrets.CLERK_SECRET_KEY }} \
             -t ${{ env.IMAGE }}:${{ github.sha }} \
             -t ${{ env.IMAGE }}:latest \
             .

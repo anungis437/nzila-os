@@ -5,29 +5,8 @@
     {
       "idx": 0,
       "version": "7",
-      "when": 1771444577180,
-      "tag": "0000_deep_mojo",
-      "breakpoints": true
-    },
-    {
-      "idx": 1,
-      "version": "7",
-      "when": 1771531200000,
-      "tag": "0001_phase_c_actions",
-      "breakpoints": true
-    },
-    {
-      "idx": 2,
-      "version": "7",
-      "when": 1771617600000,
-      "tag": "0002_ai_model_registry",
-      "breakpoints": true
-    },
-    {
-      "idx": 3,
-      "version": "7",
-      "when": 1771544163717,
-      "tag": "0003_supreme_goblin_queen",
+      "when": 1771566279323,
+      "tag": "0000_initial",
       "breakpoints": true
     }
   ]

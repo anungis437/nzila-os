@@ -20,6 +20,8 @@ services:
       - /app/packages/ai-core/node_modules
       - /app/packages/ai-sdk/node_modules
       - /app/packages/tools-runtime/node_modules
+      - /app/packages/payments-stripe/node_modules
+      - /app/packages/tax/node_modules
     ports:
       - "3000:3000"
       - "3001:3001"

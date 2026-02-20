@@ -85,6 +85,9 @@ RUN addgroup --system --gid 1001 nodejs && \
 
 USER nextjs
 
+HEALTHCHECK --interval=30s --timeout=5s --start-period=30s --retries=3 \
+    CMD wget --no-verbose --tries=1 --spider http://localhost:3000/ || exit 1
+
 EXPOSE 3000
 
 CMD ["node", "apps/web/server.js"]
@@ -112,6 +115,9 @@ RUN addgroup --system --gid 1001 nodejs && \
 
 USER nextjs
 
+HEALTHCHECK --interval=30s --timeout=5s --start-period=30s --retries=3 \
+    CMD wget --no-verbose --tries=1 --spider http://localhost:3001/ || exit 1
+
 EXPOSE 3001
 
 CMD ["node", "apps/console/server.js"]
@@ -137,6 +143,9 @@ RUN addgroup --system --gid 1001 nodejs && \
     chown -R nextjs:nodejs /app
 
 USER nextjs
+
+HEALTHCHECK --interval=30s --timeout=5s --start-period=30s --retries=3 \
+    CMD wget --no-verbose --tries=1 --spider http://localhost:3002/ || exit 1
 
 EXPOSE 3002
 
