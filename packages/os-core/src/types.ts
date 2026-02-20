@@ -36,8 +36,6 @@ export interface PolicyEvaluation {
   blockers: string[]
   warnings: string[]
   notices: string[]
-  /** Optional workflow specification produced by richer policy engines */
-  workflowSpec?: unknown
 }
 
 // ── Entity policy config (overrides defaults) ───────────────────────────────

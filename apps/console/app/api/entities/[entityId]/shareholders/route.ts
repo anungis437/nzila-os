@@ -10,29 +10,9 @@ import { eq, desc } from 'drizzle-orm'
 import { requireEntityAccess } from '@/lib/api-guards'
 import { z } from 'zod'
 
-const COARSE_TYPE_MAP: Record<string, 'individual' | 'entity'> = {
-  individual: 'individual',
-  founder: 'individual',
-  employee: 'individual',
-  corporation: 'entity',
-  trust: 'entity',
-  partnership: 'entity',
-}
-
 const CreateShareholderSchema = z.object({
   holderPersonId: z.string().uuid(),
-  /**
-   * Coarse holder type (always stored in DB).
-   * Either supply directly OR derive it from `holderSubtype`.
-   */
-  holderType: z.enum(['individual', 'entity']).optional(),
-  /**
-   * Fine-grained subtype (founder | employee | corporation | …).
-   * When supplied, `holderType` is derived automatically.
-   */
-  holderSubtype: z
-    .enum(['individual', 'founder', 'employee', 'corporation', 'trust', 'partnership'])
-    .optional(),
+  holderType: z.enum(['individual', 'entity']),
   contactEmail: z.string().email().optional(),
 })
 
@@ -50,7 +30,6 @@ export async function GET(
       entityId: shareholders.entityId,
       holderPersonId: shareholders.holderPersonId,
       holderType: shareholders.holderType,
-      holderSubtype: shareholders.holderSubtype,
       contactEmail: shareholders.contactEmail,
       createdAt: shareholders.createdAt,
       updatedAt: shareholders.updatedAt,
@@ -79,19 +58,12 @@ export async function POST(
   if (!parsed.success)
     return NextResponse.json({ error: parsed.error.flatten() }, { status: 400 })
 
-  // Derive coarse holderType from fine-grained holderSubtype when not explicitly set
-  const holderSubtype = parsed.data.holderSubtype ?? null
-  const holderType: 'individual' | 'entity' =
-    parsed.data.holderType ??
-    (holderSubtype ? (COARSE_TYPE_MAP[holderSubtype] ?? 'individual') : 'individual')
-
   const [shareholder] = await db
     .insert(shareholders)
     .values({
       entityId,
       holderPersonId: parsed.data.holderPersonId,
-      holderType,
-      holderSubtype,
+      holderType: parsed.data.holderType,
       contactEmail: parsed.data.contactEmail ?? null,
     })
     .returning()

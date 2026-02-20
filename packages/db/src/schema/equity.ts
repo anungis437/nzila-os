@@ -24,16 +24,6 @@ import { entities, people } from './entities'
 
 export const holderTypeEnum = pgEnum('holder_type', ['individual', 'entity'])
 
-/** Fine-grained subtype — maps to holderType: individual → individual|founder|employee, entity → corporation|trust|partnership */
-export const holderSubtypeEnum = pgEnum('holder_subtype', [
-  'individual',
-  'founder',
-  'employee',
-  'corporation',
-  'trust',
-  'partnership',
-])
-
 export const ledgerEntryTypeEnum = pgEnum('ledger_entry_type', [
   'issuance',
   'transfer',
@@ -74,7 +64,6 @@ export const shareholders = pgTable('shareholders', {
     .notNull()
     .references(() => people.id),
   holderType: holderTypeEnum('holder_type').notNull(),
-  holderSubtype: holderSubtypeEnum('holder_subtype'),
   contactEmail: text('contact_email'),
   createdAt: timestamp('created_at', { withTimezone: true }).notNull().defaultNow(),
   updatedAt: timestamp('updated_at', { withTimezone: true }).notNull().defaultNow(),

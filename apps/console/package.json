@@ -14,12 +14,9 @@
   "dependencies": {
     "@clerk/nextjs": "^6.12.0",
     "@heroicons/react": "^2.2.0",
-    "@nzila/ai-core": "workspace:*",
-    "@nzila/ai-sdk": "workspace:*",
     "@nzila/db": "workspace:*",
     "@nzila/os-core": "workspace:*",
     "@nzila/blob": "workspace:*",
-    "@nzila/payments-stripe": "workspace:*",
     "@nzila/ui": "workspace:*",
     "drizzle-orm": "^0.39.0",
     "gray-matter": "^4.0.3",

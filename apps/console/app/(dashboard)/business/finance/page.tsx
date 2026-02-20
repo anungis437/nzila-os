@@ -6,10 +6,6 @@ import {
   CurrencyDollarIcon,
   ArrowRightIcon,
   PlusIcon,
-  CalendarDaysIcon,
-  ReceiptPercentIcon,
-  LockClosedIcon,
-  DocumentCheckIcon,
 } from '@heroicons/react/24/outline'
 
 interface Entity {
@@ -49,50 +45,6 @@ export default function FinanceHubPage() {
           className="inline-flex items-center gap-2 px-4 py-2 bg-green-600 text-white text-sm font-medium rounded-lg hover:bg-green-700"
         >
           <PlusIcon className="h-4 w-4" /> Submit Expense
-        </Link>
-      </div>
-
-      {/* Finance Modules */}
-      <div className="grid grid-cols-1 md:grid-cols-2 gap-4 mb-8">
-        <Link
-          href="/business/finance/tax"
-          className="flex items-center gap-3 p-4 bg-white border border-gray-200 rounded-lg hover:border-blue-300 hover:shadow-sm transition-all"
-        >
-          <CalendarDaysIcon className="h-8 w-8 text-blue-500" />
-          <div>
-            <p className="font-medium text-gray-900">Tax Governance</p>
-            <p className="text-xs text-gray-500">Corporate tax years, filings, installments, and CRA/RQ notices.</p>
-          </div>
-        </Link>
-        <Link
-          href="/business/finance/indirect-tax"
-          className="flex items-center gap-3 p-4 bg-white border border-gray-200 rounded-lg hover:border-indigo-300 hover:shadow-sm transition-all"
-        >
-          <ReceiptPercentIcon className="h-8 w-8 text-indigo-500" />
-          <div>
-            <p className="font-medium text-gray-900">Indirect Tax</p>
-            <p className="text-xs text-gray-500">GST/HST and QST period tracking, ITC reconciliation.</p>
-          </div>
-        </Link>
-        <Link
-          href="/business/finance/close"
-          className="flex items-center gap-3 p-4 bg-white border border-gray-200 rounded-lg hover:border-green-300 hover:shadow-sm transition-all"
-        >
-          <LockClosedIcon className="h-8 w-8 text-green-500" />
-          <div>
-            <p className="font-medium text-gray-900">Close Management</p>
-            <p className="text-xs text-gray-500">Monthly, quarterly, and annual close controls.</p>
-          </div>
-        </Link>
-        <Link
-          href="/business/finance/year-end-pack"
-          className="flex items-center gap-3 p-4 bg-white border border-gray-200 rounded-lg hover:border-amber-300 hover:shadow-sm transition-all"
-        >
-          <DocumentCheckIcon className="h-8 w-8 text-amber-500" />
-          <div>
-            <p className="font-medium text-gray-900">Year-End Pack</p>
-            <p className="text-xs text-gray-500">Accountant evidence pack with financial, governance, and tax artifacts.</p>
-          </div>
         </Link>
       </div>
 

@@ -6,4 +6,3 @@
 export * from './workflows'
 export * from './policy-engine'
 export * from './replicability'
-export * from './state-machine'
