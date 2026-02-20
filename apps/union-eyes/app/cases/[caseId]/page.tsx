@@ -80,7 +80,7 @@ interface PageProps {
 
 export default function CaseDetailPage({ params, searchParams }: PageProps) {
   const { caseId } = use(params)
-  const sp = use(searchParams ?? Promise.resolve({}))
+  const sp = use(searchParams ?? Promise.resolve({} as { entityId?: string }))
   // entityId comes from the URL search param; in production, derive from session instead.
   const entityId = sp.entityId ?? ''
 

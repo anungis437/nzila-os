@@ -1,0 +1,20 @@
+{
+  "extends": "../../packages/config/tsconfig.nextjs.json",
+  "compilerOptions": {
+    "paths": {
+      "@/*": ["./*"],
+      "@nzila/ui": ["../../packages/ui/src"],
+      "@nzila/ml-sdk": ["../../packages/ml-sdk/src/index.ts"],
+      "@nzila/ml-sdk/client": ["../../packages/ml-sdk/src/client.ts"],
+      "@nzila/ml-sdk/types": ["../../packages/ml-sdk/src/types.ts"]
+    }
+  },
+  "include": [
+    "next-env.d.ts",
+    "**/*.ts",
+    "**/*.tsx",
+    ".next/types/**/*.ts",
+    ".next/dev/types/**/*.ts"
+  ],
+  "exclude": ["node_modules"]
+}
