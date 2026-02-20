@@ -96,7 +96,7 @@ export function createMlClient(config: MlSdkConfig) {
      * Get Stripe daily anomaly scores for a date range.
      */
     getStripeDailyScores(params: MlScoresDailyParams): Promise<StripeDailyScoreResponse[]> {
-      return get<StripeDailyScoreResponse[]>('/api/ml/scores/stripe/daily', params as Record<string, string>)
+      return get<StripeDailyScoreResponse[]>('/api/ml/scores/stripe/daily', { ...params })
     },
 
     /**
@@ -105,7 +105,7 @@ export function createMlClient(config: MlSdkConfig) {
     getStripeTxnScores(
       params: MlScoresTxnParams,
     ): Promise<{ items: StripeTxnScoreResponse[]; nextCursor: string | null; totalInPeriod: number; anomalyInPeriod: number }> {
-      return get('/api/ml/scores/stripe/transactions', params as Record<string, string>)
+      return get('/api/ml/scores/stripe/transactions', { ...params })
     },
 
     /**
@@ -115,7 +115,7 @@ export function createMlClient(config: MlSdkConfig) {
     getUEPriorityScores(
       params: UEPriorityScoresParams,
     ): Promise<{ items: UEPriorityScoreResponse[]; nextCursor: string | null; total: number }> {
-      return get('/api/ml/scores/ue/cases/priority', params as Record<string, string | number | boolean | undefined>)
+      return get('/api/ml/scores/ue/cases/priority', { ...params })
     },
 
     /**
@@ -125,7 +125,7 @@ export function createMlClient(config: MlSdkConfig) {
     getUESlaRiskScores(
       params: UESlaRiskScoresParams,
     ): Promise<{ items: UESlaRiskScoreResponse[]; nextCursor: string | null; total: number }> {
-      return get('/api/ml/scores/ue/cases/sla-risk', params as Record<string, string | number | boolean | undefined>)
+      return get('/api/ml/scores/ue/cases/sla-risk', { ...params })
     },
   }
 }

@@ -17,5 +17,9 @@ export type {
   StripeTxnScoreResponse,
   MlScoresDailyParams,
   MlScoresTxnParams,
+  UEPriorityScoreResponse,
+  UESlaRiskScoreResponse,
+  UEPriorityScoresParams,
+  UESlaRiskScoresParams,
   MlSdkError,
 } from './types'
