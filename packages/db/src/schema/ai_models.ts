@@ -23,6 +23,7 @@ import {
   numeric,
   uniqueIndex,
   index,
+  type AnyPgColumn,
 } from 'drizzle-orm/pg-core'
 import { entities } from './entities'
 import { aiEnvironmentEnum } from './ai'
@@ -80,7 +81,7 @@ export const aiDeployments = pgTable(
     costProfile: jsonb('cost_profile').default({}), // { costPerKIn, costPerKOut }
     enabled: boolean('enabled').notNull().default(true),
     fallbackDeploymentId: uuid('fallback_deployment_id').references(
-      (): ReturnType<typeof uuid> => aiDeployments.id,
+      (): AnyPgColumn => aiDeployments.id,
     ),
     approvedBy: text('approved_by'),
     approvedAt: timestamp('approved_at', { withTimezone: true }),

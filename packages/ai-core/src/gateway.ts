@@ -24,6 +24,7 @@ import type {
   AiProviderClient,
   AiControlPlaneError,
   AiFeature,
+  AiProvider,
   DataClass,
   RedactionMode,
 } from './types'
@@ -107,7 +108,7 @@ export interface ResolvedDeployment {
   deploymentName: string
   modelFamily: string
   modality: 'text' | 'embeddings'
-  provider: string
+  provider: AiProvider
   maxTokens: number
   defaultTemperature: number
   costProfile: { costPerKIn?: number; costPerKOut?: number }
@@ -157,7 +158,7 @@ export async function resolveDeployment(opts: {
     deploymentName: route.deploymentName,
     modelFamily: route.modelFamily,
     modality: route.modality,
-    provider: route.provider,
+    provider: route.provider as AiProvider,
     maxTokens: route.maxTokens,
     defaultTemperature: Number(route.defaultTemperature),
     costProfile: (route.costProfile ?? {}) as ResolvedDeployment['costProfile'],
