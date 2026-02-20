@@ -174,6 +174,26 @@ def main() -> None:
         classes = list(label_enc.classes_)
         log(f"Classes: {classes}")
 
+        # ── Label cardinality + class balance ─────────────────────────────────
+        # Log counts and percentages so we can detect majority-class collapse
+        # (e.g. model always predicts "medium") before it reaches production.
+        class_counts_series = train_df["y_priority"].value_counts()
+        total_train_n = len(train_df)
+        class_balance_train: dict[str, dict] = {}
+        log(f"Label cardinality: {len(classes)} classes (train split)")
+        for cls in classes:
+            cnt = int(class_counts_series.get(cls, 0))
+            pct = round(100.0 * cnt / total_train_n, 1) if total_train_n > 0 else 0.0
+            class_balance_train[cls] = {"count": cnt, "pct": pct}
+            log(f"  {cls}: {cnt} rows ({pct}%)")
+        if class_balance_train:
+            minority_pct = min(v["pct"] for v in class_balance_train.values())
+            if minority_pct < 5.0:
+                log(
+                    f"WARNING: minority class at {minority_pct:.1f}% — model may collapse "
+                    f"to majority class. Consider oversampling or class_weight balancing."
+                )
+
         y_train = label_enc.transform(train_df["y_priority"])
         y_test  = label_enc.transform(
             test_df["y_priority"].map(

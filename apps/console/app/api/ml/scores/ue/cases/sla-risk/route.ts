@@ -2,7 +2,9 @@
  * GET /api/ml/scores/ue/cases/sla-risk
  *
  * Returns Union Eyes case SLA breach risk scores for a date range.
- * Cursor-paginated; sorted by probability desc (highest risk first).
+ * Cursor-paginated; sorted by (occurredAt DESC, id DESC).
+ * Cursor is base64("<iso-timestamp>|<uuid>") — composite key prevents
+ * duplicate/skipped rows when multiple records share the same timestamp.
  *
  * RBAC:
  *   - View scores: any active entity member
@@ -24,7 +26,7 @@
 import { NextRequest, NextResponse } from 'next/server'
 import { db } from '@nzila/db'
 import { mlScoresUESlaRisk, mlModels } from '@nzila/db/schema'
-import { eq, and, gte, lte, lt, desc } from 'drizzle-orm'
+import { eq, and, gte, lte, lt, desc, or } from 'drizzle-orm'
 import { requireEntityAccess } from '@/lib/api-guards'
 
 export const runtime = 'nodejs'
@@ -73,12 +75,17 @@ export async function GET(req: NextRequest) {
     if (breachParam === 'true') breachFilter = true
     if (breachParam === 'false') breachFilter = false
 
-    // Decode cursor (base64-encoded ISO timestamp)
+    // Decode composite cursor: base64("<iso-timestamp>|<uuid>")
     let cursorTs: Date | null = null
+    let cursorId: string | null = null
     if (cursor) {
       try {
-        cursorTs = new Date(Buffer.from(cursor, 'base64').toString('utf-8'))
-        if (isNaN(cursorTs.getTime())) throw new Error('invalid')
+        const decoded = Buffer.from(cursor, 'base64').toString('utf-8')
+        const pipeIdx = decoded.lastIndexOf('|')
+        if (pipeIdx === -1) throw new Error('malformed')
+        cursorTs = new Date(decoded.slice(0, pipeIdx))
+        cursorId = decoded.slice(pipeIdx + 1)
+        if (isNaN(cursorTs.getTime()) || !cursorId) throw new Error('invalid')
       } catch {
         return NextResponse.json({ error: 'Invalid cursor' }, { status: 400 })
       }
@@ -89,7 +96,15 @@ export async function GET(req: NextRequest) {
       gte(mlScoresUESlaRisk.occurredAt, startTs),
       lte(mlScoresUESlaRisk.occurredAt, endTs),
       ...(breachFilter !== null ? [eq(mlScoresUESlaRisk.predictedBreach, breachFilter)] : []),
-      ...(cursorTs ? [lt(mlScoresUESlaRisk.occurredAt, cursorTs)] : []),
+      ...(cursorTs && cursorId
+        ? [or(
+            lt(mlScoresUESlaRisk.occurredAt, cursorTs),
+            and(
+              eq(mlScoresUESlaRisk.occurredAt, cursorTs),
+              lt(mlScoresUESlaRisk.id, cursorId),
+            ),
+          )]
+        : []),
     )
 
     let rows = await db
@@ -109,7 +124,7 @@ export async function GET(req: NextRequest) {
       .from(mlScoresUESlaRisk)
       .innerJoin(mlModels, eq(mlScoresUESlaRisk.modelId, mlModels.id))
       .where(whereClause)
-      .orderBy(desc(mlScoresUESlaRisk.occurredAt))
+      .orderBy(desc(mlScoresUESlaRisk.occurredAt), desc(mlScoresUESlaRisk.id))
       .limit(limit + 1)
 
     // Apply minProb filter in application layer (numeric comparison on string column)
@@ -121,7 +136,9 @@ export async function GET(req: NextRequest) {
     const pageRows = rows.slice(0, limit)
 
     const nextCursor = hasMore
-      ? Buffer.from(pageRows[pageRows.length - 1].occurredAt.toISOString()).toString('base64')
+      ? Buffer.from(
+          `${pageRows[pageRows.length - 1].occurredAt.toISOString()}|${pageRows[pageRows.length - 1].id}`,
+        ).toString('base64')
       : null
 
     return NextResponse.json({

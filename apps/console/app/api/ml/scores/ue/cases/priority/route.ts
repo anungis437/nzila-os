@@ -2,7 +2,9 @@
  * GET /api/ml/scores/ue/cases/priority
  *
  * Returns Union Eyes case priority predictions for a date range.
- * Cursor-paginated; sorted newest-first by occurredAt.
+ * Cursor-paginated; sorted newest-first by (occurredAt DESC, id DESC).
+ * Cursor is base64("<iso-timestamp>|<uuid>") — composite key prevents
+ * duplicate/skipped rows when multiple records share the same occurredAt.
  *
  * RBAC:
  *   - View scores: union_admin, union_staff, entity_admin (any active entity member)
@@ -23,7 +25,7 @@
 import { NextRequest, NextResponse } from 'next/server'
 import { db } from '@nzila/db'
 import { mlScoresUECasesPriority, mlModels } from '@nzila/db/schema'
-import { eq, and, gte, lte, lt, desc } from 'drizzle-orm'
+import { eq, and, gte, lte, lt, desc, or } from 'drizzle-orm'
 import { requireEntityAccess } from '@/lib/api-guards'
 
 export const runtime = 'nodejs'
@@ -65,12 +67,18 @@ export async function GET(req: NextRequest) {
     const startTs = new Date(startDate + 'T00:00:00Z')
     const endTs = new Date(endDate + 'T23:59:59Z')
 
-    // Decode cursor (base64-encoded ISO timestamp for keyset pagination)
+    // Decode composite cursor: base64("<iso-timestamp>|<uuid>")
+    // Composite key prevents duplicate/skipped rows when rows share a timestamp.
     let cursorTs: Date | null = null
+    let cursorId: string | null = null
     if (cursor) {
       try {
-        cursorTs = new Date(Buffer.from(cursor, 'base64').toString('utf-8'))
-        if (isNaN(cursorTs.getTime())) throw new Error('invalid')
+        const decoded = Buffer.from(cursor, 'base64').toString('utf-8')
+        const pipeIdx = decoded.lastIndexOf('|')
+        if (pipeIdx === -1) throw new Error('malformed')
+        cursorTs = new Date(decoded.slice(0, pipeIdx))
+        cursorId = decoded.slice(pipeIdx + 1)
+        if (isNaN(cursorTs.getTime()) || !cursorId) throw new Error('invalid')
       } catch {
         return NextResponse.json({ error: 'Invalid cursor' }, { status: 400 })
       }
@@ -81,7 +89,15 @@ export async function GET(req: NextRequest) {
       gte(mlScoresUECasesPriority.occurredAt, startTs),
       lte(mlScoresUECasesPriority.occurredAt, endTs),
       ...(priorityFilter ? [eq(mlScoresUECasesPriority.predictedPriority, priorityFilter)] : []),
-      ...(cursorTs ? [lt(mlScoresUECasesPriority.occurredAt, cursorTs)] : []),
+      ...(cursorTs && cursorId
+        ? [or(
+            lt(mlScoresUECasesPriority.occurredAt, cursorTs),
+            and(
+              eq(mlScoresUECasesPriority.occurredAt, cursorTs),
+              lt(mlScoresUECasesPriority.id, cursorId),
+            ),
+          )]
+        : []),
     )
 
     const rows = await db
@@ -101,14 +117,16 @@ export async function GET(req: NextRequest) {
       .from(mlScoresUECasesPriority)
       .innerJoin(mlModels, eq(mlScoresUECasesPriority.modelId, mlModels.id))
       .where(whereClause)
-      .orderBy(desc(mlScoresUECasesPriority.occurredAt))
+      .orderBy(desc(mlScoresUECasesPriority.occurredAt), desc(mlScoresUECasesPriority.id))
       .limit(limit + 1)  // fetch one extra to detect next page
 
     const hasMore = rows.length > limit
     const pageRows = rows.slice(0, limit)
 
     const nextCursor = hasMore
-      ? Buffer.from(pageRows[pageRows.length - 1].occurredAt.toISOString()).toString('base64')
+      ? Buffer.from(
+          `${pageRows[pageRows.length - 1].occurredAt.toISOString()}|${pageRows[pageRows.length - 1].id}`,
+        ).toString('base64')
       : null
 
     return NextResponse.json({
