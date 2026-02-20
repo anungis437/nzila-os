@@ -24,21 +24,29 @@ $pairs = @(
     @{src="packages\config";           dst="packages\ui\node_modules\@nzila\config"},
 
     # packages/payments-stripe → deps @nzila/blob, @nzila/db
+    # devDep @nzila/config (needed for nested tsconfig extends resolution)
     @{src="packages\blob";             dst="packages\payments-stripe\node_modules\@nzila\blob"},
     @{src="packages\db";               dst="packages\payments-stripe\node_modules\@nzila\db"},
+    @{src="packages\config";           dst="packages\payments-stripe\node_modules\@nzila\config"},
 
     # packages/ai-core → deps @nzila/db, @nzila/blob, @nzila/os-core
+    # devDep @nzila/config (needed for tsconfig extends resolution in nested copies)
     @{src="packages\db";               dst="packages\ai-core\node_modules\@nzila\db"},
     @{src="packages\blob";             dst="packages\ai-core\node_modules\@nzila\blob"},
     @{src="packages\os-core";          dst="packages\ai-core\node_modules\@nzila\os-core"},
+    @{src="packages\config";           dst="packages\ai-core\node_modules\@nzila\config"},
 
     # packages/ai-sdk → dep @nzila/ai-core
+    # devDep @nzila/config
     @{src="packages\ai-core";          dst="packages\ai-sdk\node_modules\@nzila\ai-core"},
+    @{src="packages\config";           dst="packages\ai-sdk\node_modules\@nzila\config"},
 
     # packages/tax → deps @nzila/db, @nzila/os-core, @nzila/blob
+    # devDep @nzila/config
     @{src="packages\db";               dst="packages\tax\node_modules\@nzila\db"},
     @{src="packages\os-core";          dst="packages\tax\node_modules\@nzila\os-core"},
     @{src="packages\blob";             dst="packages\tax\node_modules\@nzila\blob"},
+    @{src="packages\config";           dst="packages\tax\node_modules\@nzila\config"},
 
     # ── apps/web → deps @nzila/ui; devDeps @nzila/config ──
     @{src="packages\ui";               dst="apps\web\node_modules\@nzila\ui"},
