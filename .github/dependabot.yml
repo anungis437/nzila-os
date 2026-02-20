@@ -1,0 +1,43 @@
+version: 2
+updates:
+  # Root workspace / shared packages
+  - package-ecosystem: npm
+    directory: /
+    schedule:
+      interval: weekly
+      day: monday
+      time: "08:00"
+      timezone: "UTC"
+    open-pull-requests-limit: 10
+    groups:
+      dev-tooling:
+        patterns:
+          - "eslint*"
+          - "typescript*"
+          - "@typescript-eslint/*"
+          - "prettier"
+          - "turbo"
+          - "vitest*"
+          - "@vitest/*"
+      next-js:
+        patterns:
+          - "next"
+          - "react"
+          - "react-dom"
+          - "@types/react*"
+    ignore:
+      # Only accept patch updates for Drizzle ORM (breaking changes are frequent)
+      - dependency-name: "drizzle-orm"
+        update-types: ["version-update:semver-major", "version-update:semver-minor"]
+      - dependency-name: "drizzle-kit"
+        update-types: ["version-update:semver-major"]
+
+  # GitHub Actions
+  - package-ecosystem: github-actions
+    directory: /
+    schedule:
+      interval: weekly
+      day: monday
+      time: "08:00"
+      timezone: "UTC"
+    open-pull-requests-limit: 5

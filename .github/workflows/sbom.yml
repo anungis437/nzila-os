@@ -1,0 +1,53 @@
+name: SBOM Generation
+
+on:
+  push:
+    branches: [main]
+  release:
+    types: [published]
+
+jobs:
+  generate-sbom:
+    name: Generate SBOM
+    runs-on: ubuntu-latest
+    permissions:
+      contents: write
+      security-events: write
+
+    steps:
+      - uses: actions/checkout@v4
+
+      - uses: pnpm/action-setup@v4
+        with:
+          version: 10
+
+      - uses: actions/setup-node@v4
+        with:
+          node-version: '22'
+          cache: 'pnpm'
+
+      - name: Generate CycloneDX SBOM
+        uses: CycloneDX/gh-node-module-generatebom@v1
+        with:
+          path: ./
+          output: sbom.json
+
+      - name: Upload SBOM artifact
+        uses: actions/upload-artifact@v4
+        with:
+          name: sbom-${{ github.run_id }}
+          path: sbom.json
+          retention-days: 365
+
+      - name: Attach SBOM to GitHub release
+        if: github.event_name == 'release'
+        uses: softprops/action-gh-release@v1
+        with:
+          files: sbom.json
+
+      - name: Store SBOM as evidence artifact
+        run: |
+          mkdir -p evidence-artifacts/sbom
+          cp sbom.json evidence-artifacts/sbom/sbom-${{ github.sha }}.json
+          echo '{"type":"sbom","ref":"${{ github.sha }}","timestamp":"'$(date -u +%Y-%m-%dT%H:%M:%SZ)'","runId":"${{ github.run_id }}"}' \
+            > evidence-artifacts/sbom/metadata.json

@@ -122,6 +122,17 @@ export const partnerEntities = pgTable('partner_entities', {
   entityId: varchar('entity_id', { length: 255 }).notNull(),
   /** Which views/data sets the partner may access for this entity, e.g. ["ml:summary"] */
   allowedViews: jsonb('allowed_views').$type<string[]>().default([]).notNull(),
+  /**
+   * Optional sub-entity (subsidiary relationship).
+   * When set, this record grants the partner access to a subsidiary of entityId.
+   */
+  subsidiaryId: varchar('subsidiary_id', { length: 255 }),
+  /**
+   * When this partner-entity grant expires.
+   * Retention enforcement will revoke access after this date.
+   * NULL means the grant is permanent (manual revocation only).
+   */
+  expiresAt: timestamp('expires_at', { withTimezone: true }),
   createdAt: timestamp('created_at', { withTimezone: true }).defaultNow().notNull(),
 })
 
