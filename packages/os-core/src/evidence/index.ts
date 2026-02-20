@@ -23,3 +23,4 @@ export {
   getEvidenceMapping,
 } from './builder'
 export type { GovernanceActionContext } from './builder'
+export { processEvidencePack } from './generate-evidence-index'

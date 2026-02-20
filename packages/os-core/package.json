@@ -6,13 +6,26 @@
   "types": "./src/index.ts",
   "exports": {
     ".": "./src/index.ts",
-    "./policy": "./src/policy.ts",
+    "./policy": "./src/policy/index.ts",
     "./templates": "./src/templates.ts",
     "./types": "./src/types.ts",
     "./hash": "./src/hash.ts",
     "./evidence": "./src/evidence/index.ts",
     "./evidence/types": "./src/evidence/types.ts",
-    "./evidence/builder": "./src/evidence/builder.ts"
+    "./evidence/builder": "./src/evidence/builder.ts",
+    "./evidence/generate-evidence-index": "./src/evidence/generate-evidence-index.ts",
+    "./evidence/redaction": "./src/evidence/redaction.ts",
+    "./evidence/collectors/security": "./src/evidence/collectors/security.ts",
+    "./evidence/collectors/incident-sims": "./src/evidence/collectors/incident-sims.ts",
+    "./evidence/collectors/schema": "./src/evidence/collectors/schema.ts",
+    "./evidence/collectors/ai-evals": "./src/evidence/collectors/ai-evals.ts",
+    "./evidence/collectors/ml-drift": "./src/evidence/collectors/ml-drift.ts",
+    "./evidence/collectors/stripe-close": "./src/evidence/collectors/stripe-close.ts",
+    "./evidence/collectors/year-end": "./src/evidence/collectors/year-end.ts",
+    "./telemetry": "./src/telemetry/index.ts",
+    "./retention": "./src/retention/index.ts",
+    "./config": "./src/config/env.ts",
+    "./secrets": "./src/secrets/keyvault.ts"
   },
   "scripts": {
     "typecheck": "tsc --noEmit",
@@ -21,7 +34,18 @@
   "dependencies": {
     "zod": "^3.24.0"
   },
+  "optionalDependencies": {
+    "@azure/identity": "^4.5.0",
+    "@azure/keyvault-secrets": "^4.9.0",
+    "@opentelemetry/api": "^1.9.0",
+    "@opentelemetry/auto-instrumentations-node": "^0.56.0",
+    "@opentelemetry/exporter-trace-otlp-http": "^0.57.0",
+    "@opentelemetry/resources": "^1.30.0",
+    "@opentelemetry/sdk-node": "^0.57.0",
+    "@opentelemetry/semantic-conventions": "^1.28.0"
+  },
   "devDependencies": {
+    "@nzila/db": "workspace:*",
     "@types/node": "^22",
     "typescript": "^5",
     "vitest": "^4.0.18"

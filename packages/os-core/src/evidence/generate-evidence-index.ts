@@ -43,7 +43,90 @@ export interface ProcessEvidencePackOptions {
   dryRun?: boolean
   /** Override the run ID (for idempotent retries) */
   runId?: string
+  /** Override the auto-computed blob base path */
+  basePath?: string
+  /** Period label for appendix collectors, e.g. '2026-02' */
+  periodLabel?: string
 }
+
+/** Local-only (no upload) representation of an evidence pack index. */
+export interface LocalEvidencePackIndex {
+  $schema: string
+  packId: string
+  runId: string
+  entityId: string
+  controlFamily: string
+  eventType: string
+  eventId: string
+  summary: string
+  controlsCovered: string[]
+  createdBy: string
+  createdAt: string
+  basePath: string
+  artifacts: Array<{
+    artifactId: string
+    artifactType: string
+    filename: string
+    blobPath: string
+    sha256: string
+    contentType: string
+    sizeBytes: number
+    retentionClass: string
+    classification: string
+  }>
+}
+
+/**
+ * Build a local (no-upload) evidence pack index JSON.
+ * No DB/Blob dependencies. Useful for the CLI local mode and testing.
+ */
+export function buildLocalEvidencePackIndex(
+  request: EvidencePackRequest,
+  opts: { basePath?: string; periodLabel?: string; runId?: string } = {},
+): LocalEvidencePackIndex {
+  const { createHash } = require('node:crypto') as typeof import('node:crypto')
+  const runId = opts.runId ?? randomUUID()
+  const now = new Date()
+  const year = now.getFullYear()
+  const month = String(now.getMonth() + 1).padStart(2, '0')
+  const basePath =
+    opts.basePath ??
+    `${request.entityId}/${request.controlFamily}/${year}/${month}/${request.packId}`
+
+  const artifacts = request.artifacts.map((artifact) => {
+    const sha256 = createHash('sha256').update(artifact.buffer).digest('hex')
+    const blobPath = `${basePath}/${artifact.filename}`
+    return {
+      artifactId: artifact.artifactId,
+      artifactType: artifact.artifactType,
+      filename: artifact.filename,
+      blobPath,
+      sha256,
+      contentType: artifact.contentType,
+      sizeBytes: artifact.buffer.length,
+      retentionClass: artifact.retentionClass,
+      classification: artifact.classification ?? 'INTERNAL',
+    }
+  })
+
+  return {
+    $schema: 'Evidence-Pack-Index.schema.json',
+    packId: request.packId,
+    runId,
+    entityId: request.entityId,
+    controlFamily: request.controlFamily,
+    eventType: request.eventType,
+    eventId: request.eventId,
+    summary: request.summary ?? '',
+    controlsCovered: request.controlsCovered,
+    createdBy: request.createdBy,
+    createdAt: now.toISOString(),
+    basePath,
+    artifacts,
+  }
+}
+
+
 
 /**
  * Process a complete evidence pack:
@@ -64,7 +147,9 @@ export async function processEvidencePack(
   const now = new Date()
   const year = now.getFullYear()
   const month = String(now.getMonth() + 1).padStart(2, '0')
-  const basePath = `${request.entityId}/${request.controlFamily}/${year}/${month}/${request.packId}`
+  const basePath =
+    opts.basePath ??
+    `${request.entityId}/${request.controlFamily}/${year}/${month}/${request.packId}`
 
   console.log(`[evidence-index] Processing pack ${request.packId} (run ${runId})`)
   console.log(`[evidence-index]   entity: ${request.entityId}`)

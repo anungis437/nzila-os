@@ -146,3 +146,77 @@ jobs:
           grep -q "collectMlEvidence" tooling/scripts/generate-evidence-index.ts  || { echo "collectMlEvidence not wired"; exit 1; }
           echo "Evidence pack ML wiring verified."
 
+  # ─── Architectural Invariants & Contract Tests ────────────────────────────
+  contract-tests:
+    runs-on: ubuntu-latest
+    name: Contract Tests (Architectural Invariants)
+    needs: [lint-and-typecheck]
+    steps:
+      - uses: actions/checkout@v4
+
+      - uses: pnpm/action-setup@v4
+        with:
+          version: 10.11.0
+
+      - uses: actions/setup-node@v4
+        with:
+          node-version: 22
+          cache: pnpm
+
+      - name: Install dependencies
+        run: pnpm install --frozen-lockfile
+
+      - name: Run contract tests
+        run: pnpm contract-tests
+
+  # ─── Ops Pack Validation ──────────────────────────────────────────────────
+  ops-pack-validation:
+    runs-on: ubuntu-latest
+    name: Ops Documentation Pack
+    steps:
+      - uses: actions/checkout@v4
+
+      - uses: pnpm/action-setup@v4
+        with:
+          version: 10.11.0
+
+      - uses: actions/setup-node@v4
+        with:
+          node-version: 22
+          cache: pnpm
+
+      - name: Install dependencies
+        run: pnpm install --frozen-lockfile
+
+      - name: Validate ops pack completeness
+        run: pnpm tsx tooling/ops/validate-ops-pack.ts ${{ github.workspace }}
+
+  # ─── Schema Drift Detection ───────────────────────────────────────────────
+  schema-drift:
+    runs-on: ubuntu-latest
+    name: Schema Drift Detection
+    steps:
+      - uses: actions/checkout@v4
+
+      - uses: pnpm/action-setup@v4
+        with:
+          version: 10.11.0
+
+      - uses: actions/setup-node@v4
+        with:
+          node-version: 22
+          cache: pnpm
+
+      - name: Install dependencies
+        run: pnpm install --frozen-lockfile
+
+      - name: Verify schema snapshot (no drift)
+        run: |
+          # If snapshot doesn't exist yet, create it and pass
+          if [ ! -f tooling/db/schema-snapshot.json ]; then
+            echo "No schema snapshot found — creating initial snapshot"
+            pnpm tsx tooling/db/schema-snapshot.ts write
+          else
+            pnpm tsx tooling/db/schema-snapshot.ts verify
+          fi
+

@@ -23,7 +23,9 @@
     "remark-html": "^16.0.1"
   },
   "devDependencies": {
+    "@nzila/ai-sdk": "workspace:*",
     "@nzila/config": "workspace:*",
+    "@nzila/ml-sdk": "workspace:*",
     "@tailwindcss/postcss": "^4",
     "@types/node": "^20",
     "@types/react": "^19",

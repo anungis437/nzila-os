@@ -94,6 +94,8 @@ db.sqlite3-journal
 
 # ----- Secrets ------
 secrets/
+# Allow os-core secrets module (TypeScript source, NOT actual credentials)
+!packages/os-core/src/secrets/
 *.pem
 *.key
 

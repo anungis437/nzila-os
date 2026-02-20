@@ -6,6 +6,13 @@
  */
 import { z } from 'zod'
 
+// ── Generic evidence artifact (produced by collectors) ───────────────────────
+
+export interface EvidenceArtifact {
+  type: string
+  [key: string]: unknown
+}
+
 // ── Control families (matches DB controlFamilyEnum) ─────────────────────────
 
 export const ControlFamily = z.enum([

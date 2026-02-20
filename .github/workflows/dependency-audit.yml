@@ -1,0 +1,68 @@
+name: Dependency Audit
+
+on:
+  push:
+    branches: [main, develop]
+    paths:
+      - '**/package.json'
+      - 'pnpm-lock.yaml'
+  pull_request:
+    branches: [main]
+    paths:
+      - '**/package.json'
+      - 'pnpm-lock.yaml'
+  schedule:
+    # Daily audit at 06:00 UTC
+    - cron: '0 6 * * *'
+
+jobs:
+  audit:
+    name: pnpm audit
+    runs-on: ubuntu-latest
+    permissions:
+      contents: read
+      security-events: write
+
+    steps:
+      - uses: actions/checkout@v4
+
+      - uses: pnpm/action-setup@v4
+        with:
+          version: 10.11.0
+
+      - uses: actions/setup-node@v4
+        with:
+          node-version: '22'
+          cache: 'pnpm'
+
+      - name: Install dependencies
+        run: pnpm install --frozen-lockfile
+
+      - name: Run pnpm audit
+        id: audit
+        run: |
+          pnpm audit --audit-level=high --json > audit-report.json || true
+          cat audit-report.json
+
+      - name: Fail on critical vulnerabilities
+        run: |
+          CRITICAL=$(cat audit-report.json | python3 -c "
+          import json, sys
+          data = json.load(sys.stdin)
+          vulns = data.get('vulnerabilities', {})
+          critical = sum(1 for v in vulns.values() if v.get('severity') in ('critical',))
+          print(critical)
+          " 2>/dev/null || echo 0)
+          echo "Critical vulnerabilities: $CRITICAL"
+          if [ "$CRITICAL" -gt "0" ]; then
+            echo "::error::$CRITICAL critical vulnerability(ies) found. Review audit-report.json."
+            exit 1
+          fi
+
+      - name: Upload audit report as artifact
+        uses: actions/upload-artifact@v4
+        if: always()
+        with:
+          name: dependency-audit-${{ github.run_id }}
+          path: audit-report.json
+          retention-days: 90

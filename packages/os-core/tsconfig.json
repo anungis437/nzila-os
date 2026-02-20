@@ -3,7 +3,12 @@
   "compilerOptions": {
     "outDir": "./dist",
     "rootDir": "./src",
-    "types": ["node"]
+    "types": ["node"],
+    "paths": {
+      "@nzila/db": ["../db/src/index.ts"],
+      "@nzila/db/schema": ["../db/src/schema/index.ts"],
+      "@nzila/db/client": ["../db/src/client.ts"]
+    }
   },
   "include": ["src/**/*.ts"],
   "exclude": ["node_modules", "dist"]

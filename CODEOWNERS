@@ -1,0 +1,42 @@
+# CODEOWNERS
+# See https://docs.github.com/en/repositories/managing-your-repositorys-settings-and-features/customizing-your-repository/about-code-owners
+
+# Global fallback — all changes require review
+* @nzila/eng
+
+# OS Core — requires senior review
+/packages/os-core/** @nzila/eng @nzila/platform
+
+# DB schema — requires platform review (schema changes need migrations)
+/packages/db/src/schema/** @nzila/platform @nzila/eng
+/packages/db/drizzle/**    @nzila/platform @nzila/eng
+
+# Security-sensitive packages
+/packages/payments-stripe/** @nzila/platform @nzila/security
+/packages/qbo/**             @nzila/platform @nzila/security
+/packages/blob/**            @nzila/platform
+
+# AI / ML packages
+/packages/ai-core/**  @nzila/ai
+/packages/ai-sdk/**   @nzila/ai @nzila/eng
+/packages/ml-core/**  @nzila/ml
+/packages/ml-sdk/**   @nzila/ml @nzila/eng
+
+# CI / Security workflows — any change requires review
+/.github/**    @nzila/platform @nzila/security
+/tooling/**    @nzila/platform
+
+# Repo contract — requires platform sign-off
+/docs/repo-contract/**  @nzila/platform
+/ARCHITECTURE.md        @nzila/platform
+/SECURITY.md            @nzila/security
+/CODEOWNERS             @nzila/platform
+
+# Apps — reviewed by respective team + eng
+/apps/console/**    @nzila/eng @nzila/platform
+/apps/partners/**   @nzila/eng @nzila/partners
+/apps/web/**        @nzila/eng
+/apps/union-eyes/** @nzila/eng @nzila/ue
+
+# Ops / compliance docs
+/ops/** @nzila/platform @nzila/security
