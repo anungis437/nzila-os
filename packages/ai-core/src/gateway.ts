@@ -9,6 +9,8 @@ import { aiCapabilityProfiles, aiDeploymentRoutes, aiDeployments, aiModels } fro
 import { eq, and } from 'drizzle-orm'
 import { getAiEnv } from '@nzila/os-core/ai-env'
 import { createAzureOpenAIProvider } from './providers/azure-openai'
+import { createOpenAIProvider } from './providers/openai'
+import { createAnthropicProvider } from './providers/anthropic'
 import { redactText } from './redact'
 import { checkBudget, recordSpend } from './budgets'
 import { logAiRequest, sha256, appendAiAuditEvent } from './logging'
@@ -39,6 +41,18 @@ function getProvider(providerKey: string): AiProviderClient {
 
   if (providerKey === 'azure_openai') {
     const client = createAzureOpenAIProvider()
+    providers.set(providerKey, client)
+    return client
+  }
+
+  if (providerKey === 'openai') {
+    const client = createOpenAIProvider()
+    providers.set(providerKey, client)
+    return client
+  }
+
+  if (providerKey === 'anthropic') {
+    const client = createAnthropicProvider()
     providers.set(providerKey, client)
     return client
   }
@@ -289,8 +303,7 @@ export async function generate(req: AiGenerateRequest): Promise<AiGenerateRespon
 
   const providerKey = deployment?.provider ?? profile.allowedProviders[0] ?? env.AI_DEFAULT_PROVIDER
   const provider = getProvider(providerKey)
-  const model = deployment?.deploymentName ?? profile.allowedModels[0] ?? env.AZURE_OPENAI_DEPLOYMENT_TEXT
-
+  const model = deployment?.deploymentName ?? profile.allowedModels[0] ?? env.AZURE_OPENAI_DEPLOYMENT_TEXT ?? env.OPENAI_MODEL_TEXT ?? env.ANTHROPIC_MODEL_TEXT ?? 'gpt-4o'
   const temperature = profile.determinismRequired
     ? 0
     : req.params?.temperature ?? deployment?.defaultTemperature ?? env.AI_TEMPERATURE_DEFAULT
@@ -418,7 +431,7 @@ export async function* chatStream(
 
   const providerKey = chatDeployment?.provider ?? profile.allowedProviders[0] ?? env.AI_DEFAULT_PROVIDER
   const provider = getProvider(providerKey)
-  const model = chatDeployment?.deploymentName ?? profile.allowedModels[0] ?? env.AZURE_OPENAI_DEPLOYMENT_TEXT
+  const model = chatDeployment?.deploymentName ?? profile.allowedModels[0] ?? env.AZURE_OPENAI_DEPLOYMENT_TEXT ?? env.OPENAI_MODEL_TEXT ?? env.ANTHROPIC_MODEL_TEXT ?? 'gpt-4o'
   const temperature = profile.determinismRequired
     ? 0
     : req.params?.temperature ?? chatDeployment?.defaultTemperature ?? env.AI_TEMPERATURE_DEFAULT
@@ -504,7 +517,7 @@ export async function embed(req: AiEmbedRequest): Promise<AiEmbedResponse> {
 
   const providerKey = embedDeployment?.provider ?? profile.allowedProviders[0] ?? env.AI_DEFAULT_PROVIDER
   const provider = getProvider(providerKey)
-  const model = embedDeployment?.deploymentName ?? env.AZURE_OPENAI_DEPLOYMENT_EMBEDDINGS
+  const model = embedDeployment?.deploymentName ?? env.AZURE_OPENAI_DEPLOYMENT_EMBEDDINGS ?? env.OPENAI_MODEL_EMBEDDINGS ?? 'text-embedding-3-small'
 
   const input = typeof req.input === 'string' ? [req.input] : req.input
 

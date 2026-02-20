@@ -1,5 +1,5 @@
 /**
- * @nzila/ai-core — Azure OpenAI provider
+ * @nzila/ai-core — Direct OpenAI provider
  *
  * ╔══════════════════════════════════════════════════════════════╗
  * ║  DO NOT IMPORT IN APPS                                      ║
@@ -10,8 +10,8 @@
  * ║  redaction, auditing, and policy enforcement.                ║
  * ╚══════════════════════════════════════════════════════════════╝
  *
- * Calls Azure OpenAI REST API directly (no external SDK dep).
- * Supports chat completions and embeddings.
+ * Calls the OpenAI REST API directly (no external SDK dep).
+ * Used for local dev; Azure OpenAI is used in staging/prod.
  */
 import { getAiEnv } from '@nzila/os-core/ai-env'
 import type {
@@ -23,28 +23,27 @@ import type {
   ProviderEmbedResult,
 } from '../types'
 
-// ── Azure OpenAI provider ───────────────────────────────────────────────────
+const CHAT_URL = 'https://api.openai.com/v1/chat/completions'
+const EMBEDDINGS_URL = 'https://api.openai.com/v1/embeddings'
 
-export function createAzureOpenAIProvider(): AiProviderClient {
+// ── Direct OpenAI provider ──────────────────────────────────────────────────
+
+export function createOpenAIProvider(): AiProviderClient {
   const env = getAiEnv()
+  const apiKey = env.OPENAI_API_KEY!
+  const project = env.OPENAI_PROJECT
 
-  function chatUrl(deployment: string): string {
-    return `${env.AZURE_OPENAI_ENDPOINT!}/openai/deployments/${deployment}/chat/completions?api-version=${env.AZURE_OPENAI_API_VERSION}`
-  }
-
-  function embeddingsUrl(deployment: string): string {
-    return `${env.AZURE_OPENAI_ENDPOINT!}/openai/deployments/${deployment}/embeddings?api-version=${env.AZURE_OPENAI_API_VERSION}`
-  }
-
-  const headers = {
-    'api-key': env.AZURE_OPENAI_API_KEY!,
+  const headers: Record<string, string> = {
+    Authorization: `Bearer ${apiKey}`,
     'Content-Type': 'application/json',
+    ...(project ? { 'OpenAI-Project': project } : {}),
   }
 
   return {
     async generate(params: ProviderGenerateParams): Promise<ProviderGenerateResult> {
-      const deployment = params.model || env.AZURE_OPENAI_DEPLOYMENT_TEXT!
+      const model = params.model || env.OPENAI_MODEL_TEXT || 'gpt-4o'
       const body = {
+        model,
         messages: params.messages,
         temperature: params.temperature,
         max_tokens: params.maxTokens,
@@ -54,7 +53,7 @@ export function createAzureOpenAIProvider(): AiProviderClient {
           : {}),
       }
 
-      const res = await fetch(chatUrl(deployment), {
+      const res = await fetch(CHAT_URL, {
         method: 'POST',
         headers,
         body: JSON.stringify(body),
@@ -62,25 +61,26 @@ export function createAzureOpenAIProvider(): AiProviderClient {
 
       if (!res.ok) {
         const errorText = await res.text()
-        throw new Error(`Azure OpenAI error ${res.status}: ${errorText}`)
+        throw new Error(`OpenAI error ${res.status}: ${errorText}`)
       }
 
-      const json = (await res.json()) as AzureChatResponse
+      const json = (await res.json()) as OpenAIChatResponse
       const choice = json.choices?.[0]
 
       return {
         content: choice?.message?.content ?? '',
         tokensIn: json.usage?.prompt_tokens ?? 0,
         tokensOut: json.usage?.completion_tokens ?? 0,
-        model: json.model ?? deployment,
+        model: json.model ?? model,
       }
     },
 
     async *generateStream(
       params: ProviderGenerateParams,
     ): AsyncIterable<AiStreamChunk> {
-      const deployment = params.model || env.AZURE_OPENAI_DEPLOYMENT_TEXT!
+      const model = params.model || env.OPENAI_MODEL_TEXT || 'gpt-4o'
       const body = {
+        model,
         messages: params.messages,
         temperature: params.temperature,
         max_tokens: params.maxTokens,
@@ -88,7 +88,7 @@ export function createAzureOpenAIProvider(): AiProviderClient {
         stream: true,
       }
 
-      const res = await fetch(chatUrl(deployment), {
+      const res = await fetch(CHAT_URL, {
         method: 'POST',
         headers,
         body: JSON.stringify(body),
@@ -96,7 +96,7 @@ export function createAzureOpenAIProvider(): AiProviderClient {
 
       if (!res.ok) {
         const errorText = await res.text()
-        throw new Error(`Azure OpenAI stream error ${res.status}: ${errorText}`)
+        throw new Error(`OpenAI stream error ${res.status}: ${errorText}`)
       }
 
       const reader = res.body?.getReader()
@@ -123,11 +123,9 @@ export function createAzureOpenAIProvider(): AiProviderClient {
           }
 
           try {
-            const parsed = JSON.parse(data) as AzureStreamChunk
+            const parsed = JSON.parse(data) as OpenAIStreamChunk
             const delta = parsed.choices?.[0]?.delta?.content ?? ''
-            if (delta) {
-              yield { delta, done: false }
-            }
+            if (delta) yield { delta, done: false }
           } catch {
             // Skip malformed SSE lines
           }
@@ -138,10 +136,10 @@ export function createAzureOpenAIProvider(): AiProviderClient {
     },
 
     async embed(params: ProviderEmbedParams): Promise<ProviderEmbedResult> {
-      const deployment = params.model || env.AZURE_OPENAI_DEPLOYMENT_EMBEDDINGS!
-      const body = { input: params.input }
+      const model = params.model || env.OPENAI_MODEL_EMBEDDINGS || 'text-embedding-3-small'
+      const body = { model, input: params.input }
 
-      const res = await fetch(embeddingsUrl(deployment), {
+      const res = await fetch(EMBEDDINGS_URL, {
         method: 'POST',
         headers,
         body: JSON.stringify(body),
@@ -149,23 +147,23 @@ export function createAzureOpenAIProvider(): AiProviderClient {
 
       if (!res.ok) {
         const errorText = await res.text()
-        throw new Error(`Azure OpenAI embeddings error ${res.status}: ${errorText}`)
+        throw new Error(`OpenAI embeddings error ${res.status}: ${errorText}`)
       }
 
-      const json = (await res.json()) as AzureEmbeddingResponse
+      const json = (await res.json()) as OpenAIEmbeddingResponse
 
       return {
         embeddings: json.data.map((d) => d.embedding),
         tokensUsed: json.usage?.total_tokens ?? 0,
-        model: json.model ?? deployment,
+        model: json.model ?? model,
       }
     },
   }
 }
 
-// ── Azure response types ────────────────────────────────────────────────────
+// ── OpenAI response types ───────────────────────────────────────────────────
 
-interface AzureChatResponse {
+interface OpenAIChatResponse {
   id: string
   model: string
   choices: {
@@ -175,14 +173,14 @@ interface AzureChatResponse {
   usage: { prompt_tokens: number; completion_tokens: number; total_tokens: number }
 }
 
-interface AzureStreamChunk {
+interface OpenAIStreamChunk {
   choices: {
     delta: { content?: string; role?: string }
     finish_reason: string | null
   }[]
 }
 
-interface AzureEmbeddingResponse {
+interface OpenAIEmbeddingResponse {
   data: { embedding: number[]; index: number }[]
   model: string
   usage: { prompt_tokens: number; total_tokens: number }

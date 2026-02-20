@@ -7,8 +7,6 @@
   "exports": {
     ".": "./src/index.ts",
     "./blob": "./src/blobTool.ts",
-    "./stripe": "./src/stripeTool.ts",
-    "./knowledge": "./src/knowledgeTool.ts",
     "./sanitize": "./src/sanitize.ts"
   },
   "scripts": {
@@ -18,7 +16,6 @@
   "dependencies": {
     "@nzila/blob": "workspace:*",
     "@nzila/db": "workspace:*",
-    "@nzila/ai-core": "workspace:*",
     "@nzila/os-core": "workspace:*",
     "@nzila/payments-stripe": "workspace:*",
     "zod": "^3.24.0"

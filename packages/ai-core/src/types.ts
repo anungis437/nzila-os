@@ -4,7 +4,7 @@
 
 // ── Provider types ──────────────────────────────────────────────────────────
 
-export type AiProvider = 'azure_openai' | 'openai'
+export type AiProvider = 'azure_openai' | 'openai' | 'anthropic'
 
 export type AiModality = 'text' | 'embeddings' | 'vision' | 'speech' | 'tools'
 

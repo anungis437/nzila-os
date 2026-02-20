@@ -14,13 +14,9 @@ export {
 } from './blobTool'
 export type { BlobUploadResult } from './blobTool'
 
-// Stripe tool
-export { generateMonthlyReports } from './stripeTool'
-export type { StripeReportResult } from './stripeTool'
-
-// Knowledge tool
-export { ingestKnowledgeSource, chunkText } from './knowledgeTool'
-export type { IngestionResult, TextChunk } from './knowledgeTool'
+// Chunker (pure — no AI deps; ingestion lives in @nzila/ai-core/tools/knowledgeTool)
+export { chunkText } from './knowledgeTool'
+export type { TextChunk } from './knowledgeTool'
 
 // Sanitize
 export { sanitize, hashSanitized, createToolCallEntry } from './sanitize'
