@@ -1,6 +1,5 @@
 import type { Metadata } from 'next';
 import Image from 'next/image';
-import Link from 'next/link';
 import ScrollReveal from '@/components/public/ScrollReveal';
 import AnimatedCounter from '@/components/public/AnimatedCounter';
 import SectionHeading from '@/components/public/SectionHeading';

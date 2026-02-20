@@ -1,6 +1,5 @@
 import { notFound } from 'next/navigation';
 import Link from 'next/link';
-import Image from 'next/image';
 import { getDocBySlug, getAllDocSlugs } from '@/lib/docs';
 import ScrollReveal from '@/components/public/ScrollReveal';
 

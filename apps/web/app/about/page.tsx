@@ -4,7 +4,6 @@ import Link from 'next/link';
 import ScrollReveal from '@/components/public/ScrollReveal';
 import AnimatedCounter from '@/components/public/AnimatedCounter';
 import SectionHeading from '@/components/public/SectionHeading';
-import InvestorCTA from '@/components/public/InvestorCTA';
 
 export const metadata: Metadata = {
   title: 'About Us',

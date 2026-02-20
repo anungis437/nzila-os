@@ -1,7 +1,7 @@
 import { defineConfig, globalIgnores } from 'eslint/config'
 import nextVitals from 'eslint-config-next/core-web-vitals'
 import nextTs from 'eslint-config-next/typescript'
-import noShadowMl from '@nzila/ml-sdk/eslint-no-shadow-ml'
+import noShadowMl from '../../packages/ml-sdk/eslint-no-shadow-ml.mjs'
 
 const eslintConfig = defineConfig([
   ...nextVitals,

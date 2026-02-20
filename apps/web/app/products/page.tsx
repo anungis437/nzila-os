@@ -1,9 +1,7 @@
 import type { Metadata } from 'next';
 import Image from 'next/image';
-import Link from 'next/link';
 import ScrollReveal from '@/components/public/ScrollReveal';
 import SectionHeading from '@/components/public/SectionHeading';
-import ImageCard from '@/components/public/ImageCard';
 import InvestorCTA from '@/components/public/InvestorCTA';
 
 export const metadata: Metadata = {

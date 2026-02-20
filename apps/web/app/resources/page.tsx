@@ -3,7 +3,6 @@ import Link from 'next/link';
 import Image from 'next/image';
 import { getAllDocs } from '@/lib/docs';
 import ScrollReveal from '@/components/public/ScrollReveal';
-import SectionHeading from '@/components/public/SectionHeading';
 import SectionDivider from '@/components/public/SectionDivider';
 
 export const metadata: Metadata = {
