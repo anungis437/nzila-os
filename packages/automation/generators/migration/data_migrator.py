@@ -1031,7 +1031,7 @@ Examples:
 
   # Full migration for ABR Insights
   python data_migrator.py --platform abr \\
-    --source-url "postgresql://postgres:pass@db.project.supabase.co:5432/postgres"
+    --source-url "postgresql://postgres:pass@<abr-db-host>:5432/postgres"
 
   # Resume failed migration
   python data_migrator.py --platform ue --resume \\

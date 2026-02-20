@@ -10,8 +10,8 @@ Prerequisites:
     pip install psycopg2-binary
 
 Usage:
-    # Set source URL (direct PostgreSQL connection string for the legacy DB)
-    $env:SOURCE_DATABASE_URL = "postgresql://postgres:PASSWORD@db.your-project.supabase.co:5432/postgres"
+    # Set source URL (direct PostgreSQL connection string for the legacy ABR database)
+    $env:SOURCE_DATABASE_URL = "postgresql://postgres:PASSWORD@<abr-db-host>:5432/postgres"
 
     # Dry run first
     python migrate_abr.py --dry-run

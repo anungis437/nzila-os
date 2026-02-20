@@ -79,52 +79,84 @@ def test_connection(label, params):
 
 
 if __name__ == "__main__":
+    import os
+
     results = {}
-    
+
     # -----------------------------------------------------------------------
-    # 1. ABR Source (Supabase)
+    # 1. ABR Source (Legacy PostgreSQL — data migration complete)
+    # Set ABR_SOURCE_DATABASE_URL to override individual vars
     # -----------------------------------------------------------------------
-    results["ABR Source (Supabase)"] = test_connection("ABR Source (Supabase)", {
-        "host": "aws-1-ca-central-1.pooler.supabase.com",
-        "port": 5432,
-        "dbname": "postgres",
-        "user": "postgres.zdcmugkafbczvxcyofiz",
-        "password": "@Cehyjygj001",
-        "sslmode": "require",
-    })
-    
+    abr_source_url = os.environ.get("ABR_SOURCE_DATABASE_URL", "")
+    if abr_source_url:
+        import urllib.parse as _up
+        _p = _up.urlparse(abr_source_url)
+        abr_source_params = {
+            "host": _p.hostname,
+            "port": _p.port or 5432,
+            "dbname": _p.path.lstrip("/"),
+            "user": _p.username,
+            "password": _up.unquote(_p.password or ""),
+            "sslmode": dict(x.split("=") for x in (_p.query or "").split("&") if "=" in x).get("sslmode", "require"),
+        }
+    else:
+        abr_source_params = {
+            "host": os.environ["ABR_SOURCE_HOST"],
+            "port": int(os.environ.get("ABR_SOURCE_PORT", "5432")),
+            "dbname": os.environ.get("ABR_SOURCE_DBNAME", "postgres"),
+            "user": os.environ["ABR_SOURCE_USER"],
+            "password": os.environ["ABR_SOURCE_PASSWORD"],
+            "sslmode": os.environ.get("ABR_SOURCE_SSLMODE", "require"),
+        }
+    results["ABR Source (Legacy PostgreSQL)"] = test_connection("ABR Source (Legacy PostgreSQL)", abr_source_params)
+
     # -----------------------------------------------------------------------
-    # 2. UE Source (Azure PostgreSQL)
+    # 2. UE Source (Azure PostgreSQL — data migration complete)
+    # Set UE_SOURCE_DATABASE_URL to override individual vars
     # -----------------------------------------------------------------------
-    results["UE Source (Azure)"] = test_connection("UE Source (Azure PostgreSQL)", {
-        "host": "unioneyes-staging-db.postgres.database.azure.com",
-        "port": 5432,
-        "dbname": "unioneyes",
-        "user": "unionadmin",
-        "password": "Nzila2026!UeStaging#Migr8",
-        "sslmode": "require",
-    })
-    
+    ue_source_url = os.environ.get("UE_SOURCE_DATABASE_URL", "")
+    if ue_source_url:
+        import urllib.parse as _up2
+        _p2 = _up2.urlparse(ue_source_url)
+        ue_source_params = {
+            "host": _p2.hostname,
+            "port": _p2.port or 5432,
+            "dbname": _p2.path.lstrip("/"),
+            "user": _p2.username,
+            "password": _up2.unquote(_p2.password or ""),
+            "sslmode": dict(x.split("=") for x in (_p2.query or "").split("&") if "=" in x).get("sslmode", "require"),
+        }
+    else:
+        ue_source_params = {
+            "host": os.environ["UE_SOURCE_HOST"],
+            "port": int(os.environ.get("UE_SOURCE_PORT", "5432")),
+            "dbname": os.environ.get("UE_SOURCE_DBNAME", "unioneyes"),
+            "user": os.environ["UE_SOURCE_USER"],
+            "password": os.environ["UE_SOURCE_PASSWORD"],
+            "sslmode": os.environ.get("UE_SOURCE_SSLMODE", "require"),
+        }
+    results["UE Source (Azure PostgreSQL)"] = test_connection("UE Source (Azure PostgreSQL)", ue_source_params)
+
     # -----------------------------------------------------------------------
-    # 3. ABR Target (Local)
+    # 3. ABR Target (Local Docker — port 5433)
     # -----------------------------------------------------------------------
     results["ABR Target (Local)"] = test_connection("ABR Target (Local)", {
-        "host": "localhost",
-        "port": 5432,
-        "dbname": "nzila_abr_insights",
-        "user": "postgres",
-        "password": "postgres",
+        "host": os.environ.get("ABR_TARGET_HOST", "localhost"),
+        "port": int(os.environ.get("ABR_TARGET_PORT", "5433")),
+        "dbname": os.environ.get("ABR_TARGET_DBNAME", "nzila_abr_insights"),
+        "user": os.environ.get("ABR_TARGET_USER", "nzila"),
+        "password": os.environ.get("ABR_TARGET_PASSWORD", "nzila_dev"),
     })
-    
+
     # -----------------------------------------------------------------------
-    # 4. UE Target (Local)
+    # 4. UE Target (Local Docker — port 5433)
     # -----------------------------------------------------------------------
     results["UE Target (Local)"] = test_connection("UE Target (Local)", {
-        "host": "localhost",
-        "port": 5432,
-        "dbname": "nzila_union_eyes",
-        "user": "postgres",
-        "password": "postgres",
+        "host": os.environ.get("UE_TARGET_HOST", "localhost"),
+        "port": int(os.environ.get("UE_TARGET_PORT", "5433")),
+        "dbname": os.environ.get("UE_TARGET_DBNAME", "nzila_union_eyes"),
+        "user": os.environ.get("UE_TARGET_USER", "nzila"),
+        "password": os.environ.get("UE_TARGET_PASSWORD", "nzila_dev"),
     })
     
     # -----------------------------------------------------------------------

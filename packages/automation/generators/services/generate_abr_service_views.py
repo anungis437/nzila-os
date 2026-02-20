@@ -693,12 +693,12 @@ SERVICE_SPECS: Dict[str, dict] = {
             {"name": "audit_log", "method": "get", "desc": "Get offboarding audit log", "model": "OffboardingAuditLog"},
         ],
     },
-    "tenant-offboarding": {
-        "class_name": "TenantOffboardingViewSet",
+    "org-offboarding-admin": {
+        "class_name": "OrgOffboardingAdminViewSet",
         "app": "core",
         "models": ["OrgOffboardingRequests", "OffboardingAuditLog"],
         "actions": [
-            {"name": "initiate", "method": "post", "desc": "Initiate tenant offboarding", "model": "OrgOffboardingRequests"},
+            {"name": "initiate", "method": "post", "desc": "Initiate org offboarding", "model": "OrgOffboardingRequests"},
             {"name": "cancel", "method": "post", "desc": "Cancel offboarding", "model": "OrgOffboardingRequests"},
             {"name": "hard_delete", "method": "post", "desc": "Execute hard delete"},
             {"name": "pending_deletions", "method": "get", "desc": "Get pending deletions", "model": "OrgOffboardingRequests"},

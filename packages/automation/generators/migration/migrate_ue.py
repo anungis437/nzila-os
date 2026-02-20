@@ -10,7 +10,7 @@ Prerequisites:
     pip install psycopg2-binary
 
 Usage:
-    # Set source URL (your legacy PostgreSQL connection - NOT a Supabase SDK URL)
+    # Set source URL (direct PostgreSQL connection string for the legacy UE database)
     $env:SOURCE_DATABASE_URL = "postgresql://unionadmin:PASSWORD@unioneyes-staging-db.postgres.database.azure.com:5432/unioneyes?sslmode=require"
 
     # Dry run first

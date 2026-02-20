@@ -10,7 +10,7 @@ core/       – CodeGenerator, DependencyAnalyzer, ProgressTracker
 migration/  – Migration executors, Django project scaffolding
 services/   – Service-view generators (UE, ABR)
 fixers/     – Model & ViewSet fixers (FK, PK, related-names)
-infra/      – Azure resources, Supabase, connection tests
+infra/      – Azure resources, connection tests
 reports/    – Audit reports, progress updates, repo populator
 """
 

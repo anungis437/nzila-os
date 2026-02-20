@@ -79,7 +79,7 @@ if __name__ == "__main__":
         files["pyproject.toml"] = f'''[project]
 name = "{config.repo_name}"
 version = "0.1.0"
-description = "Nzila Backbone Platform — Multi-tenant SaaS infrastructure"
+description = "Nzila Backbone Platform — Organization-scoped SaaS infrastructure"
 requires-python = ">={config.python_version}"
 
 [tool.pytest.ini_options]
@@ -219,7 +219,7 @@ REST_FRAMEWORK = {{
 # OpenAPI / Swagger
 SPECTACULAR_SETTINGS = {{
     "TITLE": "Nzila Backbone API",
-    "DESCRIPTION": "Multi-tenant SaaS platform API for Nzila verticals",
+    "DESCRIPTION": "Organization-scoped SaaS platform API for Nzila verticals",
     "VERSION": "1.0.0",
     "SERVE_INCLUDE_SCHEMA": False,
 }}
@@ -645,7 +645,7 @@ RESEND_API_KEY=
 
         files["README.md"] = f"""# {config.product_name}
 
-Django Backbone Platform — Multi-tenant SaaS infrastructure for Nzila verticals.
+Django Backbone Platform — Organization-scoped SaaS infrastructure for Nzila verticals.
 
 ## Quick Start
 
