@@ -1,0 +1,46 @@
+name: Ops Pack Validation
+
+on:
+  push:
+    branches: [main, develop]
+    paths:
+      - 'ops/**'
+      - 'ARCHITECTURE.md'
+      - 'SECURITY.md'
+      - 'tooling/ops/**'
+  pull_request:
+    branches: [main]
+    paths:
+      - 'ops/**'
+      - 'ARCHITECTURE.md'
+      - 'SECURITY.md'
+      - 'tooling/ops/**'
+  # Also run weekly to catch staleness
+  schedule:
+    - cron: '0 9 * * 1'
+
+jobs:
+  validate-ops-pack:
+    name: Validate Ops Documentation Pack
+    runs-on: ubuntu-latest
+    permissions:
+      contents: read
+
+    steps:
+      - uses: actions/checkout@v4
+
+      - uses: pnpm/action-setup@v4
+        with:
+          version: 10
+
+      - uses: actions/setup-node@v4
+        with:
+          node-version: '22'
+          cache: 'pnpm'
+
+      - name: Install dependencies
+        run: pnpm install --frozen-lockfile
+
+      - name: Validate ops pack completeness
+        run: |
+          pnpm tsx tooling/ops/validate-ops-pack.ts ${{ github.workspace }}
