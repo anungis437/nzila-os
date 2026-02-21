@@ -21,8 +21,8 @@
     "@nzila/ui": "workspace:*",
     "drizzle-orm": "^0.39.0",
     "next": "16.1.6",
-    "react": "19.2.3",
-    "react-dom": "19.2.3",
+    "react": "19.2.4",
+    "react-dom": "19.2.4",
     "zod": "^3.24.0"
   },
   "devDependencies": {
