@@ -104,7 +104,7 @@ export async function PATCH(
   { params }: { params: Promise<{ taxYearId: string }> },
 ) {
   const { taxYearId } = await params
-  const TaxYearPatchSchema = z.object({ status: z.string().min(1) })
+  const TaxYearPatchSchema = z.object({ status: z.enum(['open', 'filed', 'assessed', 'closed']) })
   const bodyParsed = TaxYearPatchSchema.safeParse(await req.json())
   if (!bodyParsed.success) {
     return NextResponse.json({ error: bodyParsed.error.flatten() }, { status: 400 })

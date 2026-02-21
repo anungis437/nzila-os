@@ -64,13 +64,8 @@ export async function PATCH(
 ) {
   const { periodId } = await params
   const IndirectTaxPeriodPatchSchema = z.object({
-    status: z.string().optional(),
-    filedAt: z.string().optional(),
-    filedAmount: z.number().optional(),
-    paidAt: z.string().optional(),
-    paidAmount: z.number().optional(),
-    notes: z.string().optional(),
-  }).passthrough()
+    status: z.enum(['open', 'filed', 'paid', 'closed']).optional(),
+  })
   const bodyParsed = IndirectTaxPeriodPatchSchema.safeParse(await req.json())
   if (!bodyParsed.success) {
     return NextResponse.json({ error: bodyParsed.error.flatten() }, { status: 400 })
@@ -94,7 +89,7 @@ export async function PATCH(
 
   const [updated] = await db
     .update(indirectTaxPeriods)
-    .set({ ...body, updatedAt: new Date() })
+    .set({ ...(body.status !== undefined ? { status: body.status } : {}), updatedAt: new Date() })
     .where(eq(indirectTaxPeriods.id, periodId))
     .returning()
 
