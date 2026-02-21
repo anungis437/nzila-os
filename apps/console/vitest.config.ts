@@ -1,10 +1,11 @@
-import { defineConfig } from 'vitest/config'
+import { defineProject } from 'vitest/config'
 import { resolve } from 'node:path'
 
 const ROOT = resolve(__dirname, '../..')
 
-export default defineConfig({
+export default defineProject({
   test: {
+    name: 'console',
     environment: 'node',
     include: ['lib/**/*.test.ts'],
   },

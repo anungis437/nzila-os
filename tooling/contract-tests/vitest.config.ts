@@ -1,11 +1,12 @@
-import { defineConfig } from 'vitest/config'
+import { defineProject } from 'vitest/config'
 import { join } from 'node:path'
 
-export default defineConfig({
+export default defineProject({
   test: {
+    name: 'contract-tests',
     environment: 'node',
     globals: false,
-    include: ['tooling/contract-tests/**/*.test.ts'],
+    include: ['**/*.test.ts'],
     exclude: ['**/node_modules/**'],
   },
   resolve: {
