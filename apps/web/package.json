@@ -12,7 +12,9 @@
     "clean": "rm -rf .next .turbo node_modules"
   },
   "dependencies": {
+    "@clerk/nextjs": "^6.12.0",
     "@heroicons/react": "^2.2.0",
+    "@nzila/os-core": "workspace:*",
     "@nzila/ui": "workspace:*",
     "framer-motion": "^12.0.0",
     "gray-matter": "^4.0.3",

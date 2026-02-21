@@ -1,4 +1,5 @@
 import type { Metadata } from "next";
+import { ClerkProvider } from "@clerk/nextjs";
 import { Poppins } from "next/font/google";
 import "./globals.css";
 import Navigation from "@/components/public/Navigation";
@@ -70,18 +71,20 @@ export default function RootLayout({
   children: React.ReactNode;
 }>) {
   return (
-    <html lang="en">
-      <head>
-        <JsonLd />
-      </head>
-      <body className={`${poppins.className} custom-scrollbar`}>
-        <Navigation />
-        <PageTransition>
-          {children}
-        </PageTransition>
-        <Footer />
-        <BackToTop />
-      </body>
-    </html>
+    <ClerkProvider>
+      <html lang="en">
+        <head>
+          <JsonLd />
+        </head>
+        <body className={`${poppins.className} custom-scrollbar`}>
+          <Navigation />
+          <PageTransition>
+            {children}
+          </PageTransition>
+          <Footer />
+          <BackToTop />
+        </body>
+      </html>
+    </ClerkProvider>
   );
 }
