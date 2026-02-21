@@ -11,7 +11,7 @@
  *   limit       optional — default 20, max 100
  */
 import { NextRequest, NextResponse } from 'next/server'
-import { db } from '@nzila/db'
+import { platformDb } from '@nzila/db/platform'
 import { mlInferenceRuns, mlModels } from '@nzila/db/schema'
 import { eq, and, desc } from 'drizzle-orm'
 import { requireEntityAccess } from '@/lib/api-guards'
@@ -33,7 +33,7 @@ export async function GET(req: NextRequest) {
     const access = await requireEntityAccess(entityId)
     if (!access.ok) return access.response
 
-    const rows = await db
+    const rows = await platformDb
       .select({
         id: mlInferenceRuns.id,
         entityId: mlInferenceRuns.entityId,

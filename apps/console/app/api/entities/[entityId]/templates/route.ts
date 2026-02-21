@@ -10,11 +10,8 @@ import { z } from 'zod'
 import {
   templateRegistry,
   initializeStandardTemplates,
-  STANDARD_WORKFLOW_TEMPLATES,
-  type TemplateRegistryEntry,
-  ReplicableType,
 } from '@/lib/governance'
-import { listAvailableTemplates, getResolutionTemplate } from '@nzila/os-core'
+import { listAvailableTemplates } from '@nzila/os-core'
 
 // Ensure standard templates are loaded on first access
 let initialised = false

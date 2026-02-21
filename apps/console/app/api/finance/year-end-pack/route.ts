@@ -9,7 +9,7 @@
  */
 import { NextRequest, NextResponse } from 'next/server'
 import { z } from 'zod'
-import { db } from '@nzila/db'
+import { platformDb } from '@nzila/db/platform'
 import {
   taxYears,
   taxFilings,
@@ -51,7 +51,7 @@ export async function GET(req: NextRequest) {
   if (!access.ok) return access.response
 
   // Find the tax year
-  const [taxYear] = await db
+  const [taxYear] = await platformDb
     .select()
     .from(taxYears)
     .where(and(eq(taxYears.entityId, entityId), eq(taxYears.fiscalYearLabel, fiscalYear)))
@@ -64,7 +64,7 @@ export async function GET(req: NextRequest) {
   }
 
   // Fetch profile for province
-  const [profile] = await db
+  const [profile] = await platformDb
     .select()
     .from(taxProfiles)
     .where(eq(taxProfiles.entityId, entityId))
@@ -72,16 +72,16 @@ export async function GET(req: NextRequest) {
   const isQcEntity = profile?.provinceOfRegistration === 'QC'
 
   // Gather artifacts: filings, notices, installments, indirect tax, governance links
-  const [filings, allNotices, installments, indirectAccts, indirectPrds, links, periods, approvals] =
+  const [filings, allNotices, installments, _indirectAccts, indirectPrds, links, periods, _approvals] =
     await Promise.all([
-      db.select().from(taxFilings).where(eq(taxFilings.taxYearId, taxYear.id)),
-      db.select().from(taxNotices).where(eq(taxNotices.taxYearId, taxYear.id)),
-      db.select().from(taxInstallments).where(eq(taxInstallments.taxYearId, taxYear.id)),
-      db.select().from(indirectTaxAccounts).where(eq(indirectTaxAccounts.entityId, entityId)),
-      db.select().from(indirectTaxPeriods).where(eq(indirectTaxPeriods.entityId, entityId)),
-      db.select().from(financeGovernanceLinks).where(eq(financeGovernanceLinks.entityId, entityId)),
-      db.select().from(closePeriods).where(eq(closePeriods.entityId, entityId)),
-      db.select().from(closeApprovals),
+      platformDb.select().from(taxFilings).where(eq(taxFilings.taxYearId, taxYear.id)),
+      platformDb.select().from(taxNotices).where(eq(taxNotices.taxYearId, taxYear.id)),
+      platformDb.select().from(taxInstallments).where(eq(taxInstallments.taxYearId, taxYear.id)),
+      platformDb.select().from(indirectTaxAccounts).where(eq(indirectTaxAccounts.entityId, entityId)),
+      platformDb.select().from(indirectTaxPeriods).where(eq(indirectTaxPeriods.entityId, entityId)),
+      platformDb.select().from(financeGovernanceLinks).where(eq(financeGovernanceLinks.entityId, entityId)),
+      platformDb.select().from(closePeriods).where(eq(closePeriods.entityId, entityId)),
+      platformDb.select().from(closeApprovals),
     ])
 
   // Close gate

@@ -16,7 +16,7 @@
  *   includeFeatures optional boolean (default false)
  */
 import { NextRequest, NextResponse } from 'next/server'
-import { db } from '@nzila/db'
+import { platformDb } from '@nzila/db/platform'
 import { mlScoresStripeDaily, mlModels } from '@nzila/db/schema'
 import { eq, and, gte, lte } from 'drizzle-orm'
 import { requireEntityAccess } from '@/lib/api-guards'
@@ -54,7 +54,7 @@ export async function GET(req: NextRequest) {
     // If modelKey is passed, resolve modelId(s) for that key
     let modelIds: string[] | null = null
     if (modelKey) {
-      const models = await db
+      const models = await platformDb
         .select({ id: mlModels.id })
         .from(mlModels)
         .where(and(eq(mlModels.entityId, entityId), eq(mlModels.modelKey, modelKey)))
@@ -64,7 +64,7 @@ export async function GET(req: NextRequest) {
       }
     }
 
-    const rows = await db
+    const rows = await platformDb
       .select({
         id: mlScoresStripeDaily.id,
         date: mlScoresStripeDaily.date,

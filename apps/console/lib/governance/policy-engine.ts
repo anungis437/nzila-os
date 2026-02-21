@@ -12,11 +12,8 @@ import {
   CONSTITUTIONAL_THRESHOLDS, 
   ShareClass,
   EquityTransactionType,
-  Shareholder,
-  ShareHolding,
   calculatePercentage,
   calculateDilution,
-  requiresSpecialResolution,
   borrowingExceedsThreshold,
 } from '../equity/models'
 
@@ -200,7 +197,7 @@ export class PolicyEngine {
     // Extract parameters
     const newShares = (params.shares as number) || 0
     const shareClass = (params.shareClass as ShareClass) || ShareClass.COMMON_A
-    const totalConsideration = (params.totalConsideration as number) || 0
+    const _totalConsideration = (params.totalConsideration as number) || 0
     const existingShares = context.totalSharesOutstanding
 
     // Calculate dilution
@@ -281,7 +278,7 @@ export class PolicyEngine {
 
     // Extract parameters
     const shares = (params.shares as number) || 0
-    const fromHolderId = (params.fromHolderId as string) || ''
+    const _fromHolderId = (params.fromHolderId as string) || ''
     const toHolderId = (params.toHolderId as string) || ''
     const shareClass = (params.shareClass as ShareClass) || ShareClass.COMMON_A
 
@@ -363,7 +360,7 @@ export class PolicyEngine {
    */
   private evaluateConversion(
     params: Record<string, unknown>,
-    context: CapTableContext
+    _context: CapTableContext
   ): PolicyEvaluation {
     const requirements: PolicyRequirement[] = []
     const blockers: string[] = []
@@ -373,8 +370,8 @@ export class PolicyEngine {
 
     // Extract parameters
     const fromClass = (params.fromClass as ShareClass) || ShareClass.PREFERRED_B
-    const toClass = (params.toClass as ShareClass) || ShareClass.COMMON_A
-    const shares = (params.shares as number) || 0
+    const _toClass = (params.toClass as ShareClass) || ShareClass.COMMON_A
+    const _shares = (params.shares as number) || 0
 
     // 1. Board approval required
     requirements.push({
@@ -434,7 +431,7 @@ export class PolicyEngine {
    */
   private evaluateBorrowing(
     params: Record<string, unknown>,
-    context: CapTableContext
+    _context: CapTableContext
   ): PolicyEvaluation {
     const requirements: PolicyRequirement[] = []
     const blockers: string[] = []
@@ -492,7 +489,7 @@ export class PolicyEngine {
    */
   private evaluateAmendment(
     params: Record<string, unknown>,
-    context: CapTableContext
+    _context: CapTableContext
   ): PolicyEvaluation {
     const requirements: PolicyRequirement[] = []
     const blockers: string[] = []
@@ -614,8 +611,8 @@ export class PolicyEngine {
    * Evaluate merger/acquisition
    */
   private evaluateMergerAcquisition(
-    params: Record<string, unknown>,
-    context: CapTableContext
+    _params: Record<string, unknown>,
+    _context: CapTableContext
   ): PolicyEvaluation {
     const requirements: PolicyRequirement[] = []
     const blockers: string[] = []
@@ -677,8 +674,8 @@ export class PolicyEngine {
    * Evaluate dividend distribution
    */
   private evaluateDividend(
-    params: Record<string, unknown>,
-    context: CapTableContext
+    _params: Record<string, unknown>,
+    _context: CapTableContext
   ): PolicyEvaluation {
     const requirements: PolicyRequirement[] = []
     const blockers: string[] = []
@@ -711,8 +708,8 @@ export class PolicyEngine {
    */
   private evaluateGenericAction(
     action: GovernanceAction,
-    params: Record<string, unknown>,
-    context: CapTableContext
+    _params: Record<string, unknown>,
+    _context: CapTableContext
   ): PolicyEvaluation {
     return {
       action,
@@ -738,7 +735,7 @@ export class PolicyEngine {
 
   private generateIssuanceWorkflow(
     requirements: PolicyRequirement[],
-    dilutionPercentage: number
+    _dilutionPercentage: number
   ): WorkflowSpec {
     const steps: WorkflowStep[] = [
       { order: 1, type: 'APPROVAL', actor: 'board', required: true, description: 'Board approval of issuance' },
@@ -804,7 +801,7 @@ export class PolicyEngine {
 
   private generateBorrowingWorkflow(
     requirements: PolicyRequirement[],
-    amount: number
+    _amount: number
   ): WorkflowSpec {
     const specialResRequired = requirements.some(
       r => r.approvalType === ApprovalType.SPECIAL_RESOLUTION

@@ -5,7 +5,7 @@
  * POST /api/entities/[entityId]/filings   → create a filing
  */
 import { NextRequest, NextResponse } from 'next/server'
-import { db } from '@nzila/db'
+import { platformDb } from '@nzila/db/platform'
 import { filings } from '@nzila/db/schema'
 import { eq, desc } from 'drizzle-orm'
 import { requireEntityAccess } from '@/lib/api-guards'
@@ -33,7 +33,7 @@ export async function GET(
   const guard = await requireEntityAccess(entityId)
   if (!guard.ok) return guard.response
 
-  const rows = await db
+  const rows = await platformDb
     .select()
     .from(filings)
     .where(eq(filings.entityId, entityId))
@@ -55,7 +55,7 @@ export async function POST(
   if (!parsed.success)
     return NextResponse.json({ error: parsed.error.flatten() }, { status: 400 })
 
-  const [filing] = await db
+  const [filing] = await platformDb
     .insert(filings)
     .values({
       entityId,

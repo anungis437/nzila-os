@@ -16,7 +16,7 @@
 import { NextRequest, NextResponse } from 'next/server'
 import type { Stripe } from '@nzila/payments-stripe'
 import { verifyWebhookSignature, WebhookSignatureError } from '@nzila/payments-stripe/webhooks'
-import { db } from '@nzila/db'
+import { platformDb } from '@nzila/db/platform'
 import { stripeSubscriptions } from '@nzila/db/schema'
 import { eq } from 'drizzle-orm'
 
@@ -62,7 +62,7 @@ async function handleStripeEvent(event: Stripe.Event): Promise<void> {
 
     case 'customer.subscription.deleted': {
       const sub = event.data.object as Stripe.Subscription
-      await db
+      await platformDb
         .update(stripeSubscriptions)
         .set({
           status: 'canceled',
@@ -80,7 +80,7 @@ async function handleStripeEvent(event: Stripe.Event): Promise<void> {
         const subId = typeof invoice.subscription === 'string'
           ? invoice.subscription
           : invoice.subscription.id
-        await db
+        await platformDb
           .update(stripeSubscriptions)
           .set({ status: 'active', updatedAt: new Date() })
           .where(eq(stripeSubscriptions.stripeSubscriptionId, subId))
@@ -95,7 +95,7 @@ async function handleStripeEvent(event: Stripe.Event): Promise<void> {
         const subId = typeof invoice.subscription === 'string'
           ? invoice.subscription
           : invoice.subscription.id
-        await db
+        await platformDb
           .update(stripeSubscriptions)
           .set({ status: 'past_due', updatedAt: new Date() })
           .where(eq(stripeSubscriptions.stripeSubscriptionId, subId))
@@ -139,14 +139,14 @@ async function upsertSubscription(sub: Stripe.Subscription): Promise<void> {
     updatedAt: new Date(),
   }
 
-  const existing = await db
+  const existing = await platformDb
     .select({ id: stripeSubscriptions.id })
     .from(stripeSubscriptions)
     .where(eq(stripeSubscriptions.stripeSubscriptionId, sub.id))
     .limit(1)
 
   if (existing.length > 0) {
-    await db
+    await platformDb
       .update(stripeSubscriptions)
       .set(values)
       .where(eq(stripeSubscriptions.stripeSubscriptionId, sub.id))
@@ -157,7 +157,7 @@ async function upsertSubscription(sub: Stripe.Subscription): Promise<void> {
       console.warn(`[stripe/webhooks] No entity_id in subscription metadata: ${sub.id}`)
       return
     }
-    await db.insert(stripeSubscriptions).values({
+    await platformDb.insert(stripeSubscriptions).values({
       entityId,
       stripeSubscriptionId: sub.id,
       createdBy: 'webhook',

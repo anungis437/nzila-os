@@ -5,20 +5,14 @@
  * This is the core of EquityOS.
  */
 
-import { z } from 'zod'
 import {
   Shareholder,
-  ShareholderSchema,
   ShareHolding,
-  ShareHoldingSchema,
   ShareLedgerEntry,
-  ShareLedgerEntrySchema,
   CapTableSnapshot,
-  CapTableSnapshotSchema,
   ShareClass,
   ShareholderType,
   EquityTransactionType,
-  CONSTITUTIONAL_THRESHOLDS,
   calculatePercentage,
 } from '../equity/models'
 

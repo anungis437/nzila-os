@@ -14,7 +14,7 @@
  */
 import { NextRequest, NextResponse } from 'next/server'
 import { auth } from '@clerk/nextjs/server'
-import { db } from '@nzila/db'
+import { platformDb } from '@nzila/db/platform'
 import { qboConnections, qboTokens } from '@nzila/db/schema'
 import { exchangeCodeForTokens } from '@nzila/qbo/oauth'
 import { eq, and } from 'drizzle-orm'
@@ -84,7 +84,7 @@ export async function GET(req: NextRequest) {
     tokenSet.obtainedAt + tokenSet.x_refresh_token_expires_in * 1000,
   )
 
-  await db.transaction(async (tx) => {
+  await platformDb.transaction(async (tx) => {
     // Mark any existing active connection for this entity+realmId inactive
     await tx
       .update(qboConnections)

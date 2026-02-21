@@ -5,7 +5,7 @@
  * POST /api/entities/[entityId]/equity/ledger   → append entry
  */
 import { NextRequest, NextResponse } from 'next/server'
-import { db } from '@nzila/db'
+import { platformDb } from '@nzila/db/platform'
 import { shareLedgerEntries } from '@nzila/db/schema'
 import { eq, desc } from 'drizzle-orm'
 import { requireEntityAccess } from '@/lib/api-guards'
@@ -40,7 +40,7 @@ export async function GET(
   const guard = await requireEntityAccess(entityId)
   if (!guard.ok) return guard.response
 
-  const rows = await db
+  const rows = await platformDb
     .select()
     .from(shareLedgerEntries)
     .where(eq(shareLedgerEntries.entityId, entityId))
@@ -63,7 +63,7 @@ export async function POST(
     return NextResponse.json({ error: parsed.error.flatten() }, { status: 400 })
 
   // Get previous hash (last entry for this entity)
-  const [lastEntry] = await db
+  const [lastEntry] = await platformDb
     .select({ hash: shareLedgerEntries.hash })
     .from(shareLedgerEntries)
     .where(eq(shareLedgerEntries.entityId, entityId))
@@ -74,7 +74,7 @@ export async function POST(
   const payload = { ...parsed.data, entityId }
   const hash = computeEntryHash(payload, previousHash)
 
-  const [entry] = await db
+  const [entry] = await platformDb
     .insert(shareLedgerEntries)
     .values({
       entityId,

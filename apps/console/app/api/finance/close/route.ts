@@ -12,7 +12,7 @@
  */
 import { NextRequest, NextResponse } from 'next/server'
 import { z } from 'zod'
-import { db } from '@nzila/db'
+import { platformDb } from '@nzila/db/platform'
 import { closePeriods, closeExceptions } from '@nzila/db/schema'
 import { eq, and, ne } from 'drizzle-orm'
 import { requireEntityAccess } from '@/lib/api-guards'
@@ -46,7 +46,7 @@ export async function GET(req: NextRequest) {
   const access = await requireEntityAccess(entityId)
   if (!access.ok) return access.response
 
-  const periods = await db
+  const periods = await platformDb
     .select()
     .from(closePeriods)
     .where(eq(closePeriods.entityId, entityId))
@@ -64,7 +64,7 @@ export async function POST(req: NextRequest) {
   const access = await requireEntityAccess(entityId, { minRole: 'entity_secretary' })
   if (!access.ok) return access.response
 
-  const [row] = await db
+  const [row] = await platformDb
     .insert(closePeriods)
     .values({
       entityId,
@@ -98,7 +98,7 @@ export async function PATCH(req: NextRequest) {
   const { id, status } = parsed.data
 
   // Fetch the period to know entityId and prior status
-  const [existing] = await db
+  const [existing] = await platformDb
     .select()
     .from(closePeriods)
     .where(eq(closePeriods.id, id))
@@ -114,7 +114,7 @@ export async function PATCH(req: NextRequest) {
 
   // ── Governance gate: block close if unresolved exceptions ──
   if (status === 'closed') {
-    const openExceptions = await db
+    const openExceptions = await platformDb
       .select()
       .from(closeExceptions)
       .where(
@@ -148,7 +148,7 @@ export async function PATCH(req: NextRequest) {
     updates.closedAt = new Date()
   }
 
-  const [row] = await db
+  const [row] = await platformDb
     .update(closePeriods)
     .set(updates)
     .where(eq(closePeriods.id, id))

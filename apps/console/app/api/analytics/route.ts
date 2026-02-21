@@ -7,7 +7,7 @@
  * unique people, document counts, action counts, audit chain stats.
  */
 import { NextResponse } from 'next/server'
-import { db } from '@nzila/db'
+import { platformDb } from '@nzila/db/platform'
 import {
   entities,
   entityMembers,
@@ -30,7 +30,7 @@ export async function GET() {
   const { userId } = authResult
 
   // Find all entities the user can access
-  const userEntities = await db
+  const userEntities = await platformDb
     .select({
       id: entities.id,
       legalName: entities.legalName,
@@ -65,7 +65,7 @@ export async function GET() {
   }
 
   // Gather data across all entities for HyperLogLog cardinality estimation
-  const allShareholders = await db
+  const allShareholders = await platformDb
     .select({ legalName: people.legalName, email: people.email })
     .from(shareholders)
     .innerJoin(people, eq(people.id, shareholders.holderPersonId))
@@ -76,7 +76,7 @@ export async function GET() {
       )})`,
     )
 
-  const allPeople = await db
+  const allPeople = await platformDb
     .select({ legalName: people.legalName, email: people.email })
     .from(people)
     .where(
@@ -105,32 +105,32 @@ export async function GET() {
     sql`, `,
   )})`
 
-  const [docCount] = await db
+  const [docCount] = await platformDb
     .select({ count: count() })
     .from(documents)
     .where(entityFilter)
 
-  const [actionCount] = await db
+  const [actionCount] = await platformDb
     .select({ count: count() })
     .from(governanceActions)
     .where(entityFilter)
 
-  const [auditCount] = await db
+  const [auditCount] = await platformDb
     .select({ count: count() })
     .from(auditEvents)
     .where(entityFilter)
 
-  const [ledgerCount] = await db
+  const [ledgerCount] = await platformDb
     .select({ count: count() })
     .from(shareLedgerEntries)
     .where(entityFilter)
 
-  const [resolutionCount] = await db
+  const [resolutionCount] = await platformDb
     .select({ count: count() })
     .from(resolutions)
     .where(entityFilter)
 
-  const [meetingCount] = await db
+  const [meetingCount] = await platformDb
     .select({ count: count() })
     .from(meetings)
     .where(entityFilter)

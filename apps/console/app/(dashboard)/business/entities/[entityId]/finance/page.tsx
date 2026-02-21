@@ -22,7 +22,7 @@ const tiles = [
     title: 'Expenses',
     description: 'Submit and track entity-level expense claims.',
     icon: ReceiptPercentIcon,
-    href: (_eid: string) => '/business/finance/expense',
+    href: (_: string) => '/business/finance/expense',
     color: 'text-green-600',
   },
 ]

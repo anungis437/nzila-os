@@ -11,7 +11,7 @@
  */
 import { NextRequest, NextResponse } from 'next/server'
 import { z } from 'zod'
-import { db } from '@nzila/db'
+import { platformDb } from '@nzila/db/platform'
 import { stripeRefunds, stripePayments } from '@nzila/db/schema'
 import { eq } from 'drizzle-orm'
 import { requiresApproval, executeRefund } from '@nzila/payments-stripe/primitives'
@@ -38,7 +38,7 @@ export async function POST(req: NextRequest): Promise<NextResponse> {
   const { entityId, paymentId, amountCents, reason } = parsed.data
 
   // Look up the payment to get the Stripe object ID
-  const [payment] = await db
+  const [payment] = await platformDb
     .select()
     .from(stripePayments)
     .where(eq(stripePayments.id, paymentId))
@@ -62,7 +62,7 @@ export async function POST(req: NextRequest): Promise<NextResponse> {
   // Check if approval is required
   if (requiresApproval(amountCents)) {
     // Create pending refund — do NOT call Stripe yet
-    const [refundRow] = await db
+    const [refundRow] = await platformDb
       .insert(stripeRefunds)
       .values({
         entityId,
@@ -92,7 +92,7 @@ export async function POST(req: NextRequest): Promise<NextResponse> {
       reason,
     })
 
-    const [refundRow] = await db
+    const [refundRow] = await platformDb
       .insert(stripeRefunds)
       .values({
         entityId,

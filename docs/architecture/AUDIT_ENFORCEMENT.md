@@ -124,6 +124,6 @@ automatic audit emission without removing any existing capability.
 
 ## Related Documents
 
-- [ENTITY_ISOLATION.md](./ENTITY_ISOLATION.md) — Scoped DAL foundation
+- [ORG_ISOLATION.md](./ORG_ISOLATION.md) — Scoped DAL foundation
 - [VERTICAL_SCAFFOLDING.md](./VERTICAL_SCAFFOLDING.md) — Scaffolded verticals use withAudit by default
 - [ENFORCEMENT_SUMMARY.md](./ENFORCEMENT_SUMMARY.md) — Full enforcement layer summary

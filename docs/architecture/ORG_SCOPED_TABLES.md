@@ -105,7 +105,7 @@ Any new entry requires CODEOWNERS approval from `@nzila/platform`.
 | -------------------------------------- | --------- |
 | `org-scoped-registry.test.ts`          | INV-20: Registry ↔ schema bidirectional consistency |
 | `scoped-dal-negative.test.ts`          | INV-21: Negative fixtures (missing orgId, write-on-read-only, filter override) |
-| `db-boundary.test.ts`                  | INV-06/07: No raw DB in apps, entity isolation |
+| `db-boundary.test.ts`                  | INV-06/07: No raw DB in apps, Org isolation |
 
 ## 9. Current Registry (auto-generated reference)
 

@@ -3,12 +3,10 @@
  *
  * Lists knowledge sources, shows ingestion runs, and provides ingest button.
  */
-// eslint-disable-next-line no-restricted-imports -- non-ML data: AI knowledge tables, no ml* table access
-import { db } from '@nzila/db'
+import { platformDb } from '@nzila/db/platform'
 import {
   aiKnowledgeSources,
   aiKnowledgeIngestionRuns,
-  documents,
 } from '@nzila/db/schema'
 import { eq, desc } from 'drizzle-orm'
 import { auth } from '@clerk/nextjs/server'
@@ -20,14 +18,14 @@ export const dynamic = 'force-dynamic'
 const DEFAULT_ENTITY_ID = process.env.NZILA_DEFAULT_ENTITY_ID ?? ''
 
 async function getKnowledgeData(entityId: string) {
-  const sources = await db
+  const sources = await platformDb
     .select()
     .from(aiKnowledgeSources)
     .where(eq(aiKnowledgeSources.entityId, entityId))
     .orderBy(desc(aiKnowledgeSources.createdAt))
     .limit(50)
 
-  const ingestionRuns = await db
+  const ingestionRuns = await platformDb
     .select()
     .from(aiKnowledgeIngestionRuns)
     .where(eq(aiKnowledgeIngestionRuns.entityId, entityId))
@@ -83,7 +81,6 @@ export default async function AiKnowledgePage() {
           <tbody>
             {sources.map((source) => {
               const sourceRuns = runsBySource.get(source.id) ?? []
-              const latestRun = sourceRuns[0]
               return (
                 <tr key={source.id} className="border-b hover:bg-muted/30">
                   <td className="px-4 py-3 font-medium">{source.title}</td>

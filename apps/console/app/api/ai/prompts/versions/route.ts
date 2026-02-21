@@ -6,7 +6,7 @@
  * PATCH /api/ai/prompts/versions               → activate a version
  */
 import { NextRequest, NextResponse } from 'next/server'
-import { db } from '@nzila/db'
+import { platformDb } from '@nzila/db/platform'
 import { aiPromptVersions } from '@nzila/db/schema'
 import { eq, desc } from 'drizzle-orm'
 import { z } from 'zod'
@@ -54,7 +54,7 @@ export async function POST(req: NextRequest) {
   }
 
   // Get next version number
-  const [latest] = await db
+  const [latest] = await platformDb
     .select({ version: aiPromptVersions.version })
     .from(aiPromptVersions)
     .where(eq(aiPromptVersions.promptId, parsed.data.promptId))
@@ -63,7 +63,7 @@ export async function POST(req: NextRequest) {
 
   const nextVersion = (latest?.version ?? 0) + 1
 
-  const [row] = await db
+  const [row] = await platformDb
     .insert(aiPromptVersions)
     .values({
       promptId: parsed.data.promptId,

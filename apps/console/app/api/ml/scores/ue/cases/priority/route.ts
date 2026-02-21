@@ -24,7 +24,7 @@
  *   { items: UEPriorityScoreResponse[], nextCursor: string | null, total: number }
  */
 import { NextRequest, NextResponse } from 'next/server'
-import { db } from '@nzila/db'
+import { platformDb } from '@nzila/db/platform'
 import { mlScoresUECasesPriority, mlModels } from '@nzila/db/schema'
 import { eq, and, gte, lte, lt, desc, or } from 'drizzle-orm'
 import { requireEntityAccess } from '@/lib/api-guards'
@@ -101,7 +101,7 @@ export async function GET(req: NextRequest) {
         : []),
     )
 
-    const rows = await db
+    const rows = await platformDb
       .select({
         id: mlScoresUECasesPriority.id,
         caseId: mlScoresUECasesPriority.caseId,

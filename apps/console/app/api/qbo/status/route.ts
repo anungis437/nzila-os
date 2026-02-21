@@ -7,7 +7,7 @@
  */
 import { NextRequest, NextResponse } from 'next/server'
 import { z } from 'zod'
-import { db } from '@nzila/db'
+import { platformDb } from '@nzila/db/platform'
 import { qboConnections, qboTokens } from '@nzila/db/schema'
 import { eq, and, desc } from 'drizzle-orm'
 import { requireEntityAccess } from '@/lib/api-guards'
@@ -24,7 +24,7 @@ export async function GET(req: NextRequest) {
   const access = await requireEntityAccess(entityId)
   if (!access.ok) return access.response
 
-  const connection = await db.query.qboConnections.findFirst({
+  const connection = await platformDb.query.qboConnections.findFirst({
     where: and(
       eq(qboConnections.entityId, entityId),
       eq(qboConnections.isActive, true),
@@ -36,7 +36,7 @@ export async function GET(req: NextRequest) {
     return NextResponse.json({ connected: false })
   }
 
-  const tokenRow = await db.query.qboTokens.findFirst({
+  const tokenRow = await platformDb.query.qboTokens.findFirst({
     where: eq(qboTokens.connectionId, connection.id),
     orderBy: [desc(qboTokens.createdAt)],
   })
@@ -68,7 +68,7 @@ export async function DELETE(req: NextRequest) {
   const access = await requireEntityAccess(entityId, { minRole: 'entity_admin' })
   if (!access.ok) return access.response
 
-  const connection = await db.query.qboConnections.findFirst({
+  const connection = await platformDb.query.qboConnections.findFirst({
     where: and(
       eq(qboConnections.entityId, entityId),
       eq(qboConnections.isActive, true),
@@ -79,7 +79,7 @@ export async function DELETE(req: NextRequest) {
     return NextResponse.json({ error: 'No active QBO connection' }, { status: 404 })
   }
 
-  const tokenRow = await db.query.qboTokens.findFirst({
+  const tokenRow = await platformDb.query.qboTokens.findFirst({
     where: eq(qboTokens.connectionId, connection.id),
     orderBy: [desc(qboTokens.createdAt)],
   })
@@ -92,7 +92,7 @@ export async function DELETE(req: NextRequest) {
   }
 
   const now = new Date()
-  await db
+  await platformDb
     .update(qboConnections)
     .set({ isActive: false, disconnectedAt: now, updatedAt: now })
     .where(eq(qboConnections.id, connection.id))

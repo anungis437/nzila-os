@@ -5,7 +5,7 @@
  * POST /api/entities/[entityId]/equity/cap-table   → generate snapshot
  */
 import { NextRequest, NextResponse } from 'next/server'
-import { db } from '@nzila/db'
+import { platformDb } from '@nzila/db/platform'
 import {
   capTableSnapshots,
   shareholders,
@@ -29,7 +29,7 @@ export async function GET(
   const guard = await requireEntityAccess(entityId)
   if (!guard.ok) return guard.response
 
-  const rows = await db
+  const rows = await platformDb
     .select()
     .from(capTableSnapshots)
     .where(eq(capTableSnapshots.entityId, entityId))
@@ -53,7 +53,7 @@ export async function POST(
     return NextResponse.json({ error: parsed.error.flatten() }, { status: 400 })
 
   // Build snapshot from current ledger
-  const holdings = await db
+  const holdings = await platformDb
     .select({
       holderName: people.legalName,
       className: shareClasses.displayName,
@@ -86,7 +86,7 @@ export async function POST(
     })),
   }
 
-  const [snapshot] = await db
+  const [snapshot] = await platformDb
     .insert(capTableSnapshots)
     .values({
       entityId,

@@ -6,17 +6,14 @@
  * then optionally passes retrieved context to LLM for answer.
  */
 import { NextRequest, NextResponse } from 'next/server'
-import { db } from '@nzila/db'
-import { aiEmbeddings, aiKnowledgeSources } from '@nzila/db/schema'
+import { platformDb } from '@nzila/db/platform'
 import {
   generate,
   embed,
   AiRagQueryRequestSchema,
-  AiControlPlaneError,
-  logAiRequest,
 } from '@nzila/ai-core'
 import { requireEntityAccess } from '@/lib/api-guards'
-import { eq, and, sql } from 'drizzle-orm'
+import { sql } from 'drizzle-orm'
 import { asAiError } from '@/lib/catch-utils'
 
 export async function POST(req: NextRequest) {
@@ -53,7 +50,7 @@ export async function POST(req: NextRequest) {
     // Note: This requires the vector column to be properly typed in the database
     const vectorStr = `[${queryVector.join(',')}]`
 
-    const chunks = await db.execute(sql`
+    const chunks = await platformDb.execute(sql`
       SELECT
         e.id,
         e.chunk_id,
@@ -68,7 +65,7 @@ export async function POST(req: NextRequest) {
       LIMIT ${topK}
     `)
 
-    // db.execute() with the postgres driver returns rows directly as RowList (iterable)
+    // platformDb.execute() with the postgres driver returns rows directly as RowList (iterable)
     const resultChunks = (chunks as unknown as Record<string, unknown>[]).map((row) => ({
       chunkId: row.chunk_id as string,
       chunkText: row.chunk_text as string,

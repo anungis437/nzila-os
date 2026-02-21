@@ -5,7 +5,7 @@
  * POST /api/entities/[entityId]/audit   → log event (internal use)
  */
 import { NextRequest, NextResponse } from 'next/server'
-import { db } from '@nzila/db'
+import { platformDb } from '@nzila/db/platform'
 import { auditEvents } from '@nzila/db/schema'
 import { eq, desc } from 'drizzle-orm'
 import { requireEntityAccess } from '@/lib/api-guards'
@@ -29,7 +29,7 @@ export async function GET(
   const guard = await requireEntityAccess(entityId)
   if (!guard.ok) return guard.response
 
-  const rows = await db
+  const rows = await platformDb
     .select()
     .from(auditEvents)
     .where(eq(auditEvents.entityId, entityId))
@@ -55,7 +55,7 @@ export async function POST(
     return NextResponse.json({ error: parsed.error.flatten() }, { status: 400 })
 
   // Get previous hash
-  const [lastEvent] = await db
+  const [lastEvent] = await platformDb
     .select({ hash: auditEvents.hash })
     .from(auditEvents)
     .where(eq(auditEvents.entityId, entityId))
@@ -66,7 +66,7 @@ export async function POST(
   const payload = { ...parsed.data, entityId, actorClerkUserId: userId }
   const hash = computeEntryHash(payload, previousHash)
 
-  const [event] = await db
+  const [event] = await platformDb
     .insert(auditEvents)
     .values({
       entityId,

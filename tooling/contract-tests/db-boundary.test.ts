@@ -3,7 +3,7 @@
  *
  * Structural invariant: Application code (apps/*) must never
  * directly access the raw database client. All queries must flow
- * through createScopedDb(entityId) for entity isolation.
+ * through createScopedDb(entityId) for Org isolation.
  *
  * Enforcement layers validated:
  *   1. No rawDb imports in apps/*
@@ -13,7 +13,7 @@
  *   5. ESLint no-shadow-db rule wired into every app
  *
  * @invariant INV-06: No raw DB access in application layer
- * @invariant INV-07: Entity isolation via Scoped DAL
+ * @invariant INV-07: Org isolation via Scoped DAL
  */
 import { describe, it, expect } from 'vitest'
 import { readFileSync, readdirSync, existsSync, statSync } from 'node:fs'
@@ -173,9 +173,9 @@ describe('INV-06 — No raw DB access in application layer', () => {
   })
 })
 
-// ── INV-07: Entity isolation via Scoped DAL ─────────────────────────────────
+// ── INV-07: Org isolation via Scoped DAL ─────────────────────────────────────
 
-describe('INV-07 — Entity isolation enforced via Scoped DAL', () => {
+describe('INV-07 — Org isolation enforced via Scoped DAL', () => {
   it('createScopedDb exists and is exported from @nzila/db/scoped', () => {
     const scopedPath = join(ROOT, 'packages', 'db', 'src', 'scoped.ts')
     expect(existsSync(scopedPath), '@nzila/db/scoped module must exist').toBe(true)

@@ -6,10 +6,10 @@
  * Executes an approved action. RBAC: finance_preparer or ai_admin or entity_admin.
  */
 import { NextRequest, NextResponse } from 'next/server'
-import { db } from '@nzila/db'
+import { platformDb } from '@nzila/db/platform'
 import { aiActions } from '@nzila/db/schema'
 import { eq } from 'drizzle-orm'
-import { executeAction, ACTION_TYPES } from '@nzila/ai-core'
+import { executeAction } from '@nzila/ai-core'
 import { requireEntityAccess } from '@/lib/api-guards'
 import { asAiError } from '@/lib/catch-utils'
 import { z } from 'zod'
@@ -30,7 +30,7 @@ export async function POST(req: NextRequest) {
     const { entityId, actionId } = parsed.data
 
     // Load action to check type
-    const [action] = await db
+    const [action] = await platformDb
       .select()
       .from(aiActions)
       .where(eq(aiActions.id, actionId))

@@ -11,7 +11,7 @@
  *  • Hash-chained audit events
  */
 import { NextRequest, NextResponse } from 'next/server'
-import { db } from '@nzila/db'
+import { platformDb } from '@nzila/db/platform'
 import { taxFilings, taxYears, financeGovernanceLinks } from '@nzila/db/schema'
 import { eq } from 'drizzle-orm'
 import { requireEntityAccess } from '@/lib/api-guards'
@@ -34,7 +34,7 @@ export async function GET(req: NextRequest) {
   // For entity-scoped access, we need entityId. If only taxYearId, resolve entity.
   let resolvedEntityId = entityId
   if (!resolvedEntityId && taxYearId) {
-    const [ty] = await db.select().from(taxYears).where(eq(taxYears.id, taxYearId))
+    const [ty] = await platformDb.select().from(taxYears).where(eq(taxYears.id, taxYearId))
     resolvedEntityId = ty?.entityId ?? null
   }
 
@@ -49,7 +49,7 @@ export async function GET(req: NextRequest) {
     ? eq(taxFilings.taxYearId, taxYearId)
     : eq(taxFilings.entityId, resolvedEntityId)
 
-  const rows = await db.select().from(taxFilings).where(filter)
+  const rows = await platformDb.select().from(taxFilings).where(filter)
   return NextResponse.json(rows)
 }
 
@@ -91,7 +91,7 @@ export async function POST(req: NextRequest) {
 
   // ── Dividend governance link gate for T5 / RL-3 ──
   if (parsed.data.filingType === 'T5' || parsed.data.filingType === 'RL-3') {
-    const links = await db
+    const links = await platformDb
       .select()
       .from(financeGovernanceLinks)
       .where(eq(financeGovernanceLinks.entityId, parsed.data.entityId))
@@ -112,7 +112,7 @@ export async function POST(req: NextRequest) {
     }
   }
 
-  const [row] = await db.insert(taxFilings).values(parsed.data).returning()
+  const [row] = await platformDb.insert(taxFilings).values(parsed.data).returning()
 
   await recordFinanceAuditEvent({
     entityId: parsed.data.entityId,

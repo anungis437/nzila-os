@@ -5,7 +5,7 @@
  * POST /api/entities          → create entity (platform_admin, studio_admin, ops)
  */
 import { NextRequest, NextResponse } from 'next/server'
-import { db } from '@nzila/db'
+import { platformDb } from '@nzila/db/platform'
 import { entities, entityMembers } from '@nzila/db/schema'
 import { eq, and } from 'drizzle-orm'
 import { z } from 'zod'
@@ -24,7 +24,7 @@ export async function GET() {
   const { userId } = authResult
 
   // Return entities where user is a member
-  const rows = await db
+  const rows = await platformDb
     .select({
       id: entities.id,
       legalName: entities.legalName,
@@ -56,7 +56,7 @@ export async function POST(req: NextRequest) {
     return NextResponse.json({ error: parsed.error.flatten() }, { status: 400 })
   }
 
-  const [entity] = await db
+  const [entity] = await platformDb
     .insert(entities)
     .values({
       legalName: parsed.data.legalName,
@@ -67,7 +67,7 @@ export async function POST(req: NextRequest) {
     .returning()
 
   // Auto-add creator as entity_admin
-  await db.insert(entityMembers).values({
+  await platformDb.insert(entityMembers).values({
     entityId: entity.id,
     clerkUserId: userId,
     role: 'entity_admin',

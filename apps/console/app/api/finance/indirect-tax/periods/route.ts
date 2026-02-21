@@ -8,7 +8,7 @@
  * PR5 — Entity-scoped auth + audit events
  */
 import { NextRequest, NextResponse } from 'next/server'
-import { db } from '@nzila/db'
+import { platformDb } from '@nzila/db/platform'
 import { indirectTaxPeriods } from '@nzila/db/schema'
 import { eq, and } from 'drizzle-orm'
 import { requireEntityAccess } from '@/lib/api-guards'
@@ -33,7 +33,7 @@ export async function GET(req: NextRequest) {
     ? and(eq(indirectTaxPeriods.entityId, entityId), eq(indirectTaxPeriods.accountId, accountId))
     : eq(indirectTaxPeriods.entityId, entityId)
 
-  const rows = await db.select().from(indirectTaxPeriods).where(conditions)
+  const rows = await platformDb.select().from(indirectTaxPeriods).where(conditions)
   return NextResponse.json(rows)
 }
 
@@ -49,7 +49,7 @@ export async function POST(req: NextRequest) {
   })
   if (!access.ok) return access.response
 
-  const [row] = await db
+  const [row] = await platformDb
     .insert(indirectTaxPeriods)
     .values(parsed.data)
     .returning()
@@ -80,7 +80,7 @@ export async function PATCH(req: NextRequest) {
   }
 
   // Fetch existing to get entityId + previous status
-  const [existing] = await db
+  const [existing] = await platformDb
     .select()
     .from(indirectTaxPeriods)
     .where(eq(indirectTaxPeriods.id, id))
@@ -94,7 +94,7 @@ export async function PATCH(req: NextRequest) {
   })
   if (!access.ok) return access.response
 
-  const [row] = await db
+  const [row] = await platformDb
     .update(indirectTaxPeriods)
     .set({ ...updates, updatedAt: new Date() })
     .where(eq(indirectTaxPeriods.id, id))

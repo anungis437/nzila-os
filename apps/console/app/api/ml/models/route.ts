@@ -10,7 +10,7 @@
  *   status      optional — filter to a specific status (draft|active|retired)
  */
 import { NextRequest, NextResponse } from 'next/server'
-import { db } from '@nzila/db'
+import { platformDb } from '@nzila/db/platform'
 import { mlModels } from '@nzila/db/schema'
 import { eq, and, desc } from 'drizzle-orm'
 import { requireEntityAccess } from '@/lib/api-guards'
@@ -36,7 +36,7 @@ export async function GET(req: NextRequest) {
       ...(status ? [eq(mlModels.status, status as 'draft' | 'active' | 'retired')] : []),
     ]
 
-    const rows = await db
+    const rows = await platformDb
       .select()
       .from(mlModels)
       .where(and(...conditions))

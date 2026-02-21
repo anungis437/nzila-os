@@ -5,12 +5,12 @@
  * POST /api/entities/[entityId]/resolutions   → create resolution
  */
 import { NextRequest, NextResponse } from 'next/server'
-import { db } from '@nzila/db'
+import { platformDb } from '@nzila/db/platform'
 import { resolutions } from '@nzila/db/schema'
 import { eq, desc } from 'drizzle-orm'
 import { requireEntityAccess } from '@/lib/api-guards'
 import { z } from 'zod'
-import { getResolutionTemplate, listAvailableTemplates } from '@nzila/os-core'
+import { getResolutionTemplate } from '@nzila/os-core'
 
 const CreateResolutionSchema = z.object({
   kind: z.enum(['board', 'shareholder', 'special']),
@@ -34,7 +34,7 @@ export async function GET(
   const guard = await requireEntityAccess(entityId)
   if (!guard.ok) return guard.response
 
-  const rows = await db
+  const rows = await platformDb
     .select()
     .from(resolutions)
     .where(eq(resolutions.entityId, entityId))
@@ -66,7 +66,7 @@ export async function POST(
     if (tpl) bodyMarkdown = tpl.bodyMarkdown
   }
 
-  const [resolution] = await db
+  const [resolution] = await platformDb
     .insert(resolutions)
     .values({
       entityId,

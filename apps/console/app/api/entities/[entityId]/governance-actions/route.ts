@@ -5,7 +5,7 @@
  * POST /api/entities/[entityId]/governance-actions   → create + policy eval
  */
 import { NextRequest, NextResponse } from 'next/server'
-import { db } from '@nzila/db'
+import { platformDb } from '@nzila/db/platform'
 import { governanceActions, entities } from '@nzila/db/schema'
 import { eq, desc } from 'drizzle-orm'
 import { requireEntityAccess } from '@/lib/api-guards'
@@ -31,7 +31,7 @@ export async function GET(
   const guard = await requireEntityAccess(entityId)
   if (!guard.ok) return guard.response
 
-  const rows = await db
+  const rows = await platformDb
     .select()
     .from(governanceActions)
     .where(eq(governanceActions.entityId, entityId))
@@ -55,7 +55,7 @@ export async function POST(
     return NextResponse.json({ error: parsed.error.flatten() }, { status: 400 })
 
   // Load entity policy config
-  const [entity] = await db
+  const [entity] = await platformDb
     .select({ policyConfig: entities.policyConfig })
     .from(entities)
     .where(eq(entities.id, entityId))
@@ -68,7 +68,7 @@ export async function POST(
     policyConfig.success ? policyConfig.data : {},
   )
 
-  const [action] = await db
+  const [action] = await platformDb
     .insert(governanceActions)
     .values({
       entityId,

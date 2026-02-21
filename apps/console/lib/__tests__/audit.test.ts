@@ -1,4 +1,4 @@
-import { describe, it, expect, vi, beforeEach, afterEach } from 'vitest'
+import { describe, it, expect, vi, afterEach } from 'vitest'
 
 // Mock DB to avoid requiring DATABASE_URL at import time
 vi.mock('@nzila/db', () => ({ db: {} }))

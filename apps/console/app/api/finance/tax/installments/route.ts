@@ -8,7 +8,7 @@
  * PR5 — Entity-scoped auth + audit events
  */
 import { NextRequest, NextResponse } from 'next/server'
-import { db } from '@nzila/db'
+import { platformDb } from '@nzila/db/platform'
 import { taxInstallments, taxYears } from '@nzila/db/schema'
 import { eq } from 'drizzle-orm'
 import { requireEntityAccess } from '@/lib/api-guards'
@@ -28,7 +28,7 @@ export async function GET(req: NextRequest) {
 
   let resolvedEntityId = entityId
   if (!resolvedEntityId && taxYearId) {
-    const [ty] = await db.select().from(taxYears).where(eq(taxYears.id, taxYearId))
+    const [ty] = await platformDb.select().from(taxYears).where(eq(taxYears.id, taxYearId))
     resolvedEntityId = ty?.entityId ?? null
   }
   if (!resolvedEntityId) {
@@ -42,7 +42,7 @@ export async function GET(req: NextRequest) {
     ? eq(taxInstallments.taxYearId, taxYearId)
     : eq(taxInstallments.entityId, resolvedEntityId)
 
-  const rows = await db.select().from(taxInstallments).where(filter)
+  const rows = await platformDb.select().from(taxInstallments).where(filter)
   return NextResponse.json(rows)
 }
 
@@ -58,7 +58,7 @@ export async function POST(req: NextRequest) {
   })
   if (!access.ok) return access.response
 
-  const [row] = await db.insert(taxInstallments).values(parsed.data).returning()
+  const [row] = await platformDb.insert(taxInstallments).values(parsed.data).returning()
 
   await recordFinanceAuditEvent({
     entityId: parsed.data.entityId,
@@ -85,7 +85,7 @@ export async function PATCH(req: NextRequest) {
   }
 
   // Fetch existing to get entityId
-  const [existing] = await db
+  const [existing] = await platformDb
     .select()
     .from(taxInstallments)
     .where(eq(taxInstallments.id, id))
@@ -99,7 +99,7 @@ export async function PATCH(req: NextRequest) {
   })
   if (!access.ok) return access.response
 
-  const [row] = await db
+  const [row] = await platformDb
     .update(taxInstallments)
     .set({ ...updates, updatedAt: new Date() })
     .where(eq(taxInstallments.id, id))

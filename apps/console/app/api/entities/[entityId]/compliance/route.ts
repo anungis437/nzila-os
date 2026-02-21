@@ -6,7 +6,7 @@
  * PATCH (via POST with _action: 'update')   → update task status
  */
 import { NextRequest, NextResponse } from 'next/server'
-import { db } from '@nzila/db'
+import { platformDb } from '@nzila/db/platform'
 import { complianceTasks } from '@nzila/db/schema'
 import { eq, and, desc } from 'drizzle-orm'
 import { requireEntityAccess } from '@/lib/api-guards'
@@ -35,7 +35,7 @@ export async function GET(
   const guard = await requireEntityAccess(entityId)
   if (!guard.ok) return guard.response
 
-  const rows = await db
+  const rows = await platformDb
     .select()
     .from(complianceTasks)
     .where(eq(complianceTasks.entityId, entityId))
@@ -64,7 +64,7 @@ export async function POST(
     if (parsed.data.status) updates.status = parsed.data.status
     if (parsed.data.evidenceDocumentId) updates.evidenceDocumentId = parsed.data.evidenceDocumentId
 
-    const [updated] = await db
+    const [updated] = await platformDb
       .update(complianceTasks)
       .set(updates)
       .where(
@@ -86,7 +86,7 @@ export async function POST(
   if (!parsed.success)
     return NextResponse.json({ error: parsed.error.flatten() }, { status: 400 })
 
-  const [task] = await db
+  const [task] = await platformDb
     .insert(complianceTasks)
     .values({
       entityId,

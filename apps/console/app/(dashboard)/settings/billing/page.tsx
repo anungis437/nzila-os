@@ -5,8 +5,7 @@
  * Delegates interactive parts to <SubscriptionManager />.
  */
 import { CreditCardIcon } from '@heroicons/react/24/outline'
-// eslint-disable-next-line no-restricted-imports -- non-ML data: Stripe subscription tables, no ml* table access
-import { db } from '@nzila/db'
+import { platformDb } from '@nzila/db/platform'
 import { stripeSubscriptions } from '@nzila/db/schema'
 import { eq, desc } from 'drizzle-orm'
 import { auth } from '@clerk/nextjs/server'
@@ -21,7 +20,7 @@ export default async function BillingPage() {
   if (!userId) redirect('/sign-in')
 
   const subs = PLACEHOLDER_ENTITY_ID
-    ? await db
+    ? await platformDb
         .select()
         .from(stripeSubscriptions)
         .where(eq(stripeSubscriptions.entityId, PLACEHOLDER_ENTITY_ID))

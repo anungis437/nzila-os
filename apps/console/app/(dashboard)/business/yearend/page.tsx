@@ -4,9 +4,6 @@ import { useState, useEffect } from 'react'
 import Link from 'next/link'
 import {
   DocumentTextIcon,
-  CheckCircleIcon,
-  ClockIcon,
-  ExclamationCircleIcon,
   ArrowRightIcon,
 } from '@heroicons/react/24/outline'
 

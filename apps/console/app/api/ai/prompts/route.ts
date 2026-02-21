@@ -7,7 +7,7 @@
  * RBAC: entity_admin or platform ai_admin
  */
 import { NextRequest, NextResponse } from 'next/server'
-import { db } from '@nzila/db'
+import { platformDb } from '@nzila/db/platform'
 import { aiPrompts } from '@nzila/db/schema'
 import { eq } from 'drizzle-orm'
 import { z } from 'zod'
@@ -27,8 +27,8 @@ export async function GET(req: NextRequest) {
   const appKey = req.nextUrl.searchParams.get('appKey')
 
   const query = appKey
-    ? db.select().from(aiPrompts).where(eq(aiPrompts.appKey, appKey))
-    : db.select().from(aiPrompts)
+    ? platformDb.select().from(aiPrompts).where(eq(aiPrompts.appKey, appKey))
+    : platformDb.select().from(aiPrompts)
 
   const rows = await query
   return NextResponse.json(rows)
@@ -44,7 +44,7 @@ export async function POST(req: NextRequest) {
     return NextResponse.json({ error: parsed.error.flatten() }, { status: 400 })
   }
 
-  const [row] = await db
+  const [row] = await platformDb
     .insert(aiPrompts)
     .values({
       appKey: parsed.data.appKey,

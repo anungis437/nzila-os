@@ -6,12 +6,21 @@
  * and platform-level role checks from lib/rbac.
  */
 import { NextResponse } from 'next/server'
-// eslint-disable-next-line no-restricted-imports -- non-ML data: entity membership tables, no ml* table access
-import { db } from '@nzila/db'
+import {
+  createScopedDb,
+  createAuditedScopedDb,
+  withAudit,
+  type AuditedScopedDb,
+} from '@nzila/db'
+import { platformDb } from '@nzila/db/platform'
 import { entityMembers } from '@nzila/db/schema'
 import { eq, and } from 'drizzle-orm'
 import { auth } from '@clerk/nextjs/server'
 import { getUserRole, type NzilaRole } from '@/lib/rbac'
+
+// ── Re-exports for route convenience ────────────────────────────────────────
+export { withAudit, createAuditedScopedDb, createScopedDb }
+export type { AuditedScopedDb }
 
 export interface AuthContext {
   userId: string
@@ -53,7 +62,7 @@ export async function authenticateUser(): Promise<
  * @returns membership row or null
  */
 export async function getEntityMembership(entityId: string, userId: string) {
-  const [m] = await db
+  const [m] = await platformDb
     .select()
     .from(entityMembers)
     .where(

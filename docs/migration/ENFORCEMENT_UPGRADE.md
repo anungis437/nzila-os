@@ -37,7 +37,7 @@ structurally enforced, developer-proof, multi-layer guarantees.
 | ID | Description | Added To |
 |----|-------------|----------|
 | INV-06 | No raw DB access in application layer | `invariants.test.ts`, `db-boundary.test.ts` |
-| INV-07 | Entity isolation via Scoped DAL | `invariants.test.ts`, `db-boundary.test.ts` |
+| INV-07 | Org isolation via Scoped DAL | `invariants.test.ts`, `db-boundary.test.ts` |
 | INV-08 | Automatic audit emission for CRUD | `invariants.test.ts`, `audit-enforcement.test.ts` |
 | INV-09 | Audit module structure and exports | `invariants.test.ts`, `audit-enforcement.test.ts` |
 | INV-10 | Vertical scaffolding enforces governance | `vertical-governance.test.ts` |

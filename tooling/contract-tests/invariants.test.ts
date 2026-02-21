@@ -219,10 +219,10 @@ describe('INV-06: no-shadow-db', () => {
   })
 })
 
-// ── INV-07: Entity isolation via Scoped DAL ────────────────────────────────
-// createScopedDb must exist and enforce entity boundaries.
+// ── INV-07: Org isolation via Scoped DAL ────────────────────────────────
+// createScopedDb must exist and enforce Org boundaries.
 
-describe('INV-07: entity isolation scoped DAL', () => {
+describe('INV-07: Org isolation scoped DAL', () => {
   it('@nzila/db exports createScopedDb', () => {
     const scopedPath = resolve(ROOT, 'packages/db/src/scoped.ts')
     expect(existsSync(scopedPath)).toBe(true)

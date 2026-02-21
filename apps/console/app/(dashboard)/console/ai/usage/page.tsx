@@ -4,10 +4,9 @@
  * Detailed request-level usage analytics with filtering by appKey,
  * feature, and time range. Shows tokens, cost, latency percentiles.
  */
-// eslint-disable-next-line no-restricted-imports -- non-ML data: AI request/usage tables, no ml* table access
-import { db } from '@nzila/db'
+import { platformDb } from '@nzila/db/platform'
 import { aiRequests } from '@nzila/db/schema'
-import { eq, desc, and, sql, count, sum, avg } from 'drizzle-orm'
+import { eq, desc, and, count, sum, avg } from 'drizzle-orm'
 import { auth } from '@clerk/nextjs/server'
 import { redirect } from 'next/navigation'
 
@@ -29,7 +28,7 @@ interface UsageRow {
 
 async function getUsageData(entityId: string) {
   // Aggregate usage by appKey + profileKey + feature
-  const rows = await db
+  const rows = await platformDb
     .select({
       appKey: aiRequests.appKey,
       profileKey: aiRequests.profileKey,
@@ -46,7 +45,7 @@ async function getUsageData(entityId: string) {
     .orderBy(desc(count()))
 
   // Refusal counts by appKey + profileKey
-  const refusals = await db
+  const refusals = await platformDb
     .select({
       appKey: aiRequests.appKey,
       profileKey: aiRequests.profileKey,
@@ -74,7 +73,7 @@ async function getUsageData(entityId: string) {
   }))
 
   // Recent requests (last 25)
-  const recent = await db
+  const recent = await platformDb
     .select({
       id: aiRequests.id,
       appKey: aiRequests.appKey,

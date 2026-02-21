@@ -9,7 +9,7 @@
  * signature verification to work.
  */
 import { NextRequest, NextResponse } from 'next/server'
-import { db } from '@nzila/db'
+import { platformDb } from '@nzila/db/platform'
 import { stripeWebhookEvents, stripeConnections } from '@nzila/db/schema'
 import { eq } from 'drizzle-orm'
 import {
@@ -56,7 +56,7 @@ export async function POST(req: NextRequest): Promise<NextResponse> {
   }
 
   // 4. Idempotent: check if stripeEventId already exists
-  const [existing] = await db
+  const [existing] = await platformDb
     .select({ id: stripeWebhookEvents.id })
     .from(stripeWebhookEvents)
     .where(eq(stripeWebhookEvents.stripeEventId, event.id))
@@ -68,7 +68,7 @@ export async function POST(req: NextRequest): Promise<NextResponse> {
   }
 
   // 5. Persist event to stripeWebhookEvents
-  const [inserted] = await db
+  const [inserted] = await platformDb
     .insert(stripeWebhookEvents)
     .values({
       entityId,
@@ -101,7 +101,7 @@ export async function POST(req: NextRequest): Promise<NextResponse> {
   })
 
   // 7. Update lastEventAt on the stripe connection
-  await db
+  await platformDb
     .update(stripeConnections)
     .set({ lastEventAt: new Date() })
     .where(eq(stripeConnections.entityId, entityId))

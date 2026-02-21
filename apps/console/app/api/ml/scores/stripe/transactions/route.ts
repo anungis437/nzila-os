@@ -20,7 +20,7 @@
  *   includeFeatures optional boolean (default false; entity_admin only)
  */
 import { NextRequest, NextResponse } from 'next/server'
-import { db } from '@nzila/db'
+import { platformDb } from '@nzila/db/platform'
 import { mlScoresStripeTxn, mlModels } from '@nzila/db/schema'
 import { eq, and, gte, lte, lt, count } from 'drizzle-orm'
 import { requireEntityAccess } from '@/lib/api-guards'
@@ -79,7 +79,7 @@ export async function GET(req: NextRequest) {
     ]
 
     const [rows, [totalRow], [anomalyRow]] = await Promise.all([
-      db
+      platformDb
         .select({
           id: mlScoresStripeTxn.id,
           occurredAt: mlScoresStripeTxn.occurredAt,
@@ -100,11 +100,11 @@ export async function GET(req: NextRequest) {
         .where(and(...conditions))
         .orderBy(mlScoresStripeTxn.occurredAt)
         .limit(limit + 1),
-      db
+      platformDb
         .select({ count: count() })
         .from(mlScoresStripeTxn)
         .where(and(...periodConditions)),
-      db
+      platformDb
         .select({ count: count() })
         .from(mlScoresStripeTxn)
         .where(and(...periodConditions, eq(mlScoresStripeTxn.isAnomaly, true))),

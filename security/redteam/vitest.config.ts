@@ -11,6 +11,14 @@ export default defineConfig({
     outputFile: {
       json: './redteam-results.json',
     },
+    // Deterministic ordering: run tests sequentially with stable sort
+    sequence: {
+      shuffle: false,
+    },
+    // Expose seed via env for deterministic helpers
+    env: {
+      REDTEAM_SEED: process.env.REDTEAM_SEED ?? '42',
+    },
   },
   resolve: {
     alias: {

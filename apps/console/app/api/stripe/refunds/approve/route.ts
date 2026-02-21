@@ -6,7 +6,7 @@
  */
 import { NextRequest, NextResponse } from 'next/server'
 import { z } from 'zod'
-import { db } from '@nzila/db'
+import { platformDb } from '@nzila/db/platform'
 import { stripeRefunds, stripePayments } from '@nzila/db/schema'
 import { eq } from 'drizzle-orm'
 import { executeRefund } from '@nzila/payments-stripe/primitives'
@@ -40,7 +40,7 @@ export async function POST(req: NextRequest): Promise<NextResponse> {
   const { refundId, entityId, action: approvalAction } = parsed.data
 
   // Fetch the pending refund
-  const [refund] = await db
+  const [refund] = await platformDb
     .select()
     .from(stripeRefunds)
     .where(eq(stripeRefunds.id, refundId))
@@ -58,7 +58,7 @@ export async function POST(req: NextRequest): Promise<NextResponse> {
   }
 
   if (approvalAction === 'deny') {
-    await db
+    await platformDb
       .update(stripeRefunds)
       .set({
         status: 'denied',
@@ -87,7 +87,7 @@ export async function POST(req: NextRequest): Promise<NextResponse> {
     return NextResponse.json({ error: 'No associated payment found' }, { status: 400 })
   }
 
-  const [payment] = await db
+  const [payment] = await platformDb
     .select()
     .from(stripePayments)
     .where(eq(stripePayments.id, refund.paymentId))
@@ -103,7 +103,7 @@ export async function POST(req: NextRequest): Promise<NextResponse> {
       amountCents: Number(refund.amountCents),
     })
 
-    await db
+    await platformDb
       .update(stripeRefunds)
       .set({
         refundId: stripeRefundResult.id,
@@ -149,7 +149,7 @@ export async function POST(req: NextRequest): Promise<NextResponse> {
   } catch (err) {
     console.error('[stripe/refunds/approve] Error executing refund:', err)
 
-    await db
+    await platformDb
       .update(stripeRefunds)
       .set({ status: 'failed', updatedAt: new Date() })
       .where(eq(stripeRefunds.id, refundId))

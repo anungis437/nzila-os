@@ -22,6 +22,10 @@
     "format": "prettier --write \"**/*.{ts,tsx,js,jsx,json,md}\"",
     "format:check": "prettier --check \"**/*.{ts,tsx,js,jsx,json,md}\"",
     "secret-scan": "gitleaks detect --source . --config .gitleaks.toml --no-banner --verbose",
+    "ga-check": "tsx tooling/ga-check/ga-check.ts",
+    "redteam": "tsx security/redteam/profile-runner.ts",
+    "redteam:core": "tsx security/redteam/profile-runner.ts --profile core",
+    "redteam:abr": "tsx security/redteam/profile-runner.ts --profile abr-insights",
     "prepare": "lefthook install"
   },
   "devDependencies": {

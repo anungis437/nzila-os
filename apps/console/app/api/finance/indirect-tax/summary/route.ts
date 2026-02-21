@@ -7,7 +7,7 @@
  * PR5 — Entity-scoped auth + audit events
  */
 import { NextRequest, NextResponse } from 'next/server'
-import { db } from '@nzila/db'
+import { platformDb } from '@nzila/db/platform'
 import { indirectTaxSummary, indirectTaxPeriods } from '@nzila/db/schema'
 import { eq } from 'drizzle-orm'
 import { requireEntityAccess, authenticateUser } from '@/lib/api-guards'
@@ -26,7 +26,7 @@ export async function GET(req: NextRequest) {
     return NextResponse.json({ error: 'periodId required' }, { status: 400 })
   }
 
-  const rows = await db
+  const rows = await platformDb
     .select()
     .from(indirectTaxSummary)
     .where(eq(indirectTaxSummary.periodId, periodId))
@@ -42,7 +42,7 @@ export async function POST(req: NextRequest) {
   }
 
   // Resolve entityId from the period
-  const [period] = await db
+  const [period] = await platformDb
     .select()
     .from(indirectTaxPeriods)
     .where(eq(indirectTaxPeriods.id, parsed.data.periodId))
@@ -57,7 +57,7 @@ export async function POST(req: NextRequest) {
   if (!access.ok) return access.response
 
   // Upsert: check if summary already exists for this period
-  const existing = await db
+  const existing = await platformDb
     .select()
     .from(indirectTaxSummary)
     .where(eq(indirectTaxSummary.periodId, parsed.data.periodId))
@@ -65,13 +65,13 @@ export async function POST(req: NextRequest) {
   let row
   if (existing.length > 0) {
     const { periodId, ...updates } = parsed.data
-    ;[row] = await db
+    ;[row] = await platformDb
       .update(indirectTaxSummary)
       .set({ ...updates, updatedAt: new Date() })
       .where(eq(indirectTaxSummary.periodId, periodId))
       .returning()
   } else {
-    ;[row] = await db
+    ;[row] = await platformDb
       .insert(indirectTaxSummary)
       .values(parsed.data)
       .returning()

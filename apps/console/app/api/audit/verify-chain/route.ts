@@ -7,7 +7,7 @@
  * hash chains for tamper detection.
  */
 import { NextRequest, NextResponse } from 'next/server'
-import { db } from '@nzila/db'
+import { platformDb } from '@nzila/db/platform'
 import { auditEvents, shareLedgerEntries } from '@nzila/db/schema'
 import { eq, asc } from 'drizzle-orm'
 import { verifyChain } from '@nzila/os-core/hash'
@@ -18,11 +18,6 @@ const VerifyChainSchema = z.object({
   entityId: z.string().uuid(),
   chainType: z.enum(['audit', 'ledger']),
 })
-
-async function requireMembership(entityId: string, userId: string) {
-  // Delegated to requireEntityAccess
-  return null
-}
 
 export async function POST(req: NextRequest) {
   const body = await req.json()
@@ -39,7 +34,7 @@ export async function POST(req: NextRequest) {
   if (!guard.ok) return guard.response
 
   if (chainType === 'audit') {
-    const entries = await db
+    const entries = await platformDb
       .select()
       .from(auditEvents)
       .where(eq(auditEvents.entityId, entityId))
@@ -75,7 +70,7 @@ export async function POST(req: NextRequest) {
   }
 
   if (chainType === 'ledger') {
-    const entries = await db
+    const entries = await platformDb
       .select()
       .from(shareLedgerEntries)
       .where(eq(shareLedgerEntries.entityId, entityId))

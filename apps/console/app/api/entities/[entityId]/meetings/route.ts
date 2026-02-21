@@ -5,7 +5,7 @@
  * POST /api/entities/[entityId]/meetings   → create meeting
  */
 import { NextRequest, NextResponse } from 'next/server'
-import { db } from '@nzila/db'
+import { platformDb } from '@nzila/db/platform'
 import { meetings } from '@nzila/db/schema'
 import { eq, desc } from 'drizzle-orm'
 import { requireEntityAccess } from '@/lib/api-guards'
@@ -25,7 +25,7 @@ export async function GET(
   const guard = await requireEntityAccess(entityId)
   if (!guard.ok) return guard.response
 
-  const rows = await db
+  const rows = await platformDb
     .select()
     .from(meetings)
     .where(eq(meetings.entityId, entityId))
@@ -47,7 +47,7 @@ export async function POST(
   if (!parsed.success)
     return NextResponse.json({ error: parsed.error.flatten() }, { status: 400 })
 
-  const [meeting] = await db
+  const [meeting] = await platformDb
     .insert(meetings)
     .values({
       entityId,

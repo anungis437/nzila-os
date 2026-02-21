@@ -1,4 +1,21 @@
 {
+  // ── TypeScript language server ───────────────────────────
+  // Large monorepo with multiple Next.js apps + the "next" TS plugin is
+  // routinely > 3 GB.  Raise the heap ceiling so tsserver stops crashing.
+  "typescript.tsserver.maxTsServerMemory": 8192,
+  // Use the workspace's own TypeScript installation (keeps versions in sync).
+  "typescript.tsdk": "node_modules/typescript/lib",
+  // Exclude heavy generated artefacts from tsserver's watch list.
+  "typescript.tsserver.watchOptions": {
+    "excludeDirectories": [
+      "**/node_modules",
+      "**/.next",
+      "**/dist",
+      "**/.turbo",
+      "**/.tsbuildinfo"
+    ]
+  },
+
   // ── Python ──────────────────────────────────────────────
   // Cross-platform: Linux-first (VPS), Windows fallback via env override
   "python.defaultInterpreterPath": "${workspaceFolder}/.venv/bin/python",

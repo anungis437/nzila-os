@@ -125,7 +125,7 @@
 
 ---
 
-## 6. Org Boundary (Entity Isolation)
+## 6. Org Boundary (Org Isolation)
 
 ### Current Mechanism
 - **Application-layer isolation** via `authorize()` from `@nzila/os-core/policy`

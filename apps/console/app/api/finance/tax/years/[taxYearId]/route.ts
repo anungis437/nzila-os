@@ -11,7 +11,7 @@
  */
 import { NextRequest, NextResponse } from 'next/server'
 import { z } from 'zod'
-import { db } from '@nzila/db'
+import { platformDb } from '@nzila/db/platform'
 import {
   taxYears,
   taxFilings,
@@ -37,7 +37,7 @@ export async function GET(
 ) {
   const { taxYearId } = await params
 
-  const [taxYear] = await db
+  const [taxYear] = await platformDb
     .select()
     .from(taxYears)
     .where(eq(taxYears.id, taxYearId))
@@ -51,11 +51,11 @@ export async function GET(
 
   // Fetch related data for close gate evaluation
   const [filings, notices, installments, indirectPrds, profiles] = await Promise.all([
-    db.select().from(taxFilings).where(eq(taxFilings.taxYearId, taxYearId)),
-    db.select().from(taxNotices).where(eq(taxNotices.taxYearId, taxYearId)),
-    db.select().from(taxInstallments).where(eq(taxInstallments.taxYearId, taxYearId)),
-    db.select().from(indirectTaxPeriods).where(eq(indirectTaxPeriods.entityId, taxYear.entityId)),
-    db.select().from(taxProfiles).where(eq(taxProfiles.entityId, taxYear.entityId)),
+    platformDb.select().from(taxFilings).where(eq(taxFilings.taxYearId, taxYearId)),
+    platformDb.select().from(taxNotices).where(eq(taxNotices.taxYearId, taxYearId)),
+    platformDb.select().from(taxInstallments).where(eq(taxInstallments.taxYearId, taxYearId)),
+    platformDb.select().from(indirectTaxPeriods).where(eq(indirectTaxPeriods.entityId, taxYear.entityId)),
+    platformDb.select().from(taxProfiles).where(eq(taxProfiles.entityId, taxYear.entityId)),
   ])
 
   const profile = profiles[0]
@@ -112,7 +112,7 @@ export async function PATCH(
   const newStatus = bodyParsed.data.status
 
   // Fetch the existing tax year for entity scoping
-  const [existing] = await db
+  const [existing] = await platformDb
     .select()
     .from(taxYears)
     .where(eq(taxYears.id, taxYearId))
@@ -130,11 +130,11 @@ export async function PATCH(
   if (newStatus === 'closed') {
     // 1. Tax year close gate (T2, CO-17, indirect filed, etc.)
     const [filings, notices, indirectPrds, profiles, links] = await Promise.all([
-      db.select().from(taxFilings).where(eq(taxFilings.taxYearId, taxYearId)),
-      db.select().from(taxNotices).where(eq(taxNotices.taxYearId, taxYearId)),
-      db.select().from(indirectTaxPeriods).where(eq(indirectTaxPeriods.entityId, existing.entityId)),
-      db.select().from(taxProfiles).where(eq(taxProfiles.entityId, existing.entityId)),
-      db.select().from(financeGovernanceLinks).where(eq(financeGovernanceLinks.entityId, existing.entityId)),
+      platformDb.select().from(taxFilings).where(eq(taxFilings.taxYearId, taxYearId)),
+      platformDb.select().from(taxNotices).where(eq(taxNotices.taxYearId, taxYearId)),
+      platformDb.select().from(indirectTaxPeriods).where(eq(indirectTaxPeriods.entityId, existing.entityId)),
+      platformDb.select().from(taxProfiles).where(eq(taxProfiles.entityId, existing.entityId)),
+      platformDb.select().from(financeGovernanceLinks).where(eq(financeGovernanceLinks.entityId, existing.entityId)),
     ])
 
     const profile = profiles[0]
@@ -207,7 +207,7 @@ export async function PATCH(
 
   const previousStatus = existing.status
 
-  const [updated] = await db
+  const [updated] = await platformDb
     .update(taxYears)
     .set({
       status: newStatus,

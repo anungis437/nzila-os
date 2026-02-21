@@ -1,0 +1,137 @@
+# CI — NzilaOS Governance Pipeline
+#
+# This workflow adopts NzilaOS governance templates via workflow_call.
+# All scanners are PR-blocking. Evidence packs are sealed and verified.
+#
+# Required secrets:
+#   EVIDENCE_SEAL_KEY — HMAC key for evidence sealing (optional, enhances integrity)
+
+name: CI
+on:
+  pull_request:
+  push:
+    branches: [main]
+
+concurrency:
+  group: ci-${{ github.ref }}
+  cancel-in-progress: true
+
+jobs:
+  # ── Governance scanners (reusable from NzilaOS) ──────────────────────────
+  # Uncomment when nzila-automation repo publishes reusable workflows:
+  # governance:
+  #   uses: nzila-automation/.github/workflows/nzila-governance.yml@main
+  #   secrets: inherit
+
+  # ── Secret scan ──────────────────────────────────────────────────────────
+  secret-scan:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+        with:
+          fetch-depth: 0
+      - uses: gitleaks/gitleaks-action@v2
+        env:
+          GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
+
+  # ── Dependency audit ─────────────────────────────────────────────────────
+  dependency-audit:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+      - uses: pnpm/action-setup@v4
+      - uses: actions/setup-node@v4
+        with:
+          node-version: 22
+          cache: pnpm
+      - run: pnpm install --frozen-lockfile
+      - run: pnpm audit --audit-level=critical
+
+  # ── Trivy scan ───────────────────────────────────────────────────────────
+  trivy:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+      - uses: aquasecurity/trivy-action@master
+        with:
+          scan-type: fs
+          severity: CRITICAL,HIGH
+          exit-code: 1
+
+  # ── SBOM generation ──────────────────────────────────────────────────────
+  sbom:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+      - uses: anchore/sbom-action@v0
+        with:
+          format: cyclonedx-json
+          output-file: sbom.json
+      - uses: actions/upload-artifact@v4
+        with:
+          name: sbom
+          path: sbom.json
+
+  # ── Lint + Typecheck ─────────────────────────────────────────────────────
+  lint-and-typecheck:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+      - uses: pnpm/action-setup@v4
+      - uses: actions/setup-node@v4
+        with:
+          node-version: 22
+          cache: pnpm
+      - run: pnpm install --frozen-lockfile
+      - run: pnpm lint
+      - run: pnpm typecheck
+
+  # ── Test ─────────────────────────────────────────────────────────────────
+  test:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+      - uses: pnpm/action-setup@v4
+      - uses: actions/setup-node@v4
+        with:
+          node-version: 22
+          cache: pnpm
+      - run: pnpm install --frozen-lockfile
+      - run: pnpm test
+
+  # ── Contract tests ──────────────────────────────────────────────────────
+  contract-tests:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+      - uses: pnpm/action-setup@v4
+      - uses: actions/setup-node@v4
+        with:
+          node-version: 22
+          cache: pnpm
+      - run: pnpm install --frozen-lockfile
+      - run: pnpm contract-tests
+
+  # ── Evidence seal + verify ──────────────────────────────────────────────
+  evidence:
+    needs: [secret-scan, dependency-audit, trivy, sbom, lint-and-typecheck, test, contract-tests]
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+      - uses: pnpm/action-setup@v4
+      - uses: actions/setup-node@v4
+        with:
+          node-version: 22
+          cache: pnpm
+      - run: pnpm install --frozen-lockfile
+      - run: pnpm evidence:collect
+      - run: pnpm evidence:seal
+        env:
+          EVIDENCE_SEAL_KEY: ${{ secrets.EVIDENCE_SEAL_KEY }}
+      - uses: actions/upload-artifact@v4
+        with:
+          name: evidence-pack
+          path: |
+            evidence/pack.json
+            evidence/seal.json
+          retention-days: 365

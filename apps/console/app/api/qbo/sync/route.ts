@@ -17,12 +17,12 @@
  */
 import { NextRequest, NextResponse } from 'next/server'
 import { z } from 'zod'
-import { db } from '@nzila/db'
+import { platformDb } from '@nzila/db/platform'
 import { qboConnections, qboTokens, qboSyncRuns, qboReports } from '@nzila/db/schema'
 import { eq, and, desc } from 'drizzle-orm'
 import { requireEntityAccess } from '@/lib/api-guards'
 import { createQboClient } from '@nzila/qbo/client'
-import { getValidToken, isAccessTokenExpired, refreshAccessToken } from '@nzila/qbo/oauth'
+import { getValidToken, isAccessTokenExpired } from '@nzila/qbo/oauth'
 import type { QboTokenSet } from '@nzila/qbo/types'
 import { createHash } from 'crypto'
 
@@ -64,7 +64,7 @@ export async function POST(req: NextRequest) {
 
   // ── Load connection ─────────────────────────────────────────────────────
 
-  const connection = await db.query.qboConnections.findFirst({
+  const connection = await platformDb.query.qboConnections.findFirst({
     where: and(
       eq(qboConnections.entityId, entityId),
       eq(qboConnections.isActive, true),
@@ -75,7 +75,7 @@ export async function POST(req: NextRequest) {
     return NextResponse.json({ error: 'No active QBO connection for entity' }, { status: 404 })
   }
 
-  const tokenRow = await db.query.qboTokens.findFirst({
+  const tokenRow = await platformDb.query.qboTokens.findFirst({
     where: eq(qboTokens.connectionId, connection.id),
     orderBy: [desc(qboTokens.createdAt)],
   })
@@ -108,7 +108,7 @@ export async function POST(req: NextRequest) {
       const newRefreshExpiresAt = new Date(
         Date.now() + refreshed.x_refresh_token_expires_in * 1000,
       )
-      await db.insert(qboTokens).values({
+      await platformDb.insert(qboTokens).values({
         connectionId: connection.id,
         accessToken: refreshed.access_token,
         refreshToken: refreshed.refresh_token,
@@ -120,7 +120,7 @@ export async function POST(req: NextRequest) {
 
   // ── Create sync run ─────────────────────────────────────────────────────
 
-  const [syncRun] = await db
+  const [syncRun] = await platformDb
     .insert(qboSyncRuns)
     .values({
       entityId,
@@ -150,7 +150,7 @@ export async function POST(req: NextRequest) {
     // For now we use sha256 as a placeholder document ID until blob integration is wired
     const documentId = sha256
 
-    const [reportRow] = await db
+    const [reportRow] = await platformDb
       .insert(qboReports)
       .values({
         entityId,
@@ -164,7 +164,7 @@ export async function POST(req: NextRequest) {
       })
       .returning()
 
-    await db
+    await platformDb
       .update(qboSyncRuns)
       .set({ status: 'completed', completedAt: new Date() })
       .where(eq(qboSyncRuns.id, syncRun.id))
@@ -181,7 +181,7 @@ export async function POST(req: NextRequest) {
     const message = err instanceof Error ? err.message : String(err)
     console.error('[QBO] Report sync failed:', message)
 
-    await db
+    await platformDb
       .update(qboSyncRuns)
       .set({ status: 'failed', completedAt: new Date(), errorMessage: message })
       .where(eq(qboSyncRuns.id, syncRun.id))

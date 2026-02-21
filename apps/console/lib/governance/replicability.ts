@@ -226,7 +226,7 @@ export function createTemplateMetadata(
   name: string,
   category: string,
   createdBy: string,
-  content: Record<string, unknown>
+  _content: Record<string, unknown>
 ): ReplicabilityMetadata {
   const now = new Date().toISOString()
   
@@ -308,7 +308,7 @@ export function cloneFromTemplate(
 export function syncWithTemplate(
   current: ReplicabilityMetadata,
   template: TemplateRegistryEntry,
-  updatedBy: string
+  _updatedBy: string
 ): ReplicabilityMetadata {
   const now = new Date().toISOString()
   
@@ -461,7 +461,7 @@ export const STANDARD_WORKFLOW_TEMPLATES = {
  * Initialize standard templates in registry
  */
 export function initializeStandardTemplates(createdBy: string): void {
-  for (const [key, template] of Object.entries(STANDARD_WORKFLOW_TEMPLATES)) {
+  for (const [_key, template] of Object.entries(STANDARD_WORKFLOW_TEMPLATES)) {
     const now = new Date().toISOString()
     
     const entry: TemplateRegistryEntry = {

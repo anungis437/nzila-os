@@ -11,6 +11,7 @@
     "./raw": "./src/raw.ts",
     "./scoped": "./src/scoped.ts",
     "./audit": "./src/audit.ts",
+    "./platform": "./src/platform.ts",
     "./org-registry": "./src/org-registry.ts",
     "./eslint-no-shadow-db": "./eslint-no-shadow-db.mjs"
   },

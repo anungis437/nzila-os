@@ -8,7 +8,7 @@
  */
 import { NextRequest, NextResponse } from 'next/server'
 import { z } from 'zod'
-import { db } from '@nzila/db'
+import { platformDb } from '@nzila/db/platform'
 import { financeGovernanceLinks } from '@nzila/db/schema'
 import { eq, and } from 'drizzle-orm'
 import { requireEntityAccess } from '@/lib/api-guards'
@@ -41,7 +41,7 @@ export async function GET(req: NextRequest) {
     ? and(eq(financeGovernanceLinks.entityId, entityId), eq(financeGovernanceLinks.sourceId, sourceId))
     : eq(financeGovernanceLinks.entityId, entityId)
 
-  const rows = await db.select().from(financeGovernanceLinks).where(conditions)
+  const rows = await platformDb.select().from(financeGovernanceLinks).where(conditions)
   return NextResponse.json(rows)
 }
 
@@ -57,7 +57,7 @@ export async function POST(req: NextRequest) {
   })
   if (!access.ok) return access.response
 
-  const [row] = await db
+  const [row] = await platformDb
     .insert(financeGovernanceLinks)
     .values({
       entityId,

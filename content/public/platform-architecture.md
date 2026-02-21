@@ -7,7 +7,7 @@ order: 2
 
 # Platform Architecture
 
-The Nzila backbone is a multi-tenant infrastructure layer that provides shared services to every product in the portfolio.
+The Nzila backbone is a multi-Org infrastructure layer that provides shared services to every product in the portfolio.
 
 ## Core Services
 

@@ -5,9 +5,6 @@ import Link from 'next/link'
 import {
   LockClosedIcon,
   LockOpenIcon,
-  CheckCircleIcon,
-  ClockIcon,
-  ExclamationTriangleIcon,
 } from '@heroicons/react/24/outline'
 
 interface Entity {

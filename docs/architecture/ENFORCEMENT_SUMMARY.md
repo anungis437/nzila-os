@@ -2,7 +2,7 @@
 
 > **Status**: Complete  
 > **Date**: 2025-07-24  
-> **Scope**: Platform-wide structural hardening of governance, entity isolation, audit, and developer ergonomics
+> **Scope**: Platform-wide structural hardening of governance, Org isolation, audit, and developer ergonomics
 
 ---
 
@@ -23,7 +23,7 @@
 │  createScopedDb(entityId) • withAudit(scopedDb, ctx)   │
 ├────────────────────────────────────────────────────────┤
 │  Layer 1 — Schema / Type System                        │
-│  entity_id NOT NULL on every multi-tenant table        │
+│  entity_id NOT NULL on every Org-scoped table          │
 │  ScopedDb type prevents raw access                     │
 └────────────────────────────────────────────────────────┘
 ```
@@ -44,7 +44,7 @@
 | ID | Invariant | Test File | What It Prevents |
 |---|---|---|---|
 | INV-06 | No raw DB access in apps | `db-boundary.test.ts` | Direct Drizzle/driver imports bypassing Scoped DAL |
-| INV-07 | Entity isolation via Scoped DAL | `db-boundary.test.ts` | Cross-entity data leakage |
+| INV-07 | Org isolation via Scoped DAL | `db-boundary.test.ts` | Cross-Org data leakage |
 | INV-08 | Automatic audit on mutations | `audit-enforcement.test.ts` | Silent data changes without audit trail |
 | INV-09 | Audit module structural integrity | `audit-enforcement.test.ts` | Accidental removal of audit exports |
 | INV-10 | Vertical CLI generates governance-complete apps | `vertical-governance.test.ts` | New apps without mandatory governance posture |
@@ -68,7 +68,7 @@ All 21 pre-existing contract test files remain intact and passing. The 4 new con
 
 | Threat | Before | After |
 |---|---|---|
-| Cross-entity data leakage | Convention (review-enforced) | **Structural** — `createScopedDb` WHERE-injects `entity_id` at DAL level |
+| Cross-Org data leakage | Convention (review-enforced) | **Structural** — `createScopedDb` WHERE-injects `entity_id` at DAL level |
 | Silent data mutation | Convention (manual `recordAuditEvent`) | **Structural** — `withAudit` auto-emits on every insert/update/delete |
 | Raw DB bypass in app code | No enforcement | **Lint-blocked** — ESLint `no-shadow-db` fails build on raw imports |
 | New app missing auth/audit/RBAC | Convention (code review) | **Structural** — CLI generates full governance posture; INV-11 catches gaps |
@@ -131,7 +131,7 @@ const rows = await auditedDb.select(transactions)
 | `tooling/contract-tests/audit-enforcement.test.ts` | INV-08, INV-09 contract tests |
 | `tooling/contract-tests/vertical-governance.test.ts` | INV-10, INV-11 contract tests |
 | `tooling/contract-tests/enforcement-hardening.test.ts` | INV-12, INV-13, INV-14 contract tests |
-| `docs/architecture/ENTITY_ISOLATION.md` | Entity isolation architecture doc |
+| `docs/architecture/ORG_ISOLATION.md` | Org isolation architecture doc |
 | `docs/architecture/AUDIT_ENFORCEMENT.md` | Audit enforcement architecture doc |
 | `docs/architecture/VERTICAL_SCAFFOLDING.md` | CLI scaffolding doc |
 | `docs/migration/ENFORCEMENT_UPGRADE.md` | Migration notes with rollback procedure |

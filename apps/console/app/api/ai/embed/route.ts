@@ -6,7 +6,7 @@
  * Generate embeddings through the AI Control Plane.
  */
 import { NextRequest, NextResponse } from 'next/server'
-import { embed, AiEmbedRequestSchema, AiControlPlaneError } from '@nzila/ai-core'
+import { embed, AiEmbedRequestSchema } from '@nzila/ai-core'
 import { requireEntityAccess } from '@/lib/api-guards'
 import { asAiError } from '@/lib/catch-utils'
 

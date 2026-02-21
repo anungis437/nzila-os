@@ -5,7 +5,7 @@
  * PATCH  /api/entities/[entityId]  → update entity
  */
 import { NextRequest, NextResponse } from 'next/server'
-import { db } from '@nzila/db'
+import { platformDb } from '@nzila/db/platform'
 import { entities } from '@nzila/db/schema'
 import { eq } from 'drizzle-orm'
 import { requireEntityAccess } from '@/lib/api-guards'
@@ -19,7 +19,7 @@ export async function GET(
   const guard = await requireEntityAccess(entityId)
   if (!guard.ok) return guard.response
 
-  const [entity] = await db
+  const [entity] = await platformDb
     .select()
     .from(entities)
     .where(eq(entities.id, entityId))
@@ -51,7 +51,7 @@ export async function PATCH(
     return NextResponse.json({ error: parsed.error.flatten() }, { status: 400 })
   }
 
-  const [updated] = await db
+  const [updated] = await platformDb
     .update(entities)
     .set({ ...parsed.data, updatedAt: new Date() })
     .where(eq(entities.id, entityId))

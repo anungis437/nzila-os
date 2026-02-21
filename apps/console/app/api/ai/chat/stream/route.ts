@@ -6,7 +6,7 @@
  * Streaming chat completion via Server-Sent Events.
  */
 import { NextRequest } from 'next/server'
-import { chatStream, AiChatStreamRequestSchema, AiControlPlaneError } from '@nzila/ai-core'
+import { chatStream, AiChatStreamRequestSchema } from '@nzila/ai-core'
 import { requireEntityAccess } from '@/lib/api-guards'
 import { asAiError } from '@/lib/catch-utils'
 

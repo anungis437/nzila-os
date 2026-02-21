@@ -6,7 +6,7 @@
  * Chat completion through the AI Control Plane.
  */
 import { NextRequest, NextResponse } from 'next/server'
-import { chat, AiGenerateRequestSchema, AiControlPlaneError } from '@nzila/ai-core'
+import { chat, AiGenerateRequestSchema } from '@nzila/ai-core'
 import { requireEntityAccess } from '@/lib/api-guards'
 import { asAiError } from '@/lib/catch-utils'
 

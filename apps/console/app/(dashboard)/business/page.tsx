@@ -10,14 +10,11 @@ import React from 'react'
 import { currentUser } from '@clerk/nextjs/server'
 import {
   DocumentTextIcon,
-  ChartBarIcon,
   CurrencyDollarIcon,
   ClockIcon,
   CheckCircleIcon,
-  ExclamationCircleIcon,
   ArrowRightIcon,
   ShieldCheckIcon,
-  UserGroupIcon,
   DocumentDuplicateIcon,
 } from '@heroicons/react/24/outline'
 import { getShareRegister } from '@/lib/equity/share-register'

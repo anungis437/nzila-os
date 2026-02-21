@@ -7,8 +7,8 @@
  *   - enterprise:admin, enterprise:user
  */
 import { auth } from '@clerk/nextjs/server'
-// eslint-disable-next-line no-restricted-imports -- non-ML data: partner/entity tables only (no ml* table access)
-import { db } from '@nzila/db'
+// Partner tables are non-Org-scoped (see NON_ORG_SCOPED_TABLES) — use platformDb
+import { platformDb } from '@nzila/db/platform'
 import { partners, partnerEntities } from '@nzila/db/schema'
 import { eq, and } from 'drizzle-orm'
 
@@ -82,7 +82,7 @@ export async function requirePartnerEntityAccess(
   }
 
   // Resolve partner from Clerk org
-  const [partner] = await db
+  const [partner] = await platformDb
     .select({ id: partners.id, tier: partners.tier })
     .from(partners)
     .where(eq(partners.clerkOrgId, session.orgId))
@@ -93,7 +93,7 @@ export async function requirePartnerEntityAccess(
   }
 
   // Check entity entitlement
-  const [entitlement] = await db
+  const [entitlement] = await platformDb
     .select({ id: partnerEntities.id, allowedViews: partnerEntities.allowedViews })
     .from(partnerEntities)
     .where(
@@ -130,7 +130,7 @@ export async function resolvePartnerEntityIdForView(
   const session = await auth()
   if (!session.userId || !session.orgId) return null
 
-  const [partner] = await db
+  const [partner] = await platformDb
     .select({ id: partners.id })
     .from(partners)
     .where(eq(partners.clerkOrgId, session.orgId))
@@ -138,7 +138,7 @@ export async function resolvePartnerEntityIdForView(
 
   if (!partner) return null
 
-  const [entitlement] = await db
+  const [entitlement] = await platformDb
     .select({ entityId: partnerEntities.entityId, allowedViews: partnerEntities.allowedViews })
     .from(partnerEntities)
     .where(eq(partnerEntities.partnerId, partner.id))

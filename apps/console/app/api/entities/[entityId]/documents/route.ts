@@ -5,7 +5,7 @@
  * POST /api/entities/[entityId]/documents   → upload document
  */
 import { NextRequest, NextResponse } from 'next/server'
-import { db } from '@nzila/db'
+import { platformDb } from '@nzila/db/platform'
 import { documents } from '@nzila/db/schema'
 import { eq, desc } from 'drizzle-orm'
 import { requireEntityAccess } from '@/lib/api-guards'
@@ -21,7 +21,7 @@ export async function GET(
   const guard = await requireEntityAccess(entityId)
   if (!guard.ok) return guard.response
 
-  const rows = await db
+  const rows = await platformDb
     .select()
     .from(documents)
     .where(eq(documents.entityId, entityId))
@@ -85,7 +85,7 @@ export async function POST(
     contentType: file.type || 'application/octet-stream',
   })
 
-  const [doc] = await db
+  const [doc] = await platformDb
     .insert(documents)
     .values({
       entityId,

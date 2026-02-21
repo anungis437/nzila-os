@@ -5,7 +5,7 @@
  * POST /api/entities/[entityId]/people   → create person + assign role
  */
 import { NextRequest, NextResponse } from 'next/server'
-import { db } from '@nzila/db'
+import { platformDb } from '@nzila/db/platform'
 import { people, entityRoles } from '@nzila/db/schema'
 import { eq, and, desc } from 'drizzle-orm'
 import { requireEntityAccess } from '@/lib/api-guards'
@@ -32,7 +32,7 @@ export async function GET(
   if (!guard.ok) return guard.response
 
   // People with their roles for this entity
-  const rows = await db
+  const rows = await platformDb
     .select({
       personId: people.id,
       type: people.type,
@@ -112,7 +112,7 @@ export async function POST(
     return NextResponse.json({ error: parsed.error.flatten() }, { status: 400 })
 
   // Create person
-  const [person] = await db
+  const [person] = await platformDb
     .insert(people)
     .values({
       type: parsed.data.type,
@@ -125,7 +125,7 @@ export async function POST(
   // Optionally assign a role
   let role = null
   if (parsed.data.role) {
-    const [r] = await db
+    const [r] = await platformDb
       .insert(entityRoles)
       .values({
         entityId,

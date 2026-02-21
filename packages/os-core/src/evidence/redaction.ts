@@ -55,7 +55,6 @@ const PUBLIC_STRIPPED_FIELDS = [
   'entityId',
   'partnerId',
   'orgId',
-  'tenantId',
 ]
 
 /**

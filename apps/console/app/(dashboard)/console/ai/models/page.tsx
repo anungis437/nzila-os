@@ -4,8 +4,7 @@
  * Shows all registered models, deployment configurations, and
  * per-entity/app/feature routing. Proves DB-backed model governance.
  */
-// eslint-disable-next-line no-restricted-imports -- non-ML data: AI model governance tables, no ml* table access
-import { db } from '@nzila/db'
+import { platformDb } from '@nzila/db/platform'
 import {
   aiModels,
   aiDeployments,
@@ -20,12 +19,12 @@ export const dynamic = 'force-dynamic'
 const DEFAULT_ENTITY_ID = process.env.NZILA_DEFAULT_ENTITY_ID ?? ''
 
 async function getModelRegistryData(entityId: string) {
-  const models = await db
+  const models = await platformDb
     .select()
     .from(aiModels)
     .orderBy(desc(aiModels.createdAt))
 
-  const deployments = await db
+  const deployments = await platformDb
     .select({
       id: aiDeployments.id,
       modelId: aiDeployments.modelId,
@@ -47,7 +46,7 @@ async function getModelRegistryData(entityId: string) {
     .innerJoin(aiModels, eq(aiDeployments.modelId, aiModels.id))
     .orderBy(desc(aiDeployments.createdAt))
 
-  const routes = await db
+  const routes = await platformDb
     .select({
       id: aiDeploymentRoutes.id,
       entityId: aiDeploymentRoutes.entityId,

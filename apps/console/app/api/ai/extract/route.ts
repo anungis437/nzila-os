@@ -9,7 +9,6 @@ import {
   generate,
   resolvePrompt,
   AiExtractRequestSchema,
-  AiControlPlaneError,
   validateOutputSchema,
 } from '@nzila/ai-core'
 import { requireEntityAccess } from '@/lib/api-guards'

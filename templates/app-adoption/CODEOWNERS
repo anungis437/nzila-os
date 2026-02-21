@@ -1,0 +1,17 @@
+# CODEOWNERS — NzilaOS-Integrated App
+#
+# Protect governance-critical paths so that changes require review
+# from security or platform leads.
+
+# Evidence & seal scripts — require security review
+/scripts/evidence/        @nzila-os/security
+/evidence/                @nzila-os/security
+
+# CI / governance workflows — require platform review
+/.github/workflows/       @nzila-os/platform @nzila-os/security
+
+# DB adapter — require platform review (Org isolation boundary)
+/lib/db-adapter.ts        @nzila-os/platform
+
+# Governance & compliance docs
+/docs/platform/           @nzila-os/platform

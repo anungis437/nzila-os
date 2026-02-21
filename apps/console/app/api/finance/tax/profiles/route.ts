@@ -7,7 +7,7 @@
  * PR5 — Entity-scoped auth + audit events
  */
 import { NextRequest, NextResponse } from 'next/server'
-import { db } from '@nzila/db'
+import { platformDb } from '@nzila/db/platform'
 import { taxProfiles } from '@nzila/db/schema'
 import { eq } from 'drizzle-orm'
 import { requireEntityAccess } from '@/lib/api-guards'
@@ -26,7 +26,7 @@ export async function GET(req: NextRequest) {
   const access = await requireEntityAccess(entityId)
   if (!access.ok) return access.response
 
-  const rows = await db
+  const rows = await platformDb
     .select()
     .from(taxProfiles)
     .where(eq(taxProfiles.entityId, entityId))
@@ -46,7 +46,7 @@ export async function POST(req: NextRequest) {
   })
   if (!access.ok) return access.response
 
-  const [row] = await db
+  const [row] = await platformDb
     .insert(taxProfiles)
     .values(parsed.data)
     .returning()

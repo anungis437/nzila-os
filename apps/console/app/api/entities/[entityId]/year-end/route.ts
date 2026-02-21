@@ -7,7 +7,7 @@
  * to produce a readiness overview for fiscal year-end.
  */
 import { NextRequest, NextResponse } from 'next/server'
-import { db } from '@nzila/db'
+import { platformDb } from '@nzila/db/platform'
 import {
   complianceTasks,
   filings,
@@ -27,14 +27,14 @@ export async function GET(
   if (!guard.ok) return guard.response
 
   // Fetch entity for fiscal year end
-  const [entity] = await db
+  const [entity] = await platformDb
     .select({ fiscalYearEnd: entities.fiscalYearEnd, legalName: entities.legalName })
     .from(entities)
     .where(eq(entities.id, entityId))
     .limit(1)
 
   // Compliance tasks for year-end
-  const yearEndTasks = await db
+  const yearEndTasks = await platformDb
     .select()
     .from(complianceTasks)
     .where(
@@ -45,7 +45,7 @@ export async function GET(
     )
 
   // Filing status
-  const [filingStats] = await db
+  const [filingStats] = await platformDb
     .select({
       total: sql<number>`count(*)::int`,
       pending: sql<number>`count(case when ${filings.status} = 'pending' then 1 end)::int`,
@@ -56,7 +56,7 @@ export async function GET(
     .where(eq(filings.entityId, entityId))
 
   // Document counts
-  const [docStats] = await db
+  const [docStats] = await platformDb
     .select({
       total: sql<number>`count(*)::int`,
       yearEnd: sql<number>`count(case when ${documents.category} = 'year_end' then 1 end)::int`,
@@ -65,7 +65,7 @@ export async function GET(
     .where(eq(documents.entityId, entityId))
 
   // Pending governance actions
-  const [actionStats] = await db
+  const [actionStats] = await platformDb
     .select({
       total: sql<number>`count(*)::int`,
       pending: sql<number>`count(case when ${governanceActions.status} IN ('draft', 'pending_approval') then 1 end)::int`,

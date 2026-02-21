@@ -10,7 +10,7 @@
  *   modelKey    optional — filter to a specific model key
  */
 import { NextRequest, NextResponse } from 'next/server'
-import { db } from '@nzila/db'
+import { platformDb } from '@nzila/db/platform'
 import { mlModels } from '@nzila/db/schema'
 import { eq, and } from 'drizzle-orm'
 import { requireEntityAccess } from '@/lib/api-guards'
@@ -31,7 +31,7 @@ export async function GET(req: NextRequest) {
     const access = await requireEntityAccess(entityId)
     if (!access.ok) return access.response
 
-    const rows = await db
+    const rows = await platformDb
       .select({
         id: mlModels.id,
         entityId: mlModels.entityId,

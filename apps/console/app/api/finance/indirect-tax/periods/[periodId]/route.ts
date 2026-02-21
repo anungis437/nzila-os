@@ -8,7 +8,7 @@
  */
 import { NextRequest, NextResponse } from 'next/server'
 import { z } from 'zod'
-import { db } from '@nzila/db'
+import { platformDb } from '@nzila/db/platform'
 import { indirectTaxPeriods, indirectTaxSummary, indirectTaxAccounts } from '@nzila/db/schema'
 import { eq } from 'drizzle-orm'
 import { requireEntityAccess } from '@/lib/api-guards'
@@ -25,8 +25,8 @@ export async function GET(
   const { periodId } = await params
 
   const [[period], summaryRows] = await Promise.all([
-    db.select().from(indirectTaxPeriods).where(eq(indirectTaxPeriods.id, periodId)),
-    db.select().from(indirectTaxSummary).where(eq(indirectTaxSummary.periodId, periodId)),
+    platformDb.select().from(indirectTaxPeriods).where(eq(indirectTaxPeriods.id, periodId)),
+    platformDb.select().from(indirectTaxSummary).where(eq(indirectTaxSummary.periodId, periodId)),
   ])
 
   if (!period) {
@@ -37,7 +37,7 @@ export async function GET(
   if (!access.ok) return access.response
 
   // Get account info
-  const [account] = await db
+  const [account] = await platformDb
     .select()
     .from(indirectTaxAccounts)
     .where(eq(indirectTaxAccounts.id, period.accountId))
@@ -73,7 +73,7 @@ export async function PATCH(
   const body = bodyParsed.data
 
   // Fetch existing for entity scoping and previous state
-  const [existing] = await db
+  const [existing] = await platformDb
     .select()
     .from(indirectTaxPeriods)
     .where(eq(indirectTaxPeriods.id, periodId))
@@ -87,7 +87,7 @@ export async function PATCH(
   })
   if (!access.ok) return access.response
 
-  const [updated] = await db
+  const [updated] = await platformDb
     .update(indirectTaxPeriods)
     .set({ ...(body.status !== undefined ? { status: body.status } : {}), updatedAt: new Date() })
     .where(eq(indirectTaxPeriods.id, periodId))

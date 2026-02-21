@@ -6,7 +6,7 @@
  * Non-streaming text generation through the AI Control Plane.
  */
 import { NextRequest, NextResponse } from 'next/server'
-import { generate, AiGenerateRequestSchema, AiControlPlaneError } from '@nzila/ai-core'
+import { generate, AiGenerateRequestSchema } from '@nzila/ai-core'
 import { requireEntityAccess } from '@/lib/api-guards'
 import { asAiError } from '@/lib/catch-utils'
 

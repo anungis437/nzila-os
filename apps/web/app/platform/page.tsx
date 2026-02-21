@@ -26,9 +26,9 @@ const capabilities = [
   },
   {
     photo: 'https://images.unsplash.com/photo-1544197150-b99a580bb7a8?w=600',
-    name: 'Multi-Tenant Architecture',
+    name: 'Multi-Org Architecture',
     alt: 'Abstract server architecture with layered network topology',
-    description: 'Isolated yet unified — each vertical runs on shared primitives with tenant-level separation.',
+    description: 'Isolated yet unified — each vertical runs on shared primitives with Org-level separation.',
   },
   {
     photo: 'https://images.unsplash.com/photo-1563013544-824ae1b704d3?w=600',

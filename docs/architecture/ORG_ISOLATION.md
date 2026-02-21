@@ -1,10 +1,10 @@
-# Nzila OS — Entity Isolation Architecture
+# Nzila OS — Org Isolation Architecture
 
 ## Overview
 
-Entity isolation is the foundational security invariant of Nzila OS.
-Every query, mutation, and audit event is scoped to exactly one legal entity.
-Cross-entity data access is **structurally impossible** when using the platform correctly.
+Org isolation is the foundational security invariant of Nzila OS.
+Every query, mutation, and audit event is scoped to exactly one Org.
+Cross-Org data access is **structurally impossible** when using the platform correctly.
 
 ## 4-Layer Enforcement Model
 
@@ -122,3 +122,5 @@ If your code currently uses `db` from `@nzila/db` directly:
 - [AUDIT_ENFORCEMENT.md](./AUDIT_ENFORCEMENT.md) — Automatic audit emission
 - [VERTICAL_SCAFFOLDING.md](./VERTICAL_SCAFFOLDING.md) — Scaffolded verticals use scopedDb by default
 - [ENFORCEMENT_SUMMARY.md](./ENFORCEMENT_SUMMARY.md) — Full enforcement layer summary
+
+> **Terminology**: This project uses "Org" everywhere. Do NOT introduce "tenant".

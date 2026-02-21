@@ -36,27 +36,27 @@ const noShadowDbConfig = {
             group: ['@nzila/db/raw'],
             message:
               'Raw DB access is forbidden in app code. Use createScopedDb(entityId) from @nzila/db/scoped. ' +
-              'See docs/architecture/ENTITY_ISOLATION.md.',
+              'See docs/architecture/ORG_ISOLATION.md.',
           },
           {
             group: ['@nzila/db/client'],
             message:
               'Direct client import is forbidden in app code. Use createScopedDb(entityId) from @nzila/db/scoped. ' +
-              'See docs/architecture/ENTITY_ISOLATION.md.',
+              'See docs/architecture/ORG_ISOLATION.md.',
           },
           {
             group: ['drizzle-orm/postgres-js', 'drizzle-orm/node-postgres', 'drizzle-orm/neon-http'],
             message:
               'Direct drizzle() instantiation is forbidden in app code. ' +
               'Use createScopedDb(entityId) from @nzila/db/scoped. ' +
-              'See docs/architecture/ENTITY_ISOLATION.md.',
+              'See docs/architecture/ORG_ISOLATION.md.',
           },
           {
             group: ['postgres', 'pg', '@neondatabase/serverless'],
             message:
               'Direct database driver imports are forbidden in app code. ' +
               'Use createScopedDb(entityId) from @nzila/db/scoped. ' +
-              'See docs/architecture/ENTITY_ISOLATION.md.',
+              'See docs/architecture/ORG_ISOLATION.md.',
           },
         ],
       },

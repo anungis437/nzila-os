@@ -4,7 +4,7 @@
  * GET  /api/approvals   → all pending approvals across user's entities
  */
 import { NextResponse } from 'next/server'
-import { db } from '@nzila/db'
+import { platformDb } from '@nzila/db/platform'
 import { approvals, entities, entityMembers } from '@nzila/db/schema'
 import { eq, and, desc } from 'drizzle-orm'
 import { authenticateUser } from '@/lib/api-guards'
@@ -15,7 +15,7 @@ export async function GET() {
   const { userId } = authResult
 
   // Get all approvals from entities the user has access to
-  const rows = await db
+  const rows = await platformDb
     .select({
       id: approvals.id,
       entityId: approvals.entityId,

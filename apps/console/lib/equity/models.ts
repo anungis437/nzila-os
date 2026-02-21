@@ -361,7 +361,7 @@ export function calculateDilution(
 export function requiresSpecialResolution(
   actionType: EquityTransactionType,
   percentageOfTotal: number,
-  amount?: number
+  _amount?: number
 ): boolean {
   switch (actionType) {
     case EquityTransactionType.TRANSFER:

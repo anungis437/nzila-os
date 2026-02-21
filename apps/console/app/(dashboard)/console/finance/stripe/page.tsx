@@ -4,8 +4,7 @@
  * Displays connection info, webhook health, refund queue,
  * revenue summary, and report generation controls.
  */
-// eslint-disable-next-line no-restricted-imports -- non-ML data: Stripe payment tables, no ml* table access
-import { db } from '@nzila/db'
+import { platformDb } from '@nzila/db/platform'
 import {
   stripeConnections,
   stripeWebhookEvents,
@@ -22,13 +21,13 @@ import { GenerateReportsButton } from './generate-reports-button'
 export const dynamic = 'force-dynamic'
 
 async function getStripeData(entityId: string) {
-  const [connection] = await db
+  const [connection] = await platformDb
     .select()
     .from(stripeConnections)
     .where(eq(stripeConnections.entityId, entityId))
     .limit(1)
 
-  const [latestEvent] = await db
+  const [latestEvent] = await platformDb
     .select({
       id: stripeWebhookEvents.id,
       type: stripeWebhookEvents.type,
@@ -40,7 +39,7 @@ async function getStripeData(entityId: string) {
     .orderBy(desc(stripeWebhookEvents.receivedAt))
     .limit(1)
 
-  const [eventStats] = await db
+  const [eventStats] = await platformDb
     .select({
       total: count(),
       processed: sql<number>`count(*) filter (where ${stripeWebhookEvents.processingStatus} = 'processed')`,
@@ -50,7 +49,7 @@ async function getStripeData(entityId: string) {
     .from(stripeWebhookEvents)
     .where(eq(stripeWebhookEvents.entityId, entityId))
 
-  const pendingRefunds = await db
+  const pendingRefunds = await platformDb
     .select()
     .from(stripeRefunds)
     .where(
@@ -61,7 +60,7 @@ async function getStripeData(entityId: string) {
     )
     .orderBy(desc(stripeRefunds.createdAt))
 
-  const recentPayments = await db
+  const recentPayments = await platformDb
     .select({
       id: stripePayments.id,
       stripeObjectId: stripePayments.stripeObjectId,
@@ -76,7 +75,7 @@ async function getStripeData(entityId: string) {
     .orderBy(desc(stripePayments.occurredAt))
     .limit(10)
 
-  const recentReports = await db
+  const recentReports = await platformDb
     .select()
     .from(stripeReports)
     .where(eq(stripeReports.entityId, entityId))

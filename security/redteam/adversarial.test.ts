@@ -49,7 +49,7 @@ function walkSync(
 // ── RED-TEAM-001: Cross-Org Data Access ─────────────────────────────────────
 
 describe('RED-TEAM-001 — Cross-org data access must be structurally impossible', () => {
-  it('createScopedDb enforces entity isolation — cannot be constructed without orgId', () => {
+  it('createScopedDb enforces Org isolation — cannot be constructed without orgId', () => {
     const scopedPath = join(ROOT, 'packages', 'db', 'src', 'scoped.ts')
     const content = readFileSync(scopedPath, 'utf-8')
 

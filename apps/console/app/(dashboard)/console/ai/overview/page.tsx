@@ -4,19 +4,15 @@
  * Unified view of the Nzila AI Engine: request metrics, cost,
  * latency, action success rates, budget status, and refusal counts.
  */
-// eslint-disable-next-line no-restricted-imports -- non-ML data: AI request/budget tables, no ml* table access
-import { db } from '@nzila/db'
+import { platformDb } from '@nzila/db/platform'
 import {
   aiRequests,
   aiActions,
-  aiActionRuns,
   aiUsageBudgets,
   aiDeploymentRoutes,
-  aiDeployments,
-  aiModels,
   aiKnowledgeSources,
 } from '@nzila/db/schema'
-import { eq, desc, and, sql, count, sum, avg } from 'drizzle-orm'
+import { eq, desc, count, sum, avg } from 'drizzle-orm'
 import { auth } from '@clerk/nextjs/server'
 import { redirect } from 'next/navigation'
 import Link from 'next/link'
@@ -56,7 +52,7 @@ interface OverviewMetrics {
 
 async function getOverviewMetrics(entityId: string): Promise<OverviewMetrics> {
   // Request metrics
-  const requestStats = await db
+  const requestStats = await platformDb
     .select({
       total: count(),
       tokensIn: sum(aiRequests.tokensIn),
@@ -70,7 +66,7 @@ async function getOverviewMetrics(entityId: string): Promise<OverviewMetrics> {
   const stats = requestStats[0] ?? { total: 0, tokensIn: '0', tokensOut: '0', costUsd: '0', avgLatency: '0' }
 
   // Request status breakdown
-  const statusCounts = await db
+  const statusCounts = await platformDb
     .select({
       status: aiRequests.status,
       count: count(),
@@ -85,7 +81,7 @@ async function getOverviewMetrics(entityId: string): Promise<OverviewMetrics> {
   }
 
   // Requests by appKey
-  const byApp = await db
+  const byApp = await platformDb
     .select({
       appKey: aiRequests.appKey,
       count: count(),
@@ -97,7 +93,7 @@ async function getOverviewMetrics(entityId: string): Promise<OverviewMetrics> {
     .limit(10)
 
   // Requests by feature
-  const byFeature = await db
+  const byFeature = await platformDb
     .select({
       feature: aiRequests.feature,
       count: count(),
@@ -108,7 +104,7 @@ async function getOverviewMetrics(entityId: string): Promise<OverviewMetrics> {
     .orderBy(desc(count()))
 
   // Action summary
-  const allActions = await db
+  const allActions = await platformDb
     .select({
       status: aiActions.status,
       count: count(),
@@ -131,7 +127,7 @@ async function getOverviewMetrics(entityId: string): Promise<OverviewMetrics> {
   }
 
   // Budget summary
-  const budgets = await db
+  const budgets = await platformDb
     .select()
     .from(aiUsageBudgets)
     .where(eq(aiUsageBudgets.entityId, entityId))
@@ -148,13 +144,13 @@ async function getOverviewMetrics(entityId: string): Promise<OverviewMetrics> {
   }))
 
   // Deployment route count
-  const [routeCount] = await db
+  const [routeCount] = await platformDb
     .select({ count: count() })
     .from(aiDeploymentRoutes)
     .where(eq(aiDeploymentRoutes.entityId, entityId))
 
   // Knowledge source count
-  const [ksCount] = await db
+  const [ksCount] = await platformDb
     .select({ count: count() })
     .from(aiKnowledgeSources)
     .where(eq(aiKnowledgeSources.entityId, entityId))

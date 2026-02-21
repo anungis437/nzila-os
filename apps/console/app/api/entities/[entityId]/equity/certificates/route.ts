@@ -5,7 +5,7 @@
  * POST /api/entities/[entityId]/equity/certificates   → issue new certificate
  */
 import { NextRequest, NextResponse } from 'next/server'
-import { db } from '@nzila/db'
+import { platformDb } from '@nzila/db/platform'
 import { shareCertificates } from '@nzila/db/schema'
 import { eq, desc } from 'drizzle-orm'
 import { requireEntityAccess } from '@/lib/api-guards'
@@ -28,7 +28,7 @@ export async function GET(
   const guard = await requireEntityAccess(entityId)
   if (!guard.ok) return guard.response
 
-  const rows = await db
+  const rows = await platformDb
     .select()
     .from(shareCertificates)
     .where(eq(shareCertificates.entityId, entityId))
@@ -50,7 +50,7 @@ export async function POST(
   if (!parsed.success)
     return NextResponse.json({ error: parsed.error.flatten() }, { status: 400 })
 
-  const [cert] = await db
+  const [cert] = await platformDb
     .insert(shareCertificates)
     .values({
       entityId,

@@ -40,7 +40,7 @@ function assertBootInvariants(): void {
   } catch {
     errors.push(
       'BOOT ASSERTION FAILED: @nzila/db/scoped is not resolvable. ' +
-        'Scoped DAL must be installed for entity isolation.',
+        'Scoped DAL must be installed for Org isolation.',
     )
   }
 

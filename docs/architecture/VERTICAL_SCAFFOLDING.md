@@ -57,7 +57,7 @@ Every scaffolded vertical includes:
 |-----------|-----------|
 | Authentication | Clerk middleware (`middleware.ts`) |
 | Authorization | `authorize()` from `@nzila/os-core/policy` |
-| Entity isolation | `createScopedDb(entityId)` from `@nzila/db/scoped` |
+| Org isolation | `createScopedDb(entityId)` from `@nzila/db/scoped` |
 | Automatic audit | `withAudit()` from `@nzila/db/audit` |
 | No shadow AI | ESLint `no-shadow-ai` rule |
 | No shadow ML | ESLint `no-shadow-ml` rule |
@@ -82,6 +82,6 @@ Every scaffolded vertical includes:
 
 ## Related Documents
 
-- [ENTITY_ISOLATION.md](./ENTITY_ISOLATION.md) — Scoped DAL foundation
+- [ORG_ISOLATION.md](./ORG_ISOLATION.md) — Scoped DAL foundation
 - [AUDIT_ENFORCEMENT.md](./AUDIT_ENFORCEMENT.md) — Automatic audit emission
 - [ENFORCEMENT_SUMMARY.md](./ENFORCEMENT_SUMMARY.md) — Full enforcement layer summary

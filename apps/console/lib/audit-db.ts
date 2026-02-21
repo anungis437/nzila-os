@@ -18,8 +18,9 @@
  *     afterJson: { status: 'executed', ... },
  *   })
  */
-// eslint-disable-next-line no-restricted-imports -- non-ML data: audit event tables, no ml* table access
-import { db } from '@nzila/db'
+// Platform DB for direct access to the append-only audit_events table.
+// Audit-db cannot use createAuditedScopedDb (circular: audit→audit→...).
+import { platformDb } from '@nzila/db/platform'
 import { auditEvents } from '@nzila/db/schema'
 import { computeEntryHash } from '@nzila/os-core/hash'
 import { eq, desc } from 'drizzle-orm'
@@ -119,7 +120,7 @@ export async function recordAuditEvent(
   input: RecordAuditEventInput,
 ): Promise<{ id: string; hash: string; previousHash: string | null }> {
   // 1. Get the latest event for this entity (for hash chain)
-  const [latest] = await db
+  const [latest] = await platformDb
     .select({ hash: auditEvents.hash })
     .from(auditEvents)
     .where(eq(auditEvents.entityId, input.entityId))
@@ -142,7 +143,7 @@ export async function recordAuditEvent(
   const hash = computeEntryHash(payload, previousHash)
 
   // 3. Insert append-only row
-  const [row] = await db
+  const [row] = await platformDb
     .insert(auditEvents)
     .values({
       entityId: input.entityId,
@@ -192,7 +193,7 @@ export interface ChainVerificationResult {
 export async function verifyEntityAuditChain(
   entityId: string,
 ): Promise<ChainVerificationResult> {
-  const events = await db
+  const events = await platformDb
     .select()
     .from(auditEvents)
     .where(eq(auditEvents.entityId, entityId))
@@ -247,15 +248,13 @@ export async function verifyEntityAuditChain(
  */
 export async function getAuditTrailForTarget(
   entityId: string,
-  targetType: string,
-  targetId: string,
+  _targetType: string,
+  _targetId: string,
 ): Promise<AuditEventRow[]> {
-  return db
+  return platformDb
     .select()
     .from(auditEvents)
-    .where(
-      eq(auditEvents.entityId, entityId),
-    )
+    .where(eq(auditEvents.entityId, entityId))
     .orderBy(auditEvents.createdAt) as unknown as Promise<AuditEventRow[]>
   // NOTE: drizzle doesn't chain .where() with AND automatically for
   // multiple calls — use `and()` for compound filters when needed.

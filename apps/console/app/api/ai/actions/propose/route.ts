@@ -8,15 +8,13 @@
  * No LLM involved in the propose flow for typed actions.
  */
 import { NextRequest, NextResponse } from 'next/server'
-import { db } from '@nzila/db'
+import { platformDb } from '@nzila/db/platform'
 import { aiActions } from '@nzila/db/schema'
 import { eq } from 'drizzle-orm'
 import {
-  AiControlPlaneError,
   validateActionProposal,
   appendAiAuditEvent,
   checkActionPolicy,
-  ACTION_TYPES,
 } from '@nzila/ai-core'
 import { requireEntityAccess } from '@/lib/api-guards'
 import { asAiError } from '@/lib/catch-utils'
@@ -65,7 +63,7 @@ export async function POST(req: NextRequest) {
     }
 
     // 2. Insert ai_actions row — status: proposed
-    const [action] = await db
+    const [action] = await platformDb
       .insert(aiActions)
       .values({
         entityId,
@@ -120,7 +118,7 @@ export async function POST(req: NextRequest) {
       finalStatus = 'awaiting_approval'
     }
 
-    await db
+    await platformDb
       .update(aiActions)
       .set({
         status: finalStatus as 'proposed',

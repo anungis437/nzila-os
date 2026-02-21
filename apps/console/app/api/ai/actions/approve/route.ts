@@ -7,12 +7,11 @@
  * Moves from awaiting_approval → approved/rejected.
  */
 import { NextRequest, NextResponse } from 'next/server'
-import { db } from '@nzila/db'
+import { platformDb } from '@nzila/db/platform'
 import { aiActions } from '@nzila/db/schema'
 import { eq } from 'drizzle-orm'
 import {
   AiActionApproveRequestSchema,
-  AiControlPlaneError,
   appendAiAuditEvent,
 } from '@nzila/ai-core'
 import { requireEntityAccess } from '@/lib/api-guards'
@@ -29,7 +28,7 @@ export async function POST(req: NextRequest) {
     const { actionId, approved, notes } = parsed.data
 
     // 1. Find the action
-    const [action] = await db
+    const [action] = await platformDb
       .select()
       .from(aiActions)
       .where(eq(aiActions.id, actionId))
@@ -56,7 +55,7 @@ export async function POST(req: NextRequest) {
 
     // 4. Update status
     const newStatus = approved ? 'approved' : 'rejected'
-    await db
+    await platformDb
       .update(aiActions)
       .set({
         status: newStatus,

@@ -12,8 +12,7 @@
  */
 import { auth } from '@clerk/nextjs/server'
 import { redirect } from 'next/navigation'
-// eslint-disable-next-line no-restricted-imports -- non-ML data: entity/integration tables, no ml* table access
-import { db } from '@nzila/db'
+import { platformDb } from '@nzila/db/platform'
 import { entities, entityMembers, qboConnections } from '@nzila/db/schema'
 import { eq, and, desc } from 'drizzle-orm'
 import { PuzzlePieceIcon, CheckCircleIcon, XCircleIcon } from '@heroicons/react/24/outline'
@@ -30,7 +29,7 @@ interface QboStatus {
 }
 
 async function getQboStatus(entityId: string): Promise<QboStatus> {
-  const connection = await db.query.qboConnections.findFirst({
+  const connection = await platformDb.query.qboConnections.findFirst({
     where: and(eq(qboConnections.entityId, entityId), eq(qboConnections.isActive, true)),
     orderBy: [desc(qboConnections.connectedAt)],
   })
@@ -89,7 +88,7 @@ export default async function IntegrationsPage({
   const params = await searchParams
 
   // Load entities the user belongs to
-  const memberships = await db
+  const memberships = await platformDb
     .select({ entityId: entityMembers.entityId })
     .from(entityMembers)
     .where(eq(entityMembers.clerkUserId, userId))
@@ -99,7 +98,7 @@ export default async function IntegrationsPage({
   const entityIds = memberships.map((m) => m.entityId)
   const entityRows =
     entityIds.length > 0
-      ? await db.select().from(entities).where(eq(entities.id, entityIds[0]))
+      ? await platformDb.select().from(entities).where(eq(entities.id, entityIds[0]))
       : []
 
   const primaryEntityId = params.entityId ?? entityIds[0]

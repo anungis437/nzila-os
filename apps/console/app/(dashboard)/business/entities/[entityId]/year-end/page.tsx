@@ -5,7 +5,6 @@ import { useParams } from 'next/navigation'
 import Link from 'next/link'
 import {
   CheckCircleIcon,
-  ExclamationCircleIcon,
   ClockIcon,
 } from '@heroicons/react/24/outline'
 
@@ -21,11 +20,6 @@ interface YearEndData {
   fiscalYear: number
   readinessPercent: number
   items: YearEndItem[]
-}
-
-const statusIcon = {
-  true: CheckCircleIcon,
-  false: ClockIcon,
 }
 
 export default function YearEndPage() {

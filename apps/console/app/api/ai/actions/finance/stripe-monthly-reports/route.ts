@@ -6,13 +6,12 @@
  * Wraps propose + execute in one flow for auto-approved low-risk actions.
  */
 import { NextRequest, NextResponse } from 'next/server'
-import { db } from '@nzila/db'
+import { platformDb } from '@nzila/db/platform'
 import { aiActions } from '@nzila/db/schema'
 import { eq } from 'drizzle-orm'
 import {
   ACTION_TYPES,
   FinanceStripeMonthlyReportsProposalSchema,
-  validateActionProposal,
   checkActionPolicy,
   executeAction,
   appendAiAuditEvent,
@@ -37,7 +36,7 @@ export async function POST(req: NextRequest) {
     if (!access.ok) return access.response
 
     // 1. Create action
-    const [action] = await db
+    const [action] = await platformDb
       .insert(aiActions)
       .values({
         entityId: proposal.entityId,
@@ -76,7 +75,7 @@ export async function POST(req: NextRequest) {
     })
 
     if (!policyDecision.allowed) {
-      await db
+      await platformDb
         .update(aiActions)
         .set({
           status: 'rejected',
@@ -94,7 +93,7 @@ export async function POST(req: NextRequest) {
 
     // 3. Auto-approve if applicable
     if (policyDecision.autoApproved) {
-      await db
+      await platformDb
         .update(aiActions)
         .set({
           status: 'approved',
@@ -116,7 +115,7 @@ export async function POST(req: NextRequest) {
     }
 
     // Not auto-approved — return awaiting
-    await db
+    await platformDb
       .update(aiActions)
       .set({
         status: 'awaiting_approval',

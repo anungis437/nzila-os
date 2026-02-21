@@ -12,7 +12,7 @@ import { z } from 'zod'
 import { createSubscription } from '@nzila/payments-stripe/primitives'
 import { authenticateUser } from '@/lib/api-guards'
 import { recordAuditEvent } from '@/lib/audit-db'
-import { db } from '@nzila/db'
+import { platformDb } from '@nzila/db/platform'
 import { stripeSubscriptions } from '@nzila/db/schema'
 import { eq } from 'drizzle-orm'
 
@@ -51,7 +51,7 @@ export async function POST(req: NextRequest): Promise<NextResponse> {
     })
 
     // Persist to DB (status will be updated via webhook)
-    await db.insert(stripeSubscriptions).values({
+    await platformDb.insert(stripeSubscriptions).values({
       entityId: input.entityId,
       stripeCustomerId: input.customerId,
       stripeSubscriptionId: result.subscriptionId,
@@ -108,7 +108,7 @@ export async function GET(req: NextRequest): Promise<NextResponse> {
   }
 
   try {
-    const subs = await db
+    const subs = await platformDb
       .select()
       .from(stripeSubscriptions)
       .where(eq(stripeSubscriptions.entityId, entityId))

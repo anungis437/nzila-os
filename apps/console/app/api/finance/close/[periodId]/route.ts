@@ -6,7 +6,7 @@
  * PR5 — Entity-scoped auth via requireEntityAccess
  */
 import { NextRequest, NextResponse } from 'next/server'
-import { db } from '@nzila/db'
+import { platformDb } from '@nzila/db/platform'
 import { closePeriods, closeTasks, closeExceptions, closeApprovals } from '@nzila/db/schema'
 import { eq } from 'drizzle-orm'
 import { authenticateUser } from '@/lib/api-guards'
@@ -21,10 +21,10 @@ export async function GET(
   const { periodId } = await params
 
   const [[period], tasks, exceptions, approvals] = await Promise.all([
-    db.select().from(closePeriods).where(eq(closePeriods.id, periodId)),
-    db.select().from(closeTasks).where(eq(closeTasks.periodId, periodId)),
-    db.select().from(closeExceptions).where(eq(closeExceptions.periodId, periodId)),
-    db.select().from(closeApprovals).where(eq(closeApprovals.periodId, periodId)),
+    platformDb.select().from(closePeriods).where(eq(closePeriods.id, periodId)),
+    platformDb.select().from(closeTasks).where(eq(closeTasks.periodId, periodId)),
+    platformDb.select().from(closeExceptions).where(eq(closeExceptions.periodId, periodId)),
+    platformDb.select().from(closeApprovals).where(eq(closeApprovals.periodId, periodId)),
   ])
 
   if (!period) {

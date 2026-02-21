@@ -4,14 +4,11 @@
  * Lists all AI actions with filters by status, actionType, appKey.
  * Shows action details, run status, and attestation links.
  */
-// eslint-disable-next-line no-restricted-imports -- non-ML data: AI action/run tables, no ml* table access
-import { db } from '@nzila/db'
-import { aiActions, aiActionRuns, documents } from '@nzila/db/schema'
-import { eq, desc, and, sql } from 'drizzle-orm'
+import { platformDb } from '@nzila/db/platform'
+import { aiActions, aiActionRuns } from '@nzila/db/schema'
+import { eq, desc } from 'drizzle-orm'
 import { auth } from '@clerk/nextjs/server'
 import { redirect } from 'next/navigation'
-import Link from 'next/link'
-import { generateSasUrl } from '@nzila/blob'
 
 export const dynamic = 'force-dynamic'
 
@@ -19,14 +16,14 @@ export const dynamic = 'force-dynamic'
 const DEFAULT_ENTITY_ID = process.env.NZILA_DEFAULT_ENTITY_ID ?? ''
 
 async function getActionsData(entityId: string) {
-  const actions = await db
+  const actions = await platformDb
     .select()
     .from(aiActions)
     .where(eq(aiActions.entityId, entityId))
     .orderBy(desc(aiActions.createdAt))
     .limit(50)
 
-  const runs = await db
+  const runs = await platformDb
     .select()
     .from(aiActionRuns)
     .where(eq(aiActionRuns.entityId, entityId))
