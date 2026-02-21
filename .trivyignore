@@ -1,0 +1,10 @@
+# Trivy CVE suppressions
+# Only suppress CVEs that are in upstream base images beyond our direct control.
+# Each entry MUST have a justification comment and an expiry review date.
+
+# Go stdlib CVEs present in Node.js Alpine base image binaries (npm/corepack).
+# These come from Go-compiled tools bundled in the official node:22-alpine image.
+# We cannot fix these — they require an upstream Node.js Alpine image rebuild.
+# Review: check monthly whether a newer node:22-alpine resolves these.
+CVE-2024-24790   # golang net/netip: unexpected behavior from Is methods (in base image Go binaries)
+CVE-2025-68121   # golang crypto/tls: unexpected session resumption (in base image Go binaries)
