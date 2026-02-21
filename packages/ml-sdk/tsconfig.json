@@ -1,8 +1,7 @@
 {
   "extends": "../../packages/config/tsconfig.base.json",
   "compilerOptions": {
-    "outDir": "./dist",
-    "rootDir": "./src"
+    "outDir": "./dist"
   },
-  "include": ["src/**/*"]
+  "include": ["src/**/*", "../../packages/ml-core/src/types.ts"]
 }

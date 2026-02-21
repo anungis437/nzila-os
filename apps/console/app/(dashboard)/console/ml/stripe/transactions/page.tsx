@@ -40,6 +40,7 @@ export default async function MlStripeTxnPage({ searchParams }: PageProps) {
   const params = await searchParams
   const anomalyOnly = params.anomalyOnly !== 'false'
   const today = new Date().toISOString().slice(0, 10)
+  // eslint-disable-next-line react-hooks/purity -- server component: Date.now() is acceptable in async server component render
   const thirtyDaysAgo = new Date(Date.now() - 30 * 24 * 60 * 60 * 1000).toISOString().slice(0, 10)
   const startDate = params.startDate ?? thirtyDaysAgo
   const endDate = params.endDate ?? today

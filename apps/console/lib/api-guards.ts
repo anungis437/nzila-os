@@ -6,6 +6,7 @@
  * and platform-level role checks from lib/rbac.
  */
 import { NextResponse } from 'next/server'
+// eslint-disable-next-line no-restricted-imports -- non-ML data: entity membership tables, no ml* table access
 import { db } from '@nzila/db'
 import { entityMembers } from '@nzila/db/schema'
 import { eq, and } from 'drizzle-orm'

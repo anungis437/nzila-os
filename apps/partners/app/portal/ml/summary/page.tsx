@@ -11,7 +11,6 @@
  *              this page has zero direct DB access.
  */
 import { auth } from '@clerk/nextjs/server'
-import Link from 'next/link'
 import { ChartBarIcon, ShieldCheckIcon, ExclamationTriangleIcon } from '@heroicons/react/24/outline'
 
 export const dynamic = 'force-dynamic'
@@ -82,7 +81,7 @@ export default async function PartnerMlSummaryPage() {
 
   const summary = result.data
 
-  const { recentDailyScores, totalTxnAnomalies, totalDailyAnomalies, daysScored, recentAnomalyDays } = summary
+  const { recentDailyScores, totalTxnAnomalies, daysScored, recentAnomalyDays } = summary
 
   return (
     <div className="max-w-5xl space-y-8">
@@ -90,7 +89,7 @@ export default async function PartnerMlSummaryPage() {
       <div>
         <h1 className="text-2xl font-bold text-slate-900">ML Anomaly Summary</h1>
         <p className="mt-1 text-sm text-slate-500">
-          Automated anomaly detection powered by Nzila's IsolationForest ML engine.
+          Automated anomaly detection powered by Nzila&apos;s IsolationForest ML engine.
           Last 30 days of Stripe payment data — aggregate view only.
         </p>
       </div>

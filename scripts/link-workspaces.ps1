@@ -17,8 +17,7 @@ $pairs = @(
     @{src="packages\os-core";          dst="node_modules\@nzila\os-core"},
     @{src="packages\ui";               dst="node_modules\@nzila\ui"},
     @{src="packages\payments-stripe";  dst="node_modules\@nzila\payments-stripe"},
-    @{src="packages\tax";              dst="node_modules\@nzila\tax"},
-
+    @{src="packages\tax";              dst="node_modules\@nzila\tax"},    @{src="packages\tools-runtime";     dst="node_modules\@nzila\tools-runtime"},
     # ── Cross-package linking ──
     # packages/ui → devDep @nzila/config
     @{src="packages\config";           dst="packages\ui\node_modules\@nzila\config"},
@@ -29,11 +28,12 @@ $pairs = @(
     @{src="packages\db";               dst="packages\payments-stripe\node_modules\@nzila\db"},
     @{src="packages\config";           dst="packages\payments-stripe\node_modules\@nzila\config"},
 
-    # packages/ai-core → deps @nzila/db, @nzila/blob, @nzila/os-core
+    # packages/ai-core → deps @nzila/db, @nzila/blob, @nzila/os-core, @nzila/tools-runtime
     # devDep @nzila/config (needed for tsconfig extends resolution in nested copies)
     @{src="packages\db";               dst="packages\ai-core\node_modules\@nzila\db"},
     @{src="packages\blob";             dst="packages\ai-core\node_modules\@nzila\blob"},
     @{src="packages\os-core";          dst="packages\ai-core\node_modules\@nzila\os-core"},
+    @{src="packages\tools-runtime";    dst="packages\ai-core\node_modules\@nzila\tools-runtime"},
     @{src="packages\config";           dst="packages\ai-core\node_modules\@nzila\config"},
 
     # packages/ai-sdk → dep @nzila/ai-core
@@ -53,7 +53,8 @@ $pairs = @(
     @{src="packages\config";           dst="apps\web\node_modules\@nzila\config"},
 
     # ── apps/console → deps @nzila/db, @nzila/os-core, @nzila/blob, ──
-    #    @nzila/payments-stripe, @nzila/ui; devDeps @nzila/config
+    #    @nzila/payments-stripe, @nzila/ui, @nzila/ai-core, @nzila/ai-sdk,
+    #    @nzila/qbo, @nzila/ml-sdk; devDeps @nzila/config
     @{src="packages\ai-core";          dst="apps\console\node_modules\@nzila\ai-core"},
     @{src="packages\ai-sdk";           dst="apps\console\node_modules\@nzila\ai-sdk"},
     @{src="packages\db";               dst="apps\console\node_modules\@nzila\db"},
@@ -61,6 +62,9 @@ $pairs = @(
     @{src="packages\blob";             dst="apps\console\node_modules\@nzila\blob"},
     @{src="packages\payments-stripe";  dst="apps\console\node_modules\@nzila\payments-stripe"},
     @{src="packages\ui";               dst="apps\console\node_modules\@nzila\ui"},
+    @{src="packages\qbo";              dst="apps\console\node_modules\@nzila\qbo"},
+    @{src="packages\ml-sdk";           dst="apps\console\node_modules\@nzila\ml-sdk"},
+    @{src="packages\ml-core";          dst="apps\console\node_modules\@nzila\ml-core"},
     @{src="packages\config";           dst="apps\console\node_modules\@nzila\config"}
 )
 

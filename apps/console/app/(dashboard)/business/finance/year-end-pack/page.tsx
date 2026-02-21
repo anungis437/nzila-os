@@ -135,6 +135,7 @@ export default function YearEndPackPage() {
 
   useEffect(() => {
     if (!selectedEntityId || !selectedFiscalYear) return
+    // eslint-disable-next-line react-hooks/set-state-in-effect -- intentional: show spinner immediately before async fetch
     setPackLoading(true)
     fetch(
       `/api/finance/year-end-pack?entityId=${selectedEntityId}&fiscalYear=${encodeURIComponent(selectedFiscalYear)}`,

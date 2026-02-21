@@ -12,11 +12,11 @@ export async function POST(req: NextRequest) {
   const { authorize } = await import('@nzila/os-core/policy')
   try {
     await authorize(req, {
-      requiredScopes: ['admin:retention:run'],
-      actorClerkId: userId,
+      requiredScope: 'admin:retention' as const,
     })
-  } catch (err: any) {
-    return NextResponse.json({ error: err.message }, { status: err.statusCode ?? 403 })
+  } catch (err: unknown) {
+    const e = err as { message?: string; statusCode?: number }
+    return NextResponse.json({ error: e.message ?? 'Forbidden' }, { status: e.statusCode ?? 403 })
   }
 
   const body = await req.json().catch(() => ({}))

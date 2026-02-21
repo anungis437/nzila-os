@@ -18,6 +18,7 @@
  *     afterJson: { status: 'executed', ... },
  *   })
  */
+// eslint-disable-next-line no-restricted-imports -- non-ML data: audit event tables, no ml* table access
 import { db } from '@nzila/db'
 import { auditEvents } from '@nzila/db/schema'
 import { computeEntryHash } from '@nzila/os-core/hash'

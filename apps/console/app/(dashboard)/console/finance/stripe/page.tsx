@@ -4,6 +4,7 @@
  * Displays connection info, webhook health, refund queue,
  * revenue summary, and report generation controls.
  */
+// eslint-disable-next-line no-restricted-imports -- non-ML data: Stripe payment tables, no ml* table access
 import { db } from '@nzila/db'
 import {
   stripeConnections,

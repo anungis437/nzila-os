@@ -125,7 +125,7 @@ export default async function MlOverviewPage() {
             status: r.status,
             startedAt: r.startedAt,
             finishedAt: r.finishedAt ?? null,
-            rowsProcessed: r.rowsProcessed,
+            rowsProcessed: r.rowsProcessed ?? null,
           }))}
         />
       </section>

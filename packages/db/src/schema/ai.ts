@@ -428,3 +428,65 @@ export const aiKnowledgeIngestionRuns = pgTable(
     index('idx_ai_ingestion_runs_entity').on(table.entityId),
   ],
 )
+
+// ── 13) ai_models — registered AI model registry ───────────────────────────
+
+export const aiModels = pgTable('ai_models', {
+  id: uuid('id').primaryKey().defaultRandom(),
+  provider: varchar('provider', { length: 60 }).notNull(), // openai | azure_openai | anthropic
+  family: varchar('family', { length: 120 }).notNull(), // gpt-4o | claude-3-5-sonnet | ...
+  modality: varchar('modality', { length: 60 }).notNull().default('text'), // text | vision | embedding
+  notes: text('notes'),
+  createdAt: timestamp('created_at', { withTimezone: true }).notNull().defaultNow(),
+})
+
+// ── 14) ai_deployments — deployment config per model + environment ──────────
+
+export const aiDeployments = pgTable(
+  'ai_deployments',
+  {
+    id: uuid('id').primaryKey().defaultRandom(),
+    modelId: uuid('model_id')
+      .notNull()
+      .references(() => aiModels.id),
+    deploymentName: varchar('deployment_name', { length: 120 }).notNull(),
+    environment: aiEnvironmentEnum('environment').notNull().default('prod'),
+    allowedDataClasses: jsonb('allowed_data_classes').default([]),
+    maxTokens: integer('max_tokens'),
+    defaultTemperature: numeric('default_temperature', { precision: 4, scale: 3 }),
+    costProfile: jsonb('cost_profile').default({}),
+    enabled: boolean('enabled').notNull().default(true),
+    approvedBy: varchar('approved_by', { length: 120 }),
+    approvedAt: timestamp('approved_at', { withTimezone: true }),
+    createdAt: timestamp('created_at', { withTimezone: true }).notNull().defaultNow(),
+  },
+  (table) => [
+    index('idx_ai_deployments_model').on(table.modelId),
+    index('idx_ai_deployments_env').on(table.environment),
+  ],
+)
+
+// ── 15) ai_deployment_routes — entity+app+profile+feature → deployment ──────
+
+export const aiDeploymentRoutes = pgTable(
+  'ai_deployment_routes',
+  {
+    id: uuid('id').primaryKey().defaultRandom(),
+    deploymentId: uuid('deployment_id')
+      .notNull()
+      .references(() => aiDeployments.id),
+    entityId: uuid('entity_id')
+      .notNull()
+      .references(() => entities.id),
+    appKey: varchar('app_key', { length: 60 }).notNull(),
+    profileKey: varchar('profile_key', { length: 60 }).notNull(),
+    feature: aiRequestFeatureEnum('feature').notNull(),
+    createdAt: timestamp('created_at', { withTimezone: true }).notNull().defaultNow(),
+  },
+  (table) => [
+    uniqueIndex('idx_ai_routes_unique').on(
+      table.entityId, table.appKey, table.profileKey, table.feature,
+    ),
+    index('idx_ai_routes_deployment').on(table.deploymentId),
+  ],
+)

@@ -1,11 +1,9 @@
 import {
-  CommandLineIcon,
   KeyIcon,
   LinkIcon,
   ChartBarIcon,
   PlusIcon,
   ShieldCheckIcon,
-  ExclamationTriangleIcon,
 } from '@heroicons/react/24/outline'
 
 const environments = [

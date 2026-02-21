@@ -55,7 +55,6 @@ export async function initOtel(config: OtelConfig): Promise<void> {
       instrumentations: [
         getNodeAutoInstrumentations({
           '@opentelemetry/instrumentation-http': { enabled: true },
-          '@opentelemetry/instrumentation-fetch': { enabled: true },
         }),
       ],
     })

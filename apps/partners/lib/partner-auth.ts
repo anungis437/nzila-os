@@ -7,8 +7,9 @@
  *   - enterprise:admin, enterprise:user
  */
 import { auth } from '@clerk/nextjs/server'
+// eslint-disable-next-line no-restricted-imports -- non-ML data: partner/entity tables only (no ml* table access)
 import { db } from '@nzila/db'
-import { partners, partnerUsers, partnerEntities } from '@nzila/db/schema'
+import { partners, partnerEntities } from '@nzila/db/schema'
 import { eq, and } from 'drizzle-orm'
 
 export type PartnerType = 'channel' | 'isv' | 'enterprise'

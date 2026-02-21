@@ -4,6 +4,7 @@
  * Shows all registered models, deployment configurations, and
  * per-entity/app/feature routing. Proves DB-backed model governance.
  */
+// eslint-disable-next-line no-restricted-imports -- non-ML data: AI model governance tables, no ml* table access
 import { db } from '@nzila/db'
 import {
   aiModels,

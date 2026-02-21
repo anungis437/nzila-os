@@ -26,7 +26,8 @@
     "./retention": "./src/retention/index.ts",
     "./config": "./src/config/env.ts",
     "./secrets": "./src/secrets/keyvault.ts",
-    "./rateLimit": "./src/rateLimit.ts"
+    "./rateLimit": "./src/rateLimit.ts",
+    "./ai-env": "./src/ai-env.ts"
   },
   "scripts": {
     "typecheck": "tsc --noEmit",

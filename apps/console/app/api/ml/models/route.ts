@@ -32,7 +32,7 @@ export async function GET(req: NextRequest) {
 
     const conditions = [
       eq(mlModels.entityId, entityId),
-      ...(status ? [eq(mlModels.status, status)] : []),
+      ...(status ? [eq(mlModels.status, status as 'draft' | 'active' | 'retired')] : []),
     ]
 
     const rows = await db

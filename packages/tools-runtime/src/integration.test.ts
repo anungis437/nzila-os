@@ -146,6 +146,7 @@ describe('Stripe tool idempotency', () => {
   // This test belongs in packages/ai-core; tools-runtime cannot depend on ai-core.
   it.skip('idempotency key is deterministic for same proposal', async () => {
     // Import after mocks
+    // @ts-expect-error -- stripeTool.ts is a stub (moved to @nzila/ai-core); test is skipped
     const { generateMonthlyReports } = await import('./stripeTool')
 
     const proposal = {
