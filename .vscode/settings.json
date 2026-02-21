@@ -8,7 +8,12 @@
   // tooling/ml scripts use their own venv (requirements.txt) — suppress
   // "could not be resolved" errors for packages not in the workspace venv.
   "python.analysis.ignore": [
-    "tooling/ml/**"
+    "tooling/ml/**",
+    // Satellite repos have their own venv + pyrightconfig.json.
+    // Suppress Pylance analysis from the automation workspace context
+    // to avoid false "could not be resolved" Django/pytest errors.
+    "../nzila-abr-insights/backend/**",
+    "../nzila-union-eyes/backend/**"
   ],
   "python.testing.pytestEnabled": true,
   "python.testing.pytestArgs": [
