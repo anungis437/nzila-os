@@ -201,3 +201,55 @@ describe('INV-05: no DEFAULT_ENTITY_ID in partners', () => {
     ).toHaveLength(0)
   })
 })
+
+// ── INV-06: No raw DB access in application layer ──────────────────────────
+// Apps must NOT import rawDb or drizzle() directly.
+// Full enforcement in db-boundary.test.ts; here we verify the ESLint rule exists.
+
+describe('INV-06: no-shadow-db', () => {
+  it('every app eslint config enables no-shadow-db rule', async () => {
+    for (const app of APPS) {
+      const eslintPath = resolve(ROOT, `apps/${app}/eslint.config.mjs`)
+      if (!existsSync(eslintPath)) continue
+      const content = readContent(eslintPath)
+      expect(content, `apps/${app}/eslint.config.mjs must reference no-shadow-db`).toMatch(
+        /no-shadow-db|noShadowDb|eslint-no-shadow-db/,
+      )
+    }
+  })
+})
+
+// ── INV-07: Entity isolation via Scoped DAL ────────────────────────────────
+// createScopedDb must exist and enforce entity boundaries.
+
+describe('INV-07: entity isolation scoped DAL', () => {
+  it('@nzila/db exports createScopedDb', () => {
+    const scopedPath = resolve(ROOT, 'packages/db/src/scoped.ts')
+    expect(existsSync(scopedPath)).toBe(true)
+    const content = readContent(scopedPath)
+    expect(content).toContain('export function createScopedDb')
+  })
+})
+
+// ── INV-08: Automatic audit emission ───────────────────────────────────────
+// withAudit wrapper emits audit events on CRUD ops automatically.
+
+describe('INV-08: automatic audit emission', () => {
+  it('@nzila/db exports withAudit', () => {
+    const auditPath = resolve(ROOT, 'packages/db/src/audit.ts')
+    expect(existsSync(auditPath)).toBe(true)
+    const content = readContent(auditPath)
+    expect(content).toContain('export function withAudit')
+  })
+})
+
+// ── INV-09: Audit module structure ─────────────────────────────────────────
+
+describe('INV-09: audit module structure', () => {
+  it('@nzila/db package.json exports audit module', () => {
+    const pkgPath = resolve(ROOT, 'packages/db/package.json')
+    const pkg = JSON.parse(readContent(pkgPath))
+    expect(pkg.exports?.['./audit']).toBeTruthy()
+  })
+})
+

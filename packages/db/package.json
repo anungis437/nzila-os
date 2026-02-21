@@ -7,14 +7,19 @@
   "exports": {
     ".": "./src/index.ts",
     "./schema": "./src/schema/index.ts",
-    "./client": "./src/client.ts"
+    "./client": "./src/client.ts",
+    "./raw": "./src/raw.ts",
+    "./scoped": "./src/scoped.ts",
+    "./audit": "./src/audit.ts",
+    "./eslint-no-shadow-db": "./eslint-no-shadow-db.mjs"
   },
   "scripts": {
     "db:generate": "drizzle-kit generate",
     "db:migrate": "drizzle-kit migrate",
     "db:push": "drizzle-kit push",
     "db:studio": "drizzle-kit studio",
-    "typecheck": "tsc --noEmit"
+    "typecheck": "tsc --noEmit",
+    "test": "vitest run --passWithNoTests"
   },
   "dependencies": {
     "drizzle-orm": "^0.39.0",
@@ -23,6 +28,7 @@
   },
   "devDependencies": {
     "drizzle-kit": "^0.30.0",
-    "typescript": "^5"
+    "typescript": "^5",
+    "vitest": "^4.0.18"
   }
 }

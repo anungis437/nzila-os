@@ -1,2 +1,5 @@
 export { db, type Database } from './client'
+export { rawDb } from './raw'
+export { createScopedDb, type ScopedDb, ScopedDbError } from './scoped'
+export { withAudit, type AuditContext, type AuditEvent, type AuditEmitter, type AuditedScopedDb } from './audit'
 export * from './schema'

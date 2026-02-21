@@ -1,5 +1,7 @@
 # Remediation Plan — Enterprise Stress Test
 
+<!-- markdownlint-disable MD024 -->
+
 **Date:** 2026-02-20  
 **Branch:** `main` @ `a505446`  
 **Terminology:** Org / Org isolation (no "tenant")
@@ -9,7 +11,7 @@
 ## Priority Matrix
 
 | PR # | Title | Severity | Blocks GA? |
-|------|-------|---------|-----------|
+| ------ | ------- | --------- | ----------- |
 | REM-01 | Rate limiting for Next.js apps | ✅ CLOSED | Yes (closed PR #67) |
 | REM-02 | Runtime Org isolation HTTP test harness | ✅ CLOSED | Yes (closed PR #67) |
 | REM-03 | Privilege escalation regression tests | ✅ CLOSED | Yes (closed PR #67) |
@@ -38,6 +40,7 @@ PRs 6–10 (post-launch hardening) follow below.
 ### Scope
 
 All API routes in:
+
 - `apps/console/app/api/**`
 - `apps/partners/app/api/**`
 - `apps/web/app/api/**` (if any)
@@ -70,7 +73,7 @@ if (decision.isDenied()) return NextResponse.json({ error: 'Too Many Requests' }
 ### Files to Change
 
 | File | Change |
-|------|--------|
+| ------ | -------- |
 | `apps/console/package.json` | Add `@arcjet/next` |
 | `apps/partners/package.json` | Add `@arcjet/next` |
 | `apps/console/lib/arcjet.ts` | New — rate limit config |
@@ -156,7 +159,7 @@ describe('Org isolation — runtime HTTP proofs', () => {
 ### Files to Change / Create
 
 | File | Change |
-|------|--------|
+| ------ | -------- |
 | `tooling/contract-tests/org-isolation-runtime.test.ts` | New — 5 runtime tests |
 | `tooling/contract-tests/fixtures/orgs.ts` | New — seeded OrgA + OrgB fixtures |
 | `apps/console/app/api/` route handlers | Verify `authorize()` call exists; add `authorizeEntityAccess()` where missing |
@@ -214,7 +217,7 @@ describe('Privilege escalation regression', () => {
 ### Files to Change / Create
 
 | File | Change |
-|------|--------|
+| ------ | -------- |
 | `tooling/contract-tests/privilege-escalation.test.ts` | New — 4+ tests |
 | `apps/console/lib/audit-db.ts` | Add `AUTHORIZATION_DENIED: 'authorization.denied'` to `AUDIT_ACTIONS` |
 | `packages/os-core/src/policy/authorize.ts` | Optionally emit audit event on `AuthorizationError` throw |
@@ -236,7 +239,7 @@ describe('Privilege escalation regression', () => {
 ### Files to Change
 
 | File | Change |
-|------|--------|
+| ------ | -------- |
 | `apps/console/lib/audit-db.ts` | Add `DATA_EXPORT: 'data.export'`, `DATA_EXPORT_REQUEST: 'data.export_request'`, `AUTH_CONFIG_CHANGE: 'auth.config_change'` to `AUDIT_ACTIONS` |
 | `apps/console/app/api/**/route.ts` (year-end, export routes) | Call `recordAuditEvent({ action: AUDIT_ACTIONS.DATA_EXPORT, ... })` |
 | `tooling/contract-tests/audit-taxonomy.test.ts` | New — asserts `DATA_EXPORT` exists in taxonomy + export routes wire it |
@@ -305,7 +308,7 @@ Both routes are `isPublicRoute` in middleware (already pattern `/api/health/` is
 ### Files to Change / Create
 
 | File | Change |
-|------|--------|
+| ------ | -------- |
 | `apps/console/app/api/health/route.ts` | New |
 | `apps/console/app/api/ready/route.ts` | New — DB ping |
 | `apps/partners/app/api/health/route.ts` | New |
@@ -389,7 +392,7 @@ Also fixed: lefthook pre-commit hook was using `npx gitleaks@latest` (which fail
 **Configuration applied:**
 
 | Setting | Value |
-|---------|-------|
+| --------- | ------- |
 | Required status checks | `lint-and-typecheck`, `test`, `build`, `contract-tests` |
 | Require branches up to date | `strict: true` |
 | Enforce admins | `true` |
@@ -476,7 +479,7 @@ export function createRequestContext(
 ### Files to Change
 
 | File | Change |
-|------|--------|
+| ------ | -------- |
 | `packages/os-core/src/telemetry/requestContext.ts` | Add `orgId?: string` to interface + `createRequestContext` opts |
 | `apps/console/app/api/` handler wrapper (or middleware) | Pass `auth.orgId` when creating request context |
 | `apps/partners/app/api/` handler wrapper | Same |
@@ -491,6 +494,7 @@ During a cross-org incident at 3 AM, every log line must identify which Org the 
 3. Map `entityId` → org name
 
 With `orgId` in logs:
+
 1. `grep orgId=<suspect-org>` in log stream — done in 30 seconds.
 
 ---
@@ -549,7 +553,7 @@ it('audit DB migration adds immutability trigger or RLS policy', () => {
 ### Files to Change / Create
 
 | File | Change |
-|------|--------|
+| ------ | -------- |
 | `packages/db/migrations/XXXX_audit_events_immutable.sql` | New — trigger or RLS policy |
 | `tooling/contract-tests/audit-immutability.test.ts` | Extend — assert trigger/RLS migration exists |
 | `docs/hardening/BASELINE.md` | Note DB-level audit immutability as closed |

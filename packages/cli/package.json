@@ -1,0 +1,23 @@
+{
+  "name": "@nzila/cli",
+  "version": "0.1.0",
+  "private": true,
+  "type": "module",
+  "bin": {
+    "nzila": "./dist/index.mjs"
+  },
+  "main": "./src/index.ts",
+  "types": "./src/index.ts",
+  "scripts": {
+    "build": "tsc && node -e \"const fs=require('fs');const src=fs.readFileSync('dist/index.js','utf8');fs.writeFileSync('dist/index.mjs','#!/usr/bin/env node\\n'+src)\"",
+    "typecheck": "tsc --noEmit",
+    "dev": "tsx src/index.ts"
+  },
+  "dependencies": {
+    "commander": "^12.0.0"
+  },
+  "devDependencies": {
+    "tsx": "^4.19.3",
+    "typescript": "^5"
+  }
+}
