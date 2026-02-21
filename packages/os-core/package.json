@@ -25,7 +25,8 @@
     "./telemetry": "./src/telemetry/index.ts",
     "./retention": "./src/retention/index.ts",
     "./config": "./src/config/env.ts",
-    "./secrets": "./src/secrets/keyvault.ts"
+    "./secrets": "./src/secrets/keyvault.ts",
+    "./rateLimit": "./src/rateLimit.ts"
   },
   "scripts": {
     "typecheck": "tsc --noEmit",

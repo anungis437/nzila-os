@@ -1,9 +1,12 @@
 import { clerkMiddleware, createRouteMatcher } from '@clerk/nextjs/server'
+import { NextResponse } from 'next/server'
+import { checkRateLimit, rateLimitHeaders } from '@nzila/os-core/rateLimit'
 
 /**
  * Partner Portal — route protection via Clerk.
  *
  * Public routes: landing, sign-in/up, invite acceptance, webhooks.
+ * /api/health is intentionally public (probe endpoints must not require auth).
  * Everything else (the portal itself) requires authentication.
  */
 const isPublicRoute = createRouteMatcher([
@@ -12,9 +15,34 @@ const isPublicRoute = createRouteMatcher([
   '/sign-up(.*)',
   '/invite(.*)',
   '/api/webhooks(.*)',
+  '/api/health(.*)',
 ])
 
+const RATE_LIMIT_MAX = Number(process.env.RATE_LIMIT_MAX ?? '120')
+const RATE_LIMIT_WINDOW_MS = Number(process.env.RATE_LIMIT_WINDOW_MS ?? '60000')
+
 export default clerkMiddleware(async (auth, request) => {
+  // ── Rate limiting ─────────────────────────────────────────────────────
+  // Per-process sliding window; upgrade to Upstash/Arcjet for distributed.
+  const ip =
+    request.headers.get('x-forwarded-for')?.split(',')[0]?.trim() ??
+    request.headers.get('x-real-ip') ??
+    'unknown'
+  const rl = checkRateLimit(ip, {
+    max: RATE_LIMIT_MAX,
+    windowMs: RATE_LIMIT_WINDOW_MS,
+  })
+  if (!rl.allowed) {
+    return NextResponse.json(
+      { error: 'Too Many Requests' },
+      {
+        status: 429,
+        headers: rateLimitHeaders(rl, RATE_LIMIT_MAX),
+      },
+    )
+  }
+
+  // ── Authentication ────────────────────────────────────────────────────
   if (!isPublicRoute(request)) {
     await auth.protect()
   }

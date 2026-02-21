@@ -91,6 +91,16 @@ export const AUDIT_ACTIONS = {
   EVIDENCE_PACK_CREATE: 'evidence_pack.create',
   EVIDENCE_PACK_SEAL: 'evidence_pack.seal',
   EVIDENCE_PACK_VERIFY: 'evidence_pack.verify',
+
+  // Data export (required for regulated data handling)
+  DATA_EXPORT: 'data.export',
+  DATA_EXPORT_REQUEST: 'data.export_request',
+
+  // Auth / security configuration changes
+  AUTH_CONFIG_CHANGE: 'auth.config_change',
+
+  // Authorization failures (for threat detection)
+  AUTHORIZATION_DENIED: 'authorization.denied',
 } as const
 
 // ── Core: record an audit event with hash chain ─────────────────────────────

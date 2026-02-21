@@ -8,7 +8,7 @@ import { NextRequest, NextResponse } from 'next/server'
 import { z } from 'zod'
 import { generateStripeReports } from '@nzila/payments-stripe/reports'
 import { authenticateUser } from '@/lib/api-guards'
-import { recordAuditEvent } from '@/lib/audit-db'
+import { recordAuditEvent, AUDIT_ACTIONS } from '@/lib/audit-db'
 
 const GenerateReportsSchema = z.object({
   entityId: z.string().uuid(),
@@ -44,7 +44,7 @@ export async function POST(req: NextRequest): Promise<NextResponse> {
         entityId,
         actorClerkUserId: auth.userId,
         actorRole: auth.platformRole,
-        action: 'stripe.report_generated',
+        action: AUDIT_ACTIONS.DATA_EXPORT,
         targetType: 'stripe_report',
         targetId: artifact.reportId,
         afterJson: {
