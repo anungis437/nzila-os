@@ -10,6 +10,7 @@
  *  • Hash-chained audit events
  */
 import { NextRequest, NextResponse } from 'next/server'
+import { z } from 'zod'
 import { db } from '@nzila/db'
 import {
   taxYears,
@@ -103,8 +104,12 @@ export async function PATCH(
   { params }: { params: Promise<{ taxYearId: string }> },
 ) {
   const { taxYearId } = await params
-  const body = await req.json()
-  const newStatus = body.status
+  const TaxYearPatchSchema = z.object({ status: z.string().min(1) })
+  const bodyParsed = TaxYearPatchSchema.safeParse(await req.json())
+  if (!bodyParsed.success) {
+    return NextResponse.json({ error: bodyParsed.error.flatten() }, { status: 400 })
+  }
+  const newStatus = bodyParsed.data.status
 
   // Fetch the existing tax year for entity scoping
   const [existing] = await db

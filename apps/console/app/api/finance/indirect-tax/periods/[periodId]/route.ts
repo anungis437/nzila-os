@@ -7,6 +7,7 @@
  * PR5 — Entity-scoped auth + audit events
  */
 import { NextRequest, NextResponse } from 'next/server'
+import { z } from 'zod'
 import { db } from '@nzila/db'
 import { indirectTaxPeriods, indirectTaxSummary, indirectTaxAccounts } from '@nzila/db/schema'
 import { eq } from 'drizzle-orm'
@@ -62,7 +63,19 @@ export async function PATCH(
   { params }: { params: Promise<{ periodId: string }> },
 ) {
   const { periodId } = await params
-  const body = await req.json()
+  const IndirectTaxPeriodPatchSchema = z.object({
+    status: z.string().optional(),
+    filedAt: z.string().optional(),
+    filedAmount: z.number().optional(),
+    paidAt: z.string().optional(),
+    paidAmount: z.number().optional(),
+    notes: z.string().optional(),
+  }).passthrough()
+  const bodyParsed = IndirectTaxPeriodPatchSchema.safeParse(await req.json())
+  if (!bodyParsed.success) {
+    return NextResponse.json({ error: bodyParsed.error.flatten() }, { status: 400 })
+  }
+  const body = bodyParsed.data
 
   // Fetch existing for entity scoping and previous state
   const [existing] = await db

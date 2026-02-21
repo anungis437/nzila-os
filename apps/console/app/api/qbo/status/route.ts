@@ -6,6 +6,7 @@
  * DELETE /api/qbo/status?entityId=...   → revoke tokens + disconnect
  */
 import { NextRequest, NextResponse } from 'next/server'
+import { z } from 'zod'
 import { db } from '@nzila/db'
 import { qboConnections, qboTokens } from '@nzila/db/schema'
 import { eq, and, desc } from 'drizzle-orm'
@@ -58,10 +59,11 @@ export async function GET(req: NextRequest) {
 // ── DELETE — disconnect ───────────────────────────────────────────────────────
 
 export async function DELETE(req: NextRequest) {
-  const entityId = req.nextUrl.searchParams.get('entityId')
-  if (!entityId) {
+  const entityIdResult = z.string().min(1).safeParse(req.nextUrl.searchParams.get('entityId'))
+  if (!entityIdResult.success) {
     return NextResponse.json({ error: 'entityId required' }, { status: 400 })
   }
+  const entityId = entityIdResult.data
 
   const access = await requireEntityAccess(entityId, { minRole: 'entity_admin' })
   if (!access.ok) return access.response
