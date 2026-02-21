@@ -23,7 +23,7 @@
     "@nzila/tax": "workspace:*",
     "@nzila/ui": "workspace:*",
     "@stripe/react-stripe-js": "^5.6.0",
-    "@stripe/stripe-js": "^8.7.0",
+    "@stripe/stripe-js": "^8.8.0",
     "drizzle-orm": "^0.39.0",
     "gray-matter": "^4.0.3",
     "next": "16.1.6",
