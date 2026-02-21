@@ -16,7 +16,7 @@
 | REM-04 | `DATA_EXPORT` audit action + route wiring | 🟡 Critical SOFT PASS | Yes |
 | REM-05 | Health/readiness routes in Next.js apps | 🟡 HIGH SOFT PASS | No (pre-GA) |
 | REM-11 | Audit DB-level write constraints (trigger/RLS) | 🟡 SOFT PASS | No (post-sprint) |
-| REM-12 | GitHub branch protection on `main` | ❌ CRITICAL FAIL | Yes (30-min fix) |
+| REM-12 | GitHub branch protection on `main` | ✅ CLOSED | Yes (closed 2026-02-20) |
 | REM-13 | Org ID injected into `RequestContext` + every log | 🟡 HIGH SOFT PASS | No (pre-GA target) |
 
 PRs 6–10 (post-launch hardening) follow below.
@@ -373,56 +373,21 @@ describe('Health routes', () => {
 ## REM-12 — GitHub Branch Protection on `main`
 
 **Severity:** ❌ CRITICAL FAIL (Zero-code, 30-minute fix)  
-**Discovered by:** GA Readiness Gate — confirmed via `gh api .../branches/main/protection` → HTTP 404  
-**Current state:** `main` has no branch protection rules. CODEOWNERS exists but is **not enforced** without a branch protection rule requiring PR reviews. Any developer with write access can push directly to `main`, merge without CI passing, and bypass all security workflows.
-
-### Steps to Fix
-
-1. Navigate to: `https://github.com/<org>/<repo>/settings/branches`
-2. Click **Add branch protection rule**
-3. Branch name pattern: `main`
-4. Configure:
+**Status: ✅ CLOSED 2026-02-20 via `gh api` (commit `2e1c224`)**  
+**Configuration applied:**
 
 | Setting | Value |
 |---------|-------|
-| Require a pull request before merging | ✅ ON |
-| Required approving reviews | 1 (minimum) |
-| Dismiss stale pull request approvals when new commits are pushed | ✅ ON |
-| Require status checks to pass before merging | ✅ ON |
 | Required status checks | `lint-and-typecheck`, `test`, `build`, `contract-tests` |
-| Require branches to be up to date before merging | ✅ ON |
-| Include administrators | ✅ ON |
-| Restrict who can push to matching branches | `@nzila/platform` only |
+| Require branches up to date | `strict: true` |
+| Enforce admins | `true` |
+| Dismiss stale reviews | `true` |
+| Require code owner reviews | `true` |
+| Required approving reviews | 1 |
+| Allow force pushes | `false` |
+| Allow deletions | `false` |
 
-### Alternatively via CLI
-
-```bash
-gh api --method PUT /repos/{owner}/{repo}/branches/main/protection \
-  --input - << 'EOF'
-{
-  "required_status_checks": {
-    "strict": true,
-    "contexts": ["lint-and-typecheck", "test", "build", "contract-tests"]
-  },
-  "enforce_admins": true,
-  "required_pull_request_reviews": {
-    "dismiss_stale_reviews": true,
-    "required_approving_review_count": 1
-  },
-  "restrictions": null
-}
-EOF
-```
-
-### Why This Is CRITICAL (Not Just Bureaucratic)
-
-Without branch protection:
-- A developer with a compromised GitHub token can push malicious code directly to `main`
-- A bad merge (ignoring CI failures) can ship broken security checks
-- CODEOWNERS file exists but is only advisory without enforcement
-- Every CI security workflow (secret-scan, trivy, dependency-audit) can be bypassed
-
-This is the **single fastest GA fix in the entire backlog**.
+Verified via `gh api .../branches/main/protection` — all fields confirmed in API response.
 
 ---
 
