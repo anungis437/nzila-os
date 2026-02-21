@@ -44,6 +44,9 @@ importers:
       '@heroicons/react':
         specifier: ^2.2.0
         version: 2.2.0(react@19.2.3)
+      '@nzila/ai-core':
+        specifier: workspace:*
+        version: link:../../packages/ai-core
       '@nzila/blob':
         specifier: workspace:*
         version: link:../../packages/blob
@@ -53,9 +56,15 @@ importers:
       '@nzila/os-core':
         specifier: workspace:*
         version: link:../../packages/os-core
+      '@nzila/payments-stripe':
+        specifier: workspace:*
+        version: link:../../packages/payments-stripe
       '@nzila/qbo':
         specifier: workspace:*
         version: link:../../packages/qbo
+      '@nzila/tax':
+        specifier: workspace:*
+        version: link:../../packages/tax
       '@nzila/ui':
         specifier: workspace:*
         version: link:../../packages/ui
@@ -248,6 +257,12 @@ importers:
       '@heroicons/react':
         specifier: ^2.2.0
         version: 2.2.0(react@19.2.3)
+      '@nzila/blob':
+        specifier: workspace:*
+        version: link:../../packages/blob
+      '@nzila/db':
+        specifier: workspace:*
+        version: link:../../packages/db
       '@nzila/ml-sdk':
         specifier: workspace:*
         version: link:../../packages/ml-sdk
@@ -504,13 +519,16 @@ importers:
 
   packages/os-core:
     dependencies:
+      '@nzila/blob':
+        specifier: workspace:*
+        version: link:../blob
+      '@nzila/db':
+        specifier: workspace:*
+        version: link:../db
       zod:
         specifier: ^3.24.0
         version: 3.25.76
     devDependencies:
-      '@nzila/db':
-        specifier: workspace:*
-        version: link:../db
       '@types/node':
         specifier: ^22
         version: 22.19.11
@@ -554,6 +572,9 @@ importers:
       '@nzila/db':
         specifier: workspace:*
         version: link:../db
+      '@nzila/os-core':
+        specifier: workspace:*
+        version: link:../os-core
       drizzle-orm:
         specifier: ^0.39.0
         version: 0.39.3(@opentelemetry/api@1.9.0)(@types/pg@8.6.1)(postgres@3.4.8)
