@@ -29,7 +29,7 @@ jobs:
 
       - uses: pnpm/action-setup@v4
         with:
-          version: 10
+          version: 10.11.0
 
       - uses: actions/setup-node@v4
         with:
@@ -78,7 +78,7 @@ jobs:
 
       - uses: pnpm/action-setup@v4
         with:
-          version: 10
+          version: 10.11.0
 
       - uses: actions/setup-node@v4
         with:
@@ -113,7 +113,7 @@ jobs:
 
       - uses: pnpm/action-setup@v4
         with:
-          version: 10
+          version: 10.11.0
 
       - uses: actions/setup-node@v4
         with:
@@ -154,3 +154,4 @@ jobs:
           body: ${{ steps.changelog.outputs.content || 'See commit history for changes.' }}
           draft: false
           prerelease: ${{ contains(github.ref, '-rc') || contains(github.ref, '-beta') || contains(github.ref, '-alpha') }}
+
