@@ -194,7 +194,7 @@ jobs:
             env.TYPECHECK_FAILED == 'true' ||
             env.UNIT_TESTS_FAILED == 'true'
           )
-        uses: actions/github-script@v7
+        uses: actions/github-script@v8
         with:
           github-token: ${{ secrets.GITHUB_TOKEN }}
           script: |
