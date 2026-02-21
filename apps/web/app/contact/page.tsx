@@ -265,7 +265,7 @@ export default function Contact() {
           <ScrollReveal delay={0.3}>
             <div className="flex flex-col sm:flex-row items-center justify-center gap-5">
               <a
-                href="/auth/signin"
+                href="/partners"
                 className="inline-flex items-center justify-center px-10 py-4 bg-gold text-navy font-bold rounded-xl hover:bg-gold/90 transition-all text-lg shadow-lg shadow-gold/25 btn-press"
               >
                 Team Portal Login →
