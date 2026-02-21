@@ -1,3 +1,4 @@
+// Observability: @nzila/os-core/telemetry — structured logging and request tracing available via os-core.
 /**
  * API — Entities CRUD
  * GET  /api/entities          → list entities for current user

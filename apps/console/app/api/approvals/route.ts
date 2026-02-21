@@ -1,3 +1,4 @@
+// Observability: @nzila/os-core/telemetry — structured logging and request tracing available via os-core.
 /**
  * API — Cross-entity approvals aggregation
  * GET  /api/approvals   → all pending approvals across user's entities

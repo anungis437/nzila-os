@@ -11,11 +11,9 @@ import { appendAiAuditEvent } from '../logging'
 import { ACTION_TYPES, FinanceStripeMonthlyReportsProposalSchema, AiIngestKnowledgeSourceProposalSchema } from '../schemas'
 import type { FinanceStripeMonthlyReportsProposal, AiIngestKnowledgeSourceProposal } from '../schemas'
 import { createActionAttestation, storeAttestation } from './attestation'
-import {
-  generateMonthlyReports,
-  ingestKnowledgeSource,
-  type ToolCallEntry,
-} from '@nzila/tools-runtime'
+import { generateMonthlyReports } from '../tools/stripeTool'
+import { ingestKnowledgeSource } from '../tools/knowledgeTool'
+import type { ToolCallEntry } from '@nzila/tools-runtime'
 
 // ── Types ───────────────────────────────────────────────────────────────────
 

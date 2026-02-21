@@ -24,13 +24,22 @@ const APPS = ['console', 'partners', 'web', 'union-eyes']
 function findFiles(dir: string, exts = ['.ts', '.tsx']): string[] {
   if (!existsSync(dir)) return []
   const results: string[] = []
-  const entries = readdirSync(dir, { withFileTypes: true, recursive: true })
-  for (const entry of entries) {
-    if (!entry.isFile()) continue
-    if (exts.some((e) => entry.name.endsWith(e))) {
-      results.push(join((entry as any).path ?? dir, entry.name))
+
+  function recurse(currentDir: string) {
+    const entries = readdirSync(currentDir, { withFileTypes: true })
+    for (const entry of entries) {
+      // Never descend into node_modules or build artifacts
+      if (entry.name === 'node_modules' || entry.name === '.next' || entry.name === '.turbo') continue
+      const fullPath = join(currentDir, entry.name)
+      if (entry.isDirectory()) {
+        recurse(fullPath)
+      } else if (entry.isFile() && exts.some((e) => entry.name.endsWith(e))) {
+        results.push(fullPath)
+      }
     }
   }
+
+  recurse(dir)
   return results
 }
 

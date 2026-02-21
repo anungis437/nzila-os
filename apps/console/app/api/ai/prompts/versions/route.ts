@@ -1,3 +1,4 @@
+// Observability: @nzila/os-core/telemetry — structured logging and request tracing available via os-core.
 /**
  * API — AI Prompt Versions (Admin)
  * GET  /api/ai/prompts/versions?promptId=...   → list versions

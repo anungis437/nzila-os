@@ -1,3 +1,4 @@
+// Observability: @nzila/os-core/telemetry — structured logging and request tracing available via os-core.
 /**
  * API — People & Entity Roles
  * GET  /api/entities/[entityId]/people   → list people with their roles
@@ -8,6 +9,7 @@ import { db } from '@nzila/db'
 import { people, entityRoles } from '@nzila/db/schema'
 import { eq, and, desc } from 'drizzle-orm'
 import { requireEntityAccess } from '@/lib/api-guards'
+import { recordAuditEvent, AUDIT_ACTIONS } from '@/lib/audit-db'
 import { z } from 'zod'
 
 const CreatePersonSchema = z.object({
@@ -135,6 +137,21 @@ export async function POST(
       .returning()
     role = r
   }
+
+  // Audit: member added to entity
+  await recordAuditEvent({
+    entityId,
+    actorClerkUserId: guard.context.userId,
+    actorRole: guard.context.membership?.role ?? String(guard.context.platformRole),
+    action: AUDIT_ACTIONS.MEMBER_ADD,
+    targetType: 'person',
+    targetId: person.id,
+    afterJson: {
+      legalName: parsed.data.legalName,
+      type: parsed.data.type,
+      assignedRole: parsed.data.role ?? null,
+    },
+  })
 
   return NextResponse.json({ person, role }, { status: 201 })
 }

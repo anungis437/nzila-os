@@ -85,16 +85,20 @@ export interface VulnerabilityWaiver {
  * Add waivers via PR — they are code-reviewed and version-controlled.
  */
 export const ACTIVE_WAIVERS: VulnerabilityWaiver[] = [
-  // Example waiver structure (uncomment and fill when needed):
-  // {
-  //   id: 'GHSA-xxxx-xxxx-xxxx',
-  //   package: 'example-package',
-  //   reason: 'Not exploitable in our usage pattern — no user input reaches affected codepath',
-  //   approvedBy: 'security-lead',
-  //   approvedAt: '2026-02-01',
-  //   expiresAt: '2026-05-01',
-  //   severity: 'high',
-  // },
+  {
+    // minimatch ReDoS via repeated wildcards (CVE-2026-26996 / GHSA-3ppc-4f35-3m26 / npm advisory 1113371)
+    // Affected paths: devDependency chains only (eslint > minimatch, eslint-config-next > typescript-eslint > minimatch)
+    // No user-controlled input ever reaches minimatch in production — only in local lint tooling.
+    // Upgrade to minimatch >= 10.2.1 would break eslint@8/9 which requires minimatch v3/v9 API.
+    // Risk: local developer DoS only (not production). Accepted until eslint ships with patched minimatch.
+    id: 'CVE-2026-26996',
+    package: 'minimatch',
+    reason: 'Dev-only dependency (eslint toolchain). No user input reaches minimatch in production runtime. Upgrade to minimatch@10.2.1 would break eslint which requires v3/v9 API. Risk confined to local lint tooling DoS only.',
+    approvedBy: 'platform-lead',
+    approvedAt: '2026-02-21',
+    expiresAt: '2026-05-21',
+    severity: 'high',
+  },
 ]
 
 // ── SBOM Validation ───────────────────────────────────────────────────────

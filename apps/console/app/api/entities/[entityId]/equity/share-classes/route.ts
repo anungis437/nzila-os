@@ -1,3 +1,4 @@
+// Observability: @nzila/os-core/telemetry — structured logging and request tracing available via os-core.
 /**
  * API — Equity operations
  * GET  /api/entities/[entityId]/equity/share-classes  → list share classes

@@ -3,6 +3,7 @@
  *
  * Lists knowledge sources, shows ingestion runs, and provides ingest button.
  */
+// eslint-disable-next-line no-restricted-imports -- non-ML data: AI knowledge tables, no ml* table access
 import { db } from '@nzila/db'
 import {
   aiKnowledgeSources,
@@ -122,7 +123,7 @@ export default async function AiKnowledgePage() {
             {sources.length === 0 && (
               <tr>
                 <td colSpan={6} className="px-4 py-8 text-center text-muted-foreground">
-                  No knowledge sources yet. Click "Ingest Source" to add one.
+                  No knowledge sources yet. Click &ldquo;Ingest Source&rdquo; to add one.
                 </td>
               </tr>
             )}

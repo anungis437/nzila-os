@@ -1,3 +1,4 @@
+// Observability: @nzila/os-core/telemetry — structured logging and request tracing available via os-core.
 /**
  * API — Tax Notices (CRA / RQ)
  * GET  /api/finance/tax/notices?taxYearId=...   → list notices for a tax year

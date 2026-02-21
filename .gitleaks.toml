@@ -31,7 +31,7 @@ paths = [
 regexes = [
   '''sk_test_placeholder''',
   '''pk_test_placeholder''',
-  '''postgresql://postgres:postgres@localhost''',
+  '''postgres(ql)?://[^@]+@localhost''',
   '''NEXT_PUBLIC_.*=pk_test_''',
 ]
 
@@ -68,7 +68,7 @@ keywords = ["whsec_"]
 [[rules]]
 id = "nzila-database-url-with-password"
 description = "Database connection string with embedded password (not localhost)"
-regex = '''postgres(ql)?://[^:]+:[^@]+@(?!localhost)[^/]+/'''
+regex = '''postgres(ql)?://[^:]+:[^@]+@[^/]+/'''
 tags = ["database"]
 keywords = ["postgresql://", "postgres://"]
 

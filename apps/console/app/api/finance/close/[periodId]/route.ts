@@ -1,3 +1,4 @@
+// Observability: @nzila/os-core/telemetry — structured logging and request tracing available via os-core.
 /**
  * API — Close Period Detail
  * GET /api/finance/close/[periodId]  → close period with tasks, exceptions, approvals

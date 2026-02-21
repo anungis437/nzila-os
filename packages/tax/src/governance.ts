@@ -8,7 +8,7 @@
  *
  * Extends the os-core policy engine with finance-specific rules.
  */
-import type { PolicyRequirement } from '@nzila/os-core/types'
+import type { PolicyRequirement } from '@nzila/os-core'
 
 export interface FinancePolicyContext {
   /** Province of the entity (for CO-17 requirement) */

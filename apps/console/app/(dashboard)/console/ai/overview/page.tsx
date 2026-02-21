@@ -4,6 +4,7 @@
  * Unified view of the Nzila AI Engine: request metrics, cost,
  * latency, action success rates, budget status, and refusal counts.
  */
+// eslint-disable-next-line no-restricted-imports -- non-ML data: AI request/budget tables, no ml* table access
 import { db } from '@nzila/db'
 import {
   aiRequests,

@@ -1,3 +1,4 @@
+// Observability: @nzila/os-core/telemetry — structured logging and request tracing available via os-core.
 /**
  * API — QBO Report Sync
  * POST /api/qbo/sync
@@ -15,6 +16,7 @@
  *               cash_flow | aging_receivable | aging_payable | general_ledger
  */
 import { NextRequest, NextResponse } from 'next/server'
+import { z } from 'zod'
 import { db } from '@nzila/db'
 import { qboConnections, qboTokens, qboSyncRuns, qboReports } from '@nzila/db/schema'
 import { eq, and, desc } from 'drizzle-orm'
@@ -35,13 +37,19 @@ const REPORT_NAME_MAP: Record<string, string> = {
   general_ledger: 'GeneralLedger',
 }
 
-export async function POST(req: NextRequest) {
-  const body = await req.json()
-  const { entityId, reportType, periodStart, periodEnd } = body
+const QboSyncSchema = z.object({
+  entityId: z.string().min(1),
+  reportType: z.string().min(1),
+  periodStart: z.string().optional(),
+  periodEnd: z.string().optional(),
+})
 
-  if (!entityId || !reportType) {
+export async function POST(req: NextRequest) {
+  const parsed = QboSyncSchema.safeParse(await req.json())
+  if (!parsed.success) {
     return NextResponse.json({ error: 'entityId and reportType required' }, { status: 400 })
   }
+  const { entityId, reportType, periodStart, periodEnd } = parsed.data
 
   const qboReportName = REPORT_NAME_MAP[reportType as string]
   if (!qboReportName) {

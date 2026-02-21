@@ -1,5 +1,12 @@
+// Observability: @nzila/os-core/telemetry — structured logging and request tracing available via os-core.
 import { NextRequest, NextResponse } from 'next/server'
+import { z } from 'zod'
 import { auth } from '@clerk/nextjs/server'
+
+const RetentionRunSchema = z.object({
+  dryRun: z.boolean().optional(),
+  limit: z.number().int().positive().optional(),
+})
 
 export async function POST(req: NextRequest) {
   const { userId } = await auth()
@@ -12,16 +19,17 @@ export async function POST(req: NextRequest) {
   const { authorize } = await import('@nzila/os-core/policy')
   try {
     await authorize(req, {
-      requiredScopes: ['admin:retention:run'],
-      actorClerkId: userId,
+      requiredScope: 'admin:retention' as const,
     })
-  } catch (err: any) {
-    return NextResponse.json({ error: err.message }, { status: err.statusCode ?? 403 })
+  } catch (err: unknown) {
+    const e = err as { message?: string; statusCode?: number }
+    return NextResponse.json({ error: e.message ?? 'Forbidden' }, { status: e.statusCode ?? 403 })
   }
 
   const body = await req.json().catch(() => ({}))
-  const dryRun = body.dryRun === true
-  const limit = typeof body.limit === 'number' ? body.limit : 500
+  const parsed = RetentionRunSchema.safeParse(body)
+  const dryRun = parsed.success ? (parsed.data.dryRun ?? false) : false
+  const limit = parsed.success ? (parsed.data.limit ?? 500) : 500
 
   const { enforceRetention } = await import('@nzila/os-core/retention')
   const result = await enforceRetention({

@@ -97,6 +97,7 @@ export default function TaxDashboardPage() {
   // Load tax data when entity changes
   useEffect(() => {
     if (!selectedEntityId) return
+    // eslint-disable-next-line react-hooks/set-state-in-effect -- intentional: show spinner immediately before async fetch
     setYearLoading(true)
 
     Promise.all([

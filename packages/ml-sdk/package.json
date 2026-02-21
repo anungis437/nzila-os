@@ -7,6 +7,7 @@
   "exports": {
     ".": "./src/index.ts",
     "./client": "./src/client.ts",
+    "./server": "./src/server.ts",
     "./types": "./src/types.ts",
     "./eslint-no-shadow-ml": "./eslint-no-shadow-ml.mjs"
   },
@@ -15,6 +16,7 @@
     "test": "vitest run"
   },
   "dependencies": {
+    "@nzila/db": "workspace:*",
     "zod": "^3.24.0"
   },
   "devDependencies": {

@@ -1,8 +1,8 @@
 # Nzila Automation — Final GA Readiness Gate
 
-**Version:** v1.0  
+**Version:** v1.1  
 **Date:** 2026-02-20  
-**Commit:** `main` @ `a505446` + sprint PRs pending  
+**Commit:** `main` @ `2e1c224` (all REM items closed)  
 **Scope:** Org-based multi-Org platform  
 **Decision Authority:** CTO / Platform Owner  
 **Terminology:** Org / Org isolation (no "tenant")
@@ -85,11 +85,9 @@ Section 2 ❌ items → **Controlled rollout only**.
 | Trivy blocks on CRITICAL | ✅ | `trivy.yml` — `exit-code: 1`, `severity: CRITICAL`, SARIF to Security tab |
 | SBOM generated in CI | ✅ | `sbom.yml` — CycloneDX, attached to releases, 365-day retention |
 | Frozen lockfile enforced | ✅ | Every CI `pnpm install` uses `--frozen-lockfile` (ci.yml, release-train.yml, all workflows) |
-| Required status checks configured in GitHub (branch protection) | ❌ | `gh api .../branches/main/protection` → **404 — branch not protected**. No required checks, no PR enforcement, no push restriction. → **REM-12 (the only remaining blocker)** |
+| Required status checks configured in GitHub (branch protection) | ✅ | `gh api .../branches/main/protection` — configured; required checks: lint-and-typecheck, test, build, contract-tests; enforce_admins=true; no force-push; no deletion. **REM-12 closed.** |
 
-> **REM-12 is zero-code** — repo Settings → Branches → Add rule → main. Takes 5 minutes. But until it's configured, a developer can force-push to main or merge without CI passing, bypassing every security workflow listed above.
-
-**Current verdict: ❌ NO-GO — REM-12 (branch protection) is the sole remaining blocker**
+**Current verdict: ✅ PASS (as of commit `2e1c224`)**
 
 ---
 
@@ -163,11 +161,11 @@ Section 2 ❌ items → **Controlled rollout only**.
 | CODEOWNERS — Org boundary (`/packages/os-core/**`) | ✅ | `CODEOWNERS` L8: `@nzila/eng @nzila/platform` |
 | CODEOWNERS — Audit (`/apps/console/lib/audit*.ts`) | ✅ | `CODEOWNERS` L27: `@nzila/security @nzila/platform` |
 | CODEOWNERS — CI workflows (`/.github/**`) | ✅ | `CODEOWNERS` L34: `@nzila/platform @nzila/security` |
-| No direct pushes to main | ❌ | **Branch protection not configured** (HTTP 404). CODEOWNERS exists but is not enforced without branch protection rules. → **REM-12** |
+| No direct pushes to main | ✅ | Branch protection configured: required checks (lint-and-typecheck, test, build, contract-tests), enforce_admins=true, require_code_owner_reviews=true, no force-pushes, no deletions. **REM-12 closed.** |
 | Changesets / release workflow operational | ✅ | `.changeset/config.json` + `release-train.yml` + `changeset version` and `changeset publish` scripts |
 | Build reproducibility verified in CI | ✅ | `--frozen-lockfile` on every install; Node pinned at v22; Drizzle major/minor updates blocked via Dependabot ignore rules |
 
-**Current verdict: ❌ NO-GO — CODEOWNERS enforcement only activates with branch protection (REM-12)**
+**Current verdict: ✅ PASS (as of commit `2e1c224`)**
 
 ---
 
@@ -198,39 +196,45 @@ This simulation must be run before the GA Certification Report (`docs/ga/GA_CERT
 | 1.2 Privilege Escalation | 17 escalation + 7 authz-regression tests ✅ | ✅ PASS | — |
 | 1.3 Audit — DATA_EXPORT | `AUDIT_ACTIONS.DATA_EXPORT` + 18 taxonomy tests ✅ | ✅ PASS | — |
 | 1.3 Audit — DB constraints | `0004_audit_events_immutable.sql` triggers ✅ | ✅ PASS | — |
-| 1.4 Branch protection | Not configured (HTTP 404) | ❌ NO-GO | Blocks Section 1.4 |
+| 1.4 Branch protection | Configured via GitHub API — 4 required checks, enforce_admins, no force-push | ✅ PASS | — |
 | 2.1 Rate limiting | `checkRateLimit()` in both Next.js middlewares; 11/11 tests ✅ | ✅ PASS | — |
 | 2.2 Observability | Full stack: logs, orgId, correlation, redaction, OTel, health routes ✅ | ✅ PASS | — |
 | 3.1 Idempotency | No explicit tests | 🟡 Risk accepted v1 | — |
 | 3.2 Rollback runbook | Migration docs exist; no formal runbook | 🟡 Risk accepted v1 | — |
-| 4 — Branch protection | Not configured | ❌ NO-GO | Blocks Section 4 |
+| 4 — Branch protection | Configured; CODEOWNERS enforcement active | ✅ PASS | — |
 | 5 — Red team simulation | Not executed | ❌ Pending | Pending sign-off |
 
-### Overall: 🟡 NEAR-GO AS OF 2026-02-20
+### Overall: ✅ ALL HARD GATES PASS AS OF 2026-02-20
 
-> **Single remaining blocker: REM-12 (branch protection).** This is a 5-minute GitHub Settings configuration, not a code change.
+> All Section 1 and Section 2 gate items are ✅ PASS. REM-12 (branch protection) closed. Red team simulation is the final step before CTO sign-off.
 
 ---
 
 # GA UNLOCK PATH
 
-### Immediate (5 minutes, zero code)
+### Code & Infrastructure — ✅ COMPLETE
 
-| Action | Unblocks |
-|--------|----------|
-| **REM-12 — Configure GitHub branch protection on `main`** | Section 1.4, Section 4, Red team §5.6 |
+| REM | Item | Status |
+|-----|------|--------|
+| REM-01 | Rate limiting on Next.js apps | ✅ Closed (PR #67) |
+| REM-02 | Org isolation runtime tests | ✅ Closed (PR #67) |
+| REM-03 | Privilege escalation regression tests | ✅ Closed (PR #67) |
+| REM-04 | DATA_EXPORT audit action | ✅ Closed (PR #67) |
+| REM-05 | Health/readiness routes (console + partners) | ✅ Closed (PR #67) |
+| REM-11 | Audit DB-level immutability trigger | ✅ Closed (commit `059ce73`) |
+| REM-12 | GitHub branch protection on `main` | ✅ Closed (commit `2e1c224`) |
+| REM-13 | Org ID in RequestContext and log entries | ✅ Closed (commit `059ce73`) |
 
-All other Section 1 and Section 2 gates are ✅ **already passing** as of commit `059ce73`.  
-See [REMEDIATION_PLAN.md](../stress-test/REMEDIATION_PLAN.md#rem-12) for the `gh api` command.
+All Section 1 and Section 2 gates are ✅ **passing** as of commit `2e1c224`. 345 tests green.
 
-### Then (to complete the gate)
+### Remaining to GA sign-off
 
 | Item | Time | Unblocks |
 |------|------|----------|
 | Execute red team simulation (§5.1–5.6) | 1–2 hours | Section 5 |
 | Sign `GA_CERTIFICATION_REPORT.md` | 15 min | Final decision |
 
-### Achievable GA date: **today** once REM-12 is configured and red team simulation is run
+### Achievable GA date: **today** — red team simulation + CTO sign-off only
 
 ---
 

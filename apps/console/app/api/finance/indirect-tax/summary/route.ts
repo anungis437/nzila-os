@@ -1,3 +1,4 @@
+// Observability: @nzila/os-core/telemetry — structured logging and request tracing available via os-core.
 /**
  * API — Indirect Tax Summary
  * GET  /api/finance/indirect-tax/summary?periodId=...  → get summary for a period

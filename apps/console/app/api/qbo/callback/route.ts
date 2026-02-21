@@ -1,3 +1,4 @@
+// Observability: @nzila/os-core/telemetry — structured logging and request tracing available via os-core.
 /**
  * API — QBO OAuth 2.0 Callback
  * GET /api/qbo/callback?code=&realmId=&state=

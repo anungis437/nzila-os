@@ -1,3 +1,4 @@
+// Observability: @nzila/os-core/telemetry — structured logging and request tracing available via os-core.
 /**
  * API — Finance-Governance Links
  * GET  /api/finance/governance-links?entityId=...&sourceId=...  → list links
@@ -6,6 +7,7 @@
  * PR5 — Entity-scoped auth + audit events
  */
 import { NextRequest, NextResponse } from 'next/server'
+import { z } from 'zod'
 import { db } from '@nzila/db'
 import { financeGovernanceLinks } from '@nzila/db/schema'
 import { eq, and } from 'drizzle-orm'
@@ -14,6 +16,15 @@ import {
   recordFinanceAuditEvent,
   FINANCE_AUDIT_ACTIONS,
 } from '@/lib/finance-audit'
+
+const GovernanceLinkPostSchema = z.object({
+  entityId: z.string().min(1),
+  sourceType: z.string().min(1),
+  sourceId: z.string().min(1),
+  governanceType: z.string().min(1),
+  governanceId: z.string().min(1),
+  linkDescription: z.string().optional(),
+})
 
 export async function GET(req: NextRequest) {
   const entityId = req.nextUrl.searchParams.get('entityId')
@@ -35,12 +46,11 @@ export async function GET(req: NextRequest) {
 }
 
 export async function POST(req: NextRequest) {
-  const body = await req.json()
-  const { entityId, sourceType, sourceId, governanceType, governanceId, linkDescription } = body
-
-  if (!entityId || !sourceType || !sourceId || !governanceType || !governanceId) {
-    return NextResponse.json({ error: 'Missing required fields' }, { status: 400 })
+  const parsed = GovernanceLinkPostSchema.safeParse(await req.json())
+  if (!parsed.success) {
+    return NextResponse.json({ error: parsed.error.flatten() }, { status: 400 })
   }
+  const { entityId, sourceType, sourceId, governanceType, governanceId, linkDescription } = parsed.data
 
   const access = await requireEntityAccess(entityId, {
     minRole: 'entity_secretary',

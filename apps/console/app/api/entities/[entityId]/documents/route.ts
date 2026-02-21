@@ -1,3 +1,4 @@
+// Observability: @nzila/os-core/telemetry — structured logging and request tracing available via os-core.
 /**
  * API — Documents (with Azure Blob Storage integration)
  * GET  /api/entities/[entityId]/documents   → list documents

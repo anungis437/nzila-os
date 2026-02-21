@@ -36,6 +36,17 @@ export interface PolicyEvaluation {
   blockers: string[]
   warnings: string[]
   notices: string[]
+  workflowSpec?: {
+    steps: Array<{
+      order: number
+      type: 'APPROVAL' | 'NOTICE' | 'WAIT' | 'DOCUMENT'
+      actor: 'board' | 'shareholders' | 'specific' | 'system'
+      required: boolean
+      description: string
+      deadline?: number
+    }>
+    estimatedDuration: number
+  } | null
 }
 
 // ── Entity policy config (overrides defaults) ───────────────────────────────

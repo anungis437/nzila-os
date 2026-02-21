@@ -16,6 +16,7 @@
  * required approvals are in "approved" status. This is the #1
  * acceptance test for the backbone.
  */
+// eslint-disable-next-line no-restricted-imports -- non-ML data: governance/approval tables, no ml* table access
 import { db } from '@nzila/db'
 import {
   governanceActions,

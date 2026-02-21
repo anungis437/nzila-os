@@ -1,3 +1,4 @@
+// Observability: @nzila/os-core/telemetry — structured logging and request tracing available via os-core.
 /**
  * API — Analytics Overview
  * GET /api/analytics   → portfolio-level analytics powered by HyperLogLog

@@ -29,15 +29,31 @@ const SCHEMA_VALIDATION_PATTERNS = [
   /RequestSchema/,           // named schema convention
   /BodySchema/,              // named schema convention
   /validate\s*\(/,           // generic validate call
+  /verifyWebhookSignature\s*\(/, // Stripe webhook signature verification
+  /constructEvent\s*\(/,    // Stripe SDK event construction
+  /req\.formData\s*\(\)/,   // multipart form data (documents upload)
 ]
 
 function findRouteFiles(app: string): string[] {
   const appDir = resolve(ROOT, `apps/${app}/app`)
   if (!existsSync(appDir)) return []
-  const entries = readdirSync(appDir, { withFileTypes: true, recursive: true })
-  return entries
-    .filter(e => e.isFile() && e.name === 'route.ts')
-    .map(e => join((e as any).path ?? appDir, e.name))
+  const results: string[] = []
+
+  function recurse(currentDir: string) {
+    const entries = readdirSync(currentDir, { withFileTypes: true })
+    for (const entry of entries) {
+      if (entry.name === 'node_modules' || entry.name === '.next' || entry.name === '.turbo') continue
+      const fullPath = join(currentDir, entry.name)
+      if (entry.isDirectory()) {
+        recurse(fullPath)
+      } else if (entry.isFile() && entry.name === 'route.ts') {
+        results.push(fullPath)
+      }
+    }
+  }
+
+  recurse(appDir)
+  return results
 }
 
 // ── 1. Mutation route handlers must have schema validation ────────────────

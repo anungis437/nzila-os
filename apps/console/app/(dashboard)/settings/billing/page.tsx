@@ -5,6 +5,7 @@
  * Delegates interactive parts to <SubscriptionManager />.
  */
 import { CreditCardIcon } from '@heroicons/react/24/outline'
+// eslint-disable-next-line no-restricted-imports -- non-ML data: Stripe subscription tables, no ml* table access
 import { db } from '@nzila/db'
 import { stripeSubscriptions } from '@nzila/db/schema'
 import { eq, desc } from 'drizzle-orm'

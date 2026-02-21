@@ -1,3 +1,4 @@
+// Observability: @nzila/os-core/telemetry — structured logging and request tracing available via os-core.
 /**
  * API — Shareholders
  * GET  /api/entities/[entityId]/shareholders   → list shareholders

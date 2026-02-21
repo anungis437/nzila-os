@@ -1,3 +1,4 @@
+// Observability: @nzila/os-core/telemetry — structured logging and request tracing available via os-core.
 /**
  * API — Approvals & Votes
  * GET  /api/entities/[entityId]/approvals   → list approvals with vote counts

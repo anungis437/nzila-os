@@ -54,6 +54,7 @@ export interface MlTrainingRunResponse {
   status: string
   startedAt: string
   finishedAt: string | null
+  rowsProcessed?: number | null
   error: string | null
   createdAt: string
 }

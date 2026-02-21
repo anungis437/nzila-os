@@ -136,7 +136,7 @@ export async function resolveDeployment(opts: {
   entityId: string
   appKey: string
   profileKey: string
-  feature: 'chat' | 'generate' | 'embed' | 'rag' | 'extract'
+  feature: 'chat' | 'generate' | 'embed' | 'rag_query' | 'extract'
 }): Promise<ResolvedDeployment | null> {
   const environment = (process.env.NODE_ENV === 'production' ? 'prod' : 'dev') as 'dev' | 'staging' | 'prod'
 
@@ -171,9 +171,9 @@ export async function resolveDeployment(opts: {
   return {
     deploymentName: route.deploymentName,
     modelFamily: route.modelFamily,
-    modality: route.modality,
+    modality: route.modality as 'text' | 'embeddings',
     provider: route.provider as AiProvider,
-    maxTokens: route.maxTokens,
+    maxTokens: route.maxTokens ?? 0,
     defaultTemperature: Number(route.defaultTemperature),
     costProfile: (route.costProfile ?? {}) as ResolvedDeployment['costProfile'],
   }

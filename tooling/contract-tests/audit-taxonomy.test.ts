@@ -163,3 +163,44 @@ describe('Audit Taxonomy — REM-04 contract', () => {
     ).toBe(true)
   })
 })
+
+// ── REM-09: Member management call-site audit coverage ────────────────────────
+
+describe('Audit Call-site — REM-09 member management', () => {
+  const PEOPLE_ROUTE = 'apps/console/app/api/entities/[entityId]/people/route.ts'
+
+  it('people route exists (member management endpoint)', () => {
+    expect(existsSync(resolve(ROOT, PEOPLE_ROUTE))).toBe(true)
+  })
+
+  it('people route imports recordAuditEvent', () => {
+    const content = read(PEOPLE_ROUTE)
+    expect(content).not.toBe('')
+    expect(content).toContain('recordAuditEvent')
+  })
+
+  it('people route imports AUDIT_ACTIONS', () => {
+    const content = read(PEOPLE_ROUTE)
+    expect(content).toContain('AUDIT_ACTIONS')
+  })
+
+  it('people route POST emits AUDIT_ACTIONS.MEMBER_ADD on person creation', () => {
+    const content = read(PEOPLE_ROUTE)
+    expect(content).toContain('AUDIT_ACTIONS.MEMBER_ADD')
+  })
+
+  it('AUDIT_ACTIONS.MEMBER_ADD is defined in taxonomy', () => {
+    const content = read(AUDIT_DB)
+    expect(content).toContain('MEMBER_ADD')
+  })
+
+  it('AUDIT_ACTIONS.MEMBER_ROLE_CHANGE is defined in taxonomy', () => {
+    const content = read(AUDIT_DB)
+    expect(content).toContain('MEMBER_ROLE_CHANGE')
+  })
+
+  it('AUDIT_ACTIONS.MEMBER_REMOVE is defined in taxonomy', () => {
+    const content = read(AUDIT_DB)
+    expect(content).toContain('MEMBER_REMOVE')
+  })
+})

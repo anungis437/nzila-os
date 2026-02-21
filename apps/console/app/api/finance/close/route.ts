@@ -1,3 +1,4 @@
+// Observability: @nzila/os-core/telemetry — structured logging and request tracing available via os-core.
 /**
  * API — Close Periods
  * GET   /api/finance/close?entityId=...  → list close periods
@@ -10,6 +11,7 @@
  *  • Close gate: all exceptions must be resolved before closing
  */
 import { NextRequest, NextResponse } from 'next/server'
+import { z } from 'zod'
 import { db } from '@nzila/db'
 import { closePeriods, closeExceptions } from '@nzila/db/schema'
 import { eq, and, ne } from 'drizzle-orm'
@@ -18,6 +20,22 @@ import {
   recordFinanceAuditEvent,
   FINANCE_AUDIT_ACTIONS,
 } from '@/lib/finance-audit'
+
+// ── Request schemas ──────────────────────────────────────────────────────────
+
+const ClosePeriodPostSchema = z.object({
+  entityId: z.string().min(1),
+  periodLabel: z.string().min(1),
+  periodType: z.string().min(1),
+  startDate: z.string().min(1),
+  endDate: z.string().min(1),
+})
+
+const ClosePeriodPatchSchema = z.object({
+  id: z.string().min(1),
+  status: z.string().min(1),
+  entityId: z.string().optional(),
+})
 
 export async function GET(req: NextRequest) {
   const entityId = req.nextUrl.searchParams.get('entityId')
@@ -37,12 +55,11 @@ export async function GET(req: NextRequest) {
 }
 
 export async function POST(req: NextRequest) {
-  const body = await req.json()
-  const { entityId, periodLabel, periodType, startDate, endDate } = body
-
-  if (!entityId || !periodLabel || !periodType || !startDate || !endDate) {
-    return NextResponse.json({ error: 'Missing required fields' }, { status: 400 })
+  const parsed = ClosePeriodPostSchema.safeParse(await req.json())
+  if (!parsed.success) {
+    return NextResponse.json({ error: parsed.error.flatten() }, { status: 400 })
   }
+  const { entityId, periodLabel, periodType, startDate, endDate } = parsed.data
 
   const access = await requireEntityAccess(entityId, { minRole: 'entity_secretary' })
   if (!access.ok) return access.response
@@ -74,12 +91,11 @@ export async function POST(req: NextRequest) {
 }
 
 export async function PATCH(req: NextRequest) {
-  const body = await req.json()
-  const { id, status, entityId } = body
-
-  if (!id || !status) {
-    return NextResponse.json({ error: 'id and status required' }, { status: 400 })
+  const parsed = ClosePeriodPatchSchema.safeParse(await req.json())
+  if (!parsed.success) {
+    return NextResponse.json({ error: parsed.error.flatten() }, { status: 400 })
   }
+  const { id, status } = parsed.data
 
   // Fetch the period to know entityId and prior status
   const [existing] = await db

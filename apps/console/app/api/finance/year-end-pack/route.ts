@@ -1,3 +1,4 @@
+// Observability: @nzila/os-core/telemetry — structured logging and request tracing available via os-core.
 /**
  * API — Year-End Pack
  *
@@ -7,6 +8,7 @@
  * PR5 — Entity-scoped auth + audit events
  */
 import { NextRequest, NextResponse } from 'next/server'
+import { z } from 'zod'
 import { db } from '@nzila/db'
 import {
   taxYears,
@@ -189,15 +191,18 @@ export async function GET(req: NextRequest) {
 }
 
 export async function POST(req: NextRequest) {
-  const body = await req.json()
-  const { entityId, fiscalYear } = body
-
-  if (!entityId || !fiscalYear) {
+  const YearEndPackPostSchema = z.object({
+    entityId: z.string().min(1),
+    fiscalYear: z.string().min(1),
+  })
+  const parsed = YearEndPackPostSchema.safeParse(await req.json())
+  if (!parsed.success) {
     return NextResponse.json(
       { error: 'entityId and fiscalYear are required' },
       { status: 400 },
     )
   }
+  const { entityId, fiscalYear } = parsed.data
 
   const access = await requireEntityAccess(entityId, {
     minRole: 'entity_secretary',

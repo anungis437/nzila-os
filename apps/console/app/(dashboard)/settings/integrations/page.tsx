@@ -12,6 +12,7 @@
  */
 import { auth } from '@clerk/nextjs/server'
 import { redirect } from 'next/navigation'
+// eslint-disable-next-line no-restricted-imports -- non-ML data: entity/integration tables, no ml* table access
 import { db } from '@nzila/db'
 import { entities, entityMembers, qboConnections } from '@nzila/db/schema'
 import { eq, and, desc } from 'drizzle-orm'

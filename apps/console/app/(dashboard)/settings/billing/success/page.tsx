@@ -98,7 +98,7 @@ export default async function BillingSuccessPage({ searchParams }: PageProps) {
           </div>
           <h1 className="text-2xl font-bold text-gray-900">Payment pending</h1>
           <p className="mt-2 max-w-sm text-sm text-gray-500">
-            Your payment is processing. We'll activate your plan once it clears. Check your email
+            Your payment is processing. We&apos;ll activate your plan once it clears. Check your email
             for confirmation.
           </p>
           <Link

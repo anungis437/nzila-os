@@ -49,6 +49,7 @@ export const documentCategoryEnum = pgEnum('document_category', [
   'year_end',
   'export',
   'ingestion_report',
+  'attestation',
   'other',
 ])
 

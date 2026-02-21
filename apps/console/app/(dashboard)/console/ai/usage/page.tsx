@@ -4,6 +4,7 @@
  * Detailed request-level usage analytics with filtering by appKey,
  * feature, and time range. Shows tokens, cost, latency percentiles.
  */
+// eslint-disable-next-line no-restricted-imports -- non-ML data: AI request/usage tables, no ml* table access
 import { db } from '@nzila/db'
 import { aiRequests } from '@nzila/db/schema'
 import { eq, desc, and, sql, count, sum, avg } from 'drizzle-orm'

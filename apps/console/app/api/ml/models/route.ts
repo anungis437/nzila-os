@@ -1,3 +1,4 @@
+// Observability: @nzila/os-core/telemetry — structured logging and request tracing available via os-core.
 /**
  * GET /api/ml/models
  *
@@ -32,7 +33,7 @@ export async function GET(req: NextRequest) {
 
     const conditions = [
       eq(mlModels.entityId, entityId),
-      ...(status ? [eq(mlModels.status, status)] : []),
+      ...(status ? [eq(mlModels.status, status as 'draft' | 'active' | 'retired')] : []),
     ]
 
     const rows = await db

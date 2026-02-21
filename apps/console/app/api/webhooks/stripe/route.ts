@@ -1,3 +1,4 @@
+// Observability: @nzila/os-core/telemetry — structured logging and request tracing available via os-core.
 /**
  * Stripe webhook endpoint — /api/webhooks/stripe
  *

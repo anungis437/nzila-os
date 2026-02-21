@@ -1,3 +1,4 @@
+// Observability: @nzila/os-core/telemetry — structured logging and request tracing available via os-core.
 /**
  * API — Indirect Tax Period Detail
  * GET   /api/finance/indirect-tax/periods/[periodId]  → period detail + summary
@@ -6,6 +7,7 @@
  * PR5 — Entity-scoped auth + audit events
  */
 import { NextRequest, NextResponse } from 'next/server'
+import { z } from 'zod'
 import { db } from '@nzila/db'
 import { indirectTaxPeriods, indirectTaxSummary, indirectTaxAccounts } from '@nzila/db/schema'
 import { eq } from 'drizzle-orm'
@@ -61,7 +63,14 @@ export async function PATCH(
   { params }: { params: Promise<{ periodId: string }> },
 ) {
   const { periodId } = await params
-  const body = await req.json()
+  const IndirectTaxPeriodPatchSchema = z.object({
+    status: z.enum(['open', 'filed', 'paid', 'closed']).optional(),
+  })
+  const bodyParsed = IndirectTaxPeriodPatchSchema.safeParse(await req.json())
+  if (!bodyParsed.success) {
+    return NextResponse.json({ error: bodyParsed.error.flatten() }, { status: 400 })
+  }
+  const body = bodyParsed.data
 
   // Fetch existing for entity scoping and previous state
   const [existing] = await db
@@ -80,7 +89,7 @@ export async function PATCH(
 
   const [updated] = await db
     .update(indirectTaxPeriods)
-    .set({ ...body, updatedAt: new Date() })
+    .set({ ...(body.status !== undefined ? { status: body.status } : {}), updatedAt: new Date() })
     .where(eq(indirectTaxPeriods.id, periodId))
     .returning()
 

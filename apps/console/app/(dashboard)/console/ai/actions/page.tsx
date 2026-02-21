@@ -4,6 +4,7 @@
  * Lists all AI actions with filters by status, actionType, appKey.
  * Shows action details, run status, and attestation links.
  */
+// eslint-disable-next-line no-restricted-imports -- non-ML data: AI action/run tables, no ml* table access
 import { db } from '@nzila/db'
 import { aiActions, aiActionRuns, documents } from '@nzila/db/schema'
 import { eq, desc, and, sql } from 'drizzle-orm'

@@ -1,3 +1,4 @@
+// Observability: @nzila/os-core/telemetry — structured logging and request tracing available via os-core.
 /**
  * API — Tax Year by ID
  * GET    /api/finance/tax/years/[taxYearId]   → get tax year detail + close gate
@@ -9,6 +10,7 @@
  *  • Hash-chained audit events
  */
 import { NextRequest, NextResponse } from 'next/server'
+import { z } from 'zod'
 import { db } from '@nzila/db'
 import {
   taxYears,
@@ -102,8 +104,12 @@ export async function PATCH(
   { params }: { params: Promise<{ taxYearId: string }> },
 ) {
   const { taxYearId } = await params
-  const body = await req.json()
-  const newStatus = body.status
+  const TaxYearPatchSchema = z.object({ status: z.enum(['open', 'filed', 'assessed', 'closed']) })
+  const bodyParsed = TaxYearPatchSchema.safeParse(await req.json())
+  if (!bodyParsed.success) {
+    return NextResponse.json({ error: bodyParsed.error.flatten() }, { status: 400 })
+  }
+  const newStatus = bodyParsed.data.status
 
   // Fetch the existing tax year for entity scoping
   const [existing] = await db

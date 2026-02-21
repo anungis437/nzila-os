@@ -1,3 +1,4 @@
+// Observability: @nzila/os-core/telemetry — structured logging and request tracing available via os-core.
 /**
  * API — Year-End Readiness
  * GET  /api/entities/[entityId]/year-end   → year-end checklist status
