@@ -70,7 +70,7 @@ jobs:
           severity: CRITICAL
 
       - name: Upload SARIF to GitHub Security
-        uses: github/codeql-action/upload-sarif@v3
+        uses: github/codeql-action/upload-sarif@v4
         if: always() && hashFiles(format('trivy-{0}.sarif', matrix.target)) != ''
         with:
           sarif_file: trivy-${{ matrix.target }}.sarif
@@ -100,7 +100,7 @@ jobs:
           skip-dirs: 'node_modules,.pnpm-store,CAPPSnzila-automation.pnpm-store'
 
       - name: Upload filesystem SARIF
-        uses: github/codeql-action/upload-sarif@v3
+        uses: github/codeql-action/upload-sarif@v4
         if: always() && hashFiles('trivy-fs.sarif') != ''
         with:
           sarif_file: trivy-fs.sarif
