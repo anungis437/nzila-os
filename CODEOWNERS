@@ -28,6 +28,10 @@
 /ops/compliance/**             @nzila/security @nzila/platform
 /tooling/contract-tests/**     @nzila/platform
 
+# Governance — immutable controls, profiles, GA gate
+/governance/**                 @nzila/platform @nzila/security
+/security/redteam/**           @nzila/security @nzila/platform
+
 # AI / ML packages
 /packages/ai-core/**  @nzila/ai
 /packages/ai-sdk/**   @nzila/ai @nzila/eng

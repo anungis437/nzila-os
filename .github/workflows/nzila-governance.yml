@@ -1,0 +1,267 @@
+name: Nzila Governance Gate
+
+# Reusable workflow: called by individual app repos or the kernel CI.
+# Consolidates all governance checks into a single required status check.
+#
+# Usage in app repos:
+#   jobs:
+#     governance:
+#       uses: anungis437/nzila-os/.github/workflows/nzila-governance.yml@main
+#       secrets: inherit
+
+on:
+  workflow_call:
+    inputs:
+      run-red-team:
+        description: 'Run red-team tests (default: true on schedule, false on PR)'
+        type: boolean
+        default: false
+      run-trivy:
+        description: 'Run Trivy container scan'
+        type: boolean
+        default: true
+      fail-on-critical:
+        description: 'Fail on CRITICAL vulnerabilities'
+        type: boolean
+        default: true
+    secrets:
+      EVIDENCE_SEAL_KEY:
+        required: false
+  # Also callable directly in the kernel repo
+  push:
+    branches: [main]
+  pull_request:
+    branches: [main]
+
+permissions:
+  contents: read
+  security-events: write
+
+jobs:
+  # ── Secret Scanning ──────────────────────────────────────────────────────
+  secret-scan:
+    runs-on: ubuntu-latest
+    name: Secret Scan (Gitleaks + TruffleHog)
+    steps:
+      - uses: actions/checkout@v4
+        with:
+          fetch-depth: 0
+
+      - name: Gitleaks
+        uses: gitleaks/gitleaks-action@v2
+        env:
+          GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
+          GITLEAKS_LICENSE: ${{ secrets.GITLEAKS_LICENSE }}
+
+      - name: TruffleHog OSS
+        uses: trufflesecurity/trufflehog@main
+        with:
+          extra_args: --only-verified
+
+  # ── Dependency Audit ─────────────────────────────────────────────────────
+  dependency-audit:
+    runs-on: ubuntu-latest
+    name: Dependency Audit
+    steps:
+      - uses: actions/checkout@v4
+
+      - name: Setup pnpm
+        uses: pnpm/action-setup@v4
+        with:
+          version: 10.11.0
+
+      - name: Setup Node.js
+        uses: actions/setup-node@v4
+        with:
+          node-version: 22
+          cache: pnpm
+
+      - name: Install dependencies
+        run: pnpm install --frozen-lockfile
+
+      - name: Audit (fail on critical)
+        run: pnpm audit --audit-level=critical
+
+  # ── Container Scan ───────────────────────────────────────────────────────
+  trivy:
+    runs-on: ubuntu-latest
+    name: Trivy Container Scan
+    if: ${{ inputs.run-trivy != false }}
+    steps:
+      - uses: actions/checkout@v4
+
+      - name: Run Trivy (filesystem mode)
+        uses: aquasecurity/trivy-action@master
+        with:
+          scan-type: fs
+          scan-ref: '.'
+          severity: CRITICAL,HIGH
+          exit-code: ${{ inputs.fail-on-critical && '1' || '0' }}
+          format: sarif
+          output: trivy-results.sarif
+
+      - name: Upload Trivy SARIF
+        if: always()
+        uses: github/codeql-action/upload-sarif@v3
+        with:
+          sarif_file: trivy-results.sarif
+
+  # ── SBOM Generation ──────────────────────────────────────────────────────
+  sbom:
+    runs-on: ubuntu-latest
+    name: SBOM Generation
+    steps:
+      - uses: actions/checkout@v4
+
+      - name: Setup pnpm
+        uses: pnpm/action-setup@v4
+        with:
+          version: 10.11.0
+
+      - name: Setup Node.js
+        uses: actions/setup-node@v4
+        with:
+          node-version: 22
+          cache: pnpm
+
+      - name: Install dependencies
+        run: pnpm install --frozen-lockfile
+
+      - name: Generate CycloneDX SBOM
+        run: npx @cyclonedx/cyclonedx-npm --output-file sbom.json --output-format json || true
+
+      - name: Upload SBOM artifact
+        uses: actions/upload-artifact@v4
+        with:
+          name: sbom-${{ github.run_id }}
+          path: sbom.json
+          retention-days: 365
+
+  # ── Contract Tests ───────────────────────────────────────────────────────
+  contract-tests:
+    runs-on: ubuntu-latest
+    name: Contract Tests
+    steps:
+      - uses: actions/checkout@v4
+
+      - name: Setup pnpm
+        uses: pnpm/action-setup@v4
+        with:
+          version: 10.11.0
+
+      - name: Setup Node.js
+        uses: actions/setup-node@v4
+        with:
+          node-version: 22
+          cache: pnpm
+
+      - name: Install dependencies
+        run: pnpm install --frozen-lockfile
+
+      - name: Run contract tests
+        run: pnpm contract-tests
+
+  # ── Evidence Seal Verification ───────────────────────────────────────────
+  verify-seal:
+    runs-on: ubuntu-latest
+    name: Evidence Seal Verification
+    steps:
+      - uses: actions/checkout@v4
+
+      - name: Setup pnpm
+        uses: pnpm/action-setup@v4
+        with:
+          version: 10.11.0
+
+      - name: Setup Node.js
+        uses: actions/setup-node@v4
+        with:
+          node-version: 22
+          cache: pnpm
+
+      - name: Install dependencies
+        run: pnpm install --frozen-lockfile
+
+      - name: Run evidence seal contract tests
+        run: |
+          npx vitest run \
+            --config tooling/contract-tests/vitest.config.ts \
+            tooling/contract-tests/evidence-seal.test.ts \
+            tooling/contract-tests/evidence-seal-mandatory.test.ts
+        env:
+          EVIDENCE_SEAL_KEY: ${{ secrets.EVIDENCE_SEAL_KEY }}
+
+  # ── Red-Team (schedule or on-demand) ─────────────────────────────────────
+  red-team:
+    runs-on: ubuntu-latest
+    name: Red-Team Adversarial
+    if: ${{ inputs.run-red-team == true || github.event_name == 'schedule' }}
+    steps:
+      - uses: actions/checkout@v4
+
+      - name: Setup pnpm
+        uses: pnpm/action-setup@v4
+        with:
+          version: 10.11.0
+
+      - name: Setup Node.js
+        uses: actions/setup-node@v4
+        with:
+          node-version: 22
+          cache: pnpm
+
+      - name: Install dependencies
+        run: pnpm install --frozen-lockfile
+
+      - name: Run red-team tests
+        run: npx vitest run --config security/redteam/vitest.config.ts
+
+      - name: Upload red-team evidence
+        if: always()
+        uses: actions/upload-artifact@v4
+        with:
+          name: redteam-evidence-${{ github.run_id }}
+          path: security/redteam/redteam-results.json
+          retention-days: 365
+
+  # ── Governance Gate Summary ──────────────────────────────────────────────
+  governance-gate:
+    runs-on: ubuntu-latest
+    name: Governance Gate
+    needs:
+      - secret-scan
+      - dependency-audit
+      - contract-tests
+      - verify-seal
+      - sbom
+    if: always()
+    steps:
+      - name: Check all governance jobs passed
+        run: |
+          echo "=== Nzila Governance Gate Summary ==="
+          echo "Secret Scan:       ${{ needs.secret-scan.result }}"
+          echo "Dependency Audit:  ${{ needs.dependency-audit.result }}"
+          echo "Contract Tests:    ${{ needs.contract-tests.result }}"
+          echo "Verify Seal:       ${{ needs.verify-seal.result }}"
+          echo "SBOM:              ${{ needs.sbom.result }}"
+          echo "======================================"
+
+          # Fail if any required job failed
+          if [[ "${{ needs.secret-scan.result }}" == "failure" ]]; then
+            echo "❌ Secret scan failed"
+            exit 1
+          fi
+          if [[ "${{ needs.dependency-audit.result }}" == "failure" ]]; then
+            echo "❌ Dependency audit failed"
+            exit 1
+          fi
+          if [[ "${{ needs.contract-tests.result }}" == "failure" ]]; then
+            echo "❌ Contract tests failed"
+            exit 1
+          fi
+          if [[ "${{ needs.verify-seal.result }}" == "failure" ]]; then
+            echo "❌ Evidence seal verification failed"
+            exit 1
+          fi
+
+          echo "✅ All governance gates passed"

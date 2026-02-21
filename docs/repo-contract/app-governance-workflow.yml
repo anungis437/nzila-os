@@ -1,0 +1,29 @@
+# Nzila Governance — App Integration Template
+#
+# Copy this workflow into each vertical app repo:
+#   .github/workflows/nzila-governance.yml
+#
+# This imports the reusable governance workflow from the kernel repo.
+# Required checks:
+#   - Governance Gate (the summary job in the reusable workflow)
+
+name: Nzila Governance Gate
+
+on:
+  push:
+    branches: [main]
+  pull_request:
+    branches: [main]
+
+permissions:
+  contents: read
+  security-events: write
+
+jobs:
+  governance:
+    uses: anungis437/nzila-os/.github/workflows/nzila-governance.yml@main
+    with:
+      run-red-team: false
+      run-trivy: true
+      fail-on-critical: true
+    secrets: inherit

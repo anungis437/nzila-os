@@ -4,6 +4,7 @@ import nextTs from "eslint-config-next/typescript";
 import noShadowAi from "../../packages/ai-sdk/eslint-no-shadow-ai.mjs";
 import noShadowMl from "../../packages/ml-sdk/eslint-no-shadow-ml.mjs";
 import noShadowDb from "../../packages/db/eslint-no-shadow-db.mjs";
+import noDirectProvider from "../../packages/config/eslint-no-direct-provider.mjs";
 
 const eslintConfig = defineConfig([
   ...nextVitals,
@@ -11,6 +12,7 @@ const eslintConfig = defineConfig([
   noShadowAi,
   noShadowMl,
   noShadowDb,
+  noDirectProvider,
   // Override default ignores of eslint-config-next.
   globalIgnores([
     // Default ignores of eslint-config-next:

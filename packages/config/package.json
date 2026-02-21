@@ -7,6 +7,7 @@
     "./tsconfig/base": "./tsconfig.base.json",
     "./tsconfig/nextjs": "./tsconfig.nextjs.json",
     "./eslint": "./eslint.js",
+    "./eslint-no-direct-provider": "./eslint-no-direct-provider.mjs",
     "./prettier": "./prettier.js"
   }
 }

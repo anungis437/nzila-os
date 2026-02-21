@@ -3,6 +3,9 @@
  */
 import type Stripe from 'stripe'
 
+// Re-export Stripe namespace so consumers never need a direct `stripe` import
+export type { Stripe }
+
 // ── Stripe metadata convention ──────────────────────────────────────────────
 
 /**

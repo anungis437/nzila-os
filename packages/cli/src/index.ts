@@ -18,8 +18,9 @@ program
 program
   .command('create-vertical <name>')
   .description('Scaffold a new vertical app with full governance posture (scopedDb, audit, RBAC, telemetry)')
+  .option('--profile <profile>', 'Governance profile (union-eyes, abr-insights, fintech, commerce, agtech, media, advisory)', 'commerce')
   .option('--dry-run', 'Preview files without writing', false)
-  .action(async (name: string, options: { dryRun: boolean }) => {
+  .action(async (name: string, options: { profile: string; dryRun: boolean }) => {
     await createVertical(name, options)
   })
 

@@ -28,7 +28,10 @@
     "./secrets": "./src/secrets/keyvault.ts",
     "./rateLimit": "./src/rateLimit.ts",
     "./ai-env": "./src/ai-env.ts",
-    "./boot-assert": "./src/boot-assert.ts"
+    "./boot-assert": "./src/boot-assert.ts",
+    "./abr/confidential-reporting": "./src/abr/confidential-reporting.ts",
+    "./ue/case-evidence-export": "./src/ue/case-evidence-export.ts",
+    "./fin/key-lifecycle": "./src/fin/key-lifecycle.ts"
   },
   "scripts": {
     "typecheck": "tsc --noEmit",

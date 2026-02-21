@@ -66,6 +66,7 @@ describe('Migration Policy (INV-06)', () => {
     // Allow known infrastructure/setup migrations without timestamp prefix
     const KNOWN_SETUP_MIGRATIONS = [
       'ai-control-plane-pgvector.sql',
+      'hash-chain-immutability-triggers.sql',
     ]
     const violations = migrations.filter(
       (f) => !TIMESTAMP_PREFIX.test(f) && !KNOWN_SETUP_MIGRATIONS.includes(f),

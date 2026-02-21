@@ -14,7 +14,7 @@
  *   invoice.payment_failed          → mark past_due, notify
  */
 import { NextRequest, NextResponse } from 'next/server'
-import type Stripe from 'stripe'
+import type { Stripe } from '@nzila/payments-stripe'
 import { verifyWebhookSignature, WebhookSignatureError } from '@nzila/payments-stripe/webhooks'
 import { db } from '@nzila/db'
 import { stripeSubscriptions } from '@nzila/db/schema'

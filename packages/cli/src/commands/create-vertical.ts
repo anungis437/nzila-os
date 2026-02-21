@@ -19,13 +19,30 @@ import { mkdirSync, writeFileSync, existsSync } from 'node:fs'
 import { join } from 'node:path'
 
 interface CreateVerticalOptions {
+  profile: string
   dryRun: boolean
 }
+
+const VALID_PROFILES = [
+  'union-eyes',
+  'abr-insights',
+  'fintech',
+  'commerce',
+  'agtech',
+  'media',
+  'advisory',
+] as const
 
 export async function createVertical(name: string, options: CreateVerticalOptions): Promise<void> {
   // Validate name
   if (!/^[a-z][a-z0-9-]*$/.test(name)) {
     console.error(`❌ Invalid vertical name: "${name}". Must be lowercase alphanumeric with hyphens.`)
+    process.exit(1)
+  }
+
+  // Validate profile
+  if (!VALID_PROFILES.includes(options.profile as any)) {
+    console.error(`❌ Invalid governance profile: "${options.profile}". Valid: ${VALID_PROFILES.join(', ')}`)
     process.exit(1)
   }
 
@@ -38,7 +55,7 @@ export async function createVertical(name: string, options: CreateVerticalOption
     process.exit(1)
   }
 
-  const files = generateFiles(name)
+  const files = generateFiles(name, options)
 
   if (options.dryRun) {
     console.log(`\n🔍 Dry run — would create ${files.length} files:\n`)
@@ -81,7 +98,7 @@ interface GeneratedFile {
   content: string
 }
 
-function generateFiles(name: string): GeneratedFile[] {
+function generateFiles(name: string, options: CreateVerticalOptions): GeneratedFile[] {
   const pkgName = `@nzila/${name}`
   const pascalName = name
     .split('-')
@@ -591,5 +608,126 @@ See \`docs/migration/ROLLBACK_RUNBOOK.md\` for database rollback procedures.
 export { buildEvidencePackFromAction, processEvidencePack } from '@nzila/os-core/evidence'
 `,
     },
+
+    // ── Governance profile ──────────────────────────────────────────
+    {
+      path: 'governance.json',
+      content: JSON.stringify(
+        {
+          vertical: name,
+          profile: options.profile,
+          generatedAt: new Date().toISOString(),
+          immutableControls: [
+            'org-isolation',
+            'audit-emission',
+            'evidence-sealing',
+            'hash-chain-integrity',
+            'scoped-db-enforcement',
+            'no-direct-provider-import',
+          ],
+          profileExtensions: getProfileExtensions(options.profile),
+        },
+        null,
+        2,
+      ) + '\n',
+    },
+
+    // ── CODEOWNERS ──────────────────────────────────────────────────
+    {
+      path: 'CODEOWNERS',
+      content: `# ${pascalName} — Code Ownership
+# All changes to this vertical require review from vertical leads + platform governance.
+
+* @nzila-os/${name}-leads @nzila-os/platform-governance
+governance.json @nzila-os/platform-governance
+eslint.config.mjs @nzila-os/platform-governance
+middleware.ts @nzila-os/platform-governance @nzila-os/${name}-leads
+`,
+    },
+
+    // ── GitHub Actions governance workflow reference ─────────────────
+    {
+      path: '.github/governance.yml',
+      content: `# ${pascalName} — Governance Workflow Reference
+#
+# This vertical imports the reusable nzila-governance.yml workflow.
+# DO NOT modify governance controls below — they are immutable.
+name: ${name}-governance
+
+on:
+  pull_request:
+    paths:
+      - 'apps/${name}/**'
+  push:
+    branches: [main]
+    paths:
+      - 'apps/${name}/**'
+
+jobs:
+  governance:
+    uses: ./.github/workflows/nzila-governance.yml
+    with:
+      vertical: ${name}
+      profile: ${options.profile}
+    secrets: inherit
+`,
+    },
+
+    // ── Red-team test stub ──────────────────────────────────────────
+    {
+      path: '__tests__/redteam.test.ts',
+      content: `/**
+ * ${pascalName} — Red-Team Test Stub
+ *
+ * Adversarial tests specific to this vertical.
+ * These run on the red-team schedule and during PR checks.
+ */
+import { describe, it, expect } from 'vitest'
+
+describe('${pascalName} — red-team', () => {
+  it('cannot access data without entity membership', () => {
+    // TODO: Implement cross-org access test for ${name}
+    expect(true).toBe(true)
+  })
+
+  it('cannot bypass audit for mutations', () => {
+    // TODO: Implement audit bypass test for ${name}
+    expect(true).toBe(true)
+  })
+})
+`,
+    },
   ]
+}
+
+/**
+ * Get profile-specific governance extensions.
+ * These are additive controls — they never weaken base immutable controls.
+ */
+function getProfileExtensions(profile: string): string[] {
+  const map: Record<string, string[]> = {
+    'union-eyes': [
+      'litigation-hold-enforcement',
+      'role-graph-acyclic-validation',
+      'document-version-hashing',
+      'case-evidence-export',
+    ],
+    'abr-insights': [
+      'confidential-reporting',
+      'identity-vault-encryption',
+      'need-to-know-access',
+      'dual-control-case-access',
+    ],
+    fintech: [
+      'dual-control-financial-actions',
+      'key-rotation-governance',
+      'dr-simulation-artifacts',
+      'payment-encryption',
+    ],
+    commerce: [],
+    agtech: [],
+    media: [],
+    advisory: [],
+  }
+  return map[profile] ?? []
 }

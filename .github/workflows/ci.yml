@@ -254,3 +254,52 @@ jobs:
             pnpm tsx tooling/db/schema-snapshot.ts verify
           fi
 
+  # ─── Red-Team Adversarial Tests ───────────────────────────────────────────
+  red-team:
+    runs-on: ubuntu-latest
+    name: Red-Team Adversarial
+    needs: [lint-and-typecheck]
+    steps:
+      - uses: actions/checkout@v4
+
+      - uses: pnpm/action-setup@v4
+        with:
+          version: 10.11.0
+
+      - uses: actions/setup-node@v4
+        with:
+          node-version: 22
+          cache: pnpm
+
+      - name: Install dependencies
+        run: pnpm install --frozen-lockfile
+
+      - name: Run red-team adversarial tests
+        run: npx vitest run --config security/redteam/vitest.config.ts --reporter=verbose
+
+  # ─── Hash Chain Drift Detection ───────────────────────────────────────────
+  hash-chain-drift:
+    runs-on: ubuntu-latest
+    name: Hash Chain Drift
+    needs: [lint-and-typecheck]
+    steps:
+      - uses: actions/checkout@v4
+
+      - uses: pnpm/action-setup@v4
+        with:
+          version: 10.11.0
+
+      - uses: actions/setup-node@v4
+        with:
+          node-version: 22
+          cache: pnpm
+
+      - name: Install dependencies
+        run: pnpm install --frozen-lockfile
+
+      - name: Run hash chain drift tests
+        run: |
+          npx vitest run \
+            --config tooling/contract-tests/vitest.config.ts \
+            tooling/contract-tests/hash-chain-drift.test.ts
+
