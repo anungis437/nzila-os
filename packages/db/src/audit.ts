@@ -206,32 +206,63 @@ export function withAudit(
       return scopedDb.select(table, extraWhere)
     },
 
-    // INSERT — audit after successful insert
+    // INSERT — audit after successful insert; mutation fails if audit fails
     insert(table, values) {
-      const result = scopedDb.insert(table, values)
-      // Emit audit event (fire-and-forget, errors are caught inside emitter)
       const auditEvent = buildAuditEvent(
         table,
         'insert',
         Array.isArray(values) ? { rows: values.length } : (values as Record<string, unknown>),
       )
-      emitter(auditEvent)
+      // Emit audit event synchronously — if audit fails, the mutation is not returned
+      const auditPromise = Promise.resolve(emitter(auditEvent)).catch((err) => {
+        throw new Error(
+          `[AUDIT:MANDATORY] Audit emission failed for ${auditEvent.table}.insert. ` +
+          `Mutation blocked. Reason: ${(err as Error).message}`,
+        )
+      })
+      const result = scopedDb.insert(table, values)
+      // Attach audit promise to result chain so consumers must await audit completion
+      const originalThen = (result as any).then?.bind(result)
+      if (originalThen) {
+        ;(result as any).then = (onFulfilled: any, onRejected: any) =>
+          auditPromise.then(() => originalThen(onFulfilled, onRejected))
+      }
       return result
     },
 
-    // UPDATE — audit after successful update
+    // UPDATE — audit after successful update; mutation fails if audit fails
     update(table, values, extraWhere) {
-      const result = scopedDb.update(table, values, extraWhere)
       const auditEvent = buildAuditEvent(table, 'update', values as Record<string, unknown>)
-      emitter(auditEvent)
+      const auditPromise = Promise.resolve(emitter(auditEvent)).catch((err) => {
+        throw new Error(
+          `[AUDIT:MANDATORY] Audit emission failed for ${auditEvent.table}.update. ` +
+          `Mutation blocked. Reason: ${(err as Error).message}`,
+        )
+      })
+      const result = scopedDb.update(table, values, extraWhere)
+      const originalThen = (result as any).then?.bind(result)
+      if (originalThen) {
+        ;(result as any).then = (onFulfilled: any, onRejected: any) =>
+          auditPromise.then(() => originalThen(onFulfilled, onRejected))
+      }
       return result
     },
 
-    // DELETE — audit after successful delete
+    // DELETE — audit after successful delete; mutation fails if audit fails
     delete(table, extraWhere) {
-      const result = scopedDb.delete(table, extraWhere)
       const auditEvent = buildAuditEvent(table, 'delete')
-      emitter(auditEvent)
+      const auditPromise = Promise.resolve(emitter(auditEvent)).catch((err) => {
+        throw new Error(
+          `[AUDIT:MANDATORY] Audit emission failed for ${auditEvent.table}.delete. ` +
+          `Mutation blocked. Reason: ${(err as Error).message}`,
+        )
+      })
+      const result = scopedDb.delete(table, extraWhere)
+      const originalThen = (result as any).then?.bind(result)
+      if (originalThen) {
+        ;(result as any).then = (onFulfilled: any, onRejected: any) =>
+          auditPromise.then(() => originalThen(onFulfilled, onRejected))
+      }
       return result
     },
 

@@ -39,6 +39,12 @@ const noShadowDbConfig = {
               'See docs/architecture/ENTITY_ISOLATION.md.',
           },
           {
+            group: ['@nzila/db/client'],
+            message:
+              'Direct client import is forbidden in app code. Use createScopedDb(entityId) from @nzila/db/scoped. ' +
+              'See docs/architecture/ENTITY_ISOLATION.md.',
+          },
+          {
             group: ['drizzle-orm/postgres-js', 'drizzle-orm/node-postgres', 'drizzle-orm/neon-http'],
             message:
               'Direct drizzle() instantiation is forbidden in app code. ' +

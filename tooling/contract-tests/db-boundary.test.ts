@@ -129,6 +129,42 @@ describe('INV-06 — No raw DB access in application layer', () => {
       `Direct database driver imports forbidden in app code.\nViolations:\n${violations.join('\n')}`,
     ).toEqual([])
   })
+
+  it('no app file imports unscoped db from @nzila/db barrel', () => {
+    const violations: string[] = []
+    // Catches: import { db } from '@nzila/db' and import { db, ... } from '@nzila/db'
+    const unscopedDbPattern = /import\s*\{[^}]*\bdb\b[^}]*\}\s*from\s*['"]@nzila\/db['"]/
+    for (const file of appFiles) {
+      if (isExempt(file)) continue
+      const content = readFileSync(file, 'utf-8')
+      if (unscopedDbPattern.test(content)) {
+        violations.push(relative(ROOT, file))
+      }
+    }
+    expect(
+      violations,
+      `Unscoped db import from @nzila/db barrel is forbidden in app code. ` +
+        `Use createScopedDb(entityId) from @nzila/db/scoped.\nViolations:\n${violations.join('\n')}`,
+    ).toEqual([])
+  })
+
+  it('no app file imports from @nzila/db/client directly', () => {
+    const violations: string[] = []
+    for (const file of appFiles) {
+      if (isExempt(file)) continue
+      const content = readFileSync(file, 'utf-8')
+      if (
+        content.includes("from '@nzila/db/client'") ||
+        content.includes('from "@nzila/db/client"')
+      ) {
+        violations.push(relative(ROOT, file))
+      }
+    }
+    expect(
+      violations,
+      `Direct @nzila/db/client import forbidden in app code.\nViolations:\n${violations.join('\n')}`,
+    ).toEqual([])
+  })
 })
 
 // ── INV-07: Entity isolation via Scoped DAL ─────────────────────────────────

@@ -78,6 +78,17 @@ describe('INV-08 — Automatic audit emission for CRUD operations', () => {
     expect(content).toContain('table: string')
     expect(content).toMatch(/action:\s*'insert'\s*\|\s*'update'\s*\|\s*'delete'/)
     expect(content).toContain('timestamp: string')
+  })
+
+  it('withAudit blocks mutations when audit emission fails', () => {
+    const auditPath = join(ROOT, 'packages', 'db', 'src', 'audit.ts')
+    const content = readFileSync(auditPath, 'utf-8')
+    // Must contain mandatory audit failure blocking
+    expect(content).toContain('[AUDIT:MANDATORY]')
+    expect(content).toContain('Mutation blocked')
+    // Must NOT be fire-and-forget — must chain audit promise
+    expect(content).toContain('auditPromise')
+  })
     expect(content).toContain('correlationId: string')
   })
 })
