@@ -53,12 +53,11 @@ const EXEMPT_PATHS = [
   // Orchestrator API is a standalone non-Next.js service with its own DB client.
   // Migration planned — see docs/migration/ENFORCEMENT_UPGRADE.md
   'apps/orchestrator-api/',
-  'apps\\orchestrator-api\\',
 ]
 
 function isExempt(filePath: string): boolean {
-  const rel = relative(ROOT, filePath)
-  return EXEMPT_PATHS.some((p) => rel.startsWith(p.replace(/\//g, '\\')) || rel.startsWith(p))
+  const rel = relative(ROOT, filePath).replace(/\\/g, '/')
+  return EXEMPT_PATHS.some((p) => rel.startsWith(p))
 }
 
 // ── INV-06: No raw DB imports in apps/* ─────────────────────────────────────

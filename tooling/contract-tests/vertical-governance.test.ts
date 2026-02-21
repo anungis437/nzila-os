@@ -132,7 +132,8 @@ describe('INV-11 — Every API route has authorization', () => {
 
     for (const route of routes) {
       const relPath = relative(ROOT, route)
-      const isPublic = PUBLIC_ROUTE_PATTERNS.some((p) => relPath.includes(p.replace(/\//g, '\\')))
+      const normalizedPath = relPath.replace(/\\/g, '/')
+      const isPublic = PUBLIC_ROUTE_PATTERNS.some((p) => normalizedPath.includes(p))
 
       if (isPublic) continue
 
