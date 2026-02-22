@@ -177,11 +177,11 @@ function PricingCard({
   
   // Benefits list
   const benefits = [
-    "All Pro Plan features",
-    "Unlimited storage & bandwidth",
-    "Full e-commerce functionality",
-    "Priority customer support",
-    "Team collaboration tools"
+    "AI-powered grievance management",
+    "Unlimited members & storage",
+    "Full claims & arbitration toolkit",
+    "Priority support from labour specialists",
+    "Multi-role team collaboration"
   ];
 
   return (
@@ -194,7 +194,7 @@ function PricingCard({
           exit={{ opacity: 0, y: -10 }}
           className="absolute -top-0.5 right-6"
         >
-          <div className="bg-gradient-to-r from-purple-500 to-purple-700 text-white text-xs font-bold px-4 py-1.5 rounded-b-lg shadow-sm">
+          <div className="bg-linear-to-r from-purple-500 to-purple-700 text-white text-xs font-bold px-4 py-1.5 rounded-b-lg shadow-sm">
             Save {savingsPercentage}% ({savingsAmount})
           </div>
         </motion.div>
@@ -202,7 +202,7 @@ function PricingCard({
       
       <CardHeader className="px-6 py-6">
         <CardTitle className="text-2xl font-bold">{title}</CardTitle>
-        <CardDescription className="text-base text-gray-500 mt-1">Best for e-commerce and scaling businesses.</CardDescription>
+        <CardDescription className="text-base text-gray-500 mt-1">Built for unions of every size — from locals to national federations.</CardDescription>
       </CardHeader>
       
       <CardContent className="px-6 space-y-6 pb-0">
@@ -266,7 +266,7 @@ function PricingCard({
         <ul className="space-y-3">
           {benefits.map((benefit, index) => (
             <li key={index} className="flex items-center gap-2.5">
-              <div className="flex-shrink-0 w-4 h-4 text-purple-600">
+              <div className="shrink-0 w-4 h-4 text-purple-600">
                 <Check className="h-4 w-4" />
               </div>
               <span className="text-sm text-gray-700">{benefit}</span>
