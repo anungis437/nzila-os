@@ -249,16 +249,6 @@ export default function StoryPage() {
           </div>
         </section>
       </main>
-
-      {/* Footer */}
-      <footer className="bg-slate-50 border-t border-slate-200 py-12">
-        <div className="max-w-4xl mx-auto px-4 sm:px-6 lg:px-8 text-center">
-          <p className="text-sm text-slate-600">
-            Union Eyes is infrastructure for the labor movement. Built with respect, designed
-            for dignity, governed democratically.
-          </p>
-        </div>
-      </footer>
     </div>
   );
 }
