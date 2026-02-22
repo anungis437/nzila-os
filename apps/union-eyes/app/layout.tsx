@@ -39,8 +39,10 @@ export default function RootLayout({ children }: { children: React.ReactNode }) 
     <html lang="en" suppressHydrationWarning>
       <body className={poppins.className} suppressHydrationWarning>
         <ClerkProvider
-          signInUrl="/en-CA/login"
-          signUpUrl="/en-CA/signup"
+          signInUrl="/sign-in"
+          signUpUrl="/sign-up"
+          afterSignInUrl="/en-CA/dashboard"
+          afterSignUpUrl="/en-CA/dashboard"
           signInFallbackRedirectUrl="/en-CA/dashboard"
           signUpFallbackRedirectUrl="/en-CA/dashboard"
         >

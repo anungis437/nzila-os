@@ -25,6 +25,7 @@ export default function SignUpPage() {
       isSignUp
     >
       <SignUp
+        forceRedirectUrl="/en-CA/dashboard"
         appearance={{
           elements: {
             rootBox: 'w-full',

@@ -24,6 +24,7 @@ export default function SignInPage() {
       heroAlt="Workers gathered in a professional labor meeting — representing organized solidarity"
     >
       <SignIn
+        forceRedirectUrl="/en-CA/dashboard"
         appearance={{
           elements: {
             rootBox: 'w-full',
