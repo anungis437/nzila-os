@@ -223,36 +223,39 @@ export async function validateDatabaseSchema(): Promise<{
  * Performs connection check, query test, and schema validation
  * 
  * @param throwOnError - Whether to throw error if validation fails
- * @returns Promise<boolean> - true if all checks pass
+ * @returns Promise with isHealthy flag and any error messages
  */
-export async function runDatabaseStartupChecks(throwOnError = false): Promise<boolean> {
+export async function runDatabaseStartupChecks(throwOnError = false): Promise<{ isHealthy: boolean; errors: string[] }> {
   logger.info('Running database startup validation');
+  const errors: string[] = [];
   
   // 1. Validate connection with retries
   const connectionValid = await validateDatabaseConnection(3, 2000);
   if (!connectionValid) {
-    const error = new Error('Database connection validation failed');
-    if (throwOnError) throw error;
-    return false;
+    const msg = 'Database connection validation failed';
+    errors.push(msg);
+    if (throwOnError) throw new Error(msg);
+    return { isHealthy: false, errors };
   }
   
   // 2. Test query execution
   const queryValid = await testDatabaseQuery();
   if (!queryValid) {
-    const error = new Error('Database query test failed');
-    if (throwOnError) throw error;
-    return false;
+    const msg = 'Database query test failed';
+    errors.push(msg);
+    if (throwOnError) throw new Error(msg);
+    return { isHealthy: false, errors };
   }
   
   // 3. Validate schema
   const schemaResult = await validateDatabaseSchema();
   if (!schemaResult.valid) {
     logger.warn('Database schema validation warnings detected');
-    // Don&apos;t fail on schema warnings, just log them
+    // Don't fail on schema warnings, just log them
   }
   
   logger.info('All database startup checks passed');
-  return true;
+  return { isHealthy: true, errors };
 }
 
 /**
