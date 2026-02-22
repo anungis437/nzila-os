@@ -25,257 +25,59 @@ import { eq, and, desc, sql, gt } from "drizzle-orm";
 import { createHash } from "crypto";
 import { embeddingCache } from "@/lib/services/ai/embedding-cache";
 import { logger } from "@/lib/logger";
-
-// AI Provider interfaces
-interface AIProvider {
-  generateResponse(
-    messages: Array<{ role: string; content: string }>,
-    options?: {
-      temperature?: number;
-      maxTokens?: number;
-      model?: string;
-    }
-  ): Promise<{
-    content: string;
-    tokensUsed: number;
-    model: string;
-  }>;
-  
-  generateEmbedding(text: string): Promise<number[]>;
-}
+import { getAiClient, UE_APP_KEY, UE_PROFILES } from '@/lib/ai/ai-client';
+import type { ChatMessage as AiChatMessage } from '@nzila/ai-sdk/types';
 
 /**
- * OpenAI Provider
+ * AI SDK Provider Adapter
+ *
+ * INV-01: All AI calls routed through @nzila/ai-sdk — no direct provider
+ * imports. The AI control plane handles provider selection, budget,
+ * guardrails, and audit logging centrally.
  */
-class OpenAIProvider implements AIProvider {
-  private apiKey: string;
-  
-  constructor(apiKey: string) {
-    this.apiKey = apiKey;
-  }
-  
-  async generateResponse(
-    messages: Array<{ role: string; content: string }>,
-    options: { model?: string; temperature?: number; maxTokens?: number } = {}
-  ) {
-    const response = await fetch("https://api.openai.com/v1/chat/completions", {
-      method: "POST",
-      headers: {
-        "Content-Type": "application/json",
-        Authorization: `Bearer ${this.apiKey}`,
-      },
-      body: JSON.stringify({
-        model: options.model || "gpt-4",
-        messages,
-        temperature: options.temperature || 0.7,
-        max_tokens: options.maxTokens || 1000,
-      }),
-    });
-    
-    if (!response.ok) {
-      throw new Error(`OpenAI API error: ${response.statusText}`);
-    }
-    
-    const data = await response.json();
-    
-    return {
-      content: data.choices[0].message.content,
-      tokensUsed: data.usage.total_tokens,
-      model: data.model,
-    };
-  }
-  
-  async generateEmbedding(text: string): Promise<number[]> {
-    const model = "text-embedding-ada-002";
-    
-    // Check cache first
-    const cachedEmbedding = await embeddingCache.getCachedEmbedding(text, model);
-    
-    if (cachedEmbedding) {
-      logger?.debug('Using cached embedding (chatbot)', { 
-        model,
-        textLength: text.length 
-      });
-      return cachedEmbedding;
-    }
-
-    // Cache miss - call OpenAI API
-    const response = await fetch("https://api.openai.com/v1/embeddings", {
-      method: "POST",
-      headers: {
-        "Content-Type": "application/json",
-        Authorization: `Bearer ${this.apiKey}`,
-      },
-      body: JSON.stringify({
-        model,
-        input: text,
-      }),
-    });
-    
-    if (!response.ok) {
-      throw new Error(`OpenAI embeddings API error: ${response.statusText}`);
-    }
-    
-    const data = await response.json();
-    const embedding = data.data[0].embedding;
-    
-    // Store in cache for future use (non-blocking)
-    embeddingCache.setCachedEmbedding(text, model, embedding).catch(err => {
-      logger?.warn('Failed to cache embedding (chatbot)', { error: err.message });
-    });
-    
-    return embedding;
-  }
+async function aiGenerate(
+  messages: Array<{ role: string; content: string }>,
+  _options?: { temperature?: number; maxTokens?: number; model?: string },
+): Promise<{ content: string; tokensUsed: number; model: string }> {
+  const ai = getAiClient();
+  const input = messages.map(m => ({ role: m.role as 'system' | 'user' | 'assistant', content: m.content }));
+  const response = await ai.generate({
+    entityId: 'system',
+    appKey: UE_APP_KEY,
+    profileKey: UE_PROFILES.CHATBOT,
+    input,
+    dataClass: 'internal',
+  });
+  return {
+    content: response.content,
+    tokensUsed: response.tokensIn + response.tokensOut,
+    model: response.model,
+  };
 }
 
-/**
- * Anthropic Provider
- */
-class AnthropicProvider implements AIProvider {
-  private apiKey: string;
-  
-  constructor(apiKey: string) {
-    this.apiKey = apiKey;
+async function aiEmbed(text: string): Promise<number[]> {
+  // Check cache first
+  const cachedEmbedding = await embeddingCache.getCachedEmbedding(text, 'ai-sdk');
+  if (cachedEmbedding) {
+    logger?.debug('Using cached embedding (chatbot)', { textLength: text.length });
+    return cachedEmbedding;
   }
-  
-  async generateResponse(
-    messages: Array<{ role: string; content: string }>,
-    options: { model?: string; temperature?: number; maxTokens?: number } = {}
-  ) {
-    // Convert messages format for Anthropic
-    const systemMessage = messages.find((m) => m.role === "system");
-    const conversationMessages = messages.filter((m) => m.role !== "system");
-    
-    const response = await fetch("https://api.anthropic.com/v1/messages", {
-      method: "POST",
-      headers: {
-        "Content-Type": "application/json",
-        "x-api-key": this.apiKey,
-        "anthropic-version": "2023-06-01",
-      },
-      body: JSON.stringify({
-        model: options.model || "claude-3-opus-20240229",
-        messages: conversationMessages,
-        system: systemMessage?.content,
-        temperature: options.temperature || 0.7,
-        max_tokens: options.maxTokens || 1000,
-      }),
-    });
-    
-    if (!response.ok) {
-      throw new Error(`Anthropic API error: ${response.statusText}`);
-    }
-    
-    const data = await response.json();
-    
-    return {
-      content: data.content[0].text,
-      tokensUsed: data.usage.input_tokens + data.usage.output_tokens,
-      model: data.model,
-    };
-  }
-  
-  async generateEmbedding(text: string): Promise<number[]> {
-    // Anthropic doesn&apos;t have embeddings API, fallback to OpenAI
-    const openaiKey = process.env.OPENAI_API_KEY;
-    if (!openaiKey) {
-      throw new Error("OpenAI API key required for embeddings");
-    }
-    
-    const openai = new OpenAIProvider(openaiKey);
-    return openai.generateEmbedding(text);
-  }
-}
 
-/**
- * Google AI Provider
- */
-class GoogleAIProvider implements AIProvider {
-  private apiKey: string;
-  
-  constructor(apiKey: string) {
-    this.apiKey = apiKey;
-  }
-  
-  async generateResponse(
-    messages: Array<{ role: string; content: string }>,
-    options: { model?: string; temperature?: number; maxTokens?: number } = {}
-  ) {
-    // Convert messages to Google format
-    const contents = messages.map((m) => ({
-      role: m.role === "assistant" ? "model" : "user",
-      parts: [{ text: m.content }],
-    }));
-    
-    const model = options.model || "gemini-pro";
-    const response = await fetch(
-      `https://generativelanguage.googleapis.com/v1/models/${model}:generateContent?key=${this.apiKey}`,
-      {
-        method: "POST",
-        headers: {
-          "Content-Type": "application/json",
-        },
-        body: JSON.stringify({
-          contents,
-          generationConfig: {
-            temperature: options.temperature || 0.7,
-            maxOutputTokens: options.maxTokens || 1000,
-          },
-        }),
-      }
-    );
-    
-    if (!response.ok) {
-      throw new Error(`Google AI API error: ${response.statusText}`);
-    }
-    
-    const data = await response.json();
-    
-    return {
-      content: data.candidates[0].content.parts[0].text,
-      tokensUsed: data.usageMetadata?.totalTokenCount || 0,
-      model,
-    };
-  }
-  
-  async generateEmbedding(text: string): Promise<number[]> {
-    // Google doesn&apos;t have embeddings API in Gemini, fallback to OpenAI
-    const openaiKey = process.env.OPENAI_API_KEY;
-    if (!openaiKey) {
-      throw new Error("OpenAI API key required for embeddings");
-    }
-    
-    const openai = new OpenAIProvider(openaiKey);
-    return openai.generateEmbedding(text);
-  }
-}
+  const ai = getAiClient();
+  const response = await ai.embed({
+    entityId: 'system',
+    appKey: UE_APP_KEY,
+    profileKey: UE_PROFILES.EMBEDDINGS,
+    input: text,
+    dataClass: 'internal',
+  });
+  const embedding = response.embeddings[0];
 
-/**
- * AI Provider Factory
- */
-function getAIProvider(provider: string): AIProvider {
-  switch (provider) {
-    case "openai":
-      if (!process.env.OPENAI_API_KEY) {
-        throw new Error("OPENAI_API_KEY not configured");
-      }
-      return new OpenAIProvider(process.env.OPENAI_API_KEY);
-    
-    case "anthropic":
-      if (!process.env.ANTHROPIC_API_KEY) {
-        throw new Error("ANTHROPIC_API_KEY not configured");
-      }
-      return new AnthropicProvider(process.env.ANTHROPIC_API_KEY);
-    
-    case "google":
-      if (!process.env.GOOGLE_AI_API_KEY) {
-        throw new Error("GOOGLE_AI_API_KEY not configured");
-      }
-      return new GoogleAIProvider(process.env.GOOGLE_AI_API_KEY);
-    
-    default:
-      throw new Error(`Unknown AI provider: ${provider}`);
-  }
+  // Cache non-blocking
+  embeddingCache.setCachedEmbedding(text, 'ai-sdk', embedding).catch(err => {
+    logger?.warn('Failed to cache embedding (chatbot)', { error: err.message });
+  });
+  return embedding;
 }
 
 /**
@@ -412,8 +214,7 @@ export class RAGService {
     createdBy: string;
   }): Promise<void> {
     // Generate embedding for the document
-    const provider = getAIProvider("openai"); // Use OpenAI for embeddings
-    const embedding = await provider.generateEmbedding(data.content);
+    const embedding = await aiEmbed(data.content);
     
     await db.insert(knowledgeBase).values({
       ...data,
@@ -444,8 +245,7 @@ export class RAGService {
     }>
   > {
     // Generate embedding for query
-    const provider = getAIProvider("openai");
-    const queryEmbedding = await provider.generateEmbedding(query);
+    const queryEmbedding = await aiEmbed(query);
     
     // Perform vector similarity search
     // Note: This is a simplified version. In production, use pgvector's <-> operator
@@ -570,8 +370,7 @@ export class ChatbotService {
     }
     
     // Get AI response
-    const provider = getAIProvider(session.aiProvider);
-    const response = await provider.generateResponse(conversationMessages, {
+    const response = await aiGenerate(conversationMessages, {
       temperature: parseFloat(session.temperature || "0.7"),
       model: session.model,
     });

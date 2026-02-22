@@ -37,6 +37,7 @@
     "@hookform/resolvers": "^5.2.2",
     "@maxmind/geoip2-node": "^6.3.4",
     "@microsoft/microsoft-graph-client": "^3.0.7",
+    "@nzila/ai-sdk": "workspace:*",
     "@nzila/blob": "workspace:*",
     "@nzila/db": "workspace:*",
     "@nzila/ml-sdk": "workspace:*",

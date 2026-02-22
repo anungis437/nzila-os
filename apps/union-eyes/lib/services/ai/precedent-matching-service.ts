@@ -14,17 +14,13 @@
  * - Legal argument generation
  */
 
-import { OpenAI } from 'openai';
+import { getAiClient, UE_APP_KEY, UE_PROFILES } from '@/lib/ai/ai-client';
 import { db } from '@/db';
 import { arbitrationDecisions, arbitratorProfiles } from '@/db/schema';
 import { eq, and, or, sql, inArray } from 'drizzle-orm';
 import { semanticPrecedentSearch } from './vector-search-service';
 import type { OutcomeEnum, PrecedentValueEnum } from '@/db/schema/domains/agreements';
 import { logger } from '@/lib/logger';
-
-const openai = new OpenAI({
-  apiKey: process.env.OPENAI_API_KEY,
-});
 
 export interface PrecedentMatch {
   precedentId: string;
@@ -194,21 +190,17 @@ export async function matchClaimToPrecedents(
  */
 async function extractClaimKeywords(claimText: string): Promise<string[]> {
   try {
-    const response = await openai.chat.completions.create({
-      model: 'gpt-4-turbo-preview',
-      messages: [
-        {
-          role: 'system',
-          content: 'Extract 10-15 key legal terms and concepts from this grievance/claim. Return as JSON array.',
-        },
-        { role: 'user', content: claimText },
-      ],
-      response_format: { type: 'json_object' },
-      temperature: 0.3,
+    const ai = getAiClient();
+    const response = await ai.extract({
+      entityId: 'system',
+      appKey: UE_APP_KEY,
+      profileKey: UE_PROFILES.PRECEDENT_KEYWORDS,
+      input: `Extract 10-15 key legal terms and concepts from this grievance/claim:\n\n${claimText}`,
+      dataClass: 'internal',
     });
 
-    const result = JSON.parse(response.choices[0]?.message?.content || '{"keywords": []}');
-    return result.keywords || [];
+    const result = response.data as Record<string, unknown>;
+    return (result.keywords as string[]) || [];
   } catch (error) {
     logger.error('Error extracting keywords', { error });
     return [];
@@ -285,36 +277,25 @@ async function analyzePrecedentApplicability(
   distinctions: string[];
 }> {
   try {
-    const response = await openai.chat.completions.create({
-      model: 'gpt-4-turbo-preview',
-      messages: [
-        {
-          role: 'system',
-          content: `Compare a grievance claim to an arbitration precedent. Identify:
+    const ai = getAiClient();
+    const response = await ai.extract({
+      entityId: 'system',
+      appKey: UE_APP_KEY,
+      profileKey: UE_PROFILES.PRECEDENT_APPLICABILITY,
+      input: `Compare a grievance claim to an arbitration precedent. Identify:
 1. Why the precedent is applicable (similar facts, legal principles)
 2. How the cases differ (distinguishing features)
 
-Return JSON with:
-- applicableReasons: Array of reasons why precedent applies
-- distinctions: Array of how the cases differ`,
-        },
-        {
-          role: 'user',
-          content: `CLAIM FACTS: ${claim.facts}
+CLAIM FACTS: ${claim.facts}
 
 PRECEDENT: ${precedent.caseTitle}
 Facts: ${precedent.keyFacts}
 Reasoning: ${precedent.reasoning}
 Outcome: ${precedent.outcome}`,
-        },
-      ],
-      response_format: { type: 'json_object' },
-      temperature: 0.3,
+      dataClass: 'internal',
     });
 
-    const result = JSON.parse(
-      response.choices[0]?.message?.content || '{"applicableReasons": [], "distinctions": []}'
-    );
+    const result = response.data as Record<string, unknown>;
     
     return {
       applicableReasons: result.applicableReasons || [],
@@ -405,23 +386,19 @@ async function generateClaimAnalysis(
     .join('\n');
 
   try {
-    const response = await openai.chat.completions.create({
-      model: 'gpt-4-turbo-preview',
-      messages: [
-        {
-          role: 'system',
-          content: `You are a labour arbitration expert. Analyze the claim and precedents to provide:
+    const ai = getAiClient();
+    const response = await ai.extract({
+      entityId: 'system',
+      appKey: UE_APP_KEY,
+      profileKey: UE_PROFILES.CLAIM_ANALYSIS,
+      input: `You are a labour arbitration expert. Analyze the claim and precedents to provide:
 1. Detailed reasoning for predicted outcome
 2. Strengths in the union's case
-3. Weaknesses/vulnerabilities 
+3. Weaknesses/vulnerabilities
 4. Critical factors that will determine outcome
 5. Suggested arguments based on precedent
 
-Return comprehensive JSON analysis.`,
-        },
-        {
-          role: 'user',
-          content: `CLAIM:
+CLAIM:
 Facts: ${claim.facts}
 Issue: ${claim.issueType}
 
@@ -429,16 +406,10 @@ RELEVANT PRECEDENTS:
 ${precedentSummaries}
 
 Provide analysis.`,
-        },
-      ],
-      response_format: { type: 'json_object' },
-      temperature: 0.4,
+      dataClass: 'internal',
     });
 
-    const result = JSON.parse(
-      response.choices[0]?.message?.content ||
-        '{"outcomeReasoning": "", "strengths": [], "weaknesses": [], "criticalFactors": [], "suggestedArguments": []}'
-    );
+    const result = response.data as Record<string, unknown>;
 
     return {
       outcomeReasoning: result.outcomeReasoning || 'Analysis unavailable',
@@ -467,12 +438,12 @@ export async function generateLegalMemorandum(
   analysis: ClaimAnalysis
 ): Promise<string> {
   try {
-    const response = await openai.chat.completions.create({
-      model: 'gpt-4-turbo-preview',
-      messages: [
-        {
-          role: 'system',
-          content: `Generate a professional legal memorandum for a labour arbitration case.
+    const ai = getAiClient();
+    const response = await ai.generate({
+      entityId: 'system',
+      appKey: UE_APP_KEY,
+      profileKey: UE_PROFILES.LEGAL_MEMORANDUM,
+      input: `Generate a professional legal memorandum for a labour arbitration case.
 
 Structure:
 1. SUMMARY OF ISSUE
@@ -485,11 +456,9 @@ Structure:
 5. PREDICTED OUTCOME
 6. RECOMMENDED ARGUMENTS
 
-Use formal legal writing style suitable for union representatives and legal counsel.`,
-        },
-        {
-          role: 'user',
-          content: `Claim Facts: ${claim.facts}
+Use formal legal writing style suitable for union representatives and legal counsel.
+
+Claim Facts: ${claim.facts}
 Issue Type: ${claim.issueType}
 
 Top Precedents:
@@ -506,13 +475,10 @@ Strengths: ${analysis.strengthAnalysis.strengths.join('; ')}
 Weaknesses: ${analysis.strengthAnalysis.weaknesses.join('; ')}
 
 Generate memorandum.`,
-        },
-      ],
-      temperature: 0.4,
-      max_tokens: 2000,
+      dataClass: 'regulated',
     });
 
-    return response.choices[0]?.message?.content || 'Memorandum generation failed';
+    return response.content || 'Memorandum generation failed';
   } catch (error) {
     logger.error('Error generating memorandum', { error });
     return 'Failed to generate legal memorandum';

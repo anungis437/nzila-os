@@ -12,16 +12,12 @@
  * - Hybrid search (vector + keyword)
  */
 
-import { OpenAI } from 'openai';
+import { getAiClient, UE_APP_KEY, UE_PROFILES } from '@/lib/ai/ai-client';
 import { db } from '@/db';
 import { cbaClause, arbitrationDecisions } from '@/db/schema';
 import { eq, sql, and, or } from 'drizzle-orm';
 import { logger } from '@/lib/logger';
 import { embeddingCache } from './embedding-cache';
-
-const openai = new OpenAI({
-  apiKey: process.env.OPENAI_API_KEY,
-});
 
 const EMBEDDING_MODEL = 'text-embedding-3-small';
 const EMBEDDING_DIMENSIONS = 1536;
@@ -65,20 +61,23 @@ export async function generateEmbedding(text: string): Promise<number[]> {
       return cachedEmbedding;
     }
 
-    // Cache miss - call OpenAI API
+    // Cache miss - call AI SDK
     logger.info('Generating new embedding', { 
       model: EMBEDDING_MODEL,
       textLength: text.length,
       reason: 'cache_miss'
     });
 
-    const response = await openai.embeddings.create({
-      model: EMBEDDING_MODEL,
+    const ai = getAiClient();
+    const response = await ai.embed({
+      entityId: 'system',
+      appKey: UE_APP_KEY,
+      profileKey: UE_PROFILES.EMBEDDINGS,
       input: text,
-      dimensions: EMBEDDING_DIMENSIONS,
+      dataClass: 'internal',
     });
 
-    const embedding = response.data[0].embedding;
+    const embedding = response.embeddings[0];
 
     // Store in cache for future use (non-blocking)
     embeddingCache.setCachedEmbedding(text, EMBEDDING_MODEL, embedding).catch(err => {

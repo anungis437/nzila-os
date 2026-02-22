@@ -6,18 +6,18 @@
  */
 
 import { logger } from '@/lib/logger';
+import { getAiClient, UE_APP_KEY, UE_PROFILES } from '@/lib/ai/ai-client';
 
 // Embedding configuration
 export interface EmbeddingsConfig {
-  provider: 'openai' | 'anthropic' | 'local' | 'huggingface';
-  model: string;
+  /** @deprecated Provider selection is now managed by @nzila/ai-sdk control plane */
+  provider?: string;
+  model?: string;
   dimensions: number;
   batchSize: number;
 }
 
 const DEFAULT_CONFIG: EmbeddingsConfig = {
-  provider: 'openai',
-  model: 'text-embedding-3-small',
   dimensions: 1536,
   batchSize: 100,
 };
@@ -147,72 +147,47 @@ export class EmbeddingsService {
   }
 
   /**
-   * Generate embedding using configured provider
+   * Generate embedding using @nzila/ai-sdk (INV-01 compliant)
    */
   private async generateEmbedding(text: string): Promise<number[]> {
-    switch (this.config.provider) {
-      case 'openai':
-        return this.openAIEmbed(text);
-      case 'anthropic':
-        return this.anthropicEmbed(text);
-      case 'huggingface':
-        return this.huggingfaceEmbed(text);
-      case 'local':
-        return this.localEmbed(text);
-      default:
-        return this.openAIEmbed(text);
-    }
+    const ai = getAiClient();
+    const response = await ai.embed({
+      entityId: 'system',
+      appKey: UE_APP_KEY,
+      profileKey: UE_PROFILES.EMBEDDINGS,
+      input: text,
+      dataClass: 'internal',
+    });
+    return response.embeddings[0];
   }
 
   /**
-   * Generate batch embeddings
+   * Generate batch embeddings via @nzila/ai-sdk
    */
   private async generateBatchEmbeddings(texts: string[]): Promise<number[][]> {
-    // In production, would call actual API
-    // Simulated embeddings for demonstration
-    return texts.map(() => this.generateRandomVector());
+    const ai = getAiClient();
+    const response = await ai.embed({
+      entityId: 'system',
+      appKey: UE_APP_KEY,
+      profileKey: UE_PROFILES.EMBEDDINGS,
+      input: texts,
+      dataClass: 'internal',
+    });
+    return response.embeddings;
   }
 
   /**
-   * OpenAI embedding
+   * @deprecated No longer needed — embeddings come from @nzila/ai-sdk
    */
-  private async openAIEmbed(text: string): Promise<number[]> {
-    // In production:
-    // const response = await openai.embeddings.create({
-    //   model: this.config.model,
-    //   input: text,
-    // });
-    // return response.data[0].embedding;
-    
-    logger.debug('Generating OpenAI embedding', { textLength: text.length });
-    return this.generateRandomVector();
+  private async huggingfaceEmbed(_text: string): Promise<number[]> {
+    return this.generateEmbedding(_text);
   }
 
   /**
-   * Anthropic embedding
+   * @deprecated No longer needed — embeddings come from @nzila/ai-sdk
    */
-  private async anthropicEmbed(text: string): Promise<number[]> {
-    // In production would use Anthropic's embedding API
-    logger.debug('Generating Anthropic embedding', { textLength: text.length });
-    return this.generateRandomVector();
-  }
-
-  /**
-   * HuggingFace embedding
-   */
-  private async huggingfaceEmbed(text: string): Promise<number[]> {
-    // In production would use HuggingFace Inference API
-    logger.debug('Generating HuggingFace embedding', { textLength: text.length });
-    return this.generateRandomVector();
-  }
-
-  /**
-   * Local embedding (e.g., using sentence-transformers)
-   */
-  private async localEmbed(text: string): Promise<number[]> {
-    // In production would load local model
-    logger.debug('Generating local embedding', { textLength: text.length });
-    return this.generateRandomVector();
+  private async localEmbed(_text: string): Promise<number[]> {
+    return this.generateEmbedding(_text);
   }
 
   /**

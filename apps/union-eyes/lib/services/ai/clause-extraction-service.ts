@@ -5,16 +5,12 @@
  * Supports both document upload and URL-based processing.
  */
 
-import { OpenAI } from 'openai';
+import { getAiClient, UE_APP_KEY, UE_PROFILES } from '@/lib/ai/ai-client';
 import { db } from '@/db';
 import { cbaClause, collectiveAgreements } from '@/db/schema';
 import { eq } from 'drizzle-orm';
 import type { ClauseType } from '@/db/schema/domains/agreements';
 import { logger } from '@/lib/logger';
-
-const openai = new OpenAI({
-  apiKey: process.env.OPENAI_API_KEY,
-});
 
 export interface ExtractedClause {
   clauseType: ClauseType;
@@ -107,29 +103,16 @@ export async function extractClausesFromPDF(
  */
 async function extractTextFromPDF(pdfUrl: string): Promise<string> {
   try {
-    const response = await openai.chat.completions.create({
-      model: 'gpt-4-vision-preview',
-      messages: [
-        {
-          role: 'user',
-          content: [
-            {
-              type: 'text',
-              text: 'Extract all text from this collective bargaining agreement document. Maintain the structure including article numbers, section numbers, and clause text. Format as plain text with clear section breaks.',
-            },
-            {
-              type: 'image_url',
-              image_url: {
-                url: pdfUrl,
-              },
-            },
-          ],
-        },
-      ],
-      max_tokens: 4096,
+    const ai = getAiClient();
+    const response = await ai.generate({
+      entityId: 'system',
+      appKey: UE_APP_KEY,
+      profileKey: UE_PROFILES.CLAUSE_EXTRACTION,
+      input: `Extract all text from this collective bargaining agreement document at URL: ${pdfUrl}. Maintain the structure including article numbers, section numbers, and clause text. Format as plain text with clear section breaks.`,
+      dataClass: 'internal',
     });
 
-    return response.choices[0]?.message?.content || '';
+    return response.content || '';
   } catch (error) {
     logger.error('Error extracting text from PDF', { error, pdfUrl });
     throw new Error('Failed to extract text from PDF');
@@ -191,24 +174,17 @@ Extract each clause with:
 Return a JSON array of extracted clauses.`;
 
   try {
-    const response = await openai.chat.completions.create({
-      model: 'gpt-4-turbo-preview',
-      messages: [
-        {
-          role: 'system',
-          content: systemPrompt,
-        },
-        {
-          role: 'user',
-          content: `Extract and classify all clauses from this ${context.jurisdiction} ${context.sector} collective bargaining agreement:\n\n${text}`,
-        },
-      ],
-      response_format: { type: 'json_object' },
-      temperature: 0.3,
+    const ai = getAiClient();
+    const response = await ai.extract({
+      entityId: 'system',
+      appKey: UE_APP_KEY,
+      profileKey: UE_PROFILES.CLAUSE_EXTRACTION,
+      input: `${systemPrompt}\n\nExtract and classify all clauses from this ${context.jurisdiction} ${context.sector} collective bargaining agreement:\n\n${text}`,
+      dataClass: 'internal',
     });
 
-    const result = JSON.parse(response.choices[0]?.message?.content || '{"clauses": []}');
-    return result.clauses || [];
+    const result = response.data as Record<string, unknown>;
+    return (result.clauses as ExtractedClause[]) || [];
   } catch (error) {
     logger.error('Error identifying clauses', { error });
     throw new Error('Failed to identify clauses in text');
@@ -290,28 +266,17 @@ export async function reExtractClause(
   }
 ): Promise<ExtractedClause | null> {
   try {
-    const response = await openai.chat.completions.create({
-      model: 'gpt-4-turbo-preview',
-      messages: [
-        {
-          role: 'system',
-          content: 'You are a labour law expert. Re-analyze this clause with additional context and provide an improved classification and extraction.',
-        },
-        {
-          role: 'user',
-          content: `Context: ${context.surroundingClauses.join('\n\n')}
-          
-Full Agreement Available: ${context.fullAgreementText.substring(0, 2000)}...
-
-Provide the best possible extraction for this clause.`,
-        },
-      ],
-      response_format: { type: 'json_object' },
-      temperature: 0.2,
+    const ai = getAiClient();
+    const response = await ai.extract({
+      entityId: 'system',
+      appKey: UE_APP_KEY,
+      profileKey: UE_PROFILES.CLAUSE_EXTRACTION,
+      input: `Re-analyze this clause with additional context and provide an improved classification and extraction.\n\nContext: ${context.surroundingClauses.join('\n\n')}\n\nFull Agreement Available: ${context.fullAgreementText.substring(0, 2000)}...\n\nProvide the best possible extraction for this clause.`,
+      dataClass: 'internal',
     });
 
-    const result = JSON.parse(response.choices[0]?.message?.content || '{}');
-    return result.clause || null;
+    const result = response.data as Record<string, unknown>;
+    return (result.clause as ExtractedClause) || null;
   } catch (error) {
     logger.error('Error re-extracting clause', { error, clauseId });
     return null;
@@ -323,23 +288,16 @@ Provide the best possible extraction for this clause.`,
  */
 export async function generateClauseSummary(clauseContent: string): Promise<string> {
   try {
-    const response = await openai.chat.completions.create({
-      model: 'gpt-4-turbo-preview',
-      messages: [
-        {
-          role: 'system',
-          content: 'Provide a concise 1-2 sentence summary of this collective bargaining agreement clause.',
-        },
-        {
-          role: 'user',
-          content: clauseContent,
-        },
-      ],
-      max_tokens: 150,
-      temperature: 0.3,
+    const ai = getAiClient();
+    const response = await ai.generate({
+      entityId: 'system',
+      appKey: UE_APP_KEY,
+      profileKey: UE_PROFILES.CLAUSE_SUMMARY,
+      input: `Provide a concise 1-2 sentence summary of this collective bargaining agreement clause:\n\n${clauseContent}`,
+      dataClass: 'internal',
     });
 
-    return response.choices[0]?.message?.content || '';
+    return response.content || '';
   } catch (error) {
     logger.error('Error generating summary', { error });
     return '';
@@ -361,29 +319,21 @@ export async function analyzeClauseQuality(
   suggestions: string[];
 }> {
   try {
-    const response = await openai.chat.completions.create({
-      model: 'gpt-4-turbo-preview',
-      messages: [
-        {
-          role: 'system',
-          content: `You are a labour law expert analyzing collective bargaining agreement clauses for clarity, enforceability, and best practices in ${context.jurisdiction}.`,
-        },
-        {
-          role: 'user',
-          content: `Analyze this ${context.clauseType} clause and provide:
-1. Overall quality rating (excellent/good/fair/poor)
-2. List of potential issues or ambiguities
-3. Suggestions for improvement
-
-Clause: ${clause}`,
-        },
-      ],
-      response_format: { type: 'json_object' },
-      temperature: 0.3,
+    const ai = getAiClient();
+    const response = await ai.extract({
+      entityId: 'system',
+      appKey: UE_APP_KEY,
+      profileKey: UE_PROFILES.CLAUSE_QUALITY,
+      input: `You are a labour law expert analyzing collective bargaining agreement clauses for clarity, enforceability, and best practices in ${context.jurisdiction}.\n\nAnalyze this ${context.clauseType} clause and provide:\n1. Overall quality rating (excellent/good/fair/poor)\n2. List of potential issues or ambiguities\n3. Suggestions for improvement\n\nClause: ${clause}`,
+      dataClass: 'internal',
     });
 
-    const result = JSON.parse(response.choices[0]?.message?.content || '{"quality": "fair", "issues": [], "suggestions": []}');
-    return result;
+    const result = response.data as Record<string, unknown>;
+    return {
+      quality: (result.quality as 'excellent' | 'good' | 'fair' | 'poor') || 'fair',
+      issues: (result.issues as string[]) || [],
+      suggestions: (result.suggestions as string[]) || [],
+    };
   } catch (error) {
     logger.error('Error analyzing clause quality', { error });
     return {

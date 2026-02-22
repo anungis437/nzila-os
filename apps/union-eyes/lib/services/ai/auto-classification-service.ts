@@ -11,14 +11,10 @@
  * - Cross-reference detection
  */
 
-import { OpenAI } from 'openai';
+import { getAiClient, UE_APP_KEY, UE_PROFILES } from '@/lib/ai/ai-client';
 import type { ClauseType } from '@/db/schema/domains/agreements';
 import type { PrecedentValueEnum, OutcomeEnum, DecisionTypeEnum } from '@/db/schema/domains/agreements';
 import { logger } from '@/lib/logger';
-
-const openai = new OpenAI({
-  apiKey: process.env.OPENAI_API_KEY,
-});
 
 // Clause type definitions with descriptions for classification
 const CLAUSE_TYPE_DEFINITIONS: Record<ClauseType, string> = {
@@ -110,17 +106,16 @@ Clause Content:
 ${clauseContent}`
       : clauseContent;
 
-    const response = await openai.chat.completions.create({
-      model: 'gpt-4-turbo-preview',
-      messages: [
-        { role: 'system', content: systemPrompt },
-        { role: 'user', content: userContent },
-      ],
-      response_format: { type: 'json_object' },
-      temperature: 0.2,
+    const ai = getAiClient();
+    const response = await ai.extract({
+      entityId: context?.jurisdiction || 'system',
+      appKey: UE_APP_KEY,
+      profileKey: UE_PROFILES.CLAUSE_CLASSIFICATION,
+      input: `${systemPrompt}\n\n${userContent}`,
+      dataClass: 'internal',
     });
 
-    const result = JSON.parse(response.choices[0]?.message?.content || '{}');
+    const result = response.data as Record<string, unknown>;
     
     return {
       clauseType: result.clauseType || 'other',
@@ -160,20 +155,16 @@ Return JSON with:
 - confidence: Overall confidence in tag quality (0.0-1.0)`;
 
   try {
-    const response = await openai.chat.completions.create({
-      model: 'gpt-4-turbo-preview',
-      messages: [
-        { role: 'system', content: systemPrompt },
-        {
-          role: 'user',
-          content: `Clause Type: ${clauseType}\n\nContent: ${clauseContent}`,
-        },
-      ],
-      response_format: { type: 'json_object' },
-      temperature: 0.3,
+    const ai = getAiClient();
+    const response = await ai.extract({
+      entityId: 'system',
+      appKey: UE_APP_KEY,
+      profileKey: UE_PROFILES.TAG_GENERATION,
+      input: `${systemPrompt}\n\nClause Type: ${clauseType}\n\nContent: ${clauseContent}`,
+      dataClass: 'internal',
     });
 
-    const result = JSON.parse(response.choices[0]?.message?.content || '{"tags": [], "confidence": 0.5}');
+    const result = response.data as Record<string, unknown>;
     
     return {
       tags: result.tags || [],
@@ -206,17 +197,16 @@ Return JSON with:
 - confidence: Confidence in completeness (0.0-1.0)`;
 
   try {
-    const response = await openai.chat.completions.create({
-      model: 'gpt-4-turbo-preview',
-      messages: [
-        { role: 'system', content: systemPrompt },
-        { role: 'user', content: clauseContent },
-      ],
-      response_format: { type: 'json_object' },
-      temperature: 0.2,
+    const ai = getAiClient();
+    const response = await ai.extract({
+      entityId: 'system',
+      appKey: UE_APP_KEY,
+      profileKey: UE_PROFILES.CROSS_REFERENCE,
+      input: `${systemPrompt}\n\n${clauseContent}`,
+      dataClass: 'internal',
     });
 
-    const result = JSON.parse(response.choices[0]?.message?.content || '{"references": [], "confidence": 0.5}');
+    const result = response.data as Record<string, unknown>;
     
     return {
       references: result.references || [],
@@ -274,26 +264,16 @@ Return JSON with:
 - reasoning: Brief explanation`;
 
   try {
-    const response = await openai.chat.completions.create({
-      model: 'gpt-4-turbo-preview',
-      messages: [
-        { role: 'system', content: systemPrompt },
-        {
-          role: 'user',
-          content: `Case: ${caseTitle}
-
-Facts: ${facts}
-
-Reasoning: ${reasoning}
-
-Decision: ${decision}`,
-        },
-      ],
-      response_format: { type: 'json_object' },
-      temperature: 0.2,
+    const ai = getAiClient();
+    const response = await ai.extract({
+      entityId: 'system',
+      appKey: UE_APP_KEY,
+      profileKey: UE_PROFILES.PRECEDENT_CLASSIFICATION,
+      input: `${systemPrompt}\n\nCase: ${caseTitle}\n\nFacts: ${facts}\n\nReasoning: ${reasoning}\n\nDecision: ${decision}`,
+      dataClass: 'internal',
     });
 
-    const result = JSON.parse(response.choices[0]?.message?.content || '{}');
+    const result = response.data as Record<string, unknown>;
     
     return {
       precedentValue: (result.precedentValue || 'medium') as PrecedentValueEnum,
