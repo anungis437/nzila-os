@@ -153,12 +153,9 @@ const securityHeaders = [
 ];
 
 const nextConfig: NextConfig = {
-  // TypeScript configuration
-  // TODO: Set back to false once all @ts-nocheck removals have been paired with
-  // proper type fixes. Tracked in the ts-nocheck-removal follow-up PRs.
-  // Currently 2795 errors across 408 files after bulk @ts-nocheck removal.
+  // TypeScript configuration – all 2,538 errors resolved; strict checking enabled.
   typescript: {
-    ignoreBuildErrors: true,
+    ignoreBuildErrors: false,
   },
   
   // Build optimizations
