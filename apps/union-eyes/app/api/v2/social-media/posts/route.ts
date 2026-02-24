@@ -2,11 +2,9 @@
  * GET POST DELETE /api/social-media/posts
  * Migrated to withApi() framework
  */
-import { createSocialMediaService } from '@/lib/social-media/social-media-service';
-import { createClient } from '@supabase/supabase-js';
-import { withApi, ApiError, z, RATE_LIMITS } from '@/lib/api/framework';
+import { withApi, z, RATE_LIMITS } from '@/lib/api/framework';
 
-const socialMediaPostsSchema = z.object({
+const _socialMediaPostsSchema = z.object({
   platforms: z.array(z.enum(["facebook", "twitter", "linkedin", "instagram"])).min(1, "At least one platform required"),
   content: z.string().min(1, "Content is required").max(5000, "Content too long"),
   media_urls: z.array(z.string().url("Invalid media URL")).max(10, "Maximum 10 media files").optional(),

@@ -2,8 +2,18 @@
  * GET PATCH /api/admin/feature-flags
  * Migrated to withApi() framework
  */
-import { getAllFeatureFlags, toggleFeatureFlag } from '@/lib/feature-flags';
-import { logApiAuditEvent } from '@/lib/middleware/api-security';
+ 
+ 
+ 
+ 
+ 
+ 
+ 
+ 
+ 
+ 
+ 
+ 
 import { withApi, ApiError, z } from '@/lib/api/framework';
 
 const toggleFlagSchema = z.object({
@@ -19,7 +29,7 @@ export const GET = withApi(
       summary: 'GET feature-flags',
     },
   },
-  async ({ request, userId, organizationId, user, body, query }) => {
+  async ({ request: _request, userId: _userId, organizationId: _organizationId, user: _user, body: _body, query: _query }) => {
     // TODO: migrate handler body
     throw ApiError.internal('Route not yet migrated');
   },
@@ -34,7 +44,7 @@ export const PATCH = withApi(
       summary: 'PATCH feature-flags',
     },
   },
-  async ({ request, userId, organizationId, user, body, query }) => {
+  async ({ request: _request, userId: _userId, organizationId: _organizationId, user: _user, body: _body, query: _query }) => {
     // TODO: migrate handler body
     throw ApiError.internal('Route not yet migrated');
   },

@@ -11,20 +11,17 @@ import { Card, CardContent, CardDescription, CardHeader, CardTitle } from '@/com
 import { Badge } from '@/components/ui/badge';
 import { Button } from '@/components/ui/button';
 import { Progress } from '@/components/ui/progress';
-import { Tabs, TabsContent, TabsList, TabsTrigger } from '@/components/ui/tabs';
-import { 
-  Vote, 
-  DollarSign, 
-  Users, 
-  Target,
-  TrendingUp,
+import { Tabs, TabsList, TabsTrigger } from '@/components/ui/tabs';
+import {
+  Vote,
+  DollarSign,
   Calendar,
   Phone,
   Home,
   FileSignature,
   Trophy,
   XCircle,
-  Clock
+  Clock,
 } from 'lucide-react';
 import { format } from 'date-fns';
 
@@ -94,7 +91,7 @@ export function PoliticalCampaignDashboard({ organizationId }: PoliticalCampaign
       
       const data = await response.json();
       setCampaigns(data.data || []);
-    } catch (error) {
+    } catch (_error) {
 } finally {
       setLoading(false);
     }
@@ -114,7 +111,7 @@ export function PoliticalCampaignDashboard({ organizationId }: PoliticalCampaign
     return Math.min(Math.round((raised / budget) * 100), 100);
   };
 
-  const getProgressColor = (percentage: number): string => {
+  const _getProgressColor = (percentage: number): string => {
     if (percentage >= 80) return 'bg-green-500';
     if (percentage >= 50) return 'bg-yellow-500';
     return 'bg-red-500';

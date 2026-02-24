@@ -95,7 +95,7 @@ export class BiometricAuth {
 
     try {
       // Check for available authenticators
-      const authenticators = await navigator.credentials?.get({ publicKey: { challenge: new Uint8Array(16) } }) as PublicKeyCredential | null;
+      const _authenticators = await navigator.credentials?.get({ publicKey: { challenge: new Uint8Array(16) } }) as PublicKeyCredential | null;
       
       // Check for biometric support
       const biometricType = await this.detectBiometricType();
@@ -123,11 +123,13 @@ export class BiometricAuth {
    */
   private async detectBiometricType(): Promise<BiometricType> {
     // Check for Touch ID (Safari)
+    // eslint-disable-next-line @typescript-eslint/no-explicit-any
     if ((window as any).TouchID) {
       return 'fingerprint';
     }
 
     // Check for Face ID (Safari)
+    // eslint-disable-next-line @typescript-eslint/no-explicit-any
     if ((window as any).FaceID) {
       return 'face';
     }
@@ -139,7 +141,7 @@ export class BiometricAuth {
         // Platform authenticator could be fingerprint, face, or PIN
         return 'fingerprint'; // Assume fingerprint as most common
       }
-    } catch (e) {
+    } catch (_e) {
       // Not supported
     }
 
@@ -280,7 +282,7 @@ export class BiometricAuth {
       }
 
       // Verify signature (in production, verify on server)
-      const response = credential.response as AuthenticatorAssertionResponse;
+      const _response = credential.response as AuthenticatorAssertionResponse;
       
       // Update counter
       stored.counter += 1;

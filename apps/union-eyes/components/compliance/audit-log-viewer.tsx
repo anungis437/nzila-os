@@ -20,23 +20,14 @@ import {
   User,
   FileText,
   Settings,
-  AlertTriangle,
   Download,
   Search,
   Filter,
-  Calendar,
 } from "lucide-react";
-import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
+import { Card, CardContent } from "@/components/ui/card";
 import { Button } from "@/components/ui/button";
 import { Badge } from "@/components/ui/badge";
 import { Input } from "@/components/ui/input";
-import {
-  Select,
-  SelectContent,
-  SelectItem,
-  SelectTrigger,
-  SelectValue,
-} from "@/components/ui/select";
 import {
   Popover,
   PopoverContent,
@@ -44,6 +35,7 @@ import {
 } from "@/components/ui/popover";
 import { Label } from "@/components/ui/label";
 import { Checkbox } from "@/components/ui/checkbox";
+ 
 import { format } from "date-fns";
 
 export interface AuditLogEntry {
@@ -60,10 +52,13 @@ export interface AuditLogEntry {
   ipAddress: string;
   userAgent: string;
   success: boolean;
+  // eslint-disable-next-line @typescript-eslint/no-explicit-any
   metadata?: Record<string, any>;
   changes?: {
     field: string;
+    // eslint-disable-next-line @typescript-eslint/no-explicit-any
     oldValue: any;
+    // eslint-disable-next-line @typescript-eslint/no-explicit-any
     newValue: any;
   }[];
 }
@@ -93,7 +88,7 @@ export interface AuditLogViewerProps {
 export function AuditLogViewer({
   logs,
   filters,
-  availableUsers,
+  availableUsers: _availableUsers,
   totalCount,
   page,
   pageSize,
@@ -317,7 +312,7 @@ export function AuditLogViewer({
                 return (
                   <div key={log.id} className="p-4 hover:bg-gray-50">
                     <div className="flex items-start gap-4">
-                      <div className="flex-shrink-0 mt-1">
+                      <div className="shrink-0 mt-1">
                         <CategoryIcon className="h-5 w-5 text-gray-400" />
                       </div>
 

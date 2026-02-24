@@ -39,7 +39,7 @@ export function GrievanceJurisdictionInfo({
   filedDate,
   status,
 }: GrievanceJurisdictionInfoProps) {
-  const t = useTranslations();
+  const _t = useTranslations();
   const [jurisdiction, setJurisdiction] = useState<CAJurisdiction | null>(null);
   const [stepDeadlines, setStepDeadlines] = useState<StepDeadline[]>([]);
   const [arbitrationDeadline, setArbitrationDeadline] = useState<ArbitrationDeadline | null>(null);
@@ -194,7 +194,7 @@ setError(
           </CardHeader>
           <CardContent>
             <div className="space-y-3">
-              {stepDeadlines.map((step, index) => {
+              {stepDeadlines.map((step, _index) => {
                 const urgency = getDeadlineUrgency(step.businessDaysRemaining);
                 
                 return (
@@ -208,7 +208,7 @@ setError(
                         : 'bg-white border-gray-200'
                     }`}
                   >
-                    <div className="flex-shrink-0">
+                    <div className="shrink-0">
                       {step.isPassed ? (
                         <CheckCircle className="h-5 w-5 text-gray-400" />
                       ) : step.isActive ? (
@@ -230,7 +230,7 @@ setError(
                         Deadline: {step.deadline.toLocaleDateString('en-CA')}
                       </p>
                     </div>
-                    <div className="flex-shrink-0 text-right">
+                    <div className="shrink-0 text-right">
                       {!step.isPassed && (
                         <span
                           className={`text-xs font-medium px-2 py-1 rounded ${

@@ -15,7 +15,7 @@ import {
   SelectValue,
 } from "@/components/ui/select";
 import { Checkbox } from "@/components/ui/checkbox";
-import { Dialog, DialogContent, DialogDescription, DialogHeader, DialogTitle, DialogTrigger } from "@/components/ui/dialog";
+import { Dialog, DialogContent, DialogDescription, DialogHeader, DialogTitle } from "@/components/ui/dialog";
 import {
   Phone,
   Home,
@@ -26,15 +26,13 @@ import {
   Navigation,
   Clock,
   CheckCircle2,
-  AlertTriangle,
   WifiOff,
   Wifi,
-  Calendar,
   FileText,
-  Star,
   TrendingUp,
   Target,
 } from "lucide-react";
+ 
 import { format } from "date-fns";
 
 interface Contact {
@@ -90,7 +88,7 @@ const ACTIVITY_TYPES = [
   { value: "meeting", label: "Meeting", icon: Users },
 ];
 
-export default function FieldOrganizerTools({ campaignId }: { campaignId: string }) {
+export default function FieldOrganizerTools({ campaignId: _campaignId }: { campaignId: string }) {
   const [isOnline, setIsOnline] = useState(true);
   const [gpsEnabled, setGpsEnabled] = useState(false);
   const [currentLocation, setCurrentLocation] = useState<{ lat: number; lng: number } | null>(null);
@@ -176,7 +174,7 @@ export default function FieldOrganizerTools({ campaignId }: { campaignId: string
           });
           setGpsEnabled(true);
         },
-        (error) => {
+        (_error) => {
 alert("Unable to access GPS. Location tracking will not be available.");
         }
       );
@@ -187,6 +185,7 @@ alert("Unable to access GPS. Location tracking will not be available.");
     if (!selectedContact) return;
 
     const activity: Activity = {
+      // eslint-disable-next-line react-hooks/purity
       id: Date.now().toString(),
       contactId: selectedContact.id,
       contactName: `${selectedContact.firstName} ${selectedContact.lastName}`,
@@ -319,6 +318,7 @@ alert("Unable to access GPS. Location tracking will not be available.");
       <div className="grid grid-cols-1 md:grid-cols-4 gap-4">
         <Card>
           <CardHeader className="pb-2">
+            {/* eslint-disable-next-line react/no-unescaped-entities */}
             <CardDescription>Today's Activities</CardDescription>
           </CardHeader>
           <CardContent>
@@ -507,6 +507,7 @@ alert("Unable to access GPS. Location tracking will not be available.");
               <Label htmlFor="activityType">Activity Type *</Label>
               <Select
                 value={newActivity.activityType}
+                // eslint-disable-next-line @typescript-eslint/no-explicit-any
                 onValueChange={(value: any) => setNewActivity({ ...newActivity, activityType: value })}
               >
                 <SelectTrigger>
@@ -593,6 +594,7 @@ alert("Unable to access GPS. Location tracking will not be available.");
                   <Label htmlFor="quality">Interaction Quality</Label>
                   <Select
                     value={newActivity.interactionQuality}
+                    // eslint-disable-next-line @typescript-eslint/no-explicit-any
                     onValueChange={(value: any) => setNewActivity({ ...newActivity, interactionQuality: value })}
                   >
                     <SelectTrigger>

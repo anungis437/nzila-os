@@ -1,3 +1,5 @@
+export const dynamic = 'force-dynamic';
+
 import { Metadata } from 'next';
 import { auth } from '@clerk/nextjs/server';
 import { redirect } from 'next/navigation';
@@ -15,7 +17,6 @@ import {
   DollarSign,
   Download,
   Calendar,
-  Target,
 } from 'lucide-react';
 import { sql } from 'drizzle-orm';
 import {
@@ -26,7 +27,6 @@ import {
   rewardRedemptions,
 } from '@/db/schema/recognition-rewards-schema';
 import { Badge } from '@/components/ui/badge';
-import { BudgetUsageChart } from '@/components/rewards/admin/budget-usage-chart';
 
 export const metadata: Metadata = {
   title: 'Analytics & Reporting | Rewards Admin',
@@ -325,6 +325,7 @@ export default async function RewardsAnalyticsPage({
               </CardHeader>
               <CardContent>
                 <div className="space-y-3">
+                  {/* eslint-disable-next-line @typescript-eslint/no-explicit-any */}
                   {data.topAwardTypes.map((type: any) => (
                     <div key={type.award_type_id} className="flex items-center justify-between">
                       <div className="flex items-center gap-2">
@@ -351,6 +352,7 @@ export default async function RewardsAnalyticsPage({
               </CardHeader>
               <CardContent>
                 <div className="space-y-3">
+                  {/* eslint-disable-next-line @typescript-eslint/no-explicit-any */}
                   {data.topReceivers.map((receiver: any, index: number) => (
                     <div key={receiver.user_id} className="flex items-center justify-between">
                       <div className="flex items-center gap-2">
@@ -380,6 +382,7 @@ export default async function RewardsAnalyticsPage({
             </CardHeader>
             <CardContent>
               <div className="space-y-4">
+                {/* eslint-disable-next-line @typescript-eslint/no-explicit-any */}
                 {data.budgets.map((budget: any) => {
                   const usagePercent = (budget.used_credits / budget.total_credits) * 100;
                   return (

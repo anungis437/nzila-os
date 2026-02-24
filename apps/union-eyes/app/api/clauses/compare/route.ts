@@ -1,22 +1,20 @@
-import { logApiAuditEvent } from "@/lib/middleware/api-security";
 /**
  * Clause Comparison API Route
  * POST /api/clauses/compare - Compare multiple clauses
  * GET /api/clauses/compare - List saved comparisons
  */
 
-import { NextRequest, NextResponse } from "next/server";
+import { NextResponse } from "next/server";
 import { 
   compareClauses,
   saveClauseComparison 
 } from "@/lib/services/clause-service";
 import { z } from "zod";
-import { getCurrentUser, withAdminAuth, withApiAuth, withMinRole, withRoleAuth, type BaseAuthContext } from '@/lib/api-auth-guard';
+import { withRoleAuth, type BaseAuthContext } from '@/lib/api-auth-guard';
 
 import {
   ErrorCode,
   standardErrorResponse,
-  standardSuccessResponse,
 } from '@/lib/api/standardized-responses';
 
 const clausesCompareSchema = z.object({

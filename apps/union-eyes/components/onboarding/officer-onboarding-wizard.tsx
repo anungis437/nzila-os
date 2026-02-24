@@ -18,18 +18,15 @@ import { useRouter } from "next/navigation";
 import { Button } from "@/components/ui/button";
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "@/components/ui/card";
 import { Progress } from "@/components/ui/progress";
-import { 
-  Award, 
-  Handshake, 
-  Users, 
-  DollarSign, 
-  TrendingUp, 
-  FileText,
-  Scale,
-  BookOpen,
+import {
+  Award,
+  Handshake,
+  Users,
+  DollarSign,
+  TrendingUp,
   ArrowRight,
   ArrowLeft,
-  CheckCircle2
+  CheckCircle2,
 } from "lucide-react";
 import { logger } from "@/lib/logger";
 
@@ -273,7 +270,7 @@ function BargainingStep() {
         <h4 className="font-medium">The Bargaining Cycle</h4>
         
         <div className="flex items-start gap-4">
-          <div className="flex-shrink-0 w-8 h-8 rounded-full bg-purple-100 flex items-center justify-center text-purple-600 font-bold">
+          <div className="shrink-0 w-8 h-8 rounded-full bg-purple-100 flex items-center justify-center text-purple-600 font-bold">
             1
           </div>
           <div>
@@ -285,7 +282,7 @@ function BargainingStep() {
         </div>
 
         <div className="flex items-start gap-4">
-          <div className="flex-shrink-0 w-8 h-8 rounded-full bg-purple-100 flex items-center justify-center text-purple-600 font-bold">
+          <div className="shrink-0 w-8 h-8 rounded-full bg-purple-100 flex items-center justify-center text-purple-600 font-bold">
             2
           </div>
           <div>
@@ -297,7 +294,7 @@ function BargainingStep() {
         </div>
 
         <div className="flex items-start gap-4">
-          <div className="flex-shrink-0 w-8 h-8 rounded-full bg-purple-100 flex items-center justify-center text-purple-600 font-bold">
+          <div className="shrink-0 w-8 h-8 rounded-full bg-purple-100 flex items-center justify-center text-purple-600 font-bold">
             3
           </div>
           <div>
@@ -309,7 +306,7 @@ function BargainingStep() {
         </div>
 
         <div className="flex items-start gap-4">
-          <div className="flex-shrink-0 w-8 h-8 rounded-full bg-purple-100 flex items-center justify-center text-purple-600 font-bold">
+          <div className="shrink-0 w-8 h-8 rounded-full bg-purple-100 flex items-center justify-center text-purple-600 font-bold">
             4
           </div>
           <div>
@@ -345,6 +342,7 @@ function GovernanceStep() {
       </div>
 
       <div className="space-y-4">
+        {/* eslint-disable-next-line react/no-unescaped-entities */}
         <h4 className="font-medium">Robert's Rules Basics</h4>
         <div className="space-y-2">
           {[

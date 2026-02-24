@@ -6,6 +6,8 @@
 
 'use client';
 
+
+export const dynamic = 'force-dynamic';
 import { useState, useEffect } from 'react';
 import { useRouter } from 'next/navigation';
 import { Button } from '@/components/ui/button';
@@ -14,9 +16,15 @@ import { Badge } from '@/components/ui/badge';
 import { logger } from '@/lib/logger';
 import { api } from '@/lib/api/index';
 import { Tabs, TabsContent, TabsList, TabsTrigger } from '@/components/ui/tabs';
-import { 
-  User, Mail, Phone, MapPin, Briefcase, FileText, 
-  History, Settings, Edit, MoreVertical 
+ 
+import {
+  User,
+  Mail,
+  Phone,
+  Briefcase,
+  History as _History,
+  Edit,
+  MoreVertical,
 } from 'lucide-react';
 
 interface MemberProfile {
@@ -34,12 +42,13 @@ interface MemberProfile {
 }
 
 export default function MemberProfilePage({ params }: { params: { id: string } }) {
-  const router = useRouter();
+  const _router = useRouter();
   const [profile, setProfile] = useState<MemberProfile | null>(null);
   const [loading, setLoading] = useState(true);
 
   useEffect(() => {
     fetchProfile();
+  // eslint-disable-next-line react-hooks/exhaustive-deps
   }, [params.id]);
 
   const fetchProfile = async () => {

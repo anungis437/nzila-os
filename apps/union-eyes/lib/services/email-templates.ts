@@ -14,6 +14,7 @@ import { logger } from "@/lib/logger";
 interface TemplateContext {
   recipientName?: string;
   organizationName?: string;
+  // eslint-disable-next-line @typescript-eslint/no-explicit-any
   [key: string]: any;
 }
 
@@ -458,6 +459,7 @@ export function renderEmailTemplate(
   context: TemplateContext
 ): RenderedTemplate {
   try {
+    // eslint-disable-next-line @typescript-eslint/no-explicit-any
     const template = (emailTemplates as any)[templateKey];
 
     if (!template) {
@@ -493,6 +495,7 @@ export function renderEmailTemplate(
  */
 function renderVariables(
   template: string,
+  // eslint-disable-next-line @typescript-eslint/no-explicit-any
   context: Record<string, any>
 ): string {
   let result = template;
@@ -526,6 +529,7 @@ export function validateTemplateContext(
   templateKey: string,
   context: TemplateContext
 ): { valid: boolean; missingVariables: string[] } {
+  // eslint-disable-next-line @typescript-eslint/no-explicit-any
   const template = (emailTemplates as any)[templateKey];
 
   if (!template) {
@@ -545,6 +549,7 @@ export function validateTemplateContext(
   };
 }
 
+// eslint-disable-next-line import/no-anonymous-default-export
 export default {
   renderEmailTemplate,
   getAvailableTemplates,

@@ -136,6 +136,7 @@ export async function getDeadlineRules(organizationId: string): Promise<Deadline
     WHERE tenant_id = ${organizationId} AND is_active = TRUE
     ORDER BY rule_name
   `);
+  // eslint-disable-next-line @typescript-eslint/no-explicit-any
   return result as any[];
 }
 
@@ -150,6 +151,7 @@ export async function getDeadlineRuleByCode(
     SELECT * FROM deadline_rules
     WHERE tenant_id = ${organizationId} AND rule_code = ${ruleCode} AND is_active = TRUE
   `);
+  // eslint-disable-next-line @typescript-eslint/no-explicit-any
   return result[0] as any || null;
 }
 
@@ -169,6 +171,7 @@ export async function getApplicableDeadlineRules(
       AND (priority_level IS NULL OR priority_level = ${priorityLevel || null})
     ORDER BY step_number NULLS LAST, days_from_event
   `);
+  // eslint-disable-next-line @typescript-eslint/no-explicit-any
   return result as any[];
 }
 
@@ -212,6 +215,7 @@ export async function createDeadlineRule(
     )
     RETURNING *
   `);
+  // eslint-disable-next-line @typescript-eslint/no-explicit-any
   return result[0] as any;
 }
 
@@ -228,6 +232,7 @@ export async function getClaimDeadlines(claimId: string): Promise<ClaimDeadline[
     WHERE claim_id = ${claimId}
     ORDER BY due_date
   `);
+  // eslint-disable-next-line @typescript-eslint/no-explicit-any
   return result as any[];
 }
 
@@ -240,12 +245,14 @@ export async function getPendingClaimDeadlines(claimId: string): Promise<ClaimDe
     WHERE claim_id = ${claimId} AND status = 'pending'
     ORDER BY due_date
   `);
+  // eslint-disable-next-line @typescript-eslint/no-explicit-any
   return result as any[];
 }
 
 /**
  * Get critical deadlines for organization (overdue + due within 3 days)
  */
+// eslint-disable-next-line @typescript-eslint/no-explicit-any
 export async function getCriticalDeadlines(organizationId: string): Promise<any[]> {
   try {
     // Check if v_critical_deadlines view exists
@@ -275,6 +282,7 @@ export async function getCriticalDeadlines(organizationId: string): Promise<any[
         END,
         due_date
     `);
+    // eslint-disable-next-line @typescript-eslint/no-explicit-any
     return result as any[];
   } catch (error) {
     logger.error('Error fetching critical deadlines', { error, organizationId });
@@ -292,6 +300,7 @@ export async function getMemberDeadlines(
     status?: 'pending' | 'completed' | 'missed';
     daysAhead?: number;
   } = {}
+// eslint-disable-next-line @typescript-eslint/no-explicit-any
 ): Promise<any[]> {
   let query = sql`
     SELECT cd.*, c.claim_number, c.claim_type, c.status as claim_status
@@ -312,6 +321,7 @@ export async function getMemberDeadlines(
   query = sql`${query} ORDER BY cd.due_date`;
   
   const result = await db.execute(query);
+  // eslint-disable-next-line @typescript-eslint/no-explicit-any
   return result as any[];
 }
 
@@ -326,6 +336,7 @@ export async function getOverdueDeadlines(organizationId: string): Promise<Claim
       AND is_overdue = TRUE
     ORDER BY days_overdue DESC, priority DESC
   `);
+  // eslint-disable-next-line @typescript-eslint/no-explicit-any
   return result as any[];
 }
 
@@ -362,6 +373,7 @@ export async function createClaimDeadline(
     )
     RETURNING *
   `);
+  // eslint-disable-next-line @typescript-eslint/no-explicit-any
   return result[0] as any;
 }
 
@@ -394,6 +406,7 @@ export async function autoCreateClaimDeadlines(
         {
           deadlineRuleId: rule.id,
           businessDaysOnly: rule.businessDaysOnly,
+          // eslint-disable-next-line @typescript-eslint/no-explicit-any
           priority: priorityLevel as any,
         }
       );
@@ -411,6 +424,7 @@ export async function completeDeadline(
   deadlineId: string,
   completedBy: string,
   notes?: string
+// eslint-disable-next-line @typescript-eslint/no-explicit-any
 ): Promise<any> {
   const result = await db.execute(sql`
     UPDATE claim_deadlines
@@ -461,6 +475,7 @@ export async function requestDeadlineExtension(
     )
     RETURNING *
   `);
+  // eslint-disable-next-line @typescript-eslint/no-explicit-any
   return result[0] as any;
 }
 
@@ -481,6 +496,7 @@ export async function approveDeadlineExtension(
     WHERE de.id = ${extensionId}
   `);
   
+  // eslint-disable-next-line @typescript-eslint/no-explicit-any
   const extension = extensionResult[0] as any;
   if (!extension) throw new Error('Extension not found');
   
@@ -551,6 +567,7 @@ export async function getPendingExtensionRequests(
       AND de.requires_approval = TRUE
     ORDER BY de.requested_at
   `);
+  // eslint-disable-next-line @typescript-eslint/no-explicit-any
   return result as any[];
 }
 
@@ -589,6 +606,7 @@ export async function createDeadlineAlert(
     )
     RETURNING *
   `);
+  // eslint-disable-next-line @typescript-eslint/no-explicit-any
   return result[0] as any;
 }
 
@@ -654,6 +672,7 @@ export async function getUnreadAlerts(
       AND da.delivery_method = 'in_app'
     ORDER BY da.sent_at DESC
   `);
+  // eslint-disable-next-line @typescript-eslint/no-explicit-any
   return result as any[];
 }
 
@@ -679,6 +698,7 @@ export async function generateUpcomingDeadlineAlerts(
       )
   `);
   
+  // eslint-disable-next-line @typescript-eslint/no-explicit-any
   for (const deadline of threeDayResult as any[]) {
     if (deadline.assigned_to) {
       await createDeadlineAlert(
@@ -713,6 +733,7 @@ export async function generateUpcomingDeadlineAlerts(
       )
   `);
   
+  // eslint-disable-next-line @typescript-eslint/no-explicit-any
   for (const deadline of oneDayResult as any[]) {
     if (deadline.assigned_to) {
       await createDeadlineAlert(
@@ -747,6 +768,7 @@ export async function generateUpcomingDeadlineAlerts(
       )
   `);
   
+  // eslint-disable-next-line @typescript-eslint/no-explicit-any
   for (const deadline of todayResult as any[]) {
     if (deadline.assigned_to) {
       await createDeadlineAlert(
@@ -826,6 +848,7 @@ export async function getHolidays(
   query = sql`${query} ORDER BY holiday_date`;
   
   const result = await db.execute(query);
+  // eslint-disable-next-line @typescript-eslint/no-explicit-any
   return result as any[];
 }
 
@@ -840,6 +863,7 @@ export async function getDeadlineComplianceMetrics(
   organizationId: string,
   startDate?: Date,
   endDate?: Date
+// eslint-disable-next-line @typescript-eslint/no-explicit-any
 ): Promise<any[]> {
   let query = sql`
     SELECT * FROM v_deadline_compliance_metrics
@@ -856,6 +880,7 @@ export async function getDeadlineComplianceMetrics(
   query = sql`${query} ORDER BY month DESC`;
   
   const result = await db.execute(query);
+  // eslint-disable-next-line @typescript-eslint/no-explicit-any
   return result as any[];
 }
 
@@ -865,6 +890,7 @@ export async function getDeadlineComplianceMetrics(
 export async function getMemberDeadlineSummary(
   memberId: string,
   organizationId: string
+// eslint-disable-next-line @typescript-eslint/no-explicit-any
 ): Promise<any> {
   const result = await db.execute(sql`
     SELECT * FROM v_member_deadline_summary
@@ -882,6 +908,7 @@ export async function getMemberDeadlineSummary(
 /**
  * Get deadline summary for all claims (dashboard widget)
  */
+// eslint-disable-next-line @typescript-eslint/no-explicit-any
 export async function getDeadlineDashboardSummary(organizationId: string): Promise<any> {
   const result = await db.execute(sql`
     SELECT 
@@ -896,6 +923,7 @@ export async function getDeadlineDashboardSummary(organizationId: string): Promi
     WHERE tenant_id = ${organizationId}
   `);
   
+  // eslint-disable-next-line @typescript-eslint/no-explicit-any
   const row = result[0] as any;
   return {
     activeDeadlines: parseInt(row.active_deadlines) || 0,
@@ -909,4 +937,4 @@ export async function getDeadlineDashboardSummary(organizationId: string): Promi
   };
 }
 
-
+

@@ -46,6 +46,7 @@ export function AwardTypeSelector({
 
   const activeTypes = awardTypes; // All types passed in are considered active
   const groupedByProgram = activeTypes.reduce((acc, type) => {
+    // eslint-disable-next-line @typescript-eslint/no-explicit-any
     const programName = (type as any).program_name || 'Other';
     if (!acc[programName]) {
       acc[programName] = [];
@@ -119,7 +120,7 @@ export function AwardTypeSelector({
       {selectedType && (
         <div className="mt-2 p-3 bg-muted/50 rounded-lg border">
           <div className="flex items-start gap-3">
-            <div className="flex-shrink-0">
+            <div className="shrink-0">
               <Award className="h-6 w-6 text-primary" />
             </div>
             <div className="flex-1 space-y-1">

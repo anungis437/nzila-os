@@ -20,6 +20,7 @@ import { Progress } from '@/components/ui/progress';
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from '@/components/ui/select';
 import { Calendar } from '@/components/ui/calendar';
 import { Popover, PopoverContent, PopoverTrigger } from '@/components/ui/popover';
+ 
 import {
   Facebook,
   Twitter,
@@ -30,11 +31,10 @@ import {
   Send,
   Image as ImageIcon,
   Video,
-  Link as LinkIcon,
+  Link as _LinkIcon,
   Hash,
   AtSign,
   TrendingUp,
-  Users,
   Heart,
   MessageCircle,
   Share2,
@@ -43,13 +43,12 @@ import {
   Clock,
   CheckCircle2,
   XCircle,
-  AlertCircle,
   RefreshCw,
   Plus,
-  Filter,
+  Filter as _Filter,
   Search,
   Download,
-  Settings
+  Settings,
 } from 'lucide-react';
 import { format } from 'date-fns';
 
@@ -91,7 +90,7 @@ interface SocialPost {
   engagementRate: number;
 }
 
-interface Campaign {
+interface _Campaign {
   id: string;
   name: string;
   status: 'planning' | 'active' | 'paused' | 'completed';
@@ -258,7 +257,7 @@ export default function SocialMediaDashboard() {
   const [selectedTab, setSelectedTab] = useState('overview');
   const [selectedAccounts, setSelectedAccounts] = useState<string[]>(['1', '2', '3']);
   const [newPostContent, setNewPostContent] = useState('');
-  const [newPostHashtags, setNewPostHashtags] = useState<string[]>([]);
+  const [_newPostHashtags, _setNewPostHashtags] = useState<string[]>([]);
   const [newPostSchedule, setNewPostSchedule] = useState<Date>();
   const [selectedPostType, setSelectedPostType] = useState<PostType>('text');
   const [filterStatus, setFilterStatus] = useState<PostStatus | 'all'>('all');
@@ -610,7 +609,7 @@ export default function SocialMediaDashboard() {
                 <Card key={post.id}>
                   <CardContent className="pt-6">
                     <div className="flex items-start gap-4">
-                      <div className={`w-12 h-12 rounded-full ${getPlatformColor(post.platform)} flex items-center justify-center flex-shrink-0`}>
+                      <div className={`w-12 h-12 rounded-full ${getPlatformColor(post.platform)} flex items-center justify-center shrink-0`}>
                         <Icon className="h-6 w-6 text-white" />
                       </div>
                       <div className="flex-1 min-w-0">

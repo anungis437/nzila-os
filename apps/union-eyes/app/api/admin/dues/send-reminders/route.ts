@@ -8,7 +8,7 @@
  * @module app/api/admin/dues/send-reminders
  */
 
-import { NextRequest, NextResponse } from 'next/server';
+import { NextRequest } from 'next/server';
 import { manualTriggerReminders } from '@/lib/jobs/dues-reminder-scheduler';
 import { withApiAuth, getCurrentUser } from '@/lib/api-auth-guard';
 import {
@@ -21,7 +21,7 @@ import { logger } from '@/lib/logger';
 export const runtime = 'nodejs';
 export const maxDuration = 300; // 5 minutes max execution
 
-export const POST = withApiAuth(async (request: NextRequest) => {
+export const POST = withApiAuth(async (_request: NextRequest) => {
   try {
     const user = await getCurrentUser();
     if (!user) {

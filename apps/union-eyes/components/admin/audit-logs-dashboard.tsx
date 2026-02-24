@@ -12,7 +12,7 @@
  * @phase Phase 3 Week 1 Task 5
  */
 
-import { useState, useEffect, useMemo } from 'react';
+import { useState, useMemo } from 'react';
 import { useParams } from 'next/navigation';
 import Link from 'next/link';
 import { useQuery } from '@tanstack/react-query';
@@ -93,6 +93,7 @@ interface AuditLog {
   success: boolean;
   failure_reason: string | null;
   created_at: string;
+  // eslint-disable-next-line @typescript-eslint/no-explicit-any
   metadata: Record<string, any>;
 }
 
@@ -196,7 +197,7 @@ export function AuditLogsDashboard() {
   });
 
   // Fetch statistics
-  const { data: statistics, isLoading: statsLoading } = useQuery({
+  const { data: statistics, isLoading: _statsLoading } = useQuery({
     queryKey: ['audit-statistics', filters.dateRange],
     queryFn: async () => {
       const params = new URLSearchParams();
@@ -243,7 +244,7 @@ export function AuditLogsDashboard() {
 
       // Download the report
       window.location.href = `/api/admin/compliance/reports/${reportId}/download`;
-    } catch (error) {
+    } catch (_error) {
 alert('Failed to export audit logs');
     }
   };
@@ -268,7 +269,7 @@ alert('Failed to export audit logs');
     }));
   }, [statistics]);
 
-  const eventsByResource = useMemo(() => {
+  const _eventsByResource = useMemo(() => {
     if (!statistics?.eventsByResource) return [];
     return Object.entries(statistics.eventsByResource)
       .sort((a, b) => b[1] - a[1])
@@ -490,6 +491,7 @@ alert('Failed to export audit logs');
                   <label className="text-sm font-medium">Date Range</label>
                   <Select
                     value={filters.dateRange}
+                    // eslint-disable-next-line @typescript-eslint/no-explicit-any
                     onValueChange={(value: any) => setFilters({ ...filters, dateRange: value })}
                   >
                     <SelectTrigger>

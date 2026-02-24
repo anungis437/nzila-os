@@ -2,6 +2,9 @@
  * Targets page for the Template App dashboard
  * Allows users to set and manage their targets and goals
  */
+
+export const dynamic = 'force-dynamic';
+
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "@/components/ui/card";
 
 export default function TargetsPage() {

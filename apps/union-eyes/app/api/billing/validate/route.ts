@@ -1,18 +1,18 @@
-import { NextRequest, NextResponse } from 'next/server';
+import { NextResponse } from 'next/server';
 import { z } from 'zod';
 import {
   convertUSDToCAD,
   checkT106Requirement,
   validateBillingRequest,
 } from '@/lib/services/transfer-pricing-service';
-import type { BillingValidationRequest, BillingValidationResponse } from '@/lib/types/compliance-api-types';
+import type { BillingValidationResponse } from '@/lib/types/compliance-api-types';
 import { logApiAuditEvent } from '@/lib/middleware/api-security';
-import { getCurrentUser, withAdminAuth, withApiAuth, withMinRole, withRoleAuth } from '@/lib/api-auth-guard';
+import { withRoleAuth } from '@/lib/api-auth-guard';
 
+ 
 import {
   ErrorCode,
   standardErrorResponse,
-  standardSuccessResponse,
 } from '@/lib/api/standardized-responses';
 /**
  * Billing Validation API
@@ -52,7 +52,7 @@ export const POST = withRoleAuth('steward', async (request, context) => {
   }
 
   const body = parsed.data;
-  const { userId, organizationId } = context as { userId: string; organizationId: string };
+  const { userId, organizationId: _organizationId } = context as { userId: string; organizationId: string };
 
     const orgId = (body as Record<string, unknown>)["organizationId"] ?? (body as Record<string, unknown>)["orgId"] ?? (body as Record<string, unknown>)["organization_id"] ?? (body as Record<string, unknown>)["org_id"] ?? (body as Record<string, unknown>)["unionId"] ?? (body as Record<string, unknown>)["union_id"] ?? (body as Record<string, unknown>)["localId"] ?? (body as Record<string, unknown>)["local_id"];
   if (typeof orgId === 'string' && orgId.length > 0 && orgId !== context.organizationId) {
@@ -193,4 +193,4 @@ try {
     }
 });
 
-
+

@@ -10,18 +10,9 @@
 
 import { useState, useEffect, useRef } from "react";
 import { Button } from "@/components/ui/button";
-import { Input } from "@/components/ui/input";
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import { Badge } from "@/components/ui/badge";
 import { Textarea } from "@/components/ui/textarea";
-import {
-  Dialog,
-  DialogContent,
-  DialogDescription,
-  DialogHeader,
-  DialogTitle,
-  DialogTrigger,
-} from "@/components/ui/dialog";
 import {
   DropdownMenu,
   DropdownMenuContent,
@@ -76,6 +67,7 @@ export function AIChatbot() {
   // Load sessions
   useEffect(() => {
     loadSessions();
+  // eslint-disable-next-line react-hooks/exhaustive-deps
   }, []);
   
   // Scroll to bottom on new messages
@@ -97,7 +89,7 @@ export function AIChatbot() {
           loadSession(data.sessions[0].id);
         }
       }
-    } catch (error) {
+    } catch (_error) {
 }
   };
   
@@ -112,7 +104,7 @@ export function AIChatbot() {
         setCurrentSession(session || null);
         setShowSuggestions(data.messages.length === 0);
       }
-    } catch (error) {
+    } catch (_error) {
 }
   };
   
@@ -133,7 +125,7 @@ export function AIChatbot() {
         setMessages([]);
         setShowSuggestions(true);
       }
-    } catch (error) {
+    } catch (_error) {
       toast({
         title: "Error",
         description: "Failed to create new chat session",
@@ -216,7 +208,7 @@ export function AIChatbot() {
           )
         );
       }
-    } catch (error) {
+    } catch (_error) {
       toast({
         title: "Error",
         description: "Failed to send message. Please try again.",
@@ -246,7 +238,7 @@ export function AIChatbot() {
         title: "Thank you!",
         description: "Your feedback helps improve our assistant.",
       });
-    } catch (error) {
+    } catch (_error) {
 }
   };
   
@@ -267,7 +259,7 @@ export function AIChatbot() {
         title: "Session archived",
         description: "Chat session has been archived",
       });
-    } catch (error) {
+    } catch (_error) {
       toast({
         title: "Error",
         description: "Failed to archive session",

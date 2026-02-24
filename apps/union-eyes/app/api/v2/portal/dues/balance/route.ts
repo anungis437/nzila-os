@@ -3,11 +3,17 @@ import { NextResponse } from 'next/server';
  * GET /api/portal/dues/balance
  * Migrated to withApi() framework
  */
+// eslint-disable-next-line @typescript-eslint/no-unused-vars
 import { auth } from '@clerk/nextjs/server';
 import { db } from '@/db/db';
 import { memberDuesLedger } from '@/db/schema/dues-finance-schema';
 import { eq, and, sql, desc } from 'drizzle-orm';
 
+ 
+ 
+ 
+ 
+ 
 import { withApi, ApiError } from '@/lib/api/framework';
 
 export const GET = withApi(
@@ -18,7 +24,7 @@ export const GET = withApi(
       summary: 'GET balance',
     },
   },
-  async ({ request, userId, organizationId, user, body, query, params }) => {
+  async ({ request, userId, organizationId: _organizationId, user: _user, body: _body, query: _query, params: _params }) => {
         if (!userId) throw ApiError.unauthorized('User not authenticated');
 
         // Get the organizationId from query params or header

@@ -3,8 +3,19 @@ import { NextResponse } from 'next/server';
  * GET PATCH DELETE /api/clauses/[id]
  * Migrated to withApi() framework
  */
-import { logApiAuditEvent } from "@/lib/middleware/api-security";
+ 
 import { withApi, ApiError } from '@/lib/api/framework';
+ 
+ 
+ 
+ 
+ 
+ 
+ 
+ 
+ 
+ 
+ 
 import { getClauseById, getClauseHierarchy, updateClause, deleteClause } from '@/lib/services/clause-service';
 
 export const GET = withApi(
@@ -15,7 +26,7 @@ export const GET = withApi(
       summary: 'GET [id]',
     },
   },
-  async ({ request, params, userId, organizationId, user, body, query }) => {
+  async ({ request, params, userId: _userId, organizationId: _organizationId, user: _user, body: _body, query: _query }) => {
 
           const { id } = params;
           const { searchParams } = new URL(request.url);
@@ -46,7 +57,7 @@ export const PATCH = withApi(
       summary: 'PATCH [id]',
     },
   },
-  async ({ request, params, userId, organizationId, user, body, query }) => {
+  async ({ request: _request, params, userId: _userId, organizationId: _organizationId, user: _user, body, query: _query }) => {
 
           const { id } = params;
           // Update clause
@@ -67,7 +78,7 @@ export const DELETE = withApi(
       summary: 'DELETE [id]',
     },
   },
-  async ({ request, params, userId, organizationId, user, body, query }) => {
+  async ({ request: _request, params, userId: _userId, organizationId: _organizationId, user: _user, body: _body, query: _query }) => {
 
           const { id } = params;
           const success = await deleteClause(id);

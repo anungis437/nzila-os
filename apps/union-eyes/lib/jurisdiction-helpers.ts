@@ -41,7 +41,7 @@ export async function getOrganizationJurisdiction(organizationId: string): Promi
     
     // Map the old enum value to new format
     return mapJurisdictionValue(rows[0].jurisdiction);
-  } catch (error) {
+  } catch (_error) {
 return null;
   }
 }
@@ -64,7 +64,7 @@ export async function getTenantJurisdiction(organizationId: string): Promise<CAJ
     }
     
     return null;
-  } catch (error) {
+  } catch (_error) {
 return null;
   }
 }
@@ -97,7 +97,7 @@ export async function getJurisdictionDeadline(
       days: rows[0].days,
       legalReference: rows[0].legal_reference,
     };
-  } catch (error) {
+  } catch (_error) {
 return null;
   }
 }
@@ -125,9 +125,8 @@ export async function calculateBusinessDaysDeadline(
     }
     
     return new Date(rows[0].deadline);
-  } catch (error) {
+  } catch (_error) {
 return null;
   }
 }
-
 

@@ -16,6 +16,7 @@
 
 import { db } from "@/db/db";
 import { sql } from "drizzle-orm";
+ 
 import { updateMappingStatus } from "./tenant-to-org-mapper";
 
 interface RollbackResult {
@@ -65,7 +66,7 @@ return {
       backupTableName,
       rowCount,
     };
-  } catch (error) {
+  } catch (_error) {
 return {
       success: false,
       backupTableName: "",
@@ -113,7 +114,7 @@ for (const tableName of tables) {
         createdAt: new Date(),
         schemaMatches: true,
       });
-} catch (error) {
+} catch (_error) {
 }
   }
 return backups;
@@ -160,7 +161,7 @@ export async function listBackups(): Promise<BackupInfo[]> {
     }
 
     return backups;
-  } catch (error) {
+  } catch (_error) {
 return [];
   }
 }
@@ -187,7 +188,7 @@ await db.execute(sql.raw(`
       }
     }
 return deletedCount;
-  } catch (error) {
+  } catch (_error) {
 return 0;
   }
 }
@@ -280,8 +281,8 @@ for (const tableName of tables) {
     results.set(tableName, result);
   }
 
-  const totalDuration = Date.now() - startTime;
-  const totalRestored = Array.from(results.values()).reduce(
+  const _totalDuration = Date.now() - startTime;
+  const _totalRestored = Array.from(results.values()).reduce(
     (sum, r) => sum + r.rowsRestored,
     0
   );
@@ -304,10 +305,11 @@ const tables = [
   ];
 
   try {
-    let totalRestored = 0;
+     
+    let _totalRestored = 0;
 
     for (const tableName of tables) {
-      const result = await db.execute(sql.raw(`
+      const _result = await db.execute(sql.raw(`
         UPDATE ${tableName}
         SET organization_id = NULL,
             updated_at = NOW()
@@ -323,7 +325,7 @@ const tables = [
       `));
 
       const restored = Number(countResult[0]?.count || 0);
-      totalRestored += restored;
+      _totalRestored += restored;
 
       if (restored > 0) {
 }
@@ -332,7 +334,7 @@ const tables = [
     // Update mapping status
     await updateMappingStatus(tenantId, "rolled_back");
 return true;
-  } catch (error) {
+  } catch (_error) {
 return false;
   }
 }
@@ -423,9 +425,9 @@ for (const tableName of tables) {
     const result = await verifyRollback(tableName);
     results.set(tableName, result);
 
-    const status = result.success ? "Ã¢Å“â€¦" : "Ã¢ÂÅ’";
+    const _status = result.success ? "Ã¢Å“â€¦" : "Ã¢ÂÅ’";
 if (result.issues.length > 0) {
-      result.issues.forEach((issue) => undefined);
+      result.issues.forEach((_issue) => undefined);
     }
   }
 

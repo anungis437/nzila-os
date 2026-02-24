@@ -6,7 +6,9 @@
  * Part of Phase 0.2 - Admin Console UI
  */
 
-import { Suspense } from "react";
+
+export const dynamic = 'force-dynamic';
+
 import { Shield, AlertTriangle, CheckCircle, Clock, Users, Lock } from "lucide-react";
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "@/components/ui/card";
 import { Badge } from "@/components/ui/badge";
@@ -25,6 +27,7 @@ import {
   TabsList,
   TabsTrigger,
 } from "@/components/ui/tabs";
+ 
 import { Alert, AlertDescription, AlertTitle } from "@/components/ui/alert";
 
 interface PageProps {
@@ -142,7 +145,7 @@ const AUDIT_VIOLATIONS = [
   },
 ];
 
-export default async function PermissionsPage({ params }: PageProps) {
+export default async function PermissionsPage({ params: _params }: PageProps) {
   return (
     <div className="space-y-6">
       {/* Page Header */}
@@ -255,7 +258,7 @@ export default async function PermissionsPage({ params }: PageProps) {
                         key={idx}
                         className="flex items-center gap-2 text-sm py-2 border-b last:border-0"
                       >
-                        <CheckCircle className="h-4 w-4 text-green-600 flex-shrink-0" />
+                        <CheckCircle className="h-4 w-4 text-green-600 shrink-0" />
                         <span className="text-gray-700">{permission}</span>
                       </div>
                     ))}

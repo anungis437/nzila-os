@@ -4,20 +4,17 @@
  */
 "use client";
 
+
+export const dynamic = 'force-dynamic';
 import { useState, useEffect } from "react";
 import { useRouter, useSearchParams } from "next/navigation";
 import { useOrganization } from "@/lib/hooks/use-organization";
 import {
-  Building2,
-  Globe,
-  Users,
-  MapPin,
   ArrowLeft,
   Save,
   Loader2,
   AlertCircle,
-  ChevronRight,
-  Info
+  Info,
 } from "lucide-react";
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "@/components/ui/card";
 import { Button } from "@/components/ui/button";
@@ -91,6 +88,7 @@ export default function NewOrganizationPage() {
   
   const [isSubmitting, setIsSubmitting] = useState(false);
   const [error, setError] = useState<string | null>(null);
+  // eslint-disable-next-line @typescript-eslint/no-explicit-any
   const [availableOrganizations, setAvailableOrganizations] = useState<any[]>([]);
   
   // Form state
@@ -113,7 +111,7 @@ export default function NewOrganizationPage() {
         const response = await fetch("/api/organizations?status=active");
         const data = await response.json();
         setAvailableOrganizations(data.data || []);
-      } catch (error) {
+      } catch (_error) {
 }
     };
     loadOrganizations();

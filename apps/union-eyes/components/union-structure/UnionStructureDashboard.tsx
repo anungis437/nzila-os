@@ -8,21 +8,15 @@
 
 import { useState, useEffect } from "react";
 import { logger } from "@/lib/logger";
-import { 
-  Building2, 
-  MapPin, 
-  Users, 
-  Building, 
-  UserCheck, 
+import {
+  Building2,
+  MapPin,
+  Users,
+  Building,
   BarChart3,
-  Plus,
-  Search,
-  FileText
 } from "lucide-react";
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "@/components/ui/card";
-import { Button } from "@/components/ui/button";
 import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
-import { Badge } from "@/components/ui/badge";
 import { EmployerManagement } from "./EmployerManagement";
 import { WorksiteManagement } from "./WorksiteManagement";
 import { BargainingUnitManagement } from "./BargainingUnitManagement";
@@ -56,6 +50,7 @@ export function UnionStructureDashboard({ organizationId }: UnionStructureDashbo
 
   useEffect(() => {
     fetchStats();
+  // eslint-disable-next-line react-hooks/exhaustive-deps
   }, [organizationId]);
 
   const fetchStats = async () => {
@@ -184,6 +179,7 @@ export function UnionStructureDashboard({ organizationId }: UnionStructureDashbo
             <CardHeader>
               <CardTitle>Organizational Structure</CardTitle>
               <CardDescription>
+                {/* eslint-disable-next-line react/no-unescaped-entities */}
                 Visual representation of your union's organizational hierarchy
               </CardDescription>
             </CardHeader>

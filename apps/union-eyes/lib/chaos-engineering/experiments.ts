@@ -4,7 +4,7 @@
  * Predefined chaos experiments for testing system resilience
  */
 
-import { ChaosMonkey, LatencyConfig, ErrorConfig, ResourceConfig } from './chaos-monkey';
+import { ChaosMonkey } from './chaos-monkey';
 
 export interface ChaosExperiment {
   name: string;
@@ -115,7 +115,7 @@ export async function runExperiment(
 ): Promise<void> {
 try {
     await experiment.method(chaos);
-} catch (error) {
+} catch (_error) {
 if (experiment.rollback) {
 experiment.rollback();
     }

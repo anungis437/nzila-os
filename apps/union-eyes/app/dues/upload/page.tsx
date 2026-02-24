@@ -6,6 +6,8 @@
 
 'use client';
 
+
+export const dynamic = 'force-dynamic';
 import { useState } from 'react';
 import { useRouter } from 'next/navigation';
 import { Button } from '@/components/ui/button';
@@ -43,7 +45,7 @@ export default function UploadRemittancePage() {
     periodEnd: '',
     file: null,
   });
-  const [uploadProgress, setUploadProgress] = useState(0);
+  const [uploadProgress, _setUploadProgress] = useState(0);
   const [processingResults, setProcessingResults] = useState({
     totalRows: 0,
     validRows: 0,
@@ -69,6 +71,7 @@ export default function UploadRemittancePage() {
       formDataObj.append('periodStart', formData.periodStart);
       formDataObj.append('periodEnd', formData.periodEnd);
       
+      // eslint-disable-next-line @typescript-eslint/no-explicit-any
       const result = await (api.dues.remittances.upload as any)(formDataObj) as Record<string, any>;
       
       setProcessingResults({

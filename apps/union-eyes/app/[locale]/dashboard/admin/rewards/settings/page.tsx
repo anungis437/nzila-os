@@ -1,3 +1,5 @@
+export const dynamic = 'force-dynamic';
+
 import { Metadata } from 'next';
 import { auth } from '@clerk/nextjs/server';
 import { redirect } from 'next/navigation';
@@ -6,7 +8,7 @@ import { getTranslations } from 'next-intl/server';
 import { Card, CardContent, CardHeader, CardTitle, CardDescription } from '@/components/ui/card';
 import { Button } from '@/components/ui/button';
 import { Badge } from '@/components/ui/badge';
-import { Settings, Plus, Edit, Trash2 } from 'lucide-react';
+import { Settings, Edit } from 'lucide-react';
 import { listRecognitionPrograms } from '@/actions/rewards-actions';
 import { CreateProgramDialog } from '@/components/rewards/admin/create-program-dialog';
 import Link from 'next/link';
@@ -69,6 +71,7 @@ export default async function RewardsSettingsPage() {
             </div>
           ) : (
             <div className="space-y-4">
+              {/* eslint-disable-next-line @typescript-eslint/no-explicit-any */}
               {programs.map((program: any) => (
                 <div
                   key={program.id}

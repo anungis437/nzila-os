@@ -50,6 +50,7 @@ export function ArbitratorSuccessRates({
 
   useEffect(() => {
     fetchArbitratorStats();
+  // eslint-disable-next-line react-hooks/exhaustive-deps
   }, [organizationId, jurisdiction, sortBy]);
 
   const fetchArbitratorStats = async () => {
@@ -67,6 +68,7 @@ export function ArbitratorSuccessRates({
       const data = await response.json();
       
       // Calculate rates
+      // eslint-disable-next-line @typescript-eslint/no-explicit-any
       const statsWithRates = data.arbitrators?.map((arb: any) => ({
         ...arb,
         unionWinRate: arb.totalDecisions > 0 ? (arb.unionWins / arb.totalDecisions) * 100 : 0,

@@ -79,7 +79,7 @@ export function MemberSearchModal({
   const [isSearching, setIsSearching] = React.useState(false);
   const [selectedIndex, setSelectedIndex] = React.useState(0);
   const [recentSearches, setRecentSearches] = React.useState<string[]>([]);
-  const [filters, setFilters] = React.useState<SearchFilters>({});
+  const [filters, _setFilters] = React.useState<SearchFilters>({});
 
   const inputRef = React.useRef<HTMLInputElement>(null);
 
@@ -108,7 +108,7 @@ export function MemberSearchModal({
         const searchResults = await onSearch(query, filters);
         setResults(searchResults);
         setSelectedIndex(0);
-      } catch (error) {
+      } catch (_error) {
 } finally {
         setIsSearching(false);
       }
@@ -146,6 +146,7 @@ export function MemberSearchModal({
 
     window.addEventListener("keydown", handleKeyDown);
     return () => window.removeEventListener("keydown", handleKeyDown);
+  // eslint-disable-next-line react-hooks/exhaustive-deps
   }, [isOpen, results, selectedIndex, onClose]);
 
   const handleSelectMember = (member: MemberSearchResult) => {
@@ -320,7 +321,7 @@ function MemberResultItem({
       onClick={onClick}
     >
       <div className="flex items-start gap-3">
-        <Avatar className="h-10 w-10 flex-shrink-0">
+        <Avatar className="h-10 w-10 shrink-0">
           <AvatarImage src={member.avatar} alt={`${member.firstName} ${member.lastName}`} />
           <AvatarFallback>{initials}</AvatarFallback>
         </Avatar>

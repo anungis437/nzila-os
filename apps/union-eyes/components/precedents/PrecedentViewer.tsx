@@ -106,6 +106,7 @@ const GRIEVANCE_TYPE_LABELS: Record<string, string> = {
 };
 
 interface PrecedentViewerProps {
+  // eslint-disable-next-line @typescript-eslint/no-explicit-any
   precedent: any;
   isOwner: boolean;
   onEdit?: () => void;
@@ -161,7 +162,7 @@ export function PrecedentViewer({
           </div>
         </div>
 
-        <div className="flex items-center gap-2 flex-shrink-0">
+        <div className="flex items-center gap-2 shrink-0">
           {onCompare && (
             <Button variant="outline" size="sm" onClick={onCompare}>
               <GitCompare className="h-4 w-4 mr-2" />
@@ -642,6 +643,7 @@ export function PrecedentViewer({
                   <span>Tags</span>
                 </div>
                 <div className="flex flex-wrap gap-2">
+                  {/* eslint-disable-next-line @typescript-eslint/no-explicit-any */}
                   {precedent.tags.map((tag: any) => (
                     <Badge key={tag.id} variant="secondary">
                       {tag.tagName}

@@ -18,7 +18,7 @@
  * - payment_succeeded
  */
 
-import { pgTable, uuid, varchar, timestamp, numeric, text, boolean, index, integer } from 'drizzle-orm/pg-core';
+import { pgTable, uuid, varchar, timestamp, numeric, text, index, integer } from 'drizzle-orm/pg-core';
 
 export const subscriptionEvents = pgTable('subscription_events', {
   id: uuid('id').defaultRandom().primaryKey(),

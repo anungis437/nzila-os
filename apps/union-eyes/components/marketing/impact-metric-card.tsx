@@ -64,7 +64,7 @@ export function ImpactMetricCard({
           </div>
         </div>
         {isPositive && (
-          <ImprovementIcon className="h-5 w-5 text-emerald-600 flex-shrink-0" />
+          <ImprovementIcon className="h-5 w-5 text-emerald-600 shrink-0" />
         )}
       </div>
     );
@@ -95,7 +95,7 @@ export function ImpactMetricCard({
           </p>
         </div>
 
-        <ArrowRight className="h-5 w-5 text-slate-300 flex-shrink-0" />
+        <ArrowRight className="h-5 w-5 text-slate-300 shrink-0" />
 
         <div>
           <p className="text-xs text-slate-500 mb-1">After</p>

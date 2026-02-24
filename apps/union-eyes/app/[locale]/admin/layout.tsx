@@ -123,7 +123,7 @@ export default async function AdminLayout({ children, params }: AdminLayoutProps
                     href={item.href}
                     className="flex items-start gap-3 px-3 py-3 text-gray-700 hover:bg-blue-50 hover:text-blue-700 rounded-md transition-colors group"
                   >
-                    <Icon className="h-5 w-5 mt-0.5 flex-shrink-0 group-hover:text-blue-600" />
+                    <Icon className="h-5 w-5 mt-0.5 shrink-0 group-hover:text-blue-600" />
                     <div className="flex-1 min-w-0">
                       <div className="font-medium text-sm">{item.label}</div>
                       <div className="text-xs text-gray-500 group-hover:text-blue-600 truncate">

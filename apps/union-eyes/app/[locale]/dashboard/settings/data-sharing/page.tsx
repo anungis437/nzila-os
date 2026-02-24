@@ -11,6 +11,9 @@
  * - Full audit trail visible
  */
 
+
+export const dynamic = 'force-dynamic';
+
 import { db } from '@/db';
 import { dataAggregationConsent } from '@/db/schema/domains/marketing';
 import { organizations } from '@/db/schema';
@@ -21,6 +24,7 @@ import { Badge } from '@/components/ui/badge';
 import { Shield, Info, CheckCircle2, XCircle, History } from 'lucide-react';
 import Link from 'next/link';
 import ConsentForm from '@/components/marketing/consent-form';
+ 
 import RevokeConsentButton from '@/components/marketing/revoke-consent-button';
 
 interface DataSharingPageProps {
@@ -30,13 +34,13 @@ interface DataSharingPageProps {
 }
 
 export default async function DataSharingPage({ params }: DataSharingPageProps) {
-  const { locale } = params;
+  const { locale: _locale } = params;
 
   // Get user's organization
   // TODO: Get from session context
   const organizationId = 'org-placeholder';
 
-  const [organization] = await db
+  const [_organization] = await db
     .select()
     .from(organizations)
     .where(eq(organizations.id, organizationId))
@@ -49,9 +53,11 @@ export default async function DataSharingPage({ params }: DataSharingPageProps) 
     .where(
       and(
         eq(dataAggregationConsent.organizationId, organizationId),
+        // eslint-disable-next-line @typescript-eslint/no-explicit-any
         eq((dataAggregationConsent as any).status, 'active')
       )
     )
+    // eslint-disable-next-line @typescript-eslint/no-explicit-any
     .limit(1) as any[];
 
   // Get consent history
@@ -59,7 +65,9 @@ export default async function DataSharingPage({ params }: DataSharingPageProps) 
     .select()
     .from(dataAggregationConsent)
     .where(eq(dataAggregationConsent.organizationId, organizationId))
+    // eslint-disable-next-line @typescript-eslint/no-explicit-any
     .orderBy(desc((dataAggregationConsent as any).createdAt))
+    // eslint-disable-next-line @typescript-eslint/no-explicit-any
     .limit(10) as any[];
 
   const hasActiveConsent = consent !== undefined;

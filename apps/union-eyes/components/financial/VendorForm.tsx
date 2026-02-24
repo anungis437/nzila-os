@@ -11,6 +11,7 @@ import { useToast } from '@/lib/hooks/use-toast';
 import { useRouter } from 'next/navigation';
 
 interface VendorFormProps {
+  // eslint-disable-next-line @typescript-eslint/no-explicit-any
   vendor?: any;
   mode: 'create' | 'edit';
 }
@@ -68,7 +69,7 @@ export default function VendorForm({ vendor, mode }: VendorFormProps) {
         throw new Error(error.error?.message || `Failed to ${mode} vendor`);
       }
 
-      const data = await response.json();
+      const _data = await response.json();
 
       toast({
         title: 'Success',

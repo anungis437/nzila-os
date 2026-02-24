@@ -3,7 +3,12 @@
  * Migrated to withApi() framework
  */
 import { GeofencePrivacyService } from "@/services/geofence-privacy-service";
-import { withApi, ApiError, z } from '@/lib/api/framework';
+ 
+ 
+ 
+ 
+ 
+import { withApi, z } from '@/lib/api/framework';
 
 const locationTrackSchema = z.object({
   userId: z.string().uuid("Invalid userId"),
@@ -27,7 +32,7 @@ export const POST = withApi(
     },
     successStatus: 201,
   },
-  async ({ request, userId, organizationId, user, body, query }) => {
+  async ({ request: _request, userId: _userId, organizationId: _organizationId, user: _user, body, query: _query }) => {
 
         // Track location (service will verify consent)
         const location = await GeofencePrivacyService.trackLocation({

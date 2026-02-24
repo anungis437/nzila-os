@@ -21,7 +21,7 @@ const mambaRequestSchema = z.object({
   }).optional(),
 });
 
-const longDocumentSchema = z.object({
+const _longDocumentSchema = z.object({
   document: z.string().min(1),
   chunkSize: z.number().min(512).max(8192).default(4096),
   overlap: z.number().min(0).max(1024).default(256),

@@ -1,5 +1,7 @@
 'use client';
 
+
+export const dynamic = 'force-dynamic';
 import React, { useState, useEffect } from 'react';
 import Link from 'next/link';
 import { MobileHeader } from '@/components/mobile/MobileHeader';
@@ -208,7 +210,7 @@ export default function MobileMembersPage() {
                     {!member.synced && (
                       <svg
                         xmlns="http://www.w3.org/2000/svg"
-                        className="h-4 w-4 text-amber-500 flex-shrink-0"
+                        className="h-4 w-4 text-amber-500 shrink-0"
                         viewBox="0 0 20 20"
                         fill="currentColor"
                       >

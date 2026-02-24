@@ -139,6 +139,7 @@ export default function PilotApplicationActions({
                 <dt className="text-muted-foreground">Readiness Score:</dt>
                 <dd>{application.readinessScore}/100</dd>
                 <dt className="text-muted-foreground">Readiness Level:</dt>
+                {/* eslint-disable-next-line @typescript-eslint/no-explicit-any */}
                 <dd className="capitalize">{(application as any).readinessLevel || 'Unknown'}</dd>
               </dl>
             </div>
@@ -162,10 +163,12 @@ export default function PilotApplicationActions({
                 <div className="text-sm space-y-1">
                   <p>
                     <strong>Setup Time:</strong>{' '}
+                    {/* eslint-disable-next-line @typescript-eslint/no-explicit-any */}
                     {(application.responses as any).setupTime || 'Unknown'}
                   </p>
                   <p>
                     <strong>Support Level:</strong>{' '}
+                    {/* eslint-disable-next-line @typescript-eslint/no-explicit-any */}
                     {(application.responses as any).supportLevel || 'Unknown'}
                   </p>
                 </div>

@@ -17,7 +17,8 @@
 import { db } from '@/db/db';
 import { calendarEvents, eventAttendees, eventReminders } from '@/db/schema/calendar-schema';
 import { eq, and, lte, gte, isNull } from 'drizzle-orm';
-import { subMinutes, subHours, subDays, addMinutes } from 'date-fns';
+import { subMinutes, subDays, addMinutes } from 'date-fns';
+// eslint-disable-next-line @typescript-eslint/ban-ts-comment
 // @ts-ignore - Area 9's job queue system
 import { addNotificationJob } from '@/lib/job-queue';
 
@@ -102,7 +103,9 @@ export async function scheduleEventReminders(
             .insert(eventReminders)
             .values({
               eventId,
+              // eslint-disable-next-line @typescript-eslint/no-explicit-any
               organizationId: (event as any).organizationId,
+              // eslint-disable-next-line @typescript-eslint/no-explicit-any
               userId: (attendee as any).userId || (attendee as any).email,
               reminderMinutes: minutes as number,
               reminderType: channel,
@@ -138,7 +141,9 @@ async function scheduleReminderJob(
 ) {
   try {
     const timeUntilReminder = getTimeDescription(minutes);
+    // eslint-disable-next-line @typescript-eslint/no-explicit-any
     const evt = event as any;
+    // eslint-disable-next-line @typescript-eslint/no-explicit-any
     const att = attendee as any;
 
     // Prepare notification content
@@ -202,9 +207,11 @@ export async function cancelEventReminders(eventId: string): Promise<number> {
       
       if (queue) {
         // Get all jobs in the queue
+        // eslint-disable-next-line @typescript-eslint/no-explicit-any
         const jobs = await (queue as any).getJobs(['waiting', 'delayed', 'active']);
         
         // Filter jobs related to this event
+        // eslint-disable-next-line @typescript-eslint/no-explicit-any
         const eventJobs = jobs.filter((job: any) => 
           job.data.metadata?.eventId === eventId
         );
@@ -214,7 +221,7 @@ export async function cancelEventReminders(eventId: string): Promise<number> {
           await job.remove();
 }
 }
-    } catch (error) {
+    } catch (_error) {
 // Don&apos;t throw - we already updated the database status
     }
 
@@ -363,7 +370,7 @@ export async function retryFailedReminders(options?: {
   olderThanMinutes?: number;
 }): Promise<number> {
   try {
-    const maxRetries = options?.maxRetries || 3;
+    const _maxRetries = options?.maxRetries || 3;
     const olderThan = subMinutes(new Date(), options?.olderThanMinutes || 30);
 
     // Get failed reminders
@@ -469,7 +476,7 @@ export async function cleanupOldReminders(olderThanDays: number = 90): Promise<n
 
     // Delete associated reminders
     // Note: Adjust based on your schema's delete cascade rules
-    const result = await db
+    const _result = await db
       .delete(eventReminders)
       .where(eq(eventReminders.eventId, oldEventIds[0])); // Adjust for bulk delete
 

@@ -12,7 +12,7 @@ export async function createProfileAction(data: InsertProfile): Promise<ActionRe
     const newProfile = await createProfile(data);
     revalidatePath("/");
     return { isSuccess: true, message: "Profile created successfully", data: newProfile };
-  } catch (error) {
+  } catch (_error) {
     return { isSuccess: false, message: "Failed to create profile" };
   }
 }
@@ -21,7 +21,7 @@ export async function getProfileByUserIdAction(userId: string): Promise<ActionRe
   try {
     const profile = await getProfileByUserId(userId);
     return { isSuccess: true, message: "Profile retrieved successfully", data: profile };
-  } catch (error) {
+  } catch (_error) {
     return { isSuccess: false, message: "Failed to get profiles" };
   }
 }
@@ -30,7 +30,7 @@ export async function getAllProfilesAction(): Promise<ActionResult<SelectProfile
   try {
     const profiles = await getAllProfiles();
     return { isSuccess: true, message: "Profiles retrieved successfully", data: profiles };
-  } catch (error) {
+  } catch (_error) {
     return { isSuccess: false, message: "Failed to get profiles" };
   }
 }
@@ -40,7 +40,7 @@ export async function updateProfileAction(userId: string, data: Partial<InsertPr
     const updatedProfile = await updateProfile(userId, data);
     revalidatePath("/");
     return { isSuccess: true, message: "Profile updated successfully", data: updatedProfile };
-  } catch (error) {
+  } catch (_error) {
     return { isSuccess: false, message: "Failed to update profile" };
   }
 }
@@ -50,7 +50,7 @@ export async function deleteProfileAction(userId: string): Promise<ActionResult<
     await deleteProfile(userId);
     revalidatePath("/");
     return { isSuccess: true, message: "Profile deleted successfully" };
-  } catch (error) {
+  } catch (_error) {
     return { isSuccess: false, message: "Failed to delete profile" };
   }
 }

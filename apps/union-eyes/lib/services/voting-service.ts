@@ -12,25 +12,19 @@
  */
 
 import { db } from "@/db/db";
-import { 
+import {
   votingSessions,
   votingOptions,
   votes,
   voterEligibility,
-  votingNotifications
 } from "@/db/schema";
-import { eq, and, or, desc, asc, sql, inArray, count, gte, lte } from "drizzle-orm";
+import { eq, and, desc, asc, inArray, count, gte, lte } from "drizzle-orm";
 import type { SQL } from "drizzle-orm";
 import { createHash, createHmac } from "crypto";
-import { env, validateEnvironment } from "@/lib/config/env-validation";
+import { env } from "@/lib/config/env-validation";
 import { logger } from "@/lib/logger";
 import {
   deriveVotingSessionKey,
-  signVote,
-  verifyVoteSignature,
-  generateVoteReceipt,
-  createVotingAuditLog,
-  verifyElectionIntegrity,
 } from "./voting-crypto-service";
 
 // ============================================================================
@@ -145,6 +139,7 @@ export async function listVotingSessions(
     }
 
     if (filters.status && filters.status.length > 0) {
+      // eslint-disable-next-line @typescript-eslint/no-explicit-any
       conditions.push(inArray(votingSessions.status, filters.status as any));
     }
 
@@ -640,6 +635,7 @@ export async function calculateRankedChoiceResults(
 
       rankedVotes.forEach(vote => {
         // Get voter's ranked preferences (stored in voterMetadata)
+        // eslint-disable-next-line @typescript-eslint/no-explicit-any
         const preferences = (vote.voterMetadata as any)?.preferences as string[] || [vote.optionId];
         
         // Find first active option in their preferences

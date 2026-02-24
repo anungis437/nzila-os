@@ -5,13 +5,18 @@
 
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from '@/components/ui/card';
 import { Badge } from '@/components/ui/badge';
+ 
+ 
+ 
+ 
+ 
 import { Activity, AlertCircle, CheckCircle2, Clock, Server, TrendingUp } from 'lucide-react';
 
 interface WidgetProps {
   detailed?: boolean;
 }
 
-export function SystemHealthWidget({ detailed = false }: WidgetProps) {
+export function SystemHealthWidget({ detailed: _detailed = false }: WidgetProps) {
   const services = [
     { name: 'API Gateway', status: 'healthy', uptime: '99.99%' },
     { name: 'Database', status: 'healthy', uptime: '100%' },
@@ -47,7 +52,7 @@ export function SystemHealthWidget({ detailed = false }: WidgetProps) {
   );
 }
 
-export function IncidentQueueWidget({ detailed = false }: WidgetProps) {
+export function IncidentQueueWidget({ detailed: _detailed = false }: WidgetProps) {
   const incidents = [
     { id: 'INC-001', title: 'API latency spike', severity: 'high', status: 'investigating' },
     { id: 'INC-002', title: 'Cache invalidation issue', severity: 'medium', status: 'monitoring' },
@@ -85,7 +90,7 @@ export function IncidentQueueWidget({ detailed = false }: WidgetProps) {
   );
 }
 
-export function SLADashboardWidget({ detailed = false }: WidgetProps) {
+export function SLADashboardWidget({ detailed: _detailed = false }: WidgetProps) {
   const metrics = [
     { name: 'API Response Time', current: '245ms', target: '<300ms', status: 'meeting' },
     { name: 'Uptime', current: '99.97%', target: '>99.95%', status: 'meeting' },
@@ -120,7 +125,7 @@ export function SLADashboardWidget({ detailed = false }: WidgetProps) {
   );
 }
 
-export function ReleaseCalendarWidget({ detailed = false }: WidgetProps) {
+export function ReleaseCalendarWidget({ detailed: _detailed = false }: WidgetProps) {
   const releases = [
     { version: 'v2.1.0', date: '2026-02-15', status: 'scheduled', features: 5 },
     { version: 'v2.0.5', date: '2026-02-11', status: 'deployed', features: 3 },
@@ -158,7 +163,7 @@ export function ReleaseCalendarWidget({ detailed = false }: WidgetProps) {
   );
 }
 
-export function CapacityOverviewWidget({ detailed = false }: WidgetProps) {
+export function CapacityOverviewWidget({ detailed: _detailed = false }: WidgetProps) {
   const resources = [
     { name: 'CPU', usage: 65, capacity: 100, unit: '%' },
     { name: 'Memory', usage: 72, capacity: 100, unit: '%' },

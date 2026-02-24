@@ -196,6 +196,7 @@ export const pilotApplications = pgTable(
     submittedAt: timestamp('submitted_at').defaultNow().notNull(),
     reviewedAt: timestamp('reviewed_at'),
     approvedAt: timestamp('approved_at'),
+    // eslint-disable-next-line @typescript-eslint/no-explicit-any
     responses: jsonb('responses').notNull().default({}).$type<Record<string, any>>(),
     notes: text('notes'),
   },
@@ -278,6 +279,7 @@ export const organizerImpacts = pgTable(
       description: string;
       date: string;
       relatedCaseId?: string;
+      // eslint-disable-next-line @typescript-eslint/no-explicit-any
       metadata?: Record<string, any>;
     }>>(),
     periodStart: timestamp('period_start').notNull(),

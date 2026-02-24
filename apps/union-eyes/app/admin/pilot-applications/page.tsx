@@ -10,11 +10,13 @@
  * - Email notifications (future)
  */
 
+
+export const dynamic = 'force-dynamic';
+
 import { db } from '@/db';
 import { pilotApplications } from '@/db/schema/domains/marketing';
 import { desc, eq } from 'drizzle-orm';
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from '@/components/ui/card';
-import { Button } from '@/components/ui/button';
 import { Badge } from '@/components/ui/badge';
 import {
   Select,
@@ -217,6 +219,7 @@ export default async function AdminPilotApplicationsPage({
                     {format(new Date(application.submittedAt), 'MMM d, yyyy')}
                   </TableCell>
                   <TableCell>
+                    {/* eslint-disable-next-line @typescript-eslint/no-explicit-any */}
                     <PilotApplicationActions application={application as any} />
                   </TableCell>
                 </TableRow>

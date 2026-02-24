@@ -25,7 +25,7 @@ export function StatusPage() {
       const data = await response.json();
       setStatus(data);
       setLastUpdate(new Date());
-    } catch (error) {
+    } catch (_error) {
 } finally {
       setLoading(false);
     }

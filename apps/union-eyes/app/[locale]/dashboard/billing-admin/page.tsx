@@ -6,7 +6,9 @@
  * @dashboard_path /dashboard/billing-admin
  */
 
-import { Suspense } from 'react';
+
+export const dynamic = 'force-dynamic';
+
 import { auth } from '@clerk/nextjs/server';
 import { redirect } from 'next/navigation';
 import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card';
@@ -206,6 +208,7 @@ export default async function BillingAdminDashboard() {
                 <p className="text-sm text-muted-foreground">No subscriptions found</p>
               ) : (
                 <div className="space-y-3">
+                  {/* eslint-disable-next-line @typescript-eslint/no-explicit-any */}
                   {subscriptions.map((sub: any) => (
                     <div key={sub.id || sub.customer} className="flex items-center justify-between border-b pb-3 last:border-0">
                       <div className="space-y-1">

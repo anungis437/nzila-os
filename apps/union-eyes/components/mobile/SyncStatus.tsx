@@ -23,6 +23,7 @@ export function SyncStatus({ className, showDetails = false }: SyncStatusProps) 
     // Check for stored sync state
     const storedLastSync = localStorage.getItem('lastSyncTime');
     if (storedLastSync) {
+      // eslint-disable-next-line react-hooks/set-state-in-effect
       setLastSync(new Date(storedLastSync));
     }
 
@@ -40,9 +41,11 @@ export function SyncStatus({ className, showDetails = false }: SyncStatusProps) 
     };
 
     // Add event listener for sync events
+    // eslint-disable-next-line @typescript-eslint/no-explicit-any
     window.addEventListener('sync-status' as any, handleSyncEvent as EventListener);
 
     return () => {
+      // eslint-disable-next-line @typescript-eslint/no-explicit-any
       window.removeEventListener('sync-status' as any, handleSyncEvent as EventListener);
     };
   }, []);
@@ -121,9 +124,11 @@ export function SyncStatusButton({ className }: { className?: string }) {
       setSyncState(event.detail.state);
     };
 
+    // eslint-disable-next-line @typescript-eslint/no-explicit-any
     window.addEventListener('sync-status' as any, handleSyncEvent as EventListener);
 
     return () => {
+      // eslint-disable-next-line @typescript-eslint/no-explicit-any
       window.removeEventListener('sync-status' as any, handleSyncEvent as EventListener);
     };
   }, []);

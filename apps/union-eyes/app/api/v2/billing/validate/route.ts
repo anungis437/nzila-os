@@ -2,9 +2,12 @@
  * POST /api/billing/validate
  * Migrated to withApi() framework
  */
-import type { BillingValidationRequest, BillingValidationResponse } from '@/lib/types/compliance-api-types';
-import { logApiAuditEvent } from '@/lib/middleware/api-security';
-import { withApi, ApiError, z } from '@/lib/api/framework';
+ 
+ 
+ 
+ 
+ 
+import { withApi, z } from '@/lib/api/framework';
 
 const billingValidationSchema = z.object({
   amount: z.number().positive('Amount must be positive'),
@@ -22,8 +25,8 @@ export const POST = withApi(
     },
     successStatus: 201,
   },
-  async ({ request, userId, organizationId, user, body, query }) => {
+  async ({ request, userId: _userId, organizationId: _organizationId, user: _user, body: _body, query: _query }) => {
 
-        const rawBody = await request.json();
+        const _rawBody = await request.json();
   },
 );

@@ -1,12 +1,12 @@
+export const dynamic = 'force-dynamic';
+
 import { Metadata } from 'next';
 import { auth } from '@clerk/nextjs/server';
 import { redirect } from 'next/navigation';
-import { db } from '@/db';
 import { getTranslations } from 'next-intl/server';
 import { listLedger } from '@/lib/services/rewards/wallet-service';
 import { CreditTimeline } from '@/components/rewards/credit-timeline';
 import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card';
-import { Badge } from '@/components/ui/badge';
 import { Button } from '@/components/ui/button';
 import {
   Select,

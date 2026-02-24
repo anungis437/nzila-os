@@ -1,3 +1,7 @@
+"use client";
+
+export const dynamic = 'force-dynamic';
+
 /**
  * Reports Management Page
  * 
@@ -65,7 +69,7 @@ export default function ReportsPage() {
       {/* Report Builder Modal */}
       {showReportBuilder && (
         <CustomReportBuilder
-          onSave={async (report) => {
+          onSave={async (_report) => {
 setShowReportBuilder(false);
           }}
         />

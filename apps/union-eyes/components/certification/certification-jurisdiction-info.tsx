@@ -7,6 +7,7 @@ import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card';
 import { JurisdictionBadge } from '@/components/jurisdiction/jurisdiction-badge';
 import { Alert, AlertDescription } from '@/components/ui/alert';
 import { CAJurisdiction, getJurisdictionName } from '@/lib/jurisdiction-helpers-client';
+ 
 import { Progress } from '@/components/ui/progress';
 
 interface CertificationJurisdictionInfoProps {
@@ -34,9 +35,9 @@ export function CertificationJurisdictionInfo({
   organizationId,
   totalEmployees,
   cardsSignedCount = 0,
-  certificationMethod,
+  certificationMethod: _certificationMethod,
 }: CertificationJurisdictionInfoProps) {
-  const t = useTranslations();
+  const _t = useTranslations();
   const [jurisdiction, setJurisdiction] = useState<CAJurisdiction | null>(null);
   const [requirements, setRequirements] = useState<CertificationRequirements | null>(null);
   const [loading, setLoading] = useState(true);
@@ -444,7 +445,7 @@ setError(
             <ul className="text-sm space-y-2">
               {requirements.formRequirements.map((req, index) => (
                 <li key={index} className="flex items-start gap-2">
-                  <CheckCircle className="h-4 w-4 text-green-600 mt-0.5 flex-shrink-0" />
+                  <CheckCircle className="h-4 w-4 text-green-600 mt-0.5 shrink-0" />
                   <span>{req}</span>
                 </li>
               ))}

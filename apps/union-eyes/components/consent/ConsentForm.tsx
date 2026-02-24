@@ -1,6 +1,7 @@
 import React, { useState } from 'react';
 import { Button } from '@/components/ui/button';
 import { Card } from '@/components/ui/card';
+import { sanitizeHtml } from '@/lib/utils/sanitize';
 
 export interface ConsentFormProps {
   consentType: string;
@@ -56,7 +57,7 @@ export const ConsentForm: React.FC<ConsentFormProps> = ({
           <div className="bg-gray-50 p-4 rounded-md max-h-60 overflow-y-auto border">
             <div
               className="prose prose-sm max-w-none"
-              dangerouslySetInnerHTML={{ __html: content }}
+              dangerouslySetInnerHTML={{ __html: sanitizeHtml(content) }}
             />
           </div>
         )}
@@ -111,7 +112,7 @@ export const ConsentForm: React.FC<ConsentFormProps> = ({
         </div>
       </div>
       <div className="mt-6 text-xs text-gray-500 text-center">
-        By clicking "Accept & Continue", you acknowledge that you understand
+        By clicking &quot;Accept &amp; Continue&quot;, you acknowledge that you understand
         and agree to be bound by these terms.
       </div>
     </Card>

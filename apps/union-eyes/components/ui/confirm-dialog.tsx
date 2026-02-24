@@ -14,10 +14,9 @@
 "use client";
 
 import * as React from "react";
-import { AlertCircle, AlertTriangle, Info, Trash2 } from "lucide-react";
+import { AlertCircle, AlertTriangle, Info } from "lucide-react";
 import {
   AlertDialog,
-  AlertDialogAction,
   AlertDialogCancel,
   AlertDialogContent,
   AlertDialogDescription,
@@ -79,7 +78,7 @@ export function ConfirmDialog({
     try {
       await onConfirm();
       onOpenChange(false);
-    } catch (error) {
+    } catch (_error) {
 }
   };
 
@@ -90,7 +89,7 @@ export function ConfirmDialog({
           <div className="flex items-start gap-4">
             <div
               className={cn(
-                "flex-shrink-0 flex items-center justify-center w-12 h-12 rounded-full",
+                "shrink-0 flex items-center justify-center w-12 h-12 rounded-full",
                 config.iconBgColor
               )}
             >

@@ -3,10 +3,13 @@ import { NextResponse } from 'next/server';
  * POST /api/ai/match-precedents
  * Migrated to withApi() framework
  */
-import { logApiAuditEvent } from "@/lib/middleware/api-security";
-import { checkEntitlement, consumeCredits, getCreditCost } from '@/lib/services/entitlements';
 import { matchClaimToPrecedents, analyzeClaimWithPrecedents, generateLegalMemorandum } from '@/lib/services/ai/precedent-matching-service';
 
+ 
+ 
+ 
+ 
+ 
 import { withApi, ApiError, z, RATE_LIMITS } from '@/lib/api/framework';
 
 const matchPrecedentsSchema = z.object({
@@ -31,7 +34,7 @@ export const POST = withApi(
     },
     successStatus: 201,
   },
-  async ({ request, userId, organizationId, user, body, query }) => {
+  async ({ request: _request, userId: _userId, organizationId: _organizationId, user: _user, body, query: _query }) => {
 
           // Validate request body
           const { action, claim, options } = body;

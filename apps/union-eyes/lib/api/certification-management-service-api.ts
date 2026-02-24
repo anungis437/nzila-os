@@ -30,6 +30,7 @@ async function getApiClient() {
 /**
  * List certification-management-service records
  */
+// eslint-disable-next-line @typescript-eslint/no-explicit-any
 export async function getCertificationManagementServiceList(filters?: any) {
   const client = await getApiClient();
   const queryString = filters ? '?' + new URLSearchParams(filters).toString() : '';
@@ -67,6 +68,7 @@ export async function getCertificationManagementServiceById(id: string) {
 /**
  * Create new certification-management-service record
  */
+// eslint-disable-next-line @typescript-eslint/no-explicit-any
 export async function createCertificationManagementService(data: any) {
   const client = await getApiClient();
   
@@ -86,6 +88,7 @@ export async function createCertificationManagementService(data: any) {
 /**
  * Update certification-management-service record
  */
+// eslint-disable-next-line @typescript-eslint/no-explicit-any
 export async function updateCertificationManagementService(id: string, data: any) {
   const client = await getApiClient();
   

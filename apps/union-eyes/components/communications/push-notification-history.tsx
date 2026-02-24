@@ -47,16 +47,15 @@ import {
   DialogHeader,
   DialogTitle,
 } from '@/components/ui/dialog';
-import { 
-  Bell, 
-  MoreVertical, 
-  TrendingUp, 
-  Users, 
-  Eye, 
+import {
+  MoreVertical,
+  TrendingUp,
+  Eye,
   MousePointerClick,
   Send,
   Calendar,
 } from 'lucide-react';
+ 
 import { format, formatDistanceToNow } from 'date-fns';
 
 interface PushNotification {
@@ -123,7 +122,7 @@ const mockNotifications: PushNotification[] = [
 export function PushNotificationHistory({
   notifications = mockNotifications,
   onResend,
-  onViewDetails,
+  onViewDetails: _onViewDetails,
 }: PushNotificationHistoryProps) {
   const [statusFilter, setStatusFilter] = useState<string>('all');
   const [selectedNotification, setSelectedNotification] = useState<PushNotification | null>(null);

@@ -1,5 +1,7 @@
 "use client";
 
+
+export const dynamic = 'force-dynamic';
 /**
  * Organizations List Page
  * View and manage the organizational hierarchy
@@ -16,20 +18,17 @@ import {
   Users,
   MapPin,
   Search,
-  Filter,
   Plus,
   MoreVertical,
   Edit,
   Trash2,
   Eye,
   Network,
-  ChevronRight,
   Loader2,
   AlertCircle,
   GitBranch,
   Building,
-  Home,
-  Layers
+  Layers,
 } from "lucide-react";
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import { Button } from "@/components/ui/button";
@@ -62,6 +61,7 @@ import { OrganizationBreadcrumb } from "@/components/organization/organization-b
 import { OrganizationTree } from "@/components/organization/organization-tree";
 import { BulkOperations } from "@/components/organization/bulk-operations";
 import { BulkImportOrganizations } from "@/components/admin/bulk-import-organizations";
+ 
 import type { Organization, OrganizationType, OrganizationStatus } from "@/types/organization";
 
 const fetcher = (url: string) => fetch(url).then(res => res.json());
@@ -93,7 +93,7 @@ interface OrganizationWithStats extends Organization {
 
 export default function OrganizationsPage() {
   const router = useRouter();
-  const { organizationId, organization } = useOrganization();
+  const { organizationId, organization: _organization } = useOrganization();
   
   const [searchQuery, setSearchQuery] = useState("");
   const [typeFilter, setTypeFilter] = useState<string>("all");
@@ -133,7 +133,7 @@ export default function OrganizationsPage() {
       if (!response.ok) throw new Error("Failed to archive organization");
       
       mutate();
-    } catch (error) {
+    } catch (_error) {
 alert("Failed to archive organization");
     }
   };
@@ -260,7 +260,7 @@ alert("Failed to archive organization");
             </div>
             
             <Select value={typeFilter} onValueChange={setTypeFilter}>
-              <SelectTrigger className="w-full sm:w-[180px]">
+              <SelectTrigger className="w-full sm:w-45">
                 <SelectValue placeholder="Type" />
               </SelectTrigger>
               <SelectContent>
@@ -275,7 +275,7 @@ alert("Failed to archive organization");
             </Select>
             
             <Select value={statusFilter} onValueChange={setStatusFilter}>
-              <SelectTrigger className="w-full sm:w-[180px]">
+              <SelectTrigger className="w-full sm:w-45">
                 <SelectValue placeholder="Status" />
               </SelectTrigger>
               <SelectContent>

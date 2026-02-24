@@ -21,11 +21,9 @@ import * as z from "zod";
 import {
   UserX,
   Eye,
-  EyeOff,
   AlertTriangle,
   CheckCircle,
   Shield,
-  Info,
 } from "lucide-react";
 import {
   Form,
@@ -58,6 +56,7 @@ import {
   DialogTitle,
 } from "@/components/ui/dialog";
 import { Progress } from "@/components/ui/progress";
+ 
 import { Textarea } from "@/components/ui/textarea";
 
 const anonymizationSchema = z.object({
@@ -114,7 +113,7 @@ export interface MemberDataAnonymizerProps {
 }
 
 export function MemberDataAnonymizer({
-  memberId,
+  memberId: _memberId,
   memberName,
   fields,
   jobs,
@@ -186,7 +185,7 @@ export function MemberDataAnonymizer({
         setPreview(previewData);
         setShowPreview(true);
       }
-    } catch (error) {
+    } catch (_error) {
 }
   };
 

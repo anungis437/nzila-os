@@ -4,13 +4,14 @@
  */
 "use client";
 
+
+export const dynamic = 'force-dynamic';
 import { useState, useEffect } from "react";
 import { Users, Upload, Download, Plus, Search, Filter } from "lucide-react";
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 import { BulkImportMembers } from "@/components/admin/bulk-import-members";
-import { OrganizationMembers } from "@/components/organization/organization-members";
 import {
   Select,
   SelectContent,
@@ -30,7 +31,7 @@ export default function AdminMembersPage() {
   const [selectedOrg, setSelectedOrg] = useState<string>("all");
   const [organizations, setOrganizations] = useState<Organization[]>([]);
   const [isLoadingOrgs, setIsLoadingOrgs] = useState(true);
-  const [refreshKey, setRefreshKey] = useState(0);
+  const [_refreshKey, setRefreshKey] = useState(0);
 
   // Load organizations on mount
   useEffect(() => {

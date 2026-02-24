@@ -2,8 +2,14 @@
  * GET /api/docs
  * Migrated to withApi() framework
  */
-import { generateOpenAPISpec } from '@/lib/api/openapi';
 
+ 
+ 
+ 
+ 
+ 
+ 
+ 
 import { withApi, ApiError } from '@/lib/api/framework';
 
 export const GET = withApi(
@@ -14,7 +20,7 @@ export const GET = withApi(
       summary: 'GET docs',
     },
   },
-  async ({ request, userId, organizationId, user, body, query, params }) => {
+  async ({ request: _request, userId: _userId, organizationId: _organizationId, user: _user, body: _body, query: _query, params: _params }) => {
     // TODO: migrate handler body
     throw ApiError.internal('Route not yet migrated');
   },

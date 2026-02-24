@@ -43,7 +43,7 @@ export async function getMemberDetailsByUserId(userId: string): Promise<MemberDe
       memberNumber: null, // Profile table doesn&apos;t have memberNumber
       status: profile.status || 'active', // This is payment status, not member status
     };
-  } catch (error) {
+  } catch (_error) {
 return null;
   }
 }
@@ -73,7 +73,7 @@ export async function getMemberDetailsById(memberId: string): Promise<MemberDeta
       memberNumber: null, // Profile table doesn&apos;t have memberNumber
       status: profile.status || 'active', // This is payment status, not member status
     };
-  } catch (error) {
+  } catch (_error) {
 return null;
   }
 }
@@ -113,7 +113,7 @@ export async function batchGetMemberDetails(userIds: string[]): Promise<Map<stri
         status: profile.status || 'active', // This is payment status, not member status
       });
     });
-  } catch (error) {
+  } catch (_error) {
 }
 
   return memberMap;

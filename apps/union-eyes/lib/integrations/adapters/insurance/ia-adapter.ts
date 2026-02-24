@@ -112,7 +112,7 @@ export class IndustrialAllianceAdapter extends BaseIntegration {
   async sync(options: SyncOptions): Promise<SyncResult> {
     this.ensureConnected();
 
-    const startTime = Date.now();
+    const _startTime = Date.now();
     let recordsProcessed = 0;
     let recordsCreated = 0;
     let recordsUpdated = 0;
@@ -160,6 +160,7 @@ export class IndustrialAllianceAdapter extends BaseIntegration {
           }
         } catch (error) {
           const errorMessage = error instanceof Error ? error.message : 'Unknown error';
+          // eslint-disable-next-line @typescript-eslint/no-explicit-any
           errors.push({ entity, error: `Failed to sync ${entity}: ${errorMessage}` } as any);
           this.logError('sync', error);
         }
@@ -182,6 +183,7 @@ export class IndustrialAllianceAdapter extends BaseIntegration {
         recordsCreated,
         recordsUpdated,
         recordsFailed,
+        // eslint-disable-next-line @typescript-eslint/no-explicit-any
         errors: [{ entity: 'sync', error: errorMessage }] as any,
       };
     }
@@ -264,6 +266,7 @@ export class IndustrialAllianceAdapter extends BaseIntegration {
             externalProvider: 'industrial_alliance' as const,
             externalId: claim.external_id,
             claimNumber: claim.claim_number,
+            // eslint-disable-next-line @typescript-eslint/no-explicit-any
             employeeId: (claim as any).employee_id || '',
             employeeName: claim.member_name,
             submissionDate: claim.claim_date,
@@ -321,11 +324,13 @@ export class IndustrialAllianceAdapter extends BaseIntegration {
             externalProvider: 'industrial_alliance' as const,
             externalId: beneficiary.external_id,
             policyId: beneficiary.policy_id,
+            // eslint-disable-next-line @typescript-eslint/no-explicit-any
             employeeId: (beneficiary as any).employee_id || '',
             firstName: beneficiary.beneficiary_name?.split(' ')[0] || '',
             lastName: beneficiary.beneficiary_name?.split(' ').slice(1).join(' ') || '',
             relationship: beneficiary.relationship,
             percentage: Math.round(beneficiary.percentage),
+            // eslint-disable-next-line @typescript-eslint/no-explicit-any
             isPrimary: (beneficiary as any).is_primary ?? false,
             status: beneficiary.status,
             lastSyncedAt: new Date(),
@@ -405,11 +410,11 @@ export class IndustrialAllianceAdapter extends BaseIntegration {
     return { processed, created, updated, failed };
   }
 
-  async verifyWebhook(payload: string, signature: string): Promise<boolean> {
+  async verifyWebhook(_payload: string, _signature: string): Promise<boolean> {
     return false;
   }
 
-  async processWebhook(event: WebhookEvent): Promise<void> {
+  async processWebhook(_event: WebhookEvent): Promise<void> {
     this.logOperation('webhook', { message: 'Industrial Alliance does not support webhooks' });
   }
 }

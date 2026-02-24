@@ -5,7 +5,13 @@
 import { PaymentService } from '@/lib/services/payment-service';
 import { logger } from '@/lib/logger';
 
-import { withApi, ApiError, z } from '@/lib/api/framework';
+ 
+ 
+ 
+ 
+ 
+ 
+import { withApi, z } from '@/lib/api/framework';
 
 const checkoutSchema = z.object({
   transactionId: z.string().uuid('Invalid transaction ID'),
@@ -23,7 +29,7 @@ export const POST = withApi(
       summary: 'POST create',
     },
   },
-  async ({ request, userId, organizationId, user, body, query, params }) => {
+  async ({ request: _request, userId: _userId, organizationId: _organizationId, user: _user, body, query: _query, params: _params }) => {
         const { transactionId, returnUrl, cancelUrl, processorType } = body;
 
         logger.info('Creating checkout session', {

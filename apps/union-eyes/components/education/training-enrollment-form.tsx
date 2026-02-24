@@ -20,10 +20,7 @@ import { zodResolver } from "@hookform/resolvers/zod";
 import * as z from "zod";
 import {
   BookOpen,
-  CheckCircle,
   Clock,
-  CreditCard,
-  User,
   AlertTriangle,
 } from "lucide-react";
 import {
@@ -39,7 +36,6 @@ import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 import { Textarea } from "@/components/ui/textarea";
-import { Badge } from "@/components/ui/badge";
 import {
   Select,
   SelectContent,
@@ -149,6 +145,7 @@ export function TrainingEnrollmentForm({
       }
     }
 
+    // eslint-disable-next-line @typescript-eslint/no-explicit-any
     const isValid = await form.trigger(fieldsToValidate as any);
     if (isValid) {
       setCurrentStep((prev) => prev + 1);

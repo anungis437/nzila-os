@@ -23,6 +23,7 @@ interface JurisdictionRule {
   ruleDescription: string;
   category: string;
   legalReference: string;
+  // eslint-disable-next-line @typescript-eslint/no-explicit-any
   parameters: Record<string, any>;
   effectiveDate: string;
 }

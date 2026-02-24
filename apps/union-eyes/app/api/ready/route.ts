@@ -55,7 +55,7 @@ export async function GET() {
 async function checkDatabaseReady(): Promise<boolean> {
   try {
     // Test a real table exists
-    const result = await db.execute(sql`
+    const _result = await db.execute(sql`
       SELECT EXISTS (
         SELECT FROM information_schema.tables 
         WHERE table_schema = 'public' 
@@ -75,7 +75,7 @@ async function checkDatabaseReady(): Promise<boolean> {
 async function checkMigrationsComplete(): Promise<boolean> {
   try {
     // Check if drizzle migrations table exists and has entries
-    const result = await db.execute(sql`
+    const _result = await db.execute(sql`
       SELECT EXISTS (
         SELECT FROM information_schema.tables 
         WHERE table_schema = 'drizzle' 

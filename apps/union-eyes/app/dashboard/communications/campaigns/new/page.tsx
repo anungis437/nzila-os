@@ -9,6 +9,8 @@
 
 'use client';
 
+
+export const dynamic = 'force-dynamic';
 import { useState, useEffect } from 'react';
 import { useRouter } from 'next/navigation';
 import { Button } from '@/components/ui/button';
@@ -31,7 +33,6 @@ import {
   CardTitle,
 } from '@/components/ui/card';
 import { RadioGroup, RadioGroupItem } from '@/components/ui/radio-group';
-import { Badge } from '@/components/ui/badge';
 import { Alert, AlertDescription } from '@/components/ui/alert';
 import { logger } from '@/lib/logger';
 import { 
@@ -104,7 +105,7 @@ export default function NewCampaignPage() {
   const [loading, setLoading] = useState(false);
   const [error, setError] = useState<string | null>(null);
   const [templates, setTemplates] = useState<Template[]>([]);
-  const [audiencePreview, setAudiencePreview] = useState<number | null>(null);
+  const [audiencePreview, _setAudiencePreview] = useState<number | null>(null);
   
   const [formData, setFormData] = useState<CampaignForm>({
     name: '',
@@ -129,6 +130,7 @@ export default function NewCampaignPage() {
     if (currentStep === 3 && templates.length === 0) {
       fetchTemplates();
     }
+  // eslint-disable-next-line react-hooks/exhaustive-deps
   }, [currentStep]);
 
   const fetchTemplates = async () => {

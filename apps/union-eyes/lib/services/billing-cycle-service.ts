@@ -16,12 +16,11 @@
  * @module lib/services/billing-cycle-service
  */
 
-import { db } from '@/db';
 import { organizationMembers } from '@/db/schema-organizations';
 import { memberEmployment } from '@/db/schema/domains/member/member-employment';
 import { duesTransactions } from '@/db/schema/domains/finance/dues';
 import { DuesCalculationEngine } from '@/lib/dues-calculation-engine';
-import { eq, and, inArray } from 'drizzle-orm';
+import { eq, and } from 'drizzle-orm';
 import { logger } from '@/lib/logger';
 import { withRLSContext } from '@/lib/db/with-rls-context';
 import type { NodePgDatabase } from 'drizzle-orm/node-postgres';
@@ -117,6 +116,7 @@ export class BillingCycleService {
     });
 
     try {
+      // eslint-disable-next-line @typescript-eslint/no-explicit-any
       return await withRLSContext(async (tx: NodePgDatabase<any>) => {
         // Step 1: Get all active members
         const activeMembers = await this.getActiveMembersForBilling(tx, organizationId, periodStart);
@@ -235,9 +235,11 @@ export class BillingCycleService {
    * Get all active members eligible for billing
    */
   private static async getActiveMembersForBilling(
+    // eslint-disable-next-line @typescript-eslint/no-explicit-any
     tx: NodePgDatabase<any>,
     organizationId: string,
-    periodStart: Date
+    _periodStart: Date
+  // eslint-disable-next-line @typescript-eslint/no-explicit-any
   ): Promise<any[]> {
     const members = await tx
       .select({
@@ -277,9 +279,11 @@ export class BillingCycleService {
    * Process billing for a single member
    */
   private static async processMemberBilling(
+    // eslint-disable-next-line @typescript-eslint/no-explicit-any
     tx: NodePgDatabase<any>,
     params: {
       organizationId: string;
+      // eslint-disable-next-line @typescript-eslint/no-explicit-any
       member: any;
       periodStart: Date;
       periodEnd: Date;

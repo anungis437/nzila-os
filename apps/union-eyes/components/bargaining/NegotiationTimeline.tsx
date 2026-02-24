@@ -8,7 +8,8 @@
 
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "@/components/ui/card";
 import { Badge } from "@/components/ui/badge";
-import { Calendar, CheckCircle, FileText, Users, AlertCircle } from "lucide-react";
+import { Calendar, CheckCircle, FileText, AlertCircle } from "lucide-react";
+ 
 import { format } from "date-fns";
 
 interface TimelineEvent {
@@ -23,13 +24,16 @@ interface TimelineEvent {
 
 interface NegotiationTimelineProps {
   negotiationId: string;
+  // eslint-disable-next-line @typescript-eslint/no-explicit-any
   sessions?: any[];
+  // eslint-disable-next-line @typescript-eslint/no-explicit-any
   proposals?: any[];
+  // eslint-disable-next-line @typescript-eslint/no-explicit-any
   agreements?: any[];
 }
 
 export function NegotiationTimeline({
-  negotiationId,
+  negotiationId: _negotiationId,
   sessions = [],
   proposals = [],
   agreements = [],
@@ -100,7 +104,7 @@ export function NegotiationTimeline({
             {/* Timeline line */}
             <div className="absolute left-8 top-0 bottom-0 w-0.5 bg-border" />
             
-            {timelineEvents.map((event, index) => (
+            {timelineEvents.map((event, _index) => (
               <div key={event.id} className="relative pl-16">
                 {/* Timeline dot */}
                 <div className={`absolute left-6 top-2 h-4 w-4 rounded-full border-2 bg-background ${getEventColor(event.type, event.status)}`} />

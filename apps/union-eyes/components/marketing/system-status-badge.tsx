@@ -10,6 +10,7 @@
 import * as React from 'react';
 import { cn } from '@/lib/utils';
 import { CheckCircle2, AlertCircle, XCircle, HelpCircle } from 'lucide-react';
+ 
 import { SystemStatus } from '@/types/marketing';
 
 interface SystemStatusBadgeProps {
@@ -50,7 +51,7 @@ export function SystemStatusBadge({
   system,
   status,
   auditUrl,
-  lastCheck,
+  lastCheck: _lastCheck,
   className,
 }: SystemStatusBadgeProps) {
   const config = statusConfig[status];

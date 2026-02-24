@@ -79,6 +79,7 @@ async function performHealthCheck() {
     `);
     
     // Handle both array and rows format
+    // eslint-disable-next-line @typescript-eslint/no-explicit-any
     const rows = Array.isArray(result) ? result : (result as any).rows || [];
     const row = rows[0];
     
@@ -150,6 +151,7 @@ export async function testDatabaseQuery(): Promise<boolean> {
     `);
     
     // Handle both array and rows format
+    // eslint-disable-next-line @typescript-eslint/no-explicit-any
     const rows = Array.isArray(result) ? result : (result as any).rows || [];
     const count = rows[0]?.count;
     logger.info('Database query test passed', { tableCount: count });
@@ -179,7 +181,9 @@ export async function validateDatabaseSchema(): Promise<{
     `);
     
     // Handle both array and rows format
+    // eslint-disable-next-line @typescript-eslint/no-explicit-any
     const rows = Array.isArray(result) ? result : (result as any).rows || [];
+    // eslint-disable-next-line @typescript-eslint/no-explicit-any
     const tables = rows.map((row: any) => row.table_name);
     const tableCount = tables.length;
     

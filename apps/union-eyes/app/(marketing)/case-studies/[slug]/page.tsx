@@ -5,9 +5,13 @@
  * testimonials, and PDF export functionality.
  */
 
+
+export const dynamic = 'force-dynamic';
+
 import { notFound } from 'next/navigation';
 import Link from 'next/link';
 import { CaseStudy } from '@/types/marketing';
+import { sanitizeHtml } from '@/lib/utils/sanitize';
 import { ImpactMetricCard } from '@/components/marketing/impact-metric-card';
 import { HumanCenteredCallout } from '@/components/marketing/human-centered-callout';
 import { logger } from '@/lib/logger';
@@ -115,7 +119,7 @@ export default async function CaseStudyPage({ params }: CaseStudyPageProps) {
             </h2>
             <div
               className="prose prose-lg max-w-none text-gray-800"
-              dangerouslySetInnerHTML={{ __html: caseStudy.challenge }}
+              dangerouslySetInnerHTML={{ __html: sanitizeHtml(caseStudy.challenge) }}
             />
           </div>
         )}
@@ -128,7 +132,7 @@ export default async function CaseStudyPage({ params }: CaseStudyPageProps) {
             </h2>
             <div
               className="prose prose-lg max-w-none text-gray-800"
-              dangerouslySetInnerHTML={{ __html: caseStudy.solution }}
+              dangerouslySetInnerHTML={{ __html: sanitizeHtml(caseStudy.solution) }}
             />
           </div>
         )}
@@ -158,8 +162,10 @@ export default async function CaseStudyPage({ params }: CaseStudyPageProps) {
         {caseStudy.quote && (
           <div className="bg-linear-to-r from-blue-600 to-blue-800 text-white rounded-lg p-8 mb-8">
             <blockquote className="text-2xl font-medium italic mb-4">
+              {/* eslint-disable-next-line react/no-unescaped-entities, @typescript-eslint/no-explicit-any */}
               "{typeof caseStudy.quote === 'string' ? caseStudy.quote : (caseStudy.quote as any).text}"
             </blockquote>
+            {/* eslint-disable-next-line @typescript-eslint/no-explicit-any */}
             <p className="text-blue-100">— {typeof caseStudy.quote === 'string' ? '' : (caseStudy.quote as any).attribution}</p>
           </div>
         )}
@@ -172,7 +178,7 @@ export default async function CaseStudyPage({ params }: CaseStudyPageProps) {
             </h2>
             <div
               className="prose prose-lg max-w-none text-gray-800"
-              dangerouslySetInnerHTML={{ __html: Array.isArray(caseStudy.results) ? caseStudy.results.join('') : (caseStudy.results as string) }}
+              dangerouslySetInnerHTML={{ __html: sanitizeHtml(Array.isArray(caseStudy.results) ? caseStudy.results.join('') : (caseStudy.results as string)) }}
             />
           </div>
         )}
@@ -202,7 +208,7 @@ export default async function CaseStudyPage({ params }: CaseStudyPageProps) {
             </h2>
             <div
               className="prose prose-lg max-w-none text-gray-800"
-              dangerouslySetInnerHTML={{ __html: Array.isArray(caseStudy.replicability) ? caseStudy.replicability.join('') : (caseStudy.replicability as string) }}
+              dangerouslySetInnerHTML={{ __html: sanitizeHtml(Array.isArray(caseStudy.replicability) ? caseStudy.replicability.join('') : (caseStudy.replicability as string)) }}
             />
           </div>
         )}

@@ -36,17 +36,17 @@ import {
 import { Skeleton } from "@/components/ui/skeleton";
 import { Progress } from "@/components/ui/progress";
 import { useToast } from "@/components/ui/use-toast";
-import { 
-  GraduationCap, 
-  Search, 
+import {
+  GraduationCap,
+  Search,
   Filter,
   Calendar,
-  Award,
   AlertCircle,
   CheckCircle2,
-  Download
+  Download,
 } from "lucide-react";
-import { format, differenceInDays, isBefore } from "date-fns";
+import { format, differenceInDays } from "date-fns";
+ 
 import { cn } from "@/lib/utils";
 
 export interface TrainingRecord {
@@ -69,7 +69,7 @@ export interface SafetyTrainingRecordsViewerProps {
 export function SafetyTrainingRecordsViewer({
   organizationId,
   employeeId,
-  onViewCertificate
+  onViewCertificate: _onViewCertificate
 }: SafetyTrainingRecordsViewerProps) {
   const { toast } = useToast();
   const [records, setRecords] = React.useState<TrainingRecord[]>([]);
@@ -79,6 +79,7 @@ export function SafetyTrainingRecordsViewer({
 
   React.useEffect(() => {
     loadTrainingRecords();
+  // eslint-disable-next-line react-hooks/exhaustive-deps
   }, [organizationId, employeeId, statusFilter]);
 
   async function loadTrainingRecords() {
@@ -98,6 +99,7 @@ export function SafetyTrainingRecordsViewer({
 
       const data = await response.json();
       if (data.success) {
+        // eslint-disable-next-line @typescript-eslint/no-explicit-any
         setRecords(data.records.map((r: any) => ({
           ...r,
           completionDate: new Date(r.completionDate),
@@ -106,7 +108,7 @@ export function SafetyTrainingRecordsViewer({
       } else {
         throw new Error(data.error);
       }
-    } catch (error) {
+    } catch (_error) {
       toast({
         title: "Error",
         description: "Failed to load training records",

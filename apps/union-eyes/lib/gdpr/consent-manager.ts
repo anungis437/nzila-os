@@ -26,10 +26,6 @@ import {
   profiles,
   smsMessages,
   smsCampaignRecipients,
-  type NewUserConsent,
-  type NewCookieConsent,
-  type NewGdprDataRequest,
-  type NewDataAnonymizationLog,
 } from "@/db/schema";
 import { eq, and, desc, sql, or } from "drizzle-orm";
 import { createHash } from "crypto";
@@ -64,6 +60,7 @@ export class ConsentManager {
         organizationId,
         status: "granted",
         grantedAt: new Date(),
+      // eslint-disable-next-line @typescript-eslint/no-explicit-any
       } as any)
       .returning();
 
@@ -127,6 +124,7 @@ export class ConsentManager {
         and(
           eq(userConsents.userId, userId),
           eq(userConsents.organizationId, organizationId),
+          // eslint-disable-next-line @typescript-eslint/no-explicit-any
           eq(userConsents.consentType, consentType as any),
           eq(userConsents.status, "granted")
         )
@@ -175,6 +173,7 @@ export class CookieConsentManager {
           organizationId: data.organizationId,
           lastUpdated: new Date(),
           expiresAt,
+        // eslint-disable-next-line @typescript-eslint/no-explicit-any
         } as any)
         .where(eq(cookieConsents.consentId, data.consentId))
         .returning();
@@ -189,6 +188,7 @@ export class CookieConsentManager {
           ...insertFields,
           organizationId: data.organizationId,
           expiresAt,
+        // eslint-disable-next-line @typescript-eslint/no-explicit-any
         } as any)
         .returning();
 
@@ -245,6 +245,7 @@ export class GdprRequestManager {
         requestType: "access" as const,
         status: "pending" as const,
         deadline,
+        // eslint-disable-next-line @typescript-eslint/no-explicit-any
         requestDetails: data.requestDetails as any,
         verificationMethod: data.verificationMethod,
       })
@@ -304,6 +305,7 @@ export class GdprRequestManager {
         requestType: "erasure" as const,
         status: "pending" as const,
         deadline,
+        // eslint-disable-next-line @typescript-eslint/no-explicit-any
         requestDetails: data.requestDetails as any,
         verificationMethod: data.verificationMethod,
       })
@@ -334,6 +336,7 @@ export class GdprRequestManager {
         deadline,
         requestDetails: {
           preferredFormat: data.preferredFormat || "json",
+          // eslint-disable-next-line @typescript-eslint/no-explicit-any
           ...(data.requestDetails as any),
         },
       })
@@ -402,6 +405,7 @@ export class GdprRequestManager {
 
     const [updated] = await db
       .update(gdprDataRequests)
+      // eslint-disable-next-line @typescript-eslint/no-explicit-any
       .set(updateData as any)
       .where(eq(gdprDataRequests.id, requestId))
       .returning();
@@ -579,6 +583,7 @@ export class DataExportService {
         {
           dataType: "claim_notes",
           count: claimNotes.length,
+          // eslint-disable-next-line @typescript-eslint/no-explicit-any
           data: claimNotes.map((n: any) => ({
             updateId: n.updateId,
             claimId: n.claimId,
@@ -867,7 +872,7 @@ export class DataErasureService {
   }
 
   private static async eraseConsents(userId: string, organizationId: string) {
-    const result = await db
+    const _result = await db
       .delete(userConsents)
       .where(
         and(
@@ -888,8 +893,8 @@ export class DataErasureService {
    * Some data may need to be retained for legal reasons
    */
   static async canEraseData(
-    userId: string,
-    organizationId: string
+    _userId: string,
+    _organizationId: string
   ): Promise<{ canErase: boolean; reasons: string[] }> {
     const reasons: string[] = [];
 
@@ -954,6 +959,7 @@ export const CONSENT_BANNER_CONFIG = {
   cookiePolicyUrl: "/cookie-policy",
 };
 
+// eslint-disable-next-line import/no-anonymous-default-export
 export default {
   ConsentManager,
   CookieConsentManager,

@@ -8,14 +8,15 @@ import { type PostgresJsQueryResultHKT } from 'drizzle-orm/postgres-js';
 import { db } from '@/db';
 import {
   rewardWalletLedger,
-  type NewRewardWalletLedgerEntry,
   type RewardWalletLedgerEntry,
 } from '@/db/schema/domains/infrastructure/rewards';
 import { eq, and, desc, sql } from 'drizzle-orm';
 
 type DbTransaction = PgTransaction<
   PostgresJsQueryResultHKT,
+  // eslint-disable-next-line @typescript-eslint/no-explicit-any
   any,
+  // eslint-disable-next-line @typescript-eslint/no-explicit-any
   any
 >;
 
@@ -191,6 +192,7 @@ export async function getLedgerSummary(
       whereClause,
       sql`${rewardWalletLedger.createdAt} >= ${startDate}`,
       sql`${rewardWalletLedger.createdAt} <= ${endDate}`
+    // eslint-disable-next-line @typescript-eslint/no-explicit-any
     ) as any;
   }
 
@@ -220,6 +222,7 @@ export async function getLedgerSummary(
   return {
     totalCreditsIssued: summary.totalIssued,
     totalCreditsSpent: summary.totalSpent,
+    // eslint-disable-next-line @typescript-eslint/no-explicit-any
     totalCreditsOutstanding: (outstanding as any).total,
     activeMembers: summary.activeMembers,
   };
@@ -251,6 +254,7 @@ export async function getBulkBalances(
 
   const balanceMap = new Map<string, number>();
   
+  // eslint-disable-next-line @typescript-eslint/no-explicit-any
   for (const row of results as any) {
     balanceMap.set(row.user_id, row.balance_after);
   }

@@ -2,7 +2,14 @@
  * GET /api/test-auth
  * Migrated to withApi() framework
  */
-import { withApi, ApiError } from '@/lib/api/framework';
+ 
+ 
+ 
+ 
+ 
+ 
+ 
+import { withApi } from '@/lib/api/framework';
 
 export const GET = withApi(
   {
@@ -12,7 +19,7 @@ export const GET = withApi(
       summary: 'GET test-auth',
     },
   },
-  async ({ request, userId, organizationId, user, body, query, params }) => {
+  async ({ request: _request, userId: _userId, organizationId: _organizationId, user: _user, body: _body, query: _query, params: _params }) => {
 
         const DJANGO = process.env.DJANGO_URL;
         const r = await fetch(`${DJANGO}/api/auth_core/health/`, { cache: 'no-store' });

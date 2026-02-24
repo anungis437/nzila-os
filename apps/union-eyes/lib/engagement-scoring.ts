@@ -6,7 +6,7 @@
 
 import { db } from '@/db';
 import { profiles, smsMessages, newsletterEngagement, surveyResponses, pollVotes, pushDeliveries, organizationMembers } from '@/db/schema';
-import { eq, gte, and, sql, desc } from 'drizzle-orm';
+import { eq, gte, and, sql } from 'drizzle-orm';
 import { subDays, subMonths, differenceInDays } from 'date-fns';
 
 // =============================================
@@ -370,7 +370,7 @@ export async function getEngagementHistory(
   months = 6
 ): Promise<EngagementHistory[]> {
   const history: EngagementHistory[] = [];
-  const startDate = subMonths(new Date(), months);
+  const _startDate = subMonths(new Date(), months);
 
   // Calculate score for each month
   for (let i = 0; i < months; i++) {

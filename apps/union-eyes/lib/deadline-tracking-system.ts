@@ -7,16 +7,14 @@
 // ============================================================================
 
 import { db } from "@/db/db";
-import { eq, and, desc, asc, lte, gte, isNull, sql } from "drizzle-orm";
+import { eq, and, asc, lte } from "drizzle-orm";
 import {
   grievanceDeadlines,
   claims,
   notifications,
-  organizationMembers,
-  type InsertGrievanceDeadline,
   type GrievanceDeadline,
 } from "@/db/schema";
-import { addDays, addBusinessDays, differenceInDays, isPast, isBefore } from "date-fns";
+import { addDays, addBusinessDays, differenceInDays } from "date-fns";
 
 // ============================================================================
 // TYPES
@@ -226,7 +224,7 @@ export async function createGrievanceStepDeadlines(
   claimId: string,
   organizationId: string,
   filingDate: Date,
-  incidentDate: Date
+  _incidentDate: Date
 ): Promise<{ success: boolean; deadlineIds: string[]; error?: string }> {
   try {
     const deadlineIds: string[] = [];
@@ -421,7 +419,7 @@ export async function getUpcomingDeadlines(
     });
 
     return deadlines.map((d) => createDeadlineAlert(d));
-  } catch (error) {
+  } catch (_error) {
 return [];
   }
 }
@@ -429,7 +427,7 @@ return [];
 /**
  * Get overdue deadlines for a tenant
  */
-export async function getOverdueDeadlines(organizationId: string): Promise<DeadlineAlert[]> {
+export async function getOverdueDeadlines(_organizationId: string): Promise<DeadlineAlert[]> {
   try {
     const today = new Date();
 
@@ -442,7 +440,7 @@ export async function getOverdueDeadlines(organizationId: string): Promise<Deadl
     });
 
     return deadlines.map((d) => createDeadlineAlert(d));
-  } catch (error) {
+  } catch (_error) {
 return [];
   }
 }
@@ -452,7 +450,7 @@ return [];
  */
 export async function getGrievanceDeadlines(
   claimId: string,
-  organizationId: string
+  _organizationId: string
 ): Promise<GrievanceDeadline[]> {
   try {
     const deadlines = await db.query.grievanceDeadlines.findMany({
@@ -461,7 +459,7 @@ export async function getGrievanceDeadlines(
     });
 
     return deadlines;
-  } catch (error) {
+  } catch (_error) {
 return [];
   }
 }
@@ -490,7 +488,7 @@ export async function escalateMissedDeadlines(organizationId: string): Promise<n
     }
 
     return escalatedCount;
-  } catch (error) {
+  } catch (_error) {
 return 0;
   }
 }
@@ -534,8 +532,8 @@ function createDeadlineAlert(deadline: GrievanceDeadline): DeadlineAlert {
  */
 async function scheduleReminders(
   deadlineId: string,
-  dueDate: Date,
-  reminderSchedule: number[]
+  _dueDate: Date,
+  _reminderSchedule: number[]
 ): Promise<void> {
   try {
     const deadline = await db.query.grievanceDeadlines.findFirst({
@@ -550,7 +548,7 @@ async function scheduleReminders(
     // Note: Recipient information would need to come from the related grievance
     // This is a simplified version that just updates the deadline
     // For now, we skip creating notification records
-  } catch (error) {
+  } catch (_error) {
 }
 }
 
@@ -569,7 +567,7 @@ async function cancelDeadlineReminders(deadlineId: string): Promise<void> {
           eq(notifications.status, "scheduled")
         )
       );
-  } catch (error) {
+  } catch (_error) {
 }
 }
 
@@ -590,7 +588,7 @@ async function sendEscalationNotification(alert: DeadlineAlert): Promise<void> {
     // 1. Query the grievance by deadline.grievanceId
     // 2. Get the organizationId and assignedTo from the grievance
     // 3. Create notifications for relevant users
-  } catch (error) {
+  } catch (_error) {
 }
 }
 

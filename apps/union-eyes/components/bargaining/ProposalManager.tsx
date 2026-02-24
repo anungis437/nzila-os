@@ -8,7 +8,7 @@
 "use client";
 
 import { useEffect, useState } from "react";
-import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "@/components/ui/card";
+import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import { Badge } from "@/components/ui/badge";
 import { Button } from "@/components/ui/button";
 import { logger } from "@/lib/logger";
@@ -92,6 +92,7 @@ export function ProposalManager({ negotiationId }: ProposalManagerProps) {
 
   useEffect(() => {
     fetchProposals();
+  // eslint-disable-next-line react-hooks/exhaustive-deps
   }, [negotiationId]);
 
   const fetchProposals = async () => {
@@ -209,6 +210,7 @@ export function ProposalManager({ negotiationId }: ProposalManagerProps) {
                     <Label htmlFor="proposalType">Type *</Label>
                     <Select
                       value={formData.proposalType}
+                      // eslint-disable-next-line @typescript-eslint/no-explicit-any
                       onValueChange={(value: any) => setFormData({ ...formData, proposalType: value })}
                     >
                       <SelectTrigger>

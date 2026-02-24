@@ -19,8 +19,6 @@
  * - Share learnings with labor movement
  */
 
-import { db } from '@/db';
-import { sql } from 'drizzle-orm';
 import { logger } from '@/lib/logger';
 
 // ============================================================================

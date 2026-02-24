@@ -26,6 +26,7 @@ import { promisify } from 'util';
 import { brotliCompress, deflate, gzip } from 'zlib';
 
 let firebaseAdmin: typeof import('firebase-admin') | null = null;
+// eslint-disable-next-line @typescript-eslint/no-explicit-any
 let firebaseApp: any = null;
 
 const gzipAsync = promisify(gzip);
@@ -40,7 +41,7 @@ async function getFirebaseMessaging() {
   if (!firebaseAdmin) {
     try {
       firebaseAdmin = await import('firebase-admin');
-    } catch (error) {
+    } catch (_error) {
       logger.warn('firebase-admin not installed. Mobile push notifications will be disabled.');
       return null;
     }
@@ -582,7 +583,7 @@ export class MobileOfflineSyncEngine {
   /**
    * Check for conflicts with server data
    */
-  private async checkConflict(record: typeof mobileSyncQueue.$inferSelect): Promise<boolean> {
+  private async checkConflict(_record: typeof mobileSyncQueue.$inferSelect): Promise<boolean> {
     // STUB: Would compare timestamps or version vectors
     return false;
   }

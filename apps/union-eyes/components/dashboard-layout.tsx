@@ -6,7 +6,6 @@
 import { ReactNode } from "react";
 import Sidebar from "@/components/sidebar";
 import { SelectProfile } from "@/db/schema/domains/member";
-import dynamic from "next/dynamic";
 
 // We no longer need to dynamically import the upgrade popup as it&apos;s handled by the sidebar component
 

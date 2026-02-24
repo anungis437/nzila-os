@@ -5,11 +5,16 @@ import { NextResponse } from 'next/server';
  */
 import { logger } from '@/lib/logger';
 import { db } from '@/db';
-import { withRLSContext } from '@/lib/db/with-rls-context';
 import { sql } from 'drizzle-orm';
 import { predictChurnRisk } from '@/lib/ml/models/churn-prediction-model';
 
 
+ 
+ 
+ 
+ 
+ 
+ 
 import { withApi, ApiError, z, RATE_LIMITS } from '@/lib/api/framework';
 
 const mlPredictionsChurnRiskSchema = z.object({
@@ -25,7 +30,7 @@ export const GET = withApi(
       summary: 'GET churn-risk',
     },
   },
-  async ({ request, userId, organizationId, user, body, query }) => {
+  async ({ request, userId, organizationId, user: _user, body: _body, query: _query }) => {
 
         const searchParams = request.nextUrl.searchParams;
         const riskLevel = searchParams.get('riskLevel'); // 'low', 'medium', 'high'
@@ -125,7 +130,7 @@ export const POST = withApi(
     },
     successStatus: 201,
   },
-  async ({ request, userId, organizationId, user, body, query }) => {
+  async ({ request: _request, userId, organizationId, user: _user, body, query: _query }) => {
 
           // Validate request body
         const { memberId, organizationId: organizationIdFromBody } = body;

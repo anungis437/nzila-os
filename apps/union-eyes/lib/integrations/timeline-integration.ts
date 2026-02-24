@@ -163,7 +163,7 @@ export async function getEnrichedTimeline(
     // Enrich each entry with human-readable message
     const enrichedTimeline = statusHistory.map((entry, index) => {
       const previousEntry = index > 0 ? statusHistory[index - 1] : null;
-      const daysInState = previousEntry
+      const _daysInState = previousEntry
         ? Math.floor(
             (entry.timestamp.getTime() - previousEntry.timestamp.getTime()) / (1000 * 60 * 60 * 24)
           )

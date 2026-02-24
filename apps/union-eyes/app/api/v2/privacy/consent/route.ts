@@ -4,6 +4,20 @@ import { NextResponse } from 'next/server';
  * Migrated to withApi() framework
  */
 import { ProvincialPrivacyService, type Province } from "@/services/provincial-privacy-service";
+ 
+ 
+ 
+ 
+ 
+ 
+ 
+ 
+ 
+ 
+ 
+ 
+ 
+ 
 import { withApi, ApiError, z } from '@/lib/api/framework';
 
 const consentSchema = z.object({
@@ -25,7 +39,7 @@ export const GET = withApi(
       summary: 'GET consent',
     },
   },
-  async ({ request, userId, organizationId, user, body, query, params }) => {
+  async ({ request, userId, organizationId: _organizationId, user: _user, body: _body, query: _query, params: _params }) => {
 
         if (!userId) {
           throw ApiError.unauthorized('Authentication required');
@@ -54,7 +68,7 @@ export const POST = withApi(
       summary: 'POST consent',
     },
   },
-  async ({ request, userId, organizationId, user, body, query, params }) => {
+  async ({ request, userId, organizationId: _organizationId, user: _user, body, query: _query, params: _params }) => {
 
         if (!userId) {
           throw ApiError.unauthorized('Authentication required');
@@ -88,7 +102,7 @@ export const DELETE = withApi(
       summary: 'DELETE consent',
     },
   },
-  async ({ request, userId, organizationId, user, body, query, params }) => {
+  async ({ request: _request, userId, organizationId: _organizationId, user: _user, body, query: _query, params: _params }) => {
 
         if (!userId) {
           throw ApiError.unauthorized('Unauthorized');

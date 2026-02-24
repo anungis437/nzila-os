@@ -17,7 +17,6 @@ import * as React from "react";
 import {
   ArrowRight,
   AlertTriangle,
-  CheckCircle2,
   Info,
   User,
   Mail,
@@ -30,8 +29,6 @@ import { Button } from "@/components/ui/button";
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import { Badge } from "@/components/ui/badge";
 import { Avatar, AvatarFallback, AvatarImage } from "@/components/ui/avatar";
-import { RadioGroup, RadioGroupItem } from "@/components/ui/radio-group";
-import { Label } from "@/components/ui/label";
 import { Textarea } from "@/components/ui/textarea";
 import { useToast } from "@/components/ui/use-toast";
 import { cn } from "@/lib/utils";
@@ -132,6 +129,7 @@ export function MemberMergeTool({
     
     mergeFields.forEach((field) => {
       const source = selectedValues[field.key] === "primary" ? primaryMember : duplicateMember;
+      // eslint-disable-next-line @typescript-eslint/no-explicit-any
       merged[field.key] = source[field.key] as any;
     });
 
@@ -183,7 +181,7 @@ export function MemberMergeTool({
       <Card className="border-yellow-200 bg-yellow-50">
         <CardContent className="p-4">
           <div className="flex items-start gap-3">
-            <AlertTriangle className="h-5 w-5 text-yellow-600 mt-0.5 flex-shrink-0" />
+            <AlertTriangle className="h-5 w-5 text-yellow-600 mt-0.5 shrink-0" />
             <div>
               <p className="font-medium text-yellow-900">
                 Warning: This action cannot be undone
@@ -358,7 +356,9 @@ function FieldComparisonRow({
   onSelect,
 }: {
   field: MergeField;
+  // eslint-disable-next-line @typescript-eslint/no-explicit-any
   primaryValue: any;
+  // eslint-disable-next-line @typescript-eslint/no-explicit-any
   duplicateValue: any;
   selectedSource: string;
   onSelect: (source: "primary" | "duplicate") => void;
@@ -366,6 +366,7 @@ function FieldComparisonRow({
   const Icon = field.icon;
   const hasConflict = primaryValue !== duplicateValue && primaryValue && duplicateValue;
 
+  // eslint-disable-next-line @typescript-eslint/no-explicit-any
   const formatValue = (value: any) => {
     if (!value) return "—";
     if (value instanceof Date) return format(value, "PPP");
@@ -392,7 +393,7 @@ function FieldComparisonRow({
           type="radio"
           checked={selectedSource === "primary"}
           onChange={() => onSelect("primary")}
-          className="flex-shrink-0"
+          className="shrink-0"
         />
         <span className="text-sm truncate">{formatValue(primaryValue)}</span>
       </div>
@@ -406,7 +407,7 @@ function FieldComparisonRow({
           type="radio"
           checked={selectedSource === "duplicate"}
           onChange={() => onSelect("duplicate")}
-          className="flex-shrink-0"
+          className="shrink-0"
         />
         <span className="text-sm truncate">{formatValue(duplicateValue)}</span>
       </div>

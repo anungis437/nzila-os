@@ -25,7 +25,7 @@ import {
   CardTitle,
 } from "@/components/ui/card";
 import { Badge } from "@/components/ui/badge";
-import { FileText, Plus, Trash2, Upload, Send } from "lucide-react";
+import { FileText, Plus, Trash2, Send } from "lucide-react";
 import { useToast } from "@/lib/hooks/use-toast";
 
 interface Signer {
@@ -38,6 +38,7 @@ interface Signer {
 
 interface SignatureRequestFormProps {
   organizationId: string;
+  // eslint-disable-next-line @typescript-eslint/no-explicit-any
   onSuccess?: (document: any) => void;
 }
 
@@ -51,7 +52,7 @@ export function SignatureRequestForm({
   const [documentType, setDocumentType] = useState("contract");
   const [provider, setProvider] = useState("internal");
   const [expirationDays, setExpirationDays] = useState("30");
-  const [sequentialSigning, setSequentialSigning] = useState(false);
+  const [sequentialSigning, _setSequentialSigning] = useState(false);
   const [signers, setSigners] = useState<Signer[]>([
     { id: "1", email: "", name: "", signingOrder: 1 },
   ]);
@@ -82,6 +83,7 @@ export function SignatureRequestForm({
     }
   };
 
+  // eslint-disable-next-line @typescript-eslint/no-explicit-any
   const updateSigner = (id: string, field: keyof Signer, value: any) => {
     setSigners(
       signers.map((s) => (s.id === id ? { ...s, [field]: value } : s))
@@ -158,7 +160,7 @@ export function SignatureRequestForm({
       if (onSuccess) {
         onSuccess(result.document);
       }
-    } catch (error) {
+    } catch (_error) {
 toast({
         title: "Error",
         description: "Failed to send document for signature",
@@ -283,7 +285,7 @@ toast({
           </CardDescription>
         </CardHeader>
         <CardContent className="space-y-4">
-          {signers.map((signer, index) => (
+          {signers.map((signer, _index) => (
             <div
               key={signer.id}
               className="flex gap-4 p-4 border rounded-lg bg-muted/30"

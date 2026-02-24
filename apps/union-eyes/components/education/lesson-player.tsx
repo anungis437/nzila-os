@@ -39,7 +39,6 @@ import { Button } from "@/components/ui/button";
 import { Slider } from "@/components/ui/slider";
 import { Badge } from "@/components/ui/badge";
 import { Progress } from "@/components/ui/progress";
-import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
 import { ScrollArea } from "@/components/ui/scroll-area";
 import { useToast } from "@/components/ui/use-toast";
 
@@ -555,6 +554,7 @@ function SlideViewer({
   return (
     <div className="space-y-4">
       <div className="border rounded-lg overflow-hidden bg-muted min-h-[500px] flex items-center justify-center">
+        {/* eslint-disable-next-line @next/next/no-img-element */}
         <img
           src={`${content.url}?slide=${currentSlide}`}
           alt={`Slide ${currentSlide}`}

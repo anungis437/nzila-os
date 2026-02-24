@@ -7,8 +7,8 @@
 // ============================================================================
 
 import { db } from "@/db/db";
-import { eq, and, desc, asc, or, sql, ilike, inArray } from "drizzle-orm";
-import { claims, sharedClauseLibrary, type Claim } from "@/db/schema";
+import { eq, and, desc, sql, inArray } from "drizzle-orm";
+import { claims, sharedClauseLibrary, type _Claim } from "@/db/schema";
 
 // ============================================================================
 // TYPES
@@ -106,7 +106,7 @@ export async function generateSettlementRecommendation(
     if (!claim) return null;
 
     // Extract features for prediction
-    const features = extractPredictionFeatures(claim);
+    const _features = extractPredictionFeatures(claim);
 
     // Find similar precedent cases
     const precedents = await findSimilarPrecedents(claim, organizationId);
@@ -145,7 +145,7 @@ export async function generateSettlementRecommendation(
       estimatedResolutionDays: calculateEstimatedResolutionDays(precedents),
       potentialSettlementValue: calculatePotentialSettlement(claim, precedents),
     };
-  } catch (error) {
+  } catch (_error) {
 return null;
   }
 }
@@ -227,7 +227,7 @@ async function findSimilarPrecedents(
 
     // Sort by similarity (descending)
     return precedents.sort((a, b) => b.similarityScore - a.similarityScore);
-  } catch (error) {
+  } catch (_error) {
 return [];
   }
 }
@@ -346,7 +346,7 @@ async function findRelevantClauses(
 
     // Sort by relevance
     return clauseReferences.sort((a, b) => b.relevanceScore - a.relevanceScore);
-  } catch (error) {
+  } catch (_error) {
 return [];
   }
 }

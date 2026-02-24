@@ -4,7 +4,6 @@ import { usePathname } from "next/navigation";
 import { Button } from "@/components/ui/button";
 import { Globe } from "lucide-react";
 import { motion } from "framer-motion";
-import Link from "next/link";
 import {
   DropdownMenu,
   DropdownMenuContent,
@@ -34,6 +33,7 @@ export default function LanguageSwitcher() {
     const newPath = segments.join("/");
     
     // Force a full page reload to ensure translations are updated
+    // eslint-disable-next-line react-hooks/immutability
     window.location.href = newPath;
   };
 

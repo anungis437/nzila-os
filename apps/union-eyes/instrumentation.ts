@@ -1,4 +1,6 @@
+ 
 import * as Sentry from '@sentry/nextjs';
+// eslint-disable-next-line @typescript-eslint/no-unused-vars
 import { logger } from '@/lib/logger';
 
 export async function register() {
@@ -50,7 +52,7 @@ export async function register() {
       // ── Legacy env validation (kept for backwards compat) ──────────
       const { logger } = await import('./lib/logger');
       // Import and run comprehensive environment validation
-      const { validateEnvironment, printEnvironmentReport } = await import('./lib/config/env-validation');
+      const { validateEnvironment, printEnvironmentReport: _printEnvironmentReport } = await import('./lib/config/env-validation');
       const envValidation = validateEnvironment();
       
       if (!envValidation.isValid) {

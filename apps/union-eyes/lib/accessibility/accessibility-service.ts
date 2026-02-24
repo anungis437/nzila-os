@@ -10,14 +10,11 @@ import { db } from "@/db";
 import {
   accessibilityAudits,
   accessibilityIssues,
-  wcagSuccessCriteria,
-  accessibilityTestSuites,
-  type NewAccessibilityAudit,
   type NewAccessibilityIssue,
   type AccessibilityAudit,
   type AccessibilityIssue,
 } from "@/db/schema";
-import { eq, and, desc, sql, inArray } from "drizzle-orm";
+import { eq, desc, inArray } from "drizzle-orm";
 
 /**
  * Accessibility Audit Manager
@@ -73,10 +70,12 @@ export class AccessibilityAuditManager {
     
     try {
       // Run axe-core scan (this is a placeholder - actual implementation would use Playwright/Puppeteer)
+      // eslint-disable-next-line @typescript-eslint/no-explicit-any
       const scanResults = await this.runAxeScan(audit[0].targetUrl) as any;
       
       // Process and save issues
       const issues: NewAccessibilityIssue[] = scanResults.violations.map(
+        // eslint-disable-next-line @typescript-eslint/no-explicit-any
         (violation: any) => ({
           auditId,
           organizationId: audit[0].organizationId,
@@ -139,7 +138,7 @@ export class AccessibilityAuditManager {
   /**
    * Run axe-core scan (placeholder - implement with Playwright)
    */
-  private async runAxeScan(url: string): Promise<unknown> {
+  private async runAxeScan(_url: string): Promise<unknown> {
     // This is a placeholder. In production, you would:
     // 1. Launch Playwright/Puppeteer browser
     // 2. Navigate to URL
@@ -215,6 +214,7 @@ export class AccessibilityAuditManager {
     
     if (options.severity && options.severity.length > 0) {
       query = query.where(
+        // eslint-disable-next-line @typescript-eslint/no-explicit-any
         inArray(accessibilityIssues.severity as any, options.severity)
       );
     }
@@ -227,6 +227,7 @@ export class AccessibilityAuditManager {
     
     if (options.status) {
       query = query.where(
+        // eslint-disable-next-line @typescript-eslint/no-explicit-any
         eq(accessibilityIssues.status as any, options.status)
       );
     }
@@ -548,7 +549,7 @@ export class AccessibilityReportGenerator {
    */
   async generateComplianceReport(
     organizationId: string,
-    options: {
+    _options: {
       startDate?: Date;
       endDate?: Date;
       includeResolved?: boolean;

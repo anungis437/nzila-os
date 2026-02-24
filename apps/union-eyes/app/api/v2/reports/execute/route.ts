@@ -2,12 +2,10 @@
  * POST /api/reports/execute
  * Migrated to withApi() framework
  */
-import { ReportExecutor } from '@/lib/report-executor';
-import { logApiAuditEvent } from '@/lib/middleware/api-security';
 
-import { withApi, ApiError, z, RATE_LIMITS } from '@/lib/api/framework';
+import { withApi, z, RATE_LIMITS } from '@/lib/api/framework';
 
-const reportsExecuteSchema = z.object({
+const _reportsExecuteSchema = z.object({
   config: z.unknown().optional(),
 });
 

@@ -62,6 +62,7 @@ export async function initializeTracing(): Promise<void> {
   try {
     // Dynamic import to gracefully handle missing packages
     const { NodeSDK } = await import('@opentelemetry/sdk-node');
+    // eslint-disable-next-line @typescript-eslint/no-explicit-any
     const { Resource } = await import('@opentelemetry/resources') as any;
     const { 
       SEMRESATTRS_SERVICE_NAME,
@@ -114,6 +115,7 @@ export async function initializeTracing(): Promise<void> {
           '@opentelemetry/instrumentation-pg': {
             enabled: true,
           },
+          // eslint-disable-next-line @typescript-eslint/ban-ts-comment
           // @ts-ignore - redis instrumentation may not be in type map
           '@opentelemetry/instrumentation-redis-4': {
             enabled: true,

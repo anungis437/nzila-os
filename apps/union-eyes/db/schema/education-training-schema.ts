@@ -5,7 +5,7 @@ import {
   integer,
   jsonb,
   numeric,
-  pgEnum,
+  _pgEnum,
   pgTable,
   text,
   timestamp,

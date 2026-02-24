@@ -8,7 +8,6 @@ import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@
 import { Input } from "@/components/ui/input";
 import {
   TrendingUp,
-  TrendingDown,
   Users,
   AlertTriangle,
   Award,
@@ -201,7 +200,7 @@ export default function EngagementMetricsDashboard() {
   };
 
   // Get lifecycle stage styling
-  const getLifecycleStageStyle = (stage: LifecycleStage) => {
+  const _getLifecycleStageStyle = (stage: LifecycleStage) => {
     const stageData = LIFECYCLE_STAGES.find((s) => s.stage === stage);
     return stageData?.color || "bg-gray-500";
   };

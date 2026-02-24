@@ -32,7 +32,7 @@ const parsedMetadata = JSON.parse(data.metadata);
         if (parsedMetadata.clerkUserId) {
 return parsedMetadata.clerkUserId;
         }
-} catch (e) {
+} catch (_e) {
 }
     }
   } else {

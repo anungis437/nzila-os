@@ -3,8 +3,17 @@ import { NextResponse } from 'next/server';
  * GET POST /api/precedents
  * Migrated to withApi() framework
  */
-import { logApiAuditEvent } from "@/lib/middleware/api-security";
 import { withApi, ApiError, z } from '@/lib/api/framework';
+ 
+ 
+ 
+ 
+ 
+ 
+ 
+ 
+ 
+ 
 import {
   listPrecedents,
   createPrecedent,
@@ -35,7 +44,7 @@ export const GET = withApi(
       summary: 'GET precedents',
     },
   },
-  async ({ request, userId, organizationId, user, body, query }) => {
+  async ({ request, userId: _userId, organizationId: _organizationId, user: _user, body: _body, query: _query }) => {
 
           const { searchParams } = new URL(request.url);
           // Check for special modes
@@ -130,7 +139,7 @@ export const POST = withApi(
     },
     successStatus: 201,
   },
-  async ({ request, userId, organizationId, user, body, query }) => {
+  async ({ request: _request, userId: _userId, organizationId: _organizationId, user: _user, body, query: _query }) => {
 
           // Validate request body
         // Validate required fields

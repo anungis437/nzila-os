@@ -42,7 +42,7 @@ import {
 } from 'drizzle-orm/pg-core';
 import { relations } from 'drizzle-orm';
 import { organizations } from '../../../schema-organizations';
-import { profilesTable as profiles } from '../../profiles-schema';
+import { profilesTable as _profiles } from '../../profiles-schema';
 import { perCapitaRemittances } from '../../clc-per-capita-schema';
 
 // =============================================================================
@@ -222,6 +222,7 @@ export const federations = pgTable(
       languages?: string[];
       affiliations?: { name: string; code?: string }[];
       socialMedia?: { platform: string; handle: string }[];
+      // eslint-disable-next-line @typescript-eslint/no-explicit-any
       customFields?: Record<string, any>;
     }>(),
     
@@ -317,6 +318,7 @@ export const federationMemberships = pgTable(
       approvalDate?: string;
       committees?: string[];
       specialInterests?: string[];
+      // eslint-disable-next-line @typescript-eslint/no-explicit-any
       customFields?: Record<string, any>;
     }>(),
     
@@ -418,6 +420,7 @@ export const federationExecutives = pgTable(
       externalAffiliations?: { organization: string; role: string }[];
       languages?: string[];
       expertise?: string[];
+      // eslint-disable-next-line @typescript-eslint/no-explicit-any
       customFields?: Record<string, any>;
     }>(),
     
@@ -523,6 +526,7 @@ export const federationMeetings = pgTable(
       topics?: string[];
       costs?: { category: string; amount: number }[];
       sponsors?: string[];
+      // eslint-disable-next-line @typescript-eslint/no-explicit-any
       customFields?: Record<string, any>;
     }>(),
     
@@ -630,6 +634,7 @@ export const federationRemittances = pgTable(
       remindersSent?: number;
       lastReminderDate?: string;
       paymentPlan?: { installments: number; schedule: string[] };
+      // eslint-disable-next-line @typescript-eslint/no-explicit-any
       customFields?: Record<string, any>;
     }>(),
     
@@ -768,6 +773,7 @@ export const federationCampaigns = pgTable(
       mediaHits?: { date: string; outlet: string; url?: string }[];
       tactics?: string[];
       outcomes?: { metric: string; target: number; actual: number }[];
+      // eslint-disable-next-line @typescript-eslint/no-explicit-any
       customFields?: Record<string, any>;
     }>(),
     
@@ -883,6 +889,7 @@ export const federationCommunications = pgTable(
       languages?: string[];
       senderEmail?: string;
       replyToEmail?: string;
+      // eslint-disable-next-line @typescript-eslint/no-explicit-any
       customFields?: Record<string, any>;
     }>(),
     
@@ -1025,6 +1032,7 @@ export const federationResources = pgTable(
       sourceOrganization?: string;
       lastReviewedDate?: string;
       reviewDueDate?: string;
+      // eslint-disable-next-line @typescript-eslint/no-explicit-any
       customFields?: Record<string, any>;
     }>(),
     

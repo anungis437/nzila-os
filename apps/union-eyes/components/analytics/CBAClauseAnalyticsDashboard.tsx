@@ -82,7 +82,7 @@ export function CBAClauseAnalyticsDashboard() {
       const precRes = await fetch('/api/analytics/cba/precedent-stats');
       const precData = await precRes.json();
       setPrecedentStats(precData);
-    } catch (error) {
+    } catch (_error) {
 } finally {
       setLoading(false);
     }

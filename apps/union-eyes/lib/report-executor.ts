@@ -333,7 +333,7 @@ return {
   private buildSelectClause(
     fields: SelectedField[],
     dataSource: DataSourceMetadata,
-    groupBy?: string[]
+    _groupBy?: string[]
   ): SQL {
     const fieldClauses: SQL[] = [];
 
@@ -445,7 +445,7 @@ return {
    */
   private buildFilterClause(
     filters: FilterCondition[],
-    dataSource: DataSourceMetadata
+    _dataSource: DataSourceMetadata
   ): SQL | null {
     if (filters.length === 0) return null;
 
@@ -564,7 +564,11 @@ return {
       }
 
       if (sort.nulls) {
-        orderSQL = sql`${orderSQL} NULLS ${sql.raw(sort.nulls.toUpperCase())}`;
+        const nullsDir = sort.nulls.toUpperCase();
+        if (nullsDir !== 'FIRST' && nullsDir !== 'LAST') {
+          throw new Error(`Invalid nulls direction: ${sort.nulls}`);
+        }
+        orderSQL = sql`${orderSQL} NULLS ${sql.raw(nullsDir)}`;
       }
 
       orderClauses.push(orderSQL);

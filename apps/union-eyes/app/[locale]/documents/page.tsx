@@ -1,3 +1,7 @@
+"use client";
+
+export const dynamic = 'force-dynamic';
+
 /**
  * Document Management Page
  * 
@@ -26,7 +30,7 @@ import { DocumentRetentionPolicy } from "@/components/documents/document-retenti
 
 export default function DocumentsPage() {
   const [activeTab, setActiveTab] = React.useState("library");
-  const [selectedDocumentId, setSelectedDocumentId] = React.useState<string | null>(null);
+  const [selectedDocumentId, _setSelectedDocumentId] = React.useState<string | null>(null);
 
   return (
     <div className="container mx-auto py-8 space-y-6">
@@ -63,14 +67,14 @@ export default function DocumentsPage() {
         <TabsContent value="library">
           <DocumentLibraryBrowser
             items={[]}
-            onNavigate={(folderId) => undefined}
+            onNavigate={(_folderId) => undefined}
             onUpload={() => undefined}
           />
         </TabsContent>
 
         <TabsContent value="search">
           <DocumentSearchAdvanced
-            onSearch={(filters) => undefined}
+            onSearch={(_filters) => undefined}
           />
         </TabsContent>
 

@@ -10,7 +10,7 @@
 
 import { db } from '@/db/db';
 import { organizations } from '@/db/schema-organizations';
-import { eq, and, sql } from 'drizzle-orm';
+import { eq, sql } from 'drizzle-orm';
 import { logger } from '@/lib/logger';
 
 // =============================================================================
@@ -107,6 +107,7 @@ export async function findOrphanedOrganizations(): Promise<string[]> {
       )
   `);
 
+  // eslint-disable-next-line @typescript-eslint/no-explicit-any
   return (result as unknown as { rows: unknown[] }).rows.map((row: any) => row.id);
 }
 

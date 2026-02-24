@@ -30,6 +30,7 @@ async function getApiClient() {
 /**
  * List tax-slip-service records
  */
+// eslint-disable-next-line @typescript-eslint/no-explicit-any
 export async function getTaxSlipServiceList(filters?: any) {
   const client = await getApiClient();
   const queryString = filters ? '?' + new URLSearchParams(filters).toString() : '';
@@ -67,6 +68,7 @@ export async function getTaxSlipServiceById(id: string) {
 /**
  * Create new tax-slip-service record
  */
+// eslint-disable-next-line @typescript-eslint/no-explicit-any
 export async function createTaxSlipService(data: any) {
   const client = await getApiClient();
   
@@ -86,6 +88,7 @@ export async function createTaxSlipService(data: any) {
 /**
  * Update tax-slip-service record
  */
+// eslint-disable-next-line @typescript-eslint/no-explicit-any
 export async function updateTaxSlipService(id: string, data: any) {
   const client = await getApiClient();
   

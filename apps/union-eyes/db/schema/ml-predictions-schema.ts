@@ -7,12 +7,12 @@ import {
   pgTable,
   uuid,
   varchar,
-  text,
+  _text,
   timestamp,
   decimal,
   integer,
   jsonb,
-  boolean,
+  _boolean,
   index,
   unique
 } from "drizzle-orm/pg-core";

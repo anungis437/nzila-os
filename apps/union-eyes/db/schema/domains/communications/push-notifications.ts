@@ -200,6 +200,7 @@ export const pushNotifications = pgTable(
       statuses?: string[];
       tags?: string[];
       dateRange?: { start: string; end: string };
+      // eslint-disable-next-line @typescript-eslint/no-explicit-any
       customFields?: Record<string, any>;
     }>(),
     deviceIds: uuid('device_ids').array(),
@@ -271,6 +272,7 @@ export const pushDeliveries = pgTable(
       clickAction?: string;
       timeToClick?: number;
       buttonId?: string;
+      // eslint-disable-next-line @typescript-eslint/no-explicit-any
       [key: string]: any;
     }>(),
 

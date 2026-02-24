@@ -109,6 +109,7 @@ export const calendars = pgTable('calendars', {
   requireApproval: boolean('require_approval').default(false),
   
   // Metadata
+  // eslint-disable-next-line @typescript-eslint/no-explicit-any
   metadata: jsonb('metadata').$type<Record<string, any>>(),
   isActive: boolean('is_active').default(true),
   
@@ -178,6 +179,7 @@ export const calendarEvents = pgTable('calendar_events', {
   visibility: varchar('visibility', { length: 20 }).default('default'), // default, public, private, confidential
   
   // Metadata
+  // eslint-disable-next-line @typescript-eslint/no-explicit-any
   metadata: jsonb('metadata').$type<Record<string, any>>(),
   attachments: jsonb('attachments').$type<Array<{ name: string; url: string; type: string }>>(),
   
@@ -280,6 +282,7 @@ export const meetingRooms = pgTable('meeting_rooms', {
   // Metadata
   imageUrl: text('image_url'),
   floorPlanUrl: text('floor_plan_url'),
+  // eslint-disable-next-line @typescript-eslint/no-explicit-any
   metadata: jsonb('metadata').$type<Record<string, any>>(),
   
   createdAt: timestamp('created_at').defaultNow().notNull(),
@@ -334,6 +337,7 @@ export const roomBookings = pgTable('room_bookings', {
   
   // Metadata
   attendeeCount: integer('attendee_count'),
+  // eslint-disable-next-line @typescript-eslint/no-explicit-any
   metadata: jsonb('metadata').$type<Record<string, any>>(),
   
   createdAt: timestamp('created_at').defaultNow().notNull(),
@@ -443,6 +447,7 @@ export const eventReminders = pgTable('event_reminders', {
   error: text('error'),
   
   // Metadata
+  // eslint-disable-next-line @typescript-eslint/no-explicit-any
   metadata: jsonb('metadata').$type<Record<string, any>>(),
   
   createdAt: timestamp('created_at').defaultNow().notNull(),

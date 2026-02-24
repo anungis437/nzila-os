@@ -4,11 +4,13 @@
  * Premium, Nzila-quality public site with scroll-triggered reveals,
  * rich imagery, animated stats, and consistent section patterns.
  */
+
+export const dynamic = 'force-dynamic';
+
 import type { Metadata } from 'next';
 import Image from 'next/image';
 import Link from 'next/link';
 import ScrollReveal from '@/components/public/scroll-reveal';
-import SectionHeading from '@/components/public/section-heading';
 import AnimatedFeatures from './components/animated-features';
 import AnimatedReviews from './components/animated-reviews';
 import AnimatedCTA from './components/animated-cta';

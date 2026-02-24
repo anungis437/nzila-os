@@ -6,7 +6,6 @@
  */
 
 import { PilotApplicationInput } from '@/types/marketing';
-import { logger } from '@/lib/logger';
 
 export interface ReadinessAssessmentResult {
   score: number; // 0-100

@@ -18,7 +18,6 @@ import {
   SelectTrigger,
   SelectValue
 } from '@/components/ui/select';
-import { TrendChart } from './trend-chart';
 import { ArrowUp, ArrowDown, Minus, RefreshCw } from 'lucide-react';
 
 interface ComparativeAnalysisProps {
@@ -50,10 +49,12 @@ export function ComparativeAnalysis({ organizationId }: ComparativeAnalysisProps
   const [timeRange, setTimeRange] = useState('30d');
   const [comparisonData, setComparisonData] = useState<ComparisonData[]>([]);
   const [gapAnalysis, setGapAnalysis] = useState<GapAnalysis[]>([]);
+  // eslint-disable-next-line @typescript-eslint/no-explicit-any
   const [industryBenchmark, setIndustryBenchmark] = useState<any>(null);
 
   useEffect(() => {
     fetchComparativeData();
+  // eslint-disable-next-line react-hooks/exhaustive-deps
   }, [organizationId, selectedMetric, timeRange]);
 
   async function fetchComparativeData() {
@@ -70,7 +71,7 @@ export function ComparativeAnalysis({ organizationId }: ComparativeAnalysisProps
         setGapAnalysis(data.gapAnalysis || []);
         setIndustryBenchmark(data.industryBenchmark || null);
       }
-    } catch (error) {
+    } catch (_error) {
 } finally {
       setLoading(false);
     }

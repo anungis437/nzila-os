@@ -9,6 +9,7 @@
 
 import * as React from 'react';
 import { cn } from '@/lib/utils';
+ 
 import { Heart, Shield, Eye, Users } from 'lucide-react';
 
 export type CalloutVariant = 'solidarity' | 'trust' | 'transparency' | 'human';
@@ -63,7 +64,7 @@ export function HumanCenteredCallout({
   variant = 'human',
   className,
   children,
-  compact,
+  compact: _compact,
 }: HumanCenteredCalloutProps) {
   const styles = variantStyles[variant];
   const displayIcon = icon || defaultIcons[variant];
@@ -79,7 +80,7 @@ export function HumanCenteredCallout({
       )}
     >
       <div className="flex items-start gap-4">
-        <div className={cn('flex-shrink-0', styles.icon)}>
+        <div className={cn('shrink-0', styles.icon)}>
           {displayIcon}
         </div>
         <div className="flex-1 min-w-0">
@@ -121,7 +122,7 @@ export function HumanCenteredCalloutCompact({
         className
       )}
     >
-      <span className={cn('flex-shrink-0', styles.icon)}>
+      <span className={cn('shrink-0', styles.icon)}>
         {displayIcon}
       </span>
       <span className="text-sm font-medium text-slate-900">

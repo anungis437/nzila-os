@@ -6,19 +6,12 @@
 
 'use client';
 
+
+export const dynamic = 'force-dynamic';
 import { useState, useEffect } from 'react';
 import { Button } from '@/components/ui/button';
 import { Card } from '@/components/ui/card';
 import { Badge } from '@/components/ui/badge';
-import { Input } from '@/components/ui/input';
-import { 
-  Table,
-  TableBody,
-  TableCell,
-  TableHead,
-  TableHeader,
-  TableRow,
-} from '@/components/ui/table';
 import { Alert, AlertDescription } from '@/components/ui/alert';
 import { 
   CheckCircle, XCircle, AlertTriangle, Search, RefreshCw 
@@ -48,7 +41,7 @@ interface SuggestedMatch {
 export default function ReconciliationPage() {
   const [items, setItems] = useState<ReconciliationItem[]>([]);
   const [loading, setLoading] = useState(true);
-  const [selectedItem, setSelectedItem] = useState<ReconciliationItem | null>(null);
+  const [_selectedItem, _setSelectedItem] = useState<ReconciliationItem | null>(null);
 
   useEffect(() => {
     fetchReconciliationQueue();
@@ -79,6 +72,7 @@ export default function ReconciliationPage() {
 
   const handleReject = async (itemId: string) => {
     try {
+      // eslint-disable-next-line @typescript-eslint/no-explicit-any
       await (api.dues.reconciliation.reject as any)(itemId);
       setItems(items.filter(item => item.id !== itemId));
       alert('Item rejected successfully.');

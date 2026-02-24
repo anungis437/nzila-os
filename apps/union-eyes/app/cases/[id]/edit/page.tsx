@@ -6,6 +6,8 @@
 
 'use client';
 
+
+export const dynamic = 'force-dynamic';
 import { useState, useEffect } from 'react';
 import { useRouter } from 'next/navigation';
 import { Button } from '@/components/ui/button';
@@ -57,11 +59,12 @@ export default function EditCasePage({ params }: { params: { id: string } }) {
 
   useEffect(() => {
     fetchCase();
+  // eslint-disable-next-line react-hooks/exhaustive-deps
   }, [params.id]);
 
   const fetchCase = async () => {
     try {
-      const data = await api.cases.get(params.id);
+      const _data = await api.cases.get(params.id);
       
       // Mock data
       setFormData({

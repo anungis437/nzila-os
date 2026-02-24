@@ -3,10 +3,12 @@ import { NextResponse } from 'next/server';
  * POST /api/ai/extract-clauses
  * Migrated to withApi() framework
  */
-import { logApiAuditEvent } from "@/lib/middleware/api-security";
 import { extractClausesFromPDF, batchExtractClauses } from '@/lib/services/ai/clause-extraction-service';
-import { checkEntitlement, consumeCredits, getCreditCost } from '@/lib/services/entitlements';
 
+ 
+ 
+ 
+ 
 import { withApi, ApiError, z, RATE_LIMITS } from '@/lib/api/framework';
 
 const aiExtractClausesSchema = z.object({
@@ -29,7 +31,7 @@ export const POST = withApi(
     },
     successStatus: 201,
   },
-  async ({ request, userId, organizationId, user, body, query }) => {
+  async ({ request: _request, userId: _userId, organizationId, user: _user, body, query: _query }) => {
 
           // Validate request body
           // DUPLICATE REMOVED (Phase 2): Multi-line destructuring of body

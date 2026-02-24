@@ -48,8 +48,8 @@ import {
   DialogFooter,
 } from "@/components/ui/dialog";
 import { useToast } from "@/components/ui/use-toast";
+ 
 import { format } from "date-fns";
-import { cn } from "@/lib/utils";
 
 export interface MemberNote {
   id: string;
@@ -89,7 +89,7 @@ const privacyLevels = [
 ];
 
 export function MemberNotesEditor({
-  memberId,
+  memberId: _memberId,
   memberName,
   notes,
   onAddNote,
@@ -290,6 +290,7 @@ export function MemberNotesEditor({
             <div className="grid grid-cols-2 gap-4">
               <div className="space-y-2">
                 <Label htmlFor="category">Category *</Label>
+                {/* eslint-disable-next-line @typescript-eslint/no-explicit-any */}
                 <Select value={category} onValueChange={(value: any) => setCategory(value)}>
                   <SelectTrigger>
                     <SelectValue />
@@ -306,6 +307,7 @@ export function MemberNotesEditor({
 
               <div className="space-y-2">
                 <Label htmlFor="privacy">Privacy *</Label>
+                {/* eslint-disable-next-line @typescript-eslint/no-explicit-any */}
                 <Select value={privacy} onValueChange={(value: any) => setPrivacy(value)}>
                   <SelectTrigger>
                     <SelectValue />

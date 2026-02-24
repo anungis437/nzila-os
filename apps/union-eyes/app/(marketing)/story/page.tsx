@@ -8,11 +8,13 @@
  * Message: Built with unions, not for unions. By people who understand labor.
  */
 
+
+export const dynamic = 'force-dynamic';
+
 import * as React from 'react';
 import Link from 'next/link';
 import { Metadata } from 'next';
 import {
-  HumanCenteredCallout,
   CalloutPresets,
 } from '@/components/marketing/human-centered-callout';
 import { Heart, Users, Shield, Handshake } from 'lucide-react';
@@ -113,7 +115,7 @@ export default function StoryPage() {
             </h3>
             <ul className="space-y-3 text-slate-700">
               <li className="flex items-start gap-3">
-                <span className="flex-shrink-0 w-6 h-6 rounded-full bg-blue-100 text-blue-700 flex items-center justify-center text-sm font-semibold">
+                <span className="shrink-0 w-6 h-6 rounded-full bg-blue-100 text-blue-700 flex items-center justify-center text-sm font-semibold">
                   1
                 </span>
                 <span>
@@ -122,7 +124,7 @@ export default function StoryPage() {
                 </span>
               </li>
               <li className="flex items-start gap-3">
-                <span className="flex-shrink-0 w-6 h-6 rounded-full bg-blue-100 text-blue-700 flex items-center justify-center text-sm font-semibold">
+                <span className="shrink-0 w-6 h-6 rounded-full bg-blue-100 text-blue-700 flex items-center justify-center text-sm font-semibold">
                   2
                 </span>
                 <span>
@@ -131,7 +133,7 @@ export default function StoryPage() {
                 </span>
               </li>
               <li className="flex items-start gap-3">
-                <span className="flex-shrink-0 w-6 h-6 rounded-full bg-blue-100 text-blue-700 flex items-center justify-center text-sm font-semibold">
+                <span className="shrink-0 w-6 h-6 rounded-full bg-blue-100 text-blue-700 flex items-center justify-center text-sm font-semibold">
                   3
                 </span>
                 <span>
@@ -140,7 +142,7 @@ export default function StoryPage() {
                 </span>
               </li>
               <li className="flex items-start gap-3">
-                <span className="flex-shrink-0 w-6 h-6 rounded-full bg-blue-100 text-blue-700 flex items-center justify-center text-sm font-semibold">
+                <span className="shrink-0 w-6 h-6 rounded-full bg-blue-100 text-blue-700 flex items-center justify-center text-sm font-semibold">
                   4
                 </span>
                 <span>
@@ -265,7 +267,7 @@ interface PrincipleCardProps {
 function PrincipleCard({ icon, title, description }: PrincipleCardProps) {
   return (
     <div className="flex gap-4 p-6 bg-white border border-slate-200 rounded-lg">
-      <div className="flex-shrink-0 w-12 h-12 rounded-lg bg-blue-50 text-blue-700 flex items-center justify-center">
+      <div className="shrink-0 w-12 h-12 rounded-lg bg-blue-50 text-blue-700 flex items-center justify-center">
         {icon}
       </div>
       <div>

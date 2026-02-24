@@ -24,7 +24,6 @@ import {
   MoveDown,
   Eye,
   Save,
-  Copy,
 } from "lucide-react";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
@@ -39,6 +38,7 @@ import {
   SelectValue,
 } from "@/components/ui/select";
 import { Switch } from "@/components/ui/switch";
+ 
 import { useToast } from "@/components/ui/use-toast";
 
 const candidateSchema = z.object({
@@ -292,7 +292,7 @@ export function BallotBuilder({
 
 function QuestionEditor({
   index,
-  question,
+  question: _question,
   form,
   onMoveUp,
   onMoveDown,
@@ -302,7 +302,9 @@ function QuestionEditor({
   canRemove,
 }: {
   index: number;
+  // eslint-disable-next-line @typescript-eslint/no-explicit-any
   question: any;
+  // eslint-disable-next-line @typescript-eslint/no-explicit-any
   form: any;
   onMoveUp: () => void;
   onMoveDown: () => void;

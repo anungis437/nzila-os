@@ -7,12 +7,11 @@
 import { z } from 'zod';
 import { NextRequest, NextResponse } from "next/server";
 import { withApiAuth, getCurrentUser } from '@/lib/api-auth-guard';
-import { SignatureService, AuditTrailService } from "@/lib/signature/signature-service";
+import { SignatureService } from "@/lib/signature/signature-service";
 
 import {
   ErrorCode,
   standardErrorResponse,
-  standardSuccessResponse,
 } from '@/lib/api/standardized-responses';
 export const GET = withApiAuth(async (
   req: NextRequest,
@@ -51,7 +50,7 @@ return standardErrorResponse(
 });
 
 
-const signaturesDocumentsSchema = z.object({
+const _signaturesDocumentsSchema = z.object({
   action: z.unknown().optional(),
   reason: z.string().min(1, 'reason is required'),
 });

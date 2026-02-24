@@ -6,6 +6,8 @@
  */
 
 'use client';
+
+export const dynamic = 'force-dynamic';
 import Link from 'next/link';
 
 import { useState, useEffect } from 'react';
@@ -257,7 +259,7 @@ export default function PilotDashboardPage() {
                 key={idx}
                 className="flex items-start gap-4 p-4 border border-gray-200 rounded-lg"
               >
-                <div className="flex-shrink-0 mt-1">
+                <div className="shrink-0 mt-1">
                   {milestone.status === 'complete' ? (
                     <div className="w-6 h-6 bg-green-500 rounded-full flex items-center justify-center">
                       <svg className="w-4 h-4 text-white" fill="currentColor" viewBox="0 0 20 20">

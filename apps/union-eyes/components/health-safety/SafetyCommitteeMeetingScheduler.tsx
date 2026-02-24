@@ -37,7 +37,6 @@ import {
   Video
 } from "lucide-react";
 import { format } from "date-fns";
-import { cn } from "@/lib/utils";
 
 export interface SafetyMeeting {
   id: string;
@@ -71,6 +70,7 @@ export function SafetyCommitteeMeetingScheduler({
 
   React.useEffect(() => {
     loadMeetings();
+  // eslint-disable-next-line react-hooks/exhaustive-deps
   }, [organizationId]);
 
   async function loadMeetings() {
@@ -86,6 +86,7 @@ export function SafetyCommitteeMeetingScheduler({
 
       const data = await response.json();
       if (data.success) {
+        // eslint-disable-next-line @typescript-eslint/no-explicit-any
         setMeetings(data.meetings.map((m: any) => ({
           ...m,
           date: new Date(m.date)
@@ -93,7 +94,7 @@ export function SafetyCommitteeMeetingScheduler({
       } else {
         throw new Error(data.error);
       }
-    } catch (error) {
+    } catch (_error) {
       toast({
         title: "Error",
         description: "Failed to load committee meetings",

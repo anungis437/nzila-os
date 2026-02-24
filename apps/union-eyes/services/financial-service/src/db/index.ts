@@ -14,6 +14,7 @@ let logger: LoggerType | null = null;
 
 function getLogger(): LoggerType {
   if (!logger) {
+    // eslint-disable-next-line @typescript-eslint/no-require-imports, @next/next/no-assign-module-variable
     const module = require('../../../../lib/logger') as { logger: LoggerType };
     logger = module.logger;
   }

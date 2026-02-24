@@ -29,7 +29,6 @@
  */
 
 import { db } from '@/db/db';
-import { memberDuesLedger } from '@/db/schema/dues-finance-schema';
 import {
   employerRemittances,
   remittanceLineItems,
@@ -211,6 +210,7 @@ export class ManualEntryConnector implements PayrollConnector {
 
   async parseFile(data: Buffer | string): Promise<ParsedRemittanceFile> {
     const json = JSON.parse(typeof data === 'string' ? data : data.toString('utf-8'));
+    // eslint-disable-next-line @typescript-eslint/no-explicit-any
     const rows: PayrollDeductionRow[] = (json.rows ?? []).map((r: any) => ({
       employeeId: r.employeeId ?? '',
       employeeName: r.employeeName ?? '',
@@ -250,7 +250,7 @@ const CONNECTOR_REGISTRY: Record<string, () => PayrollConnector> = {
   // payworks: () => new PayworksConnector(),
 };
 
-export function getPayrollConnector(type: string, options?: Record<string, unknown>): PayrollConnector {
+export function getPayrollConnector(type: string, _options?: Record<string, unknown>): PayrollConnector {
   const factory = CONNECTOR_REGISTRY[type];
   if (!factory) {
     throw new Error(`Unknown payroll connector type: "${type}". Available: ${Object.keys(CONNECTOR_REGISTRY).join(', ')}`);

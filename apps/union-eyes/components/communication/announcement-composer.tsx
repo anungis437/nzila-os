@@ -21,11 +21,8 @@ import * as z from "zod";
 import {
   Megaphone,
   Send,
-  Calendar,
   Users,
-  Paperclip,
   Eye,
-  AlertTriangle,
 } from "lucide-react";
 import {
   Form,
@@ -51,7 +48,6 @@ import {
 import { Checkbox } from "@/components/ui/checkbox";
 import { Label } from "@/components/ui/label";
 import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
-import { Alert, AlertDescription } from "@/components/ui/alert";
 
 const announcementSchema = z.object({
   title: z.string().min(1, "Title is required"),
@@ -86,7 +82,7 @@ export function AnnouncementComposer({
 }: AnnouncementComposerProps) {
   const [isSubmitting, setIsSubmitting] = React.useState(false);
   const [showPreview, setShowPreview] = React.useState(false);
-  const [attachments, setAttachments] = React.useState<File[]>([]);
+  const [_attachments, _setAttachments] = React.useState<File[]>([]);
 
   const form = useForm<AnnouncementData>({
     resolver: zodResolver(announcementSchema),
@@ -132,6 +128,7 @@ export function AnnouncementComposer({
     if (audienceType === "department") return `~${form.watch("audienceFilters")?.length || 0} departments`;
     if (audienceType === "role") return `~${form.watch("audienceFilters")?.length || 0} roles`;
     return "Custom selection";
+  // eslint-disable-next-line react-hooks/exhaustive-deps
   }, [audienceType, form.watch("audienceFilters")]);
 
   return (

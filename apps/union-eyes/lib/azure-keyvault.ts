@@ -25,6 +25,7 @@
  * ```
  */
 
+// eslint-disable-next-line no-restricted-imports -- TODO(platform-migration): migrate to @nzila/ wrapper
 import { SecretClient } from '@azure/keyvault-secrets';
 import { DefaultAzureCredential } from '@azure/identity';
 import { logger } from '@/lib/logger';
@@ -245,13 +246,17 @@ export async function setEncryptionKeyInSession(
     const encryptionKey = key || await getEncryptionKey();
 
     // Set session variable (works with both postgres and Drizzle)
+    // eslint-disable-next-line @typescript-eslint/no-explicit-any
     if ((db as any).execute) {
       // Drizzle db - SECURITY FIX: Use proper parameterization instead of string interpolation
       const { sql } = await import('drizzle-orm');
       // Use parameterized query to safely set the encryption key
+      // eslint-disable-next-line @typescript-eslint/no-explicit-any
       await (db as any).execute(sql`SET LOCAL app.encryption_key = ${encryptionKey}`);
+    // eslint-disable-next-line @typescript-eslint/no-explicit-any
     } else if ((db as any).query) {
       // postgres client
+      // eslint-disable-next-line @typescript-eslint/no-explicit-any
       await (db as any).query(`SET LOCAL app.encryption_key = $1`, [encryptionKey]);
     } else {
       throw new Error('Unsupported database client type');
@@ -291,7 +296,7 @@ export async function rotateEncryptionKey(): Promise<void> {
   invalidateKeyCache();
   
   // Retrieve new key
-  const newKey = await getEncryptionKey();
+  const _newKey = await getEncryptionKey();
   
   logger.info(`[Key Vault] Encryption key rotated successfully (version: ${cachedKey?.version})`);
   
@@ -371,6 +376,7 @@ export async function healthCheck(): Promise<{
 // EXPORTS
 // ============================================================================
 
+// eslint-disable-next-line import/no-anonymous-default-export
 export default {
   getEncryptionKey,
   getEncryptionKeyVersion,

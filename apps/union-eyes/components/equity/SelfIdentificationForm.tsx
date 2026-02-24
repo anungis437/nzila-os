@@ -1,6 +1,6 @@
 'use client';
 
-import React, { useState, useEffect } from 'react';
+import React, { useState } from 'react';
 import { ConsentForm } from '@/components/consent/ConsentForm';
 
 interface EquityGroup {
@@ -63,7 +63,7 @@ export default function SelfIdentificationForm({
   const [indigenousDataGovernanceConsent, setIndigenousDataGovernanceConsent] = useState(false);
   const [isVisibleMinority, setIsVisibleMinority] = useState<boolean | null>(null);
   const [hasDisability, setHasDisability] = useState<boolean | null>(null);
-  const [disabilityTypes, setDisabilityTypes] = useState<string[]>([]);
+  const [disabilityTypes, _setDisabilityTypes] = useState<string[]>([]);
   const [requiresAccommodation, setRequiresAccommodation] = useState(false);
   const [isLgbtq2Plus, setIsLgbtq2Plus] = useState<boolean | null>(null);
   const [isNewcomer, setIsNewcomer] = useState<boolean | null>(null);
@@ -97,7 +97,7 @@ export default function SelfIdentificationForm({
     </ul>
   `;
 
-  const handleConsent = async (consented: boolean, signature?: string) => {
+  const handleConsent = async (consented: boolean, _signature?: string) => {
     if (!consented) {
       if (onCancel) onCancel();
       return;

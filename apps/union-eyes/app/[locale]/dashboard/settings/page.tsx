@@ -1,10 +1,12 @@
 "use client";
 
+
+export const dynamic = 'force-dynamic';
 import { useState } from "react";
 import { motion } from "framer-motion";
 import { useTranslations } from 'next-intl';
 import { Card } from "@/components/ui/card";
-import { Building2, Settings as SettingsIcon, Palette, Users, Link2, Bell, Shield, CreditCard, Upload, Save, AlertCircle, Mail, MessageSquare, Database, Calendar, Check, DollarSign, Download, Info } from "lucide-react";
+import { Building2, Settings as SettingsIcon, Palette, Users, Link2, Bell, Shield, CreditCard, Upload, Save, AlertCircle, Mail, MessageSquare, Database, Calendar, Check, Download, Info } from "lucide-react";
 
 type OrgSettingsSection = "general" | "branding" | "members" | "integrations" | "notifications" | "security" | "billing";
 
@@ -107,6 +109,7 @@ export default function OrganizationSettingsPage() {
     },
   ];
 
+  // eslint-disable-next-line @typescript-eslint/no-explicit-any
   const handleInputChange = (section: OrgSettingsSection, field: string, value: any) => {
     setOrgSettings(prev => ({
       ...prev,
@@ -147,7 +150,7 @@ setHasChanges(false);
         </div>
         
         <div className="mt-4 bg-amber-50 border border-amber-200 rounded-lg p-4 flex items-start gap-3">
-          <AlertCircle className="w-5 h-5 text-amber-600 flex-shrink-0 mt-0.5" />
+          <AlertCircle className="w-5 h-5 text-amber-600 shrink-0 mt-0.5" />
           <div>
             <p className="text-sm font-medium text-amber-900">{t('settings.adminOnly')}</p>
             <p className="text-sm text-amber-700">{t('settings.adminOnlyDescription')}</p>
@@ -160,7 +163,7 @@ setHasChanges(false);
         <motion.div
           initial={{ opacity: 0, x: -20 }}
           animate={{ opacity: 1, x: 0 }}
-          className="w-64 flex-shrink-0"
+          className="w-64 shrink-0"
         >
           <Card className="p-4 sticky top-24">
             <div className="space-y-1">
@@ -305,6 +308,7 @@ setHasChanges(false);
                     <div className="flex items-center gap-4">
                       <div className="w-24 h-24 bg-gray-100 rounded-lg border-2 border-dashed border-gray-300 flex items-center justify-center">
                         {orgSettings.branding.logoUrl ? (
+                          // eslint-disable-next-line @next/next/no-img-element
                           <img src={orgSettings.branding.logoUrl} alt="Logo" className="w-full h-full object-contain" />
                         ) : (
                           <Upload className="w-8 h-8 text-gray-400" />
@@ -860,7 +864,7 @@ setHasChanges(false);
         className="mt-8 p-6 bg-blue-50 rounded-xl border border-blue-200"
       >
         <div className="flex items-start gap-3">
-          <Info className="w-5 h-5 text-blue-600 flex-shrink-0 mt-0.5" />
+          <Info className="w-5 h-5 text-blue-600 shrink-0 mt-0.5" />
           <div>
             <h3 className="font-medium text-blue-900 mb-1">{t('settings.needHelp')}</h3>
             <p className="text-sm text-blue-700">

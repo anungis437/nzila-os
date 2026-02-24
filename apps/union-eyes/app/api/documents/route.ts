@@ -4,7 +4,7 @@
  * POST /api/documents - Upload/create a new document
  */
 
-import { NextRequest, NextResponse } from "next/server";
+import { NextResponse } from "next/server";
 import { z } from "zod";
 import { logApiAuditEvent } from "@/lib/middleware/api-security";
 import { 
@@ -13,11 +13,10 @@ import {
   searchDocuments,
   getDocumentStatistics 
 } from "@/lib/services/document-service";
-import { getCurrentUser, withAdminAuth, withApiAuth, withMinRole, withRoleAuth } from '@/lib/api-auth-guard';
+import { withRoleAuth } from '@/lib/api-auth-guard';
 import {
   ErrorCode,
   standardErrorResponse,
-  standardSuccessResponse,
 } from '@/lib/api/standardized-responses';
 
 /**
@@ -335,4 +334,4 @@ return NextResponse.json(
   }
 });
 
-
+

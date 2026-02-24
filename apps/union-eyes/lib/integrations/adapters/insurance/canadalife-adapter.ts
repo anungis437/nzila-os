@@ -114,7 +114,7 @@ export class CanadaLifeAdapter extends BaseIntegration {
   async sync(options: SyncOptions): Promise<SyncResult> {
     this.ensureConnected();
 
-    const startTime = Date.now();
+    const _startTime = Date.now();
     let recordsProcessed = 0;
     let recordsCreated = 0;
     let recordsUpdated = 0;
@@ -358,7 +358,7 @@ export class CanadaLifeAdapter extends BaseIntegration {
     return { processed, created, updated, failed };
   }
 
-  async verifyWebhook(payload: string, signature: string): Promise<boolean> {
+  async verifyWebhook(_payload: string, _signature: string): Promise<boolean> {
     return false;
   }
 

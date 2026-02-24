@@ -2,6 +2,9 @@
  * Communications Dashboard - Main Hub
  * Central hub for campaigns, distribution lists, templates, and SMS
  */
+
+export const dynamic = 'force-dynamic';
+
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "@/components/ui/card";
 import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
 import { Button } from "@/components/ui/button";
@@ -10,7 +13,7 @@ import Link from "next/link";
 import { currentUser } from "@clerk/nextjs/server";
 
 export default async function CommunicationsDashboard() {
-  const user = await currentUser();
+  const _user = await currentUser();
 
   return (
     <div className="p-6 space-y-6">

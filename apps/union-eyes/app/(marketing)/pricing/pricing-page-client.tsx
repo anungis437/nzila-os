@@ -1,12 +1,15 @@
 "use client";
 
 import { Button } from "@/components/ui/button";
-import { Card, CardContent, CardDescription, CardFooter, CardHeader, CardTitle } from "@/components/ui/card";
+import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "@/components/ui/card";
 import { cn } from "@/lib/utils";
 import WhopPricingCard from "./whop-pricing-card";
 import { useState } from "react";
 import { Check } from "lucide-react";
 import { ToggleGroup, ToggleGroupItem } from "@/components/ui/toggle-group";
+ 
+ 
+ 
 import { motion, AnimatePresence } from "framer-motion";
 
 interface PricingPageClientProps {
@@ -32,8 +35,8 @@ export default function PricingPageClient({
   userId,
   activePaymentProvider,
   whopRedirectUrl,
-  whopMonthlyLink,
-  whopYearlyLink,
+  whopMonthlyLink: _whopMonthlyLink,
+  whopYearlyLink: _whopYearlyLink,
   whopMonthlyPlanId,
   whopYearlyPlanId,
   stripeMonthlyLink,
@@ -134,7 +137,7 @@ interface PricingCardProps {
 function PricingCard({ 
   title, 
   price, 
-  description, 
+  description: _description, 
   buttonText, 
   buttonLink, 
   userId, 

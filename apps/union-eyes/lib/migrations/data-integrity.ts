@@ -156,7 +156,7 @@ async function checkTenantOrganizationMapping(
           exampleIds: tenantIds,
         });
       }
-    } catch (error) {
+    } catch (_error) {
 }
   }
 }
@@ -196,7 +196,7 @@ async function checkOrphanedRecords(issues: IntegrityIssue[]): Promise<void> {
         exampleIds: result.map((r) => r.id as string),
       });
     }
-  } catch (error) {
+  } catch (_error) {
 }
 
   // Check documents with non-existent claims
@@ -230,7 +230,7 @@ async function checkOrphanedRecords(issues: IntegrityIssue[]): Promise<void> {
         exampleIds: result.map((r) => r.id as string),
       });
     }
-  } catch (error) {
+  } catch (_error) {
 }
 }
 
@@ -268,7 +268,7 @@ async function checkNullTenantIds(issues: IntegrityIssue[]): Promise<void> {
           count,
         });
       }
-    } catch (error) {
+    } catch (_error) {
 }
   }
 }
@@ -324,7 +324,7 @@ async function checkForeignKeyIntegrity(
           count,
         });
       }
-    } catch (error) {
+    } catch (_error) {
 }
   }
 }
@@ -352,7 +352,7 @@ async function checkDuplicateRecords(issues: IntegrityIssue[]): Promise<void> {
         exampleIds: result.map((r) => r.slug as string),
       });
     }
-  } catch (error) {
+  } catch (_error) {
 }
 }
 
@@ -460,7 +460,7 @@ async function checkOrganizationIdPopulation(
           count,
         });
       }
-    } catch (error) {
+    } catch (_error) {
 }
   }
 }
@@ -503,7 +503,7 @@ async function checkOrganizationIdValidity(
           count,
         });
       }
-    } catch (error) {
+    } catch (_error) {
 }
   }
 }
@@ -545,7 +545,7 @@ async function checkMappingConsistency(
           count: result.length,
         });
       }
-    } catch (error) {
+    } catch (_error) {
 }
   }
 }
@@ -592,7 +592,7 @@ async function checkDataCompleteness(issues: IntegrityIssue[]): Promise<void> {
           count: unmigrated,
         });
       }
-    } catch (error) {
+    } catch (_error) {
 }
   }
 }
@@ -632,7 +632,7 @@ async function checkHierarchicalIntegrity(
         exampleIds: result.map((r) => r.id as string),
       });
     }
-  } catch (error) {
+  } catch (_error) {
 }
 }
 
@@ -646,18 +646,18 @@ async function checkHierarchicalIntegrity(
 function printReport(report: IntegrityReport): void {
 if (report.issues.length > 0) {
 for (const issue of report.issues) {
-      const emoji = getSeverityEmoji(issue.severity);
+      const _emoji = getSeverityEmoji(issue.severity);
 if (issue.exampleIds && issue.exampleIds.length > 0) {
 }
 }
   }
 
   if (report.recommendations.length > 0) {
-report.recommendations.forEach((rec) => undefined);
+report.recommendations.forEach((_rec) => undefined);
 }
 }
 
-function getStatusEmoji(status: string): string {
+function _getStatusEmoji(status: string): string {
   switch (status) {
     case "pass":
       return "ÃƒÂ¢Ã…â€œÃ¢â‚¬Â¦";
@@ -695,7 +695,7 @@ export async function exportReport(
     const fs = require("fs");
     fs.writeFileSync(filePath, JSON.stringify(report, null, 2));
 return true;
-  } catch (error) {
+  } catch (_error) {
 return false;
   }
 }

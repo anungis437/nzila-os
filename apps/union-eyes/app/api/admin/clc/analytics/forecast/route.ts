@@ -6,16 +6,14 @@
  * Returns forecasted remittance data with confidence intervals
  */
 
-import { NextRequest, NextResponse } from 'next/server';
-import { z } from 'zod';
+import { NextResponse } from 'next/server';
 import { logApiAuditEvent } from '@/lib/middleware/api-security';
 import { forecastRemittances } from '@/services/clc/compliance-reports';
-import { getCurrentUser, withAdminAuth, withApiAuth, withMinRole, withRoleAuth } from '@/lib/api-auth-guard';
+import { withRoleAuth } from '@/lib/api-auth-guard';
 
 import {
   ErrorCode,
   standardErrorResponse,
-  standardSuccessResponse,
 } from '@/lib/api/standardized-responses';
 export const GET = withRoleAuth('admin', async (request, context) => {
     const { userId } = context as { userId: string };
@@ -73,4 +71,4 @@ return standardErrorResponse(
       }
 });
 
-
+

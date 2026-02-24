@@ -9,6 +9,7 @@
 
 import { ChevronRight } from 'lucide-react';
 import { useOrganization } from '@/lib/hooks/use-organization';
+ 
 import { cn } from '@/lib/utils';
 
 interface OrganizationBreadcrumbProps {
@@ -18,7 +19,7 @@ interface OrganizationBreadcrumbProps {
 
 export function OrganizationBreadcrumb({ 
   className,
-  showIcons = false 
+  showIcons: _showIcons = false 
 }: OrganizationBreadcrumbProps) {
   const { organizationPath, isLoading } = useOrganization();
 

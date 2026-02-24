@@ -7,7 +7,7 @@
 
 import { db } from '@/db';
 import { auditLogs } from '@/db/schema/audit-security-schema';
-import { eq, desc, and, gte, lte, like, sql } from 'drizzle-orm';
+import { eq, desc, and, gte, lte } from 'drizzle-orm';
 import { v4 as uuidv4 } from 'uuid';
 import { logger } from '@/lib/logger';
 
@@ -18,6 +18,7 @@ export interface AuditLogEntry {
   resourceType: string;
   resourceId: string;
   description?: string;
+  // eslint-disable-next-line @typescript-eslint/no-explicit-any
   metadata?: Record<string, any>;
   ipAddress?: string;
   userAgent?: string;
@@ -231,8 +232,8 @@ export async function archiveOldAuditLogs(
  * This function is disabled to prevent accidental data loss.
  */
 export async function deleteOldAuditLogs(
-  organizationId: string,
-  beforeDate: Date
+  _organizationId: string,
+  _beforeDate: Date
 ): Promise<number> {
   throw new Error(
     'PR #11: Direct audit log deletion is disabled. Use archiveOldAuditLogs() instead. ' +
@@ -251,7 +252,7 @@ export async function exportAuditLogs(
     limit: 10000, // Maximum export size
   });
 
-  const exportData = entries.map(entry => ({
+  const _exportData = entries.map(entry => ({
     id: entry.auditId,
     timestamp: entry.createdAt,
     userId: entry.userId,
@@ -279,6 +280,7 @@ export function auditOperation(
   resourceType: string,
   resourceId: string,
   description?: string,
+  // eslint-disable-next-line @typescript-eslint/no-explicit-any
   metadata?: Record<string, any>
 ) {
   return createAuditLog({

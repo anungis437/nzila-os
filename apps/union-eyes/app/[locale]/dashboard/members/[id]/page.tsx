@@ -4,25 +4,25 @@
  */
 "use client";
 
-import { useState } from "react";
+
+export const dynamic = 'force-dynamic';
 import { useParams, useRouter } from "next/navigation";
 import useSWR from "swr";
 import { motion } from "framer-motion";
-import { 
-  User, 
-  Mail, 
-  Phone, 
-  Briefcase, 
+import {
+  User,
+  Mail,
+  Phone,
+  Briefcase,
   Calendar,
   Shield,
   FileText,
   ArrowLeft,
   Edit,
   Clock,
-  CheckCircle,
   AlertCircle,
   TrendingUp,
-  Loader2
+  Loader2,
 } from "lucide-react";
 import { Card, CardContent } from "@/components/ui/card";
 
@@ -82,7 +82,7 @@ export default function MemberDetailPage() {
   );
 
   // Fetch member's claims
-  const { data: claimsData, error: claimsError, isLoading: claimsLoading } = useSWR(
+  const { data: claimsData, error: _claimsError, isLoading: claimsLoading } = useSWR(
     `/api/members/${memberId}/claims`,
     fetcher
   );

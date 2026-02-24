@@ -11,6 +11,9 @@
  * @page app/[locale]/profile/page.tsx
  */
 
+
+export const dynamic = 'force-dynamic';
+
 import * as React from "react";
 import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
@@ -26,7 +29,6 @@ import {
   FileText,
   Edit,
 } from "lucide-react";
-import { MemberProfileCardDetailed } from "@/components/members/member-profile-card-detailed";
 
 export default function ProfilePage() {
   // Mock member data - would come from API/database

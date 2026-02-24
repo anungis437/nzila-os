@@ -186,7 +186,7 @@ export function initializeAnalyticsJobs() {
     const cron = require('node-cron');
     
     enabledJobs.forEach(job => {
-      const task = cron.schedule(job.schedule, async () => {
+      const _task = cron.schedule(job.schedule, async () => {
         logger.info('CRON: Starting job', { jobName: job.name });
         try {
           await job.handler();

@@ -33,7 +33,7 @@
 import { db } from '@/db';
 import { organizations } from '@/db/schema';
 import { clcOrganizationSyncLog, clcWebhookLog } from '@/db/schema/clc-sync-audit-schema';
-import { eq, desc, and, gte, isNotNull } from 'drizzle-orm';
+import { eq, isNotNull } from 'drizzle-orm';
 import { createHmac, timingSafeEqual } from 'crypto';
 import { logger } from '@/lib/logger';
 
@@ -85,7 +85,9 @@ interface SyncResult {
 
 interface ConflictResolution {
   field: string;
+  // eslint-disable-next-line @typescript-eslint/no-explicit-any
   localValue: any;
+  // eslint-disable-next-line @typescript-eslint/no-explicit-any
   clcValue: any;
   resolution: 'clc_wins' | 'local_wins' | 'manual_review';
   reason: string;
@@ -309,6 +311,7 @@ export async function createOrganizationFromCLC(
         name: clcOrg.name,
         displayName: clcOrg.legalName, // Map legalName to displayName which exists in schema
         slug: clcOrg.name.toLowerCase().replace(/[^a-z0-9]+/g, '-'),
+        // eslint-disable-next-line @typescript-eslint/no-explicit-any
         organizationType: clcOrg.organizationType as any, // Type assertion for CLC data
         status: clcOrg.status,
         provinceTerritory: clcOrg.province,
@@ -565,6 +568,7 @@ async function fetchWithRetry(
 // ============================================================================
 
 function compareOrganizations(
+  // eslint-disable-next-line @typescript-eslint/no-explicit-any
   localOrg: any,
   clcOrg: CLCOrganization
 ): {
@@ -616,10 +620,13 @@ function compareOrganizations(
 }
 
 function buildUpdateData(
+  // eslint-disable-next-line @typescript-eslint/no-explicit-any
   localOrg: any,
   clcOrg: CLCOrganization,
   conflicts: ConflictResolution[]
+// eslint-disable-next-line @typescript-eslint/no-explicit-any
 ): Record<string, any> {
+  // eslint-disable-next-line @typescript-eslint/no-explicit-any
   const updateData: Record<string, any> = {};
 
   for (const conflict of conflicts) {
@@ -633,7 +640,7 @@ function buildUpdateData(
   return updateData;
 }
 
-function getConflictReason(field: string, resolution: string): string {
+function getConflictReason(field: string, _resolution: string): string {
   const reasons: Record<string, string> = {
     name: 'CLC is authoritative source for official organization names',
     legalName: 'CLC is authoritative source for legal names',
@@ -745,6 +752,7 @@ async function logWebhook(
       webhookId: payload.id,
       type: payload.type,
       affiliateCode: payload.data.affiliateCode,
+      // eslint-disable-next-line @typescript-eslint/no-explicit-any
       payload: payload as any,
       status,
       message,

@@ -9,7 +9,7 @@ import {
   TableRow,
 } from '@/components/ui/table';
 import { Badge } from '@/components/ui/badge';
-import { ArrowDown, ArrowUp, RefreshCw, Plus, Minus } from 'lucide-react';
+import { ArrowUp, RefreshCw, Plus, Minus } from 'lucide-react';
 import { useTranslations } from 'next-intl';
 import type { RewardWalletLedgerEntry as RewardWalletLedger } from '@/db/schema/recognition-rewards-schema';
 
@@ -73,8 +73,10 @@ export function LedgerTable({ entries }: LedgerTableProps) {
                     <span className="font-medium">
                       {getTransactionTitle(entry, t)}
                     </span>
+                    {/* eslint-disable-next-line @typescript-eslint/no-explicit-any */}
                     {(entry as any).notes && (
                       <span className="text-sm text-muted-foreground">
+                        {/* eslint-disable-next-line @typescript-eslint/no-explicit-any */}
                         {(entry as any).notes}
                       </span>
                     )}
@@ -125,6 +127,7 @@ function getTransactionIcon(type: string) {
 
 function getTransactionTitle(
   entry: RewardWalletLedger & { created_by_name?: string },
+  // eslint-disable-next-line @typescript-eslint/no-explicit-any
   t: any
 ): string {
   switch (entry.eventType) {
@@ -143,6 +146,7 @@ function getTransactionTitle(
   }
 }
 
+// eslint-disable-next-line @typescript-eslint/no-explicit-any
 function formatEntryType(type: string, t: any): string {
   switch (type) {
     case 'earned':

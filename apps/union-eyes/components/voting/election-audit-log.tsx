@@ -50,7 +50,6 @@ import {
   TableHeader,
   TableRow,
 } from "@/components/ui/table";
-import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
 import {
   Dialog,
   DialogContent,
@@ -59,6 +58,7 @@ import {
   DialogTrigger,
 } from "@/components/ui/dialog";
 import { cn } from "@/lib/utils";
+ 
 import { format, formatDistanceToNow } from "date-fns";
 
 export interface AuditEntry {
@@ -76,6 +76,7 @@ export interface AuditEntry {
     id: string;
     name: string;
   };
+  // eslint-disable-next-line @typescript-eslint/no-explicit-any
   details: Record<string, any>;
   metadata: {
     ipAddress?: string;
@@ -130,7 +131,7 @@ export interface AuditFilters {
 }
 
 export function ElectionAuditLog({
-  electionId,
+  electionId: _electionId,
   electionTitle,
   entries,
   onExport,
@@ -242,6 +243,7 @@ export function ElectionAuditLog({
               Audit Trail
             </CardTitle>
             <div className="flex gap-2">
+              {/* eslint-disable-next-line @typescript-eslint/no-explicit-any */}
               <Select value={viewMode} onValueChange={(v: any) => setViewMode(v)}>
                 <SelectTrigger className="w-[140px]">
                   <SelectValue />
@@ -417,7 +419,7 @@ function TimelineView({
       {/* Vertical line */}
       <div className="absolute left-3 top-0 bottom-0 w-0.5 bg-gray-200" />
 
-      {entries.map((entry, index) => (
+      {entries.map((entry, _index) => (
         <div key={entry.id} className="relative">
           <div
             className={cn(

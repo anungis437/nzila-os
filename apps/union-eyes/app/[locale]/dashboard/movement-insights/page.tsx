@@ -11,7 +11,9 @@
  * - Consent status visible
  */
 
-import { Suspense } from 'react';
+
+export const dynamic = 'force-dynamic';
+
 import { db } from '@/db';
 import { dataAggregationConsent, movementTrends } from '@/db/schema/domains/marketing';
 import { eq, and, desc, gte } from 'drizzle-orm';
@@ -20,6 +22,8 @@ import { Badge } from '@/components/ui/badge';
 import { Button } from '@/components/ui/button';
 import { AlertCircle, TrendingUp, TrendingDown, Shield, Users, FileText } from 'lucide-react';
 import { Alert, AlertDescription, AlertTitle } from '@/components/ui/alert';
+ 
+ 
 import Link from 'next/link';
 
 interface MovementInsightsPageProps {
@@ -38,7 +42,7 @@ export default async function MovementInsightsPage({
   searchParams,
 }: MovementInsightsPageProps) {
   const { locale } = params;
-  const { timeframe = 'quarter', sector, jurisdiction } = searchParams;
+  const { timeframe = 'quarter', sector: _sector, jurisdiction: _jurisdiction } = searchParams;
 
   // Get user's organization consent status
   // TODO: Get from session context
@@ -274,6 +278,7 @@ function TrendCard({
 }: {
   title: string;
   description: string;
+  // eslint-disable-next-line @typescript-eslint/no-explicit-any
   trends: any[];
   unit: string;
   lowerIsBetter: boolean;

@@ -2,7 +2,6 @@
 
 import { useEffect, useState } from "react";
 import { getCreditStatus } from "@/actions/credits-actions";
-import { Progress } from "@/components/ui/progress";
 import { Card, CardContent, CardDescription, CardFooter, CardHeader, CardTitle } from "@/components/ui/card";
 import { CalendarIcon, RefreshCwIcon } from "lucide-react";
 
@@ -36,7 +35,7 @@ export function CreditUsageDisplay() {
         setLoading(true);
         const status = await getCreditStatus();
         setCreditStatus(status);
-      } catch (error) {
+      } catch (_error) {
 } finally {
         setLoading(false);
       }

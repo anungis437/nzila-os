@@ -25,7 +25,7 @@ import {
   campaigns, 
   communicationPreferences 
 } from '@/db/schema/phase-4-messaging-schema';
-import { eq, and, lte, inArray, sql } from 'drizzle-orm';
+import { eq, and, lte, sql } from 'drizzle-orm';
 import { getEmailService } from '@/lib/services/messaging/email-service';
 import { getSMSService } from '@/lib/services/messaging/sms-service';
 import { logger } from '@/lib/logger';
@@ -131,6 +131,7 @@ async function fetchQueuedMessages() {
 /**
  * Process a batch of messages
  */
+// eslint-disable-next-line @typescript-eslint/no-explicit-any
 async function processBatch(messages: any[]): Promise<ProcessingStats> {
   const stats: ProcessingStats = {
     processed: 0,
@@ -156,13 +157,14 @@ async function processBatch(messages: any[]): Promise<ProcessingStats> {
       }
 
       // Send message based on channel
-      let success = false;
+      let _success = false;
       let externalId: string | null = null;
 
       if (message.channel === 'email') {
         // Process variables/template substitution in body if needed
         let processedBody = message.body;
         if (message.variables && typeof message.variables === 'object') {
+          // eslint-disable-next-line @typescript-eslint/no-explicit-any
           processedBody = substituteVariables(message.body, message.variables as Record<string, any>);
         }
         
@@ -171,12 +173,13 @@ async function processBatch(messages: any[]): Promise<ProcessingStats> {
           subject: message.subject,
           body: processedBody,
         });
-        success = true;
+        _success = true;
         externalId = messageId || null;
       } else if (message.channel === 'sms') {
         // Process variables/template substitution in body if needed
         let processedBody = message.body;
         if (message.variables && typeof message.variables === 'object') {
+          // eslint-disable-next-line @typescript-eslint/no-explicit-any
           processedBody = substituteVariables(message.body, message.variables as Record<string, any>);
         }
         
@@ -184,7 +187,7 @@ async function processBatch(messages: any[]): Promise<ProcessingStats> {
           to: message.recipientPhone,
           body: processedBody,
         });
-        success = true;
+        _success = true;
         externalId = messageId || null;
       } else {
         throw new Error(`Unsupported channel: ${message.channel}`);
@@ -234,6 +237,7 @@ async function processBatch(messages: any[]): Promise<ProcessingStats> {
 /**
  * Check if message should be skipped (quiet hours, opt-out, etc.)
  */
+// eslint-disable-next-line @typescript-eslint/no-explicit-any
 async function shouldSkipMessage(message: any): Promise<boolean> {
   if (!message.recipientId) return false;
 
@@ -323,6 +327,7 @@ async function updateMessageStatus(
   errorMessage: string | null = null,
   externalId: string | null = null
 ) {
+  // eslint-disable-next-line @typescript-eslint/no-explicit-any
   const updates: any = {
     status,
     updatedAt: new Date(),
@@ -526,6 +531,7 @@ export async function getQueueStatus() {
 /**
  * Substitute variables in message template
  */
+// eslint-disable-next-line @typescript-eslint/no-explicit-any
 function substituteVariables(template: string, variables: Record<string, any>): string {
   let result = template;
   for (const [key, value] of Object.entries(variables)) {

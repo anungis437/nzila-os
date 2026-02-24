@@ -28,14 +28,12 @@ import {
   SelectTrigger,
   SelectValue,
 } from '@/components/ui/select';
-import { Switch } from '@/components/ui/switch';
 import { Badge } from '@/components/ui/badge';
 import { Tabs, TabsContent, TabsList, TabsTrigger } from '@/components/ui/tabs';
 import { Calendar } from '@/components/ui/calendar';
 import { Popover, PopoverContent, PopoverTrigger } from '@/components/ui/popover';
 import { format } from 'date-fns';
 import {
-  Bell,
   Calendar as CalendarIcon,
   Image as ImageIcon,
   Link as LinkIcon,
@@ -66,6 +64,7 @@ export interface PushNotificationData {
   targetAudience: 'all' | 'segment' | 'individual';
   targetSegment?: string;
   targetUserIds?: string[];
+  // eslint-disable-next-line @typescript-eslint/no-explicit-any
   data?: Record<string, any>;
 }
 
@@ -252,6 +251,7 @@ export function PushNotificationBuilder({
               {/* Priority */}
               <div className="space-y-2">
                 <Label htmlFor="priority">Priority</Label>
+                {/* eslint-disable-next-line @typescript-eslint/no-explicit-any */}
                 <Select value={priority} onValueChange={(v: any) => setPriority(v)}>
                   <SelectTrigger id="priority">
                     <SelectValue />
@@ -319,6 +319,7 @@ export function PushNotificationBuilder({
           <CardContent className="space-y-4">
             <div className="space-y-2">
               <Label>Send to</Label>
+              {/* eslint-disable-next-line @typescript-eslint/no-explicit-any */}
               <Select value={targetAudience} onValueChange={(v: any) => setTargetAudience(v)}>
                 <SelectTrigger>
                   <SelectValue />
@@ -377,6 +378,7 @@ export function PushNotificationBuilder({
                 <div className="bg-gray-100 rounded-lg p-4 space-y-2">
                   <div className="flex items-start gap-3">
                     {iconUrl && (
+                      // eslint-disable-next-line @next/next/no-img-element
                       <img src={iconUrl} alt="" className="w-8 h-8 rounded-lg" />
                     )}
                     <div className="flex-1 min-w-0">
@@ -387,6 +389,7 @@ export function PushNotificationBuilder({
                     </div>
                   </div>
                   {imageUrl && (
+                    // eslint-disable-next-line @next/next/no-img-element
                     <img src={imageUrl} alt="" className="w-full rounded-lg" />
                   )}
                 </div>
@@ -397,7 +400,7 @@ export function PushNotificationBuilder({
                 <Label className="text-xs text-muted-foreground mb-2 block">Android</Label>
                 <div className="bg-white border rounded-lg p-3 shadow-sm">
                   <div className="flex items-start gap-3">
-                    <div className="flex-shrink-0">
+                    <div className="shrink-0">
                       <Smartphone className="h-6 w-6 text-blue-600" />
                     </div>
                     <div className="flex-1 min-w-0">
@@ -406,6 +409,7 @@ export function PushNotificationBuilder({
                         {body || 'Notification body text will appear here...'}
                       </div>
                       {imageUrl && (
+                        // eslint-disable-next-line @next/next/no-img-element
                         <img src={imageUrl} alt="" className="w-full rounded mt-2" />
                       )}
                     </div>

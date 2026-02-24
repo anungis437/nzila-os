@@ -128,7 +128,9 @@ export function CommitteeManagement({
   const [searchQuery, setSearchQuery] = useState("");
   const { toast } = useToast();
 
+  // eslint-disable-next-line @typescript-eslint/no-explicit-any
   const form = useForm<FormData, any, FormData>({
+    // eslint-disable-next-line @typescript-eslint/no-explicit-any
     resolver: zodResolver(formSchema) as any,
     defaultValues: {
       name: "",
@@ -165,7 +167,7 @@ export function CommitteeManagement({
       if (!response.ok) throw new Error("Failed to fetch committees");
       const data = await response.json();
       setCommittees(data.data || []);
-    } catch (error) {
+    } catch (_error) {
       toast({
         title: "Error",
         description: "Failed to load committees",
@@ -208,6 +210,7 @@ export function CommitteeManagement({
     fetchCommittees();
     fetchUnits();
     fetchWorksites();
+  // eslint-disable-next-line react-hooks/exhaustive-deps
   }, [organizationId]);
 
   const handleCreate = () => {
@@ -240,6 +243,7 @@ export function CommitteeManagement({
     setEditingCommittee(committee);
     form.reset({
       name: committee.name,
+      // eslint-disable-next-line @typescript-eslint/no-explicit-any
       committeeType: committee.committeeType as any,
       status: committee.status,
       unitId: committee.unitId || undefined,
@@ -278,7 +282,7 @@ export function CommitteeManagement({
 
       await fetchCommittees();
       onUpdate?.();
-    } catch (error) {
+    } catch (_error) {
       toast({
         title: "Error",
         description: "Failed to delete committee",

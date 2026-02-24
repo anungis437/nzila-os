@@ -27,11 +27,8 @@ import {
   Calendar as CalendarIcon,
   Target,
   TrendingUp,
-  Users,
   Eye,
   Heart,
-  MessageCircle,
-  Share2,
   Plus,
   Edit,
   Trash2,
@@ -42,9 +39,9 @@ import {
   AlertCircle,
   BarChart3,
   Filter,
-  Download
+  Download,
 } from 'lucide-react';
-import { format, addDays, isSameDay, parseISO } from 'date-fns';
+import { format, isSameDay } from 'date-fns';
 
 // ================================================================
 // TYPES

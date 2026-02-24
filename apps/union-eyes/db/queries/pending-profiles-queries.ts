@@ -1,13 +1,15 @@
 import { pendingProfilesTable, InsertPendingProfile, SelectPendingProfile } from "@/db/schema/domains/member";
-import { eq, and } from "drizzle-orm";
+import { eq } from "drizzle-orm";
 import { NodePgDatabase } from "drizzle-orm/node-postgres";
 import { withRLSContext } from "@/lib/db/with-rls-context";
 
 // Create a new pending profile
 export const createPendingProfile = async (
   data: InsertPendingProfile,
+  // eslint-disable-next-line @typescript-eslint/no-explicit-any
   tx?: NodePgDatabase<any>
 ): Promise<SelectPendingProfile> => {
+  // eslint-disable-next-line @typescript-eslint/no-explicit-any
   const executeQuery = async (dbOrTx: NodePgDatabase<any>) => {
     const [pendingProfile] = await dbOrTx.insert(pendingProfilesTable).values(data).returning();
     return pendingProfile;
@@ -23,8 +25,10 @@ export const createPendingProfile = async (
 // Get a pending profile by email
 export const getPendingProfileByEmail = async (
   email: string,
+  // eslint-disable-next-line @typescript-eslint/no-explicit-any
   tx?: NodePgDatabase<any>
 ): Promise<SelectPendingProfile | undefined> => {
+  // eslint-disable-next-line @typescript-eslint/no-explicit-any
   const executeQuery = async (dbOrTx: NodePgDatabase<any>) => {
     const results = await dbOrTx.select().from(pendingProfilesTable).where(eq(pendingProfilesTable.email, email));
     return results[0];
@@ -39,8 +43,10 @@ export const getPendingProfileByEmail = async (
 
 // Get unclaimed pending profiles
 export const getUnclaimedPendingProfiles = async (
+  // eslint-disable-next-line @typescript-eslint/no-explicit-any
   tx?: NodePgDatabase<any>
 ): Promise<SelectPendingProfile[]> => {
+  // eslint-disable-next-line @typescript-eslint/no-explicit-any
   const executeQuery = async (dbOrTx: NodePgDatabase<any>) => {
     return dbOrTx.select().from(pendingProfilesTable).where(eq(pendingProfilesTable.claimed, false));
   };
@@ -56,8 +62,10 @@ export const getUnclaimedPendingProfiles = async (
 export const markPendingProfileAsClaimed = async (
   id: string, 
   userId: string,
+  // eslint-disable-next-line @typescript-eslint/no-explicit-any
   tx?: NodePgDatabase<any>
 ): Promise<SelectPendingProfile | undefined> => {
+  // eslint-disable-next-line @typescript-eslint/no-explicit-any
   const executeQuery = async (dbOrTx: NodePgDatabase<any>) => {
     const [updated] = await dbOrTx
       .update(pendingProfilesTable)
@@ -81,8 +89,10 @@ export const markPendingProfileAsClaimed = async (
 // Delete a pending profile
 export const deletePendingProfile = async (
   id: string,
+  // eslint-disable-next-line @typescript-eslint/no-explicit-any
   tx?: NodePgDatabase<any>
 ): Promise<boolean> => {
+  // eslint-disable-next-line @typescript-eslint/no-explicit-any
   const executeQuery = async (dbOrTx: NodePgDatabase<any>) => {
     const [deleted] = await dbOrTx
       .delete(pendingProfilesTable)

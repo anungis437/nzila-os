@@ -19,6 +19,7 @@ export interface ValidationError {
   field: string;
   message: string;
   severity: 'error' | 'warning';
+  // eslint-disable-next-line @typescript-eslint/no-explicit-any
   value?: any;
 }
 
@@ -73,6 +74,7 @@ export class RemittanceValidationService {
   /**
    * Validate single remittance record
    */
+  // eslint-disable-next-line @typescript-eslint/no-explicit-any
   validateRecord(record: any): ValidationResult {
     const errors: ValidationError[] = [];
     const warnings: ValidationError[] = [];
@@ -164,6 +166,7 @@ export class RemittanceValidationService {
   /**
    * Validate batch of remittance records
    */
+  // eslint-disable-next-line @typescript-eslint/no-explicit-any
   validateBatch(records: any[]): ValidationResult {
     const allErrors: ValidationError[] = [];
     const allWarnings: ValidationError[] = [];
@@ -206,6 +209,7 @@ export class RemittanceValidationService {
   /**
    * Validate CLC export format compliance
    */
+  // eslint-disable-next-line @typescript-eslint/no-explicit-any
   validateCLCFormat(record: any): ValidationResult {
     const errors: ValidationError[] = [];
     const warnings: ValidationError[] = [];
@@ -248,6 +252,7 @@ export class RemittanceValidationService {
   /**
    * Validate StatCan export format compliance
    */
+  // eslint-disable-next-line @typescript-eslint/no-explicit-any
   validateStatCanFormat(record: any): ValidationResult {
     const errors: ValidationError[] = [];
     const warnings: ValidationError[] = [];

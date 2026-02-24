@@ -108,11 +108,13 @@ export type WorkflowStageConfig = {
 export type StageCondition = {
   field: string;
   operator: "equals" | "not_equals" | "greater_than" | "less_than" | "contains";
+  // eslint-disable-next-line @typescript-eslint/no-explicit-any
   value: any;
 };
 
 export type StageAction = {
   action_type: "notify" | "assign" | "create_deadline" | "send_email" | "create_document";
+  // eslint-disable-next-line @typescript-eslint/no-explicit-any
   action_config: Record<string, any>;
 };
 
@@ -163,6 +165,7 @@ export const grievanceWorkflows = pgTable("grievance_workflows", {
   stages: jsonb("stages").$type<WorkflowStageConfig[]>().default([]),
   
   // Metadata
+  // eslint-disable-next-line @typescript-eslint/no-explicit-any
   metadata: jsonb("metadata").$type<Record<string, any>>().default({}),
   createdBy: varchar("created_by", { length: 255 }).notNull(),
   createdAt: timestamp("created_at", { withTimezone: true }).defaultNow(),
@@ -208,6 +211,7 @@ export const grievanceStages = pgTable("grievance_stages", {
   notificationTemplateId: uuid("notification_template_id"),
   
   // Metadata
+  // eslint-disable-next-line @typescript-eslint/no-explicit-any
   metadata: jsonb("metadata").$type<Record<string, any>>().default({}),
   createdAt: timestamp("created_at", { withTimezone: true }).defaultNow(),
   updatedAt: timestamp("updated_at", { withTimezone: true }).defaultNow(),
@@ -250,6 +254,7 @@ export const grievanceTransitions = pgTable("grievance_transitions", {
   visibilityScope: visibilityScopeEnum("visibility_scope").default("staff").notNull(),
   
   // Metadata
+  // eslint-disable-next-line @typescript-eslint/no-explicit-any
   metadata: jsonb("metadata").$type<Record<string, any>>().default({}),
 }, (table) => ({
   organizationIdx: index("idx_grievance_transitions_organization").on(table.organizationId),
@@ -288,6 +293,7 @@ export const grievanceAssignments = pgTable("grievance_assignments", {
   notes: text("notes"),
   
   // Metadata
+  // eslint-disable-next-line @typescript-eslint/no-explicit-any
   metadata: jsonb("metadata").$type<Record<string, any>>().default({}),
 }, (table) => ({
   organizationIdx: index("idx_grievance_assignments_organization").on(table.organizationId),
@@ -350,6 +356,7 @@ export const grievanceDocuments = pgTable("grievance_documents", {
   archivedAt: timestamp("archived_at", { withTimezone: true }),
   
   // Metadata
+  // eslint-disable-next-line @typescript-eslint/no-explicit-any
   metadata: jsonb("metadata").$type<Record<string, any>>().default({}),
 }, (table) => ({
   organizationIdx: index("idx_grievance_documents_organization").on(table.organizationId),
@@ -412,6 +419,7 @@ export const grievanceDeadlines = pgTable("grievance_deadlines", {
   
   // Metadata
   notes: text("notes"),
+  // eslint-disable-next-line @typescript-eslint/no-explicit-any
   metadata: jsonb("metadata").$type<Record<string, any>>().default({}),
   createdAt: timestamp("created_at", { withTimezone: true }).defaultNow(),
   updatedAt: timestamp("updated_at", { withTimezone: true }).defaultNow(),
@@ -485,6 +493,7 @@ export const grievanceSettlements = pgTable("grievance_settlements", {
   
   // Metadata
   notes: text("notes"),
+  // eslint-disable-next-line @typescript-eslint/no-explicit-any
   metadata: jsonb("metadata").$type<Record<string, any>>().default({}),
   createdAt: timestamp("created_at", { withTimezone: true }).defaultNow(),
   updatedAt: timestamp("updated_at", { withTimezone: true }).defaultNow(),
@@ -540,6 +549,7 @@ export const grievanceCommunications = pgTable("grievance_communications", {
   
   // Metadata
   recordedBy: varchar("recorded_by", { length: 255 }).notNull(),
+  // eslint-disable-next-line @typescript-eslint/no-explicit-any
   metadata: jsonb("metadata").$type<Record<string, any>>().default({}),
   createdAt: timestamp("created_at", { withTimezone: true }).defaultNow(),
 }, (table) => ({
@@ -664,6 +674,7 @@ export const grievanceApprovals = pgTable("grievance_approvals", {
   rejectionReason: text("rejection_reason"),
   
   // Metadata
+  // eslint-disable-next-line @typescript-eslint/no-explicit-any
   metadata: jsonb("metadata").$type<Record<string, any>>().default({}),
   createdAt: timestamp("created_at", { withTimezone: true }).defaultNow(),
 }, (table) => ({

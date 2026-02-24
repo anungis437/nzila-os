@@ -19,7 +19,7 @@ import {
   SelectTrigger,
   SelectValue,
 } from '@/components/ui/select';
-import { Tabs, TabsContent, TabsList, TabsTrigger } from '@/components/ui/tabs';
+import { Tabs, TabsList, TabsTrigger } from '@/components/ui/tabs';
 import {
   Table,
   TableBody,
@@ -126,6 +126,7 @@ export function WageBenchmarking({
 
   useEffect(() => {
     fetchWageData();
+  // eslint-disable-next-line react-hooks/exhaustive-deps
   }, [organizationId, selectedSector, selectedJurisdiction, selectedJobTitle]);
 
   const fetchWageData = async () => {
@@ -144,7 +145,7 @@ export function WageBenchmarking({
       const response = await fetch(`/api/clauses?${params.toString()}&clauseType=wages_compensation`);
       if (!response.ok) throw new Error('Failed to fetch wage data');
 
-      const data = await response.json();
+      const _data = await response.json();
       
       // Transform clause data to wage progressions
       // In a real implementation, this would come from a dedicated wages API endpoint

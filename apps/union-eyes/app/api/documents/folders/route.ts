@@ -4,7 +4,7 @@
  * POST /api/documents/folders - Create folder
  */
 
-import { NextRequest, NextResponse } from "next/server";
+import { NextResponse } from "next/server";
 import { z } from "zod";
 import { logApiAuditEvent } from "@/lib/middleware/api-security";
 import { 
@@ -12,12 +12,13 @@ import {
   createFolder,
   getFolderTree
 } from "@/lib/services/document-service";
-import { getCurrentUser, withAdminAuth, withApiAuth, withMinRole, withRoleAuth } from '@/lib/api-auth-guard';
+import { withRoleAuth } from '@/lib/api-auth-guard';
 
+ 
+ 
 import {
   ErrorCode,
   standardErrorResponse,
-  standardSuccessResponse,
 } from '@/lib/api/standardized-responses';
 /**
  * Validation schema for creating folders
@@ -39,7 +40,7 @@ const createFolderSchema = z.object({
  * - tree: boolean - return full folder tree structure
  */
 export const GET = withRoleAuth('member', async (request, context) => {
-    const { userId, organizationId } = context as { userId: string; organizationId: string };
+    const { userId, organizationId: _organizationId } = context as { userId: string; organizationId: string };
 
   try {
         const { searchParams } = new URL(request.url);
@@ -142,7 +143,7 @@ export const POST = withRoleAuth('steward', async (request, context) => {
   }
 
   const body = parsed.data;
-  const { userId, organizationId } = context as { userId: string; organizationId: string };
+  const { userId, organizationId: _organizationId } = context as { userId: string; organizationId: string };
 
   if (body.organizationId !== context.organizationId) {
     return standardErrorResponse(
@@ -191,4 +192,4 @@ return standardErrorResponse(
     }
 });
 
-
+

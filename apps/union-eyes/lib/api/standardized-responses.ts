@@ -115,6 +115,7 @@ export interface StandardizedError {
 /**
  * Standard success response format
  */
+// eslint-disable-next-line @typescript-eslint/no-explicit-any
 export interface StandardizedSuccess<T = any> {
   /** Indicates successful operation */
   success: true;
@@ -247,6 +248,7 @@ export function standardErrorResponse(
  *   { page: 1, pageSize: 20, total: 150, hasMore: true }
  * );
  */
+// eslint-disable-next-line @typescript-eslint/no-explicit-any
 export function standardSuccessResponse<T = any>(
   data: T,
   meta?: StandardizedSuccess<T>['meta']

@@ -29,6 +29,7 @@ export interface OrganizationContext {
  * });
  * ```
  */
+// eslint-disable-next-line @typescript-eslint/no-explicit-any
 export function withOrganizationAuth<T = any>(
   handler: (
     request: NextRequest,
@@ -94,7 +95,7 @@ export async function validateOrganizationAccess(
   requestedOrganizationId: string
 ): Promise<boolean> {
   try {
-    const userOrganizationId = await getOrganizationIdForUser(userId);
+    const _userOrganizationId = await getOrganizationIdForUser(userId);
     
     // Check if organization exists
     const exists = await validateOrganizationExists(requestedOrganizationId);
@@ -108,7 +109,7 @@ export async function validateOrganizationAccess(
     // (e.g., federation admin can access all child unions/locals)
     
     return true;
-  } catch (error) {
+  } catch (_error) {
 return false;
   }
 }

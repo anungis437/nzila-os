@@ -32,7 +32,7 @@ export function PaymentStatusAlert() {
         // Use server action (more efficient than API route)
         const { paymentFailed } = await checkPaymentFailedAction();
         setHasPaymentFailed(paymentFailed);
-      } catch (error) {
+      } catch (_error) {
 } finally {
         setIsLoading(false);
       }
@@ -60,7 +60,7 @@ export function PaymentStatusAlert() {
         <div>
           Your subscription payment has failed. Your account has been temporarily downgraded to the free plan.
         </div>
-        <div className="flex-shrink-0">
+        <div className="shrink-0">
           <Button variant="outline" asChild>
             <Link href="/pricing">
               Update Payment Method

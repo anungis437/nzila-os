@@ -13,18 +13,15 @@ import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from '@
 import { Table, TableBody, TableCell, TableHead, TableHeader, TableRow } from '@/components/ui/table';
 import { Badge } from '@/components/ui/badge';
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from '@/components/ui/card';
-import { Calendar } from '@/components/ui/calendar';
-import { Popover, PopoverContent, PopoverTrigger } from '@/components/ui/popover';
 import { Checkbox } from '@/components/ui/checkbox';
-import { 
-  Download, 
-  RefreshCw, 
-  FileText, 
-  CheckCircle, 
-  AlertCircle, 
+import {
+  Download,
+  RefreshCw,
+  FileText,
+  CheckCircle,
+  AlertCircle,
   Clock,
   Filter,
-  CalendarIcon,
   Upload,
 } from 'lucide-react';
 import { format } from 'date-fns';
@@ -146,7 +143,7 @@ export function ClcRemittancesDashboard() {
       
       // Calculate summary
       calculateSummary(data.remittances);
-    } catch (error) {
+    } catch (_error) {
 toast({
         title: 'Error',
         description: 'Failed to fetch remittances',
@@ -188,7 +185,7 @@ toast({
       }
       
       setTrendData(trends);
-    } catch (error) {
+    } catch (_error) {
 }
   };
 
@@ -260,7 +257,7 @@ toast({
         title: 'Export successful',
         description: `Downloaded ${format.toUpperCase()} file`,
       });
-    } catch (error) {
+    } catch (_error) {
 toast({
         title: 'Export failed',
         description: 'Failed to export remittances',
@@ -288,7 +285,7 @@ toast({
       });
 
       fetchRemittances();
-    } catch (error) {
+    } catch (_error) {
 toast({
         title: 'Submission failed',
         description: 'Failed to submit remittance',

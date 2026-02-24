@@ -11,15 +11,16 @@ import {
   retentionPolicies,
   legalHolds,
   policyExceptions,
-  type NewPolicyEvaluation,
 } from '@/db/schema/policy-engine-schema';
-import { eq, and, gte, lte, sql } from 'drizzle-orm';
+import { eq, and, lte, sql } from 'drizzle-orm';
 import { logger } from '@/lib/logger';
 
 interface EvaluationContext {
   subjectType: 'member' | 'user' | 'organization' | 'action';
   subjectId: string;
+  // eslint-disable-next-line @typescript-eslint/no-explicit-any
   inputData: Record<string, any>;
+  // eslint-disable-next-line @typescript-eslint/no-explicit-any
   context?: Record<string, any>;
 }
 
@@ -120,6 +121,7 @@ export class PolicyEngine {
    * Evaluate a single rule against context
    */
   private async evaluateRule(
+    // eslint-disable-next-line @typescript-eslint/no-explicit-any
     rule: any,
     context: EvaluationContext
   ): Promise<{ passed: boolean; failureReason?: string }> {
@@ -159,6 +161,7 @@ export class PolicyEngine {
   /**
    * Evaluate a single condition
    */
+  // eslint-disable-next-line @typescript-eslint/no-explicit-any
   private evaluateCondition(condition: any, data: Record<string, any>): boolean {
     const fieldValue = data[condition.field];
     const expectedValue = condition.value;

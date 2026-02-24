@@ -73,7 +73,7 @@ export async function calculateDistance(
       distance: Number(result[0]?.distance || 0),
       method: 'postgis',
     };
-  } catch (error) {
+  } catch (_error) {
     // Fallback to Haversine formula
     return {
       distance: calculateDistanceHaversine(point1, point2),
@@ -108,6 +108,7 @@ export async function findNearbyLocations(
       )
     `);
 
+    // eslint-disable-next-line @typescript-eslint/no-explicit-any
     return result.map((row: any) => ({
       userId: row.user_id,
       latitude: row.latitude,
@@ -177,8 +178,8 @@ function calculateDistanceHaversine(point1: Point, point2: Point): number {
  * Check if point is in circular geofence using Haversine (fallback)
  */
 async function isPointInGeofenceHaversine(
-  point: Point,
-  geofenceId: string
+  _point: Point,
+  _geofenceId: string
 ): Promise<{ inside: boolean; distance: number; method: 'haversine' }> {
   // This would need to fetch geofence data from database
   // Simplified implementation for demonstration
@@ -203,7 +204,7 @@ export async function checkPostGISAvailability(): Promise<boolean> {
     `);
 
     return result[0]?.available === true;
-  } catch (error) {
+  } catch (_error) {
     return false;
   }
 }

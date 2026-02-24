@@ -1,16 +1,14 @@
-import { logApiAuditEvent } from "@/lib/middleware/api-security";
 import { NextRequest, NextResponse } from 'next/server';
-import { getCurrentUser, withAdminAuth, withApiAuth, withMinRole, withRoleAuth } from '@/lib/api-auth-guard';
+import { withRoleAuth } from '@/lib/api-auth-guard';
 
 import {
   ErrorCode,
   standardErrorResponse,
-  standardSuccessResponse,
 } from '@/lib/api/standardized-responses';
 // Get batch job status
 export const GET = async (req: NextRequest, { params }: { params: { jobId: string } }) => {
   return withRoleAuth('steward', async (request, context) => {
-    const user = { id: context.userId, organizationId: context.organizationId };
+    const _user = { id: context.userId, organizationId: context.organizationId };
 
     try {
       const jobId = params.jobId;

@@ -128,7 +128,7 @@ export class SunLifeAdapter extends BaseIntegration {
   async sync(options: SyncOptions): Promise<SyncResult> {
     this.ensureConnected();
 
-    const startTime = Date.now();
+    const _startTime = Date.now();
     let recordsProcessed = 0;
     let recordsCreated = 0;
     let recordsUpdated = 0;
@@ -181,6 +181,7 @@ export class SunLifeAdapter extends BaseIntegration {
           }
         } catch (error) {
           const errorMsg = `Failed to sync ${entity}: ${error instanceof Error ? error.message : 'Unknown'}`;
+          // eslint-disable-next-line @typescript-eslint/no-explicit-any
           errors.push({ entity, error: errorMsg } as any);
           this.logError('sync', error, { entity });
         }
@@ -204,6 +205,7 @@ export class SunLifeAdapter extends BaseIntegration {
         recordsCreated,
         recordsUpdated,
         recordsFailed,
+        // eslint-disable-next-line @typescript-eslint/no-explicit-any
         errors: [{ entity: 'sync', error: error instanceof Error ? error.message : 'Unknown error' }] as any,
       };
     }
@@ -489,11 +491,11 @@ export class SunLifeAdapter extends BaseIntegration {
   // Webhook Support (Not Supported)
   // ==========================================================================
 
-  async verifyWebhook(payload: string, signature: string): Promise<boolean> {
+  async verifyWebhook(_payload: string, _signature: string): Promise<boolean> {
     return false;
   }
 
-  async processWebhook(event: WebhookEvent): Promise<void> {
+  async processWebhook(_event: WebhookEvent): Promise<void> {
     this.logOperation('webhook', { message: 'Sun Life does not support webhooks' });
   }
 }

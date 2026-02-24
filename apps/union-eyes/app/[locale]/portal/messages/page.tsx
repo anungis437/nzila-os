@@ -4,6 +4,8 @@
  */
 'use client';
 
+
+export const dynamic = 'force-dynamic';
 import { useState } from 'react';
 import { MessagesDashboard } from '@/components/messages/MessagesDashboard';
 import { MessageThreadView } from '@/components/messages/MessageThreadView';

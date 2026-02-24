@@ -6,7 +6,9 @@
  * @dashboard_path /dashboard/integrations
  */
 
-import { Suspense } from 'react';
+
+export const dynamic = 'force-dynamic';
+
 import { auth } from '@clerk/nextjs/server';
 import { redirect } from 'next/navigation';
 import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card';
@@ -79,9 +81,12 @@ export default async function IntegrationsDashboard() {
   ]);
   
   // Calculate metrics
+  // eslint-disable-next-line @typescript-eslint/no-explicit-any
   const activeApiKeys = apiKeys.filter((key: any) => key.status === 'active').length;
+  // eslint-disable-next-line @typescript-eslint/no-explicit-any
   const activeWebhooks = webhooks.filter((hook: any) => hook.status === 'active').length;
   const webhookSuccessRate = webhooks.length > 0 
+    // eslint-disable-next-line @typescript-eslint/no-explicit-any
     ? ((webhooks.filter((hook: any) => hook.last_status === 'success').length / webhooks.length) * 100).toFixed(1)
     : '100.0';
   
@@ -227,6 +232,7 @@ export default async function IntegrationsDashboard() {
                 <p className="text-sm text-muted-foreground">No API keys found</p>
               ) : (
                 <div className="space-y-3">
+                  {/* eslint-disable-next-line @typescript-eslint/no-explicit-any */}
                   {apiKeys.map((key: any) => (
                     <div key={key.id} className="flex items-center justify-between border-b pb-3 last:border-0">
                       <div className="space-y-1">
@@ -256,6 +262,7 @@ export default async function IntegrationsDashboard() {
                 <p className="text-sm text-muted-foreground">No webhooks configured</p>
               ) : (
                 <div className="space-y-3">
+                  {/* eslint-disable-next-line @typescript-eslint/no-explicit-any */}
                   {webhooks.map((hook: any) => (
                     <div key={hook.id} className="flex items-center justify-between border-b pb-3 last:border-0">
                       <div className="space-y-1">

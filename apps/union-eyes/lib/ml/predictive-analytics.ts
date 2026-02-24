@@ -112,7 +112,7 @@ export function forecastLinearRegression(
 ): PredictionResult[] {
   // Convert dates to numeric values (days since first observation)
   const firstDate = historicalData[0].date.getTime();
-  const dataPoints: [number, number][] = historicalData.map((d, i) => [
+  const dataPoints: [number, number][] = historicalData.map((d, _i) => [
     (d.date.getTime() - firstDate) / (1000 * 60 * 60 * 24), // Days
     d.value
   ]);
@@ -266,7 +266,7 @@ export function detectAnomalies(
   const avg = mean(values);
   const stdDev = standardDeviation(values);
   
-  return data.map((point, i) => {
+  return data.map((point, _i) => {
     const zScore = Math.abs((point.value - avg) / stdDev);
     const isAnomaly = zScore > threshold;
     const deviationPercentage = ((point.value - avg) / avg) * 100;

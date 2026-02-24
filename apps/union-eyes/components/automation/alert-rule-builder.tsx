@@ -18,14 +18,14 @@ import { Textarea } from '@/components/ui/textarea';
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from '@/components/ui/select';
 import { Badge } from '@/components/ui/badge';
 import { Switch } from '@/components/ui/switch';
-import { 
-  Plus, 
-  Trash2, 
-  Save, 
-  Play, 
-  AlertCircle, 
-  Bell, 
-  Clock, 
+import {
+  Plus,
+  Trash2,
+  Save,
+  Play,
+  AlertCircle,
+  Bell,
+  Clock,
   Zap,
   Mail,
   MessageSquare,
@@ -33,7 +33,6 @@ import {
   CheckCircle,
   XCircle,
   ChevronRight,
-  Settings
 } from 'lucide-react';
 
 // Sample alert rule templates
@@ -219,6 +218,7 @@ interface Condition {
   id: string;
   fieldPath: string;
   operator: string;
+  // eslint-disable-next-line @typescript-eslint/no-explicit-any
   value: any;
   conditionGroup: number;
   isOrCondition: boolean;
@@ -227,6 +227,7 @@ interface Condition {
 interface Action {
   id: string;
   actionType: string;
+  // eslint-disable-next-line @typescript-eslint/no-explicit-any
   actionConfig: any;
   orderIndex: number;
 }
@@ -240,6 +241,7 @@ export default function AlertRuleBuilder() {
   const [description, setDescription] = useState('');
   const [category, setCategory] = useState('');
   const [triggerType, setTriggerType] = useState('schedule');
+  // eslint-disable-next-line @typescript-eslint/no-explicit-any
   const [triggerConfig, setTriggerConfig] = useState<any>({});
   const [severity, setSeverity] = useState('medium');
   const [frequency, setFrequency] = useState('every_occurrence');
@@ -457,6 +459,7 @@ export default function AlertRuleBuilder() {
             {['basic', 'trigger', 'conditions', 'actions', 'review'].map((step, index) => (
               <div key={step} className="flex items-center">
                 <button
+                  // eslint-disable-next-line @typescript-eslint/no-explicit-any
                   onClick={() => setCurrentStep(step as any)}
                   className={`flex items-center justify-center w-10 h-10 rounded-full border-2 transition-colors ${
                     currentStep === step
@@ -664,6 +667,7 @@ export default function AlertRuleBuilder() {
                   onChange={(e) => setTriggerConfig({ ...triggerConfig, schedule: e.target.value })}
                 />
                 <p className="text-sm text-muted-foreground">
+                  {/* eslint-disable-next-line react/no-unescaped-entities */}
                   Format: minute hour day month weekday (e.g., "0 6 * * *" = daily at 6 AM)
                 </p>
               </div>

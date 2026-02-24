@@ -14,8 +14,7 @@
 
 import { db } from '@/db';
 import { duesTransactions } from '@/db/schema/domains/finance/dues';
-import { organizationMembers } from '@/db/schema-organizations';
-import { eq, and, lte, sql } from 'drizzle-orm';
+import { eq, and, sql } from 'drizzle-orm';
 import { logger } from '@/lib/logger';
 import { sendPaymentFailure, sendAdminIntervention, calculateRetryDate } from '@/lib/services/dues-notifications';
 

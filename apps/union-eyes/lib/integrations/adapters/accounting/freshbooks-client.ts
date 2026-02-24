@@ -48,6 +48,7 @@ export interface FreshBooksInvoice {
   v3_status: string;
 }
 
+// eslint-disable-next-line @typescript-eslint/no-unsafe-declaration-merging
 export interface FreshBooksClient {
   id: number;
   userid: number;
@@ -97,6 +98,7 @@ interface FreshBooksTokenResponse {
 // FreshBooks Client
 // ============================================================================
 
+// eslint-disable-next-line @typescript-eslint/no-unsafe-declaration-merging
 export class FreshBooksClient {
   private config: FreshBooksConfig;
   private accessToken?: string;

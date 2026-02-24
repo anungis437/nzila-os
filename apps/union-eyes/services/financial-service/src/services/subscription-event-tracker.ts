@@ -6,7 +6,7 @@
  */
 
 import { db } from '../db';
-import { subscriptionEvents, customerAcquisition, revenueCohorts, mrrSnapshots } from '../db/schema-platform-economics';
+import { subscriptionEvents, customerAcquisition, mrrSnapshots } from '../db/schema-platform-economics';
 import { eq, and, sql, desc } from 'drizzle-orm';
 
 // Plan pricing (in USD)
@@ -48,6 +48,7 @@ export interface SubscriptionEventInput {
   paymentAmount?: number;
   paymentStatus?: 'success' | 'failed';
   failureReason?: string;
+  // eslint-disable-next-line @typescript-eslint/no-explicit-any
   metadata?: Record<string, any>;
 }
 

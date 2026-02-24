@@ -15,7 +15,7 @@ import {
  */
 
 
-const locationGeofenceSchema = z.object({
+const _locationGeofenceSchema = z.object({
   name: z.string().min(1, 'name is required'),
   description: z.string().optional(),
   geofenceType: z.unknown().optional(),

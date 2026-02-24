@@ -42,6 +42,7 @@ import { Textarea } from "@/components/ui/textarea";
 import { Alert, AlertDescription } from "@/components/ui/alert";
 import { Label } from "@/components/ui/label";
 import { cn } from "@/lib/utils";
+ 
 import { format, formatDistanceToNow } from "date-fns";
 
 export interface DocumentVersion {
@@ -326,7 +327,7 @@ export function DocumentVersionControl({
 
 function VersionItem({
   version,
-  isFirst,
+  isFirst: _isFirst,
   compareMode,
   isSelected,
   onSelect,
@@ -415,6 +416,7 @@ function VersionItem({
 
             {version.comment && (
               <p className="text-sm text-gray-700 italic">
+                {/* eslint-disable-next-line react/no-unescaped-entities */}
                 "{version.comment}"
               </p>
             )}

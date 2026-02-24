@@ -85,6 +85,7 @@ export type MemberSegmentFilters = {
   seniorityYearsMax?: number;
   
   // Custom fields
+  // eslint-disable-next-line @typescript-eslint/no-explicit-any
   customFields?: Record<string, any>;
 };
 

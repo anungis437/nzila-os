@@ -19,7 +19,7 @@ import {
   sendCreditExpirationEmail, 
   sendRedemptionConfirmationEmail 
 } from './email-service';
-import { eq, and, lte, gte, desc, asc, sql, inArray, gt } from 'drizzle-orm';
+import { eq, and, lte, gte, desc, sql, gt } from 'drizzle-orm';
 import { v4 as uuidv4 } from 'uuid';
 import { logger } from '@/lib/logger';
 
@@ -84,11 +84,14 @@ export async function notifyAwardIssued(awardId: string) {
       recipientName: recipient.email.split('@')[0] || 'Member',
       recipientEmail: recipient.email,
       issuerName: issuer?.email.split('@')[0] || 'A colleague',
+      // eslint-disable-next-line @typescript-eslint/no-explicit-any
       awardTypeName: (award.awardType as any)?.name || 'Award',
       awardTypeIcon: undefined,
       message: award.reason || 'Great work!',
+      // eslint-disable-next-line @typescript-eslint/no-explicit-any
       creditsAwarded: (award.awardType as any)?.defaultCreditAmount || 0,
       awardId: award.id,
+      // eslint-disable-next-line @typescript-eslint/no-explicit-any
       orgName: (award.organization as any)?.name || 'Organization',
     });
 
@@ -152,12 +155,15 @@ export async function notifyAwardPendingApproval(awardId: string) {
         return sendApprovalRequestEmail({
           adminName: adminUser.displayName || adminUser.email.split('@')[0] || 'Admin',
           adminEmail: adminUser.email,
+          // eslint-disable-next-line @typescript-eslint/no-explicit-any
           awardTypeName: (award.awardType as any)?.name || 'Award',
           recipientName: recipient?.email.split('@')[0] || 'Unknown',
           issuerName: issuer?.email.split('@')[0] || 'Unknown',
           message: award.reason || '',
+          // eslint-disable-next-line @typescript-eslint/no-explicit-any
           creditsToAward: (award.awardType as any)?.defaultCreditAmount || 0,
           awardId: award.id,
+          // eslint-disable-next-line @typescript-eslint/no-explicit-any
           orgName: (award.organization as any)?.name || 'Organization',
         });
       })
@@ -361,8 +367,10 @@ export async function notifyRedemptionConfirmed(redemptionId: string) {
       recipientName: user.email.split('@')[0] || 'Member',
       recipientEmail: user.email,
       creditsRedeemed: redemption.creditsSpent || 0,
+      // eslint-disable-next-line @typescript-eslint/no-explicit-any
       checkoutUrl: redemption.providerCheckoutId || (redemption.providerPayloadJson as any)?.checkout_url,
       redemptionId: redemption.id,
+      // eslint-disable-next-line @typescript-eslint/no-explicit-any
       orgName: (redemption.organization as any)?.name || 'Organization',
     });
 
@@ -401,6 +409,7 @@ export async function sendBatchExpirationWarnings() {
       const result = await notifyExpiringCredits(interval.days);
       
       if (result.success) {
+        // eslint-disable-next-line @typescript-eslint/no-explicit-any
         (results as any)[interval.counter] = result.sent;
       } else {
         results.errors.push(`Failed for ${interval.days} days: ${result.error}`);
@@ -497,6 +506,7 @@ export async function scheduleExpirationNotifications(
       expiresAt,
       description: 'Credit expiration scheduled',
       createdAt: new Date(),
+    // eslint-disable-next-line @typescript-eslint/no-explicit-any
     } as any);
 
     return {

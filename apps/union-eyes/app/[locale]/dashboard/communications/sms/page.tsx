@@ -12,6 +12,8 @@
 
 'use client';
 
+
+export const dynamic = 'force-dynamic';
 import { useState, useEffect } from 'react';
 import { Button } from '@/components/ui/button';
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from '@/components/ui/card';
@@ -27,11 +29,11 @@ import {
   Inbox,
   Clock,
   Play,
-  Pause,
 } from 'lucide-react';
 import { SmsTemplateEditor } from '@/components/communications/sms-template-editor';
 import { SmsCampaignBuilder } from '@/components/communications/sms-campaign-builder';
 import { SmsInbox } from '@/components/communications/sms-inbox';
+ 
 import { useOrganizationId } from '@/lib/hooks/use-organization';
 
 interface SmsPageProps {
@@ -60,7 +62,7 @@ interface Campaign {
   createdAt: string;
 }
 
-export default function SmsPage({ params }: SmsPageProps) {
+export default function SmsPage({ params: _params }: SmsPageProps) {
   const organizationId = useOrganizationId();
   const [activeView, setActiveView] = useState<'dashboard' | 'template' | 'campaign' | 'inbox'>(
     'dashboard'
@@ -76,7 +78,7 @@ export default function SmsPage({ params }: SmsPageProps) {
         if (!response.ok) throw new Error('Failed to fetch campaigns');
         const data = await response.json();
         setCampaigns(data.campaigns);
-      } catch (error) {
+      } catch (_error) {
 } finally {
         setIsLoadingCampaigns(false);
       }

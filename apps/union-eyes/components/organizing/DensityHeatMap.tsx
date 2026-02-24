@@ -10,13 +10,11 @@ import { useState, useEffect } from 'react';
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from '@/components/ui/card';
 import { Badge } from '@/components/ui/badge';
 import { Progress } from '@/components/ui/progress';
-import { 
-  TrendingUp, 
-  Users, 
+import {
+  TrendingUp,
   Target,
   CheckCircle,
   AlertTriangle,
-  XCircle
 } from 'lucide-react';
 
 interface OrganizingCampaign {
@@ -56,6 +54,7 @@ export function DensityHeatMap({ organizationId, campaignId }: DensityHeatMapPro
 
   useEffect(() => {
     fetchCampaigns();
+  // eslint-disable-next-line react-hooks/exhaustive-deps
   }, [organizationId]);
 
   useEffect(() => {
@@ -84,7 +83,7 @@ export function DensityHeatMap({ organizationId, campaignId }: DensityHeatMapPro
           setSelectedCampaign(activeCampaign || data.data[0]);
         }
       }
-    } catch (error) {
+    } catch (_error) {
 } finally {
       setLoading(false);
     }
@@ -97,6 +96,7 @@ export function DensityHeatMap({ organizationId, campaignId }: DensityHeatMapPro
       
       if (data.success) {
         // Calculate support percentages per department
+        // eslint-disable-next-line @typescript-eslint/no-explicit-any
         const densityData = data.data.map((dept: any) => ({
           department: dept.department || 'Unknown',
           total_contacts: dept.total_contacts,
@@ -108,10 +108,11 @@ export function DensityHeatMap({ organizationId, campaignId }: DensityHeatMapPro
         
         setDepartmentDensity(densityData);
       }
-    } catch (error) {
+    } catch (_error) {
 }
   };
 
+  // eslint-disable-next-line @typescript-eslint/no-explicit-any
   const getDensityLevel = (percentage: number): { label: string; color: string; icon: any } => {
     if (percentage >= 70) {
       return { label: 'Super Majority', color: 'bg-green-500', icon: CheckCircle };

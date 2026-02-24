@@ -27,7 +27,7 @@ const migrationSQL = fs.readFileSync(
 // Verify tables
     const tables = ['donations', 'picket_tracking', 'arrears'];
     for (const table of tables) {
-      const result = await sql`
+      const _result = await sql`
         SELECT EXISTS (
           SELECT FROM information_schema.tables 
           WHERE table_schema = 'public' 
@@ -36,7 +36,7 @@ const migrationSQL = fs.readFileSync(
       `;
 }
     
-  } catch (error) {
+  } catch (_error) {
 process.exit(1);
   } finally {
     await sql.end();

@@ -76,7 +76,7 @@ return false;
 
     const mappedRole = mapOrganizationRoleToUserRole(member.role);
     return roleHasPermission(mappedRole, options.permission);
-  } catch (error) {
+  } catch (_error) {
 return false;
   }
 }
@@ -115,7 +115,7 @@ return false;
     const mappedRole = mapOrganizationRoleToUserRole(member.role);
     const requiredRoles = Array.isArray(options.role) ? options.role : [options.role];
     return requiredRoles.includes(mappedRole);
-  } catch (error) {
+  } catch (_error) {
 return false;
   }
 }

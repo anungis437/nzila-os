@@ -12,7 +12,6 @@ import {
   Heading,
   Hr,
   Html,
-  Link,
   Preview,
   Section,
   Text,
@@ -60,6 +59,7 @@ export default function ReportReadyEmail({
           <Hr style={hr} />
 
           <Text style={footer}>
+            {/* eslint-disable-next-line react/no-unescaped-entities */}
             If you didn't request this report, you can safely ignore this email.
           </Text>
 

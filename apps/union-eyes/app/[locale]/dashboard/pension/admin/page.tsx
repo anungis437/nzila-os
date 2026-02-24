@@ -1,15 +1,16 @@
 'use client';
 
+
+export const dynamic = 'force-dynamic';
 import { useState, useEffect } from 'react';
 import { useOrganizationId } from '@/lib/hooks/use-organization';
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from '@/components/ui/card';
 import { Button } from '@/components/ui/button';
 import { Badge } from '@/components/ui/badge';
 import { Tabs, TabsContent, TabsList, TabsTrigger } from '@/components/ui/tabs';
-import { 
-  Shield, 
-  AlertCircle, 
-  Clock, 
+import {
+  Shield,
+  Clock,
   Settings,
   DollarSign,
   FileCheck,
@@ -24,8 +25,7 @@ import {
   Upload,
   Plus,
   Edit,
-  Trash2,
-  Eye
+  Eye,
 } from 'lucide-react';
 
 interface PensionPlan {
@@ -96,6 +96,7 @@ export default function PensionAdminPage() {
     if (organizationId) {
       loadAdminData();
     }
+  // eslint-disable-next-line react-hooks/exhaustive-deps
   }, [organizationId]);
 
   const loadAdminData = async () => {
@@ -115,7 +116,7 @@ export default function PensionAdminPage() {
       const firstPlanId = plansData.data?.[0]?.id;
       
       // Load remaining admin data in parallel
-      const [contributionsRes, claimsRes, membersRes, t4aRes] = await Promise.all([
+      const [_contributionsRes, _claimsRes, _membersRes, _t4aRes] = await Promise.all([
         fetch(`/api/pension/plans?organizationId=${organizationId}`), // Reusing for contributions demo
         fetch('/api/pension/benefits'),
         firstPlanId ? fetch(`/api/pension/members?planId=${firstPlanId}`) : Promise.resolve({ ok: false }),
@@ -257,7 +258,7 @@ export default function PensionAdminPage() {
         }
       ]);
 
-    } catch (error) {
+    } catch (_error) {
 } finally {
       setLoading(false);
     }
@@ -293,7 +294,7 @@ export default function PensionAdminPage() {
   if (loading) {
     return (
       <div className="p-6 space-y-6">
-        <div className="flex items-center justify-center min-h-[400px]">
+        <div className="flex items-center justify-center min-h-100">
           <div className="text-center">
             <Clock className="w-12 h-12 mx-auto mb-4 animate-spin text-muted-foreground" />
             <p className="text-muted-foreground">Loading pension administration data...</p>

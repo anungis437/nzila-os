@@ -14,9 +14,12 @@
  * Exportable as PDF for investor/partnership discussions
  */
 
+
+export const dynamic = 'force-dynamic';
+
 import * as React from 'react';
 import { Metadata } from 'next';
-import { getTrustMetrics, generateTrustSummary } from '@/lib/trust/system-metrics';
+import { getTrustMetrics } from '@/lib/trust/system-metrics';
 import { SystemStatusGrid } from '@/components/marketing/system-status-badge';
 import { HumanCenteredCallout, CalloutPresets } from '@/components/marketing/human-centered-callout';
 import { Shield, Lock, GitBranch, Scale, FileText, Download } from 'lucide-react';

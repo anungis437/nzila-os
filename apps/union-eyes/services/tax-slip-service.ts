@@ -8,7 +8,7 @@ import {
 } from "@/db/schema/domains/finance";
 import { users } from "@/db/schema/domains/member";
 import { organizationMembers } from "@/db/schema/organization-members-schema";
-import { eq, and, gte, lte } from "drizzle-orm";
+import { eq, and } from "drizzle-orm";
 import { NotificationService } from "@/lib/services/notification-service";
 import { logger } from "@/lib/logger";
 
@@ -237,6 +237,7 @@ export class TaxSlipService {
       );
 
     const uniqueUsers = [...new Set(usersRequiringSlips.map((u) => u.userId))];
+    // eslint-disable-next-line @typescript-eslint/no-explicit-any
     const slips: any[] = [];
 
     for (const userId of uniqueUsers) {
@@ -333,6 +334,7 @@ export class TaxSlipService {
       );
 
     const uniqueUsers = [...new Set(usersRequiringSlips.map((u) => u.userId))];
+    // eslint-disable-next-line @typescript-eslint/no-explicit-any
     const slips: any[] = [];
 
     for (const userId of uniqueUsers) {

@@ -28,6 +28,11 @@ COPY . .
 # Collect static files
 RUN python manage.py collectstatic --noinput || true
 
+# Create non-root user for security
+RUN groupadd -r appuser && useradd -r -g appuser -d /app -s /sbin/nologin appuser \
+    && chown -R appuser:appuser /app
+USER appuser
+
 # Expose port
 EXPOSE 8000
 

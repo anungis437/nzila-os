@@ -6,25 +6,25 @@
 
 // Only import bullmq in runtime, not during build
 // eslint-disable-next-line @typescript-eslint/no-explicit-any
-let Worker: any, Job: any, IORedis: any;
+let Worker: any, _Job: any, IORedis: any;
 
 if (typeof window === 'undefined' && !process.env.__NEXT_BUILDING) {
   try {
     // eslint-disable-next-line @typescript-eslint/no-require-imports
     const bullmq = require('bullmq');
     Worker = bullmq.Worker;
-    Job = bullmq.Job;
+    _Job = bullmq.Job;
     // eslint-disable-next-line @typescript-eslint/no-require-imports
     IORedis = require('ioredis');
-  } catch (e) {
+  } catch (_e) {
     // Fail silently during build
   }
 }
 
-import { SmsJobData } from '../job-queue';
 import { db } from '../../db/db';
 import { notificationHistory, userNotificationPreferences } from '../../db/schema';
 import { eq } from 'drizzle-orm';
+// eslint-disable-next-line no-restricted-imports -- TODO(platform-migration): migrate to @nzila/ wrapper
 import twilio from 'twilio';
 
 const connection = new IORedis({
@@ -72,7 +72,7 @@ async function checkUserPreferences(phone: string): Promise<boolean> {
     });
 
     return preferences?.smsEnabled ?? false; // Default to disabled
-  } catch (error) {
+  } catch (_error) {
 return false;
   }
 }
@@ -100,7 +100,7 @@ async function logSms(
       sentAt: new Date(),
       metadata: { twilioSid },
     });
-  } catch (err) {
+  } catch (_err) {
 }
 }
 
@@ -125,6 +125,7 @@ function formatPhoneNumber(phone: string): string {
 /**
  * Process SMS job
  */
+// eslint-disable-next-line @typescript-eslint/no-explicit-any
 async function processSmsJob(job: any) {
   const { to, message, priority } = job.data;
 // Check if Twilio is configured
@@ -162,7 +163,7 @@ await logSms(null, formattedPhone, message, 'sent', 'Skipped by user preference'
     await logSms(null, formattedPhone, message, 'sent', undefined, result.sid);
 
     // Log without exposing full phone number
-    const maskedPhone = formattedPhone.replace(/(\+\d{1,3})(\d+)(\d{4})/, '$1****$3');
+    const _maskedPhone = formattedPhone.replace(/(\+\d{1,3})(\d+)(\d{4})/, '$1****$3');
 await job.updateProgress(100);
 
     return {
@@ -181,6 +182,7 @@ const errorMessage = error instanceof Error ? error.message : 'Unknown error';
 // Create worker
 export const smsWorker = new Worker(
   'sms',
+  // eslint-disable-next-line @typescript-eslint/no-explicit-any
   async (job: any) => {
     return await processSmsJob(job);
   },
@@ -195,13 +197,16 @@ export const smsWorker = new Worker(
 );
 
 // Event handlers
-smsWorker.on('completed', (job: any) => {
+// eslint-disable-next-line @typescript-eslint/no-explicit-any
+smsWorker.on('completed', (_job: any) => {
 });
 
-smsWorker.on('failed', (job: any, err: any) => {
+// eslint-disable-next-line @typescript-eslint/no-explicit-any
+smsWorker.on('failed', (_job: any, _err: any) => {
 });
 
-smsWorker.on('error', (err: any) => {
+// eslint-disable-next-line @typescript-eslint/no-explicit-any
+smsWorker.on('error', (_err: any) => {
 });
 
 // Graceful shutdown

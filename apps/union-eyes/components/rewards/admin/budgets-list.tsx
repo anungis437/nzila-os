@@ -1,7 +1,6 @@
 'use client';
 
 import { Table, TableBody, TableCell, TableHead, TableHeader, TableRow } from '@/components/ui/table';
-import { Badge } from '@/components/ui/badge';
 import { useTranslations } from 'next-intl';
 import type { RewardBudgetEnvelope } from '@/db/schema/recognition-rewards-schema';
 
@@ -35,7 +34,7 @@ export function BudgetsList({ budgets }: BudgetsListProps) {
         <TableBody>
           {budgets.map((budget) => {
             const remaining = budget.amountLimit - budget.amountUsed;
-            const usagePercent = (budget.amountUsed / budget.amountLimit) * 100;
+            const _usagePercent = (budget.amountUsed / budget.amountLimit) * 100;
             
             return (
               <TableRow key={budget.id}>

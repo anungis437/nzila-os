@@ -20,13 +20,11 @@ import { Label } from "@/components/ui/label";
 import { RadioGroup, RadioGroupItem } from "@/components/ui/radio-group";
 import { Checkbox } from "@/components/ui/checkbox";
 import { Input } from "@/components/ui/input";
+ 
 import {
-  Select,
-  SelectContent,
-  SelectItem,
-  SelectTrigger,
-  SelectValue,
+  Select as _Select,
 } from "@/components/ui/select";
+ 
 import { Alert, AlertDescription } from "@/components/ui/alert";
 
 interface Organization {
@@ -85,7 +83,7 @@ const SHARING_LEVELS = [
 export function ClauseSharingControls({
   open,
   onOpenChange,
-  clauseId,
+  clauseId: _clauseId,
   currentSettings,
   availableOrganizations = [],
   onSave,
@@ -122,7 +120,7 @@ export function ClauseSharingControls({
         anonymizedEmployerName: isAnonymized ? anonymizedEmployerName : undefined,
       });
       onOpenChange(false);
-    } catch (error) {
+    } catch (_error) {
 } finally {
       setIsSaving(false);
     }
@@ -151,6 +149,7 @@ export function ClauseSharingControls({
           {/* Sharing Level */}
           <div className="space-y-3">
             <Label className="text-base font-semibold">Sharing Level</Label>
+            {/* eslint-disable-next-line @typescript-eslint/no-explicit-any */}
             <RadioGroup value={sharingLevel} onValueChange={(value: any) => setSharingLevel(value)}>
               <div className="space-y-3">
                 {SHARING_LEVELS.map((level) => {

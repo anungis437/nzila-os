@@ -50,7 +50,7 @@ export interface BargainingNoteSearchOptions {
  */
 export async function getBargainingNoteById(
   id: string,
-  options: BargainingNoteSearchOptions = {}
+  _options: BargainingNoteSearchOptions = {}
 ): Promise<BargainingNote | null> {
   try {
     const note = await db.query.bargainingNotes.findFirst({
@@ -519,6 +519,7 @@ export async function addAttachmentToNote(
     const note = await getBargainingNoteById(noteId);
     if (!note) return null;
 
+    // eslint-disable-next-line @typescript-eslint/no-explicit-any
     const existingAttachments = (note.attachments as any[]) || [];
     const newAttachment = {
       ...attachment,
@@ -526,6 +527,7 @@ export async function addAttachmentToNote(
     };
 
     const updated = await updateBargainingNote(noteId, {
+      // eslint-disable-next-line @typescript-eslint/no-explicit-any
       attachments: [...existingAttachments, newAttachment] as any,
     });
 

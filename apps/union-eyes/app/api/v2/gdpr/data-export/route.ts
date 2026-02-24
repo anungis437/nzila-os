@@ -2,15 +2,10 @@
  * GET POST /api/gdpr/data-export
  * Migrated to withApi() framework
  */
-import { GdprRequestManager } from "@/lib/gdpr/consent-manager";
-import { getReportQueue } from "@/lib/job-queue";
-import { logger } from "@/lib/logger";
-import fs from "fs";
-import path from "path";
 
-import { withApi, ApiError, z } from '@/lib/api/framework';
+import { withApi, z } from '@/lib/api/framework';
 
-const gdprDataExportSchema = z.object({
+const _gdprDataExportSchema = z.object({
   organizationId: z.string().uuid('Invalid organizationId'),
   preferredFormat: z.unknown().optional(),
   requestDetails: z.unknown().optional(),

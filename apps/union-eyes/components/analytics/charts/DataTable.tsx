@@ -11,7 +11,7 @@
 'use client';
 
 import React, { useState, useMemo } from 'react';
-import { ChevronDown, ChevronUp, Search, Download, Filter, Eye, EyeOff } from 'lucide-react';
+import { ChevronDown, ChevronUp, Search, Download, Eye } from 'lucide-react';
 
 // ============================================================================
 // Types
@@ -22,11 +22,13 @@ export interface Column {
   label: string;
   sortable?: boolean;
   filterable?: boolean;
+  // eslint-disable-next-line @typescript-eslint/no-explicit-any
   render?: (value: any, row: any) => React.ReactNode;
   width?: string;
 }
 
 export interface DataTableProps {
+  // eslint-disable-next-line @typescript-eslint/no-explicit-any
   data: any[];
   columns: Column[];
   title?: string;
@@ -34,7 +36,9 @@ export interface DataTableProps {
   searchable?: boolean;
   exportable?: boolean;
   selectable?: boolean;
+  // eslint-disable-next-line @typescript-eslint/no-explicit-any
   onRowSelect?: (selectedRows: any[]) => void;
+  // eslint-disable-next-line @typescript-eslint/no-explicit-any
   onExport?: (data: any[]) => void;
 }
 

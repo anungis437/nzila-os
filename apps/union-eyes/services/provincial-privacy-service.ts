@@ -6,7 +6,7 @@ import {
   provincialDataHandling,
   dataSubjectAccessRequests,
 } from "@/db/schema/provincial-privacy-schema";
-import { eq, and, gte, lte, isNull } from "drizzle-orm";
+import { eq, and, lte, isNull } from "drizzle-orm";
 import { organizationMembers } from "@/db/schema/organization-members-schema";
 import { NotificationService } from "@/lib/services/notification-service";
 import { logger } from "@/lib/logger";
@@ -59,6 +59,7 @@ export class ProvincialPrivacyService {
    * Default configurations for each province
    */
   private static getDefaultConfig(province: Province) {
+    // eslint-disable-next-line @typescript-eslint/no-explicit-any
     const defaults: Record<Province, any> = {
       QC: {
         province: "QC",
@@ -386,6 +387,7 @@ export class ProvincialPrivacyService {
     status: "in_progress" | "completed" | "denied",
     assignedTo?: string
   ) {
+    // eslint-disable-next-line @typescript-eslint/no-explicit-any
     const updateData: any = { status, updatedAt: new Date() };
     if (assignedTo) updateData.assignedTo = assignedTo;
 

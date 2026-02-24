@@ -45,7 +45,7 @@ import {
 } from "@/components/ui/dialog";
 import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
 import { Textarea } from "@/components/ui/textarea";
-import { Switch } from "@/components/ui/switch";
+ 
 import {
   Clock,
   Mail,
@@ -61,10 +61,8 @@ import {
   XCircle,
   AlertCircle,
   Users,
-  FileSpreadsheet,
-  History,
+  History as _History,
   Settings,
-  ChevronRight,
 } from "lucide-react";
 
 // =============================================================================
@@ -323,9 +321,9 @@ const sampleDeliveryHistory: DeliveryHistory[] = [
 
 export default function ScheduledReportsManager() {
   const [scheduledReports, setScheduledReports] = useState(sampleScheduledReports);
-  const [deliveryHistory, setDeliveryHistory] = useState(sampleDeliveryHistory);
+  const [deliveryHistory, _setDeliveryHistory] = useState(sampleDeliveryHistory);
   const [isCreateDialogOpen, setIsCreateDialogOpen] = useState(false);
-  const [selectedReport, setSelectedReport] = useState<ScheduledReport | null>(null);
+  const [_selectedReport, setSelectedReport] = useState<ScheduledReport | null>(null);
 
   // Stats
   const activeReports = scheduledReports.filter((r) => r.isActive).length;
@@ -792,6 +790,7 @@ function CreateScheduleForm({ onClose }: CreateScheduleFormProps) {
         <Label htmlFor="scheduleType">Schedule Type *</Label>
         <Select
           value={formData.scheduleType}
+          // eslint-disable-next-line @typescript-eslint/no-explicit-any
           onValueChange={(value: any) => setFormData({ ...formData, scheduleType: value })}
         >
           <SelectTrigger>
@@ -890,6 +889,7 @@ function CreateScheduleForm({ onClose }: CreateScheduleFormProps) {
         <Label htmlFor="deliveryFormat">Delivery Format *</Label>
         <Select
           value={formData.deliveryFormat}
+          // eslint-disable-next-line @typescript-eslint/no-explicit-any
           onValueChange={(value: any) => setFormData({ ...formData, deliveryFormat: value })}
         >
           <SelectTrigger>

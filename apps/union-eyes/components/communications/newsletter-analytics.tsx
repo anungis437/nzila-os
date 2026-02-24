@@ -20,7 +20,6 @@ import {
   BarChart3,
   TrendingUp,
   TrendingDown,
-  Users,
   Mail,
   MousePointerClick,
   AlertTriangle,
@@ -139,7 +138,7 @@ export function NewsletterAnalytics({ campaignId }: NewsletterAnalyticsProps) {
       setGeographic(data.geographic || []);
       setDevices(data.devices || []);
       setTimeline(data.timeline || []);
-    } catch (error) {
+    } catch (_error) {
 toast({
         title: 'Error',
         description: 'Failed to load analytics data',
@@ -178,7 +177,7 @@ toast({
         title: 'Export Successful',
         description: 'Analytics report downloaded',
       });
-    } catch (error) {
+    } catch (_error) {
 toast({
         title: 'Error',
         description: 'Failed to export analytics',
@@ -204,7 +203,7 @@ toast({
     return 'text-red-600';
   };
 
-  const getTrendIcon = (current: number, previous: number) => {
+  const _getTrendIcon = (current: number, previous: number) => {
     if (current > previous) {
       return <TrendingUp className="w-4 h-4 text-green-600" />;
     } else if (current < previous) {
@@ -256,6 +255,7 @@ toast({
         </div>
 
         <div className="flex items-center gap-3">
+          {/* eslint-disable-next-line @typescript-eslint/no-explicit-any */}
           <Select value={timeRange} onValueChange={(v: any) => setTimeRange(v)}>
             <SelectTrigger className="w-32">
               <SelectValue />

@@ -5,6 +5,12 @@ import { NextResponse } from 'next/server';
  */
 import { logger } from '@/lib/logger';
 import { PaymentService } from '@/lib/services/payment-service';
+ 
+ 
+ 
+ 
+ 
+ 
 import { withApi, ApiError } from '@/lib/api/framework';
 
 async function getPayPalAccessToken(clientId: string, clientSecret: string, baseUrl: string): Promise<string> {
@@ -68,6 +74,7 @@ async function verifyPayPalWebhook(
   return data.verification_status === 'SUCCESS';
 }
 
+// eslint-disable-next-line @typescript-eslint/no-explicit-any
 function getTransactionIdFromPayPalEvent(resource: any): string | null {
   return (
     resource?.custom_id ||
@@ -85,7 +92,7 @@ export const POST = withApi(
       summary: 'POST paypal',
     },
   },
-  async ({ request, userId, organizationId, user, body, query, params }) => {
+  async ({ request, userId: _userId, organizationId: _organizationId, user: _user, body: _body, query: _query, params: _params }) => {
 
         const clientId = process.env.PAYPAL_CLIENT_ID;
         const clientSecret = process.env.PAYPAL_CLIENT_SECRET;

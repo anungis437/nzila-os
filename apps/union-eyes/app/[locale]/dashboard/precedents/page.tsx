@@ -1,5 +1,7 @@
-﻿"use client";
+"use client";
 
+
+export const dynamic = 'force-dynamic';
 /**
  * Phase 5B: Arbitration Precedents Main Page
  * Integrates search, view, compare, and document management
@@ -79,9 +81,12 @@ export default function PrecedentsPage() {
   const [selectedPrecedentIds, setSelectedPrecedentIds] = useState<string[]>([]);
   const [comparisonNotes, setComparisonNotes] = useState("");
   const [currentPage, setCurrentPage] = useState(1);
+  // eslint-disable-next-line @typescript-eslint/no-explicit-any
   const [precedentsData, setPrecedentsData] = useState<any>(null);
   const [isLoadingPrecedents, setIsLoadingPrecedents] = useState(false);
+  // eslint-disable-next-line @typescript-eslint/no-explicit-any
   const [selectedPrecedent, setSelectedPrecedent] = useState<any>(null);
+  // eslint-disable-next-line @typescript-eslint/no-explicit-any
   const [comparisonData, setComparisonData] = useState<any>(null);
   const [isEditDialogOpen, setIsEditDialogOpen] = useState(false);
   const [isShareDialogOpen, setIsShareDialogOpen] = useState(false);
@@ -255,7 +260,7 @@ setPrecedentsData({
           const data = await response.json();
           setSelectedPrecedent(data);
         }
-      } catch (error) {
+      } catch (_error) {
 }
     };
 
@@ -306,7 +311,7 @@ setPrecedentsData({
         const data = await response.json();
         setComparisonData(data);
       }
-    } catch (error) {
+    } catch (_error) {
 }
   };
 
@@ -402,7 +407,7 @@ setPrecedentsData({
         description: "Your changes have been saved.",
       });
       setIsEditDialogOpen(false);
-    } catch (error) {
+    } catch (_error) {
 toast({
         title: "Update failed",
         description: "Could not update precedent. Please try again.",
@@ -444,7 +449,7 @@ toast({
         description: "Precedent sharing settings have been updated.",
       });
       setIsShareDialogOpen(false);
-    } catch (error) {
+    } catch (_error) {
 toast({
         title: "Update failed",
         description: "Could not update sharing settings. Please try again.",
@@ -503,7 +508,7 @@ toast({
           variant: "destructive",
         });
       }
-    } catch (error) {
+    } catch (_error) {
 toast({
         title: "Error",
         description: "An error occurred while deleting the precedent.",
@@ -568,6 +573,7 @@ toast({
       )}
 
       {/* Main Content */}
+      {/* eslint-disable-next-line @typescript-eslint/no-explicit-any */}
       <Tabs value={activeTab} onValueChange={(v: any) => setActiveTab(v)}>
         <TabsList>
           <TabsTrigger value="browse">{t('precedents.browse')}</TabsTrigger>
@@ -592,6 +598,7 @@ toast({
           ) : (
             <>
               <div className="grid gap-4 md:grid-cols-2">
+                {/* eslint-disable-next-line @typescript-eslint/no-explicit-any */}
                 {precedentsData?.precedents?.map((precedent: any) => (
                   <Card
                     key={precedent.id}

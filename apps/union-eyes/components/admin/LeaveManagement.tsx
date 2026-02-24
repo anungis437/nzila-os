@@ -17,8 +17,7 @@
 import React, { useState, useEffect } from "react";
 import { zodResolver } from "@hookform/resolvers/zod";
 import { useForm } from "react-hook-form";
-import { z } from "zod";
-import { Loader2, Plus, Check, X } from "lucide-react";
+import { Loader2, Plus, Check } from "lucide-react";
 import {
   Dialog,
   DialogContent,
@@ -119,6 +118,7 @@ export default function LeaveManagement({ organizationId, memberId }: LeaveManag
 
   useEffect(() => {
     loadLeaves();
+  // eslint-disable-next-line react-hooks/exhaustive-deps
   }, [memberId]);
 
   const loadLeaves = async () => {
@@ -126,9 +126,10 @@ export default function LeaveManagement({ organizationId, memberId }: LeaveManag
     try {
       const result = await getAllMemberLeavesAction(memberId);
       if (result.isSuccess && Array.isArray(result.data)) {
+        // eslint-disable-next-line @typescript-eslint/no-explicit-any
         setLeaves(result.data as any);
       }
-    } catch (error) {
+    } catch (_error) {
       toast({
         title: "Error",
         description: "Failed to load leaves",
@@ -306,7 +307,9 @@ function LeaveFormDialog({ open, onClose, editingLeave, organizationId, defaultM
   const { toast } = useToast();
   const [submitting, setSubmitting] = useState(false);
 
+  // eslint-disable-next-line @typescript-eslint/no-explicit-any
   const form = useForm<any>({
+    // eslint-disable-next-line @typescript-eslint/no-explicit-any
     resolver: zodResolver(createMemberLeaveSchema) as any,
     defaultValues: editingLeave
       ? {
@@ -327,6 +330,7 @@ function LeaveFormDialog({ open, onClose, editingLeave, organizationId, defaultM
         },
   });
 
+  // eslint-disable-next-line @typescript-eslint/no-explicit-any
   const onSubmit = async (data: any) => {
     setSubmitting(true);
     try {
@@ -347,7 +351,7 @@ function LeaveFormDialog({ open, onClose, editingLeave, organizationId, defaultM
           variant: "destructive",
         });
       }
-    } catch (error) {
+    } catch (_error) {
       toast({
         title: "Error",
         description: "An unexpected error occurred",

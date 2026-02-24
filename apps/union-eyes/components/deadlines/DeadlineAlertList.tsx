@@ -143,7 +143,7 @@ export function DeadlineAlertList({
             >
               <div className="flex items-start gap-3">
                 {/* Icon */}
-                <div className="flex-shrink-0 pt-0.5">
+                <div className="shrink-0 pt-0.5">
                   {getSeverityIcon(alert.severity)}
                 </div>
 
@@ -200,7 +200,7 @@ export function DeadlineAlertList({
                 </div>
 
                 {/* Dismiss Button */}
-                <div className="flex-shrink-0">
+                <div className="shrink-0">
                   <button
                     onClick={() => onAcknowledge(alert.id)}
                     className="rounded-md p-1 text-gray-400 hover:text-gray-600 hover:bg-white focus:outline-none focus:ring-2 focus:ring-blue-500"

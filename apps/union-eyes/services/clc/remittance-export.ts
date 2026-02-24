@@ -196,6 +196,7 @@ export class RemittanceExportService {
   ): Promise<RemittanceExportRecord[]> {
     
     // Build query conditions
+    // eslint-disable-next-line @typescript-eslint/no-explicit-any
     const conditions: any[] = [];
 
     if (options.remittanceIds && options.remittanceIds.length > 0) {
@@ -233,6 +234,7 @@ export class RemittanceExportService {
       .orderBy(organizations.name, perCapitaRemittances.remittanceYear, perCapitaRemittances.remittanceMonth);
 
     // Fetch parent org details
+    // eslint-disable-next-line @typescript-eslint/no-explicit-any
     const parentOrgs = new Map<string, any>();
     for (const result of results) {
       const parentId = result.remittance.toOrganizationId;
@@ -347,7 +349,7 @@ export class RemittanceExportService {
    */
   private generateXML(
     records: RemittanceExportRecord[],
-    options: ExportOptions
+    _options: ExportOptions
   ): string {
     const xml: string[] = [];
 
@@ -406,7 +408,7 @@ export class RemittanceExportService {
    */
   private generateEDI(
     records: RemittanceExportRecord[],
-    options: ExportOptions
+    _options: ExportOptions
   ): string {
     const edi: string[] = [];
     const timestamp = this.formatTimestampEDI(new Date());
@@ -511,7 +513,7 @@ export class RemittanceExportService {
    */
   private async generateExcel(
     records: RemittanceExportRecord[],
-    options: ExportOptions
+    _options: ExportOptions
   ): Promise<Buffer> {
     // Calculate summary
     const summary = {
@@ -636,6 +638,7 @@ export class RemittanceExportService {
    * Helper: Calculate checksum (SHA-256)
    */
   private calculateChecksum(content: string | Buffer): string {
+    // eslint-disable-next-line @typescript-eslint/no-require-imports
     const crypto = require('crypto');
     return crypto
       .createHash('sha256')

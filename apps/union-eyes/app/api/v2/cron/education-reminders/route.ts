@@ -4,9 +4,16 @@
  */
 import { db } from "@/db";
 import { sql } from 'drizzle-orm';
+import { timingSafeEqual } from 'crypto';
 import { withSystemContext } from '@/lib/db/with-rls-context';
 import { logger } from "@/lib/logger";
 import { withApi, ApiError } from '@/lib/api/framework';
+ 
+ 
+ 
+ 
+ 
+ 
 import {
   batchSendSessionReminders,
   batchSendExpiryWarnings,
@@ -20,12 +27,15 @@ export const GET = withApi(
       summary: 'GET education-reminders',
     },
   },
-  async ({ request, userId, organizationId, user, body, query, params }) => {
+  async ({ request, userId: _userId, organizationId: _organizationId, user: _user, body: _body, query: _query, params: _params }) => {
 
-        // Verify cron secret for security
+        // Verify cron secret for security (timing-safe comparison)
         const authHeader = request.headers.get("authorization");
-        const cronSecret = process.env.CRON_SECRET;
-        if (cronSecret && authHeader !== `Bearer ${cronSecret}`) {
+        const secret = authHeader?.replace('Bearer ', '') ?? '';
+        const cronSecret = process.env.CRON_SECRET ?? '';
+        const secretBuf = Buffer.from(secret);
+        const expectedBuf = Buffer.from(cronSecret);
+        if (cronSecret && (secretBuf.length !== expectedBuf.length || !timingSafeEqual(secretBuf, expectedBuf))) {
           logger.warn("Unauthorized cron job attempt", {
             authHeader: authHeader?.substring(0, 20),
           });

@@ -48,8 +48,8 @@ import {
   DropdownMenuTrigger,
 } from "@/components/ui/dropdown-menu";
 import { useToast } from "@/components/ui/use-toast";
+ 
 import { format } from "date-fns";
-import { cn } from "@/lib/utils";
 
 export interface MemberDocument {
   id: string;
@@ -86,7 +86,7 @@ const categories = [
 ];
 
 export function MemberDocumentCenter({
-  memberId,
+  memberId: _memberId,
   memberName,
   documents,
   onUpload,
@@ -97,7 +97,7 @@ export function MemberDocumentCenter({
   const { toast } = useToast();
   const [searchQuery, setSearchQuery] = React.useState("");
   const [filterCategory, setFilterCategory] = React.useState<string>("all");
-  const [viewMode, setViewMode] = React.useState<"grid" | "list">("list");
+  const [_viewMode, _setViewMode] = React.useState<"grid" | "list">("list");
   const fileInputRef = React.useRef<HTMLInputElement>(null);
 
   // Filter documents
@@ -336,7 +336,7 @@ function DocumentRow({
 
   return (
     <div className="flex items-center gap-4 p-3 border rounded-lg hover:bg-gray-50 transition-colors">
-      <div className="flex-shrink-0 w-10 h-10 bg-gray-100 rounded flex items-center justify-center">
+      <div className="shrink-0 w-10 h-10 bg-gray-100 rounded flex items-center justify-center">
         {getFileIcon()}
       </div>
 

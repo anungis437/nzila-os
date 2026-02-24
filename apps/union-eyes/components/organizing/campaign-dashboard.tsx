@@ -6,7 +6,6 @@ import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 import { Badge } from "@/components/ui/badge";
 import { Progress } from "@/components/ui/progress";
-import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
 import {
   Select,
   SelectContent,
@@ -53,7 +52,7 @@ interface Campaign {
 }
 
 export default function CampaignDashboard() {
-  const [campaigns, setCampaigns] = useState<Campaign[]>([
+  const [campaigns, _setCampaigns] = useState<Campaign[]>([
     {
       id: "1",
       campaignName: "Acme Manufacturing Local 101",
@@ -114,7 +113,7 @@ export default function CampaignDashboard() {
   const [searchTerm, setSearchTerm] = useState("");
   const [statusFilter, setStatusFilter] = useState("all");
   const [priorityFilter, setPriorityFilter] = useState("all");
-  const [selectedTab, setSelectedTab] = useState("overview");
+  const [_selectedTab, _setSelectedTab] = useState("overview");
 
   const getStatusBadge = (status: string) => {
     const statusConfig = {

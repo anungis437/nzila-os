@@ -22,7 +22,6 @@ import {
   MapPin,
   User,
   FileText,
-  MessageSquare,
   Paperclip,
   Clock,
   MoreVertical,
@@ -37,6 +36,9 @@ import { Button } from "@/components/ui/button";
 import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
 import { Avatar, AvatarFallback, AvatarImage } from "@/components/ui/avatar";
 import { Textarea } from "@/components/ui/textarea";
+ 
+ 
+ 
 import {
   DropdownMenu,
   DropdownMenuContent,
@@ -45,7 +47,6 @@ import {
   DropdownMenuSeparator,
   DropdownMenuTrigger,
 } from "@/components/ui/dropdown-menu";
-import { cn } from "@/lib/utils";
 
 export interface ClaimDetail {
   claimId: string;
@@ -114,9 +115,9 @@ const priorityConfig: Record<string, { label: string; color: string }> = {
 
 export function ClaimDetailViewEnhanced({
   claim,
-  onStatusChange,
-  onPriorityChange,
-  onAssign,
+  onStatusChange: _onStatusChange,
+  onPriorityChange: _onPriorityChange,
+  onAssign: _onAssign,
   onAddComment,
   onEdit,
   onDelete,
@@ -135,7 +136,7 @@ export function ClaimDetailViewEnhanced({
     try {
       await onAddComment(newComment);
       setNewComment("");
-    } catch (error) {
+    } catch (_error) {
 } finally {
       setIsSubmitting(false);
     }

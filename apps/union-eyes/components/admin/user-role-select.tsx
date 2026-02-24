@@ -8,7 +8,7 @@
 "use client";
 
 import { useState, useTransition } from "react";
-import { Shield, Loader2 } from "lucide-react";
+import { Loader2 } from "lucide-react";
 import {
   Select,
   SelectContent,
@@ -16,7 +16,8 @@ import {
   SelectTrigger,
   SelectValue,
 } from "@/components/ui/select";
-import { Badge } from "@/components/ui/badge";
+ 
+ 
 import { useToast } from "@/lib/hooks/use-toast";
 
 type UserRole = "member" | "steward" | "officer" | "admin";
@@ -54,7 +55,7 @@ const ROLE_CONFIG = {
   },
 };
 
-export function UserRoleSelect({ userId, organizationId, currentRole }: UserRoleSelectProps) {
+export function UserRoleSelect({ userId: _userId, organizationId: _organizationId, currentRole }: UserRoleSelectProps) {
   const [role, setRole] = useState<UserRole>(currentRole);
   const [isPending, startTransition] = useTransition();
   const { toast } = useToast();
@@ -75,7 +76,7 @@ export function UserRoleSelect({ userId, organizationId, currentRole }: UserRole
           title: "Role updated",
           description: `User role changed to ${ROLE_CONFIG[newRole].label}`,
         });
-      } catch (error) {
+      } catch (_error) {
         // Revert on error
         setRole(currentRole);
         toast({

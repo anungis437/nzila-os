@@ -10,10 +10,10 @@ import {
   lmbpComplianceAlerts,
   lmbpComplianceReports,
   type NewForeignWorker,
-  type NewLMBPLetter,
+  type _NewLMBPLetter,
   type NewGSSApplication,
   type NewMentorship,
-  type NewLMBPComplianceAlert,
+  type _NewLMBPComplianceAlert,
 } from '@/db/schema/lmbp-immigration-schema';
 import { eq, and, gte, lte, sql } from 'drizzle-orm';
 
@@ -213,6 +213,7 @@ export class LMBPImmigrationService {
   async updateGSSApplicationStatus(
     applicationId: string,
     status: 'approved' | 'denied' | 'withdrawn',
+    // eslint-disable-next-line @typescript-eslint/no-explicit-any
     decisionDetails?: any
   ) {
     const application = await db

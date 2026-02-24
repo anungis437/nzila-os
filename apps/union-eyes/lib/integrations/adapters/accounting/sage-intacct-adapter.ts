@@ -119,7 +119,7 @@ export class SageIntacctAdapter extends BaseIntegration {
   async sync(options: SyncOptions): Promise<SyncResult> {
     this.ensureConnected();
 
-    const startTime = Date.now();
+    const _startTime = Date.now();
     let recordsProcessed = 0;
     let recordsCreated = 0;
     let recordsUpdated = 0;
@@ -486,12 +486,12 @@ export class SageIntacctAdapter extends BaseIntegration {
   // Webhook Support (Not Supported)
   // ==========================================================================
 
-  async verifyWebhook(payload: string, signature: string): Promise<boolean> {
+  async verifyWebhook(_payload: string, _signature: string): Promise<boolean> {
     // Sage Intacct doesn&apos;t support webhooks
     return false;
   }
 
-  async processWebhook(event: WebhookEvent): Promise<void> {
+  async processWebhook(_event: WebhookEvent): Promise<void> {
     this.logOperation('webhook', { message: 'Sage Intacct does not support webhooks' });
   }
 }

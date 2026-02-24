@@ -1,3 +1,5 @@
+export const dynamic = 'force-dynamic';
+
 import { Metadata } from 'next';
 import { auth } from '@clerk/nextjs/server';
 import { redirect } from 'next/navigation';
@@ -49,6 +51,7 @@ export default async function RedeemCreditsPage() {
           {t('redeem.balanceTitle', { defaultValue: 'Available Balance' })}
         </AlertTitle>
         <AlertDescription>
+          {/* eslint-disable-next-line @typescript-eslint/no-explicit-any */}
           {(t as any)('redeem.balanceMessage', {
             defaultValue: 'You have {balance} credits available to redeem',
             values: { balance: balance.toLocaleString() },

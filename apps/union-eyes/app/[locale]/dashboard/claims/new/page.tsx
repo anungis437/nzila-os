@@ -1,7 +1,9 @@
 "use client";
 
+
+export const dynamic = 'force-dynamic';
 import { useState, useRef, useEffect } from "react";
-import { motion, AnimatePresence } from "framer-motion";
+import { motion } from "framer-motion";
 import { useRouter } from "next/navigation";
 import { useTranslations } from "next-intl";
 import { useUser } from "@clerk/nextjs";
@@ -96,7 +98,7 @@ export default function NewClaimPage() {
                           'Voice Recording Transcript:\n' + data.transcription
             }));
           }
-        } catch (error) {
+        } catch (_error) {
 }
       }
       
@@ -128,7 +130,7 @@ export default function NewClaimPage() {
         timerRef.current = setInterval(() => {
           setRecordingTime(prev => prev + 1);
         }, 1000);
-      } catch (error) {
+      } catch (_error) {
 alert('Unable to access microphone. Please ensure you have granted permission.');
       }
     }

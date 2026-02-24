@@ -29,14 +29,13 @@ import {
 } from "@/components/ui/table";
 import { Skeleton } from "@/components/ui/skeleton";
 import { useToast } from "@/components/ui/use-toast";
-import { 
-  Shield, 
-  AlertTriangle, 
-  Package, 
+import {
+  AlertTriangle,
+  Package,
   ShoppingCart,
   Search,
   Plus,
-  TrendingDown
+  TrendingDown,
 } from "lucide-react";
 import { cn } from "@/lib/utils";
 
@@ -70,6 +69,7 @@ export function PPEDistributionTracker({
 
   React.useEffect(() => {
     loadInventory();
+  // eslint-disable-next-line react-hooks/exhaustive-deps
   }, [organizationId]);
 
   async function loadInventory() {
@@ -85,6 +85,7 @@ export function PPEDistributionTracker({
 
       const data = await response.json();
       if (data.success) {
+        // eslint-disable-next-line @typescript-eslint/no-explicit-any
         setItems(data.items.map((item: any) => ({
           ...item,
           lastRestocked: item.lastRestocked ? new Date(item.lastRestocked) : undefined
@@ -92,7 +93,7 @@ export function PPEDistributionTracker({
       } else {
         throw new Error(data.error);
       }
-    } catch (error) {
+    } catch (_error) {
       toast({
         title: "Error",
         description: "Failed to load PPE inventory",

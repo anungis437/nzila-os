@@ -24,7 +24,6 @@ import {
   Clock,
   User,
   MessageSquare,
-  ArrowRight,
   Plus,
   Trash2,
   AlertCircle,
@@ -76,7 +75,7 @@ const workflowConfigSchema = z.object({
   stages: z.array(approvalStageSchema).min(1, "At least one stage is required"),
 });
 
-type ApprovalStage = z.infer<typeof approvalStageSchema>;
+type _ApprovalStage = z.infer<typeof approvalStageSchema>;
 type WorkflowConfig = z.infer<typeof workflowConfigSchema>;
 
 export interface ApprovalRecord {
@@ -535,6 +534,7 @@ export function DocumentApprovalWorkflow({
                 ].map((option) => (
                   <button
                     key={option.value}
+                    // eslint-disable-next-line @typescript-eslint/no-explicit-any
                     onClick={() => setReviewStatus(option.value as any)}
                     className={cn(
                       "w-full flex items-center gap-3 p-3 border-2 rounded-lg transition-all",

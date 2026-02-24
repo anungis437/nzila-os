@@ -1,15 +1,10 @@
-﻿import { NextRequest, NextResponse } from 'next/server';
+﻿import { NextResponse } from 'next/server';
 import {
-  trackLocation,
   requestLocationPermission,
-  purgeExpiredLocations,
 } from '@/lib/services/geofence-privacy-service';
-import type { EmergencyActivationRequest, EmergencyActivationResponse } from '@/lib/types/compliance-api-types';
-import { getCurrentUser, withAdminAuth, withApiAuth, withMinRole, withRoleAuth } from '@/lib/api-auth-guard';
+import type { EmergencyActivationResponse } from '@/lib/types/compliance-api-types';
+import { withRoleAuth } from '@/lib/api-auth-guard';
 import { z } from 'zod';
-import {
-  ErrorCode,
-} from '@/lib/api/standardized-responses';
 
 /**
  * Emergency Activation API
@@ -104,7 +99,7 @@ export const POST = withRoleAuth('steward', async (request) => {
       ],
       message: `Emergency ${emergencyType} activated in ${affectedRegions.join(', ')}`,
     } as EmergencyActivationResponse);
-  } catch (error) {
+  } catch (_error) {
 return NextResponse.json(
       {
         success: false,

@@ -23,7 +23,7 @@ export function MessageNotificationBadge() {
 
         const data = await response.json();
         setUnreadCount(data.unreadCount);
-      } catch (error) {
+      } catch (_error) {
 }
     };
 

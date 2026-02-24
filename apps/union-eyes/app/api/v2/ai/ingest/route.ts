@@ -2,14 +2,10 @@
  * GET POST /api/ai/ingest
  * Migrated to withApi() framework
  */
-import { logger } from '@/lib/logger';
-import { dataIngestion, IngestedDocument } from '@/lib/ai/data-ingestion';
-import { entityExtraction } from '@/lib/ai/entity-extraction';
-import { ragPipeline } from '@/lib/ai/rag-pipeline';
 
-import { withApi, ApiError, z } from '@/lib/api/framework';
+import { withApi, z } from '@/lib/api/framework';
 
-const ingestSchema = z.object({
+const _ingestSchema = z.object({
   source: z.string().min(1, 'Source is required'),
   jurisdiction: z.string().optional(),
   tags: z.array(z.string()).optional(),
@@ -17,6 +13,8 @@ const ingestSchema = z.object({
   addToRAG: z.boolean().default(true),
 });
 
+ 
+ 
 import { GET as v1GET, POST as v1POST } from '@/app/api/ai/ingest/route';
 
 export const GET = withApi(
@@ -27,7 +25,7 @@ export const GET = withApi(
       summary: 'GET ingest',
     },
   },
-  async ({ request, params }) => {
+  async ({ request, params: _params }) => {
     // Delegate to v1 handler while framework migration is in progress
     const response = await v1GET(request);
     return response;
@@ -42,7 +40,7 @@ export const POST = withApi(
       summary: 'POST ingest',
     },
   },
-  async ({ request, params }) => {
+  async ({ request, params: _params }) => {
     // Delegate to v1 handler while framework migration is in progress
     const response = await v1POST(request);
     return response;

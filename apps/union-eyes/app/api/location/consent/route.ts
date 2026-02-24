@@ -16,7 +16,7 @@ import {
  */
 
 
-const locationConsentSchema = z.object({
+const _locationConsentSchema = z.object({
   userId: z.string().uuid('Invalid userId'),
   purpose: z.unknown().optional(),
   purposeDescription: z.string().optional(),

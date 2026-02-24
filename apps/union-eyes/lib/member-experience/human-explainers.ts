@@ -202,7 +202,7 @@ const statusExplainers: Record<ClaimStatus, Omit<HumanExplanation, 'daysInThisSt
 /**
  * Get priority-specific context
  */
-function getPriorityContext(priority: ClaimPriority, daysInState: number): string {
+function getPriorityContext(priority: ClaimPriority, _daysInState: number): string {
   const priorityMessages: Record<ClaimPriority, string> = {
     critical:
       'This case is flagged as CRITICAL and receives expedited handling. Stewards are treating this with the highest urgency.',
@@ -214,7 +214,7 @@ function getPriorityContext(priority: ClaimPriority, daysInState: number): strin
   const context = priorityMessages[priority];
 
   // Add time-based context
-  const thresholds: Record<ClaimStatus, number> = {
+  const _thresholds: Record<ClaimStatus, number> = {
     submitted: 2,
     under_review: 7,
     assigned: 1,

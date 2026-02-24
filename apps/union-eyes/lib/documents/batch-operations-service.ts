@@ -5,8 +5,8 @@
  * Database-agnostic: Compatible with PostgreSQL (Supabase) and Azure SQL Server
  */
 
-import { getDatabase, eq, and, inArray, isNull, getDatabaseConfig, sql } from '@/lib/database/multi-db-client';
-import { documents, documentFolders, auditLogs, profiles } from '@/db/schema';
+import { getDatabase, eq, and, inArray, isNull, getDatabaseConfig } from '@/lib/database/multi-db-client';
+import { documents, documentFolders, auditLogs } from '@/db/schema';
 import archiver from 'archiver';
 import { Readable } from 'stream';
 
@@ -31,6 +31,7 @@ export async function downloadMultiple(
   organizationId: string,
   userId: string
 ): Promise<{ stream: Readable; filename: string }> {
+  // eslint-disable-next-line @typescript-eslint/no-explicit-any
   const db = await getDatabase() as any;
 
   // Fetch all documents using Drizzle ORM
@@ -93,7 +94,7 @@ continue;
       // Add to archive
       archive.append(buffer, { name: fileName });
       filesAdded++;
-    } catch (error) {
+    } catch (_error) {
 }
   }
 
@@ -137,8 +138,9 @@ export async function bulkTag(
   organizationId: string,
   userId: string
 ): Promise<BatchOperationResult> {
+  // eslint-disable-next-line @typescript-eslint/no-explicit-any
   const db = await getDatabase() as any;
-  const dbConfig = getDatabaseConfig();
+  const _dbConfig = getDatabaseConfig();
 
   const progress: BatchOperationProgress = {
     total: documentIds.length,
@@ -224,6 +226,7 @@ export async function bulkDelete(
   userId: string,
   userRole: string
 ): Promise<BatchOperationResult> {
+  // eslint-disable-next-line @typescript-eslint/no-explicit-any
   const db = await getDatabase() as any;
 
   const progress: BatchOperationProgress = {
@@ -322,6 +325,7 @@ export async function moveToFolder(
   organizationId: string,
   userId: string
 ): Promise<BatchOperationResult> {
+  // eslint-disable-next-line @typescript-eslint/no-explicit-any
   const db = await getDatabase() as any;
 
   const progress: BatchOperationProgress = {
@@ -419,6 +423,7 @@ export async function bulkCopy(
   organizationId: string,
   userId: string
 ): Promise<BatchOperationResult> {
+  // eslint-disable-next-line @typescript-eslint/no-explicit-any
   const db = await getDatabase() as any;
 
   const progress: BatchOperationProgress = {
@@ -538,6 +543,7 @@ export async function bulkUpdateMetadata(
   organizationId: string,
   userId: string
 ): Promise<BatchOperationResult> {
+  // eslint-disable-next-line @typescript-eslint/no-explicit-any
   const db = await getDatabase() as any;
 
   const progress: BatchOperationProgress = {
@@ -629,6 +635,7 @@ export async function validateDocumentPermissions(
   hasPermission: boolean;
   deniedDocuments: string[];
 }> {
+  // eslint-disable-next-line @typescript-eslint/no-explicit-any
   const db = await getDatabase() as any;
 
   // Admins and union leaders have access to all documents

@@ -5,6 +5,7 @@ import { Card, CardContent, CardDescription, CardHeader, CardTitle } from '@/com
 import { Table, TableBody, TableCell, TableHead, TableHeader, TableRow } from '@/components/ui/table';
 import { Badge } from '@/components/ui/badge';
 import { AlertCircle, TrendingUp } from 'lucide-react';
+ 
 import { useToast } from '@/lib/hooks/use-toast';
 
 interface APAgingData {
@@ -23,7 +24,7 @@ interface APAgingReportProps {
   organizationId: string;
 }
 
-export default function APAgingReport({ organizationId }: APAgingReportProps) {
+export default function APAgingReport({ organizationId: _organizationId }: APAgingReportProps) {
   const [agingData, setAgingData] = useState<APAgingData[]>([]);
   const [loading, setLoading] = useState(true);
   const [summary, setSummary] = useState({
@@ -40,6 +41,7 @@ export default function APAgingReport({ organizationId }: APAgingReportProps) {
     // In a real implementation, this would fetch from an API endpoint
     // For now, we&apos;ll use mock data
     fetchAPAging();
+  // eslint-disable-next-line react-hooks/exhaustive-deps
   }, []);
 
   const fetchAPAging = async () => {
@@ -107,7 +109,7 @@ export default function APAgingReport({ organizationId }: APAgingReportProps) {
 
       setSummary(summary);
 
-    } catch (error) {
+    } catch (_error) {
       toast({
         title: 'Error',
         description: 'Failed to load AP aging report',

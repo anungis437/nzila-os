@@ -253,12 +253,14 @@ export class WaveClient {
       }
     `;
 
+    // eslint-disable-next-line @typescript-eslint/no-explicit-any
     const result = await this.graphql<any>(query, {
       businessId: this.config.businessId,
       page,
       pageSize,
     });
 
+    // eslint-disable-next-line @typescript-eslint/no-explicit-any
     const invoices = result.business.invoices.edges.map((edge: any) => edge.node);
     const hasMore = page < result.business.invoices.pageInfo.totalPages;
 
@@ -300,12 +302,14 @@ export class WaveClient {
       }
     `;
 
+    // eslint-disable-next-line @typescript-eslint/no-explicit-any
     const result = await this.graphql<any>(query, {
       businessId: this.config.businessId,
       page,
       pageSize,
     });
 
+    // eslint-disable-next-line @typescript-eslint/no-explicit-any
     const customers = result.business.customers.edges.map((edge: any) => ({
       ...edge.node,
       currency: edge.node.currency?.code || 'USD',
@@ -355,6 +359,7 @@ export class WaveClient {
       }
     `;
 
+    // eslint-disable-next-line @typescript-eslint/no-explicit-any
     const result = await this.graphql<any>(query, {
       businessId: this.config.businessId,
       page,
@@ -362,7 +367,9 @@ export class WaveClient {
     });
 
     const payments = result.business.moneyTransactions.edges
+      // eslint-disable-next-line @typescript-eslint/no-explicit-any
       .map((edge: any) => edge.node)
+      // eslint-disable-next-line @typescript-eslint/no-explicit-any
       .filter((node: any) => node.invoice); // Only transactions linked to invoices
 
     const hasMore = page < result.business.moneyTransactions.pageInfo.totalPages;

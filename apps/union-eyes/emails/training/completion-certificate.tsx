@@ -44,6 +44,7 @@ export default function CompletionCertificateEmail({
   return (
     <Html>
       <Head />
+      {/* eslint-disable-next-line react/no-unescaped-entities */}
       <Preview>Congratulations! You've completed {courseName}</Preview>
       <Body style={main}>
         <Container style={container}>
@@ -136,6 +137,7 @@ export default function CompletionCertificateEmail({
                   📚 Continuing Education Credit
                 </Text>
                 <Text style={ceText}>
+                  {/* eslint-disable-next-line react/no-unescaped-entities */}
                   You've earned <strong>{continuingEducationHours} CE hours</strong> that can be
                   applied toward certification renewal and professional development requirements.
                 </Text>
@@ -144,6 +146,7 @@ export default function CompletionCertificateEmail({
 
             <Section style={nextStepsBox}>
               <Heading as="h3" style={h3}>
+                {/* eslint-disable-next-line react/no-unescaped-entities */}
                 What's Next?
               </Heading>
               <ul style={nextStepsList}>

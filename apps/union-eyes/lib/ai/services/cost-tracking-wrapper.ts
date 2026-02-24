@@ -29,9 +29,11 @@ export interface LLMRequest {
   prompt?: string;
   maxTokens?: number;
   temperature?: number;
+  // eslint-disable-next-line @typescript-eslint/no-explicit-any
   [key: string]: any; // Allow other provider-specific options
 }
 
+// eslint-disable-next-line @typescript-eslint/no-explicit-any
 export interface LLMResponse<T = any> {
   success: true;
   data: T;
@@ -54,6 +56,7 @@ export interface LLMError {
   };
 }
 
+// eslint-disable-next-line @typescript-eslint/no-explicit-any
 export type LLMResult<T = any> = LLMResponse<T> | LLMError;
 
 export interface BudgetAlert {
@@ -228,6 +231,7 @@ export class CostTrackingWrapper {
    * Extract token usage from provider response
    */
   private extractTokenUsage(
+    // eslint-disable-next-line @typescript-eslint/no-explicit-any
     response: any,
     provider: 'openai' | 'anthropic' | 'google'
   ): {
@@ -277,6 +281,7 @@ export class CostTrackingWrapper {
   /**
    * Extract response text for token estimation
    */
+  // eslint-disable-next-line @typescript-eslint/no-explicit-any
   private extractResponseText(response: any): string {
     // OpenAI
     if (response?.choices?.[0]?.message?.content) {
@@ -401,6 +406,7 @@ export class CostTrackingWrapper {
           email: organizations.email,
         })
         .from(organizations)
+        // eslint-disable-next-line @typescript-eslint/no-explicit-any
         .where(or(eq(organizations.id, alert.organizationId as any), eq(organizations.slug, alert.organizationId)))
         .limit(1);
 

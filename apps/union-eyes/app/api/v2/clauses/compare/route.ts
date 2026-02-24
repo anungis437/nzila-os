@@ -3,8 +3,10 @@ import { NextResponse } from 'next/server';
  * POST /api/clauses/compare
  * Migrated to withApi() framework
  */
-import { logApiAuditEvent } from "@/lib/middleware/api-security";
 import { withApi, ApiError, z } from '@/lib/api/framework';
+ 
+ 
+ 
 import { compareClauses, saveClauseComparison } from '@/lib/services/clause-service';
 
 const clausesCompareSchema = z.object({
@@ -25,7 +27,7 @@ export const POST = withApi(
     },
     successStatus: 201,
   },
-  async ({ request, userId, organizationId, user, body, query }) => {
+  async ({ request: _request, userId, organizationId, user: _user, body, query: _query }) => {
 
           // Validate request body
         // DUPLICATE REMOVED (Phase 2): Multi-line destructuring of body

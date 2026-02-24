@@ -1,5 +1,4 @@
 import { getRequestConfig } from 'next-intl/server';
-import { notFound } from 'next/navigation';
 import { locales, defaultLocale, type Locale } from './lib/locales';
 
 // Re-export locale constants from lib/locales.ts

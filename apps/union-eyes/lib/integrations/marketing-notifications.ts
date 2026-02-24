@@ -477,6 +477,7 @@ View the case study to review formatting and content.`;
   }
 }
 
+// eslint-disable-next-line import/no-anonymous-default-export
 export default {
   sendPilotApprovalNotification,
   sendPilotRejectionNotification,

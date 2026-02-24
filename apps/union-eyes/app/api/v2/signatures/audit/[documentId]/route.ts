@@ -5,6 +5,10 @@ import { NextResponse } from 'next/server';
  */
 import { AuditTrailService } from "@/lib/signature/signature-service";
 
+ 
+ 
+ 
+ 
 import { withApi, ApiError } from '@/lib/api/framework';
 
 export const GET = withApi(
@@ -15,7 +19,7 @@ export const GET = withApi(
       summary: 'GET [documentId]',
     },
   },
-  async ({ request, params, userId, organizationId, user, body, query }) => {
+  async ({ request, params, userId: _userId, organizationId: _organizationId, user, body: _body, query: _query }) => {
 
         if (!user) {
           throw ApiError.unauthorized('Unauthorized'

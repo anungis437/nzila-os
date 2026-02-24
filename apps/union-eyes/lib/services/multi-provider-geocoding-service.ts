@@ -63,6 +63,7 @@ export class MultiProviderGeocodingService {
    * Initialize all available geocoding providers
    */
   private initializeProviders() {
+    // eslint-disable-next-line @typescript-eslint/no-explicit-any
     const providers: any[] = [];
 
     // Google Maps Geocoding (highest priority)
@@ -222,7 +223,7 @@ export class MultiProviderGeocodingService {
       // Test with a known address
       const results = await provider.geocoder.geocode('1600 Amphitheatre Parkway, Mountain View, CA');
       return results && results.length > 0;
-    } catch (error) {
+    } catch (_error) {
       return false;
     }
   }
@@ -257,7 +258,9 @@ export class MultiProviderGeocodingService {
       formattedAddress: result.formattedAddress || '',
       provider,
       confidence,
+      // eslint-disable-next-line @typescript-eslint/no-explicit-any
       placeId: (result.extra as any)?.googlePlaceId,
+      // eslint-disable-next-line @typescript-eslint/no-explicit-any
       plusCode: (result.extra as any)?.plusCode,
     };
   }

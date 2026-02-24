@@ -1,10 +1,9 @@
 "use server"; // Ensure this only runs on the server
 
 import { getProfileByUserId, updateProfile, updateProfileByWhopUserId, getProfileByEmail, createProfile, deleteProfileById } from "@/db/queries/profiles-queries";
-import { whopApp } from "@/lib/whop";
 import { auth } from '@/lib/api-auth-guard';
 import { revalidatePath } from "next/cache";
-import { getPendingProfileByEmail, markPendingProfileAsClaimed, deletePendingProfile } from "@/db/queries/pending-profiles-queries";
+import { getPendingProfileByEmail, markPendingProfileAsClaimed } from "@/db/queries/pending-profiles-queries";
 import { logger } from '@/lib/logger';
 
 // Convert Whop membership status to our app's membership status
@@ -241,6 +240,7 @@ export async function claimPendingProfile(
 async function claimOldPendingProfile(
   userId: string, 
   email: string, 
+  // eslint-disable-next-line @typescript-eslint/no-explicit-any
   pendingProfile: any
 ): Promise<{ success: boolean; error?: string }> {
   try {

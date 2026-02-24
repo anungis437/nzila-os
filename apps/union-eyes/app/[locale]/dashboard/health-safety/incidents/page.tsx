@@ -13,6 +13,8 @@
 
 "use client";
 
+
+export const dynamic = 'force-dynamic';
 import { useState, useEffect } from "react";
 import { motion } from "framer-motion";
 import Link from "next/link";
@@ -72,6 +74,7 @@ export default function IncidentsPage() {
 
   useEffect(() => {
     if (organizationId) {
+      // eslint-disable-next-line react-hooks/immutability
       loadStats();
     }
   }, [organizationId, dateRange]);

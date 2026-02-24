@@ -1,4 +1,3 @@
-import { logApiAuditEvent } from "@/lib/middleware/api-security";
 /**
  * AI Auto-Classification API Route
  * 
@@ -16,14 +15,13 @@ import {
   batchClassifyClauses,
 } from '@/lib/services/ai/auto-classification-service';
 import { z } from "zod";
-import { getCurrentUser, withAdminAuth, withApiAuth, withMinRole, withRoleAuth, BaseAuthContext } from '@/lib/api-auth-guard';
+import { withRoleAuth, BaseAuthContext } from '@/lib/api-auth-guard';
 import { checkRateLimit, RATE_LIMITS, createRateLimitHeaders } from '@/lib/rate-limiter';
-import { checkEntitlement, consumeCredits, getCreditCost } from '@/lib/services/entitlements';
+import { checkEntitlement } from '@/lib/services/entitlements';
 
 import {
   ErrorCode,
   standardErrorResponse,
-  standardSuccessResponse,
 } from '@/lib/api/standardized-responses';
 
 const aiClassifySchema = z.object({
@@ -175,7 +173,7 @@ export const POST = withRoleAuth('member', async (request: NextRequest, context:
           
           const batchResults = await batchClassifyClauses(clauses, {
             concurrency: 5,
-            onProgress: (comp, tot) => {
+            onProgress: (comp, _tot) => {
               completed = comp;
             },
           });

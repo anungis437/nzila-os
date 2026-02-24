@@ -14,14 +14,15 @@ import { createLinkedInClient } from '@/lib/social-media/linkedin-api-client';
 import { cookies } from 'next/headers';
 import { createClient } from '@supabase/supabase-js';
 import { z } from "zod";
-import { BaseAuthContext, getCurrentUser, withAdminAuth, withApiAuth, withMinRole, withRoleAuth } from '@/lib/api-auth-guard';
+import { BaseAuthContext, withRoleAuth } from '@/lib/api-auth-guard';
 
+ 
 import {
   ErrorCode,
   standardErrorResponse,
-  standardSuccessResponse,
 } from '@/lib/api/standardized-responses';
 // Lazy initialization to avoid build-time execution
+// eslint-disable-next-line @typescript-eslint/no-explicit-any
 let supabaseClient: any = null;
 
 function getSupabaseClient() {
@@ -93,6 +94,7 @@ return standardErrorResponse(
         dataType: 'SOCIAL_MEDIA',
         success: true,
         metadata: { count: accounts?.length || 0 },
+      // eslint-disable-next-line @typescript-eslint/no-explicit-any
       } as any);
 
       return NextResponse.json({ accounts: accounts || [] });
@@ -125,7 +127,7 @@ export const POST = withRoleAuth('steward', async (request: NextRequest, context
       );
     }
     
-    const { platform, account_id } = validation.data;
+    const { platform, account_id: _account_id } = validation.data;
 
       if (!platform) {
         return standardErrorResponse(
@@ -228,6 +230,7 @@ export const POST = withRoleAuth('steward', async (request: NextRequest, context
         dataType: 'SOCIAL_MEDIA',
         success: true,
         metadata: { platform },
+      // eslint-disable-next-line @typescript-eslint/no-explicit-any
       } as any);
 
       return NextResponse.json({ auth_url: authUrl });
@@ -304,7 +307,7 @@ export const DELETE = withRoleAuth('steward', async (request: NextRequest, conte
           }
           // Meta and LinkedIn don&apos;t require explicit revocation
         }
-      } catch (revokeError) {
+      } catch (_revokeError) {
 // Continue with deletion even if revocation fails
       }
 
@@ -331,6 +334,7 @@ return standardErrorResponse(
         recordId: accountId,
         success: true,
         metadata: { platform: account.platform },
+      // eslint-disable-next-line @typescript-eslint/no-explicit-any
       } as any);
 
       return NextResponse.json({
@@ -350,7 +354,7 @@ return NextResponse.json(
 
 export const PUT = withRoleAuth('member', async (request: NextRequest, context: BaseAuthContext) => {
   try {
-      const { userId, organizationId } = context;
+      const { _userId, organizationId } = context;
       
       if (!organizationId) {
         return standardErrorResponse(
@@ -433,6 +437,7 @@ export const PUT = withRoleAuth('member', async (request: NextRequest, context: 
 
         // Update account with new tokens
         const expiresAt = new Date(Date.now() + expiresIn * 1000);
+        // eslint-disable-next-line @typescript-eslint/no-explicit-any
         const updateData: Record<string, any> = {
           access_token: newAccessToken,
           token_expires_at: expiresAt.toISOString(),

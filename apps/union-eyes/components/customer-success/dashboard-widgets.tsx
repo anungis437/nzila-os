@@ -6,6 +6,12 @@
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from '@/components/ui/card';
 import { Badge } from '@/components/ui/badge';
 import { Progress } from '@/components/ui/progress';
+ 
+ 
+ 
+ 
+ 
+ 
 import { 
   Heart, 
   Users, 
@@ -21,7 +27,7 @@ interface WidgetProps {
   detailed?: boolean;
 }
 
-export function CustomerHealthScoresWidget({ detailed = false }: WidgetProps) {
+export function CustomerHealthScoresWidget({ detailed: _detailed = false }: WidgetProps) {
   const customers = [
     { name: 'Unifor Local 1', health: 92, status: 'healthy', users: 450 },
     { name: 'CUPE Local 416', health: 85, status: 'healthy', users: 320 },
@@ -65,7 +71,7 @@ export function CustomerHealthScoresWidget({ detailed = false }: WidgetProps) {
   );
 }
 
-export function OnboardingProgressWidget({ detailed = false }: WidgetProps) {
+export function OnboardingProgressWidget({ detailed: _detailed = false }: WidgetProps) {
   const onboardingCustomers = [
     { name: 'IBEW Local 353', stage: 'Setup', progress: 75, daysActive: 5 },
     { name: 'Teamsters Local 141', stage: 'Training', progress: 45, daysActive: 3 },
@@ -103,7 +109,7 @@ export function OnboardingProgressWidget({ detailed = false }: WidgetProps) {
   );
 }
 
-export function ChurnRiskWidget({ detailed = false }: WidgetProps) {
+export function ChurnRiskWidget({ detailed: _detailed = false }: WidgetProps) {
   const atRiskCustomers = [
     { name: 'SEIU Local 87', risk: 'high', reason: 'Low usage last 30d', lastLogin: '15 days ago' },
     { name: 'AFSCME Local 3299', risk: 'medium', reason: 'Support tickets increasing', lastLogin: '2 days ago' },
@@ -139,7 +145,7 @@ export function ChurnRiskWidget({ detailed = false }: WidgetProps) {
   );
 }
 
-export function AdoptionMetricsWidget({ detailed = false }: WidgetProps) {
+export function AdoptionMetricsWidget({ detailed: _detailed = false }: WidgetProps) {
   const features = [
     { name: 'Claims Management', adoption: 87, trend: 'up' },
     { name: 'CBA Library', adoption: 72, trend: 'up' },
@@ -173,7 +179,7 @@ export function AdoptionMetricsWidget({ detailed = false }: WidgetProps) {
   );
 }
 
-export function NPSWidget({ detailed = false }: WidgetProps) {
+export function NPSWidget({ detailed: _detailed = false }: WidgetProps) {
   const npsData = {
     score: 72,
     promoters: 65,
@@ -227,7 +233,7 @@ export function NPSWidget({ detailed = false }: WidgetProps) {
   );
 }
 
-export function CustomerFeedbackWidget({ detailed = false }: WidgetProps) {
+export function CustomerFeedbackWidget({ detailed: _detailed = false }: WidgetProps) {
   const feedback = [
     { customer: 'Unifor Local 1', rating: 5, comment: 'Excellent claims tracking!', date: '2 hours ago' },
     { customer: 'CUPE Local 416', rating: 4, comment: 'Good but needs better mobile app', date: '5 hours ago' },

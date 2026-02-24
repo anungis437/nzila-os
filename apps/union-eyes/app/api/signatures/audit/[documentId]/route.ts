@@ -10,7 +10,6 @@ import { AuditTrailService } from "@/lib/signature/signature-service";
 import {
   ErrorCode,
   standardErrorResponse,
-  standardSuccessResponse,
 } from '@/lib/api/standardized-responses';
 export const GET = withApiAuth(async (
   req: NextRequest,

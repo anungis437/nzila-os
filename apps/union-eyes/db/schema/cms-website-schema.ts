@@ -34,6 +34,7 @@ export const cmsPages = pgTable('cms_pages', {
   metaDescription: text('meta_description'),
   metaKeywords: text('meta_keywords').array(),
   ogImage: text('og_image'),
+  // eslint-disable-next-line @typescript-eslint/no-explicit-any
   parentPageId: uuid('parent_page_id').references((): any => cmsPages.id, { onDelete: 'set null' }),
   content: jsonb('content').notNull().default([]),
   status: text('status').notNull().default('draft'), // 'draft', 'published', 'scheduled', 'archived'

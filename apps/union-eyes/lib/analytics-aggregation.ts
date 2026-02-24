@@ -13,7 +13,7 @@
  */
 
 import { db } from '@/db';
-import { claims, users } from '@/db/schema';
+import { claims } from '@/db/schema';
 import { eq, and, gte, sql, count } from 'drizzle-orm';
 
 interface DailyAggregation {
@@ -261,7 +261,7 @@ class AnalyticsAggregationService {
         for (const { organizationId } of organizations) {
       try {
         await this.computeDailyAggregation(organizationId, yesterday);
-} catch (error) {
+} catch (_error) {
 }
     }
 }

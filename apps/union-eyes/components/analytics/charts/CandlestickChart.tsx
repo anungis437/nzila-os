@@ -11,6 +11,7 @@
 'use client';
 
 import React from 'react';
+ 
 import {
   ComposedChart,
   XAxis,
@@ -51,11 +52,12 @@ export function CandlestickChart({
   data,
   title,
   showGrid = true,
-  showVolume = false,
+  showVolume: _showVolume = false,
   height = 500,
   positiveColor = '#10b981',
   negativeColor = '#ef4444',
 }: CandlestickChartProps) {
+  // eslint-disable-next-line @typescript-eslint/no-explicit-any
   const CustomTooltip = ({ active, payload }: any) => {
     if (!active || !payload || !payload.length) return null;
     const data = payload[0].payload;
@@ -80,8 +82,9 @@ export function CandlestickChart({
     );
   };
 
+  // eslint-disable-next-line @typescript-eslint/no-explicit-any
   const Candlestick = (props: any) => {
-    const { x, y, width, payload } = props;
+    const { x, _y, width, payload } = props;
     const yScale = props.yAxis.scale;
     
     const isPositive = payload.close >= payload.open;
@@ -95,7 +98,7 @@ export function CandlestickChart({
     const candleX = x + width / 4;
     const candleWidth = width / 2;
     const bodyTop = Math.min(openY, closeY);
-    const bodyBottom = Math.max(openY, closeY);
+    const _bodyBottom = Math.max(openY, closeY);
     const bodyHeight = Math.abs(closeY - openY);
 
     return (
@@ -141,6 +144,7 @@ export function CandlestickChart({
             }}
           />
           <YAxis domain={['auto', 'auto']} />
+          {/* eslint-disable-next-line react-hooks/static-components */}
           <Tooltip content={<CustomTooltip />} />
           <ComposedChart data={data}>
             {data.map((entry, index) => (

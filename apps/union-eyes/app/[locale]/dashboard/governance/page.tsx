@@ -1,3 +1,5 @@
+export const dynamic = 'force-dynamic';
+
 import { Metadata } from "next";
 import { requireUser, hasMinRole } from "@/lib/api-auth-guard";
 import { redirect } from "next/navigation";

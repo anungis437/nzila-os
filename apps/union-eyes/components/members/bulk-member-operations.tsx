@@ -59,6 +59,7 @@ export interface BulkOperation {
 
 export interface BulkMemberOperationsProps {
   selectedMemberIds: string[];
+  // eslint-disable-next-line @typescript-eslint/no-explicit-any
   onOperationComplete?: (operation: string, results: any) => void;
   onClearSelection?: () => void;
 }
@@ -352,7 +353,7 @@ export function BulkMemberOperations({
             {/* Archive Warning */}
             {selectedOperation === "archive" && (
               <div className="bg-red-50 border border-red-200 rounded-lg p-4 flex items-start gap-3">
-                <AlertCircle className="h-5 w-5 text-red-600 mt-0.5 flex-shrink-0" />
+                <AlertCircle className="h-5 w-5 text-red-600 mt-0.5 shrink-0" />
                 <div className="text-sm text-red-900">
                   <p className="font-medium mb-1">Warning</p>
                   <p>

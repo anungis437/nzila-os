@@ -85,7 +85,7 @@ export function AttendanceTracker({ organizationId }: AttendanceTrackerProps) {
       );
       const data = await response.json();
       setSessions(data.sessions || []);
-    } catch (error) {
+    } catch (_error) {
 toast.error("Failed to load sessions");
     }
   }, [organizationId]);
@@ -115,7 +115,7 @@ toast.error("Failed to load sessions");
       setSelectedSession(data.session);
       setRegistrations(data.registrations || []);
       setStats(data.stats);
-    } catch (error) {
+    } catch (_error) {
 toast.error("Failed to load attendance records");
     } finally {
       setLoading(false);
@@ -168,7 +168,7 @@ toast.error("Failed to load attendance records");
       toast.success(data.message || "Attendance marked successfully");
       setSelectedRegistrations(new Set());
       fetchAttendance(selectedSessionId);
-    } catch (error) {
+    } catch (_error) {
 toast.error("Failed to mark attendance");
     }
   };
@@ -194,7 +194,7 @@ toast.error("Failed to mark attendance");
 
       toast.success("Attendance marked successfully");
       fetchAttendance(selectedSessionId);
-    } catch (error) {
+    } catch (_error) {
 toast.error("Failed to mark attendance");
     }
   };

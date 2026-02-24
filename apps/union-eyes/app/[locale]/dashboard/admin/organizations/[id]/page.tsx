@@ -1,11 +1,13 @@
+"use client";
+
+
+export const dynamic = 'force-dynamic';
 import React from 'react';
 /**
  * Organization Detail Page
  * View detailed information about a specific organization
  */
-"use client";
 
-import { useState } from "react";
 import { useParams, useRouter } from "next/navigation";
 import useSWR from "swr";
 import {
@@ -23,24 +25,12 @@ import {
   AlertCircle,
   Loader2,
   TrendingUp,
-  Calendar,
-  Mail,
-  Phone,
-  ExternalLink,
-  ChevronRight
+  ChevronRight,
 } from "lucide-react";
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "@/components/ui/card";
 import { Button } from "@/components/ui/button";
 import { Badge } from "@/components/ui/badge";
 import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
-import {
-  Table,
-  TableBody,
-  TableCell,
-  TableHead,
-  TableHeader,
-  TableRow,
-} from "@/components/ui/table";
 import { Separator } from "@/components/ui/separator";
 import { OrganizationBreadcrumb } from "@/components/organization/organization-breadcrumb";
 import { OrganizationAnalytics } from "@/components/organization/organization-analytics";
@@ -95,7 +85,7 @@ export default function OrganizationDetailPage() {
   );
 
   // Fetch organization members
-  const { data: membersData, isLoading: membersLoading } = useSWR(
+  const { data: membersData, isLoading: _membersLoading } = useSWR(
     organizationId ? `/api/organizations/${organizationId}/members` : null,
     fetcher
   );
@@ -122,7 +112,7 @@ export default function OrganizationDetailPage() {
       if (!response.ok) throw new Error("Failed to archive organization");
       
       router.push("/dashboard/admin/organizations");
-    } catch (error) {
+    } catch (_error) {
 alert("Failed to archive organization");
     }
   };
@@ -437,6 +427,7 @@ alert("Failed to archive organization");
               </CardHeader>
               <CardContent>
                 <div className="flex items-center gap-2 flex-wrap">
+                  {/* eslint-disable-next-line @typescript-eslint/no-explicit-any */}
                   {ancestors.map((ancestor: any, index: number) => (
                     <div key={ancestor.id} className="flex items-center gap-2">
                       {index > 0 && <ChevronRight className="w-4 h-4 text-muted-foreground" />}
@@ -497,6 +488,7 @@ alert("Failed to archive organization");
                 </div>
               ) : (
                 <div className="space-y-2">
+                  {/* eslint-disable-next-line @typescript-eslint/no-explicit-any */}
                   {children.map((child: any) => {
                     const childTypeInfo = typeConfig[child.type as OrganizationType];
                     const childStatusInfo = statusConfig[child.status as OrganizationStatus];

@@ -37,7 +37,7 @@ import {
   notificationLog,
   organizationContacts 
 } from '@/db/schema';
-import { eq, and, gte, lte, isNull, desc } from 'drizzle-orm';
+import { eq, and, lte, isNull } from 'drizzle-orm';
 import { Resend } from 'resend';
 
 // ============================================================================
@@ -121,7 +121,7 @@ const NOTIFICATION_CONFIG = {
 };
 
 const FROM_EMAIL = process.env.NOTIFICATION_FROM_EMAIL || 'notifications@clc.ca';
-const FROM_SMS = process.env.NOTIFICATION_FROM_PHONE || '+15551234567';
+const _FROM_SMS = process.env.NOTIFICATION_FROM_PHONE || '+15551234567';
 const EXECUTIVE_EMAIL = process.env.EXECUTIVE_EMAIL || 'executive@clc.ca';
 
 // ============================================================================
@@ -356,7 +356,7 @@ export async function sendBulkMonthlyReminders(
       } else {
         failed++;
       }
-    } catch (error) {
+    } catch (_error) {
 failed++;
     }
   }
@@ -422,7 +422,7 @@ export async function processOverdueRemittances(): Promise<{
         day30Count++;
         criticalRemittances.push(remittance.id);
       }
-    } catch (error) {
+    } catch (_error) {
 failedCount++;
     }
   }
@@ -800,8 +800,8 @@ async function sendNotifications(
   recipients: NotificationRecipient[],
   template: NotificationTemplate,
   config: NotificationConfig,
-  type: NotificationType,
-  data: RemittanceNotificationData
+  _type: NotificationType,
+  _data: RemittanceNotificationData
 ): Promise<NotificationResult[]> {
   const results: NotificationResult[] = [];
 
@@ -931,7 +931,7 @@ async function logNotifications(
       errors: results.map(r => r.error).filter(Boolean).join('; '),
       sentAt: new Date().toISOString()
     });
-  } catch (error) {
+  } catch (_error) {
 }
 }
 

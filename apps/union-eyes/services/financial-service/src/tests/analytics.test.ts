@@ -31,7 +31,7 @@ const TEST_TENANT_ID = randomUUID();
 const TEST_USER_ID = randomUUID();
 
 let testFundId1: string;
-let testFundId2: string;
+let _testFundId2: string;
 let testMemberId: string;
 
 describe('Analytics Endpoints - Comprehensive Tests', () => {
@@ -45,6 +45,7 @@ describe('Analytics Endpoints - Comprehensive Tests', () => {
       lastName: 'Donor',
       email: 'donor@test.com',
       status: 'active',
+    // eslint-disable-next-line @typescript-eslint/no-explicit-any
     } as any).returning();
     testMemberId = memberResult[0].id;
     
@@ -71,6 +72,7 @@ describe('Analytics Endpoints - Comprehensive Tests', () => {
         isActive: true,
         createdBy: TEST_USER_ID,
       },
+    // eslint-disable-next-line @typescript-eslint/no-explicit-any
     ] as any).returning();
     testFundId1 = funds[0].id;
     testFundId2 = funds[1].id;
@@ -126,6 +128,7 @@ describe('Analytics Endpoints - Comprehensive Tests', () => {
       });
     }
     
+    // eslint-disable-next-line @typescript-eslint/no-explicit-any
     await db.insert(stipendDisbursements).values(stipendData as any);
 });
   
@@ -319,6 +322,7 @@ await db.delete(stipendDisbursements).where(eq(stipendDisbursements.tenantId, TE
       expect(Array.isArray(response.body)).toBe(true);
       
       // All returned alerts should be critical
+      // eslint-disable-next-line @typescript-eslint/no-explicit-any
       response.body.forEach((alert: any) => {
         expect(alert.severity).toBe('critical');
       });

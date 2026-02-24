@@ -5,6 +5,10 @@ import { NextResponse } from 'next/server';
  */
 import { logApiAuditEvent } from '@/lib/middleware/api-security';
 import { forecastRemittances } from '@/services/clc/compliance-reports';
+ 
+ 
+ 
+ 
 import { withApi, ApiError } from '@/lib/api/framework';
 
 export const GET = withApi(
@@ -15,7 +19,7 @@ export const GET = withApi(
       summary: 'GET forecast',
     },
   },
-  async ({ request, userId, organizationId, user, body, query }) => {
+  async ({ request, userId, organizationId: _organizationId, user: _user, body: _body, query: _query }) => {
 
             const searchParams = request.nextUrl.searchParams;
             const monthsAhead = parseInt(searchParams.get('months') || '12');

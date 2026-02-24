@@ -1,8 +1,5 @@
 import { NextRequest, NextResponse } from 'next/server';
 import { withApiAuth } from '@/lib/api-auth-guard';
-import {
-  ErrorCode,
-} from '@/lib/api/standardized-responses';
 
 const defaultRules = [
   {
@@ -31,7 +28,7 @@ async function handler(request: NextRequest) {
       jurisdiction,
       data: rules,
     });
-  } catch (error) {
+  } catch (_error) {
     return NextResponse.json(
       { success: false, error: 'Failed to fetch jurisdiction rules' },
       { status: 500 }

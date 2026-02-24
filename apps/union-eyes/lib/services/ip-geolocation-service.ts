@@ -163,7 +163,7 @@ export function getDistanceBetweenIPs(
 export function validateIPLocation(
   ipAddress: string,
   expectedCountryCode: string,
-  maxDistanceKm?: number
+  _maxDistanceKm?: number
 ): {
   valid: boolean;
   reason?: string;

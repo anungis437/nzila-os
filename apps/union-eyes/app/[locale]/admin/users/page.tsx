@@ -5,6 +5,9 @@
  * Part of Phase 0.2 - Admin Console UI
  */
 
+
+export const dynamic = 'force-dynamic';
+
 import { Suspense } from "react";
 import Link from "next/link";
 import { Users, Plus, Search, Shield, Ban, CheckCircle, UserCog } from "lucide-react";
@@ -27,7 +30,7 @@ import {
   TableHeader,
   TableRow,
 } from "@/components/ui/table";
-import { getAdminUsers, getAdminTenants } from "@/actions/admin-actions";
+import { getAdminTenants } from "@/actions/admin-actions";
 import { UserRoleSelect } from "@/components/admin/user-role-select";
 
 interface PageProps {
@@ -46,7 +49,7 @@ async function UsersTable({
 }) {
   // This will need RLS context - for now using a mock approach
   // In production, this would be called from an API route with proper RLS
-  const tx = null as unknown; // TODO: Get transaction from RLS-protected API route
+  const _tx = null as unknown; // TODO: Get transaction from RLS-protected API route
   
   // Mock data for demonstration - replace with actual API call
   const users = await Promise.resolve([

@@ -141,7 +141,7 @@ export function ProxyVoting({
         setEndDate("");
         setSessionScope("all");
       }
-    } catch (error) {
+    } catch (_error) {
       toast({
         title: "Assignment failed",
         description: "Failed to assign proxy. Please try again.",
@@ -165,7 +165,7 @@ export function ProxyVoting({
           description: "The proxy assignment has been cancelled.",
         });
       }
-    } catch (error) {
+    } catch (_error) {
       toast({
         title: "Revocation failed",
         description: "Failed to revoke proxy. Please try again.",
@@ -183,7 +183,7 @@ export function ProxyVoting({
           description: "You can now vote on behalf of this member.",
         });
       }
-    } catch (error) {
+    } catch (_error) {
       toast({
         title: "Accept failed",
         description: "Failed to accept proxy. Please try again.",
@@ -201,7 +201,7 @@ export function ProxyVoting({
           description: "The proxy request has been declined.",
         });
       }
-    } catch (error) {
+    } catch (_error) {
       toast({
         title: "Decline failed",
         description: "Failed to decline proxy. Please try again.",

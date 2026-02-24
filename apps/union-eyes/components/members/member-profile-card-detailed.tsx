@@ -16,7 +16,6 @@
 
 import * as React from "react";
 import {
-  User,
   Mail,
   Phone,
   MapPin,

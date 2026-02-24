@@ -11,7 +11,7 @@ import { NextRequest, NextResponse } from 'next/server';
 import { z } from 'zod';
 import { logger } from '@/lib/logger';
 import { getCurrentUser } from '@/lib/api-auth-guard';
-import { dataIngestion, IngestedDocument } from '@/lib/ai/data-ingestion';
+import { dataIngestion } from '@/lib/ai/data-ingestion';
 import { entityExtraction, ExtractionResult } from '@/lib/ai/entity-extraction';
 import { ragPipeline } from '@/lib/ai/rag-pipeline';
 
@@ -90,7 +90,9 @@ export async function POST(request: NextRequest) {
     const filename = file.name || 'unknown';
 
     // Get user ID - check what properties are available
+    // eslint-disable-next-line @typescript-eslint/no-explicit-any
     const userId = (auth as any).userId || (auth as any).id || 'unknown';
+    // eslint-disable-next-line @typescript-eslint/no-explicit-any
     const orgId = (auth as any).organizationId || (auth as any).orgId || 'default';
 
     logger.info('Processing document for AI ingestion', {
@@ -132,6 +134,7 @@ export async function POST(request: NextRequest) {
         content: document.content,
         metadata: {
           source: metadata.source,
+          // eslint-disable-next-line @typescript-eslint/no-explicit-any
           type: extraction?.documentType as any || 'document',
           jurisdiction: metadata.jurisdiction,
           createdAt: new Date(),
@@ -195,8 +198,8 @@ export async function GET(request: NextRequest) {
     }
 
     const { searchParams } = new URL(request.url);
-    const action = searchParams.get('action');
-    const documentId = searchParams.get('documentId');
+    const _action = searchParams.get('action');
+    const _documentId = searchParams.get('documentId');
 
     // Return API info
     return NextResponse.json({

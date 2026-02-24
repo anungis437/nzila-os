@@ -229,6 +229,7 @@ export function retry(options?: RetryOptions) {
     const originalMethod = descriptor.value;
     const policy = new RetryPolicy({
       ...options,
+      // eslint-disable-next-line @typescript-eslint/no-explicit-any
       name: options?.name || `${(target as any).constructor.name}.${propertyKey}`,
     });
 

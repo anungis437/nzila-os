@@ -8,7 +8,6 @@
 'use client';
 
 import { TimelineStage, estimateTimeRemaining, isStageDelayed } from '@/lib/member-experience/timeline-builder';
-import type { HumanExplanation } from '@/types/marketing';
 
 interface GrievanceTimelineProps {
   stages: TimelineStage[];
@@ -44,7 +43,7 @@ export function GrievanceTimeline({
           </div>
         )}
 
-        {stages.map((stage, index) => (
+        {stages.map((stage, _index) => (
           <div
             key={stage.id}
             className={`flex items-start gap-3 ${
@@ -52,7 +51,7 @@ export function GrievanceTimeline({
             }`}
           >
             {/* Status Indicator */}
-            <div className="flex-shrink-0 mt-1">
+            <div className="shrink-0 mt-1">
               {stage.isPastStage ? (
                 <div className="w-6 h-6 bg-green-500 rounded-full flex items-center justify-center">
                   <svg className="w-4 h-4 text-white" fill="currentColor" viewBox="0 0 20 20">
@@ -134,7 +133,7 @@ export function GrievanceTimeline({
 
               <div className="flex items-start gap-4">
                 {/* Status Indicator */}
-                <div className="flex-shrink-0 relative z-10">
+                <div className="shrink-0 relative z-10">
                   {stage.isPastStage ? (
                     <div className="w-12 h-12 bg-green-500 rounded-full flex items-center justify-center shadow-lg">
                       <svg className="w-6 h-6 text-white" fill="currentColor" viewBox="0 0 20 20">
@@ -285,7 +284,7 @@ export function GrievanceTimeline({
                         <div className="mt-4 p-3 bg-yellow-100 border border-yellow-300 rounded-lg">
                           <div className="flex items-start gap-2">
                             <svg
-                              className="w-5 h-5 text-yellow-700 flex-shrink-0 mt-0.5"
+                              className="w-5 h-5 text-yellow-700 shrink-0 mt-0.5"
                               fill="currentColor"
                               viewBox="0 0 20 20"
                             >

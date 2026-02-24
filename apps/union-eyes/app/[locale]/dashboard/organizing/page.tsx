@@ -1,8 +1,11 @@
-import React from 'react';
 'use client';
 
+
+export const dynamic = 'force-dynamic';
+import React from 'react';
+
 import { useState, useEffect } from 'react';
-import { Card, CardContent, CardDescription, CardHeader, CardTitle } from '@/components/ui/card';
+import { Card, CardContent } from '@/components/ui/card';
 import { Button } from '@/components/ui/button';
 import { Badge } from '@/components/ui/badge';
 import { Input } from '@/components/ui/input';
@@ -119,7 +122,7 @@ export default function OrganizingDashboardPage() {
       ];
 
       setCampaigns(mockCampaigns);
-    } catch (err) {
+    } catch (_err) {
 setError('Unable to load organizing campaigns. Please try again later.');
     } finally {
       setLoading(false);
@@ -194,7 +197,7 @@ setError('Unable to load organizing campaigns. Please try again later.');
   if (loading) {
     return (
       <div className="p-6 space-y-6">
-        <div className="flex items-center justify-center min-h-[400px]">
+        <div className="flex items-center justify-center min-h-100">
           <div className="text-center">
             <Clock className="w-12 h-12 mx-auto mb-4 animate-spin text-muted-foreground" />
             <p className="text-muted-foreground">Loading organizing campaigns...</p>

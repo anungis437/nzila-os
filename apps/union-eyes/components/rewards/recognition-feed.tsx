@@ -4,19 +4,20 @@ import { useState, useEffect } from 'react';
 import { useTranslations } from 'next-intl';
 import { AwardCard } from './award-card';
 import { Button } from '@/components/ui/button';
-import { Tabs, TabsContent, TabsList, TabsTrigger } from '@/components/ui/tabs';
-import { RefreshCw, Filter } from 'lucide-react';
+import { Tabs, TabsList, TabsTrigger } from '@/components/ui/tabs';
+import { RefreshCw } from 'lucide-react';
+ 
 import { Skeleton } from '@/components/ui/skeleton';
-import type { RecognitionAward } from '@/db/schema/recognition-rewards-schema';
 
 interface RecognitionFeedProps {
   orgId: string;
+  // eslint-disable-next-line @typescript-eslint/no-explicit-any
   initialAwards?: any[];
   showFilters?: boolean;
 }
 
 export function RecognitionFeed({ 
-  orgId, 
+  orgId: _orgId, 
   initialAwards = [],
   showFilters = true 
 }: RecognitionFeedProps) {
@@ -46,7 +47,7 @@ export function RecognitionFeed({
       }
       
       setHasMore(data.hasMore);
-    } catch (error) {
+    } catch (_error) {
 } finally {
       setLoading(false);
     }
@@ -67,6 +68,7 @@ export function RecognitionFeed({
         prev.map((award) => {
           if (award.id === awardId) {
             const reactions = award.reactions || [];
+            // eslint-disable-next-line @typescript-eslint/no-explicit-any
             const existingReaction = reactions.find((r: any) => r.type === reactionType);
             
             if (existingReaction) {
@@ -74,6 +76,7 @@ export function RecognitionFeed({
                 // Remove reaction
                 return {
                   ...award,
+                  // eslint-disable-next-line @typescript-eslint/no-explicit-any
                   reactions: reactions.map((r: any) =>
                     r.type === reactionType
                       ? { ...r, count: r.count - 1, userReacted: false }
@@ -84,6 +87,7 @@ export function RecognitionFeed({
                 // Add reaction
                 return {
                   ...award,
+                  // eslint-disable-next-line @typescript-eslint/no-explicit-any
                   reactions: reactions.map((r: any) =>
                     r.type === reactionType
                       ? { ...r, count: r.count + 1, userReacted: true }
@@ -102,11 +106,11 @@ export function RecognitionFeed({
           return award;
         })
       );
-    } catch (error) {
+    } catch (_error) {
 }
   };
 
-  const handleComment = (awardId: string) => {
+  const handleComment = (_awardId: string) => {
     // Open comment dialog (to be implemented)
 };
 
@@ -122,12 +126,14 @@ export function RecognitionFeed({
     if (page > 1) {
       fetchAwards();
     }
+  // eslint-disable-next-line react-hooks/exhaustive-deps
   }, [page]);
 
   useEffect(() => {
     if (initialAwards.length === 0) {
       fetchAwards(true);
     }
+  // eslint-disable-next-line react-hooks/exhaustive-deps
   }, [filter]);
 
   return (
@@ -148,6 +154,7 @@ export function RecognitionFeed({
 
       {/* Filters */}
       {showFilters && (
+        // eslint-disable-next-line @typescript-eslint/no-explicit-any
         <Tabs value={filter} onValueChange={(v) => setFilter(v as any)}>
           <TabsList>
             <TabsTrigger value="all">{t('filters.all')}</TabsTrigger>

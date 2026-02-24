@@ -1,24 +1,26 @@
 "use client";
 
+
+export const dynamic = 'force-dynamic';
 import { useState, useEffect } from "react";
 import { motion, AnimatePresence } from "framer-motion";
 import { useUser } from "@clerk/nextjs";
 import { useTranslations } from 'next-intl';
-import { 
-  Vote, 
-  CheckCircle, 
-  Clock, 
+import {
+  Vote,
+  CheckCircle,
+  Clock,
   TrendingUp,
   Users,
   Calendar,
-  AlertCircle,
   ChevronDown,
   ChevronUp,
   Lock,
   Info,
-  BarChart3
+  BarChart3,
 } from "lucide-react";
-import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
+ 
+import { Card, CardContent } from "@/components/ui/card";
 
 type VoteStatus = "active" | "upcoming" | "closed";
 type VoteType = "yes-no" | "multiple-choice" | "ranked";
@@ -47,10 +49,10 @@ interface Vote {
 }
 
 export default function VotingPage() {
-  const { user } = useUser();
+  const { user: _user } = useUser();
   const [votes, setVotes] = useState<Vote[]>([]);
-  const [isLoading, setIsLoading] = useState(true);
-  const [error, setError] = useState<string | null>(null);
+  const [_isLoading, setIsLoading] = useState(true);
+  const [_error, setError] = useState<string | null>(null);
   const [selectedTab, setSelectedTab] = useState<"active" | "upcoming" | "past">("active");
   const [expandedVote, setExpandedVote] = useState<string | null>(null);
   const [selectedOption, setSelectedOption] = useState<Record<string, string>>({});

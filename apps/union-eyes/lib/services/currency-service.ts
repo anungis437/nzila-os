@@ -151,7 +151,7 @@ export class CurrencyService {
     fromCurrency: Currency,
     toCurrency: Currency,
     date: Date,
-    rateType: 'noon' | 'closing' = 'noon'
+    _rateType: 'noon' | 'closing' = 'noon'
   ): Promise<{
     amount: number;
     rate: number;
@@ -429,7 +429,7 @@ export class CurrencyService {
   /**
    * Get transfer pricing compliance summary
    */
-  async getComplianceSummary(taxYear: number, businessNumber: string): Promise<{
+  async getComplianceSummary(taxYear: number, _businessNumber: string): Promise<{
     taxYear: number;
     totalCrossBorderTransactions: number;
     relatedPartyTransactions: number;

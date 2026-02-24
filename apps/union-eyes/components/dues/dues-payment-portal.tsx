@@ -5,14 +5,12 @@ import { Card, CardContent, CardDescription, CardHeader, CardTitle } from '@/com
 import { Button } from '@/components/ui/button';
 import { Badge } from '@/components/ui/badge';
 import { Tabs, TabsContent, TabsList, TabsTrigger } from '@/components/ui/tabs';
-import { 
-  DollarSign, 
-  Calendar, 
-  CreditCard, 
-  Download, 
+import {
+  DollarSign,
+  Calendar,
   AlertTriangle,
   CheckCircle2,
-  Clock
+  Clock,
 } from 'lucide-react';
 import { formatCurrency } from '@/lib/utils';
 import PaymentMethodManager from './payment-method-manager';
@@ -49,7 +47,7 @@ export default function DuesPaymentPortal({ userId }: DuesPaymentPortalProps) {
       if (!response.ok) throw new Error('Failed to load dues balance');
       const data = await response.json();
       setBalance(data);
-    } catch (error) {
+    } catch (_error) {
 toast({
         title: 'Error',
         description: 'Failed to load your dues information',
@@ -58,6 +56,7 @@ toast({
     } finally {
       setLoading(false);
     }
+  // eslint-disable-next-line react-hooks/exhaustive-deps
   }, [userId]);
 
   useEffect(() => {

@@ -14,7 +14,6 @@ import { organizationUsers } from "@/db/schema/domains/member";
 import { organizationMembers } from "@/db/schema-organizations";
 import { eq, and } from "drizzle-orm";
 import { UserRole, Permission, hasPermission, hasAnyPermission, hasAllPermissions, canAccessRoute } from "./roles";
-import { mapToOsRole } from './policy-adapter';
 
 // ── Build a reverse-lookup from enum string values → UserRole ─────────────
 const USER_ROLE_VALUES = new Set(Object.values(UserRole) as string[]);

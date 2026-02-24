@@ -3,7 +3,6 @@
  * Real-time messaging system for member-staff communication
  */
 import { pgTable, uuid, text, timestamp, boolean, pgEnum } from 'drizzle-orm/pg-core';
-import { sql } from 'drizzle-orm';
 
 export const messageStatusEnum = pgEnum('message_status', ['sent', 'delivered', 'read']);
 export const messageTypeEnum = pgEnum('message_type', ['text', 'file', 'system']);

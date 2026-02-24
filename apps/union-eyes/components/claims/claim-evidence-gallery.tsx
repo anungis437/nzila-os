@@ -33,7 +33,6 @@ import {
   DialogTitle,
 } from "@/components/ui/dialog";
 import { Button } from "@/components/ui/button";
-import { Badge } from "@/components/ui/badge";
 import { cn } from "@/lib/utils";
 
 export interface Evidence {
@@ -102,7 +101,7 @@ export function ClaimEvidenceGallery({
               Images ({groupedEvidence.images.length})
             </h3>
             <div className="grid grid-cols-2 sm:grid-cols-3 md:grid-cols-4 gap-4">
-              {groupedEvidence.images.map((item, index) => (
+              {groupedEvidence.images.map((item, _index) => (
                 <ImageThumbnail
                   key={item.id}
                   evidence={item}
@@ -209,6 +208,7 @@ function ImageThumbnail({
 }) {
   return (
     <div className="group relative aspect-square rounded-lg overflow-hidden border bg-gray-100 cursor-pointer">
+      {/* eslint-disable-next-line @next/next/no-img-element */}
       <img
         src={evidence.thumbnailUrl || evidence.url}
         alt={evidence.name}
@@ -259,7 +259,7 @@ function DocumentItem({
       className="flex items-center gap-3 p-3 border rounded-lg hover:bg-gray-50 cursor-pointer transition-colors"
       onClick={onClick}
     >
-      <div className="flex-shrink-0 w-10 h-10 flex items-center justify-center bg-gray-100 rounded">
+      <div className="shrink-0 w-10 h-10 flex items-center justify-center bg-gray-100 rounded">
         <FileText className="h-5 w-5 text-gray-600" />
       </div>
       <div className="flex-1 min-w-0">
@@ -398,7 +398,7 @@ function EvidenceViewer({
           </DialogTitle>
         </DialogHeader>
 
-        <div className="relative flex items-center justify-center bg-gray-100 rounded-lg overflow-hidden min-h-[400px]">
+        <div className="relative flex items-center justify-center bg-gray-100 rounded-lg overflow-hidden min-h-100">
           {/* Navigation */}
           {hasPrevious && (
             <Button
@@ -423,6 +423,7 @@ function EvidenceViewer({
 
           {/* Content */}
           {evidence.type === "image" && (
+            // eslint-disable-next-line @next/next/no-img-element
             <img
               src={evidence.url}
               alt={evidence.name}

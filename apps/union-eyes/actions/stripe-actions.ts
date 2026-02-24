@@ -1,7 +1,9 @@
 import { updateProfile, updateProfileByStripeCustomerId } from "@/db/queries/profiles-queries";
 import { SelectProfile } from "@/db/schema";
+// eslint-disable-next-line no-restricted-imports -- TODO(platform-migration): migrate to @nzila/ wrapper
 import { stripe } from "@/lib/stripe";
 import { logger } from '@/lib/logger';
+// eslint-disable-next-line no-restricted-imports -- TODO(platform-migration): migrate to @nzila/ wrapper
 import Stripe from "stripe";
 
 type MembershipStatus = SelectProfile["membership"];

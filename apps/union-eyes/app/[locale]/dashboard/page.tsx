@@ -1,5 +1,7 @@
 "use client";
 
+
+export const dynamic = 'force-dynamic';
 /**
  * Dashboard Page - Role-Based Switcher
  *
@@ -76,6 +78,7 @@ export default function DashboardPage() {
   const [mounted, setMounted] = useState(false);
   const [tier, setTier] = useState<DashboardTier | null>(null);
 
+  // eslint-disable-next-line react-hooks/set-state-in-effect
   useEffect(() => { setMounted(true); }, []);
 
   // Fetch raw RBAC role & classify into tier

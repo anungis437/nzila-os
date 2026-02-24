@@ -33,11 +33,10 @@ import {
   pgEnum,
   numeric,
   date,
-  foreignKey,
-  unique,
+  _foreignKey,
+  _unique,
 } from "drizzle-orm/pg-core";
 import { relations } from "drizzle-orm";
-import { sql } from "drizzle-orm";
 
 // =============================================================================
 // ENUMS

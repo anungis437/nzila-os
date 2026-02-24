@@ -150,6 +150,7 @@ export async function processMonthlyDuesCalculation(params: {
           status: 'pending',
           dueDate: dueDate.toISOString().split('T')[0],
           transactionType: 'dues',
+        // eslint-disable-next-line @typescript-eslint/no-explicit-any
         } as any);
 
         membersProcessed++;

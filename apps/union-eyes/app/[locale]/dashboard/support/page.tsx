@@ -6,11 +6,12 @@
  * @dashboard_path /dashboard/support
  */
 
-import { Suspense } from 'react';
+
+export const dynamic = 'force-dynamic';
+
 import { auth } from '@clerk/nextjs/server';
 import { redirect } from 'next/navigation';
 import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card';
-import { Tabs, TabsContent, TabsList, TabsTrigger } from '@/components/ui/tabs';
 import { Badge } from '@/components/ui/badge';
 import { requireMinRole } from '@/lib/api-auth-guard';
 import { Headphones, Clock, TrendingUp, CheckCircle2 } from 'lucide-react';
@@ -160,6 +161,7 @@ export default async function SupportDashboard() {
             <p className="text-sm text-muted-foreground">No tickets found</p>
           ) : (
             <div className="space-y-3">
+              {/* eslint-disable-next-line @typescript-eslint/no-explicit-any */}
               {tickets.map((ticket: any) => (
                 <div key={ticket.id} className="flex items-center justify-between border-b pb-3 last:border-0">
                   <div className="space-y-1">

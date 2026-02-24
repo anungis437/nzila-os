@@ -19,7 +19,7 @@ import * as React from "react";
 import { useForm } from "react-hook-form";
 import { zodResolver } from "@hookform/resolvers/zod";
 import * as z from "zod";
-import { Calendar, Upload, Users, FileText, AlertCircle } from "lucide-react";
+import { Calendar, Upload, AlertCircle } from "lucide-react";
 import { WizardStepper, WizardStep } from "@/components/ui/wizard-stepper";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
@@ -41,6 +41,8 @@ import {
 } from "@/components/ui/popover";
 import { cn } from "@/lib/utils";
 import { format } from "date-fns";
+ 
+ 
 import { useToast } from "@/components/ui/use-toast";
 
 // Zod schemas for each step
@@ -83,11 +85,11 @@ export function ClaimFormWizard({
   onCancel,
   initialData,
   memberId,
-  organizationId,
+  organizationId: _organizationId,
 }: ClaimFormWizardProps) {
   const { toast } = useToast();
   const [currentStep, setCurrentStep] = React.useState(0);
-  const [isSubmitting, setIsSubmitting] = React.useState(false);
+  const [_isSubmitting, setIsSubmitting] = React.useState(false);
 
   const form = useForm<ClaimFormData>({
     resolver: zodResolver(claimSchema),
@@ -226,6 +228,7 @@ export function ClaimFormWizard({
 
 // Step Components
 
+// eslint-disable-next-line @typescript-eslint/no-explicit-any
 function IncidentStep({ form }: { form: any }) {
   const [dateOpen, setDateOpen] = React.useState(false);
 
@@ -359,7 +362,8 @@ function IncidentStep({ form }: { form: any }) {
   );
 }
 
-function EvidenceStep({ form }: { form: any }) {
+// eslint-disable-next-line @typescript-eslint/no-explicit-any
+function EvidenceStep({ form: _form }: { form: any }) {
   // File upload will be implemented with actual upload handler
   return (
     <div className="space-y-6">
@@ -379,6 +383,7 @@ function EvidenceStep({ form }: { form: any }) {
   );
 }
 
+// eslint-disable-next-line @typescript-eslint/no-explicit-any
 function WitnessStep({ form }: { form: any }) {
   const witnessPresent = form.watch("witnessesPresent");
   const previousReport = form.watch("previouslyReported");
@@ -444,6 +449,7 @@ function WitnessStep({ form }: { form: any }) {
   );
 }
 
+// eslint-disable-next-line @typescript-eslint/no-explicit-any
 function ReviewStep({ form }: { form: any }) {
   const data = form.watch();
 

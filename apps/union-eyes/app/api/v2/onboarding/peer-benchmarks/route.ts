@@ -2,11 +2,7 @@
  * GET /api/onboarding/peer-benchmarks
  * Migrated to withApi() framework
  */
-import { withRoleAuth } from '@/lib/role-middleware';
-import { getPeerBenchmarks } from '@/lib/utils/smart-onboarding';
-import { logger } from '@/lib/logger';
-import { eventBus, AppEvents } from '@/lib/events';
-import { withApi, ApiError, RATE_LIMITS } from '@/lib/api/framework';
+import { withApi } from '@/lib/api/framework';
 
 import { GET as v1GET } from '@/app/api/onboarding/peer-benchmarks/route';
 

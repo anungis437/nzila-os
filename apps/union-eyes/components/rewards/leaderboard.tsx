@@ -6,6 +6,7 @@ import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card';
 import { Avatar, AvatarFallback, AvatarImage } from '@/components/ui/avatar';
 import { Badge } from '@/components/ui/badge';
 import { Tabs, TabsContent, TabsList, TabsTrigger } from '@/components/ui/tabs';
+ 
 import { Trophy, TrendingUp, Award, Zap } from 'lucide-react';
 
 interface LeaderboardEntry {
@@ -28,14 +29,14 @@ interface LeaderboardProps {
 }
 
 export function Leaderboard({
-  orgId,
+  orgId: _orgId,
   period = 'monthly',
   topReceivers,
   topGivers,
   currentUserId,
 }: LeaderboardProps) {
   const t = useTranslations('rewards.leaderboard');
-  const [selectedPeriod, setSelectedPeriod] = useState(period);
+  const [_selectedPeriod, _setSelectedPeriod] = useState(period);
 
   const getInitials = (name: string) => {
     return name
@@ -70,7 +71,7 @@ export function Leaderboard({
 
     return (
       <div className="space-y-2">
-        {entries.map((entry, index) => {
+        {entries.map((entry, _index) => {
           const isCurrentUser = entry.userId === currentUserId;
           const medal = getMedalEmoji(entry.rank);
 
@@ -84,7 +85,7 @@ export function Leaderboard({
               }`}
             >
               {/* Rank */}
-              <div className="flex-shrink-0 w-12 text-center">
+              <div className="shrink-0 w-12 text-center">
                 {medal ? (
                   <span className="text-3xl">{medal}</span>
                 ) : (
@@ -135,7 +136,7 @@ export function Leaderboard({
               </div>
 
               {/* Credits */}
-              <div className="flex-shrink-0 text-right">
+              <div className="shrink-0 text-right">
                 <div className="flex items-center gap-1 text-primary font-bold text-lg">
                   <Zap className="h-5 w-5" />
                   {entry.totalCredits.toLocaleString()}

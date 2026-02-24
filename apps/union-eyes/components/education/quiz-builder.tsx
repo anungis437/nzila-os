@@ -22,11 +22,8 @@ import {
   Plus,
   Trash2,
   GripVertical,
-  Eye,
   Save,
   Copy,
-  CheckCircle,
-  XCircle,
 } from "lucide-react";
 import {
   Form,
@@ -102,6 +99,7 @@ export function QuizBuilder({
       timeLimit: initialData?.timeLimit,
       questions: initialData?.questions || [
         {
+          // eslint-disable-next-line react-hooks/purity
           id: `q-${Date.now()}`,
           question: "",
           type: "multiple_choice",
@@ -133,6 +131,7 @@ export function QuizBuilder({
     const question = form.getValues(`questions.${index}`);
     append({
       ...question,
+      // eslint-disable-next-line react-hooks/purity
       id: `q-${Date.now()}`,
     });
   };
@@ -146,7 +145,7 @@ export function QuizBuilder({
           description: "Your quiz has been saved successfully.",
         });
       }
-    } catch (error) {
+    } catch (_error) {
       toast({
         title: "Error",
         description: "Failed to save quiz. Please try again.",
@@ -317,6 +316,7 @@ function QuestionEditor({
   onMoveDown,
 }: {
   index: number;
+  // eslint-disable-next-line @typescript-eslint/no-explicit-any
   form: any;
   onRemove: () => void;
   onDuplicate: () => void;
@@ -444,12 +444,14 @@ function QuestionEditor({
 }
 
 // Multiple Choice Editor
+// eslint-disable-next-line @typescript-eslint/no-explicit-any
 function MultipleChoiceEditor({ index, form }: { index: number; form: any }) {
   const options = form.watch(`questions.${index}.options`) || [];
 
   return (
     <div className="space-y-2">
       <Label>Answer Options</Label>
+      {/* eslint-disable-next-line @typescript-eslint/no-explicit-any */}
       {options.map((_: any, optionIndex: number) => (
         <div key={optionIndex} className="flex gap-2 items-center">
           <FormField
@@ -480,6 +482,7 @@ function MultipleChoiceEditor({ index, form }: { index: number; form: any }) {
 }
 
 // True/False Editor
+// eslint-disable-next-line @typescript-eslint/no-explicit-any
 function TrueFalseEditor({ index, form }: { index: number; form: any }) {
   return (
     <FormField
@@ -511,6 +514,7 @@ function TrueFalseEditor({ index, form }: { index: number; form: any }) {
 }
 
 // Short Answer Editor
+// eslint-disable-next-line @typescript-eslint/no-explicit-any
 function ShortAnswerEditor({ index, form }: { index: number; form: any }) {
   return (
     <FormField

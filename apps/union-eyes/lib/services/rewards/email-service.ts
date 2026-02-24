@@ -4,12 +4,18 @@
  */
 
 import { Resend } from 'resend';
-import { db } from '@/db';
 import { logger } from '@/lib/logger';
 
-const resend = new Resend(process.env.RESEND_API_KEY);
+let _resend: Resend | null = null;
 
-interface EmailRecipient {
+function getResend(): Resend {
+  if (!_resend) {
+    _resend = new Resend(process.env.RESEND_API_KEY);
+  }
+  return _resend;
+}
+
+interface _EmailRecipient {
   email: string;
   name: string;
 }
@@ -60,7 +66,7 @@ interface RedemptionNotificationData {
  */
 export async function sendAwardReceivedEmail(data: AwardNotificationData) {
   try {
-    const { error } = await resend.emails.send({
+    const { error } = await getResend().emails.send({
       from: `${data.orgName} Rewards <rewards@${process.env.EMAIL_DOMAIN || 'example.com'}>`,
       to: data.recipientEmail,
       subject: `🎉 You've been recognized by ${data.issuerName}!`,
@@ -92,7 +98,7 @@ export async function sendAwardReceivedEmail(data: AwardNotificationData) {
  */
 export async function sendApprovalRequestEmail(data: ApprovalNotificationData) {
   try {
-    const { error } = await resend.emails.send({
+    const { error } = await getResend().emails.send({
       from: `${data.orgName} Rewards <rewards@${process.env.EMAIL_DOMAIN || 'example.com'}>`,
       to: data.adminEmail,
       subject: `⚡ Award Pending Approval: ${data.awardTypeName}`,
@@ -124,7 +130,7 @@ export async function sendApprovalRequestEmail(data: ApprovalNotificationData) {
  */
 export async function sendCreditExpirationEmail(data: ExpirationNotificationData) {
   try {
-    const { error } = await resend.emails.send({
+    const { error } = await getResend().emails.send({
       from: `${data.orgName} Rewards <rewards@${process.env.EMAIL_DOMAIN || 'example.com'}>`,
       to: data.recipientEmail,
       subject: `⚠️ Your credits are expiring soon!`,
@@ -154,7 +160,7 @@ export async function sendCreditExpirationEmail(data: ExpirationNotificationData
  */
 export async function sendRedemptionConfirmationEmail(data: RedemptionNotificationData) {
   try {
-    const { error } = await resend.emails.send({
+    const { error } = await getResend().emails.send({
       from: `${data.orgName} Rewards <rewards@${process.env.EMAIL_DOMAIN || 'example.com'}>`,
       to: data.recipientEmail,
       subject: `✅ Redemption Confirmed: ${data.creditsRedeemed} credits`,

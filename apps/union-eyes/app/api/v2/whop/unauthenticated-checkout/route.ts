@@ -6,7 +6,13 @@ import { NextResponse } from 'next/server';
 import { DEFAULT_REDIRECT_URL } from "@/app/api/whop/webhooks/utils/constants";
 import crypto from "crypto";
 import { logger } from '@/lib/logger';
-import { withApi, ApiError } from '@/lib/api/framework';
+ 
+ 
+ 
+ 
+ 
+ 
+import { withApi } from '@/lib/api/framework';
 
 export const POST = withApi(
   {
@@ -16,9 +22,9 @@ export const POST = withApi(
       summary: 'POST unauthenticated-checkout',
     },
   },
-  async ({ request, userId, organizationId, user, body, query, params }) => {
+  async ({ request, userId: _userId, organizationId: _organizationId, user: _user, body: _body, query: _query, params: _params }) => {
 
-        const { planId, redirectUrl, email } = await request.json();
+        const { planId, _redirectUrl, email } = await request.json();
         // Validate required parameters
         if (!planId) {
           return NextResponse.json(

@@ -22,6 +22,7 @@ import {
   strikeFunds
 } from '../db/schema';
 import { eq, and, gte, lte, sql, inArray } from 'drizzle-orm';
+// eslint-disable-next-line no-restricted-imports -- TODO(platform-migration): migrate to @nzila/ wrapper
 import Stripe from 'stripe';
 import { queueNotification } from '../services/notification-service';
 import { logger } from '@/lib/logger';
@@ -231,6 +232,7 @@ export async function processWeeklyStipends(params: {
             weeklyMaxAmount: rules.weeklyMaxAmount,
             autoApproved: !needsApproval,
           },
+        // eslint-disable-next-line @typescript-eslint/no-explicit-any
         } as any);
 
         stipendsCalculated++;
@@ -432,6 +434,7 @@ export async function processDisbursements(params: {
             status: 'disbursed',
             paymentDate: new Date(),
             notes: `Stripe payment: ${paymentIntentId}`,
+          // eslint-disable-next-line @typescript-eslint/no-explicit-any
           } as any)
           .where(eq(stipendDisbursements.id, stipend.id));
           
@@ -471,6 +474,7 @@ export async function processDisbursements(params: {
           .set({
             status: 'failed',
             notes: `Error: ${String(disbursementError)}`,
+          // eslint-disable-next-line @typescript-eslint/no-explicit-any
           } as any)
           .where(eq(stipendDisbursements.id, stipend.id));
 

@@ -8,7 +8,7 @@ import { Button } from "@/components/ui/button";
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/components/ui/select";
 import { Alert, AlertDescription } from "@/components/ui/alert";
 import { Separator } from "@/components/ui/separator";
-import { Shield, Share2, Eye, FileText, Scale, BarChart3, Save, AlertCircle } from "lucide-react";
+import { Shield, FileText, Scale, BarChart3, Save, AlertCircle } from "lucide-react";
 
 interface SharingSettings {
   organization_id: string;

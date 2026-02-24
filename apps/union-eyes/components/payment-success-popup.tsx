@@ -43,6 +43,7 @@ export default function PaymentSuccessPopup({ profile: initialProfile }: Payment
   const { userId } = useAuth();
   
   // Function to refresh profile data using server action
+  // eslint-disable-next-line react-hooks/exhaustive-deps
   const refreshProfileData = async () => {
     try {
       setIsLoading(true);
@@ -73,7 +74,7 @@ setProfile({
       } else {
 return false;
       }
-    } catch (error) {
+    } catch (_error) {
 return false;
     } finally {
       setIsLoading(false);
@@ -86,7 +87,7 @@ return false;
       try {
         // Set active popup flag in localStorage to prevent other popups from showing
         localStorage.setItem('active_popup', 'payment_success');
-      } catch (error) {
+      } catch (_error) {
 }
     }
     
@@ -99,7 +100,7 @@ return false;
           if (activePopup === 'payment_success') {
             localStorage.removeItem('active_popup');
           }
-        } catch (error) {
+        } catch (_error) {
 }
       }
     };
@@ -117,7 +118,7 @@ return false;
       try {
         // Payment success popup takes highest priority, so we&apos;ll force-close any other popup
         localStorage.setItem('active_popup', 'payment_success');
-      } catch (error) {
+      } catch (_error) {
 }
       
       // First refresh the profile data to make sure we have the latest
@@ -159,7 +160,7 @@ const timer = setTimeout(checkProfileUpdate, backoffMs);
       if (activePopup === 'payment_success') {
         localStorage.removeItem('active_popup');
       }
-    } catch (error) {
+    } catch (_error) {
 }
     
     // Remove the payment parameter from URL for a cleaner experience
@@ -176,7 +177,7 @@ const timer = setTimeout(checkProfileUpdate, backoffMs);
         spread: 80,
         origin: { y: 0.6 }
       });
-    } catch (error) {
+    } catch (_error) {
 }
   };
   
@@ -285,7 +286,7 @@ const timer = setTimeout(checkProfileUpdate, backoffMs);
                     key={i}
                     className="flex items-start text-sm text-gray-600"
                   >
-                    <div className="rounded-full bg-purple-100 p-0.5 mr-2 mt-0.5 flex-shrink-0">
+                    <div className="rounded-full bg-purple-100 p-0.5 mr-2 mt-0.5 shrink-0">
                       <Check className="w-3 h-3 text-purple-600" />
                     </div>
                     {item}

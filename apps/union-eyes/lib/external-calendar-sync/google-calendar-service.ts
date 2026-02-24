@@ -276,7 +276,7 @@ export async function importGoogleEvents(
           await db.insert(calendarEvents).values(eventData);
           importedCount++;
         }
-      } catch (error) {
+      } catch (_error) {
 }
     }
 
@@ -475,7 +475,7 @@ async function handleDeletedGoogleEvent(calendarId: string, googleEventId: strin
         })
         .where(eq(calendarEvents.id, event.id));
     }
-  } catch (error) {
+  } catch (_error) {
 }
 }
 
@@ -513,7 +513,7 @@ async function updateSyncToken(
         updatedAt: new Date(),
       })
       .where(eq(externalCalendarConnections.id, connectionId));
-  } catch (error) {
+  } catch (_error) {
 }
 }
 

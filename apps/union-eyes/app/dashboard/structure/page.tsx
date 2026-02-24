@@ -11,6 +11,9 @@
  * Requires admin permissions (withAdminAuth)
  */
 
+
+export const dynamic = 'force-dynamic';
+
 import { Suspense } from "react";
 import { getCurrentUser } from "@/lib/auth";
 import { redirect } from "next/navigation";

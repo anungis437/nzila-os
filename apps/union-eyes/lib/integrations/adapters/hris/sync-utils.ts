@@ -5,7 +5,7 @@
  */
 
 import { db } from '@/db';
-import { externalEmployees, externalDepartments } from '@/db/schema';
+import { externalEmployees } from '@/db/schema';
 import { eq, and, sql } from 'drizzle-orm';
 import { logger } from '@/lib/logger';
 

@@ -8,7 +8,10 @@ import { Dialog, DialogContent, DialogDescription, DialogFooter, DialogHeader, D
 import { Input } from '@/components/ui/input';
 import { Label } from '@/components/ui/label';
 import { Progress } from '@/components/ui/progress';
-import { Plus, Edit, Trash2 } from 'lucide-react';
+import { Plus, Edit } from 'lucide-react';
+ 
+ 
+ 
 import { useToast } from '@/lib/hooks/use-toast';
 
 interface BudgetLineItem {
@@ -28,10 +31,10 @@ interface BudgetLineItemEditorProps {
   onUpdate: () => void;
 }
 
-export default function BudgetLineItemEditor({ budgetId, lineItems, onUpdate }: BudgetLineItemEditorProps) {
+export default function BudgetLineItemEditor({ budgetId: _budgetId, lineItems, onUpdate: _onUpdate }: BudgetLineItemEditorProps) {
   const [isDialogOpen, setIsDialogOpen] = useState(false);
-  const [editingItem, setEditingItem] = useState<BudgetLineItem | null>(null);
-  const { toast } = useToast();
+  const [editingItem, _setEditingItem] = useState<BudgetLineItem | null>(null);
+  const { toast: _toast } = useToast();
 
   const [formData, setFormData] = useState({
     accountCode: '',

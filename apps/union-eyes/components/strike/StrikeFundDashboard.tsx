@@ -11,15 +11,12 @@ import { Card, CardContent, CardDescription, CardHeader, CardTitle } from '@/com
 import { Button } from '@/components/ui/button';
 import { Badge } from '@/components/ui/badge';
 import { Tabs, TabsContent, TabsList, TabsTrigger } from '@/components/ui/tabs';
-import { 
-  DollarSign, 
-  Users, 
-  MapPin, 
-  TrendingUp, 
+import {
+  DollarSign,
+  Users,
+  MapPin,
+  TrendingUp,
   AlertCircle,
-  CheckCircle,
-  Clock,
-  Calendar
 } from 'lucide-react';
 
 interface StrikeFund {
@@ -42,6 +39,7 @@ interface PicketLine {
   id: string;
   location_name: string;
   address: string;
+  // eslint-disable-next-line @typescript-eslint/no-explicit-any
   shift_schedule: any;
   active_picketers_count: number;
   total_hours_today: number;
@@ -89,7 +87,7 @@ export function StrikeFundDashboard({ organizationId }: StrikeFundDashboardProps
           setSelectedFund(data.data[0]);
         }
       }
-    } catch (error) {
+    } catch (_error) {
 } finally {
       setLoading(false);
     }
@@ -107,7 +105,7 @@ export function StrikeFundDashboard({ organizationId }: StrikeFundDashboardProps
       if (data.success) {
         setPicketLines(data.data);
       }
-    } catch (error) {
+    } catch (_error) {
 }
   };
 
@@ -119,7 +117,7 @@ export function StrikeFundDashboard({ organizationId }: StrikeFundDashboardProps
       if (data.success) {
         setRecentDisbursements(data.data);
       }
-    } catch (error) {
+    } catch (_error) {
 }
   };
 

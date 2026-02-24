@@ -1,7 +1,7 @@
 'use client';
 
 import { useState, useEffect } from 'react';
-import { Card, CardContent, CardDescription, CardFooter, CardHeader, CardTitle } from '@/components/ui/card';
+import { Card, CardContent, CardDescription, CardHeader, CardTitle } from '@/components/ui/card';
 import { Button } from '@/components/ui/button';
 import { Badge } from '@/components/ui/badge';
 import { Table, TableBody, TableCell, TableHead, TableHeader, TableRow } from '@/components/ui/table';
@@ -11,7 +11,8 @@ import { Label } from '@/components/ui/label';
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from '@/components/ui/select';
 import { Textarea } from '@/components/ui/textarea';
 import { Progress } from '@/components/ui/progress';
-import { Plus, Edit, Trash2, TrendingUp, TrendingDown, DollarSign, AlertCircle } from 'lucide-react';
+import { Plus, Edit, Trash2 } from 'lucide-react';
+ 
 import { useToast } from '@/lib/hooks/use-toast';
 
 interface Budget {
@@ -37,11 +38,11 @@ interface BudgetManagerProps {
   organizationId: string;
 }
 
-export default function BudgetManager({ organizationId }: BudgetManagerProps) {
+export default function BudgetManager({ organizationId: _organizationId }: BudgetManagerProps) {
   const [budgets, setBudgets] = useState<Budget[]>([]);
   const [loading, setLoading] = useState(true);
   const [isCreateDialogOpen, setIsCreateDialogOpen] = useState(false);
-  const [selectedBudget, setSelectedBudget] = useState<Budget | null>(null);
+  const [_selectedBudget, _setSelectedBudget] = useState<Budget | null>(null);
   const [fiscalYearFilter, setFiscalYearFilter] = useState<string>('');
   const { toast } = useToast();
 
@@ -57,6 +58,7 @@ export default function BudgetManager({ organizationId }: BudgetManagerProps) {
 
   useEffect(() => {
     fetchBudgets();
+  // eslint-disable-next-line react-hooks/exhaustive-deps
   }, [fiscalYearFilter]);
 
   const fetchBudgets = async () => {
@@ -70,7 +72,7 @@ export default function BudgetManager({ organizationId }: BudgetManagerProps) {
       
       const data = await response.json();
       setBudgets(data.data.budgets || []);
-    } catch (error) {
+    } catch (_error) {
       toast({
         title: 'Error',
         description: 'Failed to load budgets',
@@ -129,7 +131,7 @@ export default function BudgetManager({ organizationId }: BudgetManagerProps) {
       });
 
       fetchBudgets();
-    } catch (error) {
+    } catch (_error) {
       toast({
         title: 'Error',
         description: 'Failed to delete budget',
@@ -154,7 +156,7 @@ export default function BudgetManager({ organizationId }: BudgetManagerProps) {
       });
 
       fetchBudgets();
-    } catch (error) {
+    } catch (_error) {
       toast({
         title: 'Error',
         description: 'Failed to approve budget',

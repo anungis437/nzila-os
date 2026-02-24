@@ -10,14 +10,13 @@ import { logger } from "@/lib/logger";
 import { zodResolver } from "@hookform/resolvers/zod";
 import { useForm } from "react-hook-form";
 import { z } from "zod";
-import { MapPin, Plus, Edit, Trash2, Search, MoreVertical, Building2, Users } from "lucide-react";
+import { MapPin, Plus, Edit, Trash2, Search, MoreVertical, Building2 } from "lucide-react";
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "@/components/ui/card";
 import { Button } from "@/components/ui/button";
 import{ Input } from "@/components/ui/input";
-import { Textarea } from "@/components/ui/textarea";
 import { Table, TableBody, TableCell, TableHead, TableHeader, TableRow } from "@/components/ui/table";
 import { Dialog, DialogContent, DialogDescription, DialogFooter, DialogHeader, DialogTitle } from "@/components/ui/dialog";
-import { Form, FormControl, FormDescription, FormField, FormItem, FormLabel, FormMessage } from "@/components/ui/form";
+import { Form, FormControl, FormField, FormItem, FormLabel, FormMessage } from "@/components/ui/form";
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/components/ui/select";
 import { DropdownMenu, DropdownMenuContent, DropdownMenuItem, DropdownMenuLabel, DropdownMenuSeparator, DropdownMenuTrigger } from "@/components/ui/dropdown-menu";
 import { Badge } from "@/components/ui/badge";
@@ -80,7 +79,9 @@ export function WorksiteManagement({ organizationId, onUpdate }: WorksiteManagem
   const [isSubmitting, setIsSubmitting] = useState(false);
   const { toast } = useToast();
 
+  // eslint-disable-next-line @typescript-eslint/no-explicit-any
   const form = useForm<WorksiteFormData, any, WorksiteFormData>({
+    // eslint-disable-next-line @typescript-eslint/no-explicit-any
     resolver: zodResolver(formSchema) as any,
     defaultValues: {
       employerId: "",
@@ -109,6 +110,7 @@ export function WorksiteManagement({ organizationId, onUpdate }: WorksiteManagem
   useEffect(() => {
     fetchWorksites();
     fetchEmployers();
+  // eslint-disable-next-line react-hooks/exhaustive-deps
   }, [organizationId]);
 
   const fetchWorksites = async () => {
@@ -118,7 +120,7 @@ export function WorksiteManagement({ organizationId, onUpdate }: WorksiteManagem
       if (!response.ok) throw new Error("Failed to fetch worksites");
       const data = await response.json();
       setWorksites(data.data || []);
-    } catch (error) {
+    } catch (_error) {
       toast({
         title: "Error",
         description: "Failed to load worksites",
@@ -188,7 +190,7 @@ export function WorksiteManagement({ organizationId, onUpdate }: WorksiteManagem
 
       fetchWorksites();
       onUpdate?.();
-    } catch (error) {
+    } catch (_error) {
       toast({
         title: "Error",
         description: "Failed to delete worksite",

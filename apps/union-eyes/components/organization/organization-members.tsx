@@ -33,16 +33,15 @@ import {
   SelectValue,
 } from "@/components/ui/select";
 import { Checkbox } from "@/components/ui/checkbox";
-import { 
-  Users, 
-  Search, 
-  UserPlus, 
-  ArrowRight, 
-  Loader2, 
+ 
+import {
+  Users,
+  Search,
+  ArrowRight,
+  Loader2,
   AlertCircle,
   Download,
-  Upload,
-  Filter
+  Filter as _Filter,
 } from "lucide-react";
 import { cn } from "@/lib/utils";
 
@@ -82,7 +81,7 @@ export function OrganizationMembers({ organizationId, className }: OrganizationM
       
       const data = await response.json();
       setMembers(data.data || []);
-    } catch (err) {
+    } catch (_err) {
 } finally {
       setLoading(false);
     }
@@ -141,7 +140,7 @@ export function OrganizationMembers({ organizationId, className }: OrganizationM
       setSelectedMembers(new Set());
       setShowTransferDialog(false);
       setTransferTargetOrg("");
-    } catch (err) {
+    } catch (_err) {
 alert("Failed to transfer members");
     } finally {
       setTransferring(false);

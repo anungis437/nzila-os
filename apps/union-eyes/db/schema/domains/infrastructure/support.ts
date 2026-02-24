@@ -130,6 +130,7 @@ export const supportTickets = pgTable(
     satisfactionRespondedAt: timestamp('satisfaction_responded_at', { withTimezone: true }),
     
     // Metadata
+    // eslint-disable-next-line @typescript-eslint/no-explicit-any
     metadata: jsonb('metadata').$type<Record<string, any>>().default(sql`'{}'::jsonb`),
     
     // Audit
@@ -210,6 +211,7 @@ export const ticketHistory = pgTable(
     changedByName: varchar('changed_by_name', { length: 255 }),
     
     // Metadata
+    // eslint-disable-next-line @typescript-eslint/no-explicit-any
     metadata: jsonb('metadata').$type<Record<string, any>>().default(sql`'{}'::jsonb`),
     
     // Audit

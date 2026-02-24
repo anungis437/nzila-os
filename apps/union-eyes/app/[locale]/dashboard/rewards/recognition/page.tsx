@@ -1,3 +1,5 @@
+export const dynamic = 'force-dynamic';
+
 import { Metadata } from 'next';
 import { auth } from '@clerk/nextjs/server';
 import { redirect } from 'next/navigation';
@@ -6,7 +8,7 @@ import { getTranslations } from 'next-intl/server';
 import { PeerNominationForm } from '@/components/rewards/peer-nomination-form';
 import { listAwardTypes } from '@/actions/rewards-actions';
 import { listRecognitionPrograms } from '@/actions/rewards-actions';
-import { eq, and } from 'drizzle-orm';
+import { eq } from 'drizzle-orm';
 import { organizationMembers } from '@/db/schema';
 
 export const metadata: Metadata = {
@@ -52,6 +54,7 @@ export default async function PeerRecognitionPage() {
   }
 
   // Get the first active program (or you can let user select)
+  // eslint-disable-next-line @typescript-eslint/no-explicit-any
   const activeProgram = programsResult.data?.find((p: any) => p.status === 'active');
   
   if (!activeProgram) {

@@ -1,18 +1,21 @@
+"use client";
+
+
+export const dynamic = 'force-dynamic';
 import React from 'react';
 /**
  * Case Queue (LRO Workbench)
  * For union representatives to manage and review member cases
  */
-"use client";
 
 import { useState, useEffect } from "react";
 import { motion, AnimatePresence } from "framer-motion";
 import { useUser } from "@clerk/nextjs";
 import { useTranslations } from 'next-intl';
 import Link from "next/link";
-import { 
-  Clipboard, 
-  Clock, 
+import {
+  Clipboard,
+  Clock,
   AlertCircle,
   CheckCircle,
   XCircle,
@@ -28,14 +31,13 @@ import {
   Phone,
   Mail,
   ChevronDown,
-  ChevronUp,
   Eye,
   Edit,
   UserCheck,
   TrendingUp,
-  AlertTriangle
+  AlertTriangle,
 } from "lucide-react";
-import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
+import { Card, CardContent } from "@/components/ui/card";
 
 type CaseStatus = "pending" | "in-review" | "approved" | "rejected" | "resolved";
 type CasePriority = "low" | "medium" | "high" | "urgent";
@@ -66,6 +68,7 @@ interface DbClaim {
   resolutionDate: Date | null;
   attachments: string[];
   voiceTranscriptions: string[];
+  // eslint-disable-next-line @typescript-eslint/no-explicit-any
   metadata: Record<string, any>;
   createdAt: Date;
   updatedAt: Date;
@@ -159,7 +162,7 @@ const mapDbClaimToCase = (claim: DbClaim & { memberName?: string; memberEmail?: 
   daysOpen: calculateDaysOpen(claim.createdAt),
 });
 
-const mockCases: Case[] = [
+const _mockCases: Case[] = [
   {
     id: "CASE-004",
     title: "Denied Vacation Request",
@@ -903,7 +906,7 @@ setError(err instanceof Error ? err.message : 'Failed to load assigned claims');
                                     {caseItem.notes.map((note, idx) => (
                                       <div key={idx} className="bg-green-50 p-3 rounded-lg text-sm text-gray-700">
                                         <div className="flex items-start gap-2">
-                                          <FileText className="w-4 h-4 text-green-600 mt-0.5 flex-shrink-0" />
+                                          <FileText className="w-4 h-4 text-green-600 mt-0.5 shrink-0" />
                                           <p>{note}</p>
                                         </div>
                                       </div>
@@ -988,7 +991,7 @@ setError(err instanceof Error ? err.message : 'Failed to load assigned claims');
           <Card className="bg-linear-to-r from-orange-50 to-yellow-50 border-orange-200">
             <CardContent className="p-6">
               <div className="flex items-start gap-4">
-                <div className="w-12 h-12 bg-orange-600 rounded-lg flex items-center justify-center flex-shrink-0">
+                <div className="w-12 h-12 bg-orange-600 rounded-lg flex items-center justify-center shrink-0">
                   <Clipboard className="w-6 h-6 text-white" />
                 </div>
                 <div className="flex-1">

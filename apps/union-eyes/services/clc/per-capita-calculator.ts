@@ -5,13 +5,12 @@
  */
 
 import { db } from '@/db';
-import { 
-  organizations, 
+import {
+  organizations,
   organizationMembers,
-  chartOfAccounts,
-  perCapitaRemittances
+  perCapitaRemittances,
 } from '@/db/schema';
-import { eq, and, sql, gte, lte, isNotNull } from 'drizzle-orm';
+import { eq, and, sql, lte, isNotNull } from 'drizzle-orm';
 
 // =====================================================================================
 // TYPES
@@ -187,6 +186,7 @@ return null;
   }
 
   // Get per-capita rate from organization settings
+  // eslint-disable-next-line @typescript-eslint/no-explicit-any
   const orgSettings = (org.settings as any) || {};
   const perCapitaRate = parseFloat(orgSettings.perCapitaRate || '1.0');
   
@@ -244,6 +244,7 @@ export async function calculateAllPerCapita(
 
   // Filter to those with per-capita rate in settings
   const orgsWithRate = orgsWithParent.filter(org => {
+    // eslint-disable-next-line @typescript-eslint/no-explicit-any
     const settings = (org.settings as any) || {};
     return settings.perCapitaRate && parseFloat(settings.perCapitaRate) > 0;
   });
@@ -255,7 +256,7 @@ const calculations: PerCapitaCalculation[] = [];
       if (calculation) {
         calculations.push(calculation);
       }
-    } catch (error) {
+    } catch (_error) {
 }
   }
 return calculations;
@@ -322,7 +323,7 @@ export async function savePerCapitaRemittances(
       }
 
       saved++;
-    } catch (error) {
+    } catch (_error) {
 errors++;
     }
   }
@@ -376,11 +377,12 @@ export async function getRemittanceStatusForParent(
 /**
  * Get overdue remittances (past due date + grace period)
  */
+// eslint-disable-next-line @typescript-eslint/no-explicit-any
 export async function getOverdueRemittances(): Promise<any[]> {
-  const today = new Date();
+  const _today = new Date();
   const gracePeriodEnd = new Date();
   gracePeriodEnd.setDate(gracePeriodEnd.getDate() - GRACE_PERIOD_DAYS);
-  const gracePeriodEndStr = gracePeriodEnd.toISOString().split('T')[0];
+  const _gracePeriodEndStr = gracePeriodEnd.toISOString().split('T')[0];
 
   const overdueRemittances = await db
     .select()
@@ -399,7 +401,7 @@ export async function getOverdueRemittances(): Promise<any[]> {
  * Mark overdue remittances (run daily via cron)
  */
 export async function markOverdueRemittances(): Promise<number> {
-  const today = new Date();
+  const _today = new Date();
   const gracePeriodEnd = new Date();
   gracePeriodEnd.setDate(gracePeriodEnd.getDate() - GRACE_PERIOD_DAYS);
   const gracePeriodEndStr = gracePeriodEnd.toISOString().split('T')[0];
@@ -430,6 +432,7 @@ export async function updateLastRemittanceDate(
   // Update organization settings to track last remittance
   const org = await db.select().from(organizations).where(eq(organizations.id, organizationId)).limit(1);
   if (org[0]) {
+    // eslint-disable-next-line @typescript-eslint/no-explicit-any
     const settings = (org[0].settings as any) || {};
     await db
       .update(organizations)

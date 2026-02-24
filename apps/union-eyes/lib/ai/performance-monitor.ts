@@ -302,7 +302,7 @@ class PerformanceMonitor {
   }
 
   // Helper: Get recent latencies
-  private getRecentLatencies(limit: number): number[] {
+  private getRecentLatencies(_limit: number): number[] {
     // In a real implementation, this would query a proper histogram
     return [];
   }

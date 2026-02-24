@@ -10,13 +10,8 @@ import {
   documentSigners,
   signatureAuditTrail,
   organizationMembers,
-  type NewSignatureDocument,
-  type NewDocumentSigner,
-  type NewSignatureAuditTrail,
 } from "@/db/schema";
-import SignatureProviderFactory, {
-  type CreateEnvelopeRequest,
-} from "./providers";
+import SignatureProviderFactory from "./providers";
 import { eq, and, or, desc } from "drizzle-orm";
 import { createHash } from "crypto";
 import { NotificationService } from "@/lib/services/notification-service";
@@ -132,12 +127,13 @@ export class SignatureService {
         expiresAt,
         requireAuthentication: data.requireAuthentication || false,
         sequentialSigning: data.sequentialSigning || false,
+        // eslint-disable-next-line @typescript-eslint/no-explicit-any
         metadata: data.metadata as any,
       })
       .returning();
 
     // Create signer records
-    const signerRecords = await Promise.all(
+    const _signerRecords = await Promise.all(
       data.signers.map(async (signer, index) => {
         const providerSigner = envelope.signers[index];
 
@@ -234,7 +230,7 @@ export class SignatureService {
       });
       
       return !!membership;
-    } catch (error) {
+    } catch (_error) {
 return false;
     }
   }
@@ -287,6 +283,7 @@ return false;
         await db
           .update(signatureDocuments)
           .set({
+            // eslint-disable-next-line @typescript-eslint/no-explicit-any
             status: status.status as any,
             updatedAt: new Date(),
             completedAt:
@@ -339,7 +336,7 @@ return false;
           }
         }
       }
-    } catch (error) {
+    } catch (_error) {
 }
   }
 
@@ -391,6 +388,7 @@ return false;
         signatureImageUrl: data.signatureImageUrl,
         ipAddress: data.ipAddress,
         userAgent: data.userAgent,
+        // eslint-disable-next-line @typescript-eslint/no-explicit-any
         geolocation: data.geolocation as any,
         updatedAt: new Date(),
       })
@@ -472,7 +470,7 @@ return false;
           document.provider as "docusign" | "hellosign" | "internal"
         );
         await provider.voidEnvelope(document.providerEnvelopeId, reason);
-      } catch (error) {
+      } catch (_error) {
 }
     }
 
@@ -543,7 +541,7 @@ return false;
           signerId,
         },
       });
-    } catch (error) {
+    } catch (_error) {
 // Continue with audit log even if notification fails
     }
 
@@ -615,6 +613,7 @@ export class AuditTrailService {
     await db.insert(signatureAuditTrail).values({
       ...data,
       timestamp: new Date(),
+    // eslint-disable-next-line @typescript-eslint/no-explicit-any
     } as any);
   }
 

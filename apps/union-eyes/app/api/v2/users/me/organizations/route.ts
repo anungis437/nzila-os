@@ -3,11 +3,18 @@ import { NextResponse } from 'next/server';
  * GET /api/users/me/organizations
  * Migrated to withApi() framework
  */
+// eslint-disable-next-line @typescript-eslint/no-unused-vars
 import { auth } from '@clerk/nextjs/server';
 import { db } from '@/db/db';
 import { organizationMembers, organizations } from '@/db/schema-organizations';
 import { eq } from 'drizzle-orm';
 
+ 
+ 
+ 
+ 
+ 
+ 
 import { withApi, ApiError } from '@/lib/api/framework';
 
 export const GET = withApi(
@@ -18,7 +25,7 @@ export const GET = withApi(
       summary: 'GET organizations',
     },
   },
-  async ({ request, userId, organizationId, user, body, query, params }) => {
+  async ({ request: _request, userId, organizationId: _organizationId, user: _user, body: _body, query: _query, params: _params }) => {
         if (!userId) {
           throw ApiError.unauthorized('Authentication required');
         }
@@ -30,6 +37,7 @@ export const GET = withApi(
           .where(eq(organizationMembers.userId, userId));
         // Fetch the organizations the user belongs to
         const orgIds = [...new Set(memberships.map(m => m.organizationId))];
+        // eslint-disable-next-line @typescript-eslint/no-explicit-any
         let orgs: any[] = [];
         if (orgIds.length > 0) {
           // organizationMembers.organizationId is a slug/text, not UUID

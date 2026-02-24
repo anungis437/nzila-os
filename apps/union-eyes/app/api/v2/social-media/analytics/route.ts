@@ -2,11 +2,9 @@
  * GET POST PUT DELETE /api/social-media/analytics
  * Migrated to withApi() framework
  */
-import { format, subDays, startOfDay, endOfDay } from 'date-fns';
-import { createClient } from '@supabase/supabase-js';
-import { withApi, ApiError, z, RATE_LIMITS } from '@/lib/api/framework';
+import { withApi, z, RATE_LIMITS } from '@/lib/api/framework';
 
-const socialMediaAnalyticsSchema = z.object({
+const _socialMediaAnalyticsSchema = z.object({
   platform: z.unknown().optional(),
   campaign_id: z.string().uuid('Invalid campaign_id'),
   start_date: z.string().datetime().optional(),
@@ -27,6 +25,7 @@ export const GET = withApi(
   },
   async ({ request }) => {
     // Delegate to v1 handler while framework migration is in progress
+    // eslint-disable-next-line @typescript-eslint/no-explicit-any
     const response = await v1GET(request, {} as any);
     return response;
   },
@@ -43,6 +42,7 @@ export const POST = withApi(
   },
   async ({ request }) => {
     // Delegate to v1 handler while framework migration is in progress
+    // eslint-disable-next-line @typescript-eslint/no-explicit-any
     const response = await v1POST(request, {} as any);
     return response;
   },
@@ -59,6 +59,7 @@ export const PUT = withApi(
   },
   async ({ request }) => {
     // Delegate to v1 handler while framework migration is in progress
+    // eslint-disable-next-line @typescript-eslint/no-explicit-any
     const response = await v1PUT(request, {} as any);
     return response;
   },
@@ -75,6 +76,7 @@ export const DELETE = withApi(
   },
   async ({ request }) => {
     // Delegate to v1 handler while framework migration is in progress
+    // eslint-disable-next-line @typescript-eslint/no-explicit-any
     const response = await v1DELETE(request, {} as any);
     return response;
   },

@@ -78,7 +78,7 @@ export function PollCreator({ organizationId, pollId, onSave, onCancel }: PollCr
     setOptions(options.filter((opt) => opt.id !== id).map((opt, i) => ({ ...opt, order: i })));
   };
 
-  const moveOption = (id: string, direction: 'up' | 'down') => {
+  const _moveOption = (id: string, direction: 'up' | 'down') => {
     const index = options.findIndex((opt) => opt.id === id);
     if (index === -1) return;
     if (direction === 'up' && index === 0) return;
@@ -147,7 +147,7 @@ export function PollCreator({ organizationId, pollId, onSave, onCancel }: PollCr
       });
 
       if (onSave) onSave();
-    } catch (error) {
+    } catch (_error) {
 toast({
         title: 'Error',
         description: 'Failed to save poll',

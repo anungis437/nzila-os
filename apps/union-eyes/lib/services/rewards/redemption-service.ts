@@ -6,10 +6,9 @@
 import { db } from '@/db';
 import {
   rewardRedemptions,
-  type NewRewardRedemption,
   type RewardRedemption,
 } from '@/db/schema';
-import { eq, and, desc, sql, count } from 'drizzle-orm';
+import { eq, and, desc, count } from 'drizzle-orm';
 import { applyLedgerEntry } from './wallet-service';
 
 export interface InitiateRedemptionOptions {

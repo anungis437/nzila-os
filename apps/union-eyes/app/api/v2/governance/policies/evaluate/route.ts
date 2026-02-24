@@ -4,9 +4,14 @@ import { NextResponse } from 'next/server';
  * Migrated to withApi() framework
  */
 import { policyEngine } from '@/lib/services/policy-engine';
-import { logger } from '@/lib/logger';
 
-import { withApi, ApiError, z } from '@/lib/api/framework';
+ 
+ 
+ 
+ 
+ 
+ 
+import { withApi, z } from '@/lib/api/framework';
 
 const evaluateSchema = z.object({
   ruleType: z.string(),
@@ -26,7 +31,7 @@ export const POST = withApi(
       summary: 'POST evaluate',
     },
   },
-  async ({ request, userId, organizationId, user, body, query, params }) => {
+  async ({ request: _request, userId: _userId, organizationId: _organizationId, user: _user, body, query: _query, params: _params }) => {
 
         const validatedData = body;
         // Evaluate policy

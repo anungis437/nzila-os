@@ -20,7 +20,6 @@ import {
   Tooltip,
   Legend,
   ResponsiveContainer,
-  Cell,
   ZAxis,
 } from 'recharts';
 
@@ -35,6 +34,7 @@ export interface ScatterChartProps {
     z?: number; // Optional size dimension
     category?: string;
     name?: string;
+    // eslint-disable-next-line @typescript-eslint/no-explicit-any
     [key: string]: any;
   }>;
   xAxisLabel?: string;
@@ -43,6 +43,7 @@ export interface ScatterChartProps {
   colors?: string[];
   showGrid?: boolean;
   showLegend?: boolean;
+  // eslint-disable-next-line @typescript-eslint/no-explicit-any
   onPointClick?: (data: any) => void;
   height?: number;
   xDomain?: [number | 'auto', number | 'auto'];
@@ -99,6 +100,7 @@ export function ScatterChart({
       }];
 
   // Custom tooltip
+  // eslint-disable-next-line @typescript-eslint/no-explicit-any
   const CustomTooltip = ({ active, payload }: any) => {
     if (!active || !payload || !payload.length) return null;
 
@@ -136,6 +138,7 @@ export function ScatterChart({
   };
 
   // Handle point click
+  // eslint-disable-next-line @typescript-eslint/no-explicit-any
   const handleClick = (data: any) => {
     if (onPointClick) {
       onPointClick(data);
@@ -181,13 +184,14 @@ export function ScatterChart({
             <ZAxis type="number" dataKey="z" range={[50, 400]} name="Size" />
           )}
           
+          {/* eslint-disable-next-line react-hooks/static-components */}
           <Tooltip content={<CustomTooltip />} cursor={{ strokeDasharray: '3 3' }} />
           
           {showLegend && hasCategories && (
             <Legend wrapperStyle={{ paddingTop: '20px' }} />
           )}
 
-          {dataSeries.map((series, index) => (
+          {dataSeries.map((series, _index) => (
             <Scatter
               key={series.name}
               name={series.name}

@@ -7,6 +7,8 @@
 
 'use client';
 
+
+export const dynamic = 'force-dynamic';
 import { useEffect, useState } from 'react';
 import { useParams, useRouter } from 'next/navigation';
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from '@/components/ui/card';
@@ -16,11 +18,9 @@ import { Badge } from '@/components/ui/badge';
 import {
   Download,
   Printer,
-  Mail,
   CheckCircle2,
   ArrowLeft,
   FileText,
-  Calendar,
   CreditCard,
   Building2,
   User,
@@ -333,7 +333,7 @@ export default function ReceiptViewerPage() {
   if (loading) {
     return (
       <div className="container mx-auto p-6 max-w-4xl">
-        <div className="flex items-center justify-center min-h-[400px]">
+        <div className="flex items-center justify-center min-h-100">
           <div className="text-center">
             <Loader2 className="h-12 w-12 animate-spin mx-auto mb-4 text-primary" />
             <p className="text-lg font-medium">Loading receipt...</p>

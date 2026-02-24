@@ -64,6 +64,7 @@ type AlertExecutionSummary = {
   startedAt: string;
   completedAt: string | null;
   executionTimeMs: number | null;
+  // eslint-disable-next-line @typescript-eslint/no-explicit-any
   actionsExecuted: any;
   errorMessage?: string | null;
 };
@@ -74,6 +75,7 @@ type AlertEscalationSummary = {
   alertRuleName: string | null;
   name: string;
   description: string | null;
+  // eslint-disable-next-line @typescript-eslint/no-explicit-any
   escalationLevels: any;
   status: string;
   currentLevel: number;
@@ -164,6 +166,7 @@ export default function AlertManagementDashboard() {
 
   useEffect(() => {
     fetchAlertData();
+  // eslint-disable-next-line react-hooks/exhaustive-deps
   }, []);
 
   // Filter alert rules
@@ -443,6 +446,7 @@ export default function AlertManagementDashboard() {
                 </select>
                 <select
                   value={selectedStatus}
+                  // eslint-disable-next-line @typescript-eslint/no-explicit-any
                   onChange={(e) => setSelectedStatus(e.target.value as any)}
                   className="border rounded-md px-3 py-2"
                 >

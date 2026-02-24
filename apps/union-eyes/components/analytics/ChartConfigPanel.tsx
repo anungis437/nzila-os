@@ -12,7 +12,6 @@
 
 import React, { useState } from 'react';
 import { Card } from '@/components/ui/card';
-import { Button } from '@/components/ui/button';
 import { Input } from '@/components/ui/input';
 import { Label } from '@/components/ui/label';
 import { Badge } from '@/components/ui/badge';
@@ -312,6 +311,7 @@ export function ChartConfigPanel({
   ) => {
     onChange({
       ...config,
+      // eslint-disable-next-line @typescript-eslint/no-explicit-any
       [key]: { ...(config[key] as any), ...updates },
     });
   };
@@ -559,6 +559,7 @@ export function ChartConfigPanel({
               {config.legend?.show !== false && (
                 <Select
                   value={config.legend?.position || 'bottom'}
+                  // eslint-disable-next-line @typescript-eslint/no-explicit-any
                   onValueChange={(value: any) =>
                     updateNestedConfig('legend', { position: value })
                   }
@@ -607,6 +608,7 @@ export function ChartConfigPanel({
               {config.dataLabels?.enabled && (
                 <Select
                   value={config.dataLabels?.position || 'top'}
+                  // eslint-disable-next-line @typescript-eslint/no-explicit-any
                   onValueChange={(value: any) =>
                     updateNestedConfig('dataLabels', { position: value })
                   }

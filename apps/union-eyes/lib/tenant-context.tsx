@@ -8,6 +8,7 @@
  */
 
 import React, { createContext, useContext, useState, useEffect, useCallback } from "react";
+ 
 import { useAuth, useOrganization } from "@clerk/nextjs";
 
 // Tenant information interface
@@ -15,6 +16,7 @@ export interface TenantInfo {
   organizationId: string;
   name: string;
   slug: string;
+  // eslint-disable-next-line @typescript-eslint/no-explicit-any
   settings?: Record<string, any>;
   subscriptionTier?: string;
   features?: string[];
@@ -46,7 +48,7 @@ interface TenantProviderProps {
  */
 export function TenantProvider({ children }: TenantProviderProps) {
   const { userId, isLoaded: authLoaded } = useAuth();
-  const { organization, isLoaded: orgLoaded } = useOrganization();
+  const { organization: _organization, isLoaded: orgLoaded } = useOrganization();
   
   const [currentTenant, setCurrentTenant] = useState<TenantInfo | null>(null);
   const [tenants, setTenants] = useState<TenantInfo[]>([]);

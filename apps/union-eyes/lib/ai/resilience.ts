@@ -186,7 +186,7 @@ interface RateLimitConfig {
   keyPrefix: string;
 }
 
-interface RateLimitEntry {
+interface _RateLimitEntry {
   count: number;
   resetTime: number;
 }

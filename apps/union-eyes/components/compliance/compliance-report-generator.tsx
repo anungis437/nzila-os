@@ -22,8 +22,6 @@ import {
   FileText,
   Download,
   Send,
-  Calendar,
-  Users,
   CheckCircle,
   Clock,
 } from "lucide-react";
@@ -48,7 +46,6 @@ import {
   SelectValue,
 } from "@/components/ui/select";
 import { Checkbox } from "@/components/ui/checkbox";
-import { Textarea } from "@/components/ui/textarea";
 import { Label } from "@/components/ui/label";
 import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
 import { format } from "date-fns";
@@ -110,7 +107,7 @@ export function ComplianceReportGenerator({
   onDeleteReport,
 }: ComplianceReportGeneratorProps) {
   const [isGenerating, setIsGenerating] = React.useState(false);
-  const [selectedTemplate, setSelectedTemplate] = React.useState<ReportTemplate | null>(null);
+  const [_selectedTemplate, setSelectedTemplate] = React.useState<ReportTemplate | null>(null);
 
   const form = useForm<ReportConfig>({
     resolver: zodResolver(reportConfigSchema),

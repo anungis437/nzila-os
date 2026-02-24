@@ -47,6 +47,7 @@ export function SankeyChart({
   nodeColor = '#3b82f6',
   linkOpacity = 0.5,
 }: SankeyChartProps) {
+  // eslint-disable-next-line @typescript-eslint/no-explicit-any
   const CustomTooltip = ({ active, payload }: any) => {
     if (!active || !payload || !payload.length) return null;
     const data = payload[0];
@@ -68,7 +69,9 @@ export function SankeyChart({
 
     // Link tooltip
     if (data.payload.source && data.payload.target) {
+      // eslint-disable-next-line @typescript-eslint/no-explicit-any
       const sourceName = data.nodes.find((n: any) => n.index === data.payload.source)?.name;
+      // eslint-disable-next-line @typescript-eslint/no-explicit-any
       const targetName = data.nodes.find((n: any) => n.index === data.payload.target)?.name;
 
       return (
@@ -95,8 +98,9 @@ export function SankeyChart({
     return null;
   };
 
+  // eslint-disable-next-line @typescript-eslint/no-explicit-any
   const customNode = (props: any) => {
-    const { x, y, width, height, index, payload } = props;
+    const { x, y, width, height, _index, payload } = props;
     const isOut = x + width + 6 > props.containerWidth;
 
     return (
@@ -131,8 +135,9 @@ export function SankeyChart({
     );
   };
 
+  // eslint-disable-next-line @typescript-eslint/no-explicit-any
   const customLink = (props: any) => {
-    const { sourceX, targetX, sourceY, targetY, sourceControlX, targetControlX, linkWidth, payload } = props;
+    const { sourceX, targetX, sourceY, targetY, sourceControlX, targetControlX, linkWidth, _payload } = props;
 
     return (
       <path
@@ -162,6 +167,7 @@ export function SankeyChart({
           nodePadding={50}
           margin={{ top: 20, right: 150, bottom: 20, left: 150 }}
         >
+          {/* eslint-disable-next-line react-hooks/static-components */}
           <Tooltip content={<CustomTooltip />} />
         </Sankey>
       </ResponsiveContainer>

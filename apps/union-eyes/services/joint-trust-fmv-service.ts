@@ -24,7 +24,9 @@ export interface FMVBenchmarkData {
   fmvHigh: number;
   fmvMedian: number;
   region: string;
+  // eslint-disable-next-line @typescript-eslint/no-explicit-any
   dataSources?: any[];
+  // eslint-disable-next-line @typescript-eslint/no-explicit-any
   comparableTransactions?: any[];
 }
 
@@ -42,6 +44,7 @@ export interface BidSubmission {
   bidderName: string;
   bidderContact: string;
   bidAmount: number;
+  // eslint-disable-next-line @typescript-eslint/no-explicit-any
   bidDocuments?: any[];
   bidNotes?: string;
 }
@@ -240,7 +243,7 @@ export class JointTrustFMVService {
    * Create procurement request (with 3-bid requirement)
    */
   static async createProcurementRequest(data: ProcurementRequestData) {
-    const policy = await this.getPolicy();
+    const _policy = await this.getPolicy();
     const requiresCompetitiveBidding =
       data.estimatedValue >= this.COMPETITIVE_BIDDING_THRESHOLD;
     const requiresAppraisal = data.estimatedValue >= this.APPRAISAL_THRESHOLD;
@@ -533,6 +536,7 @@ export class JointTrustFMVService {
     performedBy: string;
     performedByRole?: string;
     complianceImpact?: string;
+    // eslint-disable-next-line @typescript-eslint/no-explicit-any
     metadata?: any;
   }) {
     await db.insert(fmvAuditLog).values({

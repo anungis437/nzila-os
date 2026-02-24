@@ -1,4 +1,3 @@
-import { logApiAuditEvent } from "@/lib/middleware/api-security";
 /**
  * CBA API Routes - Individual CBA operations
  * GET /api/cbas/[id] - Get CBA by ID with related data
@@ -6,7 +5,7 @@ import { logApiAuditEvent } from "@/lib/middleware/api-security";
  * DELETE /api/cbas/[id] - Delete CBA (soft delete)
  */
 
-import { NextRequest, NextResponse } from "next/server";
+import { NextResponse } from "next/server";
 import { 
   getCBAById, 
   updateCBA, 
@@ -16,13 +15,14 @@ import {
 import { getClausesByCBAId } from "@/lib/services/clause-service";
 import { getBargainingNotesByCBA } from "@/lib/services/bargaining-notes-service";
 import { z } from "zod";
-import { getCurrentUser, withAdminAuth, withApiAuth, withMinRole, withRoleAuth } from '@/lib/api-auth-guard';
+import { withRoleAuth } from '@/lib/api-auth-guard';
 import { logger } from "@/lib/logger";
 
+ 
+ 
 import {
   ErrorCode,
   standardErrorResponse,
-  standardSuccessResponse,
 } from '@/lib/api/standardized-responses';
 export const GET = withRoleAuth('member', async (request, context) => {
   const { params } = context as { params: { id: string } };
@@ -80,7 +80,7 @@ const cbasSchema = z.object({
 });
 
 export const PATCH = withRoleAuth('steward', async (request, context) => {
-    const { userId, organizationId, params } = context as { userId: string; organizationId: string; params: { id: string } };
+    const { userId, organizationId: _organizationId, params } = context as { userId: string; organizationId: string; params: { id: string } };
 
   try {
       const { id } = params;
@@ -95,7 +95,7 @@ export const PATCH = withRoleAuth('steward', async (request, context) => {
       );
     }
     
-    const { status } = validation.data;
+    const { status: _status } = validation.data;
 
       // If only updating status, use specialized function
       if (body.status && Object.keys(body).length === 1) {
@@ -129,6 +129,7 @@ export const PATCH = withRoleAuth('steward', async (request, context) => {
       logger.error("Error updating CBA", error as Error);
       
       // Handle unique constraint violations
+      // eslint-disable-next-line @typescript-eslint/no-explicit-any
       if ((error as any)?.code === "23505") {
         return standardErrorResponse(
       ErrorCode.ALREADY_EXISTS,

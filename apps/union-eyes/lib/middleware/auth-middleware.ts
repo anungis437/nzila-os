@@ -19,7 +19,7 @@
  *   }
  */
 
-import { NextRequest, NextResponse } from 'next/server';
+import { NextResponse } from 'next/server';
 import type { Session } from '@clerk/nextjs/server';
 
 // Dynamically import auth to handle different Clerk versions
@@ -170,7 +170,7 @@ return null;
         organizationId,
         metadata: publicMetadata as Record<string, unknown>,
       };
-    } catch (error) {
+    } catch (_error) {
 return null;
     }
   }

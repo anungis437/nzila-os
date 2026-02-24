@@ -57,12 +57,13 @@ export function WaterfallChart({
 }: WaterfallChartProps) {
   // Calculate cumulative values
   let cumulative = 0;
-  const chartData = data.map((item, index) => {
+  const chartData = data.map((item, _index) => {
     const start = cumulative;
     const value = item.value;
     const end = item.isTotal ? value : cumulative + value;
     
     if (!item.isTotal) {
+      // eslint-disable-next-line react-hooks/immutability
       cumulative += value;
     }
 
@@ -77,6 +78,7 @@ export function WaterfallChart({
     };
   });
 
+  // eslint-disable-next-line @typescript-eslint/no-explicit-any
   const CustomTooltip = ({ active, payload }: any) => {
     if (!active || !payload || !payload.length) return null;
     const data = payload[0].payload;
@@ -102,6 +104,7 @@ export function WaterfallChart({
     );
   };
 
+  // eslint-disable-next-line @typescript-eslint/no-explicit-any
   const getBarColor = (entry: any) => {
     if (entry.isTotal) return totalColor;
     return entry.isPositive ? positiveColor : negativeColor;

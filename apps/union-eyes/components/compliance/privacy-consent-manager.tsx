@@ -19,8 +19,6 @@ import {
   Shield,
   Check,
   X,
-  Clock,
-  FileText,
   AlertCircle,
   Info,
 } from "lucide-react";
@@ -39,6 +37,7 @@ import {
   DialogTitle,
 } from "@/components/ui/dialog";
 import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
+ 
 import { format } from "date-fns";
 
 export interface ConsentPurpose {
@@ -74,7 +73,7 @@ export interface PrivacyConsentManagerProps {
 }
 
 export function PrivacyConsentManager({
-  memberId,
+  memberId: _memberId,
   purposes,
   consents,
   onUpdateConsent,
@@ -110,7 +109,7 @@ export function PrivacyConsentManager({
     try {
       await onWithdrawAll?.();
       setShowWithdrawDialog(false);
-    } catch (error) {
+    } catch (_error) {
 }
   };
 

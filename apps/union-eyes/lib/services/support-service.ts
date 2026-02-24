@@ -18,7 +18,7 @@ import {
   type NewTicketComment,
   type KnowledgeBaseArticle,
 } from '@/db/schema';
-import { eq, and, sql, desc, asc, or, gte, lte, count, avg, inArray, type SQL } from 'drizzle-orm';
+import { eq, and, sql, desc, asc, or, gte, count, avg, inArray, type SQL } from 'drizzle-orm';
 import { logger } from '@/lib/logger';
 
 // ============================================================================
@@ -97,10 +97,13 @@ async function calculateSLADeadlines(
         eq(slaPolices.isActive, true),
         or(
           and(
+            // eslint-disable-next-line @typescript-eslint/no-explicit-any
             eq(slaPolices.priority, priority as any),
+            // eslint-disable-next-line @typescript-eslint/no-explicit-any
             eq(slaPolices.category, category as any)
           ),
           and(
+            // eslint-disable-next-line @typescript-eslint/no-explicit-any
             eq(slaPolices.priority, priority as any),
             sql`${slaPolices.category} IS NULL`
           ),
@@ -186,14 +189,17 @@ export async function listTickets(
   const conditions: SQL[] = [];
   
   if (filters.status?.length) {
+    // eslint-disable-next-line @typescript-eslint/no-explicit-any
     conditions.push(inArray(supportTickets.status, filters.status as any));
   }
   
   if (filters.priority?.length) {
+    // eslint-disable-next-line @typescript-eslint/no-explicit-any
     conditions.push(inArray(supportTickets.priority, filters.priority as any));
   }
   
   if (filters.category?.length) {
+    // eslint-disable-next-line @typescript-eslint/no-explicit-any
     conditions.push(inArray(supportTickets.category, filters.category as any));
   }
   

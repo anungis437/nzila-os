@@ -1,3 +1,5 @@
+export const dynamic = 'force-dynamic';
+
 import { Metadata } from 'next';
 import { auth } from '@clerk/nextjs/server';
 import { redirect } from 'next/navigation';
@@ -6,7 +8,7 @@ import { Card, CardContent, CardDescription, CardHeader, CardTitle } from '@/com
 import { Alert, AlertDescription, AlertTitle } from '@/components/ui/alert';
 import { Badge } from '@/components/ui/badge';
 import { Button } from '@/components/ui/button';
-import { CheckCircle2, XCircle, Settings, ExternalLink, RefreshCw } from 'lucide-react';
+import { CheckCircle2, XCircle, Settings, RefreshCw } from 'lucide-react';
 import Link from 'next/link';
 import { testShopifyConnection } from '@/lib/services/rewards/shopify-service';
 import { TestConnectionButton } from '@/components/rewards/admin/test-connection-button';
@@ -36,13 +38,14 @@ export default async function AdminShopifyPage() {
 
   // Test connection if fully configured
   let connectionStatus: 'success' | 'error' | 'unknown' = 'unknown';
+  // eslint-disable-next-line @typescript-eslint/no-explicit-any
   let shopInfo: any = null;
 
   if (isFullyConfigured) {
     try {
       shopInfo = await testShopifyConnection();
       connectionStatus = shopInfo ? 'success' : 'error';
-    } catch (error) {
+    } catch (_error) {
       connectionStatus = 'error';
     }
   }
@@ -234,6 +237,7 @@ function ConfigItem({
   label: string;
   configured: boolean;
   value?: string;
+  // eslint-disable-next-line @typescript-eslint/no-explicit-any
   t: any;
 }) {
   return (
@@ -258,6 +262,7 @@ function ConfigItem({
   );
 }
 
+// eslint-disable-next-line @typescript-eslint/no-explicit-any
 function WebhookEndpoint({ topic, url, t }: { topic: string; url: string; t: any }) {
   return (
     <div className="p-3 border rounded-md space-y-2">

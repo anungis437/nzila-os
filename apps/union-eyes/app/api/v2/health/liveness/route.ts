@@ -2,6 +2,13 @@
  * GET /api/health/liveness
  * Migrated to withApi() framework
  */
+ 
+ 
+ 
+ 
+ 
+ 
+ 
 import { withApi, ApiError } from '@/lib/api/framework';
 
 export const GET = withApi(
@@ -12,7 +19,7 @@ export const GET = withApi(
       summary: 'GET liveness',
     },
   },
-  async ({ request, userId, organizationId, user, body, query, params }) => {
+  async ({ request: _request, userId: _userId, organizationId: _organizationId, user: _user, body: _body, query: _query, params: _params }) => {
     // TODO: migrate handler body
     throw ApiError.internal('Route not yet migrated');
   },

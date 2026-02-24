@@ -16,7 +16,6 @@ import { ClaimStatus } from './workflow-engine';
 import * as React from 'react';
 import { clerkClient } from '@clerk/nextjs/server';
 import { deadlines } from '../db/schema/deadlines-schema';
-import { getDaysUntilDeadline } from './workflow-engine';
 
 interface ClaimNotificationData {
   claimId: string;
@@ -84,14 +83,14 @@ export async function sendClaimStatusNotification(
           assignedStewardEmail = steward.emailAddresses[0].emailAddress;
           assignedStewardName = `${steward.firstName || ''} ${steward.lastName || ''}`.trim() || 'Steward';
         }
-      } catch (error) {
+      } catch (_error) {
 }
     }
 
     // SPRINT 7: Generate human-readable status update message
     // Uses compassionate, context-aware language from timeline builder
     const daysInState = 0; // Just changed, so 0 days in new state
-    const priority = 'medium'; // Default priority (can be enhanced with actual priority later)
+    const _priority = 'medium'; // Default priority (can be enhanced with actual priority later)
     const humanMessage = `Your claim status has been updated to ${newStatus}.`;
 
     // Build notification data (deadline support not implemented in schema yet)
@@ -289,7 +288,7 @@ export async function sendOverdueClaimNotification(
           assignedStewardEmail = steward.emailAddresses[0].emailAddress;
           assignedStewardName = `${steward.firstName || ''} ${steward.lastName || ''}`.trim() || 'Steward';
         }
-      } catch (error) {
+      } catch (_error) {
 }
     }
 

@@ -46,7 +46,6 @@ import {
   BarChart,
   Bar,
   ComposedChart,
-  Area,
   XAxis,
   YAxis,
   CartesianGrid,
@@ -56,8 +55,6 @@ import {
   PieChart,
   Pie,
   Cell,
-  ScatterChart,
-  Scatter
 } from 'recharts';
 import {
   TrendingUp,
@@ -65,15 +62,12 @@ import {
   AlertCircle,
   CheckCircle,
   DollarSign,
-  Users,
   Calendar,
   Download,
   RefreshCw,
-  Filter,
-  BarChart3,
-  PieChart as PieChartIcon,
+  PieChart as _PieChartIcon,
   Activity,
-  AlertTriangle
+  AlertTriangle,
 } from 'lucide-react';
 
 // ============================================================================
@@ -213,7 +207,7 @@ export default function CLCAnalyticsDashboard() {
       
       const data = await response.json();
       setAnnualReport(data);
-    } catch (error) {
+    } catch (_error) {
       toast({
         title: 'Error',
         description: 'Failed to load annual compliance report',
@@ -233,7 +227,7 @@ export default function CLCAnalyticsDashboard() {
       
       const data = await response.json();
       setMultiYearTrends(data);
-    } catch (error) {
+    } catch (_error) {
       toast({
         title: 'Error',
         description: 'Failed to load multi-year trends',
@@ -274,7 +268,7 @@ export default function CLCAnalyticsDashboard() {
         title: 'Success',
         description: `Report exported as ${format.toUpperCase()}`
       });
-    } catch (error) {
+    } catch (_error) {
       toast({
         title: 'Error',
         description: 'Failed to export report',
@@ -515,7 +509,7 @@ export default function CLCAnalyticsDashboard() {
                   <ul className="space-y-2">
                     {annualReport.recommendations.map((rec, index) => (
                       <li key={index} className="flex items-start gap-2">
-                        <CheckCircle className="h-5 w-5 text-blue-500 mt-0.5 flex-shrink-0" />
+                        <CheckCircle className="h-5 w-5 text-blue-500 mt-0.5 shrink-0" />
                         <span className="text-sm">{rec}</span>
                       </li>
                     ))}
@@ -621,7 +615,7 @@ export default function CLCAnalyticsDashboard() {
                   <ul className="space-y-2">
                     {multiYearTrends.keyInsights.map((insight, index) => (
                       <li key={index} className="flex items-start gap-2">
-                        <Activity className="h-5 w-5 text-purple-500 mt-0.5 flex-shrink-0" />
+                        <Activity className="h-5 w-5 text-purple-500 mt-0.5 shrink-0" />
                         <span className="text-sm">{insight}</span>
                       </li>
                     ))}

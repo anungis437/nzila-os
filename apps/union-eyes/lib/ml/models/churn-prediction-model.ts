@@ -14,10 +14,19 @@
  * Output: Churn probability (0-1)
  */
 
-import * as tf from '@tensorflow/tfjs-node';
+import type * as tfTypes from '@tensorflow/tfjs-node';
 import * as path from 'path';
 import * as fs from 'fs/promises';
 import { logger } from '@/lib/logger';
+
+// Lazy-load TensorFlow.js to avoid crashing at build-time page data collection
+let _tf: typeof tfTypes | null = null;
+async function loadTf(): Promise<typeof tfTypes> {
+  if (!_tf) {
+    _tf = await import('@tensorflow/tfjs-node');
+  }
+  return _tf;
+}
 
 export interface ChurnFeatures {
   daysSinceLastActivity: number;
@@ -38,7 +47,7 @@ export interface ChurnPredictionResult {
 const MODEL_VERSION = 'v1.0.0';
 const MODEL_PATH = path.join(process.cwd(), 'lib', 'ml', 'models', 'saved', 'churn-model');
 
-let modelInstance: tf.LayersModel | null = null;
+let modelInstance: tfTypes.LayersModel | null = null;
 let modelLoaded = false;
 
 /**
@@ -75,7 +84,8 @@ function normalizeFeatures(features: ChurnFeatures): number[] {
  * This is a basic feedforward network:
  * Input (5) -> Dense(16, relu) -> Dropout(0.2) -> Dense(8, relu) -> Dense(1, sigmoid)
  */
-export function createChurnModel(): tf.LayersModel {
+export async function createChurnModel(): Promise<tfTypes.LayersModel> {
+  const tf = await loadTf();
   const model = tf.sequential({
     layers: [
       tf.layers.dense({
@@ -110,10 +120,12 @@ export function createChurnModel(): tf.LayersModel {
  * Load the trained churn prediction model from disk
  * Falls back to creating an untrained model if none exists
  */
-export async function loadChurnModel(): Promise<tf.LayersModel> {
+export async function loadChurnModel(): Promise<tfTypes.LayersModel> {
   if (modelLoaded && modelInstance) {
     return modelInstance;
   }
+
+  const tf = await loadTf();
 
   try {
     // Check if model file exists
@@ -128,7 +140,7 @@ export async function loadChurnModel(): Promise<tf.LayersModel> {
   } catch {
     // Model doesn't exist yet - create new one with synthetic pre-training
     logger.info('No trained model found, creating new model with synthetic initialization');
-    modelInstance = createChurnModel();
+    modelInstance = await createChurnModel();
 
     // Apply simple synthetic training to ensure better-than-random predictions
     await syntheticPreTrain(modelInstance);
@@ -143,7 +155,8 @@ export async function loadChurnModel(): Promise<tf.LayersModel> {
  * Synthetic pre-training using known patterns
  * This gives the model a head start with basic churn logic until real training data is available
  */
-async function syntheticPreTrain(model: tf.LayersModel): Promise<void> {
+async function syntheticPreTrain(model: tfTypes.LayersModel): Promise<void> {
+  const tf = await loadTf();
   // Generate synthetic training examples based on known churn patterns
   const syntheticExamples: number[][] = [];
   const syntheticLabels: number[] = [];
@@ -203,6 +216,7 @@ async function syntheticPreTrain(model: tf.LayersModel): Promise<void> {
 export async function predictChurnRisk(
   features: ChurnFeatures
 ): Promise<ChurnPredictionResult> {
+  const tf = await loadTf();
   const model = await loadChurnModel();
 
   // Normalize features
@@ -210,7 +224,7 @@ export async function predictChurnRisk(
 
   // Create tensor and predict
   const inputTensor = tf.tensor2d([normalizedFeatures], [1, 5]);
-  const prediction = model.predict(inputTensor) as tf.Tensor;
+  const prediction = model.predict(inputTensor) as tfTypes.Tensor;
   const churnProbability = (await prediction.data())[0];
 
   // Cleanup tensors
@@ -245,7 +259,7 @@ export async function predictChurnRisk(
 /**
  * Save the trained model to disk
  */
-export async function saveChurnModel(model: tf.LayersModel): Promise<void> {
+export async function saveChurnModel(model: tfTypes.LayersModel): Promise<void> {
   // Ensure directory exists
   await fs.mkdir(MODEL_PATH, { recursive: true });
 

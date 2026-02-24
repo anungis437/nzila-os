@@ -18,7 +18,6 @@
 import { db } from "@/db/db";
 import { sql } from "drizzle-orm";
 import {
-  getOrganizationIdFromTenant,
   batchGetOrganizationIds,
   updateMappingStatus,
   validateMapping,

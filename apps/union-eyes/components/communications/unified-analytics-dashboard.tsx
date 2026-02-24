@@ -21,7 +21,7 @@ import {
 import { Calendar } from '@/components/ui/calendar';
 import { Popover, PopoverContent, PopoverTrigger } from '@/components/ui/popover';
 import { cn } from '@/lib/utils';
-import { format, subDays, subMonths, startOfDay, endOfDay } from 'date-fns';
+import { format, startOfDay, endOfDay } from 'date-fns';
 import {
   Download,
   Calendar as CalendarIcon,
@@ -38,8 +38,6 @@ import {
   Zap,
 } from 'lucide-react';
 import {
-  LineChart,
-  Line,
   BarChart,
   Bar,
   PieChart,
@@ -194,7 +192,7 @@ export default function UnifiedAnalyticsDashboard() {
 
       const result = await response.json();
       setData(result);
-    } catch (error) {
+    } catch (_error) {
 } finally {
       setLoading(false);
     }
@@ -211,6 +209,7 @@ export default function UnifiedAnalyticsDashboard() {
   const filteredTimeSeries = useMemo(() => {
     if (!data) return [];
     return data.timeSeries.map((item) => {
+      // eslint-disable-next-line @typescript-eslint/no-explicit-any
       const filtered: any = { date: item.date };
       selectedChannels.forEach((channel) => {
         filtered[channel] = item[channel as keyof TimeSeriesData];
@@ -269,7 +268,7 @@ export default function UnifiedAnalyticsDashboard() {
       a.click();
       window.URL.revokeObjectURL(url);
       document.body.removeChild(a);
-    } catch (error) {
+    } catch (_error) {
 }
   };
 
@@ -295,7 +294,7 @@ export default function UnifiedAnalyticsDashboard() {
       a.click();
       window.URL.revokeObjectURL(url);
       document.body.removeChild(a);
-    } catch (error) {
+    } catch (_error) {
 }
   };
 
@@ -726,7 +725,7 @@ export default function UnifiedAnalyticsDashboard() {
               <div className="space-y-3">
                 {data.topMembers.map((member, index) => (
                   <div key={member.memberId} className="flex items-center gap-4 p-3 border rounded-lg">
-                    <div className="flex-shrink-0 w-8 h-8 rounded-full bg-primary/10 flex items-center justify-center font-bold text-primary">
+                    <div className="shrink-0 w-8 h-8 rounded-full bg-primary/10 flex items-center justify-center font-bold text-primary">
                       {index + 1}
                     </div>
                     <div className="flex-1">

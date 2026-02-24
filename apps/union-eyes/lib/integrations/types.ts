@@ -5,7 +5,6 @@
  * (HRIS, Accounting, Insurance, Pension, LMS, etc.)
  */
 
-import { Decimal } from 'decimal.js';
 
 /**
  * Supported integration types
@@ -191,6 +190,7 @@ export interface SyncResult {
 /**
  * Sync error
  */
+// eslint-disable-next-line @typescript-eslint/no-unsafe-declaration-merging
 export interface SyncError {
   entity: string;
   entityId?: string;
@@ -302,6 +302,7 @@ export class AuthenticationError extends IntegrationError {
   }
 }
 
+// eslint-disable-next-line @typescript-eslint/no-unsafe-declaration-merging
 export class SyncError extends IntegrationError {
   constructor(message: string, provider: IntegrationProvider, details?: unknown) {
     super(message, provider, 'SYNC_ERROR', details);

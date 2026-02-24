@@ -1,14 +1,15 @@
 'use client';
 
+
+export const dynamic = 'force-dynamic';
 import { useState, useEffect } from 'react';
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from '@/components/ui/card';
 import { Button } from '@/components/ui/button';
 import { Badge } from '@/components/ui/badge';
 import { Input } from '@/components/ui/input';
-import { 
-  Shield, 
-  AlertCircle, 
-  Clock, 
+import {
+  Shield,
+  Clock,
   Search,
   Plus,
   TrendingDown,
@@ -17,7 +18,7 @@ import {
   AlertTriangle,
   Eye,
   Activity,
-  Calendar
+  Calendar,
 } from 'lucide-react';
 import Link from 'next/link';
 
@@ -63,7 +64,7 @@ export default function StrikeFundDashboardPage() {
         
         const data = await response.json();
         setFunds(data.funds || []);
-      } catch (error) {
+      } catch (_error) {
 } finally {
         setLoading(false);
       }

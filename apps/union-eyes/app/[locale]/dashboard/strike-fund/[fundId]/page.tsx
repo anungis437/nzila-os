@@ -1,5 +1,7 @@
 "use client";
 
+
+export const dynamic = 'force-dynamic';
 /**
  * Strike Fund Details Page
  * Comprehensive fund management with 6 tabs: Overview, Eligibility, Attendance, Stipends, Donations, Analytics
@@ -17,7 +19,6 @@ import { Alert, AlertDescription } from "@/components/ui/alert";
 import { Skeleton } from "@/components/ui/skeleton";
 import {
   DollarSign,
-  TrendingUp,
   TrendingDown,
   AlertCircle,
   Users,
@@ -28,7 +29,6 @@ import {
   Clock,
   CreditCard,
   Heart,
-  BarChart3,
   ArrowLeft,
   Edit,
   Settings,
@@ -198,6 +198,7 @@ export default function StrikeFundDetailsPage() {
     } finally {
       setLoading(false);
     }
+  // eslint-disable-next-line react-hooks/exhaustive-deps
   }, [userId, orgId, fundId]);
 
   useEffect(() => {

@@ -9,7 +9,8 @@
 
 "use client";
 
-import { useState } from "react";
+
+export const dynamic = 'force-dynamic';
 import { motion } from "framer-motion";
 import Link from "next/link";
 import { useRouter } from "next/navigation";
@@ -114,7 +115,7 @@ export default function NewIncidentPage() {
           <Card className="bg-amber-50 dark:bg-amber-900/20 border-amber-200 dark:border-amber-800">
             <CardContent className="pt-6">
               <div className="flex gap-3">
-                <AlertCircle className="h-5 w-5 text-amber-600 dark:text-amber-400 flex-shrink-0 mt-0.5" />
+                <AlertCircle className="h-5 w-5 text-amber-600 dark:text-amber-400 shrink-0 mt-0.5" />
                 <div className="space-y-2 text-sm">
                   <p className="font-semibold text-amber-900 dark:text-amber-100">
                     Important Information

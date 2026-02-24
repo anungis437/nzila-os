@@ -14,7 +14,7 @@
 
 'use client';
 
-import { useState, useEffect } from 'react';
+import { useState } from 'react';
 import {
   Calendar as CalendarIcon,
   Clock,
@@ -158,7 +158,7 @@ export function CampaignScheduler({
 
       setTestDialogOpen(false);
       setTestEmails('');
-    } catch (error) {
+    } catch (_error) {
 toast({
         title: 'Error',
         description: 'Failed to send test emails',
@@ -211,7 +211,7 @@ toast({
       }
 
       setConfirmDialogOpen(false);
-    } catch (error) {
+    } catch (_error) {
 toast({
         title: 'Error',
         description: 'Failed to schedule campaign',
@@ -248,6 +248,7 @@ toast({
       <CardHeader>
         <CardTitle>Schedule Campaign</CardTitle>
         <CardDescription>
+          {/* eslint-disable-next-line react/no-unescaped-entities */}
           Choose when to send "{campaignName}" to {recipientCount} recipient(s)
         </CardDescription>
       </CardHeader>
@@ -256,6 +257,7 @@ toast({
         {/* Send Type Selection */}
         <div className="space-y-3">
           <Label>When would you like to send?</Label>
+          {/* eslint-disable-next-line @typescript-eslint/no-explicit-any */}
           <RadioGroup value={sendType} onValueChange={(v: any) => setSendType(v)}>
             <div className="flex items-center space-x-2 p-4 border rounded-lg hover:bg-gray-50 cursor-pointer">
               <RadioGroupItem value="now" id="send-now" />

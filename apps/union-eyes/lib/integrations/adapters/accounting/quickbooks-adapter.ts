@@ -124,7 +124,7 @@ export class QuickBooksAdapter extends BaseIntegration {
   async sync(options: SyncOptions): Promise<SyncResult> {
     this.ensureConnected();
 
-    const startTime = Date.now();
+    const _startTime = Date.now();
     let recordsProcessed = 0;
     let recordsCreated = 0;
     let recordsUpdated = 0;
@@ -499,7 +499,7 @@ export class QuickBooksAdapter extends BaseIntegration {
   // Webhook Support
   // ==========================================================================
 
-  async verifyWebhook(payload: string, signature: string): Promise<boolean> {
+  async verifyWebhook(_payload: string, _signature: string): Promise<boolean> {
     // QuickBooks uses HMAC SHA256 for webhook verification
     // Implementation would verify intuit-signature header
     return true; // Simplified for now

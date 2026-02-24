@@ -82,6 +82,7 @@ const PaymentSummaryQuerySchema = z.object({
  */
 router.post('/dues/intent', async (req: Request, res: Response) => {
   try {
+    // eslint-disable-next-line @typescript-eslint/no-explicit-any
     const organizationId = (req as any).user.organizationId;
     const validatedData = CreateDuesPaymentSchema.parse(req.body);
 
@@ -114,6 +115,7 @@ router.post('/dues/intent', async (req: Request, res: Response) => {
  */
 router.post('/dues/confirm', async (req: Request, res: Response) => {
   try {
+    // eslint-disable-next-line @typescript-eslint/no-explicit-any
     const organizationId = (req as any).user.organizationId;
     const validatedData = ConfirmDuesPaymentSchema.parse(req.body);
 
@@ -146,6 +148,7 @@ router.post('/dues/confirm', async (req: Request, res: Response) => {
  */
 router.post('/stipends/payout', async (req: Request, res: Response) => {
   try {
+    // eslint-disable-next-line @typescript-eslint/no-explicit-any
     const organizationId = (req as any).user.organizationId;
     const validatedData = CreateStipendPayoutSchema.parse(req.body);
 
@@ -181,6 +184,7 @@ router.post('/stipends/payout', async (req: Request, res: Response) => {
  */
 router.post('/stipends/payout/batch', async (req: Request, res: Response) => {
   try {
+    // eslint-disable-next-line @typescript-eslint/no-explicit-any
     const organizationId = (req as any).user.organizationId;
     const validatedData = BatchStipendPayoutSchema.parse(req.body);
 
@@ -213,6 +217,7 @@ router.post('/stipends/payout/batch', async (req: Request, res: Response) => {
  */
 router.post('/donations/intent', async (req: Request, res: Response) => {
   try {
+    // eslint-disable-next-line @typescript-eslint/no-explicit-any
     const organizationId = (req as any).user?.organizationId || req.body.organizationId; // Allow public access
     const validatedData = CreateDonationSchema.parse(req.body);
 
@@ -247,6 +252,7 @@ router.post('/donations/intent', async (req: Request, res: Response) => {
  */
 router.post('/donations/confirm', async (req: Request, res: Response) => {
   try {
+    // eslint-disable-next-line @typescript-eslint/no-explicit-any
     const organizationId = (req as any).user?.organizationId || req.body.organizationId; // Allow public access
     const validatedData = ConfirmDonationSchema.parse(req.body);
 
@@ -308,6 +314,7 @@ router.post('/webhook/stripe', async (req: Request, res: Response) => {
  */
 router.get('/summary', async (req: Request, res: Response) => {
   try {
+    // eslint-disable-next-line @typescript-eslint/no-explicit-any
     const organizationId = (req as any).user.organizationId;
     const { strikeFundId, startDate, endDate } = PaymentSummaryQuerySchema.parse(req.query);
 

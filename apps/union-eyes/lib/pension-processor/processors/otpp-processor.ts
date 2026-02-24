@@ -17,7 +17,6 @@ import type {
   AnnualPensionStatement,
   PensionPlanConfig,
   ContributionRemittance,
-  EmploymentStatus,
 } from '../types';
 import { PensionProcessorError, ContributionPeriod } from '../types';
 
@@ -135,7 +134,7 @@ export class OTTPProcessor extends BasePensionProcessor {
 
     // Check if approaching maximum contribution
     const newYTDEmployeeContribution = ytdContributions.plus(employeeContribution);
-    const newYTDEmployerContribution = ytdContributions.plus(employerContribution);
+    const _newYTDEmployerContribution = ytdContributions.plus(employerContribution);
 
     if (newYTDEmployeeContribution.greaterThan(rates.yearlyMaximumContribution)) {
       this.logWarn('Approaching maximum contribution limit', {

@@ -6,7 +6,6 @@ import {
   View,
   StyleSheet,
   Image,
-  Font,
 } from "@react-pdf/renderer";
 
 // Register fonts for better typography
@@ -274,6 +273,7 @@ export const CertificateTemplate: React.FC<CertificateTemplateProps> = ({
             {/* Header */}
             <View style={styles.header}>
               {organizationLogo && (
+                // eslint-disable-next-line jsx-a11y/alt-text
                 <Image style={styles.logo} src={organizationLogo} />
               )}
               <Text style={styles.organizationName}>{organizationName}</Text>

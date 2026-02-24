@@ -1,3 +1,5 @@
+export const dynamic = 'force-dynamic';
+
 import { Metadata } from "next";
 import { requireUser, hasMinRole } from "@/lib/api-auth-guard";
 import { redirect } from "next/navigation";
@@ -11,7 +13,7 @@ export const metadata: Metadata = {
 };
 
 export default async function StewardsDashboardPage() {
-  const user = await requireUser();
+  const _user = await requireUser();
   
   // Require chief_steward level (70) to access
   const hasAccess = await hasMinRole("chief_steward");

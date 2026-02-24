@@ -1,10 +1,10 @@
+export const dynamic = 'force-dynamic';
+
 import { Metadata } from 'next';
 import { auth } from '@clerk/nextjs/server';
 import { redirect } from 'next/navigation';
 import { getTranslations } from 'next-intl/server';
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from '@/components/ui/card';
-import { Button } from '@/components/ui/button';
-import { Plus } from 'lucide-react';
 import Link from 'next/link';
 import { listRecognitionPrograms } from '@/actions/rewards-actions';
 import { ProgramsList } from '@/components/rewards/admin/programs-list';

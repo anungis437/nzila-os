@@ -15,7 +15,7 @@
  */
 
 import { db } from '@/db/db';
-import { sql, eq, and, isNull } from 'drizzle-orm';
+import { eq, and, isNull } from 'drizzle-orm';
 import { 
   chartOfAccounts as unifiedChartOfAccounts,
   accountMappings as unifiedAccountMappings,
@@ -415,7 +415,7 @@ const CLC_CHART_OF_ACCOUNTS: CLCAccount[] = [
 /**
  * Standard account mappings for common transactions
  */
-const ACCOUNT_MAPPINGS: AccountMapping[] = [
+const _ACCOUNT_MAPPINGS: AccountMapping[] = [
   {
     transactionType: 'per_capita_remittance',
     debitAccount: '5300',

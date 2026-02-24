@@ -16,6 +16,7 @@ import { logger } from '@/lib/logger';
 /**
  * Convert array of objects to CSV string
  */
+// eslint-disable-next-line @typescript-eslint/no-explicit-any
 function arrayToCSV(data: any[], headers: string[]): string {
   const csvRows: string[] = [];
   
@@ -105,6 +106,7 @@ export async function exportAwardsToCSV(
     `;
     
     const result = await db.execute(query);
+    // eslint-disable-next-line @typescript-eslint/no-explicit-any
     const awards = (result as any[]).map((row: any) => ({
       id: row.id,
       created_at: new Date(row.created_at).toISOString(),
@@ -198,6 +200,7 @@ export async function exportLedgerToCSV(
     `;
     
     const result = await db.execute(query);
+    // eslint-disable-next-line @typescript-eslint/no-explicit-any
     const entries = (result as any[]).map((row: any) => ({
       id: row.id,
       created_at: new Date(row.created_at).toISOString(),
@@ -270,6 +273,7 @@ export async function exportBudgetsToCSV(
     `;
     
     const result = await db.execute(query);
+    // eslint-disable-next-line @typescript-eslint/no-explicit-any
     const budgets = (result as any[]).map((row: any) => {
       const usagePercent = (row.used_credits / row.total_credits) * 100;
       return {
@@ -351,6 +355,7 @@ export async function exportRedemptionsToCSV(
     `;
     
     const result = await db.execute(query);
+    // eslint-disable-next-line @typescript-eslint/no-explicit-any
     const redemptions = (result as any[]).map((row: any) => ({
       id: row.id,
       created_at: new Date(row.created_at).toISOString(),
@@ -408,6 +413,7 @@ export async function exportAnalyticsToCSV(
     `;
     
     const result = await db.execute(statsQuery);
+    // eslint-disable-next-line @typescript-eslint/no-explicit-any
     const stats = (result as any[]).map((row: any) => ({
       date: new Date(row.date).toISOString().split('T')[0],
       awards_issued: row.awards_issued,

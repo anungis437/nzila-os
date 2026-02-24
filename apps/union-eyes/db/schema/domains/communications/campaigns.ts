@@ -22,10 +22,9 @@
  * Created: February 13, 2026
  */
 
-import { relations, sql } from 'drizzle-orm';
+import { relations } from 'drizzle-orm';
 import {
   boolean,
-  date,
   integer,
   jsonb,
   pgEnum,

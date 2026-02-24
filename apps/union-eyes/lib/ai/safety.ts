@@ -5,7 +5,6 @@
  * and PII detection for secure AI operations
  */
 
-import { logger } from '@/lib/logger';
 
 // Pattern-based injection detection patterns
 const INJECTION_PATTERNS = [

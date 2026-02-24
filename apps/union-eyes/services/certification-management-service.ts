@@ -8,7 +8,7 @@ import {
   certificationComplianceReports,
   certificationAuditLog,
 } from "@/db/schema/certification-management-schema";
-import { eq, and, lte, gte, desc } from "drizzle-orm";
+import { eq, and, desc } from "drizzle-orm";
 
 /**
  * Certification & License Management Service
@@ -466,6 +466,7 @@ export class CertificationManagementService {
     performedBy: string;
     performedByRole?: string;
     complianceImpact?: string;
+    // eslint-disable-next-line @typescript-eslint/no-explicit-any
     metadata?: any;
   }) {
     await db.insert(certificationAuditLog).values({

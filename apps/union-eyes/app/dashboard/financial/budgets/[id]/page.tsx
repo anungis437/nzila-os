@@ -1,10 +1,12 @@
 'use client';
 
+
+export const dynamic = 'force-dynamic';
 import { useEffect, useState } from 'react';
 import { useParams } from 'next/navigation';
 import BudgetLineItemEditor from '@/components/financial/BudgetLineItemEditor';
 import BudgetVsActualChart from '@/components/financial/BudgetVsActualChart';
-import { Card, CardContent, CardDescription, CardHeader, CardTitle } from '@/components/ui/card';
+import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card';
 import { Badge } from '@/components/ui/badge';
 import { Button } from '@/components/ui/button';
 import { ArrowLeft } from 'lucide-react';
@@ -13,13 +15,16 @@ import { useToast } from '@/hooks/use-toast';
 export default function BudgetDetailPage() {
   const params = useParams();
   const budgetId = params.id as string;
+  // eslint-disable-next-line @typescript-eslint/no-explicit-any
   const [budget, setBudget] = useState<any>(null);
+  // eslint-disable-next-line @typescript-eslint/no-explicit-any
   const [lineItems, setLineItems] = useState<any[]>([]);
   const [loading, setLoading] = useState(true);
   const { toast } = useToast();
 
   useEffect(() => {
     fetchBudget();
+  // eslint-disable-next-line react-hooks/exhaustive-deps
   }, []);
 
   const fetchBudget = async () => {
@@ -31,7 +36,7 @@ export default function BudgetDetailPage() {
       const data = await response.json();
       setBudget(data.data.budget);
       setLineItems(data.data.lineItems || []);
-    } catch (error) {
+    } catch (_error) {
       toast({
         title: 'Error',
         description: 'Failed to load budget details',

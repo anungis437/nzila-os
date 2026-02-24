@@ -7,6 +7,8 @@
 
 'use client';
 
+
+export const dynamic = 'force-dynamic';
 import { useEffect, useState } from 'react';
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from '@/components/ui/card';
 import { Table, TableBody, TableCell, TableHead, TableHeader, TableRow } from '@/components/ui/table';
@@ -444,7 +446,7 @@ export default function DuesDashboardPage() {
   if (error || !data) {
     return (
       <div className="container mx-auto p-4 md:p-6 space-y-6">
-        <div className="flex items-center justify-center min-h-[400px]">
+        <div className="flex items-center justify-center min-h-100">
           <Card className="w-full max-w-md">
             <CardHeader>
               <CardTitle className="text-destructive">Error</CardTitle>

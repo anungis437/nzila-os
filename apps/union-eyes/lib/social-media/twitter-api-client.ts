@@ -116,6 +116,7 @@ export interface TwitterError {
   status?: number;
 }
 
+// eslint-disable-next-line @typescript-eslint/no-explicit-any
 export interface TwitterAPIResponse<T = any> {
   data?: T;
   errors?: TwitterError[];
@@ -296,6 +297,7 @@ export class TwitterAPIClient {
       duration_minutes: number;
     };
   }): Promise<TwitterTweet> {
+    // eslint-disable-next-line @typescript-eslint/no-explicit-any
     const body: Record<string, any> = {
       text: content.text,
     };
@@ -485,6 +487,7 @@ export class TwitterAPIClient {
         },
       });
 
+      // eslint-disable-next-line @typescript-eslint/no-explicit-any
       const status = await this.handleResponse<any>(response);
 
       if (status.processing_info?.state === 'succeeded') {
@@ -544,6 +547,7 @@ export class TwitterAPIClient {
     tweetId: string,
     includeMetrics: boolean = true
   ): Promise<TwitterTweet> {
+    // eslint-disable-next-line @typescript-eslint/no-explicit-any
     const params: Record<string, any> = {
       'tweet.fields': 'created_at,public_metrics,author_id,conversation_id',
     };
@@ -572,6 +576,7 @@ export class TwitterAPIClient {
     maxResults: number = 10,
     paginationToken?: string
   ): Promise<{ tweets: TwitterTweet[]; nextToken?: string }> {
+    // eslint-disable-next-line @typescript-eslint/no-explicit-any
     const params: Record<string, any> = {
       max_results: Math.min(maxResults, 100).toString(),
       'tweet.fields': 'created_at,public_metrics,attachments',

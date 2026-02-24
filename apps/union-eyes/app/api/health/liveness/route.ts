@@ -1,7 +1,4 @@
 import { NextResponse } from 'next/server';
-import {
-  ErrorCode,
-} from '@/lib/api/standardized-responses';
 
 /**
  * GET /api/health/liveness

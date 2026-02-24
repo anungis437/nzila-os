@@ -12,6 +12,7 @@ import { Dialog, DialogContent } from "@/components/ui/dialog";
 import { Switch } from "@/components/ui/switch";
 import { motion } from "framer-motion";
 import { SelectProfile } from "@/db/schema/domains/member";
+import { validateRedirectUrl } from "@/lib/utils/sanitize";
 
 interface UpgradePlanPopupProps {
   profile: SelectProfile;
@@ -52,7 +53,7 @@ export default function UpgradePlanPopup({
         if (activePopup === 'upgrade_plan') {
           localStorage.removeItem('active_popup');
         }
-      } catch (error) {
+      } catch (_error) {
 }
     }
   });
@@ -62,7 +63,7 @@ export default function UpgradePlanPopup({
     if (isOpen) {
       try {
         localStorage.setItem('active_popup', 'upgrade_plan');
-      } catch (error) {
+      } catch (_error) {
 }
     }
   }, [isOpen]);
@@ -82,7 +83,7 @@ export default function UpgradePlanPopup({
           // Another popup is active, don&apos;t show this one
           return;
         }
-      } catch (error) {
+      } catch (_error) {
 }
       
       // Check if user has already dismissed the popup this session
@@ -93,7 +94,7 @@ export default function UpgradePlanPopup({
           setManuallyDismissed(true);
           return;
         }
-      } catch (error) {
+      } catch (_error) {
 }
 
       // Don&apos;t show if already manually dismissed this session
@@ -119,7 +120,7 @@ export default function UpgradePlanPopup({
             // Set this as the active popup
             localStorage.setItem('active_popup', 'upgrade_plan');
             setInternalIsOpen(true);
-          } catch (error) {
+          } catch (_error) {
 }
         }, 800);
         
@@ -156,7 +157,7 @@ setError("Configuration issue detected. Please visit the pricing page to complet
       });
       
       if (!response.ok) {
-        const errorData = await response.json();
+        const _errorData = await response.json();
 setError('Failed to create checkout. Please try again later.');
         return;
       }
@@ -172,12 +173,14 @@ setError('Failed to create checkout. Please try again.');
         localStorage.setItem('checkout_started', 'true');
         localStorage.setItem('checkout_timestamp', new Date().toISOString());
         localStorage.setItem('checkout_plan_type', yearly ? 'yearly' : 'monthly');
-      } catch (error) {
+      } catch (_error) {
 }
       
       // Redirect to the checkout URL
-      window.location.href = data.checkoutUrl;
-    } catch (error) {
+      const safeUrl = validateRedirectUrl(data.checkoutUrl);
+      if (!safeUrl) { setError('Untrusted checkout URL'); return; }
+      window.location.href = safeUrl;
+    } catch (_error) {
 setError('An unexpected error occurred. Please try again later.');
     } finally {
       setIsLoading(false);
@@ -199,7 +202,7 @@ setError('An unexpected error occurred. Please try again later.');
   return (
     <Dialog open={isOpen} onOpenChange={onOpenChange}>
       {isOpen && <div className="fixed inset-0 bg-white/80 backdrop-blur-sm z-40" />}
-      <DialogContent className="fixed left-[50%] top-[50%] z-50 w-[400px] translate-x-[-50%] translate-y-[-50%] border-none p-0 shadow-lg rounded-xl bg-transparent [&>button]:hidden">
+      <DialogContent className="fixed left-[50%] top-[50%] z-50 w-100 translate-x-[-50%] translate-y-[-50%] border-none p-0 shadow-lg rounded-xl bg-transparent [&>button]:hidden">
         <motion.div
           initial={{ opacity: 0, scale: 0.95 }}
           animate={{ opacity: 1, scale: 1 }}
@@ -211,6 +214,7 @@ setError('An unexpected error occurred. Please try again later.');
           <button
             onClick={() => onOpenChange(false)}
             className="absolute top-3 right-3 z-50 rounded-full w-8 h-8 flex items-center justify-center text-gray-500 hover:bg-gray-100 transition-colors"
+            title="Close"
           >
             <X size={16} />
           </button>
@@ -229,7 +233,7 @@ setError('An unexpected error occurred. Please try again later.');
             
             {/* Credit usage progress bar */}
             <div className="w-full h-1.5 bg-gray-100 rounded-full overflow-hidden">
-              <div className="h-full bg-purple-500 rounded-full" style={{ width: '100%' }} />
+              <div className="h-full bg-purple-500 rounded-full w-full" />
             </div>
           </div>
           
@@ -272,7 +276,7 @@ setError('An unexpected error occurred. Please try again later.');
                   key={i}
                   className="flex items-start text-sm text-gray-600"
                 >
-                  <div className="rounded-full bg-purple-100 p-0.5 mr-2 mt-0.5 flex-shrink-0">
+                  <div className="rounded-full bg-purple-100 p-0.5 mr-2 mt-0.5 shrink-0">
                     <Check className="w-3 h-3 text-purple-600" />
                   </div>
                   {benefit}

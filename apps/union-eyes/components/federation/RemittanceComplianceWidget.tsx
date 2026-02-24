@@ -37,7 +37,7 @@ import {
   Eye,
   Search
 } from "lucide-react";
-import { format, differenceInDays } from "date-fns";
+import { format } from "date-fns";
 import { cn } from "@/lib/utils";
 
 export interface AffiliateCompliance {
@@ -68,6 +68,7 @@ export function RemittanceComplianceWidget({
 
   React.useEffect(() => {
     loadComplianceData();
+  // eslint-disable-next-line react-hooks/exhaustive-deps
   }, [federationId]);
 
   async function loadComplianceData() {
@@ -87,7 +88,7 @@ export function RemittanceComplianceWidget({
       } else {
         throw new Error(data.error);
       }
-    } catch (error) {
+    } catch (_error) {
       toast({
         title: "Error",
         description: "Failed to load compliance data",
@@ -115,7 +116,7 @@ export function RemittanceComplianceWidget({
         title: "Reminder Sent",
         description: `Payment reminder sent to ${affiliateName}`
       });
-    } catch (error) {
+    } catch (_error) {
       toast({
         title: "Error",
         description: "Failed to send reminder",
@@ -219,7 +220,7 @@ export function RemittanceComplianceWidget({
             />
           </div>
           <Select value={statusFilter} onValueChange={setStatusFilter}>
-            <SelectTrigger className="w-full sm:w-[180px]">
+            <SelectTrigger className="w-full sm:w-45">
               <SelectValue placeholder="All Status" />
             </SelectTrigger>
             <SelectContent>

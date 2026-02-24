@@ -30,7 +30,6 @@ import {
   Copy,
   Check,
   Code,
-  Calendar,
   Trash2,
 } from "lucide-react";
 import {
@@ -64,16 +63,8 @@ import {
   TableHeader,
   TableRow,
 } from "@/components/ui/table";
-import {
-  Dialog,
-  DialogContent,
-  DialogHeader,
-  DialogTitle,
-  DialogTrigger,
-  DialogFooter,
-} from "@/components/ui/dialog";
+ 
 import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
-import { Alert, AlertDescription } from "@/components/ui/alert";
 
 const shareReportSchema = z.object({
   reportId: z.string(),
@@ -130,6 +121,7 @@ export interface ReportSharingHubProps {
   subscribers?: Subscriber[];
   onShare?: (data: ShareReportData) => Promise<void>;
   onRevoke?: (accessId: string) => Promise<void>;
+  // eslint-disable-next-line @typescript-eslint/no-explicit-any
   onSubscribe?: (data: any) => Promise<void>;
   onUnsubscribe?: (subscriberId: string) => Promise<void>;
 }
@@ -140,7 +132,7 @@ export function ReportSharingHub({
   subscribers = [],
   onShare,
   onRevoke,
-  onSubscribe,
+  onSubscribe: _onSubscribe,
   onUnsubscribe,
 }: ReportSharingHubProps) {
   const [selectedReport, setSelectedReport] = React.useState<Report | null>(null);
@@ -164,6 +156,7 @@ export function ReportSharingHub({
     },
   });
 
+  // eslint-disable-next-line react-hooks/incompatible-library
   const accessType = form.watch("accessType");
   const requirePassword = form.watch("requirePassword");
 
@@ -190,7 +183,7 @@ export function ReportSharingHub({
     setTimeout(() => setCopied(null), 2000);
   };
 
-  const getAccessTypeBadge = (type: Report["accessType"]) => {
+  const _getAccessTypeBadge = (type: Report["accessType"]) => {
     const config = {
       private: { color: "bg-gray-100 text-gray-800", icon: <Lock className="h-3 w-3" />, label: "Private" },
       organization: { color: "bg-blue-100 text-blue-800", icon: <Users className="h-3 w-3" />, label: "Organization" },

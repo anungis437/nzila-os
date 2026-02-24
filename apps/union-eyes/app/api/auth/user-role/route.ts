@@ -5,14 +5,13 @@ import { getUserRole } from "@/lib/auth/rbac-server";
 import {
   ErrorCode,
   standardErrorResponse,
-  standardSuccessResponse,
 } from '@/lib/api/standardized-responses';
 
 /**
  * GET /api/auth/user-role
  * Fetch the current user's role from the database
  */
-export const GET = withApiAuth(async (request: NextRequest, context) => {
+export const GET = withApiAuth(async (request: NextRequest, _context) => {
   try {
     const { userId: authedUserId } = await auth();
 

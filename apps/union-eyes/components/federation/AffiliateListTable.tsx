@@ -51,7 +51,6 @@ import {
   ArrowUpDown
 } from "lucide-react";
 import { format } from "date-fns";
-import { cn } from "@/lib/utils";
 
 export interface Affiliate {
   id: string;
@@ -93,6 +92,7 @@ export function AffiliateListTable({
 
   React.useEffect(() => {
     loadAffiliates();
+  // eslint-disable-next-line react-hooks/exhaustive-deps
   }, [federationId, statusFilter, complianceFilter, currentPage, searchQuery, sortBy, sortOrder]);
 
   async function loadAffiliates() {
@@ -122,7 +122,7 @@ export function AffiliateListTable({
       } else {
         throw new Error(data.error);
       }
-    } catch (error) {
+    } catch (_error) {
       toast({
         title: "Error",
         description: "Failed to load affiliate unions",
@@ -225,7 +225,7 @@ export function AffiliateListTable({
             />
           </div>
           <Select value={statusFilter} onValueChange={setStatusFilter}>
-            <SelectTrigger className="w-full sm:w-[180px]">
+            <SelectTrigger className="w-full sm:w-45">
               <SelectValue placeholder="All Status" />
             </SelectTrigger>
             <SelectContent>
@@ -237,7 +237,7 @@ export function AffiliateListTable({
             </SelectContent>
           </Select>
           <Select value={complianceFilter} onValueChange={setComplianceFilter}>
-            <SelectTrigger className="w-full sm:w-[180px]">
+            <SelectTrigger className="w-full sm:w-45">
               <SelectValue placeholder="All Compliance" />
             </SelectTrigger>
             <SelectContent>

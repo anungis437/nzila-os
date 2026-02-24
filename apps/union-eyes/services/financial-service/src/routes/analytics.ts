@@ -19,7 +19,7 @@ import {
   duesTransactions,
   stipendDisbursements,
 } from '../db/schema';
-import { eq, and, gte, lte, sql, desc } from 'drizzle-orm';
+import { eq, and, gte, sql, desc } from 'drizzle-orm';
 import { logger } from '../../../lib/logger';
 import { logger } from '@/lib/logger';
 
@@ -39,7 +39,7 @@ const DateRangeSchema = z.object({
   endDate: z.string().datetime(),
 });
 
-const AlertsSchema = z.object({
+const _AlertsSchema = z.object({
   organizationId: z.string().uuid().optional(),
 });
 
@@ -167,6 +167,7 @@ router.post('/alerts/process', async (req: Request, res: Response) => {
 router.post('/reports/weekly', async (req: Request, res: Response) => {
   try {
     const organizationId = getOrganizationIdFromHeaders(req);
+    // eslint-disable-next-line @typescript-eslint/no-explicit-any
     const userId = (req as any).user?.id;
 
     if (!userId) {
@@ -492,7 +493,7 @@ router.get('/fund-health', async (req: Request, res: Response) => {
                 : 'healthy',
             alerts: forecast.alerts,
           };
-        } catch (error) {
+        } catch (_error) {
           // Fallback for funds without forecasts - calculate balance
           const [balanceData] = await db
             .select({

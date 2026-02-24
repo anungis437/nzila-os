@@ -23,8 +23,8 @@
  */
 
 import { db } from '@/db';
-import { eq, and, desc, isNull } from 'drizzle-orm';
-import { emergencyDeclarations, breakGlassActivations } from '@/db/schema/force-majeure-schema';
+import { eq, isNull } from 'drizzle-orm';
+import { emergencyDeclarations } from '@/db/schema/force-majeure-schema';
 import { createHash, randomBytes } from 'crypto';
 import { logger } from '@/lib/logger';
 
@@ -297,7 +297,7 @@ export class BreakGlassService {
    */
   async recover48Hour(
     backupLocation: 'swiss' | 'canadian',
-    coldStorageAccess: string
+    _coldStorageAccess: string
   ): Promise<RecoveryStatus> {
     const startTime = Date.now();
 

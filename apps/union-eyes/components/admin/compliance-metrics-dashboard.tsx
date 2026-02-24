@@ -12,7 +12,6 @@
  * @phase Phase 3 Week 1 Task 5
  */
 
-import { useState } from 'react';
 import { useQuery } from '@tanstack/react-query';
 import {
   Card,
@@ -35,9 +34,7 @@ import {
   Download,
   RefreshCw,
   TrendingUp,
-  Users,
   Activity,
-  Key,
 } from 'lucide-react';
 import {
   RadialBarChart,
@@ -52,7 +49,6 @@ import {
   YAxis,
   CartesianGrid,
   Tooltip,
-  Legend,
 } from 'recharts';
 import type { ComplianceMetrics } from '@/services/compliance/audit-analysis';
 
@@ -113,7 +109,7 @@ export function ComplianceMetricsDashboard() {
   });
 
   // Fetch PKI metrics
-  const { data: pkiMetrics, isLoading: pkiLoading } = useQuery({
+  const { data: pkiMetrics, isLoading: _pkiLoading } = useQuery({
     queryKey: ['pki-metrics'],
     queryFn: async () => {
       const response = await fetch('/api/signatures/metrics');
@@ -138,7 +134,7 @@ export function ComplianceMetricsDashboard() {
 
       const { reportId } = await response.json();
       window.location.href = `/api/admin/compliance/reports/${reportId}/download`;
-    } catch (error) {
+    } catch (_error) {
 alert('Failed to export compliance report');
     }
   };

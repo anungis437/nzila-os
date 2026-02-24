@@ -5,17 +5,21 @@
  * Part of Phase 0.2 - Admin Console UI
  */
 
+
+export const dynamic = 'force-dynamic';
+
 import { Suspense } from "react";
 import { Activity, Download } from "lucide-react";
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "@/components/ui/card";
 import { Button } from "@/components/ui/button";
+ 
 import { AuditLogsDashboard } from "@/components/admin/audit-logs-dashboard";
 
 interface PageProps {
   params: { locale: string };
 }
 
-export default async function AuditLogsPage({ params }: PageProps) {
+export default async function AuditLogsPage({ params: _params }: PageProps) {
   return (
     <div className="space-y-6">
       {/* Page Header */}

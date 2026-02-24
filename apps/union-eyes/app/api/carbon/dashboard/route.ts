@@ -1,9 +1,6 @@
 import { NextRequest, NextResponse } from 'next/server';
-import type { CarbonDashboardRequest, CarbonDashboardResponse } from '@/lib/types/compliance-api-types';
+import type { CarbonDashboardResponse } from '@/lib/types/compliance-api-types';
 import { withApiAuth } from '@/lib/api-auth-guard';
-import {
-  ErrorCode,
-} from '@/lib/api/standardized-responses';
 
 /**
  * Carbon Accounting API

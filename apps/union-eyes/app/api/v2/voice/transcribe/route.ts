@@ -3,9 +3,13 @@ import { NextResponse } from 'next/server';
  * POST /api/voice/transcribe
  * Migrated to withApi() framework
  */
-import { logApiAuditEvent } from "@/lib/middleware/api-security";
 import { transcribeAudioWithLanguage, type SupportedLanguage } from "@/lib/azure-speech";
-import { withApi, ApiError, ErrorCode } from '@/lib/api/framework';
+import { withApi, ErrorCode } from '@/lib/api/framework';
+ 
+ 
+ 
+ 
+ 
 import { standardErrorResponse } from '@/lib/api/standardized-responses';
 
 export const POST = withApi(
@@ -17,7 +21,7 @@ export const POST = withApi(
     },
     successStatus: 201,
   },
-  async ({ request, userId, organizationId, user, body, query }) => {
+  async ({ request, userId: _userId, organizationId: _organizationId, user: _user, body: _body, query: _query }) => {
 
           // Authenticate user
           // Parse form data

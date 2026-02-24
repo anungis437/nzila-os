@@ -7,11 +7,9 @@
 // ============================================================================
 
 import { db } from "@/db/db";
-import { eq, and, desc, asc, isNull, or, sql, ilike } from "drizzle-orm";
+import { eq, and, desc, isNull, or, sql } from "drizzle-orm";
 import {
   grievanceDocuments,
-  claims,
-  type InsertGrievanceDocument,
   type GrievanceDocument,
   type SignatureData,
 } from "@/db/schema";
@@ -279,7 +277,7 @@ export async function getDocumentVersions(
       changes: v.description || undefined,
       status: v.versionStatus || "draft",
     }));
-  } catch (error) {
+  } catch (_error) {
 return [];
   }
 }
@@ -290,7 +288,7 @@ return [];
 export async function restoreDocumentVersion(
   versionId: string,
   organizationId: string,
-  restoredBy: string
+  _restoredBy: string
 ): Promise<{ success: boolean; error?: string }> {
   try {
     const versionDoc = await db.query.grievanceDocuments.findFirst({
@@ -441,7 +439,7 @@ export async function searchDocuments(
 
     // Sort by relevance
     return results.sort((a, b) => b.relevance - a.relevance);
-  } catch (error) {
+  } catch (_error) {
 return [];
   }
 }
@@ -624,7 +622,7 @@ export async function getSignatureStatus(
       provider: signatureData?.provider,
       envelopeId: signatureData?.envelope_id,
     };
-  } catch (error) {
+  } catch (_error) {
 return null;
   }
 }
@@ -675,7 +673,7 @@ export async function applyRetentionPolicy(
     }
 
     return { archivedCount, deletedCount };
-  } catch (error) {
+  } catch (_error) {
 return { archivedCount: 0, deletedCount: 0 };
   }
 }
@@ -746,7 +744,7 @@ export async function getGrievanceDocuments(
     });
 
     return documents;
-  } catch (error) {
+  } catch (_error) {
 return [];
   }
 }
@@ -778,7 +776,7 @@ async function queueOCRProcessing(documentId: string, fileUrl: string): Promise<
     if (ocrText.trim().length > 0) {
       await updateDocumentOCR(documentId, ocrText);
     }
-  } catch (error) {
+  } catch (_error) {
 }
 }
 
@@ -843,7 +841,7 @@ async function sendSignatureRequestNotification(
         requestId: request.id,
       },
     });
-} catch (error) {
+} catch (_error) {
 // Don&apos;t throw - notification failure shouldn't block the request
   }
 }

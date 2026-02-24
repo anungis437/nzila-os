@@ -16,8 +16,8 @@
 
 import { getAiClient, UE_APP_KEY, UE_PROFILES } from '@/lib/ai/ai-client';
 import { db } from '@/db';
-import { arbitrationDecisions, arbitratorProfiles } from '@/db/schema';
-import { eq, and, or, sql, inArray } from 'drizzle-orm';
+import { arbitrationDecisions } from '@/db/schema';
+import { eq } from 'drizzle-orm';
 import { semanticPrecedentSearch } from './vector-search-service';
 import type { OutcomeEnum, PrecedentValueEnum } from '@/db/schema/domains/agreements';
 import { logger } from '@/lib/logger';
@@ -227,6 +227,7 @@ function calculateKeywordMatch(keywords: string[], precedentText: string): numbe
  */
 function calculateMetadataMatch(
   claim: { issueType: string; jurisdiction?: string },
+  // eslint-disable-next-line @typescript-eslint/no-explicit-any
   precedent: any
 ): number {
   let score = 0;
@@ -271,7 +272,9 @@ function areRelatedIssues(type1: string, type2: string): boolean {
  * Analyze why precedent is applicable and how it differs
  */
 async function analyzePrecedentApplicability(
+  // eslint-disable-next-line @typescript-eslint/no-explicit-any
   claim: any,
+  // eslint-disable-next-line @typescript-eslint/no-explicit-any
   precedent: any
 ): Promise<{
   applicableReasons: string[];
@@ -370,6 +373,7 @@ export async function analyzeClaimWithPrecedents(
  * Generate comprehensive claim analysis using AI
  */
 async function generateClaimAnalysis(
+  // eslint-disable-next-line @typescript-eslint/no-explicit-any
   claim: any,
   precedents: PrecedentMatch[]
 ): Promise<{
@@ -437,6 +441,7 @@ Provide analysis.`,
  * Generate legal memorandum based on claim and precedents
  */
 export async function generateLegalMemorandum(
+  // eslint-disable-next-line @typescript-eslint/no-explicit-any
   claim: any,
   analysis: ClaimAnalysis
 ): Promise<string> {

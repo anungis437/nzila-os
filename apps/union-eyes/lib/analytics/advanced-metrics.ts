@@ -18,9 +18,8 @@ import {
   pilotApplications,
   caseStudies,
   testimonials,
-  dataAggregationConsent,
 } from '@/db/schema/domains/marketing';
-import { gte, lte, eq, sql, and, desc } from 'drizzle-orm';
+import { gte, lte, eq, and, desc } from 'drizzle-orm';
 
 // ============================================================================
 // TYPE DEFINITIONS

@@ -1,3 +1,5 @@
+export const dynamic = 'force-dynamic';
+
 import { Metadata } from 'next';
 import { auth } from '@clerk/nextjs/server';
 import { redirect } from 'next/navigation';
@@ -212,6 +214,7 @@ export default async function CLCCompliancePage() {
           <div className="flex items-center justify-between">
             <div>
               <CardTitle className="text-2xl flex items-center gap-2">
+                {/* eslint-disable-next-line react-hooks/static-components */}
                 <StatusIcon className={`h-6 w-6 ${getComplianceStatusColor(metrics.national.overallComplianceRate)}`} />
                 {t('overallStatus', { defaultValue: 'Overall National Compliance' })}
               </CardTitle>

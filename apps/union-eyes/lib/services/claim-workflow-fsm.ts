@@ -225,13 +225,13 @@ export function validateClaimTransition(
   const {
     currentStatus,
     targetStatus,
-    userId,
+    userId: _userId,
     userRole = 'member',
     priority,
     statusChangedAt,
     hasUnresolvedCriticalSignals = false,
     hasRequiredDocumentation = false,
-    isOverdue = false,
+    isOverdue: _isOverdue = false,
     notes,
   } = context;
 
@@ -368,6 +368,7 @@ export function getTransitionRequirements(
     requiresRole: state.requiresRole[targetStatus] || ['member'],
     minHours: state.minTimeInState / (1000 * 60 * 60),
     requiresDocumentation: state.requiresDocumentation,
+    // eslint-disable-next-line @typescript-eslint/no-explicit-any
     blockIfCriticalSignals: (state as any).blockIfCriticalSignals || false,
   };
 }

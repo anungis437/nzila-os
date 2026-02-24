@@ -1,3 +1,7 @@
+"use client";
+
+export const dynamic = 'force-dynamic';
+
 /**
  * Voting & Elections Page
  * 
@@ -64,7 +68,7 @@ export default function VotingPage() {
                 requiresVerification: false,
                 allowsAbstain: false,
               }}
-              onSubmit={async (votes) => {
+              onSubmit={async (_votes) => {
 setActiveElectionId(null);
               }}
               onCancel={() => setActiveElectionId(null)}
@@ -122,7 +126,7 @@ setActiveElectionId(null);
       {/* Ballot Builder Modal */}
       {showBallotBuilder && (
         <BallotBuilder
-          onSave={async (ballot) => {
+          onSave={async (_ballot) => {
 setShowBallotBuilder(false);
           }}
           onCancel={() => setShowBallotBuilder(false)}

@@ -3,9 +3,13 @@ import { NextResponse } from 'next/server';
  * POST /api/precedents/search
  * Migrated to withApi() framework
  */
-import { logApiAuditEvent } from "@/lib/middleware/api-security";
 import { searchPrecedents } from "@/lib/services/precedent-service";
-import { withApi, ApiError, z } from '@/lib/api/framework';
+ 
+ 
+ 
+ 
+ 
+import { withApi, z } from '@/lib/api/framework';
 
 const precedentSearchSchema = z.object({
   query: z.string().min(1, 'Query is required').max(500, 'Query too long'),
@@ -23,7 +27,7 @@ export const POST = withApi(
     },
     successStatus: 201,
   },
-  async ({ request, userId, organizationId, user, body, query }) => {
+  async ({ request: _request, userId: _userId, organizationId: _organizationId, user: _user, body, query: _query }) => {
 
           // Validate request body
           const { query: searchQuery, filters, limit } = body;

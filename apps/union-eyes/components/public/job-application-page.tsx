@@ -14,7 +14,6 @@ import {
   DollarSign,
   Building,
   Clock,
-  FileText,
   Upload,
   Check,
 } from 'lucide-react';
@@ -74,7 +73,7 @@ export function PublicJobApplicationPage({ jobSlug }: JobApplicationPageProps) {
       if (!response.ok) throw new Error('Job not found');
       const data = await response.json();
       setJob(data);
-    } catch (error) {
+    } catch (_error) {
 } finally {
       setLoading(false);
     }
@@ -144,7 +143,7 @@ export function PublicJobApplicationPage({ jobSlug }: JobApplicationPageProps) {
       }
 
       setStep('confirmation');
-    } catch (error) {
+    } catch (_error) {
 alert('Failed to submit application. Please try again.');
     } finally {
       setSubmitting(false);
@@ -211,6 +210,7 @@ alert('Failed to submit application. Please try again.');
             </div>
             <h1 className="text-3xl font-bold mb-2">Application Submitted!</h1>
             <p className="text-muted-foreground">
+              {/* eslint-disable-next-line react/no-unescaped-entities */}
               We've received your application for {job.title}
             </p>
           </div>

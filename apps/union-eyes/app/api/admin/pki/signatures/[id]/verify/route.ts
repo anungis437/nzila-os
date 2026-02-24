@@ -1,4 +1,3 @@
-import { logApiAuditEvent } from "@/lib/middleware/api-security";
 
 // =====================================================================================
 // PKI Verify Signature API
@@ -6,10 +5,10 @@ import { logApiAuditEvent } from "@/lib/middleware/api-security";
 // POST /api/admin/pki/signatures/[id]/verify - Verify a signature
 // =====================================================================================
 
-import { NextRequest, NextResponse } from 'next/server';
+import { NextResponse } from 'next/server';
 import { verifySignature, verifyDocumentIntegrity } from '@/services/pki/verification-service';
 import { z } from "zod";
-import { getCurrentUser, withAdminAuth, withApiAuth, withMinRole, withRoleAuth } from '@/lib/api-auth-guard';
+import { withRoleAuth } from '@/lib/api-auth-guard';
 import { ErrorCode, standardErrorResponse } from '@/lib/api/standardized-responses';
 
 

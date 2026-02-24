@@ -14,7 +14,7 @@
  * - Support for invoices, customers, payments, GL accounts
  */
 
-import { IntegrationError, AuthenticationError, RateLimitError, IntegrationProvider } from '../../types';
+import { IntegrationError, AuthenticationError, IntegrationProvider } from '../../types';
 
 // ============================================================================
 // Types
@@ -71,7 +71,7 @@ export interface SageIntacctAccount {
   STATUS: string;
 }
 
-interface SageIntacctResponse {
+interface _SageIntacctResponse {
   response: {
     control?: {
       status: string;

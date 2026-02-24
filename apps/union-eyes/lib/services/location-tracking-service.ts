@@ -246,12 +246,13 @@ export class LocationTrackingService {
   async getLocationHistory(
     memberId: string,
     limit: number = 100
+  // eslint-disable-next-line @typescript-eslint/no-explicit-any
   ): Promise<any[]> {
     // Verify permission
     await this.verifyLocationPermission(memberId);
 
     // Return only non-expired locations
-    const now = new Date();
+    const _now = new Date();
     return await db.query.locationTracking.findMany({
       where: and(
         eq(locationTracking.userId, memberId),

@@ -7,7 +7,7 @@
 
 const logger = { error: console.error };
 
-interface RequestOptions {
+interface _RequestOptions {
   params?: Record<string, string | number | boolean | undefined>;
   headers?: Record<string, string>;
 }

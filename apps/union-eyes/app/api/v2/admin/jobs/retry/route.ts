@@ -3,6 +3,11 @@
  * Migrated to withApi() framework
  */
 import { retryJob } from '@/lib/job-queue';
+ 
+ 
+ 
+ 
+ 
 import { withApi, ApiError, z } from '@/lib/api/framework';
 
 const adminJobsRetrySchema = z.object({
@@ -20,7 +25,7 @@ export const POST = withApi(
     },
     successStatus: 201,
   },
-  async ({ request, userId, organizationId, user, body, query }) => {
+  async ({ request: _request, userId: _userId, organizationId: _organizationId, user: _user, body, query: _query }) => {
 
           const { queue, jobId } = body;
           // Validate request body

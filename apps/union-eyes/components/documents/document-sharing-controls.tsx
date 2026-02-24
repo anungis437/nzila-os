@@ -26,8 +26,8 @@ import {
   User,
   Trash2,
   Eye,
-  Edit, CheckCircle2,
-  Calendar,
+  Edit,
+  CheckCircle2,
   Clock,
 } from "lucide-react";
 import {
@@ -39,7 +39,7 @@ import {
   FormMessage,
   FormDescription,
 } from "@/components/ui/form";
-import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
+import { Card, CardContent } from "@/components/ui/card";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 import { Badge } from "@/components/ui/badge";
@@ -59,9 +59,8 @@ import {
 } from "@/components/ui/dialog";
 import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
 import { Checkbox } from "@/components/ui/checkbox";
-import { Label } from "@/components/ui/label";
-import { Alert, AlertDescription } from "@/components/ui/alert";
 import { cn } from "@/lib/utils";
+ 
 import { format, formatDistanceToNow } from "date-fns";
 
 const shareSchema = z.object({
@@ -118,7 +117,7 @@ export interface DocumentSharingControlsProps {
 }
 
 export function DocumentSharingControls({
-  documentId,
+  documentId: _documentId,
   documentName,
   shares,
   users,
@@ -238,6 +237,7 @@ export function DocumentSharingControls({
                             </SelectTrigger>
                           </FormControl>
                           <SelectContent>
+                            {/* eslint-disable-next-line @typescript-eslint/no-explicit-any */}
                             {(targetType === "user" ? users : groups).map((option: any) => (
                               <SelectItem key={option.id} value={option.id}>
                                 {option.name}

@@ -32,8 +32,7 @@ import {
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "@/components/ui/card";
 import { Checkbox } from "@/components/ui/checkbox";
 import { useToast } from "@/components/ui/use-toast";
-import { AlertTriangle, Upload, Send, Camera } from "lucide-react";
-import { cn } from "@/lib/utils";
+import { AlertTriangle, Send, Camera } from "lucide-react";
 
 const hazardSchema = z.object({
   hazardType: z.string().min(1, "Hazard type is required"),
@@ -75,6 +74,7 @@ export function HazardReportForm({
   const [photos, setPhotos] = React.useState<File[]>([]);
 
   const form = useForm<HazardFormData>({
+    // eslint-disable-next-line @typescript-eslint/no-explicit-any
     resolver: zodResolver(hazardSchema) as any,
     defaultValues: {
       hazardType: "",
@@ -131,7 +131,7 @@ export function HazardReportForm({
           window.location.href = `/health-safety/hazards`;
         }
       }
-    } catch (error) {
+    } catch (_error) {
       toast({
         title: "Error",
         description: "Failed to submit hazard report",
@@ -151,7 +151,7 @@ export function HazardReportForm({
   const isAnonymous = form.watch("isAnonymous");
   const priority = form.watch("priority");
 
-  const getPriorityColor = (p: string) => {
+  const _getPriorityColor = (p: string) => {
     switch (p) {
       case "critical":
         return "text-red-600";
@@ -219,6 +219,7 @@ export function HazardReportForm({
             {/* Priority */}
             <div className="space-y-2">
               <Label htmlFor="priority">Priority Level *</Label>
+              {/* eslint-disable-next-line @typescript-eslint/no-explicit-any */}
               <Select onValueChange={(value) => form.setValue("priority", value as any)}>
                 <SelectTrigger>
                   <SelectValue placeholder="Select priority" />

@@ -14,7 +14,6 @@
  */
 
 import { z } from 'zod';
-import type { ZodError } from 'zod';
 import { logger } from '@/lib/logger';
 
 /**

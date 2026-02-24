@@ -241,7 +241,7 @@ return null;
       const substituted = this.replaceFormulaVariables(rule.customFormula, context);
       const result = this.evaluateSafeFormula(substituted);
       return Number.isFinite(result) ? result : 0;
-    } catch (error) {
+    } catch (_error) {
 return 0;
     }
   }
@@ -380,7 +380,7 @@ return 0;
         hourlyRate: hourlyRate || undefined,
         hoursWorked: hoursWorked || undefined,
       };
-    } catch (error) {
+    } catch (_error) {
 return undefined;
     }
   }
@@ -388,7 +388,7 @@ return undefined;
   /**
    * Calculate due date based on billing frequency
    */
-  private static calculateDueDate(periodEnd: Date, frequency: string): Date {
+  private static calculateDueDate(periodEnd: Date, _frequency: string): Date {
     const dueDate = new Date(periodEnd);
     
     // Due date is typically 15 days after period end

@@ -29,7 +29,7 @@ async function migrate() {
     await sql`
       CREATE INDEX IF NOT EXISTS strike_funds_active_idx ON strike_funds(is_active)
     `;
-} catch (error) {
+} catch (_error) {
 process.exit(1);
   } finally {
     await sql.end();

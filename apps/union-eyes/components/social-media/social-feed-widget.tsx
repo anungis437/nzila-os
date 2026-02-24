@@ -25,8 +25,7 @@ import {
   Eye,
   ExternalLink,
   RefreshCw,
-  Filter,
-  ChevronDown
+  ChevronDown,
 } from 'lucide-react';
 import { formatDistanceToNow } from 'date-fns';
 
@@ -303,6 +302,7 @@ export default function SocialFeedWidget() {
                     </div>
                   ) : item.mediaUrls.length === 1 ? (
                     <div className="rounded-lg overflow-hidden">
+                      {/* eslint-disable-next-line @next/next/no-img-element */}
                       <img
                         src={item.mediaUrls[0]}
                         alt="Post media"
@@ -313,6 +313,7 @@ export default function SocialFeedWidget() {
                     <div className="grid grid-cols-2 gap-2 rounded-lg overflow-hidden">
                       {item.mediaUrls.slice(0, 4).map((url, index) => (
                         <div key={index} className="relative aspect-square">
+                          {/* eslint-disable-next-line @next/next/no-img-element */}
                           <img
                             src={url}
                             alt={`Post media ${index + 1}`}
@@ -415,7 +416,7 @@ export function SocialFeedCompact() {
           
           return (
             <div key={item.id} className="flex items-start gap-3">
-              <PlatformIcon className={`h-4 w-4 mt-1 ${platformColor} flex-shrink-0`} />
+              <PlatformIcon className={`h-4 w-4 mt-1 ${platformColor} shrink-0`} />
               <div className="flex-1 min-w-0">
                 <p className="text-sm line-clamp-2 mb-1">{item.content}</p>
                 <div className="flex items-center gap-3 text-xs text-muted-foreground">

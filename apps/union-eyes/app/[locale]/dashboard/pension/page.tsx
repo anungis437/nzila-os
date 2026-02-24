@@ -1,5 +1,7 @@
 'use client';
 
+
+export const dynamic = 'force-dynamic';
 import { useState, useEffect, useCallback } from 'react';
 import { useOrganizationId } from '@/lib/hooks/use-organization';
 import { Briefcase, TrendingUp, Calendar, DollarSign, FileText, AlertCircle, CheckCircle, Clock } from 'lucide-react';
@@ -38,7 +40,7 @@ export default function PensionDashboard() {
   const [loading, setLoading] = useState(true);
   const [plan, setPlan] = useState<PensionPlan | null>(null);
   const [contributions, setContributions] = useState<Contribution[]>([]);
-  const [benefitEstimate, setBenefitEstimate] = useState<BenefitEstimate | null>(null);
+  const [_benefitEstimate, _setBenefitEstimate] = useState<BenefitEstimate | null>(null);
   const [error, setError] = useState<string | null>(null);
 
   const fetchPensionData = useCallback(async () => {
@@ -81,7 +83,7 @@ export default function PensionDashboard() {
       // Note: Benefit estimate would be fetched separately after plan is set
       // This is handled by a separate effect when plan changes
 
-    } catch (err) {
+    } catch (_err) {
 setError('Unable to load pension information. Please try again later.');
     } finally {
       setLoading(false);
@@ -95,7 +97,7 @@ setError('Unable to load pension information. Please try again later.');
   if (loading) {
     return (
       <div className="p-6 space-y-6">
-        <div className="flex items-center justify-center min-h-[400px]">
+        <div className="flex items-center justify-center min-h-100">
           <div className="text-center">
             <Clock className="w-12 h-12 mx-auto mb-4 animate-spin text-muted-foreground" />
             <p className="text-muted-foreground">Loading your pension information...</p>
@@ -108,7 +110,7 @@ setError('Unable to load pension information. Please try again later.');
   if (error) {
     return (
       <div className="p-6 space-y-6">
-        <div className="flex items-center justify-center min-h-[400px]">
+        <div className="flex items-center justify-center min-h-100">
           <div className="text-center">
             <AlertCircle className="w-12 h-12 mx-auto mb-4 text-red-600" />
             <p className="text-muted-foreground">{error}</p>
@@ -390,7 +392,7 @@ setError('Unable to load pension information. Please try again later.');
 
                 <div className="p-4 bg-blue-50 border border-blue-200 rounded">
                   <div className="flex gap-2">
-                    <AlertCircle className="w-5 h-5 text-blue-600 flex-shrink-0 mt-0.5" />
+                    <AlertCircle className="w-5 h-5 text-blue-600 shrink-0 mt-0.5" />
                     <div>
                       <p className="font-medium text-blue-900">Estimate Disclaimer</p>
                       <p className="text-sm text-blue-800 mt-1">

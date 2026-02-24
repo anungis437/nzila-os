@@ -6,6 +6,8 @@
 
 'use client';
 
+
+export const dynamic = 'force-dynamic';
 import { useState, useEffect } from 'react';
 import { useRouter } from 'next/navigation';
 import { Button } from '@/components/ui/button';
@@ -24,8 +26,15 @@ import {
 } from '@/components/ui/table';
 import { Textarea } from '@/components/ui/textarea';
 import {
-  FileText, User, Calendar, Clock, AlertCircle, 
-  Upload, Download, Edit, MessageSquare, CheckCircle
+  FileText,
+  User,
+  Calendar,
+  AlertCircle,
+  Upload,
+  Download,
+  Edit,
+  MessageSquare,
+  CheckCircle,
 } from 'lucide-react';
 
 interface CaseDetail {
@@ -62,7 +71,7 @@ interface Evidence {
 }
 
 export default function CaseDetailPage({ params }: { params: { id: string } }) {
-  const router = useRouter();
+  const _router = useRouter();
   const [caseDetail, setCaseDetail] = useState<CaseDetail | null>(null);
   const [timeline, setTimeline] = useState<TimelineEvent[]>([]);
   const [evidence, setEvidence] = useState<Evidence[]>([]);
@@ -71,6 +80,7 @@ export default function CaseDetailPage({ params }: { params: { id: string } }) {
 
   useEffect(() => {
     fetchCaseDetail();
+  // eslint-disable-next-line react-hooks/exhaustive-deps
   }, [params.id]);
 
   const fetchCaseDetail = async () => {

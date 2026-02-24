@@ -27,14 +27,13 @@ import {
 import { Badge } from "@/components/ui/badge";
 import { Skeleton } from "@/components/ui/skeleton";
 import { useToast } from "@/components/ui/use-toast";
-import { 
-  Search, 
-  Filter, 
-  AlertTriangle, 
-  MapPin, 
+import {
+  Search,
+  Filter,
+  AlertTriangle,
+  MapPin,
   Calendar,
   Eye,
-  CheckCircle
 } from "lucide-react";
 import { HazardPriorityBadge } from "./HazardPriorityBadge";
 import { format } from "date-fns";
@@ -71,6 +70,7 @@ export function HazardsList({
 
   React.useEffect(() => {
     loadHazards();
+  // eslint-disable-next-line react-hooks/exhaustive-deps
   }, [organizationId, statusFilter, priorityFilter, searchQuery]);
 
   async function loadHazards() {
@@ -91,6 +91,7 @@ export function HazardsList({
 
       const data = await response.json();
       if (data.success) {
+        // eslint-disable-next-line @typescript-eslint/no-explicit-any
         setHazards(data.hazards.map((h: any) => ({
           ...h,
           reportedDate: new Date(h.reportedDate)
@@ -98,7 +99,7 @@ export function HazardsList({
       } else {
         throw new Error(data.error);
       }
-    } catch (error) {
+    } catch (_error) {
       toast({
         title: "Error",
         description: "Failed to load hazards",

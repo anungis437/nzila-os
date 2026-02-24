@@ -4,8 +4,18 @@ import { NextResponse } from 'next/server';
  * Migrated to withApi() framework
  */
 import { purgeExpiredLocations } from '@/lib/services/geofence-privacy-service';
-import type { EmergencyRecoveryRequest, EmergencyRecoveryResponse } from '@/lib/types/compliance-api-types';
-import { withApi, ApiError, z } from '@/lib/api/framework';
+import type { EmergencyRecoveryResponse } from '@/lib/types/compliance-api-types';
+ 
+ 
+ 
+ 
+ 
+ 
+ 
+ 
+ 
+ 
+import { withApi, z } from '@/lib/api/framework';
 
 const emergencyRecoverySchema = z.object({
   emergencyId: z.string().uuid('Invalid emergencyId'),
@@ -20,11 +30,11 @@ export const GET = withApi(
       summary: 'GET recovery',
     },
   },
-  async ({ request, userId, organizationId, user, body, query }) => {
+  async ({ request, userId: _userId, organizationId: _organizationId, user: _user, body: _body, query: _query }) => {
 
         const searchParams = request.nextUrl.searchParams;
         const emergencyId = searchParams.get('emergencyId');
-        const memberId = searchParams.get('memberId');
+        const _memberId = searchParams.get('memberId');
         if (!emergencyId) {
           return NextResponse.json(
             {
@@ -67,7 +77,7 @@ export const POST = withApi(
     },
     successStatus: 201,
   },
-  async ({ request, userId, organizationId, user, body, query }) => {
+  async ({ request: _request, userId: _userId, organizationId: _organizationId, user: _user, body, query: _query }) => {
         const { emergencyId, memberId } = body;
 
         // Validate request body
@@ -84,7 +94,7 @@ export const POST = withApi(
           );
         }
         // Purge location data from emergency tracking
-        const purgeResult = await purgeExpiredLocations();
+        const _purgeResult = await purgeExpiredLocations();
         const recoverySteps = [
           'End emergency mode',
           'Disable break-glass access',

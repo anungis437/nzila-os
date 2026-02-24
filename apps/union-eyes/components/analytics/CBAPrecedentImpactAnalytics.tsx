@@ -18,8 +18,6 @@ import {
 import {
   BarChart,
   Bar,
-  LineChart,
-  Line,
   AreaChart,
   Area,
   XAxis,
@@ -81,7 +79,7 @@ export function CBAPrecedentImpactAnalytics() {
       const topRes = await fetch('/api/analytics/cba/top-precedents?limit=10');
       const topData = await topRes.json();
       setTopPrecedents(topData.precedents || []);
-    } catch (error) {
+    } catch (_error) {
 } finally {
       setLoading(false);
     }

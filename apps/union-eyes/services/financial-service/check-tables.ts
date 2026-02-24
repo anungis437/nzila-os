@@ -1,4 +1,4 @@
-/* eslint-disable no-restricted-imports -- Admin-only diagnostic script (information_schema only, no Org data) */
+ 
 /**
  * Check Database Tables - Verify what tables exist
  *
@@ -48,7 +48,7 @@ const tablesToCheck = [
       const exists = result[0].exists;
 if (exists) {
         // Check column count
-        const columns = await sql`
+        const _columns = await sql`
           SELECT column_name 
           FROM information_schema.columns 
           WHERE table_schema = 'public' 
@@ -56,7 +56,7 @@ if (exists) {
           ORDER BY ordinal_position
         `;
 }
-    } catch (error) {
+    } catch (_error) {
 }
   }
 

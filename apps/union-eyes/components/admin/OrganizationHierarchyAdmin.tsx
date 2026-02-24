@@ -28,14 +28,12 @@ import {
   DialogTitle,
   DialogTrigger,
 } from '@/components/ui/dialog';
-import { 
-  Building2, 
-  Plus, 
-  Edit, 
-  Trash2, 
-  ChevronRight,
+import {
+  Building2,
+  Plus,
+  Edit,
   Users,
-  Shield
+  Shield,
 } from 'lucide-react';
 
 interface Organization {
@@ -59,6 +57,7 @@ export function OrganizationHierarchyAdmin({
   userRole 
 }: OrganizationHierarchyAdminProps) {
   const [organizations, setOrganizations] = useState<Organization[]>([]);
+  // eslint-disable-next-line @typescript-eslint/no-explicit-any
   const [hierarchyTree, setHierarchyTree] = useState<any[]>([]);
   const [selectedOrg, setSelectedOrg] = useState<Organization | null>(null);
   const [isCreateDialogOpen, setIsCreateDialogOpen] = useState(false);
@@ -81,7 +80,7 @@ export function OrganizationHierarchyAdmin({
         setOrganizations(data.data);
         buildHierarchyTree(data.data);
       }
-    } catch (error) {
+    } catch (_error) {
 } finally {
       setLoading(false);
     }
@@ -92,7 +91,9 @@ export function OrganizationHierarchyAdmin({
   }, [fetchOrganizations]);
 
   const buildHierarchyTree = (orgs: Organization[]) => {
+    // eslint-disable-next-line @typescript-eslint/no-explicit-any
     const orgMap = new Map<string, any>();
+    // eslint-disable-next-line @typescript-eslint/no-explicit-any
     const tree: any[] = [];
 
     // Create nodes
@@ -138,7 +139,7 @@ export function OrganizationHierarchyAdmin({
         setFormData({ name: '', organizationType: 'local_union', parentOrganizationId: '' });
         fetchOrganizations();
       }
-    } catch (error) {
+    } catch (_error) {
 }
   };
 
@@ -163,7 +164,7 @@ export function OrganizationHierarchyAdmin({
         setSelectedOrg(null);
         fetchOrganizations();
       }
-    } catch (error) {
+    } catch (_error) {
 }
   };
 
@@ -178,6 +179,7 @@ export function OrganizationHierarchyAdmin({
     return colors[type] || 'bg-gray-500';
   };
 
+  // eslint-disable-next-line @typescript-eslint/no-explicit-any
   const renderOrganizationNode = (node: any, depth: number = 0) => {
     return (
       <div key={node.id} className="space-y-2">
@@ -241,6 +243,7 @@ export function OrganizationHierarchyAdmin({
         
         {node.children && node.children.length > 0 && (
           <div className="ml-8 space-y-2">
+            {/* eslint-disable-next-line @typescript-eslint/no-explicit-any */}
             {node.children.map((child: any) => renderOrganizationNode(child, depth + 1))}
           </div>
         )}

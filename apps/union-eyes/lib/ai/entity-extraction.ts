@@ -236,7 +236,7 @@ class EntityExtractionService {
    */
   private extractByContext(text: string): ExtractedEntity[] {
     const entities: ExtractedEntity[] = [];
-    const lowerText = text.toLowerCase();
+    const _lowerText = text.toLowerCase();
 
     for (const [entityType, keywords] of Object.entries(ENTITY_KEYWORDS)) {
       for (const keyword of keywords) {

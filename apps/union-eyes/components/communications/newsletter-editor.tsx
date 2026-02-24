@@ -65,10 +65,12 @@ import {
   PopoverContent,
   PopoverTrigger,
 } from '@/components/ui/popover';
+ 
 import { cn } from '@/lib/utils';
 
 interface NewsletterEditorProps {
   content?: string;
+  // eslint-disable-next-line @typescript-eslint/no-explicit-any
   onChange?: (html: string, json: any) => void;
   editable?: boolean;
   placeholder?: string;
@@ -79,7 +81,7 @@ export function NewsletterEditor({
   content = '',
   onChange,
   editable = true,
-  placeholder = 'Start writing your newsletter...',
+  placeholder: _placeholder = 'Start writing your newsletter...',
   className,
 }: NewsletterEditorProps) {
   const [linkDialogOpen, setLinkDialogOpen] = useState(false);
@@ -119,7 +121,7 @@ export function NewsletterEditor({
     editorProps: {
       attributes: {
         class: cn(
-          'prose prose-sm max-w-none focus:outline-none min-h-[400px] p-4',
+          'prose prose-sm max-w-none focus:outline-none min-h-100 p-4',
           'prose-headings:font-bold prose-h1:text-3xl prose-h2:text-2xl prose-h3:text-xl',
           'prose-p:text-gray-700 prose-a:text-blue-600',
           className

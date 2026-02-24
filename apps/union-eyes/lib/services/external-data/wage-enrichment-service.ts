@@ -17,7 +17,7 @@ import {
 import { statCanClient } from './statcan-client';
 import { eq, and, desc } from 'drizzle-orm';
 import { v4 as uuidv4 } from 'uuid';
-import type { WageData, UnionDensity as UnionDensityType } from './statcan-client';
+import type { UnionDensity as _UnionDensityType } from './statcan-client';
 
 // =============================================================================
 // TYPES
@@ -77,6 +77,7 @@ export class WageEnrichmentService {
     source: string,
     sourceType: string,
     status: 'running' | 'completed' | 'failed' = 'running',
+    // eslint-disable-next-line @typescript-eslint/no-explicit-any
     parameters?: Record<string, any>
   ): Promise<string> {
     const syncId = this.generateSyncId();
@@ -187,8 +188,10 @@ export class WageEnrichmentService {
                   naicsCode: record.NAICS || null,
                   naicsName: record.NAICSName || null,
                   wageValue,
+                  // eslint-disable-next-line @typescript-eslint/no-explicit-any
                   wageUnit: record.Wages.UOM.toLowerCase() as any,
                   wageType: this.mapStatisticsToWageType(record.Statistics),
+                  // eslint-disable-next-line @typescript-eslint/no-explicit-any
                   sex: record.Sex as any,
                   ageGroup: record.AgeGroup || null,
                   ageGroupName: record.AgeGroupName || null,
@@ -301,6 +304,7 @@ export class WageEnrichmentService {
               naicsName: record.NAICSName || null,
               nocCode: record.NOC || null,
               nocName: record.NOCName || null,
+              // eslint-disable-next-line @typescript-eslint/no-explicit-any
               sex: record.Sex as any,
               ageGroup: record.AgeGroup || null,
               ageGroupName: record.AgeGroupName || null,

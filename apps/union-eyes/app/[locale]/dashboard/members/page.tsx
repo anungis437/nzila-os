@@ -1,9 +1,12 @@
+"use client";
+
+
+export const dynamic = 'force-dynamic';
 import React from 'react';
 /**
  * Members Directory
  * View and manage union member contacts and information
  */
-"use client";
 
 import { useState } from "react";
 import useSWR from "swr";
@@ -11,9 +14,9 @@ import { motion, AnimatePresence } from "framer-motion";
 import { useTranslations } from 'next-intl';
 import { useUser } from "@clerk/nextjs";
 import { useOrganizationId } from "@/lib/hooks/use-organization";
-import { 
-  Users, 
-  Search, 
+import {
+  Users,
+  Search,
   Filter,
   Mail,
   Phone,
@@ -25,15 +28,15 @@ import {
   MessageSquare,
   FileText,
   ChevronDown,
-  ChevronUp,
   UserPlus,
   Download,
   MoreVertical,
   Clock,
   TrendingUp,
   Loader2,
-  AlertCircle
+  AlertCircle,
 } from "lucide-react";
+ 
 import { Card, CardContent } from "@/components/ui/card";
 
 type MemberRole = "member" | "steward" | "officer" | "admin" | "super_admin";
@@ -83,7 +86,7 @@ export default function MembersPage() {
   
   // Fetch members from API with organization-aware cache key
   // Including organizationId in the key ensures fresh data when switching organizations
-  const { data, error, isLoading, mutate } = useSWR(
+  const { data, error, isLoading, mutate: _mutate } = useSWR(
     user && organizationId ? `/api/organization/members?organization=${organizationId}` : null,
     fetcher,
     { 
@@ -102,6 +105,7 @@ export default function MembersPage() {
   const [expandedMember, setExpandedMember] = useState<string | null>(null);
 
   // Extract members from API response
+  // eslint-disable-next-line @typescript-eslint/no-explicit-any
   const members: Member[] = data?.success ? data.data.members.map((m: any) => ({
     id: m.id,
     name: m.name,
@@ -459,7 +463,7 @@ export default function MembersPage() {
                           <div className="flex items-start justify-between">
                             <div className="flex items-start gap-4 flex-1">
                               {/* Avatar */}
-                              <div className="w-16 h-16 bg-linear-to-br from-blue-500 to-blue-600 rounded-full flex items-center justify-center text-white text-xl font-bold flex-shrink-0">
+                              <div className="w-16 h-16 bg-linear-to-br from-blue-500 to-blue-600 rounded-full flex items-center justify-center text-white text-xl font-bold shrink-0">
                                 {member.name.split(' ').map(n => n[0]).join('')}
                               </div>
 
@@ -636,7 +640,7 @@ export default function MembersPage() {
           <Card className="bg-linear-to-r from-blue-50 to-cyan-50 border-blue-200">
             <CardContent className="p-6">
               <div className="flex items-start gap-4">
-                <div className="w-12 h-12 bg-blue-600 rounded-lg flex items-center justify-center flex-shrink-0">
+                <div className="w-12 h-12 bg-blue-600 rounded-lg flex items-center justify-center shrink-0">
                   <Users className="w-6 h-6 text-white" />
                 </div>
                 <div className="flex-1">

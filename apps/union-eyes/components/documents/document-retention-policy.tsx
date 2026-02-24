@@ -18,10 +18,10 @@ import * as React from "react";
 import { useForm, useFieldArray } from "react-hook-form";
 import { zodResolver } from "@hookform/resolvers/zod";
 import * as z from "zod";
+ 
 import {
-  Shield,
   Clock,
-  Archive,
+  Archive as _Archive,
   Lock,
   AlertTriangle,
   Plus,
@@ -50,11 +50,10 @@ import {
 } from "@/components/ui/select";
 import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
 import { Alert, AlertDescription } from "@/components/ui/alert";
-import { Label } from "@/components/ui/label";
 import { Checkbox } from "@/components/ui/checkbox";
 import { Textarea } from "@/components/ui/textarea";
-import { cn } from "@/lib/utils";
-import { format, addDays, addMonths, addYears } from "date-fns";
+ 
+import { format } from "date-fns";
 
 const retentionRuleSchema = z.object({
   id: z.string().optional(),
@@ -74,7 +73,7 @@ const policySchema = z.object({
   notificationDays: z.number().min(1),
 });
 
-type RetentionRule = z.infer<typeof retentionRuleSchema>;
+type _RetentionRule = z.infer<typeof retentionRuleSchema>;
 type PolicyConfig = z.infer<typeof policySchema>;
 
 export interface LegalHold {
@@ -116,7 +115,7 @@ export function DocumentRetentionPolicy({
   stats,
   categories,
   onSavePolicy,
-  onCreateHold,
+  onCreateHold: _onCreateHold,
   onReleaseHold,
   onExecuteRetention,
 }: DocumentRetentionPolicyProps) {

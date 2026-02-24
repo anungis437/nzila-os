@@ -5,6 +5,9 @@
  * Main analytics dashboard page
  */
 
+
+export const dynamic = 'force-dynamic';
+
 import { Suspense } from 'react';
 import { auth } from '@clerk/nextjs/server';
 import { redirect } from 'next/navigation';

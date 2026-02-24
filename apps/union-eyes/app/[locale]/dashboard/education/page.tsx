@@ -2,6 +2,9 @@
  * Education & Training Dashboard - Main Landing Page
  * Provides portal to all education features: courses, my learning, certificates
  */
+
+export const dynamic = 'force-dynamic';
+
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "@/components/ui/card";
 import { Button } from "@/components/ui/button";
 import { GraduationCap, BookOpen, Award, Calendar } from "lucide-react";
@@ -9,7 +12,7 @@ import Link from "next/link";
 import { currentUser } from "@clerk/nextjs/server";
 
 export default async function EducationDashboard() {
-  const user = await currentUser();
+  const _user = await currentUser();
 
   return (
     <div className="p-6 space-y-6">

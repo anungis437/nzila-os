@@ -3,10 +3,19 @@ import { NextResponse } from 'next/server';
  * GET POST /api/ai/semantic-search
  * Migrated to withApi() framework
  */
-import { logApiAuditEvent } from "@/lib/middleware/api-security";
-import { checkEntitlement, consumeCredits, getCreditCost } from '@/lib/services/entitlements';
 import { semanticClauseSearch, semanticPrecedentSearch, unifiedSemanticSearch, findSimilarClauses } from '@/lib/services/ai/vector-search-service';
 
+ 
+ 
+ 
+ 
+ 
+ 
+ 
+ 
+ 
+ 
+ 
 import { withApi, ApiError, z, RATE_LIMITS } from '@/lib/api/framework';
 
 const semanticSearchSchema = z.object({
@@ -34,7 +43,7 @@ export const GET = withApi(
       summary: 'GET semantic-search',
     },
   },
-  async ({ request, userId, organizationId, user, body, query }) => {
+  async ({ request: _request, userId: _userId, organizationId: _organizationId, user: _user, body: _body, query: _query }) => {
 
           // This would query database to check how many clauses/precedents have embeddings
           // For now, return a placeholder response
@@ -65,7 +74,7 @@ export const POST = withApi(
     },
     successStatus: 201,
   },
-  async ({ request, userId, organizationId, user, body, query }) => {
+  async ({ request: _request, userId: _userId, organizationId: _organizationId, user: _user, body, query: _query }) => {
 
           // Validate request body
           const { searchType, query: searchQuery, limit, threshold, filters, hybridSearch, clauseId } = body;

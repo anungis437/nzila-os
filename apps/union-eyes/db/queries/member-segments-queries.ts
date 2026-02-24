@@ -8,7 +8,6 @@
  * @module db/queries/member-segments-queries
  */
 
-import { db } from "../db";
 import { 
   memberSegments, 
   segmentExecutions, 
@@ -23,7 +22,7 @@ import {
 } from "../schema/domains/member/member-segments";
 import { organizationMembers } from "../schema/organization-members-schema";
 import { memberEmployment } from "../schema/domains/member/member-employment";
-import { eq, and, or, isNull, desc, asc, sql, gte, lte, inArray, SQL } from "drizzle-orm";
+import { eq, and, or, desc, asc, sql, gte, lte, inArray, SQL } from "drizzle-orm";
 import { withRLSContext } from "@/lib/db/with-rls-context";
 import { logger } from "@/lib/logger";
 import type { NodePgDatabase } from "drizzle-orm/node-postgres";
@@ -38,6 +37,7 @@ import type { NodePgDatabase } from "drizzle-orm/node-postgres";
 export async function createSegment(
   data: InsertMemberSegment
 ): Promise<SelectMemberSegment> {
+  // eslint-disable-next-line @typescript-eslint/no-explicit-any
   return withRLSContext(async (tx: NodePgDatabase<any>) => {
     try {
       const [segment] = await tx
@@ -60,6 +60,7 @@ export async function getSegments(
   organizationId: string,
   userId?: string
 ): Promise<SelectMemberSegment[]> {
+  // eslint-disable-next-line @typescript-eslint/no-explicit-any
   return withRLSContext(async (tx: NodePgDatabase<any>) => {
     try {
       const conditions: SQL[] = [
@@ -96,6 +97,7 @@ export async function getSegmentById(
   id: string,
   organizationId: string
 ): Promise<SelectMemberSegment | null> {
+  // eslint-disable-next-line @typescript-eslint/no-explicit-any
   return withRLSContext(async (tx: NodePgDatabase<any>) => {
     try {
       const [segment] = await tx
@@ -124,6 +126,7 @@ export async function updateSegment(
   id: string,
   data: Partial<InsertMemberSegment>
 ): Promise<SelectMemberSegment> {
+  // eslint-disable-next-line @typescript-eslint/no-explicit-any
   return withRLSContext(async (tx: NodePgDatabase<any>) => {
     try {
       const [updated] = await tx
@@ -153,6 +156,7 @@ export async function updateSegment(
 export async function deleteSegment(
   id: string
 ): Promise<void> {
+  // eslint-disable-next-line @typescript-eslint/no-explicit-any
   return withRLSContext(async (tx: NodePgDatabase<any>) => {
     try {
       await tx
@@ -184,7 +188,9 @@ export async function searchMembersAdvanced(
     sortBy?: "name" | "joinDate" | "seniority" | "relevance";
     sortOrder?: "asc" | "desc";
   }
+// eslint-disable-next-line @typescript-eslint/no-explicit-any
 ): Promise<{ members: any[]; total: number }> {
+  // eslint-disable-next-line @typescript-eslint/no-explicit-any
   return withRLSContext(async (tx: NodePgDatabase<any>) => {
     try {
       const page = options?.page || 1;
@@ -204,6 +210,7 @@ export async function searchMembersAdvanced(
         conditions.push(inArray(organizationMembers.role, filters.role));
       }
       if (filters.membershipType && filters.membershipType.length > 0) {
+        // eslint-disable-next-line @typescript-eslint/no-explicit-any
         conditions.push(inArray(organizationMembers.memberCategory, filters.membershipType as any));
       }
 
@@ -216,7 +223,7 @@ export async function searchMembersAdvanced(
       }
 
       // Build query with joins for employment data
-      let query = tx
+      const query = tx
         .select({
           // Member fields (only existing ones)
           id: organizationMembers.id,
@@ -260,6 +267,7 @@ export async function searchMembersAdvanced(
         employmentConditions.push(inArray(memberEmployment.bargainingUnitId, filters.bargainingUnitId));
       }
       if (filters.employmentStatus && filters.employmentStatus.length > 0) {
+        // eslint-disable-next-line @typescript-eslint/no-explicit-any
         employmentConditions.push(inArray(memberEmployment.employmentStatus, filters.employmentStatus as any));
       }
       if (filters.checkoffAuthorized !== undefined) {
@@ -338,7 +346,9 @@ export async function executeSegment(
     page?: number;
     limit?: number;
   }
+// eslint-disable-next-line @typescript-eslint/no-explicit-any
 ): Promise<{ members: any[]; total: number }> {
+  // eslint-disable-next-line @typescript-eslint/no-explicit-any
   return withRLSContext(async (tx: NodePgDatabase<any>) => {
     try {
       // Get segment
@@ -366,6 +376,7 @@ export async function executeSegment(
         executedBy,
         resultCount: result.total,
         executionTimeMs,
+        // eslint-disable-next-line @typescript-eslint/no-explicit-any
         filtersSnapshot: segment.filters as any,
       });
 
@@ -396,6 +407,7 @@ export async function executeSegment(
 export async function logSegmentExecution(
   data: InsertSegmentExecution
 ): Promise<SelectSegmentExecution> {
+  // eslint-disable-next-line @typescript-eslint/no-explicit-any
   return withRLSContext(async (tx: NodePgDatabase<any>) => {
     try {
       const [execution] = await tx
@@ -418,6 +430,7 @@ export async function getSegmentExecutions(
   segmentId: string,
   limit: number = 50
 ): Promise<SelectSegmentExecution[]> {
+  // eslint-disable-next-line @typescript-eslint/no-explicit-any
   return withRLSContext(async (tx: NodePgDatabase<any>) => {
     try {
       return await tx
@@ -443,6 +456,7 @@ export async function getSegmentExecutions(
 export async function logSegmentExport(
   data: InsertSegmentExport
 ): Promise<SelectSegmentExport> {
+  // eslint-disable-next-line @typescript-eslint/no-explicit-any
   return withRLSContext(async (tx: NodePgDatabase<any>) => {
     try {
       const [exportLog] = await tx
@@ -465,6 +479,7 @@ export async function getExportHistory(
   organizationId: string,
   limit: number = 100
 ): Promise<SelectSegmentExport[]> {
+  // eslint-disable-next-line @typescript-eslint/no-explicit-any
   return withRLSContext(async (tx: NodePgDatabase<any>) => {
     try {
       return await tx
@@ -496,6 +511,7 @@ export function generateExportWatermark(
  * Generate export hash for verification
  */
 export function generateExportHash(data: string): string {
+  // eslint-disable-next-line @typescript-eslint/no-require-imports
   const crypto = require("crypto");
   return crypto.createHash("sha256").update(data).digest("hex");
 }

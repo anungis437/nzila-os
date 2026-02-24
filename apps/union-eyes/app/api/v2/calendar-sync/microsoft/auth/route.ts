@@ -3,8 +3,12 @@ import { NextResponse } from 'next/server';
  * GET /api/calendar-sync/microsoft/auth
  * Migrated to withApi() framework
  */
-import { logApiAuditEvent } from "@/lib/middleware/api-security";
 import { getAuthorizationUrl } from '@/lib/external-calendar-sync/microsoft-calendar-service';
+ 
+ 
+ 
+ 
+ 
 import { withApi, ApiError } from '@/lib/api/framework';
 
 export const GET = withApi(
@@ -15,7 +19,7 @@ export const GET = withApi(
       summary: 'GET auth',
     },
   },
-  async ({ request, userId, organizationId, user, body, query }) => {
+  async ({ request: _request, userId, organizationId: _organizationId, user: _user, body: _body, query: _query }) => {
 
           if (!userId) {
             throw ApiError.unauthorized('Authentication required');

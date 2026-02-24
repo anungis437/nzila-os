@@ -14,14 +14,11 @@ import { Input } from '@/components/ui/input';
 import { Label } from '@/components/ui/label';
 import { Textarea } from '@/components/ui/textarea';
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from '@/components/ui/select';
-import { 
-  Home, 
-  Phone, 
-  User, 
+import {
+  Home,
+  Phone,
+  User,
   Trophy,
-  TrendingUp,
-  Calendar,
-  CheckCircle2
 } from 'lucide-react';
 import { format } from 'date-fns';
 
@@ -63,6 +60,7 @@ interface CanvassingInterfaceProps {
   organizationId: string;
 }
 
+// eslint-disable-next-line @typescript-eslint/no-explicit-any
 const activityTypeIcons: Record<string, any> = {
   door_knock: Home,
   phone_call: Phone,
@@ -83,7 +81,7 @@ export function CanvassingInterface({ campaignId, organizationId }: CanvassingIn
   const [activities, setActivities] = useState<CanvassingActivity[]>([]);
   const [dailySummary, setDailySummary] = useState<DailySummary | null>(null);
   const [volunteerLeaders, setVolunteerLeaders] = useState<VolunteerLeader[]>([]);
-  const [loading, setLoading] = useState(false);
+  const [_loading, setLoading] = useState(false);
   const [showForm, setShowForm] = useState(false);
 
   // Form state
@@ -128,7 +126,7 @@ export function CanvassingInterface({ campaignId, organizationId }: CanvassingIn
         .slice(0, 10);
 
       setVolunteerLeaders(leaders);
-    } catch (error) {
+    } catch (_error) {
 } finally {
       setLoading(false);
     }
@@ -171,7 +169,7 @@ export function CanvassingInterface({ campaignId, organizationId }: CanvassingIn
 
       setShowForm(false);
       fetchActivities();
-    } catch (error) {
+    } catch (_error) {
 alert('Failed to log activity');
     }
   };

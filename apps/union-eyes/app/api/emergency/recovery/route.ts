@@ -1,7 +1,7 @@
 import { z } from 'zod';
 import { NextRequest, NextResponse } from 'next/server';
 import { purgeExpiredLocations } from '@/lib/services/geofence-privacy-service';
-import type { EmergencyRecoveryRequest, EmergencyRecoveryResponse } from '@/lib/types/compliance-api-types';
+import type { EmergencyRecoveryResponse } from '@/lib/types/compliance-api-types';
 import { withApiAuth } from '@/lib/api-auth-guard';
 import { ErrorCode, standardErrorResponse } from '@/lib/api/standardized-responses';
 
@@ -49,7 +49,7 @@ export const POST = withApiAuth(async (request: NextRequest) => {
     }
 
     // Purge location data from emergency tracking
-    const purgeResult = await purgeExpiredLocations();
+    const _purgeResult = await purgeExpiredLocations();
 
     const recoverySteps = [
       'End emergency mode',
@@ -95,7 +95,7 @@ export const GET = withApiAuth(async (request: NextRequest) => {
   try {
     const searchParams = request.nextUrl.searchParams;
     const emergencyId = searchParams.get('emergencyId');
-    const memberId = searchParams.get('memberId');
+    const _memberId = searchParams.get('memberId');
 
     if (!emergencyId) {
       return NextResponse.json(

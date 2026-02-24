@@ -12,7 +12,7 @@
  */
 
 import { db } from '@/db';
-import { eq, and, gte, lte, sql } from 'drizzle-orm';
+import { eq, and, sql } from 'drizzle-orm';
 import { users, strikeFundDisbursements } from '@/db/schema';
 import { decryptSIN } from '@/lib/encryption';
 import { logger } from '@/lib/logger';
@@ -48,7 +48,7 @@ export interface RL1Slip {
 export async function checkStrikePaymentTaxability(
   memberId: string,
   paymentAmount: number,
-  weekNumber?: number
+  _weekNumber?: number
 ): Promise<{ requiresT4A: boolean; reason: string; threshold: number }> {
   const T4A_THRESHOLD_WEEKLY = 500;
   const T4A_THRESHOLD_ANNUAL = 26000;
@@ -283,7 +283,7 @@ export async function processYearEndTaxSlips(
 
     // Generate T4A for all provinces
     try {
-      const t4a = await generateT4A(memberId as string, taxYear);
+      const _t4a = await generateT4A(memberId as string, taxYear);
       // Store T4A in database (would need taxSlips table)
       t4aCount++;
     } catch (error) {
@@ -294,7 +294,7 @@ export async function processYearEndTaxSlips(
     // Check province from disbursement record, not from user table
     if (payment.province === 'QC') {
       try {
-        const rl1 = await generateRL1(memberId as string, taxYear);
+        const _rl1 = await generateRL1(memberId as string, taxYear);
         // Store RL-1 in database
         rl1Count++;
       } catch (error) {

@@ -48,7 +48,7 @@ export const DuesNotificationTemplates = {
     subject: (data: DuesNotificationData) => 
       `Reminder: Union Dues Payment Due ${data.dueDate}`,
     
-    title: (data: DuesNotificationData) => 
+    title: (_data: DuesNotificationData) => 
       `Dues Payment Due Soon`,
     
     body: (data: DuesNotificationData) => 
@@ -120,10 +120,10 @@ export const DuesNotificationTemplates = {
    */
   DUES_REMINDER_1_DAY: {
     id: 'dues_reminder_1day',
-    subject: (data: DuesNotificationData) => 
+    subject: (_data: DuesNotificationData) => 
       `⚠️ Urgent: Union Dues Payment Due Tomorrow`,
     
-    title: (data: DuesNotificationData) => 
+    title: (_data: DuesNotificationData) => 
       `Payment Due Tomorrow`,
     
     body: (data: DuesNotificationData) => 
@@ -158,10 +158,10 @@ export const DuesNotificationTemplates = {
    */
   DUES_OVERDUE: {
     id: 'dues_overdue',
-    subject: (data: DuesNotificationData) => 
+    subject: (_data: DuesNotificationData) => 
       `🔴 Overdue: Union Dues Payment Required`,
     
-    title: (data: DuesNotificationData) => 
+    title: (_data: DuesNotificationData) => 
       `Payment Overdue`,
     
     body: (data: DuesNotificationData) => 
@@ -202,10 +202,10 @@ export const DuesNotificationTemplates = {
    */
   DUES_PAYMENT_CONFIRMATION: {
     id: 'dues_payment_confirmation',
-    subject: (data: DuesNotificationData) => 
+    subject: (_data: DuesNotificationData) => 
       `✅ Payment Received - Thank You!`,
     
-    title: (data: DuesNotificationData) => 
+    title: (_data: DuesNotificationData) => 
       `Payment Confirmed`,
     
     body: (data: DuesNotificationData) => 
@@ -257,10 +257,10 @@ export const DuesNotificationTemplates = {
    */
   DUES_PAYMENT_FAILED: {
     id: 'dues_payment_failed',
-    subject: (data: DuesNotificationData) => 
+    subject: (_data: DuesNotificationData) => 
       `⚠️ Payment Failed - Action Required`,
     
-    title: (data: DuesNotificationData) => 
+    title: (_data: DuesNotificationData) => 
       `Payment Failed`,
     
     body: (data: DuesNotificationData) => 
@@ -307,10 +307,10 @@ export const DuesNotificationTemplates = {
    */
   DUES_PAYMENT_RETRY_SCHEDULED: {
     id: 'dues_payment_retry_scheduled',
-    subject: (data: DuesNotificationData) => 
+    subject: (_data: DuesNotificationData) => 
       `Payment Retry Scheduled`,
     
-    title: (data: DuesNotificationData) => 
+    title: (_data: DuesNotificationData) => 
       `Payment Retry Scheduled`,
     
     body: (data: DuesNotificationData) => 
@@ -348,7 +348,7 @@ export const DuesNotificationTemplates = {
     subject: (data: DuesNotificationData) => 
       `🔴 Member Requires Assistance - ${data.memberName}`,
     
-    title: (data: DuesNotificationData) => 
+    title: (_data: DuesNotificationData) => 
       `Payment Assistance Required`,
     
     body: (data: DuesNotificationData) => 

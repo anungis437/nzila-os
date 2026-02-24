@@ -1,3 +1,7 @@
+"use client";
+
+export const dynamic = 'force-dynamic';
+
 /**
  * Claims Management Page
  * 
@@ -56,7 +60,7 @@ export default function ClaimsPage() {
           <ClaimFormWizard
             memberId="current-member-id"
             organizationId="current-organization-id"
-            onSubmit={async (data) => {
+            onSubmit={async (_data) => {
 // Handle claim submission
               setActiveTab("list");
             }}
@@ -88,7 +92,7 @@ export default function ClaimsPage() {
             createdAt: new Date(),
             updatedAt: new Date(),
           }}
-          onStatusChange={(status) => undefined}
+          onStatusChange={(_status) => undefined}
         />
       )}
     </div>

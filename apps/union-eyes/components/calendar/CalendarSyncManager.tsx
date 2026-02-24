@@ -38,7 +38,6 @@ import {
   XCircle,
   AlertCircle,
 } from 'lucide-react';
-import { cn } from '@/lib/utils';
 
 interface ExternalConnection {
   id: string;
@@ -49,6 +48,7 @@ interface ExternalConnection {
   syncStatus: 'synced' | 'syncing' | 'failed' | 'pending';
   lastSyncAt: string | null;
   lastSyncError: string | null;
+  // eslint-disable-next-line @typescript-eslint/no-explicit-any
   calendarMappings: Record<string, any>;
   createdAt: string;
 }
@@ -74,7 +74,7 @@ export function CalendarSyncManager({ open, onOpenChange }: CalendarSyncManagerP
       const response = await fetch('/api/calendar-sync/connections');
       const data = await response.json();
       setConnections(data.connections || []);
-    } catch (error) {
+    } catch (_error) {
 } finally {
       setLoading(false);
     }
@@ -84,7 +84,7 @@ export function CalendarSyncManager({ open, onOpenChange }: CalendarSyncManagerP
     try {
       // Redirect to OAuth flow
       window.location.href = `/api/calendar-sync/${provider}/auth`;
-    } catch (error) {
+    } catch (_error) {
 alert(`Failed to connect ${provider}`);
     }
   };
@@ -100,7 +100,7 @@ alert(`Failed to connect ${provider}`);
       });
       
       setConnections(prev => prev.filter(c => c.id !== connectionId));
-    } catch (error) {
+    } catch (_error) {
 alert('Failed to disconnect calendar');
     }
   };
@@ -115,6 +115,7 @@ alert('Failed to disconnect calendar');
 
       // Trigger sync for each mapped calendar
       const mappings = connection.calendarMappings || {};
+      // eslint-disable-next-line @typescript-eslint/no-explicit-any
       const promises = Object.entries(mappings).map(([externalCalendarId, mapping]: [string, any]) => {
         return fetch(`/api/calendar-sync/connections/${connectionId}/sync`, {
           method: 'POST',
@@ -130,7 +131,7 @@ alert('Failed to disconnect calendar');
       
       // Refresh connections to get updated sync status
       await fetchConnections();
-    } catch (error) {
+    } catch (_error) {
 alert('Failed to sync calendar');
     } finally {
       setSyncing(null);
@@ -148,7 +149,7 @@ alert('Failed to sync calendar');
       setConnections(prev =>
         prev.map(c => (c.id === connectionId ? { ...c, syncEnabled: enabled } : c))
       );
-    } catch (error) {
+    } catch (_error) {
 alert('Failed to update sync settings');
     }
   };
@@ -167,7 +168,7 @@ alert('Failed to update sync settings');
       setConnections(prev =>
         prev.map(c => (c.id === connectionId ? { ...c, syncDirection: direction } : c))
       );
-    } catch (error) {
+    } catch (_error) {
 alert('Failed to update sync direction');
     }
   };
@@ -215,6 +216,7 @@ alert('Failed to update sync direction');
                 onClick={() => handleConnect('google')}
                 className="flex-1"
               >
+                {/* eslint-disable-next-line @next/next/no-img-element */}
                 <img
                   src={getProviderLogo('google')}
                   alt="Google"
@@ -227,6 +229,7 @@ alert('Failed to update sync direction');
                 onClick={() => handleConnect('microsoft')}
                 className="flex-1"
               >
+                {/* eslint-disable-next-line @next/next/no-img-element */}
                 <img
                   src={getProviderLogo('microsoft')}
                   alt="Microsoft"
@@ -256,6 +259,7 @@ alert('Failed to update sync direction');
                       {/* Header */}
                       <div className="flex items-center justify-between">
                         <div className="flex items-center space-x-3">
+                          {/* eslint-disable-next-line @next/next/no-img-element */}
                           <img
                             src={getProviderLogo(connection.provider)}
                             alt={connection.provider}
@@ -304,6 +308,7 @@ alert('Failed to update sync direction');
                           <Label>Sync Direction</Label>
                           <Select
                             value={connection.syncDirection}
+                            // eslint-disable-next-line @typescript-eslint/no-explicit-any
                             onValueChange={(value: any) =>
                               handleChangeSyncDirection(connection.id, value)
                             }

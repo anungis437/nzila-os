@@ -1,6 +1,6 @@
 import { z } from 'zod';
 import { NextRequest, NextResponse } from 'next/server';
-import type { CarbonValidationRequest, CarbonValidationResponse } from '@/lib/types/compliance-api-types';
+import type { CarbonValidationResponse } from '@/lib/types/compliance-api-types';
 import { withApiAuth } from '@/lib/api-auth-guard';
 import { ErrorCode, standardErrorResponse } from '@/lib/api/standardized-responses';
 

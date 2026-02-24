@@ -84,7 +84,7 @@ export class SlackAdapter extends BaseIntegration {
     }
   }
 
-  async verifyWebhook(payload: string, signature: string): Promise<boolean> {
+  async verifyWebhook(_payload: string, _signature: string): Promise<boolean> {
     return true; // Simplified for now
   }
 

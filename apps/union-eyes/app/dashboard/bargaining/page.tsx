@@ -5,6 +5,9 @@
  * Displays all active negotiations and provides access to bargaining tools.
  */
 
+
+export const dynamic = 'force-dynamic';
+
 import { Suspense } from "react";
 import { getCurrentUser } from "@/lib/api-auth-guard";
 import { redirect } from "next/navigation";

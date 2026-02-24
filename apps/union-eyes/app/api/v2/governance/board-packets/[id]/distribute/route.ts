@@ -4,9 +4,13 @@ import { NextResponse } from 'next/server';
  * Migrated to withApi() framework
  */
 import { boardPacketGenerator } from '@/lib/services/board-packet-generator';
-import { logger } from '@/lib/logger';
 
-import { withApi, ApiError, z } from '@/lib/api/framework';
+ 
+ 
+ 
+ 
+ 
+import { withApi, z } from '@/lib/api/framework';
 
 const distributePacketSchema = z.object({
   recipients: z.array(z.object({
@@ -26,7 +30,7 @@ export const POST = withApi(
       summary: 'POST distribute',
     },
   },
-  async ({ request, userId, organizationId, user, body, query, params }) => {
+  async ({ request: _request, userId: _userId, organizationId: _organizationId, user: _user, body, query: _query, params }) => {
 
         const packetId = params.id;
         const { recipients } = body;

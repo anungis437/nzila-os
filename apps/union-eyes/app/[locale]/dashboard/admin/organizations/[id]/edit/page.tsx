@@ -4,6 +4,8 @@
  */
 "use client";
 
+
+export const dynamic = 'force-dynamic';
 import { useState, useEffect } from "react";
 import { useParams, useRouter } from "next/navigation";
 import useSWR from "swr";
@@ -13,8 +15,7 @@ import {
   Loader2,
   AlertCircle,
   Trash2,
-  Info,
-  AlertTriangle
+  AlertTriangle,
 } from "lucide-react";
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "@/components/ui/card";
 import { Button } from "@/components/ui/button";
@@ -28,8 +29,7 @@ import {
   SelectTrigger,
   SelectValue,
 } from "@/components/ui/select";
-import { Alert, AlertDescription, AlertTitle } from "@/components/ui/alert";
-import { Separator } from "@/components/ui/separator";
+import { Alert, AlertDescription } from "@/components/ui/alert";
 import { OrganizationBreadcrumb } from "@/components/organization/organization-breadcrumb";
 import type { OrganizationType, LabourSector, CAJurisdiction, OrganizationStatus } from "@/types/organization";
 
@@ -99,6 +99,7 @@ export default function EditOrganizationPage() {
 
   const [isSubmitting, setIsSubmitting] = useState(false);
   const [error, setError] = useState<string | null>(null);
+  // eslint-disable-next-line @typescript-eslint/no-explicit-any
   const [availableOrganizations, setAvailableOrganizations] = useState<any[]>([]);
   
   // Form state
@@ -128,8 +129,9 @@ export default function EditOrganizationPage() {
         const response = await fetch("/api/organizations?status=active");
         const data = await response.json();
         // Filter out current organization and its descendants
+        // eslint-disable-next-line @typescript-eslint/no-explicit-any
         setAvailableOrganizations((data.data || []).filter((org: any) => org.id !== organizationId));
-      } catch (error) {
+      } catch (_error) {
 }
     };
     loadOrganizations();
@@ -202,7 +204,7 @@ export default function EditOrganizationPage() {
       if (!response.ok) throw new Error("Failed to archive organization");
       
       router.push("/dashboard/admin/organizations");
-    } catch (error) {
+    } catch (_error) {
 alert("Failed to archive organization");
     }
   };

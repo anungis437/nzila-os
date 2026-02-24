@@ -13,6 +13,7 @@ import { Decimal } from 'decimal.js';
 import { db } from '@/db';
 import { currencyExchangeRates } from '@/db/schema/domains/infrastructure';
 import { eq, and, desc, lte } from 'drizzle-orm';
+ 
 import { logger } from '@/lib/logger';
 
 export interface ExchangeRate {
@@ -228,7 +229,7 @@ export class MultiCurrencyTreasuryService {
     }>;
   }> {
     const { transactionCurrencyConversions } = await import('@/db/schema/domains/finance');
-    const { and, gte, lte, eq } = await import('drizzle-orm');
+    const { and, gte, lte, eq: _eq } = await import('drizzle-orm');
     
     try {
       // Query FX transactions from database
@@ -374,7 +375,7 @@ export class MultiCurrencyTreasuryService {
   /**
    * Get FX exposure summary
    */
-  static async getFXExposure(params: {
+  static async getFXExposure(_params: {
     organizationId: string;
     baseCurrency: string;
   }): Promise<{

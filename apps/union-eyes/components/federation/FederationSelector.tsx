@@ -22,7 +22,6 @@ import {
   SelectValue,
 } from "@/components/ui/select";
 import { Badge } from "@/components/ui/badge";
-import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 import { useToast } from "@/components/ui/use-toast";
 import { Building2, Search, MapPin } from "lucide-react";
@@ -57,6 +56,7 @@ export function FederationSelector({
 
   React.useEffect(() => {
     loadFederations();
+  // eslint-disable-next-line react-hooks/exhaustive-deps
   }, [userRole]);
 
   async function loadFederations() {
@@ -77,7 +77,7 @@ export function FederationSelector({
       } else {
         throw new Error(data.error || "Failed to load federations");
       }
-    } catch (error) {
+    } catch (_error) {
       toast({
         title: "Error",
         description: "Failed to load federations",

@@ -3,7 +3,6 @@
 import { useEffect, useState } from 'react';
 import { Card } from '@/components/ui/card';
 import { Button } from '@/components/ui/button';
-import { Badge } from '@/components/ui/badge';
 import { Progress } from '@/components/ui/progress';
 import { Skeleton } from '@/components/ui/skeleton';
 import {
@@ -11,7 +10,6 @@ import {
   TrendingUp,
   Users,
   DollarSign,
-  Calendar,
   Share2,
   Check,
 } from 'lucide-react';
@@ -125,6 +123,7 @@ export function PublicDonationPage({ campaignSlug }: DonationPageProps) {
 
   useEffect(() => {
     fetchCampaign();
+  // eslint-disable-next-line react-hooks/exhaustive-deps
   }, [campaignSlug]);
 
   const fetchCampaign = async () => {
@@ -138,7 +137,7 @@ export function PublicDonationPage({ campaignSlug }: DonationPageProps) {
       if (data.suggestedAmounts?.length > 0) {
         setSelectedAmount(data.suggestedAmounts[1] || data.suggestedAmounts[0]);
       }
-    } catch (error) {
+    } catch (_error) {
 } finally {
       setLoading(false);
     }
@@ -163,7 +162,7 @@ export function PublicDonationPage({ campaignSlug }: DonationPageProps) {
       const data = await response.json();
       setClientSecret(data.clientSecret);
       setShowCheckout(true);
-    } catch (error) {
+    } catch (_error) {
 }
   };
 

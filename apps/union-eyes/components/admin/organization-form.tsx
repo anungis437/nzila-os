@@ -19,7 +19,7 @@ import React, { useState, useEffect } from "react";
 import { useForm } from "react-hook-form";
 import { zodResolver } from "@hookform/resolvers/zod";
 import { z } from "zod";
-import { Loader2, AlertTriangle, Building2, Globe, MapPin, Users, DollarSign, FileText } from "lucide-react";
+import { Loader2, AlertTriangle, Users } from "lucide-react";
 import {
   Dialog,
   DialogContent,
@@ -45,7 +45,6 @@ import {
   SelectValue,
 } from "@/components/ui/select";
 import { Input } from "@/components/ui/input";
-import { Textarea } from "@/components/ui/textarea";
 import { Button } from "@/components/ui/button";
 import { Checkbox } from "@/components/ui/checkbox";
 import { Badge } from "@/components/ui/badge";
@@ -339,6 +338,7 @@ export function OrganizationForm({
   }, [mode, organization, parentOrganization, form]);
 
   // Auto-generate slug from name
+  // eslint-disable-next-line react-hooks/incompatible-library
   const name = form.watch('name');
   useEffect(() => {
     if (autoSlug && name && mode === 'create') {
@@ -353,7 +353,7 @@ export function OrganizationForm({
       await onSubmit(data);
       onOpenChange(false);
       form.reset();
-    } catch (error) {
+    } catch (_error) {
 }
   };
 

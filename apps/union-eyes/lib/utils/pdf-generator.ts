@@ -6,7 +6,6 @@
  */
 
 import PDFDocument from 'pdfkit';
-import { Readable } from 'stream';
 
 // ============================================================================
 // TYPES
@@ -275,7 +274,7 @@ function renderTable(
   const headerHeight = 25;
 
   // Calculate total width
-  const totalWidth = columns.reduce((sum, col) => sum + (col.width || 100), 0);
+  const _totalWidth = columns.reduce((sum, col) => sum + (col.width || 100), 0);
 
   // Draw header
   let x = doc.page.margins.left;
@@ -298,7 +297,7 @@ function renderTable(
 
   // Draw rows
   let y = startY + headerHeight;
-  data.forEach((row, index) => {
+  data.forEach((row, _index) => {
     // Check if we need a new page
     if (y + rowHeight > doc.page.height - doc.page.margins.bottom) {
       doc.addPage();

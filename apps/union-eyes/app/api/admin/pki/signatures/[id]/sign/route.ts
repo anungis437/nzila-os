@@ -4,17 +4,16 @@
 // POST /api/admin/pki/signatures/[id]/sign - Sign a document
 // =====================================================================================
 
-import { NextRequest, NextResponse } from 'next/server';
+import { NextResponse } from 'next/server';
 import { signDocument } from '@/services/pki/signature-service';
 import { recordSignature } from '@/services/pki/workflow-engine';
 import type { SignDocumentParams } from '@/services/pki/signature-service';
 import { z } from "zod";
-import { getCurrentUser, withAdminAuth, withApiAuth, withMinRole, withRoleAuth, type BaseAuthContext } from '@/lib/api-auth-guard';
+import { withRoleAuth, type BaseAuthContext } from '@/lib/api-auth-guard';
 
 import {
   ErrorCode,
   standardErrorResponse,
-  standardSuccessResponse,
 } from '@/lib/api/standardized-responses';
 
 const adminPkiSignaturesSignSchema = z.object({
@@ -85,7 +84,7 @@ export const POST = withRoleAuth('admin', async (request, context: BaseAuthConte
       if (workflowId) {
         try {
           workflowResult = await recordSignature(workflowId, userId, signature.signatureId);
-        } catch (error) {
+        } catch (_error) {
 // Continue even if workflow update fails
         }
       }

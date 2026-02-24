@@ -85,7 +85,7 @@ export class TeamsAdapter extends BaseIntegration {
     }
   }
 
-  async verifyWebhook(payload: string, signature: string): Promise<boolean> {
+  async verifyWebhook(_payload: string, _signature: string): Promise<boolean> {
     return true; // Simplified for now
   }
 
@@ -157,7 +157,7 @@ export class TeamsAdapter extends BaseIntegration {
       for (const team of response.teams) {
         try {
           // Sync the team as a "team" type channel
-          const teamChannel = await db
+          const _teamChannel = await db
             .insert(externalCommunicationChannels)
             .values({
               orgId: this.orgId,

@@ -6,22 +6,21 @@
 
 // Only import bullmq in runtime, not during build
 // eslint-disable-next-line @typescript-eslint/no-explicit-any
-let Worker: any, Job: any, IORedis: any;
+let Worker: any, _Job: any, IORedis: any;
 
 if (typeof window === 'undefined' && !process.env.__NEXT_BUILDING) {
   try {
     // eslint-disable-next-line @typescript-eslint/no-require-imports
     const bullmq = require('bullmq');
     Worker = bullmq.Worker;
-    Job = bullmq.Job;
+    _Job = bullmq.Job;
     // eslint-disable-next-line @typescript-eslint/no-require-imports
     IORedis = require('ioredis');
-  } catch (e) {
+  } catch (_e) {
     // Fail silently during build
   }
 }
 
-import { CleanupJobData } from '../job-queue';
 import { db } from '../../db/db';
 import { auditLogs } from '../../db/schema/audit-security-schema';
 import { notificationHistory } from '../../db/schema/notifications-schema';
@@ -59,7 +58,7 @@ return { archived: result.rowCount || 0 };
 /**
  * Clean up old notification history
  */
-async function cleanupNotificationHistory(olderThanDays: number) {
+async function _cleanupNotificationHistory(olderThanDays: number) {
   const cutoffDate = new Date();
   cutoffDate.setDate(cutoffDate.getDate() - olderThanDays);
 const result = await db
@@ -94,7 +93,7 @@ try {
 
     const inactiveCount = inactiveResult.rowCount || 0;
 return { deleted: deletedCount + inactiveCount };
-  } catch (error) {
+  } catch (_error) {
 return { deleted: 0 };
   }
 }
@@ -120,7 +119,7 @@ let deleted = 0;
         deleted++;
       }
     }
-  } catch (error) {
+  } catch (_error) {
 }
 return { deleted };
 }
@@ -146,7 +145,7 @@ let deleted = 0;
         deleted++;
       }
     }
-  } catch (error) {
+  } catch (_error) {
 }
 return { deleted };
 }
@@ -154,6 +153,7 @@ return { deleted };
 /**
  * Process cleanup job
  */
+// eslint-disable-next-line @typescript-eslint/no-explicit-any
 async function processCleanupJob(job: any) {
   const { target, olderThanDays } = job.data;
 await job.updateProgress(10);
@@ -192,6 +192,7 @@ return {
 // Create worker
 export const cleanupWorker = new Worker(
   'cleanup',
+  // eslint-disable-next-line @typescript-eslint/no-explicit-any
   async (job: any) => {
     return await processCleanupJob(job);
   },
@@ -202,13 +203,16 @@ export const cleanupWorker = new Worker(
 );
 
 // Event handlers
-cleanupWorker.on('completed', (job: any) => {
+// eslint-disable-next-line @typescript-eslint/no-explicit-any
+cleanupWorker.on('completed', (_job: any) => {
 });
 
-cleanupWorker.on('failed', (job: any, err: any) => {
+// eslint-disable-next-line @typescript-eslint/no-explicit-any
+cleanupWorker.on('failed', (_job: any, _err: any) => {
 });
 
-cleanupWorker.on('error', (err: any) => {
+// eslint-disable-next-line @typescript-eslint/no-explicit-any
+cleanupWorker.on('error', (_err: any) => {
 });
 
 // Graceful shutdown

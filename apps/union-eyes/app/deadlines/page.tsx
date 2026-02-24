@@ -1,12 +1,13 @@
 'use client';
 
+
+export const dynamic = 'force-dynamic';
 import React, { useState, useEffect } from 'react';
 import { useRouter } from 'next/navigation';
-import { 
-  DeadlinesList, 
-  DeadlineCalendar, 
+import {
+  DeadlinesList,
+  DeadlineCalendar,
   ExtensionRequestDialog,
-  ExtensionApprovalDialog 
 } from '@/components/deadlines';
 import { ClockIcon, CalendarIcon, ListBulletIcon } from '@heroicons/react/24/outline';
 
@@ -72,7 +73,7 @@ export default function DeadlinesPage() {
 
       // Refresh deadlines
       await fetchDeadlines();
-    } catch (err) {
+    } catch (_err) {
       alert('Failed to complete deadline. Please try again.');
     }
   };
@@ -111,7 +112,7 @@ export default function DeadlinesPage() {
     router.push(`/claims/${claimNumber}`);
   };
 
-  const handleDateClick = (date: Date) => {
+  const handleDateClick = (_date: Date) => {
 };
 
   const handleDeadlineClick = (deadline: Deadline) => {

@@ -8,7 +8,7 @@
  * they cause runtime issues.
  */
 
-import { GatedFeature, SubscriptionTier, TIER_FEATURES } from './services/entitlements';
+import { GatedFeature, SubscriptionTier } from './services/entitlements';
 import { UserRole } from './api-auth-guard';
 
 /**

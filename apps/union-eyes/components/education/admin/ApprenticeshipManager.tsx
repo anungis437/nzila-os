@@ -22,22 +22,18 @@ import {
 import { Label } from "@/components/ui/label";
 import { Textarea } from "@/components/ui/textarea";
 import { Checkbox } from "@/components/ui/checkbox";
+ 
 import {
   Users,
   GraduationCap,
   TrendingUp,
-  UserX,
   CheckCircle2,
   Plus,
   Search,
-  Filter,
-  Edit,
+  Filter as _Filter,
   Trash2,
   Eye,
-  Calendar,
-  Clock,
   Award,
-  AlertCircle,
 } from "lucide-react";
 import { toast } from "sonner";
 
@@ -157,7 +153,7 @@ export default function ApprenticeshipManager({
 
       const data = await response.json();
       setPrograms(data.programs);
-    } catch (error) {
+    } catch (_error) {
 toast.error("Failed to load programs");
     } finally {
       setLoading(false);
@@ -173,7 +169,7 @@ toast.error("Failed to load programs");
 
       const data = await response.json();
       setMembers(data.members || data);
-    } catch (error) {
+    } catch (_error) {
 }
   }, [organizationId]);
 
@@ -186,7 +182,7 @@ toast.error("Failed to load programs");
 
       const data = await response.json();
       setCourses(data.courses || data);
-    } catch (error) {
+    } catch (_error) {
 }
   }, [organizationId]);
 
@@ -212,7 +208,7 @@ toast.error("Failed to load programs");
 
       const data = await response.json();
       setEnrollments(data.enrollments);
-    } catch (error) {
+    } catch (_error) {
 toast.error("Failed to load enrollments");
     }
   };
@@ -230,7 +226,7 @@ toast.error("Failed to load enrollments");
 
       if (!response.ok) throw new Error("Failed to create program");
 
-      const data = await response.json();
+      const _data = await response.json();
       toast.success("Program created successfully");
       setCreateProgramOpen(false);
       fetchPrograms();
@@ -247,7 +243,7 @@ toast.error("Failed to load enrollments");
         clcApproved: false,
         requiredCourses: [],
       });
-    } catch (error) {
+    } catch (_error) {
 toast.error("Failed to create program");
     }
   };
@@ -308,7 +304,7 @@ toast.error(error.message || "Failed to enroll member");
       toast.success("Enrollment status updated");
       fetchEnrollments(programId);
       fetchPrograms();
-    } catch (error) {
+    } catch (_error) {
 toast.error("Failed to update enrollment");
     }
   };

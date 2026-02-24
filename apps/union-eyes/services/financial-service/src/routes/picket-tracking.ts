@@ -49,7 +49,8 @@ const coordinatorOverrideSchema = z.object({
  */
 router.post('/check-in', async (req: Request, res: Response) => {
   try {
-    const { organizationId, role } = (req as any).user;
+    // eslint-disable-next-line @typescript-eslint/no-explicit-any
+    const { organizationId, _role } = (req as any).user;
 
     const validatedData = checkInSchema.parse(req.body);
 
@@ -108,6 +109,7 @@ router.post('/check-in', async (req: Request, res: Response) => {
  */
 router.post('/check-out', async (req: Request, res: Response) => {
   try {
+    // eslint-disable-next-line @typescript-eslint/no-explicit-any
     const { organizationId } = (req as any).user;
 
     const validatedData = checkOutSchema.parse(req.body);
@@ -154,6 +156,7 @@ router.post('/check-out', async (req: Request, res: Response) => {
  */
 router.get('/active', async (req: Request, res: Response) => {
   try {
+    // eslint-disable-next-line @typescript-eslint/no-explicit-any
     const { organizationId } = (req as any).user;
     const { strikeFundId } = req.query;
 
@@ -185,6 +188,7 @@ router.get('/active', async (req: Request, res: Response) => {
  */
 router.get('/history', async (req: Request, res: Response) => {
   try {
+    // eslint-disable-next-line @typescript-eslint/no-explicit-any
     const { organizationId } = (req as any).user;
     const { strikeFundId, startDate, endDate, memberId } = req.query;
 
@@ -239,6 +243,7 @@ router.get('/history', async (req: Request, res: Response) => {
  */
 router.get('/summary', async (req: Request, res: Response) => {
   try {
+    // eslint-disable-next-line @typescript-eslint/no-explicit-any
     const { organizationId } = (req as any).user;
     const { strikeFundId, startDate, endDate, memberId } = req.query;
 
@@ -364,6 +369,7 @@ router.post('/validate-qr', async (req: Request, res: Response) => {
  */
 router.post('/coordinator-override', async (req: Request, res: Response) => {
   try {
+    // eslint-disable-next-line @typescript-eslint/no-explicit-any
     const { organizationId, role } = (req as any).user;
 
     // Only coordinators and admins can use this endpoint

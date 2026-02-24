@@ -4,7 +4,18 @@ import { NextResponse } from 'next/server';
  * Migrated to withApi() framework
  */
 import type { CarbonValidationRequest, CarbonValidationResponse } from '@/lib/types/compliance-api-types';
-import { withApi, ApiError, z } from '@/lib/api/framework';
+ 
+ 
+ 
+ 
+ 
+ 
+ 
+ 
+ 
+ 
+ 
+import { withApi, z } from '@/lib/api/framework';
 
 const carbonValidateSchema = z.object({
   claimType: z.unknown().optional(),
@@ -19,7 +30,7 @@ export const GET = withApi(
       summary: 'GET validate',
     },
   },
-  async ({ request, userId, organizationId, user, body, query }) => {
+  async ({ request: _request, userId: _userId, organizationId: _organizationId, user: _user, body: _body, query: _query }) => {
 
         return NextResponse.json({
           valid: true,
@@ -73,7 +84,7 @@ export const POST = withApi(
     },
     successStatus: 201,
   },
-  async ({ request, userId, organizationId, user, body, query }) => {
+  async ({ request: _request, userId: _userId, organizationId: _organizationId, user: _user, body, query: _query }) => {
 
         // Validate request body
         const { claimType, dataPoints } = body as CarbonValidationRequest;

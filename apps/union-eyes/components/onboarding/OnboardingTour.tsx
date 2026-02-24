@@ -80,6 +80,7 @@ export function OnboardingTour({
   useEffect(() => {
     // Check if user has seen this tour
     if (skipIfSeen && hasSeenTour(tourId)) {
+      // eslint-disable-next-line react-hooks/set-state-in-effect
       setIsVisible(false);
       return;
     }

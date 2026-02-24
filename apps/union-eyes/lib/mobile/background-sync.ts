@@ -6,7 +6,7 @@
  */
 
 import { logger } from '@/lib/logger';
-import { syncQueue, offlineStorage, STORES } from './offline-storage';
+import { syncQueue } from './offline-storage';
 
 // Sync configuration
 export interface SyncConfig {
@@ -49,6 +49,7 @@ export class BackgroundSyncManager {
     try {
       const registration = await navigator.serviceWorker?.ready;
       if (registration) {
+        // eslint-disable-next-line @typescript-eslint/no-explicit-any
         await (registration as any).sync.register('sync-all');
         logger.info('Background sync registered');
       }
@@ -62,6 +63,7 @@ export class BackgroundSyncManager {
    * Check if Background Sync API is supported
    */
   isSupported(): boolean {
+    // eslint-disable-next-line @typescript-eslint/no-explicit-any
     return 'serviceWorker' in navigator && 'sync' in ((navigator.serviceWorker as any)?.registration || {});
   }
 
@@ -76,6 +78,7 @@ export class BackgroundSyncManager {
       try {
         const registration = await navigator.serviceWorker?.ready;
         if (registration) {
+          // eslint-disable-next-line @typescript-eslint/no-explicit-any
           await (registration as any).sync.register(`sync-${operation.entity}`);
         }
       } catch (error) {

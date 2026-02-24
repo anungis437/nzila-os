@@ -1,5 +1,4 @@
 import { pgTable, uuid, varchar, text, timestamp, integer, jsonb, pgEnum, index, boolean } from "drizzle-orm/pg-core";
-import { sql } from "drizzle-orm";
 
 // Enums for Collective Bargaining Agreements
 export const jurisdictionEnum = pgEnum("cba_jurisdiction", [
@@ -75,6 +74,7 @@ export const collectiveAgreements = pgTable("collective_agreements", {
     schedules?: Array<{ name: string; description: string; pageStart: number }>;
     appendices?: Array<{ name: string; description: string; pageStart: number }>;
     wageGrid?: Array<{ classification: string; step: number; rate: number; effectiveDate: string }>;
+    // eslint-disable-next-line @typescript-eslint/no-explicit-any
     benefitSummary?: { [key: string]: any };
   }>(),
   

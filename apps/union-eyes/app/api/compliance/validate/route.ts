@@ -5,7 +5,6 @@ import { withApiAuth, getCurrentUser } from '@/lib/api-auth-guard';
 import {
   ErrorCode,
   standardErrorResponse,
-  standardSuccessResponse,
 } from '@/lib/api/standardized-responses';
 interface ComplianceCheck {
   id: string;
@@ -87,7 +86,7 @@ async function handler(request: NextRequest) {
             severity: 'critical',
           });
         }
-      } catch (error) {
+      } catch (_error) {
 }
     }
 
@@ -177,7 +176,7 @@ return standardErrorResponse(
 }
 
 
-const complianceValidateSchema = z.object({
+const _complianceValidateSchema = z.object({
   jurisdiction: z.boolean().optional(),
   checksToPerform: z.unknown().optional(),
   data: z.unknown().optional(),

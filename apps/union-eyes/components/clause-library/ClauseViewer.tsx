@@ -38,6 +38,7 @@ import {
 } from "@/components/ui/alert-dialog";
 
 interface ClauseViewerProps {
+  // eslint-disable-next-line @typescript-eslint/no-explicit-any
   clause: any;
   isOwner: boolean;
   onEdit?: () => void;
@@ -306,6 +307,7 @@ export function ClauseViewer({
                   <span>Tags</span>
                 </div>
                 <div className="flex flex-wrap gap-2">
+                  {/* eslint-disable-next-line @typescript-eslint/no-explicit-any */}
                   {clause.tags.map((tag: any) => (
                     <Badge key={tag.id} variant="secondary">
                       {tag.tagName}

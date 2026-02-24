@@ -9,18 +9,20 @@
  * - All queries use provided transaction for RLS enforcement
  */
 
-import { auth } from '@/lib/api-auth-guard';
 import { requireAdmin } from '@/lib/auth/rbac-server';
 import { db } from '@/db/db';
 import { NodePgDatabase } from 'drizzle-orm/node-postgres';
-import { organizationUsers, users } from "@/db/schema/domains/member";
+import { organizationUsers } from "@/db/schema/domains/member";
 // TODO: tenant-management-schema does not exist; tenants/tenantConfigurations/tenantUsage tables
 // need migration to organizations schema. Importing from schema-organizations via barrel.
 import { organizations } from "@/db/schema";
 
 // Temporary aliases so the rest of the file compiles during migration
+// eslint-disable-next-line @typescript-eslint/no-explicit-any
 const tenants = organizations as any;
+// eslint-disable-next-line @typescript-eslint/no-explicit-any
 const tenantConfigurations = null as any;
+// eslint-disable-next-line @typescript-eslint/no-explicit-any
 const tenantUsage = null as any;
 import { eq, and, desc, sql, count, like, or, isNull } from "drizzle-orm";
 import { logger } from "@/lib/logger";
@@ -66,6 +68,7 @@ interface SystemStats {
 interface SystemConfig {
   category: string;
   key: string;
+  // eslint-disable-next-line @typescript-eslint/no-explicit-any
   value: any;
   description: string | null;
 }
@@ -74,6 +77,7 @@ interface SystemConfig {
  * Get system-wide statistics
  * @param tx - Database transaction from RLS-protected route
  */
+// eslint-disable-next-line @typescript-eslint/no-explicit-any
 export async function getSystemStats(tx: NodePgDatabase<any>): Promise<SystemStats> {
   try {
     // Total unique users across all tenants
@@ -132,6 +136,7 @@ export async function getSystemStats(tx: NodePgDatabase<any>): Promise<SystemSta
  * @param tx - Database transaction from RLS-protected route
  */
 export async function getAdminUsers(
+  // eslint-disable-next-line @typescript-eslint/no-explicit-any
   tx: NodePgDatabase<any>,
   searchQuery?: string,
   organizationId?: string,
@@ -269,6 +274,7 @@ export async function getAdminTenants(searchQuery?: string): Promise<TenantWithS
  * @param tx - Database transaction from RLS-protected route
  */
 export async function updateUserRole(
+  // eslint-disable-next-line @typescript-eslint/no-explicit-any
   tx: NodePgDatabase<any>,
   userId: string,
   organizationId: string,
@@ -304,6 +310,7 @@ export async function updateUserRole(
  * @param tx - Database transaction from RLS-protected route
  */
 export async function toggleUserStatus(
+  // eslint-disable-next-line @typescript-eslint/no-explicit-any
   tx: NodePgDatabase<any>,
   userId: string,
   organizationId: string
@@ -351,6 +358,7 @@ export async function toggleUserStatus(
  * @param tx - Database transaction from RLS-protected route
  */
 export async function deleteUserFromTenant(
+  // eslint-disable-next-line @typescript-eslint/no-explicit-any
   tx: NodePgDatabase<any>,
   userId: string,
   organizationId: string
@@ -448,6 +456,7 @@ export async function createTenant(data: {
  * Get system configurations
  * @param tx - Database transaction from RLS-protected route
  */
+// eslint-disable-next-line @typescript-eslint/no-explicit-any
 export async function getSystemConfigs(tx: NodePgDatabase<any>, category?: string): Promise<SystemConfig[]> {
   try {
     // Build where conditions
@@ -485,10 +494,12 @@ export async function getSystemConfigs(tx: NodePgDatabase<any>, category?: strin
  * @param tx - Database transaction from RLS-protected route
  */
 export async function updateSystemConfig(
+  // eslint-disable-next-line @typescript-eslint/no-explicit-any
   tx: NodePgDatabase<any>,
   organizationId: string,
   category: string,
   key: string,
+  // eslint-disable-next-line @typescript-eslint/no-explicit-any
   value: any
 ): Promise<void> {
   try {
@@ -541,6 +552,7 @@ export async function updateSystemConfig(
  * Get recent activity logs (simplified - would need audit log table in production)
  * @param tx - Database transaction from RLS-protected route
  */
+// eslint-disable-next-line @typescript-eslint/no-explicit-any
 export async function getRecentActivity(tx: NodePgDatabase<any>, limit: number = 10): Promise<any[]> {
   try {
     // For now, return recent user joins

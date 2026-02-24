@@ -5,6 +5,15 @@ import { NextResponse } from 'next/server';
  */
 import { logApiAuditEvent } from "@/lib/middleware/api-security";
 import { getFolderTree, listFolders } from "@/lib/services/document-service";
+ 
+ 
+ 
+ 
+ 
+ 
+ 
+ 
+ 
 import { withApi, ApiError, z } from '@/lib/api/framework';
 
 const createFolderSchema = z.object({
@@ -22,7 +31,7 @@ export const GET = withApi(
       summary: 'GET folders',
     },
   },
-  async ({ request, userId, organizationId, user, body, query }) => {
+  async ({ request, userId, organizationId: _organizationId, user: _user, body: _body, query: _query }) => {
 
             const { searchParams } = new URL(request.url);
             const requestOrgId = searchParams.get("organizationId") ?? searchParams.get("orgId") ?? searchParams.get("organization_id") ?? searchParams.get("org_id") ?? searchParams.get("unionId") ?? searchParams.get("union_id") ?? searchParams.get("localId") ?? searchParams.get("local_id");
@@ -79,7 +88,7 @@ export const POST = withApi(
     },
     successStatus: 201,
   },
-  async ({ request, userId, organizationId, user, body, query }) => {
+  async ({ request: _request, userId: _userId, organizationId: _organizationId, user: _user, body, query: _query }) => {
 
         // body is already parsed and validated by withApi
         return body;

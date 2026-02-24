@@ -4,7 +4,7 @@
  * NOTE: auto-resolved from case-studies/[slug]
  * Auto-migrated by scripts/migrate_routes.py
  */
-import { NextRequest, NextResponse } from 'next/server';
+import { NextRequest } from 'next/server';
 import { djangoProxy } from '@/lib/django-proxy';
 
 export const dynamic = 'force-dynamic';

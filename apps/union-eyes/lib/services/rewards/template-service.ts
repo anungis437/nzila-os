@@ -6,8 +6,8 @@
  */
 
 import { db } from '@/db';
-import { awardTemplates, awardHistory, budgetPool, budgetReservations } from '@/db/schema';
-import { eq, and, desc, like, sql, asc, ne } from 'drizzle-orm';
+import { awardTemplates, awardHistory } from '@/db/schema';
+import { eq, and, desc, sql, asc, ne } from 'drizzle-orm';
 import { v4 as uuidv4 } from 'uuid';
 import { logger } from '@/lib/logger';
 
@@ -446,6 +446,7 @@ export async function cloneTemplate(
       return { success: false, error: 'Original template not found' };
     }
 
+    // eslint-disable-next-line @typescript-eslint/no-explicit-any
     const template = original.data as any;
     const cloned = await createAwardTemplate(
       newOrganizationId,
@@ -527,6 +528,7 @@ export async function archiveOldTemplates(organizationId: string, olderThanDays 
         sql`${awardTemplates.createdAt} < ${cutoffDate}`
       ));
 
+    // eslint-disable-next-line @typescript-eslint/no-explicit-any
     return { success: true, archivedCount: (result as any).rowCount };
   } catch (error) {
     logger.error('[Templates] Error archiving old templates', {

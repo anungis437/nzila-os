@@ -11,6 +11,7 @@ import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 import { Badge } from "@/components/ui/badge";
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "@/components/ui/card";
+ 
 import { Alert, AlertDescription } from "@/components/ui/alert";
 
 interface ClauseTag {
@@ -27,7 +28,7 @@ interface ClauseTagManagerProps {
 }
 
 export function ClauseTagManager({
-  clauseId,
+  clauseId: _clauseId,
   tags,
   isOwner,
   onAddTag,

@@ -15,6 +15,8 @@
 
 'use client';
 
+
+export const dynamic = 'force-dynamic';
 import { useState, useEffect, useCallback } from 'react';
 import { useParams, useRouter } from 'next/navigation';
 import { Button } from '@/components/ui/button';
@@ -28,7 +30,7 @@ import { Progress } from '@/components/ui/progress';
 import { useToast } from '@/components/ui/use-toast';
 import { ScrollArea } from '@/components/ui/scroll-area';
 import { Badge } from '@/components/ui/badge';
-import { ChevronLeft, ChevronRight, Send, CheckCircle, Loader2, Star } from 'lucide-react';
+import { Send, CheckCircle, Loader2 } from 'lucide-react';
 
 interface Survey {
   id: string;
@@ -87,7 +89,7 @@ export default function SurveyResponsePage() {
   const [survey, setSurvey] = useState<Survey | null>(null);
   const [questions, setQuestions] = useState<Question[]>([]);
   const [answers, setAnswers] = useState<Map<string, Answer>>(new Map());
-  const [currentPage, setCurrentPage] = useState(0);
+  const [_currentPage, _setCurrentPage] = useState(0);
   const [errors, setErrors] = useState<Map<string, string>>(new Map());
 
   // Respondent info (for anonymous surveys)
@@ -109,7 +111,7 @@ export default function SurveyResponsePage() {
       
       setQuestions(questionsList);
       setIsLoading(false);
-    } catch (error) {
+    } catch (_error) {
 toast({
         title: 'Error',
         description: 'Failed to load survey',
@@ -117,6 +119,7 @@ toast({
       });
       setIsLoading(false);
     }
+  // eslint-disable-next-line react-hooks/exhaustive-deps
   }, [surveyId]);
 
   useEffect(() => {
@@ -224,7 +227,7 @@ toast({
       if (!response.ok) throw new Error('Failed to submit response');
 
       setIsComplete(true);
-    } catch (error) {
+    } catch (_error) {
 toast({
         title: 'Error',
         description: 'Failed to submit response',

@@ -8,7 +8,7 @@
 
 import { useState, useEffect } from "react";
 import { logger } from "@/lib/logger";
-import { Building2, MapPin, Users,  Building, ChevronRight } from "lucide-react";
+import { Building2, MapPin, Users, ChevronRight } from "lucide-react";
 import { Card } from "@/components/ui/card";
 import { Badge } from "@/components/ui/badge";
 
@@ -31,6 +31,7 @@ export function StructureGraph({ organizationId }: StructureGraphProps) {
 
   useEffect(() => {
     fetchData();
+  // eslint-disable-next-line react-hooks/exhaustive-deps
   }, [organizationId]);
 
   const fetchData = async () => {

@@ -322,7 +322,7 @@ export class XeroClient {
 
     if (options.modifiedSince) {
       // Xero uses If-Modified-Since header
-      const modifiedHeader = options.modifiedSince.toUTCString();
+      const _modifiedHeader = options.modifiedSince.toUTCString();
     }
 
     let endpoint = 'Invoices';

@@ -3,6 +3,7 @@
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "@/components/ui/card";
 import { Badge } from "@/components/ui/badge";
 import { Users, TrendingUp, AlertCircle, CheckCircle, Calendar, DollarSign } from "lucide-react";
+ 
 import { useTranslations } from "next-intl";
 
 interface ExecutiveDashboardProps {
@@ -24,8 +25,8 @@ interface ExecutiveMetrics {
   grievanceResolutionRate: number; // percentage
 }
 
-export default function ExecutiveDashboard({ organizationId, userRole }: ExecutiveDashboardProps) {
-  const t = useTranslations();
+export default function ExecutiveDashboard({ organizationId: _organizationId, userRole }: ExecutiveDashboardProps) {
+  const _t = useTranslations();
 
   // Mock data - replace with actual API call
   const metrics: ExecutiveMetrics = {

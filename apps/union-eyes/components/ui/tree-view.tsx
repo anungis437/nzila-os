@@ -34,6 +34,7 @@ export interface TreeNode {
   children?: TreeNode[];
   isExpandable?: boolean;
   isLoading?: boolean;
+  // eslint-disable-next-line @typescript-eslint/no-explicit-any
   metadata?: Record<string, any>;
 }
 
@@ -108,7 +109,7 @@ export function TreeView({
       try {
         const children = await onLoadChildren(node);
         updateNode(node.id, { ...updatedNode, children, isLoading: false });
-      } catch (error) {
+      } catch (_error) {
 updateNode(node.id, { ...updatedNode, isLoading: false });
       }
     }
@@ -187,7 +188,7 @@ function TreeNode({
         {/* Expand/Collapse Button */}
         {isExpandable ? (
           <button
-            className="flex-shrink-0 w-5 h-5 flex items-center justify-center hover:bg-gray-200 rounded transition-colors"
+            className="shrink-0 w-5 h-5 flex items-center justify-center hover:bg-gray-200 rounded transition-colors"
             onClick={(e) => {
               e.stopPropagation();
               onExpand(node);
@@ -216,7 +217,7 @@ function TreeNode({
         )}
 
         {/* Icon */}
-        <div className="flex-shrink-0 text-gray-500">
+        <div className="shrink-0 text-gray-500">
           {node.icon ? (
             node.icon
           ) : isExpandable ? (

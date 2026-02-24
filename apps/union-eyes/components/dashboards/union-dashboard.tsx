@@ -76,6 +76,7 @@ interface QuickLink {
   roles: UserRole[];
 }
 
+// eslint-disable-next-line @typescript-eslint/no-explicit-any
 const getQuickLinks = (t: any): QuickLink[] => [
   {
     title: t('claims.submitNew'),
@@ -152,6 +153,7 @@ interface StatCard {
   roles: UserRole[];
 }
 
+// eslint-disable-next-line @typescript-eslint/no-explicit-any
 const getStats = (t: any): StatCard[] => [
   {
     title: t('dashboard.myActiveCases'),
@@ -240,7 +242,7 @@ export default function UnionDashboard() {
           
           setUserRole(mappedRole);
         }
-      } catch (error) {
+      } catch (_error) {
         // Default to member on error
         setUserRole("member");
       }
@@ -260,8 +262,10 @@ export default function UnionDashboard() {
     onTimePercentage: 0,
   });
   const [criticalDeadlines, setCriticalDeadlines] = useState<CriticalDeadline[]>([]);
+  // eslint-disable-next-line @typescript-eslint/no-explicit-any
   const [notifications, setNotifications] = useState<any[]>([]);
   const [unreadNotificationsCount, setUnreadNotificationsCount] = useState(0);
+  // eslint-disable-next-line @typescript-eslint/no-explicit-any
   const [activities, setActivities] = useState<any[]>([]);
   const [isLoading, setIsLoading] = useState(true);
   const [isLoadingDeadlines, setIsLoadingDeadlines] = useState(true);
@@ -282,7 +286,7 @@ export default function UnionDashboard() {
           const data = await response.json();
           setDashboardStats(data);
         }
-      } catch (error) {
+      } catch (_error) {
         // silently fail
       } finally {
         setIsLoading(false);
@@ -307,7 +311,7 @@ export default function UnionDashboard() {
           setNotifications(data.notifications || []);
           setUnreadNotificationsCount(data.unreadCount || 0);
         }
-      } catch (error) {
+      } catch (_error) {
         // silently fail
       } finally {
         setIsLoadingNotifications(false);
@@ -331,7 +335,7 @@ export default function UnionDashboard() {
           const data = await response.json();
           setActivities(data.activities || []);
         }
-      } catch (error) {
+      } catch (_error) {
         // silently fail
       } finally {
         setIsLoadingActivities(false);
@@ -364,7 +368,7 @@ export default function UnionDashboard() {
           const upcomingData = await upcomingResponse.json();
           setCriticalDeadlines(upcomingData.deadlines || []);
         }
-      } catch (error) {
+      } catch (_error) {
         // silently fail
       } finally {
         setIsLoadingDeadlines(false);

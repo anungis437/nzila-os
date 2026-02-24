@@ -2,8 +2,17 @@
  * GET PATCH /api/signatures/documents/[id]
  * Migrated to withApi() framework
  */
-import { SignatureService, AuditTrailService } from "@/lib/signature/signature-service";
+import { SignatureService } from "@/lib/signature/signature-service";
 
+ 
+ 
+ 
+ 
+ 
+ 
+ 
+ 
+ 
 import { withApi, ApiError, z } from '@/lib/api/framework';
 
 const signaturesDocumentsSchema = z.object({
@@ -19,7 +28,7 @@ export const GET = withApi(
       summary: 'GET [id]',
     },
   },
-  async ({ request, params, userId, organizationId, user, body, query }) => {
+  async ({ request: _request, params, userId: _userId, organizationId: _organizationId, user, body: _body, query: _query }) => {
 
         if (!user || !user.id) {
           throw ApiError.unauthorized('Unauthorized'
@@ -46,7 +55,7 @@ export const PATCH = withApi(
       summary: 'PATCH [id]',
     },
   },
-  async ({ request, params, userId, organizationId, user, body, query }) => {
+  async ({ request: _request, params, userId, organizationId: _organizationId, user: _user, body, query: _query }) => {
 
         if (!userId) {
           throw ApiError.unauthorized('Unauthorized'

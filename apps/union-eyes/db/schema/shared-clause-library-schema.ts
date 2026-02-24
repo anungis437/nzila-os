@@ -65,6 +65,7 @@ export const sharedClauseLibrary = pgTable("shared_clause_library", {
   // Versioning
   version: integer("version").default(1),
   previousVersionId: uuid("previous_version_id")
+    // eslint-disable-next-line @typescript-eslint/no-explicit-any
     .references((): any => sharedClauseLibrary.id),
   
   // Audit

@@ -28,6 +28,7 @@ interface ComplianceCheckerProps {
   organizationId: string;
   jurisdiction: CAJurisdiction;
   checksToPerform?: string[];
+  // eslint-disable-next-line @typescript-eslint/no-explicit-any
   data?: Record<string, any>;
   autoCheck?: boolean;
   onCheckComplete?: (checks: ComplianceCheck[]) => void;
@@ -211,12 +212,12 @@ export function ComplianceChecker({
 const fallbackChecks = await buildFallbackChecks();
       setChecks(fallbackChecks);
       onCheckComplete?.(fallbackChecks);
-    } catch (error) {
+    } catch (_error) {
 try {
         const fallbackChecks = await buildFallbackChecks();
         setChecks(fallbackChecks);
         onCheckComplete?.(fallbackChecks);
-      } catch (fallbackError) {
+      } catch (_fallbackError) {
 }
     } finally {
       setLoading(false);
@@ -312,7 +313,7 @@ try {
                 )}
                 {check.recommendation && (
                   <p className="text-xs font-medium mt-2 flex items-start gap-1">
-                    <SeverityIcon className="h-3 w-3 mt-0.5 flex-shrink-0" />
+                    <SeverityIcon className="h-3 w-3 mt-0.5 shrink-0" />
                     <span>{check.recommendation}</span>
                   </p>
                 )}

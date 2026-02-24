@@ -27,6 +27,7 @@ export interface SMSMessage {
   body: string;
   from?: string; // Sending phone number or shortcode
   mediaUrl?: string[]; // MMS support
+  // eslint-disable-next-line @typescript-eslint/no-explicit-any
   metadata?: Record<string, any>;
 }
 
@@ -207,7 +208,7 @@ export class TwilioAdapter implements SMSProvider {
 
       // Add media URLs for MMS
       if (message.mediaUrl && message.mediaUrl.length > 0) {
-        message.mediaUrl.forEach((url, index) => {
+        message.mediaUrl.forEach((url, _index) => {
           body.append('MediaUrl', url);
         });
       }

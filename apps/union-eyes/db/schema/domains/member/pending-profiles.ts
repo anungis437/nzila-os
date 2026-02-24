@@ -1,5 +1,4 @@
 import { pgTable, text, timestamp, integer, boolean } from "drizzle-orm/pg-core";
-import { sql } from "drizzle-orm";
 import { paymentProviderEnum, membershipEnum } from "./profiles";
 
 export const pendingProfilesTable = pgTable("pending_profiles", {

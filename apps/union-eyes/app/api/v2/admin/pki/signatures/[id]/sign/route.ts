@@ -2,14 +2,10 @@
  * POST /api/admin/pki/signatures/[id]/sign
  * Migrated to withApi() framework
  */
-import { logApiAuditEvent } from "@/lib/middleware/api-security";
 
-import { signDocument } from '@/services/pki/signature-service';
-import { recordSignature } from '@/services/pki/workflow-engine';
-import type { SignDocumentParams } from '@/services/pki/signature-service';
-import { withApi, ApiError, z } from '@/lib/api/framework';
+import { withApi, z } from '@/lib/api/framework';
 
-const adminPkiSignaturesSignSchema = z.object({
+const _adminPkiSignaturesSignSchema = z.object({
   documentType: z.unknown().optional(),
   documentUrl: z.string().url('Invalid URL'),
   userName: z.string().min(1, 'userName is required'),

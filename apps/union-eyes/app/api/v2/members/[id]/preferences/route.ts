@@ -3,7 +3,6 @@
  * → Django: /api/auth_core/member-contact-preferences/?user_id=
  * Migrated to withApi() framework
  */
-import { NextRequest } from 'next/server';
 import { djangoProxy } from '@/lib/django-proxy';
 import { withApi } from '@/lib/api/framework';
 

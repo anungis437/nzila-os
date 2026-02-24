@@ -253,7 +253,7 @@ function TreeNodeComponent({
         <button
           onClick={() => hasChildren && onToggle(node.id)}
           className={cn(
-            "flex-shrink-0 w-5 h-5 flex items-center justify-center rounded hover:bg-muted transition-colors",
+            "shrink-0 w-5 h-5 flex items-center justify-center rounded hover:bg-muted transition-colors",
             !hasChildren && "invisible"
           )}
           aria-label={node.isExpanded ? "Collapse" : "Expand"}
@@ -268,7 +268,7 @@ function TreeNodeComponent({
         </button>
 
         {/* Organization Icon */}
-        <Building2 className="w-4 h-4 text-muted-foreground flex-shrink-0" />
+        <Building2 className="w-4 h-4 text-muted-foreground shrink-0" />
 
         {/* Organization Info */}
         <button
@@ -276,16 +276,16 @@ function TreeNodeComponent({
           className="flex-1 flex items-center gap-2 text-left min-w-0"
         >
           <span className="font-medium truncate">{node.name}</span>
-          <Badge variant="outline" className={cn("text-xs flex-shrink-0", getOrgTypeColor(node.organizationType))}>
+          <Badge variant="outline" className={cn("text-xs shrink-0", getOrgTypeColor(node.organizationType))}>
             {getOrgTypeLabel(node.organizationType)}
           </Badge>
           {node.clcAffiliated && (
-            <Badge variant="outline" className="text-xs flex-shrink-0 bg-blue-50 text-blue-700 border-blue-300">
+            <Badge variant="outline" className="text-xs shrink-0 bg-blue-50 text-blue-700 border-blue-300">
               CLC
             </Badge>
           )}
           {node.memberCount && node.memberCount > 0 && (
-            <div className="flex items-center gap-1 text-xs text-muted-foreground flex-shrink-0">
+            <div className="flex items-center gap-1 text-xs text-muted-foreground shrink-0">
               <Users className="w-3 h-3" />
               <span>{formatMemberCount(node.memberCount)}</span>
             </div>
@@ -294,7 +294,7 @@ function TreeNodeComponent({
 
         {/* Actions */}
         {showActions && (
-          <div className="flex items-center gap-1 opacity-0 group-hover:opacity-100 transition-opacity flex-shrink-0">
+          <div className="flex items-center gap-1 opacity-0 group-hover:opacity-100 transition-opacity shrink-0">
             {onAddChild && (
               <Button
                 size="sm"

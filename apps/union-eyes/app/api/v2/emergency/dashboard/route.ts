@@ -3,7 +3,12 @@
  * Migrated to withApi() framework
  */
 import { getPrivacyRules, generateComplianceReport } from '@/lib/services/provincial-privacy-service';
-import { withApi, ApiError } from '@/lib/api/framework';
+ 
+ 
+ 
+ 
+ 
+import { withApi } from '@/lib/api/framework';
 
 export const GET = withApi(
   {
@@ -13,14 +18,14 @@ export const GET = withApi(
       summary: 'GET dashboard',
     },
   },
-  async ({ request, userId, organizationId, user, body, query }) => {
+  async ({ request, userId: _userId, organizationId: _organizationId, user: _user, body: _body, query: _query }) => {
 
         const searchParams = request.nextUrl.searchParams;
         const province = searchParams.get('province') || 'FEDERAL';
         // Get provincial privacy rules
         const rules = getPrivacyRules(province);
         // Get compliance report
-        const complianceReport = await generateComplianceReport(province);
+        const _complianceReport = await generateComplianceReport(province);
         return { province,
           emergencyStatus: {
             activeEmergencies: 0,

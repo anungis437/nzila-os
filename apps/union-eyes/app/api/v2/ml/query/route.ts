@@ -4,7 +4,10 @@ import { NextResponse } from 'next/server';
  * Migrated to withApi() framework
  */
 import { logApiAuditEvent } from '@/lib/middleware/api-security';
-import { withApi, ApiError, z, RATE_LIMITS } from '@/lib/api/framework';
+ 
+ 
+ 
+import { withApi, z, RATE_LIMITS } from '@/lib/api/framework';
 
 const QuerySchema = z.object({
   question: z.string().min(1).max(500),
@@ -16,7 +19,7 @@ const QuerySchema = z.object({
  */
 function generateFollowUpSuggestions(
   question: string,
-  result: Record<string, unknown>
+  _result: Record<string, unknown>
 ): string[] {
   const suggestions: string[] = [];
   const lowerQuestion = question.toLowerCase();
@@ -75,7 +78,7 @@ export const POST = withApi(
     },
     successStatus: 201,
   },
-  async ({ request, userId, organizationId, user, body, query }) => {
+  async ({ request: _request, userId, organizationId, user: _user, body, query: _query }) => {
 
         const { question, context: queryContext } = QuerySchema.parse(body);
         const organizationScopeId = organizationId || userId || '';
@@ -95,7 +98,7 @@ export const POST = withApi(
           })
         });
         if (!response.ok) {
-          const errorData = await response.json().catch(() => ({}));
+          const _errorData = await response.json().catch(() => ({}));
     throw new Error('AI service query failed');
         }
         const result = await response.json();

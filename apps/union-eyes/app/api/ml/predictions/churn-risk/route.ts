@@ -17,7 +17,6 @@ import { logger } from '@/lib/logger';
 
 import { NextResponse } from 'next/server';
 import { db } from '@/db';
-import { withRLSContext } from '@/lib/db/with-rls-context';
 import { sql } from 'drizzle-orm';
 import { predictChurnRisk } from '@/lib/ml/models/churn-prediction-model';
 
@@ -25,7 +24,6 @@ import { predictChurnRisk } from '@/lib/ml/models/churn-prediction-model';
 import {
   ErrorCode,
   standardErrorResponse,
-  standardSuccessResponse,
 } from '@/lib/api/standardized-responses';
 interface ChurnPrediction {
   memberId: string;

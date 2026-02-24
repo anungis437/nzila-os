@@ -2,13 +2,10 @@
  * GET POST /api/ai/mamba
  * Migrated to withApi() framework
  */
-import { mambaModel } from '@/lib/ai/mamba-service';
-import { logger } from '@/lib/logger';
-import { getAuth } from '@clerk/nextjs/server';
 
-import { withApi, ApiError, z } from '@/lib/api/framework';
+import { withApi, z } from '@/lib/api/framework';
 
-const mambaRequestSchema = z.object({
+const _mambaRequestSchema = z.object({
   input: z.string().min(1).max(100000),
   options: z.object({
     maxTokens: z.number().min(1).max(8192).optional(),
@@ -18,12 +15,14 @@ const mambaRequestSchema = z.object({
   }).optional(),
 });
 
-const longDocumentSchema = z.object({
+const _longDocumentSchema = z.object({
   document: z.string().min(1),
   chunkSize: z.number().min(512).max(8192).default(4096),
   overlap: z.number().min(0).max(1024).default(256),
 });
 
+ 
+ 
 import { GET as v1GET, POST as v1POST } from '@/app/api/ai/mamba/route';
 
 export const GET = withApi(
@@ -34,7 +33,7 @@ export const GET = withApi(
       summary: 'GET mamba',
     },
   },
-  async ({ request, params }) => {
+  async ({ request, params: _params }) => {
     // Delegate to v1 handler while framework migration is in progress
     const response = await v1GET(request);
     return response;
@@ -49,7 +48,7 @@ export const POST = withApi(
       summary: 'POST mamba',
     },
   },
-  async ({ request, params }) => {
+  async ({ request, params: _params }) => {
     // Delegate to v1 handler while framework migration is in progress
     const response = await v1POST(request);
     return response;

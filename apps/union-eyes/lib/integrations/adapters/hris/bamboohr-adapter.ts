@@ -383,7 +383,7 @@ export class BambooHRAdapter extends BaseIntegration {
   // Webhook Support
   // ==========================================================================
 
-  async verifyWebhook(payload: string, signature: string): Promise<boolean> {
+  async verifyWebhook(_payload: string, _signature: string): Promise<boolean> {
     // BambooHR webhooks use HMAC SHA256 signature
     // Implementation would depend on webhook secret configuration
     // For now, return true to allow webhook processing
@@ -404,6 +404,7 @@ export class BambooHRAdapter extends BaseIntegration {
 
     if (eventType.startsWith('employee.')) {
       // Re-sync the specific employee
+      // eslint-disable-next-line @typescript-eslint/no-explicit-any
       const data = event.data as Record<string, any>;
       const employeeId = data?.employee?.id;
       if (employeeId) {

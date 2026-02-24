@@ -1,3 +1,5 @@
+export const dynamic = 'force-dynamic';
+
 import { Metadata } from 'next';
 import { auth } from '@clerk/nextjs/server';
 import { redirect } from 'next/navigation';
@@ -378,6 +380,7 @@ export default async function CLCStaffDashboardPage() {
               // TODO: Implement rejection logic
               logger.info('Rejected', { id });
             },
+          // eslint-disable-next-line @typescript-eslint/no-explicit-any
           } as any}
         />
       </div>
@@ -401,6 +404,7 @@ export default async function CLCStaffDashboardPage() {
             </div>
           ) : (
             <div className="space-y-2">
+              {/* eslint-disable-next-line @typescript-eslint/no-explicit-any */}
               {(metrics.recentActivity as any[]).map((activity: { description: string; timestamp: string; status: string }, index: number) => (
                 <div key={index} className="flex items-center gap-3 p-3 border rounded-lg hover:bg-accent transition-colors">
                   <div className="h-8 w-8 rounded-full bg-primary/10 flex items-center justify-center">

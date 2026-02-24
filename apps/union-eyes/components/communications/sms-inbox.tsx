@@ -28,7 +28,6 @@ import {
   Phone,
   Clock,
   Search,
-  ArrowUpDown,
 } from 'lucide-react';
 import { formatDistanceToNow } from 'date-fns';
 
@@ -54,7 +53,7 @@ export function SmsInbox({ organizationId }: SmsInboxProps) {
   const [replyMessage, setReplyMessage] = useState('');
   const [searchQuery, setSearchQuery] = useState('');
   const [statusFilter, setStatusFilter] = useState<string>('all');
-  const [isLoading, setIsLoading] = useState(true);
+  const [_isLoading, setIsLoading] = useState(true);
   const [isSending, setIsSending] = useState(false);
 
   // Load conversations
@@ -75,7 +74,7 @@ export function SmsInbox({ organizationId }: SmsInboxProps) {
       if (!response.ok) throw new Error('Failed to load conversations');
       const { conversations } = await response.json();
       setConversations(conversations || []);
-    } catch (error) {
+    } catch (_error) {
 toast({
         title: 'Error',
         description: 'Failed to load conversations',
@@ -102,7 +101,7 @@ toast({
           c.id === conversationId ? { ...c, status: 'read', readAt: new Date().toISOString() } : c
         )
       );
-    } catch (error) {
+    } catch (_error) {
 }
   };
 
@@ -136,7 +135,7 @@ toast({
 
       setReplyMessage('');
       loadConversations();
-    } catch (error) {
+    } catch (_error) {
 toast({
         title: 'Error',
         description: 'Failed to send reply',
@@ -166,7 +165,7 @@ toast({
         title: 'Success',
         description: 'Conversation archived',
       });
-    } catch (error) {
+    } catch (_error) {
 toast({
         title: 'Error',
         description: 'Failed to archive conversation',

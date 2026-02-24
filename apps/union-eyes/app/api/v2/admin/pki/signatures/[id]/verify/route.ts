@@ -3,7 +3,12 @@
  * Migrated to withApi() framework
  */
 import { verifySignature, verifyDocumentIntegrity } from '@/services/pki/verification-service';
-import { withApi, ApiError, z } from '@/lib/api/framework';
+ 
+ 
+ 
+ 
+ 
+import { withApi, z } from '@/lib/api/framework';
 
 const adminPkiSignaturesVerifySchema = z.object({
   verifyType: z.unknown().optional(),
@@ -20,7 +25,7 @@ export const POST = withApi(
     },
     successStatus: 201,
   },
-  async ({ request, params, userId, organizationId, user, body, query }) => {
+  async ({ request: _request, params, userId: _userId, organizationId: _organizationId, user: _user, body, query: _query }) => {
 
           const { verifyType, documentContent } = body;
           const signatureOrDocumentId = params.id;

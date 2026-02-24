@@ -13,12 +13,11 @@ import React, { useState } from 'react';
 import { Button } from '@/components/ui/button';
 import { Badge } from '@/components/ui/badge';
 import { Switch } from '@/components/ui/switch';
-import { 
-  Calendar, 
-  Plus, 
-  Settings, 
-  Cloud, 
-  CloudOff, 
+import {
+  Calendar,
+  Plus,
+  Cloud,
+  CloudOff,
   RefreshCw,
   ChevronDown,
   ChevronRight,

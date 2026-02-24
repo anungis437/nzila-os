@@ -1,7 +1,7 @@
 import { z } from 'zod';
 import { NextRequest, NextResponse } from 'next/server';
 import { getPrivacyRules, assessBreachNotification } from '@/lib/services/provincial-privacy-service';
-import type { PIPEDABreachRequest, PIPEDABreachAssessment } from '@/lib/types/compliance-api-types';
+import type { PIPEDABreachAssessment } from '@/lib/types/compliance-api-types';
 import { withApiAuth } from '@/lib/api-auth-guard';
 import { ErrorCode, standardErrorResponse } from '@/lib/api/standardized-responses';
 
@@ -53,14 +53,14 @@ export const POST = withApiAuth(async (request: NextRequest) => {
     }
 
     // Assess breach notification requirements
-    const assessment = await assessBreachNotification(
+    const _assessment = await assessBreachNotification(
       memberId,
       affectedDataTypes,
       new Date(breachDate)
     );
 
     // Get provincial rules
-    const rules = getPrivacyRules(province || 'FEDERAL');
+    const _rules = getPrivacyRules(province || 'FEDERAL');
 
     // Calculate minimum threshold (varies by province)
     const minimumThreshold = province === 'QC' ? 10 : 25; // QC has lower threshold

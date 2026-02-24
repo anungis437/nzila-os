@@ -60,6 +60,7 @@ export function TrendChart({
     margin: { top: 5, right: 30, left: 20, bottom: 5 }
   };
 
+  // eslint-disable-next-line @typescript-eslint/no-explicit-any
   const CustomTooltip = ({ active, payload }: any) => {
     if (active && payload && payload.length) {
       return (
@@ -92,6 +93,7 @@ export function TrendChart({
               stroke="currentColor"
             />
             <YAxis className="text-xs" stroke="currentColor" />
+            {/* eslint-disable-next-line react-hooks/static-components */}
             <Tooltip content={<CustomTooltip />} />
             <Area
               type="monotone"
@@ -115,6 +117,7 @@ export function TrendChart({
               stroke="currentColor"
             />
             <YAxis className="text-xs" stroke="currentColor" />
+            {/* eslint-disable-next-line react-hooks/static-components */}
             <Tooltip content={<CustomTooltip />} />
             <Bar dataKey="value" fill={color} radius={[4, 4, 0, 0]} />
           </BarChart>
@@ -132,6 +135,7 @@ export function TrendChart({
               stroke="currentColor"
             />
             <YAxis className="text-xs" stroke="currentColor" />
+            {/* eslint-disable-next-line react-hooks/static-components */}
             <Tooltip content={<CustomTooltip />} />
             <Line
               type="monotone"

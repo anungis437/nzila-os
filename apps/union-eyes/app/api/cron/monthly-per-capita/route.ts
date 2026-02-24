@@ -6,13 +6,13 @@
  */
 
 import { NextRequest, NextResponse } from 'next/server';
+import { timingSafeEqual } from 'crypto';
 import { processMonthlyPerCapita } from '@/services/clc/per-capita-calculator';
 import { markOverdueRemittances } from '@/services/clc/per-capita-calculator';
 
 import {
   ErrorCode,
   standardErrorResponse,
-  standardSuccessResponse,
 } from '@/lib/api/standardized-responses';
 // =====================================================================================
 // GET - Monthly per-capita calculation
@@ -20,9 +20,13 @@ import {
 
 export async function GET(request: NextRequest) {
   try {
-    // Verify this is a cron request (Vercel sets this header)
+    // Verify this is a cron request (timing-safe comparison)
     const authHeader = request.headers.get('authorization');
-    if (authHeader !== `Bearer ${process.env.CRON_SECRET}`) {
+    const secret = authHeader?.replace('Bearer ', '') ?? '';
+    const expected = process.env.CRON_SECRET ?? '';
+    const secretBuf = Buffer.from(secret);
+    const expectedBuf = Buffer.from(expected);
+    if (secretBuf.length !== expectedBuf.length || !timingSafeEqual(secretBuf, expectedBuf)) {
       return standardErrorResponse(
       ErrorCode.AUTH_REQUIRED,
       'Unauthorized'

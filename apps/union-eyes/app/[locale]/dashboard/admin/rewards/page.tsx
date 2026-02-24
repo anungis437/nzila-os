@@ -1,9 +1,10 @@
+export const dynamic = 'force-dynamic';
+
 import { Metadata } from 'next';
 import { auth } from '@clerk/nextjs/server';
 import { redirect } from 'next/navigation';
 import { getTranslations } from 'next-intl/server';
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from '@/components/ui/card';
-import { Button } from '@/components/ui/button';
 import { 
   Award, 
   Coins, 
@@ -35,7 +36,7 @@ async function checkAdminRole(userId: string, orgId: string): Promise<boolean> {
     });
 
     return member?.role === 'admin';
-  } catch (error) {
+  } catch (_error) {
 return false;
   }
 }
@@ -55,6 +56,7 @@ export default async function AdminRewardsPage() {
   const t = await getTranslations('rewards.admin');
 
   // Fetch summary metrics
+  // eslint-disable-next-line @typescript-eslint/no-explicit-any
   const summary = await getRewardsSummary() as { success: boolean; data?: Record<string, any>; error?: string };
 
   return (

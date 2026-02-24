@@ -106,6 +106,7 @@ export function IncidentReportForm({
   const [attachments, setAttachments] = React.useState<File[]>([]);
 
   const form = useForm<IncidentFormData>({
+    // eslint-disable-next-line @typescript-eslint/no-explicit-any
     resolver: zodResolver(incidentSchema) as any,
     defaultValues: initialData || {
       incidentTime: "",

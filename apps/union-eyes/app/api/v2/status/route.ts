@@ -4,7 +4,14 @@
  */
 import { NextResponse } from 'next/server';
 import { getSystemStatus } from '@/lib/monitoring/status-page';
-import { withApi, ApiError } from '@/lib/api/framework';
+ 
+ 
+ 
+ 
+ 
+ 
+ 
+import { withApi } from '@/lib/api/framework';
 
 export const GET = withApi(
   {
@@ -14,7 +21,7 @@ export const GET = withApi(
       summary: 'GET status',
     },
   },
-  async ({ request, userId, organizationId, user, body, query, params }) => {
+  async ({ request: _request, userId: _userId, organizationId: _organizationId, user: _user, body: _body, query: _query, params: _params }) => {
 
         const status = await getSystemStatus();
         // Return 503 if system is down

@@ -21,7 +21,6 @@ import {
   SyncResult,
   HealthCheckResult,
   WebhookEvent,
-  SyncType,
   ConnectionStatus,
 } from '../../types';
 import { ADPClient, type ADPConfig } from './adp-client';
@@ -382,7 +381,7 @@ export class ADPAdapter extends BaseIntegration {
   // Webhook Support
   // ==========================================================================
 
-  async verifyWebhook(payload: string, signature: string): Promise<boolean> {
+  async verifyWebhook(_payload: string, _signature: string): Promise<boolean> {
     // ADP webhooks require HMAC SHA256 verification
     // Would need webhook secret from configuration
     // For now, return true to allow processing
@@ -403,6 +402,7 @@ export class ADPAdapter extends BaseIntegration {
 
     if (eventType.startsWith('worker.')) {
       // Could implement targeted worker refresh here
+      // eslint-disable-next-line @typescript-eslint/no-explicit-any
       const data = event.data as Record<string, any>;
       const workerId = data?.worker?.associateOID;
       if (workerId) {

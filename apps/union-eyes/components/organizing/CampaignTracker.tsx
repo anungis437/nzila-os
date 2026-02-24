@@ -11,16 +11,15 @@ import { Card, CardContent, CardDescription, CardHeader, CardTitle } from '@/com
 import { Badge } from '@/components/ui/badge';
 import { Button } from '@/components/ui/button';
 import { Progress } from '@/components/ui/progress';
-import { Tabs, TabsContent, TabsList, TabsTrigger } from '@/components/ui/tabs';
-import { 
-  FileCheck, 
-  Users, 
-  Target, 
+import { Tabs, TabsList, TabsTrigger } from '@/components/ui/tabs';
+import {
+  FileCheck,
+  Users,
+  Target,
   Calendar,
-  TrendingUp,
   AlertCircle,
   CheckCircle2,
-  Clock
+  Clock,
 } from 'lucide-react';
 import { format } from 'date-fns';
 
@@ -108,7 +107,7 @@ export function CampaignTracker({ organizationId }: CampaignTrackerProps) {
         })
       );
       setFilings(filingsMap);
-    } catch (error) {
+    } catch (_error) {
 } finally {
       setLoading(false);
     }
@@ -123,7 +122,7 @@ export function CampaignTracker({ organizationId }: CampaignTrackerProps) {
     return Math.round((campaign.cards_signed_count / campaign.card_signing_goal) * 100);
   };
 
-  const getProgressColor = (percentage: number): string => {
+  const _getProgressColor = (percentage: number): string => {
     if (percentage >= 65) return 'bg-green-500';
     if (percentage >= 40) return 'bg-yellow-500';
     return 'bg-red-500';

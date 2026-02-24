@@ -19,14 +19,11 @@ import {
   Search,
   Filter,
   X,
-  Calendar,
-  User,
-  FileText,
   Clock,
   Bookmark,
   TrendingUp,
 } from "lucide-react";
-import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
+import { Card, CardContent } from "@/components/ui/card";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 import { Badge } from "@/components/ui/badge";
@@ -43,7 +40,6 @@ import {
   PopoverTrigger,
 } from "@/components/ui/popover";
 import { Label } from "@/components/ui/label";
-import { Checkbox } from "@/components/ui/checkbox";
 import { cn } from "@/lib/utils";
 
 export interface SearchFilters {
@@ -91,7 +87,7 @@ export function DocumentSearchAdvanced({
 }: DocumentSearchAdvancedProps) {
   const [filters, setFilters] = React.useState<SearchFilters>({ query: "" });
   const [showSuggestions, setShowSuggestions] = React.useState(false);
-  const [saveDialogOpen, setSaveDialogOpen] = React.useState(false);
+  const [_saveDialogOpen, setSaveDialogOpen] = React.useState(false);
   const [searchName, setSearchName] = React.useState("");
 
   const handleSearch = () => {
@@ -104,7 +100,7 @@ export function DocumentSearchAdvanced({
     onSearch(saved.filters);
   };
 
-  const handleSave = () => {
+  const _handleSave = () => {
     if (searchName && onSaveSearch) {
       onSaveSearch(searchName, filters);
       setSaveDialogOpen(false);

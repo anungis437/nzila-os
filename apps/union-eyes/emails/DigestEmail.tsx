@@ -47,6 +47,7 @@ export default function DigestEmail({
           </Heading>
           
           <Text style={text}>
+            {/* eslint-disable-next-line react/no-unescaped-entities */}
             Here's what happened in your Union Claims account:
           </Text>
 

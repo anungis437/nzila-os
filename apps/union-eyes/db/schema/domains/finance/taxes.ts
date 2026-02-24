@@ -1,4 +1,4 @@
-import { pgTable, uuid, text, timestamp, varchar, jsonb, boolean, decimal } from "drizzle-orm/pg-core";
+import { pgTable, uuid, text, timestamp, varchar, boolean, decimal } from "drizzle-orm/pg-core";
 
 /**
  * Strike Fund Tax Compliance Schema

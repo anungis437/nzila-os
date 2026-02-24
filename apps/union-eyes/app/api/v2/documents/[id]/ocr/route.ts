@@ -4,7 +4,12 @@
  */
 import { logApiAuditEvent } from "@/lib/middleware/api-security";
 import { processDocumentOCR } from "@/lib/services/document-service";
-import { withApi, ApiError } from '@/lib/api/framework';
+ 
+ 
+ 
+ 
+ 
+import { withApi } from '@/lib/api/framework';
 
 export const POST = withApi(
   {
@@ -15,7 +20,7 @@ export const POST = withApi(
     },
     successStatus: 201,
   },
-  async ({ request, params, userId, organizationId, user, body, query }) => {
+  async ({ request: _request, params, userId, organizationId: _organizationId, user: _user, body: _body, query: _query }) => {
 
             const result = await processDocumentOCR(params.id) as unknown as Record<string, unknown>;
             logApiAuditEvent({

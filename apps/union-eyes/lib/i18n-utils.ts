@@ -1,5 +1,3 @@
-import { getRequestConfig } from 'next-intl/server';
-import { notFound } from 'next/navigation';
 import { locales, type Locale } from '@/i18n';
 
 /**

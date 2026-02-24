@@ -2,9 +2,16 @@
  * GET POST /api/admin/billing-cycles
  * Migrated to withApi() framework
  */
-import { BillingCycleService, type BillingFrequency } from '@/lib/services/billing-cycle-service';
+import { BillingCycleService } from '@/lib/services/billing-cycle-service';
 import { logger } from '@/lib/logger';
 
+ 
+ 
+ 
+ 
+ 
+ 
+ 
 import { withApi, ApiError, z } from '@/lib/api/framework';
 
 const billingCycleSchema = z.object({
@@ -23,7 +30,7 @@ export const GET = withApi(
       summary: 'GET billing-cycles',
     },
   },
-  async ({ request, userId, organizationId, user, body, query }) => {
+  async ({ request, userId: _userId, organizationId: _organizationId, user, body: _body, query: _query }) => {
 
         if (!user) {
           throw ApiError.unauthorized('Authentication required'
@@ -60,7 +67,7 @@ export const POST = withApi(
     },
     successStatus: 201,
   },
-  async ({ request, userId, organizationId, user, body, query }) => {
+  async ({ request: _request, userId: _userId, organizationId, user, body, query: _query }) => {
 
         if (!user) {
           throw ApiError.unauthorized('Authentication required'

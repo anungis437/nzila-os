@@ -12,15 +12,7 @@ import {
   SelectTrigger,
   SelectValue,
 } from '@/components/ui/select';
-import {
-  Dialog,
-  DialogContent,
-  DialogDescription,
-  DialogFooter,
-  DialogHeader,
-  DialogTitle,
-} from '@/components/ui/dialog';
-import { Search, Plus, Eye, Edit, Copy, Trash2, Layout, FileText } from 'lucide-react';
+import { Search, Plus, Eye, Layout, FileText } from 'lucide-react';
 
 interface Template {
   id: string;
@@ -28,6 +20,7 @@ interface Template {
   description: string;
   category: string;
   thumbnail?: string;
+  // eslint-disable-next-line @typescript-eslint/no-explicit-any
   blocks: any[];
   isDefault: boolean;
 }
@@ -437,7 +430,7 @@ const DEFAULT_TEMPLATES: Template[] = [
 export function TemplateGallery({ onSelectTemplate, onCreateBlank }: TemplateGalleryProps) {
   const [searchQuery, setSearchQuery] = useState('');
   const [selectedCategory, setSelectedCategory] = useState('All');
-  const [templates, setTemplates] = useState<Template[]>(DEFAULT_TEMPLATES);
+  const [templates, _setTemplates] = useState<Template[]>(DEFAULT_TEMPLATES);
   const [filteredTemplates, setFilteredTemplates] = useState<Template[]>(DEFAULT_TEMPLATES);
 
   useEffect(() => {
@@ -457,6 +450,7 @@ export function TemplateGallery({ onSelectTemplate, onCreateBlank }: TemplateGal
       );
     }
 
+    // eslint-disable-next-line react-hooks/set-state-in-effect
     setFilteredTemplates(filtered);
   }, [searchQuery, selectedCategory, templates]);
 
@@ -526,6 +520,7 @@ export function TemplateGallery({ onSelectTemplate, onCreateBlank }: TemplateGal
           >
             <div className="aspect-video bg-linear-to-br from-primary/10 to-primary/5 flex items-center justify-center relative overflow-hidden">
               {template.thumbnail ? (
+                // eslint-disable-next-line @next/next/no-img-element
                 <img
                   src={template.thumbnail}
                   alt={template.name}

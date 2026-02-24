@@ -15,9 +15,9 @@ import {
   strikeFunds, 
   donations, 
   stipendDisbursements,
-  notificationQueue 
+  _notificationQueue 
 } from '../db/schema';
-import { eq, and, gte, lte, sql, desc } from 'drizzle-orm';
+import { eq, and, gte, lte, sql } from 'drizzle-orm';
 import { queueNotification } from './notification-service';
 import { logger } from '../../../lib/logger';
 import { logger } from '@/lib/logger';

@@ -44,6 +44,7 @@ export const duesRates = pgTable('dues_rates', {
   status: text('status').notNull().default('active'), // active, superseded, inactive
   
   // Metadata
+  // eslint-disable-next-line @typescript-eslint/no-explicit-any
   metadata: jsonb('metadata').$type<Record<string, any>>(),
   
   // Audit
@@ -103,6 +104,7 @@ export const memberDuesLedger = pgTable('member_dues_ledger', {
   status: text('status').notNull().default('posted'), // posted, pending, reversed, voided
   
   // Metadata
+  // eslint-disable-next-line @typescript-eslint/no-explicit-any
   metadata: jsonb('metadata').$type<Record<string, any>>(),
   
   // Audit (Immutable - no updates allowed)
@@ -145,6 +147,7 @@ export const memberArrears = pgTable('member_arrears', {
   paymentPlanId: uuid('payment_plan_id'),
   
   // Metadata
+  // eslint-disable-next-line @typescript-eslint/no-explicit-any
   metadata: jsonb('metadata').$type<Record<string, any>>(),
   
   // Audit
@@ -205,6 +208,7 @@ export const employerRemittances = pgTable('employer_remittances', {
   notes: text('notes'),
   
   // Metadata
+  // eslint-disable-next-line @typescript-eslint/no-explicit-any
   metadata: jsonb('metadata').$type<Record<string, any>>(),
   
   // Audit
@@ -255,6 +259,7 @@ export const remittanceLineItems = pgTable('remittance_line_items', {
   ledgerTransactionId: uuid('ledger_transaction_id'), // Link to memberDuesLedger
   
   // Metadata
+  // eslint-disable-next-line @typescript-eslint/no-explicit-any
   metadata: jsonb('metadata').$type<Record<string, any>>(),
   
   // Audit
@@ -286,6 +291,7 @@ export const remittanceExceptions = pgTable('remittance_exceptions', {
   
   // Description
   description: text('description').notNull(),
+  // eslint-disable-next-line @typescript-eslint/no-explicit-any
   details: jsonb('details').$type<Record<string, any>>(),
   
   // Resolution
@@ -300,6 +306,7 @@ export const remittanceExceptions = pgTable('remittance_exceptions', {
   resolutionNotes: text('resolution_notes'),
   
   // Metadata
+  // eslint-disable-next-line @typescript-eslint/no-explicit-any
   metadata: jsonb('metadata').$type<Record<string, any>>(),
   
   // Audit
@@ -345,6 +352,7 @@ export const paymentPlans = pgTable('payment_plans', {
   termsUrl: text('terms_url'),
   
   // Metadata
+  // eslint-disable-next-line @typescript-eslint/no-explicit-any
   metadata: jsonb('metadata').$type<Record<string, any>>(),
   
   // Audit
@@ -386,6 +394,7 @@ export const financialPeriods = pgTable('financial_periods', {
   memberCount: integer('member_count'),
   
   // Metadata
+  // eslint-disable-next-line @typescript-eslint/no-explicit-any
   metadata: jsonb('metadata').$type<Record<string, any>>(),
   
   // Audit

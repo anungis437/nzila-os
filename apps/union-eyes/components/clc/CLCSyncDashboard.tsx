@@ -2,6 +2,7 @@
 
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "@/components/ui/card";
 import { Badge } from "@/components/ui/badge";
+ 
 import { RefreshCw, CheckCircle, XCircle, Clock, AlertTriangle } from "lucide-react";
 
 interface SyncStatus {
@@ -19,7 +20,7 @@ interface CLCSyncDashboardProps {
   organizationId?: string;
 }
 
-export default function CLCSyncDashboard({ organizationId }: CLCSyncDashboardProps) {
+export default function CLCSyncDashboard({ organizationId: _organizationId }: CLCSyncDashboardProps) {
   // Mock data - replace with actual API call
   const syncStatuses: SyncStatus[] = [
     {

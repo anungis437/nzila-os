@@ -1,5 +1,7 @@
 'use client';
 
+
+export const dynamic = 'force-dynamic';
 import React, { useState, useEffect } from 'react';
 import Link from 'next/link';
 import { MobileHeader } from '@/components/mobile/MobileHeader';
@@ -31,6 +33,7 @@ export default function MobileDashboardPage() {
 
   useEffect(() => {
     loadDashboardData();
+  // eslint-disable-next-line react-hooks/exhaustive-deps
   }, []);
 
   const loadDashboardData = async () => {
@@ -287,7 +290,7 @@ function ActivityItem({
           <h4 className="text-sm font-medium text-gray-900">{title}</h4>
           <p className="text-xs text-gray-500 mt-0.5">{description}</p>
         </div>
-        <span className="text-xs text-gray-400 ml-2 flex-shrink-0">{time}</span>
+        <span className="text-xs text-gray-400 ml-2 shrink-0">{time}</span>
       </div>
     </div>
   );

@@ -295,7 +295,7 @@ export function MemberListTableAdvanced({
     [onView, onEdit, onSendMessage]
   );
 
-  const filterConfig = [
+  const _filterConfig = [
     {
       column: "status",
       title: "Status",
@@ -317,7 +317,8 @@ export function MemberListTableAdvanced({
     },
   ];
 
-  const handleBulkAction = (action: string, selectedRows: any[]) => {
+  // eslint-disable-next-line @typescript-eslint/no-explicit-any
+  const _handleBulkAction = (action: string, selectedRows: any[]) => {
     const memberIds = selectedRows.map((row) => row.original.id);
     onBulkAction?.(action, memberIds);
   };

@@ -3,8 +3,12 @@ import { NextResponse } from 'next/server';
  * GET /api/billing/batch-status/[jobId]
  * Migrated to withApi() framework
  */
-import { logApiAuditEvent } from "@/lib/middleware/api-security";
-import { withApi, ApiError } from '@/lib/api/framework';
+ 
+ 
+ 
+ 
+ 
+import { withApi } from '@/lib/api/framework';
 
 export const GET = withApi(
   {
@@ -14,7 +18,7 @@ export const GET = withApi(
       summary: 'GET [jobId]',
     },
   },
-  async ({ request, params, userId, organizationId, user, body, query }) => {
+  async ({ request: _request, params, userId: _userId, organizationId, user: _user, body: _body, query: _query }) => {
 
           const jobId = params.jobId;
           // Query newsletter campaigns to get batch job status

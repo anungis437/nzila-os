@@ -36,7 +36,7 @@ export interface LocationData {
 export async function requestLocationPermission(
   userId: string,
   purpose: string,
-  duration: 'temporary' | 'permanent' = 'temporary'
+  _duration: 'temporary' | 'permanent' = 'temporary'
 ): Promise<{
   consentId: string;
   requiresUserAction: boolean;
@@ -129,7 +129,7 @@ export async function purgeExpiredLocations(): Promise<{
   message: string;
 }> {
   try {
-    const result = await db
+    const _result = await db
       .delete(locationTracking)
       .where(lte(locationTracking.expiresAt, new Date()));
 
@@ -211,6 +211,7 @@ export async function verifyNoBackgroundTracking(): Promise<{
     .catch(() => []);
 
   const hasBackgroundTracking = backgroundRecords.some(
+    // eslint-disable-next-line @typescript-eslint/no-explicit-any
     (record: any) => record.trackingType !== 'foreground_only'
   );
 

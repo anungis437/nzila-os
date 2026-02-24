@@ -9,7 +9,6 @@
 import React, { useState } from 'react';
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from '@/components/ui/card';
 import { Button } from '@/components/ui/button';
-import { Input } from '@/components/ui/input';
 import { Label } from '@/components/ui/label';
 import { Calendar } from '@/components/ui/calendar';
 import { Popover, PopoverContent, PopoverTrigger } from '@/components/ui/popover';
@@ -81,6 +80,7 @@ export function DeadlineCalculator({
       const calculatedResult = {
         ...data.data,
         deadlineDate: new Date(data.data.deadlineDate),
+        // eslint-disable-next-line @typescript-eslint/no-explicit-any
         breakdown: data.data.breakdown?.map((d: any) => ({
           ...d,
           date: new Date(d.date)

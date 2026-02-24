@@ -2,10 +2,8 @@
  * GET POST /api/cron/external-data-sync
  * Migrated to withApi() framework
  */
-import { wageEnrichmentService } from '@/lib/services/external-data/wage-enrichment-service';
-import { logger } from '@/lib/logger';
 
-import { withApi, ApiError } from '@/lib/api/framework';
+import { withApi } from '@/lib/api/framework';
 
 import { GET as v1GET, POST as v1POST } from '@/app/api/cron/external-data-sync/route';
 

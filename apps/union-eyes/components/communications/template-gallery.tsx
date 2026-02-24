@@ -15,11 +15,11 @@
 'use client';
 
 import { useState, useEffect, useCallback } from 'react';
+import { sanitizeHtml } from '@/lib/utils/sanitize';
 import { useRouter } from 'next/navigation';
 import {
   Mail,
   Search,
-  Filter,
   Eye,
   Copy,
   Trash2,
@@ -33,7 +33,6 @@ import { Input } from '@/components/ui/input';
 import { Badge } from '@/components/ui/badge';
 import {
   Card,
-  CardContent,
   CardDescription,
   CardFooter,
   CardHeader,
@@ -62,7 +61,6 @@ import {
 } from '@/components/ui/select';
 import { Skeleton } from '@/components/ui/skeleton';
 import { useToast } from '@/lib/hooks/use-toast';
-import { cn } from '@/lib/utils';
 
 interface NewsletterTemplate {
   id: string;
@@ -71,6 +69,7 @@ interface NewsletterTemplate {
   category: 'general' | 'announcement' | 'event' | 'update' | 'custom';
   thumbnailUrl?: string;
   htmlContent: string;
+  // eslint-disable-next-line @typescript-eslint/no-explicit-any
   jsonStructure?: any;
   variables?: TemplateVariable[];
   isSystem: boolean;
@@ -84,6 +83,7 @@ interface TemplateVariable {
   name: string;
   label: string;
   type: string;
+  // eslint-disable-next-line @typescript-eslint/no-explicit-any
   default?: any;
   required?: boolean;
 }
@@ -123,7 +123,7 @@ export function TemplateGallery({
 
       const data = await response.json();
       setTemplates(data.templates || []);
-    } catch (error) {
+    } catch (_error) {
 toast({
         title: 'Error',
         description: 'Failed to load templates',
@@ -166,7 +166,7 @@ toast({
       });
 
       fetchTemplates();
-    } catch (error) {
+    } catch (_error) {
 toast({
         title: 'Error',
         description: 'Failed to duplicate template',
@@ -195,7 +195,7 @@ toast({
 
       setTemplates((prev) => prev.filter((t) => t.id !== templateId));
       setDeleteConfirm(null);
-    } catch (error) {
+    } catch (_error) {
 toast({
         title: 'Error',
         description: 'Failed to delete template',
@@ -321,6 +321,7 @@ toast({
                 onClick={() => handleSelectTemplate(template)}
               >
                 {template.thumbnailUrl ? (
+                  // eslint-disable-next-line @next/next/no-img-element
                   <img
                     src={template.thumbnailUrl}
                     alt={template.name}
@@ -477,7 +478,7 @@ toast({
                 <div
                   className="prose prose-sm max-w-none"
                   dangerouslySetInnerHTML={{
-                    __html: previewTemplate.htmlContent,
+                    __html: sanitizeHtml(previewTemplate.htmlContent),
                   }}
                 />
               </div>

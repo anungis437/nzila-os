@@ -14,13 +14,13 @@
  */
 
 import { NextRequest, NextResponse } from 'next/server';
+import { timingSafeEqual } from 'crypto';
 import { wageEnrichmentService, type SyncResult } from '@/lib/services/external-data/wage-enrichment-service';
 import { logger } from '@/lib/logger';
 
 import {
   ErrorCode,
   standardErrorResponse,
-  standardSuccessResponse,
 } from '@/lib/api/standardized-responses';
 // Common NOC codes for unionized occupations
 const COMMON_NOC_CODES = [
@@ -52,9 +52,13 @@ const COMMON_NOC_CODES = [
 export async function GET(request: NextRequest) {
   const startTime = Date.now();
   
-  // Verify cron authorization
+  // Verify cron authorization (timing-safe comparison)
   const authHeader = request.headers.get('authorization');
-  if (authHeader !== `Bearer ${process.env.CRON_SECRET}`) {
+  const secret = authHeader?.replace('Bearer ', '') ?? '';
+  const expected = process.env.CRON_SECRET ?? '';
+  const secretBuf = Buffer.from(secret);
+  const expectedBuf = Buffer.from(expected);
+  if (secretBuf.length !== expectedBuf.length || !timingSafeEqual(secretBuf, expectedBuf)) {
     logger.warn('[CRON] Unauthorized external data sync attempt');
     return standardErrorResponse(
       ErrorCode.AUTH_REQUIRED,

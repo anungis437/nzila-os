@@ -22,7 +22,6 @@ import {
   externalLmsLearners,
 } from '@/db/schema/domains/data/lms';
 import { IntegrationType, IntegrationProvider, ConnectionStatus } from '../../types';
-import { eq, and } from 'drizzle-orm';
 
 const PAGE_SIZE = 50; // LinkedIn Learning pagination
 
@@ -86,7 +85,7 @@ export class LinkedInLearningAdapter extends BaseIntegration {
     }
   }
 
-  async verifyWebhook(payload: string, signature: string): Promise<boolean> {
+  async verifyWebhook(_payload: string, _signature: string): Promise<boolean> {
     return true; // Simplified for now
   }
 

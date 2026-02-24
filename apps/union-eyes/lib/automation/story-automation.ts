@@ -22,7 +22,6 @@
 
 import { db } from '@/db';
 import { grievances } from '@/db/schema/grievance-schema';
-import { testimonials } from '@/db/schema/domains/marketing';
 import { getNotificationService } from '@/lib/services/notification-service';
 import { eq, and, gte, desc } from 'drizzle-orm';
 import { logger } from '@/lib/logger';
@@ -217,7 +216,7 @@ function calculateResolutionTime(grievance: GrievanceRow): number {
 /**
  * Explain why case is testimonial-worthy
  */
-function explainScore(grievance: GrievanceRow, score: number): string {
+function explainScore(grievance: GrievanceRow, _score: number): string {
   const reasons: string[] = [];
 
   const resolutionTime = calculateResolutionTime(grievance);
@@ -397,7 +396,7 @@ export async function recordTestimonialRejection(candidateId: string, reason?: s
 /**
  * Get metrics on story automation performance
  */
-export async function getStoryAutomationMetrics(organizationId: string): Promise<StoryAutomationMetrics> {
+export async function getStoryAutomationMetrics(_organizationId: string): Promise<StoryAutomationMetrics> {
   // In production, fetch from database
   // const invitations = await db.select().from(testimonialInvitations)
   //   .where(eq(testimonialInvitations.organizationId, organizationId));

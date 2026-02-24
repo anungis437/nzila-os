@@ -18,7 +18,6 @@ import {
   AlertTriangle,
   X,
   Check,
-  MessageSquare
 } from 'lucide-react';
 import { useToast } from '@/components/ui/use-toast';
 import { cn } from '@/lib/utils';
@@ -29,6 +28,7 @@ interface Insight {
   priority: 'critical' | 'high' | 'medium' | 'low';
   title: string;
   description: string;
+  // eslint-disable-next-line @typescript-eslint/no-explicit-any
   recommendations?: any[];
   status: 'new' | 'acknowledged' | 'in_progress' | 'completed' | 'dismissed';
   actionRequired: boolean;
@@ -119,7 +119,7 @@ export function InsightsPanel({ insights, compact = false }: InsightsPanelProps)
       } else {
         throw new Error(data.error);
       }
-    } catch (error) {
+    } catch (_error) {
       toast({
         title: 'Error',
         description: 'Failed to update insight',
@@ -196,6 +196,7 @@ export function InsightsPanel({ insights, compact = false }: InsightsPanelProps)
                 <div>
                   <h4 className="font-semibold text-sm mb-2">Recommendations</h4>
                   <ul className="space-y-2">
+                    {/* eslint-disable-next-line @typescript-eslint/no-explicit-any */}
                     {insight.recommendations.map((rec: any, idx: number) => (
                       <li key={idx} className="flex items-start gap-2 text-sm">
                         <CheckCircle className="h-4 w-4 mt-0.5 text-green-600" />

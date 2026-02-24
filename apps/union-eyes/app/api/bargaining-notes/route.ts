@@ -1,24 +1,28 @@
-import { logApiAuditEvent } from "@/lib/middleware/api-security";
 /**
  * Bargaining Notes API Routes - Main endpoints
  * GET /api/bargaining-notes - List notes with filtering
  * POST /api/bargaining-notes - Create a new note
  */
 
-import { NextRequest, NextResponse } from "next/server";
-import { 
-  listBargainingNotes, 
+import { NextResponse } from "next/server";
+import {
+  listBargainingNotes,
   createBargainingNote,
   bulkCreateBargainingNotes,
-  searchBargainingNotes,
   getBargainingTimeline,
   getBargainingNotesStatistics,
   getNotesByTags,
-  getSessionTypes
+  getSessionTypes,
 } from "@/lib/services/bargaining-notes-service";
 import { z } from "zod";
-import { getCurrentUser, withAdminAuth, withApiAuth, withMinRole, withRoleAuth } from '@/lib/api-auth-guard';
+import { withRoleAuth } from '@/lib/api-auth-guard';
 
+ 
+ 
+ 
+ 
+ 
+ 
 import {
   ErrorCode,
   standardErrorResponse,
@@ -70,6 +74,7 @@ export const GET = withRoleAuth('member', async (request, context) => {
       }
 
       // Build filters
+      // eslint-disable-next-line @typescript-eslint/no-explicit-any
       const filters: Record<string, any> = {};
       
       if (cbaId) {
@@ -153,7 +158,7 @@ export const POST = withRoleAuth('steward', async (request, context) => {
       );
     }
     
-    const { map, organizationId, sessionDate, sessionType, title, content } = validation.data;
+    const { map: _map, organizationId: _organizationId, sessionDate: _sessionDate, sessionType: _sessionType, title: _title, content: _content } = validation.data;
 
       // Check if bulk create
       if (Array.isArray(body)) {

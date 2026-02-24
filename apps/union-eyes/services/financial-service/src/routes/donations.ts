@@ -5,6 +5,7 @@
 
 import express, { Router, Request, Response } from 'express';
 import { z } from 'zod';
+// eslint-disable-next-line no-restricted-imports -- TODO(platform-migration): migrate to @nzila/ wrapper
 import Stripe from 'stripe';
 import { db } from '../db';
 import { sql } from 'drizzle-orm';
@@ -38,6 +39,7 @@ router.post('/', async (req: Request, res: Response) => {
     const validatedData = createDonationSchema.parse(req.body);
 
     // Verify strike fund exists and is active
+    // eslint-disable-next-line @typescript-eslint/no-explicit-any
     const fundResult: any = await db.execute(sql`
       SELECT id, fund_name, tenant_id, status, current_balance, target_amount
       FROM strike_funds
@@ -79,6 +81,7 @@ router.post('/', async (req: Request, res: Response) => {
     });
 
     // Create pending donation record in database
+    // eslint-disable-next-line @typescript-eslint/no-explicit-any
     const donationResult: any = await db.execute(sql`
       INSERT INTO public_donations (
         tenant_id, strike_fund_id, amount, donor_name, donor_email,
@@ -196,6 +199,7 @@ router.get('/campaigns/:fundId', async (req: Request, res: Response) => {
   try {
     const { fundId } = req.params;
 
+    // eslint-disable-next-line @typescript-eslint/no-explicit-any
     const fundResult: any = await db.execute(sql`
       SELECT 
         sf.id,
@@ -230,6 +234,7 @@ router.get('/campaigns/:fundId', async (req: Request, res: Response) => {
     const fund = rows[0];
 
     // Get recent donations (non-anonymous only)
+    // eslint-disable-next-line @typescript-eslint/no-explicit-any
     const recentDonationsResult: any = await db.execute(sql`
       SELECT 
         donor_name,
@@ -279,6 +284,7 @@ router.get('/:donationId', async (req: Request, res: Response) => {
   try {
     const { donationId } = req.params;
 
+    // eslint-disable-next-line @typescript-eslint/no-explicit-any
     const result: any = await db.execute(sql`
       SELECT 
         pd.id,

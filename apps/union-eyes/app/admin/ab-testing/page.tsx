@@ -6,6 +6,9 @@
  * Manage and monitor A/B tests for marketing optimization
  */
 
+
+export const dynamic = 'force-dynamic';
+
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from '@/components/ui/card';
 import { Badge } from '@/components/ui/badge';
 import { Button } from '@/components/ui/button';
@@ -250,25 +253,25 @@ export default function ABTestingDashboardPage() {
           <CardContent>
             <ul className="space-y-3 text-sm">
               <li className="flex items-start gap-2">
-                <CheckCircle2 className="h-5 w-5 text-green-600 flex-shrink-0 mt-0.5" />
+                <CheckCircle2 className="h-5 w-5 text-green-600 shrink-0 mt-0.5" />
                 <div>
                   <strong>Test one variable at a time</strong> - Isolate what drives the change
                 </div>
               </li>
               <li className="flex items-start gap-2">
-                <CheckCircle2 className="h-5 w-5 text-green-600 flex-shrink-0 mt-0.5" />
+                <CheckCircle2 className="h-5 w-5 text-green-600 shrink-0 mt-0.5" />
                 <div>
                   <strong>Wait for statistical significance</strong> - Don&apos;t stop tests early (aim for 95%+ confidence)
                 </div>
               </li>
               <li className="flex items-start gap-2">
-                <CheckCircle2 className="h-5 w-5 text-green-600 flex-shrink-0 mt-0.5" />
+                <CheckCircle2 className="h-5 w-5 text-green-600 shrink-0 mt-0.5" />
                 <div>
                   <strong>Define success metrics upfront</strong> - Know what conversion means for each test
                 </div>
               </li>
               <li className="flex items-start gap-2">
-                <CheckCircle2 className="h-5 w-5 text-green-600 flex-shrink-0 mt-0.5" />
+                <CheckCircle2 className="h-5 w-5 text-green-600 shrink-0 mt-0.5" />
                 <div>
                   <strong>Document and share learnings</strong> - Help the labor movement learn from your tests
                 </div>

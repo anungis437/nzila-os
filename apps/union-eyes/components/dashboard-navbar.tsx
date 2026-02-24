@@ -3,11 +3,12 @@
 import { Button } from "@/components/ui/button";
 import { UserButton } from "@clerk/nextjs";
 import Link from "next/link";
-import { Menu, X, Bell, Settings, LayoutDashboard, FileText, Vote, BarChart3, Users, MessageSquare, Scale, Library, FileBarChart, Shield, GitCompare, Target, Flag, DollarSign } from "lucide-react";
+import { Menu, X, Bell, Settings, LayoutDashboard, FileText, Vote, BarChart3, Users, Scale, Library, FileBarChart, Shield, GitCompare, Target, Flag, DollarSign } from "lucide-react";
 import { useEffect, useState } from "react";
 import { usePathname } from "next/navigation";
 import { Badge } from "@/components/ui/badge";
 import { SelectProfile } from "@/db/schema/domains/member";
+ 
 import { useLocale } from "next-intl";
 
 interface DashboardNavbarProps {
@@ -15,11 +16,11 @@ interface DashboardNavbarProps {
   onMenuClick?: () => void;
 }
 
-export default function DashboardNavbar({ profile, onMenuClick }: DashboardNavbarProps) {
+export default function DashboardNavbar({ profile, onMenuClick: _onMenuClick }: DashboardNavbarProps) {
   const [mobileMenuOpen, setMobileMenuOpen] = useState(false);
   const pathname = usePathname();
   const locale = useLocale();
-  const [notificationCount, setNotificationCount] = useState(3);
+  const [notificationCount, _setNotificationCount] = useState(3);
   const [isAdmin, setIsAdmin] = useState(false);
   const [isCongressStaff, setIsCongressStaff] = useState(false);
   const [isFederationStaff, setIsFederationStaff] = useState(false);
@@ -46,7 +47,7 @@ export default function DashboardNavbar({ profile, onMenuClick }: DashboardNavba
           setIsOfficer(data.role === 'officer' || data.roles?.includes('officer'));
           setIsSteward(data.role === 'steward' || data.roles?.includes('steward'));
         }
-      } catch (error) {
+      } catch (_error) {
 // Default to showing basic features
         setIsAdmin(false);
       }

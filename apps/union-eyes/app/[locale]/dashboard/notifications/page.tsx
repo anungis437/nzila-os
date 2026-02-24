@@ -1,5 +1,8 @@
-import React from 'react';
 "use client";
+
+
+export const dynamic = 'force-dynamic';
+import React from 'react';
 import Link from 'next/link';
 
 import { useState } from "react";
@@ -18,10 +21,8 @@ import {
   MessageSquare,
   CheckCheck,
   Filter,
-  Archive,
   Trash2,
   Settings,
-  X,
   Info,
   TrendingUp,
 } from "lucide-react";
@@ -519,7 +520,7 @@ export default function NotificationsPage() {
                     <div className="flex gap-4">
                       {/* Icon */}
                       <div
-                        className={`w-12 h-12 rounded-lg flex items-center justify-center flex-shrink-0 ${
+                        className={`w-12 h-12 rounded-lg flex items-center justify-center shrink-0 ${
                           notificationTypeConfig[notification.type].color
                         }`}
                       >
@@ -636,6 +637,7 @@ export default function NotificationsPage() {
                                 deleteNotification(notification.id);
                               }}
                               className="p-1 text-gray-400 hover:text-red-600 transition-colors"
+                              title="Delete notification"
                             >
                               <Trash2 className="w-4 h-4" />
                             </button>
@@ -653,7 +655,7 @@ export default function NotificationsPage() {
         {/* Help Section */}
         <Card className="mt-8 p-6 bg-blue-50/80 backdrop-blur-sm border-blue-200">
           <div className="flex gap-4">
-            <div className="w-10 h-10 bg-blue-100 rounded-lg flex items-center justify-center flex-shrink-0">
+            <div className="w-10 h-10 bg-blue-100 rounded-lg flex items-center justify-center shrink-0">
               <Info className="w-5 h-5 text-blue-600" />
             </div>
             <div>

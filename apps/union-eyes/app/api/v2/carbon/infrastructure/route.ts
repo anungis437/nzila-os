@@ -3,7 +3,12 @@
  * Migrated to withApi() framework
  */
 import type { AzureInfrastructureMonitoring } from '@/lib/types/compliance-api-types';
-import { withApi, ApiError } from '@/lib/api/framework';
+ 
+ 
+ 
+ 
+ 
+import { withApi } from '@/lib/api/framework';
 
 export const GET = withApi(
   {
@@ -13,7 +18,7 @@ export const GET = withApi(
       summary: 'GET infrastructure',
     },
   },
-  async ({ request, userId, organizationId, user, body, query }) => {
+  async ({ request, userId: _userId, organizationId: _organizationId, user: _user, body: _body, query: _query }) => {
 
         const searchParams = request.nextUrl.searchParams;
         const region = searchParams.get('region') || 'all';

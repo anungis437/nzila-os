@@ -3,8 +3,22 @@
  * Migrated to withApi() framework
  */
 import { processMonthlyPerCapita } from '@/services/clc/per-capita-calculator';
+import { timingSafeEqual } from 'crypto';
+ 
+ 
 import { markOverdueRemittances } from '@/services/clc/per-capita-calculator';
 
+ 
+ 
+ 
+ 
+ 
+ 
+ 
+ 
+ 
+ 
+ 
 import { withApi, ApiError } from '@/lib/api/framework';
 
 export const GET = withApi(
@@ -15,11 +29,15 @@ export const GET = withApi(
       summary: 'GET monthly-per-capita',
     },
   },
-  async ({ request, userId, organizationId, user, body, query, params }) => {
+  async ({ request, userId: _userId, organizationId: _organizationId, user: _user, body: _body, query: _query, params: _params }) => {
 
-        // Verify this is a cron request (Vercel sets this header)
+        // Verify this is a cron request (timing-safe comparison)
         const authHeader = request.headers.get('authorization');
-        if (authHeader !== `Bearer ${process.env.CRON_SECRET}`) {
+        const secret = authHeader?.replace('Bearer ', '') ?? '';
+        const expected = process.env.CRON_SECRET ?? '';
+        const secretBuf = Buffer.from(secret);
+        const expectedBuf = Buffer.from(expected);
+        if (secretBuf.length !== expectedBuf.length || !timingSafeEqual(secretBuf, expectedBuf)) {
           throw ApiError.unauthorized('Unauthorized'
         );
         }
@@ -41,7 +59,7 @@ export const POST = withApi(
       summary: 'POST monthly-per-capita',
     },
   },
-  async ({ request, userId, organizationId, user, body, query, params }) => {
+  async ({ request: _request, userId: _userId, organizationId: _organizationId, user: _user, body: _body, query: _query, params: _params }) => {
     // TODO: migrate handler body
     throw ApiError.internal('Route not yet migrated');
   },

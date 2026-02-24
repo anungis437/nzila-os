@@ -4,7 +4,7 @@
  */
 
 import { db, schema } from '../db';
-import { eq, and, lt, sql, isNull } from 'drizzle-orm';
+import { eq, and, sql } from 'drizzle-orm';
 
 export interface ArrearsDetectionConfig {
   organizationId: string;
@@ -132,7 +132,7 @@ export async function calculateLateFees(
 export async function createArrearsCases(
   detectedArrears: DetectedArrears[],
   organizationId: string,
-  createdBy: string
+  _createdBy: string
 ): Promise<string[]> {
   const createdCaseIds: string[] = [];
 
@@ -162,6 +162,7 @@ export async function createArrearsCases(
           transactionIds: arrears.transactionIds,
           escalationLevel: Math.floor(arrears.daysOverdue / 30).toString(),
           updatedAt: new Date(),
+        // eslint-disable-next-line @typescript-eslint/no-explicit-any
         } as any)
         .where(eq(schema.arrearsCases.id, existingCase.id));
 
@@ -187,6 +188,7 @@ export async function createArrearsCases(
           notes: `Auto-generated case: ${arrears.transactionCount} overdue transaction(s), ${arrears.daysOverdue} days overdue`,
           createdAt: new Date(),
           updatedAt: new Date(),
+        // eslint-disable-next-line @typescript-eslint/no-explicit-any
         } as any)
         .returning();
 
@@ -228,6 +230,7 @@ export async function applyLateFees(
             lateFeeAmount: lateFee.toString(),
             totalAmount: newTotal.toString(),
             updatedAt: new Date(),
+          // eslint-disable-next-line @typescript-eslint/no-explicit-any
           } as any)
           .where(eq(schema.duesTransactions.id, transactionId));
 

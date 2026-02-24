@@ -10,11 +10,13 @@
  * - Featured testimonial selection
  */
 
+
+export const dynamic = 'force-dynamic';
+
 import { db } from '@/db';
 import { testimonials } from '@/db/schema/domains/marketing';
 import { desc } from 'drizzle-orm';
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from '@/components/ui/card';
-import { Button } from '@/components/ui/button';
 import { Badge } from '@/components/ui/badge';
 import {
   Select,
@@ -31,7 +33,7 @@ import {
   TableHeader,
   TableRow,
 } from '@/components/ui/table';
-import { CheckCircle, XCircle, Star } from 'lucide-react';
+import { Star } from 'lucide-react';
 import { format } from 'date-fns';
 import TestimonialApprovalActions from '@/components/admin/testimonial-approval-actions';
 
@@ -173,6 +175,7 @@ export default async function AdminTestimonialsPage({
                     {format(new Date(testimonial.createdAt), 'MMM d, yyyy')}
                   </TableCell>
                   <TableCell>
+                    {/* eslint-disable-next-line @typescript-eslint/no-explicit-any */}
                     <TestimonialApprovalActions testimonial={testimonial as any} />
                   </TableCell>
                 </TableRow>

@@ -5,12 +5,12 @@
 
 import { auth } from '@clerk/nextjs/server';
 
-const API_URL = process.env.NEXT_PUBLIC_API_URL || 'http://localhost:8000';
+const _API_URL = process.env.NEXT_PUBLIC_API_URL || 'http://localhost:8000';
 
 /**
  * Get authenticated API client
  */
-async function getApiClient() {
+async function _getApiClient() {
   const { getToken } = await auth();
   const token = await getToken();
   

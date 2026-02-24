@@ -26,9 +26,12 @@
 import { logger } from '@/lib/logger';
 import type { OrganizationId } from '@/types';
 
+// eslint-disable-next-line @typescript-eslint/no-explicit-any
 export type EventHandler<T = any> = (event: Event<T>) => void | Promise<void>;
+// eslint-disable-next-line @typescript-eslint/no-explicit-any
 export type AsyncEventHandler<T = any> = (event: Event<T>) => Promise<void>;
 
+// eslint-disable-next-line @typescript-eslint/no-explicit-any
 export interface Event<T = any> {
   type: string;
   data: T;
@@ -63,6 +66,7 @@ export class EventBus {
   /**
    * Subscribe to an event type
    */
+  // eslint-disable-next-line @typescript-eslint/no-explicit-any
   on<T = any>(
     eventType: string,
     handler: EventHandler<T>
@@ -89,6 +93,7 @@ export class EventBus {
   /**
    * Subscribe to an event type (fires once then unsubscribes)
    */
+  // eslint-disable-next-line @typescript-eslint/no-explicit-any
   once<T = any>(
     eventType: string,
     handler: EventHandler<T>
@@ -115,6 +120,7 @@ export class EventBus {
   /**
    * Emit an event (fire-and-forget)
    */
+  // eslint-disable-next-line @typescript-eslint/no-explicit-any
   emit<T = any>(
     eventType: string,
     data: T,
@@ -174,6 +180,7 @@ export class EventBus {
   /**
    * Emit an event and wait for all handlers to complete
    */
+  // eslint-disable-next-line @typescript-eslint/no-explicit-any
   async emitAndWait<T = any>(
     eventType: string,
     data: T,

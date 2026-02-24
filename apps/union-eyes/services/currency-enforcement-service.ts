@@ -16,7 +16,7 @@ import { logger } from '@/lib/logger';
  * - FX conversions must use Bank of Canada noon rate
  */
 
-const DEFAULT_CURRENCY = 'CAD';
+const _DEFAULT_CURRENCY = 'CAD';
 const T106_THRESHOLD = 1000000; // $1M CAD
 
 export class CurrencyEnforcementService {
@@ -324,6 +324,7 @@ export class CurrencyEnforcementService {
       .set({
         status: 'generated',
         generatedAt: new Date(),
+        // eslint-disable-next-line @typescript-eslint/no-explicit-any
         filingData: t106Form as any,
       })
       .where(eq(t106Filings.taxYear, taxYear));
@@ -353,6 +354,7 @@ export class CurrencyEnforcementService {
 
     return filings.map(filing => {
       const transactionIds = filing.transactionIds as string[] || [];
+      // eslint-disable-next-line @typescript-eslint/no-explicit-any
       const filingData = filing.filingData as any;
       const daysToDue = Math.floor((filing.filingDeadline.getTime() - Date.now()) / (1000 * 60 * 60 * 24));
 

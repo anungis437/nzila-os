@@ -159,7 +159,7 @@ export function ClaimDocumentUpload({
 
       // Update with success
       setFiles((prev) =>
-        prev.map((f, index) =>
+        prev.map((f, _index) =>
           fileIds.includes(f.id)
             ? {
                 ...f,
@@ -285,8 +285,9 @@ function FileItem({
   return (
     <div className="flex items-center gap-3 p-3 border rounded-lg bg-white">
       {/* Icon/Preview */}
-      <div className="flex-shrink-0">
+      <div className="shrink-0">
         {file.preview ? (
+          // eslint-disable-next-line @next/next/no-img-element
           <img
             src={file.preview}
             alt={file.file.name}
@@ -294,6 +295,7 @@ function FileItem({
           />
         ) : (
           <div className="h-12 w-12 flex items-center justify-center bg-gray-100 rounded">
+            {/* eslint-disable-next-line react-hooks/static-components */}
             <Icon className="h-6 w-6 text-gray-400" />
           </div>
         )}
@@ -304,13 +306,13 @@ function FileItem({
         <div className="flex items-center gap-2 mb-1">
           <p className="text-sm font-medium truncate">{file.file.name}</p>
           {file.status === "success" && (
-            <CheckCircle className="h-4 w-4 text-green-600 flex-shrink-0" />
+            <CheckCircle className="h-4 w-4 text-green-600 shrink-0" />
           )}
           {file.status === "error" && (
-            <AlertCircle className="h-4 w-4 text-red-600 flex-shrink-0" />
+            <AlertCircle className="h-4 w-4 text-red-600 shrink-0" />
           )}
           {file.status === "uploading" && (
-            <Loader2 className="h-4 w-4 text-blue-600 animate-spin flex-shrink-0" />
+            <Loader2 className="h-4 w-4 text-blue-600 animate-spin shrink-0" />
           )}
         </div>
 
@@ -330,7 +332,7 @@ function FileItem({
         variant="ghost"
         size="icon"
         onClick={onRemove}
-        className="flex-shrink-0"
+        className="shrink-0"
       >
         <X className="h-4 w-4" />
       </Button>

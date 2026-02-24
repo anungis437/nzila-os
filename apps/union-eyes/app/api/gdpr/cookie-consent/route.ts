@@ -11,7 +11,6 @@ import { CookieConsentManager } from "@/lib/gdpr/consent-manager";
 import {
   ErrorCode,
   standardErrorResponse,
-  standardSuccessResponse,
 } from '@/lib/api/standardized-responses';
 
 const gdprCookieConsentSchema = z.object({

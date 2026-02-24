@@ -20,9 +20,6 @@ import {
   Clock,
   Archive,
   AlertTriangle,
-  TrendingUp,
-  Calendar,
-  BarChart3,
 } from "lucide-react";
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import { Badge } from "@/components/ui/badge";
@@ -36,7 +33,7 @@ import {
   SelectTrigger,
   SelectValue,
 } from "@/components/ui/select";
-import { format, addDays, differenceInDays } from "date-fns";
+import { format, differenceInDays } from "date-fns";
 
 export interface RetentionMetrics {
   totalRecords: number;

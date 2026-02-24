@@ -2,10 +2,9 @@
  * POST /api/emergency/activate
  * Migrated to withApi() framework
  */
-import type { EmergencyActivationRequest, EmergencyActivationResponse } from '@/lib/types/compliance-api-types';
-import { withApi, ApiError, z } from '@/lib/api/framework';
+import { withApi, z } from '@/lib/api/framework';
 
-const emergencyActivationSchema = z.object({
+const _emergencyActivationSchema = z.object({
   memberId: z.string().uuid(),
   emergencyType: z.string().min(1),
   affectedRegions: z.array(z.string().min(1)).min(1),

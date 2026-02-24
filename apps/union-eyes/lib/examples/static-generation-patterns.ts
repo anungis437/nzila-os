@@ -20,8 +20,6 @@
 
 import { NextResponse } from 'next/server';
 import { db } from '@/db/db';
-import { organizations } from '@/db/schema';
-import { publicContent } from '@/db/schema';
 
 // ============================================================================
 // Example 1: Basic Static Page with ISR (Incremental Static Regeneration)
@@ -176,7 +174,7 @@ export async function revalidateOrganization(slug: string, token: string) {
     revalidateTag(`organization-${slug}`, 'default');
     
     return NextResponse.json({ revalidated: true, now: Date.now() });
-  } catch (err) {
+  } catch (_err) {
     return NextResponse.json({ message: 'Error revalidating' }, { status: 500 });
   }
 }

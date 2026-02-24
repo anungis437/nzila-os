@@ -7,22 +7,21 @@
 
 // Only import bullmq in runtime, not during build
 // eslint-disable-next-line @typescript-eslint/no-explicit-any
-let Worker: any, Job: any, IORedis: any;
+let Worker: any, _Job: any, IORedis: any;
 
 if (typeof window === 'undefined' && !process.env.__NEXT_BUILDING) {
   try {
     // eslint-disable-next-line @typescript-eslint/no-require-imports
     const bullmq = require('bullmq');
     Worker = bullmq.Worker;
-    Job = bullmq.Job;
+    _Job = bullmq.Job;
     // eslint-disable-next-line @typescript-eslint/no-require-imports
     IORedis = require('ioredis');
-  } catch (e) {
+  } catch (_e) {
     // Fail silently during build
   }
 }
 
-import { NotificationJobData } from '../job-queue';
 import { addEmailJob } from '../job-queue';
 import { addSmsJob } from '../job-queue';
 import { db } from '@/db/db';
@@ -33,6 +32,7 @@ import { FCMService } from '@/services/fcm-service';
 
 const shouldLogInfo = process.env.NOTIFICATION_WORKER_VERBOSE === 'true';
 
+// eslint-disable-next-line @typescript-eslint/no-explicit-any
 function logWorkerInfo(message: string, context?: Record<string, any>) {
   if (shouldLogInfo) {
     logger.info(message, context);
@@ -123,6 +123,7 @@ async function sendInAppNotification(
   userId: string,
   title: string,
   message: string,
+  // eslint-disable-next-line @typescript-eslint/no-explicit-any
   data?: Record<string, any>,
   organizationId?: string
 ) {
@@ -162,6 +163,7 @@ async function sendInAppNotification(
 /**
  * Process notification job
  */
+// eslint-disable-next-line @typescript-eslint/no-explicit-any
 async function processNotification(job: any) {
   const { userId, title, message, data, channels } = job.data;
 
@@ -179,6 +181,7 @@ async function processNotification(job: any) {
   await job.updateProgress(20);
 
   // Determine which channels to use
+  // eslint-disable-next-line @typescript-eslint/no-explicit-any
   const enabledChannels = channels.filter((channel: any) => {
     switch (channel) {
       case 'email':
@@ -205,6 +208,7 @@ async function processNotification(job: any) {
 
   // Send to each enabled channel
   const results = await Promise.allSettled(
+    // eslint-disable-next-line @typescript-eslint/no-explicit-any
     enabledChannels.map(async (channel: any) => {
       switch (channel) {
         case 'email':
@@ -298,10 +302,13 @@ async function processNotification(job: any) {
 
   // Log to history
   const successfulChannels = results
+    // eslint-disable-next-line @typescript-eslint/no-explicit-any
     .filter((r: any) => r.status === 'fulfilled')
+    // eslint-disable-next-line @typescript-eslint/no-explicit-any
     .map((r: any) => (r as PromiseFulfilledResult<any>).value.channel);
 
   const failedChannels = results
+    // eslint-disable-next-line @typescript-eslint/no-explicit-any
     .filter((r: any) => r.status === 'rejected')
     .map((r, i) => ({
       channel: enabledChannels[i],
@@ -316,11 +323,13 @@ async function processNotification(job: any) {
     template: 'notification',
     status: failedChannels.length === 0 ? 'sent' : 'partial',
     error: failedChannels.length > 0 
+      // eslint-disable-next-line @typescript-eslint/no-explicit-any
       ? `Failed channels: ${failedChannels.map((f: any) => f.channel).join(', ')}`
       : undefined,
     sentAt: new Date(),
     metadata: {
       channels: successfulChannels,
+      // eslint-disable-next-line @typescript-eslint/no-explicit-any
       failedChannels: failedChannels.map((f: any) => f.channel),
     },
   });
@@ -350,6 +359,7 @@ async function getUserEmail(userId: string): Promise<string | null> {
     const user = await clerkClient.users.getUser(userId);
     
     // Get primary email address
+    // eslint-disable-next-line @typescript-eslint/no-explicit-any
     const primaryEmail = user.emailAddresses?.find((email: any) => email.id === user.primaryEmailAddressId);
     
     if (primaryEmail?.emailAddress) {
@@ -375,6 +385,7 @@ async function getUserEmail(userId: string): Promise<string | null> {
 // Create worker
 export const notificationWorker = new Worker(
   'notifications',
+  // eslint-disable-next-line @typescript-eslint/no-explicit-any
   async (job: any) => {
     return await processNotification(job);
   },
@@ -385,14 +396,17 @@ export const notificationWorker = new Worker(
 );
 
 // Event handlers
+// eslint-disable-next-line @typescript-eslint/no-explicit-any
 notificationWorker.on('completed', (job: any) => {
   logWorkerInfo('Notification job completed', { jobId: job.id });
 });
 
+// eslint-disable-next-line @typescript-eslint/no-explicit-any
 notificationWorker.on('failed', (job: any, err: any) => {
   logger.error('Notification job failed', err instanceof Error ? err : new Error(String(err)), { jobId: job?.id });
 });
 
+// eslint-disable-next-line @typescript-eslint/no-explicit-any
 notificationWorker.on('error', (err: any) => {
   logger.error('Notification worker error', err instanceof Error ? err : new Error(String(err)));
 });

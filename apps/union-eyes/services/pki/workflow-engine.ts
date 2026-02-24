@@ -14,9 +14,8 @@
 // =====================================================================================
 
 import { db } from '@/db';
-import { digitalSignatures } from '@/services/financial-service/src/db/schema';
 import { signatureWorkflows } from '@/db/schema/domains/documents';
-import { eq, and, inArray } from 'drizzle-orm';
+import { eq } from 'drizzle-orm';
 import crypto from 'crypto';
 import { logger } from '@/lib/logger';
 
@@ -565,8 +564,8 @@ export function getWorkflowStatus(workflowId: string): {
  */
 export function cancelWorkflow(
   workflowId: string,
-  cancelledBy: string,
-  cancellationReason: string
+  _cancelledBy: string,
+  _cancellationReason: string
 ): void {
   const workflow = workflowStore.get(workflowId);
   if (!workflow) {

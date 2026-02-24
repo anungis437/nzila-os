@@ -37,12 +37,12 @@ import {
   Users,
   MessageSquare,
   Calendar,
-  DollarSign,
   CheckCircle,
 } from 'lucide-react';
 
 interface SmsCampaignBuilderProps {
   organizationId: string;
+  // eslint-disable-next-line @typescript-eslint/no-explicit-any
   onComplete?: (campaign: any) => void;
   onCancel?: () => void;
 }
@@ -79,7 +79,7 @@ export function SmsCampaignBuilder({
 }: SmsCampaignBuilderProps) {
   const { toast } = useToast();
   const [currentStep, setCurrentStep] = useState(1);
-  const [isLoading, setIsLoading] = useState(false);
+  const [_isLoading, setIsLoading] = useState(false);
   const [isSending, setIsSending] = useState(false);
 
   // Campaign data
@@ -88,6 +88,7 @@ export function SmsCampaignBuilder({
   const [selectedTemplateId, setSelectedTemplateId] = useState<string>('');
   const [templates, setTemplates] = useState<Template[]>([]);
   const [recipientCount, setRecipientCount] = useState(0);
+  // eslint-disable-next-line @typescript-eslint/no-explicit-any
   const [recipients, setRecipients] = useState<any[]>([]);
   const [scheduledDate, setScheduledDate] = useState<string>('');
   const [members, setMembers] = useState<Member[]>([]);
@@ -104,7 +105,7 @@ export function SmsCampaignBuilder({
       if (!response.ok) throw new Error('Failed to load templates');
       const { templates } = await response.json();
       setTemplates(templates);
-    } catch (error) {
+    } catch (_error) {
 toast({
         title: 'Error',
         description: 'Failed to load templates',
@@ -124,7 +125,7 @@ toast({
       if (!response.ok) throw new Error('Failed to load members');
       const data = await response.json();
       setMembers((data?.data || []) as Member[]);
-    } catch (error) {
+    } catch (_error) {
 toast({
         title: 'Error',
         description: 'Failed to load members',
@@ -236,7 +237,7 @@ toast({
       // Move to final step
       setCurrentStep(4);
       return campaign;
-    } catch (error) {
+    } catch (_error) {
 toast({
         title: 'Error',
         description: 'Failed to create campaign',
@@ -277,7 +278,7 @@ toast({
       });
 
       onComplete?.(campaign);
-    } catch (error) {
+    } catch (_error) {
 toast({
         title: 'Error',
         description: 'Failed to send campaign',

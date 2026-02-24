@@ -4,6 +4,8 @@
  */
 "use client";
 
+
+export const dynamic = 'force-dynamic';
 import { Card, CardContent, CardDescription, CardTitle } from "@/components/ui/card";
 import { Bell } from "lucide-react";
 

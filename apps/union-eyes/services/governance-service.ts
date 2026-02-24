@@ -12,15 +12,6 @@ import { auth } from '@clerk/nextjs/server';
 // Type imports only - no runtime database access
 import type {
   NewGoldenShare,
-  GoldenShare,
-  NewReservedMatterVote,
-  ReservedMatterVote,
-  NewMissionAudit,
-  MissionAudit,
-  NewGovernanceEvent,
-  GovernanceEvent,
-  NewCouncilElection,
-  CouncilElection,
 } from '@/db/schema/domains/governance';
 
 export class GovernanceService {
@@ -291,7 +282,9 @@ export class GovernanceService {
     electionYear: number;
     electionDate: Date;
     positionsAvailable: number;
+    // eslint-disable-next-line @typescript-eslint/no-explicit-any
     candidates: any[];
+    // eslint-disable-next-line @typescript-eslint/no-explicit-any
     winners: any[];
     totalVotes?: number;
     participationRate?: number;

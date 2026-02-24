@@ -6,8 +6,14 @@ import { NextResponse } from 'next/server';
 import fs from 'fs';
 import path from 'path';
 import yaml from 'js-yaml';
-import { logger } from '@/lib/logger';
 
+ 
+ 
+ 
+ 
+ 
+ 
+ 
 import { withApi, ApiError } from '@/lib/api/framework';
 
 export const GET = withApi(
@@ -18,7 +24,7 @@ export const GET = withApi(
       summary: 'GET openapi',
     },
   },
-  async ({ request, userId, organizationId, user, body, query, params }) => {
+  async ({ request: _request, userId: _userId, organizationId: _organizationId, user: _user, body: _body, query: _query, params: _params }) => {
 
         const openApiPath = path.join(process.cwd(), 'docs', 'api', 'openapi-complete.yaml');
 

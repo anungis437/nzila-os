@@ -13,6 +13,7 @@ import { Button } from "@/components/ui/button";
 import { logger } from "@/lib/logger";
 import { Plus, FileText, Calendar, Users } from "lucide-react";
 import { format } from "date-fns";
+ 
 import Link from "next/link";
 
 interface BargainingNote {
@@ -32,7 +33,7 @@ interface NegotiationSessionNotesProps {
   cbaId?: string;
 }
 
-export function NegotiationSessionNotes({ negotiationId, cbaId }: NegotiationSessionNotesProps) {
+export function NegotiationSessionNotes({ negotiationId: _negotiationId, cbaId }: NegotiationSessionNotesProps) {
   const [notes, setNotes] = useState<BargainingNote[]>([]);
   const [loading, setLoading] = useState(true);
 
@@ -40,6 +41,7 @@ export function NegotiationSessionNotes({ negotiationId, cbaId }: NegotiationSes
     if (cbaId) {
       fetchNotes();
     }
+  // eslint-disable-next-line react-hooks/exhaustive-deps
   }, [cbaId]);
 
   const fetchNotes = async () => {

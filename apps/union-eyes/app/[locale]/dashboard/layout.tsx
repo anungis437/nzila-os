@@ -4,7 +4,6 @@
  * and applies the dashboard-specific styling
  */
 import React, { ReactNode } from "react";
-import { getProfileByUserId } from "@/db/queries/profiles-queries";
 import { auth, currentUser } from "@clerk/nextjs/server";
 import { redirect } from "next/navigation";
 import Sidebar from "@/components/sidebar";
@@ -14,8 +13,6 @@ import PaymentSuccessPopup from "@/components/payment-success-popup";
 import { OrganizationSelector } from "@/components/organization/organization-selector";
 import { OrganizationBreadcrumb } from "@/components/organization/organization-breadcrumb";
 import LanguageSwitcher from "@/components/language-switcher";
-import { cookies } from "next/headers";
-import type { SelectProfile } from "@/db/schema/domains/member";
 import { logger } from "@/lib/logger";
 import { getOrganizationIdForUser } from "@/lib/organization-utils";
 import { getUserRole } from "@/lib/auth/rbac-server";

@@ -26,7 +26,6 @@ import {
   Clock,
   AlertCircle,
   Shield,
-  User,
 } from "lucide-react";
 import {
   Form,
@@ -50,6 +49,7 @@ import {
 import { Checkbox } from "@/components/ui/checkbox";
 import { Alert, AlertDescription } from "@/components/ui/alert";
 import { Progress } from "@/components/ui/progress";
+ 
 import { format } from "date-fns";
 
 const exportRequestSchema = z.object({
@@ -90,7 +90,7 @@ export interface GdprDataExportProps {
 }
 
 export function GdprDataExport({
-  memberId,
+  memberId: _memberId,
   memberName,
   exportHistory,
   onRequestExport,

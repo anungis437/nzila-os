@@ -1,15 +1,13 @@
-import { logApiAuditEvent } from "@/lib/middleware/api-security";
 import { NextRequest, NextResponse } from 'next/server';
-import { db } from '@/db';
 import {
-  initiateRedemption,
   cancelRedemption,
   listUserRedemptions,
 } from '@/lib/services/rewards/redemption-service';
 import { initiateRedemptionSchema } from '@/lib/validation/rewards-schemas';
 import { z } from 'zod';
-import { getCurrentUser, withAdminAuth, withApiAuth, withMinRole, withRoleAuth } from '@/lib/api-auth-guard';
+import { withRoleAuth } from '@/lib/api-auth-guard';
 
+ 
 import {
   ErrorCode,
   standardErrorResponse,
@@ -71,7 +69,7 @@ export const GET = withRoleAuth('member', async (request: NextRequest, context) 
 
 export const POST = withRoleAuth('member', async (request: NextRequest, context) => {
   try {
-    const { userId, organizationId } = context as { userId: string; organizationId: string };
+    const { userId: _userId, organizationId } = context as { userId: string; organizationId: string };
 
     if (!organizationId) {
       return standardErrorResponse(
@@ -82,9 +80,9 @@ export const POST = withRoleAuth('member', async (request: NextRequest, context)
 
     const body = await request.json();
 
-    let validatedData;
+    let _validatedData;
     try {
-      validatedData = initiateRedemptionSchema.parse(body);
+      _validatedData = initiateRedemptionSchema.parse(body);
     } catch (error) {
       if (error instanceof z.ZodError) {
         return standardErrorResponse(

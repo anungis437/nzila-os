@@ -1,11 +1,11 @@
+export const dynamic = 'force-dynamic';
+
 import { Metadata } from 'next';
 import { auth } from '@clerk/nextjs/server';
 import { redirect } from 'next/navigation';
-import { db } from '@/db';
 import { withRLSContext } from '@/lib/db/with-rls-context';
 import { getTranslations } from 'next-intl/server';
 import { Leaderboard } from '@/components/rewards/leaderboard';
-import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card';
 import { Tabs, TabsContent, TabsList, TabsTrigger } from '@/components/ui/tabs';
 import { sql } from 'drizzle-orm';
 import { recognitionAwards, rewardWalletLedger } from '@/db/schema/recognition-rewards-schema';

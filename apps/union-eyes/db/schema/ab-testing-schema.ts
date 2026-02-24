@@ -37,7 +37,9 @@ export const abTests = pgTable(
     currentSampleSize: integer('current_sample_size').notNull().default(0),
     confidence: decimal('confidence', { precision: 5, scale: 2 }).notNull().default('95.00'), // 95% confidence
     winnerId: uuid('winner_id'), // References abTestVariants.id
+    // eslint-disable-next-line @typescript-eslint/no-explicit-any
     segmentCriteria: jsonb('segment_criteria').$type<Record<string, any>>(), // Audience targeting
+    // eslint-disable-next-line @typescript-eslint/no-explicit-any
     metadata: jsonb('metadata').notNull().default({}).$type<Record<string, any>>(),
     createdAt: timestamp('created_at').defaultNow().notNull(),
     updatedAt: timestamp('updated_at').defaultNow().notNull(),
@@ -61,6 +63,7 @@ export const abTestVariants = pgTable(
       .references(() => abTests.id, { onDelete: 'cascade' })
       .notNull(),
     name: text('name').notNull(), // e.g., 'Control', 'Variant A', 'Variant B'
+    // eslint-disable-next-line @typescript-eslint/no-explicit-any
     content: jsonb('content').notNull().$type<Record<string, any>>(), // Test-specific content
     weight: decimal('weight', { precision: 5, scale: 2 }).notNull().default('50.00'), // Allocation percentage
     impressions: integer('impressions').notNull().default(0),
@@ -119,6 +122,7 @@ export const abTestEvents = pgTable(
       .notNull(),
     userId: text('user_id').notNull(),
     eventType: text('event_type').notNull().$type<'impression' | 'conversion'>(),
+    // eslint-disable-next-line @typescript-eslint/no-explicit-any
     metadata: jsonb('metadata').$type<Record<string, any>>(),
     timestamp: timestamp('timestamp').defaultNow().notNull(),
   },

@@ -8,8 +8,7 @@
  * 
  */
 
-import { updateProfile, getProfileByUserId, getProfileByWhopUserId } from "@/db/queries/profiles-queries";
-import { FREE_TIER_CREDITS, CREDIT_RENEWAL_DAYS } from "./constants";
+import { updateProfile, getProfileByWhopUserId } from "@/db/queries/profiles-queries";
 import { extractUserId } from "./user-utils";
 import { revalidateAfterCancellation } from "./path-utils";
 
@@ -19,6 +18,7 @@ import { revalidateAfterCancellation } from "./path-utils";
  * @param data The webhook event data from Whop
  * @param isValid Boolean indicating if membership is becoming valid (true) or invalid (false)
  */
+// eslint-disable-next-line @typescript-eslint/no-explicit-any
 export async function handleMembershipChange(data: any | Record<string, unknown>, isValid: boolean) {
   // We only handle cancellations now
   if (isValid) {
@@ -29,7 +29,7 @@ return;
 return;
   }
   
-  const eventId = data.id || Date.now().toString();
+  const _eventId = data.id || Date.now().toString();
 try {
     // Extract Clerk user ID from metadata
 const clerkUserId = extractUserId(data);
@@ -50,7 +50,7 @@ const existingProfile = await getProfileByWhopUserId(whopUserId);
       await handleMembershipCancellation(cancellationData);
     } else {
 }
-  } catch (error) {
+  } catch (_error) {
 }
 }
 
@@ -61,7 +61,7 @@ const existingProfile = await getProfileByWhopUserId(whopUserId);
  * @param data The webhook event data from Whop
  */
 async function handleMembershipCancellation(data: Record<string, unknown>) {
-  const eventId = data.id || Date.now().toString();
+  const _eventId = data.id || Date.now().toString();
 // Extract the clerk user ID
   const clerkUserId = extractUserId(data);
   if (!clerkUserId) {
@@ -92,7 +92,7 @@ while (retries < maxRetries && !updateSuccess) {
       
       await updatePromise;
 updateSuccess = true;
-    } catch (error: unknown) {
+    } catch (_error: unknown) {
       retries++;
 if (retries < maxRetries) {
         const backoffMs = 1000 * Math.pow(2, retries);
@@ -108,6 +108,6 @@ await new Promise(resolve => setTimeout(resolve, backoffMs));
   // Always trigger revalidation, even if update failed
   try {
     revalidateAfterCancellation();
-} catch (error) {
+} catch (_error) {
 }
 } 

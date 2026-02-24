@@ -29,7 +29,7 @@ export default function CancellationPopup({ profile }: CancellationPopupProps) {
         // Another popup is active, don&apos;t show this one
         return;
       }
-    } catch (error) {
+    } catch (_error) {
 }
     
     // Check if we've already shown this cancellation
@@ -49,7 +49,7 @@ export default function CancellationPopup({ profile }: CancellationPopupProps) {
           // Set this as the active popup
           localStorage.setItem('active_popup', 'cancellation');
           setIsOpen(true);
-        } catch (error) {
+        } catch (_error) {
 }
       }, 800);
       
@@ -67,14 +67,14 @@ export default function CancellationPopup({ profile }: CancellationPopupProps) {
       if (activePopup === 'cancellation') {
         localStorage.removeItem('active_popup');
       }
-    } catch (error) {
+    } catch (_error) {
 }
     
     // Remember that we've shown it
     try {
       const cancelationKey = `cancellation_shown_${profile.userId}`;
       localStorage.setItem(cancelationKey, new Date().toISOString());
-    } catch (error) {
+    } catch (_error) {
 }
   };
 
@@ -167,7 +167,7 @@ export default function CancellationPopup({ profile }: CancellationPopupProps) {
                     key={i}
                     className="flex items-start text-sm text-gray-600"
                   >
-                    <div className="rounded-full bg-purple-100 p-0.5 mr-2 mt-0.5 flex-shrink-0">
+                    <div className="rounded-full bg-purple-100 p-0.5 mr-2 mt-0.5 shrink-0">
                       <Check className="w-3 h-3 text-purple-600" />
                     </div>
                     {item}

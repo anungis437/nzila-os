@@ -22,7 +22,7 @@ import {
   externalCustomers,
   externalAccounts,
 } from '@/db/schema';
-import { eq, and, or, sql, between, desc } from 'drizzle-orm';
+import { eq, and, sql, between, desc } from 'drizzle-orm';
 import type { IntegrationProvider } from '../../types';
 
 // ============================================================================
@@ -439,7 +439,7 @@ export async function mapAccountsToCategories(
 /**
  * Categorize account based on type and subtype
  */
-function categorizeAccount(type: string, subType: string): string {
+function categorizeAccount(type: string, _subType: string): string {
   // Map external account types to internal categories
   const typeMap: Record<string, string> = {
     // QuickBooks types

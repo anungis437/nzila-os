@@ -312,7 +312,7 @@ export class IntegrationFactory {
       .where(and(...conditions));
 
     return configs.map(config => {
-      const metadata = this.registry.getMetadata(config.provider as IntegrationProvider);
+      const _metadata = this.registry.getMetadata(config.provider as IntegrationProvider);
       return {
         organizationId: config.organizationId,
         type: config.type as IntegrationType,

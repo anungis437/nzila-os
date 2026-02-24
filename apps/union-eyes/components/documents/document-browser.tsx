@@ -16,13 +16,6 @@ import { Label } from '@/components/ui/label';
 import { Badge } from '@/components/ui/badge';
 import { Checkbox } from '@/components/ui/checkbox';
 import {
-  Select,
-  SelectContent,
-  SelectItem,
-  SelectTrigger,
-  SelectValue,
-} from '@/components/ui/select';
-import {
   DropdownMenu,
   DropdownMenuContent,
   DropdownMenuItem,
@@ -46,12 +39,10 @@ import {
   Grid3x3,
   List,
   Search,
-  Filter,
   Download,
   Trash2,
   Tag,
   FolderOpen,
-  Upload,
   SortAsc,
   SortDesc,
   ChevronLeft,
@@ -60,13 +51,13 @@ import {
   Edit,
   Share2,
   MoreVertical,
-  Calendar,
   User,
   FileType,
   ZoomIn,
   ZoomOut,
   X,
 } from 'lucide-react';
+ 
 import { format } from 'date-fns';
 
 interface Document {
@@ -86,6 +77,7 @@ interface Document {
   tags: string[];
   folder_path: string | null;
   ocr_text: string | null;
+  // eslint-disable-next-line @typescript-eslint/no-explicit-any
   metadata: any;
 }
 
@@ -125,12 +117,12 @@ const FILE_TYPE_COLORS = {
 };
 
 export function DocumentBrowser({
-  onDocumentSelect,
+  onDocumentSelect: _onDocumentSelect,
   selectionMode = 'none',
   filterByType,
   defaultView = 'grid',
 }: DocumentBrowserProps) {
-  const router = useRouter();
+  const _router = useRouter();
   const searchParams = useSearchParams();
 
   // View state
@@ -150,11 +142,11 @@ export function DocumentBrowser({
   const [dateRange, setDateRange] = useState<{ start: string; end: string } | null>(null);
   const [uploadedByFilter, setUploadedByFilter] = useState<string[]>([]);
   const [tagFilter, setTagFilter] = useState<string[]>([]);
-  const [folderPath, setFolderPath] = useState<string>('');
+  const [folderPath, _setFolderPath] = useState<string>('');
 
   // Pagination state
   const [page, setPage] = useState(1);
-  const [pageSize, setPageSize] = useState(24);
+  const [pageSize, _setPageSize] = useState(24);
   const [totalCount, setTotalCount] = useState(0);
 
   // Sort state
@@ -210,7 +202,7 @@ export function DocumentBrowser({
       const data = await response.json();
       setAvailableTags(data.tags);
       setAvailableUsers(data.users);
-    } catch (err) {
+    } catch (_err) {
 }
   }, []);
 
@@ -245,7 +237,7 @@ export function DocumentBrowser({
   /**
    * Handle select all
    */
-  const handleSelectAll = () => {
+  const _handleSelectAll = () => {
     if (selectedDocuments.size === documents.length) {
       setSelectedDocuments(new Set());
     } else {
@@ -369,6 +361,7 @@ export function DocumentBrowser({
           
           <div className="relative aspect-square mb-3 bg-muted rounded-lg overflow-hidden">
             {document.thumbnail_url ? (
+              // eslint-disable-next-line @next/next/no-img-element
               <img
                 src={document.thumbnail_url}
                 alt={document.title}
@@ -465,8 +458,9 @@ export function DocumentBrowser({
           <Checkbox checked={isSelected} />
         )}
 
-        <div className="w-12 h-12 bg-muted rounded flex items-center justify-center flex-shrink-0">
+        <div className="w-12 h-12 bg-muted rounded flex items-center justify-center shrink-0">
           {document.thumbnail_url ? (
+            // eslint-disable-next-line @next/next/no-img-element
             <img
               src={document.thumbnail_url}
               alt={document.title}
@@ -837,6 +831,7 @@ export function DocumentBrowser({
 
               <TabsContent value="preview" className="overflow-auto max-h-[60vh]">
                 {previewDocument.file_type.match(/image/) ? (
+                  // eslint-disable-next-line @next/next/no-img-element
                   <img
                     src={previewDocument.storage_path}
                     alt={previewDocument.title}

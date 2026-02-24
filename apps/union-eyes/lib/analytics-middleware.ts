@@ -20,6 +20,7 @@ export function withAnalyticsCache<T>(
   ttl: number = 5 * 60 * 1000 // 5 minutes default
 ) {
   return async (req: NextRequest) => {
+    // eslint-disable-next-line @typescript-eslint/no-explicit-any
     const organizationId = (req as any).organizationId;
     if (!organizationId) {
       return NextResponse.json({ error: 'Unauthorized' }, { status: 401 });
@@ -43,7 +44,7 @@ export function withAnalyticsCache<T>(
       );
 
       return NextResponse.json(data);
-    } catch (error) {
+    } catch (_error) {
 return NextResponse.json(
         { error: 'Internal server error' },
         { status: 500 }
@@ -80,6 +81,7 @@ export async function handleDataChange(
 /**
  * Get analytics dashboard summary with caching
  */
+// eslint-disable-next-line @typescript-eslint/no-explicit-any
 export async function getAnalyticsDashboard(organizationId: string): Promise<any> {
   return await withCache(
     organizationId,
@@ -96,20 +98,21 @@ export async function getAnalyticsDashboard(organizationId: string): Promise<any
  * Cache warming utility - pre-populate cache with common queries
  */
 export async function warmAnalyticsCache(organizationId: string): Promise<void> {
-const commonTimeRanges = [7, 30, 90];
+const _commonTimeRanges = [7, 30, 90];
   
   try {
     // Warm up dashboard cache
     await getAnalyticsDashboard(organizationId);
 
     // Can add more cache warming for specific endpoints
-} catch (error) {
+} catch (_error) {
 }
 }
 
 /**
  * Get cache statistics for monitoring
  */
+// eslint-disable-next-line @typescript-eslint/no-explicit-any
 export function getAnalyticsCacheStats(): any {
   return analyticsCache.getStats();
 }

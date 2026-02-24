@@ -3,9 +3,6 @@ import { NextResponse } from "next/server";
 import { DEFAULT_REDIRECT_URL } from "../webhooks/utils/constants";
 import { requireUser } from '@/lib/api-auth-guard';
 import { logger } from '@/lib/logger';
-import {
-  ErrorCode,
-} from '@/lib/api/standardized-responses';
 
 /**
  * API endpoint to create a Whop checkout session with properly structured metadata

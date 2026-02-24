@@ -63,7 +63,7 @@ export class WebhookRouter {
     provider: IntegrationProvider,
     payload: string,
     signature: string,
-    headers: Record<string, string>
+    _headers: Record<string, string>
   ): Promise<{ success: boolean; eventId?: string; error?: string }> {
     const eventId = this.generateEventId(provider, payload);
 

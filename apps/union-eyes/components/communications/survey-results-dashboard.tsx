@@ -16,7 +16,7 @@
 
 import { useState, useEffect, useCallback } from 'react';
 import { Button } from '@/components/ui/button';
-import { Card, CardContent, CardDescription, CardHeader, CardTitle } from '@/components/ui/card';
+import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card';
 import { Badge } from '@/components/ui/badge';
 import { useToast } from '@/components/ui/use-toast';
 import { ScrollArea } from '@/components/ui/scroll-area';
@@ -34,7 +34,6 @@ import {
   CheckCircle,
   Clock,
   Eye,
-  TrendingUp,
   FileText,
   Loader2,
 } from 'lucide-react';
@@ -129,7 +128,7 @@ export function SurveyResultsDashboard({ surveyId, organizationId }: SurveyResul
       const data = await response.json();
       setResults(data);
       setIsLoading(false);
-    } catch (error) {
+    } catch (_error) {
 toast({
         title: 'Error',
         description: 'Failed to load survey results',
@@ -137,6 +136,7 @@ toast({
       });
       setIsLoading(false);
     }
+  // eslint-disable-next-line react-hooks/exhaustive-deps
   }, [surveyId, dateRange, toast]);
 
   useEffect(() => {
@@ -167,7 +167,7 @@ toast({
         title: 'Success',
         description: 'Survey responses exported successfully',
       });
-    } catch (error) {
+    } catch (_error) {
 toast({
         title: 'Error',
         description: 'Failed to export responses',
@@ -202,7 +202,7 @@ toast({
         title: 'Success',
         description: 'Survey responses exported successfully',
       });
-    } catch (error) {
+    } catch (_error) {
 toast({
         title: 'Error',
         description: 'Failed to export responses',

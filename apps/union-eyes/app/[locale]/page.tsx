@@ -2,6 +2,9 @@
  * Locale-prefixed root page
  * Redirects authenticated users to dashboard, unauthenticated to marketing page
  */
+
+export const dynamic = 'force-dynamic';
+
 import { auth } from "@clerk/nextjs/server";
 import { redirect } from "next/navigation";
 

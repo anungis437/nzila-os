@@ -2,11 +2,8 @@
  * POST /api/documents/upload
  * Migrated to withApi() framework
  */
-import { logApiAuditEvent } from "@/lib/middleware/api-security";
-import { createDocument } from "@/lib/services/document-service";
-import { put } from "@vercel/blob";
 
-import { withApi, ApiError, z, RATE_LIMITS } from '@/lib/api/framework';
+import { withApi, z, RATE_LIMITS } from '@/lib/api/framework';
 
 const ALLOWED_MIME_TYPES_LIST = [
   'application/pdf',
@@ -30,7 +27,7 @@ const ALLOWED_MIME_TYPES_LIST = [
 
 const MAX_FILE_SIZE = 50 * 1024 * 1024;
 
-const documentUploadSchema = z.object({
+const _documentUploadSchema = z.object({
   file: z.object({
     name: z.string().min(1, "File name is required"),
     size: z.number().max(MAX_FILE_SIZE, "File size exceeds 50MB limit"),

@@ -104,7 +104,7 @@ export function ContactForm() {
     <form onSubmit={handleSubmit} className="space-y-6">
       {submitStatus === 'error' && (
         <div className="flex items-center gap-2 p-4 bg-red-50 border border-red-200 rounded-lg text-red-700">
-          <AlertCircle className="h-5 w-5 flex-shrink-0" />
+          <AlertCircle className="h-5 w-5 shrink-0" />
           <p>Something went wrong. Please try again or email us directly.</p>
         </div>
       )}

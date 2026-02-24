@@ -12,17 +12,17 @@ import { Badge } from '@/components/ui/badge';
 import { Button } from '@/components/ui/button';
 import { Tabs, TabsContent, TabsList, TabsTrigger } from '@/components/ui/tabs';
 import { Progress } from '@/components/ui/progress';
-import { 
-  BookOpen, 
-  Award, 
+import {
+  BookOpen,
+  Award,
   GraduationCap,
   Calendar,
-  Clock,
   CheckCircle2,
   AlertCircle,
   Download,
-  TrendingUp
+  TrendingUp,
 } from 'lucide-react';
+ 
 import { format } from 'date-fns';
 
 interface Registration {
@@ -81,7 +81,7 @@ const categoryColors: Record<string, string> = {
   labor_law: 'bg-indigo-600',
 };
 
-export function MemberLearningPortal({ organizationId, memberId }: MemberLearningPortalProps) {
+export function MemberLearningPortal({ organizationId: _organizationId, memberId }: MemberLearningPortalProps) {
   const [registrations, setRegistrations] = useState<Registration[]>([]);
   const [completions, setCompletions] = useState<Completion[]>([]);
   const [loading, setLoading] = useState(true);
@@ -104,7 +104,7 @@ export function MemberLearningPortal({ organizationId, memberId }: MemberLearnin
         const compData = await compResponse.json();
         setCompletions(compData.data || []);
       }
-    } catch (error) {
+    } catch (_error) {
 } finally {
       setLoading(false);
     }

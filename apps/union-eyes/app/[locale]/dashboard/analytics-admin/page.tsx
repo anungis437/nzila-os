@@ -6,7 +6,9 @@
  * @dashboard_path /dashboard/analytics-admin
  */
 
-import { Suspense } from 'react';
+
+export const dynamic = 'force-dynamic';
+
 import { auth } from '@clerk/nextjs/server';
 import { redirect } from 'next/navigation';
 import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card';
@@ -136,6 +138,7 @@ export default async function AnalyticsAdminDashboard() {
               </CardHeader>
               <CardContent>
                 <div className="space-y-3">
+                  {/* eslint-disable-next-line @typescript-eslint/no-explicit-any */}
                   {analyticsData.module_usage.map((module: any) => (
                     <div key={module.name} className="space-y-1">
                       <div className="flex items-center justify-between text-sm">

@@ -53,6 +53,7 @@ export function hasRolePermission(
  * });
  * ```
  */
+// eslint-disable-next-line @typescript-eslint/no-explicit-any
 export function withRoleAuth<T = any>(
   requiredRole: MemberRole,
   handler: (
@@ -115,7 +116,7 @@ export function withRoleAuth<T = any>(
 
       // Call the handler with role context
       return await handler(request, roleContext, params);
-    } catch (error) {
+    } catch (_error) {
 return NextResponse.json(
         { success: false, error: "Internal server error" },
         { status: 500 }
@@ -127,6 +128,7 @@ return NextResponse.json(
 /**
  * Middleware variant that allows multiple roles
  */
+// eslint-disable-next-line @typescript-eslint/no-explicit-any
 export function withAnyRole<T = any>(
   allowedRoles: MemberRole[],
   handler: (
@@ -194,7 +196,7 @@ export function withAnyRole<T = any>(
 
       // Call the handler with role context
       return await handler(request, roleContext, params);
-    } catch (error) {
+    } catch (_error) {
 return NextResponse.json(
         { success: false, error: "Internal server error" },
         { status: 500 }

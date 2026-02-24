@@ -17,7 +17,7 @@ import {
   courseSessions,
   // Add other education tables from schema
 } from "@/db/schema";
-import { eq, and, or, desc, asc, sql, inArray, count, gte, lte, like } from "drizzle-orm";
+import { eq, and, or, desc, asc, sql, count, gte, lte, like } from "drizzle-orm";
 import type { SQL } from "drizzle-orm";
 import { logger } from "@/lib/logger";
 
@@ -63,6 +63,7 @@ export interface QuizResult {
   percentage: number;
   passed: boolean;
   completedAt: Date;
+  // eslint-disable-next-line @typescript-eslint/no-explicit-any
   answers: Record<string, any>;
 }
 
@@ -331,7 +332,7 @@ export async function getCourseSessions(
 export async function enrollMember(
   memberId: string,
   courseId: string,
-  sessionId?: string
+  _sessionId?: string
 ): Promise<{ success: boolean; enrollmentId: string }> {
   try {
     // In production, this would insert into an enrollments table
@@ -385,7 +386,7 @@ export async function getMemberCourses(
 export async function updateMemberProgress(
   memberId: string,
   courseId: string,
-  progress: {
+  _progress: {
     completedLessons?: string[];
     currentLesson?: string;
     percentComplete?: number;
@@ -438,7 +439,7 @@ export async function getMemberProgress(
  */
 export async function createQuiz(
   courseId: string,
-  quiz: {
+  _quiz: {
     title: string;
     description?: string;
     questions: QuizQuestion[];
@@ -461,6 +462,7 @@ export async function createQuiz(
 export async function submitQuiz(
   memberId: string,
   quizId: string,
+  // eslint-disable-next-line @typescript-eslint/no-explicit-any
   answers: Record<string, any>
 ): Promise<QuizResult> {
   try {
@@ -596,7 +598,7 @@ function levenshteinDistance(str1: string, str2: string): number {
 /**
  * Helper function to get quiz by ID
  */
-async function getQuizById(quizId: string): Promise<{
+async function getQuizById(_quizId: string): Promise<{
   questions: QuizQuestion[];
   passingScore: number;
 } | null> {

@@ -93,7 +93,7 @@ export class SQLInjectionScanner {
     }
 
     // Check for SQL injection patterns
-    for (const [patternName, pattern] of Object.entries(INJECTION_PATTERNS)) {
+    for (const [_patternName, pattern] of Object.entries(INJECTION_PATTERNS)) {
       if (pattern.test(value)) {
         return true; // Pattern detected
       }

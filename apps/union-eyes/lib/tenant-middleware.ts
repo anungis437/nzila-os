@@ -27,6 +27,7 @@ export interface TenantContext {
  * });
  * ```
  */
+// eslint-disable-next-line @typescript-eslint/no-explicit-any
 export function withTenantAuth<T = any>(
   handler: (
     request: NextRequest,

@@ -147,13 +147,13 @@ class ExperimentManager {
       
       // Determine winner
       const significant = confidence >= 0.95;
-      let winner: 'A' | 'B' | 'tie' = 'tie';
+      let _winner: 'A' | 'B' | 'tie' = 'tie';
       
       if (significant) {
         if (metric.target === 'higher') {
-          winner = meanB > meanA ? 'B' : 'A';
+          _winner = meanB > meanA ? 'B' : 'A';
         } else {
-          winner = meanB < meanA ? 'B' : 'A';
+          _winner = meanB < meanA ? 'B' : 'A';
         }
       }
 

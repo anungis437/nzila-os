@@ -15,19 +15,15 @@ import { useState, useEffect } from "react";
 import { zodResolver } from "@hookform/resolvers/zod";
 import { useForm } from "react-hook-form";
 import { z } from "zod";
+ 
 import {
-  Building2,
   Plus,
   Edit,
   Trash2,
   Search,
   MoreVertical,
   MapPin,
-  Users,
-  Calendar,
-  Globe,
-  Mail,
-  Phone,
+  Phone as _Phone,
 } from "lucide-react";
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "@/components/ui/card";
 import { Button } from "@/components/ui/button";
@@ -134,7 +130,9 @@ export function EmployerManagement({ organizationId, onUpdate }: EmployerManagem
   const [isSubmitting, setIsSubmitting] = useState(false);
   const { toast } = useToast();
 
+  // eslint-disable-next-line @typescript-eslint/no-explicit-any
   const form = useForm<EmployerFormData, any, EmployerFormData>({
+    // eslint-disable-next-line @typescript-eslint/no-explicit-any
     resolver: zodResolver(formSchema) as any,
     defaultValues: {
       name: "",
@@ -164,6 +162,7 @@ export function EmployerManagement({ organizationId, onUpdate }: EmployerManagem
 
   useEffect(() => {
     fetchEmployers();
+  // eslint-disable-next-line react-hooks/exhaustive-deps
   }, [organizationId]);
 
   const fetchEmployers = async () => {
@@ -173,7 +172,7 @@ export function EmployerManagement({ organizationId, onUpdate }: EmployerManagem
       if (!response.ok) throw new Error("Failed to fetch employers");
       const data = await response.json();
       setEmployers(data.data || []);
-    } catch (error) {
+    } catch (_error) {
       toast({
         title: "Error",
         description: "Failed to load employers",
@@ -197,6 +196,7 @@ export function EmployerManagement({ organizationId, onUpdate }: EmployerManagem
       name: employer.name,
       legalName: employer.legalName || "",
       dbaName: "",
+      // eslint-disable-next-line @typescript-eslint/no-explicit-any
       employerType: (employer.employerType as any) || "private",
       status: employer.status,
       businessNumber: employer.businessNumber || "",
@@ -239,7 +239,7 @@ export function EmployerManagement({ organizationId, onUpdate }: EmployerManagem
 
       fetchEmployers();
       onUpdate?.();
-    } catch (error) {
+    } catch (_error) {
       toast({
         title: "Error",
         description: "Failed to delete employer",

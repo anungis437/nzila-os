@@ -2,8 +2,12 @@
  * POST /api/dues/calculate
  * Migrated to withApi() framework
  */
-import { DuesCalculationEngine } from '@/lib/dues-calculation-engine';
-import { withApi, ApiError, z, RATE_LIMITS } from '@/lib/api/framework';
+ 
+ 
+ 
+ 
+ 
+import { withApi, z, RATE_LIMITS } from '@/lib/api/framework';
 
 const calculateDuesSchema = z.object({
   memberId: z.string().uuid('Invalid member ID format'),
@@ -23,7 +27,7 @@ export const POST = withApi(
     },
     successStatus: 201,
   },
-  async ({ request, userId, organizationId, user, body, query }) => {
+  async ({ request, userId: _userId, organizationId: _organizationId, user: _user, body: _body, query: _query }) => {
 
         const rawBody = await request.json();
         return rawBody;

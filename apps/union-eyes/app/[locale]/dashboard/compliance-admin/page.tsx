@@ -6,14 +6,16 @@
  * @dashboard_path /dashboard/compliance-admin
  */
 
-import { Suspense } from 'react';
+
+export const dynamic = 'force-dynamic';
+
 import { auth } from '@clerk/nextjs/server';
 import { redirect } from 'next/navigation';
 import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card';
 import { Tabs, TabsContent, TabsList, TabsTrigger } from '@/components/ui/tabs';
 import { Badge } from '@/components/ui/badge';
 import { requireMinRole } from '@/lib/api-auth-guard';
-import { Shield, FileText, AlertTriangle, CheckCircle2, Clock, Eye } from 'lucide-react';
+import { Shield, AlertTriangle, CheckCircle2, Clock, Eye } from 'lucide-react';
 import { logger } from '@/lib/logger';
 
 // Fetch audit logs from API
@@ -54,6 +56,7 @@ export default async function ComplianceDashboard() {
   
   // Calculate metrics
   const totalEvents = auditLogs.length;
+  // eslint-disable-next-line @typescript-eslint/no-explicit-any
   const highRiskEvents = auditLogs.filter((log: any) => log.risk_level === 'high').length;
   const complianceScore = totalEvents > 0 
     ? (((totalEvents - highRiskEvents) / totalEvents) * 100).toFixed(1)
@@ -215,6 +218,7 @@ export default async function ComplianceDashboard() {
                 <p className="text-sm text-muted-foreground">No audit logs found</p>
               ) : (
                 <div className="space-y-3">
+                  {/* eslint-disable-next-line @typescript-eslint/no-explicit-any */}
                   {auditLogs.map((log: any, index: number) => (
                     <div key={log.id || index} className="flex items-center justify-between border-b pb-3 last:border-0">
                       <div className="space-y-1">

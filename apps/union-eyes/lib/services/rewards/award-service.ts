@@ -7,7 +7,6 @@ import { db } from '@/db';
 import {
   recognitionAwards,
   recognitionAwardTypes,
-  type NewRecognitionAward,
   type RecognitionAward,
 } from '@/db/schema';
 import { eq, and, inArray, desc } from 'drizzle-orm';
@@ -21,6 +20,7 @@ export interface CreateAwardOptions {
   recipientUserId: string;
   issuerUserId?: string;
   reason: string;
+  // eslint-disable-next-line @typescript-eslint/no-explicit-any
   metadataJson?: Record<string, any>;
 }
 
@@ -163,10 +163,12 @@ export async function issueAward(
       throw new Error(`Cannot issue award with status: ${award.status}`);
     }
 
+    // eslint-disable-next-line @typescript-eslint/no-explicit-any
     const awardType = award.awardType as Record<string, any>;
     const creditAmount = awardType.defaultCreditAmount;
 
     // Apply ledger entry (earn credits)
+    // eslint-disable-next-line @typescript-eslint/no-explicit-any
     const ledgerEntry = await applyLedgerEntry(tx as any, {
       orgId: award.orgId,
       userId: award.recipientUserId,
@@ -237,6 +239,7 @@ export async function revokeAward(
       throw new Error(`Cannot revoke award with status: ${award.status}`);
     }
 
+    // eslint-disable-next-line @typescript-eslint/no-explicit-any
     const awardType = award.awardType as Record<string, any>;
     const creditAmount = awardType.defaultCreditAmount;
 

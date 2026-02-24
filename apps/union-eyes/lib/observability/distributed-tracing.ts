@@ -274,6 +274,7 @@ export function trace(spanName?: string) {
     const originalMethod = descriptor.value;
     
     descriptor.value = function (...args: unknown[]) {
+      // eslint-disable-next-line @typescript-eslint/no-explicit-any
       const name = spanName || `${(target as any).constructor.name}.${propertyKey}`;
       const tracing = tracingService;
       

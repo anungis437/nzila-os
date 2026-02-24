@@ -1,5 +1,7 @@
 "use client";
 
+
+export const dynamic = 'force-dynamic';
 import { SignIn, useUser } from "@clerk/nextjs";
 import { dark } from "@clerk/themes";
 import { useTheme } from "next-themes";
@@ -24,7 +26,7 @@ export default function LoginPage() {
   // Don&apos;t render SignIn if already signed in or still loading
   if (!isLoaded || isSignedIn) {
     return (
-      <div className="flex items-center justify-center min-h-[400px]">
+      <div className="flex items-center justify-center min-h-100">
         <Loader2 className="animate-spin h-8 w-8 text-purple-600" />
       </div>
     );

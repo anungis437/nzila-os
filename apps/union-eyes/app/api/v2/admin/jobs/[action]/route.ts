@@ -2,8 +2,12 @@
  * POST /api/admin/jobs/[action]
  * Migrated to withApi() framework
  */
-import { logApiAuditEvent } from "@/lib/middleware/api-security";
 import { pauseQueue, resumeQueue, cleanCompletedJobs } from '@/lib/job-queue';
+ 
+ 
+ 
+ 
+ 
 import { withApi, ApiError, z } from '@/lib/api/framework';
 
 const adminJobsSchema = z.object({
@@ -21,7 +25,7 @@ export const POST = withApi(
     },
     successStatus: 201,
   },
-  async ({ request, params, userId, organizationId, user, body, query }) => {
+  async ({ request: _request, params, userId: _userId, organizationId: _organizationId, user: _user, body, query: _query }) => {
 
           const { action } = params;
           const { queue } = body;

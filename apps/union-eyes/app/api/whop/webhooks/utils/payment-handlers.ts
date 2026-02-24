@@ -11,16 +11,13 @@
  * 
  */
 
-import { getProfileByUserId, updateProfile, getProfileByWhopUserId, getProfileByEmail } from "@/db/queries/profiles-queries";
+import { updateProfile, getProfileByWhopUserId } from "@/db/queries/profiles-queries";
 import { PRO_TIER_CREDITS, CREDIT_RENEWAL_DAYS } from "./constants";
 import { determinePlanType } from "./plan-utils";
 import { extractUserId } from "./user-utils";
 import { revalidateAfterPayment } from "./path-utils";
 import { convertTimestampToDate } from "./plan-utils";
-import { eq } from "drizzle-orm";
-import { withSystemContext } from '@/lib/db/with-rls-context';
-import { profilesTable } from "@/db/schema/domains/member";
-import { isFrictionlessPayment, handleFrictionlessPayment, createOrUpdatePendingProfile } from "./frictionless-payment-handlers";
+import { isFrictionlessPayment, handleFrictionlessPayment } from "./frictionless-payment-handlers";
 
 /**
  * Handle payment success events
@@ -120,7 +117,7 @@ return;
       try {
 await updateProfile(clerkUserId, updateData);
 updateSuccess = true;
-      } catch (error) {
+      } catch (_error) {
         retries++;
 if (retries < maxRetries) {
           // Wait before retrying (exponential backoff)
@@ -136,9 +133,9 @@ await new Promise(resolve => setTimeout(resolve, backoffMs));
     // Revalidate paths to refresh data after payment
     try {
       revalidateAfterPayment();
-} catch (revalidateError) {
+} catch (_revalidateError) {
 }
-} catch (error) {
+} catch (_error) {
 }
 }
 
@@ -146,7 +143,7 @@ await new Promise(resolve => setTimeout(resolve, backoffMs));
  * Helper function to prepare profile update data from webhook data
  * Extracts common fields needed for both authenticated and unauthenticated payments
  */
-function prepareProfileUpdateData(data: Record<string, unknown>) {
+function _prepareProfileUpdateData(data: Record<string, unknown>) {
   // Calculate billing cycle details
   let billingCycleStart = new Date();
   let billingCycleEnd: Date | null = null;
@@ -223,7 +220,7 @@ try {
       await updateProfile(userId, {
         status: "payment_failed"
       });
-} catch (error) {
+} catch (_error) {
 }
     return;
   } 
@@ -238,7 +235,7 @@ await updateProfile(profile.userId, {
         });
 } else {
 }
-    } catch (error) {
+    } catch (_error) {
 }
   } else {
 }

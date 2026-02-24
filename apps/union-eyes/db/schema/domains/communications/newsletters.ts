@@ -158,6 +158,7 @@ export const newsletterListSubscribers = pgTable(
     status: varchar('status', { length: 50 }).default('subscribed'),
     subscribedAt: timestamp('subscribed_at', { withTimezone: true }).defaultNow(),
     unsubscribedAt: timestamp('unsubscribed_at', { withTimezone: true }),
+    // eslint-disable-next-line @typescript-eslint/no-explicit-any
     metadata: jsonb('metadata').$type<Record<string, any>>().default({}),
   }
 );
@@ -202,6 +203,7 @@ export const newsletterCampaigns = pgTable('newsletter_campaigns', {
 
   // Metadata
   tags: varchar('tags', { length: 100 }).array(),
+  // eslint-disable-next-line @typescript-eslint/no-explicit-any
   metadata: jsonb('metadata').$type<Record<string, any>>().default({}),
   createdBy: text('created_by').references(() => profiles.userId, {
     onDelete: 'set null',
@@ -230,6 +232,7 @@ export const newsletterRecipients = pgTable('newsletter_recipients', {
   bounceType: varchar('bounce_type', { length: 50 }),
   bounceReason: text('bounce_reason'),
   errorMessage: text('error_message'),
+  // eslint-disable-next-line @typescript-eslint/no-explicit-any
   metadata: jsonb('metadata').$type<Record<string, any>>().default({}),
   createdAt: timestamp('created_at', { withTimezone: true }).defaultNow(),
 });
@@ -388,6 +391,7 @@ export interface TemplateVariable {
   name: string;
   label: string;
   type: 'text' | 'number' | 'date' | 'boolean' | 'image' | 'url';
+  // eslint-disable-next-line @typescript-eslint/no-explicit-any
   default?: any;
   required?: boolean;
   description?: string;
@@ -399,6 +403,7 @@ export interface ListFilterCriteria {
   tags?: string[];
   joinedAfter?: string;
   joinedBefore?: string;
+  // eslint-disable-next-line @typescript-eslint/no-explicit-any
   customFields?: Record<string, any>;
 }
 

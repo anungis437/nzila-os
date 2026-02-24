@@ -9,7 +9,6 @@
  */
 
 import { createHmac, randomBytes, pbkdf2Sync, createVerify, createPublicKey } from 'crypto';
-import { db } from '@/db/db';
 import { logger } from '@/lib/logger';
 
 interface VoteReceipt {
@@ -234,7 +233,7 @@ export function verifyVoteReceipt(
   }
 
   // Verify vote signature still valid
-  const voteSignature: VoteSignature = {
+  const _voteSignature: VoteSignature = {
     voteHash: receipt.voteHash,
     signature: receipt.signature,
     nonce: '', // nonce is not stored, cannot re-verify with time window

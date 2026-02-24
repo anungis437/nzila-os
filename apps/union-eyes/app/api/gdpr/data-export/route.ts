@@ -190,7 +190,18 @@ export const GET = withApiAuth(async (request: NextRequest) => {
     }
 
     const reportsDir = process.env.REPORTS_DIR || "./reports";
-    const filePath = path.join(reportsDir, fileName);
+    // Sanitize fileName to prevent path traversal
+    const sanitizedFileName = path.basename(fileName);
+    const filePath = path.join(reportsDir, sanitizedFileName);
+    // Verify the resolved path stays within the reports directory
+    const resolvedReportsDir = path.resolve(reportsDir);
+    const resolvedFilePath = path.resolve(filePath);
+    if (!resolvedFilePath.startsWith(resolvedReportsDir + path.sep)) {
+      return standardErrorResponse(
+        ErrorCode.VALIDATION_ERROR,
+        'Invalid file path'
+      );
+    }
 
     const stat = await fs.promises.stat(filePath).catch(() => null);
     if (!stat) {

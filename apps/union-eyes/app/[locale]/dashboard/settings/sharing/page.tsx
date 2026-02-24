@@ -1,5 +1,7 @@
 "use client";
 
+
+export const dynamic = 'force-dynamic';
 import { useState, useEffect } from "react";
 import { useParams } from "next/navigation";
 import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
@@ -10,6 +12,7 @@ import AccessLogViewer from "@/components/sharing/AccessLogViewer";
 export default function SharingSettingsPage() {
   const params = useParams();
   const organizationId = params?.id as string;
+  // eslint-disable-next-line @typescript-eslint/no-explicit-any
   const [settings, setSettings] = useState<any>(null);
   const [isLoading, setIsLoading] = useState(true);
 
@@ -20,7 +23,7 @@ export default function SharingSettingsPage() {
         const data = await response.json();
         setSettings(data);
       }
-    } catch (error) {
+    } catch (_error) {
 } finally {
       setIsLoading(false);
     }
@@ -33,6 +36,7 @@ export default function SharingSettingsPage() {
     // eslint-disable-next-line react-hooks/exhaustive-deps
   }, [organizationId]);
 
+  // eslint-disable-next-line @typescript-eslint/no-explicit-any
   const handleSave = (updatedSettings: any) => {
     setSettings(updatedSettings);
   };

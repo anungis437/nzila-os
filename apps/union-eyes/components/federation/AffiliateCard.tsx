@@ -105,7 +105,8 @@ export function AffiliateCard({
         <div className="flex items-start justify-between">
           <div className="flex items-start gap-3 flex-1">
             {affiliate.logoUrl ? (
-              <div className="w-12 h-12 rounded-md overflow-hidden border bg-white flex-shrink-0">
+              <div className="w-12 h-12 rounded-md overflow-hidden border bg-white shrink-0">
+                {/* eslint-disable-next-line @next/next/no-img-element */}
                 <img
                   src={affiliate.logoUrl}
                   alt={`${affiliate.shortName} logo`}
@@ -113,7 +114,7 @@ export function AffiliateCard({
                 />
               </div>
             ) : (
-              <div className="w-12 h-12 rounded-md bg-primary/10 flex items-center justify-center flex-shrink-0">
+              <div className="w-12 h-12 rounded-md bg-primary/10 flex items-center justify-center shrink-0">
                 <Building2 className="h-6 w-6 text-primary" />
               </div>
             )}
@@ -160,6 +161,7 @@ export function AffiliateCard({
               variant={getComplianceVariant(affiliate.complianceStatus)}
               className="gap-1"
             >
+              {/* eslint-disable-next-line react-hooks/static-components */}
               <ComplianceIcon className="h-3 w-3" />
               {affiliate.complianceStatus === "compliant" && "Compliant"}
               {affiliate.complianceStatus === "at-risk" && "At Risk"}

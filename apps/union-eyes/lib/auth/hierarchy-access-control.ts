@@ -25,7 +25,7 @@
 
 import { db } from '@/db';
 import { organizations, organizationMembers, congressMemberships } from '@/db/schema';
-import { eq, and, or, inArray } from 'drizzle-orm';
+import { eq, and, or } from 'drizzle-orm';
 import { logger } from '@/lib/logger';
 import type { InferSelectModel } from 'drizzle-orm';
 

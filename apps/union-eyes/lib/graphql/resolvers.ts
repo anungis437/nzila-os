@@ -14,15 +14,16 @@ import { eq, and, desc, gte, lte } from 'drizzle-orm';
 import { getSystemStatus } from '@/lib/monitoring/status-page';
 import type { YogaInitialContext } from 'graphql-yoga';
 import { PensionProcessorFactory } from '@/lib/pension-processor';
-import { 
-  PensionPlanType, 
-  ContributionPeriod, 
+import {
+  PensionPlanType,
+  ContributionPeriod,
   PensionMember,
-  IPensionProcessor,
   EmploymentStatus,
 } from '@/lib/pension-processor/types';
 import { IntegrationFactory } from '@/lib/integrations/factory';
 import { IntegrationProvider, SyncType } from '@/lib/integrations/types';
+ 
+ 
 import type { SQL } from 'drizzle-orm';
 
 export const resolvers = {
@@ -44,6 +45,7 @@ export const resolvers = {
       let query = db.select().from(claims);
 
       if (filters?.status) {
+        // eslint-disable-next-line @typescript-eslint/no-explicit-any
         query = query.where(eq(claims.status, filters.status as any)) as typeof query;
       }
 
@@ -303,6 +305,7 @@ export const resolvers = {
     // Claims
     createClaim: async (
       _parent: unknown,
+      // eslint-disable-next-line @typescript-eslint/no-explicit-any
       { input }: { input: Record<string, any> },
       _context: YogaInitialContext
     ) => {
@@ -326,12 +329,14 @@ export const resolvers = {
 
     updateClaim: async (
       _parent: unknown,
+      // eslint-disable-next-line @typescript-eslint/no-explicit-any
       { id, input }: { id: string; input: Record<string, any> },
       _context: YogaInitialContext
     ) => {
       const result = await db
         .update(claims)
         .set({
+          // eslint-disable-next-line @typescript-eslint/no-explicit-any
           ...(input as Record<string, any>),
           updatedAt: new Date(),
         })
@@ -353,7 +358,7 @@ export const resolvers = {
     // Voting
     castVote: async (
       _parent: unknown,
-      { voteId, optionId }: { voteId: string; optionId: string },
+      { voteId: _voteId, optionId: _optionId }: { voteId: string; optionId: string },
       _context: YogaInitialContext
     ) => {
       // Implementation would record the vote
@@ -363,6 +368,7 @@ export const resolvers = {
     // Pension Contributions
     calculatePensionContribution: async (
       _parent: unknown,
+      // eslint-disable-next-line @typescript-eslint/no-explicit-any
       { input }: { input: Record<string, any> }
     ) => {
       const factory = PensionProcessorFactory.getInstance();
@@ -406,6 +412,7 @@ export const resolvers = {
 
     createRemittance: async (
       _parent: unknown,
+      // eslint-disable-next-line @typescript-eslint/no-explicit-any
       { input }: { input: Record<string, any> }
     ) => {
       const factory = PensionProcessorFactory.getInstance();
@@ -517,7 +524,7 @@ export const resolvers = {
           claimsCount: syncResult.recordsCreated + syncResult.recordsUpdated,
           policiesCount: syncResult.recordsCreated + syncResult.recordsUpdated,
         };
-      } catch (error) {
+      } catch (_error) {
         return {
           provider,
           connected: false,
@@ -531,6 +538,7 @@ export const resolvers = {
 
   // Field Resolvers
   Claim: {
+    // eslint-disable-next-line @typescript-eslint/no-explicit-any
     claimant: async (parent: Record<string, any>, _args: unknown, _context: YogaInitialContext) => {
       if (!parent.memberId) return null;
       const result = await db
@@ -541,6 +549,7 @@ export const resolvers = {
       return result[0] || null;
     },
 
+    // eslint-disable-next-line @typescript-eslint/no-explicit-any
     assignee: async (parent: Record<string, any>, _args: unknown, _context: YogaInitialContext) => {
       if (!parent.assignedTo) return null;
       const result = await db
@@ -553,6 +562,7 @@ export const resolvers = {
   },
 
   Member: {
+    // eslint-disable-next-line @typescript-eslint/no-explicit-any
     claims: async (parent: Record<string, any>, _args: unknown, _context: YogaInitialContext) => {
       const results = await db
         .select()

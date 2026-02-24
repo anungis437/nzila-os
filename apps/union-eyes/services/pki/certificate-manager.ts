@@ -5,7 +5,6 @@
  */
 
 import { db } from '@/db';
-import { organizations } from '@/db/schema';
 import { digitalSignatures } from '@/services/financial-service/src/db/schema';
 import { eq, and, gte, lte, sql } from 'drizzle-orm';
 import crypto from 'crypto';
@@ -119,6 +118,7 @@ export function parseCertificate(certificatePem: string): CertificateInfo {
  */
 function parseDistinguishedName(dn: string): CertificateInfo['subject'] {
   const parts = dn.split(',').map(p => p.trim());
+  // eslint-disable-next-line @typescript-eslint/no-explicit-any
   const result: any = {};
   
   for (const part of parts) {
@@ -155,7 +155,7 @@ function parseDistinguishedName(dn: string): CertificateInfo['subject'] {
 /**
  * Parse key usage extensions
  */
-function parseKeyUsage(cert: crypto.X509Certificate): string[] {
+function parseKeyUsage(_cert: crypto.X509Certificate): string[] {
   // Note: Node.js X509Certificate doesn't expose extensions directly
   // In production, use a library like node-forge or x509.js
   // For now, return common usages
@@ -165,7 +165,7 @@ function parseKeyUsage(cert: crypto.X509Certificate): string[] {
 /**
  * Parse extended key usage extensions
  */
-function parseExtendedKeyUsage(cert: crypto.X509Certificate): string[] {
+function parseExtendedKeyUsage(_cert: crypto.X509Certificate): string[] {
   // In production, parse from certificate extensions
   return ['clientAuth', 'emailProtection'];
 }

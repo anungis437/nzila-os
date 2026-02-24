@@ -2,10 +2,9 @@
  * GET POST PUT DELETE /api/social-media/campaigns
  * Migrated to withApi() framework
  */
-import { createClient } from '@supabase/supabase-js';
-import { withApi, ApiError, z, RATE_LIMITS } from '@/lib/api/framework';
+import { withApi, z, RATE_LIMITS } from '@/lib/api/framework';
 
-const socialMediaCampaignsSchema = z.object({
+const _socialMediaCampaignsSchema = z.object({
   name: z.string().min(1, 'name is required'),
   description: z.string().optional(),
   platforms: z.unknown().optional(),
@@ -29,6 +28,7 @@ export const GET = withApi(
   },
   async ({ request }) => {
     // Delegate to v1 handler while framework migration is in progress
+    // eslint-disable-next-line @typescript-eslint/no-explicit-any
     const response = await v1GET(request, {} as any);
     return response;
   },
@@ -45,6 +45,7 @@ export const POST = withApi(
   },
   async ({ request }) => {
     // Delegate to v1 handler while framework migration is in progress
+    // eslint-disable-next-line @typescript-eslint/no-explicit-any
     const response = await v1POST(request, {} as any);
     return response;
   },
@@ -61,6 +62,7 @@ export const PUT = withApi(
   },
   async ({ request }) => {
     // Delegate to v1 handler while framework migration is in progress
+    // eslint-disable-next-line @typescript-eslint/no-explicit-any
     const response = await v1PUT(request, {} as any);
     return response;
   },
@@ -77,6 +79,7 @@ export const DELETE = withApi(
   },
   async ({ request }) => {
     // Delegate to v1 handler while framework migration is in progress
+    // eslint-disable-next-line @typescript-eslint/no-explicit-any
     const response = await v1DELETE(request, {} as any);
     return response;
   },

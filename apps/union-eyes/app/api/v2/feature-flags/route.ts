@@ -4,7 +4,11 @@ import { NextResponse } from 'next/server';
  * Migrated to withApi() framework
  */
 import { evaluateFeatures, LRO_FEATURES } from '@/lib/services/feature-flags';
-import { withApi, ApiError } from '@/lib/api/framework';
+ 
+ 
+ 
+ 
+import { withApi } from '@/lib/api/framework';
 
 export const GET = withApi(
   {
@@ -14,7 +18,7 @@ export const GET = withApi(
       summary: 'GET feature-flags',
     },
   },
-  async ({ request, userId, organizationId, user, body, query }) => {
+  async ({ request: _request, userId, organizationId, user: _user, body: _body, query: _query }) => {
 
         // Evaluate all LRO features for this user
         const featureNames = Object.values(LRO_FEATURES);

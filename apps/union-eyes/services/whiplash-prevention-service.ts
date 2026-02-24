@@ -1,7 +1,7 @@
 import { db } from "@/db";
 import {
   stripeConnectAccounts,
-  paymentClassificationPolicy,
+  _paymentClassificationPolicy,
   paymentRoutingRules,
   separatedPaymentTransactions,
   whiplashViolations,
@@ -41,6 +41,7 @@ export interface PaymentTransaction {
   payeeName?: string;
   stripePaymentIntentId?: string;
   stripeChargeId?: string;
+  // eslint-disable-next-line @typescript-eslint/no-explicit-any
   metadata?: any;
 }
 
@@ -292,7 +293,7 @@ export class WhiplashPreventionService {
   /**
    * Get strike fund payment transactions
    */
-  static async getStrikeFundTransactions(startDate?: Date, endDate?: Date) {
+  static async getStrikeFundTransactions(startDate?: Date, _endDate?: Date) {
     let query = db
       .select()
       .from(separatedPaymentTransactions)
@@ -442,6 +443,7 @@ export class WhiplashPreventionService {
     transactionId?: string;
     performedBy: string;
     complianceImpact?: string;
+    // eslint-disable-next-line @typescript-eslint/no-explicit-any
     metadata?: any;
   }) {
     await db.insert(whiplashPreventionAudit).values({

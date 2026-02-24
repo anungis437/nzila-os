@@ -149,6 +149,7 @@ export const signatureDocuments = pgTable(
     metadata: jsonb("metadata").$type<{
       relatedEntityType?: string; // claim, contract, member
       relatedEntityId?: string;
+      // eslint-disable-next-line @typescript-eslint/no-explicit-any
       customFields?: Record<string, any>;
       tags?: string[];
     }>(),
@@ -236,6 +237,7 @@ export const documentSigners = pgTable(
         documentNumber: string;
         verifiedAt: string;
       };
+      // eslint-disable-next-line @typescript-eslint/no-explicit-any
       customFields?: Record<string, any>;
     }>(),
     
@@ -298,8 +300,11 @@ export const signatureAuditTrail = pgTable(
       provider?: string;
       providerEventId?: string;
       authenticationMethod?: string;
+      // eslint-disable-next-line @typescript-eslint/no-explicit-any
       certificateInfo?: any;
+      // eslint-disable-next-line @typescript-eslint/no-explicit-any
       previousValue?: any;
+      // eslint-disable-next-line @typescript-eslint/no-explicit-any
       newValue?: any;
     }>(),
     

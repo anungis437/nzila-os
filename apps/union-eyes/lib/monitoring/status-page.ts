@@ -29,7 +29,7 @@ export type { ServiceStatus, ServiceHealth, SystemStatus };
  * Get overall system status
  */
 export const getSystemStatus = cache(async (): Promise<SystemStatus> => {
-  const startTime = Date.now();
+  const _startTime = Date.now();
 
   try {
     // Check all services in parallel

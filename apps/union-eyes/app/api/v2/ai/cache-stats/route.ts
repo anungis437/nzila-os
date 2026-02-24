@@ -4,6 +4,15 @@
  */
 import { embeddingCache } from '@/lib/services/ai/embedding-cache';
 import { logger } from '@/lib/logger';
+ 
+ 
+ 
+ 
+ 
+ 
+ 
+ 
+ 
 import { withApi, ApiError, z } from '@/lib/api/framework';
 
 const aiCacheStatsSchema = z.object({
@@ -18,7 +27,7 @@ export const GET = withApi(
       summary: 'GET cache-stats',
     },
   },
-  async ({ request, userId, organizationId, user, body, query }) => {
+  async ({ request: _request, userId: _userId, organizationId: _organizationId, user, body: _body, query: _query }) => {
 
         // Get cache statistics
         const stats = await embeddingCache.getStats();
@@ -46,7 +55,7 @@ export const POST = withApi(
     },
     successStatus: 201,
   },
-  async ({ request, userId, organizationId, user, body, query }) => {
+  async ({ request: _request, userId: _userId, organizationId: _organizationId, user, body, query: _query }) => {
 
         // Validate request body
         const { action } = body;

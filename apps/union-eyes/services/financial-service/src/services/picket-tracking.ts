@@ -144,7 +144,7 @@ export function validateQRCodeData(qrData: string): {
       fundId: decoded.fundId,
       memberId: decoded.memberId,
     };
-  } catch (error) {
+  } catch (_error) {
     return { valid: false, error: 'Invalid QR code format' };
   }
 }
@@ -238,6 +238,7 @@ export async function checkIn(
         coordinatorOverride: request.coordinatorOverride || false,
         overrideReason: request.overrideReason,
         verifiedBy: request.verifiedBy,
+      // eslint-disable-next-line @typescript-eslint/no-explicit-any
       } as any)
       .returning();
 
@@ -301,6 +302,7 @@ export async function checkOut(
         durationMinutes: durationMinutes.toString(),
         hoursWorked: hoursWorked.toString(),
         updatedAt: new Date(),
+      // eslint-disable-next-line @typescript-eslint/no-explicit-any
       } as any)
       .where(eq(schema.picketAttendance.id, request.attendanceId));
 
@@ -456,6 +458,7 @@ export async function coordinatorOverride(
         locationVerified: true, // Coordinator verified
         coordinatorOverride: true,
         overrideReason: reason,
+      // eslint-disable-next-line @typescript-eslint/no-explicit-any
       } as any)
       .returning();
 

@@ -4,7 +4,7 @@
  */
 import { db } from '@/db';
 import { sql } from 'drizzle-orm';
-import { withApi, ApiError } from '@/lib/api/framework';
+import { withApi } from '@/lib/api/framework';
 
 export const GET = withApi(
   {

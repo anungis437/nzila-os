@@ -10,7 +10,6 @@
 'use client';
 
 import React, { useState, useEffect } from 'react';
-import { format } from 'date-fns';
 import {
   Dialog,
   DialogContent,
@@ -31,6 +30,7 @@ import {
   SelectValue,
 } from '@/components/ui/select';
 import { Switch } from '@/components/ui/switch';
+ 
 import { Calendar, Clock, MapPin, Users, Video, Repeat } from 'lucide-react';
 
 interface EventFormData {
@@ -53,6 +53,7 @@ interface EventFormData {
 interface EventDialogProps {
   open: boolean;
   onOpenChange: (open: boolean) => void;
+  // eslint-disable-next-line @typescript-eslint/no-explicit-any
   event?: any;
   initialDate?: Date;
   calendarId: string;
@@ -65,7 +66,7 @@ export function EventDialog({
   onOpenChange,
   event,
   initialDate,
-  calendarId,
+  calendarId: _calendarId,
   onSave,
   onDelete,
 }: EventDialogProps) {
@@ -129,7 +130,7 @@ export function EventDialog({
     try {
       await onSave(formData);
       onOpenChange(false);
-    } catch (error) {
+    } catch (_error) {
 alert('Failed to save event');
     } finally {
       setLoading(false);
@@ -144,7 +145,7 @@ alert('Failed to save event');
       try {
         await onDelete(event.id);
         onOpenChange(false);
-      } catch (error) {
+      } catch (_error) {
 alert('Failed to delete event');
       } finally {
         setLoading(false);

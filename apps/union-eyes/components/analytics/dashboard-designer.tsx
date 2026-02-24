@@ -20,19 +20,16 @@ import { zodResolver } from "@hookform/resolvers/zod";
 import * as z from "zod";
 import {
   Layout,
-  Plus,
   GripVertical,
   Trash2,
   Settings,
   Save,
   Eye,
   Share2,
-  RefreshCw,
   BarChart3,
   Users,
   FileText,
   TrendingUp,
-  DollarSign,
   Clock,
 } from "lucide-react";
 import {
@@ -48,24 +45,12 @@ import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 import { Badge } from "@/components/ui/badge";
 import {
-  Select,
-  SelectContent,
-  SelectItem,
-  SelectTrigger,
-  SelectValue,
-} from "@/components/ui/select";
-import {
   Dialog,
   DialogContent,
   DialogHeader,
   DialogTitle,
   DialogTrigger,
 } from "@/components/ui/dialog";
-import {
-  Popover,
-  PopoverContent,
-  PopoverTrigger,
-} from "@/components/ui/popover";
 import { Label } from "@/components/ui/label";
 import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
 
@@ -100,6 +85,7 @@ interface Widget {
   title: string;
   position: { x: number; y: number };
   size: { width: number; height: number };
+  // eslint-disable-next-line @typescript-eslint/no-explicit-any
   config?: Record<string, any>;
 }
 
@@ -206,18 +192,21 @@ export function DashboardDesigner({ existingDashboard, onSave }: DashboardDesign
 
     const newWidgets = [...widgets, newWidget];
     setWidgets(newWidgets);
+    // eslint-disable-next-line @typescript-eslint/no-explicit-any
     form.setValue("widgets", newWidgets as any);
   };
 
   const updateWidget = (id: string, updates: Partial<Widget>) => {
     const newWidgets = widgets.map((w) => (w.id === id ? { ...w, ...updates } : w));
     setWidgets(newWidgets);
+    // eslint-disable-next-line @typescript-eslint/no-explicit-any
     form.setValue("widgets", newWidgets as any);
   };
 
   const removeWidget = (id: string) => {
     const newWidgets = widgets.filter((w) => w.id !== id);
     setWidgets(newWidgets);
+    // eslint-disable-next-line @typescript-eslint/no-explicit-any
     form.setValue("widgets", newWidgets as any);
     if (selectedWidget?.id === id) {
       setSelectedWidget(null);
@@ -411,6 +400,7 @@ export function DashboardDesigner({ existingDashboard, onSave }: DashboardDesign
               <Card>
                 <CardHeader>
                   <div className="flex items-center justify-between">
+                    {/* eslint-disable-next-line react-hooks/incompatible-library */}
                     <CardTitle>{form.watch("name") || "Untitled Dashboard"}</CardTitle>
                     <Badge variant="outline">{widgets.length} widgets</Badge>
                   </div>

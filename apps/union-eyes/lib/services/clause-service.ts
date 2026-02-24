@@ -11,14 +11,13 @@
  */
 
 import { db } from "@/db/db";
-import { 
-  cbaClause, 
+import {
+  cbaClause,
   wageProgressions,
   benefitComparisons,
   clauseComparisons,
-  clauseTypeEnum
 } from "@/db/schema";
-import { eq, and, or, like, desc, asc, sql, inArray, gte, lte } from "drizzle-orm";
+import { eq, and, or, like, desc, asc, sql, inArray, gte } from "drizzle-orm";
 import type { SQL } from "drizzle-orm";
 import { logger } from "@/lib/logger";
 
@@ -71,7 +70,7 @@ export interface ClauseComparisonResult {
  */
 export async function getClauseById(
   id: string,
-  options: ClauseSearchOptions = {}
+  _options: ClauseSearchOptions = {}
 ): Promise<Clause | null> {
   try {
     const clause = await db.query.cbaClause.findFirst({
@@ -101,7 +100,7 @@ export async function getClauseById(
  */
 export async function getClausesByCBAId(
   cbaId: string,
-  options: ClauseSearchOptions = {}
+  _options: ClauseSearchOptions = {}
 ): Promise<Clause[]> {
   try {
     const clauses = await db
@@ -135,6 +134,7 @@ export async function listClauses(
     }
 
     if (filters.clauseType && filters.clauseType.length > 0) {
+      // eslint-disable-next-line @typescript-eslint/no-explicit-any
       conditions.push(inArray(cbaClause.clauseType, filters.clauseType as any));
     }
 
@@ -292,6 +292,7 @@ export async function searchClauses(
     ];
 
     if (filters.clauseType && filters.clauseType.length > 0) {
+      // eslint-disable-next-line @typescript-eslint/no-explicit-any
       conditions.push(inArray(cbaClause.clauseType, filters.clauseType as any));
     }
 
@@ -326,6 +327,7 @@ export async function getClausesByType(
     const clauses = await db
       .select()
       .from(cbaClause)
+      // eslint-disable-next-line @typescript-eslint/no-explicit-any
       .where(eq(cbaClause.clauseType, clauseType as any))
       .orderBy(desc(cbaClause.createdAt))
       .limit(limit);
@@ -444,13 +446,16 @@ export async function saveClauseComparison(
   clauseIds: string[],
   organizationId: string,
   createdBy: string,
+  // eslint-disable-next-line @typescript-eslint/no-explicit-any
   analysisResults?: any
+// eslint-disable-next-line @typescript-eslint/no-explicit-any
 ): Promise<any> {
   try {
     const [comparison] = await db
       .insert(clauseComparisons)
       .values({
         comparisonName,
+        // eslint-disable-next-line @typescript-eslint/no-explicit-any
         clauseType: clauseType as any,
         clauseIds,
         organizationId,
@@ -556,6 +561,7 @@ export async function getMostViewedClauses(
       .orderBy(desc(cbaClause.viewCount));
 
     if (cbaId) {
+      // eslint-disable-next-line @typescript-eslint/no-explicit-any
       query = query.where(eq(cbaClause.cbaId, cbaId)) as any;
     }
 

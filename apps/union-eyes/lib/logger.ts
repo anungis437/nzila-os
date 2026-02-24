@@ -17,7 +17,7 @@ const getSentry = async () => {
   if (!Sentry && typeof window === 'undefined') {
     try {
       Sentry = await import('@sentry/nextjs');
-    } catch (e) {
+    } catch (_e) {
       // Silent fail if Sentry not available during build
     }
   }

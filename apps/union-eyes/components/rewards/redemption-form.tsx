@@ -9,7 +9,10 @@ import { Label } from '@/components/ui/label';
 import { Textarea } from '@/components/ui/textarea';
 import { Alert, AlertDescription } from '@/components/ui/alert';
 import { AlertCircle, Loader2 } from 'lucide-react';
+ 
+ 
 import { initiateRedemption } from '@/actions/rewards-actions';
+import { validateRedirectUrl } from '@/lib/utils/sanitize';
 
 interface RedemptionFormProps {
   balance: number;
@@ -18,7 +21,7 @@ interface RedemptionFormProps {
   orgId: string;
 }
 
-export function RedemptionForm({ balance, mode, userId, orgId }: RedemptionFormProps) {
+export function RedemptionForm({ balance, mode, userId: _userId, orgId: _orgId }: RedemptionFormProps) {
   const t = useTranslations('rewards.redeem.form');
   const router = useRouter();
   const [loading, setLoading] = useState(false);
@@ -63,7 +66,9 @@ export function RedemptionForm({ balance, mode, userId, orgId }: RedemptionFormP
       // If Shopify mode, redirect to catalog/checkout
       if (mode === 'shopify' && result.data?.checkout_url) {
         // Redirect to Shopify checkout with pre-applied discount
-        window.location.href = result.data.checkout_url;
+        const safeUrl = validateRedirectUrl(result.data.checkout_url);
+        if (!safeUrl) { setError('Untrusted checkout URL'); setLoading(false); return; }
+        window.location.href = safeUrl;
       } else {
         // Manual mode or no checkout URL: redirect to wallet with success message
         router.push('/dashboard/rewards?redemption=success');
@@ -99,6 +104,7 @@ export function RedemptionForm({ balance, mode, userId, orgId }: RedemptionFormP
           disabled={loading}
         />
         <p className="text-xs text-muted-foreground">
+          {/* eslint-disable-next-line @typescript-eslint/no-explicit-any */}
           {(t as any)('creditsHelper', {
             defaultValue: 'Maximum: {balance} credits',
             values: { balance: balance.toLocaleString() },

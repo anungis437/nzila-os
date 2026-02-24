@@ -61,16 +61,16 @@ export type { SyncJobConfig } from './sync-engine';
  */
 export async function initializeIntegrationFramework(): Promise<void> {
   // Initialize registry
-  const registry = IntegrationRegistry.getInstance();
+  const _registry = IntegrationRegistry.getInstance();
   
   // Initialize factory
-  const factory = IntegrationFactory.getInstance();
+  const _factory = IntegrationFactory.getInstance();
   
   // Initialize webhook router
-  const webhookRouter = WebhookRouter.getInstance();
+  const _webhookRouter = WebhookRouter.getInstance();
   
   // Initialize sync engine
-  const syncEngine = SyncEngine.getInstance();
+  const _syncEngine = SyncEngine.getInstance();
   
   logger.info('Integration framework initialized');
 }

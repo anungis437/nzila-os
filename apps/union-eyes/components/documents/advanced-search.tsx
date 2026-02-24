@@ -38,7 +38,6 @@ import {
   Folder,
   Clock,
   Star,
-  Plus,
   Trash2,
 } from 'lucide-react';
 import { format } from 'date-fns';
@@ -136,7 +135,7 @@ export function AdvancedSearch({ onSearch, onClear, initialFilters }: AdvancedSe
       setAvailableTags(data.tags || []);
       setAvailableUsers(data.users || []);
       setAvailableFolders(data.folders || []);
-    } catch (err) {
+    } catch (_err) {
 }
   };
 
@@ -147,7 +146,7 @@ export function AdvancedSearch({ onSearch, onClear, initialFilters }: AdvancedSe
 
       const data = await response.json();
       setSavedSearches(data.searches || []);
-    } catch (err) {
+    } catch (_err) {
 }
   };
 

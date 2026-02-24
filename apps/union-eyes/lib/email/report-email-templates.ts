@@ -6,6 +6,9 @@
  * Part of: Phase 2.4 - Scheduled Reports System
  */
 
+ 
+ 
+ 
 import type { ScheduledReport } from '@/db/queries/scheduled-reports-queries';
 
 // ============================================================================
@@ -26,7 +29,7 @@ interface SendEmailParams {
  * Send scheduled report via email
  */
 export async function sendScheduledReportEmail(params: SendEmailParams): Promise<void> {
-  const { schedule, fileUrl, fileBuffer } = params;
+  const { schedule: _schedule, fileUrl: _fileUrl, fileBuffer: _fileBuffer } = params;
 
   // Check if email service is configured
   const emailProvider = process.env.EMAIL_PROVIDER || 'resend';
@@ -87,10 +90,11 @@ async function sendViaSendGrid(params: SendEmailParams): Promise<void> {
     // Check if SendGrid is available
     let sgMail: { default: { setApiKey: (key: string) => void; send: (msg: Record<string, unknown>) => Promise<unknown> } };
     try {
-      // eslint-disable-next-line @typescript-eslint/no-require-imports
+       
+      // eslint-disable-next-line @typescript-eslint/ban-ts-comment
       // @ts-ignore - @sendgrid/mail may not be installed
       sgMail = await import('@sendgrid/mail') as typeof sgMail;
-    } catch (importError) {
+    } catch (_importError) {
 throw new Error('SendGrid package not installed. Using Resend fallback.');
     }
 
@@ -118,7 +122,7 @@ throw new Error('SendGrid API key not configured. Using Resend fallback.');
       ],
     });
 return;
-  } catch (error) {
+  } catch (_error) {
 // Fall through to Resend implementation below
   }
 }

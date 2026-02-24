@@ -9,9 +9,10 @@
  * Authentication: OAuth2 with Microsoft identity platform
  */
 
+ 
 import type {
   IntegrationError,
-  RateLimitError,
+  RateLimitError as _RateLimitError,
   AuthenticationError,
 } from '../../types';
 
@@ -192,7 +193,7 @@ export class TeamsClient {
       // Check for rate limiting
       if (response.status === 429) {
         const retryAfter = response.headers.get('Retry-After');
-        const resetTime = retryAfter
+        const _resetTime = retryAfter
           ? new Date(Date.now() + parseInt(retryAfter) * 1000)
           : new Date(Date.now() + 60000);
 

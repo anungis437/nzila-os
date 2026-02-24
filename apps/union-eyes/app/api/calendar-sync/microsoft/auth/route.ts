@@ -1,4 +1,3 @@
-import { logApiAuditEvent } from "@/lib/middleware/api-security";
 /**
  * Microsoft Outlook Calendar OAuth Authorization
  * 
@@ -9,12 +8,11 @@ import { logApiAuditEvent } from "@/lib/middleware/api-security";
 
 import { NextRequest, NextResponse } from 'next/server';
 import { getAuthorizationUrl } from '@/lib/external-calendar-sync/microsoft-calendar-service';
-import { getCurrentUser, withAdminAuth, withApiAuth, withMinRole, withRoleAuth, BaseAuthContext } from '@/lib/api-auth-guard';
+import { withRoleAuth, BaseAuthContext } from '@/lib/api-auth-guard';
 
 import {
   ErrorCode,
   standardErrorResponse,
-  standardSuccessResponse,
 } from '@/lib/api/standardized-responses';
 export const GET = withRoleAuth('member', async (request: NextRequest, context: BaseAuthContext) => {
   const { userId } = context;

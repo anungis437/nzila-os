@@ -3,8 +3,15 @@ import { NextResponse } from 'next/server';
  * GET POST /api/bargaining-notes
  * Migrated to withApi() framework
  */
-import { logApiAuditEvent } from "@/lib/middleware/api-security";
 import { withApi, ApiError, z } from '@/lib/api/framework';
+ 
+ 
+ 
+ 
+ 
+ 
+ 
+ 
 import {
   listBargainingNotes,
   createBargainingNote,
@@ -32,7 +39,7 @@ export const GET = withApi(
       summary: 'GET bargaining-notes',
     },
   },
-  async ({ request, userId, organizationId, user, body, query }) => {
+  async ({ request, userId: _userId, organizationId, user: _user, body: _body, query: _query }) => {
 
           const { searchParams } = new URL(request.url);
           // Check for special modes
@@ -120,7 +127,7 @@ export const POST = withApi(
     },
     successStatus: 201,
   },
-  async ({ request, userId, organizationId, user, body, query }) => {
+  async ({ request: _request, userId, organizationId: _organizationId, user: _user, body, query: _query }) => {
 
           // Check if bulk create
           if (Array.isArray(body)) {

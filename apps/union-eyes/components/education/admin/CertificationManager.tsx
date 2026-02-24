@@ -1,7 +1,7 @@
 "use client";
 
 import { useState, useEffect, useCallback } from "react";
-import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "@/components/ui/card";
+import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import { Button } from "@/components/ui/button";
 import { Badge } from "@/components/ui/badge";
 import { Input } from "@/components/ui/input";
@@ -10,10 +10,10 @@ import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@
 import { Dialog, DialogContent, DialogDescription, DialogHeader, DialogTitle, DialogTrigger } from "@/components/ui/dialog";
 import { Table, TableBody, TableCell, TableHead, TableHeader, TableRow } from "@/components/ui/table";
 import { Checkbox } from "@/components/ui/checkbox";
-import { Award, Plus, Download, AlertTriangle, CheckCircle2, XCircle, FileText, Search, Filter, RefreshCw } from "lucide-react";
+import { Award, Plus, Download, AlertTriangle, CheckCircle2, XCircle, Search, Filter, RefreshCw } from "lucide-react";
 import { toast } from "sonner";
 
-interface Member {
+interface _Member {
   id: string;
   memberNumber: string;
   firstName: string;
@@ -90,7 +90,7 @@ export function CertificationManager({ organizationId }: CertificationManagerPro
       const data = await response.json();
       setCertifications(data.certifications);
       setStats(data.stats);
-    } catch (error) {
+    } catch (_error) {
 toast.error("Failed to load certifications");
     } finally {
       setLoading(false);
@@ -105,7 +105,7 @@ toast.error("Failed to load certifications");
 
       const data = await response.json();
       setCourses(data.courses);
-    } catch (error) {
+    } catch (_error) {
 }
   }, [organizationId]);
 
@@ -142,17 +142,17 @@ toast.error("Failed to load certifications");
 
       if (!response.ok) throw new Error("Failed to issue certification");
 
-      const data = await response.json();
+      const _data = await response.json();
       toast.success("Certification issued successfully");
       setIsIssueDialogOpen(false);
       resetIssueForm();
       fetchCertifications();
-    } catch (error) {
+    } catch (_error) {
 toast.error("Failed to issue certification");
     }
   };
 
-  const handleGenerateCertificates = async () => {
+  const _handleGenerateCertificates = async () => {
     if (selectedCertifications.size === 0) {
       toast.error("Please select certifications to generate PDFs for");
       return;
@@ -170,7 +170,7 @@ toast.error("Failed to issue certification");
         // For manual certifications, we&apos;d need a different approach
         toast.info(`Generating certificate for ${cert.firstName} ${cert.lastName}...`);
         successCount++;
-      } catch (error) {
+      } catch (_error) {
 failCount++;
       }
     }
@@ -204,7 +204,7 @@ failCount++;
       const data = await response.json();
       toast.success(`Sent ${data.sent || selectedCertifications.size} renewal reminder emails`);
       setSelectedCertifications(new Set());
-    } catch (error) {
+    } catch (_error) {
 toast.error('Failed to send renewal reminders');
     }
   };
@@ -223,7 +223,7 @@ toast.error('Failed to send renewal reminders');
 
       toast.success("Certification revoked successfully");
       fetchCertifications();
-    } catch (error) {
+    } catch (_error) {
 toast.error("Failed to revoke certification");
     }
   };

@@ -4,10 +4,14 @@
  */
 "use client";
 
+
+export const dynamic = 'force-dynamic';
 import { useEffect, useState } from "react";
 import { useUser } from "@clerk/nextjs";
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "@/components/ui/card";
 import { Button } from "@/components/ui/button";
+import { validateRedirectUrl } from "@/lib/utils/sanitize";
+ 
 import { 
   DollarSign, 
   Calendar, 
@@ -38,7 +42,7 @@ interface Transaction {
 }
 
 export default function MemberDuesPage() {
-  const { user } = useUser();
+  const { user: _user } = useUser();
   const [balance, setBalance] = useState<DuesBalance | null>(null);
   const [transactions, setTransactions] = useState<Transaction[]>([]);
   const [loading, setLoading] = useState(true);
@@ -53,7 +57,7 @@ export default function MemberDuesPage() {
           setBalance(data.balance);
           setTransactions(data.transactions || []);
         }
-      } catch (error) {
+      } catch (_error) {
 } finally {
         setLoading(false);
       }
@@ -75,10 +79,11 @@ export default function MemberDuesPage() {
         const data = await response.json();
         // Redirect to Stripe Checkout
         if (data.checkoutUrl) {
-          window.location.href = data.checkoutUrl;
+          const safeUrl = validateRedirectUrl(data.checkoutUrl);
+          if (safeUrl) window.location.href = safeUrl;
         }
       }
-    } catch (error) {
+    } catch (_error) {
 } finally {
       setPaymentProcessing(false);
     }

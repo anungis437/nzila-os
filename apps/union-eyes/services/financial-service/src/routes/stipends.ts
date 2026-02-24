@@ -53,6 +53,7 @@ const batchCreateSchema = z.object({
  */
 router.post('/calculate', async (req: Request, res: Response) => {
   try {
+    // eslint-disable-next-line @typescript-eslint/no-explicit-any
     const { organizationId } = (req as any).user;
     const validatedData = calculateStipendsSchema.parse(req.body);
 
@@ -90,6 +91,7 @@ router.post('/calculate', async (req: Request, res: Response) => {
  */
 router.post('/disbursements', async (req: Request, res: Response) => {
   try {
+    // eslint-disable-next-line @typescript-eslint/no-explicit-any
     const { organizationId, id: userId } = (req as any).user;
     const validatedData = createDisbursementSchema.parse(req.body);
 
@@ -124,6 +126,7 @@ router.post('/disbursements', async (req: Request, res: Response) => {
  */
 router.post('/disbursements/batch', async (req: Request, res: Response) => {
   try {
+    // eslint-disable-next-line @typescript-eslint/no-explicit-any
     const { organizationId, id: userId } = (req as any).user;
     const validatedData = batchCreateSchema.parse(req.body);
 
@@ -153,6 +156,7 @@ router.post('/disbursements/batch', async (req: Request, res: Response) => {
  */
 router.get('/disbursements/pending/:strikeFundId', async (req: Request, res: Response) => {
   try {
+    // eslint-disable-next-line @typescript-eslint/no-explicit-any
     const { organizationId } = (req as any).user;
     const { strikeFundId } = req.params;
 
@@ -180,6 +184,7 @@ router.get('/disbursements/pending/:strikeFundId', async (req: Request, res: Res
  */
 router.get('/disbursements/member/:memberId', async (req: Request, res: Response) => {
   try {
+    // eslint-disable-next-line @typescript-eslint/no-explicit-any
     const { organizationId } = (req as any).user;
     const { memberId } = req.params;
     const { strikeFundId } = req.query;
@@ -210,6 +215,7 @@ router.get('/disbursements/member/:memberId', async (req: Request, res: Response
  */
 router.post('/disbursements/:disbursementId/approve', async (req: Request, res: Response) => {
   try {
+    // eslint-disable-next-line @typescript-eslint/no-explicit-any
     const { organizationId, id: userId } = (req as any).user;
     const { disbursementId } = req.params;
     const { approvalNotes } = approveDisbursementSchema.parse({ 
@@ -242,6 +248,7 @@ router.post('/disbursements/:disbursementId/approve', async (req: Request, res: 
  */
 router.post('/disbursements/:disbursementId/paid', async (req: Request, res: Response) => {
   try {
+    // eslint-disable-next-line @typescript-eslint/no-explicit-any
     const { organizationId, id: userId } = (req as any).user;
     const { disbursementId } = req.params;
     const { transactionId } = markPaidSchema.parse({ disbursementId, ...req.body });
@@ -272,6 +279,7 @@ router.post('/disbursements/:disbursementId/paid', async (req: Request, res: Res
  */
 router.get('/summary/:strikeFundId', async (req: Request, res: Response) => {
   try {
+    // eslint-disable-next-line @typescript-eslint/no-explicit-any
     const { organizationId } = (req as any).user;
     const { strikeFundId } = req.params;
 

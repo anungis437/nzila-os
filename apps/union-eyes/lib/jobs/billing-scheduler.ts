@@ -327,6 +327,7 @@ export class BillingScheduler {
     const [org] = await db
       .select({ id: organizations.id, slug: organizations.slug, email: organizations.email })
       .from(organizations)
+      // eslint-disable-next-line @typescript-eslint/no-explicit-any
       .where(or(eq(organizations.id, organizationId as any), eq(organizations.slug, organizationId)))
       .limit(1);
 

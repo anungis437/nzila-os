@@ -19,7 +19,7 @@ import {
   SelectTrigger,
   SelectValue,
 } from '@/components/ui/select';
-import { Tabs, TabsContent, TabsList, TabsTrigger } from '@/components/ui/tabs';
+import { Tabs, TabsList, TabsTrigger } from '@/components/ui/tabs';
 import {
   Table,
   TableBody,
@@ -29,15 +29,14 @@ import {
   TableRow,
 } from '@/components/ui/table';
 import { Progress } from '@/components/ui/progress';
-import { 
-  Heart, 
-  Calendar, 
-  PiggyBank, 
-  Briefcase, 
+import {
+  Heart,
+  Calendar,
+  PiggyBank,
+  Briefcase,
   AlertCircle,
   CheckCircle,
   XCircle,
-  TrendingUp,
   Filter,
   Download,
   BarChart3,
@@ -96,7 +95,7 @@ export function BenefitComparison({
   const [selectedSector, setSelectedSector] = useState<string>(sector || 'all');
   const [selectedJurisdiction, setSelectedJurisdiction] = useState<string>(jurisdiction || 'all');
   const [viewMode, setViewMode] = useState<'comparison' | 'scores'>('comparison');
-  const [comparisonMode, setComparisonMode] = useState<'side-by-side' | 'matrix'>('side-by-side');
+  const [comparisonMode, _setComparisonMode] = useState<'side-by-side' | 'matrix'>('side-by-side');
 
   const [sectors, setSectors] = useState<string[]>([]);
   const [jurisdictions, setJurisdictions] = useState<string[]>([]);
@@ -115,6 +114,7 @@ export function BenefitComparison({
 
   useEffect(() => {
     fetchBenefitData();
+  // eslint-disable-next-line react-hooks/exhaustive-deps
   }, [organizationId, selectedCategory, selectedSector, selectedJurisdiction, cbaIds]);
 
   const fetchBenefitData = async () => {
@@ -136,7 +136,7 @@ export function BenefitComparison({
       const response = await fetch(`/api/clauses?${params.toString()}&clauseType=benefits_insurance`);
       if (!response.ok) throw new Error('Failed to fetch benefit data');
 
-      const data = await response.json();
+      const _data = await response.json();
       
       // Transform clause data to benefit comparisons
       // In a real implementation, this would come from benefit_comparisons table

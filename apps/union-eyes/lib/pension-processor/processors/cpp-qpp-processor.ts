@@ -17,7 +17,6 @@ import type {
   AnnualPensionStatement,
   PensionPlanConfig,
   ContributionRemittance,
-  EmploymentStatus,
 } from '../types';
 import { PensionProcessorError, ContributionPeriod } from '../types';
 

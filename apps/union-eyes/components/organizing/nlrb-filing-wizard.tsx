@@ -29,7 +29,6 @@ import {
   ChevronLeft,
   Download,
 } from "lucide-react";
-import { format } from "date-fns";
 
 interface FilingData {
   // Step 1: Basic Information
@@ -136,7 +135,7 @@ export default function NLRBFilingWizard({ campaignId, onComplete }: { campaignI
         throw new Error(error.error || 'Failed to submit filing');
       }
 
-      const result = await response.json();
+      const _result = await response.json();
 if (onComplete) onComplete();
     } catch (error) {
 alert(`Failed to submit filing: ${error instanceof Error ? error.message : 'Unknown error'}`);
@@ -276,6 +275,7 @@ alert(`Failed to submit filing: ${error instanceof Error ? error.message : 'Unkn
                 <Label htmlFor="filingType">Filing Type *</Label>
                 <Select
                   value={filingData.filingType}
+                  // eslint-disable-next-line @typescript-eslint/no-explicit-any
                   onValueChange={(value: any) => setFilingData({ ...filingData, filingType: value })}
                 >
                   <SelectTrigger>
@@ -296,6 +296,7 @@ alert(`Failed to submit filing: ${error instanceof Error ? error.message : 'Unkn
                 <Label htmlFor="jurisdiction">Jurisdiction *</Label>
                 <Select
                   value={filingData.jurisdiction}
+                  // eslint-disable-next-line @typescript-eslint/no-explicit-any
                   onValueChange={(value: any) => setFilingData({ ...filingData, jurisdiction: value })}
                 >
                   <SelectTrigger>
@@ -510,6 +511,7 @@ alert(`Failed to submit filing: ${error instanceof Error ? error.message : 'Unkn
                 <Label htmlFor="electionType">Proposed Election Type *</Label>
                 <Select
                   value={filingData.electionType}
+                  // eslint-disable-next-line @typescript-eslint/no-explicit-any
                   onValueChange={(value: any) => setFilingData({ ...filingData, electionType: value })}
                 >
                   <SelectTrigger>

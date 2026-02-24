@@ -5,6 +5,9 @@
  * Part of Phase 0.2 - Admin Console UI
  */
 
+
+export const dynamic = 'force-dynamic';
+
 import { Suspense } from "react";
 import Link from "next/link";
 import { Building2, Plus, Search, Users, HardDrive, TrendingUp } from "lucide-react";

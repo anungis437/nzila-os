@@ -11,6 +11,9 @@
  * @page app/[locale]/admin/page.tsx
  */
 
+
+export const dynamic = 'force-dynamic';
+
 import * as React from "react";
 import Link from "next/link";
 import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
@@ -395,8 +398,8 @@ export default function AdminPage({ params }: AdminPageProps) {
             totalCount={0}
             page={1}
             pageSize={50}
-            onFiltersChange={(filters) => undefined}
-            onPageChange={(page) => undefined}
+            onFiltersChange={(_filters) => undefined}
+            onPageChange={(_page) => undefined}
             onExport={() => undefined}
           />
         </TabsContent>

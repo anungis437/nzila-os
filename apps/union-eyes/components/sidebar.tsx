@@ -47,6 +47,9 @@ import { motion, AnimatePresence } from "framer-motion";
 import { SelectProfile } from "@/db/schema/domains/member";
 import { useTranslations, useLocale } from "next-intl";
 import { useState, useEffect, useCallback } from "react";
+ 
+ 
+ 
 import { useOrganization } from "@/contexts/organization-context";
 
 // ── Nzila platform roles (super-org level — no union nav) ────────────────────
@@ -57,7 +60,7 @@ const NZILA_ROLES = [
   "support_agent", "data_analyst", "billing_specialist",
 ] as const;
 
-type NzilaRole = typeof NZILA_ROLES[number];
+type _NzilaRole = typeof NZILA_ROLES[number];
 
 interface SidebarProps {
   profile: SelectProfile | null;
@@ -119,7 +122,7 @@ function NavSection({
 }
 
 // ═════════════════════════════════════════════════════════════════════════════
-export default function Sidebar({ profile, userEmail, whopMonthlyPlanId, whopYearlyPlanId, userRole = "member" }: SidebarProps) {
+export default function Sidebar({ profile: _profile, userEmail, whopMonthlyPlanId: _whopMonthlyPlanId, whopYearlyPlanId: _whopYearlyPlanId, userRole = "member" }: SidebarProps) {
   const pathname = usePathname();
   const locale = useLocale();
   const t = useTranslations();
@@ -318,6 +321,7 @@ export default function Sidebar({ profile, userEmail, whopMonthlyPlanId, whopYea
         items: section.items.filter(item => item.roles.includes(userRole)),
       }))
       .filter(section => section.items.length > 0 && section.roles.includes(userRole));
+  // eslint-disable-next-line react-hooks/exhaustive-deps
   }, [userRole, isNzila, hasSelectedOrg, locale, organization]);
 
   const visibleSections = buildSections();

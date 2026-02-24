@@ -33,7 +33,7 @@ export type ValidationResult<T> =
 /**
  * Request validation error details
  */
-interface ValidationErrorDetail {
+interface _ValidationErrorDetail {
   field: string;
   message: string;
   received?: unknown;
@@ -272,7 +272,7 @@ export class RequestValidator {
       if (key in sanitized) {
         try {
           sanitized[key as keyof T] = rule(sanitized[key as keyof T]) as never;
-        } catch (error) {
+        } catch (_error) {
 }
       }
     });

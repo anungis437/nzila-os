@@ -5,6 +5,9 @@
 import { BillingCycleService } from '@/lib/services/billing-cycle-service';
 import { logger } from '@/lib/logger';
 
+ 
+ 
+ 
 import { withApi, ApiError, z } from '@/lib/api/framework';
 
 const previewSchema = z.object({
@@ -24,7 +27,7 @@ export const POST = withApi(
     },
     successStatus: 201,
   },
-  async ({ request, userId, organizationId, user, body, query }) => {
+  async ({ request: _request, userId: _userId, organizationId, user, body, query: _query }) => {
         const { periodStart, periodEnd, frequency } = body;
 
         if (!user || !organizationId) {

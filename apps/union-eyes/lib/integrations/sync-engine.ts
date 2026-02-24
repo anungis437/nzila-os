@@ -9,7 +9,7 @@ import { integrationSyncLog, syncJobs } from '@/db/schema';
 import { eq, and, desc } from 'drizzle-orm';
 import cron from 'node-cron';
 import {
-  IntegrationType,
+  _IntegrationType,
   IntegrationProvider,
   SyncType,
   SyncStatus,

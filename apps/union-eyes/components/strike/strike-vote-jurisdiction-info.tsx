@@ -35,7 +35,7 @@ export function StrikeVoteJurisdictionInfo({
   votesAgainst,
   totalVotesCast,
 }: StrikeVoteJurisdictionInfoProps) {
-  const t = useTranslations();
+  const _t = useTranslations();
   const [jurisdiction, setJurisdiction] = useState<CAJurisdiction | null>(null);
   const [requirements, setRequirements] = useState<ThresholdRequirements | null>(null);
   const [loading, setLoading] = useState(true);

@@ -31,7 +31,7 @@ export function ProposalStatusTracker({ proposals }: ProposalStatusTrackerProps)
 
   const total = proposals.length;
   const acceptanceRate = total > 0 ? (statusCounts.accepted / total) * 100 : 0;
-  const pendingRate = total > 0 ? ((statusCounts.submitted + statusCounts.under_review) / total) * 100 : 0;
+  const _pendingRate = total > 0 ? ((statusCounts.submitted + statusCounts.under_review) / total) * 100 : 0;
 
   return (
     <Card>

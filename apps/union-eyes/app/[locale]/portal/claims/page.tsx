@@ -4,12 +4,15 @@
  */
 "use client";
 
+
+export const dynamic = 'force-dynamic';
 import { useEffect, useState } from "react";
 import { useUser } from "@clerk/nextjs";
 import { useRouter } from "next/navigation";
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "@/components/ui/card";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
+ 
 import { 
   CheckCircle, 
   AlertCircle, 
@@ -29,7 +32,7 @@ interface Claim {
 }
 
 export default function MemberClaimsPage() {
-  const { user } = useUser();
+  const { user: _user } = useUser();
   const router = useRouter();
   const [claims, setClaims] = useState<Claim[]>([]);
   const [loading, setLoading] = useState(true);
@@ -43,7 +46,7 @@ export default function MemberClaimsPage() {
           const data = await response.json();
           setClaims(data.recentClaims || []);
         }
-      } catch (error) {
+      } catch (_error) {
 } finally {
         setLoading(false);
       }

@@ -33,7 +33,7 @@ export default function BudgetVsActualChart({ lineItems }: BudgetVsActualChartPr
   const totalSpent = lineItems.reduce((sum, item) => sum + parseFloat(item.spentAmount), 0);
   const totalCommitted = lineItems.reduce((sum, item) => sum + parseFloat(item.committedAmount), 0);
   const totalVariance = totalAllocated - totalSpent - totalCommitted;
-  const utilizationPercent = totalAllocated > 0 ? ((totalSpent + totalCommitted) / totalAllocated) * 100 : 0;
+  const _utilizationPercent = totalAllocated > 0 ? ((totalSpent + totalCommitted) / totalAllocated) * 100 : 0;
 
   const overBudgetItems = lineItems.filter(item => parseFloat(item.remainingAmount) < 0);
 

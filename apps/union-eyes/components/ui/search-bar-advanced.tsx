@@ -23,7 +23,6 @@ import {
   Command,
   CommandEmpty,
   CommandGroup,
-  CommandInput,
   CommandItem,
   CommandList,
 } from "@/components/ui/command";
@@ -39,6 +38,7 @@ export interface SearchSuggestion {
   label: string;
   value: string;
   category?: string;
+  // eslint-disable-next-line @typescript-eslint/no-explicit-any
   metadata?: Record<string, any>;
 }
 
@@ -86,7 +86,7 @@ export function SearchBarAdvanced({
         if (stored) {
           setRecentSearches(JSON.parse(stored));
         }
-      } catch (error) {
+      } catch (_error) {
 }
     }
   }, [showRecentSearches]);
@@ -125,7 +125,7 @@ export function SearchBarAdvanced({
     
     try {
       localStorage.setItem(RECENT_SEARCHES_KEY, JSON.stringify(updated));
-    } catch (error) {
+    } catch (_error) {
 }
   };
 
@@ -239,6 +239,7 @@ export function SearchBarAdvanced({
           className="p-0 w-full"
           align="start"
           onOpenAutoFocus={(e) => e.preventDefault()}
+          // eslint-disable-next-line react-hooks/refs
           style={{ width: inputRef.current?.offsetWidth }}
         >
           <Command>

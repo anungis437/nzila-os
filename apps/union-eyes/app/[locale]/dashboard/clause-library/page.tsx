@@ -1,5 +1,7 @@
-﻿"use client";
+"use client";
 
+
+export const dynamic = 'force-dynamic';
 /**
  * Phase 5B: Shared Clause Library Main Page
  * Integrates search, view, compare, share, and tag management
@@ -45,9 +47,12 @@ export default function ClauseLibraryPage() {
   const [comparisonNotes, setComparisonNotes] = useState("");
   const [sharingDialogOpen, setSharingDialogOpen] = useState(false);
   const [currentPage, setCurrentPage] = useState(1);
+  // eslint-disable-next-line @typescript-eslint/no-explicit-any
   const [clausesData, setClausesData] = useState<any>(null);
   const [isLoadingClauses, setIsLoadingClauses] = useState(false);
+  // eslint-disable-next-line @typescript-eslint/no-explicit-any
   const [selectedClause, setSelectedClause] = useState<any>(null);
+  // eslint-disable-next-line @typescript-eslint/no-explicit-any
   const [comparisonData, setComparisonData] = useState<any>(null);
   const [isLoadingClause, setIsLoadingClause] = useState(false);
   const [isLoadingComparison, setIsLoadingComparison] = useState(false);
@@ -182,7 +187,7 @@ setClausesData({ clauses: [], total: 0, page: currentPage, limit: pageSize });
         });
         setSelectedClause(null);
       }
-    } catch (error) {
+    } catch (_error) {
 toast({
         title: "Error",
         description: "Failed to load clause details",
@@ -233,7 +238,7 @@ toast({
         });
         setComparisonData(null);
       }
-    } catch (error) {
+    } catch (_error) {
 toast({
         title: "Error",
         description: "Failed to load comparison",
@@ -337,6 +342,7 @@ toast({
       )}
 
       {/* Main Content */}
+      {/* eslint-disable-next-line @typescript-eslint/no-explicit-any */}
       <Tabs value={activeTab} onValueChange={(v: any) => setActiveTab(v)}>
         <TabsList>
           <TabsTrigger value="browse">Browse</TabsTrigger>
@@ -359,6 +365,7 @@ toast({
           ) : (
             <>
               <div className="grid gap-4 md:grid-cols-2">
+                {/* eslint-disable-next-line @typescript-eslint/no-explicit-any */}
                 {clausesData?.clauses?.map((clause: any) => (
                   <Card key={clause.id} className="cursor-pointer hover:shadow-md transition-shadow">
                     <CardHeader>
@@ -460,7 +467,7 @@ toast({
                     } else {
                       throw new Error("Failed to delete");
                     }
-                  } catch (error) {
+                  } catch (_error) {
                     toast({
                       title: "Error",
                       description: "Failed to delete clause",
@@ -502,7 +509,7 @@ toast({
                       } else {
                         throw new Error("Failed to add tag");
                       }
-                    } catch (error) {
+                    } catch (_error) {
                       toast({
                         title: "Error",
                         description: "Failed to add tag",
@@ -532,7 +539,7 @@ toast({
                       } else {
                         throw new Error("Failed to remove tag");
                       }
-                    } catch (error) {
+                    } catch (_error) {
                       toast({
                         title: "Error",
                         description: "Failed to remove tag",
@@ -577,7 +584,7 @@ toast({
                     } else {
                       throw new Error("Failed to update sharing");
                     }
-                  } catch (error) {
+                  } catch (_error) {
                     toast({
                       title: "Error",
                       description: "Failed to update sharing settings",
@@ -629,6 +636,7 @@ toast({
                 report += "CLAUSES\n";
                 report += "=".repeat(80) + "\n\n";
                 
+                // eslint-disable-next-line @typescript-eslint/no-explicit-any
                 comparisonData.clauses.forEach((clause: any, index: number) => {
                   report += `${index + 1}. ${clause.clauseTitle}\n`;
                   report += "-".repeat(80) + "\n";
@@ -640,6 +648,7 @@ toast({
                   if (clause.effectiveDate) report += `Effective: ${clause.effectiveDate}\n`;
                   report += `\nClause Text:\n${clause.clauseText}\n\n`;
                   if (clause.tags?.length > 0) {
+                    // eslint-disable-next-line @typescript-eslint/no-explicit-any
                     report += `Tags: ${clause.tags.map((t: any) => t.tagName).join(", ")}\n`;
                   }
                   report += "\n";

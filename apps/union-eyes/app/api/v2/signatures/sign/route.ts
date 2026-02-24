@@ -4,7 +4,12 @@
  */
 import { SignatureService } from "@/lib/signature/signature-service";
 
-import { withApi, ApiError, z } from '@/lib/api/framework';
+ 
+ 
+ 
+ 
+ 
+import { withApi, z } from '@/lib/api/framework';
 
 const signatureSchema = z.object({
   signerId: z.string().uuid('Invalid signerId'),
@@ -27,7 +32,7 @@ export const POST = withApi(
       summary: 'POST sign',
     },
   },
-  async ({ request, userId, organizationId, user, body, query, params }) => {
+  async ({ request, userId: _userId, organizationId: _organizationId, user: _user, body, query: _query, params: _params }) => {
 
         // Get IP and user agent
         const { signerId, signatureImageUrl, signatureType, geolocation } = body;

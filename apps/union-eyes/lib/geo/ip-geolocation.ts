@@ -64,7 +64,7 @@ export async function resolveIpGeolocation(rawIp: string | null | undefined): Pr
       timezone: data.timezone || undefined,
       isp: data.org || undefined,
     };
-  } catch (error) {
+  } catch (_error) {
 return {};
   }
 }

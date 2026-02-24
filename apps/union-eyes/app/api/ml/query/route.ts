@@ -1,5 +1,5 @@
 import { NextRequest, NextResponse } from 'next/server';
-import { getCurrentUser, withAdminAuth, withApiAuth, withMinRole, withRoleAuth, BaseAuthContext } from '@/lib/api-auth-guard';
+import { withRoleAuth, BaseAuthContext } from '@/lib/api-auth-guard';
 import { checkRateLimit, RATE_LIMITS, createRateLimitHeaders } from '@/lib/rate-limiter';
 import { logApiAuditEvent } from '@/lib/middleware/api-security';
 import { z } from 'zod';
@@ -7,7 +7,6 @@ import { z } from 'zod';
 import {
   ErrorCode,
   standardErrorResponse,
-  standardSuccessResponse,
 } from '@/lib/api/standardized-responses';
 const QuerySchema = z.object({
   question: z.string().min(1).max(500),
@@ -132,7 +131,7 @@ if (error instanceof z.ZodError) {
  */
 function generateFollowUpSuggestions(
   question: string, 
-  result: Record<string, unknown>
+  _result: Record<string, unknown>
 ): string[] {
   const suggestions: string[] = [];
   const lowerQuestion = question.toLowerCase();

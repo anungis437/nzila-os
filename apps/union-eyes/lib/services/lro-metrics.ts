@@ -31,6 +31,7 @@
  */
 
 import { db } from '@/db/db';
+ 
 import { logger } from '@/lib/logger';
 
 /**
@@ -216,7 +217,7 @@ export async function getAggregatedMetrics(
 ): Promise<AggregatedMetrics> {
   const { grievances } = await import('@/db/schema/domains/claims');
   const { analyticsMetrics } = await import('@/db/schema/analytics');
-  const { eq, and, gte, lte, count, avg, sql } = await import('drizzle-orm');
+  const { eq, and, gte, lte, count, avg: _avg, sql } = await import('drizzle-orm');
   
   try {
     // Build base query conditions

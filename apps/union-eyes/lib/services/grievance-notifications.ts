@@ -6,11 +6,9 @@
  */
 
 import { db } from "@/db";
-import { profiles } from "@/db/schema/profiles-schema";
 import { users } from "@/db/schema/user-management-schema";
-import { claims } from "@/db/schema/domains/claims";
 import { getNotificationService } from "./notification-service";
-import { eq, and } from "drizzle-orm";
+import { eq } from "drizzle-orm";
 import { logger } from "@/lib/logger";
 
 // ============================================================================
@@ -583,6 +581,7 @@ export async function sendSettlementProposalNotification(
   }
 }
 
+// eslint-disable-next-line import/no-anonymous-default-export
 export default {
   sendGrievanceFiledNotification,
   sendGrievanceAssignedNotification,

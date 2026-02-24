@@ -262,8 +262,8 @@ export class MultiCurrencyGLHelper {
     bookedAmount: Decimal,
     bookedCurrency: string,
     settledAmount: Decimal,
-    settledCurrency: string,
-    reportingCurrency: string
+    _settledCurrency: string,
+    _reportingCurrency: string
   ): {
     realized: Decimal;
     unrealized: Decimal;

@@ -6,8 +6,8 @@
  * Date: February 6, 2026
  */
 
-import * as fs from 'fs';
-import * as path from 'path';
+import * as _fs from 'fs';
+import * as _path from 'path';
 
 /**
  * RLS Security Gap Remediation Summary
@@ -476,6 +476,7 @@ export async function generateSecurityImplementationReport(): Promise<string> {
 }
 
 // Export for use in reports
+// eslint-disable-next-line import/no-anonymous-default-export
 export default {
   rlsRemediationSummary,
   criticalGaps,

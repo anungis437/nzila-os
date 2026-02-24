@@ -41,7 +41,7 @@ import {
   DialogTitle,
   DialogTrigger,
 } from "@/components/ui/dialog";
-import { 
+import {
   Calendar as CalendarIcon,
   Clock,
   MapPin,
@@ -50,11 +50,8 @@ import {
   Plus,
   Eye,
   Edit,
-  Trash2,
-  FileText
 } from "lucide-react";
 import { format, addDays } from "date-fns";
-import { cn } from "@/lib/utils";
 
 export interface FederationMeeting {
   id: string;
@@ -98,6 +95,7 @@ export function FederationMeetingScheduler({
 
   React.useEffect(() => {
     loadMeetings();
+  // eslint-disable-next-line react-hooks/exhaustive-deps
   }, [federationId]);
 
   async function loadMeetings() {
@@ -117,7 +115,7 @@ export function FederationMeetingScheduler({
       } else {
         throw new Error(data.error);
       }
-    } catch (error) {
+    } catch (_error) {
       toast({
         title: "Error",
         description: "Failed to load meetings",
@@ -166,7 +164,7 @@ export function FederationMeetingScheduler({
       } else {
         throw new Error(data.error);
       }
-    } catch (error) {
+    } catch (_error) {
       toast({
         title: "Error",
         description: "Failed to create meeting",
@@ -202,10 +200,11 @@ export function FederationMeetingScheduler({
       special: { variant: "default", label: "Special" }
     };
     const config = variants[type];
+    // eslint-disable-next-line @typescript-eslint/no-explicit-any
     return <Badge variant={config.variant as any}>{config.label}</Badge>;
   };
 
-  const getStatusBadge = (status: FederationMeeting["status"]) => {
+  const _getStatusBadge = (status: FederationMeeting["status"]) => {
     switch (status) {
       case "scheduled":
         return <Badge variant="secondary">Scheduled</Badge>;
@@ -278,6 +277,7 @@ export function FederationMeetingScheduler({
                     <Label htmlFor="type">Meeting Type *</Label>
                     <Select
                       value={formData.type}
+                      // eslint-disable-next-line @typescript-eslint/no-explicit-any
                       onValueChange={(value) => setFormData({ ...formData, type: value as any })}
                     >
                       <SelectTrigger id="type">

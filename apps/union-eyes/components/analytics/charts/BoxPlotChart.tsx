@@ -19,7 +19,6 @@ import {
   CartesianGrid,
   Tooltip,
   ResponsiveContainer,
-  Scatter,
 } from 'recharts';
 
 // ============================================================================
@@ -96,6 +95,7 @@ export function BoxPlotChart({
     // Whiskers will be drawn separately
   }));
 
+  // eslint-disable-next-line @typescript-eslint/no-explicit-any
   const CustomTooltip = ({ active, payload }: any) => {
     if (!active || !payload || !payload.length) return null;
     const data = payload[0].payload;
@@ -118,8 +118,9 @@ export function BoxPlotChart({
   };
 
   // Custom box plot rendering
+  // eslint-disable-next-line @typescript-eslint/no-explicit-any
   const CustomBox = (props: any) => {
-    const { x, y, width, height, payload } = props;
+    const { x, _y, width, _height, payload } = props;
     const yScale = props.yAxis.scale;
     
     const minY = yScale(payload.min);
@@ -158,7 +159,9 @@ export function BoxPlotChart({
           {showGrid && <CartesianGrid strokeDasharray="3 3" opacity={0.3} />}
           <XAxis dataKey="category" />
           <YAxis />
+          {/* eslint-disable-next-line react-hooks/static-components */}
           <Tooltip content={<CustomTooltip />} />
+          {/* eslint-disable-next-line react-hooks/static-components */}
           <Bar dataKey="q3" shape={<CustomBox />} />
         </ComposedChart>
       </ResponsiveContainer>

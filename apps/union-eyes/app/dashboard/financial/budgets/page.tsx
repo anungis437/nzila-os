@@ -1,3 +1,5 @@
+export const dynamic = 'force-dynamic';
+
 import { Suspense } from 'react';
 import BudgetManager from '@/components/financial/BudgetManager';
 import { getCurrentUser } from '@/lib/api-auth-guard';
@@ -16,6 +18,7 @@ export default async function BudgetsPage() {
   }
 
   // Check minimum role level (85 = Financial Officer)
+  // eslint-disable-next-line @typescript-eslint/no-explicit-any
   const userLevel = (user as any).roleLevel || 0;
   if (userLevel < 85) {
     return (
@@ -30,6 +33,7 @@ export default async function BudgetsPage() {
     );
   }
 
+  // eslint-disable-next-line @typescript-eslint/no-explicit-any
   const organizationId = (user as any).organizationId;
 
   return (

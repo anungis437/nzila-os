@@ -12,8 +12,10 @@ import { logger } from "@/lib/logger";
  */
 export const getUserByEmail = async (
   email: string,
+  // eslint-disable-next-line @typescript-eslint/no-explicit-any
   tx?: NodePgDatabase<any>
 ) => {
+  // eslint-disable-next-line @typescript-eslint/no-explicit-any
   const executeQuery = async (dbOrTx: NodePgDatabase<any>) => {
     try {
       const [user] = await dbOrTx
@@ -41,8 +43,10 @@ export const getUserByEmail = async (
  */
 export const getUserById = async (
   userId: string,
+  // eslint-disable-next-line @typescript-eslint/no-explicit-any
   tx?: NodePgDatabase<any>
 ) => {
+  // eslint-disable-next-line @typescript-eslint/no-explicit-any
   const executeQuery = async (dbOrTx: NodePgDatabase<any>) => {
     try {
       const [user] = await dbOrTx

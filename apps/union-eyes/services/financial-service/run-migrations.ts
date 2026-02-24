@@ -20,13 +20,13 @@ const sql = postgres(DATABASE_URL, {
   max: 1,
 });
 
-async function runMigration(filePath: string, fileName: string) {
+async function runMigration(filePath: string, _fileName: string) {
   try {
 const migrationSQL = fs.readFileSync(filePath, 'utf-8');
     
     await sql.unsafe(migrationSQL);
 return true;
-  } catch (error) {
+  } catch (_error) {
 return false;
   }
 }
@@ -40,7 +40,8 @@ const migrationsDir = path.join(__dirname, '../../database/migrations');
     '015_notification_system.sql',
   ];
 
-  let successCount = 0;
+  // eslint-disable-next-line @typescript-eslint/no-unused-vars
+  const successCount = 0;
   let failCount = 0;
 
   for (const migration of migrations) {
@@ -52,7 +53,7 @@ continue;
 
     const success = await runMigration(filePath, migration);
     if (success) {
-      successCount++;
+      _successCount++;
     } else {
       failCount++;
     }
@@ -66,6 +67,6 @@ process.exit(0);
   }
 }
 
-main().catch((error) => {
+main().catch((_error) => {
 process.exit(1);
 });

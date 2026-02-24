@@ -13,7 +13,7 @@
 
 import { getAiClient, UE_APP_KEY, UE_PROFILES } from '@/lib/ai/ai-client';
 import type { ClauseType } from '@/db/schema/domains/agreements';
-import type { PrecedentValueEnum, OutcomeEnum, DecisionTypeEnum } from '@/db/schema/domains/agreements';
+import type { PrecedentValueEnum, OutcomeEnum } from '@/db/schema/domains/agreements';
 import { logger } from '@/lib/logger';
 
 // Clause type definitions with descriptions for classification
@@ -361,7 +361,7 @@ export async function enrichClauseMetadata(
   crossReferences: CrossReferenceResult;
 }> {
   // Run all enrichment functions in parallel
-  const [classification, tags, crossReferences] = await Promise.all([
+  const [classification, _tags, crossReferences] = await Promise.all([
     classifyClause(clauseContent, context),
     generateClauseTags(clauseContent, 'other'), // Will be updated with actual type
     detectCrossReferences(clauseContent),

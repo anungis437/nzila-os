@@ -4,6 +4,8 @@
  */
 "use client";
 
+
+export const dynamic = 'force-dynamic';
 import { useState } from "react";
 import { useRouter } from "next/navigation";
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "@/components/ui/card";
@@ -45,7 +47,7 @@ export default function NewClaimPage() {
       if (response.ok) {
         router.push('../claims');
       }
-    } catch (error) {
+    } catch (_error) {
 } finally {
       setSubmitting(false);
     }

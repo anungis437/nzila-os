@@ -59,6 +59,7 @@ export const memberContactPreferences = pgTable('member_contact_preferences', {
   interpreterLanguage: text('interpreter_language'),
   
   // Metadata
+  // eslint-disable-next-line @typescript-eslint/no-explicit-any
   metadata: jsonb('metadata').$type<Record<string, any>>(),
   
   // Audit
@@ -125,6 +126,7 @@ export const memberEmploymentDetails = pgTable('member_employment_details', {
   committeeMember: boolean('committee_member').default(false),
   
   // Metadata
+  // eslint-disable-next-line @typescript-eslint/no-explicit-any
   metadata: jsonb('metadata').$type<Record<string, any>>(),
   
   // Audit
@@ -165,6 +167,7 @@ export const memberConsents = pgTable('member_consents', {
   requiresRenewal: boolean('requires_renewal').default(false),
   
   // Metadata
+  // eslint-disable-next-line @typescript-eslint/no-explicit-any
   metadata: jsonb('metadata').$type<Record<string, any>>(),
   
   // Audit
@@ -208,6 +211,7 @@ export const memberDocuments = pgTable('member_documents', {
   tags: jsonb('tags').$type<string[]>(),
   
   // Metadata
+  // eslint-disable-next-line @typescript-eslint/no-explicit-any
   metadata: jsonb('metadata').$type<Record<string, any>>(),
   
   // Audit
@@ -233,9 +237,12 @@ export const memberHistoryEvents = pgTable('member_history_events', {
   eventTitle: text('event_title').notNull(),
   eventDescription: text('event_description'),
   eventData: jsonb('event_data').$type<{
+    // eslint-disable-next-line @typescript-eslint/no-explicit-any
     previousValue?: any;
+    // eslint-disable-next-line @typescript-eslint/no-explicit-any
     newValue?: any;
     relatedId?: string;
+    // eslint-disable-next-line @typescript-eslint/no-explicit-any
     [key: string]: any;
   }>(),
   
@@ -248,6 +255,7 @@ export const memberHistoryEvents = pgTable('member_history_events', {
   visibleToMember: boolean('visible_to_member').default(true),
   
   // Metadata
+  // eslint-disable-next-line @typescript-eslint/no-explicit-any
   metadata: jsonb('metadata').$type<Record<string, any>>(),
   
   // Audit
@@ -256,22 +264,22 @@ export const memberHistoryEvents = pgTable('member_history_events', {
 });
 
 // Relations
-export const memberContactPreferencesRelations = relations(memberContactPreferences, ({ one }) => ({
+export const memberContactPreferencesRelations = relations(memberContactPreferences, ({ _one }) => ({
   // user: one(users, { fields: [memberContactPreferences.userId], references: [users.id] }),
 }));
 
-export const memberEmploymentDetailsRelations = relations(memberEmploymentDetails, ({ one }) => ({
+export const memberEmploymentDetailsRelations = relations(memberEmploymentDetails, ({ _one }) => ({
   // user: one(users, { fields: [memberEmploymentDetails.userId], references: [users.id] }),
 }));
 
-export const memberConsentsRelations = relations(memberConsents, ({ one }) => ({
+export const memberConsentsRelations = relations(memberConsents, ({ _one }) => ({
   // user: one(users, { fields: [memberConsents.userId], references: [users.id] }),
 }));
 
-export const memberDocumentsRelations = relations(memberDocuments, ({ one }) => ({
+export const memberDocumentsRelations = relations(memberDocuments, ({ _one }) => ({
   // user: one(users, { fields: [memberDocuments.userId], references: [users.id] }),
 }));
 
-export const memberHistoryEventsRelations = relations(memberHistoryEvents, ({ one }) => ({
+export const memberHistoryEventsRelations = relations(memberHistoryEvents, ({ _one }) => ({
   // user: one(users, { fields: [memberHistoryEvents.userId], references: [users.id] }),
 }));

@@ -21,7 +21,7 @@ import { cacheGet, cacheSet } from '@/lib/services/cache-service';
 // TYPES
 // =============================================================================
 
-type Organization = InferSelectModel<typeof organizations>;
+type _Organization = InferSelectModel<typeof organizations>;
 
 export interface FederationSuggestion {
   id: string;
@@ -82,6 +82,7 @@ export async function autoDetectParentFederation(
 ): Promise<FederationSuggestion[]> {
   try {
     // Query for federations in the same province/sector
+    // eslint-disable-next-line @typescript-eslint/no-explicit-any
     const filters: any[] = [
       or(
         eq(organizations.organizationType, 'federation'),
@@ -176,6 +177,7 @@ export async function suggestRelevantClauses(
     }
 
     const hierarchyPath = org.hierarchyPath || [];
+    // eslint-disable-next-line @typescript-eslint/no-explicit-any
     const filters: any[] = [
       // Only public/federation/congress level clauses
       inArray(sharedClauseLibrary.sharingLevel, ['public', 'federation', 'congress']),
@@ -254,6 +256,7 @@ export async function suggestRelevantClauses(
         clauseId: clause.id,
         clauseTitle: clause.clauseTitle,
         clauseType: clause.clauseType,
+        // eslint-disable-next-line @typescript-eslint/no-explicit-any
         sourceOrgName: (clause.sourceOrganization as any)?.name || 'Unknown',
         sharingLevel: clause.sharingLevel,
         relevanceScore,
@@ -291,6 +294,7 @@ export async function findPeerOrganizations(
       throw new Error('Organization not found');
     }
 
+    // eslint-disable-next-line @typescript-eslint/no-explicit-any
     const filters: any[] = [
       eq(organizations.status, 'active'),
     ];

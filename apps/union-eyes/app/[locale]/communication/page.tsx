@@ -1,3 +1,7 @@
+"use client";
+
+export const dynamic = 'force-dynamic';
+
 /**
  * Communication Center Page
  * 
@@ -57,7 +61,7 @@ export default function CommunicationPage() {
 
         <TabsContent value="email">
           <EmailTemplateBuilder
-            onSave={async (template) => {
+            onSave={async (_template) => {
 }}
           />
         </TabsContent>
@@ -109,7 +113,7 @@ export default function CommunicationPage() {
         <AnnouncementComposer
           departments={[]}
           roles={[]}
-          onPublish={async (announcement) => {
+          onPublish={async (_announcement) => {
 setShowAnnouncementComposer(false);
           }}
           onCancel={() => setShowAnnouncementComposer(false)}

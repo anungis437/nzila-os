@@ -1,16 +1,12 @@
 import { z } from 'zod';
 import { NextRequest, NextResponse } from 'next/server';
 import { sql } from 'drizzle-orm';
-import { logger } from '@/lib/logger';
-import { getCurrentUser, withAdminAuth, withApiAuth, withMinRole, withRoleAuth } from '@/lib/api-auth-guard';
+import { withRoleAuth } from '@/lib/api-auth-guard';
 import { checkRateLimit, RATE_LIMITS, createRateLimitHeaders } from '@/lib/rate-limiter';
-import { logApiAuditEvent } from '@/lib/middleware/api-security';
 import { db } from '@/db';
-import { withRLSContext } from '@/lib/db/with-rls-context';
 import {
   ErrorCode,
   standardErrorResponse,
-  standardSuccessResponse,
 } from '@/lib/api/standardized-responses';
 /**
  * GET /api/ml/monitoring/alerts

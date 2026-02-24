@@ -20,7 +20,6 @@ import {
   Settings,
   X,
   Check,
-  Info,
   Shield,
   BarChart3,
   Target,
@@ -39,7 +38,6 @@ import {
   DialogTitle,
 } from "@/components/ui/dialog";
 import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
-import { cn } from "@/lib/utils";
 
 export interface CookieCategory {
   id: string;
@@ -222,12 +220,12 @@ export function CookieConsentBanner({
       <div className="fixed bottom-0 left-0 right-0 z-50 p-4 bg-white border-t shadow-lg">
         <div className="max-w-7xl mx-auto">
           <div className="flex items-start gap-4">
-            <Cookie className="h-6 w-6 text-gray-600 flex-shrink-0 mt-1" />
+            <Cookie className="h-6 w-6 text-gray-600 shrink-0 mt-1" />
             <div className="flex-1 min-w-0">
               <h3 className="text-lg font-semibold mb-2">We Value Your Privacy</h3>
               <p className="text-sm text-gray-600 mb-4">
                 We use cookies to enhance your browsing experience, serve personalized content,
-                and analyze our traffic. By clicking "Accept All", you consent to our use of
+                and analyze our traffic. By clicking &quot;Accept All&quot;, you consent to our use of
                 cookies.{" "}
                 {policyUrl && (
                   <a
@@ -259,7 +257,7 @@ export function CookieConsentBanner({
                 variant="ghost"
                 size="sm"
                 onClick={onClose}
-                className="flex-shrink-0"
+                className="shrink-0"
               >
                 <X className="h-4 w-4" />
               </Button>

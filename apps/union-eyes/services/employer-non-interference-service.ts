@@ -1,6 +1,6 @@
 import { db } from "@/db";
 import {
-  dataClassificationPolicy,
+  _dataClassificationPolicy,
   dataClassificationRegistry,
   firewallAccessRules,
   employerAccessAttempts,

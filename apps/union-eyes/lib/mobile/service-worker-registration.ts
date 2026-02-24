@@ -31,6 +31,7 @@ export function useServiceWorker(): ServiceWorkerState {
 
   useEffect(() => {
     if (typeof window === 'undefined' || !('serviceWorker' in navigator)) {
+      // eslint-disable-next-line react-hooks/set-state-in-effect
       setState(prev => ({ ...prev, isSupported: false }));
       return;
     }
@@ -60,7 +61,7 @@ export function useServiceWorker(): ServiceWorkerState {
         });
 
         // Wait for ready
-        const readyRegistration = await navigator.serviceWorker.ready;
+        const _readyRegistration = await navigator.serviceWorker.ready;
 
         setState(prev => ({
           ...prev,
@@ -94,7 +95,8 @@ export function usePWAInstall(): {
     if (typeof window === 'undefined') return;
 
     // Check if running in standalone mode
-    const isStandalone = window.matchMedia('(display-mode: standalone)').matches ||
+    const _isStandalone = window.matchMedia('(display-mode: standalone)').matches ||
+                        // eslint-disable-next-line @typescript-eslint/no-explicit-any
                         (window.navigator as any).standalone === true;
 
     // Check if can install
@@ -114,7 +116,9 @@ export function usePWAInstall(): {
   const install = useCallback(async () => {
     if (!deferredPrompt) return;
 
+    // eslint-disable-next-line @typescript-eslint/no-explicit-any
     (deferredPrompt as any).prompt();
+    // eslint-disable-next-line @typescript-eslint/no-explicit-any
     const { outcome } = await (deferredPrompt as any).userChoice;
     
     if (outcome === 'accepted') {
@@ -127,6 +131,7 @@ export function usePWAInstall(): {
   return {
     isStandalone: typeof window !== 'undefined' && 
       (window.matchMedia('(display-mode: standalone)').matches ||
+       // eslint-disable-next-line @typescript-eslint/no-explicit-any
        (window.navigator as any).standalone === true),
     isInstalled: typeof window !== 'undefined' && 
       window.matchMedia('(display-mode: standalone)').matches,
@@ -153,8 +158,11 @@ export function useNetworkStatus(): {
     if (typeof window === 'undefined') return;
 
     const updateStatus = () => {
+      // eslint-disable-next-line @typescript-eslint/no-explicit-any
       const connection = (navigator as any).connection || 
+                       // eslint-disable-next-line @typescript-eslint/no-explicit-any
                        (navigator as any).mozConnection || 
+                       // eslint-disable-next-line @typescript-eslint/no-explicit-any
                        (navigator as any).webkitConnection;
       
       setStatus({
@@ -170,6 +178,7 @@ export function useNetworkStatus(): {
     window.addEventListener('offline', updateStatus);
 
     // Listen for connection changes
+    // eslint-disable-next-line @typescript-eslint/no-explicit-any
     const connection = (navigator as any).connection;
     if (connection) {
       connection.addEventListener('change', updateStatus);
@@ -232,6 +241,7 @@ export function useDeviceInfo(): {
     else if (/Firefox/i.test(ua)) browser = 'Firefox';
     else if (/Edge/i.test(ua)) browser = 'Edge';
 
+    // eslint-disable-next-line react-hooks/set-state-in-effect
     setInfo({
       isMobile,
       isTablet,

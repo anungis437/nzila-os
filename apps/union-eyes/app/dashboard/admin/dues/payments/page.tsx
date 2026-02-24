@@ -1,5 +1,7 @@
 'use client';
 
+
+export const dynamic = 'force-dynamic';
 /**
  * Admin Payments List
  * 
@@ -147,6 +149,7 @@ export default function AdminPaymentsList() {
 
   useEffect(() => {
     fetchPayments();
+  // eslint-disable-next-line react-hooks/exhaustive-deps
   }, [page, statusFilter]);
 
   // Handle search submit

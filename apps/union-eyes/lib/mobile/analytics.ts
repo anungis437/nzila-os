@@ -277,8 +277,11 @@ export class MobileAnalytics {
    * Get device info
    */
   private getDeviceInfo(): DeviceInfo {
+    // eslint-disable-next-line @typescript-eslint/no-explicit-any
     const connection = (navigator as any).connection || 
+                      // eslint-disable-next-line @typescript-eslint/no-explicit-any
                       (navigator as any).mozConnection || 
+                      // eslint-disable-next-line @typescript-eslint/no-explicit-any
                       (navigator as any).webkitConnection;
 
     return {

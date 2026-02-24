@@ -1,5 +1,4 @@
-import { pgTable, uuid, varchar, text, timestamp, integer, decimal, jsonb, pgEnum, index, boolean } from "drizzle-orm/pg-core";
-import { sql } from "drizzle-orm";
+import { pgTable, uuid, varchar, text, timestamp, integer, decimal, jsonb, pgEnum, index } from "drizzle-orm/pg-core";
 import { collectiveAgreements } from "./collective-agreements";
 
 // Enums for CBA Clauses

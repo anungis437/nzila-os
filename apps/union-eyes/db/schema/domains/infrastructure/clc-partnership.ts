@@ -8,7 +8,7 @@
  * - Sector comparisons
  */
 
-import { pgTable, uuid, varchar, text, timestamp, integer, numeric, boolean, index, jsonb } from "drizzle-orm/pg-core";
+import { pgTable, uuid, varchar, text, timestamp, integer, numeric, boolean } from "drizzle-orm/pg-core";
 
 // =============================================================================
 // ENUMS

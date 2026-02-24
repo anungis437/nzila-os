@@ -221,6 +221,7 @@ export class DocuSignProvider implements SignatureProvider {
       return {
         envelopeId: data.envelopeId,
         status: data.status?.toLowerCase() || "sent",
+        // eslint-disable-next-line @typescript-eslint/no-explicit-any
         signers: (data.recipients?.signers || []).map((signer: any) => ({
           signerId: signer.recipientId,
           email: signer.email,
@@ -307,7 +308,7 @@ export class DocuSignProvider implements SignatureProvider {
     }
   }
 
-  async sendReminder(envelopeId: string, signerId: string): Promise<void> {
+  async sendReminder(envelopeId: string, _signerId: string): Promise<void> {
     try {
       const response = await fetch(
         `${this.baseUrl}/accounts/${this.accountId}/envelopes/${envelopeId}/notification`,
@@ -404,6 +405,7 @@ export class HelloSignProvider implements SignatureProvider {
       return {
         envelopeId: signatureRequest.signature_request_id,
         status: this.mapHelloSignStatus(signatureRequest.is_complete, signatureRequest.is_declined),
+        // eslint-disable-next-line @typescript-eslint/no-explicit-any
         signers: signatureRequest.signatures.map((sig: any) => ({
           email: sig.signer_email_address,
           signerId: sig.signature_id,
@@ -460,6 +462,7 @@ export class HelloSignProvider implements SignatureProvider {
       return {
         envelopeId,
         status: this.mapHelloSignStatus(signatureRequest.is_complete, signatureRequest.is_declined),
+        // eslint-disable-next-line @typescript-eslint/no-explicit-any
         signers: signatureRequest.signatures.map((sig: any) => ({
           email: sig.signer_email_address,
           signerId: sig.signature_id,
@@ -613,16 +616,16 @@ export class InternalSignatureProvider implements SignatureProvider {
     };
   }
 
-  async downloadDocument(envelopeId: string): Promise<Buffer> {
+  async downloadDocument(_envelopeId: string): Promise<Buffer> {
     // Would retrieve from storage
     return Buffer.from("");
   }
 
-  async voidEnvelope(envelopeId: string, reason: string): Promise<void> {
+  async voidEnvelope(_envelopeId: string, _reason: string): Promise<void> {
     // Would update database
   }
 
-  async sendReminder(envelopeId: string, signerId: string): Promise<void> {
+  async sendReminder(_envelopeId: string, _signerId: string): Promise<void> {
     // Would send email reminder
   }
 }

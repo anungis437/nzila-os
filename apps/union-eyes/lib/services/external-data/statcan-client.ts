@@ -198,6 +198,7 @@ export class StatisticsCanadaClient {
 
     const endpoint = `/ind-eoc/wages/v1?${queryString.toString()}`;
     
+    // eslint-disable-next-line @typescript-eslint/no-explicit-any
     const rawData = await this.fetch<any[]>(endpoint);
     
     const results = rawData.map(record => {
@@ -284,6 +285,7 @@ export class StatisticsCanadaClient {
 
     const endpoint = `/labour-union-density/v1?${queryString.toString()}`;
     
+    // eslint-disable-next-line @typescript-eslint/no-explicit-any
     const rawData = await this.fetch<any[]>(endpoint);
     
     const results = rawData.map(record => {
@@ -329,6 +331,7 @@ export class StatisticsCanadaClient {
 
     const endpoint = `/ind-econ/cola/v1?${queryParams.toString()}`;
     
+    // eslint-disable-next-line @typescript-eslint/no-explicit-any
     const rawData = await this.fetch<any[]>(endpoint);
     
     return rawData.map(item => ({
@@ -354,6 +357,7 @@ export class StatisticsCanadaClient {
 
     const endpoint = `/ins-ei/contributions/v1?year=${year}`;
     
+    // eslint-disable-next-line @typescript-eslint/no-explicit-any
     const data = await this.fetch<any>(endpoint);
     
     return {
@@ -380,6 +384,7 @@ export class StatisticsCanadaClient {
 
     const endpoint = `/ins-cpp/contributions/v1?year=${year}`;
     
+    // eslint-disable-next-line @typescript-eslint/no-explicit-any
     const data = await this.fetch<any>(endpoint);
     
     return {

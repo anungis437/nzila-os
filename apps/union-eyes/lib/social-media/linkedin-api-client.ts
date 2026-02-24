@@ -237,6 +237,7 @@ export class LinkedInAPIClient {
     // Extract organizations from nested structure
     const orgs: LinkedInOrganization[] = [];
     for (const element of response.elements || []) {
+      // eslint-disable-next-line @typescript-eslint/no-explicit-any
       const org = (element as any)['organization~'];
       if (org) {
         orgs.push(org as LinkedInOrganization);
@@ -429,6 +430,7 @@ export class LinkedInAPIClient {
       },
     };
 
+    // eslint-disable-next-line @typescript-eslint/no-explicit-any
     const response = await this.makeRequest<any>(
       '/assets?action=registerUpload',
       {},
@@ -449,6 +451,24 @@ export class LinkedInAPIClient {
    * Upload an image to LinkedIn
    */
   private async uploadImage(uploadUrl: string, imageUrl: string): Promise<void> {
+    // Validate image URL to prevent SSRF
+    const parsed = new URL(imageUrl);
+    if (!['http:', 'https:'].includes(parsed.protocol)) {
+      throw new Error(`Blocked image URL scheme: ${parsed.protocol}`);
+    }
+    const blockedHosts = ['localhost', '127.0.0.1', '0.0.0.0', '[::1]', 'metadata.google.internal'];
+    if (blockedHosts.includes(parsed.hostname)) {
+      throw new Error(`Blocked image URL host: ${parsed.hostname}`);
+    }
+    // Block private IP ranges
+    const ipMatch = parsed.hostname.match(/^(\d+)\.(\d+)\.(\d+)\.(\d+)$/);
+    if (ipMatch) {
+      const [, a, b] = ipMatch.map(Number);
+      if (a === 10 || a === 127 || (a === 172 && b! >= 16 && b! <= 31) || (a === 192 && b === 168) || (a === 169 && b === 254)) {
+        throw new Error(`Blocked private IP in image URL: ${parsed.hostname}`);
+      }
+    }
+
     // Fetch the image
     const imageResponse = await fetch(imageUrl);
     const imageBuffer = await imageResponse.arrayBuffer();

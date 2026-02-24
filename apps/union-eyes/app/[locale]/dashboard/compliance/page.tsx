@@ -1,3 +1,5 @@
+export const dynamic = 'force-dynamic';
+
 import { FileBarChart, AlertCircle, CheckCircle2, Clock } from "lucide-react";
 
 export default function CompliancePage() {

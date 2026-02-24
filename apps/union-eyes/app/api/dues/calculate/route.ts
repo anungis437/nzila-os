@@ -1,14 +1,13 @@
-import { NextRequest, NextResponse } from 'next/server';
+import { NextResponse } from 'next/server';
 import { z } from 'zod';
 import { DuesCalculationEngine } from '@/lib/dues-calculation-engine';
 import { logApiAuditEvent } from '@/lib/middleware/api-security';
-import { getCurrentUser, withAdminAuth, withApiAuth, withMinRole, withRoleAuth, type BaseAuthContext } from '@/lib/api-auth-guard';
+import { withRoleAuth, type BaseAuthContext } from '@/lib/api-auth-guard';
 import { checkRateLimit, RATE_LIMITS, createRateLimitHeaders } from '@/lib/rate-limiter';
 
 import {
   ErrorCode,
   standardErrorResponse,
-  standardSuccessResponse,
 } from '@/lib/api/standardized-responses';
 // Validation schema for dues calculation
 const calculateDuesSchema = z.object({
@@ -130,4 +129,4 @@ try {
     }
 });
 
-
+

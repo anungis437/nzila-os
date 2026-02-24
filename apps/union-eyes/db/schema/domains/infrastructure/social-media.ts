@@ -457,6 +457,7 @@ export interface PostMetadata {
   best_time_to_post?: string;
   target_demographics?: string[];
   ab_test_variant?: string;
+  // eslint-disable-next-line @typescript-eslint/no-explicit-any
   [key: string]: any;
 }
 
@@ -467,6 +468,7 @@ export interface CampaignMetadata {
     pixel_id?: string;
     conversion_events?: string[];
   };
+  // eslint-disable-next-line @typescript-eslint/no-explicit-any
   [key: string]: any;
 }
 
@@ -478,6 +480,7 @@ export interface AnalyticsMetadata {
     locations?: Record<string, number>;
   };
   best_posting_times?: string[];
+  // eslint-disable-next-line @typescript-eslint/no-explicit-any
   [key: string]: any;
 }
 

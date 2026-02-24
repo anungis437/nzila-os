@@ -2,6 +2,9 @@
  * Data Source page for the Template App dashboard
  * Allows users to configure and manage their data sources
  */
+
+export const dynamic = 'force-dynamic';
+
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "@/components/ui/card";
 
 export default function DataSourcePage() {

@@ -15,7 +15,6 @@ import {
   pgTable,
   uuid,
   varchar,
-  text,
   timestamp,
   numeric,
   date,

@@ -70,6 +70,7 @@ export function InspectionReportViewer({ inspectionId }: InspectionReportViewerP
 
   React.useEffect(() => {
     loadReport();
+  // eslint-disable-next-line react-hooks/exhaustive-deps
   }, [inspectionId]);
 
   async function loadReport() {
@@ -90,7 +91,7 @@ export function InspectionReportViewer({ inspectionId }: InspectionReportViewerP
       } else {
         throw new Error(data.error);
       }
-    } catch (error) {
+    } catch (_error) {
       toast({
         title: "Error",
         description: "Failed to load inspection report",
@@ -117,7 +118,7 @@ export function InspectionReportViewer({ inspectionId }: InspectionReportViewerP
         title: "Success",
         description: "Inspection report exported"
       });
-    } catch (error) {
+    } catch (_error) {
       toast({
         title: "Error",
         description: "Failed to export report",
@@ -339,6 +340,7 @@ export function InspectionReportViewer({ inspectionId }: InspectionReportViewerP
                               rel="noopener noreferrer"
                               className="block"
                             >
+                              {/* eslint-disable-next-line @next/next/no-img-element */}
                               <img
                                 src={photo}
                                 alt={`Photo ${photoIndex + 1}`}

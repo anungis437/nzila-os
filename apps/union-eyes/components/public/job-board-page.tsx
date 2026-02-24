@@ -65,6 +65,7 @@ export function PublicJobBoardPage({ organizationSlug }: JobBoardPageProps) {
   useEffect(() => {
     fetchJobs();
     loadSavedJobs();
+  // eslint-disable-next-line react-hooks/exhaustive-deps
   }, [organizationSlug]);
 
   const fetchJobs = async () => {
@@ -75,7 +76,7 @@ export function PublicJobBoardPage({ organizationSlug }: JobBoardPageProps) {
       const response = await fetch(url);
       const data = await response.json();
       setJobs(data);
-    } catch (error) {
+    } catch (_error) {
 } finally {
       setLoading(false);
     }

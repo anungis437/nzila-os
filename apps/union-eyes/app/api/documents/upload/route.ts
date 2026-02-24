@@ -3,11 +3,11 @@
  * POST /api/documents/upload - Upload document files
  */
 
-import { NextRequest, NextResponse } from "next/server";
+import { NextResponse } from "next/server";
 import { z } from "zod";
 import { logApiAuditEvent } from "@/lib/middleware/api-security";
 import { createDocument } from "@/lib/services/document-service";
-import { getCurrentUser, withAdminAuth, withApiAuth, withMinRole, withRoleAuth } from '@/lib/api-auth-guard';
+import { withRoleAuth } from '@/lib/api-auth-guard';
 import { checkRateLimit, RATE_LIMITS, createRateLimitHeaders } from "@/lib/rate-limiter";
 import { put } from "@vercel/blob";
 
@@ -34,14 +34,13 @@ const ALLOWED_MIME_TYPES_LIST = [
 import {
   ErrorCode,
   standardErrorResponse,
-  standardSuccessResponse,
 } from '@/lib/api/standardized-responses';
 /**
  * Maximum file size: 50MB
  */
 const MAX_FILE_SIZE = 50 * 1024 * 1024;
 
-const documentUploadSchema = z.object({
+const _documentUploadSchema = z.object({
   file: z.object({
     name: z.string().min(1, "File name is required"),
     size: z.number().max(MAX_FILE_SIZE, "File size exceeds 50MB limit"),

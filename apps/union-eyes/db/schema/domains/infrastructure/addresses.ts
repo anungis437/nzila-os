@@ -101,7 +101,9 @@ export const internationalAddresses = pgTable(
     validationResult: jsonb("validation_result").$type<{
       isValid: boolean;
       confidence: number;
+      // eslint-disable-next-line @typescript-eslint/no-explicit-any
       corrections?: any;
+      // eslint-disable-next-line @typescript-eslint/no-explicit-any
       metadata?: any;
     }>(),
     

@@ -20,7 +20,6 @@ import {
   TrendingUp,
   Users,
   FileText,
-  DollarSign,
   Calendar,
   Award,
   MessageSquare,
@@ -29,7 +28,6 @@ import {
   Search,
   Plus,
   Eye,
-  Settings,
 } from "lucide-react";
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import { Button } from "@/components/ui/button";
@@ -50,7 +48,6 @@ import {
   DialogTrigger,
   DialogFooter,
 } from "@/components/ui/dialog";
-import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
 
 interface Widget {
   id: string;
@@ -206,7 +203,7 @@ export interface AnalyticsWidgetLibraryProps {
 export function AnalyticsWidgetLibrary({ onAddWidget }: AnalyticsWidgetLibraryProps) {
   const [searchQuery, setSearchQuery] = React.useState("");
   const [selectedCategory, setSelectedCategory] = React.useState("All");
-  const [previewWidget, setPreviewWidget] = React.useState<Widget | null>(null);
+  const [_previewWidget, setPreviewWidget] = React.useState<Widget | null>(null);
 
   const filteredWidgets = React.useMemo(() => {
     return WIDGET_LIBRARY.filter((widget) => {

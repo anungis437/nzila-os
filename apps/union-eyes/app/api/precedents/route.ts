@@ -1,11 +1,10 @@
-import { logApiAuditEvent } from "@/lib/middleware/api-security";
 /**
  * Precedents API Routes - Main endpoints for arbitration decisions
  * GET /api/precedents - List precedents with filtering
  * POST /api/precedents - Create a new precedent
  */
 
-import { NextRequest, NextResponse } from "next/server";
+import { NextResponse } from "next/server";
 import { 
   listPrecedents, 
   createPrecedent,
@@ -14,14 +13,25 @@ import {
   getPrecedentsByIssueType
 } from "@/lib/services/precedent-service";
 import { z } from "zod";
-import { getCurrentUser, withAdminAuth, withApiAuth, withMinRole, withRoleAuth } from '@/lib/api-auth-guard';
+import { withRoleAuth } from '@/lib/api-auth-guard';
 
+ 
+ 
+ 
+ 
+ 
+ 
+ 
+ 
+ 
+ 
+ 
 import {
   ErrorCode,
   standardErrorResponse,
   standardSuccessResponse,
 } from '@/lib/api/standardized-responses';
-export const GET = withRoleAuth('member', async (request, context) => {
+export const GET = withRoleAuth('member', async (request, _context) => {
   try {
       const { searchParams } = new URL(request.url);
       
@@ -51,6 +61,7 @@ export const GET = withRoleAuth('member', async (request, context) => {
       }
 
       // Build filters
+      // eslint-disable-next-line @typescript-eslint/no-explicit-any
       const filters: Record<string, any> = {};
       
       const tribunal = searchParams.get("tribunal");
@@ -147,7 +158,7 @@ const precedentsSchema = z.object({
   fullText: z.unknown().optional(),
 });
 
-export const POST = withRoleAuth('steward', async (request, context) => {
+export const POST = withRoleAuth('steward', async (request, _context) => {
   try {
       const body = await request.json();
     // Validate request body
@@ -160,7 +171,7 @@ export const POST = withRoleAuth('steward', async (request, context) => {
       );
     }
     
-    const { caseNumber, caseTitle, tribunal, decisionType, decisionDate, arbitrator, union, employer, outcome, precedentValue, fullText } = validation.data;
+    const { caseNumber: _caseNumber, caseTitle: _caseTitle, tribunal: _tribunal, decisionType: _decisionType, decisionDate: _decisionDate, arbitrator: _arbitrator, union: _union, employer: _employer, outcome: _outcome, precedentValue: _precedentValue, fullText: _fullText } = validation.data;
 
       // Validate required fields
       if (!body.caseNumber) {

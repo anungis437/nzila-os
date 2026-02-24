@@ -25,7 +25,7 @@ import {
   Download,
   Filter,
 } from "lucide-react";
-import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
+import { Card, CardContent } from "@/components/ui/card";
 import { Button } from "@/components/ui/button";
 import { Badge } from "@/components/ui/badge";
 import {
@@ -255,6 +255,7 @@ export function TrainingCalendarWidget({
                 </PopoverContent>
               </Popover>
 
+              {/* eslint-disable-next-line @typescript-eslint/no-explicit-any */}
               <Select value={view} onValueChange={(v: any) => setView(v)}>
                 <SelectTrigger className="w-[120px]">
                   <SelectValue />
@@ -286,7 +287,7 @@ export function TrainingCalendarWidget({
             <div className="grid grid-cols-7 gap-2">
               {calendarDays.map((day) => {
                 const dayEvents = getEventsForDay(day);
-                const isCurrentMonth = isSameDay(day, currentDate);
+                const _isCurrentMonth = isSameDay(day, currentDate);
                 const isDayToday = isToday(day);
 
                 return (

@@ -4,17 +4,18 @@
  */
 "use client";
 
+
+export const dynamic = 'force-dynamic';
 import { useEffect, useState } from "react";
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "@/components/ui/card";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
-import { 
-  FileText, 
-  Download, 
-  Upload, 
+import {
+  FileText,
+  Download,
+  Upload,
   Search,
-  File,
-  Folder
+  Folder,
 } from "lucide-react";
 
 interface Document {
@@ -41,7 +42,7 @@ export default function MemberDocumentsPage() {
           const data = await response.json();
           setDocuments(data.documents || []);
         }
-      } catch (error) {
+      } catch (_error) {
 } finally {
         setLoading(false);
       }
@@ -70,7 +71,7 @@ export default function MemberDocumentsPage() {
         const data = await response.json();
         setDocuments([...documents, ...data.documents]);
       }
-    } catch (error) {
+    } catch (_error) {
 } finally {
       setUploading(false);
     }
@@ -86,7 +87,7 @@ export default function MemberDocumentsPage() {
       a.download = document.name;
       a.click();
       window.URL.revokeObjectURL(url);
-    } catch (error) {
+    } catch (_error) {
 }
   };
 

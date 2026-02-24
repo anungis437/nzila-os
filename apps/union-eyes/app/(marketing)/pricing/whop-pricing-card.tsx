@@ -1,9 +1,12 @@
 "use client";
 
 import { Button } from "@/components/ui/button";
-import { Card, CardContent, CardDescription, CardFooter, CardHeader, CardTitle } from "@/components/ui/card";
+import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "@/components/ui/card";
 import { Check } from "lucide-react";
 import { useState } from "react";
+import { validateRedirectUrl } from "@/lib/utils/sanitize";
+ 
+ 
 import { motion, AnimatePresence } from "framer-motion";
 
 interface WhopPricingCardProps {
@@ -27,10 +30,10 @@ interface WhopPricingCardProps {
 export default function WhopPricingCard({ 
   title, 
   price, 
-  description, 
+  description: _description, 
   buttonText, 
   planId,
-  redirectUrl,
+  redirectUrl: _redirectUrl,
   billingCycle,
   savingsPercentage,
   savingsAmount
@@ -60,7 +63,7 @@ export default function WhopPricingCard({
       });
       
       if (!response.ok) {
-        const errorData = await response.json();
+        const _errorData = await response.json();
 setError('Failed to create checkout. Please try again.');
         return;
       }
@@ -74,8 +77,10 @@ setError('Failed to create checkout. Please try again.');
       
       // Log the checkout URL for debugging
 // Redirect to the checkout URL
-      window.location.href = data.checkoutUrl;
-    } catch (err) {
+      const safeUrl = validateRedirectUrl(data.checkoutUrl);
+      if (!safeUrl) { setError('Untrusted checkout URL'); return; }
+      window.location.href = safeUrl;
+    } catch (_err) {
 setError('An unexpected error occurred. Please try again.');
     } finally {
       setIsLoading(false);
@@ -175,7 +180,7 @@ setError('An unexpected error occurred. Please try again.');
         <ul className="space-y-3">
           {benefits.map((benefit, index) => (
             <li key={index} className="flex items-center gap-2.5">
-              <div className="flex-shrink-0 w-4 h-4 text-purple-600">
+              <div className="shrink-0 w-4 h-4 text-purple-600">
                 <Check className="h-4 w-4" />
               </div>
               <span className="text-sm text-gray-700">{benefit}</span>

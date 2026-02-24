@@ -6,11 +6,10 @@
 
 import { useState, useEffect, useRef } from 'react';
 import { useUser } from '@clerk/nextjs';
-import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card';
+import { Card, CardContent } from '@/components/ui/card';
 import { Button } from '@/components/ui/button';
 import { Badge } from '@/components/ui/badge';
 import { Textarea } from '@/components/ui/textarea';
-import { Input } from '@/components/ui/input';
 import { Avatar, AvatarFallback } from '@/components/ui/avatar';
 import { Send, Paperclip, ArrowLeft, CheckCheck, Check } from 'lucide-react';
 import { toast } from 'sonner';
@@ -81,7 +80,7 @@ export function MessageThreadView({ threadId, onBack }: MessageThreadViewProps) 
       const data = await response.json();
       setThread(data.thread);
       setMessages(data.messages);
-    } catch (error) {
+    } catch (_error) {
 toast.error('Failed to load conversation');
     } finally {
       setLoading(false);
@@ -122,7 +121,7 @@ toast.error('Failed to load conversation');
       if (fileInputRef.current) fileInputRef.current.value = '';
       fetchThread();
       toast.success('Message sent');
-    } catch (error) {
+    } catch (_error) {
 toast.error('Failed to send message');
     } finally {
       setSending(false);

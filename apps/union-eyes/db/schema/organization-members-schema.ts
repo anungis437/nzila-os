@@ -1,6 +1,5 @@
 import { pgTable, text, timestamp, uuid, varchar, pgEnum, boolean } from "drizzle-orm/pg-core";
 import { organizations } from "../schema-organizations";
-import { users } from "./user-management-schema";
 
 // Enums
 export const memberCategoryEnum = pgEnum("member_category", [

@@ -38,6 +38,7 @@ export class DjangoAPIError extends Error {
   constructor(
     message: string,
     public statusCode?: number,
+    // eslint-disable-next-line @typescript-eslint/no-explicit-any
     public response?: any
   ) {
     super(message);

@@ -13,6 +13,7 @@
  *   chaos.injectLatency({ probability: 0.1, minMs: 100, maxMs: 500 });
  */
 
+ 
 import { logger } from '@/lib/logger';
 
 export interface ChaosConfig {
@@ -198,10 +199,11 @@ export class ChaosMonkey {
    */
   private exhaustCpu(durationMs: number): void {
     const startTime = Date.now();
-    let sum = 0;
+     
+    let _sum = 0;
 
     while (Date.now() - startTime < durationMs) {
-      sum += Math.random() * Math.random();
+      _sum += Math.random() * Math.random();
     }
   }
 

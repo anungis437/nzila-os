@@ -149,6 +149,7 @@ export async function cacheGet<T>(
  */
 export async function cacheSet(
   key: string,
+  // eslint-disable-next-line @typescript-eslint/no-explicit-any
   value: any,
   options?: CacheOptions
 ): Promise<boolean> {
@@ -557,7 +558,7 @@ export async function getCacheStats(): Promise<{
       memory: info,
       keys: keyCount,
     };
-  } catch (error) {
+  } catch (_error) {
     return {
       connected: false,
       memory: 'Unknown',

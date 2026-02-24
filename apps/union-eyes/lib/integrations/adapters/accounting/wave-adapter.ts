@@ -121,7 +121,7 @@ export class WaveAdapter extends BaseIntegration {
   async sync(options: SyncOptions): Promise<SyncResult> {
     this.ensureConnected();
 
-    const startTime = Date.now();
+    const _startTime = Date.now();
     let recordsProcessed = 0;
     let recordsCreated = 0;
     let recordsUpdated = 0;
@@ -395,11 +395,11 @@ export class WaveAdapter extends BaseIntegration {
   // Webhook Support (Not Supported)
   // ==========================================================================
 
-  async verifyWebhook(payload: string, signature: string): Promise<boolean> {
+  async verifyWebhook(_payload: string, _signature: string): Promise<boolean> {
     return false;
   }
 
-  async processWebhook(event: WebhookEvent): Promise<void> {
+  async processWebhook(_event: WebhookEvent): Promise<void> {
     this.logOperation('webhook', { message: 'Wave does not support webhooks' });
   }
 }

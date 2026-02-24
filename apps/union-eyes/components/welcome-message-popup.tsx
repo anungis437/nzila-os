@@ -34,7 +34,7 @@ export default function WelcomeMessagePopup({ profile }: WelcomeMessagePopupProp
     if (isOpen) {
       try {
         localStorage.setItem('active_popup', 'welcome_message');
-      } catch (error) {
+      } catch (_error) {
 }
     }
   }, [isOpen]);
@@ -50,7 +50,7 @@ export default function WelcomeMessagePopup({ profile }: WelcomeMessagePopupProp
       if (activePopup) {
         return;
       }
-    } catch (error) {
+    } catch (_error) {
 }
     
     // Check if we've already shown this welcome message
@@ -82,10 +82,11 @@ const timer = setTimeout(() => {
           setIsOpen(true);
           
           if (!confettiShown.current) {
+            // eslint-disable-next-line react-hooks/immutability
             triggerConfetti();
             confettiShown.current = true;
           }
-        } catch (error) {
+        } catch (_error) {
 }
       }, 800);
       
@@ -103,14 +104,14 @@ const timer = setTimeout(() => {
       if (activePopup === 'welcome_message') {
         localStorage.removeItem('active_popup');
       }
-    } catch (error) {
+    } catch (_error) {
 }
     
     // Remember that we've shown it by saving to localStorage
     try {
       const welcomeKey = `welcome_shown_${profile.userId}`;
       localStorage.setItem(welcomeKey, new Date().toISOString());
-} catch (error) {
+} catch (_error) {
 }
   };
   
@@ -122,7 +123,7 @@ const timer = setTimeout(() => {
         spread: 70,
         origin: { y: 0.6 }
       });
-    } catch (error) {
+    } catch (_error) {
 }
   };
   
@@ -227,7 +228,7 @@ const timer = setTimeout(() => {
                     key={i}
                     className="flex items-start text-sm text-gray-600"
                   >
-                    <div className="rounded-full bg-purple-100 p-0.5 mr-2 mt-0.5 flex-shrink-0">
+                    <div className="rounded-full bg-purple-100 p-0.5 mr-2 mt-0.5 shrink-0">
                       <Check className="w-3 h-3 text-purple-600" />
                     </div>
                     {item}

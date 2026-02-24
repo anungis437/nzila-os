@@ -16,7 +16,6 @@ import {
   boolean,
   jsonb,
   index,
-  decimal,
 } from "drizzle-orm/pg-core";
 import { relations } from "drizzle-orm";
 import { organizations } from "../../../schema-organizations";

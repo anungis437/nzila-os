@@ -60,7 +60,7 @@ export function MemberCertificates({ memberId, organizationId }: MemberCertifica
       const data = await response.json();
       setCertifications(data.certifications);
       setStats(data.stats);
-    } catch (error) {
+    } catch (_error) {
 toast.error("Failed to load certifications");
     } finally {
       setLoading(false);
@@ -71,7 +71,7 @@ toast.error("Failed to load certifications");
     fetchCertifications();
   }, [fetchCertifications]);
 
-  const downloadCertificate = async (certificationId: string, certificateNumber: string) => {
+  const downloadCertificate = async (certificationId: string, _certificateNumber: string) => {
     try {
       const cert = certifications.find((c) => c.id === certificationId);
       if (!cert?.certificateUrl) {
@@ -82,7 +82,7 @@ toast.error("Failed to load certifications");
       // Open certificate URL in new tab
       window.open(cert.certificateUrl, "_blank");
       toast.success("Certificate opened in new tab");
-    } catch (error) {
+    } catch (_error) {
 toast.error("Failed to download certificate");
     }
   };

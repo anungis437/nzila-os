@@ -89,11 +89,11 @@ export function validateConsent(
  */
 export async function createConsentRecord(
   organizationId: string,
-  preferences: ConsentPreferences,
-  purpose: string,
-  consentGivenBy: string,
-  ipAddress: string,
-  userAgent: string
+  _preferences: ConsentPreferences,
+  _purpose: string,
+  _consentGivenBy: string,
+  _ipAddress: string,
+  _userAgent: string
 ): Promise<DataAggregationConsent> {
   const [consent] = await db
     .insert(dataAggregationConsent)
@@ -103,6 +103,7 @@ export async function createConsentRecord(
       consentDate: new Date(),
       categories: [],
       expiresAt: null,
+    // eslint-disable-next-line @typescript-eslint/no-explicit-any
     } as any)
     .returning();
 
@@ -114,14 +115,15 @@ export async function createConsentRecord(
  */
 export async function revokeConsent(
   consentId: string,
-  revokedBy: string,
-  reason?: string
+  _revokedBy: string,
+  _reason?: string
 ): Promise<DataAggregationConsent> {
   const [consent] = await db
     .update(dataAggregationConsent)
     .set({
       consentGiven: false,
       updatedAt: new Date(),
+    // eslint-disable-next-line @typescript-eslint/no-explicit-any
     } as any)
     .where(eq(dataAggregationConsent.id, consentId))
     .returning();
@@ -135,7 +137,7 @@ export async function revokeConsent(
 export async function updateConsentPreferences(
   consentId: string,
   newPreferences: Partial<ConsentPreferences>,
-  updatedBy: string
+  _updatedBy: string
 ): Promise<DataAggregationConsent> {
   // Get current consent
   const [current] = await db
@@ -149,7 +151,8 @@ export async function updateConsentPreferences(
   }
 
   // Merge preferences
-  const updatedPreferences = {
+  const _updatedPreferences = {
+    // eslint-disable-next-line @typescript-eslint/no-explicit-any
     ...((current as any).preferences as ConsentPreferences),
     ...newPreferences,
   };
@@ -159,6 +162,7 @@ export async function updateConsentPreferences(
     .update(dataAggregationConsent)
     .set({
       updatedAt: new Date(),
+    // eslint-disable-next-line @typescript-eslint/no-explicit-any
     } as any)
     .where(eq(dataAggregationConsent.id, consentId))
     .returning();

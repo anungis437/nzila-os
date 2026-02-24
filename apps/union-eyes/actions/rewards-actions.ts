@@ -7,21 +7,17 @@
 
 import { auth } from '@clerk/nextjs/server';
 import { db } from '@/db';
-import { withRLSContext } from '@/lib/db/with-rls-context';
 import { logger } from '@/lib/logger';
 import * as rewardsService from '@/lib/services/rewards';
 import {
   createProgramSchema,
   updateProgramSchema,
   createAwardTypeSchema,
-  updateAwardTypeSchema,
   createAwardSchema,
   approveAwardSchema,
   issueAwardSchema,
   revokeAwardSchema,
-  rejectAwardSchema,
   createBudgetEnvelopeSchema,
-  updateBudgetEnvelopeSchema,
   initiateRedemptionSchema,
   cancelRedemptionSchema,
   paginationSchema,

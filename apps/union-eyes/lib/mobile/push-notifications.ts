@@ -31,6 +31,7 @@ export function usePushNotifications(): PushSubscriptionState & {
 
   useEffect(() => {
     if (typeof window === 'undefined' || !('PushManager' in window)) {
+      // eslint-disable-next-line react-hooks/set-state-in-effect
       setState(prev => ({ ...prev, isSupported: false }));
       return;
     }
@@ -158,6 +159,7 @@ export function useNotificationPermission(): {
 
   useEffect(() => {
     if (typeof window === 'undefined') return;
+    // eslint-disable-next-line react-hooks/set-state-in-effect
     setPermission(Notification.permission);
   }, []);
 

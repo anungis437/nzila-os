@@ -51,6 +51,7 @@ router.get(
   authorize(['admin', 'financial_admin', 'financial_viewer']),
   async (req, res) => {
     try {
+      // eslint-disable-next-line @typescript-eslint/no-explicit-any
       const { organizationId: organizationIdFromUser, tenantId: legacyTenantId } = (req as any).user!;
       const organizationId = organizationIdFromUser ?? legacyTenantId;
 
@@ -91,6 +92,7 @@ router.get(
   authorize(['admin', 'financial_admin', 'financial_viewer']),
   async (req, res) => {
     try {
+      // eslint-disable-next-line @typescript-eslint/no-explicit-any
       const { organizationId: organizationIdFromUser, tenantId: legacyTenantId } = (req as any).user!;
       const organizationId = organizationIdFromUser ?? legacyTenantId;
 
@@ -133,6 +135,7 @@ router.get(
   authorize(['admin', 'financial_admin', 'financial_viewer']),
   async (req, res) => {
     try {
+      // eslint-disable-next-line @typescript-eslint/no-explicit-any
       const { organizationId: organizationIdFromUser, tenantId: legacyTenantId } = (req as any).user!;
       const organizationId = organizationIdFromUser ?? legacyTenantId;
 
@@ -161,6 +164,7 @@ router.get(
   authorize(['admin', 'financial_admin', 'financial_viewer']),
   async (req, res) => {
     try {
+      // eslint-disable-next-line @typescript-eslint/no-explicit-any
       const { organizationId: organizationIdFromUser, tenantId: legacyTenantId } = (req as any).user!;
       const organizationId = organizationIdFromUser ?? legacyTenantId;
 
@@ -203,6 +207,7 @@ router.get(
   authorize(['admin', 'financial_admin', 'financial_viewer']),
   async (req, res) => {
     try {
+      // eslint-disable-next-line @typescript-eslint/no-explicit-any
       const { organizationId: organizationIdFromUser, tenantId: legacyTenantId } = (req as any).user!;
       const organizationId = organizationIdFromUser ?? legacyTenantId;
 
@@ -253,6 +258,7 @@ router.get(
   authorize(['admin', 'financial_admin']),
   async (req, res) => {
     try {
+      // eslint-disable-next-line @typescript-eslint/no-explicit-any
       const { organizationId: organizationIdFromUser, tenantId: legacyTenantId } = (req as any).user!;
       const organizationId = organizationIdFromUser ?? legacyTenantId;
       const format = (req.query.format as string) || 'json';
@@ -276,6 +282,7 @@ router.get(
 
       const { startDate, endDate } = validation.data;
 
+      // eslint-disable-next-line @typescript-eslint/no-explicit-any
       let data: any;
 
       switch (reportType) {
@@ -338,6 +345,7 @@ router.get(
 /**
  * Simple CSV converter for export
  */
+// eslint-disable-next-line @typescript-eslint/no-explicit-any
 function convertToCSV(data: any): string {
   if (Array.isArray(data)) {
     if (data.length === 0) return '';

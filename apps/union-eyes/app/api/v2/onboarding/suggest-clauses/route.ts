@@ -2,13 +2,9 @@
  * POST /api/onboarding/suggest-clauses
  * Migrated to withApi() framework
  */
-import { withRoleAuth } from '@/lib/role-middleware';
-import { suggestRelevantClauses } from '@/lib/utils/smart-onboarding';
-import { logger } from '@/lib/logger';
-import { eventBus, AppEvents } from '@/lib/events';
-import { withApi, ApiError, z, RATE_LIMITS } from '@/lib/api/framework';
+import { withApi, z, RATE_LIMITS } from '@/lib/api/framework';
 
-const onboardingSuggestClausesSchema = z.object({
+const _onboardingSuggestClausesSchema = z.object({
   organizationId: z.string().uuid('Invalid organizationId'),
 });
 

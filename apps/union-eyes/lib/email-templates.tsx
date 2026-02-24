@@ -16,7 +16,7 @@ import {
   Text,
 } from '@react-email/components';
 import * as React from 'react';
-import { renderToStaticMarkup } from 'react-dom/server';
+import { render } from '@react-email/render';
 
 interface ClaimNotificationEmailProps {
   claimId: string;
@@ -403,10 +403,7 @@ const footerText = {
 /**
  * Render email template to HTML string
  */
-export function renderClaimStatusEmail(props: ClaimNotificationEmailProps): string {
-  // Note: In production, you would use @react-email/render
-  // For now, we use a simple approach
-  
-  return renderToStaticMarkup(<ClaimStatusNotificationEmail {...props} />);
+export async function renderClaimStatusEmail(props: ClaimNotificationEmailProps): Promise<string> {
+  return render(<ClaimStatusNotificationEmail {...props} />);
 }
 

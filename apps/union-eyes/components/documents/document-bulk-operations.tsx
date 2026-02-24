@@ -96,6 +96,7 @@ export function DocumentBulkOperations({
   const handleOperation = async (type: string, action: () => Promise<void>) => {
     setOperation({
       id: Date.now().toString(),
+      // eslint-disable-next-line @typescript-eslint/no-explicit-any
       type: type as any,
       status: "running",
       progress: 0,

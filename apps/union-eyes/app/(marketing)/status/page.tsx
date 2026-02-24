@@ -4,6 +4,9 @@
  * Accessible at /status for public monitoring
  */
 
+
+export const dynamic = 'force-dynamic';
+
 import { StatusPage } from '@/components/monitoring/StatusPage';
 import type { Metadata } from 'next';
 

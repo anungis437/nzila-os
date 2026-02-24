@@ -43,38 +43,28 @@
 
 import { createHash } from 'crypto';
 import { db } from '@/db';
-import { 
-  chatSessions, 
-  chatMessages, 
+import {
+  chatMessages,
   knowledgeBase,
-  type ChatSession,
-  type ChatMessage 
 } from '@/db/schema/ai-chatbot-schema';
-import { eq, desc, sql, and, gt } from 'drizzle-orm';
+import { eq, desc, sql, and } from 'drizzle-orm';
 import { logger } from '@/lib/logger';
-import { embeddingCache } from '@/lib/services/ai/embedding-cache';
 import { costTrackingWrapper as costTracker } from '@/lib/ai/services/cost-tracking-wrapper';
 
 // ============================================================================
 // INTEGRATION WITH EXISTING ENGINES
 // ============================================================================
 
-import { 
-  CLAIM_FSM, 
-  getAllowedClaimTransitions, 
+import {
+  getAllowedClaimTransitions,
   getTransitionRequirements,
   type ClaimStatus,
-  type ClaimTransitionContext 
 } from '@/lib/services/claim-workflow-fsm';
 
-import { 
-  calculateCaseSlaStatus, 
-  calculateAcknowledgmentSla,
-  calculateFirstResponseSla,
-  calculateInvestigationSla,
+import {
+  calculateCaseSlaStatus,
   type CaseSlaAssessment,
-  type SlaStatus,
-  type TimelineEvent as SlaTimelineEvent
+  type TimelineEvent as SlaTimelineEvent,
 } from '@/lib/services/sla-calculator';
 
 import { 
@@ -107,7 +97,7 @@ interface AttentionWeights {
 }
 
 /** Template inheritance configuration */
-interface InheritanceConfig {
+interface _InheritanceConfig {
   /** Parent template ID */
   parentTemplateId?: string;
   /** Override specific sections */
@@ -1046,6 +1036,7 @@ class AttentionMechanismEngine {
         ];
         
         for (const [target, reqs] of Object.entries(fsmState.requirements)) {
+          // eslint-disable-next-line @typescript-eslint/no-explicit-any
           const r = reqs as any;
           fsmContext.push(
             `→ ${target}: requires ${r.requiresRole?.join('/') || 'any'}, min ${r.minHours}h, docs: ${r.requiresDocumentation}`
@@ -1113,7 +1104,7 @@ class AttentionMechanismEngine {
 
       const timeline = await this.getCaseTimeline(caseId);
       return calculateCaseSlaStatus(caseId, timeline);
-    } catch (error) {
+    } catch (_error) {
       return null;
     }
   }
@@ -1147,7 +1138,7 @@ class AttentionMechanismEngine {
       }
 
       return { currentStatus, allowedTransitions, requirements };
-    } catch (error) {
+    } catch (_error) {
       return { currentStatus: null, allowedTransitions: [], requirements: {} };
     }
   }
@@ -1174,10 +1165,11 @@ class AttentionMechanismEngine {
         updatedAt: claim.updatedAt || claim.createdAt || new Date(),
         assignedTo: claim.assignedTo,
         organizationId: claim.organizationId,
+      // eslint-disable-next-line @typescript-eslint/no-explicit-any
       } as any as CaseForSignals;
 
       return await detectAllSignals([caseState]);
-    } catch (error) {
+    } catch (_error) {
       return [];
     }
   }
@@ -1268,8 +1260,8 @@ class AttentionMechanismEngine {
    * Retrieve relevant CBA clauses
    */
   private async retrieveCBAClauses(
-    cbaId: string,
-    query: string
+    _cbaId: string,
+    _query: string
   ): Promise<Array<{ content: string; relevanceScore: number }>> {
     // This would query the CBA clauses table
     // Simplified placeholder
@@ -1499,6 +1491,7 @@ class GovernanceAuditLayer {
       logger.info('AI Request Audit', auditRecord);
 
       // Track costs
+      // eslint-disable-next-line @typescript-eslint/no-explicit-any
       await (this.costTracker as any)?.trackCost({
         organizationId: request.context.organizationId,
         tokensUsed: response.tokensUsed,
@@ -1699,7 +1692,7 @@ export class UnionEyesAIController {
   /**
    * Get AI provider from pool
    */
-  private getProvider(preferredProvider: string): AIProvider {
+  private getProvider(_preferredProvider: string): AIProvider {
     // Simplified - would use actual provider from chatbot-service
     return {
       async generateResponse(messages, options) {
@@ -1739,6 +1732,7 @@ export interface TemplateContext {
   jurisdiction: string;
   userRole: string;
   intent: string;
+  // eslint-disable-next-line @typescript-eslint/no-explicit-any
   entities: any[];
   retrievedContext: string[];
   sla: string;

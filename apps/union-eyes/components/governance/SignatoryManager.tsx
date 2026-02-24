@@ -3,6 +3,7 @@
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "@/components/ui/card";
 import { Badge } from "@/components/ui/badge";
 import { Button } from "@/components/ui/button";
+ 
 import { PenTool, UserCheck, Shield, Plus, Edit } from "lucide-react";
 
 interface Signatory {
@@ -22,7 +23,7 @@ interface SignatoryManagerProps {
   canManage?: boolean;
 }
 
-export default function SignatoryManager({ organizationId, canManage = false }: SignatoryManagerProps) {
+export default function SignatoryManager({ organizationId: _organizationId, canManage = false }: SignatoryManagerProps) {
   // Mock data - replace with actual API call
   const signatories: Signatory[] = [
     {

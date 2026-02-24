@@ -79,7 +79,7 @@ export function AwardCard({ award, onReact, onComment, showActions = true }: Awa
       <CardContent className="space-y-3">
         {/* Recognition Message */}
         <div className="flex items-start gap-3 bg-muted/30 p-4 rounded-lg">
-          <div className="flex-shrink-0">
+          <div className="shrink-0">
             {award.award_type_icon ? (
               <div className="text-2xl">{award.award_type_icon}</div>
             ) : (

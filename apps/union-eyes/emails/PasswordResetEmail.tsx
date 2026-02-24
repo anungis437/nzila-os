@@ -12,7 +12,6 @@ import {
   Heading,
   Hr,
   Html,
-  Link,
   Preview,
   Section,
   Text,
@@ -59,6 +58,7 @@ export default function PasswordResetEmail({
           <Hr style={hr} />
 
           <Text style={securityText}>
+            {/* eslint-disable-next-line react/no-unescaped-entities */}
             If you didn't request this password reset, you can safely ignore this email. 
             Your password will remain unchanged.
           </Text>
@@ -70,6 +70,7 @@ export default function PasswordResetEmail({
           <Hr style={hr} />
 
           <Text style={footer}>
+            {/* eslint-disable-next-line react/no-unescaped-entities */}
             If you're having trouble clicking the button, copy and paste this URL into your browser:
           </Text>
           <Text style={urlText}>{resetUrl}</Text>

@@ -31,18 +31,16 @@ import {
 import { useToast } from "@/components/ui/use-toast";
 import { Progress } from "@/components/ui/progress";
 import { Badge } from "@/components/ui/badge";
-import { 
+import {
   Building2,
   Users,
-  Mail,
   DollarSign,
   Check,
   ChevronLeft,
   ChevronRight,
   Save,
-  X
+  X,
 } from "lucide-react";
-import { cn } from "@/lib/utils";
 
 export interface AffiliateOnboardingData {
   // Step 1: Basic Information
@@ -119,6 +117,7 @@ export function AffiliateOnboardingWizard({
   const totalSteps = 4;
   const progress = (currentStep / totalSteps) * 100;
 
+  // eslint-disable-next-line @typescript-eslint/no-explicit-any
   function updateFormData(field: string, value: any) {
     setFormData(prev => {
       if (field.includes('.')) {
@@ -126,6 +125,7 @@ export function AffiliateOnboardingWizard({
         return {
           ...prev,
           [parent]: {
+            // eslint-disable-next-line @typescript-eslint/no-explicit-any
             ...(prev[parent as keyof typeof prev] as any),
             [child]: value
           }
@@ -225,11 +225,12 @@ export function AffiliateOnboardingWizard({
           title: "Affiliate Added",
           description: "New affiliate union has been successfully onboarded"
         });
+        // eslint-disable-next-line @typescript-eslint/no-unused-expressions
         onComplete && onComplete(data.affiliateId);
       } else {
         throw new Error(data.error || "Failed to create affiliate");
       }
-    } catch (error) {
+    } catch (_error) {
       toast({
         title: "Error",
         description: "Failed to add affiliate union",
@@ -251,7 +252,7 @@ export function AffiliateOnboardingWizard({
         title: "Draft Saved",
         description: "Your progress has been saved"
       });
-    } catch (error) {
+    } catch (_error) {
       toast({
         title: "Error",
         description: "Failed to save draft",

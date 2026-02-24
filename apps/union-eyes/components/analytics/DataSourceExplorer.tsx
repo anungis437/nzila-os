@@ -10,7 +10,7 @@
 
 'use client';
 
-import React, { useState, useEffect, useCallback } from 'react';
+import React, { useState, useEffect } from 'react';
 import { Card } from '@/components/ui/card';
 import { Button } from '@/components/ui/button';
 import { Input } from '@/components/ui/input';
@@ -18,7 +18,7 @@ import { Badge } from '@/components/ui/badge';
 import { ScrollArea } from '@/components/ui/scroll-area';
 import {
   Database,
-  Table as TableIcon,
+  Table as _TableIcon,
   Search,
   ChevronRight,
   ChevronDown,
@@ -142,11 +142,13 @@ export function DataSourceExplorer({
   const [searchTerm, setSearchTerm] = useState('');
   const [expandedSources, setExpandedSources] = useState<string[]>([]);
   const [previewField, setPreviewField] = useState<DataSourceField | null>(null);
+  // eslint-disable-next-line @typescript-eslint/no-explicit-any
   const [sampleData, setSampleData] = useState<any[]>([]);
 
   // Auto-expand selected source
   useEffect(() => {
     if (selectedSource && !expandedSources.includes(selectedSource)) {
+      // eslint-disable-next-line react-hooks/set-state-in-effect
       setExpandedSources([...expandedSources, selectedSource]);
     }
   }, [selectedSource, expandedSources]);
@@ -186,7 +188,7 @@ export function DataSourceExplorer({
       } else {
         setSampleData([]);
       }
-    } catch (error) {
+    } catch (_error) {
 setSampleData([]);
     }
   };

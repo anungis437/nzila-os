@@ -243,7 +243,7 @@ toast({
                 <Card className="p-4">
                   <div className="flex items-center gap-4">
                     {/* File Icon */}
-                    <div className="flex-shrink-0">
+                    <div className="shrink-0">
                       {getFileIcon(attachment.fileType)}
                     </div>
 

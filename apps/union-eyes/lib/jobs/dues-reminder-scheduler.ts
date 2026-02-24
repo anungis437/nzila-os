@@ -15,7 +15,7 @@
 import { db } from '@/db';
 import { duesTransactions } from '@/db/schema/domains/finance/dues';
 import { organizationMembers, organizations } from '@/db/schema-organizations';
-import { eq, and, lte, gte, sql } from 'drizzle-orm';
+import { eq, and, sql } from 'drizzle-orm';
 import { logger } from '@/lib/logger';
 import { getNotificationService } from '@/lib/services/notification-service';
 import { DuesNotificationTemplates, DuesNotificationData } from '@/lib/notification-templates/dues-notifications';
@@ -616,6 +616,7 @@ export class DuesReminderScheduler {
         return null;
       }
 
+      // eslint-disable-next-line @typescript-eslint/no-explicit-any
       const metadata = (member[0].metadata as any) || {};
       return {
         name: member[0].name,
@@ -633,6 +634,7 @@ export class DuesReminderScheduler {
       const [org] = await db
         .select({ name: organizations.name })
         .from(organizations)
+        // eslint-disable-next-line @typescript-eslint/no-explicit-any
         .where(eq(organizations.id, organizationId as any))
         .limit(1);
 

@@ -4,11 +4,12 @@ import { NextResponse } from 'next/server';
  * Migrated to withApi() framework
  */
 import { sql } from 'drizzle-orm';
-import { logger } from '@/lib/logger';
-import { logApiAuditEvent } from '@/lib/middleware/api-security';
 import { db } from '@/db';
-import { withRLSContext } from '@/lib/db/with-rls-context';
-import { withApi, ApiError, RATE_LIMITS } from '@/lib/api/framework';
+ 
+ 
+ 
+ 
+import { withApi } from '@/lib/api/framework';
 
 export const GET = withApi(
   {
@@ -18,7 +19,7 @@ export const GET = withApi(
       summary: 'GET metrics',
     },
   },
-  async ({ request, userId, organizationId, user, body, query }) => {
+  async ({ request: _request, userId, organizationId, user: _user, body: _body, query: _query }) => {
 
         const organizationScopeId = organizationId || userId;
         // Query model performance metrics from analytics tables

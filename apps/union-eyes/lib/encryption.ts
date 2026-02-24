@@ -66,7 +66,7 @@ const MAX_KEY_VERSIONS_RETAINED = parseInt(process.env.MAX_KEY_VERSIONS_RETAINED
 // Algorithm settings
 const ALGORITHM = 'aes-256-gcm';
 const IV_LENGTH = 16; // 128 bits for AES-GCM
-const AUTH_TAG_LENGTH = 16; // 128 bits authentication tag
+const _AUTH_TAG_LENGTH = 16; // 128 bits authentication tag
 const KEY_LENGTH = 32; // 256 bits for AES-256
 
 /**

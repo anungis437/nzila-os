@@ -1,7 +1,7 @@
 "use client";
 
 import { useState, useEffect, useCallback } from "react";
-import { Calendar, Clock, MapPin, Users, Video, Plus, Edit, Trash2, X } from "lucide-react";
+import { Calendar, Clock, MapPin, Users, Video, Plus, Edit, Trash2 } from "lucide-react";
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "@/components/ui/card";
 import { Button } from "@/components/ui/button";
 import { Badge } from "@/components/ui/badge";
@@ -15,7 +15,6 @@ import {
 } from "@/components/ui/dialog";
 import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
-import { Textarea } from "@/components/ui/textarea";
 import {
   Select,
   SelectContent,
@@ -93,7 +92,7 @@ export function SessionScheduler({ organizationId }: SessionSchedulerProps) {
       const response = await fetch(`/api/education/courses?organizationId=${organizationId}`);
       const data = await response.json();
       setCourses(data.courses || []);
-    } catch (error) {
+    } catch (_error) {
 toast.error("Failed to load courses");
     }
   }, [organizationId]);
@@ -113,7 +112,7 @@ toast.error("Failed to load courses");
       const response = await fetch(url);
       const data = await response.json();
       setSessions(data.sessions || []);
-    } catch (error) {
+    } catch (_error) {
 toast.error("Failed to load sessions");
     } finally {
       setLoading(false);
@@ -153,12 +152,12 @@ toast.error("Failed to load sessions");
         throw new Error("Failed to create session");
       }
 
-      const data = await response.json();
+      const _data = await response.json();
       toast.success("Session created successfully");
       setIsCreateDialogOpen(false);
       resetForm();
       fetchSessions();
-    } catch (error) {
+    } catch (_error) {
 toast.error("Failed to create session");
     }
   };
@@ -187,7 +186,7 @@ toast.error("Failed to create session");
       setSelectedSession(null);
       resetForm();
       fetchSessions();
-    } catch (error) {
+    } catch (_error) {
 toast.error("Failed to update session");
     }
   };
@@ -211,7 +210,7 @@ toast.error("Failed to update session");
 
       toast.success("Session cancelled successfully");
       fetchSessions();
-    } catch (error) {
+    } catch (_error) {
 toast.error("Failed to cancel session");
     }
   };
@@ -473,7 +472,9 @@ toast.error("Failed to cancel session");
 
 // Session Form Component
 interface SessionFormProps {
+  // eslint-disable-next-line @typescript-eslint/no-explicit-any
   formData: any;
+  // eslint-disable-next-line @typescript-eslint/no-explicit-any
   setFormData: (data: any) => void;
   courses: Course[];
   onSubmit: () => void;

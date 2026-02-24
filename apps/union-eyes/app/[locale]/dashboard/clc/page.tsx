@@ -1,23 +1,21 @@
+export const dynamic = 'force-dynamic';
+
 import { Metadata } from 'next';
 import { auth } from '@clerk/nextjs/server';
 import { redirect } from 'next/navigation';
 import { getTranslations } from 'next-intl/server';
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from '@/components/ui/card';
 import { Button } from '@/components/ui/button';
-import { Badge } from '@/components/ui/badge';
-import { 
-  Building2, 
-  Users, 
-  DollarSign, 
-  TrendingUp, 
-  AlertCircle,
+import {
+  Building2,
+  Users,
+  DollarSign,
+  TrendingUp,
   FileText,
   Calendar,
   BarChart3,
-  CheckCircle,
-  XCircle,
   Clock,
-  MapPin
+  MapPin,
 } from 'lucide-react';
 import Link from 'next/link';
 import { db } from '@/db';
@@ -38,7 +36,7 @@ async function checkCLCAccess(userId: string, orgId: string): Promise<boolean> {
     const userRole = await getUserRoleInOrganization(userId, orgId);
     // Allow clc_executive, clc_staff, and system_admin roles
     return ['clc_executive', 'clc_staff', 'system_admin'].includes(userRole || '');
-  } catch (error) {
+  } catch (_error) {
     return false;
   }
 }
@@ -384,6 +382,7 @@ export default async function CLCDashboardPage() {
                       <Building2 className="h-5 w-5 text-muted-foreground" />
                       <div>
                         <div className="font-medium">{federation.name}</div>
+                        {/* eslint-disable-next-line @typescript-eslint/no-explicit-any */}
                         <div className="text-sm text-muted-foreground">{(federation as any).province || federation.provinceTerritory || 'N/A'}</div>
                       </div>
                     </div>

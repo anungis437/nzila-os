@@ -5,7 +5,7 @@
 import { breakGlassService } from './break-glass-service';
 import { db } from '@/db';
 import { forceMajeureEvents, forceMajeureActivations } from '@/db/schema/force-majeure-schema';
-import { eq, and, gte, desc } from 'drizzle-orm';
+import { eq, and, desc } from 'drizzle-orm';
 import { logger } from '@/lib/logger';
 
 /**
@@ -406,6 +406,7 @@ export class ForceMajeureIntegrationService {
    * Create detailed report of force majeure event and response
    */
   private generatePostIncidentReport(params: {
+    // eslint-disable-next-line @typescript-eslint/no-explicit-any
     event: any;
     duration: number;
     resolution: string;

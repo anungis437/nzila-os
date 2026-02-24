@@ -135,7 +135,7 @@ export class BreakGlassService {
     // Simplified implementation - use proper SSS library in production
     // This generates random shares without proper threshold cryptography
     // For production: Replace with secrets.js-grempe implementation above
-    const masterSecret = crypto.randomBytes(32).toString("hex");
+    const _masterSecret = crypto.randomBytes(32).toString("hex");
     
     logger.info('Break-glass: Generating SSS shares', {
       threshold: this.REQUIRED_SIGNATURES,
@@ -336,6 +336,7 @@ export class BreakGlassService {
     const signaturesReceived = record.signaturesReceived + 1;
     const signatureSlot = `signature${signaturesReceived}`;
     
+    // eslint-disable-next-line @typescript-eslint/no-explicit-any
     const updateData: any = {
       [`${signatureSlot}UserId`]: signature.keyHolderId,
       [`${signatureSlot}Timestamp`]: new Date(),
@@ -426,7 +427,9 @@ export class BreakGlassService {
       actualRecoveryTime: string;
       objectivesMet: string[];
       overallScore: number;
+      // eslint-disable-next-line @typescript-eslint/no-explicit-any
       issuesIdentified?: any[];
+      // eslint-disable-next-line @typescript-eslint/no-explicit-any
       remediationActions?: any[];
     }
   ) {

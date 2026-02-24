@@ -112,7 +112,7 @@ export function OrganizationTree({
         if (!prev) return null;
         return updateTree(prev, path, children);
       });
-    } catch (err) {
+    } catch (_err) {
 setTreeData(prev => {
         if (!prev) return null;
         return updateTree(prev, path, []);

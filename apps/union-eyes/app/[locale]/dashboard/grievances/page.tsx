@@ -1,10 +1,12 @@
-import React from 'react';
 "use client";
 
+
+export const dynamic = 'force-dynamic';
+import React from 'react';
 import { useState } from "react";
 import { motion, AnimatePresence } from "framer-motion";
 import { useTranslations } from 'next-intl';
-import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
+import { Card, CardContent } from "@/components/ui/card";
 import {
   Scale,
   FileText,
@@ -13,7 +15,6 @@ import {
   Clock,
   Calendar,
   User,
-  Building,
   Gavel,
   TrendingUp,
   Filter,
@@ -25,7 +26,6 @@ import {
   FileCheck,
   XCircle,
   AlertTriangle,
-  Phone,
   Mail,
   Eye,
 } from "lucide-react";

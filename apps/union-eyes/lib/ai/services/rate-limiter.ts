@@ -17,7 +17,7 @@
 import { Redis } from '@upstash/redis';
 import { db } from '@/db';
 import { aiBudgets } from '@/db/schema';
-import { eq, and, gte, lte } from 'drizzle-orm';
+import { eq, and, gte } from 'drizzle-orm';
 import { logger } from '@/lib/logger';
 
 // Initialize Redis client

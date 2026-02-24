@@ -26,11 +26,9 @@ import {
   MousePointer,
   UserX,
   AlertCircle,
-  Calendar,
 } from "lucide-react";
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import { Badge } from "@/components/ui/badge";
-import { Button } from "@/components/ui/button";
 import {
   Select,
   SelectContent,
@@ -125,7 +123,7 @@ export function CommunicationAnalytics({
   abTests = [],
 }: CommunicationAnalyticsProps) {
   const [timePeriod, setTimePeriod] = React.useState<"7d" | "30d" | "90d">("30d");
-  const [selectedChannel, setSelectedChannel] = React.useState<"all" | "email" | "sms" | "push">(
+  const [_selectedChannel, _setSelectedChannel] = React.useState<"all" | "email" | "sms" | "push">(
     "all"
   );
 
@@ -151,7 +149,7 @@ export function CommunicationAnalytics({
     clickRate: metrics.push.opened > 0 ? (metrics.push.clicked / metrics.push.opened) * 100 : 0,
   };
 
-  const inAppMetrics = {
+  const _inAppMetrics = {
     viewRate: metrics.inApp.shown > 0 ? (metrics.inApp.viewed / metrics.inApp.shown) * 100 : 0,
     clickRate: metrics.inApp.viewed > 0 ? (metrics.inApp.clicked / metrics.inApp.viewed) * 100 : 0,
   };
@@ -299,6 +297,7 @@ export function CommunicationAnalytics({
           </p>
         </div>
         <div className="flex gap-2">
+          {/* eslint-disable-next-line @typescript-eslint/no-explicit-any */}
           <Select value={timePeriod} onValueChange={(v) => setTimePeriod(v as any)}>
             <SelectTrigger className="w-32">
               <SelectValue />

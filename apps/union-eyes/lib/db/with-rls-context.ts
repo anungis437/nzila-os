@@ -26,7 +26,6 @@ import { auth } from '@/lib/api-auth-guard';
 import { db } from '@/db/db';
 import { sql } from 'drizzle-orm';
 import type { NodePgDatabase } from 'drizzle-orm/node-postgres';
-import { logger } from '@/lib/logger';
 
 /**
  * Execute database operation with automatic RLS context
@@ -282,7 +281,7 @@ export async function getCurrentRLSContext(): Promise<string | null> {
     
     const userId = result[0]?.current_setting;
     return userId && userId !== '' ? userId : null;
-  } catch (error) {
+  } catch (_error) {
     return null;
   }
 }

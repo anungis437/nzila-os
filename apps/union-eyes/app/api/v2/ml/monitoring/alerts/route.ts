@@ -4,10 +4,14 @@ import { NextResponse } from 'next/server';
  * Migrated to withApi() framework
  */
 import { sql } from 'drizzle-orm';
-import { logger } from '@/lib/logger';
-import { logApiAuditEvent } from '@/lib/middleware/api-security';
 import { db } from '@/db';
-import { withRLSContext } from '@/lib/db/with-rls-context';
+ 
+ 
+ 
+ 
+ 
+ 
+ 
 import { withApi, ApiError, z, RATE_LIMITS } from '@/lib/api/framework';
 
 const mlMonitoringAlertsSchema = z.object({
@@ -22,7 +26,7 @@ export const GET = withApi(
       summary: 'GET alerts',
     },
   },
-  async ({ request, userId, organizationId, user, body, query }) => {
+  async ({ request: _request, userId, organizationId, user: _user, body: _body, query: _query }) => {
         const organizationScopeId = organizationId || userId;
 
         // Query active alerts from monitoring tables
@@ -147,7 +151,7 @@ export const POST = withApi(
     },
     successStatus: 201,
   },
-  async ({ request, userId, organizationId, user, body, query }) => {
+  async ({ request: _request, userId, organizationId, user: _user, body, query: _query }) => {
         const { alertId } = body;
         const organizationScopeId = organizationId || userId;
 

@@ -4,6 +4,7 @@ import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "@/com
 import { Badge } from "@/components/ui/badge";
 import { Button } from "@/components/ui/button";
 import { FileText, Download, Edit, History, Eye } from "lucide-react";
+ 
 import { useState } from "react";
 
 interface Bylaw {
@@ -21,7 +22,7 @@ interface BylawsViewerProps {
   canEdit?: boolean;
 }
 
-export default function BylawsViewer({ organizationId, canEdit = false }: BylawsViewerProps) {
+export default function BylawsViewer({ organizationId: _organizationId, canEdit = false }: BylawsViewerProps) {
   const [selectedBylaw, setSelectedBylaw] = useState<Bylaw | null>(null);
 
   // Mock data - replace with actual API call

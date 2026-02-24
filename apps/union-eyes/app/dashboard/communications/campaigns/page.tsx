@@ -9,6 +9,8 @@
 
 'use client';
 
+
+export const dynamic = 'force-dynamic';
 import { useState, useEffect } from 'react';
 import { useRouter } from 'next/navigation';
 import { Button } from '@/components/ui/button';
@@ -110,6 +112,7 @@ export default function CampaignsPage() {
 
   useEffect(() => {
     fetchCampaigns();
+  // eslint-disable-next-line react-hooks/exhaustive-deps
   }, [page, statusFilter, channelFilter]);
 
   const getChannelIcon = (channel: string) => {

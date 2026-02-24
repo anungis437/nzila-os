@@ -11,6 +11,9 @@
  * @page app/[locale]/training/page.tsx
  */
 
+
+export const dynamic = 'force-dynamic';
+
 import * as React from "react";
 import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
 import { CourseCatalogBrowser } from "@/components/education/course-catalog-browser";
@@ -41,7 +44,7 @@ export default function TrainingPage() {
           <CourseCatalogBrowser
             courses={[]}
             categories={[]}
-            onEnroll={async (courseId) => {
+            onEnroll={async (_courseId) => {
 }}
           />
         </TabsContent>

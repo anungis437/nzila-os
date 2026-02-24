@@ -41,7 +41,7 @@ export function ChartExporter({
   onExport,
 }: ChartExporterProps) {
   const [isExporting, setIsExporting] = useState(false);
-  const [exportFormat, setExportFormat] = useState<'png' | 'svg' | 'pdf'>('png');
+  const [_exportFormat, _setExportFormat] = useState<'png' | 'svg' | 'pdf'>('png');
   const [showOptions, setShowOptions] = useState(false);
   const [options, setOptions] = useState<ExportOptions>({
     format: 'png',
@@ -69,7 +69,7 @@ export function ChartExporter({
       link.download = `${options.filename}.png`;
       link.href = canvas.toDataURL('image/png', options.quality);
       link.click();
-    } catch (error) {
+    } catch (_error) {
 alert('Failed to export as PNG. Please try again.');
     }
   };
@@ -95,7 +95,7 @@ alert('Failed to export as PNG. Please try again.');
       link.click();
 
       URL.revokeObjectURL(url);
-    } catch (error) {
+    } catch (_error) {
 alert('Failed to export as SVG. Please try again.');
     }
   };
@@ -124,7 +124,7 @@ alert('Failed to export as SVG. Please try again.');
 
       pdf.addImage(imgData, 'PNG', 0, 0, options.width!, options.height!);
       pdf.save(`${options.filename}.pdf`);
-    } catch (error) {
+    } catch (_error) {
 alert('Failed to export as PDF. Please try again.');
     }
   };

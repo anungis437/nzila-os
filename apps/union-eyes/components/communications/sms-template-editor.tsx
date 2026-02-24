@@ -40,6 +40,7 @@ interface SmsTemplateEditorProps {
     variables?: string[];
     category?: string;
   };
+  // eslint-disable-next-line @typescript-eslint/no-explicit-any
   onSave?: (template: any) => void;
   onCancel?: () => void;
 }
@@ -196,7 +197,7 @@ export function SmsTemplateEditor({
       });
 
       onSave?.(template);
-    } catch (error) {
+    } catch (_error) {
 toast({
         title: 'Error',
         description: 'Failed to save template. Please try again.',

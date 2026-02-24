@@ -9,9 +9,10 @@
  * Authentication: OAuth2
  */
 
+ 
 import type {
   IntegrationError,
-  RateLimitError,
+  RateLimitError as _RateLimitError,
   AuthenticationError,
 } from '../../types';
 
@@ -157,7 +158,7 @@ export class LinkedInLearningClient {
       // Check for rate limiting
       if (response.status === 429) {
         const retryAfter = response.headers.get('Retry-After');
-        const resetTime = retryAfter
+        const _resetTime = retryAfter
           ? new Date(Date.now() + parseInt(retryAfter) * 1000)
           : new Date(Date.now() + 3600000);
 

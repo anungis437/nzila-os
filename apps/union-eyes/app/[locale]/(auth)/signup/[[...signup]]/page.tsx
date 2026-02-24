@@ -1,5 +1,7 @@
 "use client";
 
+
+export const dynamic = 'force-dynamic';
 import { SignUp, useUser } from "@clerk/nextjs";
 import { dark } from "@clerk/themes";
 import { useTheme } from "next-themes";
@@ -78,7 +80,7 @@ if (result.success) {
           router.push("/dashboard");
         }, 3000);
       }
-    } catch (error) {
+    } catch (_error) {
 setClaimResult({
         success: false,
         message: "An unexpected error occurred while linking your purchase."
@@ -103,7 +105,7 @@ setSignupComplete(true);
         if (email && signUp?.createdUserId) {
 try {
             await handleProfileClaiming(signUp.createdUserId);
-          } catch (error) {
+          } catch (_error) {
 // Even if claiming fails, redirect to dashboard after a short delay
             setTimeout(() => {
               router.push("/dashboard");
@@ -122,7 +124,7 @@ router.push("/dashboard");
   // Don't render SignUp if already signed in or still loading
   if (!userLoaded || isSignedIn) {
     return (
-      <div className="flex items-center justify-center min-h-[400px]">
+      <div className="flex items-center justify-center min-h-100">
         <Loader2 className="animate-spin h-8 w-8 text-purple-600" />
       </div>
     );

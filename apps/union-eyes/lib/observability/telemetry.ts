@@ -28,17 +28,23 @@
  * ```
  */
 
+// eslint-disable-next-line @typescript-eslint/ban-ts-comment
 // @ts-ignore - @opentelemetry packages may not be installed
 import { NodeSDK } from '@opentelemetry/sdk-node';
+// eslint-disable-next-line @typescript-eslint/ban-ts-comment
 // @ts-ignore
 import { getNodeAutoInstrumentations } from '@opentelemetry/auto-instrumentations-node';
+// eslint-disable-next-line @typescript-eslint/ban-ts-comment
 // @ts-ignore
 import { OTLPTraceExporter } from '@opentelemetry/exporter-trace-otlp-http';
+// eslint-disable-next-line @typescript-eslint/ban-ts-comment
 // @ts-ignore
 import { Resource } from '@opentelemetry/resources';
+// eslint-disable-next-line @typescript-eslint/ban-ts-comment
 // @ts-ignore
 import { SemanticResourceAttributes } from '@opentelemetry/semantic-conventions';
 import { trace, context, propagation } from '@opentelemetry/api';
+// eslint-disable-next-line @typescript-eslint/ban-ts-comment
 // @ts-ignore
 import { BatchSpanProcessor } from '@opentelemetry/sdk-trace-base';
 
@@ -63,6 +69,7 @@ return null;
                  'unknown';
 
   // Configure resource attributes
+  // eslint-disable-next-line @typescript-eslint/ban-ts-comment
   // @ts-ignore - Resource constructor from @opentelemetry/resources
   const resource = new Resource({
     [SemanticResourceAttributes.SERVICE_NAME]: serviceName,
@@ -111,12 +118,12 @@ return null;
     process.on('SIGTERM', () => {
       sdk.shutdown()
         .then(() => undefined)
-        .catch((error) => undefined)
+        .catch((_error) => undefined)
         .finally(() => process.exit(0));
     });
 
     return sdk;
-  } catch (error) {
+  } catch (_error) {
 return null;
   }
 }
@@ -139,6 +146,7 @@ return null;
  */
 export async function withSpan<T>(
   name: string,
+  // eslint-disable-next-line @typescript-eslint/no-explicit-any
   fn: (span: any) => Promise<T>,
   attributes?: Record<string, string | number | boolean>
 ): Promise<T> {

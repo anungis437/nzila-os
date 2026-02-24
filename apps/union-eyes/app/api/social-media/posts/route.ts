@@ -1,4 +1,3 @@
-import { logApiAuditEvent } from "@/lib/middleware/api-security";
 import { checkRateLimit, RATE_LIMITS } from '@/lib/rate-limiter';
 /**
  * Social Media Posts API Routes - Phase 10
@@ -11,14 +10,15 @@ import { NextRequest, NextResponse } from 'next/server';
 import { createSocialMediaService } from '@/lib/social-media/social-media-service';
 import { createClient } from '@supabase/supabase-js';
 import { z } from "zod";
-import { BaseAuthContext, getCurrentUser, withAdminAuth, withApiAuth, withMinRole, withRoleAuth } from '@/lib/api-auth-guard';
+import { BaseAuthContext, withRoleAuth } from '@/lib/api-auth-guard';
 
+ 
 import {
   ErrorCode,
   standardErrorResponse,
-  standardSuccessResponse,
 } from '@/lib/api/standardized-responses';
 // Lazy initialization - env vars not available during build
+// eslint-disable-next-line @typescript-eslint/no-explicit-any
 let supabaseClient: any = null;
 function getSupabaseClient() {
   if (!supabaseClient) {
@@ -184,7 +184,7 @@ export const POST = withRoleAuth('member', async (request: NextRequest, context:
         hashtags,
         mentions,
         scheduled_for,
-        campaign_id,
+        campaign_id: _campaign_id,
       } = validation.data;
 
       // Check character limits per platform
@@ -258,7 +258,7 @@ return NextResponse.json(
 
 export const DELETE = withRoleAuth('member', async (request: NextRequest, context: BaseAuthContext) => {
   try {
-      const { userId, organizationId } = context;
+      const { _userId, organizationId } = context;
       
       if (!organizationId) {
         return standardErrorResponse(

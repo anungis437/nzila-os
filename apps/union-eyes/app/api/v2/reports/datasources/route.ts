@@ -2,8 +2,13 @@
  * GET /api/reports/datasources
  * Migrated to withApi() framework
  */
-import { getAllDataSources } from '@/lib/report-executor';
 
+ 
+ 
+ 
+ 
+ 
+ 
 import { withApi, ApiError } from '@/lib/api/framework';
 
 export const GET = withApi(
@@ -14,7 +19,7 @@ export const GET = withApi(
       summary: 'GET datasources',
     },
   },
-  async ({ request, userId, organizationId, user, body, query }) => {
+  async ({ request: _request, userId: _userId, organizationId: _organizationId, user: _user, body: _body, query: _query }) => {
     // TODO: migrate handler body
     throw ApiError.internal('Route not yet migrated');
   },

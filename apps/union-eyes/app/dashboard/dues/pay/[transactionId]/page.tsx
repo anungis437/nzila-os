@@ -7,8 +7,11 @@
 
 'use client';
 
+
+export const dynamic = 'force-dynamic';
 import { useEffect, useState } from 'react';
 import { useParams, useRouter } from 'next/navigation';
+import { validateRedirectUrl } from '@/lib/utils/sanitize';
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from '@/components/ui/card';
 import { Button } from '@/components/ui/button';
 import { Badge } from '@/components/ui/badge';
@@ -324,7 +327,9 @@ export default function PaymentCheckoutPage() {
 
       // Redirect to checkout
       if (data.url) {
-        window.location.href = data.url;
+        const safeUrl = validateRedirectUrl(data.url);
+        if (!safeUrl) throw new Error('Untrusted checkout URL');
+        window.location.href = safeUrl;
       } else {
         throw new Error('No checkout URL received');
       }
@@ -339,7 +344,7 @@ export default function PaymentCheckoutPage() {
   if (loading) {
     return (
       <div className="container mx-auto p-4 md:p-6 max-w-4xl">
-        <div className="flex items-center justify-center min-h-[400px]">
+        <div className="flex items-center justify-center min-h-100">
           <div className="text-center">
             <Loader2 className="h-12 w-12 animate-spin mx-auto mb-4 text-primary" />
             <p className="text-base md:text-lg font-medium">Loading payment details...</p>
@@ -455,7 +460,7 @@ export default function PaymentCheckoutPage() {
           <Card className="mt-6 border-muted">
             <CardContent className="pt-6">
               <div className="flex items-start space-x-3">
-                <div className="p-2 bg-green-100 rounded-lg flex-shrink-0">
+                <div className="p-2 bg-green-100 rounded-lg shrink-0">
                   <CheckCircle2 className="h-5 w-5 text-green-600" />
                 </div>
                 <div className="flex-1 text-sm">

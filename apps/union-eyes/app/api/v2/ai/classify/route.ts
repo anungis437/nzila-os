@@ -3,8 +3,6 @@ import { NextResponse } from 'next/server';
  * POST /api/ai/classify
  * Migrated to withApi() framework
  */
-import { logApiAuditEvent } from "@/lib/middleware/api-security";
-import { checkEntitlement, consumeCredits, getCreditCost } from '@/lib/services/entitlements';
 import {
   classifyClause,
   generateClauseTags,
@@ -15,6 +13,11 @@ import {
 } from '@/lib/services/ai/auto-classification-service';
 import type { ClauseType } from '@/db/schema/domains/agreements';
 
+ 
+ 
+ 
+ 
+ 
 import { withApi, ApiError, z, RATE_LIMITS } from '@/lib/api/framework';
 
 const aiClassifySchema = z.object({
@@ -39,7 +42,7 @@ export const POST = withApi(
     },
     successStatus: 201,
   },
-  async ({ request, userId, organizationId, user, body, query }) => {
+  async ({ request: _request, userId: _userId, organizationId: _organizationId, user: _user, body, query: _query }) => {
     const { action, content, context, clauses, caseTitle, facts, reasoning, decision } = body;
 
           // Validate request body
@@ -107,7 +110,7 @@ export const POST = withApi(
               const total = clauses.length;
               const batchResults = await batchClassifyClauses(clauses, {
                 concurrency: 5,
-                onProgress: (comp, tot) => {
+                onProgress: (comp, _tot) => {
                   completed = comp;
                 },
               });

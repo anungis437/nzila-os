@@ -7,6 +7,7 @@
  */
 
 import { NextRequest, NextResponse } from "next/server";
+import { timingSafeEqual } from 'crypto';
 import { sql } from 'drizzle-orm';
 import { withSystemContext } from '@/lib/db/with-rls-context';
 import { db } from '@/db';
@@ -14,7 +15,6 @@ import { logger } from "@/lib/logger";
 import {
   ErrorCode,
   standardErrorResponse,
-  standardSuccessResponse,
 } from '@/lib/api/standardized-responses';
 import {
   batchSendSessionReminders,
@@ -35,11 +35,14 @@ export const runtime = "nodejs";
  */
 export async function GET(request: NextRequest) {
   try {
-    // Verify cron secret for security
+    // Verify cron secret for security (timing-safe comparison)
     const authHeader = request.headers.get("authorization");
-    const cronSecret = process.env.CRON_SECRET;
+    const secret = authHeader?.replace('Bearer ', '') ?? '';
+    const cronSecret = process.env.CRON_SECRET ?? '';
+    const secretBuf = Buffer.from(secret);
+    const expectedBuf = Buffer.from(cronSecret);
 
-    if (cronSecret && authHeader !== `Bearer ${cronSecret}`) {
+    if (cronSecret && (secretBuf.length !== expectedBuf.length || !timingSafeEqual(secretBuf, expectedBuf))) {
       logger.warn("Unauthorized cron job attempt", {
         authHeader: authHeader?.substring(0, 20),
       });

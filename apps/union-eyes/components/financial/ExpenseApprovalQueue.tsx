@@ -9,6 +9,7 @@ import { Dialog, DialogContent, DialogDescription, DialogFooter, DialogHeader, D
 import { Textarea } from '@/components/ui/textarea';
 import { Label } from '@/components/ui/label';
 import { CheckCircle, XCircle, Clock, Eye } from 'lucide-react';
+ 
 import { useToast } from '@/lib/hooks/use-toast';
 
 interface ExpenseRequest {
@@ -28,7 +29,7 @@ interface ExpenseApprovalQueueProps {
   organizationId: string;
 }
 
-export default function ExpenseApprovalQueue({ organizationId }: ExpenseApprovalQueueProps) {
+export default function ExpenseApprovalQueue({ organizationId: _organizationId }: ExpenseApprovalQueueProps) {
   const [expenses, setExpenses] = useState<ExpenseRequest[]>([]);
   const [loading, setLoading] = useState(true);
   const [selectedExpense, setSelectedExpense] = useState<ExpenseRequest | null>(null);
@@ -38,6 +39,7 @@ export default function ExpenseApprovalQueue({ organizationId }: ExpenseApproval
 
   useEffect(() => {
     fetchPendingExpenses();
+  // eslint-disable-next-line react-hooks/exhaustive-deps
   }, []);
 
   const fetchPendingExpenses = async () => {
@@ -48,7 +50,7 @@ export default function ExpenseApprovalQueue({ organizationId }: ExpenseApproval
       
       const data = await response.json();
       setExpenses(data.data.expenses || []);
-    } catch (error) {
+    } catch (_error) {
       toast({
         title: 'Error',
         description: 'Failed to load pending expenses',
@@ -80,7 +82,7 @@ export default function ExpenseApprovalQueue({ organizationId }: ExpenseApproval
       setSelectedExpense(null);
       setApprovalComments('');
       fetchPendingExpenses();
-    } catch (error) {
+    } catch (_error) {
       toast({
         title: 'Error',
         description: `Failed to ${action} expense`,
@@ -90,6 +92,7 @@ export default function ExpenseApprovalQueue({ organizationId }: ExpenseApproval
   };
 
   const getStatusBadge = (status: string) => {
+    // eslint-disable-next-line @typescript-eslint/no-explicit-any
     const variants: Record<string, { variant: 'default' | 'secondary' | 'destructive' | 'outline', icon?: any }> = {
       submitted: { variant: 'outline', icon: Clock },
       approved: { variant: 'default', icon: CheckCircle },

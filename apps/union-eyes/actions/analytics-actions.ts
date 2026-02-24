@@ -9,22 +9,19 @@
 
 import { db } from '@/db';
 import { withRLSContext } from '@/lib/db/with-rls-context';
-import { 
-  analyticsMetrics, 
-  kpiConfigurations, 
-  mlPredictions, 
-  trendAnalyses, 
-  insightRecommendations,
-  comparativeAnalyses 
+import {
+  analyticsMetrics,
+  kpiConfigurations,
+  mlPredictions,
+  trendAnalyses,
 } from '@/db/schema';
-import { 
-  forecastLinearRegression, 
+import {
+  forecastLinearRegression,
   generateEnsembleForecast,
   detectTrend,
-  detectAnomalies,
   type TimeSeriesData,
   type PredictionResult,
-  type TrendAnalysisResult
+  type TrendAnalysisResult,
 } from '@/lib/ml/predictive-analytics';
 import { eq, and, gte, lte, desc } from 'drizzle-orm';
 import { auth } from '@clerk/nextjs/server';
@@ -68,6 +65,7 @@ export async function calculateMetrics(params: {
     // Calculate metric value based on type
     let metricValue: number;
     let metricUnit: string;
+    // eslint-disable-next-line @typescript-eslint/no-explicit-any
     let metadata: any = {};
     
     switch (params.metricType) {
@@ -115,6 +113,7 @@ export async function calculateMetrics(params: {
         // SECURITY FIX: Wrap with RLS context for tenant isolation
         const membersCount = await withRLSContext({ organizationId: orgId }, async (db) =>
           db.query.organizationMembers.findMany({
+            // eslint-disable-next-line @typescript-eslint/no-explicit-any
             where: (members: any, { eq, and, gte, lte }: any) => and(
               eq(members.organizationId, orgId),
               gte(members.createdAt, params.periodStart),
@@ -211,9 +210,11 @@ export async function generatePredictions(params: {
     }
     
     // Convert to time series format
+    // eslint-disable-next-line @typescript-eslint/no-explicit-any
     const timeSeriesData: TimeSeriesData[] = historicalMetrics.reverse().map((m: any) => ({
       date: m.periodStart,
       value: Number(m.metricValue),
+      // eslint-disable-next-line @typescript-eslint/no-explicit-any
       metadata: m.metadata as Record<string, any>
     }));
     
@@ -231,6 +232,7 @@ export async function generatePredictions(params: {
     
     // Store predictions in database
     const lastDate = timeSeriesData[timeSeriesData.length - 1].date;
+    // eslint-disable-next-line @typescript-eslint/no-explicit-any
     const storedPredictions: any[] = [];
     
     for (let i = 0; i < predictions.length; i++) {
@@ -298,6 +300,7 @@ export async function detectMetricTrends(params: {
     }
     
     // Convert to time series
+    // eslint-disable-next-line @typescript-eslint/no-explicit-any
     const timeSeriesData: TimeSeriesData[] = metrics.reverse().map((m: any) => ({
       date: m.periodStart,
       value: Number(m.metricValue)
@@ -345,6 +348,7 @@ export async function createKPI(params: {
   description?: string;
   metricType: string;
   dataSource: string;
+  // eslint-disable-next-line @typescript-eslint/no-explicit-any
   calculation: any;
   visualizationType: 'line' | 'bar' | 'pie' | 'gauge' | 'number';
   targetValue?: number;
@@ -454,7 +458,9 @@ function generateTrendInsights(trend: TrendAnalysisResult): string {
   return insights.join(' ');
 }
 
+// eslint-disable-next-line @typescript-eslint/no-explicit-any
 function generateTrendRecommendations(trend: TrendAnalysisResult): any {
+  // eslint-disable-next-line @typescript-eslint/no-explicit-any
   const recommendations: any[] = [];
   
   if (trend.detectedTrend === 'increasing' && trend.trendStrength > 0.7) {

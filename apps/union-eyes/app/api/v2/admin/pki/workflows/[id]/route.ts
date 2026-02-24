@@ -2,9 +2,23 @@
  * GET PUT DELETE /api/admin/pki/workflows/[id]
  * Migrated to withApi() framework
  */
-import { logApiAuditEvent } from "@/lib/middleware/api-security";
 import { getWorkflow, getWorkflowStatus, advanceWorkflow, cancelWorkflow } from "@/services/pki/workflow-engine";
 
+ 
+ 
+ 
+ 
+ 
+ 
+ 
+ 
+ 
+ 
+ 
+ 
+ 
+ 
+ 
 import { withApi, ApiError, z } from '@/lib/api/framework';
 
 const adminPkiWorkflowsSchema = z.object({
@@ -19,7 +33,7 @@ export const GET = withApi(
       summary: 'GET [id]',
     },
   },
-  async ({ request, params, userId, organizationId, user, body, query }) => {
+  async ({ request, params, userId: _userId, organizationId: _organizationId, user: _user, body: _body, query: _query }) => {
 
           const workflowId = params.id;
           const { searchParams } = new URL(request.url);
@@ -49,7 +63,7 @@ export const PUT = withApi(
       summary: 'PUT [id]',
     },
   },
-  async ({ request, params, userId, organizationId, user, body, query }) => {
+  async ({ request: _request, params, userId: _userId, organizationId: _organizationId, user: _user, body: _body, query: _query }) => {
 
           const workflowId = params.id;
           const result = advanceWorkflow(workflowId);
@@ -69,7 +83,7 @@ export const DELETE = withApi(
       summary: 'DELETE [id]',
     },
   },
-  async ({ request, params, userId, organizationId, user, body, query }) => {
+  async ({ request: _request, params, userId, organizationId: _organizationId, user: _user, body, query: _query }) => {
           const { reason } = body;
           const workflowId = params.id;
           // Validate request body

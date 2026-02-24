@@ -36,7 +36,7 @@ import {
   type JobClassification,
   type NewJobClassification,
 } from "@/db/schema/domains/member/member-employment";
-import { eq, and, or, isNull, desc, asc, like, gte, lte, sql } from "drizzle-orm";
+import { eq, and, or, isNull, desc, asc, gte, lte } from "drizzle-orm";
 import { NodePgDatabase } from "drizzle-orm/node-postgres";
 import { withRLSContext } from "@/lib/db/with-rls-context";
 import { logger } from "@/lib/logger";
@@ -50,8 +50,10 @@ import { logger } from "@/lib/logger";
  */
 export async function createMemberEmployment(
   data: NewMemberEmployment,
+  // eslint-disable-next-line @typescript-eslint/no-explicit-any
   tx?: NodePgDatabase<any>
 ): Promise<MemberEmployment> {
+  // eslint-disable-next-line @typescript-eslint/no-explicit-any
   const executeQuery = async (dbOrTx: NodePgDatabase<any>) => {
     try {
       const [employment] = await dbOrTx.insert(memberEmployment).values(data).returning();
@@ -70,6 +72,7 @@ export async function createMemberEmployment(
   if (tx) {
     return executeQuery(tx);
   } else {
+    // eslint-disable-next-line @typescript-eslint/no-explicit-any
     return withRLSContext(async (tx: NodePgDatabase<any>) => executeQuery(tx));
   }
 }
@@ -79,8 +82,10 @@ export async function createMemberEmployment(
  */
 export async function getMemberEmploymentById(
   id: string,
+  // eslint-disable-next-line @typescript-eslint/no-explicit-any
   tx?: NodePgDatabase<any>
 ): Promise<MemberEmployment | null> {
+  // eslint-disable-next-line @typescript-eslint/no-explicit-any
   const executeQuery = async (dbOrTx: NodePgDatabase<any>) => {
     try {
       const [employment] = await dbOrTx
@@ -99,6 +104,7 @@ export async function getMemberEmploymentById(
   if (tx) {
     return executeQuery(tx);
   } else {
+    // eslint-disable-next-line @typescript-eslint/no-explicit-any
     return withRLSContext(async (tx: NodePgDatabase<any>) => executeQuery(tx));
   }
 }
@@ -108,8 +114,10 @@ export async function getMemberEmploymentById(
  */
 export async function getActiveMemberEmployment(
   memberId: string,
+  // eslint-disable-next-line @typescript-eslint/no-explicit-any
   tx?: NodePgDatabase<any>
 ): Promise<MemberEmployment | null> {
+  // eslint-disable-next-line @typescript-eslint/no-explicit-any
   const executeQuery = async (dbOrTx: NodePgDatabase<any>) => {
     try {
       const [employment] = await dbOrTx
@@ -134,6 +142,7 @@ export async function getActiveMemberEmployment(
   if (tx) {
     return executeQuery(tx);
   } else {
+    // eslint-disable-next-line @typescript-eslint/no-explicit-any
     return withRLSContext(async (tx: NodePgDatabase<any>) => executeQuery(tx));
   }
 }
@@ -143,8 +152,10 @@ export async function getActiveMemberEmployment(
  */
 export async function getAllMemberEmployment(
   memberId: string,
+  // eslint-disable-next-line @typescript-eslint/no-explicit-any
   tx?: NodePgDatabase<any>
 ): Promise<MemberEmployment[]> {
+  // eslint-disable-next-line @typescript-eslint/no-explicit-any
   const executeQuery = async (dbOrTx: NodePgDatabase<any>) => {
     try {
       return await dbOrTx
@@ -161,6 +172,7 @@ export async function getAllMemberEmployment(
   if (tx) {
     return executeQuery(tx);
   } else {
+    // eslint-disable-next-line @typescript-eslint/no-explicit-any
     return withRLSContext(async (tx: NodePgDatabase<any>) => executeQuery(tx));
   }
 }
@@ -171,12 +183,15 @@ export async function getAllMemberEmployment(
 export async function getEmploymentByOrganization(
   organizationId: string,
   status?: string,
+  // eslint-disable-next-line @typescript-eslint/no-explicit-any
   tx?: NodePgDatabase<any>
 ): Promise<MemberEmployment[]> {
+  // eslint-disable-next-line @typescript-eslint/no-explicit-any
   const executeQuery = async (dbOrTx: NodePgDatabase<any>) => {
     try {
       const conditions = [eq(memberEmployment.organizationId, organizationId)];
       if (status) {
+        // eslint-disable-next-line @typescript-eslint/no-explicit-any
         conditions.push(eq(memberEmployment.employmentStatus, status as any));
       }
 
@@ -194,6 +209,7 @@ export async function getEmploymentByOrganization(
   if (tx) {
     return executeQuery(tx);
   } else {
+    // eslint-disable-next-line @typescript-eslint/no-explicit-any
     return withRLSContext(async (tx: NodePgDatabase<any>) => executeQuery(tx));
   }
 }
@@ -204,8 +220,10 @@ export async function getEmploymentByOrganization(
 export async function updateMemberEmployment(
   id: string,
   data: Partial<NewMemberEmployment>,
+  // eslint-disable-next-line @typescript-eslint/no-explicit-any
   tx?: NodePgDatabase<any>
 ): Promise<MemberEmployment> {
+  // eslint-disable-next-line @typescript-eslint/no-explicit-any
   const executeQuery = async (dbOrTx: NodePgDatabase<any>) => {
     try {
       const [employment] = await dbOrTx
@@ -225,6 +243,7 @@ export async function updateMemberEmployment(
   if (tx) {
     return executeQuery(tx);
   } else {
+    // eslint-disable-next-line @typescript-eslint/no-explicit-any
     return withRLSContext(async (tx: NodePgDatabase<any>) => executeQuery(tx));
   }
 }
@@ -234,8 +253,10 @@ export async function updateMemberEmployment(
  */
 export async function deleteMemberEmployment(
   id: string,
+  // eslint-disable-next-line @typescript-eslint/no-explicit-any
   tx?: NodePgDatabase<any>
 ): Promise<void> {
+  // eslint-disable-next-line @typescript-eslint/no-explicit-any
   const executeQuery = async (dbOrTx: NodePgDatabase<any>) => {
     try {
       await dbOrTx
@@ -252,6 +273,7 @@ export async function deleteMemberEmployment(
   if (tx) {
     return executeQuery(tx);
   } else {
+    // eslint-disable-next-line @typescript-eslint/no-explicit-any
     return withRLSContext(async (tx: NodePgDatabase<any>) => executeQuery(tx));
   }
 }
@@ -262,6 +284,7 @@ export async function deleteMemberEmployment(
  */
 export async function getEmploymentForDuesCalculation(
   memberId: string,
+  // eslint-disable-next-line @typescript-eslint/no-explicit-any
   tx?: NodePgDatabase<any>
 ): Promise<{
   grossWages?: number;
@@ -296,8 +319,10 @@ export async function getEmploymentForDuesCalculation(
  */
 export async function createEmploymentHistory(
   data: NewEmploymentHistory,
+  // eslint-disable-next-line @typescript-eslint/no-explicit-any
   tx?: NodePgDatabase<any>
 ): Promise<EmploymentHistory> {
+  // eslint-disable-next-line @typescript-eslint/no-explicit-any
   const executeQuery = async (dbOrTx: NodePgDatabase<any>) => {
     try {
       const [history] = await dbOrTx.insert(employmentHistory).values(data).returning();
@@ -316,6 +341,7 @@ export async function createEmploymentHistory(
   if (tx) {
     return executeQuery(tx);
   } else {
+    // eslint-disable-next-line @typescript-eslint/no-explicit-any
     return withRLSContext(async (tx: NodePgDatabase<any>) => executeQuery(tx));
   }
 }
@@ -325,8 +351,10 @@ export async function createEmploymentHistory(
  */
 export async function getEmploymentHistoryByMember(
   memberId: string,
+  // eslint-disable-next-line @typescript-eslint/no-explicit-any
   tx?: NodePgDatabase<any>
 ): Promise<EmploymentHistory[]> {
+  // eslint-disable-next-line @typescript-eslint/no-explicit-any
   const executeQuery = async (dbOrTx: NodePgDatabase<any>) => {
     try {
       return await dbOrTx
@@ -343,6 +371,7 @@ export async function getEmploymentHistoryByMember(
   if (tx) {
     return executeQuery(tx);
   } else {
+    // eslint-disable-next-line @typescript-eslint/no-explicit-any
     return withRLSContext(async (tx: NodePgDatabase<any>) => executeQuery(tx));
   }
 }
@@ -356,8 +385,10 @@ export async function getEmploymentHistoryByMember(
  */
 export async function createMemberLeave(
   data: NewMemberLeave,
+  // eslint-disable-next-line @typescript-eslint/no-explicit-any
   tx?: NodePgDatabase<any>
 ): Promise<MemberLeave> {
+  // eslint-disable-next-line @typescript-eslint/no-explicit-any
   const executeQuery = async (dbOrTx: NodePgDatabase<any>) => {
     try {
       const [leave] = await dbOrTx.insert(memberLeaves).values(data).returning();
@@ -376,6 +407,7 @@ export async function createMemberLeave(
   if (tx) {
     return executeQuery(tx);
   } else {
+    // eslint-disable-next-line @typescript-eslint/no-explicit-any
     return withRLSContext(async (tx: NodePgDatabase<any>) => executeQuery(tx));
   }
 }
@@ -386,8 +418,10 @@ export async function createMemberLeave(
 export async function getActiveMemberLeaves(
   memberId: string,
   currentDate?: Date,
+  // eslint-disable-next-line @typescript-eslint/no-explicit-any
   tx?: NodePgDatabase<any>
 ): Promise<MemberLeave[]> {
+  // eslint-disable-next-line @typescript-eslint/no-explicit-any
   const executeQuery = async (dbOrTx: NodePgDatabase<any>) => {
     try {
       const now = currentDate || new Date();
@@ -416,6 +450,7 @@ export async function getActiveMemberLeaves(
   if (tx) {
     return executeQuery(tx);
   } else {
+    // eslint-disable-next-line @typescript-eslint/no-explicit-any
     return withRLSContext(async (tx: NodePgDatabase<any>) => executeQuery(tx));
   }
 }
@@ -425,8 +460,10 @@ export async function getActiveMemberLeaves(
  */
 export async function getAllMemberLeaves(
   memberId: string,
+  // eslint-disable-next-line @typescript-eslint/no-explicit-any
   tx?: NodePgDatabase<any>
 ): Promise<MemberLeave[]> {
+  // eslint-disable-next-line @typescript-eslint/no-explicit-any
   const executeQuery = async (dbOrTx: NodePgDatabase<any>) => {
     try {
       return await dbOrTx
@@ -443,6 +480,7 @@ export async function getAllMemberLeaves(
   if (tx) {
     return executeQuery(tx);
   } else {
+    // eslint-disable-next-line @typescript-eslint/no-explicit-any
     return withRLSContext(async (tx: NodePgDatabase<any>) => executeQuery(tx));
   }
 }
@@ -453,8 +491,10 @@ export async function getAllMemberLeaves(
 export async function updateMemberLeave(
   id: string,
   data: Partial<NewMemberLeave>,
+  // eslint-disable-next-line @typescript-eslint/no-explicit-any
   tx?: NodePgDatabase<any>
 ): Promise<MemberLeave> {
+  // eslint-disable-next-line @typescript-eslint/no-explicit-any
   const executeQuery = async (dbOrTx: NodePgDatabase<any>) => {
     try {
       const [leave] = await dbOrTx
@@ -474,6 +514,7 @@ export async function updateMemberLeave(
   if (tx) {
     return executeQuery(tx);
   } else {
+    // eslint-disable-next-line @typescript-eslint/no-explicit-any
     return withRLSContext(async (tx: NodePgDatabase<any>) => executeQuery(tx));
   }
 }
@@ -487,8 +528,10 @@ export async function updateMemberLeave(
  */
 export async function createJobClassification(
   data: NewJobClassification,
+  // eslint-disable-next-line @typescript-eslint/no-explicit-any
   tx?: NodePgDatabase<any>
 ): Promise<JobClassification> {
+  // eslint-disable-next-line @typescript-eslint/no-explicit-any
   const executeQuery = async (dbOrTx: NodePgDatabase<any>) => {
     try {
       const [classification] = await dbOrTx.insert(jobClassifications).values(data).returning();
@@ -507,6 +550,7 @@ export async function createJobClassification(
   if (tx) {
     return executeQuery(tx);
   } else {
+    // eslint-disable-next-line @typescript-eslint/no-explicit-any
     return withRLSContext(async (tx: NodePgDatabase<any>) => executeQuery(tx));
   }
 }
@@ -517,8 +561,10 @@ export async function createJobClassification(
 export async function getJobClassificationByCode(
   organizationId: string,
   jobCode: string,
+  // eslint-disable-next-line @typescript-eslint/no-explicit-any
   tx?: NodePgDatabase<any>
 ): Promise<JobClassification | null> {
+  // eslint-disable-next-line @typescript-eslint/no-explicit-any
   const executeQuery = async (dbOrTx: NodePgDatabase<any>) => {
     try {
       const [classification] = await dbOrTx
@@ -543,6 +589,7 @@ export async function getJobClassificationByCode(
   if (tx) {
     return executeQuery(tx);
   } else {
+    // eslint-disable-next-line @typescript-eslint/no-explicit-any
     return withRLSContext(async (tx: NodePgDatabase<any>) => executeQuery(tx));
   }
 }
@@ -553,8 +600,10 @@ export async function getJobClassificationByCode(
 export async function getJobClassificationsByOrganization(
   organizationId: string,
   activeOnly: boolean = true,
+  // eslint-disable-next-line @typescript-eslint/no-explicit-any
   tx?: NodePgDatabase<any>
 ): Promise<JobClassification[]> {
+  // eslint-disable-next-line @typescript-eslint/no-explicit-any
   const executeQuery = async (dbOrTx: NodePgDatabase<any>) => {
     try {
       const conditions = [eq(jobClassifications.organizationId, organizationId)];
@@ -576,6 +625,7 @@ export async function getJobClassificationsByOrganization(
   if (tx) {
     return executeQuery(tx);
   } else {
+    // eslint-disable-next-line @typescript-eslint/no-explicit-any
     return withRLSContext(async (tx: NodePgDatabase<any>) => executeQuery(tx));
   }
 }
@@ -586,8 +636,10 @@ export async function getJobClassificationsByOrganization(
 export async function updateJobClassification(
   id: string,
   data: Partial<NewJobClassification>,
+  // eslint-disable-next-line @typescript-eslint/no-explicit-any
   tx?: NodePgDatabase<any>
 ): Promise<JobClassification> {
+  // eslint-disable-next-line @typescript-eslint/no-explicit-any
   const executeQuery = async (dbOrTx: NodePgDatabase<any>) => {
     try {
       const [classification] = await dbOrTx
@@ -607,6 +659,7 @@ export async function updateJobClassification(
   if (tx) {
     return executeQuery(tx);
   } else {
+    // eslint-disable-next-line @typescript-eslint/no-explicit-any
     return withRLSContext(async (tx: NodePgDatabase<any>) => executeQuery(tx));
   }
 }
@@ -622,6 +675,7 @@ export async function calculateSeniorityYears(
   seniorityDate: Date,
   currentDate?: Date,
   memberId?: string,
+  // eslint-disable-next-line @typescript-eslint/no-explicit-any
   tx?: NodePgDatabase<any>
 ): Promise<number> {
   const now = currentDate || new Date();

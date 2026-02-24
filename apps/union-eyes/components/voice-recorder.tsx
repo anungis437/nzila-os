@@ -93,7 +93,7 @@ export function VoiceRecorder({
         description: "Speak clearly into your microphone",
       });
 
-    } catch (error) {
+    } catch (_error) {
 toast({
         title: "Recording failed",
         description: "Could not access microphone. Please check permissions.",

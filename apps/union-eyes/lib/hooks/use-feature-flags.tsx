@@ -58,7 +58,7 @@ export function FeatureFlagProvider({
         const data = await response.json();
         setFlags(data.flags || {});
       }
-    } catch (error) {
+    } catch (_error) {
 } finally {
       setIsLoading(false);
     }

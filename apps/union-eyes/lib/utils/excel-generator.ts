@@ -95,6 +95,7 @@ export async function generateExcel(options: ExcelOptions): Promise<Buffer> {
   headerRow.alignment = { vertical: 'middle', horizontal: 'center' };
 
   // Add data rows
+  // eslint-disable-next-line @typescript-eslint/no-explicit-any
   data.forEach((row: any, index) => {
     const excelRow = worksheet.addRow(row);
 

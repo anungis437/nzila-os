@@ -6,7 +6,6 @@ import { requireApiAuth } from '@/lib/api-auth-guard';
 import {
   ErrorCode,
   standardErrorResponse,
-  standardSuccessResponse,
 } from '@/lib/api/standardized-responses';
 
 const consentSchema = z.object({

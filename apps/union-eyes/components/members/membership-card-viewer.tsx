@@ -116,6 +116,7 @@ export function MembershipCardViewer({
             <CardContent className="h-full p-8 text-white relative">
               {/* Union Logo */}
               {cardData.unionLogo && (
+                // eslint-disable-next-line @next/next/no-img-element
                 <img
                   src={cardData.unionLogo}
                   alt="Union Logo"
@@ -137,6 +138,7 @@ export function MembershipCardViewer({
               {/* Member Photo */}
               {cardData.photoUrl && (
                 <div className="absolute bottom-8 left-8 w-24 h-24 rounded-full border-4 border-white overflow-hidden bg-white">
+                  {/* eslint-disable-next-line @next/next/no-img-element */}
                   <img
                     src={cardData.photoUrl}
                     alt="Member"

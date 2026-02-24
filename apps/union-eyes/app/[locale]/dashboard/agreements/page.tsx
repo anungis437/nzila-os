@@ -1,9 +1,12 @@
+"use client";
+
+
+export const dynamic = 'force-dynamic';
 import React from 'react';
 /**
  * Agreements Page
  * View and search collective bargaining agreements and contracts
  */
-"use client";
 
 import { useState } from "react";
 import { motion, AnimatePresence } from "framer-motion";
@@ -24,7 +27,8 @@ import {
   Eye,
   TrendingUp
 } from "lucide-react";
-import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
+ 
+import { Card, CardContent } from "@/components/ui/card";
 
 type AgreementStatus = "active" | "expired" | "pending";
 type AgreementType = "collective-bargaining" | "side-letter" | "mou" | "policy" | "amendment";
@@ -186,7 +190,7 @@ const statusConfig: Record<AgreementStatus, { label: string; icon: React.ReactEl
 
 export default function AgreementsPage() {
   const t = useTranslations();
-  const { user } = useUser();
+  const { user: _user } = useUser();
   const [agreements] = useState<Agreement[]>(mockAgreements);
   const [searchQuery, setSearchQuery] = useState("");
   const [selectedType, setSelectedType] = useState<AgreementType | "all">("all");
@@ -578,7 +582,7 @@ export default function AgreementsPage() {
           <Card className="bg-linear-to-r from-purple-50 to-blue-50 border-purple-200">
             <CardContent className="p-6">
               <div className="flex items-start gap-4">
-                <div className="w-12 h-12 bg-purple-600 rounded-lg flex items-center justify-center flex-shrink-0">
+                <div className="w-12 h-12 bg-purple-600 rounded-lg flex items-center justify-center shrink-0">
                   <BookOpen className="w-6 h-6 text-white" />
                 </div>
                 <div className="flex-1">

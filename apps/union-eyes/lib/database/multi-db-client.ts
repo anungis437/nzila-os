@@ -116,6 +116,7 @@ function createAzureSqlClient(config: DatabaseConfig): UnifiedDatabaseClient {
  * Execute query with database abstraction
  * Handles differences between PostgreSQL and Azure SQL syntax
  */
+// eslint-disable-next-line @typescript-eslint/no-explicit-any
 export async function executeQuery<T = any>(
   db: UnifiedDatabaseClient,
   queryFn: (db: UnifiedDatabaseClient) => Promise<T>
@@ -136,23 +137,25 @@ export function createFullTextSearchQuery(
   columns: string[],
   dbType: DatabaseType = 'postgresql'
 ) {
-  // SECURITY FIX: Escape single quotes in searchTerm to prevent SQL injection
-  const escapedTerm = searchTerm.replace(/'/g, "''");
+  // Strip any characters that could break out of a search term context
+  const sanitizedTerm = searchTerm.replace(/[-'"\\;]/g, '').trim();
+  if (!sanitizedTerm) {
+    return sql`FALSE`;
+  }
   
   if (dbType === 'azure-sql' || dbType === 'mssql') {
-    // Azure SQL uses CONTAINS or FREETEXT
-    // SECURITY: Each column name is validated and escaped using safeColumnName()
+    // Azure SQL CONTAINS: use parameterized value wrapped in double-quotes
+    // CONTAINS requires the search term inside the SQL string, but we sanitize it strictly
     const searchConditions = columns.map(col => {
       const safeCol = safeColumnName(col);
-      return sql`CONTAINS(${safeCol}, '${sql.raw(escapedTerm)}')`;
+      return sql`CONTAINS(${safeCol}, ${`"${sanitizedTerm}"`})`;
     });
     return sql.join(searchConditions, sql.raw(' OR '));
   } else {
-    // PostgreSQL uses to_tsquery and ts_rank
-    // SECURITY: Each column name is validated and escaped using safeColumnName()
+    // PostgreSQL: plainto_tsquery safely handles parameterized input
     const searchConditions = columns.map(col => {
       const safeCol = safeColumnName(col);
-      return sql`to_tsvector('english', ${safeCol}) @@ plainto_tsquery('english', '${sql.raw(escapedTerm)}')`;
+      return sql`to_tsvector('english', ${safeCol}) @@ plainto_tsquery('english', ${sanitizedTerm})`;
     });
     return sql.join(searchConditions, sql.raw(' OR '));
   }
@@ -194,6 +197,7 @@ export function arrayAppend(
  * Handle ILIKE vs LIKE differences
  */
 export function createLikeQuery(
+  // eslint-disable-next-line @typescript-eslint/no-explicit-any
   column: any,
   pattern: string,
   dbType: DatabaseType = 'postgresql'
@@ -274,6 +278,7 @@ export function createPaginationQuery(
  * Handle boolean type differences
  */
 export function createBooleanQuery(
+  // eslint-disable-next-line @typescript-eslint/no-explicit-any
   column: any,
   value: boolean,
   dbType: DatabaseType = 'postgresql'
@@ -291,6 +296,7 @@ export function createBooleanQuery(
  * Handle NULL checks differences
  */
 export function createNullCheck(
+  // eslint-disable-next-line @typescript-eslint/no-explicit-any
   column: any,
   checkNull: boolean = true,
   dbType: DatabaseType = 'postgresql'
@@ -340,8 +346,10 @@ export async function checkDatabaseHealth(): Promise<{
     // Simple health check query
     await executeQuery(db, async (db) => {
       if (config.type === 'azure-sql' || config.type === 'mssql') {
+        // eslint-disable-next-line @typescript-eslint/no-explicit-any
         return await (db as any).execute(sql`SELECT 1`);
       } else {
+        // eslint-disable-next-line @typescript-eslint/no-explicit-any
         return await (db as any).execute(sql`SELECT 1`);
       }
     });

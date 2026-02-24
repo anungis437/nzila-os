@@ -326,6 +326,7 @@ export class IndigenousDataService {
     partnerType: string;
     agreementTitle: string;
     agreementDescription: string;
+    // eslint-disable-next-line @typescript-eslint/no-explicit-any
     dataSharingScope: any;
     purposeLimitation: string;
     validFrom: Date;
@@ -360,7 +361,7 @@ export class IndigenousDataService {
    * Get active sharing agreements for Band Council
    */
   static async getActiveSharingAgreements(bandCouncilId: string) {
-    const now = new Date();
+    const _now = new Date();
     return await db
       .select()
       .from(indigenousDataSharingAgreements)

@@ -1,4 +1,3 @@
-import { logApiAuditEvent } from "@/lib/middleware/api-security";
 /**
  * AI Semantic Search API Route
  * 
@@ -14,14 +13,13 @@ import {
   findSimilarClauses,
 } from '@/lib/services/ai/vector-search-service';
 import { z } from "zod";
-import { getCurrentUser, withAdminAuth, withApiAuth, withMinRole, withRoleAuth, BaseAuthContext } from '@/lib/api-auth-guard';
+import { withRoleAuth, BaseAuthContext } from '@/lib/api-auth-guard';
 import { checkRateLimit, RATE_LIMITS, createRateLimitHeaders } from '@/lib/rate-limiter';
-import { checkEntitlement, consumeCredits, getCreditCost } from '@/lib/services/entitlements';
+import { checkEntitlement } from '@/lib/services/entitlements';
 
 import {
   ErrorCode,
   standardErrorResponse,
-  standardSuccessResponse,
 } from '@/lib/api/standardized-responses';
 
 const semanticSearchSchema = z.object({
@@ -41,7 +39,7 @@ const semanticSearchSchema = z.object({
   return true;
 }, { message: 'Query required for non-similar searches, clauseId required for similar searches' });
 export const POST = withRoleAuth('member', async (request: NextRequest, context: BaseAuthContext) => {
-    const user = { id: context.userId, organizationId: context.organizationId };
+    const _user = { id: context.userId, organizationId: context.organizationId };
 
     // CRITICAL: Rate limit AI calls (expensive OpenAI API)
     const rateLimitResult = await checkRateLimit(
@@ -176,7 +174,7 @@ export const POST = withRoleAuth('member', async (request: NextRequest, context:
     }
 });
 
-export const GET = withRoleAuth('member', async (_request: NextRequest, context: BaseAuthContext) => {
+export const GET = withRoleAuth('member', async (_request: NextRequest, _context: BaseAuthContext) => {
   try {
     // This would query database to check how many clauses/precedents have embeddings
     // For now, return a placeholder response

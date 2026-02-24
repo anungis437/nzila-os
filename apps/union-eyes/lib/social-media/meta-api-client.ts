@@ -8,7 +8,6 @@
  * @see https://developers.facebook.com/docs/graph-api
  */
 
-import { createClient } from '@supabase/supabase-js';
 
 // Types for Meta API responses
 export interface MetaOAuthTokenResponse {
@@ -97,6 +96,7 @@ export interface MetaError {
   fbtrace_id: string;
 }
 
+// eslint-disable-next-line @typescript-eslint/no-explicit-any
 export interface MetaAPIResponse<T = any> {
   data?: T;
   error?: MetaError;
@@ -237,6 +237,7 @@ export class MetaAPIClient {
       published?: boolean;
     }
   ): Promise<MetaPostResponse> {
+    // eslint-disable-next-line @typescript-eslint/no-explicit-any
     const params: Record<string, any> = {
       message: content.message,
       access_token: pageAccessToken,
@@ -350,6 +351,7 @@ export class MetaAPIClient {
     }
 
     // Step 1: Create media container
+    // eslint-disable-next-line @typescript-eslint/no-explicit-any
     const containerParams: Record<string, any> = {
       access_token: this.accessToken,
     };
@@ -450,6 +452,7 @@ export class MetaAPIClient {
     since?: Date,
     until?: Date
   ): Promise<unknown[]> {
+    // eslint-disable-next-line @typescript-eslint/no-explicit-any
     const params: Record<string, any> = {
       metric: metrics.join(','),
       period,
@@ -519,6 +522,7 @@ export class MetaAPIClient {
       throw new Error('Access token required');
     }
 
+    // eslint-disable-next-line @typescript-eslint/no-explicit-any
     const params: Record<string, any> = {
       metric: metrics.join(','),
       period,
@@ -594,6 +598,7 @@ export class MetaAPIClient {
 
     try {
       const parsed = JSON.parse(usage);
+      // eslint-disable-next-line @typescript-eslint/no-explicit-any
       const appUsage = Object.values(parsed)[0] as any;
       
       this.rateLimitInfo = {
@@ -721,6 +726,7 @@ export function createMetaClient(accessToken?: string): MetaAPIClient {
 /**
  * Helper to format Meta insights data
  */
+// eslint-disable-next-line @typescript-eslint/no-explicit-any
 export function formatMetaInsights(insights: any[]): Record<string, number> {
   const formatted: Record<string, number> = {};
 

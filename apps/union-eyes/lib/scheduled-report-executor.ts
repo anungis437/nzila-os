@@ -122,6 +122,7 @@ return {
 /**
  * Create an export job record
  */
+// eslint-disable-next-line @typescript-eslint/no-explicit-any
 async function createExportJob(schedule: ScheduledReport): Promise<any> {
   const result = await db.execute(sql`
     INSERT INTO export_jobs (
@@ -142,6 +143,7 @@ async function createExportJob(schedule: ScheduledReport): Promise<any> {
     RETURNING *
   `);
 
+  // eslint-disable-next-line @typescript-eslint/no-explicit-any
   const rows = result as any[];
   return rows[0];
 }
@@ -187,6 +189,7 @@ async function fetchReportData(schedule: ScheduledReport): Promise<ReportData> {
     SELECT config FROM reports WHERE id = ${schedule.reportId}
   `);
   
+  // eslint-disable-next-line @typescript-eslint/no-explicit-any
   const reportRows = reportResult as any[];
   if (reportRows.length === 0) {
     throw new Error('Report not found');
@@ -222,7 +225,7 @@ async function fetchReportData(schedule: ScheduledReport): Promise<ReportData> {
 /**
  * Execute claims report query
  */
-async function executeClaimsQuery(organizationId: string, config: unknown): Promise<unknown[]> {
+async function executeClaimsQuery(organizationId: string, _config: unknown): Promise<unknown[]> {
   const result = await db.execute(sql`
     SELECT 
       c.claim_number,
@@ -248,6 +251,7 @@ async function executeClaimsQuery(organizationId: string, config: unknown): Prom
 /**
  * Execute analytics report query
  */
+// eslint-disable-next-line @typescript-eslint/no-explicit-any
 async function executeAnalyticsQuery(organizationId: string, config: any): Promise<unknown[]> {
   const groupBy = config.groupBy || 'status';
 
@@ -278,7 +282,8 @@ async function executeAnalyticsQuery(organizationId: string, config: any): Promi
 /**
  * Execute default query
  */
-async function executeDefaultQuery(organizationId: string, config: any): Promise<unknown[]> {
+// eslint-disable-next-line @typescript-eslint/no-explicit-any
+async function executeDefaultQuery(organizationId: string, _config: any): Promise<unknown[]> {
   const result = await db.execute(sql`
     SELECT 
       id,
@@ -303,6 +308,7 @@ async function executeDefaultQuery(organizationId: string, config: any): Promise
  * security risk. It should ONLY be used with pre-approved, validated SQL queries.
  * Implementation includes strict allowlist validation.
  */
+// eslint-disable-next-line @typescript-eslint/no-explicit-any
 async function executeCustomQuery(organizationId: string, config: any): Promise<unknown[]> {
   const customQuery = config.query || '';
   if (!customQuery) {
@@ -404,6 +410,7 @@ function generateCSV(data: ReportData): Buffer {
   // Data rows
   for (const row of data.rows) {
     const values = data.columns.map(col => {
+      // eslint-disable-next-line @typescript-eslint/no-explicit-any
       const value = (row as any)[col];
       if (value === null || value === undefined) return '';
       const str = String(value);
@@ -484,7 +491,7 @@ async function generateExcel(data: ReportData): Promise<Buffer> {
     });
 
     // Add borders to all cells
-    worksheet.eachRow((row, rowNumber) => {
+    worksheet.eachRow((row, _rowNumber) => {
       row.eachCell((cell) => {
         cell.border = {
           top: { style: 'thin', color: { argb: 'FFE5E7EB' } },
@@ -510,14 +517,14 @@ async function generateExcel(data: ReportData): Promise<Buffer> {
     });
 
     // Add summary row
-    const summaryRow = worksheet.addRow([]);
+    const _summaryRow = worksheet.addRow([]);
     const totalRow = worksheet.addRow([`Total Records: ${data.totalCount}`, '', '', `Generated: ${new Date().toISOString()}`]);
     totalRow.font = { italic: true, color: { argb: 'FF6B7280' } };
 
     // Generate buffer
     const buffer = await workbook.xlsx.writeBuffer();
     return Buffer.from(buffer);
-  } catch (error) {
+  } catch (_error) {
 // Fallback to CSV if Excel generation fails
     return generateCSV(data);
   }
@@ -631,6 +638,7 @@ async function generatePDF(data: ReportData): Promise<Buffer> {
         doc.rect(margin, currentY - 4, usableWidth, 6, 'F');
       }
 
+      // eslint-disable-next-line @typescript-eslint/no-explicit-any
       const row = data.rows[i] as any;
       doc.setFontSize(8);
       
@@ -661,7 +669,7 @@ async function generatePDF(data: ReportData): Promise<Buffer> {
     // Return as buffer
     const pdfOutput = doc.output('arraybuffer');
     return Buffer.from(pdfOutput);
-  } catch (error) {
+  } catch (_error) {
 // Fallback to text representation
     const lines = [
       '='.repeat(80),
@@ -678,6 +686,7 @@ async function generatePDF(data: ReportData): Promise<Buffer> {
 
     data.rows.slice(0, 100).forEach(row => {
       const values = data.columns.map(col => {
+        // eslint-disable-next-line @typescript-eslint/no-explicit-any
         const val = (row as any)[col];
         return val === null || val === undefined ? '-' : String(val).substring(0, 20);
       });
@@ -783,6 +792,7 @@ async function deliverViaWebhook(
   schedule: ScheduledReport,
   fileUrl: string
 ): Promise<void> {
+  // eslint-disable-next-line @typescript-eslint/no-explicit-any
   const webhookUrl = (schedule.scheduleConfig as any).webhookUrl;
   
   if (!webhookUrl) {
@@ -823,11 +833,13 @@ export async function retryFailedExecution(
     SELECT * FROM report_schedules WHERE id = ${scheduleId}
   `);
   
+  // eslint-disable-next-line @typescript-eslint/no-explicit-any
   const rows = result as any[];
   if (rows.length === 0) {
     throw new Error('Schedule not found');
   }
 
+  // eslint-disable-next-line @typescript-eslint/no-explicit-any
   const schedule = rows[0] as any;
 
   if (schedule.failure_count >= maxRetries) {

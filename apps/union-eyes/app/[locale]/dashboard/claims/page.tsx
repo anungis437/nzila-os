@@ -1,9 +1,12 @@
 "use client";
 
+
+export const dynamic = 'force-dynamic';
 import { useState, useEffect } from "react";
 import { motion, AnimatePresence } from "framer-motion";
 import Link from "next/link";
 import { useTranslations } from "next-intl";
+ 
 import { 
   FileText, 
   Plus, 
@@ -12,14 +15,14 @@ import {
   XCircle, 
   AlertCircle,
   Search,
-  Filter,
+  Filter as _Filter,
   Calendar,
   User,
   MessageSquare,
   ChevronDown,
   ChevronRight
 } from "lucide-react";
-import { Card, CardContent, CardHeader } from "@/components/ui/card";
+import { Card, CardContent } from "@/components/ui/card";
 
 // Database claim type from API
 interface DbClaim {
@@ -44,6 +47,7 @@ interface DbClaim {
   resolutionDate: Date | null;
   attachments: string[];
   voiceTranscriptions: string[];
+  // eslint-disable-next-line @typescript-eslint/no-explicit-any
   metadata: Record<string, any>;
   createdAt: Date;
   updatedAt: Date;
@@ -124,7 +128,6 @@ const mapDbClaimToCase = (claim: DbClaim): Case => ({
   assignedTo: claim.assignedTo || undefined,
   notes: claim.resolutionNotes || undefined,
 });
-
 
 
 export default function ClaimsPage() {

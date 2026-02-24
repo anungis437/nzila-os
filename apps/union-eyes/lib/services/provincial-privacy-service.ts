@@ -193,7 +193,7 @@ function assessRealRiskOfHarm(dataTypes: string[]): boolean {
 export async function generateBreachNotification(
   breach: BreachNotification
 ): Promise<{ notificationId: string; deadline: Date }> {
-  const rules = getPrivacyRules(breach.province);
+  const _rules = getPrivacyRules(breach.province);
 
   // For QC, must also notify CAI if 500+ people affected (Law 25)
   if (breach.province === 'QC' && breach.affectedCount && breach.affectedCount >= 500) {
@@ -265,7 +265,7 @@ export async function generateComplianceReport(
   const rules = getPrivacyRules(province);
 
   const issues: string[] = [];
-  const recommendations: string[] = [];
+  const _recommendations: string[] = [];
 
   // Check for common compliance gaps
   // (These would be populated from database checks in real implementation)

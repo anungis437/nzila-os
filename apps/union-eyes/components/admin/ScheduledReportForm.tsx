@@ -25,6 +25,7 @@ import { toast } from 'sonner';
 import { ArrowLeft, Save, Loader2 } from 'lucide-react';
 
 interface ScheduledReportFormProps {
+  // eslint-disable-next-line @typescript-eslint/no-explicit-any
   schedule?: any;
   onClose: () => void;
   onSubmit: () => void;
@@ -35,8 +36,9 @@ export function ScheduledReportForm({
   onClose,
   onSubmit,
 }: ScheduledReportFormProps) {
-  const t = useTranslations();
+  const _t = useTranslations();
   const [loading, setLoading] = useState(false);
+  // eslint-disable-next-line @typescript-eslint/no-explicit-any
   const [reports, setReports] = useState<any[]>([]);
   const [formData, setFormData] = useState({
     reportId: schedule?.reportId || '',
@@ -60,7 +62,7 @@ export function ScheduledReportForm({
       if (!response.ok) throw new Error('Failed to fetch reports');
       const data = await response.json();
       setReports(data.reports || []);
-    } catch (error) {
+    } catch (_error) {
 toast.error('Failed to load reports');
     }
   };
@@ -82,6 +84,7 @@ toast.error('Failed to load reports');
       }
 
       // Build schedule config
+      // eslint-disable-next-line @typescript-eslint/no-explicit-any
       const scheduleConfig: any = {
         time: formData.time,
       };

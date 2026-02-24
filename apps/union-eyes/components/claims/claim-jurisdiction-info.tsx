@@ -34,7 +34,7 @@ export function ClaimJurisdictionInfo({
   status,
   filedDate,
 }: ClaimJurisdictionInfoProps) {
-  const t = useTranslations();
+  const _t = useTranslations();
   const [jurisdiction, setJurisdiction] = useState<CAJurisdiction | null>(null);
   const [deadlineInfo, setDeadlineInfo] = useState<DeadlineInfo | null>(null);
   const [loading, setLoading] = useState(true);

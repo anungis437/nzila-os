@@ -15,15 +15,11 @@
 
 import { logger } from '@/lib/logger';
 import { db } from '@/db/db';
-import { 
-  lrbAgreements, 
-  lrbEmployers, 
-  lrbUnions, 
+import {
+  lrbAgreements,
   lrbSyncLog,
-  lrbSourceEnum,
-  agreementStatusEnum
 } from '@/db/schema/lrb-agreements-schema';
-import { eq, and, desc, like, or, gte, sql, type SQL } from 'drizzle-orm';
+import { eq, and, desc, like, sql, type SQL } from 'drizzle-orm';
 import { v4 as uuidv4 } from 'uuid';
 
 // =============================================================================
@@ -82,6 +78,7 @@ class OntarioLRBClient {
     page?: number;
     employerName?: string;
     unionName?: string;
+  // eslint-disable-next-line @typescript-eslint/no-explicit-any
   }): Promise<any[]> {
     // Placeholder: In production, this would call the actual Ontario LRB API
     // or scrape their website using puppeteer/cheerio
@@ -130,6 +127,7 @@ class BCLRBClient {
     page?: number;
     employerName?: string;
     unionName?: string;
+  // eslint-disable-next-line @typescript-eslint/no-explicit-any
   }): Promise<any[]> {
     logger.info('[LRB] Fetching BC LRB agreements', params);
     
@@ -491,6 +489,7 @@ export class UnifiedLRBService {
    * Search agreements
    */
   async search(params: LRBSearchParams): Promise<{
+    // eslint-disable-next-line @typescript-eslint/no-explicit-any
     agreements: any[];
     total: number;
     page: number;
@@ -550,6 +549,7 @@ export class UnifiedLRBService {
   /**
    * Get agreement by ID
    */
+  // eslint-disable-next-line @typescript-eslint/no-explicit-any
   async getById(id: string): Promise<any> {
     const result = await db.select()
       .from(lrbAgreements)

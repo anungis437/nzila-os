@@ -11,7 +11,6 @@
  */
 
 import { Decimal } from 'decimal.js';
-import { db } from '@/db';
 import { ExchangeRateService } from './exchange-rate-service';
 import { logger } from '@/lib/logger';
 
@@ -107,8 +106,8 @@ export class T106ComplianceService {
     organizationId: string,
     reportingYear: number
   ): Promise<T106Report> {
-    const startDate = new Date(reportingYear, 0, 1); // Jan 1
-    const endDate = new Date(reportingYear, 11, 31); // Dec 31
+    const _startDate = new Date(reportingYear, 0, 1); // Jan 1
+    const _endDate = new Date(reportingYear, 11, 31); // Dec 31
 
     logger.info(
       `Generating T106 report for org ${organizationId}, year ${reportingYear}`

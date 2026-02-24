@@ -73,7 +73,7 @@ export function BulkOperations({
       onSuccess();
       setShowStatusDialog(false);
       setNewStatus("");
-    } catch (err) {
+    } catch (_err) {
 alert("Failed to update organization status");
     } finally {
       setProcessing(false);
@@ -98,7 +98,7 @@ alert("Failed to update organization status");
       onSuccess();
       setShowParentDialog(false);
       setNewParentId("");
-    } catch (err) {
+    } catch (_err) {
 alert("Failed to update organization parent");
     } finally {
       setProcessing(false);
@@ -121,7 +121,7 @@ alert("Failed to update organization parent");
       );
       
       onSuccess();
-    } catch (err) {
+    } catch (_err) {
 alert("Failed to archive organizations");
     } finally {
       setProcessing(false);
@@ -142,7 +142,7 @@ alert("Failed to archive organizations");
       );
       
       onSuccess();
-    } catch (err) {
+    } catch (_err) {
 alert("Failed to activate organizations");
     } finally {
       setProcessing(false);
@@ -164,6 +164,7 @@ alert("Failed to activate organizations");
       // Create CSV
       const csv = [
         ["ID", "Name", "Type", "Status", "Parent ID", "Slug", "Created"],
+        // eslint-disable-next-line @typescript-eslint/no-explicit-any
         ...orgs.map((org: any) => [
           org.id,
           org.name,
@@ -183,7 +184,7 @@ alert("Failed to activate organizations");
       a.download = `organizations-export-${Date.now()}.csv`;
       a.click();
       URL.revokeObjectURL(url);
-    } catch (err) {
+    } catch (_err) {
 alert("Failed to export organizations");
     } finally {
       setProcessing(false);

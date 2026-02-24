@@ -143,10 +143,12 @@ export async function listMembers(
     }
 
     if (filters.status && filters.status.length > 0) {
+      // eslint-disable-next-line @typescript-eslint/no-explicit-any
       conditions.push(inArray(organizationMembers.status, filters.status as any));
     }
 
     if (filters.role && filters.role.length > 0) {
+      // eslint-disable-next-line @typescript-eslint/no-explicit-any
       conditions.push(inArray(organizationMembers.role, filters.role as any));
     }
 
@@ -351,6 +353,7 @@ export async function bulkUpdateMemberStatus(
     await db
       .update(organizationMembers)
       .set({
+        // eslint-disable-next-line @typescript-eslint/no-explicit-any
         status: status as any,
         updatedAt: new Date(),
       })
@@ -387,6 +390,7 @@ export async function bulkUpdateMemberRole(
     await db
       .update(organizationMembers)
       .set({
+        // eslint-disable-next-line @typescript-eslint/no-explicit-any
         role: role as any,
         updatedAt: new Date(),
       })
@@ -453,10 +457,12 @@ export async function searchMembers(
     }
 
     if (filters?.status && filters.status.length > 0) {
+      // eslint-disable-next-line @typescript-eslint/no-explicit-any
       conditions.push(inArray(organizationMembers.status, filters.status as any));
     }
 
     if (filters?.role && filters.role.length > 0) {
+      // eslint-disable-next-line @typescript-eslint/no-explicit-any
       conditions.push(inArray(organizationMembers.role, filters.role as any));
     }
 
@@ -653,6 +659,7 @@ export async function getMembersByRole(
       .where(
         and(
           eq(organizationMembers.organizationId, organizationId),
+          // eslint-disable-next-line @typescript-eslint/no-explicit-any
           eq(organizationMembers.role, role as any),
           sql`${organizationMembers.deletedAt} IS NULL`
         )

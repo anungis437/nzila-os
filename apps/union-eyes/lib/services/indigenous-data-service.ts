@@ -18,15 +18,13 @@
  */
 
 import { db } from '@/db';
-import { 
-  bandCouncils, 
-  bandCouncilConsent, 
-  indigenousMemberData, 
+import {
+  bandCouncils,
+  bandCouncilConsent,
+  indigenousMemberData,
   indigenousDataAccessLog,
-  indigenousDataSharingAgreements,
-  traditionalKnowledgeRegistry
 } from '@/db/schema';
-import { eq, and, desc, asc, like, sql, isNull, not, gte, lte } from 'drizzle-orm';
+import { eq, and, desc, sql, gte, lte } from 'drizzle-orm';
 import { v4 as uuidv4 } from 'uuid';
 import { logger } from '@/lib/logger';
 
@@ -42,6 +40,7 @@ export interface BandCouncilAgreement {
   expiresAt?: Date;
   status: 'active' | 'expired' | 'revoked';
   dataCategories: string[];
+  // eslint-disable-next-line @typescript-eslint/no-explicit-any
   restrictions: Record<string, any>;
 }
 
@@ -247,9 +246,10 @@ export class IndigenousDataService {
    * POSSESSION principle - Data stored on-reserve when possible
    */
   async routeToStorage(
+    // eslint-disable-next-line @typescript-eslint/no-explicit-any
     data: any,
     reserveId: string,
-    dataCategory: string
+    _dataCategory: string
   ): Promise<{
     storageLocation: 'on_premise' | 'cloud_encrypted';
     endpoint: string;

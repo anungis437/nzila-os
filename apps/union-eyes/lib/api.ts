@@ -1,13 +1,21 @@
-// Union Eyes - Clerk-Integrated API Client
+// Union Eyes - API Client (client-safe)
+//
+// This module is imported by both server and client components.
+// For server-side auth token injection, use lib/api-server.ts instead.
+// Client-side auth relies on Clerk session cookies (withCredentials: true).
 
 import axios, { AxiosInstance, AxiosError, InternalAxiosRequestConfig } from 'axios';
-import { auth } from '@clerk/nextjs/server';
 
 const API_URL = process.env.NEXT_PUBLIC_API_URL || 'http://localhost:8000';
 
 /**
- * API client for Union Eyes backend
- * Automatically includes Clerk JWT token in all requests
+ * API client for Union Eyes backend.
+ * 
+ * On the client side, authentication works via Clerk session cookies
+ * (withCredentials: true sends cookies automatically).
+ * 
+ * For server-side usage with Bearer token auth, use the server-only
+ * `createServerApiClient()` from '@/lib/api-server'.
  */
 class ApiClient {
   private client: AxiosInstance;
@@ -18,24 +26,12 @@ class ApiClient {
       headers: {
         'Content-Type': 'application/json',
       },
-      withCredentials: true, // Include credentials for CORS
+      withCredentials: true, // Include cookies for Clerk session auth
     });
 
-    // Request interceptor - add Clerk token
+    // Request interceptor - log requests in development
     this.client.interceptors.request.use(
       async (config: InternalAxiosRequestConfig) => {
-        try {
-          // Get token from Clerk (server-side)
-          const { getToken } = await auth();
-          const token = await getToken();
-          
-          if (token) {
-            config.headers.Authorization = `Bearer ${token}`;
-          }
-        } catch (error) {
-          console.warn('Failed to get Clerk token:', error);
-        }
-        
         return config;
       },
       (error) => Promise.reject(error)

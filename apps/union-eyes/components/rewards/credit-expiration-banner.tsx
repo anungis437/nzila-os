@@ -4,6 +4,7 @@ import { Alert, AlertDescription, AlertTitle } from '@/components/ui/alert';
 import { Button } from '@/components/ui/button';
 import { AlertCircle, ArrowRight } from 'lucide-react';
 import { formatDistanceToNow } from 'date-fns';
+ 
 import Link from 'next/link';
 
 interface CreditExpirationBannerProps {
@@ -14,12 +15,13 @@ interface CreditExpirationBannerProps {
   } | null;
 }
 
-export function CreditExpirationBanner({ userId, expiringCredits }: CreditExpirationBannerProps) {
+export function CreditExpirationBanner({ userId: _userId, expiringCredits }: CreditExpirationBannerProps) {
   if (!expiringCredits || expiringCredits.amount === 0) {
     return null;
   }
 
   const daysUntilExpiration = Math.ceil(
+    // eslint-disable-next-line react-hooks/purity
     (new Date(expiringCredits.expiresAt).getTime() - Date.now()) / (1000 * 60 * 60 * 24)
   );
 

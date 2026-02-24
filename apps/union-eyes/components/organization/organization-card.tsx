@@ -15,7 +15,6 @@ import {
 } from "lucide-react";
 import { Card, CardContent } from "@/components/ui/card";
 import { Badge } from "@/components/ui/badge";
-import { Button } from "@/components/ui/button";
 import type { Organization, OrganizationType, OrganizationStatus } from "@/types/organization";
 
 // Organization type configurations
@@ -114,8 +113,10 @@ export function OrganizationCard({
         </div>
 
         {/* Description */}
+        {/* eslint-disable-next-line @typescript-eslint/no-explicit-any */}
         {(organization as any).description && (
           <p className="text-sm text-muted-foreground mb-4 line-clamp-2">
+            {/* eslint-disable-next-line @typescript-eslint/no-explicit-any */}
             {(organization as any).description}
           </p>
         )}

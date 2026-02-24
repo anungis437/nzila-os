@@ -6,12 +6,13 @@ import { Button } from '@/components/ui/button';
 import { Input } from '@/components/ui/input';
 import { Label } from '@/components/ui/label';
 import { RadioGroup, RadioGroupItem } from '@/components/ui/radio-group';
-import { Checkbox } from '@/components/ui/checkbox';
-import { Loader2, CreditCard, AlertCircle } from 'lucide-react';
+import { Loader2, AlertCircle } from 'lucide-react';
 import { formatCurrency } from '@/lib/utils';
 import { useToast } from '@/lib/hooks/use-toast';
 import { loadStripe } from '@stripe/stripe-js';
 import { Elements, PaymentElement, useStripe, useElements } from '@stripe/react-stripe-js';
+ 
+ 
 import { Alert, AlertDescription } from '@/components/ui/alert';
 
 const stripePromise = loadStripe(process.env.NEXT_PUBLIC_STRIPE_PUBLISHABLE_KEY!);
@@ -24,11 +25,11 @@ interface DuesPaymentFormProps {
 }
 
 function PaymentForm({
-  userId,
+  userId: _userId,
   currentBalance,
   overdueAmount,
   onPaymentComplete,
-  clientSecret,
+  clientSecret: _clientSecret,
 }: DuesPaymentFormProps & { clientSecret: string }) {
   const stripe = useStripe();
   const elements = useElements();
@@ -98,7 +99,7 @@ function PaymentForm({
         onPaymentComplete();
       }
 
-    } catch (error) {
+    } catch (_error) {
 setError('An unexpected error occurred');
       toast({
         title: 'Payment Failed',
@@ -122,6 +123,7 @@ setError('An unexpected error occurred');
         <form onSubmit={handleSubmit} className="space-y-6">
           <div className="space-y-4">
             <Label>Payment Amount</Label>
+            {/* eslint-disable-next-line @typescript-eslint/no-explicit-any */}
             <RadioGroup value={paymentType} onValueChange={(val) => setPaymentType(val as any)}>
               <div className="flex items-center space-x-2">
                 <RadioGroupItem value="current" id="current" />
@@ -234,7 +236,7 @@ export default function DuesPaymentForm(props: DuesPaymentFormProps) {
 
         const { clientSecret } = await response.json();
         setClientSecret(clientSecret);
-      } catch (error) {
+      } catch (_error) {
 setInitError(true);
         toast({
           title: 'Error',

@@ -52,7 +52,7 @@ const roleColors: Record<string, string> = {
 
 export function BargainingTeamList({ teamMembers }: BargainingTeamListProps) {
   const activeMembers = teamMembers.filter(m => m.isActive);
-  const inactiveMembers = teamMembers.filter(m => !m.isActive);
+  const _inactiveMembers = teamMembers.filter(m => !m.isActive);
   const chiefNegotiator = activeMembers.find(m => m.isChief);
 
   // Get initials for avatar

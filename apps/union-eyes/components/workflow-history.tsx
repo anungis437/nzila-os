@@ -56,7 +56,7 @@ export function WorkflowHistory({ claimId }: WorkflowHistoryProps) {
         
         const data = await response.json();
         setHistory(data.history || []);
-      } catch (err) {
+      } catch (_err) {
 setError("Failed to load workflow history");
       } finally {
         setLoading(false);
@@ -115,7 +115,7 @@ setError("Failed to load workflow history");
             {/* Timeline line */}
             <div className="absolute left-6 top-8 bottom-8 w-0.5 bg-border"></div>
 
-            {history.map((event, index) => (
+            {history.map((event, _index) => (
               <div key={event.id} className="relative flex gap-4">
                 {/* Timeline dot */}
                 <div className="relative z-10 flex h-12 w-12 shrink-0 items-center justify-center rounded-full border-2 border-background bg-white shadow-sm">

@@ -8,6 +8,8 @@
 
 "use client";
 
+
+export const dynamic = 'force-dynamic';
 import { useState, useEffect, useCallback } from 'react';
 import { useTranslations } from 'next-intl';
 import { motion } from 'framer-motion';
@@ -50,7 +52,7 @@ interface ScheduledReport {
 }
 
 export default function ScheduledReportsPage() {
-  const t = useTranslations();
+  const _t = useTranslations();
   const [schedules, setSchedules] = useState<ScheduledReport[]>([]);
   const [loading, setLoading] = useState(true);
   const [showForm, setShowForm] = useState(false);
@@ -69,7 +71,7 @@ export default function ScheduledReportsPage() {
 
       const data = await response.json();
       setSchedules(data.schedules || []);
-    } catch (error) {
+    } catch (_error) {
 toast.error('Failed to load scheduled reports');
     } finally {
       setLoading(false);
@@ -94,7 +96,7 @@ toast.error('Failed to load scheduled reports');
 
       toast.success(schedule.isActive ? 'Schedule paused' : 'Schedule resumed');
       fetchSchedules();
-    } catch (error) {
+    } catch (_error) {
 toast.error('Failed to update schedule');
     }
   };
@@ -111,7 +113,7 @@ toast.error('Failed to update schedule');
 
       toast.success('Schedule deleted');
       fetchSchedules();
-    } catch (error) {
+    } catch (_error) {
 toast.error('Failed to delete schedule');
     }
   };

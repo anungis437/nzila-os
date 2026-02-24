@@ -466,6 +466,7 @@ export interface CreateScheduledReportPayload {
   reportName: string;
   reportType: ReportType;
   reportDescription?: string;
+  // eslint-disable-next-line @typescript-eslint/no-explicit-any
   reportParameters?: Record<string, any>;
   scheduleType: ScheduleType;
   cronExpression?: string;

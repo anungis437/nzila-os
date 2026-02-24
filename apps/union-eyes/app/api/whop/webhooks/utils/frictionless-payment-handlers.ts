@@ -64,6 +64,7 @@ return false;
  * @param eventId The event ID for logging
  * @returns Boolean indicating success
  */
+// eslint-disable-next-line @typescript-eslint/no-explicit-any
 export async function handleFrictionlessPayment(data: any | Record<string, unknown>, eventId: string): Promise<boolean> {
   try {
 // Extract email and token, checking both metadata and membership_metadata
@@ -106,7 +107,7 @@ await createOrUpdatePendingProfile(data, email, token ?? undefined, eventId);
     // Revalidate paths
     revalidateAfterPayment();
 return true;
-  } catch (error) {
+  } catch (_error) {
 return false;
   }
 }
@@ -120,8 +121,9 @@ return false;
  * @param token Optional token for purchase verification
  * @param eventId Event ID for logging
  */
+// eslint-disable-next-line @typescript-eslint/no-explicit-any
 export async function createOrUpdatePendingProfile(data: any | Record<string, unknown>, email: string, token?: string, eventId?: string) {
-  const logPrefix = eventId ? `[Event ${eventId}]` : '[Profile Creation]';
+  const _logPrefix = eventId ? `[Event ${eventId}]` : '[Profile Creation]';
   
   try {
 // Calculate billing cycle details
@@ -202,7 +204,7 @@ export async function createOrUpdatePendingProfile(data: any | Record<string, un
       await createPendingProfile(pendingProfileData);
 }
 return true;
-  } catch (error) {
+  } catch (_error) {
 return false;
   }
 }

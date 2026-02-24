@@ -9,7 +9,7 @@
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "@/components/ui/card";
 import { Badge } from "@/components/ui/badge";
 import { Button } from "@/components/ui/button";
-import { CheckCircle, XCircle, Clock, DollarSign, Calendar, FileCheck } from "lucide-react";
+import { CheckCircle, Clock, DollarSign, Calendar, FileCheck } from "lucide-react";
 import { format } from "date-fns";
 
 interface TentativeAgreement {

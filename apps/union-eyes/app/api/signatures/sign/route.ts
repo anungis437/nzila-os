@@ -10,10 +10,10 @@ import { NextRequest, NextResponse } from "next/server";
 import { requireApiAuth } from '@/lib/api-auth-guard';
 import { SignatureService } from "@/lib/signature/signature-service";
 
+ 
 import {
   ErrorCode,
   standardErrorResponse,
-  standardSuccessResponse,
 } from '@/lib/api/standardized-responses';
 
 const signatureSchema = z.object({
@@ -30,7 +30,7 @@ const signatureSchema = z.object({
 export async function POST(req: NextRequest) {
   try {
     // Authentication guard
-    const { userId } = await requireApiAuth();
+    const { userId: _userId } = await requireApiAuth();
 
     const body = await req.json();
     

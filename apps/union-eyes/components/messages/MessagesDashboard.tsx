@@ -78,7 +78,7 @@ export function MessagesDashboard({ onSelectThread }: MessagesDashboardProps = {
 
       const data = await response.json();
       setThreads(data.threads);
-    } catch (error) {
+    } catch (_error) {
 toast.error('Failed to load messages');
     } finally {
       setLoading(false);
@@ -115,7 +115,7 @@ toast.error('Failed to load messages');
       setNewThreadPriority('normal');
       fetchThreads();
       onSelectThread?.(thread.id);
-    } catch (error) {
+    } catch (_error) {
 toast.error('Failed to create message thread');
     }
   };

@@ -22,7 +22,7 @@ import { cn } from '@/lib/utils';
 import { useToast } from '@/components/ui/use-toast';
 import { RadioGroup, RadioGroupItem } from '@/components/ui/radio-group';
 import { Label } from '@/components/ui/label';
-import { CheckCircle, Users, TrendingUp, BarChart3, Loader2 } from 'lucide-react';
+import { CheckCircle, Users, BarChart3, Loader2 } from 'lucide-react';
 
 interface QuickPollWidgetProps {
   pollId: string;
@@ -77,7 +77,7 @@ export function QuickPollWidget({
       }
       
       setIsLoading(false);
-    } catch (error) {
+    } catch (_error) {
 toast({
         title: 'Error',
         description: 'Failed to load poll',

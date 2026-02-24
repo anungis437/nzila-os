@@ -4,6 +4,14 @@
  */
 import { logApiAuditEvent } from "@/lib/middleware/api-security";
 import { withApi, ApiError, z } from '@/lib/api/framework';
+ 
+ 
+ 
+ 
+ 
+ 
+ 
+ 
 import {
   listDocuments,
   searchDocuments,
@@ -35,7 +43,7 @@ export const GET = withApi(
       summary: 'GET documents',
     },
   },
-  async ({ request, userId, organizationId, user, body, query }) => {
+  async ({ request, userId, organizationId, user: _user, body: _body, query: _query }) => {
 
         const { searchParams } = new URL(request.url);
         const requestOrgId = searchParams.get("organizationId") ?? searchParams.get("orgId") ?? searchParams.get("organization_id") ?? searchParams.get("org_id") ?? searchParams.get("unionId") ?? searchParams.get("union_id") ?? searchParams.get("localId") ?? searchParams.get("local_id");
@@ -153,7 +161,7 @@ export const POST = withApi(
     },
     successStatus: 201,
   },
-  async ({ request, userId, organizationId, user, body, query }) => {
+  async ({ request, userId: _userId, organizationId: _organizationId, user: _user, body: _body, query: _query }) => {
 
         const rawBody = await request.json();
         return rawBody;

@@ -1,6 +1,8 @@
-import React from 'react';
 "use client";
 
+
+export const dynamic = 'force-dynamic';
+import React from 'react';
 import { useState } from "react";
 import { motion } from "framer-motion";
 import { useTranslations } from 'next-intl';
@@ -12,10 +14,8 @@ import {
   Users,
   FileText,
   CheckCircle,
-  XCircle,
   Clock,
   Calendar,
-  DollarSign,
   AlertTriangle,
   Award,
   Briefcase,
@@ -54,7 +54,7 @@ interface CategoryBreakdown {
 export default function AnalyticsPage() {
   const t = useTranslations();
   const [timeRange, setTimeRange] = useState<TimeRange>("30d");
-  const [selectedCategory, setSelectedCategory] = useState<MetricCategory>("cases");
+  const [_selectedCategory, _setSelectedCategory] = useState<MetricCategory>("cases");
 
   const timeRangeLabels: Record<TimeRange, string> = {
     "7d": t('analytics.last7Days'),

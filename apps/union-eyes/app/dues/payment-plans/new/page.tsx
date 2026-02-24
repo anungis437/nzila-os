@@ -6,7 +6,9 @@
 
 'use client';
 
-import { useState, useEffect } from 'react';
+
+export const dynamic = 'force-dynamic';
+import { useState, useEffect, Suspense } from 'react';
 import { useRouter, useSearchParams } from 'next/navigation';
 import { Button } from '@/components/ui/button';
 import { Card } from '@/components/ui/card';
@@ -34,6 +36,14 @@ interface Member {
 }
 
 export default function NewPaymentPlanPage() {
+  return (
+    <Suspense fallback={<div className="container mx-auto py-6">Loading...</div>}>
+      <NewPaymentPlanContent />
+    </Suspense>
+  );
+}
+
+function NewPaymentPlanContent() {
   const router = useRouter();
   const searchParams = useSearchParams();
   const memberId = searchParams.get('memberId');
@@ -57,14 +67,17 @@ export default function NewPaymentPlanPage() {
     } else {
       setLoading(false);
     }
+  // eslint-disable-next-line react-hooks/exhaustive-deps
   }, [memberId]);
 
   useEffect(() => {
     calculateEndDate();
+  // eslint-disable-next-line react-hooks/exhaustive-deps
   }, [formData.startDate, formData.duration]);
 
   const fetchMember = async () => {
     try {
+      // eslint-disable-next-line @typescript-eslint/no-explicit-any
       const data = await api.members.get(memberId || '') as Record<string, any>;
       setMember({
         id: data.id,

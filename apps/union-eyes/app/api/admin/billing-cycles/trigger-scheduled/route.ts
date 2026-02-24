@@ -8,7 +8,7 @@
  * @module app/api/admin/billing-cycles/trigger-scheduled
  */
 
-import { NextRequest, NextResponse } from 'next/server';
+import { NextRequest } from 'next/server';
 import { BillingScheduler } from '@/lib/jobs/billing-scheduler';
 import { withApiAuth, getCurrentUser } from '@/lib/api-auth-guard';
 import {

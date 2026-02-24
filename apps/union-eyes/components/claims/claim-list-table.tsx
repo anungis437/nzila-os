@@ -38,8 +38,8 @@ import {
   DropdownMenuSeparator,
   DropdownMenuTrigger,
 } from "@/components/ui/dropdown-menu";
+ 
 import { Avatar, AvatarFallback, AvatarImage } from "@/components/ui/avatar";
-import { cn } from "@/lib/utils";
 
 export interface ClaimRow {
   claimId: string;
@@ -85,7 +85,7 @@ export function ClaimListTable({
   onEdit,
   onDelete,
   onStatusChange,
-  loading = false,
+  loading: _loading = false,
 }: ClaimListTableProps) {
   const columns: ColumnDef<ClaimRow>[] = [
     {

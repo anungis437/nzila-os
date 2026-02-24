@@ -16,7 +16,7 @@ import { db } from '@/db';
 import { digitalSignatures } from '@/services/financial-service/src/db/schema';
 import { eq, and, inArray } from 'drizzle-orm';
 import crypto from 'crypto';
-import { hashDocument, hashDocumentReference } from './signature-service';
+import { hashDocument } from './signature-service';
 
 // =====================================================================================
 // TYPES

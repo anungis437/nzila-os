@@ -51,6 +51,7 @@ interface EscalationLevel {
 interface EscalationAction {
   id: string;
   type: 'send_email' | 'send_sms' | 'send_push_notification' | 'create_task' | 'trigger_webhook';
+  // eslint-disable-next-line @typescript-eslint/no-explicit-any
   config: Record<string, any>;
 }
 
@@ -496,6 +497,7 @@ export default function EscalationWorkflowBuilder() {
             <div className="text-center py-12 border-2 border-dashed rounded-lg">
               <TrendingUp className="h-12 w-12 mx-auto mb-2 text-gray-400" />
               <p className="text-muted-foreground">No escalation levels yet</p>
+              {/* eslint-disable-next-line react/no-unescaped-entities */}
               <p className="text-sm text-muted-foreground">Click "Add Level" to create your first escalation step</p>
             </div>
           ) : (
@@ -592,6 +594,7 @@ export default function EscalationWorkflowBuilder() {
                           <Label>Severity Level</Label>
                           <select
                             value={level.severity}
+                            // eslint-disable-next-line @typescript-eslint/no-explicit-any
                             onChange={(e) => updateLevel(level.id, { severity: e.target.value as any })}
                             className="w-full border rounded-md px-3 py-2"
                           >
@@ -604,6 +607,7 @@ export default function EscalationWorkflowBuilder() {
                           <Label>Recipient Type</Label>
                           <select
                             value={level.recipientType}
+                            // eslint-disable-next-line @typescript-eslint/no-explicit-any
                             onChange={(e) => updateLevel(level.id, { recipientType: e.target.value as any })}
                             className="w-full border rounded-md px-3 py-2"
                           >
@@ -683,6 +687,7 @@ export default function EscalationWorkflowBuilder() {
                                       <select
                                         value={action.type}
                                         onChange={(e) => updateAction(level.id, action.id, { 
+                                          // eslint-disable-next-line @typescript-eslint/no-explicit-any
                                           type: e.target.value as any,
                                           config: {},
                                         })}

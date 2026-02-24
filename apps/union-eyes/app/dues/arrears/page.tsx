@@ -6,6 +6,8 @@
 
 'use client';
 
+
+export const dynamic = 'force-dynamic';
 import { useState, useEffect } from 'react';
 import { useRouter } from 'next/navigation';
 import { Button } from '@/components/ui/button';
@@ -75,6 +77,7 @@ export default function ArrearsPage() {
     if (!selectedMember || !paymentAmount) return;
 
     try {
+      // eslint-disable-next-line @typescript-eslint/no-explicit-any
       await (api.dues.arrears.recordPayment as any)(selectedMember.id, {
         amount: parseFloat(paymentAmount),
         notes,

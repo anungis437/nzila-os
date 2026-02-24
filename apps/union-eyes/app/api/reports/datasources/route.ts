@@ -16,9 +16,8 @@ import { getAllDataSources } from '@/lib/report-executor';
 import {
   ErrorCode,
   standardErrorResponse,
-  standardSuccessResponse,
 } from '@/lib/api/standardized-responses';
-async function getHandler(req: NextRequest, context) {
+async function getHandler(_req: NextRequest, _context) {
   try {
     const user = await getCurrentUser();
     if (!user || !user.organizationId) {
@@ -28,8 +27,8 @@ async function getHandler(req: NextRequest, context) {
     );
     }
     
-    const organizationId = user.organizationId;
-    const userId = user.id;
+    const _organizationId = user.organizationId;
+    const _userId = user.id;
     
     // Get data sources from report executor registry
     const dataSources = getAllDataSources();

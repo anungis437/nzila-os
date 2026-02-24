@@ -10,7 +10,6 @@ import { withApiAuth } from '@/lib/api-auth-guard';
 import {
   ErrorCode,
   standardErrorResponse,
-  standardSuccessResponse,
 } from '@/lib/api/standardized-responses';
 export const GET = withApiAuth(async (request: NextRequest) => {
   const { searchParams } = new URL(request.url);

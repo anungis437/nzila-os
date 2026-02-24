@@ -6,7 +6,6 @@
  */
 
 import { logger } from '@/lib/logger';
-import { db } from '@/db/db';
 
 // Export configuration
 export interface ExportConfig {
@@ -60,7 +59,7 @@ export class DataExportService {
       job.recordCount = data.length;
 
       // Format data
-      const formatted = await this.formatData(data, config.format || 'json');
+      const _formatted = await this.formatData(data, config.format || 'json');
 
       // In production, would upload to storage and return URL
       // For now, return inline data
@@ -85,7 +84,7 @@ export class DataExportService {
   /**
    * Fetch data based on entity type
    */
-  private async fetchData(entityType: string, filters: Record<string, unknown>): Promise<unknown[]> {
+  private async fetchData(entityType: string, _filters: Record<string, unknown>): Promise<unknown[]> {
     // In production, would query actual database tables
     // Simulated for demonstration
     
@@ -147,7 +146,7 @@ export class DataExportService {
   /**
    * Get export status
    */
-  async getExportStatus(jobId: string): Promise<ExportJob | null> {
+  async getExportStatus(_jobId: string): Promise<ExportJob | null> {
     // In production, would query job queue
     return null;
   }

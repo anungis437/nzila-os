@@ -1,3 +1,7 @@
+"use client";
+
+export const dynamic = 'force-dynamic';
+
 /**
  * Notifications Page
  * 
@@ -12,7 +16,7 @@
 
 import * as React from "react";
 import Link from 'next/link';
-import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
+import { Card, CardContent } from "@/components/ui/card";
 import { Button } from "@/components/ui/button";
 import { Badge } from "@/components/ui/badge";
 import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
@@ -51,6 +55,7 @@ export default function NotificationsPage() {
       type: "announcement",
       title: "System Maintenance Scheduled",
       message: "Scheduled maintenance on Saturday from 2-4 AM EST",
+      // eslint-disable-next-line react-hooks/purity
       timestamp: new Date(Date.now() - 3600000),
       isRead: false,
       priority: "high",
@@ -60,6 +65,7 @@ export default function NotificationsPage() {
       type: "claim",
       title: "Claim Approved",
       message: "Your claim #12345 has been approved",
+      // eslint-disable-next-line react-hooks/purity
       timestamp: new Date(Date.now() - 7200000),
       isRead: false,
       priority: "normal",
@@ -69,6 +75,7 @@ export default function NotificationsPage() {
       type: "training",
       title: "New Course Available",
       message: "Advanced Safety Training course is now available",
+      // eslint-disable-next-line react-hooks/purity
       timestamp: new Date(Date.now() - 86400000),
       isRead: true,
       priority: "normal",
@@ -182,7 +189,7 @@ export default function NotificationsPage() {
                 >
                   <CardContent className="p-4">
                     <div className="flex items-start gap-4">
-                      <div className="flex-shrink-0 mt-1">
+                      <div className="shrink-0 mt-1">
                         {getNotificationIcon(notification.type)}
                       </div>
                       <div className="flex-1 min-w-0">
@@ -252,7 +259,7 @@ export default function NotificationsPage() {
                   <Card key={notification.id}>
                     <CardContent className="p-4">
                       <div className="flex items-start gap-4">
-                        <div className="flex-shrink-0 mt-1">
+                        <div className="shrink-0 mt-1">
                           {getNotificationIcon(notification.type)}
                         </div>
                         <div className="flex-1 min-w-0">

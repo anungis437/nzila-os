@@ -20,11 +20,8 @@ import { zodResolver } from "@hookform/resolvers/zod";
 import * as z from "zod";
 import {
   AlertTriangle,
-  Users,
-  FileText,
   Send,
   Clock,
-  CheckCircle,
   Shield,
   Mail,
 } from "lucide-react";
@@ -52,7 +49,7 @@ import {
 import { Checkbox } from "@/components/ui/checkbox";
 import { Alert, AlertDescription } from "@/components/ui/alert";
 import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
-import { Progress } from "@/components/ui/progress";
+ 
 import { format, differenceInHours } from "date-fns";
 
 const breachReportSchema = z.object({
@@ -114,7 +111,7 @@ export function DataBreachNotificationSystem({
   notifications,
   onReportBreach,
   onSendNotifications,
-  onUpdateStatus,
+  onUpdateStatus: _onUpdateStatus,
 }: DataBreachNotificationSystemProps) {
   const [isSubmitting, setIsSubmitting] = React.useState(false);
   const [selectedIncident, setSelectedIncident] = React.useState<BreachIncident | null>(null);

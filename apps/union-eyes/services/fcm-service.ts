@@ -19,10 +19,12 @@ import { eq, and, inArray, sql } from 'drizzle-orm';
 import { logger } from '@/lib/logger';
 
 // Optional import - will be checked at runtime
+// eslint-disable-next-line @typescript-eslint/no-explicit-any
 let admin: any = null;
 try {
+  // eslint-disable-next-line @typescript-eslint/no-require-imports
   admin = require('firebase-admin');
-} catch (error) {
+} catch (_error) {
   logger.warn('firebase-admin not installed. FCM push notifications will be disabled.');
 }
 
@@ -38,9 +40,13 @@ export interface FCMMessage {
     imageUrl?: string;
   };
   data?: Record<string, string>;
+  // eslint-disable-next-line @typescript-eslint/no-explicit-any
   android?: any; // AndroidConfig
+  // eslint-disable-next-line @typescript-eslint/no-explicit-any
   apns?: any; // ApnsConfig
+  // eslint-disable-next-line @typescript-eslint/no-explicit-any
   webpush?: any; // WebpushConfig
+  // eslint-disable-next-line @typescript-eslint/no-explicit-any
   fcmOptions?: any; // FcmOptions
 }
 
@@ -72,6 +78,7 @@ export interface TopicSubscriptionResult {
   failureCount: number;
   errors: Array<{
     index: number;
+    // eslint-disable-next-line @typescript-eslint/no-explicit-any
     error: any; // FirebaseError
   }>;
 }
@@ -90,6 +97,7 @@ export interface DirectSendResult {
 // INITIALIZATION
 // =============================================
 
+// eslint-disable-next-line @typescript-eslint/no-explicit-any
 let firebaseApp: any = null; // app.App
 
 /**
@@ -129,6 +137,7 @@ export function initializeFirebase() {
 /**
  * Get Firebase Messaging instance
  */
+// eslint-disable-next-line @typescript-eslint/no-explicit-any
 function getMessaging(): any | null { // Messaging
   const app = firebaseApp || initializeFirebase();
   if (!app) return null;
@@ -233,6 +242,7 @@ function buildDirectMessage(
   payload: {
     title: string;
     body: string;
+    // eslint-disable-next-line @typescript-eslint/no-explicit-any
     data?: Record<string, any>;
     priority?: 'low' | 'normal' | 'high' | 'urgent';
     clickAction?: string;
@@ -534,6 +544,7 @@ export async function sendToUser(payload: {
   userId: string;
   title: string;
   body: string;
+  // eslint-disable-next-line @typescript-eslint/no-explicit-any
   data?: Record<string, any>;
   priority?: 'low' | 'normal' | 'high' | 'urgent';
   clickAction?: string;
@@ -616,6 +627,7 @@ export async function sendToTopic(
   }
 
   try {
+    // eslint-disable-next-line @typescript-eslint/no-explicit-any
     const message: any = { // TopicMessage
       topic,
       notification: {
@@ -756,7 +768,7 @@ export async function verifyToken(token: string): Promise<boolean> {
     }, true);
 
     return true;
-  } catch (error) {
+  } catch (_error) {
     return false;
   }
 }
@@ -798,10 +810,12 @@ export async function cleanupInvalidTokens(organizationId: string): Promise<numb
 export async function updateDeliveryStatus(
   fcmMessageId: string,
   status: 'delivered' | 'failed' | 'clicked' | 'dismissed',
+  // eslint-disable-next-line @typescript-eslint/no-explicit-any
   eventData?: any
 ): Promise<void> {
   const now = new Date();
 
+  // eslint-disable-next-line @typescript-eslint/no-explicit-any
   const updateData: any = {
     status,
     eventData: eventData || undefined,

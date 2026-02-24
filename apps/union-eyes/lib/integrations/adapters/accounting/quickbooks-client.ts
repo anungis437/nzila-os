@@ -7,7 +7,6 @@
  * @see https://developer.intuit.com/app/developer/qbo/docs/api/accounting/
  */
 
-import { z } from 'zod';
 import { logger } from '@/lib/logger';
 import { AuthenticationError, RateLimitError, IntegrationError, IntegrationProvider } from '../../types';
 
@@ -100,7 +99,7 @@ export interface QuickBooksAccount {
   Active: boolean;
 }
 
-export interface QuickBooksPaginatedResponse<T> {
+export interface QuickBooksPaginatedResponse<_T> {
   QueryResponse: {
     // eslint-disable-next-line @typescript-eslint/no-explicit-any
     [key: string]: any;
@@ -271,11 +270,12 @@ export class QuickBooksClient {
     
     if (options?.modifiedSince) {
       const dateStr = options.modifiedSince.toISOString().split('T')[0];
+      if (!/^\d{4}-\d{2}-\d{2}$/.test(dateStr)) throw new Error('Invalid date format');
       query += ` WHERE MetaData.LastUpdatedTime > '${dateStr}'`;
     }
 
-    const limit = options?.limit || 100;
-    const offset = options?.offset || 0;
+    const limit = Math.max(1, Math.min(Math.floor(Number(options?.limit) || 100), 1000));
+    const offset = Math.max(0, Math.floor(Number(options?.offset) || 0));
     query += ` MAXRESULTS ${limit} STARTPOSITION ${offset + 1}`;
 
     const response = await this.request<QuickBooksPaginatedResponse<QuickBooksInvoice>>(
@@ -299,8 +299,8 @@ export class QuickBooksClient {
     limit?: number;
     offset?: number;
   }): Promise<{ customers: QuickBooksCustomer[]; hasMore: boolean }> {
-    const limit = options?.limit || 100;
-    const offset = options?.offset || 0;
+    const limit = Math.max(1, Math.min(Math.floor(Number(options?.limit) || 100), 1000));
+    const offset = Math.max(0, Math.floor(Number(options?.offset) || 0));
     
     const query = `SELECT * FROM Customer MAXRESULTS ${limit} STARTPOSITION ${offset + 1}`;
 
@@ -330,11 +330,12 @@ export class QuickBooksClient {
     
     if (options?.modifiedSince) {
       const dateStr = options.modifiedSince.toISOString().split('T')[0];
+      if (!/^\d{4}-\d{2}-\d{2}$/.test(dateStr)) throw new Error('Invalid date format');
       query += ` WHERE MetaData.LastUpdatedTime > '${dateStr}'`;
     }
 
-    const limit = options?.limit || 100;
-    const offset = options?.offset || 0;
+    const limit = Math.max(1, Math.min(Math.floor(Number(options?.limit) || 100), 1000));
+    const offset = Math.max(0, Math.floor(Number(options?.offset) || 0));
     query += ` MAXRESULTS ${limit} STARTPOSITION ${offset + 1}`;
 
     const response = await this.request<QuickBooksPaginatedResponse<QuickBooksPayment>>(
@@ -358,8 +359,8 @@ export class QuickBooksClient {
     limit?: number;
     offset?: number;
   }): Promise<{ accounts: QuickBooksAccount[]; hasMore: boolean }> {
-    const limit = options?.limit || 100;
-    const offset = options?.offset || 0;
+    const limit = Math.max(1, Math.min(Math.floor(Number(options?.limit) || 100), 1000));
+    const offset = Math.max(0, Math.floor(Number(options?.offset) || 0));
     
     const query = `SELECT * FROM Account MAXRESULTS ${limit} STARTPOSITION ${offset + 1}`;
 

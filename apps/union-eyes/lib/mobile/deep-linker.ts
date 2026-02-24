@@ -227,7 +227,9 @@ export async function handleDeepLink(url: string): Promise<boolean> {
   }
 
   // Navigate to the parsed route
+  // eslint-disable-next-line @typescript-eslint/no-explicit-any
   if (typeof window !== 'undefined' && (window as any).navigate) {
+    // eslint-disable-next-line @typescript-eslint/no-explicit-any
     (window as any).navigate(parsed.route, parsed.params, parsed.query);
     return true;
   }
@@ -243,8 +245,10 @@ export function registerDeepLinkHandlers(): void {
   if (typeof window === 'undefined') return;
 
   // Handle universal links (iOS)
+  // eslint-disable-next-line @typescript-eslint/no-explicit-any
   if ((navigator as any).registerProtocolHandler) {
     try {
+      // eslint-disable-next-line @typescript-eslint/no-explicit-any
       (navigator as any).registerProtocolHandler(
         'unioneyes',
         `${window.location.origin}/deep-link?url=%s`,

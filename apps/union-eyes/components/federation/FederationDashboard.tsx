@@ -19,12 +19,10 @@ import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "@/com
 import { Button } from "@/components/ui/button";
 import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
 import { Badge } from "@/components/ui/badge";
-import { 
-  Building2, 
-  Users, 
-  DollarSign, 
-  TrendingUp,
-  TrendingDown,
+import {
+  Building2,
+  Users,
+  DollarSign,
   Calendar,
   AlertCircle,
   CheckCircle2,
@@ -32,7 +30,6 @@ import {
   Plus,
   Download,
   FileText,
-  MapPin
 } from "lucide-react";
 import { useToast } from "@/components/ui/use-toast";
 import { FederationMetricsCard } from "./FederationMetricsCard";
@@ -80,6 +77,7 @@ export function FederationDashboard({
     if (federationId) {
       loadDashboardData();
     }
+  // eslint-disable-next-line react-hooks/exhaustive-deps
   }, [federationId, selectedPeriod]);
 
   async function loadDashboardData() {
@@ -101,7 +99,7 @@ export function FederationDashboard({
       } else {
         throw new Error(data.error || "Failed to load metrics");
       }
-    } catch (error) {
+    } catch (_error) {
       toast({
         title: "Error",
         description: "Failed to load federation dashboard",
@@ -142,7 +140,7 @@ export function FederationDashboard({
         title: "Report Exported",
         description: "Your federation report has been downloaded"
       });
-    } catch (error) {
+    } catch (_error) {
       toast({
         title: "Export Failed",
         description: "Unable to export report",

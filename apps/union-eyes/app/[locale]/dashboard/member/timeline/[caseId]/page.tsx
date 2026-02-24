@@ -5,11 +5,15 @@
  * for members to understand where their case is and what to expect.
  */
 
+
+export const dynamic = 'force-dynamic';
+
 import { notFound } from 'next/navigation';
 import Link from 'next/link';
 import { buildCaseTimeline, getCaseJourneySummary, calculateCaseProgress, TimelineContext } from '@/lib/member-experience/timeline-builder';
-import { GrievanceTimeline, TimelineSummary } from '@/components/marketing/grievance-timeline';
+import { GrievanceTimeline } from '@/components/marketing/grievance-timeline';
 import { HumanCenteredCallout } from '@/components/marketing/human-centered-callout';
+ 
 import { logger } from '@/lib/logger';
 
 interface TimelinePageProps {
@@ -47,7 +51,7 @@ export default async function CaseTimelinePage({ params }: TimelinePageProps) {
 
   const stages = buildCaseTimeline(caseDetails);
   const summary = getCaseJourneySummary(caseDetails);
-  const progress = calculateCaseProgress(stages);
+  const _progress = calculateCaseProgress(stages);
 
   return (
     <div className="min-h-screen bg-gray-50 py-12 px-4 sm:px-6 lg:px-8">
@@ -258,7 +262,7 @@ export default async function CaseTimelinePage({ params }: TimelinePageProps) {
   );
 }
 
-export async function generateMetadata({ params }: TimelinePageProps) {
+export async function generateMetadata({ params: _params }: TimelinePageProps) {
   return {
     title: `Case Timeline | Union Eyes`,
     description: 'Track the progress of your case with clear, human-centered explanations.',

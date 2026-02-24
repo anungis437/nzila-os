@@ -29,6 +29,7 @@ import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import { Badge } from "@/components/ui/badge";
 import { Progress } from "@/components/ui/progress";
 import { cn } from "@/lib/utils";
+ 
 import { format, subMonths, eachDayOfInterval, startOfMonth, endOfMonth } from "date-fns";
 
 export interface EngagementMetrics {
@@ -59,7 +60,7 @@ export interface MemberEngagementDashboardProps {
 }
 
 export function MemberEngagementDashboard({
-  memberId,
+  memberId: _memberId,
   memberName,
   metrics,
   activityData,
@@ -228,7 +229,7 @@ export function MemberEngagementDashboard({
       <Card className="border-blue-200 bg-blue-50">
         <CardContent className="p-6">
           <div className="flex items-start gap-3">
-            <Award className="h-6 w-6 text-blue-600 mt-0.5 flex-shrink-0" />
+            <Award className="h-6 w-6 text-blue-600 mt-0.5 shrink-0" />
             <div>
               <h3 className="font-semibold text-blue-900 mb-2">
                 Engagement Recommendations
@@ -258,7 +259,7 @@ export function MemberEngagementDashboard({
 function ActivityHeatmap({ data }: { data: ActivityData[] }) {
   const months = React.useMemo(() => {
     const endDate = new Date();
-    const startDate = subMonths(endDate, 3);
+    const _startDate = subMonths(endDate, 3);
     return [0, 1, 2].map((i) => subMonths(endDate, 2 - i));
   }, []);
 
@@ -352,7 +353,7 @@ function ActivityTimeline({ activities }: { activities: ActivityData[] }) {
     <div className="space-y-4">
       {activities.map((activity, index) => (
         <div key={index} className="flex items-start gap-4">
-          <div className="flex-shrink-0 w-8 h-8 rounded-full bg-blue-100 flex items-center justify-center text-blue-600">
+          <div className="shrink-0 w-8 h-8 rounded-full bg-blue-100 flex items-center justify-center text-blue-600">
             {getActivityIcon(activity.type)}
           </div>
           <div className="flex-1">

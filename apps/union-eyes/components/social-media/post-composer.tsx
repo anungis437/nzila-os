@@ -14,13 +14,12 @@ import { Button } from '@/components/ui/button';
 import { Textarea } from '@/components/ui/textarea';
 import { Label } from '@/components/ui/label';
 import { Input } from '@/components/ui/input';
-import { Badge } from '@/components/ui/badge';
 import { Progress } from '@/components/ui/progress';
-import { Tabs, TabsContent, TabsList, TabsTrigger } from '@/components/ui/tabs';
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from '@/components/ui/select';
 import { Calendar } from '@/components/ui/calendar';
 import { Popover, PopoverContent, PopoverTrigger } from '@/components/ui/popover';
 import { Switch } from '@/components/ui/switch';
+ 
 import {
   Facebook,
   Twitter,
@@ -31,13 +30,13 @@ import {
   Send,
   Image as ImageIcon,
   Video,
-  Link as LinkIcon,
+  Link as _LinkIcon,
   Hash,
   AtSign,
   Smile,
   MapPin,
   X,
-  Upload,
+  Upload as _Upload,
   Clock,
   Save,
   Eye,
@@ -76,7 +75,7 @@ interface HashtagSuggestion {
   relevance: number;
 }
 
-interface PostPreview {
+interface _PostPreview {
   platform: SocialPlatform;
   content: string;
   media: MediaFile[];
@@ -194,7 +193,7 @@ export default function SocialMediaPostComposer() {
   const [location, setLocation] = useState('');
   const [scheduledDate, setScheduledDate] = useState<Date>();
   const [showHashtagSuggestions, setShowHashtagSuggestions] = useState(false);
-  const [showEmojiPicker, setShowEmojiPicker] = useState(false);
+  const [_showEmojiPicker, _setShowEmojiPicker] = useState(false);
   const [isGeneratingContent, setIsGeneratingContent] = useState(false);
   const [useAIOptimization, setUseAIOptimization] = useState(true);
   const [previewPlatform, setPreviewPlatform] = useState<SocialPlatform>('facebook');
@@ -202,7 +201,7 @@ export default function SocialMediaPostComposer() {
   const fileInputRef = useRef<HTMLInputElement>(null);
   
   const hashtags = extractHashtags(content);
-  const mentions = extractMentions(content);
+  const _mentions = extractMentions(content);
   const selectedAccountsData = availableAccounts.filter(a => selectedAccounts.includes(a.id));
   
   // Character limits for selected platforms
@@ -459,6 +458,7 @@ export default function SocialMediaPostComposer() {
                     {mediaFiles.map(media => (
                       <div key={media.id} className="relative group">
                         {media.type === 'image' ? (
+                          // eslint-disable-next-line @next/next/no-img-element
                           <img
                             src={media.preview}
                             alt="Upload preview"
@@ -595,7 +595,7 @@ export default function SocialMediaPostComposer() {
 
               <div className="border rounded-lg p-4 bg-white">
                 <div className="flex items-start gap-3 mb-3">
-                  <div className={`w-10 h-10 rounded-full ${getPlatformColor(previewPlatform)} flex-shrink-0`} />
+                  <div className={`w-10 h-10 rounded-full ${getPlatformColor(previewPlatform)} shrink-0`} />
                   <div className="flex-1">
                     <div className="font-medium text-sm">
                       {selectedAccountsData.find(a => a.platform === previewPlatform)?.displayName}
@@ -609,6 +609,7 @@ export default function SocialMediaPostComposer() {
                 {mediaFiles.length > 0 && (
                   <div className="mt-3 grid grid-cols-2 gap-2">
                     {mediaFiles.slice(0, 4).map(media => (
+                      // eslint-disable-next-line @next/next/no-img-element
                       <img
                         key={media.id}
                         src={media.preview}

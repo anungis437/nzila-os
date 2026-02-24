@@ -20,7 +20,6 @@ import {
   FSMMetric,
   GovernanceMetric,
   AuditLogMetric,
-  SystemStatus,
 } from '@/types/marketing';
 import { GovernanceService } from '@/services/governance-service';
 import { logger } from '@/lib/logger';
@@ -285,7 +284,7 @@ export async function getAuditLogMetrics(): Promise<AuditLogMetric> {
 /**
  * Export trust metrics as PDF (for investor/CIO presentations)
  */
-export async function exportTrustMetricsPDF(metrics: TrustMetrics): Promise<Blob> {
+export async function exportTrustMetricsPDF(_metrics: TrustMetrics): Promise<Blob> {
   // This would use a PDF generation library like pdf-lib or jsPDF
   // For now, returning a placeholder
   throw new Error('PDF export not yet implemented - requires pdf-lib integration');

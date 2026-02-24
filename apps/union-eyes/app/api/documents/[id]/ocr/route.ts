@@ -6,12 +6,12 @@
 import { NextRequest, NextResponse } from "next/server";
 import { logApiAuditEvent } from "@/lib/middleware/api-security";
 import { processDocumentOCR } from "@/lib/services/document-service";
-import { getCurrentUser, withAdminAuth, withApiAuth, withMinRole, withRoleAuth } from '@/lib/api-auth-guard';
+import { withRoleAuth } from '@/lib/api-auth-guard';
 
+ 
 import {
   ErrorCode,
   standardErrorResponse,
-  standardSuccessResponse,
 } from '@/lib/api/standardized-responses';
 /**
  * POST /api/documents/[id]/ocr
@@ -22,7 +22,7 @@ export const POST = async (
   { params }: { params: { id: string } }
 ) => {
   return withRoleAuth('steward', async (request, context) => {
-    const { userId, organizationId } = context as { userId: string; organizationId: string };
+    const { userId, organizationId: _organizationId } = context as { userId: string; organizationId: string };
 
   try {
         const result = await processDocumentOCR(params.id);

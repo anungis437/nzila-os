@@ -7,7 +7,7 @@
  * - Federal (Canada Labour Board)
  */
 
-import { pgTable, uuid, varchar, text, timestamp, integer, boolean, index, jsonb } from "drizzle-orm/pg-core";
+import { pgTable, uuid, varchar, text, timestamp, integer, jsonb } from "drizzle-orm/pg-core";
 
 // =============================================================================
 // ENUMS

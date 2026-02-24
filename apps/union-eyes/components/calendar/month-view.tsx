@@ -22,9 +22,8 @@ import {
   ChevronLeft,
   ChevronRight,
   Plus,
-  Calendar as CalendarIcon,
+  Calendar as _CalendarIcon,
   Filter,
-  Download,
 } from "lucide-react";
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import { Button } from "@/components/ui/button";
@@ -41,7 +40,6 @@ import {
   PopoverContent,
   PopoverTrigger,
 } from "@/components/ui/popover";
-import { ScrollArea } from "@/components/ui/scroll-area";
 
 interface CalendarEvent {
   id: string;

@@ -10,7 +10,6 @@
 import { useState, useEffect } from 'react';
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from '@/components/ui/card';
 import { Badge } from '@/components/ui/badge';
-import { Button } from '@/components/ui/button';
 import { Skeleton } from '@/components/ui/skeleton';
 import {
   Select,
@@ -19,7 +18,7 @@ import {
   SelectTrigger,
   SelectValue,
 } from '@/components/ui/select';
-import { Tabs, TabsContent, TabsList, TabsTrigger } from '@/components/ui/tabs';
+import { Tabs, TabsList, TabsTrigger } from '@/components/ui/tabs';
 import { Calendar, Clock, FileText, Tag, Users, AlertCircle, CheckCircle } from 'lucide-react';
 import { format, formatDistanceToNow } from 'date-fns';
 
@@ -77,6 +76,7 @@ export function BargainingTimelineVisualization({
 
   useEffect(() => {
     fetchBargainingNotes();
+  // eslint-disable-next-line react-hooks/exhaustive-deps
   }, [cbaId, organizationId, filterType]);
 
   const fetchBargainingNotes = async () => {
@@ -230,7 +230,7 @@ setError(err instanceof Error ? err.message : 'Failed to load timeline');
                 <div className="absolute left-8 top-0 bottom-0 w-0.5 bg-border" />
 
                 <div className="space-y-8">
-                  {events.map((event, index) => {
+                  {events.map((event, _index) => {
                     const note = notes.find(n => n.id === event.id);
                     const isSelected = selectedEvent?.id === event.id;
 
@@ -408,7 +408,7 @@ setError(err instanceof Error ? err.message : 'Failed to load timeline');
       {viewMode === 'grid' && (
         <div className="grid gap-4 md:grid-cols-2 lg:grid-cols-3">
           {events.map(event => {
-            const note = notes.find(n => n.id === event.id);
+            const _note = notes.find(n => n.id === event.id);
             return (
               <Card key={event.id} className="cursor-pointer hover:shadow-lg transition-shadow">
                 <CardHeader>

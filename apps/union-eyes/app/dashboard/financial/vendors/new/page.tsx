@@ -1,5 +1,7 @@
 'use client';
 
+
+export const dynamic = 'force-dynamic';
 import VendorForm from '@/components/financial/VendorForm';
 
 export default function NewVendorPage() {

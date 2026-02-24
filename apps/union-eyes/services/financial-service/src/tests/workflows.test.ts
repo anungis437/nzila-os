@@ -20,7 +20,7 @@ import {
   stipendDisbursements,
   strikeFunds
 } from '../db/schema';
-import { eq, and } from 'drizzle-orm';
+import { eq } from 'drizzle-orm';
 import { processMonthlyDuesCalculation } from '../jobs/dues-calculation-workflow';
 import { processArrearsManagement } from '../jobs/arrears-management-workflow';
 import { processPaymentCollection } from '../jobs/payment-collection-workflow';
@@ -34,7 +34,7 @@ const TEST_USER_ID = randomUUID();
 // Test data IDs
 let testMemberId1: string;
 let testMemberId2: string;
-let testMemberId3: string;
+let _testMemberId3: string;
 let testDuesRuleId: string;
 let testStrikeFundId: string;
 
@@ -51,6 +51,7 @@ describe('Financial Workflows - End-to-End Tests', () => {
       targetAmount: '50000.00',
       status: 'active',
       createdBy: TEST_USER_ID,
+    // eslint-disable-next-line @typescript-eslint/no-explicit-any
     } as any).returning();
     testStrikeFundId = fundResult[0].id;
     
@@ -69,6 +70,7 @@ describe('Financial Workflows - End-to-End Tests', () => {
         lastName: member.name.split(' ')[1],
         email: member.email,
         status: 'active',
+      // eslint-disable-next-line @typescript-eslint/no-explicit-any
       } as any).returning();
       
       if (member.name.startsWith('Alice')) testMemberId1 = result[0].id;
@@ -84,6 +86,7 @@ describe('Financial Workflows - End-to-End Tests', () => {
       calculationType: 'flat_rate',
       flatAmount: '50.00',
       isActive: true,
+    // eslint-disable-next-line @typescript-eslint/no-explicit-any
     } as any).returning();
     testDuesRuleId = ruleResult[0].id;
 });
@@ -130,6 +133,7 @@ await db.delete(stipendDisbursements).where(eq(stipendDisbursements.tenantId, TE
           effectiveDate: today.toISOString().split('T')[0],
           endDate: yearFromNow.toISOString().split('T')[0],
         },
+      // eslint-disable-next-line @typescript-eslint/no-explicit-any
       ] as any);
       
       // Run dues calculation
@@ -167,6 +171,7 @@ await db.delete(stipendDisbursements).where(eq(stipendDisbursements.tenantId, TE
         ruleId: testDuesRuleId,
         effectiveDate: today.toISOString().split('T')[0],
         endDate: yearFromNow.toISOString().split('T')[0],
+      // eslint-disable-next-line @typescript-eslint/no-explicit-any
       } as any);
       
       // Run dues calculation twice
@@ -221,6 +226,7 @@ await db.delete(stipendDisbursements).where(eq(stipendDisbursements.tenantId, TE
         status: 'pending',
         periodStart: '2025-01-01',
         periodEnd: '2025-01-31',
+      // eslint-disable-next-line @typescript-eslint/no-explicit-any
       } as any);
       
       // Run arrears management
@@ -271,15 +277,16 @@ await db.delete(stipendDisbursements).where(eq(stipendDisbursements.tenantId, TE
         status: 'pending',
         periodStart: '2025-01-01',
         periodEnd: '2025-01-31',
+      // eslint-disable-next-line @typescript-eslint/no-explicit-any
       } as any);
       
       // Run arrears management
-      const result = await processArrearsManagement({
+      const _result = await processArrearsManagement({
         tenantId: TEST_TENANT_ID,
       });
       
       // Verify warning stage
-      const arrearsRecords = await db
+      const _arrearsRecords = await db
         .select()
         .from(arrears)
         .where(eq(arrears.tenantId, TEST_TENANT_ID));
@@ -318,6 +325,7 @@ await db.delete(stipendDisbursements).where(eq(stipendDisbursements.tenantId, TE
           periodStart: '2025-02-01',
           periodEnd: '2025-02-28',
         },
+      // eslint-disable-next-line @typescript-eslint/no-explicit-any
       ] as any);
       
       // Run arrears management
@@ -353,6 +361,7 @@ await db.delete(stipendDisbursements).where(eq(stipendDisbursements.tenantId, TE
         status: 'pending',
         periodStart: '2025-01-01',
         periodEnd: '2025-01-31',
+      // eslint-disable-next-line @typescript-eslint/no-explicit-any
       } as any);
       
       // Run payment collection
@@ -408,6 +417,7 @@ await db.delete(stipendDisbursements).where(eq(stipendDisbursements.tenantId, TE
           periodStart: '2025-02-01',
           periodEnd: '2025-02-28',
         },
+      // eslint-disable-next-line @typescript-eslint/no-explicit-any
       ] as any);
       
       // Run payment collection
@@ -443,6 +453,7 @@ await db.delete(stipendDisbursements).where(eq(stipendDisbursements.tenantId, TE
         status: 'overdue',
         periodStart: '2025-01-01',
         periodEnd: '2025-01-31',
+      // eslint-disable-next-line @typescript-eslint/no-explicit-any
       } as any);
       
       // Create arrears record
@@ -452,6 +463,7 @@ await db.delete(stipendDisbursements).where(eq(stipendDisbursements.tenantId, TE
         totalOwed: '50.00',
         oldestDebtDate: tenDaysAgo.toISOString().split('T')[0],
         arrearsStatus: 'active',
+      // eslint-disable-next-line @typescript-eslint/no-explicit-any
       } as any);
       
       // Run payment collection
@@ -497,6 +509,7 @@ await db.delete(stipendDisbursements).where(eq(stipendDisbursements.tenantId, TE
         });
       }
       
+      // eslint-disable-next-line @typescript-eslint/no-explicit-any
       await db.insert(picketAttendance).values(attendanceRecords as any);
       
       // Run stipend processing
@@ -534,6 +547,7 @@ await db.delete(stipendDisbursements).where(eq(stipendDisbursements.tenantId, TE
         checkInMethod: 'manual',
         hoursWorked: '2.0',
         approved: true,
+      // eslint-disable-next-line @typescript-eslint/no-explicit-any
       } as any);
       
       // Run stipend processing
@@ -567,6 +581,7 @@ await db.delete(stipendDisbursements).where(eq(stipendDisbursements.tenantId, TE
         });
       }
       
+      // eslint-disable-next-line @typescript-eslint/no-explicit-any
       await db.insert(picketAttendance).values(attendanceRecords as any);
       
       // Run stipend processing
@@ -605,6 +620,7 @@ await db.delete(stipendDisbursements).where(eq(stipendDisbursements.tenantId, TE
         checkInMethod: 'manual',
         hoursWorked: '8.0',
         approved: true,
+      // eslint-disable-next-line @typescript-eslint/no-explicit-any
       } as any);
       
       // Run stipend processing with low auto-approve threshold
@@ -642,6 +658,7 @@ await db.delete(stipendDisbursements).where(eq(stipendDisbursements.tenantId, TE
         checkInMethod: 'manual',
         hoursWorked: '4.5',
         approved: true,
+      // eslint-disable-next-line @typescript-eslint/no-explicit-any
       } as any);
       
       // Run stipend processing with high auto-approve threshold
@@ -679,6 +696,7 @@ await db.delete(stipendDisbursements).where(eq(stipendDisbursements.tenantId, TE
         checkInMethod: 'manual',
         hoursWorked: '8.0',
         approved: true,
+      // eslint-disable-next-line @typescript-eslint/no-explicit-any
       } as any);
       
       // Run stipend processing twice
@@ -719,6 +737,7 @@ await db.delete(stipendDisbursements).where(eq(stipendDisbursements.tenantId, TE
         ruleId: testDuesRuleId,
         effectiveDate: today.toISOString().split('T')[0],
         endDate: yearFromNow.toISOString().split('T')[0],
+      // eslint-disable-next-line @typescript-eslint/no-explicit-any
       } as any);
 
       const duesResult = await processMonthlyDuesCalculation({
@@ -731,6 +750,7 @@ await db.delete(stipendDisbursements).where(eq(stipendDisbursements.tenantId, TE
       await db.update(duesTransactions)
         .set({ 
           dueDate: tenDaysAgo.toISOString().split('T')[0],
+        // eslint-disable-next-line @typescript-eslint/no-explicit-any
         } as any)
         .where(eq(duesTransactions.organizationId, TEST_TENANT_ID));
       
@@ -743,7 +763,7 @@ await db.delete(stipendDisbursements).where(eq(stipendDisbursements.tenantId, TE
       // 4. Skip payment creation - payment collection will use existing transactions
       
       // 5. Run payment collection
-      const paymentResult = await processPaymentCollection({
+      const _paymentResult = await processPaymentCollection({
         tenantId: TEST_TENANT_ID,
       });
       // Payment collection expectations updated

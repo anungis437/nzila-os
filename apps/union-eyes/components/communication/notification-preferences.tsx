@@ -34,13 +34,11 @@ import {
   FormField,
   FormItem,
   FormLabel,
-  FormMessage,
   FormDescription,
 } from "@/components/ui/form";
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import { Button } from "@/components/ui/button";
 import { Switch } from "@/components/ui/switch";
-import { Badge } from "@/components/ui/badge";
 import {
   Select,
   SelectContent,
@@ -48,10 +46,8 @@ import {
   SelectTrigger,
   SelectValue,
 } from "@/components/ui/select";
-import { Label } from "@/components/ui/label";
 import { Separator } from "@/components/ui/separator";
 import { Alert, AlertDescription } from "@/components/ui/alert";
-import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
 
 const notificationPreferencesSchema = z.object({
   // Global settings
@@ -260,6 +256,7 @@ export function NotificationPreferences({
           <div className="grid grid-cols-2 md:grid-cols-4 gap-4">
             <FormField
               control={form.control}
+              // eslint-disable-next-line @typescript-eslint/no-explicit-any
               name={`${categoryKey}.email` as any}
               render={({ field }) => (
                 <FormItem className="flex items-center justify-between space-x-2 border rounded-lg p-3">
@@ -280,6 +277,7 @@ export function NotificationPreferences({
 
             <FormField
               control={form.control}
+              // eslint-disable-next-line @typescript-eslint/no-explicit-any
               name={`${categoryKey}.sms` as any}
               render={({ field }) => (
                 <FormItem className="flex items-center justify-between space-x-2 border rounded-lg p-3">
@@ -300,6 +298,7 @@ export function NotificationPreferences({
 
             <FormField
               control={form.control}
+              // eslint-disable-next-line @typescript-eslint/no-explicit-any
               name={`${categoryKey}.push` as any}
               render={({ field }) => (
                 <FormItem className="flex items-center justify-between space-x-2 border rounded-lg p-3">
@@ -320,6 +319,7 @@ export function NotificationPreferences({
 
             <FormField
               control={form.control}
+              // eslint-disable-next-line @typescript-eslint/no-explicit-any
               name={`${categoryKey}.inApp` as any}
               render={({ field }) => (
                 <FormItem className="flex items-center justify-between space-x-2 border rounded-lg p-3">
@@ -342,6 +342,7 @@ export function NotificationPreferences({
           {/* Frequency */}
           <FormField
             control={form.control}
+            // eslint-disable-next-line @typescript-eslint/no-explicit-any
             name={`${categoryKey}.frequency` as any}
             render={({ field }) => (
               <FormItem>

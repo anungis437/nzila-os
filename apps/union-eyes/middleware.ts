@@ -45,7 +45,7 @@ import { NextResponse } from "next/server";
 import type { NextRequest } from "next/server";
 import createIntlMiddleware from 'next-intl/middleware';
 import { locales, defaultLocale } from './lib/locales';
-import { PUBLIC_API_ROUTES, CRON_API_ROUTES, isPublicRoute as isPublicApiRoute } from './lib/public-routes';
+import { CRON_API_ROUTES, isPublicRoute as isPublicApiRoute } from './lib/public-routes';
 
 // ---------------------------------------------------------------------------
 // os-core telemetry – request-id propagation  (Edge-safe)
@@ -66,7 +66,7 @@ function withRequestId(response: NextResponse, requestId: string): NextResponse 
   return response;
 }
 
-const isProtectedRoute = createRouteMatcher([
+const _isProtectedRoute = createRouteMatcher([
   "/:locale/dashboard(.*)"
 ]);
 
@@ -226,17 +226,22 @@ export default clerkMiddleware(async (auth, req) => {
     // Instead of just letting it pass through, redirect to a clean URL
     // This prevents the accumulation of large cookies
     
-    // Extract the base URL path without query parameters
+    // Extract the base URL path without query parameters (same-origin only)
     const cleanUrl = req.nextUrl.pathname;
     
-    // Create a new URL object based on the current request
+    // Create a new URL object based on the current request (same-origin redirect)
     const url = new URL(cleanUrl, req.url);
+    
+    // Ensure the redirect stays on the same origin to prevent open-redirect attacks
+    if (url.origin !== new URL(req.url).origin) {
+      return withRequestId(NextResponse.next(), requestId);
+    }
     
     // Important: Add a small cache-busting parameter to ensure the browser doesn't use cached data
     // This helps avoid cookie-related issues without adding significant query string size
     url.searchParams.set('cb', Date.now().toString().slice(-4));
     
-    // Return a redirect response to the clean URL
+    // Return a redirect response to the clean URL (same-origin)
     return withRequestId(NextResponse.redirect(url), requestId);
   }
 

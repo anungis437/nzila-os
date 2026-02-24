@@ -10,6 +10,9 @@
  * - Movement insights participation
  */
 
+
+export const dynamic = 'force-dynamic';
+
 import { db } from '@/db';
 import {
   pilotApplications,
@@ -17,7 +20,7 @@ import {
   testimonials,
   dataAggregationConsent,
 } from '@/db/schema/domains/marketing';
-import { sql, gte, eq } from 'drizzle-orm';
+import { gte } from 'drizzle-orm';
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from '@/components/ui/card';
 import { Badge } from '@/components/ui/badge';
 import {

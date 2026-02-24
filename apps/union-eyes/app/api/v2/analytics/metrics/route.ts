@@ -2,11 +2,9 @@
  * GET POST /api/analytics/metrics
  * Migrated to withApi() framework
  */
-import { logApiAuditEvent } from "@/lib/middleware/api-security";
-import { calculateMetrics, getAnalyticsMetrics } from '@/actions/analytics-actions';
-import { withApi, ApiError, z } from '@/lib/api/framework';
+import { withApi, z } from '@/lib/api/framework';
 
-const analyticsMetricsSchema = z.object({
+const _analyticsMetricsSchema = z.object({
   metricType: z.unknown().optional(),
   metricName: z.string().min(1, 'metricName is required'),
   periodType: z.unknown().optional(),
@@ -26,6 +24,7 @@ export const GET = withApi(
   },
   async ({ request }) => {
     // Delegate to v1 handler while framework migration is in progress
+    // eslint-disable-next-line @typescript-eslint/no-explicit-any
     const response = await v1GET(request, {} as any);
     return response;
   },
@@ -41,6 +40,7 @@ export const POST = withApi(
   },
   async ({ request }) => {
     // Delegate to v1 handler while framework migration is in progress
+    // eslint-disable-next-line @typescript-eslint/no-explicit-any
     const response = await v1POST(request, {} as any);
     return response;
   },

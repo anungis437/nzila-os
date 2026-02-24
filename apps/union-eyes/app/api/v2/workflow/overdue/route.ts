@@ -4,6 +4,12 @@
  */
 import { getOverdueClaims, getClaimsApproachingDeadline } from "@/lib/workflow-engine";
 
+ 
+ 
+ 
+ 
+ 
+ 
 import { withApi } from '@/lib/api/framework';
 
 export const GET = withApi(
@@ -14,7 +20,7 @@ export const GET = withApi(
       summary: 'GET overdue',
     },
   },
-  async ({ request, userId, organizationId, user, body, query, params }) => {
+  async ({ request, userId: _userId, organizationId: _organizationId, user: _user, body: _body, query: _query, params: _params }) => {
 
         const searchParams = request.nextUrl.searchParams;
         const type = searchParams.get("type") || "overdue";

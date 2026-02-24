@@ -4,7 +4,6 @@
  */
 
 import { pgTable, uuid, text, timestamp, integer, jsonb, pgEnum } from 'drizzle-orm/pg-core';
-import { sql } from 'drizzle-orm';
 
 export const messageChannelEnum = pgEnum('message_channel', ['email', 'sms']);
 export const messageStatusEnum = pgEnum('message_status', ['queued', 'sent', 'failed', 'skipped']);

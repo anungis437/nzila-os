@@ -6,7 +6,7 @@ import { logger } from '@/lib/logger';
 import { revalidatePath } from "next/cache";
 
 // Constants
-const DEFAULT_USAGE_CREDITS = 1000; // Pro users get 1000 credits per cycle
+const _DEFAULT_USAGE_CREDITS = 1000; // Pro users get 1000 credits per cycle
 const CREDIT_RENEWAL_DAYS = 28; // Credits renew every 4 weeks (28 days)
 
 /**
@@ -56,6 +56,7 @@ const CREDIT_RENEWAL_DAYS = 28; // Credits renew every 4 weeks (28 days)
  * This resets the usedCredits counter to 0 every 4 weeks
  * The total allowance (usageCredits) stays the same
  */
+// eslint-disable-next-line @typescript-eslint/no-explicit-any
 async function checkAndRenewCredits(profile: any): Promise<any> {
   // If there's no nextCreditRenewal date, do nothing
   if (!profile || !profile.nextCreditRenewal) {
@@ -72,6 +73,7 @@ async function checkAndRenewCredits(profile: any): Promise<any> {
     nextRenewal.setDate(nextRenewal.getDate() + CREDIT_RENEWAL_DAYS);
     
     // Default values for update - only reset used credits, not total allowance
+    // eslint-disable-next-line @typescript-eslint/no-explicit-any
     const updateData: any = {
       usedCredits: 0, // Reset used credits to 0
       nextCreditRenewal: nextRenewal // Update the next renewal date
@@ -126,6 +128,7 @@ export async function withPremiumFeature<T>(
     }
     
     // Use credits for this feature
+    // eslint-disable-next-line react-hooks/rules-of-hooks
     const creditResult = await useCredits(options.creditsRequired, options.featureName);
     
     if (!creditResult.success) {
@@ -159,6 +162,7 @@ return {
  */
 export async function checkCredits(
   requiredCredits: number = 1
+// eslint-disable-next-line @typescript-eslint/no-explicit-any
 ): Promise<{ hasCredits: boolean; profile: any | null; error?: string }> {
   try {
     const { userId } = await auth();
@@ -257,7 +261,7 @@ export async function checkCredits(
     }
     
     return { hasCredits: true, profile };
-  } catch (error) {
+  } catch (_error) {
 return { hasCredits: false, profile: null, error: "Server error checking credits" };
   }
 }
@@ -268,7 +272,8 @@ return { hasCredits: false, profile: null, error: "Server error checking credits
  */
 export async function useCredits(
   creditsToUse: number = 1,
-  description: string = "Used feature"
+  _description: string = "Used feature"
+// eslint-disable-next-line @typescript-eslint/no-explicit-any
 ): Promise<{ success: boolean; profile?: any; error?: string }> {
   try {
     const { userId } = await auth();
@@ -288,7 +293,7 @@ export async function useCredits(
     const newUsedCredits = (profile.usedCredits || 0) + creditsToUse;
     // For free users with an active billing cycle, allow them to use their pro credits
     // until the billing cycle ends
-    const usageCredits = profile.usageCredits || 0;
+    const _usageCredits = profile.usageCredits || 0;
     
     // Update profile with incremented used credits
     const updatedProfile = await updateProfile(userId, {
@@ -304,7 +309,7 @@ export async function useCredits(
       success: true, 
       profile: updatedProfile 
     };
-  } catch (error) {
+  } catch (_error) {
 return { success: false, error: "Failed to use credits" };
   }
 }
@@ -366,7 +371,7 @@ export async function getCreditStatus(): Promise<{
       nextCreditRenewal: profile?.nextCreditRenewal || null,
       membership: profile?.membership || "free"
     };
-  } catch (error) {
+  } catch (_error) {
 return { 
       total: 0, 
       used: 0, 
@@ -403,7 +408,7 @@ export async function hasReachedCreditLimit(): Promise<boolean> {
     const usageCredits = profile.usageCredits ?? 0;
     
     return usedCredits >= usageCredits;
-  } catch (error) {
+  } catch (_error) {
 return false; // Default to false on error
   }
 } 

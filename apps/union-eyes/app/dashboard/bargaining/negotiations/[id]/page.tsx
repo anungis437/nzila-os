@@ -9,10 +9,13 @@
  * - Session notes
  */
 
+
+export const dynamic = 'force-dynamic';
+
 import { Suspense } from "react";
 import { notFound, redirect } from "next/navigation";
 import { getCurrentUser } from "@/lib/auth";
-import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "@/components/ui/card";
+import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import { Badge } from "@/components/ui/badge";
 import { Button } from "@/components/ui/button";
 import { Skeleton } from "@/components/ui/skeleton";
@@ -244,6 +247,7 @@ async function NegotiationDetailContent({ params }: PageProps) {
                 <div>
                   <h4 className="text-sm font-medium mb-2">Key Issues</h4>
                   <div className="space-y-2">
+                    {/* eslint-disable-next-line @typescript-eslint/no-explicit-any */}
                     {negotiation.keyIssues.map((issue: any, idx: number) => (
                       <div key={idx} className="flex items-center justify-between p-2 border rounded">
                         <span className="text-sm">{issue.issue}</span>

@@ -17,7 +17,6 @@ import {
   date,
   decimal,
   integer,
-  jsonb,
   pgEnum,
   pgTable,
   time,

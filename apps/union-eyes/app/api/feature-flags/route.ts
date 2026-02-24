@@ -33,7 +33,7 @@ export const GET = withApiAuth(async (request: NextRequest, context: BaseAuthCon
       userId,
       organizationId: orgId || null,
     });
-  } catch (error) {
+  } catch (_error) {
     return standardErrorResponse(ErrorCode.INTERNAL_ERROR, 'Failed to evaluate feature flags');
   }
 });

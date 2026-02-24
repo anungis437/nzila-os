@@ -34,6 +34,7 @@ export interface BubbleChartProps {
     z: number; // Bubble size
     category?: string;
     name?: string;
+    // eslint-disable-next-line @typescript-eslint/no-explicit-any
     [key: string]: any;
   }>;
   xAxisLabel?: string;
@@ -43,6 +44,7 @@ export interface BubbleChartProps {
   colors?: string[];
   showGrid?: boolean;
   showLegend?: boolean;
+  // eslint-disable-next-line @typescript-eslint/no-explicit-any
   onBubbleClick?: (data: any) => void;
   height?: number;
   zRange?: [number, number];
@@ -86,6 +88,7 @@ export function BubbleChart({
       }))
     : [{ name: 'Data', data: data, color: colors[0] }];
 
+  // eslint-disable-next-line @typescript-eslint/no-explicit-any
   const CustomTooltip = ({ active, payload }: any) => {
     if (!active || !payload || !payload.length) return null;
     const data = payload[0].payload;
@@ -112,6 +115,7 @@ export function BubbleChart({
           <XAxis type="number" dataKey="x" name={xAxisLabel || 'X'} label={{ value: xAxisLabel || 'X Axis', position: 'insideBottom', offset: -10 }} />
           <YAxis type="number" dataKey="y" name={yAxisLabel || 'Y'} label={{ value: yAxisLabel || 'Y Axis', angle: -90, position: 'insideLeft' }} />
           <ZAxis type="number" dataKey="z" range={zRange} name={zAxisLabel || 'Size'} />
+          {/* eslint-disable-next-line react-hooks/static-components */}
           <Tooltip content={<CustomTooltip />} cursor={{ strokeDasharray: '3 3' }} />
           {showLegend && hasCategories && <Legend wrapperStyle={{ paddingTop: '20px' }} />}
           {dataSeries.map(series => (

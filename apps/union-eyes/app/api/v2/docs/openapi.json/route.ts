@@ -2,7 +2,13 @@
  * GET /api/docs/openapi.json
  * Migrated to withApi() framework
  */
-import { openApiConfig } from '@/lib/api-docs/openapi-config';
+ 
+ 
+ 
+ 
+ 
+ 
+ 
 import { withApi, ApiError } from '@/lib/api/framework';
 
 export const GET = withApi(
@@ -13,7 +19,7 @@ export const GET = withApi(
       summary: 'GET openapi.json',
     },
   },
-  async ({ request, userId, organizationId, user, body, query, params }) => {
+  async ({ request: _request, userId: _userId, organizationId: _organizationId, user: _user, body: _body, query: _query, params: _params }) => {
     // TODO: migrate handler body
     throw ApiError.internal('Route not yet migrated');
   },

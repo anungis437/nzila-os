@@ -1,4 +1,4 @@
-/* eslint-disable no-restricted-imports -- Admin-only diagnostic script (information_schema only, no Org data) */
+ 
 /**
  * Check Donations Table Structure
  *
@@ -22,7 +22,7 @@ const columns = await sql`
     AND table_name = 'donations'
     ORDER BY ordinal_position
   `;
-columns.forEach(col => {
+columns.forEach(_col => {
 });
   
   await sql.end();

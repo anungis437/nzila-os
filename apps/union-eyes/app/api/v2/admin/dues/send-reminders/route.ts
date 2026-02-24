@@ -2,10 +2,8 @@
  * POST /api/admin/dues/send-reminders
  * Migrated to withApi() framework
  */
-import { manualTriggerReminders } from '@/lib/jobs/dues-reminder-scheduler';
-import { logger } from '@/lib/logger';
 
-import { withApi, ApiError } from '@/lib/api/framework';
+import { withApi } from '@/lib/api/framework';
 
 import { POST as v1POST } from '@/app/api/admin/dues/send-reminders/route';
 

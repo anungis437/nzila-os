@@ -9,6 +9,8 @@
 
 'use client';
 
+
+export const dynamic = 'force-dynamic';
 import { useState, useEffect } from 'react';
 import { useRouter } from 'next/navigation';
 import { Button } from '@/components/ui/button';
@@ -109,6 +111,7 @@ export default function TemplateDetailPage({ params }: { params: { id: string } 
 
   useEffect(() => {
     fetchTemplate();
+  // eslint-disable-next-line react-hooks/exhaustive-deps
   }, [params.id]);
 
   const fetchTemplate = async () => {
@@ -671,6 +674,7 @@ export default function TemplateDetailPage({ params }: { params: { id: string } 
           <AlertDialogHeader>
             <AlertDialogTitle>Delete Template?</AlertDialogTitle>
             <AlertDialogDescription>
+              {/* eslint-disable-next-line react/no-unescaped-entities */}
               This will permanently delete "{template.name}". This action cannot be undone.
               {template.isActive && (
                 <div className="mt-2 text-amber-600">

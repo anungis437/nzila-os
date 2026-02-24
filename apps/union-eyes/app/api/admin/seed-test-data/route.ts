@@ -11,7 +11,7 @@
  * Idempotent — safe to call multiple times.
  * Requires app_owner / admin role.
  */
-import { NextRequest, NextResponse } from 'next/server';
+import { NextResponse } from 'next/server';
 import { withRoleAuth } from '@/lib/role-middleware';
 import { seedOrganizationHierarchy } from '@/db/seeds/seed-org-hierarchy';
 import { seedChildOrganizations } from '@/db/seeds/seed-child-orgs';

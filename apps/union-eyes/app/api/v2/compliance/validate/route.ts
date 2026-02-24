@@ -2,6 +2,12 @@
  * POST /api/compliance/validate
  * Migrated to withApi() framework
  */
+ 
+ 
+ 
+ 
+ 
+ 
 import { withApi, ApiError, z } from '@/lib/api/framework';
 
 const complianceValidateSchema = z.object({
@@ -20,7 +26,7 @@ export const POST = withApi(
     },
     successStatus: 201,
   },
-  async ({ request, userId, organizationId, user, body, query }) => {
+  async ({ request: _request, userId: _userId, organizationId: _organizationId, user: _user, body: _body, query: _query }) => {
     // TODO: migrate handler body
     throw ApiError.internal('Route not yet migrated');
   },

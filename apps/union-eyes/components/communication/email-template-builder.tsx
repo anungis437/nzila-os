@@ -15,6 +15,7 @@
 "use client";
 
 import * as React from "react";
+import { sanitizeHtml } from '@/lib/utils/sanitize';
 import { useForm } from "react-hook-form";
 import { zodResolver } from "@hookform/resolvers/zod";
 import * as z from "zod";
@@ -24,7 +25,6 @@ import {
   Eye,
   Smartphone,
   Monitor,
-  Plus,
   GripVertical,
   Image as ImageIcon,
   Type,
@@ -32,7 +32,6 @@ import {
   Code,
   Trash2,
   Copy,
-  ChevronDown,
 } from "lucide-react";
 import {
   Form,
@@ -61,7 +60,6 @@ import {
   PopoverContent,
   PopoverTrigger,
 } from "@/components/ui/popover";
-import { Label } from "@/components/ui/label";
 import { Separator } from "@/components/ui/separator";
 
 const emailTemplateSchema = z.object({
@@ -229,11 +227,12 @@ export function EmailTemplateBuilder({
             </div>
           );
         case "image":
+          // eslint-disable-next-line @next/next/no-img-element
           return <img src={block.content} alt="" className="mb-4 w-full" />;
         case "divider":
           return <hr className="my-6 border-gray-300" />;
         case "html":
-          return <div dangerouslySetInnerHTML={{ __html: block.content }} className="mb-4" />;
+          return <div dangerouslySetInnerHTML={{ __html: sanitizeHtml(block.content) }} className="mb-4" />;
         default:
           return null;
       }
@@ -360,6 +359,7 @@ export function EmailTemplateBuilder({
   };
 
   React.useEffect(() => {
+    // eslint-disable-next-line @typescript-eslint/no-explicit-any
     form.setValue("blocks", blocks as any);
   }, [blocks, form]);
 

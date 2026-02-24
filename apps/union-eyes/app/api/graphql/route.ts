@@ -13,11 +13,7 @@
 import { createYoga } from 'graphql-yoga';
 import { NextResponse } from 'next/server';
 import { schema } from '@/lib/graphql/schema';
-import { resolvers } from '@/lib/graphql/resolvers';
 import { withApiAuth } from '@/lib/api-auth-guard';
-import {
-  ErrorCode,
-} from '@/lib/api/standardized-responses';
 
 const yoga = createYoga({
   schema,

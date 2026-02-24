@@ -10,20 +10,20 @@
  * - National averages
  */
 
-import { NextRequest, NextResponse } from 'next/server';
+import { NextResponse } from 'next/server';
 import { withRoleAuth } from '@/lib/role-middleware';
 import { getPeerBenchmarks } from '@/lib/utils/smart-onboarding';
 import { logger } from '@/lib/logger';
 import { eventBus, AppEvents } from '@/lib/events';
 import { checkRateLimit, RATE_LIMITS, createRateLimitHeaders } from '@/lib/rate-limiter';
 
+ 
 import {
   ErrorCode,
   standardErrorResponse,
-  standardSuccessResponse,
 } from '@/lib/api/standardized-responses';
 export const GET = withRoleAuth('member', async (request, context) => {
-  const { userId, organizationId } = context;
+  const { userId, organizationId: _organizationId } = context;
 
   try {
     const rateLimit = await checkRateLimit(userId, RATE_LIMITS.ONBOARDING);

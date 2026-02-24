@@ -67,7 +67,7 @@ export function TemplatePicker({ templates, onSelect, children }: TemplatePicker
     .sort((a, b) => b.useCount - a.useCount)
     .slice(0, 5);
 
-  const recentTemplates = filteredTemplates.slice(0, 5);
+  const _recentTemplates = filteredTemplates.slice(0, 5);
 
   const handleSelectTemplate = (template: AwardTemplate) => {
     onSelect(template);

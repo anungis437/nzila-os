@@ -32,15 +32,7 @@ import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
 import { Alert, AlertDescription } from "@/components/ui/alert";
-import {
-  Dialog,
-  DialogContent,
-  DialogHeader,
-  DialogTitle,
-  DialogTrigger,
-} from "@/components/ui/dialog";
 import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
-import { cn } from "@/lib/utils";
 import { format } from "date-fns";
 
 export interface VoteReceipt {
@@ -347,7 +339,7 @@ function SecurityNotice() {
     <Card className="border-blue-200 bg-blue-50">
       <CardContent className="pt-6">
         <div className="flex gap-3">
-          <Shield className="h-5 w-5 text-blue-600 flex-shrink-0 mt-0.5" />
+          <Shield className="h-5 w-5 text-blue-600 shrink-0 mt-0.5" />
           <div className="space-y-2">
             <h4 className="font-semibold text-blue-900">Privacy & Security</h4>
             <ul className="text-sm text-blue-800 space-y-1">

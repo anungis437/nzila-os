@@ -7,7 +7,7 @@
  * @module app/api/payments/checkout/create
  */
 
-import { NextRequest, NextResponse } from 'next/server';
+import { NextRequest } from 'next/server';
 import { PaymentService } from '@/lib/services/payment-service';
 import {
   ErrorCode,

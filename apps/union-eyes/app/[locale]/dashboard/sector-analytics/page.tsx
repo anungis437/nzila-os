@@ -1,3 +1,5 @@
+export const dynamic = 'force-dynamic';
+
 import { BarChart3, TrendingUp, Users, DollarSign, AlertTriangle } from "lucide-react";
 
 export default function SectorAnalyticsPage() {

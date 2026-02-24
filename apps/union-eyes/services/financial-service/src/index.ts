@@ -157,9 +157,10 @@ const authenticate = async (
     if (process.env.NODE_ENV === 'development' && req.headers['x-test-user']) {
       try {
         req.user = JSON.parse(req.headers['x-test-user'] as string);
+        // eslint-disable-next-line @typescript-eslint/no-explicit-any
         logger.info('Development auth bypass used', { userId: (req as any).user?.id });
         return next();
-      } catch (error) {
+      } catch (_error) {
         return res.status(400).json({
           success: false,
           error: 'Invalid X-Test-User header format. Expected JSON string.',
@@ -185,6 +186,7 @@ const authenticate = async (
         });
 
         // Type assertion for JWT payload
+        // eslint-disable-next-line @typescript-eslint/no-explicit-any
         const jwtPayload = payload as Record<string, any>;
 
         req.user = {
@@ -215,7 +217,7 @@ const authenticate = async (
       };
 
       next();
-    } catch (error) {
+    } catch (_error) {
       return res.status(401).json({
         success: false,
         error: 'Invalid token format',
@@ -234,7 +236,7 @@ const authenticate = async (
 // AUTHORIZATION MIDDLEWARE
 // ============================================================================
 
-const requireRole = (...roles: string[]) => {
+const _requireRole = (...roles: string[]) => {
   return (req: AuthenticatedRequest, res: Response, next: NextFunction) => {
     if (!req.user) {
       return res.status(401).json({
@@ -321,7 +323,7 @@ app.use((req: Request, res: Response) => {
 });
 
 // Global error handler
-app.use((err: Error, req: Request, res: Response, next: NextFunction) => {
+app.use((err: Error, req: Request, res: Response, _next: NextFunction) => {
   logger.error('Unhandled error:', {
     error: err.message,
     stack: err.stack,

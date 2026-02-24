@@ -19,14 +19,12 @@ import { logApiAuditEvent } from '@/lib/middleware/api-security';
 import {
   ErrorCode,
   standardErrorResponse,
-  standardSuccessResponse,
 } from '@/lib/api/standardized-responses';
-interface AuthContext {
+interface _AuthContext {
   userId: string;
   organizationId: string;
   params?: Record<string, unknown>;
 }
-
 
 
 const reportsExecuteSchema = z.object({

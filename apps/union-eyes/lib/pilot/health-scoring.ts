@@ -6,7 +6,6 @@
  */
 
 import { PilotMetrics, PilotHealthScoreBreakdown, PilotMilestone } from '@/types/marketing';
-import { logger } from '@/lib/logger';
 
 /**
  * Calculate overall pilot health score (0-100)
@@ -187,7 +186,7 @@ export function predictPilotSuccess(metrics: PilotMetrics): {
     };
   }
 
-  const healthScore = calculatePilotHealth(metrics);
+  const _healthScore = calculatePilotHealth(metrics);
   const breakdown = calculatePilotHealthBreakdown(metrics);
 
   // Critical success factors

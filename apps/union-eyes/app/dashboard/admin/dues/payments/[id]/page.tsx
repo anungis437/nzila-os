@@ -1,5 +1,7 @@
 'use client';
 
+
+export const dynamic = 'force-dynamic';
 /**
  * Admin Payment Detail View
  * 
@@ -100,6 +102,7 @@ function formatDateTime(date: string): string {
 }
 
 function getStatusBadge(status: string) {
+  // eslint-disable-next-line @typescript-eslint/no-explicit-any
   const statusConfig: Record<string, { variant: any; icon: React.ReactNode; label: string }> = {
     paid: {
       variant: 'default',

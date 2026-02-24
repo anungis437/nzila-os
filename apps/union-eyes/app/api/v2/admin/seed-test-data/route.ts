@@ -2,12 +2,21 @@
  * GET POST /api/admin/seed-test-data
  * Migrated to withApi() framework
  */
-import { withRoleAuth } from '@/lib/role-middleware';
 import { seedOrganizationHierarchy } from '@/db/seeds/seed-org-hierarchy';
 import { seedChildOrganizations } from '@/db/seeds/seed-child-orgs';
 import { logger } from '@/lib/logger';
 
-import { withApi, ApiError } from '@/lib/api/framework';
+ 
+ 
+ 
+ 
+ 
+ 
+ 
+ 
+ 
+ 
+import { withApi } from '@/lib/api/framework';
 
 export const GET = withApi(
   {
@@ -17,7 +26,7 @@ export const GET = withApi(
       summary: 'GET seed-test-data',
     },
   },
-  async ({ request, userId, organizationId, user, body, query }) => {
+  async ({ request: _request, userId, organizationId: _organizationId, user: _user, body: _body, query: _query }) => {
 
         const hierarchy = await seedOrganizationHierarchy();
         const children = await seedChildOrganizations();
@@ -36,7 +45,7 @@ export const POST = withApi(
     },
     successStatus: 201,
   },
-  async ({ request, userId, organizationId, user, body, query }) => {
+  async ({ request: _request, userId, organizationId: _organizationId, user: _user, body: _body, query: _query }) => {
 
         const hierarchy = await seedOrganizationHierarchy();
         const children = await seedChildOrganizations();

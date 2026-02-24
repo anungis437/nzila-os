@@ -25,7 +25,6 @@ import {
   GripVertical,
   CheckCircle,
   Clock,
-  TrendingUp,
 } from "lucide-react";
 import {
   Form,
@@ -48,7 +47,6 @@ import {
   SelectTrigger,
   SelectValue,
 } from "@/components/ui/select";
-import { Progress } from "@/components/ui/progress";
 import { Label } from "@/components/ui/label";
 
 const learningPathSchema = z.object({
@@ -469,15 +467,15 @@ export function LearningPathDesigner({
                       </div>
 
                       <div className="space-y-2">
-                        {path.milestones.map((milestone, idx) => (
+                        {path.milestones.map((milestone, _idx) => (
                           <div
                             key={milestone.id}
                             className="flex items-center gap-3 text-sm border-l-2 pl-3"
                           >
                             {milestone.completed ? (
-                              <CheckCircle className="h-4 w-4 text-green-600 flex-shrink-0" />
+                              <CheckCircle className="h-4 w-4 text-green-600 shrink-0" />
                             ) : (
-                              <Clock className="h-4 w-4 text-gray-400 flex-shrink-0" />
+                              <Clock className="h-4 w-4 text-gray-400 shrink-0" />
                             )}
                             <div className="flex-1">
                               <div className="font-medium">{milestone.title}</div>

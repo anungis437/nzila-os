@@ -7,12 +7,11 @@
 // ============================================================================
 
 import { db } from "@/db/db";
-import { eq, and, desc, asc, isNull, count, sql, gte, lt, or } from "drizzle-orm";
+import { eq, and, desc, or } from "drizzle-orm";
 import {
   claims,
   grievanceAssignments,
   organizationMembers,
-  type InsertGrievanceAssignment,
   type GrievanceAssignment,
 } from "@/db/schema";
 import { withRLSContext } from "@/lib/db/with-rls-context";
@@ -363,7 +362,7 @@ export async function getAssignmentRecommendations(
     const recommendations = await scoreOfficers(officers, claim, criteria, organizationId);
 
     return recommendations.slice(0, 10); // Top 10 recommendations
-  } catch (error) {
+  } catch (_error) {
 return [];
   }
 }
@@ -377,7 +376,7 @@ return [];
  */
 async function getEligibleOfficers(
   organizationId: string,
-  criteria: AssignmentCriteria
+  _criteria: AssignmentCriteria
 ): Promise<OfficerProfile[]> {
   try {
     // Get active officers (wrapped with RLS for tenant isolation)
@@ -422,7 +421,7 @@ async function getEligibleOfficers(
     }
 
     return profiles;
-  } catch (error) {
+  } catch (_error) {
 return [];
   }
 }
@@ -434,7 +433,7 @@ async function scoreOfficers(
   officers: OfficerProfile[],
   claim: unknown,
   criteria: AssignmentCriteria,
-  organizationId: string
+  _organizationId: string
 ): Promise<AssignmentRecommendation[]> {
   const recommendations: AssignmentRecommendation[] = [];
 
@@ -615,7 +614,7 @@ export async function getOfficerWorkload(
       estimatedHoursRemaining,
       utilizationRate,
     };
-  } catch (error) {
+  } catch (_error) {
     return null;
   }
 }
@@ -653,7 +652,7 @@ export async function getTenantWorkloadReport(
 
     // Sort by utilization rate (descending)
     return workloadStats.sort((a, b) => b.utilizationRate - a.utilizationRate);
-  } catch (error) {
+  } catch (_error) {
     return [];
   }
 }
@@ -718,7 +717,7 @@ export async function suggestWorkloadBalancing(
     }
 
     return suggestions;
-  } catch (error) {
+  } catch (_error) {
 return [];
   }
 }
@@ -831,7 +830,7 @@ export async function getGrievanceTeam(
     );
 
     return enriched;
-  } catch (error) {
+  } catch (_error) {
 return [];
   }
 }

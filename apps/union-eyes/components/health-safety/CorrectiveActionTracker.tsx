@@ -83,6 +83,7 @@ export function CorrectiveActionTracker({
 
   React.useEffect(() => {
     loadActions();
+  // eslint-disable-next-line react-hooks/exhaustive-deps
   }, [organizationId, sourceType, sourceId, statusFilter, priorityFilter]);
 
   async function loadActions() {
@@ -104,6 +105,7 @@ export function CorrectiveActionTracker({
 
       const data = await response.json();
       if (data.success) {
+        // eslint-disable-next-line @typescript-eslint/no-explicit-any
         setActions(data.actions.map((a: any) => ({
           ...a,
           assignedDate: new Date(a.assignedDate),
@@ -114,7 +116,7 @@ export function CorrectiveActionTracker({
       } else {
         throw new Error(data.error);
       }
-    } catch (error) {
+    } catch (_error) {
       toast({
         title: "Error",
         description: "Failed to load corrective actions",

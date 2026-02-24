@@ -298,7 +298,7 @@ export class WorkdayAdapter extends BaseIntegration {
   /**
    * Sync positions from Workday
    */
-  private async syncPositions(syncType: SyncType): Promise<{
+  private async syncPositions(_syncType: SyncType): Promise<{
     processed: number;
     created: number;
     updated: number;
@@ -371,7 +371,7 @@ export class WorkdayAdapter extends BaseIntegration {
   /**
    * Sync departments from Workday
    */
-  private async syncDepartments(syncType: SyncType): Promise<{
+  private async syncDepartments(_syncType: SyncType): Promise<{
     processed: number;
     created: number;
     updated: number;
@@ -445,12 +445,12 @@ export class WorkdayAdapter extends BaseIntegration {
   // Webhook Support (Not Available)
   // ==========================================================================
 
-  async verifyWebhook(payload: string, signature: string): Promise<boolean> {
+  async verifyWebhook(_payload: string, _signature: string): Promise<boolean> {
     // Workday doesn&apos;t support webhooks in most plans
     return false;
   }
 
-  async processWebhook(event: WebhookEvent): Promise<void> {
+  async processWebhook(_event: WebhookEvent): Promise<void> {
     throw new Error('Workday does not support webhooks');
   }
 }

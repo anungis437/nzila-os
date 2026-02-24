@@ -73,7 +73,7 @@ export function MobileHeader({
       </div>
 
       {rightContent && (
-        <div className="flex items-center justify-end flex-shrink-0 ml-2">
+        <div className="flex items-center justify-end shrink-0 ml-2">
           {rightContent}
         </div>
       )}

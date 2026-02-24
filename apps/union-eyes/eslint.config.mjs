@@ -13,7 +13,14 @@ const eslintConfig = defineConfig([
   noShadowMl,
   noShadowDb,
   noDirectProvider,
-  globalIgnores(['.next/**', 'out/**', 'build/**', 'next-env.d.ts']),
+  globalIgnores([
+    '.next/**',
+    'out/**',
+    'build/**',
+    'next-env.d.ts',
+    'backend/.venv/**',
+    'backend/**/migrations/**',
+  ]),
   {
     rules: {
       '@typescript-eslint/no-unused-vars': [

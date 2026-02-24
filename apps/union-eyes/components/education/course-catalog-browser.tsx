@@ -18,12 +18,10 @@ import * as React from "react";
 import {
   BookOpen,
   Search,
-  Filter,
   Clock,
   Users,
   Award,
   Calendar,
-  ChevronRight,
 } from "lucide-react";
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import { Button } from "@/components/ui/button";
@@ -36,6 +34,7 @@ import {
   SelectTrigger,
   SelectValue,
 } from "@/components/ui/select";
+ 
 import {
   Dialog,
   DialogContent,
@@ -44,8 +43,6 @@ import {
   DialogHeader,
   DialogTitle,
 } from "@/components/ui/dialog";
-import { Progress } from "@/components/ui/progress";
-import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
 
 export interface Course {
   id: string;
@@ -80,7 +77,7 @@ export function CourseCatalogBrowser({
   categories,
   enrolledCourseIds = [],
   onEnroll,
-  onViewDetails,
+  onViewDetails: _onViewDetails,
 }: CourseCatalogBrowserProps) {
   const [searchQuery, setSearchQuery] = React.useState("");
   const [selectedCategory, setSelectedCategory] = React.useState<string>("all");

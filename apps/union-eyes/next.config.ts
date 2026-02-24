@@ -172,6 +172,12 @@ const nextConfig: NextConfig = {
   }),
   
   // Experimental features for faster builds
+  // Externalize native/binary packages that break Turbopack bundling
+  serverExternalPackages: [
+    '@tensorflow/tfjs-node',
+    '@mapbox/node-pre-gyp',
+  ],
+
   experimental: {
     // Optimize package imports
     optimizePackageImports: [
@@ -203,7 +209,9 @@ const nextConfig: NextConfig = {
   
   // Output optimization
   // Standalone mode required for Docker production stage (node server.js)
-  output: 'standalone',
+  // Disabled on Windows dev builds: Turbopack generates filenames with colons
+  // (e.g. node:crypto) which are invalid on NTFS. CI/Docker builds run on Linux.
+  output: process.platform === 'win32' ? undefined : 'standalone',
   
   // Skip API route static analysis during build (speeds up Docker builds)
   // API routes are inherently dynamic and don't need static generation

@@ -4,6 +4,8 @@
  */
 "use client";
 
+
+export const dynamic = 'force-dynamic';
 import { useEffect, useState } from "react";
 import { useUser } from "@clerk/nextjs";
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "@/components/ui/card";
@@ -54,7 +56,7 @@ export default function MemberProfilePage() {
             email: user?.emailAddresses[0]?.emailAddress || '',
           });
         }
-      } catch (error) {
+      } catch (_error) {
 } finally {
         setLoading(false);
       }
@@ -75,7 +77,7 @@ export default function MemberProfilePage() {
       if (response.ok) {
         setEditing(false);
       }
-    } catch (error) {
+    } catch (_error) {
 } finally {
       setSaving(false);
     }

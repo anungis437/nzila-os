@@ -221,7 +221,7 @@ export function parseShopifyHeaders(
  * @param orgId Organization ID
  * @returns Webhook secret
  */
-export async function getWebhookSecret(orgId: string): Promise<string> {
+export async function getWebhookSecret(_orgId: string): Promise<string> {
   // MVP: Use global env var
   const globalSecret = process.env.SHOPIFY_WEBHOOK_SECRET;
   

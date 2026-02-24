@@ -128,7 +128,7 @@ export class GreenShieldAdapter extends BaseIntegration {
   async sync(options: SyncOptions): Promise<SyncResult> {
     this.ensureConnected();
 
-    const startTime = Date.now();
+    const _startTime = Date.now();
     let recordsProcessed = 0;
     let recordsCreated = 0;
     let recordsUpdated = 0;
@@ -177,10 +177,12 @@ export class GreenShieldAdapter extends BaseIntegration {
               break;
 
             default:
+              // eslint-disable-next-line @typescript-eslint/no-explicit-any
               errors.push({ entity, error: `Unknown entity type: ${entity}` } as any);
           }
         } catch (error) {
           const errorMessage = error instanceof Error ? error.message : 'Unknown error';
+          // eslint-disable-next-line @typescript-eslint/no-explicit-any
           errors.push({ entity, error: `Failed to sync ${entity}: ${errorMessage}` } as any);
           this.logError('sync', error);
         }
@@ -203,6 +205,7 @@ export class GreenShieldAdapter extends BaseIntegration {
         recordsCreated,
         recordsUpdated,
         recordsFailed,
+        // eslint-disable-next-line @typescript-eslint/no-explicit-any
         errors: [{ entity: 'sync', error: errorMessage }] as any,
       };
     }
@@ -374,6 +377,7 @@ export class GreenShieldAdapter extends BaseIntegration {
             externalProvider: 'green_shield_canada' as const,
             externalId: claim.external_id,
             claimNumber: claim.claim_number,
+            // eslint-disable-next-line @typescript-eslint/no-explicit-any
             employeeId: (claim as any).employee_id || claim.external_id,
             employeeName: claim.member_name,
             submissionDate: claim.claim_date,
@@ -443,6 +447,7 @@ export class GreenShieldAdapter extends BaseIntegration {
             externalProvider: 'green_shield_canada' as const,
             externalId: coverage.external_id,
             employeeId: coverage.member_id,
+            // eslint-disable-next-line @typescript-eslint/no-explicit-any
             planId: (coverage as any).plan_id || '',
             planType: coverage.coverage_type,
             coverageAmount: coverage.coverage_amount.toString(),
@@ -482,11 +487,11 @@ export class GreenShieldAdapter extends BaseIntegration {
   // Webhook Support (Not Supported)
   // ==========================================================================
 
-  async verifyWebhook(payload: string, signature: string): Promise<boolean> {
+  async verifyWebhook(_payload: string, _signature: string): Promise<boolean> {
     return false;
   }
 
-  async processWebhook(event: WebhookEvent): Promise<void> {
+  async processWebhook(_event: WebhookEvent): Promise<void> {
     this.logOperation('webhook', { message: 'Green Shield Canada does not support webhooks' });
   }
 }

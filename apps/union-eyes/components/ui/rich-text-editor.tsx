@@ -19,7 +19,7 @@
 "use client";
 
 import * as React from "react";
-import { useEditor, EditorContent, Editor } from "@tiptap/react";
+import { useEditor, EditorContent } from "@tiptap/react";
 import StarterKit from "@tiptap/starter-kit";
 import Link from "@tiptap/extension-link";
 import Image from "@tiptap/extension-image";
@@ -27,7 +27,7 @@ import Placeholder from "@tiptap/extension-placeholder";
 import {
   Bold,
   Italic,
-  Underline as UnderlineIcon,
+  Underline as _UnderlineIcon,
   Strikethrough,
   Code,
   Heading1,

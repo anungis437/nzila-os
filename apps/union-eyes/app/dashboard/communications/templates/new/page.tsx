@@ -9,6 +9,8 @@
 
 'use client';
 
+
+export const dynamic = 'force-dynamic';
 import { useState } from 'react';
 import { useRouter } from 'next/navigation';
 import { Button } from '@/components/ui/button';
@@ -174,7 +176,7 @@ export default function NewTemplatePage() {
     }
   };
 
-  const getChannelIcon = (type: string) => {
+  const _getChannelIcon = (type: string) => {
     switch (type) {
       case 'email':
         return <Mail className="h-4 w-4" />;

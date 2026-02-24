@@ -6,7 +6,6 @@
  * @see https://community.workday.com/sites/default/files/file-hosting/restapi/index.html
  */
 
-import { z } from 'zod';
 import { logger } from '@/lib/logger';
 import { AuthenticationError, RateLimitError, IntegrationError, IntegrationProvider } from '../../types';
 
@@ -222,11 +221,13 @@ export class WorkdayClient {
     if (options?.limit) params.set('limit', options.limit.toString());
     if (options?.offset) params.set('offset', options.offset.toString());
 
+    // eslint-disable-next-line @typescript-eslint/no-explicit-any
     const response = await this.request<Record<string, any>>(
       `/workers?${params.toString()}`
     );
 
     return {
+      // eslint-disable-next-line @typescript-eslint/no-explicit-any
       data: response.data.map((worker: Record<string, any>) => this.mapWorkerToEmployee(worker)),
       total: response.total || response.data.length,
       cursor: response.next_cursor,
@@ -237,6 +238,7 @@ export class WorkdayClient {
    * Get a single employee by ID
    */
   async getEmployee(employeeId: string): Promise<WorkdayEmployee> {
+    // eslint-disable-next-line @typescript-eslint/no-explicit-any
     const response = await this.request<Record<string, any>>(`/workers/${employeeId}`);
     return this.mapWorkerToEmployee(response);
   }
@@ -244,6 +246,7 @@ export class WorkdayClient {
   /**
    * Map Workday worker to our employee format
    */
+  // eslint-disable-next-line @typescript-eslint/no-explicit-any
   private mapWorkerToEmployee(worker: Record<string, any>): WorkdayEmployee {
     return {
       id: worker.id,
@@ -280,16 +283,19 @@ export class WorkdayClient {
     if (options?.limit) params.set('limit', options.limit.toString());
     if (options?.offset) params.set('offset', options.offset.toString());
 
+    // eslint-disable-next-line @typescript-eslint/no-explicit-any
     const response = await this.request<Record<string, any>>(
       `/jobProfiles?${params.toString()}`
     );
 
     return {
+      // eslint-disable-next-line @typescript-eslint/no-explicit-any
       data: response.data.map((profile: Record<string, any>) => this.mapJobProfileToPosition(profile)),
       total: response.total || response.data.length,
     };
   }
 
+  // eslint-disable-next-line @typescript-eslint/no-explicit-any
   private mapJobProfileToPosition(profile: Record<string, any>): WorkdayPosition {
     return {
       id: profile.id,
@@ -315,16 +321,19 @@ export class WorkdayClient {
     if (options?.limit) params.set('limit', options.limit.toString());
     if (options?.offset) params.set('offset', options.offset.toString());
 
+    // eslint-disable-next-line @typescript-eslint/no-explicit-any
     const response = await this.request<Record<string, any>>(
       `/organizations?${params.toString()}`
     );
 
     return {
+      // eslint-disable-next-line @typescript-eslint/no-explicit-any
       data: response.data.map((org: Record<string, any>) => this.mapOrgToDepartment(org)),
       total: response.total || response.data.length,
     };
   }
 
+  // eslint-disable-next-line @typescript-eslint/no-explicit-any
   private mapOrgToDepartment(org: Record<string, any>): WorkdayDepartment {
     return {
       id: org.id,
@@ -349,6 +358,7 @@ export class WorkdayClient {
     try {
       await this.ensureAuthenticated();
       // Simple request to verify connectivity
+      // eslint-disable-next-line @typescript-eslint/no-explicit-any
       await this.request<Record<string, any>>('/workers?limit=1');
       return true;
     } catch (error) {

@@ -5,6 +5,9 @@
  * Audience: Potential customers, union leaders, organizers
  */
 
+
+export const dynamic = 'force-dynamic';
+
 import { Metadata } from 'next';
 import { ContactForm } from './contact-form';
 import { Mail, Phone, MapPin, Clock } from 'lucide-react';
@@ -48,7 +51,7 @@ export default function ContactPage() {
             <div className="space-y-6">
               {/* Email */}
               <div className="flex items-start gap-4">
-                <div className="flex-shrink-0 w-12 h-12 rounded-lg bg-blue-50 text-blue-700 flex items-center justify-center">
+                <div className="shrink-0 w-12 h-12 rounded-lg bg-blue-50 text-blue-700 flex items-center justify-center">
                   <Mail className="h-6 w-6" />
                 </div>
                 <div>
@@ -66,7 +69,7 @@ export default function ContactPage() {
 
               {/* Phone */}
               <div className="flex items-start gap-4">
-                <div className="flex-shrink-0 w-12 h-12 rounded-lg bg-green-50 text-green-700 flex items-center justify-center">
+                <div className="shrink-0 w-12 h-12 rounded-lg bg-green-50 text-green-700 flex items-center justify-center">
                   <Phone className="h-6 w-6" />
                 </div>
                 <div>
@@ -84,7 +87,7 @@ export default function ContactPage() {
 
               {/* Location */}
               <div className="flex items-start gap-4">
-                <div className="flex-shrink-0 w-12 h-12 rounded-lg bg-purple-50 text-purple-700 flex items-center justify-center">
+                <div className="shrink-0 w-12 h-12 rounded-lg bg-purple-50 text-purple-700 flex items-center justify-center">
                   <MapPin className="h-6 w-6" />
                 </div>
                 <div>
@@ -100,7 +103,7 @@ export default function ContactPage() {
 
               {/* Hours */}
               <div className="flex items-start gap-4">
-                <div className="flex-shrink-0 w-12 h-12 rounded-lg bg-amber-50 text-amber-700 flex items-center justify-center">
+                <div className="shrink-0 w-12 h-12 rounded-lg bg-amber-50 text-amber-700 flex items-center justify-center">
                   <Clock className="h-6 w-6" />
                 </div>
                 <div>

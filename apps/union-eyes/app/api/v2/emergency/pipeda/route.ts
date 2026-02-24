@@ -4,8 +4,18 @@ import { NextResponse } from 'next/server';
  * Migrated to withApi() framework
  */
 import { getPrivacyRules, assessBreachNotification } from '@/lib/services/provincial-privacy-service';
-import type { PIPEDABreachRequest, PIPEDABreachAssessment } from '@/lib/types/compliance-api-types';
-import { withApi, ApiError, z } from '@/lib/api/framework';
+import type { PIPEDABreachAssessment } from '@/lib/types/compliance-api-types';
+ 
+ 
+ 
+ 
+ 
+ 
+ 
+ 
+ 
+ 
+import { withApi, z } from '@/lib/api/framework';
 
 const emergencyPipedaSchema = z.object({
   memberId: z.string().uuid('Invalid memberId'),
@@ -23,7 +33,7 @@ export const GET = withApi(
       summary: 'GET pipeda',
     },
   },
-  async ({ request, userId, organizationId, user, body, query }) => {
+  async ({ request, userId: _userId, organizationId: _organizationId, user: _user, body: _body, query: _query }) => {
 
         const searchParams = request.nextUrl.searchParams;
         const breachId = searchParams.get('breachId');
@@ -65,12 +75,13 @@ export const POST = withApi(
     },
     successStatus: 201,
   },
-  async ({ request, userId, organizationId, user, body, query }) => {
+  async ({ request: _request, userId: _userId, organizationId: _organizationId, user: _user, body, query: _query }) => {
 
         // Validate request body
         const { memberId, breachDate, affectedDataTypes, province: rawProvince, estimatedAffectedCount } = body;
         const province = typeof rawProvince === 'string' ? rawProvince : undefined;
         // Validate required fields
+        // eslint-disable-next-line @typescript-eslint/no-explicit-any
         if (!memberId || !breachDate || !affectedDataTypes || (affectedDataTypes as any[]).length === 0) {
           return NextResponse.json(
             {
@@ -84,13 +95,13 @@ export const POST = withApi(
           );
         }
         // Assess breach notification requirements
-        const assessment = await assessBreachNotification(
+        const _assessment = await assessBreachNotification(
           memberId,
           affectedDataTypes as string[],
           new Date(breachDate)
         );
         // Get provincial rules
-        const rules = getPrivacyRules(province || 'FEDERAL');
+        const _rules = getPrivacyRules(province || 'FEDERAL');
         // Calculate minimum threshold (varies by province)
         const minimumThreshold = province === 'QC' ? 10 : 25; // QC has lower threshold
         const affectingMinimum = estimatedAffectedCount >= minimumThreshold;

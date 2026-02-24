@@ -5,6 +5,11 @@
 import { manualTriggerRetry } from '@/lib/jobs/failed-payment-retry';
 import { logger } from '@/lib/logger';
 
+ 
+ 
+ 
+ 
+ 
 import { withApi, ApiError } from '@/lib/api/framework';
 
 export const POST = withApi(
@@ -16,7 +21,7 @@ export const POST = withApi(
     },
     successStatus: 201,
   },
-  async ({ request, userId, organizationId, user, body, query }) => {
+  async ({ request: _request, userId: _userId, organizationId: _organizationId, user, body: _body, query: _query }) => {
 
         if (!user) {
           throw ApiError.unauthorized('Authentication required'

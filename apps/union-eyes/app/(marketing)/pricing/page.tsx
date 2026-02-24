@@ -1,7 +1,9 @@
-import { auth } from "@clerk/nextjs/server";
-import dynamic from "next/dynamic";
+export const dynamic = 'force-dynamic';
 
-const PricingPageClient = dynamic(() => import("./pricing-page-client"), { ssr: true });
+import { auth } from "@clerk/nextjs/server";
+import nextDynamic from "next/dynamic";
+
+const PricingPageClient = nextDynamic(() => import("./pricing-page-client"), { ssr: true });
 
 export default async function PricingPage() {
   const { userId } = await auth();

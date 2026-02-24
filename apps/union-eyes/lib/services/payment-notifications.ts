@@ -6,13 +6,13 @@
  */
 
 import { getNotificationService } from "@/lib/services/notification-service";
-import { NotificationTemplates } from "@/lib/services/notification-service";
 import { db } from "@/db/db";
 import { profiles as profilesSchema } from "@/db/schema/profiles-schema";
 import { eq } from "drizzle-orm";
 import { logger } from "@/lib/logger";
 
 // DB table may have columns (phone, firebaseToken, organizationId) not yet in drizzle schema
+// eslint-disable-next-line @typescript-eslint/no-explicit-any
 const profiles = profilesSchema as any;
 
 // ============================================================================
@@ -484,6 +484,7 @@ export async function sendBulkNotification(
     const recipientMap = new Map(recipients.map((r) => [r.id, r]));
 
     // Build payload for each recipient
+    // eslint-disable-next-line @typescript-eslint/no-explicit-any
     const payloads: any[] = [];
 
     for (const recipientId of recipientIds) {
@@ -493,7 +494,9 @@ export async function sendBulkNotification(
       const basePayload = {
         organizationId,
         recipientId,
+        // eslint-disable-next-line @typescript-eslint/no-explicit-any
         type: type as any,
+        // eslint-disable-next-line @typescript-eslint/no-explicit-any
         priority: priority as any,
         subject,
         body: message,
@@ -559,6 +562,7 @@ export async function retryFailedNotifications(
   }
 }
 
+// eslint-disable-next-line import/no-anonymous-default-export
 export default {
   sendPaymentReceivedNotification,
   sendPaymentFailedNotification,

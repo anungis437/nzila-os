@@ -1,5 +1,7 @@
 'use client';
 
+
+export const dynamic = 'force-dynamic';
 /**
  * Admin Dues Dashboard
  * 
@@ -250,7 +252,7 @@ export default function AdminDuesDashboard() {
     data.periodStats.thisMonth.collected,
     data.periodStats.lastMonth.collected
   );
-  const outstandingChange = calculatePercentageChange(
+  const _outstandingChange = calculatePercentageChange(
     data.periodStats.thisMonth.outstanding,
     data.periodStats.lastMonth.outstanding
   );

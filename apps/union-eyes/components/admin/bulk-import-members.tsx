@@ -42,6 +42,7 @@ interface ImportPreview {
   validRows: number;
   invalidRows: number;
   errors: ValidationError[];
+  // eslint-disable-next-line @typescript-eslint/no-explicit-any
   preview: any[];
 }
 
@@ -63,6 +64,7 @@ export function BulkImportMembers({
   const [isUploading, setIsUploading] = useState(false);
   const [isImporting, setIsImporting] = useState(false);
   const [preview, setPreview] = useState<ImportPreview | null>(null);
+  // eslint-disable-next-line @typescript-eslint/no-explicit-any
   const [importResult, setImportResult] = useState<any>(null);
   const [error, setError] = useState<string | null>(null);
 

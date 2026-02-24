@@ -10,11 +10,11 @@
 'use client';
 
 import React, { useState, useEffect } from 'react';
-import { Calendar } from '@/components/ui/calendar';
 import { format, startOfMonth, endOfMonth, startOfWeek, endOfWeek, addDays, isSameDay } from 'date-fns';
 import { Button } from '@/components/ui/button';
 import { Badge } from '@/components/ui/badge';
 import { ChevronLeft, ChevronRight, Calendar as CalendarIcon, List, Clock } from 'lucide-react';
+ 
 import { cn } from '@/lib/utils';
 
 type ViewType = 'month' | 'week' | 'day' | 'agenda';
@@ -39,7 +39,7 @@ interface CalendarViewProps {
 }
 
 export function CalendarView({
-  calendarId,
+  calendarId: _calendarId,
   events = [],
   onEventClick,
   onDateClick,
@@ -59,6 +59,7 @@ export function CalendarView({
       return eventStart >= start && eventStart <= end;
     });
 
+    // eslint-disable-next-line react-hooks/set-state-in-effect
     setDisplayedEvents(filtered);
   }, [selectedDate, view, events]);
 

@@ -4,6 +4,14 @@
  */
 import { SignatureService } from "@/lib/signature/signature-service";
 
+ 
+ 
+ 
+ 
+ 
+ 
+ 
+ 
 import { withApi, ApiError } from '@/lib/api/framework';
 
 export const GET = withApi(
@@ -14,7 +22,7 @@ export const GET = withApi(
       summary: 'GET documents',
     },
   },
-  async ({ request, userId, organizationId, user, body, query }) => {
+  async ({ request, userId: _userId, organizationId: _organizationId, user, body: _body, query: _query }) => {
 
         if (!user || !user.id) {
           throw ApiError.unauthorized('Unauthorized'
@@ -42,7 +50,7 @@ export const POST = withApi(
     },
     successStatus: 201,
   },
-  async ({ request, userId, organizationId, user, body, query }) => {
+  async ({ request, userId: _userId, organizationId: _organizationId, user, body: _body, query: _query }) => {
 
         if (!user || !user.id) {
           throw ApiError.unauthorized('Unauthorized'

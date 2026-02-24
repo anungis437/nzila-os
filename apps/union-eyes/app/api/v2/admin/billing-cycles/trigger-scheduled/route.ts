@@ -5,6 +5,10 @@
 import { BillingScheduler } from '@/lib/jobs/billing-scheduler';
 import { logger } from '@/lib/logger';
 
+ 
+ 
+ 
+ 
 import { withApi, ApiError, z } from '@/lib/api/framework';
 
 const triggerSchema = z.object({
@@ -21,7 +25,7 @@ export const POST = withApi(
     },
     successStatus: 201,
   },
-  async ({ request, userId, organizationId, user, body, query }) => {
+  async ({ request: _request, userId: _userId, organizationId: _organizationId, user, body, query: _query }) => {
 
         if (!user) {
           throw ApiError.unauthorized('Authentication required');

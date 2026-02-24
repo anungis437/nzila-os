@@ -10,12 +10,10 @@ import { Button } from '@/components/ui/button';
 import { Badge } from '@/components/ui/badge';
 import {
   MoreVertical,
-  TrendingUp,
-  TrendingDown,
   AlertCircle,
   Edit,
   Trash,
-  RefreshCw
+  RefreshCw,
 } from 'lucide-react';
 import {
   DropdownMenu,

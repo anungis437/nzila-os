@@ -5,7 +5,7 @@
  */
 "use client";
 
-import { Bell, Search, Menu, Shield, ChevronRight, Home } from "lucide-react";
+import { Bell, Search, Menu, Shield, ChevronRight } from "lucide-react";
 import { UserButton, useUser } from "@clerk/nextjs";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
@@ -43,7 +43,7 @@ export default function DashboardTopbar({ profile, onMenuClick }: DashboardTopba
           const data = await response.json();
           setIsAdmin(data.role === 'admin' || data.roles?.includes('admin'));
         }
-      } catch (error) {
+      } catch (_error) {
 setIsAdmin(false);
       }
     };
@@ -62,7 +62,7 @@ setIsAdmin(false);
           const data = await response.json();
           setNotificationCount(data.count || 0);
         }
-      } catch (error) {
+      } catch (_error) {
 setNotificationCount(0);
       }
     };

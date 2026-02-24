@@ -15,17 +15,15 @@
 'use client';
 
 import { useState, useEffect, useCallback } from 'react';
+ 
 import {
   Users,
   Plus,
   Search,
-  Upload,
   Download,
   Trash2,
   MoreVertical,
-  Filter,
-  CheckCircle2,
-  XCircle,
+  Filter as _Filter,
   Mail,
   Edit,
   UserPlus,
@@ -41,7 +39,6 @@ import {
   Card,
   CardContent,
   CardDescription,
-  CardFooter,
   CardHeader,
   CardTitle,
 } from '@/components/ui/card';
@@ -74,7 +71,6 @@ import {
   TableHeader,
   TableRow,
 } from '@/components/ui/table';
-import { Tabs, TabsContent, TabsList, TabsTrigger } from '@/components/ui/tabs';
 import { Skeleton } from '@/components/ui/skeleton';
 import { useToast } from '@/lib/hooks/use-toast';
 
@@ -157,7 +153,7 @@ export function DistributionListManager() {
 
       const data = await response.json();
       setLists(data.lists || []);
-    } catch (error) {
+    } catch (_error) {
 toast({
         title: 'Error',
         description: 'Failed to load distribution lists',
@@ -180,7 +176,7 @@ toast({
 
       const data = await response.json();
       setSubscribers(data.subscribers || []);
-    } catch (error) {
+    } catch (_error) {
 toast({
         title: 'Error',
         description: 'Failed to load subscribers',
@@ -209,7 +205,7 @@ toast({
 
       const data = await response.json();
       setAvailableProfiles(data.profiles || []);
-    } catch (error) {
+    } catch (_error) {
 toast({
         title: 'Error',
         description: 'Failed to load member profiles',
@@ -263,7 +259,7 @@ toast({
       setSelectedList(data.list);
       setCreateDialogOpen(false);
       resetForm();
-    } catch (error) {
+    } catch (_error) {
 toast({
         title: 'Error',
         description: 'Failed to create distribution list',
@@ -300,7 +296,7 @@ toast({
       fetchLists(); // Update subscriber count
       setAddSubscribersOpen(false);
       setSelectedProfiles(new Set());
-    } catch (error) {
+    } catch (_error) {
 toast({
         title: 'Error',
         description: 'Failed to add subscribers',
@@ -331,7 +327,7 @@ toast({
 
       setSubscribers((prev) => prev.filter((s) => s.id !== subscriberId));
       fetchLists(); // Update subscriber count
-    } catch (error) {
+    } catch (_error) {
 toast({
         title: 'Error',
         description: 'Failed to remove subscriber',
@@ -363,7 +359,7 @@ toast({
         setSelectedList(null);
       }
       setDeleteConfirm(null);
-    } catch (error) {
+    } catch (_error) {
 toast({
         title: 'Error',
         description: 'Failed to delete list',
@@ -398,7 +394,7 @@ toast({
         title: 'Success',
         description: 'List exported successfully',
       });
-    } catch (error) {
+    } catch (_error) {
 toast({
         title: 'Error',
         description: 'Failed to export list',
@@ -708,6 +704,7 @@ toast({
               <Label>List Type</Label>
               <Select
                 value={listType}
+                // eslint-disable-next-line @typescript-eslint/no-explicit-any
                 onValueChange={(value: any) => setListType(value)}
               >
                 <SelectTrigger>

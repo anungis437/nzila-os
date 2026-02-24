@@ -18,6 +18,7 @@ import * as React from "react";
 import { useForm } from "react-hook-form";
 import { zodResolver } from "@hookform/resolvers/zod";
 import * as z from "zod";
+ 
 import {
   Calendar,
   Clock,
@@ -29,7 +30,7 @@ import {
   Pause,
   CheckCircle,
   XCircle,
-  Upload,
+  Upload as _Upload,
 } from "lucide-react";
 import {
   Form,
@@ -52,7 +53,6 @@ import {
   SelectValue,
 } from "@/components/ui/select";
 import { Checkbox } from "@/components/ui/checkbox";
-import { Label } from "@/components/ui/label";
 import {
   Table,
   TableBody,
@@ -217,6 +217,7 @@ export function DataExportScheduler({
         </p>
       </div>
 
+      {/* eslint-disable-next-line @typescript-eslint/no-explicit-any */}
       <Tabs value={activeTab} onValueChange={(v) => setActiveTab(v as any)}>
         <TabsList>
           <TabsTrigger value="create">Create Schedule</TabsTrigger>

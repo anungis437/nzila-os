@@ -7,6 +7,8 @@
 
 'use client';
 
+
+export const dynamic = 'force-dynamic';
 import { useState } from 'react';
 import { PilotApplicationInput } from '@/types/marketing';
 import { calculateReadinessScore, ReadinessAssessmentResult } from '@/lib/pilot/readiness-assessment';
@@ -26,10 +28,12 @@ export default function PilotRequestPage() {
   const [assessment, setAssessment] = useState<ReadinessAssessmentResult | null>(null);
   const [submitting, setSubmitting] = useState(false);
 
+  // eslint-disable-next-line @typescript-eslint/no-explicit-any
   const handleInputChange = (field: keyof PilotApplicationInput, value: any) => {
     setFormData(prev => ({ ...prev, [field]: value }));
   };
 
+  // eslint-disable-next-line @typescript-eslint/no-explicit-any
   const handleResponseChange = (key: string, value: any) => {
     setFormData(prev => ({
       ...prev,

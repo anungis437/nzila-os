@@ -143,6 +143,7 @@ export interface PilotApplication {
   submittedAt: Date;
   reviewedAt?: Date;
   approvedAt?: Date;
+  // eslint-disable-next-line @typescript-eslint/no-explicit-any
   responses: Record<string, any>;
   notes?: string;
 }
@@ -159,6 +160,7 @@ export interface PilotApplicationInput {
   currentSystem?: string;
   challenges: string[];
   goals: string[];
+  // eslint-disable-next-line @typescript-eslint/no-explicit-any
   responses: Record<string, any>;
 }
 
@@ -205,6 +207,7 @@ export interface RecognitionEvent {
   description: string;
   date: Date;
   relatedCaseId?: string;
+  // eslint-disable-next-line @typescript-eslint/no-explicit-any
   metadata?: Record<string, any>;
 }
 
@@ -293,6 +296,7 @@ export interface TrustMetricDetail {
   verification: boolean;
   lastCheck: Date;
   description: string;
+  // eslint-disable-next-line @typescript-eslint/no-explicit-any
   metadata?: Record<string, any>;
 }
 

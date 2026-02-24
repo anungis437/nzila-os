@@ -1,9 +1,6 @@
 import { NextRequest, NextResponse } from 'next/server';
 import { getPrivacyRules, generateComplianceReport } from '@/lib/services/provincial-privacy-service';
 import { withApiAuth } from '@/lib/api-auth-guard';
-import {
-  ErrorCode,
-} from '@/lib/api/standardized-responses';
 
 /**
  * Emergency Dashboard API
@@ -23,7 +20,7 @@ export const GET = withApiAuth(async (request: NextRequest) => {
     const rules = getPrivacyRules(province);
 
     // Get compliance report
-    const complianceReport = await generateComplianceReport(province);
+    const _complianceReport = await generateComplianceReport(province);
 
     return NextResponse.json({
       success: true,

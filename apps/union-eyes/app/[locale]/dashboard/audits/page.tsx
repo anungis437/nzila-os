@@ -1,3 +1,5 @@
+export const dynamic = 'force-dynamic';
+
 import { Metadata } from "next";
 import { requireUser, hasMinRole } from "@/lib/api-auth-guard";
 import { redirect } from "next/navigation";
@@ -12,7 +14,7 @@ export const metadata: Metadata = {
 };
 
 export default async function AuditsPage() {
-  const user = await requireUser();
+  const _user = await requireUser();
   
   // Require at least officer level (60) to view audits
   const hasAccess = await hasMinRole("officer");

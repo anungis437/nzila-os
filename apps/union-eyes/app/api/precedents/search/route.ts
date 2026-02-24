@@ -1,18 +1,16 @@
-import { logApiAuditEvent } from "@/lib/middleware/api-security";
 /**
  * Precedent Search API Route
  * POST /api/precedents/search - Search precedents
  */
 
-import { NextRequest, NextResponse } from "next/server";
+import { NextResponse } from "next/server";
 import { searchPrecedents } from "@/lib/services/precedent-service";
 import { z } from "zod";
-import { getCurrentUser, withAdminAuth, withApiAuth, withMinRole, withRoleAuth } from '@/lib/api-auth-guard';
+import { withRoleAuth } from '@/lib/api-auth-guard';
 
 import {
   ErrorCode,
   standardErrorResponse,
-  standardSuccessResponse,
 } from '@/lib/api/standardized-responses';
 
 const precedentSearchSchema = z.object({
@@ -20,7 +18,7 @@ const precedentSearchSchema = z.object({
   filters: z.record(z.string(), z.unknown()).default({}),
   limit: z.number().int().min(1).max(100).default(50),
 });
-export const POST = withRoleAuth('steward', async (request, context) => {
+export const POST = withRoleAuth('steward', async (request, _context) => {
   try {
       const body = await request.json();
       

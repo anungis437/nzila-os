@@ -2,9 +2,7 @@
  * GET /api/admin/clc/analytics/trends
  * Migrated to withApi() framework
  */
-import { logApiAuditEvent } from '@/lib/middleware/api-security';
-import { analyzeMultiYearTrends } from '@/services/clc/compliance-reports';
-import { withApi, ApiError, RATE_LIMITS } from '@/lib/api/framework';
+import { withApi } from '@/lib/api/framework';
 
 import { GET as v1GET } from '@/app/api/admin/clc/analytics/trends/route';
 
@@ -18,6 +16,7 @@ export const GET = withApi(
   },
   async ({ request }) => {
     // Delegate to v1 handler while framework migration is in progress
+    // eslint-disable-next-line @typescript-eslint/no-explicit-any
     const response = await v1GET(request, {} as any);
     return response;
   },

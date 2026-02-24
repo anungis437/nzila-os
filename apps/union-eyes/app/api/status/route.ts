@@ -25,7 +25,7 @@ export async function GET() {
     const statusCode = status.status === 'down' ? 503 : 200;
     
     return NextResponse.json(status, { status: statusCode });
-  } catch (error) {
+  } catch (_error) {
     return standardErrorResponse(ErrorCode.SERVICE_UNAVAILABLE, 'Service unavailable');
   }
 }

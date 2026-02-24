@@ -11,7 +11,9 @@
  * - Metrics tracking (views, downloads)
  */
 
-import { Suspense } from 'react';
+
+export const dynamic = 'force-dynamic';
+
 import { db } from '@/db';
 import { caseStudies } from '@/db/schema/domains/marketing';
 import { desc, eq } from 'drizzle-orm';
@@ -34,7 +36,7 @@ import {
   TableHeader,
   TableRow,
 } from '@/components/ui/table';
-import { Plus, Eye, Edit, Trash2, FileText } from 'lucide-react';
+import { Plus, Eye, Edit, Trash2 } from 'lucide-react';
 import Link from 'next/link';
 import { format } from 'date-fns';
 
@@ -53,6 +55,7 @@ export default async function AdminCaseStudiesPage({ searchParams }: AdminCaseSt
   const allStudies = await db
     .select()
     .from(caseStudies)
+    // eslint-disable-next-line @typescript-eslint/no-explicit-any
     .where(category ? eq(caseStudies.category, category as any) : undefined)
     .orderBy(desc(caseStudies.updatedAt))
     .limit(100);

@@ -2,11 +2,7 @@
  * GET POST /api/rewards/redemptions
  * Migrated to withApi() framework
  */
-import { logApiAuditEvent } from "@/lib/middleware/api-security";
-import { NextRequest, NextResponse } from 'next/server';
-import { db } from '@/db';
-import { initiateRedemptionSchema } from '@/lib/validation/rewards-schemas';
-import { withApi, ApiError } from '@/lib/api/framework';
+import { withApi } from '@/lib/api/framework';
 
 import { GET as v1GET, POST as v1POST } from '@/app/api/rewards/redemptions/route';
 

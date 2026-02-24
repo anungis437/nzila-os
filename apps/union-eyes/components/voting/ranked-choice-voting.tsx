@@ -214,7 +214,7 @@ export function RankedChoiceVoting({
         });
         setShowConfirmation(false);
       }
-    } catch (error) {
+    } catch (_error) {
       toast({
         title: "Submission failed",
         description: "Failed to submit your vote. Please try again.",
@@ -315,7 +315,7 @@ export function RankedChoiceVoting({
                   <div
                     ref={provided.innerRef}
                     {...provided.droppableProps}
-                    className={`space-y-2 min-h-[400px] p-4 rounded-lg border-2 border-dashed transition-colors ${
+                    className={`space-y-2 min-h-100 p-4 rounded-lg border-2 border-dashed transition-colors ${
                       snapshot.isDraggingOver
                         ? "border-primary bg-primary/5"
                         : "border-muted"
@@ -412,7 +412,7 @@ export function RankedChoiceVoting({
                   <div
                     ref={provided.innerRef}
                     {...provided.droppableProps}
-                    className={`space-y-2 min-h-[400px] p-4 rounded-lg border-2 border-dashed transition-colors ${
+                    className={`space-y-2 min-h-100 p-4 rounded-lg border-2 border-dashed transition-colors ${
                       snapshot.isDraggingOver
                         ? "border-primary bg-primary/5"
                         : "border-muted"

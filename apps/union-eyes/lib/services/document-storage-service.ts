@@ -35,6 +35,7 @@ export interface StorageDocument {
   documentBuffer: Buffer;
   documentType: string;
   contentType?: string;
+  // eslint-disable-next-line @typescript-eslint/no-explicit-any
   metadata?: Record<string, any>;
 }
 
@@ -53,13 +54,19 @@ export interface StorageResult {
 class DocumentStorageService {
   private backend: StorageBackend;
   private bucket: string;
+  // eslint-disable-next-line @typescript-eslint/no-explicit-any
   private s3Client?: any;
   private s3Sdk?: {
+    // eslint-disable-next-line @typescript-eslint/no-explicit-any
     PutObjectCommand: any;
+    // eslint-disable-next-line @typescript-eslint/no-explicit-any
     GetObjectCommand: any;
+    // eslint-disable-next-line @typescript-eslint/no-explicit-any
     DeleteObjectCommand: any;
+    // eslint-disable-next-line @typescript-eslint/no-explicit-any
     getSignedUrl: any;
   };
+  // eslint-disable-next-line @typescript-eslint/no-explicit-any
   private blobServiceClient?: any;
   private azureConnectionString?: string;
   private r2Endpoint?: string;
@@ -84,6 +91,7 @@ class DocumentStorageService {
     });
   }
 
+  // eslint-disable-next-line @typescript-eslint/no-explicit-any
   private async ensureAzureClient(): Promise<any> {
     if (this.blobServiceClient) {
       return this.blobServiceClient;
@@ -101,9 +109,13 @@ class DocumentStorageService {
   }
 
   private async ensureS3Client(): Promise<{
+    // eslint-disable-next-line @typescript-eslint/no-explicit-any
     PutObjectCommand: any;
+    // eslint-disable-next-line @typescript-eslint/no-explicit-any
     GetObjectCommand: any;
+    // eslint-disable-next-line @typescript-eslint/no-explicit-any
     DeleteObjectCommand: any;
+    // eslint-disable-next-line @typescript-eslint/no-explicit-any
     getSignedUrl: any;
   }> {
     if (this.s3Client && this.s3Sdk) {

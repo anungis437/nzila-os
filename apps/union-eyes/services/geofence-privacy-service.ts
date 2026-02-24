@@ -8,7 +8,7 @@ import {
   locationDeletionLog,
   locationTrackingConfig,
 } from "@/db/schema/geofence-privacy-schema";
-import { eq, and, lte, gte } from "drizzle-orm";
+import { eq, and, lte } from "drizzle-orm";
 
 /**
  * Geofence Privacy Service
@@ -416,6 +416,7 @@ export class GeofencePrivacyService {
     performedByRole?: string;
     ipAddress?: string;
     userAgent?: string;
+    // eslint-disable-next-line @typescript-eslint/no-explicit-any
     metadata?: any;
   }) {
     await db.insert(locationTrackingAudit).values({

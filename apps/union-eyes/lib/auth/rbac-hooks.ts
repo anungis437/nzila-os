@@ -77,7 +77,7 @@ export function useUserRole() {
           // Default to member if API fails
           setRole(UserRole.MEMBER);
         }
-      } catch (error) {
+      } catch (_error) {
 setRole(UserRole.MEMBER); // Default to member on error
       } finally {
         setLoading(false);

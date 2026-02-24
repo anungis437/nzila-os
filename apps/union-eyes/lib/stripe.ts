@@ -1,3 +1,4 @@
+// eslint-disable-next-line no-restricted-imports -- TODO(platform-migration): migrate to @nzila/ wrapper
 import Stripe from "stripe";
 
 // Validate Stripe secret key

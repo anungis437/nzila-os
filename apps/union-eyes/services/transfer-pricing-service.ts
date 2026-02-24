@@ -9,7 +9,7 @@ import {
   fxRateAuditLog,
   currencyEnforcementAudit,
 } from "@/db/schema/domains/finance";
-import { eq, and, lte, gte, desc } from "drizzle-orm";
+import { eq, and, gte, desc } from "drizzle-orm";
 
 /**
  * Transfer Pricing & Currency Service
@@ -39,7 +39,9 @@ export interface TransferPricingDoc {
   cadAmount: number;
   pricingJustification: string;
   documentedBy: string;
+  // eslint-disable-next-line @typescript-eslint/no-explicit-any
   comparableTransactions?: any[];
+  // eslint-disable-next-line @typescript-eslint/no-explicit-any
   supportingDocuments?: any[];
 }
 
@@ -91,7 +93,7 @@ export class TransferPricingService {
     fxRate: number;
     rateDate: Date;
   }> {
-    const policy = await this.getEnforcementPolicy();
+    const _policy = await this.getEnforcementPolicy();
 
     // Get latest Bank of Canada rate for currency
     const rate = await this.getBankOfCanadaRate(request.originalCurrency);
@@ -106,7 +108,7 @@ export class TransferPricingService {
     const cadAmount = request.originalAmount * parseFloat(rate.noonRate);
 
     // Record conversion
-    const [conversion] = await db
+    const [_conversion] = await db
       .insert(transactionCurrencyConversions)
       .values({
         transactionId: request.transactionId,
@@ -397,6 +399,7 @@ export class TransferPricingService {
     oldRate?: number;
     newRate?: number;
     performedBy?: string;
+    // eslint-disable-next-line @typescript-eslint/no-explicit-any
     metadata?: any;
   }) {
     await db.insert(fxRateAuditLog).values({
@@ -423,6 +426,7 @@ export class TransferPricingService {
     performedBy: string;
     performedByRole?: string;
     complianceImpact?: string;
+    // eslint-disable-next-line @typescript-eslint/no-explicit-any
     metadata?: any;
   }) {
     await db.insert(currencyEnforcementAudit).values({

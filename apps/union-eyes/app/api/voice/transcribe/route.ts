@@ -1,7 +1,6 @@
-import { logApiAuditEvent } from "@/lib/middleware/api-security";
-import { NextRequest, NextResponse } from "next/server";
+import { NextResponse } from "next/server";
 import { transcribeAudioWithLanguage, type SupportedLanguage } from "@/lib/azure-speech";
-import { getCurrentUser, withAdminAuth, withApiAuth, withMinRole, withRoleAuth } from '@/lib/api-auth-guard';
+import { withRoleAuth } from '@/lib/api-auth-guard';
 import {
   ErrorCode,
   standardErrorResponse,
@@ -10,7 +9,7 @@ import {
 export const runtime = "nodejs";
 export const maxDuration = 60; // Maximum duration in seconds
 
-export const POST = withRoleAuth('steward', async (request, context) => {
+export const POST = withRoleAuth('steward', async (request, _context) => {
   try {
       // Authenticate user
       // Parse form data
@@ -52,7 +51,7 @@ export const POST = withRoleAuth('steward', async (request, context) => {
         success: true,
       });
 
-    } catch (error) {
+    } catch (_error) {
 return standardErrorResponse(ErrorCode.INTERNAL_ERROR, 'Transcription failed');
     }
 });

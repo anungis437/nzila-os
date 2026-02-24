@@ -12,7 +12,6 @@ import {
   countryAddressFormats,
   addressValidationCache,
   addressChangeHistory,
-  type NewInternationalAddress,
   type InternationalAddress,
   type CountryAddressFormat,
 } from "@/db/schema";
@@ -349,7 +348,7 @@ export class AddressService {
           postalCode: data.postalCode,
           countryCode: data.countryCode,
         });
-      } catch (error) {
+      } catch (_error) {
 }
     }
     
@@ -365,7 +364,7 @@ export class AddressService {
           postalCode: data.postalCode,
           countryCode: data.countryCode,
         });
-      } catch (error) {
+      } catch (_error) {
 }
     }
     

@@ -285,7 +285,7 @@ class RAGPipeline {
     
     const results: SearchResult[] = [];
     
-    for (const [id, chunk] of this.chunks) {
+    for (const [_id, chunk] of this.chunks) {
       const score = cosineSimilarity(queryEmbedding, chunk.embedding);
       results.push({ chunk, score });
     }

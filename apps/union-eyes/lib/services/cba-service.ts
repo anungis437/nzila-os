@@ -10,11 +10,8 @@
  */
 
 import { db } from "@/db/db";
-import { 
-  collectiveAgreements, 
-  cbaStatusEnum,
-  jurisdictionEnum,
-  cbaLanguageEnum
+import {
+  collectiveAgreements,
 } from "@/db/schema";
 import { eq, and, or, gte, lte, desc, asc, like, sql, inArray } from "drizzle-orm";
 import type { SQL } from "drizzle-orm";
@@ -44,6 +41,7 @@ export interface CBAFilters {
 
 export interface CBAWithClauses extends CBA {
   clauseCount?: number;
+  // eslint-disable-next-line @typescript-eslint/no-explicit-any
   clauses?: any[];
 }
 
@@ -128,10 +126,12 @@ export async function listCBAs(
     }
 
     if (filters.status && filters.status.length > 0) {
+      // eslint-disable-next-line @typescript-eslint/no-explicit-any
       conditions.push(inArray(collectiveAgreements.status, filters.status as any));
     }
 
     if (filters.jurisdiction && filters.jurisdiction.length > 0) {
+      // eslint-disable-next-line @typescript-eslint/no-explicit-any
       conditions.push(inArray(collectiveAgreements.jurisdiction, filters.jurisdiction as any));
     }
 
@@ -286,7 +286,7 @@ export async function deleteCBA(id: string): Promise<boolean> {
  */
 export async function hardDeleteCBA(id: string): Promise<boolean> {
   try {
-    const result = await db
+    const _result = await db
       .delete(collectiveAgreements)
       .where(eq(collectiveAgreements.id, id));
 

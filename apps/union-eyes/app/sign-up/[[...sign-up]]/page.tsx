@@ -1,3 +1,5 @@
+export const dynamic = 'force-dynamic';
+
 import { SignUp } from '@clerk/nextjs';
 import type { Metadata } from 'next';
 import AuthPageLayout from '@/components/auth/auth-page-layout';

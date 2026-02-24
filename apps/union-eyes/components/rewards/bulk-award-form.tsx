@@ -10,7 +10,7 @@ import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card';
 import { Badge } from '@/components/ui/badge';
 import { Alert, AlertDescription } from '@/components/ui/alert';
 import { AwardTypeSelector } from './award-type-selector';
-import { Upload, X, AlertCircle, CheckCircle, Users } from 'lucide-react';
+import { Upload, X, CheckCircle, Users } from 'lucide-react';
 import { createAward } from '@/actions/rewards-actions';
 import type { RecognitionAwardType } from '@/db/schema/recognition-rewards-schema';
 

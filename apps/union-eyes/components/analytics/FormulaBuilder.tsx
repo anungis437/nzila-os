@@ -18,14 +18,12 @@ import { Label } from '@/components/ui/label';
 import { Badge } from '@/components/ui/badge';
 import { ScrollArea } from '@/components/ui/scroll-area';
 import { Textarea } from '@/components/ui/textarea';
+ 
 import {
   Calculator,
-  Search,
+  Search as _Search,
   Check,
-  X,
   AlertCircle,
-  Info,
-  Plus,
   Code,
 } from 'lucide-react';
 import {
@@ -38,7 +36,6 @@ import {
 } from '@/components/ui/dialog';
 import {
   Tabs,
-  TabsContent,
   TabsList,
   TabsTrigger,
 } from '@/components/ui/tabs';
@@ -375,6 +372,7 @@ export function FormulaBuilder({
     }
 
     return { isValid: true, error: null };
+  // eslint-disable-next-line react-hooks/exhaustive-deps
   }, []);
 
   // Validate formula on change

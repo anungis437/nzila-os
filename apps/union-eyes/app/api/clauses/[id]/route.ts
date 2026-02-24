@@ -1,4 +1,3 @@
-import { logApiAuditEvent } from "@/lib/middleware/api-security";
 /**
  * Clause API Routes - Individual clause operations
  * GET /api/clauses/[id] - Get clause by ID
@@ -13,17 +12,15 @@ import {
   deleteClause,
   getClauseHierarchy
 } from "@/lib/services/clause-service";
-import { z } from "zod";
-import { getCurrentUser, withAdminAuth, withApiAuth, withMinRole, withRoleAuth } from '@/lib/api-auth-guard';
+import { withRoleAuth } from '@/lib/api-auth-guard';
 
 import {
   ErrorCode,
   standardErrorResponse,
-  standardSuccessResponse,
 } from '@/lib/api/standardized-responses';
 export const GET = async (request: NextRequest, { params }: { params: { id: string } }) => {
   return withRoleAuth('member', async (request, context) => {
-    const user = { id: context.userId, organizationId: context.organizationId };
+    const _user = { id: context.userId, organizationId: context.organizationId };
 
   try {
       const { id } = params;
@@ -67,7 +64,7 @@ return standardErrorResponse(
 
 export const PATCH = async (request: NextRequest, { params }: { params: { id: string } }) => {
   return withRoleAuth('member', async (request, context) => {
-    const user = { id: context.userId, organizationId: context.organizationId };
+    const _user = { id: context.userId, organizationId: context.organizationId };
 
   try {
       const { id } = params;
@@ -96,7 +93,7 @@ return standardErrorResponse(
 
 export const DELETE = async (request: NextRequest, { params }: { params: { id: string } }) => {
   return withRoleAuth('member', async (request, context) => {
-    const user = { id: context.userId, organizationId: context.organizationId };
+    const _user = { id: context.userId, organizationId: context.organizationId };
 
   try {
       const { id } = params;

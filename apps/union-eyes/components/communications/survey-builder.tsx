@@ -24,7 +24,7 @@ import {
   SelectTrigger,
   SelectValue,
 } from '@/components/ui/select';
-import { Card, CardContent, CardDescription, CardHeader, CardTitle } from '@/components/ui/card';
+import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card';
 import { Badge } from '@/components/ui/badge';
 import { Switch } from '@/components/ui/switch';
 import { useToast } from '@/components/ui/use-toast';
@@ -154,6 +154,7 @@ export function SurveyBuilder({ organizationId, surveyId, onSave, onCancel }: Su
       setShowResults(survey.showResults || false);
 
       // Convert loaded questions to component format
+      // eslint-disable-next-line @typescript-eslint/no-explicit-any
       const formattedQuestions: Question[] = loadedQuestions.map((q: any) => ({
         id: q.id,
         questionText: q.questionText,
@@ -185,7 +186,7 @@ export function SurveyBuilder({ organizationId, surveyId, onSave, onCancel }: Su
         title: 'Success',
         description: 'Survey loaded successfully',
       });
-    } catch (error) {
+    } catch (_error) {
 toast({
         title: 'Error',
         description: 'Failed to load survey',
@@ -391,7 +392,7 @@ toast({
       });
 
       if (onSave) onSave();
-    } catch (error) {
+    } catch (_error) {
 toast({
         title: 'Error',
         description: 'Failed to save survey',
@@ -515,6 +516,7 @@ toast({
                       updateQuestion(question.id, { allowOther: checked })
                     }
                   />
+                  {/* eslint-disable-next-line react/no-unescaped-entities */}
                   <Label>Allow "Other" option</Label>
                 </div>
               </div>

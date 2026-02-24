@@ -8,6 +8,8 @@
 
 'use client';
 
+
+export const dynamic = 'force-dynamic';
 import { useEffect, useState } from 'react';
 import { useRouter } from 'next/navigation';
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from '@/components/ui/card';
@@ -21,11 +23,10 @@ import {
   SelectTrigger,
   SelectValue,
 } from '@/components/ui/select';
-import { 
-  PlusCircle, 
-  Search, 
+import {
+  PlusCircle,
+  Search,
   Calendar,
-  User,
   FileText,
   AlertCircle,
   CheckCircle,
@@ -64,6 +65,7 @@ const noteTypeLabels: Record<string, string> = {
   follow_up: 'Follow-up',
 };
 
+// eslint-disable-next-line @typescript-eslint/no-explicit-any
 const sentimentIcons: Record<string, any> = {
   positive: <Smile className="h-4 w-4 text-green-600" />,
   neutral: <Meh className="h-4 w-4 text-gray-600" />,
@@ -87,6 +89,7 @@ export default function FieldNotesPage() {
 
   useEffect(() => {
     fetchNotes();
+  // eslint-disable-next-line react-hooks/exhaustive-deps
   }, [noteTypeFilter, sentimentFilter, showFollowUps]);
 
   const fetchNotes = async () => {

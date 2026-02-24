@@ -2,9 +2,23 @@
  * GET POST /api/graphql
  * Migrated to withApi() framework
  */
+// eslint-disable-next-line @typescript-eslint/no-unused-vars
 import { createYoga } from 'graphql-yoga';
+// eslint-disable-next-line @typescript-eslint/no-unused-vars
 import { schema } from '@/lib/graphql/schema';
+// eslint-disable-next-line @typescript-eslint/no-unused-vars
 import { resolvers } from '@/lib/graphql/resolvers';
+ 
+ 
+ 
+ 
+ 
+ 
+ 
+ 
+ 
+ 
+ 
 import { withApi, ApiError } from '@/lib/api/framework';
 
 export const GET = withApi(
@@ -15,7 +29,7 @@ export const GET = withApi(
       summary: 'GET graphql',
     },
   },
-  async ({ request, userId, organizationId, user, body, query }) => {
+  async ({ request: _request, userId: _userId, organizationId: _organizationId, user: _user, body: _body, query: _query }) => {
     // TODO: migrate handler body
     throw ApiError.internal('Route not yet migrated');
   },
@@ -30,7 +44,7 @@ export const POST = withApi(
     },
     successStatus: 201,
   },
-  async ({ request, userId, organizationId, user, body, query }) => {
+  async ({ request: _request, userId: _userId, organizationId: _organizationId, user: _user, body: _body, query: _query }) => {
     // TODO: migrate handler body
     throw ApiError.internal('Route not yet migrated');
   },

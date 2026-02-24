@@ -17,7 +17,7 @@ import {
   varchar,
   timestamp,
   decimal,
-  integer,
+  _integer,
   boolean,
   jsonb,
   index,

@@ -1,3 +1,5 @@
+export const dynamic = 'force-dynamic';
+
 import { Suspense } from 'react';
 import VendorList from '@/components/financial/VendorList';
 import { getCurrentUser } from '@/lib/api-auth-guard';

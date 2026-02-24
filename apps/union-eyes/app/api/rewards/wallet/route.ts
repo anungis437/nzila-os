@@ -1,13 +1,10 @@
-import { logApiAuditEvent } from "@/lib/middleware/api-security";
 import { NextRequest, NextResponse } from 'next/server';
-import { db } from '@/db';
 import { getBalance, listLedger } from '@/lib/services/rewards/wallet-service';
-import { getCurrentUser, withAdminAuth, withApiAuth, withMinRole, withRoleAuth } from '@/lib/api-auth-guard';
+import { withRoleAuth } from '@/lib/api-auth-guard';
 
 import {
   ErrorCode,
   standardErrorResponse,
-  standardSuccessResponse,
 } from '@/lib/api/standardized-responses';
 export const GET = withRoleAuth('member', async (request: NextRequest, context) => {
   try {

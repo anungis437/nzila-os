@@ -41,6 +41,7 @@ export function CBAExpiryTracker({
 
   useEffect(() => {
     fetchExpiringCBAs();
+  // eslint-disable-next-line react-hooks/exhaustive-deps
   }, [organizationId, selectedTimeframe]);
 
   const fetchExpiringCBAs = async () => {

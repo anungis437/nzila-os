@@ -22,7 +22,7 @@ import { useDropzone } from "react-dropzone";
 import {
   Upload,
   FileText,
-  Image as ImageIcon,
+  Image as _ImageIcon,
   CheckCircle,
   AlertCircle,
   Loader2,
@@ -107,6 +107,7 @@ export function OCRUpload({
         newFiles.forEach((file) => processFile(file));
       }
     },
+    // eslint-disable-next-line react-hooks/exhaustive-deps
     [files.length, maxFiles, autoProcessOCR]
   );
 
@@ -240,7 +241,7 @@ export function OCRUpload({
         title: "Corrections saved",
         description: "OCR text has been updated successfully.",
       });
-    } catch (error) {
+    } catch (_error) {
       toast({
         title: "Save failed",
         description: "Failed to save corrections. Please try again.",
@@ -438,6 +439,7 @@ function FileCard({
       <CardContent className="pt-4">
         <div className="flex items-start gap-3">
           {file.preview ? (
+            // eslint-disable-next-line @next/next/no-img-element
             <img
               src={file.preview}
               alt={file.file.name}
@@ -562,6 +564,7 @@ function OCRPreviewDialog({
             <h4 className="font-medium mb-2">Original Document</h4>
             <ScrollArea className="h-full border rounded">
               {file.preview ? (
+                // eslint-disable-next-line @next/next/no-img-element
                 <img
                   src={file.preview}
                   alt="Document preview"

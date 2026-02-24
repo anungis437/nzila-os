@@ -16,7 +16,7 @@ import {
   calendars,
   // Import other calendar tables from schema as needed
 } from "@/db/schema";
-import { eq, and, or, desc, asc, sql, inArray, count, gte, lte } from "drizzle-orm";
+import { eq, and, asc } from "drizzle-orm";
 import type { SQL } from "drizzle-orm";
 import { logger } from "@/lib/logger";
 
@@ -42,6 +42,7 @@ export interface CalendarEvent {
   attendees?: EventAttendee[];
   reminders?: EventReminder[];
   status: string;
+  // eslint-disable-next-line @typescript-eslint/no-explicit-any
   metadata?: Record<string, any>;
   createdBy: string;
   createdAt: Date;
@@ -259,7 +260,7 @@ export async function getEventById(id: string): Promise<CalendarEvent | null> {
  */
 export async function updateEvent(
   id: string,
-  data: Partial<CalendarEvent>
+  _data: Partial<CalendarEvent>
 ): Promise<CalendarEvent | null> {
   try {
     // In production, update calendar_events table
@@ -273,7 +274,7 @@ export async function updateEvent(
 /**
  * Delete event
  */
-export async function deleteEvent(id: string, deleteRecurring = false): Promise<boolean> {
+export async function deleteEvent(id: string, _deleteRecurring = false): Promise<boolean> {
   try {
     // In production, delete from calendar_events table
     // If deleteRecurring is true, delete all instances of recurring event
@@ -289,7 +290,7 @@ export async function deleteEvent(id: string, deleteRecurring = false): Promise<
  */
 export async function listEvents(
   calendarId: string,
-  filters: {
+  _filters: {
     startDate?: Date;
     endDate?: Date;
     eventType?: string[];
@@ -310,8 +311,8 @@ export async function listEvents(
  */
 export async function getEventsForDateRange(
   calendarIds: string[],
-  startDate: Date,
-  endDate: Date
+  _startDate: Date,
+  _endDate: Date
 ): Promise<CalendarEvent[]> {
   try {
     // In production, query calendar_events table
@@ -422,7 +423,9 @@ export async function generateRecurringInstances(
 /**
  * Parse RRULE string into components
  */
+// eslint-disable-next-line @typescript-eslint/no-explicit-any
 function parseRRule(rrule: string): Record<string, any> {
+  // eslint-disable-next-line @typescript-eslint/no-explicit-any
   const parts: Record<string, any> = {};
   
   // Remove RRULE: prefix if present
@@ -541,7 +544,7 @@ export async function addAttendee(
  */
 export async function updateAttendeeResponse(
   attendeeId: string,
-  status: EventAttendee["status"]
+  _status: EventAttendee["status"]
 ): Promise<EventAttendee | null> {
   try {
     // In production, update event_attendees table
@@ -606,8 +609,8 @@ export async function listMeetingRooms(
  */
 export async function checkRoomAvailability(
   roomId: string,
-  startTime: Date,
-  endTime: Date
+  _startTime: Date,
+  _endTime: Date
 ): Promise<boolean> {
   try {
     // In production, query room_bookings table
@@ -674,8 +677,8 @@ export async function cancelRoomBooking(bookingId: string): Promise<boolean> {
  */
 export async function getUserAvailability(
   userId: string,
-  startDate: Date,
-  endDate: Date
+  _startDate: Date,
+  _endDate: Date
 ): Promise<AvailabilitySlot[]> {
   try {
     // In production:
@@ -697,9 +700,9 @@ export async function getUserAvailability(
  */
 export async function findCommonAvailability(
   userIds: string[],
-  startDate: Date,
-  endDate: Date,
-  duration: number // in minutes
+  _startDate: Date,
+  _endDate: Date,
+  _duration: number // in minutes
 ): Promise<AvailabilitySlot[]> {
   try {
     // In production:

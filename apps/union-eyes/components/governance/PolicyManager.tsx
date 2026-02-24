@@ -3,6 +3,7 @@
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "@/components/ui/card";
 import { Badge } from "@/components/ui/badge";
 import { Button } from "@/components/ui/button";
+ 
 import { FileText, Plus, Edit2, Trash2, Eye } from "lucide-react";
 
 interface Policy {
@@ -20,7 +21,7 @@ interface PolicyManagerProps {
   canManage?: boolean;
 }
 
-export default function PolicyManager({ organizationId, canManage = false }: PolicyManagerProps) {
+export default function PolicyManager({ organizationId: _organizationId, canManage = false }: PolicyManagerProps) {
   // Mock data - replace with actual API call
   const policies: Policy[] = [
     {

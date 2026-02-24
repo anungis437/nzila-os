@@ -57,6 +57,8 @@ import {
   DialogTitle,
   DialogTrigger,
 } from "@/components/ui/dialog";
+ 
+ 
 import { Textarea } from "@/components/ui/textarea";
 
 // Eligibility rule schema
@@ -502,6 +504,7 @@ export function VoterEligibilityManager({
                   </div>
                   <Select
                     value={filterStatus}
+                    // eslint-disable-next-line @typescript-eslint/no-explicit-any
                     onValueChange={(value: any) => setFilterStatus(value)}
                   >
                     <SelectTrigger className="w-[180px]">
@@ -674,8 +677,8 @@ function MemberEligibilityRow({
 function EligibilityReport({
   stats,
   rules,
-  results,
-  members,
+  results: _results,
+  members: _members,
 }: {
   stats: { eligible: number; ineligible: number; overridden: number; total: number };
   rules: EligibilityRule[];
@@ -716,6 +719,7 @@ function EligibilityReport({
           {rules.map((rule, index) => (
             <div key={index} className="p-3 bg-gray-50 rounded-lg">
               <div className="font-medium">
+                {/* eslint-disable-next-line react/no-unescaped-entities */}
                 {rule.field} {rule.operator} "{rule.value}"
               </div>
               {rule.description && (

@@ -10,7 +10,7 @@ import { useState, useEffect } from 'react';
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from '@/components/ui/card';
 import { Badge } from '@/components/ui/badge';
 import { Button } from '@/components/ui/button';
-import { Tabs, TabsContent, TabsList, TabsTrigger } from '@/components/ui/tabs';
+import { Tabs, TabsList, TabsTrigger } from '@/components/ui/tabs';
 import { Progress } from '@/components/ui/progress';
 import { 
   Users, 
@@ -65,7 +65,7 @@ interface WorkplaceMapProps {
 
 type ViewType = 'department' | 'shift' | 'support_level';
 
-const supportLevelColors: Record<string, string> = {
+const _supportLevelColors: Record<string, string> = {
   strong_supporter: 'bg-green-600',
   supporter: 'bg-green-400',
   undecided: 'bg-yellow-400',
@@ -91,6 +91,7 @@ export function WorkplaceMap({ campaignId }: WorkplaceMapProps) {
   useEffect(() => {
     fetchWorkplaceMap();
     fetchCommitteeMembers();
+  // eslint-disable-next-line react-hooks/exhaustive-deps
   }, [campaignId, viewType]);
 
   const fetchWorkplaceMap = async () => {
@@ -103,7 +104,7 @@ export function WorkplaceMap({ campaignId }: WorkplaceMapProps) {
       const data = await response.json();
       setMapData(data.data.aggregations || []);
       setSummary(data.data.summary || null);
-    } catch (error) {
+    } catch (_error) {
 } finally {
       setLoading(false);
     }
@@ -117,7 +118,7 @@ export function WorkplaceMap({ campaignId }: WorkplaceMapProps) {
       
       const data = await response.json();
       setCommitteeMembers(data.data.members || []);
-    } catch (error) {
+    } catch (_error) {
 }
   };
 

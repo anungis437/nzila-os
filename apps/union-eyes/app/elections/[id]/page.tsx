@@ -6,24 +6,17 @@
 
 'use client';
 
+
+export const dynamic = 'force-dynamic';
 import { useState, useEffect } from 'react';
 import { useRouter } from 'next/navigation';
 import { Button } from '@/components/ui/button';
 import { Card } from '@/components/ui/card';
-import { Badge } from '@/components/ui/badge';
 import { logger } from '@/lib/logger';
 import { Progress } from '@/components/ui/progress';
 import { Tabs, TabsContent, TabsList, TabsTrigger } from '@/components/ui/tabs';
 import { Alert, AlertDescription } from '@/components/ui/alert';
 import { api } from '@/lib/api/index';
-import {
-  Table,
-  TableBody,
-  TableCell,
-  TableHead,
-  TableHeader,
-  TableRow,
-} from '@/components/ui/table';
 import {
   Vote, Calendar, Users, CheckCircle, AlertCircle, Download
 } from 'lucide-react';
@@ -65,6 +58,7 @@ export default function ElectionDetailPage({ params }: { params: { id: string } 
 
   useEffect(() => {
     fetchElectionDetail();
+  // eslint-disable-next-line react-hooks/exhaustive-deps
   }, [params.id]);
 
   const fetchElectionDetail = async () => {

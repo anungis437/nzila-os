@@ -40,7 +40,6 @@ import {
   User
 } from "lucide-react";
 import { format } from "date-fns";
-import { cn } from "@/lib/utils";
 
 export interface Resource {
   id: string;
@@ -74,6 +73,7 @@ export function FederationResourceLibrary({
 
   React.useEffect(() => {
     loadResources();
+  // eslint-disable-next-line react-hooks/exhaustive-deps
   }, [federationId]);
 
   async function loadResources() {
@@ -93,7 +93,7 @@ export function FederationResourceLibrary({
       } else {
         throw new Error(data.error);
       }
-    } catch (error) {
+    } catch (_error) {
       toast({
         title: "Error",
         description: "Failed to load resources",
@@ -127,7 +127,7 @@ export function FederationResourceLibrary({
 
       // Refresh to update download count
       loadResources();
-    } catch (error) {
+    } catch (_error) {
       toast({
         title: "Download Failed",
         description: "Unable to download resource",
@@ -182,10 +182,11 @@ export function FederationResourceLibrary({
       training: { variant: "outline", label: "Training" }
     };
     const config = variants[category];
+    // eslint-disable-next-line @typescript-eslint/no-explicit-any
     return <Badge variant={config.variant as any}>{config.label}</Badge>;
   };
 
-  const getFileIcon = (fileType: Resource["fileType"]) => {
+  const getFileIcon = (_fileType: Resource["fileType"]) => {
     return <File className="h-5 w-5 text-muted-foreground" />;
   };
 
@@ -246,7 +247,7 @@ export function FederationResourceLibrary({
             />
           </div>
           <Select value={categoryFilter} onValueChange={setCategoryFilter}>
-            <SelectTrigger className="w-full sm:w-[180px]">
+            <SelectTrigger className="w-full sm:w-45">
               <SelectValue placeholder="All Categories" />
             </SelectTrigger>
             <SelectContent>
@@ -260,7 +261,7 @@ export function FederationResourceLibrary({
             </SelectContent>
           </Select>
           <Select value={sortBy} onValueChange={(v) => setSortBy(v as typeof sortBy)}>
-            <SelectTrigger className="w-full sm:w-[180px]">
+            <SelectTrigger className="w-full sm:w-45">
               <SelectValue placeholder="Sort by" />
             </SelectTrigger>
             <SelectContent>

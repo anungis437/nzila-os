@@ -4,6 +4,13 @@
  */
 import { CookieConsentManager } from "@/lib/gdpr/consent-manager";
 
+ 
+ 
+ 
+ 
+ 
+ 
+ 
 import { withApi, ApiError, z } from '@/lib/api/framework';
 
 const gdprCookieConsentSchema = z.object({
@@ -24,7 +31,7 @@ export const GET = withApi(
       summary: 'GET cookie-consent',
     },
   },
-  async ({ request, userId, organizationId, user, body, query }) => {
+  async ({ request, userId: _userId, organizationId: _organizationId, user: _user, body: _body, query: _query }) => {
 
         const { searchParams } = new URL(request.url);
         const consentId = searchParams.get("consentId");
@@ -51,7 +58,7 @@ export const POST = withApi(
     },
     successStatus: 201,
   },
-  async ({ request, userId, organizationId, user, body, query }) => {
+  async ({ request, userId: _userId, organizationId, user, body, query: _query }) => {
         const { consentId, essential, functional, analytics, marketing, userAgent } = body;
 
         // Validate request body

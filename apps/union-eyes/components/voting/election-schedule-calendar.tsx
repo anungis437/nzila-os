@@ -47,10 +47,10 @@ export function ElectionScheduleCalendar({
   elections,
   onSelectElection,
 }: ElectionScheduleCalendarProps) {
-  const [selectedDate, setSelectedDate] = React.useState<Date>(new Date());
+  const [selectedDate, _setSelectedDate] = React.useState<Date>(new Date());
 
   // Get elections for selected date
-  const electionsOnDate = elections.filter((election) => {
+  const _electionsOnDate = elections.filter((election) => {
     return (
       (election.nominationStart && isSameDay(election.nominationStart, selectedDate)) ||
       (election.nominationEnd && isSameDay(election.nominationEnd, selectedDate)) ||
@@ -279,6 +279,7 @@ function ElectionTimeline({ election }: { election: Election }) {
         {/* Vertical line */}
         <div className="absolute left-2 top-0 bottom-0 w-0.5 bg-gray-200" />
 
+        {/* eslint-disable-next-line @typescript-eslint/no-explicit-any */}
         {phases.map((phase: any, index) => (
           <div key={index} className="relative">
             <div
@@ -286,6 +287,7 @@ function ElectionTimeline({ election }: { election: Election }) {
                 "absolute left-[-1.3rem] w-5 h-5 rounded-full border-2 bg-white",
                 phase.isPast
                   ? "border-green-500"
+                  // eslint-disable-next-line @typescript-eslint/no-explicit-any
                   : index === phases.findIndex((p: any) => !p.isPast)
                   ? "border-blue-500"
                   : "border-gray-300"

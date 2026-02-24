@@ -11,8 +11,6 @@
  */
 
 import {
-  getDeadlineRuleByCode,
-  getApplicableDeadlineRules,
   autoCreateClaimDeadlines,
   getClaimDeadlines,
   getPendingClaimDeadlines,
@@ -24,7 +22,6 @@ import {
   approveDeadlineExtension,
   denyDeadlineExtension,
   getPendingExtensionRequests,
-  createDeadlineAlert,
   generateUpcomingDeadlineAlerts,
   getUnreadAlerts,
   markAlertViewed,
@@ -82,8 +79,8 @@ export async function addClaimDeadline(
   organizationId: string,
   deadlineName: string,
   daysFromNow: number,
-  priority: 'low' | 'medium' | 'high' | 'critical',
-  createdBy: string
+  _priority: 'low' | 'medium' | 'high' | 'critical',
+  _createdBy: string
 ): Promise<ClaimDeadline> {
   const now = new Date();
   const deadline = new Date(now);
@@ -130,7 +127,7 @@ export async function updateDeadlineStatuses(): Promise<{
  */
 export async function getUpcomingDeadlines(
   organizationId: string,
-  days: number = 7
+  _days: number = 7
 ): Promise<ClaimDeadline[]> {
   return getCriticalDeadlines(organizationId);
 }
@@ -141,7 +138,7 @@ export async function getUpcomingDeadlines(
 export async function getMemberUpcomingDeadlines(
   memberId: string,
   organizationId: string,
-  daysAhead: number = 7
+  _daysAhead: number = 7
 ): Promise<unknown> {
   const summary = await getMemberDeadlineSummary(memberId, organizationId);
   return summary;
@@ -236,7 +233,7 @@ export async function requestExtension(
   logger.info('Extension requested for deadline', { deadlineId, daysRequested, requestedBy });
   
   // Check if deadline allows extensions
-  const deadlines = await getClaimDeadlines(deadlineId);
+  const _deadlines = await getClaimDeadlines(deadlineId);
   // Logic to validate extension eligibility
   
   const requiresApproval = daysRequested > 7; // Example: > 7 days requires approval
@@ -516,7 +513,7 @@ export async function runEscalationJob(organizationId: string): Promise<void> {
 /**
  * Daily digest job - run at 8 AM daily
  */
-export async function runDailyDigestJob(organizationId: string): Promise<void> {
+export async function runDailyDigestJob(_organizationId: string): Promise<void> {
   logger.info(`=== Daily Digest Job (${new Date().toISOString()}) ===`);
   
   try {

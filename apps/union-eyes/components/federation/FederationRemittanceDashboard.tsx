@@ -77,6 +77,7 @@ export function FederationRemittanceDashboard({
 
   React.useEffect(() => {
     loadRemittanceData();
+  // eslint-disable-next-line react-hooks/exhaustive-deps
   }, [federationId, selectedPeriod]);
 
   async function loadRemittanceData() {
@@ -96,7 +97,7 @@ export function FederationRemittanceDashboard({
       } else {
         throw new Error(data.error || "Failed to load metrics");
       }
-    } catch (error) {
+    } catch (_error) {
       toast({
         title: "Error",
         description: "Failed to load remittance dashboard",
@@ -135,7 +136,7 @@ export function FederationRemittanceDashboard({
         title: "Reminders Sent",
         description: `Payment reminders sent to ${data.count} affiliates`
       });
-    } catch (error) {
+    } catch (_error) {
       toast({
         title: "Error",
         description: "Failed to send reminders",
@@ -164,7 +165,7 @@ export function FederationRemittanceDashboard({
         title: "Report Exported",
         description: "Remittance report has been downloaded"
       });
-    } catch (error) {
+    } catch (_error) {
       toast({
         title: "Export Failed",
         description: "Unable to export report",

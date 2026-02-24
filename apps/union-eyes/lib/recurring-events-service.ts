@@ -14,7 +14,7 @@
 import { db } from '@/db/db';
 import { calendarEvents, eventAttendees } from '@/db/schema/calendar-schema';
 import { eq, and, gte, lte } from 'drizzle-orm';
-import { RRule, RRuleSet, rrulestr } from 'rrule';
+import { rrulestr } from 'rrule';
 
 // ============================================================================
 // TYPES
@@ -132,7 +132,7 @@ export function getRecurrenceDescription(rruleString: string): string {
   try {
     const rule = rrulestr(rruleString);
     return rule.toText();
-  } catch (error) {
+  } catch (_error) {
     return 'Custom recurrence';
   }
 }
@@ -145,6 +145,7 @@ export function getRecurrenceDescription(rruleString: string): string {
  * Generate recurring event instances for a date range
  */
 export function generateRecurringInstances(
+  // eslint-disable-next-line @typescript-eslint/no-explicit-any
   baseEvent: Record<string, any>,
   rruleString: string,
   startDate: Date,
@@ -179,7 +180,7 @@ export function generateRecurringInstances(
       }));
 
     return instances;
-  } catch (error) {
+  } catch (_error) {
 return [];
   }
 }
@@ -258,7 +259,7 @@ export async function createRecurringInstances(
         }
 
         createdCount++;
-      } catch (error) {
+      } catch (_error) {
 }
     }
 
@@ -445,7 +446,7 @@ export async function needsInstanceGeneration(
       .limit(1);
 
     return instances.length === 0;
-  } catch (error) {
+  } catch (_error) {
 return false;
   }
 }

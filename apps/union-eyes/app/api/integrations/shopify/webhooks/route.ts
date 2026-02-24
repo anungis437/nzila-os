@@ -299,7 +299,7 @@ async function handleRefundCreated(payload: Record<string, unknown>) {
  * Returns 200 OK to verify webhook endpoint is reachable.
  * Shopify may check this during webhook setup.
  */
-export async function GET(request: NextRequest) {
+export async function GET(_request: NextRequest) {
   return standardSuccessResponse({
     status: 'ok',
     endpoint: 'shopify-webhooks',

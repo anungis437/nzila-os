@@ -15,7 +15,6 @@ import { entityExtraction, ExtractionResult } from './entity-extraction';
 import { ragPipeline, SearchResult } from './rag-pipeline';
 import { templateEngine, TemplateContext } from './template-engine';
 import { aiSafety, SafetyCheckResult } from './safety';
-import { aiResilience } from './resilience';
 import { learningService } from './learning';
 
 // Pipeline configuration
@@ -115,9 +114,11 @@ class AIPipeline {
       // 3. Build template context
       const templateContext: TemplateContext = {
         query,
+        // eslint-disable-next-line @typescript-eslint/no-explicit-any
         jurisdiction: (context.jurisdiction || 'federal') as any,
         userRole: 'member',
         intent: this.classifyIntent(query),
+        // eslint-disable-next-line @typescript-eslint/no-explicit-any
         entities: [] as any[],
         retrievedContext: sources.map(s => s.chunk.content),
         sla: 'standard',
@@ -228,6 +229,7 @@ class AIPipeline {
       content: document.content,
       metadata: {
         source: metadata.source,
+        // eslint-disable-next-line @typescript-eslint/no-explicit-any
         type: extraction.documentType as any,
         jurisdiction: metadata.jurisdiction,
         createdAt: new Date(),
@@ -249,7 +251,9 @@ class AIPipeline {
    * Generate response using template engine
    */
   private async generateResponse(context: TemplateContext): Promise<string> {
+    // eslint-disable-next-line @typescript-eslint/no-explicit-any
     const prompt = (templateEngine as any).buildPrompt('general_query', context);
+    // eslint-disable-next-line @typescript-eslint/no-explicit-any
     const response = await (templateEngine as any).execute(prompt, context);
     return response;
   }

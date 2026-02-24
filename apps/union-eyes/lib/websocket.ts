@@ -217,7 +217,7 @@ export class WebSocketManager {
   /**
    * Broadcast message to all in a room
    */
-  broadcastToRoom(roomId: string, message: WebSocketMessage, excludeUserId?: string): void {
+  broadcastToRoom(roomId: string, message: WebSocketMessage, _excludeUserId?: string): void {
     const connections = this.connections.get(roomId);
     if (!connections) return;
 
@@ -259,7 +259,7 @@ export class WebSocketManager {
    * Send notification to user
    */
   sendToUser(userId: string, notification: unknown): void {
-    const message: WebSocketMessage = {
+    const _message: WebSocketMessage = {
       type: 'notification',
       payload: notification,
       timestamp: Date.now(),

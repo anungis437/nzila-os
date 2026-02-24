@@ -1,4 +1,3 @@
-import { logApiAuditEvent } from "@/lib/middleware/api-security";
 /**
  * API Route: POST /api/admin/jobs/[action]
  * 
@@ -12,7 +11,6 @@ import { withAdminAuth } from "@/lib/api-auth-guard";
 import {
   ErrorCode,
   standardErrorResponse,
-  standardSuccessResponse,
 } from '@/lib/api/standardized-responses';
 
 const adminJobsSchema = z.object({
@@ -21,7 +19,7 @@ const adminJobsSchema = z.object({
 });
 
 export const POST = async (request: NextRequest, { params }: { params: { action: string } }) => {
-  return withAdminAuth(async (request, context) => {
+  return withAdminAuth(async (request, _context) => {
   // Import job-queue functions (now delegates to Django Celery task API)
     const { pauseQueue, resumeQueue, cleanCompletedJobs } = await import('@/lib/job-queue');
     try {

@@ -48,7 +48,6 @@ import {
   ArrowUpDown
 } from "lucide-react";
 import { format } from "date-fns";
-import { cn } from "@/lib/utils";
 
 export interface RemittancePayment {
   id: string;
@@ -87,6 +86,7 @@ export function RemittanceHistoryTable({
 
   React.useEffect(() => {
     loadPaymentHistory();
+  // eslint-disable-next-line react-hooks/exhaustive-deps
   }, [federationId, statusFilter, currentPage, searchQuery, sortBy, sortOrder, dateFrom, dateTo]);
 
   async function loadPaymentHistory() {
@@ -117,7 +117,7 @@ export function RemittanceHistoryTable({
       } else {
         throw new Error(data.error);
       }
-    } catch (error) {
+    } catch (_error) {
       toast({
         title: "Error",
         description: "Failed to load payment history",
@@ -148,7 +148,7 @@ export function RemittanceHistoryTable({
         title: "Receipt Downloaded",
         description: "Payment receipt has been downloaded"
       });
-    } catch (error) {
+    } catch (_error) {
       toast({
         title: "Download Failed",
         description: "Unable to download receipt",
@@ -206,7 +206,7 @@ export function RemittanceHistoryTable({
               />
             </div>
             <Select value={statusFilter} onValueChange={setStatusFilter}>
-              <SelectTrigger className="w-full sm:w-[180px]">
+              <SelectTrigger className="w-full sm:w-45">
                 <SelectValue placeholder="All Status" />
               </SelectTrigger>
               <SelectContent>

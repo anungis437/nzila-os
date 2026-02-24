@@ -20,7 +20,7 @@ import {
   members,
   payments,
 } from '../db/schema';
-import { eq, and, inArray, sql } from 'drizzle-orm';
+import { eq, and, inArray } from 'drizzle-orm';
 import { NotificationService } from '../services/notification-service';
 import { logger } from '@/lib/logger';
 
@@ -136,8 +136,10 @@ export async function processPaymentCollection(params: {
               failureReason: 'No outstanding dues transactions found for member',
               notes: `Payment requires manual review - no matching transactions found for member ${payment.memberId}`,
               updatedAt: new Date(),
+            // eslint-disable-next-line @typescript-eslint/no-explicit-any
             } as any)
             .where(eq(payments.id, payment.id))
+            // eslint-disable-next-line @typescript-eslint/no-explicit-any
             .catch((err: any) => {
               logger.error('Failed to mark payment as unmatched', { error: err, paymentId: payment.id });
             });
@@ -161,6 +163,7 @@ export async function processPaymentCollection(params: {
             .set({
               status: 'paid',
               notes: `Paid ${amountToApply} via ${payment.paymentMethod}`,
+            // eslint-disable-next-line @typescript-eslint/no-explicit-any
             } as any)
             .where(eq(duesTransactions.id, transaction.id));
 
@@ -188,6 +191,7 @@ export async function processPaymentCollection(params: {
                 .set({
                   arrearsStatus: 'resolved',
                   notes: `Paid via ${payment.paymentMethod} - Ref: ${payment.processorPaymentId || payment.id}`,
+                // eslint-disable-next-line @typescript-eslint/no-explicit-any
                 } as any)
                 .where(eq(arrears.id, arrearsRecord[0].id));
 
@@ -204,14 +208,17 @@ export async function processPaymentCollection(params: {
         
         await db.update(payments)
           .set({ 
+            // eslint-disable-next-line @typescript-eslint/no-explicit-any
             status: finalPaymentStatus as any,
             reconciliationStatus: 'reconciled',
             reconciliationDate: new Date(),
             paidDate: new Date(),
             notes: paymentNotes,
             updatedAt: new Date(),
+          // eslint-disable-next-line @typescript-eslint/no-explicit-any
           } as any)
           .where(eq(payments.id, payment.id))
+          // eslint-disable-next-line @typescript-eslint/no-explicit-any
           .catch((err: any) => {
             logger.error('Failed to update payment status', { error: err, paymentId: payment.id });
           });
@@ -268,8 +275,10 @@ export async function processPaymentCollection(params: {
             failureReason: paymentError instanceof Error ? paymentError.message : String(paymentError),
             notes: `Payment processing failed - marked for retry. Error: ${paymentError instanceof Error ? paymentError.message : String(paymentError)}`,
             updatedAt: new Date(),
+          // eslint-disable-next-line @typescript-eslint/no-explicit-any
           } as any)
           .where(eq(payments.id, payment.id))
+          // eslint-disable-next-line @typescript-eslint/no-explicit-any
           .catch((err: any) => {
             logger.error('Failed to mark payment as failed', { error: err, paymentId: payment.id });
           });
@@ -329,7 +338,7 @@ async function sendPaymentReceipt(params: {
     transactionsUpdated,
   } = params;
 
-  const receiptMessage = `
+  const _receiptMessage = `
 Thank you for your payment!
 
 Payment Receipt

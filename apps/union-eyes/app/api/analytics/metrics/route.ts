@@ -1,4 +1,3 @@
-import { logApiAuditEvent } from "@/lib/middleware/api-security";
 /**
  * Metrics API
  * Q1 2025 - Advanced Analytics
@@ -6,15 +5,14 @@ import { logApiAuditEvent } from "@/lib/middleware/api-security";
  * Endpoint for calculating and retrieving analytics metrics
  */
 
-import { NextRequest, NextResponse } from 'next/server';
+import { NextResponse } from 'next/server';
 import { calculateMetrics, getAnalyticsMetrics } from '@/actions/analytics-actions';
 import { z } from "zod";
-import { getCurrentUser, withAdminAuth, withApiAuth, withMinRole, withRoleAuth } from '@/lib/api-auth-guard';
+import { withRoleAuth } from '@/lib/api-auth-guard';
 
 import {
   ErrorCode,
   standardErrorResponse,
-  standardSuccessResponse,
 } from '@/lib/api/standardized-responses';
 
 const analyticsMetricsSchema = z.object({
@@ -25,7 +23,7 @@ const analyticsMetricsSchema = z.object({
   periodEnd: z.string().optional(),
 });
 
-export const POST = withRoleAuth('steward', async (request, context) => {
+export const POST = withRoleAuth('steward', async (request, _context) => {
     try {
       const body = await request.json();
     // Validate request body
@@ -84,7 +82,7 @@ return standardErrorResponse(
     }
 });
 
-export const GET = withRoleAuth('member', async (request, context) => {
+export const GET = withRoleAuth('member', async (request, _context) => {
     try {
       const searchParams = request.nextUrl.searchParams;
       const metricType = searchParams.get('metricType');

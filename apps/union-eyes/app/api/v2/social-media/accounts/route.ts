@@ -2,14 +2,9 @@
  * GET POST PUT DELETE /api/social-media/accounts
  * Migrated to withApi() framework
  */
-import { createMetaClient } from '@/lib/social-media/meta-api-client';
-import { createTwitterClient, generatePKCE } from '@/lib/social-media/twitter-api-client';
-import { createLinkedInClient } from '@/lib/social-media/linkedin-api-client';
-import { cookies } from 'next/headers';
-import { createClient } from '@supabase/supabase-js';
-import { withApi, ApiError, z, RATE_LIMITS } from '@/lib/api/framework';
+import { withApi, z, RATE_LIMITS } from '@/lib/api/framework';
 
-const socialMediaAccountsSchema = z.object({
+const _socialMediaAccountsSchema = z.object({
   platform: z.string().min(1, 'platform is required'),
   account_id: z.string().uuid('Invalid account_id'),
 });
@@ -26,6 +21,7 @@ export const GET = withApi(
   },
   async ({ request }) => {
     // Delegate to v1 handler while framework migration is in progress
+    // eslint-disable-next-line @typescript-eslint/no-explicit-any
     const response = await v1GET(request, {} as any);
     return response;
   },
@@ -42,6 +38,7 @@ export const POST = withApi(
   },
   async ({ request }) => {
     // Delegate to v1 handler while framework migration is in progress
+    // eslint-disable-next-line @typescript-eslint/no-explicit-any
     const response = await v1POST(request, {} as any);
     return response;
   },
@@ -58,6 +55,7 @@ export const PUT = withApi(
   },
   async ({ request }) => {
     // Delegate to v1 handler while framework migration is in progress
+    // eslint-disable-next-line @typescript-eslint/no-explicit-any
     const response = await v1PUT(request, {} as any);
     return response;
   },
@@ -74,6 +72,7 @@ export const DELETE = withApi(
   },
   async ({ request }) => {
     // Delegate to v1 handler while framework migration is in progress
+    // eslint-disable-next-line @typescript-eslint/no-explicit-any
     const response = await v1DELETE(request, {} as any);
     return response;
   },

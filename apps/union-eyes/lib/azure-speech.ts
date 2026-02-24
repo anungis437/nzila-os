@@ -68,7 +68,7 @@ export async function transcribeAudio(audioBuffer: Buffer): Promise<string> {
       }
     };
 
-    recognizer.sessionStopped = (s, e) => {
+    recognizer.sessionStopped = (_s, _e) => {
       recognizer.close();
       resolve(transcription.trim());
     };
@@ -143,7 +143,7 @@ export async function transcribeAudioWithLanguage(
       }
     };
 
-    recognizer.sessionStopped = (s, e) => {
+    recognizer.sessionStopped = (_s, _e) => {
       recognizer.close();
       resolve(transcription.trim());
     };

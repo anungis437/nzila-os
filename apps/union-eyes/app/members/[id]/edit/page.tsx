@@ -6,6 +6,8 @@
 
 'use client';
 
+
+export const dynamic = 'force-dynamic';
 import { useState, useEffect } from 'react';
 import { useRouter } from 'next/navigation';
 import { Button } from '@/components/ui/button';
@@ -65,10 +67,12 @@ export default function EditMemberPage({ params }: { params: { id: string } }) {
 
   useEffect(() => {
     fetchMember();
+  // eslint-disable-next-line react-hooks/exhaustive-deps
   }, [params.id]);
 
   const fetchMember = async () => {
     try {
+      // eslint-disable-next-line @typescript-eslint/no-explicit-any
       const data = await api.members.get(params.id) as Record<string, any>;
       
       setFormData({

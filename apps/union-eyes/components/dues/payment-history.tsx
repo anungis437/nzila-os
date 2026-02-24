@@ -44,7 +44,7 @@ export default function PaymentHistory({ userId }: PaymentHistoryProps) {
       if (!response.ok) throw new Error('Failed to load payment history');
       const data = await response.json();
       setPayments(data);
-    } catch (error) {
+    } catch (_error) {
 toast({
         title: 'Error',
         description: 'Failed to load payment history',
@@ -78,7 +78,7 @@ toast({
         title: 'Success',
         description: 'Receipt downloaded',
       });
-    } catch (error) {
+    } catch (_error) {
 toast({
         title: 'Error',
         description: 'Failed to download receipt',

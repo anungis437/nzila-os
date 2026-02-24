@@ -1,4 +1,4 @@
-import { pgEnum, pgTable, text, timestamp, integer, boolean, uuid } from "drizzle-orm/pg-core";
+import { pgEnum, pgTable, text, timestamp, integer, uuid } from "drizzle-orm/pg-core";
 import { sql } from "drizzle-orm";
 
 export const membershipEnum = pgEnum("membership", ["free", "pro"]);

@@ -258,6 +258,7 @@ export function InspectionChecklist({
                   <RadioGroup
                     value={item.status || ""}
                     onValueChange={(value) =>
+                      // eslint-disable-next-line @typescript-eslint/no-explicit-any
                       updateItem(item.id, { status: value as any })
                     }
                   >

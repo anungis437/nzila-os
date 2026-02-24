@@ -8,7 +8,7 @@ import { useState, useEffect, useCallback } from "react";
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "@/components/ui/card";
 import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
 import { Badge } from "@/components/ui/badge";
-import { Users, FileText, DollarSign, TrendingUp, AlertCircle, Loader2, Building2, Activity } from "lucide-react";
+import { Users, FileText, TrendingUp, AlertCircle, Loader2, Building2, Activity } from "lucide-react";
 import { cn } from "@/lib/utils";
 
 interface OrganizationAnalytics {

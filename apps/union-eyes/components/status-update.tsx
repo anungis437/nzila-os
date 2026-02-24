@@ -42,7 +42,7 @@ export function StatusUpdate({ claimId, currentStatus, onStatusUpdated }: Status
           const data = await response.json();
           setAllowedTransitions(data.allowedTransitions || []);
         }
-      } catch (err) {
+      } catch (_err) {
 // Fallback: allow all transitions
         setAllowedTransitions(statusOptions.map(s => s.value));
       }

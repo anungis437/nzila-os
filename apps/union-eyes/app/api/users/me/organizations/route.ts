@@ -12,7 +12,7 @@ import { eq } from 'drizzle-orm';
 
 export const dynamic = 'force-dynamic';
 
-export async function GET(req: NextRequest) {
+export async function GET(_req: NextRequest) {
   try {
     const { userId } = await auth();
     if (!userId) {
@@ -27,6 +27,7 @@ export async function GET(req: NextRequest) {
 
     // Fetch the organizations the user belongs to
     const orgIds = [...new Set(memberships.map(m => m.organizationId))];
+    // eslint-disable-next-line @typescript-eslint/no-explicit-any
     let orgs: any[] = [];
 
     if (orgIds.length > 0) {

@@ -12,7 +12,7 @@
  * - Push notification handling
  */
 
-const CACHE_NAME = 'union-eyes-v1';
+const _CACHE_NAME = 'union-eyes-v1';
 const STATIC_CACHE = 'static-v1';
 const DYNAMIC_CACHE = 'dynamic-v1';
 const API_CACHE = 'api-v1';
@@ -26,7 +26,7 @@ const STATIC_ASSETS = [
 ];
 
 // API endpoints that should be cached
-const API_PATTERNS = [
+const _API_PATTERNS = [
   /\/api\/v1\/claims/,
   /\/api\/v1\/members/,
   /\/api\/notifications/,
@@ -139,7 +139,7 @@ async function networkFirstStrategy(request) {
     }
     
     return networkResponse;
-  } catch (error) {
+  } catch (_error) {
     console.log('[SW] Network first - falling back to cache:', request.url);
     
     const cachedResponse = await caches.match(request);
@@ -258,7 +258,7 @@ self.addEventListener('push', (event) => {
   if (event.data) {
     try {
       data = event.data.json();
-    } catch (e) {
+    } catch (_e) {
       data = { title: 'Union Eyes', body: event.data.text() };
     }
   }

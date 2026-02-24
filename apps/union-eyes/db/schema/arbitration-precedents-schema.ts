@@ -122,6 +122,7 @@ export const precedentCitations = pgTable("precedent_citations", {
   // Where it was cited
   citingClaimId: uuid("citing_claim_id"), // FK to claims (not enforced yet)
   citingPrecedentId: uuid("citing_precedent_id")
+    // eslint-disable-next-line @typescript-eslint/no-explicit-any
     .references((): any => arbitrationPrecedents.id, { onDelete: "set null" }),
   citingOrganizationId: uuid("citing_organization_id")
     .notNull()

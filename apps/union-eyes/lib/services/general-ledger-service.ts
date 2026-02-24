@@ -10,10 +10,8 @@ import {
   chartOfAccounts,
   glTransactionLog,
   glTrialBalance,
-  glAccountMappings,
-  costCenters,
 } from "@/db/schema/domains/finance";
-import { eq, and, gte, lte, isNull } from "drizzle-orm";
+import { eq, and, lte, isNull } from "drizzle-orm";
 import { createAuditLog } from "./audit-service";
 import { logger } from "@/lib/logger";
 
@@ -342,6 +340,7 @@ export async function generateTrialBalance(
       .insert(glTrialBalance)
       .values({
         organizationId,
+        // eslint-disable-next-line @typescript-eslint/no-explicit-any
         chartOfAccountsId: null as any, // Null for combined TB
         periodEndDate,
         debitTotal: totalDebits.toString(),
@@ -520,6 +519,7 @@ export async function getUnreconciledTransactions(
   }
 }
 
+// eslint-disable-next-line import/no-anonymous-default-export
 export default {
   postGLTransaction,
   reverseGLTransaction,

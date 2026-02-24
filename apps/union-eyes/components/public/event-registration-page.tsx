@@ -68,6 +68,7 @@ function EventCheckoutForm({
 }: {
   eventId: string;
   totalAmount: number;
+  // eslint-disable-next-line @typescript-eslint/no-explicit-any
   attendeeData: any;
   onSuccess: (ticket: EventTicket) => void;
 }) {
@@ -152,6 +153,7 @@ export function PublicEventRegistrationPage({ eventSlug }: EventRegistrationPage
 
   useEffect(() => {
     fetchEvent();
+  // eslint-disable-next-line react-hooks/exhaustive-deps
   }, [eventSlug]);
 
   const fetchEvent = async () => {
@@ -160,7 +162,7 @@ export function PublicEventRegistrationPage({ eventSlug }: EventRegistrationPage
       if (!response.ok) throw new Error('Event not found');
       const data = await response.json();
       setEvent(data);
-    } catch (error) {
+    } catch (_error) {
 } finally {
       setLoading(false);
     }
@@ -198,7 +200,7 @@ export function PublicEventRegistrationPage({ eventSlug }: EventRegistrationPage
         const ticketData = await response.json();
         setTicket(ticketData);
         setStep('confirmation');
-      } catch (error) {
+      } catch (_error) {
 }
     } else {
       // Paid event - proceed to payment
@@ -219,7 +221,7 @@ export function PublicEventRegistrationPage({ eventSlug }: EventRegistrationPage
         const data = await response.json();
         setClientSecret(data.clientSecret);
         setStep('payment');
-      } catch (error) {
+      } catch (_error) {
 }
     }
   };

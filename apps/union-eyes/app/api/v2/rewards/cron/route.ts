@@ -4,8 +4,23 @@
  */
 import { db } from '@/db';
 import { processAnniversaryAwards, processScheduledAwards } from '@/lib/services/rewards/automation-service';
+ 
+ 
 import { sendBatchExpirationWarnings } from '@/lib/services/rewards/notification-service';
 
+import { timingSafeEqual } from 'crypto';
+
+ 
+ 
+ 
+ 
+ 
+ 
+ 
+ 
+ 
+ 
+ 
 import { withApi, ApiError } from '@/lib/api/framework';
 
 export const GET = withApi(
@@ -16,7 +31,7 @@ export const GET = withApi(
       summary: 'GET cron',
     },
   },
-  async ({ request, userId, organizationId, user, body, query, params }) => {
+  async ({ request: _request, userId: _userId, organizationId: _organizationId, user: _user, body: _body, query: _query, params: _params }) => {
     // TODO: migrate handler body
     throw ApiError.internal('Route not yet migrated');
   },
@@ -30,12 +45,15 @@ export const POST = withApi(
       summary: 'POST cron',
     },
   },
-  async ({ request, userId, organizationId, user, body, query, params }) => {
+  async ({ request, userId: _userId, organizationId: _organizationId, user: _user, body: _body, query: _query, params: _params }) => {
 
-        // 1. Verify cron secret
+        // 1. Verify cron secret (timing-safe comparison)
         const authHeader = request.headers.get('authorization');
-        const secret = authHeader?.replace('Bearer ', '');
-        if (secret !== process.env.CRON_SECRET) {
+        const secret = authHeader?.replace('Bearer ', '') ?? '';
+        const expected = process.env.CRON_SECRET ?? '';
+        const secretBuf = Buffer.from(secret);
+        const expectedBuf = Buffer.from(expected);
+        if (secretBuf.length !== expectedBuf.length || !timingSafeEqual(secretBuf, expectedBuf)) {
           throw ApiError.unauthorized('Unauthorized'
         );
         }

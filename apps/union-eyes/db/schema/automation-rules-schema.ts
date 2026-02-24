@@ -5,7 +5,7 @@
  * Enables automatic notifications, escalations, and actions.
  */
 
-import { pgTable, uuid, varchar, text, timestamp, integer, boolean, jsonb, index } from "drizzle-orm/pg-core";
+import { pgTable, uuid, varchar, text, timestamp, integer, jsonb, index } from "drizzle-orm/pg-core";
 
 export const automationRuleStatusEnum = {
   ACTIVE: 'active',
@@ -52,6 +52,7 @@ export const automationRules = pgTable("automation_rules", {
   
   // Target entity
   targetEntity: varchar("target_entity", { length: 50 }).notNull(),
+  // eslint-disable-next-line @typescript-eslint/no-explicit-any
   targetFilter: jsonb("target_filter").$type<Record<string, any>>(),
   
   // Trigger configuration
@@ -67,12 +68,14 @@ export const automationRules = pgTable("automation_rules", {
   conditions: jsonb("conditions").$type<Array<{
     field: string;
     operator: string;
+    // eslint-disable-next-line @typescript-eslint/no-explicit-any
     value: any;
   }>>(),
   
   // Actions to execute
   actions: jsonb("actions").$type<Array<{
     type: string;
+    // eslint-disable-next-line @typescript-eslint/no-explicit-any
     config: Record<string, any>;
     order: number;
   }>>(),
@@ -122,6 +125,7 @@ export const automationExecutionLog = pgTable("automation_execution_log", {
   actionsExecuted: jsonb("actions_executed").$type<Array<{
     actionType: string;
     status: string;
+    // eslint-disable-next-line @typescript-eslint/no-explicit-any
     result?: Record<string, any>;
     duration: number;
   }>>(),

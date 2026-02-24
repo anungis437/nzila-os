@@ -231,6 +231,7 @@ export async function searchMembersAdvancedAction(
     sortBy?: "name" | "joinDate" | "seniority" | "relevance";
     sortOrder?: "asc" | "desc";
   }
+// eslint-disable-next-line @typescript-eslint/no-explicit-any
 ): Promise<ActionResult<{ members: any[]; total: number }>> {
   try {
     const { userId } = await auth();
@@ -267,6 +268,7 @@ export async function executeSegmentAction(
     page?: number;
     limit?: number;
   }
+// eslint-disable-next-line @typescript-eslint/no-explicit-any
 ): Promise<ActionResult<{ members: any[]; total: number }>> {
   try {
     const { userId } = await auth();
@@ -348,6 +350,7 @@ export async function exportMembersAction(
     }
 
     // Get members data
+    // eslint-disable-next-line @typescript-eslint/no-explicit-any
     let members: any[];
     let totalCount: number;
 
@@ -377,6 +380,7 @@ export async function exportMembersAction(
     const [org] = await db
       .select({ name: organizations.name })
       .from(organizations)
+      // eslint-disable-next-line @typescript-eslint/no-explicit-any
       .where(or(eq(organizations.id, organizationId as any), eq(organizations.slug, organizationId)))
       .limit(1);
 

@@ -137,7 +137,7 @@ export function addVersionHeaders(
 /**
  * Version-aware API handler wrapper
  */
-export function withVersioning<T>(
+export function withVersioning<_T>(
   handlers: Partial<Record<ApiVersion, (request: NextRequest) => Promise<NextResponse>>>
 ) {
   return async (request: NextRequest): Promise<NextResponse> => {

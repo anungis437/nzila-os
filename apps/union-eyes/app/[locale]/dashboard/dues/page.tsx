@@ -1,6 +1,7 @@
+export const dynamic = 'force-dynamic';
+
 import { Suspense } from 'react';
 import { auth } from '@clerk/nextjs/server';
-import { getDuesBalanceByMember } from '@/db/queries/dues-queries';
 import DuesPaymentPortal from '@/components/dues/dues-payment-portal';
 import { Skeleton } from '@/components/ui/skeleton';
 

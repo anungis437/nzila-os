@@ -31,6 +31,7 @@ import {
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import { useToast } from "@/components/ui/use-toast";
 import { Badge } from "@/components/ui/badge";
+ 
 import { format } from "date-fns";
 
 const appealSchema = z.object({
@@ -63,7 +64,7 @@ const appealReasons = [
 ];
 
 export function ClaimAppealForm({
-  claimId,
+  claimId: _claimId,
   claimNumber,
   currentDecision,
   decisionDate,
@@ -133,7 +134,7 @@ export function ClaimAppealForm({
           </div>
 
           <div className="bg-yellow-50 border border-yellow-200 rounded-lg p-4 flex items-start gap-3">
-            <AlertTriangle className="h-5 w-5 text-yellow-600 mt-0.5 flex-shrink-0" />
+            <AlertTriangle className="h-5 w-5 text-yellow-600 mt-0.5 shrink-0" />
             <div className="text-sm text-yellow-900">
               <p className="font-medium mb-1">Important Notice</p>
               <p>
@@ -218,7 +219,7 @@ export function ClaimAppealForm({
 
             {/* Info Box */}
             <div className="bg-blue-50 border border-blue-200 rounded-lg p-4 flex items-start gap-3">
-              <Info className="h-5 w-5 text-blue-600 mt-0.5 flex-shrink-0" />
+              <Info className="h-5 w-5 text-blue-600 mt-0.5 shrink-0" />
               <div className="text-sm text-blue-900">
                 <p className="font-medium mb-1">What happens next?</p>
                 <ul className="list-disc list-inside space-y-1 text-blue-800">
@@ -260,7 +261,7 @@ export function ClaimAppealForm({
               { step: 5, title: "Final Decision", duration: "20-30 business days" },
             ].map((item) => (
               <div key={item.step} className="flex items-start gap-4">
-                <div className="flex-shrink-0 w-8 h-8 rounded-full bg-blue-100 flex items-center justify-center text-sm font-medium text-blue-700">
+                <div className="shrink-0 w-8 h-8 rounded-full bg-blue-100 flex items-center justify-center text-sm font-medium text-blue-700">
                   {item.step}
                 </div>
                 <div className="flex-1">

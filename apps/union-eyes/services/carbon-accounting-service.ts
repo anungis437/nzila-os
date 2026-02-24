@@ -2,8 +2,6 @@
 // Calculate and track Union Eyes' carbon emissions (Scope 1, 2, 3)
 // Monitor renewable energy commitments and SBTi targets
 
-import { db } from '@/db';
-import { sql } from 'drizzle-orm';
 
 /**
  * Carbon Accounting Service
@@ -157,7 +155,7 @@ export class CarbonAccountingService {
    * Calculate Scope 2 Emissions
    * Indirect electricity emissions from cloud infrastructure
    */
-  async calculateScope2(year: number, month: number): Promise<number> {
+  async calculateScope2(_year: number, _month: number): Promise<number> {
     // In production, this would query Azure usage metrics
     // For now, use estimated values based on carbon reduction plan
     
@@ -177,7 +175,7 @@ export class CarbonAccountingService {
    * Calculate Scope 3 Emissions
    * Supply chain and other indirect emissions
    */
-  async calculateScope3(year: number, month: number): Promise<{
+  async calculateScope3(_year: number, _month: number): Promise<{
     remoteWork: number;
     saasVendors: number;
     travel: number;
@@ -213,7 +211,7 @@ export class CarbonAccountingService {
    * Calculate Renewable Energy Percent
    * % of electricity from renewable sources (weighted by usage)
    */
-  async calculateRenewablePercent(year: number, month: number): Promise<number> {
+  async calculateRenewablePercent(_year: number, _month: number): Promise<number> {
     // Union Eyes deploys 100% to Canada Central (99% renewable)
     // In production, this would query actual deployment regions
     return 99;
@@ -223,7 +221,7 @@ export class CarbonAccountingService {
    * Get Active Member Count
    * Number of active members for per-member emissions calculation
    */
-  async getActiveMemberCount(year: number, month: number): Promise<number> {
+  async getActiveMemberCount(_year: number, _month: number): Promise<number> {
     // In production, query actual member data from database
     // For now, use estimated value from carbon plan
     return 5000;

@@ -119,7 +119,7 @@ export function InternationalAddressInput({
         const data = await response.json();
         setCountryFormat(data.format);
       }
-    } catch (error) {
+    } catch (_error) {
 }
   };
   
@@ -208,7 +208,7 @@ export function InternationalAddressInput({
           onValidate(data.validation.isValid);
         }
       }
-    } catch (error) {
+    } catch (_error) {
       toast({
         title: "Validation Failed",
         description: "Unable to validate address",
@@ -481,7 +481,7 @@ export function AddressFormExample() {
           description: "Address saved successfully",
         });
       }
-    } catch (error) {
+    } catch (_error) {
       toast({
         title: "Error",
         description: "Failed to save address",

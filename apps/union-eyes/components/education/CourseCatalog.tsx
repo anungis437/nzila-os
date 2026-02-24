@@ -14,15 +14,14 @@ import { Input } from '@/components/ui/input';
 import { Label } from '@/components/ui/label';
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from '@/components/ui/select';
 import { Dialog, DialogContent, DialogDescription, DialogHeader, DialogTitle } from '@/components/ui/dialog';
-import { 
-  BookOpen, 
-  Clock, 
-  Users, 
+import {
+  BookOpen,
+  Clock,
+  Users,
   Award,
   Search,
   Filter,
   CheckCircle2,
-  Calendar
 } from 'lucide-react';
 
 interface Course {
@@ -93,7 +92,7 @@ export function CourseCatalog({ organizationId, memberId }: CourseCatalogProps) 
       
       const data = await response.json();
       setCourses(data.data || []);
-    } catch (error) {
+    } catch (_error) {
 } finally {
       setLoading(false);
     }

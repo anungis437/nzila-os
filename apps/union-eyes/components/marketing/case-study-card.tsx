@@ -118,6 +118,7 @@ export function CaseStudyCard({
       {caseStudy.testimonial && (
         <div className="p-6 bg-blue-50 border-b border-gray-200">
           <blockquote className="italic text-gray-800 mb-2">
+            {/* eslint-disable-next-line react/no-unescaped-entities */}
             "{caseStudy.testimonial.quote}"
           </blockquote>
           <p className="text-sm text-gray-600">

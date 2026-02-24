@@ -12,7 +12,6 @@
 import { db } from '@/db';
 import {
   rewardBudgetEnvelopes,
-  budgetPool,
   budgetReservations,
   type NewRewardBudgetEnvelope,
   type RewardBudgetEnvelope,
@@ -83,6 +82,7 @@ export async function listBudgetEnvelopes(
       conditions,
       lte(rewardBudgetEnvelopes.startsAt, now),
       gte(rewardBudgetEnvelopes.endsAt, now)
+    // eslint-disable-next-line @typescript-eslint/no-explicit-any
     ) as any;
   }
 
@@ -243,6 +243,7 @@ export async function getBudgetUsageSummary(
 
   let whereClause = eq(rewardBudgetEnvelopes.orgId, orgId);
   if (programId) {
+    // eslint-disable-next-line @typescript-eslint/no-explicit-any
     whereClause = and(whereClause, eq(rewardBudgetEnvelopes.programId, programId)) as any;
   }
 
@@ -510,9 +511,12 @@ export async function cleanupExpiredReservations(): Promise<{
 
   const expiredReservations = await db.query.budgetReservations.findMany({
     where: and(
+      // eslint-disable-next-line @typescript-eslint/no-explicit-any
       ne(budgetReservations.status, 'released' as any),
+      // eslint-disable-next-line @typescript-eslint/no-explicit-any
       ne(budgetReservations.status, 'expired' as any),
       lte(budgetReservations.expiresAt, now)
+    // eslint-disable-next-line @typescript-eslint/no-explicit-any
     ) as any,
   });
 
@@ -562,11 +566,14 @@ export async function checkBudgetWithReservations(
  * Get all active reservations
  */
 export async function getActiveReservations(poolId?: string) {
-  const now = new Date();
+  const _now = new Date();
   
   let whereClause = and(
+    // eslint-disable-next-line @typescript-eslint/no-explicit-any
     ne(budgetReservations.status, 'released' as any),
+    // eslint-disable-next-line @typescript-eslint/no-explicit-any
     ne(budgetReservations.status, 'expired' as any)
+  // eslint-disable-next-line @typescript-eslint/no-explicit-any
   ) as any;
 
   if (poolId) {

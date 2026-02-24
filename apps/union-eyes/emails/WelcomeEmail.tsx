@@ -17,6 +17,7 @@ import {
   Section,
   Text,
 } from '@react-email/components';
+ 
 import * as React from 'react';
 
 interface WelcomeEmailProps {
@@ -26,7 +27,7 @@ interface WelcomeEmailProps {
 
 export default function WelcomeEmail({
   userName = 'there',
-  userEmail = '',
+  userEmail: _userEmail = '',
 }: WelcomeEmailProps) {
   return (
     <Html>
@@ -41,6 +42,7 @@ export default function WelcomeEmail({
           </Text>
 
           <Text style={text}>
+            {/* eslint-disable-next-line react/no-unescaped-entities */}
             Welcome to the Union Claims Management System. We're excited to have you on board!
           </Text>
 

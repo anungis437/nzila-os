@@ -4,6 +4,8 @@
  */
 "use client";
 
+
+export const dynamic = 'force-dynamic';
 import { useEffect, useState, useCallback } from "react";
 import { useUser } from "@clerk/nextjs";
 import { motion } from "framer-motion";
@@ -98,7 +100,7 @@ export default function MemberPortalDashboard() {
       setActivities(activityItems.sort((a, b) => 
         new Date(b.timestamp).getTime() - new Date(a.timestamp).getTime()
       ));
-    } catch (error) {
+    } catch (_error) {
 } finally {
       setLoading(false);
     }

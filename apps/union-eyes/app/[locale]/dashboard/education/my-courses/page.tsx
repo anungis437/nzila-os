@@ -4,6 +4,8 @@
  */
 "use client";
 
+
+export const dynamic = 'force-dynamic';
 import MemberLearningPortal from "@/components/education/MemberLearningPortal";
 import { useOrganizationId } from "@/lib/hooks/use-organization";
 import { useUser } from "@clerk/nextjs";

@@ -498,7 +498,7 @@ export async function getApprovalWorkflowState(
       requiresAction: canApprove
     };
 
-  } catch (error) {
+  } catch (_error) {
 return null;
   }
 }
@@ -507,6 +507,7 @@ return null;
 // HELPER FUNCTIONS - COMPLIANCE
 // ============================================================================
 
+// eslint-disable-next-line @typescript-eslint/no-explicit-any
 async function runComplianceChecks(remittance: any): Promise<ComplianceCheckResult> {
   const errors: string[] = [];
   const warnings: string[] = [];
@@ -664,7 +665,7 @@ async function logApprovalAction(
       rejectionReason,
       createdAt: new Date().toISOString()
     });
-  } catch (error) {
+  } catch (_error) {
 }
 }
 
@@ -712,15 +713,15 @@ async function notifyNextApprovers(
   }
 }
 
-async function notifyFinalApproval(remittanceId: string): Promise<void> {
+async function notifyFinalApproval(_remittanceId: string): Promise<void> {
   // Send notification that remittance is fully approved
   // Implementation similar to notifyNextApprovers
 }
 
 async function notifyRejection(
-  remittanceId: string,
-  level: ApprovalLevel,
-  reason: string
+  _remittanceId: string,
+  _level: ApprovalLevel,
+  _reason: string
 ): Promise<void> {
   // Send notification that remittance was rejected
   // Implementation similar to notifyNextApprovers
@@ -738,7 +739,7 @@ async function getApproversForLevel(
     clc: ['clc_admin']
   };
 
-  const roles = authorityMap[level] || [];
+  const _roles = authorityMap[level] || [];
   
   // Query users with appropriate roles
   // For now, return placeholder

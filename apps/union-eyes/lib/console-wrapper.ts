@@ -37,13 +37,13 @@ export function initializeConsoleWrapper(): void {
   }
 
   // Disable console.log in production (use logger.info instead)
-  console.log = (...args: unknown[]) => {
+  console.log = (..._args: unknown[]) => {
     // Silent in production - developers should use logger.info()
     // This prevents accidental sensitive data leaks
   };
 
   // Disable console.info in production (use logger.info instead)
-  console.info = (...args: unknown[]) => {
+  console.info = (..._args: unknown[]) => {
     // Silent in production - use structured logger
   };
 
@@ -75,7 +75,7 @@ export function initializeConsoleWrapper(): void {
   };
 
   // Disable console.debug in production
-  console.debug = (...args: unknown[]) => {
+  console.debug = (..._args: unknown[]) => {
     // Silent in production - debug logs are dev-only
   };
 }

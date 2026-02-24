@@ -133,7 +133,7 @@ class SocialMediaService {
   /**
    * Get post analytics
    */
-  async getAnalytics(platform: SocialPlatform, postId: string): Promise<SocialAnalytics | null> {
+  async getAnalytics(platform: SocialPlatform, _postId: string): Promise<SocialAnalytics | null> {
     if (!this.isEnabled(platform)) {
       return null;
     }
@@ -189,7 +189,7 @@ class SocialMediaService {
   /**
    * Publish post (internal)
    */
-  private async publishPost(platform: SocialPlatform, post: SocialPost): Promise<string> {
+  private async publishPost(platform: SocialPlatform, _post: SocialPost): Promise<string> {
     // In production, this would call platform APIs:
     // - Facebook Graph API
     // - Twitter API v2
