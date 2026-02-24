@@ -1,4 +1,4 @@
-import { describe, it, expect, vi, beforeEach, afterEach } from 'vitest'
+import { describe, it, expect, vi, afterEach } from 'vitest'
 
 // Mock DB to avoid requiring DATABASE_URL at import time
 vi.mock('@nzila/db', () => ({ db: {} }))
@@ -7,17 +7,22 @@ vi.mock('drizzle-orm', () => ({
   eq: vi.fn(), and: vi.fn(), desc: vi.fn(), sql: vi.fn(), asc: vi.fn(),
 }))
 
+// Mock @nzila/os-core logger to capture log calls
+const { mockInfo } = vi.hoisted(() => ({ mockInfo: vi.fn() }))
+vi.mock('@nzila/os-core', () => ({
+  createLogger: () => ({
+    debug: vi.fn(),
+    info: mockInfo,
+    warn: vi.fn(),
+    error: vi.fn(),
+  }),
+}))
+
 import { auditLog } from './audit'
 
 describe('auditLog', () => {
-  let logSpy: ReturnType<typeof vi.spyOn>
-
-  beforeEach(() => {
-    logSpy = vi.spyOn(console, 'log').mockImplementation(() => {})
-  })
-
   afterEach(() => {
-    vi.restoreAllMocks()
+    mockInfo.mockClear()
   })
 
   it('logs an audit event with provided fields', () => {
@@ -27,10 +32,10 @@ describe('auditLog', () => {
       resource: 'document',
     })
 
-    expect(logSpy).toHaveBeenCalledOnce()
-    const args = logSpy.mock.calls[0]
+    expect(mockInfo).toHaveBeenCalledOnce()
+    const args = mockInfo.mock.calls[0]
     expect(args[0]).toBe('[AUDIT][LEGACY]')
-    const entry = JSON.parse(args[1] as string)
+    const entry = JSON.parse(args[1].detail)
     expect(entry.userId).toBe('user-1')
     expect(entry.action).toBe('create')
     expect(entry.resource).toBe('document')
@@ -46,8 +51,8 @@ describe('auditLog', () => {
       timestamp: ts,
     })
 
-    const args = logSpy.mock.calls[0]
-    const entry = JSON.parse(args[1] as string)
+    const meta = mockInfo.mock.calls[0][1]
+    const entry = JSON.parse(meta.detail)
     expect(entry.timestamp).toBe(ts)
   })
 
@@ -58,8 +63,8 @@ describe('auditLog', () => {
       resource: 'dashboard',
     })
 
-    const args = logSpy.mock.calls[0]
-    const entry = JSON.parse(args[1] as string)
+    const meta = mockInfo.mock.calls[0][1]
+    const entry = JSON.parse(meta.detail)
     expect(entry.timestamp).toMatch(/^\d{4}-\d{2}-\d{2}T/)
   })
 
@@ -71,8 +76,8 @@ describe('auditLog', () => {
       metadata: { key: 'theme', value: 'dark' },
     })
 
-    const args = logSpy.mock.calls[0]
-    const entry = JSON.parse(args[1] as string)
+    const meta = mockInfo.mock.calls[0][1]
+    const entry = JSON.parse(meta.detail)
     expect(entry.metadata).toEqual({ key: 'theme', value: 'dark' })
   })
 
@@ -83,8 +88,8 @@ describe('auditLog', () => {
       resource: 'homepage',
     })
 
-    const args = logSpy.mock.calls[0]
-    const entry = JSON.parse(args[1] as string)
+    const meta = mockInfo.mock.calls[0][1]
+    const entry = JSON.parse(meta.detail)
     expect(entry.userId).toBeNull()
   })
 })

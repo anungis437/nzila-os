@@ -15,6 +15,9 @@ import { platformDb } from '@nzila/db/platform'
 import { mlInferenceRuns, mlModels } from '@nzila/db/schema'
 import { eq, and, desc } from 'drizzle-orm'
 import { requireEntityAccess } from '@/lib/api-guards'
+import { createLogger } from '@nzila/os-core'
+
+const logger = createLogger('ml:runs:inference')
 
 export const runtime = 'nodejs'
 export const dynamic = 'force-dynamic'
@@ -76,7 +79,7 @@ export async function GET(req: NextRequest) {
       })),
     )
   } catch (err) {
-    console.error('[ML /runs/inference]', err)
+    logger.error('[ML /runs/inference]', err instanceof Error ? err : { detail: err })
     return NextResponse.json({ error: 'Internal server error' }, { status: 500 })
   }
 }

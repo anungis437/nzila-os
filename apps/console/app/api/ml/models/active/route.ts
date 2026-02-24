@@ -14,6 +14,9 @@ import { platformDb } from '@nzila/db/platform'
 import { mlModels } from '@nzila/db/schema'
 import { eq, and } from 'drizzle-orm'
 import { requireEntityAccess } from '@/lib/api-guards'
+import { createLogger } from '@nzila/os-core'
+
+const logger = createLogger('ml:models:active')
 
 export const runtime = 'nodejs'
 export const dynamic = 'force-dynamic'
@@ -76,7 +79,7 @@ export async function GET(req: NextRequest) {
       })),
     )
   } catch (err) {
-    console.error('[ML /models/active]', err)
+    logger.error('[ML /models/active]', err instanceof Error ? err : { detail: err })
     return NextResponse.json({ error: 'Internal server error' }, { status: 500 })
   }
 }

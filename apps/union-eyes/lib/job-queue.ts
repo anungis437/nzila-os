@@ -20,6 +20,7 @@
 // Types  (kept identical to the old BullMQ version)
 // ============================================================
 
+import { createLogger } from '@nzila/os-core'
 export interface EmailJobData {
   type: 'email';
   to: string | string[];
@@ -28,6 +29,8 @@ export interface EmailJobData {
   data: Record<string, unknown>;
   priority?: number;
 }
+
+const logger = createLogger('job-queue')
 
 export interface SmsJobData {
   type: 'sms';
@@ -286,7 +289,7 @@ export async function scheduleEmailDigest(
   _frequency: 'daily' | 'weekly',
   _hour = 8
 ): Promise<void> {
-  console.warn(
+  logger.warn(
     '[job-queue] scheduleEmailDigest() is a no-op. ' +
     'Email digest schedule is managed by Celery Beat in backend/config/settings.py.'
   );
@@ -297,7 +300,7 @@ export async function scheduleEmailDigest(
  * NOTE: Cleanup schedule is managed by Celery Beat � this is a no-op.
  */
 export async function scheduleCleanupJobs(): Promise<void> {
-  console.warn(
+  logger.warn(
     '[job-queue] scheduleCleanupJobs() is a no-op. ' +
     'Cleanup schedule is managed by Celery Beat in backend/config/settings.py.'
   );
@@ -369,7 +372,7 @@ export async function cleanCompletedJobs(
   _queueName: string,
   _olderThanMs = 24 * 60 * 60 * 1000
 ): Promise<void> {
-  console.warn('[job-queue] cleanCompletedJobs() is a no-op. Run `manage.py celery_deleteresults` instead.');
+  logger.warn('[job-queue] cleanCompletedJobs() is a no-op. Run `manage.py celery_deleteresults` instead.');
 }
 
 /** Graceful shutdown � no-op (no local connections). */

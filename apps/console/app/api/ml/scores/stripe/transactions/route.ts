@@ -24,6 +24,9 @@ import { platformDb } from '@nzila/db/platform'
 import { mlScoresStripeTxn, mlModels } from '@nzila/db/schema'
 import { eq, and, gte, lte, lt, count } from 'drizzle-orm'
 import { requireEntityAccess } from '@/lib/api-guards'
+import { createLogger } from '@nzila/os-core'
+
+const logger = createLogger('ml:scores:stripe:transactions')
 
 export const runtime = 'nodejs'
 export const dynamic = 'force-dynamic'
@@ -140,7 +143,7 @@ export async function GET(req: NextRequest) {
       anomalyInPeriod: anomalyRow?.count ?? 0,
     })
   } catch (err) {
-    console.error('[ML /scores/stripe/transactions]', err)
+    logger.error('[ML /scores/stripe/transactions]', err instanceof Error ? err : { detail: err })
     return NextResponse.json({ error: 'Internal server error' }, { status: 500 })
   }
 }

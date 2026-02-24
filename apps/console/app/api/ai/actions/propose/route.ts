@@ -11,6 +11,7 @@ import { NextRequest, NextResponse } from 'next/server'
 import { platformDb } from '@nzila/db/platform'
 import { aiActions } from '@nzila/db/schema'
 import { eq } from 'drizzle-orm'
+import { createLogger } from '@nzila/os-core'
 import {
   validateActionProposal,
   appendAiAuditEvent,
@@ -19,6 +20,8 @@ import {
 import { requireEntityAccess } from '@/lib/api-guards'
 import { asAiError } from '@/lib/catch-utils'
 import { z } from 'zod'
+
+const logger = createLogger('ai:actions:propose')
 
 const ProposeBodySchema = z.object({
   entityId: z.string().uuid(),
@@ -144,7 +147,7 @@ export async function POST(req: NextRequest) {
         { status: aiErr.statusCode },
       )
     }
-    console.error('[AI Action Propose Error]', err)
+    logger.error('[AI Action Propose Error]', err instanceof Error ? err : { detail: err })
     return NextResponse.json(
       { error: 'Internal server error', code: 'unknown' },
       { status: 500 },

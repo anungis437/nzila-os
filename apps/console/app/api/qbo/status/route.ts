@@ -12,6 +12,9 @@ import { qboConnections, qboTokens } from '@nzila/db/schema'
 import { eq, and, desc } from 'drizzle-orm'
 import { requireEntityAccess } from '@/lib/api-guards'
 import { revokeToken } from '@nzila/qbo/oauth'
+import { createLogger } from '@nzila/os-core'
+
+const logger = createLogger('qbo:status')
 
 // ── GET — connection status ───────────────────────────────────────────────────
 
@@ -87,7 +90,7 @@ export async function DELETE(req: NextRequest) {
   // Best-effort revoke — don't fail if Intuit is down
   if (tokenRow) {
     await revokeToken(tokenRow.refreshToken).catch((err: unknown) =>
-      console.warn('[QBO] Token revocation failed (continuing disconnect):', err),
+      logger.warn('[QBO] Token revocation failed (continuing disconnect):', err),
     )
   }
 

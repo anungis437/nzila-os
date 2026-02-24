@@ -46,6 +46,9 @@ import type { NextRequest } from "next/server";
 import createIntlMiddleware from 'next-intl/middleware';
 import { locales, defaultLocale } from './lib/locales';
 import { CRON_API_ROUTES, isPublicRoute as isPublicApiRoute } from './lib/public-routes';
+import { createLogger } from '@nzila/os-core'
+
+const logger = createLogger('middleware')
 
 // ---------------------------------------------------------------------------
 // os-core telemetry – request-id propagation  (Edge-safe)
@@ -137,7 +140,7 @@ const getAllowedOrigins = (): string[] => {
   
   // Production: Require explicit configuration, fail secure
   if (!originsEnv) {
-    console.warn('⚠️  CORS_ALLOWED_ORIGINS not configured - CORS disabled for security');
+    logger.warn('⚠️  CORS_ALLOWED_ORIGINS not configured - CORS disabled for security');
     return [];
   }
   

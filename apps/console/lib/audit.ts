@@ -17,6 +17,9 @@ export {
   exportAuditTrailBuffer,
   AUDIT_ACTIONS,
 } from './audit-db'
+import { createLogger } from '@nzila/os-core'
+
+const logger = createLogger('audit')
 
 interface AuditEvent {
   userId: string | null
@@ -35,5 +38,5 @@ export function auditLog(event: AuditEvent) {
     ...event,
     timestamp: event.timestamp || new Date().toISOString(),
   }
-  console.log('[AUDIT][LEGACY]', JSON.stringify(entry))
+  logger.info('[AUDIT][LEGACY]', { detail: JSON.stringify(entry) })
 }

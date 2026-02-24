@@ -7,6 +7,7 @@
  */
 import { NextRequest, NextResponse } from 'next/server'
 import { platformDb } from '@nzila/db/platform'
+import { createLogger } from '@nzila/os-core'
 import {
   generate,
   embed,
@@ -15,6 +16,8 @@ import {
 import { requireEntityAccess } from '@/lib/api-guards'
 import { sql } from 'drizzle-orm'
 import { asAiError } from '@/lib/catch-utils'
+
+const logger = createLogger('ai:rag:query')
 
 export async function POST(req: NextRequest) {
   try {
@@ -117,7 +120,7 @@ export async function POST(req: NextRequest) {
         { status: aiErr.statusCode },
       )
     }
-    console.error('[AI RAG Query Error]', err)
+    logger.error('[AI RAG Query Error]', err instanceof Error ? err : { detail: err })
     return NextResponse.json(
       { error: 'Internal server error', code: 'unknown' },
       { status: 500 },

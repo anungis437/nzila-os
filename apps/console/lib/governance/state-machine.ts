@@ -19,6 +19,7 @@
 // Platform DB for governance state machine — complex multi-table operations
 // with explicit audit via recordAuditEvent()
 import { platformDb } from '@nzila/db/platform'
+import { createLogger } from '@nzila/os-core'
 import {
   governanceActions,
   approvals,
@@ -34,6 +35,8 @@ import {
 } from '@nzila/os-core'
 import { buildEvidencePackFromAction } from '@nzila/os-core/evidence/builder'
 import { recordAuditEvent, AUDIT_ACTIONS } from '@/lib/audit-db'
+
+const logger = createLogger('state-machine')
 
 // ── Types ───────────────────────────────────────────────────────────────────
 
@@ -416,7 +419,7 @@ export async function executeGovernanceAction(
     })
   } catch {
     // Evidence pack build is best-effort; log and continue
-    console.warn('[GOVERNANCE] Evidence pack build failed for action', action.id)
+    logger.warn('[GOVERNANCE] Evidence pack build failed for action', { detail: action.id })
   }
 
   // 5. Transition to executed

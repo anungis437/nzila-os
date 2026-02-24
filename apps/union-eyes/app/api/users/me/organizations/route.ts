@@ -9,6 +9,9 @@ import { auth } from '@clerk/nextjs/server';
 import { db } from '@/db/db';
 import { organizationMembers, organizations } from '@/db/schema-organizations';
 import { eq } from 'drizzle-orm';
+import { createLogger } from '@nzila/os-core'
+
+const logger = createLogger('users:me:organizations')
 
 export const dynamic = 'force-dynamic';
 
@@ -60,7 +63,7 @@ export async function GET(_req: NextRequest) {
       })),
     });
   } catch (error) {
-    console.error('[/api/users/me/organizations] Error:', error);
+    logger.error('[/api/users/me/organizations] Error:', error instanceof Error ? error : { detail: error });
     return NextResponse.json(
       { error: 'Failed to load organizations' },
       { status: 500 },

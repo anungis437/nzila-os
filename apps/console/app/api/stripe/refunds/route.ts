@@ -17,6 +17,9 @@ import { eq } from 'drizzle-orm'
 import { requiresApproval, executeRefund } from '@nzila/payments-stripe/primitives'
 import { authenticateUser } from '@/lib/api-guards'
 import { recordAuditEvent } from '@/lib/audit-db'
+import { createLogger } from '@nzila/os-core'
+
+const logger = createLogger('stripe:refunds')
 
 const RequestRefundSchema = z.object({
   entityId: z.string().uuid(),
@@ -128,7 +131,7 @@ export async function POST(req: NextRequest): Promise<NextResponse> {
       { status: 201 },
     )
   } catch (err) {
-    console.error('[stripe/refunds] Error executing refund:', err)
+    logger.error('[stripe/refunds] Error executing refund:', err instanceof Error ? err : { detail: err })
     return NextResponse.json(
       { error: 'Failed to execute refund' },
       { status: 500 },

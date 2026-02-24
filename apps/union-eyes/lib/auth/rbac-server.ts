@@ -14,6 +14,9 @@ import { organizationUsers } from "@/db/schema/domains/member";
 import { organizationMembers } from "@/db/schema-organizations";
 import { eq, and } from "drizzle-orm";
 import { UserRole, Permission, hasPermission, hasAnyPermission, hasAllPermissions, canAccessRoute } from "./roles";
+import { createLogger } from '@nzila/os-core'
+
+const logger = createLogger('rbac-server')
 
 // ── Build a reverse-lookup from enum string values → UserRole ─────────────
 const USER_ROLE_VALUES = new Set(Object.values(UserRole) as string[]);
@@ -47,13 +50,13 @@ export async function getUserRole(
 ): Promise<UserRole> {
   try {
     // 1. Try organization_users (canonical RBAC table)
-    console.log('[getUserRole] Step 1: querying organization_users for', userId);
+    logger.info('[getUserRole] Step 1: querying organization_users for', { detail: userId });
     const orgUser = await db
       .select({ role: organizationUsers.role })
       .from(organizationUsers)
       .where(eq(organizationUsers.userId, userId))
       .limit(1);
-    console.log('[getUserRole] Step 1 result:', JSON.stringify(orgUser));
+    logger.info('[getUserRole] Step 1 result:', { detail: JSON.stringify(orgUser) });
 
     const fromOrgUsers = resolveUserRole(orgUser[0]?.role);
     if (fromOrgUsers) return fromOrgUsers;
@@ -87,7 +90,7 @@ export async function getUserRole(
     return UserRole.MEMBER;
   } catch (error) {
     // SECURITY FIX: Fail closed — authorization errors must not grant access
-    console.error('[getUserRole] FATAL:', error);
+    logger.error('[getUserRole] FATAL:', error instanceof Error ? error : { detail: error });
     throw new Error('Authorization system unavailable');
   }
 }

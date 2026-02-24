@@ -2,6 +2,9 @@
 
 import axios, { AxiosInstance, AxiosError, InternalAxiosRequestConfig } from 'axios';
 import { auth } from '@clerk/nextjs/server';
+import { createLogger } from '@nzila/os-core'
+
+const logger = createLogger('api')
 
 const API_URL = process.env.NEXT_PUBLIC_API_URL || 'http://localhost:8001';
 
@@ -33,7 +36,7 @@ class ApiClient {
             config.headers.Authorization = `Bearer ${token}`;
           }
         } catch (error) {
-          console.warn('Failed to get Clerk token:', error);
+          logger.warn('Failed to get Clerk token:', error instanceof Error ? error : { detail: error });
         }
         
         return config;
@@ -54,7 +57,7 @@ class ApiClient {
         
         // Log other errors for debugging
         if (error.response?.status && error.response.status >= 500) {
-          console.error('API Server Error:', error.response.data);
+          logger.error('API Server Error:', error.response.data instanceof Error ? error.response.data : { detail: error.response.data });
         }
         
         return Promise.reject(error);

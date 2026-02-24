@@ -2,6 +2,9 @@
 import * as Sentry from '@sentry/nextjs';
 // eslint-disable-next-line @typescript-eslint/no-unused-vars
 import { logger } from '@/lib/logger';
+import { createLogger } from '@nzila/os-core'
+
+const logger = createLogger('instrumentation')
 
 export async function register() {
   // IMPORTANT: OpenTelemetry must be initialized FIRST, before any other imports
@@ -15,8 +18,8 @@ export async function register() {
       // Log error but don't fail startup - tracing is non-critical
       const errorMessage = error instanceof Error ? error.message : String(error);
       const errorStack = error instanceof Error ? error.stack : undefined;
-      console.error('❌ [ERROR] Failed to initialize OpenTelemetry tracing:', errorMessage);
-      if (errorStack) console.error('Stack:', errorStack);
+      logger.error('❌ [ERROR] Failed to initialize OpenTelemetry tracing:', errorMessage instanceof Error ? errorMessage : { detail: errorMessage });
+      if (errorStack) logger.error('Stack:', { detail: errorStack });
     }
 
     // Initialise os-core metrics (SLO counters for union-eyes)
@@ -56,16 +59,16 @@ export async function register() {
       const envValidation = validateEnvironment();
       
       if (!envValidation.isValid) {
-        console.error('❌ [ERROR] Environment validation failed');
+        logger.error('❌ [ERROR] Environment validation failed');
         envValidation.errors.forEach((error, index) => {
-          console.error(`  ${index + 1}. ${error}`);
+          logger.error(`  ${index + 1}. ${error}`);
         });
         
         // In production, fail fast on missing critical environment variables
         if (process.env.NODE_ENV === 'production') {
           throw new Error('Critical environment variables are missing. Service cannot start.');
         } else {
-          console.warn('⚠️  [WARN] Development mode: continuing despite validation errors');
+          logger.warn('⚠️  [WARN] Development mode: continuing despite validation errors');
         }
       } else {
         logger.info('Environment validation passed');
@@ -73,9 +76,9 @@ export async function register() {
 
       // Print warnings if any
       if (envValidation.warnings.length > 0) {
-        console.warn('⚠️  [WARN] Environment warnings:');
+        logger.warn('⚠️  [WARN] Environment warnings:');
         envValidation.warnings.forEach((warning, index) => {
-          console.warn(`  ${index + 1}. ${warning}`);
+          logger.warn(`  ${index + 1}. ${warning}`);
         });
       }
 

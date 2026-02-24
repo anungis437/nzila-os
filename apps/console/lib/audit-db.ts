@@ -24,6 +24,9 @@ import { platformDb } from '@nzila/db/platform'
 import { auditEvents } from '@nzila/db/schema'
 import { computeEntryHash } from '@nzila/os-core/hash'
 import { eq, desc } from 'drizzle-orm'
+import { createLogger } from '@nzila/os-core'
+
+const logger = createLogger('audit-db')
 
 // ── Types ───────────────────────────────────────────────────────────────────
 
@@ -160,9 +163,8 @@ export async function recordAuditEvent(
     .returning({ id: auditEvents.id, hash: auditEvents.hash })
 
   // Also log to stdout for observability pipelines
-  console.log(
-    '[AUDIT]',
-    JSON.stringify({
+  logger.info('[AUDIT]', {
+    detail: JSON.stringify({
       id: row.id,
       entityId: input.entityId,
       action: input.action,
@@ -170,7 +172,7 @@ export async function recordAuditEvent(
       targetId: input.targetId,
       hash: hash.slice(0, 12) + '…',
     }),
-  )
+  })
 
   return { id: row.id, hash, previousHash }
 }

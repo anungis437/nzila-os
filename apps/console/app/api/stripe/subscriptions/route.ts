@@ -15,6 +15,9 @@ import { recordAuditEvent } from '@/lib/audit-db'
 import { platformDb } from '@nzila/db/platform'
 import { stripeSubscriptions } from '@nzila/db/schema'
 import { eq } from 'drizzle-orm'
+import { createLogger } from '@nzila/os-core'
+
+const logger = createLogger('stripe:subscriptions')
 
 const CreateSubscriptionSchema = z.object({
   entityId: z.string().uuid(),
@@ -88,7 +91,7 @@ export async function POST(req: NextRequest): Promise<NextResponse> {
       { status: 201 },
     )
   } catch (err) {
-    console.error('[stripe/subscriptions] Error creating subscription:', err)
+    logger.error('[stripe/subscriptions] Error creating subscription:', err instanceof Error ? err : { detail: err })
     return NextResponse.json(
       { error: 'Failed to create subscription' },
       { status: 500 },
@@ -116,7 +119,7 @@ export async function GET(req: NextRequest): Promise<NextResponse> {
 
     return NextResponse.json({ subscriptions: subs })
   } catch (err) {
-    console.error('[stripe/subscriptions] Error fetching subscriptions:', err)
+    logger.error('[stripe/subscriptions] Error fetching subscriptions:', err instanceof Error ? err : { detail: err })
     return NextResponse.json(
       { error: 'Failed to fetch subscriptions' },
       { status: 500 },

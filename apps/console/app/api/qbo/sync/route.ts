@@ -25,6 +25,9 @@ import { createQboClient } from '@nzila/qbo/client'
 import { getValidToken, isAccessTokenExpired } from '@nzila/qbo/oauth'
 import type { QboTokenSet } from '@nzila/qbo/types'
 import { createHash } from 'crypto'
+import { createLogger } from '@nzila/os-core'
+
+const logger = createLogger('qbo:sync')
 
 // QBO report name → API report name mapping
 const REPORT_NAME_MAP: Record<string, string> = {
@@ -179,7 +182,7 @@ export async function POST(req: NextRequest) {
     })
   } catch (err) {
     const message = err instanceof Error ? err.message : String(err)
-    console.error('[QBO] Report sync failed:', message)
+    logger.error('[QBO] Report sync failed:', message instanceof Error ? message : { detail: message })
 
     await platformDb
       .update(qboSyncRuns)

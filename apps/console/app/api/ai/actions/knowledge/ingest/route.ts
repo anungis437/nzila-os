@@ -9,6 +9,7 @@ import { NextRequest, NextResponse } from 'next/server'
 import { platformDb } from '@nzila/db/platform'
 import { aiActions } from '@nzila/db/schema'
 import { eq } from 'drizzle-orm'
+import { createLogger } from '@nzila/os-core'
 import {
   ACTION_TYPES,
   AiIngestKnowledgeSourceProposalSchema,
@@ -18,6 +19,8 @@ import {
 } from '@nzila/ai-core'
 import { requireEntityAccess } from '@/lib/api-guards'
 import { asAiError } from '@/lib/catch-utils'
+
+const logger = createLogger('ai:actions:knowledge:ingest')
 
 export async function POST(req: NextRequest) {
   try {
@@ -137,7 +140,7 @@ export async function POST(req: NextRequest) {
         { status: aiErr.statusCode },
       )
     }
-    console.error('[Knowledge Ingest Error]', err)
+    logger.error('[Knowledge Ingest Error]', err instanceof Error ? err : { detail: err })
     return NextResponse.json(
       { error: 'Internal server error', code: 'unknown' },
       { status: 500 },

@@ -10,6 +10,9 @@ import { NextRequest, NextResponse } from 'next/server'
 import { z } from 'zod'
 import { createPortalSession } from '@nzila/payments-stripe/primitives'
 import { authenticateUser } from '@/lib/api-guards'
+import { createLogger } from '@nzila/os-core'
+
+const logger = createLogger('stripe:customer-portal')
 
 const CreatePortalSchema = z.object({
   customerId: z.string().min(1),
@@ -36,7 +39,7 @@ export async function POST(req: NextRequest): Promise<NextResponse> {
 
     return NextResponse.json({ url: session.url })
   } catch (err) {
-    console.error('[stripe/customer-portal] Error creating portal session:', err)
+    logger.error('[stripe/customer-portal] Error creating portal session:', err instanceof Error ? err : { detail: err })
     return NextResponse.json(
       { error: 'Failed to create portal session' },
       { status: 500 },

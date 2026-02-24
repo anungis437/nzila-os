@@ -13,6 +13,9 @@ import { db } from '@/db/db';
 import { memberDuesLedger } from '@/db/schema/dues-finance-schema';
 import { eq, and, desc, sql } from 'drizzle-orm';
 import { z } from 'zod';
+import { createLogger } from '@nzila/os-core'
+
+const logger = createLogger('portal:dues:pay')
 
 export const dynamic = 'force-dynamic';
 
@@ -60,7 +63,7 @@ export async function GET(req: NextRequest) {
 
     return NextResponse.json({ success: true, data: { payments } });
   } catch (error) {
-    console.error('[portal/dues/pay] GET Error:', error);
+    logger.error('[portal/dues/pay] GET Error:', error instanceof Error ? error : { detail: error });
     return NextResponse.json(
       { success: false, error: 'Failed to fetch payment history' },
       { status: 500 },
@@ -154,7 +157,7 @@ export async function POST(req: NextRequest) {
       },
     });
   } catch (error) {
-    console.error('[portal/dues/pay] POST Error:', error);
+    logger.error('[portal/dues/pay] POST Error:', error instanceof Error ? error : { detail: error });
     return NextResponse.json(
       { success: false, error: 'Failed to record payment' },
       { status: 500 },

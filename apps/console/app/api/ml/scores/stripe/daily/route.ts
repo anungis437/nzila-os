@@ -20,6 +20,9 @@ import { platformDb } from '@nzila/db/platform'
 import { mlScoresStripeDaily, mlModels } from '@nzila/db/schema'
 import { eq, and, gte, lte } from 'drizzle-orm'
 import { requireEntityAccess } from '@/lib/api-guards'
+import { createLogger } from '@nzila/os-core'
+
+const logger = createLogger('ml:scores:stripe:daily')
 
 export const runtime = 'nodejs'
 export const dynamic = 'force-dynamic'
@@ -105,7 +108,7 @@ export async function GET(req: NextRequest) {
       })),
     )
   } catch (err) {
-    console.error('[ML /scores/stripe/daily]', err)
+    logger.error('[ML /scores/stripe/daily]', err instanceof Error ? err : { detail: err })
     return NextResponse.json({ error: 'Internal server error' }, { status: 500 })
   }
 }

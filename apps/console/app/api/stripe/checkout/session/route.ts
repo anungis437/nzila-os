@@ -7,6 +7,9 @@ import { z } from 'zod'
 import { createCheckoutSession } from '@nzila/payments-stripe/primitives'
 import { authenticateUser } from '@/lib/api-guards'
 import { recordAuditEvent } from '@/lib/audit-db'
+import { createLogger } from '@nzila/os-core'
+
+const logger = createLogger('stripe:checkout:session')
 
 const LineItemSchema = z.object({
   priceId: z.string().optional(),
@@ -67,7 +70,7 @@ export async function POST(req: NextRequest): Promise<NextResponse> {
       { status: 201 },
     )
   } catch (err) {
-    console.error('[stripe/checkout] Error creating session:', err)
+    logger.error('[stripe/checkout] Error creating session:', err instanceof Error ? err : { detail: err })
     return NextResponse.json(
       { error: 'Failed to create checkout session' },
       { status: 500 },

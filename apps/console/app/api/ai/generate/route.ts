@@ -9,6 +9,9 @@ import { NextRequest, NextResponse } from 'next/server'
 import { generate, AiGenerateRequestSchema } from '@nzila/ai-core'
 import { requireEntityAccess } from '@/lib/api-guards'
 import { asAiError } from '@/lib/catch-utils'
+import { createLogger } from '@nzila/os-core'
+
+const logger = createLogger('ai:generate')
 
 export async function POST(req: NextRequest) {
   try {
@@ -38,7 +41,7 @@ export async function POST(req: NextRequest) {
         { status: aiErr.statusCode },
       )
     }
-    console.error('[AI Generate Error]', err)
+    logger.error('[AI Generate Error]', err instanceof Error ? err : { detail: err })
     return NextResponse.json(
       { error: 'Internal server error', code: 'unknown' },
       { status: 500 },

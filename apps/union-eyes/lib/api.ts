@@ -5,6 +5,9 @@
 // Client-side auth relies on Clerk session cookies (withCredentials: true).
 
 import axios, { AxiosInstance, AxiosError, InternalAxiosRequestConfig } from 'axios';
+import { createLogger } from '@nzila/os-core'
+
+const logger = createLogger('api')
 
 const API_URL = process.env.NEXT_PUBLIC_API_URL || 'http://localhost:8000';
 
@@ -50,7 +53,7 @@ class ApiClient {
         
         // Log other errors for debugging
         if (error.response?.status && error.response.status >= 500) {
-          console.error('API Server Error:', error.response.data);
+          logger.error('API Server Error:', error.response.data instanceof Error ? error.response.data : { detail: error.response.data });
         }
         
         return Promise.reject(error);

@@ -2,12 +2,5 @@
   "$schema": "./exception-schema.json",
   "ruleId": "TS_STRICT_001",
   "description": "Allowed exceptions to the strict:true TypeScript invariant",
-  "entries": [
-    {
-      "path": "apps/union-eyes/services/financial-service/tsconfig.json",
-      "owner": "union-eyes-team",
-      "justification": "Legacy Django-migrated financial service with extensive untyped interop. Migration tracked in docs/migration/ENFORCEMENT_UPGRADE.md",
-      "expiresOn": "2026-09-01"
-    }
-  ]
+  "entries": []
 }

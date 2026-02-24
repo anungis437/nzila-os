@@ -16,6 +16,9 @@ import {
 } from '@nzila/ai-core'
 import { requireEntityAccess } from '@/lib/api-guards'
 import { asAiError } from '@/lib/catch-utils'
+import { createLogger } from '@nzila/os-core'
+
+const logger = createLogger('ai:actions:approve')
 
 export async function POST(req: NextRequest) {
   try {
@@ -92,7 +95,7 @@ export async function POST(req: NextRequest) {
         { status: aiErr.statusCode },
       )
     }
-    console.error('[AI Action Approve Error]', err)
+    logger.error('[AI Action Approve Error]', err instanceof Error ? err : { detail: err })
     return NextResponse.json(
       { error: 'Internal server error', code: 'unknown' },
       { status: 500 },

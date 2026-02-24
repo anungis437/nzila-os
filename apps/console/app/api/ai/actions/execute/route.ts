@@ -13,6 +13,9 @@ import { executeAction } from '@nzila/ai-core'
 import { requireEntityAccess } from '@/lib/api-guards'
 import { asAiError } from '@/lib/catch-utils'
 import { z } from 'zod'
+import { createLogger } from '@nzila/os-core'
+
+const logger = createLogger('ai:actions:execute')
 
 const ExecuteBodySchema = z.object({
   entityId: z.string().uuid(),
@@ -63,7 +66,7 @@ export async function POST(req: NextRequest) {
         { status: aiErr.statusCode },
       )
     }
-    console.error('[AI Action Execute Error]', err)
+    logger.error('[AI Action Execute Error]', err instanceof Error ? err : { detail: err })
     return NextResponse.json(
       { error: 'Internal server error', code: 'unknown' },
       { status: 500 },

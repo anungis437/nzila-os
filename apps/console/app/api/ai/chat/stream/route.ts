@@ -9,6 +9,9 @@ import { NextRequest } from 'next/server'
 import { chatStream, AiChatStreamRequestSchema } from '@nzila/ai-core'
 import { requireEntityAccess } from '@/lib/api-guards'
 import { asAiError } from '@/lib/catch-utils'
+import { createLogger } from '@nzila/os-core'
+
+const logger = createLogger('ai:chat:stream')
 
 export async function POST(req: NextRequest) {
   try {
@@ -73,7 +76,7 @@ export async function POST(req: NextRequest) {
         { status: aiErr.statusCode, headers: { 'Content-Type': 'application/json' } },
       )
     }
-    console.error('[AI Chat Stream Error]', err)
+    logger.error('[AI Chat Stream Error]', err instanceof Error ? err : { detail: err })
     return new Response(
       JSON.stringify({ error: 'Internal server error', code: 'unknown' }),
       { status: 500, headers: { 'Content-Type': 'application/json' } },

@@ -9,6 +9,9 @@ import { auth } from '@clerk/nextjs/server';
 import { db } from '@/db/db';
 import { memberDuesLedger } from '@/db/schema/dues-finance-schema';
 import { eq, and, sql, desc } from 'drizzle-orm';
+import { createLogger } from '@nzila/os-core'
+
+const logger = createLogger('portal:dues:balance')
 
 export const dynamic = 'force-dynamic';
 
@@ -96,7 +99,7 @@ export async function GET(req: NextRequest) {
       },
     });
   } catch (error) {
-    console.error('[portal/dues/balance] Error:', error);
+    logger.error('[portal/dues/balance] Error:', error instanceof Error ? error : { detail: error });
     return NextResponse.json(
       { success: false, error: 'Failed to fetch dues balance' },
       { status: 500 },

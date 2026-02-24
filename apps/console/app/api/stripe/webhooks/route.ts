@@ -19,6 +19,9 @@ import { verifyWebhookSignature, WebhookSignatureError } from '@nzila/payments-s
 import { platformDb } from '@nzila/db/platform'
 import { stripeSubscriptions } from '@nzila/db/schema'
 import { eq } from 'drizzle-orm'
+import { createLogger } from '@nzila/os-core'
+
+const logger = createLogger('stripe:webhooks')
 
 export const runtime = 'nodejs'
 
@@ -34,7 +37,7 @@ export async function POST(req: NextRequest): Promise<NextResponse> {
     event = result.event
   } catch (err) {
     if (err instanceof WebhookSignatureError) {
-      console.warn('[stripe/webhooks] Invalid signature:', err.message)
+      logger.warn('Invalid signature', { detail: err.message })
       return NextResponse.json({ error: 'Invalid signature' }, { status: 400 })
     }
     throw err
@@ -43,7 +46,7 @@ export async function POST(req: NextRequest): Promise<NextResponse> {
   try {
     await handleStripeEvent(event)
   } catch (err) {
-    console.error(`[stripe/webhooks] Error handling event ${event.type}:`, err)
+    logger.error(`[stripe/webhooks] Error handling event ${event.type}:`, err instanceof Error ? err : { detail: err })
     // Return 200 to prevent Stripe from retrying for handler errors (not sig errors)
     return NextResponse.json({ received: true, error: 'Handler error' })
   }
@@ -70,7 +73,7 @@ async function handleStripeEvent(event: Stripe.Event): Promise<void> {
           updatedAt: new Date(),
         })
         .where(eq(stripeSubscriptions.stripeSubscriptionId, sub.id))
-      console.log(`[stripe/webhooks] Subscription canceled: ${sub.id}`)
+      logger.info(`[stripe/webhooks] Subscription canceled: ${sub.id}`)
       break
     }
 
@@ -84,7 +87,7 @@ async function handleStripeEvent(event: Stripe.Event): Promise<void> {
           .update(stripeSubscriptions)
           .set({ status: 'active', updatedAt: new Date() })
           .where(eq(stripeSubscriptions.stripeSubscriptionId, subId))
-        console.log(`[stripe/webhooks] Invoice paid, subscription active: ${subId}`)
+        logger.info(`[stripe/webhooks] Invoice paid, subscription active: ${subId}`)
       }
       break
     }
@@ -99,7 +102,7 @@ async function handleStripeEvent(event: Stripe.Event): Promise<void> {
           .update(stripeSubscriptions)
           .set({ status: 'past_due', updatedAt: new Date() })
           .where(eq(stripeSubscriptions.stripeSubscriptionId, subId))
-        console.warn(`[stripe/webhooks] Payment failed, subscription past_due: ${subId}`)
+        logger.warn(`[stripe/webhooks] Payment failed, subscription past_due: ${subId}`)
         // TODO: send notification email to customer
       }
       break
@@ -107,12 +110,12 @@ async function handleStripeEvent(event: Stripe.Event): Promise<void> {
 
     case 'checkout.session.completed': {
       // Handled by one-time checkout flow — subscription provisioning done via sub events
-      console.log('[stripe/webhooks] checkout.session.completed received')
+      logger.info('[stripe/webhooks] checkout.session.completed received')
       break
     }
 
     default:
-      console.log(`[stripe/webhooks] Unhandled event type: ${event.type}`)
+      logger.info(`[stripe/webhooks] Unhandled event type: ${event.type}`)
   }
 }
 
@@ -154,7 +157,7 @@ async function upsertSubscription(sub: Stripe.Subscription): Promise<void> {
     // Insert new record — entityId comes from metadata set during creation
     const entityId = (sub.metadata as Record<string, string>)?.entity_id
     if (!entityId) {
-      console.warn(`[stripe/webhooks] No entity_id in subscription metadata: ${sub.id}`)
+      logger.warn(`[stripe/webhooks] No entity_id in subscription metadata: ${sub.id}`)
       return
     }
     await platformDb.insert(stripeSubscriptions).values({
@@ -165,5 +168,5 @@ async function upsertSubscription(sub: Stripe.Subscription): Promise<void> {
     })
   }
 
-  console.log(`[stripe/webhooks] Subscription upserted: ${sub.id} (${sub.status})`)
+  logger.info(`[stripe/webhooks] Subscription upserted: ${sub.id} (${sub.status})`)
 }

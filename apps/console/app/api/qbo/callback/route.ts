@@ -18,6 +18,9 @@ import { platformDb } from '@nzila/db/platform'
 import { qboConnections, qboTokens } from '@nzila/db/schema'
 import { exchangeCodeForTokens } from '@nzila/qbo/oauth'
 import { eq, and } from 'drizzle-orm'
+import { createLogger } from '@nzila/os-core'
+
+const logger = createLogger('qbo:callback')
 
 export async function GET(req: NextRequest) {
   const { userId } = await auth()
@@ -70,7 +73,7 @@ export async function GET(req: NextRequest) {
   try {
     tokenSet = await exchangeCodeForTokens(code, realmId)
   } catch (err) {
-    console.error('[QBO] Token exchange failed:', err)
+    logger.error('[QBO] Token exchange failed:', err instanceof Error ? err : { detail: err })
     return NextResponse.redirect(
       new URL('/settings/integrations?qbo=error&reason=token_exchange', req.url),
     )

@@ -28,6 +28,9 @@ import { platformDb } from '@nzila/db/platform'
 import { mlScoresUECasesPriority, mlModels } from '@nzila/db/schema'
 import { eq, and, gte, lte, lt, desc, or } from 'drizzle-orm'
 import { requireEntityAccess } from '@/lib/api-guards'
+import { createLogger } from '@nzila/os-core'
+
+const logger = createLogger('ml:scores:ue:cases:priority')
 
 export const runtime = 'nodejs'
 export const dynamic = 'force-dynamic'
@@ -148,7 +151,7 @@ export async function GET(req: NextRequest) {
       total: pageRows.length,
     })
   } catch (err) {
-    console.error('[ML /scores/ue/cases/priority]', err)
+    logger.error('[ML /scores/ue/cases/priority]', err instanceof Error ? err : { detail: err })
     return NextResponse.json({ error: 'Internal server error' }, { status: 500 })
   }
 }

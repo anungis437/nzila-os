@@ -17,8 +17,7 @@ export default function Contact() {
 
   const handleSubmit = (e: React.FormEvent) => {
     e.preventDefault();
-    console.log('Form submitted:', formData);
-    setSubmitted(true);
+setSubmitted(true);
     setTimeout(() => setSubmitted(false), 5000);
   };
 

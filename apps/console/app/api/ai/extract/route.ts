@@ -5,6 +5,7 @@
  * Generates structured JSON output validated against a Zod/JSON schema.
  */
 import { NextRequest, NextResponse } from 'next/server'
+import { createLogger } from '@nzila/os-core'
 import {
   generate,
   resolvePrompt,
@@ -13,6 +14,8 @@ import {
 } from '@nzila/ai-core'
 import { requireEntityAccess } from '@/lib/api-guards'
 import { asAiError } from '@/lib/catch-utils'
+
+const logger = createLogger('ai:extract')
 
 export async function POST(req: NextRequest) {
   try {
@@ -95,7 +98,7 @@ export async function POST(req: NextRequest) {
         { status: aiErr.statusCode },
       )
     }
-    console.error('[AI Extract Error]', err)
+    logger.error('[AI Extract Error]', err instanceof Error ? err : { detail: err })
     return NextResponse.json(
       { error: 'Internal server error', code: 'unknown' },
       { status: 500 },

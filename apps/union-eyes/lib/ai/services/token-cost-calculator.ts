@@ -7,10 +7,13 @@
  * Part of Phase 1: LLM Excellence Implementation
  */
 
+import { createLogger } from '@nzila/os-core'
 export interface ModelPricing {
   inputPerMillion: number; // USD per 1M input tokens
   outputPerMillion: number; // USD per 1M output tokens
 }
+
+const logger = createLogger('token-cost-calculator')
 
 /**
  * Model pricing data (as of February 2026)
@@ -54,7 +57,7 @@ export function calculateCost(
   const pricing = MODEL_PRICING[model];
   
   if (!pricing) {
-    console.warn(`No pricing data for model: ${model}. Returning 0 cost.`);
+    logger.warn(`No pricing data for model: ${model}. Returning 0 cost.`);
     return 0;
   }
   

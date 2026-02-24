@@ -15,6 +15,9 @@
 
 import { NextRequest, NextResponse } from 'next/server';
 import { auth } from '@clerk/nextjs/server';
+import { createLogger } from '@nzila/os-core'
+
+const logger = createLogger('django-proxy')
 
 const DJANGO_API_URL = process.env.DJANGO_API_URL ?? 'http://localhost:8000';
 
@@ -111,10 +114,10 @@ export async function djangoProxy(
     });
   } catch (err) {
     const message = err instanceof Error ? err.message : String(err);
-    console.error(`[djangoProxy] upstream fetch failed: ${message}`, {
+    logger.error(`[djangoProxy] upstream fetch failed: ${message}`, { detail: {
       url: upstreamUrl.toString(),
       method,
-    });
+    }});
     return NextResponse.json(
       { error: 'Backend unavailable', detail: message },
       { status: 502 },

@@ -10,6 +10,9 @@ import { z } from 'zod'
 import { generateStripeReports } from '@nzila/payments-stripe/reports'
 import { authenticateUser } from '@/lib/api-guards'
 import { recordAuditEvent, AUDIT_ACTIONS } from '@/lib/audit-db'
+import { createLogger } from '@nzila/os-core'
+
+const logger = createLogger('stripe:reports:generate')
 
 const GenerateReportsSchema = z.object({
   entityId: z.string().uuid(),
@@ -74,7 +77,7 @@ export async function POST(req: NextRequest): Promise<NextResponse> {
       { status: 201 },
     )
   } catch (err) {
-    console.error('[stripe/reports/generate] Error:', err)
+    logger.error('[stripe/reports/generate] Error:', err instanceof Error ? err : { detail: err })
     return NextResponse.json(
       { error: 'Failed to generate reports' },
       { status: 500 },

@@ -5,7 +5,9 @@
  * Used by client components to communicate with backend
  */
 
-const logger = { error: console.error };
+import { createLogger } from '@nzila/os-core'
+
+const logger = createLogger('api')
 
 interface _RequestOptions {
   params?: Record<string, string | number | boolean | undefined>;

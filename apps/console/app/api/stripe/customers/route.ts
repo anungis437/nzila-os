@@ -7,6 +7,9 @@ import { z } from 'zod'
 import { createCustomer } from '@nzila/payments-stripe/primitives'
 import { authenticateUser } from '@/lib/api-guards'
 import { recordAuditEvent } from '@/lib/audit-db'
+import { createLogger } from '@nzila/os-core'
+
+const logger = createLogger('stripe:customers')
 
 const CreateCustomerSchema = z.object({
   entityId: z.string().uuid(),
@@ -54,7 +57,7 @@ export async function POST(req: NextRequest): Promise<NextResponse> {
 
     return NextResponse.json({ customerId: customer.id, email: customer.email }, { status: 201 })
   } catch (err) {
-    console.error('[stripe/customers] Error creating customer:', err)
+    logger.error('[stripe/customers] Error creating customer:', err instanceof Error ? err : { detail: err })
     return NextResponse.json(
       { error: 'Failed to create Stripe customer' },
       { status: 500 },

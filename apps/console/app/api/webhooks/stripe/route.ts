@@ -12,6 +12,7 @@ import { NextRequest, NextResponse } from 'next/server'
 import { platformDb } from '@nzila/db/platform'
 import { stripeWebhookEvents, stripeConnections } from '@nzila/db/schema'
 import { eq } from 'drizzle-orm'
+import { createLogger } from '@nzila/os-core'
 import {
   verifyWebhookSignature,
   WebhookSignatureError,
@@ -20,6 +21,8 @@ import {
   markEventFailed,
 } from '@nzila/payments-stripe'
 import { recordAuditEvent } from '@/lib/audit-db'
+
+const logger = createLogger('webhooks:stripe')
 
 // Next.js 16: disable body parsing for this route (Stripe needs raw body)
 export const dynamic = 'force-dynamic'
@@ -51,7 +54,7 @@ export async function POST(req: NextRequest): Promise<NextResponse> {
   const entityId = extractEntityIdFromEvent(event)
   if (!entityId) {
     // Cannot process without an entity — log and return 200 to avoid retries
-    console.warn(`[stripe-webhook] No entity_id in event ${event.id} (${event.type})`)
+    logger.warn(`[stripe-webhook] No entity_id in event ${event.id} (${event.type})`)
     return NextResponse.json({ received: true, warning: 'no_entity_id' })
   }
 
@@ -128,7 +131,7 @@ export async function POST(req: NextRequest): Promise<NextResponse> {
     const errorMessage = err instanceof Error ? err.message : 'Unknown processing error'
     await markEventFailed(webhookEventId, errorMessage)
 
-    console.error(`[stripe-webhook] Processing failed for ${event.id}:`, errorMessage)
+    logger.error(`[stripe-webhook] Processing failed for ${event.id}:`, { detail: errorMessage })
     // Still return 200 — event is persisted, can be retried
   }
 

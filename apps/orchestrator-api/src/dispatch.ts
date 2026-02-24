@@ -5,10 +5,13 @@
  * on the target repository.
  */
 
+import { createLogger } from '@nzila/os-core'
 const GITHUB_TOKEN = process.env.GITHUB_TOKEN ?? ''
 const REPO_OWNER = process.env.GITHUB_REPO_OWNER ?? 'anungis437'
 const REPO_NAME = process.env.GITHUB_REPO_NAME ?? 'nzila-automation'
 const WORKFLOW_ID = 'nzila-playbook-runner.yml'
+
+const logger = createLogger('dispatch')
 
 export interface DispatchInput {
   playbook: string
@@ -19,7 +22,7 @@ export interface DispatchInput {
 
 export async function dispatchWorkflow(input: DispatchInput): Promise<boolean> {
   if (!GITHUB_TOKEN) {
-    console.error('[dispatch] GITHUB_TOKEN is not set — skipping dispatch')
+    logger.error('[dispatch] GITHUB_TOKEN is not set — skipping dispatch')
     return false
   }
 
@@ -44,11 +47,11 @@ export async function dispatchWorkflow(input: DispatchInput): Promise<boolean> {
   })
 
   if (res.status === 204) {
-    console.log(`[dispatch] Workflow dispatched for ${input.correlation_id}`)
+    logger.info(`[dispatch] Workflow dispatched for ${input.correlation_id}`)
     return true
   }
 
   const body = await res.text()
-  console.error(`[dispatch] Failed (${res.status}): ${body}`)
+  logger.error(`[dispatch] Failed (${res.status}): ${body}`)
   return false
 }

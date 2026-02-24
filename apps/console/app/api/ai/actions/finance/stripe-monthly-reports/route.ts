@@ -9,6 +9,7 @@ import { NextRequest, NextResponse } from 'next/server'
 import { platformDb } from '@nzila/db/platform'
 import { aiActions } from '@nzila/db/schema'
 import { eq } from 'drizzle-orm'
+import { createLogger } from '@nzila/os-core'
 import {
   ACTION_TYPES,
   FinanceStripeMonthlyReportsProposalSchema,
@@ -18,6 +19,8 @@ import {
 } from '@nzila/ai-core'
 import { requireEntityAccess } from '@/lib/api-guards'
 import { asAiError } from '@/lib/catch-utils'
+
+const logger = createLogger('ai:actions:finance:stripe-monthly-reports')
 
 export async function POST(req: NextRequest) {
   try {
@@ -139,7 +142,7 @@ export async function POST(req: NextRequest) {
         { status: aiErr.statusCode },
       )
     }
-    console.error('[Stripe Monthly Reports Error]', err)
+    logger.error('[Stripe Monthly Reports Error]', err instanceof Error ? err : { detail: err })
     return NextResponse.json(
       { error: 'Internal server error', code: 'unknown' },
       { status: 500 },

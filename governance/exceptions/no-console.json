@@ -4,81 +4,27 @@
   "description": "Allowed exceptions to the no-console runtime invariant",
   "entries": [
     {
-      "path": "apps/union-eyes/**",
+      "path": "apps/union-eyes/db/seeds/**",
       "owner": "union-eyes-team",
-      "justification": "Django-migrated app with console.error in catch blocks. Migration to structured logger tracked in docs/migration/ENFORCEMENT_UPGRADE.md",
+      "justification": "Seed scripts are CLI programs — console output is appropriate for development tooling.",
       "expiresOn": "2026-09-01"
     },
     {
-      "path": "apps/console/app/api/stripe/**",
-      "owner": "payments-team",
-      "justification": "Stripe webhook handlers use console for debugging. Migrate to structured logger.",
-      "expiresOn": "2026-09-01"
-    },
-    {
-      "path": "apps/console/app/api/ai/**",
-      "owner": "ai-team",
-      "justification": "AI routes use console.error in catch. Migrate to structured logger.",
-      "expiresOn": "2026-09-01"
-    },
-    {
-      "path": "apps/console/app/api/ml/**",
-      "owner": "ml-team",
-      "justification": "ML routes use console.error in catch. Migrate to structured logger.",
-      "expiresOn": "2026-09-01"
-    },
-    {
-      "path": "apps/abr/lib/api.ts",
-      "owner": "abr-team",
-      "justification": "ABR API client uses console.warn/error in catch blocks. Migrate to structured logger.",
-      "expiresOn": "2026-09-01"
-    },
-    {
-      "path": "apps/console/app/api/qbo/**",
-      "owner": "integrations-team",
-      "justification": "QBO integration routes use console.error in catch. Migrate to structured logger.",
-      "expiresOn": "2026-09-01"
-    },
-    {
-      "path": "apps/console/app/api/webhooks/**",
-      "owner": "payments-team",
-      "justification": "Webhook handlers use console for debugging. Migrate to structured logger.",
-      "expiresOn": "2026-09-01"
-    },
-    {
-      "path": "apps/console/lib/audit-db.ts",
+      "path": "apps/union-eyes/lib/console-wrapper.ts",
       "owner": "platform-team",
-      "justification": "Legacy audit DB module uses console.log. Migrate to structured logger.",
+      "justification": "Console-wrapper intentionally stores and overrides console methods to route them to structured logger in production.",
       "expiresOn": "2026-09-01"
     },
     {
-      "path": "apps/console/lib/audit.ts",
+      "path": "apps/union-eyes/lib/logger.ts",
       "owner": "platform-team",
-      "justification": "Legacy audit module uses console.log. Migrate to structured logger.",
+      "justification": "App-specific logger implementation uses console as the output sink — console calls here ARE the structured output.",
       "expiresOn": "2026-09-01"
     },
     {
-      "path": "apps/console/lib/governance/state-machine.ts",
-      "owner": "governance-team",
-      "justification": "Governance state machine uses console.warn. Migrate to structured logger.",
-      "expiresOn": "2026-09-01"
-    },
-    {
-      "path": "apps/orchestrator-api/**",
-      "owner": "platform-team",
-      "justification": "Standalone service with console usage. Migrate to structured logger.",
-      "expiresOn": "2026-09-01"
-    },
-    {
-      "path": "apps/partners/**",
-      "owner": "partners-team",
-      "justification": "Partners app uses console.error in catch blocks. Migrate to structured logger.",
-      "expiresOn": "2026-09-01"
-    },
-    {
-      "path": "apps/web/app/contact/page.tsx",
-      "owner": "web-team",
-      "justification": "Contact form uses console.log for debugging. Migrate to structured logger.",
+      "path": "apps/union-eyes/public/service-worker.js",
+      "owner": "union-eyes-team",
+      "justification": "Service Worker runs in browser context where @nzila/os-core is not available — console is the only logging mechanism.",
       "expiresOn": "2026-09-01"
     }
   ]

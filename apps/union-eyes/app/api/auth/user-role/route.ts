@@ -2,10 +2,13 @@ import { NextRequest, NextResponse } from "next/server";
 import { withApiAuth, auth } from "@/lib/api-auth-guard";
 import { getUserRole } from "@/lib/auth/rbac-server";
 
+const logger = createLogger('auth:user-role')
+
 import {
   ErrorCode,
   standardErrorResponse,
 } from '@/lib/api/standardized-responses';
+import { createLogger } from '@nzila/os-core'
 
 /**
  * GET /api/auth/user-role
@@ -29,7 +32,7 @@ export const GET = withApiAuth(async (request: NextRequest, _context) => {
 
     return NextResponse.json({ role });
   } catch (error) {
-    console.error('[/api/auth/user-role] Error:', error);
+    logger.error('[/api/auth/user-role] Error:', error instanceof Error ? error : { detail: error });
 return standardErrorResponse(
       ErrorCode.INTERNAL_ERROR,
       'Failed to fetch user role',

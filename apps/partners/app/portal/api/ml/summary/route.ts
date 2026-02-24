@@ -19,6 +19,9 @@
 import { NextRequest, NextResponse } from 'next/server'
 import { getPartnerMlSummary } from '@nzila/ml-sdk/server'
 import { requirePartnerEntityAccess, resolvePartnerEntityIdForView } from '@/lib/partner-auth'
+import { createLogger } from '@nzila/os-core'
+
+const logger = createLogger('ml:summary')
 
 export const runtime = 'nodejs'
 export const dynamic = 'force-dynamic'
@@ -56,7 +59,7 @@ export async function GET(req: NextRequest) {
 
     return NextResponse.json(summary)
   } catch (err) {
-    console.error('[Partner ML /summary]', err)
+    logger.error('[Partner ML /summary]', err instanceof Error ? err : { detail: err })
     return NextResponse.json({ error: 'Internal server error' }, { status: 500 })
   }
 }
