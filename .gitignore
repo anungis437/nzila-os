@@ -114,6 +114,7 @@ packages/packages/
 *.tmp
 *.bak
 *.cache
+tmp-*
 docker-build.log
 build-output.txt
 install-err.txt

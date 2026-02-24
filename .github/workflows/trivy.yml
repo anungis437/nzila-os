@@ -98,6 +98,7 @@ jobs:
           ignore-unfixed: true
           severity: CRITICAL
           skip-dirs: 'node_modules,.pnpm-store'
+          skip-files: '.gitleaks.toml'  # Secret scanner config contains detection regex patterns that look like secrets (e.g. sk_test_placeholder)
 
       # ── Step 2: SARIF upload for GitHub Security tab (non-blocking) ──────
       - name: Run Trivy filesystem scan (SARIF — for Security tab)
@@ -113,6 +114,7 @@ jobs:
           ignore-unfixed: true
           severity: CRITICAL,HIGH
           skip-dirs: 'node_modules,.pnpm-store'
+          skip-files: '.gitleaks.toml'
 
       - name: Upload filesystem SARIF
         uses: github/codeql-action/upload-sarif@v4

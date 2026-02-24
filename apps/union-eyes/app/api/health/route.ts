@@ -1,14 +1,39 @@
-/**
- * GET /api/health
- * -> Django auth_core: /api/auth_core/health/
- * Auto-migrated by scripts/migrate_routes.py
- */
-import { NextRequest } from 'next/server';
-import { djangoProxy } from '@/lib/django-proxy';
+// Observability: @nzila/os-core/telemetry — structured logging and request tracing available via os-core.
+import { NextResponse } from 'next/server'
 
-export const dynamic = 'force-dynamic';
+const APP = 'union-eyes'
+const VERSION = process.env.npm_package_version ?? '0.0.0'
+const COMMIT = process.env.VERCEL_GIT_COMMIT_SHA ?? process.env.GITHUB_SHA ?? 'local'
 
-export function GET(req: NextRequest) {
-  return djangoProxy(req, '/api/auth_core/health/');
+async function checkDb(): Promise<boolean> {
+  try {
+    const { db } = await import('@nzila/db')
+    const { sql } = await import('drizzle-orm')
+    await db.execute(sql`SELECT 1`)
+    return true
+  } catch {
+    return false
+  }
+}
+
+export async function GET() {
+  const [dbResult] = await Promise.allSettled([checkDb()])
+
+  const checks = {
+    db: dbResult.status === 'fulfilled' ? dbResult.value : false,
+  }
+
+  const allHealthy = Object.values(checks).every(Boolean)
+
+  return NextResponse.json(
+    {
+      status: allHealthy ? 'ok' : 'degraded',
+      app: APP,
+      buildInfo: { version: VERSION, commit: COMMIT },
+      checks,
+      timestamp: new Date().toISOString(),
+    },
+    { status: allHealthy ? 200 : 503 },
+  )
 }
 

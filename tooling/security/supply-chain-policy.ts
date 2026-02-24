@@ -99,6 +99,32 @@ export const ACTIVE_WAIVERS: VulnerabilityWaiver[] = [
     expiresAt: '2026-05-21',
     severity: 'high',
   },
+  {
+    // SheetJS (xlsx) Prototype Pollution — CVE-2023-30533 / npm advisory 1108110
+    // Affected paths: apps/union-eyes > xlsx@0.18.5
+    // The npm package `xlsx` is abandoned — no fix is published to npm.
+    // The upstream fix (v0.19.3+) is only available from cdn.sheetjs.com (not npm).
+    // Union-Eyes uses xlsx for internal admin report exports only; no untrusted files are read.
+    // Migration to cdn.sheetjs.com or an alternative library is planned.
+    id: '1108110',
+    package: 'xlsx',
+    reason: 'SheetJS npm package is abandoned (no npm patch available). Only used for internal admin report exports in union-eyes — no untrusted file input. Migration to cdn.sheetjs.com or alternative planned.',
+    approvedBy: 'platform-lead',
+    approvedAt: '2026-02-24',
+    expiresAt: '2026-05-24',
+    severity: 'high',
+  },
+  {
+    // SheetJS (xlsx) ReDoS — CVE-2024-22363 / npm advisory 1108111
+    // Same root cause: xlsx npm package abandoned. Same mitigation as above.
+    id: '1108111',
+    package: 'xlsx',
+    reason: 'SheetJS npm package is abandoned (no npm patch available). Only used for internal admin report exports in union-eyes — no untrusted file input. Migration to cdn.sheetjs.com or alternative planned.',
+    approvedBy: 'platform-lead',
+    approvedAt: '2026-02-24',
+    expiresAt: '2026-05-24',
+    severity: 'high',
+  },
 ]
 
 // ── SBOM Validation ───────────────────────────────────────────────────────

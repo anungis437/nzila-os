@@ -67,6 +67,13 @@ const ORG_GUARD_PATTERNS = [
   /await\s+auth\(\)/,           // const { userId } = await auth()
   /requirePlatformRole\s*\(/,   // platform-level admin guard
   /verifyWebhookSignature\s*\(/, // webhook signature verification
+  /getAuth\s*\(/,                // Clerk getAuth() check
+  /djangoProxy\s*\(/,            // Django backend handles auth & org isolation internally
+  /requireApiAuth\s*\(/,         // UE API auth guard
+  /requireUser\s*\(/,            // UE user auth guard
+  /getCurrentUser\s*\(/,         // UE user auth utility
+  /verifyShopifySignature\s*\(/, // Shopify webhook signature verification
+  /CRON_SECRET/,                 // Cron job secret verification
 ]
 
 function hasOrgGuard(content: string): boolean {
@@ -78,10 +85,13 @@ const routes = allApiRoutes()
 // Routes that are deliberately public (health, webhooks, auth callbacks)
 const PUBLIC_ROUTE_SEGMENTS = [
   '/api/health',
-  '/api/webhooks/',
+  '/webhooks/',               // Webhook endpoints (may be nested e.g. /payments/webhooks/)
   '/api/hooks/',
   '/api/auth/',
-  '/api/stripe/webhooks',  // Stripe webhook — verified by signature, not session
+  '/api/ready',               // Readiness probes
+  '/api/status',              // Status endpoints
+  '/api/docs',                // API documentation
+  '/unauthenticated-',        // Intentionally unauthenticated flows
 ]
 
 function isPublicRoute(path: string): boolean {

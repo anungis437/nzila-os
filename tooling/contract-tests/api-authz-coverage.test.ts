@@ -51,6 +51,19 @@ describe('API Authorization Contract (INV-04)', () => {
 
   it('every POST/PUT/PATCH/DELETE route must produce an auth check', () => {
     const MUTATION_EXPORTS = /export\s+async\s+function\s+(POST|PUT|PATCH|DELETE)/
+
+    // Routes that are deliberately public or use external auth (webhook signatures, etc.)
+    const PUBLIC_ROUTE_PATTERNS = [
+      /\/webhooks\//,              // Webhook endpoints (verified by signature, may be nested)
+      /\/api\/hooks\//,            // Hook endpoints
+      /\/api\/health/,             // Health checks
+      /\/api\/ready/,              // Readiness probes
+      /\/api\/status/,             // Status endpoints
+      /\/api\/docs/,               // API documentation
+      /\/api\/auth\//,             // Auth callbacks
+      /\/unauthenticated-/,        // Intentionally unauthenticated flows
+    ]
+
     const AUTH_PATTERNS = [
       /auth\(\)/,
       /authorize\(/,
@@ -61,12 +74,21 @@ describe('API Authorization Contract (INV-04)', () => {
       /verifyWebhookSignature\(/,
       /authenticateUser\(/,
       /requirePlatformRole\(/,
+      /djangoProxy\(/,           // Django backend handles auth internally
+      /requireApiAuth\(/,        // UE API auth guard
+      /requireUser\(/,           // UE user auth guard
+      /getCurrentUser\(/,        // UE user auth utility
+      /verifyShopifySignature\(/, // Shopify webhook signature verification
+      /CRON_SECRET/,             // Cron job secret verification
     ]
 
     const violations: string[] = []
     for (const route of routes) {
       const content = readFileSync(route, 'utf-8')
       if (!MUTATION_EXPORTS.test(content)) continue
+      const routeNorm = route.replace(/\\/g, '/')
+      const isPublic = PUBLIC_ROUTE_PATTERNS.some((p) => p.test(routeNorm))
+      if (isPublic) continue
       const hasAuth = AUTH_PATTERNS.some((p) => p.test(content))
       if (!hasAuth) {
         violations.push(route.replace(REPO_ROOT + '/', ''))

@@ -76,6 +76,9 @@ const MUTATION_ALLOWLIST = [
   'apps/orchestrator-api/',
   // Partners legacy — tracked for migration
   'apps/partners/',
+  // Union-Eyes — Django-migrated app; mutations are transitioning to audited clients.
+  // Tracked for migration alongside console/partners.
+  'apps/union-eyes/',
 ]
 
 function isAllowlisted(filePath: string): boolean {

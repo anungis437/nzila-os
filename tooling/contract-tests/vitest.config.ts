@@ -7,7 +7,10 @@ export default defineProject({
     environment: 'node',
     globals: false,
     include: ['**/*.test.ts'],
-    exclude: ['**/node_modules/**'],
+    exclude: [
+      '**/node_modules/**',
+      '**/services/financial-service/**', // Uses Jest, not vitest
+    ],
   },
   resolve: {
     alias: {

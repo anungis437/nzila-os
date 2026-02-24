@@ -76,7 +76,7 @@ describe('getAllDocs', () => {
     expect(dated).toBeDefined()
     expect(typeof dated?.date).toBe('string')
     expect(dated?.date).toBe('2026-02-01')
-    expect(dated?.date instanceof Date).toBe(false)
+    expect((dated?.date ?? null) instanceof Date).toBe(false)
   })
 })
 
@@ -98,7 +98,7 @@ describe('getDocBySlug', () => {
     expect(doc).not.toBeNull()
     expect(typeof doc?.date).toBe('string')
     expect(doc?.date).toBe('2026-02-01')
-    expect(doc?.date instanceof Date).toBe(false)
+    expect((doc?.date ?? null) instanceof Date).toBe(false)
   })
 })
 

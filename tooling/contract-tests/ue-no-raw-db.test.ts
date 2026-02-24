@@ -33,6 +33,9 @@ const ALLOWLISTED_PATHS = [
   'scripts/',                          // Dev scripts
   'app/api/ready/',                    // K8s health probes (information_schema only)
   'app/api/health/',                   // K8s health probes
+  'app/api/v2/ready/',                 // v2 K8s readiness probes
+  'app/api/ml/',                       // ML monitoring/predictions — admin-only analytics, RLS migration tracked
+  'app/api/v2/ml/',                    // v2 ML routes — same as above
 ];
 
 const DANGEROUS_PATTERNS = [

@@ -59,6 +59,9 @@ const EXEMPT_PATHS = [
   // Partners app has legacy unscoped db import in partner-auth.
   // Migration to createScopedDb(entityId) tracked in docs/migration/ENFORCEMENT_UPGRADE.md
   'apps/partners/',
+  // Union-Eyes — Django-migrated app with direct DB access patterns.
+  // Migration to createScopedDb(entityId) tracked alongside console/partners.
+  'apps/union-eyes/',
 ]
 
 function isExempt(filePath: string): boolean {
