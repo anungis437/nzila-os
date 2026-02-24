@@ -8,6 +8,7 @@ import { NextRequest, NextResponse } from 'next/server';
 import { z } from 'zod';
 import { boardPacketGenerator } from '@/lib/services/board-packet-generator';
 import { logger } from '@/lib/logger';
+import { auth } from '@clerk/nextjs/server';
 
 // Validation schema for distribution
 const distributePacketSchema = z.object({
@@ -28,6 +29,11 @@ export async function POST(
   { params }: { params: { id: string } }
 ) {
   try {
+    const { userId } = await auth();
+    if (!userId) {
+      return NextResponse.json({ error: 'Unauthorized' }, { status: 401 });
+    }
+
     const packetId = params.id;
     const body = await req.json();
     

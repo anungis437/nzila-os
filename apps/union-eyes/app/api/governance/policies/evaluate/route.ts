@@ -8,6 +8,7 @@ import { NextRequest, NextResponse } from 'next/server';
 import { z } from 'zod';
 import { policyEngine } from '@/lib/services/policy-engine';
 import { logger } from '@/lib/logger';
+import { auth } from '@clerk/nextjs/server';
 
 // Validation schema for evaluation request
 const evaluateSchema = z.object({
@@ -25,6 +26,11 @@ const evaluateSchema = z.object({
  */
 export async function POST(req: NextRequest): Promise<Response> {
   try {
+    const { userId } = await auth();
+    if (!userId) {
+      return NextResponse.json({ error: 'Unauthorized' }, { status: 401 });
+    }
+
     const body = await req.json();
     
     // Validate input

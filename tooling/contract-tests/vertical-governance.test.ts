@@ -117,6 +117,26 @@ describe('INV-11 — Every API route has authorization', () => {
     'await auth(',              // Clerk auth() direct call (e.g., OAuth callbacks)
     'await auth()',             // Clerk auth() direct call (no args)
     'stripe.webhooks',          // Stripe webhook verification pattern
+    'djangoProxy(',             // Django proxy — calls auth() internally
+    'proxyGet(',                // Django proxy shorthand — wraps djangoProxy()
+    'proxyPost(',               // Django proxy shorthand — wraps djangoProxy()
+    'proxyPatch(',              // Django proxy shorthand — wraps djangoProxy()
+    'proxyPut(',                // Django proxy shorthand — wraps djangoProxy()
+    'proxyDelete(',             // Django proxy shorthand — wraps djangoProxy()
+    'buildListProxy(',          // Django proxy builder — wraps djangoProxy()
+    'buildDetailProxy(',        // Django proxy builder — wraps djangoProxy()
+    'proxyResource(',           // Django proxy builder — wraps djangoProxy()
+    'withApi(',                 // withApi() framework — enforces auth by default
+    'withApiAuth(',             // withApiAuth() wrapper — enforces auth
+    'getCurrentUser(',          // getCurrentUser() — Clerk auth check
+    'timingSafeEqual(',         // Cron secret verification via timing-safe compare
+    'CRON_SECRET',              // Cron route secret verification
+    'verifyShopifySignature(',  // Shopify webhook signature verification
+    'withRoleAuth(',             // Role-based auth guard wrapper
+    'withAdminAuth(',            // Admin-only auth guard wrapper
+    'requireApiAuth(',           // API auth requirement check
+    'requireUser(',              // Requires authenticated user
+    'getAuth(',                  // Clerk getAuth() direct call
   ]
 
   // Routes that are explicitly public
@@ -124,6 +144,12 @@ describe('INV-11 — Every API route has authorization', () => {
     '/api/health',
     '/api/webhooks',
     '/api/public',
+    '/api/ready',               // Readiness/liveness probes
+    '/api/docs',                // OpenAPI documentation
+    '/api/status',              // Status page (public)
+    '/api/gdpr/cookie-consent', // Cookie consent must be public
+    '/api/whop/unauthenticated-checkout', // Whop public checkout flow
+    '/api/payments/webhooks/paypal',       // PayPal webhook (has its own signature verification)
   ]
 
   for (const appDir of appDirs) {
