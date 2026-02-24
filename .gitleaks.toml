@@ -25,6 +25,7 @@ paths = [
   '''docs/.*\.md$''',                  # Documentation
   '''content/.*\.md$''',               # Content files
   '''governance/.*\.md$''',            # Governance docs
+  '''tmp-.*''',                        # Temporary analysis files (not committed to production)
 ]
 
 # Known placeholder patterns used in tests/CI
