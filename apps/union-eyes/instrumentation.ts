@@ -2,9 +2,6 @@
 import * as Sentry from '@sentry/nextjs';
 // eslint-disable-next-line @typescript-eslint/no-unused-vars
 import { logger } from '@/lib/logger';
-import { createLogger } from '@nzila/os-core'
-
-const logger = createLogger('instrumentation')
 
 export async function register() {
   // IMPORTANT: OpenTelemetry must be initialized FIRST, before any other imports

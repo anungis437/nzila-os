@@ -24,20 +24,20 @@ import type { OrgRole } from '@nzila/commerce-core/enums'
  * Context passed to every transition attempt.
  * Carries org identity, actor, and arbitrary metadata for guards.
  */
-export interface TransitionContext {
+export interface TransitionContext<TRole extends string = OrgRole> {
   /** The org this resource belongs to */
   readonly entityId: string
   /** The actor attempting the transition */
   readonly actorId: string
   /** Actor's role within the org */
-  readonly role: OrgRole
+  readonly role: TRole
   /** Arbitrary metadata available to guards */
   readonly meta: Readonly<Record<string, unknown>>
 }
 
 /** Pure predicate — receives context + current entity, returns boolean */
-export type Guard<TState extends string, TEntity = unknown> = (
-  ctx: TransitionContext,
+export type Guard<TState extends string, TEntity = unknown, TRole extends string = OrgRole> = (
+  ctx: TransitionContext<TRole>,
   entity: TEntity,
   from: TState,
   to: TState,
@@ -57,15 +57,15 @@ export interface ScheduledAction {
 }
 
 /** A single declarative transition definition */
-export interface TransitionDef<TState extends string, TEntity = unknown> {
+export interface TransitionDef<TState extends string, TEntity = unknown, TRole extends string = OrgRole> {
   /** Source state */
   readonly from: TState
   /** Target state */
   readonly to: TState
   /** Roles allowed to perform this transition (empty = any role) */
-  readonly allowedRoles: readonly OrgRole[]
+  readonly allowedRoles: readonly TRole[]
   /** Guard predicates — ALL must pass for transition to proceed */
-  readonly guards: readonly Guard<TState, TEntity>[]
+  readonly guards: readonly Guard<TState, TEntity, TRole>[]
   /** Events to emit when this transition succeeds */
   readonly events: readonly EmittedEvent[]
   /** Actions to schedule when this transition succeeds */
@@ -80,7 +80,7 @@ export interface TransitionDef<TState extends string, TEntity = unknown> {
 }
 
 /** Complete state machine definition — pure data */
-export interface MachineDefinition<TState extends string, TEntity = unknown> {
+export interface MachineDefinition<TState extends string, TEntity = unknown, TRole extends string = OrgRole> {
   /** Unique machine name (e.g. 'quote', 'order') */
   readonly name: string
   /** All possible states */
@@ -90,7 +90,7 @@ export interface MachineDefinition<TState extends string, TEntity = unknown> {
   /** Terminal states (no transitions out) */
   readonly terminalStates: readonly TState[]
   /** All valid transitions */
-  readonly transitions: readonly TransitionDef<TState, TEntity>[]
+  readonly transitions: readonly TransitionDef<TState, TEntity, TRole>[]
 }
 
 /** Result of a successful transition */
@@ -133,11 +133,11 @@ export type TransitionResult<TState extends string> =
  * 5. Evaluate: all guard predicates
  * 6. Return: success with events + actions, or failure with reason
  */
-export function attemptTransition<TState extends string, TEntity = unknown>(
-  machine: MachineDefinition<TState, TEntity>,
+export function attemptTransition<TState extends string, TEntity = unknown, TRole extends string = OrgRole>(
+  machine: MachineDefinition<TState, TEntity, TRole>,
   currentState: TState,
   targetState: TState,
-  ctx: TransitionContext,
+  ctx: TransitionContext<TRole>,
   resourceEntityId: string,
   entity: TEntity,
 ): TransitionResult<TState> {
@@ -207,13 +207,13 @@ export function attemptTransition<TState extends string, TEntity = unknown>(
  * Get all valid target states from the current state for a given context.
  * Useful for UI: "what buttons should we show?"
  */
-export function getAvailableTransitions<TState extends string, TEntity = unknown>(
-  machine: MachineDefinition<TState, TEntity>,
+export function getAvailableTransitions<TState extends string, TEntity = unknown, TRole extends string = OrgRole>(
+  machine: MachineDefinition<TState, TEntity, TRole>,
   currentState: TState,
-  ctx: TransitionContext,
+  ctx: TransitionContext<TRole>,
   resourceEntityId: string,
   entity: TEntity,
-): readonly TransitionDef<TState, TEntity>[] {
+): readonly TransitionDef<TState, TEntity, TRole>[] {
   if (machine.terminalStates.includes(currentState)) return []
   if (ctx.entityId !== resourceEntityId) return []
 
@@ -228,8 +228,8 @@ export function getAvailableTransitions<TState extends string, TEntity = unknown
  * Validate a machine definition for internal consistency.
  * Useful in contract tests and CI.
  */
-export function validateMachine<TState extends string>(
-  machine: MachineDefinition<TState>,
+export function validateMachine<TState extends string, TRole extends string = OrgRole>(
+  machine: MachineDefinition<TState, unknown, TRole>,
 ): string[] {
   const errors: string[] = []
   const stateSet = new Set<string>(machine.states)

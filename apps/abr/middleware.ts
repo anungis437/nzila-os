@@ -17,8 +17,8 @@ const isPublicRoute = createRouteMatcher([
 ]);
 
 export default clerkMiddleware(async (auth, request: NextRequest) => {
-  // 1. Auth layer — protect non-public routes
-  if (!isPublicRoute(request)) {
+  // 1. Auth layer — protect non-public routes (skip in dev — prevents Clerk handshake loops)
+  if (process.env.NODE_ENV !== 'development' && !isPublicRoute(request)) {
     await auth.protect();
   }
 

@@ -62,36 +62,6 @@ const nextConfig: NextConfig = {
       },
     ];
   },
-  webpack(config) {
-    config.optimization = {
-      ...config.optimization,
-      splitChunks: {
-        ...config.optimization?.splitChunks,
-        cacheGroups: {
-          framework: {
-            test: /[\\/]node_modules[\\/](react|react-dom|scheduler)[\\/]/,
-            name: "framework",
-            priority: 40,
-            chunks: "all" as const,
-            enforce: true,
-          },
-          lib: {
-            test: /[\\/]node_modules[\\/](framer-motion|@radix-ui)[\\/]/,
-            name: "lib",
-            priority: 30,
-            chunks: "all" as const,
-          },
-          commons: {
-            minChunks: 2,
-            name: "commons",
-            priority: 20,
-            chunks: "all" as const,
-          },
-        },
-      },
-    };
-    return config;
-  },
 };
 
 export default withNextIntl(nextConfig);

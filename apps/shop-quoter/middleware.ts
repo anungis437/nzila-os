@@ -21,23 +21,25 @@ const RATE_LIMIT_WINDOW_MS = Number(
 );
 
 export default clerkMiddleware(async (auth, request) => {
-  /* ── Layer 2 — Rate limiting ── */
-  const ip =
-    request.headers.get("x-forwarded-for")?.split(",")[0]?.trim() ??
-    request.headers.get("x-real-ip") ??
-    "unknown";
-  const rl = checkRateLimit(ip, {
-    max: RATE_LIMIT_MAX,
-    windowMs: RATE_LIMIT_WINDOW_MS,
-  });
-  if (!rl.allowed) {
-    return NextResponse.json(
-      { error: "Too Many Requests" },
-      {
-        status: 429,
-        headers: rateLimitHeaders(rl, RATE_LIMIT_MAX),
-      },
-    );
+  /* ── Layer 2 — Rate limiting (skip in dev — HMR triggers too many requests) ── */
+  if (process.env.NODE_ENV !== "development") {
+    const ip =
+      request.headers.get("x-forwarded-for")?.split(",")[0]?.trim() ??
+      request.headers.get("x-real-ip") ??
+      "unknown";
+    const rl = checkRateLimit(ip, {
+      max: RATE_LIMIT_MAX,
+      windowMs: RATE_LIMIT_WINDOW_MS,
+    });
+    if (!rl.allowed) {
+      return NextResponse.json(
+        { error: "Too Many Requests" },
+        {
+          status: 429,
+          headers: rateLimitHeaders(rl, RATE_LIMIT_MAX),
+        },
+      );
+    }
   }
 
   /* ── Layer 3 — Auth protection ── */

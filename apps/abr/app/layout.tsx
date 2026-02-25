@@ -32,8 +32,8 @@ export default function RootLayout({
     <ClerkProvider
       signInUrl="/sign-in"
       signUpUrl="/sign-up"
-      signInForceRedirectUrl="/en-CA/dashboard"
-      signUpForceRedirectUrl="/en-CA/dashboard"
+      signInFallbackRedirectUrl="/en-CA/dashboard"
+      signUpFallbackRedirectUrl="/en-CA/dashboard"
     >
       <html lang="en" className={poppins.variable}>
         <body className="font-poppins antialiased">{children}</body>

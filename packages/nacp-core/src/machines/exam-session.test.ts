@@ -10,11 +10,11 @@ import type { ExamSession } from '../types/index'
 
 const ORG_ID = 'org-uuid-001'
 
-function makeCtx(overrides: Partial<TransitionContext> = {}): TransitionContext {
+function makeCtx(overrides: Partial<TransitionContext<NacpRole>> = {}): TransitionContext<NacpRole> {
   return {
     entityId: ORG_ID,
     actorId: 'actor-uuid-001',
-    role: NacpRole.ADMIN as string,
+    role: NacpRole.ADMIN,
     meta: {},
     ...overrides,
   }
@@ -75,7 +75,7 @@ describe('examSessionMachine', () => {
         examSessionMachine,
         ExamSessionStatus.SCHEDULED,
         ExamSessionStatus.OPENED,
-        makeCtx({ role: NacpRole.VIEWER as string }),
+        makeCtx({ role: NacpRole.VIEWER }),
         ORG_ID,
         makeSession(),
       )

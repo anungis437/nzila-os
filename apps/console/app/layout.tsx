@@ -2,8 +2,6 @@ import type { Metadata } from 'next'
 import { ClerkProvider } from '@clerk/nextjs'
 import './globals.css'
 
-export const dynamic = 'force-dynamic'
-
 export const metadata: Metadata = {
   title: 'Nzila Console',
   description: 'Internal operations console for Nzila Ventures',

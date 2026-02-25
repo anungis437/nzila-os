@@ -16,8 +16,8 @@ const t = (
   from: ESS,
   to: ESS,
   label: string,
-  opts: Partial<Pick<TransitionDef<ESS, ExamSession>, 'allowedRoles' | 'guards' | 'events' | 'actions' | 'timeout'>> = {},
-): TransitionDef<ESS, ExamSession> => ({
+  opts: Partial<Pick<TransitionDef<ESS, ExamSession, NacpRole>, 'allowedRoles' | 'guards' | 'events' | 'actions' | 'timeout'>> = {},
+): TransitionDef<ESS, ExamSession, NacpRole> => ({
   from,
   to,
   label,
@@ -28,7 +28,7 @@ const t = (
   timeout: opts.timeout,
 })
 
-export const examSessionMachine: MachineDefinition<ESS, ExamSession> = {
+export const examSessionMachine: MachineDefinition<ESS, ExamSession, NacpRole> = {
   name: 'exam_session',
   states: [
     ExamSessionStatus.SCHEDULED,

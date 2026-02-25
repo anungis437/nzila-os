@@ -13,24 +13,27 @@ const RATE_LIMIT_MAX = Number(process.env.RATE_LIMIT_MAX ?? '200')
 const RATE_LIMIT_WINDOW_MS = Number(process.env.RATE_LIMIT_WINDOW_MS ?? '60000')
 
 export default clerkMiddleware(async (_auth, request) => {
-  const ip =
-    request.headers.get('x-forwarded-for')?.split(',')[0]?.trim() ??
-    request.headers.get('x-real-ip') ??
-    'unknown'
+  // ── Rate limiting (skip in dev — HMR triggers too many requests) ──────
+  if (process.env.NODE_ENV !== 'development') {
+    const ip =
+      request.headers.get('x-forwarded-for')?.split(',')[0]?.trim() ??
+      request.headers.get('x-real-ip') ??
+      'unknown'
 
-  const rl = checkRateLimit(ip, {
-    max: RATE_LIMIT_MAX,
-    windowMs: RATE_LIMIT_WINDOW_MS,
-  })
+    const rl = checkRateLimit(ip, {
+      max: RATE_LIMIT_MAX,
+      windowMs: RATE_LIMIT_WINDOW_MS,
+    })
 
-  if (!rl.allowed) {
-    return NextResponse.json(
-      { error: 'Too Many Requests' },
-      {
-        status: 429,
-        headers: rateLimitHeaders(rl, RATE_LIMIT_MAX),
-      },
-    )
+    if (!rl.allowed) {
+      return NextResponse.json(
+        { error: 'Too Many Requests' },
+        {
+          status: 429,
+          headers: rateLimitHeaders(rl, RATE_LIMIT_MAX),
+        },
+      )
+    }
   }
 
   /* ── Request-ID propagation for observability ── */
