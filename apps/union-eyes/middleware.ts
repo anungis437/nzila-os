@@ -46,9 +46,21 @@ import type { NextRequest } from "next/server";
 import createIntlMiddleware from 'next-intl/middleware';
 import { locales, defaultLocale } from './lib/locales';
 import { CRON_API_ROUTES, isPublicRoute as isPublicApiRoute } from './lib/public-routes';
-import { createLogger } from '@nzila/os-core'
 
-const logger = createLogger('middleware')
+// Edge-safe logger — os-core's createLogger uses Node.js APIs (process.stdout,
+// node:crypto, node:async_hooks) that are unavailable on the Edge Runtime.
+// Use console.* directly for the few log calls in middleware.
+const logger = {
+  warn(msg: string, meta?: Record<string, unknown>) {
+    console.warn(`[middleware] ${msg}`, meta ?? '');
+  },
+  info(msg: string, meta?: Record<string, unknown>) {
+    console.info(`[middleware] ${msg}`, meta ?? '');
+  },
+  error(msg: string, meta?: Record<string, unknown>) {
+    console.error(`[middleware] ${msg}`, meta ?? '');
+  },
+};
 
 // ---------------------------------------------------------------------------
 // os-core telemetry – request-id propagation  (Edge-safe)
