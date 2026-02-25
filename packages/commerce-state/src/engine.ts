@@ -228,8 +228,8 @@ export function getAvailableTransitions<TState extends string, TEntity = unknown
  * Validate a machine definition for internal consistency.
  * Useful in contract tests and CI.
  */
-export function validateMachine<TState extends string, TRole extends string = OrgRole>(
-  machine: MachineDefinition<TState, unknown, TRole>,
+export function validateMachine<TState extends string, TEntity = unknown, TRole extends string = OrgRole>(
+  machine: MachineDefinition<TState, TEntity, TRole>,
 ): string[] {
   const errors: string[] = []
   const stateSet = new Set<string>(machine.states)
