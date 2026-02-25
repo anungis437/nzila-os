@@ -1,11 +1,13 @@
+import type { NextConfig } from 'next';
 import createNextIntlPlugin from 'next-intl/plugin';
 
 const withNextIntl = createNextIntlPlugin();
 
 /** @type {import('next').NextConfig} */
-const nextConfig = {
+const nextConfig: NextConfig = {
   output: 'standalone',
   reactStrictMode: true,
+  turbopack: {},
   transpilePackages: [
     '@nzila/db',
     '@nzila/os-core',

@@ -31,6 +31,7 @@ const securityHeaders = [
 
 const nextConfig: NextConfig = {
   reactCompiler: true,
+  turbopack: {},
   transpilePackages: ['@nzila/ui'],
   output: 'standalone',
   headers: async () => [

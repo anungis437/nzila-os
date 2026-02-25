@@ -36,7 +36,7 @@ class ApiClient {
             config.headers.Authorization = `Bearer ${token}`;
           }
         } catch (error) {
-          logger.warn('Failed to get Clerk token:', error instanceof Error ? error : { detail: error });
+          logger.warn('Failed to get Clerk token:', error instanceof Error ? { message: error.message } : { detail: error });
         }
         
         return config;
