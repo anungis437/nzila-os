@@ -316,6 +316,25 @@ const nextConfig: NextConfig = {
     config.infrastructureLogging = {
       level: 'error',
     };
+
+    // Provide empty fallbacks for Node.js builtins in the client bundle.
+    // Server-only packages (@grpc/grpc-js, pg, etc.) may be transitively
+    // imported via barrel exports; they never run client-side.
+    if (!isServer) {
+      config.resolve = config.resolve || {};
+      config.resolve.fallback = {
+        ...config.resolve.fallback,
+        fs: false,
+        net: false,
+        tls: false,
+        dns: false,
+        http2: false,
+        child_process: false,
+        async_hooks: false,
+        diagnostics_channel: false,
+        perf_hooks: false,
+      };
+    }
     
     // Optimize build performance
     if (!dev) {
