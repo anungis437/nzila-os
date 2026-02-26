@@ -18,7 +18,7 @@ and operate the application without tribal knowledge.
 - **00-overview** — You are here.
 - **01-repo-bootstrap** — Clone, install, configure environment.
 - **02-monorepo-structure** — Workspace layout and turbo tasks.
-- **03-auth-and-tenancy** — Authentication provider and multi-tenant model.
+- **03-auth-and-tenancy** — Authentication provider and multi-org model.
 - **04-database-azure-postgresql** — Database provisioning, migrations, pooling.
 - **05-api-layer** — API route patterns and middleware.
 - **06-testing-quality** — Unit, integration, and e2e testing strategy.

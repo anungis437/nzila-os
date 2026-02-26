@@ -177,7 +177,7 @@ export async function isPhoneOptedOut(
 }
 
 /**
- * Check rate limit for tenant
+ * Check rate limit for org
  */
 async function checkRateLimit(organizationId: string): Promise<boolean> {
   const now = new Date();
@@ -546,7 +546,7 @@ export async function handleInboundSms(data: TwilioWebhookData): Promise<void> {
       normalizedBody === 'quit'
     ) {
       // Handle opt-out
-      // await handleOptOut(tenantId, From);
+      // await handleOptOut(orgId, From);
       logger.info('Opt-out received', { from: From });
       return;
     }

@@ -88,20 +88,20 @@ export default function AdminPage({ params }: AdminPageProps) {
 
       {/* Quick Access Cards */}
       <div className="grid gap-4 md:grid-cols-2 lg:grid-cols-3">
-        <Link href={`/${params.locale}/admin/tenants`}>
+        <Link href={`/${params.locale}/admin/orgs`}>
           <Card className="hover:shadow-lg transition-shadow cursor-pointer h-full">
             <CardHeader>
               <CardTitle className="flex items-center justify-between">
                 <div className="flex items-center gap-2">
                   <Building2 className="h-5 w-5 text-blue-600" />
-                  <span>Tenants</span>
+                  <span>Organizations</span>
                 </div>
                 <ArrowRight className="h-4 w-4 text-gray-400" />
               </CardTitle>
             </CardHeader>
             <CardContent>
               <p className="text-sm text-gray-600">
-                Manage tenant organizations, subscriptions, and resources
+                Manage organizations, subscriptions, and resources
               </p>
             </CardContent>
           </Card>
@@ -120,7 +120,7 @@ export default function AdminPage({ params }: AdminPageProps) {
             </CardHeader>
             <CardContent>
               <p className="text-sm text-gray-600">
-                User management and role assignment across all tenants
+                User management and role assignment across all orgs
               </p>
             </CardContent>
           </Card>

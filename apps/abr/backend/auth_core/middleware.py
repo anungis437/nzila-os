@@ -98,10 +98,10 @@ class OrganizationIsolationMiddleware(MiddlewareMixin):
 
         # Try to get Organization model instance
         try:
-            from apps.organizations.models import Organization
+            from auth_core.models import Organizations
 
-            organization = Organization.objects.filter(
-                external_id=org_id  # Map Clerk org_id to Organization.external_id
+            organization = Organizations.objects.filter(
+                clerk_organization_id=org_id
             ).first()
 
             if not organization:
@@ -116,7 +116,7 @@ class OrganizationIsolationMiddleware(MiddlewareMixin):
             request.organization_id = organization.id
 
         except ImportError:
-            # Organization model not available (single-tenant app)
+            # Organization model not available (single-org app)
             request.organization = None
             request.organization_id = org_id
 

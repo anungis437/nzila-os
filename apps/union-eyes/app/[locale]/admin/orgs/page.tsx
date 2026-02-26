@@ -1,7 +1,7 @@
 /**
- * Tenants Management Page
+ * Orgs Management Page
  * 
- * Displays list of all tenants with stats, filtering, and management actions.
+ * Displays list of all orgs with stats, filtering, and management actions.
  * Part of Phase 0.2 - Admin Console UI
  */
 
@@ -23,30 +23,30 @@ import {
   TableHeader,
   TableRow,
 } from "@/components/ui/table";
-import { getAdminTenants } from "@/actions/admin-actions";
+import { getAdminOrgs } from "@/actions/admin-actions";
 
 interface PageProps {
   params: { locale: string };
   searchParams: { q?: string };
 }
 
-async function TenantsTable({ searchQuery }: { searchQuery?: string }) {
-  const tenants = await getAdminTenants(searchQuery);
+async function OrgsTable({ searchQuery }: { searchQuery?: string }) {
+  const orgs = await getAdminOrgs(searchQuery);
 
-  if (tenants.length === 0) {
+  if (orgs.length === 0) {
     return (
       <Card>
         <CardContent className="flex flex-col items-center justify-center py-12">
           <Building2 className="h-12 w-12 text-gray-400 mb-4" />
-          <h3 className="text-lg font-semibold text-gray-900 mb-2">No tenants found</h3>
+          <h3 className="text-lg font-semibold text-gray-900 mb-2">No organizations found</h3>
           <p className="text-sm text-gray-600 mb-4">
-            {searchQuery ? "Try adjusting your search query" : "Get started by creating your first tenant"}
+            {searchQuery ? "Try adjusting your search query" : "Get started by creating your first organization"}
           </p>
           {!searchQuery && (
-            <Link href="tenants/new">
+            <Link href="orgs/new">
               <Button>
                 <Plus className="h-4 w-4 mr-2" />
-                Create Tenant
+                Create Organization
               </Button>
             </Link>
           )}
@@ -70,52 +70,52 @@ async function TenantsTable({ searchQuery }: { searchQuery?: string }) {
           </TableRow>
         </TableHeader>
         <TableBody>
-          {tenants.map((tenant) => (
-            <TableRow key={tenant.id}>
+          {orgs.map((org) => (
+            <TableRow key={org.id}>
               <TableCell>
                 <div>
-                  <div className="font-medium text-gray-900">{tenant.name}</div>
-                  <div className="text-sm text-gray-500">{tenant.slug}</div>
-                  {tenant.contactEmail && (
-                    <div className="text-xs text-gray-400">{tenant.contactEmail}</div>
+                  <div className="font-medium text-gray-900">{org.name}</div>
+                  <div className="text-sm text-gray-500">{org.slug}</div>
+                  {org.contactEmail && (
+                    <div className="text-xs text-gray-400">{org.contactEmail}</div>
                   )}
                 </div>
               </TableCell>
               <TableCell>
                 <Badge
-                  variant={tenant.status === "active" ? "default" : "secondary"}
+                  variant={org.status === "active" ? "default" : "secondary"}
                   className={
-                    tenant.status === "active"
+                    org.status === "active"
                       ? "bg-green-100 text-green-800 hover:bg-green-100"
                       : ""
                   }
                 >
-                  {tenant.status}
+                  {org.status}
                 </Badge>
               </TableCell>
               <TableCell>
-                <Badge variant="outline">{tenant.subscriptionTier}</Badge>
+                <Badge variant="outline">{org.subscriptionTier}</Badge>
               </TableCell>
               <TableCell className="text-right">
                 <div className="flex items-center justify-end gap-2">
                   <Users className="h-4 w-4 text-gray-400" />
-                  <span className="font-medium">{tenant.activeUsers}</span>
-                  <span className="text-gray-400">/ {tenant.totalUsers}</span>
+                  <span className="font-medium">{org.activeUsers}</span>
+                  <span className="text-gray-400">/ {org.totalUsers}</span>
                 </div>
               </TableCell>
               <TableCell className="text-right">
                 <div className="flex items-center justify-end gap-2">
                   <HardDrive className="h-4 w-4 text-gray-400" />
-                  <span className="font-medium">{tenant.storageUsed}</span>
+                  <span className="font-medium">{org.storageUsed}</span>
                 </div>
               </TableCell>
               <TableCell>
                 <span className="text-sm text-gray-600">
-                  {new Date(tenant.createdAt).toLocaleDateString()}
+                  {new Date(org.createdAt).toLocaleDateString()}
                 </span>
               </TableCell>
               <TableCell className="text-right">
-                <Link href={`tenants/${tenant.id}`}>
+                <Link href={`orgs/${org.id}`}>
                   <Button variant="ghost" size="sm">
                     Manage
                   </Button>
@@ -143,7 +143,7 @@ function TableSkeleton() {
   );
 }
 
-export default async function TenantsPage({ params, searchParams }: PageProps) {
+export default async function OrgsPage({ params, searchParams }: PageProps) {
   const searchQuery = searchParams.q;
 
   return (
@@ -153,31 +153,31 @@ export default async function TenantsPage({ params, searchParams }: PageProps) {
         <div>
           <h2 className="text-3xl font-bold text-gray-900 flex items-center gap-3">
             <Building2 className="h-8 w-8 text-blue-600" />
-            Tenant Management
+            Org Management
           </h2>
           <p className="text-gray-600 mt-2">
-            Manage tenant organizations, subscriptions, and resource allocation
+            Manage organizations, subscriptions, and resource allocation
           </p>
         </div>
-        <Link href={`/${params.locale}/admin/tenants/new`}>
+        <Link href={`/${params.locale}/admin/orgs/new`}>
           <Button size="lg">
             <Plus className="h-4 w-4 mr-2" />
-            Create Tenant
+            Create Organization
           </Button>
         </Link>
       </div>
 
       {/* Quick Stats */}
       <Suspense fallback={<div className="h-20 bg-gray-100 animate-pulse rounded-lg" />}>
-        <TenantStats />
+        <OrgStats />
       </Suspense>
 
       {/* Search and Filter */}
       <Card>
         <CardHeader>
-          <CardTitle>All Tenants</CardTitle>
+          <CardTitle>All Organizations</CardTitle>
           <CardDescription>
-            Search and manage tenant organizations across the platform
+            Search and manage organizations across the platform
           </CardDescription>
         </CardHeader>
         <CardContent>
@@ -193,7 +193,7 @@ export default async function TenantsPage({ params, searchParams }: PageProps) {
             </div>
             <Button type="submit">Search</Button>
             {searchQuery && (
-              <Link href={`/${params.locale}/admin/tenants`}>
+              <Link href={`/${params.locale}/admin/orgs`}>
                 <Button variant="outline">Clear</Button>
               </Link>
             )}
@@ -201,29 +201,29 @@ export default async function TenantsPage({ params, searchParams }: PageProps) {
         </CardContent>
       </Card>
 
-      {/* Tenants Table */}
+      {/* Orgs Table */}
       <Suspense fallback={<TableSkeleton />}>
-        <TenantsTable searchQuery={searchQuery} />
+        <OrgsTable searchQuery={searchQuery} />
       </Suspense>
     </div>
   );
 }
 
-async function TenantStats() {
-  const tenants = await getAdminTenants();
+async function OrgStats() {
+  const orgs = await getAdminOrgs();
   
   const stats = {
-    total: tenants.length,
-    active: tenants.filter(t => t.status === "active").length,
-    totalUsers: tenants.reduce((sum, t) => sum + t.totalUsers, 0),
-    totalStorage: tenants.reduce((sum, t) => sum + parseFloat(t.storageUsed.replace(/[^0-9.]/g, "")), 0),
+    total: orgs.length,
+    active: orgs.filter(t => t.status === "active").length,
+    totalUsers: orgs.reduce((sum, t) => sum + t.totalUsers, 0),
+    totalStorage: orgs.reduce((sum, t) => sum + parseFloat(t.storageUsed.replace(/[^0-9.]/g, "")), 0),
   };
 
   return (
     <div className="grid gap-4 md:grid-cols-4">
       <Card>
         <CardHeader className="flex flex-row items-center justify-between space-y-0 pb-2">
-          <CardTitle className="text-sm font-medium">Total Tenants</CardTitle>
+          <CardTitle className="text-sm font-medium">Total Orgs</CardTitle>
           <Building2 className="h-4 w-4 text-gray-600" />
         </CardHeader>
         <CardContent>
@@ -242,7 +242,7 @@ async function TenantStats() {
         <CardContent>
           <div className="text-2xl font-bold">{stats.totalUsers}</div>
           <p className="text-xs text-gray-600 mt-1">
-            Across all tenants
+            Across all orgs
           </p>
         </CardContent>
       </Card>
@@ -262,7 +262,7 @@ async function TenantStats() {
 
       <Card>
         <CardHeader className="flex flex-row items-center justify-between space-y-0 pb-2">
-          <CardTitle className="text-sm font-medium">Avg Users/Tenant</CardTitle>
+          <CardTitle className="text-sm font-medium">Avg Users/Org</CardTitle>
           <TrendingUp className="h-4 w-4 text-gray-600" />
         </CardHeader>
         <CardContent>
@@ -270,7 +270,7 @@ async function TenantStats() {
             {stats.total > 0 ? Math.round(stats.totalUsers / stats.total) : 0}
           </div>
           <p className="text-xs text-gray-600 mt-1">
-            Average per tenant
+            Average per org
           </p>
         </CardContent>
       </Card>

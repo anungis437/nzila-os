@@ -38,7 +38,7 @@ placeholder values:
   "PRODUCTION_URL": "https://app.example.com",
   "PRIMARY_APP_PATH": "app",
   "APP_PORT": "3000",
-  "TENANT_KEY": "organization_id"
+  "ORG_KEY": "organization_id"
 }
 ```
 

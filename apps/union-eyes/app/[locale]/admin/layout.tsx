@@ -49,8 +49,8 @@ export default async function AdminLayout({ children, params }: AdminLayoutProps
       description: "System overview" 
     },
     { 
-      href: `/${locale}/admin/tenants`, 
-      label: "Tenants", 
+      href: `/${locale}/admin/orgs`, 
+      label: "Organizations", 
       icon: Building2,
       description: "Manage organizations" 
     },

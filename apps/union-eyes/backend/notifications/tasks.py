@@ -27,15 +27,16 @@ logger = logging.getLogger(__name__)
 # Constants
 # ---------------------------------------------------------------------------
 
-EMAIL_CONCURRENCY = 5   # BullMQ: concurrency: 5
+EMAIL_CONCURRENCY = 5  # BullMQ: concurrency: 5
 EMAIL_RATE_LIMIT = "100/m"  # BullMQ: limiter { max: 100, duration: 60000 }
-SMS_CONCURRENCY = 3     # BullMQ: concurrency: 3
+SMS_CONCURRENCY = 3  # BullMQ: concurrency: 3
 SMS_RATE_LIMIT = "10/s"  # BullMQ: limiter { max: 10, duration: 1000 }
 
 
 # ---------------------------------------------------------------------------
 # Helpers
 # ---------------------------------------------------------------------------
+
 
 def _get_twilio_client():
     """Return a Twilio client or raise if not configured."""
@@ -75,6 +76,7 @@ def _log_notification(
     """Persist a delivery record to the NotificationLog model (best-effort)."""
     try:
         from notifications.models import NotificationLog
+
         NotificationLog.objects.create(
             organization_id=None,
             type=channel,
@@ -89,6 +91,7 @@ def _check_email_preference(email: str) -> bool:
         # Preference lookup via the notification_preferences table when available.
         # Falls back to True (opt-in by default).
         from notifications.models import CommunicationPreferences  # noqa: F401
+
         # Future: CommunicationPreferences.objects.get(email=email).email_enabled
         return True
     except Exception:  # noqa: BLE001
@@ -110,17 +113,17 @@ def _render_email_template(template: str, data: dict) -> str:
     from django.template.loader import render_to_string
 
     template_map = {
-        "welcome":         "emails/welcome.html",
-        "password-reset":  "emails/password_reset.html",
-        "digest":          "emails/digest.html",
-        "report-ready":    "emails/report_ready.html",
-        "deadline-alert":  "emails/deadline_alert.html",
-        "notification":    "emails/notification.html",
-        "raw-html":        None,
-        "claims-report":   "emails/report_ready.html",
-        "members-report":  "emails/report_ready.html",
+        "welcome": "emails/welcome.html",
+        "password-reset": "emails/password_reset.html",
+        "digest": "emails/digest.html",
+        "report-ready": "emails/report_ready.html",
+        "deadline-alert": "emails/deadline_alert.html",
+        "notification": "emails/notification.html",
+        "raw-html": None,
+        "claims-report": "emails/report_ready.html",
+        "members-report": "emails/report_ready.html",
         "grievances-report": "emails/report_ready.html",
-        "usage-report":    "emails/report_ready.html",
+        "usage-report": "emails/report_ready.html",
     }
 
     if template == "raw-html":
@@ -158,19 +161,20 @@ def _send_via_smtp(to: str, subject: str, html: str) -> None:
 # Options: concurrency=5, rate_limit=100/min, max_retries=3, exponential backoff
 # ---------------------------------------------------------------------------
 
+
 @shared_task(
     bind=True,
     name="notifications.tasks.send_email_task",
     queue="email",
     max_retries=3,
-    default_retry_delay=5,      # base seconds; doubled each retry (exponential)
+    default_retry_delay=5,  # base seconds; doubled each retry (exponential)
     rate_limit=EMAIL_RATE_LIMIT,
     acks_late=True,
 )
 def send_email_task(
     self,
     *,
-    to,                          # str or list[str]
+    to,  # str or list[str]
     subject: str,
     template: str,
     data: dict,
@@ -197,17 +201,35 @@ def send_email_task(
             # Respect opt-out (skip non-critical emails)
             if priority != 1 and not _check_email_preference(email):
                 logger.info("Skipping email — opted out: %s", email)
-                _log_notification("notifications", "email", email, subject, template, "skipped")
+                _log_notification(
+                    "notifications", "email", email, subject, template, "skipped"
+                )
                 continue
 
             html = _render_email_template(template, data)
             _send_via_smtp(email, subject, html)
-            _log_notification("notifications", "email", email, subject, template, "sent", user_id=user_id)
+            _log_notification(
+                "notifications",
+                "email",
+                email,
+                subject,
+                template,
+                "sent",
+                user_id=user_id,
+            )
             sent += 1
             logger.info("Email sent to %s (template=%s)", email, template)
 
         except Exception as exc:  # noqa: BLE001
-            _log_notification("notifications", "email", email, subject, template, "failed", error=str(exc))
+            _log_notification(
+                "notifications",
+                "email",
+                email,
+                subject,
+                template,
+                "failed",
+                error=str(exc),
+            )
             errors.append({"email": email, "error": str(exc)})
             logger.error("Failed to send email to %s: %s", email, exc)
 
@@ -215,7 +237,7 @@ def send_email_task(
         # Retry the whole task; Celery will pass same args
         raise self.retry(
             exc=RuntimeError(f"{len(errors)}/{len(recipients)} emails failed"),
-            countdown=5 * (2 ** self.request.retries),  # exponential backoff
+            countdown=5 * (2**self.request.retries),  # exponential backoff
         )
 
     return {"sent": sent, "total": len(recipients)}
@@ -225,6 +247,7 @@ def send_email_task(
 # Task: send_email_digest_task
 # BullMQ equivalent: emailQueue / processDigestJob()  (repeat cron job)
 # ---------------------------------------------------------------------------
+
 
 @shared_task(
     bind=True,
@@ -257,6 +280,7 @@ def send_email_digest_task(self, frequency: str = "daily"):
 # BullMQ equivalent: smsQueue / sms-worker.ts → processSmsJob()
 # Options: concurrency=3, rate_limit=10/s, max_retries=2, exponential backoff
 # ---------------------------------------------------------------------------
+
 
 @shared_task(
     bind=True,
@@ -311,7 +335,7 @@ def send_sms_task(
         logger.error("Failed to send SMS to %s: %s", formatted, exc)
         raise self.retry(
             exc=exc,
-            countdown=3 * (2 ** self.request.retries),
+            countdown=3 * (2**self.request.retries),
         )
 
 
@@ -320,6 +344,7 @@ def send_sms_task(
 # BullMQ equivalent: notificationsQueue / notification-worker.ts → processNotification()
 # Options: concurrency=10, max_retries=3, exponential backoff
 # ---------------------------------------------------------------------------
+
 
 @shared_task(
     bind=True,
@@ -335,7 +360,7 @@ def send_notification_task(
     user_id: str,
     title: str,
     message: str,
-    channels: list,               # ['email', 'sms', 'push', 'in-app']
+    channels: list,  # ['email', 'sms', 'push', 'in-app']
     data: Optional[dict] = None,
 ):
     """
@@ -416,7 +441,7 @@ def send_notification_task(
     if failed_channels and len(failed_channels) == len(channels):
         raise self.retry(
             exc=RuntimeError(f"All channels failed for user {user_id}"),
-            countdown=5 * (2 ** self.request.retries),
+            countdown=5 * (2**self.request.retries),
         )
 
     return {
@@ -430,6 +455,7 @@ def send_notification_task(
 # Internal helpers for in-app / push
 # ---------------------------------------------------------------------------
 
+
 def _create_in_app_notification(
     user_id: str,
     title: str,
@@ -439,6 +465,7 @@ def _create_in_app_notification(
     """Persist an in-app notification record and publish via Redis pub/sub."""
     try:
         from notifications.models import NotificationLog
+
         NotificationLog.objects.create(
             type="in-app",
             organization_id=data.get("organization_id") or None,
@@ -452,18 +479,21 @@ def _create_in_app_notification(
 
         r = _redis.from_url(settings.REDIS_URL)
         import json
+
         org_id = data.get("organization_id", "default")
         r.publish(
             f"notifications:{org_id}:{user_id}",
-            json.dumps({
-                "type": "notification",
-                "userId": user_id,
-                "tenantId": org_id,
-                "title": title,
-                "message": message,
-                "data": data,
-                "timestamp": timezone.now().isoformat(),
-            }),
+            json.dumps(
+                {
+                    "type": "notification",
+                    "userId": user_id,
+                    "orgId": org_id,
+                    "title": title,
+                    "message": message,
+                    "data": data,
+                    "timestamp": timezone.now().isoformat(),
+                }
+            ),
         )
     except Exception as exc:  # noqa: BLE001
         logger.warning("Redis pub/sub failed for in-app notification: %s", exc)
@@ -472,4 +502,6 @@ def _create_in_app_notification(
 def _send_push_notification(user_id: str, title: str, message: str, data: dict) -> None:
     """Dispatch a push notification via the existing FcmServiceViewSet logic."""
     # Delegate to the existing FCM service view logic when available.
-    logger.info("Push notification queued for user %s (FCM integration pending)", user_id)
+    logger.info(
+        "Push notification queued for user %s (FCM integration pending)", user_id
+    )

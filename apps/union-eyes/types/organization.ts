@@ -1,6 +1,6 @@
 // =====================================================
 // Types for Hierarchical Organization Model
-// Generated for Phase 5A: CLC Multi-Tenancy Support
+// Generated for Phase 5A: CLC Multi-Org Support
 // =====================================================
 
 import type { CAJurisdiction } from '@/lib/jurisdiction-helpers-client';
@@ -93,7 +93,7 @@ export interface OrganizationSettings {
 }
 
 /**
- * Main Organization model (replaces Tenant)
+ * Main Organization model
  */
 export interface Organization {
   id: string;
@@ -144,7 +144,7 @@ export interface Organization {
   created_by?: string;
   
   // Legacy Migration Support
-  legacy_tenant_id?: string;
+  legacy_org_id?: string;
 }
 
 /**
@@ -228,12 +228,12 @@ export interface UpdateOrganizationRequest {
 }
 
 /**
- * Organization member (updated from tenant member)
+ * Organization member
  */
 export interface OrganizationMember {
   id: string;
   user_id: string;
-  organization_id: string; // Changed from tenant_id
+  organization_id: string;
   role: 'admin' | 'manager' | 'steward' | 'member';
   status: 'active' | 'inactive' | 'suspended';
   membership_number?: string;
@@ -315,9 +315,9 @@ export interface JurisdictionMetadata {
 
 /**
  * Helper type: Backwards compatibility alias
- * @deprecated Use Organization instead
+ * @deprecated Use Organization directly
  */
-export type Tenant = Organization;
+export type Org = Organization;
 
 /**
  * Helper type: Backwards compatibility alias

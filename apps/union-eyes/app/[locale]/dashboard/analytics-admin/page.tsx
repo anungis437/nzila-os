@@ -17,10 +17,10 @@ import { requireMinRole } from '@/lib/api-auth-guard';
 import { BarChart3, Users, FileText, TrendingUp, Database, Activity } from 'lucide-react';
 import { logger } from '@/lib/logger';
 
-// Fetch cross-tenant analytics from API
-async function getCrossTenantAnalytics() {
+// Fetch cross-org analytics from API
+async function getCrossOrgAnalytics() {
   try {
-    const response = await fetch(`${process.env.NEXT_PUBLIC_APP_URL}/api/analytics/cross-tenant?metric_type=all`, {
+    const response = await fetch(`${process.env.NEXT_PUBLIC_APP_URL}/api/analytics/cross-org?metric_type=all`, {
       cache: 'no-store',
       headers: {
         'Content-Type': 'application/json',
@@ -28,13 +28,13 @@ async function getCrossTenantAnalytics() {
     });
     
     if (!response.ok) {
-      logger.error('Failed to fetch cross-tenant analytics');
+      logger.error('Failed to fetch cross-org analytics');
       return null;
     }
     
     return await response.json();
   } catch (error) {
-    logger.error('Error fetching cross-tenant analytics:', error);
+    logger.error('Error fetching cross-org analytics:', error);
     return null;
   }
 }
@@ -50,7 +50,7 @@ export default async function AnalyticsAdminDashboard() {
   await requireMinRole('data_analyst');
   
   // Fetch real data
-  const analytics = await getCrossTenantAnalytics();
+  const analytics = await getCrossOrgAnalytics();
   
   // Fallback to placeholder if API fails
   const analyticsData = analytics?.data || {

@@ -1,7 +1,7 @@
 /**
  * CFO Server Actions — Platform Administration.
  *
- * Multi-tenant firm management, MRR computation, and subscription actions.
+ * Multi-org firm management, MRR computation, and subscription actions.
  * Restricted to platform_admin role.
  */
 'use server'

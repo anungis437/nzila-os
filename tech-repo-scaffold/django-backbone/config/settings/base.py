@@ -2,6 +2,7 @@
 Base Django settings for Nzila Backbone Platform.
 Shared across all environments.
 """
+
 import os
 from pathlib import Path
 
@@ -109,7 +110,7 @@ REST_FRAMEWORK = {
 # OpenAPI / Swagger
 SPECTACULAR_SETTINGS = {
     "TITLE": "Nzila Backbone API",
-    "DESCRIPTION": "Multi-tenant SaaS platform API for Nzila verticals",
+    "DESCRIPTION": "Multi-org SaaS platform API for Nzila verticals",
     "VERSION": "1.0.0",
     "SERVE_INCLUDE_SCHEMA": False,
 }

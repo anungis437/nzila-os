@@ -8,7 +8,7 @@ export interface PlaceholderValues {
   OWNER_GITHUB: string;
   PRIMARY_APP_PATH: string;
   APP_PORT: string;
-  TENANT_KEY: string;
+  ORG_KEY: string;
   IMAGE_REPO: string;
   AUTH_PROVIDER: string;
   DB_PROVIDER: string;
@@ -24,7 +24,7 @@ export interface Manifest {
   owner_github: string;
   primary_app_path: string;
   app_port: number;
-  tenant_key: string;
+  org_key: string;
   image_repo: string;
   auth_provider: string;
   db_provider: string;
@@ -51,7 +51,7 @@ export function buildPlaceholders(manifest: Manifest): PlaceholderValues {
     OWNER_GITHUB: manifest.owner_github,
     PRIMARY_APP_PATH: manifest.primary_app_path,
     APP_PORT: String(manifest.app_port),
-    TENANT_KEY: manifest.tenant_key,
+    ORG_KEY: manifest.org_key,
     IMAGE_REPO: manifest.image_repo,
     AUTH_PROVIDER: manifest.auth_provider,
     DB_PROVIDER: manifest.db_provider,

@@ -20,7 +20,7 @@ export async function GET(request: NextRequest) {
   try {
     // Authentication guard with organization isolation
     const { userId: _userId, organizationId: _organizationId } = await requireApiAuth({
-      tenant: true,
+      org: true,
       roles: ['admin', 'steward'],
     });
 

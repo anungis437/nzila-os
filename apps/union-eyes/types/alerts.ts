@@ -148,7 +148,7 @@ export const AlertRuleSchema = z.object({
   // Metadata
   runbook_url: z.string().url().optional().describe('Link to incident response runbook'),
   tags: z.array(z.string()).default([]),
-  tenant_id: z.string().uuid().optional().describe('Tenant-specific rule'),
+  org_id: z.string().uuid().optional().describe('Org-specific rule'),
   
   // Audit fields
   created_by: z.string(),
@@ -177,8 +177,8 @@ export const AlertInstanceSchema = z.object({
   details: z.record(z.unknown()).optional().describe('Additional context (metric values, stack traces, etc.)'),
   
   // Instance metadata
-  tenant_id: z.string().uuid().optional(),
-  resource_id: z.string().optional().describe('ID of affected resource (user, tenant, etc.)'),
+  org_id: z.string().uuid().optional(),
+  resource_id: z.string().optional().describe('ID of affected resource (user, org, etc.)'),
   resource_type: z.string().optional().describe('Type of resource'),
   
   // Lifecycle timestamps
@@ -280,7 +280,7 @@ export interface AlertDashboardStats {
  */
 export const NotificationPreferencesSchema = z.object({
   user_id: z.string(),
-  tenant_id: z.string().uuid().optional(),
+  org_id: z.string().uuid().optional(),
   
   // Channel preferences
   email_enabled: z.boolean().default(true),

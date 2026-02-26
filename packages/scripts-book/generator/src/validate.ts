@@ -15,7 +15,7 @@ export const ManifestSchema = z.object({
   owner_github: z.string().min(1),
   primary_app_path: z.string().min(1),
   app_port: z.number().int().min(1).max(65535),
-  tenant_key: z.string().min(1),
+  org_key: z.string().min(1),
   image_repo: z.string().min(1),
   auth_provider: z.enum(["clerk", "none"]),
   db_provider: z.enum(["azure_postgresql"]),

@@ -11,7 +11,7 @@ from typing import Any, Dict, List
 
 def analyze_cross_platform_patterns() -> Dict[str, Any]:
     """Analyze cross-platform patterns."""
-    
+
     # Define platforms with their verticals
     platforms = [
         {"id": "union_eyes", "vertical": "Uniontech", "entities": 4773},
@@ -28,9 +28,9 @@ def analyze_cross_platform_patterns() -> Dict[str, Any]:
         {"id": "ponduops", "vertical": "Agrotech", "entities": 220},
         {"id": "insight_cfo", "vertical": "Fintech", "entities": 37},
         {"id": "stsa", "vertical": "Fintech", "entities": 95},
-        {"id": "memora", "vertical": "Healthtech", "entities": 150}
+        {"id": "memora", "vertical": "Healthtech", "entities": 150},
     ]
-    
+
     # Analyze verticals
     verticals = {}
     for p in platforms:
@@ -39,17 +39,17 @@ def analyze_cross_platform_patterns() -> Dict[str, Any]:
             verticals[v] = {"platforms": [], "total_entities": 0}
         verticals[v]["platforms"].append(p["id"])
         verticals[v]["total_entities"] += p["entities"]
-    
+
     # Identify shared patterns
     shared_patterns = identify_shared_patterns()
-    
+
     return {
         "generated_at": datetime.now().isoformat(),
         "total_platforms": len(platforms),
         "vertical_distribution": verticals,
         "shared_patterns": shared_patterns,
         "code_reuse_opportunities": calculate_reuse_opportunities(),
-        "vertical_synergies": identify_synergies()
+        "vertical_synergies": identify_synergies(),
     }
 
 
@@ -61,43 +61,43 @@ def identify_shared_patterns() -> List[Dict[str, Any]]:
             "platforms": 15,
             "implementation": "Clerk, custom, DRF auth",
             "reuse_priority": "HIGH",
-            "effort_hours": 40
+            "effort_hours": 40,
         },
         {
-            "pattern": "Organization/Tenant",
+            "pattern": "Organization",
             "platforms": 12,
             "implementation": "Various custom implementations",
             "reuse_priority": "HIGH",
-            "effort_hours": 60
+            "effort_hours": 60,
         },
         {
             "pattern": "Notification System",
             "platforms": 5,
             "implementation": "Per-platform",
             "reuse_priority": "MEDIUM",
-            "effort_hours": 30
+            "effort_hours": 30,
         },
         {
             "pattern": "Analytics Dashboard",
             "platforms": 15,
             "implementation": "Custom per platform",
             "reuse_priority": "MEDIUM",
-            "effort_hours": 40
+            "effort_hours": 40,
         },
         {
             "pattern": "Payment Processing",
             "platforms": 4,
             "implementation": "Stripe + custom",
             "reuse_priority": "HIGH",
-            "effort_hours": 50
+            "effort_hours": 50,
         },
         {
             "pattern": "Document Management",
             "platforms": 4,
             "implementation": "Various",
             "reuse_priority": "MEDIUM",
-            "effort_hours": 35
-        }
+            "effort_hours": 35,
+        },
     ]
 
 
@@ -110,12 +110,12 @@ def calculate_reuse_opportunities() -> Dict[str, Any]:
         "estimated_savings_hours": 255,
         "by_category": {
             "authentication": {"priority": "P1", "hours": 40},
-            "multi_tenancy": {"priority": "P1", "hours": 60},
+            "multi_org": {"priority": "P1", "hours": 60},
             "payments": {"priority": "P1", "hours": 50},
             "notifications": {"priority": "P2", "hours": 30},
             "analytics": {"priority": "P2", "hours": 40},
-            "documents": {"priority": "P2", "hours": 35}
-        }
+            "documents": {"priority": "P2", "hours": 35},
+        },
     }
 
 
@@ -126,26 +126,26 @@ def identify_synergies() -> List[Dict[str, Any]]:
             "verticals": ["EdTech", "Legaltech"],
             "synergy_type": "AI Services",
             "opportunity": "Legal AI for ABR Insights",
-            "value_potential": "$200K ARR"
+            "value_potential": "$200K ARR",
         },
         {
             "verticals": ["Agrotech"],
             "synergy_type": "Supply Chain",
             "opportunity": "CORA + PonduOps consolidation",
-            "value_potential": "$150K ARR"
+            "value_potential": "$150K ARR",
         },
         {
             "verticals": ["Fintech", "Commerce"],
             "synergy_type": "Payments",
             "opportunity": "Unified payment gateway",
-            "value_potential": "$100K ARR"
+            "value_potential": "$100K ARR",
         },
         {
             "verticals": ["EdTech", "Entertainment"],
             "synergy_type": "Gamification",
             "opportunity": "Shared gamification engine",
-            "value_potential": "$80K ARR"
-        }
+            "value_potential": "$80K ARR",
+        },
     ]
 
 

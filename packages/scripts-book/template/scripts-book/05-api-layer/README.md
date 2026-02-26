@@ -11,7 +11,7 @@ follows Next.js App Router conventions:
 ```
 app/api/
 ├── auth/           # Authentication callbacks
-├── tenants/        # Tenant management
+├── orgs/           # Organization management
 ├── [resource]/     # Domain-specific CRUD endpoints
 │   ├── route.ts    # GET / POST handlers
 │   └── [id]/
@@ -26,7 +26,7 @@ Requests pass through the following middleware (in order):
 
 1. **Rate limiting** — Prevents abuse; configured per-route.
 2. **Authentication** — Validates session / JWT via {{AUTH_PROVIDER}}.
-3. **Tenant resolution** — Extracts `{{TENANT_KEY}}` from the session.
+3. **Org resolution** — Extracts `{{ORG_KEY}}` from the session.
 4. **Input validation** — Zod schemas validate request body and query params.
 5. **Handler** — Business logic executes.
 6. **Error boundary** — Catches unhandled errors, returns structured JSON.

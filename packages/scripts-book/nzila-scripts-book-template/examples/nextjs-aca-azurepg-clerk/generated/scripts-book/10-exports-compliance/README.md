@@ -16,7 +16,7 @@ Depending on the jurisdictions served, the application may be subject to:
 
 ## Data residency
 
-- All tenant data is stored in the region configured for the azure_postgresql instance.
+- All org data is stored in the region configured for the azure_postgresql instance.
 - Cross-region replication is disabled by default. Enable it only after a legal review confirms compliance with applicable data-residency laws.
 
 ## Export control classification
@@ -36,11 +36,11 @@ The following automated checks run in CI:
 
 ## Data export
 
-When a tenant requests a data export:
+When an org requests a data export:
 
 1. An authorized admin triggers the export via the admin dashboard.
 2. The export job runs asynchronously and writes an encrypted archive to blob storage.
-3. The tenant is notified with a time-limited download link.
+3. The org is notified with a time-limited download link.
 4. The export event is recorded in the audit log (see Chapter 08).
 
 ## Audit trail

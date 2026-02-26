@@ -1,5 +1,5 @@
 /**
- * CFO — Platform Admin (Multi-Tenant Management).
+ * CFO — Platform Admin (Multi-Org Management).
  *
  * Platform admin only — manages firms, subscriptions, MRR metrics.
  */
@@ -35,7 +35,7 @@ export default async function PlatformAdminPage() {
     <div className="space-y-6">
       <div>
         <h2 className="font-poppins text-2xl font-bold text-foreground">Platform Admin</h2>
-        <p className="mt-1 text-sm text-muted-foreground">Multi-tenant firm management & revenue metrics</p>
+        <p className="mt-1 text-sm text-muted-foreground">Multi-org firm management & revenue metrics</p>
       </div>
 
       <div className="grid gap-4 sm:grid-cols-2 lg:grid-cols-4">

@@ -39,6 +39,7 @@ REPORTS_DIR = os.environ.get("REPORTS_DIR", "/tmp/reports")
 # Options: max_retries=2, fixed retry delay=10s
 # ---------------------------------------------------------------------------
 
+
 @shared_task(
     bind=True,
     name="analytics.tasks.generate_report_task",
@@ -46,14 +47,14 @@ REPORTS_DIR = os.environ.get("REPORTS_DIR", "/tmp/reports")
     max_retries=2,
     default_retry_delay=10,
     acks_late=True,
-    time_limit=600,   # 10-minute hard limit for large reports
+    time_limit=600,  # 10-minute hard limit for large reports
     soft_time_limit=540,
 )
 def generate_report_task(
     self,
     *,
     report_type: str,
-    tenant_id: str,
+    org_id: str,
     user_id: str,
     parameters: Optional[dict] = None,
     notify_user: bool = True,
@@ -66,7 +67,7 @@ def generate_report_task(
 
     Args:
         report_type:  One of 'claims', 'members', 'grievances', 'usage', 'gdpr-export'.
-        tenant_id:    Organization / tenant UUID.
+        org_id:       Organization UUID.
         user_id:      Requesting Clerk user ID.
         parameters:   Report-specific parameters (date range, format, etc.).
         notify_user:  Whether to email the user on completion.
@@ -75,14 +76,16 @@ def generate_report_task(
     os.makedirs(REPORTS_DIR, exist_ok=True)
 
     logger.info(
-        "Starting report generation: type=%s tenant=%s user=%s",
-        report_type, tenant_id, user_id,
+        "Starting report generation: type=%s org=%s user=%s",
+        report_type,
+        org_id,
+        user_id,
     )
 
     try:
         result_path, content_type = _dispatch_report(
             report_type=report_type,
-            tenant_id=tenant_id,
+            org_id=org_id,
             user_id=user_id,
             parameters=parameters,
         )
@@ -116,18 +119,19 @@ def generate_report_task(
 # Report dispatch
 # ---------------------------------------------------------------------------
 
+
 def _dispatch_report(
     report_type: str,
-    tenant_id: str,
+    org_id: str,
     user_id: str,
     parameters: dict,
 ) -> tuple[str, str]:
     """Route to the appropriate generator; return (file_path, content_type)."""
     dispatch = {
-        "claims":      _generate_claims_report,
-        "members":     _generate_members_report,
-        "grievances":  _generate_grievances_report,
-        "usage":       _generate_usage_report,
+        "claims": _generate_claims_report,
+        "members": _generate_members_report,
+        "grievances": _generate_grievances_report,
+        "usage": _generate_usage_report,
         "gdpr-export": _generate_gdpr_export,
     }
 
@@ -135,12 +139,13 @@ def _dispatch_report(
     if not generator:
         raise ValueError(f"Unknown report type: {report_type}")
 
-    return generator(tenant_id=tenant_id, user_id=user_id, parameters=parameters)
+    return generator(org_id=org_id, user_id=user_id, parameters=parameters)
 
 
 # ---------------------------------------------------------------------------
 # Individual report generators
 # ---------------------------------------------------------------------------
+
 
 def _write_csv(rows: list[dict], filename: str) -> str:
     """Write rows to a CSV file in REPORTS_DIR and return the path."""
@@ -166,15 +171,15 @@ def _write_json(data: dict, filename: str) -> str:
     return path
 
 
-def _generate_claims_report(tenant_id: str, user_id: str, parameters: dict):
-    """Generate a CSV report of claims for this tenant."""
+def _generate_claims_report(org_id: str, user_id: str, parameters: dict):
+    """Generate a CSV report of claims for this org."""
     from grievances.models import Claims
 
     date_from = parameters.get("date_from")
     date_to = parameters.get("date_to")
 
     qs = Claims.objects.filter(organization_id=None)  # FK not on Claims yet
-    # When FK available: .filter(organization__id=tenant_id)
+    # When FK available: .filter(organization__id=org_id)
 
     rows = [
         {
@@ -185,38 +190,44 @@ def _generate_claims_report(tenant_id: str, user_id: str, parameters: dict):
         for c in qs[:5000]
     ]
 
-    filename = f"claims_{tenant_id}_{uuid.uuid4().hex[:8]}.csv"
+    filename = f"claims_{org_id}_{uuid.uuid4().hex[:8]}.csv"
     path = _write_csv(rows, filename)
     return path, "text/csv"
 
 
-def _generate_members_report(tenant_id: str, user_id: str, parameters: dict):
-    """Generate a CSV report of union members for this tenant."""
-    from unions.models import Unions  # placeholder — swap for Members model when available
+def _generate_members_report(org_id: str, user_id: str, parameters: dict):
+    """Generate a CSV report of union members for this org."""
+    from unions.models import (
+        Unions,
+    )  # placeholder — swap for Members model when available
 
     rows = []  # Member queryset goes here when models are fully populated
-    filename = f"members_{tenant_id}_{uuid.uuid4().hex[:8]}.csv"
+    filename = f"members_{org_id}_{uuid.uuid4().hex[:8]}.csv"
     path = _write_csv(rows, filename)
     return path, "text/csv"
 
 
-def _generate_grievances_report(tenant_id: str, user_id: str, parameters: dict):
-    """Generate a CSV report of grievances for this tenant."""
+def _generate_grievances_report(org_id: str, user_id: str, parameters: dict):
+    """Generate a CSV report of grievances for this org."""
     from grievances.models import Claims
 
     rows = [
-        {"id": str(c.id), "claim_number": c.claim_number or "", "created_at": c.created_at.isoformat()}
+        {
+            "id": str(c.id),
+            "claim_number": c.claim_number or "",
+            "created_at": c.created_at.isoformat(),
+        }
         for c in Claims.objects.all()[:5000]
     ]
-    filename = f"grievances_{tenant_id}_{uuid.uuid4().hex[:8]}.csv"
+    filename = f"grievances_{org_id}_{uuid.uuid4().hex[:8]}.csv"
     path = _write_csv(rows, filename)
     return path, "text/csv"
 
 
-def _generate_usage_report(tenant_id: str, user_id: str, parameters: dict):
+def _generate_usage_report(org_id: str, user_id: str, parameters: dict):
     """Generate a JSON usage report."""
     report = {
-        "tenant_id": tenant_id,
+        "org_id": org_id,
         "generated_at": timezone.now().isoformat(),
         "period": {
             "from": (date.today() - timedelta(days=30)).isoformat(),
@@ -224,12 +235,12 @@ def _generate_usage_report(tenant_id: str, user_id: str, parameters: dict):
         },
         "metrics": {},
     }
-    filename = f"usage_{tenant_id}_{uuid.uuid4().hex[:8]}.json"
+    filename = f"usage_{org_id}_{uuid.uuid4().hex[:8]}.json"
     path = _write_json(report, filename)
     return path, "application/json"
 
 
-def _generate_gdpr_export(tenant_id: str, user_id: str, parameters: dict):
+def _generate_gdpr_export(org_id: str, user_id: str, parameters: dict):
     """
     Generate a GDPR personal-data export for a specific user.
 
@@ -287,10 +298,10 @@ def _flatten_for_export(data, prefix="") -> list[dict]:
 def _escape_xml(value: str) -> str:
     return (
         value.replace("&", "&amp;")
-             .replace("<", "&lt;")
-             .replace(">", "&gt;")
-             .replace('"', "&quot;")
-             .replace("'", "&apos;")
+        .replace("<", "&lt;")
+        .replace(">", "&gt;")
+        .replace('"', "&quot;")
+        .replace("'", "&apos;")
     )
 
 
@@ -306,6 +317,7 @@ def _to_xml(entries: list[dict]) -> str:
 # ---------------------------------------------------------------------------
 # Post-generation notification
 # ---------------------------------------------------------------------------
+
 
 def _notify_report_ready(user_id: str, report_type: str, result_path: str) -> None:
     """Queue an email notification to the user that their report is ready."""
@@ -337,6 +349,7 @@ def _get_user_email(user_id: str) -> str:
     """
     try:
         from clerk_backend_api import Clerk  # type: ignore[import]
+
         client = Clerk(bearer_auth=os.environ.get("CLERK_SECRET_KEY", ""))
         user = client.users.get(user_id=user_id)
         primary_id = user.primary_email_address_id

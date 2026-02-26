@@ -37,7 +37,7 @@ node generator/dist/index.js apply --target examples/nextjs-aca-azurepg-clerk/ge
 | `{{OWNER_GITHUB}}` | anungis437 |
 | `{{PRIMARY_APP_PATH}}` | apps/web |
 | `{{APP_PORT}}` | 3000 |
-| `{{TENANT_KEY}}` | orgId |
+| `{{ORG_KEY}}` | orgId |
 | `{{IMAGE_REPO}}` | courtlens-web |
 | `{{AUTH_PROVIDER}}` | clerk |
 | `{{DB_PROVIDER}}` | azure_postgresql |

@@ -18,7 +18,7 @@ The mixin reads the Clerk organisation ID from the `X-Organization-Id`
 request header (forwarded by the Next.js djangoProxy utility) and resolves
 it to the local `organizations.id` UUID.
 
-If the header is absent (unauthenticated or single-tenant call) the mixin
+If the header is absent (unauthenticated or single-org call) the mixin
 falls through to the default queryset with no org filter applied.
 """
 
@@ -46,9 +46,7 @@ def _resolve_local_org_id(clerk_org_id: str | None) -> str | None:
     from auth_core.models import Organizations  # noqa: PLC0415
 
     try:
-        org = Organizations.objects.only("id").get(
-            clerk_organization_id=clerk_org_id
-        )
+        org = Organizations.objects.only("id").get(clerk_organization_id=clerk_org_id)
         return str(org.id)
     except Organizations.DoesNotExist:
         logger.warning(
@@ -90,7 +88,7 @@ class OrgScopedMixin:
 
         local_org_id = _resolve_local_org_id(clerk_org_id)
         if not local_org_id:
-# Org hasn't been created locally yet (no webhook fired).
+            # Org hasn't been created locally yet (no webhook fired).
             # Fail closed — return empty queryset rather than leaking data.
             return qs.none()
 
@@ -139,7 +137,9 @@ class UserScopedMixin:
         if not user or not user.is_authenticated:
             return qs.none()
 
-        clerk_user_id: str = user.username  # ClerkAuthentication sets username = Clerk user ID
+        clerk_user_id: str = (
+            user.username
+        )  # ClerkAuthentication sets username = Clerk user ID
 
         model = qs.model
         field_names = {f.name for f in model._meta.get_fields()}

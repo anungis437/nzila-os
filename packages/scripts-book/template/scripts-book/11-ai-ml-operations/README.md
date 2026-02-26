@@ -35,9 +35,9 @@ operational footprint minimal.
 
 ## Rate limiting and cost control
 
-- AI endpoints enforce per-tenant rate limits independent of general API
+- AI endpoints enforce per-org rate limits independent of general API
   rate limits.
-- A daily spend cap is configured per tenant. When exceeded, AI features
+- A daily spend cap is configured per org. When exceeded, AI features
   return `429 Too Many Requests`.
 
 ## Evaluation and monitoring
@@ -50,5 +50,5 @@ operational footprint minimal.
 
 - User inputs sent to external AI providers are logged for debugging but
   scrubbed of PII before transmission.
-- Tenant data is never used to fine-tune shared models.
+- Org data is never used to fine-tune shared models.
 - The AI privacy policy is documented in the application's terms of service.

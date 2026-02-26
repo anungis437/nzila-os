@@ -44,7 +44,7 @@ const ROLE_PERMISSIONS = {
       "Manage users",
       "Configure system",
       "View audit logs",
-      "Manage tenants",
+      "Manage orgs",
       "Manage roles",
       "Delete data",
       "Export data",
@@ -54,7 +54,7 @@ const ROLE_PERMISSIONS = {
     label: "Officer",
     count: 68,
     permissions: [
-      "View tenant data",
+      "View org data",
       "Manage claims",
       "Manage members",
       "View reports",
@@ -99,7 +99,7 @@ const RECENT_CHANGES = [
     to: "officer",
     by: "Admin User",
     timestamp: "2026-02-12T14:30:00Z",
-    tenant: "Local 123",
+    org: "Local 123",
   },
   {
     id: 2,
@@ -108,7 +108,7 @@ const RECENT_CHANGES = [
     permission: "manage_documents",
     by: "Admin User",
     timestamp: "2026-02-12T13:15:00Z",
-    tenant: "Local 456",
+    org: "Local 456",
   },
   {
     id: 3,
@@ -117,7 +117,7 @@ const RECENT_CHANGES = [
     permission: "export_data",
     by: "System",
     timestamp: "2026-02-12T12:00:00Z",
-    tenant: "Local 123",
+    org: "Local 123",
   },
 ];
 
@@ -291,7 +291,7 @@ export default async function PermissionsPage({ params: _params }: PageProps) {
                     <TableHead>Action</TableHead>
                     <TableHead>Details</TableHead>
                     <TableHead>By</TableHead>
-                    <TableHead>Tenant</TableHead>
+                    <TableHead>Organization</TableHead>
                     <TableHead>Timestamp</TableHead>
                   </TableRow>
                 </TableHeader>
@@ -316,7 +316,7 @@ export default async function PermissionsPage({ params: _params }: PageProps) {
                         )}
                       </TableCell>
                       <TableCell className="text-sm text-gray-600">{change.by}</TableCell>
-                      <TableCell className="text-sm text-gray-600">{change.tenant}</TableCell>
+                      <TableCell className="text-sm text-gray-600">{change.org}</TableCell>
                       <TableCell className="text-sm text-gray-600">
                         {new Date(change.timestamp).toLocaleString()}
                       </TableCell>

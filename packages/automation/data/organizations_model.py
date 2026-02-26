@@ -159,11 +159,12 @@ class Organizations(models.Model):
     created_by = models.UUIDField(null=True, blank=True)
     
     # Legacy & Migration
-    legacy_tenant_id = models.UUIDField(
+    legacy_org_id = models.UUIDField(
         null=True,
         blank=True,
         db_index=True,
-        help_text="Original tenant_id from legacy system"
+        db_column='legacy_tenant_id',
+        help_text="Original org ID from legacy system"
     )
     
     # CLC Financial Fields
@@ -198,7 +199,7 @@ class Organizations(models.Model):
             models.Index(fields=['hierarchy_level'], name='idx_organizations_hierarchy_level'),
             models.Index(fields=['status'], name='idx_organizations_status'),
             models.Index(fields=['clc_affiliated'], name='idx_organizations_clc_affiliated'),
-            models.Index(fields=['legacy_tenant_id'], name='idx_organizations_legacy_tenant'),
+            models.Index(fields=['legacy_org_id'], name='idx_organizations_legacy_tenant'),
         ]
     
     def __str__(self):

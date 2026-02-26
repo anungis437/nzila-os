@@ -138,7 +138,7 @@ export const organizations = pgTable(
     createdBy: uuid('created_by'),
     
     // Legacy & Migration
-    legacyTenantId: uuid('legacy_tenant_id'),
+    legacyOrgId: uuid('legacy_tenant_id'),
     
     // CLC Financial Fields
     clcAffiliateCode: varchar('clc_affiliate_code', { length: 20 }),
@@ -155,7 +155,7 @@ export const organizations = pgTable(
     statusIdx: index('idx_organizations_status').on(table.status),
     clcAffiliatedIdx: index('idx_organizations_clc_affiliated').on(table.clcAffiliated),
     // jurisdictionIdx: index('idx_organizations_jurisdiction').on(table.jurisdiction), // Commented out - column does not exist
-    legacyTenantIdx: index('idx_organizations_legacy_tenant').on(table.legacyTenantId),
+    legacyOrgIdx: index('idx_organizations_legacy_tenant').on(table.legacyOrgId),
   })
 );
 
@@ -278,7 +278,7 @@ export const organizationMembers = pgTable(
     organizationId: text('organization_id').notNull(),
     
     // LEGACY: Keep for backward compatibility during migration
-    tenantId: uuid('tenant_id'),
+    legacyOrgId: uuid('tenant_id'),
     
     // Required fields in actual database
     name: text('name').notNull(),
@@ -329,40 +329,40 @@ export const organizationMembersRelations = relations(organizationMembers, ({ on
 // These are partial schemas showing the new organization_id column
 // Full schemas exist elsewhere, this just documents the migration
 // 
-// NOTE: Legacy tenantId fields are kept for backward compatibility during migration.
+// NOTE: Legacy org ID fields (mapped to DB tenant_id columns) are kept for backward compatibility.
 // They should be removed in a future major version once all systems are updated.
 // Current status (2024): Migration to organization_id complete, legacy fields deprecated.
 
 export const claimsOrganizationMigration = {
   // Add to existing claims table
   organizationId: uuid('organization_id').references(() => organizations.id),
-  // Keep legacy tenant_id for backward compatibility
-  tenantId: uuid('tenant_id'),
+  // Keep legacy tenant_id column for backward compatibility
+  legacyOrgId: uuid('tenant_id'),
 };
 
 export const membersOrganizationMigration = {
   organizationId: uuid('organization_id').references(() => organizations.id),
-  tenantId: uuid('tenant_id'),
+  legacyOrgId: uuid('tenant_id'),
 };
 
 export const strikeFundsOrganizationMigration = {
   organizationId: uuid('organization_id').references(() => organizations.id),
-  tenantId: uuid('tenant_id'),
+  legacyOrgId: uuid('tenant_id'),
 };
 
 export const duesPaymentsOrganizationMigration = {
   organizationId: uuid('organization_id').references(() => organizations.id),
-  tenantId: uuid('tenant_id'),
+  legacyOrgId: uuid('tenant_id'),
 };
 
 export const deadlinesOrganizationMigration = {
   organizationId: uuid('organization_id').references(() => organizations.id),
-  tenantId: uuid('tenant_id'),
+  legacyOrgId: uuid('tenant_id'),
 };
 
 export const documentsOrganizationMigration = {
   organizationId: uuid('organization_id').references(() => organizations.id),
-  tenantId: uuid('tenant_id'),
+  legacyOrgId: uuid('tenant_id'),
 };
 
 // =====================================================

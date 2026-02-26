@@ -38,7 +38,7 @@ Every target repo needs a `scripts-book.manifest.json` at its root. Example:
   "owner_github": "your-org",
   "primary_app_path": "apps/web",
   "app_port": 3000,
-  "tenant_key": "orgId",
+  "org_key": "orgId",
   "image_repo": "myapp-web",
   "auth_provider": "clerk",
   "db_provider": "azure_postgresql",

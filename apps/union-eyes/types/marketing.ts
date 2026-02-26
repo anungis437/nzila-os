@@ -309,7 +309,7 @@ export interface ImmutabilityMetric extends TrustMetricDetail {
 
 export interface RLSMetric extends TrustMetricDetail {
   policiesActive: number;
-  tenantIsolation: string; // "100%"
+  orgIsolation: string; // "100%"
   lastPolicyCheck: Date;
   tablesProtected: string[];
 }

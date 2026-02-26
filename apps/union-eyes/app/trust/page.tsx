@@ -6,7 +6,7 @@
  * 
  * Shows:
  * - Immutability enforcement status
- * - RLS tenant isolation
+ * - RLS org isolation
  * - FSM validation
  * - Governance structure
  * - Audit log metrics
@@ -80,7 +80,7 @@ export default async function TrustPage() {
           <StatCard
             icon={<Shield className="h-5 w-5" />}
             label="RLS Isolation"
-            value={metrics.rlsEnforcement.tenantIsolation}
+            value={metrics.rlsEnforcement.orgIsolation}
             status={metrics.rlsEnforcement.status}
           />
           <StatCard
@@ -146,8 +146,8 @@ export default async function TrustPage() {
                     value: metrics.rlsEnforcement.policiesActive,
                   },
                   {
-                    label: 'Tenant Isolation',
-                    value: metrics.rlsEnforcement.tenantIsolation,
+                    label: 'Org Isolation',
+                    value: metrics.rlsEnforcement.orgIsolation,
                   },
                   {
                     label: 'Tables Protected',
@@ -260,11 +260,11 @@ export default async function TrustPage() {
               <Section
                 id="rls"
                 title="Row-Level Security (RLS)"
-                description="PostgreSQL RLS policies ensure complete tenant data isolation. Organizations cannot access each other's data."
+                description="PostgreSQL RLS policies ensure complete org data isolation. Organizations cannot access each other's data."
               >
                 <ul className="list-disc list-inside text-sm text-slate-700 space-y-1">
                   <li>Active policies: {metrics.rlsEnforcement.policiesActive}</li>
-                  <li>Tenant isolation: {metrics.rlsEnforcement.tenantIsolation}</li>
+                  <li>Org isolation: {metrics.rlsEnforcement.orgIsolation}</li>
                   <li>Protected tables: {metrics.rlsEnforcement.tablesProtected.join(', ')}</li>
                 </ul>
               </Section>

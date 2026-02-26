@@ -9,7 +9,7 @@ processes that keep the application secure over time.
 
 - All traffic is encrypted in transit (TLS 1.2+).
 - Authentication is delegated to clerk (see Chapter 03).
-- Tenant data isolation is enforced via `orgId` at the query and RLS layer (see Chapter 03).
+- Org data isolation is enforced via `orgId` at the query and RLS layer (see Chapter 03).
 - Content Security Policy (CSP) headers are configured in `next.config.mjs`.
 
 ## Secrets hygiene
@@ -44,7 +44,7 @@ All privileged actions (user creation, role changes, data exports) are logged
 to an append-only audit table with the following fields:
 
 - `actor_id` — Who performed the action.
-- `orgId` — Which tenant context.
+- `orgId` — Which org context.
 - `action` — Machine-readable action name.
 - `timestamp` — UTC timestamp.
 - `metadata` — JSON payload with before/after state.

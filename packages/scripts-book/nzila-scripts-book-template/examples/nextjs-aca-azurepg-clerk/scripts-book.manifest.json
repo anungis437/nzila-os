@@ -5,7 +5,7 @@
   "owner_github": "anungis437",
   "primary_app_path": "apps/web",
   "app_port": 3000,
-  "tenant_key": "orgId",
+  "org_key": "orgId",
   "image_repo": "courtlens-web",
   "auth_provider": "clerk",
   "db_provider": "azure_postgresql",

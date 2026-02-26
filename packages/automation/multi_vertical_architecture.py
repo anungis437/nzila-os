@@ -12,31 +12,32 @@ Handles legacy codebases across multiple verticals:
 """
 
 import json
-from pathlib import Path
 from collections import defaultdict
+from pathlib import Path
+
 
 def analyze_cross_domain_architecture():
     """
     Design strategy for migrating multiple legacy platforms
     into unified Nzila backbone
     """
-    
+
     print("=" * 100)
     print("NZILA CROSS-DOMAIN BACKBONE ARCHITECTURE")
     print("Multi-Vertical Platform Migration Strategy")
     print("=" * 100)
-    
+
     # VERTICAL ANALYSIS
     print("\n\n📊 VERTICAL LANDSCAPE")
     print("=" * 100)
-    
+
     verticals = [
         {
             "name": "Healthtech",
             "legacy_platforms": [
                 "Memora (cognitive health games)",
                 "ClinicConnect (clinical trials)",
-                "CareAI (caregiver support)"
+                "CareAI (caregiver support)",
             ],
             "unique_requirements": [
                 "PIPEDA, GDPR, HIPAA compliance",
@@ -44,29 +45,28 @@ def analyze_cross_domain_architecture():
                 "PHI (Protected Health Information) handling",
                 "Medical device integration (HL7/FHIR)",
                 "Clinical safety monitoring",
-                "Consent management (granular)"
+                "Consent management (granular)",
             ],
             "shared_with_backbone": [
-                "✅ Multi-tenant isolation",
+                "✅ Multi-org isolation",
                 "✅ Consent & compliance",
                 "✅ AI Core (cognitive analytics)",
                 "✅ Billing (freemium + SaaS)",
-                "✅ Notifications"
+                "✅ Notifications",
             ],
             "domain_specific_modules": [
                 "clinical/",
                 "medical_devices/",
                 "trials/",
-                "health_records/"
-            ]
+                "health_records/",
+            ],
         },
-        
         {
             "name": "Agrotech",
             "legacy_platforms": [
                 "Farm management system",
                 "Supply chain tracking",
-                "Market pricing analytics"
+                "Market pricing analytics",
             ],
             "unique_requirements": [
                 "IoT sensor integration (soil, weather, equipment)",
@@ -76,31 +76,30 @@ def analyze_cross_domain_architecture():
                 "Inventory management",
                 "Farmer cooperative management",
                 "Agricultural compliance (organic, fair trade)",
-                "Mobile-first (offline sync for rural areas)"
+                "Mobile-first (offline sync for rural areas)",
             ],
             "shared_with_backbone": [
-                "✅ Multi-tenant (cooperative/farm level)",
+                "✅ Multi-org (cooperative/farm level)",
                 "✅ AI Core (price prediction, yield optimization)",
                 "✅ Analytics (farm performance dashboards)",
                 "✅ Integrations (weather APIs, market data)",
                 "✅ Notifications (harvest alerts, price alerts)",
-                "✅ Billing (cooperative subscriptions)"
+                "✅ Billing (cooperative subscriptions)",
             ],
             "domain_specific_modules": [
                 "farms/",
                 "crops/",
                 "sensors/",
                 "supply_chain/",
-                "markets/"
-            ]
+                "markets/",
+            ],
         },
-        
         {
             "name": "Legaltech",
             "legacy_platforms": [
                 "Document automation",
                 "Case management",
-                "Legal research assistant"
+                "Legal research assistant",
             ],
             "unique_requirements": [
                 "Document generation (contracts, briefs)",
@@ -110,31 +109,30 @@ def analyze_cross_domain_architecture():
                 "Billing & time tracking (legal fees)",
                 "Court filing integration",
                 "Legal compliance (bar association rules)",
-                "Multi-jurisdiction support"
+                "Multi-jurisdiction support",
             ],
             "shared_with_backbone": [
-                "✅ Multi-tenant (law firm/client level)",
+                "✅ Multi-org (law firm/client level)",
                 "✅ AI Core (legal research, document analysis)",
                 "✅ Consent & compliance (client privilege)",
                 "✅ Billing (hourly billing, retainers)",
                 "✅ Content (legal templates, precedents)",
-                "✅ Notifications (deadline alerts)"
+                "✅ Notifications (deadline alerts)",
             ],
             "domain_specific_modules": [
                 "cases/",
                 "documents/",
                 "legal_research/",
                 "billing_time/",
-                "courts/"
-            ]
+                "courts/",
+            ],
         },
-        
         {
             "name": "Uniontech",
             "legacy_platforms": [
                 "Union organizing platform",
                 "Worker rights tracker",
-                "Collective bargaining tools"
+                "Collective bargaining tools",
             ],
             "unique_requirements": [
                 "Member management (union membership)",
@@ -144,31 +142,30 @@ def analyze_cross_domain_architecture():
                 "Voting & polling (union elections)",
                 "Anonymous reporting (workplace violations)",
                 "Multi-lingual support (diverse workforce)",
-                "Worker safety incident tracking"
+                "Worker safety incident tracking",
             ],
             "shared_with_backbone": [
-                "✅ Multi-tenant (union/local chapter level)",
+                "✅ Multi-org (union/local chapter level)",
                 "✅ Consent & compliance (worker privacy)",
                 "✅ Analytics (campaign effectiveness)",
                 "✅ Notifications (campaign updates, alerts)",
                 "✅ Content (worker rights education)",
-                "✅ Billing (union dues management)"
+                "✅ Billing (union dues management)",
             ],
             "domain_specific_modules": [
                 "unions/",
                 "members/",
                 "campaigns/",
                 "grievances/",
-                "voting/"
-            ]
+                "voting/",
+            ],
         },
-        
         {
             "name": "Cybersecurity",
             "legacy_platforms": [
                 "Threat detection system",
                 "Compliance dashboard",
-                "Security audit tools"
+                "Security audit tools",
             ],
             "unique_requirements": [
                 "Threat intelligence feeds",
@@ -178,31 +175,30 @@ def analyze_cross_domain_architecture():
                 "Compliance reporting (SOC 2, ISO 27001)",
                 "Access control auditing",
                 "Encryption key management",
-                "Security policy enforcement"
+                "Security policy enforcement",
             ],
             "shared_with_backbone": [
-                "✅ Multi-tenant (client organization level)",
+                "✅ Multi-org (client organization level)",
                 "✅ AI Core (anomaly detection, threat prediction)",
                 "✅ Audit logging (security events)",
                 "✅ Compliance (regulatory frameworks)",
                 "✅ Notifications (security alerts)",
-                "✅ Analytics (security metrics)"
+                "✅ Analytics (security metrics)",
             ],
             "domain_specific_modules": [
                 "threats/",
                 "vulnerabilities/",
                 "incidents/",
                 "compliance_frameworks/",
-                "audits/"
-            ]
+                "audits/",
+            ],
         },
-        
         {
             "name": "Justice & Equity (Anti-Black Racism)",
             "legacy_platforms": [
                 "Incident reporting platform",
                 "Community organizing tools",
-                "Policy advocacy tracker"
+                "Policy advocacy tracker",
             ],
             "unique_requirements": [
                 "Anonymous incident reporting",
@@ -212,62 +208,61 @@ def analyze_cross_domain_architecture():
                 "Advocacy campaign management",
                 "Safe space moderation (community guidelines)",
                 "Trauma-informed design",
-                "Multi-stakeholder collaboration (activists, lawyers, media)"
+                "Multi-stakeholder collaboration (activists, lawyers, media)",
             ],
             "shared_with_backbone": [
-                "✅ Multi-tenant (organization/coalition level)",
+                "✅ Multi-org (organization/coalition level)",
                 "✅ Consent & compliance (privacy, anonymity)",
                 "✅ AI Core (sentiment analysis, pattern detection)",
                 "✅ Content (educational resources, policy templates)",
                 "✅ Notifications (campaign updates, alerts)",
-                "✅ Analytics (incident trends, campaign impact)"
+                "✅ Analytics (incident trends, campaign impact)",
             ],
             "domain_specific_modules": [
                 "incidents/",
                 "campaigns/",
                 "policies/",
                 "community/",
-                "advocacy/"
-            ]
-        }
+                "advocacy/",
+            ],
+        },
     ]
-    
+
     for vertical in verticals:
         print(f"\n\n{'=' * 80}")
         print(f"📂 {vertical['name'].upper()}")
         print(f"{'=' * 80}")
         print(f"\nLegacy Platforms:")
-        for platform in vertical['legacy_platforms']:
+        for platform in vertical["legacy_platforms"]:
             print(f"   • {platform}")
-        
+
         print(f"\n🔧 Unique Requirements:")
-        for req in vertical['unique_requirements']:
+        for req in vertical["unique_requirements"]:
             print(f"   • {req}")
-        
+
         print(f"\n♻️ Shared with Backbone:")
-        for shared in vertical['shared_with_backbone']:
+        for shared in vertical["shared_with_backbone"]:
             print(f"   {shared}")
-        
+
         print(f"\n📁 Domain-Specific Django Apps:")
-        for module in vertical['domain_specific_modules']:
+        for module in vertical["domain_specific_modules"]:
             print(f"   apps/{vertical['name'].lower()}/{module}")
-    
+
     # CROSS-DOMAIN PATTERNS
     print("\n\n" + "=" * 100)
     print("🔗 CROSS-DOMAIN PATTERNS (Common Across ALL Verticals)")
     print("=" * 100)
-    
+
     cross_domain_patterns = {
-        "Multi-Tenancy": {
+        "Multi-Org Isolation": {
             "healthtech": "Clinic/trial isolation",
             "agrotech": "Farm/cooperative isolation",
             "legaltech": "Law firm/client isolation",
             "uniontech": "Union/chapter isolation",
             "cybersecurity": "Client organization isolation",
             "justice": "Coalition/organization isolation",
-            "backbone_module": "tenants/"
+            "backbone_module": "organizations/",
         },
-        
         "AI Core": {
             "healthtech": "Cognitive analytics, companion personality",
             "agrotech": "Yield prediction, price forecasting",
@@ -275,9 +270,8 @@ def analyze_cross_domain_architecture():
             "uniontech": "Campaign effectiveness prediction",
             "cybersecurity": "Threat detection, anomaly detection",
             "justice": "Sentiment analysis, pattern detection",
-            "backbone_module": "ai_core/"
+            "backbone_module": "ai_core/",
         },
-        
         "Consent & Compliance": {
             "healthtech": "PIPEDA, GDPR, HIPAA",
             "agrotech": "Data sovereignty, farmer privacy",
@@ -285,9 +279,8 @@ def analyze_cross_domain_architecture():
             "uniontech": "Worker privacy, anonymous reporting",
             "cybersecurity": "Data protection regulations",
             "justice": "Anonymity, evidence integrity",
-            "backbone_module": "compliance/"
+            "backbone_module": "compliance/",
         },
-        
         "Analytics & Observability": {
             "healthtech": "Clinical outcomes, engagement metrics",
             "agrotech": "Farm performance, yield trends",
@@ -295,9 +288,8 @@ def analyze_cross_domain_architecture():
             "uniontech": "Campaign effectiveness, membership growth",
             "cybersecurity": "Threat trends, compliance scores",
             "justice": "Incident patterns, policy impact",
-            "backbone_module": "analytics/"
+            "backbone_module": "analytics/",
         },
-        
         "Notifications": {
             "healthtech": "Medication reminders, appointment alerts",
             "agrotech": "Harvest alerts, price alerts",
@@ -305,9 +297,8 @@ def analyze_cross_domain_architecture():
             "uniontech": "Campaign updates, vote alerts",
             "cybersecurity": "Security alerts, compliance deadlines",
             "justice": "Incident alerts, campaign calls-to-action",
-            "backbone_module": "notifications/"
+            "backbone_module": "notifications/",
         },
-        
         "Billing & Revenue": {
             "healthtech": "Freemium + SaaS clinic licensing",
             "agrotech": "Cooperative subscriptions, usage-based",
@@ -315,9 +306,8 @@ def analyze_cross_domain_architecture():
             "uniontech": "Union dues management, chapter fees",
             "cybersecurity": "Client subscriptions, assessment fees",
             "justice": "Donor management, grant tracking",
-            "backbone_module": "billing/"
+            "backbone_module": "billing/",
         },
-        
         "Content Management": {
             "healthtech": "Health education, FAQ",
             "agrotech": "Farming best practices, guides",
@@ -325,9 +315,8 @@ def analyze_cross_domain_architecture():
             "uniontech": "Worker rights education, organizing guides",
             "cybersecurity": "Security policies, compliance guides",
             "justice": "Policy templates, advocacy resources",
-            "backbone_module": "content/"
+            "backbone_module": "content/",
         },
-        
         "Integrations": {
             "healthtech": "HL7/FHIR, wearables, EMR",
             "agrotech": "Weather APIs, IoT sensors, market data",
@@ -335,23 +324,23 @@ def analyze_cross_domain_architecture():
             "uniontech": "Payroll systems, HR platforms",
             "cybersecurity": "SIEM tools, threat intelligence feeds",
             "justice": "Social media, government databases",
-            "backbone_module": "integrations/"
-        }
+            "backbone_module": "integrations/",
+        },
     }
-    
+
     for pattern_name, pattern_data in cross_domain_patterns.items():
         print(f"\n\n🔹 {pattern_name}")
         print(f"   Backbone Module: {pattern_data['backbone_module']}")
         print(f"\n   Domain-Specific Applications:")
         for vertical_name, use_case in pattern_data.items():
-            if vertical_name != 'backbone_module':
+            if vertical_name != "backbone_module":
                 print(f"      • {vertical_name.capitalize()}: {use_case}")
-    
+
     # LEGACY MIGRATION FRAMEWORK
     print("\n\n" + "=" * 100)
     print("🔄 LEGACY MIGRATION FRAMEWORK")
     print("=" * 100)
-    
+
     migration_framework = """
     
 Step 1: Legacy Codebase Analysis
@@ -385,7 +374,7 @@ Analyze patterns ACROSS all legacy platforms:
 
 1. Common entities
    - User/Profile → users/
-   - Organization/Tenant → tenants/
+   - Organization → organizations/
    - Notification → notifications/
    - AuditLog → compliance/
    - File/Document → files/
@@ -411,14 +400,14 @@ Map legacy components to Nzila Backbone:
 [Legacy Platform] → [Backbone Module] → [Domain-Specific Extension]
 
 Example (Memora):
-- User authentication → tenants/ + users/ (backbone)
+- User authentication → organizations/ + users/ (backbone)
 - ConsentRecord → compliance/ (backbone)
 - GameSession → healthtech/games/ (domain-specific)
 - CompanionPersonality → ai_core/ (backbone) + healthtech/companion/ (domain-specific)
 - CognitiveScore → ai_core/cognitive/ (backbone shared)
 
 Example (Agrotech):
-- Farm authentication → tenants/ + users/ (backbone)
+- Farm authentication → organizations/ + users/ (backbone)
 - FarmerConsent → compliance/ (backbone)
 - FarmPlot → agrotech/farms/ (domain-specific)
 - YieldPrediction → ai_core/prediction/ (backbone) + agrotech/crops/ (domain-specific)
@@ -459,7 +448,7 @@ Step 5: Incremental Migration
 Phased approach:
 
 Phase 1: Backbone (Weeks 1-16)
-   → Build multi-tenant, AI Core, compliance (as designed)
+   → Build multi-org, AI Core, compliance (as designed)
    → NO product-specific features yet
 
 Phase 2: Healthtech Migration (Weeks 17-24)
@@ -471,7 +460,7 @@ Phase 3: Agrotech Migration (Weeks 25-32)
    → Analyze agrotech legacy codebase
    → Create agrotech/ Django apps
    → Migrate farm management, supply chain entities
-   → Inherit from backbone (tenants, AI Core, analytics)
+   → Inherit from backbone (organizations, AI Core, analytics)
 
 Phase 4: Legaltech Migration (Weeks 33-40)
    → Analyze legaltech legacy codebase
@@ -512,14 +501,14 @@ For each legacy platform:
    - Legacy system decommission
 
 """
-    
+
     print(migration_framework)
-    
+
     # UNIFIED ARCHITECTURE
     print("\n\n" + "=" * 100)
     print("🏗️ UNIFIED NZILA ARCHITECTURE")
     print("=" * 100)
-    
+
     unified_structure = """
     
 nzila-platform/
@@ -531,7 +520,7 @@ nzila-platform/
 │   │   ├── users/                  # User management
 │   │   │
 │   │   # ========== BACKBONE (Shared Across ALL Verticals) ==========
-│   │   ├── tenants/                # Multi-tenant foundation
+│   │   ├── organizations/          # Multi-org foundation
 │   │   ├── compliance/             # Consent & governance
 │   │   ├── ai_core/                # AI/LLM infrastructure
 │   │   │   ├── ml/                 # ML models, training
@@ -643,14 +632,14 @@ nzila-platform/
     └── migration_guides/          # Legacy migration guides
 
 """
-    
+
     print(unified_structure)
-    
+
     # AUTOMATION OPPORTUNITIES
     print("\n\n" + "=" * 100)
     print("🤖 AUTOMATION OPPORTUNITIES (Business Intelligence)")
     print("=" * 100)
-    
+
     automation_opportunities = [
         {
             "category": "Legacy Codebase Analysis",
@@ -660,11 +649,10 @@ nzila-platform/
                 "Database schema reverse engineering",
                 "Component dependency mapping",
                 "Business logic extraction (algorithms, rules)",
-                "Integration point discovery"
+                "Integration point discovery",
             ],
-            "tools": ["AST parsers", "babel/typescript parser", "SQL schema analysis"]
+            "tools": ["AST parsers", "babel/typescript parser", "SQL schema analysis"],
         },
-        
         {
             "category": "Cross-Platform Pattern Detection",
             "automations": [
@@ -672,11 +660,10 @@ nzila-platform/
                 "Shared workflow detection (registration, billing, export)",
                 "UI component similarity analysis",
                 "Code duplication detection",
-                "Naming convention extraction"
+                "Naming convention extraction",
             ],
-            "tools": ["ML-based code similarity", "graph analysis", "NLP on code"]
+            "tools": ["ML-based code similarity", "graph analysis", "NLP on code"],
         },
-        
         {
             "category": "Migration Manifest Generation",
             "automations": [
@@ -684,11 +671,10 @@ nzila-platform/
                 "Map legacy entities → Nzila models",
                 "Suggest Django app structure",
                 "Identify backbone vs domain-specific modules",
-                "Generate data migration scripts"
+                "Generate data migration scripts",
             ],
-            "tools": ["Template engine", "schema mapping ML", "code generation"]
+            "tools": ["Template engine", "schema mapping ML", "code generation"],
         },
-        
         {
             "category": "Data Migration",
             "automations": [
@@ -696,11 +682,10 @@ nzila-platform/
                 "Schema transformation scripts",
                 "Data validation rules",
                 "Migration progress tracking",
-                "Rollback procedures"
+                "Rollback procedures",
             ],
-            "tools": ["Airflow/Celery", "pandas", "SQLAlchemy", "data validation"]
+            "tools": ["Airflow/Celery", "pandas", "SQLAlchemy", "data validation"],
         },
-        
         {
             "category": "Code Migration",
             "automations": [
@@ -708,11 +693,10 @@ nzila-platform/
                 "React component modernization (legacy → current)",
                 "API endpoint migration (legacy → DRF)",
                 "Test case generation",
-                "Documentation generation"
+                "Documentation generation",
             ],
-            "tools": ["jscodeshift", "AST transformations", "LLM-assisted conversion"]
+            "tools": ["jscodeshift", "AST transformations", "LLM-assisted conversion"],
         },
-        
         {
             "category": "Cross-Domain Intelligence",
             "automations": [
@@ -720,24 +704,24 @@ nzila-platform/
                 "Suggest backbone module abstractions",
                 "Detect compliance patterns",
                 "Recommend AI Core applications",
-                "Generate vertical-specific analytics dashboards"
+                "Generate vertical-specific analytics dashboards",
             ],
-            "tools": ["ML pattern recognition", "LLM analysis", "graph analysis"]
-        }
+            "tools": ["ML pattern recognition", "LLM analysis", "graph analysis"],
+        },
     ]
-    
+
     for opportunity in automation_opportunities:
         print(f"\n\n🔧 {opportunity['category']}")
         print(f"   Automations:")
-        for automation in opportunity['automations']:
+        for automation in opportunity["automations"]:
             print(f"      • {automation}")
         print(f"   Tools: {', '.join(opportunity['tools'])}")
-    
+
     # STRATEGIC VALUE
     print("\n\n" + "=" * 100)
     print("💎 STRATEGIC VALUE PROPOSITION")
     print("=" * 100)
-    
+
     strategic_value = """
     
 Why This Multi-Vertical Approach is POWERFUL:
@@ -789,14 +773,14 @@ Why This Multi-Vertical Approach is POWERFUL:
    → Portfolio-level optimization vs siloed products
 
 """
-    
+
     print(strategic_value)
-    
+
     # NEXT STEPS
     print("\n\n" + "=" * 100)
     print("✅ NEXT STEPS")
     print("=" * 100)
-    
+
     next_steps = """
     
 Immediate Actions:
@@ -857,12 +841,13 @@ Backbone becomes defensible competitive advantage:
    → Cross-domain network effects
 
 """
-    
+
     print(next_steps)
-    
+
     print("\n" + "=" * 100)
     print("🎯 READY TO BUILD MULTI-VERTICAL NZILA PLATFORM")
     print("=" * 100)
+
 
 if __name__ == "__main__":
     analyze_cross_domain_architecture()

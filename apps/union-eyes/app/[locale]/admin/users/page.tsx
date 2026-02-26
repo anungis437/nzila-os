@@ -30,12 +30,12 @@ import {
   TableHeader,
   TableRow,
 } from "@/components/ui/table";
-import { getAdminTenants } from "@/actions/admin-actions";
+import { getAdminOrgs } from "@/actions/admin-actions";
 import { UserRoleSelect } from "@/components/admin/user-role-select";
 
 interface PageProps {
   params: { locale: string };
-  searchParams: { q?: string; tenant?: string; role?: string };
+  searchParams: { q?: string; org?: string; role?: string };
 }
 
 async function UsersTable({ 
@@ -48,7 +48,7 @@ async function UsersTable({
   role?: "member" | "steward" | "officer" | "admin";
 }) {
   // Fetch users from API
-  let users: { id: string; name: string; email: string; role: "member" | "steward" | "officer" | "admin"; organizationId: string; tenantName: string; status: string; lastLogin: string; joinedAt: string; }[] = [];
+  let users: { id: string; name: string; email: string; role: "member" | "steward" | "officer" | "admin"; organizationId: string; orgName: string; status: string; lastLogin: string; joinedAt: string; }[] = [];
   try {
     const baseUrl = process.env.NEXT_PUBLIC_APP_URL || '';
     const params = new URLSearchParams();
@@ -86,7 +86,7 @@ async function UsersTable({
         <TableHeader>
           <TableRow>
             <TableHead>User</TableHead>
-            <TableHead>Tenant</TableHead>
+            <TableHead>Organization</TableHead>
             <TableHead>Role</TableHead>
             <TableHead>Status</TableHead>
             <TableHead>Last Login</TableHead>
@@ -104,7 +104,7 @@ async function UsersTable({
                 </div>
               </TableCell>
               <TableCell>
-                <span className="text-sm font-medium">{user.tenantName}</span>
+                <span className="text-sm font-medium">{user.orgName}</span>
               </TableCell>
               <TableCell>
                 <UserRoleSelect
@@ -177,10 +177,10 @@ function TableSkeleton() {
 
 export default async function UsersPage({ params, searchParams }: PageProps) {
   const searchQuery = searchParams.q;
-  const selectedTenant = searchParams.tenant;
+  const selectedOrg = searchParams.org;
   const selectedRole = searchParams.role as "member" | "steward" | "officer" | "admin" | undefined;
 
-  const tenants = await getAdminTenants();
+  const orgs = await getAdminOrgs();
 
   return (
     <div className="space-y-6">
@@ -192,7 +192,7 @@ export default async function UsersPage({ params, searchParams }: PageProps) {
             User Management
           </h2>
           <p className="text-gray-600 mt-2">
-            Manage users, assign roles, and control access across all tenants
+            Manage users, assign roles, and control access across all orgs
           </p>
         </div>
         <Button size="lg" variant="outline">
@@ -231,15 +231,15 @@ export default async function UsersPage({ params, searchParams }: PageProps) {
 
             <div className="flex gap-4">
               <div className="flex-1">
-                <Select name="tenant" defaultValue={selectedTenant}>
+                <Select name="org" defaultValue={selectedOrg}>
                   <SelectTrigger>
-                    <SelectValue placeholder="Filter by tenant" />
+                    <SelectValue placeholder="Filter by org" />
                   </SelectTrigger>
                   <SelectContent>
-                    <SelectItem value="all">All Tenants</SelectItem>
-                    {tenants.map((tenant) => (
-                      <SelectItem key={tenant.id} value={tenant.id}>
-                        {tenant.name}
+                    <SelectItem value="all">All Organizations</SelectItem>
+                    {orgs.map((org) => (
+                      <SelectItem key={org.id} value={org.id}>
+                        {org.name}
                       </SelectItem>
                     ))}
                   </SelectContent>
@@ -261,7 +261,7 @@ export default async function UsersPage({ params, searchParams }: PageProps) {
                 </Select>
               </div>
 
-              {(searchQuery || selectedTenant || selectedRole) && (
+              {(searchQuery || selectedOrg || selectedRole) && (
                 <Link href={`/${params.locale}/admin/users`}>
                   <Button variant="outline">Clear Filters</Button>
                 </Link>
@@ -275,7 +275,7 @@ export default async function UsersPage({ params, searchParams }: PageProps) {
       <Suspense fallback={<TableSkeleton />}>
         <UsersTable 
           searchQuery={searchQuery} 
-          organizationId={selectedTenant} 
+          organizationId={selectedOrg} 
           role={selectedRole} 
         />
       </Suspense>

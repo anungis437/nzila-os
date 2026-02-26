@@ -15,7 +15,7 @@ This chapter covers logging, monitoring, alerting, and health checks for
 ## Logging
 
 - All application logs are emitted as structured JSON to `stdout`.
-- Each log entry includes `requestId`, `{{TENANT_KEY}}`, `level`, and `timestamp`.
+- Each log entry includes `requestId`, `{{ORG_KEY}}`, `level`, and `timestamp`.
 - Log levels: `debug`, `info`, `warn`, `error`, `fatal`.
 - In production, the minimum level is `info`.
 

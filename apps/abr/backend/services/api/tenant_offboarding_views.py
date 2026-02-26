@@ -28,25 +28,25 @@ from auth_core.models import AuditLogs
 from core.models import OffboardingAuditLog, OrgOffboardingRequests
 
 
-class TenantOffboardingPagination(CursorPagination):
+class OrgOffboardingPagination(CursorPagination):
     page_size = 50
     ordering = "-created_at"
     cursor_query_param = "cursor"
 
 
-class TenantOffboardingViewSet(viewsets.ViewSet):
+class OrgOffboardingViewSet(viewsets.ViewSet):
     """
-        ViewSet for tenant-offboarding operations.
+        ViewSet for org-offboarding operations.
 
         Endpoints:
-        - POST /api/services/tenant-offboarding/initiate/ — Initiate tenant offboarding
-    - POST /api/services/tenant-offboarding/cancel/ — Cancel offboarding
-    - POST /api/services/tenant-offboarding/hard_delete/ — Execute hard delete
-    - GET /api/services/tenant-offboarding/pending_deletions/ — Get pending deletions
+        - POST /api/services/org-offboarding/initiate/ — Initiate org offboarding
+    - POST /api/services/org-offboarding/cancel/ — Cancel offboarding
+    - POST /api/services/org-offboarding/hard_delete/ — Execute hard delete
+    - GET /api/services/org-offboarding/pending_deletions/ — Get pending deletions
     """
 
     permission_classes = [IsAuthenticated]
-    pagination_class = TenantOffboardingPagination
+    pagination_class = OrgOffboardingPagination
 
     def paginate_queryset(self, queryset):
         paginator = self.pagination_class()
@@ -65,8 +65,8 @@ class TenantOffboardingViewSet(viewsets.ViewSet):
     @action(detail=False, methods=["post"])
     def initiate(self, request):
         """
-        Initiate tenant offboarding
-        POST /api/services/tenant-offboarding/initiate/
+        Initiate org offboarding
+        POST /api/services/org-offboarding/initiate/
         """
         try:
             data = request.data
@@ -105,7 +105,7 @@ class TenantOffboardingViewSet(viewsets.ViewSet):
     def cancel(self, request):
         """
         Cancel offboarding
-        POST /api/services/tenant-offboarding/cancel/
+        POST /api/services/org-offboarding/cancel/
         """
         try:
             data = request.data
@@ -144,7 +144,7 @@ class TenantOffboardingViewSet(viewsets.ViewSet):
     def hard_delete(self, request):
         """
         Execute hard delete
-        POST /api/services/tenant-offboarding/hard_delete/
+        POST /api/services/org-offboarding/hard_delete/
         """
         try:
             data = request.data
@@ -171,7 +171,7 @@ class TenantOffboardingViewSet(viewsets.ViewSet):
     def pending_deletions(self, request):
         """
         Get pending deletions
-        GET /api/services/tenant-offboarding/pending_deletions/
+        GET /api/services/org-offboarding/pending_deletions/
         """
         try:
             queryset = OrgOffboardingRequests.objects.filter(

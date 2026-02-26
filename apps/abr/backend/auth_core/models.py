@@ -7,15 +7,19 @@ Re-run the generator to overwrite.
 """
 
 import uuid
+from typing import TYPE_CHECKING
 
 from django.contrib.postgres.fields import ArrayField
 from django.contrib.postgres.search import SearchVectorField
 from django.db import models
 
-try:
-    from pgvector.django import VectorField
-except ImportError:
-    VectorField = None  # pgvector not installed
+if TYPE_CHECKING:
+    from pgvector.django import VectorField  # type: ignore[import-unresolved]
+else:
+    try:
+        from pgvector.django import VectorField
+    except ImportError:
+        VectorField = None  # pgvector not installed
 
 
 class BaseModel(models.Model):
@@ -198,10 +202,11 @@ class Organizations(BaseModel):
     created_by = models.UUIDField(null=True, blank=True)
 
     # Legacy & Migration
-    legacy_tenant_id = models.UUIDField(
+    legacy_org_id = models.UUIDField(
         null=True,
         blank=True,
         db_index=True,
+        db_column="legacy_tenant_id",
         help_text=(
             "Read-only. Historical ID carried over from the pre-NzilaOS system. "
             "Maps to the current Organization via external_id. "
@@ -229,6 +234,15 @@ class Organizations(BaseModel):
         null=True, blank=True, help_text="e.g., March 31"
     )
 
+    # Clerk Integration
+    clerk_organization_id = models.TextField(
+        null=True,
+        blank=True,
+        unique=True,
+        db_index=True,
+        help_text="Clerk organization ID (e.g. org_2abc...) — set by webhook on organization.created",
+    )
+
     class Meta:
         db_table = "organizations"
         verbose_name = "Organization"
@@ -241,7 +255,7 @@ class Organizations(BaseModel):
             models.Index(fields=["hierarchy_level"], name="idx_org_hier_level"),
             models.Index(fields=["status"], name="idx_organizations_status"),
             models.Index(fields=["clc_affiliated"], name="idx_org_clc_affiliated"),
-            models.Index(fields=["legacy_tenant_id"], name="idx_org_legacy_tenant"),
+            models.Index(fields=["legacy_org_id"], name="idx_org_legacy_tenant"),
         ]
 
     def __str__(self):
@@ -249,7 +263,7 @@ class Organizations(BaseModel):
 
     def is_clc_root(self):
         """Check if this is the CLC root organization."""
-        return self.organization_type == "congress" and self.parent_id is None
+        return self.organization_type == "congress" and self.parent is None
 
     def is_national_union(self):
         """Check if this is a national union (level 1 under CLC)."""

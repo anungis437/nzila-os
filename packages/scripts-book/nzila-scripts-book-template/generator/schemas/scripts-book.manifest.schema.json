@@ -11,7 +11,7 @@
     "owner_github",
     "primary_app_path",
     "app_port",
-    "tenant_key",
+    "org_key",
     "image_repo",
     "auth_provider",
     "db_provider",
@@ -53,10 +53,10 @@
       "maximum": 65535,
       "description": "Application port number."
     },
-    "tenant_key": {
+    "org_key": {
       "type": "string",
       "minLength": 1,
-      "description": "Multi-tenancy key field name (e.g., orgId)."
+      "description": "Multi-org isolation key field name (e.g., orgId)."
     },
     "image_repo": {
       "type": "string",
