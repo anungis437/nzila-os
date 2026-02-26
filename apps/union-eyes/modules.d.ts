@@ -48,3 +48,15 @@ declare module 'sharp' {
   function sharp(input: Buffer | string): SharpInstance;
   export default sharp;
 }
+
+// --- Optional: @azure/arm-resources (carbon-accounting-integration.ts) ---
+declare module '@azure/arm-resources' {
+  export class ResourceManagementClient {
+    constructor(credential: unknown, subscriptionId: string);
+    resources: {
+      listByResourceGroup(resourceGroupName: string): AsyncIterable<{
+        id?: string; type?: string; location?: string; name?: string;
+      }>;
+    };
+  }
+}
