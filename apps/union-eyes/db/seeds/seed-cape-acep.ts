@@ -42,7 +42,7 @@ const CAPE_ACEP_ORG = {
   hierarchyPath: [] as string[],
   hierarchyLevel: 1,
   provinceTerritory: 'ON',
-  sectors: ['public_service'] as const,
+  sectors: ['public_service' as const],
   email: 'info@acep-cape.ca',
   phone: '613-236-9181',
   website: 'https://acep-cape.ca',
