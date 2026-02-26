@@ -251,112 +251,6 @@ toast.error("Failed to optimize database");
     }
   };
 
-  // Fallback mock data
-  const localSections: LocalSection[] = [
-    {
-      id: "1",
-      number: "301",
-      name: "Toronto Central",
-      region: "Ontario",
-      memberCount: 1234,
-      activeCount: 987,
-      president: "Sarah Johnson",
-      contact: "toronto@union.ca",
-      status: "active",
-    },
-    {
-      id: "2",
-      number: "302",
-      name: "Ottawa Valley",
-      region: "Ontario",
-      memberCount: 856,
-      activeCount: 743,
-      president: "Mike Chen",
-      contact: "ottawa@union.ca",
-      status: "active",
-    },
-    {
-      id: "3",
-      number: "401",
-      name: "Montreal Metro",
-      region: "Quebec",
-      memberCount: 2145,
-      activeCount: 1876,
-      president: "Jean Tremblay",
-      contact: "montreal@union.ca",
-      status: "active",
-    },
-    {
-      id: "4",
-      number: "501",
-      name: "Vancouver West",
-      region: "British Columbia",
-      memberCount: 1567,
-      activeCount: 1342,
-      president: "Emily Wong",
-      contact: "vancouver@union.ca",
-      status: "active",
-    },
-    {
-      id: "5",
-      number: "601",
-      name: "Calgary South",
-      region: "Alberta",
-      memberCount: 678,
-      activeCount: 534,
-      president: "David Martinez",
-      contact: "calgary@union.ca",
-      status: "active",
-    },
-  ];
-
-  const systemUsers: SystemUser[] = [
-    {
-      id: "1",
-      name: "Sarah Johnson",
-      email: "sarah.johnson@union.ca",
-      role: "lro",
-      organizationId: "org-1",
-      organizationName: "301 - Toronto Central",
-      local: "301 - Toronto Central",
-      status: "active",
-      lastLogin: "2025-11-13T09:30:00",
-    },
-    {
-      id: "2",
-      name: "Mike Chen",
-      email: "mike.chen@union.ca",
-      role: "lro",
-      organizationId: "org-2",
-      organizationName: "302 - Ottawa Valley",
-      local: "302 - Ottawa Valley",
-      status: "active",
-      lastLogin: "2025-11-13T08:15:00",
-    },
-    {
-      id: "3",
-      name: "Admin User",
-      email: "admin@union.ca",
-      role: "admin",
-      organizationId: "org-national",
-      organizationName: "National",
-      local: "National",
-      status: "active",
-      lastLogin: "2025-11-13T10:00:00",
-    },
-    {
-      id: "4",
-      name: "Emily Davis",
-      email: "emily.davis@union.ca",
-      role: "steward",
-      organizationId: "org-1",
-      organizationName: "301 - Toronto Central",
-      local: "301 - Toronto Central",
-      status: "active",
-      lastLogin: "2025-11-12T16:45:00",
-    },
-  ];
-
   const adminSections = [
     {
       id: "overview",
@@ -415,14 +309,14 @@ toast.error("Failed to optimize database");
     member: { label: t('admin.roles.member'), color: "bg-gray-100 text-gray-700" },
   };
 
-  const _filteredLocals = localSections.filter(
+  const filteredLocals = organizations.filter(
     (local) =>
       local.name.toLowerCase().includes(searchQuery.toLowerCase()) ||
       local.number.includes(searchQuery) ||
       local.region.toLowerCase().includes(searchQuery.toLowerCase())
   );
 
-  const _filteredUsers = systemUsers.filter(
+  const filteredUsers = users.filter(
     (user) =>
       user.name.toLowerCase().includes(searchQuery.toLowerCase()) ||
       user.email.toLowerCase().includes(searchQuery.toLowerCase()) ||
@@ -656,7 +550,7 @@ toast.error("Failed to optimize database");
                       </tr>
                     </thead>
                     <tbody>
-                      {users.map((user) => (
+                      {filteredUsers.map((user) => (
                         <tr
                           key={`${user.id}-${user.organizationId}`}
                           className="border-b border-gray-100 hover:bg-gray-50"
@@ -765,7 +659,7 @@ toast.error("Failed to optimize database");
                 </div>
               ) : (
                 <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
-                  {organizations.map((local) => (
+                  {filteredLocals.map((local) => (
                   <Card
                     key={local.id}
                     className="p-5 bg-linear-to-br from-white to-gray-50 border-gray-200 hover:shadow-lg transition-all"

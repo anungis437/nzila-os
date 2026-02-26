@@ -1122,17 +1122,52 @@ export const generateStatCanReport = generateStatCanAnnualReport;
 // Export renamed for tests
 export const detectAnomalies = detectComplianceAnomalies;
 
-// Simple forecast wrapper matching test expectations
+// Simple forecast using historical per-capita remittance data
 // eslint-disable-next-line @typescript-eslint/no-explicit-any
 export async function forecastRemittances(months: number): Promise<any[]> {
-  // Stub implementation for tests - returns basic forecast structure
-  return Array.from({ length: months }, (_, i) => ({
-    month: i + 1,
-    year: new Date().getFullYear(),
-    forecastAmount: 10000,
-    confidenceLevel: 80,
-    method: 'linear_regression',
-    lowerBound: 9000,
-    upperBound: 11000
-  }));
+  // Fetch last 12 months of historical remittance data for a moving-average forecast
+  const historicalData = await db
+    .select({
+      month: sql<number>`EXTRACT(MONTH FROM ${perCapitaRemittances.periodStart})::int`,
+      year: sql<number>`EXTRACT(YEAR FROM ${perCapitaRemittances.periodStart})::int`,
+      totalAmount: sql<number>`SUM(${perCapitaRemittances.amount})::numeric`,
+      remittanceCount: sql<number>`COUNT(*)::int`,
+    })
+    .from(perCapitaRemittances)
+    .where(
+      sql`${perCapitaRemittances.periodStart} >= NOW() - INTERVAL '12 months'`
+    )
+    .groupBy(
+      sql`EXTRACT(YEAR FROM ${perCapitaRemittances.periodStart})`,
+      sql`EXTRACT(MONTH FROM ${perCapitaRemittances.periodStart})`
+    )
+    .orderBy(
+      sql`EXTRACT(YEAR FROM ${perCapitaRemittances.periodStart})`,
+      sql`EXTRACT(MONTH FROM ${perCapitaRemittances.periodStart})`
+    );
+
+  // Calculate moving average from available data
+  const amounts = historicalData.map((d) => Number(d.totalAmount) || 0);
+  const avgAmount = amounts.length > 0
+    ? amounts.reduce((a, b) => a + b, 0) / amounts.length
+    : 0;
+  const stdDev = amounts.length > 1
+    ? Math.sqrt(amounts.reduce((sum, v) => sum + (v - avgAmount) ** 2, 0) / (amounts.length - 1))
+    : avgAmount * 0.1;
+
+  const confidenceLevel = amounts.length >= 6 ? 85 : amounts.length >= 3 ? 70 : 50;
+
+  const now = new Date();
+  return Array.from({ length: months }, (_, i) => {
+    const forecastDate = new Date(now.getFullYear(), now.getMonth() + i + 1, 1);
+    return {
+      month: forecastDate.getMonth() + 1,
+      year: forecastDate.getFullYear(),
+      forecastAmount: Math.round(avgAmount * 100) / 100,
+      confidenceLevel,
+      method: amounts.length >= 3 ? 'moving_average' : 'insufficient_data',
+      lowerBound: Math.round((avgAmount - 1.96 * stdDev) * 100) / 100,
+      upperBound: Math.round((avgAmount + 1.96 * stdDev) * 100) / 100,
+    };
+  });
 }

@@ -748,7 +748,7 @@ return [];
 }
 
 // ============================================================================
-// OCR PROCESSING (Stub - requires OCR service integration)
+// OCR PROCESSING
 // ============================================================================
 
 async function queueOCRProcessing(documentId: string, fileUrl: string): Promise<void> {

@@ -51,6 +51,7 @@ export const ORG_SCOPED_TABLES = [
   'complianceTasks',
   'auditEvents',
   'evidencePacks',
+  'auditLog',
 
   // ── equity.ts ───────────────────────────────────────────
   'shareClasses',
@@ -131,6 +132,7 @@ export const ORG_SCOPED_TABLES = [
   'zongaWalletLedger',
   'zongaPayouts',
   'zongaOutbox',
+  'zongaRoyaltySplits',
 
   // ── commerce.ts ─────────────────────────────────────────
   'commerceCustomers',

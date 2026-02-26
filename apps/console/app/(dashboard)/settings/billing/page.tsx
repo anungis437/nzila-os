@@ -6,24 +6,30 @@
  */
 import { CreditCardIcon } from '@heroicons/react/24/outline'
 import { platformDb } from '@nzila/db/platform'
-import { stripeSubscriptions } from '@nzila/db/schema'
+import { stripeSubscriptions, entityMembers } from '@nzila/db/schema'
 import { eq, desc } from 'drizzle-orm'
 import { auth } from '@clerk/nextjs/server'
 import { redirect } from 'next/navigation'
 import SubscriptionManager from './SubscriptionManager'
 
-// TODO: replace with real entity resolution once user→entity mapping is wired
-const PLACEHOLDER_ENTITY_ID = process.env.DEFAULT_ENTITY_ID ?? ''
-
 export default async function BillingPage() {
   const { userId } = await auth()
   if (!userId) redirect('/sign-in')
 
-  const subs = PLACEHOLDER_ENTITY_ID
+  // Resolve entity from user membership (same pattern as integrations page)
+  const [membership] = await platformDb
+    .select({ entityId: entityMembers.entityId })
+    .from(entityMembers)
+    .where(eq(entityMembers.clerkUserId, userId))
+    .limit(1)
+
+  const entityId = membership?.entityId ?? ''
+
+  const subs = entityId
     ? await platformDb
         .select()
         .from(stripeSubscriptions)
-        .where(eq(stripeSubscriptions.entityId, PLACEHOLDER_ENTITY_ID))
+        .where(eq(stripeSubscriptions.entityId, entityId))
         .orderBy(desc(stripeSubscriptions.createdAt))
         .limit(5)
     : []
@@ -44,15 +50,18 @@ export default async function BillingPage() {
         </div>
       </div>
 
-      <SubscriptionManager activeSub={activeSub ? {
-        subscriptionId: activeSub.stripeSubscriptionId,
-        customerId: activeSub.stripeCustomerId,
-        status: activeSub.status,
-        planName: activeSub.planName,
-        planInterval: activeSub.planInterval,
-        currentPeriodEnd: activeSub.currentPeriodEnd?.toISOString() ?? null,
-        cancelAtPeriodEnd: activeSub.cancelAtPeriodEnd,
-      } : null} />
+      <SubscriptionManager
+        entityId={entityId}
+        activeSub={activeSub ? {
+          subscriptionId: activeSub.stripeSubscriptionId,
+          customerId: activeSub.stripeCustomerId,
+          status: activeSub.status,
+          planName: activeSub.planName,
+          planInterval: activeSub.planInterval,
+          currentPeriodEnd: activeSub.currentPeriodEnd?.toISOString() ?? null,
+          cancelAtPeriodEnd: activeSub.cancelAtPeriodEnd,
+        } : null}
+      />
     </div>
   )
 }

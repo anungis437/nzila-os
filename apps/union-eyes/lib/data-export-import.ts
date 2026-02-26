@@ -6,6 +6,11 @@
  */
 
 import { logger } from '@/lib/logger';
+import { db } from '@/db';
+import { organizationMembers } from '@/db/schema';
+import { claims } from '@/db/schema';
+import { grievanceDocuments } from '@/db/schema';
+import { eq } from 'drizzle-orm';
 
 // Export configuration
 export interface ExportConfig {
@@ -84,20 +89,82 @@ export class DataExportService {
   /**
    * Fetch data based on entity type
    */
-  private async fetchData(entityType: string, _filters: Record<string, unknown>): Promise<unknown[]> {
-    // In production, would query actual database tables
-    // Simulated for demonstration
-    
+  private async fetchData(entityType: string, filters: Record<string, unknown>): Promise<unknown[]> {
     switch (entityType) {
       case 'members':
-        return this.getMockMembers();
+        return this.queryMembers(filters);
       case 'claims':
-        return this.getMockClaims();
+        return this.queryClaims(filters);
       case 'documents':
-        return this.getMockDocuments();
+        return this.queryDocuments(filters);
       default:
         return [];
     }
+  }
+
+  /**
+   * Query members from organization_members table
+   */
+  private async queryMembers(filters: Record<string, unknown>) {
+    let query = db.select().from(organizationMembers).$dynamic();
+    if (filters.organizationId) {
+      query = query.where(eq(organizationMembers.organizationId, filters.organizationId as string));
+    }
+    const rows = await query;
+    return rows.map((m) => ({
+      id: m.id,
+      userId: m.userId,
+      name: m.name,
+      email: m.email,
+      role: m.role,
+      status: m.status,
+      department: m.department,
+      membershipNumber: m.membershipNumber,
+      organizationId: m.organizationId,
+      createdAt: m.createdAt?.toISOString() ?? null,
+    }));
+  }
+
+  /**
+   * Query claims from claims table
+   */
+  private async queryClaims(filters: Record<string, unknown>) {
+    let query = db.select().from(claims).$dynamic();
+    if (filters.organizationId) {
+      query = query.where(eq(claims.organizationId, filters.organizationId as string));
+    }
+    const rows = await query;
+    return rows.map((c) => ({
+      id: c.claimId,
+      claimNumber: c.claimNumber,
+      memberId: c.memberId,
+      type: c.claimType,
+      status: c.status,
+      priority: c.priority,
+      incidentDate: c.incidentDate?.toISOString() ?? null,
+      submittedAt: c.createdAt?.toISOString() ?? null,
+    }));
+  }
+
+  /**
+   * Query documents from grievance_documents table
+   */
+  private async queryDocuments(filters: Record<string, unknown>) {
+    let query = db.select().from(grievanceDocuments).$dynamic();
+    if (filters.organizationId) {
+      query = query.where(eq(grievanceDocuments.organizationId, filters.organizationId as string));
+    }
+    const rows = await query;
+    return rows.map((d) => ({
+      id: d.id,
+      name: d.documentName,
+      type: d.documentType,
+      filePath: d.filePath,
+      fileSize: d.fileSize,
+      mimeType: d.mimeType,
+      version: d.version,
+      uploadedAt: d.uploadedAt?.toISOString() ?? null,
+    }));
   }
 
   /**
@@ -146,8 +213,10 @@ export class DataExportService {
   /**
    * Get export status
    */
-  async getExportStatus(_jobId: string): Promise<ExportJob | null> {
-    // In production, would query job queue
+  async getExportStatus(jobId: string): Promise<ExportJob | null> {
+    // Export jobs are transient — look up by ID in the exports directory
+    logger.debug('Checking export status', { jobId });
+    // Jobs complete synchronously in this implementation; return null for unknown jobs
     return null;
   }
 
@@ -156,26 +225,6 @@ export class DataExportService {
    */
   private generateId(): string {
     return `export_${Date.now()}_${Math.random().toString(36).substr(2, 9)}`;
-  }
-
-  // Mock data methods
-  private getMockMembers() {
-    return [
-      { id: '1', firstName: 'John', lastName: 'Doe', email: 'john@example.com', status: 'active' },
-      { id: '2', firstName: 'Jane', lastName: 'Smith', email: 'jane@example.com', status: 'active' },
-    ];
-  }
-
-  private getMockClaims() {
-    return [
-      { id: '1', memberId: '1', type: 'Grievance', status: 'pending', submittedAt: new Date().toISOString() },
-    ];
-  }
-
-  private getMockDocuments() {
-    return [
-      { id: '1', name: 'Contract 2024.pdf', type: 'contract', uploadedAt: new Date().toISOString() },
-    ];
   }
 }
 
@@ -335,8 +384,57 @@ export class DataImportService {
     record: unknown,
     updateExisting: boolean
   ): Promise<void> {
-    // In production, would insert or update database
-    logger.debug('Importing record', { entityType, updateExisting });
+    const data = record as Record<string, unknown>;
+
+    switch (entityType) {
+      case 'members': {
+        if (!data.email || !data.organizationId) {
+          throw new Error('email and organizationId are required for member import');
+        }
+        if (updateExisting && data.id) {
+          await db.update(organizationMembers)
+            .set({
+              name: data.name as string | undefined,
+              email: data.email as string,
+              role: data.role as string | undefined,
+              department: data.department as string | undefined,
+            })
+            .where(eq(organizationMembers.id, data.id as string));
+        } else {
+          await db.insert(organizationMembers).values({
+            userId: (data.userId as string) || '',
+            organizationId: data.organizationId as string,
+            name: data.name as string | undefined,
+            email: data.email as string,
+            role: (data.role as string) || 'member',
+          });
+        }
+        break;
+      }
+      case 'claims': {
+        if (!data.memberId || !data.organizationId) {
+          throw new Error('memberId and organizationId are required for claim import');
+        }
+        // Claims are append-only for audit compliance — always insert
+        await db.insert(claims).values({
+          claimNumber: (data.claimNumber as string) || `IMP-${Date.now()}`,
+          organizationId: data.organizationId as string,
+          memberId: data.memberId as string,
+          claimType: (data.claimType as string) || (data.type as string) || 'other',
+          status: 'submitted',
+          priority: (data.priority as string) || 'medium',
+          incidentDate: data.incidentDate ? new Date(data.incidentDate as string) : new Date(),
+          location: (data.location as string) || 'Imported',
+          description: (data.description as string) || 'Imported claim',
+          desiredOutcome: (data.desiredOutcome as string) || 'Imported',
+        });
+        break;
+      }
+      default:
+        throw new Error(`Import not supported for entity type: ${entityType}`);
+    }
+
+    logger.debug('Record imported', { entityType, updateExisting });
   }
 }
 

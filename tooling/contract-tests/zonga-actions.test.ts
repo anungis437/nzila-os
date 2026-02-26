@@ -49,14 +49,19 @@ describe('ZNG-ACT-01 — Every action file uses "use server" directive', () => {
   }
 })
 
-describe('ZNG-ACT-01 — Every action file calls auth()', () => {
+describe('ZNG-ACT-01 — Every action file authenticates', () => {
   for (const file of ACTION_FILES) {
-    it(`${file} authenticates via auth()`, () => {
+    it(`${file} authenticates via auth() or resolveOrgContext()`, () => {
       const path = join(ZONGA_ACTIONS, file)
       if (!existsSync(path)) return
       const content = readFileSync(path, 'utf-8')
-      expect(content).toContain('auth()')
-      expect(content).toContain('@clerk/nextjs')
+      const hasDirectAuth =
+        content.includes('auth()') && content.includes('@clerk/nextjs')
+      const hasOrgContext = content.includes('resolveOrgContext')
+      expect(
+        hasDirectAuth || hasOrgContext,
+        `${file} must call auth() (with @clerk/nextjs import) or resolveOrgContext()`,
+      ).toBe(true)
     })
   }
 })

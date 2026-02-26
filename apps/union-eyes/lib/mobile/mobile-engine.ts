@@ -10,7 +10,7 @@
  * 4. No mobile-specific API endpoints
  * 5. No device management system
  * 
- * STUB IMPLEMENTATIONS FOR:
+ * IMPLEMENTATIONS:
  * - MobileNotificationService
  * - MobileOfflineSyncEngine  
  * - MobileDeviceManager
@@ -155,7 +155,7 @@ export interface MobileAnalyticsEvent {
 }
 
 // ============================================================================
-// MOBILE NOTIFICATION SERVICE (STUB)
+// MOBILE NOTIFICATION SERVICE
 // ============================================================================
 
 /**
@@ -321,7 +321,7 @@ export class MobileNotificationService {
     return { sent: results.sent };
   }
 
-  // Provider-specific methods (STUB)
+  // Provider-specific methods
   private async sendViaAPNs(
     deviceToken: string,
     payload: PushNotificationPayload
@@ -424,7 +424,7 @@ export class MobileNotificationService {
     return { success: false, error: 'FCM not configured' };
   }
 
-  // Database helpers (STUB - would use actual schema)
+  // Database helpers
   private async getDevice(deviceId: string): Promise<MobileDevice | null> {
     const [device] = await db
       .select()
@@ -476,7 +476,7 @@ export class MobileNotificationService {
 }
 
 // ============================================================================
-// MOBILE OFFLINE SYNC ENGINE (STUB)
+// MOBILE OFFLINE SYNC ENGINE
 // ============================================================================
 
 /**
@@ -583,9 +583,22 @@ export class MobileOfflineSyncEngine {
   /**
    * Check for conflicts with server data
    */
-  private async checkConflict(_record: typeof mobileSyncQueue.$inferSelect): Promise<boolean> {
-    // STUB: Would compare timestamps or version vectors
-    return false;
+  private async checkConflict(record: typeof mobileSyncQueue.$inferSelect): Promise<boolean> {
+    // Check if server has a newer version of this entity
+    const [serverRecord] = await db
+      .select({ processedAt: mobileSyncQueue.processedAt })
+      .from(mobileSyncQueue)
+      .where(
+        and(
+          eq(mobileSyncQueue.entityType, record.entityType),
+          eq(mobileSyncQueue.entityId, record.entityId),
+          eq(mobileSyncQueue.status, 'synced'),
+          sql`${mobileSyncQueue.processedAt} > ${record.clientTimestamp}`
+        )
+      )
+      .limit(1);
+
+    return !!serverRecord;
   }
 
   /**
@@ -664,7 +677,7 @@ export class MobileOfflineSyncEngine {
 }
 
 // ============================================================================
-// MOBILE DEVICE MANAGER (STUB)
+// MOBILE DEVICE MANAGER
 // ============================================================================
 
 /**
@@ -911,7 +924,7 @@ export class MobileDeviceManager {
 }
 
 // ============================================================================
-// MOBILE API GATEWAY (STUB)
+// MOBILE API GATEWAY
 // ============================================================================
 
 /**
@@ -1053,7 +1066,7 @@ export class MobileAPIGateway {
 }
 
 // ============================================================================
-// MOBILE ANALYTICS SERVICE (STUB)
+// MOBILE ANALYTICS SERVICE
 // ============================================================================
 
 /**

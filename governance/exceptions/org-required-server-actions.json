@@ -1,0 +1,96 @@
+{
+  "ruleId": "ORG_REQUIRED_SERVER_ACTIONS_001",
+  "description": "Server action files that have not yet been migrated to resolveOrgContext(). Each exception must be resolved before its expiry date.",
+  "entries": [
+    {
+      "path": "apps/nacp-exams/lib/actions/candidate-actions.ts",
+      "owner": "@nzila/nacp",
+      "justification": "Migration to resolveOrgContext pending — uses bare auth() with orgId today",
+      "expiresOn": "2026-09-30"
+    },
+    {
+      "path": "apps/nacp-exams/lib/actions/center-actions.ts",
+      "owner": "@nzila/nacp",
+      "justification": "Migration to resolveOrgContext pending — uses bare auth() with orgId today",
+      "expiresOn": "2026-09-30"
+    },
+    {
+      "path": "apps/nacp-exams/lib/actions/subject-actions.ts",
+      "owner": "@nzila/nacp",
+      "justification": "Migration to resolveOrgContext pending — uses bare auth() with orgId today",
+      "expiresOn": "2026-09-30"
+    },
+    {
+      "path": "apps/nacp-exams/lib/actions/integrity-actions.ts",
+      "owner": "@nzila/nacp",
+      "justification": "Migration to resolveOrgContext pending — uses bare auth() with orgId today",
+      "expiresOn": "2026-09-30"
+    },
+    {
+      "path": "apps/nacp-exams/lib/actions/report-actions.ts",
+      "owner": "@nzila/nacp",
+      "justification": "Migration to resolveOrgContext pending — uses bare auth() with orgId today",
+      "expiresOn": "2026-09-30"
+    },
+    {
+      "path": "apps/nacp-exams/lib/actions/ai-exam-actions.ts",
+      "owner": "@nzila/nacp",
+      "justification": "Migration to resolveOrgContext pending — uses bare auth() with orgId today",
+      "expiresOn": "2026-09-30"
+    },
+    {
+      "path": "apps/zonga/lib/actions/catalog-actions.ts",
+      "owner": "@nzila/zonga",
+      "justification": "Migration to resolveOrgContext pending — uses bare auth() with orgId today",
+      "expiresOn": "2026-09-30"
+    },
+    {
+      "path": "apps/zonga/lib/actions/creator-actions.ts",
+      "owner": "@nzila/zonga",
+      "justification": "Migration to resolveOrgContext pending — uses bare auth() with orgId today",
+      "expiresOn": "2026-09-30"
+    },
+    {
+      "path": "apps/zonga/lib/actions/release-actions.ts",
+      "owner": "@nzila/zonga",
+      "justification": "Migration to resolveOrgContext pending — uses bare auth() with orgId today",
+      "expiresOn": "2026-09-30"
+    },
+    {
+      "path": "apps/zonga/lib/actions/upload-actions.ts",
+      "owner": "@nzila/zonga",
+      "justification": "Migration to resolveOrgContext pending — uses bare auth() with orgId today",
+      "expiresOn": "2026-09-30"
+    },
+    {
+      "path": "apps/zonga/lib/actions/social-actions.ts",
+      "owner": "@nzila/zonga",
+      "justification": "Migration to resolveOrgContext pending — uses bare auth() with orgId today",
+      "expiresOn": "2026-09-30"
+    },
+    {
+      "path": "apps/zonga/lib/actions/search-actions.ts",
+      "owner": "@nzila/zonga",
+      "justification": "Migration to resolveOrgContext pending — uses bare auth() with orgId today",
+      "expiresOn": "2026-09-30"
+    },
+    {
+      "path": "apps/zonga/lib/actions/playlist-actions.ts",
+      "owner": "@nzila/zonga",
+      "justification": "Migration to resolveOrgContext pending — uses bare auth() with orgId today",
+      "expiresOn": "2026-09-30"
+    },
+    {
+      "path": "apps/zonga/lib/actions/notification-actions.ts",
+      "owner": "@nzila/zonga",
+      "justification": "Migration to resolveOrgContext pending — uses bare auth() with orgId today",
+      "expiresOn": "2026-09-30"
+    },
+    {
+      "path": "apps/zonga/lib/actions/event-actions.ts",
+      "owner": "@nzila/zonga",
+      "justification": "Migration to resolveOrgContext pending — uses bare auth() with orgId today",
+      "expiresOn": "2026-09-30"
+    }
+  ]
+}

@@ -422,7 +422,7 @@ export async function processDisbursements(params: {
             stipendId: stipend.id,
             amount,
           });
-          paymentIntentId = 'pi_simulated_' + Math.random().toString(36).substr(2, 9);
+          paymentIntentId = 'pi_simulated_' + crypto.randomUUID().substring(0, 9);
         }
 
         // Update stipend status

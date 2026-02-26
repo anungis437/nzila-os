@@ -158,7 +158,7 @@ type HandlerFn<TBody, TQuery> = (ctx: ApiContext<TBody, TQuery>) => Promise<Hand
 
 function generateTraceId(): string {
   const ts = Date.now().toString(36);
-  const rand = Math.random().toString(36).substring(2, 10);
+  const rand = crypto.randomUUID().substring(0, 8);
   return `${ts}-${rand}`;
 }
 

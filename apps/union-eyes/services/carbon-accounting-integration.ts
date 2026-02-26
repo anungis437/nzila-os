@@ -3,6 +3,7 @@
 // Implements renewable region verification and emissions tracking
 
 import { carbonAccountingService } from './carbon-accounting-service';
+import { logger } from '@/lib/logger';
 
 /**
  * Carbon Accounting Integration Service
@@ -137,7 +138,7 @@ export class CarbonAccountingIntegration {
 
   /**
    * Get Azure Resources
-   * Fetch resources from Azure subscription
+   * Fetch resources from Azure subscription via Resource Management SDK
    */
   private async getAzureResources(params: {
     subscriptionId: string;
@@ -148,28 +149,32 @@ export class CarbonAccountingIntegration {
     location: string;
     name: string;
   }>> {
-    // In production, this would use Azure Resource Graph API
-    // For now, return mock structure
-    return [
-      {
-        id: `/subscriptions/${params.subscriptionId}/resourceGroups/${params.resourceGroupName}/providers/Microsoft.Web/sites/union-eyes-app`,
-        type: 'Microsoft.Web/sites',
-        location: 'Canada East',
-        name: 'union-eyes-app',
-      },
-      {
-        id: `/subscriptions/${params.subscriptionId}/resourceGroups/${params.resourceGroupName}/providers/Microsoft.DBforPostgreSQL/servers/union-eyes-db`,
-        type: 'Microsoft.DBforPostgreSQL/servers',
-        location: 'Canada East',
-        name: 'union-eyes-db',
-      },
-      {
-        id: `/subscriptions/${params.subscriptionId}/resourceGroups/${params.resourceGroupName}/providers/Microsoft.Storage/storageAccounts/unioneyesstorage`,
-        type: 'Microsoft.Storage/storageAccounts',
-        location: 'Canada Central',
-        name: 'unioneyesstorage',
-      },
-    ];
+    try {
+      const { DefaultAzureCredential } = await import('@azure/identity');
+      const { ResourceManagementClient } = await import('@azure/arm-resources');
+
+      const credential = new DefaultAzureCredential();
+      const client = new ResourceManagementClient(credential, params.subscriptionId);
+
+      const resources: Array<{ id: string; type: string; location: string; name: string }> = [];
+      for await (const resource of client.resources.listByResourceGroup(params.resourceGroupName)) {
+        resources.push({
+          id: resource.id || '',
+          type: resource.type || '',
+          location: resource.location || '',
+          name: resource.name || '',
+        });
+      }
+
+      return resources;
+    } catch (error) {
+      logger.warn('Azure SDK not available or not authenticated — returning empty resource list for carbon accounting', {
+        error: error instanceof Error ? error.message : String(error),
+        subscriptionId: params.subscriptionId,
+        resourceGroupName: params.resourceGroupName,
+      });
+      return [];
+    }
   }
 
   /**

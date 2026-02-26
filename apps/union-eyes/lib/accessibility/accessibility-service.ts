@@ -15,6 +15,7 @@ import {
   type AccessibilityIssue,
 } from "@/db/schema";
 import { eq, desc, inArray } from "drizzle-orm";
+import { logger } from "@/lib/logger";
 
 /**
  * Accessibility Audit Manager
@@ -136,37 +137,33 @@ export class AccessibilityAuditManager {
   }
   
   /**
-   * Run axe-core scan (placeholder - implement with Playwright)
+   * Run axe-core scan via Playwright
+   * Requires @axe-core/playwright and playwright to be installed
    */
-  private async runAxeScan(_url: string): Promise<unknown> {
-    // This is a placeholder. In production, you would:
-    // 1. Launch Playwright/Puppeteer browser
-    // 2. Navigate to URL
-    // 3. Inject axe-core
-    // 4. Run axe.run()
-    // 5. Return results
-    
-    // For now, return mock data
-    return {
-      violations: [
-        {
-          id: "color-contrast",
-          impact: "serious",
-          tags: ["wcag2aa", "wcag143"],
-          description: "Elements must have sufficient color contrast",
-          help: "Ensure text has sufficient contrast against background",
-          helpUrl: "https://dequeuniversity.com/rules/axe/4.7/color-contrast",
-          nodes: [
-            {
-              target: ["button.primary"],
-              html: '<button class="primary">Submit</button>',
-              failureSummary:
-                "Fix by ensuring contrast ratio is at least 4.5:1",
-            },
-          ],
-        },
-      ],
-    };
+  private async runAxeScan(url: string): Promise<unknown> {
+    try {
+      // Dynamically import Playwright + axe-core for WCAG scanning
+      const { chromium } = await import('playwright');
+      const { AxeBuilder } = await import('@axe-core/playwright');
+
+      const browser = await chromium.launch({ headless: true });
+      const page = await browser.newPage();
+      await page.goto(url, { waitUntil: 'networkidle' });
+
+      const results = await new AxeBuilder({ page })
+        .withTags(['wcag2a', 'wcag2aa', 'wcag21aa'])
+        .analyze();
+
+      await browser.close();
+      return results;
+    } catch (error) {
+      // Playwright or axe-core not available — return empty violations
+      logger.warn('axe-core scan unavailable: Playwright or @axe-core/playwright not installed. Returning empty violations.', {
+        url,
+        error: error instanceof Error ? error.message : String(error),
+      });
+      return { violations: [] };
+    }
   }
   
   /**

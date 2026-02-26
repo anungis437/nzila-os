@@ -160,6 +160,18 @@ export const complianceTasks = pgTable('compliance_tasks', {
   updatedAt: timestamp('updated_at', { withTimezone: true }).notNull().defaultNow(),
 })
 
+// ── audit_log (lightweight action log — used by CFO, Partners, Zonga, Shop-Quoter) ──
+
+export const auditLog = pgTable('audit_log', {
+  id: uuid('id').primaryKey().defaultRandom(),
+  action: text('action').notNull(),
+  actorId: text('actor_id').notNull(),
+  entityType: text('entity_type').notNull(),
+  entityId: uuid('entity_id'),
+  metadata: jsonb('metadata').default({}),
+  createdAt: timestamp('created_at', { withTimezone: true }).notNull().defaultNow(),
+})
+
 // ── 18) audit_events (APPEND-ONLY) ─────────────────────────────────────────
 
 export const auditEvents = pgTable('audit_events', {

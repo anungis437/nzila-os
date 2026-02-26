@@ -129,7 +129,8 @@ export class LMBPImmigrationService {
     
     // Generate letter number (format: LMBP-YYYY-NNNNNN)
     const year = validFrom.getFullYear();
-    const randomNum = Math.floor(Math.random() * 1000000).toString().padStart(6, '0');
+    const { randomInt } = await import('crypto');
+    const randomNum = randomInt(0, 1000000).toString().padStart(6, '0');
     const letterNumber = `LMBP-${year}-${randomNum}`;
     
     // Calculate compliance report due date (1 year from valid_from)

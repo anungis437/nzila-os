@@ -17,7 +17,8 @@ import {
   notificationQueue, 
   notificationTemplates, 
   userNotificationPreferences,
-  notificationLog 
+  notificationLog,
+  inAppNotifications,
 } from '../db/schema';
 import { eq, and, desc } from 'drizzle-orm';
 import { Resend } from 'resend';
@@ -356,30 +357,59 @@ async function sendSMS(userId: string, message: string, data: Record<string, any
 }
 
 /**
- * Send push notification
+ * Send push notification via Firebase Admin SDK (FCM)
+ *
+ * Uses a dynamic import so the firebase-admin dependency is optional –
+ * if it's not installed or FCM_PROJECT_ID is not configured, push
+ * notifications are gracefully skipped with a warning log.
  */
 async function sendPushNotification(
   userId: string,
   title: string,
   body: string,
   // eslint-disable-next-line @typescript-eslint/no-explicit-any
-  _data: Record<string, any>
+  data: Record<string, any>
 ): Promise<void> {
   try {
-    // TODO: Implement FCM service for push notifications
-    // const results = await FCMService.sendToUser({
-    //   userId,
-    //   title,
-    //   body,
-    //   data,
-    // });
-    
-    // const successCount = results.filter(r => r.success).length;
-    logger.info('[PUSH] Push notification stubbed (FCMService not implemented)', {
-      userId,
-      title,
-      body,
+    const projectId = process.env.FCM_PROJECT_ID;
+    if (!projectId) {
+      logger.warn('[PUSH] FCM_PROJECT_ID not configured – skipping push notification', {
+        userId,
+        title,
+      });
+      return;
+    }
+
+    // Dynamic import so the module is optional at build time
+    const admin = await import('firebase-admin').catch(() => null);
+    if (!admin) {
+      logger.warn('[PUSH] firebase-admin not installed – skipping push notification', {
+        userId,
+        title,
+      });
+      return;
+    }
+
+    // Initialize app if not already done
+    if (!admin.apps?.length) {
+      admin.initializeApp({
+        credential: admin.credential.applicationDefault(),
+        projectId,
+      });
+    }
+
+    const messaging = admin.messaging();
+
+    // Build the FCM message (topic = userId so each user subscribes to their own topic)
+    await messaging.send({
+      topic: `user_${userId}`,
+      notification: { title, body },
+      data: Object.fromEntries(
+        Object.entries(data).map(([k, v]) => [k, String(v)]),
+      ),
     });
+
+    logger.info('[PUSH] Successfully sent via FCM', { userId, title });
   } catch (error) {
     logger.error('[PUSH] Failed to send', { error, userId });
     throw error;
@@ -395,12 +425,40 @@ async function createInAppNotification(
   type: NotificationType,
   message: string,
   // eslint-disable-next-line @typescript-eslint/no-explicit-any
-  _data: Record<string, any>
+  data: Record<string, any>
 ): Promise<void> {
-  // Store in database for in-app display
-  logger.info('[IN-APP] Notification created', { userId, type, message, organizationId });
-  
-  // In production, would insert into in_app_notifications table
+  try {
+    // Map notification type to a human-readable title
+    const titleMap: Record<string, string> = {
+      payment_confirmation: 'Payment Confirmed',
+      payment_failed: 'Payment Failed',
+      payment_reminder: 'Payment Reminder',
+      donation_received: 'Donation Received',
+      stipend_approved: 'Stipend Approved',
+      stipend_disbursed: 'Stipend Disbursed',
+      low_balance_alert: 'Low Balance Alert',
+      arrears_warning: 'Arrears Warning',
+      strike_announcement: 'Strike Announcement',
+      picket_reminder: 'Picket Reminder',
+    };
+
+    await db.insert(inAppNotifications).values({
+      userId,
+      tenantId: organizationId,
+      title: titleMap[type] || type,
+      message,
+      type: type.includes('alert') || type.includes('warning') || type.includes('failed')
+        ? 'warning'
+        : 'info',
+      data,
+      read: false,
+    });
+
+    logger.info('[IN-APP] Notification created', { userId, type, organizationId });
+  } catch (error) {
+    logger.error('[IN-APP] Failed to create notification', { error, userId, type });
+    throw error;
+  }
 }
 
 // ============================================================================

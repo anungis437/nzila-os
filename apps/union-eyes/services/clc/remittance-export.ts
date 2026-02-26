@@ -621,7 +621,10 @@ export class RemittanceExportService {
    * Helper: Generate EDI control number
    */
   private generateControlNumber(): string {
-    return Math.floor(Math.random() * 1000000000).toString().padStart(9, '0');
+    // eslint-disable-next-line @typescript-eslint/no-require-imports
+    const nodeCrypto = require('crypto');
+    const buf = nodeCrypto.randomBytes(4);
+    return (buf.readUInt32BE(0) % 1000000000).toString().padStart(9, '0');
   }
 
   /**

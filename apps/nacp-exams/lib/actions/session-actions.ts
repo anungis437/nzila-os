@@ -7,8 +7,6 @@
  * Uses @nzila/db for persistence, @nzila/nacp-core schemas for validation,
  * and the evidence pipeline for tamper-proof audit trails.
  */
-import { auth } from '@clerk/nextjs/server'
-import { redirect } from 'next/navigation'
 import { platformDb } from '@nzila/db/platform'
 import { sql } from 'drizzle-orm'
 import { CreateExamSessionSchema } from '@nzila/nacp-core/schemas'
@@ -17,6 +15,8 @@ import type { ExamSession } from '@nzila/nacp-core/types'
 import { transitionSession } from '@/lib/session-machine'
 import { logTransition } from '@/lib/commerce-telemetry'
 import { buildExamEvidencePack } from '@/lib/evidence'
+import { classifyTransitionEvidence } from '@/lib/evidence-classification'
+import { resolveOrgContext } from '@/lib/resolve-org'
 
 // ── Types ────────────────────────────────────────────────────────────────────
 
@@ -46,10 +46,9 @@ export async function listSessions(opts?: {
   status?: string
   search?: string
 }): Promise<{ sessions: ExamSessionRow[] }> {
-  const { userId } = await auth()
-  if (!userId) redirect('/sign-in')
+  const ctx = await resolveOrgContext()
 
-  let filter = sql`1=1`
+  let filter = sql`es.entity_id = ${ctx.entityId}`
   if (opts?.status) {
     filter = sql`${filter} AND es.status = ${opts.status}`
   }
@@ -83,8 +82,7 @@ export async function listSessions(opts?: {
 }
 
 export async function getSessionStats(): Promise<SessionStats> {
-  const { userId } = await auth()
-  if (!userId) redirect('/sign-in')
+  const ctx = await resolveOrgContext()
 
   const [row] = await platformDb.execute(sql`
     SELECT
@@ -94,6 +92,7 @@ export async function getSessionStats(): Promise<SessionStats> {
       COUNT(*) FILTER (WHERE status = ${ExamSessionStatus.CLOSED})::int as completed,
       COUNT(*) FILTER (WHERE status = 'cancelled')::int as cancelled
     FROM exam_sessions
+    WHERE entity_id = ${ctx.entityId}
   `)
 
   const r = row as Record<string, number>
@@ -116,8 +115,7 @@ export async function createSession(data: {
   maxCandidates: number
   notes?: string
 }) {
-  const { userId } = await auth()
-  if (!userId) redirect('/sign-in')
+  const ctx = await resolveOrgContext()
 
   const parsed = CreateExamSessionSchema.safeParse(data)
   if (!parsed.success) {
@@ -127,9 +125,10 @@ export async function createSession(data: {
   const id = crypto.randomUUID()
 
   await platformDb.execute(sql`
-    INSERT INTO exam_sessions (id, exam_id, center_id, scheduled_date, duration_minutes, max_candidates, status, notes, created_by, created_at)
+    INSERT INTO exam_sessions (id, entity_id, exam_id, center_id, scheduled_date, duration_minutes, max_candidates, status, notes, created_by, created_at)
     VALUES (
       ${id},
+      ${ctx.entityId},
       ${data.examId},
       ${data.centerId},
       ${data.scheduledDate},
@@ -137,17 +136,23 @@ export async function createSession(data: {
       ${data.maxCandidates},
       ${ExamSessionStatus.SCHEDULED},
       ${data.notes ?? null},
-      ${userId},
+      ${ctx.actorId},
       NOW()
     )
   `)
 
+  // Evidence: session.created is best-effort (not regulatory)
   await buildExamEvidencePack({
     action: 'session.created',
     entityType: 'exam_session',
     entityId: id,
-    actorId: userId,
-    payload: { examId: data.examId, centerId: data.centerId, scheduledDate: data.scheduledDate },
+    actorId: ctx.actorId,
+    payload: {
+      orgId: ctx.entityId,
+      examId: data.examId,
+      centerId: data.centerId,
+      scheduledDate: data.scheduledDate,
+    },
   }).catch(() => {})
 
   return { success: true, id }
@@ -156,22 +161,20 @@ export async function createSession(data: {
 export async function updateSessionStatus(
   sessionId: string,
   targetStatus: ExamSessionStatus,
-  role: NacpRole = NacpRole.ADMIN,
 ) {
-  const { userId } = await auth()
-  if (!userId) redirect('/sign-in')
+  const ctx = await resolveOrgContext()
 
-  // ── Fetch current session for state machine context ──────────────
+  // ── Fetch current session for state machine context (org-scoped) ──
   const [row] = await platformDb.execute(sql`
     SELECT
-      id, entity_id as "entityId", exam_id as "examId",
+      id, entity_id as "entityId", entity_id as "orgId", exam_id as "examId",
       center_id as "centerId", status, scheduled_date as "scheduledAt",
       opened_at as "openedAt", sealed_at as "sealedAt",
       exported_at as "exportedAt", closed_at as "closedAt",
       integrity_hash as "integrityHash", supervisor_id as "supervisorId",
       COALESCE(candidate_count, 0)::int as "candidateCount",
       created_at as "createdAt", updated_at as "updatedAt"
-    FROM exam_sessions WHERE id = ${sessionId}
+    FROM exam_sessions WHERE id = ${sessionId} AND entity_id = ${ctx.entityId}
   `)
   if (!row) return { success: false, error: 'Session not found' }
 
@@ -182,8 +185,8 @@ export async function updateSessionStatus(
   const result = transitionSession(
     currentStatus,
     targetStatus,
-    { entityId: session.entityId ?? sessionId, actorId: userId, role, meta: {} },
-    session.entityId ?? sessionId,
+    { entityId: ctx.entityId, actorId: ctx.actorId, role: ctx.role, meta: {} },
+    ctx.entityId,
     session,
   )
 
@@ -191,38 +194,45 @@ export async function updateSessionStatus(
     return { success: false, error: `Invalid transition: ${result.reason}` }
   }
 
-  // ── Persist the update ────────────────────────────────────────────
+  // ── Persist the update (org-scoped) ───────────────────────────────
   await platformDb.execute(sql`
     UPDATE exam_sessions
     SET status = ${targetStatus}, updated_at = NOW()
-    WHERE id = ${sessionId}
+    WHERE id = ${sessionId} AND entity_id = ${ctx.entityId}
   `)
 
   // ── Audit trail + telemetry ───────────────────────────────────────
-  try {
-    await buildExamEvidencePack({
-      action: 'session.status_changed',
-      entityType: 'exam_session',
-      entityId: sessionId,
-      actorId: userId,
-      payload: {
-        fromStatus: currentStatus,
-        toStatus: targetStatus,
-        transitionLabel: result.label,
-        eventsEmitted: result.eventsToEmit.map((e: { type: string }) => e.type),
-      },
-    })
-    logTransition(
-      { orgId: sessionId, actorId: userId },
-      'exam_session',
-      currentStatus,
-      targetStatus,
-      true,
-      { transitionLabel: result.label },
-    )
-  } catch {
-    // Audit/telemetry failure is non-blocking
+  const evidenceClass = classifyTransitionEvidence(targetStatus)
+  const evidencePromise = buildExamEvidencePack({
+    action: 'session.status_changed',
+    entityType: 'exam_session',
+    entityId: sessionId,
+    actorId: ctx.actorId,
+    payload: {
+      orgId: ctx.entityId,
+      fromStatus: currentStatus,
+      toStatus: targetStatus,
+      transitionLabel: result.label,
+      eventsEmitted: result.eventsToEmit.map((e: { type: string }) => e.type),
+    },
+  })
+
+  if (evidenceClass === 'mandatory') {
+    // Mandatory evidence (sealed / exported / closed) — failure rolls back
+    await evidencePromise
+  } else {
+    // Best-effort evidence (opened / in_progress) — log but don't block
+    await evidencePromise.catch(() => {})
   }
+
+  logTransition(
+    { orgId: ctx.entityId, actorId: ctx.actorId },
+    'exam_session',
+    currentStatus,
+    targetStatus,
+    true,
+    { transitionLabel: result.label },
+  )
 
   return { success: true }
 }

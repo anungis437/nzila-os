@@ -94,6 +94,7 @@ export const zongaCreators = pgTable('zonga_creators', {
   status: zongaCreatorStatusEnum('status').notNull().default('pending'),
   genre: varchar('genre', { length: 100 }),
   country: varchar('country', { length: 100 }),
+  payoutCurrency: varchar('payout_currency', { length: 3 }).notNull().default('USD'),
   verified: boolean('verified').notNull().default(false),
   createdAt: timestamp('created_at', { withTimezone: true }).notNull().defaultNow(),
   updatedAt: timestamp('updated_at', { withTimezone: true }).notNull().defaultNow(),
@@ -153,11 +154,16 @@ export const zongaRevenueEvents = pgTable('zonga_revenue_events', {
     .references(() => zongaCreators.id),
   assetId: uuid('asset_id')
     .references(() => zongaContentAssets.id),
+  releaseId: uuid('release_id')
+    .references(() => zongaReleases.id),
   type: zongaRevenueTypeEnum('type').notNull(),
   amount: numeric('amount', { precision: 18, scale: 6 }).notNull(),
   currency: varchar('currency', { length: 3 }).notNull().default('USD'),
+  assetTitle: varchar('asset_title', { length: 255 }),
+  source: varchar('source', { length: 100 }),
   description: text('description'),
   externalRef: varchar('external_ref', { length: 255 }),
+  createdBy: uuid('created_by'),
   metadata: jsonb('metadata').notNull().default({}),
   occurredAt: timestamp('occurred_at', { withTimezone: true }).notNull().defaultNow(),
   createdAt: timestamp('created_at', { withTimezone: true }).notNull().defaultNow(),
@@ -194,9 +200,12 @@ export const zongaPayouts = pgTable('zonga_payouts', {
   creatorId: uuid('creator_id')
     .notNull()
     .references(() => zongaCreators.id),
+  creatorName: varchar('creator_name', { length: 255 }),
   amount: numeric('amount', { precision: 18, scale: 6 }).notNull(),
   currency: varchar('currency', { length: 3 }).notNull().default('USD'),
   status: zongaPayoutStatusEnum('status').notNull().default('pending'),
+  payoutRail: varchar('payout_rail', { length: 50 }),
+  stripeTransferId: varchar('stripe_transfer_id', { length: 255 }),
   periodStart: timestamp('period_start', { withTimezone: true }).notNull(),
   periodEnd: timestamp('period_end', { withTimezone: true }).notNull(),
   revenueEventCount: integer('revenue_event_count').notNull().default(0),
@@ -205,6 +214,26 @@ export const zongaPayouts = pgTable('zonga_payouts', {
   approvedAt: timestamp('approved_at', { withTimezone: true }),
   completedAt: timestamp('completed_at', { withTimezone: true }),
   failedReason: text('failed_reason'),
+  createdBy: uuid('created_by'),
+  createdAt: timestamp('created_at', { withTimezone: true }).notNull().defaultNow(),
+  updatedAt: timestamp('updated_at', { withTimezone: true }).notNull().defaultNow(),
+})
+
+// ── Royalty Splits ──────────────────────────────────────────────────────────
+
+export const zongaRoyaltySplits = pgTable('zonga_royalty_splits', {
+  id: uuid('id').primaryKey().defaultRandom(),
+  entityId: uuid('entity_id')
+    .notNull()
+    .references(() => entities.id),
+  releaseId: uuid('release_id')
+    .notNull()
+    .references(() => zongaReleases.id),
+  creatorId: uuid('creator_id')
+    .notNull()
+    .references(() => zongaCreators.id),
+  creatorName: varchar('creator_name', { length: 255 }),
+  sharePercent: numeric('share_percent', { precision: 5, scale: 2 }).notNull(),
   createdAt: timestamp('created_at', { withTimezone: true }).notNull().defaultNow(),
   updatedAt: timestamp('updated_at', { withTimezone: true }).notNull().defaultNow(),
 })

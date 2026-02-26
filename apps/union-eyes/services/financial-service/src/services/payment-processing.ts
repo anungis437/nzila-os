@@ -168,15 +168,18 @@ export interface StipendPayoutResult {
 }
 
 /**
- * Create ACH payout for stipend disbursement
- * 
- * Note: In production, this would use Stripe Connect or a dedicated ACH processor
- * For MVP, we'll simulate the payout creation
+ * Create payout for stipend disbursement via Stripe Connect
+ *
+ * Uses Stripe Connect Transfers when STRIPE_SECRET_KEY is configured.
+ * Falls back to record-only mode in development without Stripe keys.
+ *
+ * For production each member receiving stipends must have a Stripe
+ * Connected Account on file (stored as stripeConnectedAccountId).
  */
 export async function createStipendPayout(
   request: CreateStipendPayoutRequest
 ): Promise<StipendPayoutResult> {
-  const { organizationId, disbursementId, amount, _recipientBankAccount, _description } = request;
+  const { organizationId, disbursementId, amount, recipientBankAccount, description } = request;
 
   try {
     // Validate amount
@@ -184,22 +187,89 @@ export async function createStipendPayout(
       throw new Error('Payout amount must be at least $1.00');
     }
 
-    // In production, integrate with Stripe Connect or ACH processor
-    // For now, create a simulated payout record
-    
-    // Generate transaction ID
-    const transactionId = `ACH-${Date.now()}-${Math.random().toString(36).substring(7)}`;
-
-    // Estimate arrival (ACH typically takes 1-3 business days)
+    let transactionId: string;
+    let status: string;
     const estimatedArrival = new Date();
-    estimatedArrival.setDate(estimatedArrival.getDate() + 2);
+    estimatedArrival.setDate(estimatedArrival.getDate() + 2); // ACH: 1-3 business days
+
+    if (process.env.STRIPE_SECRET_KEY) {
+      // Look up the member's Stripe Connected Account ID from the disbursement
+      const [disbursement] = await db.select()
+        .from(schema.stipendDisbursements)
+        .where(and(
+          eq(schema.stipendDisbursements.id, disbursementId),
+          eq(schema.stipendDisbursements.tenantId, organizationId),
+        ))
+        .limit(1);
+
+      if (!disbursement) {
+        throw new Error(`Disbursement ${disbursementId} not found`);
+      }
+
+      // eslint-disable-next-line @typescript-eslint/no-explicit-any
+      const metadata = (disbursement as any).metadata || {};
+      const connectedAccountId: string | undefined = metadata.stripeConnectedAccountId;
+
+      if (connectedAccountId) {
+        // Use Stripe Connect Transfer to connected account
+        const transfer = await stripe.transfers.create({
+          amount: Math.round(amount * 100), // cents
+          currency: 'cad',
+          destination: connectedAccountId,
+          description: description || `Strike stipend – Disbursement ${disbursementId}`,
+          metadata: {
+            organizationId,
+            disbursementId,
+            memberId: disbursement.memberId,
+            type: 'strike_stipend',
+          },
+        });
+        transactionId = transfer.id;
+        status = 'pending'; // Stripe transfer initiated
+        logger.info('Stripe Connect transfer created for stipend', {
+          transferId: transfer.id,
+          amount,
+          disbursementId,
+        });
+      } else {
+        // No connected account – create a PaymentIntent (manual payout flow)
+        const paymentIntent = await stripe.paymentIntents.create({
+          amount: Math.round(amount * 100),
+          currency: 'cad',
+          description: description || `Strike stipend – Disbursement ${disbursementId}`,
+          metadata: {
+            organizationId,
+            disbursementId,
+            memberId: disbursement.memberId,
+            type: 'strike_stipend',
+            recipientName: recipientBankAccount?.accountHolderName || 'Unknown',
+          },
+        });
+        transactionId = paymentIntent.id;
+        status = 'pending';
+        logger.info('Stripe PaymentIntent created for stipend (no connected account)', {
+          paymentIntentId: paymentIntent.id,
+          amount,
+          disbursementId,
+        });
+      }
+    } else {
+      // Development fallback – record-only, no real payment
+      transactionId = `ACH-${Date.now()}-${crypto.randomUUID().substring(0, 8)}`;
+      status = 'pending';
+      logger.warn('[DEV] No STRIPE_SECRET_KEY – recording stipend without payment', {
+        disbursementId,
+        amount,
+      });
+    }
 
     // Update disbursement record
     await db.update(schema.stipendDisbursements)
       .set({
         status: 'paid',
-        transactionId,
-        paidAt: new Date(),
+        paymentDate: new Date(),
+        paymentReference: transactionId,
+        paymentMethod: process.env.STRIPE_SECRET_KEY ? 'stripe_connect' : 'pending',
         updatedAt: new Date(),
       // eslint-disable-next-line @typescript-eslint/no-explicit-any
       } as any)
@@ -210,7 +280,7 @@ export async function createStipendPayout(
 
     return {
       payoutId: transactionId,
-      status: 'pending',
+      status,
       estimatedArrival,
       transactionId,
     };

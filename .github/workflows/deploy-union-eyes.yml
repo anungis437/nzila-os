@@ -1,0 +1,54 @@
+name: Deploy Union Eyes (Azure Container Apps)
+
+on:
+  workflow_dispatch:
+  push:
+    branches: [main]
+    paths:
+      - 'apps/union-eyes/**'
+      - 'packages/db/**'
+      - 'packages/config/**'
+      - 'packages/commerce-core/**'
+      - 'packages/commerce-services/**'
+      - 'packages/payments-stripe/**'
+
+permissions:
+  contents: read
+
+env:
+  APP_NAME: nzila-os-union-eyes
+  IMAGE: nzilastagingacr.azurecr.io/nzila-os-union-eyes
+
+jobs:
+  build-and-deploy:
+    runs-on: ubuntu-latest
+    name: Build & Deploy Union Eyes
+    steps:
+      - uses: actions/checkout@v4
+
+      - name: Azure login
+        uses: azure/login@v2
+        with:
+          creds: ${{ secrets.AZURE_CREDENTIALS }}
+
+      - name: ACR login
+        run: az acr login --name nzilastagingacr
+
+      - name: Build & push image
+        run: |
+          docker build \
+            --target union-eyes \
+            --build-arg NEXT_PUBLIC_CLERK_PUBLISHABLE_KEY=${{ secrets.UE_CLERK_PUBLISHABLE_KEY }} \
+            --build-arg NEXT_PUBLIC_APP_URL=${{ secrets.UE_APP_URL }} \
+            -t ${{ env.IMAGE }}:${{ github.sha }} \
+            -t ${{ env.IMAGE }}:latest \
+            .
+          docker push ${{ env.IMAGE }}:${{ github.sha }}
+          docker push ${{ env.IMAGE }}:latest
+
+      - name: Update Container App
+        run: |
+          az containerapp update \
+            --name ${{ env.APP_NAME }} \
+            --resource-group ${{ secrets.AZURE_RESOURCE_GROUP }} \
+            --image ${{ env.IMAGE }}:${{ github.sha }}

@@ -489,12 +489,54 @@ def _should_retry_payment(
 
 def _attempt_payment_retry(txn: dict) -> dict:
     """
-    Attempt to charge the payment method on file.
-    Stub — wire into Stripe/payment-processor when available.
+    Attempt to charge the payment method on file via Stripe.
+
+    Requires STRIPE_SECRET_KEY in the environment.
+    Uses the payment_method stored on the dues_transaction.
     """
-    logger.info("Attempting payment retry for transaction %s", txn.get("id"))
-    # Stripe charge attempt goes here
-    return {"success": False, "reason": "payment_processor_not_configured"}
+    import os
+
+    stripe_key = os.environ.get("STRIPE_SECRET_KEY")
+    if not stripe_key:
+        logger.warning("STRIPE_SECRET_KEY not configured — payment retry skipped for %s", txn.get("id"))
+        return {"success": False, "reason": "payment_processor_not_configured"}
+
+    try:
+        import stripe
+
+        stripe.api_key = stripe_key
+        amount_cents = int(float(txn.get("amount", 0)) * 100)
+        currency = txn.get("currency", "cad").lower()
+        payment_method = txn.get("payment_method_id") or txn.get("stripe_payment_method_id")
+        customer_id = txn.get("stripe_customer_id")
+
+        if not payment_method or not customer_id:
+            logger.warning("Transaction %s missing payment_method or customer — cannot retry", txn.get("id"))
+            return {"success": False, "reason": "missing_payment_method"}
+
+        intent = stripe.PaymentIntent.create(
+            amount=amount_cents,
+            currency=currency,
+            customer=customer_id,
+            payment_method=payment_method,
+            confirm=True,
+            off_session=True,
+            metadata={
+                "transaction_id": str(txn.get("id", "")),
+                "retry": "true",
+            },
+        )
+
+        if intent.status in ("succeeded", "requires_capture"):
+            logger.info("Payment retry succeeded for transaction %s (intent %s)", txn.get("id"), intent.id)
+            return {"success": True, "payment_intent_id": intent.id}
+
+        logger.warning("Payment retry intent status=%s for transaction %s", intent.status, txn.get("id"))
+        return {"success": False, "reason": f"intent_status_{intent.status}", "payment_intent_id": intent.id}
+
+    except Exception as exc:  # noqa: BLE001
+        logger.error("Payment retry failed for transaction %s: %s", txn.get("id"), exc)
+        return {"success": False, "reason": str(exc)}
 
 
 def _mark_for_admin_intervention(transaction_id: str, failure_count: int) -> None:

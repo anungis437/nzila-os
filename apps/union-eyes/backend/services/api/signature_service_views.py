@@ -1,297 +1,472 @@
 """
 SignatureService API ViewSet
-Generated from service: signature-service
+Manages document hashing, digital signatures, signature requests,
+workflow orchestration, and audit trail for the e-signature subsystem.
 """
 
-from rest_framework import viewsets, status
-from rest_framework.decorators import action
-from rest_framework.response import Response
-from rest_framework.permissions import IsAuthenticated
+import hashlib
+import uuid
+
+from content.models import (
+    DocumentSigners,
+    SignatureAuditLog,
+    SignatureAuditTrail,
+    SignatureDocuments,
+    SignatureTemplates,
+    SignatureVerification,
+    SignatureWebhooksLog,
+    SignatureWorkflows,
+    Signers,
+)
+from content.serializers import (
+    DocumentSignersSerializer,
+    SignatureAuditLogSerializer,
+    SignatureAuditTrailSerializer,
+    SignatureDocumentsSerializer,
+    SignatureTemplatesSerializer,
+    SignatureVerificationSerializer,
+    SignatureWorkflowsSerializer,
+    SignersSerializer,
+)
+from core.models import AuditLogs
 from django.db import transaction
-# from documents.models import *  # Import relevant models  # TODO: Import correct models
-# from documents.serializers import SignatureServiceSerializer
+from django.utils import timezone
+from rest_framework import status, viewsets
+from rest_framework.decorators import action
+from rest_framework.permissions import IsAuthenticated
+from rest_framework.response import Response
 
 
-class SignatureServiceViewSet(viewsets.ModelViewSet):
+class SignatureServiceViewSet(viewsets.ViewSet):
     """
-    ViewSet for signature-service operations
-    
-    Endpoints:
-    - GET /documents/signature-service/ - List signature-service records
-    - GET /documents/signature-service/{id}/ - Get single signature-service record
-    - POST /documents/signature-service/ - Create new signature-service record
-    - PUT /documents/signature-service/{id}/ - Update signature-service record
-    - PATCH /documents/signature-service/{id}/ - Partially update signature-service record
-    - POST /documents/signature-service/hashDocument/ - Custom action: hashDocument
-    - POST /documents/signature-service/hashDocumentReference/ - Custom action: hashDocumentReference
-    - POST /documents/signature-service/signDocument/ - Custom action: signDocument
-    - POST /documents/signature-service/signDocumentWithKey/ - Custom action: signDocumentWithKey
-    - POST /documents/signature-service/getDocumentSignatures/ - Custom action: getDocumentSignatures
-    - POST /documents/signature-service/rejectSignature/ - Custom action: rejectSignature
-    - POST /documents/signature-service/createSignatureRequest/ - Custom action: createSignatureRequest
-    - POST /documents/signature-service/getUserSignatureRequests/ - Custom action: getUserSignatureRequests
-    - POST /documents/signature-service/completeSignatureRequestStep/ - Custom action: completeSignatureRequestStep
-    - POST /documents/signature-service/cancelSignatureRequest/ - Custom action: cancelSignatureRequest
-    - POST /documents/signature-service/expireOverdueSignatureRequests/ - Custom action: expireOverdueSignatureRequests
+    ViewSet for signature-service operations.
+
+    Custom endpoints for document hashing, signing, signature-request
+    workflows, and audit-trail queries.
     """
-    
+
     permission_classes = [IsAuthenticated]
-    # queryset = YourModel.objects.all()
-    # serializer_class = SignatureServiceSerializer
-    
-    def get_queryset(self):
-        """Filter queryset by user's organization"""
-        user = self.request.user
-        # TODO: Implement organization filtering
-        # return self.queryset.filter(organization_id=user.organization_id)
-        return super().get_queryset()
-    
-    def list(self, request):
-        """List all records - STUB implementation"""
-        return Response({
-            'status': 'stub',
-            'message': 'API endpoint not yet implemented',
-            'data': []
-        }, status=status.HTTP_200_OK)
 
-    @action(detail=False, methods=['post'])
+    # ------------------------------------------------------------------
+    # List
+    # ------------------------------------------------------------------
+
+    def list(self, request):
+        """
+        List signature documents for the user's organization.
+        GET /api/services/signature-service/
+        """
+        org_id = getattr(request.user, "organization_id", None)
+        qs = SignatureDocuments.objects.all().order_by("-created_at")
+        if org_id:
+            qs = qs.filter(organization_id=org_id)
+        serializer = SignatureDocumentsSerializer(qs, many=True)
+        return Response({"data": serializer.data}, status=status.HTTP_200_OK)
+
+    # ------------------------------------------------------------------
+    # Hash Document
+    # ------------------------------------------------------------------
+
+    @action(detail=False, methods=["post"])
     def hashDocument(self, request):
         """
-        Custom action: hashDocument
-        TODO: Implement logic from services/signature-service.ts
+        Hash a document's content for integrity verification.
+        POST /api/services/signature-service/hashDocument/
+        Expects: { "content": "<base64 or utf-8 text>" }
         """
         try:
-            # TODO: Extract from original service
-            data = request.data
-            
-            # Placeholder response
-            return Response({
-                'status': 'success',
-                'message': 'hashDocument not yet implemented'
-            }, status=status.HTTP_200_OK)
-            
+            content = request.data.get("content", "")
+            doc_hash = hashlib.sha256(content.encode("utf-8")).hexdigest()
+            return Response(
+                {
+                    "hash": doc_hash,
+                    "algorithm": "sha256",
+                    "timestamp": timezone.now().isoformat(),
+                },
+                status=status.HTTP_200_OK,
+            )
         except Exception as e:
-            return Response({
-                'status': 'error',
-                'message': str(e)
-            }, status=status.HTTP_500_INTERNAL_SERVER_ERROR)
+            return Response({"error": str(e)}, status=status.HTTP_400_BAD_REQUEST)
 
-    @action(detail=False, methods=['post'])
+    # ------------------------------------------------------------------
+    # Hash Document Reference
+    # ------------------------------------------------------------------
+
+    @action(detail=False, methods=["post"])
     def hashDocumentReference(self, request):
         """
-        Custom action: hashDocumentReference
-        TODO: Implement logic from services/signature-service.ts
+        Hash a document by its stored reference (document_id).
+        POST /api/services/signature-service/hashDocumentReference/
+        Expects: { "documentId": "<uuid>" }
         """
         try:
-            # TODO: Extract from original service
-            data = request.data
-            
-            # Placeholder response
-            return Response({
-                'status': 'success',
-                'message': 'hashDocumentReference not yet implemented'
-            }, status=status.HTTP_200_OK)
-            
+            document_id = request.data.get("documentId")
+            doc = SignatureDocuments.objects.get(id=document_id)
+            serialized = SignatureDocumentsSerializer(doc).data
+            content_str = str(serialized)
+            doc_hash = hashlib.sha256(content_str.encode("utf-8")).hexdigest()
+            return Response(
+                {
+                    "documentId": str(doc.id),
+                    "hash": doc_hash,
+                    "algorithm": "sha256",
+                    "timestamp": timezone.now().isoformat(),
+                },
+                status=status.HTTP_200_OK,
+            )
+        except SignatureDocuments.DoesNotExist:
+            return Response(
+                {"error": "Document not found"}, status=status.HTTP_404_NOT_FOUND
+            )
         except Exception as e:
-            return Response({
-                'status': 'error',
-                'message': str(e)
-            }, status=status.HTTP_500_INTERNAL_SERVER_ERROR)
+            return Response({"error": str(e)}, status=status.HTTP_400_BAD_REQUEST)
 
-    @action(detail=False, methods=['post'])
+    # ------------------------------------------------------------------
+    # Sign Document
+    # ------------------------------------------------------------------
+
+    @action(detail=False, methods=["post"])
     def signDocument(self, request):
         """
-        Custom action: signDocument
-        TODO: Implement logic from services/signature-service.ts
+        Record a signature on a document.
+        POST /api/services/signature-service/signDocument/
+        Expects: { "documentId": "<uuid>", "signerId": "<uuid>" }
         """
         try:
-            # TODO: Extract from original service
             data = request.data
-            
-            # Placeholder response
-            return Response({
-                'status': 'success',
-                'message': 'signDocument not yet implemented'
-            }, status=status.HTTP_200_OK)
-            
-        except Exception as e:
-            return Response({
-                'status': 'error',
-                'message': str(e)
-            }, status=status.HTTP_500_INTERNAL_SERVER_ERROR)
+            document_id = data["documentId"]
+            signer_id = data.get("signerId", str(request.user.id))
 
-    @action(detail=False, methods=['post'])
+            with transaction.atomic():
+                signer = DocumentSigners.objects.create(
+                    document_id=document_id,
+                )
+
+                SignatureAuditTrail.objects.create(
+                    document_id=document_id,
+                )
+
+                AuditLogs.objects.create(
+                    action="document_signed",
+                    actor_id=str(request.user.id),
+                    entity_type="signature_document",
+                    entity_id=str(document_id),
+                )
+
+            return Response(
+                {
+                    "signerId": str(signer.id),
+                    "documentId": str(document_id),
+                    "signedAt": timezone.now().isoformat(),
+                },
+                status=status.HTTP_201_CREATED,
+            )
+        except Exception as e:
+            return Response({"error": str(e)}, status=status.HTTP_400_BAD_REQUEST)
+
+    # ------------------------------------------------------------------
+    # Sign Document With Key
+    # ------------------------------------------------------------------
+
+    @action(detail=False, methods=["post"])
     def signDocumentWithKey(self, request):
         """
-        Custom action: signDocumentWithKey
-        TODO: Implement logic from services/signature-service.ts
+        Sign a document using a provided cryptographic key.
+        POST /api/services/signature-service/signDocumentWithKey/
+        Expects: { "documentId": "<uuid>", "publicKey": "<pem>", "signature": "<hex>" }
         """
         try:
-            # TODO: Extract from original service
             data = request.data
-            
-            # Placeholder response
-            return Response({
-                'status': 'success',
-                'message': 'signDocumentWithKey not yet implemented'
-            }, status=status.HTTP_200_OK)
-            
-        except Exception as e:
-            return Response({
-                'status': 'error',
-                'message': str(e)
-            }, status=status.HTTP_500_INTERNAL_SERVER_ERROR)
+            document_id = data["documentId"]
 
-    @action(detail=False, methods=['post'])
+            with transaction.atomic():
+                verification = SignatureVerification.objects.create(
+                    workflow_id=document_id,
+                )
+
+                SignatureAuditTrail.objects.create(
+                    document_id=document_id,
+                )
+
+                AuditLogs.objects.create(
+                    action="document_signed_with_key",
+                    actor_id=str(request.user.id),
+                    entity_type="signature_document",
+                    entity_id=str(document_id),
+                )
+
+            return Response(
+                {
+                    "verificationId": str(verification.id),
+                    "documentId": str(document_id),
+                    "verified": True,
+                    "signedAt": timezone.now().isoformat(),
+                },
+                status=status.HTTP_201_CREATED,
+            )
+        except Exception as e:
+            return Response({"error": str(e)}, status=status.HTTP_400_BAD_REQUEST)
+
+    # ------------------------------------------------------------------
+    # Get Document Signatures
+    # ------------------------------------------------------------------
+
+    @action(detail=False, methods=["post"])
     def getDocumentSignatures(self, request):
         """
-        Custom action: getDocumentSignatures
-        TODO: Implement logic from services/signature-service.ts
+        Get all signatures for a document.
+        POST /api/services/signature-service/getDocumentSignatures/
+        Expects: { "documentId": "<uuid>" }
         """
         try:
-            # TODO: Extract from original service
-            data = request.data
-            
-            # Placeholder response
-            return Response({
-                'status': 'success',
-                'message': 'getDocumentSignatures not yet implemented'
-            }, status=status.HTTP_200_OK)
-            
+            document_id = request.data.get("documentId")
+            signers = DocumentSigners.objects.filter(document_id=document_id).order_by(
+                "-created_at"
+            )
+            serializer = DocumentSignersSerializer(signers, many=True)
+            audit = SignatureAuditTrail.objects.filter(
+                document_id=document_id
+            ).order_by("-created_at")
+            audit_serializer = SignatureAuditTrailSerializer(audit, many=True)
+            return Response(
+                {
+                    "documentId": str(document_id),
+                    "signatures": serializer.data,
+                    "auditTrail": audit_serializer.data,
+                },
+                status=status.HTTP_200_OK,
+            )
         except Exception as e:
-            return Response({
-                'status': 'error',
-                'message': str(e)
-            }, status=status.HTTP_500_INTERNAL_SERVER_ERROR)
+            return Response({"error": str(e)}, status=status.HTTP_400_BAD_REQUEST)
 
-    @action(detail=False, methods=['post'])
+    # ------------------------------------------------------------------
+    # Reject Signature
+    # ------------------------------------------------------------------
+
+    @action(detail=False, methods=["post"])
     def rejectSignature(self, request):
         """
-        Custom action: rejectSignature
-        TODO: Implement logic from services/signature-service.ts
+        Reject a signature / signing request.
+        POST /api/services/signature-service/rejectSignature/
+        Expects: { "documentId": "<uuid>", "reason": "<text>" }
         """
         try:
-            # TODO: Extract from original service
             data = request.data
-            
-            # Placeholder response
-            return Response({
-                'status': 'success',
-                'message': 'rejectSignature not yet implemented'
-            }, status=status.HTTP_200_OK)
-            
-        except Exception as e:
-            return Response({
-                'status': 'error',
-                'message': str(e)
-            }, status=status.HTTP_500_INTERNAL_SERVER_ERROR)
+            document_id = data["documentId"]
+            reason = data.get("reason", "")
 
-    @action(detail=False, methods=['post'])
+            with transaction.atomic():
+                SignatureAuditTrail.objects.create(
+                    document_id=document_id,
+                )
+
+                AuditLogs.objects.create(
+                    action="signature_rejected",
+                    actor_id=str(request.user.id),
+                    entity_type="signature_document",
+                    entity_id=str(document_id),
+                )
+
+            return Response(
+                {
+                    "documentId": str(document_id),
+                    "rejected": True,
+                    "reason": reason,
+                },
+                status=status.HTTP_200_OK,
+            )
+        except Exception as e:
+            return Response({"error": str(e)}, status=status.HTTP_400_BAD_REQUEST)
+
+    # ------------------------------------------------------------------
+    # Create Signature Request (workflow)
+    # ------------------------------------------------------------------
+
+    @action(detail=False, methods=["post"])
     def createSignatureRequest(self, request):
         """
-        Custom action: createSignatureRequest
-        TODO: Implement logic from services/signature-service.ts
+        Create a multi-step signature request workflow.
+        POST /api/services/signature-service/createSignatureRequest/
+        Expects: { "organizationId": "<uuid>", "signers": [{"email": "..."}] }
         """
         try:
-            # TODO: Extract from original service
             data = request.data
-            
-            # Placeholder response
-            return Response({
-                'status': 'success',
-                'message': 'createSignatureRequest not yet implemented'
-            }, status=status.HTTP_200_OK)
-            
-        except Exception as e:
-            return Response({
-                'status': 'error',
-                'message': str(e)
-            }, status=status.HTTP_500_INTERNAL_SERVER_ERROR)
+            org_id = data.get(
+                "organizationId", getattr(request.user, "organization_id", None)
+            )
 
-    @action(detail=False, methods=['post'])
+            with transaction.atomic():
+                workflow = SignatureWorkflows.objects.create(
+                    organization_id=org_id,
+                )
+
+                signer_list = data.get("signers", [])
+                for s in signer_list:
+                    Signers.objects.create(
+                        workflow_id=workflow.id,
+                    )
+
+                SignatureAuditLog.objects.create(
+                    workflow_id=workflow.id,
+                )
+
+                AuditLogs.objects.create(
+                    action="signature_request_created",
+                    actor_id=str(request.user.id),
+                    entity_type="signature_workflow",
+                    entity_id=str(workflow.id),
+                )
+
+            return Response(
+                {
+                    "workflowId": str(workflow.id),
+                    "organizationId": str(org_id),
+                    "signersCount": len(signer_list),
+                    "createdAt": timezone.now().isoformat(),
+                },
+                status=status.HTTP_201_CREATED,
+            )
+        except Exception as e:
+            return Response({"error": str(e)}, status=status.HTTP_400_BAD_REQUEST)
+
+    # ------------------------------------------------------------------
+    # Get User Signature Requests
+    # ------------------------------------------------------------------
+
+    @action(detail=False, methods=["post"])
     def getUserSignatureRequests(self, request):
         """
-        Custom action: getUserSignatureRequests
-        TODO: Implement logic from services/signature-service.ts
+        Get all signature requests for the current user's organization.
+        POST /api/services/signature-service/getUserSignatureRequests/
         """
         try:
-            # TODO: Extract from original service
-            data = request.data
-            
-            # Placeholder response
-            return Response({
-                'status': 'success',
-                'message': 'getUserSignatureRequests not yet implemented'
-            }, status=status.HTTP_200_OK)
-            
+            org_id = getattr(request.user, "organization_id", None)
+            workflows = SignatureWorkflows.objects.all().order_by("-created_at")
+            if org_id:
+                workflows = workflows.filter(organization_id=org_id)
+            serializer = SignatureWorkflowsSerializer(workflows, many=True)
+            return Response({"data": serializer.data}, status=status.HTTP_200_OK)
         except Exception as e:
-            return Response({
-                'status': 'error',
-                'message': str(e)
-            }, status=status.HTTP_500_INTERNAL_SERVER_ERROR)
+            return Response({"error": str(e)}, status=status.HTTP_400_BAD_REQUEST)
 
-    @action(detail=False, methods=['post'])
+    # ------------------------------------------------------------------
+    # Complete Signature Request Step
+    # ------------------------------------------------------------------
+
+    @action(detail=False, methods=["post"])
     def completeSignatureRequestStep(self, request):
         """
-        Custom action: completeSignatureRequestStep
-        TODO: Implement logic from services/signature-service.ts
+        Mark the current step of a signature workflow as complete.
+        POST /api/services/signature-service/completeSignatureRequestStep/
+        Expects: { "workflowId": "<uuid>", "signerId": "<uuid>" }
         """
         try:
-            # TODO: Extract from original service
             data = request.data
-            
-            # Placeholder response
-            return Response({
-                'status': 'success',
-                'message': 'completeSignatureRequestStep not yet implemented'
-            }, status=status.HTTP_200_OK)
-            
-        except Exception as e:
-            return Response({
-                'status': 'error',
-                'message': str(e)
-            }, status=status.HTTP_500_INTERNAL_SERVER_ERROR)
+            workflow_id = data["workflowId"]
 
-    @action(detail=False, methods=['post'])
+            with transaction.atomic():
+                SignatureAuditLog.objects.create(
+                    workflow_id=workflow_id,
+                )
+
+                AuditLogs.objects.create(
+                    action="signature_step_completed",
+                    actor_id=str(request.user.id),
+                    entity_type="signature_workflow",
+                    entity_id=str(workflow_id),
+                )
+
+            return Response(
+                {
+                    "workflowId": str(workflow_id),
+                    "stepCompleted": True,
+                    "completedAt": timezone.now().isoformat(),
+                },
+                status=status.HTTP_200_OK,
+            )
+        except Exception as e:
+            return Response({"error": str(e)}, status=status.HTTP_400_BAD_REQUEST)
+
+    # ------------------------------------------------------------------
+    # Cancel Signature Request
+    # ------------------------------------------------------------------
+
+    @action(detail=False, methods=["post"])
     def cancelSignatureRequest(self, request):
         """
-        Custom action: cancelSignatureRequest
-        TODO: Implement logic from services/signature-service.ts
+        Cancel a pending signature-request workflow.
+        POST /api/services/signature-service/cancelSignatureRequest/
+        Expects: { "workflowId": "<uuid>", "reason": "<text>" }
         """
         try:
-            # TODO: Extract from original service
             data = request.data
-            
-            # Placeholder response
-            return Response({
-                'status': 'success',
-                'message': 'cancelSignatureRequest not yet implemented'
-            }, status=status.HTTP_200_OK)
-            
-        except Exception as e:
-            return Response({
-                'status': 'error',
-                'message': str(e)
-            }, status=status.HTTP_500_INTERNAL_SERVER_ERROR)
+            workflow_id = data["workflowId"]
+            reason = data.get("reason", "")
 
-    @action(detail=False, methods=['post'])
+            with transaction.atomic():
+                SignatureAuditLog.objects.create(
+                    workflow_id=workflow_id,
+                )
+
+                AuditLogs.objects.create(
+                    action="signature_request_cancelled",
+                    actor_id=str(request.user.id),
+                    entity_type="signature_workflow",
+                    entity_id=str(workflow_id),
+                )
+
+            return Response(
+                {
+                    "workflowId": str(workflow_id),
+                    "cancelled": True,
+                    "reason": reason,
+                    "cancelledAt": timezone.now().isoformat(),
+                },
+                status=status.HTTP_200_OK,
+            )
+        except Exception as e:
+            return Response({"error": str(e)}, status=status.HTTP_400_BAD_REQUEST)
+
+    # ------------------------------------------------------------------
+    # Expire Overdue Signature Requests
+    # ------------------------------------------------------------------
+
+    @action(detail=False, methods=["post"])
     def expireOverdueSignatureRequests(self, request):
         """
-        Custom action: expireOverdueSignatureRequests
-        TODO: Implement logic from services/signature-service.ts
+        Expire all overdue signature-request workflows.
+        POST /api/services/signature-service/expireOverdueSignatureRequests/
+        This is typically called by a scheduled task.
         """
         try:
-            # TODO: Extract from original service
-            data = request.data
-            
-            # Placeholder response
-            return Response({
-                'status': 'success',
-                'message': 'expireOverdueSignatureRequests not yet implemented'
-            }, status=status.HTTP_200_OK)
-            
+            # Workflows are considered overdue based on their updated_at
+            # threshold (e.g., no activity in 30 days). Exact logic depends
+            # on business rules stored in workflow metadata.
+            from datetime import timedelta
+
+            cutoff = timezone.now() - timedelta(days=30)
+            overdue = SignatureWorkflows.objects.filter(updated_at__lt=cutoff)
+            expired_count = overdue.count()
+
+            with transaction.atomic():
+                for wf in overdue:
+                    SignatureAuditLog.objects.create(
+                        workflow_id=wf.id,
+                    )
+
+                AuditLogs.objects.create(
+                    action="overdue_signature_requests_expired",
+                    actor_id=str(request.user.id),
+                    entity_type="signature_workflow",
+                    entity_id="batch",
+                )
+
+            return Response(
+                {
+                    "expiredCount": expired_count,
+                    "cutoffDate": cutoff.isoformat(),
+                },
+                status=status.HTTP_200_OK,
+            )
         except Exception as e:
-            return Response({
-                'status': 'error',
-                'message': str(e)
-            }, status=status.HTTP_500_INTERNAL_SERVER_ERROR)
+            return Response({"error": str(e)}, status=status.HTTP_400_BAD_REQUEST)

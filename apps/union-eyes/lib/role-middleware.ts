@@ -8,6 +8,21 @@
 import { NextRequest, NextResponse } from "next/server";
 import { withOrganizationAuth } from "@/lib/organization-middleware";
 import { getMemberByUserId } from "@/db/queries/organization-members-queries";
+import { logger } from '@/lib/logger';
+
+/**
+ * Super-admin organization ID — the platform-level org whose admins
+ * get cross-org access.  Set via SUPER_ADMIN_ORG_ID env var.
+ */
+const SUPER_ADMIN_ORG_ID = (() => {
+  const id = process.env.SUPER_ADMIN_ORG_ID;
+  if (!id) {
+    logger.warn(
+      '[role-middleware] SUPER_ADMIN_ORG_ID is not set. Super-admin cross-org access will be disabled.',
+    );
+  }
+  return id ?? null;
+})();
 
 export type MemberRole = "member" | "steward" | "officer" | "admin" | "super_admin";
 
@@ -69,23 +84,23 @@ export function withRoleAuth<T = any>(
       // Get user's member record to check role
       const member = await getMemberByUserId(organizationId, userId);
 
-      // Check for super admin access (admin or super_admin in default org)
+      // Check for super admin access (admin or super_admin in platform org)
       if (!member) {
-        const DEFAULT_ORG_ID = "00000000-0000-0000-0000-000000000001";
-        const superAdminMember = await getMemberByUserId(DEFAULT_ORG_ID, userId);
-        const superAdminRole = superAdminMember?.role as MemberRole | undefined;
-        
-        if (superAdminMember && (superAdminRole === 'admin' || superAdminRole === 'super_admin')) {
-          // Grant admin access to super admins
-          const roleContext: RoleContext = {
-            organizationId,
-            userId,
-            role: superAdminRole,
-            memberId: superAdminMember.id,
-          };
-          return await handler(request, roleContext, params);
+        if (SUPER_ADMIN_ORG_ID) {
+          const superAdminMember = await getMemberByUserId(SUPER_ADMIN_ORG_ID, userId);
+          const superAdminRole = superAdminMember?.role as MemberRole | undefined;
+
+          if (superAdminMember && (superAdminRole === 'admin' || superAdminRole === 'super_admin')) {
+            const roleContext: RoleContext = {
+              organizationId,
+              userId,
+              role: superAdminRole,
+              memberId: superAdminMember.id,
+            };
+            return await handler(request, roleContext, params);
+          }
         }
-        
+
         return NextResponse.json(
           { 
             success: false, 
@@ -144,23 +159,23 @@ export function withAnyRole<T = any>(
       // Get user's member record to check role
       const member = await getMemberByUserId(organizationId, userId);
 
-      // Check for super admin access (admin or super_admin in default org)
+      // Check for super admin access (admin or super_admin in platform org)
       if (!member) {
-        const DEFAULT_ORG_ID = "00000000-0000-0000-0000-000000000001";
-        const superAdminMember = await getMemberByUserId(DEFAULT_ORG_ID, userId);
-        const superAdminRole = superAdminMember?.role as MemberRole | undefined;
-        
-        if (superAdminMember && (superAdminRole === 'admin' || superAdminRole === 'super_admin')) {
-          // Grant admin access to super admins
-          const roleContext: RoleContext = {
-            organizationId,
-            userId,
-            role: superAdminRole,
-            memberId: superAdminMember.id,
-          };
-          return await handler(request, roleContext, params);
+        if (SUPER_ADMIN_ORG_ID) {
+          const superAdminMember = await getMemberByUserId(SUPER_ADMIN_ORG_ID, userId);
+          const superAdminRole = superAdminMember?.role as MemberRole | undefined;
+
+          if (superAdminMember && (superAdminRole === 'admin' || superAdminRole === 'super_admin')) {
+            const roleContext: RoleContext = {
+              organizationId,
+              userId,
+              role: superAdminRole,
+              memberId: superAdminMember.id,
+            };
+            return await handler(request, roleContext, params);
+          }
         }
-        
+
         return NextResponse.json(
           { 
             success: false, 

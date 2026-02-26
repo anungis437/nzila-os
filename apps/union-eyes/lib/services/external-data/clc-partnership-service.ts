@@ -295,28 +295,22 @@ export class CLCPartnershipService {
     try {
       logger.info('[CLC] Starting per-capita benchmarks sync', { syncId, params });
 
-      // Note: This is a template - actual implementation would call CLC API
-      // const data = await this.oauthClient.apiRequest('/per-capita/benchmarks', {
-      //   params: { year: params.fiscalYear, jurisdiction: params.jurisdiction }
-      // });
+      const apiData = await this.oauthClient.apiRequest<Array<{
+        organizationId: string;
+        organizationName: string;
+        organizationType: string;
+        fiscalYear: number;
+        totalMembers: number;
+        duesPayingMembers: number;
+        perCapitaRate: number;
+        nationalAverageRate: number;
+        provincialAverageRate: number;
+        percentileRank: number;
+      }>>('/per-capita/benchmarks', {
+        params: { year: params.fiscalYear, jurisdiction: params.jurisdiction },
+      });
 
-      // Simulated data for template
-      const mockData = [
-        {
-          organizationId: 'CLC-001',
-          organizationName: 'Sample Provincial Union',
-          organizationType: 'provincial',
-          fiscalYear: params.fiscalYear || new Date().getFullYear(),
-          totalMembers: 50000,
-          duesPayingMembers: 45000,
-          perCapitaRate: 0.0125,
-          nationalAverageRate: 0.0130,
-          provincialAverageRate: 0.0128,
-          percentileRank: 45,
-        },
-      ];
-
-      for (const record of mockData) {
+      for (const record of apiData) {
         try {
           recordsProcessed++;
 
@@ -418,21 +412,20 @@ export class CLCPartnershipService {
     try {
       logger.info('[CLC] Starting union density sync', { syncId, params });
 
-      // Simulated data
-      const mockData = [
-        {
-          sector: 'Health Care',
-          subSector: 'Hospitals',
-          jurisdiction: params.jurisdiction || 'ON',
-          year: params.year || new Date().getFullYear(),
-          totalWorkforce: 500000,
-          unionMembers: 350000,
-          densityPercent: 70.0,
-          nationalDensity: 65.0,
-        },
-      ];
+      const apiData = await this.oauthClient.apiRequest<Array<{
+        sector: string;
+        subSector?: string;
+        jurisdiction: string;
+        year: number;
+        totalWorkforce: number;
+        unionMembers: number;
+        densityPercent: number;
+        nationalDensity: number;
+      }>>('/union-density', {
+        params: { year: params.year, jurisdiction: params.jurisdiction },
+      });
 
-      for (const record of mockData) {
+      for (const record of apiData) {
         try {
           recordsProcessed++;
 
@@ -531,20 +524,19 @@ export class CLCPartnershipService {
     try {
       logger.info('[CLC] Starting bargaining trends sync', { syncId, params });
 
-      // Simulated data
-      const mockData = [
-        {
-          sector: params.sector || 'Public Sector',
-          year: params.year || new Date().getFullYear(),
-          quarter: 4,
-          totalAgreements: 150,
-          settledAgreements: 140,
-          averageWageIncrease: 3.5,
-          medianWageIncrease: 3.2,
-        },
-      ];
+      const apiData = await this.oauthClient.apiRequest<Array<{
+        sector: string;
+        year: number;
+        quarter: number;
+        totalAgreements: number;
+        settledAgreements: number;
+        averageWageIncrease: number;
+        medianWageIncrease: number;
+      }>>('/bargaining-trends', {
+        params: { year: params.year, sector: params.sector },
+      });
 
-      for (const record of mockData) {
+      for (const record of apiData) {
         try {
           recordsProcessed++;
 

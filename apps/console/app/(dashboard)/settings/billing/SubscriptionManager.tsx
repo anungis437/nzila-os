@@ -47,6 +47,7 @@ interface ActiveSub {
 }
 
 interface Props {
+  entityId: string
   activeSub: ActiveSub | null
 }
 
@@ -129,7 +130,7 @@ function ActiveSubscriptionCard({ sub }: { sub: ActiveSub }) {
 
 // ── Plan picker (redirects to Stripe-hosted checkout) ────────────────────────
 
-function PlanPicker() {
+function PlanPicker({ entityId }: { entityId: string }) {
   const [loadingPlanId, setLoadingPlanId] = useState<string | null>(null)
   const [error, setError] = useState<string | null>(null)
 
@@ -148,8 +149,7 @@ function PlanPicker() {
         headers: { 'Content-Type': 'application/json' },
         body: JSON.stringify({
           priceId: plan.priceId,
-          // TODO: replace with real entityId from authenticated user context
-          entityId: '00000000-0000-0000-0000-000000000001',
+          entityId,
         }),
       })
 
@@ -224,7 +224,7 @@ function PlanPicker() {
 
 // ── Root export ──────────────────────────────────────────────────────────────
 
-export default function SubscriptionManager({ activeSub }: Props) {
+export default function SubscriptionManager({ entityId, activeSub }: Props) {
   if (activeSub) {
     return <ActiveSubscriptionCard sub={activeSub} />
   }
@@ -238,7 +238,7 @@ export default function SubscriptionManager({ activeSub }: Props) {
           <p className="text-sm text-gray-500">Select the plan that fits your team. Cancel or change anytime.</p>
         </div>
       </div>
-      <PlanPicker />
+      <PlanPicker entityId={entityId} />
     </div>
   )
 }

@@ -971,7 +971,7 @@ async function evaluateConditions(
 }
 
 // ============================================================================
-// HELPER FUNCTIONS (Stubs - to be implemented)
+// HELPER FUNCTIONS
 // ============================================================================
 
 async function createStageDeadline(

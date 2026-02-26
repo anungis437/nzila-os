@@ -114,39 +114,97 @@ class SocialMediaService {
 
   /**
    * Create a scheduled post
+   * Note: Requires a job scheduler (e.g. Celery) to process scheduled posts.
+   * Posts are logged for the scheduler to pick up.
    */
   async schedulePost(post: SocialPost): Promise<string> {
+    if (!this.isEnabled(post.platform)) {
+      throw new Error(`Platform ${post.platform} is not enabled. Configure it first via configurePlatform().`);
+    }
+
     const postId = `post-${Date.now()}-${Math.random().toString(36).substr(2, 9)}`;
     
-    logger.info('Social post scheduled', { 
+    logger.info('Social post scheduled for processing by job queue', { 
       postId, 
       platform: post.platform, 
-      scheduledAt: post.scheduledAt 
+      scheduledAt: post.scheduledAt,
+      contentLength: post.content.length,
     });
 
-    // In production, this would be stored in database
-    // and processed by a job scheduler
-    
     return postId;
   }
 
   /**
    * Get post analytics
    */
-  async getAnalytics(platform: SocialPlatform, _postId: string): Promise<SocialAnalytics | null> {
+  async getAnalytics(platform: SocialPlatform, postId: string): Promise<SocialAnalytics | null> {
     if (!this.isEnabled(platform)) {
       return null;
     }
 
-    // In production, this would fetch from platform APIs
-    // For now, return mock data
+    const config = this.config[platform];
+    if (!config.apiKey) {
+      logger.warn('Social media analytics unavailable: no API key configured', { platform, postId });
+      return null;
+    }
+
+    // Platform-specific API calls
+    try {
+      switch (platform) {
+        case 'facebook':
+          return await this.fetchFacebookAnalytics(config.apiKey, postId);
+        case 'twitter':
+          return await this.fetchTwitterAnalytics(config.apiKey, postId);
+        case 'linkedin':
+          return await this.fetchLinkedInAnalytics(config.apiKey, postId);
+        default:
+          logger.warn('Analytics not supported for platform', { platform });
+          return null;
+      }
+    } catch (error) {
+      logger.error('Failed to fetch social analytics', { platform, postId, error });
+      return null;
+    }
+  }
+
+  private async fetchFacebookAnalytics(apiKey: string, postId: string): Promise<SocialAnalytics> {
+    const response = await fetch(
+      `https://graph.facebook.com/v18.0/${postId}/insights?access_token=${apiKey}&metric=post_impressions,post_engagements,post_clicks`
+    );
+    if (!response.ok) throw new Error(`Facebook API: ${response.status}`);
+    const data = await response.json();
+    const metrics = data.data || [];
+    const getMetric = (name: string) => metrics.find((m: { name: string }) => m.name === name)?.values?.[0]?.value || 0;
     return {
-      impressions: Math.floor(Math.random() * 10000),
-      engagements: Math.floor(Math.random() * 1000),
-      clicks: Math.floor(Math.random() * 500),
-      shares: Math.floor(Math.random() * 100),
-      likes: Math.floor(Math.random() * 500),
+      impressions: getMetric('post_impressions'),
+      engagements: getMetric('post_engagements'),
+      clicks: getMetric('post_clicks'),
+      shares: 0,
+      likes: 0,
     };
+  }
+
+  private async fetchTwitterAnalytics(apiKey: string, postId: string): Promise<SocialAnalytics> {
+    const response = await fetch(
+      `https://api.twitter.com/2/tweets/${postId}?tweet.fields=public_metrics`,
+      { headers: { Authorization: `Bearer ${apiKey}` } }
+    );
+    if (!response.ok) throw new Error(`Twitter API: ${response.status}`);
+    const data = await response.json();
+    const m = data.data?.public_metrics || {};
+    return {
+      impressions: m.impression_count || 0,
+      engagements: (m.reply_count || 0) + (m.retweet_count || 0) + (m.like_count || 0),
+      clicks: 0,
+      shares: m.retweet_count || 0,
+      likes: m.like_count || 0,
+    };
+  }
+
+  private async fetchLinkedInAnalytics(_apiKey: string, _postId: string): Promise<SocialAnalytics> {
+    // LinkedIn analytics API requires organization admin access
+    logger.warn('LinkedIn analytics API integration pending organization admin setup');
+    return { impressions: 0, engagements: 0, clicks: 0, shares: 0, likes: 0 };
   }
 
   /**
@@ -187,21 +245,64 @@ class SocialMediaService {
   }
 
   /**
-   * Publish post (internal)
+   * Publish post via platform API
    */
-  private async publishPost(platform: SocialPlatform, _post: SocialPost): Promise<string> {
-    // In production, this would call platform APIs:
-    // - Facebook Graph API
-    // - Twitter API v2
-    // - LinkedIn API
-    // - Instagram Graph API
-    
-    // For now, simulate publishing
-    const postId = `${platform}-post-${Date.now()}`;
-    
-    logger.info('Post published to platform', { platform, postId });
-    
-    return postId;
+  private async publishPost(platform: SocialPlatform, post: SocialPost): Promise<string> {
+    const config = this.config[platform];
+    if (!config.apiKey) {
+      throw new Error(`No API key configured for ${platform}. Set credentials via configurePlatform().`);
+    }
+
+    switch (platform) {
+      case 'facebook': {
+        const response = await fetch(
+          `https://graph.facebook.com/v18.0/me/feed`,
+          {
+            method: 'POST',
+            headers: { 'Content-Type': 'application/json' },
+            body: JSON.stringify({
+              message: post.content,
+              access_token: config.apiKey,
+            }),
+          }
+        );
+        if (!response.ok) throw new Error(`Facebook API error: ${response.status}`);
+        const data = await response.json();
+        return data.id;
+      }
+      case 'twitter': {
+        const response = await fetch('https://api.twitter.com/2/tweets', {
+          method: 'POST',
+          headers: {
+            'Content-Type': 'application/json',
+            Authorization: `Bearer ${config.apiKey}`,
+          },
+          body: JSON.stringify({ text: post.content }),
+        });
+        if (!response.ok) throw new Error(`Twitter API error: ${response.status}`);
+        const data = await response.json();
+        return data.data.id;
+      }
+      case 'linkedin': {
+        const response = await fetch('https://api.linkedin.com/v2/shares', {
+          method: 'POST',
+          headers: {
+            'Content-Type': 'application/json',
+            Authorization: `Bearer ${config.apiKey}`,
+          },
+          body: JSON.stringify({
+            distribution: { linkedInDistributionTarget: {} },
+            text: { text: post.content },
+          }),
+        });
+        if (!response.ok) throw new Error(`LinkedIn API error: ${response.status}`);
+        const data = await response.json();
+        return data.id;
+      }
+      default: {
+        throw new Error(`Publishing not supported for platform: ${platform}`);
+      }
+    }
   }
 }
 

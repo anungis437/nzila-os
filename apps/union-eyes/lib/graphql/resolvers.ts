@@ -10,7 +10,8 @@ import {
   externalInsuranceClaims, 
   externalInsurancePolicies 
 } from '@/db/schema';
-import { eq, and, desc, gte, lte } from 'drizzle-orm';
+import { perCapitaRemittances } from '@/db/schema';
+import { eq, and, desc, gte, lte, sql, count } from 'drizzle-orm';
 import { getSystemStatus } from '@/lib/monitoring/status-page';
 import type { YogaInitialContext } from 'graphql-yoga';
 import { PensionProcessorFactory } from '@/lib/pension-processor';
@@ -161,44 +162,65 @@ export const resolvers = {
     },
 
     remittance: async (_parent: unknown, { id }: { id: string }) => {
-      // Mock implementation - would fetch from database in production
+      const result = await db
+        .select()
+        .from(perCapitaRemittances)
+        .where(eq(perCapitaRemittances.id, id))
+        .limit(1);
+      const r = result[0];
+      if (!r) return null;
+      const periodStart = new Date(r.remittanceYear, r.remittanceMonth - 1, 1);
+      const periodEnd = new Date(r.remittanceYear, r.remittanceMonth, 0);
       return {
-        id,
-        planType: 'CPP',
-        periodStart: new Date('2026-01-01'),
-        periodEnd: new Date('2026-01-31'),
-        totalEmployeeContributions: 50000,
-        totalEmployerContributions: 50000,
-        totalContributions: 100000,
-        employeeCount: 250,
-        status: 'SUBMITTED',
-        confirmationNumber: 'CPP-2026-001',
-        submittedAt: new Date('2026-02-01'),
-        createdAt: new Date('2026-02-01'),
+        id: r.id,
+        planType: 'PER_CAPITA',
+        periodStart,
+        periodEnd,
+        totalEmployeeContributions: r.totalAmount ? parseFloat(r.totalAmount) : 0,
+        totalEmployerContributions: 0,
+        totalContributions: r.totalAmount ? parseFloat(r.totalAmount) : 0,
+        employeeCount: r.totalMembers,
+        status: (r.status || 'pending').toUpperCase(),
+        confirmationNumber: r.paymentReference,
+        submittedAt: r.submittedDate ? new Date(r.submittedDate) : null,
+        createdAt: r.createdAt ? new Date(r.createdAt) : new Date(),
       };
     },
 
     remittances: async (
       _parent: unknown, 
-      { planType, status }: { planType?: string; status?: string }
+      { planType: _planType, status: filterStatus }: { planType?: string; status?: string }
     ) => {
-      // Mock implementation - would fetch from database in production
-      return [
-        {
-          id: '1',
-          planType: planType || 'CPP',
-          periodStart: new Date('2026-01-01'),
-          periodEnd: new Date('2026-01-31'),
-          totalEmployeeContributions: 50000,
-          totalEmployerContributions: 50000,
-          totalContributions: 100000,
-          employeeCount: 250,
-          status: status || 'SUBMITTED',
-          confirmationNumber: 'CPP-2026-001',
-          submittedAt: new Date('2026-02-01'),
-          createdAt: new Date('2026-02-01'),
-        },
-      ];
+      let query = db.select().from(perCapitaRemittances);
+
+      const conditions: SQL<unknown>[] = [];
+      if (filterStatus) {
+        conditions.push(eq(perCapitaRemittances.status, filterStatus.toLowerCase()));
+      }
+      if (conditions.length > 0) {
+        query = query.where(and(...conditions)) as typeof query;
+      }
+
+      const results = await query.orderBy(desc(perCapitaRemittances.createdAt)).limit(50);
+
+      return results.map(r => {
+        const periodStart = new Date(r.remittanceYear, r.remittanceMonth - 1, 1);
+        const periodEnd = new Date(r.remittanceYear, r.remittanceMonth, 0);
+        return {
+          id: r.id,
+          planType: 'PER_CAPITA',
+          periodStart,
+          periodEnd,
+          totalEmployeeContributions: r.totalAmount ? parseFloat(r.totalAmount) : 0,
+          totalEmployerContributions: 0,
+          totalContributions: r.totalAmount ? parseFloat(r.totalAmount) : 0,
+          employeeCount: r.totalMembers,
+          status: (r.status || 'pending').toUpperCase(),
+          confirmationNumber: r.paymentReference,
+          submittedAt: r.submittedDate ? new Date(r.submittedDate) : null,
+          createdAt: r.createdAt ? new Date(r.createdAt) : new Date(),
+        };
+      });
     },
 
     // Insurance
@@ -283,16 +305,41 @@ export const resolvers = {
     },
 
     insuranceConnections: async () => {
-      // Mock implementation - would fetch actual connection status in production
       const providers = ['SUN_LIFE', 'MANULIFE', 'GREEN_SHIELD_CANADA', 'CANADA_LIFE', 'INDUSTRIAL_ALLIANCE'];
-      
-      return providers.map(provider => ({
-        provider,
-        connected: ['SUN_LIFE', 'MANULIFE'].includes(provider),
-        lastSyncAt: ['SUN_LIFE', 'MANULIFE'].includes(provider) ? new Date() : null,
-        claimsCount: ['SUN_LIFE', 'MANULIFE'].includes(provider) ? 150 : 0,
-        policiesCount: ['SUN_LIFE', 'MANULIFE'].includes(provider) ? 45 : 0,
-      }));
+
+      // Query actual claim/policy counts per provider
+      const claimCounts = await db
+        .select({
+          provider: externalInsuranceClaims.externalProvider,
+          count: count(),
+        })
+        .from(externalInsuranceClaims)
+        .groupBy(externalInsuranceClaims.externalProvider);
+
+      const policyCounts = await db
+        .select({
+          provider: externalInsurancePolicies.externalProvider,
+          count: count(),
+        })
+        .from(externalInsurancePolicies)
+        .groupBy(externalInsurancePolicies.externalProvider);
+
+      const claimMap = new Map(claimCounts.map(c => [c.provider?.toUpperCase().replace(/_/g, '_'), c.count]));
+      const policyMap = new Map(policyCounts.map(p => [p.provider?.toUpperCase().replace(/_/g, '_'), p.count]));
+
+      return providers.map(provider => {
+        const providerKey = provider.toLowerCase();
+        const claimsCount = claimMap.get(provider) || claimMap.get(providerKey) || 0;
+        const policiesCount = policyMap.get(provider) || policyMap.get(providerKey) || 0;
+        const connected = claimsCount > 0 || policiesCount > 0;
+        return {
+          provider,
+          connected,
+          lastSyncAt: connected ? new Date() : null,
+          claimsCount,
+          policiesCount,
+        };
+      });
     },
 
     // System Status
@@ -418,26 +465,48 @@ export const resolvers = {
       const factory = PensionProcessorFactory.getInstance();
       const processor = factory.getProcessor(input.planType as PensionPlanType);
 
-      // Mock contributions data
-      const contributions = input.contributions.map((id: string) => ({
-        memberId: id,
-        planType: input.planType,
-        contributionPeriod: 'MONTHLY' as ContributionPeriod,
-        periodStartDate: new Date(input.periodStart),
-        periodEndDate: new Date(input.periodEnd),
-        grossEarnings: 100,
-        pensionableEarnings: 100,
-        employeeContribution: 100,
-        employerContribution: 100,
-        totalContribution: 200,
-        employeeRate: 0.05,
-        employerRate: 0.05,
-        ytdPensionableEarnings: 1000,
-        ytdEmployeeContribution: 50,
-        ytdEmployerContribution: 50,
-        calculatedAt: new Date(),
-        taxYear: new Date().getFullYear(),
-      }));
+      // Calculate real contributions for each member
+      const contributions = await Promise.all(
+        input.contributions.map(async (contrib: {
+          memberId: string;
+          grossEarnings: number;
+          pensionableEarnings?: number;
+        }) => {
+          const member = {
+            id: contrib.memberId,
+            planType: input.planType as PensionPlanType,
+            dateOfBirth: new Date(1980, 0, 1), // Default — overridden by processor lookup
+          };
+          const earnings = {
+            grossEarnings: contrib.grossEarnings,
+            pensionableEarnings: contrib.pensionableEarnings ?? contrib.grossEarnings,
+            periodStartDate: new Date(input.periodStart),
+            periodEndDate: new Date(input.periodEnd),
+          };
+
+          const calculated = await processor.calculateContribution(member, earnings);
+
+          return {
+            memberId: contrib.memberId,
+            planType: input.planType,
+            contributionPeriod: 'MONTHLY' as ContributionPeriod,
+            periodStartDate: new Date(input.periodStart),
+            periodEndDate: new Date(input.periodEnd),
+            grossEarnings: calculated.grossEarnings.toNumber(),
+            pensionableEarnings: calculated.pensionableEarnings.toNumber(),
+            employeeContribution: calculated.employeeContribution.toNumber(),
+            employerContribution: calculated.employerContribution.toNumber(),
+            totalContribution: calculated.totalContribution.toNumber(),
+            employeeRate: calculated.employeeRate ?? 0.05,
+            employerRate: calculated.employerRate ?? 0.05,
+            ytdPensionableEarnings: 0,
+            ytdEmployeeContribution: 0,
+            ytdEmployerContribution: 0,
+            calculatedAt: new Date(),
+            taxYear: new Date().getFullYear(),
+          };
+        })
+      );
 
       const periodStart = new Date(input.periodStart);
       const remittance = await processor.createRemittance(
@@ -466,7 +535,6 @@ export const resolvers = {
       _parent: unknown,
       { id }: { id: string }
     ) => {
-      // Mock implementation - would fetch remittance and submit
       const factory = PensionProcessorFactory.getInstance();
       const processor = factory.getDefaultProcessor();
 

@@ -7,9 +7,11 @@ import {
   weeklyThresholdTracking,
 } from "@/db/schema/domains/finance";
 import { users } from "@/db/schema/domains/member";
+import { memberAddresses } from "@/db/schema/domains/member/addresses";
 import { organizationMembers } from "@/db/schema/organization-members-schema";
 import { eq, and } from "drizzle-orm";
 import { NotificationService } from "@/lib/services/notification-service";
+import { decryptSIN } from "@/lib/encryption";
 import { logger } from "@/lib/logger";
 
 /**
@@ -512,47 +514,60 @@ export class TaxSlipService {
       logger.warn('Tax slip: Missing member name', { userId });
     }
 
-    // SIN decryption: Requires proper encryption/decryption infrastructure with secure key management
-    // Implementation should use AWS KMS, Azure Key Vault, or similar HSM for production
-    // For now, return undefined as we need proper encryption implementation with:
-    // - Encrypted at rest in database (user.encryptedSin field)
-    // - Decryption key stored in HSM (not in code/env)
-    // - Audit logging of all SIN access
-    // - CRA compliance for SIN storage (safeguards, retention, disposal)
-    const sin = undefined; // user?.encryptedSin ? await decrypt(user.encryptedSin) : undefined
-    
-    if (!user?.encryptedSin) {
+    // SIN decryption: Uses Azure Key Vault-backed encryption service
+    // with AES-256-GCM, audit logging, and key rotation support
+    let sin: string | undefined;
+    if (user?.encryptedSin) {
+      try {
+        sin = await decryptSIN(user.encryptedSin);
+      } catch (decryptError) {
+        missingFields.push('sin');
+        logger.error('Tax slip: Failed to decrypt SIN', {
+          userId,
+          error: decryptError instanceof Error ? decryptError.message : 'Unknown error',
+        });
+      }
+    } else {
       missingFields.push('sin');
-      logger.warn('Tax slip: Missing SIN for member', { userId });
+      logger.warn('Tax slip: No encrypted SIN on file for member', { userId });
     }
 
-    // Address fields: Should be added to member schema for CRA compliance
-    // Required fields for T4A/RL-1: street, city, province, postal code
-    // TODO: Add member_addresses table or extend profiles/users with address fields:
-    // - streetAddress (varchar 200)
-    // - city (varchar 100)
-    // - province (varchar 2) - use provincesEnum
-    // - postalCode (varchar 10) - validate Canadian postal code format
-    // - addressType (enum: 'mailing', 'residential')
-    // - effectiveDate (timestamp)
-    //
-    // Migration required: See docs/migrations/add-member-addresses.md
-    // Schema location: db/schema/domains/member/addresses.ts
-    
-    // For now, log warning and use placeholder values
-    // In production, T4A/RL-1 generation should fail with clear error
-    // when address data is missing, requiring admin to complete member profile
-    const address = "Address Required";
-    const city = "City Required";
-    const province = "Province Required";
-    const postalCode = "Postal Code Required";
-    
-    missingFields.push('address', 'city', 'province', 'postalCode');
-    logger.error('Tax slip: Missing address fields - member profile incomplete', { 
-      userId,
-      missingFields,
-      requiresAction: 'Admin must complete member address data for tax compliance'
-    });
+    // Query member address from memberAddresses table
+    const addressResult = await db
+      .select()
+      .from(memberAddresses)
+      .where(
+        and(
+          eq(memberAddresses.userId, userId),
+          eq(memberAddresses.addressType, 'mailing'),
+        ),
+      )
+      .limit(1);
+
+    const memberAddr = addressResult[0];
+
+    let address: string;
+    let city: string;
+    let province: string;
+    let postalCode: string;
+
+    if (memberAddr) {
+      address = memberAddr.streetAddress;
+      city = memberAddr.city;
+      province = memberAddr.province;
+      postalCode = memberAddr.postalCode;
+    } else {
+      address = '';
+      city = '';
+      province = '';
+      postalCode = '';
+      missingFields.push('address', 'city', 'province', 'postalCode');
+      logger.error('Tax slip: Missing mailing address \u2013 member profile incomplete', {
+        userId,
+        missingFields,
+        requiresAction: 'Admin must populate member address for tax compliance',
+      });
+    }
     
     // Calculate Quebec residency from province
     const isQuebecResident = province === "QC";

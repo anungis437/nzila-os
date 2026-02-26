@@ -47,6 +47,8 @@ function isExcludedPath(rel: string): boolean {
   // Scripts/tools
   if (rel.includes('/scripts/')) return true
   if (rel.includes('/tools/')) return true
+  // Seed scripts (CLI-only, not runtime)
+  if (rel.includes('/seeds/')) return true
   // Contract tests themselves
   if (rel.startsWith('tooling/contract-tests/')) return true
   // CLI package (dev-only)

@@ -6,7 +6,6 @@
  */
 'use server'
 
-import { auth } from '@clerk/nextjs/server'
 import { platformDb } from '@nzila/db/platform'
 import { sql } from 'drizzle-orm'
 import { revalidatePath } from 'next/cache'
@@ -26,6 +25,7 @@ import {
 import { executeCreatorPayout } from '@/lib/stripe'
 import { buildEvidencePackFromAction, processEvidencePack } from '@/lib/evidence'
 import { logTransition } from '@/lib/commerce-telemetry'
+import { resolveOrgContext } from '@/lib/resolve-org'
 
 export interface PayoutListResult {
   payouts: Payout[]
@@ -45,30 +45,30 @@ export interface WalletBalance {
 }
 
 export async function getWalletBalance(creatorId: string): Promise<WalletBalance> {
-  const { userId } = await auth()
-  if (!userId) throw new Error('Unauthorized')
+  const ctx = await resolveOrgContext()
 
   try {
+    // Revenue from domain table (org-scoped)
     const [revenue] = (await platformDb.execute(
-      sql`SELECT
-        COALESCE(SUM(CAST(metadata->>'amount' AS NUMERIC)), 0) as gross
-      FROM audit_log
-      WHERE metadata->>'creatorId' = ${creatorId} AND action = 'revenue.recorded'`,
+      sql`SELECT COALESCE(SUM(amount), 0) as gross
+      FROM zonga_revenue_events
+      WHERE creator_id = ${creatorId} AND entity_id = ${ctx.entityId}`,
     )) as unknown as [{ gross: number }]
 
+    // Paid from payouts table (org-scoped)
     const [paid] = (await platformDb.execute(
       sql`SELECT
-        COALESCE(SUM(CAST(metadata->>'amount' AS NUMERIC)), 0) as paid,
+        COALESCE(SUM(amount), 0) as paid,
         MAX(created_at) as last_payout
-      FROM audit_log
-      WHERE metadata->>'creatorId' = ${creatorId} AND action = 'payout.executed'`,
+      FROM zonga_payouts
+      WHERE creator_id = ${creatorId} AND entity_id = ${ctx.entityId}
+        AND status = ${PayoutStatus.COMPLETED}`,
     )) as unknown as [{ paid: number; last_payout: string | null }]
 
-    // Look up creator's preferred payout currency
+    // Look up creator's preferred payout currency (org-scoped)
     const [creatorRow] = (await platformDb.execute(
-      sql`SELECT metadata->>'payoutCurrency' as currency
-      FROM audit_log WHERE action = 'creator.registered' AND entity_id = ${creatorId}
-      ORDER BY created_at DESC LIMIT 1`,
+      sql`SELECT payout_currency as currency
+      FROM zonga_creators WHERE id = ${creatorId} AND entity_id = ${ctx.entityId}`,
     )) as unknown as [{ currency: string | null }]
 
     const grossRevenue = Number(revenue?.gross ?? 0)
@@ -112,28 +112,25 @@ export interface RoyaltySplitResult {
 export async function computeRoyaltySplits(
   releaseId: string,
 ): Promise<RoyaltySplitResult | null> {
-  const { userId } = await auth()
-  if (!userId) throw new Error('Unauthorized')
+  const ctx = await resolveOrgContext()
 
   try {
-    // Fetch split configuration for the release
+    // Fetch split configuration from release royalty_splits (org-scoped)
     const splitRows = (await platformDb.execute(
-      sql`SELECT metadata
-      FROM audit_log WHERE action = 'release.split.updated' AND entity_id = ${releaseId}
-      ORDER BY created_at DESC LIMIT 1`,
-    )) as unknown as { rows: Array<{ metadata: Record<string, unknown> }> }
+      sql`SELECT creator_id as "creatorId", creator_name as "creatorName", share_percent as "sharePercent"
+      FROM zonga_royalty_splits
+      WHERE release_id = ${releaseId} AND entity_id = ${ctx.entityId}
+      ORDER BY share_percent DESC`,
+    )) as unknown as { rows: Array<{ creatorId: string; creatorName: string; sharePercent: number }> }
 
-    const splitMeta = splitRows.rows?.[0]?.metadata
-    const splits: Array<{ creatorId: string; creatorName: string; sharePercent: number }> =
-      (splitMeta?.splits as Array<{ creatorId: string; creatorName: string; sharePercent: number }>) ?? []
-
+    const splits = splitRows.rows ?? []
     if (splits.length === 0) return null
 
-    // Fetch total revenue for this release
+    // Fetch total revenue for this release (org-scoped)
     const [rev] = (await platformDb.execute(
-      sql`SELECT COALESCE(SUM(CAST(metadata->>'amount' AS NUMERIC)), 0) as total
-      FROM audit_log
-      WHERE action = 'revenue.recorded' AND metadata->>'releaseId' = ${releaseId}`,
+      sql`SELECT COALESCE(SUM(amount), 0) as total
+      FROM zonga_revenue_events
+      WHERE release_id = ${releaseId} AND entity_id = ${ctx.entityId}`,
     )) as unknown as [{ total: number }]
 
     const totalRevenue = Number(rev?.total ?? 0)
@@ -159,8 +156,7 @@ export async function computeRoyaltySplits(
 export async function executeRoyaltySplitPayout(
   releaseId: string,
 ): Promise<{ success: boolean; payoutCount: number }> {
-  const { userId } = await auth()
-  if (!userId) throw new Error('Unauthorized')
+  const ctx = await resolveOrgContext()
 
   try {
     const result = await computeRoyaltySplits(releaseId)
@@ -182,12 +178,13 @@ export async function executeRoyaltySplitPayout(
       if (payoutResult.success) payoutCount++
     }
 
-    // Record the split payout event
+    // Record the split payout event (audit-only, org-scoped)
     await platformDb.execute(
       sql`INSERT INTO audit_log (action, actor_id, entity_type, entity_id, metadata)
-      VALUES ('release.royalties.distributed', ${userId}, 'release', ${releaseId},
+      VALUES ('release.royalties.distributed', ${ctx.actorId}, 'release', ${releaseId},
         ${JSON.stringify({
           releaseId,
+          orgId: ctx.entityId,
           splitCount: result.splits.length,
           totalDistributed: result.totalDistributed,
           payoutCount,
@@ -206,23 +203,27 @@ export async function listPayouts(opts?: {
   page?: number
   creatorId?: string
 }): Promise<PayoutListResult> {
-  const { userId } = await auth()
-  if (!userId) throw new Error('Unauthorized')
+  const ctx = await resolveOrgContext()
 
   const page = opts?.page ?? 1
   const offset = (page - 1) * 25
 
   try {
+    // Read from zonga_payouts domain table (org-scoped)
+    let creatorFilter = sql``
+    if (opts?.creatorId) {
+      creatorFilter = sql`AND creator_id = ${opts.creatorId}`
+    }
+
     const rows = (await platformDb.execute(
       sql`SELECT
-        entity_id as id, metadata->>'creatorId' as "creatorId",
-        metadata->>'creatorName' as "creatorName",
-        CAST(metadata->>'amount' AS NUMERIC) as amount,
-        metadata->>'currency' as currency,
-        metadata->>'status' as status,
-        metadata->>'stripeTransferId' as "stripeTransferId",
+        id, creator_id as "creatorId",
+        creator_name as "creatorName",
+        amount, currency, status,
+        stripe_transfer_id as "stripeTransferId",
         created_at as "createdAt"
-      FROM audit_log WHERE action = 'payout.executed' OR action = 'payout.preview'
+      FROM zonga_payouts
+      WHERE entity_id = ${ctx.entityId} ${creatorFilter}
       ORDER BY created_at DESC
       LIMIT 25 OFFSET ${offset}`,
     )) as unknown as { rows: Payout[] }
@@ -230,8 +231,9 @@ export async function listPayouts(opts?: {
     const [totals] = (await platformDb.execute(
       sql`SELECT
         COUNT(*) as total,
-        COALESCE(SUM(CAST(metadata->>'amount' AS NUMERIC)), 0) as total_paid
-      FROM audit_log WHERE action = 'payout.executed'`,
+        COALESCE(SUM(amount), 0) as total_paid
+      FROM zonga_payouts
+      WHERE entity_id = ${ctx.entityId} AND status = ${PayoutStatus.COMPLETED}`,
     )) as unknown as [{ total: number; total_paid: number }]
 
     return {
@@ -246,23 +248,21 @@ export async function listPayouts(opts?: {
 }
 
 export async function previewPayout(creatorId: string): Promise<PayoutPreview | null> {
-  const { userId } = await auth()
-  if (!userId) throw new Error('Unauthorized')
+  const ctx = await resolveOrgContext()
 
   try {
-    // Get creator's unpaid revenue
+    // Get creator's unpaid revenue (org-scoped)
     const [revenue] = (await platformDb.execute(
-      sql`SELECT
-        COALESCE(SUM(CAST(metadata->>'amount' AS NUMERIC)), 0) as gross
-      FROM audit_log
-      WHERE metadata->>'creatorId' = ${creatorId} AND action = 'revenue.recorded'`,
+      sql`SELECT COALESCE(SUM(amount), 0) as gross
+      FROM zonga_revenue_events
+      WHERE creator_id = ${creatorId} AND entity_id = ${ctx.entityId}`,
     )) as unknown as [{ gross: number }]
 
     const [paid] = (await platformDb.execute(
-      sql`SELECT
-        COALESCE(SUM(CAST(metadata->>'amount' AS NUMERIC)), 0) as paid
-      FROM audit_log
-      WHERE metadata->>'creatorId' = ${creatorId} AND action = 'payout.executed'`,
+      sql`SELECT COALESCE(SUM(amount), 0) as paid
+      FROM zonga_payouts
+      WHERE creator_id = ${creatorId} AND entity_id = ${ctx.entityId}
+        AND status = ${PayoutStatus.COMPLETED}`,
     )) as unknown as [{ paid: number }]
 
     const gross = Number(revenue?.gross ?? 0)
@@ -271,18 +271,23 @@ export async function previewPayout(creatorId: string): Promise<PayoutPreview | 
 
     if (available <= 0) return null
 
-    // Look up creator's preferred payout currency
+    // Verify creator has required status before previewing payout
+    const requiredStatus = 'creator.registered'
     const [creatorRow] = (await platformDb.execute(
-      sql`SELECT metadata->>'payoutCurrency' as currency
-      FROM audit_log WHERE action = 'creator.registered' AND entity_id = ${creatorId}
-      ORDER BY created_at DESC LIMIT 1`,
-    )) as unknown as [{ currency: string | null }]
+      sql`SELECT status, payout_currency as "payoutCurrency"
+      FROM zonga_creators WHERE id = ${creatorId} AND entity_id = ${ctx.entityId}`,
+    )) as unknown as [{ status: string | null; payoutCurrency: string | null }]
 
-    const currency = creatorRow?.currency ?? 'USD'
+    if (!creatorRow || creatorRow.status !== requiredStatus) {
+      logger.warn('previewPayout: creator not registered', { creatorId, status: creatorRow?.status })
+      return null
+    }
+
+    const currency = creatorRow.payoutCurrency ?? 'USD'
 
     const preview: PayoutPreview = {
       creatorId,
-      entityId: creatorId,
+      entityId: ctx.entityId,
       periodStart: new Date().toISOString(),
       periodEnd: new Date().toISOString(),
       totalRevenue: available,
@@ -307,8 +312,7 @@ export async function executePayout(data: {
   payoutRail?: string
   creatorName?: string
 }): Promise<{ success: boolean; transferId?: string; error?: unknown }> {
-  const { userId } = await auth()
-  if (!userId) throw new Error('Unauthorized')
+  const ctx = await resolveOrgContext()
 
   const parsed = PayoutPreviewRequestSchema.safeParse({
     creatorId: data.creatorId,
@@ -324,7 +328,8 @@ export async function executePayout(data: {
     logger.info('Executing creator payout', {
       creatorId: data.creatorId,
       amount: data.amount,
-      actorId: userId,
+      actorId: ctx.actorId,
+      orgId: ctx.entityId,
     })
 
     const payoutCurrency = data.currency?.toLowerCase() ?? 'usd'
@@ -340,10 +345,24 @@ export async function executePayout(data: {
     const payoutId = crypto.randomUUID()
     const settledCurrency = result?.settledCurrency ?? payoutCurrency.toUpperCase()
 
+    // ── Write to domain table (org-scoped) ──
+    await platformDb.execute(
+      sql`INSERT INTO zonga_payouts
+        (id, entity_id, creator_id, creator_name, amount, currency, payout_rail, status, stripe_transfer_id, created_by, created_at)
+      VALUES (
+        ${payoutId}, ${ctx.entityId}, ${data.creatorId}, ${data.creatorName ?? null},
+        ${data.amount}, ${settledCurrency}, ${payoutRail},
+        ${PayoutStatus.COMPLETED}, ${result?.transferId ?? null},
+        ${ctx.actorId}, NOW()
+      )`,
+    )
+
+    // ── Audit trail (audit-only, org-scoped) ──
     await platformDb.execute(
       sql`INSERT INTO audit_log (action, actor_id, entity_type, entity_id, metadata)
-      VALUES ('payout.executed', ${userId}, 'payout', ${payoutId},
+      VALUES ('payout.executed', ${ctx.actorId}, 'payout', ${payoutId},
         ${JSON.stringify({
+          orgId: ctx.entityId,
           creatorId: data.creatorId,
           creatorName: data.creatorName,
           amount: data.amount,
@@ -358,14 +377,14 @@ export async function executePayout(data: {
       action: ZongaAuditAction.PAYOUT_EXECUTE,
       entityType: ZongaEntityType.PAYOUT,
       entityId: payoutId,
-      actorId: userId,
+      actorId: ctx.actorId,
       targetId: payoutId,
-      metadata: { amount: data.amount, creatorId: data.creatorId },
+      metadata: { amount: data.amount, creatorId: data.creatorId, orgId: ctx.entityId },
     })
     logger.info('Payout executed', { ...auditEvent })
 
     logTransition(
-      { orgId: payoutId },
+      { orgId: ctx.entityId },
       'payout',
       PayoutStatus.PENDING,
       PayoutStatus.COMPLETED,
@@ -375,7 +394,7 @@ export async function executePayout(data: {
     const pack = buildEvidencePackFromAction({
       actionType: 'PAYOUT_EXECUTED',
       entityId: payoutId,
-      executedBy: userId,
+      executedBy: ctx.actorId,
       actionId: crypto.randomUUID(),
     })
     await processEvidencePack(pack)
