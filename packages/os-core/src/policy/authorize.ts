@@ -72,7 +72,9 @@ export async function authorize(
   options: AuthorizeOptions = {},
 ): Promise<AuthContext> {
   // Import Clerk dynamically to avoid bundling it in non-Next.js contexts
-  const { auth } = await import('@clerk/nextjs/server')
+  // webpackIgnore prevents webpack from tracing into @clerk/nextjs/server
+  // which imports 'server-only' and breaks client-side tree-shaking of the barrel export
+  const { auth } = await import(/* webpackIgnore: true */ '@clerk/nextjs/server')
   const session = await auth()
 
   if (!session?.userId) {
@@ -168,9 +170,9 @@ export async function authorizeEntityAccess(
 ): Promise<void> {
   if (ctx.partnerId) {
     // Partner context — must have partner_entities row
-    const { db } = await import('@nzila/db')
-    const { partnerEntities } = await import('@nzila/db/schema')
-    const { eq, and } = await import('drizzle-orm')
+    const { db } = await import(/* webpackIgnore: true */ '@nzila/db')
+    const { partnerEntities } = await import(/* webpackIgnore: true */ '@nzila/db/schema')
+    const { eq, and } = await import(/* webpackIgnore: true */ 'drizzle-orm')
 
     const [entitlement] = await db
       .select()
