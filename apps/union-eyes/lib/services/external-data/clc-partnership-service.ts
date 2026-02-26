@@ -194,15 +194,29 @@ class CLC_OAuthClient {
   /**
    * Make authenticated API request
    */
-  async apiRequest<T>(endpoint: string, options: RequestInit = {}): Promise<T> {
+  async apiRequest<T>(endpoint: string, options: RequestInit & { params?: Record<string, unknown> } = {}): Promise<T> {
     const accessToken = await this.getAccessToken();
     
     if (!accessToken) {
       throw new Error('Not authenticated with CLC API');
     }
 
-    const response = await fetch(`${this.config.apiBaseUrl}${endpoint}`, {
-      ...options,
+    // Build URL with query params if provided
+    let url = `${this.config.apiBaseUrl}${endpoint}`;
+    if (options.params) {
+      const searchParams = new URLSearchParams();
+      for (const [key, value] of Object.entries(options.params)) {
+        if (value !== undefined && value !== null) {
+          searchParams.set(key, String(value));
+        }
+      }
+      const qs = searchParams.toString();
+      if (qs) url += `?${qs}`;
+    }
+
+    const { params: _params, ...fetchOptions } = options;
+    const response = await fetch(url, {
+      ...fetchOptions,
       headers: {
         'Authorization': `Bearer ${accessToken}`,
         'Content-Type': 'application/json',
