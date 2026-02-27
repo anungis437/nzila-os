@@ -197,7 +197,7 @@ export async function uploadCover(
  * Generate a new time-limited streaming URL for an existing audio file.
  */
 export async function getStreamUrl(blobPath: string): Promise<string> {
-  const ctx = await resolveOrgContext()
+  const _ctx = await resolveOrgContext()
 
   return getAudioStreamUrl(blobPath)
 }

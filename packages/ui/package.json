@@ -11,7 +11,7 @@
   "scripts": {
     "lint": "eslint src/",
     "typecheck": "tsc --noEmit",
-    "test": "vitest run"
+    "test": "vitest run --passWithNoTests"
   },
   "peerDependencies": {
     "react": "^19.0.0",

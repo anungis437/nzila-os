@@ -6,6 +6,10 @@ import noShadowMl from '../../packages/ml-sdk/eslint-no-shadow-ml.mjs'
 import noShadowDb from '../../packages/db/eslint-no-shadow-db.mjs'
 import noDirectProvider from '../../packages/config/eslint-no-direct-provider.mjs'
 
+// Re-use plugin instances already loaded by eslint-config-next so the custom
+// rules block below can reference react/* , react-hooks/* and @next/next/* rules.
+const nextPlugins = nextVitals[0]?.plugins ?? {}
+
 const eslintConfig = defineConfig([
   ...nextVitals,
   ...nextTs,
@@ -22,6 +26,11 @@ const eslintConfig = defineConfig([
     'backend/**/migrations/**',
   ]),
   {
+    plugins: {
+      react: nextPlugins.react,
+      'react-hooks': nextPlugins['react-hooks'],
+      '@next/next': nextPlugins['@next/next'],
+    },
     rules: {
       '@typescript-eslint/no-unused-vars': [
         'warn',

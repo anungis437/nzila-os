@@ -89,7 +89,7 @@ export async function listNotifications(opts?: {
 /* ─── Unread count ─── */
 
 export async function getUnreadCount(): Promise<number> {
-  const ctx = await resolveOrgContext()
+  const _ctx = await resolveOrgContext()
 
   try {
     const notifications = await listNotifications({ unreadOnly: true })

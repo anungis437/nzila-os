@@ -249,7 +249,7 @@ export interface IntegrityResult {
 }
 
 export async function getIntegrityChecks(): Promise<IntegrityResult> {
-  const ctx = await resolveOrgContext()
+  const _ctx = await resolveOrgContext()
 
   try {
     // Run ML-based content integrity check
