@@ -54,7 +54,11 @@ describe('ZNG-ACT2-01 — Every action file calls auth()', () => {
       const path = join(ZONGA_ACTIONS, file)
       if (!existsSync(path)) return
       const content = readFileSync(path, 'utf-8')
-      expect(content).toContain('auth()')
+      // resolveOrgContext() wraps auth() — see lib/resolve-org.ts
+      expect(
+        content.includes('auth()') || content.includes('resolveOrgContext()'),
+        `${file} must call auth() directly or via resolveOrgContext()`,
+      ).toBe(true)
     })
   }
 })

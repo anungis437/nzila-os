@@ -14,6 +14,13 @@ import {
   ShieldCheckIcon,
   ServerIcon,
   EyeIcon,
+  BoltIcon,
+  LockClosedIcon,
+  FingerPrintIcon,
+  ArrowTrendingUpIcon,
+  CloudIcon,
+  CurrencyDollarIcon,
+  LinkIcon,
 } from '@heroicons/react/24/outline'
 import { ExecutiveModeWrapper } from './executive-mode'
 
@@ -24,11 +31,18 @@ const navItems = [
   { name: 'Audit Insights', href: '/audit-insights', icon: ShieldCheckIcon },
   { name: 'System Health', href: '/system-health', icon: ServerIcon },
   { name: 'Governance', href: '/governance', icon: EyeIcon },
+  { name: 'Performance', href: '/performance', icon: BoltIcon },
+  { name: 'Isolation', href: '/isolation-certification', icon: LockClosedIcon },
+  { name: 'Proof Pack', href: '/proof-pack', icon: FingerPrintIcon },
+  { name: 'Scale Sim', href: '/scale-simulation', icon: ArrowTrendingUpIcon },
+  { name: 'Deploy Profile', href: '/deployment-profile', icon: CloudIcon },
+  { name: 'Economics', href: '/platform-economics', icon: CurrencyDollarIcon },
+  { name: 'Audit Graph', href: '/audit-graph', icon: LinkIcon },
   { name: 'Docs', href: '/docs', icon: DocumentTextIcon },
   { name: 'Analytics', href: '/analytics', icon: ChartBarIcon },
   { name: 'Automation', href: '/automation', icon: CogIcon },
   { name: 'Standards', href: '/standards', icon: BookOpenIcon },
-  { name: 'Integrations', href: '/settings/integrations', icon: PuzzlePieceIcon },
+  { name: 'Integrations', href: '/integrations', icon: PuzzlePieceIcon },
   { name: 'Settings', href: '/settings', icon: Cog6ToothIcon },
 ]
 

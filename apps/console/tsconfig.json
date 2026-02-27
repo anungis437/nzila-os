@@ -7,7 +7,11 @@
       "@nzila/db": ["../../packages/db/src/index.ts"],
       "@nzila/db/schema": ["../../packages/db/src/schema/index.ts"],
       "@nzila/db/client": ["../../packages/db/src/client.ts"],
-      "@nzila/commerce-observability": ["../../packages/commerce-observability/src"]
+      "@nzila/commerce-observability": ["../../packages/commerce-observability/src"],
+      "@nzila/platform-performance": ["../../packages/platform-performance/src/index.ts"],
+      "@nzila/platform-isolation": ["../../packages/platform-isolation/src/index.ts"],
+      "@nzila/platform-proof": ["../../packages/platform-proof/src/index.ts"],
+      "@nzila/db/org-registry": ["../../packages/db/src/org-registry.ts"]
     }
   },
   "include": [

@@ -163,6 +163,9 @@ export const ORG_SCOPED_TABLES = [
   'commerceZohoSyncRecords',
   'commerceZohoConflicts',
   'commerceZohoCredentials',
+
+  // ── platform.ts ─────────────────────────────────────────
+  'platformRequestMetrics',
 ] as const
 
 /**
@@ -211,6 +214,9 @@ export const NON_ORG_SCOPED_TABLES = [
   { table: 'assets', reason: 'Partner portal — global assets registry' },
   { table: 'apiCredentials', reason: 'Partner portal — scoped by partner_id FK' },
   { table: 'gtmRequests', reason: 'Partner portal — scoped by partner_id FK' },
+  // Platform infrastructure — system-level, not Org-scoped
+  { table: 'platformIsolationAudits', reason: 'System-level isolation audit results' },
+  { table: 'platformProofPacks', reason: 'System-level governance proof packs' },
 ] as const
 
 /**
