@@ -8,7 +8,12 @@
     ".": "./src/index.ts",
     "./dispatcher": "./src/dispatcher.ts",
     "./retry": "./src/retry.ts",
-    "./health": "./src/health.ts"
+    "./health": "./src/health.ts",
+    "./circuitBreaker": "./src/circuitBreaker.ts",
+    "./metrics": "./src/metrics.ts",
+    "./rateLimitParser": "./src/rateLimitParser.ts",
+    "./chaos": "./src/chaos.ts",
+    "./slo": "./src/slo.ts"
   },
   "scripts": {
     "typecheck": "tsc --noEmit",
@@ -17,6 +22,7 @@
   },
   "dependencies": {
     "@nzila/integrations-core": "workspace:*",
+    "@nzila/integrations-db": "workspace:*",
     "zod": "^3.24.0"
   },
   "devDependencies": {

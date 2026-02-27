@@ -1,3 +1,8 @@
 export { IntegrationDispatcher, type DispatcherPorts, type DispatcherOptions } from './dispatcher'
 export { withRetry, computeDelay, shouldRetry, DEFAULT_RETRY_OPTIONS, type RetryOptions } from './retry'
 export { checkAllIntegrations, type HealthCheckerPorts, type AggregateHealthResult } from './health'
+export { CircuitBreaker, DEFAULT_CIRCUIT_BREAKER_CONFIG, type CircuitBreakerConfig, type CircuitBreakerPorts, type CircuitCheckResult, type CircuitRecordResult } from './circuitBreaker'
+export { MetricsCollector, computePercentile, type MetricsCollectorPorts, type DeliveryMetricEvent } from './metrics'
+export { parseRateLimitInfo, parseSlackRateLimit, parseHubSpotRateLimit, parseTeamsRateLimit, parseGenericRateLimit, type RateLimitParser } from './rateLimitParser'
+export { ChaosSimulator, CHAOS_SCENARIOS, isChaosAllowed, type ChaosConfig, type ChaosScenario, type ChaosPorts } from './chaos'
+export { SloComputer, type SloComputerPorts, type SloResult } from './slo'
