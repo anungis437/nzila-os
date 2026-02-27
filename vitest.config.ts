@@ -37,6 +37,8 @@ export default defineConfig({
       'packages/shop-quoter',
       'packages/os-core',
       'packages/payments-stripe',
+      'packages/platform-export',
+      'packages/platform-metrics',
       'packages/qbo',
       'packages/fx',
       'packages/tax',

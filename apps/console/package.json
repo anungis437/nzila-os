@@ -19,6 +19,8 @@
     "@nzila/db": "workspace:*",
     "@nzila/os-core": "workspace:*",
     "@nzila/payments-stripe": "workspace:*",
+    "@nzila/platform-export": "workspace:*",
+    "@nzila/platform-metrics": "workspace:*",
     "@nzila/qbo": "workspace:*",
     "@nzila/tax": "workspace:*",
     "@nzila/ui": "workspace:*",

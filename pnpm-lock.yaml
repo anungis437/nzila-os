@@ -282,6 +282,12 @@ importers:
       '@nzila/payments-stripe':
         specifier: workspace:*
         version: link:../../packages/payments-stripe
+      '@nzila/platform-export':
+        specifier: workspace:*
+        version: link:../../packages/platform-export
+      '@nzila/platform-metrics':
+        specifier: workspace:*
+        version: link:../../packages/platform-metrics
       '@nzila/qbo':
         specifier: workspace:*
         version: link:../../packages/qbo
@@ -2028,6 +2034,62 @@ importers:
         specifier: ^3.24.0
         version: 3.25.76
     devDependencies:
+      typescript:
+        specifier: ^5
+        version: 5.9.3
+      vitest:
+        specifier: ^4.0.18
+        version: 4.0.18(@opentelemetry/api@1.9.0)(@types/node@25.3.0)(jiti@2.6.1)(jsdom@28.1.0(@noble/hashes@2.0.1))(lightningcss@1.31.1)(terser@5.46.0)(tsx@4.21.0)(yaml@2.8.2)
+
+  packages/platform-export:
+    dependencies:
+      '@nzila/db':
+        specifier: workspace:*
+        version: link:../db
+      drizzle-orm:
+        specifier: ^0.39.0
+        version: 0.39.3(@opentelemetry/api@1.9.0)(@types/pg@8.15.6)(pg@8.18.0)(postgres@3.4.8)
+    devDependencies:
+      '@nzila/config':
+        specifier: workspace:*
+        version: link:../config
+      '@typescript-eslint/eslint-plugin':
+        specifier: ^8.0.0
+        version: 8.56.1(@typescript-eslint/parser@8.56.1(eslint@9.39.3(jiti@2.6.1))(typescript@5.9.3))(eslint@9.39.3(jiti@2.6.1))(typescript@5.9.3)
+      '@typescript-eslint/parser':
+        specifier: ^8.0.0
+        version: 8.56.1(eslint@9.39.3(jiti@2.6.1))(typescript@5.9.3)
+      eslint:
+        specifier: ^9.39.0
+        version: 9.39.3(jiti@2.6.1)
+      typescript:
+        specifier: ^5
+        version: 5.9.3
+      vitest:
+        specifier: ^4.0.18
+        version: 4.0.18(@opentelemetry/api@1.9.0)(@types/node@25.3.0)(jiti@2.6.1)(jsdom@28.1.0(@noble/hashes@2.0.1))(lightningcss@1.31.1)(terser@5.46.0)(tsx@4.21.0)(yaml@2.8.2)
+
+  packages/platform-metrics:
+    dependencies:
+      '@nzila/db':
+        specifier: workspace:*
+        version: link:../db
+      drizzle-orm:
+        specifier: ^0.39.0
+        version: 0.39.3(@opentelemetry/api@1.9.0)(@types/pg@8.15.6)(pg@8.18.0)(postgres@3.4.8)
+    devDependencies:
+      '@nzila/config':
+        specifier: workspace:*
+        version: link:../config
+      '@typescript-eslint/eslint-plugin':
+        specifier: ^8.0.0
+        version: 8.56.1(@typescript-eslint/parser@8.56.1(eslint@9.39.3(jiti@2.6.1))(typescript@5.9.3))(eslint@9.39.3(jiti@2.6.1))(typescript@5.9.3)
+      '@typescript-eslint/parser':
+        specifier: ^8.0.0
+        version: 8.56.1(eslint@9.39.3(jiti@2.6.1))(typescript@5.9.3)
+      eslint:
+        specifier: ^9.39.0
+        version: 9.39.3(jiti@2.6.1)
       typescript:
         specifier: ^5
         version: 5.9.3
