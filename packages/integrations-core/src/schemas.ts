@@ -16,7 +16,17 @@ export const IntegrationProviderSchema = z.enum([
 
 export const IntegrationStatusSchema = z.enum(['active', 'inactive', 'suspended'])
 
-export const DeliveryStatusSchema = z.enum(['queued', 'sent', 'failed', 'dlq'])
+export const DeliveryStatusSchema = z.enum(['queued', 'sent', 'failed', 'dlq', 'blocked_by_circuit'])
+
+export const CircuitStateSchema = z.enum(['closed', 'open', 'half_open'])
+
+export const RateLimitInfoSchema = z.object({
+  isRateLimited: z.boolean(),
+  retryAfterMs: z.number().optional(),
+  limit: z.number().optional(),
+  remaining: z.number().optional(),
+  resetAt: z.string().optional(),
+})
 
 export const HealthStatusSchema = z.enum(['ok', 'degraded', 'down'])
 

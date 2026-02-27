@@ -27,6 +27,21 @@ export const IntegrationEventTypes = {
   'integration.webhook.delivered': 'integration.webhook.delivered',
   'integration.webhook.failed': 'integration.webhook.failed',
 
+  // Circuit breaker
+  'integration.circuit.opened': 'integration.circuit.opened',
+  'integration.circuit.half_open': 'integration.circuit.half_open',
+  'integration.circuit.closed': 'integration.circuit.closed',
+  'integration.delivery.blocked_by_circuit': 'integration.delivery.blocked_by_circuit',
+
+  // Rate limiting
+  'integration.rate_limited': 'integration.rate_limited',
+
+  // Chaos simulation
+  'integration.chaos.toggled': 'integration.chaos.toggled',
+
+  // SLA
+  'integration.sla.breach': 'integration.sla.breach',
+
   // CRM
   'integration.crm.contact.upserted': 'integration.crm.contact.upserted',
   'integration.crm.deal.created': 'integration.crm.deal.created',

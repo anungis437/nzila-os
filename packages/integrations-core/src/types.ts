@@ -31,8 +31,21 @@ export type DeliveryStatus =
   | 'sent'
   | 'failed'
   | 'dlq'
+  | 'blocked_by_circuit'
 
 export type HealthStatus = 'ok' | 'degraded' | 'down'
+
+export type CircuitState = 'closed' | 'open' | 'half_open'
+
+// ── Rate-limit info ─────────────────────────────────────────────────────────
+
+export interface RateLimitInfo {
+  readonly isRateLimited: boolean
+  readonly retryAfterMs?: number
+  readonly limit?: number
+  readonly remaining?: number
+  readonly resetAt?: string
+}
 
 // ── Org-scoped integration config ───────────────────────────────────────────
 
@@ -114,6 +127,8 @@ export interface SendResult {
   readonly ok: boolean
   readonly providerMessageId?: string
   readonly error?: string
+  readonly rateLimitInfo?: RateLimitInfo
+  readonly latencyMs?: number
 }
 
 export interface IntegrationAdapter {

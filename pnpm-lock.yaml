@@ -2111,6 +2111,9 @@ importers:
       '@nzila/integrations-core':
         specifier: workspace:*
         version: link:../integrations-core
+      '@nzila/integrations-db':
+        specifier: workspace:*
+        version: link:../integrations-db
       zod:
         specifier: ^3.24.0
         version: 3.25.76

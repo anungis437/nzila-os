@@ -31,7 +31,7 @@ export const integrationStatusEnum = pgEnum('integration_status', [
 ])
 
 export const deliveryStatusEnum = pgEnum('delivery_status', [
-  'queued', 'sent', 'failed', 'dlq',
+  'queued', 'sent', 'failed', 'dlq', 'blocked_by_circuit',
 ])
 
 // ── integration_configs ─────────────────────────────────────────────────────

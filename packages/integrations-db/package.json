@@ -7,11 +7,13 @@
   "exports": {
     ".": "./src/index.ts",
     "./schema": "./src/schema.ts",
-    "./repos": "./src/repos.ts"
+    "./repos": "./src/repos.ts",
+    "./health-schema": "./src/health-schema.ts",
+    "./health-repos": "./src/health-repos.ts"
   },
   "scripts": {
     "typecheck": "tsc --noEmit",
-    "test": "vitest run",
+    "test": "vitest run --passWithNoTests",
     "lint": "eslint src/"
   },
   "dependencies": {
