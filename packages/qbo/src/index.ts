@@ -80,3 +80,54 @@ export type {
   AccountType,
   QboRef,
 } from './types'
+
+// Chart of Accounts mapping (Nzila ↔ QBO)
+export {
+  inferNzilaCategory,
+  buildCoaMapping,
+  createManualMapping,
+  detectMappingDrifts,
+  syncChartOfAccounts,
+} from './coa-mapping'
+export type {
+  NzilaAccountCategory,
+  CoaMapping,
+  CoaMappingResult,
+  CoaDrift,
+} from './coa-mapping'
+
+// Journal entry write-back helpers
+export {
+  validateJournalBalance,
+  postJournalEntry,
+  postAdjustingEntry,
+  postReversingEntry,
+  postTaxAccrualEntry,
+} from './journal-write'
+export type {
+  JournalLineInput,
+  JournalEntryInput,
+  PostedJournalEntry,
+} from './journal-write'
+
+// Sync engine (status tracking + conflict resolution)
+export {
+  createSyncState,
+  updateSyncState,
+  isSyncOverdue,
+  detectFieldConflicts,
+  resolveConflict,
+  autoResolveConflicts,
+  generateSyncHealthReport,
+  DEFAULT_SYNC_SCHEDULES,
+} from './sync'
+export type {
+  SyncDirection,
+  SyncEntityType,
+  ConflictResolution,
+  SyncState,
+  SyncConflict,
+  SyncResult,
+  SyncSchedule,
+  SyncHealthReport,
+} from './sync'

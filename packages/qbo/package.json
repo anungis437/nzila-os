@@ -10,7 +10,10 @@
     "./oauth": "./src/oauth.ts",
     "./client": "./src/client.ts",
     "./accounts": "./src/accounts.ts",
-    "./types": "./src/types.ts"
+    "./types": "./src/types.ts",
+    "./coa-mapping": "./src/coa-mapping.ts",
+    "./journal-write": "./src/journal-write.ts",
+    "./sync": "./src/sync.ts"
   },
   "scripts": {
     "typecheck": "tsc --noEmit",
