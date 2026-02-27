@@ -77,10 +77,17 @@ Apps consume `@nzila/ai-sdk` and `@nzila/ml-sdk`. They never call provider SDKs 
 ### 3. Entitlements as Data
 Partner access is granted via `partner_entities` rows. No hardcoded entity lists. No `DEFAULT_ENTITY_ID`.
 
-### 4. Correlation IDs Everywhere
+### 4. Stack Authority
+Every app has a formally designated authoritative data layer (Django or TS/Drizzle).
+Django-authoritative apps (UE, ABR) must not mutate domain data via Drizzle directly.
+TS-authoritative apps must not introduce a Django backend.
+See [docs/architecture/STACK_AUTHORITY.md](./docs/architecture/STACK_AUTHORITY.md).
+Enforced by `tooling/contract-tests/stack-authority.test.ts` (STACK_AUTHORITY_001).
+
+### 5. Correlation IDs Everywhere
 Every API request carries a `requestId` (UUID) and optional `traceId`. All audit events reference these.
 
-### 5. Fail Fast on Bad Config
+### 6. Fail Fast on Bad Config
 Every app validates environment variables at startup using Zod schemas from `@nzila/os-core/config`. An invalid env causes process exit before serving traffic.
 
 ## Data Flow: Evidence Pack

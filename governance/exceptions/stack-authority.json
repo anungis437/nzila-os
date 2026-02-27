@@ -1,0 +1,36 @@
+{
+  "ruleId": "STACK_AUTHORITY_001",
+  "description": "Exceptions for Django-authoritative apps where TS layer performs limited Drizzle mutations. Each exception must be resolved before its expiry date.",
+  "entries": [
+    {
+      "path": "apps/union-eyes/actions/admin-actions.ts",
+      "owner": "@nzila/union-eyes",
+      "justification": "Mutations via tx param (transaction passed from caller). Migrate to djangoProxy() in Phase 3.",
+      "expiresOn": "2026-09-30"
+    },
+    {
+      "path": "apps/union-eyes/actions/analytics-actions.ts",
+      "owner": "@nzila/union-eyes",
+      "justification": "Mutations via withRLSContext callback — org-scoped. Migrate to djangoProxy() in Phase 3.",
+      "expiresOn": "2026-09-30"
+    },
+    {
+      "path": "apps/union-eyes/app/api/whop/webhooks/utils/frictionless-payment-handlers.ts",
+      "owner": "@nzila/union-eyes",
+      "justification": "Direct db.update on pendingProfiles/profiles — webhook handler. Migrate to djangoProxy() in Phase 3.",
+      "expiresOn": "2026-09-30"
+    },
+    {
+      "path": "apps/union-eyes/app/api/portal/dues/pay/route.ts",
+      "owner": "@nzila/union-eyes",
+      "justification": "Direct db.insert on memberDuesLedger — payment processing. Migrate to djangoProxy() in Phase 3.",
+      "expiresOn": "2026-09-30"
+    },
+    {
+      "path": "apps/union-eyes/app/*/dashboard/layout.tsx",
+      "owner": "@nzila/union-eyes",
+      "justification": "Direct db.insert(profiles) in dashboard layout — profile auto-creation. Migrate to djangoProxy() in Phase 3.",
+      "expiresOn": "2026-09-30"
+    }
+  ]
+}

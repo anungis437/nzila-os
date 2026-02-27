@@ -119,6 +119,17 @@ describe('INV-31 — UE App-Layer DB Access Is RLS-Guarded', () => {
     ).toEqual([]);
   });
 
+  it('no unguarded raw DB access in server action files', () => {
+    const actionsViolations = scanDirectory(join(UE_ROOT, 'actions'));
+
+    expect(
+      actionsViolations,
+      `BLOCKER: UE server action files must not use db.execute() or raw drivers without withRLSContext().\n\n` +
+        `Violations found:\n` +
+        actionsViolations.map(v => `  ${v.file}:${v.line} — [${v.label}] ${v.content}`).join('\n'),
+    ).toEqual([]);
+  });
+
   it('no raw postgres driver imports in app-layer code', () => {
     const appViolations = scanDirectory(join(UE_ROOT, 'app'))
       .filter(v => v.label.includes('postgres'));
@@ -127,6 +138,17 @@ describe('INV-31 — UE App-Layer DB Access Is RLS-Guarded', () => {
       appViolations,
       `BLOCKER: No raw postgres imports allowed in app layer.\n` +
         appViolations.map(v => `  ${v.file}:${v.line} — ${v.content}`).join('\n'),
+    ).toEqual([]);
+  });
+
+  it('no raw postgres driver imports in server action files', () => {
+    const actionsViolations = scanDirectory(join(UE_ROOT, 'actions'))
+      .filter(v => v.label.includes('postgres'));
+
+    expect(
+      actionsViolations,
+      `BLOCKER: No raw postgres imports allowed in server actions.\n` +
+        actionsViolations.map(v => `  ${v.file}:${v.line} — ${v.content}`).join('\n'),
     ).toEqual([]);
   });
 });

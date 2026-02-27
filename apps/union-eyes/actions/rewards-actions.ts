@@ -6,7 +6,7 @@
  */
 
 import { auth } from '@clerk/nextjs/server';
-import { db } from '@/db';
+import { withRLSContext } from '@/lib/db/with-rls-context';
 import { logger } from '@/lib/logger';
 import * as rewardsService from '@/lib/services/rewards';
 import {
@@ -31,14 +31,18 @@ import { revalidatePath } from 'next/cache';
 // =====================================================
 
 async function getCurrentUserOrgId(): Promise<string> {
-  const { userId } = await auth();
+  const { userId, orgId } = await auth();
   if (!userId) throw new Error('Unauthorized');
 
-  // Note: This is a lookup query to get org context, not tenant-scoped data
-  // organizationMembers table maps users to orgs, so no RLS wrapper needed here
-  const result = await db.query.organizationMembers.findFirst({
-    where: (members, { eq }) => eq(members.userId, userId),
-  });
+  // Prefer Clerk's active org context (avoids raw DB lookup)
+  if (orgId) return orgId;
+
+  // Fallback: resolve via org membership with system RLS context
+  const result = await withRLSContext({ organizationId: 'system' }, async (rlsDb) =>
+    rlsDb.query.organizationMembers.findFirst({
+      where: (members, { eq }) => eq(members.userId, userId),
+    })
+  );
 
   if (!result) throw new Error('User not associated with any organization');
 
@@ -46,21 +50,27 @@ async function getCurrentUserOrgId(): Promise<string> {
 }
 
 async function checkAdminRole(): Promise<{ userId: string; orgId: string }> {
-  const { userId } = await auth();
+  const { userId, orgId } = await auth();
   if (!userId) throw new Error('Unauthorized');
 
-  // Note: This is a lookup query to get org context, not tenant-scoped data
-  // organizationMembers table maps users to orgs, so no RLS wrapper needed here
-  const member = await db.query.organizationMembers.findFirst({
-    where: (members, { eq }) => eq(members.userId, userId),
-  });
+  // Prefer Clerk's active org context and verify role via RLS
+  const resolvedOrgId = orgId ?? (await getCurrentUserOrgId());
+
+  const member = await withRLSContext({ organizationId: resolvedOrgId }, async (rlsDb) =>
+    rlsDb.query.organizationMembers.findFirst({
+      where: (members, { eq, and }) => and(
+        eq(members.userId, userId),
+        eq(members.organizationId, resolvedOrgId),
+      ),
+    })
+  );
 
   if (!member) throw new Error('User not associated with any organization');
   if (!['admin', 'owner'].includes(member.role)) {
     throw new Error('Insufficient permissions');
   }
 
-  return { userId, orgId: member.organizationId };
+  return { userId, orgId: resolvedOrgId };
 }
 
 // =====================================================

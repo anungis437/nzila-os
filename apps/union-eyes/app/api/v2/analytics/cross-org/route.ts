@@ -10,11 +10,11 @@ export const dynamic = 'force-dynamic';
 
 export const GET = withApi(
   {
-    auth: { required: false },
+    auth: { required: true, minRole: 'admin' },
     openapi: {
       tags: ['Analytics', 'Django Proxy'],
       summary: 'GET cross-org',
-      description: 'Proxied to Django: /api/analytics/analytics-metrics/',
+      description: 'Proxied to Django: /api/analytics/analytics-metrics/ — admin-only',
     },
   },
   async ({ request }) => {
@@ -25,11 +25,11 @@ export const GET = withApi(
 
 export const POST = withApi(
   {
-    auth: { required: false },
+    auth: { required: true, minRole: 'admin' },
     openapi: {
       tags: ['Analytics', 'Django Proxy'],
       summary: 'POST cross-org',
-      description: 'Proxied to Django: /api/analytics/analytics-metrics/',
+      description: 'Proxied to Django: /api/analytics/analytics-metrics/ — admin-only',
     },
   },
   async ({ request }) => {

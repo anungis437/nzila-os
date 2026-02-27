@@ -6,10 +6,12 @@ import {
   markPendingProfileAsClaimed,
   deletePendingProfile 
 } from "@/db/queries/pending-profiles-queries";
+import { requireAuth } from '@/lib/auth/rbac-server';
 import { logger } from '@/lib/logger';
 
 export async function getPendingProfileByEmailAction(email: string) {
   try {
+    await requireAuth();
     const profile = await getPendingProfileByEmail(email);
     return { success: true, data: profile };
   } catch (error) {
@@ -20,6 +22,7 @@ export async function getPendingProfileByEmailAction(email: string) {
 
 export async function getUnclaimedPendingProfilesAction() {
   try {
+    await requireAuth();
     const profiles = await getUnclaimedPendingProfiles();
     return { success: true, data: profiles };
   } catch (error) {
@@ -30,6 +33,7 @@ export async function getUnclaimedPendingProfilesAction() {
 
 export async function markPendingProfileAsClaimedAction(id: string, userId: string) {
   try {
+    await requireAuth();
     const updated = await markPendingProfileAsClaimed(id, userId);
     return { success: true, data: updated };
   } catch (error) {
@@ -40,6 +44,7 @@ export async function markPendingProfileAsClaimedAction(id: string, userId: stri
 
 export async function deletePendingProfileAction(id: string) {
   try {
+    await requireAuth();
     const deleted = await deletePendingProfile(id);
     return { success: true, data: deleted };
   } catch (error) {

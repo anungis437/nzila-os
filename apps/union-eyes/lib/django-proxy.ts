@@ -31,9 +31,11 @@ export interface ProxyOptions {
   /** Transform the Django response JSON before returning to client */
   transformResponse?: (data: unknown) => unknown;
   /**
-   * When true, the Clerk JWT is required; missing auth returns 401.
-   * When false (default), the request is forwarded even without auth
-   * (Django's IsAuthenticatedOrReadOnly will decide then).
+   * When true (default), the Clerk JWT is required; missing auth returns 401.
+   * Set to false explicitly for public endpoints (health checks, public data)
+   * where Django's IsAuthenticatedOrReadOnly will decide.
+   *
+   * @default true
    */
   requireAuth?: boolean;
 }
@@ -54,7 +56,9 @@ export async function djangoProxy(
   const { getToken, orgId } = await auth();
   const token = await getToken();
 
-  if (options.requireAuth && !token) {
+  // Secure-by-default: requireAuth is true unless explicitly set to false
+  const authRequired = options.requireAuth !== false;
+  if (authRequired && !token) {
     return NextResponse.json({ error: 'Unauthorized' }, { status: 401 });
   }
 

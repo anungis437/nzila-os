@@ -1,13 +1,16 @@
 /**
  * ORG_REQUIRED_SERVER_ACTIONS_001 — "Server actions must use resolveOrgContext"
  *
- * Enforces that every server action file in NACP and Zonga apps
- * uses the org-scoped auth helper (resolveOrgContext) instead of
- * bare auth() from Clerk.
+ * Enforces that every server action file across all apps uses the
+ * org-scoped auth helper (resolveOrgContext) instead of bare auth()
+ * from Clerk.
  *
  * Scope:
  *   apps/nacp-exams/lib/actions/*.ts
  *   apps/zonga/lib/actions/*.ts
+ *   apps/cfo/lib/actions/*.ts
+ *   apps/partners/lib/actions/*.ts
+ *   apps/union-eyes/actions/*.ts
  *
  * Rules:
  *   - FAIL if a server action file ('use server') does not import resolveOrgContext
@@ -35,6 +38,9 @@ import {
 const ACTION_ROOTS = [
   join(ROOT, 'apps', 'nacp-exams', 'lib', 'actions'),
   join(ROOT, 'apps', 'zonga', 'lib', 'actions'),
+  join(ROOT, 'apps', 'cfo', 'lib', 'actions'),
+  join(ROOT, 'apps', 'partners', 'lib', 'actions'),
+  join(ROOT, 'apps', 'union-eyes', 'actions'),
 ]
 
 function readSafe(path: string): string {

@@ -1,0 +1,12 @@
+{
+  "ruleId": "SERVER_ACTION_AUTH_REQUIRED_001",
+  "description": "Server action files that are temporarily allowed without auth guards. Each exception must be resolved before its expiry date.",
+  "entries": [
+    {
+      "path": "apps/shop-quoter/lib/actions.ts",
+      "owner": "@nzila/shop-quoter",
+      "justification": "Shop-quoter auth migration deferred — not priority. Add authenticateUser() guard.",
+      "expiresOn": "2026-09-30"
+    }
+  ]
+}

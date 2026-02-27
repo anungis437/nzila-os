@@ -91,6 +91,168 @@
       "owner": "@nzila/zonga",
       "justification": "Migration to resolveOrgContext pending — uses bare auth() with orgId today",
       "expiresOn": "2026-09-30"
+    },
+    {
+      "path": "apps/cfo/lib/actions/advisory-actions.ts",
+      "owner": "@nzila/cfo",
+      "justification": "CFO uses requirePermission + platformDb — resolveOrgContext migration pending",
+      "expiresOn": "2026-09-30"
+    },
+    {
+      "path": "apps/cfo/lib/actions/audit-actions.ts",
+      "owner": "@nzila/cfo",
+      "justification": "CFO uses requirePermission + platformDb — resolveOrgContext migration pending",
+      "expiresOn": "2026-09-30"
+    },
+    {
+      "path": "apps/cfo/lib/actions/client-actions.ts",
+      "owner": "@nzila/cfo",
+      "justification": "CFO uses requirePermission + platformDb — resolveOrgContext migration pending",
+      "expiresOn": "2026-09-30"
+    },
+    {
+      "path": "apps/cfo/lib/actions/import-actions.ts",
+      "owner": "@nzila/cfo",
+      "justification": "CFO uses requirePermission + platformDb — resolveOrgContext migration pending",
+      "expiresOn": "2026-09-30"
+    },
+    {
+      "path": "apps/cfo/lib/actions/integration-actions.ts",
+      "owner": "@nzila/cfo",
+      "justification": "CFO uses requirePermission + platformDb — resolveOrgContext migration pending",
+      "expiresOn": "2026-09-30"
+    },
+    {
+      "path": "apps/cfo/lib/actions/ledger-actions.ts",
+      "owner": "@nzila/cfo",
+      "justification": "CFO uses requirePermission + platformDb — resolveOrgContext migration pending",
+      "expiresOn": "2026-09-30"
+    },
+    {
+      "path": "apps/cfo/lib/actions/misc-actions.ts",
+      "owner": "@nzila/cfo",
+      "justification": "CFO uses requirePermission + platformDb — resolveOrgContext migration pending",
+      "expiresOn": "2026-09-30"
+    },
+    {
+      "path": "apps/cfo/lib/actions/notification-actions.ts",
+      "owner": "@nzila/cfo",
+      "justification": "CFO uses requirePermission + platformDb — resolveOrgContext migration pending",
+      "expiresOn": "2026-09-30"
+    },
+    {
+      "path": "apps/cfo/lib/actions/platform-admin-actions.ts",
+      "owner": "@nzila/cfo",
+      "justification": "CFO uses requirePermission + platformDb — resolveOrgContext migration pending",
+      "expiresOn": "2026-09-30"
+    },
+    {
+      "path": "apps/cfo/lib/actions/report-actions.ts",
+      "owner": "@nzila/cfo",
+      "justification": "CFO uses requirePermission + platformDb — resolveOrgContext migration pending",
+      "expiresOn": "2026-09-30"
+    },
+    {
+      "path": "apps/cfo/lib/actions/security-actions.ts",
+      "owner": "@nzila/cfo",
+      "justification": "CFO uses requirePermission + platformDb — resolveOrgContext migration pending",
+      "expiresOn": "2026-09-30"
+    },
+    {
+      "path": "apps/cfo/lib/actions/workflow-actions.ts",
+      "owner": "@nzila/cfo",
+      "justification": "CFO uses requirePermission + platformDb — resolveOrgContext migration pending",
+      "expiresOn": "2026-09-30"
+    },
+    {
+      "path": "apps/partners/lib/actions/admin-actions.ts",
+      "owner": "@nzila/partners",
+      "justification": "Partners uses requirePlatformAdmin — resolveOrgContext migration pending",
+      "expiresOn": "2026-09-30"
+    },
+    {
+      "path": "apps/partners/lib/actions/ai-deal-actions.ts",
+      "owner": "@nzila/partners",
+      "justification": "Partners uses auth() — resolveOrgContext migration pending",
+      "expiresOn": "2026-09-30"
+    },
+    {
+      "path": "apps/partners/lib/actions/certification-actions.ts",
+      "owner": "@nzila/partners",
+      "justification": "Partners uses auth() — resolveOrgContext migration pending",
+      "expiresOn": "2026-09-30"
+    },
+    {
+      "path": "apps/partners/lib/actions/commission-actions.ts",
+      "owner": "@nzila/partners",
+      "justification": "Partners uses auth() — resolveOrgContext migration pending",
+      "expiresOn": "2026-09-30"
+    },
+    {
+      "path": "apps/partners/lib/actions/deal-actions.ts",
+      "owner": "@nzila/partners",
+      "justification": "Partners uses auth() — resolveOrgContext migration pending",
+      "expiresOn": "2026-09-30"
+    },
+    {
+      "path": "apps/union-eyes/actions/analytics-actions.ts",
+      "owner": "@nzila/union-eyes",
+      "justification": "UE uses auth() + withRLSContext — resolveOrgContext migration pending",
+      "expiresOn": "2026-09-30"
+    },
+    {
+      "path": "apps/union-eyes/actions/credits-actions.ts",
+      "owner": "@nzila/union-eyes",
+      "justification": "UE uses auth() — resolveOrgContext migration pending",
+      "expiresOn": "2026-09-30"
+    },
+    {
+      "path": "apps/union-eyes/actions/member-employment-actions.ts",
+      "owner": "@nzila/union-eyes",
+      "justification": "UE uses auth() — resolveOrgContext migration pending",
+      "expiresOn": "2026-09-30"
+    },
+    {
+      "path": "apps/union-eyes/actions/member-segments-actions.ts",
+      "owner": "@nzila/union-eyes",
+      "justification": "UE uses auth() — resolveOrgContext migration pending",
+      "expiresOn": "2026-09-30"
+    },
+    {
+      "path": "apps/union-eyes/actions/pending-profiles-actions.ts",
+      "owner": "@nzila/union-eyes",
+      "justification": "UE uses requireAuth() — resolveOrgContext migration pending",
+      "expiresOn": "2026-09-30"
+    },
+    {
+      "path": "apps/union-eyes/actions/profiles-actions.ts",
+      "owner": "@nzila/union-eyes",
+      "justification": "UE uses auth() — resolveOrgContext migration pending",
+      "expiresOn": "2026-09-30"
+    },
+    {
+      "path": "apps/union-eyes/actions/rewards-actions.ts",
+      "owner": "@nzila/union-eyes",
+      "justification": "UE uses auth() + withRLSContext — resolveOrgContext migration pending",
+      "expiresOn": "2026-09-30"
+    },
+    {
+      "path": "apps/union-eyes/actions/stripe-actions.ts",
+      "owner": "@nzila/union-eyes",
+      "justification": "UE uses auth() — resolveOrgContext migration pending",
+      "expiresOn": "2026-09-30"
+    },
+    {
+      "path": "apps/union-eyes/actions/admin-actions.ts",
+      "owner": "@nzila/union-eyes",
+      "justification": "UE uses requireAdmin() — resolveOrgContext migration pending",
+      "expiresOn": "2026-09-30"
+    },
+    {
+      "path": "apps/union-eyes/actions/whop-actions.ts",
+      "owner": "@nzila/union-eyes",
+      "justification": "UE uses auth from api-auth-guard — resolveOrgContext migration pending",
+      "expiresOn": "2026-09-30"
     }
   ]
 }

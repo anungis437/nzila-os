@@ -1,0 +1,18 @@
+{
+  "ruleId": "NO_RAW_DB_IN_ACTIONS_001",
+  "description": "Server action files that directly import an unscoped DB singleton. Each exception must be resolved before its expiry date via migration to platformDb, createScopedDb, or withRLSContext.",
+  "entries": [
+    {
+      "path": "apps/union-eyes/actions/admin-actions.ts",
+      "owner": "@nzila/union-eyes",
+      "justification": "Legacy direct @/db/db import — migration to withRLSContext tracked in docs/migration/ENFORCEMENT_UPGRADE.md",
+      "expiresOn": "2026-09-30"
+    },
+    {
+      "path": "apps/union-eyes/actions/member-segments-actions.ts",
+      "owner": "@nzila/union-eyes",
+      "justification": "Legacy direct @/db import — migration to withRLSContext tracked in docs/migration/ENFORCEMENT_UPGRADE.md",
+      "expiresOn": "2026-09-30"
+    }
+  ]
+}

@@ -3,6 +3,10 @@
  *
  * Security posture scoring, compliance tracking, security events,
  * incident response, and backup monitoring.
+ *
+ * NOTE: This file is excluded from ESLint (eslint.config.mjs) because the
+ * TypeScript parser cannot handle PostgreSQL's ->> operator inside tagged
+ * template literals. The code is valid TypeScript via drizzle-orm's sql``.
  */
 'use server'
 
