@@ -85,11 +85,11 @@ export function AuthPageLayout({
           {/* Bottom trust */}
           <div className="flex items-center gap-4 text-xs text-slate-400">
             <span className="flex items-center gap-1.5">
-              <span className="h-2 w-2 rounded-full bg-emerald-400" />
-              SOC 2 Type II Certified
+              <span className="h-2 w-2 rounded-full bg-amber-400" />
+              SOC 2 Type II — In Progress
             </span>
             <span>•</span>
-            <span>PIPEDA Compliant</span>
+            <span>PIPEDA Committed</span>
             <span>•</span>
             <span>256-bit Encryption</span>
           </div>

@@ -20,7 +20,8 @@
       "@nzila/payments-stripe": ["../../packages/payments-stripe/src"],
       "@nzila/qbo": ["../../packages/qbo/src"],
       "@nzila/tax": ["../../packages/tax/src"],
-      "@nzila/commerce-core": ["../../packages/commerce-core/src"]
+      "@nzila/commerce-core": ["../../packages/commerce-core/src"],
+      "@nzila/fx": ["../../packages/fx/src"]
     }
   },
   "include": ["next-env.d.ts", "**/*.ts", "**/*.tsx", ".next/types/**/*.ts"],

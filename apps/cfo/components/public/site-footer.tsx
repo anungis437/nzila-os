@@ -31,10 +31,10 @@ const legalLinks = [
 ];
 
 const trustBadges = [
-  { label: "SOC 2 Type II", icon: "🛡️" },
-  { label: "CPA Canada", icon: "📋" },
-  { label: "PIPEDA", icon: "🔒" },
-  { label: "ISO 27001", icon: "✅" },
+  { label: "SOC 2 Type II — In Progress", icon: "🛡️" },
+  { label: "CPA Canada Aligned", icon: "📋" },
+  { label: "PIPEDA Committed", icon: "🔒" },
+  { label: "ISO 27001 — Planned", icon: "✅" },
 ];
 
 export function SiteFooter() {
@@ -47,7 +47,7 @@ export function SiteFooter() {
             Ready to transform your advisory practice?
           </h2>
           <p className="mx-auto mt-4 max-w-2xl text-lg text-slate-300">
-            Join 5,000+ accounting firms using LedgerIQ to deliver AI-powered
+            See how LedgerIQ helps accounting firms deliver AI-powered
             virtual CFO services with confidence and precision.
           </p>
           <div className="mt-8 flex flex-col items-center justify-center gap-4 sm:flex-row">
