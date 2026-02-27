@@ -480,3 +480,327 @@ export const commerceSyncReceipts = pgTable('commerce_sync_receipts', {
   snapshot: jsonb('snapshot').default({}),
   createdAt: timestamp('created_at', { withTimezone: true }).notNull().defaultNow(),
 })
+
+// ═══════════════════════════════════════════════════════════════════════════
+// Shop Quoter — Suppliers, Products, Inventory, Purchase Orders (legacy port)
+// ═══════════════════════════════════════════════════════════════════════════
+
+export const commerceSupplierStatusEnum = pgEnum('commerce_supplier_status', [
+  'active',
+  'inactive',
+  'pending',
+  'blocked',
+])
+
+export const commerceProductStatusEnum = pgEnum('commerce_product_status', [
+  'active',
+  'inactive',
+  'discontinued',
+])
+
+export const commerceStockStatusEnum = pgEnum('commerce_stock_status', [
+  'in_stock',
+  'low_stock',
+  'out_of_stock',
+  'overstock',
+])
+
+export const commercePurchaseOrderStatusEnum = pgEnum('commerce_purchase_order_status', [
+  'draft',
+  'sent',
+  'acknowledged',
+  'partial_received',
+  'received',
+  'cancelled',
+])
+
+export const commerceAllocationStatusEnum = pgEnum('commerce_allocation_status', [
+  'reserved',
+  'allocated',
+  'fulfilled',
+  'cancelled',
+])
+
+export const commerceZohoSyncDirectionEnum = pgEnum('commerce_zoho_sync_direction', [
+  'bidirectional',
+  'to_zoho',
+  'from_zoho',
+])
+
+export const commerceZohoConflictResolutionEnum = pgEnum('commerce_zoho_conflict_resolution', [
+  'zoho_wins',
+  'nzila_wins',
+  'newest_wins',
+  'manual',
+])
+
+// ── 18) commerce_suppliers ──────────────────────────────────────────────────
+
+export const commerceSuppliers = pgTable('commerce_suppliers', {
+  id: uuid('id').primaryKey().defaultRandom(),
+  entityId: uuid('entity_id')
+    .notNull()
+    .references(() => entities.id),
+  name: text('name').notNull(),
+  contactName: text('contact_name'),
+  email: text('email'),
+  phone: text('phone'),
+  address: jsonb('address'),
+  paymentTerms: varchar('payment_terms', { length: 30 }), // NET 30, NET 15, etc.
+  leadTimeDays: integer('lead_time_days').notNull().default(14),
+  rating: numeric('rating', { precision: 2, scale: 1 }).default('0'), // 0.0 - 5.0
+  status: commerceSupplierStatusEnum('status').notNull().default('active'),
+  zohoVendorId: text('zoho_vendor_id'), // Zoho Books vendor ID
+  notes: text('notes'),
+  tags: jsonb('tags').default([]),
+  metadata: jsonb('metadata').default({}),
+  createdAt: timestamp('created_at', { withTimezone: true }).notNull().defaultNow(),
+  updatedAt: timestamp('updated_at', { withTimezone: true }).notNull().defaultNow(),
+})
+
+// ── 19) commerce_products ───────────────────────────────────────────────────
+
+export const commerceProducts = pgTable('commerce_products', {
+  id: uuid('id').primaryKey().defaultRandom(),
+  entityId: uuid('entity_id')
+    .notNull()
+    .references(() => entities.id),
+  sku: varchar('sku', { length: 50 }).notNull(),
+  name: text('name').notNull(),
+  nameFr: text('name_fr'),
+  description: text('description'),
+  descriptionFr: text('description_fr'),
+  category: varchar('category', { length: 50 }).notNull(),
+  subcategory: varchar('subcategory', { length: 50 }),
+  basePrice: numeric('base_price', { precision: 18, scale: 2 }).notNull(),
+  costPrice: numeric('cost_price', { precision: 18, scale: 2 }).notNull(),
+  supplierId: uuid('supplier_id').references(() => commerceSuppliers.id),
+  status: commerceProductStatusEnum('status').notNull().default('active'),
+  weightGrams: integer('weight_grams'),
+  dimensions: text('dimensions'), // e.g. "10x5x3 cm"
+  packagingType: varchar('packaging_type', { length: 30 }),
+  imageUrl: text('image_url'),
+  tags: jsonb('tags').default([]), // colors, themes, etc.
+  customizable: boolean('customizable').notNull().default(false),
+  zohoItemId: text('zoho_item_id'), // Zoho Inventory item ID
+  metadata: jsonb('metadata').default({}),
+  createdAt: timestamp('created_at', { withTimezone: true }).notNull().defaultNow(),
+  updatedAt: timestamp('updated_at', { withTimezone: true }).notNull().defaultNow(),
+})
+
+// ── 20) commerce_inventory ──────────────────────────────────────────────────
+
+export const commerceInventory = pgTable('commerce_inventory', {
+  id: uuid('id').primaryKey().defaultRandom(),
+  entityId: uuid('entity_id')
+    .notNull()
+    .references(() => entities.id),
+  productId: uuid('product_id')
+    .notNull()
+    .references(() => commerceProducts.id),
+  currentStock: integer('current_stock').notNull().default(0),
+  allocatedStock: integer('allocated_stock').notNull().default(0),
+  availableStock: integer('available_stock').notNull().default(0), // currentStock - allocatedStock
+  reorderPoint: integer('reorder_point').notNull().default(10),
+  minStockLevel: integer('min_stock_level').notNull().default(5),
+  maxStockLevel: integer('max_stock_level'),
+  location: varchar('location', { length: 50 }), // bin location e.g. "15th floor", "A-12"
+  stockStatus: commerceStockStatusEnum('stock_status').notNull().default('in_stock'),
+  lastRestockedAt: timestamp('last_restocked_at', { withTimezone: true }),
+  zohoWarehouseId: text('zoho_warehouse_id'),
+  metadata: jsonb('metadata').default({}),
+  createdAt: timestamp('created_at', { withTimezone: true }).notNull().defaultNow(),
+  updatedAt: timestamp('updated_at', { withTimezone: true }).notNull().defaultNow(),
+})
+
+// ── 21) commerce_stock_movements ────────────────────────────────────────────
+
+export const commerceStockMovements = pgTable('commerce_stock_movements', {
+  id: uuid('id').primaryKey().defaultRandom(),
+  entityId: uuid('entity_id')
+    .notNull()
+    .references(() => entities.id),
+  inventoryId: uuid('inventory_id')
+    .notNull()
+    .references(() => commerceInventory.id),
+  productId: uuid('product_id')
+    .notNull()
+    .references(() => commerceProducts.id),
+  movementType: varchar('movement_type', { length: 30 }).notNull(), // receipt, allocation, adjustment, return
+  quantity: integer('quantity').notNull(), // positive = in, negative = out
+  referenceType: varchar('reference_type', { length: 30 }), // purchase_order, order, adjustment
+  referenceId: uuid('reference_id'),
+  reason: text('reason'),
+  performedBy: text('performed_by').notNull(),
+  metadata: jsonb('metadata').default({}),
+  createdAt: timestamp('created_at', { withTimezone: true }).notNull().defaultNow(),
+})
+
+// ── 22) commerce_purchase_orders ────────────────────────────────────────────
+
+export const commercePurchaseOrders = pgTable('commerce_purchase_orders', {
+  id: uuid('id').primaryKey().defaultRandom(),
+  entityId: uuid('entity_id')
+    .notNull()
+    .references(() => entities.id),
+  supplierId: uuid('supplier_id')
+    .notNull()
+    .references(() => commerceSuppliers.id),
+  ref: varchar('ref', { length: 30 }).notNull(), // e.g. PO-2026-001
+  status: commercePurchaseOrderStatusEnum('status').notNull().default('draft'),
+  currency: varchar('currency', { length: 3 }).notNull().default('CAD'),
+  subtotal: numeric('subtotal', { precision: 18, scale: 2 }).notNull().default('0'),
+  taxTotal: numeric('tax_total', { precision: 18, scale: 2 }).notNull().default('0'),
+  shippingCost: numeric('shipping_cost', { precision: 18, scale: 2 }).notNull().default('0'),
+  total: numeric('total', { precision: 18, scale: 2 }).notNull().default('0'),
+  expectedDeliveryDate: timestamp('expected_delivery_date', { withTimezone: true }),
+  actualDeliveryDate: timestamp('actual_delivery_date', { withTimezone: true }),
+  sentAt: timestamp('sent_at', { withTimezone: true }),
+  notes: text('notes'),
+  zohoPoId: text('zoho_po_id'), // Zoho Books PO ID
+  metadata: jsonb('metadata').default({}),
+  createdBy: text('created_by').notNull(),
+  createdAt: timestamp('created_at', { withTimezone: true }).notNull().defaultNow(),
+  updatedAt: timestamp('updated_at', { withTimezone: true }).notNull().defaultNow(),
+})
+
+// ── 23) commerce_purchase_order_lines ───────────────────────────────────────
+
+export const commercePurchaseOrderLines = pgTable('commerce_purchase_order_lines', {
+  id: uuid('id').primaryKey().defaultRandom(),
+  entityId: uuid('entity_id')
+    .notNull()
+    .references(() => entities.id),
+  purchaseOrderId: uuid('purchase_order_id')
+    .notNull()
+    .references(() => commercePurchaseOrders.id),
+  productId: uuid('product_id').references(() => commerceProducts.id),
+  description: text('description').notNull(),
+  sku: varchar('sku', { length: 50 }),
+  quantity: integer('quantity').notNull(),
+  quantityReceived: integer('quantity_received').notNull().default(0),
+  unitCost: numeric('unit_cost', { precision: 18, scale: 2 }).notNull(),
+  lineTotal: numeric('line_total', { precision: 18, scale: 2 }).notNull(),
+  sortOrder: integer('sort_order').notNull().default(0),
+  orderId: uuid('order_id').references(() => commerceOrders.id), // mandate assignment
+  metadata: jsonb('metadata').default({}),
+  createdAt: timestamp('created_at', { withTimezone: true }).notNull().defaultNow(),
+  updatedAt: timestamp('updated_at', { withTimezone: true }).notNull().defaultNow(),
+})
+
+// ── 24) commerce_mandate_allocations ────────────────────────────────────────
+// Tracks stock reserved/allocated for specific orders (mandates)
+
+export const commerceMandateAllocations = pgTable('commerce_mandate_allocations', {
+  id: uuid('id').primaryKey().defaultRandom(),
+  entityId: uuid('entity_id')
+    .notNull()
+    .references(() => entities.id),
+  orderId: uuid('order_id')
+    .notNull()
+    .references(() => commerceOrders.id),
+  productId: uuid('product_id')
+    .notNull()
+    .references(() => commerceProducts.id),
+  inventoryId: uuid('inventory_id')
+    .notNull()
+    .references(() => commerceInventory.id),
+  quantityReserved: integer('quantity_reserved').notNull(),
+  quantityAllocated: integer('quantity_allocated').notNull().default(0),
+  quantityFulfilled: integer('quantity_fulfilled').notNull().default(0),
+  status: commerceAllocationStatusEnum('status').notNull().default('reserved'),
+  expectedFulfillmentDate: timestamp('expected_fulfillment_date', { withTimezone: true }),
+  priority: varchar('priority', { length: 10 }).notNull().default('medium'), // low, medium, high, urgent
+  notes: text('notes'),
+  metadata: jsonb('metadata').default({}),
+  createdAt: timestamp('created_at', { withTimezone: true }).notNull().defaultNow(),
+  updatedAt: timestamp('updated_at', { withTimezone: true }).notNull().defaultNow(),
+})
+
+// ── 25) commerce_zoho_sync_configs ──────────────────────────────────────────
+// Configurable field mappings for Zoho CRM/Books/Inventory sync
+
+export const commerceZohoSyncConfigs = pgTable('commerce_zoho_sync_configs', {
+  id: uuid('id').primaryKey().defaultRandom(),
+  entityId: uuid('entity_id')
+    .notNull()
+    .references(() => entities.id),
+  name: text('name').notNull(),
+  nzilaTable: varchar('nzila_table', { length: 50 }).notNull(), // commerce_customers, commerce_quotes, etc.
+  zohoModule: varchar('zoho_module', { length: 50 }).notNull(), // Contacts, Deals, Invoices, etc.
+  syncDirection: commerceZohoSyncDirectionEnum('sync_direction').notNull().default('bidirectional'),
+  fieldMappings: jsonb('field_mappings').notNull().default([]), // [{nzilaField, zohoField, required, transform}]
+  syncFrequency: varchar('sync_frequency', { length: 20 }).notNull().default('realtime'), // realtime, hourly, daily
+  conflictResolution: commerceZohoConflictResolutionEnum('conflict_resolution').notNull().default('newest_wins'),
+  isActive: boolean('is_active').notNull().default(true),
+  webhookUrl: text('webhook_url'),
+  lastSyncAt: timestamp('last_sync_at', { withTimezone: true }),
+  metadata: jsonb('metadata').default({}),
+  createdAt: timestamp('created_at', { withTimezone: true }).notNull().defaultNow(),
+  updatedAt: timestamp('updated_at', { withTimezone: true }).notNull().defaultNow(),
+})
+
+// ── 26) commerce_zoho_sync_records ──────────────────────────────────────────
+// Individual sync history for each record
+
+export const commerceZohoSyncRecords = pgTable('commerce_zoho_sync_records', {
+  id: uuid('id').primaryKey().defaultRandom(),
+  entityId: uuid('entity_id')
+    .notNull()
+    .references(() => entities.id),
+  configId: uuid('config_id')
+    .notNull()
+    .references(() => commerceZohoSyncConfigs.id),
+  nzilaRecordId: uuid('nzila_record_id').notNull(),
+  zohoRecordId: text('zoho_record_id'),
+  syncDirection: commerceZohoSyncDirectionEnum('sync_direction').notNull(),
+  status: commerceSyncStatusEnum('status').notNull().default('pending'),
+  dataSnapshot: jsonb('data_snapshot').default({}),
+  errorMessage: text('error_message'),
+  retryCount: integer('retry_count').notNull().default(0),
+  lastAttemptAt: timestamp('last_attempt_at', { withTimezone: true }),
+  completedAt: timestamp('completed_at', { withTimezone: true }),
+  metadata: jsonb('metadata').default({}),
+  createdAt: timestamp('created_at', { withTimezone: true }).notNull().defaultNow(),
+})
+
+// ── 27) commerce_zoho_conflicts ─────────────────────────────────────────────
+// Conflict records requiring manual resolution
+
+export const commerceZohoConflicts = pgTable('commerce_zoho_conflicts', {
+  id: uuid('id').primaryKey().defaultRandom(),
+  entityId: uuid('entity_id')
+    .notNull()
+    .references(() => entities.id),
+  syncRecordId: uuid('sync_record_id')
+    .notNull()
+    .references(() => commerceZohoSyncRecords.id),
+  nzilaData: jsonb('nzila_data').notNull(),
+  zohoData: jsonb('zoho_data').notNull(),
+  conflictFields: jsonb('conflict_fields').notNull().default([]), // list of field names in conflict
+  resolution: commerceZohoConflictResolutionEnum('resolution'),
+  resolvedData: jsonb('resolved_data'),
+  resolvedBy: text('resolved_by'),
+  resolvedAt: timestamp('resolved_at', { withTimezone: true }),
+  metadata: jsonb('metadata').default({}),
+  createdAt: timestamp('created_at', { withTimezone: true }).notNull().defaultNow(),
+})
+
+// ── 28) commerce_zoho_credentials ───────────────────────────────────────────
+// Encrypted Zoho OAuth tokens per organization (stores in metadata)
+
+export const commerceZohoCredentials = pgTable('commerce_zoho_credentials', {
+  id: uuid('id').primaryKey().defaultRandom(),
+  entityId: uuid('entity_id')
+    .notNull()
+    .references(() => entities.id)
+    .unique(), // one per org
+  accessToken: text('access_token').notNull(), // encrypted
+  refreshToken: text('refresh_token').notNull(), // encrypted
+  tokenExpiry: timestamp('token_expiry', { withTimezone: true }).notNull(),
+  accountsServer: varchar('accounts_server', { length: 100 }).notNull().default('https://accounts.zoho.com'),
+  apiServer: varchar('api_server', { length: 100 }).notNull().default('https://www.zohoapis.com'),
+  metadata: jsonb('metadata').default({}),
+  createdAt: timestamp('created_at', { withTimezone: true }).notNull().defaultNow(),
+  updatedAt: timestamp('updated_at', { withTimezone: true }).notNull().defaultNow(),
+})

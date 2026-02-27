@@ -13,3 +13,9 @@ export * from './payments'
 export * from './disputes'
 export * from './evidence'
 export * from './sync'
+
+// Shop Quoter — Suppliers, Products, Inventory, Purchase Orders
+export * from './suppliers'
+export * from './products'
+export * from './inventory'
+export * from './purchase-orders'

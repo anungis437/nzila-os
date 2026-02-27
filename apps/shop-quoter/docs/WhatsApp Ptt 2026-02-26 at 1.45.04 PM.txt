@@ -1,0 +1,15 @@
+(Transcribed by TurboScribe.ai. Go Unlimited to remove this message.)
+
+Bonjour, Roby. Il paraît que je vais t'envoyer des voice memos pour te raconter mes problèmes au travail. Non, non, mais un des issues que je trouve qu'on a, c'est que moi, quand je close un mandat corporatif, j'ai quatre endroits où aller indiquer qu'il est closé.
+
+Ça fait que ce serait le fun que ça soit tout dans la même place. Un des endroits, c'est le Excel que Lisa met, qu'est-ce qu'il faut commander. Moi, il faut que j'aille le mettre dans le Excel shipped.
+
+Il faut que j'aille dans Asana pour le mettre shipped pour que tout le monde soit notifié. Puis là, avant, on allait dans WhatsApp aussi pour dire shipped pour que Fred alle envoie le message au client pour dire que c'est shipped. Là, on a enlevé WhatsApp parce que je fais juste faire une notification dans Asana à la place.
+
+Puis là, elle reçoit une notification que c'est shipped. On a déjà enlevé au moins un endroit, mais c'est quand même gossant qu'il faut qu'on aille à quelques endroits pour dire que c'est envoyé. Mais il faut qu'il y ait des notifications right pour la personne qu'il faut qu'ils disent au client que c'est envoyé.
+
+Parce que Fred, quand on lui dit que c'est fait, elle, elle envoie le tracking number. Il faut qu'elle aille dans ShipStation ou l'endroit où il y a le tracking, qu'elle trouve l'information et qu'elle l'envoie au client pour que les clients s'attendent à recevoir ces boîtes. On veut tout le temps que les clients sachent.
+
+On ne veut pas qu'ils reçoivent les boîtes chez eux et qu'ils ne savent pas. Ça, c'est un des issues en prod.
+
+(Transcribed by TurboScribe.ai. Go Unlimited to remove this message.)

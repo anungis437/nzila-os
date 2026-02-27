@@ -57,3 +57,27 @@ export type {
   OrderToInvoiceData,
   OrderToInvoicePorts,
 } from './sagas'
+
+// ── Aging reports & revenue recognition ─────────────────────────────────────
+export {
+  generateAgingReport,
+  STANDARD_AGING_BUCKETS,
+  allocateTransactionPrice,
+  calculateRecognizedRevenue,
+  getDueDunningActions,
+  STANDARD_DUNNING_SCHEDULE,
+  evaluateCustomerCredit,
+} from './aging-report'
+
+export type {
+  AgingInvoice,
+  AgingBucket,
+  AgingBucketConfig,
+  AgingReport,
+  RevenueContract,
+  PerformanceObligation,
+  RevenueAllocation,
+  RevenueRecognitionReport,
+  DunningStep,
+  CustomerCredit,
+} from './aging-report'

@@ -8,12 +8,22 @@ import {
   ChartBarIcon,
   CogIcon,
   ArrowTopRightOnSquareIcon,
+  TruckIcon,
+  CubeIcon,
+  ClipboardDocumentListIcon,
+  ShoppingCartIcon,
+  BanknotesIcon,
 } from '@heroicons/react/24/outline'
 
 const navItems = [
   { name: 'Dashboard', href: '/dashboard', icon: HomeIcon },
   { name: 'Quotes', href: '/quotes', icon: DocumentTextIcon },
   { name: 'Clients', href: '/clients', icon: UserGroupIcon },
+  { name: 'Orders', href: '/orders', icon: ShoppingCartIcon },
+  { name: 'Invoices', href: '/invoices', icon: BanknotesIcon },
+  { name: 'Products', href: '/products', icon: CubeIcon },
+  { name: 'Suppliers', href: '/suppliers', icon: TruckIcon },
+  { name: 'Purchase Orders', href: '/purchase-orders', icon: ClipboardDocumentListIcon },
   { name: 'Analytics', href: '/analytics', icon: ChartBarIcon },
   { name: 'Legacy Import', href: '/import', icon: ArrowDownTrayIcon },
   { name: 'Settings', href: '/settings', icon: CogIcon },

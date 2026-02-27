@@ -1,0 +1,25 @@
+(Transcribed by TurboScribe.ai. Go Unlimited to remove this message.)
+
+Au moment que ça rentre en coordination aussi, l'équipe post-vente va aussi remplir une worksheet, qui est dans le fond un genre de gabarit d'instructions pour la production, qui va faire état un peu des particularités au niveau de soit la liste de distribution des destinataires, ou encore des petites particularités au niveau de la présentation des boîtes. Ça peut être par exemple, est-ce qu'il y a des heures précises de livraison? Est-ce que la date est flexible au niveau de l'envoi? Est-ce qu'on peut devancer le mandat? Est-ce qu'on peut inclure un carton promotionnel aux envois? Est-ce qu'on doit fermer et sceller les boîtes? Ou est-ce qu'on doit expédier les autocollants, les cartons à part, pour que le client puisse ouvrir et manipuler ses boîtes sous perception? Est-ce que, justement, il y a de la personnalisation autocollant carton? Ou s'il n'y en a pas, est-ce qu'on envoie les boîtes avec un manchon shop-moi-ça standard? Est-ce qu'on inclut un carton shop-moi-ça standard ou pas? Donc, toutes ces petites particularités-là vont être précisées dans la worksheet. Ça va aussi détailler s'il est question d'une distribution particulière.
+
+Par exemple, attention, il y a des bodelins pour hommes et des bodelins pour femmes. Ça, ça va nécessiter une manipulation différente en atelier. Est-ce qu'il y a de la micro-personnalisation avec le prénom au niveau des cartons? Si ce n'est pas précisé, à ce moment-là, il peut y avoir un oubli ou une petite erreur au niveau de la préparation des boîtes parce que la production ne va pas avoir noté qu'il y a une différence dans les différentes versions, disons, dans la personnalisation.
+
+Est-ce qu'il y a un ruban à inclure? Si oui, le ruban va être mis sur quoi? Sur l'extérieur de la boîte ou sur un item dans la boîte? Est-ce qu'on doit laisser de l'espace pour que le client fasse lui-même des ajouts d'items une fois la réception faite? Ou est-ce qu'on les envoie vraiment prêtes à expédier? On a des clients aussi qui demandent à ce qu'il n'y ait pas de papier de bulle parce que c'est non recyclable, puis il y a des exigences écoresponsables. Donc, ça doit être précisé sur la worksheet. Donc, c'est vraiment plein de détails qui vont être confirmés au niveau post-vente ou au niveau de la vente qui vont avoir été discutés.
+
+Puis, c'est vraiment l'équipe de vente qui va faire la passation d'informations via la worksheet à l'équipe de production. L'équipe de production, quand elle rentre en production officiellement, c'est qu'elle a la worksheet. Elle a la liste d'adresses officiellement confirmée, finalisée.
+
+Les importations d'adresses ont été faites dans ShipStation aussi pour lui permettre de faire l'impression des bordereaux d'expédition. Et elle a la facture avec l'Excel qui détaille quels sont les produits à mettre dans la boîte. Parce que la facture ne détaillera pas le nom du fournisseur, alors qu'il y a l'Excel au niveau des confirmations de commandes de stock qui va le détailler.
+
+L'équipe de production va aussi avoir dans Asana. Et tout ça, c'est accessible via le mandat dans Asana. En fait, toute l'information va être consolidée, mise en place dans Asana, regroupée plutôt à ce moment-là.
+
+Et il va y avoir des photos si, disons qu'il y a des items personnalisés qui vont avoir été commandés pour le projet. Les photos des montages approuvés. Même chose pour les autocollants, les cartons.
+
+Donc, toutes les versions personnalisées, finalisées vont être mises dans Asana pour que l'équipe de production puisse avoir une référence aussi pour valider si c'est vraiment la bonne version. Parce que des fois, ça peut porter à la confusion quand une compagnie commande pour une autre compagnie. Des fois, le nom ne matche pas.
+
+Puis là, c'est la graveur. On ne concorde pas avec le mandat. L'équipe de production peut se poser des questions.
+
+Ça nous permet d'éviter justement des questionnements inutiles quand tout ça est mis dans Asana. Dans le worksheet aussi, je parlais de versions tantôt. Il peut y avoir des versions de langues aussi.
+
+Est-ce qu'il y a des versions anglaises, des versions françaises, des gravures et des personnalisations, donc autocollants et cartons?
+
+(Transcribed by TurboScribe.ai. Go Unlimited to remove this message.)

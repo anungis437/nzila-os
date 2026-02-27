@@ -15,6 +15,7 @@
     "@clerk/nextjs": "^6.12.0",
     "@heroicons/react": "^2.2.0",
     "@nzila/commerce-core": "workspace:*",
+    "@nzila/commerce-db": "workspace:*",
     "@nzila/commerce-services": "workspace:*",
     "@nzila/commerce-audit": "workspace:*",
     "@nzila/db": "workspace:*",
