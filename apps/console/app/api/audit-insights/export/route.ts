@@ -9,6 +9,9 @@ import { authenticateUser } from '@/lib/api-guards'
 import { platformDb } from '@nzila/db/platform'
 import { auditEvents, entities } from '@nzila/db/schema'
 import { eq, count, desc, sql } from 'drizzle-orm'
+import { createLogger } from '@nzila/os-core'
+
+const logger = createLogger('audit-insights-export')
 
 export const dynamic = 'force-dynamic'
 
@@ -50,6 +53,7 @@ export async function GET(req: NextRequest) {
       `${r.targetType},${r.action},${r.entityId},"${(r.entityName ?? '').replace(/"/g, '""')}",${r.total}`,
   )
   const csv = [header, ...lines].join('\n')
+  logger.info('Audit insights export', { orgId, rowCount: rows.length })
 
   return new NextResponse(csv, {
     headers: {

@@ -8,6 +8,9 @@ import { NextRequest, NextResponse } from 'next/server'
 import { authenticateUser, getEntityMembership } from '@/lib/api-guards'
 import { exportOrgData, datasetToCsv } from '@nzila/platform-export'
 import { recordAuditEvent, AUDIT_ACTIONS } from '@/lib/audit-db'
+import { createLogger } from '@nzila/os-core'
+
+const logger = createLogger('org-export')
 
 export const dynamic = 'force-dynamic'
 
@@ -41,6 +44,7 @@ export async function GET(
   })
 
   const data = await exportOrgData(orgId)
+  logger.info('Org data export', { orgId, userId, format: 'csv-zip' })
 
   // Build a multi-part CSV response (simplified: JSON with CSV sections)
   const sections: Record<string, string> = {
