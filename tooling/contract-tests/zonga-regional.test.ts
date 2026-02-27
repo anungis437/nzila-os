@@ -401,7 +401,11 @@ describe('ZNG-REG-11 — Upload actions exist with auth + evidence', () => {
   })
 
   it('calls auth() for authentication', () => {
-    expect(upload).toContain('auth()')
+    // resolveOrgContext() wraps auth() — see lib/resolve-org.ts
+    expect(
+      upload.includes('auth()') || upload.includes('resolveOrgContext()'),
+      'upload-actions must call auth() directly or via resolveOrgContext()',
+    ).toBe(true)
   })
 
   it('exports uploadAudio function', () => {
