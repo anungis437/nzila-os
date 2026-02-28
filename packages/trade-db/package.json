@@ -25,6 +25,7 @@
   "dependencies": {
     "@nzila/trade-core": "workspace:*",
     "@nzila/db": "workspace:*",
+    "@nzila/org": "workspace:*",
     "drizzle-orm": "^0.39.0"
   },
   "devDependencies": {

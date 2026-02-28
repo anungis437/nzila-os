@@ -16,6 +16,8 @@
     "@nzila/blob": "workspace:*",
     "@nzila/db": "workspace:*",
     "@nzila/os-core": "workspace:*",
+    "@nzila/integrations-core": "workspace:*",
+    "@nzila/integrations-runtime": "workspace:*",
     "@nzila/ui": "workspace:*",
     "@nzila/ai-sdk": "workspace:*",
     "@nzila/ml-sdk": "workspace:*",

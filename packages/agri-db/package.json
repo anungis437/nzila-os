@@ -7,6 +7,7 @@
   "exports": {
     ".": "./src/index.ts",
     "./types": "./src/types.ts",
+    "./readonly": "./src/readonly/index.ts",
     "./producers": "./src/repositories/producers.ts",
     "./crops": "./src/repositories/crops.ts",
     "./harvests": "./src/repositories/harvests.ts",

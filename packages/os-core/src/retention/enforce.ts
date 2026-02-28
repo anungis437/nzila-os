@@ -75,7 +75,7 @@ export async function enforceRetention(
     .select({
       id: documents.id,
       category: documents.category,
-      retentionClass: sql<string>`'7_YEARS'`, // TODO: add retention_class column to documents
+      retentionClass: sql<string>`'7_YEARS'`, // DEFERRED: add retention_class column via migration (PR-5.2). Currently hard-coded.
       createdAt: documents.createdAt,
       blobPath: documents.blobPath,
       blobContainer: documents.blobContainer,

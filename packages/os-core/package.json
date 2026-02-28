@@ -35,7 +35,9 @@
     "./boot-assert": "./src/boot-assert.ts",
     "./abr/confidential-reporting": "./src/abr/confidential-reporting.ts",
     "./ue/case-evidence-export": "./src/ue/case-evidence-export.ts",
-    "./fin/key-lifecycle": "./src/fin/key-lifecycle.ts"
+    "./fin/key-lifecycle": "./src/fin/key-lifecycle.ts",
+    "./audit": "./src/audit/index.ts",
+    "./audit/abr": "./src/audit/abr.ts"
   },
   "scripts": {
     "typecheck": "tsc --noEmit",

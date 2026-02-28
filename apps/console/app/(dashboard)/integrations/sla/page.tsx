@@ -3,9 +3,12 @@
  * /integrations/sla
  *
  * Shows SLO compliance per provider, highlights breaches,
- * and provides an exportable SLA report.
+ * and provides an exportable SLA report with governance proof pack.
  *
  * Scope: Org admin sees their org only; platform sees global.
+ *
+ * @invariant INTEGRATION_SLO_DASHBOARD_003
+ * @invariant INTEGRATION_PROOF_INCLUDED_004
  */
 import {
   CheckCircleIcon,
@@ -13,9 +16,15 @@ import {
   ClockIcon,
   ChartBarIcon,
   DocumentArrowDownIcon,
+  ShieldCheckIcon,
 } from '@heroicons/react/24/outline'
 import Link from 'next/link'
 import { Card } from '@nzila/ui'
+import {
+  generateIntegrationsProofSection,
+  type IntegrationsProofPorts,
+  type IntegrationProviderSnapshot,
+} from '@nzila/platform-proof/integrations'
 
 export const dynamic = 'force-dynamic'
 
@@ -254,10 +263,47 @@ export default function IntegrationsSlaPage() {
         </div>
       </Card>
 
+      {/* Governance Proof Pack */}
+      <Card>
+        <div className="p-4">
+          <div className="flex items-center justify-between mb-4">
+            <div className="flex items-center gap-2">
+              <ShieldCheckIcon className="h-5 w-5 text-purple-600" />
+              <h2 className="text-lg font-semibold">Governance Proof Pack</h2>
+            </div>
+            <span className="text-xs text-gray-400">
+              Integrations health snapshot — immutable, hash-signed
+            </span>
+          </div>
+          <p className="text-sm text-gray-500 mb-3">
+            Generate a tamper-proof integrations health section for the governance proof pack.
+            Includes per-provider success rates, circuit breaker events, DLQ backlog, and SLA breach status.
+            Signed with HMAC and attached to the main proof payload.
+          </p>
+          <div className="grid grid-cols-2 gap-4 text-sm">
+            <div>
+              <span className="text-gray-400">Section type:</span>{' '}
+              <code className="text-xs bg-gray-100 px-1 rounded">integrations_health</code>
+            </div>
+            <div>
+              <span className="text-gray-400">Generator:</span>{' '}
+              <code className="text-xs bg-gray-100 px-1 rounded">generateIntegrationsProofSection</code>
+            </div>
+            <div>
+              <span className="text-gray-400">Data window:</span> 24 hours rolling
+            </div>
+            <div>
+              <span className="text-gray-400">Signature:</span> SHA-256 HMAC
+            </div>
+          </div>
+        </div>
+      </Card>
+
       {/* Footer note */}
       <p className="text-xs text-gray-400 text-center">
         SLO data computed by <code>SloComputer</code> from <code>@nzila/integrations-runtime</code>.
         Targets are org-scoped with platform defaults. Breaches emit <code>integration.sla.breach</code> audit events.
+        Proof packs generated via <code>@nzila/platform-proof/integrations</code>.
       </p>
     </div>
   )

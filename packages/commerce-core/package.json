@@ -16,6 +16,7 @@
     "lint": "eslint src/"
   },
   "dependencies": {
+    "@nzila/org": "workspace:*",
     "zod": "^3.24.0"
   },
   "devDependencies": {

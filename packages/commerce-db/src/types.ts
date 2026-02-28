@@ -18,7 +18,11 @@
  * - `actorRole` → optional role for audit enrichment.
  */
 export interface CommerceDbContext {
-  /** Org entity ID — scopes every query to this org. */
+  /** Organisation UUID — canonical field. */
+  readonly orgId: string
+  /**
+   * @deprecated Use `orgId` instead. Kept for backward compatibility.
+   */
   readonly entityId: string
   /** Clerk user ID — recorded in every audit event. */
   readonly actorId: string
@@ -29,11 +33,15 @@ export interface CommerceDbContext {
 }
 
 /**
- * Read-only context (subset with just entityId).
+ * Read-only context (subset with just orgId).
  * Used for repository queries that don't mutate data.
  */
 export interface CommerceReadContext {
-  /** Org entity ID — scopes every query to this org. */
+  /** Organisation UUID — canonical field. */
+  readonly orgId: string
+  /**
+   * @deprecated Use `orgId` instead. Kept for backward compatibility.
+   */
   readonly entityId: string
 }
 

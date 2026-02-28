@@ -11,6 +11,7 @@ import { requireRole } from '@/lib/rbac'
 import { platformDb } from '@nzila/db/platform'
 import { automationCommands, zongaOutbox, nacpOutbox } from '@nzila/db/schema'
 import { count, eq, sql, or } from 'drizzle-orm'
+import { getOutboxBacklogs, getWorkerMetrics, type OutboxBacklog, type WorkerMetrics } from '@nzila/platform-ops'
 import {
   ServerIcon,
   QueueListIcon,
@@ -159,6 +160,8 @@ export default async function SystemHealthPage({
   const params = await searchParams
   const isExecutive = params.mode === 'executive'
   const checks = await gatherHealthChecks()
+  const outboxBacklogs = await getOutboxBacklogs()
+  const workerMetrics = await getWorkerMetrics()
 
   const overallHealthy = checks.every((c) => c.status === 'healthy')
 
@@ -201,6 +204,120 @@ export default async function SystemHealthPage({
           </div>
         ))}
       </div>
+
+      {/* Outbox Backlog by Domain */}
+      {outboxBacklogs.length > 0 && (
+        <div className="mt-8 bg-white border border-gray-200 rounded-xl overflow-hidden">
+          <div className="px-6 py-4 border-b border-gray-100">
+            <h2 className="text-lg font-semibold text-gray-900">
+              Outbox Backlog by Domain
+            </h2>
+            <p className="text-sm text-gray-500 mt-0.5">
+              Pending event count and oldest event age per domain
+            </p>
+          </div>
+          <table className="w-full text-sm">
+            <thead className="bg-gray-50 text-gray-500 text-left">
+              <tr>
+                <th className="px-6 py-3 font-medium">Domain</th>
+                <th className="px-6 py-3 font-medium">Pending</th>
+                <th className="px-6 py-3 font-medium">Oldest Age</th>
+                <th className="px-6 py-3 font-medium">Status</th>
+              </tr>
+            </thead>
+            <tbody className="divide-y divide-gray-100">
+              {outboxBacklogs.map((b) => (
+                <tr key={b.domain} className="text-gray-700">
+                  <td className="px-6 py-3 font-mono text-xs">{b.domain}</td>
+                  <td className="px-6 py-3">{b.pendingCount}</td>
+                  <td className="px-6 py-3">
+                    {b.oldestAgeSec != null ? `${b.oldestAgeSec}s` : '—'}
+                  </td>
+                  <td className="px-6 py-3">
+                    <span
+                      className={`px-2 py-0.5 rounded-full text-xs font-medium ${
+                        b.status === 'critical'
+                          ? 'bg-red-100 text-red-800'
+                          : b.status === 'warning'
+                            ? 'bg-amber-100 text-amber-800'
+                            : 'bg-green-100 text-green-800'
+                      }`}
+                    >
+                      {b.status}
+                    </span>
+                  </td>
+                </tr>
+              ))}
+            </tbody>
+          </table>
+        </div>
+      )}
+
+      {/* Worker Saturation */}
+      {workerMetrics.length > 0 && (
+        <div className="mt-8 bg-white border border-gray-200 rounded-xl overflow-hidden">
+          <div className="px-6 py-4 border-b border-gray-100">
+            <h2 className="text-lg font-semibold text-gray-900">
+              Worker Saturation
+            </h2>
+            <p className="text-sm text-gray-500 mt-0.5">
+              Queue depth and saturation indicators by worker type
+            </p>
+          </div>
+          <table className="w-full text-sm">
+            <thead className="bg-gray-50 text-gray-500 text-left">
+              <tr>
+                <th className="px-6 py-3 font-medium">Queue</th>
+                <th className="px-6 py-3 font-medium">Pending</th>
+                <th className="px-6 py-3 font-medium">Running</th>
+                <th className="px-6 py-3 font-medium">Saturation</th>
+                <th className="px-6 py-3 font-medium">Status</th>
+              </tr>
+            </thead>
+            <tbody className="divide-y divide-gray-100">
+              {workerMetrics.map((w) => (
+                <tr key={w.queueName} className="text-gray-700">
+                  <td className="px-6 py-3 font-mono text-xs">{w.queueName}</td>
+                  <td className="px-6 py-3">{w.pendingCount}</td>
+                  <td className="px-6 py-3">{w.runningCount}</td>
+                  <td className="px-6 py-3">
+                    <div className="flex items-center gap-2">
+                      <div className="w-20 bg-gray-200 rounded-full h-2">
+                        <div
+                          className={`h-2 rounded-full ${
+                            w.saturationPct > 90
+                              ? 'bg-red-500'
+                              : w.saturationPct > 50
+                                ? 'bg-amber-500'
+                                : 'bg-green-500'
+                          }`}
+                          style={{ width: `${Math.min(w.saturationPct, 100)}%` }}
+                        />
+                      </div>
+                      <span className="text-xs text-gray-500">{w.saturationPct}%</span>
+                    </div>
+                  </td>
+                  <td className="px-6 py-3">
+                    <span
+                      className={`px-2 py-0.5 rounded-full text-xs font-medium ${
+                        w.status === 'saturated'
+                          ? 'bg-red-100 text-red-800'
+                          : w.status === 'busy'
+                            ? 'bg-amber-100 text-amber-800'
+                            : w.status === 'active'
+                              ? 'bg-blue-100 text-blue-800'
+                              : 'bg-gray-100 text-gray-600'
+                      }`}
+                    >
+                      {w.status}
+                    </span>
+                  </td>
+                </tr>
+              ))}
+            </tbody>
+          </table>
+        </div>
+      )}
     </div>
   )
 }
