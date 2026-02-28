@@ -9,7 +9,8 @@
     "./integrations": "./src/integrations-proof.ts",
     "./abr": "./src/abr-proof.ts",
     "./nacp": "./src/nacp-proof.ts",
-    "./data-lifecycle": "./src/data-lifecycle-proof.ts"
+    "./data-lifecycle": "./src/data-lifecycle-proof.ts",
+    "./ports/nacp": "./src/ports/nacp.ts"
   },
   "scripts": {
     "typecheck": "tsc --noEmit",

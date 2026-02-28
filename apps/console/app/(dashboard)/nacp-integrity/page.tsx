@@ -15,7 +15,7 @@
 import { requireRole } from '@/lib/rbac'
 import {
   generateNacpIntegrityProofSection,
-  type NacpIntegrityProofPorts,
+  nacpIntegrityPorts,
   type NacpSealStatus,
   type NacpAnomaly,
 } from '@nzila/platform-proof'
@@ -31,19 +31,6 @@ import {
 } from '@heroicons/react/24/outline'
 
 export const dynamic = 'force-dynamic'
-
-// ── Stub ports — replace with real DB queries when tables are available ────
-
-const stubPorts: NacpIntegrityProofPorts = {
-  fetchSealStatuses: async (_orgId: string): Promise<readonly NacpSealStatus[]> => [
-    { eventType: 'SUBMISSION_SEALED', totalEvents: 0, sealedCount: 0, unsealedCount: 0, lastSealedAt: null, lastSubjectId: null },
-    { eventType: 'GRADING_FINALIZED', totalEvents: 0, sealedCount: 0, unsealedCount: 0, lastSealedAt: null, lastSubjectId: null },
-    { eventType: 'EXPORT_GENERATED', totalEvents: 0, sealedCount: 0, unsealedCount: 0, lastSealedAt: null, lastSubjectId: null },
-  ],
-  fetchAnomalies: async (): Promise<readonly NacpAnomaly[]> => [],
-  fetchExportProofHash: async () => null,
-  fetchHashChainInfo: async () => ({ length: 0, head: null }),
-}
 
 // ── Verdict UI ──────────────────────────────────────────────────────────────
 
@@ -162,7 +149,7 @@ export default async function NacpIntegrityPage({
   const orgId = params.orgId ?? 'default'
   const isExecutive = params.mode === 'executive'
 
-  const section = await generateNacpIntegrityProofSection(orgId, stubPorts)
+  const section = await generateNacpIntegrityProofSection(orgId, nacpIntegrityPorts)
 
   const proofJson = JSON.stringify(section, null, 2)
   const downloadHref = `data:application/json;charset=utf-8,${encodeURIComponent(proofJson)}`

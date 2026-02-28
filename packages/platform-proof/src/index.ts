@@ -36,6 +36,8 @@ export {
   type NacpIntegrityProofPorts,
 } from './nacp-proof'
 
+export { nacpIntegrityPorts } from './ports/nacp'
+
 export {
   generateDataLifecycleProofSection,
   type DataLifecycleProofSection,
