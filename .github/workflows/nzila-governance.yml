@@ -127,7 +127,7 @@ jobs:
           skip-dirs: 'node_modules,.pnpm-store'
 
       - name: Upload SBOM artifact
-        uses: actions/upload-artifact@v4
+        uses: actions/upload-artifact@v6
         with:
           name: sbom-${{ github.run_id }}
           path: sbom.json
@@ -197,7 +197,7 @@ jobs:
           EVIDENCE_SEAL_KEY: ${{ secrets.EVIDENCE_SEAL_KEY }}
 
       - name: Upload UE pack.json + seal.json
-        uses: actions/upload-artifact@v4
+        uses: actions/upload-artifact@v6
         with:
           name: ue-evidence-${{ github.run_id }}
           path: |
@@ -336,7 +336,7 @@ jobs:
           EVIDENCE_SEAL_KEY: ${{ secrets.EVIDENCE_SEAL_KEY }}
 
       - name: Upload ABR pack.json + seal.json
-        uses: actions/upload-artifact@v4
+        uses: actions/upload-artifact@v6
         with:
           name: abr-evidence-${{ github.run_id }}
           path: |
@@ -434,7 +434,7 @@ jobs:
           EVIDENCE_SEAL_KEY: ${{ secrets.EVIDENCE_SEAL_KEY }}
 
       - name: Upload pack.json + seal.json as governance artifacts
-        uses: actions/upload-artifact@v4
+        uses: actions/upload-artifact@v6
         with:
           name: governance-evidence-${{ github.run_id }}
           path: |
@@ -500,7 +500,7 @@ jobs:
 
       - name: Upload red-team evidence
         if: always()
-        uses: actions/upload-artifact@v4
+        uses: actions/upload-artifact@v6
         with:
           name: redteam-evidence-${{ github.run_id }}
           path: security/redteam/redteam-results.json
