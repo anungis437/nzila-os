@@ -503,7 +503,7 @@ export default function CardSigningTracker({ campaignId: _campaignId }: { campai
             <div className="text-center py-12 text-muted-foreground">
               <FileSignature className="w-16 h-16 mx-auto mb-4 opacity-50" />
               <p>No card signing events recorded yet</p>
-              {/* eslint-disable-next-line react/no-unescaped-orgs */}
+              {/* eslint-disable-next-line react/no-unescaped-entities */}
               <p className="text-sm mt-2">Click "Record Card Signing" to add your first event</p>
             </div>
           )}

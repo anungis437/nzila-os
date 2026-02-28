@@ -67,7 +67,7 @@ export default function ProgramMilestoneEmail({
             <Text style={greeting}>Congratulations {memberName}!</Text>
 
             <Text style={paragraph}>
-              {/* eslint-disable-next-line react/no-unescaped-orgs */}
+              {/* eslint-disable-next-line react/no-unescaped-entities */}
               You've reached an important milestone in your <strong>{programName}</strong> journey.
               Your dedication and hard work continue to pay off!
             </Text>
@@ -148,7 +148,7 @@ export default function ProgramMilestoneEmail({
               <Section style={nextLevelBox}>
                 <Text style={nextLevelTitle}>🎯 Next Step: {nextLevel}</Text>
                 <Text style={nextLevelText}>
-                  {/* eslint-disable-next-line react/no-unescaped-orgs */}
+                  {/* eslint-disable-next-line react/no-unescaped-entities */}
                   You're now eligible to advance to {nextLevel}. Continue your excellent work
                   to reach the next milestone: <strong>{nextMilestone}</strong>.
                 </Text>

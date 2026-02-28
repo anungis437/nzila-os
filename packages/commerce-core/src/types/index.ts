@@ -71,6 +71,7 @@ export interface OrgContext {
 
 export interface Customer {
   id: string
+  /** @deprecated Use OrgContext.orgId — entity-level orgId will be removed. */
   orgId: string
   name: string
   email: string | null

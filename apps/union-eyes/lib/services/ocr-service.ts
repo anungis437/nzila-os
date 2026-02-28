@@ -363,7 +363,8 @@ export async function preprocessImage(
   try {
     const sharp = await import("sharp");
     
-    return await sharp.default(imageBuffer)
+    // eslint-disable-next-line @typescript-eslint/no-explicit-any
+    return await (sharp.default(imageBuffer) as any)
       .grayscale()
       .normalize() // Enhance contrast
       .median(3) // Reduce noise

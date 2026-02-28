@@ -54,8 +54,10 @@ export interface ZongaOrgContext {
 
 // ── Creator ─────────────────────────────────────────────────────────────────
 
+
 export interface Creator {
   readonly id: string
+  /** @deprecated Use ZongaOrgContext.orgId — entity-level orgId will be removed. */
   readonly orgId: string
   readonly userId: string
   readonly displayName: string

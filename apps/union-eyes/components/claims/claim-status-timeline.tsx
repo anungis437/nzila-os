@@ -163,7 +163,7 @@ export function ClaimStatusTimeline({
                         </p>
                         {event.notes && (
                           <p className="text-sm text-gray-700 mt-2 italic">
-                            {/* eslint-disable-next-line react/no-unescaped-orgs */}
+                            {/* eslint-disable-next-line react/no-unescaped-entities */}
                             "{event.notes}"
                           </p>
                         )}

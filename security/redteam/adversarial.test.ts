@@ -63,7 +63,7 @@ describe('RED-TEAM-001 — Cross-org data access must be structurally impossible
     const content = readFileSync(scopedPath, 'utf-8')
 
     // SELECT must include entityFilter
-    expect(content).toContain('eq(entityCol, orgId)')
+    expect(content).toContain('eq(orgCol, orgId)')
     expect(content).toContain('select(table, extraWhere)')
   })
 

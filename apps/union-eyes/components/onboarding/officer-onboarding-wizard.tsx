@@ -342,7 +342,7 @@ function GovernanceStep() {
       </div>
 
       <div className="space-y-4">
-        {/* eslint-disable-next-line react/no-unescaped-orgs */}
+        {/* eslint-disable-next-line react/no-unescaped-entities */}
         <h4 className="font-medium">Robert's Rules Basics</h4>
         <div className="space-y-2">
           {[

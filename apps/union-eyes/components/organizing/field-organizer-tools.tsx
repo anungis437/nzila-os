@@ -318,7 +318,7 @@ alert("Unable to access GPS. Location tracking will not be available.");
       <div className="grid grid-cols-1 md:grid-cols-4 gap-4">
         <Card>
           <CardHeader className="pb-2">
-            {/* eslint-disable-next-line react/no-unescaped-orgs */}
+            {/* eslint-disable-next-line react/no-unescaped-entities */}
             <CardDescription>Today's Activities</CardDescription>
           </CardHeader>
           <CardContent>

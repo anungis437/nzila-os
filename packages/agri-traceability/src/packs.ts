@@ -172,7 +172,7 @@ export interface TraceabilityChainInput {
   chainId: string
   entries: Array<{
     entityType: string
-    entityId: string
+    subjectId: string
     action: string
     timestamp: string
     hash: string

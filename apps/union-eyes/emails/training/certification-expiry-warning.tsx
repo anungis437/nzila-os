@@ -131,7 +131,7 @@ export default function CertificationExpiryWarningEmail({
               </Heading>
               <Text style={actionText}>
                 To maintain your certification and avoid any lapse in your credentials, please
-                {/* eslint-disable-next-line react/no-unescaped-orgs */}
+                {/* eslint-disable-next-line react/no-unescaped-entities */}
                 complete the renewal process before the expiry date. Don't wait until the last
                 minute - start your renewal today!
               </Text>

@@ -68,7 +68,7 @@ const db = createScopedDb(orgId)
 
 | Guarantee                         | Enforced by                                      |
 | --------------------------------- | ------------------------------------------------ |
-| No query without Org filter       | `getEntityIdColumn()` throws if column missing    |
+| No query without Org filter       | `getOrgIdColumn()` throws if column missing       |
 | No write without audit            | `createAuditedScopedDb()` wraps every mutation    |
 | No raw DB in apps                 | ESLint `no-shadow-db` + contract test             |
 | Registry consistent with schema   | `org-scoped-registry.test.ts` contract test       |

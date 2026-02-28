@@ -719,7 +719,7 @@ function EligibilityReport({
           {rules.map((rule, index) => (
             <div key={index} className="p-3 bg-gray-50 rounded-lg">
               <div className="font-medium">
-                {/* eslint-disable-next-line react/no-unescaped-orgs */}
+                {/* eslint-disable-next-line react/no-unescaped-entities */}
                 {rule.field} {rule.operator} "{rule.value}"
               </div>
               {rule.description && (

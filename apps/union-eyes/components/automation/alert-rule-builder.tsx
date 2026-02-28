@@ -667,7 +667,7 @@ export default function AlertRuleBuilder() {
                   onChange={(e) => setTriggerConfig({ ...triggerConfig, schedule: e.target.value })}
                 />
                 <p className="text-sm text-muted-foreground">
-                  {/* eslint-disable-next-line react/no-unescaped-orgs */}
+                  {/* eslint-disable-next-line react/no-unescaped-entities */}
                   Format: minute hour day month weekday (e.g., "0 6 * * *" = daily at 6 AM)
                 </p>
               </div>

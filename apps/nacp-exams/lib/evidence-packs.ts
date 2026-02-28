@@ -19,6 +19,7 @@ import {
   type EvidencePackResult,
 } from '@nzila/os-core/evidence'
 import { generateSeal, type SealEnvelope } from '@nzila/os-core/evidence/seal'
+import { createHash } from 'node:crypto'
 
 // ── Terminal Event Definitions ─────────────────────────────────────────────
 
@@ -47,8 +48,8 @@ export interface NacpEvidenceContext {
   correlationId: string
   /** Entity type (e.g. 'exam_session', 'exam_submission', 'exam_result') */
   entityType: string
-  /** Entity ID */
-  entityId: string
+  /** Subject ID */
+  subjectId: string
   /** State transition */
   fromState?: string
   toState?: string
@@ -95,7 +96,6 @@ export function computeHashChainEntry(
   contentHash: string,
   previousHash: string,
 ): HashChainEntry {
-  const { createHash } = require('node:crypto') as typeof import('node:crypto')
   const timestamp = new Date().toISOString()
 
   const chainInput = `${index}:${contentHash}:${previousHash}:${timestamp}`
@@ -125,7 +125,6 @@ export function verifyHashChainEntry(
     )
   }
 
-  const { createHash } = require('node:crypto') as typeof import('node:crypto')
   const expectedChainInput = `${entry.index}:${entry.contentHash}:${entry.previousHash}:${entry.timestamp}`
   const expectedChainHash = createHash('sha256')
     .update(expectedChainInput)
@@ -166,7 +165,7 @@ export async function buildNacpEvidencePack(
 
   // Map to platform evidence action context
   const govAction: GovernanceActionContext = {
-    actionId: `nacp-${ctx.action}-${ctx.entityId}`,
+    actionId: `nacp-${ctx.action}-${ctx.subjectId}`,
     actionType: ctx.action,
     orgId: ctx.orgId,
     executedBy: ctx.actorId,
@@ -177,9 +176,8 @@ export async function buildNacpEvidencePack(
   const evidencePack = await processEvidencePack(pack)
 
   // Seal with cryptographic envelope
-  const { createHash } = require('node:crypto') as typeof import('node:crypto')
   const sealInput = {
-    packDigest: evidencePack.packId ?? ctx.entityId,
+    packDigest: evidencePack.packId ?? ctx.subjectId,
     artifacts: Object.keys(ctx.artifacts ?? {}).map((key) => ({
       sha256: createHash('sha256').update(String(ctx.artifacts?.[key] ?? key)).digest('hex'),
       name: key,

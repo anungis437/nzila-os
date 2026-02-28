@@ -84,8 +84,8 @@ export interface AbrAuditEvent {
   /** The type of entity being acted upon */
   readonly entityType: AbrEntityType
 
-  /** The specific entity ID */
-  readonly entityId: string
+  /** The specific subject ID */
+  readonly subjectId: string
 
   /** Optional state transition (from → to) */
   readonly fromState?: string
@@ -106,7 +106,7 @@ export interface BuildAbrAuditOpts {
   actorId: string
   correlationId: string
   entityType: AbrEntityType
-  entityId: string
+  subjectId: string
   fromState?: string
   toState?: string
   metadata?: Record<string, unknown>
@@ -126,7 +126,7 @@ export function buildAbrAuditEvent(opts: BuildAbrAuditOpts): AbrAuditEvent {
     appId: 'abr',
     correlationId: opts.correlationId,
     entityType: opts.entityType,
-    entityId: opts.entityId,
+    subjectId: opts.subjectId,
     fromState: opts.fromState,
     toState: opts.toState,
     timestamp: new Date().toISOString(),

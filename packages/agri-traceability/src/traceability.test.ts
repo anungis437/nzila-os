@@ -100,7 +100,7 @@ describe('traceability chain pack', () => {
         entries: [
           {
             entityType: 'harvest',
-            entityId: 'h1',
+            subjectId: 'h1',
             action: 'created',
             timestamp: '2025-01-10T06:00:00Z',
             hash: 'abc123',
@@ -124,9 +124,9 @@ describe('traceability chain pack', () => {
 describe('traceability chain builder', () => {
   it('builds a valid hash chain', () => {
     const chain = buildTraceabilityChain('org_1', [
-      { entityType: 'harvest', entityId: 'h1', action: 'created', timestamp: '2025-01-10T06:00:00Z' },
-      { entityType: 'lot', entityId: 'l1', action: 'aggregated', timestamp: '2025-01-11T09:00:00Z' },
-      { entityType: 'shipment', entityId: 's1', action: 'dispatched', timestamp: '2025-01-12T14:00:00Z' },
+      { entityType: 'harvest', subjectId: 'h1', action: 'created', timestamp: '2025-01-10T06:00:00Z' },
+      { entityType: 'lot', subjectId: 'l1', action: 'aggregated', timestamp: '2025-01-11T09:00:00Z' },
+      { entityType: 'shipment', subjectId: 's1', action: 'dispatched', timestamp: '2025-01-12T14:00:00Z' },
     ])
 
     expect(chain.entryCount).toBe(3)
@@ -138,16 +138,16 @@ describe('traceability chain builder', () => {
 
   it('verifies a valid chain', () => {
     const chain = buildTraceabilityChain('org_1', [
-      { entityType: 'harvest', entityId: 'h1', action: 'created', timestamp: '2025-01-10T06:00:00Z' },
-      { entityType: 'lot', entityId: 'l1', action: 'aggregated', timestamp: '2025-01-11T09:00:00Z' },
+      { entityType: 'harvest', subjectId: 'h1', action: 'created', timestamp: '2025-01-10T06:00:00Z' },
+      { entityType: 'lot', subjectId: 'l1', action: 'aggregated', timestamp: '2025-01-11T09:00:00Z' },
     ])
     expect(verifyTraceabilityChain(chain)).toBe(true)
   })
 
   it('detects tampered chain', () => {
     const chain = buildTraceabilityChain('org_1', [
-      { entityType: 'harvest', entityId: 'h1', action: 'created', timestamp: '2025-01-10T06:00:00Z' },
-      { entityType: 'lot', entityId: 'l1', action: 'aggregated', timestamp: '2025-01-11T09:00:00Z' },
+      { entityType: 'harvest', subjectId: 'h1', action: 'created', timestamp: '2025-01-10T06:00:00Z' },
+      { entityType: 'lot', subjectId: 'l1', action: 'aggregated', timestamp: '2025-01-11T09:00:00Z' },
     ])
     // Tamper with an entry
     chain.entries[0]!.hash = 'tampered'

@@ -49,7 +49,7 @@ describe('RED-TEAM-009 — Cross-Org read via forged orgId must be structurally 
     const content = readFileSync(scopedPath, 'utf-8')
 
     // The select function ALWAYS applies entityFilter
-    expect(content).toContain('eq(entityCol, orgId)')
+    expect(content).toContain('eq(orgCol, orgId)')
     // There's no parameter to skip filtering
     expect(content).not.toMatch(/skipFilter|noFilter|allEntities|bypassScope/i)
   })
@@ -105,7 +105,7 @@ describe('RED-TEAM-010 — Cross-Org write via forged orgId must be blocked', ()
 
     // UPDATE statements include the entity filter
     expect(content).toContain('update(table, values, extraWhere)')
-    expect(content).toContain('eq(entityCol, orgId)')
+    expect(content).toContain('eq(orgCol, orgId)')
   })
 
   it('ScopedDb forces org_id filter on every DELETE', () => {
@@ -114,7 +114,7 @@ describe('RED-TEAM-010 — Cross-Org write via forged orgId must be blocked', ()
 
     // DELETE statements include the entity filter
     expect(content).toContain('.delete(table)')
-    expect(content).toContain('eq(entityCol, orgId)')
+    expect(content).toContain('eq(orgCol, orgId)')
   })
 
   it('AuditedScopedDb wraps ScopedDb — no unscoped write path', () => {
@@ -415,8 +415,8 @@ describe('RED-TEAM-018 — Non-Org tables cannot be accessed via ScopedDb', () =
     const scopedPath = join(ROOT, 'packages', 'db', 'src', 'scoped.ts')
     const content = readFileSync(scopedPath, 'utf-8')
 
-    // getEntityIdColumn throws on missing column
-    expect(content).toContain('getEntityIdColumn')
+    // getOrgIdColumn throws on missing column
+    expect(content).toContain('getOrgIdColumn')
     expect(content).toContain('does not have an org_id column')
     expect(content).toContain('ScopedDbError')
   })

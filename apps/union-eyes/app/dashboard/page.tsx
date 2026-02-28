@@ -83,7 +83,7 @@ export default function DashboardPage() {
       <div>
         <h1 className="text-3xl font-bold">Dashboard</h1>
         <p className="text-muted-foreground">
-          {/* eslint-disable-next-line react/no-unescaped-orgs */}
+          {/* eslint-disable-next-line react/no-unescaped-entities */}
           Welcome back! Here's an overview of your union management system.
         </p>
       </div>

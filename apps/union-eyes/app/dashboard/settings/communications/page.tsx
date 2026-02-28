@@ -581,7 +581,7 @@ export default function CommunicationPreferencesPage() {
         <CardContent className="space-y-2 text-sm text-muted-foreground">
           <p>
             <strong>Your Rights:</strong> You have the right to control your communication preferences 
-            {/* eslint-disable-next-line react/no-unescaped-orgs */}
+            {/* eslint-disable-next-line react/no-unescaped-entities */}
             at any time. We comply with Canada's Anti-Spam Legislation (CASL) and GDPR requirements.
           </p>
           <p>

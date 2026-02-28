@@ -250,7 +250,7 @@ function UsersStep() {
       <div className="bg-blue-50 rounded-lg p-4 border border-blue-200">
         <h3 className="font-semibold text-blue-900 mb-2">👥 User Management</h3>
         <p className="text-blue-800 text-sm">
-          {/* eslint-disable-next-line react/no-unescaped-orgs */}
+          {/* eslint-disable-next-line react/no-unescaped-entities */}
           Manage your organization's users and their access levels efficiently.
         </p>
       </div>
@@ -301,7 +301,7 @@ function SecurityStep({
       <div className="bg-green-50 rounded-lg p-4 border border-green-200">
         <h3 className="font-semibold text-green-900 mb-2">🔒 Security & Compliance</h3>
         <p className="text-green-800 text-sm">
-          {/* eslint-disable-next-line react/no-unescaped-orgs */}
+          {/* eslint-disable-next-line react/no-unescaped-entities */}
           Protect your organization's data and maintain compliance with privacy regulations.
         </p>
       </div>

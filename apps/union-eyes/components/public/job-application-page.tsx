@@ -210,7 +210,7 @@ alert('Failed to submit application. Please try again.');
             </div>
             <h1 className="text-3xl font-bold mb-2">Application Submitted!</h1>
             <p className="text-muted-foreground">
-              {/* eslint-disable-next-line react/no-unescaped-orgs */}
+              {/* eslint-disable-next-line react/no-unescaped-entities */}
               We've received your application for {job.title}
             </p>
           </div>

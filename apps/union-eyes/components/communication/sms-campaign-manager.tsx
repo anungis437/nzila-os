@@ -438,7 +438,7 @@ export function SMSCampaignManager({
                           <div>
                             <FormLabel className="!mt-0">Respect quiet hours</FormLabel>
                             <FormDescription className="text-xs">
-                              {/* eslint-disable-next-line react/no-unescaped-orgs */}
+                              {/* eslint-disable-next-line react/no-unescaped-entities */}
                               Don&apos;t send between 9 PM and 8 AM in recipient's timezone
                             </FormDescription>
                           </div>
@@ -457,7 +457,7 @@ export function SMSCampaignManager({
                           <div>
                             <FormLabel className="!mt-0">Include opt-out instructions</FormLabel>
                             <FormDescription className="text-xs">
-                              {/* eslint-disable-next-line react/no-unescaped-orgs */}
+                              {/* eslint-disable-next-line react/no-unescaped-entities */}
                               Required by law - adds "Reply STOP to opt out"
                             </FormDescription>
                           </div>

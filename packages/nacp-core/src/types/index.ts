@@ -53,6 +53,7 @@ export interface NacpOrgContext {
 
 export interface Exam {
   readonly id: string
+  /** @deprecated Use NacpOrgContext.orgId — entity-level orgId will be removed. */
   readonly orgId: string
   readonly title: string
   readonly code: string

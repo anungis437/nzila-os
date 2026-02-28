@@ -248,7 +248,7 @@ toast({
       <CardHeader>
         <CardTitle>Schedule Campaign</CardTitle>
         <CardDescription>
-          {/* eslint-disable-next-line react/no-unescaped-orgs */}
+          {/* eslint-disable-next-line react/no-unescaped-entities */}
           Choose when to send "{campaignName}" to {recipientCount} recipient(s)
         </CardDescription>
       </CardHeader>

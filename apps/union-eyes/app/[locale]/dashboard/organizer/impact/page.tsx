@@ -58,7 +58,7 @@ export default function OrganizerImpactPage() {
             Your Impact Dashboard
           </h1>
           <p className="text-gray-600 mb-6">
-            {/* eslint-disable-next-line react/no-unescaped-orgs */}
+            {/* eslint-disable-next-line react/no-unescaped-entities */}
             Start handling cases to see your impact on members' lives.
           </p>
         </div>
@@ -80,7 +80,7 @@ export default function OrganizerImpactPage() {
             Your Impact
           </h1>
           <p className="text-lg text-gray-600">
-            {/* eslint-disable-next-line react/no-unescaped-orgs */}
+            {/* eslint-disable-next-line react/no-unescaped-entities */}
             See the difference you&apos;re making in members' lives
           </p>
         </div>

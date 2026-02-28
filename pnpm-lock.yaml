@@ -1072,6 +1072,9 @@ importers:
       '@nzila/payments-stripe':
         specifier: workspace:*
         version: link:../../packages/payments-stripe
+      '@nzila/ui':
+        specifier: workspace:*
+        version: link:../../packages/ui
       '@paralleldrive/cuid2':
         specifier: ^3.3.0
         version: 3.3.0

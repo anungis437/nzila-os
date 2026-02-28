@@ -516,7 +516,7 @@ toast({
                       updateQuestion(question.id, { allowOther: checked })
                     }
                   />
-                  {/* eslint-disable-next-line react/no-unescaped-orgs */}
+                  {/* eslint-disable-next-line react/no-unescaped-entities */}
                   <Label>Allow "Other" option</Label>
                 </div>
               </div>

@@ -17,6 +17,7 @@ import {
 } from '@nzila/os-core/evidence'
 import { generateSeal, type SealEnvelope } from '@nzila/os-core/evidence/seal'
 import { buildAbrAuditEvent, AbrAuditAction, AbrEntityType, type AbrAuditEvent } from '@nzila/os-core/audit/abr'
+import { createHash } from 'node:crypto'
 
 // ── Terminal Event Definitions ─────────────────────────────────────────────
 
@@ -50,8 +51,8 @@ export interface AbrEvidenceContext {
   /** The entity type (usually 'abr_case' or 'abr_decision') */
   entityType: AbrEntityType
 
-  /** The specific entity ID */
-  entityId: string
+  /** The specific subject ID */
+  subjectId: string
 
   /** State transition details */
   fromState?: string
@@ -106,7 +107,7 @@ export async function buildAbrEvidencePack(
 
   // Map to platform evidence action context
   const govAction: GovernanceActionContext = {
-    actionId: `abr-${ctx.action}-${ctx.entityId}`,
+    actionId: `abr-${ctx.action}-${ctx.subjectId}`,
     actionType: ctx.action,
     orgId: ctx.orgId,
     executedBy: ctx.actorId,
@@ -117,9 +118,8 @@ export async function buildAbrEvidencePack(
   const evidencePack = await processEvidencePack(pack)
 
   // Seal with cryptographic envelope
-  const { createHash } = require('node:crypto') as typeof import('node:crypto')
   const sealInput = {
-    packDigest: evidencePack.packId ?? ctx.entityId,
+    packDigest: evidencePack.packId ?? ctx.subjectId,
     artifacts: Object.keys(ctx.artifacts ?? {}).map((key) => ({
       sha256: createHash('sha256').update(String(ctx.artifacts?.[key] ?? key)).digest('hex'),
       name: key,
@@ -134,7 +134,7 @@ export async function buildAbrEvidencePack(
     actorId: ctx.actorId,
     correlationId: ctx.correlationId,
     entityType: ctx.entityType,
-    entityId: ctx.entityId,
+    subjectId: ctx.subjectId,
     fromState: ctx.fromState,
     toState: ctx.toState,
     metadata: {

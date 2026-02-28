@@ -181,7 +181,7 @@ export function UnionStructureDashboard({ organizationId }: UnionStructureDashbo
             <CardHeader>
               <CardTitle>Organizational Structure</CardTitle>
               <CardDescription>
-                {/* eslint-disable-next-line react/no-unescaped-orgs */}
+                {/* eslint-disable-next-line react/no-unescaped-entities */}
                 Visual representation of your union's organizational hierarchy
               </CardDescription>
             </CardHeader>

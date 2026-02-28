@@ -416,7 +416,7 @@ function VersionItem({
 
             {version.comment && (
               <p className="text-sm text-gray-700 italic">
-                {/* eslint-disable-next-line react/no-unescaped-orgs */}
+                {/* eslint-disable-next-line react/no-unescaped-entities */}
                 "{version.comment}"
               </p>
             )}

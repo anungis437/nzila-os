@@ -674,7 +674,7 @@ export default function TemplateDetailPage({ params }: { params: { id: string } 
           <AlertDialogHeader>
             <AlertDialogTitle>Delete Template?</AlertDialogTitle>
             <AlertDialogDescription>
-              {/* eslint-disable-next-line react/no-unescaped-orgs */}
+              {/* eslint-disable-next-line react/no-unescaped-entities */}
               This will permanently delete "{template.name}". This action cannot be undone.
               {template.isActive && (
                 <div className="mt-2 text-amber-600">

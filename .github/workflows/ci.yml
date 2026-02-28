@@ -71,7 +71,7 @@ jobs:
         run: pnpm install --frozen-lockfile
 
       - name: Run migrations
-        run: pnpm tsx packages/db/src/migrate.ts
+        run: pnpm --filter @nzila/db db:migrate
         env:
           DATABASE_URL: postgresql://postgres:postgres@localhost:5432/test_db
 

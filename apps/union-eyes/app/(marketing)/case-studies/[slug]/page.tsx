@@ -162,7 +162,7 @@ export default async function CaseStudyPage({ params }: CaseStudyPageProps) {
         {caseStudy.quote && (
           <div className="bg-linear-to-r from-blue-600 to-blue-800 text-white rounded-lg p-8 mb-8">
             <blockquote className="text-2xl font-medium italic mb-4">
-              {/* eslint-disable-next-line react/no-unescaped-orgs, @typescript-eslint/no-explicit-any */}
+              {/* eslint-disable-next-line react/no-unescaped-entities, @typescript-eslint/no-explicit-any */}
               "{typeof caseStudy.quote === 'string' ? caseStudy.quote : (caseStudy.quote as any).text}"
             </blockquote>
             {/* eslint-disable-next-line @typescript-eslint/no-explicit-any */}

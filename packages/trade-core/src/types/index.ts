@@ -56,6 +56,7 @@ export interface TradeOrgContext {
 
 export interface TradeParty {
   readonly id: TradePartyId
+  /** @deprecated Use TradeOrgContext.orgId — entity-level orgId will be removed. */
   readonly orgId: string
   readonly role: TradePartyRole
   readonly name: string

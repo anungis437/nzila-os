@@ -2,14 +2,14 @@
 // @nzila/agri-traceability — Chain Builder
 // ---------------------------------------------------------------------------
 // Builds a hash chain linking successive traceability events together.
-// Each entry's hash = SHA-256(previousHash + entityType + entityId + action + timestamp).
+// Each entry's hash = SHA-256(previousHash + entityType + subjectId + action + timestamp).
 // ---------------------------------------------------------------------------
 
 import { createHash } from 'node:crypto'
 
 export interface ChainEntry {
   entityType: string
-  entityId: string
+  subjectId: string
   action: string
   timestamp: string
 }
@@ -52,11 +52,11 @@ export function buildTraceabilityChain(
   let previousHash = genesis
   for (const entry of entries) {
     const hash = sha256(
-      previousHash + entry.entityType + entry.entityId + entry.action + entry.timestamp,
+      previousHash + entry.entityType + entry.subjectId + entry.action + entry.timestamp,
     )
     chain.entries.push({
       entityType: entry.entityType,
-      entityId: entry.entityId,
+      subjectId: entry.subjectId,
       action: entry.action,
       timestamp: entry.timestamp,
       hash,
@@ -82,7 +82,7 @@ export function verifyTraceabilityChain(chain: TraceabilityHashChain): boolean {
   for (const entry of chain.entries) {
     if (entry.previousHash !== previousHash) return false
     const expected = sha256(
-      previousHash + entry.entityType + entry.entityId + entry.action + entry.timestamp,
+      previousHash + entry.entityType + entry.subjectId + entry.action + entry.timestamp,
     )
     if (entry.hash !== expected) return false
     previousHash = entry.hash

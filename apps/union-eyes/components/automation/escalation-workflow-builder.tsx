@@ -497,7 +497,7 @@ export default function EscalationWorkflowBuilder() {
             <div className="text-center py-12 border-2 border-dashed rounded-lg">
               <TrendingUp className="h-12 w-12 mx-auto mb-2 text-gray-400" />
               <p className="text-muted-foreground">No escalation levels yet</p>
-              {/* eslint-disable-next-line react/no-unescaped-orgs */}
+              {/* eslint-disable-next-line react/no-unescaped-entities */}
               <p className="text-sm text-muted-foreground">Click "Add Level" to create your first escalation step</p>
             </div>
           ) : (

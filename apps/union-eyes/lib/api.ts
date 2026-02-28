@@ -58,7 +58,7 @@ class ApiClient {
         
         // Log other errors for debugging
         if (error.response?.status && error.response.status >= 500) {
-          logger.error('API Server Error:', error.response.data instanceof Error ? error.response.data : { detail: error.response.data });
+          logger.error('API Server Error:', error.response.data instanceof Error ? { message: error.response.data.message } : { detail: error.response.data });
         }
         
         return Promise.reject(error);

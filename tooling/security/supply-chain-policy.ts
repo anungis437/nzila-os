@@ -125,6 +125,42 @@ export const ACTIVE_WAIVERS: VulnerabilityWaiver[] = [
     expiresAt: '2026-05-24',
     severity: 'high',
   },
+  {
+    // minimatch ReDoS via matchOne combinatorial backtracking — npm advisory 1113545
+    // Same root cause as CVE-2026-26996: dev-only dependency chain (eslint, typescript-eslint).
+    // No user-controlled input reaches minimatch in production.
+    id: '1113545',
+    package: 'minimatch',
+    reason: 'Dev-only dependency (eslint toolchain). No user input reaches minimatch in production. Upgrade would break eslint compatibility. Risk confined to local lint tooling DoS only.',
+    approvedBy: 'platform-lead',
+    approvedAt: '2026-02-28',
+    expiresAt: '2026-05-28',
+    severity: 'high',
+  },
+  {
+    // minimatch ReDoS via nested extglobs — npm advisory 1113553
+    // Same root cause as CVE-2026-26996: dev-only dependency chain (eslint, typescript-eslint).
+    // No user-controlled input reaches minimatch in production.
+    id: '1113553',
+    package: 'minimatch',
+    reason: 'Dev-only dependency (eslint toolchain). No user input reaches minimatch in production. Upgrade would break eslint compatibility. Risk confined to local lint tooling DoS only.',
+    approvedBy: 'platform-lead',
+    approvedAt: '2026-02-28',
+    expiresAt: '2026-05-28',
+    severity: 'high',
+  },
+  {
+    // serialize-javascript RCE via RegExp.flags — npm advisory 1113633
+    // Affected paths: devDependency chains only (terser-webpack-plugin > serialize-javascript).
+    // Not used in production runtime — only during build/bundling steps.
+    id: '1113633',
+    package: 'serialize-javascript',
+    reason: 'Dev-only dependency (terser-webpack-plugin build chain). Not used in production runtime. Upgrade pending upstream patch in webpack/terser ecosystem.',
+    approvedBy: 'platform-lead',
+    approvedAt: '2026-02-28',
+    expiresAt: '2026-05-28',
+    severity: 'high',
+  },
 ]
 
 // ── SBOM Validation ───────────────────────────────────────────────────────
