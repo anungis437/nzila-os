@@ -27,13 +27,17 @@ for (const app of APPS) {
       'next.config.ts',
       'vitest.config.ts',
       'app/layout.tsx',
-      'app/page.tsx',
     ]
     for (const file of required) {
       it(`${file} exists`, () => {
         expect(existsSync(join(APP_DIR, file))).toBe(true)
       })
     }
+    it('app/page.tsx exists', () => {
+      const hasRoot = existsSync(join(APP_DIR, 'app/page.tsx'))
+      const hasMarketing = existsSync(join(APP_DIR, 'app/(marketing)/page.tsx'))
+      expect(hasRoot || hasMarketing).toBe(true)
+    })
   })
 
   describe(`AGRI-CFG-02 — ${app} security headers`, () => {

@@ -223,17 +223,18 @@ export class ZohoBooksClient {
       options.body = JSON.stringify(body)
     }
 
-    logger.debug({ method, url }, 'Zoho Books API request')
+    logger.debug('Zoho Books API request', { method, url })
 
     const response = await fetch(url, options)
     const responseBody = await response.json()
 
     if (!response.ok || responseBody.code !== 0) {
       const errorBody = responseBody as ZohoErrorResponse
-      logger.error(
-        { status: response.status, error: errorBody, endpoint },
-        'Zoho Books API error',
-      )
+      logger.error('Zoho Books API error', {
+        status: response.status,
+        error: errorBody,
+        endpoint,
+      })
       throw new Error(`Zoho Books API error: ${errorBody.message || response.statusText}`)
     }
 

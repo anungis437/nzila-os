@@ -71,3 +71,19 @@ export function getShipmentTransitions(current: ShipmentStatus): readonly Shipme
 export function isTerminalShipmentStatus(status: ShipmentStatus): boolean {
   return status === ShipmentStatus.CLOSED
 }
+
+// ─── Named FSM aggregates (for external reference) ───
+
+export const LotQualityFSM = {
+  transitions: LOT_TRANSITIONS,
+  attempt: attemptLotTransition,
+  available: getLotTransitions,
+  isTerminal: isTerminalLotStatus,
+} as const
+
+export const ShipmentFSM = {
+  transitions: SHIPMENT_TRANSITIONS,
+  attempt: attemptShipmentTransition,
+  available: getShipmentTransitions,
+  isTerminal: isTerminalShipmentStatus,
+} as const

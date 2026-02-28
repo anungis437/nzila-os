@@ -127,7 +127,7 @@ Security: PCI-DSS aligned
 **Entities**: 22 modules | **Complexity**: HIGH
 
 **v1 Assessment**: ❌ **COMPLETELY MISSING FROM PORTFOLIO**
-**v2 Discovery**: Flagship banking stress testing platform built on Base44.
+**v2 Discovery**: Flagship banking stress testing platform (originally Base44, migrated to NzilaOS).
 
 #### Business Purpose
 Lexora is a **banking stress testing and regulatory compliance platform**:
@@ -140,11 +140,11 @@ Lexora is a **banking stress testing and regulatory compliance platform**:
 
 #### Technical Architecture
 ```
-Platform: Base44 (low-code/no-code)
-Frontend: React 18 + Vite
+Platform: NzilaOS (migrated from Base44)
+Frontend: Next.js 16 + React 19 (TypeScript)
 Modules: 22 business modules
-API: Base44 managed backend
-Authentication: Base44 built-in
+API: NzilaOS server actions + Drizzle ORM
+Authentication: Clerk (multi-tenant)
 ```
 
 #### Key Features
@@ -376,7 +376,7 @@ Dependencies: 93 npm packages
 **v2 Correction**: **SEVERELY MISCLASSIFIED** — 80+ entities, comprehensive agriculture platform.
 
 #### Business Purpose (CORRECTED)
-CORA is a **comprehensive agricultural technology platform** (Base44), NOT a minimal research tool:
+CORA is a **comprehensive agricultural technology platform** (migrated from Base44 to NzilaOS), NOT a minimal research tool:
 - **Farm Management**: Field mapping, crop tracking, seasonal planning
 - **Supply Chain**: Procurement, inventory, distribution logistics
 - **Market Intelligence**: Price tracking, demand forecasting
@@ -387,11 +387,11 @@ CORA is a **comprehensive agricultural technology platform** (Base44), NOT a min
 
 #### Technical Architecture
 ```
-Platform: Base44 (low-code/no-code)
-Frontend: React 18 + Vite
+Platform: NzilaOS (migrated from Base44)
+Frontend: Next.js 16 + React 19 (TypeScript)
 Entities: 80+ (was reported as 18)
 Modules: Comprehensive farm-to-market coverage
-API: Base44 managed backend
+API: NzilaOS server actions + Drizzle ORM
 ```
 
 #### v1 → v2 Corrections
@@ -461,7 +461,7 @@ Notifications: Slack webhooks
 **v2 Correction**: **COMPLETELY WRONG VERTICAL** — This is an Agrotech Supply Chain ERP, NOT a DevOps platform.
 
 #### Business Purpose (CORRECTED)
-PonduOps is an **agricultural supply chain and operations ERP** built on Base44:
+PonduOps is an **agricultural supply chain and operations ERP** (migrated from Base44 to NzilaOS):
 - **Crop Planning**: Seasonal planning, planting schedules, rotation management
 - **Harvest Management**: Yield tracking, quality grading, batch management
 - **Supply Chain**: Procurement, warehousing, distribution, fleet management
@@ -472,12 +472,12 @@ PonduOps is an **agricultural supply chain and operations ERP** built on Base44:
 
 #### Technical Architecture
 ```
-Platform: Base44 (low-code/no-code)
-Frontend: React 18 + Vite
+Platform: NzilaOS (migrated from Base44)
+Frontend: Next.js 16 + React 19 (TypeScript)
 Modules: 70+ business modules
-Structure: backend/, frontend/, mobile/, docs/
-Security: Gitleaks, pre-commit hooks
-CI/CD: GitHub Actions
+ORM: Drizzle (PostgreSQL)
+Authentication: Clerk (multi-tenant)
+CI/CD: Turborepo + GitHub Actions
 ```
 
 #### v1 → v2 Corrections
@@ -498,7 +498,7 @@ CI/CD: GitHub Actions
 **v2 Discovery**: Undocumented virtual CFO and accounting advisory platform.
 
 #### Business Purpose
-Insight CFO is a **virtual CFO and accounting firm advisory services platform** (Base44):
+Insight CFO is a **virtual CFO and accounting firm advisory services platform** (migrated from Base44 to NzilaOS):
 - **Client Portal**: Financial health scoring, document sharing
 - **Advisory Dashboard**: CFO-as-a-Service workflow management
 - **Financial Reporting**: Automated P&L, cash flow, balance sheet
@@ -509,8 +509,8 @@ Insight CFO is a **virtual CFO and accounting firm advisory services platform** 
 
 #### Technical Architecture
 ```
-Platform: Base44 (low-code/no-code)
-Frontend: React 18 + Vite
+Platform: NzilaOS (migrated from Base44)
+Frontend: Next.js 16 + React 19 (TypeScript)
 Entities: 37 database entities
 Pages: 21 application pages
 Integrations: 7 (QuickBooks, Xero, HubSpot, Salesforce, Plaid, Stripe, AI)
@@ -702,7 +702,7 @@ Next.js 14-15:        6 platforms (40%)
   - Union Eyes (14.2), SentryIQ (14.2.5), CongoWave (14.2.21),
     CyberLearn (14), ABR Insights (15), C3UO (15)
 
-Base44 (React+Vite):  4 platforms (27%)
+NzilaOS (Next.js 16):  4 platforms (27%) — migrated from Base44
   - PonduOps, STSA, CORA, Insight CFO
 
 React (standalone):   2 platforms (13%)
@@ -715,12 +715,12 @@ Unknown:              2 platforms
 #### Backend Frameworks (CORRECTED)
 ```
 Django/DRF:           3 platforms
-  - eExports (4.2), CongoWave (5.1.4), CORA (via Base44)
+  - eExports (4.2), CongoWave (5.1.4), CORA (legacy Django layer)
 
 Fastify:              1 platform
   - SentryIQ (high-performance Node.js)
 
-Base44 Managed:       4 platforms
+NzilaOS (Drizzle ORM): 4 platforms — migrated from Base44
   - PonduOps, STSA, CORA, Insight CFO
 
 Turborepo Monorepo:   4 platforms
@@ -734,7 +734,7 @@ Supabase (BaaS):      3 platforms
 ```
 PostgreSQL Direct:    Union Eyes (Drizzle), CongoWave (Django ORM + PostGIS), eExports
 Supabase/PostgreSQL:  ABR Insights (132 tables), Shop Quoter (93 tables), CyberLearn (30+ tables)
-Base44 Managed:       PonduOps, STSA, CORA, Insight CFO
+NzilaOS (Drizzle/PG): PonduOps, STSA, CORA, Insight CFO — migrated from Base44
 Unknown:              Court Lens, Trade OS, C3UO
 ```
 
@@ -907,12 +907,12 @@ HIGH MATURITY (Feature-complete, needs deployment polish):
 MEDIUM MATURITY (Functional, needs scaling):
   ⚠️ Court Lens: 24 apps, needs consolidation
   ⚠️ Trade OS: Carrier integrations, needs API hardening
-  ⚠️ Insight CFO: Base44, needs migration for scale
+  ⚠️ Insight CFO: Migrated to NzilaOS, needs integration hardening
 
-BASE44 PLATFORMS (Functional, need replatforming):
-  🔄 PonduOps: 70+ modules, Base44 → Django migration
-  🔄 STSA/Lexora: 22 modules, financial precision critical
-  🔄 CORA: 80+ entities, comprehensive but Base44-locked
+MIGRATED PLATFORMS (Replatformed from Base44 to NzilaOS):
+  ✅ PonduOps: 70+ modules, now on NzilaOS (Next.js + Drizzle)
+  ✅ STSA/Lexora: 22 modules, financial precision preserved
+  ✅ CORA: 80+ entities, comprehensive — now NzilaOS-native
 ```
 
 ---
@@ -968,12 +968,12 @@ PHASE 5 — FINTECH (28-32 weeks)
   - CRITICAL: Financial data precision
 
   Migrate STSA/Lexora (8 weeks):
-  - Stress test engine → Django
+  - Stress test engine → NzilaOS
   - Regulatory calculations must be exact
   - Basel III/IV compliance
 
   Migrate Insight CFO (8 weeks):
-  - Base44 → Django
+  - Migrated to NzilaOS (Next.js + Drizzle)
   - 7 integrations (QuickBooks, Xero, Plaid, etc.)
   - Financial reporting precision
 
@@ -1007,11 +1007,11 @@ PHASE 7 — ENTERTAINMENT + EDTECH (21-24 weeks)
 
 PHASE 8 — AGROTECH + CONSOLIDATION (16-19 weeks)
   Migrate PonduOps (8-10 weeks):
-  - Base44 → Django (70+ modules)
+  - Migrated to NzilaOS (70+ modules)
   - Supply chain logic extraction
 
   Migrate CORA (8-9 weeks):
-  - Base44 → Django (80+ entities)
+  - Migrated to NzilaOS (80+ entities)
   - Consolidate with PonduOps where applicable
 ```
 
@@ -1077,10 +1077,10 @@ MEDIUM RISK (data migration + integrations):
   🟡 eExports: ITAR compliance, customs data sovereignty
   🟡 Trade OS: Carrier API dependencies, customs gateway
   🟡 CyberLearn: Docker lab infrastructure, mobile app
-  🟡 PonduOps: Base44 data extraction (70+ modules)
+  🟡 PonduOps: Data migration complete (70+ modules on NzilaOS)
 
 LOWER RISK (contained scope):
-  🟢 CORA: Base44 data extraction, agricultural data
+  🟢 CORA: Data migration complete, agricultural data on NzilaOS
 ```
 
 ---

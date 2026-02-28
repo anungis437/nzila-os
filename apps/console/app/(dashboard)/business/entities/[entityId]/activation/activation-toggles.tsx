@@ -6,7 +6,8 @@
 'use client'
 
 import { useState, useTransition } from 'react'
-import { toggleAppActivation, type ManagedApp, type AppActivationState } from './actions'
+import { toggleAppActivation } from './actions'
+import type { ManagedApp, AppActivationState } from './constants'
 
 const APP_LABELS: Record<ManagedApp, { name: string; description: string; color: string }> = {
   'union-eyes': {

@@ -36,9 +36,9 @@ Nzila Ventures is building the **infrastructure company for social impact techno
 | 9 | **Shop Quoter** | Commerce | 93 | HIGH-EXTREME | In Development |
 | 10 | **Trade OS** | Trade | 337 | MEDIUM-HIGH | In Development |
 | 11 | **eExports** | Trade | 78 | MEDIUM-HIGH | Django PoC |
-| 12 | **PonduOps** | Agrotech | 220 | HIGH | Base44 |
-| 13 | **Insight CFO** | Fintech | 37 | HIGH | Base44 |
-| 14 | **STSA/Lexora** | Fintech | 95 | HIGH | Base44 |
+| 12 | **PonduOps** | Agrotech | 220 | HIGH | In Development |
+| 13 | **Insight CFO** | Fintech | 37 | HIGH | In Development |
+| 14 | **STSA/Lexora** | Fintech | 95 | HIGH | In Development |
 | 15 | **Memora** | Healthtech | 150 | MEDIUM | Healthtech |
 
 ### Target Markets

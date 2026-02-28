@@ -134,7 +134,7 @@
       "frameworks": ["PIPEDA"],
       "data_sensitivity": "MEDIUM",
       "pii_categories": ["Farm Owner Data"],
-      "encryption": "Base44 managed",
+      "encryption": "NzilaOS platform-managed (AES-256)",
       "rls_policies": 0,
       "audit_logging": false,
       "status": "PARTIAL"

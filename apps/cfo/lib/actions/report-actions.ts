@@ -151,10 +151,10 @@ export async function getReportNarrative(reportId: string): Promise<string | nul
  * Build the export URL for client-side download.
  * The actual export is handled by the /api/reports/export route.
  */
-export function getReportExportUrl(opts: {
+export async function getReportExportUrl(opts: {
   reportId?: string
   format: 'csv' | 'pdf'
-}): string {
+}): Promise<string> {
   const params = new URLSearchParams({ format: opts.format })
   if (opts.reportId) params.set('reportId', opts.reportId)
   return `/api/reports/export?${params.toString()}`

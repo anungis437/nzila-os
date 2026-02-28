@@ -76,7 +76,7 @@ export interface SupplierListFilter {
 export async function createSupplier(
   input: CreateSupplierInput,
 ): Promise<typeof commerceSuppliers.$inferSelect> {
-  logger.info({ entityId: input.entityId, name: input.name }, 'Creating supplier')
+  logger.info('Creating supplier', { entityId: input.entityId, name: input.name })
 
   const [supplier] = await db
     .insert(commerceSuppliers)
@@ -95,7 +95,7 @@ export async function createSupplier(
     })
     .returning()
 
-  logger.info({ supplierId: supplier.id, name: supplier.name }, 'Supplier created')
+  logger.info('Supplier created', { supplierId: supplier.id, name: supplier.name })
 
   return supplier
 }
@@ -218,7 +218,7 @@ export async function updateSupplier(
     .where(eq(commerceSuppliers.id, supplierId))
     .returning()
 
-  logger.info({ supplierId, updates: Object.keys(updates) }, 'Supplier updated')
+  logger.info('Supplier updated', { supplierId, updates: Object.keys(updates) })
 
   return updated
 }
@@ -237,7 +237,7 @@ export async function deleteSupplier(supplierId: string): Promise<boolean> {
 
   await db.delete(commerceSuppliers).where(eq(commerceSuppliers.id, supplierId))
 
-  logger.info({ supplierId }, 'Supplier deleted')
+  logger.info('Supplier deleted', { supplierId })
 
   return true
 }
@@ -267,17 +267,7 @@ export async function syncSupplierToZoho(
     company_name: supplier.name,
     email: supplier.email ?? undefined,
     phone: supplier.phone ?? undefined,
-    billing_address: address
-      ? {
-          street: address.street,
-          city: address.city,
-          state: address.province,
-          zip: address.postalCode,
-          country: address.country ?? 'Canada',
-        }
-      : undefined,
     payment_terms: supplier.paymentTerms ? parseInt(supplier.paymentTerms.replace(/\D/g, ''), 10) : 30,
-    notes: supplier.notes ?? undefined,
   }
 
   let zohoVendorId: string
@@ -286,7 +276,7 @@ export async function syncSupplierToZoho(
     // Update existing
     const updated = await booksClient.updateVendor(supplier.zohoVendorId, zohoVendor)
     zohoVendorId = updated.vendor_id
-    logger.info({ supplierId, zohoVendorId }, 'Updated supplier in Zoho Books')
+    logger.info('Updated supplier in Zoho Books', { supplierId, zohoVendorId })
   } else {
     // Create new
     const created = await booksClient.createVendor(zohoVendor)
@@ -298,7 +288,7 @@ export async function syncSupplierToZoho(
       .set({ zohoVendorId, updatedAt: new Date() })
       .where(eq(commerceSuppliers.id, supplierId))
 
-    logger.info({ supplierId, zohoVendorId }, 'Created supplier in Zoho Books')
+    logger.info('Created supplier in Zoho Books', { supplierId, zohoVendorId })
   }
 
   return zohoVendorId
@@ -315,33 +305,24 @@ export async function syncSupplierFromZoho(
     .where(eq(commerceSuppliers.zohoVendorId, zohoVendor.vendor_id))
     .limit(1)
 
-  const address: SupplierAddress | null = zohoVendor.billing_address
-    ? {
-        street: zohoVendor.billing_address.street,
-        city: zohoVendor.billing_address.city,
-        province: zohoVendor.billing_address.state,
-        postalCode: zohoVendor.billing_address.zip,
-        country: zohoVendor.billing_address.country,
-      }
-    : null
+  const address: SupplierAddress | null = null
 
   if (existing) {
     // Update existing supplier
     const [updated] = await db
       .update(commerceSuppliers)
       .set({
-        name: zohoVendor.contact_name || zohoVendor.company_name,
+        name: zohoVendor.contact_name || zohoVendor.company_name || 'Unknown',
         email: zohoVendor.email ?? null,
         phone: zohoVendor.phone ?? null,
         address,
         paymentTerms: zohoVendor.payment_terms ? `NET ${zohoVendor.payment_terms}` : null,
-        notes: zohoVendor.notes ?? null,
         updatedAt: new Date(),
       })
       .where(eq(commerceSuppliers.id, existing.id))
       .returning()
 
-    logger.info({ supplierId: updated.id }, 'Updated supplier from Zoho')
+    logger.info('Updated supplier from Zoho', { supplierId: updated.id })
     return updated
   } else {
     // Create new supplier
@@ -349,17 +330,17 @@ export async function syncSupplierFromZoho(
       .insert(commerceSuppliers)
       .values({
         entityId,
-        name: zohoVendor.contact_name || zohoVendor.company_name,
+        name: zohoVendor.contact_name || zohoVendor.company_name || 'Unknown',
         email: zohoVendor.email ?? null,
         phone: zohoVendor.phone ?? null,
         address,
         paymentTerms: zohoVendor.payment_terms ? `NET ${zohoVendor.payment_terms}` : 'NET 30',
         zohoVendorId: zohoVendor.vendor_id,
-        status: zohoVendor.status === 'active' ? 'active' : 'inactive',
+        status: 'active' as const,
       })
       .returning()
 
-    logger.info({ supplierId: created.id, zohoVendorId: zohoVendor.vendor_id }, 'Created supplier from Zoho')
+    logger.info('Created supplier from Zoho', { supplierId: created.id, zohoVendorId: zohoVendor.vendor_id })
     return created
   }
 }

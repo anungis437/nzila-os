@@ -63,7 +63,7 @@
           "title": "Frontend Frameworks",
           "data": [
             {"label": "Next.js 14-15", "value": 6, "percentage": 40},
-            {"label": "Base44", "value": 4, "percentage": 27},
+            {"label": "NzilaOS (Next.js 16)", "value": 4, "percentage": 27},
             {"label": "React standalone", "value": 2, "percentage": 13},
             {"label": "Django templates", "value": 2, "percentage": 13},
             {"label": "Unknown", "value": 1, "percentage": 7}
@@ -76,7 +76,7 @@
           "data": [
             {"label": "Django/DRF", "value": 3},
             {"label": "Fastify", "value": 1},
-            {"label": "Base44 Managed", "value": 4},
+            {"label": "NzilaOS (Drizzle ORM)", "value": 4},
             {"label": "Turborepo Monorepo", "value": 4},
             {"label": "Supabase (BaaS)", "value": 3}
           ]

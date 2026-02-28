@@ -14,22 +14,7 @@ import { eq } from 'drizzle-orm'
 import { recordAuditEvent } from '@/lib/audit-db'
 import { auth } from '@clerk/nextjs/server'
 import { getUserRole } from '@/lib/rbac'
-
-export const MANAGED_APPS = [
-  'union-eyes',
-  'zonga',
-  'shop-quoter',
-  'cfo',
-  'nacp',
-  'abr',
-] as const
-
-export type ManagedApp = (typeof MANAGED_APPS)[number]
-
-export interface AppActivationState {
-  app: ManagedApp
-  enabled: boolean
-}
+import { MANAGED_APPS, type ManagedApp, type AppActivationState } from './constants'
 
 /**
  * Get the current activation state for all managed apps in an org.

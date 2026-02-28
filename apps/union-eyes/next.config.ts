@@ -198,8 +198,8 @@ const nextConfig: NextConfig = {
     '@azure/cognitiveservices-computervision',
     '@azure/ms-rest-js',
     // Auth (async_hooks, diagnostics_channel)
-    '@clerk/backend',
-    '@clerk/nextjs',
+    // Note: @clerk/nextjs and @clerk/backend are NOT externalized
+    // — Turbopack handles them correctly when bundled
     // Observability (async_hooks, diagnostics_channel, perf_hooks)
     '@sentry/nextjs',
     '@opentelemetry/sdk-node',

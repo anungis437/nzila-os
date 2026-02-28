@@ -119,7 +119,7 @@ export function MultiYearProjection() {
           <label className="mb-1 block text-xs font-medium text-muted-foreground">Province</label>
           <select
             value={province}
-            onChange={(e) => setProvince(e.target.value)}
+            onChange={(e) => setProvince(e.target.value as Province)}
             className="w-full rounded-lg border border-border bg-background px-3 py-2 text-sm
                        text-foreground focus:outline-none focus:ring-2 focus:ring-electric/40"
           >

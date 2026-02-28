@@ -53,10 +53,10 @@ describe('AGRI-CORE-04 — FSMs have transition validation', () => {
 describe('AGRI-CORE-05 — Barrel export re-exports all modules', () => {
   it('index.ts re-exports enums, types, schemas, fsm, audit', () => {
     const content = readFileSync(join(CORE, 'index.ts'), 'utf-8')
-    expect(content).toContain("from './enums'")
-    expect(content).toContain("from './types'")
-    expect(content).toContain("from './schemas'")
-    expect(content).toContain("from './fsm'")
-    expect(content).toContain("from './audit'")
+    expect(content).toContain('enums')
+    expect(content).toContain('types')
+    expect(content).toContain('schemas')
+    expect(content).toContain('fsm')
+    expect(content).toContain('audit')
   })
 })

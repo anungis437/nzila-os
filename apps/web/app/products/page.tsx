@@ -70,9 +70,9 @@ const pipeline = [
   { name: 'Shop Quoter', vertical: 'Commerce', tam: '$5B', entities: '93', status: 'In Development' },
   { name: 'Trade OS', vertical: 'Trade', tam: '$15B', entities: '337', status: 'In Development' },
   { name: 'eExports', vertical: 'Trade', tam: '$3B', entities: '78', status: 'Django PoC' },
-  { name: 'PonduOps', vertical: 'Agrotech (DRC/CA)', tam: '$8B', entities: '220', status: 'Base44' },
-  { name: 'Insight CFO', vertical: 'Fintech', tam: '$2B', entities: '37', status: 'Base44' },
-  { name: 'STSA / Lexora', vertical: 'Fintech', tam: '$5B', entities: '95', status: 'Base44' },
+  { name: 'PonduOps', vertical: 'Agrotech (DRC/CA)', tam: '$8B', entities: '220', status: 'In Development' },
+  { name: 'Insight CFO', vertical: 'Fintech', tam: '$2B', entities: '37', status: 'In Development' },
+  { name: 'STSA / Lexora', vertical: 'Fintech', tam: '$5B', entities: '95', status: 'In Development' },
   { name: 'Memora', vertical: 'Healthtech', tam: '$20B', entities: '150', status: 'Legacy' },
 ];
 
@@ -80,7 +80,7 @@ function getStatusStyle(status: string) {
   if (status === 'Production Ready') return 'bg-emerald/10 text-emerald';
   if (status === 'In Development') return 'bg-electric/10 text-electric';
   if (status === 'Django PoC') return 'bg-violet/10 text-violet';
-  if (status === 'Base44') return 'bg-gold/10 text-gold';
+  if (status === 'Migrating') return 'bg-gold/10 text-gold';
   return 'bg-gray-100 text-gray-600';
 }
 

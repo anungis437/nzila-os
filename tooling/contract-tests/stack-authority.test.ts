@@ -43,8 +43,11 @@ const DJANGO_AUTHORITATIVE_APPS = ['union-eyes', 'abr']
 const TS_AUTHORITATIVE_APPS = [
   'console',
   'cfo',
+  'cora',
   'partners',
+  'pondu',
   'nacp-exams',
+  'trade',
   'zonga',
   'shop-quoter',
   'web',

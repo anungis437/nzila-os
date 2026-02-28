@@ -120,7 +120,7 @@
     ]
   },
   "legacy_migration": {
-    "source_framework": "React 18 + Vite + @base44/sdk",
+    "source_framework": "React 18 + Vite + @base44/sdk (LEGACY — migrated to NzilaOS)",
     "entity_count": 100,
     "migration_priority": [
       "Phase 1: Core Foundation (users, consent, auth)",
@@ -133,7 +133,7 @@
       "React frontend (separate repo)",
       "Radix UI + Tailwind design system",
       "54 existing page components",
-      "Base44 SDK entity structure as Django models"
+      "Base44 SDK entity structure migrated to Drizzle ORM models"
     ]
   }
 }

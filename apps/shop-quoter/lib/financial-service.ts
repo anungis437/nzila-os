@@ -135,7 +135,7 @@ async function generateInvoiceRef(entityId: string): Promise<string> {
 // ─────────────────────────────────────────────────────────────────────────────
 
 export async function createInvoiceFromOrder(input: CreateInvoiceInput): Promise<InvoiceWithDetails> {
-  logger.info({ entityId: input.entityId, orderId: input.orderId }, 'Creating invoice from order')
+  logger.info('Creating invoice from order', { entityId: input.entityId, orderId: input.orderId })
 
   // Get order with lines
   const [order] = await db.select().from(commerceOrders).where(eq(commerceOrders.id, input.orderId)).limit(1)
@@ -195,7 +195,7 @@ export async function createInvoiceFromOrder(input: CreateInvoiceInput): Promise
 
   const lines = await db.insert(commerceInvoiceLines).values(invoiceLineValues).returning()
 
-  logger.info({ invoiceId: invoice.id, ref: invoice.ref }, 'Invoice created')
+  logger.info('Invoice created', { invoiceId: invoice.id, ref: invoice.ref })
 
   return { invoice, customer, order, lines, payments: [] }
 }
@@ -242,7 +242,7 @@ export async function issueInvoice(invoiceId: string): Promise<typeof commerceIn
     .where(eq(commerceInvoices.id, invoiceId))
     .returning()
 
-  logger.info({ invoiceId, ref: invoice.ref }, 'Invoice issued')
+  logger.info('Invoice issued', { invoiceId, ref: invoice.ref })
 
   return updated
 }
@@ -273,7 +273,7 @@ export async function sendInvoice(invoiceId: string): Promise<typeof commerceInv
     .where(eq(commerceInvoices.id, invoiceId))
     .returning()
 
-  logger.info({ invoiceId, ref: invoice.ref }, 'Invoice sent')
+  logger.info('Invoice sent', { invoiceId, ref: invoice.ref })
 
   return updated
 }
@@ -305,7 +305,7 @@ export async function voidInvoice(invoiceId: string, reason?: string): Promise<t
     .where(eq(commerceInvoices.id, invoiceId))
     .returning()
 
-  logger.info({ invoiceId, ref: invoice.ref, reason }, 'Invoice voided')
+  logger.info('Invoice voided', { invoiceId, ref: invoice.ref, reason })
 
   return updated
 }
@@ -355,15 +355,12 @@ export async function recordPayment(input: RecordPaymentInput): Promise<typeof c
     })
     .where(eq(commerceInvoices.id, input.invoiceId))
 
-  logger.info(
-    {
+  logger.info('Payment recorded', {
       paymentId: payment.id,
       invoiceId: input.invoiceId,
       amount: input.amount,
       newStatus,
-    },
-    'Payment recorded',
-  )
+    })
 
   return payment
 }

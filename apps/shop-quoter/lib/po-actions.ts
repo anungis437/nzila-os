@@ -77,7 +77,7 @@ export async function createPOAction(input: {
 
     return { success: true, data: result }
   } catch (error) {
-    logger.error({ error }, 'Failed to create purchase order')
+    logger.error('Failed to create purchase order', { error })
     return { success: false, error: error instanceof Error ? error.message : 'Unknown error' }
   }
 }
@@ -96,7 +96,7 @@ export async function getPOAction(poId: string): Promise<ActionResult<POWithLine
     const result = await getPurchaseOrder(poId)
     return { success: true, data: result }
   } catch (error) {
-    logger.error({ error, poId }, 'Failed to get purchase order')
+    logger.error('Failed to get purchase order', { error, poId })
     return { success: false, error: error instanceof Error ? error.message : 'Unknown error' }
   }
 }
@@ -130,7 +130,7 @@ export async function listPOsAction(filter: {
 
     return { success: true, data: result }
   } catch (error) {
-    logger.error({ error }, 'Failed to list purchase orders')
+    logger.error('Failed to list purchase orders', { error })
     return { success: false, error: error instanceof Error ? error.message : 'Unknown error' }
   }
 }
@@ -170,7 +170,7 @@ export async function updatePOAction(
 
     return { success: true, data: result }
   } catch (error) {
-    logger.error({ error, poId }, 'Failed to update purchase order')
+    logger.error('Failed to update purchase order', { error, poId })
     return { success: false, error: error instanceof Error ? error.message : 'Unknown error' }
   }
 }
@@ -193,7 +193,7 @@ export async function sendPOAction(poId: string): Promise<ActionResult<POWithLin
 
     return { success: true, data: result }
   } catch (error) {
-    logger.error({ error, poId }, 'Failed to send purchase order')
+    logger.error('Failed to send purchase order', { error, poId })
     return { success: false, error: error instanceof Error ? error.message : 'Unknown error' }
   }
 }
@@ -216,7 +216,7 @@ export async function cancelPOAction(poId: string): Promise<ActionResult<POWithL
 
     return { success: true, data: result }
   } catch (error) {
-    logger.error({ error, poId }, 'Failed to cancel purchase order')
+    logger.error('Failed to cancel purchase order', { error, poId })
     return { success: false, error: error instanceof Error ? error.message : 'Unknown error' }
   }
 }
@@ -251,7 +251,7 @@ export async function receivePOLineAction(input: {
       data: { lineId: line.id, quantityReceived: line.quantityReceived },
     }
   } catch (error) {
-    logger.error({ error, lineId: input.lineId }, 'Failed to receive PO line')
+    logger.error('Failed to receive PO line', { error, lineId: input.lineId })
     return { success: false, error: error instanceof Error ? error.message : 'Unknown error' }
   }
 }
@@ -279,7 +279,7 @@ export async function getPOSummaryAction(input: {
 
     return { success: true, data: result }
   } catch (error) {
-    logger.error({ error }, 'Failed to get PO summary')
+    logger.error('Failed to get PO summary', { error })
     return { success: false, error: error instanceof Error ? error.message : 'Unknown error' }
   }
 }

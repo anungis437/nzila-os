@@ -1,5 +1,8 @@
 import { UserButton } from '@clerk/nextjs'
 import Link from 'next/link'
+
+export const dynamic = 'force-dynamic'
+
 import {
   HomeIcon,
   DocumentTextIcon,

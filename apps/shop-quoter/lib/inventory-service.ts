@@ -106,7 +106,7 @@ export interface InventorySnapshot {
 export async function createProduct(
   input: CreateProductInput,
 ): Promise<ProductWithInventory> {
-  logger.info({ entityId: input.entityId, sku: input.sku }, 'Creating product')
+  logger.info('Creating product', { entityId: input.entityId, sku: input.sku })
 
   // Check for duplicate SKU
   const [existing] = await db
@@ -126,17 +126,14 @@ export async function createProduct(
       sku: input.sku,
       name: input.name,
       description: input.description ?? null,
-      categoryId: input.categoryId ?? null,
+      category: input.categoryId ?? 'general',
       supplierId: input.supplierId ?? null,
-      unitCost: input.unitCost?.toFixed(2) ?? '0.00',
-      unitPrice: input.unitPrice?.toFixed(2) ?? '0.00',
-      currency: input.currency ?? 'CAD',
-      unit: input.unit ?? 'each',
-      reorderPoint: input.reorderPoint ?? 10,
-      reorderQty: input.reorderQty ?? 50,
-      leadTimeDays: input.leadTimeDays ?? 14,
-      weight: input.weight?.toFixed(4) ?? null,
-      dimensions: input.dimensions ?? null,
+      costPrice: input.unitCost?.toFixed(2) ?? '0.00',
+      basePrice: input.unitPrice?.toFixed(2) ?? '0.00',
+      weightGrams: input.weight ? Math.round(input.weight * 1000) : null,
+      dimensions: input.dimensions
+        ? `${input.dimensions.length}x${input.dimensions.width}x${input.dimensions.height}`
+        : null,
       tags: input.tags ?? [],
       status: 'active',
     })
@@ -148,9 +145,10 @@ export async function createProduct(
     .values({
       entityId: input.entityId,
       productId: product.id,
-      quantityOnHand: 0,
-      quantityReserved: 0,
-      quantityAvailable: 0,
+      currentStock: 0,
+      allocatedStock: 0,
+      availableStock: 0,
+      reorderPoint: input.reorderPoint ?? 10,
     })
     .returning()
 
@@ -165,7 +163,7 @@ export async function createProduct(
     supplier = s
   }
 
-  logger.info({ productId: product.id, sku: product.sku }, 'Product created')
+  logger.info('Product created', { productId: product.id, sku: product.sku })
 
   return { product, supplier, inventory }
 }
@@ -232,7 +230,7 @@ export async function listProducts(filter: ProductListFilter): Promise<ProductWi
   }
 
   if (filter.categoryId) {
-    conditions.push(eq(commerceProducts.categoryId, filter.categoryId))
+    conditions.push(eq(commerceProducts.category, filter.categoryId))
   }
 
   if (filter.supplierId) {
@@ -277,7 +275,7 @@ export async function listProducts(filter: ProductListFilter): Promise<ProductWi
   if (filter.lowStock) {
     results = results.filter((r) => {
       if (!r.inventory) return true // No inventory = out of stock
-      return r.inventory.quantityAvailable <= r.product.reorderPoint
+      return r.inventory.availableStock <= r.inventory.reorderPoint
     })
   }
 
@@ -300,17 +298,15 @@ export async function updateProduct(
 
   if (input.name !== undefined) updates.name = input.name
   if (input.description !== undefined) updates.description = input.description
-  if (input.categoryId !== undefined) updates.categoryId = input.categoryId
+  if (input.categoryId !== undefined) updates.category = input.categoryId
   if (input.supplierId !== undefined) updates.supplierId = input.supplierId
-  if (input.unitCost !== undefined) updates.unitCost = input.unitCost.toFixed(2)
-  if (input.unitPrice !== undefined) updates.unitPrice = input.unitPrice.toFixed(2)
-  if (input.currency !== undefined) updates.currency = input.currency
-  if (input.unit !== undefined) updates.unit = input.unit
-  if (input.reorderPoint !== undefined) updates.reorderPoint = input.reorderPoint
-  if (input.reorderQty !== undefined) updates.reorderQty = input.reorderQty
-  if (input.leadTimeDays !== undefined) updates.leadTimeDays = input.leadTimeDays
-  if (input.weight !== undefined) updates.weight = input.weight.toFixed(4)
-  if (input.dimensions !== undefined) updates.dimensions = input.dimensions
+  if (input.unitCost !== undefined) updates.costPrice = input.unitCost.toFixed(2)
+  if (input.unitPrice !== undefined) updates.basePrice = input.unitPrice.toFixed(2)
+  if (input.weight !== undefined) updates.weightGrams = input.weight ? Math.round(input.weight * 1000) : null
+  if (input.dimensions !== undefined)
+    updates.dimensions = input.dimensions
+      ? `${input.dimensions.length}x${input.dimensions.width}x${input.dimensions.height}`
+      : null
   if (input.status !== undefined) updates.status = input.status
   if (input.tags !== undefined) updates.tags = input.tags
 
@@ -320,7 +316,7 @@ export async function updateProduct(
     .where(eq(commerceProducts.id, productId))
     .returning()
 
-  logger.info({ productId, updates: Object.keys(updates) }, 'Product updated')
+  logger.info('Product updated', { productId, updates: Object.keys(updates) })
 
   return updated
 }
@@ -343,7 +339,7 @@ export async function deleteProduct(productId: string): Promise<boolean> {
   // Delete product
   await db.delete(commerceProducts).where(eq(commerceProducts.id, productId))
 
-  logger.info({ productId }, 'Product deleted')
+  logger.info('Product deleted', { productId })
 
   return true
 }
@@ -379,15 +375,15 @@ export async function recordStockMovement(
       .values({
         entityId: input.entityId,
         productId: input.productId,
-        quantityOnHand: 0,
-        quantityReserved: 0,
-        quantityAvailable: 0,
+        currentStock: 0,
+        allocatedStock: 0,
+        availableStock: 0,
       })
       .returning()
     inventory = created
   }
 
-  const previousQty = inventory.quantityOnHand
+  const previousQty = inventory.currentStock
 
   // Calculate new quantity
   let newQty: number
@@ -417,18 +413,21 @@ export async function recordStockMovement(
     .insert(commerceStockMovements)
     .values({
       entityId: input.entityId,
+      inventoryId: inventory.id,
       productId: input.productId,
-      type: input.type,
+      movementType: input.type,
       quantity: input.type === 'adjustment' ? input.quantity - previousQty : input.quantity,
-      previousQuantity: previousQty,
-      newQuantity: newQty,
-      costPerUnit: (input.costPerUnit ?? Number(product.unitCost)).toFixed(2),
-      totalCost: ((input.costPerUnit ?? Number(product.unitCost)) * Math.abs(input.quantity)).toFixed(2),
       reason: input.reason ?? null,
       referenceType: input.referenceType ?? null,
       referenceId: input.referenceId ?? null,
-      notes: input.notes ?? null,
-      createdBy: input.userId ?? null,
+      performedBy: input.userId ?? 'system',
+      metadata: {
+        previousQuantity: previousQty,
+        newQuantity: newQty,
+        costPerUnit: input.costPerUnit ?? Number(product.costPrice),
+        totalCost: (input.costPerUnit ?? Number(product.costPrice)) * Math.abs(input.quantity),
+        notes: input.notes ?? null,
+      },
     })
     .returning()
 
@@ -436,23 +435,19 @@ export async function recordStockMovement(
   await db
     .update(commerceInventory)
     .set({
-      quantityOnHand: newQty,
-      quantityAvailable: newQty - inventory.quantityReserved,
-      lastMovementAt: new Date(),
+      currentStock: newQty,
+      availableStock: newQty - inventory.allocatedStock,
       updatedAt: new Date(),
     })
     .where(eq(commerceInventory.productId, input.productId))
 
-  logger.info(
-    {
-      productId: input.productId,
-      type: input.type,
-      quantity: input.quantity,
-      previousQty,
-      newQty,
-    },
-    'Stock movement recorded',
-  )
+  logger.info('Stock movement recorded', {
+    productId: input.productId,
+    type: input.type,
+    quantity: input.quantity,
+    previousQty,
+    newQty,
+  })
 
   return movement
 }
@@ -473,23 +468,23 @@ export async function reserveStock(
     throw new Error(`Inventory record not found for product ${productId}`)
   }
 
-  const newReserved = inventory.quantityReserved + quantity
-  const newAvailable = inventory.quantityOnHand - newReserved
+  const newReserved = inventory.allocatedStock + quantity
+  const newAvailable = inventory.currentStock - newReserved
 
   if (newAvailable < 0) {
-    throw new Error(`Insufficient available stock. Available: ${inventory.quantityAvailable}, Requested: ${quantity}`)
+    throw new Error(`Insufficient available stock. Available: ${inventory.availableStock}, Requested: ${quantity}`)
   }
 
   await db
     .update(commerceInventory)
     .set({
-      quantityReserved: newReserved,
-      quantityAvailable: newAvailable,
+      allocatedStock: newReserved,
+      availableStock: newAvailable,
       updatedAt: new Date(),
     })
     .where(eq(commerceInventory.productId, productId))
 
-  logger.info({ productId, quantity, referenceType, referenceId }, 'Stock reserved')
+  logger.info('Stock reserved', { productId, quantity, referenceType, referenceId })
 
   return true
 }
@@ -505,19 +500,19 @@ export async function releaseReservation(productId: string, quantity: number): P
     throw new Error(`Inventory record not found for product ${productId}`)
   }
 
-  const newReserved = Math.max(0, inventory.quantityReserved - quantity)
-  const newAvailable = inventory.quantityOnHand - newReserved
+  const newReserved = Math.max(0, inventory.allocatedStock - quantity)
+  const newAvailable = inventory.currentStock - newReserved
 
   await db
     .update(commerceInventory)
     .set({
-      quantityReserved: newReserved,
-      quantityAvailable: newAvailable,
+      allocatedStock: newReserved,
+      availableStock: newAvailable,
       updatedAt: new Date(),
     })
     .where(eq(commerceInventory.productId, productId))
 
-  logger.info({ productId, quantity }, 'Reservation released')
+  logger.info('Reservation released', { productId, quantity })
 
   return true
 }
@@ -560,21 +555,21 @@ export async function getInventorySnapshot(entityId: string): Promise<InventoryS
 
   for (const product of products) {
     const inventory = inventoryMap.get(product.id)
-    const qty = inventory?.quantityOnHand ?? 0
-    const value = qty * Number(product.unitCost)
+    const qty = inventory?.currentStock ?? 0
+    const value = qty * Number(product.costPrice)
     totalValue += value
 
     if (qty === 0) {
       outOfStockCount++
-    } else if (qty <= product.reorderPoint) {
+    } else if (inventory && qty <= inventory.reorderPoint) {
       lowStockCount++
     }
 
-    const categoryId = product.categoryId ?? 'uncategorized'
-    const stats = categoryStats.get(categoryId) ?? { count: 0, value: 0 }
+    const cat = product.category ?? 'uncategorized'
+    const stats = categoryStats.get(cat) ?? { count: 0, value: 0 }
     stats.count++
     stats.value += value
-    categoryStats.set(categoryId, stats)
+    categoryStats.set(cat, stats)
   }
 
   // Get recent movements
@@ -625,13 +620,11 @@ export async function syncProductToZoho(
     name: product.name,
     sku: product.sku,
     description: product.description ?? undefined,
-    rate: Number(product.unitPrice),
-    purchase_rate: Number(product.unitCost),
-    unit: product.unit ?? 'qty',
-    initial_stock: inventory?.quantityOnHand ?? 0,
-    reorder_level: product.reorderPoint,
-    item_type: 'inventory',
-    product_type: 'goods',
+    rate: Number(product.basePrice),
+    purchase_rate: Number(product.costPrice),
+    unit: 'qty',
+    reorder_level: inventory?.reorderPoint ?? 10,
+    stock_on_hand: inventory?.currentStock ?? 0,
   }
 
   let zohoItemId: string
@@ -640,7 +633,7 @@ export async function syncProductToZoho(
     // Update existing
     const updated = await inventoryClient.updateItem(product.zohoItemId, zohoItem)
     zohoItemId = updated.item_id
-    logger.info({ productId, zohoItemId }, 'Updated product in Zoho Inventory')
+    logger.info('Updated product in Zoho Inventory', { productId, zohoItemId })
   } else {
     // Create new
     const created = await inventoryClient.createItem(zohoItem)
@@ -652,7 +645,7 @@ export async function syncProductToZoho(
       .set({ zohoItemId, updatedAt: new Date() })
       .where(eq(commerceProducts.id, productId))
 
-    logger.info({ productId, zohoItemId }, 'Created product in Zoho Inventory')
+    logger.info('Created product in Zoho Inventory', { productId, zohoItemId })
   }
 
   return zohoItemId
@@ -677,10 +670,8 @@ export async function syncProductFromZoho(
       .set({
         name: zohoItem.name,
         description: zohoItem.description ?? null,
-        unitCost: (zohoItem.purchase_rate ?? 0).toFixed(2),
-        unitPrice: (zohoItem.rate ?? 0).toFixed(2),
-        unit: zohoItem.unit ?? 'each',
-        reorderPoint: zohoItem.reorder_level ?? 10,
+        costPrice: (zohoItem.purchase_rate ?? 0).toFixed(2),
+        basePrice: (zohoItem.rate ?? 0).toFixed(2),
         status: zohoItem.status === 'active' ? 'active' : 'inactive',
         updatedAt: new Date(),
       })
@@ -692,14 +683,14 @@ export async function syncProductFromZoho(
       await db
         .update(commerceInventory)
         .set({
-          quantityOnHand: zohoItem.stock_on_hand,
-          quantityAvailable: zohoItem.available_stock ?? zohoItem.stock_on_hand,
+          currentStock: zohoItem.stock_on_hand,
+          availableStock: zohoItem.stock_on_hand,
           updatedAt: new Date(),
         })
         .where(eq(commerceInventory.productId, existing.id))
     }
 
-    logger.info({ productId: updated.id }, 'Updated product from Zoho')
+    logger.info('Updated product from Zoho', { productId: updated.id })
     return updated
   } else {
     // Create new product
@@ -707,14 +698,13 @@ export async function syncProductFromZoho(
       .insert(commerceProducts)
       .values({
         entityId,
-        sku: zohoItem.sku,
+        sku: zohoItem.sku ?? zohoItem.item_id,
         name: zohoItem.name,
         description: zohoItem.description ?? null,
+        category: 'general',
         supplierId: supplierId ?? null,
-        unitCost: (zohoItem.purchase_rate ?? 0).toFixed(2),
-        unitPrice: (zohoItem.rate ?? 0).toFixed(2),
-        unit: zohoItem.unit ?? 'each',
-        reorderPoint: zohoItem.reorder_level ?? 10,
+        costPrice: (zohoItem.purchase_rate ?? 0).toFixed(2),
+        basePrice: (zohoItem.rate ?? 0).toFixed(2),
         zohoItemId: zohoItem.item_id,
         status: zohoItem.status === 'active' ? 'active' : 'inactive',
       })
@@ -724,12 +714,12 @@ export async function syncProductFromZoho(
     await db.insert(commerceInventory).values({
       entityId,
       productId: created.id,
-      quantityOnHand: zohoItem.stock_on_hand ?? 0,
-      quantityReserved: 0,
-      quantityAvailable: zohoItem.available_stock ?? zohoItem.stock_on_hand ?? 0,
+      currentStock: zohoItem.stock_on_hand ?? 0,
+      allocatedStock: 0,
+      availableStock: zohoItem.stock_on_hand ?? 0,
     })
 
-    logger.info({ productId: created.id, zohoItemId: zohoItem.item_id }, 'Created product from Zoho')
+    logger.info('Created product from Zoho', { productId: created.id, zohoItemId: zohoItem.item_id })
     return created
   }
 }

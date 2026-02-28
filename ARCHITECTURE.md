@@ -23,6 +23,8 @@ apps/
   partners/      Partner portal (entitlement-gated)
   web/           Public marketing/landing
   union-eyes/    UE case management
+  pondu/         Agri field operations (producers, harvests, lots, quality, warehouse, shipments, payments)
+  cora/          Agri intelligence dashboard (yield, pricing, risk, traceability)
 
 packages/
   os-core/       Control backbone (evidence, policy, telemetry, retention, config, secrets)
@@ -37,6 +39,12 @@ packages/
   tax/           Tax calendar + obligation engine
   analytics/     Aggregation + reporting
   ui/            Shared component library
+  agri-core/     Agri domain primitives (enums, types, schemas, FSMs)
+  agri-db/       Agri database repositories (org-scoped)
+  agri-events/   Agri domain event bus + integration dispatch
+  agri-intelligence/ Agri computation library (yield, loss, payout)
+  agri-traceability/ Agri evidence packs + hash chain verification
+  agri-adapters/ Agri external system adapters (weather, market, mobile-money, SMS)
 
 tooling/
   scripts/       CLI tools (thin wrappers over packages)

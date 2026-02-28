@@ -38,4 +38,4 @@ python -m analytics.portfolio.vertical_performance
 ### Integration Metrics
 - Payment processors (Stripe, PayPal, Mobile Money)
 - AI/ML services (Azure OpenAI, custom ML)
-- Database providers (PostgreSQL, Supabase, Base44)
+- Database providers (PostgreSQL, Supabase, NzilaOS/Drizzle)

@@ -5,7 +5,7 @@
  * Tokens are stored encrypted in the commerce_zoho_credentials table.
  */
 
-import { db } from '../db'
+import { db } from '@nzila/db'
 import { commerceZohoCredentials } from '@nzila/db'
 import { eq } from 'drizzle-orm'
 import { logger } from '../logger'
@@ -43,7 +43,7 @@ export class ZohoOAuthClient {
 
     if (!response.ok) {
       const error = await response.text()
-      logger.error({ error }, 'Zoho token exchange failed')
+      logger.error('Zoho token exchange failed', { error })
       throw new Error(`Zoho token exchange failed: ${error}`)
     }
 
@@ -75,7 +75,7 @@ export class ZohoOAuthClient {
     const expiryTime = credentials.tokenExpiry.getTime()
 
     if (now >= expiryTime - TOKEN_EXPIRY_BUFFER_MS) {
-      logger.info({ entityId: this.entityId }, 'Zoho access token expired, refreshing')
+      logger.info('Zoho access token expired, refreshing', { entityId: this.entityId })
       const refreshed = await this.refreshAccessToken(credentials)
       return refreshed.accessToken
     }
@@ -102,7 +102,7 @@ export class ZohoOAuthClient {
 
     if (!response.ok) {
       const error = await response.text()
-      logger.error({ error, entityId: this.entityId }, 'Zoho token refresh failed')
+      logger.error('Zoho token refresh failed', { error, entityId: this.entityId })
       throw new Error(`Zoho token refresh failed: ${error}`)
     }
 
@@ -117,7 +117,7 @@ export class ZohoOAuthClient {
     }
 
     await this.storeCredentials(newCredentials)
-    logger.info({ entityId: this.entityId }, 'Zoho access token refreshed')
+    logger.info('Zoho access token refreshed', { entityId: this.entityId })
     return newCredentials
   }
 
@@ -151,11 +151,11 @@ export class ZohoOAuthClient {
         method: 'POST',
       })
     } catch (error) {
-      logger.warn({ error, entityId: this.entityId }, 'Zoho token revocation failed')
+      logger.warn('Zoho token revocation failed', { error, entityId: this.entityId })
     }
 
     await db.delete(commerceZohoCredentials).where(eq(commerceZohoCredentials.entityId, this.entityId))
-    logger.info({ entityId: this.entityId }, 'Zoho credentials revoked and deleted')
+    logger.info('Zoho credentials revoked and deleted', { entityId: this.entityId })
   }
 
   /**

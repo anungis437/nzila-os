@@ -58,7 +58,7 @@ export default async function OrderDetailPage({ params }: { params: { id: string
 
   // Calculate totals
   const totalQuantity = lines.reduce((acc, line) => acc + line.quantity, 0)
-  const currentStepIndex = statusSteps.indexOf(order.status)
+  const currentStepIndex = statusSteps.indexOf(order.status as typeof statusSteps[number])
 
   const getNextAction = () => {
     switch (order.status) {

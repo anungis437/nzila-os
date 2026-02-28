@@ -180,17 +180,18 @@ export class ZohoCrmClient {
       options.body = JSON.stringify(body)
     }
 
-    logger.debug({ method, url }, 'Zoho CRM API request')
+    logger.debug('Zoho CRM API request', { method, url })
 
     const response = await fetch(url, options)
     const responseBody = await response.json()
 
     if (!response.ok) {
       const errorBody = responseBody as ZohoErrorResponse
-      logger.error(
-        { status: response.status, error: errorBody, endpoint },
-        'Zoho CRM API error',
-      )
+      logger.error('Zoho CRM API error', {
+        status: response.status,
+        error: errorBody,
+        endpoint,
+      })
       throw new Error(`Zoho CRM API error: ${errorBody.message || response.statusText}`)
     }
 

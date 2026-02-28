@@ -21,7 +21,7 @@ import {
 } from '@nzila/db'
 import { logger } from './logger'
 import { ZohoBooksClient } from './zoho/books-client'
-import type { ZohoPurchaseOrder } from './zoho/types'
+import type { ZohoPurchaseOrder, ZohoPurchaseOrderLine } from './zoho/types'
 
 // ─────────────────────────────────────────────────────────────────────────────
 // Types
@@ -144,7 +144,7 @@ export async function createPurchaseOrder(input: CreatePOInput): Promise<POWithL
   const { subtotal, lineItems } = calculateLineTotals(lines)
   const total = subtotal + shippingCost
 
-  logger.info({ entityId, ref, supplierId, lineCount: lines.length }, 'Creating purchase order')
+  logger.info('Creating purchase order', { entityId, ref, supplierId, lineCount: lines.length })
 
   // Create PO in transaction
   const result = await db.transaction(async (tx) => {
@@ -196,7 +196,7 @@ export async function createPurchaseOrder(input: CreatePOInput): Promise<POWithL
     .where(eq(commerceSuppliers.id, supplierId))
     .limit(1)
 
-  logger.info({ poId: result.po.id, ref }, 'Purchase order created')
+  logger.info('Purchase order created', { poId: result.po.id, ref })
 
   return { ...result, supplier }
 }
@@ -371,7 +371,7 @@ export async function sendPurchaseOrder(poId: string): Promise<POWithLines | nul
     })
     .where(eq(commercePurchaseOrders.id, poId))
 
-  logger.info({ poId, ref: existing.po.ref }, 'Purchase order sent')
+  logger.info('Purchase order sent', { poId, ref: existing.po.ref })
 
   return getPurchaseOrder(poId)
 }
@@ -392,7 +392,7 @@ export async function cancelPurchaseOrder(poId: string): Promise<POWithLines | n
     })
     .where(eq(commercePurchaseOrders.id, poId))
 
-  logger.info({ poId, ref: existing.po.ref }, 'Purchase order cancelled')
+  logger.info('Purchase order cancelled', { poId, ref: existing.po.ref })
 
   return getPurchaseOrder(poId)
 }
@@ -434,10 +434,12 @@ export async function receivePOLine(input: ReceiveLineInput): Promise<typeof com
     throw new Error(`Cannot receive more than ordered quantity (${line.quantity})`)
   }
 
-  logger.info(
-    { lineId, quantityReceived, previousReceived: line.quantityReceived, ordered: line.quantity },
-    'Receiving PO line items',
-  )
+  logger.info('Receiving PO line items', {
+    lineId,
+    quantityReceived,
+    previousReceived: line.quantityReceived,
+    ordered: line.quantity,
+  })
 
   await db.transaction(async (tx) => {
     // Update line quantity received
@@ -573,21 +575,22 @@ export async function syncPOToZoho(
     throw new Error(`Supplier ${supplier?.name ?? po.supplierId} not linked to Zoho`)
   }
 
-  const zohoLineItems = lines.map((line) => ({
+  const zohoLineItems: ZohoPurchaseOrderLine[] = lines.map((line) => ({
+    line_item_id: '',
     item_id: '', // Would need product's zohoItemId
+    name: line.description ?? '',
     description: line.description,
     quantity: line.quantity,
     rate: Number(line.unitCost),
-    item_total: Number(line.lineTotal),
+    amount: Number(line.lineTotal),
   }))
 
   const zohoPO: Partial<ZohoPurchaseOrder> = {
     vendor_id: zohoVendorId,
     purchaseorder_number: po.ref,
     date: po.createdAt.toISOString().split('T')[0],
-    expected_delivery_date: po.expectedDeliveryDate?.toISOString().split('T')[0],
+    delivery_date: po.expectedDeliveryDate?.toISOString().split('T')[0],
     line_items: zohoLineItems,
-    notes: po.notes ?? undefined,
   }
 
   let zohoPoId: string
@@ -596,7 +599,7 @@ export async function syncPOToZoho(
     // Update existing
     const updated = await booksClient.updatePurchaseOrder(po.zohoPoId, zohoPO)
     zohoPoId = updated.purchaseorder_id
-    logger.info({ poId, zohoPoId }, 'Updated PO in Zoho Books')
+    logger.info('Updated PO in Zoho Books', { poId, zohoPoId })
   } else {
     // Create new
     const created = await booksClient.createPurchaseOrder(zohoPO)
@@ -608,7 +611,7 @@ export async function syncPOToZoho(
       .set({ zohoPoId, updatedAt: new Date() })
       .where(eq(commercePurchaseOrders.id, poId))
 
-    logger.info({ poId, zohoPoId }, 'Created PO in Zoho Books')
+    logger.info('Created PO in Zoho Books', { poId, zohoPoId })
   }
 
   return zohoPoId

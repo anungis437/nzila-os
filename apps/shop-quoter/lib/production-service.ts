@@ -180,7 +180,7 @@ function calculateLineTotals(lines: OrderLine[]): { subtotal: number; taxTotal: 
 }
 
 export async function createOrder(input: CreateOrderInput): Promise<OrderWithDetails> {
-  logger.info({ entityId: input.entityId, customerId: input.customerId }, 'Creating order')
+  logger.info('Creating order', { entityId: input.entityId, customerId: input.customerId })
 
   const ref = await generateOrderRef(input.entityId)
   const { subtotal, taxTotal, total } = calculateLineTotals(input.lines)
@@ -232,7 +232,7 @@ export async function createOrder(input: CreateOrderInput): Promise<OrderWithDet
     .where(eq(commerceCustomers.id, input.customerId))
     .limit(1)
 
-  logger.info({ orderId: order.id, ref: order.ref }, 'Order created')
+  logger.info('Order created', { orderId: order.id, ref: order.ref })
 
   return { order, customer, lines, allocations: [] }
 }
@@ -282,7 +282,7 @@ export async function confirmOrder(orderId: string): Promise<typeof commerceOrde
     .where(eq(commerceOrders.id, orderId))
     .returning()
 
-  logger.info({ orderId, ref: order.ref }, 'Order confirmed')
+  logger.info('Order confirmed', { orderId, ref: order.ref })
 
   return updated
 }
@@ -307,7 +307,7 @@ export async function startFulfillment(orderId: string): Promise<typeof commerce
     .where(eq(commerceOrders.id, orderId))
     .returning()
 
-  logger.info({ orderId, ref: order.ref }, 'Order fulfillment started')
+  logger.info('Order fulfillment started', { orderId, ref: order.ref })
 
   return updated
 }
@@ -338,7 +338,7 @@ export async function markOrderShipped(
     .where(eq(commerceOrders.id, orderId))
     .returning()
 
-  logger.info({ orderId, ref: order.ref, trackingInfo }, 'Order shipped')
+  logger.info('Order shipped', { orderId, ref: order.ref, trackingInfo })
 
   return updated
 }
@@ -368,7 +368,7 @@ export async function completeOrder(orderId: string): Promise<typeof commerceOrd
     .where(eq(commerceOrders.id, orderId))
     .returning()
 
-  logger.info({ orderId, ref: order.ref }, 'Order completed')
+  logger.info('Order completed', { orderId, ref: order.ref })
 
   return updated
 }
@@ -402,7 +402,7 @@ export async function cancelOrder(orderId: string, reason?: string): Promise<typ
     .where(eq(commerceOrders.id, orderId))
     .returning()
 
-  logger.info({ orderId, ref: order.ref, reason }, 'Order cancelled')
+  logger.info('Order cancelled', { orderId, ref: order.ref, reason })
 
   return updated
 }
@@ -434,25 +434,22 @@ export async function allocateInventory(input: AllocationInput): Promise<typeof 
   }
 
   // Check available stock
-  if (inventory.quantityAvailable < input.quantity) {
-    logger.warn(
-      {
-        productId: input.productId,
-        requested: input.quantity,
-        available: inventory.quantityAvailable,
-      },
-      'Insufficient stock for full allocation',
-    )
+  if (inventory.availableStock < input.quantity) {
+    logger.warn('Insufficient stock for full allocation', {
+      productId: input.productId,
+      requested: input.quantity,
+      available: inventory.availableStock,
+    })
   }
 
   // Reserve the inventory
-  const reserveQty = Math.min(input.quantity, inventory.quantityAvailable)
+  const reserveQty = Math.min(input.quantity, inventory.availableStock)
 
   await db
     .update(commerceInventory)
     .set({
-      quantityReserved: inventory.quantityReserved + reserveQty,
-      quantityAvailable: inventory.quantityAvailable - reserveQty,
+      allocatedStock: inventory.allocatedStock + reserveQty,
+      availableStock: inventory.availableStock - reserveQty,
       updatedAt: new Date(),
     })
     .where(eq(commerceInventory.productId, input.productId))
@@ -481,16 +478,13 @@ export async function allocateInventory(input: AllocationInput): Promise<typeof 
     })
     .returning()
 
-  logger.info(
-    {
-      allocationId: allocation.id,
-      orderId: input.orderId,
-      productId: input.productId,
-      requested: input.quantity,
-      allocated: reserveQty,
-    },
-    'Inventory allocated',
-  )
+  logger.info('Inventory allocated', {
+    allocationId: allocation.id,
+    orderId: input.orderId,
+    productId: input.productId,
+    requested: input.quantity,
+    allocated: reserveQty,
+  })
 
   return allocation
 }
@@ -534,9 +528,8 @@ export async function fulfillAllocation(
   await db
     .update(commerceInventory)
     .set({
-      quantityOnHand: sql`${commerceInventory.quantityOnHand} - ${actualFulfill}`,
-      quantityReserved: sql`${commerceInventory.quantityReserved} - ${actualFulfill}`,
-      lastMovementAt: new Date(),
+      currentStock: sql`${commerceInventory.currentStock} - ${actualFulfill}`,
+      allocatedStock: sql`${commerceInventory.allocatedStock} - ${actualFulfill}`,
       updatedAt: new Date(),
     })
     .where(eq(commerceInventory.id, allocation.inventoryId))
@@ -544,22 +537,21 @@ export async function fulfillAllocation(
   // Record stock movement
   await db.insert(commerceStockMovements).values({
     entityId: allocation.entityId,
+    inventoryId: allocation.inventoryId,
     productId: allocation.productId,
-    type: 'out',
+    movementType: 'out',
     quantity: actualFulfill,
     reason: 'Order fulfillment',
     referenceType: 'order',
     referenceId: allocation.orderId,
+    performedBy: 'system',
   })
 
-  logger.info(
-    {
-      allocationId,
-      quantityFulfilled: actualFulfill,
-      status: newStatus,
-    },
-    'Allocation fulfilled',
-  )
+  logger.info('Allocation fulfilled', {
+    allocationId,
+    quantityFulfilled: actualFulfill,
+    status: newStatus,
+  })
 
   return updated
 }
@@ -581,8 +573,8 @@ export async function cancelAllocation(allocationId: string): Promise<typeof com
   await db
     .update(commerceInventory)
     .set({
-      quantityReserved: sql`${commerceInventory.quantityReserved} - ${releaseQty}`,
-      quantityAvailable: sql`${commerceInventory.quantityAvailable} + ${releaseQty}`,
+      allocatedStock: sql`${commerceInventory.allocatedStock} - ${releaseQty}`,
+      availableStock: sql`${commerceInventory.availableStock} + ${releaseQty}`,
       updatedAt: new Date(),
     })
     .where(eq(commerceInventory.id, allocation.inventoryId))
@@ -597,7 +589,7 @@ export async function cancelAllocation(allocationId: string): Promise<typeof com
     .where(eq(commerceMandateAllocations.id, allocationId))
     .returning()
 
-  logger.info({ allocationId, releasedQty: releaseQty }, 'Allocation cancelled')
+  logger.info('Allocation cancelled', { allocationId, releasedQty: releaseQty })
 
   return updated
 }
@@ -634,7 +626,7 @@ export async function autoAllocateOrder(
       .limit(1)
 
     if (!product) {
-      logger.warn({ orderId, sku: line.sku }, 'Product not found for auto-allocation')
+      logger.warn('Product not found for auto-allocation', { orderId, sku: line.sku })
       continue
     }
 
@@ -652,7 +644,7 @@ export async function autoAllocateOrder(
       .limit(1)
 
     if (existingAllocation) {
-      logger.info({ orderId, productId: product.id }, 'Skipping - already allocated')
+      logger.info('Skipping - already allocated', { orderId, productId: product.id })
       continue
     }
 
@@ -665,11 +657,11 @@ export async function autoAllocateOrder(
       })
       allocations.push(allocation)
     } catch (error) {
-      logger.error({ orderId, productId: product.id, error }, 'Auto-allocation failed')
+      logger.error('Auto-allocation failed', { orderId, productId: product.id, error })
     }
   }
 
-  logger.info({ orderId, allocationsCreated: allocations.length }, 'Auto-allocation complete')
+  logger.info('Auto-allocation complete', { orderId, allocationsCreated: allocations.length })
 
   return allocations
 }
@@ -753,7 +745,7 @@ export async function getProductionDashboard(entityId: string): Promise<Producti
       quantityAllocated: alloc.quantityAllocated,
       quantityFulfilled: alloc.quantityFulfilled,
       quantityShortage: shortage,
-      stockAvailable: inventory?.quantityAvailable ?? 0,
+      stockAvailable: inventory?.availableStock ?? 0,
       priority: alloc.priority as Priority,
       expectedFulfillmentDate: alloc.expectedFulfillmentDate,
       status: alloc.status as AllocationStatus,

@@ -291,17 +291,18 @@ export class ZohoInventoryClient {
       options.body = JSON.stringify(body)
     }
 
-    logger.debug({ method, url }, 'Zoho Inventory API request')
+    logger.debug('Zoho Inventory API request', { method, url })
 
     const response = await fetch(url, options)
     const responseBody = await response.json()
 
     if (!response.ok || responseBody.code !== 0) {
       const errorBody = responseBody as ZohoErrorResponse
-      logger.error(
-        { status: response.status, error: errorBody, endpoint },
-        'Zoho Inventory API error',
-      )
+      logger.error('Zoho Inventory API error', {
+        status: response.status,
+        error: errorBody,
+        endpoint,
+      })
       throw new Error(`Zoho Inventory API error: ${errorBody.message || response.statusText}`)
     }
 

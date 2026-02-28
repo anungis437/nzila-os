@@ -1,6 +1,6 @@
 # CFO Legacy Migration Tracker
 
-> **Source**: `C:/apps/legacy/cfo` (Vite 6 + React 18 SPA, Base44 SDK)
+> **Source**: `C:/apps/legacy/cfo` (Vite 6 + React 18 SPA, formerly Base44 SDK — migrated to NzilaOS)
 > **Target**: `apps/cfo/` (Next.js 16, React 19, TypeScript, Clerk Auth)
 > **Brand**: LedgerIQ — AI-Powered Virtual CFO Platform
 
@@ -15,15 +15,15 @@
 | Pages | 19 |
 | Custom components | 54 |
 | shadcn/ui components | 49 |
-| Base44 entities | 18 |
-| Base44 integrations | 6 |
+| Legacy Base44 entities | 18 |
+| Legacy Base44 integrations | 6 |
 | console.error/log instances | ~72 across 35 files |
 
 ---
 
-## Base44 Entities → API Migration
+## Legacy Base44 Entities → API Migration
 
-All entities below use `@base44/sdk` `createClient().entities.EntityName` pattern.
+All entities below used `@base44/sdk` `createClient().entities.EntityName` pattern (now migrated).
 Each must be migrated to a proper API layer backed by the monorepo's database/services.
 
 | Entity | Legacy Usage | Target API | Status |
@@ -51,7 +51,7 @@ Each must be migrated to a proper API layer backed by the monorepo's database/se
 | WorkflowInstance | WorkflowExecution | `api/workflow-instances` | ⬜ Not started |
 | WorkflowTemplate | WorkflowBuilder | `api/workflow-templates` | ⬜ Not started |
 
-## Base44 Integrations → Service Migration
+## Legacy Base44 Integrations → Service Migration
 
 | Integration | Legacy Usage | Target Service | Status |
 |---|---|---|---|
@@ -131,7 +131,7 @@ Each must be migrated to a proper API layer backed by the monorepo's database/se
 | `framer-motion` | ✅ Keep | Already in target deps |
 | `zod` | ✅ Keep | Already in target deps |
 | `react-router-dom` | ❌ Remove | Replaced by Next.js App Router |
-| `@base44/sdk` | ❌ Remove | Replaced by `@nzila/*` packages |
+| `@base44/sdk` | ❌ Removed | Replaced by `@nzila/*` packages |
 
 ---
 

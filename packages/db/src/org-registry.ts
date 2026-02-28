@@ -166,6 +166,20 @@ export const ORG_SCOPED_TABLES = [
 
   // ── platform.ts ─────────────────────────────────────────
   'platformRequestMetrics',
+
+  // ── trade.ts ────────────────────────────────────────────
+  'tradeParties',
+  'tradeListings',
+  'tradeListingMedia',
+  'tradeDeals',
+  'tradeQuotes',
+  'tradeFinancingTerms',
+  'tradeShipments',
+  'tradeDocuments',
+  'tradeCommissions',
+  'tradeEvidenceArtifacts',
+  'tradeVehicleListings',
+  'tradeVehicleDocs',
 ] as const
 
 /**

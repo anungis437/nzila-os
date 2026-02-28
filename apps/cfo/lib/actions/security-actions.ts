@@ -237,7 +237,7 @@ export async function updateIncidentStatus(
   try {
     await platformDb.execute(
       sql`UPDATE audit_log SET metadata = metadata || ${JSON.stringify({ status })}::jsonb
-      WHERE id = ${incidentId} AND action = 'security.incident'``,
+      WHERE id = ${incidentId} AND action = 'security.incident'`,
     )
     revalidatePath('/dashboard/security')
     return { success: true }

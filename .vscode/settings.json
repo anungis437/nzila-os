@@ -1,8 +1,8 @@
 {
   // ── TypeScript language server ───────────────────────────
-  // Large monorepo with multiple Next.js apps + the "next" TS plugin is
-  // routinely > 3 GB.  Raise the heap ceiling so tsserver stops crashing.
-  "typescript.tsserver.maxTsServerMemory": 8192,
+  // Large monorepo: 58 tsconfig files, 49 packages, 10 apps.
+  // Raise the heap ceiling so tsserver stops crashing / OOM-ing.
+  "typescript.tsserver.maxTsServerMemory": 12288,
   // Use the workspace's own TypeScript installation (keeps versions in sync).
   "typescript.tsdk": "node_modules/typescript/lib",
   // Exclude heavy generated artefacts from tsserver's watch list.
@@ -12,9 +12,44 @@
       "**/.next",
       "**/dist",
       "**/.turbo",
-      "**/.tsbuildinfo"
+      "**/.tsbuildinfo",
+      "**/coverage",
+      "**/.venv"
     ]
   },
+  // Disable project-wide diagnostics — at this scale tsserver tries to
+  // type-check EVERY file in EVERY project in the background, which is
+  // the #1 cause of the OOM crashes.
+  "typescript.tsserver.experimental.enableProjectDiagnostics": false,
+  // Scanning all 49+ packages for auto-imports is very expensive.
+  // "auto" limits it to packages in your dependencies.
+  "typescript.preferences.includePackageJsonAutoImports": "auto",
+  // Use VS Code's native file watcher instead of tsserver's own polling,
+  // which duplicates effort and adds heap pressure.
+  "typescript.tsserver.experimental.useVsCodeWatcher": true,
+
+  // ── File watcher / search exclusions ────────────────────
+  // Prevents VS Code from watching these large trees (saves memory + CPU).
+  "files.watcherExclude": {
+    "**/node_modules/**": true,
+    "**/.next/**": true,
+    "**/dist/**": true,
+    "**/.turbo/**": true,
+    "**/coverage/**": true,
+    "**/.venv/**": true,
+    "**/.tsbuildinfo": true
+  },
+  // Keep these out of Quick Open / search results.
+  "search.exclude": {
+    "**/node_modules": true,
+    "**/.next": true,
+    "**/dist": true,
+    "**/.turbo": true,
+    "**/coverage": true,
+    "**/pnpm-lock.yaml": true
+  },
+  // Don't track symlinks — pnpm creates many via node_modules.
+  "search.followSymlinks": false,
 
   // ── Python ──────────────────────────────────────────────
   // Cross-platform: Linux-first (VPS), Windows fallback via env override

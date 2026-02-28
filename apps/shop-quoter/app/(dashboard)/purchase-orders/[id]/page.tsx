@@ -59,6 +59,7 @@ export default async function PODetailPage({ params }: { params: { id: string } 
 
   const canReceive = ['sent', 'acknowledged', 'partial_received'].includes(po.status)
   const canEdit = po.status === 'draft'
+  const canApprove = po.status === 'draft' || po.status === 'acknowledged'
 
   return (
     <div className="p-8 max-w-6xl mx-auto">

@@ -76,8 +76,8 @@
         "migration_weeks": "8-9",
         "tech_stack": {
           "frontend": "React 18 + Vite",
-          "backend": "Base44",
-          "database": "Base44 Managed"
+          "backend": "NzilaOS (Drizzle ORM)",
+          "database": "PostgreSQL (NzilaOS-managed)"
         },
         "key_features": [
           "Farm Management",

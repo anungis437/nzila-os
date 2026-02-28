@@ -10,6 +10,8 @@ import { CookieConsentProvider } from "@/components/gdpr/cookie-consent-provider
 import { Poppins } from 'next/font/google';
 import './globals.css';
 
+export const dynamic = 'force-dynamic'
+
 const poppins = Poppins({
   subsets: ['latin'],
   weight: ['300', '400', '500', '600', '700'],

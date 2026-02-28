@@ -27,9 +27,9 @@ const platforms = [
   { name: 'Shop Quoter', vertical: 'Commerce', entities: '93', complexity: 'HIGH-EXTREME', readiness: 7.0, status: 'In Development', tam: '$5B', description: 'Corporate gift boxes, CRM integration, WhatsApp AI' },
   { name: 'Trade OS', vertical: 'Trade', entities: '337', complexity: 'MEDIUM-HIGH', readiness: 6.5, status: 'In Development', tam: '$15B', description: 'Trade operations, multi-carrier logistics, customs' },
   { name: 'eExports', vertical: 'Trade', entities: '78', complexity: 'MEDIUM-HIGH', readiness: 8.0, status: 'Django PoC', tam: '$3B', description: 'Export documentation, compliance, shipment tracking' },
-  { name: 'PonduOps', vertical: 'Agrotech', entities: '220', complexity: 'HIGH', readiness: 5.0, status: 'Base44', tam: '$8B', description: 'Supply chain ERP, crop planning, IoT integration' },
-  { name: 'Insight CFO', vertical: 'Fintech', entities: '37', complexity: 'HIGH', readiness: 6.0, status: 'Base44', tam: '$2B', description: 'Virtual CFO, accounting, QuickBooks/Xero integration' },
-  { name: 'STSA / Lexora', vertical: 'Fintech', entities: '95', complexity: 'HIGH', readiness: 6.0, status: 'Base44', tam: '$5B', description: 'Banking stress testing, Basel III/IV compliance' },
+  { name: 'PonduOps', vertical: 'Agrotech', entities: '220', complexity: 'HIGH', readiness: 7.0, status: 'In Development', tam: '$8B', description: 'Supply chain ERP, crop planning, IoT integration' },
+  { name: 'Insight CFO', vertical: 'Fintech', entities: '37', complexity: 'HIGH', readiness: 6.0, status: 'In Development', tam: '$2B', description: 'Virtual CFO, accounting, QuickBooks/Xero integration' },
+  { name: 'STSA / Lexora', vertical: 'Fintech', entities: '95', complexity: 'HIGH', readiness: 6.0, status: 'In Development', tam: '$5B', description: 'Banking stress testing, Basel III/IV compliance' },
   { name: 'Memora', vertical: 'Healthtech', entities: '150', complexity: 'MEDIUM', readiness: 5.0, status: 'Legacy', tam: '$20B', description: 'Cognitive wellness, dementia care, caregiver support' },
 ];
 

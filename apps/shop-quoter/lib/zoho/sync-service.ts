@@ -8,14 +8,14 @@
  */
 
 import { and, eq, isNull, gte } from 'drizzle-orm'
-import { db } from '@nzila/db'
 import {
+  db,
   commerceCustomers,
   commerceQuotes,
   commerceZohoSyncConfigs,
   commerceZohoSyncRecords,
   commerceZohoConflicts,
-} from '@nzila/db/commerce'
+} from '@nzila/db'
 import { logger } from '../logger'
 import { ZohoCrmClient } from './crm-client'
 import type { ZohoContact, ZohoDeal, SyncResult, SyncConflict } from './types'
@@ -48,29 +48,32 @@ interface _SyncRecord {
 // ─────────────────────────────────────────────────────────────────────────────
 
 function mapCustomerToZohoContact(customer: typeof commerceCustomers.$inferSelect): Partial<ZohoContact> {
-  const [firstName, ...lastNameParts] = (customer.displayName ?? '').split(' ')
+  const [firstName, ...lastNameParts] = (customer.name ?? '').split(' ')
+  const addr = customer.address as { street?: string; city?: string; state?: string; zip?: string } | null
   return {
     First_Name: firstName || 'Unknown',
     Last_Name: lastNameParts.join(' ') || 'Customer',
     Email: customer.email ?? undefined,
     Phone: customer.phone ?? undefined,
-    Mailing_Street: customer.address ?? undefined,
-    Mailing_City: customer.city ?? undefined,
-    Mailing_State: customer.province ?? undefined,
-    Mailing_Zip: customer.postalCode ?? undefined,
+    Mailing_Street: addr?.street ?? undefined,
+    Mailing_City: addr?.city ?? undefined,
+    Mailing_State: addr?.state ?? undefined,
+    Mailing_Zip: addr?.zip ?? undefined,
   }
 }
 
 function mapZohoContactToCustomer(contact: ZohoContact): Partial<typeof commerceCustomers.$inferInsert> {
-  const displayName = [contact.First_Name, contact.Last_Name].filter(Boolean).join(' ')
+  const name = [contact.First_Name, contact.Last_Name].filter(Boolean).join(' ')
   return {
-    displayName,
+    name,
     email: contact.Email ?? null,
     phone: contact.Phone ?? null,
-    address: contact.Mailing_Street ?? null,
-    city: contact.Mailing_City ?? null,
-    province: contact.Mailing_State ?? null,
-    postalCode: contact.Mailing_Zip ?? null,
+    address: {
+      street: contact.Mailing_Street ?? null,
+      city: contact.Mailing_City ?? null,
+      state: contact.Mailing_State ?? null,
+      zip: contact.Mailing_Zip ?? null,
+    },
   }
 }
 
@@ -92,12 +95,12 @@ function _mapQuoteToZohoDeal(
   contactId?: string,
 ): Partial<ZohoDeal> {
   return {
-    Deal_Name: quote.title ?? `Quote ${quote.quoteNumber}`,
+    Deal_Name: `Quote ${quote.ref}`,
     Amount: quote.total ? Number(quote.total) : undefined,
     Stage: QUOTE_STATUS_TO_DEAL_STAGE[quote.status ?? 'draft'] ?? 'Qualification',
-    Contact_Name: contactId ? { id: contactId } : undefined,
-    Description: (quote.notes ?? []).join('\n'),
-    Closing_Date: quote.expiresAt?.toISOString().split('T')[0],
+    Contact_Name: contactId ? { id: contactId, name: '' } : undefined,
+    Description: quote.notes ?? undefined,
+    Closing_Date: quote.validUntil?.toISOString().split('T')[0],
   }
 }
 
@@ -110,10 +113,9 @@ function _mapZohoDealToQuote(deal: ZohoDeal): Partial<typeof commerceQuotes.$inf
   const status = statusEntry?.[0] ?? 'draft'
 
   return {
-    title: deal.Deal_Name,
     total: deal.Amount?.toString() ?? '0',
     status: status as 'draft' | 'sent' | 'accepted' | 'declined' | 'expired',
-    notes: deal.Description ? [deal.Description] : [],
+    notes: deal.Description ?? null,
   }
 }
 
@@ -188,19 +190,23 @@ export class ZohoSyncService {
 
   async syncContacts(options: SyncOptions = {}): Promise<SyncResult> {
     const { direction = 'bidirectional', dryRun = false } = options
+    const config = await this.getSyncConfig('contacts')
+
     const result: SyncResult = {
-      module: 'contacts',
-      direction,
-      created: 0,
-      updated: 0,
-      skipped: 0,
+      configId: config?.id ?? '',
+      recordsProcessed: 0,
+      recordsCreated: 0,
+      recordsUpdated: 0,
+      recordsFailed: 0,
       conflicts: [],
       errors: [],
+      startedAt: new Date(),
+      status: 'in_progress',
     }
 
-    const config = await this.getSyncConfig('contacts')
     if (!config?.isActive) {
-      logger.info({ entityId: this.entityId }, 'Contact sync disabled, skipping')
+      logger.info('Contact sync disabled, skipping', { entityId: this.entityId })
+      result.status = 'completed'
       return result
     }
 
@@ -209,26 +215,37 @@ export class ZohoSyncService {
     try {
       if (direction === 'nzila_to_zoho' || direction === 'bidirectional') {
         const localResult = await this.pushContactsToZoho(lastSync, dryRun)
-        result.created += localResult.created
-        result.updated += localResult.updated
-        result.skipped += localResult.skipped
+        result.recordsCreated += localResult.recordsCreated
+        result.recordsUpdated += localResult.recordsUpdated
+        result.recordsProcessed += localResult.recordsProcessed
         result.conflicts.push(...localResult.conflicts)
+        result.errors.push(...localResult.errors)
       }
 
       if (direction === 'zoho_to_nzila' || direction === 'bidirectional') {
         const remoteResult = await this.pullContactsFromZoho(lastSync, dryRun)
-        result.created += remoteResult.created
-        result.updated += remoteResult.updated
-        result.skipped += remoteResult.skipped
+        result.recordsCreated += remoteResult.recordsCreated
+        result.recordsUpdated += remoteResult.recordsUpdated
+        result.recordsProcessed += remoteResult.recordsProcessed
         result.conflicts.push(...remoteResult.conflicts)
+        result.errors.push(...remoteResult.errors)
       }
 
       if (!dryRun) {
         await this.recordSyncRun('contacts', 'success', result)
       }
+      result.status = 'completed'
+      result.completedAt = new Date()
     } catch (error) {
       const message = error instanceof Error ? error.message : 'Unknown sync error'
-      result.errors.push({ code: 'SYNC_ERROR', message })
+      result.errors.push({
+        recordId: '',
+        operation: 'update',
+        errorCode: 'SYNC_ERROR',
+        errorMessage: message,
+        retryable: true,
+      })
+      result.status = 'failed'
       if (!dryRun) {
         await this.recordSyncRun('contacts', 'failed', result, message)
       }
@@ -242,13 +259,15 @@ export class ZohoSyncService {
     dryRun: boolean,
   ): Promise<SyncResult> {
     const result: SyncResult = {
-      module: 'contacts',
-      direction: 'nzila_to_zoho',
-      created: 0,
-      updated: 0,
-      skipped: 0,
+      configId: '',
+      recordsProcessed: 0,
+      recordsCreated: 0,
+      recordsUpdated: 0,
+      recordsFailed: 0,
       conflicts: [],
       errors: [],
+      startedAt: new Date(),
+      status: 'in_progress',
     }
 
     // Get customers modified since last sync
@@ -262,10 +281,10 @@ export class ZohoSyncService {
       .from(commerceCustomers)
       .where(and(...whereConditions))
 
-    logger.info(
-      { count: customers.length, entityId: this.entityId },
-      'Pushing customers to Zoho',
-    )
+    logger.info('Pushing customers to Zoho', {
+      count: customers.length,
+      entityId: this.entityId,
+    })
 
     for (const customer of customers) {
       try {
@@ -273,27 +292,34 @@ export class ZohoSyncService {
         const contactData = mapCustomerToZohoContact(customer)
 
         if (dryRun) {
+          result.recordsProcessed++
           if (zohoContactId) {
-            result.updated++
+            result.recordsUpdated++
           } else {
-            result.created++
+            result.recordsCreated++
           }
           continue
         }
 
         if (zohoContactId) {
           await this.crmClient.updateContact(zohoContactId, contactData)
-          result.updated++
+          result.recordsUpdated++
         } else {
           const newContact = await this.crmClient.createContact(contactData)
           await this.linkRecords('contacts', customer.id, newContact.id)
-          result.created++
+          result.recordsCreated++
         }
+        result.recordsProcessed++
       } catch (error) {
         const message = error instanceof Error ? error.message : 'Unknown error'
+        result.recordsFailed++
+        result.recordsProcessed++
         result.errors.push({
-          code: 'PUSH_ERROR',
-          message: `Failed to push customer ${customer.id}: ${message}`,
+          recordId: customer.id,
+          operation: 'update',
+          errorCode: 'PUSH_ERROR',
+          errorMessage: `Failed to push customer ${customer.id}: ${message}`,
+          retryable: true,
         })
       }
     }
@@ -306,13 +332,15 @@ export class ZohoSyncService {
     dryRun: boolean,
   ): Promise<SyncResult> {
     const result: SyncResult = {
-      module: 'contacts',
-      direction: 'zoho_to_nzila',
-      created: 0,
-      updated: 0,
-      skipped: 0,
+      configId: '',
+      recordsProcessed: 0,
+      recordsCreated: 0,
+      recordsUpdated: 0,
+      recordsFailed: 0,
       conflicts: [],
       errors: [],
+      startedAt: new Date(),
+      status: 'in_progress',
     }
 
     // Fetch contacts from Zoho (with pagination)
@@ -333,7 +361,7 @@ export class ZohoSyncService {
         if (lastSync && contact.Modified_Time) {
           const modifiedTime = new Date(contact.Modified_Time)
           if (modifiedTime < lastSync) {
-            result.skipped++
+            result.recordsProcessed++
             continue
           }
         }
@@ -343,10 +371,11 @@ export class ZohoSyncService {
           const customerData = mapZohoContactToCustomer(contact)
 
           if (dryRun) {
+            result.recordsProcessed++
             if (localId) {
-              result.updated++
+              result.recordsUpdated++
             } else {
-              result.created++
+              result.recordsCreated++
             }
             continue
           }
@@ -364,19 +393,16 @@ export class ZohoSyncService {
               if (existingCustomer.updatedAt && existingCustomer.updatedAt > remoteModified) {
                 // Local is newer - conflict
                 const conflict: SyncConflict = {
-                  id: crypto.randomUUID(),
-                  entityId: this.entityId,
-                  localTable: 'commerce_customers',
-                  localRecordId: localId,
-                  zohoModule: 'Contacts',
+                  syncRecordId: '',
+                  nzilaRecordId: localId,
                   zohoRecordId: contact.id,
-                  conflictType: 'update_conflict',
-                  localData: existingCustomer,
-                  remoteData: contact,
-                  detectedAt: new Date(),
+                  nzilaData: existingCustomer as unknown as Record<string, unknown>,
+                  zohoData: contact as unknown as Record<string, unknown>,
+                  conflictFields: ['updatedAt'],
                 }
                 result.conflicts.push(conflict)
                 await this.recordConflict(conflict)
+                result.recordsProcessed++
                 continue
               }
             }
@@ -385,24 +411,34 @@ export class ZohoSyncService {
               .update(commerceCustomers)
               .set({ ...customerData, updatedAt: new Date() })
               .where(eq(commerceCustomers.id, localId))
-            result.updated++
+            result.recordsUpdated++
+            result.recordsProcessed++
           } else {
             // Create new customer
             const [newCustomer] = await db
               .insert(commerceCustomers)
               .values({
-                ...customerData,
                 entityId: this.entityId,
+                name: customerData.name ?? 'Unknown',
+                email: customerData.email,
+                phone: customerData.phone,
+                address: customerData.address,
               })
               .returning()
             await this.linkRecords('contacts', newCustomer.id, contact.id)
-            result.created++
+            result.recordsCreated++
+            result.recordsProcessed++
           }
         } catch (error) {
           const message = error instanceof Error ? error.message : 'Unknown error'
+          result.recordsFailed++
+          result.recordsProcessed++
           result.errors.push({
-            code: 'PULL_ERROR',
-            message: `Failed to pull contact ${contact.id}: ${message}`,
+            recordId: contact.id,
+            operation: 'update',
+            errorCode: 'PULL_ERROR',
+            errorMessage: `Failed to pull contact ${contact.id}: ${message}`,
+            retryable: true,
           })
         }
       }
@@ -489,27 +525,24 @@ export class ZohoSyncService {
       }
     }
 
-    logger.info(
-      {
-        entityId: this.entityId,
-        module,
-        status,
-        created: result.created,
-        updated: result.updated,
-        skipped: result.skipped,
-        conflicts: result.conflicts.length,
-        errors: result.errors.length,
-        errorMessage,
-      },
-      'Sync run completed',
-    )
+    logger.info('Sync run completed', {
+      entityId: this.entityId,
+      module,
+      status,
+      recordsCreated: result.recordsCreated,
+      recordsUpdated: result.recordsUpdated,
+      recordsProcessed: result.recordsProcessed,
+      conflicts: result.conflicts.length,
+      errors: result.errors.length,
+      errorMessage,
+    })
   }
 
   private async recordConflict(conflict: SyncConflict): Promise<void> {
     // Get or create a sync record first
     const config = await this.getSyncConfig('contacts')
     if (!config) {
-      logger.warn({ entityId: this.entityId }, 'No sync config found for conflict recording')
+      logger.warn('No sync config found for conflict recording', { entityId: this.entityId })
       return
     }
 
@@ -519,20 +552,20 @@ export class ZohoSyncService {
       .values({
         entityId: this.entityId,
         configId: config.id,
-        nzilaRecordId: conflict.localRecordId,
-        zohoRecordId: conflict.zohoRecordId,
+        nzilaRecordId: conflict.nzilaRecordId,
+        zohoRecordId: conflict.zohoRecordId ?? null,
         syncDirection: 'from_zoho',
-        status: 'conflict',
+        status: 'pending',
       })
       .returning()
 
     // Record the conflict
     await db.insert(commerceZohoConflicts).values({
-      entityId: conflict.entityId,
+      entityId: this.entityId,
       syncRecordId: syncRecord.id,
-      nzilaData: conflict.localData,
-      zohoData: conflict.remoteData,
-      conflictFields: ['updatedAt'], // simplified - would detect actual fields in production
+      nzilaData: conflict.nzilaData,
+      zohoData: conflict.zohoData,
+      conflictFields: conflict.conflictFields,
     })
   }
 
@@ -559,16 +592,12 @@ export class ZohoSyncService {
       )
 
     return conflicts.map(({ conflict, syncRecord }) => ({
-      id: conflict.id,
-      entityId: conflict.entityId,
-      localTable: 'commerce_customers', // TODO: derive from config
-      localRecordId: syncRecord.nzilaRecordId,
-      zohoModule: 'Contacts',
-      zohoRecordId: syncRecord.zohoRecordId ?? '',
-      conflictType: 'update_conflict' as const,
-      localData: conflict.nzilaData,
-      remoteData: conflict.zohoData,
-      detectedAt: conflict.createdAt,
+      syncRecordId: syncRecord.id,
+      nzilaRecordId: syncRecord.nzilaRecordId,
+      zohoRecordId: syncRecord.zohoRecordId ?? undefined,
+      nzilaData: conflict.nzilaData as Record<string, unknown>,
+      zohoData: conflict.zohoData as Record<string, unknown>,
+      conflictFields: (conflict.conflictFields ?? []) as string[],
     }))
   }
 
