@@ -102,8 +102,10 @@ describe('ABR-VAULT-03 — Decryption with wrong key throws', () => {
 
   it('tampered ciphertext causes decryptIdentity to throw', () => {
     const encrypted = encryptIdentity(IDENTITY_PAYLOAD, TEST_KEY, KEY_ID)
-    // Flip a single hex char
-    const tampered = { ...encrypted, encryptedPayload: encrypted.encryptedPayload.replace(/[0-9a-f](?=[0-9a-f])/, 'f') }
+    // XOR the first byte to guarantee a deterministic change (regex flip is a no-op when char is already 'f')
+    const firstByte = parseInt(encrypted.encryptedPayload.slice(0, 2), 16)
+    const flippedByte = (firstByte ^ 0xff).toString(16).padStart(2, '0')
+    const tampered = { ...encrypted, encryptedPayload: flippedByte + encrypted.encryptedPayload.slice(2) }
     expect(() => decryptIdentity(tampered, TEST_KEY)).toThrow()
   })
 })
