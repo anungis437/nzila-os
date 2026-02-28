@@ -31,10 +31,18 @@ export type CandidateRef = string & { readonly __brand: 'CandidateRef' }
 
 /**
  * NACP org context carried through every request.
- * entityId is the Nzila convention for org identity.
+ *
+ * `orgId` is the canonical field (aligns with @nzila/org).
+ * `entityId` is retained as a deprecated alias during migration.
+ *
+ * @see {@link @nzila/org OrgContext} for the canonical base type.
  */
 export interface NacpOrgContext {
-  /** The org UUID (maps to entity_id in DB). */
+  /** Organisation UUID — canonical field. */
+  readonly orgId: string
+  /**
+   * @deprecated Use `orgId` instead. Kept for backward compatibility.
+   */
   readonly entityId: string
   /** Authenticated user performing the action. */
   readonly actorId: string

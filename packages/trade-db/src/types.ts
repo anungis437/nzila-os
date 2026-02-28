@@ -5,13 +5,21 @@
  */
 
 export interface TradeDbContext {
-  /** Org ID — all queries scoped to this entity */
+  /** Organisation UUID — canonical field. */
+  readonly orgId: string
+  /**
+   * @deprecated Use `orgId` instead. Kept for backward compatibility.
+   */
   readonly entityId: string
   /** Actor performing the operation */
   readonly actorId: string
 }
 
 export interface TradeReadContext {
-  /** Org ID — all queries scoped to this entity */
+  /** Organisation UUID — canonical field. */
+  readonly orgId: string
+  /**
+   * @deprecated Use `orgId` instead. Kept for backward compatibility.
+   */
   readonly entityId: string
 }

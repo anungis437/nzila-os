@@ -20,6 +20,7 @@
     "@nzila/commerce-core": "workspace:*",
     "@nzila/commerce-audit": "workspace:*",
     "@nzila/commerce-events": "workspace:*",
+    "@nzila/org": "workspace:*",
     "zod": "^3.24.0"
   },
   "devDependencies": {

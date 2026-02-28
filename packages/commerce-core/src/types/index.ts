@@ -49,19 +49,27 @@ export interface RefNumberStrategy {
 
 /**
  * Org context carried through every request.
- * entityId is the Nzila convention for org identity.
+ *
+ * `orgId` is the canonical field (aligns with @nzila/org).
+ * `entityId` is retained as a deprecated alias during migration.
+ *
+ * @see {@link @nzila/org OrgContext} for the canonical base type.
  */
 export interface OrgContext {
-  /** The org UUID (maps to entity_id in DB). */
-  entityId: string
+  /** Organisation UUID — canonical field. */
+  readonly orgId: string
+  /**
+   * @deprecated Use `orgId` instead. Kept for backward compatibility.
+   */
+  readonly entityId: string
   /** Authenticated user performing the action. */
-  actorId: string
+  readonly actorId: string
   /** User's role within this org. */
-  role: OrgRole
+  readonly role: OrgRole
   /** Granular permission keys. */
-  permissions: string[]
+  readonly permissions: readonly string[]
   /** Request-level correlation ID for tracing. */
-  requestId: string
+  readonly requestId: string
 }
 
 // ── Customer ────────────────────────────────────────────────────────────────

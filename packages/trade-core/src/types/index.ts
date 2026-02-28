@@ -36,7 +36,20 @@ export type TradeCommissionId = Brand<string, 'TradeCommissionId'>
 
 // ── Context ─────────────────────────────────────────────────────────────────
 
+/**
+ * Trade org context carried through every request.
+ *
+ * `orgId` is the canonical field (aligns with @nzila/org).
+ * `entityId` is retained as a deprecated alias during migration.
+ *
+ * @see {@link @nzila/org OrgContext} for the canonical base type.
+ */
 export interface TradeOrgContext {
+  /** Organisation UUID — canonical field. */
+  readonly orgId: string
+  /**
+   * @deprecated Use `orgId` instead. Kept for backward compatibility.
+   */
   readonly entityId: string
   readonly actorId: string
   readonly role: TradeOrgRole
