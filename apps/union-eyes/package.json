@@ -125,7 +125,7 @@
     "input-otp": "^1.2.4",
     "ioredis": "^5.4.1",
     "jspdf": "^4.2.0",
-    "lucide-react": "^0.436.0",
+    "lucide-react": "^0.575.0",
     "mammoth": "^1.8.0",
     "microsoft-cognitiveservices-speech-sdk": "^1.47.0",
     "next": "16.1.6",
