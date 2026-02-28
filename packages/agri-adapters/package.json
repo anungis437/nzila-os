@@ -22,6 +22,6 @@
   "devDependencies": {
     "typescript": "^5",
     "vitest": "^4.0.18",
-    "eslint": "^9"
+    "eslint": "^10"
   }
 }
