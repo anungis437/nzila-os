@@ -106,19 +106,10 @@ export async function buildAbrEvidencePack(
 
   // Map to platform evidence action context
   const govAction: GovernanceActionContext = {
-    domain: 'abr',
-    action: ctx.action,
-    entityType: ctx.entityType,
+    actionId: `abr-${ctx.action}-${ctx.entityId}`,
+    actionType: ctx.action,
     orgId: ctx.orgId,
-    actorId: ctx.actorId,
-    entityId: ctx.entityId,
-    correlationId: ctx.correlationId,
-    metadata: {
-      fromState: ctx.fromState,
-      toState: ctx.toState,
-      summary: ctx.summary,
-      ...ctx.artifacts,
-    },
+    executedBy: ctx.actorId,
   }
 
   // Build and process the evidence pack
@@ -126,11 +117,15 @@ export async function buildAbrEvidencePack(
   const evidencePack = await processEvidencePack(pack)
 
   // Seal with cryptographic envelope
+  const { createHash } = require('node:crypto') as typeof import('node:crypto')
   const sealInput = {
     packDigest: evidencePack.packId ?? ctx.entityId,
-    artifacts: Object.keys(ctx.artifacts ?? {}),
+    artifacts: Object.keys(ctx.artifacts ?? {}).map((key) => ({
+      sha256: createHash('sha256').update(String(ctx.artifacts?.[key] ?? key)).digest('hex'),
+      name: key,
+    })),
   }
-  const seal = await generateSeal(sealInput)
+  const seal = generateSeal(sealInput)
 
   // Build audit event for the evidence creation itself
   const auditEvent = buildAbrAuditEvent({

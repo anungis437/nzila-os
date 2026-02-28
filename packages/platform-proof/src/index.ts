@@ -20,3 +20,25 @@ export {
   type IntegrationProviderSnapshot,
   type IntegrationsProofPorts,
 } from './integrations-proof'
+
+export {
+  generateAbrProofSection,
+  type AbrProofSection,
+  type AbrTerminalEventStats,
+  type AbrProofPorts,
+} from './abr-proof'
+
+export {
+  generateNacpIntegrityProofSection,
+  type NacpIntegrityProofSection,
+  type NacpSealStatus,
+  type NacpAnomaly,
+  type NacpIntegrityProofPorts,
+} from './nacp-proof'
+
+export {
+  generateDataLifecycleProofSection,
+  type DataLifecycleProofSection,
+  type AppManifestSummary,
+  type DataLifecycleProofPorts,
+} from './data-lifecycle-proof'

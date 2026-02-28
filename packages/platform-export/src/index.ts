@@ -25,6 +25,12 @@ export interface OrgExportDataset {
   quotes: ExportRow[]
   auditEvents: ExportRow[]
   featureFlags: ExportRow[]
+  /** ABR cases — decisions, exports, closures */
+  abrCases: ExportRow[]
+  /** ABR evidence index — sealed evidence pack references */
+  abrEvidenceIndex: ExportRow[]
+  /** ABR-specific audit events slice */
+  abrAuditSlice: ExportRow[]
 }
 
 export interface ExportRow {
@@ -94,6 +100,14 @@ export async function exportOrgData(orgId: string): Promise<OrgExportDataset> {
       .where(eq(auditEvents.orgId, orgId)),
   ])
 
+  // ABR-specific audit slice: filter audit events for ABR domain
+  const abrAuditSlice = audit
+    .filter((e) => {
+      const action = String(e.action ?? '')
+      return action.startsWith('abr.') || action.includes('DECISION') || action.includes('CASE')
+    })
+    .map(rowToExportRow)
+
   return {
     orgName: orgRow[0]?.legalName ?? 'Unknown',
     claims: claims.map(rowToExportRow),
@@ -101,6 +115,9 @@ export async function exportOrgData(orgId: string): Promise<OrgExportDataset> {
     quotes: quotes.map(rowToExportRow),
     auditEvents: audit.map(rowToExportRow),
     featureFlags: [], // Feature flags not yet implemented — returns empty
+    abrCases: [], // Populated when ABR DB tables are available
+    abrEvidenceIndex: [], // Populated when ABR evidence index table is available
+    abrAuditSlice,
   }
 }
 

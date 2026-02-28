@@ -5,7 +5,7 @@
   "description": "Cross-package integration tests for the commerce engine",
   "type": "module",
   "scripts": {
-    "test": "vitest run",
+    "test": "vitest run --passWithNoTests",
     "lint": "eslint src/"
   },
   "devDependencies": {

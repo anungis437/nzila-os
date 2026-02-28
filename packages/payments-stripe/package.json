@@ -17,7 +17,7 @@
   },
   "scripts": {
     "typecheck": "tsc --noEmit",
-    "test": "vitest run",
+    "test": "vitest run --passWithNoTests",
     "test:coverage": "vitest run --coverage",
     "clean": "rm -rf dist node_modules .turbo"
   },

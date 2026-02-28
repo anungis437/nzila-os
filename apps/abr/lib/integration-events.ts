@@ -57,10 +57,10 @@ export function buildAbrSendRequest(req: AbrNotificationRequest): SendRequest {
   return {
     orgId: req.orgId,
     channel: req.channel,
-    recipientRef: req.recipientRef,
+    to: req.recipientRef,
     templateId: req.templateId,
     correlationId: req.correlationId,
-    payload: {
+    variables: {
       ...req.payload,
       _abrEvent: req.event,
       _app: 'abr',

@@ -44,6 +44,7 @@ export default defineConfig({
       'packages/platform-performance',
       'packages/platform-isolation',
       'packages/platform-proof',
+      'packages/data-lifecycle',
       'packages/qbo',
       'packages/fx',
       'packages/tax',

@@ -1,17 +1,17 @@
 // Observability: @nzila/os-core/telemetry — structured logging and request tracing available via os-core.
 /**
- * API — Entities CRUD
- * GET  /api/entities          → list entities for current user
- * POST /api/entities          → create entity (platform_admin, studio_admin, ops)
+ * API — Orgs CRUD
+ * GET  /api/orgs          → list orgs for current user
+ * POST /api/orgs          → create org (platform_admin, studio_admin, ops)
  */
 import { NextRequest, NextResponse } from 'next/server'
 import { platformDb } from '@nzila/db/platform'
-import { entities, entityMembers } from '@nzila/db/schema'
+import { orgs, orgMembers } from '@nzila/db/schema'
 import { eq, and } from 'drizzle-orm'
 import { z } from 'zod'
 import { authenticateUser, requirePlatformRole } from '@/lib/api-guards'
 
-const CreateEntitySchema = z.object({
+const CreateOrgSchema = z.object({
   legalName: z.string().min(1),
   jurisdiction: z.string().min(2).max(10),
   incorporationNumber: z.string().optional(),
@@ -23,41 +23,41 @@ export async function GET() {
   if (!authResult.ok) return authResult.response
   const { userId } = authResult
 
-  // Return entities where user is a member
+  // Return orgs where user is a member
   const rows = await platformDb
     .select({
-      id: entities.id,
-      legalName: entities.legalName,
-      jurisdiction: entities.jurisdiction,
-      incorporationNumber: entities.incorporationNumber,
-      fiscalYearEnd: entities.fiscalYearEnd,
-      status: entities.status,
-      createdAt: entities.createdAt,
+      id: orgs.id,
+      legalName: orgs.legalName,
+      jurisdiction: orgs.jurisdiction,
+      incorporationNumber: orgs.incorporationNumber,
+      fiscalYearEnd: orgs.fiscalYearEnd,
+      status: orgs.status,
+      createdAt: orgs.createdAt,
     })
-    .from(entities)
-    .innerJoin(entityMembers, and(
-      eq(entityMembers.orgId, entities.id),
-      eq(entityMembers.clerkUserId, userId),
-      eq(entityMembers.status, 'active'),
+    .from(orgs)
+    .innerJoin(orgMembers, and(
+      eq(orgMembers.orgId, orgs.id),
+      eq(orgMembers.clerkUserId, userId),
+      eq(orgMembers.status, 'active'),
     ))
 
   return NextResponse.json(rows)
 }
 
 export async function POST(req: NextRequest) {
-  // Only platform_admin, studio_admin, and ops can create entities
+  // Only platform_admin, studio_admin, and ops can create orgs
   const authResult = await requirePlatformRole('platform_admin', 'studio_admin', 'ops')
   if (!authResult.ok) return authResult.response
   const { userId } = authResult
 
   const body = await req.json()
-  const parsed = CreateEntitySchema.safeParse(body)
+  const parsed = CreateOrgSchema.safeParse(body)
   if (!parsed.success) {
     return NextResponse.json({ error: parsed.error.flatten() }, { status: 400 })
   }
 
-  const [entity] = await platformDb
-    .insert(entities)
+  const [org] = await platformDb
+    .insert(orgs)
     .values({
       legalName: parsed.data.legalName,
       jurisdiction: parsed.data.jurisdiction,
@@ -67,11 +67,11 @@ export async function POST(req: NextRequest) {
     .returning()
 
   // Auto-add creator as org_admin
-  await platformDb.insert(entityMembers).values({
-    orgId: entity.id,
+  await platformDb.insert(orgMembers).values({
+    orgId: org.id,
     clerkUserId: userId,
     role: 'org_admin',
   })
 
-  return NextResponse.json(entity, { status: 201 })
+  return NextResponse.json(org, { status: 201 })
 }

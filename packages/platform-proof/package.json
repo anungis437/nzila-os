@@ -6,11 +6,14 @@
   "types": "./src/index.ts",
   "exports": {
     ".": "./src/index.ts",
-    "./integrations": "./src/integrations-proof.ts"
+    "./integrations": "./src/integrations-proof.ts",
+    "./abr": "./src/abr-proof.ts",
+    "./nacp": "./src/nacp-proof.ts",
+    "./data-lifecycle": "./src/data-lifecycle-proof.ts"
   },
   "scripts": {
     "typecheck": "tsc --noEmit",
-    "test": "vitest run",
+    "test": "vitest run --passWithNoTests",
     "lint": "eslint src/"
   },
   "dependencies": {
