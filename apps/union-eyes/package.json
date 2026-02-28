@@ -131,7 +131,7 @@
     "next": "16.1.6",
     "next-intl": "^4.6.0",
     "next-themes": "^0.3.0",
-    "node-cron": "^3.0.3",
+    "node-cron": "^4.2.1",
     "node-geocoder": "^4.4.1",
     "papaparse": "^5.5.3",
     "pdf-parse": "^2.4.5",
