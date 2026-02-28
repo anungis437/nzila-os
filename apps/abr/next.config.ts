@@ -6,6 +6,9 @@ const withNextIntl = createNextIntlPlugin("./i18n.ts");
 const nextConfig: NextConfig = {
   reactStrictMode: true,
   output: process.platform === 'win32' ? undefined : 'standalone',
+  // Prevent Turbopack from bundling Node.js-only server packages.
+  // These are resolved at runtime by Node.js, not at build time.
+  serverExternalPackages: ['drizzle-orm', 'drizzle-zod', 'pg', 'postgres'],
   transpilePackages: [
     "@nzila/ui",
     "@nzila/os-core",

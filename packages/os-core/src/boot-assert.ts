@@ -18,6 +18,11 @@
  * Called automatically on module import.
  */
 function assertBootInvariants(): void {
+  // Skip during Next.js build phases — assertions run at server startup, not build time.
+  // Turbopack transpiles @nzila/os-core during build which would otherwise execute
+  // import.meta.resolve() in a context where workspace package symlinks may differ.
+  if (typeof process !== 'undefined' && process.env.NEXT_PHASE) return
+
   const errors: string[] = []
 
   // 1. DATABASE_URL must be set (lazy validation — db connects on first use)
