@@ -118,7 +118,7 @@
     "firebase-admin": "^12.7.0",
     "framer-motion": "^11.3.30",
     "geoip-lite": "^1.4.10",
-    "googleapis": "^166.0.0",
+    "googleapis": "^171.4.0",
     "graphql-yoga": "^5.18.0",
     "html2canvas": "^1.4.1",
     "import-in-the-middle": "^2.0.6",
