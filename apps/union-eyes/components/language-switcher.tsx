@@ -27,11 +27,25 @@ export default function LanguageSwitcher() {
   const currentLocale = locales.find((l) => l.code === locale) || locales[0];
 
   const switchLocale = (newLocale: string) => {
-    // Remove the current locale from the pathname and add the new one
     const segments = pathname.split("/");
-    segments[1] = newLocale; // Replace the locale segment
-    const newPath = segments.join("/");
-    
+    // segments[1] is either a locale code (e.g. "fr-CA") or a root marketing
+    // page segment (e.g. "story", "pricing").  Only replace it when it IS a
+    // locale; otherwise prepend the new locale to the full path.
+    const knownLocaleCodes = locales.map((l) => l.code);
+    const hasLocalePrefix = knownLocaleCodes.includes(segments[1]);
+
+    let newPath: string;
+    if (hasLocalePrefix) {
+      // /fr-CA/story  →  /en-CA/story
+      segments[1] = newLocale;
+      newPath = segments.join("/");
+    } else {
+      // /story  →  /fr-CA/story
+      // /       →  /fr-CA
+      const rest = pathname === "/" ? "" : pathname;
+      newPath = `/${newLocale}${rest}`;
+    }
+
     // Force a full page reload to ensure translations are updated
     // eslint-disable-next-line react-hooks/immutability
     window.location.href = newPath;

@@ -79,7 +79,7 @@ export default async function AdminLayout({ children, params }: AdminLayoutProps
       description: "System activity logs" 
     },
     { 
-      href: `/${locale}/admin/settings`, 
+      href: `/${locale}/dashboard/settings`, 
       label: "Settings", 
       icon: Settings,
       description: "System configuration" 

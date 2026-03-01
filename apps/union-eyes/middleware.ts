@@ -96,6 +96,8 @@ const isPublicRoute = createRouteMatcher([
   "/:locale/signup(.*)",
   "/:locale/sign-in(.*)",
   "/:locale/sign-up(.*)",
+  // Debug (dev only — remove before production)
+  "/api/auth/debug-role",
   // Marketing pages (no locale prefix)
   "/story(.*)",
   "/pricing(.*)",
@@ -103,6 +105,13 @@ const isPublicRoute = createRouteMatcher([
   "/status(.*)",
   "/case-studies(.*)",
   "/pilot-request(.*)",
+  // Locale-prefixed marketing pages (e.g. /fr-CA/story, /en-CA/pricing)
+  "/:locale/story(.*)",
+  "/:locale/pricing(.*)",
+  "/:locale/contact(.*)",
+  "/:locale/status(.*)",
+  "/:locale/case-studies(.*)",
+  "/:locale/pilot-request(.*)",
 ]);
 
 // Clerk's auth pages live at root (no locale prefix) — skip intl redirect for them
@@ -214,7 +223,20 @@ export default clerkMiddleware(async (auth, req) => {
       return withRequestId(NextResponse.next(), requestId);
     }
 
-    await auth.protect();
+    // For API routes: return 401 JSON instead of redirecting/rewriting.
+    // auth.protect() in dev mode performs a "dev-browser rewrite" that renders
+    // the homepage with locale="clerk_<handshake-token>", which 404s.
+    // Using auth() directly lets us return a clean 401 JSON response.
+    const { userId } = await auth();
+    if (!userId) {
+      return withRequestId(
+        new NextResponse(JSON.stringify({ error: 'Unauthorized' }), {
+          status: 401,
+          headers: { 'Content-Type': 'application/json' },
+        }),
+        requestId,
+      );
+    }
     return withRequestId(NextResponse.next(), requestId);
   }
 

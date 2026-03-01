@@ -1361,5 +1361,110 @@
     "alerts": "Alerts",
     "preferences": "Preferences",
     "viewProfile": "View Profile"
+  },
+  "marketing": {
+    "nav": {
+      "home": "Home",
+      "story": "Our Story",
+      "pricing": "Pricing",
+      "caseStudies": "Case Studies",
+      "status": "Status",
+      "contact": "Contact",
+      "requestPilot": "Request Pilot",
+      "signIn": "Sign In"
+    },
+    "home": {
+      "badge": "Built with Unions, Not for Unions",
+      "heroHeading": "Empower Your Union With Intelligent Tools",
+      "heroDescription": "AI-powered grievance management, claims processing, and member engagement \u2014 one platform for 4,773 union orgs.",
+      "ctaPrimary": "Request a Pilot",
+      "ctaSecondary": "Our Story",
+      "statsLabel": {
+        "unionEntities": "Union Entities",
+        "timeSaved": "Time Saved",
+        "fasterResponses": "Faster Responses",
+        "platformUptime": "Platform Uptime"
+      },
+      "missionBadge": "Our Mission",
+      "missionHeading": "Technology That Serves Workers First",
+      "missionDescription": "Union Eyes was born in 2023 when a healthcare steward lost a winnable grievance because her notes were trapped in a spreadsheet. The employer had a million-dollar HR system. She had a notebook. We built this platform to level the playing field \u2014 because every worker deserves powerful tools, not just management.",
+      "value1": "Human-Centered",
+      "value2": "No Surveillance",
+      "value3": "Democratic Governance",
+      "value4": "Worker Owned Data",
+      "unionRoles": "Union Roles",
+      "languages": "Languages",
+      "certLabel": "PIPEDA Compliant"
+    },
+    "story": {
+      "badge": "Built with Unions, Not for Unions",
+      "heroHeading": "Union Eyes exists because workers deserve better than pen and paper",
+      "heroDescription": "This platform was co-designed with union stewards who spent years managing grievances in spreadsheets, losing documents, and watching cases fall through the cracks while employers had million-dollar HR systems.",
+      "readMore": "Read more",
+      "backToHome": "Back to home",
+      "pageTitle": "Our Story | Union Eyes",
+      "pageDescription": "Union Eyes was built by people who understand labor, not Silicon Valley. This is why we exist."
+    },
+    "pricing": {
+      "heroHeading": "Simple, Transparent Pricing",
+      "heroDescription": "No hidden fees. No tiered structures designed to confuse. Just fair pricing that scales with your union.",
+      "monthly": "Monthly",
+      "yearly": "Yearly",
+      "perMonth": "/ month",
+      "perYear": "/ year",
+      "getStarted": "Get Started",
+      "pageTitle": "Pricing | Union Eyes",
+      "pageDescription": "Simple, transparent pricing for unions of all sizes."
+    },
+    "contact": {
+      "heroHeading": "Get in touch",
+      "heroDescription": "We don\u2019t do high-pressure sales. We\u2019re here to answer questions and have a real conversation about your needs.",
+      "sendMessage": "Send us a message",
+      "otherWays": "Other ways to reach us",
+      "emailLabel": "Email",
+      "phoneLabel": "Phone",
+      "officeLabel": "Office",
+      "hoursLabel": "Office Hours",
+      "pageTitle": "Contact Us | Union Eyes",
+      "pageDescription": "Get in touch with the Union Eyes team."
+    },
+    "caseStudies": {
+      "heroHeading": "Unions Making a Difference",
+      "heroDescription": "Real case studies on how unions use Union Eyes to improve outcomes.",
+      "viewAll": "View all",
+      "readMore": "Read case study",
+      "pageTitle": "Case Studies | Union Eyes",
+      "pageDescription": "Discover how unions across Canada use Union Eyes."
+    },
+    "pilotRequest": {
+      "heroHeading": "Request Your Pilot",
+      "heroDescription": "Join forward-thinking unions modernizing their operations with Union Eyes.",
+      "pageTitle": "Request a Pilot | Union Eyes",
+      "pageDescription": "Submit a pilot program application for Union Eyes."
+    },
+    "status": {
+      "heroHeading": "System Status",
+      "heroDescription": "Real-time status of Union Eyes services and infrastructure",
+      "pageTitle": "System Status | Union Eyes",
+      "pageDescription": "Real-time status of Union Eyes services."
+    },
+    "footer": {
+      "description": "AI-powered union management for 4,773 union organizations across Canada.",
+      "product": "Product",
+      "company": "Company",
+      "legal": "Legal",
+      "features": "Features",
+      "pricing": "Pricing",
+      "caseStudies": "Case Studies",
+      "status": "Status",
+      "story": "Our Story",
+      "contact": "Contact",
+      "pilotRequest": "Request Pilot",
+      "privacy": "Privacy",
+      "terms": "Terms of Service",
+      "security": "Security",
+      "rights": "All rights reserved.",
+      "tagline": "Built with unions, not for unions."
+    }
   }
 }

@@ -1,23 +1,72 @@
 {
   "$schema": "https://turbo.build/schema.json",
   "globalDependencies": ["**/.env.*local"],
+  "ui": "stream",
+  "concurrency": "50%",
   "tasks": {
     "build": {
       "dependsOn": ["^build"],
-      "outputs": [".next/**", "!.next/cache/**", "dist/**"]
+      "inputs": [
+        "src/**",
+        "app/**",
+        "components/**",
+        "lib/**",
+        "public/**",
+        "package.json",
+        "tsconfig.json",
+        "next.config.*",
+        "tailwind.config.*",
+        "postcss.config.*"
+      ],
+      "outputs": [".next/**", "!.next/cache/**", "dist/**"],
+      "env": [
+        "NEXT_PUBLIC_CLERK_PUBLISHABLE_KEY",
+        "NEXT_PUBLIC_CONSOLE_URL",
+        "NEXT_PUBLIC_APP_URL",
+        "CLERK_SECRET_KEY",
+        "NODE_ENV"
+      ]
     },
     "dev": {
       "cache": false,
       "persistent": true
     },
     "lint": {
-      "dependsOn": ["^build"]
+      "dependsOn": ["^build"],
+      "inputs": [
+        "src/**",
+        "app/**",
+        "components/**",
+        "lib/**",
+        "*.config.*",
+        "package.json",
+        "tsconfig.json"
+      ]
     },
     "typecheck": {
-      "dependsOn": ["^build"]
+      "dependsOn": ["^build"],
+      "inputs": [
+        "src/**",
+        "app/**",
+        "components/**",
+        "lib/**",
+        "package.json",
+        "tsconfig.json"
+      ]
     },
     "test": {
-      "dependsOn": ["^build"]
+      "dependsOn": ["^build"],
+      "inputs": [
+        "src/**",
+        "app/**",
+        "lib/**",
+        "__tests__/**",
+        "*.test.*",
+        "*.spec.*",
+        "package.json",
+        "tsconfig.json",
+        "vitest.config.*"
+      ]
     },
     "test:coverage": {
       "dependsOn": ["^build"],

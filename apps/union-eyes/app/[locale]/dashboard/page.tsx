@@ -26,7 +26,7 @@ import {
 
 // -- Role-tier classification -------------------------------------------------
 
-/** All Nzila Ventures (app operations) roles */
+/** All Nzila Ventures (app operations) roles + org-admin */
 const NZILA_ROLES: string[] = [
   UserRole.APP_OWNER,
   UserRole.COO,
@@ -46,6 +46,7 @@ const NZILA_ROLES: string[] = [
   UserRole.CONTENT_MANAGER,
   UserRole.TRAINING_COORDINATOR,
   UserRole.SYSTEM_ADMIN,
+  UserRole.ADMIN,
 ];
 
 /** CLC (Congress) level roles */

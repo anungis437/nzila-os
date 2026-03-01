@@ -59,6 +59,12 @@ export const PUBLIC_API_ROUTES = new Set([
   // DEV/TESTING ENDPOINTS
   // Note: Sentry test endpoint removed for production security
   // ========================================================================
+
+  // ========================================================================
+  // DEV DEBUGGING (remove before production)
+  // Justification: Must be public so currentUser() resolves via cookie
+  // ========================================================================
+  '/api/auth/debug-role',      // Role inspection endpoint (dev only)
 ]);
 
 /**

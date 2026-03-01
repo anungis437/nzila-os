@@ -518,5 +518,110 @@
         }
       }
     }
+  },
+  "marketing": {
+    "nav": {
+      "home": "Accueil",
+      "story": "Notre histoire",
+      "pricing": "Tarification",
+      "caseStudies": "\u00c9tudes de cas",
+      "status": "Statut",
+      "contact": "Contact",
+      "requestPilot": "Demander un projet pilote",
+      "signIn": "Se connecter"
+    },
+    "home": {
+      "badge": "Construit avec les syndicats, pas pour eux",
+      "heroHeading": "Outillez votre syndicat avec des outils intelligents",
+      "heroDescription": "Gestion de griefs propuls\u00e9e par IA, traitement des r\u00e9clamations et mobilisation des membres \u2014 une plateforme pour 4\u00a0773 syndicats.",
+      "ctaPrimary": "Demander un projet pilote",
+      "ctaSecondary": "Notre histoire",
+      "statsLabel": {
+        "unionEntities": "Entit\u00e9s syndicales",
+        "timeSaved": "Temps \u00e9conomis\u00e9",
+        "fasterResponses": "R\u00e9ponses plus rapides",
+        "platformUptime": "Disponibilit\u00e9 de la plateforme"
+      },
+      "missionBadge": "Notre mission",
+      "missionHeading": "Une technologie au service des travailleurs en premier",
+      "missionDescription": "Union Eyes est n\u00e9 en 2023 lorsqu'une d\u00e9l\u00e9gu\u00e9e syndicale du secteur de la sant\u00e9 a perdu un grief gagnant parce que ses notes \u00e9taient dans un tableur. L'employeur avait un syst\u00e8me RH \u00e0 un million de dollars. Elle avait un cahier. Nous avons b\u00e2ti cette plateforme pour r\u00e9tablir l'\u00e9quilibre \u2014 parce que chaque travailleur m\u00e9rite des outils puissants.",
+      "value1": "Centr\u00e9 sur l'humain",
+      "value2": "Pas de surveillance",
+      "value3": "Gouvernance d\u00e9mocratique",
+      "value4": "Donn\u00e9es des travailleurs",
+      "unionRoles": "R\u00f4les syndicaux",
+      "languages": "Langues",
+      "certLabel": "Conforme LPRPDE"
+    },
+    "story": {
+      "badge": "Construit avec les syndicats, pas pour eux",
+      "heroHeading": "Union Eyes existe parce que les travailleurs m\u00e9ritent mieux que le papier et le stylo",
+      "heroDescription": "Cette plateforme a \u00e9t\u00e9 co-con\u00e7ue avec des d\u00e9l\u00e9gu\u00e9s syndicaux qui ont pass\u00e9 des ann\u00e9es \u00e0 g\u00e9rer des griefs dans des tableurs, \u00e0 perdre des documents et \u00e0 voir des dossiers passer \u00e0 travers les mailles du filet pendant que les employeurs avaient des syst\u00e8mes RH \u00e0 un million de dollars.",
+      "readMore": "En savoir plus",
+      "backToHome": "Retour \u00e0 l'accueil",
+      "pageTitle": "Notre histoire | Union Eyes",
+      "pageDescription": "Union Eyes a \u00e9t\u00e9 construit par des gens qui comprennent le travail, pas la Silicon Valley."
+    },
+    "pricing": {
+      "heroHeading": "Tarification simple et transparente",
+      "heroDescription": "Pas de frais cach\u00e9s. Pas de structures \u00e0 niveaux con\u00e7ues pour confondre. Une tarification \u00e9quitable qui \u00e9volue avec votre syndicat.",
+      "monthly": "Mensuel",
+      "yearly": "Annuel",
+      "perMonth": "/ mois",
+      "perYear": "/ an",
+      "getStarted": "Commencer",
+      "pageTitle": "Tarification | Union Eyes",
+      "pageDescription": "Tarification simple et transparente pour les syndicats de toutes tailles."
+    },
+    "contact": {
+      "heroHeading": "Contactez-nous",
+      "heroDescription": "Nous ne faisons pas de ventes sous pression. Nous sommes l\u00e0 pour r\u00e9pondre \u00e0 vos questions et avoir une vraie conversation sur vos besoins.",
+      "sendMessage": "Envoyez-nous un message",
+      "otherWays": "Autres fa\u00e7ons de nous joindre",
+      "emailLabel": "Courriel",
+      "phoneLabel": "T\u00e9l\u00e9phone",
+      "officeLabel": "Bureau",
+      "hoursLabel": "Heures de bureau",
+      "pageTitle": "Contactez-nous | Union Eyes",
+      "pageDescription": "Joignez l'\u00e9quipe d'Union Eyes pour des questions sur notre plateforme."
+    },
+    "caseStudies": {
+      "heroHeading": "Syndicats qui se d\u00e9marquent",
+      "heroDescription": "\u00c9tudes de cas concr\u00e8tes sur la fa\u00e7on dont les syndicats utilisent Union Eyes pour am\u00e9liorer leurs r\u00e9sultats.",
+      "viewAll": "Voir tous",
+      "readMore": "Lire l'\u00e9tude de cas",
+      "pageTitle": "\u00c9tudes de cas | Union Eyes",
+      "pageDescription": "D\u00e9couvrez comment les syndicats \u00e0 travers le Canada utilisent Union Eyes."
+    },
+    "pilotRequest": {
+      "heroHeading": "Demandez votre projet pilote",
+      "heroDescription": "Rejoignez des syndicats progressistes qui modernisent leurs op\u00e9rations avec Union Eyes.",
+      "pageTitle": "Demander un projet pilote | Union Eyes",
+      "pageDescription": "Soumettez une demande de projet pilote pour Union Eyes."
+    },
+    "status": {
+      "heroHeading": "Statut du syst\u00e8me",
+      "heroDescription": "\u00c9tat en temps r\u00e9el des services et de l'infrastructure d'Union Eyes",
+      "pageTitle": "Statut du syst\u00e8me | Union Eyes",
+      "pageDescription": "\u00c9tat en temps r\u00e9el des services d'Union Eyes."
+    },
+    "footer": {
+      "description": "Gestion syndicale propuls\u00e9e par IA pour 4\u00a0773 organisations syndicales au Canada.",
+      "product": "Produit",
+      "company": "Entreprise",
+      "legal": "L\u00e9gal",
+      "features": "Fonctionnalit\u00e9s",
+      "pricing": "Tarification",
+      "caseStudies": "\u00c9tudes de cas",
+      "status": "Statut",
+      "story": "Notre histoire",
+      "contact": "Contact",
+      "pilotRequest": "Demander un pilote",
+      "privacy": "Confidentialit\u00e9",
+      "terms": "Conditions d'utilisation",
+      "security": "S\u00e9curit\u00e9",
+      "rights": "Tous droits r\u00e9serv\u00e9s.",
+      "tagline": "Construit avec les syndicats, pas pour eux."
+    }
   }
 }

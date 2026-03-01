@@ -407,6 +407,25 @@ const nextConfig: NextConfig = {
       }),
     );
 
+    // Suppress "Critical dependency" warnings from OpenTelemetry instrumentation
+    // These are expected: OTel uses dynamic require() for auto-instrumentation hooks
+    // and they never execute in the webpack bundle (server externals handle them)
+    config.ignoreWarnings = [
+      ...(config.ignoreWarnings || []),
+      {
+        module: /require-in-the-middle/,
+        message: /Critical dependency/,
+      },
+      {
+        module: /@opentelemetry\/instrumentation/,
+        message: /Critical dependency/,
+      },
+      {
+        module: /boot-assert/,
+        message: /Critical dependency.*import\.meta/,
+      },
+    ];
+
     // Externalize server-only packages to prevent bundling Node.js builtin dependencies
     if (isServer) {
       config.externals = config.externals || {};

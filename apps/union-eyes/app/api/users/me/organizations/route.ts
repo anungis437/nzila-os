@@ -3,6 +3,9 @@
  *
  * Returns the authenticated user's organizations and memberships.
  * Queries Drizzle/PostgreSQL directly (replaces Django proxy).
+ *
+ * Platform admins (PLATFORM_ADMIN_USER_IDS) see ALL organizations
+ * so they can switch into any org context for support / administration.
  */
 import { NextRequest, NextResponse } from 'next/server';
 import { auth } from '@clerk/nextjs/server';
@@ -15,6 +18,15 @@ const logger = createLogger('users:me:organizations')
 
 export const dynamic = 'force-dynamic';
 
+/** Check if the given userId is in the PLATFORM_ADMIN_USER_IDS env var. */
+function isPlatformAdmin(userId: string): boolean {
+  const ids = (process.env.PLATFORM_ADMIN_USER_IDS ?? '')
+    .split(',')
+    .map(s => s.trim())
+    .filter(Boolean);
+  return ids.includes(userId);
+}
+
 export async function GET(_req: NextRequest) {
   try {
     const { userId } = await auth();
@@ -22,22 +34,32 @@ export async function GET(_req: NextRequest) {
       return NextResponse.json({ error: 'Unauthorized' }, { status: 401 });
     }
 
+    const isAdmin = isPlatformAdmin(userId);
+
     // Fetch user's organization memberships
     const memberships = await db
       .select()
       .from(organizationMembers)
       .where(eq(organizationMembers.userId, userId));
 
-    // Fetch the organizations the user belongs to
-    const orgIds = [...new Set(memberships.map(m => m.organizationId))];
     // eslint-disable-next-line @typescript-eslint/no-explicit-any
     let orgs: any[] = [];
 
-    if (orgIds.length > 0) {
-      // organizationMembers.organizationId is a slug/text, not UUID
-      // We need to match against organizations by slug or id
-      const allOrgs = await db.select().from(organizations);
-      orgs = allOrgs.filter(o => orgIds.includes(o.id) || orgIds.includes(o.slug ?? ''));
+    if (isAdmin) {
+      // Platform admins can see ALL organizations
+      orgs = await db.select().from(organizations);
+      logger.info('[/api/users/me/organizations] Platform admin — returning all orgs', {
+        userId,
+        count: orgs.length,
+      });
+    } else {
+      // Regular users only see orgs they are members of
+      const orgIds = [...new Set(memberships.map(m => m.organizationId))];
+
+      if (orgIds.length > 0) {
+        const allOrgs = await db.select().from(organizations);
+        orgs = allOrgs.filter(o => orgIds.includes(o.id) || orgIds.includes(o.slug ?? ''));
+      }
     }
 
     return NextResponse.json({

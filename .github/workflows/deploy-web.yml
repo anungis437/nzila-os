@@ -17,8 +17,45 @@ env:
   IMAGE: nzilastagingacr.azurecr.io/nzila-os-web
 
 jobs:
+  pre-deploy-gates:
+    runs-on: ubuntu-latest
+    name: Pre-Deploy Gates
+    steps:
+      - uses: actions/checkout@v4
+
+      - uses: pnpm/action-setup@41ff72655975bd51cab0327fa583b6e92b6d3061 # v4.2.0
+        with:
+          version: 10.11.0
+
+      - uses: actions/setup-node@v4
+        with:
+          node-version: '22'
+          cache: 'pnpm'
+
+      - name: Install dependencies
+        run: pnpm install --frozen-lockfile
+
+      - name: Run contract tests (fail closed)
+        run: pnpm contract:test
+
+      - name: SLO gate (fail closed)
+        run: node --import tsx scripts/slo-gate.ts --env=prod
+
+      - name: Generate SLO summary
+        if: always()
+        run: node --import tsx scripts/slo-gate.ts --env=prod > slo-summary.txt 2>&1 || true
+
+      - name: Upload SLO summary
+        if: always()
+        uses: actions/upload-artifact@v4
+        with:
+          name: slo-summary-web
+          path: slo-summary.txt
+          retention-days: 90
+
   build-and-deploy:
     runs-on: ubuntu-latest
+    needs: pre-deploy-gates
     name: Build & Deploy Web
     steps:
       - uses: actions/checkout@v4

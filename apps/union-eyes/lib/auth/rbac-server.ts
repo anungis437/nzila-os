@@ -25,13 +25,36 @@ function resolveUserRole(raw: string | null | undefined): UserRole | null {
   if (!raw) return null;
   const key = raw.toLowerCase();
   if (USER_ROLE_VALUES.has(key)) return key as UserRole;
-  // Legacy aliases
+  // Legacy + cross-app aliases
   const aliases: Record<string, UserRole> = {
+    // Legacy union names
     'super_admin': UserRole.ADMIN,
     'union_steward': UserRole.STEWARD,
     'union_officer': UserRole.OFFICER,
+    // Common shortcuts
+    'owner': UserRole.APP_OWNER,
+    'admin_owner': UserRole.APP_OWNER,
+    // system_admin is already in UserRole, but keep alias in case stored differently
+    'sysadmin': UserRole.SYSTEM_ADMIN,
   };
   return aliases[key] ?? null;
+}
+
+/**
+ * Map Nzila platform roles (used by the console / CFO apps via
+ * publicMetadata.nzilaRole) to the union-eyes UserRole equivalents.
+ * Returns null for viewer / non-elevated roles so they don't bypass the
+ * default member resolution.
+ */
+function resolveNzilaRole(raw: string | null | undefined): UserRole | null {
+  if (!raw) return null;
+  const map: Record<string, UserRole> = {
+    'platform_admin': UserRole.APP_OWNER,
+    'studio_admin': UserRole.CTO,
+    'ops': UserRole.PLATFORM_LEAD,
+    'analyst': UserRole.DATA_ANALYST,
+  };
+  return map[raw.toLowerCase()] ?? null;
 }
 
 /**
@@ -49,6 +72,18 @@ export async function getUserRole(
   organizationId?: string | null,
 ): Promise<UserRole> {
   try {
+    // 0. PLATFORM_ADMIN_USER_IDS — explicit override, highest priority.
+    //    Set PLATFORM_ADMIN_USER_IDS=user_abc,user_xyz in .env.local to
+    //    grant app_owner rights regardless of DB or Clerk metadata state.
+    const platformAdminIds = (process.env.PLATFORM_ADMIN_USER_IDS ?? '')
+      .split(',')
+      .map((s) => s.trim())
+      .filter(Boolean);
+    if (platformAdminIds.includes(userId)) {
+      logger.info('[getUserRole] Granting app_owner via PLATFORM_ADMIN_USER_IDS', { detail: userId });
+      return UserRole.APP_OWNER;
+    }
+
     // 1. Try organization_users (canonical RBAC table)
     logger.info('[getUserRole] Step 1: querying organization_users for', { detail: userId });
     const orgUser = await db
@@ -81,10 +116,19 @@ export async function getUserRole(
 
     // 3. Fallback to Clerk publicMetadata
     const user = await currentUser();
+
+    // 3a. publicMetadata.role (union-eyes native key)
     const fromClerk = resolveUserRole(
       user?.publicMetadata?.role as string | undefined,
     );
     if (fromClerk) return fromClerk;
+
+    // 3b. publicMetadata.nzilaRole (used by the rest of the Nzila platform —
+    //     console, CFO, partners apps all write to this key)
+    const fromNzilaRole = resolveNzilaRole(
+      user?.publicMetadata?.nzilaRole as string | undefined,
+    );
+    if (fromNzilaRole) return fromNzilaRole;
 
     // Default role
     return UserRole.MEMBER;

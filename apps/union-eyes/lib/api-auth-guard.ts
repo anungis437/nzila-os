@@ -446,6 +446,42 @@ export async function getUserContext(): Promise<UnifiedUserContext | null> {
   }
 
   if (!membership) {
+    // ─── Fallback: PLATFORM_ADMIN_USER_IDS env var ───────────────────
+    const platformAdminIds = (process.env.PLATFORM_ADMIN_USER_IDS || '')
+      .split(',')
+      .map(id => id.trim())
+      .filter(Boolean);
+
+    if (platformAdminIds.includes(userId)) {
+      logger.info('[Auth] getUserContext: user matched PLATFORM_ADMIN_USER_IDS, granting app_owner', { userId });
+      return {
+        userId,
+        organizationId: orgId || 'platform',
+        roles: ['app_owner'],
+        permissions: getPermissionsForRole('app_owner'),
+      };
+    }
+
+    // ─── Fallback: Clerk publicMetadata ──────────────────────────────
+    try {
+      const clerkUser = await clerkCurrentUser();
+      const metadata = clerkUser?.publicMetadata as Record<string, unknown> | undefined;
+      const clerkRole = (metadata?.role || metadata?.nzilaRole) as string | undefined;
+
+      if (clerkRole) {
+        const normalized = normalizeRole(clerkRole);
+        logger.info('[Auth] getUserContext: no DB membership, using Clerk metadata role', { userId, clerkRole, normalized });
+        return {
+          userId,
+          organizationId: orgId || 'platform',
+          roles: [normalized],
+          permissions: getPermissionsForRole(normalized),
+        };
+      }
+    } catch (err) {
+      logger.warn('[Auth] getUserContext: failed to read Clerk metadata', { userId, error: String(err) });
+    }
+
     return null;
   }
 

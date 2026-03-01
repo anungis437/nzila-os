@@ -5,8 +5,8 @@
   "type": "module",
   "main": "./src/index.ts",
   "scripts": {
-    "dev": "tsx watch src/index.ts",
-    "start": "node --import tsx src/index.ts",
+    "dev": "tsx watch --env-file=.env src/index.ts",
+    "start": "node --env-file=.env --import tsx src/index.ts",
     "typecheck": "tsc --noEmit",
     "test": "vitest run --passWithNoTests",
     "build": "echo 'orchestrator-api: no build step (tsx runtime)'"

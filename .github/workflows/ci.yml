@@ -9,6 +9,9 @@ on:
 permissions:
   contents: read
 
+env:
+  TURBO_TELEMETRY_DISABLED: 1
+
 jobs:
   lint-and-typecheck:
     runs-on: ubuntu-latest
@@ -29,6 +32,15 @@ jobs:
 
       - name: Install dependencies
         run: pnpm install --frozen-lockfile
+
+      - name: Restore turbo cache
+        uses: actions/cache@v4
+        with:
+          path: node_modules/.cache/turbo
+          key: turbo-lint-${{ runner.os }}-${{ hashFiles('pnpm-lock.yaml') }}-${{ github.sha }}
+          restore-keys: |
+            turbo-lint-${{ runner.os }}-${{ hashFiles('pnpm-lock.yaml') }}-
+            turbo-lint-${{ runner.os }}-
 
       - name: Lint
         run: pnpm lint
@@ -103,12 +115,22 @@ jobs:
       - name: Install dependencies
         run: pnpm install --frozen-lockfile
 
+      - name: Restore turbo cache
+        uses: actions/cache@v4
+        with:
+          path: node_modules/.cache/turbo
+          key: turbo-build-${{ runner.os }}-${{ hashFiles('pnpm-lock.yaml') }}-${{ github.sha }}
+          restore-keys: |
+            turbo-build-${{ runner.os }}-${{ hashFiles('pnpm-lock.yaml') }}-
+            turbo-build-${{ runner.os }}-
+
       - name: Build
         run: pnpm build
         env:
           NEXT_PUBLIC_CONSOLE_URL: https://console.nzila.app
           NEXT_PUBLIC_CLERK_PUBLISHABLE_KEY: ${{ secrets.CLERK_PUBLISHABLE_KEY }}
           CLERK_SECRET_KEY: ${{ secrets.CLERK_SECRET_KEY }}
+          NODE_OPTIONS: "--max-old-space-size=8192"
 
   ml-gates:
     runs-on: ubuntu-latest

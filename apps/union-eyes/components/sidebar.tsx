@@ -54,10 +54,20 @@ import { useOrganization } from "@/contexts/organization-context";
 
 // ── Nzila platform roles (super-org level — no union nav) ────────────────────
 const NZILA_ROLES = [
-  "app_owner", "coo", "cto", "platform_lead",
-  "customer_success_director", "support_manager",
-  "data_analytics_manager", "billing_manager",
+  // Strategic leadership
+  "app_owner", "coo", "cto",
+  // Operational leadership
+  "platform_lead", "customer_success_director",
+  // Department managers
+  "support_manager", "data_analytics_manager", "billing_manager",
+  "integration_manager", "compliance_manager", "security_manager",
+  // Operations staff
   "support_agent", "data_analyst", "billing_specialist",
+  "integration_specialist",
+  // Content & training
+  "content_manager", "training_coordinator",
+  // System & org-level admin
+  "admin", "system_admin",
 ] as const;
 
 type _NzilaRole = typeof NZILA_ROLES[number];
@@ -155,6 +165,9 @@ export default function Sidebar({ profile: _profile, userEmail, whopMonthlyPlanI
         { href: `/${locale}/dashboard/support`, icon: <AlertTriangle size={16} />, label: 'Support Center', roles: ["app_owner", "coo", "support_manager", "support_agent"] },
         { href: `/${locale}/dashboard/analytics-admin`, icon: <BarChart3 size={16} />, label: 'Platform Analytics', roles: ["app_owner", "coo", "cto", "data_analytics_manager", "data_analyst"] },
         { href: `/${locale}/dashboard/billing-admin`, icon: <DollarSign size={16} />, label: 'Billing & Subscriptions', roles: ["app_owner", "coo", "billing_manager", "billing_specialist"] },
+        { href: `/${locale}/dashboard/integrations`, icon: <Network size={16} />, label: 'Integrations & APIs', roles: ["app_owner", "coo", "cto", "integration_manager", "integration_specialist"] },
+        { href: `/${locale}/dashboard/security`, icon: <Shield size={16} />, label: 'Security & Compliance', roles: ["app_owner", "coo", "cto", "compliance_manager", "security_manager"] },
+        { href: `/${locale}/dashboard/content`, icon: <BookOpen size={16} />, label: 'Content & Training', roles: ["app_owner", "coo", "content_manager", "training_coordinator"] },
       ],
     },
     {
