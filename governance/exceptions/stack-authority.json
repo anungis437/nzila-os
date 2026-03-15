@@ -67,6 +67,18 @@
       "owner": "@nzila/union-eyes",
       "justification": "Analytics overview — read-only aggregation of grievances, claims, organizationMembers. withApi auth enforced (minRole: steward). No mutations.",
       "expiresOn": "2026-12-31"
+    },
+    {
+      "path": "apps/union-eyes/app/api/v2/arbitration/precedents/**/route.ts",
+      "owner": "@nzila/union-eyes",
+      "justification": "Arbitration precedents v2 — Django proxy routes with withApi auth enforced (minRole: steward).",
+      "expiresOn": "2026-12-31"
+    },
+    {
+      "path": "apps/union-eyes/app/api/v2/precedents/**/route.ts",
+      "owner": "@nzila/union-eyes",
+      "justification": "Precedents v2 — mixed Django proxy and direct DB routes with withApi auth enforced.",
+      "expiresOn": "2026-12-31"
     }
   ]
 }
