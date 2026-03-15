@@ -1,28 +1,53 @@
-/**
- * GET PATCH DELETE /api/pension/trustee-meetings/[id]
- * -> Django billing: /api/billing/per-capita-remittances/
- * NOTE: auto-resolved from pension/trustee-meetings/[id]
- * Auto-migrated by scripts/migrate_routes.py
- */
-import { NextRequest } from 'next/server';
-import { djangoProxy } from '@/lib/django-proxy';
+import { withApi } from '@/lib/api/framework';
+import { db } from '@/db/db';
+import { pensionTrusteeMeetings } from '@/db/schema';
+import { eq, and } from 'drizzle-orm';
 
 export const dynamic = 'force-dynamic';
 
-type Params = { params: Promise<{ id: string }> };
+export const GET = withApi(
+  {
+    auth: { required: true, minRole: 'member' },
+    openapi: { tags: ['Pension'], summary: 'Get trustee meeting', description: 'Get a single trustee meeting by ID' },
+  },
+  async ({ params, organizationId }) => {
+    const id = params.id;
+    const [meeting] = await db
+      .select()
+      .from(pensionTrusteeMeetings)
+      .where(and(eq(pensionTrusteeMeetings.id, id), eq(pensionTrusteeMeetings.organizationId, organizationId!)));
+    return { data: meeting ?? null };
+  },
+);
 
-export async function GET(req: NextRequest, { params }: Params) {
-  const { id } = await params;
-  return djangoProxy(req, '/api/billing/per-capita-remittances/' + id + '/');
-}
+export const PATCH = withApi(
+  {
+    auth: { required: true, minRole: 'steward' },
+    openapi: { tags: ['Pension'], summary: 'Update trustee meeting', description: 'Update an existing trustee meeting' },
+  },
+  async ({ params, body, organizationId }) => {
+    const id = params.id;
+    const [meeting] = await db
+      .update(pensionTrusteeMeetings)
+      .set({ ...body, updatedAt: new Date() })
+      .where(and(eq(pensionTrusteeMeetings.id, id), eq(pensionTrusteeMeetings.organizationId, organizationId!)))
+      .returning();
+    return { data: meeting ?? null };
+  },
+);
 
-export async function PATCH(req: NextRequest, { params }: Params) {
-  const { id } = await params;
-  return djangoProxy(req, '/api/billing/per-capita-remittances/' + id + '/', { method: 'PATCH' });
-}
-
-export async function DELETE(req: NextRequest, { params }: Params) {
-  const { id } = await params;
-  return djangoProxy(req, '/api/billing/per-capita-remittances/' + id + '/', { method: 'DELETE' });
-}
+export const DELETE = withApi(
+  {
+    auth: { required: true, minRole: 'steward' },
+    openapi: { tags: ['Pension'], summary: 'Delete trustee meeting', description: 'Delete a trustee meeting' },
+  },
+  async ({ params, organizationId }) => {
+    const id = params.id;
+    const [meeting] = await db
+      .delete(pensionTrusteeMeetings)
+      .where(and(eq(pensionTrusteeMeetings.id, id), eq(pensionTrusteeMeetings.organizationId, organizationId!)))
+      .returning();
+    return { data: meeting ?? null };
+  },
+);
 

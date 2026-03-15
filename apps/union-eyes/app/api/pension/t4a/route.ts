@@ -1,8 +1,3 @@
-/**
- * GET POST /api/tax/t4a
- * T4A tax records — list and generate.
- * Backed by pensionT4aRecords table (Drizzle ORM).
- */
 import { withApi } from '@/lib/api/framework';
 import { db } from '@/db/db';
 import { pensionT4aRecords } from '@/db/schema';
@@ -13,9 +8,9 @@ export const dynamic = 'force-dynamic';
 export const GET = withApi(
   {
     auth: { required: true, minRole: 'member' },
-    openapi: { tags: ['Tax'], summary: 'List T4A records', description: 'List T4A tax records for the organization' },
+    openapi: { tags: ['Pension'], summary: 'List T4A records', description: 'List all T4A tax records for the organization' },
   },
-  async ({ organizationId }) => {
+  async ({ request, organizationId }) => {
     const records = await db
       .select()
       .from(pensionT4aRecords)
@@ -28,7 +23,7 @@ export const GET = withApi(
 export const POST = withApi(
   {
     auth: { required: true, minRole: 'steward' },
-    openapi: { tags: ['Tax'], summary: 'Generate T4A record', description: 'Generate a new T4A tax record' },
+    openapi: { tags: ['Pension'], summary: 'Generate T4A record', description: 'Generate a new T4A tax record' },
   },
   async ({ body, organizationId }) => {
     const [record] = await db
@@ -38,4 +33,3 @@ export const POST = withApi(
     return { data: record };
   },
 );
-

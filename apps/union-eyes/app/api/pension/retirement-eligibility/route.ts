@@ -1,19 +1,30 @@
-/**
- * GET POST /api/pension/retirement-eligibility
- * -> Django billing: /api/billing/per-capita-remittances/
- * NOTE: auto-resolved from pension/retirement-eligibility
- * Auto-migrated by scripts/migrate_routes.py
- */
-import { NextRequest } from 'next/server';
-import { djangoProxy } from '@/lib/django-proxy';
+import { withApi } from '@/lib/api/framework';
+import { db } from '@/db/db';
+import { pensionMembers } from '@/db/schema';
+import { eq, and, gte, desc } from 'drizzle-orm';
 
 export const dynamic = 'force-dynamic';
 
-export function GET(req: NextRequest) {
-  return djangoProxy(req, '/api/billing/per-capita-remittances/');
-}
+export const GET = withApi(
+  {
+    auth: { required: true, minRole: 'member' },
+    openapi: { tags: ['Pension'], summary: 'Check retirement eligibility', description: 'List members meeting the years-of-service threshold for retirement eligibility' },
+  },
+  async ({ request, organizationId }) => {
+    const url = new URL(request.url);
+    const threshold = parseInt(url.searchParams.get('threshold') ?? '25', 10);
 
-export function POST(req: NextRequest) {
-  return djangoProxy(req, '/api/billing/per-capita-remittances/', { method: 'POST' });
-}
+    const eligible = await db
+      .select()
+      .from(pensionMembers)
+      .where(
+        and(
+          eq(pensionMembers.organizationId, organizationId!),
+          gte(pensionMembers.yearsOfService, threshold),
+        ),
+      )
+      .orderBy(desc(pensionMembers.createdAt));
+    return { data: eligible };
+  },
+);
 

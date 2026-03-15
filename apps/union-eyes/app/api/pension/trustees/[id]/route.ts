@@ -1,28 +1,53 @@
-/**
- * GET PATCH DELETE /api/pension/trustees/[id]
- * -> Django billing: /api/billing/per-capita-remittances/
- * NOTE: auto-resolved from pension/trustees/[id]
- * Auto-migrated by scripts/migrate_routes.py
- */
-import { NextRequest } from 'next/server';
-import { djangoProxy } from '@/lib/django-proxy';
+import { withApi } from '@/lib/api/framework';
+import { db } from '@/db/db';
+import { pensionTrustees } from '@/db/schema';
+import { eq, and } from 'drizzle-orm';
 
 export const dynamic = 'force-dynamic';
 
-type Params = { params: Promise<{ id: string }> };
+export const GET = withApi(
+  {
+    auth: { required: true, minRole: 'member' },
+    openapi: { tags: ['Pension'], summary: 'Get trustee', description: 'Get a single trustee by ID' },
+  },
+  async ({ params, organizationId }) => {
+    const id = params.id;
+    const [trustee] = await db
+      .select()
+      .from(pensionTrustees)
+      .where(and(eq(pensionTrustees.id, id), eq(pensionTrustees.organizationId, organizationId!)));
+    return { data: trustee ?? null };
+  },
+);
 
-export async function GET(req: NextRequest, { params }: Params) {
-  const { id } = await params;
-  return djangoProxy(req, '/api/billing/per-capita-remittances/' + id + '/');
-}
+export const PATCH = withApi(
+  {
+    auth: { required: true, minRole: 'steward' },
+    openapi: { tags: ['Pension'], summary: 'Update trustee', description: 'Update an existing trustee' },
+  },
+  async ({ params, body, organizationId }) => {
+    const id = params.id;
+    const [trustee] = await db
+      .update(pensionTrustees)
+      .set({ ...body, updatedAt: new Date() })
+      .where(and(eq(pensionTrustees.id, id), eq(pensionTrustees.organizationId, organizationId!)))
+      .returning();
+    return { data: trustee ?? null };
+  },
+);
 
-export async function PATCH(req: NextRequest, { params }: Params) {
-  const { id } = await params;
-  return djangoProxy(req, '/api/billing/per-capita-remittances/' + id + '/', { method: 'PATCH' });
-}
-
-export async function DELETE(req: NextRequest, { params }: Params) {
-  const { id } = await params;
-  return djangoProxy(req, '/api/billing/per-capita-remittances/' + id + '/', { method: 'DELETE' });
-}
+export const DELETE = withApi(
+  {
+    auth: { required: true, minRole: 'steward' },
+    openapi: { tags: ['Pension'], summary: 'Delete trustee', description: 'Delete a trustee' },
+  },
+  async ({ params, organizationId }) => {
+    const id = params.id;
+    const [trustee] = await db
+      .delete(pensionTrustees)
+      .where(and(eq(pensionTrustees.id, id), eq(pensionTrustees.organizationId, organizationId!)))
+      .returning();
+    return { data: trustee ?? null };
+  },
+);
 

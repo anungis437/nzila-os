@@ -1,19 +1,36 @@
-/**
- * GET POST /api/pension/plans
- * -> Django billing: /api/billing/per-capita-remittances/
- * NOTE: auto-resolved from pension/plans
- * Auto-migrated by scripts/migrate_routes.py
- */
-import { NextRequest } from 'next/server';
-import { djangoProxy } from '@/lib/django-proxy';
+import { withApi } from '@/lib/api/framework';
+import { db } from '@/db/db';
+import { pensionPlans } from '@/db/schema';
+import { eq, desc } from 'drizzle-orm';
 
 export const dynamic = 'force-dynamic';
 
-export function GET(req: NextRequest) {
-  return djangoProxy(req, '/api/billing/per-capita-remittances/');
-}
+export const GET = withApi(
+  {
+    auth: { required: true, minRole: 'member' },
+    openapi: { tags: ['Pension'], summary: 'List pension plans', description: 'List all pension plans for the organization' },
+  },
+  async ({ request, organizationId }) => {
+    const plans = await db
+      .select()
+      .from(pensionPlans)
+      .where(eq(pensionPlans.organizationId, organizationId!))
+      .orderBy(desc(pensionPlans.createdAt));
+    return { data: plans };
+  },
+);
 
-export function POST(req: NextRequest) {
-  return djangoProxy(req, '/api/billing/per-capita-remittances/', { method: 'POST' });
-}
+export const POST = withApi(
+  {
+    auth: { required: true, minRole: 'steward' },
+    openapi: { tags: ['Pension'], summary: 'Create pension plan', description: 'Create a new pension plan' },
+  },
+  async ({ body, organizationId }) => {
+    const [plan] = await db
+      .insert(pensionPlans)
+      .values({ ...body, organizationId: organizationId! })
+      .returning();
+    return { data: plan };
+  },
+);
 

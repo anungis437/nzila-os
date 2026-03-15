@@ -10,11 +10,11 @@ export const dynamic = 'force-dynamic';
 
 export const GET = withApi(
   {
-    auth: { required: false },
+    auth: { required: true, minRole: 'member' },
     openapi: {
-      tags: ['Pension', 'Django Proxy'],
+      tags: ['Pension'],
       summary: 'GET benefits',
-      description: 'Proxied to Django: /api/billing/per-capita-remittances/',
+      description: 'List pension benefit claims',
     },
   },
   async ({ request }) => {
@@ -25,11 +25,11 @@ export const GET = withApi(
 
 export const POST = withApi(
   {
-    auth: { required: false },
+    auth: { required: true, minRole: 'member' },
     openapi: {
-      tags: ['Pension', 'Django Proxy'],
+      tags: ['Pension'],
       summary: 'POST benefits',
-      description: 'Proxied to Django: /api/billing/per-capita-remittances/',
+      description: 'Submit a pension benefit claim',
     },
   },
   async ({ request }) => {

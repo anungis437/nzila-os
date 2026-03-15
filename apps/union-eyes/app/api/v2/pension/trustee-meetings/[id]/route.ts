@@ -10,11 +10,11 @@ export const dynamic = 'force-dynamic';
 
 export const GET = withApi(
   {
-    auth: { required: false },
+    auth: { required: true, minRole: 'member' },
     openapi: {
-      tags: ['Pension', 'Django Proxy'],
-      summary: 'GET [id]',
-      description: 'Proxied to Django: /api/billing/per-capita-remittances/',
+      tags: ['Pension'],
+      summary: 'GET trustee meeting by ID',
+      description: 'Get a single trustee meeting',
     },
   },
   async ({ request }) => {
@@ -25,11 +25,11 @@ export const GET = withApi(
 
 export const PATCH = withApi(
   {
-    auth: { required: false },
+    auth: { required: true, minRole: 'steward' },
     openapi: {
-      tags: ['Pension', 'Django Proxy'],
-      summary: 'PATCH [id]',
-      description: 'Proxied to Django: /api/billing/per-capita-remittances/',
+      tags: ['Pension'],
+      summary: 'PATCH trustee meeting',
+      description: 'Update a trustee meeting',
     },
   },
   async ({ request }) => {
@@ -40,11 +40,11 @@ export const PATCH = withApi(
 
 export const DELETE = withApi(
   {
-    auth: { required: false },
+    auth: { required: true, minRole: 'steward' },
     openapi: {
-      tags: ['Pension', 'Django Proxy'],
-      summary: 'DELETE [id]',
-      description: 'Proxied to Django: /api/billing/per-capita-remittances/',
+      tags: ['Pension'],
+      summary: 'DELETE trustee meeting',
+      description: 'Delete a trustee meeting',
     },
   },
   async ({ request }) => {
