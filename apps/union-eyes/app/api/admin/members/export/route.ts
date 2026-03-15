@@ -4,12 +4,15 @@
  * NOTE: auto-resolved from admin/members/export
  * Auto-migrated by scripts/migrate_routes.py
  */
-import { NextRequest } from 'next/server';
 import { djangoProxy } from '@/lib/django-proxy';
+import { withApi } from '@/lib/api/framework';
 
 export const dynamic = 'force-dynamic';
 
-export function GET(req: NextRequest) {
-  return djangoProxy(req, '/api/auth_core/organization-members/');
-}
+export const GET = withApi(
+  { auth: { required: true, minRole: 'admin' as const } },
+  async ({ request }) => {
+    return djangoProxy(request, '/api/auth_core/organization-members/');
+  },
+);
 

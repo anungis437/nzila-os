@@ -10,7 +10,7 @@ export const dynamic = 'force-dynamic';
 
 export const GET = withApi(
   {
-    auth: { required: false },
+    auth: { required: true },
     openapi: {
       tags: ['Pilot', 'Django Proxy'],
       summary: 'GET [id]',
@@ -25,7 +25,7 @@ export const GET = withApi(
 
 export const PATCH = withApi(
   {
-    auth: { required: false },
+    auth: { required: true },
     openapi: {
       tags: ['Pilot', 'Django Proxy'],
       summary: 'PATCH [id]',
@@ -40,7 +40,7 @@ export const PATCH = withApi(
 
 export const DELETE = withApi(
   {
-    auth: { required: false },
+    auth: { required: true },
     openapi: {
       tags: ['Pilot', 'Django Proxy'],
       summary: 'DELETE [id]',

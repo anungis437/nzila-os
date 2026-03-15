@@ -23,7 +23,7 @@ const distributePacketSchema = z.object({
 
 export const POST = withApi(
   {
-    auth: { required: false },
+    auth: { required: true, minRole: 'admin' },
     body: distributePacketSchema,
     openapi: {
       tags: ['Governance'],

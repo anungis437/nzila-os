@@ -53,13 +53,13 @@ export async function getGovernanceServiceList(filters?: any) {
 export async function getGovernanceServiceById(id: string) {
   const client = await getApiClient();
   
-  const response = await fetch(`${API_URL}/api/governance/governance-service/${{id}}/`, {
+  const response = await fetch(`${API_URL}/api/governance/governance-service/${id}/`, {
     method: 'GET',
     headers: client.headers,
   });
   
   if (!response.ok) {
-    throw new Error(`Failed to fetch governance-service {id}: ${response.statusText}`);
+    throw new Error(`Failed to fetch governance-service ${id}: ${response.statusText}`);
   }
   
   return response.json();
@@ -92,14 +92,14 @@ export async function createGovernanceService(data: any) {
 export async function updateGovernanceService(id: string, data: any) {
   const client = await getApiClient();
   
-  const response = await fetch(`${API_URL}/api/governance/governance-service/${{id}}/`, {
+  const response = await fetch(`${API_URL}/api/governance/governance-service/${id}/`, {
     method: 'PUT',
     headers: client.headers,
     body: JSON.stringify(data),
   });
   
   if (!response.ok) {
-    throw new Error(`Failed to update governance-service {id}: ${response.statusText}`);
+    throw new Error(`Failed to update governance-service ${id}: ${response.statusText}`);
   }
   
   return response.json();

@@ -24,7 +24,7 @@ const evaluateSchema = z.object({
 
 export const POST = withApi(
   {
-    auth: { required: false },
+    auth: { required: true, minRole: 'admin' },
     body: evaluateSchema,
     openapi: {
       tags: ['Governance'],
