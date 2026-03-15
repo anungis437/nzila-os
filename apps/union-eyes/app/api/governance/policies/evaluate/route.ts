@@ -4,13 +4,10 @@
  * Evaluates subjects against policy rules
  */
 
-import { NextRequest, NextResponse } from 'next/server';
-import { z } from 'zod';
+import { NextResponse } from 'next/server';
+import { withApi, z } from '@/lib/api/framework';
 import { policyEngine } from '@/lib/services/policy-engine';
-import { logger } from '@/lib/logger';
-import { auth } from '@clerk/nextjs/server';
 
-// Validation schema for evaluation request
 const evaluateSchema = z.object({
   ruleType: z.string(),
   category: z.string(),
@@ -24,19 +21,14 @@ const evaluateSchema = z.object({
  * POST /api/governance/policies/evaluate
  * Evaluate subject against policy rules
  */
-export async function POST(req: NextRequest): Promise<Response> {
-  try {
-    const { userId } = await auth();
-    if (!userId) {
-      return NextResponse.json({ error: 'Unauthorized' }, { status: 401 });
-    }
+export const POST = withApi(
+  {
+    auth: { required: true, minRole: 'admin' },
+    body: evaluateSchema,
+  },
+  async ({ body }) => {
+    const validatedData = body;
 
-    const body = await req.json();
-    
-    // Validate input
-    const validatedData = evaluateSchema.parse(body);
-    
-    // Evaluate policy
     const result = await policyEngine.evaluate(
       validatedData.ruleType,
       validatedData.category,
@@ -47,23 +39,9 @@ export async function POST(req: NextRequest): Promise<Response> {
         context: validatedData.context,
       }
     );
-    
+
     return NextResponse.json({
       result,
     });
-  } catch (error: unknown) {
-    logger.error('Error evaluating policy:', error);
-    
-    if (error instanceof z.ZodError) {
-      return NextResponse.json(
-        { error: 'Validation failed', details: error.errors },
-        { status: 400 }
-      );
-    }
-    
-    return NextResponse.json(
-      { error: 'Failed to evaluate policy', details: (error as Error).message },
-      { status: 500 }
-    );
-  }
-}
+  },
+);
