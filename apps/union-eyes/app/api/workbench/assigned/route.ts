@@ -4,16 +4,36 @@
  * NOTE: auto-resolved from workbench/assigned
  * Auto-migrated by scripts/migrate_routes.py
  */
-import { NextRequest } from 'next/server';
 import { djangoProxy } from '@/lib/django-proxy';
+import { withApi } from '@/lib/api/framework';
 
 export const dynamic = 'force-dynamic';
 
-export function GET(req: NextRequest) {
-  return djangoProxy(req, '/api/ai_core/knowledge-base/');
-}
+export const GET = withApi(
+  {
+    auth: { required: true, minRole: 'steward' },
+    openapi: {
+      tags: ['Workbench', 'Django Proxy'],
+      summary: 'GET assigned cases',
+      description: 'Proxied to Django: /api/ai_core/knowledge-base/',
+    },
+  },
+  async ({ request }) => {
+    return djangoProxy(request, '/api/ai_core/knowledge-base/');
+  },
+);
 
-export function POST(req: NextRequest) {
-  return djangoProxy(req, '/api/ai_core/knowledge-base/', { method: 'POST' });
-}
+export const POST = withApi(
+  {
+    auth: { required: true, minRole: 'steward' },
+    openapi: {
+      tags: ['Workbench', 'Django Proxy'],
+      summary: 'POST assigned cases',
+      description: 'Proxied to Django: /api/ai_core/knowledge-base/',
+    },
+  },
+  async ({ request }) => {
+    return djangoProxy(request, '/api/ai_core/knowledge-base/', { method: 'POST' });
+  },
+);
 
