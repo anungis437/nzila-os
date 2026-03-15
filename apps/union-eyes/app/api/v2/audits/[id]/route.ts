@@ -1,24 +1,31 @@
 /**
- * GET /api/audits/[id]
- * → Django: /api/core/audit-logs/
- * Migrated to withApi() framework
+ * GET /api/v2/audits/[id]
+ * Single audit log entry from PostgreSQL.
  */
-import { djangoProxy } from '@/lib/django-proxy';
 import { withApi } from '@/lib/api/framework';
+import { db } from '@/db/db';
+import { auditLogs } from '@/db/schema/audit-security-schema';
+import { eq, and } from 'drizzle-orm';
 
 export const dynamic = 'force-dynamic';
 
 export const GET = withApi(
-  {
-    auth: { required: false },
-    openapi: {
-      tags: ['Audits', 'Django Proxy'],
-      summary: 'GET [id]',
-      description: 'Proxied to Django: /api/core/audit-logs/',
-    },
-  },
-  async ({ request }) => {
-    const response = await djangoProxy(request, '/api/core/audit-logs/');
-    return response;
+  { auth: { required: true, minRole: 'officer' } },
+  async ({ params, organizationId }) => {
+    const { id } = params as { id: string };
+    const [row] = await db
+      .select()
+      .from(auditLogs)
+      .where(
+        and(
+          eq(auditLogs.auditId, id),
+          eq(auditLogs.organizationId, organizationId!),
+        ),
+      )
+      .limit(1);
+    if (!row) {
+      return Response.json({ error: 'Not found' }, { status: 404 });
+    }
+    return { data: row };
   },
 );

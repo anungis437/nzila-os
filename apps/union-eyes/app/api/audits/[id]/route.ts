@@ -1,17 +1,32 @@
 /**
  * GET /api/audits/[id]
- * -> Django core: /api/core/audit-logs/
- * Auto-migrated by scripts/migrate_routes.py
+ * Single audit log entry from PostgreSQL.
  */
-import { NextRequest } from 'next/server';
-import { djangoProxy } from '@/lib/django-proxy';
+import { withApi } from '@/lib/api/framework';
+import { db } from '@/db/db';
+import { auditLogs } from '@/db/schema/audit-security-schema';
+import { eq, and } from 'drizzle-orm';
 
 export const dynamic = 'force-dynamic';
 
-type Params = { params: Promise<{ id: string }> };
-
-export async function GET(req: NextRequest, { params }: Params) {
-  const { id } = await params;
-  return djangoProxy(req, '/api/core/audit-logs/' + id + '/');
-}
+export const GET = withApi(
+  { auth: { required: true, minRole: 'officer' } },
+  async ({ params, organizationId }) => {
+    const { id } = params as { id: string };
+    const [row] = await db
+      .select()
+      .from(auditLogs)
+      .where(
+        and(
+          eq(auditLogs.auditId, id),
+          eq(auditLogs.organizationId, organizationId!),
+        ),
+      )
+      .limit(1);
+    if (!row) {
+      return Response.json({ error: 'Not found' }, { status: 404 });
+    }
+    return { data: row };
+  },
+);
 

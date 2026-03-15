@@ -1,24 +1,37 @@
 /**
- * GET /api/audits
- * → Django: /api/core/audit-logs/
- * Migrated to withApi() framework
+ * GET /api/v2/audits
+ * Organization audit logs from PostgreSQL.
  */
-import { djangoProxy } from '@/lib/django-proxy';
 import { withApi } from '@/lib/api/framework';
+import { db } from '@/db/db';
+import { auditLogs } from '@/db/schema/audit-security-schema';
+import { eq, desc } from 'drizzle-orm';
 
 export const dynamic = 'force-dynamic';
 
 export const GET = withApi(
-  {
-    auth: { required: false },
-    openapi: {
-      tags: ['Audits', 'Django Proxy'],
-      summary: 'GET audits',
-      description: 'Proxied to Django: /api/core/audit-logs/',
-    },
-  },
-  async ({ request }) => {
-    const response = await djangoProxy(request, '/api/core/audit-logs/');
-    return response;
+  { auth: { required: true, minRole: 'officer' } },
+  async ({ organizationId }) => {
+    const rows = await db
+      .select()
+      .from(auditLogs)
+      .where(eq(auditLogs.organizationId, organizationId!))
+      .orderBy(desc(auditLogs.createdAt))
+      .limit(100);
+    return {
+      audits: rows.map(row => ({
+        id: row.auditId,
+        title: row.action,
+        type: row.resourceType,
+        status: row.outcome === 'success' ? 'completed' : 'in-progress',
+        dateCompleted: row.outcome === 'success' ? row.createdAt?.toISOString() : undefined,
+        auditor: row.userId ?? 'system',
+        severity: row.severity,
+        findings: 0,
+        hasReport: false,
+        createdAt: row.createdAt?.toISOString(),
+      })),
+      total: rows.length,
+    };
   },
 );
