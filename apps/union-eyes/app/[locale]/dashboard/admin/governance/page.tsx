@@ -1,11 +1,8 @@
 export const dynamic = 'force-dynamic';
 
 import { Metadata } from 'next';
-import { auth } from '@clerk/nextjs/server';
+import { requireUser, hasMinRole } from '@/lib/api-auth-guard';
 import { redirect } from 'next/navigation';
-import { getUserRole } from '@/lib/auth/rbac-server';
-import { getOrganizationIdForUser } from '@/lib/organization-utils';
-import { UserRole } from '@/lib/auth/roles';
 import GovernanceConsole from './governance-console';
 
 export const metadata: Metadata = {
@@ -13,25 +10,11 @@ export const metadata: Metadata = {
   description: 'Golden share, reserved matters, audits, and council elections',
 };
 
-const GOVERNANCE_ADMIN_ROLES: UserRole[] = [
-  UserRole.APP_OWNER,
-  UserRole.COO,
-  UserRole.ADMIN,
-  UserRole.SYSTEM_ADMIN,
-  UserRole.PLATFORM_LEAD,
-];
-
 export default async function GovernancePage() {
-  const { userId } = await auth();
+  await requireUser();
 
-  if (!userId) {
-    redirect('/sign-in');
-  }
-
-  const organizationId = await getOrganizationIdForUser(userId);
-  const userRole = await getUserRole(userId, organizationId);
-
-  if (!GOVERNANCE_ADMIN_ROLES.includes(userRole)) {
+  const hasAccess = await hasMinRole("admin");
+  if (!hasAccess) {
     redirect('/dashboard');
   }
 

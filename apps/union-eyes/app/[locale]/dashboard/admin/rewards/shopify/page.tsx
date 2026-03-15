@@ -1,12 +1,9 @@
 export const dynamic = 'force-dynamic';
 
 import { Metadata } from 'next';
-import { auth } from '@clerk/nextjs/server';
+import { requireUser, hasMinRole } from '@/lib/api-auth-guard';
 import { redirect } from 'next/navigation';
 import { getTranslations } from 'next-intl/server';
-import { getUserRole } from '@/lib/auth/rbac-server';
-import { getOrganizationIdForUser } from '@/lib/organization-utils';
-import { UserRole } from '@/lib/auth/roles';
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from '@/components/ui/card';
 import { Alert, AlertDescription, AlertTitle } from '@/components/ui/alert';
 import { Badge } from '@/components/ui/badge';
@@ -22,17 +19,9 @@ export const metadata: Metadata = {
 };
 
 export default async function AdminShopifyPage() {
-  const { userId } = await auth();
-
-  if (!userId) {
-    redirect('/sign-in');
-  }
-
-  const organizationId = await getOrganizationIdForUser(userId);
-  const userRole = await getUserRole(userId, organizationId);
-
-  const REWARDS_ADMIN_ROLES: UserRole[] = [UserRole.APP_OWNER, UserRole.COO, UserRole.CUSTOMER_SUCCESS_DIRECTOR, UserRole.ADMIN, UserRole.SYSTEM_ADMIN, UserRole.PLATFORM_LEAD];
-  if (!REWARDS_ADMIN_ROLES.includes(userRole)) {
+  await requireUser();
+  const hasAccess = await hasMinRole("admin");
+  if (!hasAccess) {
     redirect('/dashboard');
   }
 

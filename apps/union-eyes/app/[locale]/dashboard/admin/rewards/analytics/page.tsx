@@ -1,12 +1,9 @@
 export const dynamic = 'force-dynamic';
 
 import { Metadata } from 'next';
-import { auth } from '@clerk/nextjs/server';
+import { requireUser, hasMinRole } from '@/lib/api-auth-guard';
 import { redirect } from 'next/navigation';
 import { getTranslations } from 'next-intl/server';
-import { getUserRole } from '@/lib/auth/rbac-server';
-import { getOrganizationIdForUser } from '@/lib/organization-utils';
-import { UserRole } from '@/lib/auth/roles';
 import { withRLSContext } from '@/lib/db/with-rls-context';
 import { Card, CardContent, CardHeader, CardTitle, CardDescription } from '@/components/ui/card';
 import { Tabs, TabsContent, TabsList, TabsTrigger } from '@/components/ui/tabs';
@@ -170,20 +167,13 @@ export default async function RewardsAnalyticsPage({
 }: {
   searchParams: Promise<{ period?: string }>;
 }) {
-  const { userId } = await auth();
+  const user = await requireUser();
 
-  if (!userId) {
-    redirect('/sign-in');
-  }
-
-  const organizationId = await getOrganizationIdForUser(userId);
-  const userRole = await getUserRole(userId, organizationId);
-
-  const REWARDS_ADMIN_ROLES: UserRole[] = [UserRole.APP_OWNER, UserRole.COO, UserRole.CUSTOMER_SUCCESS_DIRECTOR, UserRole.ADMIN, UserRole.SYSTEM_ADMIN, UserRole.PLATFORM_LEAD];
-  if (!REWARDS_ADMIN_ROLES.includes(userRole)) {
+  const hasAccess = await hasMinRole("admin");
+  if (!hasAccess) {
     redirect('/dashboard');
   }
-  const orgId = organizationId;
+  const orgId = user.organizationId!;
 
   const t = await getTranslations('rewards.admin.analytics');
 

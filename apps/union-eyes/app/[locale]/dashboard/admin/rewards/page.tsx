@@ -1,7 +1,7 @@
 export const dynamic = 'force-dynamic';
 
 import { Metadata } from 'next';
-import { auth } from '@clerk/nextjs/server';
+import { requireUser, hasMinRole } from '@/lib/api-auth-guard';
 import { redirect } from 'next/navigation';
 import { getTranslations } from 'next-intl/server';
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from '@/components/ui/card';
@@ -17,38 +17,18 @@ import {
 } from 'lucide-react';
 import Link from 'next/link';
 import { getRewardsSummary } from '@/actions/rewards-actions';
-import { getUserRole } from '@/lib/auth/rbac-server';
 import { logger } from '@/lib/logger';
-import { getOrganizationIdForUser } from '@/lib/organization-utils';
-import { UserRole } from '@/lib/auth/roles';
 
 export const metadata: Metadata = {
   title: 'Recognition & Rewards Admin | Union Eyes',
   description: 'Manage recognition programs, awards, and budgets',
 };
 
-// Roles that can access the rewards admin section
-const REWARDS_ADMIN_ROLES: UserRole[] = [
-  UserRole.APP_OWNER,
-  UserRole.COO,
-  UserRole.CUSTOMER_SUCCESS_DIRECTOR,
-  UserRole.ADMIN,
-  UserRole.SYSTEM_ADMIN,
-  UserRole.PLATFORM_LEAD,
-];
-
 export default async function AdminRewardsPage() {
-  const { userId } = await auth();
+  await requireUser();
 
-  if (!userId) {
-    redirect('/sign-in');
-  }
-
-  // Use platform RBAC — same path as dashboard layout
-  const organizationId = await getOrganizationIdForUser(userId);
-  const userRole = await getUserRole(userId, organizationId);
-
-  if (!REWARDS_ADMIN_ROLES.includes(userRole)) {
+  const hasAccess = await hasMinRole("admin");
+  if (!hasAccess) {
     redirect('/dashboard');
   }
 
