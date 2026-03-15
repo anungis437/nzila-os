@@ -15,3 +15,4 @@
 export * from './governance';
 export * from './conflicts';
 export * from './voting';
+export * from './strategic-goals';

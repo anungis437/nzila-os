@@ -44,7 +44,7 @@ export default function ExecutiveDashboard({ organizationId, userRole }: Executi
   const fetchMetrics = useCallback(async () => {
     try {
       setLoading(true);
-      const res = await fetch(`/api/v2/executive/metrics?organizationId=${organizationId}`);
+      const res = await fetch(`/api/v2/executive/metrics?organizationId=${encodeURIComponent(organizationId)}`);
       if (res.ok) {
         const data = await res.json();
         setMetrics({
