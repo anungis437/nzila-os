@@ -10,10 +10,15 @@ import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
 import { Button } from "@/components/ui/button";
 import { MessageSquare, Users, FileText, Mail, BarChart3, Send } from "lucide-react";
 import Link from "next/link";
-import { currentUser } from "@clerk/nextjs/server";
+import { redirect } from "next/navigation";
+import { requireUser } from "@/lib/auth/require-user";
+import { hasMinRole } from "@/lib/auth/has-min-role";
 
 export default async function CommunicationsDashboard() {
-  const _user = await currentUser();
+  const user = await requireUser();
+  if (!(await hasMinRole("steward"))) {
+    redirect(`/dashboard`);
+  }
 
   return (
     <div className="p-6 space-y-6">

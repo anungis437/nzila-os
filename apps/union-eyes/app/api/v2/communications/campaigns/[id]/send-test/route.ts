@@ -10,7 +10,7 @@ export const dynamic = 'force-dynamic';
 
 export const GET = withApi(
   {
-    auth: { required: false },
+    auth: { required: true, minRole: 'member' },
     openapi: {
       tags: ['Communications', 'Django Proxy'],
       summary: 'GET send-test',
@@ -25,7 +25,7 @@ export const GET = withApi(
 
 export const PATCH = withApi(
   {
-    auth: { required: false },
+    auth: { required: true, minRole: 'member' },
     openapi: {
       tags: ['Communications', 'Django Proxy'],
       summary: 'PATCH send-test',
@@ -40,7 +40,7 @@ export const PATCH = withApi(
 
 export const DELETE = withApi(
   {
-    auth: { required: false },
+    auth: { required: true, minRole: 'member' },
     openapi: {
       tags: ['Communications', 'Django Proxy'],
       summary: 'DELETE send-test',
