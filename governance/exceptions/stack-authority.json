@@ -69,6 +69,24 @@
       "expiresOn": "2026-12-31"
     },
     {
+      "path": "apps/union-eyes/app/api/v2/analytics/clause-stats/route.ts",
+      "owner": "@nzila/union-eyes",
+      "justification": "Cross-union clause stats — direct DB read-only aggregation of sharedClauseLibrary, crossOrgAccessLog. withApi auth enforced (minRole: steward).",
+      "expiresOn": "2026-12-31"
+    },
+    {
+      "path": "apps/union-eyes/app/api/v2/analytics/precedent-stats/route.ts",
+      "owner": "@nzila/union-eyes",
+      "justification": "Cross-union precedent stats — direct DB read-only aggregation of arbitrationPrecedents. withApi auth enforced (minRole: steward).",
+      "expiresOn": "2026-12-31"
+    },
+    {
+      "path": "apps/union-eyes/app/api/v2/analytics/org-activity/route.ts",
+      "owner": "@nzila/union-eyes",
+      "justification": "Cross-union org activity — direct DB read-only aggregation of crossOrgAccessLog, organizationSharingSettings. withApi auth enforced (minRole: steward).",
+      "expiresOn": "2026-12-31"
+    },
+    {
       "path": "apps/union-eyes/app/api/v2/arbitration/precedents/**/route.ts",
       "owner": "@nzila/union-eyes",
       "justification": "Arbitration precedents v2 — Django proxy routes with withApi auth enforced (minRole: steward).",
