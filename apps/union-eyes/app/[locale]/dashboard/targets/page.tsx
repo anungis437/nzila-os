@@ -5,9 +5,17 @@
 
 export const dynamic = 'force-dynamic';
 
+import { redirect } from 'next/navigation';
+import { requireUser, hasMinRole } from '@/lib/api-auth-guard';
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "@/components/ui/card";
 
-export default function TargetsPage() {
+export default async function TargetsPage() {
+  await requireUser();
+  const authorized = await hasMinRole('member');
+  if (!authorized) {
+    redirect('/login');
+  }
+
   return (
     <main className="p-6 md:p-10">
       <h1 className="text-3xl font-bold mb-8">Targets</h1>
