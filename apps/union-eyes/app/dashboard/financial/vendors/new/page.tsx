@@ -1,13 +1,15 @@
-'use client';
-
-
 export const dynamic = 'force-dynamic';
-import VendorForm from '@/components/financial/VendorForm';
 
-export default function NewVendorPage() {
-  return (
-    <div className="container mx-auto py-10">
-      <VendorForm mode="create" />
-    </div>
-  );
+import { redirect } from 'next/navigation';
+import { requireUser, hasMinRole } from '@/lib/api-auth-guard';
+import NewVendorClient from './NewVendorClient';
+
+export default async function NewVendorPage() {
+  await requireUser();
+  const authorized = await hasMinRole('member');
+  if (!authorized) {
+    redirect('/login');
+  }
+
+  return <NewVendorClient />;
 }

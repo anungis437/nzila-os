@@ -2,7 +2,7 @@ export const dynamic = 'force-dynamic';
 
 import { Suspense } from 'react';
 import VendorList from '@/components/financial/VendorList';
-import { getCurrentUser } from '@/lib/api-auth-guard';
+import { requireUser, hasMinRole } from '@/lib/api-auth-guard';
 import { redirect } from 'next/navigation';
 
 export const metadata = {
@@ -11,9 +11,9 @@ export const metadata = {
 };
 
 export default async function VendorsPage() {
-  const user = await getCurrentUser();
-  
-  if (!user) {
+  const user = await requireUser();
+  const authorized = await hasMinRole('member');
+  if (!authorized) {
     redirect('/login');
   }
 

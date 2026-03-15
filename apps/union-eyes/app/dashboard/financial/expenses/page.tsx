@@ -3,7 +3,7 @@ export const dynamic = 'force-dynamic';
 import { Suspense } from 'react';
 import ExpenseApprovalQueue from '@/components/financial/ExpenseApprovalQueue';
 import ExpenseRequestForm from '@/components/financial/ExpenseRequestForm';
-import { getCurrentUser } from '@/lib/api-auth-guard';
+import { requireUser, hasMinRole } from '@/lib/api-auth-guard';
 import { redirect } from 'next/navigation';
 import { Tabs, TabsContent, TabsList, TabsTrigger } from '@/components/ui/tabs';
 
@@ -13,9 +13,9 @@ export const metadata = {
 };
 
 export default async function ExpensesPage() {
-  const user = await getCurrentUser();
-  
-  if (!user) {
+  const user = await requireUser();
+  const authorized = await hasMinRole('member');
+  if (!authorized) {
     redirect('/login');
   }
 
