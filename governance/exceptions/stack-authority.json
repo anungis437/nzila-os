@@ -49,6 +49,18 @@
       "owner": "@nzila/union-eyes",
       "justification": "Pilot demo-data seeding — TS-only tables (no Django model). RLS policies applied. Scoped to CAPE pilot lifecycle.",
       "expiresOn": "2026-12-31"
+    },
+    {
+      "path": "apps/union-eyes/app/api/clause-library/**/route.ts",
+      "owner": "@nzila/union-eyes",
+      "justification": "Shared clause library — TS-only tables (sharedClauseLibrary, clauseLibraryTags). No Django model exists. withApi auth enforced.",
+      "expiresOn": "2026-12-31"
+    },
+    {
+      "path": "apps/union-eyes/app/api/v2/clause-library/**/route.ts",
+      "owner": "@nzila/union-eyes",
+      "justification": "Shared clause library v2 — TS-only tables (sharedClauseLibrary, clauseLibraryTags). No Django model exists. withApi auth enforced.",
+      "expiresOn": "2026-12-31"
     }
   ]
 }

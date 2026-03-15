@@ -1,39 +1,66 @@
 /**
- * GET POST /api/clause-library/search
- * → Django: /api/bargaining/shared-clause-library/
- * Migrated to withApi() framework
+ * GET POST /api/v2/clause-library/search
+ * Direct DB — replaces Django proxy
  */
-import { djangoProxy } from '@/lib/django-proxy';
 import { withApi } from '@/lib/api/framework';
+import { db } from '@/db/db';
+import { sharedClauseLibrary } from '@/db/schema/domains/agreements/shared-library';
+import { organizations } from '@/db/schema-organizations';
+import { eq, ilike, or } from 'drizzle-orm';
+import { withSystemContext } from '@/lib/db/with-rls-context';
 
 export const dynamic = 'force-dynamic';
 
 export const GET = withApi(
   {
-    auth: { required: false },
-    openapi: {
-      tags: ['Clause-library', 'Django Proxy'],
-      summary: 'GET search',
-      description: 'Proxied to Django: /api/bargaining/shared-clause-library/',
-    },
+    auth: { required: true, minRole: 'steward' },
+    openapi: { tags: ['Clause-library'], summary: 'Search clauses by text query' },
   },
   async ({ request }) => {
-    const response = await djangoProxy(request, '/api/bargaining/shared-clause-library/');
-    return response;
+    const url = new URL(request.url);
+    const q = url.searchParams.get('q') || url.searchParams.get('search') || '';
+    if (!q) return { clauses: [] };
+
+    return withSystemContext(async () => {
+      const rows = await db.select({
+        id: sharedClauseLibrary.id, clauseNumber: sharedClauseLibrary.clauseNumber,
+        clauseTitle: sharedClauseLibrary.clauseTitle, clauseText: sharedClauseLibrary.clauseText,
+        clauseType: sharedClauseLibrary.clauseType, sharingLevel: sharedClauseLibrary.sharingLevel,
+        sector: sharedClauseLibrary.sector, province: sharedClauseLibrary.province,
+        sourceOrganizationId: sharedClauseLibrary.sourceOrganizationId, organizationName: organizations.name,
+      }).from(sharedClauseLibrary)
+        .leftJoin(organizations, eq(sharedClauseLibrary.sourceOrganizationId, organizations.id))
+        .where(or(ilike(sharedClauseLibrary.clauseTitle, `%${q}%`), ilike(sharedClauseLibrary.clauseText, `%${q}%`)))
+        .limit(50);
+
+      return { clauses: rows.map((r) => ({ ...r, sourceOrganization: { id: r.sourceOrganizationId, organizationName: r.organizationName } })) };
+    });
   },
 );
 
 export const POST = withApi(
   {
-    auth: { required: false },
-    openapi: {
-      tags: ['Clause-library', 'Django Proxy'],
-      summary: 'POST search',
-      description: 'Proxied to Django: /api/bargaining/shared-clause-library/',
-    },
+    auth: { required: true, minRole: 'steward' },
+    openapi: { tags: ['Clause-library'], summary: 'Search clauses (POST)' },
   },
   async ({ request }) => {
-    const response = await djangoProxy(request, '/api/bargaining/shared-clause-library/', { method: 'POST' });
-    return response;
+    const body = await request.json();
+    const q = body.query || body.search || '';
+    if (!q) return { clauses: [] };
+
+    return withSystemContext(async () => {
+      const rows = await db.select({
+        id: sharedClauseLibrary.id, clauseNumber: sharedClauseLibrary.clauseNumber,
+        clauseTitle: sharedClauseLibrary.clauseTitle, clauseText: sharedClauseLibrary.clauseText,
+        clauseType: sharedClauseLibrary.clauseType, sharingLevel: sharedClauseLibrary.sharingLevel,
+        sector: sharedClauseLibrary.sector, province: sharedClauseLibrary.province,
+        sourceOrganizationId: sharedClauseLibrary.sourceOrganizationId, organizationName: organizations.name,
+      }).from(sharedClauseLibrary)
+        .leftJoin(organizations, eq(sharedClauseLibrary.sourceOrganizationId, organizations.id))
+        .where(or(ilike(sharedClauseLibrary.clauseTitle, `%${q}%`), ilike(sharedClauseLibrary.clauseText, `%${q}%`)))
+        .limit(50);
+
+      return { clauses: rows.map((r) => ({ ...r, sourceOrganization: { id: r.sourceOrganizationId, organizationName: r.organizationName } })) };
+    });
   },
 );
