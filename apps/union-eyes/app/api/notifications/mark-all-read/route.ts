@@ -1,19 +1,37 @@
 /**
- * GET POST /api/notifications/mark-all-read
- * -> Django notifications: /api/notifications/in-app-notifications/
- * NOTE: auto-resolved from notifications/mark-all-read
- * Auto-migrated by scripts/migrate_routes.py
+ * POST /api/notifications/mark-all-read
+ * Marks all unread notifications as read for the authenticated user.
+ * Backed by inAppNotifications table (Drizzle ORM).
  */
-import { NextRequest } from 'next/server';
-import { djangoProxy } from '@/lib/django-proxy';
+import { withApi } from '@/lib/api/framework';
+import { db } from '@/db/db';
+import { inAppNotifications } from '@/db/schema';
+import { eq, and } from 'drizzle-orm';
 
 export const dynamic = 'force-dynamic';
 
-export function GET(req: NextRequest) {
-  return djangoProxy(req, '/api/notifications/in-app-notifications/');
-}
+export const POST = withApi(
+  {
+    auth: { required: true, minRole: 'member' },
+    openapi: {
+      tags: ['Notifications'],
+      summary: 'Mark all notifications as read',
+      description: 'Marks all unread in-app notifications as read for the current user.',
+    },
+  },
+  async ({ userId, organizationId }) => {
+    await db
+      .update(inAppNotifications)
+      .set({ read: true, readAt: new Date() })
+      .where(
+        and(
+          eq(inAppNotifications.userId, userId!),
+          eq(inAppNotifications.organizationId, organizationId!),
+          eq(inAppNotifications.read, false),
+        ),
+      );
 
-export function POST(req: NextRequest) {
-  return djangoProxy(req, '/api/notifications/in-app-notifications/', { method: 'POST' });
-}
+    return { success: true };
+  },
+);
 

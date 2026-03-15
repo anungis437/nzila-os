@@ -1,19 +1,39 @@
 /**
- * GET POST /api/notifications/count
- * -> Django notifications: /api/notifications/in-app-notifications/
- * NOTE: auto-resolved from notifications/count
- * Auto-migrated by scripts/migrate_routes.py
+ * GET /api/notifications/count
+ * Returns unread notification count for the authenticated user.
+ * Backed by inAppNotifications table (Drizzle ORM).
  */
-import { NextRequest } from 'next/server';
-import { djangoProxy } from '@/lib/django-proxy';
+import { withApi } from '@/lib/api/framework';
+import { db } from '@/db/db';
+import { inAppNotifications } from '@/db/schema';
+import { eq, and, count, isNull, or, gte } from 'drizzle-orm';
 
 export const dynamic = 'force-dynamic';
 
-export function GET(req: NextRequest) {
-  return djangoProxy(req, '/api/notifications/in-app-notifications/');
-}
+export const GET = withApi(
+  {
+    auth: { required: true, minRole: 'member' },
+    openapi: {
+      tags: ['Notifications'],
+      summary: 'Get unread notification count',
+      description: 'Returns the number of unread in-app notifications for the current user.',
+    },
+  },
+  async ({ userId, organizationId }) => {
+    const now = new Date();
+    const [result] = await db
+      .select({ count: count() })
+      .from(inAppNotifications)
+      .where(
+        and(
+          eq(inAppNotifications.userId, userId!),
+          eq(inAppNotifications.organizationId, organizationId!),
+          eq(inAppNotifications.read, false),
+          or(isNull(inAppNotifications.expiresAt), gte(inAppNotifications.expiresAt, now)),
+        ),
+      );
 
-export function POST(req: NextRequest) {
-  return djangoProxy(req, '/api/notifications/in-app-notifications/', { method: 'POST' });
-}
+    return { count: result?.count ?? 0 };
+  },
+);
 

@@ -1,7 +1,6 @@
 /**
- * GET PATCH DELETE /api/notifications/[id]
- * → Django: /api/notifications/in-app-notifications/
- * Migrated to withApi() framework
+ * GET PATCH DELETE /api/v2/notifications/[id]
+ * Deprecated — use /api/notifications/[id] instead (DB-backed).
  */
 import { djangoProxy } from '@/lib/django-proxy';
 import { withApi } from '@/lib/api/framework';
@@ -10,11 +9,11 @@ export const dynamic = 'force-dynamic';
 
 export const GET = withApi(
   {
-    auth: { required: false },
+    auth: { required: true, minRole: 'member' },
     openapi: {
       tags: ['Notifications', 'Django Proxy'],
-      summary: 'GET [id]',
-      description: 'Proxied to Django: /api/notifications/in-app-notifications/',
+      summary: 'GET [id] (v2, deprecated)',
+      description: 'Deprecated — use /api/notifications/[id].',
     },
   },
   async ({ request }) => {
@@ -25,11 +24,11 @@ export const GET = withApi(
 
 export const PATCH = withApi(
   {
-    auth: { required: false },
+    auth: { required: true, minRole: 'member' },
     openapi: {
       tags: ['Notifications', 'Django Proxy'],
-      summary: 'PATCH [id]',
-      description: 'Proxied to Django: /api/notifications/in-app-notifications/',
+      summary: 'PATCH [id] (v2, deprecated)',
+      description: 'Deprecated — use /api/notifications/[id].',
     },
   },
   async ({ request }) => {
@@ -40,11 +39,11 @@ export const PATCH = withApi(
 
 export const DELETE = withApi(
   {
-    auth: { required: false },
+    auth: { required: true, minRole: 'member' },
     openapi: {
       tags: ['Notifications', 'Django Proxy'],
-      summary: 'DELETE [id]',
-      description: 'Proxied to Django: /api/notifications/in-app-notifications/',
+      summary: 'DELETE [id] (v2, deprecated)',
+      description: 'Deprecated — use /api/notifications/[id].',
     },
   },
   async ({ request }) => {

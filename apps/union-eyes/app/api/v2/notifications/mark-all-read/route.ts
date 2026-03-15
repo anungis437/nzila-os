@@ -1,35 +1,19 @@
 /**
- * GET POST /api/notifications/mark-all-read
- * → Django: /api/notifications/in-app-notifications/
- * Migrated to withApi() framework
+ * POST /api/v2/notifications/mark-all-read
+ * Deprecated — use /api/notifications/mark-all-read instead (DB-backed).
  */
 import { djangoProxy } from '@/lib/django-proxy';
 import { withApi } from '@/lib/api/framework';
 
 export const dynamic = 'force-dynamic';
 
-export const GET = withApi(
-  {
-    auth: { required: false },
-    openapi: {
-      tags: ['Notifications', 'Django Proxy'],
-      summary: 'GET mark-all-read',
-      description: 'Proxied to Django: /api/notifications/in-app-notifications/',
-    },
-  },
-  async ({ request }) => {
-    const response = await djangoProxy(request, '/api/notifications/in-app-notifications/');
-    return response;
-  },
-);
-
 export const POST = withApi(
   {
-    auth: { required: false },
+    auth: { required: true, minRole: 'member' },
     openapi: {
       tags: ['Notifications', 'Django Proxy'],
-      summary: 'POST mark-all-read',
-      description: 'Proxied to Django: /api/notifications/in-app-notifications/',
+      summary: 'POST mark-all-read (v2, deprecated)',
+      description: 'Deprecated — use /api/notifications/mark-all-read.',
     },
   },
   async ({ request }) => {

@@ -1,7 +1,6 @@
 /**
- * GET POST /api/notifications/preferences
- * → Django: /api/notifications/in-app-notifications/
- * Migrated to withApi() framework
+ * GET POST /api/v2/notifications/preferences
+ * Deprecated — use /api/notifications/preferences instead (DB-backed).
  */
 import { djangoProxy } from '@/lib/django-proxy';
 import { withApi } from '@/lib/api/framework';
@@ -10,11 +9,11 @@ export const dynamic = 'force-dynamic';
 
 export const GET = withApi(
   {
-    auth: { required: false },
+    auth: { required: true, minRole: 'member' },
     openapi: {
       tags: ['Notifications', 'Django Proxy'],
-      summary: 'GET preferences',
-      description: 'Proxied to Django: /api/notifications/in-app-notifications/',
+      summary: 'GET preferences (v2, deprecated)',
+      description: 'Deprecated — use /api/notifications/preferences.',
     },
   },
   async ({ request }) => {
@@ -25,11 +24,11 @@ export const GET = withApi(
 
 export const POST = withApi(
   {
-    auth: { required: false },
+    auth: { required: true, minRole: 'member' },
     openapi: {
       tags: ['Notifications', 'Django Proxy'],
-      summary: 'POST preferences',
-      description: 'Proxied to Django: /api/notifications/in-app-notifications/',
+      summary: 'POST preferences (v2, deprecated)',
+      description: 'Deprecated — use /api/notifications/preferences.',
     },
   },
   async ({ request }) => {

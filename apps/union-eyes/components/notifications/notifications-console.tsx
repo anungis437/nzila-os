@@ -1,6 +1,6 @@
 'use client';
 
-import React, { useState, useCallback } from 'react';
+import React, { useState, useCallback, useEffect } from 'react';
 import Link from 'next/link';
 import { useParams } from 'next/navigation';
 import { motion, AnimatePresence } from 'framer-motion';
@@ -22,6 +22,8 @@ import {
   Settings,
   Info,
   TrendingUp,
+  Loader2,
+  RefreshCw,
 } from 'lucide-react';
 
 type NotificationType =
@@ -32,25 +34,36 @@ type NotificationType =
   | 'meeting'
   | 'system'
   | 'message'
-  | 'achievement';
+  | 'achievement'
+  | 'info'
+  | 'success'
+  | 'warning'
+  | 'error';
 
 type NotificationPriority = 'low' | 'medium' | 'high' | 'urgent';
 
 interface Notification {
   id: string;
   type: NotificationType;
-  priority: NotificationPriority;
   title: string;
   message: string;
-  timestamp: string;
+  createdAt: string;
   read: boolean;
-  actionUrl?: string;
-  actionLabel?: string;
-  metadata?: {
-    caseNumber?: string;
-    daysRemaining?: number;
-    memberName?: string;
-    voteTopic?: string;
+  readAt: string | null;
+  actionUrl: string | null;
+  actionLabel: string | null;
+  data: Record<string, unknown> | null;
+  expiresAt: string | null;
+}
+
+interface ApiResponse {
+  notifications: Notification[];
+  unreadCount: number;
+  pagination: {
+    page: number;
+    limit: number;
+    total: number;
+    totalPages: number;
   };
 }
 
@@ -61,152 +74,13 @@ export default function NotificationsConsole() {
 
   const [selectedCategory, setSelectedCategory] = useState<string>('all');
   const [showUnreadOnly, setShowUnreadOnly] = useState(false);
-  const [notifications, setNotifications] = useState<Notification[]>([
-    {
-      id: 'notif-1',
-      type: 'deadline',
-      priority: 'urgent',
-      title: 'Grievance Deadline Approaching',
-      message:
-        'GRV-2025-001 (Unjust Termination) requires response within 3 days. Step 2 meeting scheduled for Nov 16.',
-      timestamp: '2025-11-13T09:30:00',
-      read: false,
-      actionUrl: '/dashboard/grievances',
-      actionLabel: 'View Grievance',
-      metadata: {
-        caseNumber: 'GRV-2025-001',
-        daysRemaining: 3,
-      },
-    },
-    {
-      id: 'notif-2',
-      type: 'case_update',
-      priority: 'high',
-      title: 'Case Status Update',
-      message:
-        "Case #2024-0156 has been updated to 'Under Review'. LRO Sarah Johnson added new documentation.",
-      timestamp: '2025-11-13T08:15:00',
-      read: false,
-      actionUrl: '/dashboard/claims',
-      actionLabel: 'View Case',
-      metadata: {
-        caseNumber: '2024-0156',
-      },
-    },
-    {
-      id: 'notif-3',
-      type: 'vote',
-      priority: 'high',
-      title: 'New Vote: Collective Agreement Ratification',
-      message:
-        'Your local is voting on the tentative collective agreement. Voting closes Nov 20, 2025.',
-      timestamp: '2025-11-12T16:45:00',
-      read: false,
-      actionUrl: '/dashboard/voting',
-      actionLabel: 'Cast Your Vote',
-      metadata: {
-        voteTopic: 'Collective Agreement Ratification',
-      },
-    },
-    {
-      id: 'notif-4',
-      type: 'meeting',
-      priority: 'medium',
-      title: 'Upcoming Meeting Reminder',
-      message:
-        'Monthly membership meeting scheduled for Nov 15, 2025 at 6:00 PM. Location: Union Hall (Main Floor).',
-      timestamp: '2025-11-12T14:20:00',
-      read: false,
-      actionUrl: '/dashboard',
-      actionLabel: 'Add to Calendar',
-    },
-    {
-      id: 'notif-5',
-      type: 'deadline',
-      priority: 'urgent',
-      title: 'Response Required: Unsafe Conditions Grievance',
-      message:
-        'GRV-2025-003 deadline in 5 days. Management response received. Review required.',
-      timestamp: '2025-11-12T11:00:00',
-      read: true,
-      actionUrl: '/dashboard/grievances',
-      actionLabel: 'Review Response',
-      metadata: {
-        caseNumber: 'GRV-2025-003',
-        daysRemaining: 5,
-      },
-    },
-    {
-      id: 'notif-6',
-      type: 'message',
-      priority: 'medium',
-      title: 'Message from Steward Mike Chen',
-      message:
-        'Question about overtime distribution in your department. Can we schedule a call?',
-      timestamp: '2025-11-11T15:30:00',
-      read: true,
-      actionUrl: '/dashboard',
-      actionLabel: 'Reply',
-      metadata: {
-        memberName: 'Mike Chen',
-      },
-    },
-    {
-      id: 'notif-7',
-      type: 'achievement',
-      priority: 'low',
-      title: 'Case Resolution Milestone',
-      message:
-        'Congratulations! Your local has resolved 50 cases this quarter with 92% satisfaction rate.',
-      timestamp: '2025-11-11T10:00:00',
-      read: true,
-    },
-    {
-      id: 'notif-8',
-      type: 'system',
-      priority: 'low',
-      title: 'System Update Completed',
-      message:
-        'UnionEyes platform updated to v2.4.0 with improved analytics and new grievance tracking features.',
-      timestamp: '2025-11-10T23:00:00',
-      read: true,
-      actionUrl: '/dashboard/settings',
-      actionLabel: 'View Release Notes',
-    },
-    {
-      id: 'notif-9',
-      type: 'case_update',
-      priority: 'medium',
-      title: 'Investigation Complete',
-      message:
-        'Case #2024-0142 investigation completed. Employer agreed to mediation. Next steps available.',
-      timestamp: '2025-11-10T13:45:00',
-      read: true,
-      actionUrl: '/dashboard/claims',
-      actionLabel: 'View Details',
-      metadata: {
-        caseNumber: '2024-0142',
-      },
-    },
-    {
-      id: 'notif-10',
-      type: 'grievance',
-      priority: 'high',
-      title: 'Arbitration Hearing Scheduled',
-      message:
-        'GRV-2024-089 arbitration hearing set for Dec 15, 2025. Witness prep meeting Nov 28.',
-      timestamp: '2025-11-09T09:00:00',
-      read: true,
-      actionUrl: '/dashboard/grievances',
-      actionLabel: 'View Schedule',
-      metadata: {
-        caseNumber: 'GRV-2024-089',
-      },
-    },
-  ]);
+  const [notifications, setNotifications] = useState<Notification[]>([]);
+  const [unreadCount, setUnreadCount] = useState(0);
+  const [loading, setLoading] = useState(true);
+  const [error, setError] = useState<string | null>(null);
 
   const notificationTypeConfig: Record<
-    NotificationType,
+    string,
     { icon: React.ReactElement; color: string; label: string }
   > = {
     case_update: {
@@ -249,6 +123,26 @@ export default function NotificationsConsole() {
       color: 'bg-emerald-100 text-emerald-700',
       label: t('notifications.types.achievement'),
     },
+    info: {
+      icon: <Info className="w-5 h-5" />,
+      color: 'bg-blue-100 text-blue-700',
+      label: 'Info',
+    },
+    success: {
+      icon: <CheckCircle className="w-5 h-5" />,
+      color: 'bg-green-100 text-green-700',
+      label: 'Success',
+    },
+    warning: {
+      icon: <AlertTriangle className="w-5 h-5" />,
+      color: 'bg-yellow-100 text-yellow-700',
+      label: 'Warning',
+    },
+    error: {
+      icon: <AlertTriangle className="w-5 h-5" />,
+      color: 'bg-red-100 text-red-700',
+      label: 'Error',
+    },
   };
 
   const priorityConfig: Record<
@@ -286,32 +180,72 @@ export default function NotificationsConsole() {
     },
   ];
 
-  const filteredNotifications = notifications.filter((notif) => {
-    const categoryMatch =
-      selectedCategory === 'all' || notif.type === selectedCategory;
-    const unreadMatch = !showUnreadOnly || !notif.read;
-    return categoryMatch && unreadMatch;
-  });
+  const fetchNotifications = useCallback(async () => {
+    try {
+      setError(null);
+      const params = new URLSearchParams();
+      if (showUnreadOnly) params.set('unreadOnly', 'true');
+      if (selectedCategory !== 'all') params.set('type', selectedCategory);
+      params.set('limit', '100');
 
-  const unreadCount = notifications.filter((n) => !n.read).length;
+      const res = await fetch(`/api/notifications?${params.toString()}`);
+      if (!res.ok) throw new Error('Failed to fetch notifications');
+      const data: ApiResponse = await res.json();
+      setNotifications(data.notifications);
+      setUnreadCount(data.unreadCount);
+    } catch {
+      setError('Unable to load notifications');
+    } finally {
+      setLoading(false);
+    }
+  }, [showUnreadOnly, selectedCategory]);
 
-  const markAsRead = useCallback((id: string) => {
+  useEffect(() => {
+    fetchNotifications();
+  }, [fetchNotifications]);
+
+  const filteredNotifications = notifications;
+
+  const markAsRead = useCallback(async (id: string) => {
     setNotifications((prev) =>
-      prev.map((n) => (n.id === id ? { ...n, read: true } : n))
+      prev.map((n) => (n.id === id ? { ...n, read: true, readAt: new Date().toISOString() } : n))
     );
+    setUnreadCount((prev) => Math.max(0, prev - 1));
+    try {
+      await fetch(`/api/notifications/${id}`, {
+        method: 'PATCH',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({ read: true }),
+      });
+    } catch {
+      // Silently handle — optimistic update already applied
+    }
   }, []);
 
-  const markAllAsRead = useCallback(() => {
-    setNotifications((prev) => prev.map((n) => ({ ...n, read: true })));
+  const markAllAsRead = useCallback(async () => {
+    setNotifications((prev) => prev.map((n) => ({ ...n, read: true, readAt: new Date().toISOString() })));
+    setUnreadCount(0);
+    try {
+      await fetch('/api/notifications/mark-all-read', { method: 'POST' });
+    } catch {
+      // Silently handle — optimistic update already applied
+    }
   }, []);
 
-  const deleteNotification = useCallback((id: string) => {
+  const deleteNotification = useCallback(async (id: string) => {
+    const wasUnread = notifications.find((n) => n.id === id && !n.read);
     setNotifications((prev) => prev.filter((n) => n.id !== id));
-  }, []);
+    if (wasUnread) setUnreadCount((prev) => Math.max(0, prev - 1));
+    try {
+      await fetch(`/api/notifications/${id}`, { method: 'DELETE' });
+    } catch {
+      // Silently handle — optimistic update already applied
+    }
+  }, [notifications]);
 
-  const getTimeAgo = (timestamp: string) => {
+  const getTimeAgo = (dateStr: string) => {
     const now = new Date();
-    const time = new Date(timestamp);
+    const time = new Date(dateStr);
     const diffInMinutes = Math.floor(
       (now.getTime() - time.getTime()) / (1000 * 60)
     );
@@ -321,6 +255,44 @@ export default function NotificationsConsole() {
     if (diffInMinutes < 1440) return t('notifications.hoursAgo', { hours: Math.floor(diffInMinutes / 60) });
     return t('notifications.daysAgo', { days: Math.floor(diffInMinutes / 1440) });
   };
+
+  const getTypeConfig = (type: string) =>
+    notificationTypeConfig[type] || notificationTypeConfig.info;
+
+  if (loading) {
+    return (
+      <div className="p-8">
+        <div className="max-w-5xl mx-auto flex items-center justify-center min-h-100">
+          <div className="flex flex-col items-center gap-3">
+            <Loader2 className="w-8 h-8 animate-spin text-blue-600" />
+            <p className="text-gray-600">{t('common.loading')}...</p>
+          </div>
+        </div>
+      </div>
+    );
+  }
+
+  if (error) {
+    return (
+      <div className="p-8">
+        <div className="max-w-5xl mx-auto">
+          <Card className="p-12 text-center bg-white/80 backdrop-blur-sm border-gray-200">
+            <div className="inline-flex items-center justify-center w-16 h-16 rounded-full bg-red-100 mb-4">
+              <AlertTriangle className="w-8 h-8 text-red-600" />
+            </div>
+            <h2 className="text-xl font-semibold text-gray-900 mb-2">{error}</h2>
+            <button
+              onClick={() => { setLoading(true); fetchNotifications(); }}
+              className="mt-4 flex items-center gap-2 mx-auto px-4 py-2 bg-blue-600 text-white rounded-lg text-sm font-medium hover:bg-blue-700 transition-colors"
+            >
+              <RefreshCw className="w-4 h-4" />
+              {t('common.retry')}
+            </button>
+          </Card>
+        </div>
+      </div>
+    );
+  }
 
   return (
     <div className="p-8">
@@ -385,8 +357,9 @@ export default function NotificationsConsole() {
                   <p className="text-sm text-gray-600 mb-1">{t('notifications.urgent')}</p>
                   <p className="text-2xl font-bold text-gray-900">
                     {
-                      notifications.filter((n) => n.priority === 'urgent')
-                        .length
+                      notifications.filter((n) => 
+                        (n.data as Record<string, unknown>)?.priority === 'urgent'
+                      ).length
                     }
                   </p>
                 </div>
@@ -404,7 +377,7 @@ export default function NotificationsConsole() {
                     {
                       notifications.filter(
                         (n) =>
-                          new Date(n.timestamp).toDateString() ===
+                          new Date(n.createdAt).toDateString() ===
                           new Date().toDateString()
                       ).length
                     }
@@ -521,10 +494,10 @@ export default function NotificationsConsole() {
                       {/* Icon */}
                       <div
                         className={`w-12 h-12 rounded-lg flex items-center justify-center shrink-0 ${
-                          notificationTypeConfig[notification.type].color
+                          getTypeConfig(notification.type).color
                         }`}
                       >
-                        {notificationTypeConfig[notification.type].icon}
+                        {getTypeConfig(notification.type).icon}
                       </div>
 
                       {/* Content */}
@@ -557,44 +530,50 @@ export default function NotificationsConsole() {
                           </div>
 
                           {/* Priority Badge */}
-                          {(notification.priority === 'high' ||
-                            notification.priority === 'urgent') && (
+                          {notification.data && (
+                            (notification.data as Record<string, unknown>).priority === 'high' ||
+                            (notification.data as Record<string, unknown>).priority === 'urgent'
+                          ) && (
                             <span
                               className={`px-2 py-1 rounded-full text-xs font-medium whitespace-nowrap ${
-                                priorityConfig[notification.priority].color
+                                priorityConfig[
+                                  ((notification.data as Record<string, unknown>).priority as NotificationPriority) || 'low'
+                                ]?.color || 'bg-gray-100 text-gray-700'
                               }`}
                             >
-                              {priorityConfig[notification.priority].label}
+                              {priorityConfig[
+                                ((notification.data as Record<string, unknown>).priority as NotificationPriority) || 'low'
+                              ]?.label || ''}
                             </span>
                           )}
                         </div>
 
                         {/* Metadata */}
-                        {notification.metadata && (
+                        {notification.data && (
                           <div className="flex flex-wrap gap-3 mb-3">
-                            {notification.metadata.caseNumber && (
+                            {(notification.data as Record<string, unknown>).caseNumber && (
                               <div className="flex items-center gap-1 text-xs text-gray-600">
                                 <FileText className="w-3 h-3" />
-                                {notification.metadata.caseNumber}
+                                {(notification.data as Record<string, unknown>).caseNumber as string}
                               </div>
                             )}
-                            {notification.metadata.daysRemaining !==
+                            {(notification.data as Record<string, unknown>).daysRemaining !==
                               undefined && (
                               <div
                                 className={`flex items-center gap-1 text-xs ${
-                                  notification.metadata.daysRemaining <= 3
+                                  ((notification.data as Record<string, unknown>).daysRemaining as number) <= 3
                                     ? 'text-red-600 font-medium'
                                     : 'text-gray-600'
                                 }`}
                               >
                                 <Clock className="w-3 h-3" />
-                                {t('notifications.daysLeft', { days: notification.metadata.daysRemaining })}
+                                {t('notifications.daysLeft', { days: (notification.data as Record<string, unknown>).daysRemaining as number })}
                               </div>
                             )}
-                            {notification.metadata.memberName && (
+                            {(notification.data as Record<string, unknown>).memberName && (
                               <div className="flex items-center gap-1 text-xs text-gray-600">
                                 <Users className="w-3 h-3" />
-                                {notification.metadata.memberName}
+                                {(notification.data as Record<string, unknown>).memberName as string}
                               </div>
                             )}
                           </div>
@@ -604,17 +583,14 @@ export default function NotificationsConsole() {
                         <div className="flex items-center justify-between gap-3">
                           <div className="flex items-center gap-3">
                             <span className="text-xs text-gray-500">
-                              {getTimeAgo(notification.timestamp)}
+                              {getTimeAgo(notification.createdAt)}
                             </span>
                             <span
                               className={`px-2 py-0.5 rounded-full text-xs font-medium ${
-                                notificationTypeConfig[notification.type].color
+                                getTypeConfig(notification.type).color
                               }`}
                             >
-                              {
-                                notificationTypeConfig[notification.type]
-                                  .label
-                              }
+                              {getTypeConfig(notification.type).label}
                             </span>
                           </div>
 

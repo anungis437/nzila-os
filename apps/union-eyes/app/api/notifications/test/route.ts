@@ -1,19 +1,37 @@
 /**
- * GET POST /api/notifications/test
- * -> Django notifications: /api/notifications/in-app-notifications/
- * NOTE: auto-resolved from notifications/test
- * Auto-migrated by scripts/migrate_routes.py
+ * POST /api/notifications/test
+ * Creates a test notification for the authenticated user. Steward-only.
+ * Backed by inAppNotifications table (Drizzle ORM).
  */
-import { NextRequest } from 'next/server';
-import { djangoProxy } from '@/lib/django-proxy';
+import { withApi } from '@/lib/api/framework';
+import { db } from '@/db/db';
+import { inAppNotifications } from '@/db/schema';
 
 export const dynamic = 'force-dynamic';
 
-export function GET(req: NextRequest) {
-  return djangoProxy(req, '/api/notifications/in-app-notifications/');
-}
+export const POST = withApi(
+  {
+    auth: { required: true, minRole: 'steward' },
+    openapi: {
+      tags: ['Notifications'],
+      summary: 'Send a test notification',
+      description: 'Creates a test in-app notification for the current user. Steward-only.',
+    },
+  },
+  async ({ userId, organizationId }) => {
+    const [notification] = await db
+      .insert(inAppNotifications)
+      .values({
+        userId: userId!,
+        organizationId: organizationId!,
+        title: 'Test Notification',
+        message: 'This is a test notification to verify your notification setup is working correctly.',
+        type: 'info',
+        actionLabel: 'Dismiss',
+      })
+      .returning();
 
-export function POST(req: NextRequest) {
-  return djangoProxy(req, '/api/notifications/in-app-notifications/', { method: 'POST' });
-}
+    return notification;
+  },
+);
 
