@@ -1,54 +1,35 @@
 /**
- * GET PATCH DELETE /api/governance/reserved-matters/[id]
- * → Django: /api/compliance/data-classification-policy/
- * Migrated to withApi() framework
+ * PATCH /api/v2/governance/reserved-matters/[id]
+ * Records Class A vote results on a reserved matter.
  */
-import { djangoProxy } from '@/lib/django-proxy';
-import { withApi } from '@/lib/api/framework';
+import { withApi, z } from '@/lib/api/framework';
+import { db } from '@/db/db';
+import { sql } from 'drizzle-orm';
+import { withSystemContext } from '@/lib/db/with-rls-context';
 
 export const dynamic = 'force-dynamic';
 
-export const GET = withApi(
-  {
-    auth: { required: false },
-    openapi: {
-      tags: ['Governance', 'Django Proxy'],
-      summary: 'GET [id]',
-      description: 'Proxied to Django: /api/compliance/data-classification-policy/',
-    },
-  },
-  async ({ request }) => {
-    const response = await djangoProxy(request, '/api/compliance/data-classification-policy/');
-    return response;
-  },
-);
-
 export const PATCH = withApi(
   {
-    auth: { required: false },
-    openapi: {
-      tags: ['Governance', 'Django Proxy'],
-      summary: 'PATCH [id]',
-      description: 'Proxied to Django: /api/compliance/data-classification-policy/',
-    },
+    auth: { required: true, minRole: 'admin' },
+    body: z.object({
+      votesFor: z.number().int(),
+      votesAgainst: z.number().int(),
+      abstain: z.number().int().optional(),
+    }),
   },
-  async ({ request }) => {
-    const response = await djangoProxy(request, '/api/compliance/data-classification-policy/', { method: 'PATCH' });
-    return response;
-  },
-);
-
-export const DELETE = withApi(
-  {
-    auth: { required: false },
-    openapi: {
-      tags: ['Governance', 'Django Proxy'],
-      summary: 'DELETE [id]',
-      description: 'Proxied to Django: /api/compliance/data-classification-policy/',
-    },
-  },
-  async ({ request }) => {
-    const response = await djangoProxy(request, '/api/compliance/data-classification-policy/', { method: 'DELETE' });
-    return response;
+  async ({ body, params }) => {
+    return withSystemContext(async () => {
+      const id = params.id;
+      await db.execute(sql`
+        UPDATE reserved_matter_votes
+        SET class_a_votes_for = ${body.votesFor},
+            class_a_votes_against = ${body.votesAgainst},
+            class_a_abstain = ${body.abstain ?? 0},
+            updated_at = NOW()
+        WHERE id = ${id}::uuid
+      `);
+      return { updated: true };
+    });
   },
 );

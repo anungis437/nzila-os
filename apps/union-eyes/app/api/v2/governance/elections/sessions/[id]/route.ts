@@ -1,54 +1,37 @@
 /**
- * GET PATCH DELETE /api/governance/elections/sessions/[id]
- * → Django: /api/compliance/data-classification-policy/
- * Migrated to withApi() framework
+ * GET PATCH DELETE /api/v2/governance/elections/sessions/[id]
+ * Single voting session operations backed by PostgreSQL.
  */
-import { djangoProxy } from '@/lib/django-proxy';
-import { withApi } from '@/lib/api/framework';
+import { withApi, ApiError } from '@/lib/api/framework';
+import { db } from '@/db/db';
+import { votingSessions } from '@/db/schema';
+import { eq } from 'drizzle-orm';
 
 export const dynamic = 'force-dynamic';
 
 export const GET = withApi(
-  {
-    auth: { required: false },
-    openapi: {
-      tags: ['Governance', 'Django Proxy'],
-      summary: 'GET [id]',
-      description: 'Proxied to Django: /api/compliance/data-classification-policy/',
-    },
-  },
-  async ({ request }) => {
-    const response = await djangoProxy(request, '/api/compliance/data-classification-policy/');
-    return response;
+  { auth: { required: true, minRole: 'officer' } },
+  async ({ params }) => {
+    const [row] = await db.select().from(votingSessions).where(eq(votingSessions.id, params.id));
+    if (!row) throw ApiError.notFound('Voting session not found');
+    return { data: row };
   },
 );
 
 export const PATCH = withApi(
-  {
-    auth: { required: false },
-    openapi: {
-      tags: ['Governance', 'Django Proxy'],
-      summary: 'PATCH [id]',
-      description: 'Proxied to Django: /api/compliance/data-classification-policy/',
-    },
-  },
-  async ({ request }) => {
-    const response = await djangoProxy(request, '/api/compliance/data-classification-policy/', { method: 'PATCH' });
-    return response;
+  { auth: { required: true, minRole: 'admin' } },
+  async ({ params, body }) => {
+    const [row] = await db.update(votingSessions).set({ ...body, updatedAt: new Date() }).where(eq(votingSessions.id, params.id)).returning();
+    if (!row) throw ApiError.notFound('Voting session not found');
+    return { data: row };
   },
 );
 
 export const DELETE = withApi(
-  {
-    auth: { required: false },
-    openapi: {
-      tags: ['Governance', 'Django Proxy'],
-      summary: 'DELETE [id]',
-      description: 'Proxied to Django: /api/compliance/data-classification-policy/',
-    },
-  },
-  async ({ request }) => {
-    const response = await djangoProxy(request, '/api/compliance/data-classification-policy/', { method: 'DELETE' });
-    return response;
+  { auth: { required: true, minRole: 'admin' } },
+  async ({ params }) => {
+    const [row] = await db.update(votingSessions).set({ status: 'cancelled', updatedAt: new Date() }).where(eq(votingSessions.id, params.id)).returning();
+    if (!row) throw ApiError.notFound('Voting session not found');
+    return { data: row };
   },
 );

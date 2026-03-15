@@ -1,28 +1,53 @@
 /**
  * GET PATCH DELETE /api/governance/board-packets/[id]
- * -> Django compliance: /api/compliance/data-classification-policy/
- * NOTE: auto-resolved from governance/board-packets/[id]
- * Auto-migrated by scripts/migrate_routes.py
+ * Single board packet operations — replaces Django proxy.
  */
-import { NextRequest } from 'next/server';
-import { djangoProxy } from '@/lib/django-proxy';
+import { withApi, ApiError } from '@/lib/api/framework';
+import { db } from '@/db/db';
+import { boardPackets } from '@/db/schema/board-packet-schema';
+import { eq } from 'drizzle-orm';
 
 export const dynamic = 'force-dynamic';
 
-type Params = { params: Promise<{ id: string }> };
+export const GET = withApi(
+  {
+    auth: { required: true, minRole: 'officer' },
+    openapi: { tags: ['Governance'], summary: 'Get board packet by ID' },
+  },
+  async ({ request }) => {
+    const id = request.url.split('/board-packets/')[1]?.split('?')[0]?.split('/')[0];
+    if (!id) throw ApiError.badRequest('Missing packet ID');
+    const [packet] = await db.select().from(boardPackets).where(eq(boardPackets.id, id));
+    if (!packet) throw ApiError.notFound('Board packet not found');
+    return { data: packet };
+  },
+);
 
-export async function GET(req: NextRequest, { params }: Params) {
-  const { id } = await params;
-  return djangoProxy(req, '/api/compliance/data-classification-policy/' + id + '/');
-}
+export const PATCH = withApi(
+  {
+    auth: { required: true, minRole: 'admin' },
+    openapi: { tags: ['Governance'], summary: 'Update board packet' },
+  },
+  async ({ request, body }) => {
+    const id = request.url.split('/board-packets/')[1]?.split('?')[0]?.split('/')[0];
+    if (!id) throw ApiError.badRequest('Missing packet ID');
+    const [packet] = await db.update(boardPackets).set({ ...body, updatedAt: new Date() }).where(eq(boardPackets.id, id)).returning();
+    if (!packet) throw ApiError.notFound('Board packet not found');
+    return { data: packet };
+  },
+);
 
-export async function PATCH(req: NextRequest, { params }: Params) {
-  const { id } = await params;
-  return djangoProxy(req, '/api/compliance/data-classification-policy/' + id + '/', { method: 'PATCH' });
-}
-
-export async function DELETE(req: NextRequest, { params }: Params) {
-  const { id } = await params;
-  return djangoProxy(req, '/api/compliance/data-classification-policy/' + id + '/', { method: 'DELETE' });
-}
+export const DELETE = withApi(
+  {
+    auth: { required: true, minRole: 'admin' },
+    openapi: { tags: ['Governance'], summary: 'Delete board packet' },
+  },
+  async ({ request }) => {
+    const id = request.url.split('/board-packets/')[1]?.split('?')[0]?.split('/')[0];
+    if (!id) throw ApiError.badRequest('Missing packet ID');
+    const [packet] = await db.update(boardPackets).set({ status: 'archived', updatedAt: new Date() }).where(eq(boardPackets.id, id)).returning();
+    if (!packet) throw ApiError.notFound('Board packet not found');
+    return { data: packet };
+  },
+);
 

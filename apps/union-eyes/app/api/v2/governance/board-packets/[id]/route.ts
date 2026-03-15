@@ -1,54 +1,37 @@
 /**
- * GET PATCH DELETE /api/governance/board-packets/[id]
- * → Django: /api/compliance/data-classification-policy/
- * Migrated to withApi() framework
+ * GET PATCH DELETE /api/v2/governance/board-packets/[id]
+ * Single board packet operations backed by PostgreSQL.
  */
-import { djangoProxy } from '@/lib/django-proxy';
-import { withApi } from '@/lib/api/framework';
+import { withApi, ApiError } from '@/lib/api/framework';
+import { db } from '@/db/db';
+import { boardPackets } from '@/db/schema/board-packet-schema';
+import { eq } from 'drizzle-orm';
 
 export const dynamic = 'force-dynamic';
 
 export const GET = withApi(
-  {
-    auth: { required: false },
-    openapi: {
-      tags: ['Governance', 'Django Proxy'],
-      summary: 'GET [id]',
-      description: 'Proxied to Django: /api/compliance/data-classification-policy/',
-    },
-  },
-  async ({ request }) => {
-    const response = await djangoProxy(request, '/api/compliance/data-classification-policy/');
-    return response;
+  { auth: { required: true, minRole: 'officer' } },
+  async ({ params }) => {
+    const [row] = await db.select().from(boardPackets).where(eq(boardPackets.id, params.id));
+    if (!row) throw ApiError.notFound('Board packet not found');
+    return { data: row };
   },
 );
 
 export const PATCH = withApi(
-  {
-    auth: { required: false },
-    openapi: {
-      tags: ['Governance', 'Django Proxy'],
-      summary: 'PATCH [id]',
-      description: 'Proxied to Django: /api/compliance/data-classification-policy/',
-    },
-  },
-  async ({ request }) => {
-    const response = await djangoProxy(request, '/api/compliance/data-classification-policy/', { method: 'PATCH' });
-    return response;
+  { auth: { required: true, minRole: 'admin' } },
+  async ({ params, body }) => {
+    const [row] = await db.update(boardPackets).set({ ...body, updatedAt: new Date() }).where(eq(boardPackets.id, params.id)).returning();
+    if (!row) throw ApiError.notFound('Board packet not found');
+    return { data: row };
   },
 );
 
 export const DELETE = withApi(
-  {
-    auth: { required: false },
-    openapi: {
-      tags: ['Governance', 'Django Proxy'],
-      summary: 'DELETE [id]',
-      description: 'Proxied to Django: /api/compliance/data-classification-policy/',
-    },
-  },
-  async ({ request }) => {
-    const response = await djangoProxy(request, '/api/compliance/data-classification-policy/', { method: 'DELETE' });
-    return response;
+  { auth: { required: true, minRole: 'admin' } },
+  async ({ params }) => {
+    const [row] = await db.update(boardPackets).set({ status: 'archived', updatedAt: new Date() }).where(eq(boardPackets.id, params.id)).returning();
+    if (!row) throw ApiError.notFound('Board packet not found');
+    return { data: row };
   },
 );

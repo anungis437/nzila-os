@@ -16,3 +16,6 @@ export * from './governance';
 export * from './conflicts';
 export * from './voting';
 export * from './strategic-goals';
+export * from './bylaws';
+export * from './signatories';
+export * from './governance-policies';

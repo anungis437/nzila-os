@@ -1,28 +1,53 @@
 /**
  * GET PATCH DELETE /api/governance/elections/sessions/[id]
- * -> Django compliance: /api/compliance/data-classification-policy/
- * NOTE: auto-resolved from governance/elections/sessions/[id]
- * Auto-migrated by scripts/migrate_routes.py
+ * Single voting session operations — replaces Django proxy.
  */
-import { NextRequest } from 'next/server';
-import { djangoProxy } from '@/lib/django-proxy';
+import { withApi, ApiError } from '@/lib/api/framework';
+import { db } from '@/db/db';
+import { votingSessions } from '@/db/schema';
+import { eq } from 'drizzle-orm';
 
 export const dynamic = 'force-dynamic';
 
-type Params = { params: Promise<{ id: string }> };
+export const GET = withApi(
+  {
+    auth: { required: true, minRole: 'officer' },
+    openapi: { tags: ['Governance'], summary: 'Get voting session by ID' },
+  },
+  async ({ request }) => {
+    const id = request.url.split('/sessions/')[1]?.split('?')[0]?.split('/')[0];
+    if (!id) throw ApiError.badRequest('Missing session ID');
+    const [session] = await db.select().from(votingSessions).where(eq(votingSessions.id, id));
+    if (!session) throw ApiError.notFound('Voting session not found');
+    return { data: session };
+  },
+);
 
-export async function GET(req: NextRequest, { params }: Params) {
-  const { id } = await params;
-  return djangoProxy(req, '/api/compliance/data-classification-policy/' + id + '/');
-}
+export const PATCH = withApi(
+  {
+    auth: { required: true, minRole: 'admin' },
+    openapi: { tags: ['Governance'], summary: 'Update voting session' },
+  },
+  async ({ request, body }) => {
+    const id = request.url.split('/sessions/')[1]?.split('?')[0]?.split('/')[0];
+    if (!id) throw ApiError.badRequest('Missing session ID');
+    const [session] = await db.update(votingSessions).set({ ...body, updatedAt: new Date() }).where(eq(votingSessions.id, id)).returning();
+    if (!session) throw ApiError.notFound('Voting session not found');
+    return { data: session };
+  },
+);
 
-export async function PATCH(req: NextRequest, { params }: Params) {
-  const { id } = await params;
-  return djangoProxy(req, '/api/compliance/data-classification-policy/' + id + '/', { method: 'PATCH' });
-}
-
-export async function DELETE(req: NextRequest, { params }: Params) {
-  const { id } = await params;
-  return djangoProxy(req, '/api/compliance/data-classification-policy/' + id + '/', { method: 'DELETE' });
-}
+export const DELETE = withApi(
+  {
+    auth: { required: true, minRole: 'admin' },
+    openapi: { tags: ['Governance'], summary: 'Cancel voting session' },
+  },
+  async ({ request }) => {
+    const id = request.url.split('/sessions/')[1]?.split('?')[0]?.split('/')[0];
+    if (!id) throw ApiError.badRequest('Missing session ID');
+    const [session] = await db.update(votingSessions).set({ status: 'cancelled', updatedAt: new Date() }).where(eq(votingSessions.id, id)).returning();
+    if (!session) throw ApiError.notFound('Voting session not found');
+    return { data: session };
+  },
+);
 

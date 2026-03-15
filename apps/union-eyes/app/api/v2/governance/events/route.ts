@@ -1,39 +1,23 @@
 /**
- * GET POST /api/governance/events
- * → Django: /api/compliance/data-classification-policy/
- * Migrated to withApi() framework
+ * GET /api/v2/governance/events
+ * Returns recent governance events from PostgreSQL.
  */
-import { djangoProxy } from '@/lib/django-proxy';
 import { withApi } from '@/lib/api/framework';
+import { db } from '@/db/db';
+import { sql } from 'drizzle-orm';
+import { withSystemContext } from '@/lib/db/with-rls-context';
 
 export const dynamic = 'force-dynamic';
 
 export const GET = withApi(
-  {
-    auth: { required: false },
-    openapi: {
-      tags: ['Governance', 'Django Proxy'],
-      summary: 'GET events',
-      description: 'Proxied to Django: /api/compliance/data-classification-policy/',
-    },
-  },
-  async ({ request }) => {
-    const response = await djangoProxy(request, '/api/compliance/data-classification-policy/');
-    return response;
-  },
-);
-
-export const POST = withApi(
-  {
-    auth: { required: false },
-    openapi: {
-      tags: ['Governance', 'Django Proxy'],
-      summary: 'POST events',
-      description: 'Proxied to Django: /api/compliance/data-classification-policy/',
-    },
-  },
-  async ({ request }) => {
-    const response = await djangoProxy(request, '/api/compliance/data-classification-policy/', { method: 'POST' });
-    return response;
+  { auth: { required: true, minRole: 'admin' } },
+  async () => {
+    return withSystemContext(async () => {
+      const rows = await db.execute(sql`
+        SELECT id, title, event_type, event_date, description, impact
+        FROM governance_events ORDER BY event_date DESC LIMIT 50
+      `);
+      return { events: Array.from(rows) };
+    });
   },
 );

@@ -1,18 +1,50 @@
 /**
  * GET /api/governance/elections/sessions/[id]/results
- * -> Django compliance: /api/compliance/data-classification-policy/
- * NOTE: auto-resolved from governance/elections/sessions/[id]/results
- * Auto-migrated by scripts/migrate_routes.py
+ * Aggregated vote results for a session — replaces Django proxy.
  */
-import { NextRequest } from 'next/server';
-import { djangoProxy } from '@/lib/django-proxy';
+import { withApi, ApiError } from '@/lib/api/framework';
+import { db } from '@/db/db';
+import { votes, votingOptions, votingSessions } from '@/db/schema';
+import { eq, sql } from 'drizzle-orm';
 
 export const dynamic = 'force-dynamic';
 
-type Params = { params: Promise<{ id: string }> };
+export const GET = withApi(
+  {
+    auth: { required: true, minRole: 'officer' },
+    openapi: { tags: ['Governance'], summary: 'Get election results' },
+  },
+  async ({ request }) => {
+    const id = request.url.split('/sessions/')[1]?.split('/results')[0];
+    if (!id) throw ApiError.badRequest('Missing session ID');
 
-export async function GET(req: NextRequest, { params }: Params) {
-  const { id } = await params;
-  return djangoProxy(req, '/api/compliance/data-classification-policy/' + id + '/');
-}
+    const [session] = await db.select().from(votingSessions).where(eq(votingSessions.id, id));
+    if (!session) throw ApiError.notFound('Voting session not found');
+
+    const options = await db.select().from(votingOptions).where(eq(votingOptions.sessionId, id));
+
+    const tallies = await db
+      .select({
+        optionId: votes.optionId,
+        count: sql<number>`count(*)::int`,
+      })
+      .from(votes)
+      .where(eq(votes.sessionId, id))
+      .groupBy(votes.optionId);
+
+    const totalVotes = tallies.reduce((sum, t) => sum + t.count, 0);
+
+    return {
+      session,
+      options,
+      results: tallies.map((t) => ({
+        optionId: t.optionId,
+        label: options.find((o) => o.id === t.optionId)?.label ?? 'Unknown',
+        votes: t.count,
+        percentage: totalVotes > 0 ? Math.round((t.count / totalVotes) * 10000) / 100 : 0,
+      })),
+      totalVotes,
+    };
+  },
+);
 

@@ -30,7 +30,7 @@ export default function BylawsViewer({ organizationId, canEdit = false }: Bylaws
   const fetchBylaws = useCallback(async () => {
     try {
       setLoading(true);
-      const res = await fetch(`/api/v2/governance/bylaws?organizationId=${organizationId}`);
+      const res = await fetch(`/api/v2/governance/bylaws?organizationId=${encodeURIComponent(organizationId)}`);
       if (res.ok) {
         const data = await res.json();
         const items = Array.isArray(data) ? data : data?.results ?? data?.data ?? [];

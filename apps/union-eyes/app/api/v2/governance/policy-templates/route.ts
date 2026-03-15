@@ -1,39 +1,39 @@
 /**
- * GET POST /api/governance/policy-templates
- * → Django: /api/compliance/data-classification-policy/
- * Migrated to withApi() framework
+ * GET POST /api/v2/governance/policy-templates
+ * Policy templates (draft policies) backed by PostgreSQL.
  */
-import { djangoProxy } from '@/lib/django-proxy';
 import { withApi } from '@/lib/api/framework';
+import { db } from '@/db/db';
+import { governancePolicies } from '@/db/schema';
+import { eq, and, desc } from 'drizzle-orm';
 
 export const dynamic = 'force-dynamic';
 
 export const GET = withApi(
-  {
-    auth: { required: false },
-    openapi: {
-      tags: ['Governance', 'Django Proxy'],
-      summary: 'GET policy-templates',
-      description: 'Proxied to Django: /api/compliance/data-classification-policy/',
-    },
-  },
-  async ({ request }) => {
-    const response = await djangoProxy(request, '/api/compliance/data-classification-policy/');
-    return response;
+  { auth: { required: true, minRole: 'officer' } },
+  async ({ organizationId }) => {
+    const rows = await db
+      .select()
+      .from(governancePolicies)
+      .where(
+        and(
+          eq(governancePolicies.organizationId, organizationId!),
+          eq(governancePolicies.status, 'draft'),
+        ),
+      )
+      .orderBy(desc(governancePolicies.createdAt))
+      .limit(50);
+    return { data: rows, total: rows.length };
   },
 );
 
 export const POST = withApi(
-  {
-    auth: { required: false },
-    openapi: {
-      tags: ['Governance', 'Django Proxy'],
-      summary: 'POST policy-templates',
-      description: 'Proxied to Django: /api/compliance/data-classification-policy/',
-    },
-  },
-  async ({ request }) => {
-    const response = await djangoProxy(request, '/api/compliance/data-classification-policy/', { method: 'POST' });
-    return response;
+  { auth: { required: true, minRole: 'admin' } },
+  async ({ body, organizationId }) => {
+    const [row] = await db
+      .insert(governancePolicies)
+      .values({ ...body, organizationId: organizationId!, status: 'draft' })
+      .returning();
+    return { data: row };
   },
 );

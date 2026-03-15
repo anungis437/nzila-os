@@ -1,39 +1,26 @@
 /**
- * GET POST /api/governance/elections/sessions
- * → Django: /api/compliance/data-classification-policy/
- * Migrated to withApi() framework
+ * GET POST /api/v2/governance/elections/sessions
+ * Voting session management backed by PostgreSQL.
  */
-import { djangoProxy } from '@/lib/django-proxy';
 import { withApi } from '@/lib/api/framework';
+import { db } from '@/db/db';
+import { votingSessions } from '@/db/schema';
+import { desc } from 'drizzle-orm';
 
 export const dynamic = 'force-dynamic';
 
 export const GET = withApi(
-  {
-    auth: { required: false },
-    openapi: {
-      tags: ['Governance', 'Django Proxy'],
-      summary: 'GET sessions',
-      description: 'Proxied to Django: /api/compliance/data-classification-policy/',
-    },
-  },
-  async ({ request }) => {
-    const response = await djangoProxy(request, '/api/compliance/data-classification-policy/');
-    return response;
+  { auth: { required: true, minRole: 'officer' } },
+  async () => {
+    const rows = await db.select().from(votingSessions).orderBy(desc(votingSessions.createdAt)).limit(50);
+    return { data: rows, total: rows.length };
   },
 );
 
 export const POST = withApi(
-  {
-    auth: { required: false },
-    openapi: {
-      tags: ['Governance', 'Django Proxy'],
-      summary: 'POST sessions',
-      description: 'Proxied to Django: /api/compliance/data-classification-policy/',
-    },
-  },
-  async ({ request }) => {
-    const response = await djangoProxy(request, '/api/compliance/data-classification-policy/', { method: 'POST' });
-    return response;
+  { auth: { required: true, minRole: 'admin' } },
+  async ({ body }) => {
+    const [row] = await db.insert(votingSessions).values(body).returning();
+    return { data: row };
   },
 );
