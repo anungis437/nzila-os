@@ -1,19 +1,40 @@
 /**
  * GET POST /api/strike/disbursements
  * -> Django unions: /api/unions/voting-sessions/
- * NOTE: auto-resolved from strike/disbursements
- * Auto-migrated by scripts/migrate_routes.py
+ * Migrated to withApi() framework
  */
-import { NextRequest } from 'next/server';
 import { djangoProxy } from '@/lib/django-proxy';
+import { withApi } from '@/lib/api/framework';
 
 export const dynamic = 'force-dynamic';
 
-export function GET(req: NextRequest) {
-  return djangoProxy(req, '/api/unions/voting-sessions/');
-}
+export const GET = withApi(
+  {
+    auth: { required: true, minRole: 'member' },
+    openapi: {
+      tags: ['Strike', 'Django Proxy'],
+      summary: 'GET disbursements',
+      description: 'Proxied to Django: /api/unions/voting-sessions/',
+    },
+  },
+  async ({ request }) => {
+    const response = await djangoProxy(request, '/api/unions/voting-sessions/');
+    return response;
+  },
+);
 
-export function POST(req: NextRequest) {
-  return djangoProxy(req, '/api/unions/voting-sessions/', { method: 'POST' });
-}
+export const POST = withApi(
+  {
+    auth: { required: true, minRole: 'steward' },
+    openapi: {
+      tags: ['Strike', 'Django Proxy'],
+      summary: 'POST disbursements',
+      description: 'Proxied to Django: /api/unions/voting-sessions/',
+    },
+  },
+  async ({ request }) => {
+    const response = await djangoProxy(request, '/api/unions/voting-sessions/', { method: 'POST' });
+    return response;
+  },
+);
 
