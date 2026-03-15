@@ -1,39 +1,65 @@
 /**
- * GET POST /api/organization/members/search
- * → Django: /api/auth_core/organization-members/
- * Migrated to withApi() framework
+ * GET /api/v2/organization/members/search?organization=<orgId>&q=<query>
+ * Direct DB query — replaces Django proxy
  */
-import { djangoProxy } from '@/lib/django-proxy';
 import { withApi } from '@/lib/api/framework';
+import { db } from '@/db/db';
+import { organizationMembers } from '@/db/schema-organizations';
+import { eq, and, isNull, or, ilike } from 'drizzle-orm';
+import { withSystemContext } from '@/lib/db/with-rls-context';
 
 export const dynamic = 'force-dynamic';
 
 export const GET = withApi(
   {
-    auth: { required: false },
+    auth: { required: true, minRole: 'steward' },
     openapi: {
-      tags: ['Organization', 'Django Proxy'],
-      summary: 'GET search',
-      description: 'Proxied to Django: /api/auth_core/organization-members/',
+      tags: ['Organization', 'Members'],
+      summary: 'Search organization members (v2)',
+      description: 'Search members by name or email within an organization',
     },
   },
   async ({ request }) => {
-    const response = await djangoProxy(request, '/api/auth_core/organization-members/');
-    return response;
-  },
-);
+    const url = new URL(request.url);
+    const orgId = url.searchParams.get('organization');
+    const q = url.searchParams.get('q') || '';
 
-export const POST = withApi(
-  {
-    auth: { required: false },
-    openapi: {
-      tags: ['Organization', 'Django Proxy'],
-      summary: 'POST search',
-      description: 'Proxied to Django: /api/auth_core/organization-members/',
-    },
-  },
-  async ({ request }) => {
-    const response = await djangoProxy(request, '/api/auth_core/organization-members/', { method: 'POST' });
-    return response;
+    if (!orgId) {
+      return { success: true, data: { members: [] } };
+    }
+
+    return withSystemContext(async () => {
+      const conditions = [
+        eq(organizationMembers.organizationId, orgId),
+        isNull(organizationMembers.deletedAt),
+      ];
+
+      if (q) {
+        conditions.push(
+          or(
+            ilike(organizationMembers.name, `%${q}%`),
+            ilike(organizationMembers.email, `%${q}%`),
+          )!,
+        );
+      }
+
+      const rows = await db
+        .select()
+        .from(organizationMembers)
+        .where(and(...conditions))
+        .limit(50);
+
+      const members = rows.map(m => ({
+        id: m.id,
+        name: m.name,
+        email: m.email,
+        role: m.role,
+        status: m.status,
+        department: m.department,
+        membershipNumber: m.membershipNumber || '',
+      }));
+
+      return { success: true, data: { members } };
+    });
   },
 );

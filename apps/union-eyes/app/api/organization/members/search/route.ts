@@ -1,19 +1,66 @@
 /**
- * GET POST /api/organization/members/search
- * -> Django auth_core: /api/auth_core/organization-members/
- * NOTE: auto-resolved from organization/members/search
- * Auto-migrated by scripts/migrate_routes.py
+ * GET /api/organization/members/search?organization=<orgId>&q=<query>
+ * Direct DB query — replaces Django proxy
  */
-import { NextRequest } from 'next/server';
-import { djangoProxy } from '@/lib/django-proxy';
+import { withApi } from '@/lib/api/framework';
+import { db } from '@/db/db';
+import { organizationMembers } from '@/db/schema-organizations';
+import { eq, and, isNull, or, ilike } from 'drizzle-orm';
+import { withSystemContext } from '@/lib/db/with-rls-context';
 
 export const dynamic = 'force-dynamic';
 
-export function GET(req: NextRequest) {
-  return djangoProxy(req, '/api/auth_core/organization-members/');
-}
+export const GET = withApi(
+  {
+    auth: { required: true, minRole: 'steward' },
+    openapi: {
+      tags: ['Organization', 'Members'],
+      summary: 'Search organization members',
+      description: 'Search members by name or email within an organization',
+    },
+  },
+  async ({ request }) => {
+    const url = new URL(request.url);
+    const orgId = url.searchParams.get('organization');
+    const q = url.searchParams.get('q') || '';
 
-export function POST(req: NextRequest) {
-  return djangoProxy(req, '/api/auth_core/organization-members/', { method: 'POST' });
-}
+    if (!orgId) {
+      return { success: true, data: { members: [] } };
+    }
+
+    return withSystemContext(async () => {
+      const conditions = [
+        eq(organizationMembers.organizationId, orgId),
+        isNull(organizationMembers.deletedAt),
+      ];
+
+      if (q) {
+        conditions.push(
+          or(
+            ilike(organizationMembers.name, `%${q}%`),
+            ilike(organizationMembers.email, `%${q}%`),
+          )!,
+        );
+      }
+
+      const rows = await db
+        .select()
+        .from(organizationMembers)
+        .where(and(...conditions))
+        .limit(50);
+
+      const members = rows.map(m => ({
+        id: m.id,
+        name: m.name,
+        email: m.email,
+        role: m.role,
+        status: m.status,
+        department: m.department,
+        membershipNumber: m.membershipNumber || '',
+      }));
+
+      return { success: true, data: { members } };
+    });
+  },
+);
 
