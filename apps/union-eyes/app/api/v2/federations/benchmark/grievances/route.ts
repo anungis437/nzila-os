@@ -10,7 +10,7 @@ export const dynamic = 'force-dynamic';
 
 export const GET = withApi(
   {
-    auth: { required: false },
+    auth: { required: true, minRole: 'member' },
     openapi: {
       tags: ['Federations', 'Django Proxy'],
       summary: 'GET grievances',
