@@ -10,7 +10,7 @@ export const dynamic = 'force-dynamic';
 
 export const GET = withApi(
   {
-    auth: { required: false },
+    auth: { required: true, minRole: 'chief_steward' },
     openapi: {
       tags: ['Stewards', 'Django Proxy'],
       summary: 'GET stewards',
@@ -25,7 +25,7 @@ export const GET = withApi(
 
 export const POST = withApi(
   {
-    auth: { required: false },
+    auth: { required: true, minRole: 'chief_steward' },
     openapi: {
       tags: ['Stewards', 'Django Proxy'],
       summary: 'POST stewards',
