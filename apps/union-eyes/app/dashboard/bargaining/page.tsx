@@ -9,7 +9,7 @@
 export const dynamic = 'force-dynamic';
 
 import { Suspense } from "react";
-import { getCurrentUser } from "@/lib/api-auth-guard";
+import { requireUser, hasMinRole } from "@/lib/api-auth-guard";
 import { redirect } from "next/navigation";
 import { NegotiationDashboard } from "@/components/bargaining/NegotiationDashboard";
 import { Skeleton } from "@/components/ui/skeleton";
@@ -20,14 +20,13 @@ export const metadata = {
 };
 
 async function BargainingDashboardContent() {
-  const user = await getCurrentUser();
+  const user = await requireUser();
+  const hasAccess = await hasMinRole("bargaining_committee");
   
-  if (!user) {
-    redirect("/login");
+  if (!hasAccess) {
+    redirect("/dashboard");
   }
 
-  // Role check: Requires bargaining committee role (level 40)
-  // This is already handled by the API but we can do client-side check too
   const organizationId = user.organizationId || '';
 
   return (

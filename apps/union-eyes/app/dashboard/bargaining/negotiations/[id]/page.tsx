@@ -14,7 +14,7 @@ export const dynamic = 'force-dynamic';
 
 import { Suspense } from "react";
 import { notFound, redirect } from "next/navigation";
-import { getCurrentUser } from "@/lib/auth";
+import { requireUser, hasMinRole } from "@/lib/api-auth-guard";
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import { Badge } from "@/components/ui/badge";
 import { Button } from "@/components/ui/button";
@@ -58,10 +58,11 @@ async function fetchNegotiationData(id: string) {
 }
 
 async function NegotiationDetailContent({ params }: PageProps) {
-  const user = await getCurrentUser();
+  const user = await requireUser();
+  const hasAccess = await hasMinRole("bargaining_committee");
   
-  if (!user) {
-    redirect("/login");
+  if (!hasAccess) {
+    redirect("/dashboard");
   }
 
   const data = await fetchNegotiationData(params.id);
