@@ -8,7 +8,7 @@ export const dynamic = 'force-dynamic';
 
 const { GET, POST } = crudRoutes({
   table: oauthProviders,
-  pk: 'id',
+  pk: 'providerId',
   tags: ["Auth"],
   orgScoped: true,
   readRole: 'member',

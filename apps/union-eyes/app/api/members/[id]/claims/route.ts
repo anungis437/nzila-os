@@ -8,7 +8,7 @@ export const dynamic = 'force-dynamic';
 
 const { GET, PATCH, DELETE } = crudRoutes({
   table: claims,
-  pk: 'id',
+  pk: 'claimId',
   tags: ["Claims"],
   orgScoped: true,
   itemRoute: true,

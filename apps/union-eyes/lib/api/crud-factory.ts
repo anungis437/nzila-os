@@ -45,8 +45,8 @@ export interface CrudOptions {
   /** The Drizzle pgTable reference */
   // eslint-disable-next-line @typescript-eslint/no-explicit-any
   table: PgTable<any>;
-  /** Primary key column name (e.g. 'id', 'claimId', 'auditId') */
-  pk: string;
+  /** Primary key column name (e.g. 'id', 'claimId', 'auditId'). Auto-detected if omitted or wrong. */
+  pk?: string;
   /** OpenAPI tags */
   tags: string[];
   /** Whether the table has an organization_id column for scoping */
@@ -73,6 +73,24 @@ function getColumn(table: PgTable<any>, name: string): PgColumn | undefined {
   return (table as any)[name] as PgColumn | undefined;
 }
 
+/** Auto-detect the primary key column on a Drizzle pgTable */
+// eslint-disable-next-line @typescript-eslint/no-explicit-any
+function findPrimaryKeyColumn(table: PgTable<any>): { name: string; col: PgColumn } | undefined {
+  // eslint-disable-next-line @typescript-eslint/no-explicit-any
+  for (const [name, col] of Object.entries(table as any)) {
+    // eslint-disable-next-line @typescript-eslint/no-explicit-any
+    if (col && typeof col === 'object' && (col as any).primary === true) {
+      return { name, col: col as PgColumn };
+    }
+    // Drizzle stores primaryKey flag in config
+    // eslint-disable-next-line @typescript-eslint/no-explicit-any
+    if (col && typeof col === 'object' && (col as any).config?.primaryKey === true) {
+      return { name, col: col as PgColumn };
+    }
+  }
+  return undefined;
+}
+
 // eslint-disable-next-line @typescript-eslint/no-explicit-any
 function getTableName(table: PgTable<any>): string {
   const sym = Object.getOwnPropertySymbols(table).find(s => s.toString().includes('Name'));
@@ -86,7 +104,7 @@ export function crudRoutes(opts: CrudOptions & { itemRoute?: false | undefined }
 export function crudRoutes(opts: CrudOptions): CollectionHandlers | ItemHandlers {
   const {
     table,
-    pk,
+    pk = 'id',
     tags,
     orgScoped = true,
     itemRoute = false,
@@ -98,7 +116,18 @@ export function crudRoutes(opts: CrudOptions): CollectionHandlers | ItemHandlers
   } = opts;
 
   const resourceName = opts.resourceName ?? getTableName(table);
-  const pkCol = getColumn(table, pk);
+
+  // Resolve PK: try specified name first, then auto-detect from schema
+  let pkCol = getColumn(table, pk);
+  let resolvedPk = pk;
+  if (!pkCol) {
+    const detected = findPrimaryKeyColumn(table);
+    if (detected) {
+      pkCol = detected.col;
+      resolvedPk = detected.name;
+    }
+  }
+
   const orgCol = orgScoped ? getColumn(table, 'organizationId') : undefined;
   const orderCol = getColumn(table, orderBy);
 
@@ -198,7 +227,7 @@ export function crudRoutes(opts: CrudOptions): CollectionHandlers | ItemHandlers
 
   function buildItemHandlers() {
     if (!pkCol) {
-      throw new Error(`crud-factory: PK column "${pk}" not found on table "${resourceName}"`);
+      throw new Error(`crud-factory: PK column "${resolvedPk}" not found on table "${resourceName}" (tried "${pk}" and auto-detect)`);
     }
 
     const GET = withApi(

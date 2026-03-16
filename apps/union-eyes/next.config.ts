@@ -160,6 +160,15 @@ const nextConfig: NextConfig = {
     ignoreBuildErrors: true,
   },
   
+  // Turbopack resolve aliases
+  // swagger-ui-react imports `immutable` with a default import, but immutable v5
+  // ESM build has no default export. Force CJS build for Turbopack compatibility.
+  turbopack: {
+    resolveAlias: {
+      immutable: 'immutable/dist/immutable.js',
+    },
+  },
+
   // Build optimizations
   reactStrictMode: true,
   
