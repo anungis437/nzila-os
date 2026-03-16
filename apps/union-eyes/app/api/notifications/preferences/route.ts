@@ -3,7 +3,7 @@
  * Notification preferences for the authenticated user.
  * Backed by userNotificationPreferences table (Drizzle ORM).
  */
-import { withApi } from '@/lib/api/framework';
+import { withApi, ApiError } from '@/lib/api/framework';
 import { db } from '@/db/db';
 import { userNotificationPreferences } from '@/db/schema';
 import { eq, and } from 'drizzle-orm';
@@ -116,10 +116,7 @@ export const PUT = withApi(
     }
 
     if (!email) {
-      return new Response(JSON.stringify({ error: 'email is required for new preferences' }), {
-        status: 400,
-        headers: { 'Content-Type': 'application/json' },
-      });
+      throw ApiError.badRequest('email is required for new preferences');
     }
 
     const [created] = await db

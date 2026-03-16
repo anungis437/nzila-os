@@ -97,9 +97,9 @@ export async function exportAwardsToCSV(
       LEFT JOIN recognition_award_types rat ON rat.id = ra.award_type_id
       LEFT JOIN recognition_programs rp ON rp.id = rat.program_id
       LEFT JOIN organization_members recipient ON recipient.user_id = ra.recipient_user_id
-      LEFT JOIN users recipient_user ON recipient_user.id = ra.recipient_user_id
+      LEFT JOIN auth_user recipient_user ON recipient_user.id::text = ra.recipient_user_id
       LEFT JOIN organization_members issuer ON issuer.user_id = ra.issuer_user_id
-      LEFT JOIN users issuer_user ON issuer_user.id = ra.issuer_user_id
+      LEFT JOIN auth_user issuer_user ON issuer_user.id::text = ra.issuer_user_id
       LEFT JOIN organization_members approver ON approver.user_id = ra.approved_by_user_id
       WHERE ${sql.join(conditions, sql` AND `)}
       ORDER BY ra.created_at DESC
@@ -194,7 +194,7 @@ export async function exportLedgerToCSV(
         rwl.description
       FROM ${rewardWalletLedger} rwl
       LEFT JOIN organization_members om ON om.user_id = rwl.user_id
-      LEFT JOIN users u ON u.id = rwl.user_id
+      LEFT JOIN auth_user u ON u.id::text = rwl.user_id
       WHERE ${sql.join(conditions, sql` AND `)}
       ORDER BY rwl.created_at DESC
     `;
@@ -349,7 +349,7 @@ export async function exportRedemptionsToCSV(
         rr.provider
       FROM ${rewardRedemptions} rr
       LEFT JOIN organization_members om ON om.user_id = rr.user_id
-      LEFT JOIN users u ON u.id = rr.user_id
+      LEFT JOIN auth_user u ON u.id::text = rr.user_id
       WHERE ${sql.join(conditions, sql` AND `)}
       ORDER BY rr.created_at DESC
     `;

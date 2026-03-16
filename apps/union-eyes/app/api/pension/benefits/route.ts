@@ -10,7 +10,7 @@ export const GET = withApi(
     auth: { required: true, minRole: 'member' },
     openapi: { tags: ['Pension'], summary: 'List benefit claims', description: 'List all pension benefit claims for the organization' },
   },
-  async ({ _request, organizationId }) => {
+  async ({ organizationId }) => {
     const claims = await db
       .select()
       .from(pensionBenefitClaims)
@@ -28,7 +28,7 @@ export const POST = withApi(
   async ({ body, organizationId }) => {
     const [claim] = await db
       .insert(pensionBenefitClaims)
-      .values({ ...body, organizationId: organizationId! })
+      .values({ ...(body as Record<string, unknown>), organizationId: organizationId! } as typeof pensionBenefitClaims.$inferInsert)
       .returning();
     return { data: claim };
   },

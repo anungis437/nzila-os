@@ -551,12 +551,12 @@ export default function NotificationsConsole() {
                         {/* Metadata */}
                         {notification.data && (
                           <div className="flex flex-wrap gap-3 mb-3">
-                            {(notification.data as Record<string, unknown>).caseNumber && (
+                            {(notification.data as Record<string, unknown>).caseNumber ? (
                               <div className="flex items-center gap-1 text-xs text-gray-600">
                                 <FileText className="w-3 h-3" />
-                                {(notification.data as Record<string, unknown>).caseNumber as string}
+                                {String((notification.data as Record<string, unknown>).caseNumber)}
                               </div>
-                            )}
+                            ) : null}
                             {(notification.data as Record<string, unknown>).daysRemaining !==
                               undefined && (
                               <div
@@ -570,12 +570,12 @@ export default function NotificationsConsole() {
                                 {t('notifications.daysLeft', { days: (notification.data as Record<string, unknown>).daysRemaining as number })}
                               </div>
                             )}
-                            {(notification.data as Record<string, unknown>).memberName && (
+                            {(notification.data as Record<string, unknown>).memberName ? (
                               <div className="flex items-center gap-1 text-xs text-gray-600">
                                 <Users className="w-3 h-3" />
-                                {(notification.data as Record<string, unknown>).memberName as string}
+                                {String((notification.data as Record<string, unknown>).memberName)}
                               </div>
-                            )}
+                            ) : null}
                           </div>
                         )}
 

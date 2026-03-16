@@ -112,7 +112,7 @@ export default async function SettingsPage() {
   const organizationId = user.organizationId;
   const userRole = await getUserRole(user.userId, organizationId);
 
-  if (PLATFORM_ROLES.has(userRole)) {
+  if (userRole && PLATFORM_ROLES.has(userRole)) {
     const data = await withSystemContext(() => loadPlatformSettings());
     return <PlatformSettingsContent initialData={data} />;
   }

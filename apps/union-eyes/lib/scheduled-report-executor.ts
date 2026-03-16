@@ -66,14 +66,14 @@ const reportData = await fetchReportData(schedule);
     // 3. Generate export file
 const fileBuffer = await generateExportFile(
       reportData,
-      schedule.exportFormat
+      schedule.format
     );
 
     // 4. Upload file to storage
 const fileUrl = await uploadFile(
       fileBuffer,
       schedule.id,
-      schedule.exportFormat,
+      schedule.format,
       schedule.organizationId
     );
 
@@ -127,16 +127,16 @@ async function createExportJob(schedule: ScheduledReport): Promise<any> {
   const result = await db.execute(sql`
     INSERT INTO export_jobs (
       report_id,
-      tenant_id,
+      organization_id,
       schedule_id,
-      export_format,
+      export_type,
       status,
       created_by
     ) VALUES (
       ${schedule.reportId},
-      ${schedule.organizationId},
+      ${schedule.organizationId}::uuid,
       ${schedule.id},
-      ${schedule.exportFormat},
+      ${schedule.format},
       'processing',
       'system'
     )
@@ -168,8 +168,6 @@ async function updateExportJob(
       status = ${data.status},
       completed_at = NOW(),
       file_url = ${data.fileUrl ?? null},
-      file_size_bytes = ${data.fileSizeBytes ?? null},
-      row_count = ${data.rowCount ?? null},
       processing_duration_ms = ${data.processingDurationMs ?? null},
       error_message = ${data.errorMessage ?? null}
     WHERE id = ${jobId}
@@ -233,13 +231,13 @@ async function executeClaimsQuery(organizationId: string, _config: unknown): Pro
       c.priority,
       c.claim_type,
       c.claim_amount,
-      c.date_filed,
-      c.resolution_date,
-      u.full_name as claimant_name,
-      u.member_id
+      c.filed_date,
+      c.resolved_at,
+      om.name as claimant_name,
+      om.membership_number as member_id
     FROM claims c
-    LEFT JOIN user_profiles u ON c.user_id = u.user_id
-    WHERE c.tenant_id = ${organizationId}
+    LEFT JOIN organization_members om ON om.id::text = c.member_id AND om.organization_id = c.organization_id::text
+    WHERE c.organization_id = ${organizationId}::uuid
       AND c.created_at >= NOW() - INTERVAL '90 days'
     ORDER BY c.created_at DESC
     LIMIT 1000
@@ -266,10 +264,10 @@ async function executeAnalyticsQuery(organizationId: string, config: any): Promi
     SELECT 
       ${sql.raw(groupBy)} as category,
       COUNT(*) as count,
-      AVG(claim_amount) as avg_amount,
-      SUM(claim_amount) as total_amount
+      AVG(claim_amount::numeric) as avg_amount,
+      SUM(claim_amount::numeric) as total_amount
     FROM claims
-    WHERE tenant_id = ${organizationId}
+    WHERE organization_id = ${organizationId}::uuid
       AND created_at >= NOW() - INTERVAL '30 days'
     GROUP BY ${sql.raw(groupBy)}
     ORDER BY count DESC
@@ -293,7 +291,7 @@ async function executeDefaultQuery(organizationId: string, _config: any): Promis
       claim_amount,
       created_at
     FROM claims
-    WHERE tenant_id = ${organizationId}
+    WHERE organization_id = ${organizationId}::uuid
     ORDER BY created_at DESC
     LIMIT 500
   `);
@@ -344,23 +342,23 @@ async function executeCustomQuery(organizationId: string, config: any): Promise<
   switch (queryKey) {
     case 'claims_summary':
       result = await db.execute(sql`
-        SELECT COUNT(*) as total, SUM(claim_amount) as total_amount 
+        SELECT COUNT(*) as total, SUM(claim_amount::numeric) as total_amount 
         FROM claims 
-        WHERE tenant_id = ${organizationId}
+        WHERE organization_id = ${organizationId}::uuid
       `);
       break;
     case 'member_stats':
       result = await db.execute(sql`
-        SELECT COUNT(*) as total, COUNT(DISTINCT union_id) as unique_unions 
-        FROM members 
-        WHERE tenant_id = ${organizationId}
+        SELECT COUNT(*) as total, COUNT(DISTINCT organization_id) as unique_orgs 
+        FROM organization_members 
+        WHERE organization_id = ${organizationId}::uuid
       `);
       break;
     case 'recent_claims':
       result = await db.execute(sql`
-        SELECT id, claim_number, status, claim_amount, created_at 
+        SELECT claim_id as id, claim_number, status, claim_amount, created_at 
         FROM claims 
-        WHERE tenant_id = ${organizationId}
+        WHERE organization_id = ${organizationId}::uuid
         ORDER BY created_at DESC 
         LIMIT 100
       `);
@@ -750,20 +748,16 @@ async function deliverReport(
   fileUrl: string,
   fileBuffer: Buffer
 ): Promise<void> {
-  switch (schedule.deliveryMethod) {
-    case 'email':
-      await deliverViaEmail(schedule, fileUrl, fileBuffer);
-      break;
-    case 'dashboard':
-      // No action needed - file is already accessible via fileUrl
-break;
-    case 'storage':
-      // Already uploaded in previous step
-break;
-    case 'webhook':
-      await deliverViaWebhook(schedule, fileUrl);
-      break;
-    default:
+  // Deliver via email to recipients
+  if (schedule.recipients && schedule.recipients.length > 0) {
+    await deliverViaEmail(schedule, fileUrl, fileBuffer);
+  }
+
+  // Also deliver via webhook if configured in parameters
+  // eslint-disable-next-line @typescript-eslint/no-explicit-any
+  const params = schedule.parameters as any;
+  if (params?.webhookUrl) {
+    await deliverViaWebhook(schedule, fileUrl);
 }
 }
 
@@ -793,7 +787,8 @@ async function deliverViaWebhook(
   fileUrl: string
 ): Promise<void> {
   // eslint-disable-next-line @typescript-eslint/no-explicit-any
-  const webhookUrl = (schedule.scheduleConfig as any).webhookUrl;
+  const params = schedule.parameters as any;
+  const webhookUrl = params?.webhookUrl;
   
   if (!webhookUrl) {
     throw new Error('Webhook URL not configured');
@@ -830,7 +825,7 @@ export async function retryFailedExecution(
 ): Promise<ExecutionResult> {
   // Get the schedule
   const result = await db.execute(sql`
-    SELECT * FROM report_schedules WHERE id = ${scheduleId}
+    SELECT * FROM scheduled_reports WHERE id = ${scheduleId}
   `);
   
   // eslint-disable-next-line @typescript-eslint/no-explicit-any

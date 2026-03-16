@@ -20,7 +20,7 @@ export const GET = withApi(
       .where(
         and(
           eq(pensionMembers.organizationId, organizationId!),
-          gte(pensionMembers.yearsOfService, threshold),
+          gte(pensionMembers.yearsOfService, String(threshold)),
         ),
       )
       .orderBy(desc(pensionMembers.createdAt));

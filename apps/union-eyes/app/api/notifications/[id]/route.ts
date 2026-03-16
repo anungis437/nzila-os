@@ -3,14 +3,12 @@
  * Single notification operations — read, mark-as-read, delete.
  * Backed by inAppNotifications table (Drizzle ORM).
  */
-import { withApi } from '@/lib/api/framework';
+import { withApi, ApiError } from '@/lib/api/framework';
 import { db } from '@/db/db';
 import { inAppNotifications } from '@/db/schema';
 import { eq, and } from 'drizzle-orm';
 
 export const dynamic = 'force-dynamic';
-
-type Params = { params: Promise<{ id: string }> };
 
 export const GET = withApi(
   {
@@ -21,8 +19,8 @@ export const GET = withApi(
       description: 'Returns a single in-app notification by ID.',
     },
   },
-  async ({ request, userId }, _req?: unknown, routeParams?: Params) => {
-    const { id } = await routeParams!.params;
+  async ({ params, userId }) => {
+    const { id } = await params;
 
     const [notification] = await db
       .select()
@@ -31,10 +29,7 @@ export const GET = withApi(
       .limit(1);
 
     if (!notification) {
-      return new Response(JSON.stringify({ error: 'Notification not found' }), {
-        status: 404,
-        headers: { 'Content-Type': 'application/json' },
-      });
+      throw ApiError.notFound('Notification');
     }
 
     return notification;
@@ -50,8 +45,8 @@ export const PATCH = withApi(
       description: 'Updates a notification, typically to mark it as read.',
     },
   },
-  async ({ body, userId }, _req?: unknown, routeParams?: Params) => {
-    const { id } = await routeParams!.params;
+  async ({ params, body, userId }) => {
+    const { id } = await params;
     const { read } = (body as { read?: boolean }) || {};
 
     const updateData: Record<string, unknown> = {};
@@ -69,10 +64,7 @@ export const PATCH = withApi(
       .returning();
 
     if (!updated) {
-      return new Response(JSON.stringify({ error: 'Notification not found' }), {
-        status: 404,
-        headers: { 'Content-Type': 'application/json' },
-      });
+      throw ApiError.notFound('Notification');
     }
 
     return updated;
@@ -88,8 +80,8 @@ export const DELETE = withApi(
       description: 'Deletes a single in-app notification.',
     },
   },
-  async ({ userId }, _req?: unknown, routeParams?: Params) => {
-    const { id } = await routeParams!.params;
+  async ({ params, userId }) => {
+    const { id } = await params;
 
     const [deleted] = await db
       .delete(inAppNotifications)
@@ -97,10 +89,7 @@ export const DELETE = withApi(
       .returning();
 
     if (!deleted) {
-      return new Response(JSON.stringify({ error: 'Notification not found' }), {
-        status: 404,
-        headers: { 'Content-Type': 'application/json' },
-      });
+      throw ApiError.notFound('Notification');
     }
 
     return { success: true };

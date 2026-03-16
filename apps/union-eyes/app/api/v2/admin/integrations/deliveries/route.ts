@@ -5,8 +5,8 @@
  * @role integration_manager
  */
 import { withApi, z } from '@/lib/api/framework';
-import { db } from '@/db/db';
 import { sql } from 'drizzle-orm';
+import { withRLSContext } from '@/lib/db/with-rls-context';
 
 export const dynamic = 'force-dynamic';
 
@@ -35,25 +35,27 @@ export const GET = withApi(
       whereClause = sql`${whereClause} AND provider = ${provider}`;
     }
 
-    const [countResult, deliveries] = await Promise.all([
-      db.execute(sql`
-        SELECT count(*)::int AS total
-        FROM integration_deliveries
-        WHERE ${whereClause}
-      `),
-      db.execute(sql`
-        SELECT id, config_id, channel, provider, recipient_ref,
-               status, attempts, max_attempts, last_error,
-               provider_message_id, correlation_id, created_at, updated_at
-        FROM integration_deliveries
-        WHERE ${whereClause}
-        ORDER BY created_at DESC
-        LIMIT ${limit} OFFSET ${offset}
-      `),
-    ]);
+    const [countResult, deliveries] = await withRLSContext(async (db) =>
+      Promise.all([
+        db.execute(sql`
+          SELECT count(*)::int AS total
+          FROM integration_deliveries
+          WHERE ${whereClause}
+        `),
+        db.execute(sql`
+          SELECT id, config_id, channel, provider, recipient_ref,
+                 status, attempts, max_attempts, last_error,
+                 provider_message_id, correlation_id, created_at, updated_at
+          FROM integration_deliveries
+          WHERE ${whereClause}
+          ORDER BY created_at DESC
+          LIMIT ${limit} OFFSET ${offset}
+        `),
+      ]),
+    );
 
-    const total = (Array.from(countResult)[0] as Record<string, unknown>)?.total as number ?? 0;
-    const rows = Array.from(deliveries).map((r: Record<string, unknown>) => ({
+    const total = ((Array.from(countResult) as Record<string, unknown>[])[0])?.total as number ?? 0;
+    const rows = (Array.from(deliveries) as Record<string, unknown>[]).map((r) => ({
       id: r.id,
       configId: r.config_id,
       channel: r.channel,

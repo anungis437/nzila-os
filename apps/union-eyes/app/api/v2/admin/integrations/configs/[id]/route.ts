@@ -5,8 +5,8 @@
  * @role integration_manager
  */
 import { withApi, ApiError, z } from '@/lib/api/framework';
-import { db } from '@/db/db';
 import { sql } from 'drizzle-orm';
+import { withRLSContext } from '@/lib/db/with-rls-context';
 import { logger } from '@/lib/logger';
 
 export const dynamic = 'force-dynamic';
@@ -24,16 +24,18 @@ export const GET = withApi(
   async ({ params, organizationId }) => {
     const { id } = await params;
 
-    const result = await db.execute(sql`
-      SELECT id, org_id, type, provider, status, metadata,
-             credentials_ref, created_by, created_at, updated_at
-      FROM integration_configs
-      WHERE id = ${id}::uuid AND org_id = ${organizationId}::uuid
-    `);
+    const result = await withRLSContext(async (db) =>
+      db.execute(sql`
+        SELECT id, org_id, type, provider, status, metadata,
+               credentials_ref, created_by, created_at, updated_at
+        FROM integration_configs
+        WHERE id = ${id}::uuid AND org_id = ${organizationId}::uuid
+      `),
+    );
 
-    const row = Array.from(result)[0] as Record<string, unknown> | undefined;
+    const row = (Array.from(result) as Record<string, unknown>[])[0];
     if (!row) {
-      throw new ApiError(404, 'Integration config not found');
+      throw ApiError.notFound('Integration config');
     }
 
     return {
@@ -91,7 +93,7 @@ export const PATCH = withApi(
     }
 
     if (sets.length === 1) {
-      throw new ApiError(400, 'No fields to update');
+      throw ApiError.badRequest('No fields to update');
     }
 
     // Use template literal for the update
@@ -123,10 +125,10 @@ export const PATCH = withApi(
       `;
     }
 
-    const result = await db.execute(updateSql);
-    const row = Array.from(result)[0] as Record<string, unknown> | undefined;
+    const result = await withRLSContext(async (db) => db.execute(updateSql));
+    const row = (Array.from(result) as Record<string, unknown>[])[0];
     if (!row) {
-      throw new ApiError(404, 'Integration config not found');
+      throw ApiError.notFound('Integration config');
     }
 
     logger.info('Integration config updated', {
@@ -153,15 +155,17 @@ export const DELETE = withApi(
   async ({ params, organizationId, userId }) => {
     const { id } = await params;
 
-    const result = await db.execute(sql`
-      DELETE FROM integration_configs
-      WHERE id = ${id}::uuid AND org_id = ${organizationId}::uuid
-      RETURNING id, provider
-    `);
+    const result = await withRLSContext(async (db) =>
+      db.execute(sql`
+        DELETE FROM integration_configs
+        WHERE id = ${id}::uuid AND org_id = ${organizationId}::uuid
+        RETURNING id, provider
+      `),
+    );
 
-    const row = Array.from(result)[0] as Record<string, unknown> | undefined;
+    const row = (Array.from(result) as Record<string, unknown>[])[0];
     if (!row) {
-      throw new ApiError(404, 'Integration config not found');
+      throw ApiError.notFound('Integration config');
     }
 
     logger.info('Integration config deleted', {

@@ -3,7 +3,7 @@
  * In-app notifications — list and create.
  * Backed by inAppNotifications table (Drizzle ORM).
  */
-import { withApi } from '@/lib/api/framework';
+import { withApi, ApiError } from '@/lib/api/framework';
 import { db } from '@/db/db';
 import { inAppNotifications } from '@/db/schema';
 import { eq, and, desc, count, isNull, or, gte } from 'drizzle-orm';
@@ -104,10 +104,7 @@ export const POST = withApi(
       };
 
     if (!targetUserId || !title || !message) {
-      return new Response(JSON.stringify({ error: 'userId, title, and message are required' }), {
-        status: 400,
-        headers: { 'Content-Type': 'application/json' },
-      });
+      throw ApiError.badRequest('userId, title, and message are required');
     }
 
     const [notification] = await db

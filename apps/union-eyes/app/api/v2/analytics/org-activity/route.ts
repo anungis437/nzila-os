@@ -12,7 +12,7 @@ import {
   sharedClauseLibrary,
   arbitrationPrecedents,
 } from '@/db/schema';
-import { sql, gte, lte, eq, desc, and, ne } from 'drizzle-orm';
+import { sql, gte, lte, eq, desc, and, ne, type SQL } from 'drizzle-orm';
 import { withSystemContext } from '@/lib/db/with-rls-context';
 
 export const dynamic = 'force-dynamic';
@@ -34,7 +34,7 @@ export const GET = withApi(
       const organizationLevel = url.searchParams.get('organizationLevel');
 
       // Build date conditions for access log
-      const accessConditions = [];
+      const accessConditions: SQL[] = [];
       if (fromDate) accessConditions.push(gte(crossOrgAccessLog.createdAt, new Date(fromDate)));
       if (toDate) accessConditions.push(lte(crossOrgAccessLog.createdAt, new Date(toDate)));
 
@@ -77,8 +77,10 @@ export const GET = withApi(
 
       // Most active organizations (accessor side)
       const orgLevelFilter = organizationLevel && organizationLevel !== 'all'
-        ? eq(organizations.organizationType, organizationLevel)
+        ? eq(organizations.organizationType, organizationLevel as typeof organizations.organizationType.enumValues[number])
         : undefined;
+
+      const combinedWhere = [accessWhere, orgLevelFilter].filter((c): c is SQL => c != null);
 
       const mostActiveOrgs = await db
         .select({
@@ -92,7 +94,7 @@ export const GET = withApi(
         })
         .from(crossOrgAccessLog)
         .innerJoin(organizations, eq(crossOrgAccessLog.userOrganizationId, organizations.id))
-        .where(accessWhere && orgLevelFilter ? and(accessWhere, orgLevelFilter) : (accessWhere ?? orgLevelFilter))
+        .where(combinedWhere.length > 0 ? and(...combinedWhere) : undefined)
         .groupBy(crossOrgAccessLog.userOrganizationId, organizations.name, organizations.organizationType)
         .orderBy(desc(sql`count(*)`))
         .limit(10);

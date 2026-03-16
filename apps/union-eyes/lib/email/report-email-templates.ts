@@ -58,7 +58,7 @@ async function sendViaResend(params: SendEmailParams): Promise<void> {
     const resend = new Resend(process.env.RESEND_API_KEY);
 
     const reportName = (schedule as unknown as Record<string, unknown>).report_name as string || 'Report';
-    const fileName = `${reportName.replace(/\s+/g, '-')}.${schedule.exportFormat}`;
+    const fileName = `${reportName.replace(/\s+/g, '-')}.${schedule.format}`;
 
     await resend.emails.send({
       from: process.env.EMAIL_FROM || 'reports@union-claims.com',
@@ -105,7 +105,7 @@ throw new Error('SendGrid API key not configured. Using Resend fallback.');
     sgMail.default.setApiKey(process.env.SENDGRID_API_KEY);
 
     const reportName = (schedule as unknown as Record<string, unknown>).report_name as string || 'Report';
-    const fileName = `${reportName.replace(/\s+/g, '-')}.${schedule.exportFormat}`;
+    const fileName = `${reportName.replace(/\s+/g, '-')}.${schedule.format}`;
 
     await sgMail.default.send({
       to: schedule.recipients,
@@ -116,7 +116,7 @@ throw new Error('SendGrid API key not configured. Using Resend fallback.');
         {
           content: fileBuffer.toString('base64'),
           filename: fileName,
-          type: getMimeType(schedule.exportFormat),
+          type: getMimeType(schedule.format),
           disposition: 'attachment',
         },
       ],
@@ -137,7 +137,7 @@ return;
 function generateEmailHTML(schedule: ScheduledReport, fileUrl: string): string {
   const reportName = (schedule as unknown as Record<string, unknown>).report_name as string || 'Report';
   const reportDescription = (schedule as unknown as Record<string, unknown>).report_description as string || '';
-  const scheduleType = schedule.scheduleType.charAt(0).toUpperCase() + schedule.scheduleType.slice(1);
+  const scheduleType = schedule.frequency.charAt(0).toUpperCase() + schedule.frequency.slice(1);
 
   return `
     <!DOCTYPE html>
@@ -246,11 +246,11 @@ function generateEmailHTML(schedule: ScheduledReport, fileUrl: string): string {
             </div>
             <div class="info-row">
               <span class="info-label">Export Format:</span>
-              <span class="info-value">${schedule.exportFormat.toUpperCase()}</span>
+              <span class="info-value">${schedule.format.toUpperCase()}</span>
             </div>
             <div class="info-row" style="border-bottom: none;">
               <span class="info-label">Next Run:</span>
-              <span class="info-value">${schedule.nextRunAt ? new Date(schedule.nextRunAt).toLocaleString() : 'N/A'}</span>
+              <span class="info-value">${schedule.nextExecutionAt ? new Date(schedule.nextExecutionAt).toLocaleString() : 'N/A'}</span>
             </div>
           </div>
 
@@ -303,10 +303,10 @@ export async function sendTestEmail(to: string): Promise<void> {
   const testSchedule: Partial<ScheduledReport> = {
     id: 'test-123',
     reportId: 'report-123',
-    scheduleType: 'daily',
-    exportFormat: 'pdf',
+    frequency: 'daily',
+    format: 'pdf',
     recipients: [to],
-    nextRunAt: new Date(),
+    nextExecutionAt: new Date(),
   };
 
   const testBuffer = Buffer.from('Test report content', 'utf-8');

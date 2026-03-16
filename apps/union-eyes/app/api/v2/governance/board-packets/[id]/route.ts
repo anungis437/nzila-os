@@ -21,7 +21,7 @@ export const GET = withApi(
 export const PATCH = withApi(
   { auth: { required: true, minRole: 'admin' } },
   async ({ params, body }) => {
-    const [row] = await db.update(boardPackets).set({ ...body, updatedAt: new Date() }).where(eq(boardPackets.id, params.id)).returning();
+    const [row] = await db.update(boardPackets).set({ ...(body as Record<string, unknown>), updatedAt: new Date() }).where(eq(boardPackets.id, params.id)).returning();
     if (!row) throw ApiError.notFound('Board packet not found');
     return { data: row };
   },

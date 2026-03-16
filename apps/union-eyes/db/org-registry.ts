@@ -22,11 +22,9 @@ export const UE_ORG_SCOPED_TABLES = [
   'recognition_programs',
   'recognition_award_types',
   'recognition_awards',
-  'reward_wallets',
   'reward_wallet_ledger',
   'reward_budget_envelopes',
   'reward_redemptions',
-  'reward_automation_rules',
   // Dues & Finance
   'dues_rules',
   'dues_transactions',
@@ -44,7 +42,7 @@ export const UE_ORG_SCOPED_TABLES = [
   'notification_queue',
   'notification_templates',
   'newsletter_campaigns',
-  'sms_communications',
+  'sms_messages',
   // Surveys & Voting
   'surveys',
   'survey_responses',

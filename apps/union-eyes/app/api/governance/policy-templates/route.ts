@@ -37,7 +37,7 @@ export const POST = withApi(
     openapi: { tags: ['Governance'], summary: 'Create policy template' },
   },
   async ({ body, organizationId }) => {
-    const [template] = await db.insert(governancePolicies).values({ ...body, organizationId: organizationId!, status: 'draft' }).returning();
+    const [template] = await db.insert(governancePolicies).values({ ...(body as Record<string, unknown>), organizationId: organizationId!, status: 'draft' } as typeof governancePolicies.$inferInsert).returning();
     return { data: template };
   },
 );

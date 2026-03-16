@@ -28,7 +28,7 @@ export const POST = withApi(
   async ({ body, organizationId }) => {
     const [plan] = await db
       .insert(pensionPlans)
-      .values({ ...body, organizationId: organizationId! })
+      .values({ ...(body as Record<string, unknown>), organizationId: organizationId! } as typeof pensionPlans.$inferInsert)
       .returning();
     return { data: plan };
   },

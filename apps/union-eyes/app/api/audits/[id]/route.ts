@@ -2,7 +2,7 @@
  * GET /api/audits/[id]
  * Single audit log entry from PostgreSQL.
  */
-import { withApi } from '@/lib/api/framework';
+import { withApi, ApiError } from '@/lib/api/framework';
 import { db } from '@/db/db';
 import { auditLogs } from '@/db/schema/audit-security-schema';
 import { eq, and } from 'drizzle-orm';
@@ -24,7 +24,7 @@ export const GET = withApi(
       )
       .limit(1);
     if (!row) {
-      return Response.json({ error: 'Not found' }, { status: 404 });
+      throw ApiError.notFound('Audit log');
     }
     return { data: row };
   },

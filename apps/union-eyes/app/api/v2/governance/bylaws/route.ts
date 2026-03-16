@@ -25,7 +25,7 @@ export const GET = withApi(
 export const POST = withApi(
   { auth: { required: true, minRole: 'admin' } },
   async ({ body, organizationId }) => {
-    const [row] = await db.insert(bylaws).values({ ...body, organizationId: organizationId! }).returning();
+    const [row] = await db.insert(bylaws).values({ ...(body as Record<string, unknown>), organizationId: organizationId! } as typeof bylaws.$inferInsert).returning();
     return { data: row };
   },
 );

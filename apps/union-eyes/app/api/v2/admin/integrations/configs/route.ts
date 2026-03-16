@@ -6,8 +6,8 @@
  * @role integration_manager
  */
 import { withApi, ApiError, z, zUUID } from '@/lib/api/framework';
-import { db } from '@/db/db';
 import { sql, eq, and, desc, count } from 'drizzle-orm';
+import { withRLSContext } from '@/lib/db/with-rls-context';
 import { logger } from '@/lib/logger';
 
 export const dynamic = 'force-dynamic';
@@ -36,17 +36,19 @@ export const GET = withApi(
       whereClause = sql`${whereClause} AND status = ${status}`;
     }
 
-    const configs = await db.execute(sql`
-      SELECT id, org_id, type, provider, status, metadata,
-             credentials_ref, created_by, created_at, updated_at
-      FROM integration_configs
-      WHERE ${whereClause}
-      ORDER BY
-        CASE status WHEN 'active' THEN 0 WHEN 'inactive' THEN 1 WHEN 'suspended' THEN 2 END,
-        created_at DESC
-    `);
+    const configs = await withRLSContext(async (db) =>
+      db.execute(sql`
+        SELECT id, org_id, type, provider, status, metadata,
+               credentials_ref, created_by, created_at, updated_at
+        FROM integration_configs
+        WHERE ${whereClause}
+        ORDER BY
+          CASE status WHEN 'active' THEN 0 WHEN 'inactive' THEN 1 WHEN 'suspended' THEN 2 END,
+          created_at DESC
+      `),
+    );
 
-    const rows = Array.from(configs).map((r: Record<string, unknown>) => ({
+    const rows = (Array.from(configs) as Record<string, unknown>[]).map((r) => ({
       id: r.id as string,
       orgId: r.org_id as string,
       type: r.type as string,
@@ -90,32 +92,36 @@ export const POST = withApi(
     },
   },
   async ({ body, organizationId, userId }) => {
-    // Check for duplicate provider in same org
-    const existing = await db.execute(sql`
-      SELECT id FROM integration_configs
-      WHERE org_id = ${organizationId}::uuid
-        AND provider = ${body.provider}
-        AND status != 'suspended'
-      LIMIT 1
-    `);
+    const { existing, result } = await withRLSContext(async (db) => {
+      // Check for duplicate provider in same org
+      const existing = await db.execute(sql`
+        SELECT id FROM integration_configs
+        WHERE org_id = ${organizationId}::uuid
+          AND provider = ${body.provider}
+          AND status != 'suspended'
+        LIMIT 1
+      `);
 
-    if (Array.from(existing).length > 0) {
-      throw new ApiError(409, `Integration config for provider "${body.provider}" already exists`);
-    }
+      if (Array.from(existing).length > 0) {
+        throw ApiError.badRequest(`Integration config for provider "${body.provider}" already exists`);
+      }
 
-    const result = await db.execute(sql`
-      INSERT INTO integration_configs (org_id, type, provider, credentials_ref, metadata, status, created_by)
-      VALUES (
-        ${organizationId}::uuid,
-        ${body.type},
-        ${body.provider},
-        ${body.credentialsRef},
-        ${JSON.stringify(body.metadata ?? {})}::jsonb,
-        'inactive',
-        ${userId}
-      )
-      RETURNING id, org_id, type, provider, status, metadata, credentials_ref, created_by, created_at, updated_at
-    `);
+      const result = await db.execute(sql`
+        INSERT INTO integration_configs (org_id, type, provider, credentials_ref, metadata, status, created_by)
+        VALUES (
+          ${organizationId}::uuid,
+          ${body.type},
+          ${body.provider},
+          ${body.credentialsRef},
+          ${JSON.stringify(body.metadata ?? {})}::jsonb,
+          'inactive',
+          ${userId}
+        )
+        RETURNING id, org_id, type, provider, status, metadata, credentials_ref, created_by, created_at, updated_at
+      `);
+
+      return { existing, result };
+    });
 
     const row = Array.from(result)[0] as Record<string, unknown>;
     logger.info('Integration config created', {

@@ -39,7 +39,7 @@ export const GET = withApi(
       options,
       results: tallies.map((t) => ({
         optionId: t.optionId,
-        label: options.find((o) => o.id === t.optionId)?.label ?? 'Unknown',
+        label: options.find((o) => o.id === t.optionId)?.text ?? 'Unknown',
         votes: t.count,
         percentage: totalVotes > 0 ? Math.round((t.count / totalVotes) * 10000) / 100 : 0,
       })),

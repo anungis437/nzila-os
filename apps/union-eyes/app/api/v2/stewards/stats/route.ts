@@ -21,7 +21,7 @@ export const GET = withApi(
       description: 'Aggregate steward count, active cases, escalations, completed this month, and success rate.',
     },
   },
-  async () => {
+  async (_ctx) => {
     return withSystemContext(async () => {
       const now = new Date();
       const monthStart = new Date(now.getFullYear(), now.getMonth(), 1);

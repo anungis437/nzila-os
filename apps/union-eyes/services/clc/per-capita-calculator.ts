@@ -101,10 +101,10 @@ export async function getMemberStanding(
     SELECT 
       MAX(payment_date) as last_payment_date,
       COALESCE(SUM(CASE WHEN payment_date < ${sixtyDaysAgo} THEN amount ELSE 0 END), 0) as dues_owing
-    FROM dues_payments
+    FROM dues_transactions
     WHERE member_id = ${userId}
-      AND organization_id = ${organizationId}
-      AND status = 'completed'
+      AND organization_id = ${organizationId}::uuid
+      AND status = 'paid'
   `);
 
   const lastPaymentDate = result[0]?.last_payment_date as Date | null;
@@ -137,9 +137,9 @@ export async function countGoodStandingMembers(
         WHEN dp.payment_date >= ${sixtyDaysAgo} THEN om.user_id 
       END) as good_standing_members
     FROM organization_members om
-    LEFT JOIN dues_payments dp ON dp.member_id = om.user_id 
-      AND dp.organization_id = om.organization_id
-      AND dp.status = 'completed'
+    LEFT JOIN dues_transactions dp ON dp.member_id = om.user_id::uuid 
+      AND dp.organization_id = om.organization_id::uuid
+      AND dp.status = 'paid'
     WHERE om.organization_id = ${organizationId}
       AND om.status = 'active'
   `);

@@ -6,8 +6,7 @@
 export const dynamic = 'force-dynamic';
 
 import { redirect } from 'next/navigation';
-import { requireUser } from '@/lib/auth/require-user';
-import { hasMinRole } from '@/lib/auth/has-min-role';
+import { requireUser, hasMinRole } from '@/lib/api-auth-guard';
 import { SmsConsole } from '@/components/communications/sms-console';
 
 export default async function SmsPage() {

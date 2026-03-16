@@ -29,7 +29,7 @@ export const PATCH = withApi(
     const id = params.id;
     const [plan] = await db
       .update(pensionPlans)
-      .set({ ...body, updatedAt: new Date() })
+      .set({ ...(body as Record<string, unknown>), updatedAt: new Date() })
       .where(and(eq(pensionPlans.id, id), eq(pensionPlans.organizationId, organizationId!)))
       .returning();
     return { data: plan ?? null };

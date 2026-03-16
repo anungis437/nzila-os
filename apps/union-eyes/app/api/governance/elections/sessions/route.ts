@@ -35,7 +35,7 @@ export const POST = withApi(
     openapi: { tags: ['Governance'], summary: 'Create voting session' },
   },
   async ({ body, userId }) => {
-    const [session] = await db.insert(votingSessions).values({ ...body, createdBy: userId! }).returning();
+    const [session] = await db.insert(votingSessions).values({ ...(body as Record<string, unknown>), createdBy: userId! } as typeof votingSessions.$inferInsert).returning();
     return { data: session };
   },
 );

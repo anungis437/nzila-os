@@ -31,7 +31,7 @@ export const PATCH = withApi(
   async ({ request, body }) => {
     const id = request.url.split('/board-packets/')[1]?.split('?')[0]?.split('/')[0];
     if (!id) throw ApiError.badRequest('Missing packet ID');
-    const [packet] = await db.update(boardPackets).set({ ...body, updatedAt: new Date() }).where(eq(boardPackets.id, id)).returning();
+    const [packet] = await db.update(boardPackets).set({ ...(body as Record<string, unknown>), updatedAt: new Date() }).where(eq(boardPackets.id, id)).returning();
     if (!packet) throw ApiError.notFound('Board packet not found');
     return { data: packet };
   },

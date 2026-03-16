@@ -11,8 +11,7 @@ import { Button } from "@/components/ui/button";
 import { MessageSquare, Users, FileText, Mail, BarChart3, Send } from "lucide-react";
 import Link from "next/link";
 import { redirect } from "next/navigation";
-import { requireUser } from "@/lib/auth/require-user";
-import { hasMinRole } from "@/lib/auth/has-min-role";
+import { requireUser, hasMinRole } from "@/lib/api-auth-guard";
 
 export default async function CommunicationsDashboard() {
   const user = await requireUser();

@@ -75,7 +75,7 @@ export const POST = withApi(
         description: body.description ?? null,
         category: body.category,
         progress: body.progress ?? 0,
-        dueDate: body.dueDate ? new Date(body.dueDate) : null,
+        dueDate: body.dueDate ?? null,
         owner: body.owner ?? null,
         status: body.status ?? 'on-track',
       })

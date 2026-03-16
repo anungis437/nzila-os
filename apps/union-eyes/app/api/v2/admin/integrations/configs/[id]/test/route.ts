@@ -5,8 +5,8 @@
  * @role integration_manager
  */
 import { withApi, ApiError } from '@/lib/api/framework';
-import { db } from '@/db/db';
 import { sql } from 'drizzle-orm';
+import { withRLSContext } from '@/lib/db/with-rls-context';
 import { logger } from '@/lib/logger';
 
 export const dynamic = 'force-dynamic';
@@ -23,15 +23,17 @@ export const POST = withApi(
   async ({ params, organizationId }) => {
     const { id } = await params;
 
-    const result = await db.execute(sql`
-      SELECT id, provider, status, metadata, credentials_ref
-      FROM integration_configs
-      WHERE id = ${id}::uuid AND org_id = ${organizationId}::uuid
-    `);
+    const result = await withRLSContext(async (db) =>
+      db.execute(sql`
+        SELECT id, provider, status, metadata, credentials_ref
+        FROM integration_configs
+        WHERE id = ${id}::uuid AND org_id = ${organizationId}::uuid
+      `),
+    );
 
-    const row = Array.from(result)[0] as Record<string, unknown> | undefined;
+    const row = (Array.from(result) as Record<string, unknown>[])[0];
     if (!row) {
-      throw new ApiError(404, 'Integration config not found');
+      throw ApiError.notFound('Integration config');
     }
 
     const provider = row.provider as string;

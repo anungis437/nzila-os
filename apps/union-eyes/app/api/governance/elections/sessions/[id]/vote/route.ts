@@ -37,7 +37,7 @@ export const POST = withApi(
     const id = request.url.split('/sessions/')[1]?.split('/vote')[0];
     if (!id) throw ApiError.badRequest('Missing session ID');
 
-    const [vote] = await db.insert(votes).values({ ...body, sessionId: id }).returning();
+    const [vote] = await db.insert(votes).values({ ...(body as Record<string, unknown>), sessionId: id } as typeof votes.$inferInsert).returning();
     return { data: vote };
   },
 );

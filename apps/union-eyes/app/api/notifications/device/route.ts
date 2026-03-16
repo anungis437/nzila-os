@@ -4,7 +4,7 @@
  * Stores device token in userNotificationPreferences.data jsonb column.
  * Backed by userNotificationPreferences table (Drizzle ORM).
  */
-import { withApi } from '@/lib/api/framework';
+import { withApi, ApiError } from '@/lib/api/framework';
 import { db } from '@/db/db';
 import { userNotificationPreferences } from '@/db/schema';
 import { eq, and } from 'drizzle-orm';
@@ -24,10 +24,7 @@ export const POST = withApi(
     const { token, platform } = body as { token?: string; platform?: string };
 
     if (!token || !platform) {
-      return new Response(JSON.stringify({ error: 'token and platform are required' }), {
-        status: 400,
-        headers: { 'Content-Type': 'application/json' },
-      });
+      throw ApiError.badRequest('token and platform are required');
     }
 
     const [prefs] = await db
@@ -42,10 +39,7 @@ export const POST = withApi(
       .limit(1);
 
     if (!prefs) {
-      return new Response(
-        JSON.stringify({ error: 'Notification preferences not found. Set preferences first.' }),
-        { status: 404, headers: { 'Content-Type': 'application/json' } },
-      );
+      throw ApiError.notFound('Notification preferences not found. Set preferences first.');
     }
 
     // Store device tokens in preferences — push must be enabled

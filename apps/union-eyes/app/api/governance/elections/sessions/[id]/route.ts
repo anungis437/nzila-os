@@ -31,7 +31,7 @@ export const PATCH = withApi(
   async ({ request, body }) => {
     const id = request.url.split('/sessions/')[1]?.split('?')[0]?.split('/')[0];
     if (!id) throw ApiError.badRequest('Missing session ID');
-    const [session] = await db.update(votingSessions).set({ ...body, updatedAt: new Date() }).where(eq(votingSessions.id, id)).returning();
+    const [session] = await db.update(votingSessions).set({ ...(body as Record<string, unknown>), updatedAt: new Date() }).where(eq(votingSessions.id, id)).returning();
     if (!session) throw ApiError.notFound('Voting session not found');
     return { data: session };
   },

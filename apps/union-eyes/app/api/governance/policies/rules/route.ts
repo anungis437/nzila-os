@@ -35,7 +35,7 @@ export const POST = withApi(
     openapi: { tags: ['Governance'], summary: 'Create governance policy' },
   },
   async ({ body, organizationId }) => {
-    const [policy] = await db.insert(governancePolicies).values({ ...body, organizationId: organizationId! }).returning();
+    const [policy] = await db.insert(governancePolicies).values({ ...(body as Record<string, unknown>), organizationId: organizationId! } as typeof governancePolicies.$inferInsert).returning();
     return { data: policy };
   },
 );

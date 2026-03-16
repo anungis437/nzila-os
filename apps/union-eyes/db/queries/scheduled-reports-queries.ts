@@ -17,45 +17,45 @@ export interface ScheduledReport {
   id: string;
   reportId: string;
   organizationId: string;
-  scheduleType: 'daily' | 'weekly' | 'monthly' | 'quarterly' | 'custom';
-  scheduleConfig: {
-    time?: string; // HH:MM format
-    dayOfWeek?: number; // 0-6 for weekly
-    dayOfMonth?: number; // 1-31 for monthly
-    cronExpression?: string; // For custom schedules
-    timezone?: string;
-  };
-  deliveryMethod: 'email' | 'dashboard' | 'storage' | 'webhook';
-  recipients: string[]; // Email addresses or user IDs
-  exportFormat: 'pdf' | 'excel' | 'csv' | 'json';
+  name: string;
+  frequency: 'daily' | 'weekly' | 'monthly' | 'quarterly' | 'custom';
+  dayOfWeek: number | null;
+  dayOfMonth: number | null;
+  timeOfDay: string | null;
+  timezone: string | null;
+  format: 'pdf' | 'excel' | 'csv' | 'json';
+  recipients: string[];
+  parameters: Record<string, unknown> | null;
   isActive: boolean;
-  nextRunAt: Date | null;
-  lastRunAt: Date | null;
-  lastRunStatus: 'success' | 'failed' | 'pending' | null;
-  runCount: number;
-  failureCount: number;
+  lastExecutedAt: Date | null;
+  nextExecutionAt: Date | null;
+  createdBy: string | null;
   createdAt: Date;
   updatedAt: Date;
 }
 
 export interface CreateScheduledReportParams {
   reportId: string;
-  scheduleType: 'daily' | 'weekly' | 'monthly' | 'quarterly' | 'custom';
-  // eslint-disable-next-line @typescript-eslint/no-explicit-any
-  scheduleConfig: Record<string, any>;
-  deliveryMethod: 'email' | 'dashboard' | 'storage' | 'webhook';
+  name: string;
+  frequency: 'daily' | 'weekly' | 'monthly' | 'quarterly' | 'custom';
+  dayOfWeek?: number;
+  dayOfMonth?: number;
+  timeOfDay?: string;
+  timezone?: string;
+  format: 'pdf' | 'excel' | 'csv' | 'json';
   recipients: string[];
-  exportFormat: 'pdf' | 'excel' | 'csv' | 'json';
   isActive?: boolean;
 }
 
 export interface UpdateScheduledReportParams {
-  scheduleType?: 'daily' | 'weekly' | 'monthly' | 'quarterly' | 'custom';
-  // eslint-disable-next-line @typescript-eslint/no-explicit-any
-  scheduleConfig?: Record<string, any>;
-  deliveryMethod?: 'email' | 'dashboard' | 'storage' | 'webhook';
+  name?: string;
+  frequency?: 'daily' | 'weekly' | 'monthly' | 'quarterly' | 'custom';
+  dayOfWeek?: number;
+  dayOfMonth?: number;
+  timeOfDay?: string;
+  timezone?: string;
+  format?: 'pdf' | 'excel' | 'csv' | 'json';
   recipients?: string[];
-  exportFormat?: 'pdf' | 'excel' | 'csv' | 'json';
   isActive?: boolean;
 }
 
@@ -71,11 +71,10 @@ export async function getScheduledReports(
   filters?: {
     reportId?: string;
     isActive?: boolean;
-    scheduleType?: string;
+    frequency?: string;
   }
 ): Promise<ScheduledReport[]> {
-  const tenantId = organizationId;
-  const conditions = [sql`rs.tenant_id = ${tenantId}`];
+  const conditions = [sql`rs.organization_id = ${organizationId}`];
 
   if (filters?.reportId) {
     conditions.push(sql`rs.report_id = ${filters.reportId}`);
@@ -85,8 +84,8 @@ export async function getScheduledReports(
     conditions.push(sql`rs.is_active = ${filters.isActive}`);
   }
 
-  if (filters?.scheduleType) {
-    conditions.push(sql`rs.schedule_type = ${filters.scheduleType}`);
+  if (filters?.frequency) {
+    conditions.push(sql`rs.frequency = ${filters.frequency}`);
   }
 
   const whereClause = sql.join(conditions, sql` AND `);
@@ -97,10 +96,10 @@ export async function getScheduledReports(
       r.name as report_name,
       r.description as report_description,
       r.category as report_category
-    FROM report_schedules rs
+    FROM scheduled_reports rs
     JOIN reports r ON rs.report_id = r.id
     WHERE ${whereClause}
-    ORDER BY rs.next_run_at ASC NULLS LAST, rs.created_at DESC
+    ORDER BY rs.next_execution_at ASC NULLS LAST, rs.created_at DESC
   `);
   
   // eslint-disable-next-line @typescript-eslint/no-explicit-any
@@ -114,16 +113,15 @@ export async function getScheduledReportById(
   id: string,
   organizationId: string
 ): Promise<ScheduledReport | null> {
-  const tenantId = organizationId;
   const result = await db.execute(sql`
     SELECT 
       rs.*,
       r.name as report_name,
       r.description as report_description,
       r.config as report_config
-    FROM report_schedules rs
+    FROM scheduled_reports rs
     JOIN reports r ON rs.report_id = r.id
-    WHERE rs.id = ${id} AND rs.tenant_id = ${tenantId}
+    WHERE rs.id = ${id} AND rs.organization_id = ${organizationId}
   `);
 
   // eslint-disable-next-line @typescript-eslint/no-explicit-any
@@ -138,31 +136,40 @@ export async function createScheduledReport(
   organizationId: string,
   data: CreateScheduledReportParams
 ): Promise<ScheduledReport> {
-  const tenantId = organizationId;
-  const nextRunAt = calculateNextRunAt(data.scheduleType, data.scheduleConfig);
+  const nextExecutionAt = calculateNextRunAt(data.frequency, {
+    time: data.timeOfDay,
+    dayOfWeek: data.dayOfWeek,
+    dayOfMonth: data.dayOfMonth,
+  });
   const isActive = data.isActive ?? true;
 
   const result = await db.execute(sql`
-    INSERT INTO report_schedules (
+    INSERT INTO scheduled_reports (
       report_id,
-      tenant_id,
-      schedule_type,
-      schedule_config,
-      delivery_method,
+      organization_id,
+      name,
+      frequency,
+      day_of_week,
+      day_of_month,
+      time_of_day,
+      timezone,
+      format,
       recipients,
-      export_format,
       is_active,
-      next_run_at
+      next_execution_at
     ) VALUES (
       ${data.reportId},
-      ${tenantId},
-      ${data.scheduleType},
-      ${JSON.stringify(data.scheduleConfig)},
-      ${data.deliveryMethod},
+      ${organizationId},
+      ${data.name},
+      ${data.frequency},
+      ${data.dayOfWeek ?? null},
+      ${data.dayOfMonth ?? null},
+      ${data.timeOfDay ?? '09:00'},
+      ${data.timezone ?? 'UTC'},
+      ${data.format},
       ${JSON.stringify(data.recipients)},
-      ${data.exportFormat},
       ${isActive},
-      ${nextRunAt}
+      ${nextExecutionAt}
     )
     RETURNING *
   `);
@@ -180,39 +187,48 @@ export async function updateScheduledReport(
   organizationId: string,
   data: UpdateScheduledReportParams
 ): Promise<ScheduledReport> {
-  const tenantId = organizationId;
   // Get existing schedule first
-  const existing = await getScheduledReportById(id, tenantId);
+  const existing = await getScheduledReportById(id, organizationId);
   if (!existing) {
     throw new Error('Scheduled report not found');
   }
 
   // Build update object with all fields (existing + updates)
-  const scheduleType = data.scheduleType ?? existing.scheduleType;
-  const scheduleConfig = data.scheduleConfig ?? existing.scheduleConfig;
-  const deliveryMethod = data.deliveryMethod ?? existing.deliveryMethod;
+  const frequency = data.frequency ?? existing.frequency;
+  const dayOfWeek = data.dayOfWeek ?? existing.dayOfWeek;
+  const dayOfMonth = data.dayOfMonth ?? existing.dayOfMonth;
+  const timeOfDay = data.timeOfDay ?? existing.timeOfDay ?? '09:00';
+  const timezone = data.timezone ?? existing.timezone ?? 'UTC';
+  const format = data.format ?? existing.format;
   const recipients = data.recipients ?? existing.recipients;
-  const exportFormat = data.exportFormat ?? existing.exportFormat;
   const isActive = data.isActive ?? existing.isActive;
+  const name = data.name ?? existing.name;
 
-  // Recalculate next run time if schedule changed
-  let nextRunAt = existing.nextRunAt;
-  if (data.scheduleType || data.scheduleConfig) {
-    nextRunAt = calculateNextRunAt(scheduleType, scheduleConfig);
+  // Recalculate next execution time if schedule changed
+  let nextExecutionAt = existing.nextExecutionAt;
+  if (data.frequency || data.dayOfWeek !== undefined || data.dayOfMonth !== undefined || data.timeOfDay) {
+    nextExecutionAt = calculateNextRunAt(frequency, {
+      time: timeOfDay,
+      dayOfWeek,
+      dayOfMonth,
+    });
   }
 
   const result = await db.execute(sql`
-    UPDATE report_schedules
+    UPDATE scheduled_reports
     SET 
-      schedule_type = ${scheduleType},
-      schedule_config = ${JSON.stringify(scheduleConfig)},
-      delivery_method = ${deliveryMethod},
+      name = ${name},
+      frequency = ${frequency},
+      day_of_week = ${dayOfWeek},
+      day_of_month = ${dayOfMonth},
+      time_of_day = ${timeOfDay},
+      timezone = ${timezone},
+      format = ${format},
       recipients = ${JSON.stringify(recipients)},
-      export_format = ${exportFormat},
       is_active = ${isActive},
-      next_run_at = ${nextRunAt},
+      next_execution_at = ${nextExecutionAt},
       updated_at = NOW()
-    WHERE id = ${id} AND tenant_id = ${tenantId}
+    WHERE id = ${id} AND organization_id = ${organizationId}
     RETURNING *
   `);
   
@@ -232,10 +248,9 @@ export async function deleteScheduledReport(
   id: string,
   organizationId: string
 ): Promise<void> {
-  const tenantId = organizationId;
   await db.execute(sql`
-    DELETE FROM report_schedules
-    WHERE id = ${id} AND tenant_id = ${tenantId}
+    DELETE FROM scheduled_reports
+    WHERE id = ${id} AND organization_id = ${organizationId}
   `);
 }
 
@@ -248,12 +263,12 @@ export async function getDueSchedules(): Promise<ScheduledReport[]> {
       rs.*,
       r.name as report_name,
       r.config as report_config
-    FROM report_schedules rs
+    FROM scheduled_reports rs
     JOIN reports r ON rs.report_id = r.id
     WHERE rs.is_active = true
-      AND rs.next_run_at IS NOT NULL
-      AND rs.next_run_at <= NOW()
-    ORDER BY rs.next_run_at ASC
+      AND rs.next_execution_at IS NOT NULL
+      AND rs.next_execution_at <= NOW()
+    ORDER BY rs.next_execution_at ASC
     LIMIT 100
   `);
   
@@ -271,7 +286,7 @@ export async function updateScheduleAfterRun(
 ): Promise<void> {
   // Get the schedule to calculate next run
   const scheduleResult = await db.execute(sql`
-    SELECT * FROM report_schedules WHERE id = ${id}
+    SELECT * FROM scheduled_reports WHERE id = ${id}
   `);
   
   // eslint-disable-next-line @typescript-eslint/no-explicit-any
@@ -279,21 +294,24 @@ export async function updateScheduleAfterRun(
   if (scheduleRows.length === 0) return;
 
   const scheduleData = scheduleRows[0];
-  const nextRunAt = calculateNextRunAt(
-    scheduleData.schedule_type,
-    scheduleData.schedule_config
+  const nextExecutionAt = calculateNextRunAt(
+    scheduleData.frequency,
+    {
+      time: scheduleData.time_of_day,
+      dayOfWeek: scheduleData.day_of_week,
+      dayOfMonth: scheduleData.day_of_month,
+    }
   );
 
-  const status = success ? 'success' : 'failed';
+  // Deactivate schedule on failure to prevent repeated failures
+  const isActive = success ? scheduleData.is_active : false;
 
   await db.execute(sql`
-    UPDATE report_schedules
+    UPDATE scheduled_reports
     SET 
-      last_run_at = NOW(),
-      last_run_status = ${status},
-      next_run_at = ${nextRunAt},
-      run_count = run_count + 1,
-      failure_count = CASE WHEN ${status} = 'failed' THEN failure_count + 1 ELSE failure_count END,
+      last_executed_at = NOW(),
+      next_execution_at = ${nextExecutionAt},
+      is_active = ${isActive},
       updated_at = NOW()
     WHERE id = ${id}
   `);
@@ -308,12 +326,11 @@ export async function getScheduleExecutionHistory(
   limit = 50
 // eslint-disable-next-line @typescript-eslint/no-explicit-any
 ): Promise<any[]> {
-  const tenantId = organizationId;
   const result = await db.execute(sql`
     SELECT *
     FROM export_jobs
     WHERE schedule_id = ${scheduleId}
-      AND tenant_id = ${tenantId}
+      AND organization_id = ${organizationId}
     ORDER BY created_at DESC
     LIMIT ${limit}
   `);
@@ -394,8 +411,7 @@ export async function pauseSchedule(
   id: string,
   organizationId: string
 ): Promise<void> {
-  const tenantId = organizationId;
-  await updateScheduledReport(id, tenantId, { isActive: false });
+  await updateScheduledReport(id, organizationId, { isActive: false });
 }
 
 /**
@@ -405,7 +421,6 @@ export async function resumeSchedule(
   id: string,
   organizationId: string
 ): Promise<void> {
-  const tenantId = organizationId;
-  await updateScheduledReport(id, tenantId, { isActive: true });
+  await updateScheduledReport(id, organizationId, { isActive: true });
 }
 

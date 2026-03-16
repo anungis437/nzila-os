@@ -103,7 +103,7 @@ const dbStatsJob: JobConfig = {
     try {
       // Update PostgreSQL statistics for query planner
       await db.execute(sql`ANALYZE claims`);
-      await db.execute(sql`ANALYZE members`);
+      await db.execute(sql`ANALYZE organization_members`);
       await db.execute(sql`ANALYZE claim_updates`);
       
       logger.info('CRON: Database statistics updated successfully');
@@ -125,12 +125,12 @@ const refreshMaterializedViewsJob: JobConfig = {
     logger.info('CRON: Starting materialized view refresh');
     try {
       // Refresh daily analytics summary
-      await db.execute(sql`REFRESH MATERIALIZED VIEW CONCURRENTLY analytics_daily_summary`);
-      logger.info('CRON: Refreshed analytics_daily_summary');
+      await db.execute(sql`REFRESH MATERIALIZED VIEW CONCURRENTLY mv_claims_daily_summary`);
+      logger.info('CRON: Refreshed mv_claims_daily_summary');
 
       // Refresh member analytics summary
-      await db.execute(sql`REFRESH MATERIALIZED VIEW CONCURRENTLY analytics_member_summary`);
-      logger.info('CRON: Refreshed analytics_member_summary');
+      await db.execute(sql`REFRESH MATERIALIZED VIEW CONCURRENTLY mv_member_engagement`);
+      logger.info('CRON: Refreshed mv_member_engagement');
 
       logger.info('CRON: All materialized views refreshed successfully');
     } catch (error) {

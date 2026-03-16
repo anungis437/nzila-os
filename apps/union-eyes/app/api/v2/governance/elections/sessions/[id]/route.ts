@@ -21,7 +21,7 @@ export const GET = withApi(
 export const PATCH = withApi(
   { auth: { required: true, minRole: 'admin' } },
   async ({ params, body }) => {
-    const [row] = await db.update(votingSessions).set({ ...body, updatedAt: new Date() }).where(eq(votingSessions.id, params.id)).returning();
+    const [row] = await db.update(votingSessions).set({ ...(body as Record<string, unknown>), updatedAt: new Date() }).where(eq(votingSessions.id, params.id)).returning();
     if (!row) throw ApiError.notFound('Voting session not found');
     return { data: row };
   },

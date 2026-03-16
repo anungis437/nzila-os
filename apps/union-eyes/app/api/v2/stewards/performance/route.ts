@@ -21,7 +21,7 @@ export const GET = withApi(
       description: 'Returns active and completed case counts per steward with success rate.',
     },
   },
-  async () => {
+  async (_ctx) => {
     return withSystemContext(async () => {
       // Get all active stewards with their assignment counts
       const rows = await db
@@ -37,7 +37,7 @@ export const GET = withApi(
         .where(eq(stewards.active, true))
         .groupBy(stewards.id, stewards.userId);
 
-      if (rows.length === 0) return [];
+      if (rows.length === 0) return { data: [] };
 
       // Look up steward names from organization members
       const userIds = rows.map(r => r.userId);
@@ -48,12 +48,12 @@ export const GET = withApi(
 
       const nameMap = new Map(members.map(m => [m.userId, m.name ?? 'Unknown']));
 
-      return rows.map(r => ({
+      return { data: rows.map(r => ({
         name: nameMap.get(r.userId) ?? 'Unknown',
         active: r.active,
         completed: r.completed,
         successRate: r.total > 0 ? Math.round((r.completed / r.total) * 100) : 0,
-      }));
+      })) };
     });
   },
 );

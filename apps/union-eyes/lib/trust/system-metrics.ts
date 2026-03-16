@@ -248,13 +248,17 @@ export async function getAuditLogMetrics(): Promise<AuditLogMetric> {
 
     const eventsLogged = Number((eventCount[0] as Record<string, unknown>)?.count || 0);
 
-    // Count archived events
-    const archivedCount = await db.execute(sql`
-      SELECT COUNT(*) as count
-      FROM audit_logs_archive;
-    `);
-
-    const archivedEvents = Number((archivedCount[0] as Record<string, unknown>)?.count || 0);
+    // Count archived events (audit_log is the legacy table used as archive)
+    let archivedEvents = 0;
+    try {
+      const archivedCount = await db.execute(sql`
+        SELECT COUNT(*) as count
+        FROM audit_log;
+      `);
+      archivedEvents = Number((archivedCount[0] as Record<string, unknown>)?.count || 0);
+    } catch {
+      // audit_log table may not exist in all environments
+    }
 
     return {
       status: 'active',

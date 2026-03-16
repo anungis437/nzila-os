@@ -22,7 +22,7 @@ export const GET = withApi(
       description: 'Returns grievances with escalated status that require chief steward review.',
     },
   },
-  async () => {
+  async (_ctx) => {
     return withSystemContext(async () => {
       // Get escalated grievances with their steward assignments
       const rows = await db
@@ -39,7 +39,7 @@ export const GET = withApi(
         .orderBy(grievances.escalatedAt)
         .limit(50);
 
-      if (rows.length === 0) return [];
+      if (rows.length === 0) return { data: [] };
 
       // Look up steward names
       const stewardIds = [...new Set(rows.map(r => r.stewardId).filter(Boolean))] as string[];
@@ -65,12 +65,12 @@ export const GET = withApi(
         }
       }
 
-      return rows.map(r => ({
+      return { data: rows.map(r => ({
         id: r.grievanceNumber,
         member: r.grievantName ?? 'Unknown',
         steward: r.stewardId ? (stewardNameMap.get(r.stewardId) ?? 'Unassigned') : 'Unassigned',
         reason: r.title,
-      }));
+      })) };
     });
   },
 );
