@@ -1,15 +1,14 @@
 /**
- * CRUD item route for dataClassificationPolicy
+ * CRUD item route for workplaceIncidents
  */
 import { crudRoutes } from '@/lib/api/crud-factory';
-import { dataClassificationPolicy } from '@/db/schema';
+import { workplaceIncidents } from '@/db/schema';
 
 export const dynamic = 'force-dynamic';
 
 const { GET, PATCH, DELETE } = crudRoutes({
-  table: dataClassificationPolicy,
-  pk: 'id',
-  tags: ["Compliance"],
+  table: workplaceIncidents,
+  tags: ["Health-safety"],
   orgScoped: true,
   itemRoute: true,
   readRole: 'member',

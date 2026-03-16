@@ -33,6 +33,27 @@ export * from "./domains/scheduling";       // Priority 8: Calendar, events, tra
 export * from "./domains/compliance";       // Priority 9: Regulatory compliance and privacy
 export * from "./domains/data";             // Priority 10: External data integration
 
+// Health & Safety — re-export excluding auditStatusEnum (conflicts with infrastructure/accessibility)
+export {
+  // Enums (sans auditStatusEnum)
+  incidentTypeEnum, incidentSeverityEnum, bodyPartEnum, injuryNatureEnum,
+  inspectionStatusEnum, inspectionTypeEnum,
+  hazardCategoryEnum, hazardLevelEnum,
+  auditTypeEnum,
+  trainingStatusEnum,
+  ppeTypeEnum, ppeStatusEnum,
+  safetyCertificationTypeEnum, certificationStatusEnum,
+  correctiveActionStatusEnum, correctiveActionPriorityEnum,
+  meetingTypeEnum,
+  // Tables
+  workplaceIncidents, safetyInspections, hazardReports,
+  safetyCommitteeMeetings, safetyTrainingRecords, ppeEquipment,
+  safetyAudits, injuryLogs, safetyPolicies, correctiveActions, safetyCertifications,
+  // Relations
+  workplaceIncidentsRelations, safetyInspectionsRelations, hazardReportsRelations,
+  correctiveActionsRelations, injuryLogsRelations,
+} from "./domains/health-safety";
+
 // Advanced Feature Domains
 export * from "./domains/ml";               // Priority 11: Machine learning and AI
 export * from "./domains/analytics";        // Priority 12: Reporting and analytics
