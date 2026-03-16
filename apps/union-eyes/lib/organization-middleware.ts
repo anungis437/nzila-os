@@ -89,6 +89,20 @@ return NextResponse.json(
 }
 
 /**
+ * Get organization ID from cookies (for server components).
+ * Reads selected_org_id / selected_organization_id cookie.
+ * Returns null if none set.
+ */
+export async function getOrganizationId(): Promise<string | null> {
+  const cookieStore = await cookies();
+  return (
+    cookieStore.get("selected_org_id")?.value ??
+    cookieStore.get("selected_organization_id")?.value ??
+    null
+  );
+}
+
+/**
  * Validate organization access for a specific organization ID
  * 
  * Use this when the organization ID comes from the request (e.g., URL parameter)
