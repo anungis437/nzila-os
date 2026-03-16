@@ -54,6 +54,8 @@ export default defineConfig({
       'packages/ui',
       // Integration platform
       'packages/integrations-core',
+      'packages/integrations-calendar',
+      'packages/integrations-pension',
       'packages/integrations-db',
       'packages/integrations-runtime',
       'packages/comms-email',

@@ -50,7 +50,7 @@ export const attendeeResponseEnum = pgEnum('attendee_response', [
   'delegated',
 ]);
 
-export const eventTypeEnum = pgEnum('calendar_event_type', [
+export const externalEventTypeEnum = pgEnum('calendar_event_type', [
   'meeting',
   'bargaining_session',
   'grievance_hearing',
@@ -134,7 +134,7 @@ export const externalCalendarEvents = pgTable(
     description: text('description'),
     location: varchar('location', { length: 500 }),
     meetingUrl: text('meeting_url'),
-    eventType: eventTypeEnum('event_type'),
+    eventType: externalEventTypeEnum('event_type'),
     status: calendarEventStatusEnum('status').notNull(),
     startTime: timestamp('start_time', { withTimezone: true }).notNull(),
     endTime: timestamp('end_time', { withTimezone: true }).notNull(),

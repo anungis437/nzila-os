@@ -494,6 +494,12 @@ export const stewardAssignments = pgTable(
     // Additional Information
     notes: text('notes'),
 
+    // Grievance link (for case-based assignments)
+    grievanceId: uuid('grievance_id'),
+
+    // Completion tracking
+    completedAt: timestamp('completed_at', { withTimezone: true }),
+
     // Metadata
     createdAt: timestamp('created_at', { withTimezone: true }).defaultNow(),
     updatedAt: timestamp('updated_at', { withTimezone: true }).defaultNow(),

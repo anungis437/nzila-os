@@ -45,7 +45,7 @@ export const pensionProviderEnum = pgEnum('pension_provider', [
   'CUSTOM',
 ]);
 
-export const pensionPlanTypeEnum = pgEnum('pension_plan_type', [
+export const externalPensionPlanTypeEnum = pgEnum('pension_plan_type', [
   'defined_benefit',
   'defined_contribution',
   'hybrid',
@@ -53,7 +53,7 @@ export const pensionPlanTypeEnum = pgEnum('pension_plan_type', [
   'multi_employer',
 ]);
 
-export const pensionMemberStatusEnum = pgEnum('pension_member_status', [
+export const externalPensionMemberStatusEnum = pgEnum('pension_member_status', [
   'active',
   'deferred',
   'retired',
@@ -90,7 +90,7 @@ export const externalPensionPlans = pgTable(
 
     // Plan data
     planName: varchar('plan_name', { length: 500 }).notNull(),
-    planType: pensionPlanTypeEnum('plan_type').notNull(),
+    planType: externalPensionPlanTypeEnum('plan_type').notNull(),
     planNumber: varchar('plan_number', { length: 100 }),
     jurisdiction: varchar('jurisdiction', { length: 100 }), // ON, QC, BC, AB, federal
     regulatoryBody: varchar('regulatory_body', { length: 255 }),
@@ -145,7 +145,7 @@ export const externalPensionMembers = pgTable(
     employeeName: varchar('employee_name', { length: 500 }),
     planId: varchar('plan_id', { length: 255 }).notNull(),
     membershipNumber: varchar('membership_number', { length: 100 }),
-    memberStatus: pensionMemberStatusEnum('member_status').notNull(),
+    memberStatus: externalPensionMemberStatusEnum('member_status').notNull(),
     enrollmentDate: date('enrollment_date').notNull(),
     vestingDate: date('vesting_date'),
     terminationDate: date('termination_date'),
