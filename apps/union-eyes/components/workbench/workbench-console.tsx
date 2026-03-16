@@ -228,7 +228,7 @@ export default function WorkbenchConsole() {
         }
 
         const data = await response.json();
-        const mappedCases = data.claims.map(mapDbClaimToCase);
+        const mappedCases = (data.claims ?? []).map(mapDbClaimToCase);
         setCases(mappedCases);
       } catch (err) {
         setError(err instanceof Error ? err.message : 'Failed to load assigned claims');
@@ -279,7 +279,7 @@ export default function WorkbenchConsole() {
   const pendingCount = cases.filter(c => c.status === "pending").length;
   const inReviewCount = cases.filter(c => c.status === "in-review").length;
   const urgentCount = cases.filter(c => c.priority === "urgent").length;
-  const avgDaysOpen = Math.round(cases.reduce((sum, c) => sum + c.daysOpen, 0) / cases.length);
+  const avgDaysOpen = cases.length > 0 ? Math.round(cases.reduce((sum, c) => sum + c.daysOpen, 0) / cases.length) : 0;
 
   const handleAssignToMe = (caseId: string) => {
     setCases(cases.map(c => 
