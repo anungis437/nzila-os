@@ -23,3 +23,5 @@ export * from './insurance';
 export * from './communication';
 export * from './lms';
 export * from './documents';
+export * from './pension';
+export * from './calendar';
