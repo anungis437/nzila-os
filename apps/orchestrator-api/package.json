@@ -22,7 +22,7 @@
     "@nzila/platform-procurement-proof": "workspace:*",
     "@nzila/platform-utils": "workspace:*",
     "drizzle-orm": "^0.39.0",
-    "fastify": "^5.3.3",
+    "fastify": "^5.8.2",
     "postgres": "^3.4.5",
     "zod": "^3.24.0"
   },
