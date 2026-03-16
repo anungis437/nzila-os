@@ -7,7 +7,8 @@
 
 export const dynamic = 'force-dynamic';
 
-import { auth, currentUser } from "@clerk/nextjs/server";
+import { currentUser } from "@clerk/nextjs/server";
+import { requireUser } from "@/lib/api-auth-guard";
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "@/components/ui/card";
 import { getClaimsAssignedToUser } from "@/db/queries/claims-queries";
 import { notFound } from "next/navigation";
@@ -18,7 +19,9 @@ export default async function DebugPage() {
     notFound();
   }
 
-  const { userId, orgId } = await auth();
+  const authContext = await requireUser();
+  const userId = authContext.userId;
+  const orgId = authContext.organizationId;
   const user = await currentUser();
   
   // Get assigned claims

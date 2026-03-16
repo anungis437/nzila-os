@@ -4,14 +4,12 @@
  */
 export const dynamic = 'force-dynamic';
 
-import { auth } from "@clerk/nextjs/server";
-import { hasMinRole } from "@/lib/api-auth-guard";
+import { requireUser, hasMinRole } from "@/lib/api-auth-guard";
 import { redirect } from "next/navigation";
 import MembersConsole from "@/components/admin/members-console";
 
 export default async function AdminMembersPage() {
-  const { userId } = await auth();
-  if (!userId) redirect("/sign-in");
+  await requireUser();
 
   const isAdmin = await hasMinRole("support_manager");
   if (!isAdmin) redirect("/dashboard");

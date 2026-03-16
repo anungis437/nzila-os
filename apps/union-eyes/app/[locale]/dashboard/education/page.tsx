@@ -9,10 +9,10 @@ import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "@/com
 import { Button } from "@/components/ui/button";
 import { GraduationCap, BookOpen, Award, Calendar } from "lucide-react";
 import Link from "next/link";
-import { currentUser } from "@clerk/nextjs/server";
+import { requireUser } from "@/lib/api-auth-guard";
 
 export default async function EducationDashboard() {
-  const _user = await currentUser();
+  await requireUser();
 
   return (
     <div className="p-6 space-y-6">

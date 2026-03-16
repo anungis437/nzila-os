@@ -10,10 +10,8 @@
 
 export const dynamic = "force-dynamic";
 
-import { auth } from "@clerk/nextjs/server";
+import { requireUser, getUserRole } from "@/lib/api-auth-guard";
 import { redirect } from "next/navigation";
-import { getUserRole } from "@/lib/auth/rbac-server";
-import { getOrganizationIdForUser } from "@/lib/organization-utils";
 import { db } from "@/db/db";
 import { sql } from "drizzle-orm";
 import { withSystemContext } from '@/lib/db/with-rls-context';
@@ -109,11 +107,10 @@ async function loadPlatformSettings(): Promise<PlatformSettingsData> {
 }
 
 export default async function SettingsPage() {
-  const { userId } = await auth();
-  if (!userId) return redirect("/login");
+  const user = await requireUser();
 
-  const organizationId = await getOrganizationIdForUser(userId);
-  const userRole = await getUserRole(userId, organizationId);
+  const organizationId = user.organizationId;
+  const userRole = await getUserRole(user.userId, organizationId);
 
   if (PLATFORM_ROLES.has(userRole)) {
     const data = await withSystemContext(() => loadPlatformSettings());
