@@ -141,3 +141,8 @@ install-log.txt
 install-out.txt
 tsc-output.txt
 *.tsbuildinfo
+
+# Temp diagnostic outputs
+contract-test-results.txt
+ct-output.txt
+ts-errors*.txt
