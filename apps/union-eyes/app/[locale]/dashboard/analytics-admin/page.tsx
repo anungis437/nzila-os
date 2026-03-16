@@ -8,12 +8,11 @@
 
 export const dynamic = 'force-dynamic';
 
-import { auth } from '@clerk/nextjs/server';
 import { redirect } from 'next/navigation';
 import Link from 'next/link';
 import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card';
 import { Tabs, TabsContent, TabsList, TabsTrigger } from '@/components/ui/tabs';
-import { hasMinRole } from '@/lib/api-auth-guard';
+import { requireUser, hasMinRole } from '@/lib/api-auth-guard';
 import { BarChart3, Users, FileText, TrendingUp, Activity, Eye, LogIn, Layers, Building2, Clock, X } from 'lucide-react';
 import { db } from '@/db/db';
 import { sql } from 'drizzle-orm';
@@ -212,8 +211,7 @@ export default async function AnalyticsAdminDashboard({
 }: {
   searchParams: Promise<{ tab?: string; module?: string }>;
 }) {
-  const { userId } = await auth();
-  if (!userId) redirect('/sign-in');
+  await requireUser();
 
   const hasAccess = await hasMinRole('data_analyst');
   if (!hasAccess) redirect('/dashboard');

@@ -9,12 +9,11 @@
 
 export const dynamic = 'force-dynamic';
 
-import { auth } from '@clerk/nextjs/server';
 import { redirect } from 'next/navigation';
 import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card';
 import { Tabs, TabsContent, TabsList, TabsTrigger } from '@/components/ui/tabs';
 import { Badge } from '@/components/ui/badge';
-import { hasMinRole } from '@/lib/api-auth-guard';
+import { requireUser, hasMinRole } from '@/lib/api-auth-guard';
 import { Shield, AlertTriangle, CheckCircle2, Clock, Eye } from 'lucide-react';
 import { logger } from '@/lib/logger';
 
@@ -42,11 +41,7 @@ async function getAuditLogs() {
 }
 
 export default async function ComplianceDashboard() {
-  const { userId } = await auth();
-  
-  if (!userId) {
-    redirect('/sign-in');
-  }
+  await requireUser();
   
   // Require compliance manager role
   const hasAccess = await hasMinRole('compliance_manager');

@@ -7,15 +7,13 @@
 
 export const dynamic = 'force-dynamic';
 
-import { auth } from '@clerk/nextjs/server';
 import { redirect, notFound } from 'next/navigation';
 import Link from 'next/link';
 import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card';
 import { Badge } from '@/components/ui/badge';
 import { Separator } from '@/components/ui/separator';
-import { hasMinRole } from '@/lib/api-auth-guard';
+import { requireUser, hasMinRole } from '@/lib/api-auth-guard';
 import { ArrowLeft, Download, Eye, Calendar, FolderOpen, FileText } from 'lucide-react';
-import { getOrganizationIdForUser } from '@/lib/organization-utils';
 import { ContentWorkflowActions } from '../_components/content-workflow-actions';
 import { db } from '@/db/db';
 import { sql } from 'drizzle-orm';
@@ -176,17 +174,14 @@ export default async function TemplateDetailPage({
 }) {
   const { slug } = await params;
 
-  const { userId } = await auth();
-  if (!userId) {
-    redirect('/sign-in');
-  }
+  const user = await requireUser();
 
   const hasAccess = await hasMinRole('member');
   if (!hasAccess) {
     redirect('/dashboard');
   }
 
-  const organizationId = await getOrganizationIdForUser(userId);
+  const organizationId = user.organizationId;
   if (!organizationId) {
     redirect('/dashboard');
   }

@@ -1,8 +1,7 @@
 export const dynamic = 'force-dynamic';
 
 import { Metadata } from 'next';
-import { auth } from '@clerk/nextjs/server';
-import { redirect } from 'next/navigation';
+import { requireUser } from '@/lib/api-auth-guard';
 import { getBalance } from '@/lib/services/rewards/wallet-service';
 import { getTranslations } from 'next-intl/server';
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from '@/components/ui/card';
@@ -16,11 +15,9 @@ export const metadata: Metadata = {
 };
 
 export default async function RedeemCreditsPage() {
-  const { userId, orgId } = await auth();
-
-  if (!userId || !orgId) {
-    redirect('/sign-in');
-  }
+  const user = await requireUser();
+  const userId = user.userId;
+  const orgId = user.organizationId!;
 
   const t = await getTranslations('rewards');
 

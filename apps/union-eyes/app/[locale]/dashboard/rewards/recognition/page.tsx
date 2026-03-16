@@ -1,8 +1,7 @@
 export const dynamic = 'force-dynamic';
 
 import { Metadata } from 'next';
-import { auth } from '@clerk/nextjs/server';
-import { redirect } from 'next/navigation';
+import { requireUser } from '@/lib/api-auth-guard';
 import { db } from '@/db';
 import { getTranslations } from 'next-intl/server';
 import { PeerNominationForm } from '@/components/rewards/peer-nomination-form';
@@ -31,11 +30,9 @@ async function getOrganizationMembers(orgId: string) {
 }
 
 export default async function PeerRecognitionPage() {
-  const { userId, orgId } = await auth();
-
-  if (!userId || !orgId) {
-    redirect('/sign-in');
-  }
+  const user = await requireUser();
+  const userId = user.userId;
+  const orgId = user.organizationId!;
 
   const t = await getTranslations('rewards.peer');
 

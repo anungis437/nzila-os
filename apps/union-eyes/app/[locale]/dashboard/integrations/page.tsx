@@ -8,16 +8,14 @@
 
 export const dynamic = 'force-dynamic';
 
-import { auth } from '@clerk/nextjs/server';
 import { redirect } from 'next/navigation';
 import Link from 'next/link';
 import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card';
 import { Tabs, TabsContent, TabsList, TabsTrigger } from '@/components/ui/tabs';
 import { Badge } from '@/components/ui/badge';
-import { hasMinRole } from '@/lib/api-auth-guard';
+import { requireUser, hasMinRole } from '@/lib/api-auth-guard';
 import { Key, Webhook, Activity, CheckCircle2, XCircle, Clock, Plug, AlertTriangle } from 'lucide-react';
 import { logger } from '@/lib/logger';
-import { getOrganizationIdForUser } from '@/lib/organization-utils';
 import { db } from '@/db/db';
 import { sql } from 'drizzle-orm';
 import { withSystemContext } from '@/lib/db/with-rls-context';
@@ -274,18 +272,14 @@ export default async function IntegrationsDashboard({
   const activeTab = params.tab ?? 'overview';
   const filterStatus = params.status ?? null;
 
-  const { userId } = await auth();
-
-  if (!userId) {
-    redirect('/sign-in');
-  }
+  const user = await requireUser();
 
   const hasAccess = await hasMinRole('integration_manager');
   if (!hasAccess) {
     redirect('/dashboard');
   }
 
-  const organizationId = await getOrganizationIdForUser(userId);
+  const organizationId = user.organizationId;
 
   let apiKeys: ApiKey[] = [];
   let webhooks: WebhookEntry[] = [];

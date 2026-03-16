@@ -1,8 +1,7 @@
 export const dynamic = 'force-dynamic';
 
 import { Metadata } from 'next';
-import { auth } from '@clerk/nextjs/server';
-import { redirect } from 'next/navigation';
+import { requireUser } from '@/lib/api-auth-guard';
 import { getBalance, listLedger } from '@/lib/services/rewards/wallet-service';
 import { getTotalEarned, getTotalRedeemed } from '@/lib/utils/rewards-stats-utils';
 import { getTranslations } from 'next-intl/server';
@@ -12,28 +11,15 @@ import { Gift, TrendingUp, Calendar } from 'lucide-react';
 import Link from 'next/link';
 import { WalletBalanceCard } from '@/components/rewards/wallet-balance-card';
 import { LedgerTable } from '@/components/rewards/ledger-table';
-import { getOrganizationIdForUser } from '@/lib/organization-utils';
-
 export const metadata: Metadata = {
   title: 'My Wallet | Recognition & Rewards',
   description: 'View your reward credits balance and transaction history',
 };
 
 export default async function RewardsWalletPage() {
-  const { userId } = await auth();
-
-  if (!userId) {
-    redirect('/sign-in');
-  }
-
-  // Use DB-based organization (not Clerk org) since this app uses its own org management
-  let orgId: string;
-  try {
-    orgId = await getOrganizationIdForUser(userId);
-  } catch {
-    // User has no organization membership - show rewards page with empty state
-    orgId = '';
-  }
+  const user = await requireUser();
+  const userId = user.userId;
+  const orgId = user.organizationId ?? '';
 
   const t = await getTranslations('rewards');
 

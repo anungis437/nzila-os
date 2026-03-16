@@ -8,16 +8,14 @@
 
 export const dynamic = 'force-dynamic';
 
-import { auth } from '@clerk/nextjs/server';
 import { redirect } from 'next/navigation';
 import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card';
 import { Tabs, TabsContent, TabsList, TabsTrigger } from '@/components/ui/tabs';
 import { Badge } from '@/components/ui/badge';
-import { hasMinRole } from '@/lib/api-auth-guard';
+import { requireUser, hasMinRole } from '@/lib/api-auth-guard';
 import Link from 'next/link';
 import { FileText, BookOpen, Video, Download, Eye, TrendingUp, GraduationCap, FolderOpen } from 'lucide-react';
 import { logger } from '@/lib/logger';
-import { getOrganizationIdForUser } from '@/lib/organization-utils';
 import { db } from '@/db/db';
 import { sql } from 'drizzle-orm';
 import { withSystemContext } from '@/lib/db/with-rls-context';
@@ -153,18 +151,14 @@ export default async function ContentDashboard({
   const filterStatus = params.status ?? null;
   const filterType = params.type ?? null;
 
-  const { userId } = await auth();
-
-  if (!userId) {
-    redirect('/sign-in');
-  }
+  const user = await requireUser();
 
   const hasAccess = await hasMinRole('content_manager');
   if (!hasAccess) {
     redirect('/dashboard');
   }
 
-  const organizationId = await getOrganizationIdForUser(userId);
+  const organizationId = user.organizationId;
 
   let items: ContentItem[] = [];
   let courses: TrainingCourse[] = [];

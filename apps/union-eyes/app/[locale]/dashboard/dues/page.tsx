@@ -1,7 +1,7 @@
 export const dynamic = 'force-dynamic';
 
 import { Suspense } from 'react';
-import { auth } from '@clerk/nextjs/server';
+import { requireUser } from '@/lib/api-auth-guard';
 import DuesPaymentPortal from '@/components/dues/dues-payment-portal';
 import { Skeleton } from '@/components/ui/skeleton';
 
@@ -11,11 +11,8 @@ export const metadata = {
 };
 
 export default async function DuesPortalPage() {
-  const { userId } = await auth();
-  
-  if (!userId) {
-    return <div>Please sign in to view your dues</div>;
-  }
+  const user = await requireUser();
+  const userId = user.userId;
 
   return (
     <div className="container mx-auto py-8">

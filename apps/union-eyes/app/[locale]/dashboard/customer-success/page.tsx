@@ -8,12 +8,11 @@
 
 export const dynamic = 'force-dynamic';
 
-import { auth } from '@clerk/nextjs/server';
 import { redirect } from 'next/navigation';
 import { Card, CardContent, CardHeader, CardTitle, CardDescription } from '@/components/ui/card';
 import { Badge } from '@/components/ui/badge';
 import { Progress } from '@/components/ui/progress';
-import { hasMinRole } from '@/lib/api-auth-guard';
+import { requireUser, hasMinRole } from '@/lib/api-auth-guard';
 import { db } from '@/db/db';
 import { sql } from 'drizzle-orm';
 import { withSystemContext } from '@/lib/db/with-rls-context';
@@ -319,11 +318,7 @@ export default async function CustomerSuccessDashboard({
 }: {
   searchParams: Promise<Record<string, string | undefined>>;
 }) {
-  const { userId } = await auth();
-
-  if (!userId) {
-    redirect('/sign-in');
-  }
+  await requireUser();
 
   const hasAccess = await hasMinRole('customer_success_director');
   if (!hasAccess) {

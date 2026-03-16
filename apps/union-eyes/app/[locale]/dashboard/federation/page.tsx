@@ -1,7 +1,7 @@
 export const dynamic = 'force-dynamic';
 
 import { Metadata } from 'next';
-import { auth } from '@clerk/nextjs/server';
+import { requireUser } from '@/lib/api-auth-guard';
 import { redirect } from 'next/navigation';
 import { getTranslations } from 'next-intl/server';
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from '@/components/ui/card';
@@ -108,11 +108,9 @@ async function getFederationMetrics(orgId: string) {
 }
 
 export default async function FederationDashboardPage() {
-  const { userId, orgId } = await auth();
-
-  if (!userId || !orgId) {
-    redirect('/sign-in');
-  }
+  const user = await requireUser();
+  const userId = user.userId;
+  const orgId = user.organizationId!;
 
   const hasAccess = await checkFederationAccess(userId, orgId);
   if (!hasAccess) {

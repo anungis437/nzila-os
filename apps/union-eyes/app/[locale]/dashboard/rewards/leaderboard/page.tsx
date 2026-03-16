@@ -1,8 +1,7 @@
 export const dynamic = 'force-dynamic';
 
 import { Metadata } from 'next';
-import { auth } from '@clerk/nextjs/server';
-import { redirect } from 'next/navigation';
+import { requireUser } from '@/lib/api-auth-guard';
 import { withRLSContext } from '@/lib/db/with-rls-context';
 import { getTranslations } from 'next-intl/server';
 import { Leaderboard } from '@/components/rewards/leaderboard';
@@ -99,11 +98,9 @@ async function getLeaderboardData(orgId: string, period: 'all-time' | 'monthly' 
 }
 
 export default async function LeaderboardPage() {
-  const { userId, orgId } = await auth();
-
-  if (!userId || !orgId) {
-    redirect('/sign-in');
-  }
+  const user = await requireUser();
+  const userId = user.userId;
+  const orgId = user.organizationId!;
 
   const t = await getTranslations('rewards.leaderboard');
   

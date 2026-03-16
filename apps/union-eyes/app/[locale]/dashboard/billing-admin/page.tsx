@@ -8,13 +8,12 @@
 
 export const dynamic = 'force-dynamic';
 
-import { auth } from '@clerk/nextjs/server';
 import { redirect } from 'next/navigation';
 import Link from 'next/link';
 import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card';
 import { Tabs, TabsContent, TabsList, TabsTrigger } from '@/components/ui/tabs';
 import { Badge } from '@/components/ui/badge';
-import { hasMinRole } from '@/lib/api-auth-guard';
+import { requireUser, hasMinRole } from '@/lib/api-auth-guard';
 import { DollarSign, CreditCard, TrendingUp, Users, FileText, AlertCircle, CheckCircle2, XCircle, Clock } from 'lucide-react';
 import { logger } from '@/lib/logger';
 import { db } from '@/db/db';
@@ -275,11 +274,7 @@ export default async function BillingAdminDashboard({
   const activeTab = params.tab ?? 'overview';
   const filterStatus = params.status ?? null;
 
-  const { userId } = await auth();
-
-  if (!userId) {
-    redirect('/sign-in');
-  }
+  await requireUser();
 
   const hasAccess = await hasMinRole('billing_specialist');
   if (!hasAccess) {

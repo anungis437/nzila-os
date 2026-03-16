@@ -8,7 +8,6 @@
 
 export const dynamic = 'force-dynamic';
 
-import { auth } from '@clerk/nextjs/server';
 import { redirect } from 'next/navigation';
 import Link from 'next/link';
 import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card';
@@ -16,7 +15,7 @@ import { Badge } from '@/components/ui/badge';
 import { db } from '@/db/db';
 import { sql } from 'drizzle-orm';
 import { withSystemContext } from '@/lib/db/with-rls-context';
-import { hasMinRole } from '@/lib/api-auth-guard';
+import { requireUser, hasMinRole } from '@/lib/api-auth-guard';
 
 /* ── Types ── */
 interface OrgRow {
@@ -225,8 +224,7 @@ function formatSector(s: string) {
 export default async function SectorAnalyticsPage(props: {
   searchParams: Promise<Record<string, string | string[] | undefined>>;
 }) {
-  const { userId } = await auth();
-  if (!userId) redirect('/sign-in');
+  await requireUser();
   const hasAccess = await hasMinRole('platform_lead');
   if (!hasAccess) redirect('/dashboard');
 

@@ -8,16 +8,14 @@
 
 export const dynamic = 'force-dynamic';
 
-import { auth } from '@clerk/nextjs/server';
 import { redirect } from 'next/navigation';
 import Link from 'next/link';
 import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card';
 import { Tabs, TabsContent, TabsList, TabsTrigger } from '@/components/ui/tabs';
 import { Badge } from '@/components/ui/badge';
-import { hasMinRole } from '@/lib/api-auth-guard';
+import { requireUser, hasMinRole } from '@/lib/api-auth-guard';
 import { Shield, AlertTriangle, Activity, XCircle, Lock, Eye, Clock, CheckCircle } from 'lucide-react';
 import { logger } from '@/lib/logger';
-import { getOrganizationIdForUser } from '@/lib/organization-utils';
 import { db } from '@/db/db';
 import { sql } from 'drizzle-orm';
 import { withSystemContext } from '@/lib/db/with-rls-context';
@@ -196,18 +194,14 @@ export default async function SecurityDashboard({
   const filterSeverity = params.severity ?? null;
   const filterStatus = params.status ?? null;
 
-  const { userId } = await auth();
-
-  if (!userId) {
-    redirect('/sign-in');
-  }
+  const user = await requireUser();
 
   const hasAccess = await hasMinRole('security_manager');
   if (!hasAccess) {
     redirect('/dashboard');
   }
 
-  const organizationId = await getOrganizationIdForUser(userId);
+  const organizationId = user.organizationId;
 
   let events: SecurityEvent[] = [];
   let posture: PostureCheck[] = [];

@@ -10,9 +10,8 @@
 
 export const dynamic = 'force-dynamic';
 
-import { auth } from '@clerk/nextjs/server';
 import { redirect } from 'next/navigation';
-import { hasMinRole } from '@/lib/api-auth-guard';
+import { requireUser, hasMinRole } from '@/lib/api-auth-guard';
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from '@/components/ui/card';
 import { Badge } from '@/components/ui/badge';
 import { Tabs, TabsContent, TabsList, TabsTrigger } from '@/components/ui/tabs';
@@ -136,9 +135,7 @@ function formatNumber(n: number): string {
 
 /* ─── page ─── */
 export default async function DataSourcePage() {
-  const { userId } = await auth();
-  if (!userId) redirect('/sign-in');
-
+  await requireUser();
   const canAccess = await hasMinRole('integration_manager');
   if (!canAccess) redirect('/dashboard');
 
