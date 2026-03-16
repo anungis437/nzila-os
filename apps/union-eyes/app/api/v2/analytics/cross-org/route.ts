@@ -1,17 +1,22 @@
 /**
- * CRUD collection route for analyticsMetrics
+ * Cross-org analytics v2 — aggregates metrics across all organisations.
+ * Requires platform-level auth (platform_lead or higher).
  */
-import { crudRoutes } from '@/lib/api/crud-factory';
+import { withApi } from '@/lib/api/with-api';
+import { db } from '@/db/db';
 import { analyticsMetrics } from '@/db/schema';
+import { desc, count } from 'drizzle-orm';
 
 export const dynamic = 'force-dynamic';
 
-const { GET, POST } = crudRoutes({
-  table: analyticsMetrics,
-  pk: 'id',
-  tags: ["Analytics"],
-  orgScoped: true,
-  readRole: 'member',
-  writeRole: 'steward',
-});
-export { GET, POST };
+export const GET = withApi(
+  {
+    auth: { required: true, minRole: 'platform_lead' },
+    openapi: { tags: ['Analytics'], summary: 'Cross-org analytics metrics (v2)' },
+  },
+  async () => {
+    const rows = await db.select().from(analyticsMetrics).orderBy(desc(analyticsMetrics.createdAt)).limit(200);
+    const [{ value: total }] = await db.select({ value: count() }).from(analyticsMetrics);
+    return { items: rows, total };
+  },
+);
