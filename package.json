@@ -91,7 +91,7 @@
     "prepare": "lefthook install"
   },
   "devDependencies": {
-    "@changesets/cli": "^2.27.0",
+    "@changesets/cli": "^2.30.0",
     "@nzila/platform-assurance": "workspace:*",
     "@nzila/platform-change-management": "workspace:*",
     "@nzila/platform-compliance-snapshots": "workspace:*",
