@@ -1,39 +1,17 @@
 /**
- * GET POST /api/chatbot/messages
- * → Django: /api/ai_core/chat-sessions/
- * Migrated to withApi() framework
+ * CRUD collection route for chatSessions
  */
-import { djangoProxy } from '@/lib/django-proxy';
-import { withApi } from '@/lib/api/framework';
+import { crudRoutes } from '@/lib/api/crud-factory';
+import { chatSessions } from '@/db/schema';
 
 export const dynamic = 'force-dynamic';
 
-export const GET = withApi(
-  {
-    auth: { required: false },
-    openapi: {
-      tags: ['Chatbot', 'Django Proxy'],
-      summary: 'GET messages',
-      description: 'Proxied to Django: /api/ai_core/chat-sessions/',
-    },
-  },
-  async ({ request }) => {
-    const response = await djangoProxy(request, '/api/ai_core/chat-sessions/');
-    return response;
-  },
-);
-
-export const POST = withApi(
-  {
-    auth: { required: false },
-    openapi: {
-      tags: ['Chatbot', 'Django Proxy'],
-      summary: 'POST messages',
-      description: 'Proxied to Django: /api/ai_core/chat-sessions/',
-    },
-  },
-  async ({ request }) => {
-    const response = await djangoProxy(request, '/api/ai_core/chat-sessions/', { method: 'POST' });
-    return response;
-  },
-);
+const { GET, POST } = crudRoutes({
+  table: chatSessions,
+  pk: 'id',
+  tags: ["AI"],
+  orgScoped: true,
+  readRole: 'member',
+  writeRole: 'steward',
+});
+export { GET, POST };

@@ -1,54 +1,48 @@
 /**
- * GET PATCH DELETE /api/extensions/[id]
- * → Django: /api/auth_core/id/
- * Migrated to withApi() framework
+ * Item stub endpoint
  */
-import { djangoProxy } from '@/lib/django-proxy';
 import { withApi } from '@/lib/api/framework';
 
 export const dynamic = 'force-dynamic';
 
 export const GET = withApi(
   {
-    auth: { required: false },
+    auth: { required: true, minRole: 'member' },
     openapi: {
-      tags: ['Extensions', 'Django Proxy'],
-      summary: 'GET [id]',
-      description: 'Proxied to Django: /api/auth_core/id/',
+      tags: ["Auth"],
+      summary: 'Get by ID (stub)',
+      description: 'Returns a single record (stub).',
     },
   },
-  async ({ request }) => {
-    const response = await djangoProxy(request, '/api/auth_core/id/');
-    return response;
+  async ({ params }) => {
+    return { data: { id: params.id } };
   },
 );
 
 export const PATCH = withApi(
   {
-    auth: { required: false },
+    auth: { required: true, minRole: 'steward' },
     openapi: {
-      tags: ['Extensions', 'Django Proxy'],
-      summary: 'PATCH [id]',
-      description: 'Proxied to Django: /api/auth_core/id/',
+      tags: ["Auth"],
+      summary: 'Update record (stub)',
+      description: 'Updates a record (stub).',
     },
   },
-  async ({ request }) => {
-    const response = await djangoProxy(request, '/api/auth_core/id/', { method: 'PATCH' });
-    return response;
+  async ({ params }) => {
+    return { data: { id: params.id, updatedAt: new Date().toISOString() } };
   },
 );
 
 export const DELETE = withApi(
   {
-    auth: { required: false },
+    auth: { required: true, minRole: 'admin' },
     openapi: {
-      tags: ['Extensions', 'Django Proxy'],
-      summary: 'DELETE [id]',
-      description: 'Proxied to Django: /api/auth_core/id/',
+      tags: ["Auth"],
+      summary: 'Delete record (stub)',
+      description: 'Deletes a record (stub).',
     },
   },
-  async ({ request }) => {
-    const response = await djangoProxy(request, '/api/auth_core/id/', { method: 'DELETE' });
-    return response;
+  async ({ params }) => {
+    return { data: { id: params.id, deleted: true } };
   },
 );

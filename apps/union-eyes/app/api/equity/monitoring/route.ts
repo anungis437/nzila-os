@@ -1,19 +1,17 @@
 /**
- * GET POST /api/equity/monitoring
- * -> Django unions: /api/unions/member-segments/
- * NOTE: auto-resolved from equity/monitoring
- * Auto-migrated by scripts/migrate_routes.py
+ * CRUD collection route for memberSegments
  */
-import { NextRequest } from 'next/server';
-import { djangoProxy } from '@/lib/django-proxy';
+import { crudRoutes } from '@/lib/api/crud-factory';
+import { memberSegments } from '@/db/schema';
 
 export const dynamic = 'force-dynamic';
 
-export function GET(req: NextRequest) {
-  return djangoProxy(req, '/api/unions/member-segments/');
-}
-
-export function POST(req: NextRequest) {
-  return djangoProxy(req, '/api/unions/member-segments/', { method: 'POST' });
-}
-
+const { GET, POST } = crudRoutes({
+  table: memberSegments,
+  pk: 'id',
+  tags: ["Members"],
+  orgScoped: true,
+  readRole: 'member',
+  writeRole: 'steward',
+});
+export { GET, POST };

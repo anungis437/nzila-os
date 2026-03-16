@@ -1,12 +1,18 @@
-import { NextRequest } from 'next/server';
-import { djangoProxy } from '@/lib/django-proxy';
+/**
+ * CRUD item route for claims
+ */
+import { crudRoutes } from '@/lib/api/crud-factory';
+import { claims } from '@/db/schema';
 
 export const dynamic = 'force-dynamic';
 
-type Params = { params: Promise<{ id: string }> };
-
-/** PATCH /api/claims/[id]/status  Django PATCH /api/grievances/claims/{id}/status/ */
-export async function PATCH(req: NextRequest, { params }: Params) {
-  const { id } = await params;
-  return djangoProxy(req, '/api/grievances/claims/' + id + '/status/', { method: 'PATCH' });
-}
+const { GET, PATCH, DELETE } = crudRoutes({
+  table: claims,
+  pk: 'id',
+  tags: ["Claims"],
+  orgScoped: true,
+  itemRoute: true,
+  readRole: 'member',
+  writeRole: 'steward',
+});
+export { GET, PATCH, DELETE };

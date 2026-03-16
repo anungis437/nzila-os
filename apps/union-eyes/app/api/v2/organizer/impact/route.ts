@@ -1,39 +1,17 @@
 /**
- * GET POST /api/organizer/impact
- * → Django: /api/unions/organizer-tasks/
- * Migrated to withApi() framework
+ * CRUD collection route for organizerTasks
  */
-import { djangoProxy } from '@/lib/django-proxy';
-import { withApi } from '@/lib/api/framework';
+import { crudRoutes } from '@/lib/api/crud-factory';
+import { organizerTasks } from '@/db/schema';
 
 export const dynamic = 'force-dynamic';
 
-export const GET = withApi(
-  {
-    auth: { required: false },
-    openapi: {
-      tags: ['Organizer', 'Django Proxy'],
-      summary: 'GET impact',
-      description: 'Proxied to Django: /api/unions/organizer-tasks/',
-    },
-  },
-  async ({ request }) => {
-    const response = await djangoProxy(request, '/api/unions/organizer-tasks/');
-    return response;
-  },
-);
-
-export const POST = withApi(
-  {
-    auth: { required: false },
-    openapi: {
-      tags: ['Organizer', 'Django Proxy'],
-      summary: 'POST impact',
-      description: 'Proxied to Django: /api/unions/organizer-tasks/',
-    },
-  },
-  async ({ request }) => {
-    const response = await djangoProxy(request, '/api/unions/organizer-tasks/', { method: 'POST' });
-    return response;
-  },
-);
+const { GET, POST } = crudRoutes({
+  table: organizerTasks,
+  pk: 'id',
+  tags: ["Organization"],
+  orgScoped: true,
+  readRole: 'member',
+  writeRole: 'steward',
+});
+export { GET, POST };

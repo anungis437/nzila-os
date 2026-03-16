@@ -1,19 +1,17 @@
 /**
- * GET POST /api/user/status
- * -> Django auth_core: /api/auth_core/users/
- * NOTE: auto-resolved from user/status
- * Auto-migrated by scripts/migrate_routes.py
+ * CRUD collection route for users
  */
-import { NextRequest } from 'next/server';
-import { djangoProxy } from '@/lib/django-proxy';
+import { crudRoutes } from '@/lib/api/crud-factory';
+import { users } from '@/db/schema';
 
 export const dynamic = 'force-dynamic';
 
-export function GET(req: NextRequest) {
-  return djangoProxy(req, '/api/auth_core/users/');
-}
-
-export function POST(req: NextRequest) {
-  return djangoProxy(req, '/api/auth_core/users/', { method: 'POST' });
-}
-
+const { GET, POST } = crudRoutes({
+  table: users,
+  pk: 'id',
+  tags: ["Auth"],
+  orgScoped: true,
+  readRole: 'member',
+  writeRole: 'admin',
+});
+export { GET, POST };

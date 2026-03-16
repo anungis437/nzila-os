@@ -1,19 +1,17 @@
 /**
- * GET POST /api/portal/documents
- * -> Django content: /api/content/cms-pages/
- * NOTE: auto-resolved from portal/documents
- * Auto-migrated by scripts/migrate_routes.py
+ * CRUD collection route for cmsPages
  */
-import { NextRequest } from 'next/server';
-import { djangoProxy } from '@/lib/django-proxy';
+import { crudRoutes } from '@/lib/api/crud-factory';
+import { cmsPages } from '@/db/schema';
 
 export const dynamic = 'force-dynamic';
 
-export function GET(req: NextRequest) {
-  return djangoProxy(req, '/api/content/cms-pages/');
-}
-
-export function POST(req: NextRequest) {
-  return djangoProxy(req, '/api/content/cms-pages/', { method: 'POST' });
-}
-
+const { GET, POST } = crudRoutes({
+  table: cmsPages,
+  pk: 'id',
+  tags: ["Content"],
+  orgScoped: true,
+  readRole: 'member',
+  writeRole: 'steward',
+});
+export { GET, POST };

@@ -1,39 +1,17 @@
 /**
- * GET POST /api/enterprise/dsr/requests
- * → Django: /api/auth_core/dsr/
- * Migrated to withApi() framework
+ * CRUD collection route for dataSubjectAccessRequests
  */
-import { djangoProxy } from '@/lib/django-proxy';
-import { withApi } from '@/lib/api/framework';
+import { crudRoutes } from '@/lib/api/crud-factory';
+import { dataSubjectAccessRequests } from '@/db/schema';
 
 export const dynamic = 'force-dynamic';
 
-export const GET = withApi(
-  {
-    auth: { required: false },
-    openapi: {
-      tags: ['Enterprise', 'Django Proxy'],
-      summary: 'GET requests',
-      description: 'Proxied to Django: /api/auth_core/dsr/',
-    },
-  },
-  async ({ request }) => {
-    const response = await djangoProxy(request, '/api/auth_core/dsr/');
-    return response;
-  },
-);
-
-export const POST = withApi(
-  {
-    auth: { required: false },
-    openapi: {
-      tags: ['Enterprise', 'Django Proxy'],
-      summary: 'POST requests',
-      description: 'Proxied to Django: /api/auth_core/dsr/',
-    },
-  },
-  async ({ request }) => {
-    const response = await djangoProxy(request, '/api/auth_core/dsr/', { method: 'POST' });
-    return response;
-  },
-);
+const { GET, POST } = crudRoutes({
+  table: dataSubjectAccessRequests,
+  pk: 'id',
+  tags: ["Compliance"],
+  orgScoped: true,
+  readRole: 'member',
+  writeRole: 'steward',
+});
+export { GET, POST };

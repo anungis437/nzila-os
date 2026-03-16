@@ -1,14 +1,17 @@
 /**
- * GET /api/analytics/insights
- * -> Django analytics: /api/analytics/insight-recommendations/
- * Auto-migrated by scripts/migrate_routes.py
+ * CRUD collection route for insightRecommendations
  */
-import { NextRequest } from 'next/server';
-import { djangoProxy } from '@/lib/django-proxy';
+import { crudRoutes } from '@/lib/api/crud-factory';
+import { insightRecommendations } from '@/db/schema';
 
 export const dynamic = 'force-dynamic';
 
-export function GET(req: NextRequest) {
-  return djangoProxy(req, '/api/analytics/insight-recommendations/');
-}
-
+const { GET, POST } = crudRoutes({
+  table: insightRecommendations,
+  pk: 'id',
+  tags: ["Analytics"],
+  orgScoped: true,
+  readRole: 'member',
+  writeRole: 'steward',
+});
+export { GET, POST };

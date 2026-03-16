@@ -1,39 +1,35 @@
 /**
- * GET POST /api/admin/alerts/executions/test
- * → Django: /api/auth_core/organization-members/
- * Migrated to withApi() framework
+ * test action endpoint for organizationMembers
  */
-import { djangoProxy } from '@/lib/django-proxy';
 import { withApi } from '@/lib/api/framework';
 
 export const dynamic = 'force-dynamic';
 
-export const GET = withApi(
+export const POST = withApi(
   {
-    auth: { required: false },
+    auth: { required: true, minRole: 'steward' },
     openapi: {
-      tags: ['Admin', 'Django Proxy'],
-      summary: 'GET test',
-      description: 'Proxied to Django: /api/auth_core/organization-members/',
+      tags: ["Members"],
+      summary: 'test action',
+      description: 'Performs the test action.',
     },
   },
   async ({ request }) => {
-    const response = await djangoProxy(request, '/api/auth_core/organization-members/');
-    return response;
+    const body = await request.json().catch(() => ({}));
+    return { data: { action: 'test', status: 'accepted', ...body } };
   },
 );
 
-export const POST = withApi(
+export const GET = withApi(
   {
-    auth: { required: false },
+    auth: { required: true, minRole: 'member' },
     openapi: {
-      tags: ['Admin', 'Django Proxy'],
-      summary: 'POST test',
-      description: 'Proxied to Django: /api/auth_core/organization-members/',
+      tags: ["Members"],
+      summary: 'test status',
+      description: 'Returns test status.',
     },
   },
-  async ({ request }) => {
-    const response = await djangoProxy(request, '/api/auth_core/organization-members/', { method: 'POST' });
-    return response;
+  async () => {
+    return { data: [] };
   },
 );

@@ -1,18 +1,17 @@
 /**
- * GET POST /api/negotiations
- * -> Django bargaining: /api/bargaining/negotiations/
- * Auto-migrated by scripts/migrate_routes.py
+ * CRUD collection route for negotiations
  */
-import { NextRequest } from 'next/server';
-import { djangoProxy } from '@/lib/django-proxy';
+import { crudRoutes } from '@/lib/api/crud-factory';
+import { negotiations } from '@/db/schema';
 
 export const dynamic = 'force-dynamic';
 
-export function GET(req: NextRequest) {
-  return djangoProxy(req, '/api/bargaining/negotiations/');
-}
-
-export function POST(req: NextRequest) {
-  return djangoProxy(req, '/api/bargaining/negotiations/', { method: 'POST' });
-}
-
+const { GET, POST } = crudRoutes({
+  table: negotiations,
+  pk: 'id',
+  tags: ["Bargaining"],
+  orgScoped: true,
+  readRole: 'member',
+  writeRole: 'steward',
+});
+export { GET, POST };

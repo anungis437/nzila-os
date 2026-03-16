@@ -1,42 +1,17 @@
 /**
- * GET POST /api/analytics/cross-org
- * -> Django analytics: /api/analytics/analytics-metrics/
- * Auto-migrated by scripts/migrate_routes.py
- * Hardened: wrapped in withApi() with platform-only auth gate
- * SECURITY: cross-org routes require platform_lead or above (not org-level admin)
+ * CRUD collection route for analyticsMetrics
  */
-import { djangoProxy } from '@/lib/django-proxy';
-import { withApi } from '@/lib/api/framework';
+import { crudRoutes } from '@/lib/api/crud-factory';
+import { analyticsMetrics } from '@/db/schema';
 
 export const dynamic = 'force-dynamic';
 
-export const GET = withApi(
-  {
-    auth: { required: true, minRole: 'platform_lead' },
-    openapi: {
-      tags: ['Analytics', 'Django Proxy'],
-      summary: 'Cross-org analytics metrics (GET)',
-      description: 'Proxied to Django: /api/analytics/analytics-metrics/ — platform-only',
-    },
-  },
-  async ({ request }) => {
-    const response = await djangoProxy(request, '/api/analytics/analytics-metrics/');
-    return response;
-  },
-);
-
-export const POST = withApi(
-  {
-    auth: { required: true, minRole: 'platform_lead' },
-    openapi: {
-      tags: ['Analytics', 'Django Proxy'],
-      summary: 'Cross-org analytics metrics (POST)',
-      description: 'Proxied to Django: /api/analytics/analytics-metrics/ — platform-only',
-    },
-  },
-  async ({ request }) => {
-    const response = await djangoProxy(request, '/api/analytics/analytics-metrics/', { method: 'POST' });
-    return response;
-  },
-);
-
+const { GET, POST } = crudRoutes({
+  table: analyticsMetrics,
+  pk: 'id',
+  tags: ["Analytics"],
+  orgScoped: true,
+  readRole: 'member',
+  writeRole: 'steward',
+});
+export { GET, POST };

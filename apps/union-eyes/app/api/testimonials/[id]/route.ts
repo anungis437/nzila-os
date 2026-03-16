@@ -1,28 +1,18 @@
 /**
- * GET PATCH DELETE /api/testimonials/[id]
- * -> Django content: /api/content/public-content/
- * NOTE: auto-resolved from testimonials/[id]
- * Auto-migrated by scripts/migrate_routes.py
+ * CRUD item route for publicContent
  */
-import { NextRequest } from 'next/server';
-import { djangoProxy } from '@/lib/django-proxy';
+import { crudRoutes } from '@/lib/api/crud-factory';
+import { publicContent } from '@/db/schema';
 
 export const dynamic = 'force-dynamic';
 
-type Params = { params: Promise<{ id: string }> };
-
-export async function GET(req: NextRequest, { params }: Params) {
-  const { id } = await params;
-  return djangoProxy(req, '/api/content/public-content/' + id + '/');
-}
-
-export async function PATCH(req: NextRequest, { params }: Params) {
-  const { id } = await params;
-  return djangoProxy(req, '/api/content/public-content/' + id + '/', { method: 'PATCH' });
-}
-
-export async function DELETE(req: NextRequest, { params }: Params) {
-  const { id } = await params;
-  return djangoProxy(req, '/api/content/public-content/' + id + '/', { method: 'DELETE' });
-}
-
+const { GET, PATCH, DELETE } = crudRoutes({
+  table: publicContent,
+  pk: 'id',
+  tags: ["Content"],
+  orgScoped: true,
+  itemRoute: true,
+  readRole: 'member',
+  writeRole: 'steward',
+});
+export { GET, PATCH, DELETE };

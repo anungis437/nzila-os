@@ -1,39 +1,17 @@
 /**
- * GET POST /api/billing/invoices
- * → Django: /api/core/external-invoices/
- * Migrated to withApi() framework
+ * CRUD collection route for externalInvoices
  */
-import { djangoProxy } from '@/lib/django-proxy';
-import { withApi } from '@/lib/api/framework';
+import { crudRoutes } from '@/lib/api/crud-factory';
+import { externalInvoices } from '@/db/schema';
 
 export const dynamic = 'force-dynamic';
 
-export const GET = withApi(
-  {
-    auth: { required: false },
-    openapi: {
-      tags: ['Billing', 'Django Proxy'],
-      summary: 'GET invoices',
-      description: 'Proxied to Django: /api/core/external-invoices/',
-    },
-  },
-  async ({ request }) => {
-    const response = await djangoProxy(request, '/api/core/external-invoices/');
-    return response;
-  },
-);
-
-export const POST = withApi(
-  {
-    auth: { required: false },
-    openapi: {
-      tags: ['Billing', 'Django Proxy'],
-      summary: 'POST invoices',
-      description: 'Proxied to Django: /api/core/external-invoices/',
-    },
-  },
-  async ({ request }) => {
-    const response = await djangoProxy(request, '/api/core/external-invoices/', { method: 'POST' });
-    return response;
-  },
-);
+const { GET, POST } = crudRoutes({
+  table: externalInvoices,
+  pk: 'id',
+  tags: ["Finance"],
+  orgScoped: true,
+  readRole: 'member',
+  writeRole: 'steward',
+});
+export { GET, POST };

@@ -41,6 +41,9 @@ export * from "./domains/infrastructure";   // Priority 13: System infrastructur
 // Pilot Domains
 export * from "./domains/pilot";            // CAPE-CLC pilot onboarding and demo data
 
+// Federation
+export * from "./domains/federation";       // Federation management and memberships
+
 // ============================================================================
 // EXTERNAL EXPORTS (Outside Domain Structure)
 // ============================================================================

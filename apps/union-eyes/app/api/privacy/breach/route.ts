@@ -1,19 +1,17 @@
 /**
- * GET POST /api/privacy/breach
- * -> Django compliance: /api/compliance/data-classification-policy/
- * NOTE: auto-resolved from privacy/breach
- * Auto-migrated by scripts/migrate_routes.py
+ * CRUD collection route for dataClassificationPolicy
  */
-import { NextRequest } from 'next/server';
-import { djangoProxy } from '@/lib/django-proxy';
+import { crudRoutes } from '@/lib/api/crud-factory';
+import { dataClassificationPolicy } from '@/db/schema';
 
 export const dynamic = 'force-dynamic';
 
-export function GET(req: NextRequest) {
-  return djangoProxy(req, '/api/compliance/data-classification-policy/');
-}
-
-export function POST(req: NextRequest) {
-  return djangoProxy(req, '/api/compliance/data-classification-policy/', { method: 'POST' });
-}
-
+const { GET, POST } = crudRoutes({
+  table: dataClassificationPolicy,
+  pk: 'id',
+  tags: ["Compliance"],
+  orgScoped: true,
+  readRole: 'member',
+  writeRole: 'admin',
+});
+export { GET, POST };

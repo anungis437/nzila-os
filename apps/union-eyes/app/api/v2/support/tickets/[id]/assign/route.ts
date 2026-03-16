@@ -1,54 +1,18 @@
 /**
- * GET PATCH DELETE /api/support/tickets/[id]/assign
- * → Django: /api/notifications/in-app-notifications/
- * Migrated to withApi() framework
+ * CRUD item route for inAppNotifications
  */
-import { djangoProxy } from '@/lib/django-proxy';
-import { withApi } from '@/lib/api/framework';
+import { crudRoutes } from '@/lib/api/crud-factory';
+import { inAppNotifications } from '@/db/schema';
 
 export const dynamic = 'force-dynamic';
 
-export const GET = withApi(
-  {
-    auth: { required: false },
-    openapi: {
-      tags: ['Support', 'Django Proxy'],
-      summary: 'GET assign',
-      description: 'Proxied to Django: /api/notifications/in-app-notifications/',
-    },
-  },
-  async ({ request }) => {
-    const response = await djangoProxy(request, '/api/notifications/in-app-notifications/');
-    return response;
-  },
-);
-
-export const PATCH = withApi(
-  {
-    auth: { required: false },
-    openapi: {
-      tags: ['Support', 'Django Proxy'],
-      summary: 'PATCH assign',
-      description: 'Proxied to Django: /api/notifications/in-app-notifications/',
-    },
-  },
-  async ({ request }) => {
-    const response = await djangoProxy(request, '/api/notifications/in-app-notifications/', { method: 'PATCH' });
-    return response;
-  },
-);
-
-export const DELETE = withApi(
-  {
-    auth: { required: false },
-    openapi: {
-      tags: ['Support', 'Django Proxy'],
-      summary: 'DELETE assign',
-      description: 'Proxied to Django: /api/notifications/in-app-notifications/',
-    },
-  },
-  async ({ request }) => {
-    const response = await djangoProxy(request, '/api/notifications/in-app-notifications/', { method: 'DELETE' });
-    return response;
-  },
-);
+const { GET, PATCH, DELETE } = crudRoutes({
+  table: inAppNotifications,
+  pk: 'id',
+  tags: ["Notifications"],
+  orgScoped: true,
+  itemRoute: true,
+  readRole: 'member',
+  writeRole: 'steward',
+});
+export { GET, PATCH, DELETE };

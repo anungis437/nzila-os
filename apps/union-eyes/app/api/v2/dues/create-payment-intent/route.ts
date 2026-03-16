@@ -1,39 +1,17 @@
 /**
- * GET POST /api/dues/create-payment-intent
- * → Django: /api/billing/per-capita-remittances/
- * Migrated to withApi() framework
+ * CRUD collection route for perCapitaRemittances
  */
-import { djangoProxy } from '@/lib/django-proxy';
-import { withApi } from '@/lib/api/framework';
+import { crudRoutes } from '@/lib/api/crud-factory';
+import { perCapitaRemittances } from '@/db/schema';
 
 export const dynamic = 'force-dynamic';
 
-export const GET = withApi(
-  {
-    auth: { required: false },
-    openapi: {
-      tags: ['Dues', 'Django Proxy'],
-      summary: 'GET create-payment-intent',
-      description: 'Proxied to Django: /api/billing/per-capita-remittances/',
-    },
-  },
-  async ({ request }) => {
-    const response = await djangoProxy(request, '/api/billing/per-capita-remittances/');
-    return response;
-  },
-);
-
-export const POST = withApi(
-  {
-    auth: { required: false },
-    openapi: {
-      tags: ['Dues', 'Django Proxy'],
-      summary: 'POST create-payment-intent',
-      description: 'Proxied to Django: /api/billing/per-capita-remittances/',
-    },
-  },
-  async ({ request }) => {
-    const response = await djangoProxy(request, '/api/billing/per-capita-remittances/', { method: 'POST' });
-    return response;
-  },
-);
+const { GET, POST } = crudRoutes({
+  table: perCapitaRemittances,
+  pk: 'id',
+  tags: ["Billing"],
+  orgScoped: true,
+  readRole: 'member',
+  writeRole: 'steward',
+});
+export { GET, POST };

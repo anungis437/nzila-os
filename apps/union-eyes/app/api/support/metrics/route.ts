@@ -1,19 +1,17 @@
 /**
- * GET POST /api/support/metrics
- * -> Django notifications: /api/notifications/in-app-notifications/
- * NOTE: auto-resolved from support/metrics
- * Auto-migrated by scripts/migrate_routes.py
+ * CRUD collection route for inAppNotifications
  */
-import { NextRequest } from 'next/server';
-import { djangoProxy } from '@/lib/django-proxy';
+import { crudRoutes } from '@/lib/api/crud-factory';
+import { inAppNotifications } from '@/db/schema';
 
 export const dynamic = 'force-dynamic';
 
-export function GET(req: NextRequest) {
-  return djangoProxy(req, '/api/notifications/in-app-notifications/');
-}
-
-export function POST(req: NextRequest) {
-  return djangoProxy(req, '/api/notifications/in-app-notifications/', { method: 'POST' });
-}
-
+const { GET, POST } = crudRoutes({
+  table: inAppNotifications,
+  pk: 'id',
+  tags: ["Notifications"],
+  orgScoped: true,
+  readRole: 'member',
+  writeRole: 'steward',
+});
+export { GET, POST };

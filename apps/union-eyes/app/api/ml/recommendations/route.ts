@@ -1,19 +1,17 @@
 /**
- * GET POST /api/ml/recommendations
- * -> Django ai_core: /api/ai_core/ml-predictions/
- * NOTE: auto-resolved from ml/recommendations
- * Auto-migrated by scripts/migrate_routes.py
+ * CRUD collection route for mlPredictions
  */
-import { NextRequest } from 'next/server';
-import { djangoProxy } from '@/lib/django-proxy';
+import { crudRoutes } from '@/lib/api/crud-factory';
+import { mlPredictions } from '@/db/schema';
 
 export const dynamic = 'force-dynamic';
 
-export function GET(req: NextRequest) {
-  return djangoProxy(req, '/api/ai_core/ml-predictions/');
-}
-
-export function POST(req: NextRequest) {
-  return djangoProxy(req, '/api/ai_core/ml-predictions/', { method: 'POST' });
-}
-
+const { GET, POST } = crudRoutes({
+  table: mlPredictions,
+  pk: 'id',
+  tags: ["AI"],
+  orgScoped: true,
+  readRole: 'member',
+  writeRole: 'steward',
+});
+export { GET, POST };

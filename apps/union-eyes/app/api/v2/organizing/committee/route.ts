@@ -1,39 +1,17 @@
 /**
- * GET POST /api/organizing/committee
- * → Django: /api/unions/organizing-campaigns/
- * Migrated to withApi() framework
+ * CRUD collection route for organizingCampaigns
  */
-import { djangoProxy } from '@/lib/django-proxy';
-import { withApi } from '@/lib/api/framework';
+import { crudRoutes } from '@/lib/api/crud-factory';
+import { organizingCampaigns } from '@/db/schema';
 
 export const dynamic = 'force-dynamic';
 
-export const GET = withApi(
-  {
-    auth: { required: true, minRole: 'member' },
-    openapi: {
-      tags: ['Organizing', 'Django Proxy'],
-      summary: 'GET committee',
-      description: 'Proxied to Django: /api/unions/organizing-campaigns/',
-    },
-  },
-  async ({ request }) => {
-    const response = await djangoProxy(request, '/api/unions/organizing-campaigns/');
-    return response;
-  },
-);
-
-export const POST = withApi(
-  {
-    auth: { required: true, minRole: 'steward' },
-    openapi: {
-      tags: ['Organizing', 'Django Proxy'],
-      summary: 'POST committee',
-      description: 'Proxied to Django: /api/unions/organizing-campaigns/',
-    },
-  },
-  async ({ request }) => {
-    const response = await djangoProxy(request, '/api/unions/organizing-campaigns/', { method: 'POST' });
-    return response;
-  },
-);
+const { GET, POST } = crudRoutes({
+  table: organizingCampaigns,
+  pk: 'id',
+  tags: ["Organization"],
+  orgScoped: true,
+  readRole: 'member',
+  writeRole: 'steward',
+});
+export { GET, POST };

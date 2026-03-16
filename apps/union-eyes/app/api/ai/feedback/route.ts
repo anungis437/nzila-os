@@ -1,19 +1,17 @@
 /**
- * GET POST /api/ai/feedback
- * -> Django ai_core: /api/ai_core/knowledge-base/
- * NOTE: auto-resolved from ai/feedback
- * Auto-migrated by scripts/migrate_routes.py
+ * CRUD collection route for knowledgeBase
  */
-import { NextRequest } from 'next/server';
-import { djangoProxy } from '@/lib/django-proxy';
+import { crudRoutes } from '@/lib/api/crud-factory';
+import { knowledgeBase } from '@/db/schema';
 
 export const dynamic = 'force-dynamic';
 
-export function GET(req: NextRequest) {
-  return djangoProxy(req, '/api/ai_core/knowledge-base/');
-}
-
-export function POST(req: NextRequest) {
-  return djangoProxy(req, '/api/ai_core/knowledge-base/', { method: 'POST' });
-}
-
+const { GET, POST } = crudRoutes({
+  table: knowledgeBase,
+  pk: 'id',
+  tags: ["AI"],
+  orgScoped: true,
+  readRole: 'member',
+  writeRole: 'steward',
+});
+export { GET, POST };

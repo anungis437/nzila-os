@@ -1,19 +1,17 @@
 /**
- * GET POST /api/gdpr/data-erasure
- * -> Django compliance: /api/compliance/dsr-requests/
- * NOTE: auto-resolved from gdpr/data-erasure
- * Auto-migrated by scripts/migrate_routes.py
+ * CRUD collection route for dataSubjectAccessRequests
  */
-import { NextRequest } from 'next/server';
-import { djangoProxy } from '@/lib/django-proxy';
+import { crudRoutes } from '@/lib/api/crud-factory';
+import { dataSubjectAccessRequests } from '@/db/schema';
 
 export const dynamic = 'force-dynamic';
 
-export function GET(req: NextRequest) {
-  return djangoProxy(req, '/api/compliance/dsr-requests/');
-}
-
-export function POST(req: NextRequest) {
-  return djangoProxy(req, '/api/compliance/dsr-requests/', { method: 'POST' });
-}
-
+const { GET, POST } = crudRoutes({
+  table: dataSubjectAccessRequests,
+  pk: 'id',
+  tags: ["Compliance"],
+  orgScoped: true,
+  readRole: 'member',
+  writeRole: 'steward',
+});
+export { GET, POST };

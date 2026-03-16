@@ -1,54 +1,18 @@
 /**
- * GET PATCH DELETE /api/documents/[id]/download
- * → Django: /api/content/documents/
- * Migrated to withApi() framework
+ * CRUD item route for documents
  */
-import { djangoProxy } from '@/lib/django-proxy';
-import { withApi } from '@/lib/api/framework';
+import { crudRoutes } from '@/lib/api/crud-factory';
+import { documents } from '@/db/schema';
 
 export const dynamic = 'force-dynamic';
 
-export const GET = withApi(
-  {
-    auth: { required: false },
-    openapi: {
-      tags: ['Documents', 'Django Proxy'],
-      summary: 'GET download',
-      description: 'Proxied to Django: /api/content/documents/',
-    },
-  },
-  async ({ request }) => {
-    const response = await djangoProxy(request, '/api/content/documents/');
-    return response;
-  },
-);
-
-export const PATCH = withApi(
-  {
-    auth: { required: false },
-    openapi: {
-      tags: ['Documents', 'Django Proxy'],
-      summary: 'PATCH download',
-      description: 'Proxied to Django: /api/content/documents/',
-    },
-  },
-  async ({ request }) => {
-    const response = await djangoProxy(request, '/api/content/documents/', { method: 'PATCH' });
-    return response;
-  },
-);
-
-export const DELETE = withApi(
-  {
-    auth: { required: false },
-    openapi: {
-      tags: ['Documents', 'Django Proxy'],
-      summary: 'DELETE download',
-      description: 'Proxied to Django: /api/content/documents/',
-    },
-  },
-  async ({ request }) => {
-    const response = await djangoProxy(request, '/api/content/documents/', { method: 'DELETE' });
-    return response;
-  },
-);
+const { GET, PATCH, DELETE } = crudRoutes({
+  table: documents,
+  pk: 'id',
+  tags: ["Content"],
+  orgScoped: true,
+  itemRoute: true,
+  readRole: 'member',
+  writeRole: 'steward',
+});
+export { GET, PATCH, DELETE };

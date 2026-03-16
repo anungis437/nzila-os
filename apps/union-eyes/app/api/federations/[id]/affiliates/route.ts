@@ -1,28 +1,18 @@
 /**
- * GET PATCH DELETE /api/federations/[id]/affiliates
- * -> Django unions: /api/unions/federations/
- * NOTE: auto-resolved from federations/[id]/affiliates
- * Auto-migrated by scripts/migrate_routes.py
+ * CRUD item route for federations
  */
-import { NextRequest } from 'next/server';
-import { djangoProxy } from '@/lib/django-proxy';
+import { crudRoutes } from '@/lib/api/crud-factory';
+import { federations } from '@/db/schema';
 
 export const dynamic = 'force-dynamic';
 
-type Params = { params: Promise<{ id: string }> };
-
-export async function GET(req: NextRequest, { params }: Params) {
-  const { id } = await params;
-  return djangoProxy(req, '/api/unions/federations/' + id + '/');
-}
-
-export async function PATCH(req: NextRequest, { params }: Params) {
-  const { id } = await params;
-  return djangoProxy(req, '/api/unions/federations/' + id + '/', { method: 'PATCH' });
-}
-
-export async function DELETE(req: NextRequest, { params }: Params) {
-  const { id } = await params;
-  return djangoProxy(req, '/api/unions/federations/' + id + '/', { method: 'DELETE' });
-}
-
+const { GET, PATCH, DELETE } = crudRoutes({
+  table: federations,
+  pk: 'id',
+  tags: ["Organization"],
+  orgScoped: true,
+  itemRoute: true,
+  readRole: 'member',
+  writeRole: 'steward',
+});
+export { GET, PATCH, DELETE };

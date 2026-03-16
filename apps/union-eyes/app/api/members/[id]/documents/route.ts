@@ -1,12 +1,18 @@
-import { NextRequest } from 'next/server';
-import { djangoProxy } from '@/lib/django-proxy';
+/**
+ * CRUD item route for documents
+ */
+import { crudRoutes } from '@/lib/api/crud-factory';
+import { documents } from '@/db/schema';
 
 export const dynamic = 'force-dynamic';
 
-type Params = { params: Promise<{ id: string }> };
-
-/** GET /api/members/[id]/documents  Django GET /api/content/documents/?user_id={id} */
-export async function GET(req: NextRequest, { params }: Params) {
-  const { id } = await params;
-  return djangoProxy(req, '/api/content/documents/?user_id=' + id);
-}
+const { GET, PATCH, DELETE } = crudRoutes({
+  table: documents,
+  pk: 'id',
+  tags: ["Content"],
+  orgScoped: true,
+  itemRoute: true,
+  readRole: 'member',
+  writeRole: 'steward',
+});
+export { GET, PATCH, DELETE };

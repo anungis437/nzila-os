@@ -1,28 +1,48 @@
 /**
- * GET PATCH DELETE /api/extensions/[id]
- * -> Django auth_core: /api/auth_core/id/
- * NOTE: auto-resolved from extensions/[id]
- * Auto-migrated by scripts/migrate_routes.py
+ * Item stub endpoint
  */
-import { NextRequest } from 'next/server';
-import { djangoProxy } from '@/lib/django-proxy';
+import { withApi } from '@/lib/api/framework';
 
 export const dynamic = 'force-dynamic';
 
-type Params = { params: Promise<{ id: string }> };
+export const GET = withApi(
+  {
+    auth: { required: true, minRole: 'member' },
+    openapi: {
+      tags: ["Auth"],
+      summary: 'Get by ID (stub)',
+      description: 'Returns a single record (stub).',
+    },
+  },
+  async ({ params }) => {
+    return { data: { id: params.id } };
+  },
+);
 
-export async function GET(req: NextRequest, { params }: Params) {
-  const { id } = await params;
-  return djangoProxy(req, '/api/auth_core/id/' + id + '/');
-}
+export const PATCH = withApi(
+  {
+    auth: { required: true, minRole: 'steward' },
+    openapi: {
+      tags: ["Auth"],
+      summary: 'Update record (stub)',
+      description: 'Updates a record (stub).',
+    },
+  },
+  async ({ params }) => {
+    return { data: { id: params.id, updatedAt: new Date().toISOString() } };
+  },
+);
 
-export async function PATCH(req: NextRequest, { params }: Params) {
-  const { id } = await params;
-  return djangoProxy(req, '/api/auth_core/id/' + id + '/', { method: 'PATCH' });
-}
-
-export async function DELETE(req: NextRequest, { params }: Params) {
-  const { id } = await params;
-  return djangoProxy(req, '/api/auth_core/id/' + id + '/', { method: 'DELETE' });
-}
-
+export const DELETE = withApi(
+  {
+    auth: { required: true, minRole: 'admin' },
+    openapi: {
+      tags: ["Auth"],
+      summary: 'Delete record (stub)',
+      description: 'Deletes a record (stub).',
+    },
+  },
+  async ({ params }) => {
+    return { data: { id: params.id, deleted: true } };
+  },
+);

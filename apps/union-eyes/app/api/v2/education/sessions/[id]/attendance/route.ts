@@ -1,54 +1,18 @@
 /**
- * GET PATCH DELETE /api/education/sessions/[id]/attendance
- * → Django: /api/unions/training-courses/
- * Migrated to withApi() framework
+ * CRUD item route for trainingCourses
  */
-import { djangoProxy } from '@/lib/django-proxy';
-import { withApi } from '@/lib/api/framework';
+import { crudRoutes } from '@/lib/api/crud-factory';
+import { trainingCourses } from '@/db/schema';
 
 export const dynamic = 'force-dynamic';
 
-export const GET = withApi(
-  {
-    auth: { required: false },
-    openapi: {
-      tags: ['Education', 'Django Proxy'],
-      summary: 'GET attendance',
-      description: 'Proxied to Django: /api/unions/training-courses/',
-    },
-  },
-  async ({ request }) => {
-    const response = await djangoProxy(request, '/api/unions/training-courses/');
-    return response;
-  },
-);
-
-export const PATCH = withApi(
-  {
-    auth: { required: false },
-    openapi: {
-      tags: ['Education', 'Django Proxy'],
-      summary: 'PATCH attendance',
-      description: 'Proxied to Django: /api/unions/training-courses/',
-    },
-  },
-  async ({ request }) => {
-    const response = await djangoProxy(request, '/api/unions/training-courses/', { method: 'PATCH' });
-    return response;
-  },
-);
-
-export const DELETE = withApi(
-  {
-    auth: { required: false },
-    openapi: {
-      tags: ['Education', 'Django Proxy'],
-      summary: 'DELETE attendance',
-      description: 'Proxied to Django: /api/unions/training-courses/',
-    },
-  },
-  async ({ request }) => {
-    const response = await djangoProxy(request, '/api/unions/training-courses/', { method: 'DELETE' });
-    return response;
-  },
-);
+const { GET, PATCH, DELETE } = crudRoutes({
+  table: trainingCourses,
+  pk: 'id',
+  tags: ["Scheduling"],
+  orgScoped: true,
+  itemRoute: true,
+  readRole: 'member',
+  writeRole: 'steward',
+});
+export { GET, PATCH, DELETE };

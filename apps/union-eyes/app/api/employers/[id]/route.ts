@@ -1,27 +1,18 @@
 /**
- * GET PATCH DELETE /api/employers/[id]
- * -> Django unions: /api/unions/employers/
- * Auto-migrated by scripts/migrate_routes.py
+ * CRUD item route for employers
  */
-import { NextRequest } from 'next/server';
-import { djangoProxy } from '@/lib/django-proxy';
+import { crudRoutes } from '@/lib/api/crud-factory';
+import { employers } from '@/db/schema';
 
 export const dynamic = 'force-dynamic';
 
-type Params = { params: Promise<{ id: string }> };
-
-export async function GET(req: NextRequest, { params }: Params) {
-  const { id } = await params;
-  return djangoProxy(req, '/api/unions/employers/' + id + '/');
-}
-
-export async function PATCH(req: NextRequest, { params }: Params) {
-  const { id } = await params;
-  return djangoProxy(req, '/api/unions/employers/' + id + '/', { method: 'PATCH' });
-}
-
-export async function DELETE(req: NextRequest, { params }: Params) {
-  const { id } = await params;
-  return djangoProxy(req, '/api/unions/employers/' + id + '/', { method: 'DELETE' });
-}
-
+const { GET, PATCH, DELETE } = crudRoutes({
+  table: employers,
+  pk: 'id',
+  tags: ["Organization"],
+  orgScoped: true,
+  itemRoute: true,
+  readRole: 'member',
+  writeRole: 'steward',
+});
+export { GET, PATCH, DELETE };

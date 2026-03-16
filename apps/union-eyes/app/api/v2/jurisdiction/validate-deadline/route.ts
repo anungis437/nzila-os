@@ -1,39 +1,17 @@
 /**
- * GET POST /api/jurisdiction/validate-deadline
- * → Django: /api/unions/bargaining-units/
- * Migrated to withApi() framework
+ * CRUD collection route for bargainingUnits
  */
-import { djangoProxy } from '@/lib/django-proxy';
-import { withApi } from '@/lib/api/framework';
+import { crudRoutes } from '@/lib/api/crud-factory';
+import { bargainingUnits } from '@/db/schema';
 
 export const dynamic = 'force-dynamic';
 
-export const GET = withApi(
-  {
-    auth: { required: false },
-    openapi: {
-      tags: ['Jurisdiction', 'Django Proxy'],
-      summary: 'GET validate-deadline',
-      description: 'Proxied to Django: /api/unions/bargaining-units/',
-    },
-  },
-  async ({ request }) => {
-    const response = await djangoProxy(request, '/api/unions/bargaining-units/');
-    return response;
-  },
-);
-
-export const POST = withApi(
-  {
-    auth: { required: false },
-    openapi: {
-      tags: ['Jurisdiction', 'Django Proxy'],
-      summary: 'POST validate-deadline',
-      description: 'Proxied to Django: /api/unions/bargaining-units/',
-    },
-  },
-  async ({ request }) => {
-    const response = await djangoProxy(request, '/api/unions/bargaining-units/', { method: 'POST' });
-    return response;
-  },
-);
+const { GET, POST } = crudRoutes({
+  table: bargainingUnits,
+  pk: 'id',
+  tags: ["Organization"],
+  orgScoped: true,
+  readRole: 'member',
+  writeRole: 'steward',
+});
+export { GET, POST };

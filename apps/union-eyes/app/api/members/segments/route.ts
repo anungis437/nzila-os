@@ -1,16 +1,17 @@
-import { NextRequest } from 'next/server';
-import { djangoProxy } from '@/lib/django-proxy';
+/**
+ * CRUD collection route for memberSegments
+ */
+import { crudRoutes } from '@/lib/api/crud-factory';
+import { memberSegments } from '@/db/schema';
 
 export const dynamic = 'force-dynamic';
 
-/** GET  /api/members/segments  list member segments
- *   Django GET /api/unions/member-segments/
- *  POST /api/members/segments  create segment
- *   Django POST /api/unions/member-segments/
- */
-export function GET(req: NextRequest) {
-  return djangoProxy(req, '/api/unions/member-segments/');
-}
-export function POST(req: NextRequest) {
-  return djangoProxy(req, '/api/unions/member-segments/', { method: 'POST' });
-}
+const { GET, POST } = crudRoutes({
+  table: memberSegments,
+  pk: 'id',
+  tags: ["Members"],
+  orgScoped: true,
+  readRole: 'member',
+  writeRole: 'steward',
+});
+export { GET, POST };

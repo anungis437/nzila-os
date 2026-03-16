@@ -1,19 +1,17 @@
 /**
- * GET POST /api/arbitration/precedents
- * -> Django bargaining: /api/bargaining/arbitration-decisions/
- * NOTE: auto-resolved from arbitration/precedents
- * Auto-migrated by scripts/migrate_routes.py
+ * CRUD collection route for arbitrationDecisions
  */
-import { NextRequest } from 'next/server';
-import { djangoProxy } from '@/lib/django-proxy';
+import { crudRoutes } from '@/lib/api/crud-factory';
+import { arbitrationDecisions } from '@/db/schema';
 
 export const dynamic = 'force-dynamic';
 
-export function GET(req: NextRequest) {
-  return djangoProxy(req, '/api/bargaining/arbitration-decisions/');
-}
-
-export function POST(req: NextRequest) {
-  return djangoProxy(req, '/api/bargaining/arbitration-decisions/', { method: 'POST' });
-}
-
+const { GET, POST } = crudRoutes({
+  table: arbitrationDecisions,
+  pk: 'id',
+  tags: ["Bargaining"],
+  orgScoped: true,
+  readRole: 'member',
+  writeRole: 'steward',
+});
+export { GET, POST };

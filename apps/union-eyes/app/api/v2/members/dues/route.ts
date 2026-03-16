@@ -1,24 +1,17 @@
 /**
- * GET /api/members/dues
- * → Django: /api/billing/dues/
- * Migrated to withApi() framework
+ * CRUD collection route for duesTransactions
  */
-import { djangoProxy } from '@/lib/django-proxy';
-import { withApi } from '@/lib/api/framework';
+import { crudRoutes } from '@/lib/api/crud-factory';
+import { duesTransactions } from '@/db/schema';
 
 export const dynamic = 'force-dynamic';
 
-export const GET = withApi(
-  {
-    auth: { required: false },
-    openapi: {
-      tags: ['Members', 'Django Proxy'],
-      summary: 'GET dues',
-      description: 'Proxied to Django: /api/billing/dues/',
-    },
-  },
-  async ({ request }) => {
-    const response = await djangoProxy(request, '/api/billing/dues/');
-    return response;
-  },
-);
+const { GET, POST } = crudRoutes({
+  table: duesTransactions,
+  pk: 'id',
+  tags: ["Billing"],
+  orgScoped: true,
+  readRole: 'member',
+  writeRole: 'steward',
+});
+export { GET, POST };

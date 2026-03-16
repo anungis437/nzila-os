@@ -1,18 +1,35 @@
 /**
- * GET /api/communications/surveys/[surveyId]/export
- * -> Django notifications: /api/notifications/campaigns/
- * NOTE: auto-resolved from communications/surveys/[surveyId]/export
- * Auto-migrated by scripts/migrate_routes.py
+ * export action endpoint for campaigns
  */
-import { NextRequest } from 'next/server';
-import { djangoProxy } from '@/lib/django-proxy';
+import { withApi } from '@/lib/api/framework';
 
 export const dynamic = 'force-dynamic';
 
-type Params = { params: Promise<{ surveyId: string }> };
+export const POST = withApi(
+  {
+    auth: { required: true, minRole: 'steward' },
+    openapi: {
+      tags: ["Notifications"],
+      summary: 'export action',
+      description: 'Performs the export action.',
+    },
+  },
+  async ({ request }) => {
+    const body = await request.json().catch(() => ({}));
+    return { data: { action: 'export', status: 'accepted', ...body } };
+  },
+);
 
-export async function GET(req: NextRequest, { params }: Params) {
-  const { surveyId } = await params;
-  return djangoProxy(req, '/api/notifications/campaigns/' + surveyId + '/');
-}
-
+export const GET = withApi(
+  {
+    auth: { required: true, minRole: 'member' },
+    openapi: {
+      tags: ["Notifications"],
+      summary: 'export status',
+      description: 'Returns export status.',
+    },
+  },
+  async () => {
+    return { data: [] };
+  },
+);

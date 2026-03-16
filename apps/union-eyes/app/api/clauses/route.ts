@@ -1,18 +1,17 @@
 /**
- * GET POST /api/clauses
- * -> Django bargaining: /api/bargaining/cba-clauses/
- * Auto-migrated by scripts/migrate_routes.py
+ * CRUD collection route for cbaClause
  */
-import { NextRequest } from 'next/server';
-import { djangoProxy } from '@/lib/django-proxy';
+import { crudRoutes } from '@/lib/api/crud-factory';
+import { cbaClause } from '@/db/schema';
 
 export const dynamic = 'force-dynamic';
 
-export function GET(req: NextRequest) {
-  return djangoProxy(req, '/api/bargaining/cba-clauses/');
-}
-
-export function POST(req: NextRequest) {
-  return djangoProxy(req, '/api/bargaining/cba-clauses/', { method: 'POST' });
-}
-
+const { GET, POST } = crudRoutes({
+  table: cbaClause,
+  pk: 'id',
+  tags: ["Bargaining"],
+  orgScoped: true,
+  readRole: 'member',
+  writeRole: 'steward',
+});
+export { GET, POST };

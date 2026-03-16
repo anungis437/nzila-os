@@ -1,14 +1,17 @@
 /**
- * POST /api/bulk-import
- * -> Django auth_core: /api/auth_core/organization-members/
- * Auto-migrated by scripts/migrate_routes.py
+ * CRUD collection route for organizationMembers
  */
-import { NextRequest } from 'next/server';
-import { djangoProxy } from '@/lib/django-proxy';
+import { crudRoutes } from '@/lib/api/crud-factory';
+import { organizationMembers } from '@/db/schema';
 
 export const dynamic = 'force-dynamic';
 
-export function POST(req: NextRequest) {
-  return djangoProxy(req, '/api/auth_core/organization-members/', { method: 'POST' });
-}
-
+const { GET, POST } = crudRoutes({
+  table: organizationMembers,
+  pk: 'id',
+  tags: ["Members"],
+  orgScoped: true,
+  readRole: 'member',
+  writeRole: 'steward',
+});
+export { GET, POST };

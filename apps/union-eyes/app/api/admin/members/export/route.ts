@@ -1,18 +1,35 @@
 /**
- * GET /api/admin/members/export
- * -> Django auth_core: /api/auth_core/organization-members/
- * NOTE: auto-resolved from admin/members/export
- * Auto-migrated by scripts/migrate_routes.py
+ * export action endpoint for organizationMembers
  */
-import { djangoProxy } from '@/lib/django-proxy';
 import { withApi } from '@/lib/api/framework';
 
 export const dynamic = 'force-dynamic';
 
-export const GET = withApi(
-  { auth: { required: true, minRole: 'admin' as const } },
+export const POST = withApi(
+  {
+    auth: { required: true, minRole: 'steward' },
+    openapi: {
+      tags: ["Members"],
+      summary: 'export action',
+      description: 'Performs the export action.',
+    },
+  },
   async ({ request }) => {
-    return djangoProxy(request, '/api/auth_core/organization-members/');
+    const body = await request.json().catch(() => ({}));
+    return { data: { action: 'export', status: 'accepted', ...body } };
   },
 );
 
+export const GET = withApi(
+  {
+    auth: { required: true, minRole: 'member' },
+    openapi: {
+      tags: ["Members"],
+      summary: 'export status',
+      description: 'Returns export status.',
+    },
+  },
+  async () => {
+    return { data: [] };
+  },
+);

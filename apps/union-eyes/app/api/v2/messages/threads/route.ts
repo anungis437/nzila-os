@@ -1,39 +1,17 @@
 /**
- * GET POST /api/messages/threads
- * → Django: /api/notifications/messages/
- * Migrated to withApi() framework
+ * CRUD collection route for messages
  */
-import { djangoProxy } from '@/lib/django-proxy';
-import { withApi } from '@/lib/api/framework';
+import { crudRoutes } from '@/lib/api/crud-factory';
+import { messages } from '@/db/schema';
 
 export const dynamic = 'force-dynamic';
 
-export const GET = withApi(
-  {
-    auth: { required: false },
-    openapi: {
-      tags: ['Messages', 'Django Proxy'],
-      summary: 'GET threads',
-      description: 'Proxied to Django: /api/notifications/messages/',
-    },
-  },
-  async ({ request }) => {
-    const response = await djangoProxy(request, '/api/notifications/messages/');
-    return response;
-  },
-);
-
-export const POST = withApi(
-  {
-    auth: { required: false },
-    openapi: {
-      tags: ['Messages', 'Django Proxy'],
-      summary: 'POST threads',
-      description: 'Proxied to Django: /api/notifications/messages/',
-    },
-  },
-  async ({ request }) => {
-    const response = await djangoProxy(request, '/api/notifications/messages/', { method: 'POST' });
-    return response;
-  },
-);
+const { GET, POST } = crudRoutes({
+  table: messages,
+  pk: 'id',
+  tags: ["Notifications"],
+  orgScoped: true,
+  readRole: 'member',
+  writeRole: 'steward',
+});
+export { GET, POST };

@@ -1,54 +1,18 @@
 /**
- * GET PATCH DELETE /api/bargaining-notes/[id]
- * → Django: /api/bargaining/bargaining-notes/
- * Migrated to withApi() framework
+ * CRUD item route for bargainingNotes
  */
-import { djangoProxy } from '@/lib/django-proxy';
-import { withApi } from '@/lib/api/framework';
+import { crudRoutes } from '@/lib/api/crud-factory';
+import { bargainingNotes } from '@/db/schema';
 
 export const dynamic = 'force-dynamic';
 
-export const GET = withApi(
-  {
-    auth: { required: false },
-    openapi: {
-      tags: ['Bargaining-notes', 'Django Proxy'],
-      summary: 'GET [id]',
-      description: 'Proxied to Django: /api/bargaining/bargaining-notes/',
-    },
-  },
-  async ({ request }) => {
-    const response = await djangoProxy(request, '/api/bargaining/bargaining-notes/');
-    return response;
-  },
-);
-
-export const PATCH = withApi(
-  {
-    auth: { required: false },
-    openapi: {
-      tags: ['Bargaining-notes', 'Django Proxy'],
-      summary: 'PATCH [id]',
-      description: 'Proxied to Django: /api/bargaining/bargaining-notes/',
-    },
-  },
-  async ({ request }) => {
-    const response = await djangoProxy(request, '/api/bargaining/bargaining-notes/', { method: 'PATCH' });
-    return response;
-  },
-);
-
-export const DELETE = withApi(
-  {
-    auth: { required: false },
-    openapi: {
-      tags: ['Bargaining-notes', 'Django Proxy'],
-      summary: 'DELETE [id]',
-      description: 'Proxied to Django: /api/bargaining/bargaining-notes/',
-    },
-  },
-  async ({ request }) => {
-    const response = await djangoProxy(request, '/api/bargaining/bargaining-notes/', { method: 'DELETE' });
-    return response;
-  },
-);
+const { GET, PATCH, DELETE } = crudRoutes({
+  table: bargainingNotes,
+  pk: 'id',
+  tags: ["Bargaining"],
+  orgScoped: true,
+  itemRoute: true,
+  readRole: 'member',
+  writeRole: 'steward',
+});
+export { GET, PATCH, DELETE };

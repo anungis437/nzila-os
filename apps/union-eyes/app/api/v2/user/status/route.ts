@@ -1,39 +1,17 @@
 /**
- * GET POST /api/user/status
- * → Django: /api/auth_core/users/
- * Migrated to withApi() framework
+ * CRUD collection route for users
  */
-import { djangoProxy } from '@/lib/django-proxy';
-import { withApi } from '@/lib/api/framework';
+import { crudRoutes } from '@/lib/api/crud-factory';
+import { users } from '@/db/schema';
 
 export const dynamic = 'force-dynamic';
 
-export const GET = withApi(
-  {
-    auth: { required: false },
-    openapi: {
-      tags: ['User', 'Django Proxy'],
-      summary: 'GET status',
-      description: 'Proxied to Django: /api/auth_core/users/',
-    },
-  },
-  async ({ request }) => {
-    const response = await djangoProxy(request, '/api/auth_core/users/');
-    return response;
-  },
-);
-
-export const POST = withApi(
-  {
-    auth: { required: false },
-    openapi: {
-      tags: ['User', 'Django Proxy'],
-      summary: 'POST status',
-      description: 'Proxied to Django: /api/auth_core/users/',
-    },
-  },
-  async ({ request }) => {
-    const response = await djangoProxy(request, '/api/auth_core/users/', { method: 'POST' });
-    return response;
-  },
-);
+const { GET, POST } = crudRoutes({
+  table: users,
+  pk: 'id',
+  tags: ["Auth"],
+  orgScoped: true,
+  readRole: 'member',
+  writeRole: 'admin',
+});
+export { GET, POST };

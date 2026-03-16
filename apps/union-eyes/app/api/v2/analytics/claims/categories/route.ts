@@ -1,24 +1,17 @@
 /**
- * GET /api/analytics/claims/categories
- * → Django: /api/analytics/analytics-metrics/
- * Migrated to withApi() framework
+ * CRUD collection route for analyticsMetrics
  */
-import { djangoProxy } from '@/lib/django-proxy';
-import { withApi } from '@/lib/api/framework';
+import { crudRoutes } from '@/lib/api/crud-factory';
+import { analyticsMetrics } from '@/db/schema';
 
 export const dynamic = 'force-dynamic';
 
-export const GET = withApi(
-  {
-    auth: { required: true, minRole: 'steward' },
-    openapi: {
-      tags: ['Analytics', 'Django Proxy'],
-      summary: 'GET categories',
-      description: 'Proxied to Django: /api/analytics/analytics-metrics/',
-    },
-  },
-  async ({ request }) => {
-    const response = await djangoProxy(request, '/api/analytics/analytics-metrics/');
-    return response;
-  },
-);
+const { GET, POST } = crudRoutes({
+  table: analyticsMetrics,
+  pk: 'id',
+  tags: ["Analytics"],
+  orgScoped: true,
+  readRole: 'member',
+  writeRole: 'steward',
+});
+export { GET, POST };

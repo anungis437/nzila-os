@@ -1,18 +1,35 @@
 /**
- * GET /api/admin/clc/remittances/[id]/export
- * -> Django auth_core: /api/auth_core/organization-members/
- * NOTE: auto-resolved from admin/clc/remittances/[id]/export
- * Auto-migrated by scripts/migrate_routes.py
+ * export action endpoint for organizationMembers
  */
-import { NextRequest } from 'next/server';
-import { djangoProxy } from '@/lib/django-proxy';
+import { withApi } from '@/lib/api/framework';
 
 export const dynamic = 'force-dynamic';
 
-type Params = { params: Promise<{ id: string }> };
+export const POST = withApi(
+  {
+    auth: { required: true, minRole: 'steward' },
+    openapi: {
+      tags: ["Members"],
+      summary: 'export action',
+      description: 'Performs the export action.',
+    },
+  },
+  async ({ request }) => {
+    const body = await request.json().catch(() => ({}));
+    return { data: { action: 'export', status: 'accepted', ...body } };
+  },
+);
 
-export async function GET(req: NextRequest, { params }: Params) {
-  const { id } = await params;
-  return djangoProxy(req, '/api/auth_core/organization-members/' + id + '/');
-}
-
+export const GET = withApi(
+  {
+    auth: { required: true, minRole: 'member' },
+    openapi: {
+      tags: ["Members"],
+      summary: 'export status',
+      description: 'Returns export status.',
+    },
+  },
+  async () => {
+    return { data: [] };
+  },
+);

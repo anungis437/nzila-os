@@ -1,39 +1,17 @@
 /**
- * GET POST /api/external-data/lrb
- * → Django: /api/core/external-accounts/
- * Migrated to withApi() framework
+ * CRUD collection route for externalAccounts
  */
-import { djangoProxy } from '@/lib/django-proxy';
-import { withApi } from '@/lib/api/framework';
+import { crudRoutes } from '@/lib/api/crud-factory';
+import { externalAccounts } from '@/db/schema';
 
 export const dynamic = 'force-dynamic';
 
-export const GET = withApi(
-  {
-    auth: { required: false },
-    openapi: {
-      tags: ['External-data', 'Django Proxy'],
-      summary: 'GET lrb',
-      description: 'Proxied to Django: /api/core/external-accounts/',
-    },
-  },
-  async ({ request }) => {
-    const response = await djangoProxy(request, '/api/core/external-accounts/');
-    return response;
-  },
-);
-
-export const POST = withApi(
-  {
-    auth: { required: false },
-    openapi: {
-      tags: ['External-data', 'Django Proxy'],
-      summary: 'POST lrb',
-      description: 'Proxied to Django: /api/core/external-accounts/',
-    },
-  },
-  async ({ request }) => {
-    const response = await djangoProxy(request, '/api/core/external-accounts/', { method: 'POST' });
-    return response;
-  },
-);
+const { GET, POST } = crudRoutes({
+  table: externalAccounts,
+  pk: 'id',
+  tags: ["Finance"],
+  orgScoped: true,
+  readRole: 'member',
+  writeRole: 'steward',
+});
+export { GET, POST };

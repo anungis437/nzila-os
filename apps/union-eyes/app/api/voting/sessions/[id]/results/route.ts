@@ -1,18 +1,18 @@
 /**
- * GET /api/voting/sessions/[id]/results
- * -> Django unions: /api/unions/voting-sessions/
- * NOTE: auto-resolved from voting/sessions/[id]/results
- * Auto-migrated by scripts/migrate_routes.py
+ * CRUD item route for votingSessions
  */
-import { NextRequest } from 'next/server';
-import { djangoProxy } from '@/lib/django-proxy';
+import { crudRoutes } from '@/lib/api/crud-factory';
+import { votingSessions } from '@/db/schema';
 
 export const dynamic = 'force-dynamic';
 
-type Params = { params: Promise<{ id: string }> };
-
-export async function GET(req: NextRequest, { params }: Params) {
-  const { id } = await params;
-  return djangoProxy(req, '/api/unions/voting-sessions/' + id + '/');
-}
-
+const { GET, PATCH, DELETE } = crudRoutes({
+  table: votingSessions,
+  pk: 'id',
+  tags: ["Governance"],
+  orgScoped: true,
+  itemRoute: true,
+  readRole: 'member',
+  writeRole: 'steward',
+});
+export { GET, PATCH, DELETE };

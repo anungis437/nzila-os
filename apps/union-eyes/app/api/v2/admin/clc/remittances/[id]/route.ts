@@ -1,54 +1,18 @@
 /**
- * GET PATCH DELETE /api/admin/clc/remittances/[id]
- * → Django: /api/auth_core/organization-members/
- * Migrated to withApi() framework
+ * CRUD item route for organizationMembers
  */
-import { djangoProxy } from '@/lib/django-proxy';
-import { withApi } from '@/lib/api/framework';
+import { crudRoutes } from '@/lib/api/crud-factory';
+import { organizationMembers } from '@/db/schema';
 
 export const dynamic = 'force-dynamic';
 
-export const GET = withApi(
-  {
-    auth: { required: false },
-    openapi: {
-      tags: ['Admin', 'Django Proxy'],
-      summary: 'GET [id]',
-      description: 'Proxied to Django: /api/auth_core/organization-members/',
-    },
-  },
-  async ({ request }) => {
-    const response = await djangoProxy(request, '/api/auth_core/organization-members/');
-    return response;
-  },
-);
-
-export const PATCH = withApi(
-  {
-    auth: { required: false },
-    openapi: {
-      tags: ['Admin', 'Django Proxy'],
-      summary: 'PATCH [id]',
-      description: 'Proxied to Django: /api/auth_core/organization-members/',
-    },
-  },
-  async ({ request }) => {
-    const response = await djangoProxy(request, '/api/auth_core/organization-members/', { method: 'PATCH' });
-    return response;
-  },
-);
-
-export const DELETE = withApi(
-  {
-    auth: { required: false },
-    openapi: {
-      tags: ['Admin', 'Django Proxy'],
-      summary: 'DELETE [id]',
-      description: 'Proxied to Django: /api/auth_core/organization-members/',
-    },
-  },
-  async ({ request }) => {
-    const response = await djangoProxy(request, '/api/auth_core/organization-members/', { method: 'DELETE' });
-    return response;
-  },
-);
+const { GET, PATCH, DELETE } = crudRoutes({
+  table: organizationMembers,
+  pk: 'id',
+  tags: ["Members"],
+  orgScoped: true,
+  itemRoute: true,
+  readRole: 'member',
+  writeRole: 'steward',
+});
+export { GET, PATCH, DELETE };

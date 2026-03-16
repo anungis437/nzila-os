@@ -1,39 +1,17 @@
 /**
- * GET POST /api/clc/dashboard
- * → Django: /api/billing/clc-sync-log/
- * Migrated to withApi() framework
+ * CRUD collection route for clcSyncLog
  */
-import { djangoProxy } from '@/lib/django-proxy';
-import { withApi } from '@/lib/api/framework';
+import { crudRoutes } from '@/lib/api/crud-factory';
+import { clcSyncLog } from '@/db/schema';
 
 export const dynamic = 'force-dynamic';
 
-export const GET = withApi(
-  {
-    auth: { required: false },
-    openapi: {
-      tags: ['Clc', 'Django Proxy'],
-      summary: 'GET dashboard',
-      description: 'Proxied to Django: /api/billing/clc-sync-log/',
-    },
-  },
-  async ({ request }) => {
-    const response = await djangoProxy(request, '/api/billing/clc-sync-log/');
-    return response;
-  },
-);
-
-export const POST = withApi(
-  {
-    auth: { required: false },
-    openapi: {
-      tags: ['Clc', 'Django Proxy'],
-      summary: 'POST dashboard',
-      description: 'Proxied to Django: /api/billing/clc-sync-log/',
-    },
-  },
-  async ({ request }) => {
-    const response = await djangoProxy(request, '/api/billing/clc-sync-log/', { method: 'POST' });
-    return response;
-  },
-);
+const { GET, POST } = crudRoutes({
+  table: clcSyncLog,
+  pk: 'id',
+  tags: ["Billing"],
+  orgScoped: true,
+  readRole: 'member',
+  writeRole: 'steward',
+});
+export { GET, POST };

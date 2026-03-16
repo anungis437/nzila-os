@@ -1,14 +1,17 @@
 /**
- * GET /api/case-studies
- * -> Django grievances: /api/grievances/grievances/
- * Auto-migrated by scripts/migrate_routes.py
+ * CRUD collection route for grievances
  */
-import { NextRequest } from 'next/server';
-import { djangoProxy } from '@/lib/django-proxy';
+import { crudRoutes } from '@/lib/api/crud-factory';
+import { grievances } from '@/db/schema';
 
 export const dynamic = 'force-dynamic';
 
-export function GET(req: NextRequest) {
-  return djangoProxy(req, '/api/grievances/grievances/');
-}
-
+const { GET, POST } = crudRoutes({
+  table: grievances,
+  pk: 'id',
+  tags: ["Claims"],
+  orgScoped: true,
+  readRole: 'member',
+  writeRole: 'steward',
+});
+export { GET, POST };

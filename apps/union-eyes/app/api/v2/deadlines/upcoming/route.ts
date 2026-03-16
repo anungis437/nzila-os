@@ -1,39 +1,17 @@
 /**
- * GET POST /api/deadlines/upcoming
- * → Django: /api/grievances/claim-deadlines/
- * Migrated to withApi() framework
+ * CRUD collection route for deadlines
  */
-import { djangoProxy } from '@/lib/django-proxy';
-import { withApi } from '@/lib/api/framework';
+import { crudRoutes } from '@/lib/api/crud-factory';
+import { deadlines } from '@/db/schema';
 
 export const dynamic = 'force-dynamic';
 
-export const GET = withApi(
-  {
-    auth: { required: false },
-    openapi: {
-      tags: ['Deadlines', 'Django Proxy'],
-      summary: 'GET upcoming',
-      description: 'Proxied to Django: /api/grievances/claim-deadlines/',
-    },
-  },
-  async ({ request }) => {
-    const response = await djangoProxy(request, '/api/grievances/claim-deadlines/');
-    return response;
-  },
-);
-
-export const POST = withApi(
-  {
-    auth: { required: false },
-    openapi: {
-      tags: ['Deadlines', 'Django Proxy'],
-      summary: 'POST upcoming',
-      description: 'Proxied to Django: /api/grievances/claim-deadlines/',
-    },
-  },
-  async ({ request }) => {
-    const response = await djangoProxy(request, '/api/grievances/claim-deadlines/', { method: 'POST' });
-    return response;
-  },
-);
+const { GET, POST } = crudRoutes({
+  table: deadlines,
+  pk: 'id',
+  tags: ["Claims"],
+  orgScoped: true,
+  readRole: 'member',
+  writeRole: 'steward',
+});
+export { GET, POST };

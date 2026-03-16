@@ -1,25 +1,17 @@
 /**
- * GET POST /api/admin/members/bulk-import
- * -> Django auth_core: /api/auth_core/organization-members/
- * NOTE: auto-resolved from admin/members/bulk-import
- * Auto-migrated by scripts/migrate_routes.py
+ * CRUD collection route for organizationMembers
  */
-import { djangoProxy } from '@/lib/django-proxy';
-import { withApi } from '@/lib/api/framework';
+import { crudRoutes } from '@/lib/api/crud-factory';
+import { organizationMembers } from '@/db/schema';
 
 export const dynamic = 'force-dynamic';
 
-export const GET = withApi(
-  { auth: { required: true, minRole: 'admin' as const } },
-  async ({ request }) => {
-    return djangoProxy(request, '/api/auth_core/organization-members/');
-  },
-);
-
-export const POST = withApi(
-  { auth: { required: true, minRole: 'admin' as const } },
-  async ({ request }) => {
-    return djangoProxy(request, '/api/auth_core/organization-members/', { method: 'POST' });
-  },
-);
-
+const { GET, POST } = crudRoutes({
+  table: organizationMembers,
+  pk: 'id',
+  tags: ["Members"],
+  orgScoped: true,
+  readRole: 'member',
+  writeRole: 'steward',
+});
+export { GET, POST };

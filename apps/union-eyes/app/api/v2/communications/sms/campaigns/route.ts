@@ -1,39 +1,17 @@
 /**
- * GET POST /api/communications/sms/campaigns
- * → Django: /api/notifications/campaigns/
- * Migrated to withApi() framework
+ * CRUD collection route for campaigns
  */
-import { djangoProxy } from '@/lib/django-proxy';
-import { withApi } from '@/lib/api/framework';
+import { crudRoutes } from '@/lib/api/crud-factory';
+import { campaigns } from '@/db/schema';
 
 export const dynamic = 'force-dynamic';
 
-export const GET = withApi(
-  {
-    auth: { required: true, minRole: 'member' },
-    openapi: {
-      tags: ['Communications', 'Django Proxy'],
-      summary: 'GET campaigns',
-      description: 'Proxied to Django: /api/notifications/campaigns/',
-    },
-  },
-  async ({ request }) => {
-    const response = await djangoProxy(request, '/api/notifications/campaigns/');
-    return response;
-  },
-);
-
-export const POST = withApi(
-  {
-    auth: { required: true, minRole: 'member' },
-    openapi: {
-      tags: ['Communications', 'Django Proxy'],
-      summary: 'POST campaigns',
-      description: 'Proxied to Django: /api/notifications/campaigns/',
-    },
-  },
-  async ({ request }) => {
-    const response = await djangoProxy(request, '/api/notifications/campaigns/', { method: 'POST' });
-    return response;
-  },
-);
+const { GET, POST } = crudRoutes({
+  table: campaigns,
+  pk: 'id',
+  tags: ["Notifications"],
+  orgScoped: true,
+  readRole: 'member',
+  writeRole: 'steward',
+});
+export { GET, POST };

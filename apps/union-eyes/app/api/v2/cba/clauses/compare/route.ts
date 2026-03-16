@@ -1,39 +1,17 @@
 /**
- * GET POST /api/cba/clauses/compare
- * → Django: /api/bargaining/collective-agreements/
- * Migrated to withApi() framework
+ * CRUD collection route for collectiveAgreements
  */
-import { djangoProxy } from '@/lib/django-proxy';
-import { withApi } from '@/lib/api/framework';
+import { crudRoutes } from '@/lib/api/crud-factory';
+import { collectiveAgreements } from '@/db/schema';
 
 export const dynamic = 'force-dynamic';
 
-export const GET = withApi(
-  {
-    auth: { required: false },
-    openapi: {
-      tags: ['Cba', 'Django Proxy'],
-      summary: 'GET compare',
-      description: 'Proxied to Django: /api/bargaining/collective-agreements/',
-    },
-  },
-  async ({ request }) => {
-    const response = await djangoProxy(request, '/api/bargaining/collective-agreements/');
-    return response;
-  },
-);
-
-export const POST = withApi(
-  {
-    auth: { required: false },
-    openapi: {
-      tags: ['Cba', 'Django Proxy'],
-      summary: 'POST compare',
-      description: 'Proxied to Django: /api/bargaining/collective-agreements/',
-    },
-  },
-  async ({ request }) => {
-    const response = await djangoProxy(request, '/api/bargaining/collective-agreements/', { method: 'POST' });
-    return response;
-  },
-);
+const { GET, POST } = crudRoutes({
+  table: collectiveAgreements,
+  pk: 'id',
+  tags: ["Bargaining"],
+  orgScoped: true,
+  readRole: 'member',
+  writeRole: 'steward',
+});
+export { GET, POST };

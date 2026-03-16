@@ -1,18 +1,17 @@
 /**
- * GET POST /api/calendar/events
- * -> Django unions: /api/unions/calendar-events/
- * Auto-migrated by scripts/migrate_routes.py
+ * CRUD collection route for calendarEvents
  */
-import { NextRequest } from 'next/server';
-import { djangoProxy } from '@/lib/django-proxy';
+import { crudRoutes } from '@/lib/api/crud-factory';
+import { calendarEvents } from '@/db/schema';
 
 export const dynamic = 'force-dynamic';
 
-export function GET(req: NextRequest) {
-  return djangoProxy(req, '/api/unions/calendar-events/');
-}
-
-export function POST(req: NextRequest) {
-  return djangoProxy(req, '/api/unions/calendar-events/', { method: 'POST' });
-}
-
+const { GET, POST } = crudRoutes({
+  table: calendarEvents,
+  pk: 'id',
+  tags: ["Scheduling"],
+  orgScoped: true,
+  readRole: 'member',
+  writeRole: 'steward',
+});
+export { GET, POST };

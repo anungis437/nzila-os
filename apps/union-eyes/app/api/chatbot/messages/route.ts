@@ -1,19 +1,17 @@
 /**
- * GET POST /api/chatbot/messages
- * -> Django ai_core: /api/ai_core/chat-sessions/
- * NOTE: auto-resolved from chatbot/messages
- * Auto-migrated by scripts/migrate_routes.py
+ * CRUD collection route for chatSessions
  */
-import { NextRequest } from 'next/server';
-import { djangoProxy } from '@/lib/django-proxy';
+import { crudRoutes } from '@/lib/api/crud-factory';
+import { chatSessions } from '@/db/schema';
 
 export const dynamic = 'force-dynamic';
 
-export function GET(req: NextRequest) {
-  return djangoProxy(req, '/api/ai_core/chat-sessions/');
-}
-
-export function POST(req: NextRequest) {
-  return djangoProxy(req, '/api/ai_core/chat-sessions/', { method: 'POST' });
-}
-
+const { GET, POST } = crudRoutes({
+  table: chatSessions,
+  pk: 'id',
+  tags: ["AI"],
+  orgScoped: true,
+  readRole: 'member',
+  writeRole: 'steward',
+});
+export { GET, POST };

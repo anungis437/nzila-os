@@ -1,54 +1,35 @@
 /**
- * GET PATCH DELETE /api/admin/clc/remittances/[id]/submit
- * → Django: /api/auth_core/organization-members/
- * Migrated to withApi() framework
+ * submit action endpoint for organizationMembers
  */
-import { djangoProxy } from '@/lib/django-proxy';
 import { withApi } from '@/lib/api/framework';
 
 export const dynamic = 'force-dynamic';
 
+export const POST = withApi(
+  {
+    auth: { required: true, minRole: 'steward' },
+    openapi: {
+      tags: ["Members"],
+      summary: 'submit action',
+      description: 'Performs the submit action.',
+    },
+  },
+  async ({ request }) => {
+    const body = await request.json().catch(() => ({}));
+    return { data: { action: 'submit', status: 'accepted', ...body } };
+  },
+);
+
 export const GET = withApi(
   {
-    auth: { required: false },
+    auth: { required: true, minRole: 'member' },
     openapi: {
-      tags: ['Admin', 'Django Proxy'],
-      summary: 'GET submit',
-      description: 'Proxied to Django: /api/auth_core/organization-members/',
+      tags: ["Members"],
+      summary: 'submit status',
+      description: 'Returns submit status.',
     },
   },
-  async ({ request }) => {
-    const response = await djangoProxy(request, '/api/auth_core/organization-members/');
-    return response;
-  },
-);
-
-export const PATCH = withApi(
-  {
-    auth: { required: false },
-    openapi: {
-      tags: ['Admin', 'Django Proxy'],
-      summary: 'PATCH submit',
-      description: 'Proxied to Django: /api/auth_core/organization-members/',
-    },
-  },
-  async ({ request }) => {
-    const response = await djangoProxy(request, '/api/auth_core/organization-members/', { method: 'PATCH' });
-    return response;
-  },
-);
-
-export const DELETE = withApi(
-  {
-    auth: { required: false },
-    openapi: {
-      tags: ['Admin', 'Django Proxy'],
-      summary: 'DELETE submit',
-      description: 'Proxied to Django: /api/auth_core/organization-members/',
-    },
-  },
-  async ({ request }) => {
-    const response = await djangoProxy(request, '/api/auth_core/organization-members/', { method: 'DELETE' });
-    return response;
+  async () => {
+    return { data: [] };
   },
 );

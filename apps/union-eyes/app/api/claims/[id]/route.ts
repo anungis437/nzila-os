@@ -1,31 +1,18 @@
 /**
- * GET /api/claims/[id]
- * Drizzle ORM — direct database access (migrated from Django proxy)
+ * CRUD item route for claims
  */
-import { NextRequest, NextResponse } from 'next/server';
-import { getClaimById } from '@/lib/services/claims-service';
+import { crudRoutes } from '@/lib/api/crud-factory';
+import { claims } from '@/db/schema';
 
 export const dynamic = 'force-dynamic';
 
-type Params = { params: Promise<{ id: string }> };
-
-export async function GET(_req: NextRequest, { params }: Params) {
-  const { id } = await params;
-  const claim = await getClaimById(id);
-  if (!claim) {
-    return NextResponse.json({ error: 'Claim not found' }, { status: 404 });
-  }
-  return NextResponse.json(claim);
-}
-
-export async function PATCH(req: NextRequest, { params }: Params) {
-  const { id } = await params;
-  const { djangoProxy } = await import('@/lib/django-proxy');
-  return djangoProxy(req, '/api/grievances/claims/' + id + '/', { method: 'PATCH' });
-}
-
-export async function DELETE(req: NextRequest, { params }: Params) {
-  const { id } = await params;
-  const { djangoProxy } = await import('@/lib/django-proxy');
-  return djangoProxy(req, '/api/grievances/claims/' + id + '/', { method: 'DELETE' });
-}
+const { GET, PATCH, DELETE } = crudRoutes({
+  table: claims,
+  pk: 'id',
+  tags: ["Claims"],
+  orgScoped: true,
+  itemRoute: true,
+  readRole: 'member',
+  writeRole: 'steward',
+});
+export { GET, PATCH, DELETE };

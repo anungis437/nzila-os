@@ -1,39 +1,17 @@
 /**
- * GET POST /api/documents/categories
- * → Django: /api/content/documents/
- * Migrated to withApi() framework
+ * CRUD collection route for documents
  */
-import { djangoProxy } from '@/lib/django-proxy';
-import { withApi } from '@/lib/api/framework';
+import { crudRoutes } from '@/lib/api/crud-factory';
+import { documents } from '@/db/schema';
 
 export const dynamic = 'force-dynamic';
 
-export const GET = withApi(
-  {
-    auth: { required: false },
-    openapi: {
-      tags: ['Documents', 'Django Proxy'],
-      summary: 'GET categories',
-      description: 'Proxied to Django: /api/content/documents/',
-    },
-  },
-  async ({ request }) => {
-    const response = await djangoProxy(request, '/api/content/documents/');
-    return response;
-  },
-);
-
-export const POST = withApi(
-  {
-    auth: { required: false },
-    openapi: {
-      tags: ['Documents', 'Django Proxy'],
-      summary: 'POST categories',
-      description: 'Proxied to Django: /api/content/documents/',
-    },
-  },
-  async ({ request }) => {
-    const response = await djangoProxy(request, '/api/content/documents/', { method: 'POST' });
-    return response;
-  },
-);
+const { GET, POST } = crudRoutes({
+  table: documents,
+  pk: 'id',
+  tags: ["Content"],
+  orgScoped: true,
+  readRole: 'member',
+  writeRole: 'steward',
+});
+export { GET, POST };

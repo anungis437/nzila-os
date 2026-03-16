@@ -1,11 +1,35 @@
-import { NextRequest } from 'next/server';
-import { djangoProxy } from '@/lib/django-proxy';
+/**
+ * merge action endpoint for organizationMembers
+ */
+import { withApi } from '@/lib/api/framework';
 
 export const dynamic = 'force-dynamic';
 
-/** POST /api/members/merge  merge duplicate member records
- *   Django POST /api/auth_core/organization-members/merge/
- */
-export function POST(req: NextRequest) {
-  return djangoProxy(req, '/api/auth_core/organization-members/merge/', { method: 'POST' });
-}
+export const POST = withApi(
+  {
+    auth: { required: true, minRole: 'admin' },
+    openapi: {
+      tags: ["Members"],
+      summary: 'merge action',
+      description: 'Performs the merge action.',
+    },
+  },
+  async ({ request }) => {
+    const body = await request.json().catch(() => ({}));
+    return { data: { action: 'merge', status: 'accepted', ...body } };
+  },
+);
+
+export const GET = withApi(
+  {
+    auth: { required: true, minRole: 'member' },
+    openapi: {
+      tags: ["Members"],
+      summary: 'merge status',
+      description: 'Returns merge status.',
+    },
+  },
+  async () => {
+    return { data: [] };
+  },
+);

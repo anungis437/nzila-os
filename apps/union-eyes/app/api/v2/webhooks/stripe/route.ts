@@ -1,9 +1,6 @@
 /**
- * GET POST /api/webhooks/stripe
- * → Django: /api/auth_core/health/
- * Migrated to withApi() framework
+ * Health check endpoint
  */
-import { djangoProxy } from '@/lib/django-proxy';
 import { withApi } from '@/lib/api/framework';
 
 export const dynamic = 'force-dynamic';
@@ -12,28 +9,12 @@ export const GET = withApi(
   {
     auth: { required: false },
     openapi: {
-      tags: ['Webhooks', 'Django Proxy'],
-      summary: 'GET stripe',
-      description: 'Proxied to Django: /api/auth_core/health/',
+      tags: ["System"],
+      summary: 'Health check',
+      description: 'Returns service health status.',
     },
   },
-  async ({ request }) => {
-    const response = await djangoProxy(request, '/api/auth_core/health/');
-    return response;
-  },
-);
-
-export const POST = withApi(
-  {
-    auth: { required: false },
-    openapi: {
-      tags: ['Webhooks', 'Django Proxy'],
-      summary: 'POST stripe',
-      description: 'Proxied to Django: /api/auth_core/health/',
-    },
-  },
-  async ({ request }) => {
-    const response = await djangoProxy(request, '/api/auth_core/health/', { method: 'POST' });
-    return response;
+  async () => {
+    return { status: 'healthy', timestamp: new Date().toISOString() };
   },
 );

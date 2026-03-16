@@ -1,28 +1,18 @@
 /**
- * GET PATCH DELETE /api/deadlines/[id]/extend
- * -> Django grievances: /api/grievances/claim-deadlines/
- * NOTE: auto-resolved from deadlines/[id]/extend
- * Auto-migrated by scripts/migrate_routes.py
+ * CRUD item route for deadlines
  */
-import { NextRequest } from 'next/server';
-import { djangoProxy } from '@/lib/django-proxy';
+import { crudRoutes } from '@/lib/api/crud-factory';
+import { deadlines } from '@/db/schema';
 
 export const dynamic = 'force-dynamic';
 
-type Params = { params: Promise<{ id: string }> };
-
-export async function GET(req: NextRequest, { params }: Params) {
-  const { id } = await params;
-  return djangoProxy(req, '/api/grievances/claim-deadlines/' + id + '/');
-}
-
-export async function PATCH(req: NextRequest, { params }: Params) {
-  const { id } = await params;
-  return djangoProxy(req, '/api/grievances/claim-deadlines/' + id + '/', { method: 'PATCH' });
-}
-
-export async function DELETE(req: NextRequest, { params }: Params) {
-  const { id } = await params;
-  return djangoProxy(req, '/api/grievances/claim-deadlines/' + id + '/', { method: 'DELETE' });
-}
-
+const { GET, PATCH, DELETE } = crudRoutes({
+  table: deadlines,
+  pk: 'id',
+  tags: ["Claims"],
+  orgScoped: true,
+  itemRoute: true,
+  readRole: 'member',
+  writeRole: 'steward',
+});
+export { GET, PATCH, DELETE };

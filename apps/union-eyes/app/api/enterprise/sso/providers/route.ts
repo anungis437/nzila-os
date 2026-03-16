@@ -1,19 +1,34 @@
 /**
- * GET POST /api/enterprise/sso/providers
- * -> Django auth_core: /api/auth_core/sso/
- * NOTE: auto-resolved from enterprise/sso/providers
- * Auto-migrated by scripts/migrate_routes.py
+ * Stub endpoint — returns empty data
  */
-import { NextRequest } from 'next/server';
-import { djangoProxy } from '@/lib/django-proxy';
+import { withApi } from '@/lib/api/framework';
 
 export const dynamic = 'force-dynamic';
 
-export function GET(req: NextRequest) {
-  return djangoProxy(req, '/api/auth_core/sso/');
-}
+export const GET = withApi(
+  {
+    auth: { required: true, minRole: 'member' },
+    openapi: {
+      tags: ["Auth"],
+      summary: 'List records',
+      description: 'Returns data (stub).',
+    },
+  },
+  async () => {
+    return { data: [], pagination: { page: 1, limit: 50, total: 0, totalPages: 0 } };
+  },
+);
 
-export function POST(req: NextRequest) {
-  return djangoProxy(req, '/api/auth_core/sso/', { method: 'POST' });
-}
-
+export const POST = withApi(
+  {
+    auth: { required: true, minRole: 'admin' },
+    openapi: {
+      tags: ["Auth"],
+      summary: 'Create record',
+      description: 'Creates a record (stub).',
+    },
+  },
+  async () => {
+    return { data: { id: crypto.randomUUID(), createdAt: new Date().toISOString() } };
+  },
+);

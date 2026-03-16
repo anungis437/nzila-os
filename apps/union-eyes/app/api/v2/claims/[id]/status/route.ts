@@ -1,24 +1,18 @@
 /**
- * PATCH /api/claims/[id]/status
- * → Django: /api/grievances/claims/
- * Migrated to withApi() framework
+ * CRUD item route for claims
  */
-import { djangoProxy } from '@/lib/django-proxy';
-import { withApi } from '@/lib/api/framework';
+import { crudRoutes } from '@/lib/api/crud-factory';
+import { claims } from '@/db/schema';
 
 export const dynamic = 'force-dynamic';
 
-export const PATCH = withApi(
-  {
-    auth: { required: false },
-    openapi: {
-      tags: ['Claims', 'Django Proxy'],
-      summary: 'PATCH status',
-      description: 'Proxied to Django: /api/grievances/claims/',
-    },
-  },
-  async ({ request }) => {
-    const response = await djangoProxy(request, '/api/grievances/claims/', { method: 'PATCH' });
-    return response;
-  },
-);
+const { GET, PATCH, DELETE } = crudRoutes({
+  table: claims,
+  pk: 'id',
+  tags: ["Claims"],
+  orgScoped: true,
+  itemRoute: true,
+  readRole: 'member',
+  writeRole: 'steward',
+});
+export { GET, PATCH, DELETE };

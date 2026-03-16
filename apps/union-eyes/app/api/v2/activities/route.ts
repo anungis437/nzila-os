@@ -1,24 +1,17 @@
 /**
- * GET /api/activities
- * → Django: /api/core/audit-logs/
- * Migrated to withApi() framework
+ * CRUD collection route for auditLogs
  */
-import { djangoProxy } from '@/lib/django-proxy';
-import { withApi } from '@/lib/api/framework';
+import { crudRoutes } from '@/lib/api/crud-factory';
+import { auditLogs } from '@/db/schema';
 
 export const dynamic = 'force-dynamic';
 
-export const GET = withApi(
-  {
-    auth: { required: false },
-    openapi: {
-      tags: ['Activities', 'Django Proxy'],
-      summary: 'GET activities',
-      description: 'Proxied to Django: /api/core/audit-logs/',
-    },
-  },
-  async ({ request }) => {
-    const response = await djangoProxy(request, '/api/core/audit-logs/');
-    return response;
-  },
-);
+const { GET, POST } = crudRoutes({
+  table: auditLogs,
+  pk: 'id',
+  tags: ["System"],
+  orgScoped: true,
+  readRole: 'member',
+  writeRole: 'steward',
+});
+export { GET, POST };

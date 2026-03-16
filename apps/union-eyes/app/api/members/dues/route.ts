@@ -1,11 +1,17 @@
-import { NextRequest } from 'next/server';
-import { djangoProxy } from '@/lib/django-proxy';
+/**
+ * CRUD collection route for duesTransactions
+ */
+import { crudRoutes } from '@/lib/api/crud-factory';
+import { duesTransactions } from '@/db/schema';
 
 export const dynamic = 'force-dynamic';
 
-/** GET /api/members/dues  member dues history
- *   Django GET /api/billing/dues/
- */
-export function GET(req: NextRequest) {
-  return djangoProxy(req, '/api/billing/dues/');
-}
+const { GET, POST } = crudRoutes({
+  table: duesTransactions,
+  pk: 'id',
+  tags: ["Billing"],
+  orgScoped: true,
+  readRole: 'member',
+  writeRole: 'steward',
+});
+export { GET, POST };

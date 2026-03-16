@@ -1,19 +1,17 @@
 /**
- * GET POST /api/clc/sync
- * -> Django billing: /api/billing/clc-sync-log/
- * NOTE: auto-resolved from clc/sync
- * Auto-migrated by scripts/migrate_routes.py
+ * CRUD collection route for clcSyncLog
  */
-import { NextRequest } from 'next/server';
-import { djangoProxy } from '@/lib/django-proxy';
+import { crudRoutes } from '@/lib/api/crud-factory';
+import { clcSyncLog } from '@/db/schema';
 
 export const dynamic = 'force-dynamic';
 
-export function GET(req: NextRequest) {
-  return djangoProxy(req, '/api/billing/clc-sync-log/');
-}
-
-export function POST(req: NextRequest) {
-  return djangoProxy(req, '/api/billing/clc-sync-log/', { method: 'POST' });
-}
-
+const { GET, POST } = crudRoutes({
+  table: clcSyncLog,
+  pk: 'id',
+  tags: ["Billing"],
+  orgScoped: true,
+  readRole: 'member',
+  writeRole: 'steward',
+});
+export { GET, POST };

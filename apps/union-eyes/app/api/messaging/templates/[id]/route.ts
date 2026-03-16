@@ -1,28 +1,18 @@
 /**
- * GET PATCH DELETE /api/messaging/templates/[id]
- * -> Django notifications: /api/notifications/message-threads/
- * NOTE: auto-resolved from messaging/templates/[id]
- * Auto-migrated by scripts/migrate_routes.py
+ * CRUD item route for messageThreads
  */
-import { NextRequest } from 'next/server';
-import { djangoProxy } from '@/lib/django-proxy';
+import { crudRoutes } from '@/lib/api/crud-factory';
+import { messageThreads } from '@/db/schema';
 
 export const dynamic = 'force-dynamic';
 
-type Params = { params: Promise<{ id: string }> };
-
-export async function GET(req: NextRequest, { params }: Params) {
-  const { id } = await params;
-  return djangoProxy(req, '/api/notifications/message-threads/' + id + '/');
-}
-
-export async function PATCH(req: NextRequest, { params }: Params) {
-  const { id } = await params;
-  return djangoProxy(req, '/api/notifications/message-threads/' + id + '/', { method: 'PATCH' });
-}
-
-export async function DELETE(req: NextRequest, { params }: Params) {
-  const { id } = await params;
-  return djangoProxy(req, '/api/notifications/message-threads/' + id + '/', { method: 'DELETE' });
-}
-
+const { GET, PATCH, DELETE } = crudRoutes({
+  table: messageThreads,
+  pk: 'id',
+  tags: ["Notifications"],
+  orgScoped: true,
+  itemRoute: true,
+  readRole: 'member',
+  writeRole: 'steward',
+});
+export { GET, PATCH, DELETE };

@@ -1,39 +1,17 @@
 /**
- * GET POST /api/mobile/devices
- * → Django: /api/auth_core/devices/
- * Migrated to withApi() framework
+ * CRUD collection route for pushDevices
  */
-import { djangoProxy } from '@/lib/django-proxy';
-import { withApi } from '@/lib/api/framework';
+import { crudRoutes } from '@/lib/api/crud-factory';
+import { pushDevices } from '@/db/schema';
 
 export const dynamic = 'force-dynamic';
 
-export const GET = withApi(
-  {
-    auth: { required: false },
-    openapi: {
-      tags: ['Mobile', 'Django Proxy'],
-      summary: 'GET devices',
-      description: 'Proxied to Django: /api/auth_core/devices/',
-    },
-  },
-  async ({ request }) => {
-    const response = await djangoProxy(request, '/api/auth_core/devices/');
-    return response;
-  },
-);
-
-export const POST = withApi(
-  {
-    auth: { required: false },
-    openapi: {
-      tags: ['Mobile', 'Django Proxy'],
-      summary: 'POST devices',
-      description: 'Proxied to Django: /api/auth_core/devices/',
-    },
-  },
-  async ({ request }) => {
-    const response = await djangoProxy(request, '/api/auth_core/devices/', { method: 'POST' });
-    return response;
-  },
-);
+const { GET, POST } = crudRoutes({
+  table: pushDevices,
+  pk: 'id',
+  tags: ["Auth"],
+  orgScoped: true,
+  readRole: 'member',
+  writeRole: 'steward',
+});
+export { GET, POST };

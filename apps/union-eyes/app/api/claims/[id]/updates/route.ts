@@ -1,22 +1,18 @@
 /**
- * GET /api/claims/[id]/updates
- * Drizzle ORM — direct database access (migrated from Django proxy)
+ * CRUD item route for claims
  */
-import { NextRequest, NextResponse } from 'next/server';
-import { listClaimUpdates } from '@/lib/services/claims-service';
+import { crudRoutes } from '@/lib/api/crud-factory';
+import { claims } from '@/db/schema';
 
 export const dynamic = 'force-dynamic';
 
-type Params = { params: Promise<{ id: string }> };
-
-export async function GET(_req: NextRequest, { params }: Params) {
-  const { id } = await params;
-  const updates = await listClaimUpdates(id);
-  return NextResponse.json(updates);
-}
-
-export async function POST(req: NextRequest, { params }: Params) {
-  const { id } = await params;
-  const { djangoProxy } = await import('@/lib/django-proxy');
-  return djangoProxy(req, '/api/grievances/claims/' + id + '/updates/', { method: 'POST' });
-}
+const { GET, PATCH, DELETE } = crudRoutes({
+  table: claims,
+  pk: 'id',
+  tags: ["Claims"],
+  orgScoped: true,
+  itemRoute: true,
+  readRole: 'member',
+  writeRole: 'steward',
+});
+export { GET, PATCH, DELETE };

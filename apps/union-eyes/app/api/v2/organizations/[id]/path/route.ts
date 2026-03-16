@@ -1,24 +1,18 @@
 /**
- * GET /api/organizations/[id]/path
- * → Django: /api/unions/hierarchy/
- * Migrated to withApi() framework
+ * CRUD item route for organizationRelationships
  */
-import { djangoProxy } from '@/lib/django-proxy';
-import { withApi } from '@/lib/api/framework';
+import { crudRoutes } from '@/lib/api/crud-factory';
+import { organizationRelationships } from '@/db/schema';
 
 export const dynamic = 'force-dynamic';
 
-export const GET = withApi(
-  {
-    auth: { required: false },
-    openapi: {
-      tags: ['Organizations', 'Django Proxy'],
-      summary: 'GET path',
-      description: 'Proxied to Django: /api/unions/hierarchy/',
-    },
-  },
-  async ({ request }) => {
-    const response = await djangoProxy(request, '/api/unions/hierarchy/');
-    return response;
-  },
-);
+const { GET, PATCH, DELETE } = crudRoutes({
+  table: organizationRelationships,
+  pk: 'id',
+  tags: ["Organization"],
+  orgScoped: true,
+  itemRoute: true,
+  readRole: 'member',
+  writeRole: 'steward',
+});
+export { GET, PATCH, DELETE };

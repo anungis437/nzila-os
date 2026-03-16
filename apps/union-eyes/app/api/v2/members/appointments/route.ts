@@ -1,24 +1,17 @@
 /**
- * POST /api/members/appointments
- * → Django: /api/unions/appointments/
- * Migrated to withApi() framework
+ * CRUD collection route for calendarEvents
  */
-import { djangoProxy } from '@/lib/django-proxy';
-import { withApi } from '@/lib/api/framework';
+import { crudRoutes } from '@/lib/api/crud-factory';
+import { calendarEvents } from '@/db/schema';
 
 export const dynamic = 'force-dynamic';
 
-export const POST = withApi(
-  {
-    auth: { required: false },
-    openapi: {
-      tags: ['Members', 'Django Proxy'],
-      summary: 'POST appointments',
-      description: 'Proxied to Django: /api/unions/appointments/',
-    },
-  },
-  async ({ request }) => {
-    const response = await djangoProxy(request, '/api/unions/appointments/', { method: 'POST' });
-    return response;
-  },
-);
+const { GET, POST } = crudRoutes({
+  table: calendarEvents,
+  pk: 'id',
+  tags: ["Scheduling"],
+  orgScoped: true,
+  readRole: 'member',
+  writeRole: 'steward',
+});
+export { GET, POST };

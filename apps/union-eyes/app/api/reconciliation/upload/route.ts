@@ -1,19 +1,17 @@
 /**
- * GET POST /api/reconciliation/upload
- * -> Django billing: /api/billing/remittance-approvals/
- * NOTE: auto-resolved from reconciliation/upload
- * Auto-migrated by scripts/migrate_routes.py
+ * CRUD collection route for remittanceApprovals
  */
-import { NextRequest } from 'next/server';
-import { djangoProxy } from '@/lib/django-proxy';
+import { crudRoutes } from '@/lib/api/crud-factory';
+import { remittanceApprovals } from '@/db/schema';
 
 export const dynamic = 'force-dynamic';
 
-export function GET(req: NextRequest) {
-  return djangoProxy(req, '/api/billing/remittance-approvals/');
-}
-
-export function POST(req: NextRequest) {
-  return djangoProxy(req, '/api/billing/remittance-approvals/', { method: 'POST' });
-}
-
+const { GET, POST } = crudRoutes({
+  table: remittanceApprovals,
+  pk: 'id',
+  tags: ["Billing"],
+  orgScoped: true,
+  readRole: 'member',
+  writeRole: 'steward',
+});
+export { GET, POST };

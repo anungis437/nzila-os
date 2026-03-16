@@ -1,39 +1,18 @@
 /**
- * GET PATCH /api/members/[id]/employment
- * → Django: /api/unions/member-employment/?user_id=
- * Migrated to withApi() framework
+ * CRUD item route for memberEmployment
  */
-import { djangoProxy } from '@/lib/django-proxy';
-import { withApi } from '@/lib/api/framework';
+import { crudRoutes } from '@/lib/api/crud-factory';
+import { memberEmployment } from '@/db/schema';
 
 export const dynamic = 'force-dynamic';
 
-export const GET = withApi(
-  {
-    auth: { required: false },
-    openapi: {
-      tags: ['Members', 'Django Proxy'],
-      summary: 'GET employment',
-      description: 'Proxied to Django: /api/unions/member-employment/?user_id=',
-    },
-  },
-  async ({ request }) => {
-    const response = await djangoProxy(request, '/api/unions/member-employment/?user_id=');
-    return response;
-  },
-);
-
-export const PATCH = withApi(
-  {
-    auth: { required: false },
-    openapi: {
-      tags: ['Members', 'Django Proxy'],
-      summary: 'PATCH employment',
-      description: 'Proxied to Django: /api/auth_core/member-employment-details/',
-    },
-  },
-  async ({ request }) => {
-    const response = await djangoProxy(request, '/api/auth_core/member-employment-details/', { method: 'PATCH' });
-    return response;
-  },
-);
+const { GET, PATCH, DELETE } = crudRoutes({
+  table: memberEmployment,
+  pk: 'id',
+  tags: ["Members"],
+  orgScoped: true,
+  itemRoute: true,
+  readRole: 'member',
+  writeRole: 'steward',
+});
+export { GET, PATCH, DELETE };

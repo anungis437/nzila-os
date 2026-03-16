@@ -1,19 +1,17 @@
 /**
- * GET POST /api/enterprise/dsr/requests
- * -> Django auth_core: /api/auth_core/dsr/
- * NOTE: auto-resolved from enterprise/dsr/requests
- * Auto-migrated by scripts/migrate_routes.py
+ * CRUD collection route for dataSubjectAccessRequests
  */
-import { NextRequest } from 'next/server';
-import { djangoProxy } from '@/lib/django-proxy';
+import { crudRoutes } from '@/lib/api/crud-factory';
+import { dataSubjectAccessRequests } from '@/db/schema';
 
 export const dynamic = 'force-dynamic';
 
-export function GET(req: NextRequest) {
-  return djangoProxy(req, '/api/auth_core/dsr/');
-}
-
-export function POST(req: NextRequest) {
-  return djangoProxy(req, '/api/auth_core/dsr/', { method: 'POST' });
-}
-
+const { GET, POST } = crudRoutes({
+  table: dataSubjectAccessRequests,
+  pk: 'id',
+  tags: ["Compliance"],
+  orgScoped: true,
+  readRole: 'member',
+  writeRole: 'steward',
+});
+export { GET, POST };

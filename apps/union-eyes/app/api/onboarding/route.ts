@@ -1,18 +1,17 @@
 /**
- * GET POST /api/onboarding
- * -> Django auth_core: /api/auth_core/pending-profiles/
- * Auto-migrated by scripts/migrate_routes.py
+ * CRUD collection route for pendingProfilesTable
  */
-import { NextRequest } from 'next/server';
-import { djangoProxy } from '@/lib/django-proxy';
+import { crudRoutes } from '@/lib/api/crud-factory';
+import { pendingProfilesTable } from '@/db/schema';
 
 export const dynamic = 'force-dynamic';
 
-export function GET(req: NextRequest) {
-  return djangoProxy(req, '/api/auth_core/pending-profiles/');
-}
-
-export function POST(req: NextRequest) {
-  return djangoProxy(req, '/api/auth_core/pending-profiles/', { method: 'POST' });
-}
-
+const { GET, POST } = crudRoutes({
+  table: pendingProfilesTable,
+  pk: 'id',
+  tags: ["Auth"],
+  orgScoped: true,
+  readRole: 'member',
+  writeRole: 'steward',
+});
+export { GET, POST };

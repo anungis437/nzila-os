@@ -1,54 +1,18 @@
 /**
- * GET PATCH DELETE /api/pension/trustee-meetings/[id]
- * → Django: /api/billing/per-capita-remittances/
- * Migrated to withApi() framework
+ * CRUD item route for perCapitaRemittances
  */
-import { djangoProxy } from '@/lib/django-proxy';
-import { withApi } from '@/lib/api/framework';
+import { crudRoutes } from '@/lib/api/crud-factory';
+import { perCapitaRemittances } from '@/db/schema';
 
 export const dynamic = 'force-dynamic';
 
-export const GET = withApi(
-  {
-    auth: { required: true, minRole: 'member' },
-    openapi: {
-      tags: ['Pension'],
-      summary: 'GET trustee meeting by ID',
-      description: 'Get a single trustee meeting',
-    },
-  },
-  async ({ request }) => {
-    const response = await djangoProxy(request, '/api/billing/per-capita-remittances/');
-    return response;
-  },
-);
-
-export const PATCH = withApi(
-  {
-    auth: { required: true, minRole: 'steward' },
-    openapi: {
-      tags: ['Pension'],
-      summary: 'PATCH trustee meeting',
-      description: 'Update a trustee meeting',
-    },
-  },
-  async ({ request }) => {
-    const response = await djangoProxy(request, '/api/billing/per-capita-remittances/', { method: 'PATCH' });
-    return response;
-  },
-);
-
-export const DELETE = withApi(
-  {
-    auth: { required: true, minRole: 'steward' },
-    openapi: {
-      tags: ['Pension'],
-      summary: 'DELETE trustee meeting',
-      description: 'Delete a trustee meeting',
-    },
-  },
-  async ({ request }) => {
-    const response = await djangoProxy(request, '/api/billing/per-capita-remittances/', { method: 'DELETE' });
-    return response;
-  },
-);
+const { GET, PATCH, DELETE } = crudRoutes({
+  table: perCapitaRemittances,
+  pk: 'id',
+  tags: ["Billing"],
+  orgScoped: true,
+  itemRoute: true,
+  readRole: 'member',
+  writeRole: 'steward',
+});
+export { GET, PATCH, DELETE };

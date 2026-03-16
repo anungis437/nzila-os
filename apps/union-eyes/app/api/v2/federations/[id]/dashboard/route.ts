@@ -1,54 +1,18 @@
 /**
- * GET PATCH DELETE /api/federations/[id]/dashboard
- * → Django: /api/unions/federations/
- * Migrated to withApi() framework
+ * CRUD item route for federations
  */
-import { djangoProxy } from '@/lib/django-proxy';
-import { withApi } from '@/lib/api/framework';
+import { crudRoutes } from '@/lib/api/crud-factory';
+import { federations } from '@/db/schema';
 
 export const dynamic = 'force-dynamic';
 
-export const GET = withApi(
-  {
-    auth: { required: false },
-    openapi: {
-      tags: ['Federations', 'Django Proxy'],
-      summary: 'GET dashboard',
-      description: 'Proxied to Django: /api/unions/federations/',
-    },
-  },
-  async ({ request }) => {
-    const response = await djangoProxy(request, '/api/unions/federations/');
-    return response;
-  },
-);
-
-export const PATCH = withApi(
-  {
-    auth: { required: false },
-    openapi: {
-      tags: ['Federations', 'Django Proxy'],
-      summary: 'PATCH dashboard',
-      description: 'Proxied to Django: /api/unions/federations/',
-    },
-  },
-  async ({ request }) => {
-    const response = await djangoProxy(request, '/api/unions/federations/', { method: 'PATCH' });
-    return response;
-  },
-);
-
-export const DELETE = withApi(
-  {
-    auth: { required: false },
-    openapi: {
-      tags: ['Federations', 'Django Proxy'],
-      summary: 'DELETE dashboard',
-      description: 'Proxied to Django: /api/unions/federations/',
-    },
-  },
-  async ({ request }) => {
-    const response = await djangoProxy(request, '/api/unions/federations/', { method: 'DELETE' });
-    return response;
-  },
-);
+const { GET, PATCH, DELETE } = crudRoutes({
+  table: federations,
+  pk: 'id',
+  tags: ["Organization"],
+  orgScoped: true,
+  itemRoute: true,
+  readRole: 'member',
+  writeRole: 'steward',
+});
+export { GET, PATCH, DELETE };

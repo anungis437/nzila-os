@@ -1,19 +1,17 @@
 /**
- * GET POST /api/mobile/push/unsubscribe
- * -> Django auth_core: /api/auth_core/push/
- * NOTE: auto-resolved from mobile/push/unsubscribe
- * Auto-migrated by scripts/migrate_routes.py
+ * CRUD collection route for pushNotifications
  */
-import { NextRequest } from 'next/server';
-import { djangoProxy } from '@/lib/django-proxy';
+import { crudRoutes } from '@/lib/api/crud-factory';
+import { pushNotifications } from '@/db/schema';
 
 export const dynamic = 'force-dynamic';
 
-export function GET(req: NextRequest) {
-  return djangoProxy(req, '/api/auth_core/push/');
-}
-
-export function POST(req: NextRequest) {
-  return djangoProxy(req, '/api/auth_core/push/', { method: 'POST' });
-}
-
+const { GET, POST } = crudRoutes({
+  table: pushNotifications,
+  pk: 'id',
+  tags: ["Notifications"],
+  orgScoped: true,
+  readRole: 'member',
+  writeRole: 'steward',
+});
+export { GET, POST };

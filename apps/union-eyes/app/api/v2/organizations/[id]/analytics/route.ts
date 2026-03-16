@@ -1,24 +1,18 @@
 /**
- * GET /api/organizations/[id]/analytics
- * → Django: /api/analytics/organizations/
- * Migrated to withApi() framework
+ * CRUD item route for organizations
  */
-import { djangoProxy } from '@/lib/django-proxy';
-import { withApi } from '@/lib/api/framework';
+import { crudRoutes } from '@/lib/api/crud-factory';
+import { organizations } from '@/db/schema';
 
 export const dynamic = 'force-dynamic';
 
-export const GET = withApi(
-  {
-    auth: { required: false },
-    openapi: {
-      tags: ['Organizations', 'Django Proxy'],
-      summary: 'GET analytics',
-      description: 'Proxied to Django: /api/analytics/organizations/',
-    },
-  },
-  async ({ request }) => {
-    const response = await djangoProxy(request, '/api/analytics/organizations/');
-    return response;
-  },
-);
+const { GET, PATCH, DELETE } = crudRoutes({
+  table: organizations,
+  pk: 'id',
+  tags: ["Analytics"],
+  orgScoped: false,
+  itemRoute: true,
+  readRole: 'member',
+  writeRole: 'steward',
+});
+export { GET, PATCH, DELETE };

@@ -1,39 +1,34 @@
 /**
- * GET POST /api/enterprise/sso/providers
- * → Django: /api/auth_core/sso/
- * Migrated to withApi() framework
+ * Stub endpoint — returns empty data
  */
-import { djangoProxy } from '@/lib/django-proxy';
 import { withApi } from '@/lib/api/framework';
 
 export const dynamic = 'force-dynamic';
 
 export const GET = withApi(
   {
-    auth: { required: false },
+    auth: { required: true, minRole: 'member' },
     openapi: {
-      tags: ['Enterprise', 'Django Proxy'],
-      summary: 'GET providers',
-      description: 'Proxied to Django: /api/auth_core/sso/',
+      tags: ["Auth"],
+      summary: 'List records',
+      description: 'Returns data (stub).',
     },
   },
-  async ({ request }) => {
-    const response = await djangoProxy(request, '/api/auth_core/sso/');
-    return response;
+  async () => {
+    return { data: [], pagination: { page: 1, limit: 50, total: 0, totalPages: 0 } };
   },
 );
 
 export const POST = withApi(
   {
-    auth: { required: false },
+    auth: { required: true, minRole: 'admin' },
     openapi: {
-      tags: ['Enterprise', 'Django Proxy'],
-      summary: 'POST providers',
-      description: 'Proxied to Django: /api/auth_core/sso/',
+      tags: ["Auth"],
+      summary: 'Create record',
+      description: 'Creates a record (stub).',
     },
   },
-  async ({ request }) => {
-    const response = await djangoProxy(request, '/api/auth_core/sso/', { method: 'POST' });
-    return response;
+  async () => {
+    return { data: { id: crypto.randomUUID(), createdAt: new Date().toISOString() } };
   },
 );

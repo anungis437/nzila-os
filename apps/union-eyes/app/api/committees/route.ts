@@ -1,18 +1,17 @@
 /**
- * GET POST /api/committees
- * -> Django unions: /api/unions/committees/
- * Auto-migrated by scripts/migrate_routes.py
+ * CRUD collection route for committees
  */
-import { NextRequest } from 'next/server';
-import { djangoProxy } from '@/lib/django-proxy';
+import { crudRoutes } from '@/lib/api/crud-factory';
+import { committees } from '@/db/schema';
 
 export const dynamic = 'force-dynamic';
 
-export function GET(req: NextRequest) {
-  return djangoProxy(req, '/api/unions/committees/');
-}
-
-export function POST(req: NextRequest) {
-  return djangoProxy(req, '/api/unions/committees/', { method: 'POST' });
-}
-
+const { GET, POST } = crudRoutes({
+  table: committees,
+  pk: 'id',
+  tags: ["Organization"],
+  orgScoped: true,
+  readRole: 'member',
+  writeRole: 'steward',
+});
+export { GET, POST };

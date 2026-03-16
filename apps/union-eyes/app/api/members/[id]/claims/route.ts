@@ -1,21 +1,18 @@
-import { NextRequest } from 'next/server';
-import { djangoProxy } from '@/lib/django-proxy';
+/**
+ * CRUD item route for claims
+ */
+import { crudRoutes } from '@/lib/api/crud-factory';
+import { claims } from '@/db/schema';
 
 export const dynamic = 'force-dynamic';
 
-type Params = { params: Promise<{ id: string }> };
-
-/** GET /api/members/[id]/claims   Django GET /api/grievances/claims/?member_id={id} */
-export async function GET(req: NextRequest, { params }: Params) {
-  const { id } = await params;
-  return djangoProxy(req, '/api/grievances/claims/?member_id=' + id);
-}
-
-/** POST /api/members/[id]/claims   Django POST /api/grievances/claims/ */
-export async function POST(req: NextRequest, { params }: Params) {
-  const { id } = await params;
-  return djangoProxy(req, '/api/grievances/claims/', {
-    method: 'POST',
-    extraHeaders: { 'X-Member-Id': id },
-  });
-}
+const { GET, PATCH, DELETE } = crudRoutes({
+  table: claims,
+  pk: 'id',
+  tags: ["Claims"],
+  orgScoped: true,
+  itemRoute: true,
+  readRole: 'member',
+  writeRole: 'steward',
+});
+export { GET, PATCH, DELETE };

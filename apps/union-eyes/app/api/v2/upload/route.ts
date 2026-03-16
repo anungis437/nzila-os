@@ -1,24 +1,17 @@
 /**
- * POST /api/upload
- * → Django: /api/content/cms-media-library/
- * Migrated to withApi() framework
+ * CRUD collection route for cmsMediaLibrary
  */
-import { djangoProxy } from '@/lib/django-proxy';
-import { withApi } from '@/lib/api/framework';
+import { crudRoutes } from '@/lib/api/crud-factory';
+import { cmsMediaLibrary } from '@/db/schema';
 
 export const dynamic = 'force-dynamic';
 
-export const POST = withApi(
-  {
-    auth: { required: false },
-    openapi: {
-      tags: ['Upload', 'Django Proxy'],
-      summary: 'POST upload',
-      description: 'Proxied to Django: /api/content/cms-media-library/',
-    },
-  },
-  async ({ request }) => {
-    const response = await djangoProxy(request, '/api/content/cms-media-library/', { method: 'POST' });
-    return response;
-  },
-);
+const { GET, POST } = crudRoutes({
+  table: cmsMediaLibrary,
+  pk: 'id',
+  tags: ["Content"],
+  orgScoped: true,
+  readRole: 'member',
+  writeRole: 'steward',
+});
+export { GET, POST };

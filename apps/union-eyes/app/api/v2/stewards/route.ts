@@ -1,39 +1,17 @@
 /**
- * GET POST /api/stewards
- * → Django: /api/unions/steward-assignments/
- * Migrated to withApi() framework
+ * CRUD collection route for stewardAssignments
  */
-import { djangoProxy } from '@/lib/django-proxy';
-import { withApi } from '@/lib/api/framework';
+import { crudRoutes } from '@/lib/api/crud-factory';
+import { stewardAssignments } from '@/db/schema';
 
 export const dynamic = 'force-dynamic';
 
-export const GET = withApi(
-  {
-    auth: { required: true, minRole: 'chief_steward' },
-    openapi: {
-      tags: ['Stewards', 'Django Proxy'],
-      summary: 'GET stewards',
-      description: 'Proxied to Django: /api/unions/steward-assignments/',
-    },
-  },
-  async ({ request }) => {
-    const response = await djangoProxy(request, '/api/unions/steward-assignments/');
-    return response;
-  },
-);
-
-export const POST = withApi(
-  {
-    auth: { required: true, minRole: 'chief_steward' },
-    openapi: {
-      tags: ['Stewards', 'Django Proxy'],
-      summary: 'POST stewards',
-      description: 'Proxied to Django: /api/unions/steward-assignments/',
-    },
-  },
-  async ({ request }) => {
-    const response = await djangoProxy(request, '/api/unions/steward-assignments/', { method: 'POST' });
-    return response;
-  },
-);
+const { GET, POST } = crudRoutes({
+  table: stewardAssignments,
+  pk: 'id',
+  tags: ["Organization"],
+  orgScoped: true,
+  readRole: 'member',
+  writeRole: 'steward',
+});
+export { GET, POST };

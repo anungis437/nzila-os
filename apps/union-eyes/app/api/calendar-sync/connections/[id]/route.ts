@@ -1,28 +1,18 @@
 /**
- * GET PATCH DELETE /api/calendar-sync/connections/[id]
- * -> Django unions: /api/unions/external-calendar-connections/
- * NOTE: auto-resolved from calendar-sync/connections/[id]
- * Auto-migrated by scripts/migrate_routes.py
+ * CRUD item route for externalCalendarConnections
  */
-import { NextRequest } from 'next/server';
-import { djangoProxy } from '@/lib/django-proxy';
+import { crudRoutes } from '@/lib/api/crud-factory';
+import { externalCalendarConnections } from '@/db/schema';
 
 export const dynamic = 'force-dynamic';
 
-type Params = { params: Promise<{ id: string }> };
-
-export async function GET(req: NextRequest, { params }: Params) {
-  const { id } = await params;
-  return djangoProxy(req, '/api/unions/external-calendar-connections/' + id + '/');
-}
-
-export async function PATCH(req: NextRequest, { params }: Params) {
-  const { id } = await params;
-  return djangoProxy(req, '/api/unions/external-calendar-connections/' + id + '/', { method: 'PATCH' });
-}
-
-export async function DELETE(req: NextRequest, { params }: Params) {
-  const { id } = await params;
-  return djangoProxy(req, '/api/unions/external-calendar-connections/' + id + '/', { method: 'DELETE' });
-}
-
+const { GET, PATCH, DELETE } = crudRoutes({
+  table: externalCalendarConnections,
+  pk: 'id',
+  tags: ["Scheduling"],
+  orgScoped: true,
+  itemRoute: true,
+  readRole: 'member',
+  writeRole: 'steward',
+});
+export { GET, PATCH, DELETE };

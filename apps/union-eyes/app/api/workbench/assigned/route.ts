@@ -75,7 +75,7 @@ export const GET = withApi(
             LIMIT 200`
       );
 
-      return Response.json({ claims: rows });
+      return { claims: rows };
     });
   },
 );

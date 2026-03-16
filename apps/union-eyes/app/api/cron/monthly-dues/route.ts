@@ -1,19 +1,20 @@
 /**
- * GET POST /api/cron/monthly-dues
- * -> Django auth_core: /api/auth_core/health/
- * NOTE: auto-resolved from cron/monthly-dues
- * Auto-migrated by scripts/migrate_routes.py
+ * Health check endpoint
  */
-import { NextRequest } from 'next/server';
-import { djangoProxy } from '@/lib/django-proxy';
+import { withApi } from '@/lib/api/framework';
 
 export const dynamic = 'force-dynamic';
 
-export function GET(req: NextRequest) {
-  return djangoProxy(req, '/api/auth_core/health/');
-}
-
-export function POST(req: NextRequest) {
-  return djangoProxy(req, '/api/auth_core/health/', { method: 'POST' });
-}
-
+export const GET = withApi(
+  {
+    auth: { required: false },
+    openapi: {
+      tags: ["System"],
+      summary: 'Health check',
+      description: 'Returns service health status.',
+    },
+  },
+  async () => {
+    return { status: 'healthy', timestamp: new Date().toISOString() };
+  },
+);

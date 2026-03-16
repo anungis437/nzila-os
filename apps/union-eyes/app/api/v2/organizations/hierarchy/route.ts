@@ -1,24 +1,25 @@
 /**
- * GET /api/organizations/hierarchy
- * → Django: /api/unions/hierarchy/
- * Migrated to withApi() framework
+ * Organization hierarchy endpoint
  */
-import { djangoProxy } from '@/lib/django-proxy';
 import { withApi } from '@/lib/api/framework';
+import { db } from '@/db/db';
+import { organizationRelationships, organizations } from '@/db/schema';
+import { eq } from 'drizzle-orm';
 
 export const dynamic = 'force-dynamic';
 
 export const GET = withApi(
   {
-    auth: { required: false },
+    auth: { required: true, minRole: 'member' },
     openapi: {
-      tags: ['Organizations', 'Django Proxy'],
-      summary: 'GET hierarchy',
-      description: 'Proxied to Django: /api/unions/hierarchy/',
+      tags: ["Organization"],
+      summary: 'Get organization hierarchy',
+      description: 'Returns the organization hierarchy tree.',
     },
   },
-  async ({ request }) => {
-    const response = await djangoProxy(request, '/api/unions/hierarchy/');
-    return response;
+  async ({ organizationId }) => {
+    const relationships = await db.select().from(organizationRelationships);
+    const orgs = await db.select().from(organizations);
+    return { data: { relationships, organizations: orgs } };
   },
 );

@@ -1,24 +1,18 @@
 /**
- * GET /api/members/[id]/documents
- * → Django: /api/content/documents/?user_id=
- * Migrated to withApi() framework
+ * CRUD item route for documents
  */
-import { djangoProxy } from '@/lib/django-proxy';
-import { withApi } from '@/lib/api/framework';
+import { crudRoutes } from '@/lib/api/crud-factory';
+import { documents } from '@/db/schema';
 
 export const dynamic = 'force-dynamic';
 
-export const GET = withApi(
-  {
-    auth: { required: false },
-    openapi: {
-      tags: ['Members', 'Django Proxy'],
-      summary: 'GET documents',
-      description: 'Proxied to Django: /api/content/documents/?user_id=',
-    },
-  },
-  async ({ request }) => {
-    const response = await djangoProxy(request, '/api/content/documents/?user_id=');
-    return response;
-  },
-);
+const { GET, PATCH, DELETE } = crudRoutes({
+  table: documents,
+  pk: 'id',
+  tags: ["Content"],
+  orgScoped: true,
+  itemRoute: true,
+  readRole: 'member',
+  writeRole: 'steward',
+});
+export { GET, PATCH, DELETE };

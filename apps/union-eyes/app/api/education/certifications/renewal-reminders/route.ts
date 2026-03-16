@@ -1,19 +1,17 @@
 /**
- * GET POST /api/education/certifications/renewal-reminders
- * -> Django unions: /api/unions/training-courses/
- * NOTE: auto-resolved from education/certifications/renewal-reminders
- * Auto-migrated by scripts/migrate_routes.py
+ * CRUD collection route for trainingCourses
  */
-import { NextRequest } from 'next/server';
-import { djangoProxy } from '@/lib/django-proxy';
+import { crudRoutes } from '@/lib/api/crud-factory';
+import { trainingCourses } from '@/db/schema';
 
 export const dynamic = 'force-dynamic';
 
-export function GET(req: NextRequest) {
-  return djangoProxy(req, '/api/unions/training-courses/');
-}
-
-export function POST(req: NextRequest) {
-  return djangoProxy(req, '/api/unions/training-courses/', { method: 'POST' });
-}
-
+const { GET, POST } = crudRoutes({
+  table: trainingCourses,
+  pk: 'id',
+  tags: ["Scheduling"],
+  orgScoped: true,
+  readRole: 'member',
+  writeRole: 'steward',
+});
+export { GET, POST };

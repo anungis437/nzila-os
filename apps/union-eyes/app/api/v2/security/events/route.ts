@@ -1,39 +1,17 @@
 /**
- * GET POST /api/security/events
- * → Django: /api/core/security-events/
- * Migrated to withApi() framework
+ * CRUD collection route for securityEvents
  */
-import { djangoProxy } from '@/lib/django-proxy';
-import { withApi } from '@/lib/api/framework';
+import { crudRoutes } from '@/lib/api/crud-factory';
+import { securityEvents } from '@/db/schema';
 
 export const dynamic = 'force-dynamic';
 
-export const GET = withApi(
-  {
-    auth: { required: false },
-    openapi: {
-      tags: ['Security', 'Django Proxy'],
-      summary: 'GET events',
-      description: 'Proxied to Django: /api/core/security-events/',
-    },
-  },
-  async ({ request }) => {
-    const response = await djangoProxy(request, '/api/core/security-events/');
-    return response;
-  },
-);
-
-export const POST = withApi(
-  {
-    auth: { required: false },
-    openapi: {
-      tags: ['Security', 'Django Proxy'],
-      summary: 'POST events',
-      description: 'Proxied to Django: /api/core/security-events/',
-    },
-  },
-  async ({ request }) => {
-    const response = await djangoProxy(request, '/api/core/security-events/', { method: 'POST' });
-    return response;
-  },
-);
+const { GET, POST } = crudRoutes({
+  table: securityEvents,
+  pk: 'id',
+  tags: ["System"],
+  orgScoped: true,
+  readRole: 'member',
+  writeRole: 'steward',
+});
+export { GET, POST };

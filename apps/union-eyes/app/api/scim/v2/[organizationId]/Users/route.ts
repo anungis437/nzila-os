@@ -1,28 +1,34 @@
 /**
- * GET PATCH DELETE /api/scim/v2/[organizationId]/Users
- * -> Django auth_core: /api/auth_core/scim-configurations/
- * NOTE: auto-resolved from scim/v2/[organizationId]/Users
- * Auto-migrated by scripts/migrate_routes.py
+ * Stub endpoint — returns empty data
  */
-import { NextRequest } from 'next/server';
-import { djangoProxy } from '@/lib/django-proxy';
+import { withApi } from '@/lib/api/framework';
 
 export const dynamic = 'force-dynamic';
 
-type Params = { params: Promise<{ organizationId: string }> };
+export const GET = withApi(
+  {
+    auth: { required: true, minRole: 'member' },
+    openapi: {
+      tags: ["Auth"],
+      summary: 'List records',
+      description: 'Returns data (stub).',
+    },
+  },
+  async () => {
+    return { data: [], pagination: { page: 1, limit: 50, total: 0, totalPages: 0 } };
+  },
+);
 
-export async function GET(req: NextRequest, { params }: Params) {
-  const { organizationId } = await params;
-  return djangoProxy(req, '/api/auth_core/scim-configurations/' + organizationId + '/');
-}
-
-export async function PATCH(req: NextRequest, { params }: Params) {
-  const { organizationId } = await params;
-  return djangoProxy(req, '/api/auth_core/scim-configurations/' + organizationId + '/', { method: 'PATCH' });
-}
-
-export async function DELETE(req: NextRequest, { params }: Params) {
-  const { organizationId } = await params;
-  return djangoProxy(req, '/api/auth_core/scim-configurations/' + organizationId + '/', { method: 'DELETE' });
-}
-
+export const POST = withApi(
+  {
+    auth: { required: true, minRole: 'admin' },
+    openapi: {
+      tags: ["Auth"],
+      summary: 'Create record',
+      description: 'Creates a record (stub).',
+    },
+  },
+  async () => {
+    return { data: { id: crypto.randomUUID(), createdAt: new Date().toISOString() } };
+  },
+);

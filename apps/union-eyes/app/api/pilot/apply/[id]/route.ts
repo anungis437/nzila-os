@@ -1,28 +1,18 @@
 /**
- * GET PATCH DELETE /api/pilot/apply/[id]
- * -> Django auth_core: /api/auth_core/apply/
- * NOTE: auto-resolved from pilot/apply/[id]
- * Auto-migrated by scripts/migrate_routes.py
+ * CRUD item route for pendingProfilesTable
  */
-import { NextRequest } from 'next/server';
-import { djangoProxy } from '@/lib/django-proxy';
+import { crudRoutes } from '@/lib/api/crud-factory';
+import { pendingProfilesTable } from '@/db/schema';
 
 export const dynamic = 'force-dynamic';
 
-type Params = { params: Promise<{ id: string }> };
-
-export async function GET(req: NextRequest, { params }: Params) {
-  const { id } = await params;
-  return djangoProxy(req, '/api/auth_core/apply/' + id + '/');
-}
-
-export async function PATCH(req: NextRequest, { params }: Params) {
-  const { id } = await params;
-  return djangoProxy(req, '/api/auth_core/apply/' + id + '/', { method: 'PATCH' });
-}
-
-export async function DELETE(req: NextRequest, { params }: Params) {
-  const { id } = await params;
-  return djangoProxy(req, '/api/auth_core/apply/' + id + '/', { method: 'DELETE' });
-}
-
+const { GET, PATCH, DELETE } = crudRoutes({
+  table: pendingProfilesTable,
+  pk: 'id',
+  tags: ["Auth"],
+  orgScoped: true,
+  itemRoute: true,
+  readRole: 'member',
+  writeRole: 'member',
+});
+export { GET, PATCH, DELETE };

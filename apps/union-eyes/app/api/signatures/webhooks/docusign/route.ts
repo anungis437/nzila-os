@@ -1,19 +1,17 @@
 /**
- * GET POST /api/signatures/webhooks/docusign
- * -> Django content: /api/content/documents/
- * NOTE: auto-resolved from signatures/webhooks/docusign
- * Auto-migrated by scripts/migrate_routes.py
+ * CRUD collection route for documents
  */
-import { NextRequest } from 'next/server';
-import { djangoProxy } from '@/lib/django-proxy';
+import { crudRoutes } from '@/lib/api/crud-factory';
+import { documents } from '@/db/schema';
 
 export const dynamic = 'force-dynamic';
 
-export function GET(req: NextRequest) {
-  return djangoProxy(req, '/api/content/documents/');
-}
-
-export function POST(req: NextRequest) {
-  return djangoProxy(req, '/api/content/documents/', { method: 'POST' });
-}
-
+const { GET, POST } = crudRoutes({
+  table: documents,
+  pk: 'id',
+  tags: ["Content"],
+  orgScoped: true,
+  readRole: 'member',
+  writeRole: 'steward',
+});
+export { GET, POST };

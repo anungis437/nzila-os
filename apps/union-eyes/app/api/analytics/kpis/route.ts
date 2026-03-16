@@ -1,18 +1,17 @@
 /**
- * GET POST /api/analytics/kpis
- * -> Django analytics: /api/analytics/kpi-configurations/
- * Auto-migrated by scripts/migrate_routes.py
+ * CRUD collection route for kpiConfigurations
  */
-import { NextRequest } from 'next/server';
-import { djangoProxy } from '@/lib/django-proxy';
+import { crudRoutes } from '@/lib/api/crud-factory';
+import { kpiConfigurations } from '@/db/schema';
 
 export const dynamic = 'force-dynamic';
 
-export function GET(req: NextRequest) {
-  return djangoProxy(req, '/api/analytics/kpi-configurations/');
-}
-
-export function POST(req: NextRequest) {
-  return djangoProxy(req, '/api/analytics/kpi-configurations/', { method: 'POST' });
-}
-
+const { GET, POST } = crudRoutes({
+  table: kpiConfigurations,
+  pk: 'id',
+  tags: ["Analytics"],
+  orgScoped: true,
+  readRole: 'member',
+  writeRole: 'steward',
+});
+export { GET, POST };

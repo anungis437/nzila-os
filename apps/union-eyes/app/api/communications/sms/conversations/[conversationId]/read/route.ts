@@ -1,28 +1,17 @@
 /**
- * GET PATCH DELETE /api/communications/sms/conversations/[conversationId]/read
- * -> Django notifications: /api/notifications/campaigns/
- * NOTE: auto-resolved from communications/sms/conversations/[conversationId]/read
- * Auto-migrated by scripts/migrate_routes.py
+ * CRUD collection route for campaigns
  */
-import { NextRequest } from 'next/server';
-import { djangoProxy } from '@/lib/django-proxy';
+import { crudRoutes } from '@/lib/api/crud-factory';
+import { campaigns } from '@/db/schema';
 
 export const dynamic = 'force-dynamic';
 
-type Params = { params: Promise<{ conversationId: string }> };
-
-export async function GET(req: NextRequest, { params }: Params) {
-  const { conversationId } = await params;
-  return djangoProxy(req, '/api/notifications/campaigns/' + conversationId + '/');
-}
-
-export async function PATCH(req: NextRequest, { params }: Params) {
-  const { conversationId } = await params;
-  return djangoProxy(req, '/api/notifications/campaigns/' + conversationId + '/', { method: 'PATCH' });
-}
-
-export async function DELETE(req: NextRequest, { params }: Params) {
-  const { conversationId } = await params;
-  return djangoProxy(req, '/api/notifications/campaigns/' + conversationId + '/', { method: 'DELETE' });
-}
-
+const { GET, POST } = crudRoutes({
+  table: campaigns,
+  pk: 'id',
+  tags: ["Notifications"],
+  orgScoped: true,
+  readRole: 'member',
+  writeRole: 'steward',
+});
+export { GET, POST };

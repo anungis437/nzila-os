@@ -1,39 +1,17 @@
 /**
- * GET PATCH /api/members/me
- * → Django: /api/auth_core/profile/
- * Migrated to withApi() framework
+ * CRUD collection route for profilesTable
  */
-import { djangoProxy } from '@/lib/django-proxy';
-import { withApi } from '@/lib/api/framework';
+import { crudRoutes } from '@/lib/api/crud-factory';
+import { profilesTable } from '@/db/schema';
 
 export const dynamic = 'force-dynamic';
 
-export const GET = withApi(
-  {
-    auth: { required: false },
-    openapi: {
-      tags: ['Members', 'Django Proxy'],
-      summary: 'GET me',
-      description: 'Proxied to Django: /api/auth_core/profile/',
-    },
-  },
-  async ({ request }) => {
-    const response = await djangoProxy(request, '/api/auth_core/profile/');
-    return response;
-  },
-);
-
-export const PATCH = withApi(
-  {
-    auth: { required: false },
-    openapi: {
-      tags: ['Members', 'Django Proxy'],
-      summary: 'PATCH me',
-      description: 'Proxied to Django: /api/auth_core/member-contact-preferences/',
-    },
-  },
-  async ({ request }) => {
-    const response = await djangoProxy(request, '/api/auth_core/member-contact-preferences/', { method: 'PATCH' });
-    return response;
-  },
-);
+const { GET, POST } = crudRoutes({
+  table: profilesTable,
+  pk: 'id',
+  tags: ["Members"],
+  orgScoped: true,
+  readRole: 'member',
+  writeRole: 'steward',
+});
+export { GET, POST };

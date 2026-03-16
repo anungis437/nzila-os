@@ -1,54 +1,18 @@
 /**
- * GET PATCH DELETE /api/reports/[id]
- * → Django: /api/analytics/reports/
- * Migrated to withApi() framework
+ * CRUD item route for reports
  */
-import { djangoProxy } from '@/lib/django-proxy';
-import { withApi } from '@/lib/api/framework';
+import { crudRoutes } from '@/lib/api/crud-factory';
+import { reports } from '@/db/schema';
 
 export const dynamic = 'force-dynamic';
 
-export const GET = withApi(
-  {
-    auth: { required: false },
-    openapi: {
-      tags: ['Reports', 'Django Proxy'],
-      summary: 'GET [id]',
-      description: 'Proxied to Django: /api/analytics/reports/',
-    },
-  },
-  async ({ request }) => {
-    const response = await djangoProxy(request, '/api/analytics/reports/');
-    return response;
-  },
-);
-
-export const PATCH = withApi(
-  {
-    auth: { required: false },
-    openapi: {
-      tags: ['Reports', 'Django Proxy'],
-      summary: 'PATCH [id]',
-      description: 'Proxied to Django: /api/analytics/reports/',
-    },
-  },
-  async ({ request }) => {
-    const response = await djangoProxy(request, '/api/analytics/reports/', { method: 'PATCH' });
-    return response;
-  },
-);
-
-export const DELETE = withApi(
-  {
-    auth: { required: false },
-    openapi: {
-      tags: ['Reports', 'Django Proxy'],
-      summary: 'DELETE [id]',
-      description: 'Proxied to Django: /api/analytics/reports/',
-    },
-  },
-  async ({ request }) => {
-    const response = await djangoProxy(request, '/api/analytics/reports/', { method: 'DELETE' });
-    return response;
-  },
-);
+const { GET, PATCH, DELETE } = crudRoutes({
+  table: reports,
+  pk: 'id',
+  tags: ["Analytics"],
+  orgScoped: true,
+  itemRoute: true,
+  readRole: 'member',
+  writeRole: 'steward',
+});
+export { GET, PATCH, DELETE };

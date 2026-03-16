@@ -1,18 +1,17 @@
 /**
- * GET POST /api/units
- * -> Django unions: /api/unions/bargaining-units/
- * Auto-migrated by scripts/migrate_routes.py
+ * CRUD collection route for bargainingUnits
  */
-import { NextRequest } from 'next/server';
-import { djangoProxy } from '@/lib/django-proxy';
+import { crudRoutes } from '@/lib/api/crud-factory';
+import { bargainingUnits } from '@/db/schema';
 
 export const dynamic = 'force-dynamic';
 
-export function GET(req: NextRequest) {
-  return djangoProxy(req, '/api/unions/bargaining-units/');
-}
-
-export function POST(req: NextRequest) {
-  return djangoProxy(req, '/api/unions/bargaining-units/', { method: 'POST' });
-}
-
+const { GET, POST } = crudRoutes({
+  table: bargainingUnits,
+  pk: 'id',
+  tags: ["Organization"],
+  orgScoped: true,
+  readRole: 'member',
+  writeRole: 'steward',
+});
+export { GET, POST };

@@ -1,54 +1,17 @@
 /**
- * GET PATCH DELETE /api/arrears/escalate/[caseId]
- * → Django: /api/billing/per-capita-remittances/
- * Migrated to withApi() framework
+ * CRUD collection route for perCapitaRemittances
  */
-import { djangoProxy } from '@/lib/django-proxy';
-import { withApi } from '@/lib/api/framework';
+import { crudRoutes } from '@/lib/api/crud-factory';
+import { perCapitaRemittances } from '@/db/schema';
 
 export const dynamic = 'force-dynamic';
 
-export const GET = withApi(
-  {
-    auth: { required: false },
-    openapi: {
-      tags: ['Arrears', 'Django Proxy'],
-      summary: 'GET [caseId]',
-      description: 'Proxied to Django: /api/billing/per-capita-remittances/',
-    },
-  },
-  async ({ request }) => {
-    const response = await djangoProxy(request, '/api/billing/per-capita-remittances/');
-    return response;
-  },
-);
-
-export const PATCH = withApi(
-  {
-    auth: { required: false },
-    openapi: {
-      tags: ['Arrears', 'Django Proxy'],
-      summary: 'PATCH [caseId]',
-      description: 'Proxied to Django: /api/billing/per-capita-remittances/',
-    },
-  },
-  async ({ request }) => {
-    const response = await djangoProxy(request, '/api/billing/per-capita-remittances/', { method: 'PATCH' });
-    return response;
-  },
-);
-
-export const DELETE = withApi(
-  {
-    auth: { required: false },
-    openapi: {
-      tags: ['Arrears', 'Django Proxy'],
-      summary: 'DELETE [caseId]',
-      description: 'Proxied to Django: /api/billing/per-capita-remittances/',
-    },
-  },
-  async ({ request }) => {
-    const response = await djangoProxy(request, '/api/billing/per-capita-remittances/', { method: 'DELETE' });
-    return response;
-  },
-);
+const { GET, POST } = crudRoutes({
+  table: perCapitaRemittances,
+  pk: 'id',
+  tags: ["Billing"],
+  orgScoped: true,
+  readRole: 'member',
+  writeRole: 'steward',
+});
+export { GET, POST };

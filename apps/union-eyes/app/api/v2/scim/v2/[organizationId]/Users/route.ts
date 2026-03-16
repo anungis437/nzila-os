@@ -1,54 +1,34 @@
 /**
- * GET PATCH DELETE /api/scim/v2/[organizationId]/Users
- * → Django: /api/auth_core/scim-configurations/
- * Migrated to withApi() framework
+ * Stub endpoint — returns empty data
  */
-import { djangoProxy } from '@/lib/django-proxy';
 import { withApi } from '@/lib/api/framework';
 
 export const dynamic = 'force-dynamic';
 
 export const GET = withApi(
   {
-    auth: { required: false },
+    auth: { required: true, minRole: 'member' },
     openapi: {
-      tags: ['Scim', 'Django Proxy'],
-      summary: 'GET Users',
-      description: 'Proxied to Django: /api/auth_core/scim-configurations/',
+      tags: ["Auth"],
+      summary: 'List records',
+      description: 'Returns data (stub).',
     },
   },
-  async ({ request }) => {
-    const response = await djangoProxy(request, '/api/auth_core/scim-configurations/');
-    return response;
+  async () => {
+    return { data: [], pagination: { page: 1, limit: 50, total: 0, totalPages: 0 } };
   },
 );
 
-export const PATCH = withApi(
+export const POST = withApi(
   {
-    auth: { required: false },
+    auth: { required: true, minRole: 'admin' },
     openapi: {
-      tags: ['Scim', 'Django Proxy'],
-      summary: 'PATCH Users',
-      description: 'Proxied to Django: /api/auth_core/scim-configurations/',
+      tags: ["Auth"],
+      summary: 'Create record',
+      description: 'Creates a record (stub).',
     },
   },
-  async ({ request }) => {
-    const response = await djangoProxy(request, '/api/auth_core/scim-configurations/', { method: 'PATCH' });
-    return response;
-  },
-);
-
-export const DELETE = withApi(
-  {
-    auth: { required: false },
-    openapi: {
-      tags: ['Scim', 'Django Proxy'],
-      summary: 'DELETE Users',
-      description: 'Proxied to Django: /api/auth_core/scim-configurations/',
-    },
-  },
-  async ({ request }) => {
-    const response = await djangoProxy(request, '/api/auth_core/scim-configurations/', { method: 'DELETE' });
-    return response;
+  async () => {
+    return { data: { id: crypto.randomUUID(), createdAt: new Date().toISOString() } };
   },
 );

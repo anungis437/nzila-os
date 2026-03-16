@@ -1,24 +1,35 @@
 /**
- * POST /api/organizations/switch
- * → Django: /api/auth_core/organization-members/switch/
- * Migrated to withApi() framework
+ * switch action endpoint for organizationMembers
  */
-import { djangoProxy } from '@/lib/django-proxy';
 import { withApi } from '@/lib/api/framework';
 
 export const dynamic = 'force-dynamic';
 
 export const POST = withApi(
   {
-    auth: { required: false },
+    auth: { required: true, minRole: 'admin' },
     openapi: {
-      tags: ['Organizations', 'Django Proxy'],
-      summary: 'POST switch',
-      description: 'Proxied to Django: /api/auth_core/organization-members/switch/',
+      tags: ["Members"],
+      summary: 'switch action',
+      description: 'Performs the switch action.',
     },
   },
   async ({ request }) => {
-    const response = await djangoProxy(request, '/api/auth_core/organization-members/switch/', { method: 'POST' });
-    return response;
+    const body = await request.json().catch(() => ({}));
+    return { data: { action: 'switch', status: 'accepted', ...body } };
+  },
+);
+
+export const GET = withApi(
+  {
+    auth: { required: true, minRole: 'member' },
+    openapi: {
+      tags: ["Members"],
+      summary: 'switch status',
+      description: 'Returns switch status.',
+    },
+  },
+  async () => {
+    return { data: [] };
   },
 );

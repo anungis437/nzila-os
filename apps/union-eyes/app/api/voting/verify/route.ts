@@ -1,19 +1,17 @@
 /**
- * GET POST /api/voting/verify
- * -> Django unions: /api/unions/voting-sessions/
- * NOTE: auto-resolved from voting/verify
- * Auto-migrated by scripts/migrate_routes.py
+ * CRUD collection route for votingSessions
  */
-import { NextRequest } from 'next/server';
-import { djangoProxy } from '@/lib/django-proxy';
+import { crudRoutes } from '@/lib/api/crud-factory';
+import { votingSessions } from '@/db/schema';
 
 export const dynamic = 'force-dynamic';
 
-export function GET(req: NextRequest) {
-  return djangoProxy(req, '/api/unions/voting-sessions/');
-}
-
-export function POST(req: NextRequest) {
-  return djangoProxy(req, '/api/unions/voting-sessions/', { method: 'POST' });
-}
-
+const { GET, POST } = crudRoutes({
+  table: votingSessions,
+  pk: 'id',
+  tags: ["Governance"],
+  orgScoped: true,
+  readRole: 'member',
+  writeRole: 'steward',
+});
+export { GET, POST };

@@ -1,39 +1,17 @@
 /**
- * GET POST /api/mobile/push/unsubscribe
- * → Django: /api/auth_core/push/
- * Migrated to withApi() framework
+ * CRUD collection route for pushNotifications
  */
-import { djangoProxy } from '@/lib/django-proxy';
-import { withApi } from '@/lib/api/framework';
+import { crudRoutes } from '@/lib/api/crud-factory';
+import { pushNotifications } from '@/db/schema';
 
 export const dynamic = 'force-dynamic';
 
-export const GET = withApi(
-  {
-    auth: { required: false },
-    openapi: {
-      tags: ['Mobile', 'Django Proxy'],
-      summary: 'GET unsubscribe',
-      description: 'Proxied to Django: /api/auth_core/push/',
-    },
-  },
-  async ({ request }) => {
-    const response = await djangoProxy(request, '/api/auth_core/push/');
-    return response;
-  },
-);
-
-export const POST = withApi(
-  {
-    auth: { required: false },
-    openapi: {
-      tags: ['Mobile', 'Django Proxy'],
-      summary: 'POST unsubscribe',
-      description: 'Proxied to Django: /api/auth_core/push/',
-    },
-  },
-  async ({ request }) => {
-    const response = await djangoProxy(request, '/api/auth_core/push/', { method: 'POST' });
-    return response;
-  },
-);
+const { GET, POST } = crudRoutes({
+  table: pushNotifications,
+  pk: 'id',
+  tags: ["Notifications"],
+  orgScoped: true,
+  readRole: 'member',
+  writeRole: 'steward',
+});
+export { GET, POST };

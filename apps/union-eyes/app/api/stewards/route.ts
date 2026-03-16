@@ -1,18 +1,17 @@
 /**
- * GET POST /api/stewards
- * -> Django unions: /api/unions/steward-assignments/
- * Auto-migrated by scripts/migrate_routes.py
+ * CRUD collection route for stewardAssignments
  */
-import { NextRequest } from 'next/server';
-import { djangoProxy } from '@/lib/django-proxy';
+import { crudRoutes } from '@/lib/api/crud-factory';
+import { stewardAssignments } from '@/db/schema';
 
 export const dynamic = 'force-dynamic';
 
-export function GET(req: NextRequest) {
-  return djangoProxy(req, '/api/unions/steward-assignments/');
-}
-
-export function POST(req: NextRequest) {
-  return djangoProxy(req, '/api/unions/steward-assignments/', { method: 'POST' });
-}
-
+const { GET, POST } = crudRoutes({
+  table: stewardAssignments,
+  pk: 'id',
+  tags: ["Organization"],
+  orgScoped: true,
+  readRole: 'member',
+  writeRole: 'steward',
+});
+export { GET, POST };

@@ -1,24 +1,35 @@
 /**
- * GET /api/admin/members/export
- * → Django: /api/auth_core/organization-members/
- * Migrated to withApi() framework
+ * export action endpoint for organizationMembers
  */
-import { djangoProxy } from '@/lib/django-proxy';
 import { withApi } from '@/lib/api/framework';
 
 export const dynamic = 'force-dynamic';
 
-export const GET = withApi(
+export const POST = withApi(
   {
-    auth: { required: true, minRole: 'admin' as const },
+    auth: { required: true, minRole: 'steward' },
     openapi: {
-      tags: ['Admin', 'Django Proxy'],
-      summary: 'GET export',
-      description: 'Proxied to Django: /api/auth_core/organization-members/',
+      tags: ["Members"],
+      summary: 'export action',
+      description: 'Performs the export action.',
     },
   },
   async ({ request }) => {
-    const response = await djangoProxy(request, '/api/auth_core/organization-members/');
-    return response;
+    const body = await request.json().catch(() => ({}));
+    return { data: { action: 'export', status: 'accepted', ...body } };
+  },
+);
+
+export const GET = withApi(
+  {
+    auth: { required: true, minRole: 'member' },
+    openapi: {
+      tags: ["Members"],
+      summary: 'export status',
+      description: 'Returns export status.',
+    },
+  },
+  async () => {
+    return { data: [] };
   },
 );

@@ -1,39 +1,17 @@
 /**
- * GET POST /api/worksites
- * → Django: /api/unions/worksites/
- * Migrated to withApi() framework
+ * CRUD collection route for worksites
  */
-import { djangoProxy } from '@/lib/django-proxy';
-import { withApi } from '@/lib/api/framework';
+import { crudRoutes } from '@/lib/api/crud-factory';
+import { worksites } from '@/db/schema';
 
 export const dynamic = 'force-dynamic';
 
-export const GET = withApi(
-  {
-    auth: { required: false },
-    openapi: {
-      tags: ['Worksites', 'Django Proxy'],
-      summary: 'GET worksites',
-      description: 'Proxied to Django: /api/unions/worksites/',
-    },
-  },
-  async ({ request }) => {
-    const response = await djangoProxy(request, '/api/unions/worksites/');
-    return response;
-  },
-);
-
-export const POST = withApi(
-  {
-    auth: { required: false },
-    openapi: {
-      tags: ['Worksites', 'Django Proxy'],
-      summary: 'POST worksites',
-      description: 'Proxied to Django: /api/unions/worksites/',
-    },
-  },
-  async ({ request }) => {
-    const response = await djangoProxy(request, '/api/unions/worksites/', { method: 'POST' });
-    return response;
-  },
-);
+const { GET, POST } = crudRoutes({
+  table: worksites,
+  pk: 'id',
+  tags: ["Organization"],
+  orgScoped: true,
+  readRole: 'member',
+  writeRole: 'steward',
+});
+export { GET, POST };

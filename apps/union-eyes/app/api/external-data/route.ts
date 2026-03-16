@@ -1,18 +1,17 @@
 /**
- * GET POST /api/external-data
- * -> Django core: /api/core/external-accounts/
- * Auto-migrated by scripts/migrate_routes.py
+ * CRUD collection route for externalAccounts
  */
-import { NextRequest } from 'next/server';
-import { djangoProxy } from '@/lib/django-proxy';
+import { crudRoutes } from '@/lib/api/crud-factory';
+import { externalAccounts } from '@/db/schema';
 
 export const dynamic = 'force-dynamic';
 
-export function GET(req: NextRequest) {
-  return djangoProxy(req, '/api/core/external-accounts/');
-}
-
-export function POST(req: NextRequest) {
-  return djangoProxy(req, '/api/core/external-accounts/', { method: 'POST' });
-}
-
+const { GET, POST } = crudRoutes({
+  table: externalAccounts,
+  pk: 'id',
+  tags: ["Finance"],
+  orgScoped: true,
+  readRole: 'member',
+  writeRole: 'steward',
+});
+export { GET, POST };

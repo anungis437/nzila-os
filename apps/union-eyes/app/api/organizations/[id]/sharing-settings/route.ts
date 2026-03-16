@@ -1,16 +1,18 @@
-import { NextRequest } from 'next/server';
-import { djangoProxy } from '@/lib/django-proxy';
+/**
+ * CRUD item route for organizations
+ */
+import { crudRoutes } from '@/lib/api/crud-factory';
+import { organizations } from '@/db/schema';
 
 export const dynamic = 'force-dynamic';
 
-type Params = { params: Promise<{ id: string }> };
-
-export async function GET(req: NextRequest, { params }: Params) {
-  const { id } = await params;
-  return djangoProxy(req, '/api/auth_core/organizations/' + id + '/sharing-settings/');
-}
-
-export async function PATCH(req: NextRequest, { params }: Params) {
-  const { id } = await params;
-  return djangoProxy(req, '/api/auth_core/organizations/' + id + '/sharing-settings/', { method: 'PATCH' });
-}
+const { GET, PATCH, DELETE } = crudRoutes({
+  table: organizations,
+  pk: 'id',
+  tags: ["Organizations"],
+  orgScoped: false,
+  itemRoute: true,
+  readRole: 'member',
+  writeRole: 'steward',
+});
+export { GET, PATCH, DELETE };

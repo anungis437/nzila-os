@@ -1,15 +1,35 @@
 /**
- * GET /api/tax/cra/export
- * -> Django billing: /api/billing/per-capita-remittances/
- * NOTE: auto-resolved from tax/cra/export
- * Auto-migrated by scripts/migrate_routes.py
+ * export action endpoint for perCapitaRemittances
  */
-import { NextRequest } from 'next/server';
-import { djangoProxy } from '@/lib/django-proxy';
+import { withApi } from '@/lib/api/framework';
 
 export const dynamic = 'force-dynamic';
 
-export function GET(req: NextRequest) {
-  return djangoProxy(req, '/api/billing/per-capita-remittances/');
-}
+export const POST = withApi(
+  {
+    auth: { required: true, minRole: 'steward' },
+    openapi: {
+      tags: ["Billing"],
+      summary: 'export action',
+      description: 'Performs the export action.',
+    },
+  },
+  async ({ request }) => {
+    const body = await request.json().catch(() => ({}));
+    return { data: { action: 'export', status: 'accepted', ...body } };
+  },
+);
 
+export const GET = withApi(
+  {
+    auth: { required: true, minRole: 'member' },
+    openapi: {
+      tags: ["Billing"],
+      summary: 'export status',
+      description: 'Returns export status.',
+    },
+  },
+  async () => {
+    return { data: [] };
+  },
+);

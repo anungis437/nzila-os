@@ -1,19 +1,17 @@
 /**
- * GET POST /api/tax/cope/receipts
- * -> Django billing: /api/billing/per-capita-remittances/
- * NOTE: auto-resolved from tax/cope/receipts
- * Auto-migrated by scripts/migrate_routes.py
+ * CRUD collection route for perCapitaRemittances
  */
-import { NextRequest } from 'next/server';
-import { djangoProxy } from '@/lib/django-proxy';
+import { crudRoutes } from '@/lib/api/crud-factory';
+import { perCapitaRemittances } from '@/db/schema';
 
 export const dynamic = 'force-dynamic';
 
-export function GET(req: NextRequest) {
-  return djangoProxy(req, '/api/billing/per-capita-remittances/');
-}
-
-export function POST(req: NextRequest) {
-  return djangoProxy(req, '/api/billing/per-capita-remittances/', { method: 'POST' });
-}
-
+const { GET, POST } = crudRoutes({
+  table: perCapitaRemittances,
+  pk: 'id',
+  tags: ["Billing"],
+  orgScoped: true,
+  readRole: 'member',
+  writeRole: 'steward',
+});
+export { GET, POST };

@@ -1,39 +1,17 @@
 /**
- * GET POST /api/employers
- * → Django: /api/unions/employers/
- * Migrated to withApi() framework
+ * CRUD collection route for employers
  */
-import { djangoProxy } from '@/lib/django-proxy';
-import { withApi } from '@/lib/api/framework';
+import { crudRoutes } from '@/lib/api/crud-factory';
+import { employers } from '@/db/schema';
 
 export const dynamic = 'force-dynamic';
 
-export const GET = withApi(
-  {
-    auth: { required: false },
-    openapi: {
-      tags: ['Employers', 'Django Proxy'],
-      summary: 'GET employers',
-      description: 'Proxied to Django: /api/unions/employers/',
-    },
-  },
-  async ({ request }) => {
-    const response = await djangoProxy(request, '/api/unions/employers/');
-    return response;
-  },
-);
-
-export const POST = withApi(
-  {
-    auth: { required: false },
-    openapi: {
-      tags: ['Employers', 'Django Proxy'],
-      summary: 'POST employers',
-      description: 'Proxied to Django: /api/unions/employers/',
-    },
-  },
-  async ({ request }) => {
-    const response = await djangoProxy(request, '/api/unions/employers/', { method: 'POST' });
-    return response;
-  },
-);
+const { GET, POST } = crudRoutes({
+  table: employers,
+  pk: 'id',
+  tags: ["Organization"],
+  orgScoped: true,
+  readRole: 'member',
+  writeRole: 'steward',
+});
+export { GET, POST };

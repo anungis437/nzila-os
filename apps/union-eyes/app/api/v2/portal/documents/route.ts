@@ -1,39 +1,17 @@
 /**
- * GET POST /api/portal/documents
- * → Django: /api/content/cms-pages/
- * Migrated to withApi() framework
+ * CRUD collection route for cmsPages
  */
-import { djangoProxy } from '@/lib/django-proxy';
-import { withApi } from '@/lib/api/framework';
+import { crudRoutes } from '@/lib/api/crud-factory';
+import { cmsPages } from '@/db/schema';
 
 export const dynamic = 'force-dynamic';
 
-export const GET = withApi(
-  {
-    auth: { required: false },
-    openapi: {
-      tags: ['Portal', 'Django Proxy'],
-      summary: 'GET documents',
-      description: 'Proxied to Django: /api/content/cms-pages/',
-    },
-  },
-  async ({ request }) => {
-    const response = await djangoProxy(request, '/api/content/cms-pages/');
-    return response;
-  },
-);
-
-export const POST = withApi(
-  {
-    auth: { required: false },
-    openapi: {
-      tags: ['Portal', 'Django Proxy'],
-      summary: 'POST documents',
-      description: 'Proxied to Django: /api/content/cms-pages/',
-    },
-  },
-  async ({ request }) => {
-    const response = await djangoProxy(request, '/api/content/cms-pages/', { method: 'POST' });
-    return response;
-  },
-);
+const { GET, POST } = crudRoutes({
+  table: cmsPages,
+  pk: 'id',
+  tags: ["Content"],
+  orgScoped: true,
+  readRole: 'member',
+  writeRole: 'steward',
+});
+export { GET, POST };

@@ -1,18 +1,17 @@
 /**
- * GET POST /api/worksites
- * -> Django unions: /api/unions/worksites/
- * Auto-migrated by scripts/migrate_routes.py
+ * CRUD collection route for worksites
  */
-import { NextRequest } from 'next/server';
-import { djangoProxy } from '@/lib/django-proxy';
+import { crudRoutes } from '@/lib/api/crud-factory';
+import { worksites } from '@/db/schema';
 
 export const dynamic = 'force-dynamic';
 
-export function GET(req: NextRequest) {
-  return djangoProxy(req, '/api/unions/worksites/');
-}
-
-export function POST(req: NextRequest) {
-  return djangoProxy(req, '/api/unions/worksites/', { method: 'POST' });
-}
-
+const { GET, POST } = crudRoutes({
+  table: worksites,
+  pk: 'id',
+  tags: ["Organization"],
+  orgScoped: true,
+  readRole: 'member',
+  writeRole: 'steward',
+});
+export { GET, POST };

@@ -1,39 +1,17 @@
 /**
- * GET POST /api/onboarding
- * → Django: /api/auth_core/pending-profiles/
- * Migrated to withApi() framework
+ * CRUD collection route for pendingProfilesTable
  */
-import { djangoProxy } from '@/lib/django-proxy';
-import { withApi } from '@/lib/api/framework';
+import { crudRoutes } from '@/lib/api/crud-factory';
+import { pendingProfilesTable } from '@/db/schema';
 
 export const dynamic = 'force-dynamic';
 
-export const GET = withApi(
-  {
-    auth: { required: false },
-    openapi: {
-      tags: ['Onboarding', 'Django Proxy'],
-      summary: 'GET onboarding',
-      description: 'Proxied to Django: /api/auth_core/pending-profiles/',
-    },
-  },
-  async ({ request }) => {
-    const response = await djangoProxy(request, '/api/auth_core/pending-profiles/');
-    return response;
-  },
-);
-
-export const POST = withApi(
-  {
-    auth: { required: false },
-    openapi: {
-      tags: ['Onboarding', 'Django Proxy'],
-      summary: 'POST onboarding',
-      description: 'Proxied to Django: /api/auth_core/pending-profiles/',
-    },
-  },
-  async ({ request }) => {
-    const response = await djangoProxy(request, '/api/auth_core/pending-profiles/', { method: 'POST' });
-    return response;
-  },
-);
+const { GET, POST } = crudRoutes({
+  table: pendingProfilesTable,
+  pk: 'id',
+  tags: ["Auth"],
+  orgScoped: true,
+  readRole: 'member',
+  writeRole: 'steward',
+});
+export { GET, POST };

@@ -1,19 +1,17 @@
 /**
- * GET POST /api/messaging/campaigns
- * -> Django notifications: /api/notifications/message-threads/
- * NOTE: auto-resolved from messaging/campaigns
- * Auto-migrated by scripts/migrate_routes.py
+ * CRUD collection route for messageThreads
  */
-import { NextRequest } from 'next/server';
-import { djangoProxy } from '@/lib/django-proxy';
+import { crudRoutes } from '@/lib/api/crud-factory';
+import { messageThreads } from '@/db/schema';
 
 export const dynamic = 'force-dynamic';
 
-export function GET(req: NextRequest) {
-  return djangoProxy(req, '/api/notifications/message-threads/');
-}
-
-export function POST(req: NextRequest) {
-  return djangoProxy(req, '/api/notifications/message-threads/', { method: 'POST' });
-}
-
+const { GET, POST } = crudRoutes({
+  table: messageThreads,
+  pk: 'id',
+  tags: ["Notifications"],
+  orgScoped: true,
+  readRole: 'member',
+  writeRole: 'steward',
+});
+export { GET, POST };

@@ -1,24 +1,18 @@
 /**
- * GET /api/communications/campaigns/[id]/analytics
- * → Django: /api/notifications/campaigns/
- * Migrated to withApi() framework
+ * CRUD item route for campaigns
  */
-import { djangoProxy } from '@/lib/django-proxy';
-import { withApi } from '@/lib/api/framework';
+import { crudRoutes } from '@/lib/api/crud-factory';
+import { campaigns } from '@/db/schema';
 
 export const dynamic = 'force-dynamic';
 
-export const GET = withApi(
-  {
-    auth: { required: true, minRole: 'member' },
-    openapi: {
-      tags: ['Communications', 'Django Proxy'],
-      summary: 'GET analytics',
-      description: 'Proxied to Django: /api/notifications/campaigns/',
-    },
-  },
-  async ({ request }) => {
-    const response = await djangoProxy(request, '/api/notifications/campaigns/');
-    return response;
-  },
-);
+const { GET, PATCH, DELETE } = crudRoutes({
+  table: campaigns,
+  pk: 'id',
+  tags: ["Notifications"],
+  orgScoped: true,
+  itemRoute: true,
+  readRole: 'member',
+  writeRole: 'steward',
+});
+export { GET, PATCH, DELETE };

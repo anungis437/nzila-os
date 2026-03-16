@@ -1,39 +1,17 @@
 /**
- * GET POST /api/storage/cleanup
- * → Django: /api/content/cms-media-library/
- * Migrated to withApi() framework
+ * CRUD collection route for cmsMediaLibrary
  */
-import { djangoProxy } from '@/lib/django-proxy';
-import { withApi } from '@/lib/api/framework';
+import { crudRoutes } from '@/lib/api/crud-factory';
+import { cmsMediaLibrary } from '@/db/schema';
 
 export const dynamic = 'force-dynamic';
 
-export const GET = withApi(
-  {
-    auth: { required: false },
-    openapi: {
-      tags: ['Storage', 'Django Proxy'],
-      summary: 'GET cleanup',
-      description: 'Proxied to Django: /api/content/cms-media-library/',
-    },
-  },
-  async ({ request }) => {
-    const response = await djangoProxy(request, '/api/content/cms-media-library/');
-    return response;
-  },
-);
-
-export const POST = withApi(
-  {
-    auth: { required: false },
-    openapi: {
-      tags: ['Storage', 'Django Proxy'],
-      summary: 'POST cleanup',
-      description: 'Proxied to Django: /api/content/cms-media-library/',
-    },
-  },
-  async ({ request }) => {
-    const response = await djangoProxy(request, '/api/content/cms-media-library/', { method: 'POST' });
-    return response;
-  },
-);
+const { GET, POST } = crudRoutes({
+  table: cmsMediaLibrary,
+  pk: 'id',
+  tags: ["Content"],
+  orgScoped: true,
+  readRole: 'member',
+  writeRole: 'steward',
+});
+export { GET, POST };

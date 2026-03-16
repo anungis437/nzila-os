@@ -1,19 +1,17 @@
 /**
- * GET POST /api/reports/builder
- * -> Django analytics: /api/analytics/reports/
- * NOTE: auto-resolved from reports/builder
- * Auto-migrated by scripts/migrate_routes.py
+ * CRUD collection route for reports
  */
-import { NextRequest } from 'next/server';
-import { djangoProxy } from '@/lib/django-proxy';
+import { crudRoutes } from '@/lib/api/crud-factory';
+import { reports } from '@/db/schema';
 
 export const dynamic = 'force-dynamic';
 
-export function GET(req: NextRequest) {
-  return djangoProxy(req, '/api/analytics/reports/');
-}
-
-export function POST(req: NextRequest) {
-  return djangoProxy(req, '/api/analytics/reports/', { method: 'POST' });
-}
-
+const { GET, POST } = crudRoutes({
+  table: reports,
+  pk: 'id',
+  tags: ["Analytics"],
+  orgScoped: true,
+  readRole: 'member',
+  writeRole: 'steward',
+});
+export { GET, POST };

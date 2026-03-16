@@ -1,18 +1,18 @@
-import { NextRequest } from 'next/server';
-import { djangoProxy } from '@/lib/django-proxy';
+/**
+ * CRUD item route for communicationPreferences
+ */
+import { crudRoutes } from '@/lib/api/crud-factory';
+import { communicationPreferences } from '@/db/schema';
 
 export const dynamic = 'force-dynamic';
 
-type Params = { params: Promise<{ id: string }> };
-
-/** GET  /api/members/[id]/preferences  Django GET  /api/auth_core/member-contact-preferences/?user_id={id} */
-export async function GET(req: NextRequest, { params }: Params) {
-  const { id } = await params;
-  return djangoProxy(req, '/api/auth_core/member-contact-preferences/?user_id=' + id);
-}
-
-/** PATCH /api/members/[id]/preferences  Django PATCH /api/auth_core/member-contact-preferences/{id}/ */
-export async function PATCH(req: NextRequest, { params }: Params) {
-  const { id } = await params;
-  return djangoProxy(req, '/api/auth_core/member-contact-preferences/' + id + '/', { method: 'PATCH' });
-}
+const { GET, PATCH, DELETE } = crudRoutes({
+  table: communicationPreferences,
+  pk: 'id',
+  tags: ["Auth"],
+  orgScoped: true,
+  itemRoute: true,
+  readRole: 'member',
+  writeRole: 'steward',
+});
+export { GET, PATCH, DELETE };

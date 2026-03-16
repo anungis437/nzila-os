@@ -1,54 +1,18 @@
 /**
- * GET PATCH DELETE /api/precedents/[id]
- * → Django: /api/bargaining/arbitration-precedents/
- * Migrated to withApi() framework
+ * CRUD item route for arbitrationPrecedents
  */
-import { djangoProxy } from '@/lib/django-proxy';
-import { withApi } from '@/lib/api/framework';
+import { crudRoutes } from '@/lib/api/crud-factory';
+import { arbitrationPrecedents } from '@/db/schema';
 
 export const dynamic = 'force-dynamic';
 
-export const GET = withApi(
-  {
-    auth: { required: true, minRole: 'steward' },
-    openapi: {
-      tags: ['Precedents', 'Django Proxy'],
-      summary: 'GET [id]',
-      description: 'Proxied to Django: /api/bargaining/arbitration-precedents/',
-    },
-  },
-  async ({ request }) => {
-    const response = await djangoProxy(request, '/api/bargaining/arbitration-precedents/');
-    return response;
-  },
-);
-
-export const PATCH = withApi(
-  {
-    auth: { required: true, minRole: 'steward' },
-    openapi: {
-      tags: ['Precedents', 'Django Proxy'],
-      summary: 'PATCH [id]',
-      description: 'Proxied to Django: /api/bargaining/arbitration-precedents/',
-    },
-  },
-  async ({ request }) => {
-    const response = await djangoProxy(request, '/api/bargaining/arbitration-precedents/', { method: 'PATCH' });
-    return response;
-  },
-);
-
-export const DELETE = withApi(
-  {
-    auth: { required: true, minRole: 'steward' },
-    openapi: {
-      tags: ['Precedents', 'Django Proxy'],
-      summary: 'DELETE [id]',
-      description: 'Proxied to Django: /api/bargaining/arbitration-precedents/',
-    },
-  },
-  async ({ request }) => {
-    const response = await djangoProxy(request, '/api/bargaining/arbitration-precedents/', { method: 'DELETE' });
-    return response;
-  },
-);
+const { GET, PATCH, DELETE } = crudRoutes({
+  table: arbitrationPrecedents,
+  pk: 'id',
+  tags: ["Bargaining"],
+  orgScoped: true,
+  itemRoute: true,
+  readRole: 'member',
+  writeRole: 'steward',
+});
+export { GET, PATCH, DELETE };

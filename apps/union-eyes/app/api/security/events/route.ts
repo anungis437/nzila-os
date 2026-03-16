@@ -1,19 +1,17 @@
 /**
- * GET POST /api/security/events
- * -> Django core: /api/core/security-events/
- * NOTE: auto-resolved from security/events
- * Auto-migrated by scripts/migrate_routes.py
+ * CRUD collection route for securityEvents
  */
-import { NextRequest } from 'next/server';
-import { djangoProxy } from '@/lib/django-proxy';
+import { crudRoutes } from '@/lib/api/crud-factory';
+import { securityEvents } from '@/db/schema';
 
 export const dynamic = 'force-dynamic';
 
-export function GET(req: NextRequest) {
-  return djangoProxy(req, '/api/core/security-events/');
-}
-
-export function POST(req: NextRequest) {
-  return djangoProxy(req, '/api/core/security-events/', { method: 'POST' });
-}
-
+const { GET, POST } = crudRoutes({
+  table: securityEvents,
+  pk: 'id',
+  tags: ["System"],
+  orgScoped: true,
+  readRole: 'member',
+  writeRole: 'steward',
+});
+export { GET, POST };

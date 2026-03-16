@@ -1,18 +1,17 @@
 /**
- * GET /api/admin/employment/member/[memberId]/history
- * -> Django auth_core: /api/auth_core/organization-members/
- * NOTE: auto-resolved from admin/employment/member/[memberId]/history
- * Auto-migrated by scripts/migrate_routes.py
+ * CRUD collection route for organizationMembers
  */
-import { NextRequest } from 'next/server';
-import { djangoProxy } from '@/lib/django-proxy';
+import { crudRoutes } from '@/lib/api/crud-factory';
+import { organizationMembers } from '@/db/schema';
 
 export const dynamic = 'force-dynamic';
 
-type Params = { params: Promise<{ memberId: string }> };
-
-export async function GET(req: NextRequest, { params }: Params) {
-  const { memberId } = await params;
-  return djangoProxy(req, '/api/auth_core/organization-members/' + memberId + '/');
-}
-
+const { GET, POST } = crudRoutes({
+  table: organizationMembers,
+  pk: 'id',
+  tags: ["Members"],
+  orgScoped: true,
+  readRole: 'member',
+  writeRole: 'steward',
+});
+export { GET, POST };

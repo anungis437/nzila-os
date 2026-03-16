@@ -1,19 +1,17 @@
 /**
- * GET POST /api/organizing/nlrb-filings
- * -> Django unions: /api/unions/organizing-campaigns/
- * NOTE: auto-resolved from organizing/nlrb-filings
- * Auto-migrated by scripts/migrate_routes.py
+ * CRUD collection route for organizingCampaigns
  */
-import { NextRequest } from 'next/server';
-import { djangoProxy } from '@/lib/django-proxy';
+import { crudRoutes } from '@/lib/api/crud-factory';
+import { organizingCampaigns } from '@/db/schema';
 
 export const dynamic = 'force-dynamic';
 
-export function GET(req: NextRequest) {
-  return djangoProxy(req, '/api/unions/organizing-campaigns/');
-}
-
-export function POST(req: NextRequest) {
-  return djangoProxy(req, '/api/unions/organizing-campaigns/', { method: 'POST' });
-}
-
+const { GET, POST } = crudRoutes({
+  table: organizingCampaigns,
+  pk: 'id',
+  tags: ["Organization"],
+  orgScoped: true,
+  readRole: 'member',
+  writeRole: 'steward',
+});
+export { GET, POST };

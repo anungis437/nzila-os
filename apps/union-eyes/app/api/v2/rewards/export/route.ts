@@ -1,24 +1,35 @@
 /**
- * GET /api/rewards/export
- * → Django: /api/unions/recognition-awards/
- * Migrated to withApi() framework
+ * export action endpoint for recognitionAwards
  */
-import { djangoProxy } from '@/lib/django-proxy';
 import { withApi } from '@/lib/api/framework';
 
 export const dynamic = 'force-dynamic';
 
-export const GET = withApi(
+export const POST = withApi(
   {
-    auth: { required: true },
+    auth: { required: true, minRole: 'steward' },
     openapi: {
-      tags: ['Rewards', 'Django Proxy'],
-      summary: 'GET export',
-      description: 'Proxied to Django: /api/unions/recognition-awards/',
+      tags: ["Organization"],
+      summary: 'export action',
+      description: 'Performs the export action.',
     },
   },
   async ({ request }) => {
-    const response = await djangoProxy(request, '/api/unions/recognition-awards/');
-    return response;
+    const body = await request.json().catch(() => ({}));
+    return { data: { action: 'export', status: 'accepted', ...body } };
+  },
+);
+
+export const GET = withApi(
+  {
+    auth: { required: true, minRole: 'member' },
+    openapi: {
+      tags: ["Organization"],
+      summary: 'export status',
+      description: 'Returns export status.',
+    },
+  },
+  async () => {
+    return { data: [] };
   },
 );

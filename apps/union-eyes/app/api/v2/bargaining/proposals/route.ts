@@ -1,39 +1,17 @@
 /**
- * GET POST /api/bargaining/proposals
- * → Django: /api/bargaining/bargaining-proposals/
- * Migrated to withApi() framework
+ * CRUD collection route for bargainingProposals
  */
-import { djangoProxy } from '@/lib/django-proxy';
-import { withApi } from '@/lib/api/framework';
+import { crudRoutes } from '@/lib/api/crud-factory';
+import { bargainingProposals } from '@/db/schema';
 
 export const dynamic = 'force-dynamic';
 
-export const GET = withApi(
-  {
-    auth: { required: true, minRole: 'member' },
-    openapi: {
-      tags: ['Bargaining', 'Django Proxy'],
-      summary: 'GET proposals',
-      description: 'Proxied to Django: /api/bargaining/bargaining-proposals/',
-    },
-  },
-  async ({ request }) => {
-    const response = await djangoProxy(request, '/api/bargaining/bargaining-proposals/');
-    return response;
-  },
-);
-
-export const POST = withApi(
-  {
-    auth: { required: true, minRole: 'steward' },
-    openapi: {
-      tags: ['Bargaining', 'Django Proxy'],
-      summary: 'POST proposals',
-      description: 'Proxied to Django: /api/bargaining/bargaining-proposals/',
-    },
-  },
-  async ({ request }) => {
-    const response = await djangoProxy(request, '/api/bargaining/bargaining-proposals/', { method: 'POST' });
-    return response;
-  },
-);
+const { GET, POST } = crudRoutes({
+  table: bargainingProposals,
+  pk: 'id',
+  tags: ["Bargaining"],
+  orgScoped: true,
+  readRole: 'member',
+  writeRole: 'steward',
+});
+export { GET, POST };

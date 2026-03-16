@@ -1,39 +1,17 @@
 /**
- * GET POST /api/reconciliation/resolve
- * → Django: /api/billing/remittance-approvals/
- * Migrated to withApi() framework
+ * CRUD collection route for remittanceApprovals
  */
-import { djangoProxy } from '@/lib/django-proxy';
-import { withApi } from '@/lib/api/framework';
+import { crudRoutes } from '@/lib/api/crud-factory';
+import { remittanceApprovals } from '@/db/schema';
 
 export const dynamic = 'force-dynamic';
 
-export const GET = withApi(
-  {
-    auth: { required: false },
-    openapi: {
-      tags: ['Reconciliation', 'Django Proxy'],
-      summary: 'GET resolve',
-      description: 'Proxied to Django: /api/billing/remittance-approvals/',
-    },
-  },
-  async ({ request }) => {
-    const response = await djangoProxy(request, '/api/billing/remittance-approvals/');
-    return response;
-  },
-);
-
-export const POST = withApi(
-  {
-    auth: { required: false },
-    openapi: {
-      tags: ['Reconciliation', 'Django Proxy'],
-      summary: 'POST resolve',
-      description: 'Proxied to Django: /api/billing/remittance-approvals/',
-    },
-  },
-  async ({ request }) => {
-    const response = await djangoProxy(request, '/api/billing/remittance-approvals/', { method: 'POST' });
-    return response;
-  },
-);
+const { GET, POST } = crudRoutes({
+  table: remittanceApprovals,
+  pk: 'id',
+  tags: ["Billing"],
+  orgScoped: true,
+  readRole: 'member',
+  writeRole: 'steward',
+});
+export { GET, POST };

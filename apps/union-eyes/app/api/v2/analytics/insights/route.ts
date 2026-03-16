@@ -1,24 +1,17 @@
 /**
- * GET /api/analytics/insights
- * → Django: /api/analytics/insight-recommendations/
- * Migrated to withApi() framework
+ * CRUD collection route for insightRecommendations
  */
-import { djangoProxy } from '@/lib/django-proxy';
-import { withApi } from '@/lib/api/framework';
+import { crudRoutes } from '@/lib/api/crud-factory';
+import { insightRecommendations } from '@/db/schema';
 
 export const dynamic = 'force-dynamic';
 
-export const GET = withApi(
-  {
-    auth: { required: true, minRole: 'steward' },
-    openapi: {
-      tags: ['Analytics', 'Django Proxy'],
-      summary: 'GET insights',
-      description: 'Proxied to Django: /api/analytics/insight-recommendations/',
-    },
-  },
-  async ({ request }) => {
-    const response = await djangoProxy(request, '/api/analytics/insight-recommendations/');
-    return response;
-  },
-);
+const { GET, POST } = crudRoutes({
+  table: insightRecommendations,
+  pk: 'id',
+  tags: ["Analytics"],
+  orgScoped: true,
+  readRole: 'member',
+  writeRole: 'steward',
+});
+export { GET, POST };

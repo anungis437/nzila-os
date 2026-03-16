@@ -1,18 +1,17 @@
 /**
- * GET POST /api/meeting-rooms
- * -> Django unions: /api/unions/meeting-rooms/
- * Auto-migrated by scripts/migrate_routes.py
+ * CRUD collection route for meetingRooms
  */
-import { NextRequest } from 'next/server';
-import { djangoProxy } from '@/lib/django-proxy';
+import { crudRoutes } from '@/lib/api/crud-factory';
+import { meetingRooms } from '@/db/schema';
 
 export const dynamic = 'force-dynamic';
 
-export function GET(req: NextRequest) {
-  return djangoProxy(req, '/api/unions/meeting-rooms/');
-}
-
-export function POST(req: NextRequest) {
-  return djangoProxy(req, '/api/unions/meeting-rooms/', { method: 'POST' });
-}
-
+const { GET, POST } = crudRoutes({
+  table: meetingRooms,
+  pk: 'id',
+  tags: ["Scheduling"],
+  orgScoped: true,
+  readRole: 'member',
+  writeRole: 'steward',
+});
+export { GET, POST };

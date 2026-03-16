@@ -1,28 +1,18 @@
 /**
- * GET PATCH DELETE /api/support/tickets/[id]/assign
- * -> Django notifications: /api/notifications/in-app-notifications/
- * NOTE: auto-resolved from support/tickets/[id]/assign
- * Auto-migrated by scripts/migrate_routes.py
+ * CRUD item route for inAppNotifications
  */
-import { NextRequest } from 'next/server';
-import { djangoProxy } from '@/lib/django-proxy';
+import { crudRoutes } from '@/lib/api/crud-factory';
+import { inAppNotifications } from '@/db/schema';
 
 export const dynamic = 'force-dynamic';
 
-type Params = { params: Promise<{ id: string }> };
-
-export async function GET(req: NextRequest, { params }: Params) {
-  const { id } = await params;
-  return djangoProxy(req, '/api/notifications/in-app-notifications/' + id + '/');
-}
-
-export async function PATCH(req: NextRequest, { params }: Params) {
-  const { id } = await params;
-  return djangoProxy(req, '/api/notifications/in-app-notifications/' + id + '/', { method: 'PATCH' });
-}
-
-export async function DELETE(req: NextRequest, { params }: Params) {
-  const { id } = await params;
-  return djangoProxy(req, '/api/notifications/in-app-notifications/' + id + '/', { method: 'DELETE' });
-}
-
+const { GET, PATCH, DELETE } = crudRoutes({
+  table: inAppNotifications,
+  pk: 'id',
+  tags: ["Notifications"],
+  orgScoped: true,
+  itemRoute: true,
+  readRole: 'member',
+  writeRole: 'steward',
+});
+export { GET, PATCH, DELETE };

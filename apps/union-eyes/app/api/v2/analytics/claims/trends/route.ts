@@ -1,24 +1,17 @@
 /**
- * GET /api/analytics/claims/trends
- * → Django: /api/analytics/trend-analyses/
- * Migrated to withApi() framework
+ * CRUD collection route for trendAnalyses
  */
-import { djangoProxy } from '@/lib/django-proxy';
-import { withApi } from '@/lib/api/framework';
+import { crudRoutes } from '@/lib/api/crud-factory';
+import { trendAnalyses } from '@/db/schema';
 
 export const dynamic = 'force-dynamic';
 
-export const GET = withApi(
-  {
-    auth: { required: true, minRole: 'steward' },
-    openapi: {
-      tags: ['Analytics', 'Django Proxy'],
-      summary: 'GET trends',
-      description: 'Proxied to Django: /api/analytics/trend-analyses/',
-    },
-  },
-  async ({ request }) => {
-    const response = await djangoProxy(request, '/api/analytics/trend-analyses/');
-    return response;
-  },
-);
+const { GET, POST } = crudRoutes({
+  table: trendAnalyses,
+  pk: 'id',
+  tags: ["Analytics"],
+  orgScoped: true,
+  readRole: 'member',
+  writeRole: 'steward',
+});
+export { GET, POST };

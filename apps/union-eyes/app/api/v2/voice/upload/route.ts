@@ -1,39 +1,17 @@
 /**
- * GET POST /api/voice/upload
- * → Django: /api/ai_core/knowledge-base/
- * Migrated to withApi() framework
+ * CRUD collection route for knowledgeBase
  */
-import { djangoProxy } from '@/lib/django-proxy';
-import { withApi } from '@/lib/api/framework';
+import { crudRoutes } from '@/lib/api/crud-factory';
+import { knowledgeBase } from '@/db/schema';
 
 export const dynamic = 'force-dynamic';
 
-export const GET = withApi(
-  {
-    auth: { required: false },
-    openapi: {
-      tags: ['Voice', 'Django Proxy'],
-      summary: 'GET upload',
-      description: 'Proxied to Django: /api/ai_core/knowledge-base/',
-    },
-  },
-  async ({ request }) => {
-    const response = await djangoProxy(request, '/api/ai_core/knowledge-base/');
-    return response;
-  },
-);
-
-export const POST = withApi(
-  {
-    auth: { required: false },
-    openapi: {
-      tags: ['Voice', 'Django Proxy'],
-      summary: 'POST upload',
-      description: 'Proxied to Django: /api/ai_core/knowledge-base/',
-    },
-  },
-  async ({ request }) => {
-    const response = await djangoProxy(request, '/api/ai_core/knowledge-base/', { method: 'POST' });
-    return response;
-  },
-);
+const { GET, POST } = crudRoutes({
+  table: knowledgeBase,
+  pk: 'id',
+  tags: ["AI"],
+  orgScoped: true,
+  readRole: 'member',
+  writeRole: 'steward',
+});
+export { GET, POST };

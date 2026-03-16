@@ -1,18 +1,17 @@
 /**
- * GET POST /api/billing/invoices
- * -> Django core: /api/core/external-invoices/
- * Auto-migrated by scripts/migrate_routes.py
+ * CRUD collection route for externalInvoices
  */
-import { NextRequest } from 'next/server';
-import { djangoProxy } from '@/lib/django-proxy';
+import { crudRoutes } from '@/lib/api/crud-factory';
+import { externalInvoices } from '@/db/schema';
 
 export const dynamic = 'force-dynamic';
 
-export function GET(req: NextRequest) {
-  return djangoProxy(req, '/api/core/external-invoices/');
-}
-
-export function POST(req: NextRequest) {
-  return djangoProxy(req, '/api/core/external-invoices/', { method: 'POST' });
-}
-
+const { GET, POST } = crudRoutes({
+  table: externalInvoices,
+  pk: 'id',
+  tags: ["Finance"],
+  orgScoped: true,
+  readRole: 'member',
+  writeRole: 'steward',
+});
+export { GET, POST };

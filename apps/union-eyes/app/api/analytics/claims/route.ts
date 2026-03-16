@@ -1,14 +1,17 @@
 /**
- * GET /api/analytics/claims
- * -> Django analytics: /api/analytics/analytics-metrics/
- * Auto-migrated by scripts/migrate_routes.py
+ * CRUD collection route for analyticsMetrics
  */
-import { NextRequest } from 'next/server';
-import { djangoProxy } from '@/lib/django-proxy';
+import { crudRoutes } from '@/lib/api/crud-factory';
+import { analyticsMetrics } from '@/db/schema';
 
 export const dynamic = 'force-dynamic';
 
-export function GET(req: NextRequest) {
-  return djangoProxy(req, '/api/analytics/analytics-metrics/');
-}
-
+const { GET, POST } = crudRoutes({
+  table: analyticsMetrics,
+  pk: 'id',
+  tags: ["Analytics"],
+  orgScoped: true,
+  readRole: 'member',
+  writeRole: 'steward',
+});
+export { GET, POST };

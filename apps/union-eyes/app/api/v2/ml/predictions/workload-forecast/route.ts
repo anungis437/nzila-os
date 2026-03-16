@@ -1,39 +1,17 @@
 /**
- * GET POST /api/ml/predictions/workload-forecast
- * → Django: /api/ai_core/ml-predictions/
- * Migrated to withApi() framework
+ * CRUD collection route for mlPredictions
  */
-import { djangoProxy } from '@/lib/django-proxy';
-import { withApi } from '@/lib/api/framework';
+import { crudRoutes } from '@/lib/api/crud-factory';
+import { mlPredictions } from '@/db/schema';
 
 export const dynamic = 'force-dynamic';
 
-export const GET = withApi(
-  {
-    auth: { required: false },
-    openapi: {
-      tags: ['Ml', 'Django Proxy'],
-      summary: 'GET workload-forecast',
-      description: 'Proxied to Django: /api/ai_core/ml-predictions/',
-    },
-  },
-  async ({ request }) => {
-    const response = await djangoProxy(request, '/api/ai_core/ml-predictions/');
-    return response;
-  },
-);
-
-export const POST = withApi(
-  {
-    auth: { required: false },
-    openapi: {
-      tags: ['Ml', 'Django Proxy'],
-      summary: 'POST workload-forecast',
-      description: 'Proxied to Django: /api/ai_core/ml-predictions/',
-    },
-  },
-  async ({ request }) => {
-    const response = await djangoProxy(request, '/api/ai_core/ml-predictions/', { method: 'POST' });
-    return response;
-  },
-);
+const { GET, POST } = crudRoutes({
+  table: mlPredictions,
+  pk: 'id',
+  tags: ["AI"],
+  orgScoped: true,
+  readRole: 'member',
+  writeRole: 'steward',
+});
+export { GET, POST };

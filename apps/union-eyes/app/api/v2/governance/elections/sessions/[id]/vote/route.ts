@@ -1,54 +1,18 @@
 /**
- * GET PATCH DELETE /api/governance/elections/sessions/[id]/vote
- * → Django: /api/compliance/data-classification-policy/
- * Migrated to withApi() framework
+ * CRUD item route for dataClassificationPolicy
  */
-import { djangoProxy } from '@/lib/django-proxy';
-import { withApi } from '@/lib/api/framework';
+import { crudRoutes } from '@/lib/api/crud-factory';
+import { dataClassificationPolicy } from '@/db/schema';
 
 export const dynamic = 'force-dynamic';
 
-export const GET = withApi(
-  {
-    auth: { required: false },
-    openapi: {
-      tags: ['Governance', 'Django Proxy'],
-      summary: 'GET vote',
-      description: 'Proxied to Django: /api/compliance/data-classification-policy/',
-    },
-  },
-  async ({ request }) => {
-    const response = await djangoProxy(request, '/api/compliance/data-classification-policy/');
-    return response;
-  },
-);
-
-export const PATCH = withApi(
-  {
-    auth: { required: false },
-    openapi: {
-      tags: ['Governance', 'Django Proxy'],
-      summary: 'PATCH vote',
-      description: 'Proxied to Django: /api/compliance/data-classification-policy/',
-    },
-  },
-  async ({ request }) => {
-    const response = await djangoProxy(request, '/api/compliance/data-classification-policy/', { method: 'PATCH' });
-    return response;
-  },
-);
-
-export const DELETE = withApi(
-  {
-    auth: { required: false },
-    openapi: {
-      tags: ['Governance', 'Django Proxy'],
-      summary: 'DELETE vote',
-      description: 'Proxied to Django: /api/compliance/data-classification-policy/',
-    },
-  },
-  async ({ request }) => {
-    const response = await djangoProxy(request, '/api/compliance/data-classification-policy/', { method: 'DELETE' });
-    return response;
-  },
-);
+const { GET, PATCH, DELETE } = crudRoutes({
+  table: dataClassificationPolicy,
+  pk: 'id',
+  tags: ["Compliance"],
+  orgScoped: true,
+  itemRoute: true,
+  readRole: 'member',
+  writeRole: 'admin',
+});
+export { GET, PATCH, DELETE };

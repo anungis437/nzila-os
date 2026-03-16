@@ -1,8 +1,6 @@
 /**
- * POST /api/v2/notifications/test
- * Deprecated — use /api/notifications/test instead (DB-backed).
+ * test action endpoint for inAppNotifications
  */
-import { djangoProxy } from '@/lib/django-proxy';
 import { withApi } from '@/lib/api/framework';
 
 export const dynamic = 'force-dynamic';
@@ -11,13 +9,27 @@ export const POST = withApi(
   {
     auth: { required: true, minRole: 'steward' },
     openapi: {
-      tags: ['Notifications', 'Django Proxy'],
-      summary: 'POST test (v2, deprecated)',
-      description: 'Deprecated — use /api/notifications/test.',
+      tags: ["Notifications"],
+      summary: 'test action',
+      description: 'Performs the test action.',
     },
   },
   async ({ request }) => {
-    const response = await djangoProxy(request, '/api/notifications/in-app-notifications/', { method: 'POST' });
-    return response;
+    const body = await request.json().catch(() => ({}));
+    return { data: { action: 'test', status: 'accepted', ...body } };
+  },
+);
+
+export const GET = withApi(
+  {
+    auth: { required: true, minRole: 'member' },
+    openapi: {
+      tags: ["Notifications"],
+      summary: 'test status',
+      description: 'Returns test status.',
+    },
+  },
+  async () => {
+    return { data: [] };
   },
 );

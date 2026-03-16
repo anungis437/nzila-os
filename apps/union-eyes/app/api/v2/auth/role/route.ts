@@ -1,39 +1,17 @@
 /**
- * GET POST /api/auth/role
- * → Django: /api/auth_core/role/
- * Migrated to withApi() framework
+ * CRUD collection route for organizationMembers
  */
-import { djangoProxy } from '@/lib/django-proxy';
-import { withApi } from '@/lib/api/framework';
+import { crudRoutes } from '@/lib/api/crud-factory';
+import { organizationMembers } from '@/db/schema';
 
 export const dynamic = 'force-dynamic';
 
-export const GET = withApi(
-  {
-    auth: { required: false },
-    openapi: {
-      tags: ['Auth', 'Django Proxy'],
-      summary: 'GET role',
-      description: 'Proxied to Django: /api/auth_core/role/',
-    },
-  },
-  async ({ request }) => {
-    const response = await djangoProxy(request, '/api/auth_core/role/');
-    return response;
-  },
-);
-
-export const POST = withApi(
-  {
-    auth: { required: false },
-    openapi: {
-      tags: ['Auth', 'Django Proxy'],
-      summary: 'POST role',
-      description: 'Proxied to Django: /api/auth_core/role/',
-    },
-  },
-  async ({ request }) => {
-    const response = await djangoProxy(request, '/api/auth_core/role/', { method: 'POST' });
-    return response;
-  },
-);
+const { GET, POST } = crudRoutes({
+  table: organizationMembers,
+  pk: 'id',
+  tags: ["Auth"],
+  orgScoped: true,
+  readRole: 'member',
+  writeRole: 'admin',
+});
+export { GET, POST };

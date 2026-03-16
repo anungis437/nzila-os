@@ -1,14 +1,17 @@
 /**
- * GET /api/activities
- * -> Django core: /api/core/audit-logs/
- * Auto-migrated by scripts/migrate_routes.py
+ * CRUD collection route for auditLogs
  */
-import { NextRequest } from 'next/server';
-import { djangoProxy } from '@/lib/django-proxy';
+import { crudRoutes } from '@/lib/api/crud-factory';
+import { auditLogs } from '@/db/schema';
 
 export const dynamic = 'force-dynamic';
 
-export function GET(req: NextRequest) {
-  return djangoProxy(req, '/api/core/audit-logs/');
-}
-
+const { GET, POST } = crudRoutes({
+  table: auditLogs,
+  pk: 'id',
+  tags: ["System"],
+  orgScoped: true,
+  readRole: 'member',
+  writeRole: 'steward',
+});
+export { GET, POST };

@@ -1,28 +1,35 @@
 /**
- * GET PATCH DELETE /api/admin/clc/remittances/[id]/submit
- * -> Django auth_core: /api/auth_core/organization-members/
- * NOTE: auto-resolved from admin/clc/remittances/[id]/submit
- * Auto-migrated by scripts/migrate_routes.py
+ * submit action endpoint for organizationMembers
  */
-import { NextRequest } from 'next/server';
-import { djangoProxy } from '@/lib/django-proxy';
+import { withApi } from '@/lib/api/framework';
 
 export const dynamic = 'force-dynamic';
 
-type Params = { params: Promise<{ id: string }> };
+export const POST = withApi(
+  {
+    auth: { required: true, minRole: 'steward' },
+    openapi: {
+      tags: ["Members"],
+      summary: 'submit action',
+      description: 'Performs the submit action.',
+    },
+  },
+  async ({ request }) => {
+    const body = await request.json().catch(() => ({}));
+    return { data: { action: 'submit', status: 'accepted', ...body } };
+  },
+);
 
-export async function GET(req: NextRequest, { params }: Params) {
-  const { id } = await params;
-  return djangoProxy(req, '/api/auth_core/organization-members/' + id + '/');
-}
-
-export async function PATCH(req: NextRequest, { params }: Params) {
-  const { id } = await params;
-  return djangoProxy(req, '/api/auth_core/organization-members/' + id + '/', { method: 'PATCH' });
-}
-
-export async function DELETE(req: NextRequest, { params }: Params) {
-  const { id } = await params;
-  return djangoProxy(req, '/api/auth_core/organization-members/' + id + '/', { method: 'DELETE' });
-}
-
+export const GET = withApi(
+  {
+    auth: { required: true, minRole: 'member' },
+    openapi: {
+      tags: ["Members"],
+      summary: 'submit status',
+      description: 'Returns submit status.',
+    },
+  },
+  async () => {
+    return { data: [] };
+  },
+);

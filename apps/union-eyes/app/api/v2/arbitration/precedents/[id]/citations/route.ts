@@ -1,54 +1,18 @@
 /**
- * GET PATCH DELETE /api/arbitration/precedents/[id]/citations
- * → Django: /api/bargaining/arbitration-decisions/
- * Migrated to withApi() framework
+ * CRUD item route for arbitrationDecisions
  */
-import { djangoProxy } from '@/lib/django-proxy';
-import { withApi } from '@/lib/api/framework';
+import { crudRoutes } from '@/lib/api/crud-factory';
+import { arbitrationDecisions } from '@/db/schema';
 
 export const dynamic = 'force-dynamic';
 
-export const GET = withApi(
-  {
-    auth: { required: true, minRole: 'steward' },
-    openapi: {
-      tags: ['Arbitration', 'Django Proxy'],
-      summary: 'GET citations',
-      description: 'Proxied to Django: /api/bargaining/arbitration-decisions/',
-    },
-  },
-  async ({ request }) => {
-    const response = await djangoProxy(request, '/api/bargaining/arbitration-decisions/');
-    return response;
-  },
-);
-
-export const PATCH = withApi(
-  {
-    auth: { required: true, minRole: 'steward' },
-    openapi: {
-      tags: ['Arbitration', 'Django Proxy'],
-      summary: 'PATCH citations',
-      description: 'Proxied to Django: /api/bargaining/arbitration-decisions/',
-    },
-  },
-  async ({ request }) => {
-    const response = await djangoProxy(request, '/api/bargaining/arbitration-decisions/', { method: 'PATCH' });
-    return response;
-  },
-);
-
-export const DELETE = withApi(
-  {
-    auth: { required: true, minRole: 'steward' },
-    openapi: {
-      tags: ['Arbitration', 'Django Proxy'],
-      summary: 'DELETE citations',
-      description: 'Proxied to Django: /api/bargaining/arbitration-decisions/',
-    },
-  },
-  async ({ request }) => {
-    const response = await djangoProxy(request, '/api/bargaining/arbitration-decisions/', { method: 'DELETE' });
-    return response;
-  },
-);
+const { GET, PATCH, DELETE } = crudRoutes({
+  table: arbitrationDecisions,
+  pk: 'id',
+  tags: ["Bargaining"],
+  orgScoped: true,
+  itemRoute: true,
+  readRole: 'member',
+  writeRole: 'steward',
+});
+export { GET, PATCH, DELETE };

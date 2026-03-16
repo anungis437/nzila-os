@@ -1,19 +1,17 @@
 /**
- * GET POST /api/mobile/notifications
- * -> Django auth_core: /api/auth_core/notifications/
- * NOTE: auto-resolved from mobile/notifications
- * Auto-migrated by scripts/migrate_routes.py
+ * CRUD collection route for notifications
  */
-import { NextRequest } from 'next/server';
-import { djangoProxy } from '@/lib/django-proxy';
+import { crudRoutes } from '@/lib/api/crud-factory';
+import { notifications } from '@/db/schema';
 
 export const dynamic = 'force-dynamic';
 
-export function GET(req: NextRequest) {
-  return djangoProxy(req, '/api/auth_core/notifications/');
-}
-
-export function POST(req: NextRequest) {
-  return djangoProxy(req, '/api/auth_core/notifications/', { method: 'POST' });
-}
-
+const { GET, POST } = crudRoutes({
+  table: notifications,
+  pk: 'id',
+  tags: ["Notifications"],
+  orgScoped: true,
+  readRole: 'member',
+  writeRole: 'steward',
+});
+export { GET, POST };

@@ -1,19 +1,17 @@
 /**
- * GET POST /api/stripe/webhooks
- * -> Django billing: /api/billing/stripe-connect-accounts/
- * NOTE: auto-resolved from stripe/webhooks
- * Auto-migrated by scripts/migrate_routes.py
+ * CRUD collection route for stripeConnectAccounts
  */
-import { NextRequest } from 'next/server';
-import { djangoProxy } from '@/lib/django-proxy';
+import { crudRoutes } from '@/lib/api/crud-factory';
+import { stripeConnectAccounts } from '@/db/schema';
 
 export const dynamic = 'force-dynamic';
 
-export function GET(req: NextRequest) {
-  return djangoProxy(req, '/api/billing/stripe-connect-accounts/');
-}
-
-export function POST(req: NextRequest) {
-  return djangoProxy(req, '/api/billing/stripe-connect-accounts/', { method: 'POST' });
-}
-
+const { GET, POST } = crudRoutes({
+  table: stripeConnectAccounts,
+  pk: 'id',
+  tags: ["Billing"],
+  orgScoped: true,
+  readRole: 'member',
+  writeRole: 'admin',
+});
+export { GET, POST };

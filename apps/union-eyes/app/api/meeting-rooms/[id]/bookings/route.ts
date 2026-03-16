@@ -1,28 +1,18 @@
 /**
- * GET PATCH DELETE /api/meeting-rooms/[id]/bookings
- * -> Django unions: /api/unions/meeting-rooms/
- * NOTE: auto-resolved from meeting-rooms/[id]/bookings
- * Auto-migrated by scripts/migrate_routes.py
+ * CRUD item route for meetingRooms
  */
-import { NextRequest } from 'next/server';
-import { djangoProxy } from '@/lib/django-proxy';
+import { crudRoutes } from '@/lib/api/crud-factory';
+import { meetingRooms } from '@/db/schema';
 
 export const dynamic = 'force-dynamic';
 
-type Params = { params: Promise<{ id: string }> };
-
-export async function GET(req: NextRequest, { params }: Params) {
-  const { id } = await params;
-  return djangoProxy(req, '/api/unions/meeting-rooms/' + id + '/');
-}
-
-export async function PATCH(req: NextRequest, { params }: Params) {
-  const { id } = await params;
-  return djangoProxy(req, '/api/unions/meeting-rooms/' + id + '/', { method: 'PATCH' });
-}
-
-export async function DELETE(req: NextRequest, { params }: Params) {
-  const { id } = await params;
-  return djangoProxy(req, '/api/unions/meeting-rooms/' + id + '/', { method: 'DELETE' });
-}
-
+const { GET, PATCH, DELETE } = crudRoutes({
+  table: meetingRooms,
+  pk: 'id',
+  tags: ["Scheduling"],
+  orgScoped: true,
+  itemRoute: true,
+  readRole: 'member',
+  writeRole: 'steward',
+});
+export { GET, PATCH, DELETE };

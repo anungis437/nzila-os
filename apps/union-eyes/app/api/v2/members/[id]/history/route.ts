@@ -1,24 +1,48 @@
 /**
- * GET /api/members/[id]/history
- * → Django: /api/auth_core/member-history-events/?user_id=
- * Migrated to withApi() framework
+ * Item stub endpoint
  */
-import { djangoProxy } from '@/lib/django-proxy';
 import { withApi } from '@/lib/api/framework';
 
 export const dynamic = 'force-dynamic';
 
 export const GET = withApi(
   {
-    auth: { required: false },
+    auth: { required: true, minRole: 'member' },
     openapi: {
-      tags: ['Members', 'Django Proxy'],
-      summary: 'GET history',
-      description: 'Proxied to Django: /api/auth_core/member-history-events/?user_id=',
+      tags: ["Members"],
+      summary: 'Get by ID (stub)',
+      description: 'Returns a single record (stub).',
     },
   },
-  async ({ request }) => {
-    const response = await djangoProxy(request, '/api/auth_core/member-history-events/?user_id=');
-    return response;
+  async ({ params }) => {
+    return { data: { id: params.id } };
+  },
+);
+
+export const PATCH = withApi(
+  {
+    auth: { required: true, minRole: 'steward' },
+    openapi: {
+      tags: ["Members"],
+      summary: 'Update record (stub)',
+      description: 'Updates a record (stub).',
+    },
+  },
+  async ({ params }) => {
+    return { data: { id: params.id, updatedAt: new Date().toISOString() } };
+  },
+);
+
+export const DELETE = withApi(
+  {
+    auth: { required: true, minRole: 'admin' },
+    openapi: {
+      tags: ["Members"],
+      summary: 'Delete record (stub)',
+      description: 'Deletes a record (stub).',
+    },
+  },
+  async ({ params }) => {
+    return { data: { id: params.id, deleted: true } };
   },
 );

@@ -1,24 +1,17 @@
 /**
- * GET /api/case-studies
- * → Django: /api/grievances/grievances/
- * Migrated to withApi() framework
+ * CRUD collection route for grievances
  */
-import { djangoProxy } from '@/lib/django-proxy';
-import { withApi } from '@/lib/api/framework';
+import { crudRoutes } from '@/lib/api/crud-factory';
+import { grievances } from '@/db/schema';
 
 export const dynamic = 'force-dynamic';
 
-export const GET = withApi(
-  {
-    auth: { required: false },
-    openapi: {
-      tags: ['Case-studies', 'Django Proxy'],
-      summary: 'GET case-studies',
-      description: 'Proxied to Django: /api/grievances/grievances/',
-    },
-  },
-  async ({ request }) => {
-    const response = await djangoProxy(request, '/api/grievances/grievances/');
-    return response;
-  },
-);
+const { GET, POST } = crudRoutes({
+  table: grievances,
+  pk: 'id',
+  tags: ["Claims"],
+  orgScoped: true,
+  readRole: 'member',
+  writeRole: 'steward',
+});
+export { GET, POST };
