@@ -165,7 +165,7 @@ const API_ROUTE_MATRIX: ApiRouteRule[] = [
   { apiPath: 'messaging/templates',  expectedAuthPattern: 'crudRoutes',           expectedMinRole: 'member',               backingPage: 'communications/templates' },
   { apiPath: 'messaging/preferences',expectedAuthPattern: 'crudRoutes',           expectedMinRole: 'member',               backingPage: 'settings/communications' },
   { apiPath: 'organizing/notes',     expectedAuthPattern: 'crudRoutes',           expectedMinRole: 'member',               backingPage: 'organizing/notes' },
-  { apiPath: 'activities',           expectedAuthPattern: 'crudRoutes',           expectedMinRole: 'member',               backingPage: 'admin (audit log)' },
+  { apiPath: 'activities',           expectedAuthPattern: 'withApi',              expectedMinRole: 'member',               backingPage: 'admin (audit log)' },
   { apiPath: 'dues/calculate',       expectedAuthPattern: 'withRoleAuth',         expectedMinRole: 'steward',              backingPage: 'admin/dues' },
   { apiPath: 'analytics/cross-org',  expectedAuthPattern: 'withApi',              expectedMinRole: 'platform_lead',        backingPage: 'cross-org analytics (platform)' },
 ]
@@ -366,7 +366,8 @@ describe('PERSONA_ACCESS_001 — API routes backing dashboard have auth and DB s
           content.includes('@/db/db') ||
           content.includes('@nzila/db') ||
           content.includes('@/lib/dues-calculation-engine') || // DuesCalculationEngine wraps DB queries
-          content.includes('@/lib/database')
+          content.includes('@/lib/database') ||
+          content.includes('@/lib/db/') // RLS context wrappers are DB-connected
         expect(
           hasSchemaImport,
           `API route ${rule.apiPath} does not import from DB schema — may not be DB-connected`,
