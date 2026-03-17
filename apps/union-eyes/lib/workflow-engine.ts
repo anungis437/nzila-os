@@ -37,6 +37,7 @@ import {
 } from './services/defensibility-pack';
 import { defensibilityPacks } from '../db/schema/defensibility-packs-schema';
 import { addTimelineEntry } from './integrations/timeline-integration';
+import { eventBus } from '@/lib/events/event-bus';
 import { logger } from '@/lib/logger';
 
 // Define valid status transitions
@@ -453,6 +454,27 @@ export async function updateClaimStatus(
     // Send email notification (async, don&apos;t block on email sending)
     sendClaimStatusNotification(claim.claimId, currentStatus, newStatus, notes).catch((_error) => {
 // Don&apos;t fail the status update if email fails
+    });
+    // EMIT CLAIM EVENT (staging hardening — all transitions emit to claim_events)
+    eventBus.emit('claim_events', {
+      claim_id: claim.claimId,
+      event_type: `transition:${currentStatus}→${newStatus}`,
+      actor: userId,
+      timestamp: new Date().toISOString(),
+      payload: {
+        previousStatus: currentStatus,
+        newStatus,
+        claimNumber: claim.claimNumber,
+        organizationId: claim.organizationId,
+        priority,
+        slaCompliant: validation.metadata?.slaCompliant,
+        daysInState: validation.metadata?.daysInState,
+        notes: notes ?? null,
+      },
+    }, {
+      organizationId: claim.organizationId,
+      userId,
+      source: 'workflow-engine',
     });
     // SPRINT 7: Auto-create timeline entry (FSM → Timeline integration)
     // Every status change automatically appears in member's case timeline

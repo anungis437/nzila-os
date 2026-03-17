@@ -44,22 +44,43 @@ interface CLCStats {
 // ── Component ────────────────────────────────────────────────────────────────
 export default function CLCDashboard() {
   const { user } = useUser();
-  const { userOrganizations } = useOrganization();
+  const { organizationId } = useOrganization();
   const [mounted, setMounted] = useState(false);
-
-  const stats: CLCStats = {
-    totalAffiliates: userOrganizations?.length ?? 0,
-    totalMembers: 0,
-    remittancesCollected: 0,
-    remittancesOutstanding: 0,
-    activeCampaigns: 0,
-    complianceRate: 0,
-  };
+  const [childOrgs, setChildOrgs] = useState<{ id: string; name: string; memberCount: number }[]>([]);
 
   useEffect(() => {
     // eslint-disable-next-line react-hooks/set-state-in-effect
     setMounted(true);
   }, []);
+
+  // Fetch actual child organizations (affiliates) instead of user memberships
+  useEffect(() => {
+    if (!organizationId) return;
+    let cancelled = false;
+    (async () => {
+      try {
+        const res = await fetch(`/api/organizations/${organizationId}/children`);
+        if (res.ok) {
+          const json = await res.json();
+          if (!cancelled) setChildOrgs(json.data ?? []);
+        }
+      } catch {
+        // API unavailable — keep empty
+      }
+    })();
+    return () => { cancelled = true; };
+  }, [organizationId]);
+
+  const totalAffiliateMembers = childOrgs.reduce((sum, o) => sum + (o.memberCount ?? 0), 0);
+
+  const stats: CLCStats = {
+    totalAffiliates: childOrgs.length,
+    totalMembers: totalAffiliateMembers,
+    remittancesCollected: 0,
+    remittancesOutstanding: 0,
+    activeCampaigns: 0,
+    complianceRate: 0,
+  };
 
   const getGreeting = () => {
     const hour = new Date().getHours();
