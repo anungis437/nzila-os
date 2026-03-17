@@ -25,6 +25,7 @@
 import { auth } from '@/lib/api-auth-guard';
 import { db } from '@/db/db';
 import { sql } from 'drizzle-orm';
+import { logger } from '@/lib/logger';
 import type { NodePgDatabase } from 'drizzle-orm/node-postgres';
 
 /**
@@ -83,11 +84,11 @@ export async function withRLSContext<T>(
     throw new Error('Unauthorized: No authenticated user found. User must be logged in via Clerk.');
   }
 
-  // NzilaOS PR-UE-02: Require org context for all RLS-guarded operations
+  // Organization context required — warn when missing (platform admins may lack active org)
   if (!orgId) {
-    throw new Error(
-      'Organization context required: No active organization found. ' +
-      'User must have an active Org selected in Clerk.'
+    logger.warn(
+      '[withRLSContext] Organization context required but orgId is null — ' +
+      'proceeding without org isolation. User must have an active Org selected in Clerk for RLS.'
     );
   }
 
@@ -100,10 +101,10 @@ export async function withRLSContext<T>(
     // NOTE: SET LOCAL does not accept parameterized values ($1); use set_config() instead
     await tx.execute(sql`SELECT set_config('app.current_user_id', ${userId}, true)`);
 
-    // NzilaOS PR-UE-02: Set org context for RLS policies
-    // This makes the org ID available to all RLS policies as:
-    // current_setting('app.current_org_id', true)
-    await tx.execute(sql`SELECT set_config('app.current_org_id', ${orgId}, true)`);
+    // Set org context for RLS policies when available
+    if (orgId) {
+      await tx.execute(sql`SELECT set_config('app.current_org_id', ${orgId}, true)`);
+    }
     
     // Execute the operation with user + org context set
     const result = await operation(tx as unknown as NodePgDatabase<Record<string, unknown>>);
