@@ -18,6 +18,13 @@ import {
   commerceQuotes,
   commerceQuoteLines,
   commerceTimelineEvents,
+  commerceOrders,
+  commerceSuppliers,
+  commercePurchaseOrders,
+  flowProductionJobs,
+  flowShipments,
+  flowPayments,
+  flowDomainEvents,
 } from '@nzila/db'
 import {
   upsertOrgSettings,
@@ -683,11 +690,185 @@ export async function seedDemo() {
     }
   }
 
-  // Create order-centric demo data (in-memory for now; DB insert when tables exist)
+  // ── Seed order-centric demo data to DB ──────────────────────────────────
+
   const vendors = createDemoVendors(org.id)
   const orders = createDemoOrders(org.id)
   const purchaseOrders = createDemoPurchaseOrders(org.id)
   const productionJobs = createDemoProductionJobs(org.id)
+
+  // Insert vendors (as commerce suppliers) into DB
+  for (const v of vendors) {
+    await db
+      .insert(commerceSuppliers)
+      .values({
+        id: v.id,
+        orgId: v.orgId,
+        name: v.name,
+        email: v.contactEmail,
+        leadTimeDays: v.leadTimeDays,
+      })
+      .onConflictDoNothing()
+  }
+
+  // Map Flow order status → commerce enum status
+  const orderStatusMap: Record<string, string> = {
+    DEPOSIT_REQUIRED: 'created',
+    READY_FOR_PROCUREMENT: 'confirmed',
+    IN_PRODUCTION: 'fulfillment',
+    SHIPPED: 'shipped',
+    CLOSED: 'completed',
+  }
+
+  // Insert orders into DB
+  for (const o of orders) {
+    await db
+      .insert(commerceOrders)
+      .values({
+        id: o.id,
+        orgId: o.orgId,
+        customerId: o.customerId,
+        quoteId: o.quoteId,
+        ref: `SO-2026-${o.id.slice(-3)}`,
+        status: (orderStatusMap[o.status] ?? 'created') as 'created',
+        currency: o.currency as 'CAD',
+        subtotal: String(o.totalAmount),
+        taxTotal: '0',
+        total: String(o.totalAmount),
+        paymentStatus: o.paymentStatus,
+        productionStatus: o.productionStatus,
+        fulfillmentStatus: o.fulfillmentStatus,
+        notes: o.notes ?? null,
+        createdBy: 'demo-seed',
+      })
+      .onConflictDoNothing()
+  }
+
+  // Map Flow PO status → commerce enum status
+  const poStatusMap: Record<string, string> = {
+    DRAFT: 'draft',
+    SENT: 'sent',
+    CONFIRMED: 'acknowledged',
+    IN_PRODUCTION: 'acknowledged',
+    SHIPPED: 'partial_received',
+    RECEIVED: 'received',
+    CANCELLED: 'cancelled',
+  }
+
+  // Insert POs into DB
+  for (const po of purchaseOrders) {
+    await db
+      .insert(commercePurchaseOrders)
+      .values({
+        id: po.id,
+        orgId: po.orgId,
+        supplierId: po.vendorId,
+        orderId: po.orderId,
+        ref: `PO-2026-${po.id.slice(-3)}`,
+        status: (poStatusMap[po.status] ?? 'draft') as 'draft',
+        total: String(po.totalAmount),
+        createdBy: 'demo-seed',
+      })
+      .onConflictDoNothing()
+  }
+
+  // Map Flow production status → flow enum status
+  const prodStatusMap: Record<string, string> = {
+    IN_PRODUCTION: 'in_production',
+    QUALITY_CHECK: 'quality_check',
+    READY_TO_SHIP: 'ready_to_ship',
+    COMPLETED: 'completed',
+  }
+
+  // Insert production jobs into DB
+  for (const job of productionJobs) {
+    await db
+      .insert(flowProductionJobs)
+      .values({
+        id: job.id,
+        orgId: job.orgId,
+        orderId: job.orderId,
+        status: (prodStatusMap[job.status] ?? 'pending_proof') as 'pending_proof',
+        notes: job.proofUrl ? `Proof: ${job.proofUrl}` : null,
+      })
+      .onConflictDoNothing()
+  }
+
+  // Insert demo shipments into DB
+  await db
+    .insert(flowShipments)
+    .values({
+      id: 'demo-shipment-001',
+      orgId: org.id,
+      orderId: 'demo-order-005',
+      productionJobId: 'demo-job-003',
+      status: 'shipped',
+      carrier: 'Purolator',
+      trackingNumber: 'PLR-2026-98765',
+      shippedAt: new Date('2026-01-10'),
+    })
+    .onConflictDoNothing()
+
+  // Insert demo payments into DB
+  for (const pay of [
+    {
+      id: 'demo-payment-001',
+      orgId: org.id,
+      orderId: 'demo-order-002',
+      customerId: 'demo-customer-4',
+      status: 'paid' as const,
+      provider: 'stripe',
+      providerRef: 'pi_demo_001',
+      amountDue: '12200',
+      amountPaid: '3660',
+      depositRequired: true,
+      depositPercent: '30',
+      dueBeforeProduction: true,
+    },
+    {
+      id: 'demo-payment-002',
+      orgId: org.id,
+      orderId: 'demo-order-005',
+      customerId: 'demo-customer-1',
+      status: 'paid' as const,
+      provider: 'stripe',
+      providerRef: 'pi_demo_002',
+      amountDue: '600',
+      amountPaid: '600',
+    },
+  ]) {
+    await db.insert(flowPayments).values(pay).onConflictDoNothing()
+  }
+
+  // Insert demo domain events into DB
+  for (const evt of [
+    {
+      orgId: org.id,
+      entityType: 'order',
+      entityId: 'demo-order-003',
+      eventType: 'order_created' as const,
+      actorId: 'demo-sales',
+      payloadJson: { ref: 'SO-2026-003' },
+    },
+    {
+      orgId: org.id,
+      entityType: 'order',
+      entityId: 'demo-order-003',
+      eventType: 'production_started' as const,
+      actorId: 'demo-production',
+      payloadJson: { jobId: 'demo-job-001' },
+    },
+    {
+      orgId: org.id,
+      entityType: 'order',
+      entityId: 'demo-order-005',
+      eventType: 'shipment_created' as const,
+      actorId: 'demo-production',
+      payloadJson: { shipmentId: 'demo-shipment-001', carrier: 'Purolator' },
+    },
+  ]) {
+    await db.insert(flowDomainEvents).values(evt).onConflictDoNothing()
+  }
 
   logger.info(
     'Flow demo data seeded to database',

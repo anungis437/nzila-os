@@ -4,7 +4,7 @@
  * Vendors are stored in commerce_suppliers (shared schema).
  * This module adds the vendor↔product many-to-many link table.
  */
-import { pgTable, uuid, text, timestamp, numeric, integer } from 'drizzle-orm/pg-core'
+import { pgTable, uuid, text, timestamp, numeric, integer, index } from 'drizzle-orm/pg-core'
 import type { InferSelectModel, InferInsertModel } from 'drizzle-orm'
 import { orgs } from '../orgs'
 import { commerceSuppliers, commerceProducts } from '../commerce'
@@ -33,4 +33,10 @@ export const flowVendorProductLinks = pgTable('flow_vendor_product_links', {
   notes: text('notes'),
   createdAt: timestamp('created_at', { withTimezone: true }).notNull().defaultNow(),
   updatedAt: timestamp('updated_at', { withTimezone: true }).notNull().defaultNow(),
-})
+},
+  (table) => [
+    index('flow_vendor_product_links_org_id_idx').on(table.orgId),
+    index('flow_vendor_product_links_vendor_id_idx').on(table.vendorId),
+    index('flow_vendor_product_links_product_id_idx').on(table.productId),
+  ],
+)

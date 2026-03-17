@@ -4,7 +4,7 @@
  * Tracks production lifecycle for each order.
  * Linked to orders, optionally to purchase orders and vendors.
  */
-import { pgTable, uuid, text, timestamp, boolean } from 'drizzle-orm/pg-core'
+import { pgTable, uuid, text, timestamp, boolean, index } from 'drizzle-orm/pg-core'
 import { orgs } from '../orgs'
 import { commerceOrders, commercePurchaseOrders, commerceSuppliers } from '../commerce'
 import { flowProductionJobStatusEnum } from './enums'
@@ -29,4 +29,10 @@ export const flowProductionJobs = pgTable('flow_production_jobs', {
   notes: text('notes'),
   createdAt: timestamp('created_at', { withTimezone: true }).notNull().defaultNow(),
   updatedAt: timestamp('updated_at', { withTimezone: true }).notNull().defaultNow(),
-})
+},
+  (table) => [
+    index('flow_production_jobs_org_id_idx').on(table.orgId),
+    index('flow_production_jobs_order_id_idx').on(table.orderId),
+    index('flow_production_jobs_status_idx').on(table.status),
+  ],
+)

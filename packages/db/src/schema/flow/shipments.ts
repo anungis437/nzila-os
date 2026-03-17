@@ -4,7 +4,7 @@
  * Tracks shipment lifecycle for each order.
  * Optionally linked to production jobs.
  */
-import { pgTable, uuid, text, timestamp, jsonb } from 'drizzle-orm/pg-core'
+import { pgTable, uuid, text, timestamp, jsonb, index } from 'drizzle-orm/pg-core'
 import { orgs } from '../orgs'
 import { commerceOrders } from '../commerce'
 import { flowProductionJobs } from './production'
@@ -28,4 +28,11 @@ export const flowShipments = pgTable('flow_shipments', {
   notes: text('notes'),
   createdAt: timestamp('created_at', { withTimezone: true }).notNull().defaultNow(),
   updatedAt: timestamp('updated_at', { withTimezone: true }).notNull().defaultNow(),
-})
+},
+  (table) => [
+    index('flow_shipments_org_id_idx').on(table.orgId),
+    index('flow_shipments_order_id_idx').on(table.orderId),
+    index('flow_shipments_status_idx').on(table.status),
+    index('flow_shipments_tracking_number_idx').on(table.trackingNumber),
+  ],
+)
