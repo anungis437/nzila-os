@@ -4,7 +4,7 @@
  * Order-linked payments with deposit support.
  * Distinct from commerce_payments (which is invoice-linked).
  */
-import { pgTable, uuid, text, timestamp, numeric, varchar, boolean, jsonb } from 'drizzle-orm/pg-core'
+import { pgTable, uuid, text, timestamp, numeric, varchar, boolean, jsonb, index } from 'drizzle-orm/pg-core'
 import { orgs } from '../orgs'
 import { commerceOrders, commerceCustomers } from '../commerce'
 import { flowPaymentStatusEnum } from './enums'
@@ -32,4 +32,11 @@ export const flowPayments = pgTable('flow_payments', {
   metadataJson: jsonb('metadata_json'),
   createdAt: timestamp('created_at', { withTimezone: true }).notNull().defaultNow(),
   updatedAt: timestamp('updated_at', { withTimezone: true }).notNull().defaultNow(),
-})
+},
+  (table) => [
+    index('flow_payments_org_id_idx').on(table.orgId),
+    index('flow_payments_order_id_idx').on(table.orderId),
+    index('flow_payments_status_idx').on(table.status),
+    index('flow_payments_provider_ref_idx').on(table.providerRef),
+  ],
+)

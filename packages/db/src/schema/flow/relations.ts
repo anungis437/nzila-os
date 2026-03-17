@@ -18,6 +18,7 @@ import {
   commercePurchaseOrders,
   commercePurchaseOrderLines,
 } from '../commerce'
+import { orgs } from '../orgs'
 import { flowProductionJobs } from './production'
 import { flowShipments } from './shipments'
 import { flowPayments } from './payments'
@@ -116,6 +117,15 @@ export const flowVendorProductLinkRelations = relations(flowVendorProductLinks, 
 
 export const flowProductRelations = relations(commerceProducts, ({ many }) => ({
   vendorLinks: many(flowVendorProductLinks),
+}))
+
+// ── Domain Events ↔ Org ─────────────────────────────────────────────────
+
+export const flowDomainEventRelations = relations(flowDomainEvents, ({ one }) => ({
+  org: one(orgs, {
+    fields: [flowDomainEvents.orgId],
+    references: [orgs.id],
+  }),
 }))
 
 // ── Production Jobs ↔ Order, PO, Vendor, Shipments ───────────────────────

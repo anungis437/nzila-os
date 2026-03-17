@@ -44,6 +44,58 @@ export const flowPaymentStatusEnum = pgEnum('flow_payment_status', [
   'refunded',
 ])
 
+// ── Quote Status (Spec §3C) ───────────────────────────────────────────────
+
+export const flowQuoteStatusEnum = pgEnum('flow_quote_status', [
+  'draft',
+  'internal_review',
+  'sent_to_client',
+  'revision_requested',
+  'accepted',
+  'rejected',
+  'expired',
+])
+
+// ── Order Status (Spec §3E) ──────────────────────────────────────────────
+
+export const flowOrderStatusEnum = pgEnum('flow_order_status', [
+  'created',
+  'confirmed',
+  'deposit_required',
+  'payment_partial',
+  'payment_complete',
+  'ready_for_procurement',
+  'in_production',
+  'ready_to_ship',
+  'shipped',
+  'delivered',
+  'closed',
+  'cancelled',
+])
+
+// ── Purchase Order Status (Spec §3I) ─────────────────────────────────────
+
+export const flowPurchaseOrderStatusEnum = pgEnum('flow_purchase_order_status', [
+  'draft',
+  'sent',
+  'confirmed',
+  'in_production',
+  'shipped',
+  'received',
+  'cancelled',
+])
+
+// ── Invoice Status (Spec §3N) ────────────────────────────────────────────
+
+export const flowInvoiceStatusEnum = pgEnum('flow_invoice_status', [
+  'draft',
+  'issued',
+  'partially_paid',
+  'paid',
+  'overdue',
+  'void',
+])
+
 // ── Domain Event Type (Spec §5A) ──────────────────────────────────────────
 
 export const flowEventTypeEnum = pgEnum('flow_event_type', [
