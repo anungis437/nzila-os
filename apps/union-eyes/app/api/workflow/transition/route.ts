@@ -28,6 +28,13 @@ export async function POST(request: NextRequest) {
       roles: ['steward', 'admin'],
     })
 
+    if (!userId) {
+      return NextResponse.json(
+        { success: false, error: 'Unauthorized' },
+        { status: 401 },
+      )
+    }
+
     const body = await request.json()
     const { claimNumber, targetStatus, notes } = body as {
       claimNumber?: string
