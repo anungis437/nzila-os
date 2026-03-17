@@ -219,6 +219,12 @@ packages:
     tier: utility
     description: "AI contract tests and validation"
 
+  platform-contracts:
+    owner: "@nzila/platform"
+    steward: null
+    tier: foundational
+    description: "Cross-platform contracts — health, metrics, governance, evidence, environment, change"
+
   platform-change-management:
     owner: "@nzila/governance"
     steward: null

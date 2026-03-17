@@ -8,11 +8,13 @@
  */
 import { NextResponse } from 'next/server'
 import { getAllQueueStats, getFailedJobs } from '@/lib/job-queue'
+import { requireApiAuth } from '@/lib/api-auth-guard'
 
 export const dynamic = 'force-dynamic'
 
 export async function GET() {
   try {
+    await requireApiAuth()
     const stats = await getAllQueueStats().catch(() => [])
 
     // Aggregate totals

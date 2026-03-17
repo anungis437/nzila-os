@@ -40,13 +40,15 @@ export async function GET() {
 
   return NextResponse.json(
     {
-      service: APP,
+      app: APP,
       status: allHealthy ? 'ok' : 'degraded',
       version: VERSION,
       uptime: Math.floor((Date.now() - START_TIME) / 1000),
-      db_connection: dbOk,
-      queue_status: queueStatus,
       buildInfo: { version: VERSION, commit: COMMIT },
+      checks: {
+        db: dbOk ? 'ok' : 'fail',
+        queue: queueStatus,
+      },
       timestamp: new Date().toISOString(),
     },
     { status: allHealthy ? 200 : 503 },

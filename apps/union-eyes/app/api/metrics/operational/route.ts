@@ -13,6 +13,7 @@ import { db } from '@/db/db'
 import { claims, claimUpdates } from '@/db/schema'
 import { eq, sql, count, gte, and } from 'drizzle-orm'
 import { getAllQueueStats } from '@/lib/job-queue'
+import { requireApiAuth } from '@/lib/api-auth-guard'
 
 export const dynamic = 'force-dynamic'
 
@@ -21,6 +22,7 @@ export async function GET() {
   const oneDayAgo = new Date(now.getTime() - 24 * 60 * 60 * 1000)
 
   try {
+    await requireApiAuth()
     const [
       totalClaimsResult,
       recentTransitionsResult,
