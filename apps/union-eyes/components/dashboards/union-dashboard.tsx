@@ -218,6 +218,18 @@ export default function UnionDashboard() {
           // Map RBAC roles to simplified dashboard roles
           let mappedRole: UserRole = "member";
           switch (role) {
+            // Platform / Nzila roles — show full admin view when viewing a union
+            case RBACRole.APP_OWNER:
+            case RBACRole.COO:
+            case RBACRole.CTO:
+            case RBACRole.PLATFORM_LEAD:
+            case RBACRole.SYSTEM_ADMIN:
+            case RBACRole.CUSTOMER_SUCCESS_DIRECTOR:
+            case RBACRole.SUPPORT_MANAGER:
+            case RBACRole.DATA_ANALYTICS_MANAGER:
+            case RBACRole.COMPLIANCE_MANAGER:
+            case RBACRole.SECURITY_MANAGER:
+            // Union leadership
             case RBACRole.ADMIN:
             case RBACRole.PRESIDENT:
             case RBACRole.VICE_PRESIDENT:
