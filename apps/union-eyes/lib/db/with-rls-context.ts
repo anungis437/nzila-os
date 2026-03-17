@@ -22,7 +22,7 @@
  * - Error handling with security event logging
  */
 
-import { auth } from '@/lib/api-auth-guard';
+import { auth, currentUser } from '@/lib/api-auth-guard';
 import { db } from '@/db/db';
 import { sql } from 'drizzle-orm';
 import { logger } from '@/lib/logger';
@@ -78,10 +78,27 @@ export async function withRLSContext<T>(
   ) as (tx: NodePgDatabase<Record<string, unknown>>) => Promise<T>;
 
   // Get authenticated user from Clerk
-  const { userId, orgId } = await auth();
+  const { userId, orgId: clerkOrgId } = await auth();
   
   if (!userId) {
     throw new Error('Unauthorized: No authenticated user found. User must be logged in via Clerk.');
+  }
+
+  // Resolve orgId using the same fallback chain as getCurrentUser():
+  // Clerk JWT orgId → publicMetadata.organizationId → privateMetadata.organizationId → tenantId
+  let orgId = clerkOrgId;
+  if (!orgId) {
+    try {
+      const user = await currentUser();
+      if (user) {
+        const pub = user.publicMetadata || {};
+        const priv = user.privateMetadata || {};
+        orgId = (pub.organizationId as string) || (priv.organizationId as string)
+          || (pub.tenantId as string) || (priv.tenantId as string) || null;
+      }
+    } catch {
+      // Clerk currentUser() can fail in edge cases — proceed without org
+    }
   }
 
   // Organization context required — warn when missing (platform admins may lack active org)
