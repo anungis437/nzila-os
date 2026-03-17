@@ -78,8 +78,11 @@ rate_limit_tier := "admin" if { input.role in ["admin", "super_admin"] }
 rate_limit_tier := "authenticated" if { input.authenticated; not input.role in ["admin", "super_admin", "system"] }
 rate_limit_tier := "public" if { not input.authenticated }
 
+default request_allowed := true
+request_allowed := false if { path_blocked }
+
 decision := {
-  "allowed": not path_blocked,
+  "allowed": request_allowed,
   "rate_limit": rate_limits[rate_limit_tier],
   "missing_headers": missing_headers | missing_auth_headers,
   "cors_allowed": cors_allowed,
