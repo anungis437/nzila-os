@@ -82,6 +82,9 @@ const MUTATION_ALLOWLIST = [
   // Shop-quoter — commerce DAL (lib/db.ts) uses direct inserts for QuoteRepository.
   // Tracked for migration to createAuditedScopedDb.
   'apps/shop-quoter/',
+  // Flow — commerce app with legacy direct DB mutations in services/repositories.
+  // Tracked for migration to createAuditedScopedDb.
+  'apps/flow/',
 ]
 
 function isAllowlisted(filePath: string): boolean {

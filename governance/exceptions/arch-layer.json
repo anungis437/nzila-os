@@ -26,6 +26,12 @@
       "owner": "union-eyes-team",
       "justification": "Django-migrated app with direct DB access patterns. Migration tracked alongside console/partners.",
       "expiresOn": "2026-09-01"
+    },
+    {
+      "path": "apps/flow/**",
+      "owner": "commerce-team",
+      "justification": "Flow commerce app — legacy direct DB access in API routes. Migration to service layer tracked in docs/migration/ENFORCEMENT_UPGRADE.md",
+      "expiresOn": "2026-09-01"
     }
   ]
 }

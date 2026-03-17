@@ -1,5 +1,5 @@
 {
-  "capturedAt": "2026-03-13T15:46:39.210Z",
+  "capturedAt": "2026-03-17T08:10:29.906Z",
   "schemaDir": "packages/db/src/schema",
   "files": {
     "packages/db/src/schema/agri.ts": {
@@ -19,8 +19,8 @@
       "size": 2950
     },
     "packages/db/src/schema/commerce.ts": {
-      "hash": "7b4bfb43cac96f0a317fd29ffe2874e87fa515dcc7bf3d8ea0e16d3f0ddefc0a",
-      "size": 48970
+      "hash": "753d237ab94893599c0ce1b2d97ca903bceee94a8f49c4f428daf9f7e3cddf67",
+      "size": 49545
     },
     "packages/db/src/schema/equity.ts": {
       "hash": "0fd6a70ac3ffbd6857b9edd13a145a3abfbc8333dac18e802078fcb16b5e5f7b",
@@ -30,13 +30,73 @@
       "hash": "29436abc580bf1d71b1ee6ae6cc2e55cd39b656a82b47ee6d4a47e3b72f28118",
       "size": 8821
     },
+    "packages/db/src/schema/flow/audit.ts": {
+      "hash": "ae0c01e642a3b758bdd79e89170af22f428fcd3df9d39b7a66f321f77cb42b37",
+      "size": 709
+    },
+    "packages/db/src/schema/flow/customers.ts": {
+      "hash": "283cc10976f0de51a8d0c78986be3fcc479410c84c4717314540a29cc277331d",
+      "size": 791
+    },
+    "packages/db/src/schema/flow/enums.ts": {
+      "hash": "da49f2e98055cc11b308e031238fda4756cb4c8d5c0476139644526d1a1bf98d",
+      "size": 2657
+    },
+    "packages/db/src/schema/flow/events.ts": {
+      "hash": "6fd8db52636c1400713f90ed8a39e93676fdacf7e824c42e7ce527556f5a4d72",
+      "size": 1115
+    },
+    "packages/db/src/schema/flow/index.ts": {
+      "hash": "b21fb04c5f64cdb35cb769824732c0250ed13767ccd85d59bbbf760bc4bbfea8",
+      "size": 486
+    },
+    "packages/db/src/schema/flow/invoices.ts": {
+      "hash": "8b6e0f5c005221a871823f45472ba69e6ab33b9d4fb4a52156c9be95c1eaa459",
+      "size": 1005
+    },
+    "packages/db/src/schema/flow/orders.ts": {
+      "hash": "31e0ee4ecb75358402c87fe739e7775776c3e536968c68a54043a2db81f7e1c6",
+      "size": 1165
+    },
+    "packages/db/src/schema/flow/payments.ts": {
+      "hash": "81b9bf319d74f371711bc31f4d570177af263688fac847c28d39607ca458efd5",
+      "size": 1952
+    },
+    "packages/db/src/schema/flow/production.ts": {
+      "hash": "9d2be49a898a1f026504ae507e44fb69e3955c6083e81dce0c6ac01e5f4edbb5",
+      "size": 1772
+    },
+    "packages/db/src/schema/flow/products.ts": {
+      "hash": "800e9ca1e7a297071af67b7295dff175fcab1e1c78e232dc6d0aad441352276f",
+      "size": 970
+    },
+    "packages/db/src/schema/flow/purchase-orders.ts": {
+      "hash": "2084df476a991ccb4909a3e237dd1e2fb1c265ea36b2429378402b3602f49b71",
+      "size": 1074
+    },
+    "packages/db/src/schema/flow/quotes.ts": {
+      "hash": "ae9bcae276481739eaf9388aa2bab59d2e1770aa98cecb79501da0f42383f853",
+      "size": 1038
+    },
+    "packages/db/src/schema/flow/relations.ts": {
+      "hash": "e6bf685c6e2b81204c68c926826dcb93e31e90f62be634ca7d9d700ecbdf0e3a",
+      "size": 6270
+    },
+    "packages/db/src/schema/flow/shipments.ts": {
+      "hash": "372538204c2415e64011fc9b3116c9b1a3aba3cae3d5130a6ee404dc333a40ac",
+      "size": 1526
+    },
+    "packages/db/src/schema/flow/vendors.ts": {
+      "hash": "401949c9c57c9e9ba466a0e80b66ed33fcd249da2e1ef0f7357d9a5b252e4b51",
+      "size": 1724
+    },
     "packages/db/src/schema/governance.ts": {
       "hash": "bb8a212287eaba316edd07dad1f580416848b94126c4e0997338d6f505cee4d7",
       "size": 4293
     },
     "packages/db/src/schema/index.ts": {
-      "hash": "93a589a6518e412f33174fc5a4189fbe520f591a3be6bac4b678972908cc07aa",
-      "size": 1303
+      "hash": "290c75823c3fa168a0d572d875d391e660b48df5f85e6792db0b86d4a8851dd3",
+      "size": 1326
     },
     "packages/db/src/schema/ml.ts": {
       "hash": "cc221874e122db086918e3556e3f9376938e90765ad76c501e6699ca2098881f",
@@ -87,5 +147,5 @@
       "size": 21915
     }
   },
-  "compositeHash": "ede1dbe5d4d5d7d50a694af7f56a45f345266c072862191da7671e1cebbec24c"
+  "compositeHash": "08c4546cbed1e19051d21bfdd544cc502dced254dceac6408a9ecd59549ca226"
 }
