@@ -3643,6 +3643,12 @@ importers:
         specifier: ^5.8.0
         version: 5.9.3
 
+  packages/platform-contracts:
+    dependencies:
+      '@nzila/platform-ai-contract':
+        specifier: workspace:*
+        version: link:../platform-ai-contract
+
   packages/platform-cost:
     dependencies:
       '@nzila/db':
