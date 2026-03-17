@@ -673,6 +673,130 @@ importers:
         specifier: ^4.0.18
         version: 4.0.18(@opentelemetry/api@1.9.0)(@types/node@25.3.3)(jiti@2.6.1)(jsdom@28.1.0(@noble/hashes@2.0.1))(lightningcss@1.31.1)(terser@5.46.0)(tsx@4.21.0)(yaml@2.8.2)
 
+  apps/flow:
+    dependencies:
+      '@clerk/nextjs':
+        specifier: ^6.12.0
+        version: 6.39.0(next@16.1.6(@opentelemetry/api@1.9.0)(@playwright/test@1.58.2)(babel-plugin-react-compiler@1.0.0)(react-dom@19.2.4(react@19.2.4))(react@19.2.4))(react-dom@19.2.4(react@19.2.4))(react@19.2.4)
+      '@heroicons/react':
+        specifier: ^2.2.0
+        version: 2.2.0(react@19.2.4)
+      '@nzila/ai-sdk':
+        specifier: workspace:*
+        version: link:../../packages/ai-sdk
+      '@nzila/blob':
+        specifier: workspace:*
+        version: link:../../packages/blob
+      '@nzila/commerce-audit':
+        specifier: workspace:*
+        version: link:../../packages/commerce-audit
+      '@nzila/commerce-core':
+        specifier: workspace:*
+        version: link:../../packages/commerce-core
+      '@nzila/commerce-db':
+        specifier: workspace:*
+        version: link:../../packages/commerce-db
+      '@nzila/commerce-events':
+        specifier: workspace:*
+        version: link:../../packages/commerce-events
+      '@nzila/commerce-governance':
+        specifier: workspace:*
+        version: link:../../packages/commerce-governance
+      '@nzila/commerce-observability':
+        specifier: workspace:*
+        version: link:../../packages/commerce-observability
+      '@nzila/commerce-services':
+        specifier: workspace:*
+        version: link:../../packages/commerce-services
+      '@nzila/commerce-state':
+        specifier: workspace:*
+        version: link:../../packages/commerce-state
+      '@nzila/db':
+        specifier: workspace:*
+        version: link:../../packages/db
+      '@nzila/ml-sdk':
+        specifier: workspace:*
+        version: link:../../packages/ml-sdk
+      '@nzila/os-core':
+        specifier: workspace:*
+        version: link:../../packages/os-core
+      '@nzila/platform-commerce-org':
+        specifier: workspace:*
+        version: link:../../packages/platform-commerce-org
+      '@nzila/platform-events':
+        specifier: workspace:*
+        version: link:../../packages/platform-events
+      '@nzila/platform-policy-engine':
+        specifier: workspace:*
+        version: link:../../packages/platform-policy-engine
+      '@nzila/pricing-engine':
+        specifier: workspace:*
+        version: link:../../packages/pricing-engine
+      '@nzila/shop-quoter':
+        specifier: workspace:*
+        version: link:../../packages/shop-quoter
+      '@nzila/ui':
+        specifier: workspace:*
+        version: link:../../packages/ui
+      clsx:
+        specifier: ^2.1.0
+        version: 2.1.1
+      framer-motion:
+        specifier: ^11.3.30
+        version: 11.18.2(react-dom@19.2.4(react@19.2.4))(react@19.2.4)
+      next:
+        specifier: 16.1.6
+        version: 16.1.6(@babel/core@7.29.0)(@opentelemetry/api@1.9.0)(@playwright/test@1.58.2)(babel-plugin-react-compiler@1.0.0)(react-dom@19.2.4(react@19.2.4))(react@19.2.4)
+      next-intl:
+        specifier: ^4.6.0
+        version: 4.8.3(next@16.1.6(@opentelemetry/api@1.9.0)(@playwright/test@1.58.2)(babel-plugin-react-compiler@1.0.0)(react-dom@19.2.4(react@19.2.4))(react@19.2.4))(react@19.2.4)(typescript@5.9.3)
+      react:
+        specifier: 19.2.4
+        version: 19.2.4
+      react-dom:
+        specifier: 19.2.4
+        version: 19.2.4(react@19.2.4)
+      tailwind-merge:
+        specifier: ^3.5.0
+        version: 3.5.0
+      tailwindcss-animate:
+        specifier: ^1.0.7
+        version: 1.0.7(tailwindcss@4.2.1)
+      zod:
+        specifier: ^3.24.0
+        version: 3.25.76
+    devDependencies:
+      '@nzila/config':
+        specifier: workspace:*
+        version: link:../../packages/config
+      '@tailwindcss/postcss':
+        specifier: ^4
+        version: 4.2.1
+      '@types/node':
+        specifier: ^25
+        version: 25.3.3
+      '@types/react':
+        specifier: ^19
+        version: 19.2.14
+      '@types/react-dom':
+        specifier: ^19
+        version: 19.2.3(@types/react@19.2.14)
+      eslint:
+        specifier: ^9.39.0
+        version: 9.39.3(jiti@2.6.1)
+      eslint-config-next:
+        specifier: 16.1.6
+        version: 16.1.6(@typescript-eslint/parser@8.56.1(eslint@9.39.3(jiti@2.6.1))(typescript@5.9.3))(eslint@9.39.3(jiti@2.6.1))(typescript@5.9.3)
+      tailwindcss:
+        specifier: ^4
+        version: 4.2.1
+      typescript:
+        specifier: ^5
+        version: 5.9.3
+      vitest:
+        specifier: ^4.0.18
+        version: 4.0.18(@opentelemetry/api@1.9.0)(@types/node@25.3.3)(jiti@2.6.1)(jsdom@28.1.0(@noble/hashes@2.0.1))(lightningcss@1.31.1)(terser@5.46.0)(tsx@4.21.0)(yaml@2.8.2)
+
   apps/mobility:
     dependencies:
       '@clerk/nextjs':

@@ -20,6 +20,7 @@ export * from './platform'
 export * from './trade'
 export * from './agri'
 export * from './mobility'
+export * from './flow'
 
 // Platform OS schemas (re-exported from dedicated packages)
 export {

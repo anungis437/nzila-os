@@ -1,0 +1,196 @@
+@import "tailwindcss";
+
+/* ── Design Tokens ── */
+:root {
+  /* Brand — Navy / Electric / Gold / Emerald / Coral / Violet */
+  --navy: 220 40% 9%;
+  --navy-light: 220 30% 18%;
+  --electric: 217 91% 53%;
+  --electric-light: 217 85% 65%;
+  --gold: 40 55% 55%;
+  --gold-light: 40 65% 72%;
+  --emerald: 160 84% 39%;
+  --coral: 0 84% 60%;
+  --violet: 262 83% 58%;
+
+  /* shadcn/ui semantic tokens */
+  --background: 0 0% 100%;
+  --foreground: 222.2 84% 4.9%;
+  --card: 0 0% 100%;
+  --card-foreground: 222.2 84% 4.9%;
+  --popover: 0 0% 100%;
+  --popover-foreground: 222.2 84% 4.9%;
+  --primary: 217 91% 53%;
+  --primary-foreground: 210 40% 98%;
+  --secondary: 210 40% 96.1%;
+  --secondary-foreground: 222.2 47.4% 11.2%;
+  --muted: 210 40% 96.1%;
+  --muted-foreground: 215.4 16.3% 46.9%;
+  --accent: 210 40% 96.1%;
+  --accent-foreground: 222.2 47.4% 11.2%;
+  --destructive: 0 84.2% 60.2%;
+  --destructive-foreground: 210 40% 98%;
+  --border: 214.3 31.8% 91.4%;
+  --input: 214.3 31.8% 91.4%;
+  --ring: 217 91% 53%;
+  --radius: 0.5rem;
+}
+
+.dark {
+  --background: 222.2 84% 4.9%;
+  --foreground: 210 40% 98%;
+  --card: 222.2 84% 4.9%;
+  --card-foreground: 210 40% 98%;
+  --popover: 222.2 84% 4.9%;
+  --popover-foreground: 210 40% 98%;
+  --primary: 217 91% 53%;
+  --primary-foreground: 222.2 47.4% 11.2%;
+  --secondary: 217.2 32.6% 17.5%;
+  --secondary-foreground: 210 40% 98%;
+  --muted: 217.2 32.6% 17.5%;
+  --muted-foreground: 215 20.2% 65.1%;
+  --accent: 217.2 32.6% 17.5%;
+  --accent-foreground: 210 40% 98%;
+  --destructive: 0 62.8% 30.6%;
+  --destructive-foreground: 210 40% 98%;
+  --border: 217.2 32.6% 17.5%;
+  --input: 217.2 32.6% 17.5%;
+  --ring: 224.3 76.3% 48%;
+}
+
+/* ── Base ── */
+body {
+  background: hsl(var(--background));
+  color: hsl(var(--foreground));
+}
+
+/* ── Utility classes ── */
+.font-poppins {
+  font-family: var(--font-poppins), system-ui, sans-serif;
+}
+
+.text-navy {
+  color: hsl(var(--navy));
+}
+
+.bg-navy {
+  background-color: hsl(var(--navy));
+}
+
+.text-electric {
+  color: hsl(var(--electric));
+}
+
+.bg-electric {
+  background-color: hsl(var(--electric));
+}
+
+.text-gold {
+  color: hsl(var(--gold));
+}
+
+.gradient-text {
+  background: linear-gradient(135deg, hsl(var(--electric)), hsl(var(--gold)));
+  -webkit-background-clip: text;
+  -webkit-text-fill-color: transparent;
+  background-clip: text;
+  background-size: 200% 200%;
+  animation: gradient-shift 6s ease infinite;
+}
+
+@keyframes gradient-shift {
+  0%,
+  100% {
+    background-position: 0% 50%;
+  }
+  50% {
+    background-position: 100% 50%;
+  }
+}
+
+/* ── Glass effects ── */
+.glass-card {
+  background: rgba(255, 255, 255, 0.05);
+  backdrop-filter: blur(12px);
+  border: 1px solid rgba(255, 255, 255, 0.1);
+}
+
+.glass-card-light {
+  background: rgba(255, 255, 255, 0.7);
+  backdrop-filter: blur(12px);
+  border: 1px solid rgba(255, 255, 255, 0.3);
+}
+
+/* ── Interaction utilities ── */
+.hover-lift {
+  transition: transform 0.2s ease, box-shadow 0.2s ease;
+}
+.hover-lift:hover {
+  transform: translateY(-2px);
+  box-shadow:
+    0 10px 25px -5px rgba(0, 0, 0, 0.1),
+    0 8px 10px -6px rgba(0, 0, 0, 0.08);
+}
+
+.btn-press:active {
+  transform: scale(0.97);
+}
+
+.focus-ring:focus-visible {
+  outline: 2px solid hsl(var(--electric));
+  outline-offset: 2px;
+}
+
+/* ── Background mesh ── */
+.bg-mesh {
+  background-image: radial-gradient(
+      at 40% 20%,
+      hsl(var(--electric) / 0.08) 0px,
+      transparent 50%
+    ),
+    radial-gradient(
+      at 80% 0%,
+      hsl(var(--gold) / 0.06) 0px,
+      transparent 50%
+    ),
+    radial-gradient(
+      at 0% 50%,
+      hsl(var(--violet) / 0.05) 0px,
+      transparent 50%
+    );
+}
+
+/* ── Animations ── */
+.shimmer {
+  background: linear-gradient(
+    90deg,
+    transparent 0%,
+    rgba(255, 255, 255, 0.08) 50%,
+    transparent 100%
+  );
+  background-size: 200% 100%;
+  animation: shimmer 2s infinite;
+}
+
+@keyframes shimmer {
+  0% {
+    background-position: -200% 0;
+  }
+  100% {
+    background-position: 200% 0;
+  }
+}
+
+.pulse-glow {
+  animation: pulse-glow 2s ease-in-out infinite;
+}
+
+@keyframes pulse-glow {
+  0%,
+  100% {
+    box-shadow: 0 0 5px hsl(var(--electric) / 0.3);
+  }
+  50% {
+    box-shadow: 0 0 20px hsl(var(--electric) / 0.6);
+  }
+}

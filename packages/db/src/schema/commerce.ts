@@ -216,6 +216,7 @@ export const commerceQuoteLines = pgTable('commerce_quote_lines', {
   quoteId: uuid('quote_id')
     .notNull()
     .references(() => commerceQuotes.id),
+  productId: uuid('product_id').references(() => commerceProducts.id), // Flow: product FK (Spec §3D)
   description: text('description').notNull(),
   sku: varchar('sku', { length: 50 }),
   quantity: integer('quantity').notNull().default(1),
@@ -250,6 +251,12 @@ export const commerceOrders = pgTable('commerce_orders', {
   notes: text('notes'),
   orderLockedAt: timestamp('order_locked_at', { withTimezone: true }),
   metadata: jsonb('metadata').default({}),
+  // Flow lifecycle columns (Spec §3E)
+  paymentStatus: varchar('payment_status', { length: 30 }),
+  productionStatus: varchar('production_status', { length: 30 }),
+  fulfillmentStatus: varchar('fulfillment_status', { length: 30 }),
+  marginActual: numeric('margin_actual', { precision: 18, scale: 2 }),
+  confirmedAt: timestamp('confirmed_at', { withTimezone: true }),
   createdBy: text('created_by').notNull(),
   createdAt: timestamp('created_at', { withTimezone: true }).notNull().defaultNow(),
   updatedAt: timestamp('updated_at', { withTimezone: true }).notNull().defaultNow(),
@@ -646,6 +653,7 @@ export const commercePurchaseOrders = pgTable('commerce_purchase_orders', {
   supplierId: uuid('supplier_id')
     .notNull()
     .references(() => commerceSuppliers.id),
+  orderId: uuid('order_id').references(() => commerceOrders.id), // Flow: links PO to order (Spec §3I)
   ref: varchar('ref', { length: 30 }).notNull(), // e.g. PO-2026-001
   status: commercePurchaseOrderStatusEnum('status').notNull().default('draft'),
   currency: varchar('currency', { length: 3 }).notNull().default('CAD'),
