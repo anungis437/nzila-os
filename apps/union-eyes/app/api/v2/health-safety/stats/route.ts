@@ -4,7 +4,8 @@
  * Query params: organizationId, period (7d | 30d | 90d | 12m)
  */
 import { withApi } from '@/lib/api/framework';
-import { withRLSContext } from '@/lib/db/with-rls-context';
+import { db } from '@/db/db';
+import { withSystemContext } from '@/lib/db/with-rls-context';
 import { sql } from 'drizzle-orm';
 
 export const dynamic = 'force-dynamic';
@@ -38,8 +39,8 @@ export const GET = withApi(
     const orgFilter = organizationId ? sql`organization_id = ${organizationId}` : sql`1=1`;
     const dateFilter = sql`created_at >= ${startDate}`;
 
-    return withRLSContext(async (db) => {
-      const incRows = Array.from(await db.execute(sql`SELECT count(*)::int AS total_incidents FROM workplace_incidents WHERE ${orgFilter} AND ${dateFilter}`));
+    return withSystemContext(async () => {
+    const incRows = Array.from(await db.execute(sql`SELECT count(*)::int AS total_incidents FROM workplace_incidents WHERE ${orgFilter} AND ${dateFilter}`));
       const total_incidents = Number((incRows[0] as Record<string, unknown>)?.total_incidents ?? 0);
 
       const hazRows = Array.from(await db.execute(sql`SELECT count(*)::int AS open_hazards FROM hazard_reports WHERE ${orgFilter}`));
@@ -61,20 +62,20 @@ export const GET = withApi(
       const total_inspections = Number((totalInspRows[0] as Record<string, unknown>)?.total_inspections ?? 0);
       const complianceRate = total_inspections > 0 ? 95 : 100;
 
-      return {
-        totalIncidents: total_incidents,
-        total_incidents,
-        openHazards: open_hazards,
-        open_hazards,
-        inspectionsDue: inspections_due,
-        inspections_due,
-        trainingDue: training_due,
-        training_due,
-        daysWithoutIncident,
-        days_without_incident: daysWithoutIncident,
-        complianceRate,
-        compliance_rate: complianceRate,
-      };
+    return {
+      totalIncidents: total_incidents,
+      total_incidents,
+      openHazards: open_hazards,
+      open_hazards,
+      inspectionsDue: inspections_due,
+      inspections_due,
+      trainingDue: training_due,
+      training_due,
+      daysWithoutIncident,
+      days_without_incident: daysWithoutIncident,
+      complianceRate,
+      compliance_rate: complianceRate,
+    };
     });
   },
 );

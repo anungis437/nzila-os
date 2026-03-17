@@ -4,7 +4,8 @@
  * Returns { success: true, metrics: SafetyMetrics }.
  */
 import { withApi } from '@/lib/api/framework';
-import { withRLSContext } from '@/lib/db/with-rls-context';
+import { db } from '@/db/db';
+import { withSystemContext } from '@/lib/db/with-rls-context';
 import { sql } from 'drizzle-orm';
 
 export const dynamic = 'force-dynamic';
@@ -36,8 +37,8 @@ export const GET = withApi(
     const orgFilter = organizationId ? sql`organization_id = ${organizationId}` : sql`1=1`;
     const dateFilter = sql`created_at >= ${startDate}`;
 
-    return withRLSContext(async (db) => {
-      const incidentRows = Array.from(
+    return withSystemContext(async () => {
+    const incidentRows = Array.from(
         await db.execute(sql`SELECT count(*)::int AS cnt FROM workplace_incidents WHERE ${orgFilter} AND ${dateFilter}`)
       );
       const totalIncidents = Number((incidentRows[0] as Record<string, unknown>)?.cnt ?? 0);
@@ -94,23 +95,23 @@ export const GET = withApi(
       );
       const ppeInventoryLow = Number((ppeRows[0] as Record<string, unknown>)?.cnt ?? 0);
 
-      return {
-        success: true,
-        metrics: {
-          totalIncidents,
-          incidentTrend,
-          incidentChange,
-          openHazards,
-          hazardTrend,
-          inspectionsDue,
-          inspectionsCompleted,
-          inspectionComplianceRate,
-          daysWithoutIncident,
-          criticalAlerts,
-          trainingCompliance,
-          ppeInventoryLow,
-        },
-      };
+    return {
+      success: true,
+      metrics: {
+        totalIncidents,
+        incidentTrend,
+        incidentChange,
+        openHazards,
+        hazardTrend,
+        inspectionsDue,
+        inspectionsCompleted,
+        inspectionComplianceRate,
+        daysWithoutIncident,
+        criticalAlerts,
+        trainingCompliance,
+        ppeInventoryLow,
+      },
+    };
     });
   },
 );

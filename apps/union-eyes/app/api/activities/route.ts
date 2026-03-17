@@ -5,7 +5,8 @@
  * while the staging DB stores audit_logs in the public schema.
  */
 import { withApi } from '@/lib/api/framework';
-import { withRLSContext } from '@/lib/db/with-rls-context';
+import { db } from '@/db/db';
+import { withSystemContext } from '@/lib/db/with-rls-context';
 import { sql } from 'drizzle-orm';
 
 export const dynamic = 'force-dynamic';
@@ -24,7 +25,7 @@ export const GET = withApi(
     const limit = Math.min(100, Math.max(1, parseInt(url.searchParams.get('limit') || '50')));
     const offset = (page - 1) * limit;
 
-    return withRLSContext(async (db) => {
+    return withSystemContext(async () => {
       const rows = await db.execute(sql`
         SELECT id, audit_id, user_id, organization_id, action,
                resource_type, resource_id, ip_address, user_agent,
