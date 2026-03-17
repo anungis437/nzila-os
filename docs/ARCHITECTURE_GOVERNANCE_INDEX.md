@@ -16,6 +16,8 @@
 | [PACKAGE_LIFECYCLE_POLICY.md](governance/PACKAGE_LIFECYCLE_POLICY.md) | Create, graduate, deprecate, and remove packages |
 | [DOMAIN_VS_AUDIT_MODEL.md](architecture/DOMAIN_VS_AUDIT_MODEL.md) | Rules separating domain state from audit/evidence stores |
 | [AI_PLATFORM_CONTRACT.md](architecture/AI_PLATFORM_CONTRACT.md) | Canonical AI output schemas and prohibited patterns |
+| [PLATFORM_SURFACE_MODEL.md](PLATFORM_SURFACE_MODEL.md) | Operating shell model: Control Plane, Console, Platform Admin, App Admin |
+| [APP_DOMAIN_CORE_STANDARD.md](APP_DOMAIN_CORE_STANDARD.md) | Internal app architecture: domain/services/workflows/queries/events/ui |
 | [CONTROL_PLANE_PRINCIPLES.md](architecture/CONTROL_PLANE_PRINCIPLES.md) | Control Plane route buckets (HEALTH/ATTENTION/ACTION) |
 | [ARCHITECTURAL_BOUNDARIES.md](architecture/ARCHITECTURAL_BOUNDARIES.md) | Dependency direction rules and vertical isolation |
 | [APP_GOLD_STANDARD.md](governance/APP_GOLD_STANDARD.md) | Structural requirements for production-ready apps |
@@ -27,6 +29,8 @@
 | [platform/registry/layers.json](../platform/registry/layers.json) | Layer map with paths, dependency rules, and allowed overrides |
 | [platform/registry/apps.json](../platform/registry/apps.json) | App registry: tier, owner, domain, capability flags |
 | [platform/registry/platform-registry.json](../platform/registry/platform-registry.json) | Canonical registry: apps, platform services, shared packages, governance surfaces |
+| [platform/registry/platform-surfaces.json](../platform/registry/platform-surfaces.json) | Surface capability registry: allowed/forbidden feature classes per surface |
+| [platform/registry/environments.json](../platform/registry/environments.json) | Environment definitions: development, staging, production |
 
 ## Templates
 
@@ -42,12 +46,38 @@
 | shop-quoter | [apps/shop-quoter/docs/DOMAIN_MODEL.md](../apps/shop-quoter/docs/DOMAIN_MODEL.md) |
 | zonga | [apps/zonga/docs/DOMAIN_MODEL.md](../apps/zonga/docs/DOMAIN_MODEL.md) |
 
+## App Architecture Shapes
+
+| App | Shape Doc | Meta |
+|---|---|---|
+| union-eyes | [ARCHITECTURE_SHAPE.md](../apps/union-eyes/docs/ARCHITECTURE_SHAPE.md) | [meta](../apps/union-eyes/app-architecture.meta.json) |
+| shop-quoter | [ARCHITECTURE_SHAPE.md](../apps/shop-quoter/docs/ARCHITECTURE_SHAPE.md) | [meta](../apps/shop-quoter/app-architecture.meta.json) |
+| zonga | [ARCHITECTURE_SHAPE.md](../apps/zonga/docs/ARCHITECTURE_SHAPE.md) | [meta](../apps/zonga/app-architecture.meta.json) |
+| cfo | [ARCHITECTURE_SHAPE.md](../apps/cfo/docs/ARCHITECTURE_SHAPE.md) | [meta](../apps/cfo/app-architecture.meta.json) |
+| partners | [ARCHITECTURE_SHAPE.md](../apps/partners/docs/ARCHITECTURE_SHAPE.md) | [meta](../apps/partners/app-architecture.meta.json) |
+| control-plane | [ARCHITECTURE_SHAPE.md](../apps/control-plane/docs/ARCHITECTURE_SHAPE.md) | [meta](../apps/control-plane/app-architecture.meta.json) |
+| web | [ARCHITECTURE_SHAPE.md](../apps/web/docs/ARCHITECTURE_SHAPE.md) | [meta](../apps/web/app-architecture.meta.json) |
+
 ## Control Plane Governance
 
 | Document | Purpose |
 |---|---|
 | [Route Governance](../apps/control-plane/docs/ROUTE_GOVERNANCE.md) | Per-route bucket assignment and justification |
-| [route.meta.json](../apps/control-plane/route.meta.json) | Machine-readable route manifest |
+| [route.meta.json](../apps/control-plane/route.meta.json) | Machine-readable route manifest (v2: with actionability_score, duplication_risk, source_contracts_used) |
+
+## Route Manifests (All Surfaces)
+
+| Surface | Manifest | Routes |
+|---|---|---|
+| Control Plane | [route.meta.json](../apps/control-plane/route.meta.json) | 13 routes |
+| Console | [route.meta.json](../apps/console/route.meta.json) | 22 routes |
+| Platform Admin | [route.meta.json](../apps/platform-admin/route.meta.json) | 13 routes |
+
+## Surface Migration Tracking
+
+| Document | Purpose |
+|---|---|
+| [platform-surface-migrations/README.md](platform-surface-migrations/README.md) | Active surface boundary violations and migration plans |
 
 ## Enforcement Scripts
 
@@ -65,6 +95,17 @@
 | `scripts/app-gold-standard-check.ts` | `pnpm app:gold-standard:check` | Check app compliance with gold standard |
 | `scripts/package-deprecation-check.ts` | `pnpm package:deprecation:check` | Validate deprecation metadata consistency |
 | `scripts/governance-check.ts` | `pnpm governance:check` | Existing: SBOM, evidence, policy engine validation |
+| `scripts/platform-surface-model-check.ts` | `pnpm platform:surface:model:check` | Validate route feature classes against surface capabilities |
+| `scripts/app-domain-core-check.ts` | `pnpm app:domain-core:check` | Validate app internal architecture (domain-core standard) |
+| `scripts/platform-contract-check.ts` | `pnpm platform:contract:check` | Validate platform contract package and app adapter scaffolds |
+| `scripts/control-plane-coherence-check.ts` | `pnpm control-plane:coherence:check` | Cross-surface coherence: duplication detection, contract alignment |
+| `scripts/registry-consistency-check.ts` | `pnpm registry:consistency:check` | Registry cross-validation: surfaces, environments, tiers |
+
+## Aggregate Commands
+
+| Command | Purpose |
+|---|---|
+| `pnpm architecture:check` | Run all architecture checks: layers, domain-core, surface model, contracts, registry, coherence |
 
 ## Contract Tests
 
@@ -78,6 +119,7 @@
 | Package | Purpose |
 |---|---|
 | `@nzila/platform-ai-contract` | Canonical AI output types and validation schemas |
+| `@nzila/platform-contracts` | Platform-wide contract interfaces: health, metrics, governance, evidence, environment, change |
 
 ## Dashboard
 

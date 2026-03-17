@@ -1,0 +1,14 @@
+{
+  "domain_core_standard_adopted": true,
+  "layers_present": ["domain", "services", "workflows", "queries", "events", "ui"],
+  "layers_missing": [],
+  "exceptions": [
+    "Domain types currently co-located in db/ schemas and lib/types/ — extraction planned"
+  ],
+  "migration_status": "partial",
+  "priority_migrations": [
+    "Extract canonical entity types (Claim, Member, Organization) into domain/",
+    "Move remaining business logic from API routes into services/"
+  ],
+  "app_tier": "PRODUCTION"
+}

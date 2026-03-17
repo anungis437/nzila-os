@@ -1,0 +1,181 @@
+{
+  "description": "Machine-readable route governance manifest for the Console",
+  "routes": [
+    {
+      "route": "/system-health",
+      "purpose": "Detailed system health diagnostics and service status",
+      "feature_class": "diagnostics",
+      "owning_surface": "console",
+      "primary_user": "devops-engineer",
+      "source_systems": ["platform-observability", "platform-metrics"]
+    },
+    {
+      "route": "/performance",
+      "purpose": "Performance analysis dashboards and regression detection",
+      "feature_class": "diagnostics",
+      "owning_surface": "console",
+      "primary_user": "developer",
+      "source_systems": ["platform-performance", "platform-rum"]
+    },
+    {
+      "route": "/performance/regressions",
+      "purpose": "Performance regression analysis and comparison",
+      "feature_class": "diagnostics",
+      "owning_surface": "console",
+      "primary_user": "developer",
+      "source_systems": ["platform-performance"]
+    },
+    {
+      "route": "/proof-center",
+      "purpose": "Evidence pack generation and proof management",
+      "feature_class": "evidence_generation",
+      "owning_surface": "console",
+      "primary_user": "platform-operator-technical",
+      "source_systems": ["platform-evidence-pack", "platform-proof"]
+    },
+    {
+      "route": "/proof-pack",
+      "purpose": "Proof pack assembly and export",
+      "feature_class": "evidence_generation",
+      "owning_surface": "console",
+      "primary_user": "platform-operator-technical",
+      "source_systems": ["platform-procurement-proof"]
+    },
+    {
+      "route": "/ai/chat",
+      "purpose": "AI chat interface for platform queries",
+      "feature_class": "ai_model_interaction",
+      "owning_surface": "console",
+      "primary_user": "developer",
+      "source_systems": ["ai-sdk", "platform-ai-query"]
+    },
+    {
+      "route": "/ai/rag",
+      "purpose": "RAG pipeline management and testing",
+      "feature_class": "ai_model_interaction",
+      "owning_surface": "console",
+      "primary_user": "developer",
+      "source_systems": ["platform-semantic-search"]
+    },
+    {
+      "route": "/ai/prompts",
+      "purpose": "Prompt template management and governance",
+      "feature_class": "ai_model_interaction",
+      "owning_surface": "console",
+      "primary_user": "developer",
+      "source_systems": ["platform-ai-governance"]
+    },
+    {
+      "route": "/ai/embed",
+      "purpose": "Embedding generation and vector operations",
+      "feature_class": "ai_model_interaction",
+      "owning_surface": "console",
+      "primary_user": "developer",
+      "source_systems": ["ai-core"]
+    },
+    {
+      "route": "/ai/extract",
+      "purpose": "AI-powered data extraction tooling",
+      "feature_class": "ai_model_interaction",
+      "owning_surface": "console",
+      "primary_user": "developer",
+      "source_systems": ["ai-sdk"]
+    },
+    {
+      "route": "/ai/generate",
+      "purpose": "AI content generation tooling",
+      "feature_class": "ai_model_interaction",
+      "owning_surface": "console",
+      "primary_user": "developer",
+      "source_systems": ["ai-sdk"]
+    },
+    {
+      "route": "/ai/actions",
+      "purpose": "AI action execution and management",
+      "feature_class": "ai_model_interaction",
+      "owning_surface": "console",
+      "primary_user": "developer",
+      "source_systems": ["ai-sdk", "platform-governed-ai"]
+    },
+    {
+      "route": "/scale-simulation",
+      "purpose": "Load testing and scale simulation tooling",
+      "feature_class": "debug_tooling",
+      "owning_surface": "console",
+      "primary_user": "devops-engineer",
+      "source_systems": ["platform-performance"]
+    },
+    {
+      "route": "/trend-detection",
+      "purpose": "Trend detection and pattern analysis",
+      "feature_class": "diagnostics",
+      "owning_surface": "console",
+      "primary_user": "developer",
+      "source_systems": ["platform-intelligence"]
+    },
+    {
+      "route": "/standards",
+      "purpose": "Code standards and quality inspection",
+      "feature_class": "debug_tooling",
+      "owning_surface": "console",
+      "primary_user": "developer",
+      "source_systems": ["governance"]
+    },
+    {
+      "route": "/settings",
+      "purpose": "Console application settings",
+      "feature_class": "maintenance",
+      "owning_surface": "console",
+      "primary_user": "platform-operator-technical",
+      "source_systems": []
+    },
+    {
+      "route": "/settings/billing",
+      "purpose": "Billing and subscription management",
+      "feature_class": "maintenance",
+      "owning_surface": "console",
+      "primary_user": "platform-operator-technical",
+      "source_systems": ["stripe"]
+    },
+    {
+      "route": "/settings/integrations",
+      "purpose": "Integration configuration and status",
+      "feature_class": "maintenance",
+      "owning_surface": "console",
+      "primary_user": "platform-operator-technical",
+      "source_systems": ["platform-integrations-control-plane"]
+    },
+    {
+      "route": "/platform",
+      "purpose": "Platform-level operational details",
+      "feature_class": "diagnostics",
+      "owning_surface": "console",
+      "primary_user": "platform-operator-technical",
+      "source_systems": ["platform-registry"]
+    },
+    {
+      "route": "/platform-economics",
+      "purpose": "Platform economics and unit cost analysis",
+      "feature_class": "diagnostics",
+      "owning_surface": "console",
+      "primary_user": "platform-operator-technical",
+      "source_systems": ["platform-cost"]
+    },
+    {
+      "route": "/pilot/export",
+      "purpose": "Pilot data export and reporting",
+      "feature_class": "support_tools",
+      "owning_surface": "console",
+      "primary_user": "platform-operator-technical",
+      "source_systems": ["platform-environment"]
+    },
+    {
+      "route": "/docs",
+      "purpose": "Internal documentation browser",
+      "feature_class": "support_tools",
+      "owning_surface": "console",
+      "primary_user": "developer",
+      "source_systems": ["content"]
+    }
+  ]
+}

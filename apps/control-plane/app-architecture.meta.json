@@ -1,0 +1,16 @@
+{
+  "domain_core_standard_adopted": true,
+  "layers_present": ["services", "queries", "ui"],
+  "layers_missing": [],
+  "layers_not_applicable": ["domain", "workflows", "events"],
+  "exceptions": [
+    "Control Plane is an operating shell — domain/workflows/events layers are not applicable",
+    "Summary orchestration currently embedded in API route handlers"
+  ],
+  "migration_status": "not_started",
+  "priority_migrations": [
+    "Extract summary queries from API routes into queries/",
+    "Extract orchestration logic into services/"
+  ],
+  "app_tier": "PILOT"
+}

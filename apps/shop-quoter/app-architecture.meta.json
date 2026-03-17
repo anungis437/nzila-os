@@ -1,0 +1,17 @@
+{
+  "domain_core_standard_adopted": true,
+  "layers_present": ["domain", "services", "workflows", "queries", "events", "ui"],
+  "layers_missing": [],
+  "exceptions": [
+    "Quote machine FSM at lib/quote-machine.ts — move to workflows/",
+    "Service files split between lib/services/ and lib/ root"
+  ],
+  "migration_status": "partial",
+  "priority_migrations": [
+    "Extract Quote, Supplier, PO entity types into domain/",
+    "Create queries/ for read models from actions",
+    "Move config-events.ts into events/",
+    "Consolidate root-level *-service.ts into services/"
+  ],
+  "app_tier": "PRODUCTION"
+}

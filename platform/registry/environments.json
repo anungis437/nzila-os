@@ -1,0 +1,36 @@
+{
+  "description": "Machine-readable environment registry for Nzila OS. Defines deployment targets and their configuration.",
+  "schema_version": "1.0",
+  "environments": [
+    {
+      "name": "development",
+      "tier": "development",
+      "url_pattern": "http://localhost:{port}",
+      "apps_deployed": "all",
+      "notes": "Local development via docker-compose or pnpm dev"
+    },
+    {
+      "name": "staging",
+      "tier": "staging",
+      "url_pattern": "https://nzila-os-{app}.delightfulisland-0d503d3c.eastus.azurecontainerapps.io",
+      "infrastructure": {
+        "provider": "azure",
+        "resource_group": "nzila-staging-rg",
+        "region": "eastus",
+        "compute": "Azure Container Apps",
+        "registry": "nzilastagingacr.azurecr.io",
+        "storage": "nzilastagingstore"
+      },
+      "apps_deployed": ["web", "console", "partners", "union-eyes"],
+      "notes": "Staging environment on Azure Container Apps"
+    },
+    {
+      "name": "production",
+      "tier": "production",
+      "url_pattern": null,
+      "infrastructure": null,
+      "apps_deployed": [],
+      "notes": "Production environment — not yet provisioned"
+    }
+  ]
+}

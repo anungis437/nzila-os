@@ -1,0 +1,18 @@
+{
+  "domain_core_standard_adopted": true,
+  "layers_present": ["domain", "services", "workflows", "queries", "events", "ui"],
+  "layers_missing": [],
+  "exceptions": [
+    "Workflow logic in lib/workflow-automation.ts and lib/workflow-templates.ts",
+    "Financial integrations (fx, tax, qbo) at lib/ root level"
+  ],
+  "migration_status": "not_started",
+  "priority_migrations": [
+    "Create domain/ with FinancialReport, Adjustment, Export types",
+    "Move workflow-*.ts into workflows/",
+    "Create services/ from advisory-automation.ts, policy-enforcement.ts, financial integrations",
+    "Create queries/ for reporting read models",
+    "Create events/ for financial domain events"
+  ],
+  "app_tier": "PILOT"
+}

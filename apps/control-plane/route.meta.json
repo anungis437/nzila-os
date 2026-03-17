@@ -1,5 +1,6 @@
 {
   "description": "Machine-readable route governance manifest for the Control Plane",
+  "schema_version": "2.0",
   "routes": [
     {
       "path": "/overview",
@@ -7,7 +8,10 @@
       "bucket": "HEALTH",
       "primary_user": "platform-operator",
       "actionability": "View platform health summary",
-      "source": "aggregated"
+      "actionability_score": 3,
+      "source": "aggregated",
+      "source_contracts_used": ["health", "metrics"],
+      "duplication_risk": "low"
     },
     {
       "path": "/governance",
@@ -15,7 +19,10 @@
       "bucket": "HEALTH",
       "primary_user": "platform-operator",
       "actionability": "Review governance posture, export compliance reports",
-      "source": "@nzila/platform-governance"
+      "actionability_score": 4,
+      "source": "@nzila/platform-governance",
+      "source_contracts_used": ["governance", "evidence"],
+      "duplication_risk": "low"
     },
     {
       "path": "/environments",
@@ -23,7 +30,10 @@
       "bucket": "HEALTH",
       "primary_user": "platform-operator",
       "actionability": "View environment status, trigger health checks",
-      "source": "@nzila/platform-environment"
+      "actionability_score": 4,
+      "source": "@nzila/platform-environment",
+      "source_contracts_used": ["health", "environment"],
+      "duplication_risk": "low"
     },
     {
       "path": "/changes",
@@ -31,7 +41,10 @@
       "bucket": "ATTENTION",
       "primary_user": "platform-operator",
       "actionability": "Review pending changes, approve/reject",
-      "source": "@nzila/platform-change-management"
+      "actionability_score": 5,
+      "source": "@nzila/platform-change-management",
+      "source_contracts_used": ["change"],
+      "duplication_risk": "low"
     },
     {
       "path": "/change-calendar",
@@ -39,7 +52,10 @@
       "bucket": "HEALTH",
       "primary_user": "platform-operator",
       "actionability": "View change schedule, identify conflicts",
-      "source": "@nzila/platform-change-management"
+      "actionability_score": 2,
+      "source": "@nzila/platform-change-management",
+      "source_contracts_used": ["change"],
+      "duplication_risk": "low"
     },
     {
       "path": "/decisions",
@@ -47,7 +63,10 @@
       "bucket": "ATTENTION",
       "primary_user": "platform-operator",
       "actionability": "Review pending decisions, approve/escalate",
-      "source": "@nzila/platform-decision-engine"
+      "actionability_score": 5,
+      "source": "@nzila/platform-decision-engine",
+      "source_contracts_used": ["governance"],
+      "duplication_risk": "medium_with_platform_admin_decisions"
     },
     {
       "path": "/decision-summary",
@@ -55,7 +74,10 @@
       "bucket": "ATTENTION",
       "primary_user": "platform-operator",
       "actionability": "View decision trends, identify bottlenecks",
-      "source": "@nzila/platform-decision-engine"
+      "actionability_score": 2,
+      "source": "@nzila/platform-decision-engine",
+      "source_contracts_used": ["governance", "metrics"],
+      "duplication_risk": "low"
     },
     {
       "path": "/intelligence",
@@ -63,7 +85,10 @@
       "bucket": "ATTENTION",
       "primary_user": "platform-operator",
       "actionability": "Review AI insights, triage signals",
-      "source": "@nzila/platform-intelligence"
+      "actionability_score": 4,
+      "source": "@nzila/platform-intelligence",
+      "source_contracts_used": [],
+      "duplication_risk": "low"
     },
     {
       "path": "/anomalies",
@@ -71,7 +96,10 @@
       "bucket": "ATTENTION",
       "primary_user": "platform-operator",
       "actionability": "Triage anomalies, acknowledge/investigate",
-      "source": "@nzila/platform-anomaly-engine"
+      "actionability_score": 5,
+      "source": "@nzila/platform-anomaly-engine",
+      "source_contracts_used": ["metrics"],
+      "duplication_risk": "low"
     },
     {
       "path": "/agents",
@@ -79,7 +107,10 @@
       "bucket": "ACTION",
       "primary_user": "platform-operator",
       "actionability": "Review agent recommendations, approve/dismiss",
-      "source": "@nzila/platform-agent-workflows"
+      "actionability_score": 5,
+      "source": "@nzila/platform-agent-workflows",
+      "source_contracts_used": [],
+      "duplication_risk": "low"
     },
     {
       "path": "/modules",
@@ -87,7 +118,10 @@
       "bucket": "HEALTH",
       "primary_user": "platform-operator",
       "actionability": "View module status, feature coverage",
-      "source": "module-registry"
+      "actionability_score": 2,
+      "source": "module-registry",
+      "source_contracts_used": [],
+      "duplication_risk": "low"
     },
     {
       "path": "/procurement",
@@ -95,7 +129,10 @@
       "bucket": "ACTION",
       "primary_user": "platform-operator",
       "actionability": "Generate procurement packs, validate evidence",
-      "source": "@nzila/platform-procurement-proof"
+      "actionability_score": 5,
+      "source": "@nzila/platform-procurement-proof",
+      "source_contracts_used": ["evidence", "governance"],
+      "duplication_risk": "medium_with_console_proof_center"
     },
     {
       "path": "/architecture",
@@ -103,7 +140,10 @@
       "bucket": "HEALTH",
       "primary_user": "platform-operator",
       "actionability": "View architecture health, package ownership, contract status",
-      "source": "architecture-checks"
+      "actionability_score": 2,
+      "source": "architecture-checks",
+      "source_contracts_used": [],
+      "duplication_risk": "low"
     }
   ]
 }

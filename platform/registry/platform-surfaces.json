@@ -1,0 +1,78 @@
+{
+  "description": "Machine-readable platform surface capability registry. Defines allowed and forbidden capabilities for each operational surface.",
+  "surfaces": {
+    "control-plane": {
+      "role": "operating_shell",
+      "path": "apps/control-plane",
+      "intended_users": ["platform-operator", "executive", "governance-lead"],
+      "bucket_model": ["HEALTH", "ATTENTION", "ACTION"],
+      "allowed_capabilities": [
+        "health_summary",
+        "governance_posture",
+        "change_management",
+        "environment_status",
+        "anomaly_triage",
+        "decision_queues",
+        "module_status",
+        "procurement_evidence",
+        "architecture_health",
+        "intelligence_signals",
+        "agent_recommendations"
+      ],
+      "forbidden_capabilities": [
+        "deep_app_domain_ops",
+        "full_app_admin_replacement",
+        "raw_data_tables",
+        "app_specific_configuration",
+        "duplicate_executive_summaries"
+      ]
+    },
+    "console": {
+      "role": "operator_shell",
+      "path": "apps/console",
+      "intended_users": ["developer", "devops-engineer", "platform-operator-technical"],
+      "allowed_capabilities": [
+        "diagnostics",
+        "maintenance",
+        "debug_tooling",
+        "support_tools",
+        "log_analysis",
+        "trace_exploration",
+        "ai_model_interaction",
+        "evidence_generation",
+        "performance_analysis",
+        "infrastructure_inspection"
+      ],
+      "forbidden_capabilities": [
+        "executive_status_home",
+        "cross_platform_governance_summary_duplication",
+        "platform_configuration_changes",
+        "domain_specific_dashboards"
+      ]
+    },
+    "platform-admin": {
+      "role": "platform_configuration",
+      "path": "apps/platform-admin",
+      "intended_users": ["platform-administrator", "governance-administrator"],
+      "allowed_capabilities": [
+        "policy_configuration",
+        "registry_admin",
+        "global_platform_settings",
+        "compliance_admin",
+        "knowledge_management",
+        "ontology_management",
+        "entity_graph_config",
+        "data_fabric_admin",
+        "event_fabric_admin",
+        "integration_ops",
+        "reasoning_config"
+      ],
+      "forbidden_capabilities": [
+        "domain_ops_dashboards",
+        "general_system_status_home",
+        "operational_debugging",
+        "runtime_monitoring"
+      ]
+    }
+  }
+}

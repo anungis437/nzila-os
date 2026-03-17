@@ -1,0 +1,110 @@
+{
+  "description": "Machine-readable route governance manifest for Platform Admin",
+  "routes": [
+    {
+      "route": "/",
+      "purpose": "Platform Admin home — configuration overview",
+      "feature_class": "global_platform_settings",
+      "owning_surface": "platform-admin",
+      "primary_user": "platform-administrator",
+      "source_systems": ["platform-registry"]
+    },
+    {
+      "route": "/ontology",
+      "purpose": "Platform ontology management and concept editing",
+      "feature_class": "ontology_management",
+      "owning_surface": "platform-admin",
+      "primary_user": "governance-administrator",
+      "source_systems": ["platform-ontology"]
+    },
+    {
+      "route": "/entity-graph",
+      "purpose": "Entity graph configuration and relationship management",
+      "feature_class": "entity_graph_config",
+      "owning_surface": "platform-admin",
+      "primary_user": "platform-administrator",
+      "source_systems": ["platform-entity-graph"]
+    },
+    {
+      "route": "/knowledge",
+      "purpose": "Knowledge registry administration",
+      "feature_class": "knowledge_management",
+      "owning_surface": "platform-admin",
+      "primary_user": "governance-administrator",
+      "source_systems": ["platform-knowledge-registry"]
+    },
+    {
+      "route": "/data-fabric",
+      "purpose": "Data fabric configuration and pipeline management",
+      "feature_class": "data_fabric_admin",
+      "owning_surface": "platform-admin",
+      "primary_user": "platform-administrator",
+      "source_systems": ["platform-data-fabric"]
+    },
+    {
+      "route": "/decisions",
+      "purpose": "Decision engine configuration and policy rule management",
+      "feature_class": "policy_configuration",
+      "owning_surface": "platform-admin",
+      "primary_user": "governance-administrator",
+      "source_systems": ["platform-decision-engine"]
+    },
+    {
+      "route": "/events",
+      "purpose": "Event fabric administration and subscription management",
+      "feature_class": "event_fabric_admin",
+      "owning_surface": "platform-admin",
+      "primary_user": "platform-administrator",
+      "source_systems": ["platform-event-fabric"]
+    },
+    {
+      "route": "/integration-ops",
+      "purpose": "Integration operations management and health",
+      "feature_class": "integration_ops",
+      "owning_surface": "platform-admin",
+      "primary_user": "platform-administrator",
+      "source_systems": ["platform-integrations-control-plane"]
+    },
+    {
+      "route": "/reasoning",
+      "purpose": "Reasoning engine configuration and rule management",
+      "feature_class": "reasoning_config",
+      "owning_surface": "platform-admin",
+      "primary_user": "governance-administrator",
+      "source_systems": ["platform-reasoning-engine"]
+    },
+    {
+      "route": "/ai-runs",
+      "purpose": "AI run history and model execution management",
+      "feature_class": "compliance_admin",
+      "owning_surface": "platform-admin",
+      "primary_user": "governance-administrator",
+      "source_systems": ["platform-ai-governance"]
+    },
+    {
+      "route": "/search",
+      "purpose": "Platform-wide semantic search administration",
+      "feature_class": "global_platform_settings",
+      "owning_surface": "platform-admin",
+      "primary_user": "platform-administrator",
+      "source_systems": ["platform-semantic-search"]
+    },
+    {
+      "route": "/orchestrator-ops",
+      "purpose": "Orchestrator operations and workflow management",
+      "feature_class": "integration_ops",
+      "owning_surface": "platform-admin",
+      "primary_user": "platform-administrator",
+      "source_systems": ["orchestrator-api"]
+    },
+    {
+      "route": "/platform-health",
+      "purpose": "Platform health configuration and threshold management",
+      "feature_class": "global_platform_settings",
+      "owning_surface": "platform-admin",
+      "primary_user": "platform-administrator",
+      "source_systems": ["platform-observability"],
+      "migration_note": "Review overlap with control-plane /overview — this should be config-only, not monitoring"
+    }
+  ]
+}

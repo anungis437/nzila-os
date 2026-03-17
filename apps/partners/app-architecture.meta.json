@@ -1,0 +1,17 @@
+{
+  "domain_core_standard_adopted": true,
+  "layers_present": ["domain", "services", "workflows", "queries", "events", "ui"],
+  "layers_missing": [],
+  "exceptions": [
+    "Tier gating logic in lib/tier-gates.ts contains workflow-like patterns"
+  ],
+  "migration_status": "not_started",
+  "priority_migrations": [
+    "Create domain/ with Partner, Contract, Commission, Tier types",
+    "Move tier-gates.ts into workflows/",
+    "Create services/ from payments.ts, partner-auth.ts, policy-enforcement.ts",
+    "Create queries/ for partner read models",
+    "Create events/ for onboarding domain events"
+  ],
+  "app_tier": "PILOT"
+}

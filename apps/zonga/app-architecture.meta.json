@@ -1,0 +1,18 @@
+{
+  "domain_core_standard_adopted": true,
+  "layers_present": ["domain", "services", "workflows", "queries", "events", "ui"],
+  "layers_missing": [],
+  "exceptions": [
+    "All service logic in single zonga-services.ts — decomposition planned",
+    "Payout FSM at lib/payout-machine.ts — move to workflows/"
+  ],
+  "migration_status": "not_started",
+  "priority_migrations": [
+    "Create domain/ with Release, Creator, Listener, Payout types",
+    "Decompose zonga-services.ts into services/",
+    "Create queries/ for read models",
+    "Create events/ for domain events",
+    "Move payout-machine.ts to workflows/"
+  ],
+  "app_tier": "INCUBATING"
+}

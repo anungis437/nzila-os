@@ -1,0 +1,13 @@
+{
+  "domain_core_standard_adopted": true,
+  "layers_present": ["ui"],
+  "layers_missing": [],
+  "layers_not_applicable": ["domain", "workflows", "queries", "events"],
+  "exceptions": [
+    "Web is the primary portal — delegates domain logic to vertical apps",
+    "Lighter alignment by design"
+  ],
+  "migration_status": "complete",
+  "priority_migrations": [],
+  "app_tier": "PRODUCTION"
+}
