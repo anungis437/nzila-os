@@ -11,6 +11,7 @@ import { motion, AnimatePresence } from "framer-motion";
 import { useUser } from "@clerk/nextjs";
 import { useTranslations } from 'next-intl';
 import Link from "next/link";
+import { useOrganizationId } from "@/lib/hooks/use-organization";
 import {
   Clipboard,
   Clock,
@@ -196,6 +197,7 @@ const statusConfig: Record<CaseStatus, { label: string; icon: React.ReactElement
 export default function WorkbenchConsole() {
   const t = useTranslations();
   const { user } = useUser();
+  const organizationId = useOrganizationId();
   const [cases, setCases] = useState<Case[]>([]);
   const [isLoading, setIsLoading] = useState(true);
   const [error, setError] = useState<string | null>(null);
@@ -221,7 +223,10 @@ export default function WorkbenchConsole() {
         setIsLoading(true);
         setError(null);
 
-        const response = await fetch('/api/workbench/assigned');
+        const url = organizationId
+          ? `/api/workbench/assigned?organizationId=${organizationId}`
+          : '/api/workbench/assigned';
+        const response = await fetch(url);
         
         if (!response.ok) {
           throw new Error(`Failed to fetch assigned claims: ${response.statusText}`);
@@ -238,7 +243,7 @@ export default function WorkbenchConsole() {
     };
 
     fetchAssignedClaims();
-  }, []);
+  }, [organizationId]);
 
   // Filter and sort cases
   const filteredAndSortedCases = cases

@@ -45,8 +45,9 @@ interface FedStats {
 // ── Component ────────────────────────────────────────────────────────────────
 export default function FederationDashboard() {
   const { user } = useUser();
-  const { organization, userOrganizations } = useOrganization();
+  const { organization, organizationId } = useOrganization();
   const [mounted, setMounted] = useState(false);
+  const [childOrgs, setChildOrgs] = useState<{ id: string; name: string; memberCount: number }[]>([]);
 
   useEffect(() => {
     // eslint-disable-next-line react-hooks/set-state-in-effect
@@ -54,9 +55,29 @@ export default function FederationDashboard() {
      
   }, []);
 
+  // Fetch actual child organizations (affiliated locals/unions)
+  useEffect(() => {
+    if (!organizationId) return;
+    let cancelled = false;
+    (async () => {
+      try {
+        const res = await fetch(`/api/organizations/${organizationId}/children`);
+        if (res.ok) {
+          const json = await res.json();
+          if (!cancelled) setChildOrgs(json.data ?? []);
+        }
+      } catch {
+        // API unavailable — keep empty
+      }
+    })();
+    return () => { cancelled = true; };
+  }, [organizationId]);
+
+  const totalLocalMembers = childOrgs.reduce((sum, o) => sum + (o.memberCount ?? 0), 0);
+
   const stats: FedStats = {
-    totalLocals: userOrganizations?.length ?? 0,
-    totalMembers: 0,
+    totalLocals: childOrgs.length,
+    totalMembers: totalLocalMembers,
     remittancesCollected: 0,
     remittancesOutstanding: 0,
     activeCBAs: 0,

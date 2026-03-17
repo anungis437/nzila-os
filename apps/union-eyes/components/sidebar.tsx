@@ -325,6 +325,26 @@ export default function Sidebar({ profile: _profile, userEmail, whopMonthlyPlanI
     items: { href: string; icon: React.ReactNode; label: string; roles: string[] }[];
   };
 
+  // ── Sections filtered by org type ──────────────────────────────────────────
+  // Congress orgs (CLC) don't handle individual cases/grievances — strip
+  // union-level sections like Representative Tools, claims, and committees.
+  const orgType = organization?.type;
+  const isCongressOrg = orgType === 'congress';
+  const isFederationOrg = orgType === 'federation';
+
+  const effectiveOrgSections: SidebarSection[] = isCongressOrg
+    ? [
+        // Congress orgs only get a minimal home link from orgSections
+        {
+          title: organization?.name ?? 'Congress',
+          roles: [...unionAll, ...clcRoles, mgmt],
+          items: [
+            { href: `/${locale}/dashboard`, icon: <Home size={16} />, label: t('navigation.dashboard'), roles: [...unionAll, ...clcRoles, mgmt] },
+          ],
+        },
+      ]
+    : orgSections;
+
   // ── Assemble final navigation list based on role tier ──────────────────────
   const buildSections = useCallback(() => {
     let sections: SidebarSection[] = [];
@@ -340,17 +360,22 @@ export default function Sidebar({ profile: _profile, userEmail, whopMonthlyPlanI
       sections = [...superOrgSections];
     } else if (isViewingTenantOrg) {
       // Platform admin viewing a tenant — show tenant sections
-      const orgType = organization?.type;
-      if (orgType === 'congress') {
-        sections = [...orgSections, ...fedSections];
-      } else if (orgType === 'federation') {
-        sections = [...orgSections, ...fedSections];
+      if (isCongressOrg || isFederationOrg) {
+        sections = [...effectiveOrgSections, ...fedSections];
       } else {
-        sections = [...orgSections];
+        sections = [...effectiveOrgSections];
       }
     } else {
-      // Union / federation / CLC roles: show org sections + fed sections
-      sections = [...orgSections, ...fedSections];
+      // Regular org-member view — scope by org type
+      if (isCongressOrg) {
+        // Congress: home + federation/CLC services only (no case management)
+        sections = [...effectiveOrgSections, ...fedSections];
+      } else if (isFederationOrg) {
+        sections = [...effectiveOrgSections, ...fedSections];
+      } else {
+        // Union / local: full union nav + federation services
+        sections = [...effectiveOrgSections, ...fedSections];
+      }
     }
 
     // Always append system section
