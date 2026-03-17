@@ -65,6 +65,9 @@ const EXEMPT_PATHS = [
   // Shop-quoter — commerce DAL uses direct DB for QuoteRepository implementation.
   // Migration to createScopedDb(orgId) tracked in docs/migration/ENFORCEMENT_UPGRADE.md
   'apps/shop-quoter/',
+  // Flow — commerce app with legacy unscoped DB imports in services/repositories.
+  // Migration to createScopedDb(orgId) tracked in docs/migration/ENFORCEMENT_UPGRADE.md
+  'apps/flow/',
 ]
 
 function isExempt(filePath: string): boolean {

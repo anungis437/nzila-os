@@ -45,6 +45,7 @@ const TS_AUTHORITATIVE_APPS = [
   'cfo',
   'control-plane',
   'cora',
+  'flow',
   'mobility',
   'mobility-client-portal',
   'partners',

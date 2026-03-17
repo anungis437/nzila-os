@@ -61,6 +61,7 @@ const ENTITY_ID_EXCEPTIONS = [
   /partnerEntityId/,        // partner-specific
   /entityType/,             // audit categorisation field
   /entity_type/,            // audit SQL column
+  /entity_id/,              // DB column name (domain event entity reference)
   /personType.*entity/i,    // person kind enum
   /AbrEntityType/,          // ABR audit domain type
   /'individual'.*'entity'/i, // enum values

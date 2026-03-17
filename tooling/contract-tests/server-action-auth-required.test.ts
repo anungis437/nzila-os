@@ -42,6 +42,7 @@ const APPS_DIR = join(ROOT, 'apps')
 const AUTH_PATTERNS = [
   'auth(',
   'resolveOrgContext(',
+  'resolveOrgCommerceContext(',
   'requireAuth(',
   'requireAdmin(',
   'requirePermission(',
