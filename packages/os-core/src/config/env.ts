@@ -148,6 +148,7 @@ type AppName =
   | 'union-eyes'
   | 'cfo'
   | 'shop-quoter'
+  | 'flow'
   | 'nacp-exams'
   | 'zonga'
   | 'abr'
@@ -168,6 +169,7 @@ const SCHEMAS: Record<AppName, ZodTypeAny> = {
   'union-eyes': unionEyesSchema,
   cfo: cfoSchema,
   'shop-quoter': shopQuoterSchema,
+  flow: shopQuoterSchema,
   'nacp-exams': nacpExamsSchema,
   zonga: zongaSchema,
   abr: abrSchema,
@@ -192,7 +194,9 @@ export type ValidatedEnv<T extends AppName = 'base'> = T extends 'console'
           ? z.infer<typeof cfoSchema>
           : T extends 'shop-quoter'
             ? z.infer<typeof shopQuoterSchema>
-            : T extends 'nacp-exams'
+            : T extends 'flow'
+              ? z.infer<typeof shopQuoterSchema>
+              : T extends 'nacp-exams'
               ? z.infer<typeof nacpExamsSchema>
               : T extends 'zonga'
                 ? z.infer<typeof zongaSchema>

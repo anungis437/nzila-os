@@ -1,0 +1,86 @@
+{
+  "app": {
+    "name": "Flow",
+    "tagline": "Professional Quoting Made Simple",
+    "description": "Gift box quoting and proposal tool with AI-assisted pricing, Quebec tax calculations, and evidence-first audit trails."
+  },
+  "nav": {
+    "home": "Home",
+    "about": "About",
+    "features": "Features",
+    "pricing": "Pricing",
+    "contact": "Contact",
+    "signIn": "Sign In",
+    "getStarted": "Get Started"
+  },
+  "hero": {
+    "badge": "NzilaOS Commerce Engine",
+    "title": "Professional Quoting,",
+    "titleAccent": "Made Simple",
+    "subtitle": "Create tiered proposals, calculate Quebec taxes automatically, and track every decision with an evidence-first audit trail powered by AI.",
+    "cta": "Start Quoting",
+    "ctaSecondary": "See Features"
+  },
+  "stats": {
+    "quotes": "5,000+",
+    "quotesLabel": "Quotes Created",
+    "accuracy": "99.9%",
+    "accuracyLabel": "Tax Accuracy",
+    "businesses": "200+",
+    "businessesLabel": "Businesses",
+    "speed": "3x",
+    "speedLabel": "Faster Proposals"
+  },
+  "features": {
+    "title": "Everything You Need to Quote Smarter",
+    "subtitle": "Built for gift box businesses that demand accuracy and speed",
+    "smartQuoting": "Smart Quoting",
+    "smartQuotingDesc": "Create tiered proposals (Budget / Standard / Premium) with automatic Quebec GST/QST calculations and margin tracking.",
+    "aiPricing": "AI-Assisted Pricing",
+    "aiPricingDesc": "Leverage AI-powered pricing suggestions with full audit trail and governance review for every pricing decision.",
+    "auditTrail": "Evidence-First Audit",
+    "auditTrailDesc": "Every quote transition produces hash-chained audit entries for IRAP compliance and complete decision traceability.",
+    "marginAnalytics": "Margin Analytics",
+    "marginAnalyticsDesc": "Real-time margin tracking with configurable floor gates per org, ensuring profitability on every quote.",
+    "clientManagement": "Client Management",
+    "clientManagementDesc": "Organize clients, track quote history, and build lasting relationships with CRM-integrated workflows.",
+    "bulkImport": "Bulk Import",
+    "bulkImportDesc": "Import product catalogs, client lists, and pricing data from CSV/Excel with validation and conflict resolution."
+  },
+  "mission": {
+    "title": "Quoting with Confidence",
+    "description": "Flow empowers businesses to create accurate, professional proposals in minutes. With AI-assisted pricing, automatic tax calculation, and evidence-first audit trails, every quote tells a trustworthy story.",
+    "highlight": "Built in Quebec for Canadian commerce."
+  },
+  "cta": {
+    "title": "Ready to Streamline Your Quoting?",
+    "subtitle": "Join hundreds of businesses using Flow to win more deals faster.",
+    "button": "Get Started Free"
+  },
+  "footer": {
+    "description": "Professional quoting and proposal tool for gift box businesses.",
+    "platform": "Platform",
+    "resources": "Resources",
+    "legal": "Legal",
+    "ecosystem": "Ecosystem",
+    "allRights": "All rights reserved.",
+    "soc2": "SOC 2 Compliant",
+    "gdpr": "GDPR Ready",
+    "pipeda": "PIPEDA Compliant"
+  },
+  "auth": {
+    "signInTitle": "Welcome Back",
+    "signInSubtitle": "Sign in to manage your quotes and proposals",
+    "signUpTitle": "Create Your Account",
+    "signUpSubtitle": "Start creating professional proposals in minutes"
+  },
+  "dashboard": {
+    "title": "Dashboard",
+    "overview": "Overview",
+    "quotes": "Quotes",
+    "clients": "Clients",
+    "analytics": "Analytics",
+    "import": "Import",
+    "settings": "Settings"
+  }
+}

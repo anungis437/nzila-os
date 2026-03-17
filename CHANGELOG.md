@@ -12,7 +12,7 @@ NzilaOS v1.0.0 — Union-Eyes GA release. 100 merged PRs, 7,669+ tests, 0 TypeSc
 
 ### Highlights
 - **Union-Eyes (CAPE)**: Full collective agreement processing engine — parsing, interpretation, grievance tracking, employer templates, steward workload management, per-org representation protocol, draft recovery, E2E pilot readiness.
-- **Platform**: 13 apps (web, console, partners, union-eyes, abr, cfo, orchestrator-api, trade, pondu, cora, zonga, nacp-exams, shop-quoter), 50+ shared packages, dual-stack Next.js 16 + Django 5.
+- **Platform**: 13 apps (web, console, partners, union-eyes, abr, cfo, orchestrator-api, trade, pondu, cora, zonga, nacp-exams, flow), 50+ shared packages, dual-stack Next.js 16 + Django 5.
 - **Enterprise hardening**: RBAC, contract tests, SLO gating, SBOM generation, governance gate, secret scanning (Gitleaks + TruffleHog + Snyk), evidence packs, compliance workflow.
 - **Azure**: Container Apps deployment pipeline, GitOps multi-app build (7 apps), ACR image registry, PostgreSQL Flexible Server, Key Vault, VNet.
 

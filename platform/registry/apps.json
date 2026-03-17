@@ -14,8 +14,8 @@
       "docs_complete": true
     },
     {
-      "name": "shop-quoter",
-      "path": "apps/shop-quoter",
+      "name": "flow",
+      "path": "apps/flow",
       "tier": "PRODUCTION",
       "owner": "commerce",
       "domain": "commerce",
@@ -23,7 +23,22 @@
       "metrics_endpoint": true,
       "evidence_export": true,
       "demo_seed": true,
-      "docs_complete": true
+      "docs_complete": true,
+      "governance_telemetry": true,
+      "port": 3007,
+      "endpoints": {
+        "health": "/api/health",
+        "metrics": "/api/metrics",
+        "governance_telemetry": "/api/governance/telemetry",
+        "evidence_export": "/api/evidence/export",
+        "operational_summary": "/api/ops/summary"
+      },
+      "runbook": "docs/RUNBOOK.md",
+      "environments": {
+        "staging": "nzila-os-flow.delightfulisland-0d503d3c.eastus.azurecontainerapps.io",
+        "production": null
+      },
+      "integrations": ["shopify", "zoho", "canva"]
     },
     {
       "name": "web",
