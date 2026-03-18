@@ -1,4 +1,6 @@
 import { NextRequest, NextResponse } from 'next/server'
+import { authenticateUser, withRequestContext } from '@/lib/api-guards'
+import { withSpan } from '@nzila/os-core/telemetry'
 import { ZohoInventoryClient } from '@/lib/zoho/inventory-client'
 import { createZohoOAuthClient } from '@/lib/zoho/oauth'
 
@@ -9,8 +11,13 @@ import { createZohoOAuthClient } from '@/lib/zoho/oauth'
  * Used by the product picker in the new-quote form.
  */
 export async function GET(request: NextRequest) {
-  const query = request.nextUrl.searchParams.get('q') ?? ''
-  const page = Number(request.nextUrl.searchParams.get('page') ?? '1')
+  return withRequestContext(request, () =>
+    withSpan('api.zoho.products', { 'http.method': 'GET' }, async () => {
+    const authResult = await authenticateUser()
+    if (!authResult.ok) return authResult.response
+
+    const query = request.nextUrl.searchParams.get('q') ?? ''
+    const page = Number(request.nextUrl.searchParams.get('page') ?? '1')
 
   const orgId = process.env.ZOHO_ORGANIZATION_ID
   if (!orgId) {
@@ -52,4 +59,6 @@ export async function GET(request: NextRequest) {
     // Zoho not connected — return empty with message
     return NextResponse.json({ items: [], message: 'Zoho connection unavailable' })
   }
+    }),
+  )
 }
