@@ -110,7 +110,7 @@ export function TrendChart({
               />
               <YAxis tick={{ fontSize: 12 }} />
               <Tooltip
-                formatter={(value: string | number | undefined) => valueFormatter(Number(value ?? 0))}
+                formatter={(value) => valueFormatter(Number(value ?? 0))}
                 labelFormatter={(label) => `Date: ${label}`}
                 contentStyle={{
                   backgroundColor: "white",
@@ -144,7 +144,7 @@ export function TrendChart({
               />
               <YAxis tick={{ fontSize: 12 }} />
               <Tooltip
-                formatter={(value: string | number | undefined) => valueFormatter(Number(value ?? 0))}
+                formatter={(value) => valueFormatter(Number(value ?? 0))}
                 labelFormatter={(label) => `Date: ${label}`}
                 contentStyle={{
                   backgroundColor: "white",
