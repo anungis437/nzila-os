@@ -1,6 +1,11 @@
 /**
  * Queries layer — read models and reporting projections for Flow.
- *
- * Migration: read logic will be extracted from actions/ into this directory.
  */
-export {}
+export {
+  getOrderStatusDistribution,
+  getOrderPipelineSummary,
+  getRecentEventActivity,
+  type OrderStatusDistribution,
+  type OrderPipelineSummary,
+  type EventActivitySummary,
+} from './order-metrics'

@@ -7,6 +7,7 @@ export default defineConfig({
       'apps/abr',
       'apps/cfo',
       'apps/console',
+      'apps/flow',
       'apps/orchestrator-api',
       'apps/partners',
       'apps/union-eyes',

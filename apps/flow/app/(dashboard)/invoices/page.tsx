@@ -1,4 +1,5 @@
 import Link from 'next/link'
+import { getLocale } from 'next-intl/server'
 import {
   PlusIcon,
   FunnelIcon,
@@ -17,7 +18,7 @@ const statusColors: Record<string, string> = {
   draft: 'bg-gray-100 text-gray-700',
   issued: 'bg-blue-100 text-blue-700',
   sent: 'bg-indigo-100 text-indigo-700',
-  partial_paid: 'bg-purple-100 text-purple-700',
+  partial_paid: 'bg-electric/10 text-electric',
   paid: 'bg-green-100 text-green-700',
   overdue: 'bg-red-100 text-red-700',
   disputed: 'bg-orange-100 text-orange-700',
@@ -50,6 +51,9 @@ function getAgingBracket(dueDate: Date | string | null, status: string): string 
 // ── Page Component ──────────────────────────────────────────────────────────
 
 export default async function InvoicesListPage() {
+  const locale = await getLocale()
+  const base = `/${locale}/dashboard`
+
   // Fetch invoices and customers from database
   const [invoicesResult, customersResult] = await Promise.all([
     getInvoicesAction(),
@@ -89,19 +93,19 @@ export default async function InvoicesListPage() {
       {/* Header */}
       <div className="flex items-center justify-between mb-6">
         <div>
-          <h1 className="text-2xl font-bold text-gray-900">Invoices & Payments</h1>
+          <h1 className="text-2xl font-bold text-navy">Invoices & Payments</h1>
           <p className="text-sm text-gray-500 mt-1">
             Manage invoices, track payments, and monitor accounts receivable.
           </p>
         </div>
         <div className="flex items-center gap-3">
-          <button className="inline-flex items-center gap-2 px-4 py-2.5 bg-white text-gray-700 text-sm font-medium rounded-lg border border-gray-300 hover:bg-gray-50 transition">
+          <button className="inline-flex items-center gap-2 px-4 py-2.5 bg-white text-gray-700 text-sm font-medium rounded-lg border border-gray-300 hover:bg-electric/[0.02]/60 transition">
             <ArrowPathIcon className="h-4 w-4" />
             Sync with Zoho
           </button>
           <Link
-            href="/invoices/new"
-            className="inline-flex items-center gap-2 px-4 py-2.5 bg-purple-600 text-white text-sm font-semibold rounded-lg hover:bg-purple-700 transition shadow-sm"
+            href={`${base}/invoices/new`}
+            className="inline-flex items-center gap-2 px-4 py-2.5 bg-electric text-white text-sm font-semibold rounded-lg hover:bg-electric-light transition shadow-sm"
           >
             <PlusIcon className="h-4 w-4" />
             New Invoice
@@ -164,10 +168,10 @@ export default async function InvoicesListPage() {
       </div>
 
       {/* Aging Summary */}
-      <div className="bg-linear-to-r from-purple-50 to-indigo-50 rounded-xl border border-purple-100 p-4 mb-6">
+      <div className="bg-linear-to-r from-electric/5 to-indigo-50 rounded-xl border border-electric/10 p-4 mb-6">
         <div className="flex items-center justify-between">
           <div>
-            <p className="text-sm text-purple-700 font-medium mb-2">Accounts Receivable Aging</p>
+            <p className="text-sm text-electric font-medium mb-2">Accounts Receivable Aging</p>
             <div className="flex items-center gap-6">
               <div>
                 <span className="text-xs text-gray-500">Current</span>
@@ -202,8 +206,8 @@ export default async function InvoicesListPage() {
             </div>
           </div>
           <Link
-            href="/invoices/reports"
-            className="text-sm text-purple-600 font-medium hover:underline"
+            href={`${base}/invoices/reports`}
+            className="text-sm text-electric font-medium hover:underline"
           >
             View Full Report →
           </Link>
@@ -217,10 +221,10 @@ export default async function InvoicesListPage() {
           <input
             type="text"
             placeholder="Search by invoice #, customer..."
-            className="w-full pl-9 pr-4 py-2 text-sm border border-gray-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-purple-500 focus:border-transparent"
+            className="w-full pl-9 pr-4 py-2 text-sm border border-gray-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-electric/30 focus:border-electric"
           />
         </div>
-        <select className="px-3 py-2 text-sm border border-gray-300 rounded-lg bg-white text-gray-700 focus:outline-none focus:ring-2 focus:ring-purple-500">
+        <select className="px-3 py-2 text-sm border border-gray-300 rounded-lg bg-white text-gray-700 focus:outline-none focus:ring-2 focus:ring-electric/30">
           <option value="">All Statuses</option>
           <option value="draft">Draft</option>
           <option value="sent">Sent</option>
@@ -229,7 +233,7 @@ export default async function InvoicesListPage() {
           <option value="paid">Paid</option>
           <option value="overdue">Overdue</option>
         </select>
-        <button className="inline-flex items-center gap-2 px-3 py-2 text-sm font-medium text-gray-700 bg-white border border-gray-300 rounded-lg hover:bg-gray-50 transition">
+        <button className="inline-flex items-center gap-2 px-3 py-2 text-sm font-medium text-gray-700 bg-white border border-gray-300 rounded-lg hover:bg-electric/[0.02]/60 transition">
           <FunnelIcon className="h-4 w-4" />
           More Filters
         </button>
@@ -271,11 +275,11 @@ export default async function InvoicesListPage() {
               return (
                 <tr
                   key={inv.id}
-                  className={`border-b border-gray-100 hover:bg-gray-50 transition cursor-pointer ${isOverdue ? 'bg-red-50/50' : ''}`}
+                  className={`border-b border-gray-100 hover:bg-electric/[0.02]/60 transition cursor-pointer ${isOverdue ? 'bg-red-50/50' : ''}`}
                 >
                   <td className="px-5 py-4">
-                    <Link href={`/invoices/${inv.id}`} className="flex items-center gap-2">
-                      <span className="font-semibold text-purple-600 hover:underline">
+                    <Link href={`${base}/invoices/${inv.id}`} className="flex items-center gap-2">
+                      <span className="font-semibold text-electric hover:underline">
                         {inv.ref}
                       </span>
                       {isOverdue && (
@@ -320,7 +324,7 @@ export default async function InvoicesListPage() {
           <div className="flex flex-col items-center justify-center py-16">
             <DocumentTextIcon className="h-12 w-12 text-gray-300 mb-3" />
             <p className="text-gray-500 mb-3">No invoices found.</p>
-            <Link href="/invoices/new" className="text-purple-600 font-semibold hover:underline">
+            <Link href={`${base}/invoices/new`} className="text-electric font-semibold hover:underline">
               Create your first invoice →
             </Link>
           </div>

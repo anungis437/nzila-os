@@ -1,4 +1,5 @@
 import Link from 'next/link'
+import { getLocale } from 'next-intl/server'
 import {
   PlusIcon,
   FunnelIcon,
@@ -15,7 +16,7 @@ const statusColors: Record<string, string> = {
   draft: 'bg-gray-100 text-gray-700',
   sent: 'bg-amber-100 text-amber-700',
   acknowledged: 'bg-blue-100 text-blue-700',
-  partial_received: 'bg-purple-100 text-purple-700',
+  partial_received: 'bg-electric/10 text-electric',
   received: 'bg-green-100 text-green-700',
   cancelled: 'bg-red-100 text-red-700',
 }
@@ -33,6 +34,9 @@ const statusLabels: Record<string, string> = {
 // ── Page Component ──────────────────────────────────────────────────────────
 
 export default async function PurchaseOrdersListPage() {
+  const locale = await getLocale()
+  const base = `/${locale}/dashboard`
+
   // Fetch POs and suppliers from database
   const [posResult, suppliersResult, summary] = await Promise.all([
     getPurchaseOrdersAction(),
@@ -57,19 +61,19 @@ export default async function PurchaseOrdersListPage() {
       {/* Header */}
       <div className="flex items-center justify-between mb-6">
         <div>
-          <h1 className="text-2xl font-bold text-gray-900">Purchase Orders</h1>
+          <h1 className="text-2xl font-bold text-navy">Purchase Orders</h1>
           <p className="text-sm text-gray-500 mt-1">
             Create and manage supplier purchase orders with receiving workflow.
           </p>
         </div>
         <div className="flex items-center gap-3">
-          <button className="inline-flex items-center gap-2 px-4 py-2.5 bg-white text-gray-700 text-sm font-medium rounded-lg border border-gray-300 hover:bg-gray-50 transition">
+          <button className="inline-flex items-center gap-2 px-4 py-2.5 bg-white text-gray-700 text-sm font-medium rounded-lg border border-gray-300 hover:bg-electric/[0.02]/60 transition">
             <ArrowPathIcon className="h-4 w-4" />
             Sync with Zoho
           </button>
           <Link
-            href="/purchase-orders/new"
-            className="inline-flex items-center gap-2 px-4 py-2.5 bg-purple-600 text-white text-sm font-semibold rounded-lg hover:bg-purple-700 transition shadow-sm"
+            href={`${base}/purchase-orders/new`}
+            className="inline-flex items-center gap-2 px-4 py-2.5 bg-electric text-white text-sm font-semibold rounded-lg hover:bg-electric-light transition shadow-sm"
           >
             <PlusIcon className="h-4 w-4" />
             New PO
@@ -90,10 +94,10 @@ export default async function PurchaseOrdersListPage() {
         <div className="bg-white rounded-xl border border-gray-200 p-4 flex items-center justify-between">
           <div>
             <p className="text-sm text-gray-500">Awaiting Delivery</p>
-            <p className="text-2xl font-bold text-purple-600">{awaitingDelivery}</p>
+            <p className="text-2xl font-bold text-electric">{awaitingDelivery}</p>
           </div>
           {awaitingDelivery > 0 && (
-            <TruckIcon className="h-8 w-8 text-purple-400" />
+            <TruckIcon className="h-8 w-8 text-electric/60" />
           )}
         </div>
         <div className="bg-white rounded-xl border border-gray-200 p-4">
@@ -111,10 +115,10 @@ export default async function PurchaseOrdersListPage() {
           <input
             type="text"
             placeholder="Search by PO number, supplier..."
-            className="w-full pl-9 pr-4 py-2 text-sm border border-gray-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-purple-500 focus:border-transparent"
+            className="w-full pl-9 pr-4 py-2 text-sm border border-gray-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-electric/30 focus:border-electric"
           />
         </div>
-        <select className="px-3 py-2 text-sm border border-gray-300 rounded-lg bg-white text-gray-700 focus:outline-none focus:ring-2 focus:ring-purple-500">
+        <select className="px-3 py-2 text-sm border border-gray-300 rounded-lg bg-white text-gray-700 focus:outline-none focus:ring-2 focus:ring-electric/30">
           <option value="">All Statuses</option>
           <option value="draft">Draft</option>
           <option value="pending_approval">Pending Approval</option>
@@ -123,7 +127,7 @@ export default async function PurchaseOrdersListPage() {
           <option value="partially_received">Partially Received</option>
           <option value="received">Received</option>
         </select>
-        <button className="inline-flex items-center gap-2 px-3 py-2 text-sm font-medium text-gray-700 bg-white border border-gray-300 rounded-lg hover:bg-gray-50 transition">
+        <button className="inline-flex items-center gap-2 px-3 py-2 text-sm font-medium text-gray-700 bg-white border border-gray-300 rounded-lg hover:bg-electric/[0.02]/60 transition">
           <FunnelIcon className="h-4 w-4" />
           More Filters
         </button>
@@ -164,10 +168,10 @@ export default async function PurchaseOrdersListPage() {
               return (
                 <tr
                   key={po.id}
-                  className="border-b border-gray-100 hover:bg-gray-50 transition cursor-pointer"
+                  className="border-b border-gray-100 hover:bg-electric/[0.02]/60 transition cursor-pointer"
                 >
                   <td className="px-5 py-4">
-                    <Link href={`/purchase-orders/${po.id}`} className="font-semibold text-purple-600 hover:underline">
+                    <Link href={`${base}/purchase-orders/${po.id}`} className="font-semibold text-electric hover:underline">
                       {po.ref}
                     </Link>
                   </td>
@@ -185,7 +189,7 @@ export default async function PurchaseOrdersListPage() {
                   </td>
                   <td className="px-5 py-4 text-center">
                     {po.status !== 'draft' && po.status !== 'cancelled' ? (
-                      <span className={`text-xs font-medium ${po.status === 'received' ? 'text-green-600' : 'text-purple-600'}`}>
+                      <span className={`text-xs font-medium ${po.status === 'received' ? 'text-green-600' : 'text-electric'}`}>
                         {po.status === 'received' ? '100%' : po.status === 'partial_received' ? 'Partial' : '0%'}
                       </span>
                     ) : (
@@ -206,7 +210,7 @@ export default async function PurchaseOrdersListPage() {
           <div className="flex flex-col items-center justify-center py-16">
             <ClipboardDocumentCheckIcon className="h-12 w-12 text-gray-300 mb-3" />
             <p className="text-gray-500 mb-3">No purchase orders found.</p>
-            <Link href="/purchase-orders/new" className="text-purple-600 font-semibold hover:underline">
+            <Link href={`${base}/purchase-orders/new`} className="text-electric font-semibold hover:underline">
               Create your first PO →
             </Link>
           </div>

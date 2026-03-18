@@ -1,4 +1,5 @@
 import Link from 'next/link'
+import { getLocale } from 'next-intl/server'
 import {
   PlusIcon,
   FunnelIcon,
@@ -27,6 +28,9 @@ const syncStatusDisplay: Record<string, { icon: React.ElementType; color: string
 // ── Page Component ──────────────────────────────────────────────────────────
 
 export default async function SuppliersListPage() {
+  const locale = await getLocale()
+  const base = `/${locale}/dashboard`
+
   // Fetch suppliers from database
   const result = await getSuppliersAction()
   const suppliers = result.rows
@@ -40,19 +44,19 @@ export default async function SuppliersListPage() {
       {/* Header */}
       <div className="flex items-center justify-between mb-6">
         <div>
-          <h1 className="text-2xl font-bold text-gray-900">Suppliers</h1>
+          <h1 className="text-2xl font-bold text-navy">Suppliers</h1>
           <p className="text-sm text-gray-500 mt-1">
             Manage your supplier relationships and track purchase orders.
           </p>
         </div>
         <div className="flex items-center gap-3">
-          <button className="inline-flex items-center gap-2 px-4 py-2.5 bg-white text-gray-700 text-sm font-medium rounded-lg border border-gray-300 hover:bg-gray-50 transition">
+          <button className="inline-flex items-center gap-2 px-4 py-2.5 bg-white text-gray-700 text-sm font-medium rounded-lg border border-gray-300 hover:bg-electric/[0.02]/60 transition">
             <ArrowPathIcon className="h-4 w-4" />
             Sync with Zoho
           </button>
           <Link
-            href="/suppliers/new"
-            className="inline-flex items-center gap-2 px-4 py-2.5 bg-purple-600 text-white text-sm font-semibold rounded-lg hover:bg-purple-700 transition shadow-sm"
+            href={`${base}/suppliers/new`}
+            className="inline-flex items-center gap-2 px-4 py-2.5 bg-electric text-white text-sm font-semibold rounded-lg hover:bg-electric-light transition shadow-sm"
           >
             <PlusIcon className="h-4 w-4" />
             Add Supplier
@@ -64,7 +68,7 @@ export default async function SuppliersListPage() {
       <div className="grid grid-cols-4 gap-4 mb-6">
         <div className="bg-white rounded-xl border border-gray-200 p-4">
           <p className="text-sm text-gray-500">Total Suppliers</p>
-          <p className="text-2xl font-bold text-gray-900">{suppliers.length}</p>
+          <p className="text-2xl font-bold text-navy">{suppliers.length}</p>
         </div>
         <div className="bg-white rounded-xl border border-gray-200 p-4">
           <p className="text-sm text-gray-500">Active</p>
@@ -76,7 +80,7 @@ export default async function SuppliersListPage() {
         </div>
         <div className="bg-white rounded-xl border border-gray-200 p-4">
           <p className="text-sm text-gray-500">Avg Lead Time</p>
-          <p className="text-2xl font-bold text-purple-600">
+          <p className="text-2xl font-bold text-electric">
             {suppliers.length > 0 
               ? Math.round(suppliers.reduce((acc, s) => acc + (s.leadTimeDays ?? 0), 0) / suppliers.length)
               : 0} days
@@ -91,10 +95,10 @@ export default async function SuppliersListPage() {
           <input
             type="text"
             placeholder="Search by name, code, email..."
-            className="w-full pl-9 pr-4 py-2 text-sm border border-gray-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-purple-500 focus:border-transparent"
+            className="w-full pl-9 pr-4 py-2 text-sm border border-gray-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-electric/30 focus:border-electric"
           />
         </div>
-        <button className="inline-flex items-center gap-2 px-3 py-2 text-sm font-medium text-gray-700 bg-white border border-gray-300 rounded-lg hover:bg-gray-50 transition">
+        <button className="inline-flex items-center gap-2 px-3 py-2 text-sm font-medium text-gray-700 bg-white border border-gray-300 rounded-lg hover:bg-electric/[0.02]/60 transition">
           <FunnelIcon className="h-4 w-4" />
           Filter
         </button>
@@ -133,11 +137,11 @@ export default async function SuppliersListPage() {
               return (
                 <tr
                   key={supplier.id}
-                  className="border-b border-gray-100 hover:bg-gray-50 transition cursor-pointer"
+                  className="border-b border-gray-100 hover:bg-electric/[0.02]/60 transition cursor-pointer"
                 >
                   <td className="px-5 py-4">
-                    <Link href={`/suppliers/${supplier.id}`} className="block">
-                      <span className="font-semibold text-purple-600 hover:underline block">
+                    <Link href={`${base}/suppliers/${supplier.id}`} className="block">
+                      <span className="font-semibold text-electric hover:underline block">
                         {supplier.name}
                       </span>
                       <span className="text-xs text-gray-500">{supplier.id.slice(0, 8)}</span>
@@ -176,7 +180,7 @@ export default async function SuppliersListPage() {
         {suppliers.length === 0 && (
           <div className="flex flex-col items-center justify-center py-16">
             <p className="text-gray-500 mb-3">No suppliers found.</p>
-            <Link href="/suppliers/new" className="text-purple-600 font-semibold hover:underline">
+            <Link href={`${base}/suppliers/new`} className="text-electric font-semibold hover:underline">
               Add your first supplier →
             </Link>
           </div>

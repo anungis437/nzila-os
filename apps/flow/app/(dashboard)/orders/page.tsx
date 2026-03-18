@@ -1,4 +1,5 @@
 import Link from 'next/link'
+import { getLocale } from 'next-intl/server'
 import {
   FunnelIcon,
   MagnifyingGlassIcon,
@@ -16,7 +17,7 @@ const statusColors: Record<string, string> = {
   draft: 'bg-gray-100 text-gray-700',
   pending: 'bg-amber-100 text-amber-700',
   confirmed: 'bg-blue-100 text-blue-700',
-  processing: 'bg-purple-100 text-purple-700',
+  processing: 'bg-electric/10 text-electric',
   shipped: 'bg-cyan-100 text-cyan-700',
   delivered: 'bg-green-100 text-green-700',
   cancelled: 'bg-red-100 text-red-700',
@@ -25,6 +26,9 @@ const statusColors: Record<string, string> = {
 // ── Page Component ──────────────────────────────────────────────────────────
 
 export default async function OrdersListPage() {
+  const locale = await getLocale()
+  const base = `/${locale}/dashboard`
+
   // Fetch orders and customers from database
   const [ordersResult, customersResult] = await Promise.all([
     getOrdersAction(),
@@ -53,14 +57,14 @@ export default async function OrdersListPage() {
       {/* Header */}
       <div className="flex items-center justify-between mb-6">
         <div>
-          <h1 className="text-2xl font-bold text-gray-900">Orders & Fulfillment</h1>
+          <h1 className="text-2xl font-bold text-navy">Orders & Fulfillment</h1>
           <p className="text-sm text-gray-500 mt-1">
             Track production orders through allocation, picking, and shipping.
           </p>
         </div>
         <Link
-          href="/dashboard"
-          className="inline-flex items-center gap-2 px-4 py-2.5 bg-purple-600 text-white text-sm font-semibold rounded-lg hover:bg-purple-700 transition shadow-sm"
+          href={base}
+          className="inline-flex items-center gap-2 px-4 py-2.5 bg-electric text-white text-sm font-semibold rounded-lg hover:bg-electric-light transition shadow-sm"
         >
           Production Dashboard
         </Link>
@@ -78,12 +82,12 @@ export default async function OrdersListPage() {
           </div>
         </div>
         <div className="bg-white rounded-xl border border-gray-200 p-4 flex items-center gap-3">
-          <div className="h-10 w-10 bg-purple-100 rounded-lg flex items-center justify-center">
-            <ShoppingCartIcon className="h-5 w-5 text-purple-600" />
+          <div className="h-10 w-10 bg-electric/10 rounded-lg flex items-center justify-center">
+            <ShoppingCartIcon className="h-5 w-5 text-electric" />
           </div>
           <div>
             <p className="text-xs text-gray-500">In Production</p>
-            <p className="text-xl font-bold text-purple-600">{inProduction}</p>
+            <p className="text-xl font-bold text-electric">{inProduction}</p>
           </div>
         </div>
         <div className="bg-white rounded-xl border border-gray-200 p-4 flex items-center gap-3">
@@ -124,10 +128,10 @@ export default async function OrdersListPage() {
           <input
             type="text"
             placeholder="Search by order #, customer..."
-            className="w-full pl-9 pr-4 py-2 text-sm border border-gray-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-purple-500 focus:border-transparent"
+            className="w-full pl-9 pr-4 py-2 text-sm border border-gray-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-electric/30 focus:border-electric"
           />
         </div>
-        <select className="px-3 py-2 text-sm border border-gray-300 rounded-lg bg-white text-gray-700 focus:outline-none focus:ring-2 focus:ring-purple-500">
+        <select className="px-3 py-2 text-sm border border-gray-300 rounded-lg bg-white text-gray-700 focus:outline-none focus:ring-2 focus:ring-electric/30">
           <option value="">All Statuses</option>
           <option value="pending">Pending</option>
           <option value="confirmed">Confirmed</option>
@@ -137,14 +141,14 @@ export default async function OrdersListPage() {
           <option value="shipped">Shipped</option>
           <option value="delivered">Delivered</option>
         </select>
-        <select className="px-3 py-2 text-sm border border-gray-300 rounded-lg bg-white text-gray-700 focus:outline-none focus:ring-2 focus:ring-purple-500">
+        <select className="px-3 py-2 text-sm border border-gray-300 rounded-lg bg-white text-gray-700 focus:outline-none focus:ring-2 focus:ring-electric/30">
           <option value="">All Priorities</option>
           <option value="urgent">Urgent</option>
           <option value="high">High</option>
           <option value="normal">Normal</option>
           <option value="low">Low</option>
         </select>
-        <button className="inline-flex items-center gap-2 px-3 py-2 text-sm font-medium text-gray-700 bg-white border border-gray-300 rounded-lg hover:bg-gray-50 transition">
+        <button className="inline-flex items-center gap-2 px-3 py-2 text-sm font-medium text-gray-700 bg-white border border-gray-300 rounded-lg hover:bg-electric/[0.02]/60 transition">
           <FunnelIcon className="h-4 w-4" />
           More Filters
         </button>
@@ -188,11 +192,11 @@ export default async function OrdersListPage() {
               return (
                 <tr
                   key={order.id}
-                  className={`border-b border-gray-100 hover:bg-gray-50 transition cursor-pointer ${needsAttention ? 'bg-red-50/50' : ''}`}
+                  className={`border-b border-gray-100 hover:bg-electric/[0.02]/60 transition cursor-pointer ${needsAttention ? 'bg-red-50/50' : ''}`}
                 >
                   <td className="px-5 py-4">
-                    <Link href={`/orders/${order.id}`} className="flex items-center gap-2">
-                      <span className="font-semibold text-purple-600 hover:underline">
+                    <Link href={`${base}/orders/${order.id}`} className="flex items-center gap-2">
+                      <span className="font-semibold text-electric hover:underline">
                         {order.ref}
                       </span>
                       {needsAttention && (
@@ -232,7 +236,7 @@ export default async function OrdersListPage() {
           <div className="flex flex-col items-center justify-center py-16">
             <ShoppingCartIcon className="h-12 w-12 text-gray-300 mb-3" />
             <p className="text-gray-500 mb-3">No orders found.</p>
-            <Link href="/quotes" className="text-purple-600 font-semibold hover:underline">
+            <Link href={`${base}/quotes`} className="text-electric font-semibold hover:underline">
               Create orders from quotes →
             </Link>
           </div>

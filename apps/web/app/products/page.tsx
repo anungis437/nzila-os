@@ -68,7 +68,7 @@ const pipeline = [
   { name: 'Court Lens', vertical: 'Legaltech', tam: '$12B', orgs: '682', status: 'In Development' },
   { name: 'CyberLearn', vertical: 'EdTech', tam: '$8B', orgs: '30+', status: 'In Development' },
   { name: 'Shop Quoter', vertical: 'Commerce', tam: '$5B', orgs: '93', status: 'In Development' },
-  { name: 'Trade OS', vertical: 'Trade', tam: '$15B', orgs: '337', status: 'In Development' },
+  { name: 'Trade OS', vertical: 'Commerce', tam: '$15B', orgs: '337', status: 'Beta' },
   { name: 'eExports', vertical: 'Trade', tam: '$3B', orgs: '78', status: 'Django PoC' },
   { name: 'PonduOps', vertical: 'Agrotech (DRC/CA)', tam: '$8B', orgs: '220', status: 'In Development' },
   { name: 'Insight CFO', vertical: 'Fintech', tam: '$2B', orgs: '37', status: 'In Development' },
@@ -78,6 +78,7 @@ const pipeline = [
 
 function getStatusStyle(status: string) {
   if (status === 'Production Ready') return 'bg-emerald/10 text-emerald';
+  if (status === 'Beta') return 'bg-violet/10 text-violet';
   if (status === 'In Development') return 'bg-electric/10 text-electric';
   if (status === 'Django PoC') return 'bg-violet/10 text-violet';
   if (status === 'Migrating') return 'bg-gold/10 text-gold';

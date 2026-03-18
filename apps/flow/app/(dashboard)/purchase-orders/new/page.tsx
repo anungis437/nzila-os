@@ -3,6 +3,7 @@
 import { useState, useEffect } from 'react'
 import Link from 'next/link'
 import { useRouter, useSearchParams } from 'next/navigation'
+import { useLocale } from 'next-intl'
 import {
   ArrowLeftIcon,
   CheckIcon,
@@ -37,6 +38,8 @@ interface Product {
 export default function NewPurchaseOrderPage() {
   const router = useRouter()
   const searchParams = useSearchParams()
+  const locale = useLocale()
+  const base = `/${locale}/dashboard`
   const preselectedSupplier = searchParams.get('supplierId') ?? ''
   
   const [isSubmitting, setIsSubmitting] = useState(false)
@@ -124,7 +127,7 @@ export default function NewPurchaseOrderPage() {
         notes: formData.get('notes') as string || null,
       })
       
-      router.push('/purchase-orders')
+      router.push(`${base}/purchase-orders`)
     } catch (err) {
       setError(err instanceof Error ? err.message : 'Failed to create purchase order')
       setIsSubmitting(false)
@@ -136,8 +139,8 @@ export default function NewPurchaseOrderPage() {
       {/* Breadcrumb */}
       <div className="mb-6">
         <Link
-          href="/purchase-orders"
-          className="inline-flex items-center gap-2 text-sm text-gray-500 hover:text-purple-600 transition"
+          href={`${base}/purchase-orders`}
+          className="inline-flex items-center gap-2 text-sm text-gray-500 hover:text-electric transition"
         >
           <ArrowLeftIcon className="h-4 w-4" />
           Back to Purchase Orders
@@ -146,7 +149,7 @@ export default function NewPurchaseOrderPage() {
 
       {/* Header */}
       <div className="mb-8">
-        <h1 className="text-2xl font-bold text-gray-900">Create Purchase Order</h1>
+        <h1 className="text-2xl font-bold text-navy">Create Purchase Order</h1>
         <p className="text-sm text-gray-500 mt-1">
           Create a new PO to order inventory from your suppliers.
         </p>
@@ -161,7 +164,7 @@ export default function NewPurchaseOrderPage() {
         
         {/* Supplier & Details */}
         <div className="bg-white rounded-xl border border-gray-200 p-6">
-          <h2 className="text-lg font-semibold text-gray-900 mb-4">Order Details</h2>
+          <h2 className="text-lg font-semibold text-navy mb-4">Order Details</h2>
           <div className="grid grid-cols-2 gap-4">
             <div>
               <label htmlFor="supplierId" className="block text-sm font-medium text-gray-700 mb-1">
@@ -173,7 +176,7 @@ export default function NewPurchaseOrderPage() {
                 required
                 value={supplierId}
                 onChange={(e) => setSupplierId(e.target.value)}
-                className="w-full px-4 py-2.5 text-sm border border-gray-300 rounded-lg bg-white focus:outline-none focus:ring-2 focus:ring-purple-500 focus:border-transparent"
+                className="w-full px-4 py-2.5 text-sm border border-gray-300 rounded-lg bg-white focus:outline-none focus:ring-2 focus:ring-electric/30 focus:border-electric"
               >
                 <option value="">Select supplier</option>
                 {suppliers.map(sup => (
@@ -189,7 +192,7 @@ export default function NewPurchaseOrderPage() {
                 type="date"
                 id="expectedDate"
                 name="expectedDate"
-                className="w-full px-4 py-2.5 text-sm border border-gray-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-purple-500 focus:border-transparent"
+                className="w-full px-4 py-2.5 text-sm border border-gray-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-electric/30 focus:border-electric"
               />
             </div>
             <div className="col-span-2">
@@ -200,7 +203,7 @@ export default function NewPurchaseOrderPage() {
                 id="notes"
                 name="notes"
                 rows={2}
-                className="w-full px-4 py-2.5 text-sm border border-gray-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-purple-500 focus:border-transparent resize-none"
+                className="w-full px-4 py-2.5 text-sm border border-gray-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-electric/30 focus:border-electric resize-none"
                 placeholder="Any special instructions..."
               />
             </div>
@@ -210,11 +213,11 @@ export default function NewPurchaseOrderPage() {
         {/* Line Items */}
         <div className="bg-white rounded-xl border border-gray-200 overflow-hidden">
           <div className="px-6 py-4 border-b border-gray-100 flex items-center justify-between">
-            <h2 className="text-lg font-semibold text-gray-900">Line Items</h2>
+            <h2 className="text-lg font-semibold text-navy">Line Items</h2>
             <button
               type="button"
               onClick={addLine}
-              className="inline-flex items-center gap-2 px-3 py-1.5 text-sm font-medium text-purple-600 hover:bg-purple-50 rounded-lg transition"
+              className="inline-flex items-center gap-2 px-3 py-1.5 text-sm font-medium text-electric hover:bg-electric/5 rounded-lg transition"
             >
               <PlusIcon className="h-4 w-4" />
               Add Item
@@ -224,7 +227,7 @@ export default function NewPurchaseOrderPage() {
           {lines.length > 0 ? (
             <table className="w-full text-sm">
               <thead>
-                <tr className="bg-gray-50 border-b border-gray-100">
+                <tr className="bg-gray-50/60 border-b border-gray-100">
                   <th className="text-left px-6 py-3 font-medium text-gray-500">Product</th>
                   <th className="text-center px-4 py-3 font-medium text-gray-500 w-24">Qty</th>
                   <th className="text-right px-4 py-3 font-medium text-gray-500 w-28">Unit Cost</th>
@@ -240,7 +243,7 @@ export default function NewPurchaseOrderPage() {
                         value={line.productId}
                         onChange={(e) => updateLine(line.id, 'productId', e.target.value)}
                         required
-                        className="w-full px-3 py-2 text-sm border border-gray-300 rounded-lg bg-white focus:outline-none focus:ring-2 focus:ring-purple-500"
+                        className="w-full px-3 py-2 text-sm border border-gray-300 rounded-lg bg-white focus:outline-none focus:ring-2 focus:ring-electric/30"
                       >
                         <option value="">Select product</option>
                         {products.map(prod => (
@@ -254,7 +257,7 @@ export default function NewPurchaseOrderPage() {
                         min="1"
                         value={line.quantity}
                         onChange={(e) => updateLine(line.id, 'quantity', parseInt(e.target.value) || 1)}
-                        className="w-full px-3 py-2 text-sm border border-gray-300 rounded-lg text-center focus:outline-none focus:ring-2 focus:ring-purple-500"
+                        className="w-full px-3 py-2 text-sm border border-gray-300 rounded-lg text-center focus:outline-none focus:ring-2 focus:ring-electric/30"
                       />
                     </td>
                     <td className="px-4 py-3 text-right font-mono text-gray-600">
@@ -286,7 +289,7 @@ export default function NewPurchaseOrderPage() {
                   <td className="px-4 py-3 text-right font-mono">${taxAmount.toFixed(2)}</td>
                   <td></td>
                 </tr>
-                <tr className="bg-gray-50 border-t border-gray-200">
+                <tr className="bg-gray-50/60 border-t border-gray-200">
                   <td colSpan={3} className="px-6 py-3 text-right text-sm font-semibold text-gray-900">Total</td>
                   <td className="px-4 py-3 text-right font-mono font-bold text-lg">${total.toFixed(2)}</td>
                   <td></td>
@@ -299,7 +302,7 @@ export default function NewPurchaseOrderPage() {
               <button
                 type="button"
                 onClick={addLine}
-                className="inline-flex items-center gap-2 px-4 py-2 text-sm font-medium text-purple-600 bg-purple-50 rounded-lg hover:bg-purple-100 transition"
+                className="inline-flex items-center gap-2 px-4 py-2 text-sm font-medium text-electric bg-electric/5 rounded-lg hover:bg-electric/10 transition"
               >
                 <PlusIcon className="h-4 w-4" />
                 Add First Item
@@ -315,15 +318,15 @@ export default function NewPurchaseOrderPage() {
           </p>
           <div className="flex items-center gap-3">
             <Link
-              href="/purchase-orders"
-              className="px-6 py-2.5 text-sm font-medium text-gray-700 bg-white border border-gray-300 rounded-lg hover:bg-gray-50 transition"
+              href={`${base}/purchase-orders`}
+              className="px-6 py-2.5 text-sm font-medium text-gray-700 bg-white border border-gray-300 rounded-lg hover:bg-electric/[0.02]/60 transition"
             >
               Cancel
             </Link>
             <button
               type="submit"
               disabled={isSubmitting || lines.length === 0}
-              className="inline-flex items-center gap-2 px-6 py-2.5 bg-purple-600 text-white text-sm font-semibold rounded-lg hover:bg-purple-700 transition shadow-sm disabled:opacity-50 disabled:cursor-not-allowed"
+              className="inline-flex items-center gap-2 px-6 py-2.5 bg-electric text-white text-sm font-semibold rounded-lg hover:bg-electric-light transition shadow-sm disabled:opacity-50 disabled:cursor-not-allowed"
             >
               {isSubmitting ? (
                 <>

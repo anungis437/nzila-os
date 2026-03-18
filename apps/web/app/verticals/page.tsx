@@ -69,8 +69,8 @@ const verticals = [
     photo: 'https://images.unsplash.com/photo-1556742049-0cfed4f6a45d?w=800',
     alt: 'Customer completing a digital payment at a modern retail checkout',
     platforms: ['Shop Quoter', 'Trade OS', 'eExports'],
-    description: 'E-commerce, logistics, trade operations, and export documentation.',
-    tam: '$25B', orgs: '508', status: '3 platforms',
+    description: 'Order-centric trade operations, AI-powered quoting, logistics intelligence, and cross-border export compliance.',
+    tam: '$25B', orgs: '508', status: '3 platforms — Trade OS in Beta',
   },
   {
     slug: 'entertainment',

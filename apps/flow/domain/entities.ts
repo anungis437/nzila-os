@@ -164,6 +164,7 @@ export const PurchaseOrderStatus = z.enum([
   'IN_PRODUCTION',
   'SHIPPED',
   'RECEIVED',
+  'CANCELLED',
 ])
 export type PurchaseOrderStatus = z.infer<typeof PurchaseOrderStatus>
 
@@ -215,10 +216,12 @@ export type ProductionJob = z.infer<typeof ProductionJobSchema>
 
 export const ShipmentStatus = z.enum([
   'PENDING',
-  'PICKED_UP',
+  'PACKED',
+  'SHIPPED',
   'IN_TRANSIT',
   'DELIVERED',
   'FAILED',
+  'RETURNED',
 ])
 export type ShipmentStatus = z.infer<typeof ShipmentStatus>
 

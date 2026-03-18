@@ -1,5 +1,6 @@
 import Link from 'next/link'
 import { notFound } from 'next/navigation'
+import { getLocale } from 'next-intl/server'
 import {
   ArrowLeftIcon,
   PencilIcon,
@@ -22,7 +23,7 @@ const statusColors: Record<string, string> = {
   issued: 'bg-blue-100 text-blue-700',
   sent: 'bg-blue-100 text-blue-700',
   viewed: 'bg-indigo-100 text-indigo-700',
-  partially_paid: 'bg-purple-100 text-purple-700',
+  partially_paid: 'bg-electric/10 text-electric',
   paid: 'bg-green-100 text-green-700',
   overdue: 'bg-red-100 text-red-700',
   cancelled: 'bg-gray-100 text-gray-500',
@@ -31,15 +32,19 @@ const statusColors: Record<string, string> = {
 
 // ── Page Component ──────────────────────────────────────────────────────────
 
-export default async function InvoiceDetailPage({ params }: { params: { id: string } }) {
-  const invoice = await getInvoiceAction(params.id)
+export default async function InvoiceDetailPage({ params }: { params: Promise<{ id: string }> }) {
+  const { id } = await params
+  const locale = await getLocale()
+  const base = `/${locale}/dashboard`
+
+  const invoice = await getInvoiceAction(id)
   if (!invoice) {
     notFound()
   }
 
   // Fetch related data
   const [lines, customer, order] = await Promise.all([
-    getInvoiceLinesAction(params.id),
+    getInvoiceLinesAction(id),
     getCustomerAction(invoice.customerId),
     invoice.orderId ? getOrderAction(invoice.orderId) : Promise.resolve(null),
   ])
@@ -70,8 +75,8 @@ export default async function InvoiceDetailPage({ params }: { params: { id: stri
       {/* Breadcrumb */}
       <div className="mb-6">
         <Link
-          href="/invoices"
-          className="inline-flex items-center gap-2 text-sm text-gray-500 hover:text-purple-600 transition"
+          href={`${base}/invoices`}
+          className="inline-flex items-center gap-2 text-sm text-gray-500 hover:text-electric transition"
         >
           <ArrowLeftIcon className="h-4 w-4" />
           Back to Invoices
@@ -82,7 +87,7 @@ export default async function InvoiceDetailPage({ params }: { params: { id: stri
       <div className="flex items-start justify-between mb-8">
         <div>
           <div className="flex items-center gap-3 mb-2">
-            <h1 className="text-2xl font-bold text-gray-900">{invoice.ref}</h1>
+            <h1 className="text-2xl font-bold text-navy">{invoice.ref}</h1>
             <span className={`inline-flex px-2.5 py-0.5 text-xs font-semibold rounded-full capitalize ${statusColors[invoice.status] ?? 'bg-gray-100 text-gray-600'}`}>
               {invoice.status.replace(/_/g, ' ')}
             </span>
@@ -94,9 +99,9 @@ export default async function InvoiceDetailPage({ params }: { params: { id: stri
             )}
           </div>
           <p className="text-sm text-gray-500">
-            Customer: <Link href={`/clients/${invoice.customerId}`} className="text-purple-600 hover:underline">{customer?.name ?? 'Unknown'}</Link>
+            Customer: <Link href={`${base}/clients/${invoice.customerId}`} className="text-electric hover:underline">{customer?.name ?? 'Unknown'}</Link>
             {order && (
-              <> · Order: <Link href={`/orders/${invoice.orderId}`} className="text-purple-600 hover:underline">{order.ref}</Link></>
+              <> · Order: <Link href={`${base}/orders/${invoice.orderId}`} className="text-electric hover:underline">{order.ref}</Link></>
             )}
           </p>
         </div>
@@ -111,7 +116,7 @@ export default async function InvoiceDetailPage({ params }: { params: { id: stri
           </button>
           {canEdit && (
             <Link
-              href={`/invoices/${params.id}/edit`}
+              href={`${base}/invoices/${id}/edit`}
               className="inline-flex items-center gap-2 px-4 py-2 bg-white text-gray-700 text-sm font-medium rounded-lg border border-gray-300 hover:bg-gray-50 transition"
             >
               <PencilIcon className="h-4 w-4" />
@@ -152,12 +157,12 @@ export default async function InvoiceDetailPage({ params }: { params: { id: stri
             <div className="p-6 border-b border-gray-100 bg-gray-50">
               <div className="flex justify-between">
                 <div>
-                  <h2 className="text-xl font-bold text-purple-600">Flow</h2>
+                  <h2 className="text-xl font-bold text-electric">Flow</h2>
                   <p className="text-xs text-gray-500 mt-1">NzilaOS Commerce</p>
                 </div>
                 <div className="text-right">
                   <p className="text-sm font-semibold text-gray-900">INVOICE</p>
-                  <p className="text-lg font-bold text-gray-900">{invoice.ref}</p>
+                  <p className="text-lg font-bold text-navy">{invoice.ref}</p>
                 </div>
               </div>
             </div>
@@ -256,7 +261,7 @@ export default async function InvoiceDetailPage({ params }: { params: { id: stri
                 </div>
                 <div className="w-full bg-gray-200 rounded-full h-2">
                   <div
-                    className={`h-2 rounded-full ${paidPercentage === 100 ? 'bg-green-500' : 'bg-purple-500'}`}
+                    className={`h-2 rounded-full ${paidPercentage === 100 ? 'bg-green-500' : 'bg-electric'}`}
                     style={{ width: `${paidPercentage}%` }}
                   />
                 </div>
@@ -324,7 +329,7 @@ export default async function InvoiceDetailPage({ params }: { params: { id: stri
           {/* Zoho Integration */}
           <div className="bg-white rounded-xl border border-gray-200 p-6">
             <h3 className="text-sm font-semibold text-gray-500 uppercase tracking-wide mb-4">Zoho Books</h3>
-            <button className="w-full inline-flex items-center justify-center gap-2 px-4 py-2.5 bg-purple-50 text-purple-700 text-sm font-medium rounded-lg hover:bg-purple-100 transition">
+            <button className="w-full inline-flex items-center justify-center gap-2 px-4 py-2.5 bg-electric/5 text-electric text-sm font-medium rounded-lg hover:bg-electric/10 transition">
               <ArrowPathIcon className="h-4 w-4" />
               Sync to Zoho
             </button>
@@ -340,8 +345,8 @@ export default async function InvoiceDetailPage({ params }: { params: { id: stri
               </button>
               {invoice.orderId && (
                 <Link
-                  href={`/orders/${invoice.orderId}`}
-                  className="w-full inline-flex items-center justify-center gap-2 px-4 py-2 text-sm font-medium text-purple-700 bg-purple-50 rounded-lg hover:bg-purple-100 transition"
+                  href={`${base}/orders/${invoice.orderId}`}
+                  className="w-full inline-flex items-center justify-center gap-2 px-4 py-2 text-sm font-medium text-electric bg-electric/5 rounded-lg hover:bg-electric/10 transition"
                 >
                   View Related Order
                 </Link>

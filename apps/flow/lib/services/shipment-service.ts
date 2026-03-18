@@ -4,8 +4,10 @@
  * Manages shipment creation, tracking, and lifecycle transitions.
  * Uses flow_shipments table for persistent shipment data.
  */
-import { productionRepo } from '@/lib/repositories/production-repo'
 import { emitWorkflowAuditEvent } from '@/lib/services/workflow-audit-service'
+import { attemptShipmentTransition } from '@/lib/workflows/shipment-state-machine'
+import { InvalidWorkflowTransitionError } from '@/lib/workflows/errors'
+import type { ShipmentStatus } from '@/domain/entities'
 import { logger } from '@/lib/logger'
 import { db, flowShipments } from '@nzila/db'
 import { eq, and } from 'drizzle-orm'
@@ -56,6 +58,21 @@ export async function addTracking(
   tracking: TrackingInfo,
   userId: string,
 ): Promise<ShipmentResult> {
+  // Load current state for workflow validation
+  const [existing] = await db
+    .select()
+    .from(flowShipments)
+    .where(and(eq(flowShipments.id, shipmentId), eq(flowShipments.orgId, orgId)))
+    .limit(1)
+
+  if (!existing) return { ok: false, error: 'Shipment not found' }
+
+  const current = existing.status.toUpperCase() as ShipmentStatus
+  const result = attemptShipmentTransition(current, 'SHIPPED')
+  if (!result.ok) {
+    throw new InvalidWorkflowTransitionError('shipment', current, 'SHIPPED')
+  }
+
   const [row] = await db
     .update(flowShipments)
     .set({
@@ -90,6 +107,21 @@ export async function markDelivered(
   orgId: string,
   userId: string,
 ): Promise<ShipmentResult> {
+  // Load current state for workflow validation
+  const [existing] = await db
+    .select()
+    .from(flowShipments)
+    .where(and(eq(flowShipments.id, shipmentId), eq(flowShipments.orgId, orgId)))
+    .limit(1)
+
+  if (!existing) return { ok: false, error: 'Shipment not found' }
+
+  const current = existing.status.toUpperCase() as ShipmentStatus
+  const result = attemptShipmentTransition(current, 'DELIVERED')
+  if (!result.ok) {
+    throw new InvalidWorkflowTransitionError('shipment', current, 'DELIVERED')
+  }
+
   const [row] = await db
     .update(flowShipments)
     .set({

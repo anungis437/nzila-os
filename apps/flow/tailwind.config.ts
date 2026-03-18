@@ -11,6 +11,7 @@ const config: Config = {
   theme: {
     extend: {
       fontFamily: {
+        sans: ["var(--font-poppins)", "system-ui", "sans-serif"],
         poppins: ["var(--font-poppins)", "sans-serif"],
       },
       colors: {

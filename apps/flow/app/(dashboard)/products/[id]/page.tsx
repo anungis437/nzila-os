@@ -1,5 +1,6 @@
 import Link from 'next/link'
 import { notFound } from 'next/navigation'
+import { getLocale } from 'next-intl/server'
 import {
   ArrowLeftIcon,
   PencilIcon,
@@ -21,16 +22,20 @@ function getStockLevelStyle(quantity: number, reorderPoint: number): { color: st
 
 // ── Page Component ──────────────────────────────────────────────────────────
 
-export default async function ProductDetailPage({ params }: { params: { id: string } }) {
-  const product = await getProductAction(params.id)
+export default async function ProductDetailPage({ params }: { params: Promise<{ id: string }> }) {
+  const { id } = await params
+  const locale = await getLocale()
+  const base = `/${locale}/dashboard`
+
+  const product = await getProductAction(id)
   if (!product) {
     notFound()
   }
 
   // Fetch inventory and stock movements
   const [inventoryResult, movementsResult] = await Promise.all([
-    getInventoryAction({ productId: params.id }),
-    getStockMovementsAction({ productId: params.id, limit: 10 }),
+    getInventoryAction({ productId: id }),
+    getStockMovementsAction({ productId: id, limit: 10 }),
   ])
 
   const inventory = inventoryResult.rows[0]
@@ -54,8 +59,8 @@ export default async function ProductDetailPage({ params }: { params: { id: stri
       {/* Breadcrumb */}
       <div className="mb-6">
         <Link
-          href="/products"
-          className="inline-flex items-center gap-2 text-sm text-gray-500 hover:text-purple-600 transition"
+          href={`${base}/products`}
+          className="inline-flex items-center gap-2 text-sm text-gray-500 hover:text-electric transition"
         >
           <ArrowLeftIcon className="h-4 w-4" />
           Back to Products
@@ -66,7 +71,7 @@ export default async function ProductDetailPage({ params }: { params: { id: stri
       <div className="flex items-start justify-between mb-8">
         <div>
           <div className="flex items-center gap-3 mb-2">
-            <h1 className="text-2xl font-bold text-gray-900">{product.name}</h1>
+            <h1 className="text-2xl font-bold text-navy">{product.name}</h1>
             <span className={`inline-flex px-2.5 py-0.5 text-xs font-semibold rounded-full ${stockStyle.bg} ${stockStyle.color}`}>
               {stockStyle.label}
             </span>
@@ -84,8 +89,8 @@ export default async function ProductDetailPage({ params }: { params: { id: stri
             Sync
           </button>
           <Link
-            href={`/products/${params.id}/edit`}
-            className="inline-flex items-center gap-2 px-4 py-2.5 bg-purple-600 text-white text-sm font-semibold rounded-lg hover:bg-purple-700 transition shadow-sm"
+            href={`${base}/products/${id}/edit`}
+            className="inline-flex items-center gap-2 px-4 py-2.5 bg-electric text-white text-sm font-semibold rounded-lg hover:bg-electric-light transition shadow-sm"
           >
             <PencilIcon className="h-4 w-4" />
             Edit Product
@@ -108,8 +113,8 @@ export default async function ProductDetailPage({ params }: { params: { id: stri
             </p>
           </div>
           <Link
-            href={`/purchase-orders/new?productId=${product.id}`}
-            className="px-4 py-2 bg-white text-purple-600 text-sm font-semibold rounded-lg border border-purple-200 hover:bg-purple-50 transition"
+            href={`${base}/purchase-orders/new?productId=${product.id}`}
+            className="px-4 py-2 bg-white text-electric text-sm font-semibold rounded-lg border border-electric/20 hover:bg-electric/5 transition"
           >
             Create PO
           </Link>
@@ -121,7 +126,7 @@ export default async function ProductDetailPage({ params }: { params: { id: stri
         <div className="col-span-2 space-y-6">
           {/* Description */}
           <div className="bg-white rounded-xl border border-gray-200 p-6">
-            <h2 className="text-lg font-semibold text-gray-900 mb-3">Description</h2>
+            <h2 className="text-lg font-semibold text-navy mb-3">Description</h2>
             <p className="text-sm text-gray-600">{product.description}</p>
             <div className="grid grid-cols-3 gap-4 mt-4 pt-4 border-t border-gray-100">
               <div>
@@ -145,15 +150,15 @@ export default async function ProductDetailPage({ params }: { params: { id: stri
 
           {/* Pricing */}
           <div className="bg-white rounded-xl border border-gray-200 p-6">
-            <h2 className="text-lg font-semibold text-gray-900 mb-4">Pricing</h2>
+            <h2 className="text-lg font-semibold text-navy mb-4">Pricing</h2>
             <div className="grid grid-cols-3 gap-6">
               <div className="text-center p-4 bg-gray-50 rounded-lg">
                 <p className="text-xs text-gray-500 mb-1">Unit Cost</p>
                 <p className="text-2xl font-bold text-gray-600">${costPrice.toFixed(2)}</p>
               </div>
-              <div className="text-center p-4 bg-purple-50 rounded-lg">
-                <p className="text-xs text-purple-600 mb-1">Unit Price</p>
-                <p className="text-2xl font-bold text-purple-700">${basePrice.toFixed(2)}</p>
+              <div className="text-center p-4 bg-electric/5 rounded-lg">
+                <p className="text-xs text-electric mb-1">Unit Price</p>
+                <p className="text-2xl font-bold text-electric">${basePrice.toFixed(2)}</p>
               </div>
               <div className="text-center p-4 bg-green-50 rounded-lg">
                 <p className="text-xs text-green-600 mb-1">Margin</p>
@@ -165,10 +170,10 @@ export default async function ProductDetailPage({ params }: { params: { id: stri
           {/* Stock Movements */}
           <div className="bg-white rounded-xl border border-gray-200 p-6">
             <div className="flex items-center justify-between mb-4">
-              <h2 className="text-lg font-semibold text-gray-900">Recent Stock Movements</h2>
+              <h2 className="text-lg font-semibold text-navy">Recent Stock Movements</h2>
               <Link
-                href={`/products/${params.id}/movements`}
-                className="text-sm text-purple-600 font-medium hover:underline"
+                href={`/products/${id}/movements`}
+                className="text-sm text-electric font-medium hover:underline"
               >
                 View All →
               </Link>
@@ -203,7 +208,7 @@ export default async function ProductDetailPage({ params }: { params: { id: stri
                       <td className="py-3 text-gray-600">{mv.reason ?? '—'}</td>
                       <td className="py-3">
                         {mv.referenceId ? (
-                          <span className="text-purple-600 font-mono text-xs">{mv.referenceId.slice(0, 8)}</span>
+                          <span className="text-electric font-mono text-xs">{mv.referenceId.slice(0, 8)}</span>
                         ) : (
                           <span className="text-gray-400">—</span>
                         )}
@@ -229,7 +234,7 @@ export default async function ProductDetailPage({ params }: { params: { id: stri
               <div className="flex items-center justify-between p-3 bg-gray-50 rounded-lg">
                 <div>
                   <p className="text-xs text-gray-500">Total Stock</p>
-                  <p className="text-2xl font-bold text-gray-900">{currentStock}</p>
+                  <p className="text-2xl font-bold text-navy">{currentStock}</p>
                 </div>
                 <CubeIcon className="h-8 w-8 text-gray-300" />
               </div>
@@ -262,10 +267,10 @@ export default async function ProductDetailPage({ params }: { params: { id: stri
               <h3 className="text-sm font-semibold text-gray-500 uppercase tracking-wide mb-3">Supplier</h3>
               <Link
                 href={`/suppliers/${product.supplierId}`}
-                className="flex items-center gap-3 p-3 bg-gray-50 rounded-lg hover:bg-purple-50 transition"
+                className="flex items-center gap-3 p-3 bg-gray-50 rounded-lg hover:bg-electric/5 transition"
               >
-                <div className="h-10 w-10 bg-purple-100 rounded-lg flex items-center justify-center">
-                  <CubeIcon className="h-5 w-5 text-purple-600" />
+                <div className="h-10 w-10 bg-electric/10 rounded-lg flex items-center justify-center">
+                  <CubeIcon className="h-5 w-5 text-electric" />
                 </div>
                 <div>
                   <p className="text-sm font-medium text-gray-900">View Supplier</p>
@@ -276,7 +281,7 @@ export default async function ProductDetailPage({ params }: { params: { id: stri
           )}
 
           {/* Value */}
-          <div className="bg-linear-to-br from-purple-500 to-indigo-600 rounded-xl p-6 text-white">
+          <div className="bg-linear-to-br from-electric/50 to-indigo-600 rounded-xl p-6 text-white">
             <h3 className="text-sm font-semibold opacity-80 uppercase tracking-wide mb-2">Stock Value</h3>
             <p className="text-3xl font-bold">
               ${(currentStock * costPrice).toLocaleString('en-US', { minimumFractionDigits: 2 })}

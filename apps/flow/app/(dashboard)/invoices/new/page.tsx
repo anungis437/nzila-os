@@ -3,6 +3,7 @@
 import { useState, useEffect } from 'react'
 import Link from 'next/link'
 import { useRouter } from 'next/navigation'
+import { useLocale } from 'next-intl'
 import {
   ArrowLeftIcon,
   CheckIcon,
@@ -34,6 +35,8 @@ interface Order {
 
 export default function NewInvoicePage() {
   const router = useRouter()
+  const locale = useLocale()
+  const base = `/${locale}/dashboard`
   const [isSubmitting, setIsSubmitting] = useState(false)
   const [error, setError] = useState<string | null>(null)
   const [customerId, setCustomerId] = useState('')
@@ -152,7 +155,7 @@ export default function NewInvoicePage() {
         notes: formData.get('notes') as string || null,
       })
       
-      router.push('/invoices')
+      router.push(`${base}/invoices`)
     } catch (err) {
       setError(err instanceof Error ? err.message : 'Failed to create invoice')
       setIsSubmitting(false)
@@ -168,8 +171,8 @@ export default function NewInvoicePage() {
       {/* Breadcrumb */}
       <div className="mb-6">
         <Link
-          href="/invoices"
-          className="inline-flex items-center gap-2 text-sm text-gray-500 hover:text-purple-600 transition"
+          href={`${base}/invoices`}
+          className="inline-flex items-center gap-2 text-sm text-gray-500 hover:text-electric transition"
         >
           <ArrowLeftIcon className="h-4 w-4" />
           Back to Invoices
@@ -178,7 +181,7 @@ export default function NewInvoicePage() {
 
       {/* Header */}
       <div className="mb-8">
-        <h1 className="text-2xl font-bold text-gray-900">Create Invoice</h1>
+        <h1 className="text-2xl font-bold text-navy">Create Invoice</h1>
         <p className="text-sm text-gray-500 mt-1">
           Create a new invoice for your customer. This will be synced to Zoho Books.
         </p>
@@ -193,7 +196,7 @@ export default function NewInvoicePage() {
         
         {/* Customer & Details */}
         <div className="bg-white rounded-xl border border-gray-200 p-6">
-          <h2 className="text-lg font-semibold text-gray-900 mb-4">Invoice Details</h2>
+          <h2 className="text-lg font-semibold text-navy mb-4">Invoice Details</h2>
           <div className="grid grid-cols-2 gap-4">
             <div>
               <label htmlFor="customerId" className="block text-sm font-medium text-gray-700 mb-1">
@@ -205,7 +208,7 @@ export default function NewInvoicePage() {
                 required
                 value={customerId}
                 onChange={(e) => setCustomerId(e.target.value)}
-                className="w-full px-4 py-2.5 text-sm border border-gray-300 rounded-lg bg-white focus:outline-none focus:ring-2 focus:ring-purple-500 focus:border-transparent"
+                className="w-full px-4 py-2.5 text-sm border border-gray-300 rounded-lg bg-white focus:outline-none focus:ring-2 focus:ring-electric/30 focus:border-electric"
               >
                 <option value="">Select customer</option>
                 {customers.map(cust => (
@@ -224,7 +227,7 @@ export default function NewInvoicePage() {
                 value={orderId}
                 onChange={(e) => setOrderId(e.target.value)}
                 disabled={!customerId}
-                className="w-full px-4 py-2.5 text-sm border border-gray-300 rounded-lg bg-white focus:outline-none focus:ring-2 focus:ring-purple-500 focus:border-transparent disabled:bg-gray-100"
+                className="w-full px-4 py-2.5 text-sm border border-gray-300 rounded-lg bg-white focus:outline-none focus:ring-2 focus:ring-electric/30 focus:border-electric disabled:bg-gray-100"
               >
                 <option value="">{customerId ? 'Select order' : 'Select customer first'}</option>
                 {orders.map(order => (
@@ -242,7 +245,7 @@ export default function NewInvoicePage() {
                 name="issueDate"
                 required
                 defaultValue={new Date().toISOString().split('T')[0]}
-                className="w-full px-4 py-2.5 text-sm border border-gray-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-purple-500 focus:border-transparent"
+                className="w-full px-4 py-2.5 text-sm border border-gray-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-electric/30 focus:border-electric"
               />
             </div>
             <div>
@@ -255,7 +258,7 @@ export default function NewInvoicePage() {
                 name="dueDate"
                 required
                 defaultValue={dueDate}
-                className="w-full px-4 py-2.5 text-sm border border-gray-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-purple-500 focus:border-transparent"
+                className="w-full px-4 py-2.5 text-sm border border-gray-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-electric/30 focus:border-electric"
               />
             </div>
             <div>
@@ -266,7 +269,7 @@ export default function NewInvoicePage() {
                 id="paymentTerms"
                 name="paymentTerms"
                 defaultValue="Net 30"
-                className="w-full px-4 py-2.5 text-sm border border-gray-300 rounded-lg bg-white focus:outline-none focus:ring-2 focus:ring-purple-500 focus:border-transparent"
+                className="w-full px-4 py-2.5 text-sm border border-gray-300 rounded-lg bg-white focus:outline-none focus:ring-2 focus:ring-electric/30 focus:border-electric"
               >
                 <option value="Net 30">Net 30</option>
                 <option value="Net 15">Net 15</option>
@@ -282,7 +285,7 @@ export default function NewInvoicePage() {
                 id="notes"
                 name="notes"
                 rows={2}
-                className="w-full px-4 py-2.5 text-sm border border-gray-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-purple-500 focus:border-transparent resize-none"
+                className="w-full px-4 py-2.5 text-sm border border-gray-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-electric/30 focus:border-electric resize-none"
                 placeholder="Payment instructions, thank you message, etc."
               />
             </div>
@@ -292,11 +295,11 @@ export default function NewInvoicePage() {
         {/* Line Items */}
         <div className="bg-white rounded-xl border border-gray-200 overflow-hidden">
           <div className="px-6 py-4 border-b border-gray-100 flex items-center justify-between">
-            <h2 className="text-lg font-semibold text-gray-900">Line Items</h2>
+            <h2 className="text-lg font-semibold text-navy">Line Items</h2>
             <button
               type="button"
               onClick={addLine}
-              className="inline-flex items-center gap-2 px-3 py-1.5 text-sm font-medium text-purple-600 hover:bg-purple-50 rounded-lg transition"
+              className="inline-flex items-center gap-2 px-3 py-1.5 text-sm font-medium text-electric hover:bg-electric/5 rounded-lg transition"
             >
               <PlusIcon className="h-4 w-4" />
               Add Item
@@ -306,7 +309,7 @@ export default function NewInvoicePage() {
           {lines.length > 0 ? (
             <table className="w-full text-sm">
               <thead>
-                <tr className="bg-gray-50 border-b border-gray-100">
+                <tr className="bg-gray-50/60 border-b border-gray-100">
                   <th className="text-left px-6 py-3 font-medium text-gray-500">Description</th>
                   <th className="text-center px-4 py-3 font-medium text-gray-500 w-24">Qty</th>
                   <th className="text-right px-4 py-3 font-medium text-gray-500 w-32">Unit Price</th>
@@ -324,7 +327,7 @@ export default function NewInvoicePage() {
                         onChange={(e) => updateLine(line.id, 'description', e.target.value)}
                         required
                         placeholder="Item description"
-                        className="w-full px-3 py-2 text-sm border border-gray-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-purple-500"
+                        className="w-full px-3 py-2 text-sm border border-gray-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-electric/30"
                       />
                     </td>
                     <td className="px-4 py-3">
@@ -333,7 +336,7 @@ export default function NewInvoicePage() {
                         min="1"
                         value={line.quantity}
                         onChange={(e) => updateLine(line.id, 'quantity', parseInt(e.target.value) || 1)}
-                        className="w-full px-3 py-2 text-sm border border-gray-300 rounded-lg text-center focus:outline-none focus:ring-2 focus:ring-purple-500"
+                        className="w-full px-3 py-2 text-sm border border-gray-300 rounded-lg text-center focus:outline-none focus:ring-2 focus:ring-electric/30"
                       />
                     </td>
                     <td className="px-4 py-3">
@@ -345,7 +348,7 @@ export default function NewInvoicePage() {
                           min="0"
                           value={line.unitPrice}
                           onChange={(e) => updateLine(line.id, 'unitPrice', parseFloat(e.target.value) || 0)}
-                          className="w-full pl-7 pr-3 py-2 text-sm border border-gray-300 rounded-lg text-right focus:outline-none focus:ring-2 focus:ring-purple-500"
+                          className="w-full pl-7 pr-3 py-2 text-sm border border-gray-300 rounded-lg text-right focus:outline-none focus:ring-2 focus:ring-electric/30"
                         />
                       </div>
                     </td>
@@ -375,7 +378,7 @@ export default function NewInvoicePage() {
                   <td className="px-4 py-3 text-right font-mono">${taxAmount.toFixed(2)}</td>
                   <td></td>
                 </tr>
-                <tr className="bg-gray-50 border-t border-gray-200">
+                <tr className="bg-gray-50/60 border-t border-gray-200">
                   <td colSpan={3} className="px-6 py-3 text-right text-sm font-semibold text-gray-900">Total</td>
                   <td className="px-4 py-3 text-right font-mono font-bold text-lg">${total.toFixed(2)}</td>
                   <td></td>
@@ -388,7 +391,7 @@ export default function NewInvoicePage() {
               <button
                 type="button"
                 onClick={addLine}
-                className="inline-flex items-center gap-2 px-4 py-2 text-sm font-medium text-purple-600 bg-purple-50 rounded-lg hover:bg-purple-100 transition"
+                className="inline-flex items-center gap-2 px-4 py-2 text-sm font-medium text-electric bg-electric/5 rounded-lg hover:bg-electric/10 transition"
               >
                 <PlusIcon className="h-4 w-4" />
                 Add First Item
@@ -404,15 +407,15 @@ export default function NewInvoicePage() {
           </p>
           <div className="flex items-center gap-3">
             <Link
-              href="/invoices"
-              className="px-6 py-2.5 text-sm font-medium text-gray-700 bg-white border border-gray-300 rounded-lg hover:bg-gray-50 transition"
+              href={`${base}/invoices`}
+              className="px-6 py-2.5 text-sm font-medium text-gray-700 bg-white border border-gray-300 rounded-lg hover:bg-electric/[0.02]/60 transition"
             >
               Cancel
             </Link>
             <button
               type="submit"
               disabled={isSubmitting || lines.length === 0}
-              className="inline-flex items-center gap-2 px-6 py-2.5 bg-purple-600 text-white text-sm font-semibold rounded-lg hover:bg-purple-700 transition shadow-sm disabled:opacity-50 disabled:cursor-not-allowed"
+              className="inline-flex items-center gap-2 px-6 py-2.5 bg-electric text-white text-sm font-semibold rounded-lg hover:bg-electric-light transition shadow-sm disabled:opacity-50 disabled:cursor-not-allowed"
             >
               {isSubmitting ? (
                 <>

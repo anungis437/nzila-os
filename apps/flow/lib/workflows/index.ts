@@ -5,9 +5,17 @@
  * Each workflow exposes: validateTransition, attemptTransition, applyTransition.
  */
 
-// Types
+// Types & Errors
 export { InvalidTransitionError } from './types'
 export type { Transition, TransitionResult } from './types'
+export {
+  FlowWorkflowError,
+  InvalidWorkflowTransitionError,
+  MissingWorkflowPrerequisiteError,
+  PaymentGateBlockedError,
+  WorkflowInvariantError,
+  EntityNotFoundError,
+} from './errors'
 
 // Quote workflow (existing, refactored)
 export {
@@ -41,3 +49,11 @@ export {
   applyProductionTransition,
   getAvailableProductionTransitions,
 } from './production-workflow'
+
+// Shipment workflow
+export {
+  validateShipmentTransition,
+  attemptShipmentTransition,
+  applyShipmentTransition,
+  getAvailableShipmentTransitions,
+} from './shipment-state-machine'

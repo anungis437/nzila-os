@@ -1,5 +1,6 @@
 import { UserButton } from '@clerk/nextjs'
 import Link from 'next/link'
+import { OrgPicker } from './components/org-picker'
 import {
   HomeIcon,
   DocumentTextIcon,
@@ -13,20 +14,57 @@ import {
   ClipboardDocumentListIcon,
   ShoppingCartIcon,
   BanknotesIcon,
+  WrenchScrewdriverIcon,
+  ArchiveBoxIcon,
+  LinkIcon,
+  ServerIcon,
+  CreditCardIcon,
 } from '@heroicons/react/24/outline'
 
-const navItems = [
-  { name: 'Dashboard', href: '/dashboard', icon: HomeIcon },
-  { name: 'Quotes', href: '/quotes', icon: DocumentTextIcon },
-  { name: 'Clients', href: '/clients', icon: UserGroupIcon },
-  { name: 'Orders', href: '/orders', icon: ShoppingCartIcon },
-  { name: 'Invoices', href: '/invoices', icon: BanknotesIcon },
-  { name: 'Products', href: '/products', icon: CubeIcon },
-  { name: 'Suppliers', href: '/suppliers', icon: TruckIcon },
-  { name: 'Purchase Orders', href: '/purchase-orders', icon: ClipboardDocumentListIcon },
-  { name: 'Analytics', href: '/analytics', icon: ChartBarIcon },
-  { name: 'Legacy Import', href: '/import', icon: ArrowDownTrayIcon },
-  { name: 'Settings', href: '/settings', icon: CogIcon },
+type NavItem = { name: string; href: string; icon: React.ComponentType<React.SVGProps<SVGSVGElement>> }
+
+const navSections: { label: string; items: NavItem[] }[] = [
+  {
+    label: 'Main',
+    items: [
+      { name: 'Dashboard', href: '/dashboard', icon: HomeIcon },
+    ],
+  },
+  {
+    label: 'Sales & Commerce',
+    items: [
+      { name: 'Quotes', href: '/quotes', icon: DocumentTextIcon },
+      { name: 'Clients', href: '/clients', icon: UserGroupIcon },
+      { name: 'Orders', href: '/orders', icon: ShoppingCartIcon },
+      { name: 'Invoices', href: '/invoices', icon: BanknotesIcon },
+      { name: 'Payments', href: '/payments', icon: CreditCardIcon },
+    ],
+  },
+  {
+    label: 'Operations',
+    items: [
+      { name: 'Products', href: '/products', icon: CubeIcon },
+      { name: 'Inventory', href: '/inventory', icon: ArchiveBoxIcon },
+      { name: 'Suppliers', href: '/suppliers', icon: TruckIcon },
+      { name: 'Purchase Orders', href: '/purchase-orders', icon: ClipboardDocumentListIcon },
+      { name: 'Production', href: '/production', icon: WrenchScrewdriverIcon },
+    ],
+  },
+  {
+    label: 'Intelligence',
+    items: [
+      { name: 'Analytics', href: '/analytics', icon: ChartBarIcon },
+    ],
+  },
+  {
+    label: 'System',
+    items: [
+      { name: 'Integrations', href: '/integrations', icon: LinkIcon },
+      { name: 'Legacy Import', href: '/import', icon: ArrowDownTrayIcon },
+      { name: 'System Status', href: '/system', icon: ServerIcon },
+      { name: 'Settings', href: '/settings', icon: CogIcon },
+    ],
+  },
 ]
 
 const externalLinks = [
@@ -46,16 +84,28 @@ export default function DashboardLayout({ children }: { children: React.ReactNod
           <p className="text-xs text-gray-400 mt-0.5">NzilaOS Commerce</p>
         </div>
 
-        <nav className="flex-1 px-3 py-4 space-y-1">
-          {navItems.map((item) => (
-            <Link
-              key={item.name}
-              href={item.href}
-              className="flex items-center gap-3 px-3 py-2 text-sm font-medium text-gray-700 rounded-lg hover:bg-purple-50 hover:text-purple-700 transition"
-            >
-              <item.icon className="h-5 w-5" />
-              {item.name}
-            </Link>
+        {/* Org Picker — same pattern as UE OrganizationSelector */}
+        <OrgPicker />
+
+        <nav className="flex-1 px-3 py-4 space-y-4 overflow-y-auto">
+          {navSections.map((section) => (
+            <div key={section.label}>
+              <p className="px-3 mb-1 text-xs font-semibold text-gray-400 uppercase tracking-widest">
+                {section.label}
+              </p>
+              <div className="space-y-0.5">
+                {section.items.map((item) => (
+                  <Link
+                    key={item.name}
+                    href={item.href}
+                    className="flex items-center gap-3 px-3 py-2 text-sm font-medium text-gray-700 rounded-lg hover:bg-purple-50 hover:text-purple-700 transition"
+                  >
+                    <item.icon className="h-5 w-5" />
+                    {item.name}
+                  </Link>
+                ))}
+              </div>
+            </div>
           ))}
         </nav>
 

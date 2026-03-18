@@ -11,6 +11,7 @@ export default defineProject({
   },
   resolve: {
     alias: {
+      '@': resolve(__dirname, './'),
       '@nzila/os-core/hash': resolve(ROOT, 'packages/os-core/src/hash.ts'),
       '@nzila/os-core/rateLimit': resolve(ROOT, 'packages/os-core/src/rateLimit.ts'),
       '@nzila/os-core/telemetry': resolve(ROOT, 'packages/os-core/src/telemetry/index.ts'),

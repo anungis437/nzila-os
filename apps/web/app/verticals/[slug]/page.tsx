@@ -313,53 +313,60 @@ const verticalData: Record<string, {
 
   commerce: {
     name: 'Commerce',
-    tagline: 'Trade Infrastructure for Modern Businesses & Global Supply Chains',
-    description: 'E-commerce, logistics, trade operations, and export documentation.',
+    tagline: 'Enterprise-Grade Trade Infrastructure for Modern Businesses & Global Supply Chains',
+    description: 'Order-centric trade operations, AI-powered quoting, logistics intelligence, and cross-border export compliance.',
     hero: 'https://images.unsplash.com/photo-1556742049-0cfed4f6a45d?w=1920',
     heroAlt: 'Customer completing a digital payment at a modern retail checkout counter',
     tam: '$25B',
     orgs: '508',
     platforms: ['Shop Quoter', 'Trade OS', 'eExports'],
-    status: '3 Platforms',
+    status: '3 Platforms — Trade OS in Beta',
     color: 'from-gold to-coral',
     overview:
-      'Nzila\'s Commerce vertical streamlines the full cycle of trade — from storefront quoting to cross-border export documentation — for SMEs and enterprise operators navigating complex supply chains.',
+      'Nzila\'s Commerce vertical is the most complete trade-operations platform for SMEs and enterprise operators — covering the entire lifecycle from AI-assisted quoting through order management, production gating, shipment tracking, and cross-border export documentation. Trade OS, its flagship engine, enforces every state transition through auditable workflows, ensuring no order ships without payment clearance and no production starts without deposit confirmation.',
     capabilities: [
       {
         title: 'Instant Quote Generation (Shop Quoter)',
         icon: '💰',
         description:
-          'AI-assisted product and service quoting with margin controls, PDF generation, e-signature, and CRM integration.',
+          'AI-assisted product and service quoting with margin controls, PDF generation, e-signature, and CRM integration — quotes convert to orders in one click.',
       },
       {
-        title: 'Trade Operations Management (Trade OS)',
+        title: 'Order-Centric Trade Management (Trade OS)',
         icon: '🔄',
         description:
-          'End-to-end trade-cycle management covering POs, invoicing, inventory, shipment tracking, and supplier communications.',
+          'State-machine-enforced order lifecycle from creation through confirmation, production, shipment, and delivery — with payment deposit gating that blocks fulfilment until financial prerequisites are met.',
       },
       {
         title: 'Export Documentation (eExports)',
         icon: '📦',
         description:
-          'Generation and management of export certificates, customs declarations, HS code classification, and trade-compliance checks.',
+          'Generation and management of export certificates, customs declarations, HS code classification, and trade-compliance checks for cross-border operations.',
       },
       {
         title: 'Logistics & Supplier Intelligence',
         icon: '🚢',
         description:
-          'Route optimisation, carrier benchmarking, lead-time analytics, and supplier risk scoring.',
+          'Route optimisation, carrier benchmarking, lead-time analytics, and supplier risk scoring — integrated with real-time shipment state tracking.',
+      },
+      {
+        title: 'Order Intelligence & Analytics',
+        icon: '📊',
+        description:
+          'Real-time pipeline metrics, order status distribution, payment gate analysis, and domain event audit trails — giving operators full visibility into trade-cycle health.',
       },
     ],
     useCases: [
-      { scenario: 'A service business creating custom quotes for clients', outcome: 'Professional branded quotes in under 2 minutes via Shop Quoter' },
-      { scenario: 'An importer managing 50+ active purchase orders', outcome: 'Trade OS unified dashboard with real-time shipment visibility' },
-      { scenario: 'An exporter navigating customs for new markets', outcome: 'eExports auto-generates correct documentation per destination country' },
+      { scenario: 'A service business creating custom quotes for clients', outcome: 'Professional branded quotes in under 2 minutes via Shop Quoter — converting to tracked orders instantly' },
+      { scenario: 'An importer managing 50+ active purchase orders', outcome: 'Trade OS unified dashboard with state-machine-enforced workflows, payment gating, and real-time shipment visibility' },
+      { scenario: 'An exporter navigating customs for new markets', outcome: 'eExports auto-generates correct documentation per destination country with HS code intelligence' },
     ],
     differentiators: [
-      'Three complementary platforms covering the full trade lifecycle',
-      'Export-market focus aligned with diaspora and emerging-market operators',
-      'HS code intelligence and customs compliance built in',
-      'SME-friendly UX with enterprise-grade data architecture',
+      'Three complementary platforms covering the full trade lifecycle — quote to delivery',
+      'State-machine-enforced workflows prevent illegal transitions and ensure audit compliance',
+      'Payment deposit gating blocks production and shipment until financial prerequisites are met',
+      'Domain event audit trail captures every state change for full operational transparency',
+      'SME-friendly UX with enterprise-grade data architecture and cross-border intelligence',
     ],
   },
 

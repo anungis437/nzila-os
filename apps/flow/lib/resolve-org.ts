@@ -12,6 +12,7 @@ import type { OrgContext } from '@nzila/commerce-core/types'
 import { OrgRole } from '@nzila/commerce-core/enums'
 import type { OrgCommerceConfig } from '@nzila/platform-commerce-org/types'
 import { getOrgCommerceConfig } from '@nzila/platform-commerce-org/service'
+import { resolveInternalOrgId } from './clerk-org-resolver'
 
 /**
  * Resolve org context from Clerk auth.
@@ -31,9 +32,10 @@ export async function resolveOrgContext(): Promise<OrgContext> {
   }
 
   const role = mapClerkRole(orgRole)
+  const internalOrgId = await resolveInternalOrgId(orgId)
 
   return {
-    orgId,
+    orgId: internalOrgId,
     actorId: userId,
     role,
     permissions: derivePermissions(role),

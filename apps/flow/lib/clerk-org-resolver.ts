@@ -1,0 +1,65 @@
+/**
+ * Clerk org ID → internal UUID resolver.
+ *
+ * Clerk organizations use string IDs (e.g. `org_3B5A…`),
+ * while the Nzila schema uses UUID `org_id` columns.
+ * This module bridges the two via the `orgs.clerk_org_id` column.
+ *
+ * @module clerk-org-resolver
+ */
+import { auth } from '@clerk/nextjs/server'
+import type { CommerceDbContext, CommerceReadContext } from '@nzila/commerce-db'
+
+/** In-process cache (per-instance, cleared on deploy). */
+const cache = new Map<string, { uuid: string; ts: number }>()
+const CACHE_TTL_MS = 5 * 60 * 1000 // 5 min
+
+/**
+ * Resolve a Clerk organization ID to the internal UUID stored in `orgs.id`.
+ * Reads from `orgs WHERE clerk_org_id = $1`.
+ */
+export async function resolveInternalOrgId(clerkOrgId: string): Promise<string> {
+  const hit = cache.get(clerkOrgId)
+  if (hit && Date.now() - hit.ts < CACHE_TTL_MS) return hit.uuid
+
+  const { db, orgs } = await import('@nzila/db')
+  const { eq } = await import('drizzle-orm')
+
+  const [row] = await db
+    .select({ id: orgs.id })
+    .from(orgs)
+    .where(eq(orgs.clerkOrgId, clerkOrgId))
+    .limit(1)
+
+  if (!row) {
+    throw new Error(
+      `No internal org found for Clerk org "${clerkOrgId}". ` +
+      `Ensure the org is registered in the orgs table with a matching clerk_org_id.`,
+    )
+  }
+
+  cache.set(clerkOrgId, { uuid: row.id, ts: Date.now() })
+  return row.id
+}
+
+/**
+ * Build a `CommerceReadContext` from the current Clerk session.
+ * Resolves Clerk org ID → internal UUID automatically.
+ */
+export async function getReadContext(): Promise<CommerceReadContext> {
+  const { userId, orgId } = await auth()
+  if (!userId || !orgId) throw new Error('Unauthorized')
+  const internalOrgId = await resolveInternalOrgId(orgId)
+  return { orgId: internalOrgId }
+}
+
+/**
+ * Build a `CommerceDbContext` from the current Clerk session.
+ * Resolves Clerk org ID → internal UUID automatically.
+ */
+export async function getDbContext(): Promise<CommerceDbContext> {
+  const { userId, orgId } = await auth()
+  if (!userId || !orgId) throw new Error('Unauthorized')
+  const internalOrgId = await resolveInternalOrgId(orgId)
+  return { orgId: internalOrgId, actorId: userId, actorRole: 'user' }
+}

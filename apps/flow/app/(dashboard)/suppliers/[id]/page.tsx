@@ -1,5 +1,6 @@
 import Link from 'next/link'
 import { notFound } from 'next/navigation'
+import { getLocale } from 'next-intl/server'
 import {
   ArrowLeftIcon,
   PencilIcon,
@@ -25,14 +26,18 @@ const syncStatusDisplay: Record<string, { icon: React.ElementType; color: string
 
 // ── Page Component ──────────────────────────────────────────────────────────
 
-export default async function SupplierDetailPage({ params }: { params: { id: string } }) {
-  const supplier = await getSupplierAction(params.id)
+export default async function SupplierDetailPage({ params }: { params: Promise<{ id: string }> }) {
+  const { id } = await params
+  const locale = await getLocale()
+  const base = `/${locale}/dashboard`
+
+  const supplier = await getSupplierAction(id)
   if (!supplier) {
     notFound()
   }
 
   // Fetch recent POs for this supplier
-  const posResult = await getPurchaseOrdersAction({ limit: 5, supplierId: params.id })
+  const posResult = await getPurchaseOrdersAction({ limit: 5, supplierId: id })
   const recentPOs = posResult.rows
 
   // Determine sync status
@@ -55,8 +60,8 @@ export default async function SupplierDetailPage({ params }: { params: { id: str
       {/* Breadcrumb */}
       <div className="mb-6">
         <Link
-          href="/suppliers"
-          className="inline-flex items-center gap-2 text-sm text-gray-500 hover:text-purple-600 transition"
+          href={`${base}/suppliers`}
+          className="inline-flex items-center gap-2 text-sm text-gray-500 hover:text-electric transition"
         >
           <ArrowLeftIcon className="h-4 w-4" />
           Back to Suppliers
@@ -67,7 +72,7 @@ export default async function SupplierDetailPage({ params }: { params: { id: str
       <div className="flex items-start justify-between mb-8">
         <div>
           <div className="flex items-center gap-3 mb-2">
-            <h1 className="text-2xl font-bold text-gray-900">{supplier.name}</h1>
+            <h1 className="text-2xl font-bold text-navy">{supplier.name}</h1>
             <span className={`inline-flex items-center gap-1 px-2.5 py-0.5 text-xs font-semibold rounded-full ${syncInfo.bg} ${syncInfo.color}`}>
               <SyncIcon className="h-3.5 w-3.5" />
               {syncInfo.label}
@@ -86,8 +91,8 @@ export default async function SupplierDetailPage({ params }: { params: { id: str
             Sync Now
           </button>
           <Link
-            href={`/suppliers/${params.id}/edit`}
-            className="inline-flex items-center gap-2 px-4 py-2.5 bg-purple-600 text-white text-sm font-semibold rounded-lg hover:bg-purple-700 transition shadow-sm"
+            href={`${base}/suppliers/${id}/edit`}
+            className="inline-flex items-center gap-2 px-4 py-2.5 bg-electric text-white text-sm font-semibold rounded-lg hover:bg-electric-light transition shadow-sm"
           >
             <PencilIcon className="h-4 w-4" />
             Edit Supplier
@@ -100,16 +105,16 @@ export default async function SupplierDetailPage({ params }: { params: { id: str
         <div className="col-span-2 space-y-6">
           {/* Contact Card */}
           <div className="bg-white rounded-xl border border-gray-200 p-6">
-            <h2 className="text-lg font-semibold text-gray-900 mb-4">Contact Information</h2>
+            <h2 className="text-lg font-semibold text-navy mb-4">Contact Information</h2>
             <div className="grid grid-cols-2 gap-4">
               <div className="flex items-start gap-3">
-                <div className="h-9 w-9 bg-purple-100 rounded-lg flex items-center justify-center flex-shrink-0">
-                  <EnvelopeIcon className="h-5 w-5 text-purple-600" />
+                <div className="h-9 w-9 bg-electric/10 rounded-lg flex items-center justify-center flex-shrink-0">
+                  <EnvelopeIcon className="h-5 w-5 text-electric" />
                 </div>
                 <div>
                   <p className="text-xs text-gray-500">Email</p>
                   {supplier.email ? (
-                    <a href={`mailto:${supplier.email}`} className="text-sm text-purple-600 hover:underline">
+                    <a href={`mailto:${supplier.email}`} className="text-sm text-electric hover:underline">
                       {supplier.email}
                     </a>
                   ) : (
@@ -118,8 +123,8 @@ export default async function SupplierDetailPage({ params }: { params: { id: str
                 </div>
               </div>
               <div className="flex items-start gap-3">
-                <div className="h-9 w-9 bg-purple-100 rounded-lg flex items-center justify-center flex-shrink-0">
-                  <PhoneIcon className="h-5 w-5 text-purple-600" />
+                <div className="h-9 w-9 bg-electric/10 rounded-lg flex items-center justify-center flex-shrink-0">
+                  <PhoneIcon className="h-5 w-5 text-electric" />
                 </div>
                 <div>
                   <p className="text-xs text-gray-500">Phone</p>
@@ -133,8 +138,8 @@ export default async function SupplierDetailPage({ params }: { params: { id: str
                 </div>
               </div>
               <div className="flex items-start gap-3">
-                <div className="h-9 w-9 bg-purple-100 rounded-lg flex items-center justify-center flex-shrink-0">
-                  <BuildingOfficeIcon className="h-5 w-5 text-purple-600" />
+                <div className="h-9 w-9 bg-electric/10 rounded-lg flex items-center justify-center flex-shrink-0">
+                  <BuildingOfficeIcon className="h-5 w-5 text-electric" />
                 </div>
                 <div>
                   <p className="text-xs text-gray-500">Contact Person</p>
@@ -142,8 +147,8 @@ export default async function SupplierDetailPage({ params }: { params: { id: str
                 </div>
               </div>
               <div className="flex items-start gap-3">
-                <div className="h-9 w-9 bg-purple-100 rounded-lg flex items-center justify-center flex-shrink-0">
-                  <MapPinIcon className="h-5 w-5 text-purple-600" />
+                <div className="h-9 w-9 bg-electric/10 rounded-lg flex items-center justify-center flex-shrink-0">
+                  <MapPinIcon className="h-5 w-5 text-electric" />
                 </div>
                 <div>
                   <p className="text-xs text-gray-500">Address</p>
@@ -164,10 +169,10 @@ export default async function SupplierDetailPage({ params }: { params: { id: str
           {/* Recent POs */}
           <div className="bg-white rounded-xl border border-gray-200 p-6">
             <div className="flex items-center justify-between mb-4">
-              <h2 className="text-lg font-semibold text-gray-900">Recent Purchase Orders</h2>
+              <h2 className="text-lg font-semibold text-navy">Recent Purchase Orders</h2>
               <Link
-                href={`/purchase-orders/new?supplierId=${supplier.id}`}
-                className="text-sm text-purple-600 font-medium hover:underline"
+                href={`${base}/purchase-orders/new?supplierId=${supplier.id}`}
+                className="text-sm text-electric font-medium hover:underline"
               >
                 + New PO
               </Link>
@@ -186,7 +191,7 @@ export default async function SupplierDetailPage({ params }: { params: { id: str
                   {recentPOs.map((po) => (
                     <tr key={po.id} className="border-b border-gray-50">
                       <td className="py-3">
-                        <Link href={`/purchase-orders/${po.id}`} className="text-purple-600 hover:underline font-medium">
+                        <Link href={`${base}/purchase-orders/${po.id}`} className="text-electric hover:underline font-medium">
                           {po.ref}
                         </Link>
                       </td>
@@ -211,7 +216,7 @@ export default async function SupplierDetailPage({ params }: { params: { id: str
           {/* Notes */}
           {supplier.notes && (
             <div className="bg-white rounded-xl border border-gray-200 p-6">
-              <h2 className="text-lg font-semibold text-gray-900 mb-3">Notes</h2>
+              <h2 className="text-lg font-semibold text-navy mb-3">Notes</h2>
               <p className="text-sm text-gray-600 whitespace-pre-wrap">{supplier.notes}</p>
             </div>
           )}
@@ -235,11 +240,11 @@ export default async function SupplierDetailPage({ params }: { params: { id: str
               </div>
               <div>
                 <p className="text-xs text-gray-500">Active POs</p>
-                <p className="text-2xl font-bold text-purple-600">{activePOs}</p>
+                <p className="text-2xl font-bold text-electric">{activePOs}</p>
               </div>
               <div>
                 <p className="text-xs text-gray-500">Total PO Value (Recent)</p>
-                <p className="text-xl font-bold text-gray-900">${totalPOValue.toLocaleString()}</p>
+                <p className="text-xl font-bold text-navy">${totalPOValue.toLocaleString()}</p>
               </div>
             </div>
           </div>

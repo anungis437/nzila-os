@@ -1,5 +1,6 @@
 import Link from 'next/link'
 import { currentUser } from '@clerk/nextjs/server'
+import { getLocale } from 'next-intl/server'
 import { Card } from '@nzila/ui'
 import {
   DocumentTextIcon,
@@ -69,36 +70,38 @@ function formatStat(value: number | null, isCurrency = false): string {
   return value.toLocaleString()
 }
 
-const quickActions = [
-  {
-    name: 'New Quote',
-    href: '/quotes/new',
-    icon: PlusIcon,
-    description: 'Create a new gift box proposal.',
-    color: 'bg-purple-50 text-purple-600 hover:bg-purple-100',
-  },
-  {
-    name: 'View Clients',
-    href: '/clients',
-    icon: UserGroupIcon,
-    description: 'Manage your client directory.',
-    color: 'bg-blue-50 text-blue-600 hover:bg-blue-100',
-  },
-  {
-    name: 'Import Legacy',
-    href: '/import',
-    icon: ArrowDownTrayIcon,
-    description: 'Migrate data from ShopMoiÇa V1.',
-    color: 'bg-amber-50 text-amber-600 hover:bg-amber-100',
-  },
-]
-
 export default async function DashboardPage() {
   const user = await currentUser()
+  const locale = await getLocale()
+  const base = `/${locale}/dashboard`
   const data = await getDashboardStats()
 
+  const quickActions = [
+    {
+      name: 'New Quote',
+      href: `${base}/quotes/new`,
+      icon: PlusIcon,
+      description: 'Create a new gift box proposal.',
+      color: 'bg-electric/5 text-electric hover:bg-electric/10',
+    },
+    {
+      name: 'View Clients',
+      href: `${base}/clients`,
+      icon: UserGroupIcon,
+      description: 'Manage your client directory.',
+      color: 'bg-blue-50 text-blue-600 hover:bg-blue-100',
+    },
+    {
+      name: 'Import Legacy',
+      href: `${base}/import`,
+      icon: ArrowDownTrayIcon,
+      description: 'Migrate data from ShopMoiÇa V1.',
+      color: 'bg-amber-50 text-amber-600 hover:bg-amber-100',
+    },
+  ]
+
   const statItems = [
-    { label: 'Active Quotes', value: formatStat(data.activeQuotes), icon: DocumentTextIcon, color: 'text-purple-600 bg-purple-50', live: data.activeQuotes !== null },
+    { label: 'Active Quotes', value: formatStat(data.activeQuotes), icon: DocumentTextIcon, color: 'text-electric bg-electric/5', live: data.activeQuotes !== null },
     { label: 'Pending Review', value: formatStat(data.pendingReview), icon: ClockIcon, color: 'text-amber-600 bg-amber-50', live: data.pendingReview !== null },
     { label: 'Accepted (MTD)', value: formatStat(data.acceptedMtd), icon: CheckCircleIcon, color: 'text-green-600 bg-green-50', live: data.acceptedMtd !== null },
     { label: 'Revenue (MTD)', value: formatStat(data.revenueMtd, true), icon: CurrencyDollarIcon, color: 'text-blue-600 bg-blue-50', live: data.revenueMtd !== null },
@@ -108,7 +111,7 @@ export default async function DashboardPage() {
     <div className="p-8 max-w-7xl mx-auto">
       {/* Header */}
       <div className="mb-8">
-        <h1 className="text-2xl font-bold text-gray-900">
+        <h1 className="text-2xl font-bold text-navy">
           Welcome back{user?.firstName ? `, ${user.firstName}` : ''}
         </h1>
         <p className="text-gray-500 mt-1">Here&apos;s an overview of your quoting activity.</p>
@@ -124,7 +127,7 @@ export default async function DashboardPage() {
               </div>
               <div>
                 <p className="text-sm text-gray-500">{stat.label}</p>
-                <p className="text-2xl font-bold text-gray-900">{stat.value}</p>
+                <p className="text-2xl font-bold text-navy">{stat.value}</p>
                 {stat.live && <p className="text-[10px] text-green-500 mt-0.5">Live from DB</p>}
               </div>
             </div>
@@ -180,8 +183,8 @@ export default async function DashboardPage() {
               <ExclamationTriangleIcon className="h-10 w-10 text-gray-300 mb-3" />
               <p className="text-sm text-gray-500">No quotes yet. Create your first one!</p>
               <Link
-                href="/quotes/new"
-                className="mt-3 text-sm font-semibold text-purple-600 hover:text-purple-700"
+                href={`${base}/quotes/new`}
+                className="mt-3 text-sm font-semibold text-electric hover:text-electric"
               >
                 Create Quote →
               </Link>

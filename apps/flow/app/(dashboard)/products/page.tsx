@@ -1,4 +1,5 @@
 import Link from 'next/link'
+import { getLocale } from 'next-intl/server'
 import {
   PlusIcon,
   FunnelIcon,
@@ -28,6 +29,9 @@ function getStockLevelStyle(quantity: number, reorderPoint: number): { color: st
 // ── Page Component ──────────────────────────────────────────────────────────
 
 export default async function ProductsListPage() {
+  const locale = await getLocale()
+  const base = `/${locale}/dashboard`
+
   // Fetch products and inventory from database
   const [productsResult, inventoryResult, summary] = await Promise.all([
     getProductsAction(),
@@ -52,19 +56,19 @@ export default async function ProductsListPage() {
       {/* Header */}
       <div className="flex items-center justify-between mb-6">
         <div>
-          <h1 className="text-2xl font-bold text-gray-900">Products & Inventory</h1>
+          <h1 className="text-2xl font-bold text-navy">Products & Inventory</h1>
           <p className="text-sm text-gray-500 mt-1">
             Manage your product catalog and track inventory levels.
           </p>
         </div>
         <div className="flex items-center gap-3">
-          <button className="inline-flex items-center gap-2 px-4 py-2.5 bg-white text-gray-700 text-sm font-medium rounded-lg border border-gray-300 hover:bg-gray-50 transition">
+          <button className="inline-flex items-center gap-2 px-4 py-2.5 bg-white text-gray-700 text-sm font-medium rounded-lg border border-gray-300 hover:bg-electric/[0.02]/60 transition">
             <ArrowPathIcon className="h-4 w-4" />
             Sync Inventory
           </button>
           <Link
-            href="/products/new"
-            className="inline-flex items-center gap-2 px-4 py-2.5 bg-purple-600 text-white text-sm font-semibold rounded-lg hover:bg-purple-700 transition shadow-sm"
+            href={`${base}/products/new`}
+            className="inline-flex items-center gap-2 px-4 py-2.5 bg-electric text-white text-sm font-semibold rounded-lg hover:bg-electric-light transition shadow-sm"
           >
             <PlusIcon className="h-4 w-4" />
             Add Product
@@ -76,7 +80,7 @@ export default async function ProductsListPage() {
       <div className="grid grid-cols-4 gap-4 mb-6">
         <div className="bg-white rounded-xl border border-gray-200 p-4">
           <p className="text-sm text-gray-500">Total Products</p>
-          <p className="text-2xl font-bold text-gray-900">{products.length}</p>
+          <p className="text-2xl font-bold text-navy">{products.length}</p>
         </div>
         <div className="bg-white rounded-xl border border-gray-200 p-4">
           <p className="text-sm text-gray-500">Active</p>
@@ -103,14 +107,14 @@ export default async function ProductsListPage() {
       </div>
 
       {/* Inventory Value Banner */}
-      <div className="bg-linear-to-r from-purple-50 to-indigo-50 rounded-xl border border-purple-100 p-4 mb-6 flex items-center justify-between">
+      <div className="bg-linear-to-r from-electric/5 to-indigo-50 rounded-xl border border-electric/10 p-4 mb-6 flex items-center justify-between">
         <div>
-          <p className="text-sm text-purple-700 font-medium">Total Inventory Value (at cost)</p>
-          <p className="text-3xl font-bold text-purple-900">${totalValue.toLocaleString('en-US', { minimumFractionDigits: 2 })}</p>
+          <p className="text-sm text-electric font-medium">Total Inventory Value (at cost)</p>
+          <p className="text-3xl font-bold text-navy">${totalValue.toLocaleString('en-US', { minimumFractionDigits: 2 })}</p>
         </div>
         <Link
-          href="/products/movements"
-          className="text-sm text-purple-600 font-medium hover:underline"
+          href={`${base}/products/movements`}
+          className="text-sm text-electric font-medium hover:underline"
         >
           View Stock Movements →
         </Link>
@@ -123,17 +127,17 @@ export default async function ProductsListPage() {
           <input
             type="text"
             placeholder="Search by name, SKU..."
-            className="w-full pl-9 pr-4 py-2 text-sm border border-gray-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-purple-500 focus:border-transparent"
+            className="w-full pl-9 pr-4 py-2 text-sm border border-gray-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-electric/30 focus:border-electric"
           />
         </div>
-        <select className="px-3 py-2 text-sm border border-gray-300 rounded-lg bg-white text-gray-700 focus:outline-none focus:ring-2 focus:ring-purple-500">
+        <select className="px-3 py-2 text-sm border border-gray-300 rounded-lg bg-white text-gray-700 focus:outline-none focus:ring-2 focus:ring-electric/30">
           <option value="">All Categories</option>
           <option value="chocolates">Chocolates</option>
           <option value="coffee">Coffee</option>
           <option value="packaging">Packaging</option>
           <option value="specialty">Specialty</option>
         </select>
-        <button className="inline-flex items-center gap-2 px-3 py-2 text-sm font-medium text-gray-700 bg-white border border-gray-300 rounded-lg hover:bg-gray-50 transition">
+        <button className="inline-flex items-center gap-2 px-3 py-2 text-sm font-medium text-gray-700 bg-white border border-gray-300 rounded-lg hover:bg-electric/[0.02]/60 transition">
           <FunnelIcon className="h-4 w-4" />
           More Filters
         </button>
@@ -176,11 +180,11 @@ export default async function ProductsListPage() {
               return (
                 <tr
                   key={product.id}
-                  className="border-b border-gray-100 hover:bg-gray-50 transition cursor-pointer"
+                  className="border-b border-gray-100 hover:bg-electric/[0.02]/60 transition cursor-pointer"
                 >
                   <td className="px-5 py-4">
-                    <Link href={`/products/${product.id}`} className="block">
-                      <span className="font-semibold text-purple-600 hover:underline block">
+                    <Link href={`${base}/products/${product.id}`} className="block">
+                      <span className="font-semibold text-electric hover:underline block">
                         {product.name}
                       </span>
                       <span className="text-xs text-gray-500">{product.sku}</span>
@@ -220,7 +224,7 @@ export default async function ProductsListPage() {
           <div className="flex flex-col items-center justify-center py-16">
             <CubeIcon className="h-12 w-12 text-gray-300 mb-3" />
             <p className="text-gray-500 mb-3">No products found.</p>
-            <Link href="/products/new" className="text-purple-600 font-semibold hover:underline">
+            <Link href={`${base}/products/new`} className="text-electric font-semibold hover:underline">
               Add your first product →
             </Link>
           </div>

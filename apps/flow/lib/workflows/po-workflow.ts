@@ -10,10 +10,14 @@ import { logger } from '@/lib/logger'
 
 const TRANSITIONS: readonly Transition<PurchaseOrderStatus>[] = [
   { from: 'DRAFT', to: 'SENT', label: 'Send to vendor', auditEvent: 'po_sent' },
+  { from: 'DRAFT', to: 'CANCELLED', label: 'Cancel PO', auditEvent: null },
   { from: 'SENT', to: 'CONFIRMED', label: 'Vendor confirmed', auditEvent: 'po_confirmed' },
   { from: 'SENT', to: 'DRAFT', label: 'Return to draft', auditEvent: null },
+  { from: 'SENT', to: 'CANCELLED', label: 'Cancel PO', auditEvent: null },
   { from: 'CONFIRMED', to: 'IN_PRODUCTION', label: 'Production started', auditEvent: 'po_in_production' },
+  { from: 'CONFIRMED', to: 'CANCELLED', label: 'Cancel PO', auditEvent: null },
   { from: 'IN_PRODUCTION', to: 'SHIPPED', label: 'Vendor shipped', auditEvent: 'po_shipped' },
+  { from: 'IN_PRODUCTION', to: 'CANCELLED', label: 'Cancel PO', auditEvent: null },
   { from: 'SHIPPED', to: 'RECEIVED', label: 'Goods received', auditEvent: 'po_received' },
 ] as const
 

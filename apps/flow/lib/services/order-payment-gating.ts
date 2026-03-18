@@ -1,8 +1,14 @@
 /**
- * Flow — Order Payment Gating Service
+ * Flow — Order Payment Gating Service (Canonical)
  *
- * Enforces payment requirements before production and procurement.
- * No production without required payment. No PO without financial validation.
+ * Single source-of-truth for payment gates on every order lifecycle transition.
+ * Pure functions — no DB calls. Callers provide the order + context.
+ *
+ * Gates:
+ *  - canGeneratePO: deposit met before PO creation
+ *  - canStartProduction: deposit + payment current before production
+ *  - canShipOrder: full payment required before shipment release
+ *  - explainBlock: human-readable explanation of why a gate is blocked
  */
 import type { Order } from '@/domain/entities'
 import { logger } from '@/lib/logger'
@@ -130,4 +136,57 @@ export function canGeneratePO(
     order_id: order.id,
     outstanding_balance: balance,
   }
+}
+
+export function canShipOrder(
+  order: Pick<Order, 'id' | 'total_amount' | 'payment_status' | 'status'>,
+  amountPaid: number,
+): PaymentGateResult {
+  const blockers: string[] = []
+
+  if (order.status === 'CANCELLED') {
+    blockers.push('Order is cancelled')
+  }
+
+  if (order.payment_status === 'OVERDUE') {
+    blockers.push('Cannot ship with overdue payment')
+  }
+
+  const balance = outstandingBalance(order, amountPaid)
+  if (balance > 0) {
+    blockers.push(`Outstanding balance of ${balance.toFixed(2)} must be settled before shipment`)
+  }
+
+  logger.info('Shipment gate evaluated', {
+    orderId: order.id,
+    allowed: blockers.length === 0,
+    blockers,
+    balance,
+  })
+
+  return {
+    allowed: blockers.length === 0,
+    blockers,
+    order_id: order.id,
+    outstanding_balance: balance,
+  }
+}
+
+export type PaymentGateType = 'po_creation' | 'production_start' | 'shipment'
+
+export function getPaymentGateState(
+  order: Pick<Order, 'id' | 'total_amount' | 'payment_status' | 'status'>,
+  amountPaid: number,
+  depositRule: DepositRequirement,
+): Record<PaymentGateType, PaymentGateResult> {
+  return {
+    po_creation: canGeneratePO(order, amountPaid, depositRule),
+    production_start: canStartProduction(order, amountPaid, depositRule),
+    shipment: canShipOrder(order, amountPaid),
+  }
+}
+
+export function explainBlock(result: PaymentGateResult): string {
+  if (result.allowed) return 'Gate passed — no blockers.'
+  return result.blockers.join(' | ')
 }

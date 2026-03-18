@@ -3,6 +3,7 @@
 import { useState } from 'react'
 import Link from 'next/link'
 import { useRouter } from 'next/navigation'
+import { useLocale } from 'next-intl'
 import {
   ArrowLeftIcon,
   CheckIcon,
@@ -11,6 +12,8 @@ import { createSupplierAction } from '@/app/actions/suppliers'
 
 export default function NewSupplierPage() {
   const router = useRouter()
+  const locale = useLocale()
+  const base = `/${locale}/dashboard`
   const [isSubmitting, setIsSubmitting] = useState(false)
   const [error, setError] = useState<string | null>(null)
 
@@ -47,7 +50,7 @@ export default function NewSupplierPage() {
         paymentTerms: formData.get('paymentTerms') as string || null,
         notes: formData.get('notes') as string || null,
       })
-      router.push('/suppliers')
+      router.push(`${base}/suppliers`)
     } catch (err) {
       setError(err instanceof Error ? err.message : 'Failed to create supplier')
       setIsSubmitting(false)
@@ -59,8 +62,8 @@ export default function NewSupplierPage() {
       {/* Breadcrumb */}
       <div className="mb-6">
         <Link
-          href="/suppliers"
-          className="inline-flex items-center gap-2 text-sm text-gray-500 hover:text-purple-600 transition"
+          href={`${base}/suppliers`}
+          className="inline-flex items-center gap-2 text-sm text-gray-500 hover:text-electric transition"
         >
           <ArrowLeftIcon className="h-4 w-4" />
           Back to Suppliers
@@ -69,7 +72,7 @@ export default function NewSupplierPage() {
 
       {/* Header */}
       <div className="mb-8">
-        <h1 className="text-2xl font-bold text-gray-900">Add New Supplier</h1>
+        <h1 className="text-2xl font-bold text-navy">Add New Supplier</h1>
         <p className="text-sm text-gray-500 mt-1">
           Create a new supplier record. This will be synced to Zoho Books.
         </p>
@@ -84,7 +87,7 @@ export default function NewSupplierPage() {
         
         {/* Basic Info */}
         <div className="bg-white rounded-xl border border-gray-200 p-6">
-          <h2 className="text-lg font-semibold text-gray-900 mb-4">Basic Information</h2>
+          <h2 className="text-lg font-semibold text-navy mb-4">Basic Information</h2>
           <div className="grid grid-cols-2 gap-4">
             <div className="col-span-2 sm:col-span-1">
               <label htmlFor="name" className="block text-sm font-medium text-gray-700 mb-1">
@@ -95,7 +98,7 @@ export default function NewSupplierPage() {
                 id="name"
                 name="name"
                 required
-                className="w-full px-4 py-2.5 text-sm border border-gray-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-purple-500 focus:border-transparent"
+                className="w-full px-4 py-2.5 text-sm border border-gray-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-electric/30 focus:border-electric"
                 placeholder="e.g., Premium Coffee Roasters"
               />
             </div>
@@ -106,7 +109,7 @@ export default function NewSupplierPage() {
               <select
                 id="status"
                 name="status"
-                className="w-full px-4 py-2.5 text-sm border border-gray-300 rounded-lg bg-white focus:outline-none focus:ring-2 focus:ring-purple-500 focus:border-transparent"
+                className="w-full px-4 py-2.5 text-sm border border-gray-300 rounded-lg bg-white focus:outline-none focus:ring-2 focus:ring-electric/30 focus:border-electric"
               >
                 <option value="active">Active</option>
                 <option value="pending">Pending</option>
@@ -118,7 +121,7 @@ export default function NewSupplierPage() {
 
         {/* Contact Info */}
         <div className="bg-white rounded-xl border border-gray-200 p-6">
-          <h2 className="text-lg font-semibold text-gray-900 mb-4">Contact Information</h2>
+          <h2 className="text-lg font-semibold text-navy mb-4">Contact Information</h2>
           <div className="grid grid-cols-2 gap-4">
             <div>
               <label htmlFor="email" className="block text-sm font-medium text-gray-700 mb-1">
@@ -128,7 +131,7 @@ export default function NewSupplierPage() {
                 type="email"
                 id="email"
                 name="email"
-                className="w-full px-4 py-2.5 text-sm border border-gray-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-purple-500 focus:border-transparent"
+                className="w-full px-4 py-2.5 text-sm border border-gray-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-electric/30 focus:border-electric"
                 placeholder="orders@supplier.com"
               />
             </div>
@@ -140,7 +143,7 @@ export default function NewSupplierPage() {
                 type="tel"
                 id="phone"
                 name="phone"
-                className="w-full px-4 py-2.5 text-sm border border-gray-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-purple-500 focus:border-transparent"
+                className="w-full px-4 py-2.5 text-sm border border-gray-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-electric/30 focus:border-electric"
                 placeholder="+1 514-555-0100"
               />
             </div>
@@ -152,7 +155,7 @@ export default function NewSupplierPage() {
                 type="text"
                 id="contactPerson"
                 name="contactPerson"
-                className="w-full px-4 py-2.5 text-sm border border-gray-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-purple-500 focus:border-transparent"
+                className="w-full px-4 py-2.5 text-sm border border-gray-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-electric/30 focus:border-electric"
                 placeholder="John Smith"
               />
             </div>
@@ -164,7 +167,7 @@ export default function NewSupplierPage() {
                 type="url"
                 id="website"
                 name="website"
-                className="w-full px-4 py-2.5 text-sm border border-gray-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-purple-500 focus:border-transparent"
+                className="w-full px-4 py-2.5 text-sm border border-gray-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-electric/30 focus:border-electric"
                 placeholder="https://supplier.com"
               />
             </div>
@@ -173,7 +176,7 @@ export default function NewSupplierPage() {
 
         {/* Address */}
         <div className="bg-white rounded-xl border border-gray-200 p-6">
-          <h2 className="text-lg font-semibold text-gray-900 mb-4">Address</h2>
+          <h2 className="text-lg font-semibold text-navy mb-4">Address</h2>
           <div className="grid grid-cols-2 gap-4">
             <div className="col-span-2">
               <label htmlFor="street" className="block text-sm font-medium text-gray-700 mb-1">
@@ -183,7 +186,7 @@ export default function NewSupplierPage() {
                 type="text"
                 id="street"
                 name="street"
-                className="w-full px-4 py-2.5 text-sm border border-gray-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-purple-500 focus:border-transparent"
+                className="w-full px-4 py-2.5 text-sm border border-gray-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-electric/30 focus:border-electric"
                 placeholder="123 Main Street"
               />
             </div>
@@ -195,7 +198,7 @@ export default function NewSupplierPage() {
                 type="text"
                 id="city"
                 name="city"
-                className="w-full px-4 py-2.5 text-sm border border-gray-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-purple-500 focus:border-transparent"
+                className="w-full px-4 py-2.5 text-sm border border-gray-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-electric/30 focus:border-electric"
                 placeholder="Montreal"
               />
             </div>
@@ -207,7 +210,7 @@ export default function NewSupplierPage() {
                 type="text"
                 id="state"
                 name="state"
-                className="w-full px-4 py-2.5 text-sm border border-gray-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-purple-500 focus:border-transparent"
+                className="w-full px-4 py-2.5 text-sm border border-gray-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-electric/30 focus:border-electric"
                 placeholder="QC"
               />
             </div>
@@ -219,7 +222,7 @@ export default function NewSupplierPage() {
                 type="text"
                 id="postalCode"
                 name="postalCode"
-                className="w-full px-4 py-2.5 text-sm border border-gray-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-purple-500 focus:border-transparent"
+                className="w-full px-4 py-2.5 text-sm border border-gray-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-electric/30 focus:border-electric"
                 placeholder="H2Y 1C6"
               />
             </div>
@@ -230,7 +233,7 @@ export default function NewSupplierPage() {
               <select
                 id="country"
                 name="country"
-                className="w-full px-4 py-2.5 text-sm border border-gray-300 rounded-lg bg-white focus:outline-none focus:ring-2 focus:ring-purple-500 focus:border-transparent"
+                className="w-full px-4 py-2.5 text-sm border border-gray-300 rounded-lg bg-white focus:outline-none focus:ring-2 focus:ring-electric/30 focus:border-electric"
               >
                 <option value="Canada">Canada</option>
                 <option value="United States">United States</option>
@@ -241,7 +244,7 @@ export default function NewSupplierPage() {
 
         {/* Payment Terms & Notes */}
         <div className="bg-white rounded-xl border border-gray-200 p-6">
-          <h2 className="text-lg font-semibold text-gray-900 mb-4">Payment & Notes</h2>
+          <h2 className="text-lg font-semibold text-navy mb-4">Payment & Notes</h2>
           <div className="space-y-4">
             <div>
               <label htmlFor="paymentTerms" className="block text-sm font-medium text-gray-700 mb-1">
@@ -251,7 +254,7 @@ export default function NewSupplierPage() {
                 id="paymentTerms"
                 name="paymentTerms"
                 defaultValue="Net 30"
-                className="w-full px-4 py-2.5 text-sm border border-gray-300 rounded-lg bg-white focus:outline-none focus:ring-2 focus:ring-purple-500 focus:border-transparent"
+                className="w-full px-4 py-2.5 text-sm border border-gray-300 rounded-lg bg-white focus:outline-none focus:ring-2 focus:ring-electric/30 focus:border-electric"
               >
                 <option value="Net 30">Net 30</option>
                 <option value="Net 15">Net 15</option>
@@ -268,7 +271,7 @@ export default function NewSupplierPage() {
                 id="notes"
                 name="notes"
                 rows={4}
-                className="w-full px-4 py-2.5 text-sm border border-gray-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-purple-500 focus:border-transparent resize-none"
+                className="w-full px-4 py-2.5 text-sm border border-gray-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-electric/30 focus:border-electric resize-none"
                 placeholder="Any additional notes about this supplier..."
               />
             </div>
@@ -278,15 +281,15 @@ export default function NewSupplierPage() {
         {/* Actions */}
         <div className="flex items-center justify-end gap-3 pt-4">
           <Link
-            href="/suppliers"
-            className="px-6 py-2.5 text-sm font-medium text-gray-700 bg-white border border-gray-300 rounded-lg hover:bg-gray-50 transition"
+            href={`${base}/suppliers`}
+            className="px-6 py-2.5 text-sm font-medium text-gray-700 bg-white border border-gray-300 rounded-lg hover:bg-electric/[0.02]/60 transition"
           >
             Cancel
           </Link>
           <button
             type="submit"
             disabled={isSubmitting}
-            className="inline-flex items-center gap-2 px-6 py-2.5 bg-purple-600 text-white text-sm font-semibold rounded-lg hover:bg-purple-700 transition shadow-sm disabled:opacity-50 disabled:cursor-not-allowed"
+            className="inline-flex items-center gap-2 px-6 py-2.5 bg-electric text-white text-sm font-semibold rounded-lg hover:bg-electric-light transition shadow-sm disabled:opacity-50 disabled:cursor-not-allowed"
           >
             {isSubmitting ? (
               <>

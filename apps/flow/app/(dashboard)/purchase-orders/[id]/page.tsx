@@ -1,8 +1,8 @@
 import Link from 'next/link'
 import { notFound } from 'next/navigation'
+import { getLocale } from 'next-intl/server'
 import {
   ArrowLeftIcon,
-  PencilIcon,
   ArrowPathIcon,
   TruckIcon,
   CheckCircleIcon,
@@ -12,6 +12,7 @@ import {
 } from '@heroicons/react/24/outline'
 import { getPurchaseOrderWithLinesAction } from '@/app/actions/purchase-orders'
 import { getSupplierAction } from '@/app/actions/suppliers'
+import { POActions } from './po-actions'
 
 /** PO status badge colours. */
 const statusColors: Record<string, string> = {
@@ -19,7 +20,7 @@ const statusColors: Record<string, string> = {
   pending_approval: 'bg-amber-100 text-amber-700',
   approved: 'bg-blue-100 text-blue-700',
   ordered: 'bg-indigo-100 text-indigo-700',
-  partially_received: 'bg-purple-100 text-purple-700',
+  partially_received: 'bg-electric/10 text-electric',
   received: 'bg-green-100 text-green-700',
   cancelled: 'bg-red-100 text-red-700',
   closed: 'bg-gray-100 text-gray-500',
@@ -38,8 +39,12 @@ const statusLabels: Record<string, string> = {
 
 // ── Page Component ──────────────────────────────────────────────────────────
 
-export default async function PODetailPage({ params }: { params: { id: string } }) {
-  const po = await getPurchaseOrderWithLinesAction(params.id)
+export default async function PODetailPage({ params }: { params: Promise<{ id: string }> }) {
+  const { id } = await params
+  const locale = await getLocale()
+  const base = `/${locale}/dashboard`
+
+  const po = await getPurchaseOrderWithLinesAction(id)
   if (!po) {
     notFound()
   }
@@ -58,16 +63,16 @@ export default async function PODetailPage({ params }: { params: { id: string } 
   const receivedPercentage = totalOrdered > 0 ? Math.round((totalReceived / totalOrdered) * 100) : 0
 
   const canReceive = ['sent', 'acknowledged', 'partial_received'].includes(po.status)
-  const canEdit = po.status === 'draft'
-  const canApprove = po.status === 'draft' || po.status === 'acknowledged'
+  const _canEdit = po.status === 'draft'
+  const _canApprove = po.status === 'draft' || po.status === 'acknowledged'
 
   return (
     <div className="p-8 max-w-6xl mx-auto">
       {/* Breadcrumb */}
       <div className="mb-6">
         <Link
-          href="/purchase-orders"
-          className="inline-flex items-center gap-2 text-sm text-gray-500 hover:text-purple-600 transition"
+          href={`${base}/purchase-orders`}
+          className="inline-flex items-center gap-2 text-sm text-gray-500 hover:text-electric transition"
         >
           <ArrowLeftIcon className="h-4 w-4" />
           Back to Purchase Orders
@@ -78,13 +83,13 @@ export default async function PODetailPage({ params }: { params: { id: string } 
       <div className="flex items-start justify-between mb-8">
         <div>
           <div className="flex items-center gap-3 mb-2">
-            <h1 className="text-2xl font-bold text-gray-900">{po.ref}</h1>
+            <h1 className="text-2xl font-bold text-navy">{po.ref}</h1>
             <span className={`inline-flex px-2.5 py-0.5 text-xs font-semibold rounded-full ${statusColors[po.status] ?? 'bg-gray-100 text-gray-600'}`}>
               {statusLabels[po.status] ?? po.status}
             </span>
           </div>
           <p className="text-sm text-gray-500">
-            Supplier: <Link href={`/suppliers/${po.supplierId}`} className="text-purple-600 hover:underline">{supplier?.name ?? 'Unknown'}</Link>
+            Supplier: <Link href={`${base}/suppliers/${po.supplierId}`} className="text-electric hover:underline">{supplier?.name ?? 'Unknown'}</Link>
             {po.zohoPoId && (
               <> · Zoho: <span className="font-mono">{po.zohoPoId}</span></>
             )}
@@ -99,30 +104,16 @@ export default async function PODetailPage({ params }: { params: { id: string } 
             <DocumentDuplicateIcon className="h-4 w-4" />
             Duplicate
           </button>
-          {canEdit && (
-            <Link
-              href={`/purchase-orders/${params.id}/edit`}
-              className="inline-flex items-center gap-2 px-4 py-2 bg-white text-gray-700 text-sm font-medium rounded-lg border border-gray-300 hover:bg-gray-50 transition"
-            >
-              <PencilIcon className="h-4 w-4" />
-              Edit
-            </Link>
-          )}
-          {canReceive && (
-            <Link
-              href={`/purchase-orders/${params.id}/receive`}
-              className="inline-flex items-center gap-2 px-4 py-2.5 bg-purple-600 text-white text-sm font-semibold rounded-lg hover:bg-purple-700 transition shadow-sm"
-            >
-              <TruckIcon className="h-4 w-4" />
-              Receive Stock
-            </Link>
-          )}
-          {canApprove && (
-            <button className="inline-flex items-center gap-2 px-4 py-2.5 bg-green-600 text-white text-sm font-semibold rounded-lg hover:bg-green-700 transition shadow-sm">
-              <CheckCircleIcon className="h-4 w-4" />
-              Approve
-            </button>
-          )}
+          <POActions
+            poId={id}
+            status={po.status}
+            lines={po.lines.map((l) => ({
+              id: l.id,
+              description: l.description ?? '',
+              quantity: l.quantity ?? 0,
+              quantityReceived: l.quantityReceived ?? 0,
+            }))}
+          />
         </div>
       </div>
 
@@ -135,7 +126,7 @@ export default async function PODetailPage({ params }: { params: { id: string } 
           </div>
           <div className="w-full bg-gray-200 rounded-full h-3">
             <div
-              className={`h-3 rounded-full transition-all ${receivedPercentage === 100 ? 'bg-green-500' : 'bg-purple-500'}`}
+              className={`h-3 rounded-full transition-all ${receivedPercentage === 100 ? 'bg-green-500' : 'bg-electric'}`}
               style={{ width: `${receivedPercentage}%` }}
             />
           </div>
@@ -152,7 +143,7 @@ export default async function PODetailPage({ params }: { params: { id: string } 
           {/* Line Items */}
           <div className="bg-white rounded-xl border border-gray-200 overflow-hidden">
             <div className="px-6 py-4 border-b border-gray-100">
-              <h2 className="text-lg font-semibold text-gray-900">Line Items</h2>
+              <h2 className="text-lg font-semibold text-navy">Line Items</h2>
             </div>
             <table className="w-full text-sm">
               <thead>
@@ -172,7 +163,7 @@ export default async function PODetailPage({ params }: { params: { id: string } 
                     <tr key={line.id} className="border-b border-gray-50">
                       <td className="px-6 py-4">
                         {line.productId ? (
-                          <Link href={`/products/${line.productId}`} className="font-medium text-purple-600 hover:underline">
+                          <Link href={`${base}/products/${line.productId}`} className="font-medium text-electric hover:underline">
                             {line.description}
                           </Link>
                         ) : (
@@ -212,7 +203,7 @@ export default async function PODetailPage({ params }: { params: { id: string } 
           {/* Notes */}
           {po.notes && (
             <div className="bg-white rounded-xl border border-gray-200 p-6">
-              <h2 className="text-lg font-semibold text-gray-900 mb-3">Notes</h2>
+              <h2 className="text-lg font-semibold text-navy mb-3">Notes</h2>
               <p className="text-sm text-gray-600 whitespace-pre-wrap">{po.notes}</p>
             </div>
           )}
@@ -304,7 +295,7 @@ export default async function PODetailPage({ params }: { params: { id: string } 
                 </div>
               </div>
             ) : (
-              <button className="w-full inline-flex items-center justify-center gap-2 px-4 py-2.5 bg-purple-50 text-purple-700 text-sm font-medium rounded-lg hover:bg-purple-100 transition">
+              <button className="w-full inline-flex items-center justify-center gap-2 px-4 py-2.5 bg-electric/5 text-electric text-sm font-medium rounded-lg hover:bg-electric/10 transition">
                 <ArrowPathIcon className="h-4 w-4" />
                 Sync to Zoho
               </button>
