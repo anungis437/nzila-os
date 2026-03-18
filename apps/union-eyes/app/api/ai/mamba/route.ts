@@ -33,6 +33,7 @@ const _longDocumentSchema = z.object({
  */
 export async function POST(request: NextRequest) {
   try {
+    // @ts-expect-error — Clerk bundles its own next types; NextRequest [Internal] symbol differs
     const auth = getAuth(request);
     
     if (!auth?.userId) {
@@ -102,6 +103,7 @@ export async function POST(request: NextRequest) {
  */
 export async function GET(request: NextRequest) {
   try {
+    // @ts-expect-error — Clerk bundles its own next types; NextRequest [Internal] symbol differs
     const auth = getAuth(request);
     
     if (!auth?.userId) {
