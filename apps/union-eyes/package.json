@@ -149,7 +149,7 @@
     "react-dropzone": "^14.4.0",
     "react-email": "^5.0.8",
     "react-hook-form": "^7.68.0",
-    "react-resizable-panels": "^2.1.1",
+    "react-resizable-panels": "^4.7.3",
     "recharts": "^3.7.0",
     "require-in-the-middle": "^8.0.1",
     "resend": "^6.6.0",
