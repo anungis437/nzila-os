@@ -45,6 +45,8 @@ jobs:
 
       - name: Typecheck
         run: pnpm typecheck
+        env:
+          NODE_OPTIONS: "--max-old-space-size=8192"
 
   test:
     runs-on: ubuntu-latest
