@@ -342,7 +342,7 @@ const clerkHandler = clerkMiddleware(async (auth, req) => {
 
 // Wrap clerkMiddleware to catch errors at the Clerk SDK level (before our callback runs)
 import type { NextFetchEvent } from "next/server";
-export default async function middleware(req: NextRequest, event: NextFetchEvent) {
+export default async function middleware(req: NextRequest, event: NextFetchEvent): Promise<NextResponse> {
   try {
     // @ts-expect-error — Clerk and root next may bundle different NextRequest types
     return await clerkHandler(req, event);
