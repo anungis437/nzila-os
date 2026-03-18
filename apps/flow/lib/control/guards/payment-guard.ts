@@ -13,6 +13,7 @@ import {
   canShipOrder,
   type DepositRequirement,
 } from '@/lib/services/order-payment-gating'
+import type { Order } from '@/domain/entities'
 import { logger } from '@/lib/logger'
 
 const DEFAULT_DEPOSIT: DepositRequirement = {
@@ -23,10 +24,19 @@ const DEFAULT_DEPOSIT: DepositRequirement = {
 }
 
 async function loadPaymentContext(orderId: string, orgId: string) {
-  const order = await orderRepo.findById(orderId, orgId)
-  if (!order) return null
+  const dbOrder = await orderRepo.findById(orderId, orgId)
+  if (!dbOrder) return null
 
   const totalPaid = await paymentRepo.totalPaidForOrder(orderId)
+
+  // Map Drizzle camelCase/lowercase to domain snake_case/UPPERCASE shape
+  const order: Pick<Order, 'id' | 'total_amount' | 'payment_status' | 'status' | 'quote_id'> = {
+    id: dbOrder.id,
+    total_amount: Number(dbOrder.total ?? 0),
+    payment_status: (dbOrder.paymentStatus ?? 'PENDING_DEPOSIT') as Order['payment_status'],
+    status: (dbOrder.status?.toUpperCase() ?? 'CREATED') as Order['status'],
+    quote_id: dbOrder.quoteId ?? null,
+  }
 
   // Look up deposit requirement — if order has quote_id, check quote-level requirement
   let depositRule: DepositRequirement = DEFAULT_DEPOSIT

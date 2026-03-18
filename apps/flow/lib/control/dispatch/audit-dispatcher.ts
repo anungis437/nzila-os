@@ -7,6 +7,7 @@
  */
 import { timelineRepo } from '@/lib/repositories/workflow-repository'
 import { logger } from '@/lib/logger'
+import type { TimelineEvent } from '@/lib/schemas/workflow-schemas'
 
 export interface AuditEntry {
   org_id: string
@@ -24,7 +25,9 @@ export async function dispatchAuditEntry(entry: AuditEntry): Promise<string> {
   const auditRef = `audit-${Date.now()}-${Math.random().toString(36).slice(2, 8)}`
 
   // Write to timeline as canonical audit trail
-  await timelineRepo.add({
+  const timelineEvent = {
+    id: auditRef,
+    timestamp: new Date(),
     orgId: entry.org_id,
     quoteId: entry.entity_id, // timeline repo uses quoteId as entity key
     event: entry.action,
@@ -38,7 +41,8 @@ export async function dispatchAuditEntry(entry: AuditEntry): Promise<string> {
       correlation_id: entry.correlation_id,
       ...entry.metadata,
     },
-  })
+  }
+  await timelineRepo.add(timelineEvent as TimelineEvent)
 
   logger.info('Audit entry dispatched', {
     auditRef,

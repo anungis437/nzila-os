@@ -43,17 +43,18 @@ export async function checkQuoteInvariants(
     return { valid: false, violations }
   }
 
-  if (!quote.customer_id) {
+  if (!quote.customerId) {
     violations.push('Quote has no customer assigned')
   } else {
-    const customer = await customerRepo.findById(quote.customer_id, orgId)
+    const customer = await customerRepo.findById(quote.customerId, orgId)
     if (!customer) {
-      violations.push(`Customer "${quote.customer_id}" referenced by quote does not exist`)
+      violations.push(`Customer "${quote.customerId}" referenced by quote does not exist`)
     }
   }
 
-  if (quote.total_amount == null || quote.total_amount < 0) {
-    violations.push('Quote total_amount is invalid')
+  const quoteTotal = Number(quote.total ?? 0)
+  if (quoteTotal < 0) {
+    violations.push('Quote total is invalid')
   }
 
   return { valid: violations.length === 0, violations }
@@ -71,12 +72,13 @@ export async function checkOrderInvariants(
     return { valid: false, violations }
   }
 
-  if (!order.customer_id) {
+  if (!order.customerId) {
     violations.push('Order has no customer assigned')
   }
 
-  if (order.total_amount == null || order.total_amount < 0) {
-    violations.push('Order total_amount is invalid')
+  const orderTotal = Number(order.total ?? 0)
+  if (orderTotal < 0) {
+    violations.push('Order total is invalid')
   }
 
   return { valid: violations.length === 0, violations }
@@ -94,21 +96,21 @@ export async function checkPurchaseOrderInvariants(
     return { valid: false, violations }
   }
 
-  if (!po.order_id) {
-    violations.push('PurchaseOrder has no order_id')
+  if (!po.orderId) {
+    violations.push('PurchaseOrder has no orderId')
   } else {
-    const order = await orderRepo.findById(po.order_id, orgId)
+    const order = await orderRepo.findById(po.orderId, orgId)
     if (!order) {
-      violations.push(`Order "${po.order_id}" referenced by PO does not exist`)
+      violations.push(`Order "${po.orderId}" referenced by PO does not exist`)
     }
   }
 
-  if (!po.vendor_id) {
-    violations.push('PurchaseOrder has no vendor assigned')
+  if (!po.supplierId) {
+    violations.push('PurchaseOrder has no supplier assigned')
   } else {
-    const vendor = await vendorRepo.findById(po.vendor_id, orgId)
+    const vendor = await vendorRepo.findById(po.supplierId, orgId)
     if (!vendor) {
-      violations.push(`Vendor "${po.vendor_id}" referenced by PO does not exist`)
+      violations.push(`Vendor "${po.supplierId}" referenced by PO does not exist`)
     }
   }
 
@@ -127,11 +129,11 @@ export async function checkProductionJobInvariants(
     return { valid: false, violations }
   }
 
-  if (!job.order_id) {
-    violations.push('ProductionJob has no order_id')
+  if (!job.orderId) {
+    violations.push('ProductionJob has no orderId')
   }
 
-  if (!job.vendor_id) {
+  if (!job.assignedVendorId) {
     violations.push('ProductionJob has no vendor assigned')
   }
 
