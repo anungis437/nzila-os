@@ -21,11 +21,11 @@ export const confirmPaymentHandler: CommandHandler<ConfirmPaymentCommand> = {
     if (!order) throw new EntityNotFoundError('order', input.order_id)
 
     // Confirm payment
-    await paymentRepo.update(input.payment_id, context.org_id, { status: 'confirmed' })
+    await paymentRepo.update(input.payment_id, context.org_id, { status: 'paid' })
 
     // Recompute order payment state
     const totalPaid = await paymentRepo.totalPaidForOrder(input.order_id)
-    const newPaymentStatus = totalPaid >= order.totalAmount ? 'PAID' : 'PARTIALLY_PAID'
+    const newPaymentStatus = totalPaid >= Number(order.total) ? 'PAID' : 'PARTIALLY_PAID'
 
     const orderPatch: Record<string, unknown> = { paymentStatus: newPaymentStatus }
     if (newPaymentStatus === 'PAID') {

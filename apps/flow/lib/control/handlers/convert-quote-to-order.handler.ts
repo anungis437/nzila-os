@@ -27,8 +27,8 @@ export const convertQuoteToOrderHandler: CommandHandler<ConvertQuoteToOrderComma
     const quote = await quoteRepo.findById(input.quote_id, context.org_id)
     if (!quote) throw new EntityNotFoundError('quote', input.quote_id)
 
-    if (quote.status !== 'ACCEPTED') {
-      return { success: false, errors: [{ code: 'INVALID_TRANSITION', message: `Quote must be ACCEPTED to convert — current: ${quote.status}` }] }
+    if (quote.status !== 'accepted') {
+      return { success: false, errors: [{ code: 'INVALID_TRANSITION', message: `Quote must be accepted to convert — current: ${quote.status}` }] }
     }
 
     // Create order from quote
@@ -39,7 +39,7 @@ export const convertQuoteToOrderHandler: CommandHandler<ConvertQuoteToOrderComma
       orgId: context.org_id,
       quoteId: input.quote_id,
       customerId: quote.customerId,
-      status: 'CREATED',
+      status: 'created',
       totalAmount: quote.total,
       paymentStatus: 'NOT_REQUIRED',
       productionStatus: 'NOT_STARTED',

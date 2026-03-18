@@ -30,7 +30,7 @@ export const acceptQuoteHandler: CommandHandler<AcceptQuoteCommand> = {
     }
 
     const statusBefore = quote.status
-    await quoteRepo.update(input.quote_id, context.org_id, { status: 'ACCEPTED' })
+    await quoteRepo.update(input.quote_id, context.org_id, { status: 'accepted' })
 
     const eventId = dispatchDomainEvent({
       type: 'quote_accepted',

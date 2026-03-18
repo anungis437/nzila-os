@@ -30,7 +30,7 @@ export const confirmPurchaseOrderHandler: CommandHandler<ConfirmPurchaseOrderCom
     }
 
     const statusBefore = po.status
-    await purchaseOrderRepo.update(input.purchase_order_id, context.org_id, { status: 'CONFIRMED' })
+    await purchaseOrderRepo.update(input.purchase_order_id, context.org_id, { status: 'acknowledged' })
 
     const eventId = dispatchDomainEvent({
       type: 'po_confirmed',

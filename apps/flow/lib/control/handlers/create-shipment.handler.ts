@@ -30,12 +30,9 @@ export const createShipmentHandler: CommandHandler<CreateShipmentCommand> = {
     }
 
     // Create shipment via service
-    const result = await createShipmentRecord(input.order_id, context.org_id, {
-      carrier: input.carrier,
-      trackingNumber: input.tracking_number,
-    })
+    const result = await createShipmentRecord(input.order_id, context.org_id, {})
 
-    const shipmentId = result.id
+    const shipmentId = result.shipmentId!
 
     const eventId = dispatchDomainEvent({
       type: 'shipment_created' as never,

@@ -64,8 +64,8 @@ export const createPurchaseOrderHandler: CommandHandler<CreatePurchaseOrderComma
       orgId: context.org_id,
       orderId: input.order_id,
       vendorId: input.vendor_id,
-      status: 'DRAFT',
-      totalAmount: order.totalAmount,
+      status: 'draft',
+      totalAmount: order.total,
       expectedDelivery: input.expected_delivery ?? null,
       notes: input.notes ?? null,
       createdBy: input.actor_id,
@@ -73,7 +73,7 @@ export const createPurchaseOrderHandler: CommandHandler<CreatePurchaseOrderComma
 
     // 5. Update order status
     await orderRepo.update(input.order_id, context.org_id, {
-      status: 'READY_FOR_PROCUREMENT',
+      status: 'fulfillment',
     })
 
     const eventId = dispatchDomainEvent({

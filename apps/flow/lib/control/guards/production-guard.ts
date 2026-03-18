@@ -30,7 +30,7 @@ export async function checkProductionReadiness(
   if (!order) {
     blockers.push(`Order "${orderId}" not found`)
   } else {
-    const validOrderStates = ['CONFIRMED', 'DEPOSIT_REQUIRED', 'PAYMENT_PARTIAL', 'PAYMENT_COMPLETE', 'READY_FOR_PROCUREMENT']
+    const validOrderStates = ['confirmed', 'fulfillment']
     if (!validOrderStates.includes(order.status)) {
       blockers.push(`Order status "${order.status}" does not allow production start`)
     }
@@ -41,9 +41,9 @@ export async function checkProductionReadiness(
   if (!po) {
     blockers.push(`PurchaseOrder "${purchaseOrderId}" not found`)
   } else {
-    const validPOStates = ['CONFIRMED']
+    const validPOStates = ['acknowledged']
     if (!validPOStates.includes(po.status)) {
-      blockers.push(`PO status "${po.status}" does not allow production — must be CONFIRMED`)
+      blockers.push(`PO status "${po.status}" does not allow production — must be acknowledged`)
     } else {
       poValid = true
     }
@@ -61,7 +61,7 @@ export async function checkProductionReadiness(
   const vendor = await vendorRepo.findById(vendorId, orgId)
   if (!vendor) {
     blockers.push(`Vendor "${vendorId}" not found`)
-  } else if (!vendor.active) {
+  } else if (vendor.status !== 'active') {
     blockers.push(`Vendor "${vendor.name}" is inactive`)
   } else {
     vendorAssigned = true

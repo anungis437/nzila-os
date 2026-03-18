@@ -32,7 +32,7 @@ export const markShipmentDeliveredHandler: CommandHandler<MarkShipmentDeliveredC
 
     // Update order
     await orderRepo.update(input.order_id, context.org_id, {
-      status: 'DELIVERED',
+      status: 'delivered',
       fulfillmentStatus: 'DELIVERED',
     })
 

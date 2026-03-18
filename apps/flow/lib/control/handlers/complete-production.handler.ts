@@ -23,19 +23,19 @@ export const completeProductionHandler: CommandHandler<CompleteProductionCommand
     const job = await productionRepo.findById(input.production_job_id, context.org_id)
     if (!job) throw new EntityNotFoundError('production_job', input.production_job_id)
 
-    if (job.status !== 'IN_PRODUCTION' && job.status !== 'QUALITY_CHECK') {
+    if (job.status !== 'in_production' && job.status !== 'quality_check') {
       return { success: false, errors: [{ code: 'INVALID_TRANSITION', message: `Cannot complete production from status ${job.status}` }] }
     }
 
     const statusBefore = job.status
     await productionRepo.update(input.production_job_id, context.org_id, {
-      status: 'READY_TO_SHIP',
+      status: 'ready_to_ship',
       actualCompletion: new Date(),
     })
 
     // Update order production status
     await orderRepo.update(input.order_id, context.org_id, {
-      status: 'READY_TO_SHIP',
+      status: 'fulfillment',
       productionStatus: 'COMPLETE',
     })
 

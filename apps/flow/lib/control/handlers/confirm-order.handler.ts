@@ -30,7 +30,7 @@ export const confirmOrderHandler: CommandHandler<ConfirmOrderCommand> = {
     }
 
     const statusBefore = order.status
-    await orderRepo.update(input.order_id, context.org_id, { status: 'CONFIRMED' })
+    await orderRepo.update(input.order_id, context.org_id, { status: 'confirmed' })
 
     const eventId = dispatchDomainEvent({
       type: 'order_confirmed',

@@ -38,7 +38,7 @@ export async function checkShipmentReadiness(
     blockers.push('No production jobs found for this order')
   } else {
     const readyJobs = jobs.filter(j =>
-      j.status === 'READY_TO_SHIP' || j.status === 'QUALITY_CHECK',
+      j.status === 'ready_to_ship' || j.status === 'quality_check',
     )
     if (readyJobs.length === 0) {
       blockers.push('No production jobs are ready for shipment')
@@ -48,7 +48,7 @@ export async function checkShipmentReadiness(
   }
 
   // 3. Shipping address — check customer or order metadata
-  if (order.customer_id) {
+  if (order.customerId) {
     // Customer record serves as address holder
     shippingAddressExists = true
   } else {
@@ -92,8 +92,8 @@ export async function checkCanMarkShipped(
     }
   }
 
-  if (shipment.status !== 'PENDING' && shipment.status !== 'PACKED') {
-    blockers.push(`Shipment status "${shipment.status}" cannot transition to SHIPPED`)
+  if (shipment.status !== 'pending' && shipment.status !== 'packed') {
+    blockers.push(`Shipment status "${shipment.status}" cannot transition to shipped`)
   }
 
   return {
@@ -126,8 +126,8 @@ export async function checkCanMarkDelivered(
     }
   }
 
-  if (shipment.status !== 'SHIPPED' && shipment.status !== 'IN_TRANSIT') {
-    blockers.push(`Shipment status "${shipment.status}" cannot transition to DELIVERED`)
+  if (shipment.status !== 'shipped' && shipment.status !== 'in_transit') {
+    blockers.push(`Shipment status "${shipment.status}" cannot transition to delivered`)
   }
 
   return {
