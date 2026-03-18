@@ -23,6 +23,7 @@
     "@nzila/db": "workspace:*",
     "@nzila/blob": "workspace:*",
     "@nzila/os-core": "workspace:*",
+    "@nzila/platform-contracts": "workspace:*",
     "@nzila/platform-policy-engine": "workspace:*",
     "@nzila/pricing-engine": "workspace:*",
     "@nzila/shop-quoter": "workspace:*",

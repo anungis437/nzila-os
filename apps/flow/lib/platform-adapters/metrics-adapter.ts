@@ -59,7 +59,7 @@ export const metricsAdapter: MetricsContract = {
         .where(
           and(
             eq(flowProductionJobs.orgId, orgId),
-            eq(flowProductionJobs.status, 'IN_PRODUCTION'),
+            eq(flowProductionJobs.status, 'in_production'),
           ),
         )
 

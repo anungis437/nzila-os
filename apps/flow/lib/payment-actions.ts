@@ -69,8 +69,9 @@ export async function recordPaymentAction(
       type: 'record_payment',
       order_id: input.quoteId, // maps to order context
       amount: input.amount,
-      method: input.method ?? 'bank_transfer',
-      reference: input.reference,
+      currency: 'CAD' as const,
+      method: 'BANK_TRANSFER' as const,
+      reference: input.providerRef,
       org_id: ctx.orgId,
       actor_id: ctx.actorId,
     })

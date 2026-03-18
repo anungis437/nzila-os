@@ -17,34 +17,27 @@ import { onFlowEvent } from './emitter'
 // Must match the pgEnum values in packages/db/src/schema/flow/enums.ts
 const DB_EVENT_TYPES = new Set([
   'quote_created',
-  'quote_updated',
   'quote_sent',
   'quote_accepted',
   'quote_revision_requested',
   'order_created',
-  'order_confirmed',
   'deposit_required',
   'payment_received',
-  'payment_confirmed',
   'po_created',
   'po_sent',
   'po_confirmed',
-  'po_cancelled',
   'production_started',
   'production_completed',
-  'production_blocked',
   'shipment_created',
-  'shipment_shipped',
-  'shipment_delivered',
-  'order_shipped',
   'order_delivered',
-  'payment_gate_blocked',
 ] as const)
+
+type DbEventType = typeof DB_EVENT_TYPES extends Set<infer T> ? T : never
 
 // ── Persist a single event ─────────────────────────────────────────────────
 
 export async function persistFlowEvent(event: FlowEvent): Promise<boolean> {
-  if (!DB_EVENT_TYPES.has(event.type as typeof DB_EVENT_TYPES extends Set<infer T> ? T : never)) {
+  if (!DB_EVENT_TYPES.has(event.type as DbEventType)) {
     logger.debug('Skipping event persistence — type not in DB enum', {
       eventType: event.type,
       entityId: event.entity_id,
@@ -57,7 +50,7 @@ export async function persistFlowEvent(event: FlowEvent): Promise<boolean> {
     orgId: event.org_id,
     entityType: event.entity_type,
     entityId: event.entity_id,
-    eventType: event.type as typeof DB_EVENT_TYPES extends Set<infer T> ? T : never,
+    eventType: event.type as DbEventType,
     actorId: event.actor_id,
     payloadJson: event.metadata,
     createdAt: event.timestamp,

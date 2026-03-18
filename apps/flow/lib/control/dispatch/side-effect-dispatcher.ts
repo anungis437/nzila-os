@@ -15,6 +15,7 @@ export interface SideEffectRequest {
   entity_id: string
   org_id: string
   payload: Record<string, unknown>
+  metadata?: Record<string, unknown>
 }
 
 export interface SideEffectResult {

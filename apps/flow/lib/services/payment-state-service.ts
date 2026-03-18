@@ -75,9 +75,9 @@ export async function getPaymentSnapshotForOrder(
   const order = await orderRepo.findById(orderId, orgId)
   if (!order) return null
 
-  const payments = await paymentRepo.findByOrderId(orderId, orgId)
-  const totalPaid = payments.reduce((sum, p) => sum + Number(p.amount ?? 0), 0)
-  const totalDue = Number(order.totalAmount ?? 0)
+  const payments = await paymentRepo.findByOrder(orderId, orgId)
+  const totalPaid = payments.reduce((sum: number, p: { amount?: string | number | null }) => sum + Number(p.amount ?? 0), 0)
+  const totalDue = Number(order.total ?? 0)
 
   // Check if quote-level requirement exists (via quoteId on the order)
   let depositRequired = false
@@ -104,7 +104,7 @@ export async function getPaymentSnapshotForOrder(
     deposit_amount: depositAmount,
     deposit_percent: depositPercent,
     due_before_production: dueBeforeProduction,
-    events: payments.map(p => ({
+    events: payments.map((p: { id: string; method?: string | null; amount?: string | number | null; createdAt?: Date | null }) => ({
       id: p.id,
       event_type: p.method ?? 'payment',
       amount: Number(p.amount ?? 0),

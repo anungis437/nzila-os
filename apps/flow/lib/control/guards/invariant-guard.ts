@@ -12,7 +12,7 @@ import { quoteRepo, orderRepo, customerRepo, vendorRepo, purchaseOrderRepo, prod
 
 export async function checkEntityExists(
   entityType: string,
-  entityId: string,
+  targetId: string,
   orgId: string,
 ): Promise<InvariantCheckResult> {
   const violations: string[] = []
@@ -23,9 +23,9 @@ export async function checkEntityExists(
     return { valid: false, violations }
   }
 
-  const entity = await repo.findById(entityId, orgId)
+  const entity = await repo.findById(targetId, orgId)
   if (!entity) {
-    violations.push(`${entityType} "${entityId}" not found in org "${orgId}"`)
+    violations.push(`${entityType} "${targetId}" not found in org "${orgId}"`)
   }
 
   return { valid: violations.length === 0, violations }

@@ -70,7 +70,7 @@ function makeCtx(correlationId?: string): CommandContext {
 interface StepOutcome {
   step: string
   success: boolean
-  entityId?: string
+  entity_id?: string
   statusAfter?: string
   error?: string
 }
@@ -83,7 +83,7 @@ async function step(name: string, fn: () => Promise<CommandResult>): Promise<Com
     outcomes.push({
       step: name,
       success: result.success,
-      entityId: result.entity_id,
+      entity_id: result.entity_id,
       statusAfter: result.status_after,
       error: result.errors?.map(e => e.message).join('; '),
     })
@@ -512,7 +512,7 @@ async function seedFlowStaging(): Promise<void> {
     outcomes: outcomes.map(o => ({
       step: o.step,
       ok: o.success,
-      entity: o.entityId ?? '—',
+      entity: o.entity_id ?? '—',
       status: o.statusAfter ?? '—',
       error: o.error ?? null,
     })),

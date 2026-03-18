@@ -474,7 +474,7 @@ describe('Control Layer Errors', () => {
     const err = new EntityNotFoundError('order', 'fake-id-123')
     expect(err.code).toBe('ENTITY_NOT_FOUND')
     expect(err.entityType).toBe('order')
-    expect(err.entityId).toBe('fake-id-123')
+    expect(err.message).toBe('order "fake-id-123" not found')
   })
 
   it('PermissionDeniedError carries action context', () => {

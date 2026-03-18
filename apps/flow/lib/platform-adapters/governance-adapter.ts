@@ -41,7 +41,7 @@ export const governanceAdapter: GovernanceContract = {
         .where(
           and(
             eq(commerceOrders.orgId, orgId),
-            eq(commerceOrders.status, 'IN_PRODUCTION'),
+            eq(commerceOrders.status, 'fulfillment'),
             eq(commerceOrders.paymentStatus, 'PENDING'),
           ),
         )
