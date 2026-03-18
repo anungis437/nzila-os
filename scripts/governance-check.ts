@@ -14,7 +14,6 @@ const __dirname = path.dirname(__filename)
 const ROOT = path.resolve(__dirname, '..')
 
 const TARGET_APPS = [
-  'shop-quoter',
   'cfo',
   'partners',
   'web',
