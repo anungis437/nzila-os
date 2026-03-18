@@ -1,5 +1,5 @@
 {
-  "capturedAt": "2026-03-17T08:10:29.906Z",
+  "capturedAt": "2026-03-18T06:15:02.810Z",
   "schemaDir": "packages/db/src/schema",
   "files": {
     "packages/db/src/schema/agri.ts": {
@@ -115,8 +115,8 @@
       "size": 9523
     },
     "packages/db/src/schema/orgs.ts": {
-      "hash": "509ec90eb31fe9140b67be796c499c3f801bf737a137a23a66f1c87756a62858",
-      "size": 3389
+      "hash": "7d8f6bb812d44e44a133613d1c51a285104e36f8c4de61b812bc59cb82757b71",
+      "size": 3454
     },
     "packages/db/src/schema/partners.ts": {
       "hash": "e5543350511497cec07b80c2c8252a3ac90eb7709736adda9ca504ec4233d578",
@@ -147,5 +147,5 @@
       "size": 21915
     }
   },
-  "compositeHash": "08c4546cbed1e19051d21bfdd544cc502dced254dceac6408a9ecd59549ca226"
+  "compositeHash": "fbf3e0f8bdac389e7e6f92344f0f02b9a789c7389ff36454d5b24edd7728723c"
 }
