@@ -45,6 +45,7 @@ export const orgMemberStatusEnum = pgEnum('org_member_status', [
 
 export const orgs = pgTable('orgs', {
   id: uuid('id').primaryKey().defaultRandom(),
+  clerkOrgId: varchar('clerk_org_id', { length: 255 }).unique(),
   legalName: text('legal_name').notNull(),
   jurisdiction: varchar('jurisdiction', { length: 10 }).notNull(), // e.g. CA-ON
   incorporationNumber: text('incorporation_number'),

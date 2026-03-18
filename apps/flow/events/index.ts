@@ -20,3 +20,14 @@ export {
   emitProductionEvent,
   onFlowEvent,
 } from '../lib/events/emitter'
+
+export {
+  persistFlowEvent,
+  initEventPersistence,
+} from '../lib/events/persist'
+
+export {
+  queryFlowEvents,
+  getEntityTimeline,
+  type EventQueryFilter,
+} from '../lib/events/event-queries'

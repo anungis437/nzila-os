@@ -29,4 +29,11 @@ export async function register() {
   } catch {
     if (process.env.NODE_ENV === 'production') throw new Error('Boot invariants failed')
   }
+
+  try {
+    const { initEventPersistence } = await import('@/lib/events/persist')
+    initEventPersistence()
+  } catch {
+    // Non-critical — events still work in-process without persistence
+  }
 }

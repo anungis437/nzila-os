@@ -7,29 +7,7 @@ import {
   updateSupplier,
   deleteSupplier,
 } from '@nzila/commerce-db'
-import { auth } from '@clerk/nextjs/server'
-import type { CommerceDbContext, CommerceReadContext } from '@nzila/commerce-db'
-
-// Helper to construct context from Clerk auth
-async function getDbContext(): Promise<CommerceDbContext> {
-  const { userId, orgId } = await auth()
-  if (!userId || !orgId) {
-    throw new Error('Unauthorized')
-  }
-  return {
-    orgId: orgId,
-    actorId: userId,
-    actorRole: 'user',
-  }
-}
-
-async function getReadContext(): Promise<CommerceReadContext> {
-  const { userId, orgId } = await auth()
-  if (!userId || !orgId) {
-    throw new Error('Unauthorized')
-  }
-  return { orgId: orgId }
-}
+import { getDbContext, getReadContext } from '@/lib/clerk-org-resolver'
 
 // ── Read Actions ──────────────────────────────────────────────────────────
 

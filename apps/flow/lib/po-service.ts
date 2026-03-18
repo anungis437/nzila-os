@@ -15,6 +15,9 @@ import {
   commerceStockMovements,
 } from '@nzila/db'
 import { logger } from './logger'
+import { attemptPOTransition } from './workflows/po-workflow'
+import { InvalidWorkflowTransitionError } from './workflows/errors'
+import type { PurchaseOrderStatus as WorkflowPOStatus } from '@/domain/entities'
 import { ZohoBooksClient } from './zoho/books-client'
 import type { ZohoPurchaseOrder, ZohoPurchaseOrderLine } from './zoho/types'
 import type { OrgCommerceSettings } from '@nzila/platform-commerce-org/types'
@@ -356,8 +359,10 @@ export async function sendPurchaseOrder(poId: string): Promise<POWithLines | nul
   const existing = await getPurchaseOrder(poId)
   if (!existing) return null
 
-  if (existing.po.status !== 'draft') {
-    throw new Error(`Cannot send PO in ${existing.po.status} status`)
+  const current = existing.po.status.toUpperCase() as WorkflowPOStatus
+  const result = attemptPOTransition(current, 'SENT')
+  if (!result.ok) {
+    throw new InvalidWorkflowTransitionError('purchase-order', current, 'SENT')
   }
 
   await db
@@ -378,8 +383,10 @@ export async function cancelPurchaseOrder(poId: string): Promise<POWithLines | n
   const existing = await getPurchaseOrder(poId)
   if (!existing) return null
 
-  if (['received', 'cancelled'].includes(existing.po.status)) {
-    throw new Error(`Cannot cancel PO in ${existing.po.status} status`)
+  const current = existing.po.status.toUpperCase() as WorkflowPOStatus
+  const result = attemptPOTransition(current, 'CANCELLED')
+  if (!result.ok) {
+    throw new InvalidWorkflowTransitionError('purchase-order', current, 'CANCELLED')
   }
 
   await db

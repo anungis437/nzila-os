@@ -22,6 +22,9 @@ import {
   commerceStockMovements,
 } from '@nzila/db'
 import { logger } from './logger'
+import { attemptOrderTransition } from './workflows/order-workflow'
+import { InvalidWorkflowTransitionError } from './workflows/errors'
+import type { OrderStatus as WorkflowOrderStatus } from '@/domain/entities'
 import type { OrgCommerceSettings } from '@nzila/platform-commerce-org/types'
 import { SHOPMOICA_SETTINGS } from '@nzila/platform-commerce-org/defaults'
 import { calculateTaxes } from '@nzila/platform-commerce-org/pricing'
@@ -274,11 +277,17 @@ export async function confirmOrder(orderId: string): Promise<typeof commerceOrde
   const [order] = await db
     .select()
     .from(commerceOrders)
-    .where(and(eq(commerceOrders.id, orderId), eq(commerceOrders.status, 'created')))
+    .where(eq(commerceOrders.id, orderId))
     .limit(1)
 
   if (!order) {
-    throw new Error('Order not found or cannot be confirmed')
+    throw new Error('Order not found')
+  }
+
+  const current = order.status.toUpperCase() as WorkflowOrderStatus
+  const result = attemptOrderTransition(current, 'CONFIRMED')
+  if (!result.ok) {
+    throw new InvalidWorkflowTransitionError('order', current, 'CONFIRMED')
   }
 
   const [updated] = await db
@@ -299,11 +308,18 @@ export async function startFulfillment(orderId: string): Promise<typeof commerce
   const [order] = await db
     .select()
     .from(commerceOrders)
-    .where(and(eq(commerceOrders.id, orderId), eq(commerceOrders.status, 'confirmed')))
+    .where(eq(commerceOrders.id, orderId))
     .limit(1)
 
   if (!order) {
-    throw new Error('Order not found or cannot start fulfillment')
+    throw new Error('Order not found')
+  }
+
+  // 'fulfillment' is the legacy DB value; map to the closest workflow status
+  const current = order.status.toUpperCase() as WorkflowOrderStatus
+  const result = attemptOrderTransition(current, 'IN_PRODUCTION')
+  if (!result.ok) {
+    throw new InvalidWorkflowTransitionError('order', current, 'IN_PRODUCTION')
   }
 
   const [updated] = await db
@@ -327,11 +343,17 @@ export async function markOrderShipped(
   const [order] = await db
     .select()
     .from(commerceOrders)
-    .where(and(eq(commerceOrders.id, orderId), eq(commerceOrders.status, 'fulfillment')))
+    .where(eq(commerceOrders.id, orderId))
     .limit(1)
 
   if (!order) {
-    throw new Error('Order not found or cannot be marked as shipped')
+    throw new Error('Order not found')
+  }
+
+  const current = order.status.toUpperCase() as WorkflowOrderStatus
+  const result = attemptOrderTransition(current, 'SHIPPED')
+  if (!result.ok) {
+    throw new InvalidWorkflowTransitionError('order', current, 'SHIPPED')
   }
 
   const metadata = { ...(order.metadata as object), shipping: trackingInfo }
@@ -355,16 +377,18 @@ export async function completeOrder(orderId: string): Promise<typeof commerceOrd
   const [order] = await db
     .select()
     .from(commerceOrders)
-    .where(
-      and(
-        eq(commerceOrders.id, orderId),
-        or(eq(commerceOrders.status, 'shipped'), eq(commerceOrders.status, 'delivered')),
-      ),
-    )
+    .where(eq(commerceOrders.id, orderId))
     .limit(1)
 
   if (!order) {
-    throw new Error('Order not found or cannot be completed')
+    throw new Error('Order not found')
+  }
+
+  const current = order.status.toUpperCase() as WorkflowOrderStatus
+  // 'completed' maps to CLOSED in the new workflow
+  const result = attemptOrderTransition(current, 'CLOSED')
+  if (!result.ok) {
+    throw new InvalidWorkflowTransitionError('order', current, 'CLOSED')
   }
 
   const [updated] = await db
@@ -385,11 +409,17 @@ export async function cancelOrder(orderId: string, reason?: string): Promise<typ
   const [order] = await db
     .select()
     .from(commerceOrders)
-    .where(and(eq(commerceOrders.id, orderId), ne(commerceOrders.status, 'completed')))
+    .where(eq(commerceOrders.id, orderId))
     .limit(1)
 
   if (!order) {
-    throw new Error('Order not found or already completed')
+    throw new Error('Order not found')
+  }
+
+  const current = order.status.toUpperCase() as WorkflowOrderStatus
+  const result = attemptOrderTransition(current, 'CANCELLED')
+  if (!result.ok) {
+    throw new InvalidWorkflowTransitionError('order', current, 'CANCELLED')
   }
 
   // Release any allocations

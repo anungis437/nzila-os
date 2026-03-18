@@ -3,6 +3,7 @@
 import { useState, useEffect } from 'react'
 import Link from 'next/link'
 import { useRouter } from 'next/navigation'
+import { useLocale } from 'next-intl'
 import {
   ArrowLeftIcon,
   CheckIcon,
@@ -17,6 +18,8 @@ interface Supplier {
 
 export default function NewProductPage() {
   const router = useRouter()
+  const locale = useLocale()
+  const base = `/${locale}/dashboard`
   const [isSubmitting, setIsSubmitting] = useState(false)
   const [error, setError] = useState<string | null>(null)
   const [suppliers, setSuppliers] = useState<Supplier[]>([])
@@ -52,7 +55,7 @@ export default function NewProductPage() {
         weightGrams: formData.get('weight') ? parseInt(formData.get('weight') as string) : null,
         dimensions: formData.get('dimensions') as string || null,
       })
-      router.push('/products')
+      router.push(`${base}/products`)
     } catch (err) {
       setError(err instanceof Error ? err.message : 'Failed to create product')
       setIsSubmitting(false)
@@ -64,8 +67,8 @@ export default function NewProductPage() {
       {/* Breadcrumb */}
       <div className="mb-6">
         <Link
-          href="/products"
-          className="inline-flex items-center gap-2 text-sm text-gray-500 hover:text-purple-600 transition"
+          href={`${base}/products`}
+          className="inline-flex items-center gap-2 text-sm text-gray-500 hover:text-electric transition"
         >
           <ArrowLeftIcon className="h-4 w-4" />
           Back to Products
@@ -74,7 +77,7 @@ export default function NewProductPage() {
 
       {/* Header */}
       <div className="mb-8">
-        <h1 className="text-2xl font-bold text-gray-900">Add New Product</h1>
+        <h1 className="text-2xl font-bold text-navy">Add New Product</h1>
         <p className="text-sm text-gray-500 mt-1">
           Create a new product in your inventory. This will be synced to Zoho Inventory.
         </p>
@@ -89,7 +92,7 @@ export default function NewProductPage() {
         
         {/* Basic Info */}
         <div className="bg-white rounded-xl border border-gray-200 p-6">
-          <h2 className="text-lg font-semibold text-gray-900 mb-4">Basic Information</h2>
+          <h2 className="text-lg font-semibold text-navy mb-4">Basic Information</h2>
           <div className="grid grid-cols-2 gap-4">
             <div className="col-span-2">
               <label htmlFor="name" className="block text-sm font-medium text-gray-700 mb-1">
@@ -100,7 +103,7 @@ export default function NewProductPage() {
                 id="name"
                 name="name"
                 required
-                className="w-full px-4 py-2.5 text-sm border border-gray-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-purple-500 focus:border-transparent"
+                className="w-full px-4 py-2.5 text-sm border border-gray-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-electric/30 focus:border-electric"
                 placeholder="e.g., Premium Dark Chocolate Bar"
               />
             </div>
@@ -113,7 +116,7 @@ export default function NewProductPage() {
                 id="sku"
                 name="sku"
                 required
-                className="w-full px-4 py-2.5 text-sm border border-gray-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-purple-500 focus:border-transparent"
+                className="w-full px-4 py-2.5 text-sm border border-gray-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-electric/30 focus:border-electric"
                 placeholder="e.g., CHOC-DARK-001"
               />
             </div>
@@ -124,7 +127,7 @@ export default function NewProductPage() {
               <select
                 id="category"
                 name="category"
-                className="w-full px-4 py-2.5 text-sm border border-gray-300 rounded-lg bg-white focus:outline-none focus:ring-2 focus:ring-purple-500 focus:border-transparent"
+                className="w-full px-4 py-2.5 text-sm border border-gray-300 rounded-lg bg-white focus:outline-none focus:ring-2 focus:ring-electric/30 focus:border-electric"
               >
                 <option value="">Select category</option>
                 <option value="Chocolates">Chocolates</option>
@@ -142,7 +145,7 @@ export default function NewProductPage() {
                 id="description"
                 name="description"
                 rows={3}
-                className="w-full px-4 py-2.5 text-sm border border-gray-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-purple-500 focus:border-transparent resize-none"
+                className="w-full px-4 py-2.5 text-sm border border-gray-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-electric/30 focus:border-electric resize-none"
                 placeholder="Product description..."
               />
             </div>
@@ -151,7 +154,7 @@ export default function NewProductPage() {
 
         {/* Pricing */}
         <div className="bg-white rounded-xl border border-gray-200 p-6">
-          <h2 className="text-lg font-semibold text-gray-900 mb-4">Pricing</h2>
+          <h2 className="text-lg font-semibold text-navy mb-4">Pricing</h2>
           <div className="grid grid-cols-2 gap-4">
             <div>
               <label htmlFor="unitCost" className="block text-sm font-medium text-gray-700 mb-1">
@@ -166,7 +169,7 @@ export default function NewProductPage() {
                   required
                   step="0.01"
                   min="0"
-                  className="w-full pl-8 pr-4 py-2.5 text-sm border border-gray-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-purple-500 focus:border-transparent"
+                  className="w-full pl-8 pr-4 py-2.5 text-sm border border-gray-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-electric/30 focus:border-electric"
                   placeholder="0.00"
                 />
               </div>
@@ -184,7 +187,7 @@ export default function NewProductPage() {
                   required
                   step="0.01"
                   min="0"
-                  className="w-full pl-8 pr-4 py-2.5 text-sm border border-gray-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-purple-500 focus:border-transparent"
+                  className="w-full pl-8 pr-4 py-2.5 text-sm border border-gray-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-electric/30 focus:border-electric"
                   placeholder="0.00"
                 />
               </div>
@@ -194,7 +197,7 @@ export default function NewProductPage() {
 
         {/* Inventory */}
         <div className="bg-white rounded-xl border border-gray-200 p-6">
-          <h2 className="text-lg font-semibold text-gray-900 mb-4">Supplier</h2>
+          <h2 className="text-lg font-semibold text-navy mb-4">Supplier</h2>
           <div>
             <label htmlFor="supplierId" className="block text-sm font-medium text-gray-700 mb-1">
               Preferred Supplier
@@ -202,7 +205,7 @@ export default function NewProductPage() {
             <select
               id="supplierId"
               name="supplierId"
-              className="w-full px-4 py-2.5 text-sm border border-gray-300 rounded-lg bg-white focus:outline-none focus:ring-2 focus:ring-purple-500 focus:border-transparent"
+              className="w-full px-4 py-2.5 text-sm border border-gray-300 rounded-lg bg-white focus:outline-none focus:ring-2 focus:ring-electric/30 focus:border-electric"
             >
               <option value="">Select supplier</option>
               {suppliers.map((supplier) => (
@@ -219,7 +222,7 @@ export default function NewProductPage() {
 
         {/* Physical Properties */}
         <div className="bg-white rounded-xl border border-gray-200 p-6">
-          <h2 className="text-lg font-semibold text-gray-900 mb-4">Physical Properties</h2>
+          <h2 className="text-lg font-semibold text-navy mb-4">Physical Properties</h2>
           <div className="grid grid-cols-2 gap-4">
             <div>
               <label htmlFor="weight" className="block text-sm font-medium text-gray-700 mb-1">
@@ -230,7 +233,7 @@ export default function NewProductPage() {
                 id="weight"
                 name="weight"
                 min="0"
-                className="w-full px-4 py-2.5 text-sm border border-gray-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-purple-500 focus:border-transparent"
+                className="w-full px-4 py-2.5 text-sm border border-gray-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-electric/30 focus:border-electric"
                 placeholder="e.g., 100"
               />
             </div>
@@ -242,7 +245,7 @@ export default function NewProductPage() {
                 type="text"
                 id="dimensions"
                 name="dimensions"
-                className="w-full px-4 py-2.5 text-sm border border-gray-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-purple-500 focus:border-transparent"
+                className="w-full px-4 py-2.5 text-sm border border-gray-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-electric/30 focus:border-electric"
                 placeholder="e.g., 15cm x 8cm x 2cm"
               />
             </div>
@@ -252,15 +255,15 @@ export default function NewProductPage() {
         {/* Actions */}
         <div className="flex items-center justify-end gap-3 pt-4">
           <Link
-            href="/products"
-            className="px-6 py-2.5 text-sm font-medium text-gray-700 bg-white border border-gray-300 rounded-lg hover:bg-gray-50 transition"
+            href={`${base}/products`}
+            className="px-6 py-2.5 text-sm font-medium text-gray-700 bg-white border border-gray-300 rounded-lg hover:bg-electric/[0.02]/60 transition"
           >
             Cancel
           </Link>
           <button
             type="submit"
             disabled={isSubmitting}
-            className="inline-flex items-center gap-2 px-6 py-2.5 bg-purple-600 text-white text-sm font-semibold rounded-lg hover:bg-purple-700 transition shadow-sm disabled:opacity-50 disabled:cursor-not-allowed"
+            className="inline-flex items-center gap-2 px-6 py-2.5 bg-electric text-white text-sm font-semibold rounded-lg hover:bg-electric-light transition shadow-sm disabled:opacity-50 disabled:cursor-not-allowed"
           >
             {isSubmitting ? (
               <>

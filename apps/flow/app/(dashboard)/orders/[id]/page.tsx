@@ -1,17 +1,17 @@
 import Link from 'next/link'
 import { notFound } from 'next/navigation'
+import { getLocale } from 'next-intl/server'
 import {
   ArrowLeftIcon,
-  TruckIcon,
   ClockIcon,
   CheckCircleIcon,
-  CubeIcon,
   UserIcon,
   MapPinIcon,
   PrinterIcon,
 } from '@heroicons/react/24/outline'
 import { getOrderAction, getOrderLinesAction } from '@/app/actions/orders'
 import { getCustomerAction } from '@/app/actions/customers'
+import { OrderActions } from './order-actions'
 
 /** Order status badge colours. */
 const statusColors: Record<string, string> = {
@@ -30,15 +30,19 @@ const statusSteps = ['created', 'confirmed', 'fulfillment', 'shipped', 'delivere
 
 // ── Page Component ──────────────────────────────────────────────────────────
 
-export default async function OrderDetailPage({ params }: { params: { id: string } }) {
-  const order = await getOrderAction(params.id)
+export default async function OrderDetailPage({ params }: { params: Promise<{ id: string }> }) {
+  const { id } = await params
+  const locale = await getLocale()
+  const base = `/${locale}/dashboard`
+
+  const order = await getOrderAction(id)
   if (!order) {
     notFound()
   }
 
   // Fetch related data
   const [linesResult, customer] = await Promise.all([
-    getOrderLinesAction(params.id),
+    getOrderLinesAction(id),
     getCustomerAction(order.customerId),
   ])
 
@@ -71,15 +75,15 @@ export default async function OrderDetailPage({ params }: { params: { id: string
     }
   }
 
-  const nextAction = getNextAction()
+  const _nextAction = getNextAction()
 
   return (
     <div className="p-8 max-w-6xl mx-auto">
       {/* Breadcrumb */}
       <div className="mb-6">
         <Link
-          href="/orders"
-          className="inline-flex items-center gap-2 text-sm text-gray-500 hover:text-purple-600 transition"
+          href={`${base}/orders`}
+          className="inline-flex items-center gap-2 text-sm text-gray-500 hover:text-electric transition"
         >
           <ArrowLeftIcon className="h-4 w-4" />
           Back to Orders
@@ -90,13 +94,13 @@ export default async function OrderDetailPage({ params }: { params: { id: string
       <div className="flex items-start justify-between mb-8">
         <div>
           <div className="flex items-center gap-3 mb-2">
-            <h1 className="text-2xl font-bold text-gray-900">{order.ref}</h1>
+            <h1 className="text-2xl font-bold text-navy">{order.ref}</h1>
             <span className={`inline-flex px-2.5 py-0.5 text-xs font-semibold rounded-full capitalize ${statusColors[order.status] ?? 'bg-gray-100 text-gray-600'}`}>
               {order.status.replace(/_/g, ' ')}
             </span>
           </div>
           <p className="text-sm text-gray-500">
-            Customer: <Link href={`/clients/${order.customerId}`} className="text-purple-600 hover:underline">{customer?.name ?? 'Unknown'}</Link>
+            Customer: <Link href={`${base}/clients/${order.customerId}`} className="text-electric hover:underline">{customer?.name ?? 'Unknown'}</Link>
             · Created: <span className="font-medium text-gray-700">{new Date(order.createdAt).toLocaleDateString()}</span>
           </p>
         </div>
@@ -105,14 +109,7 @@ export default async function OrderDetailPage({ params }: { params: { id: string
             <PrinterIcon className="h-4 w-4" />
             Print
           </button>
-          {nextAction && (
-            <button className="inline-flex items-center gap-2 px-4 py-2.5 bg-purple-600 text-white text-sm font-semibold rounded-lg hover:bg-purple-700 transition shadow-sm">
-              {order.status === 'fulfillment' && <CubeIcon className="h-4 w-4" />}
-              {order.status === 'shipped' && <TruckIcon className="h-4 w-4" />}
-              {order.status === 'delivered' && <CheckCircleIcon className="h-4 w-4" />}
-              {nextAction.label}
-            </button>
-          )}
+          <OrderActions orderId={id} status={order.status} />
         </div>
       </div>
 
@@ -128,14 +125,14 @@ export default async function OrderDetailPage({ params }: { params: { id: string
             return (
               <div key={step} className="flex items-center">
                 <div className="flex flex-col items-center">
-                  <div className={`h-8 w-8 rounded-full flex items-center justify-center ${isComplete ? 'bg-green-500' : isCurrent ? 'bg-purple-500' : 'bg-gray-200'}`}>
+                  <div className={`h-8 w-8 rounded-full flex items-center justify-center ${isComplete ? 'bg-green-500' : isCurrent ? 'bg-electric' : 'bg-gray-200'}`}>
                     {isComplete ? (
                       <CheckCircleIcon className="h-5 w-5 text-white" />
                     ) : (
                       <span className={`text-xs font-semibold ${isCurrent ? 'text-white' : 'text-gray-500'}`}>{index + 1}</span>
                     )}
                   </div>
-                  <span className={`text-xs mt-1 capitalize ${isCurrent ? 'text-purple-600 font-semibold' : isComplete ? 'text-green-600' : 'text-gray-400'}`}>
+                  <span className={`text-xs mt-1 capitalize ${isCurrent ? 'text-electric font-semibold' : isComplete ? 'text-green-600' : 'text-gray-400'}`}>
                     {step}
                   </span>
                 </div>
@@ -156,7 +153,7 @@ export default async function OrderDetailPage({ params }: { params: { id: string
           {/* Line Items */}
           <div className="bg-white rounded-xl border border-gray-200 overflow-hidden">
             <div className="px-6 py-4 border-b border-gray-100">
-              <h2 className="text-lg font-semibold text-gray-900">Order Items</h2>
+              <h2 className="text-lg font-semibold text-navy">Order Items</h2>
             </div>
             <table className="w-full text-sm">
               <thead>
@@ -198,7 +195,7 @@ export default async function OrderDetailPage({ params }: { params: { id: string
           {/* Notes */}
           {order.notes && (
             <div className="bg-white rounded-xl border border-gray-200 p-6">
-              <h2 className="text-lg font-semibold text-gray-900 mb-3">Order Notes</h2>
+              <h2 className="text-lg font-semibold text-navy mb-3">Order Notes</h2>
               <p className="text-sm text-gray-600 whitespace-pre-wrap">{order.notes}</p>
             </div>
           )}
@@ -211,11 +208,11 @@ export default async function OrderDetailPage({ params }: { params: { id: string
             <h3 className="text-sm font-semibold text-gray-500 uppercase tracking-wide mb-4">Customer</h3>
             <div className="space-y-4">
               <div className="flex items-start gap-3">
-                <div className="h-9 w-9 bg-purple-100 rounded-lg flex items-center justify-center shrink-0">
-                  <UserIcon className="h-5 w-5 text-purple-600" />
+                <div className="h-9 w-9 bg-electric/10 rounded-lg flex items-center justify-center shrink-0">
+                  <UserIcon className="h-5 w-5 text-electric" />
                 </div>
                 <div>
-                  <Link href={`/clients/${order.customerId}`} className="text-sm font-medium text-purple-600 hover:underline">
+                  <Link href={`${base}/clients/${order.customerId}`} className="text-sm font-medium text-electric hover:underline">
                     {customer?.name ?? 'Unknown'}
                   </Link>
                   <p className="text-xs text-gray-500">{customer?.email ?? '—'}</p>

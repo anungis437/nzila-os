@@ -85,7 +85,7 @@ export default function ImportPage() {
 
   return (
     <div className="p-8 max-w-4xl mx-auto">
-      <h1 className="text-2xl font-bold text-gray-900 mb-1">Legacy Import</h1>
+      <h1 className="text-2xl font-bold text-navy mb-1">Legacy Import</h1>
       <p className="text-sm text-gray-500 mb-8">
         Migrate data from ShopMoiÇa V1 into the NzilaOS commerce engine. Paste legacy JSON records below.
       </p>
@@ -113,7 +113,7 @@ export default function ImportPage() {
           value={jsonInput}
           onChange={(e) => setJsonInput(e.target.value)}
           rows={12}
-          className="w-full px-4 py-3 border border-gray-300 rounded-lg text-sm font-mono focus:ring-2 focus:ring-purple-500 focus:border-transparent resize-y"
+          className="w-full px-4 py-3 border border-gray-300 rounded-lg text-sm font-mono focus:ring-2 focus:ring-electric/30 focus:border-electric resize-y"
           placeholder={`[\n  {\n    "id": "abc-123",\n    "client_id": "client-001",\n    "title": "Holiday Gift Boxes",\n    "box_count": 50,\n    "budget_range": "premium",\n    "theme": "holiday",\n    "notes": null,\n    "status": "quoted",\n    "created_by": "user-1",\n    "created_at": "2025-11-01T10:00:00Z",\n    "updated_at": "2025-11-15T14:30:00Z"\n  }\n]`}
         />
 
@@ -134,7 +134,7 @@ export default function ImportPage() {
           <button
             onClick={handleValidate}
             disabled={!jsonInput.trim() || status === 'importing'}
-            className="inline-flex items-center gap-2 px-4 py-2.5 text-sm font-medium text-gray-700 bg-white border border-gray-300 rounded-lg hover:bg-gray-50 transition disabled:opacity-50 disabled:cursor-not-allowed"
+            className="inline-flex items-center gap-2 px-4 py-2.5 text-sm font-medium text-gray-700 bg-white border border-gray-300 rounded-lg hover:bg-electric/[0.02]/60 transition disabled:opacity-50 disabled:cursor-not-allowed"
           >
             <ExclamationTriangleIcon className="h-4 w-4" />
             Validate
@@ -142,7 +142,7 @@ export default function ImportPage() {
           <button
             onClick={handleImport}
             disabled={!jsonInput.trim() || status === 'importing'}
-            className="inline-flex items-center gap-2 px-4 py-2.5 text-sm font-semibold text-white bg-purple-600 rounded-lg hover:bg-purple-700 transition shadow-sm disabled:opacity-50 disabled:cursor-not-allowed"
+            className="inline-flex items-center gap-2 px-4 py-2.5 text-sm font-semibold text-white bg-electric rounded-lg hover:bg-electric-light transition shadow-sm disabled:opacity-50 disabled:cursor-not-allowed"
           >
             {status === 'importing' ? (
               <ArrowPathIcon className="h-4 w-4 animate-spin" />
@@ -157,11 +157,11 @@ export default function ImportPage() {
       {/* Results */}
       {result && (
         <section className="bg-white rounded-xl border border-gray-200 p-6">
-          <h2 className="text-lg font-semibold text-gray-900 mb-4">Import Results</h2>
+          <h2 className="text-lg font-semibold text-navy mb-4">Import Results</h2>
 
           <div className="grid grid-cols-2 md:grid-cols-4 gap-4 mb-6">
-            <div className="bg-gray-50 rounded-lg p-4 text-center">
-              <p className="text-2xl font-bold text-gray-900">{result.totalRecords}</p>
+            <div className="bg-gray-50/60 rounded-lg p-4 text-center">
+              <p className="text-2xl font-bold text-navy">{result.totalRecords}</p>
               <p className="text-xs text-gray-500">Total</p>
             </div>
             <div className="bg-green-50 rounded-lg p-4 text-center">

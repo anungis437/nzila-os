@@ -2,6 +2,9 @@
 
 /* ── Design Tokens ── */
 :root {
+  /* Font — override Tailwind v4 default --font-sans to use Poppins */
+  --font-sans: var(--font-poppins), system-ui, sans-serif;
+
   /* Brand — Navy / Electric / Gold / Emerald / Coral / Violet */
   --navy: 220 40% 9%;
   --navy-light: 220 30% 18%;
