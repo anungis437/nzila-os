@@ -66,6 +66,10 @@ const ENTITY_ID_EXCEPTIONS = [
   /AbrEntityType/,          // ABR audit domain type
   /'individual'.*'entity'/i, // enum values
   /partner.*entity/i,       // partner-entity domain references
+  /flowDomainEvents/,       // Drizzle ORM column accessor for domain event entity ref
+  /filter\.entityId/,       // domain event filter usage
+  /readonly\s+entityId/,    // domain event entity ref property (e.g. EntityNotFoundError)
+  /entityId\?\s*:/,         // optional domain event entity ref field (e.g. EventQueryFilter)
 ]
 
 function isExceptionLine(line: string): boolean {

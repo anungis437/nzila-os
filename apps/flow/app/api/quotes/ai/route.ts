@@ -1,4 +1,6 @@
 import { NextRequest, NextResponse } from 'next/server'
+import { authenticateUser, withRequestContext } from '@/lib/api-guards'
+import { withSpan } from '@nzila/os-core/telemetry'
 import {
   getSmartPricing,
   findSimilarProducts,
@@ -16,7 +18,12 @@ import {
  *   - "predict"         → predictConversion
  */
 export async function POST(request: NextRequest) {
-  const body = await request.json()
+  return withRequestContext(request, () =>
+    withSpan('api.quotes.ai', { 'http.method': 'POST' }, async () => {
+    const authResult = await authenticateUser()
+    if (!authResult.ok) return authResult.response
+
+    const body = await request.json()
   const action = body.action as string
 
   switch (action) {
@@ -62,4 +69,6 @@ export async function POST(request: NextRequest) {
     default:
       return NextResponse.json({ error: `Unknown action: ${action}` }, { status: 400 })
   }
+    }),
+  )
 }

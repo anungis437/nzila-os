@@ -126,7 +126,7 @@
     "import-in-the-middle": "^2.0.6",
     "input-otp": "^1.2.4",
     "ioredis": "^5.4.1",
-    "jspdf": "^4.2.0",
+    "jspdf": "^4.2.1",
     "lucide-react": "^0.576.0",
     "mammoth": "^1.8.0",
     "microsoft-cognitiveservices-speech-sdk": "^1.47.0",
