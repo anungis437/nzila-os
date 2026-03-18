@@ -32,7 +32,6 @@ COPY apps/nacp-exams/package.json ./apps/nacp-exams/
 COPY apps/orchestrator-api/package.json ./apps/orchestrator-api/
 COPY apps/partners/package.json ./apps/partners/
 COPY apps/pondu/package.json ./apps/pondu/
-COPY apps/shop-quoter/package.json ./apps/shop-quoter/
 COPY apps/trade/package.json ./apps/trade/
 COPY apps/union-eyes/package.json ./apps/union-eyes/
 COPY apps/web/package.json ./apps/web/
@@ -100,7 +99,6 @@ COPY packages/platform-rfp-generator/package.json ./packages/platform-rfp-genera
 COPY packages/pricing-engine/package.json ./packages/pricing-engine/
 COPY packages/qbo/package.json ./packages/qbo/
 COPY packages/scripts-book/package.json ./packages/scripts-book/
-COPY packages/shop-quoter/package.json ./packages/shop-quoter/
 COPY packages/tax/package.json ./packages/tax/
 COPY packages/tools-runtime/package.json ./packages/tools-runtime/
 COPY packages/trade-adapters/package.json ./packages/trade-adapters/
@@ -395,7 +393,6 @@ COPY apps/nacp-exams/package.json ./apps/nacp-exams/
 COPY apps/orchestrator-api/package.json ./apps/orchestrator-api/
 COPY apps/partners/package.json ./apps/partners/
 COPY apps/pondu/package.json ./apps/pondu/
-COPY apps/shop-quoter/package.json ./apps/shop-quoter/
 COPY apps/trade/package.json ./apps/trade/
 COPY apps/union-eyes/package.json ./apps/union-eyes/
 COPY apps/web/package.json ./apps/web/
@@ -463,7 +460,6 @@ COPY packages/platform-rfp-generator/package.json ./packages/platform-rfp-genera
 COPY packages/pricing-engine/package.json ./packages/pricing-engine/
 COPY packages/qbo/package.json ./packages/qbo/
 COPY packages/scripts-book/package.json ./packages/scripts-book/
-COPY packages/shop-quoter/package.json ./packages/shop-quoter/
 COPY packages/tax/package.json ./packages/tax/
 COPY packages/tools-runtime/package.json ./packages/tools-runtime/
 COPY packages/trade-adapters/package.json ./packages/trade-adapters/

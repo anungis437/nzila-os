@@ -13,8 +13,6 @@
       "@nzila/commerce-services": ["../../packages/commerce-services/src"],
       "@nzila/commerce-audit": ["../../packages/commerce-audit/src"],
       "@nzila/pricing-engine": ["../../packages/pricing-engine/src"],
-      "@nzila/shop-quoter": ["../../packages/shop-quoter/src/index.ts"],
-      "@nzila/shop-quoter/*": ["../../packages/shop-quoter/src/*"],
       "@nzila/blob": ["../../packages/blob/src"],
       "@nzila/ai-sdk": ["../../packages/ai-sdk/src"],
       "@nzila/ml-sdk": ["../../packages/ml-sdk/src"],

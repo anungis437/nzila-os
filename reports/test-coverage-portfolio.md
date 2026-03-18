@@ -24,7 +24,7 @@
 | nacp-exams | 1 | Smoke | Platform smoke |
 | partners | 1 | Smoke | Platform smoke |
 | platform-admin | 1 | Smoke | Platform smoke |
-| shop-quoter | 1 | Smoke | Platform smoke |
+| flow | 1 | Smoke | Platform smoke |
 | web | 1 | Smoke | Platform smoke |
 | zonga | 1 | Smoke | Platform smoke |
 | mobility | 0 | — | Pure UI, no server-side logic |

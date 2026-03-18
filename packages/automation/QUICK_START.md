@@ -321,7 +321,7 @@ Batch 1: Foundation Platforms
 Batch 2: Next.js Platforms (Parallel)
 - Duration: 10 weeks
 - Execution: Parallel
-- Platforms: abr-insights, congowave, cyberlearn, shop-quoter
+- Platforms: abr-insights, congowave, cyberlearn, flow
 
 ... (more batches)
 ```

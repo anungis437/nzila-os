@@ -24,7 +24,6 @@ const APPS = [
   'console',
   'partners',
   'cfo',
-  'shop-quoter',
   'nacp-exams',
   'zonga',
   'abr',

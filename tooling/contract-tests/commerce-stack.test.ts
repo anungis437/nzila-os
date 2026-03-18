@@ -38,7 +38,6 @@ const APPS = [
   'console',
   'partners',
   'cfo',
-  'shop-quoter',
   'nacp-exams',
   'zonga',
   'abr',
@@ -55,14 +54,6 @@ const CFO_FINANCE_DEPS = [
   '@nzila/qbo',
   '@nzila/tax',
   '@nzila/commerce-core',
-]
-
-/** Shop-quoter quoting stack */
-const QUOTER_DEPS = [
-  '@nzila/commerce-state',
-  '@nzila/commerce-governance',
-  '@nzila/commerce-services',
-  '@nzila/commerce-events',
 ]
 
 describe('Commerce stack completeness', () => {
@@ -127,38 +118,10 @@ describe('Commerce stack completeness', () => {
     })
   })
 
-  describe('Shop-quoter quoting stack', () => {
-    const sqPkg = resolve(ROOT, 'apps', 'shop-quoter', 'package.json')
-    if (!existsSync(sqPkg)) return
-
-    const deps = JSON.parse(readFileSync(sqPkg, 'utf-8')).dependencies ?? {}
-
-    for (const dep of QUOTER_DEPS) {
-      it(`shop-quoter — declares ${dep}`, () => {
-        expect(deps[dep]).toBeDefined()
-      })
-    }
-
-    it('shop-quoter — has lib/quote-machine.ts', () => {
-      const f = resolve(ROOT, 'apps', 'shop-quoter', 'lib', 'quote-machine.ts')
-      expect(existsSync(f)).toBe(true)
-      const c = readFileSync(f, 'utf-8')
-      expect(c).toContain('@nzila/commerce-state')
-    })
-
-    it('shop-quoter — has lib/governed-quote.ts', () => {
-      const f = resolve(ROOT, 'apps', 'shop-quoter', 'lib', 'governed-quote.ts')
-      expect(existsSync(f)).toBe(true)
-      const c = readFileSync(f, 'utf-8')
-      expect(c).toContain('@nzila/commerce-governance')
-    })
-  })
-
   // ── STUDIO-COM-02: State Machine Activation ─────────────────────────────
 
   describe('State machine wiring', () => {
     const MACHINE_APPS: Record<string, { wiring: string; machine: string }> = {
-      'shop-quoter': { wiring: 'lib/quote-machine.ts', machine: 'quoteMachine' },
       'nacp-exams': { wiring: 'lib/session-machine.ts', machine: 'examSessionMachine' },
     }
 
@@ -211,7 +174,7 @@ describe('Commerce stack completeness', () => {
   })
 
   describe('Commerce telemetry (logTransition)', () => {
-    const TELEMETRY_APPS = ['shop-quoter', 'nacp-exams', 'zonga']
+    const TELEMETRY_APPS = ['nacp-exams', 'zonga']
 
     for (const app of TELEMETRY_APPS) {
       it(`${app} — has commerce-telemetry.ts`, () => {

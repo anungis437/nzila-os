@@ -39,7 +39,6 @@ const ACTION_ROOTS: Array<{ app: string; dir: string }> = [
   { app: 'cfo', dir: join(ROOT, 'apps', 'cfo', 'lib', 'actions') },
   { app: 'partners', dir: join(ROOT, 'apps', 'partners', 'lib', 'actions') },
   { app: 'union-eyes', dir: join(ROOT, 'apps', 'union-eyes', 'actions') },
-  { app: 'shop-quoter', dir: join(ROOT, 'apps', 'shop-quoter', 'lib') },
   { app: 'abr', dir: join(ROOT, 'apps', 'abr', 'lib', 'actions') },
 ]
 

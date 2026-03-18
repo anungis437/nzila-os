@@ -80,7 +80,7 @@ Each includes: purpose, exports table, usage examples, source layout.
 | partners | 8/8 | production |
 | platform-admin | 8/8 | production |
 | pondu | 8/8 | production |
-| shop-quoter | 8/8 | production |
+| flow | 8/8 | production |
 | trade | 8/8 | production |
 | union-eyes | 7/8 | production |
 | web | 8/8 | production |

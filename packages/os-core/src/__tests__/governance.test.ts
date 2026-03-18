@@ -15,7 +15,7 @@ const APPS_DIR = join(ROOT, 'apps')
 
 const NEXTJS_APPS = [
   'abr', 'cfo', 'console', 'cora', 'mobility', 'mobility-client-portal',
-  'nacp-exams', 'partners', 'platform-admin', 'pondu', 'shop-quoter',
+  'nacp-exams', 'partners', 'platform-admin', 'pondu',
   'trade', 'union-eyes', 'web', 'zonga',
 ]
 

@@ -5,7 +5,9 @@
 > **Date:** 2026-02-24  
 > **Author:** NzilaOS Engineering  
 > **Classification:** Internal — IRAP Project File  
-> **Package:** `@nzila/shop-quoter`
+> **Package:** `@nzila/shop-quoter`  
+>
+> **Note:** The `@nzila/shop-quoter` package has been superseded by `apps/flow` (full commerce vertical). This document is retained for IRAP audit trail.
 
 ---
 

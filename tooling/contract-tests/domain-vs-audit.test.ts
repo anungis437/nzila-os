@@ -19,7 +19,7 @@ const allowlist: {
   audit_import_patterns: string[]
 } = JSON.parse(fs.readFileSync(join(__dirname, 'domain-audit-allowlist.json'), 'utf-8'))
 
-const TARGET_APPS = ['union-eyes', 'shop-quoter', 'zonga', 'cfo', 'partners']
+const TARGET_APPS = ['union-eyes', 'zonga', 'cfo', 'partners']
 
 const BUSINESS_DIRS = [
   'app/(dashboard)',

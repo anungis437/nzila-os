@@ -26,7 +26,6 @@
     "@nzila/platform-contracts": "workspace:*",
     "@nzila/platform-policy-engine": "workspace:*",
     "@nzila/pricing-engine": "workspace:*",
-    "@nzila/shop-quoter": "workspace:*",
     "@nzila/ui": "workspace:*",
     "@nzila/ai-sdk": "workspace:*",
     "@nzila/ml-sdk": "workspace:*",

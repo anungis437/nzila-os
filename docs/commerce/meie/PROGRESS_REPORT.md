@@ -4,6 +4,8 @@
 > **Projet:** NZL-2026-COM — Modernisation du moteur de commerce  
 > **Période:** Février 2026  
 > **Date du rapport:** 2026-02-24  
+>
+> **Note:** Le paquet `@nzila/shop-quoter` référencé dans ce document a été supersédé par `apps/flow` (vertical commerce complet).
 
 ---
 

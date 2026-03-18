@@ -5,7 +5,7 @@
  *
  * These Next.js server actions handle form submissions and mutations from the
  * client-side UI. They bridge React forms to the NzilaOS commerce engine via
- * the @nzila/shop-quoter adapter and the pricing-engine.
+ * the pricing-engine.
  */
 import { quoteRepo, customerRepo } from '@/lib/db'
 import type { CustomerRecord } from '@/lib/db'

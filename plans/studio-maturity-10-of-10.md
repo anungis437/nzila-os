@@ -3,6 +3,8 @@
 > **Created**: 2026-02-25
 > **Scope**: Bring every app to full cross-intelligence maturity
 > **Reference implementation**: `apps/console` (9/10 — the gold standard)
+>
+> **Note**: References to `shop-quoter` in this document are historical. The app has been superseded by `apps/flow` (full commerce vertical).
 
 ---
 

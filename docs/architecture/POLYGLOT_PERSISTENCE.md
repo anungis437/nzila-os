@@ -18,7 +18,7 @@ This document outlines a polyglot persistence architecture for Nzila OS. The cur
 
 | Layer | Technology | Purpose | Apps Using |
 |-------|------------|---------|------------|
-| **Primary DB** | PostgreSQL (Drizzle) | TS-authoritative apps | console, cfo, partners, shop-quoter, nacp-exams, zonga, orchestrator-api |
+| **Primary DB** | PostgreSQL (Drizzle) | TS-authoritative apps | console, cfo, partners, flow, nacp-exams, zonga, orchestrator-api |
 | **Secondary DB** | PostgreSQL (Django ORM) | Django-authoritative apps | union-eyes, abr |
 | **Cache/Session** | Redis (ioredis, @upstash/redis, django-redis) | Cache, Celery broker, rate limiting | union-eyes |
 | **Vector** | pgvector (PostgreSQL extension) | AI embeddings, RAG chunk storage | ai-core (via `ai_embeddings` table, HNSW index) |
@@ -36,7 +36,7 @@ This document outlines a polyglot persistence architecture for Nzila OS. The cur
 | **abr** | Similar to union-eyes | Complex joins | High-frequency | AI embeddings |
 | **console** | Governance, finance, ML | Aggregations, reports | Transactional | ML model storage |
 | **cfo** | Financial data | Audit queries | ACID critical | Audit trails |
-| **shop-quoter** | Products, orders, invoices | CRUD, search | E-commerce scale | Full-text product search |
+| **flow** | Products, orders, invoices | CRUD, search | E-commerce scale | Full-text product search |
 | **partners** | Entitlements, entities | Relationship queries | Low volume | Partner isolation |
 | **orchestrator-api** | API orchestration | Routing, aggregation | Low-medium | Rate limiting, correlation IDs |
 | **analytics** *(package)* | Metrics, aggregations | Heavy read/aggregation | Batch | Time-series patterns |
@@ -66,7 +66,7 @@ flowchart TB
         ABR[ABR]
         CON[Console]
         CFO[CFO]
-        SQ[Shop-Quoter]
+        FL[Flow]
         PART[Partners]
         ORCH[Orchestrator API]
     end
@@ -153,7 +153,7 @@ export function orgKey(orgId: string, domain: string, id: string): string {
 
 ### 4.2 Phase 2: Add Elasticsearch for Search (Medium Impact)
 
-**Rationale**: Full-text search across union-eyes cases, grievances, shop-quoter products.
+**Rationale**: Full-text search across union-eyes cases, grievances, flow products.
 PostgreSQL `TSVECTOR` is currently used in Django apps but does not scale to cross-app
 faceted search or analytics aggregations.
 
@@ -306,7 +306,7 @@ async function handleOrderCreated(event: DomainEvent<OrderCreated>) {
 
 The saga pattern is **already implemented** in `packages/commerce-events/src/saga.ts`
 (207 lines) with sequential step execution, automatic compensation on failure, and
-`SagaExecution` audit records. The `shop-quoter` app already consumes `@nzila/commerce-events`.
+`SagaExecution` audit records. The `flow` app already consumes `@nzila/commerce-events`.
 
 Usage with the existing implementation:
 
@@ -349,7 +349,7 @@ async function placeOrderSaga(order: Order) {
 | **abr** | PostgreSQL (Django) | Elasticsearch, pgvector, Redis |
 | **console** | PostgreSQL (Drizzle) | Redis, TimescaleDB |
 | **cfo** | PostgreSQL (Drizzle) | Redis |
-| **shop-quoter** | PostgreSQL (Drizzle) | Elasticsearch, Redis |
+| **flow** | PostgreSQL (Drizzle) | Elasticsearch, Redis |
 | **partners** | PostgreSQL (Drizzle) | Redis |
 | **orchestrator-api** | PostgreSQL (Drizzle) | Redis |
 
@@ -397,7 +397,7 @@ describe('Polyglot Authority Invariants', () => {
 
 1. **Add Elasticsearch** for search capabilities
    - Requires new indexing pipelines
-   - Start with shop-quoter product search as pilot
+   - Start with flow product search as pilot
    - Use shared-index + filtered-alias tenant isolation
 
 2. **Standardize pgvector** across apps

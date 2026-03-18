@@ -19,7 +19,6 @@ export default defineProject({
       '@nzila/os-core/config': resolve(ROOT, 'packages/os-core/src/config/env.ts'),
       '@nzila/os-core/retention': resolve(ROOT, 'packages/os-core/src/retention/index.ts'),
       '@nzila/os-core': resolve(ROOT, 'packages/os-core/src/index.ts'),
-      '@nzila/shop-quoter': resolve(ROOT, 'packages/shop-quoter/src/index.ts'),
       '@nzila/commerce-core': resolve(ROOT, 'packages/commerce-core/src/index.ts'),
       '@nzila/commerce-core/types': resolve(ROOT, 'packages/commerce-core/src/types/index.ts'),
       '@nzila/commerce-core/enums': resolve(ROOT, 'packages/commerce-core/src/enums.ts'),

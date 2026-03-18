@@ -99,12 +99,6 @@ apps:
       p99_latency_ms: 1500
       error_rate_max_pct: 2.0
 
-  shop-quoter:
-    performance:
-      p95_latency_ms: 400
-      p99_latency_ms: 1500
-      error_rate_max_pct: 2.0
-
   union-eyes:
     performance:
       p95_latency_ms: 500

@@ -62,9 +62,6 @@ const EXEMPT_PATHS = [
   // Union-Eyes — Django-migrated app with direct DB access patterns.
   // Migration to createScopedDb(orgId) tracked alongside console/partners.
   'apps/union-eyes/',
-  // Shop-quoter — commerce DAL uses direct DB for QuoteRepository implementation.
-  // Migration to createScopedDb(orgId) tracked in docs/migration/ENFORCEMENT_UPGRADE.md
-  'apps/shop-quoter/',
   // Flow — commerce app with legacy unscoped DB imports in services/repositories.
   // Migration to createScopedDb(orgId) tracked in docs/migration/ENFORCEMENT_UPGRADE.md
   'apps/flow/',

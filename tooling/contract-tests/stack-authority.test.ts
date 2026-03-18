@@ -54,7 +54,6 @@ const TS_AUTHORITATIVE_APPS = [
   'nacp-exams',
   'trade',
   'zonga',
-  'shop-quoter',
   'web',
   'orchestrator-api',
 ]
