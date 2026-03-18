@@ -117,7 +117,7 @@
     "drizzle-zod": "^0.8.3",
     "embla-carousel-react": "^8.2.0",
     "exceljs": "^4.4.0",
-    "firebase-admin": "^12.7.0",
+    "firebase-admin": "^13.7.0",
     "framer-motion": "^11.3.30",
     "geoip-lite": "^1.4.10",
     "googleapis": "^171.4.0",
