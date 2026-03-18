@@ -10,6 +10,7 @@
     "typecheck": "tsc --noEmit",
     "test": "vitest run",
     "demo:seed": "tsx lib/demoSeed.ts",
+    "seed:staging": "tsx lib/seed-flow-staging.ts",
     "clean": "rm -rf .next .turbo node_modules"
   },
   "dependencies": {

@@ -11,6 +11,7 @@ import { z } from 'zod'
 export const FlowEventType = z.enum([
   // Quote lifecycle
   'quote_created',
+  'quote_updated',
   'quote_sent',
   'quote_accepted',
   'quote_rejected',
@@ -29,6 +30,8 @@ export const FlowEventType = z.enum([
 
   // Payment
   'payment_received',
+  'payment_confirmed',
+  'payment_failed',
   'deposit_required',
   'payment_overdue',
 
@@ -36,6 +39,7 @@ export const FlowEventType = z.enum([
   'po_created',
   'po_sent',
   'po_confirmed',
+  'po_cancelled',
   'po_in_production',
   'po_shipped',
   'po_received',
@@ -46,8 +50,14 @@ export const FlowEventType = z.enum([
   'proof_rejected',
   'production_started',
   'production_completed',
+  'production_blocked',
   'quality_check_started',
   'quality_check_failed',
+
+  // Shipment
+  'shipment_created',
+  'shipment_shipped',
+  'shipment_delivered',
 
   // System
   'payment_gate_blocked',

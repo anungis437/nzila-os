@@ -17,19 +17,28 @@ import { onFlowEvent } from './emitter'
 // Must match the pgEnum values in packages/db/src/schema/flow/enums.ts
 const DB_EVENT_TYPES = new Set([
   'quote_created',
+  'quote_updated',
   'quote_sent',
   'quote_accepted',
   'quote_revision_requested',
   'order_created',
+  'order_confirmed',
   'deposit_required',
   'payment_received',
+  'payment_confirmed',
   'po_created',
   'po_sent',
   'po_confirmed',
+  'po_cancelled',
   'production_started',
   'production_completed',
+  'production_blocked',
   'shipment_created',
+  'shipment_shipped',
+  'shipment_delivered',
+  'order_shipped',
   'order_delivered',
+  'payment_gate_blocked',
 ] as const)
 
 // ── Persist a single event ─────────────────────────────────────────────────

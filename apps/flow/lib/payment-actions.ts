@@ -32,43 +32,26 @@ export async function setDepositRequirementAction(
 ): Promise<ActionResult<{ requirementId: string }>> {
   try {
     const ctx = await resolveOrgContext()
-    const requirement = await setPaymentRequirement(input, ctx.actorId, ctx.orgId)
 
-    // Transition quote to DEPOSIT_REQUIRED if currently ACCEPTED
-    const quote = await quoteRepo.findById(input.quoteId)
-    if (quote && input.depositRequired) {
-      const current = quote.status?.toUpperCase() ?? ''
-      const transition = attemptQuoteTransition(current as 'ACCEPTED', 'DEPOSIT_REQUIRED')
-      if (transition.ok) {
-        await quoteRepo.update(input.quoteId, { status: 'DEPOSIT_REQUIRED' })
-        await recordTimelineEvent({
-          quoteId: input.quoteId,
-          event: 'status_change',
-          description: `Quote moved to DEPOSIT_REQUIRED`,
-          actor: ctx.actorId,
-        })
-      }
-    } else if (quote && !input.depositRequired) {
-      const current = quote.status?.toUpperCase() ?? ''
-      const transition = attemptQuoteTransition(current as 'ACCEPTED', 'READY_FOR_PO')
-      if (transition.ok) {
-        await quoteRepo.update(input.quoteId, { status: 'READY_FOR_PO' })
-        await recordTimelineEvent({
-          quoteId: input.quoteId,
-          event: 'status_change',
-          description: `Quote advanced to READY_FOR_PO (no deposit required)`,
-          actor: ctx.actorId,
-        })
-        emitWorkflowAuditEvent({
-          event: 'quote_unblocked_for_po',
-          quoteId: input.quoteId,
-          orgId: ctx.orgId,
-          userId: ctx.actorId,
-          metadata: {},
-        })
-      }
+    // Route through control layer
+    const { executeCommand } = await import('@/lib/control/control-adapter')
+    const result = await executeCommand({
+      type: 'require_deposit',
+      order_id: input.quoteId, // maps to order context
+      deposit_amount: input.depositAmount ?? 0,
+      deposit_percent: input.depositPercent,
+      deposit_required: input.depositRequired,
+      due_before_production: input.dueBeforeProduction ?? true,
+      org_id: ctx.orgId,
+      actor_id: ctx.actorId,
+    })
+
+    if (!result.ok) {
+      return { ok: false, error: result.error }
     }
 
+    // Still call legacy service for backward compat (payment requirement record)
+    const requirement = await setPaymentRequirement(input, ctx.actorId, ctx.orgId)
     return { ok: true, data: { requirementId: requirement.id } }
   } catch (err) {
     const msg = err instanceof Error ? err.message : 'Unknown error'
@@ -82,34 +65,26 @@ export async function recordPaymentAction(
 ): Promise<ActionResult<{ newStatus: string }>> {
   try {
     const ctx = await resolveOrgContext()
-    const result = await recordPayment(input, ctx.actorId, ctx.orgId)
 
-    // If payment is cleared, advance to READY_FOR_PO
-    if (result.newStatus === 'PAID') {
-      const quote = await quoteRepo.findById(input.quoteId)
-      if (quote) {
-        const current = quote.status?.toUpperCase() ?? ''
-        const transition = attemptQuoteTransition(current as 'DEPOSIT_REQUIRED', 'READY_FOR_PO')
-        if (transition.ok) {
-          await quoteRepo.update(input.quoteId, { status: 'READY_FOR_PO' })
-          await recordTimelineEvent({
-            quoteId: input.quoteId,
-            event: 'status_change',
-            description: 'Deposit payment cleared — quote advanced to READY_FOR_PO',
-            actor: ctx.actorId,
-          })
-          emitWorkflowAuditEvent({
-            event: 'quote_unblocked_for_po',
-            quoteId: input.quoteId,
-            orgId: ctx.orgId,
-            userId: ctx.actorId,
-            metadata: { newStatus: result.newStatus },
-          })
-        }
-      }
+    // Route through control layer
+    const { executeCommand } = await import('@/lib/control/control-adapter')
+    const result = await executeCommand({
+      type: 'record_payment',
+      order_id: input.quoteId, // maps to order context
+      amount: input.amount,
+      method: input.method ?? 'bank_transfer',
+      reference: input.reference,
+      org_id: ctx.orgId,
+      actor_id: ctx.actorId,
+    })
+
+    if (!result.ok) {
+      return { ok: false, error: result.error }
     }
 
-    return { ok: true, data: { newStatus: result.newStatus } }
+    // Still call legacy service for backward compat
+    const legacyResult = await recordPayment(input, ctx.actorId, ctx.orgId)
+    return { ok: true, data: { newStatus: legacyResult.newStatus } }
   } catch (err) {
     const msg = err instanceof Error ? err.message : 'Unknown error'
     logger.error('Failed to record payment', { error: msg })

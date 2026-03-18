@@ -67,18 +67,20 @@ export async function sendQuoteToClientAction(
     const quote = await quoteRepo.findById(parsed.quoteId)
     if (!quote) return { ok: false, error: 'Quote not found' }
 
-    const current = quote.status.toUpperCase()
+    // Route through control layer
+    const { executeCommand } = await import('@/lib/control/control-adapter')
+    const result = await executeCommand({
+      type: 'send_quote',
+      quote_id: parsed.quoteId,
+      org_id: ctx.orgId,
+      actor_id: ctx.actorId,
+    })
 
-    // Allow sending from INTERNAL_REVIEW or re-sending from REVISION_REQUESTED
-    const transition = attemptQuoteTransition(
-      current as 'INTERNAL_REVIEW',
-      'SENT_TO_CLIENT',
-    )
-    if (!transition.ok) {
-      return { ok: false, error: transition.reason }
+    if (!result.ok) {
+      return { ok: false, error: result.error ?? 'Transition failed' }
     }
 
-    // Generate share link
+    // Generate share link (side effect — not part of state transition)
     const { link, rawToken } = await createShareLink(
       {
         quoteId: parsed.quoteId,
@@ -87,31 +89,6 @@ export async function sendQuoteToClientAction(
       },
       ctx.orgId,
     )
-
-    // Update quote status
-    await quoteRepo.update(parsed.quoteId, { status: 'SENT_TO_CLIENT' })
-
-    // Record timeline
-    await recordTimelineEvent({
-      quoteId: parsed.quoteId,
-      event: 'sent_to_client',
-      description: 'Quote sent to client via secure link',
-      actor: ctx.actorId,
-      metadata: { shareLinkId: link.id },
-    })
-
-    // Audit
-    emitWorkflowAuditEvent({
-      event: 'quote_sent_to_client',
-      quoteId: parsed.quoteId,
-      orgId: ctx.orgId,
-      userId: ctx.actorId,
-      metadata: {
-        shareLinkId: link.id,
-        fromStatus: current,
-        toStatus: 'SENT_TO_CLIENT',
-      },
-    })
 
     const baseUrl = process.env.NEXT_PUBLIC_APP_URL ?? 'http://localhost:3007'
     const shareLinkUrl = `${baseUrl}/quote/${rawToken}`

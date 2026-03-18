@@ -208,63 +208,67 @@ export async function validateLegacyDataAction(
   return { ok: true, data: { valid: errors.length === 0, errors } }
 }
 
-// ── Update Quote Status (governed transition) ─────────────────────────────
+// ── Update Quote Status (governed transition via control layer) ────────────
 
 export async function updateQuoteStatusAction(
   quoteId: string,
   newStatus: string,
 ): Promise<ActionResult<{ id: string; status: string }>> {
   try {
-    const quote = await quoteRepo.findById(quoteId)
-    if (!quote) return { ok: false, error: `Quote ${quoteId} not found` }
-
-    // ── State machine: validate transition ──────────────────────────
     const { ctx } = await resolveOrgCommerceContext()
 
-    const transition = transitionQuote(
-      quote.status as Parameters<typeof transitionQuote>[0],
-      newStatus,
-      { orgId: ctx.orgId, actorId: ctx.actorId, role: ctx.role as Parameters<typeof transitionQuote>[2]['role'], meta: {} },
-      quoteId,
-    )
-    if (!transition.ok) {
-      return { ok: false, error: `Invalid transition: ${transition.reason}` }
+    // Map target status to the appropriate command type
+    const commandType = resolveQuoteCommandType(newStatus)
+    if (!commandType) {
+      return { ok: false, error: `No command handler for target status: ${newStatus}` }
     }
 
-    // ── Persist the update ──────────────────────────────────────────
-    const updated = await quoteRepo.update(quoteId, {
-      status: newStatus,
+    const { executeCommand } = await import('@/lib/control/control-adapter')
+    const result = await executeCommand({
+      type: commandType,
+      quote_id: quoteId,
+      org_id: ctx.orgId,
+      actor_id: ctx.actorId,
     })
 
-    // ── Audit trail: record the transition ──────────────────────────
+    if (!result.ok) {
+      return { ok: false, error: result.error ?? 'Transition failed' }
+    }
+
+    // Legacy audit/telemetry (retained for backward compat)
     try {
-      auditQuoteTransition({
-        quoteId,
-        fromStatus: quote.status,
-        toStatus: newStatus,
-        userId: ctx.actorId,
-        orgId: ctx.orgId,
-      })
-      logTransition(
-        { orgId: ctx.orgId },
-        'quote',
-        quote.status,
-        newStatus,
-        true,
-      )
+      const quote = await quoteRepo.findById(quoteId)
+      if (quote) {
+        logTransition(
+          { orgId: ctx.orgId },
+          'quote',
+          quote.status,
+          newStatus,
+          true,
+        )
+      }
     } catch (auditErr) {
-      // Audit failure is non-blocking but logged
       logger.warn('Audit/telemetry failed for quote transition', {
         quoteId,
         error: auditErr instanceof Error ? auditErr.message : String(auditErr),
       })
     }
 
-    return { ok: true, data: { id: updated.id, status: newStatus } }
+    return { ok: true, data: { id: quoteId, status: newStatus } }
   } catch (err) {
     return {
       ok: false,
       error: err instanceof Error ? err.message : 'Failed to update status',
     }
   }
+}
+
+/** Maps a target quote status to the appropriate command type. */
+function resolveQuoteCommandType(targetStatus: string): string | null {
+  const map: Record<string, string> = {
+    SENT_TO_CLIENT: 'send_quote',
+    ACCEPTED: 'accept_quote',
+    REVISION_REQUESTED: 'request_quote_revision',
+  }
+  return map[targetStatus.toUpperCase()] ?? null
 }
