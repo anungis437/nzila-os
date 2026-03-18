@@ -33,7 +33,6 @@ export const convertQuoteToOrderHandler: CommandHandler<ConvertQuoteToOrderComma
 
     // Create order from quote
     const orderId = randomUUID()
-    const lines = await quoteRepo.findLines(input.quote_id)
 
     await orderRepo.create({
       id: orderId,

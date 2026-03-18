@@ -11,8 +11,6 @@ import { quoteRepo, customerRepo } from '@/lib/db'
 import type { CustomerRecord } from '@/lib/db'
 import { resolveOrgCommerceContext } from '@/lib/resolve-org'
 import { calculateTaxes } from '@nzila/platform-commerce-org/pricing'
-import { transitionQuote } from '@/lib/quote-machine'
-import { auditQuoteTransition } from '@/lib/evidence'
 import { logTransition } from '@/lib/commerce-telemetry'
 import { logger } from '@/lib/logger'
 

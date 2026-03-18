@@ -1,7 +1,7 @@
 /**
  * Flow — Send Quote Handler
  */
-import type { CommandContext, CommandHandler, CommandResult } from '@/lib/control/types'
+import type { CommandHandler, CommandResult } from '@/lib/control/types'
 import { SendQuoteCommand } from '@/lib/commands/types'
 import { quoteRepo } from '@/lib/repositories'
 import { checkQuoteInvariants } from '@/lib/control/guards/invariant-guard'
@@ -9,7 +9,6 @@ import { validateTransition } from '@/lib/control/guards/workflow-guard'
 import { dispatchDomainEvent } from '@/lib/control/dispatch/event-dispatcher'
 import { dispatchAuditEntry } from '@/lib/control/dispatch/audit-dispatcher'
 import { EntityNotFoundError } from '@/lib/control/errors/entity-not-found-error'
-import { InvalidTransitionError } from '@/lib/control/errors/invalid-transition-error'
 
 export const sendQuoteHandler: CommandHandler<SendQuoteCommand> = {
   commandType: 'send_quote',

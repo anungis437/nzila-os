@@ -10,7 +10,7 @@ import type {
   GovernanceCheckEntry,
   GovernanceCheckResult,
 } from '@nzila/platform-contracts'
-import { db, commerceOrders, flowProductionJobs, flowPayments } from '@nzila/db'
+import { db, commerceOrders, flowProductionJobs } from '@nzila/db'
 import { eq, and, sql } from 'drizzle-orm'
 import { getRegisteredCommandTypes } from '@/lib/control/command-bus'
 import { randomUUID } from 'node:crypto'

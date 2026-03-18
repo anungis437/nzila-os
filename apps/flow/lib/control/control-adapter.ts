@@ -8,7 +8,6 @@
 import { execute } from './command-bus'
 import type { CommandContext, CommandResult } from './types'
 import { resolveOrgContext } from '@/lib/resolve-org'
-import { logger } from '@/lib/logger'
 import { randomUUID } from 'node:crypto'
 
 // Re-export for convenience

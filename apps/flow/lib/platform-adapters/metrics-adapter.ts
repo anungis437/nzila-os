@@ -6,7 +6,7 @@
  */
 import type { MetricsContract, MetricsSummary, MetricEntry } from '@nzila/platform-contracts'
 import { db, commerceOrders, commerceQuotes, flowPayments, flowProductionJobs } from '@nzila/db'
-import { eq, and, gte, lte, count, sql } from 'drizzle-orm'
+import { eq, and, gte, count, sql } from 'drizzle-orm'
 import { logger } from '@/lib/logger'
 
 export const metricsAdapter: MetricsContract = {

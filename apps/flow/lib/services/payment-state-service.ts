@@ -11,7 +11,6 @@ import {
   paymentEventRepo,
 } from '@/lib/repositories/workflow-repository'
 import { orderRepo, paymentRepo } from '@/lib/repositories'
-import { logger } from '@/lib/logger'
 
 // ── Types ──────────────────────────────────────────────────────────────────
 

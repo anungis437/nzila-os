@@ -11,7 +11,6 @@ import { quoteRepo } from '@/lib/db'
 import { resolveOrgContext } from '@/lib/resolve-org'
 import { attemptQuoteTransition } from '@/lib/workflows/quote-state-machine'
 import { createShareLink, findShareLinksForQuote } from '@/lib/services/share-link-service'
-import { emitWorkflowAuditEvent } from '@/lib/services/workflow-audit-service'
 import { recordTimelineEvent } from '@/lib/repositories/workflow-repository'
 import { SHOPMOICA_SETTINGS } from '@nzila/platform-commerce-org/defaults'
 import type { ActionResult } from '@/lib/actions'
@@ -81,7 +80,7 @@ export async function sendQuoteToClientAction(
     }
 
     // Generate share link (side effect — not part of state transition)
-    const { link, rawToken } = await createShareLink(
+    const { rawToken } = await createShareLink(
       {
         quoteId: parsed.quoteId,
         expiresInDays: parsed.expiresInDays,

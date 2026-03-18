@@ -45,7 +45,7 @@ import type { OrgCommerceConfig } from '@nzila/platform-commerce-org/types'
 
 const ORG_ID = SHOPMOICA_ORG_ID
 const SEED_ACTOR = 'staging-seed'
-const ENV: 'staging' = 'staging'
+const ENV = 'staging' as const
 
 // Pre-generated stable IDs for referential integrity
 const IDS = {

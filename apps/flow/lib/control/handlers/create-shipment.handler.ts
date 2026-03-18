@@ -1,7 +1,6 @@
 /**
  * Flow — Create Shipment Handler
  */
-import { randomUUID } from 'node:crypto'
 import type { CommandHandler, CommandResult } from '@/lib/control/types'
 import { CreateShipmentCommand } from '@/lib/commands/types'
 import { checkShipmentReadiness } from '@/lib/control/guards/shipment-guard'

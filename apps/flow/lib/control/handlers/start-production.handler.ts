@@ -10,7 +10,6 @@ import { orderRepo, productionRepo } from '@/lib/repositories'
 import { checkProductionReadiness } from '@/lib/control/guards/production-guard'
 import { dispatchDomainEvent } from '@/lib/control/dispatch/event-dispatcher'
 import { dispatchAuditEntry } from '@/lib/control/dispatch/audit-dispatcher'
-import { EntityNotFoundError } from '@/lib/control/errors/entity-not-found-error'
 
 export const startProductionHandler: CommandHandler<StartProductionCommand> = {
   commandType: 'start_production',

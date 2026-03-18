@@ -2,13 +2,12 @@
  * Flow — Create Quote Handler
  */
 import { randomUUID } from 'node:crypto'
-import type { CommandContext, CommandHandler, CommandResult } from '@/lib/control/types'
+import type { CommandHandler, CommandResult } from '@/lib/control/types'
 import { CreateQuoteCommand } from '@/lib/commands/types'
-import { quoteRepo, customerRepo } from '@/lib/repositories'
+import { quoteRepo } from '@/lib/repositories'
 import { checkEntityExists } from '@/lib/control/guards/invariant-guard'
 import { dispatchDomainEvent } from '@/lib/control/dispatch/event-dispatcher'
 import { dispatchAuditEntry } from '@/lib/control/dispatch/audit-dispatcher'
-import { logger } from '@/lib/logger'
 
 export const createQuoteHandler: CommandHandler<CreateQuoteCommand> = {
   commandType: 'create_quote',
@@ -28,7 +27,7 @@ export const createQuoteHandler: CommandHandler<CreateQuoteCommand> = {
 
     // 3. Persist
     const quoteId = randomUUID()
-    const quote = await quoteRepo.create({
+    await quoteRepo.create({
       id: quoteId,
       orgId: context.org_id,
       status: 'DRAFT',

@@ -6,7 +6,6 @@
  * domain state — failures produce warnings, not rollbacks.
  */
 import { logger } from '@/lib/logger'
-import { IntegrationDispatchError } from '@/lib/control/errors/integration-dispatch-error'
 
 export type SideEffectType = 'zoho_sync' | 'shopify_sync' | 'canva_update' | 'customer_notification'
 
