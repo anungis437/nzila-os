@@ -20,6 +20,9 @@ staging-*.sql
 **/build/
 **/dist/
 
+# ----- Proof artifacts (generated) ------
+proof-artifacts/
+
 # ----- pnpm ------
 .pnpm-store/
 .pnpm-cache/

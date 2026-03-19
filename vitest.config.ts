@@ -147,6 +147,8 @@ export default defineConfig({
       'packages/governance',
       'packages/security',
       'packages/enforcement',
+      // E2E platform proof tests
+      'tests/e2e/platform',
     ],
   },
 })

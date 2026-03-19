@@ -159,6 +159,12 @@ jobs:
       - name: Validate release strict
         run: pnpm validate:release:strict
 
+      - name: Platform proof tests
+        run: pnpm proof:run
+
+      - name: Verify proof artifacts
+        run: pnpm proof:verify
+
       - name: Upload governance gate report
         if: always()
         uses: actions/upload-artifact@v7
@@ -167,6 +173,7 @@ jobs:
           path: |
             ops/outputs/governance-gate-report.json
             ops/outputs/control-manifest-report.json
+            proof-artifacts/**
           retention-days: 90
 
   ml-gates:
