@@ -28,7 +28,6 @@ const RATE_LIMIT_APPS = [
   'console',
   'partners',
   'cfo',
-  'shop-quoter',
   'nacp-exams',
   'zonga',
   'abr',

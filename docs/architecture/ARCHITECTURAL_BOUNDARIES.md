@@ -8,7 +8,7 @@
 ```
 ┌─────────────────────────────────────────────┐
 │                   APPS                       │
-│  (apps/union-eyes, apps/shop-quoter, ...)   │
+│  (apps/union-eyes, apps/flow, ...)   │
 └──────────────────┬──────────────────────────┘
                    │ may depend on
                    ▼

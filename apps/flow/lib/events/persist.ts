@@ -32,10 +32,12 @@ const DB_EVENT_TYPES = new Set([
   'order_delivered',
 ] as const)
 
+type DbEventType = typeof DB_EVENT_TYPES extends Set<infer T> ? T : never
+
 // ── Persist a single event ─────────────────────────────────────────────────
 
 export async function persistFlowEvent(event: FlowEvent): Promise<boolean> {
-  if (!DB_EVENT_TYPES.has(event.type as typeof DB_EVENT_TYPES extends Set<infer T> ? T : never)) {
+  if (!DB_EVENT_TYPES.has(event.type as DbEventType)) {
     logger.debug('Skipping event persistence — type not in DB enum', {
       eventType: event.type,
       entityId: event.entity_id,
@@ -48,7 +50,7 @@ export async function persistFlowEvent(event: FlowEvent): Promise<boolean> {
     orgId: event.org_id,
     entityType: event.entity_type,
     entityId: event.entity_id,
-    eventType: event.type as typeof DB_EVENT_TYPES extends Set<infer T> ? T : never,
+    eventType: event.type as DbEventType,
     actorId: event.actor_id,
     payloadJson: event.metadata,
     createdAt: event.timestamp,

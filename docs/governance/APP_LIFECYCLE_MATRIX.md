@@ -45,7 +45,7 @@
 | App | Tier | Owner | Domain | Notes |
 |-----|------|-------|--------|-------|
 | union-eyes | PRODUCTION | union | union | Full gold standard. 21+ test files, docs, health/metrics/evidence endpoints, domain model. Reference implementation. |
-| shop-quoter | PRODUCTION | commerce | commerce | Full gold standard. 7+ test files, docs, health endpoint, demo seed, domain model. |
+| flow | PRODUCTION | commerce | commerce | Full gold standard. Commerce vertical reference app with domain core, governance, evidence. |
 | web | PRODUCTION | platform | platform | Public-facing site. 3+ test files, docs, health endpoint. |
 | partners | PILOT | commerce | commerce | Partner operations portal. 4+ test files, docs, health endpoint. Proving workflows with controlled partner use. |
 | cfo | PILOT | finance | finance | Financial intelligence and reporting. 5+ test files, docs, health endpoint. Operational with limited user base. |

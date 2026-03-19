@@ -92,7 +92,7 @@
 | App | Admin Surface | Purpose |
 |-----|---------------|---------|
 | union-eyes | Case Operations | Case lifecycle management, evidence review, grievance intake |
-| shop-quoter | Supplier Operations | Supplier management, quote approval, production operations |
+| flow | Commerce Operations | Supplier management, quote approval, production operations |
 | zonga | Content Moderation | Creator release approval, moderation queue, content policy |
 | trade | Vehicle Operations | Vehicle intake, deal management, trade processing |
 | cfo | Financial Operations | Financial report configuration, reconciliation, FX management |
@@ -113,7 +113,7 @@
 ### Control Plane must NOT
 
 1. **Become a dumping ground for all app admin UIs**
-   - App-local admin features (e.g., "manage shop-quoter suppliers") do not belong in Control Plane
+   - App-local admin features (e.g., "manage flow suppliers") do not belong in Control Plane
    - If it only affects one app's domain, it goes in that app
 
 2. **Duplicate what lives in individual apps**
@@ -136,7 +136,7 @@
 ### Platform Admin must NOT
 
 1. **Swallow every domain setting**
-   - Domain-specific configuration (e.g., "set quote expiry for shop-quoter") belongs in the app
+   - Domain-specific configuration (e.g., "set quote expiry for flow") belongs in the app
    - Platform Admin only handles platform-wide configuration
 
 2. **Duplicate operational monitoring**

@@ -12,7 +12,7 @@ Relevant seeded decisions for the agri/trade vertical:
 
 | # | Decision ID | Title | Scenario |
 |---|-------------|-------|----------|
-| 3 | DEC-2026-0003 | Pricing outlier detected in shop-quoter | Price anomaly review |
+| 3 | DEC-2026-0003 | Pricing outlier detected in flow | Price anomaly review |
 | 4 | DEC-2026-0004 | Partner performance drop — delivery_sla_compliance | Partner follow-up |
 
 Open the Control Plane at `http://localhost:3010`.
@@ -57,14 +57,14 @@ The Decision Layer generated an OPERATIONS review request with 80% confidence. T
 
 ### Narrative
 
-"This decision is already seeded in the demo data. A pricing outlier was detected in the shop-quoter — unit costs for building materials are 130% above the supplier benchmark. The Decision Layer generated a FINANCIAL review request with 65% confidence.
+"This decision is already seeded in the demo data. A pricing outlier was detected in Flow — unit costs for building materials are 130% above the supplier benchmark. The Decision Layer generated a FINANCIAL review request with 65% confidence.
 
 Notably, this decision has already been reviewed and approved by the procurement lead, who confirmed it was a data entry error."
 
 ### Pages to Open
 
 1. **`/decisions`** — Decision list page
-   - Locate "Pricing outlier detected in shop-quoter"
+   - Locate "Pricing outlier detected in flow"
    - Point out: severity badge (MEDIUM, yellow), status badge (APPROVED, green), confidence (65%)
 
 2. **`/decisions/DEC-2026-0003`** — Decision detail page

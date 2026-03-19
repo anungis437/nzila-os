@@ -48,7 +48,7 @@ commerce modulaire avec traçabilité complète.
 | IT-1 | Extraction d'un moteur de tarification déterministe à fonctions pures avec conformité fiscale québécoise | **Résolue** — `@nzila/pricing-engine` |
 | IT-2 | Orchestration de cycle de vie commercial par machines à états déclaratives composables | **Résolue** — `@nzila/commerce-state` |
 | IT-3 | Architecture de piste d'audit par preuves à chaîne de hachage intégrée au niveau cadriciel | **Résolue** — `@nzila/commerce-audit` + `@nzila/commerce-evidence` |
-| IT-4 | Migration sans perte de données héritées avec établissement d'isolation par organisation | **En cours** — `@nzila/shop-quoter` |
+| IT-4 | Migration sans perte de données héritées avec établissement d'isolation par organisation | **Résolue** — supersédé par `apps/flow` |
 | IT-5 | Portes de gouvernance configurables par organisation avec seuils de marge formels | **Résolue** — `@nzila/commerce-governance` |
 
 ### 2.2 Avancement technologique
@@ -147,7 +147,7 @@ l'ingénierie de plateformes de commerce pour PME, spécifiquement :
 
 **Livrables :**
 
-- [`packages/shop-quoter/`](../../packages/shop-quoter/) — adaptateur complet
+- [`apps/flow/`](../../apps/flow/) — adaptateur complet (supersède `@nzila/shop-quoter`)
 - [`docs/commerce/IRAP_TECHNICAL_DESIGN.md`](IRAP_TECHNICAL_DESIGN.md) — conception technique IRAP
 
 ---
@@ -167,7 +167,7 @@ l'ingénierie de plateformes de commerce pour PME, spécifiquement :
 | L7 | Portes de gouvernance | `@nzila/commerce-governance` | ✅ Terminé |
 | L8 | Paquets de preuves | `@nzila/commerce-evidence` | ✅ Terminé |
 | L9 | Observabilité | `@nzila/commerce-observability` | ✅ Terminé |
-| L10 | **Adaptateur Shop Quoter** | **`@nzila/shop-quoter`** | ✅ **Terminé** |
+| L10 | **Adaptateur Flow** (ex Shop Quoter) | **`apps/flow`** | ✅ **Terminé** |
 | L11 | Tests d'intégration | `@nzila/commerce-integration-tests` | 🔄 En cours |
 
 ### 4.2 Documentation technique
@@ -208,7 +208,7 @@ l'ingénierie de plateformes de commerce pour PME, spécifiquement :
 | Métrique | Cible | Actuel |
 |---------|-------|--------|
 | Couverture de tests (pricing-engine) | ≥85% | En mesure |
-| Couverture de tests (shop-quoter) | ≥80% | En mesure |
+| Couverture de tests (flow) | ≥80% | En mesure |
 | Zéro `console.log` dans le code de production | 0 | Appliqué par tests de contrat |
 | Violations de typage TypeScript | 0 | Appliqué par CI |
 | Entrées d'audit par enregistrement migré | ≥2 | Vérifié |

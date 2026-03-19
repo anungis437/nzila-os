@@ -25,7 +25,7 @@
 
 ### 2. Console Evidence Routes vs App-Level Evidence
 
-**Current state**: Console has `/proof-center` and `/proof-pack` for evidence generation. Individual apps (union-eyes, shop-quoter) also have evidence export endpoints.
+**Current state**: Console has `/proof-center` and `/proof-pack` for evidence generation. Individual apps (union-eyes, flow) also have evidence export endpoints.
 
 **Target**: Console evidence tools are platform-level cross-app evidence assembly. App-level evidence exports feed into them but are not duplicates.
 

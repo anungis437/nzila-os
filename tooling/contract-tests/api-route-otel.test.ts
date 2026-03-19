@@ -22,7 +22,6 @@ const ROOT = resolve(__dirname, '../..')
  */
 const INSTRUMENTED_APPS = [
   'cfo',
-  'shop-quoter',
   'nacp-exams',
   'zonga',
   'partners',

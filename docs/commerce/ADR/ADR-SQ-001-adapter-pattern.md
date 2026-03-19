@@ -1,7 +1,7 @@
 # IRAP — Shop Quoter Adapter ADR-001: Adapter Pattern Selection
 
 > **ADR ID:** ADR-SQ-001  
-> **Status:** Accepted  
+> **Status:** Accepted (superseded — functionality now in `apps/flow`)  
 > **Date:** 2026-02-24  
 > **Decision Makers:** NzilaOS Engineering  
 > **IRAP Reference:** Project milestone M5  

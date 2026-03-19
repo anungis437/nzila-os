@@ -17,7 +17,7 @@ import { resolve, join, relative } from 'node:path'
 const ROOT = resolve(__dirname, '../..')
 const APPS = [
   'console', 'partners', 'web', 'union-eyes',
-  'cfo', 'shop-quoter', 'nacp-exams', 'zonga', 'abr', 'orchestrator-api',
+  'cfo', 'nacp-exams', 'zonga', 'abr', 'orchestrator-api',
 ]
 
 // ── Helpers ───────────────────────────────────────────────────────────────

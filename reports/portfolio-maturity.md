@@ -20,7 +20,7 @@
 | partners | production-grade | 8/8 | ✅ | ✅ | ✅ | ✅ | ✅ | ✅ | ✅ | 3 | — |
 | platform-admin | internal/admin | 8/8 | ✅ | ✅ | ✅ | ✅ | ✅ | ✅ | ✅ | 1 | — |
 | pondu | pilot-grade | 8/8 | ✅ | ✅ | ✅ | ✅ | ✅ | ✅ | ✅ | 1 | — |
-| shop-quoter | production-grade | 8/8 | ✅ | ✅ | ✅ | ✅ | ✅ | ✅ | ✅ | 5 | — |
+| flow | production-grade | 8/8 | ✅ | ✅ | ✅ | ✅ | ✅ | ✅ | ✅ | 5 | — |
 | trade | pilot-grade | 8/8 | ✅ | ✅ | ✅ | ✅ | ✅ | ✅ | ✅ | 1 | — |
 | web | production-grade | 8/8 | ✅ | ✅ | ✅ | ✅ | ✅ | ✅ | ✅ | 1 | — |
 | zonga | production-grade | 8/8 | ✅ | ✅ | ✅ | ✅ | ✅ | ✅ | ✅ | 4 | — |

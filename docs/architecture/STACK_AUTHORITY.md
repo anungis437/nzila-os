@@ -32,7 +32,7 @@ audit trails, and lets contract tests enforce structural invariants.
 | **nacp-exams** | **TS/Drizzle** | `platformDb` + `resolveOrgContext` | — | Clean vertical |
 | **trade** | **TS/Drizzle** | `@nzila/trade-db` + `resolveOrgContext` | — | Cross-border trade vertical |
 | **zonga** | **TS/Drizzle** | `@nzila/db` + `resolveOrgContext` | — | ESLint-enforced `createScopedDb` |
-| **shop-quoter** | **TS/Drizzle** | `db` + `platformDb` | — | Migration to `createScopedDb` pending |
+| **flow** | **TS/Drizzle** | `createScopedDb` + `createAuditedScopedDb` + control-layer | — | Full commerce vertical |
 | **web** | **None** | No DB | — | Static/marketing |
 | **orchestrator-api** | **TS/Drizzle** | Lazy `getDb()` (Fastify) | — | API-key authed, not a business app |
 | **union-eyes** | **Django** | Django ORM (12 apps) | TS/Drizzle (read proxy) | See §2 |

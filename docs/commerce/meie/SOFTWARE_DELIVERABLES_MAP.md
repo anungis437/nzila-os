@@ -2,6 +2,8 @@
 
 > **Projet:** NZL-2026-COM  
 > **Date:** 2026-02-24  
+>
+> **Note:** Le paquet `@nzila/shop-quoter` référencé ci-dessous a été supersédé par `apps/flow` (vertical commerce complet).
 
 ---
 

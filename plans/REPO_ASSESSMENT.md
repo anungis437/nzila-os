@@ -36,7 +36,7 @@ graph TB
         A5[abr]
         A6[nacp-exams]
         A7[cora]
-        A8[shop-quoter]
+        A8[flow]
         A9[cfo]
         A10[trade]
         A11[pondu]

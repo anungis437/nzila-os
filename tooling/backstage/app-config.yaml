@@ -51,8 +51,6 @@ catalog:
     - type: file
       target: ../../apps/cora/catalog-info.yaml
     - type: file
-      target: ../../apps/shop-quoter/catalog-info.yaml
-    - type: file
       target: ../../apps/cfo/catalog-info.yaml
     - type: file
       target: ../../apps/trade/catalog-info.yaml

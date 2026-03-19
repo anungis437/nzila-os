@@ -16,7 +16,7 @@
 ## Target Structure (Lighter Alignment)
 
 The web app is the primary user-facing portal. It has lighter domain-core needs
-because most business logic lives in domain-specific apps (union-eyes, shop-quoter, etc.).
+because most business logic lives in domain-specific apps (union-eyes, flow, etc.).
 
 | Layer | Status | Notes |
 |-------|--------|-------|

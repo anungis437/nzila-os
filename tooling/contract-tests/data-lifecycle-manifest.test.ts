@@ -32,7 +32,6 @@ const REQUIRED_APPS = [
   'orchestrator-api',
   'cfo',
   'partners',
-  'shop-quoter',
   'trade',
   'zonga',
   'pondu',

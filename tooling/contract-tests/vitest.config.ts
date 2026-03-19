@@ -17,6 +17,9 @@ export default defineProject({
     alias: {
       // Allow contract tests to import from the monorepo root
       '@repo-root': join(__dirname, '..', '..'),
+      // Workspace packages used by scripts/slo-gate.ts
+      '@nzila/platform-performance': join(__dirname, '..', '..', 'packages', 'platform-performance', 'src', 'index.ts'),
+      '@nzila/platform-ops': join(__dirname, '..', '..', 'packages', 'platform-ops', 'src', 'index.ts'),
     },
   },
 })

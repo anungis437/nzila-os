@@ -32,7 +32,6 @@ const HEALTH_APPS = [
   'console',
   'partners',
   'cfo',
-  'shop-quoter',
   'nacp-exams',
   'zonga',
   'abr',

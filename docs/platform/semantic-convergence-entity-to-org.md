@@ -45,8 +45,8 @@ Canonical terminology: **org**, **orgId**, **/orgs** routes, **OrgContext**.
 
 ~300 files across:
 
-- **apps/**: cfo, console, nacp-exams, partners, shop-quoter, trade, union-eyes, zonga
-- **packages/**: ai-core, ai-sdk, commerce-*, db, fx, ml-*, nacp-core, org, os-core, payments-stripe, platform-*, shop-quoter, tax, tools-runtime, trade-*, zonga-core
+- **apps/**: cfo, console, flow, nacp-exams, partners, trade, union-eyes, zonga
+- **packages/**: ai-core, ai-sdk, commerce-*, db, fx, ml-*, nacp-core, org, os-core, payments-stripe, platform-*, tax, tools-runtime, trade-*, zonga-core
 - **tooling/**: ai-evals, contract-tests, ml, scripts, security
 
 Key patterns:

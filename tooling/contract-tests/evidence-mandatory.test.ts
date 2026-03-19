@@ -22,7 +22,6 @@ const EVIDENCE_REQUIRED = [
   'union-eyes',
   'partners',
   'cfo',
-  'shop-quoter',
   'nacp-exams',
   'zonga',
   'abr',

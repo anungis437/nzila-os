@@ -170,7 +170,7 @@ Features **must** be placed in the correct surface. Overlap is a governance viol
 | App | Admin Surface | Purpose |
 |-----|---------------|---------|
 | union-eyes | Case Operations | Case lifecycle, evidence review, grievance intake |
-| shop-quoter | Supplier Operations | Quote approval, production operations |
+| flow | Commerce Operations | Quote approval, production operations |
 | zonga | Content Moderation | Release approval, moderation queue |
 | cfo | Financial Operations | Report configuration, reconciliation |
 | partners | Partner Operations | Onboarding, commission management |

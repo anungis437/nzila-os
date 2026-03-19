@@ -4,7 +4,7 @@
   "stability": "STABLE",
   "allowed_dependents": [
     "packages/commerce-*",
-    "apps/shop-quoter",
+    "apps/flow",
     "apps/web"
   ],
   "forbidden_dependents": [],

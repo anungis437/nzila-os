@@ -3,5 +3,4 @@ packages:
   - "packages/*"
   - "!packages/automation"
   - "!packages/packages"
-  - "packages/shop-quoter"
   - "tooling/*"

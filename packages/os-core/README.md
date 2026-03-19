@@ -42,7 +42,7 @@ export const GET = apiHandler({ requireAuth: true }, async (req, ctx) => {
 
 Every app has a Zod schema in `src/config/env.ts`. Call `validateEnv(appName)` at import time — it throws in production and warns in development for missing variables.
 
-Covered apps: `web`, `console`, `partners`, `union-eyes`, `abr`, `cfo`, `nacp-exams`, `shop-quoter`, `zonga`, `orchestrator-api`, `mobility`, `mobility-client-portal`, `pondu`, `cora`, `trade`, `platform-admin`.
+Covered apps: `web`, `console`, `partners`, `union-eyes`, `abr`, `cfo`, `nacp-exams`, `flow`, `zonga`, `orchestrator-api`, `mobility`, `mobility-client-portal`, `pondu`, `cora`, `trade`, `platform-admin`.
 
 ## Standard Middleware Pattern
 
