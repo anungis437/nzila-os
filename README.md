@@ -86,7 +86,7 @@ apps/                      13 deployable applications
 ├── abr/                   ABR app (Next.js + Django backend, port 3004)
 ├── nacp-exams/            NACP exams (Next.js, port 3005)
 ├── cora/                  Agri intelligence dashboard (Next.js, port 3006)
-├── shop-quoter/           Shop quoter (Next.js, port 3007)
+├── flow/                  Full commerce vertical (Next.js, port 3007)
 ├── cfo/                   CFO / finance (Next.js, port 3008)
 ├── trade/                 Trade management (Next.js, port 3009)
 ├── pondu/                 Agri field operations (Next.js, port 3010)
@@ -185,7 +185,7 @@ All Next.js apps use Clerk auth, Tailwind CSS v4, and the `@nzila/ui` component 
 | `abr` | 3004 | ABR app (**Django-authoritative backend**) |
 | `nacp-exams` | 3005 | NACP examinations |
 | `cora` | 3006 | Agri intelligence — yield, pricing, risk, traceability |
-| `shop-quoter` | 3007 | Shop quoter — bridges legacy ShopMoiÇa quoting |
+| `flow` | 3007 | Full commerce vertical — quoting, orders, invoices, procurement |
 | `cfo` | 3008 | CFO finance dashboard |
 | `trade` | 3009 | Trade management |
 | `pondu` | 3010 | Agri field ops — producers, harvests, lots, QA, warehouse, shipments |
@@ -267,7 +267,6 @@ All Next.js apps use Clerk auth, Tailwind CSS v4, and the `@nzila/ui` component 
 | `@nzila/commerce-observability` | Observability |
 | `@nzila/commerce-integration-tests` | Cross-package integration tests |
 | `@nzila/pricing-engine` | Pricing engine |
-| `@nzila/shop-quoter` | Legacy ShopMoiÇa quoting bridge |
 
 ### Trade
 

@@ -1,0 +1,32 @@
+{
+  "name": "@nzila/ai-control",
+  "version": "0.1.0",
+  "private": true,
+  "type": "module",
+  "main": "./src/index.ts",
+  "types": "./src/index.ts",
+  "exports": {
+    ".": "./src/index.ts",
+    "./runner": "./src/runner.ts",
+    "./budget": "./src/budget.ts",
+    "./policy": "./src/policy.ts",
+    "./classifier": "./src/classifier.ts",
+    "./logging": "./src/logging.ts",
+    "./schemas": "./src/schemas.ts"
+  },
+  "scripts": {
+    "typecheck": "tsc --noEmit",
+    "test": "vitest run",
+    "lint": "eslint src/"
+  },
+  "dependencies": {
+    "zod": "^3.24.0"
+  },
+  "devDependencies": {
+    "@typescript-eslint/eslint-plugin": "^8",
+    "@typescript-eslint/parser": "^8",
+    "typescript": "^5",
+    "vitest": "^4.0.18",
+    "eslint": "^10"
+  }
+}

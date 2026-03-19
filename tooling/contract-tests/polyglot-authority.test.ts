@@ -53,7 +53,6 @@ const SECONDARY_STORE_ALLOWLIST: Record<string, string[]> = {
   'abr': ['redis', 'elasticsearch', 'pgvector'],
   'console': ['redis', 'timescaledb'],
   'cfo': ['redis'],
-  'shop-quoter': ['redis', 'elasticsearch'],
   'partners': ['redis'],
   'orchestrator-api': ['redis'],
   'web': [],

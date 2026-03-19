@@ -24,7 +24,7 @@ Each app exports evidence via `GET /api/evidence/export`:
 
 ```json
 {
-  "app": "shop-quoter",
+  "app": "flow",
   "version": "0.1.0",
   "generated_at": "2025-01-15T10:30:00Z",
   "git_commit": "abc123def",
@@ -100,7 +100,7 @@ Each app exports evidence via `GET /api/evidence/export`:
 
 | App | Endpoint | Status |
 |-----|----------|--------|
-| shop-quoter | `/api/evidence/export` | ✅ Active |
+| flow | `/api/evidence/export` | ✅ Active |
 | cfo | `/api/evidence/export` | ✅ Active |
 | partners | `/api/evidence/export` | ✅ Active |
 | web | `/api/evidence/export` | ✅ Active |

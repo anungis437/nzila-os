@@ -580,7 +580,7 @@ export default function CLCAnalyticsDashboard() {
                           <CartesianGrid strokeDasharray="3 3" />
                           <XAxis dataKey="year" />
                           <YAxis />
-                          <Tooltip formatter={(value: string | number | undefined) => `$${Number(value ?? 0).toLocaleString()}`} />
+                          <Tooltip formatter={(value) => `$${Number(value ?? 0).toLocaleString()}`} />
                           <Legend />
                           <Line type="monotone" dataKey="value" stroke="#82ca9d" name="Total Amount" />
                         </LineChart>
@@ -595,7 +595,7 @@ export default function CLCAnalyticsDashboard() {
                           <CartesianGrid strokeDasharray="3 3" />
                           <XAxis dataKey="year" />
                           <YAxis domain={[0, 100]} />
-                          <Tooltip formatter={(value: string | number | undefined) => `${Number(value ?? 0).toFixed(1)}%`} />
+                          <Tooltip formatter={(value) => `${Number(value ?? 0).toFixed(1)}%`} />
                           <Legend />
                           <Line type="monotone" dataKey="value" stroke="#ff7300" name="Compliance Rate %" />
                         </LineChart>
@@ -838,7 +838,7 @@ export default function CLCAnalyticsDashboard() {
                       <CartesianGrid strokeDasharray="3 3" />
                       <XAxis dataKey="year" />
                       <YAxis />
-                      <Tooltip formatter={(value: string | number | undefined) => `$${Number(value ?? 0).toLocaleString()}`} />
+                      <Tooltip formatter={(value) => `$${Number(value ?? 0).toLocaleString()}`} />
                       <Legend />
                       <Line 
                         type="monotone" 

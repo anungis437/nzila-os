@@ -18,7 +18,7 @@ Business applications under `apps/`.
 Examples:
 
 - `union-eyes` — union case management and governance
-- `shop-quoter` — commerce quoting and supplier operations
+- `flow` — commerce quoting and supplier operations
 - `zonga` — creator/media marketplace and moderation
 - `cfo` — financial intelligence and reporting
 - `partners` — partner operations portal
@@ -142,7 +142,7 @@ Scripts and tooling are Layer 4. They run in CI or development, never in app run
 ```ts
 // ✗ FORBIDDEN — upward dependency
 // Inside packages/commerce-core/src/index.ts
-import { ShopConfig } from '../../apps/shop-quoter/lib/config'
+import { ShopConfig } from '../../apps/flow/lib/config'
 ```
 
 Packages must never depend upward toward apps. Extract shared types to the package itself.

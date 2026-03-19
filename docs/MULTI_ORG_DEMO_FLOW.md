@@ -1,11 +1,11 @@
 # Multi-Org Demo Flow
 
-> Demonstrates how to run Shop Quoter with two fully-configured demo orgs.
+> Demonstrates how to run Flow with two fully-configured demo orgs.
 
 ## Quick Start
 
 ```bash
-pnpm --filter @nzila/shop-quoter-app demo:seed
+pnpm --filter @nzila/flow demo:seed
 ```
 
 This runs `lib/demoSeed.ts` which seeds **both** demonstration orgs into the

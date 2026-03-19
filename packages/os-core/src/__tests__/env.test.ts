@@ -59,9 +59,9 @@ describe('validateEnv', () => {
     expect(env.NODE_ENV).toBe('test')
   })
 
-  it('validates all 16 app schemas have entries', () => {
+  it('validates all 15 app schemas have entries', () => {
     const ALL_APPS = [
-      'console', 'partners', 'web', 'union-eyes', 'cfo', 'shop-quoter',
+      'console', 'partners', 'web', 'union-eyes', 'cfo',
       'nacp-exams', 'zonga', 'abr', 'orchestrator-api', 'mobility',
       'mobility-client-portal', 'pondu', 'cora', 'trade', 'platform-admin',
     ] as const

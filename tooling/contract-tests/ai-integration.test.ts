@@ -36,7 +36,6 @@ const ALL_APPS = [
   'console',
   'union-eyes',
   'cfo',
-  'shop-quoter',
   'partners',
   'nacp-exams',
   'zonga',
@@ -156,8 +155,8 @@ describe('AI/ML integration (STUDIO-AI-01)', () => {
      * for Phase 3 (AI Integration). We only enforce usage for apps that
      * are KNOWN to have AI/ML-powered features in production already.
      */
-    const AI_EXERCISED_APPS = new Set(['cfo', 'union-eyes', 'zonga', 'shop-quoter', 'nacp-exams', 'partners', 'abr'])
-    const ML_EXERCISED_APPS = new Set(['cfo', 'union-eyes', 'zonga', 'shop-quoter', 'nacp-exams', 'partners', 'abr'])
+    const AI_EXERCISED_APPS = new Set(['cfo', 'union-eyes', 'zonga', 'nacp-exams', 'partners', 'abr'])
+    const ML_EXERCISED_APPS = new Set(['cfo', 'union-eyes', 'zonga', 'nacp-exams', 'partners', 'abr'])
 
     const SDK_WIRING: Array<{ file: string; importHint: string; activeApps: Set<string> }> = [
       { file: 'lib/ai-client.ts', importHint: 'ai-client', activeApps: AI_EXERCISED_APPS },

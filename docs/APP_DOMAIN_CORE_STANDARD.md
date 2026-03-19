@@ -14,7 +14,7 @@
 | App | Tier | Domain | Adoption Status |
 |-----|------|--------|----------------|
 | union-eyes | PRODUCTION | Union/Labour | Partial — services, workflows, queries, events exist |
-| shop-quoter | PRODUCTION | Commerce | Partial — services, workflows exist |
+| flow | PRODUCTION | Commerce | Full — services, workflows, domain core, governance, evidence |
 | zonga | INCUBATING | Media | Partial — workflows exist |
 | cfo | PILOT | Finance | Not started |
 | partners | PILOT | Commerce | Not started |
@@ -217,7 +217,7 @@ Apps are **not** required to move every file immediately. The migration approach
 | App | Priority Migrations |
 |-----|-------------------|
 | union-eyes | Claim FSM (already in services/), assignment logic, SLA workflows |
-| shop-quoter | Quote lifecycle, payment gating, PO/production gating, supplier ranking |
+| flow | Quote lifecycle, payment gating, PO/production gating, supplier ranking |
 | zonga | Release lifecycle, creator onboarding, listener actions, moderation state |
 | cfo | Financial report logic, adjustment workflows, export rules |
 | partners | Onboarding lifecycle, contract handling, revenue/update workflows |

@@ -10,6 +10,7 @@
     "typecheck": "tsc --noEmit",
     "test": "vitest run",
     "demo:seed": "tsx lib/demoSeed.ts",
+    "seed:staging": "tsx lib/seed-flow-staging.ts",
     "clean": "rm -rf .next .turbo node_modules"
   },
   "dependencies": {
@@ -22,9 +23,9 @@
     "@nzila/db": "workspace:*",
     "@nzila/blob": "workspace:*",
     "@nzila/os-core": "workspace:*",
+    "@nzila/platform-contracts": "workspace:*",
     "@nzila/platform-policy-engine": "workspace:*",
     "@nzila/pricing-engine": "workspace:*",
-    "@nzila/shop-quoter": "workspace:*",
     "@nzila/ui": "workspace:*",
     "@nzila/ai-sdk": "workspace:*",
     "@nzila/ml-sdk": "workspace:*",
@@ -51,7 +52,7 @@
     "@types/react": "^19",
     "@types/react-dom": "^19",
     "eslint": "^10",
-    "eslint-config-next": "16.1.6",
+    "eslint-config-next": "16.2.0",
     "tailwindcss": "^4",
     "typescript": "^5",
     "vitest": "^4.0.18"

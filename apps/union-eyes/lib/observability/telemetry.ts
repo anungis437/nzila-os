@@ -86,6 +86,8 @@ return null;
   });
 
   // Initialize SDK
+  // eslint-disable-next-line @typescript-eslint/ban-ts-comment
+  // @ts-ignore - Resource types may mismatch across @opentelemetry package copies
   const sdk = new NodeSDK({
     resource,
     spanProcessor: new BatchSpanProcessor(traceExporter),

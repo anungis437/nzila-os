@@ -2,7 +2,7 @@
   "description": "Canonical platform registry for Nzila OS. Source of truth for apps, platform services, shared packages, governance surfaces, and control-plane surfaces.",
   "apps": [
     { "name": "union-eyes", "path": "apps/union-eyes", "tier": "PRODUCTION", "owner": "union", "domain": "union" },
-    { "name": "shop-quoter", "path": "apps/shop-quoter", "tier": "PRODUCTION", "owner": "commerce", "domain": "commerce" },
+    { "name": "flow", "path": "apps/flow", "tier": "PRODUCTION", "owner": "commerce", "domain": "commerce" },
     { "name": "web", "path": "apps/web", "tier": "PRODUCTION", "owner": "platform", "domain": "platform" },
     { "name": "partners", "path": "apps/partners", "tier": "PILOT", "owner": "commerce", "domain": "commerce" },
     { "name": "cfo", "path": "apps/cfo", "tier": "PILOT", "owner": "finance", "domain": "finance" },
@@ -44,7 +44,7 @@
       "owner": "platform",
       "lifecycle": "STABLE",
       "apis": ["structured AI query", "prompt execution"],
-      "used_by": ["control-plane", "union-eyes", "shop-quoter", "cfo"],
+      "used_by": ["control-plane", "union-eyes", "cfo"],
       "control_plane_visible": true
     },
     {
@@ -62,7 +62,7 @@
       "owner": "platform",
       "lifecycle": "STABLE",
       "apis": ["policy evaluation", "rule enforcement"],
-      "used_by": ["union-eyes", "shop-quoter", "zonga", "cfo", "partners", "web", "console"],
+      "used_by": ["union-eyes", "zonga", "cfo", "partners", "web", "console"],
       "control_plane_visible": false
     },
     {
@@ -107,7 +107,7 @@
       "owner": "platform",
       "lifecycle": "STABLE",
       "apis": ["evidence packaging", "evidence export", "compliance artifact generation"],
-      "used_by": ["control-plane", "union-eyes", "shop-quoter"],
+      "used_by": ["control-plane", "union-eyes"],
       "control_plane_visible": true
     },
     {
@@ -215,7 +215,7 @@
       "owner": "platform",
       "lifecycle": "STABLE",
       "apis": ["proof generation", "hash chain"],
-      "used_by": ["union-eyes", "shop-quoter"],
+      "used_by": ["union-eyes"],
       "control_plane_visible": false
     },
     {
@@ -395,7 +395,7 @@
       "owner": "commerce",
       "lifecycle": "STABLE",
       "apis": ["commerce org context", "org scoping"],
-      "used_by": ["shop-quoter", "partners", "cfo"],
+      "used_by": ["partners", "cfo"],
       "control_plane_visible": false
     },
     {
@@ -460,7 +460,6 @@
     { "name": "finops", "category": "APP_SUPPORT", "owner": "finance", "stability": "EVOLVING" },
     { "name": "qbo", "category": "APP_SUPPORT", "owner": "finance", "stability": "EVOLVING" },
     { "name": "pricing-engine", "category": "APP_SUPPORT", "owner": "commerce", "stability": "STABLE" },
-    { "name": "shop-quoter", "category": "APP_SUPPORT", "owner": "commerce", "stability": "STABLE" },
     { "name": "webhooks", "category": "APP_SUPPORT", "owner": "platform", "stability": "STABLE" },
     { "name": "comms-email", "category": "APP_SUPPORT", "owner": "platform", "stability": "EVOLVING" },
     { "name": "comms-sms", "category": "APP_SUPPORT", "owner": "platform", "stability": "EVOLVING" },

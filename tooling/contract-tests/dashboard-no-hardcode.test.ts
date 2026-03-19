@@ -34,7 +34,6 @@ const DASHBOARD_APPS = [
   'partners',
   'union-eyes',
   'cfo',
-  'shop-quoter',
   'nacp-exams',
   'zonga',
   'abr',

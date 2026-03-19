@@ -1,0 +1,1 @@
+export { RecordPaymentCommand } from './types'

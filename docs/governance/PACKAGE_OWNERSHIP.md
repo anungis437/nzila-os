@@ -97,7 +97,7 @@
 | Package | Owner | Stability | Allowed Dependents | Notes |
 |---------|-------|-----------|--------------------|-------|
 | `@nzila/commerce-core` | commerce | STABLE | apps/*, packages/commerce-* | Commerce domain model |
-| `@nzila/commerce-db` | commerce | STABLE | packages/commerce-*, apps/shop-quoter, apps/web | Commerce database |
+| `@nzila/commerce-db` | commerce | STABLE | packages/commerce-*, apps/flow, apps/web | Commerce database |
 | `@nzila/commerce-events` | commerce | STABLE | packages/commerce-*, apps/* | Commerce event contracts |
 | `@nzila/commerce-state` | commerce | STABLE | packages/commerce-*, apps/* | Commerce state machines |
 | `@nzila/commerce-services` | commerce | STABLE | apps/*, packages/commerce-* | Commerce service layer |
@@ -107,7 +107,7 @@
 | `@nzila/commerce-observability` | commerce | STABLE | packages/commerce-* | Commerce telemetry |
 | `@nzila/commerce-integration-tests` | commerce | STABLE | (test only) | Commerce integration tests |
 | `@nzila/platform-commerce-org` | commerce | STABLE | apps/*, packages/commerce-* | Org-scoped commerce config |
-| `@nzila/pricing-engine` | commerce | STABLE | apps/shop-quoter, apps/web, packages/commerce-* | Pricing calculation engine |
+| `@nzila/pricing-engine` | commerce | STABLE | apps/flow, apps/web, packages/commerce-* | Pricing calculation engine |
 | `@nzila/payments-stripe` | commerce | STABLE | apps/*, packages/commerce-* | Stripe payment integration |
 | `@nzila/fx` | commerce | STABLE | apps/*, packages/commerce-* | Foreign exchange rates |
 | `@nzila/tax` | commerce | STABLE | apps/*, packages/commerce-* | Tax calculation |
@@ -172,7 +172,6 @@
 
 | Package | Owner | Stability | Allowed Dependents | Notes |
 |---------|-------|-----------|--------------------|-------|
-| `@nzila/shop-quoter` | commerce | STABLE | apps/shop-quoter | Shop Quoter adapter |
 | `@nzila/nacp-core` | nacp | EVOLVING | apps/nacp-exams | NACP exam domain logic |
 | `@nzila/zonga-core` | zonga | EVOLVING | apps/zonga | Zonga domain logic |
 | `@nzila/analytics` | platform | EVOLVING | apps/* | Analytics helpers |

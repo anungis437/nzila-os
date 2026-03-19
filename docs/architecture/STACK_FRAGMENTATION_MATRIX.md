@@ -17,7 +17,7 @@
 | **cfo** | N | **Y** | `auth()` (Clerk) + `getUserRole()` (platform RBAC) + `requireOrgAccess()` + entity membership checks | `platformDb.execute()` (raw SQL), `createScopedDb`, `createAuditedScopedDb`, `withAudit` — all from `@nzila/db` | Clerk `auth()` + `orgMembers` table lookup | **TS/Drizzle** (`@nzila/db`) — console-aligned |
 | **console** | N | **Y** | `auth()` (Clerk) + `getUserRole()` (platform RBAC `NzilaRole`) + `requireOrgAccess()` + `getOrgMembership()` | `platformDb`, `createScopedDb`, `createAuditedScopedDb`, `withAudit` — all from `@nzila/db` | Clerk `auth()` + `orgMembers` table | **TS/Drizzle** (`@nzila/db`) — **reference implementation** |
 | **partners** | N | **Y** | `auth()` (Clerk) + `requireAuth()` + `requirePartnerEntityAccess()` + `hasRole()` / `hasAnyRole()` (partner-specific roles) + tier gates | `platformDb` (via `@nzila/db/platform`), `createAuditedScopedDb`, `createScopedDb`, `withAudit`, entity membership checks | Clerk org → `partners` + `partnerEntities` table (entitlement-gated) | **TS/Drizzle** (`@nzila/db`) |
-| **shop-quoter** | N | **Y** | `auth()` (Clerk) + `authenticateUser()` (simple) | `db` + schema imports from `@nzila/db` (direct `db.query`), `platformDb.execute()` for AI actions | Clerk `auth()` (basic) | **TS/Drizzle** (`@nzila/db`) |
+| **flow** | N | **Y** | `auth()` (Clerk) + `authenticateUser()` + control-layer guards | `createScopedDb`, `createAuditedScopedDb`, `withAudit` via `@nzila/db` | Clerk `auth()` + org context | **TS/Drizzle** (`@nzila/db`) |
 | **web** | N | **N** (stub only) | `auth()` (Clerk) + `authenticateUser()` (stub) | **None** — `withAudit` is a forward-declaration stub. No `@nzila/db` dependency. | N/A (public site) | **No DB** — static/marketing |
 | **orchestrator-api** | N | **Y** (lazy init) | API key (`ORCHESTRATOR_API_KEY`) via `authenticateRequest()` + `x-request-id` / `x-actor` headers | Lazy Drizzle client (`getDb()`) using `@nzila/db/schema` — only when `DATABASE_URL` set | Header-based (`x-actor`) | **TS/Drizzle** (Fastify, not Next.js) |
 
@@ -87,13 +87,13 @@
 | Pattern | Used By | Description |
 |---------|---------|-------------|
 | `auth()` (Clerk) | **All apps** | Base Clerk session — `userId`, `orgId`, `orgRole` |
-| `authenticateUser()` | ABR, NACP, Zonga, Shop-Quoter, UE, Console, CFO, Partners, Web | Simple guard returning `{ok, userId}` or 401 |
+| `authenticateUser()` | ABR, NACP, Zonga, Flow, UE, Console, CFO, Partners, Web | Simple guard returning `{ok, userId}` or 401 |
 | `resolveOrgContext()` | NACP-Exams, Zonga | Maps Clerk org to typed app-specific context with role + permissions |
 | `getUserRole()` (platform RBAC) | Console, CFO | Reads `publicMetadata.nzilaRole` from Clerk — returns `NzilaRole` |
 | `requireOrgAccess()` | Console, CFO, Partners | Authenticates + checks `org_members` table membership |
 | `requireAuth()` / `requirePartnerEntityAccess()` | Partners | Partner-specific: role check + `partner_entities` entitlement lookup |
 | `withApiAuth()` / `requireUser()` / `requireRole()` | UE | Custom full-stack auth guard module (`api-auth-guard.ts`) with role hierarchy |
-| `withRequestContext()` | ABR, NACP, Zonga, Shop-Quoter | OS-core `AsyncLocalStorage` wrapper for request tracing |
+| `withRequestContext()` | ABR, NACP, Zonga, Flow | OS-core `AsyncLocalStorage` wrapper for request tracing |
 | API key auth | Orchestrator-API | `ORCHESTRATOR_API_KEY` bearer/header validation |
 
 ---
@@ -105,8 +105,8 @@
 | `createScopedDb(orgId)` | Console, CFO, UE, Partners | **Canonical** — entity-scoped Drizzle DAL, auto WHERE-injects `org_id` |
 | `createAuditedScopedDb({orgId, actorId})` | Console, CFO, UE, Partners | Scoped DAL + automatic audit emission on mutations |
 | `withAudit(scopedDb, ctx)` | Console, CFO, UE, Partners | Wrap mutations with audit trail |
-| `platformDb` / `platformDb.execute()` | Console, CFO, Partners, NACP, Shop-Quoter | Unscoped platform-level DB (for non-org-scoped tables like `partners`, `org_members`) |
-| `db` (direct Drizzle) | UE (`@/db/db.ts`), Shop-Quoter (`@nzila/db`) | Direct Drizzle client — **no auto-scoping** |
+| `platformDb` / `platformDb.execute()` | Console, CFO, Partners, NACP, Flow | Unscoped platform-level DB (for non-org-scoped tables like `partners`, `org_members`) |
+| `db` (direct Drizzle) | UE (`@/db/db.ts`) | Direct Drizzle client — **no auto-scoping** |
 | `createOrgScopedQuery()` | UE | Supabase-style adapter, adds `.eq('organization_id', orgId)` manually |
 | Django ORM | UE, ABR | Python-side DB access via Django models — org isolation via middleware |
 | `djangoProxy()` | UE | Forwards Next.js API requests to Django REST backend |
@@ -178,7 +178,7 @@ These apps follow the canonical NzilaOS pattern:
 ### Minimal Fragmentation: Newer Verticals
 
 - **nacp-exams**, **zonga** — Clean `resolveOrgContext()` pattern, `platformDb` for queries.
-- **shop-quoter** — Uses `@nzila/db` directly (some raw `db.query`, some `platformDb.execute()`).
+- **flow** — Full commerce vertical with control-layer guards, `createScopedDb`, governed state machines.
 - **web** — No DB at all.
 - **orchestrator-api** — Fastify, API key auth, lazy DB — appropriately different (not a business app).
 
@@ -190,8 +190,7 @@ These apps follow the canonical NzilaOS pattern:
 |----------|--------|---------------|
 | **P0** | Document "Django is authoritative for domain data" or "Migrate to TS/Drizzle" for UE and ABR | union-eyes, abr |
 | **P0** | Consolidate UE's auth to one stack (recommend: TS `@nzila/db` + `createScopedDb` as canonical, Django as API backend only) | union-eyes |
-| **P1** | Adopt `resolveOrgContext()` or `requireOrgAccess()` uniformly across all apps | nacp-exams, zonga, shop-quoter |
-| **P1** | Replace `platformDb.execute()` raw SQL with typed Drizzle queries where possible | cfo, nacp-exams, shop-quoter |
+| **P1** | Adopt `resolveOrgContext()` or `requireOrgAccess()` uniformly across all apps | nacp-exams, zonga |
+| **P1** | Replace `platformDb.execute()` raw SQL with typed Drizzle queries where possible | cfo, nacp-exams |
 | **P2** | Add `django-proxy.ts` to ABR if Django is meant to be the data layer (parity with UE) | abr |
-| **P2** | Shop-quoter: migrate from direct `db` imports to `createScopedDb` for org isolation | shop-quoter |
 | **P3** | Deprecate UE's `@/db/` local schema in favor of `@nzila/db` shared schema | union-eyes |

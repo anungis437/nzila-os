@@ -12,7 +12,7 @@ import { readFileSync, readdirSync, existsSync } from 'node:fs'
 import { resolve, join } from 'node:path'
 
 const ROOT = resolve(__dirname, '../..')
-const APPS = ['console', 'partners', 'web', 'union-eyes', 'cfo', 'shop-quoter', 'nacp-exams', 'zonga', 'abr']
+const APPS = ['console', 'partners', 'web', 'union-eyes', 'cfo', 'nacp-exams', 'zonga', 'abr']
 
 // ── Helper: read all .ts/.tsx files in a directory recursively ────────────
 

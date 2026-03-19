@@ -64,7 +64,7 @@ const logger = createClientLogger('middleware');
 // on every response so downstream API routes (running on Node.js) can call
 // createRequestContext(req) and pick it up automatically.
 // ---------------------------------------------------------------------------
-function ensureRequestId(req: NextRequest): string {
+function ensureRequestId(req: Pick<NextRequest, 'headers'>): string {
   return req.headers.get('x-request-id') ?? crypto.randomUUID();
 }
 
@@ -320,6 +320,7 @@ const clerkHandler = clerkMiddleware(async (auth, req) => {
   }
 
   // For non-API routes, run i18n middleware and return its response
+  // @ts-expect-error — Clerk and root next may bundle different NextRequest types
   const intlResponse = intlMiddleware(req);
   // intlMiddleware returns a Response; wrap it so we can attach our header
   if (intlResponse instanceof NextResponse) {
@@ -341,8 +342,9 @@ const clerkHandler = clerkMiddleware(async (auth, req) => {
 
 // Wrap clerkMiddleware to catch errors at the Clerk SDK level (before our callback runs)
 import type { NextFetchEvent } from "next/server";
-export default async function middleware(req: NextRequest, event: NextFetchEvent) {
+export default async function middleware(req: NextRequest, event: NextFetchEvent): Promise<NextResponse> {
   try {
+    // @ts-expect-error — Clerk and root next may bundle different NextRequest types
     return await clerkHandler(req, event);
   } catch (outerError) {
     console.error('[middleware] Clerk/outer error:', outerError);

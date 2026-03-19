@@ -29,7 +29,6 @@ const APPS = [
   'web',
   'union-eyes',
   'cfo',
-  'shop-quoter',
   'nacp-exams',
   'zonga',
   'abr',

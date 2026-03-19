@@ -43,7 +43,7 @@
 | App | Document |
 |---|---|
 | union-eyes | [apps/union-eyes/docs/DOMAIN_MODEL.md](../apps/union-eyes/docs/DOMAIN_MODEL.md) |
-| shop-quoter | [apps/shop-quoter/docs/DOMAIN_MODEL.md](../apps/shop-quoter/docs/DOMAIN_MODEL.md) |
+| flow | [apps/flow/docs/DOMAIN_MODEL.md](../apps/flow/docs/DOMAIN_MODEL.md) |
 | zonga | [apps/zonga/docs/DOMAIN_MODEL.md](../apps/zonga/docs/DOMAIN_MODEL.md) |
 
 ## App Architecture Shapes
@@ -51,7 +51,7 @@
 | App | Shape Doc | Meta |
 |---|---|---|
 | union-eyes | [ARCHITECTURE_SHAPE.md](../apps/union-eyes/docs/ARCHITECTURE_SHAPE.md) | [meta](../apps/union-eyes/app-architecture.meta.json) |
-| shop-quoter | [ARCHITECTURE_SHAPE.md](../apps/shop-quoter/docs/ARCHITECTURE_SHAPE.md) | [meta](../apps/shop-quoter/app-architecture.meta.json) |
+| flow | [ARCHITECTURE_SHAPE.md](../apps/flow/docs/ARCHITECTURE_SHAPE.md) | [meta](../apps/flow/app-architecture.meta.json) |
 | zonga | [ARCHITECTURE_SHAPE.md](../apps/zonga/docs/ARCHITECTURE_SHAPE.md) | [meta](../apps/zonga/app-architecture.meta.json) |
 | cfo | [ARCHITECTURE_SHAPE.md](../apps/cfo/docs/ARCHITECTURE_SHAPE.md) | [meta](../apps/cfo/app-architecture.meta.json) |
 | partners | [ARCHITECTURE_SHAPE.md](../apps/partners/docs/ARCHITECTURE_SHAPE.md) | [meta](../apps/partners/app-architecture.meta.json) |

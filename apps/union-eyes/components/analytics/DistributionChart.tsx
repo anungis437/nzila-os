@@ -106,7 +106,7 @@ export function DistributionChart({
               />
               <YAxis tick={{ fontSize: 12 }} />
               <Tooltip
-                formatter={(value: string | number | undefined) => valueFormatter(Number(value ?? 0))}
+                formatter={(value) => valueFormatter(Number(value ?? 0))}
                 contentStyle={{
                   backgroundColor: "white",
                   border: "1px solid #e5e7eb",
@@ -145,7 +145,7 @@ export function DistributionChart({
                 ))}
               </Pie>
               <Tooltip
-                formatter={(value: string | number | undefined) => valueFormatter(Number(value ?? 0))}
+                formatter={(value) => valueFormatter(Number(value ?? 0))}
                 contentStyle={{
                   backgroundColor: "white",
                   border: "1px solid #e5e7eb",

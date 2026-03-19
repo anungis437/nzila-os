@@ -100,7 +100,7 @@ tout en établissant l'isolation par organisation ?
 - 26 des 31 fichiers source utilisent `console.log`
 - Pas de notion d'organisation dans le modèle hérité
 
-**Résolution :** Le paquet `@nzila/shop-quoter` résout via :
+**Résolution :** Le paquet `@nzila/shop-quoter` (désormais supersédé par `apps/flow`) résout via :
 
 1. Schémas Zod pour validation au point d'entrée
 2. Fonctions de mappage pures avec repli sûr pour valeurs inconnues
@@ -109,7 +109,7 @@ tout en établissant l'isolation par organisation ?
 5. Import par lot avec rapports de diagnostic par enregistrement
 6. Injection de `OrgContext.orgId` pour chaque opération
 
-**Référence code :** [`packages/shop-quoter/`](../../packages/shop-quoter/)
+**Référence code :** [`apps/flow/`](../../apps/flow/) (supersède `packages/shop-quoter/`)
 
 **État :** ✅ **Résolue**
 
@@ -149,7 +149,7 @@ via `GovernancePolicy`, résolue avec des défauts sensibles via `resolvePolicy(
 | IT-1 | Tarification déterministe | ✅ Résolue | `@nzila/pricing-engine` |
 | IT-2 | Machines à états | ✅ Résolue | `@nzila/commerce-state` |
 | IT-3 | Piste d'audit à chaîne de hachage | ✅ Résolue | `@nzila/commerce-audit` + `@nzila/commerce-evidence` |
-| IT-4 | Migration sans perte | ✅ Résolue | `@nzila/shop-quoter` |
+| IT-4 | Migration sans perte | ✅ Résolue | `apps/flow` (ex `@nzila/shop-quoter`) |
 | IT-5 | Portes de gouvernance | ✅ Résolue | `@nzila/commerce-governance` |
 
 ---

@@ -56,7 +56,6 @@ const nextConfig: NextConfig = {
     "@nzila/commerce-services",
     "@nzila/commerce-audit",
     "@nzila/pricing-engine",
-    "@nzila/shop-quoter",
   ],
   output: process.platform === 'win32' ? undefined : 'standalone',
   images: {

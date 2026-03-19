@@ -42,7 +42,7 @@ console.log('══════════════════════�
 // ── Gate 1: All apps must have middleware.ts with rate limiting ──────────
 const NEXTJS_APPS = [
   'abr', 'cfo', 'console', 'cora', 'mobility', 'mobility-client-portal',
-  'nacp-exams', 'partners', 'platform-admin', 'pondu', 'shop-quoter',
+  'nacp-exams', 'partners', 'platform-admin', 'pondu',
   'trade', 'union-eyes', 'web', 'zonga',
 ]
 
