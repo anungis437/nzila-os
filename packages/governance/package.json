@@ -1,12 +1,17 @@
 {
-  "name": "@nzila/comms-push",
+  "name": "@nzila/governance",
   "version": "0.1.0",
-  "private": true, "type": "module",
+  "private": true,
+  "type": "module",
   "main": "./src/index.ts",
   "types": "./src/index.ts",
   "exports": {
     ".": "./src/index.ts",
-    "./firebase": "./src/adapters/firebase.ts"
+    "./engine": "./src/engine.ts",
+    "./policy": "./src/policy.ts",
+    "./middleware": "./src/middleware.ts",
+    "./decisions": "./src/decisions.ts",
+    "./schemas": "./src/schemas.ts"
   },
   "scripts": {
     "typecheck": "tsc --noEmit",
@@ -14,15 +19,13 @@
     "lint": "eslint src/"
   },
   "dependencies": {
-    "@nzila/integrations-core": "workspace:*",
-    "firebase-admin": "^13.7.0",
     "zod": "^3.24.0"
   },
   "devDependencies": {
+    "@typescript-eslint/eslint-plugin": "^8",
+    "@typescript-eslint/parser": "^8",
     "typescript": "^5",
     "vitest": "^4.0.18",
-    "@typescript-eslint/eslint-plugin": "^8.0.0",
-    "@typescript-eslint/parser": "^8.0.0",
     "eslint": "^10"
   }
 }
