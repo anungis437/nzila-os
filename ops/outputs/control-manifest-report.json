@@ -1,0 +1,693 @@
+{
+  "timestamp": "2026-03-19T22:51:28.006Z",
+  "total": 137,
+  "passed": 137,
+  "failed": 0,
+  "results": [
+    {
+      "name": "CM-001: all apps have control-manifest.json",
+      "status": "pass",
+      "detail": "17 manifests found"
+    },
+    {
+      "name": "CM-002: abr schema valid",
+      "status": "pass",
+      "detail": "schema valid"
+    },
+    {
+      "name": "CM-002: cfo schema valid",
+      "status": "pass",
+      "detail": "schema valid"
+    },
+    {
+      "name": "CM-002: console schema valid",
+      "status": "pass",
+      "detail": "schema valid"
+    },
+    {
+      "name": "CM-002: control-plane schema valid",
+      "status": "pass",
+      "detail": "schema valid"
+    },
+    {
+      "name": "CM-002: cora schema valid",
+      "status": "pass",
+      "detail": "schema valid"
+    },
+    {
+      "name": "CM-002: flow schema valid",
+      "status": "pass",
+      "detail": "schema valid"
+    },
+    {
+      "name": "CM-002: mobility schema valid",
+      "status": "pass",
+      "detail": "schema valid"
+    },
+    {
+      "name": "CM-002: mobility-client-portal schema valid",
+      "status": "pass",
+      "detail": "schema valid"
+    },
+    {
+      "name": "CM-002: nacp-exams schema valid",
+      "status": "pass",
+      "detail": "schema valid"
+    },
+    {
+      "name": "CM-002: orchestrator-api schema valid",
+      "status": "pass",
+      "detail": "schema valid"
+    },
+    {
+      "name": "CM-002: partners schema valid",
+      "status": "pass",
+      "detail": "schema valid"
+    },
+    {
+      "name": "CM-002: platform-admin schema valid",
+      "status": "pass",
+      "detail": "schema valid"
+    },
+    {
+      "name": "CM-002: pondu schema valid",
+      "status": "pass",
+      "detail": "schema valid"
+    },
+    {
+      "name": "CM-002: trade schema valid",
+      "status": "pass",
+      "detail": "schema valid"
+    },
+    {
+      "name": "CM-002: union-eyes schema valid",
+      "status": "pass",
+      "detail": "schema valid"
+    },
+    {
+      "name": "CM-002: web schema valid",
+      "status": "pass",
+      "detail": "schema valid"
+    },
+    {
+      "name": "CM-002: zonga schema valid",
+      "status": "pass",
+      "detail": "schema valid"
+    },
+    {
+      "name": "CM-003: abr immutable controls",
+      "status": "pass",
+      "detail": "no immutable controls waived"
+    },
+    {
+      "name": "CM-003: cfo immutable controls",
+      "status": "pass",
+      "detail": "no immutable controls waived"
+    },
+    {
+      "name": "CM-003: console immutable controls",
+      "status": "pass",
+      "detail": "no immutable controls waived"
+    },
+    {
+      "name": "CM-003: control-plane immutable controls",
+      "status": "pass",
+      "detail": "no immutable controls waived"
+    },
+    {
+      "name": "CM-003: cora immutable controls",
+      "status": "pass",
+      "detail": "no immutable controls waived"
+    },
+    {
+      "name": "CM-003: flow immutable controls",
+      "status": "pass",
+      "detail": "no immutable controls waived"
+    },
+    {
+      "name": "CM-003: mobility immutable controls",
+      "status": "pass",
+      "detail": "no immutable controls waived"
+    },
+    {
+      "name": "CM-003: mobility-client-portal immutable controls",
+      "status": "pass",
+      "detail": "no immutable controls waived"
+    },
+    {
+      "name": "CM-003: nacp-exams immutable controls",
+      "status": "pass",
+      "detail": "no immutable controls waived"
+    },
+    {
+      "name": "CM-003: orchestrator-api immutable controls",
+      "status": "pass",
+      "detail": "no immutable controls waived"
+    },
+    {
+      "name": "CM-003: partners immutable controls",
+      "status": "pass",
+      "detail": "no immutable controls waived"
+    },
+    {
+      "name": "CM-003: platform-admin immutable controls",
+      "status": "pass",
+      "detail": "no immutable controls waived"
+    },
+    {
+      "name": "CM-003: pondu immutable controls",
+      "status": "pass",
+      "detail": "no immutable controls waived"
+    },
+    {
+      "name": "CM-003: trade immutable controls",
+      "status": "pass",
+      "detail": "no immutable controls waived"
+    },
+    {
+      "name": "CM-003: union-eyes immutable controls",
+      "status": "pass",
+      "detail": "no immutable controls waived"
+    },
+    {
+      "name": "CM-003: web immutable controls",
+      "status": "pass",
+      "detail": "no immutable controls waived"
+    },
+    {
+      "name": "CM-003: zonga immutable controls",
+      "status": "pass",
+      "detail": "no immutable controls waived"
+    },
+    {
+      "name": "CM-004: abr risk level consistent",
+      "status": "pass",
+      "detail": "risk: low"
+    },
+    {
+      "name": "CM-004: cfo risk level consistent",
+      "status": "pass",
+      "detail": "risk: medium"
+    },
+    {
+      "name": "CM-004: console risk level consistent",
+      "status": "pass",
+      "detail": "risk: critical"
+    },
+    {
+      "name": "CM-004: control-plane risk level consistent",
+      "status": "pass",
+      "detail": "risk: high"
+    },
+    {
+      "name": "CM-004: cora risk level consistent",
+      "status": "pass",
+      "detail": "risk: none"
+    },
+    {
+      "name": "CM-004: flow risk level consistent",
+      "status": "pass",
+      "detail": "risk: high"
+    },
+    {
+      "name": "CM-004: mobility risk level consistent",
+      "status": "pass",
+      "detail": "risk: none"
+    },
+    {
+      "name": "CM-004: mobility-client-portal risk level consistent",
+      "status": "pass",
+      "detail": "risk: none"
+    },
+    {
+      "name": "CM-004: nacp-exams risk level consistent",
+      "status": "pass",
+      "detail": "risk: low"
+    },
+    {
+      "name": "CM-004: orchestrator-api risk level consistent",
+      "status": "pass",
+      "detail": "risk: high"
+    },
+    {
+      "name": "CM-004: partners risk level consistent",
+      "status": "pass",
+      "detail": "risk: medium"
+    },
+    {
+      "name": "CM-004: platform-admin risk level consistent",
+      "status": "pass",
+      "detail": "risk: none"
+    },
+    {
+      "name": "CM-004: pondu risk level consistent",
+      "status": "pass",
+      "detail": "risk: none"
+    },
+    {
+      "name": "CM-004: trade risk level consistent",
+      "status": "pass",
+      "detail": "risk: none"
+    },
+    {
+      "name": "CM-004: union-eyes risk level consistent",
+      "status": "pass",
+      "detail": "risk: critical"
+    },
+    {
+      "name": "CM-004: web risk level consistent",
+      "status": "pass",
+      "detail": "risk: medium"
+    },
+    {
+      "name": "CM-004: zonga risk level consistent",
+      "status": "pass",
+      "detail": "risk: low"
+    },
+    {
+      "name": "CM-005: abr profile valid",
+      "status": "pass",
+      "detail": "profile: abr-insights"
+    },
+    {
+      "name": "CM-005: cfo profile valid",
+      "status": "pass",
+      "detail": "profile: fintech"
+    },
+    {
+      "name": "CM-005: console profile valid",
+      "status": "pass",
+      "detail": "no profile (allowed)"
+    },
+    {
+      "name": "CM-005: control-plane profile valid",
+      "status": "pass",
+      "detail": "no profile (allowed)"
+    },
+    {
+      "name": "CM-005: cora profile valid",
+      "status": "pass",
+      "detail": "no profile (allowed)"
+    },
+    {
+      "name": "CM-005: flow profile valid",
+      "status": "pass",
+      "detail": "profile: commerce"
+    },
+    {
+      "name": "CM-005: mobility profile valid",
+      "status": "pass",
+      "detail": "no profile (allowed)"
+    },
+    {
+      "name": "CM-005: mobility-client-portal profile valid",
+      "status": "pass",
+      "detail": "no profile (allowed)"
+    },
+    {
+      "name": "CM-005: nacp-exams profile valid",
+      "status": "pass",
+      "detail": "no profile (allowed)"
+    },
+    {
+      "name": "CM-005: orchestrator-api profile valid",
+      "status": "pass",
+      "detail": "no profile (allowed)"
+    },
+    {
+      "name": "CM-005: partners profile valid",
+      "status": "pass",
+      "detail": "no profile (allowed)"
+    },
+    {
+      "name": "CM-005: platform-admin profile valid",
+      "status": "pass",
+      "detail": "no profile (allowed)"
+    },
+    {
+      "name": "CM-005: pondu profile valid",
+      "status": "pass",
+      "detail": "no profile (allowed)"
+    },
+    {
+      "name": "CM-005: trade profile valid",
+      "status": "pass",
+      "detail": "profile: commerce"
+    },
+    {
+      "name": "CM-005: union-eyes profile valid",
+      "status": "pass",
+      "detail": "profile: union-eyes"
+    },
+    {
+      "name": "CM-005: web profile valid",
+      "status": "pass",
+      "detail": "no profile (allowed)"
+    },
+    {
+      "name": "CM-005: zonga profile valid",
+      "status": "pass",
+      "detail": "profile: agtech"
+    },
+    {
+      "name": "CM-006: abr high-risk controls",
+      "status": "pass",
+      "detail": "not high/critical risk"
+    },
+    {
+      "name": "CM-006: cfo high-risk controls",
+      "status": "pass",
+      "detail": "not high/critical risk"
+    },
+    {
+      "name": "CM-006: console high-risk controls",
+      "status": "pass",
+      "detail": "enforcement + governance declared"
+    },
+    {
+      "name": "CM-006: control-plane high-risk controls",
+      "status": "pass",
+      "detail": "enforcement + governance declared"
+    },
+    {
+      "name": "CM-006: cora high-risk controls",
+      "status": "pass",
+      "detail": "not high/critical risk"
+    },
+    {
+      "name": "CM-006: flow high-risk controls",
+      "status": "pass",
+      "detail": "enforcement + governance declared"
+    },
+    {
+      "name": "CM-006: mobility high-risk controls",
+      "status": "pass",
+      "detail": "not high/critical risk"
+    },
+    {
+      "name": "CM-006: mobility-client-portal high-risk controls",
+      "status": "pass",
+      "detail": "not high/critical risk"
+    },
+    {
+      "name": "CM-006: nacp-exams high-risk controls",
+      "status": "pass",
+      "detail": "not high/critical risk"
+    },
+    {
+      "name": "CM-006: orchestrator-api high-risk controls",
+      "status": "pass",
+      "detail": "enforcement + governance declared"
+    },
+    {
+      "name": "CM-006: partners high-risk controls",
+      "status": "pass",
+      "detail": "not high/critical risk"
+    },
+    {
+      "name": "CM-006: platform-admin high-risk controls",
+      "status": "pass",
+      "detail": "not high/critical risk"
+    },
+    {
+      "name": "CM-006: pondu high-risk controls",
+      "status": "pass",
+      "detail": "not high/critical risk"
+    },
+    {
+      "name": "CM-006: trade high-risk controls",
+      "status": "pass",
+      "detail": "not high/critical risk"
+    },
+    {
+      "name": "CM-006: union-eyes high-risk controls",
+      "status": "pass",
+      "detail": "enforcement + governance declared"
+    },
+    {
+      "name": "CM-006: web high-risk controls",
+      "status": "pass",
+      "detail": "not high/critical risk"
+    },
+    {
+      "name": "CM-006: zonga high-risk controls",
+      "status": "pass",
+      "detail": "not high/critical risk"
+    },
+    {
+      "name": "CM-007: abr AI control",
+      "status": "pass",
+      "detail": "no AI routes"
+    },
+    {
+      "name": "CM-007: cfo AI control",
+      "status": "pass",
+      "detail": "no AI routes"
+    },
+    {
+      "name": "CM-007: console AI control",
+      "status": "pass",
+      "detail": "14 AI routes → aiControl=true"
+    },
+    {
+      "name": "CM-007: control-plane AI control",
+      "status": "pass",
+      "detail": "no AI routes"
+    },
+    {
+      "name": "CM-007: cora AI control",
+      "status": "pass",
+      "detail": "no AI routes"
+    },
+    {
+      "name": "CM-007: flow AI control",
+      "status": "pass",
+      "detail": "no AI routes"
+    },
+    {
+      "name": "CM-007: mobility AI control",
+      "status": "pass",
+      "detail": "no AI routes"
+    },
+    {
+      "name": "CM-007: mobility-client-portal AI control",
+      "status": "pass",
+      "detail": "no AI routes"
+    },
+    {
+      "name": "CM-007: nacp-exams AI control",
+      "status": "pass",
+      "detail": "no AI routes"
+    },
+    {
+      "name": "CM-007: orchestrator-api AI control",
+      "status": "pass",
+      "detail": "no AI routes"
+    },
+    {
+      "name": "CM-007: partners AI control",
+      "status": "pass",
+      "detail": "no AI routes"
+    },
+    {
+      "name": "CM-007: platform-admin AI control",
+      "status": "pass",
+      "detail": "no AI routes"
+    },
+    {
+      "name": "CM-007: pondu AI control",
+      "status": "pass",
+      "detail": "no AI routes"
+    },
+    {
+      "name": "CM-007: trade AI control",
+      "status": "pass",
+      "detail": "no AI routes"
+    },
+    {
+      "name": "CM-007: union-eyes AI control",
+      "status": "pass",
+      "detail": "14 AI routes → aiControl=true"
+    },
+    {
+      "name": "CM-007: web AI control",
+      "status": "pass",
+      "detail": "no AI routes"
+    },
+    {
+      "name": "CM-007: zonga AI control",
+      "status": "pass",
+      "detail": "no AI routes"
+    },
+    {
+      "name": "CM-008: abr webhook audit",
+      "status": "pass",
+      "detail": "no webhook routes"
+    },
+    {
+      "name": "CM-008: cfo webhook audit",
+      "status": "pass",
+      "detail": "no webhook routes"
+    },
+    {
+      "name": "CM-008: console webhook audit",
+      "status": "pass",
+      "detail": "2 webhook routes → audit=true"
+    },
+    {
+      "name": "CM-008: control-plane webhook audit",
+      "status": "pass",
+      "detail": "no webhook routes"
+    },
+    {
+      "name": "CM-008: cora webhook audit",
+      "status": "pass",
+      "detail": "no webhook routes"
+    },
+    {
+      "name": "CM-008: flow webhook audit",
+      "status": "pass",
+      "detail": "2 webhook routes → audit=true"
+    },
+    {
+      "name": "CM-008: mobility webhook audit",
+      "status": "pass",
+      "detail": "no webhook routes"
+    },
+    {
+      "name": "CM-008: mobility-client-portal webhook audit",
+      "status": "pass",
+      "detail": "no webhook routes"
+    },
+    {
+      "name": "CM-008: nacp-exams webhook audit",
+      "status": "pass",
+      "detail": "no webhook routes"
+    },
+    {
+      "name": "CM-008: orchestrator-api webhook audit",
+      "status": "pass",
+      "detail": "no webhook routes"
+    },
+    {
+      "name": "CM-008: partners webhook audit",
+      "status": "pass",
+      "detail": "no webhook routes"
+    },
+    {
+      "name": "CM-008: platform-admin webhook audit",
+      "status": "pass",
+      "detail": "no webhook routes"
+    },
+    {
+      "name": "CM-008: pondu webhook audit",
+      "status": "pass",
+      "detail": "no webhook routes"
+    },
+    {
+      "name": "CM-008: trade webhook audit",
+      "status": "pass",
+      "detail": "no webhook routes"
+    },
+    {
+      "name": "CM-008: union-eyes webhook audit",
+      "status": "pass",
+      "detail": "11 webhook routes → audit=true"
+    },
+    {
+      "name": "CM-008: web webhook audit",
+      "status": "pass",
+      "detail": "no webhook routes"
+    },
+    {
+      "name": "CM-008: zonga webhook audit",
+      "status": "pass",
+      "detail": "no webhook routes"
+    },
+    {
+      "name": "CM-009: abr exception expiry",
+      "status": "pass",
+      "detail": "no exceptions"
+    },
+    {
+      "name": "CM-009: cfo exception expiry",
+      "status": "pass",
+      "detail": "no exceptions"
+    },
+    {
+      "name": "CM-009: console exception expiry",
+      "status": "pass",
+      "detail": "no exceptions"
+    },
+    {
+      "name": "CM-009: control-plane exception expiry",
+      "status": "pass",
+      "detail": "no exceptions"
+    },
+    {
+      "name": "CM-009: cora exception expiry",
+      "status": "pass",
+      "detail": "1 exceptions, all dated"
+    },
+    {
+      "name": "CM-009: flow exception expiry",
+      "status": "pass",
+      "detail": "no exceptions"
+    },
+    {
+      "name": "CM-009: mobility exception expiry",
+      "status": "pass",
+      "detail": "1 exceptions, all dated"
+    },
+    {
+      "name": "CM-009: mobility-client-portal exception expiry",
+      "status": "pass",
+      "detail": "1 exceptions, all dated"
+    },
+    {
+      "name": "CM-009: nacp-exams exception expiry",
+      "status": "pass",
+      "detail": "no exceptions"
+    },
+    {
+      "name": "CM-009: orchestrator-api exception expiry",
+      "status": "pass",
+      "detail": "no exceptions"
+    },
+    {
+      "name": "CM-009: partners exception expiry",
+      "status": "pass",
+      "detail": "no exceptions"
+    },
+    {
+      "name": "CM-009: platform-admin exception expiry",
+      "status": "pass",
+      "detail": "1 exceptions, all dated"
+    },
+    {
+      "name": "CM-009: pondu exception expiry",
+      "status": "pass",
+      "detail": "1 exceptions, all dated"
+    },
+    {
+      "name": "CM-009: trade exception expiry",
+      "status": "pass",
+      "detail": "1 exceptions, all dated"
+    },
+    {
+      "name": "CM-009: union-eyes exception expiry",
+      "status": "pass",
+      "detail": "no exceptions"
+    },
+    {
+      "name": "CM-009: web exception expiry",
+      "status": "pass",
+      "detail": "no exceptions"
+    },
+    {
+      "name": "CM-009: zonga exception expiry",
+      "status": "pass",
+      "detail": "no exceptions"
+    }
+  ]
+}
