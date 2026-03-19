@@ -1,0 +1,583 @@
+{
+  "$schema": "https://nzilaos.dev/schemas/runtime-adoption-matrix.json",
+  "version": "1.0.0",
+  "generatedAt": "2025-07-25T00:00:00Z",
+  "summary": {
+    "totalApps": 17,
+    "totalEntrypoints": 1382,
+    "classifiedEntrypoints": {
+      "P0_critical": 172,
+      "P1_high": 541,
+      "P2_medium": 452,
+      "P3_low": 217
+    },
+    "enforcementAdoption": {
+      "adoptedEntrypoints": 0,
+      "adoptionPercentage": 0.0,
+      "targetPercentage": 100.0
+    },
+    "webhookHandlers": 26,
+    "cronHandlers": 21,
+    "serverActions": 1
+  },
+  "apps": [
+    {
+      "name": "abr",
+      "framework": "nextjs",
+      "totalRoutes": 2,
+      "classification": { "P0": 0, "P1": 1, "P2": 0, "P3": 1 },
+      "adoption": {
+        "enforcement": false,
+        "governance": false,
+        "audit": false,
+        "observability": false,
+        "security": false,
+        "aiControl": false,
+        "contracts": false,
+        "events": false
+      },
+      "rolloutPriority": 11,
+      "riskLevel": "low",
+      "p0Routes": [],
+      "webhookRoutes": [],
+      "cronRoutes": []
+    },
+    {
+      "name": "cfo",
+      "framework": "nextjs",
+      "totalRoutes": 8,
+      "classification": { "P0": 2, "P1": 3, "P2": 2, "P3": 1 },
+      "adoption": {
+        "enforcement": false,
+        "governance": false,
+        "audit": false,
+        "observability": false,
+        "security": false,
+        "aiControl": false,
+        "contracts": false,
+        "events": false
+      },
+      "rolloutPriority": 6,
+      "riskLevel": "medium",
+      "p0Routes": ["finance/close", "finance/indirect-tax"],
+      "webhookRoutes": [],
+      "cronRoutes": []
+    },
+    {
+      "name": "console",
+      "framework": "nextjs",
+      "totalRoutes": 72,
+      "classification": { "P0": 18, "P1": 28, "P2": 20, "P3": 6 },
+      "adoption": {
+        "enforcement": false,
+        "governance": false,
+        "audit": false,
+        "observability": false,
+        "security": false,
+        "aiControl": false,
+        "contracts": false,
+        "events": false
+      },
+      "rolloutPriority": 2,
+      "riskLevel": "critical",
+      "p0Routes": [
+        "admin/break-glass",
+        "admin/idempotency-cleanup",
+        "admin/retention/run",
+        "ai/actions/approve",
+        "ai/actions/execute",
+        "ai/actions/propose",
+        "ai/actions/finance/stripe-monthly-reports",
+        "audit/tamper-status",
+        "audit/verify-chain",
+        "audit/verify-entity-chain",
+        "finance/close",
+        "finance/governance-links",
+        "finance/indirect-tax",
+        "finance/tax",
+        "governance/votes",
+        "stripe/checkout",
+        "stripe/webhooks",
+        "webhooks/stripe"
+      ],
+      "webhookRoutes": ["stripe/webhooks", "webhooks/stripe"],
+      "cronRoutes": [],
+      "aiRoutes": [
+        "ai/chat",
+        "ai/chat/stream",
+        "ai/embed",
+        "ai/extract",
+        "ai/generate",
+        "ai/rag/query",
+        "ai/actions/approve",
+        "ai/actions/execute",
+        "ai/actions/propose",
+        "ai/actions/finance/stripe-monthly-reports",
+        "ai/actions/knowledge/ingest",
+        "ai/prompts",
+        "ai/prompts/versions",
+        "ml/models"
+      ]
+    },
+    {
+      "name": "control-plane",
+      "framework": "nextjs",
+      "totalRoutes": 19,
+      "classification": { "P0": 4, "P1": 8, "P2": 6, "P3": 1 },
+      "adoption": {
+        "enforcement": false,
+        "governance": false,
+        "audit": false,
+        "observability": false,
+        "security": false,
+        "aiControl": false,
+        "contracts": false,
+        "events": false
+      },
+      "rolloutPriority": 3,
+      "riskLevel": "high",
+      "p0Routes": [
+        "agents/execute",
+        "governance/evaluate",
+        "governance/policies",
+        "intelligence/analyze"
+      ],
+      "webhookRoutes": [],
+      "cronRoutes": []
+    },
+    {
+      "name": "cora",
+      "framework": "nextjs",
+      "totalRoutes": 1,
+      "classification": { "P0": 0, "P1": 0, "P2": 0, "P3": 1 },
+      "adoption": {
+        "enforcement": false,
+        "governance": false,
+        "audit": false,
+        "observability": false,
+        "security": false,
+        "aiControl": false,
+        "contracts": false,
+        "events": false
+      },
+      "rolloutPriority": 12,
+      "riskLevel": "none",
+      "p0Routes": [],
+      "webhookRoutes": [],
+      "cronRoutes": []
+    },
+    {
+      "name": "flow",
+      "framework": "nextjs",
+      "totalRoutes": 16,
+      "classification": { "P0": 4, "P1": 6, "P2": 4, "P3": 2 },
+      "adoption": {
+        "enforcement": false,
+        "governance": false,
+        "audit": false,
+        "observability": false,
+        "security": false,
+        "aiControl": false,
+        "contracts": false,
+        "events": false
+      },
+      "rolloutPriority": 4,
+      "riskLevel": "high",
+      "p0Routes": [
+        "governance/telemetry",
+        "quotes/ai",
+        "shopify/webhook",
+        "zoho/webhook"
+      ],
+      "webhookRoutes": ["shopify/webhook", "zoho/webhook"],
+      "cronRoutes": []
+    },
+    {
+      "name": "mobility",
+      "framework": "nextjs",
+      "totalRoutes": 1,
+      "classification": { "P0": 0, "P1": 0, "P2": 0, "P3": 1 },
+      "adoption": {
+        "enforcement": false,
+        "governance": false,
+        "audit": false,
+        "observability": false,
+        "security": false,
+        "aiControl": false,
+        "contracts": false,
+        "events": false
+      },
+      "rolloutPriority": 13,
+      "riskLevel": "none",
+      "p0Routes": [],
+      "webhookRoutes": [],
+      "cronRoutes": []
+    },
+    {
+      "name": "mobility-client-portal",
+      "framework": "nextjs",
+      "totalRoutes": 1,
+      "classification": { "P0": 0, "P1": 0, "P2": 0, "P3": 1 },
+      "adoption": {
+        "enforcement": false,
+        "governance": false,
+        "audit": false,
+        "observability": false,
+        "security": false,
+        "aiControl": false,
+        "contracts": false,
+        "events": false
+      },
+      "rolloutPriority": 14,
+      "riskLevel": "none",
+      "p0Routes": [],
+      "webhookRoutes": [],
+      "cronRoutes": []
+    },
+    {
+      "name": "nacp-exams",
+      "framework": "nextjs",
+      "totalRoutes": 3,
+      "classification": { "P0": 0, "P1": 1, "P2": 1, "P3": 1 },
+      "adoption": {
+        "enforcement": false,
+        "governance": false,
+        "audit": false,
+        "observability": false,
+        "security": false,
+        "aiControl": false,
+        "contracts": false,
+        "events": false
+      },
+      "rolloutPriority": 9,
+      "riskLevel": "low",
+      "p0Routes": [],
+      "webhookRoutes": [],
+      "cronRoutes": []
+    },
+    {
+      "name": "orchestrator-api",
+      "framework": "fastify",
+      "totalRoutes": 7,
+      "classification": { "P0": 2, "P1": 3, "P2": 1, "P3": 1 },
+      "adoption": {
+        "enforcement": false,
+        "governance": false,
+        "audit": false,
+        "observability": false,
+        "security": false,
+        "aiControl": false,
+        "contracts": false,
+        "events": false
+      },
+      "rolloutPriority": 5,
+      "riskLevel": "high",
+      "p0Routes": ["commands", "proof-center"],
+      "webhookRoutes": [],
+      "cronRoutes": []
+    },
+    {
+      "name": "partners",
+      "framework": "nextjs",
+      "totalRoutes": 5,
+      "classification": { "P0": 0, "P1": 2, "P2": 2, "P3": 1 },
+      "adoption": {
+        "enforcement": false,
+        "governance": false,
+        "audit": false,
+        "observability": false,
+        "security": false,
+        "aiControl": false,
+        "contracts": false,
+        "events": false
+      },
+      "rolloutPriority": 7,
+      "riskLevel": "medium",
+      "p0Routes": [],
+      "webhookRoutes": [],
+      "cronRoutes": []
+    },
+    {
+      "name": "platform-admin",
+      "framework": "nextjs",
+      "totalRoutes": 1,
+      "classification": { "P0": 0, "P1": 0, "P2": 0, "P3": 1 },
+      "adoption": {
+        "enforcement": false,
+        "governance": false,
+        "audit": false,
+        "observability": false,
+        "security": false,
+        "aiControl": false,
+        "contracts": false,
+        "events": false
+      },
+      "rolloutPriority": 15,
+      "riskLevel": "none",
+      "p0Routes": [],
+      "webhookRoutes": [],
+      "cronRoutes": []
+    },
+    {
+      "name": "pondu",
+      "framework": "nextjs",
+      "totalRoutes": 1,
+      "classification": { "P0": 0, "P1": 0, "P2": 0, "P3": 1 },
+      "adoption": {
+        "enforcement": false,
+        "governance": false,
+        "audit": false,
+        "observability": false,
+        "security": false,
+        "aiControl": false,
+        "contracts": false,
+        "events": false
+      },
+      "rolloutPriority": 16,
+      "riskLevel": "none",
+      "p0Routes": [],
+      "webhookRoutes": [],
+      "cronRoutes": []
+    },
+    {
+      "name": "trade",
+      "framework": "nextjs",
+      "totalRoutes": 1,
+      "classification": { "P0": 0, "P1": 0, "P2": 0, "P3": 1 },
+      "adoption": {
+        "enforcement": false,
+        "governance": false,
+        "audit": false,
+        "observability": false,
+        "security": false,
+        "aiControl": false,
+        "contracts": false,
+        "events": false
+      },
+      "rolloutPriority": 17,
+      "riskLevel": "none",
+      "p0Routes": [],
+      "webhookRoutes": [],
+      "cronRoutes": []
+    },
+    {
+      "name": "union-eyes",
+      "framework": "nextjs",
+      "totalRoutes": 1235,
+      "classification": { "P0": 142, "P1": 486, "P2": 412, "P3": 195 },
+      "adoption": {
+        "enforcement": false,
+        "governance": false,
+        "audit": false,
+        "observability": false,
+        "security": false,
+        "aiControl": false,
+        "contracts": false,
+        "events": false
+      },
+      "rolloutPriority": 1,
+      "riskLevel": "critical",
+      "p0Routes": [
+        "billing/subscriptions",
+        "payments/webhooks/stripe",
+        "payments/webhooks/paypal",
+        "stripe/webhooks",
+        "whop/webhooks",
+        "whop/create-checkout",
+        "voting/sessions",
+        "governance/council-elections",
+        "governance/elections",
+        "governance/golden-share",
+        "governance/reserved-matters",
+        "governance/board-packets",
+        "governance/policies",
+        "governance/mission-audits",
+        "tax/t4a",
+        "tax/t106",
+        "tax/slips",
+        "tax/rl-1",
+        "tax/cra-export",
+        "tax/cope-receipts",
+        "financial/reports",
+        "financial/vendors",
+        "ai/summarize",
+        "ai/classify",
+        "ai/extract-clauses",
+        "ai/copilot",
+        "ai/match-precedents",
+        "ai/semantic-search",
+        "ai/mamba",
+        "strike/disbursements",
+        "strike/funds",
+        "strike/stipends",
+        "strike/eligibility",
+        "signatures/webhooks/docusign",
+        "webhooks/signatures",
+        "emergency/activate",
+        "emergency/recovery",
+        "emergency/pipeda",
+        "enterprise/DSR",
+        "enterprise/SSO",
+        "enterprise/webhooks",
+        "enterprise/integrations",
+        "cron/monthly-dues",
+        "cron/monthly-per-capita",
+        "cron/sla-watchdog",
+        "gdpr/consents",
+        "gdpr/requests",
+        "compliance/audit-logs",
+        "compliance/alerts",
+        "compliance/validate"
+      ],
+      "webhookRoutes": [
+        "enterprise/webhooks",
+        "integrations/webhooks",
+        "integrations/shopify/webhooks",
+        "payments/webhooks/paypal",
+        "payments/webhooks/stripe",
+        "signatures/webhooks/docusign",
+        "stripe/webhooks",
+        "webhooks/clc",
+        "webhooks/signatures",
+        "webhooks/stripe",
+        "whop/webhooks"
+      ],
+      "cronRoutes": [
+        "cron/analytics/daily-metrics",
+        "cron/education-reminders",
+        "cron/external-data-sync",
+        "cron/monthly-dues",
+        "cron/monthly-per-capita",
+        "cron/overdue-notifications",
+        "cron/process-messages",
+        "cron/process-notifications",
+        "cron/scheduled-reports",
+        "cron/sla-watchdog",
+        "rewards/cron"
+      ],
+      "aiRoutes": [
+        "ai/summarize",
+        "ai/search",
+        "ai/classify",
+        "ai/copilot",
+        "ai/extract-clauses",
+        "ai/feedback",
+        "ai/grievances-triage",
+        "ai/insights",
+        "ai/ingest",
+        "ai/match-precedents",
+        "ai/mamba",
+        "ai/semantic-search",
+        "ai/employers-risk",
+        "ai/cache-stats"
+      ]
+    },
+    {
+      "name": "web",
+      "framework": "nextjs",
+      "totalRoutes": 5,
+      "classification": { "P0": 0, "P1": 1, "P2": 3, "P3": 1 },
+      "adoption": {
+        "enforcement": false,
+        "governance": false,
+        "audit": false,
+        "observability": false,
+        "security": false,
+        "aiControl": false,
+        "contracts": false,
+        "events": false
+      },
+      "rolloutPriority": 8,
+      "riskLevel": "medium",
+      "p0Routes": [],
+      "webhookRoutes": [],
+      "cronRoutes": []
+    },
+    {
+      "name": "zonga",
+      "framework": "nextjs",
+      "totalRoutes": 4,
+      "classification": { "P0": 0, "P1": 2, "P2": 1, "P3": 1 },
+      "adoption": {
+        "enforcement": false,
+        "governance": false,
+        "audit": false,
+        "observability": false,
+        "security": false,
+        "aiControl": false,
+        "contracts": false,
+        "events": false
+      },
+      "rolloutPriority": 10,
+      "riskLevel": "low",
+      "p0Routes": [],
+      "webhookRoutes": [],
+      "cronRoutes": []
+    }
+  ],
+  "controlMatrix": {
+    "enforcement": {
+      "package": "@nzila/enforcement",
+      "requiredFor": ["P0", "P1"],
+      "totalQualifyingRoutes": 713,
+      "adoptedRoutes": 0,
+      "adoptionPercentage": 0.0
+    },
+    "governance": {
+      "package": "@nzila/governance",
+      "requiredFor": ["P0"],
+      "totalQualifyingRoutes": 172,
+      "adoptedRoutes": 0,
+      "adoptionPercentage": 0.0
+    },
+    "audit": {
+      "package": "@nzila/audit",
+      "requiredFor": ["P0", "P1"],
+      "totalQualifyingRoutes": 713,
+      "adoptedRoutes": 0,
+      "adoptionPercentage": 0.0
+    },
+    "observability": {
+      "package": "@nzila/observability",
+      "requiredFor": ["P0", "P1", "P2", "P3"],
+      "totalQualifyingRoutes": 1382,
+      "adoptedRoutes": 0,
+      "adoptionPercentage": 0.0
+    },
+    "security": {
+      "package": "@nzila/security",
+      "requiredFor": ["P0", "P1", "P2"],
+      "totalQualifyingRoutes": 1165,
+      "adoptedRoutes": 0,
+      "adoptionPercentage": 0.0
+    },
+    "aiControl": {
+      "package": "@nzila/ai-control",
+      "requiredFor": ["AI routes"],
+      "totalQualifyingRoutes": 32,
+      "adoptedRoutes": 0,
+      "adoptionPercentage": 0.0
+    },
+    "contracts": {
+      "package": "@nzila/contracts",
+      "requiredFor": ["Event emitters"],
+      "totalQualifyingRoutes": 198,
+      "adoptedRoutes": 0,
+      "adoptionPercentage": 0.0
+    },
+    "events": {
+      "package": "@nzila/events",
+      "requiredFor": ["Event emitters"],
+      "totalQualifyingRoutes": 198,
+      "adoptedRoutes": 0,
+      "adoptionPercentage": 0.0
+    }
+  },
+  "milestones": {
+    "M0_baseline": { "status": "complete", "scope": "Inventory" },
+    "M1_critical": { "status": "not-started", "scope": "172 P0 routes", "apps": ["union-eyes", "console", "control-plane", "flow", "orchestrator-api"] },
+    "M2_high": { "status": "not-started", "scope": "713 P0+P1 routes", "apps": 11 },
+    "M3_broad": { "status": "not-started", "scope": "1165 P0+P1+P2 routes", "apps": 14 },
+    "M4_full": { "status": "not-started", "scope": "1382 all routes", "apps": 17 }
+  }
+}
