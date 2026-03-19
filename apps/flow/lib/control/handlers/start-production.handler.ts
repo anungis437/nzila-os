@@ -56,7 +56,7 @@ export const startProductionHandler: CommandHandler<StartProductionCommand> = {
       orgId: context.org_id,
       orderId: input.order_id,
       purchaseOrderId: input.purchase_order_id,
-      vendorId: input.vendor_id,
+      assignedVendorId: input.vendor_id,
       status: 'in_production',
     })
 
