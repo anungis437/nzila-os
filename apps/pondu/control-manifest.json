@@ -1,0 +1,25 @@
+{
+  "$schema": "https://nzilaos.dev/schemas/control-manifest.json",
+  "app": "pondu",
+  "version": "1.0.0",
+  "riskLevel": "none",
+  "policyProfile": null,
+  "controls": {
+    "enforcement": false,
+    "governance": false,
+    "audit": false,
+    "observability": true,
+    "security": true,
+    "aiControl": false,
+    "contracts": false,
+    "events": false
+  },
+  "exceptions": [
+    {
+      "control": "enforcement",
+      "reason": "Scaffold app with 1 route, no P0/P1 endpoints",
+      "expiresOn": "2026-12-31",
+      "owner": "platform-team"
+    }
+  ]
+}

@@ -153,6 +153,9 @@ jobs:
       - name: Governance fail-closed gate
         run: pnpm validate:governance:gate
 
+      - name: Control manifest validation
+        run: pnpm validate:control:manifests
+
       - name: Validate release strict
         run: pnpm validate:release:strict
 
@@ -161,7 +164,9 @@ jobs:
         uses: actions/upload-artifact@v7
         with:
           name: governance-gate-report
-          path: ops/outputs/governance-gate-report.json
+          path: |
+            ops/outputs/governance-gate-report.json
+            ops/outputs/control-manifest-report.json
           retention-days: 90
 
   ml-gates:

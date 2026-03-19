@@ -1,0 +1,18 @@
+{
+  "$schema": "https://nzilaos.dev/schemas/control-manifest.json",
+  "app": "orchestrator-api",
+  "version": "1.0.0",
+  "riskLevel": "high",
+  "policyProfile": null,
+  "controls": {
+    "enforcement": true,
+    "governance": true,
+    "audit": true,
+    "observability": true,
+    "security": true,
+    "aiControl": false,
+    "contracts": true,
+    "events": true
+  },
+  "exceptions": []
+}
