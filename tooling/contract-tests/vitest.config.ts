@@ -20,6 +20,8 @@ export default defineProject({
       // Workspace packages used by scripts/slo-gate.ts
       '@nzila/platform-performance': join(__dirname, '..', '..', 'packages', 'platform-performance', 'src', 'index.ts'),
       '@nzila/platform-ops': join(__dirname, '..', '..', 'packages', 'platform-ops', 'src', 'index.ts'),
+      // Governance packages used by proof harness
+      '@nzila/enforcement': join(__dirname, '..', '..', 'packages', 'enforcement', 'src', 'index.ts'),
     },
   },
 })
