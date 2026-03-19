@@ -72,7 +72,6 @@ export class TracedLogger {
   }
 
   child(extra: Record<string, unknown>): TracedLogger {
-    const parent = this
     const childLogger = new TracedLogger(this.config)
     const originalLog = childLogger.log.bind(childLogger)
     childLogger.log = (level: LogLevel, event: string, metadata: Record<string, unknown>) => {

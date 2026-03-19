@@ -3,7 +3,6 @@ import {
   extractTraceFromHeaders,
   withTraceContextAsync,
   buildTraceHeaders,
-  generateSpanId,
   type TraceContext,
 } from './context.js'
 import { createSpan, endSpan, addSpanEvent } from './spans.js'
