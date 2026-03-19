@@ -42,6 +42,7 @@ export const requestQuoteRevisionHandler: CommandHandler<RequestQuoteRevisionCom
       requestMessage: input.request_message,
       status: 'OPEN',
       createdAt: new Date(),
+      resolvedAt: null,
     })
 
     const eventId = dispatchDomainEvent({

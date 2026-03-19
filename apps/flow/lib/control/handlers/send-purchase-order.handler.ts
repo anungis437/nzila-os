@@ -30,7 +30,7 @@ export const sendPurchaseOrderHandler: CommandHandler<SendPurchaseOrderCommand> 
     }
 
     const statusBefore = po.status
-    await purchaseOrderRepo.update(input.purchase_order_id, context.org_id, { status: 'SENT' })
+    await purchaseOrderRepo.update(input.purchase_order_id, context.org_id, { status: 'sent' })
 
     const eventId = dispatchDomainEvent({
       type: 'po_sent',

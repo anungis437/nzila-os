@@ -34,7 +34,7 @@ export const sendQuoteHandler: CommandHandler<SendQuoteCommand> = {
 
     // 4. Persist
     const statusBefore = quote.status
-    await quoteRepo.update(input.quote_id, context.org_id, { status: 'SENT_TO_CLIENT' })
+    await quoteRepo.update(input.quote_id, context.org_id, { status: 'sent' })
 
     // 5. Event
     const eventId = dispatchDomainEvent({

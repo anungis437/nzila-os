@@ -57,13 +57,13 @@ export const startProductionHandler: CommandHandler<StartProductionCommand> = {
       orderId: input.order_id,
       purchaseOrderId: input.purchase_order_id,
       vendorId: input.vendor_id,
-      status: 'IN_PRODUCTION',
+      status: 'in_production',
     })
 
     // Update order status
     await orderRepo.update(input.order_id, context.org_id, {
-      status: 'IN_PRODUCTION',
-      productionStatus: 'IN_PRODUCTION',
+      status: 'fulfillment',
+      productionStatus: 'in_production',
     })
 
     const eventId = dispatchDomainEvent({

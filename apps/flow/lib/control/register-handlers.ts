@@ -55,10 +55,10 @@ const handlers = [
   createShipmentHandler,
   markShipmentShippedHandler,
   markShipmentDeliveredHandler,
-] as const
+]
 
 for (const handler of handlers) {
-  registerHandler(handler)
+  registerHandler(handler as never)
 }
 
 export { handlers }

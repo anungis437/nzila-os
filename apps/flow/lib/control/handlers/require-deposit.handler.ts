@@ -42,7 +42,6 @@ export const requireDepositHandler: CommandHandler<RequireDepositCommand> = {
     if (order.quoteId) {
       await paymentRequirementRepo.save({
         id: randomUUID(),
-        orgId: context.org_id,
         quoteId: order.quoteId,
         depositRequired: input.deposit_required,
         depositPercent: input.deposit_percent ?? null,
