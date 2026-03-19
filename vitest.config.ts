@@ -138,6 +138,15 @@ export default defineConfig({
       'packages/platform-ai-contract',
       // Control Plane
       'apps/control-plane',
+      // Governance packages
+      'packages/observability',
+      'packages/audit',
+      'packages/ai-control',
+      'packages/contracts',
+      'packages/events',
+      'packages/governance',
+      'packages/security',
+      'packages/enforcement',
     ],
   },
 })
