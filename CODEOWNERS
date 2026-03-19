@@ -47,6 +47,10 @@
 
 # Governance — immutable controls, profiles, GA gate
 /governance/**                 @nzila/platform @nzila/security
+/packages/enforcement/**       @nzila/platform @nzila/security
+/packages/governance/**        @nzila/platform @nzila/security
+/packages/audit/**             @nzila/platform @nzila/security
+/packages/ai-control/**        @nzila/platform @nzila/security
 /security/redteam/**           @nzila/security @nzila/platform
 
 # Platform packages — ownership changes require platform review

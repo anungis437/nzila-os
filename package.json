@@ -81,6 +81,7 @@
     "validate:readmes": "tsx scripts/validate-readmes.ts",
     "validate:release:strict": "tsx scripts/validate-release-strict.ts",
     "validate:governance": "pnpm ga-check && pnpm contract-tests && pnpm validate:release:strict",
+    "validate:governance:gate": "tsx tooling/governance/validate-governance-gate.ts",
     "verify:env": "tsx tooling/build-env-check.ts",
     "verify:security": "tsx tooling/security-headers-check.ts",
     "verify:backup": "tsx scripts/backup-verify.ts",

@@ -1,0 +1,63 @@
+{
+  "timestamp": "2026-03-19T22:42:38.767Z",
+  "total": 11,
+  "passed": 11,
+  "failed": 0,
+  "checks": [
+    {
+      "name": "GOV-GATE-001: All governance packages have source",
+      "status": "pass",
+      "detail": "8 packages verified"
+    },
+    {
+      "name": "GOV-GATE-002: All governance packages have package.json",
+      "status": "pass",
+      "detail": "8 package.json files verified"
+    },
+    {
+      "name": "GOV-GATE-003: All governance packages have test files",
+      "status": "pass",
+      "detail": "8 packages have tests"
+    },
+    {
+      "name": "GOV-GATE-004: Enforcement package exports pipeline",
+      "status": "pass",
+      "detail": "All 5 enforcement exports present"
+    },
+    {
+      "name": "GOV-GATE-005: Enforcement layers are complete",
+      "status": "pass",
+      "detail": "All 5 enforcement layers exported"
+    },
+    {
+      "name": "GOV-GATE-006: Governance no-bypass contract tests exist",
+      "status": "pass",
+      "detail": "All 5 bypass invariants present"
+    },
+    {
+      "name": "GOV-GATE-007: Runtime adoption matrix exists",
+      "status": "pass",
+      "detail": "Matrix tracks 17 apps"
+    },
+    {
+      "name": "GOV-GATE-008: GA check script exists",
+      "status": "pass",
+      "detail": "GA check script verified"
+    },
+    {
+      "name": "GOV-GATE-009: CODEOWNERS protects governance files",
+      "status": "pass",
+      "detail": "CODEOWNERS protects 2 governance paths"
+    },
+    {
+      "name": "GOV-GATE-010: ESLint configs exist for governance packages",
+      "status": "pass",
+      "detail": "8 ESLint configs verified"
+    },
+    {
+      "name": "GOV-GATE-011: Vitest config includes governance packages",
+      "status": "pass",
+      "detail": "8 packages in vitest workspace"
+    }
+  ]
+}

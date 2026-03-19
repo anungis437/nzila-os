@@ -150,8 +150,19 @@ jobs:
       - name: Contract tests
         run: pnpm contract-tests
 
+      - name: Governance fail-closed gate
+        run: pnpm validate:governance:gate
+
       - name: Validate release strict
         run: pnpm validate:release:strict
+
+      - name: Upload governance gate report
+        if: always()
+        uses: actions/upload-artifact@v7
+        with:
+          name: governance-gate-report
+          path: ops/outputs/governance-gate-report.json
+          retention-days: 90
 
   ml-gates:
     runs-on: ubuntu-latest
