@@ -106,8 +106,8 @@ export async function getPaymentSnapshotForOrder(
     due_before_production: dueBeforeProduction,
     events: payments.map((p) => ({
       id: p.id,
-      event_type: p.method ?? 'payment',
-      amount: Number(p.amount ?? 0),
+      event_type: p.provider ?? 'payment',
+      amount: Number(p.amountPaid ?? 0),
       created_at: p.createdAt ?? new Date(),
     })),
   }
