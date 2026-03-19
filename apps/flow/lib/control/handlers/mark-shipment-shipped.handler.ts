@@ -31,12 +31,11 @@ export const markShipmentShippedHandler: CommandHandler<MarkShipmentShippedComma
     await addTracking(input.shipment_id, context.org_id, {
       carrier: input.carrier,
       trackingNumber: input.tracking_number,
-      trackingUrl: input.tracking_url,
     }, input.actor_id)
 
     // Update order
     await orderRepo.update(input.order_id, context.org_id, {
-      status: 'SHIPPED',
+      status: 'shipped',
       fulfillmentStatus: 'SHIPPED',
     })
 

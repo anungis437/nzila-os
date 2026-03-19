@@ -30,9 +30,9 @@ export const recordPaymentHandler: CommandHandler<RecordPaymentCommand> = {
       id: paymentId,
       orgId: context.org_id,
       orderId: input.order_id,
-      amountPaid: input.amount,
-      amountDue: order.totalAmount,
-      status: 'pending',
+      amountPaid: String(input.amount),
+      amountDue: order.total ?? '0',
+      status: 'pending_deposit',
       provider: input.method,
       providerRef: input.reference ?? null,
       depositRequired: false,
@@ -41,14 +41,14 @@ export const recordPaymentHandler: CommandHandler<RecordPaymentCommand> = {
 
     // Compute new payment state
     const totalPaid = await paymentRepo.totalPaidForOrder(input.order_id)
-    const newPaymentStatus = totalPaid >= order.totalAmount ? 'PAID' : 'PARTIALLY_PAID'
+    const newPaymentStatus = totalPaid >= Number(order.total) ? 'PAID' : 'PARTIALLY_PAID'
 
     // Update order payment status
     const orderStatusUpdate: Record<string, unknown> = { paymentStatus: newPaymentStatus }
-    if (newPaymentStatus === 'PAID' && order.status === 'DEPOSIT_REQUIRED') {
-      orderStatusUpdate.status = 'PAYMENT_COMPLETE'
-    } else if (totalPaid > 0 && order.status === 'DEPOSIT_REQUIRED') {
-      orderStatusUpdate.status = 'PAYMENT_PARTIAL'
+    if (newPaymentStatus === 'PAID' && order.status === 'confirmed') {
+      orderStatusUpdate.status = 'fulfillment'
+    } else if (totalPaid > 0 && order.status === 'confirmed') {
+      orderStatusUpdate.status = 'fulfillment'
     }
     await orderRepo.update(input.order_id, context.org_id, orderStatusUpdate)
 

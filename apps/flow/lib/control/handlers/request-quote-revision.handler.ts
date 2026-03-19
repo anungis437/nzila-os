@@ -32,12 +32,11 @@ export const requestQuoteRevisionHandler: CommandHandler<RequestQuoteRevisionCom
     }
 
     const statusBefore = quote.status
-    await quoteRepo.update(input.quote_id, context.org_id, { status: 'REVISION_REQUESTED' })
+    await quoteRepo.update(input.quote_id, context.org_id, { status: 'revised' })
 
     // Record revision
     await revisionRepo.save({
       id: randomUUID(),
-      orgId: context.org_id,
       quoteId: input.quote_id,
       requestedBy: input.actor_id,
       requestMessage: input.request_message,

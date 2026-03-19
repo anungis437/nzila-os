@@ -30,7 +30,7 @@ export const completeProductionHandler: CommandHandler<CompleteProductionCommand
     const statusBefore = job.status
     await productionRepo.update(input.production_job_id, context.org_id, {
       status: 'ready_to_ship',
-      actualCompletion: new Date(),
+      qualityCheckedAt: new Date(),
     })
 
     // Update order production status

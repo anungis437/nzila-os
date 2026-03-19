@@ -34,7 +34,7 @@ export const requireDepositHandler: CommandHandler<RequireDepositCommand> = {
 
     const statusBefore = order.status
     await orderRepo.update(input.order_id, context.org_id, {
-      status: 'DEPOSIT_REQUIRED',
+      status: 'needs_attention',
       paymentStatus: 'PENDING_DEPOSIT',
     })
 

@@ -30,6 +30,7 @@ export const createQuoteHandler: CommandHandler<CreateQuoteCommand> = {
     await quoteRepo.create({
       id: quoteId,
       orgId: context.org_id,
+      ref: `QT-${quoteId.slice(0, 8).toUpperCase()}`,
       status: 'draft',
       customerId: input.customer_id,
       currency: input.currency,

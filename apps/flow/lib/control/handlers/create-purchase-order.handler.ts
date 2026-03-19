@@ -62,11 +62,12 @@ export const createPurchaseOrderHandler: CommandHandler<CreatePurchaseOrderComma
     await purchaseOrderRepo.create({
       id: poId,
       orgId: context.org_id,
+      ref: `PO-${poId.slice(0, 8).toUpperCase()}`,
       orderId: input.order_id,
-      vendorId: input.vendor_id,
+      supplierId: input.vendor_id,
       status: 'draft',
-      totalAmount: order.total,
-      expectedDelivery: input.expected_delivery ?? null,
+      total: order.total ?? '0',
+      expectedDeliveryDate: input.expected_delivery ?? null,
       notes: input.notes ?? null,
       createdBy: input.actor_id,
     })
