@@ -10,8 +10,6 @@ import {
   DocumentTextIcon,
   UserIcon,
   CubeIcon,
-  TruckIcon,
-  FlagIcon,
   ExclamationTriangleIcon,
 } from '@heroicons/react/24/outline'
 import { quoteRepo, customerRepo } from '@/lib/db'
@@ -23,40 +21,19 @@ import { findShareLinksForQuote } from '@/lib/services/share-link-service'
 import { predictConversion } from '@/lib/ai-actions'
 import type { QuoteWorkflowStatus } from '@/lib/schemas/workflow-schemas'
 import { QuoteDetailActions } from './quote-detail-actions'
-
-// ── Status configuration ────────────────────────────────────────────────────
-
-const statusConfig: Record<string, { dot: string; bg: string; text: string; label: string }> = {
-  DRAFT:              { dot: 'bg-gray-400',   bg: 'bg-gray-50',    text: 'text-gray-700',   label: 'Draft' },
-  INTERNAL_REVIEW:    { dot: 'bg-blue-400',   bg: 'bg-blue-50',    text: 'text-blue-700',   label: 'Internal Review' },
-  SENT_TO_CLIENT:     { dot: 'bg-violet-400', bg: 'bg-violet-50',  text: 'text-violet-700', label: 'Sent to Client' },
-  REVISION_REQUESTED: { dot: 'bg-amber-400',  bg: 'bg-amber-50',   text: 'text-amber-700',  label: 'Revision Requested' },
-  ACCEPTED:           { dot: 'bg-emerald-500',bg: 'bg-emerald-50', text: 'text-emerald-700',label: 'Accepted' },
-  DEPOSIT_REQUIRED:   { dot: 'bg-orange-400', bg: 'bg-orange-50',  text: 'text-orange-700', label: 'Deposit Required' },
-  READY_FOR_PO:       { dot: 'bg-indigo-400', bg: 'bg-indigo-50',  text: 'text-indigo-700', label: 'Ready for PO' },
-  IN_PRODUCTION:      { dot: 'bg-cyan-400',   bg: 'bg-cyan-50',    text: 'text-cyan-700',   label: 'In Production' },
-  SHIPPED:            { dot: 'bg-teal-400',   bg: 'bg-teal-50',    text: 'text-teal-700',   label: 'Shipped' },
-  DELIVERED:          { dot: 'bg-emerald-500',bg: 'bg-emerald-50', text: 'text-emerald-700',label: 'Delivered' },
-  CLOSED:             { dot: 'bg-gray-400',   bg: 'bg-gray-50',    text: 'text-gray-600',   label: 'Closed' },
-  EXPIRED:            { dot: 'bg-gray-300',   bg: 'bg-gray-50',    text: 'text-gray-500',   label: 'Expired' },
-  CANCELLED:          { dot: 'bg-gray-300',   bg: 'bg-gray-50',    text: 'text-gray-500',   label: 'Cancelled' },
-  PRICING:            { dot: 'bg-blue-400',   bg: 'bg-blue-50',    text: 'text-blue-700',   label: 'Pricing' },
-  READY:              { dot: 'bg-indigo-400', bg: 'bg-indigo-50',  text: 'text-indigo-700', label: 'Ready' },
-  SENT:               { dot: 'bg-violet-400', bg: 'bg-violet-50',  text: 'text-violet-700', label: 'Sent' },
-  REVIEWING:          { dot: 'bg-amber-400',  bg: 'bg-amber-50',   text: 'text-amber-700',  label: 'Reviewing' },
-  DECLINED:           { dot: 'bg-red-400',    bg: 'bg-red-50',     text: 'text-red-700',    label: 'Declined' },
-}
+import { StatusBadge, LifecycleTimeline, SystemGuidance, ProgressStepper } from '../../../(dashboard)/components'
+import type { Step, TimelineEvent } from '../../../(dashboard)/components'
 
 // Lifecycle phases for progress bar
-const LIFECYCLE_PHASES = [
+const QUOTE_STEPS: Step[] = [
   { key: 'DRAFT', label: 'Draft', icon: DocumentTextIcon },
   { key: 'REVIEW', label: 'Review', icon: ClockIcon },
   { key: 'CLIENT', label: 'Client', icon: UserIcon },
   { key: 'ACCEPTED', label: 'Accepted', icon: CheckCircleIcon },
   { key: 'PAYMENT', label: 'Payment', icon: CurrencyDollarIcon },
   { key: 'PRODUCTION', label: 'Production', icon: CubeIcon },
-  { key: 'DELIVERY', label: 'Delivery', icon: TruckIcon },
-  { key: 'CLOSED', label: 'Closed', icon: FlagIcon },
+  { key: 'DELIVERY', label: 'Delivery' },
+  { key: 'CLOSED', label: 'Closed' },
 ]
 
 function phaseIndex(status: string): number {
@@ -76,19 +53,6 @@ function phaseIndex(status: string): number {
   return map[status] ?? 0
 }
 
-// Timeline event icon mapping
-function timelineIcon(event: string) {
-  const e = event.toLowerCase()
-  if (e.includes('accepted') || e.includes('approved')) return { icon: CheckCircleIcon, color: 'bg-emerald-400' }
-  if (e.includes('sent') || e.includes('send')) return { icon: TruckIcon, color: 'bg-violet-400' }
-  if (e.includes('revision') || e.includes('request')) return { icon: ExclamationTriangleIcon, color: 'bg-amber-400' }
-  if (e.includes('payment') || e.includes('deposit')) return { icon: CurrencyDollarIcon, color: 'bg-orange-400' }
-  if (e.includes('production')) return { icon: CubeIcon, color: 'bg-cyan-400' }
-  if (e.includes('shipped') || e.includes('delivered')) return { icon: TruckIcon, color: 'bg-teal-400' }
-  if (e.includes('closed')) return { icon: FlagIcon, color: 'bg-gray-400' }
-  return { icon: ClockIcon, color: 'bg-electric' }
-}
-
 function fmt(n: number) {
   return new Intl.NumberFormat('en-CA', { style: 'currency', currency: 'CAD' }).format(n)
 }
@@ -106,7 +70,6 @@ export default async function QuoteDetailPage({ params }: { params: Promise<{ id
     : null
 
   const status = (quote.status ?? 'draft').toUpperCase()
-  const cfg = statusConfig[status] ?? statusConfig.DRAFT
   const currentPhase = phaseIndex(status)
 
   // Load workflow data
@@ -135,6 +98,35 @@ export default async function QuoteDetailPage({ params }: { params: Promise<{ id
     }
   } catch { /* skip if unavailable */ }
 
+  // Build timeline events for shared component
+  const quoteTimeline: TimelineEvent[] = [
+    { label: 'Created', description: 'Quote created', timestamp: quote.createdAt, actor: quote.createdBy ?? undefined },
+    ...timeline.map((e) => ({
+      label: e.event.replace(/_/g, ' '),
+      description: e.description,
+      timestamp: e.timestamp,
+      actor: e.actor ?? undefined,
+    })),
+  ]
+
+  // Status-specific guidance
+  const guidanceMap: Record<string, { severity: 'info' | 'success' | 'warning' | 'error' | 'tip'; message: string }> = {
+    DRAFT:              { severity: 'info',    message: 'This quote is in draft — complete the details and submit for internal review.' },
+    INTERNAL_REVIEW:    { severity: 'info',    message: 'Awaiting internal review. Once approved, it can be sent to the client.' },
+    SENT_TO_CLIENT:     { severity: 'tip',     message: 'Quote sent to client — waiting for their response.' },
+    REVISION_REQUESTED: { severity: 'warning', message: 'The client has requested changes — review their feedback and update the quote.' },
+    ACCEPTED:           { severity: 'success', message: 'Client accepted! Set up payment requirements or proceed to production.' },
+    DEPOSIT_REQUIRED:   { severity: 'warning', message: 'Deposit required before production can begin.' },
+    READY_FOR_PO:       { severity: 'info',    message: 'Ready for purchase order — create POs for the required materials.' },
+    IN_PRODUCTION:      { severity: 'info',    message: 'Production is underway.' },
+    SHIPPED:            { severity: 'info',    message: 'Order has been shipped — awaiting delivery confirmation.' },
+    DELIVERED:          { severity: 'success', message: 'Delivered to client. Review and close when ready.' },
+    CLOSED:             { severity: 'info',    message: 'This quote is closed.' },
+    EXPIRED:            { severity: 'warning', message: 'This quote has expired. Create a new version if the client is still interested.' },
+    CANCELLED:          { severity: 'error',   message: 'This quote was cancelled.' },
+  }
+  const guidance = guidanceMap[status]
+
   return (
     <div className="p-6 lg:p-8 max-w-6xl mx-auto space-y-6">
       {/* Back */}
@@ -151,55 +143,22 @@ export default async function QuoteDetailPage({ params }: { params: Promise<{ id
         <div>
           <div className="flex items-center gap-3">
             <h1 className="text-2xl font-bold text-navy">{quote.reference}</h1>
-            <span className={`inline-flex items-center gap-1.5 px-2.5 py-1 text-xs font-semibold rounded-full ${cfg.bg} ${cfg.text}`}>
-              <span className={`h-1.5 w-1.5 rounded-full ${cfg.dot}`} />
-              {cfg.label}
-            </span>
+            <StatusBadge status={status} />
           </div>
           <p className="text-sm text-gray-500 mt-1">{quote.title}</p>
         </div>
-        <QuoteDetailActions quoteId={id} status={status} />
+        <QuoteDetailActions quoteId={id} status={status} basePath={base} />
       </div>
 
       {/* ── Lifecycle Progress ─────────────────────────────────────── */}
       <div className="bg-white rounded-xl border border-gray-200 p-5">
-        <div className="flex items-center justify-between">
-          {LIFECYCLE_PHASES.map((phase, i) => {
-            const isComplete = i < currentPhase
-            const isCurrent = i === currentPhase
-            const Icon = phase.icon
-            return (
-              <div key={phase.key} className="flex items-center flex-1 last:flex-none">
-                <div className="flex flex-col items-center">
-                  <div className={`flex items-center justify-center h-8 w-8 rounded-full transition-colors ${
-                    isComplete
-                      ? 'bg-electric text-white'
-                      : isCurrent
-                        ? 'bg-electric/10 text-electric ring-2 ring-electric/30'
-                        : 'bg-gray-100 text-gray-400'
-                  }`}>
-                    {isComplete ? (
-                      <CheckCircleIcon className="h-4 w-4" />
-                    ) : (
-                      <Icon className="h-4 w-4" />
-                    )}
-                  </div>
-                  <span className={`text-[10px] mt-1.5 font-medium ${
-                    isCurrent ? 'text-electric' : isComplete ? 'text-navy' : 'text-gray-400'
-                  }`}>
-                    {phase.label}
-                  </span>
-                </div>
-                {i < LIFECYCLE_PHASES.length - 1 && (
-                  <div className={`flex-1 h-0.5 mx-2 mt-[-14px] rounded-full ${
-                    i < currentPhase ? 'bg-electric' : 'bg-gray-200'
-                  }`} />
-                )}
-              </div>
-            )
-          })}
-        </div>
+        <ProgressStepper steps={QUOTE_STEPS} currentIndex={currentPhase} />
       </div>
+
+      {/* ── Guidance ───────────────────────────────────────────────── */}
+      {guidance && (
+        <SystemGuidance severity={guidance.severity} message={guidance.message} />
+      )}
 
       {/* ── Main Grid ──────────────────────────────────────────────── */}
       <div className="grid grid-cols-1 lg:grid-cols-3 gap-6">
@@ -384,19 +343,15 @@ export default async function QuoteDetailPage({ params }: { params: Promise<{ id
             <h2 className="text-sm font-semibold text-navy uppercase tracking-wider mb-4">Workflow</h2>
             {availableTransitions.length > 0 ? (
               <div className="space-y-2">
-                {availableTransitions.map((t) => {
-                  const targetCfg = statusConfig[t.to] ?? statusConfig.DRAFT
-                  return (
+                {availableTransitions.map((t) => (
                     <div
                       key={`${t.from}-${t.to}`}
                       className="flex items-center gap-2 text-sm px-3 py-2.5 bg-gray-50 rounded-lg"
                     >
-                      <span className={`h-2 w-2 rounded-full ${targetCfg.dot}`} />
-                      <span className="text-gray-600">{t.label}</span>
-                      <span className="ml-auto text-xs font-medium text-gray-500">{targetCfg.label}</span>
+                      <span className="text-gray-600 flex-1">{t.label}</span>
+                      <StatusBadge status={t.to} />
                     </div>
-                  )
-                })}
+                ))}
               </div>
             ) : (
               <p className="text-sm text-gray-400">No transitions available</p>
@@ -595,47 +550,7 @@ export default async function QuoteDetailPage({ params }: { params: Promise<{ id
           {/* Timeline */}
           <section className="bg-white rounded-xl border border-gray-200 p-6">
             <h2 className="text-sm font-semibold text-navy uppercase tracking-wider mb-4">Timeline</h2>
-            <div className="relative">
-              {/* Vertical line */}
-              <div className="absolute left-[9px] top-2 bottom-2 w-px bg-gray-200" />
-
-              <div className="space-y-4">
-                {/* Created event */}
-                <div className="flex items-start gap-3 relative">
-                  <div className="mt-0.5 h-[18px] w-[18px] rounded-full bg-electric flex items-center justify-center shrink-0 z-10">
-                    <DocumentTextIcon className="h-2.5 w-2.5 text-white" />
-                  </div>
-                  <div className="min-w-0">
-                    <p className="text-sm font-medium text-navy">Created</p>
-                    <p className="text-xs text-gray-500">Quote created</p>
-                    <p className="text-[10px] text-gray-400 mt-0.5">
-                      {new Date(quote.createdAt).toLocaleString('en-CA')}
-                      {quote.createdBy ? ` · ${quote.createdBy}` : ''}
-                    </p>
-                  </div>
-                </div>
-
-                {timeline.map((event) => {
-                  const ti = timelineIcon(event.event)
-                  const Icon = ti.icon
-                  return (
-                    <div key={event.id} className="flex items-start gap-3 relative">
-                      <div className={`mt-0.5 h-[18px] w-[18px] rounded-full ${ti.color} flex items-center justify-center shrink-0 z-10`}>
-                        <Icon className="h-2.5 w-2.5 text-white" />
-                      </div>
-                      <div className="min-w-0">
-                        <p className="text-sm font-medium text-navy">{event.event.replace(/_/g, ' ')}</p>
-                        <p className="text-xs text-gray-500">{event.description}</p>
-                        <p className="text-[10px] text-gray-400 mt-0.5">
-                          {new Date(event.timestamp).toLocaleString('en-CA')}
-                          {event.actor ? ` · ${event.actor}` : ''}
-                        </p>
-                      </div>
-                    </div>
-                  )
-                })}
-              </div>
-            </div>
+            <LifecycleTimeline events={quoteTimeline} />
           </section>
         </div>
       </div>

@@ -76,6 +76,11 @@ export async function updateOrderAction(
   if (data.status) {
     const statusCommandMap: Record<string, string> = {
       confirmed: 'confirm_order',
+      fulfillment: 'start_fulfillment',
+      shipped: 'ship_order',
+      delivered: 'mark_order_delivered',
+      completed: 'complete_order',
+      cancelled: 'cancel_order',
     }
     const commandType = statusCommandMap[data.status]
     if (commandType) {
@@ -94,7 +99,7 @@ export async function updateOrderAction(
       return result
     }
   }
-  // Non-status updates or unmapped statuses go direct
+  // Non-status updates go direct
   const ctx = await getDbContext()
   return updateOrder(ctx, orderId, data)
 }

@@ -48,6 +48,15 @@ import { voidInvoiceHandler } from './handlers/void-invoice.handler'
 
 // Workflow trigger handlers
 import { triggerSalesToProcurementHandler } from './handlers/trigger-sales-to-procurement.handler'
+import { checkProductionReadinessHandler } from './handlers/check-production-readiness.handler'
+
+// Order lifecycle handlers (ship / deliver)
+import { shipOrderHandler } from './handlers/ship-order.handler'
+import { markOrderDeliveredHandler } from './handlers/mark-order-delivered.handler'
+
+// PO lifecycle handlers (receive / cancel)
+import { receivePOLineHandler } from './handlers/receive-po-line.handler'
+import { cancelPurchaseOrderHandler } from './handlers/cancel-purchase-order.handler'
 
 // ── Registration ───────────────────────────────────────────────────────────
 
@@ -77,6 +86,11 @@ const handlers = [
   issueInvoiceHandler,
   voidInvoiceHandler,
   triggerSalesToProcurementHandler,
+  checkProductionReadinessHandler,
+  shipOrderHandler,
+  markOrderDeliveredHandler,
+  receivePOLineHandler,
+  cancelPurchaseOrderHandler,
 ]
 
 for (const handler of handlers) {

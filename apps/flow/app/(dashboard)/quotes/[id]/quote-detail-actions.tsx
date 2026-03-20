@@ -20,9 +20,10 @@ import { triggerSalesToProcurementAction } from '@/app/actions/workflow-triggers
 interface QuoteDetailActionsProps {
   quoteId: string
   status: string
+  basePath: string
 }
 
-export function QuoteDetailActions({ quoteId, status }: QuoteDetailActionsProps) {
+export function QuoteDetailActions({ quoteId, status, basePath }: QuoteDetailActionsProps) {
   const [sending, setSending] = useState(false)
   const [linkUrl, setLinkUrl] = useState<string | null>(null)
   const [error, setError] = useState<string | null>(null)
@@ -188,7 +189,7 @@ export function QuoteDetailActions({ quoteId, status }: QuoteDetailActionsProps)
       {poResult?.ok && (
         <p className="text-xs text-emerald-600 font-medium">
           PO created successfully.{' '}
-          <a href={`/purchase-orders/${poResult.poId}`} className="underline hover:text-emerald-700">View PO →</a>
+          <a href={`${basePath}/purchase-orders/${poResult.poId}`} className="underline hover:text-emerald-700">View PO →</a>
         </p>
       )}
     </div>

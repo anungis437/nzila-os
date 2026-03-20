@@ -254,6 +254,49 @@ export const TriggerSalesToProcurementCommand = z.object({
 })
 export type TriggerSalesToProcurementCommand = z.infer<typeof TriggerSalesToProcurementCommand>
 
+// ── Order Shipping / Delivery ──────────────────────────────────────────────
+
+export const ShipOrderCommand = z.object({
+  ...baseFields,
+  type: z.literal('ship_order'),
+  order_id: z.string().uuid(),
+})
+export type ShipOrderCommand = z.infer<typeof ShipOrderCommand>
+
+export const MarkOrderDeliveredCommand = z.object({
+  ...baseFields,
+  type: z.literal('mark_order_delivered'),
+  order_id: z.string().uuid(),
+})
+export type MarkOrderDeliveredCommand = z.infer<typeof MarkOrderDeliveredCommand>
+
+// ── Purchase Order Lifecycle ───────────────────────────────────────────────
+
+export const ReceivePOLineCommand = z.object({
+  ...baseFields,
+  type: z.literal('receive_po_line'),
+  line_id: z.string().uuid(),
+  purchase_order_id: z.string().uuid(),
+  quantity_received: z.number().int().nonnegative(),
+})
+export type ReceivePOLineCommand = z.infer<typeof ReceivePOLineCommand>
+
+export const CancelPurchaseOrderCommand = z.object({
+  ...baseFields,
+  type: z.literal('cancel_purchase_order'),
+  purchase_order_id: z.string().uuid(),
+})
+export type CancelPurchaseOrderCommand = z.infer<typeof CancelPurchaseOrderCommand>
+
+// ── Production Readiness Check ─────────────────────────────────────────────
+
+export const CheckProductionReadinessCommand = z.object({
+  ...baseFields,
+  type: z.literal('check_production_readiness'),
+  order_id: z.string().uuid(),
+})
+export type CheckProductionReadinessCommand = z.infer<typeof CheckProductionReadinessCommand>
+
 // ── Union Type ─────────────────────────────────────────────────────────────
 
 export type FlowCommand =
@@ -282,5 +325,10 @@ export type FlowCommand =
   | IssueInvoiceCommand
   | VoidInvoiceCommand
   | TriggerSalesToProcurementCommand
+  | ShipOrderCommand
+  | MarkOrderDeliveredCommand
+  | ReceivePOLineCommand
+  | CancelPurchaseOrderCommand
+  | CheckProductionReadinessCommand
 
 export type FlowCommandType = FlowCommand['type']

@@ -3,7 +3,7 @@
 import { getReadContext } from '@/lib/clerk-org-resolver'
 import { db, commercePayments, commerceInvoices, commerceCustomers } from '@nzila/db'
 import { eq, desc, and } from 'drizzle-orm'
-import { recordPayment as recordPaymentService } from '@/lib/financial-service'
+import { executeCommand } from '@/lib/control/control-adapter'
 
 export async function getPaymentsAction(opts?: { limit?: number; offset?: number }) {
   const ctx = await getReadContext()
@@ -57,11 +57,18 @@ export async function recordPaymentAction(data: {
     .limit(1)
 
   if (!invoice) throw new Error('Invoice not found')
+  if (!invoice.orderId) throw new Error('Invoice is not linked to an order')
 
-  return recordPaymentService({
-    invoiceId: data.invoiceId,
+  const result = await executeCommand({
+    type: 'record_payment',
+    order_id: invoice.orderId,
     amount: data.amount,
-    method: data.method,
+    currency: 'CAD' as const,
+    method: (data.method.toUpperCase() || 'OTHER') as 'BANK_TRANSFER' | 'CREDIT_CARD' | 'CHECK' | 'CASH' | 'OTHER',
     reference: data.reference,
+    actor_id: '',
   })
+
+  if (!result.ok) throw new Error(result.error ?? 'Payment recording failed')
+  return result.data
 }
