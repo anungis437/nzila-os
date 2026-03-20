@@ -11,6 +11,7 @@
  * 5. Return structured CommandResult
  */
 import type { CommandContext, CommandResult, CommandHandler } from './types'
+import { afterCommandSuccess, emitCommandEvent } from './control-plane-bridge'
 import { logger } from '@/lib/logger'
 
 const registry = new Map<string, CommandHandler<unknown>>()
@@ -56,6 +57,11 @@ export async function execute<T extends { type: string }>(
       entityId: result.entity_id,
       statusAfter: result.status_after,
     })
+
+    // Control plane post-execution hook: emit system event + metrics
+    if (result.success) {
+      afterCommandSuccess(context, result)
+    }
 
     return result
   } catch (err: unknown) {

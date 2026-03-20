@@ -42,6 +42,7 @@ export default defineConfig({
       'packages/zonga-rights',
       'packages/zonga-payments',
       'packages/zonga-intelligence',
+      'packages/zonga-control-plane',
       'packages/os-core',
       'packages/payments-stripe',
       'packages/platform-export',
