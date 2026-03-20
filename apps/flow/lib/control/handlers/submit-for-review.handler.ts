@@ -1,72 +1,55 @@
 /**
- * Flow — Send Quote Handler
+ * Flow — Submit for Review Handler
  */
 import type { CommandHandler, CommandResult } from '@/lib/control/types'
-import { SendQuoteCommand } from '@/lib/commands/types'
+import { SubmitForReviewCommand } from '@/lib/commands/types'
 import { quoteRepo } from '@/lib/repositories'
 import { checkQuoteInvariants } from '@/lib/control/guards/invariant-guard'
-import { quoteCanBeSent } from '@/domain/invariants'
 import { validateTransition } from '@/lib/control/guards/workflow-guard'
 import { dispatchDomainEvent } from '@/lib/control/dispatch/event-dispatcher'
 import { dispatchAuditEntry } from '@/lib/control/dispatch/audit-dispatcher'
 import { EntityNotFoundError } from '@/lib/control/errors/entity-not-found-error'
 
-export const sendQuoteHandler: CommandHandler<SendQuoteCommand> = {
-  commandType: 'send_quote',
+export const submitForReviewHandler: CommandHandler<SubmitForReviewCommand> = {
+  commandType: 'submit_for_review',
 
   async execute(command, context): Promise<CommandResult> {
-    const input = SendQuoteCommand.parse(command)
+    const input = SubmitForReviewCommand.parse(command)
 
-    // 1. Invariant (DB-level: entity exists, customer exists)
     const inv = await checkQuoteInvariants(input.quote_id, context.org_id)
     if (!inv.valid) {
       return { success: false, errors: [{ code: 'INVARIANT_VIOLATION', message: inv.violations.join('; ') }] }
     }
 
-    // 2. Load
     const quote = await quoteRepo.findById(input.quote_id, context.org_id)
     if (!quote) throw new EntityNotFoundError('quote', input.quote_id)
 
-    // 2b. Domain invariant (pure predicate)
-    const lineCount = quote.lines?.length ?? 0
-    const domainCheck = quoteCanBeSent(
-      { customer_id: quote.customerId, valid_until: quote.validUntil ? new Date(quote.validUntil) : null, total_amount: Number(quote.total ?? 0) },
-      lineCount,
-    )
-    if (!domainCheck.valid) {
-      return { success: false, errors: [{ code: 'DOMAIN_INVARIANT', message: domainCheck.violations.join('; ') }] }
-    }
-
-    // 3. Workflow
-    const wf = validateTransition('quote', quote.status, 'SENT_TO_CLIENT')
+    const currentStatus = (quote.status ?? 'draft').toUpperCase()
+    const wf = validateTransition('quote', currentStatus, 'INTERNAL_REVIEW')
     if (!wf.allowed) {
-      return { success: false, errors: [{ code: 'INVALID_TRANSITION', message: wf.reason ?? `Cannot transition from ${quote.status} to SENT_TO_CLIENT` }] }
+      return { success: false, errors: [{ code: 'INVALID_TRANSITION', message: wf.reason ?? `Cannot submit for review from ${currentStatus}` }] }
     }
 
-    // 4. Persist
-    const statusBefore = quote.status
-    await quoteRepo.update(input.quote_id, context.org_id, { status: 'sent' })
+    await quoteRepo.update(input.quote_id, { status: 'INTERNAL_REVIEW' })
 
-    // 5. Event
     const eventId = dispatchDomainEvent({
-      type: 'quote_sent',
+      type: 'quote_submitted_for_review',
       actor_id: input.actor_id,
       org_id: context.org_id,
       entity_type: 'quote',
       entity_id: input.quote_id,
       correlation_id: context.correlation_id,
-      metadata: { from_status: statusBefore },
+      metadata: { from_status: currentStatus },
     })
 
-    // 6. Audit
     const auditRef = await dispatchAuditEntry({
       org_id: context.org_id,
       actor_id: input.actor_id,
       entity_type: 'quote',
       entity_id: input.quote_id,
-      action: 'quote_sent',
-      status_before: statusBefore,
-      status_after: 'SENT_TO_CLIENT',
+      action: 'quote_submitted_for_review',
+      status_before: currentStatus,
+      status_after: 'INTERNAL_REVIEW',
       correlation_id: context.correlation_id,
     })
 
@@ -74,10 +57,10 @@ export const sendQuoteHandler: CommandHandler<SendQuoteCommand> = {
       success: true,
       entity_type: 'quote',
       entity_id: input.quote_id,
-      status_after: 'SENT_TO_CLIENT',
+      status_after: 'INTERNAL_REVIEW',
       emitted_event_ids: [eventId],
       audit_ref: auditRef,
-      message: 'Quote sent to client',
+      message: 'Quote submitted for internal review',
     }
   },
 }

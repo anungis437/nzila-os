@@ -43,3 +43,37 @@ export {
   type Invoice,
   type AuditEvent,
 } from './entities'
+
+// Domain invariants — pure predicate functions
+export {
+  type InvariantResult,
+  type PaymentInfo,
+  quoteHasLines,
+  quoteHasCustomer,
+  quoteNotExpired,
+  quoteCanBeSent,
+  orderHasCustomer,
+  orderNotCancelled,
+  orderNotClosed,
+  orderCanBeConfirmed,
+  depositSatisfied,
+  fullPaymentSatisfied,
+  poHasVendor,
+  poNotCancelled,
+  poCanBeSent,
+  productionHasVendor,
+  productionCanStart,
+  shipmentHasTrackingInfo,
+  invoiceNotVoid,
+  invoiceNotPaid,
+  invoiceCanBeIssued,
+  invoiceCanBeVoided,
+} from './invariants'
+
+// Conversion rules — entity promotion predicates
+export {
+  canConvertQuoteToOrder,
+  canCreatePOFromOrder,
+  canStartProductionFromPO,
+  canCreateInvoiceFromOrder,
+} from './conversion-rules'

@@ -9,6 +9,7 @@ import type { CommandHandler, CommandResult } from '@/lib/control/types'
 import { ConvertQuoteToOrderCommand } from '@/lib/commands/types'
 import { quoteRepo, orderRepo } from '@/lib/repositories'
 import { checkQuoteInvariants } from '@/lib/control/guards/invariant-guard'
+import { canConvertQuoteToOrder } from '@/domain/conversion-rules'
 import { dispatchDomainEvent } from '@/lib/control/dispatch/event-dispatcher'
 import { dispatchAuditEntry } from '@/lib/control/dispatch/audit-dispatcher'
 import { EntityNotFoundError } from '@/lib/control/errors/entity-not-found-error'
@@ -27,8 +28,14 @@ export const convertQuoteToOrderHandler: CommandHandler<ConvertQuoteToOrderComma
     const quote = await quoteRepo.findById(input.quote_id, context.org_id)
     if (!quote) throw new EntityNotFoundError('quote', input.quote_id)
 
-    if (quote.status !== 'accepted') {
-      return { success: false, errors: [{ code: 'INVALID_TRANSITION', message: `Quote must be accepted to convert — current: ${quote.status}` }] }
+    // Domain conversion rule — checks status, customer, lines, and total
+    const lineCount = quote.lines?.length ?? 0
+    const conversionCheck = canConvertQuoteToOrder(
+      { status: quote.status?.toUpperCase() as 'ACCEPTED' | 'READY_FOR_PO', customer_id: quote.customerId, total_amount: Number(quote.total ?? 0) },
+      lineCount,
+    )
+    if (!conversionCheck.valid) {
+      return { success: false, errors: [{ code: 'CONVERSION_BLOCKED', message: conversionCheck.violations.join('; ') }] }
     }
 
     // Create order from quote

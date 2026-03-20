@@ -12,6 +12,7 @@ import {
   deleteOrderLine,
 } from '@nzila/commerce-db'
 import { getDbContext, getReadContext } from '@/lib/clerk-org-resolver'
+import { executeCommand } from '@/lib/control/control-adapter'
 
 // ── Read Actions ──────────────────────────────────────────────────────────
 
@@ -58,6 +59,10 @@ export async function createOrderAction(data: {
   return createOrder(ctx, { ...data, createdBy: ctx.actorId })
 }
 
+/**
+ * Update order. Status changes route through the command bus for governance;
+ * non-status field updates go direct to commerce-db.
+ */
 export async function updateOrderAction(
   orderId: string,
   data: Partial<{
@@ -67,6 +72,29 @@ export async function updateOrderAction(
     billingAddress: Record<string, unknown> | null
   }>,
 ) {
+  // If there's a status change, route it through the command bus
+  if (data.status) {
+    const statusCommandMap: Record<string, string> = {
+      confirmed: 'confirm_order',
+    }
+    const commandType = statusCommandMap[data.status]
+    if (commandType) {
+      const result = await executeCommand({
+        type: commandType,
+        order_id: orderId,
+        actor_id: '', // resolved by control adapter
+      })
+      if (!result.ok) return result
+      // If there are other fields besides status, update those directly
+      const { status: _, ...rest } = data
+      if (Object.keys(rest).length > 0) {
+        const ctx = await getDbContext()
+        return updateOrder(ctx, orderId, rest)
+      }
+      return result
+    }
+  }
+  // Non-status updates or unmapped statuses go direct
   const ctx = await getDbContext()
   return updateOrder(ctx, orderId, data)
 }

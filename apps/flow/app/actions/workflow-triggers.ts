@@ -4,10 +4,11 @@
  * Workflow Trigger Actions
  *
  * Server actions for key workflow transitions:
- * 1. Sales → Procurement: Create PO from accepted quote
+ * 1. Sales → Procurement: Create PO from accepted quote (via command bus)
  * 2. Receiving → Production: Trigger production readiness when all PO items received
  */
 import { getReadContext } from '@/lib/clerk-org-resolver'
+import { executeCommand } from '@/lib/control/control-adapter'
 import { auth } from '@clerk/nextjs/server'
 import { revalidatePath } from 'next/cache'
 
@@ -24,73 +25,30 @@ export interface TriggerPOResult {
 /**
  * Create a Purchase Order from an accepted quote.
  *
- * This is the "Sales → Procurement" handoff:
- * 1. Validates quote status (must be ACCEPTED or READY_FOR_PO)
- * 2. Ensures a default supplier exists
- * 3. Creates Order + PO via quote-to-po-service
+ * Routes through the command bus for full guard/audit pipeline:
+ * invariant → workflow → payment → service → event → audit.
  */
 export async function triggerSalesToProcurementAction(
   quoteId: string,
 ): Promise<TriggerPOResult> {
-  try {
-    const ctx = await getReadContext()
-    const { userId } = await auth()
-    if (!userId) return { ok: false, error: 'Not authenticated' }
+  const { userId } = await auth()
+  if (!userId) return { ok: false, error: 'Not authenticated' }
 
-    const { quoteRepo } = await import('@/lib/db')
-    const quote = await quoteRepo.findById(quoteId)
-    if (!quote) return { ok: false, error: 'Quote not found' }
+  const result = await executeCommand({
+    type: 'trigger_sales_to_procurement',
+    quote_id: quoteId,
+    actor_id: userId,
+  })
 
-    const status = (quote.status ?? 'draft').toUpperCase()
-
-    // If ACCEPTED, transition to READY_FOR_PO first
-    if (status === 'ACCEPTED') {
-      await quoteRepo.update(quoteId, { status: 'READY_FOR_PO' })
-    } else if (status !== 'READY_FOR_PO') {
-      return {
-        ok: false,
-        error: `Quote must be ACCEPTED or READY_FOR_PO to create PO. Current: ${status}`,
-      }
-    }
-
-    // Find or create a default supplier for this org
-    const { db, commerceSuppliers } = await import('@nzila/db')
-    const { eq } = await import('drizzle-orm')
-
-    let [supplier] = await db
-      .select()
-      .from(commerceSuppliers)
-      .where(eq(commerceSuppliers.orgId, ctx.orgId))
-      .limit(1)
-
-    if (!supplier) {
-      // Create a default supplier for demo
-      ;[supplier] = await db
-        .insert(commerceSuppliers)
-        .values({
-          orgId: ctx.orgId,
-          name: 'Default Supplier',
-          email: 'supplier@example.com',
-          status: 'active',
-        })
-        .returning()
-    }
-
-    // Use the quote-to-po service
-    const { createPurchaseOrderFromQuote } = await import('@/lib/services/quote-to-po-service')
-    const result = await createPurchaseOrderFromQuote(
-      quoteId,
-      supplier.id,
-      userId,
-      ctx.orgId,
-    )
-
+  if (result.ok) {
     revalidatePath('/purchase-orders')
     revalidatePath(`/quotes/${quoteId}`)
+  }
 
-    return result
-  } catch (err) {
-    return { ok: false, error: err instanceof Error ? err.message : 'Failed to create PO' }
+  return {
+    ok: result.ok,
+    orderId: result.data?.entity_id,
+    error: result.error,
   }
 }
 

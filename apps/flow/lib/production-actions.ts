@@ -4,10 +4,12 @@
  * Production Server Actions
  *
  * Next.js server actions for order management and production planning.
+ * State-changing operations route through the command bus for governance.
  */
 
 import { revalidatePath } from 'next/cache'
 import { resolveOrgContext } from '@/lib/resolve-org'
+import { executeCommandV2 } from '@/lib/control/control-adapter'
 import {
   createOrder,
   getOrder,
@@ -145,41 +147,37 @@ export async function listOrdersAction(filter?: {
 export async function confirmOrderAction(
   orderId: string,
 ): Promise<ActionResult<typeof commerceOrders.$inferSelect>> {
-  try {
-    await resolveOrgContext()
-    const order = await confirmOrder(orderId)
+  const result = await executeCommandV2({
+    type: 'confirm_order',
+    order_id: orderId,
+    actor_id: '', // resolved by control adapter
+  })
 
+  if (result.success) {
     revalidatePath('/orders')
     revalidatePath(`/orders/${orderId}`)
     revalidatePath('/production')
-
-    return { success: true, data: order }
-  } catch (error) {
-    return {
-      success: false,
-      error: error instanceof Error ? error.message : 'Failed to confirm order',
-    }
   }
+
+  return result
 }
 
 export async function startFulfillmentAction(
   orderId: string,
 ): Promise<ActionResult<typeof commerceOrders.$inferSelect>> {
-  try {
-    await resolveOrgContext()
-    const order = await startFulfillment(orderId)
+  const result = await executeCommandV2({
+    type: 'start_fulfillment',
+    order_id: orderId,
+    actor_id: '', // resolved by control adapter
+  })
 
+  if (result.success) {
     revalidatePath('/orders')
     revalidatePath(`/orders/${orderId}`)
     revalidatePath('/production')
-
-    return { success: true, data: order }
-  } catch (error) {
-    return {
-      success: false,
-      error: error instanceof Error ? error.message : 'Failed to start fulfillment',
-    }
   }
+
+  return result
 }
 
 export async function markOrderShippedAction(
@@ -202,46 +200,47 @@ export async function markOrderShippedAction(
     }
   }
 }
+      error: error instanceof Error ? error.message : 'Failed to mark order as shipped',
+    }
+  }
+}
 
 export async function completeOrderAction(
   orderId: string,
 ): Promise<ActionResult<typeof commerceOrders.$inferSelect>> {
-  try {
-    await resolveOrgContext()
-    const order = await completeOrder(orderId)
+  const result = await executeCommandV2({
+    type: 'complete_order',
+    order_id: orderId,
+    actor_id: '', // resolved by control adapter
+  })
 
+  if (result.success) {
     revalidatePath('/orders')
     revalidatePath(`/orders/${orderId}`)
     revalidatePath('/production')
-
-    return { success: true, data: order }
-  } catch (error) {
-    return {
-      success: false,
-      error: error instanceof Error ? error.message : 'Failed to complete order',
-    }
   }
+
+  return result
 }
 
 export async function cancelOrderAction(
   orderId: string,
   reason?: string,
 ): Promise<ActionResult<typeof commerceOrders.$inferSelect>> {
-  try {
-    await resolveOrgContext()
-    const order = await cancelOrder(orderId, reason)
+  const result = await executeCommandV2({
+    type: 'cancel_order',
+    order_id: orderId,
+    actor_id: '', // resolved by control adapter
+    reason,
+  })
 
+  if (result.success) {
     revalidatePath('/orders')
     revalidatePath(`/orders/${orderId}`)
     revalidatePath('/production')
-
-    return { success: true, data: order }
-  } catch (error) {
-    return {
-      success: false,
-      error: error instanceof Error ? error.message : 'Failed to cancel order',
-    }
   }
+
+  return result
 }
 
 // ─────────────────────────────────────────────────────────────────────────────
