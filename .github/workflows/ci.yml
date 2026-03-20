@@ -164,7 +164,6 @@ jobs:
 
       - name: Verify proof artifacts
         run: pnpm proof:verify
-
       - name: Upload governance gate report
         if: always()
         uses: actions/upload-artifact@v7
