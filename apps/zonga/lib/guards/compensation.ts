@@ -12,7 +12,7 @@ import { logger } from '@/lib/logger'
 export interface CompensationResult {
   compensated: boolean
   action: string
-  entityId: string
+  resourceId: string
   details?: string
 }
 
@@ -39,13 +39,13 @@ export async function compensateFailedPayout(
     )
 
     logger.warn('Payout compensated after failure', { payoutId, reason })
-    return { compensated: true, action: 'payout.failed', entityId: payoutId }
+    return { compensated: true, action: 'payout.failed', resourceId: payoutId }
   } catch (err) {
     logger.error('Compensation failed for payout', { payoutId, error: err })
     return {
       compensated: false,
       action: 'payout.failed',
-      entityId: payoutId,
+      resourceId: payoutId,
       details: 'Compensation itself failed — manual intervention required',
     }
   }
@@ -73,13 +73,13 @@ export async function compensateFailedTicketPurchase(
     )
 
     logger.warn('Ticket purchase compensated', { purchaseId, reason })
-    return { compensated: true, action: 'ticket.cancelled', entityId: purchaseId }
+    return { compensated: true, action: 'ticket.cancelled', resourceId: purchaseId }
   } catch (err) {
     logger.error('Compensation failed for ticket purchase', { purchaseId, error: err })
     return {
       compensated: false,
       action: 'ticket.cancelled',
-      entityId: purchaseId,
+      resourceId: purchaseId,
       details: 'Compensation itself failed — manual intervention required',
     }
   }
@@ -108,13 +108,13 @@ export async function compensateReleaseTransition(
     )
 
     logger.warn('Release transition compensated', { releaseId, previousStatus, reason })
-    return { compensated: true, action: 'release.reverted', entityId: releaseId }
+    return { compensated: true, action: 'release.reverted', resourceId: releaseId }
   } catch (err) {
     logger.error('Compensation failed for release transition', { releaseId, error: err })
     return {
       compensated: false,
       action: 'release.reverted',
-      entityId: releaseId,
+      resourceId: releaseId,
       details: 'Compensation itself failed — manual intervention required',
     }
   }

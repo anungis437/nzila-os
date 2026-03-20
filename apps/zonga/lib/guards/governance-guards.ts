@@ -81,17 +81,17 @@ export function guardRateLimit(
 export function guardAuditCompleteness(
   hasAuditEntry: boolean,
   entityType: string,
-  entityId: string,
+  resourceId: string,
 ): GovernanceGuardResult {
   if (!hasAuditEntry) {
     logger.error('G4 VIOLATION: Mutation without audit entry', {
       entityType,
-      entityId,
+      resourceId,
     })
     return {
       passed: false,
       invariant: 'G4_AUDIT_COMPLETENESS',
-      details: `No audit entry found for ${entityType}:${entityId}`,
+      details: `No audit entry found for ${entityType}:${resourceId}`,
     }
   }
   return { passed: true, invariant: 'G4_AUDIT_COMPLETENESS' }
