@@ -12,6 +12,7 @@ import { sql } from 'drizzle-orm'
 import { revalidatePath } from 'next/cache'
 import { logger } from '@/lib/logger'
 import { createNotification } from '@/lib/actions/notification-actions'
+import { executeCommand } from '@/lib/control'
 
 /* ─── Types ─── */
 
@@ -122,23 +123,21 @@ export async function createModerationCase(data: {
   severity: string
   notes?: string
 }): Promise<{ success: boolean; caseId?: string }> {
-  const ctx = await resolveOrgContext()
+  const result = await executeCommand({
+    type: 'create_moderation_case' as const,
+    entity_type: data.entityType,
+    target_entity_id: data.targetEntityId,
+    case_type: data.caseType,
+    severity: data.severity,
+    notes: data.notes,
+  })
 
-  try {
-    const [row] = (await platformDb.execute(
-      sql`INSERT INTO zonga_moderation_cases (org_id, entity_type, entity_id, case_type, severity, notes)
-      VALUES (${ctx.orgId}, ${data.entityType}, ${data.targetEntityId}, ${data.caseType},
-        ${data.severity}, ${data.notes ?? null})
-      RETURNING id`,
-    )) as unknown as [{ id: string }]
-
-    logger.info('Moderation case created', { caseId: row?.id, entityType: data.entityType })
-    revalidatePath('/dashboard/moderation')
-    return { success: true, caseId: row?.id }
-  } catch (error) {
-    logger.error('createModerationCase failed', { error })
+  if (!result.success) {
     return { success: false }
   }
+
+  revalidatePath('/dashboard/moderation')
+  return { success: true, caseId: result.data?.entity_id }
 }
 
 export async function resolveModerationCase(
@@ -147,18 +146,22 @@ export async function resolveModerationCase(
 ): Promise<{ success: boolean }> {
   const ctx = await resolveOrgContext()
 
-  try {
-    await platformDb.execute(
-      sql`UPDATE zonga_moderation_cases
-      SET status = ${data.status}, notes = ${data.notes ?? null},
-        resolved_at = NOW(), assigned_to = ${ctx.actorId}
-      WHERE id = ${caseId} AND org_id = ${ctx.orgId}`,
-    )
+  const result = await executeCommand({
+    type: 'resolve_moderation_case' as const,
+    case_id: caseId,
+    status: data.status,
+    notes: data.notes,
+    actor_id: ctx.actorId,
+  })
 
-    // Fetch case to get entity owner for notification
+  if (!result.success) {
+    return { success: false }
+  }
+
+  // Side-effect: notify content owner on resolution
+  if (data.status === 'resolved') {
     const modCase = await getModerationCase(caseId)
-    if (modCase && data.status === 'resolved') {
-      // Look up the content owner for notification
+    if (modCase) {
       const [owner] = (await platformDb.execute(
         sql`SELECT CASE
           WHEN ${modCase.entityType} = 'asset' THEN (SELECT creator_id FROM zonga_content_assets WHERE id = ${modCase.targetEntityId})
@@ -178,14 +181,10 @@ export async function resolveModerationCase(
         })
       }
     }
-
-    logger.info('Moderation case resolved', { caseId, status: data.status })
-    revalidatePath('/dashboard/moderation')
-    return { success: true }
-  } catch (error) {
-    logger.error('resolveModerationCase failed', { error })
-    return { success: false }
   }
+
+  revalidatePath('/dashboard/moderation')
+  return { success: true }
 }
 
 export async function assignModerationCase(

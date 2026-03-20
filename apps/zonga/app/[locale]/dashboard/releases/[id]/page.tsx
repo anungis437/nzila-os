@@ -13,6 +13,14 @@ import { platformDb } from '@nzila/db/platform'
 import { sql } from 'drizzle-orm'
 import { logger } from '@/lib/logger'
 import { PublishReleaseButton } from '@/components/dashboard/publish-release-button'
+import { StatusBadge, SystemGuidance, ProgressStepper } from '@/components'
+import type { Step } from '@/components'
+
+const RELEASE_STEPS: Step[] = [
+  { key: 'draft', label: 'Draft' },
+  { key: 'scheduled', label: 'Scheduled' },
+  { key: 'released', label: 'Released' },
+]
 
 async function getReleaseDetail(releaseId: string) {
   try {
@@ -74,13 +82,6 @@ export default async function ReleaseDetailPage({
 
   const tracks = await getReleaseTracks(id)
 
-  const statusColors: Record<string, string> = {
-    draft: 'bg-gray-100 text-gray-600',
-    scheduled: 'bg-blue-100 text-blue-700',
-    released: 'bg-emerald-100 text-emerald-700',
-    archived: 'bg-red-100 text-red-600',
-  }
-
   const typeLabels: Record<string, string> = {
     single: '💿 Single',
     ep: '📀 EP',
@@ -96,6 +97,10 @@ export default async function ReleaseDetailPage({
         sharePercent: number
       }>)
     : []
+
+  const releaseStepIndex = RELEASE_STEPS.findIndex(
+    (s) => s.key === ((release.status as string) ?? 'draft'),
+  )
 
   return (
     <div className="space-y-8">
@@ -118,14 +123,7 @@ export default async function ReleaseDetailPage({
               {release.title as string}
             </h1>
             <div className="mt-1 flex items-center gap-2 text-sm text-gray-500">
-              <span
-                className={`inline-flex rounded-full px-2 py-0.5 text-xs font-medium ${
-                  statusColors[(release.status as string) ?? 'draft'] ??
-                  statusColors.draft
-                }`}
-              >
-                {release.status as string}
-              </span>
+              <StatusBadge status={(release.status as string) ?? 'draft'} />
               <span>
                 {typeLabels[(release.type as string) ?? ''] ?? String(release.type)}
               </span>
@@ -136,6 +134,25 @@ export default async function ReleaseDetailPage({
           </div>
         </div>
       </div>
+
+      {/* Progress */}
+      <ProgressStepper
+        steps={RELEASE_STEPS}
+        currentIndex={releaseStepIndex >= 0 ? releaseStepIndex : 0}
+        className="mb-2"
+      />
+
+      {/* Guidance */}
+      {(release.status as string) === 'draft' && (
+        <SystemGuidance severity="info" title="Ready to publish?">
+          Add all tracks and configure royalty splits before publishing. Once released, the content will be distributed to all channels.
+        </SystemGuidance>
+      )}
+      {(release.status as string) === 'archived' && (
+        <SystemGuidance severity="warning" title="Release archived">
+          This release has been taken down and is no longer available on distribution channels.
+        </SystemGuidance>
+      )}
 
       <div className="grid grid-cols-1 gap-6 lg:grid-cols-3">
         {/* Main */}

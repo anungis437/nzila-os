@@ -10,6 +10,7 @@ import { Card } from '@nzila/ui'
 import { getCreatorDetail } from '@/lib/actions/creator-actions'
 import { getWalletBalance, listPayouts } from '@/lib/actions/payout-actions'
 import { formatCurrencyAmount } from '@/lib/stripe'
+import { StatusBadge, SystemGuidance } from '@/components'
 
 export default async function CreatorDetailPage({
   params,
@@ -57,13 +58,7 @@ export default async function CreatorDetailPage({
           <h1 className="text-2xl font-bold text-navy">{creator.displayName ?? 'Unnamed Creator'}</h1>
           <p className="text-gray-500">{creator.bio ?? '—'}</p>
           <div className="flex items-center gap-2 mt-1">
-            <span className={`inline-flex rounded-full px-2 py-0.5 text-xs font-medium ${
-              creator.status === 'active'
-                ? 'bg-emerald-500/10 text-emerald-600'
-                : 'bg-gray-100 text-gray-500'
-            }`}>
-              {creator.status ?? 'pending'}
-            </span>
+            <StatusBadge status={creator.status ?? 'pending'} />
             {creator.genre && (
               <span className="text-xs text-gray-400">
                 {(creator.genre as string).replace(/_/g, ' ')}
@@ -77,6 +72,18 @@ export default async function CreatorDetailPage({
           </div>
         </div>
       </div>
+
+      {/* Guidance */}
+      {creator.status === 'pending' && (
+        <SystemGuidance severity="info" title="Complete onboarding">
+          This creator hasn&apos;t been activated yet. Verify their profile and payout details before publishing content.
+        </SystemGuidance>
+      )}
+      {creator.status === 'suspended' && (
+        <SystemGuidance severity="warning" title="Creator suspended">
+          This creator account is suspended. Content will not be visible until the suspension is lifted.
+        </SystemGuidance>
+      )}
 
       {/* Stats */}
       <div className="grid grid-cols-2 lg:grid-cols-4 gap-4">
@@ -169,13 +176,7 @@ export default async function CreatorDetailPage({
                       </td>
                       <td className="py-2 text-gray-400 uppercase">{p.currency ?? 'USD'}</td>
                       <td className="py-2">
-                        <span className={`inline-flex rounded-full px-2 py-0.5 text-xs font-medium ${
-                          p.status === 'completed'
-                            ? 'bg-emerald-500/10 text-emerald-600'
-                            : 'bg-amber-500/10 text-amber-600'
-                        }`}>
-                          {p.status ?? 'pending'}
-                        </span>
+                        <StatusBadge status={p.status ?? 'pending'} />
                       </td>
                     </tr>
                   ))}
