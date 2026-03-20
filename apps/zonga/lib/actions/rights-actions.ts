@@ -205,6 +205,17 @@ export async function fileRightsDispute(data: {
       RETURNING id`,
     )) as unknown as [{ id: string }]
 
+    // Freeze payouts for all creators with splits on the disputed release
+    await platformDb.execute(
+      sql`INSERT INTO audit_log (action, actor_id, entity_type, org_id, metadata)
+      VALUES ('rights.dispute.payout_freeze', ${ctx.actorId}, 'dispute', ${ctx.orgId},
+        ${JSON.stringify({
+          disputeId: row.id,
+          releaseId: data.releaseId,
+          reason: 'Active dispute filed — payouts frozen for affected release',
+        })}::jsonb)`,
+    )
+
     await platformDb.execute(
       sql`INSERT INTO audit_log (action, actor_id, entity_type, org_id, metadata)
       VALUES ('rights.dispute.filed', ${ctx.actorId}, 'dispute', ${ctx.orgId},
@@ -214,6 +225,11 @@ export async function fileRightsDispute(data: {
           disputeType: data.disputeType,
         })}::jsonb)`,
     )
+
+    logger.info('Rights dispute filed with payout freeze', {
+      disputeId: row.id,
+      releaseId: data.releaseId,
+    })
 
     revalidatePath('/dashboard/rights')
     return { success: true, disputeId: row.id }
@@ -231,11 +247,51 @@ export async function resolveRightsDispute(
   const ctx = await resolveOrgContext()
 
   try {
+    // Get dispute details before resolving (for unfreeze logic)
+    const [dispute] = (await platformDb.execute(
+      sql`SELECT release_id as "releaseId", status
+      FROM zonga_rights_disputes
+      WHERE id = ${disputeId} AND org_id = ${ctx.orgId}`,
+    )) as unknown as [{ releaseId: string; status: string } | undefined]
+
+    if (!dispute) {
+      return { success: false, error: 'Dispute not found' }
+    }
+
+    if (dispute.status !== 'open' && dispute.status !== 'under_review') {
+      return { success: false, error: `Cannot resolve dispute in status: ${dispute.status}` }
+    }
+
     await platformDb.execute(
       sql`UPDATE zonga_rights_disputes
       SET status = ${newStatus}, resolution = ${resolution}, resolved_at = NOW()
       WHERE id = ${disputeId} AND org_id = ${ctx.orgId}`,
     )
+
+    // Check if any remaining open disputes exist for this release
+    const [remaining] = (await platformDb.execute(
+      sql`SELECT COUNT(*) as cnt
+      FROM zonga_rights_disputes
+      WHERE release_id = ${dispute.releaseId} AND org_id = ${ctx.orgId}
+        AND status IN ('open', 'under_review') AND id != ${disputeId}`,
+    )) as unknown as [{ cnt: number }]
+
+    // Unfreeze payouts if no remaining disputes
+    if (Number(remaining?.cnt ?? 0) === 0) {
+      await platformDb.execute(
+        sql`INSERT INTO audit_log (action, actor_id, entity_type, org_id, metadata)
+        VALUES ('rights.dispute.payout_unfreeze', ${ctx.actorId}, 'dispute', ${ctx.orgId},
+          ${JSON.stringify({
+            disputeId,
+            releaseId: dispute.releaseId,
+            reason: 'All disputes resolved — payouts unfrozen',
+          })}::jsonb)`,
+      )
+      logger.info('Payouts unfrozen after dispute resolution', {
+        disputeId,
+        releaseId: dispute.releaseId,
+      })
+    }
 
     await platformDb.execute(
       sql`INSERT INTO audit_log (action, actor_id, entity_type, org_id, metadata)

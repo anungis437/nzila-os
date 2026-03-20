@@ -162,3 +162,38 @@ export function buildGovernanceLogAttrs(ctx: ZongaLogContext, attrs: {
     'nzila.actor_id': ctx.actorId,
   }
 }
+
+// ── Control-Plane Metric Hooks ─────────────────────────────────────────────
+// These helpers bridge control-plane recordMetric into the app's
+// structured observability layer.
+
+import { recordMetric, MetricName } from '@nzila/zonga-control-plane'
+
+export function emitPayoutMetric(orgId: string, amount: number, latencyMs: number): void {
+  recordMetric(MetricName.PAYOUT_LATENCY_MS, latencyMs, { org_id: orgId })
+  recordMetric(MetricName.PAYOUT_AMOUNT_TOTAL, amount, { org_id: orgId })
+}
+
+export function emitDisputeFiledMetric(orgId: string): void {
+  recordMetric(MetricName.DISPUTE_FILED_TOTAL, 1, { org_id: orgId })
+}
+
+export function emitPayoutFreezeMetric(orgId: string): void {
+  recordMetric(MetricName.PAYOUT_FREEZE_TOTAL, 1, { org_id: orgId })
+}
+
+export function emitOversellBlockMetric(orgId: string, eventId: string): void {
+  recordMetric(MetricName.INVENTORY_OVERSELL_BLOCKS, 1, { org_id: orgId, event_id: eventId })
+}
+
+export function emitInvariantCheckMetric(orgId: string, passed: boolean, invariantId: string): void {
+  recordMetric(MetricName.INVARIANT_CHECKS_TOTAL, 1, { org_id: orgId, invariant: invariantId })
+  if (!passed) {
+    recordMetric(MetricName.INVARIANT_FAILURES_TOTAL, 1, { org_id: orgId, invariant: invariantId })
+  }
+}
+
+export function emitCapacityMetric(orgId: string, eventId: string, sold: number, capacity: number): void {
+  const utilization = capacity > 0 ? (sold / capacity) * 100 : 0
+  recordMetric(MetricName.EVENT_CAPACITY_UTILIZATION, utilization, { org_id: orgId, event_id: eventId })
+}

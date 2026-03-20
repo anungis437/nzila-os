@@ -11,8 +11,24 @@
  * 5. Return structured CommandResult
  */
 import type { CommandContext, CommandResult, CommandHandler } from './types'
-import { afterCommandSuccess } from './control-plane-bridge'
+import { afterCommandSuccess, emitCommandEvent } from './control-plane-bridge'
 import { logger } from '@/lib/logger'
+
+// ── Pre-execution guard registry ──────────────────────────────────────────
+type PreExecutionGuard = (
+  command: { type: string } & Record<string, unknown>,
+  context: CommandContext,
+) => Promise<{ allowed: boolean; reason?: string }>
+
+const preGuards: PreExecutionGuard[] = []
+
+/**
+ * Register a guard that runs before every command execution.
+ * If any guard returns `{ allowed: false }`, the command is blocked.
+ */
+export function registerPreExecutionGuard(guard: PreExecutionGuard): void {
+  preGuards.push(guard)
+}
 
 const registry = new Map<string, CommandHandler<unknown>>()
 
@@ -48,6 +64,29 @@ export async function execute<T extends { type: string }>(
   })
 
   try {
+    // ── Pre-execution guard checks ──
+    for (const guard of preGuards) {
+      const gate = await guard(command as { type: string } & Record<string, unknown>, context)
+      if (!gate.allowed) {
+        logger.warn('Command bus: blocked by pre-execution guard', {
+          commandType: command.type,
+          reason: gate.reason,
+        })
+        emitCommandEvent(context, 'command.blocked', {
+          entity_type: command.type,
+          entity_id: context.correlation_id ?? 'unknown',
+          reason: gate.reason,
+        })
+        return {
+          success: false,
+          errors: [{
+            code: 'PRE_EXECUTION_GUARD_FAILED',
+            message: gate.reason ?? 'Command blocked by pre-execution guard',
+          }],
+        }
+      }
+    }
+
     const result = await handler.execute(command, context)
 
     logger.info('Command bus: completed', {

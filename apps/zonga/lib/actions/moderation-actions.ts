@@ -199,6 +199,15 @@ export async function assignModerationCase(
       WHERE id = ${caseId} AND org_id = ${ctx.orgId}`,
     )
 
+    // Audit trail for case assignment
+    await platformDb.execute(
+      sql`INSERT INTO audit_log (action, actor_id, entity_type, entity_id, org_id, metadata)
+      VALUES ('moderation.case.assigned', ${ctx.actorId}, 'moderation_case', ${caseId}, ${ctx.orgId},
+        ${JSON.stringify({ caseId, assignedTo })}::jsonb)`,
+    )
+
+    logger.info('Moderation case assigned', { caseId, assignedTo, actorId: ctx.actorId })
+
     revalidatePath('/dashboard/moderation')
     return { success: true }
   } catch (error) {

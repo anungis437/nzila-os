@@ -106,6 +106,21 @@ export async function recordRevenueEvent(data: {
       )`,
     )
 
+    // ── Ledger backing entry (enforces NO_REVENUE_WITHOUT_LEDGER invariant) ──
+    await platformDb.execute(
+      sql`INSERT INTO audit_log (action, actor_id, entity_type, entity_id, org_id, metadata)
+      VALUES ('ledger.revenue.entry', 'system', 'ledger_entry', ${eventId}, ${ctx.orgId},
+        ${JSON.stringify({
+          revenueEventId: eventId,
+          type: data.type,
+          amount: data.amount,
+          creatorId: data.creatorId,
+          direction: 'credit',
+          account: `creator:${data.creatorId}`,
+          counterparty: 'platform:revenue',
+        })}::jsonb)`,
+    )
+
     // ── Audit trail (audit_log stays as audit-only) ──
     await platformDb.execute(
       sql`INSERT INTO audit_log (action, actor_id, entity_type, org_id, metadata)

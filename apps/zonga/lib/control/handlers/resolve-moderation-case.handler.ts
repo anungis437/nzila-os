@@ -7,6 +7,7 @@ import type { CommandHandler, CommandResult } from '../types'
 import { platformDb } from '@nzila/db/platform'
 import { sql } from 'drizzle-orm'
 import { logger } from '@/lib/logger'
+import { guardAdminActionReason } from '@/lib/guards/governance-guards'
 
 export interface ResolveModerationCaseCommand {
   type: 'resolve_moderation_case'
@@ -20,6 +21,18 @@ export const resolveModerationCaseHandler: CommandHandler<ResolveModerationCaseC
   commandType: 'resolve_moderation_case',
 
   async execute(command, context): Promise<CommandResult> {
+    // G1: Require resolution reason for admin action
+    const reasonCheck = guardAdminActionReason(command.notes)
+    if (!reasonCheck.passed) {
+      return {
+        success: false,
+        errors: [{
+          code: 'GOVERNANCE_VIOLATION',
+          message: reasonCheck.details ?? 'Resolution reason required',
+        }],
+      }
+    }
+
     await platformDb.execute(
       sql`UPDATE zonga_moderation_cases
       SET status = ${command.status}, notes = ${command.notes ?? null},
@@ -31,6 +44,13 @@ export const resolveModerationCaseHandler: CommandHandler<ResolveModerationCaseC
       caseId: command.case_id,
       status: command.status,
     })
+
+    // Audit trail
+    await platformDb.execute(
+      sql`INSERT INTO audit_log (action, actor_id, entity_type, entity_id, org_id, metadata)
+      VALUES ('moderation.case.resolved', ${command.actor_id}, 'moderation_case', ${command.case_id}, ${context.org_id},
+        ${JSON.stringify({ status: command.status, notes: command.notes })}::jsonb)`,
+    )
 
     return {
       success: true,

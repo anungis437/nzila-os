@@ -10,6 +10,7 @@ import './register-handlers'
 
 // Re-export the execution primitives
 export { executeCommand } from './control-adapter'
+export { registerPreExecutionGuard } from './command-bus'
 export type { ActionResult } from './control-adapter'
 export type { CommandContext, CommandResult, CommandHandler, CommandError } from './types'
 

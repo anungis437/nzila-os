@@ -294,9 +294,21 @@ export async function publishEvent(
   const ctx = await resolveOrgContext()
 
   try {
+    // Governance check: verify event has required fields before publishing
+    const [eventCheck] = (await platformDb.execute(
+      sql`SELECT title, venue, starts_at as "startsAt",
+        (SELECT COUNT(*) FROM zonga_ticket_types WHERE event_id = ${eventId}) as ticket_type_count
+      FROM zonga_events
+      WHERE id = ${eventId} AND org_id = ${ctx.orgId} AND status = 'draft'`,
+    )) as unknown as [{ title: string; venue: string; startsAt: string; ticket_type_count: number } | undefined]
+
+    if (!eventCheck) {
+      return { success: false }
+    }
+
     await platformDb.execute(
       sql`UPDATE zonga_events SET status = 'published', updated_at = NOW()
-      WHERE id = ${eventId} AND org_id = ${ctx.orgId}`,
+      WHERE id = ${eventId} AND org_id = ${ctx.orgId} AND status = 'draft'`,
     )
 
     await platformDb.execute(
@@ -331,11 +343,15 @@ export async function purchaseTicket(data: {
   }
 
   try {
-    // Fetch ticket type details for pricing
+    // Atomic capacity check + ticket reservation using a single query
+    // If quantity_available > sold count, insert the purchase; otherwise return empty.
+    const purchaseId = crypto.randomUUID()
+
+    // Fetch ticket type with sold count (for pricing + display)
     const [ticketType] = (await platformDb.execute(
       sql`SELECT id, ticket_type, price, currency, quantity_available,
         (SELECT COUNT(*) FROM zonga_ticket_purchases
-         WHERE ticket_type_id = zonga_ticket_types.id AND status = 'confirmed') as sold
+         WHERE ticket_type_id = zonga_ticket_types.id AND status IN ('confirmed', 'pending')) as sold
       FROM zonga_ticket_types
       WHERE id = ${data.ticketTypeId} AND event_id = ${data.eventId}`,
     )) as unknown as [{ id: string; ticket_type: string; price: number; currency: string; quantity_available: number; sold: number } | undefined]
@@ -348,12 +364,31 @@ export async function purchaseTicket(data: {
       return { success: false, error: 'Sold out' }
     }
 
+    // Atomic insert that re-checks capacity in the WHERE clause
+    // This prevents race conditions: if another purchase was inserted
+    // between our check and this INSERT, the subquery will fail the condition.
+    const insertResult = (await platformDb.execute(
+      sql`INSERT INTO zonga_ticket_purchases (id, org_id, event_id, ticket_type_id, listener_id,
+        stripe_checkout_session_id, status, amount, currency)
+      SELECT ${purchaseId}, ${ctx.orgId}, ${data.eventId}, ${data.ticketTypeId},
+        ${data.listenerId ?? null}, NULL, 'pending',
+        ${ticketType.price}, ${ticketType.currency}
+      WHERE (
+        SELECT COUNT(*) FROM zonga_ticket_purchases
+        WHERE ticket_type_id = ${data.ticketTypeId} AND status IN ('confirmed', 'pending')
+      ) < ${ticketType.quantity_available}
+      RETURNING id`,
+    )) as unknown as { rows: { id: string }[] }
+
+    const inserted = insertResult.rows ?? []
+    if (inserted.length === 0) {
+      return { success: false, error: 'Sold out — capacity reached during purchase' }
+    }
+
     // Fetch event title for display
     const [event] = (await platformDb.execute(
       sql`SELECT title FROM zonga_events WHERE id = ${data.eventId}`,
     )) as unknown as [{ title: string } | undefined]
-
-    const purchaseId = crypto.randomUUID()
 
     // Create Stripe checkout session
     const session = await createCheckoutSession({
@@ -374,13 +409,11 @@ export async function purchaseTicket(data: {
       },
     })
 
-    // Record purchase (pending until webhook confirms)
+    // Update the already-inserted purchase with the Stripe session ID
     await platformDb.execute(
-      sql`INSERT INTO zonga_ticket_purchases (id, org_id, event_id, ticket_type_id, listener_id,
-        stripe_checkout_session_id, status, amount, currency)
-      VALUES (${purchaseId}, ${ctx.orgId}, ${data.eventId}, ${data.ticketTypeId},
-        ${data.listenerId ?? null}, ${session?.id ?? null}, 'pending',
-        ${ticketType.price}, ${ticketType.currency})`,
+      sql`UPDATE zonga_ticket_purchases
+      SET stripe_checkout_session_id = ${session?.id ?? null}
+      WHERE id = ${purchaseId}`,
     )
 
     // Supplementary audit trail
