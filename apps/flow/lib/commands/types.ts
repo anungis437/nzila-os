@@ -85,6 +85,27 @@ export const ConfirmOrderCommand = z.object({
 })
 export type ConfirmOrderCommand = z.infer<typeof ConfirmOrderCommand>
 
+export const StartFulfillmentCommand = z.object({
+  ...baseFields,
+  type: z.literal('start_fulfillment'),
+  order_id: z.string().uuid(),
+})
+export type StartFulfillmentCommand = z.infer<typeof StartFulfillmentCommand>
+
+export const CompleteOrderCommand = z.object({
+  ...baseFields,
+  type: z.literal('complete_order'),
+  order_id: z.string().uuid(),
+})
+export type CompleteOrderCommand = z.infer<typeof CompleteOrderCommand>
+
+export const CancelOrderCommand = z.object({
+  ...baseFields,
+  type: z.literal('cancel_order'),
+  order_id: z.string().uuid(),
+})
+export type CancelOrderCommand = z.infer<typeof CancelOrderCommand>
+
 export const RequireDepositCommand = z.object({
   ...baseFields,
   type: z.literal('require_deposit'),
@@ -191,6 +212,48 @@ export const MarkShipmentDeliveredCommand = z.object({
 })
 export type MarkShipmentDeliveredCommand = z.infer<typeof MarkShipmentDeliveredCommand>
 
+// ── Quote: Submit for Review ───────────────────────────────────────────────
+
+export const SubmitForReviewCommand = z.object({
+  ...baseFields,
+  type: z.literal('submit_for_review'),
+  quote_id: z.string().uuid(),
+})
+export type SubmitForReviewCommand = z.infer<typeof SubmitForReviewCommand>
+
+// ── Invoice Commands ───────────────────────────────────────────────────────
+
+export const CreateInvoiceCommand = z.object({
+  ...baseFields,
+  type: z.literal('create_invoice'),
+  order_id: z.string().uuid(),
+  due_date: z.coerce.date(),
+})
+export type CreateInvoiceCommand = z.infer<typeof CreateInvoiceCommand>
+
+export const IssueInvoiceCommand = z.object({
+  ...baseFields,
+  type: z.literal('issue_invoice'),
+  invoice_id: z.string().uuid(),
+})
+export type IssueInvoiceCommand = z.infer<typeof IssueInvoiceCommand>
+
+export const VoidInvoiceCommand = z.object({
+  ...baseFields,
+  type: z.literal('void_invoice'),
+  invoice_id: z.string().uuid(),
+})
+export type VoidInvoiceCommand = z.infer<typeof VoidInvoiceCommand>
+
+// ── Sales → Procurement Trigger ────────────────────────────────────────────
+
+export const TriggerSalesToProcurementCommand = z.object({
+  ...baseFields,
+  type: z.literal('trigger_sales_to_procurement'),
+  quote_id: z.string().uuid(),
+})
+export type TriggerSalesToProcurementCommand = z.infer<typeof TriggerSalesToProcurementCommand>
+
 // ── Union Type ─────────────────────────────────────────────────────────────
 
 export type FlowCommand =
@@ -199,7 +262,11 @@ export type FlowCommand =
   | AcceptQuoteCommand
   | RequestQuoteRevisionCommand
   | ConvertQuoteToOrderCommand
+  | SubmitForReviewCommand
   | ConfirmOrderCommand
+  | StartFulfillmentCommand
+  | CompleteOrderCommand
+  | CancelOrderCommand
   | RequireDepositCommand
   | RecordPaymentCommand
   | ConfirmPaymentCommand
@@ -211,5 +278,9 @@ export type FlowCommand =
   | CreateShipmentCommand
   | MarkShipmentShippedCommand
   | MarkShipmentDeliveredCommand
+  | CreateInvoiceCommand
+  | IssueInvoiceCommand
+  | VoidInvoiceCommand
+  | TriggerSalesToProcurementCommand
 
 export type FlowCommandType = FlowCommand['type']

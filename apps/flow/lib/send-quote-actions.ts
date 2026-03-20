@@ -22,26 +22,18 @@ export async function submitForReviewAction(
 ): Promise<ActionResult<{ status: string }>> {
   try {
     const ctx = await resolveOrgContext()
-    const quote = await quoteRepo.findById(quoteId)
-    if (!quote) return { ok: false, error: 'Quote not found' }
 
-    const current = quote.status.toUpperCase()
-    const transition = attemptQuoteTransition(
-      current as 'DRAFT',
-      'INTERNAL_REVIEW',
-    )
-    if (!transition.ok) {
-      return { ok: false, error: transition.reason }
-    }
-
-    await quoteRepo.update(quoteId, { status: 'INTERNAL_REVIEW' })
-
-    await recordTimelineEvent({
-      quoteId,
-      event: 'internal_review',
-      description: 'Quote submitted for internal review',
-      actor: ctx.actorId,
+    const { executeCommand } = await import('@/lib/control/control-adapter')
+    const result = await executeCommand({
+      type: 'submit_for_review',
+      quote_id: quoteId,
+      org_id: ctx.orgId,
+      actor_id: ctx.actorId,
     })
+
+    if (!result.ok) {
+      return { ok: false, error: result.error ?? 'Transition failed' }
+    }
 
     return { ok: true, data: { status: 'INTERNAL_REVIEW' } }
   } catch (err) {

@@ -15,6 +15,9 @@ import { convertQuoteToOrderHandler } from './handlers/convert-quote-to-order.ha
 
 // Order handlers
 import { confirmOrderHandler } from './handlers/confirm-order.handler'
+import { startFulfillmentHandler } from './handlers/start-fulfillment.handler'
+import { completeOrderHandler } from './handlers/complete-order.handler'
+import { cancelOrderHandler } from './handlers/cancel-order.handler'
 import { requireDepositHandler } from './handlers/require-deposit.handler'
 
 // Payment handlers
@@ -35,6 +38,17 @@ import { createShipmentHandler } from './handlers/create-shipment.handler'
 import { markShipmentShippedHandler } from './handlers/mark-shipment-shipped.handler'
 import { markShipmentDeliveredHandler } from './handlers/mark-shipment-delivered.handler'
 
+// Review handler
+import { submitForReviewHandler } from './handlers/submit-for-review.handler'
+
+// Invoice handlers
+import { createInvoiceHandler } from './handlers/create-invoice.handler'
+import { issueInvoiceHandler } from './handlers/issue-invoice.handler'
+import { voidInvoiceHandler } from './handlers/void-invoice.handler'
+
+// Workflow trigger handlers
+import { triggerSalesToProcurementHandler } from './handlers/trigger-sales-to-procurement.handler'
+
 // ── Registration ───────────────────────────────────────────────────────────
 
 const handlers = [
@@ -44,6 +58,9 @@ const handlers = [
   requestQuoteRevisionHandler,
   convertQuoteToOrderHandler,
   confirmOrderHandler,
+  startFulfillmentHandler,
+  completeOrderHandler,
+  cancelOrderHandler,
   requireDepositHandler,
   recordPaymentHandler,
   confirmPaymentHandler,
@@ -55,6 +72,11 @@ const handlers = [
   createShipmentHandler,
   markShipmentShippedHandler,
   markShipmentDeliveredHandler,
+  submitForReviewHandler,
+  createInvoiceHandler,
+  issueInvoiceHandler,
+  voidInvoiceHandler,
+  triggerSalesToProcurementHandler,
 ]
 
 for (const handler of handlers) {

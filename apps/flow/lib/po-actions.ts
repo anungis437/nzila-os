@@ -7,6 +7,7 @@
 'use server'
 
 import { resolveOrgContext } from '@/lib/resolve-org'
+import { executeCommandV2 } from '@/lib/control/control-adapter'
 import { revalidatePath } from 'next/cache'
 import {
   createPurchaseOrder,
@@ -166,19 +167,18 @@ export async function updatePOAction(
 // ─────────────────────────────────────────────────────────────────────────────
 
 export async function sendPOAction(poId: string): Promise<ActionResult<POWithLines | null>> {
-  try {
-    await resolveOrgContext()
+  const result = await executeCommandV2({
+    type: 'send_purchase_order',
+    purchase_order_id: poId,
+    actor_id: '', // resolved by control adapter
+  })
 
-    const result = await sendPurchaseOrder(poId)
-
+  if (result.success) {
     revalidatePath('/purchase-orders')
     revalidatePath(`/purchase-orders/${poId}`)
-
-    return { success: true, data: result }
-  } catch (error) {
-    logger.error('Failed to send purchase order', { error, poId })
-    return { success: false, error: error instanceof Error ? error.message : 'Unknown error' }
   }
+
+  return result
 }
 
 // ─────────────────────────────────────────────────────────────────────────────
@@ -198,6 +198,8 @@ export async function cancelPOAction(poId: string): Promise<ActionResult<POWithL
   } catch (error) {
     logger.error('Failed to cancel purchase order', { error, poId })
     return { success: false, error: error instanceof Error ? error.message : 'Unknown error' }
+  }
+}
   }
 }
 

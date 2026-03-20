@@ -18,6 +18,7 @@ import {
   generatePORef,
 } from '@nzila/commerce-db'
 import { getDbContext, getReadContext } from '@/lib/clerk-org-resolver'
+import { executeCommand } from '@/lib/control/control-adapter'
 
 type POStatus =
   | 'draft'
@@ -132,13 +133,25 @@ export async function deletePurchaseOrderAction(purchaseOrderId: string) {
 // ── Workflow Actions ──────────────────────────────────────────────────────
 
 export async function sendPurchaseOrderAction(purchaseOrderId: string) {
-  const ctx = await getDbContext()
-  return sendPurchaseOrder(ctx, purchaseOrderId)
+  const result = await executeCommand({
+    type: 'send_purchase_order',
+    purchase_order_id: purchaseOrderId,
+    actor_id: '', // resolved by control adapter
+  })
+  return result.ok
+    ? { ...(await getPurchaseOrderById({ orgId: '', actorId: '' } as never, purchaseOrderId)) }
+    : { error: result.error }
 }
 
 export async function acknowledgePurchaseOrderAction(purchaseOrderId: string) {
-  const ctx = await getDbContext()
-  return acknowledgePurchaseOrder(ctx, purchaseOrderId)
+  const result = await executeCommand({
+    type: 'confirm_purchase_order',
+    purchase_order_id: purchaseOrderId,
+    actor_id: '', // resolved by control adapter
+  })
+  return result.ok
+    ? { ...(await getPurchaseOrderById({ orgId: '', actorId: '' } as never, purchaseOrderId)) }
+    : { error: result.error }
 }
 
 export async function receiveLineAction(lineId: string, quantityReceived: number) {

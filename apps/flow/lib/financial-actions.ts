@@ -8,6 +8,7 @@
 
 import { revalidatePath } from 'next/cache'
 import { resolveOrgContext } from '@/lib/resolve-org'
+import { executeCommandV2 } from '@/lib/control/control-adapter'
 import {
   createInvoiceFromOrder,
   getInvoice,
@@ -47,27 +48,20 @@ export async function createInvoiceFromOrderAction(input: {
   dueDate?: string
   notes?: string
 }): Promise<ActionResult<InvoiceWithDetails>> {
-  try {
-    const { orgId, actorId } = await resolveOrgContext()
+  const result = await executeCommandV2({
+    type: 'create_invoice',
+    order_id: input.orderId,
+    due_date: input.dueDate ? new Date(input.dueDate) : new Date(Date.now() + 30 * 24 * 60 * 60 * 1000),
+    actor_id: '', // resolved by control adapter
+    notes: input.notes,
+  })
 
-    const data = await createInvoiceFromOrder({
-      orgId,
-      orderId: input.orderId,
-      dueDate: input.dueDate ? new Date(input.dueDate) : undefined,
-      notes: input.notes,
-      userId: actorId,
-    })
-
+  if (result.success) {
     revalidatePath('/invoices')
     revalidatePath(`/orders/${input.orderId}`)
-
-    return { success: true, data }
-  } catch (error) {
-    return {
-      success: false,
-      error: error instanceof Error ? error.message : 'Failed to create invoice',
-    }
   }
+
+  return result
 }
 
 export async function getInvoiceAction(
@@ -120,20 +114,18 @@ export async function listInvoicesAction(filter?: {
 export async function issueInvoiceAction(
   invoiceId: string,
 ): Promise<ActionResult<typeof commerceInvoices.$inferSelect>> {
-  try {
-    await resolveOrgContext()
-    const invoice = await issueInvoice(invoiceId)
+  const result = await executeCommandV2({
+    type: 'issue_invoice',
+    invoice_id: invoiceId,
+    actor_id: '', // resolved by control adapter
+  })
 
+  if (result.success) {
     revalidatePath('/invoices')
     revalidatePath(`/invoices/${invoiceId}`)
-
-    return { success: true, data: invoice }
-  } catch (error) {
-    return {
-      success: false,
-      error: error instanceof Error ? error.message : 'Failed to issue invoice',
-    }
   }
+
+  return result
 }
 
 export async function sendInvoiceAction(
@@ -159,20 +151,19 @@ export async function voidInvoiceAction(
   invoiceId: string,
   reason?: string,
 ): Promise<ActionResult<typeof commerceInvoices.$inferSelect>> {
-  try {
-    await resolveOrgContext()
-    const invoice = await voidInvoice(invoiceId, reason)
+  const result = await executeCommandV2({
+    type: 'void_invoice',
+    invoice_id: invoiceId,
+    actor_id: '', // resolved by control adapter
+    reason,
+  })
 
+  if (result.success) {
     revalidatePath('/invoices')
     revalidatePath(`/invoices/${invoiceId}`)
-
-    return { success: true, data: invoice }
-  } catch (error) {
-    return {
-      success: false,
-      error: error instanceof Error ? error.message : 'Failed to void invoice',
-    }
   }
+
+  return result
 }
 
 // ─────────────────────────────────────────────────────────────────────────────

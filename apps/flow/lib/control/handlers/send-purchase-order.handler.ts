@@ -5,6 +5,7 @@ import type { CommandHandler, CommandResult } from '@/lib/control/types'
 import { SendPurchaseOrderCommand } from '@/lib/commands/types'
 import { purchaseOrderRepo } from '@/lib/repositories'
 import { checkPurchaseOrderInvariants } from '@/lib/control/guards/invariant-guard'
+import { poCanBeSent } from '@/domain/invariants'
 import { validateTransition } from '@/lib/control/guards/workflow-guard'
 import { dispatchDomainEvent } from '@/lib/control/dispatch/event-dispatcher'
 import { dispatchAuditEntry } from '@/lib/control/dispatch/audit-dispatcher'
@@ -23,6 +24,16 @@ export const sendPurchaseOrderHandler: CommandHandler<SendPurchaseOrderCommand> 
 
     const po = await purchaseOrderRepo.findById(input.purchase_order_id, context.org_id)
     if (!po) throw new EntityNotFoundError('purchase_order', input.purchase_order_id)
+
+    // Domain invariant — pure predicate check
+    const lineCount = po.lines?.length ?? 0
+    const domainCheck = poCanBeSent(
+      { vendor_id: po.supplierId, status: po.status?.toUpperCase() as 'DRAFT', total_amount: Number(po.total ?? 0) },
+      lineCount,
+    )
+    if (!domainCheck.valid) {
+      return { success: false, errors: [{ code: 'DOMAIN_INVARIANT', message: domainCheck.violations.join('; ') }] }
+    }
 
     const wf = validateTransition('purchase_order', po.status, 'SENT')
     if (!wf.allowed) {

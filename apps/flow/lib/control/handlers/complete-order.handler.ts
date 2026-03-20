@@ -1,21 +1,23 @@
 /**
- * Flow — Confirm Order Handler
+ * Flow — Complete Order Handler
+ *
+ * Transitions an order to completed status.
+ * Gated by invariant + workflow guards.
  */
 import type { CommandHandler, CommandResult } from '@/lib/control/types'
-import { ConfirmOrderCommand } from '@/lib/commands/types'
+import { CompleteOrderCommand } from '@/lib/commands/types'
 import { orderRepo } from '@/lib/repositories'
 import { checkOrderInvariants } from '@/lib/control/guards/invariant-guard'
-import { orderCanBeConfirmed } from '@/domain/invariants'
 import { validateTransition } from '@/lib/control/guards/workflow-guard'
 import { dispatchDomainEvent } from '@/lib/control/dispatch/event-dispatcher'
 import { dispatchAuditEntry } from '@/lib/control/dispatch/audit-dispatcher'
 import { EntityNotFoundError } from '@/lib/control/errors/entity-not-found-error'
 
-export const confirmOrderHandler: CommandHandler<ConfirmOrderCommand> = {
-  commandType: 'confirm_order',
+export const completeOrderHandler: CommandHandler<CompleteOrderCommand> = {
+  commandType: 'complete_order',
 
   async execute(command, context): Promise<CommandResult> {
-    const input = ConfirmOrderCommand.parse(command)
+    const input = CompleteOrderCommand.parse(command)
 
     const inv = await checkOrderInvariants(input.order_id, context.org_id)
     if (!inv.valid) {
@@ -25,26 +27,16 @@ export const confirmOrderHandler: CommandHandler<ConfirmOrderCommand> = {
     const order = await orderRepo.findById(input.order_id, context.org_id)
     if (!order) throw new EntityNotFoundError('order', input.order_id)
 
-    // Domain invariant — pure check
-    const domainCheck = orderCanBeConfirmed({
-      status: order.status?.toUpperCase() as 'CREATED',
-      customer_id: order.customerId,
-      total_amount: Number(order.total ?? 0),
-    })
-    if (!domainCheck.valid) {
-      return { success: false, errors: [{ code: 'DOMAIN_INVARIANT', message: domainCheck.violations.join('; ') }] }
-    }
-
-    const wf = validateTransition('order', order.status, 'CONFIRMED')
+    const wf = validateTransition('order', order.status, 'COMPLETED')
     if (!wf.allowed) {
-      return { success: false, errors: [{ code: 'INVALID_TRANSITION', message: wf.reason ?? `Cannot confirm order from status ${order.status}` }] }
+      return { success: false, errors: [{ code: 'INVALID_TRANSITION', message: wf.reason ?? `Cannot complete order from status ${order.status}` }] }
     }
 
     const statusBefore = order.status
-    await orderRepo.update(input.order_id, context.org_id, { status: 'confirmed' })
+    await orderRepo.update(input.order_id, context.org_id, { status: 'completed' })
 
     const eventId = dispatchDomainEvent({
-      type: 'order_confirmed',
+      type: 'order_completed',
       actor_id: input.actor_id,
       org_id: context.org_id,
       entity_type: 'order',
@@ -58,9 +50,9 @@ export const confirmOrderHandler: CommandHandler<ConfirmOrderCommand> = {
       actor_id: input.actor_id,
       entity_type: 'order',
       entity_id: input.order_id,
-      action: 'order_confirmed',
+      action: 'order_completed',
       status_before: statusBefore,
-      status_after: 'CONFIRMED',
+      status_after: 'COMPLETED',
       correlation_id: context.correlation_id,
     })
 
@@ -68,10 +60,10 @@ export const confirmOrderHandler: CommandHandler<ConfirmOrderCommand> = {
       success: true,
       entity_type: 'order',
       entity_id: input.order_id,
-      status_after: 'CONFIRMED',
+      status_after: 'COMPLETED',
       emitted_event_ids: [eventId],
       audit_ref: auditRef,
-      message: 'Order confirmed',
+      message: 'Order completed',
     }
   },
 }
