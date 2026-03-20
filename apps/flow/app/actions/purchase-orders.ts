@@ -11,10 +11,6 @@ import {
   updatePurchaseOrderLine,
   deletePurchaseOrderLine,
   deletePurchaseOrder,
-  sendPurchaseOrder,
-  acknowledgePurchaseOrder,
-  receiveLineItem,
-  cancelPurchaseOrder,
   generatePORef,
 } from '@nzila/commerce-db'
 import { getDbContext, getReadContext } from '@/lib/clerk-org-resolver'
@@ -155,11 +151,34 @@ export async function acknowledgePurchaseOrderAction(purchaseOrderId: string) {
 }
 
 export async function receiveLineAction(lineId: string, quantityReceived: number) {
-  const ctx = await getDbContext()
-  return receiveLineItem(ctx, lineId, quantityReceived)
+  // Look up the PO for this line via a quick DB query
+  const { db: database, commercePurchaseOrderLines } = await import('@nzila/db')
+  const { eq } = await import('drizzle-orm')
+  const [line] = await database
+    .select({ purchaseOrderId: commercePurchaseOrderLines.purchaseOrderId })
+    .from(commercePurchaseOrderLines)
+    .where(eq(commercePurchaseOrderLines.id, lineId))
+    .limit(1)
+
+  if (!line) throw new Error('PO line not found')
+
+  const result = await executeCommand({
+    type: 'receive_po_line',
+    line_id: lineId,
+    purchase_order_id: line.purchaseOrderId,
+    quantity_received: quantityReceived,
+    actor_id: '',
+  })
+  if (!result.ok) throw new Error(result.error ?? 'Failed to record received quantity')
+  return result.data
 }
 
 export async function cancelPurchaseOrderAction(purchaseOrderId: string) {
-  const ctx = await getDbContext()
-  return cancelPurchaseOrder(ctx, purchaseOrderId)
+  const result = await executeCommand({
+    type: 'cancel_purchase_order',
+    purchase_order_id: purchaseOrderId,
+    actor_id: '',
+  })
+  if (!result.ok) throw new Error(result.error ?? 'Failed to cancel purchase order')
+  return result.data
 }

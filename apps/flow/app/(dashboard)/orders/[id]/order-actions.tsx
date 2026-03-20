@@ -43,9 +43,8 @@ export function OrderActions({ orderId, status }: { orderId: string; status: str
 
   function checkReadiness() {
     startTransition(async () => {
-      const result = await checkProductionReadinessAction(orderId)
-      alert(result.message)
-      if (result.ok && result.allReceived) router.refresh()
+      await checkProductionReadinessAction(orderId)
+      router.refresh()
     })
   }
 

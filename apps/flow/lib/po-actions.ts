@@ -200,8 +200,6 @@ export async function cancelPOAction(poId: string): Promise<ActionResult<POWithL
     return { success: false, error: error instanceof Error ? error.message : 'Unknown error' }
   }
 }
-  }
-}
 
 // ─────────────────────────────────────────────────────────────────────────────
 // Receive PO Line Items

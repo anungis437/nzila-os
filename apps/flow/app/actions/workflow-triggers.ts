@@ -7,7 +7,6 @@
  * 1. Sales → Procurement: Create PO from accepted quote (via command bus)
  * 2. Receiving → Production: Trigger production readiness when all PO items received
  */
-import { getReadContext } from '@/lib/clerk-org-resolver'
 import { executeCommand } from '@/lib/control/control-adapter'
 import { auth } from '@clerk/nextjs/server'
 import { revalidatePath } from 'next/cache'
@@ -67,7 +66,8 @@ export interface ProductionReadinessResult {
 
 /**
  * Check if all POs for an order are fully received.
- * If yes, update order status to "fulfillment" (production ready).
+ * If yes, routes through the command bus to transition the order
+ * to fulfillment (production ready).
  *
  * Called after each PO line receive operation.
  */
@@ -75,53 +75,23 @@ export async function checkProductionReadinessAction(
   orderId: string,
 ): Promise<ProductionReadinessResult> {
   try {
-    const ctx = await getReadContext()
+    const { userId } = await auth()
+    if (!userId) return { ok: false, allReceived: false, totalPOs: 0, receivedPOs: 0, pendingPOs: 0, message: 'Not authenticated' }
 
-    const { db, commerceOrders, commercePurchaseOrders } = await import('@nzila/db')
-    const { eq, and } = await import('drizzle-orm')
+    const result = await executeCommand({
+      type: 'check_production_readiness',
+      order_id: orderId,
+      actor_id: userId,
+    })
 
-    // Get the order
-    const [order] = await db
-      .select()
-      .from(commerceOrders)
-      .where(and(eq(commerceOrders.id, orderId), eq(commerceOrders.orgId, ctx.orgId)))
-      .limit(1)
-
-    if (!order) return { ok: false, allReceived: false, totalPOs: 0, receivedPOs: 0, pendingPOs: 0, message: 'Order not found' }
-
-    // Get all POs linked to this order
-    const pos = await db
-      .select()
-      .from(commercePurchaseOrders)
-      .where(eq(commercePurchaseOrders.orderId, orderId))
-
-    if (pos.length === 0) {
-      return {
-        ok: true,
-        allReceived: false,
-        orderId,
-        orderRef: order.ref,
-        totalPOs: 0,
-        receivedPOs: 0,
-        pendingPOs: 0,
-        message: 'No purchase orders found for this order.',
-      }
+    if (!result.ok) {
+      return { ok: false, allReceived: false, totalPOs: 0, receivedPOs: 0, pendingPOs: 0, message: result.error ?? 'Check failed' }
     }
 
-    const receivedPOs = pos.filter((po) => po.status === 'received').length
-    const pendingPOs = pos.length - receivedPOs
-    const allReceived = receivedPOs === pos.length
+    const statusAfter = result.data?.status_after ?? ''
+    const allReceived = statusAfter === 'FULFILLMENT'
 
-    if (allReceived && order.status !== 'fulfillment' && order.status !== 'shipped' && order.status !== 'delivered' && order.status !== 'completed') {
-      // Transition order to fulfillment (production ready)
-      await db
-        .update(commerceOrders)
-        .set({
-          status: 'fulfillment',
-          updatedAt: new Date(),
-        })
-        .where(eq(commerceOrders.id, orderId))
-
+    if (allReceived) {
       revalidatePath('/orders')
       revalidatePath(`/orders/${orderId}`)
     }
@@ -130,13 +100,10 @@ export async function checkProductionReadinessAction(
       ok: true,
       allReceived,
       orderId,
-      orderRef: order.ref,
-      totalPOs: pos.length,
-      receivedPOs,
-      pendingPOs,
-      message: allReceived
-        ? `All ${pos.length} PO(s) received. Order ${order.ref} is ready for production!`
-        : `${receivedPOs}/${pos.length} PO(s) received. Waiting on ${pendingPOs} pending PO(s).`,
+      totalPOs: 0,
+      receivedPOs: 0,
+      pendingPOs: 0,
+      message: result.data?.message ?? 'Check completed',
     }
   } catch (err) {
     return {

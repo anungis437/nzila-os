@@ -4,38 +4,15 @@ import { getLocale } from 'next-intl/server'
 import {
   ArrowLeftIcon,
   ArrowPathIcon,
-  TruckIcon,
   CheckCircleIcon,
-  ClockIcon,
   PrinterIcon,
   DocumentDuplicateIcon,
 } from '@heroicons/react/24/outline'
 import { getPurchaseOrderWithLinesAction } from '@/app/actions/purchase-orders'
 import { getSupplierAction } from '@/app/actions/suppliers'
 import { POActions } from './po-actions'
-
-/** PO status badge colours. */
-const statusColors: Record<string, string> = {
-  draft: 'bg-gray-100 text-gray-700',
-  pending_approval: 'bg-amber-100 text-amber-700',
-  approved: 'bg-blue-100 text-blue-700',
-  ordered: 'bg-indigo-100 text-indigo-700',
-  partially_received: 'bg-electric/10 text-electric',
-  received: 'bg-green-100 text-green-700',
-  cancelled: 'bg-red-100 text-red-700',
-  closed: 'bg-gray-100 text-gray-500',
-}
-
-const statusLabels: Record<string, string> = {
-  draft: 'Draft',
-  pending_approval: 'Pending Approval',
-  approved: 'Approved',
-  ordered: 'Ordered',
-  partially_received: 'Partially Received',
-  received: 'Received',
-  cancelled: 'Cancelled',
-  closed: 'Closed',
-}
+import { StatusBadge, LifecycleTimeline, SystemGuidance } from '@/app/(dashboard)/components'
+import type { TimelineEvent } from '@/app/(dashboard)/components'
 
 // ── Page Component ──────────────────────────────────────────────────────────
 
@@ -66,6 +43,28 @@ export default async function PODetailPage({ params }: { params: Promise<{ id: s
   const _canEdit = po.status === 'draft'
   const _canApprove = po.status === 'draft' || po.status === 'acknowledged'
 
+  // Build timeline events
+  const poTimeline: TimelineEvent[] = [
+    { label: 'Created', description: `PO created by ${po.createdBy}`, timestamp: po.createdAt },
+  ]
+  if (po.sentAt) poTimeline.push({ label: 'Sent to Supplier', timestamp: po.sentAt })
+  if (po.expectedDeliveryDate && !po.actualDeliveryDate)
+    poTimeline.push({ label: 'Expected Delivery', timestamp: po.expectedDeliveryDate })
+  if (po.actualDeliveryDate) poTimeline.push({ label: 'Received', timestamp: po.actualDeliveryDate })
+
+  // Guidance
+  const poGuidance = (() => {
+    switch (po.status) {
+      case 'draft':             return { severity: 'info' as const, msg: 'Review line items and send to the supplier when ready.' }
+      case 'sent':              return { severity: 'info' as const, msg: 'Waiting for supplier acknowledgement.' }
+      case 'acknowledged':      return { severity: 'tip' as const, msg: 'Supplier acknowledged. Begin receiving items as they arrive.' }
+      case 'partial_received':  return { severity: 'warning' as const, msg: `${totalReceived} of ${totalOrdered} items received. Continue receiving to complete.` }
+      case 'received':          return { severity: 'success' as const, msg: 'All items received. This PO is complete.' }
+      case 'cancelled':         return { severity: 'warning' as const, msg: 'This purchase order has been cancelled.' }
+      default:                  return null
+    }
+  })()
+
   return (
     <div className="p-8 max-w-6xl mx-auto">
       {/* Breadcrumb */}
@@ -84,9 +83,7 @@ export default async function PODetailPage({ params }: { params: Promise<{ id: s
         <div>
           <div className="flex items-center gap-3 mb-2">
             <h1 className="text-2xl font-bold text-navy">{po.ref}</h1>
-            <span className={`inline-flex px-2.5 py-0.5 text-xs font-semibold rounded-full ${statusColors[po.status] ?? 'bg-gray-100 text-gray-600'}`}>
-              {statusLabels[po.status] ?? po.status}
-            </span>
+            <StatusBadge status={po.status} />
           </div>
           <p className="text-sm text-gray-500">
             Supplier: <Link href={`${base}/suppliers/${po.supplierId}`} className="text-electric hover:underline">{supplier?.name ?? 'Unknown'}</Link>
@@ -135,6 +132,13 @@ export default async function PODetailPage({ params }: { params: Promise<{ id: s
             {po.expectedDeliveryDate && <span>Expected: {new Date(po.expectedDeliveryDate).toLocaleDateString()}</span>}
           </div>
         </div>
+      )}
+
+      {/* System Guidance */}
+      {poGuidance && (
+        <SystemGuidance severity={poGuidance.severity} className="mb-6">
+          {poGuidance.msg}
+        </SystemGuidance>
       )}
 
       <div className="grid grid-cols-3 gap-6">
@@ -214,50 +218,7 @@ export default async function PODetailPage({ params }: { params: Promise<{ id: s
           {/* Timeline */}
           <div className="bg-white rounded-xl border border-gray-200 p-6">
             <h3 className="text-sm font-semibold text-gray-500 uppercase tracking-wide mb-4">Timeline</h3>
-            <div className="space-y-4">
-              <div className="flex items-start gap-3">
-                <div className="h-8 w-8 bg-green-100 rounded-full flex items-center justify-center shrink-0">
-                  <CheckCircleIcon className="h-4 w-4 text-green-600" />
-                </div>
-                <div>
-                  <p className="text-sm font-medium text-gray-900">Created</p>
-                  <p className="text-xs text-gray-500">{new Date(po.createdAt).toLocaleDateString()} by {po.createdBy}</p>
-                </div>
-              </div>
-              {po.sentAt && (
-                <div className="flex items-start gap-3">
-                  <div className="h-8 w-8 bg-blue-100 rounded-full flex items-center justify-center shrink-0">
-                    <TruckIcon className="h-4 w-4 text-blue-600" />
-                  </div>
-                  <div>
-                    <p className="text-sm font-medium text-gray-900">Sent to Supplier</p>
-                    <p className="text-xs text-gray-500">{new Date(po.sentAt).toLocaleDateString()}</p>
-                  </div>
-                </div>
-              )}
-              {po.expectedDeliveryDate && !po.actualDeliveryDate && (
-                <div className="flex items-start gap-3">
-                  <div className="h-8 w-8 bg-amber-100 rounded-full flex items-center justify-center shrink-0">
-                    <ClockIcon className="h-4 w-4 text-amber-600" />
-                  </div>
-                  <div>
-                    <p className="text-sm font-medium text-gray-900">Expected Delivery</p>
-                    <p className="text-xs text-gray-500">{new Date(po.expectedDeliveryDate).toLocaleDateString()}</p>
-                  </div>
-                </div>
-              )}
-              {po.actualDeliveryDate && (
-                <div className="flex items-start gap-3">
-                  <div className="h-8 w-8 bg-green-100 rounded-full flex items-center justify-center shrink-0">
-                    <CheckCircleIcon className="h-4 w-4 text-green-600" />
-                  </div>
-                  <div>
-                    <p className="text-sm font-medium text-gray-900">Received</p>
-                    <p className="text-xs text-gray-500">{new Date(po.actualDeliveryDate).toLocaleDateString()}</p>
-                  </div>
-                </div>
-              )}
-            </div>
+            <LifecycleTimeline events={poTimeline} />
           </div>
 
           {/* Quick Stats */}

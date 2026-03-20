@@ -3,8 +3,6 @@ import { notFound } from 'next/navigation'
 import { getLocale } from 'next-intl/server'
 import {
   ArrowLeftIcon,
-  ClockIcon,
-  CheckCircleIcon,
   UserIcon,
   MapPinIcon,
   PrinterIcon,
@@ -12,21 +10,17 @@ import {
 import { getOrderAction, getOrderLinesAction } from '@/app/actions/orders'
 import { getCustomerAction } from '@/app/actions/customers'
 import { OrderActions } from './order-actions'
+import { StatusBadge, ProgressStepper, LifecycleTimeline, SystemGuidance } from '@/app/(dashboard)/components'
+import type { Step, TimelineEvent } from '@/app/(dashboard)/components'
 
-/** Order status badge colours. */
-const statusColors: Record<string, string> = {
-  created: 'bg-gray-100 text-gray-700',
-  confirmed: 'bg-blue-100 text-blue-700',
-  fulfillment: 'bg-indigo-100 text-indigo-700',
-  shipped: 'bg-cyan-100 text-cyan-700',
-  delivered: 'bg-green-100 text-green-700',
-  completed: 'bg-emerald-100 text-emerald-700',
-  cancelled: 'bg-red-100 text-red-700',
-  return_requested: 'bg-amber-100 text-amber-700',
-  needs_attention: 'bg-orange-100 text-orange-700',
-}
-
-const statusSteps = ['created', 'confirmed', 'fulfillment', 'shipped', 'delivered', 'completed'] as const
+const ORDER_STEPS: Step[] = [
+  { key: 'created',     label: 'Created' },
+  { key: 'confirmed',   label: 'Confirmed' },
+  { key: 'fulfillment', label: 'Fulfillment' },
+  { key: 'shipped',     label: 'Shipped' },
+  { key: 'delivered',   label: 'Delivered' },
+  { key: 'completed',   label: 'Completed' },
+]
 
 // ── Page Component ──────────────────────────────────────────────────────────
 
@@ -62,20 +56,28 @@ export default async function OrderDetailPage({ params }: { params: Promise<{ id
 
   // Calculate totals
   const totalQuantity = lines.reduce((acc, line) => acc + line.quantity, 0)
-  const currentStepIndex = statusSteps.indexOf(order.status as typeof statusSteps[number])
+  const currentStepIndex = ORDER_STEPS.findIndex((s) => s.key === order.status)
 
-  const getNextAction = () => {
-    switch (order.status) {
-      case 'created': return { label: 'Confirm Order', action: 'confirm' }
-      case 'confirmed': return { label: 'Start Fulfillment', action: 'fulfill' }
-      case 'fulfillment': return { label: 'Ship Order', action: 'ship' }
-      case 'shipped': return { label: 'Mark Delivered', action: 'deliver' }
-      case 'delivered': return { label: 'Complete Order', action: 'complete' }
-      default: return null
-    }
+  // Build sidebar timeline events
+  const timelineEvents: TimelineEvent[] = [
+    { label: 'Created', description: 'Order created', timestamp: order.createdAt },
+  ]
+  if (order.orderLockedAt) {
+    timelineEvents.push({ label: 'Locked', description: 'Order confirmed and locked', timestamp: order.orderLockedAt })
   }
 
-  const _nextAction = getNextAction()
+  // Guidance message based on current status
+  const guidance = (() => {
+    switch (order.status) {
+      case 'created':    return { severity: 'info' as const, msg: 'Review line items and confirm this order to begin procurement.' }
+      case 'confirmed':  return { severity: 'info' as const, msg: 'Order is confirmed. Create purchase orders or check production readiness.' }
+      case 'fulfillment': return { severity: 'tip' as const, msg: 'All materials received. Mark as shipped once packaging is complete.' }
+      case 'shipped':    return { severity: 'info' as const, msg: 'Shipment is in transit. Mark delivered once the customer confirms receipt.' }
+      case 'delivered':  return { severity: 'success' as const, msg: 'Customer has received the order. Complete to close.' }
+      case 'cancelled':  return { severity: 'warning' as const, msg: 'This order has been cancelled.' }
+      default:           return null
+    }
+  })()
 
   return (
     <div className="p-8 max-w-6xl mx-auto">
@@ -95,9 +97,7 @@ export default async function OrderDetailPage({ params }: { params: Promise<{ id
         <div>
           <div className="flex items-center gap-3 mb-2">
             <h1 className="text-2xl font-bold text-navy">{order.ref}</h1>
-            <span className={`inline-flex px-2.5 py-0.5 text-xs font-semibold rounded-full capitalize ${statusColors[order.status] ?? 'bg-gray-100 text-gray-600'}`}>
-              {order.status.replace(/_/g, ' ')}
-            </span>
+            <StatusBadge status={order.status} />
           </div>
           <p className="text-sm text-gray-500">
             Customer: <Link href={`${base}/clients/${order.customerId}`} className="text-electric hover:underline">{customer?.name ?? 'Unknown'}</Link>
@@ -116,36 +116,15 @@ export default async function OrderDetailPage({ params }: { params: Promise<{ id
       {/* Status Progress */}
       <div className="bg-white rounded-xl border border-gray-200 p-6 mb-6">
         <h3 className="text-sm font-semibold text-gray-700 mb-4">Order Progress</h3>
-        <div className="flex items-center justify-between">
-          {statusSteps.map((step, index) => {
-            const isComplete = index < currentStepIndex
-            const isCurrent = index === currentStepIndex
-            const _isPending = index > currentStepIndex
-            
-            return (
-              <div key={step} className="flex items-center">
-                <div className="flex flex-col items-center">
-                  <div className={`h-8 w-8 rounded-full flex items-center justify-center ${isComplete ? 'bg-green-500' : isCurrent ? 'bg-electric' : 'bg-gray-200'}`}>
-                    {isComplete ? (
-                      <CheckCircleIcon className="h-5 w-5 text-white" />
-                    ) : (
-                      <span className={`text-xs font-semibold ${isCurrent ? 'text-white' : 'text-gray-500'}`}>{index + 1}</span>
-                    )}
-                  </div>
-                  <span className={`text-xs mt-1 capitalize ${isCurrent ? 'text-electric font-semibold' : isComplete ? 'text-green-600' : 'text-gray-400'}`}>
-                    {step}
-                  </span>
-                </div>
-                {index < statusSteps.length - 1 && (
-                  <div className={`w-12 h-0.5 mx-2 ${isComplete ? 'bg-green-500' : 'bg-gray-200'}`} />
-                )}
-              </div>
-            )
-          })}
-        </div>
+        <ProgressStepper steps={ORDER_STEPS} currentIndex={currentStepIndex >= 0 ? currentStepIndex : 0} />
       </div>
 
-      {/* Allocation Warning - removed for now as allocation data comes from separate table */}
+      {/* System Guidance */}
+      {guidance && (
+        <SystemGuidance severity={guidance.severity} className="mb-6">
+          {guidance.msg}
+        </SystemGuidance>
+      )}
 
       <div className="grid grid-cols-3 gap-6">
         {/* Main Content */}
@@ -245,24 +224,7 @@ export default async function OrderDetailPage({ params }: { params: Promise<{ id
           {/* Timeline */}
           <div className="bg-white rounded-xl border border-gray-200 p-6">
             <h3 className="text-sm font-semibold text-gray-500 uppercase tracking-wide mb-4">Timeline</h3>
-            <div className="space-y-4">
-              <div className="flex items-center gap-3">
-                <ClockIcon className="h-4 w-4 text-gray-400 shrink-0" />
-                <div className="text-sm">
-                  <span className="text-gray-500">Created:</span>
-                  <span className="ml-2 text-gray-900">{new Date(order.createdAt).toLocaleDateString()}</span>
-                </div>
-              </div>
-              {order.orderLockedAt && (
-                <div className="flex items-center gap-3">
-                  <CheckCircleIcon className="h-4 w-4 text-green-500 shrink-0" />
-                  <div className="text-sm">
-                    <span className="text-gray-500">Locked:</span>
-                    <span className="ml-2 text-gray-900">{new Date(order.orderLockedAt).toLocaleDateString()}</span>
-                  </div>
-                </div>
-              )}
-            </div>
+            <LifecycleTimeline events={timelineEvents} />
           </div>
 
           {/* Summary */}
