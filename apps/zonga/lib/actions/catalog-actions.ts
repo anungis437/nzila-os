@@ -90,9 +90,11 @@ export async function createContentAsset(data: {
   title: string
   type: string
   genre?: string
+  language?: string
   creatorId?: string
   creatorName?: string
   duration?: number
+  collaborators?: string[]
 }): Promise<{ success: boolean; assetId?: string; error?: unknown }> {
   const ctx = await resolveOrgContext()
 
@@ -116,7 +118,7 @@ export async function createContentAsset(data: {
     await platformDb.execute(
       sql`INSERT INTO audit_log (action, actor_id, entity_type, entity_id, org_id, metadata)
       VALUES ('asset.created', ${ctx.actorId}, 'content_asset', ${assetId}, ${ctx.orgId},
-        ${JSON.stringify({ title: data.title, type: data.type })}::jsonb)`,
+        ${JSON.stringify({ title: data.title, type: data.type, language: data.language, collaborators: data.collaborators })}::jsonb)`,
     )
 
     const auditEvent = buildZongaAuditEvent({

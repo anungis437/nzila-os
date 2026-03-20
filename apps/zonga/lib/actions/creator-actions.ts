@@ -71,6 +71,9 @@ export async function registerCreator(data: {
   email: string
   genre?: string
   country?: string
+  bio?: string
+  language?: string
+  payoutRail?: string
 }): Promise<{ success: boolean; creatorId?: string; error?: unknown }> {
   const ctx = await resolveOrgContext()
 
@@ -80,6 +83,9 @@ export async function registerCreator(data: {
     email: data.email,
     genre: data.genre,
     country: data.country,
+    bio: data.bio,
+    language: data.language,
+    payout_rail: data.payoutRail,
     actor_id: ctx.actorId,
   })
 

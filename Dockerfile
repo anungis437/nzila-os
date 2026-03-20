@@ -161,7 +161,7 @@ ENV NEXT_PUBLIC_CFO_URL=$NEXT_PUBLIC_CFO_URL
 
 # Build only apps that have deps installed in the Docker image (turbo filters)
 # Default: all apps. Override via --build-arg TURBO_FILTER for single-app builds.
-ARG TURBO_FILTER="--filter=@nzila/web --filter=@nzila/console --filter=@nzila/partners --filter=@nzila/union-eyes --filter=@nzila/abr --filter=@nzila/orchestrator-api --filter=@nzila/cfo"
+ARG TURBO_FILTER="--filter=@nzila/web --filter=@nzila/console --filter=@nzila/partners --filter=@nzila/union-eyes --filter=@nzila/abr --filter=@nzila/orchestrator-api --filter=@nzila/cfo --filter=@nzila/zonga"
 ENV NODE_OPTIONS="--max-old-space-size=4096"
 RUN pnpm turbo build ${TURBO_FILTER} --concurrency=1
 # ============================================
@@ -371,6 +371,36 @@ HEALTHCHECK --interval=30s --timeout=5s --start-period=30s --retries=3 \
 EXPOSE 3005
 
 CMD ["node", "apps/cfo/server.js"]
+
+# ============================================
+# Zonga production stage
+# ============================================
+FROM base AS zonga
+WORKDIR /app
+
+ENV NODE_ENV=production
+ENV NEXT_TELEMETRY_DISABLED=1
+ENV PORT=3006
+
+# Copy necessary files
+COPY --from=builder /app/apps/zonga/.next/standalone ./
+COPY --from=builder /app/apps/zonga/.next/static ./apps/zonga/.next/static
+COPY --from=builder /app/apps/zonga/messages ./apps/zonga/messages
+COPY --from=builder /app/content ./content
+
+# Create non-root user
+RUN groupadd --system --gid 1001 nodejs && \
+    useradd --system --uid 1001 --no-create-home nextjs && \
+    chown -R nextjs:nodejs /app
+
+USER nextjs
+
+HEALTHCHECK --interval=30s --timeout=5s --start-period=30s --retries=3 \
+    CMD wget --no-verbose --tries=1 --spider http://localhost:3006/api/health || exit 1
+
+EXPOSE 3006
+
+CMD ["node", "apps/zonga/server.js"]
 
 # ============================================
 # Dev stage - for development with hot reload

@@ -6,6 +6,7 @@ import { auth } from '@clerk/nextjs/server';
 import { redirect } from 'next/navigation';
 import Link from 'next/link';
 import { UserButton, OrganizationSwitcher } from '@clerk/nextjs';
+import { DashboardShell } from '@/components/dashboard/dashboard-shell';
 
 const sidebarLinks = [
   { href: 'dashboard', label: 'Overview', icon: '📊' },
@@ -40,6 +41,7 @@ export default async function DashboardLayout({
   }
 
   return (
+    <DashboardShell>
     <div className="flex min-h-screen bg-gray-50">
       {/* ─── Sidebar ─── */}
       <aside className="hidden md:flex md:w-64 md:flex-col bg-navy text-white">
@@ -103,8 +105,9 @@ export default async function DashboardLayout({
           </div>
         </header>
 
-        <main className="flex-1 p-6">{children}</main>
+        <main className="flex-1 p-6 pb-24">{children}</main>
       </div>
     </div>
+    </DashboardShell>
   );
 }

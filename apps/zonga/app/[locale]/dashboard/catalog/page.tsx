@@ -11,6 +11,7 @@ import { redirect } from 'next/navigation'
 import { Card } from '@nzila/ui'
 import { listCatalogAssets } from '@/lib/actions/catalog-actions'
 import { AfricanGenre } from '@/lib/zonga-services'
+import { CatalogCard } from '@/components/dashboard/catalog-card'
 
 /** Top-level genre groups for the filter bar. */
 const GENRE_GROUPS = [
@@ -136,41 +137,7 @@ export default async function CatalogPage({
       ) : (
         <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 xl:grid-cols-4 gap-4">
           {filteredAssets.map((asset) => (
-            <Link key={asset.id} href={`catalog/${asset.id}`}>
-              <Card>
-                <div className="p-4 hover:bg-gray-50 transition-colors rounded-xl">
-                  <div className="flex items-center gap-3 mb-3">
-                    <div className="flex h-12 w-12 items-center justify-center rounded-lg bg-electric/10 text-2xl">
-                      {asset.type === 'album' ? '💿' : asset.type === 'video' ? '🎬' : '🎵'}
-                    </div>
-                    <div className="flex-1 min-w-0">
-                      <p className="font-semibold text-navy truncate">{asset.title ?? 'Untitled'}</p>
-                      <p className="text-xs text-gray-500">
-                        {(asset.metadata?.creatorName as string) ?? 'Unknown'}
-                        {asset.collaborators?.length ? ` ft. ${asset.collaborators.join(', ')}` : ''}
-                      </p>
-                    </div>
-                  </div>
-                  <div className="flex items-center justify-between">
-                    <div className="flex items-center gap-2">
-                      <span className="text-xs text-gray-400">{asset.genre?.replace(/_/g, ' ') ?? '—'}</span>
-                      {asset.language && (
-                        <span className="inline-flex rounded-full bg-gray-100 px-1.5 py-0.5 text-[10px] font-medium text-gray-500 uppercase">
-                          {asset.language}
-                        </span>
-                      )}
-                    </div>
-                    <span className={`inline-flex rounded-full px-2 py-0.5 text-xs font-medium ${
-                      asset.status === 'published'
-                        ? 'bg-emerald-500/10 text-emerald-600'
-                        : 'bg-amber-500/10 text-amber-600'
-                    }`}>
-                      {asset.status ?? 'draft'}
-                    </span>
-                  </div>
-                </div>
-              </Card>
-            </Link>
+            <CatalogCard key={asset.id} asset={asset} basePath="catalog" />
           ))}
         </div>
       )}

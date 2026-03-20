@@ -11,6 +11,7 @@ import Link from 'next/link'
 import { useParams } from 'next/navigation'
 import { Card } from '@nzila/ui'
 import { globalSearch, type SearchResults, type SearchResult } from '@/lib/actions/search-actions'
+import { PlayButton, toPlayerTrack } from '@/components/player'
 
 const typeConfig: Record<string, { icon: string; color: string; basePath: string }> = {
   asset: { icon: '🎵', color: 'bg-electric/10 text-electric', basePath: 'catalog' },
@@ -26,7 +27,18 @@ function ResultCard({ result, locale }: { result: SearchResult; locale: string }
     <Link href={`/${locale}/dashboard/${config.basePath}/${result.id}`}>
       <Card>
         <div className="flex items-center gap-4 p-4 hover:bg-gray-50 transition-colors rounded-lg">
-          <span className="text-2xl">{config.icon}</span>
+          {result.type === 'asset' ? (
+            <PlayButton
+              track={toPlayerTrack({
+                id: result.id,
+                title: result.title ?? 'Untitled',
+                creatorName: result.subtitle,
+              })}
+              variant="icon"
+            />
+          ) : (
+            <span className="text-2xl">{config.icon}</span>
+          )}
           <div className="flex-1 min-w-0">
             <p className="text-sm font-medium text-navy truncate">{result.title ?? 'Untitled'}</p>
             {result.subtitle && (

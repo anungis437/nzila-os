@@ -5,6 +5,7 @@
  */
 import { auth } from '@clerk/nextjs/server'
 import { redirect } from 'next/navigation'
+import Link from 'next/link'
 import { Card } from '@nzila/ui'
 import {
   listModerationCases,
@@ -139,12 +140,17 @@ export default async function ModerationPage() {
                     <th className="px-5 py-3 text-xs font-medium text-gray-500">Status</th>
                     <th className="px-5 py-3 text-xs font-medium text-gray-500">Assigned</th>
                     <th className="px-5 py-3 text-xs font-medium text-gray-500">Created</th>
+                    <th className="px-5 py-3 text-xs font-medium text-gray-500"></th>
                   </tr>
                 </thead>
                 <tbody className="divide-y divide-gray-50">
                   {cases.map((c) => (
                     <tr key={c.id} className="hover:bg-gray-50">
-                      <td className="px-5 py-3 font-medium text-navy">{c.caseType}</td>
+                      <td className="px-5 py-3 font-medium text-navy">
+                        <Link href={`moderation/${c.id}`} className="hover:text-electric">
+                          {c.caseType}
+                        </Link>
+                      </td>
                       <td className="px-5 py-3 text-gray-500">
                         {c.entityType}
                         <span className="text-gray-300 mx-1">/</span>
@@ -157,6 +163,14 @@ export default async function ModerationPage() {
                       </td>
                       <td className="px-5 py-3 text-gray-400 text-xs">
                         {c.createdAt ? new Date(c.createdAt).toLocaleDateString() : '—'}
+                      </td>
+                      <td className="px-5 py-3">
+                        <Link
+                          href={`moderation/${c.id}`}
+                          className="text-xs text-electric hover:underline"
+                        >
+                          View →
+                        </Link>
                       </td>
                     </tr>
                   ))}

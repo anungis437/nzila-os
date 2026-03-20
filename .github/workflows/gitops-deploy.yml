@@ -119,7 +119,7 @@ jobs:
     name: Build Images
     strategy:
       matrix:
-        app: [web, console, partners, union-eyes, orchestrator-api, cfo]
+        app: [web, console, partners, union-eyes, orchestrator-api, cfo, zonga]
 
     steps:
       - uses: actions/checkout@v4
@@ -152,8 +152,7 @@ jobs:
           case "$APP" in
             web|console)   PK="${{ secrets.CLERK_PK_WEB }}" ;;
             partners)      PK="${{ secrets.CLERK_PK_PARTNERS }}" ;;
-            union-eyes)    PK="${{ secrets.CLERK_PK_UNION_EYES }}" ;;
-            *)             PK="" ;;
+            union-eyes)    PK="${{ secrets.CLERK_PK_UNION_EYES }}" ;;            zonga)         PK="${{ secrets.CLERK_PK_ZONGA }}" ;;            *)             PK="" ;;
           esac
           echo "pk=$PK" >> "$GITHUB_OUTPUT"
 
@@ -230,7 +229,7 @@ jobs:
           fi
 
           # Update each Container App with the newly built image
-          ALL_APPS=(web console partners union-eyes orchestrator-api cfo)
+          ALL_APPS=(web console partners union-eyes orchestrator-api cfo zonga)
           FAILED=()
 
           for APP in "${ALL_APPS[@]}"; do

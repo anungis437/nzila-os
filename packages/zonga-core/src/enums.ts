@@ -476,3 +476,328 @@ export const AfricanCountry = {
   SD: 'SD', // Sudan
 } as const
 export type AfricanCountry = (typeof AfricanCountry)[keyof typeof AfricanCountry]
+
+// ── Streaming / Playback ────────────────────────────────────────────────────
+
+export const StreamProtocol = {
+  PROGRESSIVE: 'progressive',
+  HLS: 'hls',
+  DASH: 'dash',
+} as const
+export type StreamProtocol = (typeof StreamProtocol)[keyof typeof StreamProtocol]
+
+export const PlaybackState = {
+  IDLE: 'idle',
+  LOADING: 'loading',
+  PLAYING: 'playing',
+  PAUSED: 'paused',
+  BUFFERING: 'buffering',
+  ENDED: 'ended',
+  ERROR: 'error',
+} as const
+export type PlaybackState = (typeof PlaybackState)[keyof typeof PlaybackState]
+
+export const DownloadStatus = {
+  PENDING: 'pending',
+  DOWNLOADING: 'downloading',
+  COMPLETED: 'completed',
+  FAILED: 'failed',
+  EXPIRED: 'expired',
+  REVOKED: 'revoked',
+} as const
+export type DownloadStatus = (typeof DownloadStatus)[keyof typeof DownloadStatus]
+
+// ── Rights / Ownership ──────────────────────────────────────────────────────
+
+export const RightsOwnerRole = {
+  MASTER: 'master',
+  PUBLISHER: 'publisher',
+  COMPOSER: 'composer',
+  LYRICIST: 'lyricist',
+  PERFORMER: 'performer',
+  PRODUCER: 'producer',
+  LABEL: 'label',
+} as const
+export type RightsOwnerRole = (typeof RightsOwnerRole)[keyof typeof RightsOwnerRole]
+
+export const SplitAgreementStatus = {
+  DRAFT: 'draft',
+  PENDING_APPROVAL: 'pending_approval',
+  ACTIVE: 'active',
+  DISPUTED: 'disputed',
+  SUPERSEDED: 'superseded',
+  TERMINATED: 'terminated',
+} as const
+export type SplitAgreementStatus = (typeof SplitAgreementStatus)[keyof typeof SplitAgreementStatus]
+
+export const DisputeStatus = {
+  OPEN: 'open',
+  UNDER_REVIEW: 'under_review',
+  EVIDENCE_REQUESTED: 'evidence_requested',
+  MEDIATION: 'mediation',
+  RESOLVED_FOR_CLAIMANT: 'resolved_for_claimant',
+  RESOLVED_FOR_RESPONDENT: 'resolved_for_respondent',
+  DISMISSED: 'dismissed',
+  APPEALED: 'appealed',
+} as const
+export type DisputeStatus = (typeof DisputeStatus)[keyof typeof DisputeStatus]
+
+export const DisputeType = {
+  OWNERSHIP: 'ownership',
+  SPLIT_PERCENTAGE: 'split_percentage',
+  UNAUTHORIZED_USE: 'unauthorized_use',
+  TAKEDOWN: 'takedown',
+  PAYOUT: 'payout',
+  METADATA: 'metadata',
+} as const
+export type DisputeType = (typeof DisputeType)[keyof typeof DisputeType]
+
+export const TakedownReason = {
+  COPYRIGHT_INFRINGEMENT: 'copyright_infringement',
+  TRADEMARK_VIOLATION: 'trademark_violation',
+  EXPLICIT_CONTENT: 'explicit_content',
+  HATE_SPEECH: 'hate_speech',
+  COURT_ORDER: 'court_order',
+  RIGHTS_HOLDER_REQUEST: 'rights_holder_request',
+  FRAUD: 'fraud',
+  POLICY_VIOLATION: 'policy_violation',
+} as const
+export type TakedownReason = (typeof TakedownReason)[keyof typeof TakedownReason]
+
+export const TakedownStatus = {
+  REQUESTED: 'requested',
+  UNDER_REVIEW: 'under_review',
+  EXECUTED: 'executed',
+  COUNTER_NOTICE_FILED: 'counter_notice_filed',
+  REINSTATED: 'reinstated',
+  PERMANENT: 'permanent',
+} as const
+export type TakedownStatus = (typeof TakedownStatus)[keyof typeof TakedownStatus]
+
+// ── Distribution ────────────────────────────────────────────────────────────
+
+export const DistributionTarget = {
+  ZONGA: 'zonga',
+  SPOTIFY: 'spotify',
+  APPLE_MUSIC: 'apple_music',
+  YOUTUBE_MUSIC: 'youtube_music',
+  DEEZER: 'deezer',
+  TIDAL: 'tidal',
+  BOOMPLAY: 'boomplay',
+  AUDIOMACK: 'audiomack',
+  MDUNDO: 'mdundo',
+} as const
+export type DistributionTarget = (typeof DistributionTarget)[keyof typeof DistributionTarget]
+
+// ── Events / Ticketing (Extended) ───────────────────────────────────────────
+
+export const EventType = {
+  CONCERT: 'concert',
+  FESTIVAL: 'festival',
+  ALBUM_LAUNCH: 'album_launch',
+  CLUB_NIGHT: 'club_night',
+  SHOWCASE: 'showcase',
+  LISTENING_PARTY: 'listening_party',
+  VIRTUAL: 'virtual',
+  WORKSHOP: 'workshop',
+  MEET_AND_GREET: 'meet_and_greet',
+} as const
+export type EventType = (typeof EventType)[keyof typeof EventType]
+
+export const TicketTier = {
+  EARLY_BIRD: 'early_bird',
+  GENERAL: 'general',
+  VIP: 'vip',
+  VVIP: 'vvip',
+  BACKSTAGE: 'backstage',
+  TABLE: 'table',
+  COMP: 'comp',
+} as const
+export type TicketTier = (typeof TicketTier)[keyof typeof TicketTier]
+
+export const TicketTransferStatus = {
+  INITIATED: 'initiated',
+  ACCEPTED: 'accepted',
+  DECLINED: 'declined',
+  EXPIRED: 'expired',
+  CANCELLED: 'cancelled',
+} as const
+export type TicketTransferStatus = (typeof TicketTransferStatus)[keyof typeof TicketTransferStatus]
+
+export const RefundStatus = {
+  REQUESTED: 'requested',
+  APPROVED: 'approved',
+  PROCESSING: 'processing',
+  COMPLETED: 'completed',
+  DENIED: 'denied',
+} as const
+export type RefundStatus = (typeof RefundStatus)[keyof typeof RefundStatus]
+
+export const ScanResult = {
+  VALID: 'valid',
+  ALREADY_SCANNED: 'already_scanned',
+  INVALID: 'invalid',
+  EXPIRED: 'expired',
+  TRANSFERRED: 'transferred',
+  FRAUDULENT: 'fraudulent',
+} as const
+export type ScanResult = (typeof ScanResult)[keyof typeof ScanResult]
+
+export const PromoCodeType = {
+  PERCENTAGE: 'percentage',
+  FIXED_AMOUNT: 'fixed_amount',
+  FREE_TICKET: 'free_ticket',
+} as const
+export type PromoCodeType = (typeof PromoCodeType)[keyof typeof PromoCodeType]
+
+// ── Settlement ──────────────────────────────────────────────────────────────
+
+export const SettlementStatus = {
+  PENDING: 'pending',
+  CALCULATING: 'calculating',
+  READY: 'ready',
+  PROCESSING: 'processing',
+  COMPLETED: 'completed',
+  FAILED: 'failed',
+  DISPUTED: 'disputed',
+} as const
+export type SettlementStatus = (typeof SettlementStatus)[keyof typeof SettlementStatus]
+
+export const ChargebackStatus = {
+  RECEIVED: 'received',
+  UNDER_REVIEW: 'under_review',
+  EVIDENCE_SUBMITTED: 'evidence_submitted',
+  WON: 'won',
+  LOST: 'lost',
+} as const
+export type ChargebackStatus = (typeof ChargebackStatus)[keyof typeof ChargebackStatus]
+
+// ── Media Pipeline ──────────────────────────────────────────────────────────
+
+export const TranscodeJobStatus = {
+  QUEUED: 'queued',
+  PROCESSING: 'processing',
+  COMPLETED: 'completed',
+  FAILED: 'failed',
+  CANCELLED: 'cancelled',
+} as const
+export type TranscodeJobStatus = (typeof TranscodeJobStatus)[keyof typeof TranscodeJobStatus]
+
+export const MediaValidationResult = {
+  VALID: 'valid',
+  INVALID_FORMAT: 'invalid_format',
+  CORRUPT_FILE: 'corrupt_file',
+  EXCEEDS_SIZE_LIMIT: 'exceeds_size_limit',
+  DURATION_TOO_SHORT: 'duration_too_short',
+  DURATION_TOO_LONG: 'duration_too_long',
+  SILENT_AUDIO: 'silent_audio',
+} as const
+export type MediaValidationResult = (typeof MediaValidationResult)[keyof typeof MediaValidationResult]
+
+// ── Recommendation / AI ─────────────────────────────────────────────────────
+
+export const RecommendationType = {
+  SIMILAR_TRACKS: 'similar_tracks',
+  MOOD_BASED: 'mood_based',
+  REGIONAL_DISCOVERY: 'regional_discovery',
+  ARTIST_AFFINITY: 'artist_affinity',
+  SESSION_CONTINUATION: 'session_continuation',
+  TRENDING: 'trending',
+  NEW_RELEASES: 'new_releases',
+  EDITORIAL_PICK: 'editorial_pick',
+} as const
+export type RecommendationType = (typeof RecommendationType)[keyof typeof RecommendationType]
+
+export const FraudSignalType = {
+  STREAM_SPIKE: 'stream_spike',
+  BOT_PATTERN: 'bot_pattern',
+  REPEATED_SHORT_PLAYS: 'repeated_short_plays',
+  GEO_ANOMALY: 'geo_anomaly',
+  MASS_UPLOAD: 'mass_upload',
+  PAYOUT_ANOMALY: 'payout_anomaly',
+  METADATA_POISONING: 'metadata_poisoning',
+  ACCOUNT_TAKEOVER: 'account_takeover',
+  DUPLICATE_CONTENT: 'duplicate_content',
+} as const
+export type FraudSignalType = (typeof FraudSignalType)[keyof typeof FraudSignalType]
+
+// ── Mood / Discovery Tags ──────────────────────────────────────────────────
+
+export const MoodTag = {
+  ENERGETIC: 'energetic',
+  CHILL: 'chill',
+  ROMANTIC: 'romantic',
+  MELANCHOLIC: 'melancholic',
+  UPLIFTING: 'uplifting',
+  AGGRESSIVE: 'aggressive',
+  SPIRITUAL: 'spiritual',
+  PARTY: 'party',
+  FOCUS: 'focus',
+  WORKOUT: 'workout',
+  CELEBRATION: 'celebration',
+  NOSTALGIC: 'nostalgic',
+} as const
+export type MoodTag = (typeof MoodTag)[keyof typeof MoodTag]
+
+export const RegionTag = {
+  WEST_AFRICA: 'west_africa',
+  EAST_AFRICA: 'east_africa',
+  CENTRAL_AFRICA: 'central_africa',
+  SOUTHERN_AFRICA: 'southern_africa',
+  NORTH_AFRICA: 'north_africa',
+  DIASPORA_UK: 'diaspora_uk',
+  DIASPORA_US: 'diaspora_us',
+  DIASPORA_CANADA: 'diaspora_canada',
+  DIASPORA_FRANCE: 'diaspora_france',
+  GLOBAL: 'global',
+} as const
+export type RegionTag = (typeof RegionTag)[keyof typeof RegionTag]
+
+// ── Creator Verification ────────────────────────────────────────────────────
+
+export const VerificationStatus = {
+  NOT_SUBMITTED: 'not_submitted',
+  PENDING: 'pending',
+  APPROVED: 'approved',
+  REJECTED: 'rejected',
+  EXPIRED: 'expired',
+} as const
+export type VerificationStatus = (typeof VerificationStatus)[keyof typeof VerificationStatus]
+
+export const VerificationType = {
+  IDENTITY: 'identity',
+  LABEL_AFFILIATION: 'label_affiliation',
+  RIGHTS_HOLDER: 'rights_holder',
+  PROMOTER: 'promoter',
+} as const
+export type VerificationType = (typeof VerificationType)[keyof typeof VerificationType]
+
+// ── Consent / Privacy ───────────────────────────────────────────────────────
+
+export const ConsentType = {
+  DATA_PROCESSING: 'data_processing',
+  MARKETING: 'marketing',
+  ANALYTICS_TRACKING: 'analytics_tracking',
+  RIGHTS_AGREEMENT: 'rights_agreement',
+  PAYOUT_TERMS: 'payout_terms',
+} as const
+export type ConsentType = (typeof ConsentType)[keyof typeof ConsentType]
+
+// ── Export Job ───────────────────────────────────────────────────────────────
+
+export const ExportJobStatus = {
+  QUEUED: 'queued',
+  PROCESSING: 'processing',
+  COMPLETED: 'completed',
+  FAILED: 'failed',
+  EXPIRED: 'expired',
+} as const
+export type ExportJobStatus = (typeof ExportJobStatus)[keyof typeof ExportJobStatus]
+
+export const ExportFormat = {
+  CSV: 'csv',
+  JSON: 'json',
+  PDF: 'pdf',
+  XLSX: 'xlsx',
+} as const
+export type ExportFormat = (typeof ExportFormat)[keyof typeof ExportFormat]

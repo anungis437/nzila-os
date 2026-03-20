@@ -97,6 +97,20 @@ apps:
       - name: NODE_ENV
         value: production
 
+  zonga:
+    image_tag: "${VERSION}"
+    port: 3006
+    cpu: 1.0
+    memory: 2Gi
+    scale_rules:
+      - name: http-requests
+        type: http
+        metadata:
+          concurrentRequests: "50"
+    env:
+      - name: NODE_ENV
+        value: production
+
 database:
   sku: GP_Standard_D4ds_v5
   storage_gb: 512

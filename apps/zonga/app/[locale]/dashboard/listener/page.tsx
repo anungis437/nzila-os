@@ -2,7 +2,7 @@
  * Zonga — Listener Dashboard (Server Component).
  *
  * Listener profile overview: following, favorites, saved playlists,
- * recent activity feed, and discovery.
+ * recent activity feed, now-playing widget, queue, and discovery.
  */
 import { auth } from '@clerk/nextjs/server'
 import { redirect } from 'next/navigation'
@@ -15,10 +15,16 @@ import {
   discoverReleases,
 } from '@/lib/actions/listener-actions'
 import { listFollowing } from '@/lib/actions/social-actions'
+import { NowPlayingWidget, ReleaseRow, QueueView } from '@/components/dashboard/listener-sections'
 
-export default async function ListenerPage() {
+export default async function ListenerPage({
+  params,
+}: {
+  params: Promise<{ locale: string }>
+}) {
   const { userId } = await auth()
   if (!userId) redirect('/sign-in')
+  const { locale } = await params
 
   const [profile, feed, following, playlists, trendingArtists, newReleases] = await Promise.all([
     getListenerProfile(),
@@ -34,6 +40,12 @@ export default async function ListenerPage() {
       <div>
         <h1 className="text-2xl font-bold text-navy">My Music</h1>
         <p className="text-gray-500 mt-1">Your listening activity, favorites &amp; discovery</p>
+      </div>
+
+      {/* Now Playing + Queue row */}
+      <div className="grid grid-cols-1 lg:grid-cols-2 gap-4">
+        <NowPlayingWidget />
+        <QueueView />
       </div>
 
       {/* Profile Stats */}
@@ -130,7 +142,7 @@ export default async function ListenerPage() {
         )}
       </div>
 
-      {/* New Releases */}
+      {/* New Releases — now with inline play buttons */}
       <div>
         <h2 className="text-lg font-semibold text-navy mb-3">New Releases</h2>
         {newReleases.length === 0 ? (
@@ -143,19 +155,16 @@ export default async function ListenerPage() {
           <Card>
             <div className="divide-y divide-gray-50">
               {newReleases.map((r) => (
-                <div key={r.id} className="px-5 py-3 flex items-center justify-between">
-                  <div>
-                    <p className="text-sm font-medium text-navy">{r.title}</p>
-                    <p className="text-xs text-gray-400">
-                      {r.creatorName} · {r.releaseType ?? 'single'} · {r.trackCount} tracks
-                    </p>
-                  </div>
-                  {r.publishedAt && (
-                    <p className="text-xs text-gray-400">
-                      {new Date(r.publishedAt).toLocaleDateString()}
-                    </p>
-                  )}
-                </div>
+                <ReleaseRow
+                  key={r.id}
+                  id={r.id}
+                  title={r.title}
+                  creatorName={r.creatorName}
+                  releaseType={r.releaseType}
+                  trackCount={r.trackCount}
+                  publishedAt={r.publishedAt}
+                  locale={locale}
+                />
               ))}
             </div>
           </Card>

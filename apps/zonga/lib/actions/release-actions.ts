@@ -71,22 +71,34 @@ export async function listReleases(opts?: {
 
 export async function createRelease(data: {
   title: string
-  type: 'single' | 'ep' | 'album' | 'compilation'
+  type?: 'single' | 'ep' | 'album' | 'compilation'
+  releaseType?: 'single' | 'ep' | 'album' | 'compilation'
   creatorId?: string
   creatorName?: string
   trackCount?: number
   releaseDate?: string
+  description?: string
+  upc?: string
+  tracks?: Array<{ assetId: string; trackNumber: number }>
+  distributionTargets?: string[]
+  splits?: Array<{ creatorName: string; sharePercent: number }>
 }): Promise<{ success: boolean; releaseId?: string; error?: unknown }> {
   const ctx = await resolveOrgContext()
 
+  const releaseType = data.releaseType ?? data.type ?? 'single'
   const result = await executeCommand({
     type: 'create_release' as const,
     title: data.title,
-    release_type: data.type,
+    release_type: releaseType,
     creator_id: data.creatorId,
     creator_name: data.creatorName,
-    track_count: data.trackCount,
+    track_count: data.trackCount ?? data.tracks?.length,
     release_date: data.releaseDate,
+    description: data.description,
+    upc: data.upc,
+    tracks: data.tracks,
+    distribution_targets: data.distributionTargets,
+    splits: data.splits,
     actor_id: ctx.actorId,
   })
 

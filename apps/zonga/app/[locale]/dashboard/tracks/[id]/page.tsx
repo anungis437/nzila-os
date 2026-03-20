@@ -92,7 +92,12 @@ export default async function TrackPage({
           <Card>
             <div className="p-5">
               <h2 className="mb-3 text-sm font-semibold text-navy">▶️ Now Playing</h2>
-              <TrackPlayer assetId={id} title={asset.title} />
+              <TrackPlayer
+                assetId={id}
+                title={asset.title}
+                creatorName={(asset.metadata?.creatorName as string) ?? undefined}
+                durationSeconds={asset.durationSeconds ?? undefined}
+              />
             </div>
           </Card>
 

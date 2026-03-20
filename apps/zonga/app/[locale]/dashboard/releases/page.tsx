@@ -3,6 +3,7 @@
  *
  * Manage content releases (albums, EPs, singles, compilations).
  */
+import Link from 'next/link'
 import { auth } from '@clerk/nextjs/server'
 import { redirect } from 'next/navigation'
 import { Card } from '@nzila/ui'
@@ -31,12 +32,12 @@ export default async function ReleasesPage({
           <h1 className="text-2xl font-bold text-navy">Releases</h1>
           <p className="text-gray-500 mt-1">Albums, EPs, singles & compilations</p>
         </div>
-        <a
-          href="releases/new"
+        <Link
+          href="releases/create"
           className="inline-flex items-center gap-2 rounded-lg bg-electric px-4 py-2 text-sm font-medium text-white hover:bg-electric/90"
         >
           💿 New Release
-        </a>
+        </Link>
       </div>
 
       {/* Status Tabs */}
@@ -123,12 +124,12 @@ export default async function ReleasesPage({
                   </p>
                 )}
 
-                <a
+                <Link
                   href={`releases/${r.id}`}
                   className="inline-flex w-full items-center justify-center gap-1 rounded-lg border border-gray-200 px-3 py-1.5 text-xs font-medium text-navy hover:bg-gray-50 transition"
                 >
                   View Details →
-                </a>
+                </Link>
               </div>
             </Card>
           ))}

@@ -68,6 +68,15 @@ apps:
       - name: NODE_ENV
         value: production
 
+  zonga:
+    image_tag: "${VERSION}"
+    port: 3006
+    cpu: 0.5
+    memory: 1Gi
+    env:
+      - name: NODE_ENV
+        value: production
+
 database:
   name: nzila-staging-db
   sku: Standard_B2s

@@ -222,9 +222,17 @@ export default async function ReleaseDetailPage({
           {/* Royalty Splits */}
           <Card>
             <div className="p-5">
-              <h2 className="mb-3 text-sm font-semibold text-navy">
-                💰 Royalty Splits
-              </h2>
+              <div className="flex items-center justify-between mb-3">
+                <h2 className="text-sm font-semibold text-navy">
+                  💰 Royalty Splits
+                </h2>
+                <Link
+                  href={`${id}/splits`}
+                  className="text-xs text-electric hover:underline"
+                >
+                  Edit Splits →
+                </Link>
+              </div>
               {royaltySplits.length === 0 ? (
                 <p className="text-center text-sm text-gray-500 py-6">
                   No royalty splits configured. All revenue goes to the primary

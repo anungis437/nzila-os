@@ -169,7 +169,7 @@ describe('@nzila/zonga-core — services', () => {
 
     it('all audit actions are valid string literals', () => {
       const actions = Object.values(ZongaAuditAction)
-      expect(actions).toHaveLength(14)
+      expect(actions).toHaveLength(47)
       for (const action of actions) {
         expect(typeof action).toBe('string')
         expect(action).toMatch(/^[a-z]+\.[a-z_]+$/)
