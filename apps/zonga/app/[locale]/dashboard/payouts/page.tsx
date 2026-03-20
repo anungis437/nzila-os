@@ -12,14 +12,20 @@ import { formatCurrencyAmount } from '@/lib/stripe'
 
 /** Payout rail display labels. */
 const railLabels: Record<string, string> = {
-  stripe_connect: 'Stripe',
-  mpesa: 'M-Pesa',
-  mtn_momo: 'MTN MoMo',
-  airtel_money: 'Airtel',
-  orange_money: 'Orange',
-  bank_transfer: 'Bank',
-  chipper_cash: 'Chipper',
+  stripe_connect: 'Stripe (Card)',
+  mpesa: 'M-Pesa (Safaricom)',
+  mtn_momo: 'MTN Mobile Money',
+  airtel_money: 'Airtel Money',
+  orange_money: 'Orange Money',
+  bank_transfer: 'Bank Transfer',
+  chipper_cash: 'Chipper Cash',
   flutterwave: 'Flutterwave',
+  vodacom_mpesa: 'Vodacom M-Pesa',
+  moov_money: 'Moov Money',
+  wave: 'Wave',
+  ecocash: 'EcoCash',
+  paga: 'Paga',
+  paystack: 'Paystack',
 }
 
 function formatAmount(cents: number, currency = 'USD'): string {
@@ -48,7 +54,7 @@ export default async function PayoutsPage({
           href="payouts/new"
           className="inline-flex items-center gap-2 rounded-lg bg-electric px-4 py-2 text-sm font-medium text-white hover:bg-electric/90"
         >
-          💸 New Payout
+          New Payout
         </a>
       </div>
 
@@ -80,10 +86,9 @@ export default async function PayoutsPage({
       {payouts.length === 0 ? (
         <Card>
           <div className="p-12 text-center">
-            <div className="text-5xl mb-4">💸</div>
             <p className="font-semibold text-navy text-lg">No payouts yet</p>
             <p className="text-gray-500 text-sm mt-1">
-              Creator payouts will appear here once executed.
+              Artist payouts will appear here once earnings have been distributed.
             </p>
           </div>
         </Card>
@@ -125,7 +130,7 @@ export default async function PayoutsPage({
                             ? 'bg-amber-500/10 text-amber-600'
                             : 'bg-gray-100 text-gray-500'
                       }`}>
-                        {p.status ?? 'unknown'}
+                        {(p.status ?? 'unknown').charAt(0).toUpperCase() + (p.status ?? 'unknown').slice(1)}
                       </span>
                     </td>
                     <td className="px-5 py-3 text-gray-500">

@@ -139,7 +139,7 @@ describe('@nzila/zonga-economics — ledger', () => {
 // ── Fee Tests ───────────────────────────────────────────────────────────
 
 describe('@nzila/zonga-economics — fees', () => {
-  it('applies stream platform fee (30%)', () => {
+  it('applies stream platform fee (15%)', () => {
     const result = applyFees({
       grossAmount: 100,
       currency: Currency.USD,
@@ -147,36 +147,36 @@ describe('@nzila/zonga-economics — fees', () => {
       rules: DEFAULT_FEE_RULES as unknown as FeeRule[],
     })
     expect(result.fees).toHaveLength(1)
-    expect(result.fees[0]!.amount).toBe(30)
-    expect(result.netAmount).toBe(70)
+    expect(result.fees[0]!.amount).toBe(15)
+    expect(result.netAmount).toBe(85)
   })
 
-  it('applies ticket sale fees (10% + $0.50 platform + 2.9% + $0.30 processing)', () => {
+  it('applies ticket sale fees (8% + $0.25 platform + 1.5% + $0.10 processing)', () => {
     const result = applyFees({
       grossAmount: 50,
       currency: Currency.USD,
       revenueSource: 'ticket_sale' as any,
       rules: DEFAULT_FEE_RULES as unknown as FeeRule[],
     })
-    // Platform: 10% of 50 + $0.50 = $5.50
-    // Processing: 2.9% of 50 + $0.30 = $1.75
+    // Platform: 8% of 50 + $0.25 = $4.25
+    // Processing: 1.5% of 50 + $0.10 = $0.85
     expect(result.fees).toHaveLength(2)
     const platformFee = result.fees.find(f => f.type === FeeType.PLATFORM_COMMISSION)
     const processingFee = result.fees.find(f => f.type === FeeType.PAYMENT_PROCESSING)
-    expect(platformFee?.amount).toBeCloseTo(5.50)
-    expect(processingFee?.amount).toBeCloseTo(1.75)
-    expect(result.netAmount).toBeCloseTo(42.75)
+    expect(platformFee?.amount).toBeCloseTo(4.25)
+    expect(processingFee?.amount).toBeCloseTo(0.85)
+    expect(result.netAmount).toBeCloseTo(44.90)
   })
 
-  it('applies tip fee (5%)', () => {
+  it('applies tip fee (3%)', () => {
     const result = applyFees({
       grossAmount: 20,
       currency: Currency.USD,
       revenueSource: 'tip' as any,
       rules: DEFAULT_FEE_RULES as unknown as FeeRule[],
     })
-    expect(result.fees[0]!.amount).toBe(1)
-    expect(result.netAmount).toBe(19)
+    expect(result.fees[0]!.amount).toBeCloseTo(0.60)
+    expect(result.netAmount).toBeCloseTo(19.40)
   })
 
   it('returns zero fees for unknown revenue source', () => {
@@ -250,13 +250,13 @@ describe('@nzila/zonga-economics — splits', () => {
       feeRules: DEFAULT_FEE_RULES as unknown as FeeRule[],
     })
 
-    // After 30% stream fee, net = $70
-    expect(result.netAmount).toBe(70)
-    // Artist gets 70% of $70 = $49
+    // After 15% stream fee, net = $85
+    expect(result.netAmount).toBe(85)
+    // Artist gets 70% of $85 = $59.50
     const artist = result.distributions.find(d => d.recipientName === 'Artist')
-    expect(artist?.amount).toBeCloseTo(49)
-    // Label gets 30% of $70 = $21
+    expect(artist?.amount).toBeCloseTo(59.50)
+    // Label gets 30% of $85 = $25.50
     const label = result.distributions.find(d => d.recipientName === 'Label')
-    expect(label?.amount).toBeCloseTo(21)
+    expect(label?.amount).toBeCloseTo(25.50)
   })
 })

@@ -21,14 +21,20 @@ interface PayoutPreviewData {
 }
 
 const PAYOUT_RAILS = [
-  { label: 'Stripe Connect', value: 'stripe_connect' },
-  { label: 'M-Pesa', value: 'mpesa' },
-  { label: 'MTN MoMo', value: 'mtn_momo' },
+  { label: 'Stripe (Card)', value: 'stripe_connect' },
+  { label: 'M-Pesa (Safaricom)', value: 'mpesa' },
+  { label: 'MTN Mobile Money', value: 'mtn_momo' },
   { label: 'Airtel Money', value: 'airtel_money' },
   { label: 'Orange Money', value: 'orange_money' },
   { label: 'Bank Transfer', value: 'bank_transfer' },
   { label: 'Chipper Cash', value: 'chipper_cash' },
   { label: 'Flutterwave', value: 'flutterwave' },
+  { label: 'Vodacom M-Pesa', value: 'vodacom_mpesa' },
+  { label: 'Moov Money', value: 'moov_money' },
+  { label: 'Wave', value: 'wave' },
+  { label: 'EcoCash', value: 'ecocash' },
+  { label: 'Paga', value: 'paga' },
+  { label: 'Paystack', value: 'paystack' },
 ]
 
 export default function NewPayoutPage() {
@@ -76,7 +82,7 @@ export default function NewPayoutPage() {
       })
 
       if (!res.success) {
-        setError('Payout failed. Please try again.')
+        setError('Payout could not be processed. Check the artist\'s payout rail configuration and try again, or contact support.')
         return
       }
       router.push('../payouts')
@@ -90,7 +96,7 @@ export default function NewPayoutPage() {
       <Card>
         <div className="p-6 space-y-5">
           <div>
-            <label className="block text-sm font-medium text-gray-700 mb-1">Select Creator</label>
+            <label className="block text-sm font-medium text-gray-700 mb-1">Select Artist</label>
             <select
               value={selectedCreator}
               onChange={(e) => {
@@ -100,7 +106,7 @@ export default function NewPayoutPage() {
               }}
               className="w-full rounded-lg border border-gray-200 px-3 py-2 text-sm focus:ring-2 focus:ring-electric focus:border-transparent"
             >
-              <option value="">Choose a creator…</option>
+              <option value="">Choose an artist…</option>
               {creators.map((c) => (
                 <option key={c.id} value={c.id}>
                   {c.name ?? 'Unnamed'} — {c.email ?? c.id.slice(0, 8)}
@@ -141,9 +147,15 @@ export default function NewPayoutPage() {
                   </p>
                 </div>
                 <div>
-                  <p className="text-xs text-gray-500">Platform Fee</p>
+                  <p className="text-xs text-gray-500">Service Fee</p>
                   <p className="font-medium text-red-500">
-                    − {preview.currency} {preview.platformFee.toFixed(2)}
+                    − {preview.currency} {(preview.platformFee * 0.8).toFixed(2)}
+                  </p>
+                </div>
+                <div>
+                  <p className="text-xs text-gray-500">Processing Fee</p>
+                  <p className="font-medium text-red-500">
+                    − {preview.currency} {(preview.platformFee * 0.2).toFixed(2)}
                   </p>
                 </div>
                 <div className="col-span-2 border-t pt-2">

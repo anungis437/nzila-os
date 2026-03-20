@@ -29,31 +29,81 @@
   },
   "revenue": {
     "title": "Revenus",
-    "streams": "Écoutes",
+    "totalRevenue": "Revenus totaux",
+    "streamingRevenue": "Revenus de streaming",
+    "downloadRevenue": "Revenus de téléchargement",
+    "licensingRevenue": "Revenus de licence",
+    "streams": "Streaming",
     "downloads": "Téléchargements",
     "licensing": "Licences",
-    "sync": "Synchronisation",
-    "merchandise": "Marchandise",
-    "tips": "Pourboires",
+    "sync": "Licence de synchronisation",
+    "merchandise": "Produits dérivés",
+    "tips": "Dons et pourboires",
     "subscriptions": "Abonnements",
-    "totalEarnings": "Revenus totaux",
-    "platformFee": "Frais de plateforme",
-    "netPayout": "Paiement net"
+    "radioBroadcast": "Diffusion radio",
+    "livePerformance": "Spectacle en direct",
+    "publishingPerformance": "Édition et droits d'exécution",
+    "samplingLicense": "Licence de sampling",
+    "remixLicense": "Licence de remix",
+    "podcastLicense": "Licence podcast",
+    "sponsorship": "Parrainage",
+    "adRevenue": "Revenus publicitaires",
+    "serviceFee": "Frais de service",
+    "processingFee": "Frais de traitement",
+    "taxAmount": "Taxes",
+    "totalFees": "Frais totaux",
+    "netPayout": "Paiement net",
+    "revenueByArtist": "Revenus par artiste",
+    "recentActivity": "Activité récente",
+    "supportedPayoutRails": "Canaux de paiement disponibles",
+    "noArtistRevenue": "Aucune donnée de revenu artiste disponible. Les revenus apparaîtront ici dès que votre catalogue générera des écoutes.",
+    "noRevenueEvents": "Aucun événement de revenu enregistré. Les événements apparaîtront ici dès que votre catalogue générera des revenus."
   },
   "payouts": {
     "title": "Paiements",
     "pending": "En attente",
     "processing": "En cours",
     "completed": "Terminé",
+    "failed": "Échoué",
     "requestPayout": "Demander un paiement",
-    "walletBalance": "Solde du portefeuille"
+    "newPayout": "Nouveau paiement",
+    "walletBalance": "Solde du portefeuille",
+    "totalPayouts": "Total des paiements",
+    "totalPaidOut": "Total versé",
+    "averagePayout": "Paiement moyen",
+    "noPayoutsYet": "Aucun paiement pour le moment",
+    "noPayoutsDescription": "Les paiements aux artistes apparaîtront ici une fois les revenus distribués.",
+    "selectArtist": "Sélectionner un artiste",
+    "chooseArtist": "Choisir un artiste…",
+    "payoutRail": "Canal de paiement",
+    "previewPayout": "Aperçu du paiement",
+    "executePayout": "Exécuter le paiement",
+    "payoutPreview": "Aperçu du paiement",
+    "grossAmount": "Montant brut",
+    "confirmPayout": "Je confirme ce paiement",
+    "noPendingBalance": "Aucun solde en attente pour cet artiste.",
+    "payoutFailed": "Le paiement n'a pas pu être traité. Vérifiez la configuration du canal de paiement de l'artiste et réessayez, ou contactez le support."
+  },
+  "splits": {
+    "title": "Répartition des redevances",
+    "description": "Configurez la répartition des revenus entre les collaborateurs. Le total doit être exactement 100 %. Chaque collaborateur reçoit sa part après déduction des frais de service et de traitement.",
+    "splitConfiguration": "Configuration de la répartition",
+    "distributeEvenly": "Répartir également",
+    "addCollaborator": "Ajouter un collaborateur",
+    "total": "Total",
+    "overAllocated": "Excédent de {amount} %",
+    "underAllocated": "Déficit de {amount} %. Le total des parts doit être exactement 100 %.",
+    "preview": "Aperçu",
+    "saveSplits": "Enregistrer la répartition",
+    "splitsSaved": "Répartition enregistrée avec succès",
+    "backToRelease": "Retour à la sortie"
   },
   "creators": {
-    "title": "Créateurs",
+    "title": "Artistes et créateurs",
     "artists": "Artistes",
     "labels": "Labels",
     "producers": "Producteurs",
-    "register": "Inscrire un créateur"
+    "register": "Inscrire un artiste"
   },
   "integrity": {
     "title": "Intégrité",
@@ -73,24 +123,24 @@
       "badge": "Musique africaine, scène mondiale",
       "title": "Votre musique,",
       "titleAccent": "Vos revenus",
-      "description": "La plateforme musicale équitable — redevances transparentes, paiements instantanés et pleine propriété créative pour les artistes et créateurs africains."
+      "description": "La plateforme musicale équitable — redevances transparentes, paiements instantanés et pleine propriété créative pour les artistes africains."
     },
     "features": {
       "badge": "Fonctionnalités",
       "title": "Conçu pour les",
-      "titleAccent": "créateurs africains",
+      "titleAccent": "artistes africains",
       "description": "Tout ce dont vous avez besoin pour distribuer, monétiser et développer votre musique — avec transparence à chaque étape."
     },
     "mission": {
       "badge": "Notre mission",
       "title": "La musique qui",
-      "titleAccent": "responsabilise",
-      "description": "Zonga est née d'une conviction simple : les créateurs africains méritent les mêmes outils, la même transparence et le même partage de revenus que les artistes du monde entier."
+      "titleAccent": "donne du pouvoir",
+      "description": "Zonga est née d'une conviction simple : les artistes africains méritent les mêmes outils, la même transparence et le même partage de revenus que les artistes du monde entier."
     },
     "cta": {
       "title": "Prêt à partager votre",
       "titleAccent": "musique ?",
-      "description": "Rejoignez des milliers de créateurs africains qui font confiance à Zonga pour des redevances transparentes, des paiements instantanés et une pleine propriété créative."
+      "description": "Rejoignez des milliers d'artistes africains qui font confiance à Zonga pour des redevances transparentes, des paiements instantanés et une pleine propriété créative."
     }
   }
 }

@@ -151,10 +151,10 @@ export default function SplitsEditorPage({
       </Link>
 
       <div>
-        <h1 className="text-2xl font-bold text-navy">💰 Royalty Splits</h1>
+        <h1 className="text-2xl font-bold text-navy">Royalty Splits</h1>
         <p className="mt-1 text-sm text-gray-500">
           Configure how revenue is distributed among collaborators.
-          Splits must total exactly 100%.
+          Splits must total exactly 100%. Each collaborator receives their share after platform and processing fees are deducted.
         </p>
       </div>
 
@@ -357,7 +357,7 @@ export default function SplitsEditorPage({
       )}
       {saved && (
         <div className="rounded-lg bg-emerald-50 px-4 py-3 text-sm text-emerald-700">
-          ✓ Splits saved successfully
+          Splits saved successfully
         </div>
       )}
 

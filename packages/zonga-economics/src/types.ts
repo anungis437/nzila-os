@@ -41,6 +41,12 @@ export const RevenueSource = {
   SYNC_LICENSE: 'sync_license',
   MERCHANDISE: 'merchandise',
   SPONSORSHIP: 'sponsorship',
+  RADIO_BROADCAST: 'radio_broadcast',
+  LIVE_PERFORMANCE: 'live_performance',
+  PUBLISHING_PERFORMANCE: 'publishing_performance',
+  SAMPLING_LICENSE: 'sampling_license',
+  REMIX_LICENSE: 'remix_license',
+  PODCAST_LICENSE: 'podcast_license',
 } as const
 export type RevenueSource = (typeof RevenueSource)[keyof typeof RevenueSource]
 
@@ -71,6 +77,7 @@ export const FeeType = {
   PAYOUT_FEE: 'payout_fee',
   CURRENCY_CONVERSION: 'currency_conversion',
   TAX_WITHHOLDING: 'tax_withholding',
+  TAX_REGIONAL: 'tax_regional',
 } as const
 export type FeeType = (typeof FeeType)[keyof typeof FeeType]
 
@@ -79,6 +86,8 @@ export const Currency = {
   ZAR: 'ZAR', NGN: 'NGN', KES: 'KES', GHS: 'GHS',
   TZS: 'TZS', UGX: 'UGX', ETB: 'ETB', XOF: 'XOF',
   XAF: 'XAF', MAD: 'MAD', EGP: 'EGP', RWF: 'RWF',
+  MWK: 'MWK', ZMW: 'ZMW', BWP: 'BWP', LSL: 'LSL',
+  SZL: 'SZL', CVE: 'CVE',
 } as const
 export type Currency = (typeof Currency)[keyof typeof Currency]
 
@@ -236,6 +245,8 @@ export const RecordRevenueEventSchema = z.object({
   source: z.enum([
     'stream', 'download', 'ticket_sale', 'tip',
     'subscription', 'sync_license', 'merchandise', 'sponsorship',
+    'radio_broadcast', 'live_performance', 'publishing_performance',
+    'sampling_license', 'remix_license', 'podcast_license',
   ]),
   grossAmount: z.number().positive(),
   currency: z.string().min(3).max(3),

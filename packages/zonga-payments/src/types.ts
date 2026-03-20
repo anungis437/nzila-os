@@ -27,6 +27,13 @@ export const PaymentProvider = {
   FLUTTERWAVE: 'flutterwave',
   PAYSTACK: 'paystack',
   INTERNAL_WALLET: 'internal_wallet',
+  ORANGE_MONEY: 'orange_money',
+  CHIPPER_CASH: 'chipper_cash',
+  WAVE: 'wave',
+  PAGA: 'paga',
+  ECOCASH: 'ecocash',
+  MOOV_MONEY: 'moov_money',
+  VODACOM_MPESA: 'vodacom_mpesa',
 } as const
 export type PaymentProvider = (typeof PaymentProvider)[keyof typeof PaymentProvider]
 
@@ -124,7 +131,15 @@ export interface PayoutDestination {
 
 export interface MobileMoneyRequest {
   readonly phoneNumber: string
-  readonly provider: 'mpesa' | 'mtn_momo' | 'airtel_money'
+  readonly provider:
+    | 'mpesa'
+    | 'mtn_momo'
+    | 'airtel_money'
+    | 'orange_money'
+    | 'vodacom_mpesa'
+    | 'moov_money'
+    | 'wave'
+    | 'ecocash'
   readonly amount: number
   readonly currency: string
   readonly reference: string
@@ -174,7 +189,11 @@ export const CreatePaymentIntentSchema = z.object({
   amount: z.number().positive(),
   currency: z.string().length(3),
   method: z.enum(['card', 'mobile_money', 'bank_transfer', 'wallet', 'crypto', 'ussd']),
-  provider: z.enum(['stripe', 'mpesa', 'mtn_momo', 'airtel_money', 'flutterwave', 'paystack', 'internal_wallet']),
+  provider: z.enum([
+    'stripe', 'mpesa', 'mtn_momo', 'airtel_money', 'flutterwave', 'paystack',
+    'internal_wallet', 'orange_money', 'chipper_cash', 'wave', 'paga',
+    'ecocash', 'moov_money', 'vodacom_mpesa',
+  ]),
   idempotencyKey: z.string().min(1),
   metadata: z.record(z.unknown()).default({}),
 })
@@ -190,7 +209,11 @@ export const CreatePayoutSchema = z.object({
   amount: z.number().positive(),
   currency: z.string().length(3),
   method: z.enum(['card', 'mobile_money', 'bank_transfer', 'wallet', 'crypto', 'ussd']),
-  provider: z.enum(['stripe', 'mpesa', 'mtn_momo', 'airtel_money', 'flutterwave', 'paystack', 'internal_wallet']),
+  provider: z.enum([
+    'stripe', 'mpesa', 'mtn_momo', 'airtel_money', 'flutterwave', 'paystack',
+    'internal_wallet', 'orange_money', 'chipper_cash', 'wave', 'paga',
+    'ecocash', 'moov_money', 'vodacom_mpesa',
+  ]),
   destination: z.object({
     type: z.enum(['bank_account', 'mobile_wallet', 'crypto_wallet', 'internal_wallet']),
     accountIdentifier: z.string().min(1),
@@ -204,7 +227,10 @@ export const CreatePayoutSchema = z.object({
 
 export const MobileMoneyRequestSchema = z.object({
   phoneNumber: z.string().min(9).max(15),
-  provider: z.enum(['mpesa', 'mtn_momo', 'airtel_money']),
+  provider: z.enum([
+    'mpesa', 'mtn_momo', 'airtel_money', 'orange_money',
+    'vodacom_mpesa', 'moov_money', 'wave', 'ecocash',
+  ]),
   amount: z.number().positive(),
   currency: z.string().length(3),
   reference: z.string().min(1),

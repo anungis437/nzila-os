@@ -327,25 +327,25 @@ describe('checkPayoutReadiness', () => {
     const accruals = [
       makeAccrual({ holderId: 'holder-1', netAmount: 12 }),
     ]
-    const result = checkPayoutReadiness('holder-1', accruals, 10)
+    const result = checkPayoutReadiness('holder-1', accruals, 1)
     expect(result.ready).toBe(true)
     expect(result.shortfall).toBe(0)
   })
 
   it('not ready when below minimum', () => {
     const accruals = [
-      makeAccrual({ holderId: 'holder-1', netAmount: 7 }),
+      makeAccrual({ holderId: 'holder-1', netAmount: 0.50 }),
     ]
-    const result = checkPayoutReadiness('holder-1', accruals, 10)
+    const result = checkPayoutReadiness('holder-1', accruals, 1)
     expect(result.ready).toBe(false)
-    expect(result.shortfall).toBe(3)
+    expect(result.shortfall).toBeCloseTo(0.50)
   })
 
   it('ignores accruals not in approved status', () => {
     const accruals = [
       makeAccrual({ holderId: 'holder-1', netAmount: 20, status: 'pending' }),
     ]
-    const result = checkPayoutReadiness('holder-1', accruals, 10)
+    const result = checkPayoutReadiness('holder-1', accruals, 1)
     expect(result.ready).toBe(false)
     expect(result.totalAccrued).toBe(0)
   })
