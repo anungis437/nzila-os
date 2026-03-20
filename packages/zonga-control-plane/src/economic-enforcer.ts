@@ -8,7 +8,6 @@
 import type {
   ControlPlaneContext,
   EconomicIntegrityResult,
-  SystemEvent,
 } from './types'
 import { SystemEventType, AuditSeverity } from './types'
 import { emitSystemEvent, buildSystemEvent } from './system-events'

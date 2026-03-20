@@ -16,8 +16,9 @@ import type {
   ControlPlaneContext,
   WorkflowDefinition,
   WorkflowStepResult,
+  WorkflowId,
 } from './types'
-import { WorkflowExecutionStatus, WorkflowId } from './types'
+import { WorkflowExecutionStatus } from './types'
 import { clearEventLog, getEventLog } from './system-events'
 
 function makeContext(overrides?: Partial<ControlPlaneContext>): ControlPlaneContext {
@@ -68,7 +69,7 @@ function makeStepDef(
 let testCounter = 0
 function uniqueId(): string {
   testCounter++
-  return `test_workflow_${testCounter}` as any
+  return `test_workflow_${testCounter}`
 }
 
 describe('@nzila/zonga-control-plane — orchestrator', () => {
@@ -80,7 +81,7 @@ describe('@nzila/zonga-control-plane — orchestrator', () => {
     it('registers a workflow definition', () => {
       const id = uniqueId()
       const def: WorkflowDefinition = {
-        id: id as any,
+        id: id as WorkflowId,
         name: 'Test Workflow',
         description: 'For testing',
         steps: [makeStepDef('step1')],
@@ -94,7 +95,7 @@ describe('@nzila/zonga-control-plane — orchestrator', () => {
     it('throws when registering duplicate workflow ID', () => {
       const id = uniqueId()
       const def: WorkflowDefinition = {
-        id: id as any,
+        id: id as WorkflowId,
         name: 'Dup',
         description: 'Dup',
         steps: [],
@@ -110,7 +111,7 @@ describe('@nzila/zonga-control-plane — orchestrator', () => {
     it('completes a single-step workflow', async () => {
       const id = uniqueId()
       registerWorkflow({
-        id: id as any,
+        id: id as WorkflowId,
         name: 'Single Step',
         description: 'One step',
         steps: [makeStepDef('s1', { output: { done: true } })],
@@ -128,7 +129,7 @@ describe('@nzila/zonga-control-plane — orchestrator', () => {
       const id = uniqueId()
       const order: string[] = []
       registerWorkflow({
-        id: id as any,
+        id: id as WorkflowId,
         name: 'Multi Step',
         description: 'Three steps',
         steps: [
@@ -159,7 +160,7 @@ describe('@nzila/zonga-control-plane — orchestrator', () => {
       const compensated: string[] = []
 
       registerWorkflow({
-        id: id as any,
+        id: id as WorkflowId,
         name: 'With Rollback',
         description: 'Fails at step 3, rolls back step 1 and 2',
         steps: [
@@ -181,7 +182,7 @@ describe('@nzila/zonga-control-plane — orchestrator', () => {
     it('retries a step on transient failure', async () => {
       const id = uniqueId()
       registerWorkflow({
-        id: id as any,
+        id: id as WorkflowId,
         name: 'With Retry',
         description: 'Retries step once',
         steps: [
@@ -205,7 +206,7 @@ describe('@nzila/zonga-control-plane — orchestrator', () => {
     it('emits system events for start, step completion, and workflow completion', async () => {
       const id = uniqueId()
       registerWorkflow({
-        id: id as any,
+        id: id as WorkflowId,
         name: 'Events Test',
         description: 'Check events',
         steps: [makeStepDef('s1')],

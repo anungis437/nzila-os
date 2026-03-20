@@ -2,6 +2,7 @@
  * @nzila/platform-ontology — Unit Tests
  */
 import { describe, it, expect, beforeEach } from 'vitest'
+import type { OntologyEntityType } from './index'
 import {
   OntologyEntityTypes,
   RelationshipTypes,
@@ -113,7 +114,7 @@ describe('platform-ontology', () => {
 
     it('supports custom type registration', () => {
       registerOntologyType({
-        entityType: 'CustomWidget' as any,
+        entityType: 'CustomWidget' as unknown as OntologyEntityType,
         description: 'A custom widget entity',
         requiredFields: ['canonicalName'],
         optionalFields: ['color'],
@@ -126,14 +127,14 @@ describe('platform-ontology', () => {
 
     it('lists all definitions including custom', () => {
       registerOntologyType({
-        entityType: 'CustomWidget' as any,
+        entityType: 'CustomWidget' as unknown as OntologyEntityType,
         description: 'Widget',
         requiredFields: ['canonicalName'],
         optionalFields: [],
         allowedRelationships: [],
       })
       const all = listOntologyDefinitions()
-      expect(all.some((d) => d.entityType === ('CustomWidget' as any))).toBe(true)
+      expect(all.some((d) => d.entityType === ('CustomWidget' as unknown as OntologyEntityType))).toBe(true)
     })
 
     it('resolves relationships for an entity type', () => {

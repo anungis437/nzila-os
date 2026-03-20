@@ -10,7 +10,6 @@ import type {
   GovernanceViolation,
   AdminActionRequest,
   AdminActionResult,
-  SystemEvent,
 } from './types'
 import { AuditSeverity, SystemEventType } from './types'
 import { emitSystemEvent, buildSystemEvent } from './system-events'

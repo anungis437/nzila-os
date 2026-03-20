@@ -11,7 +11,6 @@ import type {
   WorkflowExecution,
   WorkflowStep,
   WorkflowStepResult,
-  SystemEvent,
 } from './types'
 import {
   WorkflowStepStatus,
@@ -214,7 +213,7 @@ async function executeStepWithRetry(
   context: ControlPlaneContext,
   input: Record<string, unknown>,
   previousOutput: Record<string, unknown> | undefined,
-  executionId: string,
+  _executionId: string,
 ): Promise<WorkflowStepResult> {
   let lastError: string | undefined
   for (let attempt = 0; attempt <= stepDef.maxRetries; attempt++) {

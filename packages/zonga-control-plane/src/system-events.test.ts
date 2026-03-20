@@ -17,7 +17,9 @@ import {
 } from './system-events'
 import { SystemEventType, AuditSeverity } from './types'
 
-function makeEvent(overrides?: Partial<ReturnType<typeof buildSystemEvent>>) {
+type BuildSystemEventParams = Parameters<typeof buildSystemEvent>[0]
+
+function makeEvent(overrides?: Partial<BuildSystemEventParams>) {
   return buildSystemEvent({
     type: SystemEventType.REVENUE_RECORDED,
     orgId: 'org-1',
@@ -88,7 +90,7 @@ describe('@nzila/zonga-control-plane — system events', () => {
         type: SystemEventType.PAYOUT_COMPLETED,
         orgId: 'org-42',
         actorId: 'admin-7',
-      } as any)
+      })
       expect(event.orgId).toBe('org-42')
       expect(event.actorId).toBe('admin-7')
     })
@@ -98,9 +100,9 @@ describe('@nzila/zonga-control-plane — system events', () => {
 
   describe('queryAuditEvents', () => {
     beforeEach(() => {
-      emitSystemEvent(makeEvent({ entityId: 'e-1', entityType: 'revenue' } as any))
-      emitSystemEvent(makeEvent({ entityId: 'e-2', entityType: 'payout' } as any))
-      emitSystemEvent(makeEvent({ entityId: 'e-3', entityType: 'revenue' } as any))
+      emitSystemEvent(makeEvent({ entityId: 'e-1', entityType: 'revenue' }))
+      emitSystemEvent(makeEvent({ entityId: 'e-2', entityType: 'payout' }))
+      emitSystemEvent(makeEvent({ entityId: 'e-3', entityType: 'revenue' }))
     })
 
     it('returns all events when filter is empty', () => {

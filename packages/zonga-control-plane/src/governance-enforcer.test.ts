@@ -1,16 +1,14 @@
 import { describe, it, expect, beforeEach } from 'vitest'
 import type { ControlPlaneContext, AdminActionRequest } from './types'
-import { AuditSeverity, SystemEventType } from './types'
+import { SystemEventType } from './types'
 import { clearEventLog, getEventLog } from './system-events'
 import {
-  registerPolicy,
   listPolicies,
   validateGovernancePolicy,
   executeAdminAction,
   payoutPolicy,
   releasePolicy,
   eventPolicy,
-  type GovernancePolicy,
 } from './governance-enforcer'
 
 function makeContext(overrides?: Partial<ControlPlaneContext>): ControlPlaneContext {

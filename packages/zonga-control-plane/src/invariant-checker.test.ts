@@ -6,7 +6,7 @@
  */
 import { describe, it, expect, beforeEach } from 'vitest'
 import { checkAllInvariants, checkInvariant } from './invariant-checker'
-import type { ControlPlaneContext, InvariantCheck } from './types'
+import type { ControlPlaneContext } from './types'
 import { InvariantId } from './types'
 import { clearEventLog } from './system-events'
 

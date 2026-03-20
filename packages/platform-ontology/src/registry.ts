@@ -12,7 +12,7 @@ import type {
   CreateOntologyEntityInput,
   CreateRelationshipInput,
 } from './types'
-import { OntologyEntityTypes as _OntologyEntityTypes } from './types'
+import { OntologyEntityTypes as _OntologyEntityTypes, RelationshipTypes } from './types'
 import {
   getTypeDefinition,
   getAllTypeDefinitions,
@@ -79,7 +79,7 @@ export function validateRelationshipAllowed(
         r.relationshipType === relationshipType,
     )
   }
-  return isRelationshipAllowed(sourceType, targetType, relationshipType as any)
+  return isRelationshipAllowed(sourceType, targetType, relationshipType as (typeof RelationshipTypes)[keyof typeof RelationshipTypes])
 }
 
 /**

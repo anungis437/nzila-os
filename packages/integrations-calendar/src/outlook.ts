@@ -136,7 +136,7 @@ export function createOutlookCalendarClient(
       return events.map((e) => mapGraphEvent(e, calendarId))
     },
 
-    async fetchAttendees(_orgId: string, eventId: string): Promise<CalendarAttendee[]> {
+    async fetchAttendees(_orgId: string, _eventId: string): Promise<CalendarAttendee[]> {
       // Attendees are embedded in the event response in Graph API
       // The caller should extract them from the event fetch
       return []
