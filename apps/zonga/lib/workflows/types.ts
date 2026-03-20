@@ -21,6 +21,7 @@ export interface Transition<S extends string> {
   readonly to: S
   readonly label: string
   readonly auditEvent: string | null
+  readonly requiredRole?: string
 }
 
 export interface TransitionResult<S extends string> {

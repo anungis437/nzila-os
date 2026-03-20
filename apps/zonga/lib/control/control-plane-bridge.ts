@@ -11,21 +11,30 @@ import {
   buildSystemEvent,
   checkAllInvariants,
   canExecutePayout,
-  validateLedgerIntegrity,
   enforceEconomicIntegrity,
   validateGovernancePolicy,
   executeAdminAction,
   recordMetric,
   generateCorrelationId,
+  AuditSeverity,
+  MetricName,
 } from '@nzila/zonga-control-plane'
 import type {
   ControlPlaneContext,
-  SystemEvent,
-  LedgerEntry,
-  SplitAllocation,
-  AuditableAction,
+  SystemEventType,
   AdminActionRequest,
+  InvariantCheckResult,
+  EconomicIntegrityResult,
+  GovernancePolicyResult,
+  AdminActionResult,
 } from '@nzila/zonga-control-plane/types'
+import type {
+  LedgerEntry,
+  LedgerTransaction,
+  PayoutRecord,
+  RevenueRecord,
+} from '@nzila/zonga-control-plane'
+import type { InvariantInput } from '@nzila/zonga-control-plane'
 import type { CommandContext, CommandResult } from './types'
 import { logger } from '@/lib/logger'
 
@@ -33,12 +42,12 @@ import { logger } from '@/lib/logger'
 
 export function toControlPlaneContext(ctx: CommandContext): ControlPlaneContext {
   return {
-    org_id: ctx.org_id,
-    actor_id: ctx.actor_id ?? 'system',
-    role: 'operator',
-    permissions: [],
-    correlation_id: ctx.correlation_id ?? generateCorrelationId(),
-    request_id: ctx.correlation_id ?? generateCorrelationId(),
+    orgId: ctx.org_id,
+    actorId: ctx.actor_id ?? 'system',
+    actorRole: 'operator',
+    correlationId: ctx.correlation_id ?? generateCorrelationId(),
+    requestId: ctx.correlation_id ?? generateCorrelationId(),
+    timestamp: new Date(),
   }
 }
 
@@ -50,13 +59,14 @@ export function emitCommandEvent(
   payload: Record<string, unknown>,
 ): void {
   const event = buildSystemEvent({
-    type: eventType as SystemEvent['type'],
-    entity_type: (payload['entity_type'] as string) ?? 'unknown',
-    entity_id: (payload['entity_id'] as string) ?? 'unknown',
-    org_id: ctx.org_id,
-    actor_id: ctx.actor_id ?? 'system',
-    correlation_id: ctx.correlation_id ?? generateCorrelationId(),
-    metadata: payload,
+    type: eventType as SystemEventType,
+    entityType: (payload['entity_type'] as string) ?? 'unknown',
+    entityId: (payload['entity_id'] as string) ?? 'unknown',
+    orgId: ctx.org_id,
+    actorId: ctx.actor_id ?? 'system',
+    correlationId: ctx.correlation_id ?? generateCorrelationId(),
+    payload,
+    severity: AuditSeverity.INFO,
   })
   emitSystemEvent(event)
 }
@@ -79,21 +89,22 @@ export interface PayoutGateInput {
  * `allowed` is false.
  */
 export function gatePayout(input: PayoutGateInput): { allowed: boolean; reason?: string } {
-  const result = canExecutePayout({
-    creatorId: input.creator_id,
-    requestedAmount: input.amount,
-    currentBalance: input.totalRevenue - input.totalPayouts,
-    hasActiveDisputes: input.hasActiveDisputes,
-    ledgerEntries: input.ledgerEntries,
-  })
+  const availableBalance = input.totalRevenue - input.totalPayouts
+  const hasLedgerBacking = input.ledgerEntries.length > 0
+  const result = canExecutePayout(
+    input.amount,
+    availableBalance,
+    input.hasActiveDisputes,
+    hasLedgerBacking,
+  )
 
   if (!result.allowed) {
     logger.warn('Control plane: payout blocked', {
       creatorId: input.creator_id,
       amount: input.amount,
-      reason: result.reason,
+      reasons: result.reasons,
     })
-    return { allowed: false, reason: result.reason }
+    return { allowed: false, reason: result.reasons.join('; ') }
   }
 
   return { allowed: true }
@@ -102,26 +113,28 @@ export function gatePayout(input: PayoutGateInput): { allowed: boolean; reason?:
 // ── Economic Integrity Check ───────────────────────────────────────────────
 
 /**
- * Run economic integrity enforcement over the given ledger entries.
- * Returns violations if the ledger is not balanced.
+ * Run economic integrity enforcement over the given transactions.
+ * Returns the full economic integrity result.
  */
 export function enforceEconomics(
   ctx: CommandContext,
-  ledgerEntries: LedgerEntry[],
-): { valid: boolean; violations: string[] } {
+  transactions: LedgerTransaction[],
+  payouts: PayoutRecord[],
+  revenues: RevenueRecord[],
+): EconomicIntegrityResult {
   const cpCtx = toControlPlaneContext(ctx)
-  const result = enforceEconomicIntegrity(cpCtx, ledgerEntries)
+  const result = enforceEconomicIntegrity(cpCtx, transactions, payouts, revenues)
 
-  if (!result.valid) {
+  if (!result.ledgerBalanced) {
     logger.error('Control plane: economic integrity violation', {
       orgId: ctx.org_id,
-      violations: result.violations,
+      discrepancy: result.discrepancy,
     })
-    recordMetric({
-      name: 'economic_integrity_violation',
-      value: result.violations.length,
-      tags: { org_id: ctx.org_id },
-    })
+    recordMetric(
+      MetricName.LEDGER_INTEGRITY_FAILURES,
+      1,
+      { org_id: ctx.org_id },
+    )
   }
 
   return result
@@ -130,62 +143,48 @@ export function enforceEconomics(
 // ── Governance Validation ──────────────────────────────────────────────────
 
 /**
- * Validates an action against registered governance policies.
+ * Validates an entity against registered governance policies.
  * Returns a structured result with any violations.
  */
 export function validateGovernance(
   ctx: CommandContext,
-  action: AuditableAction,
-): { passed: boolean; violations: Array<{ policy: string; reason: string }> } {
+  entityType: string,
+  entity: Record<string, unknown>,
+): GovernancePolicyResult {
   const cpCtx = toControlPlaneContext(ctx)
-  return validateGovernancePolicy(cpCtx, action)
+  return validateGovernancePolicy(cpCtx, entityType, entity)
 }
 
 /**
  * Wraps an admin action through the governance layer.
  * Requires reason ≥ 10 characters and appropriate role.
  */
-export async function executeAdminOp(
-  ctx: CommandContext,
+export function executeAdminOp(
   request: AdminActionRequest,
-): Promise<{ success: boolean; action_id?: string; violations?: Array<{ policy: string; reason: string }> }> {
-  const cpCtx = toControlPlaneContext(ctx)
-  return executeAdminAction(cpCtx, request)
+): AdminActionResult {
+  return executeAdminAction(request)
 }
 
 // ── System Invariant Check ─────────────────────────────────────────────────
-
-export interface InvariantInput {
-  ledgerEntries: LedgerEntry[]
-  splits: SplitAllocation[]
-  recentActions: AuditableAction[]
-  eventCapacities: Array<{ event_id: string; capacity: number; tickets_sold: number }>
-}
 
 /**
  * Runs all 9 system invariants and emits a system event on failure.
  * Returns the full check result.
  */
-export function runInvariantCheck(ctx: CommandContext, input: InvariantInput) {
+export function runInvariantCheck(ctx: CommandContext, input: InvariantInput): InvariantCheckResult {
   const cpCtx = toControlPlaneContext(ctx)
-  const result = checkAllInvariants(cpCtx, {
-    ledgerEntries: input.ledgerEntries,
-    splits: input.splits,
-    recentActions: input.recentActions,
-    eventCapacities: input.eventCapacities,
-  })
+  const result = checkAllInvariants(cpCtx, input)
 
-  if (!result.passed) {
-    const failures = result.results.filter(r => !r.passed)
+  if (!result.allPassed) {
     logger.error('Control plane: invariants broken', {
       orgId: ctx.org_id,
-      failures: failures.map(f => f.invariant_id),
+      failures: result.failures.map((f) => f.id),
     })
     emitCommandEvent(ctx, 'invariant.broken', {
       entity_type: 'system',
       entity_id: ctx.org_id,
-      failures: failures.map(f => ({
-        invariant: f.invariant_id,
+      failures: result.failures.map((f) => ({
+        invariant: f.id,
         details: f.details,
       })),
     })
@@ -210,12 +209,9 @@ export function afterCommandSuccess(ctx: CommandContext, result: CommandResult):
     audit_ref: result.audit_ref,
   })
 
-  recordMetric({
-    name: 'command_executed',
-    value: 1,
-    tags: {
-      org_id: ctx.org_id,
-      entity_type: result.entity_type,
-    },
-  })
+  recordMetric(
+    MetricName.AUDIT_EVENTS_TOTAL,
+    1,
+    { org_id: ctx.org_id, entity_type: result.entity_type },
+  )
 }

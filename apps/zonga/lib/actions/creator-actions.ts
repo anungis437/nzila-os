@@ -104,7 +104,7 @@ export async function registerCreator(data: {
     entityType: ZongaEntityType.CREATOR,
     orgId: ctx.orgId,
     actorId: ctx.actorId,
-    targetId: creatorId,
+    targetId: creatorId ?? 'unknown',
     metadata: { name: data.name },
   })
   logger.info('Creator registered', { ...auditEvent })

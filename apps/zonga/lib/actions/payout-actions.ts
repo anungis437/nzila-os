@@ -10,7 +10,6 @@ import { platformDb } from '@nzila/db/platform'
 import { sql } from 'drizzle-orm'
 import { revalidatePath } from 'next/cache'
 import { logger } from '@/lib/logger'
-import { buildTransitionAuditEntry } from '@/lib/commerce-audit'
 import {
   PayoutStatus,
   ZongaCurrency,
@@ -39,15 +38,14 @@ function logTransition(
   to: string,
   actorId: string,
 ) {
-  const entry = buildTransitionAuditEntry({
+  logger.info('payout.transition', {
     targetEntityId: payoutId,
     entityType: 'payout',
     from,
     to,
     actorId,
-    timestamp: new Date(),
+    timestamp: new Date().toISOString(),
   })
-  logger.info('payout.transition', { ...entry, payoutId, from, to })
 }
 
 /* ─── Wallet Balance ─── */

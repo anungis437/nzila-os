@@ -117,7 +117,7 @@ export async function createRelease(data: {
     entityType: ZongaEntityType.RELEASE,
     orgId: ctx.orgId,
     actorId: ctx.actorId,
-    targetId: releaseId,
+    targetId: releaseId ?? 'unknown',
     metadata: { title: data.title, type: releaseType },
   })
   logger.info('Release created', { ...auditEvent })

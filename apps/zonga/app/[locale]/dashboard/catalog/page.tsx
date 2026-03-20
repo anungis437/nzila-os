@@ -141,8 +141,6 @@ export default async function CatalogPage({
               key={asset.id}
               asset={asset}
               basePath="catalog"
-              showCollaborators={!!asset.collaborators?.length}
-              showLanguage={!!asset.language}
             />
           ))}
         </div>

@@ -20,7 +20,7 @@ export { moderation } from './moderation'
 export type { ModerationStatus } from './moderation'
 
 export { trackUploadProcessing } from './track-upload-processing'
-export type { TrackUploadProcessingStatus } from './track-upload-processing'
+export type { TrackUploadStatus } from './track-upload-processing'
 
 export { ticketScan } from './ticket-scan'
 export type { TicketScanStatus } from './ticket-scan'
