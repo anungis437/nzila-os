@@ -1,0 +1,29 @@
+{
+  "name": "@nzila/zonga-events",
+  "version": "0.1.0",
+  "private": true,
+  "type": "module",
+  "main": "./src/index.ts",
+  "types": "./src/index.ts",
+  "exports": {
+    ".": "./src/index.ts",
+    "./types": "./src/types.ts",
+    "./ticketing": "./src/ticketing.ts",
+    "./checkin": "./src/checkin.ts",
+    "./capacity": "./src/capacity.ts",
+    "./settlement": "./src/event-settlement.ts"
+  },
+  "scripts": {
+    "typecheck": "tsc --noEmit",
+    "test": "vitest run",
+    "lint": "eslint src/"
+  },
+  "dependencies": {
+    "@nzila/zonga-economics": "workspace:*",
+    "zod": "^3.24.0"
+  },
+  "devDependencies": {
+    "typescript": "^5",
+    "vitest": "^4.0.18"
+  }
+}

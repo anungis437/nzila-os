@@ -10,6 +10,7 @@ import { platformDb } from '@nzila/db/platform'
 import { sql } from 'drizzle-orm'
 import { revalidatePath } from 'next/cache'
 import { logger } from '@/lib/logger'
+import { buildTransitionAuditEntry } from '@/lib/commerce-audit'
 import {
   PayoutStatus,
   ZongaCurrency,
@@ -24,6 +25,24 @@ export interface PayoutListResult {
   payouts: Payout[]
   total: number
   totalPaid: number
+}
+
+/** Log a payout status transition for audit trail */
+function logTransition(
+  payoutId: string,
+  from: string,
+  to: string,
+  actorId: string,
+) {
+  const entry = buildTransitionAuditEntry({
+    entityId: payoutId,
+    entityType: 'payout',
+    from,
+    to,
+    actorId,
+    timestamp: new Date(),
+  })
+  logger.info('payout.transition', { ...entry, payoutId, from, to })
 }
 
 /* ─── Wallet Balance ─── */
@@ -320,6 +339,13 @@ export async function executePayout(data: {
   if (!result.success) {
     return { success: false, error: result.error }
   }
+
+  logTransition(
+    result.data?.entity_id ?? data.creatorId,
+    PayoutStatus.PENDING,
+    PayoutStatus.COMPLETED,
+    ctx.actorId,
+  )
 
   revalidatePath('/dashboard/payouts')
   return { success: true, transferId: result.data?.entity_id }
