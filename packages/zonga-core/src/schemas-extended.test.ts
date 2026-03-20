@@ -466,7 +466,7 @@ describe('@nzila/zonga-core — schemas (extended coverage)', () => {
       const r = CreateFraudReviewSchema.safeParse({
         signalType: 'bot_pattern',
         entityType: 'creator',
-        entityId: UUID,
+        targetEntityId: UUID,
         severity: 'high',
         score: 85,
         explanation: 'Automated stream pattern detected from single IP range',
@@ -476,7 +476,7 @@ describe('@nzila/zonga-core — schemas (extended coverage)', () => {
 
     it('rejects score > 100', () => {
       expect(CreateFraudReviewSchema.safeParse({
-        signalType: 'stream_spike', entityType: 'asset', entityId: UUID,
+        signalType: 'stream_spike', entityType: 'asset', targetEntityId: UUID,
         severity: 'critical', score: 150, explanation: 'Very bad stuff happening',
       }).success).toBe(false)
     })

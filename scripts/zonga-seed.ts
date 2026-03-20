@@ -88,9 +88,9 @@ const assetPairs = [
 const events = [
   { id: uuid('e1', 1), creatorIdx: 0, title: 'Dakar Music Festival 2026', venue: 'Place du Souvenir Africain', city: 'Dakar', country: 'Senegal', currency: 'XOF', gaPrice: 5000, vipPrice: 15000, daysFromSeed: 30 },
   { id: uuid('e1', 2), creatorIdx: 2, title: 'Lagos Live Sessions', venue: 'Eko Hotel & Suites', city: 'Lagos', country: 'Nigeria', currency: 'NGN', gaPrice: 10000, vipPrice: 50000, daysFromSeed: 45 },
-  { id: uuid('e1', 3), creatorIdx: 3, title: 'Amapiano Nights Jozi', venue: 'Constitution Hill', city: 'Johannesburg', country: 'South Africa', currency: 'ZAR', gaPrice: 250, vipPrice: 750, daysFromSeed: 60 },
+  { id: uuid('e1', 3), creatorIdx: 3, title: 'Amapiano Nights Jozi', venue: 'Constitution Hill', city: 'Johannesburg', country: 'ZA', currency: 'ZAR', gaPrice: 250, vipPrice: 750, daysFromSeed: 60 },
   { id: uuid('e1', 4), creatorIdx: 6, title: 'Nairobi Soundscapes', venue: 'KICC Amphitheatre', city: 'Nairobi', country: 'Kenya', currency: 'KES', gaPrice: 2000, vipPrice: 8000, daysFromSeed: 75 },
-  { id: uuid('e1', 5), creatorIdx: 7, title: 'Durban Bass Carnival', venue: 'Moses Mabhida Stadium', city: 'Durban', country: 'South Africa', currency: 'ZAR', gaPrice: 200, vipPrice: 600, daysFromSeed: 90 },
+  { id: uuid('e1', 5), creatorIdx: 7, title: 'Durban Bass Carnival', venue: 'Moses Mabhida Stadium', city: 'Durban', country: 'ZA', currency: 'ZAR', gaPrice: 200, vipPrice: 600, daysFromSeed: 90 },
 ]
 
 // ── Listeners ───────────────────────────────────────────────────────────
@@ -98,7 +98,7 @@ const events = [
 const listeners = [
   { id: uuid('l1', 1), displayName: 'Adama Traoré', email: 'adama@example.com', city: 'Dakar', country: 'Senegal' },
   { id: uuid('l1', 2), displayName: 'Chioma Eze', email: 'chioma@example.com', city: 'Lagos', country: 'Nigeria' },
-  { id: uuid('l1', 3), displayName: 'Thabo Molefe', email: 'thabo@example.com', city: 'Johannesburg', country: 'South Africa' },
+  { id: uuid('l1', 3), displayName: 'Thabo Molefe', email: 'thabo@example.com', city: 'Johannesburg', country: 'ZA' },
   { id: uuid('l1', 4), displayName: 'Wanjiku Mwangi', email: 'wanjiku@example.com', city: 'Nairobi', country: 'Kenya' },
   { id: uuid('l1', 5), displayName: 'Yaa Mensah', email: 'yaa@example.com', city: 'Accra', country: 'Ghana' },
   { id: uuid('l1', 6), displayName: 'Ibrahim Diop', email: 'ibrahim@example.com', city: 'Abidjan', country: 'Côte d\'Ivoire' },

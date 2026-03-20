@@ -29,31 +29,81 @@
   },
   "revenue": {
     "title": "Revenue",
-    "streams": "Streams",
+    "totalRevenue": "Total Revenue",
+    "streamingRevenue": "Streaming Revenue",
+    "downloadRevenue": "Download Revenue",
+    "licensingRevenue": "Licensing Revenue",
+    "streams": "Streaming",
     "downloads": "Downloads",
     "licensing": "Licensing",
-    "sync": "Sync",
+    "sync": "Sync Licensing",
     "merchandise": "Merchandise",
-    "tips": "Tips",
+    "tips": "Tips & Donations",
     "subscriptions": "Subscriptions",
-    "totalEarnings": "Total Earnings",
-    "platformFee": "Platform Fee",
-    "netPayout": "Net Payout"
+    "radioBroadcast": "Radio Broadcast",
+    "livePerformance": "Live Performance",
+    "publishingPerformance": "Publishing & Performance",
+    "samplingLicense": "Sampling License",
+    "remixLicense": "Remix License",
+    "podcastLicense": "Podcast License",
+    "sponsorship": "Sponsorship",
+    "adRevenue": "Ad Revenue",
+    "serviceFee": "Service Fee",
+    "processingFee": "Processing Fee",
+    "taxAmount": "Tax",
+    "totalFees": "Total Fees",
+    "netPayout": "Net Payout",
+    "revenueByArtist": "Revenue by Artist",
+    "recentActivity": "Recent Activity",
+    "supportedPayoutRails": "Supported Payout Rails",
+    "noArtistRevenue": "No artist revenue data available. Revenue will appear here once listeners engage with your catalog.",
+    "noRevenueEvents": "No revenue events recorded. Events will appear here as your catalog generates income."
   },
   "payouts": {
     "title": "Payouts",
     "pending": "Pending",
     "processing": "Processing",
     "completed": "Completed",
+    "failed": "Failed",
     "requestPayout": "Request Payout",
-    "walletBalance": "Wallet Balance"
+    "newPayout": "New Payout",
+    "walletBalance": "Wallet Balance",
+    "totalPayouts": "Total Payouts",
+    "totalPaidOut": "Total Paid Out",
+    "averagePayout": "Average Payout",
+    "noPayoutsYet": "No payouts yet",
+    "noPayoutsDescription": "Artist payouts will appear here once earnings have been distributed.",
+    "selectArtist": "Select Artist",
+    "chooseArtist": "Choose an artist…",
+    "payoutRail": "Payout Rail",
+    "previewPayout": "Preview Payout",
+    "executePayout": "Execute Payout",
+    "payoutPreview": "Payout Preview",
+    "grossAmount": "Gross Amount",
+    "confirmPayout": "I confirm this payout",
+    "noPendingBalance": "No pending balance for this artist.",
+    "payoutFailed": "Payout could not be processed. Check the artist's payout rail configuration and try again, or contact support."
+  },
+  "splits": {
+    "title": "Royalty Splits",
+    "description": "Configure how revenue is distributed among collaborators. Splits must total exactly 100%. Each collaborator receives their share after platform and processing fees are deducted.",
+    "splitConfiguration": "Split Configuration",
+    "distributeEvenly": "Distribute evenly",
+    "addCollaborator": "Add Collaborator",
+    "total": "Total",
+    "overAllocated": "Over-allocated by {amount}%",
+    "underAllocated": "Under-allocated by {amount}%. All revenue shares must total 100%.",
+    "preview": "Preview",
+    "saveSplits": "Save Splits",
+    "splitsSaved": "Splits saved successfully",
+    "backToRelease": "Back to Release"
   },
   "creators": {
-    "title": "Creators",
+    "title": "Artists & Creators",
     "artists": "Artists",
     "labels": "Labels",
     "producers": "Producers",
-    "register": "Register Creator"
+    "register": "Register Artist"
   },
   "integrity": {
     "title": "Integrity",
@@ -78,19 +128,19 @@
     "features": {
       "badge": "Platform Features",
       "title": "Built for",
-      "titleAccent": "African Creators",
+      "titleAccent": "African Artists",
       "description": "Everything you need to distribute, monetize, and grow your music — with transparency at every step."
     },
     "mission": {
       "badge": "Our Mission",
       "title": "Music That",
       "titleAccent": "Empowers",
-      "description": "Zonga was born from a simple belief: African creators deserve the same tools, transparency, and revenue share as artists anywhere in the world. We built a platform that makes that possible."
+      "description": "Zonga was born from a simple belief: African artists deserve the same tools, transparency, and revenue share as artists anywhere in the world. We built a platform that makes that possible."
     },
     "cta": {
       "title": "Ready to Share Your",
       "titleAccent": "Music?",
-      "description": "Join thousands of African creators who trust Zonga for transparent royalties, instant payouts, and full creative ownership."
+      "description": "Join thousands of African artists who trust Zonga for transparent royalties, instant payouts, and full creative ownership."
     }
   }
 }

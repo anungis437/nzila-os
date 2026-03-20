@@ -25,23 +25,37 @@ function formatCompact(n: number): string {
 }
 
 const PAYOUT_RAILS = [
-  { key: 'mpesa', label: 'M-Pesa', color: 'bg-green-100 text-green-700' },
-  { key: 'mtn_momo', label: 'MTN MoMo', color: 'bg-yellow-100 text-yellow-700' },
-  { key: 'airtel_money', label: 'Airtel', color: 'bg-red-100 text-red-700' },
-  { key: 'orange_money', label: 'Orange', color: 'bg-orange-100 text-orange-700' },
-  { key: 'stripe', label: 'Stripe', color: 'bg-purple-100 text-purple-700' },
-  { key: 'bank_transfer', label: 'Bank', color: 'bg-blue-100 text-blue-700' },
-  { key: 'chipper_cash', label: 'Chipper', color: 'bg-teal-100 text-teal-700' },
+  { key: 'mpesa', label: 'M-Pesa (Safaricom)', color: 'bg-green-100 text-green-700' },
+  { key: 'vodacom_mpesa', label: 'Vodacom M-Pesa', color: 'bg-green-100 text-green-700' },
+  { key: 'mtn_momo', label: 'MTN Mobile Money', color: 'bg-yellow-100 text-yellow-700' },
+  { key: 'airtel_money', label: 'Airtel Money', color: 'bg-red-100 text-red-700' },
+  { key: 'orange_money', label: 'Orange Money', color: 'bg-orange-100 text-orange-700' },
+  { key: 'moov_money', label: 'Moov Money', color: 'bg-orange-100 text-orange-700' },
+  { key: 'wave', label: 'Wave', color: 'bg-cyan-100 text-cyan-700' },
+  { key: 'ecocash', label: 'EcoCash', color: 'bg-emerald-100 text-emerald-700' },
+  { key: 'chipper_cash', label: 'Chipper Cash', color: 'bg-teal-100 text-teal-700' },
+  { key: 'paga', label: 'Paga', color: 'bg-lime-100 text-lime-700' },
+  { key: 'stripe', label: 'Stripe (Card)', color: 'bg-purple-100 text-purple-700' },
+  { key: 'bank_transfer', label: 'Bank Transfer', color: 'bg-blue-100 text-blue-700' },
   { key: 'flutterwave', label: 'Flutterwave', color: 'bg-indigo-100 text-indigo-700' },
+  { key: 'paystack', label: 'Paystack', color: 'bg-sky-100 text-sky-700' },
 ]
 
 const TYPE_ICONS: Record<string, string> = {
-  stream: '🎧',
-  download: '⬇️',
-  sync_license: '🎬',
-  subscription: '💳',
-  tip: '🎁',
-  ad_revenue: '📺',
+  stream: 'STR',
+  download: 'DL',
+  sync_license: 'SYN',
+  subscription: 'SUB',
+  tip: 'TIP',
+  ad_revenue: 'AD',
+  radio_broadcast: 'RAD',
+  live_performance: 'LIV',
+  publishing_performance: 'PUB',
+  sampling_license: 'SAM',
+  remix_license: 'RMX',
+  podcast_license: 'POD',
+  merchandise: 'MER',
+  sponsorship: 'SPO',
 }
 
 export default async function RevenuePage() {
@@ -56,28 +70,25 @@ export default async function RevenuePage() {
   const total = overview.totalRevenue || 1
   const sourceMix = [
     {
-      label: 'Streams',
+      label: 'Streaming',
       amount: overview.streamRevenue,
       pct: Math.round((overview.streamRevenue / total) * 100),
-      icon: '🎧',
       bar: 'bg-electric',
     },
     {
       label: 'Downloads',
       amount: overview.downloadRevenue,
       pct: Math.round((overview.downloadRevenue / total) * 100),
-      icon: '⬇️',
       bar: 'bg-purple-500',
     },
     {
-      label: 'Sync Licensing',
+      label: 'Licensing',
       amount: overview.syncRevenue,
       pct: Math.round((overview.syncRevenue / total) * 100),
-      icon: '🎬',
       bar: 'bg-amber-500',
     },
     {
-      label: 'Other',
+      label: 'Other Revenue',
       amount:
         overview.totalRevenue -
         overview.streamRevenue -
@@ -90,7 +101,6 @@ export default async function RevenuePage() {
           Math.round((overview.downloadRevenue / total) * 100) -
           Math.round((overview.syncRevenue / total) * 100),
       ),
-      icon: '📊',
       bar: 'bg-gray-400',
     },
   ].filter((s) => s.amount > 0)
@@ -110,32 +120,27 @@ export default async function RevenuePage() {
           {
             label: 'Total Revenue',
             value: formatCompact(overview.totalRevenue),
-            icon: '💰',
             color: 'text-emerald-600',
           },
           {
-            label: 'Streams',
+            label: 'Streaming Revenue',
             value: formatCompact(overview.streamRevenue),
-            icon: '🎧',
             color: 'text-blue-600',
           },
           {
-            label: 'Downloads',
+            label: 'Download Revenue',
             value: formatCompact(overview.downloadRevenue),
-            icon: '⬇️',
             color: 'text-purple-600',
           },
           {
-            label: 'Sync Licensing',
+            label: 'Licensing Revenue',
             value: formatCompact(overview.syncRevenue),
-            icon: '🎬',
             color: 'text-amber-600',
           },
         ].map((card) => (
           <Card key={card.label}>
             <div className="p-5">
-              <div className="flex items-center gap-2 mb-1">
-                <span className="text-lg">{card.icon}</span>
+              <div className="mb-1">
                 <p className="text-xs text-gray-500">{card.label}</p>
               </div>
               <p className={`text-xl font-bold ${card.color}`}>{card.value}</p>
@@ -167,7 +172,7 @@ export default async function RevenuePage() {
                 <div key={s.label} className="flex items-center gap-1.5">
                   <div className={`h-2.5 w-2.5 rounded-full ${s.bar}`} />
                   <span className="text-gray-600">
-                    {s.icon} {s.label}
+                    {s.label}
                   </span>
                   <span className="font-semibold text-navy">{s.pct}%</span>
                 </div>
@@ -181,14 +186,13 @@ export default async function RevenuePage() {
         {/* Revenue by Creator */}
         <div>
           <h2 className="text-lg font-semibold text-navy mb-3">
-            💸 Per-Creator Revenue
+            Revenue by Artist
           </h2>
           {byCreator.length === 0 ? (
             <Card>
               <div className="p-8 text-center">
-                <div className="text-3xl mb-2">🎤</div>
                 <p className="text-sm text-gray-500">
-                  No creator revenue data yet.
+                  No artist revenue data available. Revenue will appear here once listeners engage with your catalog.
                 </p>
               </div>
             </Card>
@@ -238,14 +242,13 @@ export default async function RevenuePage() {
         {/* Recent Revenue Events */}
         <div>
           <h2 className="text-lg font-semibold text-navy mb-3">
-            📋 Recent Events
+            Recent Activity
           </h2>
           {overview.recentEvents.length === 0 ? (
             <Card>
               <div className="p-8 text-center">
-                <div className="text-3xl mb-2">📊</div>
                 <p className="text-sm text-gray-500">
-                  No revenue events yet.
+                  No revenue events recorded. Events will appear here as your catalog generates income.
                 </p>
               </div>
             </Card>
@@ -269,8 +272,8 @@ export default async function RevenuePage() {
                       className="flex items-center justify-between px-5 py-3"
                     >
                       <div className="flex items-center gap-3 min-w-0">
-                        <span className="text-lg shrink-0">
-                          {TYPE_ICONS[event.type ?? ''] ?? '📊'}
+                        <span className="text-xs font-bold text-gray-400 bg-gray-100 rounded px-1.5 py-0.5 shrink-0 uppercase tracking-wide">
+                          {TYPE_ICONS[event.type ?? ''] ?? 'REV'}
                         </span>
                         <div className="min-w-0">
                           <p className="text-sm font-medium text-navy truncate">
@@ -301,7 +304,7 @@ export default async function RevenuePage() {
       {/* Payout Rails */}
       <div>
         <h2 className="text-lg font-semibold text-navy mb-3">
-          🏦 Supported Payout Rails
+          Supported Payout Rails
         </h2>
         <div className="grid grid-cols-2 sm:grid-cols-4 gap-3">
           {PAYOUT_RAILS.map((rail) => (

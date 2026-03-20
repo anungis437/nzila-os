@@ -14,7 +14,11 @@ import { revalidatePath } from 'next/cache'
 import { logger } from '@/lib/logger'
 import {
   type Creator,
+  buildZongaAuditEvent,
+  ZongaAuditAction,
+  ZongaEntityType,
 } from '@/lib/zonga-services'
+import { buildEvidencePackFromAction, processEvidencePack } from '@/lib/evidence'
 import { executeCommand } from '@/lib/control'
 
 export interface CreatorListResult {
@@ -93,8 +97,28 @@ export async function registerCreator(data: {
     return { success: false, error: result.error }
   }
 
+  const creatorId = result.data?.entity_id
+
+  const auditEvent = buildZongaAuditEvent({
+    action: ZongaAuditAction.CREATOR_ACTIVATE,
+    entityType: ZongaEntityType.CREATOR,
+    orgId: ctx.orgId,
+    actorId: ctx.actorId,
+    targetId: creatorId,
+    metadata: { name: data.name },
+  })
+  logger.info('Creator registered', { ...auditEvent })
+
+  const pack = buildEvidencePackFromAction({
+    actionType: 'CREATOR_REGISTERED',
+    orgId: ctx.orgId,
+    executedBy: ctx.actorId,
+    actionId: crypto.randomUUID(),
+  })
+  await processEvidencePack(pack)
+
   revalidatePath('/dashboard/creators')
-  return { success: true, creatorId: result.data?.entity_id }
+  return { success: true, creatorId }
 }
 
 export async function getCreatorDetail(creatorId: string): Promise<{

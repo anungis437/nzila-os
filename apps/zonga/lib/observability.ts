@@ -150,14 +150,14 @@ export function buildGovernanceLogAttrs(ctx: ZongaLogContext, attrs: {
   passed: boolean
   reason: string
   entityType: string
-  entityId: string
+  targetEntityId: string
 }) {
   return {
     'zonga.governance.gate': attrs.gate,
     'zonga.governance.passed': attrs.passed,
     'zonga.governance.reason': attrs.reason,
     'zonga.governance.entity_type': attrs.entityType,
-    'zonga.governance.entity_id': attrs.entityId,
+    'zonga.governance.entity_id': attrs.targetEntityId,
     'nzila.org_id': ctx.orgId,
     'nzila.actor_id': ctx.actorId,
   }

@@ -14,6 +14,25 @@ import type {
   RoyaltyTrigger,
 } from './types'
 
+// ── Revenue Source Mapping ────────────────────────────────────────────────
+
+/**
+ * Map a royalty trigger to the corresponding revenue source for fee lookup.
+ * Ensures each trigger type uses the correct fee schedule.
+ */
+function triggerToRevenueSource(trigger: RoyaltyTrigger): string {
+  const mapping: Record<string, string> = {
+    stream: 'stream',
+    download: 'download',
+    sync_license: 'sync_license',
+    radio_play: 'radio_broadcast',
+    live_performance: 'live_performance',
+    user_generated_content: 'stream',
+    mechanical: 'publishing_performance',
+  }
+  return mapping[trigger] ?? 'stream'
+}
+
 // ── Types ─────────────────────────────────────────────────────────────────
 
 export interface RoyaltyCalculation {
@@ -74,7 +93,7 @@ export function calculateRoyalties(
   const splitRules: SplitRule[] = splits.map((s, i) => ({
     id: `royalty-split-${i}`,
     orgId: '*',
-    revenueSource: 'stream' as any,
+    revenueSource: triggerToRevenueSource(rule.trigger),
     recipientAccountId: s.holderId,
     recipientName: s.holderName,
     sharePercent: s.percentage,
@@ -84,18 +103,23 @@ export function calculateRoyalties(
     effectiveUntil: null,
   }))
 
-  // Use the streaming fee rules
-  const streamFees = DEFAULT_FEE_RULES.filter(
-    (r) => r.revenueSource === 'stream',
+  // Use the fee rules matching the actual revenue source (not hardcoded to stream)
+  const revenueSource = triggerToRevenueSource(rule.trigger)
+  const sourceFees = DEFAULT_FEE_RULES.filter(
+    (r) => r.revenueSource === revenueSource,
   )
+  // Fall back to stream fees only if no rules exist for this source
+  const feeRules = sourceFees.length > 0
+    ? sourceFees
+    : DEFAULT_FEE_RULES.filter((r) => r.revenueSource === 'stream')
 
   const splitResult = calculateSplits({
     revenueEventId: `royalty-${rule.assetId}`,
     grossAmount,
     currency: 'USD' as Currency,
-    revenueSource: 'stream' as any,
+    revenueSource,
     splitRules,
-    feeRules: [...streamFees],
+    feeRules: [...feeRules],
   })
   const netAmount = splitResult.netAmount
 
@@ -128,7 +152,7 @@ export function calculateRoyalties(
 export function checkPayoutReadiness(
   holderId: string,
   accruals: readonly RoyaltyAccrual[],
-  minimumPayout: number = 10,
+  minimumPayout: number = 1,
 ): PayoutReadiness {
   const holderAccruals = accruals.filter(
     (a) => a.holderId === holderId && a.status === 'approved',

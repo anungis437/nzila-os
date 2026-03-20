@@ -73,7 +73,7 @@ const FRAUD_INDICATORS: Record<string, FraudIndicator> = {
  * Returns 0-100 score with risk level classification.
  */
 export function computeFraudScore(
-  entityId: string,
+  targetEntityId: string,
   entityType: 'user' | 'track' | 'event' | 'transaction',
   indicatorNames: readonly string[],
 ): {
@@ -170,7 +170,7 @@ export function detectStreamFarming(
   return {
     type: 'stream_farming',
     userId: pattern.userId,
-    entityId: pattern.trackId,
+    targetEntityId: pattern.trackId,
     indicators,
     timestamp: new Date(),
   }

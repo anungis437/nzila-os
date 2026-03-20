@@ -114,13 +114,13 @@ export interface FraudSignal {
     | 'bot_activity'
     | 'review_manipulation'
   readonly userId: string
-  readonly entityId: string
+  readonly targetEntityId: string
   readonly indicators: readonly string[]
   readonly timestamp: Date
 }
 
 export interface FraudScore extends AIInferenceResult {
-  readonly entityId: string
+  readonly targetEntityId: string
   readonly entityType: 'user' | 'track' | 'event' | 'transaction'
   readonly riskLevel: RiskLevel
   readonly score: number // 0-100
@@ -224,7 +224,7 @@ export const RequestRecommendationsSchema = z.object({
 })
 
 export const RequestFraudCheckSchema = z.object({
-  entityId: z.string().min(1),
+  targetEntityId: z.string().min(1),
   entityType: z.enum(['user', 'track', 'event', 'transaction']),
   signals: z.array(z.string()).default([]),
 })

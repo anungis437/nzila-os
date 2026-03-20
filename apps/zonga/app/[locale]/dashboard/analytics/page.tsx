@@ -108,10 +108,10 @@ export default async function AnalyticsPage() {
       {/* Engagement Row */}
       <div className="grid grid-cols-2 sm:grid-cols-4 gap-4">
         {[
-          { icon: '🎤', label: 'Creators', value: analytics.totalCreators ?? 0 },
-          { icon: '💿', label: 'Releases', value: analytics.totalReleases ?? 0 },
-          { icon: '❤️', label: 'Favorites', value: analytics.totalFavorites ?? 0 },
-          { icon: '🤝', label: 'Follows', value: analytics.totalFollowers ?? 0 },
+          { icon: '🎤', label: 'Active Creators', value: analytics.totalCreators ?? 0 },
+          { icon: '💿', label: 'Published Releases', value: analytics.totalReleases ?? 0 },
+          { icon: '❤️', label: 'Total Favorites', value: analytics.totalFavorites ?? 0 },
+          { icon: '🤝', label: 'Artist Follows', value: analytics.totalFollowers ?? 0 },
         ].map((kpi) => (
           <Card key={kpi.label}>
             <div className="p-5">
