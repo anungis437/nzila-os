@@ -5,7 +5,7 @@
  * the economic engine for split calculations, and manages
  * payout thresholds.
  */
-import type { SplitRule, Currency } from '@nzila/zonga-economics'
+import type { SplitRule, Currency, RevenueSource } from '@nzila/zonga-economics'
 import { calculateSplits, DEFAULT_FEE_RULES } from '@nzila/zonga-economics'
 import type {
   RoyaltyRule,
@@ -20,8 +20,8 @@ import type {
  * Map a royalty trigger to the corresponding revenue source for fee lookup.
  * Ensures each trigger type uses the correct fee schedule.
  */
-function triggerToRevenueSource(trigger: RoyaltyTrigger): string {
-  const mapping: Record<string, string> = {
+function triggerToRevenueSource(trigger: RoyaltyTrigger): RevenueSource {
+  const mapping: Record<string, RevenueSource> = {
     stream: 'stream',
     download: 'download',
     sync_license: 'sync_license',
@@ -30,7 +30,7 @@ function triggerToRevenueSource(trigger: RoyaltyTrigger): string {
     user_generated_content: 'stream',
     mechanical: 'publishing_performance',
   }
-  return mapping[trigger] ?? 'stream'
+  return mapping[trigger] ?? ('stream' as RevenueSource)
 }
 
 // ── Types ─────────────────────────────────────────────────────────────────

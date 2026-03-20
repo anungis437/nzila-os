@@ -5,6 +5,7 @@
     "module": "ESNext",
     "moduleResolution": "bundler",
     "noUncheckedIndexedAccess": true,
+    "skipLibCheck": true,
     "noEmit": true
   },
   "include": ["src"]
