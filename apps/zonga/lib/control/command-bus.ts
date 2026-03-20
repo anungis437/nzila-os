@@ -11,7 +11,7 @@
  * 5. Return structured CommandResult
  */
 import type { CommandContext, CommandResult, CommandHandler } from './types'
-import { afterCommandSuccess, emitCommandEvent } from './control-plane-bridge'
+import { afterCommandSuccess } from './control-plane-bridge'
 import { logger } from '@/lib/logger'
 
 const registry = new Map<string, CommandHandler<unknown>>()

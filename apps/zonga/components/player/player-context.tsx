@@ -196,6 +196,70 @@ export function PlayerProvider({ children }: { children: ReactNode }) {
     })
   }, [currentTrack?.assetId, currentTrack?.streamUrl])
 
+  // Sync volume
+  useEffect(() => {
+    if (audioRef.current) {
+      audioRef.current.volume = state.muted ? 0 : state.volume
+    }
+  }, [state.volume, state.muted])
+
+  // Build shuffle map when queue / shuffle changes
+  useEffect(() => {
+    if (state.shuffle && state.queue.length > 0) {
+      const indices = state.queue.map((_, i) => i).filter((i) => i !== state.currentIndex)
+      // Fisher-Yates shuffle
+      for (let i = indices.length - 1; i > 0; i--) {
+        const j = Math.floor(Math.random() * (i + 1));
+        [indices[i], indices[j]] = [indices[j]!, indices[i]!]
+      }
+      shuffleMapRef.current = [state.currentIndex, ...indices]
+    }
+  }, [state.shuffle, state.queue, state.currentIndex])
+
+  const getNextIndex = useCallback((): number | null => {
+    if (state.queue.length <= 1 && state.repeat !== 'all') return null
+
+    if (state.shuffle) {
+      const map = shuffleMapRef.current
+      const currentMapIndex = map.indexOf(state.currentIndex)
+      if (currentMapIndex < map.length - 1) return map[currentMapIndex + 1]!
+      return state.repeat === 'all' ? map[0]! : null
+    }
+
+    if (state.currentIndex < state.queue.length - 1) return state.currentIndex + 1
+    return state.repeat === 'all' ? 0 : null
+  }, [state.queue.length, state.repeat, state.shuffle, state.currentIndex])
+
+  const getPreviousIndex = useCallback((): number | null => {
+    if (state.shuffle) {
+      const map = shuffleMapRef.current
+      const currentMapIndex = map.indexOf(state.currentIndex)
+      if (currentMapIndex > 0) return map[currentMapIndex - 1]!
+      return state.repeat === 'all' ? map[map.length - 1]! : null
+    }
+
+    if (state.currentIndex > 0) return state.currentIndex - 1
+    return state.repeat === 'all' ? state.queue.length - 1 : null
+  }, [state.shuffle, state.currentIndex, state.repeat, state.queue.length])
+
+  const handleTrackEnded = useCallback(() => {
+    if (state.repeat === 'one') {
+      const audio = audioRef.current
+      if (audio) {
+        audio.currentTime = 0
+        audio.play().catch(() => {})
+      }
+      return
+    }
+
+    const nextIndex = getNextIndex()
+    if (nextIndex !== null) {
+      dispatch({ type: 'SET_CURRENT_INDEX', index: nextIndex })
+    } else {
+      dispatch({ type: 'SET_PLAYBACK_STATE', state: 'ended' })
+    }
+  }, [state.repeat, getNextIndex])
+
   // Wire up audio events
   useEffect(() => {
     const audio = audioRef.current
@@ -234,70 +298,6 @@ export function PlayerProvider({ children }: { children: ReactNode }) {
       audio.removeEventListener('canplay', onCanPlay)
     }
   })
-
-  // Sync volume
-  useEffect(() => {
-    if (audioRef.current) {
-      audioRef.current.volume = state.muted ? 0 : state.volume
-    }
-  }, [state.volume, state.muted])
-
-  // Build shuffle map when queue / shuffle changes
-  useEffect(() => {
-    if (state.shuffle && state.queue.length > 0) {
-      const indices = state.queue.map((_, i) => i).filter((i) => i !== state.currentIndex)
-      // Fisher-Yates shuffle
-      for (let i = indices.length - 1; i > 0; i--) {
-        const j = Math.floor(Math.random() * (i + 1));
-        [indices[i], indices[j]] = [indices[j]!, indices[i]!]
-      }
-      shuffleMapRef.current = [state.currentIndex, ...indices]
-    }
-  }, [state.shuffle, state.queue.length, state.currentIndex])
-
-  const handleTrackEnded = useCallback(() => {
-    if (state.repeat === 'one') {
-      const audio = audioRef.current
-      if (audio) {
-        audio.currentTime = 0
-        audio.play().catch(() => {})
-      }
-      return
-    }
-
-    const nextIndex = getNextIndex()
-    if (nextIndex !== null) {
-      dispatch({ type: 'SET_CURRENT_INDEX', index: nextIndex })
-    } else {
-      dispatch({ type: 'SET_PLAYBACK_STATE', state: 'ended' })
-    }
-  }, [state.currentIndex, state.queue.length, state.repeat, state.shuffle])
-
-  function getNextIndex(): number | null {
-    if (state.queue.length <= 1 && state.repeat !== 'all') return null
-
-    if (state.shuffle) {
-      const map = shuffleMapRef.current
-      const currentMapIndex = map.indexOf(state.currentIndex)
-      if (currentMapIndex < map.length - 1) return map[currentMapIndex + 1]!
-      return state.repeat === 'all' ? map[0]! : null
-    }
-
-    if (state.currentIndex < state.queue.length - 1) return state.currentIndex + 1
-    return state.repeat === 'all' ? 0 : null
-  }
-
-  function getPreviousIndex(): number | null {
-    if (state.shuffle) {
-      const map = shuffleMapRef.current
-      const currentMapIndex = map.indexOf(state.currentIndex)
-      if (currentMapIndex > 0) return map[currentMapIndex - 1]!
-      return state.repeat === 'all' ? map[map.length - 1]! : null
-    }
-
-    if (state.currentIndex > 0) return state.currentIndex - 1
-    return state.repeat === 'all' ? state.queue.length - 1 : null
-  }
 
   const value = useMemo<PlayerContextValue>(() => ({
     state,
@@ -339,7 +339,7 @@ export function PlayerProvider({ children }: { children: ReactNode }) {
       audioRef.current?.pause()
       dispatch({ type: 'CLEAR_QUEUE' })
     },
-  }), [state, currentTrack])
+  }), [state, currentTrack, getNextIndex, getPreviousIndex])
 
   return (
     <PlayerContext.Provider value={value}>

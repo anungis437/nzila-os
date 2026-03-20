@@ -10,7 +10,6 @@ import Link from 'next/link'
 import { Card } from '@nzila/ui'
 import { listRightsDisputes, listSyncLicenses } from '@/lib/actions/rights-actions'
 import { listReleases } from '@/lib/actions/release-actions'
-import { StatusBadge } from '@/components'
 
 function disputeStatusBadge(status: string) {
   const map: Record<string, string> = {

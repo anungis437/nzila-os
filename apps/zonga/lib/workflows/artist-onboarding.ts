@@ -4,7 +4,7 @@
  * Lifecycle: application → verification → approval → active artist.
  * Emits audit events at each transition.
  */
-import type { Transition, TransitionResult } from './types'
+import type { Transition } from './types'
 import { validateTransition, attemptTransition, getAvailableTransitions } from './types'
 
 export type ArtistOnboardingStatus =

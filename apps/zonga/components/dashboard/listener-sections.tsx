@@ -127,7 +127,7 @@ export function ReleaseRow({ id, title, creatorName, releaseType, trackCount, pu
 // ── Queue View ───────────────────────────────────────────────────────────────
 
 export function QueueView() {
-  const { state, currentTrack, removeFromQueue } = usePlayer()
+  const { state, removeFromQueue } = usePlayer()
 
   if (state.queue.length === 0) return null
 

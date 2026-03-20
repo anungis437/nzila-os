@@ -15,7 +15,7 @@ function formatUSD(n: number): string {
   return formatCurrencyAmount(Math.round(n * 100), 'USD')
 }
 
-function formatNumber(n: number): string {
+function _formatNumber(n: number): string {
   return new Intl.NumberFormat('en').format(n)
 }
 

@@ -51,6 +51,8 @@ export default async function CatalogPage({
     ? assets.filter((a) => a.genre === params.genre)
     : assets
   const displayTotal = params.genre ? filteredAssets.length : total
+  const withCollaborators = filteredAssets.filter((a) => a.collaborators?.length).length
+  const languages = new Set(filteredAssets.map((asset) => asset.language).filter(Boolean))
 
   return (
     <div className="space-y-6">
@@ -58,7 +60,7 @@ export default async function CatalogPage({
       <div className="flex items-center justify-between">
         <div>
           <h1 className="text-2xl font-bold text-navy">Catalog</h1>
-          <p className="text-gray-500 mt-1">{displayTotal} asset{displayTotal !== 1 ? 's' : ''} in your library</p>
+          <p className="text-gray-500 mt-1">{displayTotal} asset{displayTotal !== 1 ? 's' : ''} in your library{withCollaborators > 0 && ` · ${withCollaborators} with collaborators`}{languages.size > 0 && ` · ${languages.size} language${languages.size !== 1 ? 's' : ''}`}</p>
         </div>
         <Link
           href="catalog/upload"

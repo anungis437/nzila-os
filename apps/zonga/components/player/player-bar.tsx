@@ -6,6 +6,7 @@
  */
 'use client'
 
+import Image from 'next/image'
 import { usePlayer } from './player-context'
 
 function formatTime(seconds: number): string {
@@ -60,12 +61,13 @@ export function PlayerBar() {
       <div className="mx-auto flex max-w-screen-2xl items-center gap-4 px-4 py-2">
         {/* Track Info */}
         <div className="flex items-center gap-3 min-w-0 w-1/4">
-          <div className="h-10 w-10 flex-shrink-0 rounded bg-white/10 flex items-center justify-center overflow-hidden">
+          <div className="h-10 w-10 flex-shrink-0 rounded bg-white/10 flex items-center justify-center overflow-hidden relative">
             {currentTrack.coverArtUrl ? (
-              <img
+              <Image
                 src={currentTrack.coverArtUrl}
                 alt=""
-                className="h-full w-full object-cover"
+                fill
+                className="object-cover"
               />
             ) : (
               <span className="text-lg">🎵</span>
