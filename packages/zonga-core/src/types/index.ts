@@ -922,7 +922,7 @@ export interface FraudReviewFlag {
   readonly orgId: string
   readonly signalType: FraudSignalType
   readonly entityType: string
-  readonly entityId: string
+  readonly targetEntityId: string
   readonly severity: 'low' | 'medium' | 'high' | 'critical'
   readonly score: number
   readonly explanation: string

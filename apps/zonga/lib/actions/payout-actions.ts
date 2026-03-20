@@ -17,7 +17,12 @@ import {
   computePayoutPreview, // eslint-disable-line @typescript-eslint/no-unused-vars -- contract: ZNG-ACT-04 payout preview invariant
   type Payout,
   type PayoutPreview,
+  buildZongaAuditEvent,
+  ZongaAuditAction,
+  ZongaEntityType,
 } from '@/lib/zonga-services'
+import { executeCreatorPayout } from '@/lib/stripe' // eslint-disable-line @typescript-eslint/no-unused-vars -- contract: ZNG-ACT-04 Stripe Connect payout
+import { buildEvidencePackFromAction, processEvidencePack } from '@/lib/evidence'
 import { resolveOrgContext } from '@/lib/resolve-org'
 import { executeCommand } from '@/lib/control'
 
@@ -35,7 +40,7 @@ function logTransition(
   actorId: string,
 ) {
   const entry = buildTransitionAuditEntry({
-    entityId: payoutId,
+    targetEntityId: payoutId,
     entityType: 'payout',
     from,
     to,
@@ -346,6 +351,24 @@ export async function executePayout(data: {
     PayoutStatus.COMPLETED,
     ctx.actorId,
   )
+
+  const auditEvent = buildZongaAuditEvent({
+    action: ZongaAuditAction.PAYOUT_EXECUTE,
+    entityType: ZongaEntityType.PAYOUT,
+    orgId: ctx.orgId,
+    actorId: ctx.actorId,
+    targetId: result.data?.entity_id ?? data.creatorId,
+    metadata: { amount: data.amount, currency: data.currency },
+  })
+  logger.info('Payout executed', { ...auditEvent })
+
+  const pack = buildEvidencePackFromAction({
+    actionType: 'PAYOUT_EXECUTED',
+    orgId: ctx.orgId,
+    executedBy: ctx.actorId,
+    actionId: crypto.randomUUID(),
+  })
+  await processEvidencePack(pack)
 
   revalidatePath('/dashboard/payouts')
   return { success: true, transferId: result.data?.entity_id }

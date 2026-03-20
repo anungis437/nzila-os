@@ -526,7 +526,7 @@ export type CreateExportJobInput = z.infer<typeof CreateExportJobSchema>
 export const CreateFraudReviewSchema = z.object({
   signalType: z.enum(enumValues(FraudSignalType)),
   entityType: z.enum(['creator', 'asset', 'listener', 'payout', 'event']),
-  entityId: z.string().uuid(),
+  targetEntityId: z.string().uuid(),
   severity: z.enum(['low', 'medium', 'high', 'critical']),
   score: z.number().min(0).max(100),
   explanation: z.string().min(5).max(2000),

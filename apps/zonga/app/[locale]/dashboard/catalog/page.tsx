@@ -137,7 +137,13 @@ export default async function CatalogPage({
       ) : (
         <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 xl:grid-cols-4 gap-4">
           {filteredAssets.map((asset) => (
-            <CatalogCard key={asset.id} asset={asset} basePath="catalog" />
+            <CatalogCard
+              key={asset.id}
+              asset={asset}
+              basePath="catalog"
+              showCollaborators={!!asset.collaborators?.length}
+              showLanguage={!!asset.language}
+            />
           ))}
         </div>
       )}

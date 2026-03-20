@@ -15,7 +15,11 @@ import { logger } from '@/lib/logger'
 import {
   ReleaseStatus,
   type Release,
+  buildZongaAuditEvent,
+  ZongaAuditAction,
+  ZongaEntityType,
 } from '@/lib/zonga-services'
+import { buildEvidencePackFromAction, processEvidencePack } from '@/lib/evidence'
 import { runPrediction } from '@/lib/ml-client'
 import { executeCommand } from '@/lib/control'
 
@@ -106,8 +110,28 @@ export async function createRelease(data: {
     return { success: false, error: result.error }
   }
 
+  const releaseId = result.data?.entity_id
+
+  const auditEvent = buildZongaAuditEvent({
+    action: ZongaAuditAction.RELEASE_PUBLISH,
+    entityType: ZongaEntityType.RELEASE,
+    orgId: ctx.orgId,
+    actorId: ctx.actorId,
+    targetId: releaseId,
+    metadata: { title: data.title, type: releaseType },
+  })
+  logger.info('Release created', { ...auditEvent })
+
+  const pack = buildEvidencePackFromAction({
+    actionType: 'RELEASE_CREATED',
+    orgId: ctx.orgId,
+    executedBy: ctx.actorId,
+    actionId: crypto.randomUUID(),
+  })
+  await processEvidencePack(pack)
+
   revalidatePath('/dashboard/releases')
-  return { success: true, releaseId: result.data?.entity_id }
+  return { success: true, releaseId }
 }
 
 export async function transitionReleaseStatus(
@@ -126,6 +150,9 @@ export async function transitionReleaseStatus(
   if (!result.success) {
     return { success: false, error: result.error }
   }
+
+  // Audit: record 'release.status_changed' for all status transitions
+  logger.info('release.status_changed', { releaseId, targetStatus, orgId: ctx.orgId, actorId: ctx.actorId })
 
   revalidatePath('/dashboard/releases')
   return { success: true }

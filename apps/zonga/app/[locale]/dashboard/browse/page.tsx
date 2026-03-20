@@ -7,6 +7,7 @@
  */
 import { auth } from '@clerk/nextjs/server'
 import { redirect } from 'next/navigation'
+import { Card } from '@nzila/ui'
 import { listCatalogAssets } from '@/lib/actions/catalog-actions'
 import { listEvents } from '@/lib/actions/event-actions'
 import { listPlaylists } from '@/lib/actions/playlist-actions'
@@ -30,12 +31,16 @@ export default async function BrowsePage({
   ])
 
   return (
-    <BrowseGrid
-      locale={locale}
-      trending={trending}
-      assets={publishedAssets.assets}
-      playlists={playlists.playlists}
-      events={upcomingEvents.events}
-    />
+    <Card>
+      <div className="text-navy">
+        <BrowseGrid
+          locale={locale}
+          trending={trending}
+          assets={publishedAssets.assets}
+          playlists={playlists.playlists}
+          events={upcomingEvents.events}
+        />
+      </div>
+    </Card>
   )
 }
