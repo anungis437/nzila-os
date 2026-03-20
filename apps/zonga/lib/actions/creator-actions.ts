@@ -13,14 +13,9 @@ import { sql } from 'drizzle-orm'
 import { revalidatePath } from 'next/cache'
 import { logger } from '@/lib/logger'
 import {
-  CreateCreatorSchema,
-  buildZongaAuditEvent,
-  ZongaAuditAction,
-  ZongaEntityType,
-  CreatorStatus,
   type Creator,
 } from '@/lib/zonga-services'
-import { buildEvidencePackFromAction, processEvidencePack } from '@/lib/evidence'
+import { executeCommand } from '@/lib/control'
 
 export interface CreatorListResult {
   creators: Creator[]
@@ -79,59 +74,21 @@ export async function registerCreator(data: {
 }): Promise<{ success: boolean; creatorId?: string; error?: unknown }> {
   const ctx = await resolveOrgContext()
 
-  const parsed = CreateCreatorSchema.safeParse(data)
-  if (!parsed.success) {
-    logger.warn('registerCreator validation failed', { errors: parsed.error.flatten().fieldErrors })
-    return { success: false, error: parsed.error.flatten().fieldErrors }
+  const result = await executeCommand({
+    type: 'register_creator' as const,
+    name: data.name,
+    email: data.email,
+    genre: data.genre,
+    country: data.country,
+    actor_id: ctx.actorId,
+  })
+
+  if (!result.success) {
+    return { success: false, error: result.error }
   }
 
-  try {
-    const creatorId = crypto.randomUUID()
-
-    // Write to domain table
-    await platformDb.execute(
-      sql`INSERT INTO zonga_creators (id, org_id, user_id, display_name, status, genre, country)
-      VALUES (${creatorId}, ${ctx.orgId}, ${ctx.actorId}, ${data.name},
-        ${CreatorStatus.ACTIVE}, ${data.genre ?? null}, ${data.country ?? null})`,
-    )
-
-    // Write creator account
-    await platformDb.execute(
-      sql`INSERT INTO zonga_creator_accounts (org_id, creator_id, email, onboarding_status)
-      VALUES (${ctx.orgId}, ${creatorId}, ${data.email}, 'registered')`,
-    )
-
-    // Supplementary audit trail
-    await platformDb.execute(
-      sql`INSERT INTO audit_log (action, actor_id, entity_type, entity_id, metadata, org_id)
-      VALUES ('creator.registered', ${ctx.actorId}, 'creator', ${creatorId},
-        ${JSON.stringify({ name: data.name, email: data.email })}::jsonb, ${ctx.orgId})`,
-    )
-
-    const auditEvent = buildZongaAuditEvent({
-      action: ZongaAuditAction.CREATOR_ACTIVATE,
-      entityType: ZongaEntityType.CREATOR,
-      orgId: creatorId,
-      actorId: ctx.actorId,
-      targetId: creatorId,
-      metadata: { name: data.name },
-    })
-    logger.info('Creator registered', { ...auditEvent })
-
-    const pack = buildEvidencePackFromAction({
-      actionType: 'CREATOR_REGISTERED',
-      orgId: creatorId,
-      executedBy: ctx.actorId,
-      actionId: crypto.randomUUID(),
-    })
-    await processEvidencePack(pack)
-
-    revalidatePath('/dashboard/creators')
-    return { success: true, creatorId }
-  } catch (error) {
-    logger.error('registerCreator failed', { error })
-    return { success: false }
-  }
+  revalidatePath('/dashboard/creators')
+  return { success: true, creatorId: result.data?.entity_id }
 }
 
 export async function getCreatorDetail(creatorId: string): Promise<{

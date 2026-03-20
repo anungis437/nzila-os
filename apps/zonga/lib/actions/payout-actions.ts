@@ -11,21 +11,14 @@ import { sql } from 'drizzle-orm'
 import { revalidatePath } from 'next/cache'
 import { logger } from '@/lib/logger'
 import {
-  buildZongaAuditEvent,
-  ZongaAuditAction,
-  ZongaEntityType,
   PayoutStatus,
-  PayoutRail,
   ZongaCurrency,
   computePayoutPreview, // eslint-disable-line @typescript-eslint/no-unused-vars -- contract: ZNG-ACT-04 payout preview invariant
-  PayoutPreviewRequestSchema,
   type Payout,
   type PayoutPreview,
 } from '@/lib/zonga-services'
-import { executeCreatorPayout } from '@/lib/stripe'
-import { buildEvidencePackFromAction, processEvidencePack } from '@/lib/evidence'
-import { logTransition } from '@/lib/commerce-telemetry'
 import { resolveOrgContext } from '@/lib/resolve-org'
+import { executeCommand } from '@/lib/control'
 
 export interface PayoutListResult {
   payouts: Payout[]
@@ -314,95 +307,20 @@ export async function executePayout(data: {
 }): Promise<{ success: boolean; transferId?: string; error?: unknown }> {
   const ctx = await resolveOrgContext()
 
-  const parsed = PayoutPreviewRequestSchema.safeParse({
-    creatorId: data.creatorId,
-    grossAmount: data.amount,
-    currency: data.currency ?? 'USD',
+  const result = await executeCommand({
+    type: 'execute_payout' as const,
+    creator_id: data.creatorId,
+    amount: data.amount,
+    currency: data.currency,
+    payout_rail: data.payoutRail,
+    creator_name: data.creatorName,
+    actor_id: ctx.actorId,
   })
-  if (!parsed.success) {
-    logger.warn('executePayout validation failed', { errors: parsed.error.flatten().fieldErrors })
-    return { success: false, error: parsed.error.flatten().fieldErrors }
+
+  if (!result.success) {
+    return { success: false, error: result.error }
   }
 
-  try {
-    logger.info('Executing creator payout', {
-      creatorId: data.creatorId,
-      amount: data.amount,
-      actorId: ctx.actorId,
-      orgId: ctx.orgId,
-    })
-
-    const payoutCurrency = data.currency?.toLowerCase() ?? 'usd'
-    const payoutRail = (data.payoutRail ?? PayoutRail.STRIPE_CONNECT) as PayoutRail
-
-    const result = await executeCreatorPayout({
-      creatorConnectAccountId: data.creatorId,
-      amountCents: Math.round(data.amount * 100),
-      currency: payoutCurrency,
-      payoutRail,
-    })
-
-    const payoutId = crypto.randomUUID()
-    const settledCurrency = result?.settledCurrency ?? payoutCurrency.toUpperCase()
-
-    // ── Write to domain table (org-scoped) ──
-    await platformDb.execute(
-      sql`INSERT INTO zonga_payouts
-        (id, org_id, creator_id, creator_name, amount, currency, payout_rail, status, stripe_transfer_id, created_by, created_at)
-      VALUES (
-        ${payoutId}, ${ctx.orgId}, ${data.creatorId}, ${data.creatorName ?? null},
-        ${data.amount}, ${settledCurrency}, ${payoutRail},
-        ${PayoutStatus.COMPLETED}, ${result?.transferId ?? null},
-        ${ctx.actorId}, NOW()
-      )`,
-    )
-
-    // ── Audit trail (audit-only, org-scoped) ──
-    await platformDb.execute(
-      sql`INSERT INTO audit_log (action, actor_id, entity_type, org_id, metadata)
-      VALUES ('payout.executed', ${ctx.actorId}, 'payout', ${payoutId},
-        ${JSON.stringify({
-          orgId: ctx.orgId,
-          creatorId: data.creatorId,
-          creatorName: data.creatorName,
-          amount: data.amount,
-          currency: settledCurrency,
-          payoutRail,
-          status: PayoutStatus.COMPLETED,
-          stripeTransferId: result?.transferId ?? null,
-        })}::jsonb)`,
-    )
-
-    const auditEvent = buildZongaAuditEvent({
-      action: ZongaAuditAction.PAYOUT_EXECUTE,
-      entityType: ZongaEntityType.PAYOUT,
-      orgId: payoutId,
-      actorId: ctx.actorId,
-      targetId: payoutId,
-      metadata: { amount: data.amount, creatorId: data.creatorId, orgId: ctx.orgId },
-    })
-    logger.info('Payout executed', { ...auditEvent })
-
-    logTransition(
-      { orgId: ctx.orgId },
-      'payout',
-      PayoutStatus.PENDING,
-      PayoutStatus.COMPLETED,
-      true,
-    )
-
-    const pack = buildEvidencePackFromAction({
-      actionType: 'PAYOUT_EXECUTED',
-      orgId: payoutId,
-      executedBy: ctx.actorId,
-      actionId: crypto.randomUUID(),
-    })
-    await processEvidencePack(pack)
-
-    revalidatePath('/dashboard/payouts')
-    return { success: true, transferId: result?.transferId }
-  } catch (error) {
-    logger.error('executePayout failed', { error })
-    return { success: false }
-  }
+  revalidatePath('/dashboard/payouts')
+  return { success: true, transferId: result.data?.entity_id }
 }

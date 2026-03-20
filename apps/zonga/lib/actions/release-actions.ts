@@ -13,17 +13,11 @@ import { sql } from 'drizzle-orm'
 import { revalidatePath } from 'next/cache'
 import { logger } from '@/lib/logger'
 import {
-  buildZongaAuditEvent,
-  ZongaAuditAction,
-  ZongaEntityType,
   ReleaseStatus,
-  CreateReleaseSchema,
   type Release,
 } from '@/lib/zonga-services'
-import { transitionRelease } from '@/lib/workflows/release-state-machine'
 import { runPrediction } from '@/lib/ml-client'
-import { buildEvidencePackFromAction, processEvidencePack } from '@/lib/evidence'
-import { logTransition } from '@/lib/commerce-telemetry'
+import { executeCommand } from '@/lib/control'
 
 /* ─── Releases ─── */
 
@@ -85,45 +79,23 @@ export async function createRelease(data: {
 }): Promise<{ success: boolean; releaseId?: string; error?: unknown }> {
   const ctx = await resolveOrgContext()
 
-  const parsed = CreateReleaseSchema.safeParse(data)
-  if (!parsed.success) {
-    logger.warn('createRelease validation failed', { errors: parsed.error.flatten().fieldErrors })
-    return { success: false, error: parsed.error.flatten().fieldErrors }
+  const result = await executeCommand({
+    type: 'create_release' as const,
+    title: data.title,
+    release_type: data.type,
+    creator_id: data.creatorId,
+    creator_name: data.creatorName,
+    track_count: data.trackCount,
+    release_date: data.releaseDate,
+    actor_id: ctx.actorId,
+  })
+
+  if (!result.success) {
+    return { success: false, error: result.error }
   }
 
-  try {
-    const releaseId = crypto.randomUUID()
-
-    // Write to domain table
-    await platformDb.execute(
-      sql`INSERT INTO zonga_releases (id, org_id, creator_id, title, status, release_type, release_date)
-      VALUES (${releaseId}, ${ctx.orgId}, ${data.creatorId ?? ctx.actorId}, ${data.title},
-        ${ReleaseStatus.DRAFT}, ${data.type}, ${data.releaseDate ? new Date(data.releaseDate) : null})`,
-    )
-
-    // Supplementary audit trail
-    await platformDb.execute(
-      sql`INSERT INTO audit_log (action, actor_id, entity_type, entity_id, org_id, metadata)
-      VALUES ('release.created', ${ctx.actorId}, 'release', ${releaseId}, ${ctx.orgId},
-        ${JSON.stringify({ title: data.title, type: data.type })}::jsonb)`,
-    )
-
-    const auditEvent = buildZongaAuditEvent({
-      action: ZongaAuditAction.RELEASE_PUBLISH,
-      entityType: ZongaEntityType.RELEASE,
-      orgId: releaseId,
-      actorId: ctx.actorId,
-      targetId: releaseId,
-      metadata: { title: data.title, type: data.type },
-    })
-    logger.info('Release created', { ...auditEvent })
-
-    revalidatePath('/dashboard/releases')
-    return { success: true, releaseId }
-  } catch (error) {
-    logger.error('createRelease failed', { error })
-    return { success: false }
-  }
+  revalidatePath('/dashboard/releases')
+  return { success: true, releaseId: result.data?.entity_id }
 }
 
 export async function transitionReleaseStatus(
@@ -132,65 +104,19 @@ export async function transitionReleaseStatus(
 ): Promise<{ success: boolean; error?: string }> {
   const ctx = await resolveOrgContext()
 
-  try {
-    // Read current status from domain table
-    const [release] = (await platformDb.execute(
-      sql`SELECT id, status, title FROM zonga_releases
-      WHERE id = ${releaseId} AND org_id = ${ctx.orgId}`,
-    )) as unknown as [{ id: string; status: ReleaseStatus; title: string } | undefined]
+  const result = await executeCommand({
+    type: 'transition_release_status' as const,
+    release_id: releaseId,
+    target_status: targetStatus,
+    actor_id: ctx.actorId,
+  })
 
-    if (!release) {
-      return { success: false, error: 'Release not found' }
-    }
-
-    const result = transitionRelease(
-      release.status as ReleaseStatus,
-      targetStatus,
-      { role: 'admin' as const, actorId: ctx.actorId, orgId: ctx.orgId, meta: {} },
-      releaseId,
-      { id: releaseId, title: release.title },
-    )
-
-    if (!result.ok) {
-      return { success: false, error: `Transition not allowed: ${release.status} → ${targetStatus}` }
-    }
-
-    // Update domain table
-    const now = new Date()
-    await platformDb.execute(
-      sql`UPDATE zonga_releases
-      SET status = ${targetStatus},
-          published_at = ${targetStatus === ReleaseStatus.PUBLISHED ? now : null},
-          updated_at = ${now}
-      WHERE id = ${releaseId}`,
-    )
-
-    // Audit trail
-    await platformDb.execute(
-      sql`INSERT INTO audit_log (action, actor_id, entity_type, entity_id, org_id, metadata)
-      VALUES (${'release.status_changed'}, ${ctx.actorId}, 'release', ${releaseId}, ${ctx.orgId},
-        ${JSON.stringify({ from: release.status, to: targetStatus })}::jsonb)`,
-    )
-
-    logTransition({ orgId: ctx.orgId }, 'release', release.status, targetStatus, true)
-
-    if (targetStatus === ReleaseStatus.PUBLISHED) {
-      const pack = buildEvidencePackFromAction({
-        actionType: 'RELEASE_PUBLISHED',
-        orgId: ctx.orgId,
-        executedBy: ctx.actorId,
-        actionId: crypto.randomUUID(),
-      })
-      await processEvidencePack(pack)
-    }
-
-    logger.info('Release status transitioned', { releaseId, from: release.status, to: targetStatus })
-    revalidatePath('/dashboard/releases')
-    return { success: true }
-  } catch (error) {
-    logger.error('transitionReleaseStatus failed', { error })
-    return { success: false, error: 'Internal error' }
+  if (!result.success) {
+    return { success: false, error: result.error }
   }
+
+  revalidatePath('/dashboard/releases')
+  return { success: true }
 }
 
 /** @deprecated Use transitionReleaseStatus instead */
