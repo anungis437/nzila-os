@@ -17,6 +17,7 @@
     "@nzila/db": "workspace:*",
     "@nzila/os-core": "workspace:*",
     "@nzila/ui": "workspace:*",
+    "@nzila/zonga-control-plane": "workspace:*",
     "@nzila/zonga-core": "workspace:*",
     "@nzila/ai-sdk": "workspace:*",
     "@nzila/ml-sdk": "workspace:*",

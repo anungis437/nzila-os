@@ -12,3 +12,15 @@ import './register-handlers'
 export { executeCommand } from './control-adapter'
 export type { ActionResult } from './control-adapter'
 export type { CommandContext, CommandResult, CommandHandler, CommandError } from './types'
+
+// Control plane bridge
+export {
+  gatePayout,
+  enforceEconomics,
+  validateGovernance,
+  executeAdminOp,
+  runInvariantCheck,
+  afterCommandSuccess,
+  emitCommandEvent,
+  toControlPlaneContext,
+} from './control-plane-bridge'
