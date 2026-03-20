@@ -41,7 +41,7 @@ function collectFiles(dir: string, ext: string[]): string[] {
           'platform-semantic-search', 'platform-reasoning-engine',
           'platform-decision-graph', 'platform-data-fabric',
           'platform-entity-graph', 'platform-context-orchestrator',
-          'platform-governed-ai',
+          'platform-governed-ai', 'zonga-control-plane',
         ].includes(e.name)) continue
         stack.push(full)
       } else if (e.isFile() && ext.some(x => e.name.endsWith(x))) {
