@@ -4,6 +4,7 @@ import { getLocale } from 'next-intl/server'
 import {
   ArrowLeftIcon,
   ArrowPathIcon,
+  CheckCircleIcon,
   PrinterIcon,
   DocumentDuplicateIcon,
 } from '@heroicons/react/24/outline'

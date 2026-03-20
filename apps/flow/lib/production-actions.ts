@@ -200,10 +200,6 @@ export async function markOrderShippedAction(
     }
   }
 }
-      error: error instanceof Error ? error.message : 'Failed to mark order as shipped',
-    }
-  }
-}
 
 export async function completeOrderAction(
   orderId: string,

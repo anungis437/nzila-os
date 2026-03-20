@@ -11,8 +11,6 @@ import {
   updatePurchaseOrderLine,
   deletePurchaseOrderLine,
   deletePurchaseOrder,
-  sendPurchaseOrder,
-  acknowledgePurchaseOrder,
   generatePORef,
 } from '@nzila/commerce-db'
 import { getDbContext, getReadContext } from '@/lib/clerk-org-resolver'
