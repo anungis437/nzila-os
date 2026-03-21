@@ -41,6 +41,7 @@ export default defineConfig({
       'packages/zonga-events',
       'packages/zonga-rights',
       'packages/zonga-payments',
+      'packages/zonga-growth',
       'packages/zonga-intelligence',
       'packages/zonga-control-plane',
       'packages/os-core',
