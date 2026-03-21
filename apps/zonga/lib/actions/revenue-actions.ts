@@ -19,6 +19,8 @@ import {
 } from '@/lib/zonga-services'
 import { buildEvidencePackFromAction, processEvidencePack } from '@/lib/evidence'
 import { resolveOrgContext } from '@/lib/resolve-org'
+import { getCreatorPlan } from '@/lib/guards/plan-queries'
+import { guardCreatorFeature } from '@/lib/guards/subscription-guards'
 
 export interface RevenueOverview {
   totalRevenue: number
@@ -158,6 +160,14 @@ export async function getRevenueByCreator(): Promise<
   Array<{ creatorId: string; creatorName: string; total: number; events: number }>
 > {
   const ctx = await resolveOrgContext()
+
+  // S2: Per-creator revenue breakdown requires label plan (advanced_analytics)
+  const creatorPlan = await getCreatorPlan(ctx.actorId, ctx.orgId)
+  const gate = guardCreatorFeature(creatorPlan.plan, 'advanced_analytics')
+  if (!gate.passed) {
+    logger.info('getRevenueByCreator blocked — label plan required', { plan: creatorPlan.plan })
+    return []
+  }
 
   try {
     const rows = (await platformDb.execute(

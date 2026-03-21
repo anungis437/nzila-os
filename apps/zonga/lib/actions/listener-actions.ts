@@ -10,6 +10,8 @@ import { resolveOrgContext } from '@/lib/resolve-org'
 import { platformDb } from '@nzila/db/platform'
 import { sql } from 'drizzle-orm'
 import { logger } from '@/lib/logger'
+import { getListenerPlan } from '@/lib/guards/plan-queries'
+import { isListenerPremium } from '@/lib/guards/subscription-guards'
 
 /* ─── Types ─── */
 
@@ -19,6 +21,8 @@ export interface ListenerProfile {
   email?: string
   city?: string
   country?: string
+  plan?: string
+  subscriptionStatus?: string
   followingCount: number
   favoritesCount: number
   createdAt?: Date
@@ -75,6 +79,8 @@ export async function getListenerProfile(listenerId?: string): Promise<ListenerP
         l.email,
         l.city,
         l.country,
+        l.plan,
+        l.subscription_status as "subscriptionStatus",
         l.created_at as "createdAt",
         COALESCE((SELECT COUNT(*) FROM zonga_listener_follows WHERE listener_id = l.id AND org_id = ${ctx.orgId}), 0) as "followingCount",
         COALESCE((SELECT COUNT(*) FROM zonga_listener_favorites WHERE listener_id = l.id AND org_id = ${ctx.orgId}), 0) as "favoritesCount"
@@ -277,6 +283,11 @@ export async function discoverReleases(opts?: {
   const ctx = await resolveOrgContext()
   const limit = opts?.limit ?? 20
 
+  // S1: Free listeners don't see exclusive releases
+  const planInfo = await getListenerPlan(ctx.actorId, ctx.orgId)
+  const premium = isListenerPremium(planInfo.plan, planInfo.subscriptionStatus)
+  const exclusiveFilter = premium ? sql`` : sql` AND r.exclusive IS NOT TRUE`
+
   try {
     const rows = (await platformDb.execute(
       sql`SELECT
@@ -290,6 +301,7 @@ export async function discoverReleases(opts?: {
       FROM zonga_releases r
       LEFT JOIN zonga_creators c ON c.id = r.creator_id
       WHERE r.org_id = ${ctx.orgId} AND r.status = 'published'
+      ${exclusiveFilter}
       ORDER BY r.published_at DESC NULLS LAST
       LIMIT ${limit}`,
     )) as unknown as { rows: DiscoverRelease[] }

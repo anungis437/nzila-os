@@ -1,8 +1,8 @@
 /**
  * Zonga — Marketing Landing Page
  * ───────────────────────────────
- * Premium, Nzila-quality public site celebrating African music
- * and creators with scroll-triggered reveals and rich imagery.
+ * Premium, Nzila-quality public site celebrating African music.
+ * Speaks to ALL stakeholders: artists, labels, listeners, event organizers.
  */
 
 export const dynamic = 'force-dynamic';
@@ -14,15 +14,50 @@ import ScrollReveal from '@/components/public/scroll-reveal';
 
 export const metadata: Metadata = {
   title: 'Zonga — Music Without Borders',
-  description: 'The fair-share music platform — transparent royalties, instant payouts, and full creative ownership for African artists and creators.',
+  description: 'The fair-share African music platform — for artists, labels, listeners, and event organizers. Transparent royalties, instant payouts, and a vibrant music ecosystem.',
   openGraph: {
     title: 'Zonga — Music Without Borders',
-    description: 'Transparent royalties, instant payouts, and full creative ownership for African artists and creators.',
+    description: 'The fair-share African music platform for artists, labels, listeners, and event organizers.',
     images: [{ url: 'https://images.unsplash.com/photo-1493225457124-a3eb161ffa5f?w=1200&h=630&fit=crop&q=80', width: 1200, height: 630, alt: 'African musician performing — Zonga music platform' }],
   },
 };
 
-const features = [
+const stakeholderPaths = [
+  {
+    title: 'For Artists',
+    description: 'Distribute your music, earn 85% of revenue, and own your masters — with instant payouts to mobile money, bank, or crypto.',
+    icon: '🎤',
+    href: '/sign-up',
+    cta: 'Start Distributing',
+    highlights: ['85% revenue share', 'Instant mobile money payouts', 'Own your masters'],
+  },
+  {
+    title: 'For Labels',
+    description: 'Manage rosters, automate royalty splits, and scale distribution across the continent — with full compliance and reporting.',
+    icon: '🏢',
+    href: '/for-labels',
+    cta: 'Learn More',
+    highlights: ['Multi-artist dashboard', 'Automated royalty splits', 'Compliance + reporting'],
+  },
+  {
+    title: 'For Listeners',
+    description: 'Discover the best of African music — Afrobeats, Amapiano, Highlife, Bongo, and more. Follow artists. Attend live events.',
+    icon: '🎧',
+    href: '/artists',
+    cta: 'Explore Music',
+    highlights: ['Curated playlists', 'Follow your favorites', 'Live event access'],
+  },
+  {
+    title: 'For Event Organizers',
+    description: 'Sell tickets, manage events, and connect with fans — powered by the same platform artists already trust.',
+    icon: '🎪',
+    href: '/events',
+    cta: 'Browse Events',
+    highlights: ['Ticketing built-in', 'Multi-tier pricing', 'Fan engagement tools'],
+  },
+];
+
+const platformFeatures = [
   {
     title: 'Fair Revenue Split',
     description: 'Transparent royalty calculations with real-time breakdown by stream, download, licensing, sync, and more.',
@@ -30,7 +65,7 @@ const features = [
   },
   {
     title: 'Instant Payouts',
-    description: 'Request payouts anytime. No 90-day holds, no black-box deductions — just your money, fast.',
+    description: 'Request payouts anytime via Orange Money, M-Pesa, MTN MoMo, Flutterwave, or bank transfer. No 90-day holds.',
     icon: '⚡',
   },
   {
@@ -50,9 +85,18 @@ const features = [
   },
   {
     title: 'Audience Analytics',
-    description: 'Deep listener analytics by geography, demographics, and trends. Know your audience.',
+    description: 'Deep listener analytics by geography, demographics, and trends. Know your audience across the continent.',
     icon: '📊',
   },
+];
+
+const regions = [
+  { name: 'West Africa', genres: 'Afrobeats · Highlife · Jùjú', flag: '🇳🇬' },
+  { name: 'East Africa', genres: 'Bongo Flava · Benga · Taarab', flag: '🇰🇪' },
+  { name: 'Southern Africa', genres: 'Amapiano · Kwaito · Maskandi', flag: '🇿🇦' },
+  { name: 'Central Africa', genres: 'Soukous · Ndombolo · Rumba', flag: '🇨🇩' },
+  { name: 'North Africa', genres: 'Raï · Gnawa · Chaabi', flag: '🇲🇦' },
+  { name: 'Diaspora', genres: 'Afro-House · Afro-R&B · Afrofusion', flag: '🌍' },
 ];
 
 export default function HomePage() {
@@ -80,15 +124,15 @@ export default function HomePage() {
 
           <ScrollReveal delay={0.1}>
             <h1 className="text-5xl md:text-7xl lg:text-8xl font-bold text-white mb-6 leading-tight">
-              Your Music,<br />
-              <span className="gradient-text">Your Revenue</span>
+              Music Without<br />
+              <span className="gradient-text">Borders</span>
             </h1>
           </ScrollReveal>
 
           <ScrollReveal delay={0.2}>
             <p className="text-xl md:text-2xl text-gray-300 mb-10 max-w-3xl">
-              The fair-share music platform — transparent royalties, instant payouts,
-              and full creative ownership for African artists and creators.
+              The platform where African artists earn fairly, labels scale effortlessly,
+              fans discover authentically, and events come alive.
             </p>
           </ScrollReveal>
 
@@ -98,19 +142,18 @@ export default function HomePage() {
                 href="/sign-up"
                 className="inline-flex items-center justify-center px-8 py-4 bg-electric text-white font-bold rounded-xl hover:bg-blue-700 transition-all text-lg shadow-lg shadow-electric/30 btn-press"
               >
-                Start Distributing
+                Join Zonga
               </Link>
               <Link
-                href="/for-labels"
+                href="/artists"
                 className="inline-flex items-center justify-center px-8 py-4 bg-white/10 backdrop-blur text-white font-bold rounded-xl border border-white/20 hover:bg-white/20 transition-all text-lg btn-press"
               >
-                For Labels
+                Explore Music
               </Link>
             </div>
           </ScrollReveal>
         </div>
 
-        {/* Scroll indicator */}
         <div className="absolute bottom-8 left-1/2 -translate-x-1/2 z-10">
           <div className="w-6 h-10 rounded-full border-2 border-white/30 flex items-start justify-center p-1.5">
             <div className="w-1.5 h-3 rounded-full bg-white/60 animate-bounce" />
@@ -144,8 +187,53 @@ export default function HomePage() {
         </div>
       </section>
 
-      {/* ═══════════════════════ FEATURES ═══════════════════════ */}
+      {/* ═══════════════════════ STAKEHOLDER PATHS ═══════════════════════ */}
       <section className="py-24 px-4 md:px-6 bg-white">
+        <div className="max-w-7xl mx-auto">
+          <ScrollReveal>
+            <div className="text-center mb-16">
+              <span className="inline-block px-4 py-1.5 text-xs font-semibold tracking-widest uppercase rounded-full bg-electric/10 text-electric mb-4">
+                For Everyone in Music
+              </span>
+              <h2 className="text-3xl md:text-5xl font-bold text-navy mb-4">
+                One Platform, <span className="text-electric">Every Role</span>
+              </h2>
+              <p className="text-lg text-gray-600 max-w-2xl mx-auto">
+                Whether you create, curate, listen, or organize — Zonga is built for you.
+              </p>
+            </div>
+          </ScrollReveal>
+
+          <div className="grid md:grid-cols-2 gap-8">
+            {stakeholderPaths.map((path, i) => (
+              <ScrollReveal key={path.title} delay={i * 0.1}>
+                <div className="glass-card-light rounded-2xl p-8 hover-lift h-full flex flex-col">
+                  <div className="text-4xl mb-4">{path.icon}</div>
+                  <h3 className="text-2xl font-bold text-navy mb-3">{path.title}</h3>
+                  <p className="text-gray-600 leading-relaxed mb-6">{path.description}</p>
+                  <ul className="space-y-2 mb-8 flex-1">
+                    {path.highlights.map((h) => (
+                      <li key={h} className="flex items-center gap-2 text-sm text-gray-700">
+                        <div className="w-1.5 h-1.5 rounded-full bg-electric shrink-0" />
+                        {h}
+                      </li>
+                    ))}
+                  </ul>
+                  <Link
+                    href={path.href}
+                    className="inline-flex items-center justify-center px-6 py-3 bg-navy text-white font-semibold rounded-xl hover:bg-navy-light transition-all text-sm btn-press"
+                  >
+                    {path.cta} →
+                  </Link>
+                </div>
+              </ScrollReveal>
+            ))}
+          </div>
+        </div>
+      </section>
+
+      {/* ═══════════════════════ PLATFORM FEATURES ═══════════════════════ */}
+      <section className="py-24 px-4 md:px-6 bg-gray-50">
         <div className="max-w-7xl mx-auto">
           <ScrollReveal>
             <div className="text-center mb-16">
@@ -153,22 +241,52 @@ export default function HomePage() {
                 Platform Features
               </span>
               <h2 className="text-3xl md:text-5xl font-bold text-navy mb-4">
-                Built for <span className="text-electric">African Creators</span>
+                Built for <span className="text-electric">African Music</span>
               </h2>
               <p className="text-lg text-gray-600 max-w-2xl mx-auto">
-                Everything you need to distribute, monetize, and grow your music
-                — with transparency at every step.
+                Every feature designed with the realities of African music distribution, payments, and rights in mind.
               </p>
             </div>
           </ScrollReveal>
 
           <div className="grid md:grid-cols-2 lg:grid-cols-3 gap-8">
-            {features.map((feature, i) => (
+            {platformFeatures.map((feature, i) => (
               <ScrollReveal key={feature.title} delay={i * 0.1}>
                 <div className="glass-card-light rounded-2xl p-8 hover-lift">
                   <div className="text-4xl mb-4">{feature.icon}</div>
                   <h3 className="text-xl font-bold text-navy mb-3">{feature.title}</h3>
                   <p className="text-gray-600 leading-relaxed">{feature.description}</p>
+                </div>
+              </ScrollReveal>
+            ))}
+          </div>
+        </div>
+      </section>
+
+      {/* ═══════════════════════ REGIONS ═══════════════════════ */}
+      <section className="py-24 bg-white">
+        <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
+          <ScrollReveal>
+            <div className="text-center mb-16">
+              <span className="inline-block px-4 py-1.5 text-xs font-semibold tracking-widest uppercase rounded-full bg-electric/10 text-electric mb-4">
+                Continental Coverage
+              </span>
+              <h2 className="text-3xl md:text-5xl font-bold text-navy mb-4">
+                Every Sound, <span className="text-electric">Every Region</span>
+              </h2>
+              <p className="text-lg text-gray-600 max-w-2xl mx-auto">
+                From Lagos to Nairobi, Johannesburg to Dakar — Zonga amplifies the full spectrum of African music.
+              </p>
+            </div>
+          </ScrollReveal>
+
+          <div className="grid grid-cols-2 md:grid-cols-3 gap-6">
+            {regions.map((region, i) => (
+              <ScrollReveal key={region.name} delay={i * 0.08}>
+                <div className="glass-card-light rounded-xl p-6 hover-lift text-center">
+                  <div className="text-3xl mb-3">{region.flag}</div>
+                  <h3 className="text-lg font-bold text-navy mb-1">{region.name}</h3>
+                  <p className="text-sm text-gray-500">{region.genres}</p>
                 </div>
               </ScrollReveal>
             ))}
@@ -190,11 +308,11 @@ export default function HomePage() {
               <p className="text-lg text-gray-600 mb-6 leading-relaxed">
                 Zonga was born from a simple belief: African creators deserve the
                 same tools, transparency, and revenue share as artists anywhere in
-                the world. We built a platform that makes that possible — with
-                fair royalties, instant payouts, and full creative ownership.
+                the world. But we go further — building for labels that need scale,
+                listeners who crave authenticity, and organizers who bring music to life.
               </p>
               <div className="grid grid-cols-2 gap-4">
-                {['85% Revenue Share', 'No Hidden Fees', 'Own Your Masters', 'Global Distribution'].map((item) => (
+                {['85% Revenue Share', 'No Hidden Fees', 'Own Your Masters', 'Pan-African Reach'].map((item) => (
                   <div key={item} className="flex items-center gap-2">
                     <div className="w-2 h-2 rounded-full bg-electric" />
                     <span className="text-sm font-medium text-gray-700">{item}</span>
@@ -207,7 +325,7 @@ export default function HomePage() {
               <div className="relative rounded-2xl overflow-hidden aspect-4/3">
                 <Image
                   src="https://images.unsplash.com/photo-1511671782779-c97d3d27a1d4?w=800"
-                  alt="Music studio — representing the creative tools Zonga provides to African artists"
+                  alt="Music studio — representing the creative tools Zonga provides"
                   fill
                   className="object-cover"
                   sizes="(max-width: 1024px) 100vw, 50vw"
@@ -243,18 +361,18 @@ export default function HomePage() {
         <div className="relative z-10 max-w-4xl mx-auto px-4 sm:px-6 lg:px-8 text-center">
           <ScrollReveal>
             <h2 className="text-3xl md:text-5xl font-bold text-white mb-6">
-              Ready to Share Your <span className="gradient-text">Music?</span>
+              Ready to Join the <span className="gradient-text">Movement?</span>
             </h2>
             <p className="text-lg text-gray-300 mb-10 max-w-2xl mx-auto">
-              Join thousands of African creators who trust Zonga for transparent
-              royalties, instant payouts, and full creative ownership.
+              Artists, labels, listeners, and event organizers — Zonga is where
+              African music thrives. Join thousands who already call it home.
             </p>
             <div className="flex flex-col sm:flex-row gap-4 justify-center">
               <Link
                 href="/sign-up"
                 className="inline-flex items-center justify-center px-8 py-4 bg-electric text-white font-bold rounded-xl hover:bg-blue-700 transition-all text-lg shadow-lg shadow-electric/30 btn-press"
               >
-                Start Free
+                Get Started Free
               </Link>
               <Link
                 href="/pricing"

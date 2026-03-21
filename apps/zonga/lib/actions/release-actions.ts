@@ -22,6 +22,8 @@ import {
 import { buildEvidencePackFromAction, processEvidencePack } from '@/lib/evidence'
 import { runPrediction } from '@/lib/ml-client'
 import { executeCommand } from '@/lib/control'
+import { getCreatorPlan } from '@/lib/guards/plan-queries'
+import { guardCreatorFeature } from '@/lib/guards/subscription-guards'
 
 /* ─── Releases ─── */
 
@@ -183,6 +185,11 @@ export interface AnalyticsOverview {
 export async function getAnalyticsOverview(): Promise<AnalyticsOverview> {
   const ctx = await resolveOrgContext()
 
+  // S2: Advanced analytics (topAssets, revenueByMonth, topCreators) require label plan
+  const creatorPlan = await getCreatorPlan(ctx.actorId, ctx.orgId)
+  const advancedGate = guardCreatorFeature(creatorPlan.plan, 'advanced_analytics')
+  const hasAdvanced = advancedGate.passed
+
   try {
     const [streams] = (await platformDb.execute(
       sql`SELECT COUNT(*) as total FROM zonga_revenue_events
@@ -200,7 +207,8 @@ export async function getAnalyticsOverview(): Promise<AnalyticsOverview> {
       WHERE la.org_id = ${ctx.orgId} AND la.activity_type = 'stream'`,
     )) as unknown as [{ total: number }]
 
-    const topAssets = (await platformDb.execute(
+    const topAssets = hasAdvanced
+      ? ((await platformDb.execute(
       sql`SELECT
         r.asset_id as "assetId",
         COALESCE(a.title, r.asset_id::text) as title,
@@ -210,16 +218,19 @@ export async function getAnalyticsOverview(): Promise<AnalyticsOverview> {
       WHERE r.type = 'stream' AND r.org_id = ${ctx.orgId}
       GROUP BY r.asset_id, a.title
       ORDER BY streams DESC LIMIT 10`,
-    )) as unknown as { rows: Array<{ assetId: string; title: string; streams: number }> }
+    )) as unknown as { rows: Array<{ assetId: string; title: string; streams: number }> })
+      : { rows: [] }
 
-    const revenueByMonth = (await platformDb.execute(
+    const revenueByMonth = hasAdvanced
+      ? ((await platformDb.execute(
       sql`SELECT
         TO_CHAR(occurred_at, 'YYYY-MM') as month,
         COALESCE(SUM(amount::numeric), 0) as amount
       FROM zonga_revenue_events WHERE org_id = ${ctx.orgId}
       GROUP BY TO_CHAR(occurred_at, 'YYYY-MM')
       ORDER BY month DESC LIMIT 12`,
-    )) as unknown as { rows: Array<{ month: string; amount: number }> }
+    )) as unknown as { rows: Array<{ month: string; amount: number }> })
+      : { rows: [] }
 
     const [followers] = (await platformDb.execute(
       sql`SELECT COUNT(*) as total FROM zonga_listener_follows
@@ -241,7 +252,8 @@ export async function getAnalyticsOverview(): Promise<AnalyticsOverview> {
       WHERE org_id = ${ctx.orgId} AND status = 'published'`,
     )) as unknown as [{ total: number }]
 
-    const topCreators = (await platformDb.execute(
+    const topCreators = hasAdvanced
+      ? ((await platformDb.execute(
       sql`SELECT
         r.creator_id as "creatorId",
         COALESCE(c.display_name, r.creator_id::text) as name,
@@ -251,7 +263,8 @@ export async function getAnalyticsOverview(): Promise<AnalyticsOverview> {
       WHERE r.type = 'stream' AND r.org_id = ${ctx.orgId}
       GROUP BY r.creator_id, c.display_name
       ORDER BY streams DESC LIMIT 10`,
-    )) as unknown as { rows: Array<{ creatorId: string; name: string; streams: number }> }
+    )) as unknown as { rows: Array<{ creatorId: string; name: string; streams: number }> })
+      : { rows: [] }
 
     return {
       totalStreams: Number(streams?.total ?? 0),

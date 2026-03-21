@@ -139,6 +139,25 @@ export const zongaPayoutStatusEnum = pgEnum('zonga_payout_status', [
   'cancelled',
 ])
 
+export const zongaListenerPlanEnum = pgEnum('zonga_listener_plan', [
+  'free',
+  'premium',
+])
+
+export const zongaSubscriptionStatusEnum = pgEnum('zonga_subscription_status', [
+  'active',
+  'past_due',
+  'canceled',
+  'trialing',
+  'incomplete',
+])
+
+export const zongaCreatorPlanEnum = pgEnum('zonga_creator_plan', [
+  'artist',
+  'label',
+  'enterprise',
+])
+
 export const zongaLedgerEntryTypeEnum = pgEnum('zonga_ledger_entry_type', [
   'credit',
   'debit',
@@ -176,6 +195,10 @@ export const zongaCreators = pgTable('zonga_creators', {
   bio: text('bio'),
   avatarUrl: text('avatar_url'),
   status: zongaCreatorStatusEnum('status').notNull().default('pending'),
+  plan: zongaCreatorPlanEnum('plan').notNull().default('artist'),
+  stripeCustomerId: varchar('stripe_customer_id', { length: 255 }),
+  stripeSubscriptionId: varchar('stripe_subscription_id', { length: 255 }),
+  subscriptionStatus: zongaSubscriptionStatusEnum('subscription_status'),
   genre: varchar('genre', { length: 100 }),
   country: varchar('country', { length: 100 }),
   payoutCurrency: varchar('payout_currency', { length: 3 }).notNull().default('USD'),
@@ -405,6 +428,11 @@ export const zongaListeners = pgTable('zonga_listeners', {
   email: varchar('email', { length: 255 }),
   city: varchar('city', { length: 100 }),
   country: varchar('country', { length: 100 }),
+  plan: zongaListenerPlanEnum('plan').notNull().default('free'),
+  subscriptionStatus: zongaSubscriptionStatusEnum('subscription_status'),
+  stripeCustomerId: varchar('stripe_customer_id', { length: 255 }),
+  stripeSubscriptionId: varchar('stripe_subscription_id', { length: 255 }),
+  currentPeriodEnd: timestamp('current_period_end', { withTimezone: true }),
   preferencesJson: jsonb('preferences_json').notNull().default({}),
   createdAt: timestamp('created_at', { withTimezone: true }).notNull().defaultNow(),
   updatedAt: timestamp('updated_at', { withTimezone: true }).notNull().defaultNow(),

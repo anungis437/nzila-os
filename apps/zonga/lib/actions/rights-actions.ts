@@ -11,6 +11,8 @@ import { platformDb } from '@nzila/db/platform'
 import { sql } from 'drizzle-orm'
 import { revalidatePath } from 'next/cache'
 import { logger } from '@/lib/logger'
+import { getCreatorPlan } from '@/lib/guards/plan-queries'
+import { guardCreatorFeature } from '@/lib/guards/subscription-guards'
 
 /* ─── Types ─── */
 
@@ -91,6 +93,13 @@ export async function saveSplits(
   splits: SplitInput[],
 ): Promise<{ success: boolean; error?: string }> {
   const ctx = await resolveOrgContext()
+
+  // S2: Automated royalty splits require label plan
+  const creatorPlan = await getCreatorPlan(ctx.actorId, ctx.orgId)
+  const splitGate = guardCreatorFeature(creatorPlan.plan, 'automated_royalty_splits')
+  if (!splitGate.passed) {
+    return { success: false, error: splitGate.details ?? 'Label plan required for automated royalty splits' }
+  }
 
   // Validate total = 100%
   const total = splits.reduce((sum, s) => sum + s.sharePercent, 0)
@@ -356,6 +365,13 @@ export async function createSyncLicense(data: {
   expiresAt?: string
 }): Promise<{ success: boolean; licenseId?: string; error?: string }> {
   const ctx = await resolveOrgContext()
+
+  // S3: Sync licensing / rights management requires enterprise plan
+  const creatorPlan = await getCreatorPlan(ctx.actorId, ctx.orgId)
+  const gate = guardCreatorFeature(creatorPlan.plan, 'rights_management')
+  if (!gate.passed) {
+    return { success: false, error: gate.details ?? 'Enterprise plan required for sync licensing' }
+  }
 
   if (!data.assetId || !data.licensee || !data.territory || !data.usageType) {
     return { success: false, error: 'All fields are required' }

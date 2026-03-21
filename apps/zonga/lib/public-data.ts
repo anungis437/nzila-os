@@ -143,7 +143,7 @@ export async function getPublicEvents(opts?: {
 }): Promise<PublicEvent[]> {
   const limit = opts?.limit ?? 20
   const dateFilter = opts?.upcoming !== false
-    ? sql` AND e.start_date >= now()`
+    ? sql` AND e.starts_at >= now()`
     : sql``
 
   const rows = (await platformDb.execute(sql`
@@ -154,16 +154,16 @@ export async function getPublicEvents(opts?: {
       e.venue,
       e.city,
       e.country,
-      e.start_date AS "startDate",
-      e.end_date AS "endDate",
-      e.cover_image_url AS "coverImageUrl",
+      e.starts_at AS "startDate",
+      e.ends_at AS "endDate",
+      e.image_url AS "coverImageUrl",
       c.display_name AS "creatorName",
       (SELECT COUNT(*) FROM zonga_ticket_types tt WHERE tt.event_id = e.id) AS "ticketCount"
     FROM zonga_events e
     JOIN zonga_creators c ON c.id = e.creator_id
     WHERE e.status = 'published'
     ${dateFilter}
-    ORDER BY e.start_date ASC
+    ORDER BY e.starts_at ASC
     LIMIT ${limit}
   `)) as unknown as { rows: PublicEvent[] }
 

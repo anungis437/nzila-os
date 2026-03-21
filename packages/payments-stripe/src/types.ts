@@ -28,6 +28,8 @@ export type SupportedStripeEventType =
   | 'charge.dispute.created'
   | 'payout.paid'
   | 'invoice.paid'
+  | 'customer.subscription.updated'
+  | 'customer.subscription.deleted'
 
 export const SUPPORTED_EVENT_TYPES: readonly SupportedStripeEventType[] = [
   'checkout.session.completed',
@@ -37,6 +39,8 @@ export const SUPPORTED_EVENT_TYPES: readonly SupportedStripeEventType[] = [
   'charge.dispute.created',
   'payout.paid',
   'invoice.paid',
+  'customer.subscription.updated',
+  'customer.subscription.deleted',
 ] as const
 
 // ── Payment object types ────────────────────────────────────────────────────
