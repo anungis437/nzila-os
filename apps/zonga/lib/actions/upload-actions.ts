@@ -26,6 +26,8 @@ import {
   fingerprintAudio,
 } from '@/lib/blob'
 import { buildEvidencePackFromAction, processEvidencePack } from '@/lib/evidence'
+import { getCreatorPlan } from '@/lib/guards/plan-queries'
+import { guardCreatorFeature } from '@/lib/guards/subscription-guards'
 
 // ── Upload Audio ────────────────────────────────────────────────────────────
 
@@ -196,4 +198,103 @@ export async function getStreamUrl(blobPath: string): Promise<string> {
   const _ctx = await resolveOrgContext()
 
   return getAudioStreamUrl(blobPath)
+}
+
+// ── Bulk Upload (Label Plan Required — S2 Guard) ────────────────────────────
+
+export interface BulkUploadResult {
+  ok: boolean
+  uploaded: Array<{ assetId: string; fileName: string; blobPath: string }>
+  failed: Array<{ fileName: string; error: string }>
+  error?: string
+}
+
+/**
+ * Upload multiple audio files at once. Requires label plan or above (S2 guard).
+ * Accepts FormData with multiple files + a creatorId field.
+ */
+export async function bulkUploadAudio(
+  formData: FormData,
+): Promise<BulkUploadResult> {
+  const ctx = await resolveOrgContext()
+  const creatorId = formData.get('creatorId') as string
+
+  if (!creatorId) {
+    return { ok: false, uploaded: [], failed: [], error: 'Missing creatorId' }
+  }
+
+  // S2: bulk upload requires label plan
+  const planInfo = await getCreatorPlan(creatorId, ctx.orgId)
+  const guard = guardCreatorFeature(planInfo.plan, 'bulk_upload')
+  if (!guard.passed) {
+    return { ok: false, uploaded: [], failed: [], error: guard.details ?? 'Label plan required for bulk uploads' }
+  }
+
+  const files = formData.getAll('files') as File[]
+  if (files.length === 0) {
+    return { ok: false, uploaded: [], failed: [], error: 'No files provided' }
+  }
+
+  const uploaded: BulkUploadResult['uploaded'] = []
+  const failed: BulkUploadResult['failed'] = []
+
+  for (const file of files) {
+    try {
+      const assetId = crypto.randomUUID()
+
+      // Create the content asset record first
+      await platformDb.execute(
+        sql`INSERT INTO zonga_content_assets (id, org_id, creator_id, title, type, status)
+        VALUES (${assetId}, ${ctx.orgId}, ${creatorId}, ${file.name.replace(/\.[^.]+$/, '')}, 'track', 'draft')`,
+      )
+
+      const buffer = Buffer.from(await file.arrayBuffer())
+
+      const result = await uploadAudioFile({
+        creatorId,
+        assetId,
+        fileName: file.name,
+        buffer,
+        contentType: file.type,
+      })
+
+      const sha256 = await fingerprintAudio(buffer)
+      const storageUrl = `blob://${result.blobPath}`
+
+      await platformDb.execute(
+        sql`UPDATE zonga_content_assets
+        SET storage_url = ${storageUrl}, updated_at = now()
+        WHERE id = ${assetId} AND org_id = ${ctx.orgId}`,
+      )
+
+      uploaded.push({ assetId, fileName: file.name, blobPath: result.blobPath })
+
+      logger.info('Bulk upload: file processed', { assetId, fileName: file.name, sha256 })
+    } catch (err) {
+      failed.push({ fileName: file.name, error: err instanceof Error ? err.message : 'Upload failed' })
+      logger.warn('Bulk upload: file failed', { fileName: file.name, error: String(err) })
+    }
+  }
+
+  // Audit the bulk operation
+  const audit = buildZongaAuditEvent({
+    orgId: creatorId,
+    actorId: ctx.actorId,
+    action: ZongaAuditAction.CONTENT_UPLOAD,
+    entityType: ZongaEntityType.CONTENT_ASSET,
+    targetId: creatorId,
+    metadata: { bulkUpload: true, totalFiles: files.length, succeeded: uploaded.length, failed: failed.length },
+  })
+  await platformDb.execute(
+    sql`INSERT INTO audit_log (entity_id, actor_id, action, metadata, org_id)
+    VALUES (${audit.orgId}, ${audit.actorId}, ${audit.action}, ${JSON.stringify(audit.metadata)}::jsonb, ${ctx.orgId})`,
+  )
+
+  revalidatePath('/dashboard/catalog')
+
+  return {
+    ok: failed.length === 0,
+    uploaded,
+    failed,
+  }
 }

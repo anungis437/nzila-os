@@ -15,7 +15,10 @@ import {
   discoverReleases,
 } from '@/lib/actions/listener-actions'
 import { listFollowing } from '@/lib/actions/social-actions'
+import { getListenerSubscription } from '@/lib/actions/subscription-actions'
 import { NowPlayingWidget, ReleaseRow, QueueView } from '@/components/dashboard/listener-sections'
+import { PlanBadge } from '@/components/dashboard/plan-badge'
+import { UpgradePrompt } from '@/components/dashboard/upgrade-prompt'
 
 export default async function ListenerPage({
   params,
@@ -26,21 +29,37 @@ export default async function ListenerPage({
   if (!userId) redirect('/sign-in')
   const { locale } = await params
 
-  const [profile, feed, following, playlists, trendingArtists, newReleases] = await Promise.all([
+  const [profile, feed, following, playlists, trendingArtists, newReleases, listenerSub] = await Promise.all([
     getListenerProfile(),
     getListenerFeed({ limit: 20 }),
     listFollowing(),
     listSavedPlaylists(),
     discoverArtists({ limit: 6 }),
     discoverReleases({ limit: 6 }),
+    getListenerSubscription(),
   ])
+
+  const listenerPlan = listenerSub?.plan ?? 'free'
+  const isPremium = listenerPlan === 'premium' && (listenerSub?.subscriptionStatus === 'active' || listenerSub?.subscriptionStatus === 'trialing')
 
   return (
     <div className="space-y-8">
       <div>
-        <h1 className="text-2xl font-bold text-navy">My Music</h1>
+        <div className="flex items-center gap-3">
+          <h1 className="text-2xl font-bold text-navy">My Music</h1>
+          <PlanBadge plan={listenerPlan} />
+        </div>
         <p className="text-gray-500 mt-1">Your listening activity, favorites &amp; discovery</p>
       </div>
+
+      {/* Premium Upgrade Prompt */}
+      {!isPremium && (
+        <UpgradePrompt
+          feature="Offline downloads & Hi-Fi audio"
+          requiredPlan="Premium"
+          locale={locale}
+        />
+      )}
 
       {/* Now Playing + Queue row */}
       <div className="grid grid-cols-1 lg:grid-cols-2 gap-4">

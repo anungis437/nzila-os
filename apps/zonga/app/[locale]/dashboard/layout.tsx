@@ -24,6 +24,7 @@ const sidebarLinks = [
   { href: 'dashboard/notifications', label: 'Notifications', icon: '🔔' },
   { href: 'dashboard/moderation', label: 'Moderation', icon: '🛡️' },
   { href: 'dashboard/integrity', label: 'Integrity', icon: '🔒' },
+  { href: 'dashboard/subscription', label: 'Subscription', icon: '💎' },
 ];
 
 export default async function DashboardLayout({
