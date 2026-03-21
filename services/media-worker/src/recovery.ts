@@ -130,7 +130,7 @@ export async function detectOrphans(
       if (assetId && !knownAssetIds.has(assetId)) {
         orphans.push({
           key: obj.key,
-          sizeBytes: obj.size,
+          sizeBytes: obj.sizeBytes,
           lastModified: obj.lastModified,
         })
       }

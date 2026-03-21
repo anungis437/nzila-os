@@ -82,7 +82,7 @@ describe('detectOrphans', () => {
     const orphans = await detectOrphans(storage, 'audio/processed/', knownIds, logger)
 
     expect(orphans).toHaveLength(1)
-    expect(orphans[0].key).toContain('orphan-1')
+    expect(orphans[0]!.key).toContain('orphan-1')
   })
 
   it('returns empty when all assets are known', async () => {

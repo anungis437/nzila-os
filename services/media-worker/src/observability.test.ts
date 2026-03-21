@@ -35,7 +35,7 @@ describe('createLogger', () => {
     console.log = origLog
 
     expect(logs).toHaveLength(1)
-    const parsed = JSON.parse(logs[0])
+    const parsed = JSON.parse(logs[0]!)
     expect(parsed.level).toBe('info')
     expect(parsed.message).toBe('hello')
     expect(parsed.service).toBe('test-service')
@@ -67,7 +67,7 @@ describe('createLogger', () => {
     logger.info('test')
 
     console.log = origLog
-    const parsed = JSON.parse(logs[0])
+    const parsed = JSON.parse(logs[0]!)
     expect(parsed.correlationId).toBe('corr-123')
     expect(parsed.context.jobId).toBe('job-456')
   })
@@ -87,7 +87,7 @@ describe('createLogger', () => {
     logger.error('fail', new Error('boom'))
 
     console.error = origError
-    const parsed = JSON.parse(errorLogs[0])
+    const parsed = JSON.parse(errorLogs[0]!)
     expect(parsed.level).toBe('error')
     expect(parsed.error.message).toBe('boom')
   })
@@ -167,8 +167,8 @@ describe('createHealthChecker', () => {
 
     const status = await checker.check()
     expect(status.status).toBe('unhealthy')
-    expect(status.checks[0].status).toBe('fail')
-    expect(status.checks[0].message).toBe('down')
+    expect(status.checks[0]!.status).toBe('fail')
+    expect(status.checks[0]!.message).toBe('down')
   })
 
   it('handles check that throws', async () => {
@@ -182,8 +182,8 @@ describe('createHealthChecker', () => {
 
     const status = await checker.check()
     expect(status.status).toBe('unhealthy')
-    expect(status.checks[0].status).toBe('fail')
-    expect(status.checks[0].message).toContain('conn failed')
+    expect(status.checks[0]!.status).toBe('fail')
+    expect(status.checks[0]!.message).toContain('conn failed')
   })
 
   it('reports uptime', async () => {

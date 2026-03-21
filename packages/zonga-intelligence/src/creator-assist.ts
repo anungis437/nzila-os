@@ -99,11 +99,11 @@ export function suggestReleaseTiming(
 // ── Pricing Suggestions (Heuristic Fallback) ────────────────────────────────
 
 /** Default pricing tiers for African markets (in USD minor units/cents) */
-const DEFAULT_PRICING: Record<string, { low: number; mid: number; high: number }> = {
+const DEFAULT_PRICING = {
   track: { low: 49, mid: 99, high: 199 },     // $0.49 - $1.99
   album: { low: 499, mid: 999, high: 1999 },   // $4.99 - $19.99
   ticket: { low: 500, mid: 2000, high: 10000 }, // $5.00 - $100.00
-}
+} as const satisfies Record<string, { low: number; mid: number; high: number }>
 
 /**
  * Suggest pricing based on creator tier and content type.

@@ -101,7 +101,6 @@ export async function withNzilaSpan<T>(
     name,
     {
       'nzila.org.id': orgId,
-      'nzila.tenant.id': orgId,
     },
     async () => fn(),
   );

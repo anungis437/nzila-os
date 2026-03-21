@@ -47,8 +47,8 @@ export async function getCreatorPlan(
       WHERE id = ${creatorId} AND org_id = ${orgId}`,
     )) as unknown as [CreatorPlanInfo | undefined]
 
-    return row ?? { plan: 'artist', subscriptionStatus: null }
+    return row ?? { plan: 'starter', subscriptionStatus: null }
   } catch {
-    return { plan: 'artist', subscriptionStatus: null }
+    return { plan: 'starter', subscriptionStatus: null }
   }
 }

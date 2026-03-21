@@ -4,7 +4,7 @@
  * Runtime enforcement of plan-based access control.
  *
  * S1: Premium-only features require active premium subscription
- * S2: Label features require label or enterprise plan
+ * S2: Business features require business or enterprise plan
  * S3: Enterprise features require enterprise plan
  * S4: Download gating — premium only
  * S5: Audio quality gating — standard for free, hifi for premium
@@ -14,8 +14,7 @@
 import { logger } from '@/lib/logger'
 import {
   PREMIUM_ONLY_FEATURES,
-  LABEL_ONLY_FEATURES,
-  ENTERPRISE_ONLY_FEATURES,
+  hasCreatorFeature,
   type ListenerPlan,
   type ListenerFeature,
   type CreatorPlan,
@@ -107,43 +106,37 @@ export function guardSubscriptionActive(
 // ── Creator/Label Guards ────────────────────────────────────────────────────
 
 const PLAN_HIERARCHY: Record<CreatorPlan, number> = {
-  artist: 0,
-  label: 1,
-  enterprise: 2,
+  starter: 0,
+  pro_creator: 1,
+  business: 2,
+  enterprise: 3,
 }
 
-/** S2: Check if a creator has access to label-tier features */
+/** S2: Check if a creator has access to a specific feature */
 export function guardCreatorFeature(
   plan: CreatorPlan,
   feature: CreatorFeature,
 ): SubscriptionGuardResult {
-  if (PLAN_HIERARCHY[plan] >= PLAN_HIERARCHY.enterprise) {
+  if (hasCreatorFeature(plan, feature)) {
     return { passed: true, invariant: 'S2_CREATOR_FEATURE_ACCESS' }
   }
 
-  if ((ENTERPRISE_ONLY_FEATURES as readonly string[]).includes(feature)) {
-    if (PLAN_HIERARCHY[plan] < PLAN_HIERARCHY.enterprise) {
-      logger.info('S3 GATE: Enterprise feature blocked', { plan, feature })
-      return {
-        passed: false,
-        invariant: 'S3_ENTERPRISE_FEATURE_ACCESS',
-        details: `Feature '${feature}' requires enterprise plan (current: ${plan})`,
-      }
+  // Determine minimum tier that has this feature
+  if (hasCreatorFeature('enterprise', feature) && !hasCreatorFeature('business', feature)) {
+    logger.info('S3 GATE: Enterprise feature blocked', { plan, feature })
+    return {
+      passed: false,
+      invariant: 'S3_ENTERPRISE_FEATURE_ACCESS',
+      details: `Feature '${feature}' requires enterprise plan (current: ${plan})`,
     }
   }
 
-  if ((LABEL_ONLY_FEATURES as readonly string[]).includes(feature)) {
-    if (PLAN_HIERARCHY[plan] < PLAN_HIERARCHY.label) {
-      logger.info('S2 GATE: Label feature blocked', { plan, feature })
-      return {
-        passed: false,
-        invariant: 'S2_CREATOR_FEATURE_ACCESS',
-        details: `Feature '${feature}' requires label plan or above (current: ${plan})`,
-      }
-    }
+  logger.info('S2 GATE: Creator feature blocked', { plan, feature })
+  return {
+    passed: false,
+    invariant: 'S2_CREATOR_FEATURE_ACCESS',
+    details: `Feature '${feature}' requires a higher plan (current: ${plan})`,
   }
-
-  return { passed: true, invariant: 'S2_CREATOR_FEATURE_ACCESS' }
 }
 
 /** S2: Bulk check — does the plan include a required minimum tier? */
@@ -171,14 +164,14 @@ export function isListenerPremium(
   return plan === 'premium' && (subscriptionStatus === 'active' || subscriptionStatus === 'trialing')
 }
 
-/** Quick check: is the creator on a label plan with active subscription? */
+/** Quick check: is the creator on a business plan or above with active subscription? */
 export function isCreatorLabel(
   plan: CreatorPlan | null | undefined,
   subscriptionStatus: string | null | undefined,
 ): boolean {
   if (!plan) return false
   const tier = PLAN_HIERARCHY[plan] ?? 0
-  return tier >= PLAN_HIERARCHY.label && (subscriptionStatus === 'active' || subscriptionStatus === 'trialing')
+  return tier >= PLAN_HIERARCHY.business && (subscriptionStatus === 'active' || subscriptionStatus === 'trialing')
 }
 
 /** Maximum audio quality allowed for the listener's plan */
