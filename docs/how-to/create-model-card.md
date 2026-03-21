@@ -13,7 +13,7 @@ const risk = classifyRisk({
   classifiedBy: 'you@nzila.io',
   autonomyLevel: 30,       // 0-100: how much autonomous decision-making
   dataClassification: 33,  // 0=public, 33=internal, 66=sensitive, 100=regulated
-  impactScope: 40,         // number of affected users/tenants
+  impactScope: 40,         // number of affected users/orgs
   reversibility: 20,       // 0=fully reversible, 100=irreversible
   transparency: 30,        // 0=interpretable, 100=black box
   biasRisk: 20,            // demographic bias potential

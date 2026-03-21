@@ -8,7 +8,7 @@ export interface DecisionStore {
   getByActor(actorId: string): DecisionLogEntry[];
   getByResource(resourceType: string): DecisionLogEntry[];
   getByOutcome(outcome: "allow" | "deny"): DecisionLogEntry[];
-  getByTenant(tenantId: string): DecisionLogEntry[];
+  getByOrg(orgId: string): DecisionLogEntry[];
   getAll(): DecisionLogEntry[];
 }
 
@@ -37,9 +37,9 @@ export class InMemoryDecisionStore implements DecisionStore {
     return this.entries.filter((e) => e.outcome === outcome);
   }
 
-  getByTenant(tenantId: string): DecisionLogEntry[] {
+  getByOrg(orgId: string): DecisionLogEntry[] {
     return this.entries.filter(
-      (e) => e.request.actor.tenantId === tenantId,
+      (e) => e.request.actor.orgId === orgId,
     );
   }
 

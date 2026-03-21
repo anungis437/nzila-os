@@ -32,7 +32,7 @@
 - Custom decision rules beyond the 8 built-in rules
 - Integration with external case management systems
 - Automated workflows triggered by decisions (decisions are advisory only)
-- Multi-tenant configuration (single-org pilot)
+- Multi-org configuration (single-org pilot)
 
 ---
 

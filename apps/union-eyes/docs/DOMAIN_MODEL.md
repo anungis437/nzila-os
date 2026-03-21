@@ -7,7 +7,7 @@
 
 | Entity | Table(s) | Purpose |
 |--------|----------|---------|
-| Org | `orgs` | Organisation tenant root |
+| Org | `orgs` | Organisation root |
 | Union | `unions` | Union / labour organisation |
 | Member | `members`, `profiles_v2` | Union member record |
 | Grievance | `grievances` | Worker grievance case |

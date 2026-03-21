@@ -8,7 +8,7 @@ function makeEvent(type: string, payload: Record<string, unknown> = {}, override
     type,
     version: 1,
     timestamp: new Date().toISOString(),
-    metadata: { tenantId: "t1", actorId: "a1", source: "test" },
+    metadata: { orgId: "t1", actorId: "a1", source: "test" },
     payload,
     ...overrides,
   };
@@ -84,13 +84,13 @@ describe("InMemoryEventStore", () => {
     expect(events[0]!.payload).toEqual({ orderId: "o1" });
   });
 
-  it("retrieves events by tenant", async () => {
+  it("retrieves events by org", async () => {
     const store = new InMemoryEventStore();
-    await store.save(makeEvent("a", {}, { metadata: { tenantId: "t1", actorId: "a1", source: "test" } }));
-    await store.save(makeEvent("b", {}, { metadata: { tenantId: "t2", actorId: "a2", source: "test" } }));
+    await store.save(makeEvent("a", {}, { metadata: { orgId: "t1", actorId: "a1", source: "test" } }));
+    await store.save(makeEvent("b", {}, { metadata: { orgId: "t2", actorId: "a2", source: "test" } }));
 
-    const t1Events = await store.getByTenant("t1");
-    const t2Events = await store.getByTenant("t2");
+    const t1Events = await store.getByOrg("t1");
+    const t2Events = await store.getByOrg("t2");
     expect(t1Events).toHaveLength(1);
     expect(t2Events).toHaveLength(1);
   });

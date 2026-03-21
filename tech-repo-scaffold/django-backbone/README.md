@@ -1,6 +1,6 @@
 # Nzila Backbone Platform
 
-Django Backbone Platform — Multi-tenant SaaS infrastructure for Nzila verticals.
+Django Backbone Platform — Multi-org SaaS infrastructure for Nzila verticals.
 
 ## Quick Start
 

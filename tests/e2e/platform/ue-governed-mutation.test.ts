@@ -68,7 +68,7 @@ const POLICY_SET: PolicySet = {
 const evidence = {
   traceId: '',
   actorId: '',
-  tenantId: '',
+  orgId: '',
   governanceDecision: null as ReturnType<typeof canAccess> | null,
   auditEntries: [] as Array<Record<string, unknown>>,
   rateLimitResult: null as { allowed: boolean; remaining: number; resetAt: number } | null,
@@ -106,14 +106,14 @@ describe('UE Governed Mutation — Full Pipeline Proof', () => {
           extractActor: async (headers) => {
             const token = headers.authorization?.replace('Bearer ', '')
             if (token !== 'tok_admin_001') return null
-            const actor = { tenantId: 'tenant_ue_main', actorId: 'user_admin_001', roles: ['admin'] }
+            const actor = { orgId: 'org_ue_main', actorId: 'user_admin_001', roles: ['admin'] }
             evidence.actorId = actor.actorId
-            evidence.tenantId = actor.tenantId
+            evidence.orgId = actor.orgId
             return actor
           },
         }),
         rateLimitLayer({
-          check: async (tenantId, route) => {
+          check: async (orgId, route) => {
             const result = { allowed: true, remaining: 99, resetAt: Date.now() + 60000 }
             evidence.rateLimitResult = result
             return result
@@ -122,7 +122,7 @@ describe('UE Governed Mutation — Full Pipeline Proof', () => {
         governanceLayer({
           evaluate: async (evalCtx) => {
             const decision = canAccess(POLICY_SET, {
-              actor: { id: evalCtx.actorId!, tenantId: evalCtx.tenantId!, roles: evalCtx.roles ?? [] },
+              actor: { id: evalCtx.actorId!, orgId: evalCtx.orgId!, roles: evalCtx.roles ?? [] },
               resource: { type: evalCtx.resourceType },
               action: evalCtx.action,
             })
@@ -135,7 +135,7 @@ describe('UE Governed Mutation — Full Pipeline Proof', () => {
           record: async (entry) => {
             const auditEntry = await auditEngine.record({
               actorId: entry.actorId ?? 'unknown',
-              tenantId: entry.tenantId ?? 'unknown',
+              orgId: entry.orgId ?? 'unknown',
               action: entry.action,
               resource: entry.resource,
               resourceId: entry.resourceId,
@@ -173,8 +173,8 @@ describe('UE Governed Mutation — Full Pipeline Proof', () => {
     expect(evidence.actorId).toBe('user_admin_001')
   })
 
-  it('tenant resolved correctly', () => {
-    expect(evidence.tenantId).toBe('tenant_ue_main')
+  it('org resolved correctly', () => {
+    expect(evidence.orgId).toBe('org_ue_main')
   })
 
   it('governance decision is allow', () => {
@@ -215,7 +215,7 @@ describe('UE Governed Mutation — Full Pipeline Proof', () => {
       summary: buildSummary(SCENARIO, {
         trace_id: evidence.traceId,
         actor_id: evidence.actorId,
-        tenant_id: evidence.tenantId,
+        org_id: evidence.orgId,
         governance_decision_id: govDecision.matchedRuleId,
         audit_event_id: (evidence.auditEntries[0] as any)?.id ?? null,
         audit_chain_valid: chain.valid,

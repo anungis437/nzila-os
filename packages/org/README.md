@@ -4,7 +4,7 @@ Canonical organisation context and identity types. Single source of truth for or
 
 ## Domain context
 
-NzilaOS is a multi-tenant platform. Every request must carry an `OrgContext` that identifies the organisation, authenticated actor, originating application, and granted permissions. This package defines the canonical shape of that context, enforced at the API boundary and threaded through all service calls.
+NzilaOS is a multi-org platform. Every request must carry an `OrgContext` that identifies the organisation, authenticated actor, originating application, and granted permissions. This package defines the canonical shape of that context, enforced at the API boundary and threaded through all service calls.
 
 ## Public API surface
 
@@ -36,7 +36,7 @@ import type { OrgContext } from '@nzila/org'
 type MobilityRole = 'lead_advisor' | 'associate' | 'compliance_officer' | 'admin'
 
 async function createCase(ctx: OrgContext<MobilityRole>, data: CaseInput) {
-  // ctx.orgId is the tenant boundary
+  // ctx.orgId is the org boundary
   // ctx.actorId is the authenticated user
   // ctx.requestId is the correlation ID
 }
@@ -44,7 +44,7 @@ async function createCase(ctx: OrgContext<MobilityRole>, data: CaseInput) {
 
 ## Downstream consumers
 
-Every app and package that requires tenant-scoped operations imports `OrgContext` from this package.
+Every app and package that requires org-scoped operations imports `OrgContext` from this package.
 
 ## Maturity
 

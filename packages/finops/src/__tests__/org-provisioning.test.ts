@@ -1,22 +1,22 @@
 /**
- * Tenant Provisioning — Test Suite
+ * Org Provisioning — Test Suite
  */
 
 import { describe, it, expect, vi } from 'vitest';
 import {
-  provisionTenant,
-  deprovisionTenant,
+  provisionOrg,
+  deprovisionOrg,
   type ProvisioningExecutor,
-  type TenantProvisionRequest,
-} from '../tenant-provisioning.js';
+  type OrgProvisionRequest,
+} from '../org-provisioning.js';
 
 const noopExecutor: ProvisioningExecutor = {
   execute: async () => {},
 };
 
-describe('Tenant Provisioning', () => {
-  it('provisions a free-tier tenant', async () => {
-    const result = await provisionTenant(
+describe('Org Provisioning', () => {
+  it('provisions a free-tier org', async () => {
+    const result = await provisionOrg(
       {
         orgId: 'org_test_free',
         orgName: 'Test Free Org',
@@ -34,8 +34,8 @@ describe('Tenant Provisioning', () => {
     expect(result.steps.every((s) => s.status === 'completed')).toBe(true);
   });
 
-  it('provisions an enterprise-tier tenant with expanded quotas', async () => {
-    const result = await provisionTenant(
+  it('provisions an enterprise-tier org with expanded quotas', async () => {
+    const result = await provisionOrg(
       {
         orgId: 'org_test_enterprise',
         orgName: 'Test Enterprise Org',
@@ -61,7 +61,7 @@ describe('Tenant Provisioning', () => {
       },
     };
 
-    const result = await provisionTenant(
+    const result = await provisionOrg(
       {
         orgId: 'org_partial',
         orgName: 'Partial Org',
@@ -79,15 +79,15 @@ describe('Tenant Provisioning', () => {
 
   it('rejects invalid orgId', async () => {
     await expect(
-      provisionTenant(
-        { orgId: '', orgName: 'Bad', tier: 'free', adminEmail: 'a@b.com' } as TenantProvisionRequest,
+      provisionOrg(
+        { orgId: '', orgName: 'Bad', tier: 'free', adminEmail: 'a@b.com' } as OrgProvisionRequest,
         noopExecutor,
       ),
     ).rejects.toThrow();
   });
 
   it('records provisioning duration', async () => {
-    const result = await provisionTenant(
+    const result = await provisionOrg(
       {
         orgId: 'org_timed',
         orgName: 'Timed Org',
@@ -101,9 +101,9 @@ describe('Tenant Provisioning', () => {
   });
 });
 
-describe('Tenant Deprovisioning', () => {
-  it('deprovisions a tenant with data retention', async () => {
-    const result = await deprovisionTenant('org_remove', 'Subscription cancelled', noopExecutor);
+describe('Org Deprovisioning', () => {
+  it('deprovisions an org with data retention', async () => {
+    const result = await deprovisionOrg('org_remove', 'Subscription cancelled', noopExecutor);
 
     expect(result.status).toBe('success');
     expect(result.dataRetentionDays).toBe(90);
@@ -111,6 +111,6 @@ describe('Tenant Deprovisioning', () => {
   });
 
   it('rejects empty orgId', async () => {
-    await expect(deprovisionTenant('', 'test')).rejects.toThrow('orgId is required');
+    await expect(deprovisionOrg('', 'test')).rejects.toThrow('orgId is required');
   });
 });

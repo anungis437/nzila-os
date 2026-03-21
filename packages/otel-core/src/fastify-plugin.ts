@@ -48,7 +48,6 @@ async function nzilaOtelPlugin(
 
       if (orgId) {
         span.setAttribute('nzila.org.id', orgId);
-        span.setAttribute('nzila.tenant.id', orgId);
       }
       if (userId) {
         span.setAttribute('nzila.user.id', userId);

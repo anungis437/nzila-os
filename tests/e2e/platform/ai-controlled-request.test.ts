@@ -60,13 +60,13 @@ describe('AI-Controlled Request — Full Control Chain Proof', () => {
 
     // Configure budget
     budgetStore.setConfig({
-      tenantId: 'tenant_ai_demo',
+      orgId: 'org_ai_demo',
       monthlyCapUsd: 500,
       warningThresholdPercent: 80,
     })
 
     // Check budget before
-    const budgetBefore = await checkBudget(budgetStore, 'tenant_ai_demo')
+    const budgetBefore = await checkBudget(budgetStore, 'org_ai_demo')
     evidence.budgetStatus = {
       status: budgetBefore.status,
       remainingUsd: budgetBefore.remainingUsd,
@@ -82,7 +82,7 @@ describe('AI-Controlled Request — Full Control Chain Proof', () => {
       },
       {
         model: 'gpt-4',
-        tenantId: 'tenant_ai_demo',
+        orgId: 'org_ai_demo',
         actorId: 'user_analyst_001',
         prompt: 'Summarize the quarterly financial report for Q1 2026.',
         systemPrompt: 'You are a financial analyst assistant.',
@@ -97,7 +97,7 @@ describe('AI-Controlled Request — Full Control Chain Proof', () => {
 
     // Check policy decision (simulated separately for artifact recording)
     const policyResult = policyRegistry.evaluate({
-      tenantId: 'tenant_ai_demo',
+      orgId: 'org_ai_demo',
       actorId: 'user_analyst_001',
       model: 'gpt-4',
       action: 'ai.invoke',
@@ -130,8 +130,8 @@ describe('AI-Controlled Request — Full Control Chain Proof', () => {
     expect(evidence.response!.costUsd).toBeGreaterThan(0)
   })
 
-  it('tenant and actor are attached', () => {
-    // runAI returns response with tenant/actor correlation via log store
+  it('org and actor are attached', () => {
+    // runAI returns response with org/actor correlation via log store
     expect(evidence.response!.id).toBeTruthy()
   })
 
@@ -145,12 +145,12 @@ describe('AI-Controlled Request — Full Control Chain Proof', () => {
       summary: buildSummary(SCENARIO, {
         trace_id: evidence.traceId,
         actor_id: 'user_analyst_001',
-        tenant_id: 'tenant_ai_demo',
+        org_id: 'org_ai_demo',
         ai_control_log_id: evidence.logEntryId,
       }),
       request: {
         model: 'gpt-4',
-        tenantId: 'tenant_ai_demo',
+        orgId: 'org_ai_demo',
         actorId: 'user_analyst_001',
         prompt: 'Summarize the quarterly financial report for Q1 2026.',
         temperature: 0.3,

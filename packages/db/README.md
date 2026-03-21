@@ -22,12 +22,12 @@ import { createScopedDb } from '@nzila/db'
 
 const db = createScopedDb(orgId)
 const records = await db.select().from(schema.policies)
-// Automatically filtered to orgId — no data leakage across tenants
+// Automatically filtered to orgId — no data leakage across orgs
 ```
 
 ## Schema
 
-Schemas are defined under `src/schema/` using Drizzle's `pgTable` builder. Most tables include an `org_id` column for tenant isolation.
+Schemas are defined under `src/schema/` using Drizzle's `pgTable` builder. Most tables include an `org_id` column for org isolation.
 
 ## Dependencies
 

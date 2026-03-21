@@ -31,8 +31,8 @@ This document specifies the complete org-scoping requirements for migration.
 | Tables with `org_id` column | **0 / 40+** |
 | RLS policies defined | **0** (RLS enabled on 17 tables but no policies written) |
 | Row-level filtering in queries | None — all `SELECT *` return global results |
-| Tenant isolation mechanism | None |
-| Schema-per-tenant | Not used |
+| Org isolation mechanism | None |
+| Schema-per-org | Not used |
 
 ### 2.2 Application Layer
 
@@ -41,7 +41,7 @@ This document specifies the complete org-scoping requirements for migration.
 | Files with org_id reference | **0 / 31** |
 | Auth context carrying org_id | No — auth returns `user_id` only |
 | API routes with org scoping | None |
-| Middleware tenant resolution | None |
+| Middleware org resolution | None |
 | Service constructors accepting org_id | None (all services are singletons) |
 
 ### 2.3 External Integrations
@@ -62,7 +62,7 @@ This document specifies the complete org-scoping requirements for migration.
 ### 3.1 Core Principles
 
 1. **Org is the root aggregate** — every business entity descends from an org
-2. **RLS enforces isolation** — application code cannot bypass tenant boundaries
+2. **RLS enforces isolation** — application code cannot bypass org boundaries
 3. **Auth carries org context** — JWT includes `org_id` claim
 4. **Services are org-scoped** — no singletons, every service instance knows its org
 5. **External credentials per-org** — each org has its own Zoho/API keys
@@ -475,8 +475,8 @@ This plan aligns with NzilaOS governance requirements:
 
 | Requirement | Status |
 |-------------|--------|
-| `tenant_key: "org_id"` (from manifest) | ✅ Implemented via org_id column |
-| `multi_tenant: true` (from manifest) | ✅ RLS + middleware enforce isolation |
+| `org_key: "org_id"` (from manifest) | ✅ Implemented via org_id column |
+| `multi_org: true` (from manifest) | ✅ RLS + middleware enforce isolation |
 | No singleton services | ✅ Factory pattern per-request |
 | Structured logging with org context | ✅ Logger carries org_id |
 | Audit trail per org | ✅ AuditLog table with org_id |

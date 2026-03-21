@@ -12,4 +12,4 @@ Operational procedures for incident response and system maintenance.
 
 ## Operations
 - [SLO Breach](slo-breach.md) — Error budget exhaustion
-- [Tenant Offboarding](tenant-offboarding.md) — Tenant exit procedure
+- [Org Offboarding](tenant-offboarding.md) — Org exit procedure

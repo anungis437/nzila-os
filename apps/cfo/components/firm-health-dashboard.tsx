@@ -2,7 +2,7 @@
  * CFO — Firm Health Dashboard (Client Component).
  *
  * Admin-level dashboard showing per-firm health scores, key metrics,
- * SLA compliance, and trend indicators. Designed for multi-tenant
+ * SLA compliance, and trend indicators. Designed for multi-org
  * VCFO platform administration.
  */
 'use client'

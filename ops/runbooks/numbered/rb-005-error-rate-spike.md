@@ -57,10 +57,10 @@
 3. **If infrastructure:**
    - Follow appropriate runbook (RB-001 for DB, RB-003 for integrations).
 
-4. **If specific to one tenant:**
-   - Check tenant-specific configuration.
-   - Isolate tenant if needed (`@nzila/platform-isolation`).
-   - Investigate tenant-specific data.
+4. **If specific to one org:**
+   - Check org-specific configuration.
+   - Isolate org if needed (`@nzila/platform-isolation`).
+   - Investigate org-specific data.
 
 ## Prevention
 

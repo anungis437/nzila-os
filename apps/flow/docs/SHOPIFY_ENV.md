@@ -13,7 +13,7 @@
 |---|---|---|
 | `SHOPIFY_WEBHOOK_SECRET` | Webhook HMAC signing secret from Shopify | — |
 | `SHOPIFY_API_VERSION` | Admin REST API version | `2024-01` |
-| `ORG_ID` | Organisation ID for multi-tenant credential lookup | — |
+| `ORG_ID` | Organisation ID for multi-org credential lookup | — |
 
 ## Setup Steps
 
@@ -38,9 +38,9 @@
    - Topics: `customers/create`, `customers/update`, `orders/create`, `orders/updated`
    - Copy the signing secret to `SHOPIFY_WEBHOOK_SECRET`
 
-## Database Credentials (multi-tenant)
+## Database Credentials (multi-org)
 
-For production multi-tenant setups, Shopify credentials are stored in the
+For production multi-org setups, Shopify credentials are stored in the
 `commerce_shopify_credentials` table per organisation. The `ShopifySyncService.fromOrg(orgId)`
 factory method resolves credentials automatically.
 

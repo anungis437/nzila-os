@@ -55,7 +55,7 @@ To maintain buyer trust, the following capabilities are explicitly excluded:
 | External API calls | Decisions do not trigger integrations without human action |
 | Data modification | The engine reads signals but never writes to source systems |
 | Model retraining | Rules are version-controlled code, not retrained models |
-| Cross-tenant data sharing | Decision records are scoped to org_id |
+| Cross-org data sharing | Decision records are scoped to org_id |
 
 ## AI Governance Controls
 

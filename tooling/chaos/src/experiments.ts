@@ -85,8 +85,8 @@ export const NZILA_EXPERIMENTS: NzilaExperiment[] = [
   // ── Data ──────────────────────────────────────────────────────────────
   {
     config: {
-      name: 'cross-tenant-isolation',
-      description: 'Verifies that org isolation holds under concurrent multi-tenant load',
+      name: 'cross-org-isolation',
+      description: 'Verifies that org isolation holds under concurrent multi-org load',
       category: 'data',
       targetService: 'all',
       faultType: 'error',
@@ -95,7 +95,7 @@ export const NZILA_EXPERIMENTS: NzilaExperiment[] = [
       steadyStateTimeout: 15_000,
       rollbackOnFailure: true,
     },
-    description: 'Run concurrent requests with different orgIds and verify no data leaks between tenants.',
+    description: 'Run concurrent requests with different orgIds and verify no data leaks between orgs.',
     frequency: 'weekly',
     category: 'Security',
   },

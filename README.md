@@ -225,7 +225,7 @@ All Next.js apps use Clerk auth, Tailwind CSS v4, and the `@nzila/ui` component 
 | Package | Purpose |
 |---------|---------|
 | `@nzila/platform-export` | Platform data export |
-| `@nzila/platform-isolation` | Org-level tenant isolation |
+| `@nzila/platform-isolation` | Org-level isolation |
 | `@nzila/platform-metrics` | Platform metrics collection |
 | `@nzila/platform-ops` | Operational snapshots |
 | `@nzila/platform-performance` | Performance envelopes |

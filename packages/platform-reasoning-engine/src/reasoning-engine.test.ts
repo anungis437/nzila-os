@@ -11,20 +11,20 @@ import type { ReasoningStore, ReasoningStrategy, Citation } from './index'
 import { OntologyEntityTypes, EntityStatuses } from '@nzila/platform-ontology'
 import type { ContextEnvelope } from '@nzila/platform-context-orchestrator'
 
-const TENANT = '00000000-0000-0000-0000-000000000001'
+const ORG = '00000000-0000-0000-0000-000000000001'
 const ENTITY_ID = '00000000-0000-0000-0000-000000000099'
 
 function makeContext(): ContextEnvelope {
   return {
     id: '00000000-0000-0000-0000-000000000050',
-    tenantId: TENANT,
+    tenantId: ORG,
     purpose: 'decision',
     primaryEntityType: OntologyEntityTypes.CASE,
     primaryEntityId: ENTITY_ID,
     assembledAt: '2025-06-01T00:00:00.000Z',
     entity: {
       id: ENTITY_ID,
-      tenantId: TENANT,
+      tenantId: ORG,
       entityType: OntologyEntityTypes.CASE,
       canonicalName: 'Case #42',
       aliases: [],
@@ -108,7 +108,7 @@ describe('platform-reasoning-engine', () => {
         strategy: makeStrategy(),
         context: makeContext(),
         request: {
-          tenantId: TENANT,
+          orgId: ORG,
           reasoningType: ReasoningTypes.RISK_BASED,
           entityType: OntologyEntityTypes.CASE,
           entityId: ENTITY_ID,
@@ -131,7 +131,7 @@ describe('platform-reasoning-engine', () => {
         strategy: makeStrategy(),
         context: makeContext(),
         request: {
-          tenantId: TENANT,
+          orgId: ORG,
           reasoningType: ReasoningTypes.RISK_BASED,
           entityType: OntologyEntityTypes.CASE,
           entityId: ENTITY_ID,
@@ -161,7 +161,7 @@ describe('platform-reasoning-engine', () => {
         strategy: failingStrategy,
         context: makeContext(),
         request: {
-          tenantId: TENANT,
+          orgId: ORG,
           reasoningType: ReasoningTypes.DEDUCTIVE,
           entityType: OntologyEntityTypes.CASE,
           entityId: ENTITY_ID,
@@ -185,7 +185,7 @@ describe('platform-reasoning-engine', () => {
         strategy: makeStrategy(),
         context: makeContext(),
         request: {
-          tenantId: TENANT,
+          orgId: ORG,
           reasoningType: ReasoningTypes.RISK_BASED,
           entityType: OntologyEntityTypes.CASE,
           entityId: ENTITY_ID,

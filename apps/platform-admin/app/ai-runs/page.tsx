@@ -74,7 +74,7 @@ export default function AIRunAuditViewer() {
             Audit Record Fields
           </h2>
           <ul className="space-y-1 text-sm text-gray-600">
-            <li>tenantId, entityType, entityId</li>
+            <li>orgId, entityType, entityId</li>
             <li>operationType, modelId, prompt</li>
             <li>result, confidence, reasoning</li>
             <li>evidence (citations with source type)</li>

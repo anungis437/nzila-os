@@ -6,7 +6,7 @@ export interface EventStore {
   save(event: DomainEvent): Promise<void>
   getByType(eventType: string, options?: { limit?: number }): Promise<DomainEvent[]>
   getByCorrelation(correlationId: string): Promise<DomainEvent[]>
-  getByTenant(tenantId: string, options?: { limit?: number }): Promise<DomainEvent[]>
+  getByOrg(orgId: string, options?: { limit?: number }): Promise<DomainEvent[]>
 }
 
 // ─── In-Memory Event Store (testing / development) ──────────────────────────
@@ -27,8 +27,8 @@ export class InMemoryEventStore implements EventStore {
     return this.events.filter((e) => e.metadata.correlationId === correlationId)
   }
 
-  async getByTenant(tenantId: string, options?: { limit?: number }): Promise<DomainEvent[]> {
-    const filtered = this.events.filter((e) => e.metadata.tenantId === tenantId)
+  async getByOrg(orgId: string, options?: { limit?: number }): Promise<DomainEvent[]> {
+    const filtered = this.events.filter((e) => e.metadata.orgId === orgId)
     return filtered.slice(-(options?.limit ?? 1000))
   }
 

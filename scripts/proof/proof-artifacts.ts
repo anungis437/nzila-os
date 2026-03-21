@@ -19,7 +19,7 @@ export interface ProofSummary {
   timestamp: string
   trace_id: string
   actor_id: string | null
-  tenant_id: string | null
+  org_id: string | null
   governance_decision_id: string | null
   audit_event_id: string | null
   audit_chain_valid: boolean | null
@@ -56,7 +56,7 @@ export function buildSummary(
     timestamp: new Date().toISOString(),
     trace_id: '',
     actor_id: null,
-    tenant_id: null,
+    org_id: null,
     governance_decision_id: null,
     audit_event_id: null,
     audit_chain_valid: null,

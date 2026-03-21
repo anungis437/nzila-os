@@ -1,5 +1,5 @@
 /**
- * Tenant Resource Quotas
+ * Org Resource Quotas
  *
  * Enforcement layer for per-org resource limits.
  * Works with @nzila/platform-cost for usage data.

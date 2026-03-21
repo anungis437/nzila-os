@@ -14,6 +14,6 @@
 
 export { CircuitBreaker, type CircuitBreakerOptions, type CircuitState } from './circuit-breaker';
 export { Bulkhead, type BulkheadOptions } from './bulkhead';
-export { TenantBulkheadPool, TenantBulkheadOverloadError, type TenantBulkheadPoolOptions } from './tenant-bulkhead';
+export { OrgBulkheadPool, OrgBulkheadOverloadError, type OrgBulkheadPoolOptions } from './org-bulkhead';
 export { retry, type RetryOptions } from './retry';
 export { withTimeout, type TimeoutOptions } from './timeout';

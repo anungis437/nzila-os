@@ -16,7 +16,7 @@
 ### **Technical Specifications**
 
 - **Database Entities:** 4,773 (largest union platform in North America)
-- **Row-Level Security Policies:** 238 (multi-tenant, 100+ unions per platform)
+- **Row-Level Security Policies:** 238 (multi-org, 100+ unions per platform)
 - **ML Pipeline:** Pension forecasting, churn prediction, workload optimization
 - **Core Modules:** 10+ (Membership, Grievances, CBA Intelligence, Pension, Elections, Campaigns, Financial Management, Insurance Adapter, Settlement Tracker, Compliance Hub)
 - **Tech Stack:** Django 5, Azure PostgreSQL, Drizzle ORM, optional Clerk auth (Profile: django-aca-azurepg)
@@ -96,7 +96,7 @@
 | Competitor | Product | Strengths | Weaknesses | Nzila Advantage |
 |------------|---------|-----------|------------|-----------------|
 | **BargainingPower** (BargainingPower.com) | Grievance tracking | Established (10+ years), 200+ customers | Grievance-only (no pension, no campaigns), legacy UI, no AI/ML | Union Eyes: 10 modules (comprehensive), ML pipeline, modern UX, 4,773 entities |
-| **UnionWare** (UnionWare Suite) | Desktop software (membership, financials) | 1,000+ customers (small unions), Windows integration | Legacy desktop app (Windows 95 era), no cloud, no mobile, no AI | Union Eyes: Cloud-native, mobile-first, AI/ML, multi-tenant security (238 RLS policies) |
+| **UnionWare** (UnionWare Suite) | Desktop software (membership, financials) | 1,000+ customers (small unions), Windows integration | Legacy desktop app (Windows 95 era), no cloud, no mobile, no AI | Union Eyes: Cloud-native, mobile-first, AI/ML, multi-org security (238 RLS policies) |
 | **iMIS** (by ASI) | Association Management Software | Generic AMS (20,000+ customers), strong financials module | Not union-specific (no CBA, no grievances, no ML churn), expensive ($50K+ per year) | Union Eyes: Union-tailored workflows, CBA intelligence, ML forecasting, $15K-$25K ACV (50% cheaper) |
 
 **Horizontal Competitors (Generic HR Tech):**
@@ -111,7 +111,7 @@
 
 1. **Technical Moat:**
    - **4,773 entities** (10x larger than BargainingPower, UnionWare)
-   - **238 RLS policies** (multi-tenant security, enterprise-grade)
+   - **238 RLS policies** (multi-org security, enterprise-grade)
    - **ML pipeline** (pension forecasting 92% accuracy vs actuary baseline, churn prediction 87% precision)
 
 2. **Domain Expertise Moat:**

@@ -30,7 +30,7 @@
 
 | Category | Competitors | NzilaOS Advantage |
 |----------|-------------|-------------------|
-| Farm management | Farmforce, Dimitra, AgroStar | Org-isolated multi-tenant + evidence packs |
+| Farm management | Farmforce, Dimitra, AgroStar | Org-isolated multi-org + evidence packs |
 | Commodity trading | AgriDigital, Covantis | Integrated ops + intelligence, not just trading |
 | Traceability | Trace, SourceMap, FairTrade tools | Hash-chained evidence, not just metadata |
 | Agri analytics | aWhere, Gro Intelligence | Embedded in ops workflow, not standalone |

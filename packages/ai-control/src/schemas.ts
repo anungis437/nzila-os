@@ -4,7 +4,7 @@ import { z } from 'zod'
 
 export const aiRequestSchema = z.object({
   model: z.string().min(1),
-  tenantId: z.string().min(1),
+  orgId: z.string().min(1),
   actorId: z.string().min(1),
   prompt: z.string().min(1),
   systemPrompt: z.string().optional(),
@@ -37,7 +37,7 @@ export type AIResponse = z.infer<typeof aiResponseSchema>
 // ─── Budget Config ──────────────────────────────────────────────────────────
 
 export const budgetConfigSchema = z.object({
-  tenantId: z.string().min(1),
+  orgId: z.string().min(1),
   monthlyCapUsd: z.number().positive(),
   perRequestCapUsd: z.number().positive().optional(),
   warningThresholdPercent: z.number().min(0).max(100).default(80),
@@ -51,7 +51,7 @@ export type BudgetConfig = z.infer<typeof budgetConfigSchema>
 // ─── Budget Status ──────────────────────────────────────────────────────────
 
 export const budgetStatusSchema = z.object({
-  tenantId: z.string(),
+  orgId: z.string(),
   period: z.string(),
   spentUsd: z.number().nonnegative(),
   monthlyCapUsd: z.number().positive(),
@@ -65,7 +65,7 @@ export type BudgetStatus = z.infer<typeof budgetStatusSchema>
 // ─── Policy Context ─────────────────────────────────────────────────────────
 
 export const aiPolicyContextSchema = z.object({
-  tenantId: z.string().min(1),
+  orgId: z.string().min(1),
   actorId: z.string().min(1),
   role: z.string().optional(),
   model: z.string().min(1),
@@ -95,7 +95,7 @@ export type OutputClassification = 'safe' | 'warning' | 'restricted'
 export const aiLogEntrySchema = z.object({
   id: z.string(),
   timestamp: z.string().datetime(),
-  tenantId: z.string(),
+  orgId: z.string(),
   actorId: z.string(),
   model: z.string(),
   promptHash: z.string(),

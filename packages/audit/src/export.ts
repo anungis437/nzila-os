@@ -4,14 +4,14 @@ import type { AuditEntry } from './schema.js'
 // ─── Audit Export ───────────────────────────────────────────────────────────
 
 export interface AuditExportOptions {
-  readonly tenantId: string
+  readonly orgId: string
   readonly fromDate?: string
   readonly toDate?: string
   readonly format?: 'json' | 'csv'
 }
 
 export interface AuditExportResult {
-  readonly tenantId: string
+  readonly orgId: string
   readonly exportedAt: string
   readonly entryCount: number
   readonly entries: AuditEntry[]
@@ -23,7 +23,7 @@ export async function exportAuditLog(
   store: AuditStore,
   options: AuditExportOptions,
 ): Promise<AuditExportResult> {
-  const entries = await store.getEntries(options.tenantId, {
+  const entries = await store.getEntries(options.orgId, {
     fromDate: options.fromDate,
     toDate: options.toDate,
     limit: 100_000,
@@ -37,7 +37,7 @@ export async function exportAuditLog(
       : JSON.stringify(entries, null, 2)
 
   return {
-    tenantId: options.tenantId,
+    orgId: options.orgId,
     exportedAt: new Date().toISOString(),
     entryCount: entries.length,
     entries,
@@ -51,7 +51,7 @@ function entriesToCsv(entries: AuditEntry[]): string {
     'id',
     'timestamp',
     'actorId',
-    'tenantId',
+    'orgId',
     'action',
     'resource',
     'resourceId',
@@ -67,7 +67,7 @@ function entriesToCsv(entries: AuditEntry[]): string {
       e.id,
       e.timestamp,
       e.actorId,
-      e.tenantId,
+      e.orgId,
       e.action,
       e.resource,
       e.resourceId ?? '',

@@ -186,8 +186,8 @@ export default async function PilotExportPage() {
           <div className="mb-2">
             <StatusBadge ok={bundle.isolation.isolationVerified} label={bundle.isolation.isolationVerified ? 'Verified' : 'Unverified'} />
           </div>
-          <InfoRow label="Tenants Checked" value={bundle.isolation.tenantsChecked} />
-          <InfoRow label="Cross-Tenant Leaks" value={bundle.isolation.crossTenantLeaks} />
+          <InfoRow label="Orgs Checked" value={bundle.isolation.tenantsChecked} />
+          <InfoRow label="Cross-Org Leaks" value={bundle.isolation.crossTenantLeaks} />
         </SectionCard>
       </div>
 

@@ -38,8 +38,8 @@ spec:
           type: string
           description: Team that owns this app
           default: platform-team
-        tenantScoped:
-          title: Tenant-Scoped
+        orgScoped:
+          title: Org-Scoped
           type: boolean
           description: Whether the app requires orgId scoping
           default: true
@@ -74,7 +74,7 @@ spec:
           description: ${{ parameters.description }}
           port: ${{ parameters.port }}
           owner: ${{ parameters.owner }}
-          tenantScoped: ${{ parameters.tenantScoped }}
+          orgScoped: ${{ parameters.orgScoped }}
           needsDatabase: ${{ parameters.needsDatabase }}
           needsBlobStorage: ${{ parameters.needsBlobStorage }}
           needsAiSdk: ${{ parameters.needsAiSdk }}

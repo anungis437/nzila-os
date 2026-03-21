@@ -90,7 +90,7 @@ describe('Contract-Backed Event Flow — Full Pipeline Proof', () => {
         currency: 'USD',
       },
       {
-        tenantId: 'tenant_commerce',
+        orgId: 'org_commerce',
         actorId: 'user_checkout_001',
         traceId: evidence.traceId,
         correlationId,
@@ -109,7 +109,7 @@ describe('Contract-Backed Event Flow — Full Pipeline Proof', () => {
         status: 'success',
       },
       {
-        tenantId: 'tenant_commerce',
+        orgId: 'org_commerce',
         actorId: 'user_checkout_001',
         traceId: evidence.traceId,
         correlationId,
@@ -154,8 +154,8 @@ describe('Contract-Backed Event Flow — Full Pipeline Proof', () => {
     expect(paymentEvent.metadata.causationId).toBe(orderEvent.id)
   })
 
-  it('tenant and actor context propagated', () => {
-    expect(orderEvent.metadata.tenantId).toBe('tenant_commerce')
+  it('org and actor context propagated', () => {
+    expect(orderEvent.metadata.orgId).toBe('org_commerce')
     expect(orderEvent.metadata.actorId).toBe('user_checkout_001')
   })
 
@@ -169,7 +169,7 @@ describe('Contract-Backed Event Flow — Full Pipeline Proof', () => {
       summary: buildSummary(SCENARIO, {
         trace_id: evidence.traceId,
         actor_id: 'user_checkout_001',
-        tenant_id: 'tenant_commerce',
+        org_id: 'org_commerce',
         event_contract: 'OrderCreated_v1, PaymentProcessed_v1',
       }),
       event: {

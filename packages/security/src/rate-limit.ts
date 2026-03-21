@@ -1,5 +1,5 @@
 /**
- * Per-tenant, per-route sliding-window rate limiter.
+ * Per-org, per-route sliding-window rate limiter.
  *
  * Uses an in-memory store by default; swap `RateLimitStore` for Redis
  * or another distributed backend in production.
@@ -24,10 +24,10 @@ export interface RateLimitStore {
 }
 
 /**
- * Build a composite rate-limit key from tenant + route.
+ * Build a composite rate-limit key from org + route.
  */
-export function rateLimitKey(tenantId: string, route: string): string {
-  return `rl:${tenantId}:${route}`;
+export function rateLimitKey(orgId: string, route: string): string {
+  return `rl:${orgId}:${route}`;
 }
 
 // ── In-memory store ─────────────────────────────────────────
@@ -75,8 +75,8 @@ export class RateLimiter {
     private readonly config: RateLimitConfig,
   ) {}
 
-  async check(tenantId: string, route: string): Promise<RateLimitResult> {
-    const key = rateLimitKey(tenantId, route);
+  async check(orgId: string, route: string): Promise<RateLimitResult> {
+    const key = rateLimitKey(orgId, route);
     const { count, resetAt } = await this.store.hit(key, this.config.windowMs);
     const remaining = Math.max(0, this.config.maxRequests - count);
     return {
@@ -86,7 +86,7 @@ export class RateLimiter {
     };
   }
 
-  async reset(tenantId: string, route: string): Promise<void> {
-    await this.store.reset(rateLimitKey(tenantId, route));
+  async reset(orgId: string, route: string): Promise<void> {
+    await this.store.reset(rateLimitKey(orgId, route));
   }
 }

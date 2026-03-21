@@ -33,7 +33,7 @@ export function verifyChain(entries: readonly AuditEntry[]): VerificationResult 
       id: entry.id,
       timestamp: entry.timestamp,
       actorId: entry.actorId,
-      tenantId: entry.tenantId,
+      orgId: entry.orgId,
       action: entry.action,
       resource: entry.resource,
       resourceId: entry.resourceId,
@@ -77,10 +77,10 @@ export function verifyChain(entries: readonly AuditEntry[]): VerificationResult 
 
 // ─── Store-based Verification ───────────────────────────────────────────────
 
-export async function verifyTenantChain(
+export async function verifyOrgChain(
   store: AuditStore,
-  tenantId: string,
+  orgId: string,
 ): Promise<VerificationResult> {
-  const entries = await store.getEntries(tenantId, { limit: 100_000 })
+  const entries = await store.getEntries(orgId, { limit: 100_000 })
   return verifyChain(entries)
 }

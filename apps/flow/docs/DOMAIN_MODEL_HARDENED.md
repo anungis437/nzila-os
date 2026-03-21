@@ -34,7 +34,7 @@ No bypass is permitted. All critical mutations route through `executeCommand()`.
 | Field | Type | Notes |
 |-------|------|-------|
 | id | UUID | Primary key |
-| org_id | string | Multi-tenant isolation |
+| org_id | string | Multi-org isolation |
 | customer_id | UUID | Required for send |
 | status | QuoteStatus | State machine governed |
 | title | string | 1–500 chars |
@@ -55,7 +55,7 @@ No bypass is permitted. All critical mutations route through `executeCommand()`.
 | Field | Type | Notes |
 |-------|------|-------|
 | id | UUID | Primary key |
-| org_id | string | Multi-tenant isolation |
+| org_id | string | Multi-org isolation |
 | quote_id | UUID? | Source quote (nullable for manual orders) |
 | customer_id | UUID | Required |
 | status | OrderStatus | Main lifecycle state |
@@ -100,7 +100,7 @@ Reference entity — no state machine. Contact info, lead time, rating.
 | Field | Type | Notes |
 |-------|------|-------|
 | id | UUID | Primary key |
-| org_id | string | Multi-tenant isolation |
+| org_id | string | Multi-org isolation |
 | order_id | UUID | Parent order |
 | vendor_id | UUID | Assigned vendor |
 | status | PurchaseOrderStatus | State machine governed |

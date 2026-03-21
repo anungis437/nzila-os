@@ -130,13 +130,13 @@
       }
     },
     {
-      "title": "Cost Attribution by Tenant",
+      "title": "Cost Attribution by Org",
       "type": "piechart",
       "gridPos": { "h": 10, "w": 12, "x": 0, "y": 26 },
       "targets": [
         {
-          "expr": "sum(nzila_cost_usd_total) by (tenant_id)",
-          "legendFormat": "{{tenant_id}}",
+          "expr": "sum(nzila_cost_usd_total) by (org_id)",
+          "legendFormat": "{{org_id}}",
           "refId": "A"
         }
       ]

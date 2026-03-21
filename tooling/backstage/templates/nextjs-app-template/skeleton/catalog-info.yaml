@@ -8,7 +8,7 @@ metadata:
     backstage.io/techdocs-ref: dir:./docs
     nzila.app/port: "${{ values.port }}"
     nzila.app/stack: nextjs
-    nzila.app/tenant-scoped: "${{ values.tenantScoped }}"
+    nzila.app/org-scoped: "${{ values.orgScoped }}"
 spec:
   type: service
   lifecycle: production

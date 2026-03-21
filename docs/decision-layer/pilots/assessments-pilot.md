@@ -32,7 +32,7 @@
 - Integration with external regulatory reporting systems
 - Custom decision rules (uses built-in 8-rule set)
 - Auto-hold or auto-release of exam results (decisions are advisory)
-- Multi-tenant or multi-jurisdiction deployment
+- Multi-org or multi-jurisdiction deployment
 
 ---
 

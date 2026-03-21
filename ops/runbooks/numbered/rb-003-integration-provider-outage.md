@@ -14,12 +14,12 @@
 - Integration SLA drops below threshold (see `ops/slo-policy.yml`)
 - ChatOps alert: "Integration SLA regression: {provider}"
 - DLQ backlog growing for specific provider type
-- Tenant reports: "sync not updating"
+- Org reports: "sync not updating"
 
 ## Impact
 
 - Data not flowing to/from external systems (Stripe, QuickBooks, HubSpot, etc.)
-- Tenant operations may be blocked if integration is critical path
+- Org operations may be blocked if integration is critical path
 
 ## Diagnosis
 
@@ -38,7 +38,7 @@
 
 1. **If provider is down (their outage):**
    - No action needed on our side — circuit breaker will queue events.
-   - Notify affected tenants via email/in-app banner.
+   - Notify affected orgs via email/in-app banner.
    - Monitor provider status page for recovery.
    - Events will auto-retry on recovery.
 

@@ -9,7 +9,7 @@
     "./recommendations": "./src/recommendations.ts",
     "./metering": "./src/metering.ts",
     "./alerts": "./src/alerts.ts",
-    "./tenant-provisioning": "./src/tenant-provisioning.ts"
+    "./org-provisioning": "./src/org-provisioning.ts"
   },
   "scripts": {
     "build": "tsc --build",

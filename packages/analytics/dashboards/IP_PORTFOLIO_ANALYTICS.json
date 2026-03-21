@@ -295,7 +295,7 @@
             "notes": "Proprietary algorithm for tuning AI personality (warmth, formality, humor, empathy, technical depth)"
           },
           {
-            "trade_secret": "Multi-Tenant Data Isolation Architecture",
+            "trade_secret": "Multi-Org Data Isolation Architecture",
             "platform": "Backbone (Cross-Platform)",
             "category": "Architecture",
             "valuation": 100000,
@@ -404,7 +404,7 @@
         }
       },
       "audit_schedule": [
-        {"date": "2026-03-20", "trade_secret": "Multi-Tenant Data Isolation Architecture", "type": "Quarterly Security Audit", "owner": "CTO"},
+        {"date": "2026-03-20", "trade_secret": "Multi-Org Data Isolation Architecture", "type": "Quarterly Security Audit", "owner": "CTO"},
         {"date": "2026-04-15", "trade_secret": "Companion Engine Personality Graph Algorithm", "type": "Quarterly Code Access Audit", "owner": "CTO"},
         {"date": "2026-04-15", "trade_secret": "Backbone Migration Sequencing Algorithm", "type": "Bi-Annual Review", "owner": "CTO"},
         {"date": "2026-04-20", "trade_secret": "CORA Climate Adaptation Algorithm", "type": "Quarterly Audit", "owner": "CTO"},

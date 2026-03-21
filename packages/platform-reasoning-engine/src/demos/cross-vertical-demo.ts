@@ -16,7 +16,7 @@ import { createInMemoryDecisionStore, createDecisionNode, executeDecision, Decis
 import { createInMemoryAIRunStore, createNullPolicyEvaluator, executeGovernedAIRun, AIOperationTypes } from '@nzila/platform-governed-ai'
 import { createInMemoryReasoningStore, executeReasoningChain, ReasoningTypes } from '@nzila/platform-reasoning-engine'
 
-const TENANT = 'tenant-cross-vertical-demo'
+const ORG = 'org-cross-vertical-demo'
 
 export async function runCrossVerticalDemo() {
   console.log('=== NzilaOS Cross-Vertical Reasoning Demo ===\n')
@@ -33,7 +33,7 @@ export async function runCrossVerticalDemo() {
 
   // Register agri knowledge
   await registerKnowledgeAsset(knowledgeStore, {
-    tenantId: TENANT,
+    tenantId: ORG,
     name: 'Crop Yield Threshold Policy',
     knowledgeType: KnowledgeTypes.POLICY,
     content: 'If predicted yield drops below 60% of historical average, trigger supply chain alert.',
@@ -43,7 +43,7 @@ export async function runCrossVerticalDemo() {
 
   // AI: Yield prediction
   const yieldRun = await executeGovernedAIRun(aiStore, policyEval, {
-    tenantId: TENANT,
+    tenantId: ORG,
     entityType: OntologyEntityTypes.PRODUCT,
     entityId: 'crop-maize-2024',
     operationType: AIOperationTypes.RISK_SCORING,
@@ -66,7 +66,7 @@ export async function runCrossVerticalDemo() {
 
   // Decision: Supply chain alert
   const agriDecision = await createDecisionNode(decisionStore, {
-    tenantId: TENANT,
+    tenantId: ORG,
     entityType: OntologyEntityTypes.PRODUCT,
     entityId: 'crop-maize-2024',
     decisionType: DecisionTypes.RISK_ASSESSMENT,
@@ -80,7 +80,7 @@ export async function runCrossVerticalDemo() {
   bus.publish(
     buildPlatformEvent({
       type: PlatformEventTypes.ENTITY_UPDATED,
-      tenantId: TENANT,
+      tenantId: ORG,
       entityType: OntologyEntityTypes.PRODUCT,
       entityId: 'crop-maize-2024',
       payload: { alert: 'yield_below_threshold', yieldRatio: 0.525 },
@@ -94,7 +94,7 @@ export async function runCrossVerticalDemo() {
 
   // Register commerce knowledge
   await registerKnowledgeAsset(knowledgeStore, {
-    tenantId: TENANT,
+    tenantId: ORG,
     name: 'Commodity Price Surge Policy',
     knowledgeType: KnowledgeTypes.RULE,
     content: 'If commodity prices surge >25% in 30 days, flag transactions for review.',
@@ -104,7 +104,7 @@ export async function runCrossVerticalDemo() {
 
   // AI: Transaction anomaly detection
   const commerceRun = await executeGovernedAIRun(aiStore, policyEval, {
-    tenantId: TENANT,
+    tenantId: ORG,
     entityType: OntologyEntityTypes.TRANSACTION,
     entityId: 'txn-batch-2024-03',
     operationType: AIOperationTypes.ANOMALY_DETECTION,
@@ -134,7 +134,7 @@ export async function runCrossVerticalDemo() {
   console.log('\n--- Cross-Vertical Reasoning ---')
 
   const chain = await executeReasoningChain(reasoningStore, {
-    tenantId: TENANT,
+    orgId: ORG,
     entityType: OntologyEntityTypes.ORGANIZATION,
     entityId: 'org-nzila-demo',
     reasoningType: ReasoningTypes.CROSS_VERTICAL,

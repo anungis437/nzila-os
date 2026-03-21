@@ -85,7 +85,7 @@ Check `reports/ops-readiness-audit.json` for current error classification covera
 
 | Condition | Action |
 |-----------|--------|
-| Provider down >1 hour | Notify affected tenants via status page |
+| Provider down >1 hour | Notify affected orgs via status page |
 | Multi-provider failure | Escalate to P1, involve infrastructure team |
 | Data loss confirmed | Invoke `secret-compromise.md` if credentials involved |
 | DLQ depth >1000 | Alert product team, consider feature flag to disable integration |

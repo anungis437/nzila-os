@@ -49,7 +49,7 @@ export function strictValidate<T>(schema: ZodType<T>, input: unknown): T {
 
 export const UUIDSchema = z.string().uuid();
 
-export const TenantIdSchema = z.string().min(1).max(128);
+export const OrgIdSchema = z.string().min(1).max(128);
 
 export const PaginationSchema = z.object({
   page: z.coerce.number().int().min(1).default(1),

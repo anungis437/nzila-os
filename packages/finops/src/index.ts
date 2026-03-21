@@ -2,7 +2,7 @@
  * @nzila/finops — FinOps Package
  *
  * Complements @nzila/platform-cost with:
- * - Tenant resource quotas (enforcement + tracking)
+ * - Org resource quotas (enforcement + tracking)
  * - FinOps recommendations (cost optimization)
  * - Usage metering (per-org resource consumption)
  * - Budget alert policies

@@ -56,7 +56,7 @@ Nzila’s future tech investments fall under **five major innovation themes**:
 | **Capability** | **Rationale** |
 | --- | --- |
 | LLM Self-Auditing & Guardrails | Enable transparent AI in health and education |
-| Decentralized Consent Management | Expand user trust + multi-tenant governance across B2B/B2C |
+| Decentralized Consent Management | Expand user trust + multi-org governance across B2B/B2C |
 | Adaptive Voice UX | Natural, inclusive interface for aging, neurodiverse, and mobility-limited users |
 | Longitudinal Cognition Indexing | Predictive layer for mental wellness and learning journeys |
 | AI Monetization Engine | Drive revenue via external SDKs, rate-limited APIs, and white-label licensing |

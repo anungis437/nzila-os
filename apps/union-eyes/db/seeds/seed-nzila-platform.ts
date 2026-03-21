@@ -2,7 +2,7 @@
  * Seed: Nzila Platform Organization
  *
  * Creates the platform-level organization that platform admins use to
- * view cross-tenant metrics and manage the Union Eyes instance.
+ * view cross-org metrics and manage the Union Eyes instance.
  *
  * Uses the DEFAULT_ORGANIZATION_ID constant (458a56cb-...) so that all
  * code referencing that ID resolves to this record.
@@ -26,7 +26,7 @@ const NZILA_PLATFORM_ORG = {
   slug: 'nzila-platform',
   displayName: 'Nzila',
   shortName: 'Nzila',
-  description: 'Platform-level organization for Nzila administrators. Provides cross-tenant metrics and platform management.',
+  description: 'Platform-level organization for Nzila administrators. Provides cross-org metrics and platform management.',
   organizationType: 'congress' as const,
   parentId: null,
   hierarchyPath: [] as string[],
@@ -43,8 +43,8 @@ const NZILA_PLATFORM_ORG = {
   status: 'active',
   featuresEnabled: [
     'platform-admin',
-    'cross-tenant-metrics',
-    'tenant-management',
+    'cross-org-metrics',
+    'org-management',
     'audit-log',
   ],
   settings: {

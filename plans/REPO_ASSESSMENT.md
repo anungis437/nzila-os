@@ -100,7 +100,7 @@ graph TB
 
 Defines the canonical business entity type system with **40+ entity types**:
 
-- **People**: Tenant, Organization, Person, User, Advisor, Member, Client, Family, Farmer
+- **People**: Organization, Person, User, Advisor, Member, Client, Family, Farmer
 - **Cases & Claims**: Case, Claim, Program
 - **Documents & Communications**: Document, Communication
 - **Workflows**: Task, Workflow, Decision, Approval
@@ -121,7 +121,7 @@ Cross-vertical reasoning framework with:
 
 AI operations with full governance lifecycle:
 
-1. **Policy Pre-check** — Tenant/regulatory policy evaluation
+1. **Policy Pre-check** — Org/regulatory policy evaluation
 2. **Model Invocation** — Structured AI model calls
 3. **Evidence Grounding** — Attach evidence chain
 4. **Audit Persistence** — Full AI run recording
@@ -192,7 +192,7 @@ The following platform packages were observed in the environment and represent t
 - **Secret scanning**: `.gitleaks.toml` configured
 - **Security headers**: `tooling/security-headers-check.ts`
 - **Environment validation**: Zod-based env validation at startup
-- **Tenant isolation**: Org-scoped RLS (Row-Level Security)
+- **Org isolation**: Org-scoped RLS (Row-Level Security)
 
 ---
 
@@ -253,7 +253,7 @@ The following platform packages were observed in the environment and represent t
 3. **Well-structured monorepo** — Clear separation between apps, packages, and tooling
 4. **Extensive CI/CD** — 20+ workflows covering security, compliance, and deployment
 5. **Modern platform capabilities** — Ontology, reasoning engine, governed AI
-6. **Multi-tenant architecture** — Org-scoped RLS throughout
+6. **Multi-org architecture** — Org-scoped RLS throughout
 
 ### Areas of Attention
 

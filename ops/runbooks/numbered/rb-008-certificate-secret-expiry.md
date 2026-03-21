@@ -20,7 +20,7 @@
 
 - **TLS expiry (P1):** All users blocked from accessing the application
 - **API key expiry (P2):** Specific integrations fail, DLQ backlog grows
-- **OAuth token expiry (P2):** Tenant-specific integration disruption
+- **OAuth token expiry (P2):** Org-specific integration disruption
 
 ## Diagnosis
 

@@ -13,7 +13,7 @@
  *     route: "/api/claims",
  *     layers: [traceLayer(), authLayer(authConfig), auditLayer(auditConfig)],
  *   }, async (ctx) => {
- *     // Business logic — ctx has tenantId, actorId, roles
+ *     // Business logic — ctx has orgId, actorId, roles
  *     return { success: true, status: 200, body: { id: "123" } };
  *   });
  */

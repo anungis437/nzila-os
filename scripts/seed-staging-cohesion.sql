@@ -1,7 +1,7 @@
 -- ============================================================
 -- Staging Cohesion Seed: Fill org-distribution gaps
 -- NZILA Ventures = platform owner (billing/platform data only)
--- CAPE + CLC = UE tenant orgs (union-specific data)
+-- CAPE + CLC = UE orgs (union-specific data)
 -- ============================================================
 
 -- Org ID aliases:
@@ -341,7 +341,7 @@ VALUES
    'CLC Standard Dues', 'CLC-DUES-STD', 'percentage', 'monthly', '2023-07-01', NOW(), NOW());
 
 -- ============================================================
--- 20. ORG SHARING SETTINGS: CLC=0 (CAPE=1) — CLC tenant setting
+-- 20. ORG SHARING SETTINGS: CLC=0 (CAPE=1) — CLC org setting
 -- ============================================================
 INSERT INTO organization_sharing_settings (id, organization_id, created_at, updated_at)
 VALUES

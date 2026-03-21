@@ -26,7 +26,7 @@ export {
 
 export {
   verifyChain,
-  verifyTenantChain,
+  verifyOrgChain,
 } from './verify.js'
 
 export {

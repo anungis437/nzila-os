@@ -91,7 +91,7 @@ export default async function DeliveriesPage(props: Props) {
       <div className="mb-6">
         <h1 className="text-2xl font-bold text-gray-900">Delivery Logs</h1>
         <p className="text-sm text-gray-500">
-          All integration deliveries. Filtered by org tenant. Platform admins see global view.
+          All integration deliveries. Filtered by org. Platform admins see global view.
         </p>
       </div>
 

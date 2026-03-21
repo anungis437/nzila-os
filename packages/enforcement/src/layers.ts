@@ -27,7 +27,7 @@ export function traceLayer(): EnforcementLayer {
 export interface AuthLayerConfig {
   /** Callback to extract actor info from headers. */
   extractActor: (headers: Record<string, string | undefined>) => Promise<{
-    tenantId: string;
+    orgId: string;
     actorId: string;
     roles: string[];
   } | null>;
@@ -42,7 +42,7 @@ export function authLayer(config: AuthLayerConfig): EnforcementLayer {
     if (!actor) {
       return { success: false, status: 401, body: { error: "Unauthorized" } };
     }
-    ctx.tenantId = actor.tenantId;
+    ctx.orgId = actor.orgId;
     ctx.actorId = actor.actorId;
     ctx.roles = actor.roles;
     return next();
@@ -52,7 +52,7 @@ export function authLayer(config: AuthLayerConfig): EnforcementLayer {
 // ── Rate-Limit Layer ────────────────────────────────────────
 
 export interface RateLimitLayerConfig {
-  check: (tenantId: string, route: string) => Promise<{
+  check: (orgId: string, route: string) => Promise<{
     allowed: boolean;
     remaining: number;
     resetAt: number;
@@ -61,9 +61,9 @@ export interface RateLimitLayerConfig {
 
 export function rateLimitLayer(config: RateLimitLayerConfig): EnforcementLayer {
   return async (ctx: EnforcementContext, next: NextFn): Promise<EnforcementResult> => {
-    if (!ctx.tenantId) return next(); // No tenant = skip rate limit
+    if (!ctx.orgId) return next(); // No org = skip rate limit
 
-    const result = await config.check(ctx.tenantId, ctx.route);
+    const result = await config.check(ctx.orgId, ctx.route);
     if (!result.allowed) {
       return {
         success: false,
@@ -109,7 +109,7 @@ export interface AuditLayerConfig {
   /** Record an audit entry. Called after the handler completes. */
   record: (entry: {
     actorId: string;
-    tenantId: string;
+    orgId: string;
     action: string;
     resource: string;
     resourceId?: string;
@@ -126,7 +126,7 @@ export function auditLayer(config: AuditLayerConfig): EnforcementLayer {
     // Fire-and-forget audit (don't block response, but still await for safety)
     await config.record({
       actorId: ctx.actorId ?? "anonymous",
-      tenantId: ctx.tenantId ?? "unknown",
+      orgId: ctx.orgId ?? "unknown",
       action: ctx.action,
       resource: ctx.resourceType,
       resourceId: ctx.resourceId,

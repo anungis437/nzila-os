@@ -19,7 +19,7 @@ import { createInMemoryDecisionStore, createDecisionNode, executeDecision, getDe
 import { createInMemoryAIRunStore, createNullPolicyEvaluator, executeGovernedAIRun, AIOperationTypes } from '@nzila/platform-governed-ai'
 import { createInMemoryReasoningStore, executeReasoningChain, ReasoningTypes } from '@nzila/platform-reasoning-engine'
 
-const TENANT = 'tenant-mobility-demo'
+const ORG = 'org-mobility-demo'
 
 export async function runMobilityDemo() {
   console.log('=== NzilaOS Mobility Demo ===\n')
@@ -30,7 +30,7 @@ export async function runMobilityDemo() {
 
   const _vehicleNode = await graphStore.addNode({
     id: 'vehicle-001',
-    tenantId: TENANT,
+    tenantId: ORG,
     entityType: OntologyEntityTypes.VEHICLE,
     entityId: 'vehicle-001',
     status: EntityStatuses.ACTIVE,
@@ -41,7 +41,7 @@ export async function runMobilityDemo() {
 
   const _driverNode = await graphStore.addNode({
     id: 'driver-001',
-    tenantId: TENANT,
+    tenantId: ORG,
     entityType: OntologyEntityTypes.EMPLOYEE,
     entityId: 'driver-001',
     status: EntityStatuses.ACTIVE,
@@ -52,7 +52,7 @@ export async function runMobilityDemo() {
 
   const _tripNode = await graphStore.addNode({
     id: 'trip-001',
-    tenantId: TENANT,
+    tenantId: ORG,
     entityType: OntologyEntityTypes.CASE,
     entityId: 'trip-001',
     status: EntityStatuses.ACTIVE,
@@ -63,7 +63,7 @@ export async function runMobilityDemo() {
 
   await graphStore.addEdge({
     id: 'edge-1',
-    tenantId: TENANT,
+    tenantId: ORG,
     fromNodeId: 'trip-001',
     toNodeId: 'vehicle-001',
     relationshipType: RelationshipTypes.ASSIGNED_TO,
@@ -73,7 +73,7 @@ export async function runMobilityDemo() {
 
   await graphStore.addEdge({
     id: 'edge-2',
-    tenantId: TENANT,
+    tenantId: ORG,
     fromNodeId: 'trip-001',
     toNodeId: 'driver-001',
     relationshipType: RelationshipTypes.ASSIGNED_TO,
@@ -93,7 +93,7 @@ export async function runMobilityDemo() {
   bus.publish(
     buildPlatformEvent({
       type: PlatformEventTypes.ENTITY_CREATED,
-      tenantId: TENANT,
+      tenantId: ORG,
       entityType: OntologyEntityTypes.CASE,
       entityId: 'trip-001',
       payload: { origin: 'Kinshasa', destination: 'Lubumbashi' },
@@ -106,7 +106,7 @@ export async function runMobilityDemo() {
   console.log('\n3. Registering fleet policy...')
   const knowledgeStore = createInMemoryKnowledgeStore()
   await registerKnowledgeAsset(knowledgeStore, {
-    tenantId: TENANT,
+    tenantId: ORG,
     name: 'Fleet Trip Approval Policy',
     knowledgeType: KnowledgeTypes.POLICY,
     content: 'Trips over 500km require manager approval. Vehicles must have valid inspection.',
@@ -119,7 +119,7 @@ export async function runMobilityDemo() {
   console.log('\n4. Making trip approval decision...')
   const decisionStore = createInMemoryDecisionStore()
   const riskDecision = await createDecisionNode(decisionStore, {
-    tenantId: TENANT,
+    tenantId: ORG,
     entityType: OntologyEntityTypes.CASE,
     entityId: 'trip-001',
     decisionType: DecisionTypes.RISK_ASSESSMENT,
@@ -131,7 +131,7 @@ export async function runMobilityDemo() {
   await executeDecision(decisionStore, riskDecision.id)
 
   const approvalDecision = await createDecisionNode(decisionStore, {
-    tenantId: TENANT,
+    tenantId: ORG,
     entityType: OntologyEntityTypes.CASE,
     entityId: 'trip-001',
     decisionType: DecisionTypes.APPROVAL,
@@ -150,7 +150,7 @@ export async function runMobilityDemo() {
   const aiStore = createInMemoryAIRunStore()
   const policyEval = createNullPolicyEvaluator()
   const aiRun = await executeGovernedAIRun(aiStore, policyEval, {
-    tenantId: TENANT,
+    tenantId: ORG,
     entityType: OntologyEntityTypes.CASE,
     entityId: 'trip-001',
     operationType: AIOperationTypes.RISK_SCORING,
@@ -175,7 +175,7 @@ export async function runMobilityDemo() {
   console.log('\n6. Executing reasoning chain...')
   const reasoningStore = createInMemoryReasoningStore()
   const chain = await executeReasoningChain(reasoningStore, {
-    tenantId: TENANT,
+    orgId: ORG,
     entityType: OntologyEntityTypes.CASE,
     entityId: 'trip-001',
     reasoningType: ReasoningTypes.RISK_BASED,

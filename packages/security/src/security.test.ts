@@ -2,7 +2,7 @@ import { describe, it, expect } from "vitest";
 import { RateLimiter, InMemoryRateLimitStore } from "./rate-limit.js";
 import { ServiceAuthVerifier, ServiceAuthError } from "./auth.js";
 import { EnvSecretsProvider, CachedSecretsProvider, requireSecret } from "./secrets.js";
-import { assertTenantOwnership, TenantIsolationError, withTenantScope } from "./isolation.js";
+import { assertOrgOwnership, OrgIsolationError, withOrgScope } from "./isolation.js";
 import { validateInput, UUIDSchema, PaginationSchema } from "./validation.js";
 import { z } from "zod";
 
@@ -13,7 +13,7 @@ describe("RateLimiter", () => {
     const store = new InMemoryRateLimitStore();
     const limiter = new RateLimiter(store, { maxRequests: 5, windowMs: 60_000 });
 
-    const result = await limiter.check("tenant1", "/api/data");
+    const result = await limiter.check("org1", "/api/data");
     expect(result.allowed).toBe(true);
     expect(result.remaining).toBe(4);
   });
@@ -31,7 +31,7 @@ describe("RateLimiter", () => {
     expect(result.remaining).toBe(0);
   });
 
-  it("isolates tenants", async () => {
+  it("isolates orgs", async () => {
     const store = new InMemoryRateLimitStore();
     const limiter = new RateLimiter(store, { maxRequests: 2, windowMs: 60_000 });
 
@@ -113,24 +113,24 @@ describe("Secrets", () => {
   });
 });
 
-// ── Tenant Isolation ────────────────────────────────────────
+// ── Org Isolation ────────────────────────────────────────
 
-describe("Tenant Isolation", () => {
-  it("passes for matching tenant", () => {
+describe("Org Isolation", () => {
+  it("passes for matching org", () => {
     expect(() =>
-      assertTenantOwnership({ tenantId: "t1" }, { tenantId: "t1" }),
+      assertOrgOwnership({ orgId: "t1" }, { orgId: "t1" }),
     ).not.toThrow();
   });
 
-  it("throws for mismatched tenant", () => {
+  it("throws for mismatched org", () => {
     expect(() =>
-      assertTenantOwnership({ tenantId: "t2" }, { tenantId: "t1" }),
-    ).toThrow(TenantIsolationError);
+      assertOrgOwnership({ orgId: "t2" }, { orgId: "t1" }),
+    ).toThrow(OrgIsolationError);
   });
 
-  it("withTenantScope adds tenantId to query", () => {
-    const scoped = withTenantScope({ status: "active" }, { tenantId: "t1" });
-    expect(scoped.tenantId).toBe("t1");
+  it("withOrgScope adds orgId to query", () => {
+    const scoped = withOrgScope({ status: "active" }, { orgId: "t1" });
+    expect(scoped.orgId).toBe("t1");
     expect(scoped.status).toBe("active");
   });
 });

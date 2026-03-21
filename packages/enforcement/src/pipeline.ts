@@ -10,8 +10,8 @@
 export interface EnforcementContext {
   /** Unique trace/request ID. */
   traceId: string;
-  /** Authenticated tenant ID (set by auth layer). */
-  tenantId?: string;
+  /** Authenticated org ID (set by auth layer). */
+  orgId?: string;
   /** Authenticated actor ID (set by auth layer). */
   actorId?: string;
   /** Roles of the authenticated actor. */

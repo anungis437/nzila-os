@@ -30,7 +30,7 @@ The governed AI lifecycle has four stages:
 ### Step 2: Check policy state
 
 If pre-check is rejecting requests:
-- Verify tenant policy configuration
+- Verify org policy configuration
 - Check if a new regulatory constraint was added
 - Review policy engine logs in `platform-policy-engine`
 

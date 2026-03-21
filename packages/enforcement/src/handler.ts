@@ -39,7 +39,7 @@ export function createContext(opts: {
  * Build a fully-enforced handler.
  *
  * The handler function is the final layer in the pipeline.
- * It receives the enriched context (with tenantId, actorId, roles populated
+ * It receives the enriched context (with orgId, actorId, roles populated
  * by earlier layers).
  */
 export function createEnforcedHandler(

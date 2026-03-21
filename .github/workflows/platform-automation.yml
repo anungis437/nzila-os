@@ -1,7 +1,7 @@
 ##
 # Platform Automation Workflow
 #
-# Runs daily FinOps analysis and weekly tenant health checks.
+# Runs daily FinOps analysis and weekly org health checks.
 # Generates cost optimization reports and quota compliance evidence.
 ##
 
@@ -21,7 +21,7 @@ on:
           - all
           - finops-report
           - quota-audit
-          - tenant-health
+          - org-health
           - cost-recommendations
         default: all
 
@@ -29,7 +29,8 @@ permissions:
   contents: read
 
 env:
-  NODE_VERSION: '22'
+  NODE_VERSION: '22'
+
 
 jobs:
   # ── FinOps Cost Analysis ──────────────────────────────────────────────────
@@ -140,7 +141,7 @@ jobs:
             grep -c "DEFAULT_QUOTA_POLICIES" packages/finops/src/quotas.ts || true
           fi
 
-      - name: Validate tenant isolation
+      - name: Validate org isolation
         run: |
           echo "Checking @nzila/platform-isolation..."
           if [ -d packages/platform-isolation ]; then
@@ -157,7 +158,7 @@ jobs:
             "checks": {
               "cost_policy_exists": true,
               "quota_enforcement_module": true,
-              "tenant_isolation_package": true,
+              "org_isolation_package": true,
               "rls_enforcement": true,
               "budget_alerts_configured": true
             },
@@ -175,13 +176,13 @@ jobs:
           path: evidence/quota-audit.json
           retention-days: 365
 
-  # ── Tenant Health Check ───────────────────────────────────────────────────
-  tenant-health:
+  # ── Org Health Check ───────────────────────────────────────────────────
+  org-health:
     runs-on: ubuntu-latest
-    name: Tenant Health
+    name: Org Health
     if: >
       github.event.inputs.task == 'all' ||
-      github.event.inputs.task == 'tenant-health' ||
+      github.event.inputs.task == 'org-health' ||
       github.event_name == 'schedule'
 
     steps:
@@ -189,22 +190,22 @@ jobs:
 
       - name: Verify provisioning automation
         run: |
-          echo "Checking tenant provisioning module..."
-          if [ -f packages/finops/src/tenant-provisioning.ts ]; then
-            echo "✅ Tenant provisioning module found"
+          echo "Checking org provisioning module..."
+          if [ -f packages/finops/src/org-provisioning.ts ]; then
+            echo "✅ Org provisioning module found"
           fi
 
       - name: Verify tier configurations
         run: |
           echo "Validating tier definitions..."
-          grep -c "free\|starter\|professional\|enterprise" packages/finops/src/tenant-provisioning.ts || true
+          grep -c "free\|starter\|professional\|enterprise" packages/finops/src/org-provisioning.ts || true
           echo "✅ All tiers defined"
 
-      - name: Generate tenant health report
+      - name: Generate org health report
         run: |
           mkdir -p evidence
-          cat > evidence/tenant-health.md <<EOF
-          # Tenant Health Report — $(date -u +%Y-%m-%d)
+          cat > evidence/org-health.md <<EOF
+          # Org Health Report — $(date -u +%Y-%m-%d)
 
           ## Provisioning Automation
 
@@ -230,6 +231,6 @@ jobs:
 
       - uses: actions/upload-artifact@v7
         with:
-          name: tenant-health-${{ github.run_id }}
-          path: evidence/tenant-health.md
+          name: org-health-${{ github.run_id }}
+          path: evidence/org-health.md
           retention-days: 365

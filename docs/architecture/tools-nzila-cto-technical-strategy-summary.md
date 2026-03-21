@@ -92,7 +92,7 @@ Nzila operates on a **shared services + vertical pod** model:
 | **Q2–Q3 2026** | FamilySync DB + multi-profile logic |
 | **Q4 2026** | AI Core v1 launched; NLP optimization phase begins |
 | **2027** | Companion SDK designed for platform extension |
-| **2028** | Optional multi-tenant infrastructure + developer onboarding tools |
+| **2028** | Optional multi-org infrastructure + developer onboarding tools |
 
 ---
 

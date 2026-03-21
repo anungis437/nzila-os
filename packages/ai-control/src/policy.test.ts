@@ -7,7 +7,7 @@ describe("AIPolicyRegistry", () => {
     setAIPolicyRegistry(registry);
 
     const result = checkAIPolicy({
-      tenantId: "t1",
+      orgId: "t1",
       actorId: "u1",
       model: "gpt-4",
       action: "completion",
@@ -28,7 +28,7 @@ describe("AIPolicyRegistry", () => {
     setAIPolicyRegistry(registry);
 
     const result = checkAIPolicy({
-      tenantId: "t1",
+      orgId: "t1",
       actorId: "u1",
       model: "dangerous-model",
       action: "completion",
@@ -40,7 +40,7 @@ describe("AIPolicyRegistry", () => {
   it("evaluates directly on registry instance", () => {
     const registry = new AIPolicyRegistry();
     const result = registry.evaluate({
-      tenantId: "t1",
+      orgId: "t1",
       actorId: "u1",
       model: "gpt-4",
       action: "completion",

@@ -8,7 +8,7 @@ metadata:
     backstage.io/techdocs-ref: dir:./docs
     nzila.app/port: "3008"
     nzila.app/stack: nextjs
-    nzila.app/tenant-scoped: "true"
+    nzila.app/org-scoped: "true"
   tags:
     - nextjs
     - finance

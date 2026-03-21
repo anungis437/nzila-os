@@ -49,6 +49,6 @@ Every AI decision produces evidence:
 2. **Policy decision** — Risk tier evaluation recorded
 3. **Attestation** — Self-hashing JSON for AI actions
 4. **OTel span** — Distributed trace with `nzila.ai.risk_tier`
-5. **Budget record** — Cost attributed to tenant
+5. **Budget record** — Cost attributed to org
 
 This evidence chain is the foundation for SOC 2 Type II AI-related controls.

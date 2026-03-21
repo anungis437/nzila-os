@@ -70,7 +70,7 @@ export default function SearchExplorer() {
             Capabilities
           </h2>
           <ul className="space-y-1 text-sm text-gray-600">
-            <li>Tenant-isolated search per request</li>
+            <li>Org-isolated search per request</li>
             <li>Entity type filtering via ontology</li>
             <li>Tag-based filtering and boosting</li>
             <li>Pagination with offset and limit</li>

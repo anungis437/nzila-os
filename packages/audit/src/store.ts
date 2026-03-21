@@ -4,13 +4,13 @@ import type { AuditEntry } from './schema.js'
 
 export interface AuditStore {
   append(entry: AuditEntry): Promise<void>
-  getLastEntry(tenantId: string): Promise<AuditEntry | undefined>
+  getLastEntry(orgId: string): Promise<AuditEntry | undefined>
   getEntry(id: string): Promise<AuditEntry | undefined>
   getEntries(
-    tenantId: string,
+    orgId: string,
     options?: { limit?: number; offset?: number; fromDate?: string; toDate?: string },
   ): Promise<AuditEntry[]>
-  getEntryCount(tenantId: string): Promise<number>
+  getEntryCount(orgId: string): Promise<number>
 }
 
 // ─── In-Memory Store (testing / development) ────────────────────────────────
@@ -22,9 +22,9 @@ export class InMemoryAuditStore implements AuditStore {
     this.entries.push(Object.freeze({ ...entry }))
   }
 
-  async getLastEntry(tenantId: string): Promise<AuditEntry | undefined> {
+  async getLastEntry(orgId: string): Promise<AuditEntry | undefined> {
     for (let i = this.entries.length - 1; i >= 0; i--) {
-      if (this.entries[i].tenantId === tenantId) {
+      if (this.entries[i].orgId === orgId) {
         return this.entries[i]
       }
     }
@@ -36,10 +36,10 @@ export class InMemoryAuditStore implements AuditStore {
   }
 
   async getEntries(
-    tenantId: string,
+    orgId: string,
     options?: { limit?: number; offset?: number; fromDate?: string; toDate?: string },
   ): Promise<AuditEntry[]> {
-    let filtered = this.entries.filter((e) => e.tenantId === tenantId)
+    let filtered = this.entries.filter((e) => e.orgId === orgId)
 
     if (options?.fromDate) {
       filtered = filtered.filter((e) => e.timestamp >= options.fromDate!)
@@ -54,8 +54,8 @@ export class InMemoryAuditStore implements AuditStore {
     return filtered.slice(offset, offset + limit)
   }
 
-  async getEntryCount(tenantId: string): Promise<number> {
-    return this.entries.filter((e) => e.tenantId === tenantId).length
+  async getEntryCount(orgId: string): Promise<number> {
+    return this.entries.filter((e) => e.orgId === orgId).length
   }
 
   /** Test helper — returns all entries */

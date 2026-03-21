@@ -10,7 +10,7 @@ describe("validateDomainEvent", () => {
       version: 1,
       timestamp: new Date().toISOString(),
       metadata: {
-        tenantId: "t1",
+        orgId: "t1",
         actorId: "u1",
         source: "test",
       },
@@ -39,7 +39,7 @@ describe("parseDomainEvent", () => {
       type: "test.event",
       version: 1,
       timestamp: new Date().toISOString(),
-      metadata: { tenantId: "t1", actorId: "u1", source: "test" },
+      metadata: { orgId: "t1", actorId: "u1", source: "test" },
       payload: {},
     };
     const parsed = parseDomainEvent(event);
@@ -58,7 +58,7 @@ describe("safeParseDomainEvent", () => {
       type: "ev",
       version: 1,
       timestamp: new Date().toISOString(),
-      metadata: { tenantId: "t", actorId: "a", source: "test" },
+      metadata: { orgId: "t", actorId: "a", source: "test" },
       payload: {},
     });
     expect(result.success).toBe(true);

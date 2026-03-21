@@ -84,8 +84,8 @@ Side exits: EXPIRED, CANCELLED (from DRAFT/SENT_TO_CLIENT)
    don't send emails. Integrate with a provider for production.
 3. **Zoho sync**: Workflow status changes don't automatically sync
    to Zoho. Add webhooks or polling for real-time sync.
-4. **Multi-tenant isolation**: Demo data is org-scoped but in-memory
-   stores don't enforce tenant isolation.
+4. **Multi-org isolation**: Demo data is org-scoped but in-memory
+   stores don't enforce org isolation.
 
 ## Deployment Checklist
 

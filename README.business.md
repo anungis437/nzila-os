@@ -100,7 +100,7 @@ For high-stakes business events (contract completions, regulatory filings, compl
 
 ### 3. Organisation-Scoped Multi-Tenancy
 
-All data is isolated by organisation. There is no "default" organisation, no global data, no cross-tenant leakage. This is enforced at the code level, the database level, and verified by automated tests on every commit.
+All data is isolated by organisation. There is no "default" organisation, no global data, no cross-org leakage. This is enforced at the code level, the database level, and verified by automated tests on every commit.
 
 ### 4. Automated Compliance Gates
 

@@ -59,7 +59,7 @@ authLayer({
     const decoded = await verifyToken(token)
     return {
       actorId: decoded.sub,
-      tenantId: decoded.orgId,
+      orgId: decoded.orgId,
       roles: decoded.roles,
     }
   },

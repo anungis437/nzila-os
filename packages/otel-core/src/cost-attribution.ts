@@ -2,7 +2,7 @@
  * Cost Attribution Telemetry
  *
  * Attaches cost-relevant metadata to every span so that
- * compute/storage/network/AI costs can be broken down per tenant.
+ * compute/storage/network/AI costs can be broken down per org.
  */
 
 import { z } from 'zod';
@@ -10,7 +10,7 @@ import { z } from 'zod';
 // ── Schemas ──────────────────────────────────────────────────────────────────
 
 export const CostAttributionSchema = z.object({
-  tenantId: z.string().min(1),
+  orgId: z.string().min(1),
   workflowId: z.string().optional(),
   resourceType: z.enum(['compute', 'storage', 'network', 'ai']),
   usage: z.number().nonnegative(),
@@ -26,7 +26,7 @@ export const CostAttributionSchema = z.object({
 export type CostAttribution = z.infer<typeof CostAttributionSchema>;
 
 export const ResourceMetricsSchema = z.object({
-  tenantId: z.string().min(1),
+  orgId: z.string().min(1),
   serviceName: z.string(),
   durationMs: z.number().nonnegative(),
   memoryMb: z.number().nonnegative(),
@@ -115,7 +115,7 @@ export async function attributeCost(
       spanId = ctx.spanId;
 
       // Inject cost attributes into the span
-      activeSpan.setAttribute('nzila.tenant.id', validated.tenantId);
+      activeSpan.setAttribute('nzila.org.id', validated.orgId);
       activeSpan.setAttribute('nzila.cost.usd', totalCost);
       activeSpan.setAttribute('nzila.cost.resource_type', resourceType);
       activeSpan.setAttribute('compute.duration.ms', validated.durationMs);
@@ -129,7 +129,7 @@ export async function attributeCost(
   }
 
   return CostAttributionSchema.parse({
-    tenantId: validated.tenantId,
+    orgId: validated.orgId,
     workflowId: undefined,
     resourceType,
     usage: validated.durationMs,

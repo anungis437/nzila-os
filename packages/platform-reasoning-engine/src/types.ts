@@ -75,7 +75,7 @@ export interface ReasoningConclusion {
 
 export interface ReasoningChain {
   readonly id: string
-  readonly tenantId: string
+  readonly orgId: string
   readonly reasoningType: ReasoningType
   readonly status: ReasoningStatus
   readonly entityType: OntologyEntityType
@@ -124,8 +124,8 @@ export interface ReasoningStore {
     entityType: OntologyEntityType,
     entityId: string,
   ): Promise<readonly ReasoningChain[]>
-  getChainsByTenant(
-    tenantId: string,
+  getChainsByOrg(
+    orgId: string,
     limit?: number,
   ): Promise<readonly ReasoningChain[]>
 }
@@ -133,7 +133,7 @@ export interface ReasoningStore {
 // ── Zod Schemas ─────────────────────────────────────────────────────────────
 
 export const ReasoningRequestSchema = z.object({
-  tenantId: z.string().uuid(),
+  orgId: z.string().uuid(),
   reasoningType: z.enum(
     Object.values(ReasoningTypes) as [string, ...string[]],
   ),

@@ -69,14 +69,14 @@ describe("authLayer", () => {
     const ctx = makeCtx();
     const layer = authLayer({
       extractActor: async () => ({
-        tenantId: "t1",
+        orgId: "t1",
         actorId: "u1",
         roles: ["admin"],
       }),
     });
     await layer(ctx, async () => ({ success: true, status: 200 }));
 
-    expect(ctx.tenantId).toBe("t1");
+    expect(ctx.orgId).toBe("t1");
     expect(ctx.actorId).toBe("u1");
     expect(ctx.roles).toEqual(["admin"]);
   });
@@ -88,7 +88,7 @@ describe("rateLimitLayer", () => {
       check: async () => ({ allowed: false, remaining: 0, resetAt: Date.now() + 60000 }),
     });
     const ctx = makeCtx();
-    ctx.tenantId = "t1";
+    ctx.orgId = "t1";
     const result = await layer(ctx, async () => ({ success: true, status: 200 }));
     expect(result.status).toBe(429);
   });
@@ -118,7 +118,7 @@ describe("auditLayer", () => {
     const layer = auditLayer({ record: recorded });
     const ctx = makeCtx();
     ctx.actorId = "u1";
-    ctx.tenantId = "t1";
+    ctx.orgId = "t1";
 
     await layer(ctx, async () => ({ success: true, status: 200 }));
 

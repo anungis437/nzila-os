@@ -17,7 +17,7 @@
 
 ### 2. Scope Agreement
 
-- [ ] Pilot scope document signed (apps, modules, tenant count)
+- [ ] Pilot scope document signed (apps, modules, org count)
 - [ ] Duration defined (typical: 30–90 days)
 - [ ] Success criteria defined and measurable
 - [ ] Data volume / transaction estimates documented

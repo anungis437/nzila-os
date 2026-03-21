@@ -52,7 +52,7 @@
 ### If Slow Burn (1×)
 
 1. **Create a ticket** for investigation
-2. **Analyze patterns** — is it periodic? timezone-related? tenant-specific?
+2. **Analyze patterns** — is it periodic? timezone-related? org-specific?
 3. **Implement fix** in next sprint if not urgent
 4. **Monitor** error budget recovery over 7 days
 

@@ -6,7 +6,7 @@ export const auditEntrySchema = z.object({
   id: z.string().uuid(),
   timestamp: z.string().datetime(),
   actorId: z.string().min(1),
-  tenantId: z.string().min(1),
+  orgId: z.string().min(1),
   action: z.string().min(1),
   resource: z.string().min(1),
   resourceId: z.string().optional(),
@@ -23,7 +23,7 @@ export type AuditEntry = z.infer<typeof auditEntrySchema>
 
 export const auditInputSchema = z.object({
   actorId: z.string().min(1),
-  tenantId: z.string().min(1),
+  orgId: z.string().min(1),
   action: z.string().min(1),
   resource: z.string().min(1),
   resourceId: z.string().optional(),
@@ -38,7 +38,7 @@ export type AuditInput = z.infer<typeof auditInputSchema>
 
 export const rootHashSnapshotSchema = z.object({
   id: z.string().uuid(),
-  tenantId: z.string().min(1),
+  orgId: z.string().min(1),
   timestamp: z.string().datetime(),
   entryCount: z.number().int().nonnegative(),
   rootHash: z.string(),

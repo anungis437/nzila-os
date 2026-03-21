@@ -1,7 +1,7 @@
 # Runbook: Orchestrator Workflow Failure
 
 **Scope:** Workflow execution failures in the orchestration layer
-**Severity:** P2 (single workflow) / P1 (core workflows: tenant-onboarding, invoice-generation)
+**Severity:** P2 (single workflow) / P1 (core workflows: org-onboarding, invoice-generation)
 **On-call:** Platform Engineering
 
 ## Detection

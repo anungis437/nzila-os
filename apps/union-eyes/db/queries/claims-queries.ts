@@ -292,7 +292,7 @@ export const getClaimsAssignedToUser = async (
     try {
       const conditions = [eq(claims.assignedTo, userId)];
       
-      // Filter by organization if provided (for multi-tenant isolation)
+      // Filter by organization if provided (for multi-org isolation)
       if (organizationSlug) {
         // Convert organization slug to UUID
         const [org] = await dbOrTx

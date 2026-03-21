@@ -52,7 +52,7 @@ All runbooks are consolidated in [`ops/runbooks/`](../ops/runbooks/):
 | Category | Location | Contents |
 |----------|----------|----------|
 | Platform incidents | [`ops/runbooks/platform/`](../ops/runbooks/platform/) | Orchestrator, integration, AI, event fabric, observability failures, secret compromise, SLO breach |
-| Numbered procedures | [`ops/runbooks/numbered/`](../ops/runbooks/numbered/) | DB pool exhaustion, DLQ backlog, provider outage, latency regression, error rate, tenant isolation, deployment failure, cert/secret expiry, hash chain integrity |
+| Numbered procedures | [`ops/runbooks/numbered/`](../ops/runbooks/numbered/) | DB pool exhaustion, DLQ backlog, provider outage, latency regression, error rate, org isolation, deployment failure, cert/secret expiry, hash chain integrity |
 | Commerce | [`ops/runbooks/commerce/`](../ops/runbooks/commerce/) | Audit gap, evidence pack, governance override, org isolation, saga compensation, stuck state |
 | Security | [`ops/runbooks/security/`](../ops/runbooks/security/) | Data breach, key rotation |
 
@@ -77,7 +77,7 @@ System design, boundaries, and technical strategy.
 | [Policy Engine](architecture/policy-engine.md) | RBAC & zero-trust |
 | [Stack Authority](architecture/STACK_AUTHORITY.md) | Technology authority |
 | [Stack Fragmentation Matrix](architecture/STACK_FRAGMENTATION_MATRIX.md) | Tech debt tracking |
-| [Org Isolation](architecture/ORG_ISOLATION.md) | Multi-tenant isolation |
+| [Org Isolation](architecture/ORG_ISOLATION.md) | Multi-org isolation |
 | [Org-Scoped Tables](architecture/ORG_SCOPED_TABLES.md) | Data isolation |
 | [Polyglot Persistence](architecture/POLYGLOT_PERSISTENCE.md) | Data layer strategy |
 | [Evidence Lifecycle](architecture/EVIDENCE_LIFECYCLE.md) | Audit evidence model |
@@ -146,7 +146,7 @@ Agricultural vertical specification (modules 00–08).
 
 ### [Pilot](pilot/)
 
-Pilot runbook and operational procedures for tenant rollouts.
+Pilot runbook and operational procedures for org rollouts.
 
 ### [Migration](migration/)
 

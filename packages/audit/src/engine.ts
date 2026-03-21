@@ -26,7 +26,7 @@ export class AuditEngine {
   async record(input: AuditInput): Promise<AuditEntry> {
     const validated = auditInputSchema.parse(input)
 
-    const lastEntry = await this.store.getLastEntry(validated.tenantId)
+    const lastEntry = await this.store.getLastEntry(validated.orgId)
     const prevHash = lastEntry?.hash ?? GENESIS_HASH
 
     const id = randomUUID()
@@ -36,7 +36,7 @@ export class AuditEngine {
       id,
       timestamp,
       actorId: validated.actorId,
-      tenantId: validated.tenantId,
+      orgId: validated.orgId,
       action: validated.action,
       resource: validated.resource,
       resourceId: validated.resourceId,
@@ -49,7 +49,7 @@ export class AuditEngine {
       id,
       timestamp,
       actorId: validated.actorId,
-      tenantId: validated.tenantId,
+      orgId: validated.orgId,
       action: validated.action,
       resource: validated.resource,
       resourceId: validated.resourceId,
@@ -65,17 +65,17 @@ export class AuditEngine {
   }
 
   async getEntries(
-    tenantId: string,
+    orgId: string,
     options?: { limit?: number; offset?: number; fromDate?: string; toDate?: string },
   ): Promise<AuditEntry[]> {
-    return this.store.getEntries(tenantId, options)
+    return this.store.getEntries(orgId, options)
   }
 
   async getEntry(id: string): Promise<AuditEntry | undefined> {
     return this.store.getEntry(id)
   }
 
-  async getEntryCount(tenantId: string): Promise<number> {
-    return this.store.getEntryCount(tenantId)
+  async getEntryCount(orgId: string): Promise<number> {
+    return this.store.getEntryCount(orgId)
   }
 }

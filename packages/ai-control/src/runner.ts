@@ -53,13 +53,13 @@ export async function runAI(
   // 2. Check policy
   const policyDecision = config.policyRegistry
     ? config.policyRegistry.evaluate({
-        tenantId: validated.tenantId,
+        orgId: validated.orgId,
         actorId: validated.actorId,
         model: validated.model,
         action: 'ai.invoke',
       })
     : checkAIPolicy({
-        tenantId: validated.tenantId,
+        orgId: validated.orgId,
         actorId: validated.actorId,
         model: validated.model,
         action: 'ai.invoke',
@@ -74,10 +74,10 @@ export async function runAI(
   }
 
   // 3. Check budget
-  const budgetStatus = await checkBudget(config.budgetStore, validated.tenantId)
+  const budgetStatus = await checkBudget(config.budgetStore, validated.orgId)
   if (budgetStatus.status === 'blocked') {
     throw new AIControlError(
-      `AI budget exceeded for tenant ${validated.tenantId}: ${budgetStatus.usagePercent.toFixed(1)}% used`,
+      `AI budget exceeded for org ${validated.orgId}: ${budgetStatus.usagePercent.toFixed(1)}% used`,
       'BUDGET_EXCEEDED',
       { budgetStatus },
     )
@@ -107,7 +107,7 @@ export async function runAI(
   }
 
   // 7. Record spend
-  await recordSpend(config.budgetStore, validated.tenantId, providerResult.costUsd)
+  await recordSpend(config.budgetStore, validated.orgId, providerResult.costUsd)
 
   // 8. Log the request
   const logEntry = createAILogEntry(validated, response, policyDecision)

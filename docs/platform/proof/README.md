@@ -92,7 +92,7 @@ Every proof artifact is a self-contained JSON file that:
 
 - Can be parsed by any JSON tool
 - Contains trace IDs linking back to the originating request
-- Includes timestamps, actor IDs, tenant IDs, and governance decisions
+- Includes timestamps, actor IDs, org IDs, and governance decisions
 - Audit entries form a hash chain verifiable with `@nzila/audit.verifyChain()`
 - Summary files contain a `status: "pass"` field for machine verification
 

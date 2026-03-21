@@ -1,37 +1,37 @@
 /**
- * Tenant Provisioning Automation
+ * Org Provisioning Automation
  *
- * Automates new org/tenant onboarding with:
+ * Automates new org onboarding with:
  * - Resource quota assignment
  * - Database schema provisioning (RLS)
  * - Default configuration
  * - Evidence trail for compliance
  *
- * Invariant: Every tenant operation is org-scoped.
+ * Invariant: Every org operation is org-scoped.
  */
 
 import { z } from 'zod';
 
 // ── Schemas ───────────────────────────────────────────────────────────────────
 
-export const TenantTierSchema = z.enum(['free', 'starter', 'professional', 'enterprise']);
-export type TenantTier = z.infer<typeof TenantTierSchema>;
+export const OrgTierSchema = z.enum(['free', 'starter', 'professional', 'enterprise']);
+export type OrgTier = z.infer<typeof OrgTierSchema>;
 
-export const TenantProvisionRequestSchema = z.object({
+export const OrgProvisionRequestSchema = z.object({
   orgId: z.string().min(1, 'orgId is required'),
   orgName: z.string().min(1),
-  tier: TenantTierSchema,
+  tier: OrgTierSchema,
   region: z.string().default('canadacentral'),
   adminEmail: z.string().email(),
   features: z.array(z.string()).default([]),
   metadata: z.record(z.string()).optional(),
 });
 
-export type TenantProvisionRequest = z.infer<typeof TenantProvisionRequestSchema>;
+export type OrgProvisionRequest = z.infer<typeof OrgProvisionRequestSchema>;
 
-export const TenantConfigSchema = z.object({
+export const OrgConfigSchema = z.object({
   orgId: z.string(),
-  tier: TenantTierSchema,
+  tier: OrgTierSchema,
   quotas: z.object({
     maxUsers: z.number(),
     maxAiRequestsPerDay: z.number(),
@@ -53,11 +53,11 @@ export const TenantConfigSchema = z.object({
   provisionedBy: z.string(),
 });
 
-export type TenantConfig = z.infer<typeof TenantConfigSchema>;
+export type OrgConfig = z.infer<typeof OrgConfigSchema>;
 
 // ── Tier-Based Defaults ───────────────────────────────────────────────────────
 
-const TIER_DEFAULTS: Record<TenantTier, Omit<TenantConfig, 'orgId' | 'tier' | 'features' | 'provisionedAt' | 'provisionedBy'>> = {
+const TIER_DEFAULTS: Record<OrgTier, Omit<OrgConfig, 'orgId' | 'tier' | 'features' | 'provisionedAt' | 'provisionedBy'>> = {
   free: {
     quotas: {
       maxUsers: 5,
@@ -66,7 +66,7 @@ const TIER_DEFAULTS: Record<TenantTier, Omit<TenantConfig, 'orgId' | 'tier' | 'f
       maxApiCallsPerDay: 1_000,
       maxIntegrations: 1,
     },
-    database: { rlsEnabled: true, schema: 'tenant_free' },
+    database: { rlsEnabled: true, schema: 'org_free' },
     security: { mfaRequired: false, sessionTimeoutMinutes: 480, ipAllowlist: [] },
   },
   starter: {
@@ -77,7 +77,7 @@ const TIER_DEFAULTS: Record<TenantTier, Omit<TenantConfig, 'orgId' | 'tier' | 'f
       maxApiCallsPerDay: 50_000,
       maxIntegrations: 5,
     },
-    database: { rlsEnabled: true, schema: 'tenant_starter' },
+    database: { rlsEnabled: true, schema: 'org_starter' },
     security: { mfaRequired: false, sessionTimeoutMinutes: 480, ipAllowlist: [] },
   },
   professional: {
@@ -88,7 +88,7 @@ const TIER_DEFAULTS: Record<TenantTier, Omit<TenantConfig, 'orgId' | 'tier' | 'f
       maxApiCallsPerDay: 500_000,
       maxIntegrations: 20,
     },
-    database: { rlsEnabled: true, schema: 'tenant_professional' },
+    database: { rlsEnabled: true, schema: 'org_professional' },
     security: { mfaRequired: true, sessionTimeoutMinutes: 240, ipAllowlist: [] },
   },
   enterprise: {
@@ -99,7 +99,7 @@ const TIER_DEFAULTS: Record<TenantTier, Omit<TenantConfig, 'orgId' | 'tier' | 'f
       maxApiCallsPerDay: -1, // unlimited
       maxIntegrations: -1, // unlimited
     },
-    database: { rlsEnabled: true, schema: 'tenant_enterprise' },
+    database: { rlsEnabled: true, schema: 'org_enterprise' },
     security: { mfaRequired: true, sessionTimeoutMinutes: 120, ipAllowlist: [] },
   },
 };
@@ -117,32 +117,32 @@ export interface ProvisioningStep {
 export interface ProvisioningResult {
   orgId: string;
   status: 'success' | 'partial' | 'failed';
-  config: TenantConfig;
+  config: OrgConfig;
   steps: ProvisioningStep[];
   duration: number;
 }
 
 /**
- * Provision a new tenant with tier-appropriate resources.
+ * Provision a new org with tier-appropriate resources.
  *
  * Executes provisioning steps in sequence:
  * 1. Validate request
- * 2. Create tenant configuration
+ * 2. Create org configuration
  * 3. Provision database schema (RLS)
  * 4. Set up resource quotas
  * 5. Configure security policies
  * 6. Enable features
  * 7. Record evidence
  */
-export async function provisionTenant(
-  request: TenantProvisionRequest,
+export async function provisionOrg(
+  request: OrgProvisionRequest,
   executor: ProvisioningExecutor = defaultExecutor,
 ): Promise<ProvisioningResult> {
-  const validated = TenantProvisionRequestSchema.parse(request);
+  const validated = OrgProvisionRequestSchema.parse(request);
   const start = Date.now();
 
   const tierDefaults = TIER_DEFAULTS[validated.tier];
-  const config: TenantConfig = {
+  const config: OrgConfig = {
     orgId: validated.orgId,
     tier: validated.tier,
     ...tierDefaults,
@@ -202,7 +202,7 @@ export interface DeprovisionResult {
 }
 
 /**
- * Deprovision a tenant with data retention compliance.
+ * Deprovision an org with data retention compliance.
  *
  * Steps:
  * 1. Disable access (immediate)
@@ -211,7 +211,7 @@ export interface DeprovisionResult {
  * 4. Schedule data deletion after retention period
  * 5. Record evidence
  */
-export async function deprovisionTenant(
+export async function deprovisionOrg(
   orgId: string,
   reason: string,
   executor: ProvisioningExecutor = defaultExecutor,

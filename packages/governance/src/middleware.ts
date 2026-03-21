@@ -11,7 +11,7 @@ import type { DecisionLogger } from "./decisions.js";
  * @example
  * ```ts
  * const handler = withGovernanceCheck(policySet, logger, async (req) => {
- *   return db.claims.findMany({ where: { tenantId: req.actor.tenantId } });
+ *   return db.claims.findMany({ where: { orgId: req.actor.orgId } });
  * });
  * const result = await handler(accessRequest);
  * ```

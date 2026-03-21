@@ -25,21 +25,21 @@ export {
 } from "./secrets.js";
 export type { SecretsProvider } from "./secrets.js";
 
-// Tenant isolation
+// Org isolation
 export {
-  assertTenantOwnership,
-  withTenantScope,
-  assertAllSameTenant,
-  TenantIsolationError,
+  assertOrgOwnership,
+  withOrgScope,
+  assertAllSameOrg,
+  OrgIsolationError,
 } from "./isolation.js";
-export type { TenantContext } from "./isolation.js";
+export type { OrgContext } from "./isolation.js";
 
 // Validation
 export {
   validateInput,
   strictValidate,
   UUIDSchema,
-  TenantIdSchema,
+  OrgIdSchema,
   PaginationSchema,
   SortSchema,
 } from "./validation.js";

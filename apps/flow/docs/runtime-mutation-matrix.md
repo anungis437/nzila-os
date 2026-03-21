@@ -8,7 +8,7 @@
 Flow uses a command bus architecture (`lib/control/command-bus.ts`) to enforce the canonical mutation lifecycle:
 
 1. Validate input (Zod)
-2. Resolve actor + tenant
+2. Resolve actor + org
 3. Load domain state
 4. Governance check (invariant guard)
 5. Workflow transition validation (workflow guard)

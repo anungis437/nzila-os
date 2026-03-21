@@ -167,13 +167,13 @@ export function createAppPipeline() {
         if (!token) return null
         return {
           actorId: 'placeholder-user',
-          tenantId: 'placeholder-org',
+          orgId: 'placeholder-org',
           roles: ['member'],
         }
       },
     }),
     rateLimitLayer({
-      check: async (_tenantId, _route) => {
+      check: async (_orgId, _route) => {
         // TODO: Wire to your rate limiter (Redis, in-memory, etc.)
         return { allowed: true, remaining: 100, resetAt: Date.now() + 60000 }
       },

@@ -4,7 +4,7 @@ import { z } from "zod";
 
 export const ActorSchema = z.object({
   id: z.string(),
-  tenantId: z.string(),
+  orgId: z.string(),
   roles: z.array(z.string()),
   attributes: z.record(z.string(), z.unknown()).optional(),
 });
@@ -13,7 +13,7 @@ export type Actor = z.infer<typeof ActorSchema>;
 export const ResourceSchema = z.object({
   type: z.string(),
   id: z.string().optional(),
-  tenantId: z.string().optional(),
+  orgId: z.string().optional(),
   attributes: z.record(z.string(), z.unknown()).optional(),
 });
 export type Resource = z.infer<typeof ResourceSchema>;
@@ -23,7 +23,7 @@ export type Resource = z.infer<typeof ResourceSchema>;
 export type PolicyAction = string; // e.g. "read", "write", "delete", "approve"
 
 export const PolicyConditionSchema = z.object({
-  field: z.string(),       // dot-path on context, e.g. "actor.tenantId"
+  field: z.string(),       // dot-path on context, e.g. "actor.orgId"
   operator: z.enum(["eq", "neq", "in", "not_in", "exists", "gt", "lt"]),
   value: z.unknown(),
 });

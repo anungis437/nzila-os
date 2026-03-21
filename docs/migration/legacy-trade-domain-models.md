@@ -1338,7 +1338,7 @@ FK → ThirdPartyInspector + FK → User + OneToOne → InspectionReport. Rating
 
 ### Core Entities (Merge Both)
 
-1. **Tenant/Organization** — trade-os `Organization` as base, absorb eexports dealer/broker profiles
+1. **Organization** — trade-os `Organization` as base, absorb eexports dealer/broker profiles
 2. **User + Membership** — trade-os `OrganizationMembership` + eexports role/consent fields
 3. **Deal** — Unified FSM combining both apps' statuses; support both single-item and multi-item
 4. **DealItem** — Keep from trade-os; vehicle becomes a product type

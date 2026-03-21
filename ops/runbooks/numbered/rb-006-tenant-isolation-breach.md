@@ -12,12 +12,12 @@
 
 - Contract test `org-isolation.test.ts` or `cross-org-auth.test.ts` fails
 - Audit log shows queries without `org_id` filter on org-scoped tables
-- Tenant reports seeing data from another organization
+- Org reports seeing data from another organization
 - Security scan flags RLS policy bypass
 
 ## Impact
 
-- **Critical**: Data confidentiality breach between tenants
+- **Critical**: Data confidentiality breach between orgs
 - Regulatory exposure (POPIA, GDPR)
 - Immediate customer trust damage
 
@@ -25,7 +25,7 @@
 
 1. **Confirm the breach:**
    - Check audit trail for cross-org data access events.
-   - Verify which tenant(s) and data types are affected.
+   - Verify which org(s) and data types are affected.
 
 2. **Identify the vector:**
    ```sql
@@ -48,7 +48,7 @@
 ## Remediation
 
 1. **Immediate containment:**
-   - Isolate affected tenant(s) via `@nzila/platform-isolation`.
+   - Isolate affected org(s) via `@nzila/platform-isolation`.
    - Disable the affected endpoint/feature via feature flag.
    - **Do NOT** attempt to "fix forward" without isolation first.
 
@@ -68,7 +68,7 @@
 5. **Deploy fix & re-enable:**
    - Deploy to staging, run full contract test suite.
    - Deploy to production.
-   - Remove tenant isolation after verification.
+   - Remove org isolation after verification.
 
 ## Prevention
 

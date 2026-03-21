@@ -187,7 +187,7 @@ export async function getRoleDefinitionsByLevel(minLevel: number): Promise<RoleD
 }
 
 /**
- * Create custom role definition for tenant
+ * Create custom role definition for org
  */
 export async function createRoleDefinition(
   roleCode: string,
@@ -866,4 +866,4 @@ export async function verifyAuditLogIntegrity(
   };
 }
 
-
+

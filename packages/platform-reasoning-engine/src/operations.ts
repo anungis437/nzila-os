@@ -65,7 +65,7 @@ export async function executeReasoningChain(
 
     const chain: ReasoningChain = {
       id: generateId(),
-      tenantId: request.tenantId,
+      orgId: request.orgId,
       reasoningType: request.reasoningType as ReasoningChain['reasoningType'],
       status: ReasoningStatuses.COMPLETED,
       entityType: request.entityType as OntologyEntityType,
@@ -86,7 +86,7 @@ export async function executeReasoningChain(
   } catch (_error) {
     const chain: ReasoningChain = {
       id: generateId(),
-      tenantId: request.tenantId,
+      orgId: request.orgId,
       reasoningType: request.reasoningType as ReasoningChain['reasoningType'],
       status: ReasoningStatuses.FAILED,
       entityType: request.entityType as OntologyEntityType,

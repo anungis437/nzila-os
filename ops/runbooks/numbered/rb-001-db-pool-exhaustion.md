@@ -17,7 +17,7 @@
 
 ## Impact
 
-- All tenants on affected database cluster experience degraded or unavailable service
+- All orgs on affected database cluster experience degraded or unavailable service
 - Writes may fail, causing DLQ backlog growth
 
 ## Diagnosis
@@ -37,7 +37,7 @@
    WHERE (now() - pg_stat_activity.query_start) > interval '5 minutes'
    ORDER BY duration DESC;
    ```
-4. Check if a specific app or tenant is monopolizing connections.
+4. Check if a specific app or org is monopolizing connections.
 
 ## Remediation
 

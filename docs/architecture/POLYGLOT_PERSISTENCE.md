@@ -164,8 +164,8 @@ faceted search or analytics aggregations.
 - Analytics aggregations
 - Compliance document search
 
-**Tenant Isolation Strategy**: Use a **shared index per document type** with an `orgId` field
-and filtered aliases (e.g., `cases-org-{orgId}`), rather than index-per-tenant which
+**Org Isolation Strategy**: Use a **shared index per document type** with an `orgId` field
+and filtered aliases (e.g., `cases-org-{orgId}`), rather than index-per-org which
 creates operational overhead at scale.
 
 **Integration**:
@@ -181,7 +181,7 @@ export interface SearchableDocument {
   metadata: Record<string, unknown>;
 }
 
-// Shared index + filtered alias for tenant isolation
+// Shared index + filtered alias for org isolation
 export async function indexDocument(client: Client, doc: SearchableDocument) {
   return client.index({
     index: `nzila-${doc.type}`,          // shared index
@@ -369,7 +369,7 @@ describe('Polyglot Authority Invariants', () => {
   });
   
   test('STACK_POLYGLOT_003: Elasticsearch indices must use shared index with orgId field', () => {
-    // Verify tenant isolation via filtered aliases, not index-per-tenant
+    // Verify org isolation via filtered aliases, not index-per-org
   });
 
   test('STACK_POLYGLOT_004: Embedding writes must go through ai_embeddings table', () => {
@@ -398,7 +398,7 @@ describe('Polyglot Authority Invariants', () => {
 1. **Add Elasticsearch** for search capabilities
    - Requires new indexing pipelines
    - Start with flow product search as pilot
-   - Use shared-index + filtered-alias tenant isolation
+   - Use shared-index + filtered-alias org isolation
 
 2. **Standardize pgvector** across apps
    - Expose high-level embedding API from `@nzila/ai-core`

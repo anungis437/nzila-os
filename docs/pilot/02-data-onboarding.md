@@ -25,7 +25,7 @@ All PII must be:
 
 - Encrypted in transit (TLS 1.2+)
 - Encrypted at rest (Azure Blob + AES-256)
-- Org-scoped (never visible to other tenants)
+- Org-scoped (never visible to other orgs)
 - Subject to data lifecycle policy (`packages/data-lifecycle`)
 
 ---

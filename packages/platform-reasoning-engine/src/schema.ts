@@ -18,7 +18,7 @@ export const reasoningChains = pgTable(
   'reasoning_chains',
   {
     id: uuid('id').primaryKey().defaultRandom(),
-    tenantId: uuid('tenant_id').notNull(),
+    tenantId: uuid('tenant_id').notNull(),  // DB column stays tenant_id for migration compat
     reasoningType: varchar('reasoning_type', { length: 64 }).notNull(),
     status: varchar('status', { length: 32 }).notNull(),
     entityType: varchar('entity_type', { length: 64 }).notNull(),

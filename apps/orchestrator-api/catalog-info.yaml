@@ -8,7 +8,7 @@ metadata:
     backstage.io/techdocs-ref: dir:./docs
     nzila.app/port: "3100"
     nzila.app/stack: fastify
-    nzila.app/tenant-scoped: "true"
+    nzila.app/org-scoped: "true"
   tags:
     - fastify
     - api

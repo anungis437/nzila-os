@@ -3,9 +3,9 @@ import type { BudgetConfig, BudgetStatus } from './schemas.js'
 // ─── Budget Store Interface ─────────────────────────────────────────────────
 
 export interface BudgetStore {
-  getConfig(tenantId: string): Promise<BudgetConfig | undefined>
-  getSpend(tenantId: string, period: string): Promise<number>
-  recordSpend(tenantId: string, period: string, amountUsd: number): Promise<void>
+  getConfig(orgId: string): Promise<BudgetConfig | undefined>
+  getSpend(orgId: string, period: string): Promise<number>
+  recordSpend(orgId: string, period: string, amountUsd: number): Promise<void>
 }
 
 // ─── Budget Enforcement ─────────────────────────────────────────────────────
@@ -17,14 +17,14 @@ export function getCurrentPeriod(): string {
 
 export async function checkBudget(
   store: BudgetStore,
-  tenantId: string,
+  orgId: string,
   role?: string,
 ): Promise<BudgetStatus> {
-  const config = await store.getConfig(tenantId)
+  const config = await store.getConfig(orgId)
 
   if (!config) {
     return {
-      tenantId,
+      orgId,
       period: getCurrentPeriod(),
       spentUsd: 0,
       monthlyCapUsd: 0,
@@ -35,7 +35,7 @@ export async function checkBudget(
   }
 
   const period = getCurrentPeriod()
-  const spentUsd = await store.getSpend(tenantId, period)
+  const spentUsd = await store.getSpend(orgId, period)
 
   // Use role-specific cap if available
   let effectiveCap = config.monthlyCapUsd
@@ -56,7 +56,7 @@ export async function checkBudget(
   }
 
   return {
-    tenantId,
+    orgId,
     period,
     spentUsd,
     monthlyCapUsd: effectiveCap,
@@ -68,11 +68,11 @@ export async function checkBudget(
 
 export async function recordSpend(
   store: BudgetStore,
-  tenantId: string,
+  orgId: string,
   amountUsd: number,
 ): Promise<void> {
   const period = getCurrentPeriod()
-  await store.recordSpend(tenantId, period, amountUsd)
+  await store.recordSpend(orgId, period, amountUsd)
 }
 
 // ─── In-Memory Budget Store (testing) ───────────────────────────────────────
@@ -82,19 +82,19 @@ export class InMemoryBudgetStore implements BudgetStore {
   private readonly spending = new Map<string, number>()
 
   setConfig(config: BudgetConfig): void {
-    this.configs.set(config.tenantId, config)
+    this.configs.set(config.orgId, config)
   }
 
-  async getConfig(tenantId: string): Promise<BudgetConfig | undefined> {
-    return this.configs.get(tenantId)
+  async getConfig(orgId: string): Promise<BudgetConfig | undefined> {
+    return this.configs.get(orgId)
   }
 
-  async getSpend(tenantId: string, period: string): Promise<number> {
-    return this.spending.get(`${tenantId}:${period}`) ?? 0
+  async getSpend(orgId: string, period: string): Promise<number> {
+    return this.spending.get(`${orgId}:${period}`) ?? 0
   }
 
-  async recordSpend(tenantId: string, period: string, amountUsd: number): Promise<void> {
-    const key = `${tenantId}:${period}`
+  async recordSpend(orgId: string, period: string, amountUsd: number): Promise<void> {
+    const key = `${orgId}:${period}`
     const current = this.spending.get(key) ?? 0
     this.spending.set(key, current + amountUsd)
   }

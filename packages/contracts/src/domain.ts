@@ -3,7 +3,7 @@ import { z } from 'zod'
 // ─── Event Envelope ─────────────────────────────────────────────────────────
 
 export const eventMetadataSchema = z.object({
-  tenantId: z.string().min(1),
+  orgId: z.string().min(1),
   actorId: z.string().min(1),
   traceId: z.string().optional(),
   spanId: z.string().optional(),

@@ -13,7 +13,7 @@
  *    unbounded memory growth.
  *
  * 3. STACK_POLYGLOT_003 — Elasticsearch indices must use shared-index + orgId field
- *    for tenant isolation (filtered aliases), not index-per-tenant.
+ *    for org isolation (filtered aliases), not index-per-org.
  *
  * 4. STACK_POLYGLOT_004 — Embedding writes must go through the governed
  *    `ai_embeddings` table. No ad-hoc vector columns outside the schema.
@@ -315,12 +315,12 @@ describe('STACK_POLYGLOT_002 — Redis usage must have TTL', () => {
   })
 })
 
-// ── STACK_POLYGLOT_003 — Elasticsearch tenant isolation ─────────────────
+// ── STACK_POLYGLOT_003 — Elasticsearch org isolation ─────────────────
 
 describe('STACK_POLYGLOT_003 — Elasticsearch indices must use shared index with orgId field', () => {
   const exceptionFile = loadExceptions('governance/exceptions/polyglot-authority.json')
 
-  it('no Elasticsearch index name contains a dynamic orgId segment (index-per-tenant anti-pattern)', () => {
+  it('no Elasticsearch index name contains a dynamic orgId segment (index-per-org anti-pattern)', () => {
     const violations: Violation[] = []
 
     const allFiles = walkSync(ROOT, ['.ts', '.tsx', '.js', '.jsx', '.mjs'])
@@ -342,25 +342,25 @@ describe('STACK_POLYGLOT_003 — Elasticsearch indices must use shared index wit
         const line = lines[i]!
         if (isCommentLine(line)) continue
 
-        // Detect index-per-tenant patterns:
+        // Detect index-per-org patterns:
         //   index: `org-${orgId}-cases`
         //   index: `${orgId}_products`
         //   index: 'org-' + orgId
-        const hasIndexPerTenant =
+        const hasIndexPerOrg =
           /index\s*:\s*`[^`]*\$\{[^}]*(?:org|entity|tenant)[^}]*\}[^`]*`/.test(line) ||
           /index\s*:\s*['"][^'"]*['"]\s*\+\s*(?:org|entity|tenant)/i.test(line)
 
-        if (!hasIndexPerTenant) continue
+        if (!hasIndexPerOrg) continue
 
         violations.push({
           ruleId: 'STACK_POLYGLOT_003',
           filePath: rel,
           line: i + 1,
           snippet: line.trim().slice(0, 120),
-          offendingValue: 'Index-per-tenant pattern detected',
+          offendingValue: 'Index-per-org pattern detected',
           remediation:
             'Use a shared index (e.g. `nzila-cases`) with an orgId field and filtered ' +
-            'aliases for tenant isolation. Index-per-tenant creates operational overhead ' +
+            'aliases for org isolation. Index-per-org creates operational overhead ' +
             'at scale. See docs/architecture/POLYGLOT_PERSISTENCE.md §4.2.',
         })
       }
@@ -369,7 +369,7 @@ describe('STACK_POLYGLOT_003 — Elasticsearch indices must use shared index wit
     expect(violations, formatViolations(violations)).toHaveLength(0)
   })
 
-  it('Elasticsearch search queries include orgId filter for tenant isolation', () => {
+  it('Elasticsearch search queries include orgId filter for org isolation', () => {
     // This test will be meaningful once Elasticsearch is adopted.
     // For now, verify no unfiltered search calls exist.
     const violations: Violation[] = []
@@ -397,7 +397,7 @@ describe('STACK_POLYGLOT_003 — Elasticsearch indices must use shared index wit
           offendingValue: 'Elasticsearch .search() without orgId filter',
           remediation:
             'All Elasticsearch queries in app code must include an orgId filter ' +
-            'for tenant isolation. Use the org-scoped alias or add a term filter.',
+            'for org isolation. Use the org-scoped alias or add a term filter.',
         })
       }
     }

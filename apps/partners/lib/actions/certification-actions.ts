@@ -54,7 +54,7 @@ const CERT_TRACKS: Omit<CertTrack, 'completedModules' | 'status' | 'completedAt'
   {
     id: 'advanced-architecture',
     name: 'Advanced Architecture',
-    description: 'Multi-tenant design, API integration patterns, and security compliance.',
+    description: 'Multi-org design, API integration patterns, and security compliance.',
     modules: 8,
   },
   {

@@ -23,7 +23,7 @@ on:
           - all-weekly
           - database-connection-loss
           - ai-gateway-latency
-          - cross-tenant-isolation
+          - cross-org-isolation
           - blob-storage-unavailable
           - bulkhead-saturation
           - clerk-auth-latency
@@ -41,7 +41,8 @@ permissions:
   contents: read
 
 env:
-  NODE_VERSION: '22'
+  NODE_VERSION: '22'
+
 
 jobs:
   run-experiments:
@@ -141,7 +142,7 @@ jobs:
           |------------|-----------|--------|
           | database-connection-loss | Weekly | ⏳ |
           | ai-gateway-latency | Weekly | ⏳ |
-          | cross-tenant-isolation | Weekly | ⏳ |
+          | cross-org-isolation | Weekly | ⏳ |
           | blob-storage-unavailable | Monthly | ⏳ |
           | bulkhead-saturation | Monthly | ⏳ |
           | clerk-auth-latency | Monthly | ⏳ |

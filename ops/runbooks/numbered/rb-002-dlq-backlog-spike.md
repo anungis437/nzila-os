@@ -13,12 +13,12 @@
 - Console → System Health shows outbox backlog status `critical` (>100 pending)
 - DLQ count exceeds SLO threshold (`ops/slo-policy.yml → dlq.backlog_max`)
 - ChatOps alert: "DLQ backlog exceeded threshold"
-- Integration delivery delays reported by tenants
+- Integration delivery delays reported by orgs
 
 ## Impact
 
 - Event delivery to downstream systems delayed or stalled
-- Tenant data may be stale in integrated systems (CRM, accounting, etc.)
+- Org data may be stale in integrated systems (CRM, accounting, etc.)
 
 ## Diagnosis
 
@@ -58,8 +58,8 @@
      AND type = '<affected_type>';
    ```
 
-4. **If backlog is from a single tenant:**
-   - Check tenant-specific integration credentials.
+4. **If backlog is from a single org:**
+   - Check org-specific integration credentials.
    - Verify org-scoped rate limits.
 
 ## Prevention

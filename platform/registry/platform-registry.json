@@ -205,7 +205,7 @@
       "path": "packages/platform-isolation",
       "owner": "platform",
       "lifecycle": "STABLE",
-      "apis": ["org isolation", "tenant boundary enforcement"],
+      "apis": ["org isolation", "org boundary enforcement"],
       "used_by": ["all apps"],
       "control_plane_visible": false
     },

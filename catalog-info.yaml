@@ -12,7 +12,7 @@ metadata:
   tags:
     - monorepo
     - evidence-first
-    - multi-tenant
+    - multi-org
     - polyglot
   links:
     - url: https://nzila.app

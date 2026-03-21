@@ -70,11 +70,11 @@
               "deliverables": ["Azure infrastructure", "PostgreSQL setup", "CI/CD pipeline"]
             },
             {
-              "phase": "Phase 1: Multi-Tenant + Auth",
+              "phase": "Phase 1: Multi-Org + Auth",
               "duration": "4 weeks",
               "status": "in_progress",
               "completion": 60,
-              "deliverables": ["Clerk integration", "Tenant isolation", "RLS policies"]
+              "deliverables": ["Clerk integration", "Org isolation", "RLS policies"]
             },
             {
               "phase": "Phase 2: AI Core + Compliance",

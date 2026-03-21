@@ -6,8 +6,8 @@ import type { RootHashSnapshot } from './schema.js'
 
 export interface SnapshotStore {
   saveSnapshot(snapshot: RootHashSnapshot): Promise<void>
-  getSnapshot(tenantId: string, date: string): Promise<RootHashSnapshot | undefined>
-  getSnapshots(tenantId: string): Promise<RootHashSnapshot[]>
+  getSnapshot(orgId: string, date: string): Promise<RootHashSnapshot | undefined>
+  getSnapshots(orgId: string): Promise<RootHashSnapshot[]>
 }
 
 export class InMemorySnapshotStore implements SnapshotStore {
@@ -17,26 +17,26 @@ export class InMemorySnapshotStore implements SnapshotStore {
     this.snapshots.push(Object.freeze({ ...snapshot }))
   }
 
-  async getSnapshot(tenantId: string, date: string): Promise<RootHashSnapshot | undefined> {
+  async getSnapshot(orgId: string, date: string): Promise<RootHashSnapshot | undefined> {
     return this.snapshots.find(
-      (s) => s.tenantId === tenantId && s.timestamp.startsWith(date),
+      (s) => s.orgId === orgId && s.timestamp.startsWith(date),
     )
   }
 
-  async getSnapshots(tenantId: string): Promise<RootHashSnapshot[]> {
-    return this.snapshots.filter((s) => s.tenantId === tenantId)
+  async getSnapshots(orgId: string): Promise<RootHashSnapshot[]> {
+    return this.snapshots.filter((s) => s.orgId === orgId)
   }
 }
 
 export async function createRootHashSnapshot(
   auditStore: AuditStore,
   snapshotStore: SnapshotStore,
-  tenantId: string,
+  orgId: string,
 ): Promise<RootHashSnapshot> {
-  const entries = await auditStore.getEntries(tenantId, { limit: 100_000 })
+  const entries = await auditStore.getEntries(orgId, { limit: 100_000 })
 
   if (entries.length === 0) {
-    throw new Error(`No audit entries for tenant ${tenantId}`)
+    throw new Error(`No audit entries for org ${orgId}`)
   }
 
   const firstEntry = entries[0]
@@ -44,7 +44,7 @@ export async function createRootHashSnapshot(
 
   const snapshot: RootHashSnapshot = {
     id: randomUUID(),
-    tenantId,
+    orgId,
     timestamp: new Date().toISOString(),
     entryCount: entries.length,
     rootHash: lastEntry.hash,

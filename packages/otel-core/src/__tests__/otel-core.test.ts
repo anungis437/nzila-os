@@ -156,7 +156,7 @@ describe('evaluateBurnRate', () => {
 describe('attributeCost', () => {
   it('should calculate compute cost from resource metrics', async () => {
     const metrics: ResourceMetrics = {
-      tenantId: 'org-123',
+      orgId: 'org-123',
       serviceName: 'console',
       durationMs: 150,
       memoryMb: 256,
@@ -164,7 +164,7 @@ describe('attributeCost', () => {
     };
 
     const cost = await attributeCost(metrics);
-    expect(cost.tenantId).toBe('org-123');
+    expect(cost.orgId).toBe('org-123');
     expect(cost.resourceType).toBe('compute');
     expect(cost.costUSD).toBeGreaterThan(0);
     expect(cost.serviceName).toBe('console');
@@ -172,7 +172,7 @@ describe('attributeCost', () => {
 
   it('should classify AI costs correctly', async () => {
     const metrics: ResourceMetrics = {
-      tenantId: 'org-456',
+      orgId: 'org-456',
       serviceName: 'console',
       durationMs: 2000,
       memoryMb: 512,
@@ -189,7 +189,7 @@ describe('attributeCost', () => {
   it('should reject invalid metrics', async () => {
     await expect(
       attributeCost({
-        tenantId: '',
+        orgId: '',
         serviceName: 'test',
         durationMs: 100,
         memoryMb: 128,

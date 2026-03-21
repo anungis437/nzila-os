@@ -8,7 +8,7 @@ Task-oriented guides for specific goals. Each guide assumes you have a working d
 
 ## Operations
 
-- [Add a New Tenant](add-tenant.md)
+- [Add a New Org](add-tenant.md)
 - [Rotate Secrets](rotate-secrets.md)
 
 ## Security

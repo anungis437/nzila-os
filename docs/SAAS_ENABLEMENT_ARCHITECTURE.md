@@ -6,7 +6,7 @@
 ## Overview
 
 Shop Quoter was migrated from a single-client ShopMoiCa-specific application
-to an **org-native, multi-tenant commerce configuration platform**. Every
+to an **org-native, multi-org commerce configuration platform**. Every
 previously-hardcoded value is now resolved at runtime from per-org database
 records, with compile-time type safety enforced through Zod schemas and strict
 TypeScript.

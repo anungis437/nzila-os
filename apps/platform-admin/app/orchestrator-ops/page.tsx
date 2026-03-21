@@ -40,7 +40,7 @@ function seedWf(name: string, tags: string[], dangerLevel: DangerLevel, requires
 
 // Seed the registry with known workflows for display purposes
 const seedWorkflows: WorkflowDefinition[] = [
-  seedWf('tenant-onboarding', ['platform'], 'destructive', true),
+  seedWf('org-onboarding', ['platform'], 'destructive', true),
   seedWf('invoice-generation', ['commerce'], 'destructive', true),
   seedWf('notification-dispatch', ['integrations'], 'safe', false),
   seedWf('document-processing', ['automation'], 'moderate', true),

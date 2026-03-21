@@ -2,7 +2,7 @@
 
 ## Overview
 
-The Health & Safety module provides a comprehensive database schema for managing workplace health and safety operations within union organizations. This schema is designed to integrate seamlessly with the existing Union Eyes application structure and supports multi-tenant operations.
+The Health & Safety module provides a comprehensive database schema for managing workplace health and safety operations within union organizations. This schema is designed to integrate seamlessly with the existing Union Eyes application structure and supports multi-org operations.
 
 ## Schema Design
 
@@ -22,7 +22,7 @@ The Health & Safety module provides a comprehensive database schema for managing
 
 ## Key Features
 
-### Multi-Tenant Support
+### Multi-Org Support
 - All tables include `organizationId` for data isolation
 - RLS (Row Level Security) enabled on all tables
 - Organization-based access control
@@ -30,7 +30,7 @@ The Health & Safety module provides a comprehensive database schema for managing
 ### Standard Fields
 Every table includes:
 - `id` (UUID) - Primary key
-- `organizationId` (UUID) - Tenant isolation
+- `organizationId` (UUID) - Org isolation
 - `createdAt` (timestamp) - Record creation time
 - `updatedAt` (timestamp) - Last update time
 - `createdBy` (UUID) - Creator reference
@@ -270,7 +270,7 @@ const monthlyStats = await db
 All tables include strategic indexes for performance:
 
 ### Primary Indexes
-- `organizationId` - Fast tenant filtering
+- `organizationId` - Fast org filtering
 - Status fields - Quick status-based queries
 - Date fields - Efficient date range queries
 

@@ -94,7 +94,7 @@ export default function DashboardPage() {
   useEffect(() => { setMounted(true); }, []);
 
   // Fetch raw RBAC role & classify into tier, then override when
-  // a platform admin is viewing a tenant org.
+  // a platform admin is viewing another org.
   // Wait for org context to finish loading to avoid flash of wrong dashboard.
   useEffect(() => {
     if (!user?.id || orgLoading) return;
@@ -153,7 +153,7 @@ export default function DashboardPage() {
     );
   }
 
-  // Platform admin viewing tenant org — show admin banner + tenant dashboard
+  // Platform admin viewing org — show admin banner + org dashboard
   const adminBanner = isPlatformViewer && organization ? (
     <div className="mx-6 mt-6 mb-0 flex items-center gap-3 rounded-lg border border-blue-200 bg-blue-50 px-4 py-3 text-sm text-blue-800">
       <svg xmlns="http://www.w3.org/2000/svg" className="h-5 w-5 shrink-0" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round"><path d="M12 22s8-4 8-10V5l-8-3-8 3v7c0 6 8 10 8 10z"/></svg>

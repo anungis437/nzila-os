@@ -11,7 +11,7 @@ describe("AuditEngine", () => {
 
     const e1 = await engine.record({
       actorId: "user1",
-      tenantId: "t1",
+      orgId: "t1",
       action: "create",
       resource: "claim",
       payload: { claimId: "c1" },
@@ -23,7 +23,7 @@ describe("AuditEngine", () => {
 
     const e2 = await engine.record({
       actorId: "user1",
-      tenantId: "t1",
+      orgId: "t1",
       action: "update",
       resource: "claim",
       payload: { claimId: "c1", status: "approved" },
@@ -39,14 +39,14 @@ describe("AuditEngine", () => {
 
     const e1 = await engine.record({
       actorId: "u1",
-      tenantId: "t1",
+      orgId: "t1",
       action: "create",
       resource: "a",
       payload: { x: 1 },
     });
     const e2 = await engine.record({
       actorId: "u1",
-      tenantId: "t1",
+      orgId: "t1",
       action: "create",
       resource: "a",
       payload: { x: 2 },
@@ -61,9 +61,9 @@ describe("verifyChain", () => {
     const store = new InMemoryAuditStore();
     const engine = new AuditEngine(store);
 
-    await engine.record({ actorId: "u", tenantId: "t", action: "a", resource: "r", payload: {} });
-    await engine.record({ actorId: "u", tenantId: "t", action: "b", resource: "r", payload: {} });
-    await engine.record({ actorId: "u", tenantId: "t", action: "c", resource: "r", payload: {} });
+    await engine.record({ actorId: "u", orgId: "t", action: "a", resource: "r", payload: {} });
+    await engine.record({ actorId: "u", orgId: "t", action: "b", resource: "r", payload: {} });
+    await engine.record({ actorId: "u", orgId: "t", action: "c", resource: "r", payload: {} });
 
     const entries = store.getAll();
     const result = verifyChain(entries);
@@ -75,8 +75,8 @@ describe("verifyChain", () => {
     const store = new InMemoryAuditStore();
     const engine = new AuditEngine(store);
 
-    await engine.record({ actorId: "u", tenantId: "t", action: "a", resource: "r", payload: {} });
-    const e2 = await engine.record({ actorId: "u", tenantId: "t", action: "b", resource: "r", payload: {} });
+    await engine.record({ actorId: "u", orgId: "t", action: "a", resource: "r", payload: {} });
+    const e2 = await engine.record({ actorId: "u", orgId: "t", action: "b", resource: "r", payload: {} });
 
     const entries = store.getAll();
     // Tamper with the second entry's action (top-level hash field)

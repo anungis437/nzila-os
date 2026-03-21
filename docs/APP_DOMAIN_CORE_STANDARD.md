@@ -157,7 +157,7 @@ export async function getClaimsByOrganization(orgId: string): Promise<ClaimSumma
 **Rules**:
 - Events are facts — immutable records of what happened
 - Event names follow `<entity>.<past-tense-verb>` pattern
-- Events must include `organizationId` for multi-tenant isolation
+- Events must include `organizationId` for multi-org isolation
 - App-local events may be promoted to platform events via `@nzila/platform-events`
 
 **Example**:

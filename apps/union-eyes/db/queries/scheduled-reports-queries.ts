@@ -64,7 +64,7 @@ export interface UpdateScheduledReportParams {
 // ============================================================================
 
 /**
- * Get all scheduled reports for a tenant
+ * Get all scheduled reports for an org
  */
 export async function getScheduledReports(
   organizationId: string,

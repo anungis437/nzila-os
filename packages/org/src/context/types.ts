@@ -23,7 +23,7 @@
  *   `string` for cross-cutting code that doesn't need role narrowing.
  */
 export interface OrgContext<R extends string = string> {
-  /** Organisation UUID — the tenant boundary. */
+  /** Organisation UUID — the org boundary. */
   readonly orgId: string
 
   /** Authenticated user performing the action. */
@@ -49,10 +49,10 @@ export interface OrgContext<R extends string = string> {
 
 /**
  * Minimal context required for database operations.
- * Carries only tenant identity and actor for RLS / audit logging.
+ * Carries only org identity and actor for RLS / audit logging.
  */
 export interface DbContext {
-  /** Organisation UUID — the tenant boundary. */
+  /** Organisation UUID — the org boundary. */
   readonly orgId: string
 
   /** Authenticated user performing the action. */

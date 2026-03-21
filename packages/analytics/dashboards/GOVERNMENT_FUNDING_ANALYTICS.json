@@ -258,7 +258,7 @@
           "projects": [
             {"intern": "AI/ML Researcher (ABR)", "university": "McGill", "focus": "Bias detection in gamified learning", "duration": "12 months"},
             {"intern": "Data Scientist (CORA)", "university": "University of Waterloo", "focus": "Climate adaptation ML models", "duration": "12 months"},
-            {"intern": "Software Engineer (Backbone)", "university": "UBC", "focus": "Multi-tenant architecture optimization", "duration": "12 months"},
+            {"intern": "Software Engineer (Backbone)", "university": "UBC", "focus": "Multi-org architecture optimization", "duration": "12 months"},
             {"intern": "Security Researcher (Compliance)", "university": "University of Toronto", "focus": "SOC 2 automation & monitoring", "duration": "12 months"}
           ],
           "application_status": "Projected",

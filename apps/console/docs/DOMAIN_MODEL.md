@@ -6,14 +6,14 @@
 ## Purpose
 
 Console is the **internal operations interface** for platform administrators
-and operations teams. It provides tenant management, user administration,
+and operations teams. It provides org management, user administration,
 system configuration, and operational tooling.
 
 ## Primary Surfaces
 
 | Surface | Purpose |
 |---------|---------|
-| Tenant management | Create, configure, and manage tenant organisations |
+| Org management | Create, configure, and manage organisations |
 | User administration | Manage user accounts, roles, and permissions |
 | System configuration | Platform-wide settings, feature flags, environment config |
 | Blob/storage management | View and manage platform storage resources |

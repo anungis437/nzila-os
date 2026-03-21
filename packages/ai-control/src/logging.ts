@@ -5,7 +5,7 @@ import type { AILogEntry, AIRequest, AIResponse } from './schemas.js'
 
 export interface AILogStore {
   append(entry: AILogEntry): Promise<void>
-  getEntries(tenantId: string, options?: { limit?: number }): Promise<AILogEntry[]>
+  getEntries(orgId: string, options?: { limit?: number }): Promise<AILogEntry[]>
 }
 
 export class InMemoryAILogStore implements AILogStore {
@@ -15,8 +15,8 @@ export class InMemoryAILogStore implements AILogStore {
     this.entries.push(Object.freeze({ ...entry }))
   }
 
-  async getEntries(tenantId: string, options?: { limit?: number }): Promise<AILogEntry[]> {
-    const filtered = this.entries.filter((e) => e.tenantId === tenantId)
+  async getEntries(orgId: string, options?: { limit?: number }): Promise<AILogEntry[]> {
+    const filtered = this.entries.filter((e) => e.orgId === orgId)
     const limit = options?.limit ?? 1000
     return filtered.slice(-limit)
   }
@@ -36,7 +36,7 @@ export function createAILogEntry(
   return {
     id: randomUUID(),
     timestamp: response.timestamp,
-    tenantId: request.tenantId,
+    orgId: request.orgId,
     actorId: request.actorId,
     model: response.model,
     promptHash: hashContent(request.prompt),

@@ -18,7 +18,7 @@ describe("withEnforcement (Next.js)", () => {
       async (ctx) => ({
         success: true,
         status: 201,
-        body: { id: "c1", tenantId: ctx.tenantId },
+        body: { id: "c1", orgId: ctx.orgId },
       }),
     );
 

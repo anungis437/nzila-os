@@ -46,7 +46,7 @@ For each control the map specifies:
 | **Evidence pack** | A bundle of artifacts for one event (incident, DR test, close cycle) — see `Evidence-Pack-Index.schema.json` |
 | **Hash chain** | The `hash` / `previous_hash` columns in `audit_events` and `share_ledger_entries` tables that form an append-only ledger |
 | **Retention class** | `PERMANENT`, `7_YEARS`, `3_YEARS`, `1_YEAR` — determines blob lifecycle policy |
-| **Entity** | A legal entity managed in Nzila OS (multi-tenant) |
+| **Entity** | A legal entity managed in Nzila OS (multi-org) |
 
 ## 4. Roles & Responsibilities (RACI)
 

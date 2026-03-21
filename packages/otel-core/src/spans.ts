@@ -1,15 +1,13 @@
 /**
  * Nzila-specific span creation and attribute injection.
  *
- * Enriches every span with org/tenant/workflow context for
+ * Enriches every span with org/workflow context for
  * cost attribution and evidence correlation.
  */
 
 interface NzilaSpanAttributes {
-  /** Organization ID — required for all tenant-scoped operations */
+  /** Organization ID — required for all org-scoped operations */
   'nzila.org.id'?: string;
-  /** Tenant ID — alias for orgId in multi-tenant context */
-  'nzila.tenant.id'?: string;
   /** User ID performing the action */
   'nzila.user.id'?: string;
   /** Business process identifier */

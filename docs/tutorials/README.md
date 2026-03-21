@@ -11,7 +11,7 @@ Each tutorial takes you from zero to a working result.
 | 2 | [Adding AI to an App](adding-ai.md) | 20 min | Tutorial 1 |
 | 3 | [Creating a Package](creating-package.md) | 10 min | Tutorial 1 |
 | 4 | [Setting Up Observability](observability-setup.md) | 15 min | Tutorial 1 |
-| 5 | [Multi-Tenant Data Access](multi-tenant.md) | 20 min | Tutorial 1 |
+| 5 | [Multi-Org Data Access](multi-tenant.md) | 20 min | Tutorial 1 |
 
 ## Before You Start
 

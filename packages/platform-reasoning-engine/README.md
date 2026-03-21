@@ -35,7 +35,7 @@ const chain = await executeReasoningChain({
   strategy: myRiskStrategy,
   context: contextEnvelope, // from platform-context-orchestrator
   request: {
-    tenantId: 'tenant-uuid',
+    orgId: 'org-uuid',
     reasoningType: ReasoningTypes.RISK_BASED,
     entityType: 'case',
     entityId: 'case-uuid',

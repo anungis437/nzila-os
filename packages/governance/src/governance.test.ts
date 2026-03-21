@@ -19,13 +19,13 @@ const testPolicySet: PolicySet = {
       priority: 100,
     },
     {
-      id: "allow-read-own-tenant",
-      description: "Users can read their own tenant's resources",
+      id: "allow-read-own-org",
+      description: "Users can read their own org's resources",
       resource: "claim",
       actions: ["read"],
       effect: "allow",
       conditions: [
-        { field: "actor.tenantId", operator: "eq", value: "t1" },
+        { field: "actor.orgId", operator: "eq", value: "t1" },
       ],
       priority: 50,
     },
@@ -42,7 +42,7 @@ const testPolicySet: PolicySet = {
 
 function makeRequest(overrides: Partial<AccessRequest> = {}): AccessRequest {
   return {
-    actor: { id: "u1", tenantId: "t1", roles: ["user"] },
+    actor: { id: "u1", orgId: "t1", roles: ["user"] },
     resource: { type: "claim" },
     action: "read",
     ...overrides,
@@ -52,22 +52,22 @@ function makeRequest(overrides: Partial<AccessRequest> = {}): AccessRequest {
 describe("canAccess", () => {
   it("allows admin access via wildcard rule", () => {
     const result = canAccess(testPolicySet, makeRequest({
-      actor: { id: "admin1", tenantId: "t1", roles: ["admin"] },
+      actor: { id: "admin1", orgId: "t1", roles: ["admin"] },
       action: "write",
     }));
     expect(result.outcome).toBe("allow");
     expect(result.matchedRuleId).toBe("allow-admin-all");
   });
 
-  it("allows tenant-scoped read", () => {
+  it("allows org-scoped read", () => {
     const result = canAccess(testPolicySet, makeRequest());
     expect(result.outcome).toBe("allow");
-    expect(result.matchedRuleId).toBe("allow-read-own-tenant");
+    expect(result.matchedRuleId).toBe("allow-read-own-org");
   });
 
   it("denies delete via high-priority deny rule", () => {
     const result = canAccess(testPolicySet, makeRequest({
-      actor: { id: "admin1", tenantId: "t1", roles: ["admin"] },
+      actor: { id: "admin1", orgId: "t1", roles: ["admin"] },
       action: "delete",
     }));
     expect(result.outcome).toBe("deny");
@@ -76,7 +76,7 @@ describe("canAccess", () => {
 
   it("denies by default when no rule matches", () => {
     const result = canAccess(testPolicySet, makeRequest({
-      actor: { id: "u2", tenantId: "t2", roles: ["user"] },
+      actor: { id: "u2", orgId: "t2", roles: ["user"] },
       action: "write",
       resource: { type: "invoice" },
     }));
@@ -103,8 +103,8 @@ describe("DecisionLogger", () => {
     const store = new InMemoryDecisionStore();
     const logger = new DecisionLogger(store, "test-policy");
 
-    logger.log(canAccess(testPolicySet, makeRequest({ actor: { id: "u1", tenantId: "t1", roles: ["user"] } })));
-    logger.log(canAccess(testPolicySet, makeRequest({ actor: { id: "u2", tenantId: "t1", roles: ["user"] } })));
+    logger.log(canAccess(testPolicySet, makeRequest({ actor: { id: "u1", orgId: "t1", roles: ["user"] } })));
+    logger.log(canAccess(testPolicySet, makeRequest({ actor: { id: "u2", orgId: "t1", roles: ["user"] } })));
 
     expect(store.getByActor("u1")).toHaveLength(1);
     expect(store.getByActor("u2")).toHaveLength(1);
@@ -132,7 +132,7 @@ describe("withGovernanceCheck", () => {
 
     await expect(
       handler(makeRequest({
-        actor: { id: "u2", tenantId: "t2", roles: ["user"] },
+        actor: { id: "u2", orgId: "t2", roles: ["user"] },
         action: "write",
         resource: { type: "secret" },
       })),

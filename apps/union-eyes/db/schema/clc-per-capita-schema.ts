@@ -118,7 +118,7 @@ export const perCapitaRemittancesRelations = relations(perCapitaRemittances, ({ 
  * This table was created for CLC-specific accounts but has been superseded
  * by the unified chartOfAccounts table which contains:
  *   - CLC standard accounts (30 rows with is_clc_standard = true)
- *   - Organization-specific accounts (multi-tenant)
+ *   - Organization-specific accounts (multi-org)
  *   - Full hierarchy and ERP integration support
  * 
  * Migration plan: This definition will be removed in v3.0

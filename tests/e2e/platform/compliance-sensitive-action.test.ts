@@ -79,12 +79,12 @@ const evidence = {
   chainVerification: null as { valid: boolean; entriesChecked: number } | null,
 }
 
-function buildPipeline(actorId: string, tenantId: string, roles: string[]) {
+function buildPipeline(actorId: string, orgId: string, roles: string[]) {
   return createEnforcedHandler(
     [
       traceLayer(),
       authLayer({
-        extractActor: async () => ({ tenantId, actorId, roles }),
+        extractActor: async () => ({ orgId, actorId, roles }),
       }),
       rateLimitLayer({
         check: async () => ({ allowed: true, remaining: 50, resetAt: Date.now() + 60000 }),
@@ -92,7 +92,7 @@ function buildPipeline(actorId: string, tenantId: string, roles: string[]) {
       governanceLayer({
         evaluate: async (ctx) => {
           const decision = canAccess(COMPLIANCE_POLICY, {
-            actor: { id: ctx.actorId!, tenantId: ctx.tenantId!, roles: ctx.roles ?? [] },
+            actor: { id: ctx.actorId!, orgId: ctx.orgId!, roles: ctx.roles ?? [] },
             resource: { type: ctx.resourceType },
             action: ctx.action,
           })
@@ -106,7 +106,7 @@ function buildPipeline(actorId: string, tenantId: string, roles: string[]) {
         record: async (entry) => {
           await auditEngine.record({
             actorId: entry.actorId ?? 'unknown',
-            tenantId: entry.tenantId ?? 'unknown',
+            orgId: entry.orgId ?? 'unknown',
             action: entry.action,
             resource: entry.resource,
             resourceId: 'claim-001',
@@ -141,13 +141,13 @@ describe('Compliance-Sensitive Action — Strict Governance Proof', () => {
     })
     ;(denyCtx as any).traceId = evidence.traceId
 
-    const denyHandler = buildPipeline('user_junior_001', 'tenant_abr', ['viewer'])
+    const denyHandler = buildPipeline('user_junior_001', 'org_abr', ['viewer'])
     evidence.denyResult = await denyHandler(denyCtx)
 
     // Governance deny short-circuits before auditLayer — record deny audit explicitly
     await auditEngine.record({
       actorId: 'user_junior_001',
-      tenantId: 'tenant_abr',
+      orgId: 'org_abr',
       action: 'approve',
       resource: 'financial-claim',
       payload: { outcome: 'deny', status: 403 },
@@ -163,7 +163,7 @@ describe('Compliance-Sensitive Action — Strict Governance Proof', () => {
     })
     ;(allowCtx as any).traceId = evidence.traceId
 
-    const allowHandler = buildPipeline('user_compliance_001', 'tenant_abr', ['compliance-officer'])
+    const allowHandler = buildPipeline('user_compliance_001', 'org_abr', ['compliance-officer'])
     evidence.allowResult = await allowHandler(allowCtx)
 
     // Verify chain across all entries
@@ -172,7 +172,7 @@ describe('Compliance-Sensitive Action — Strict Governance Proof', () => {
 
     // Export audit log
     const exported = await exportAuditLog(auditStore, {
-      tenantId: 'tenant_abr',
+      orgId: 'org_abr',
       format: 'json',
     })
     evidence.auditExport = {
@@ -242,7 +242,7 @@ describe('Compliance-Sensitive Action — Strict Governance Proof', () => {
       summary: buildSummary(SCENARIO, {
         trace_id: evidence.traceId,
         actor_id: 'user_junior_001 → user_compliance_001',
-        tenant_id: 'tenant_abr',
+        org_id: 'org_abr',
         governance_decision_id: 'allow-compliance-approve',
         audit_chain_valid: evidence.chainVerification!.valid,
       }),

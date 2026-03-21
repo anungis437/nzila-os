@@ -68,7 +68,7 @@ describe('PROOF-001 — Enforcement pipeline blocks unauthorized requests', () =
         authLayer({
           extractActor: async () => ({
             actorId: 'user-123',
-            tenantId: 'org-456',
+            orgId: 'org-456',
             roles: ['member'],
           }),
         }),
@@ -76,7 +76,7 @@ describe('PROOF-001 — Enforcement pipeline blocks unauthorized requests', () =
       async (ctx) => ({
         success: true,
         status: 200,
-        body: { actorId: ctx.actorId, tenantId: ctx.tenantId },
+        body: { actorId: ctx.actorId, orgId: ctx.orgId },
       }),
     )
 
@@ -100,7 +100,7 @@ describe('PROOF-002 — Enforcement pipeline allows authorized requests', () => 
         authLayer({
           extractActor: async () => ({
             actorId: 'admin-1',
-            tenantId: 'org-1',
+            orgId: 'org-1',
             roles: ['admin'],
           }),
         }),
@@ -134,7 +134,7 @@ describe('PROOF-003 — Rate limiting layer trips on excess', () => {
         authLayer({
           extractActor: async () => ({
             actorId: 'user-1',
-            tenantId: 'org-1',
+            orgId: 'org-1',
             roles: ['member'],
           }),
         }),
@@ -158,7 +158,7 @@ describe('PROOF-003 — Rate limiting layer trips on excess', () => {
         authLayer({
           extractActor: async () => ({
             actorId: 'user-1',
-            tenantId: 'org-1',
+            orgId: 'org-1',
             roles: ['member'],
           }),
         }),
@@ -186,7 +186,7 @@ describe('PROOF-004 — Governance layer denies policy violations', () => {
         authLayer({
           extractActor: async () => ({
             actorId: 'user-99',
-            tenantId: 'org-1',
+            orgId: 'org-1',
             roles: ['viewer'],
           }),
         }),
@@ -219,7 +219,7 @@ describe('PROOF-005 — Audit layer records all enforcement decisions', () => {
         authLayer({
           extractActor: async () => ({
             actorId: 'user-1',
-            tenantId: 'org-1',
+            orgId: 'org-1',
             roles: ['admin'],
           }),
         }),
@@ -238,7 +238,7 @@ describe('PROOF-005 — Audit layer records all enforcement decisions', () => {
     expect(result.success).toBe(true)
     expect(auditLog.length).toBe(1)
     expect(auditLog[0]!.actorId).toBe('user-1')
-    expect(auditLog[0]!.tenantId).toBe('org-1')
+    expect(auditLog[0]!.orgId).toBe('org-1')
     expect(auditLog[0]!.action).toBe('read')
     expect(auditLog[0]!.traceId).toBeDefined()
   })
@@ -374,7 +374,7 @@ describe('PROOF-010 — Full pipeline integration: auth + governance + audit', (
             if (!headers.authorization) return null
             return {
               actorId: 'cfo-user-1',
-              tenantId: 'acme-corp',
+              orgId: 'acme-corp',
               roles: ['finance-admin'],
             }
           },
@@ -416,6 +416,6 @@ describe('PROOF-010 — Full pipeline integration: auth + governance + audit', (
     expect(evidence.governance).toBe(true)
     expect(evidence.audit.length).toBe(1)
     expect(evidence.audit[0]!.actorId).toBe('cfo-user-1')
-    expect(evidence.audit[0]!.tenantId).toBe('acme-corp')
+    expect(evidence.audit[0]!.orgId).toBe('acme-corp')
   })
 })

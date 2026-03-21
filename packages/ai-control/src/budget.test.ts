@@ -5,7 +5,7 @@ describe("Budget enforcement", () => {
   it("allows spend within budget", async () => {
     const store = new InMemoryBudgetStore();
     store.setConfig({
-      tenantId: "t1",
+      orgId: "t1",
       monthlyCapUsd: 100,
       warningThresholdPercent: 80,
     });
@@ -18,7 +18,7 @@ describe("Budget enforcement", () => {
   it("tracks spend accumulation", async () => {
     const store = new InMemoryBudgetStore();
     store.setConfig({
-      tenantId: "t1",
+      orgId: "t1",
       monthlyCapUsd: 100,
       warningThresholdPercent: 80,
     });
@@ -32,7 +32,7 @@ describe("Budget enforcement", () => {
   it("blocks when over monthly cap", async () => {
     const store = new InMemoryBudgetStore();
     store.setConfig({
-      tenantId: "t1",
+      orgId: "t1",
       monthlyCapUsd: 100,
       warningThresholdPercent: 80,
     });
@@ -45,7 +45,7 @@ describe("Budget enforcement", () => {
   it("warns when above warning threshold", async () => {
     const store = new InMemoryBudgetStore();
     store.setConfig({
-      tenantId: "t1",
+      orgId: "t1",
       monthlyCapUsd: 100,
       warningThresholdPercent: 80,
     });
@@ -57,14 +57,14 @@ describe("Budget enforcement", () => {
 
   it("blocks when no config exists", async () => {
     const store = new InMemoryBudgetStore();
-    const result = await checkBudget(store, "unknown-tenant");
+    const result = await checkBudget(store, "unknown-org");
     expect(result.status).toBe("blocked");
   });
 
   it("enforces role-specific caps", async () => {
     const store = new InMemoryBudgetStore();
     store.setConfig({
-      tenantId: "t1",
+      orgId: "t1",
       monthlyCapUsd: 100,
       warningThresholdPercent: 80,
       roles: { viewer: { monthlyCapUsd: 20 } },

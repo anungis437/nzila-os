@@ -106,7 +106,7 @@ interface ClassificationInput {
   // Factor inputs (each 0-100)
   autonomyLevel: number;       // How much autonomous decision-making
   dataClassification: number;  // 0=public, 33=internal, 66=sensitive, 100=regulated
-  impactScope: number;         // Number of users/tenants affected
+  impactScope: number;         // Number of users/orgs affected
   reversibility: number;       // 0=fully reversible, 100=irreversible
   transparency: number;        // 0=fully interpretable, 100=black box
   biasRisk: number;            // Demographic bias risk
