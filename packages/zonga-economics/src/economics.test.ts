@@ -166,15 +166,15 @@ describe('@nzila/zonga-economics — fees', () => {
     expect(result.netAmount).toBeCloseTo(44.90)
   })
 
-  it('applies tip fee (3%)', () => {
+  it('applies tip fee (10%)', () => {
     const result = applyFees({
       grossAmount: 20,
       currency: Currency.USD,
       revenueSource: RevenueSource.TIP,
       rules: DEFAULT_FEE_RULES as unknown as FeeRule[],
     })
-    expect(result.fees[0]!.amount).toBeCloseTo(0.60)
-    expect(result.netAmount).toBeCloseTo(19.40)
+    expect(result.fees[0]!.amount).toBeCloseTo(2.00)
+    expect(result.netAmount).toBeCloseTo(18.00)
   })
 
   it('returns zero fees for unknown revenue source', () => {
