@@ -619,3 +619,285 @@ export const zongaOutbox = pgTable('zonga_outbox', {
   createdAt: timestamp('created_at', { withTimezone: true }).notNull().defaultNow(),
   dispatchedAt: timestamp('dispatched_at', { withTimezone: true }),
 })
+
+// ══════════════════════════════════════════════════════════════════════════════
+// GLOBAL SCALE EXTENSIONS
+// ══════════════════════════════════════════════════════════════════════════════
+
+// ── Enums (new) ─────────────────────────────────────────────────────────────
+
+export const zongaWalletStatusEnum = pgEnum('zonga_wallet_status', [
+  'active',
+  'frozen',
+  'closed',
+])
+
+export const zongaWalletTxTypeEnum = pgEnum('zonga_wallet_tx_type', [
+  'credit',
+  'debit',
+  'transfer_in',
+  'transfer_out',
+  'refund',
+  'payout',
+  'hold',
+  'release',
+])
+
+export const zongaPaymentIntentStatusEnum = pgEnum('zonga_payment_intent_status', [
+  'created',
+  'processing',
+  'requires_action',
+  'captured',
+  'failed',
+  'cancelled',
+  'refunded',
+  'partially_refunded',
+])
+
+export const zongaTranscodeJobStatusEnum = pgEnum('zonga_transcode_job_status', [
+  'queued',
+  'processing',
+  'completed',
+  'failed',
+  'cancelled',
+])
+
+export const zongaQueueJobStatusEnum = pgEnum('zonga_queue_job_status', [
+  'pending',
+  'processing',
+  'completed',
+  'failed',
+  'dead_letter',
+])
+
+export const zongaShareTypeEnum = pgEnum('zonga_share_type', [
+  'track',
+  'playlist',
+  'event',
+  'artist',
+])
+
+// ── Wallets ─────────────────────────────────────────────────────────────────
+
+export const zongaWallets = pgTable('zonga_wallets', {
+  id: uuid('id').primaryKey().defaultRandom(),
+  orgId: uuid('org_id')
+    .notNull()
+    .references(() => orgs.id),
+  ownerId: uuid('owner_id').notNull(),
+  ownerType: varchar('owner_type', { length: 50 }).notNull(), // 'creator' | 'listener' | 'platform'
+  currency: varchar('currency', { length: 3 }).notNull().default('USD'),
+  balance: numeric('balance', { precision: 18, scale: 6 }).notNull().default('0'),
+  holdBalance: numeric('hold_balance', { precision: 18, scale: 6 }).notNull().default('0'),
+  status: zongaWalletStatusEnum('status').notNull().default('active'),
+  createdAt: timestamp('created_at', { withTimezone: true }).notNull().defaultNow(),
+  updatedAt: timestamp('updated_at', { withTimezone: true }).notNull().defaultNow(),
+})
+
+export const zongaWalletTransactions = pgTable('zonga_wallet_transactions', {
+  id: uuid('id').primaryKey().defaultRandom(),
+  orgId: uuid('org_id')
+    .notNull()
+    .references(() => orgs.id),
+  walletId: uuid('wallet_id')
+    .notNull()
+    .references(() => zongaWallets.id),
+  type: zongaWalletTxTypeEnum('type').notNull(),
+  amount: numeric('amount', { precision: 18, scale: 6 }).notNull(),
+  currency: varchar('currency', { length: 3 }).notNull(),
+  balanceAfter: numeric('balance_after', { precision: 18, scale: 6 }).notNull(),
+  description: text('description'),
+  referenceType: varchar('reference_type', { length: 100 }),
+  referenceId: uuid('reference_id'),
+  idempotencyKey: varchar('idempotency_key', { length: 255 }).notNull(),
+  counterpartyWalletId: uuid('counterparty_wallet_id'),
+  metadata: jsonb('metadata').notNull().default({}),
+  createdAt: timestamp('created_at', { withTimezone: true }).notNull().defaultNow(),
+})
+
+// ── Payment Intents ─────────────────────────────────────────────────────────
+
+export const zongaPaymentIntents = pgTable('zonga_payment_intents', {
+  id: uuid('id').primaryKey().defaultRandom(),
+  orgId: uuid('org_id')
+    .notNull()
+    .references(() => orgs.id),
+  userId: uuid('user_id').notNull(),
+  orderId: varchar('order_id', { length: 255 }).notNull(),
+  amount: numeric('amount', { precision: 18, scale: 6 }).notNull(),
+  currency: varchar('currency', { length: 3 }).notNull(),
+  method: varchar('method', { length: 50 }).notNull(),
+  provider: varchar('provider', { length: 50 }).notNull(),
+  status: zongaPaymentIntentStatusEnum('status').notNull().default('created'),
+  providerIntentId: varchar('provider_intent_id', { length: 255 }),
+  idempotencyKey: varchar('idempotency_key', { length: 255 }).notNull(),
+  metadata: jsonb('metadata').notNull().default({}),
+  capturedAt: timestamp('captured_at', { withTimezone: true }),
+  expiresAt: timestamp('expires_at', { withTimezone: true }).notNull(),
+  createdAt: timestamp('created_at', { withTimezone: true }).notNull().defaultNow(),
+  updatedAt: timestamp('updated_at', { withTimezone: true }).notNull().defaultNow(),
+})
+
+export const zongaPaymentWebhookEvents = pgTable('zonga_payment_webhook_events', {
+  id: uuid('id').primaryKey().defaultRandom(),
+  orgId: uuid('org_id')
+    .notNull()
+    .references(() => orgs.id),
+  provider: varchar('provider', { length: 50 }).notNull(),
+  eventType: varchar('event_type', { length: 255 }).notNull(),
+  externalId: varchar('external_id', { length: 255 }),
+  payload: jsonb('payload').notNull().default({}),
+  processed: boolean('processed').notNull().default(false),
+  processedAt: timestamp('processed_at', { withTimezone: true }),
+  createdAt: timestamp('created_at', { withTimezone: true }).notNull().defaultNow(),
+})
+
+// ── Transcode Jobs ──────────────────────────────────────────────────────────
+
+export const zongaTranscodeJobs = pgTable('zonga_transcode_jobs', {
+  id: uuid('id').primaryKey().defaultRandom(),
+  orgId: uuid('org_id')
+    .notNull()
+    .references(() => orgs.id),
+  assetId: uuid('asset_id')
+    .notNull()
+    .references(() => zongaContentAssets.id),
+  sourceUrl: text('source_url').notNull(),
+  status: zongaTranscodeJobStatusEnum('status').notNull().default('queued'),
+  targetQualities: jsonb('target_qualities').notNull().default([]),
+  outputs: jsonb('outputs').notNull().default([]),
+  hlsManifestUrl: text('hls_manifest_url'),
+  progress: integer('progress').notNull().default(0),
+  errorMessage: text('error_message'),
+  startedAt: timestamp('started_at', { withTimezone: true }),
+  completedAt: timestamp('completed_at', { withTimezone: true }),
+  createdAt: timestamp('created_at', { withTimezone: true }).notNull().defaultNow(),
+  updatedAt: timestamp('updated_at', { withTimezone: true }).notNull().defaultNow(),
+})
+
+// ── Streaming Sessions ──────────────────────────────────────────────────────
+
+export const zongaStreamingSessions = pgTable('zonga_streaming_sessions', {
+  id: uuid('id').primaryKey().defaultRandom(),
+  orgId: uuid('org_id')
+    .notNull()
+    .references(() => orgs.id),
+  listenerId: uuid('listener_id')
+    .references(() => zongaListeners.id),
+  assetId: uuid('asset_id')
+    .notNull()
+    .references(() => zongaContentAssets.id),
+  quality: varchar('quality', { length: 20 }).notNull(),
+  protocol: varchar('protocol', { length: 20 }).notNull().default('hls'),
+  resumePositionMs: integer('resume_position_ms').notNull().default(0),
+  durationPlayedMs: integer('duration_played_ms').notNull().default(0),
+  completionPercent: numeric('completion_percent', { precision: 5, scale: 2 }).notNull().default('0'),
+  lowDataMode: boolean('low_data_mode').notNull().default(false),
+  country: varchar('country', { length: 3 }),
+  deviceType: varchar('device_type', { length: 50 }),
+  createdAt: timestamp('created_at', { withTimezone: true }).notNull().defaultNow(),
+  updatedAt: timestamp('updated_at', { withTimezone: true }).notNull().defaultNow(),
+})
+
+// ── Queue Jobs (generic) ────────────────────────────────────────────────────
+
+export const zongaQueueJobs = pgTable('zonga_queue_jobs', {
+  id: uuid('id').primaryKey().defaultRandom(),
+  orgId: uuid('org_id')
+    .notNull()
+    .references(() => orgs.id),
+  queue: varchar('queue', { length: 100 }).notNull(),
+  jobType: varchar('job_type', { length: 100 }).notNull(),
+  payload: jsonb('payload').notNull().default({}),
+  status: zongaQueueJobStatusEnum('status').notNull().default('pending'),
+  priority: integer('priority').notNull().default(0),
+  retryCount: integer('retry_count').notNull().default(0),
+  maxRetries: integer('max_retries').notNull().default(3),
+  idempotencyKey: varchar('idempotency_key', { length: 255 }),
+  lastError: text('last_error'),
+  scheduledAt: timestamp('scheduled_at', { withTimezone: true }),
+  startedAt: timestamp('started_at', { withTimezone: true }),
+  completedAt: timestamp('completed_at', { withTimezone: true }),
+  createdAt: timestamp('created_at', { withTimezone: true }).notNull().defaultNow(),
+})
+
+// ── Social Graph ────────────────────────────────────────────────────────────
+
+export const zongaUserFollows = pgTable('zonga_user_follows', {
+  id: uuid('id').primaryKey().defaultRandom(),
+  orgId: uuid('org_id')
+    .notNull()
+    .references(() => orgs.id),
+  followerId: uuid('follower_id').notNull(),
+  followeeId: uuid('followee_id').notNull(),
+  followerType: varchar('follower_type', { length: 50 }).notNull(), // 'listener' | 'creator'
+  followeeType: varchar('followee_type', { length: 50 }).notNull(), // 'listener' | 'creator'
+  createdAt: timestamp('created_at', { withTimezone: true }).notNull().defaultNow(),
+})
+
+export const zongaUserActivity = pgTable('zonga_user_activity', {
+  id: uuid('id').primaryKey().defaultRandom(),
+  orgId: uuid('org_id')
+    .notNull()
+    .references(() => orgs.id),
+  userId: uuid('user_id').notNull(),
+  userType: varchar('user_type', { length: 50 }).notNull(),
+  activityType: varchar('activity_type', { length: 100 }).notNull(),
+  entityType: varchar('entity_type', { length: 50 }),
+  entityId: uuid('entity_id'),
+  metadata: jsonb('metadata').notNull().default({}),
+  createdAt: timestamp('created_at', { withTimezone: true }).notNull().defaultNow(),
+})
+
+export const zongaSharedContent = pgTable('zonga_shared_content', {
+  id: uuid('id').primaryKey().defaultRandom(),
+  orgId: uuid('org_id')
+    .notNull()
+    .references(() => orgs.id),
+  sharerId: uuid('sharer_id').notNull(),
+  shareType: zongaShareTypeEnum('share_type').notNull(),
+  entityId: uuid('entity_id').notNull(),
+  deepLink: text('deep_link').notNull(),
+  platform: varchar('platform', { length: 50 }),
+  clickCount: integer('click_count').notNull().default(0),
+  createdAt: timestamp('created_at', { withTimezone: true }).notNull().defaultNow(),
+})
+
+// ── Recommendation Cache ────────────────────────────────────────────────────
+
+export const zongaRecommendationCache = pgTable('zonga_recommendation_cache', {
+  id: uuid('id').primaryKey().defaultRandom(),
+  orgId: uuid('org_id')
+    .notNull()
+    .references(() => orgs.id),
+  userId: uuid('user_id').notNull(),
+  surface: varchar('surface', { length: 100 }).notNull(), // 'trending', 'for_you', 'city', 'events'
+  items: jsonb('items').notNull().default([]),
+  generatedAt: timestamp('generated_at', { withTimezone: true }).notNull().defaultNow(),
+  expiresAt: timestamp('expires_at', { withTimezone: true }).notNull(),
+  createdAt: timestamp('created_at', { withTimezone: true }).notNull().defaultNow(),
+})
+
+// ── Creator Analytics Snapshots ─────────────────────────────────────────────
+
+export const zongaCreatorAnalytics = pgTable('zonga_creator_analytics', {
+  id: uuid('id').primaryKey().defaultRandom(),
+  orgId: uuid('org_id')
+    .notNull()
+    .references(() => orgs.id),
+  creatorId: uuid('creator_id')
+    .notNull()
+    .references(() => zongaCreators.id),
+  periodStart: timestamp('period_start', { withTimezone: true }).notNull(),
+  periodEnd: timestamp('period_end', { withTimezone: true }).notNull(),
+  totalStreams: integer('total_streams').notNull().default(0),
+  uniqueListeners: integer('unique_listeners').notNull().default(0),
+  totalRevenue: numeric('total_revenue', { precision: 18, scale: 6 }).notNull().default('0'),
+  topCountries: jsonb('top_countries').notNull().default([]),
+  topTracks: jsonb('top_tracks').notNull().default([]),
+  eventRevenue: numeric('event_revenue', { precision: 18, scale: 6 }).notNull().default('0'),
+  followerCount: integer('follower_count').notNull().default(0),
+  followerGrowth: integer('follower_growth').notNull().default(0),
+  metadata: jsonb('metadata').notNull().default({}),
+  createdAt: timestamp('created_at', { withTimezone: true }).notNull().defaultNow(),
+})

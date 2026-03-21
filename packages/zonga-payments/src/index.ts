@@ -55,3 +55,52 @@ export {
   type PayoutBatchPlan,
   type PayoutReconciliation,
 } from './payouts'
+
+// ── Provider Adapters ─────────────────────────────────────────────────────
+export {
+  createStripeAdapter,
+  createMoMoAdapter,
+  createOrangeMoneyAdapter,
+  createAirtelAdapter,
+  type StripeConfig,
+  type MoMoConfig,
+  type OrangeMoneyConfig,
+  type AirtelConfig,
+} from './adapters/index'
+
+// ── Wallet Service ────────────────────────────────────────────────────────
+export {
+  WalletStatus,
+  WalletTxType,
+  createWalletService,
+  validateDebit,
+  validateHold,
+  validateCredit,
+  buildCreditEntries,
+  buildDebitEntries,
+  buildTransferEntries,
+  CreditWalletSchema,
+  DebitWalletSchema,
+  TransferSchema,
+  type Wallet,
+  type WalletTransaction,
+  type WalletOperationResult,
+  type CreditParams,
+  type DebitParams,
+  type TransferParams,
+  type HoldParams,
+  type WalletRepository,
+  type LedgerPort,
+  type WalletLedgerEntry,
+  type WalletValidation,
+} from './wallet'
+
+// ── Payment Flow Orchestration ────────────────────────────────────────────
+export {
+  createPaymentFlowService,
+  type FlowOrchestrator,
+  type PaymentIntentRepository,
+  type WebhookEventRepository,
+  type AuditLogger,
+  type PaymentFlowDeps,
+} from './payment-flow'

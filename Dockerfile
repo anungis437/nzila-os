@@ -108,6 +108,12 @@ COPY packages/trade-db/package.json ./packages/trade-db/
 COPY packages/ui/package.json ./packages/ui/
 COPY packages/webhooks/package.json ./packages/webhooks/
 COPY packages/zonga-core/package.json ./packages/zonga-core/
+COPY packages/zonga-economics/package.json ./packages/zonga-economics/
+COPY packages/zonga-payments/package.json ./packages/zonga-payments/
+COPY packages/zonga-growth/package.json ./packages/zonga-growth/
+
+# Services
+COPY services/media-worker/package.json ./services/media-worker/
 
 # Override .npmrc — keep node-linker=hoisted (required for module resolution)
 # but remove exFAT workarounds that are unnecessary on ext4
@@ -499,6 +505,12 @@ COPY packages/trade-db/package.json ./packages/trade-db/
 COPY packages/ui/package.json ./packages/ui/
 COPY packages/webhooks/package.json ./packages/webhooks/
 COPY packages/zonga-core/package.json ./packages/zonga-core/
+COPY packages/zonga-economics/package.json ./packages/zonga-economics/
+COPY packages/zonga-payments/package.json ./packages/zonga-payments/
+COPY packages/zonga-growth/package.json ./packages/zonga-growth/
+
+# Services
+COPY services/media-worker/package.json ./services/media-worker/
 
 # Override .npmrc — keep node-linker=hoisted (required for module resolution)
 # but remove exFAT workarounds that are unnecessary on ext4
