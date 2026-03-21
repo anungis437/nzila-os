@@ -35,7 +35,7 @@ export interface UserActivity {
   readonly userType: EntityType
   readonly activityType: ListenerActivityType
   readonly entityType: string | null
-  readonly entityId: string | null
+  readonly contentId: string | null
   readonly metadata: Readonly<Record<string, unknown>>
   readonly createdAt: string
 }
@@ -137,7 +137,7 @@ export function createSocialGraphService(deps: { repo: SocialRepository }) {
         userType: params.followerType,
         activityType: 'follow' as ListenerActivityType,
         entityType: params.followeeType,
-        entityId: params.followeeId,
+        contentId: params.followeeId,
         metadata: {},
       })
 

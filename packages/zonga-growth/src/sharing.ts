@@ -36,7 +36,7 @@ export interface SharedContent {
   readonly orgId: string
   readonly sharerId: string
   readonly shareType: ShareType
-  readonly entityId: string
+  readonly contentId: string
   readonly deepLink: string
   readonly platform: SharePlatform | null
   readonly clickCount: number
@@ -47,14 +47,14 @@ export interface ShareIntent {
   readonly orgId: string
   readonly sharerId: string
   readonly shareType: ShareType
-  readonly entityId: string
+  readonly contentId: string
   readonly platform?: SharePlatform
 }
 
 export interface DeepLinkParams {
   readonly baseUrl: string
   readonly shareType: ShareType
-  readonly entityId: string
+  readonly contentId: string
   readonly shareId: string
   readonly utm?: {
     source?: string
@@ -68,7 +68,7 @@ export interface ViralityMetrics {
   readonly totalClicks: number
   readonly clickThroughRate: number
   readonly topPlatform: SharePlatform | null
-  readonly topContent: { entityId: string; shares: number } | null
+  readonly topContent: { contentId: string; shares: number } | null
 }
 
 export interface FriendsListening {
@@ -83,7 +83,7 @@ export const ShareIntentSchema = z.object({
   orgId: z.string().uuid(),
   sharerId: z.string().uuid(),
   shareType: z.enum(['track', 'playlist', 'event', 'artist']),
-  entityId: z.string().uuid(),
+  contentId: z.string().uuid(),
   platform: z
     .enum([
       'whatsapp',
@@ -113,7 +113,7 @@ export function buildDeepLink(params: DeepLinkParams): string {
   }
 
   const path = pathMap[params.shareType]
-  const url = new URL(`/${path}/${params.entityId}`, params.baseUrl)
+  const url = new URL(`/${path}/${params.contentId}`, params.baseUrl)
   url.searchParams.set('ref', params.shareId)
 
   if (params.utm) {
@@ -168,16 +168,16 @@ export function computeViralityMetrics(
   const contentCounts = new Map<string, number>()
   for (const share of shares) {
     contentCounts.set(
-      share.entityId,
-      (contentCounts.get(share.entityId) ?? 0) + 1,
+      share.contentId,
+      (contentCounts.get(share.contentId) ?? 0) + 1,
     )
   }
 
-  let topContent: { entityId: string; shares: number } | null = null
+  let topContent: { contentId: string; shares: number } | null = null
   let topContentCount = 0
-  for (const [entityId, count] of contentCounts) {
+  for (const [contentId, count] of contentCounts) {
     if (count > topContentCount) {
-      topContent = { entityId, shares: count }
+      topContent = { contentId, shares: count }
       topContentCount = count
     }
   }
@@ -207,7 +207,7 @@ export interface SharingRepository {
   ): Promise<readonly SharedContent[]>
   listSharesByEntity(
     orgId: string,
-    entityId: string,
+    contentId: string,
     limit: number,
     offset: number,
   ): Promise<readonly SharedContent[]>
@@ -247,7 +247,7 @@ export function createSharingService(deps: {
         orgId: intent.orgId,
         sharerId: intent.sharerId,
         shareType: intent.shareType,
-        entityId: intent.entityId,
+        contentId: intent.contentId,
         deepLink: '', // will update below
         platform: intent.platform ?? null,
       })
@@ -256,7 +256,7 @@ export function createSharingService(deps: {
       const deepLink = buildDeepLink({
         baseUrl,
         shareType: intent.shareType,
-        entityId: intent.entityId,
+        contentId: intent.contentId,
         shareId: shareStub.id,
         utm: {
           source: intent.platform ?? 'direct',
