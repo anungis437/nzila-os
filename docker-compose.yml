@@ -190,6 +190,9 @@ services:
       - S3_REGION=${S3_REGION:-auto}
       - REDIS_URL=redis://redis:6379
       - DATABASE_URL=${DATABASE_URL}
+      - CDN_BASE_URL=${CDN_BASE_URL:-}
+      - LOG_LEVEL=${LOG_LEVEL:-info}
+      - WORKER_CONCURRENCY=${WORKER_CONCURRENCY:-2}
     depends_on:
       redis:
         condition: service_healthy

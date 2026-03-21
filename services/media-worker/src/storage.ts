@@ -2,7 +2,8 @@
  * @nzila/media-worker — Storage Abstraction
  *
  * S3-compatible storage layer supporting AWS S3 and Cloudflare R2.
- * Handles raw uploads, processed outputs, HLS segments, and artwork.
+ * Handles raw uploads, processed outputs, HLS segments, artwork,
+ * waveform data, and preview clips.
  *
  * @module @nzila/media-worker/storage
  */
@@ -14,6 +15,8 @@ export const STORAGE_PATHS = {
   PROCESSED: 'audio/processed',
   HLS: 'audio/hls',
   ARTWORK: 'artwork',
+  WAVEFORM: 'audio/waveform',
+  PREVIEW: 'audio/preview',
 } as const
 
 export function rawPath(assetId: string, fileName: string): string {
@@ -44,10 +47,18 @@ export function artworkPath(assetId: string, size: number): string {
   return `${STORAGE_PATHS.ARTWORK}/${assetId}/${size}x${size}.webp`
 }
 
+export function waveformPath(assetId: string): string {
+  return `${STORAGE_PATHS.WAVEFORM}/${assetId}/waveform.json`
+}
+
+export function previewPath(assetId: string): string {
+  return `${STORAGE_PATHS.PREVIEW}/${assetId}/preview.mp4`
+}
+
 // ── Storage Provider Interface ──────────────────────────────────────────────
 
 export interface StorageProvider {
-  readonly name: 's3' | 'r2'
+  readonly name: string
 
   /** Upload a buffer to the given key. */
   upload(params: UploadParams): Promise<UploadResult>
@@ -69,6 +80,15 @@ export interface StorageProvider {
 
   /** List objects under a prefix. */
   list(prefix: string): Promise<readonly StorageObject[]>
+
+  /** Get object metadata without downloading the body. */
+  getObjectMetadata(key: string): Promise<ObjectMetadata | null>
+
+  /** Copy an object to a new key. */
+  copyObject(sourceKey: string, destinationKey: string): Promise<void>
+
+  /** Delete all objects under a prefix. */
+  deletePrefix(prefix: string): Promise<number>
 }
 
 export interface UploadParams {
@@ -93,6 +113,15 @@ export interface StorageObject {
   readonly etag: string
 }
 
+export interface ObjectMetadata {
+  readonly key: string
+  readonly sizeBytes: number
+  readonly lastModified: Date
+  readonly etag: string
+  readonly contentType: string
+  readonly metadata: Record<string, string>
+}
+
 // ── Storage Configuration ───────────────────────────────────────────────────
 
 export interface StorageConfig {
@@ -105,59 +134,60 @@ export interface StorageConfig {
   readonly cdnBaseUrl?: string
 }
 
-// ── S3 Adapter ──────────────────────────────────────────────────────────────
+// ── S3-Compatible Adapter (works with AWS S3 + Cloudflare R2) ───────────────
 
 export function createS3StorageAdapter(config: StorageConfig): StorageProvider {
+  // Singleton client — reused across all operations
+  let _client: import('@aws-sdk/client-s3').S3Client | null = null
+
+  async function getClient(): Promise<import('@aws-sdk/client-s3').S3Client> {
+    if (_client) return _client
+    const { S3Client } = await import('@aws-sdk/client-s3')
+    _client = new S3Client({
+      region: config.region,
+      endpoint: config.endpoint,
+      credentials: {
+        accessKeyId: config.accessKeyId,
+        secretAccessKey: config.secretAccessKey,
+      },
+      forcePathStyle: config.provider === 'r2',
+    })
+    return _client
+  }
+
+  function buildUrl(key: string): string {
+    return config.cdnBaseUrl
+      ? `${config.cdnBaseUrl}/${key}`
+      : `https://${config.bucket}.s3.${config.region}.amazonaws.com/${key}`
+  }
+
   return {
-    name: 's3',
+    name: config.provider,
 
     async upload(params: UploadParams): Promise<UploadResult> {
-      // In production, would use @aws-sdk/client-s3
-      // For now, define the contract with validated structure
-      const { PutObjectCommand, S3Client } = await import('@aws-sdk/client-s3')
-      const client = new S3Client({
-        region: config.region,
-        endpoint: config.endpoint,
-        credentials: {
-          accessKeyId: config.accessKeyId,
-          secretAccessKey: config.secretAccessKey,
-        },
-        forcePathStyle: config.provider === 'r2',
-      })
-
-      const command = new PutObjectCommand({
-        Bucket: config.bucket,
-        Key: params.key,
-        Body: params.body,
-        ContentType: params.contentType,
-        Metadata: params.metadata,
-        CacheControl: params.cacheControl ?? 'public, max-age=31536000, immutable',
-      })
-
-      const result = await client.send(command)
-      const url = config.cdnBaseUrl
-        ? `${config.cdnBaseUrl}/${params.key}`
-        : `https://${config.bucket}.s3.${config.region}.amazonaws.com/${params.key}`
-
+      const { PutObjectCommand } = await import('@aws-sdk/client-s3')
+      const client = await getClient()
+      const result = await client.send(
+        new PutObjectCommand({
+          Bucket: config.bucket,
+          Key: params.key,
+          Body: params.body,
+          ContentType: params.contentType,
+          Metadata: params.metadata,
+          CacheControl: params.cacheControl ?? 'public, max-age=31536000, immutable',
+        }),
+      )
       return {
         key: params.key,
         etag: result.ETag ?? '',
         sizeBytes: params.body.byteLength,
-        url,
+        url: buildUrl(params.key),
       }
     },
 
     async download(key: string): Promise<Uint8Array> {
-      const { GetObjectCommand, S3Client } = await import('@aws-sdk/client-s3')
-      const client = new S3Client({
-        region: config.region,
-        endpoint: config.endpoint,
-        credentials: {
-          accessKeyId: config.accessKeyId,
-          secretAccessKey: config.secretAccessKey,
-        },
-        forcePathStyle: config.provider === 'r2',
-      })
+      const { GetObjectCommand } = await import('@aws-sdk/client-s3')
+      const client = await getClient()
       const result = await client.send(
         new GetObjectCommand({ Bucket: config.bucket, Key: key }),
       )
@@ -167,32 +197,16 @@ export function createS3StorageAdapter(config: StorageConfig): StorageProvider {
     },
 
     async delete(key: string): Promise<void> {
-      const { DeleteObjectCommand, S3Client } = await import('@aws-sdk/client-s3')
-      const client = new S3Client({
-        region: config.region,
-        endpoint: config.endpoint,
-        credentials: {
-          accessKeyId: config.accessKeyId,
-          secretAccessKey: config.secretAccessKey,
-        },
-        forcePathStyle: config.provider === 'r2',
-      })
+      const { DeleteObjectCommand } = await import('@aws-sdk/client-s3')
+      const client = await getClient()
       await client.send(
         new DeleteObjectCommand({ Bucket: config.bucket, Key: key }),
       )
     },
 
     async exists(key: string): Promise<boolean> {
-      const { HeadObjectCommand, S3Client } = await import('@aws-sdk/client-s3')
-      const client = new S3Client({
-        region: config.region,
-        endpoint: config.endpoint,
-        credentials: {
-          accessKeyId: config.accessKeyId,
-          secretAccessKey: config.secretAccessKey,
-        },
-        forcePathStyle: config.provider === 'r2',
-      })
+      const { HeadObjectCommand } = await import('@aws-sdk/client-s3')
+      const client = await getClient()
       try {
         await client.send(
           new HeadObjectCommand({ Bucket: config.bucket, Key: key }),
@@ -204,17 +218,9 @@ export function createS3StorageAdapter(config: StorageConfig): StorageProvider {
     },
 
     async getSignedUrl(key: string, expiresInSeconds: number): Promise<string> {
-      const { GetObjectCommand, S3Client } = await import('@aws-sdk/client-s3')
+      const { GetObjectCommand } = await import('@aws-sdk/client-s3')
       const { getSignedUrl: s3GetSignedUrl } = await import('@aws-sdk/s3-request-presigner')
-      const client = new S3Client({
-        region: config.region,
-        endpoint: config.endpoint,
-        credentials: {
-          accessKeyId: config.accessKeyId,
-          secretAccessKey: config.secretAccessKey,
-        },
-        forcePathStyle: config.provider === 'r2',
-      })
+      const client = await getClient()
       return s3GetSignedUrl(
         client,
         new GetObjectCommand({ Bucket: config.bucket, Key: key }),
@@ -223,17 +229,9 @@ export function createS3StorageAdapter(config: StorageConfig): StorageProvider {
     },
 
     async getSignedUploadUrl(key: string, contentType: string, expiresInSeconds: number): Promise<string> {
-      const { PutObjectCommand, S3Client } = await import('@aws-sdk/client-s3')
+      const { PutObjectCommand } = await import('@aws-sdk/client-s3')
       const { getSignedUrl: s3GetSignedUrl } = await import('@aws-sdk/s3-request-presigner')
-      const client = new S3Client({
-        region: config.region,
-        endpoint: config.endpoint,
-        credentials: {
-          accessKeyId: config.accessKeyId,
-          secretAccessKey: config.secretAccessKey,
-        },
-        forcePathStyle: config.provider === 'r2',
-      })
+      const client = await getClient()
       return s3GetSignedUrl(
         client,
         new PutObjectCommand({ Bucket: config.bucket, Key: key, ContentType: contentType }),
@@ -242,25 +240,185 @@ export function createS3StorageAdapter(config: StorageConfig): StorageProvider {
     },
 
     async list(prefix: string): Promise<readonly StorageObject[]> {
-      const { ListObjectsV2Command, S3Client } = await import('@aws-sdk/client-s3')
-      const client = new S3Client({
-        region: config.region,
-        endpoint: config.endpoint,
-        credentials: {
-          accessKeyId: config.accessKeyId,
-          secretAccessKey: config.secretAccessKey,
-        },
-        forcePathStyle: config.provider === 'r2',
-      })
-      const result = await client.send(
-        new ListObjectsV2Command({ Bucket: config.bucket, Prefix: prefix }),
+      const { ListObjectsV2Command } = await import('@aws-sdk/client-s3')
+      const client = await getClient()
+      const objects: StorageObject[] = []
+      let continuationToken: string | undefined
+
+      // Paginate through all objects
+      do {
+        const result = await client.send(
+          new ListObjectsV2Command({
+            Bucket: config.bucket,
+            Prefix: prefix,
+            ContinuationToken: continuationToken,
+          }),
+        )
+        for (const obj of result.Contents ?? []) {
+          objects.push({
+            key: obj.Key ?? '',
+            sizeBytes: obj.Size ?? 0,
+            lastModified: obj.LastModified ?? new Date(),
+            etag: obj.ETag ?? '',
+          })
+        }
+        continuationToken = result.NextContinuationToken
+      } while (continuationToken)
+
+      return objects
+    },
+
+    async getObjectMetadata(key: string): Promise<ObjectMetadata | null> {
+      const { HeadObjectCommand } = await import('@aws-sdk/client-s3')
+      const client = await getClient()
+      try {
+        const result = await client.send(
+          new HeadObjectCommand({ Bucket: config.bucket, Key: key }),
+        )
+        return {
+          key,
+          sizeBytes: result.ContentLength ?? 0,
+          lastModified: result.LastModified ?? new Date(),
+          etag: result.ETag ?? '',
+          contentType: result.ContentType ?? 'application/octet-stream',
+          metadata: (result.Metadata as Record<string, string>) ?? {},
+        }
+      } catch {
+        return null
+      }
+    },
+
+    async copyObject(sourceKey: string, destinationKey: string): Promise<void> {
+      const { CopyObjectCommand } = await import('@aws-sdk/client-s3')
+      const client = await getClient()
+      await client.send(
+        new CopyObjectCommand({
+          Bucket: config.bucket,
+          CopySource: `${config.bucket}/${sourceKey}`,
+          Key: destinationKey,
+        }),
       )
-      return (result.Contents ?? []).map((obj) => ({
-        key: obj.Key ?? '',
-        sizeBytes: obj.Size ?? 0,
-        lastModified: obj.LastModified ?? new Date(),
-        etag: obj.ETag ?? '',
-      }))
+    },
+
+    async deletePrefix(prefix: string): Promise<number> {
+      const { DeleteObjectCommand, ListObjectsV2Command } = await import('@aws-sdk/client-s3')
+      const client = await getClient()
+      let deleted = 0
+      let continuationToken: string | undefined
+
+      do {
+        const result = await client.send(
+          new ListObjectsV2Command({
+            Bucket: config.bucket,
+            Prefix: prefix,
+            ContinuationToken: continuationToken,
+          }),
+        )
+        for (const obj of result.Contents ?? []) {
+          if (obj.Key) {
+            await client.send(
+              new DeleteObjectCommand({ Bucket: config.bucket, Key: obj.Key }),
+            )
+            deleted++
+          }
+        }
+        continuationToken = result.NextContinuationToken
+      } while (continuationToken)
+
+      return deleted
+    },
+  }
+}
+
+// ── In-Memory Storage (for tests) ───────────────────────────────────────────
+
+export function createInMemoryStorageAdapter(): StorageProvider & { readonly store: Map<string, { body: Uint8Array; contentType: string; metadata: Record<string, string>; cacheControl: string }> } {
+  const store = new Map<string, { body: Uint8Array; contentType: string; metadata: Record<string, string>; cacheControl: string }>()
+
+  return {
+    name: 'memory',
+    store,
+
+    async upload(params: UploadParams): Promise<UploadResult> {
+      store.set(params.key, {
+        body: params.body,
+        contentType: params.contentType,
+        metadata: params.metadata ?? {},
+        cacheControl: params.cacheControl ?? '',
+      })
+      return {
+        key: params.key,
+        etag: `"${params.key}"`,
+        sizeBytes: params.body.byteLength,
+        url: `mem://${params.key}`,
+      }
+    },
+
+    async download(key: string): Promise<Uint8Array> {
+      const entry = store.get(key)
+      if (!entry) throw new Error(`Not found: ${key}`)
+      return entry.body
+    },
+
+    async delete(key: string): Promise<void> {
+      store.delete(key)
+    },
+
+    async exists(key: string): Promise<boolean> {
+      return store.has(key)
+    },
+
+    async getSignedUrl(key: string): Promise<string> {
+      return `mem-signed://${key}`
+    },
+
+    async getSignedUploadUrl(key: string): Promise<string> {
+      return `mem-upload://${key}`
+    },
+
+    async list(prefix: string): Promise<readonly StorageObject[]> {
+      const results: StorageObject[] = []
+      for (const [key, entry] of store) {
+        if (key.startsWith(prefix)) {
+          results.push({
+            key,
+            sizeBytes: entry.body.byteLength,
+            lastModified: new Date(),
+            etag: `"${key}"`,
+          })
+        }
+      }
+      return results
+    },
+
+    async getObjectMetadata(key: string): Promise<ObjectMetadata | null> {
+      const entry = store.get(key)
+      if (!entry) return null
+      return {
+        key,
+        sizeBytes: entry.body.byteLength,
+        lastModified: new Date(),
+        etag: `"${key}"`,
+        contentType: entry.contentType,
+        metadata: entry.metadata,
+      }
+    },
+
+    async copyObject(sourceKey: string, destinationKey: string): Promise<void> {
+      const entry = store.get(sourceKey)
+      if (!entry) throw new Error(`Not found: ${sourceKey}`)
+      store.set(destinationKey, { ...entry })
+    },
+
+    async deletePrefix(prefix: string): Promise<number> {
+      let deleted = 0
+      for (const key of store.keys()) {
+        if (key.startsWith(prefix)) {
+          store.delete(key)
+          deleted++
+        }
+      }
+      return deleted
     },
   }
 }

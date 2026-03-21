@@ -14,12 +14,16 @@ export {
   hlsVariantPath,
   hlsSegmentPath,
   artworkPath,
+  waveformPath,
+  previewPath,
   createS3StorageAdapter,
+  createInMemoryStorageAdapter,
   type StorageProvider,
   type StorageConfig,
   type UploadParams,
   type UploadResult,
   type StorageObject,
+  type ObjectMetadata,
 } from './storage'
 
 // ── Transcoding ─────────────────────────────────────────────────────────────
@@ -29,12 +33,20 @@ export {
   buildTranscodeArgs,
   buildHlsArgs,
   buildMasterPlaylist,
+  buildPreviewArgs,
+  buildWaveformArgs,
+  generateWaveformFromPcm,
   createTranscodeService,
+  PREVIEW_CONFIG,
+  WAVEFORM_CONFIG,
   type QualityTier,
   type TranscodeJobInput,
   type TranscodeJobOutput,
   type TranscodeOutputFile,
   type FFmpegExecutor,
+  type WaveformData,
+  type TranscodeProgress,
+  type ProgressCallback,
 } from './transcoder'
 
 // ── Streaming Delivery ──────────────────────────────────────────────────────
@@ -78,6 +90,9 @@ export {
 export {
   QUEUE_NAMES,
   createQueueWorker,
+  createRedisQueueProvider,
+  createInMemoryQueueProvider,
+  replayDeadLetters,
   type QueueName,
   type QueueMessage,
   type QueueProvider,
@@ -86,6 +101,8 @@ export {
   type QueueWorker,
   type JobHandler,
   type WorkerLogger,
+  type RedisQueueConfig,
+  type RedisClient,
   type TranscodeJobPayload,
   type PaymentProcessPayload,
   type PaymentConfirmPayload,
@@ -94,3 +111,42 @@ export {
   type RecommendationUpdatePayload,
   type AnalyticsIngestPayload,
 } from './queue'
+
+// ── Observability ───────────────────────────────────────────────────────────
+export {
+  createCorrelationId,
+  createLogger,
+  createMetricsCollector,
+  createHealthChecker,
+  MediaWorkerError,
+  isRetryableError,
+  MEDIA_METRICS,
+  type CorrelationContext,
+  type LogLevel,
+  type LogEntry,
+  type StructuredLogger,
+  type MetricsCollector,
+  type MediaErrorCode,
+  type HealthStatus,
+  type HealthCheck,
+  type HealthCheckDep,
+} from './observability'
+
+// ── Server ──────────────────────────────────────────────────────────────────
+export {
+  validateEnv,
+  createHttpServer,
+  registerShutdownHandlers,
+  type ServerEnv,
+  type ServerDeps,
+} from './server'
+
+// ── Recovery ────────────────────────────────────────────────────────────────
+export {
+  classifyFailure,
+  cleanupPartialArtifacts,
+  detectOrphans,
+  purgeOrphans,
+  type RetryDecision,
+  type OrphanedArtifact,
+} from './recovery'

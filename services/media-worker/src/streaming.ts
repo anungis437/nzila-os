@@ -2,14 +2,14 @@
  * @nzila/media-worker — Streaming Delivery Service
  *
  * Serves HLS streams with signed URLs for premium content,
- * handles quality negotiation, bandwidth detection, and
- * CDN edge routing.
+ * handles quality negotiation, bandwidth detection, CDN edge routing,
+ * and download vs streaming distinction.
  *
  * @module @nzila/media-worker/streaming
  */
 
 import type { StorageProvider } from './storage'
-import { hlsManifestPath, hlsVariantPath, hlsSegmentPath, processedPath } from './storage'
+import { hlsManifestPath, hlsVariantPath, hlsSegmentPath, processedPath, waveformPath, previewPath } from './storage'
 import type { QualityTier } from './transcoder'
 
 // ── Stream Access Control ───────────────────────────────────────────────────
@@ -153,6 +153,56 @@ export function createStreamingDeliveryService(deps: {
         hlsManifestUrl: null,
         progressiveFallbackUrl: null,
       }
+    },
+
+    /**
+     * Generate a signed download URL for offline consumption.
+     * Distinct from streaming — downloads are single-file progressive
+     * with longer TTL and Content-Disposition header semantics.
+     */
+    async resolveDownloadUrl(params: {
+      assetId: string
+      quality: QualityTier
+      accessTier: StreamAccessTier
+    }): Promise<{ url: string; expiresAt: Date } | null> {
+      const policy = getAccessPolicy(params.accessTier)
+      if (!policy.offlineEnabled) return null
+
+      const qualityRank = QUALITY_RANK[params.quality]
+      const maxRank = QUALITY_RANK[policy.maxQuality]
+      if (qualityRank > maxRank) return null
+
+      const key = processedPath(params.assetId, params.quality)
+      const exists = await storage.exists(key)
+      if (!exists) return null
+
+      // Download URLs get 2x streaming TTL
+      const downloadTtl = policy.urlTtlSeconds * 2
+      const url = await storage.getSignedUrl(key, downloadTtl)
+      return {
+        url,
+        expiresAt: new Date(Date.now() + downloadTtl * 1000),
+      }
+    },
+
+    /**
+     * Get preview clip URL for a track.
+     */
+    async resolvePreviewUrl(assetId: string): Promise<string | null> {
+      const key = previewPath(assetId)
+      const exists = await storage.exists(key)
+      if (!exists) return null
+      return `${cdnBaseUrl}/${key}`
+    },
+
+    /**
+     * Get waveform data URL for a track.
+     */
+    async resolveWaveformUrl(assetId: string): Promise<string | null> {
+      const key = waveformPath(assetId)
+      const exists = await storage.exists(key)
+      if (!exists) return null
+      return `${cdnBaseUrl}/${key}`
     },
 
     /**
