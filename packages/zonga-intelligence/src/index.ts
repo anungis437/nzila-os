@@ -92,3 +92,15 @@ export {
   type PerformancePrediction,
   type CreatorAssistInput,
 } from './creator-assist'
+
+// ── Recommendation Engine ─────────────────────────────────────────────────
+export {
+  createRecommendationEngine,
+  DEFAULT_RECOMMENDATION_CONFIG,
+  type RecommendationEngine,
+  type RecommendParams,
+  type RecommendationConfig,
+  type RecommendationPorts,
+  type TrendingItem,
+  type ContentSimilarity,
+} from './recommendation-engine'

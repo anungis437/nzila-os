@@ -91,3 +91,17 @@ export type {
   PayoutHistoryEntry,
   PlatformMetrics,
 } from './reporting'
+
+// Pricing tiers
+export {
+  PRICING_TIERS,
+  resolveTierFeeRules,
+  getEffectiveTierCommission,
+  computeSubscriptionRevenue,
+  isTierPayoutFrequencyAllowed,
+  computeCreatorNetRevenue,
+} from './pricing-tiers'
+export type {
+  CreatorPlanTier,
+  PricingTier,
+} from './pricing-tiers'

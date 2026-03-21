@@ -5,12 +5,17 @@
   "exceptions": [
     "zonga-services.ts is a re-export barrel from @nzila/zonga-core — acts as thin façade"
   ],
-  "migration_status": "in_progress",
-  "priority_migrations": [
-    "Wire platform-adapters with health, metrics, storage, payments exports",
-    "Complete launch-grade monetization model (pricing-tiers.ts)",
-    "Finalize payout-orchestrator in @nzila/zonga-payments",
-    "Create event-economics.ts in @nzila/zonga-events"
+  "migration_status": "complete",
+  "priority_migrations": [],
+  "completed_migrations": [
+    "Platform-adapters wired with health, metrics, storage, payments exports",
+    "pricing-tiers.ts created in @nzila/zonga-economics — full monetization model",
+    "payout-orchestrator finalized in @nzila/zonga-payments — single execution path",
+    "event-economics.ts + event-settlement.ts created in @nzila/zonga-events",
+    "royalty-engine.ts deterministic computation in @nzila/zonga-rights",
+    "payout-proof.ts immutable audit trail in @nzila/zonga-rights",
+    "recommendation-engine.ts AI productization in @nzila/zonga-intelligence",
+    "engagement-engine.ts creator economy loop in @nzila/zonga-growth"
   ],
-  "app_tier": "PRODUCTION_CANDIDATE"
+  "app_tier": "PRODUCTION"
 }
