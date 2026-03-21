@@ -21,12 +21,12 @@ export const issueInvoiceHandler: CommandHandler<IssueInvoiceCommand> = {
     if (!invoice) throw new EntityNotFoundError('invoice', input.invoice_id)
 
     const currentStatus = (invoice.status ?? 'draft').toUpperCase()
-    const domainCheck = invoiceCanBeIssued({ status: currentStatus as 'DRAFT', amount: Number(invoice.amount ?? 0) })
+    const domainCheck = invoiceCanBeIssued({ status: currentStatus as 'DRAFT', amount: Number(invoice.total ?? 0) })
     if (!domainCheck.valid) {
       return { success: false, errors: [{ code: 'DOMAIN_INVARIANT', message: domainCheck.violations.join('; ') }] }
     }
 
-    await invoiceRepo.update(input.invoice_id, { status: 'sent' })
+    await invoiceRepo.update(input.invoice_id, context.org_id, { status: 'sent' })
 
     const eventId = dispatchDomainEvent({
       type: 'invoice_issued',

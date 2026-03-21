@@ -21,6 +21,7 @@ export const FlowEventType = z.enum([
   // Order lifecycle
   'order_created',
   'order_confirmed',
+  'order_completed',
   'order_cancelled',
   'order_ready_for_procurement',
   'order_ready_to_ship',
@@ -43,6 +44,8 @@ export const FlowEventType = z.enum([
   'po_in_production',
   'po_shipped',
   'po_received',
+  'po_line_received',
+  'purchase_order_cancelled',
 
   // Production
   'proof_sent',
@@ -51,13 +54,26 @@ export const FlowEventType = z.enum([
   'production_started',
   'production_completed',
   'production_blocked',
+  'production_readiness_achieved',
   'quality_check_started',
   'quality_check_failed',
+
+  // Invoice
+  'invoice_created',
+  'invoice_issued',
+  'invoice_voided',
+
+  // Fulfillment
+  'fulfillment_started',
 
   // Shipment
   'shipment_created',
   'shipment_shipped',
   'shipment_delivered',
+
+  // Workflow
+  'quote_submitted_for_review',
+  'sales_to_procurement_triggered',
 
   // System
   'payment_gate_blocked',

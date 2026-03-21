@@ -173,12 +173,12 @@ export async function sendPOAction(poId: string): Promise<ActionResult<POWithLin
     actor_id: '', // resolved by control adapter
   })
 
-  if (result.success) {
-    revalidatePath('/purchase-orders')
-    revalidatePath(`/purchase-orders/${poId}`)
-  }
+  if (!result.success) return { success: false, error: result.error ?? 'Command failed' }
 
-  return result
+  revalidatePath('/purchase-orders')
+  revalidatePath(`/purchase-orders/${poId}`)
+
+  return { success: true, data: null }
 }
 
 // ─────────────────────────────────────────────────────────────────────────────

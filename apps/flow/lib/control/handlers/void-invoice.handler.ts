@@ -26,7 +26,7 @@ export const voidInvoiceHandler: CommandHandler<VoidInvoiceCommand> = {
       return { success: false, errors: [{ code: 'DOMAIN_INVARIANT', message: domainCheck.violations.join('; ') }] }
     }
 
-    await invoiceRepo.update(input.invoice_id, { status: 'void' })
+    await invoiceRepo.update(input.invoice_id, context.org_id, { status: 'cancelled' })
 
     const eventId = dispatchDomainEvent({
       type: 'invoice_voided',

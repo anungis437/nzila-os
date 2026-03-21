@@ -28,7 +28,8 @@ export const sendQuoteHandler: CommandHandler<SendQuoteCommand> = {
     if (!quote) throw new EntityNotFoundError('quote', input.quote_id)
 
     // 2b. Domain invariant (pure predicate)
-    const lineCount = quote.lines?.length ?? 0
+    const lines = await quoteRepo.findLines(input.quote_id)
+    const lineCount = lines.length
     const domainCheck = quoteCanBeSent(
       { customer_id: quote.customerId, valid_until: quote.validUntil ? new Date(quote.validUntil) : null, total_amount: Number(quote.total ?? 0) },
       lineCount,

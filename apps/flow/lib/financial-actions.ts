@@ -53,12 +53,13 @@ export async function createInvoiceFromOrderAction(input: {
     notes: input.notes,
   })
 
-  if (result.success) {
-    revalidatePath('/invoices')
-    revalidatePath(`/orders/${input.orderId}`)
-  }
+  if (!result.success) return { success: false, error: result.error }
 
-  return result
+  revalidatePath('/invoices')
+  revalidatePath(`/orders/${input.orderId}`)
+
+  const invoice = result.data?.entity_id ? await getInvoice(result.data.entity_id) : undefined
+  return { success: true, data: invoice ?? undefined }
 }
 
 export async function getInvoiceAction(
@@ -117,12 +118,12 @@ export async function issueInvoiceAction(
     actor_id: '', // resolved by control adapter
   })
 
-  if (result.success) {
-    revalidatePath('/invoices')
-    revalidatePath(`/invoices/${invoiceId}`)
-  }
+  if (!result.success) return { success: false, error: result.error }
 
-  return result
+  revalidatePath('/invoices')
+  revalidatePath(`/invoices/${invoiceId}`)
+
+  return { success: true }
 }
 
 export async function sendInvoiceAction(
@@ -155,12 +156,12 @@ export async function voidInvoiceAction(
     reason,
   })
 
-  if (result.success) {
-    revalidatePath('/invoices')
-    revalidatePath(`/invoices/${invoiceId}`)
-  }
+  if (!result.success) return { success: false, error: result.error }
 
-  return result
+  revalidatePath('/invoices')
+  revalidatePath(`/invoices/${invoiceId}`)
+
+  return { success: true }
 }
 
 // ─────────────────────────────────────────────────────────────────────────────

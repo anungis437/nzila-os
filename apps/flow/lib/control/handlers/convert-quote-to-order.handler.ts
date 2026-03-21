@@ -10,6 +10,7 @@ import { ConvertQuoteToOrderCommand } from '@/lib/commands/types'
 import { quoteRepo, orderRepo } from '@/lib/repositories'
 import { checkQuoteInvariants } from '@/lib/control/guards/invariant-guard'
 import { canConvertQuoteToOrder } from '@/domain/conversion-rules'
+import type { QuoteStatus } from '@/domain/entities'
 import { dispatchDomainEvent } from '@/lib/control/dispatch/event-dispatcher'
 import { dispatchAuditEntry } from '@/lib/control/dispatch/audit-dispatcher'
 import { EntityNotFoundError } from '@/lib/control/errors/entity-not-found-error'
@@ -29,9 +30,10 @@ export const convertQuoteToOrderHandler: CommandHandler<ConvertQuoteToOrderComma
     if (!quote) throw new EntityNotFoundError('quote', input.quote_id)
 
     // Domain conversion rule — checks status, customer, lines, and total
-    const lineCount = quote.lines?.length ?? 0
+    const lines = await quoteRepo.findLines(input.quote_id)
+    const lineCount = lines.length
     const conversionCheck = canConvertQuoteToOrder(
-      { status: quote.status?.toUpperCase() as 'ACCEPTED' | 'READY_FOR_PO', customer_id: quote.customerId, total_amount: Number(quote.total ?? 0) },
+      { status: quote.status?.toUpperCase() as QuoteStatus, customer_id: quote.customerId, total_amount: Number(quote.total ?? 0) },
       lineCount,
     )
     if (!conversionCheck.valid) {

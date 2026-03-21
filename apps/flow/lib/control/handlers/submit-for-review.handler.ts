@@ -30,7 +30,7 @@ export const submitForReviewHandler: CommandHandler<SubmitForReviewCommand> = {
       return { success: false, errors: [{ code: 'INVALID_TRANSITION', message: wf.reason ?? `Cannot submit for review from ${currentStatus}` }] }
     }
 
-    await quoteRepo.update(input.quote_id, { status: 'INTERNAL_REVIEW' })
+    await quoteRepo.update(input.quote_id, context.org_id, { status: 'reviewing' })
 
     const eventId = dispatchDomainEvent({
       type: 'quote_submitted_for_review',

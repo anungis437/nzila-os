@@ -153,13 +153,13 @@ export async function confirmOrderAction(
     actor_id: '', // resolved by control adapter
   })
 
-  if (result.success) {
-    revalidatePath('/orders')
-    revalidatePath(`/orders/${orderId}`)
-    revalidatePath('/production')
-  }
+  if (!result.success) return { success: false, error: result.error }
 
-  return result
+  revalidatePath('/orders')
+  revalidatePath(`/orders/${orderId}`)
+  revalidatePath('/production')
+
+  return { success: true }
 }
 
 export async function startFulfillmentAction(
@@ -171,13 +171,13 @@ export async function startFulfillmentAction(
     actor_id: '', // resolved by control adapter
   })
 
-  if (result.success) {
-    revalidatePath('/orders')
-    revalidatePath(`/orders/${orderId}`)
-    revalidatePath('/production')
-  }
+  if (!result.success) return { success: false, error: result.error }
 
-  return result
+  revalidatePath('/orders')
+  revalidatePath(`/orders/${orderId}`)
+  revalidatePath('/production')
+
+  return { success: true }
 }
 
 export async function markOrderShippedAction(
@@ -210,13 +210,13 @@ export async function completeOrderAction(
     actor_id: '', // resolved by control adapter
   })
 
-  if (result.success) {
-    revalidatePath('/orders')
-    revalidatePath(`/orders/${orderId}`)
-    revalidatePath('/production')
-  }
+  if (!result.success) return { success: false, error: result.error }
 
-  return result
+  revalidatePath('/orders')
+  revalidatePath(`/orders/${orderId}`)
+  revalidatePath('/production')
+
+  return { success: true }
 }
 
 export async function cancelOrderAction(
@@ -230,13 +230,13 @@ export async function cancelOrderAction(
     reason,
   })
 
-  if (result.success) {
-    revalidatePath('/orders')
-    revalidatePath(`/orders/${orderId}`)
-    revalidatePath('/production')
-  }
+  if (!result.success) return { success: false, error: result.error }
 
-  return result
+  revalidatePath('/orders')
+  revalidatePath(`/orders/${orderId}`)
+  revalidatePath('/production')
+
+  return { success: true }
 }
 
 // ─────────────────────────────────────────────────────────────────────────────

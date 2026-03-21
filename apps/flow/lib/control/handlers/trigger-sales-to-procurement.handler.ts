@@ -39,7 +39,7 @@ export const triggerSalesToProcurementHandler: CommandHandler<TriggerSalesToProc
       if (!wf.allowed) {
         return { success: false, errors: [{ code: 'INVALID_TRANSITION', message: wf.reason ?? 'Cannot transition to READY_FOR_PO' }] }
       }
-      await quoteRepo.update(input.quote_id, { status: 'READY_FOR_PO' })
+      await quoteRepo.update(input.quote_id, context.org_id, { status: 'accepted' })
     } else if (currentStatus !== 'READY_FOR_PO') {
       return { success: false, errors: [{ code: 'INVALID_STATE', message: `Quote must be ACCEPTED or READY_FOR_PO. Current: ${currentStatus}` }] }
     }

@@ -157,7 +157,7 @@ export default async function QuoteDetailPage({ params }: { params: Promise<{ id
 
       {/* ── Guidance ───────────────────────────────────────────────── */}
       {guidance && (
-        <SystemGuidance severity={guidance.severity} message={guidance.message} />
+        <SystemGuidance severity={guidance.severity}>{guidance.message}</SystemGuidance>
       )}
 
       {/* ── Main Grid ──────────────────────────────────────────────── */}

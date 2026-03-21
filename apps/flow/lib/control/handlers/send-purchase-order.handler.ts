@@ -26,7 +26,8 @@ export const sendPurchaseOrderHandler: CommandHandler<SendPurchaseOrderCommand> 
     if (!po) throw new EntityNotFoundError('purchase_order', input.purchase_order_id)
 
     // Domain invariant — pure predicate check
-    const lineCount = po.lines?.length ?? 0
+    const lines = await purchaseOrderRepo.findLines(input.purchase_order_id)
+    const lineCount = lines.length
     const domainCheck = poCanBeSent(
       { vendor_id: po.supplierId, status: po.status?.toUpperCase() as 'DRAFT', total_amount: Number(po.total ?? 0) },
       lineCount,
