@@ -31,7 +31,6 @@ vi.mock('@/lib/logger', () => ({
 }))
 
 /* ── Import after mocks ── */
-// eslint-disable-next-line @typescript-eslint/no-require-imports
 let POST: (request: Request) => Promise<Response>
 
 beforeEach(async () => {

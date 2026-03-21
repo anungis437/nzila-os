@@ -66,6 +66,7 @@ const OTEL_EXEMPT_ROUTE_PATTERNS = [
   '/api/quote/[token]/',       // Token-gated public quote response
   '/api/shopify/webhook/',     // Shopify webhook (HMAC-verified)
   '/api/zoho/webhook/',        // Zoho webhook (token-verified)
+  '/api/webhooks/stripe/',     // Stripe webhook (signature-verified)
 ]
 
 function isOtelExempt(routePath: string): boolean {
