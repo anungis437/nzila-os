@@ -177,6 +177,7 @@ export interface CreateIntentParams {
   readonly amount: number
   readonly currency: string
   readonly method: PaymentMethod
+  readonly provider?: string
   readonly metadata?: Record<string, unknown>
   readonly idempotencyKey: string
 }
