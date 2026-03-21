@@ -2198,6 +2198,9 @@ importers:
       '@nzila/zonga-core':
         specifier: workspace:*
         version: link:../../packages/zonga-core
+      '@nzila/zonga-intelligence':
+        specifier: workspace:*
+        version: link:../../packages/zonga-intelligence
       clsx:
         specifier: ^2.1.1
         version: 2.1.1
@@ -5144,6 +5147,9 @@ importers:
       '@nzila/zonga-economics':
         specifier: workspace:*
         version: link:../zonga-economics
+      '@nzila/zonga-rights':
+        specifier: workspace:*
+        version: link:../zonga-rights
       zod:
         specifier: ^3.23.0
         version: 3.25.76

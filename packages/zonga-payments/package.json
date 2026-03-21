@@ -11,6 +11,7 @@
   },
   "dependencies": {
     "@nzila/zonga-economics": "workspace:*",
+    "@nzila/zonga-rights": "workspace:*",
     "zod": "^3.23.0"
   },
   "devDependencies": {

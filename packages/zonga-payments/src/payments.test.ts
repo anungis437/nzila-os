@@ -14,6 +14,7 @@ import {
   planPayoutBatches,
   reconcilePayouts,
 } from './payouts'
+import { createPayoutOrchestrator, type PayoutOrchestratorPorts } from './payout-orchestrator'
 
 // ── Helpers ──────────────────────────────────────────────────────────────────
 
@@ -302,5 +303,147 @@ describe('reconcilePayouts', () => {
     const result = reconcilePayouts([])
     expect(result.totalInstructions).toBe(0)
     expect(result.completionRate).toBe(0)
+  })
+})
+
+// ── Payout Orchestrator — Proof Gate ─────────────────────────────────────────
+
+function makePorts(overrides?: Partial<PayoutOrchestratorPorts>): PayoutOrchestratorPorts {
+  return {
+    checkEligibility: async () => ({
+      eligible: true,
+      recipientId: 'artist-1',
+      orgId: 'org-1',
+      blockers: [],
+      kycVerified: true,
+      balanceMinor: 10000,
+      minimumPayoutMinor: 500,
+      hasActiveDisputes: false,
+    }),
+    loadPendingPayouts: async () => [],
+    executeProviderPayout: async () => ({
+      success: true,
+      providerRef: 'prov-ref-123',
+      error: null,
+      providerFeeMinor: 50,
+    }),
+    recordAuditEvent: async () => {},
+    updatePayoutStatus: async () => {},
+    persistProof: async () => {},
+    loadRevenueBreakdown: async () => [
+      { source: 'streaming', amountMinor: 5000, units: 1000 },
+    ],
+    loadRoyaltyHashes: async () => ['hash-abc'],
+    ...overrides,
+  }
+}
+
+describe('createPayoutOrchestrator — proof gate', () => {
+  it('blocks payout when proof generation throws (PAYOUT_BLOCKED_NO_PROOF)', async () => {
+    const ports = makePorts({
+      // Return a breakdown that does NOT match the instruction amount (5000 ≠ 100)
+      // This will cause generatePayoutProof to throw because breakdown total ≠ amount
+      loadRevenueBreakdown: async () => [
+        { source: 'streaming', amountMinor: 9999, units: 1 },
+      ],
+    })
+    const orch = createPayoutOrchestrator(ports)
+    const instruction = makePayoutInstruction({ id: 'po-proof-1', amount: 5000, currency: 'KES' })
+    const result = await orch.executePayout(instruction, 'org-1')
+
+    expect(result.status).toBe('blocked')
+    expect(result.error).toBe('PAYOUT_BLOCKED_NO_PROOF')
+  })
+
+  it('blocks payout with zero amount (generatePayoutProof rejects amount <= 0)', async () => {
+    const ports = makePorts({
+      loadRevenueBreakdown: async () => [],
+    })
+    const orch = createPayoutOrchestrator(ports)
+    const instruction = makePayoutInstruction({ id: 'po-zero', amount: 0, currency: 'KES' })
+    const result = await orch.executePayout(instruction, 'org-1')
+
+    expect(result.status).toBe('blocked')
+    expect(result.error).toBe('PAYOUT_BLOCKED_NO_PROOF')
+  })
+
+  it('persists proof BEFORE provider execution', async () => {
+    const callOrder: string[] = []
+    const ports = makePorts({
+      persistProof: async () => { callOrder.push('persistProof') },
+      executeProviderPayout: async () => {
+        callOrder.push('executeProviderPayout')
+        return { success: true, providerRef: 'ref-1', error: null, providerFeeMinor: 0 }
+      },
+    })
+    const orch = createPayoutOrchestrator(ports)
+    const instruction = makePayoutInstruction({ id: 'po-order', amount: 5000, currency: 'KES' })
+    await orch.executePayout(instruction, 'org-1')
+
+    const persistIdx = callOrder.indexOf('persistProof')
+    const executeIdx = callOrder.indexOf('executeProviderPayout')
+    expect(persistIdx).toBeLessThan(executeIdx)
+  })
+
+  it('completes payout with valid proof', async () => {
+    const ports = makePorts()
+    const orch = createPayoutOrchestrator(ports)
+    const instruction = makePayoutInstruction({ id: 'po-valid', amount: 5000, currency: 'KES' })
+    const result = await orch.executePayout(instruction, 'org-1')
+
+    expect(result.status).toBe('completed')
+    expect(result.providerRef).toBe('prov-ref-123')
+    expect(result.error).toBeNull()
+  })
+
+  it('marks proof as disbursed on success', async () => {
+    let lastProof: unknown = null
+    const ports = makePorts({
+      persistProof: async (proof) => { lastProof = proof },
+    })
+    const orch = createPayoutOrchestrator(ports)
+    const instruction = makePayoutInstruction({ id: 'po-disbursed', amount: 5000, currency: 'KES' })
+    await orch.executePayout(instruction, 'org-1')
+
+    expect(lastProof).not.toBeNull()
+    expect((lastProof as { status: string }).status).toBe('disbursed')
+  })
+
+  it('blocks payout when eligibility check fails', async () => {
+    const ports = makePorts({
+      checkEligibility: async () => ({
+        eligible: false,
+        recipientId: 'artist-1',
+        orgId: 'org-1',
+        blockers: ['KYC not verified'],
+        kycVerified: false,
+        balanceMinor: 10000,
+        minimumPayoutMinor: 500,
+        hasActiveDisputes: false,
+      }),
+    })
+    const orch = createPayoutOrchestrator(ports)
+    const instruction = makePayoutInstruction({ id: 'po-inelig', amount: 5000, currency: 'KES' })
+    const result = await orch.executePayout(instruction, 'org-1')
+
+    expect(result.status).toBe('blocked')
+    expect(result.error).toContain('KYC not verified')
+  })
+
+  it('records audit event with proofId on success', async () => {
+    let auditDetails: Record<string, unknown> = {}
+    const ports = makePorts({
+      recordAuditEvent: async (event) => {
+        if (event.eventType === 'payout_succeeded') {
+          auditDetails = event.details
+        }
+      },
+    })
+    const orch = createPayoutOrchestrator(ports)
+    const instruction = makePayoutInstruction({ id: 'po-audit', amount: 5000, currency: 'KES' })
+    await orch.executePayout(instruction, 'org-1')
+
+    expect(auditDetails.proofId).toBeDefined()
+    expect(String(auditDetails.proofId)).toMatch(/^pp-/)
   })
 })

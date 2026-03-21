@@ -20,7 +20,7 @@ import {
   ZongaAuditAction,
   ZongaEntityType,
 } from '@/lib/zonga-services'
-import { executeCreatorPayout } from '@/lib/stripe' // eslint-disable-line @typescript-eslint/no-unused-vars -- contract: ZNG-ACT-04 Stripe Connect payout
+// payout execution routed through control-plane command bus → payout orchestrator
 import { buildEvidencePackFromAction, processEvidencePack } from '@/lib/evidence'
 import { resolveOrgContext } from '@/lib/resolve-org'
 import { executeCommand } from '@/lib/control'

@@ -5,11 +5,21 @@
  * generates proofs, resolves routes, executes disbursements,
  * and emits audit events.
  *
+ * HARD RULE: No payout executes without a valid, persisted proof.
+ *
  * All monetary amounts are in integer minor units (cents).
  */
 import type { PayoutInstruction, PaymentProvider } from './types'
 import { PayoutStatus } from './types'
 import { resolvePayoutRoute, type ProviderRoute } from './payouts'
+import {
+  generatePayoutProof,
+  verifyProofIntegrity,
+  markProofDisbursed,
+  type PayoutProof,
+  type PayoutProofInput,
+  type RevenueSourceAmount,
+} from '@nzila/zonga-rights'
 
 // ── Ports (Dependency Injection) ──────────────────────────────────────────
 
@@ -19,6 +29,12 @@ export interface PayoutOrchestratorPorts {
   executeProviderPayout(instruction: PayoutInstruction, route: ProviderRoute): Promise<PayoutExecutionResult>
   recordAuditEvent(event: PayoutAuditEvent): Promise<void>
   updatePayoutStatus(payoutId: string, status: PayoutStatus, providerRef?: string, failureReason?: string): Promise<void>
+  /** Persist proof BEFORE payout execution — required */
+  persistProof(proof: PayoutProof): Promise<void>
+  /** Load revenue breakdown for proof generation */
+  loadRevenueBreakdown(recipientId: string, orgId: string): Promise<readonly RevenueSourceAmount[]>
+  /** Load royalty computation hashes that justify this payout */
+  loadRoyaltyHashes(recipientId: string, orgId: string): Promise<readonly string[]>
 }
 
 // ── Types ─────────────────────────────────────────────────────────────────
@@ -108,8 +124,81 @@ export function createPayoutOrchestrator(ports: PayoutOrchestratorPorts) {
         }
       }
 
-      // 2. Resolve route
-      const routeResult = resolvePayoutRoute(instruction.currency, 'XX', instruction.method)
+      // 2. HARD GATE: Generate payout proof (BEFORE any execution)
+      const [revenueBreakdown, royaltyHashes] = await Promise.all([
+        ports.loadRevenueBreakdown(instruction.recipientId, orgId),
+        ports.loadRoyaltyHashes(instruction.recipientId, orgId),
+      ])
+
+      const proofInput: PayoutProofInput = {
+        payoutId: instruction.id,
+        orgId,
+        recipientId: instruction.recipientId,
+        recipientName: instruction.destination.accountName,
+        amountMinor: instruction.amount,
+        currency: instruction.currency,
+        revenueSourceBreakdown: revenueBreakdown,
+        royaltyComputationHashes: royaltyHashes,
+        provider: instruction.provider,
+      }
+
+      let proof: PayoutProof
+      try {
+        proof = generatePayoutProof(proofInput)
+      } catch (proofError) {
+        await ports.recordAuditEvent({
+          eventType: 'payout_blocked',
+          payoutId: instruction.id,
+          orgId,
+          recipientId: instruction.recipientId,
+          amountMinor: instruction.amount,
+          currency: instruction.currency,
+          provider: instruction.provider,
+          details: { error: 'PAYOUT_BLOCKED_NO_PROOF', reason: String(proofError) },
+          timestamp,
+        })
+        return {
+          payoutId: instruction.id,
+          recipientId: instruction.recipientId,
+          status: 'blocked',
+          amountMinor: instruction.amount,
+          currency: instruction.currency,
+          provider: instruction.provider,
+          providerRef: null,
+          error: 'PAYOUT_BLOCKED_NO_PROOF',
+        }
+      }
+
+      // 3. HARD GATE: Validate proof integrity
+      if (!proof.proofHash || !verifyProofIntegrity(proof)) {
+        await ports.recordAuditEvent({
+          eventType: 'payout_blocked',
+          payoutId: instruction.id,
+          orgId,
+          recipientId: instruction.recipientId,
+          amountMinor: instruction.amount,
+          currency: instruction.currency,
+          provider: instruction.provider,
+          details: { error: 'PAYOUT_BLOCKED_INVALID_PROOF', proofId: proof.proofId },
+          timestamp,
+        })
+        return {
+          payoutId: instruction.id,
+          recipientId: instruction.recipientId,
+          status: 'blocked',
+          amountMinor: instruction.amount,
+          currency: instruction.currency,
+          provider: instruction.provider,
+          providerRef: null,
+          error: 'PAYOUT_BLOCKED_INVALID_PROOF',
+        }
+      }
+
+      // 4. Persist proof BEFORE payout execution (non-negotiable)
+      await ports.persistProof(proof)
+
+      // 5. Resolve route
+      const routeResult = resolvePayoutRoute(instruction.currency, countryFromCurrency(instruction.currency), instruction.method)
       const route = routeResult.route
       if (!route) {
         const routeError = routeResult.error ?? 'No route found'
@@ -154,6 +243,10 @@ export function createPayoutOrchestrator(ports: PayoutOrchestratorPorts) {
       const result = await ports.executeProviderPayout(instruction, route)
 
       if (result.success) {
+        // Mark proof as disbursed with provider reference
+        const disbursedProof = markProofDisbursed(proof, result.providerRef ?? instruction.id)
+        await ports.persistProof(disbursedProof)
+
         await ports.updatePayoutStatus(instruction.id, PayoutStatus.COMPLETED, result.providerRef ?? undefined)
         await ports.recordAuditEvent({
           eventType: 'payout_succeeded',
@@ -163,7 +256,7 @@ export function createPayoutOrchestrator(ports: PayoutOrchestratorPorts) {
           amountMinor: instruction.amount,
           currency: instruction.currency,
           provider: route.provider,
-          details: { providerRef: result.providerRef, feeMinor: result.providerFeeMinor },
+          details: { providerRef: result.providerRef, feeMinor: result.providerFeeMinor, proofId: proof.proofId },
           timestamp: new Date().toISOString(),
         })
         return {
@@ -220,4 +313,16 @@ export function createPayoutOrchestrator(ports: PayoutOrchestratorPorts) {
       return results
     },
   }
+}
+
+// ── Helpers ───────────────────────────────────────────────────────────────
+
+const CURRENCY_COUNTRY: Record<string, string> = {
+  KES: 'KE', TZS: 'TZ', UGX: 'UG', NGN: 'NG', GHS: 'GH',
+  ZAR: 'ZA', RWF: 'RW', XOF: 'SN', XAF: 'CM', MWK: 'MW',
+  ZMW: 'ZM', BWP: 'BW', MAD: 'MA', LSL: 'LS', SZL: 'SZ',
+}
+
+function countryFromCurrency(currency: string): string {
+  return CURRENCY_COUNTRY[currency] ?? 'XX'
 }

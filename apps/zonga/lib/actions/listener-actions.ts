@@ -12,6 +12,11 @@ import { sql } from 'drizzle-orm'
 import { logger } from '@/lib/logger'
 import { getListenerPlan } from '@/lib/guards/plan-queries'
 import { isListenerPremium } from '@/lib/guards/subscription-guards'
+import {
+  createRecommendationEngine,
+  type RecommendationPorts,
+  type Recommendation,
+} from '@nzila/zonga-intelligence'
 
 /* ─── Types ─── */
 
@@ -310,5 +315,106 @@ export async function discoverReleases(opts?: {
   } catch (error) {
     logger.error('discoverReleases failed', { error })
     return []
+  }
+}
+
+/* ─── AI Recommendations ─── */
+
+export interface ListenerRecommendation {
+  itemId: string
+  itemType: string
+  score: number
+  reason: string
+  strategy: string
+}
+
+/**
+ * Fetch AI-powered recommendations for the current listener.
+ * Falls back to trending content when the engine has insufficient signals.
+ */
+export async function getRecommendationsForUser(opts?: {
+  limit?: number
+}): Promise<{ items: ListenerRecommendation[]; strategy: string }> {
+  const ctx = await resolveOrgContext()
+  const limit = opts?.limit ?? 8
+
+  const ports: RecommendationPorts = {
+    fetchUserSignals: async (userId, maxAgeDays) => {
+      try {
+        const rows = (await platformDb.execute(
+          sql`SELECT
+            id as "signalId",
+            signal_type as "signalType",
+            entity_id as "itemId",
+            entity_type as "itemType",
+            1.0 as weight,
+            created_at as "timestamp"
+          FROM zonga_listener_activity
+          WHERE listener_id = ${userId} AND org_id = ${ctx.orgId}
+            AND created_at > NOW() - INTERVAL '1 day' * ${maxAgeDays}
+          ORDER BY created_at DESC
+          LIMIT 200`,
+        )) as unknown as { rows: Array<Record<string, unknown>> }
+        return (rows.rows ?? []).map((r) => ({
+          signalId: String(r.signalId),
+          signalType: String(r.signalType ?? 'stream') as 'play' | 'skip' | 'save' | 'share' | 'purchase',
+          itemId: String(r.itemId),
+          itemType: (String(r.itemType ?? 'track')) as 'track' | 'artist' | 'event' | 'playlist',
+          weight: Number(r.weight ?? 1),
+          timestamp: r.timestamp instanceof Date ? r.timestamp : new Date(),
+        }))
+      } catch {
+        return []
+      }
+    },
+    fetchTrendingItems: async (_region, itemType, trendLimit) => {
+      try {
+        const rows = (await platformDb.execute(
+          sql`SELECT
+            r.id as "itemId",
+            'track' as "itemType",
+            COALESCE(r.stream_count, 0) as velocity,
+            COALESCE(r.stream_count, 0) as volume,
+            'global' as region
+          FROM zonga_releases r
+          WHERE r.org_id = ${ctx.orgId} AND r.status = 'published'
+          ORDER BY r.published_at DESC NULLS LAST
+          LIMIT ${trendLimit}`,
+        )) as unknown as { rows: Array<Record<string, unknown>> }
+        return (rows.rows ?? []).map((r) => ({
+          itemId: String(r.itemId),
+          itemType: itemType,
+          velocity: Number(r.velocity ?? 0),
+          volume: Number(r.volume ?? 0),
+          region: String(r.region ?? 'global'),
+        }))
+      } catch {
+        return []
+      }
+    },
+    fetchContentSimilar: async () => [],
+    fetchUserRegion: async () => 'global',
+  }
+
+  try {
+    const engine = createRecommendationEngine(ports)
+    const result = await engine.recommend({
+      userId: ctx.actorId,
+      targetType: 'track',
+      limit,
+    })
+
+    const items: ListenerRecommendation[] = result.recommendations.map((r: Recommendation) => ({
+      itemId: r.itemId,
+      itemType: r.itemType,
+      score: r.score,
+      reason: r.reason,
+      strategy: r.strategy,
+    }))
+
+    return { items, strategy: result.strategy }
+  } catch (error) {
+    logger.error('getRecommendationsForUser failed', { error })
+    return { items: [], strategy: 'fallback' }
   }
 }

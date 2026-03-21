@@ -62,16 +62,28 @@ const VIOLATION_PATTERNS: { pattern: RegExp; description: string }[] = [
     pattern: /PayoutSettlement\s*\(/,
     description: 'Legacy PayoutSettlement usage (removed)',
   },
+  {
+    pattern: /executeCreatorPayout\s*\(/,
+    description: 'Direct Stripe creator payout bypass',
+  },
 ]
 
 /**
  * Files that are explicitly allowed to reference payout patterns.
- * Only the orchestrator itself and its test file.
+ * Only the orchestrator itself, its test file, and adapter definitions.
  */
 const ALLOWED_FILES = new Set([
   path.normalize('packages/zonga-payments/src/payout-orchestrator.ts'),
   path.normalize('packages/zonga-payments/src/payments.test.ts'),
   path.normalize('packages/zonga-payments/src/types.ts'),
+  path.normalize('packages/zonga-payments/src/adapters/index.ts'),
+  path.normalize('packages/zonga-payments/src/adapters/stripe.ts'),
+  path.normalize('packages/zonga-payments/src/adapters/momo.ts'),
+  path.normalize('packages/zonga-payments/src/adapters/orange.ts'),
+  path.normalize('packages/zonga-payments/src/adapters/airtel.ts'),
+  // Command bus handler and stripe adapter — called via orchestrated single path
+  path.normalize('apps/zonga/lib/control/handlers/execute-payout.handler.ts'),
+  path.normalize('apps/zonga/lib/stripe.ts'),
 ])
 
 // ── Scanner ─────────────────────────────────────────────────────────────────

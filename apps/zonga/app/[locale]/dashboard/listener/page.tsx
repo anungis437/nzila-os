@@ -13,6 +13,7 @@ import {
   listSavedPlaylists,
   discoverArtists,
   discoverReleases,
+  getRecommendationsForUser,
 } from '@/lib/actions/listener-actions'
 import { listFollowing } from '@/lib/actions/social-actions'
 import { getListenerSubscription } from '@/lib/actions/subscription-actions'
@@ -29,7 +30,7 @@ export default async function ListenerPage({
   if (!userId) redirect('/sign-in')
   const { locale } = await params
 
-  const [profile, feed, following, playlists, trendingArtists, newReleases, listenerSub] = await Promise.all([
+  const [profile, feed, following, playlists, trendingArtists, newReleases, listenerSub, aiRecs] = await Promise.all([
     getListenerProfile(),
     getListenerFeed({ limit: 20 }),
     listFollowing(),
@@ -37,6 +38,7 @@ export default async function ListenerPage({
     discoverArtists({ limit: 6 }),
     discoverReleases({ limit: 6 }),
     getListenerSubscription(),
+    getRecommendationsForUser({ limit: 8 }),
   ])
 
   const listenerPlan = listenerSub?.plan ?? 'free'
@@ -65,6 +67,37 @@ export default async function ListenerPage({
       <div className="grid grid-cols-1 lg:grid-cols-2 gap-4">
         <NowPlayingWidget />
         <QueueView />
+      </div>
+
+      {/* AI Recommendations — powered by @nzila/zonga-intelligence */}
+      <div>
+        <div className="flex items-center gap-2 mb-3">
+          <h2 className="text-lg font-semibold text-navy">Recommended for You</h2>
+          <span className="text-xs bg-purple-100 text-purple-700 px-2 py-0.5 rounded-full">AI</span>
+        </div>
+        {aiRecs.items.length === 0 ? (
+          <Card>
+            <div className="p-8 text-center">
+              <p className="text-gray-500 text-sm">
+                Listen to more music to get personalized recommendations.
+              </p>
+            </div>
+          </Card>
+        ) : (
+          <div className="grid grid-cols-2 sm:grid-cols-4 gap-3">
+            {aiRecs.items.map((rec) => (
+              <Card key={rec.itemId}>
+                <div className="p-4">
+                  <div className="w-full aspect-square bg-gradient-to-br from-purple-50 to-indigo-50 rounded-lg mb-3 flex items-center justify-center text-2xl">
+                    🎵
+                  </div>
+                  <p className="text-sm font-medium text-navy truncate">{rec.reason}</p>
+                  <p className="text-xs text-gray-400 mt-0.5 capitalize">{rec.itemType} · {Math.round(rec.score * 100)}% match</p>
+                </div>
+              </Card>
+            ))}
+          </div>
+        )}
       </div>
 
       {/* Profile Stats */}
