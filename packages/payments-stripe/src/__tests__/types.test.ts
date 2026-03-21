@@ -12,8 +12,8 @@ import {
 } from '../types'
 
 describe('SUPPORTED_EVENT_TYPES', () => {
-  it('contains exactly 7 event types', () => {
-    expect(SUPPORTED_EVENT_TYPES).toHaveLength(7)
+  it('contains exactly 9 event types', () => {
+    expect(SUPPORTED_EVENT_TYPES).toHaveLength(9)
   })
 
   it('includes all expected event types', () => {
@@ -25,6 +25,8 @@ describe('SUPPORTED_EVENT_TYPES', () => {
       'charge.dispute.created',
       'payout.paid',
       'invoice.paid',
+      'customer.subscription.updated',
+      'customer.subscription.deleted',
     ]
     for (const t of expected) {
       expect(SUPPORTED_EVENT_TYPES).toContain(t)

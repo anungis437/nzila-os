@@ -1,5 +1,5 @@
 {
-  "capturedAt": "2026-03-18T06:15:02.810Z",
+  "capturedAt": "2026-03-21T14:10:09.732Z",
   "schemaDir": "packages/db/src/schema",
   "files": {
     "packages/db/src/schema/agri.ts": {
@@ -143,9 +143,9 @@
       "size": 2403
     },
     "packages/db/src/schema/zonga.ts": {
-      "hash": "b87009c4c0c4ccde9dc7fdba57e2a02ede653b157a51aafae9fbcc7307d6cc5d",
-      "size": 21915
+      "hash": "eaf6e801278c107db5e255380b3918d060225bc2342c706d50247b5f1070404b",
+      "size": 22920
     }
   },
-  "compositeHash": "fbf3e0f8bdac389e7e6f92344f0f02b9a789c7389ff36454d5b24edd7728723c"
+  "compositeHash": "1004672c6d2eb1c8d703a0ae214b0aa0e0ed53d82c58f0daf85162ed18d5dd2e"
 }
