@@ -105,10 +105,26 @@ describe('ZNG-ACT-03 — Zonga actions use zonga-core audit types', () => {
 })
 
 describe('ZNG-ACT-04 — Payout actions use Stripe Connect', () => {
-  it('payout-actions.ts imports Stripe payout function', () => {
+  it('payout-actions.ts routes through command bus (no direct executeCreatorPayout)', () => {
     const path = join(ZONGA_ACTIONS, 'payout-actions.ts')
     const content = readFileSync(path, 'utf-8')
+    expect(content).toContain('executeCommand')
+    expect(content).not.toContain('executeCreatorPayout')
+  })
+
+  it('execute-payout handler imports executeCreatorPayout from stripe', () => {
+    const handlerPath = join(
+      ROOT,
+      'apps',
+      'zonga',
+      'lib',
+      'control',
+      'handlers',
+      'execute-payout.handler.ts',
+    )
+    const content = readFileSync(handlerPath, 'utf-8')
     expect(content).toContain('executeCreatorPayout')
+    expect(content).toContain("from '@/lib/stripe'")
   })
 
   it('payout-actions.ts uses computePayoutPreview from zonga-core', () => {
