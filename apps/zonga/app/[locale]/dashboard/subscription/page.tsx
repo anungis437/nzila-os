@@ -67,7 +67,7 @@ export default async function SubscriptionPage() {
                   </span>
                 </div>
                 <p className="text-2xl font-bold text-electric mt-1">
-                  {formatPrice(currentListenerPlanDef.priceMonthly)}
+                  {formatPrice(currentListenerPlanDef.priceMonthlyMinor)}
                 </p>
                 {listenerSub?.currentPeriodEnd && (
                   <p className="text-xs text-gray-400 mt-1">
@@ -135,7 +135,7 @@ export default async function SubscriptionPage() {
             <Card key={key}>
               <div className="p-5">
                 <h3 className="text-sm font-semibold tracking-widest uppercase text-electric mb-1">{plan.name}</h3>
-                <p className="text-2xl font-bold text-navy mb-3">{formatPrice(plan.priceMonthly)}</p>
+                <p className="text-2xl font-bold text-navy mb-3">{formatPrice(plan.priceMonthlyMinor)}</p>
                 <ul className="space-y-1.5">
                   {plan.features.slice(0, 6).map((f) => (
                     <li key={f} className="flex items-center gap-2 text-xs text-gray-600">

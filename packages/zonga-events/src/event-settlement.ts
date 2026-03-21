@@ -42,17 +42,18 @@ const now = new Date('2024-01-01')
 /**
  * Standard event revenue splits.
  * These can be overridden per event agreement.
+ * Platform share: 7.5% (commercial spec default).
  */
 export const DEFAULT_EVENT_SPLITS: readonly SplitRule[] = [
   {
     id: 'evt-split-platform', orgId: '*', revenueSource: 'ticket_sale' as any,
     recipientAccountId: 'platform', recipientName: 'Platform',
-    sharePercent: 10, priority: 0, isActive: true, effectiveFrom: now, effectiveUntil: null,
+    sharePercent: 7.5, priority: 0, isActive: true, effectiveFrom: now, effectiveUntil: null,
   },
   {
     id: 'evt-split-promoter', orgId: '*', revenueSource: 'ticket_sale' as any,
     recipientAccountId: 'promoter', recipientName: 'Promoter',
-    sharePercent: 30, priority: 1, isActive: true, effectiveFrom: now, effectiveUntil: null,
+    sharePercent: 32.5, priority: 1, isActive: true, effectiveFrom: now, effectiveUntil: null,
   },
   {
     id: 'evt-split-artist', orgId: '*', revenueSource: 'ticket_sale' as any,

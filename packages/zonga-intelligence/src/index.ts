@@ -79,3 +79,16 @@ export {
   type RevenueEntry,
   type TrackPerformance,
 } from './insights'
+// ── Creator Assist ────────────────────────────────────────────────────
+export {
+  suggestReleaseTiming,
+  suggestPricing,
+  generateGrowthStrategies,
+  predictPerformance,
+  type ReleaseTimingSuggestion,
+  type PricingSuggestion,
+  type GrowthStrategy,
+  type StrategyRecommendation,
+  type PerformancePrediction,
+  type CreatorAssistInput,
+} from './creator-assist'

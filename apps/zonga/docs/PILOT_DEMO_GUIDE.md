@@ -174,7 +174,7 @@ These invariants are verified by contract tests and must hold:
 | Push notifications | Not implemented | Only in-app notification feed (v1) |
 | Listener profiles | Basic | Profile CRUD exists but no avatar upload |
 | Search ranking | Simple | SQL `ILIKE` search, no full-text or vector ranking |
-| Event check-in | Not implemented | Ticket purchase confirmed, but no venue check-in flow |
-| Royalty computation | Seed only | `zonga_royalty_splits` schema exists, computation logic is TODO |
-| M-Pesa payouts | Schema only | Stripe Connect live, M-Pesa rail needs integration |
+| Event check-in | Implemented | QR-based check-in with offline mode in @nzila/zonga-events |
+| Royalty computation | Implemented | Full engine in @nzila/zonga-rights/royalties with per-holder breakdowns |
+| M-Pesa payouts | Implemented | MTN MoMo adapter + 13 provider routes in @nzila/zonga-payments |
 | KYC gate | Optional | Creator `identity_verified` field exists, no KYC provider integrated |

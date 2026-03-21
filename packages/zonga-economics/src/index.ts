@@ -78,3 +78,16 @@ export {
   computeSettlementSummary,
 } from './settlement'
 export type { SettlementValidation } from './settlement'
+
+// Reporting engine
+export {
+  aggregateRevenueBySource,
+  buildCreatorRevenueReport,
+} from './reporting'
+export type {
+  CreatorRevenueReport,
+  RevenueBySource,
+  OrgFinancialSummary,
+  PayoutHistoryEntry,
+  PlatformMetrics,
+} from './reporting'

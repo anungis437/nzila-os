@@ -76,7 +76,22 @@ export {
   type SharingRepository,
   type FriendsListeningPort,
 } from './sharing'
-
+// ── Engagement Engine ───────────────────────────────────────────────────
+export {
+  computeRegionalChart,
+  computeVelocityRanking,
+  scoreFanEngagement,
+  computeCreatorMomentum,
+  type RegionalChartEntry,
+  type RegionalChartInput,
+  type VelocityRankEntry,
+  type VelocityInput,
+  type FanEngagementScore,
+  type FanTier,
+  type FanEngagementInput,
+  type CreatorMomentumScore,
+  type CreatorMomentumInput,
+} from './engagement-engine'
 // ── Cache Strategy ──────────────────────────────────────────────────────────
 export {
   CacheKeys,

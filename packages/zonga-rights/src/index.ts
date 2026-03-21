@@ -64,3 +64,20 @@ export {
   type DisputeAction,
   type DisputeResolutionResult,
 } from './disputes'
+
+// ── Deterministic Royalty Engine ──────────────────────────────────────────
+export {
+  computeRoyalty,
+  type DeterministicSplit,
+  type RoyaltyComputationResult,
+} from './royalty-engine'
+
+// ── Payout Proof ──────────────────────────────────────────────────────────
+export {
+  generatePayoutProof,
+  markProofDisbursed,
+  verifyProofIntegrity,
+  type PayoutProof,
+  type PayoutProofInput,
+  type RevenueSourceAmount,
+} from './payout-proof'

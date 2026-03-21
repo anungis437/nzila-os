@@ -87,3 +87,20 @@ export {
   type EventRevenueBreakdown,
   type SettlementReadiness,
 } from './event-settlement'
+
+// ── Event Economics ───────────────────────────────────────────────────────
+export {
+  DEFAULT_EVENT_FEE_MODEL,
+  PREMIUM_EVENT_FEE_MODEL,
+  DEFAULT_REFUND_POLICY,
+  feeModelToRules,
+  computeTicketClassRevenue,
+  calculateRefund,
+  computeEventRevenueSummary,
+  type EventFeeModel,
+  type TicketClassConfig,
+  type TicketClassRevenue,
+  type RefundPolicy,
+  type RefundCalculation,
+  type EventRevenueSummary,
+} from './event-economics'

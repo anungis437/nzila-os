@@ -104,3 +104,22 @@ export {
   type AuditLogger,
   type PaymentFlowDeps,
 } from './payment-flow'
+
+// ── Payout Orchestrator ───────────────────────────────────────────────────
+export {
+  createPayoutOrchestrator,
+  type PayoutOrchestratorPorts,
+  type PayoutEligibility,
+  type PayoutExecutionResult,
+  type PayoutAuditEvent,
+  type OrchestratedPayoutResult,
+} from './payout-orchestrator'
+
+// ── Payout Eligibility ───────────────────────────────────────────────────
+export {
+  checkPayoutEligibility,
+  DEFAULT_MINIMUM_PAYOUT_MINOR,
+  DEFAULT_COOLDOWN_HOURS,
+  type EligibilityCheckInput,
+  type EligibilityResult,
+} from './payout-eligibility'

@@ -3,16 +3,14 @@
   "layers_present": ["domain", "services", "workflows", "queries", "events", "ui"],
   "layers_missing": [],
   "exceptions": [
-    "All service logic in single zonga-services.ts — decomposition planned",
-    "Payout FSM at lib/payout-machine.ts — move to workflows/"
+    "zonga-services.ts is a re-export barrel from @nzila/zonga-core — acts as thin façade"
   ],
-  "migration_status": "not_started",
+  "migration_status": "in_progress",
   "priority_migrations": [
-    "Create domain/ with Release, Creator, Listener, Payout types",
-    "Decompose zonga-services.ts into services/",
-    "Create queries/ for read models",
-    "Create events/ for domain events",
-    "Move payout-machine.ts to workflows/"
+    "Wire platform-adapters with health, metrics, storage, payments exports",
+    "Complete launch-grade monetization model (pricing-tiers.ts)",
+    "Finalize payout-orchestrator in @nzila/zonga-payments",
+    "Create event-economics.ts in @nzila/zonga-events"
   ],
-  "app_tier": "INCUBATING"
+  "app_tier": "PRODUCTION_CANDIDATE"
 }

@@ -2,17 +2,26 @@
   "$schema": "https://nzilaos.dev/schemas/control-manifest.json",
   "app": "zonga",
   "version": "1.0.0",
-  "riskLevel": "low",
-  "policyProfile": "agtech",
+  "riskLevel": "medium",
+  "policyProfile": "creator-economy",
   "controls": {
     "enforcement": true,
     "governance": true,
     "audit": true,
     "observability": true,
     "security": true,
-    "aiControl": false,
+    "aiControl": true,
     "contracts": true,
     "events": true
+  },
+  "capabilities": {
+    "commerce": true,
+    "payouts": true,
+    "rights": true,
+    "moderation": true,
+    "events": true,
+    "subscriptions": true,
+    "mobileMoney": true
   },
   "exceptions": []
 }

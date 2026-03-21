@@ -14,7 +14,7 @@ import { FeeType } from './types'
  *  - Streaming: 15% (vs industry 30–50%). Creators keep 85%.
  *  - Downloads: 12%. One-time purchases have lower servicing cost.
  *  - Tickets: 8% + $0.25. Lower flat fee for affordable markets.
- *  - Tips: 3%. Near-zero friction to maximise creator generosity.
+ *  - Tips: 10%. Platform take on direct fan-to-creator tips.
  *  - Sync licensing: 15%. Standard for rights negotiation overhead.
  *  - Radio/performance: 10%. Bulk collection, lower per-unit cost.
  *  - Merchandise: 10%. Physical goods have higher fulfilment cost.
@@ -77,7 +77,7 @@ export const DEFAULT_FEE_RULES: readonly FeeRule[] = [
     orgId: '*',
     feeType: FeeType.PLATFORM_COMMISSION,
     revenueSource: 'tip' as RevenueSource,
-    ratePercent: 3,
+    ratePercent: 10,
     flatAmount: 0,
     currency: 'USD' as Currency,
     minAmount: 0,
