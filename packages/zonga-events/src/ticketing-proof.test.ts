@@ -795,12 +795,12 @@ describe('TKT-7: Event settlement', () => {
     expect(total).toBe(100)
   })
 
-  it('platform/promoter/artist split ratio is 10/30/60', () => {
+  it('platform/promoter/artist split ratio is 7.5/32.5/60', () => {
     const platform = DEFAULT_EVENT_SPLITS.find(s => s.recipientName === 'Platform')
     const promoter = DEFAULT_EVENT_SPLITS.find(s => s.recipientName === 'Promoter')
     const artist = DEFAULT_EVENT_SPLITS.find(s => s.recipientName === 'Artist(s)')
-    expect(platform?.sharePercent).toBe(10)
-    expect(promoter?.sharePercent).toBe(30)
+    expect(platform?.sharePercent).toBe(7.5)
+    expect(promoter?.sharePercent).toBe(32.5)
     expect(artist?.sharePercent).toBe(60)
   })
 
