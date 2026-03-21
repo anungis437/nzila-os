@@ -147,6 +147,18 @@ export const ORG_SCOPED_TABLES = [
   'zongaModerationCases',
   'zongaIntegritySignals',
   'zongaNotifications',
+  'zongaWallets',
+  'zongaWalletTransactions',
+  'zongaPaymentIntents',
+  'zongaPaymentWebhookEvents',
+  'zongaTranscodeJobs',
+  'zongaStreamingSessions',
+  'zongaQueueJobs',
+  'zongaUserFollows',
+  'zongaUserActivity',
+  'zongaSharedContent',
+  'zongaRecommendationCache',
+  'zongaCreatorAnalytics',
 
   // ── commerce.ts ─────────────────────────────────────────
   'commerceCustomers',
