@@ -51,7 +51,7 @@ Get-Content scripts/zonga-seed-output.sql | docker exec -i nzila-postgres psql -
 psql -U nzila -d nzila_automation -p 5433 -f scripts/zonga-seed-output.sql
 ```
 
-> **Note**: Seed uses org ID `org_zonga_demo`. Ensure Clerk org matches or bypass with test middleware.
+> **Note**: Seed uses org UUID `22222222-2222-2222-2222-222222222222` mapped to Clerk org `org_3BEaESt8ZIC4XEdJ7hmmB6nu6pp`. The `orgs` row is created automatically by the seed SQL with `ON CONFLICT` upsert.
 
 ---
 

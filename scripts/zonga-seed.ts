@@ -17,7 +17,8 @@ const __dirname = path.dirname(__filename)
 
 // ── Config ──────────────────────────────────────────────────────────────
 
-const ORG_ID = 'org_zonga_demo'
+const ORG_ID = '22222222-2222-2222-2222-222222222222'
+const CLERK_ORG_ID = 'org_3BEaESt8ZIC4XEdJ7hmmB6nu6pp'
 const SEED_DATE = '2026-01-15T00:00:00Z'
 const PAYOUT_PERIOD_START = '2026-01-01T00:00:00Z'
 const PAYOUT_PERIOD_END = '2026-01-31T23:59:59Z'
@@ -128,7 +129,7 @@ function generateSQL(): string {
     '-- ═══════════════════════════════════════════════════════════════════════',
     '-- Zonga Platform Seed Data (Delta Upgrade Edition)',
     `-- Generated: ${new Date().toISOString()}`,
-    `-- Org: ${ORG_ID}`,
+    `-- Org: ${ORG_ID} (Clerk: ${CLERK_ORG_ID})`,
     '-- Covers: creators, assets, releases, events, tickets, listeners,',
     '-- economics (ledger, splits, payouts), rights, moderation, integrity',
     '-- ═══════════════════════════════════════════════════════════════════════',
@@ -160,6 +161,11 @@ function generateSQL(): string {
     `DELETE FROM zonga_creator_accounts WHERE org_id = ${esc(ORG_ID)};`,
     `DELETE FROM zonga_listeners WHERE org_id = ${esc(ORG_ID)};`,
     `DELETE FROM zonga_creators WHERE org_id = ${esc(ORG_ID)};`,
+    '',
+    '-- ═══ Org ═══',
+    `INSERT INTO orgs (id, clerk_org_id, legal_name, jurisdiction, fiscal_year_end, policy_config, status)`,
+    `VALUES (${esc(ORG_ID)}, ${esc(CLERK_ORG_ID)}, 'Zonga Music Platform', 'CA-QC', '12-31', '{"tier":"PREMIUM"}', 'active')`,
+    `ON CONFLICT (id) DO UPDATE SET clerk_org_id = EXCLUDED.clerk_org_id;`,
     '',
   ]
 
