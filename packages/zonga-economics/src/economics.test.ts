@@ -1,7 +1,6 @@
 import { describe, it, expect } from 'vitest'
 import {
   validateLedgerEntries,
-  validateTransaction,
   buildTransferEntries,
   computeBalanceFromEntries,
 } from './ledger'
@@ -15,13 +14,12 @@ import {
 } from './splits'
 import {
   EntryDirection,
-  TransactionStatus,
+  RevenueSource,
   Currency,
   FeeType,
 } from './types'
 import type {
   EconomicEntry,
-  EconomicTransaction,
   FeeRule,
   SplitRule,
 } from './types'
@@ -47,7 +45,7 @@ function makeSplitRule(overrides: Partial<SplitRule>): SplitRule {
   return {
     id: 'split-1',
     orgId: 'org-1',
-    revenueSource: 'stream' as any,
+    revenueSource: RevenueSource.STREAM,
     recipientAccountId: 'acct-1',
     recipientName: 'Artist',
     sharePercent: 100,
@@ -143,7 +141,7 @@ describe('@nzila/zonga-economics — fees', () => {
     const result = applyFees({
       grossAmount: 100,
       currency: Currency.USD,
-      revenueSource: 'stream' as any,
+      revenueSource: RevenueSource.STREAM,
       rules: DEFAULT_FEE_RULES as unknown as FeeRule[],
     })
     expect(result.fees).toHaveLength(1)
@@ -155,7 +153,7 @@ describe('@nzila/zonga-economics — fees', () => {
     const result = applyFees({
       grossAmount: 50,
       currency: Currency.USD,
-      revenueSource: 'ticket_sale' as any,
+      revenueSource: RevenueSource.TICKET_SALE,
       rules: DEFAULT_FEE_RULES as unknown as FeeRule[],
     })
     // Platform: 8% of 50 + $0.25 = $4.25
@@ -172,7 +170,7 @@ describe('@nzila/zonga-economics — fees', () => {
     const result = applyFees({
       grossAmount: 20,
       currency: Currency.USD,
-      revenueSource: 'tip' as any,
+      revenueSource: RevenueSource.TIP,
       rules: DEFAULT_FEE_RULES as unknown as FeeRule[],
     })
     expect(result.fees[0]!.amount).toBeCloseTo(0.60)
@@ -183,7 +181,7 @@ describe('@nzila/zonga-economics — fees', () => {
     const result = applyFees({
       grossAmount: 100,
       currency: Currency.USD,
-      revenueSource: 'unknown' as any,
+      revenueSource: 'unknown' as RevenueSource,
       rules: DEFAULT_FEE_RULES as unknown as FeeRule[],
     })
     expect(result.fees).toHaveLength(0)
@@ -245,7 +243,7 @@ describe('@nzila/zonga-economics — splits', () => {
       revenueEventId: 'rev-1',
       grossAmount: 100,
       currency: Currency.USD,
-      revenueSource: 'stream' as any,
+      revenueSource: RevenueSource.STREAM,
       splitRules,
       feeRules: DEFAULT_FEE_RULES as unknown as FeeRule[],
     })

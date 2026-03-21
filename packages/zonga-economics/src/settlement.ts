@@ -11,7 +11,7 @@ import type {
   PayoutBatch,
   Currency,
 } from './types'
-import { PayoutInstructionStatus, SettlementBatchStatus } from './types'
+import { PayoutInstructionStatus } from './types'
 
 export interface SettlementValidation {
   readonly valid: boolean

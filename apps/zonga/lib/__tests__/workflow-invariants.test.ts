@@ -32,8 +32,8 @@ import type { Transition } from '../workflows'
 interface WorkflowDef {
   name: string
   transitions: readonly Transition<string>[]
-  validate: (from: string, to: string) => { ok: boolean }
-  getAvailable: (from: string) => readonly Transition<string>[]
+  validate(from: string, to: string): { ok: boolean }
+  getAvailable(from: string): readonly Transition<string>[]
 }
 
 /** Collect all unique states referenced in transitions */

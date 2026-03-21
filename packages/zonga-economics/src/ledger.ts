@@ -10,6 +10,7 @@ import type {
   EconomicAccount,
   AccountBalanceSnapshot,
   ReconciliationResult,
+  Currency,
 } from './types'
 import { EntryDirection, TransactionStatus } from './types'
 
@@ -108,7 +109,7 @@ export function buildTransferEntries(params: {
   sourceAccountId: string
   destinationAccountId: string
   amount: number
-  currency: string
+  currency: Currency
   description: string
   sourceBalanceAfter: number
   destinationBalanceAfter: number
@@ -120,7 +121,7 @@ export function buildTransferEntries(params: {
     accountId: params.sourceAccountId,
     direction: EntryDirection.DEBIT,
     amount: params.amount,
-    currency: params.currency as any,
+    currency: params.currency,
     balanceAfter: params.sourceBalanceAfter,
     description: params.description,
     createdAt: now,
@@ -131,7 +132,7 @@ export function buildTransferEntries(params: {
     accountId: params.destinationAccountId,
     direction: EntryDirection.CREDIT,
     amount: params.amount,
-    currency: params.currency as any,
+    currency: params.currency,
     balanceAfter: params.destinationBalanceAfter,
     description: params.description,
     createdAt: now,

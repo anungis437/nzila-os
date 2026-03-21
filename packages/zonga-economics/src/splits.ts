@@ -8,7 +8,6 @@ import type {
   SplitRule,
   SplitCalculation,
   SplitDistribution,
-  AppliedFee,
   RevenueSource,
   Currency,
 } from './types'
