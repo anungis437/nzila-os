@@ -154,6 +154,8 @@ export default defineConfig({
       'packages/governance',
       'packages/security',
       'packages/enforcement',
+      // Services
+      'services/media-worker',
       // E2E platform proof tests
       'tests/e2e/platform',
     ],
