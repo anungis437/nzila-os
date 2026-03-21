@@ -356,10 +356,10 @@ export async function getRecommendationsForUser(opts?: {
           LIMIT 200`,
         )) as unknown as { rows: Array<Record<string, unknown>> }
         return (rows.rows ?? []).map((r) => ({
-          signalId: String(r.signalId),
+          userId,
           signalType: String(r.signalType ?? 'stream') as 'play' | 'skip' | 'save' | 'share' | 'purchase',
-          itemId: String(r.itemId),
-          itemType: (String(r.itemType ?? 'track')) as 'track' | 'artist' | 'event' | 'playlist',
+          targetId: String(r.itemId),
+          targetType: (String(r.itemType ?? 'track')) as 'track' | 'artist' | 'event' | 'playlist',
           weight: Number(r.weight ?? 1),
           timestamp: r.timestamp instanceof Date ? r.timestamp : new Date(),
         }))
