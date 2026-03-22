@@ -38,7 +38,9 @@
     "@nzila/tax": "workspace:*",
     "@nzila/commerce-core": "workspace:*",
     "@nzila/fx": "workspace:*",
-    "@nzila/platform-contracts": "workspace:*"
+    "@nzila/platform-contracts": "workspace:*",
+    "@nzila/cfo-core": "workspace:*",
+    "@nzila/cfo-intelligence": "workspace:*"
   },
   "devDependencies": {
     "@nzila/config": "workspace:*",
