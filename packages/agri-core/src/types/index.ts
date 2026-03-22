@@ -9,17 +9,6 @@ import type {
   ConfidenceLevel,
 } from '../enums'
 
-export type {
-  AgriOrgRole, CropType, UnitOfMeasure, ProducerStatus,
-  LotStatus, ShipmentStatus, BatchStatus, PaymentPlanStatus,
-  PaymentStatus, PaymentMethod, CertificationType,
-  AgriEvidenceType, TraceabilityEntityType, WarehouseStatus,
-  ForecastType, RiskType, RiskScope,
-  SupplyChainStepType, SupplyChainStepStatus, SupplyChainStatus,
-  ProvenanceSourceType, SyncStatus, ConflictResolutionStrategy,
-  ConfidenceLevel,
-} from '../enums'
-
 // ─── Geo ───
 
 export interface GeoPoint {

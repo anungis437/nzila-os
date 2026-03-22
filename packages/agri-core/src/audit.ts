@@ -1,5 +1,6 @@
 import { createHash } from 'node:crypto'
-import type { AgriOrgRole, AgriAuditEntry } from './types/index'
+import type { AgriOrgRole } from './enums'
+import type { AgriAuditEntry } from './types/index'
 
 export function buildActionAuditEntry(input: {
   id: string
