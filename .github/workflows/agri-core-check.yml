@@ -1,0 +1,51 @@
+name: Agri Core Check
+
+on:
+  push:
+    branches: [main]
+  pull_request:
+    branches: [main]
+
+permissions:
+  contents: read
+
+env:
+  TURBO_TELEMETRY_DISABLED: 1
+
+jobs:
+  agri-core-enforcement:
+    runs-on: ubuntu-latest
+    name: Agri Core Enforcement
+    steps:
+      - uses: actions/checkout@v4
+
+      - name: Setup pnpm
+        uses: pnpm/action-setup@41ff72655975bd51cab0327fa583b6e92b6d3061
+
+      - name: Setup Node.js
+        uses: actions/setup-node@v4
+        with:
+          node-version: 22
+          cache: pnpm
+
+      - name: Install dependencies
+        run: pnpm install --frozen-lockfile
+
+      - name: Agri shared-core enforcement
+        run: pnpm tsx scripts/agri-core-enforcement.ts
+
+      - name: Agri duplication report
+        run: pnpm tsx scripts/agri-duplication-report.ts
+
+      - name: Upload duplication report
+        if: always()
+        uses: actions/upload-artifact@v4
+        with:
+          name: agri-duplication-report
+          path: ops/outputs/agri-duplication-report.json
+
+      - name: Agri reporting schema check
+        run: pnpm tsx scripts/agri-reporting-schema-check.ts
+
+      - name: Agri package tests
+        run: pnpm turbo test --filter='@nzila/agri-*' --filter='@nzila/agrimo-*'

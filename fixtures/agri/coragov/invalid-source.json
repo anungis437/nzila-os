@@ -1,0 +1,17 @@
+{
+  "report_id": "crpt_fix_bad_01",
+  "org_id": "org_bad",
+  "source_app": "INVALID_APP",
+  "schema_version": "1.0.0",
+  "reporting_period": {
+    "start": "2025-01-01T00:00:00.000Z",
+    "end": "2025-03-31T23:59:59.000Z"
+  },
+  "entity_scope": "cooperative",
+  "report_type": "cooperative_summary",
+  "title": "Bad Report — Invalid source_app",
+  "generated_at": "2025-04-01T12:00:00.000Z",
+  "metrics": [
+    { "key": "yield_kg", "label": "Yield", "value": 1000, "unit": "kg", "period": "Q1-2025" }
+  ]
+}

@@ -1,0 +1,19 @@
+{
+  "$schema": "./agri-core-enforcement-allowlist.schema.json",
+  "description": "Allowlisted app-level files that may reference agri domain shapes without triggering duplication enforcement. Every entry must document its reason.",
+  "version": "1.0.0",
+  "allowlist": [
+    {
+      "file": "packages/agrimo-core/cooperative-model.ts",
+      "reason": "Backward-compat re-export layer for agrimo offline engine. Re-exports shared types, does not redefine them."
+    },
+    {
+      "file": "packages/agrimo-core/supply-chain.ts",
+      "reason": "Backward-compat re-export layer wrapping @nzila/agri-supply-chain. Delegates to shared package."
+    },
+    {
+      "file": "packages/agrimo-core/provenance.ts",
+      "reason": "Backward-compat re-export layer wrapping @nzila/agri-provenance. Delegates to shared package."
+    }
+  ]
+}

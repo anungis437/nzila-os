@@ -1,0 +1,17 @@
+{
+  "report_id": "",
+  "org_id": "org_bad",
+  "source_app": "cora",
+  "schema_version": "1.0.0",
+  "reporting_period": {
+    "start": "not-a-date",
+    "end": "also-not-a-date"
+  },
+  "entity_scope": "galaxy",
+  "report_type": "",
+  "title": "",
+  "generated_at": "bad-date",
+  "metrics": [
+    { "key": "", "label": "", "value": "NaN", "unit": "", "period": "" }
+  ]
+}

@@ -1,0 +1,42 @@
+# ---------------------------------------------------------------------------
+# Agri CoraGov Ingestion — CI contract enforcement
+# ---------------------------------------------------------------------------
+
+name: Agri CoraGov Ingestion Check
+
+on:
+  pull_request:
+    paths:
+      - 'packages/agri-reporting/**'
+      - 'fixtures/agri/coragov/**'
+      - 'scripts/agri-reporting-schema-check.ts'
+      - '.github/workflows/agri-gov-ingestion-check.yml'
+
+concurrency:
+  group: agri-gov-ingestion-${{ github.ref }}
+  cancel-in-progress: true
+
+jobs:
+  ingestion-contract:
+    name: CoraGov Ingestion Contract
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+
+      - uses: pnpm/action-setup@v4
+
+      - uses: actions/setup-node@v4
+        with:
+          node-version: '22'
+          cache: 'pnpm'
+
+      - run: pnpm install --frozen-lockfile
+
+      - name: Reporting schema check
+        run: npx tsx scripts/agri-reporting-schema-check.ts
+
+      - name: CoraGov ingestion tests
+        run: npx vitest run packages/agri-reporting/__tests__/coragov-ingestion.test.ts --reporter=verbose
+
+      - name: Canonical reporting tests
+        run: npx vitest run packages/agri-reporting/__tests__/canonical-reporting.test.ts --reporter=verbose

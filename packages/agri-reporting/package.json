@@ -8,9 +8,14 @@
   "exports": {
     ".": "./src/index.ts",
     "./engine": "./src/engine.ts",
-    "./formats": "./src/formats.ts"
+    "./formats": "./src/formats.ts",
+    "./canonical": "./src/canonical-reporting-schema.ts",
+    "./validate": "./src/validate-canonical-report.ts",
+    "./coragov": "./src/coragov-ingestion-contract.ts",
+    "./coragov-harness": "./src/coragov-ingestion-harness.ts"
   },
   "dependencies": {
-    "@nzila/agri-core": "workspace:*"
+    "@nzila/agri-core": "workspace:*",
+    "zod": "^3.24.0"
   }
 }

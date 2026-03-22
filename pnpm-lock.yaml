@@ -2431,6 +2431,9 @@ importers:
       '@nzila/agri-core':
         specifier: workspace:*
         version: link:../agri-core
+      zod:
+        specifier: ^3.24.0
+        version: 3.25.76
 
   packages/agri-supply-chain:
     dependencies:
