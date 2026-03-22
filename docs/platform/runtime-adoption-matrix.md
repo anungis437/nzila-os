@@ -55,7 +55,7 @@
 | orchestrator-api | 7 | 2 | 3 | ❌ | **Fastify** — needs preHandler pattern |
 | partners | 5 | 0 | 2 | ❌ | Deals, commissions |
 | platform-admin | 1 | 0 | 0 | ➖ | Health only |
-| pondu | 1 | 0 | 0 | ➖ | Health only |
+| agrimo | 1 | 0 | 0 | ➖ | Health only |
 | trade | 1 | 0 | 0 | ➖ | Health only |
 | union-eyes | 1,235 | 142 | 486 | ❌ | **Largest gap** — 89.8% of total surface |
 | web | 5 | 0 | 1 | ❌ | Governance status writes |
@@ -118,7 +118,7 @@ Required for all endpoints (1,382 total).
 | orchestrator-api | 7 | 0 | ❌ |
 | partners | 5 | 0 | ❌ |
 | platform-admin | 1 | 0 | ❌ |
-| pondu | 1 | 0 | ❌ |
+| agrimo | 1 | 0 | ❌ |
 | trade | 1 | 0 | ❌ |
 | union-eyes | 1,235 | 0 | ❌ |
 | web | 5 | 0 | ❌ |
@@ -196,7 +196,7 @@ Based on risk exposure (P0 density × route count):
 | 9 | **nacp-exams** | 0 | 1 | 3 | 🟢 Low | Exam sessions |
 | 10 | **zonga** | 0 | 2 | 4 | 🟢 Low | Catalog writes |
 | 11 | **abr** | 0 | 1 | 2 | 🟢 Low | Isolation proof |
-| 12-17 | Health-only apps | 0 | 0 | 6 | ⚪ None | cora, mobility, mobility-client-portal, platform-admin, pondu, trade |
+| 12-17 | Health-only apps | 0 | 0 | 6 | ⚪ None | cora, mobility, mobility-client-portal, platform-admin, agrimo, trade |
 
 ---
 

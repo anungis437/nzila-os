@@ -18,7 +18,7 @@ Nzila OS is the digital backbone that powers every Nzila venture. It is not a st
 
 | Domain | Apps | What It Does |
 |--------|------|-------------|
-| **Agriculture** | Pondu, Cora | Smallholder supply chains — producer profiles, harvest tracking, warehouse ops, payment disbursement, yield intelligence, traceability |
+| **Agriculture** | Agrimo, Cora | Smallholder supply chains — producer profiles, harvest tracking, warehouse ops, payment disbursement, yield intelligence, traceability |
 | **Commerce** | Shop Quoter | Multi-vertical quoting engine, order lifecycle, pricing rules |
 | **Trade** | Trade | Cross-border trade management, vehicle commerce |
 | **Finance** | CFO | Stripe payments, QuickBooks sync, tax calendar, FX, financial reporting |
@@ -37,7 +37,7 @@ For a full non-technical overview, see [README.business.md](README.business.md).
 ```
 ┌──────────────────────────────────────────────────────────────────────────┐
 │                          13 APPS (Next.js + Django)                      │
-│  web │ console │ partners │ union-eyes │ abr │ cora │ pondu │ trade │…  │
+│  web │ console │ partners │ union-eyes │ abr │ cora │ agrimo │ trade │…  │
 └───────┬──────────────────────┬───────────────────────┬───────────────────┘
         │                      │                       │
         ▼                      ▼                       ▼
@@ -89,7 +89,7 @@ apps/                      13 deployable applications
 ├── flow/                  Full commerce vertical (Next.js, port 3007)
 ├── cfo/                   CFO / finance (Next.js, port 3008)
 ├── trade/                 Trade management (Next.js, port 3009)
-├── pondu/                 Agri field operations (Next.js, port 3010)
+├── agrimo/                 Agri field operations (Next.js, port 3010)
 ├── zonga/                 Zonga (Next.js, port 3011)
 └── orchestrator-api/      Fastify API orchestrator (rate-limited, helmet-secured)
 
@@ -188,7 +188,7 @@ All Next.js apps use Clerk auth, Tailwind CSS v4, and the `@nzila/ui` component 
 | `flow` | 3007 | Full commerce vertical — quoting, orders, invoices, procurement |
 | `cfo` | 3008 | CFO finance dashboard |
 | `trade` | 3009 | Trade management |
-| `pondu` | 3010 | Agri field ops — producers, harvests, lots, QA, warehouse, shipments |
+| `agrimo` | 3010 | Agri field ops — producers, harvests, lots, QA, warehouse, shipments |
 | `zonga` | 3011 | Zonga |
 
 ### API

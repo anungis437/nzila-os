@@ -18,7 +18,7 @@
 
 ## Buyer Personas
 
-| Persona | Need | Pondu Value | Cora Value |
+| Persona | Need | Agrimo Value | Cora Value |
 |---------|------|-------------|------------|
 | **Cooperative Manager** | Track harvests, manage producer payments | End-to-end lot tracking, automated payment distribution | Yield benchmarking, producer performance |
 | **Export Compliance Officer** | Certification + traceability for buyers | Sealed evidence packs, audit trail | Impact reports, traceability chain visualization |
@@ -37,7 +37,7 @@
 
 ## Pricing Tiers
 
-| Tier | Target | Pondu | Cora | Bundle |
+| Tier | Target | Agrimo | Cora | Bundle |
 |------|--------|-------|------|--------|
 | **Starter** | Small cooperatives (<500 producers) | ✅ | ✅ Basic | ✅ |
 | **Professional** | Mid-size exporters | ✅ | ✅ Full | ✅ |

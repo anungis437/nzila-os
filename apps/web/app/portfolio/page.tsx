@@ -27,7 +27,7 @@ const platforms = [
   { name: 'Shop Quoter', vertical: 'Commerce', orgs: '93', complexity: 'HIGH-EXTREME', readiness: 7.0, status: 'In Development', tam: '$5B', description: 'Corporate gift boxes, CRM integration, WhatsApp AI' },
   { name: 'Trade OS', vertical: 'Trade', orgs: '337', complexity: 'MEDIUM-HIGH', readiness: 6.5, status: 'In Development', tam: '$15B', description: 'Trade operations, multi-carrier logistics, customs' },
   { name: 'eExports', vertical: 'Trade', orgs: '78', complexity: 'MEDIUM-HIGH', readiness: 8.0, status: 'Django PoC', tam: '$3B', description: 'Export documentation, compliance, shipment tracking' },
-  { name: 'PonduOps', vertical: 'Agrotech', orgs: '220', complexity: 'HIGH', readiness: 7.0, status: 'In Development', tam: '$8B', description: 'Supply chain ERP, crop planning, IoT integration' },
+  { name: 'AgrimoOps', vertical: 'Agrotech', orgs: '220', complexity: 'HIGH', readiness: 7.0, status: 'In Development', tam: '$8B', description: 'Supply chain ERP, crop planning, IoT integration' },
   { name: 'Insight CFO', vertical: 'Fintech', orgs: '37', complexity: 'HIGH', readiness: 6.0, status: 'In Development', tam: '$2B', description: 'Virtual CFO, accounting, QuickBooks/Xero integration' },
   { name: 'STSA / Lexora', vertical: 'Fintech', orgs: '95', complexity: 'HIGH', readiness: 6.0, status: 'In Development', tam: '$5B', description: 'Banking stress testing, Basel III/IV compliance' },
   { name: 'Memora', vertical: 'Healthtech', orgs: '150', complexity: 'MEDIUM', readiness: 5.0, status: 'Legacy', tam: '$20B', description: 'Cognitive wellness, dementia care, caregiver support' },

@@ -19,7 +19,7 @@
 | nacp-exams | production-grade | 8/8 | ✅ | ✅ | ✅ | ✅ | ✅ | ✅ | ✅ | 3 | — |
 | partners | production-grade | 8/8 | ✅ | ✅ | ✅ | ✅ | ✅ | ✅ | ✅ | 3 | — |
 | platform-admin | internal/admin | 8/8 | ✅ | ✅ | ✅ | ✅ | ✅ | ✅ | ✅ | 1 | — |
-| pondu | pilot-grade | 8/8 | ✅ | ✅ | ✅ | ✅ | ✅ | ✅ | ✅ | 1 | — |
+| agrimo | pilot-grade | 8/8 | ✅ | ✅ | ✅ | ✅ | ✅ | ✅ | ✅ | 1 | — |
 | flow | production-grade | 8/8 | ✅ | ✅ | ✅ | ✅ | ✅ | ✅ | ✅ | 5 | — |
 | trade | pilot-grade | 8/8 | ✅ | ✅ | ✅ | ✅ | ✅ | ✅ | ✅ | 1 | — |
 | web | production-grade | 8/8 | ✅ | ✅ | ✅ | ✅ | ✅ | ✅ | ✅ | 1 | — |

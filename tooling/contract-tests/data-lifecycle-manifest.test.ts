@@ -34,7 +34,7 @@ const REQUIRED_APPS = [
   'partners',
   'trade',
   'zonga',
-  'pondu',
+  'agrimo',
   'cora',
 ]
 

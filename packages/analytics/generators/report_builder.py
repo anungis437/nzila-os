@@ -123,7 +123,7 @@ class ReportBuilder:
 | Migration Complexity | Union Eyes | HIGH | Phased migration, 10-12 weeks |
 | Financial Compliance | C3UO | HIGH | Banking-grade security |
 | Data Migration | Shop Quoter | MEDIUM | $885K historical data |
-| NzilaOS Migration | CORA, PonduOps | COMPLETED | Migrated from Base44 to NzilaOS |
+| NzilaOS Migration | CORA, AgrimoOps | COMPLETED | Migrated from Base44 to NzilaOS |
 
 ---
 

@@ -379,10 +379,10 @@ export const APP_MANIFESTS: DataLifecycleManifest[] = [
     backup: { frequency: 'daily', provider: 'Azure Backup', location: 'Same region', encryptedAtRest: true, backupRetention: '30 days', rtoHours: 2, rpoHours: 1 },
   },
 
-  // ── Pondu ─────────────────────────────────────────────────────────
+  // ── Agrimo ─────────────────────────────────────────────────────────
   {
-    appId: 'pondu',
-    appName: 'Pondu Media Platform',
+    appId: 'agrimo',
+    appName: 'Agrimo Media Platform',
     version: '1.0.0',
     lastUpdated: '2026-02-28',
     dataCategories: [
@@ -451,7 +451,7 @@ export const APP_MANIFESTS: DataLifecycleManifest[] = [
     backup: { frequency: 'daily', provider: 'Azure Backup', location: 'Same region', encryptedAtRest: true, backupRetention: '30 days', rtoHours: 4, rpoHours: 2 },
   },
 
-  // ── Agri (Pondu) ──────────────────────────────────────────────────
+  // ── Agri (Agrimo) ──────────────────────────────────────────────────
   {
     appId: 'agri',
     appName: 'Agri Supply Chain Platform',

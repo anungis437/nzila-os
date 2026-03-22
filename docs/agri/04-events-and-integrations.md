@@ -12,19 +12,19 @@ All operational events follow the **transactional outbox pattern**:
 
 | Event Type | Emitter | Trigger |
 |-----------|---------|---------|
-| `agri.lot.created` | Pondu | Lot assembled from harvests |
-| `agri.lot.inspected` | Pondu | Quality inspection recorded |
-| `agri.lot.graded` | Pondu | Grade assigned to lot |
-| `agri.lot.certified` | Pondu | Lot certified (evidence pack generated) |
-| `agri.lot.rejected` | Pondu | Lot failed quality checks |
-| `agri.batch.created` | Pondu | Batch created from certified lots |
-| `agri.batch.allocated` | Pondu | Batch allocated to shipment |
-| `agri.shipment.planned` | Pondu | Shipment plan created |
-| `agri.shipment.milestone` | Pondu | Shipment milestone recorded |
-| `agri.shipment.closed` | Pondu | Shipment arrived and finalized |
-| `agri.payment.plan.created` | Pondu | Payment plan generated |
-| `agri.payment.executed` | Pondu | Individual payment executed |
-| `agri.certification.issued` | Pondu | Certification artifact issued |
+| `agri.lot.created` | Agrimo | Lot assembled from harvests |
+| `agri.lot.inspected` | Agrimo | Quality inspection recorded |
+| `agri.lot.graded` | Agrimo | Grade assigned to lot |
+| `agri.lot.certified` | Agrimo | Lot certified (evidence pack generated) |
+| `agri.lot.rejected` | Agrimo | Lot failed quality checks |
+| `agri.batch.created` | Agrimo | Batch created from certified lots |
+| `agri.batch.allocated` | Agrimo | Batch allocated to shipment |
+| `agri.shipment.planned` | Agrimo | Shipment plan created |
+| `agri.shipment.milestone` | Agrimo | Shipment milestone recorded |
+| `agri.shipment.closed` | Agrimo | Shipment arrived and finalized |
+| `agri.payment.plan.created` | Agrimo | Payment plan generated |
+| `agri.payment.executed` | Agrimo | Individual payment executed |
+| `agri.certification.issued` | Agrimo | Certification artifact issued |
 
 ### Event Schema
 
@@ -38,7 +38,7 @@ interface AgriDomainEvent<TPayload> {
     actorId: string             // who triggered
     correlationId: string       // request tracing
     causationId: string | null  // parent event
-    source: string              // '@nzila/pondu' | '@nzila/cora'
+    source: string              // '@nzila/agrimo' | '@nzila/cora'
   }
   createdAt: string             // ISO 8601
 }
@@ -68,10 +68,10 @@ All integrations are dispatched via `@nzila/integrations-runtime` dispatcher. No
 
 ## Cora Event Consumption
 
-Cora does not directly subscribe to Pondu events. Instead:
+Cora does not directly subscribe to Agrimo events. Instead:
 
 1. Cora reads operational data from `agri-db` (read-only scoped queries)
 2. Cora computes metrics via `agri-intelligence`
 3. Cora writes results to intelligence tables (`agri_forecasts`, `agri_price_signals`, `agri_risk_scores`)
 
-This keeps Cora fully decoupled from Pondu's write path.
+This keeps Cora fully decoupled from Agrimo's write path.

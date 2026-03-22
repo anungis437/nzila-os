@@ -111,7 +111,7 @@ apps:
       p99_latency_ms: 2000
       error_rate_max_pct: 2.0
 
-  pondu:
+  agrimo:
     performance:
       p95_latency_ms: 600
       p99_latency_ms: 3000

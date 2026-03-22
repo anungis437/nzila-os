@@ -147,6 +147,10 @@ export const ForecastType = {
   YIELD: 'yield',
   PRICE: 'price',
   DEMAND: 'demand',
+  COST: 'cost',
+  CLIMATE: 'climate',
+  PRODUCTION: 'production',
+  LOGISTICS: 'logistics',
 } as const
 export type ForecastType = (typeof ForecastType)[keyof typeof ForecastType]
 
@@ -165,3 +169,69 @@ export const RiskScope = {
   CROP: 'crop',
 } as const
 export type RiskScope = (typeof RiskScope)[keyof typeof RiskScope]
+
+// ─── Supply Chain Step ───
+
+export const SupplyChainStepType = {
+  HARVEST: 'harvest',
+  COLLECTION: 'collection',
+  STORAGE: 'storage',
+  PROCESSING: 'processing',
+  TRANSPORT: 'transport',
+  DELIVERY: 'delivery',
+} as const
+export type SupplyChainStepType = (typeof SupplyChainStepType)[keyof typeof SupplyChainStepType]
+
+export const SupplyChainStepStatus = {
+  PENDING: 'pending',
+  IN_PROGRESS: 'in_progress',
+  COMPLETED: 'completed',
+  FAILED: 'failed',
+  SKIPPED: 'skipped',
+} as const
+export type SupplyChainStepStatus = (typeof SupplyChainStepStatus)[keyof typeof SupplyChainStepStatus]
+
+export const SupplyChainStatus = {
+  ACTIVE: 'active',
+  COMPLETED: 'completed',
+  CANCELLED: 'cancelled',
+} as const
+export type SupplyChainStatus = (typeof SupplyChainStatus)[keyof typeof SupplyChainStatus]
+
+// ─── Provenance ───
+
+export const ProvenanceSourceType = {
+  MANUAL_ENTRY: 'manual_entry',
+  SENSOR: 'sensor',
+  IMPORT: 'import',
+  API: 'api',
+  DERIVED: 'derived',
+  EXTERNAL: 'external',
+} as const
+export type ProvenanceSourceType = (typeof ProvenanceSourceType)[keyof typeof ProvenanceSourceType]
+
+// ─── Sync ───
+
+export const SyncStatus = {
+  PENDING: 'pending',
+  SYNCED: 'synced',
+  CONFLICT: 'conflict',
+  FAILED: 'failed',
+} as const
+export type SyncStatus = (typeof SyncStatus)[keyof typeof SyncStatus]
+
+export const ConflictResolutionStrategy = {
+  LAST_WRITE_WINS: 'last_write_wins',
+  DEVICE_PRIORITY: 'device_priority',
+  MANUAL: 'manual',
+} as const
+export type ConflictResolutionStrategy = (typeof ConflictResolutionStrategy)[keyof typeof ConflictResolutionStrategy]
+
+// ─── Intelligence ───
+
+export const ConfidenceLevel = {
+  HIGH: 'high',
+  MEDIUM: 'medium',
+  LOW: 'low',
+} as const
+export type ConfidenceLevel = (typeof ConfidenceLevel)[keyof typeof ConfidenceLevel]

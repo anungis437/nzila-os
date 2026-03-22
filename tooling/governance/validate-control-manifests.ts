@@ -75,7 +75,7 @@ const OUTPUT_FILE = join(OUTPUT_DIR, 'control-manifest-report.json')
 const APP_NAMES = [
   'abr', 'cfo', 'console', 'control-plane', 'cora', 'flow',
   'mobility', 'mobility-client-portal', 'nacp-exams',
-  'orchestrator-api', 'partners', 'platform-admin', 'pondu',
+  'orchestrator-api', 'partners', 'platform-admin', 'agrimo',
   'trade', 'union-eyes', 'web', 'zonga',
 ]
 

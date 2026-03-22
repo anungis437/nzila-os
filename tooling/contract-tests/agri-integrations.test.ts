@@ -17,7 +17,7 @@ const ROOT = join(__dirname, '../..')
 const EVENT_EMITTER_PATH = join(
   ROOT,
   'apps',
-  'pondu',
+  'agrimo',
   'lib',
   'events',
   'agri-event-emitter.ts',

@@ -29,3 +29,10 @@ export type {
   PricingSignalProvider,
   ClimateRiskProvider,
 } from './providers'
+
+export {
+  createRecommendation,
+  createAlert,
+  createInsight,
+  assertExplainable,
+} from './explainability'

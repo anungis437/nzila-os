@@ -1,5 +1,5 @@
 # Agrotech Product Roadmap 2025–2028
-> Feature roadmap for CORA (supply chain matching) and PonduOps (farm ERP) platforms under Nzila Corp.
+> Feature roadmap for CORA (supply chain matching) and AgrimoOps (farm ERP) platforms under Nzila Corp.
 
 ---
 
@@ -37,7 +37,7 @@
 
 ---
 
-## 2. PonduOps Platform Roadmap (70+ Modules)
+## 2. AgrimoOps Platform Roadmap (70+ Modules)
 
 ### 2025 — Mobile-First Farm ERP
 | Quarter | Feature | KPI Target |
@@ -60,7 +60,7 @@
 |---|---|---|
 | Q1 | Mobile money integration (M-Pesa, Airtel Money, Orange Money) for in-app payments | 500 transactions/month |
 | Q2 | Cooperative governance module: voting, meeting management, member registration | 100 cooperatives using governance |
-| Q3 | Credit scoring for farmers based on PonduOps activity data | 300 credit scores generated |
+| Q3 | Credit scoring for farmers based on AgrimoOps activity data | 300 credit scores generated |
 | Q4 | Multi-cooperative federation management: umbrella dashboards, cross-coop analytics | 5 federations onboarded |
 
 ### 2028 — Platform Maturity
@@ -71,25 +71,25 @@
 
 ---
 
-## 3. Integration Roadmap: CORA ↔ PonduOps
+## 3. Integration Roadmap: CORA ↔ AgrimoOps
 
 ### Phase 1: Data Bridge (Q3 2025)
 - **Unified farmer identity**: Single farmer profile across both platforms via shared UUID
-- **Harvest-to-market pipeline**: PonduOps harvest data automatically creates CORA supply listings
-- **Shared authentication**: SSO between CORA and PonduOps using Django auth backend
+- **Harvest-to-market pipeline**: AgrimoOps harvest data automatically creates CORA supply listings
+- **Shared authentication**: SSO between CORA and AgrimoOps using Django auth backend
 
 ### Phase 2: Cross-Platform Analytics (Q2 2026)
-- **Farmer 360 dashboard**: Combined view of farm operations (PonduOps) + market activity (CORA)
-- **Supply-demand forecasting**: PonduOps crop planning data feeds CORA demand prediction
+- **Farmer 360 dashboard**: Combined view of farm operations (AgrimoOps) + market activity (CORA)
+- **Supply-demand forecasting**: AgrimoOps crop planning data feeds CORA demand prediction
 - **Cooperative performance index**: Blended score from farm productivity + market engagement
 
 ### Phase 3: Platform Convergence (Q1 2027)
-- **Unified API gateway**: Single API entry point routing to CORA and PonduOps microservices
+- **Unified API gateway**: Single API entry point routing to CORA and AgrimoOps microservices
 - **Shared notification system**: Cross-platform alerts (e.g., "Your cassava is ready — 3 buyers waiting on CORA")
-- **Integrated mobile app**: Single farmer-facing app combining PonduOps farm tools + CORA marketplace
+- **Integrated mobile app**: Single farmer-facing app combining AgrimoOps farm tools + CORA marketplace
 
 ### Phase 4: Ecosystem Platform (2028)
-- **Third-party developer SDK**: Enable agtech startups to build on CORA+PonduOps data
+- **Third-party developer SDK**: Enable agtech startups to build on CORA+AgrimoOps data
 - **Data export API**: Standardized agricultural data feeds for NGOs, government, research institutions
 - **Plugin architecture**: Modular feature additions without core platform changes
 
@@ -101,7 +101,7 @@
 | Item | Impact | Effort | Target |
 |---|---|---|---|
 | CORA entity model normalization (80+ entities have duplication) | Query performance, data integrity | 6 weeks | Q1 2025 |
-| PonduOps test coverage (currently <40%) | Deployment confidence, regression risk | 8 weeks | Q2 2025 |
+| AgrimoOps test coverage (currently <40%) | Deployment confidence, regression risk | 8 weeks | Q2 2025 |
 | Django version upgrade (current → 5.x LTS) | Security vulnerabilities, dependency conflicts | 3 weeks | Q1 2025 |
 | PostgreSQL query optimization (slow cooperative reports) | Page load >8s for large cooperatives | 4 weeks | Q2 2025 |
 
@@ -116,7 +116,7 @@
 ### Deferred Debt (2027+)
 - Full microservices migration completion
 - Database sharding for multi-region deployment
-- Legacy PonduOps module consolidation (70 → 45 modules)
+- Legacy AgrimoOps module consolidation (70 → 45 modules)
 - Comprehensive API documentation with OpenAPI 3.1
 
 ---
@@ -125,7 +125,7 @@
 
 ### Current State
 - **CORA**: Django monolith, 80+ entities, supply chain focus, Azure-hosted
-- **PonduOps**: Django monolith, 70+ modules, farm ERP focus, Azure-hosted
+- **AgrimoOps**: Django monolith, 70+ modules, farm ERP focus, Azure-hosted
 - **Shared**: PostgreSQL, Python ecosystem, Azure infrastructure
 
 ### Target State (2028)
@@ -134,7 +134,7 @@
 │              Unified Mobile App (PWA)            │
 ├─────────────┬───────────────┬───────────────────┤
 │  Farm Tools │  Marketplace  │   Analytics       │
-│  (PonduOps) │   (CORA)      │   (Shared)        │
+│  (AgrimoOps) │   (CORA)      │   (Shared)        │
 ├─────────────┴───────────────┴───────────────────┤
 │              API Gateway (Kong/Azure APIM)       │
 ├──────────┬──────────┬──────────┬────────────────┤

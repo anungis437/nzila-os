@@ -65,7 +65,7 @@ Nzila Ventures is a **multi-vertical platform company** with **3 flagship B2B Sa
 | **Trade OS** | Trade-Commerce | $350K | 5.8% | 60 freight brokers | $5.8K | Multi-carrier optimization |
 | **Court Lens** | Legaltech | $300K | 5% | 30 law firms | $10K | Legal AI, outcome prediction |
 | **Shop Quoter** | eCommerce | $180K | 3% | 40 corporate clients | $4.5K | Gift box customization |
-| **Others (7 platforms)** | Various | $220K | 3.7% | 70 customers | $3.1K avg | PonduOps, CongoWave, eEXPORTS, Memora, ClinicConnect, CyberLearn, Insight CFO |
+| **Others (7 platforms)** | Various | $220K | 3.7% | 70 customers | $3.1K avg | AgrimoOps, CongoWave, eEXPORTS, Memora, ClinicConnect, CyberLearn, Insight CFO |
 
 **Note**: Flagship concentration (65% from Union Eyes/ABR/CORA) de-risks via established product-market fit, enterprise sales motion proven.
 

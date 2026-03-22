@@ -63,7 +63,7 @@ describe('validateEnv', () => {
     const ALL_APPS = [
       'console', 'partners', 'web', 'union-eyes', 'cfo',
       'nacp-exams', 'zonga', 'abr', 'orchestrator-api', 'mobility',
-      'mobility-client-portal', 'pondu', 'cora', 'trade', 'platform-admin',
+      'mobility-client-portal', 'agrimo', 'cora', 'trade', 'platform-admin',
     ] as const
 
     // Each should resolve a schema without throwing "Unknown app name"

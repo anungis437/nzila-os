@@ -64,14 +64,14 @@ describe('AGRI-BOUND-02 — No cross-vertical imports (agri → trade)', () => {
 })
 
 describe('AGRI-BOUND-03 — agri-core package.json has no app deps', () => {
-  it('agri-core package.json has no @nzila/pondu or @nzila/cora dep', () => {
+  it('agri-core package.json has no @nzila/agrimo or @nzila/cora dep', () => {
     const pkgPath = join(ROOT, 'packages', 'agri-core', 'package.json')
     const pkg = JSON.parse(readFileSync(pkgPath, 'utf-8'))
     const allDeps = {
       ...pkg.dependencies,
       ...pkg.devDependencies,
     }
-    expect(allDeps).not.toHaveProperty('@nzila/pondu')
+    expect(allDeps).not.toHaveProperty('@nzila/agrimo')
     expect(allDeps).not.toHaveProperty('@nzila/cora')
   })
 })

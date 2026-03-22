@@ -41,7 +41,7 @@ it('batch allocation across orgs is rejected', ...)
 
 ## Authorization
 
-| Role | Pondu Permissions | Cora Permissions |
+| Role | Agrimo Permissions | Cora Permissions |
 |------|-------------------|------------------|
 | admin | Full CRUD + certify + execute payments | Full analytics + configure models |
 | manager | CRUD producers, harvests, lots, batches | View all analytics + export |

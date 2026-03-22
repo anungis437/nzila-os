@@ -64,7 +64,7 @@
 
 | Component | Role in Bundle |
 |-----------|---------------|
-| **Cora / Pondu / Trade** | Core trade operations — commodity management, shipment tracking, partner management |
+| **Cora / Agrimo / Trade** | Core trade operations — commodity management, shipment tracking, partner management |
 | **CFO** | Financial oversight — margin analysis, budget variance, financial anomaly review |
 | **Control Plane** | Operational dashboard — decision review, anomaly overview, governance status |
 | **Decision Layer** | Recommendation engine — evidence-backed trade and financial decisions |

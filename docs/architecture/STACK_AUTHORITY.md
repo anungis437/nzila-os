@@ -28,7 +28,7 @@ audit trails, and lets contract tests enforce structural invariants.
 | **cfo** | **TS/Drizzle** | `createScopedDb` + `createAuditedScopedDb` + `platformDb` | — | Console-aligned |
 | **cora** | **TS/Drizzle** | `@nzila/agri-db` + `resolveOrgContext` | — | Cooperative management vertical |
 | **partners** | **TS/Drizzle** | `createAuditedScopedDb` + `platformDb` | — | Console-aligned + entitlements |
-| **pondu** | **TS/Drizzle** | `@nzila/agri-db` + `resolveOrgContext` | — | Agricultural traceability vertical |
+| **agrimo** | **TS/Drizzle** | `@nzila/agri-db` + `resolveOrgContext` | — | Agricultural traceability vertical |
 | **nacp-exams** | **TS/Drizzle** | `platformDb` + `resolveOrgContext` | — | Clean vertical |
 | **trade** | **TS/Drizzle** | `@nzila/trade-db` + `resolveOrgContext` | — | Cross-border trade vertical |
 | **zonga** | **TS/Drizzle** | `@nzila/db` + `resolveOrgContext` | — | ESLint-enforced `createScopedDb` |

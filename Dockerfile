@@ -31,7 +31,7 @@ COPY apps/cora/package.json ./apps/cora/
 COPY apps/nacp-exams/package.json ./apps/nacp-exams/
 COPY apps/orchestrator-api/package.json ./apps/orchestrator-api/
 COPY apps/partners/package.json ./apps/partners/
-COPY apps/pondu/package.json ./apps/pondu/
+COPY apps/agrimo/package.json ./apps/agrimo/
 COPY apps/trade/package.json ./apps/trade/
 COPY apps/union-eyes/package.json ./apps/union-eyes/
 COPY apps/web/package.json ./apps/web/
@@ -428,7 +428,7 @@ COPY apps/cora/package.json ./apps/cora/
 COPY apps/nacp-exams/package.json ./apps/nacp-exams/
 COPY apps/orchestrator-api/package.json ./apps/orchestrator-api/
 COPY apps/partners/package.json ./apps/partners/
-COPY apps/pondu/package.json ./apps/pondu/
+COPY apps/agrimo/package.json ./apps/agrimo/
 COPY apps/trade/package.json ./apps/trade/
 COPY apps/union-eyes/package.json ./apps/union-eyes/
 COPY apps/web/package.json ./apps/web/

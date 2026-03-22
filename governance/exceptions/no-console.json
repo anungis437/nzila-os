@@ -106,7 +106,7 @@
       "expiresOn": "2026-09-01"
     },
     {
-      "path": "apps/pondu/lib/events/agri-event-emitter.ts",
+      "path": "apps/agrimo/lib/events/agri-event-emitter.ts",
       "owner": "agri-team",
       "justification": "Event emitter uses console for structured event logging and webhook error reporting — will migrate to os-core logger.",
       "expiresOn": "2026-09-01"

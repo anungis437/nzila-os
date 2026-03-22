@@ -55,7 +55,7 @@ catalog:
     - type: file
       target: ../../apps/trade/catalog-info.yaml
     - type: file
-      target: ../../apps/pondu/catalog-info.yaml
+      target: ../../apps/agrimo/catalog-info.yaml
     - type: file
       target: ../../apps/zonga/catalog-info.yaml
     - type: file

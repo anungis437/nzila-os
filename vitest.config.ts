@@ -14,7 +14,7 @@ export default defineConfig({
       'apps/web',
       'apps/nacp-exams',
       'apps/zonga',
-      'apps/pondu',
+      'apps/agrimo',
       'apps/cora',
       // Packages
       'packages/ai-core',
@@ -75,9 +75,17 @@ export default defineConfig({
       'packages/agri-core',
       'packages/agri-db',
       'packages/agri-events',
+      'packages/agri-forecasting',
       'packages/agri-intelligence',
+      'packages/agri-provenance',
+      'packages/agri-reporting',
+      'packages/agri-supply-chain',
+      'packages/agri-sync-contracts',
       'packages/agri-traceability',
       'packages/agri-adapters',
+      // Agrimo packages
+      'packages/agrimo-core',
+      'packages/agrimo-intelligence',
       // Platform hardening packages
       'packages/platform-cost',
       'packages/platform-deploy',

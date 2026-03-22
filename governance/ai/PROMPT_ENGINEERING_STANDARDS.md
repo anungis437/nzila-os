@@ -116,7 +116,7 @@ Companion tone adapts by **platform** and **user context**. Choose one primary t
 
 ---
 
-### **4. PRACTICAL** (CORA, PonduOps, eEXPORTS)
+### **4. PRACTICAL** (CORA, AgrimoOps, eEXPORTS)
 
 **Use Case**: AgTech, TradeOS, Business Operations (farm advisory, logistics, supply chain)
 

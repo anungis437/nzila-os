@@ -70,7 +70,7 @@ const pipeline = [
   { name: 'Shop Quoter', vertical: 'Commerce', tam: '$5B', orgs: '93', status: 'In Development' },
   { name: 'Trade OS', vertical: 'Commerce', tam: '$15B', orgs: '337', status: 'Beta' },
   { name: 'eExports', vertical: 'Trade', tam: '$3B', orgs: '78', status: 'Django PoC' },
-  { name: 'PonduOps', vertical: 'Agrotech (DRC/CA)', tam: '$8B', orgs: '220', status: 'In Development' },
+  { name: 'AgrimoOps', vertical: 'Agrotech (DRC/CA)', tam: '$8B', orgs: '220', status: 'In Development' },
   { name: 'Insight CFO', vertical: 'Fintech', tam: '$2B', orgs: '37', status: 'In Development' },
   { name: 'STSA / Lexora', vertical: 'Fintech', tam: '$5B', orgs: '95', status: 'In Development' },
   { name: 'Memora', vertical: 'Healthtech', tam: '$20B', orgs: '150', status: 'Legacy' },

@@ -4,7 +4,7 @@ import { checkRateLimit, rateLimitHeaders } from '@nzila/os-core/rateLimit'
 
 /**
  * Public routes — everything else requires authentication.
- * Cora is read-only analytics — same auth enforcement as Pondu.
+ * Cora is read-only analytics — same auth enforcement as Agrimo.
  */
 const isPublicRoute = createRouteMatcher([
   '/',

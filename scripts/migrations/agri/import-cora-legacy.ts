@@ -14,7 +14,7 @@
  *   - DATABASE_URL env var for destination (NzilaOS)
  *   - LEGACY_CORA_DATABASE_URL env var for source (Cora Insights)
  *
- * Note: Run import-pondu-legacy.ts first to establish producer records.
+ * Note: Run import-agrimo-legacy.ts first to establish producer records.
  *       Cora records reference producers by legacy ID for cross-linking.
  *
  * @idempotent Uses legacySourceId + legacySourceSystem='cora-insights' as upsert key

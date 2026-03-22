@@ -205,7 +205,7 @@ investors@nzila.ventures
 | **Trade OS** | Trade-Commerce | 337 | Production | Multi-carrier rate optimization, customs duty calculator | $350K |
 | **Court Lens** | Legaltech | 682 | Production | Legal AI (outcome prediction), semantic search | $300K |
 | **eEXPORTS** | Trade-Commerce | 78 | Production | Real-time shipment tracking (WebSocket), AI document processing | $100K |
-| **PonduOps** | AgTech | 70+ modules | Production | AgTech ERP, farm-to-market supply chain | $80K |
+| **AgrimoOps** | AgTech | 70+ modules | Production | AgTech ERP, farm-to-market supply chain | $80K |
 | **Shop Quoter** | eCommerce | 93 | Production | Corporate gift box customization, inventory management | $180K |
 | **CongoWave** | Entertainment | 83+ models | Production | Music streaming, 16 Django apps | $50K |
 | **Memora** | Healthtech | 40+ tables | Production | Health journeys, AI coaching | $120K |
@@ -234,7 +234,7 @@ investors@nzila.ventures
 
 **1. django-aca-azurepg** (4 platforms)
 - Django 5, Azure PostgreSQL, Drizzle ORM, optional Clerk auth
-- **Platforms:** Union Eyes, Court Lens, PonduOps, CongoWave
+- **Platforms:** Union Eyes, Court Lens, AgrimoOps, CongoWave
 
 **2. nextjs-aca-azurepg-clerk** (8 platforms)
 - Next.js 14+ App Router, Azure PostgreSQL, Drizzle ORM, Clerk mandatory
@@ -392,7 +392,7 @@ investors@nzila.ventures
 - **SentryIQ (Insurancetech):** Insurance brokers (IBAO, IBAC), direct-to-consumer (SMB insurance buyers)
 - **Trade OS (Trade-Commerce):** Freight brokers, 3PLs (third-party logistics), SMB exporters
 - **Court Lens (Legaltech):** Law firms (personal injury, family law, employment law), solo practitioners
-- **Others:** Vertical-specific GTM (PonduOps → AgTech cooperatives, CongoWave → African diaspora music lovers, Memora → senior care facilities)
+- **Others:** Vertical-specific GTM (AgrimoOps → AgTech cooperatives, CongoWave → African diaspora music lovers, Memora → senior care facilities)
 
 ---
 
@@ -405,7 +405,7 @@ investors@nzila.ventures
 
 **Channel Partnerships:**
 - **HR Tech Resellers:** ADP Marketplace, Workday App Store (Union Eyes, ABR)
-- **AgTech Distributors:** John Deere, CNH Industrial (CORA, PonduOps)
+- **AgTech Distributors:** John Deere, CNH Industrial (CORA, AgrimoOps)
 - **Insurance Brokers:** Hub International, Marsh Canada (SentryIQ)
 
 ---

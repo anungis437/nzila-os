@@ -55,7 +55,7 @@ Detailed strategies for each of Nzila's 10+ verticals:
 |----------|---------------------|-------------|--------|
 | **Uniontech** | 🏆 **Union Eyes** (Crown Jewel), C3UO | $50B+ | **FLAGSHIP** — 4,773 entities, production-ready |
 | **Justice & Equity** | 🏆 **ABR Insights** | $3B+ | **FLAGSHIP** — 132 tables, 9.1/10 production readiness |
-| **Agrotech** | 🏆 **CORA** (Crown Jewel), PonduOps | $12B+ | **FLAGSHIP** — 80+ entities, comprehensive AgTech |
+| **Agrotech** | 🏆 **CORA** (Crown Jewel), AgrimoOps | $12B+ | **FLAGSHIP** — 80+ entities, comprehensive AgTech |
 | **Healthtech** | Memora | $250B+ | Active — MVP stage |
 | **Fintech/Banking** | DiasporaCore (C3UO), STSA | $1.8T+ | Active — Documentation in progress |
 | **Insurancetech** | SentryIQ | $500B+ | Active — Documentation in progress |

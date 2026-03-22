@@ -170,8 +170,8 @@ class EntityConsolidationAnalyzer:
                     "Payment": 85,
                 },
             },
-            "ponduops": {
-                "name": "PonduOps",
+            "agrimoops": {
+                "name": "AgrimoOps",
                 "total_entities": 220,
                 "entity_types": {
                     "User": 68,

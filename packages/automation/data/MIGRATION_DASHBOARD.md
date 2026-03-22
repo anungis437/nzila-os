@@ -511,14 +511,14 @@ All routes: Clerk auth (`auth().userId`), entity scoping, structured error respo
 | `cloud-shell-storage-eastus` | East US | Storage | ⚪ Keep (Cloud Shell) |
 | `DefaultResourceGroup-EUS` | East US | Default Log Analytics | ⚪ Keep |
 | `NetworkWatcherRG` | East US 2 | Network Watchers | ⚪ Keep |
-| `pondu-ops-rg` | East US | KeyVault | 🟡 Keep or merge into nzila-staging |
+| `agrimo-ops-rg` | East US | KeyVault | 🟡 Keep or merge into nzila-staging |
 
 ### Consolidation Summary
 
 | Category | RGs | Recommendation |
 |----------|-----|----------------|
 | 🔴 **Delete (legacy/duplicate)** | 7 | court_lens, courtlens-rg, rg-support-7310, rg-union-claims-dev-4x25 + AKS managed, union-eyes-rg, nzilaexport-staging-rg |
-| 🟡 **Migrate then decommission** | 5 | unioneyes-staging-rg, unioneyes-prod-rg, rg-abr-insights, abr-insights-rg, pondu-ops-rg |
+| 🟡 **Migrate then decommission** | 5 | unioneyes-staging-rg, unioneyes-prod-rg, rg-abr-insights, abr-insights-rg, agrimo-ops-rg |
 | 🟢 **Keep** | 10 | nzila-staging-rg, congowave-*, infrastructure RGs |
 | 🟡 **Evaluate** | 3 | cyberlearn-* (3 RGs — consolidate into 1?) |
 

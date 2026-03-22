@@ -1,0 +1,23 @@
+apiVersion: backstage.io/v1alpha1
+kind: Component
+metadata:
+  name: agrimo
+  description: Agri field operations — producers, harvests, lots, QA, warehouse, shipments, payments
+  annotations:
+    github.com/project-slug: anungis437/nzila-os
+    backstage.io/techdocs-ref: dir:./docs
+    nzila.app/port: "3010"
+    nzila.app/stack: nextjs
+    nzila.app/org-scoped: "true"
+  tags:
+    - nextjs
+    - agri
+    - field-ops
+spec:
+  type: service
+  lifecycle: production
+  owner: platform-team
+  system: nzila-os
+  dependsOn:
+    - resource:default/postgres-db
+    - resource:default/azure-blob

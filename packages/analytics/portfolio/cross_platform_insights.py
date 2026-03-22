@@ -25,7 +25,7 @@ def analyze_cross_platform_patterns() -> Dict[str, Any]:
         {"id": "trade_os", "vertical": "Trade", "orgs": 337},
         {"id": "eexports", "vertical": "Trade", "orgs": 78},
         {"id": "shop_quoter", "vertical": "Commerce", "orgs": 93},
-        {"id": "ponduops", "vertical": "Agrotech", "orgs": 220},
+        {"id": "agrimoops", "vertical": "Agrotech", "orgs": 220},
         {"id": "insight_cfo", "vertical": "Fintech", "orgs": 37},
         {"id": "stsa", "vertical": "Fintech", "orgs": 95},
         {"id": "memora", "vertical": "Healthtech", "orgs": 150},
@@ -131,7 +131,7 @@ def identify_synergies() -> List[Dict[str, Any]]:
         {
             "verticals": ["Agrotech"],
             "synergy_type": "Supply Chain",
-            "opportunity": "CORA + PonduOps consolidation",
+            "opportunity": "CORA + AgrimoOps consolidation",
             "value_potential": "$150K ARR",
         },
         {

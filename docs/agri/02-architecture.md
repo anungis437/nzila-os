@@ -7,18 +7,18 @@
 │                          CLIENT LAYER                                   │
 │                                                                         │
 │   ┌──────────────────────┐       ┌──────────────────────┐              │
-│   │    apps/pondu        │       │    apps/cora          │              │
-│   │    (Pondu Ops)       │       │    (Cora Insights)    │              │
+│   │    apps/agrimo        │       │    apps/cora          │              │
+│   │    (Agrimo)       │       │    (Cora Insights)    │              │
 │   │                      │       │                       │              │
-│   │  /pondu/dashboard    │       │  /cora/dashboard      │              │
-│   │  /pondu/producers    │       │  /cora/yield-forecast │              │
-│   │  /pondu/harvests     │       │  /cora/price-signals  │              │
-│   │  /pondu/lots         │       │  /cora/risk           │              │
-│   │  /pondu/quality      │       │  /cora/impact         │              │
-│   │  /pondu/warehouse    │       │  /cora/performance    │              │
-│   │  /pondu/shipments    │       │  /cora/data-sources   │              │
-│   │  /pondu/payments     │       │                       │              │
-│   │  /pondu/certs        │       │                       │              │
+│   │  /agrimo/dashboard    │       │  /cora/dashboard      │              │
+│   │  /agrimo/producers    │       │  /cora/yield-forecast │              │
+│   │  /agrimo/harvests     │       │  /cora/price-signals  │              │
+│   │  /agrimo/lots         │       │  /cora/risk           │              │
+│   │  /agrimo/quality      │       │  /cora/impact         │              │
+│   │  /agrimo/warehouse    │       │  /cora/performance    │              │
+│   │  /agrimo/shipments    │       │  /cora/data-sources   │              │
+│   │  /agrimo/payments     │       │                       │              │
+│   │  /agrimo/certs        │       │                       │              │
 │   └──────────┬───────────┘       └───────────┬───────────┘              │
 │              │ server actions                 │ read-only queries        │
 └──────────────┼────────────────────────────────┼─────────────────────────┘
@@ -55,7 +55,7 @@
 Each app follows strict layering:
 
 ```
-Route (app/pondu/*)
+Route (app/agrimo/*)
   └─▶ Server Action (lib/actions/*.ts)
        └─▶ Service (lib/services/*.ts or agri-core)
             └─▶ Domain Logic (agri-core FSMs, validators)
@@ -74,7 +74,7 @@ Route (app/pondu/*)
 
 ## Data Flow
 
-### Write Path (Pondu)
+### Write Path (Agrimo)
 
 ```
 User action
@@ -98,7 +98,7 @@ Dashboard request
 
 ## Deployment Profiles
 
-| Profile | Pondu | Cora | DB | Integrations |
+| Profile | Agrimo | Cora | DB | Integrations |
 |---------|-------|------|-----|-------------|
 | **Managed** | Cloud (Vercel/Azure) | Cloud | Shared Neon/Azure PG | Managed |
 | **Sovereign** | On-premise | On-premise | Customer DB | Customer-managed |

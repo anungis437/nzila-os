@@ -401,9 +401,9 @@
     "dependencies": []
   },
   {
-    "platform_id": "ponduops",
-    "name": "Ponduops",
-    "path": "D:\\APPS\\nzila-automation\\legacy-codebases\\ponduops",
+    "platform_id": "agrimoops",
+    "name": "Agrimoops",
+    "path": "D:\\APPS\\nzila-automation\\legacy-codebases\\agrimoops",
     "business_vertical": null,
     "size_mb": 1.65,
     "entity_count": 220,

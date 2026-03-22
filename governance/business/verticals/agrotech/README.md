@@ -1,9 +1,9 @@
-# 🌾 Agrotech Vertical — CORA & PonduOps
+# 🌾 Agrotech Vertical — CORA & AgrimoOps
 
 **Market:** Agricultural supply chain, farm management, commodity trading, cooperative platforms  
 **TAM:** $8.6B+ (Canadian AgTech market by 2028)  
 **SAM:** $300M (commercial farms >$500K revenue × $10K AgTech spend)  
-**Platforms:** CORA (flagship supply chain), PonduOps (farm ERP)
+**Platforms:** CORA (flagship supply chain), AgrimoOps (farm ERP)
 
 ---
 
@@ -51,10 +51,10 @@
 
 ---
 
-## 🚜 PLATFORM #2: PONDUOPS — FARM ERP
+## 🚜 PLATFORM #2: AGRIMOOPS — FARM ERP
 
 ### **Product Overview**
-**PonduOps** is a comprehensive AgTech ERP for farm-to-market supply chain management (crop planning, yield tracking, inventory management, order fulfillment, logistics coordination).
+**AgrimoOps** is a comprehensive AgTech ERP for farm-to-market supply chain management (crop planning, yield tracking, inventory management, order fulfillment, logistics coordination).
 
 ### **Technical Specifications**
 - **Modules:** 70+ (comprehensive farm operations)
@@ -80,7 +80,7 @@
 
 ### **Phase 3: Export Corridor Leader** (2030)
 - **CORA:** 90 cooperatives + grain elevators
-- **Total AgrotechARR:** $980K ($900K CORA + $80K PonduOps)
+- **Total AgrotechARR:** $980K ($900K CORA + $80K AgrimoOps)
 
 ## 🎯 SUCCESS METRICS
 

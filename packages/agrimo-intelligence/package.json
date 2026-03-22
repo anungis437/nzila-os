@@ -1,0 +1,17 @@
+{
+  "name": "@nzila/agrimo-intelligence",
+  "version": "0.1.0",
+  "private": true,
+  "type": "module",
+  "exports": {
+    ".": "./index.ts",
+    "./assist-engine": "./assist-engine.ts"
+  },
+  "dependencies": {
+    "zod": "^3.24.0"
+  },
+  "devDependencies": {
+    "vitest": "^4.0.18",
+    "typescript": "^5"
+  }
+}

@@ -88,7 +88,7 @@ Decision categories activated: COMPLIANCE, RISK, GOVERNANCE, OPERATIONS
 
 | Component | Tier |
 |-----------|------|
-| Cora / Pondu / Trade | Base |
+| Cora / Agrimo / Trade | Base |
 | CFO | Base |
 | Control Plane | Base |
 | Decision Layer | Add-On |

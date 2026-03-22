@@ -201,6 +201,118 @@ importers:
         specifier: ^4.0.18
         version: 4.1.0(@opentelemetry/api@1.9.0)(@types/node@25.5.0)(jsdom@28.1.0(@noble/hashes@2.0.1))(vite@7.3.1(@types/node@25.5.0)(jiti@2.6.1)(lightningcss@1.32.0)(terser@5.46.1)(tsx@4.21.0)(yaml@2.8.2))
 
+  apps/agrimo:
+    dependencies:
+      '@clerk/nextjs':
+        specifier: ^6.12.0
+        version: 6.39.0(next@16.1.6(@opentelemetry/api@1.9.0)(@playwright/test@1.58.2)(babel-plugin-react-compiler@1.0.0)(react-dom@19.2.4(react@19.2.4))(react@19.2.4))(react-dom@19.2.4(react@19.2.4))(react@19.2.4)
+      '@heroicons/react':
+        specifier: ^2.2.0
+        version: 2.2.0(react@19.2.4)
+      '@nzila/agri-adapters':
+        specifier: workspace:*
+        version: link:../../packages/agri-adapters
+      '@nzila/agri-core':
+        specifier: workspace:*
+        version: link:../../packages/agri-core
+      '@nzila/agri-db':
+        specifier: workspace:*
+        version: link:../../packages/agri-db
+      '@nzila/agri-events':
+        specifier: workspace:*
+        version: link:../../packages/agri-events
+      '@nzila/agri-forecasting':
+        specifier: workspace:*
+        version: link:../../packages/agri-forecasting
+      '@nzila/agri-intelligence':
+        specifier: workspace:*
+        version: link:../../packages/agri-intelligence
+      '@nzila/agri-provenance':
+        specifier: workspace:*
+        version: link:../../packages/agri-provenance
+      '@nzila/agri-reporting':
+        specifier: workspace:*
+        version: link:../../packages/agri-reporting
+      '@nzila/agri-supply-chain':
+        specifier: workspace:*
+        version: link:../../packages/agri-supply-chain
+      '@nzila/agri-sync-contracts':
+        specifier: workspace:*
+        version: link:../../packages/agri-sync-contracts
+      '@nzila/agri-traceability':
+        specifier: workspace:*
+        version: link:../../packages/agri-traceability
+      '@nzila/agrimo-core':
+        specifier: workspace:*
+        version: link:../../packages/agrimo-core
+      '@nzila/blob':
+        specifier: workspace:*
+        version: link:../../packages/blob
+      '@nzila/db':
+        specifier: workspace:*
+        version: link:../../packages/db
+      '@nzila/evidence':
+        specifier: workspace:*
+        version: link:../../packages/evidence
+      '@nzila/integrations-runtime':
+        specifier: workspace:*
+        version: link:../../packages/integrations-runtime
+      '@nzila/os-core':
+        specifier: workspace:*
+        version: link:../../packages/os-core
+      '@nzila/ui':
+        specifier: workspace:*
+        version: link:../../packages/ui
+      framer-motion:
+        specifier: ^11.3.30
+        version: 11.18.2(react-dom@19.2.4(react@19.2.4))(react@19.2.4)
+      next:
+        specifier: 16.1.6
+        version: 16.1.6(@babel/core@7.29.0)(@opentelemetry/api@1.9.0)(@playwright/test@1.58.2)(babel-plugin-react-compiler@1.0.0)(react-dom@19.2.4(react@19.2.4))(react@19.2.4)
+      react:
+        specifier: 19.2.4
+        version: 19.2.4
+      react-dom:
+        specifier: 19.2.4
+        version: 19.2.4(react@19.2.4)
+      zod:
+        specifier: ^3.24.0
+        version: 3.25.76
+    devDependencies:
+      '@nzila/config':
+        specifier: workspace:*
+        version: link:../../packages/config
+      '@tailwindcss/postcss':
+        specifier: ^4
+        version: 4.2.2
+      '@types/node':
+        specifier: ^25
+        version: 25.5.0
+      '@types/react':
+        specifier: ^19
+        version: 19.2.14
+      '@types/react-dom':
+        specifier: ^19
+        version: 19.2.3(@types/react@19.2.14)
+      babel-plugin-react-compiler:
+        specifier: 1.0.0
+        version: 1.0.0
+      eslint:
+        specifier: ^9.39.0
+        version: 9.39.4(jiti@2.6.1)
+      eslint-config-next:
+        specifier: 16.2.0
+        version: 16.2.0(eslint@9.39.4(jiti@2.6.1))(typescript@5.9.3)
+      tailwindcss:
+        specifier: ^4
+        version: 4.2.2
+      typescript:
+        specifier: ^5
+        version: 5.9.3
+      vitest:
+        specifier: ^4.0.18
+        version: 4.1.0(@opentelemetry/api@1.9.0)(@types/node@25.5.0)(jsdom@28.1.0(@noble/hashes@2.0.1))(vite@7.3.1(@types/node@25.5.0)(jiti@2.6.1)(lightningcss@1.32.0)(terser@5.46.1)(tsx@4.21.0)(yaml@2.8.2))
+
   apps/cfo:
     dependencies:
       '@clerk/nextjs':
@@ -617,9 +729,21 @@ importers:
       '@nzila/agri-db':
         specifier: workspace:*
         version: link:../../packages/agri-db
+      '@nzila/agri-forecasting':
+        specifier: workspace:*
+        version: link:../../packages/agri-forecasting
       '@nzila/agri-intelligence':
         specifier: workspace:*
         version: link:../../packages/agri-intelligence
+      '@nzila/agri-provenance':
+        specifier: workspace:*
+        version: link:../../packages/agri-provenance
+      '@nzila/agri-reporting':
+        specifier: workspace:*
+        version: link:../../packages/agri-reporting
+      '@nzila/agri-supply-chain':
+        specifier: workspace:*
+        version: link:../../packages/agri-supply-chain
       '@nzila/agri-traceability':
         specifier: workspace:*
         version: link:../../packages/agri-traceability
@@ -1288,97 +1412,6 @@ importers:
       '@types/react-dom':
         specifier: ^19
         version: 19.2.3(@types/react@19.2.14)
-      eslint:
-        specifier: ^9.39.0
-        version: 9.39.4(jiti@2.6.1)
-      eslint-config-next:
-        specifier: 16.2.0
-        version: 16.2.0(eslint@9.39.4(jiti@2.6.1))(typescript@5.9.3)
-      tailwindcss:
-        specifier: ^4
-        version: 4.2.2
-      typescript:
-        specifier: ^5
-        version: 5.9.3
-      vitest:
-        specifier: ^4.0.18
-        version: 4.1.0(@opentelemetry/api@1.9.0)(@types/node@25.5.0)(jsdom@28.1.0(@noble/hashes@2.0.1))(vite@7.3.1(@types/node@25.5.0)(jiti@2.6.1)(lightningcss@1.32.0)(terser@5.46.1)(tsx@4.21.0)(yaml@2.8.2))
-
-  apps/pondu:
-    dependencies:
-      '@clerk/nextjs':
-        specifier: ^6.12.0
-        version: 6.39.0(next@16.1.6(@opentelemetry/api@1.9.0)(@playwright/test@1.58.2)(babel-plugin-react-compiler@1.0.0)(react-dom@19.2.4(react@19.2.4))(react@19.2.4))(react-dom@19.2.4(react@19.2.4))(react@19.2.4)
-      '@heroicons/react':
-        specifier: ^2.2.0
-        version: 2.2.0(react@19.2.4)
-      '@nzila/agri-adapters':
-        specifier: workspace:*
-        version: link:../../packages/agri-adapters
-      '@nzila/agri-core':
-        specifier: workspace:*
-        version: link:../../packages/agri-core
-      '@nzila/agri-db':
-        specifier: workspace:*
-        version: link:../../packages/agri-db
-      '@nzila/agri-events':
-        specifier: workspace:*
-        version: link:../../packages/agri-events
-      '@nzila/agri-traceability':
-        specifier: workspace:*
-        version: link:../../packages/agri-traceability
-      '@nzila/blob':
-        specifier: workspace:*
-        version: link:../../packages/blob
-      '@nzila/db':
-        specifier: workspace:*
-        version: link:../../packages/db
-      '@nzila/evidence':
-        specifier: workspace:*
-        version: link:../../packages/evidence
-      '@nzila/integrations-runtime':
-        specifier: workspace:*
-        version: link:../../packages/integrations-runtime
-      '@nzila/os-core':
-        specifier: workspace:*
-        version: link:../../packages/os-core
-      '@nzila/ui':
-        specifier: workspace:*
-        version: link:../../packages/ui
-      framer-motion:
-        specifier: ^11.3.30
-        version: 11.18.2(react-dom@19.2.4(react@19.2.4))(react@19.2.4)
-      next:
-        specifier: 16.1.6
-        version: 16.1.6(@babel/core@7.29.0)(@opentelemetry/api@1.9.0)(@playwright/test@1.58.2)(babel-plugin-react-compiler@1.0.0)(react-dom@19.2.4(react@19.2.4))(react@19.2.4)
-      react:
-        specifier: 19.2.4
-        version: 19.2.4
-      react-dom:
-        specifier: 19.2.4
-        version: 19.2.4(react@19.2.4)
-      zod:
-        specifier: ^3.24.0
-        version: 3.25.76
-    devDependencies:
-      '@nzila/config':
-        specifier: workspace:*
-        version: link:../../packages/config
-      '@tailwindcss/postcss':
-        specifier: ^4
-        version: 4.2.2
-      '@types/node':
-        specifier: ^25
-        version: 25.5.0
-      '@types/react':
-        specifier: ^19
-        version: 19.2.14
-      '@types/react-dom':
-        specifier: ^19
-        version: 19.2.3(@types/react@19.2.14)
-      babel-plugin-react-compiler:
-        specifier: 1.0.0
-        version: 1.0.0
       eslint:
         specifier: ^9.39.0
         version: 9.39.4(jiti@2.6.1)
@@ -2339,7 +2372,83 @@ importers:
         specifier: ^4.0.18
         version: 4.1.0(@opentelemetry/api@1.9.0)(@types/node@25.5.0)(jsdom@28.1.0(@noble/hashes@2.0.1))(vite@7.3.1(@types/node@25.5.0)(jiti@2.6.1)(lightningcss@1.32.0)(terser@5.46.1)(tsx@4.21.0)(yaml@2.8.2))
 
+  packages/agri-forecasting:
+    dependencies:
+      '@nzila/agri-core':
+        specifier: workspace:*
+        version: link:../agri-core
+      '@nzila/agri-intelligence':
+        specifier: workspace:*
+        version: link:../agri-intelligence
+    devDependencies:
+      eslint:
+        specifier: ^9.39.0
+        version: 9.39.4(jiti@2.6.1)
+      typescript:
+        specifier: ^5
+        version: 5.9.3
+      vitest:
+        specifier: ^4.0.18
+        version: 4.1.0(@opentelemetry/api@1.9.0)(@types/node@25.5.0)(jsdom@28.1.0(@noble/hashes@2.0.1))(vite@7.3.1(@types/node@25.5.0)(jiti@2.6.1)(lightningcss@1.32.0)(terser@5.46.1)(tsx@4.21.0)(yaml@2.8.2))
+
   packages/agri-intelligence:
+    dependencies:
+      '@nzila/agri-core':
+        specifier: workspace:*
+        version: link:../agri-core
+    devDependencies:
+      eslint:
+        specifier: ^9.39.0
+        version: 9.39.4(jiti@2.6.1)
+      typescript:
+        specifier: ^5
+        version: 5.9.3
+      vitest:
+        specifier: ^4.0.18
+        version: 4.1.0(@opentelemetry/api@1.9.0)(@types/node@25.5.0)(jsdom@28.1.0(@noble/hashes@2.0.1))(vite@7.3.1(@types/node@25.5.0)(jiti@2.6.1)(lightningcss@1.32.0)(terser@5.46.1)(tsx@4.21.0)(yaml@2.8.2))
+
+  packages/agri-provenance:
+    dependencies:
+      '@nzila/agri-core':
+        specifier: workspace:*
+        version: link:../agri-core
+      '@nzila/evidence':
+        specifier: workspace:*
+        version: link:../evidence
+    devDependencies:
+      eslint:
+        specifier: ^9.39.0
+        version: 9.39.4(jiti@2.6.1)
+      typescript:
+        specifier: ^5
+        version: 5.9.3
+      vitest:
+        specifier: ^4.0.18
+        version: 4.1.0(@opentelemetry/api@1.9.0)(@types/node@25.5.0)(jsdom@28.1.0(@noble/hashes@2.0.1))(vite@7.3.1(@types/node@25.5.0)(jiti@2.6.1)(lightningcss@1.32.0)(terser@5.46.1)(tsx@4.21.0)(yaml@2.8.2))
+
+  packages/agri-reporting:
+    dependencies:
+      '@nzila/agri-core':
+        specifier: workspace:*
+        version: link:../agri-core
+
+  packages/agri-supply-chain:
+    dependencies:
+      '@nzila/agri-core':
+        specifier: workspace:*
+        version: link:../agri-core
+    devDependencies:
+      eslint:
+        specifier: ^9.39.0
+        version: 9.39.4(jiti@2.6.1)
+      typescript:
+        specifier: ^5
+        version: 5.9.3
+      vitest:
+        specifier: ^4.0.18
+        version: 4.1.0(@opentelemetry/api@1.9.0)(@types/node@25.5.0)(jsdom@28.1.0(@noble/hashes@2.0.1))(vite@7.3.1(@types/node@25.5.0)(jiti@2.6.1)(lightningcss@1.32.0)(terser@5.46.1)(tsx@4.21.0)(yaml@2.8.2))
+
+  packages/agri-sync-contracts:
     dependencies:
       '@nzila/agri-core':
         specifier: workspace:*
@@ -2367,6 +2476,44 @@ importers:
       eslint:
         specifier: ^9.39.0
         version: 9.39.4(jiti@2.6.1)
+      typescript:
+        specifier: ^5
+        version: 5.9.3
+      vitest:
+        specifier: ^4.0.18
+        version: 4.1.0(@opentelemetry/api@1.9.0)(@types/node@25.5.0)(jsdom@28.1.0(@noble/hashes@2.0.1))(vite@7.3.1(@types/node@25.5.0)(jiti@2.6.1)(lightningcss@1.32.0)(terser@5.46.1)(tsx@4.21.0)(yaml@2.8.2))
+
+  packages/agrimo-core:
+    dependencies:
+      '@nzila/agri-core':
+        specifier: workspace:*
+        version: link:../agri-core
+      '@nzila/agri-provenance':
+        specifier: workspace:*
+        version: link:../agri-provenance
+      '@nzila/agri-supply-chain':
+        specifier: workspace:*
+        version: link:../agri-supply-chain
+      '@nzila/agri-sync-contracts':
+        specifier: workspace:*
+        version: link:../agri-sync-contracts
+      zod:
+        specifier: ^3.24.0
+        version: 3.25.76
+    devDependencies:
+      typescript:
+        specifier: ^5
+        version: 5.9.3
+      vitest:
+        specifier: ^4.0.18
+        version: 4.1.0(@opentelemetry/api@1.9.0)(@types/node@25.5.0)(jsdom@28.1.0(@noble/hashes@2.0.1))(vite@7.3.1(@types/node@25.5.0)(jiti@2.6.1)(lightningcss@1.32.0)(terser@5.46.1)(tsx@4.21.0)(yaml@2.8.2))
+
+  packages/agrimo-intelligence:
+    dependencies:
+      zod:
+        specifier: ^3.24.0
+        version: 3.25.76
+    devDependencies:
       typescript:
         specifier: ^5
         version: 5.9.3

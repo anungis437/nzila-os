@@ -79,7 +79,7 @@ export const agriTraceabilityEntityTypeEnum = pgEnum('agri_traceability_entity_t
 ])
 
 export const agriForecastTypeEnum = pgEnum('agri_forecast_type', [
-  'yield', 'price', 'demand',
+  'yield', 'price', 'demand', 'cost', 'climate', 'production', 'logistics',
 ])
 
 export const agriRiskTypeEnum = pgEnum('agri_risk_type', [

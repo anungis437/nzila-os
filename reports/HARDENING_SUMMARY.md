@@ -21,7 +21,7 @@ The release gate passes with 0 blockers.
 |-------------|--------|
 | `api-response.ts` | Standard error envelope (`ApiError`, `apiSuccess`, `apiError`) with Zod integration |
 | `api-handler.ts` | Next.js App Router handler wrapper: request-ID, AsyncLocalStorage context, auth guard, structured catch |
-| 6 env schemas | Zod schemas for mobility, mobility-client-portal, pondu, cora, trade, platform-admin |
+| 6 env schemas | Zod schemas for mobility, mobility-client-portal, agrimo, cora, trade, platform-admin |
 | 3 middleware patches | mobility, mobility-client-portal upgraded to 3-layer; platform-admin created from scratch |
 | `validate-runtime.ts` | Script validating middleware, env, health, os-core deps across all 16 apps |
 
@@ -44,7 +44,7 @@ Each includes: purpose, exports table, usage examples, source layout.
 | Deliverable | Detail |
 |-------------|--------|
 | 2 health routes | `trade` and `platform-admin` — production-grade with DB probe, version/commit info, degraded status |
-| 4 smoke test suites | `trade` (4 tests), `pondu` (5), `cora` (5), `platform-admin` (4) — middleware, health, org, instrumentation, deps |
+| 4 smoke test suites | `trade` (4 tests), `agrimo` (5), `cora` (5), `platform-admin` (4) — middleware, health, org, instrumentation, deps |
 
 ### PR5 — Test & Governance Expansion
 | Test File | Tests | Coverage |
@@ -79,7 +79,7 @@ Each includes: purpose, exports table, usage examples, source layout.
 | nacp-exams | 8/8 | production |
 | partners | 8/8 | production |
 | platform-admin | 8/8 | production |
-| pondu | 8/8 | production |
+| agrimo | 8/8 | production |
 | flow | 8/8 | production |
 | trade | 8/8 | production |
 | union-eyes | 7/8 | production |
@@ -138,7 +138,7 @@ Result:   PASSED
 - `apps/platform-admin/lib/__tests__/smoke.test.ts`
 - `apps/trade/app/api/health/route.ts`
 - `apps/trade/lib/__tests__/smoke.test.ts`
-- `apps/pondu/lib/__tests__/smoke.test.ts`
+- `apps/agrimo/lib/__tests__/smoke.test.ts`
 - `apps/cora/lib/__tests__/smoke.test.ts`
 - `packages/platform-validation/src/__tests__/grading.test.ts`
 - `packages/platform-validation/vitest.config.ts`

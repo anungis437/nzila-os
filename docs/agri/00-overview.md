@@ -8,26 +8,26 @@ It consists of **two distinct applications** backed by **shared infrastructure p
 
 | App | Name | Purpose |
 |-----|------|---------|
-| **Pondu** | Pondu Ops | Operational execution — harvest intake, lot aggregation, quality inspection, certification, warehousing, shipments, and payment distribution |
+| **Agrimo** | Agrimo | Operational execution — harvest intake, lot aggregation, quality inspection, certification, warehousing, shipments, and payment distribution |
 | **Cora** | Cora Insights | Intelligence and analytics — yield forecasting, price signals, climate risk, cooperative performance, impact reporting, and traceability dashboards |
 
 ## Design Principles
 
 ### 1. Separate UIs, Shared Intelligence
 
-Pondu and Cora are **independent Next.js apps** with their own routes, layouts, and deployment targets. They share domain primitives, database schemas, and intelligence computation via shared packages — never via direct imports between apps.
+Agrimo and Cora are **independent Next.js apps** with their own routes, layouts, and deployment targets. They share domain primitives, database schemas, and intelligence computation via shared packages — never via direct imports between apps.
 
 ### 2. Upstream Emits, Downstream Consumes
 
 ```
-Pondu (writes) ──emits events──▶ agri-events (outbox) ──▶ Cora (reads + computes)
+Agrimo (writes) ──emits events──▶ agri-events (outbox) ──▶ Cora (reads + computes)
                                         │
                                         ▼
                              integrations-runtime
                            (email, SMS, Slack, CRM)
 ```
 
-Pondu is the source of truth for operational data. Cora reads from agri-db via a **read-only scoped query layer** and computes analytics via `agri-intelligence`. Cora never writes to Pondu operational tables.
+Agrimo is the source of truth for operational data. Cora reads from agri-db via a **read-only scoped query layer** and computes analytics via `agri-intelligence`. Cora never writes to Agrimo operational tables.
 
 ### 3. Org Isolation Everywhere
 
@@ -54,20 +54,20 @@ All external integrations (email, SMS, Slack, Teams, HubSpot) are routed through
 
 ## Bundling Strategy
 
-Pondu and Cora are **separately deployable** — each can be deployed as a standalone Next.js app. The shared packages are workspace dependencies resolved at build time. This enables:
+Agrimo and Cora are **separately deployable** — each can be deployed as a standalone Next.js app. The shared packages are workspace dependencies resolved at build time. This enables:
 
 - **Managed**: Both apps on shared infra, single DB
 - **Sovereign**: Org-deployed, data stays on-premise
-- **Hybrid**: Pondu on-premise, Cora in cloud (or vice versa)
+- **Hybrid**: Agrimo on-premise, Cora in cloud (or vice versa)
 
 ## Boundaries
 
 ```
-apps/pondu ──imports──▶ agri-core, agri-db, agri-events, agri-traceability, agri-adapters
+apps/agrimo ──imports──▶ agri-core, agri-db, agri-events, agri-traceability, agri-adapters
 apps/cora  ──imports──▶ agri-core, agri-db (read-only), agri-intelligence, agri-traceability
 
-❌ apps/pondu CANNOT import from apps/cora
-❌ apps/cora CANNOT import from apps/pondu
+❌ apps/agrimo CANNOT import from apps/cora
+❌ apps/cora CANNOT import from apps/agrimo
 ❌ Shared packages CANNOT import from apps/*
-❌ agri-intelligence CANNOT write to Pondu operational tables
+❌ agri-intelligence CANNOT write to Agrimo operational tables
 ```

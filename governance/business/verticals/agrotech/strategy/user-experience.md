@@ -1,5 +1,5 @@
 # Agrotech UX Strategy
-> User experience design for CORA + PonduOps platforms, optimized for agricultural users in Sub-Saharan Africa.
+> User experience design for CORA + AgrimoOps platforms, optimized for agricultural users in Sub-Saharan Africa.
 
 ---
 
@@ -12,7 +12,7 @@
 - **Connectivity**: <10% of the day with mobile data; relies on cooperative WiFi for sync
 - **Goals**: Know market prices before selling, track input costs, receive weather alerts
 - **Pain points**: Middlemen exploit price information asymmetry, no record of past yields, input purchases are cash-only with no receipts
-- **Platform usage**: PonduOps (harvest logging via cooperative manager), CORA (price alerts via SMS)
+- **Platform usage**: AgrimoOps (harvest logging via cooperative manager), CORA (price alerts via SMS)
 
 ### Persona 2: Jean-Pierre — Cooperative Manager
 - **Context**: Manages a 300-member cassava and maize cooperative in Katanga
@@ -21,7 +21,7 @@
 - **Connectivity**: 3G coverage at cooperative office, intermittent mobile data in field
 - **Goals**: Track member contributions, coordinate bulk sales, report to federation, manage input orders
 - **Pain points**: Paper-based records are error-prone, no visibility into member farm activities, government reporting is manual and time-consuming
-- **Platform usage**: PonduOps (cooperative management, financial ledger), CORA (supply listings, buyer matching)
+- **Platform usage**: AgrimoOps (cooperative management, financial ledger), CORA (supply listings, buyer matching)
 
 ### Persona 3: Amara — Enterprise Buyer
 - **Context**: Procurement manager at a Kinshasa-based grain trading company
@@ -46,7 +46,7 @@
 For farmers without smartphones (Persona 1: Marie):
 - **Market prices**: `SMS "PRIX MANIOC" to 12345` → receives current cassava prices for 3 nearest markets
 - **Weather alerts**: Automatic SMS 48h before severe weather events (rain, drought)
-- **Harvest confirmation**: SMS-based harvest recording: `RECOLTE MANIOC 500KG` → logged in PonduOps
+- **Harvest confirmation**: SMS-based harvest recording: `RECOLTE MANIOC 500KG` → logged in AgrimoOps
 
 ### USSD Integration
 - **Menu-driven interface**: `*123#` → structured menus for price check, harvest log, cooperative balance
@@ -82,7 +82,7 @@ For farmers without smartphones (Persona 1: Marie):
 
 ### Content Localization Rules
 1. All user-facing strings externalized (no hardcoded text in templates)
-2. Agricultural terms use local names (e.g., "pondu" not "cassava leaves" in Lingala context)
+2. Agricultural terms use local names (e.g., "agrimo" not "cassava leaves" in Lingala context)
 3. Units default to local convention (kg, hectares) with metric system throughout
 4. Currency displays in both local (CDF — Congolese Franc) and reference (USD) simultaneously
 
@@ -92,7 +92,7 @@ For farmers without smartphones (Persona 1: Marie):
 
 ### Cooperative-Mediated Registration (Primary)
 ```
-Step 1: Cooperative manager creates cooperative account on PonduOps
+Step 1: Cooperative manager creates cooperative account on AgrimoOps
         → Receives cooperative ID + admin credentials
         → Guided setup: cooperative name, location, crops, member count
 
@@ -113,7 +113,7 @@ Step 4: First real data entry within 7 days
 ```
 
 ### Field Agent Assisted Setup
-- Field agents carry pre-configured tablets with PonduOps pre-loaded
+- Field agents carry pre-configured tablets with AgrimoOps pre-loaded
 - Agent scans national ID (OCR) → auto-fills registration fields
 - GPS coordinates captured automatically for farm location
 - Training conducted during weekly cooperative meeting (captive audience)

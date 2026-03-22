@@ -11,7 +11,7 @@
 | Vertical | Agri / Trade Operations |
 | Duration | 45 days |
 | Target users | 3–5 trade/ops managers + 2–3 logistics/compliance leads + 1–2 finance leads |
-| Bundle | Cora/Pondu/Trade + CFO + Control Plane + Decision Layer |
+| Bundle | Cora/Agrimo/Trade + CFO + Control Plane + Decision Layer |
 | Success criteria | See metrics below |
 
 ---

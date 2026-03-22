@@ -28,7 +28,13 @@ class NetworkEffectsTracker:
                 "network_density": 0.65,
                 "viral_coefficient": 1.2,
                 "data_network_effect": True,
-                "shared_services": ["auth", "payments", "notifications", "analytics", "ai_companion"],
+                "shared_services": [
+                    "auth",
+                    "payments",
+                    "notifications",
+                    "analytics",
+                    "ai_companion",
+                ],
             },
             "abr_insights": {
                 "name": "ABR Insights",
@@ -40,7 +46,13 @@ class NetworkEffectsTracker:
                 "network_density": 0.45,
                 "viral_coefficient": 0.9,
                 "data_network_effect": True,
-                "shared_services": ["auth", "notifications", "analytics", "ai_companion", "gamification"],
+                "shared_services": [
+                    "auth",
+                    "notifications",
+                    "analytics",
+                    "ai_companion",
+                    "gamification",
+                ],
             },
             "cora": {
                 "name": "CORA",
@@ -76,7 +88,13 @@ class NetworkEffectsTracker:
                 "network_density": 0.55,
                 "viral_coefficient": 1.3,
                 "data_network_effect": False,
-                "shared_services": ["auth", "payments", "notifications", "analytics", "compliance"],
+                "shared_services": [
+                    "auth",
+                    "payments",
+                    "notifications",
+                    "analytics",
+                    "compliance",
+                ],
             },
             "trade_os": {
                 "name": "Trade OS",
@@ -88,7 +106,13 @@ class NetworkEffectsTracker:
                 "network_density": 0.35,
                 "viral_coefficient": 0.8,
                 "data_network_effect": True,
-                "shared_services": ["auth", "payments", "notifications", "analytics", "documents"],
+                "shared_services": [
+                    "auth",
+                    "payments",
+                    "notifications",
+                    "analytics",
+                    "documents",
+                ],
             },
             "sentryiq": {
                 "name": "SentryIQ360",
@@ -100,7 +124,13 @@ class NetworkEffectsTracker:
                 "network_density": 0.70,
                 "viral_coefficient": 0.5,
                 "data_network_effect": True,
-                "shared_services": ["auth", "notifications", "analytics", "ai_companion", "documents"],
+                "shared_services": [
+                    "auth",
+                    "notifications",
+                    "analytics",
+                    "ai_companion",
+                    "documents",
+                ],
             },
             "court_lens": {
                 "name": "Court Lens",
@@ -121,7 +151,7 @@ class NetworkEffectsTracker:
         return [
             {
                 "source": "cora",
-                "target": "ponduops",
+                "target": "agrimoops",
                 "link_type": "data_sharing",
                 "strength": 0.9,
                 "description": "Shared farm data and supply chain",
@@ -169,16 +199,18 @@ class NetworkEffectsTracker:
 
         for pid, p in self.platforms.items():
             score = self._calculate_platform_network_score(pid, p)
-            platform_scores.append({
-                "platform_id": pid,
-                "name": p["name"],
-                "network_type": p["network_type"],
-                "network_score": score,
-                "viral_coefficient": p["viral_coefficient"],
-                "data_network_effect": p["data_network_effect"],
-                "shared_service_count": len(p["shared_services"]),
-                "cross_platform_links": self._count_links(pid),
-            })
+            platform_scores.append(
+                {
+                    "platform_id": pid,
+                    "name": p["name"],
+                    "network_type": p["network_type"],
+                    "network_score": score,
+                    "viral_coefficient": p["viral_coefficient"],
+                    "data_network_effect": p["data_network_effect"],
+                    "shared_service_count": len(p["shared_services"]),
+                    "cross_platform_links": self._count_links(pid),
+                }
+            )
 
         platform_scores.sort(key=lambda s: s["network_score"], reverse=True)
 
@@ -212,7 +244,9 @@ class NetworkEffectsTracker:
         # Shared services contribution (0-15)
         service_score = min(len(platform["shared_services"]) / 6, 1.0) * 15
 
-        return round(viral_score + density_score + data_score + link_score + service_score, 1)
+        return round(
+            viral_score + density_score + data_score + link_score + service_score, 1
+        )
 
     def _count_links(self, platform_id: str) -> int:
         """Count cross-platform links for a platform."""
@@ -240,9 +274,9 @@ class NetworkEffectsTracker:
     def _classify_portfolio_network(self) -> str:
         """Classify the overall portfolio network effect strength."""
         density = self._calculate_portfolio_density()
-        avg_viral = sum(
-            p["viral_coefficient"] for p in self.platforms.values()
-        ) / len(self.platforms)
+        avg_viral = sum(p["viral_coefficient"] for p in self.platforms.values()) / len(
+            self.platforms
+        )
 
         if density > 0.3 and avg_viral > 1.0:
             return "STRONG"

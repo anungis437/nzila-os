@@ -35,7 +35,7 @@ All platform codebases owned 100% by **Nzila Ventures Inc.** (federally incorpor
 | **Trade OS** | 10.37 MB | 337 | Multi-carrier rate optimization, customs duty calculator, FedEx/UPS integrations | Copyright + Trade Secret | $350K+ |
 | **Court Lens** | ~180 MB est | 682 | Legal AI (outcome prediction), 24 legal domain apps, semantic search | Copyright + Trade Secret | $300K+ |
 | **eEXPORTS** | 6.62 MB | 78 | WebSocket real-time tracking, AI document processing, Carfax integration | Copyright + Trade Secret | $250K+ |
-| **PonduOps** | ~120 MB est | 70+ modules | AgTech ERP, crop planning, farm-to-market supply chain | Copyright + Trade Secret | $200K+ |
+| **AgrimoOps** | ~120 MB est | 70+ modules | AgTech ERP, crop planning, farm-to-market supply chain | Copyright + Trade Secret | $200K+ |
 | **Others** (6 platforms) | — | 400+ combined | Shop Quoter, Memora, ClinicConnect, CyberLearn, CongoWave, Insight CFO | Copyright + Trade Secret | $550K+ combined |
 
 **Total Portfolio Valuation** (source code + deployed infrastructure): **$5M-$6M**

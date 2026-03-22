@@ -194,7 +194,7 @@
             "phase": 2,
             "name": "Parallel Batch 1",
             "weeks": 10,
-            "platforms": ["abr-insights", "congowave", "cyberlearn", "ponduops"],
+            "platforms": ["abr-insights", "congowave", "cyberlearn", "agrimoops"],
             "goal": "Apply established patterns in parallel"
         }
     ]

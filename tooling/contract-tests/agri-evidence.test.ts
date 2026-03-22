@@ -5,7 +5,7 @@
  *   1. Evidence pack builders exist in agri-traceability
  *   2. Evidence packs use @nzila/evidence for sealing
  *   3. Traceability chain builder exists
- *   4. Evidence wiring exists in apps/pondu
+ *   4. Evidence wiring exists in apps/agrimo
  *
  * @invariant AGRI_EVIDENCE_TRACEABILITY_004
  */
@@ -48,15 +48,15 @@ describe('AGRI-EVID-03 — Pack builders for all required pack types', () => {
   })
 })
 
-describe('AGRI-EVID-04 — Evidence wiring in apps/pondu', () => {
-  it('agri-evidence-packs.ts exists in pondu', () => {
+describe('AGRI-EVID-04 — Evidence wiring in apps/agrimo', () => {
+  it('agri-evidence-packs.ts exists in agrimo', () => {
     expect(
-      existsSync(join(ROOT, 'apps', 'pondu', 'lib', 'evidence', 'agri-evidence-packs.ts')),
+      existsSync(join(ROOT, 'apps', 'agrimo', 'lib', 'evidence', 'agri-evidence-packs.ts')),
     ).toBe(true)
   })
 
   it('re-exports from @nzila/agri-traceability', () => {
-    const path = join(ROOT, 'apps', 'pondu', 'lib', 'evidence', 'agri-evidence-packs.ts')
+    const path = join(ROOT, 'apps', 'agrimo', 'lib', 'evidence', 'agri-evidence-packs.ts')
     if (!existsSync(path)) return
     const content = readFileSync(path, 'utf-8')
     expect(content).toContain('@nzila/agri-traceability')
