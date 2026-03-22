@@ -171,9 +171,14 @@ export function getCurrentPosition(chain: SupplyChain): {
   steps_total: number
 } {
   const completedSteps = chain.steps.filter((s) => s.status === 'completed')
-  const lastActive = chain.steps.findLast(
-    (s) => s.status === 'in_progress' || s.status === 'completed',
-  )
+  let lastActive: (typeof chain.steps)[number] | undefined
+  for (let i = chain.steps.length - 1; i >= 0; i--) {
+    const s = chain.steps[i]!
+    if (s.status === 'in_progress' || s.status === 'completed') {
+      lastActive = s
+      break
+    }
+  }
 
   return {
     current_step: lastActive?.type ?? null,
