@@ -1,0 +1,47 @@
+{
+  "report_id": "crpt_fix_agrimo_01",
+  "org_id": "org_agrimo_fix_01",
+  "source_app": "agrimo",
+  "schema_version": "1.0.0",
+  "reporting_period": {
+    "start": "2025-01-01T00:00:00.000Z",
+    "end": "2025-06-30T23:59:59.000Z"
+  },
+  "entity_scope": "farm",
+  "report_type": "farm_summary",
+  "title": "H1 2025 Farm Summary — Agrimo Fixture",
+  "generated_at": "2025-07-01T09:00:00.000Z",
+  "metrics": [
+    { "key": "yield_kg", "label": "Total Yield", "value": 18500, "unit": "kg", "period": "H1-2025" },
+    { "key": "revenue_usd", "label": "Revenue", "value": 55500, "unit": "USD", "period": "H1-2025" },
+    { "key": "cost_per_ha", "label": "Cost per Hectare", "value": 320, "unit": "USD/ha", "period": "H1-2025" }
+  ],
+  "forecasts": [
+    {
+      "forecast_type": "yield",
+      "target_period": "H2-2025",
+      "predicted_value": 21000,
+      "confidence_level": "medium",
+      "model_version": "agrimo-forecast-v2.1"
+    }
+  ],
+  "risk_signals": [
+    { "risk_type": "drought", "severity": "high", "description": "Below-average rainfall forecast for southern region", "affected_entity": "region_south" }
+  ],
+  "supply_chain_events": [
+    {
+      "chain_id": "sc_agrimo_001",
+      "step_type": "harvest",
+      "status": "completed",
+      "timestamp": "2025-06-15T06:00:00.000Z",
+      "location": "Central Province",
+      "quantity_kg": 8000
+    }
+  ],
+  "provenance_refs": [
+    { "provenance_id": "prov_ag_001", "source_type": "satellite_analysis", "hash": "sha256:112233", "verified": true }
+  ],
+  "extensions": {
+    "agrimo": { "crop_type": "maize", "field_id": "field_014" }
+  }
+}

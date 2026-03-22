@@ -1,0 +1,29 @@
+{
+  "report_id": "crpt_fix_cora_01",
+  "org_id": "org_cora_fix_01",
+  "source_app": "cora",
+  "schema_version": "1.0.0",
+  "reporting_period": {
+    "start": "2025-01-01T00:00:00.000Z",
+    "end": "2025-03-31T23:59:59.000Z"
+  },
+  "entity_scope": "cooperative",
+  "report_type": "cooperative_summary",
+  "title": "Q1 2025 Cooperative Summary — Cora Fixture",
+  "generated_at": "2025-04-01T12:00:00.000Z",
+  "metrics": [
+    { "key": "compliance_rate", "label": "Compliance Rate", "value": 94.2, "unit": "%", "period": "Q1-2025" },
+    { "key": "member_count", "label": "Active Members", "value": 128, "unit": "count", "period": "Q1-2025" }
+  ],
+  "forecasts": [],
+  "risk_signals": [
+    { "risk_type": "regulatory", "severity": "low", "description": "Minor documentation gap in 3 cooperatives" }
+  ],
+  "supply_chain_events": [],
+  "provenance_refs": [
+    { "provenance_id": "prov_cora_001", "source_type": "audit_report", "hash": "sha256:aabbcc", "verified": true }
+  ],
+  "extensions": {
+    "cora": { "governance_tier": "A", "audit_cycle": "quarterly" }
+  }
+}
