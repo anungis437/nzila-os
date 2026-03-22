@@ -13,9 +13,7 @@ import { describe, it, expect, vi, beforeEach } from 'vitest'
 
 // ── Mocks ───────────────────────────────────────────────────────────────────
 
-vi.mock('@nzila/db', () => ({
-  db: { execute: vi.fn() },
-}))
+vi.mock('@nzila/db', () => ({}))
 
 vi.mock('@nzila/db/platform', () => ({
   platformDb: { execute: vi.fn() },
@@ -25,7 +23,6 @@ vi.mock('@/lib/logger', () => ({
   logger: { info: vi.fn(), error: vi.fn(), warn: vi.fn() },
 }))
 
-import { db } from '@nzila/db'
 import { platformDb } from '@nzila/db/platform'
 
 // ── Import adapters ─────────────────────────────────────────────────────────
@@ -48,7 +45,7 @@ describe('healthAdapter', () => {
   })
 
   it('returns healthy when database responds', async () => {
-    vi.mocked(db.execute).mockResolvedValue([] as never)
+    vi.mocked(platformDb.execute).mockResolvedValue([] as never)
 
     const result = await healthAdapter.check()
 
@@ -65,7 +62,7 @@ describe('healthAdapter', () => {
   })
 
   it('returns unhealthy when database fails', async () => {
-    vi.mocked(db.execute).mockRejectedValue(new Error('ECONNREFUSED'))
+    vi.mocked(platformDb.execute).mockRejectedValue(new Error('ECONNREFUSED'))
 
     const result = await healthAdapter.check()
 
@@ -75,7 +72,7 @@ describe('healthAdapter', () => {
   })
 
   it('always returns HealthResponse shape', async () => {
-    vi.mocked(db.execute).mockResolvedValue([] as never)
+    vi.mocked(platformDb.execute).mockResolvedValue([] as never)
 
     const result = await healthAdapter.check()
 

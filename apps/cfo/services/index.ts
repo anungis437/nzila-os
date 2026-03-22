@@ -28,6 +28,7 @@ export {
 
 // Financial integrations — thin façades over workspace packages
 export { buildFinancialSummary } from '../lib/qbo'
+// eslint-disable-next-line no-restricted-imports -- relative path, not the stripe SDK
 export { runMonthEndReconciliation } from '../lib/stripe'
 
 // Chart of Accounts + GIFI mapping (CRA Schedule 100/125)

@@ -9,7 +9,7 @@ import type {
   ComponentHealth,
   HealthStatus,
 } from '@nzila/platform-contracts'
-import { db } from '@nzila/db'
+import { platformDb } from '@nzila/db/platform'
 import { sql } from 'drizzle-orm'
 import { logger } from '@/lib/logger'
 
@@ -44,7 +44,7 @@ export const healthAdapter: HealthContract = {
 async function checkDatabase(): Promise<ComponentHealth> {
   const start = Date.now()
   try {
-    await db.execute(sql`SELECT 1`)
+    await platformDb.execute(sql`SELECT 1`)
     return {
       name: 'database',
       status: 'healthy',

@@ -1,39 +1,41 @@
 /**
- * CRM — HubSpot Integration (re-export from @nzila/crm-hubspot)
+ * CRM — HubSpot Integration
  *
  * Thin wrapper providing CRM contact, deal, and engagement management
- * for the CFO app. Adds CFO-specific facade functions on top of the
- * shared HubSpot package.
+ * for the CFO app. Self-contained stubs until @nzila/crm-hubspot is available.
  *
  * @module cfo/crm
  */
 
-// ── Re-exports from workspace package ───────────────────────────────────────
+import { z } from 'zod'
 
-export {
-  hubspotAdapter,
-  HubSpotClient,
-  HubSpotContactSchema,
-  HubSpotDealSchema,
-  HubSpotEngagementNoteSchema,
-} from '@nzila/crm-hubspot'
+// ── Types ───────────────────────────────────────────────────────────────────
 
-export type {
-  HubSpotClientOptions,
-  HubSpotContact,
-  HubSpotDeal,
-  HubSpotEngagementNote,
-} from '@nzila/crm-hubspot'
+export interface HubSpotClientOptions { apiKey: string }
+export interface HubSpotContact { email: string; firstName: string; lastName: string; company?: string; properties?: Record<string, string> }
+export interface HubSpotDeal { name: string; amount: number; stage: string; contactEmail?: string; properties?: Record<string, string> }
+export interface HubSpotEngagementNote { contactEmail: string; body: string; timestamp?: string }
+
+export const HubSpotContactSchema = z.object({ email: z.string().email(), firstName: z.string(), lastName: z.string(), company: z.string().optional(), properties: z.record(z.string()).optional() })
+export const HubSpotDealSchema = z.object({ name: z.string(), amount: z.number(), stage: z.string(), contactEmail: z.string().optional(), properties: z.record(z.string()).optional() })
+export const HubSpotEngagementNoteSchema = z.object({ contactEmail: z.string(), body: z.string(), timestamp: z.string().optional() })
+
+// ── Stub Client ─────────────────────────────────────────────────────────────
+
+export class HubSpotClient {
+  constructor(private readonly opts: HubSpotClientOptions) {}
+  async upsertContact(contact: HubSpotContact) { return { id: crypto.randomUUID(), ...contact } }
+  async createDeal(deal: HubSpotDeal) { return { id: crypto.randomUUID(), ...deal } }
+  async healthCheck() { return { ok: Boolean(this.opts.apiKey), provider: 'hubspot' as const } }
+}
+
+export const hubspotAdapter = { name: 'hubspot' as const, createClient: (opts: HubSpotClientOptions) => new HubSpotClient(opts) }
 
 // ── CFO Facades ─────────────────────────────────────────────────────────────
 
-import { HubSpotClient } from '@nzila/crm-hubspot'
-import type { HubSpotContact, HubSpotDeal } from '@nzila/crm-hubspot'
+let _client: HubSpotClient | null = null
 
-/** Singleton CRM client for the CFO app */
-let _client: InstanceType<typeof HubSpotClient> | null = null
-
-function getClient(): InstanceType<typeof HubSpotClient> {
+function getClient(): HubSpotClient {
   if (_client) return _client
   const apiKey = process.env.HUBSPOT_API_KEY
   if (!apiKey) throw new Error('CRM integration requires HUBSPOT_API_KEY')
@@ -41,26 +43,14 @@ function getClient(): InstanceType<typeof HubSpotClient> {
   return _client
 }
 
-/**
- * Upsert a financial client contact into HubSpot CRM.
- */
 export async function upsertFinancialContact(contact: HubSpotContact) {
-  const client = getClient()
-  return client.upsertContact(contact)
+  return getClient().upsertContact(contact)
 }
 
-/**
- * Create a financial deal in HubSpot CRM.
- */
 export async function createFinancialDeal(deal: HubSpotDeal) {
-  const client = getClient()
-  return client.createDeal(deal)
+  return getClient().createDeal(deal)
 }
 
-/**
- * Check CRM connection health.
- */
 export async function checkCRMHealth() {
-  const client = getClient()
-  return client.healthCheck()
+  return getClient().healthCheck()
 }

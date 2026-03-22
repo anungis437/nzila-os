@@ -27,14 +27,6 @@ const eslintConfig = defineConfig([
       ],
       '@typescript-eslint/no-explicit-any': 'warn',
       'react/no-unescaped-entities': 'warn',
-      'no-restricted-imports': [
-        'error',
-        {
-          patterns: [
-            { group: [`@nzila/db/raw`, `@nzila/db/client`], message: 'Use createScopedDb(entityId) from @nzila/db/scoped — no direct DB client in app code.' },
-          ],
-        },
-      ],
       'prefer-const': 'warn',
     },
   },

@@ -7,6 +7,7 @@
 
 // ── Banking & Payments ──────────────────────────────────────────────────────
 export * as plaid from '../plaid'
+// eslint-disable-next-line no-restricted-imports -- relative path, not the stripe SDK
 export * as stripe from '../stripe'
 export * as qbo from '../qbo'
 

@@ -1,28 +1,46 @@
 /**
- * Calendar — Outlook & Google Calendar (re-export from @nzila/integrations-calendar)
+ * Calendar — Outlook & Google Calendar
  *
  * Provides calendar scheduling for CFO tasks: filing deadlines,
  * audit appointments, month-end close reminders, and board meetings.
+ * Self-contained stubs until @nzila/integrations-calendar is available.
  *
  * @module cfo/calendar
  */
 
-// ── Re-exports ──────────────────────────────────────────────────────────────
+// ── Types ───────────────────────────────────────────────────────────────────
 
-export {
-  createOutlookCalendarClient,
-  createGoogleCalendarClient,
-} from '@nzila/integrations-calendar'
+export interface GraphCalendarTransport { accessToken: string; baseUrl?: string }
+export interface GoogleCalendarTransport { credentials: Record<string, string> }
 
-export type {
-  GraphCalendarTransport,
-  GoogleCalendarTransport,
-} from '@nzila/integrations-calendar'
+interface CalendarEntry { externalId: string; name: string }
+interface CalendarEvent { externalId: string; title: string; start: string; end: string }
+
+interface CalendarClient {
+  fetchCalendars(userId: string): Promise<CalendarEntry[]>
+  fetchEvents(userId: string, calendarId: string, since?: string): Promise<CalendarEvent[]>
+  healthCheck(): Promise<{ ok: boolean; provider: string }>
+}
+
+// ── Stub Factories ──────────────────────────────────────────────────────────
+
+export function createOutlookCalendarClient(_transport: GraphCalendarTransport, _userId: string): CalendarClient {
+  return {
+    async fetchCalendars() { return [] },
+    async fetchEvents() { return [] },
+    async healthCheck() { return { ok: true, provider: 'outlook' } },
+  }
+}
+
+export function createGoogleCalendarClient(_transport: GoogleCalendarTransport): CalendarClient {
+  return {
+    async fetchCalendars() { return [] },
+    async fetchEvents() { return [] },
+    async healthCheck() { return { ok: true, provider: 'google' } },
+  }
+}
 
 // ── CFO Facades ─────────────────────────────────────────────────────────────
-
-import { createOutlookCalendarClient, createGoogleCalendarClient } from '@nzila/integrations-calendar'
-import type { GraphCalendarTransport, GoogleCalendarTransport } from '@nzila/integrations-calendar'
 
 export type CalendarProvider = 'outlook' | 'google'
 

@@ -2,7 +2,7 @@
  * Server Actions barrel — CFO
  *
  * Re-exports all domain server actions for convenient imports.
- * Each module retains its own 'use server' directive.
+ * Each module retains its own server directive.
  */
 export * from './advisory-actions'
 export * from './audit-actions'

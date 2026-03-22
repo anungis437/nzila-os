@@ -1,21 +1,28 @@
 /**
- * ChatOps — Slack & Teams Notifications (re-export from @nzila/chatops-*)
+ * ChatOps — Slack & Teams Notifications
  *
  * Unified notification adapter for sending CFO alerts, approvals,
  * and financial summaries to Slack and Microsoft Teams channels.
+ * Self-contained stubs until @nzila/chatops-* packages are available.
  *
  * @module cfo/chatops
  */
 
-// ── Re-exports ──────────────────────────────────────────────────────────────
+// ── Stub Adapters ───────────────────────────────────────────────────────────
 
-export { slackAdapter } from '@nzila/chatops-slack'
-export { teamsAdapter } from '@nzila/chatops-teams'
+interface ChatMessage { orgId: string; channel: string; to: string; body: string; correlationId: string }
+interface SlackCredentials { token: string }
+interface TeamsCredentials { webhookUrl: string }
 
-// ── CFO Facades ─────────────────────────────────────────────────────────────
+export const slackAdapter = {
+  name: 'slack' as const,
+  async send(_msg: ChatMessage, _creds: SlackCredentials) { /* stub */ },
+}
 
-import { slackAdapter } from '@nzila/chatops-slack'
-import { teamsAdapter } from '@nzila/chatops-teams'
+export const teamsAdapter = {
+  name: 'teams' as const,
+  async send(_msg: ChatMessage, _creds: TeamsCredentials) { /* stub */ },
+}
 
 export type ChatChannel = 'slack' | 'teams' | 'both'
 
