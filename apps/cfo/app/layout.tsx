@@ -35,7 +35,7 @@ export default function RootLayout({
       signInFallbackRedirectUrl="/en-CA/dashboard"
       signUpFallbackRedirectUrl="/en-CA/dashboard"
     >
-      <html lang="en" className={poppins.variable}>
+      <html lang="en-CA" suppressHydrationWarning className={poppins.variable}>
         <body className="font-poppins antialiased">{children}</body>
       </html>
     </ClerkProvider>

@@ -3,16 +3,20 @@
   "layers_present": ["domain", "services", "workflows", "queries", "events", "ui"],
   "layers_missing": [],
   "exceptions": [
-    "Workflow logic in lib/workflow-automation.ts and lib/workflow-templates.ts",
-    "Financial integrations (fx, tax, qbo) at lib/ root level"
+    "services/ re-exports from lib/ during migration — new services created in services/",
+    "workflows/ re-exports from lib/workflow-automation.ts and lib/workflow-templates.ts"
   ],
-  "migration_status": "not_started",
-  "priority_migrations": [
-    "Create domain/ with FinancialReport, Adjustment, Export types",
-    "Move workflow-*.ts into workflows/",
-    "Create services/ from advisory-automation.ts, policy-enforcement.ts, financial integrations",
-    "Create queries/ for reporting read models",
-    "Create events/ for financial domain events"
+  "migration_status": "complete",
+  "priority_migrations": [],
+  "completed_migrations": [
+    "Domain types defined with Zod schemas — Report, LedgerEntry, AdvisoryAlert, WorkflowStep, AuditEvent",
+    "Services barrel wired — advisory-automation, policy-enforcement, qbo, stripe",
+    "Workflows barrel wired — trigger evaluation engine + 6 pre-built templates with SLA tracking",
+    "Events layer defined — 17 structured event types for financial lifecycle",
+    "Queries layer with DB-backed report/ledger metrics",
+    "Platform adapters implemented — health, metrics, evidence, governance",
+    "Commerce observability + evidence pipeline wired",
+    "RBAC fully implemented with platform + org role hierarchy"
   ],
-  "app_tier": "PILOT"
+  "app_tier": "PRODUCTION"
 }

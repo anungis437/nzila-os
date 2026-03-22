@@ -9,7 +9,13 @@ import { authenticateUser, withRequestContext } from '@/lib/api-guards'
 import { withSpan } from '@nzila/os-core/telemetry'
 import { platformDb } from '@nzila/db/platform'
 import { sql } from 'drizzle-orm'
+import { z } from 'zod'
 import { logger } from '@/lib/logger'
+
+const ExportQuerySchema = z.object({
+  reportId: z.string().uuid().optional(),
+  format: z.enum(['csv', 'pdf']).default('csv'),
+})
 
 interface ReportRow {
   id: string
@@ -30,8 +36,19 @@ export async function GET(request: NextRequest) {
       if (!auth.ok) return auth.response
 
       const { searchParams } = new URL(request.url)
-      const reportId = searchParams.get('reportId')
-      const format = searchParams.get('format') ?? 'csv'
+      const parsed = ExportQuerySchema.safeParse({
+        reportId: searchParams.get('reportId') ?? undefined,
+        format: searchParams.get('format') ?? undefined,
+      })
+
+      if (!parsed.success) {
+        return NextResponse.json(
+          { ok: false, error: 'Invalid parameters', details: parsed.error.flatten().fieldErrors },
+          { status: 400 },
+        )
+      }
+
+      const { reportId, format } = parsed.data
 
       try {
         let rows: ReportRow[]

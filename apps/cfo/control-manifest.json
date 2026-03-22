@@ -2,7 +2,7 @@
   "$schema": "https://nzilaos.dev/schemas/control-manifest.json",
   "app": "cfo",
   "version": "1.0.0",
-  "riskLevel": "medium",
+  "riskLevel": "high",
   "policyProfile": "fintech",
   "controls": {
     "enforcement": true,
@@ -10,9 +10,17 @@
     "audit": true,
     "observability": true,
     "security": true,
-    "aiControl": false,
+    "aiControl": true,
     "contracts": true,
     "events": true
+  },
+  "capabilities": {
+    "commerce": true,
+    "payments": true,
+    "tax": true,
+    "fx": true,
+    "reconciliation": true,
+    "advisory": true
   },
   "exceptions": []
 }

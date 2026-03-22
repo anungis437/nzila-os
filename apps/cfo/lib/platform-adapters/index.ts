@@ -1,11 +1,9 @@
 /**
- * Platform adapter barrel — cfo
+ * Platform adapter barrel — CFO
  *
  * See @nzila/platform-contracts for contract definitions.
  */
-export {}
-
-// TODO: export { healthAdapter } from './health-adapter'
-// TODO: export { metricsAdapter } from './metrics-adapter'
-// TODO: export { governanceAdapter } from './governance-adapter'
-// TODO: export { evidenceAdapter } from './evidence-adapter'
+export { healthAdapter } from './health-adapter'
+export { metricsAdapter } from './metrics-adapter'
+export { governanceAdapter } from './governance-adapter'
+export { evidenceAdapter } from './evidence-adapter'

@@ -6,11 +6,20 @@
 import { NextResponse } from 'next/server'
 import { authenticateUser, withRequestContext } from '@/lib/api-guards'
 import { withSpan } from '@nzila/os-core/telemetry'
+import { z } from 'zod'
 import {
   getLedgerEntries,
   runReconciliation,
   getFinancialOverview,
 } from '@/lib/actions/ledger-actions'
+
+const LedgerQuerySchema = z.object({
+  page: z.coerce.number().int().positive().default(1),
+  pageSize: z.coerce.number().int().min(1).max(200).default(50),
+  source: z.enum(['stripe', 'qbo', 'xero', 'sage', 'manual']).optional(),
+  startDate: z.string().date().optional(),
+  endDate: z.string().date().optional(),
+})
 
 export async function GET(request: Request) {
   return withRequestContext(request, () =>
@@ -26,12 +35,22 @@ export async function GET(request: Request) {
         return NextResponse.json({ ok: true, data })
       }
 
-      const page = Number(url.searchParams.get('page') ?? '1')
-      const pageSize = Number(url.searchParams.get('pageSize') ?? '50')
-      const source = url.searchParams.get('source') ?? undefined
-      const startDate = url.searchParams.get('startDate') ?? undefined
-      const endDate = url.searchParams.get('endDate') ?? undefined
+      const parsed = LedgerQuerySchema.safeParse({
+        page: url.searchParams.get('page') ?? undefined,
+        pageSize: url.searchParams.get('pageSize') ?? undefined,
+        source: url.searchParams.get('source') ?? undefined,
+        startDate: url.searchParams.get('startDate') ?? undefined,
+        endDate: url.searchParams.get('endDate') ?? undefined,
+      })
 
+      if (!parsed.success) {
+        return NextResponse.json(
+          { ok: false, error: 'Invalid query parameters', details: parsed.error.flatten().fieldErrors },
+          { status: 400 },
+        )
+      }
+
+      const { page, pageSize, source, startDate, endDate } = parsed.data
       const data = await getLedgerEntries({ page, pageSize, source, startDate, endDate })
       return NextResponse.json({ ok: true, data })
     }),

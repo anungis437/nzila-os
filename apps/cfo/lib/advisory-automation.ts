@@ -168,7 +168,7 @@ export function evaluateClientMetrics(
 
     // Special case: tax optimization only triggers if effective > optimal
     if (threshold.category === 'tax-optimization') {
-      triggered = metrics.effectiveTaxRate > metrics.optimalTaxRate + 2 // 2% threshold
+      triggered = metrics.effectiveTaxRate > metrics.optimalTaxRate + 0.02 // 2pp threshold
     }
 
     if (triggered) {

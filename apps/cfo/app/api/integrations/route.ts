@@ -6,11 +6,16 @@
 import { NextResponse } from 'next/server'
 import { authenticateUser, withRequestContext } from '@/lib/api-guards'
 import { withSpan } from '@nzila/os-core/telemetry'
+import { z } from 'zod'
 import {
   getIntegrationStatuses,
   triggerSync,
   getTaxDeadlines,
 } from '@/lib/actions/integration-actions'
+
+const SyncRequestSchema = z.object({
+  provider: z.enum(['stripe', 'quickbooks', 'tax-engine']),
+})
 
 export async function GET(request: Request) {
   return withRequestContext(request, () =>
@@ -40,20 +45,16 @@ export async function POST(request: Request) {
 
       try {
         const body = await request.json()
-        const provider = body?.provider as
-          | 'stripe'
-          | 'quickbooks'
-          | 'tax-engine'
-          | undefined
+        const parsed = SyncRequestSchema.safeParse(body)
 
-        if (!provider || !['stripe', 'quickbooks', 'tax-engine'].includes(provider)) {
+        if (!parsed.success) {
           return NextResponse.json(
             { ok: false, error: 'Invalid provider. Must be stripe, quickbooks, or tax-engine' },
             { status: 400 },
           )
         }
 
-        const result = await triggerSync(provider)
+        const result = await triggerSync(parsed.data.provider)
         return NextResponse.json({ ok: result.success, message: result.message })
       } catch (err) {
         return NextResponse.json(

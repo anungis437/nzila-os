@@ -7,6 +7,7 @@ import { NextResponse } from 'next/server'
 import { authenticateUser, withRequestContext } from '@/lib/api-guards'
 import { withSpan } from '@nzila/os-core/telemetry'
 import { listClients, createClient } from '@/lib/actions/client-actions'
+import { ClientSchema } from '@/domain'
 
 export async function GET(request: Request) {
   return withRequestContext(request, () =>
@@ -34,7 +35,14 @@ export async function POST(request: Request) {
 
       try {
         const body = await request.json()
-        const result = await createClient(body)
+        const parsed = ClientSchema.omit({ id: true }).safeParse(body)
+        if (!parsed.success) {
+          return NextResponse.json(
+            { ok: false, error: 'Validation failed', details: parsed.error.flatten().fieldErrors },
+            { status: 400 },
+          )
+        }
+        const result = await createClient(parsed.data)
 
         if (!result.ok) {
           return NextResponse.json(

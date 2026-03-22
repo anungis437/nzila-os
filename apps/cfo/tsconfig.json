@@ -21,7 +21,13 @@
       "@nzila/qbo": ["../../packages/qbo/src"],
       "@nzila/tax": ["../../packages/tax/src"],
       "@nzila/commerce-core": ["../../packages/commerce-core/src"],
-      "@nzila/fx": ["../../packages/fx/src"]
+      "@nzila/fx": ["../../packages/fx/src"],
+      "@nzila/crm-hubspot": ["../../packages/crm-hubspot/src"],
+      "@nzila/chatops-slack": ["../../packages/chatops-slack/src"],
+      "@nzila/chatops-teams": ["../../packages/chatops-teams/src"],
+      "@nzila/integrations-calendar": ["../../packages/integrations-calendar/src"],
+      "@nzila/integrations-m365": ["../../packages/integrations-m365/src"],
+      "@nzila/integrations-pension": ["../../packages/integrations-pension/src"]
     }
   },
   "include": ["next-env.d.ts", "**/*.ts", "**/*.tsx", ".next/types/**/*.ts"],

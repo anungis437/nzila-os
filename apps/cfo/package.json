@@ -37,7 +37,14 @@
     "@nzila/qbo": "workspace:*",
     "@nzila/tax": "workspace:*",
     "@nzila/commerce-core": "workspace:*",
-    "@nzila/fx": "workspace:*"
+    "@nzila/fx": "workspace:*",
+    "@nzila/platform-contracts": "workspace:*",
+    "@nzila/crm-hubspot": "workspace:*",
+    "@nzila/chatops-slack": "workspace:*",
+    "@nzila/chatops-teams": "workspace:*",
+    "@nzila/integrations-calendar": "workspace:*",
+    "@nzila/integrations-m365": "workspace:*",
+    "@nzila/integrations-pension": "workspace:*"
   },
   "devDependencies": {
     "@nzila/config": "workspace:*",
