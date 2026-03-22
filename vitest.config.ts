@@ -154,6 +154,9 @@ export default defineConfig({
       'packages/governance',
       'packages/security',
       'packages/enforcement',
+      // CFO packages
+      'packages/cfo-core',
+      'packages/cfo-intelligence',
       // Services
       'services/media-worker',
       // E2E platform proof tests
