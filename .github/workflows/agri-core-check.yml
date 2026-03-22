@@ -47,5 +47,8 @@ jobs:
       - name: Agri reporting schema check
         run: pnpm tsx scripts/agri-reporting-schema-check.ts
 
+      - name: Agri CoraGov ingestion check
+        run: pnpm tsx scripts/agri-ingestion-check.ts
+
       - name: Agri package tests
         run: pnpm turbo test --filter='@nzila/agri-*' --filter='@nzila/agrimo-*'

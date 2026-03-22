@@ -56,12 +56,17 @@ export {
 export {
   coraGovRowSchema,
   type CoraGovRow,
+  coraGovDatasetSchema,
+  type CoraGovDataset,
   coraGovPayloadSchema,
   type CoraGovPayload,
+  CANONICAL_SECTIONS,
+  type CanonicalSection,
   type IngestionOk,
   type IngestionRejected,
   type IngestionResult,
   canonicalToCoraGovRows,
+  canonicalToCoraGovDataset,
   buildCoraGovPayload,
 } from './coragov-ingestion-contract.js'
 

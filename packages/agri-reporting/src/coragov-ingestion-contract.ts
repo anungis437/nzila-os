@@ -2,16 +2,26 @@
 // @nzila/agri-reporting — CoraGov Ingestion Contract
 //
 // Defines the wire-format for CoraGov ingestion payloads, the transformation
-// pipeline from canonical reports → CoraGov table rows, and the
+// pipeline from canonical reports → CoraGov structured datasets, and the
 // IngestionResult envelope.
 //
 // Both Cora and Agrimo feed into CoraGov through exactly this contract.
+// All 5 canonical sections are ingested as structured datasets:
+//   metrics, forecasts, risk_signals, supply_chain_events, provenance_refs
 // ---------------------------------------------------------------------------
 
 import { z } from 'zod'
-import { canonicalReportSchema, type CanonicalReport } from './canonical-reporting-schema.js'
+import {
+  canonicalReportSchema,
+  canonicalMetricSchema,
+  canonicalForecastSchema,
+  canonicalRiskSignalSchema,
+  canonicalSupplyChainEventSchema,
+  canonicalProvenanceRefSchema,
+  type CanonicalReport,
+} from './canonical-reporting-schema.js'
 
-// ─── CoraGov ingestion row ───────────────────────────────────────────────
+// ─── CoraGov ingestion row (legacy — metrics only) ───────────────────────
 
 export const coraGovRowSchema = z.object({
   org_id: z.string().min(1),
@@ -32,35 +42,70 @@ export const coraGovRowSchema = z.object({
 
 export type CoraGovRow = z.infer<typeof coraGovRowSchema>
 
-// ─── CoraGov ingestion payload (batch of rows) ───────────────────────────
+// ─── CoraGov structured dataset ──────────────────────────────────────────
+// Full canonical ingestion — all 5 sections preserved as typed arrays.
+
+export const coraGovDatasetSchema = z.object({
+  org_id: z.string().min(1),
+  source_app: z.string().min(1),
+  report_id: z.string().min(1),
+  report_type: z.string().min(1),
+  period_start: z.string().datetime(),
+  period_end: z.string().datetime(),
+  entity_scope: z.string().min(1),
+  generated_at: z.string().datetime(),
+  schema_version: z.string().min(1),
+  metrics: z.array(canonicalMetricSchema),
+  forecasts: z.array(canonicalForecastSchema),
+  risk_signals: z.array(canonicalRiskSignalSchema),
+  supply_chain_events: z.array(canonicalSupplyChainEventSchema),
+  provenance_refs: z.array(canonicalProvenanceRefSchema),
+})
+
+export type CoraGovDataset = z.infer<typeof coraGovDatasetSchema>
+
+// ─── CoraGov payload — structured (batch of datasets) ────────────────────
 
 export const coraGovPayloadSchema = z.object({
   batch_id: z.string().min(1),
   submitted_at: z.string().datetime(),
   source_app: z.string().min(1),
-  rows: z.array(coraGovRowSchema).min(1),
+  datasets: z.array(coraGovDatasetSchema).min(1),
 })
 
 export type CoraGovPayload = z.infer<typeof coraGovPayloadSchema>
+
+// ─── Canonical section names ──────────────────────────────────────────────
+
+export const CANONICAL_SECTIONS = [
+  'metrics',
+  'forecasts',
+  'risk_signals',
+  'supply_chain_events',
+  'provenance_refs',
+] as const
+
+export type CanonicalSection = (typeof CANONICAL_SECTIONS)[number]
 
 // ─── Ingestion result ─────────────────────────────────────────────────────
 
 export interface IngestionOk {
   accepted: true
   batch_id: string
-  row_count: number
+  dataset_count: number
+  validated_sections: CanonicalSection[]
 }
 
 export interface IngestionRejected {
   accepted: false
   batch_id: string
   reason: string
-  errors?: { path: string; message: string }[]
+  errors?: { section?: CanonicalSection; path: string; message: string }[]
 }
 
 export type IngestionResult = IngestionOk | IngestionRejected
 
-// ─── Transform: CanonicalReport → CoraGovRow[] ───────────────────────────
+// ─── Transform: CanonicalReport → CoraGovRow[] (legacy — metrics only) ───
 
 export function canonicalToCoraGovRows(report: CanonicalReport): CoraGovRow[] {
   return report.metrics.map((m) => ({
@@ -81,7 +126,28 @@ export function canonicalToCoraGovRows(report: CanonicalReport): CoraGovRow[] {
   }))
 }
 
-// ─── Build ingestion payload from one or more canonical reports ───────────
+// ─── Transform: CanonicalReport → CoraGovDataset (full — all sections) ───
+
+export function canonicalToCoraGovDataset(report: CanonicalReport): CoraGovDataset {
+  return {
+    org_id: report.org_id,
+    source_app: report.source_app,
+    report_id: report.report_id,
+    report_type: report.report_type,
+    period_start: report.reporting_period.start,
+    period_end: report.reporting_period.end,
+    entity_scope: report.entity_scope,
+    generated_at: report.generated_at,
+    schema_version: report.schema_version,
+    metrics: report.metrics,
+    forecasts: report.forecasts,
+    risk_signals: report.risk_signals,
+    supply_chain_events: report.supply_chain_events,
+    provenance_refs: report.provenance_refs,
+  }
+}
+
+// ─── Build structured ingestion payload from canonical reports ────────────
 
 let batchSeq = 0
 
@@ -113,14 +179,7 @@ export function buildCoraGovPayload(
     }
   }
 
-  const rows = reports.flatMap(canonicalToCoraGovRows)
-  if (rows.length === 0) {
-    return {
-      accepted: false,
-      batch_id: '',
-      reason: 'All reports have empty metrics — nothing to ingest',
-    }
-  }
+  const datasets = reports.map(canonicalToCoraGovDataset)
 
   batchSeq++
   const batch_id = `cgov_${Date.now().toString(36)}_${batchSeq.toString(36)}`
@@ -129,7 +188,7 @@ export function buildCoraGovPayload(
     batch_id,
     submitted_at: new Date().toISOString(),
     source_app: sourceApp,
-    rows,
+    datasets,
   }
 
   // Validate the assembled payload
@@ -146,5 +205,10 @@ export function buildCoraGovPayload(
     }
   }
 
-  return { accepted: true, batch_id, row_count: rows.length }
+  // Determine which sections have data
+  const validated_sections = CANONICAL_SECTIONS.filter((s) =>
+    datasets.some((d) => d[s].length > 0),
+  )
+
+  return { accepted: true, batch_id, dataset_count: datasets.length, validated_sections }
 }

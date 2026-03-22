@@ -1,0 +1,23 @@
+{
+  "report_id": "crpt_fix_no_prov",
+  "org_id": "org_no_prov",
+  "source_app": "cora",
+  "schema_version": "1.0.0",
+  "reporting_period": {
+    "start": "2025-01-01T00:00:00.000Z",
+    "end": "2025-03-31T23:59:59.000Z"
+  },
+  "entity_scope": "cooperative",
+  "report_type": "cooperative_summary",
+  "title": "Q1 2025 Missing Provenance Fixture",
+  "generated_at": "2025-04-01T12:00:00.000Z",
+  "metrics": [
+    { "key": "compliance_rate", "label": "Compliance Rate", "value": 90.0, "unit": "%", "period": "Q1-2025" }
+  ],
+  "forecasts": [],
+  "risk_signals": [],
+  "supply_chain_events": [],
+  "provenance_refs": [
+    { "provenance_id": "", "source_type": "audit_report", "hash": "sha256:bad", "verified": true }
+  ]
+}

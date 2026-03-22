@@ -1,12 +1,13 @@
 // ---------------------------------------------------------------------------
 // scripts/agri-final-lock-check.ts
 //
-// Combined lock gate — runs all three enforcement conditions in sequence.
+// Combined lock gate — runs all four enforcement conditions in sequence.
 // Exit code 0 only if every condition passes.
 //
 //   1. Shared-core enforcement   (scripts/agri-core-enforcement.ts)
 //   2. Duplication report        (scripts/agri-duplication-report.ts)
 //   3. Reporting schema check    (scripts/agri-reporting-schema-check.ts)
+//   4. CoraGov ingestion check   (scripts/agri-ingestion-check.ts)
 //
 // Usage:  npx tsx scripts/agri-final-lock-check.ts
 // ---------------------------------------------------------------------------
@@ -29,6 +30,7 @@ const CHECKS: SubCheck[] = [
   { label: 'AGRI-LOCK-001 — Shared-core enforcement', script: 'scripts/agri-core-enforcement.ts' },
   { label: 'AGRI-LOCK-002 — Duplication report',       script: 'scripts/agri-duplication-report.ts' },
   { label: 'AGRI-LOCK-003 — Reporting schema check',   script: 'scripts/agri-reporting-schema-check.ts' },
+  { label: 'AGRI-LOCK-004 — CoraGov ingestion check',  script: 'scripts/agri-ingestion-check.ts' },
 ]
 
 let failures = 0

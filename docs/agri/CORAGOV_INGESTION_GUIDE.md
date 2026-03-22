@@ -5,12 +5,15 @@
 ## Overview
 
 CoraGov ingestion transforms canonical reports from both Cora and Agrimo into
-a flat row-based format suitable for governance table storage. The entire
-pipeline runs through `@nzila/agri-reporting`:
+structured datasets preserving all 5 canonical sections:
+**metrics, forecasts, risk_signals, supply_chain_events, provenance_refs**.
 
 ```
-CanonicalReport → canonicalToCoraGovRows() → CoraGovPayload → ingestion
+CanonicalReport → canonicalToCoraGovDataset() → CoraGovPayload → ingestion
 ```
+
+The legacy `canonicalToCoraGovRows()` is still available for flat metric-only
+row transforms but is no longer the primary ingestion path.
 
 ## Step 1 — Build a Canonical Report
 
@@ -60,7 +63,8 @@ if (!ingestionResult.accepted) {
   console.error('Rejected:', ingestionResult.reason)
   return
 }
-console.log(`Batch ${ingestionResult.batch_id}: ${ingestionResult.row_count} rows`)
+console.log(`Batch ${ingestionResult.batch_id}: ${ingestionResult.dataset_count} datasets`)
+console.log('Validated sections:', ingestionResult.validated_sections)
 ```
 
 ## Step 4 — Simulate (Testing)
@@ -72,13 +76,14 @@ import { simulateCoraGovIngestion } from '@nzila/agri-reporting'
 
 const result = simulateCoraGovIngestion(rawPayload)
 if (result.accepted) {
-  console.log(`Accepted: ${result.row_count} rows`)
+  console.log(`Accepted: ${result.dataset_count} datasets`)
+  console.log('Sections:', result.validated_sections)
 }
 ```
 
-## Row Format
+## Dataset Format
 
-Each metric in a canonical report becomes one `CoraGovRow`:
+Each canonical report becomes one `CoraGovDataset` containing all sections:
 
 | Field | Source |
 |-------|--------|
@@ -89,13 +94,13 @@ Each metric in a canonical report becomes one `CoraGovRow`:
 | `period_start` | Reporting period start |
 | `period_end` | Reporting period end |
 | `entity_scope` | `farm`, `cooperative`, `region`, or `national` |
-| `metric_key` | Metric key |
-| `metric_label` | Metric display label |
-| `metric_value` | Numeric value |
-| `metric_unit` | Unit of measurement |
-| `metric_period` | Metric period label |
 | `generated_at` | Report generation timestamp |
 | `schema_version` | `1.0.0` |
+| `metrics` | Array of canonical metrics |
+| `forecasts` | Array of canonical forecasts |
+| `risk_signals` | Array of canonical risk signals |
+| `supply_chain_events` | Array of canonical supply chain events |
+| `provenance_refs` | Array of canonical provenance references |
 
 ## Test Fixtures
 
@@ -105,8 +110,12 @@ Located in `fixtures/agri/coragov/`:
 |------|---------|
 | `cora-valid.json` | Valid Cora cooperative summary with 2 metrics |
 | `agrimo-valid.json` | Valid Agrimo farm summary with 3 metrics, forecasts, risk signals, supply chain events |
+| `cora-valid-full.json` | Full Cora fixture with all 5 sections populated |
+| `agrimo-valid-full.json` | Full Agrimo fixture with all 5 sections populated |
 | `invalid-source.json` | Invalid `source_app` — rejected by schema |
 | `malformed-payload.json` | Multiple validation failures — empty strings, bad dates |
+| `invalid-missing-provenance.json` | Empty `provenance_id` — fails provenance validation |
+| `invalid-schema-drift.json` | Wrong schema version, invalid enums — schema drift detection |
 
 ## CI Enforcement
 

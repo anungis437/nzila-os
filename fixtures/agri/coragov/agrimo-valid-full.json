@@ -1,0 +1,71 @@
+{
+  "report_id": "crpt_fix_agrimo_full_01",
+  "org_id": "org_agrimo_full_01",
+  "source_app": "agrimo",
+  "schema_version": "1.0.0",
+  "reporting_period": {
+    "start": "2025-01-01T00:00:00.000Z",
+    "end": "2025-06-30T23:59:59.000Z"
+  },
+  "entity_scope": "farm",
+  "report_type": "farm_summary",
+  "title": "H1 2025 Full Farm Summary — Agrimo Fixture",
+  "generated_at": "2025-07-01T09:00:00.000Z",
+  "metrics": [
+    { "key": "yield_kg", "label": "Total Yield", "value": 18500, "unit": "kg", "period": "H1-2025" },
+    { "key": "revenue_usd", "label": "Revenue", "value": 55500, "unit": "USD", "period": "H1-2025" },
+    { "key": "cost_per_ha", "label": "Cost per Hectare", "value": 320, "unit": "USD/ha", "period": "H1-2025" }
+  ],
+  "forecasts": [
+    {
+      "forecast_type": "yield",
+      "target_period": "H2-2025",
+      "predicted_value": 21000,
+      "confidence_level": "medium",
+      "model_version": "agrimo-forecast-v2.1"
+    },
+    {
+      "forecast_type": "cost",
+      "target_period": "Q4-2025",
+      "predicted_value": 295,
+      "confidence_level": "low"
+    }
+  ],
+  "risk_signals": [
+    { "risk_type": "drought", "severity": "high", "description": "Below-average rainfall forecast for southern region", "affected_entity": "region_south" },
+    { "risk_type": "pest", "severity": "medium", "description": "Fall armyworm sightings increasing in Q2", "mitigation": "Deploy pheromone traps and monitor weekly" }
+  ],
+  "supply_chain_events": [
+    {
+      "chain_id": "sc_agrimo_001",
+      "step_type": "harvest",
+      "status": "completed",
+      "timestamp": "2025-06-15T06:00:00.000Z",
+      "location": "Central Province",
+      "quantity_kg": 8000
+    },
+    {
+      "chain_id": "sc_agrimo_002",
+      "step_type": "transport",
+      "status": "completed",
+      "timestamp": "2025-06-16T10:00:00.000Z",
+      "location": "Depot Alpha",
+      "quantity_kg": 8000
+    },
+    {
+      "chain_id": "sc_agrimo_003",
+      "step_type": "storage",
+      "status": "in_progress",
+      "timestamp": "2025-06-17T08:00:00.000Z",
+      "location": "Warehouse B"
+    }
+  ],
+  "provenance_refs": [
+    { "provenance_id": "prov_ag_full_001", "source_type": "satellite_analysis", "hash": "sha256:112233aa", "verified": true },
+    { "provenance_id": "prov_ag_full_002", "source_type": "soil_test", "hash": "sha256:445566bb", "verified": true },
+    { "provenance_id": "prov_ag_full_003", "source_type": "field_survey", "hash": "sha256:778899cc", "verified": false }
+  ],
+  "extensions": {
+    "agrimo": { "crop_type": "maize", "field_id": "field_014", "irrigation": "drip" }
+  }
+}

@@ -10,9 +10,12 @@ import {
 } from '../src/canonical-reporting-schema'
 import {
   canonicalToCoraGovRows,
+  canonicalToCoraGovDataset,
   buildCoraGovPayload,
   coraGovRowSchema,
+  coraGovDatasetSchema,
   coraGovPayloadSchema,
+  CANONICAL_SECTIONS,
 } from '../src/coragov-ingestion-contract'
 import { simulateCoraGovIngestion } from '../src/coragov-ingestion-harness'
 
@@ -24,7 +27,7 @@ function loadFixture(name: string): unknown {
   return JSON.parse(readFileSync(resolve(fixtureDir, name), 'utf-8'))
 }
 
-// ── Row transformation ──────────────────────────────────────────────────────
+// ── Row transformation (legacy) ─────────────────────────────────────────────
 
 describe('canonicalToCoraGovRows', () => {
   it('transforms a canonical report into CoraGov rows', () => {
@@ -73,6 +76,69 @@ describe('canonicalToCoraGovRows', () => {
   })
 })
 
+// ── Dataset transformation (full) ───────────────────────────────────────────
+
+describe('canonicalToCoraGovDataset', () => {
+  it('transforms a full canonical report into a CoraGov dataset', () => {
+    const report = buildCanonicalReport({
+      org_id: 'org_ds1',
+      source_app: SourceApp.AGRIMO,
+      report_type: 'farm_summary',
+      title: 'DS1',
+      entity_scope: EntityScope.FARM,
+      reporting_period: {
+        start: '2025-01-01T00:00:00.000Z',
+        end: '2025-06-30T23:59:59.000Z',
+      },
+      metrics: [
+        { key: 'yield', label: 'Yield', value: 12000, unit: 'kg', period: 'H1' },
+      ],
+      forecasts: [
+        { forecast_type: 'yield', target_period: 'H2-2025', predicted_value: 14000, confidence_level: 'medium' },
+      ],
+      risk_signals: [
+        { risk_type: 'drought', severity: 'high', description: 'Low rainfall' },
+      ],
+      supply_chain_events: [
+        { chain_id: 'sc_1', step_type: 'harvest', status: 'completed', timestamp: '2025-06-15T06:00:00.000Z' },
+      ],
+      provenance_refs: [
+        { provenance_id: 'prov_1', source_type: 'satellite', hash: 'sha256:abc', verified: true },
+      ],
+    })
+
+    const dataset = canonicalToCoraGovDataset(report)
+    expect(dataset.org_id).toBe('org_ds1')
+    expect(dataset.source_app).toBe('agrimo')
+    expect(dataset.metrics).toHaveLength(1)
+    expect(dataset.forecasts).toHaveLength(1)
+    expect(dataset.risk_signals).toHaveLength(1)
+    expect(dataset.supply_chain_events).toHaveLength(1)
+    expect(dataset.provenance_refs).toHaveLength(1)
+    expect(coraGovDatasetSchema.safeParse(dataset).success).toBe(true)
+  })
+
+  it('produces empty arrays for missing optional sections', () => {
+    const report = buildCanonicalReport({
+      org_id: 'org_ds2',
+      source_app: SourceApp.CORA,
+      report_type: 'risk_assessment',
+      title: 'DS2',
+      entity_scope: EntityScope.NATIONAL,
+      reporting_period: {
+        start: '2025-01-01T00:00:00.000Z',
+        end: '2025-12-31T23:59:59.000Z',
+      },
+    })
+    const dataset = canonicalToCoraGovDataset(report)
+    expect(dataset.metrics).toHaveLength(0)
+    expect(dataset.forecasts).toHaveLength(0)
+    expect(dataset.risk_signals).toHaveLength(0)
+    expect(dataset.supply_chain_events).toHaveLength(0)
+    expect(dataset.provenance_refs).toHaveLength(0)
+  })
+})
+
 // ── buildCoraGovPayload ─────────────────────────────────────────────────────
 
 describe('buildCoraGovPayload', () => {
@@ -96,7 +162,8 @@ describe('buildCoraGovPayload', () => {
     expect(result.accepted).toBe(true)
     if (result.accepted) {
       expect(result.batch_id).toMatch(/^cgov_/)
-      expect(result.row_count).toBe(1)
+      expect(result.dataset_count).toBe(1)
+      expect(result.validated_sections).toContain('metrics')
     }
   })
 
@@ -120,7 +187,7 @@ describe('buildCoraGovPayload', () => {
     const result = buildCoraGovPayload(SourceApp.AGRIMO, [report])
     expect(result.accepted).toBe(true)
     if (result.accepted) {
-      expect(result.row_count).toBe(2)
+      expect(result.dataset_count).toBe(1)
     }
   })
 
@@ -129,7 +196,7 @@ describe('buildCoraGovPayload', () => {
     expect(result.accepted).toBe(false)
   })
 
-  it('rejects reports with no metrics', () => {
+  it('accepts reports with no metrics but valid schema (empty dataset)', () => {
     const report = buildCanonicalReport({
       org_id: 'org_none',
       source_app: SourceApp.CORA,
@@ -142,19 +209,22 @@ describe('buildCoraGovPayload', () => {
       },
     })
     const result = buildCoraGovPayload(SourceApp.CORA, [report])
-    expect(result.accepted).toBe(false)
+    expect(result.accepted).toBe(true)
+    if (result.accepted) {
+      expect(result.validated_sections).toHaveLength(0)
+    }
   })
 })
 
 // ── Harness simulation ──────────────────────────────────────────────────────
 
 describe('simulateCoraGovIngestion', () => {
-  it('accepts a valid CoraGov payload', () => {
+  it('accepts a valid CoraGov dataset payload', () => {
     const payload = {
       batch_id: 'cgov_test_1',
       submitted_at: '2025-04-01T12:00:00.000Z',
       source_app: 'cora',
-      rows: [
+      datasets: [
         {
           org_id: 'org_h1',
           source_app: 'cora',
@@ -163,24 +233,27 @@ describe('simulateCoraGovIngestion', () => {
           period_start: '2025-01-01T00:00:00.000Z',
           period_end: '2025-03-31T23:59:59.000Z',
           entity_scope: 'cooperative',
-          metric_key: 'compliance',
-          metric_label: 'Compliance Rate',
-          metric_value: 95.0,
-          metric_unit: '%',
-          metric_period: 'Q1-2025',
           generated_at: '2025-04-01T10:00:00.000Z',
           schema_version: '1.0.0',
+          metrics: [
+            { key: 'compliance', label: 'Compliance Rate', value: 95.0, unit: '%', period: 'Q1-2025' },
+          ],
+          forecasts: [],
+          risk_signals: [],
+          supply_chain_events: [],
+          provenance_refs: [],
         },
       ],
     }
     const result = simulateCoraGovIngestion(payload)
     expect(result.accepted).toBe(true)
     if (result.accepted) {
-      expect(result.row_count).toBe(1)
+      expect(result.dataset_count).toBe(1)
+      expect(result.validated_sections).toContain('metrics')
     }
   })
 
-  it('rejects a payload with missing rows', () => {
+  it('rejects a payload with missing datasets', () => {
     const result = simulateCoraGovIngestion({ batch_id: 'cgov_bad' })
     expect(result.accepted).toBe(false)
   })
@@ -201,11 +274,21 @@ describe('coragov-ingestion — fixture: Cora valid', () => {
     expect(result.success).toBe(true)
   })
 
-  it('transforms to CoraGov rows', () => {
+  it('transforms to CoraGov rows (legacy)', () => {
     const report = canonicalReportSchema.parse(fixture)
     const rows = canonicalToCoraGovRows(report)
     expect(rows.length).toBeGreaterThan(0)
     expect(rows[0].source_app).toBe('cora')
+  })
+
+  it('transforms to CoraGov dataset (full)', () => {
+    const report = canonicalReportSchema.parse(fixture)
+    const dataset = canonicalToCoraGovDataset(report)
+    expect(dataset.source_app).toBe('cora')
+    expect(dataset.metrics).toHaveLength(2)
+    expect(dataset.risk_signals).toHaveLength(1)
+    expect(dataset.provenance_refs).toHaveLength(1)
+    expect(coraGovDatasetSchema.safeParse(dataset).success).toBe(true)
   })
 })
 
@@ -217,11 +300,23 @@ describe('coragov-ingestion — fixture: Agrimo valid', () => {
     expect(result.success).toBe(true)
   })
 
-  it('transforms to CoraGov rows with correct metrics', () => {
+  it('transforms to CoraGov rows with correct metrics (legacy)', () => {
     const report = canonicalReportSchema.parse(fixture)
     const rows = canonicalToCoraGovRows(report)
     expect(rows).toHaveLength(3) // yield_kg, revenue_usd, cost_per_ha
     expect(rows[0].source_app).toBe('agrimo')
+  })
+
+  it('transforms to CoraGov dataset preserving all sections', () => {
+    const report = canonicalReportSchema.parse(fixture)
+    const dataset = canonicalToCoraGovDataset(report)
+    expect(dataset.source_app).toBe('agrimo')
+    expect(dataset.metrics).toHaveLength(3)
+    expect(dataset.forecasts).toHaveLength(1)
+    expect(dataset.risk_signals).toHaveLength(1)
+    expect(dataset.supply_chain_events).toHaveLength(1)
+    expect(dataset.provenance_refs).toHaveLength(1)
+    expect(coraGovDatasetSchema.safeParse(dataset).success).toBe(true)
   })
 })
 
@@ -247,7 +342,7 @@ describe('coragov-ingestion — fixture: malformed payload', () => {
       batch_id: 'cgov_malformed',
       submitted_at: 'not-a-date',
       source_app: 'cora',
-      rows: [fixture],
+      datasets: [fixture],
     })
     expect(result.accepted).toBe(false)
   })

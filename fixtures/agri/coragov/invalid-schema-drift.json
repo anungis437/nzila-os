@@ -1,0 +1,39 @@
+{
+  "report_id": "crpt_fix_drift",
+  "org_id": "org_drift",
+  "source_app": "agrimo",
+  "schema_version": "2.0.0",
+  "reporting_period": {
+    "start": "2025-01-01T00:00:00.000Z",
+    "end": "2025-03-31T23:59:59.000Z"
+  },
+  "entity_scope": "farm",
+  "report_type": "farm_summary",
+  "title": "Schema Drift Fixture — wrong version",
+  "generated_at": "2025-04-01T12:00:00.000Z",
+  "metrics": [
+    { "key": "yield", "label": "Yield", "value": 1000, "unit": "kg", "period": "Q1-2025" }
+  ],
+  "forecasts": [
+    {
+      "forecast_type": "yield",
+      "target_period": "Q2-2025",
+      "predicted_value": 1200,
+      "confidence_level": "VERY_HIGH"
+    }
+  ],
+  "risk_signals": [
+    { "risk_type": "drought", "severity": "extreme", "description": "Bad severity enum" }
+  ],
+  "supply_chain_events": [
+    {
+      "chain_id": "sc_drift_001",
+      "step_type": "harvest",
+      "status": "completed",
+      "timestamp": "not-a-date"
+    }
+  ],
+  "provenance_refs": [
+    { "provenance_id": "prov_drift", "source_type": "test", "hash": "sha256:abc", "verified": "yes" }
+  ]
+}

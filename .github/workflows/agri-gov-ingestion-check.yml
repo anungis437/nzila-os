@@ -10,6 +10,7 @@ on:
       - 'packages/agri-reporting/**'
       - 'fixtures/agri/coragov/**'
       - 'scripts/agri-reporting-schema-check.ts'
+      - 'scripts/agri-ingestion-check.ts'
       - '.github/workflows/agri-gov-ingestion-check.yml'
 
 concurrency:
@@ -35,8 +36,11 @@ jobs:
       - name: Reporting schema check
         run: npx tsx scripts/agri-reporting-schema-check.ts
 
+      - name: CoraGov ingestion check
+        run: npx tsx scripts/agri-ingestion-check.ts
+
       - name: CoraGov ingestion tests
-        run: npx vitest run packages/agri-reporting/__tests__/coragov-ingestion.test.ts --reporter=verbose
+        run: npx vitest run packages/agri-reporting/__tests__/coragov-ingestion.test.ts packages/agri-reporting/__tests__/coragov-ingestion-cora.spec.ts packages/agri-reporting/__tests__/coragov-ingestion-agrimo.spec.ts packages/agri-reporting/__tests__/coragov-ingestion-rejection.spec.ts packages/agri-reporting/__tests__/coragov-end-to-end.spec.ts --reporter=verbose
 
       - name: Canonical reporting tests
         run: npx vitest run packages/agri-reporting/__tests__/canonical-reporting.test.ts --reporter=verbose
