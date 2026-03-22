@@ -2,8 +2,8 @@
   "$schema": "https://nzilaos.dev/schemas/control-manifest.json",
   "app": "zonga",
   "version": "1.0.0",
-  "riskLevel": "medium",
-  "policyProfile": "creator-economy",
+  "riskLevel": "low",
+  "policyProfile": "media",
   "controls": {
     "enforcement": true,
     "governance": true,

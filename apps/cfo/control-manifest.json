@@ -2,7 +2,7 @@
   "$schema": "https://nzilaos.dev/schemas/control-manifest.json",
   "app": "cfo",
   "version": "1.0.0",
-  "riskLevel": "high",
+  "riskLevel": "medium",
   "policyProfile": "fintech",
   "controls": {
     "enforcement": true,
