@@ -34,7 +34,7 @@
 | orchestrator-api | 7 | 2 | 3 | 1 | 1 | Workflow orchestration |
 | partners | 5 | 0 | 2 | 2 | 1 | Partner commissions |
 | platform-admin | 1 | 0 | 0 | 0 | 1 | Health only |
-| pondu | 1 | 0 | 0 | 0 | 1 | Health only |
+| agrimo | 1 | 0 | 0 | 0 | 1 | Health only |
 | trade | 1 | 0 | 0 | 0 | 1 | Health only |
 | union-eyes | 1,235 | 142 | 486 | 412 | 195 | Labour relations platform |
 | web | 5 | 0 | 1 | 3 | 1 | Public governance status |

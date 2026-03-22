@@ -19,7 +19,7 @@
 | console | 2 | Smoke + integration | Platform integration |
 | cora | 2 | Smoke + resolve-org | Role mapping, read-only permissions |
 | trade | 2 | Smoke + evidence packs | 3 evidence builders, org export |
-| pondu | 2 | Smoke + evidence packs | 4 agri evidence builders |
+| agrimo | 2 | Smoke + evidence packs | 4 agri evidence builders |
 | abr | 1 | Smoke | Platform smoke |
 | nacp-exams | 1 | Smoke | Platform smoke |
 | partners | 1 | Smoke | Platform smoke |

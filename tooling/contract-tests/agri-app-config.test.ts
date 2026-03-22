@@ -2,7 +2,7 @@
  * Contract Test — Agri App Config Compliance
  *
  * AGRI_APP_CONFIG_006:
- *   1. Both Pondu and Cora have required config files
+ *   1. Both Agrimo and Cora have required config files
  *   2. Security headers are present in next.config.ts
  *   3. tsconfig extends @nzila/config
  *   4. Vitest config uses defineProject
@@ -15,7 +15,7 @@ import { join } from 'node:path'
 
 const ROOT = join(__dirname, '../..')
 
-const APPS = ['pondu', 'cora'] as const
+const APPS = ['agrimo', 'cora'] as const
 
 for (const app of APPS) {
   const APP_DIR = join(ROOT, 'apps', app)

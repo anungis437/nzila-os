@@ -164,7 +164,7 @@ class PlatformAnalyzerV2:
             "weeks": 9,
             "orgs": 80,
         },
-        "ponduops": {"complexity": "HIGH", "weeks": 10, "orgs": 70},
+        "agrimoops": {"complexity": "HIGH", "weeks": 10, "orgs": 70},
         "congowave_app_v1-main": {"complexity": "HIGH", "weeks": 9, "orgs": 83},
         "nzila_eexports-main": {"complexity": "MEDIUM", "weeks": 8, "orgs": 78},
         "nzila-trade-os-main": {"complexity": "MEDIUM", "weeks": 9, "orgs": 337},
@@ -305,7 +305,7 @@ class PlatformAnalyzerV2:
         """Detect framework and tech stack"""
         stack = TechStack()
 
-        # Check for legacy Base44 platforms (migrated — CORA, PonduOps, STSA now on NzilaOS)
+        # Check for legacy Base44 platforms (migrated — CORA, AgrimoOps, STSA now on NzilaOS)
         readme = path / "README.md"
         if readme.exists():
             try:

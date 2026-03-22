@@ -149,8 +149,8 @@
       "docs_complete": false
     },
     {
-      "name": "pondu",
-      "path": "apps/pondu",
+      "name": "agrimo",
+      "path": "apps/agrimo",
       "tier": "INCUBATING",
       "owner": "platform",
       "domain": "analytics",

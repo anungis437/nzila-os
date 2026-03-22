@@ -15,7 +15,7 @@
 - **Execution**: Parallel
 - **Goal**: Parallel migration of standard complexity platforms
 - **Platforms**:
-  - `ponduops`
+  - `agrimoops`
   - `stsa-ac5f24e9`
   - `insight-cfo-bad2ab5f`
   - `nzila_eexports-main`

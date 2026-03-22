@@ -207,7 +207,7 @@ Key documents:
 4. **Phase 4**: CourtLens + ABR Insights (13 weeks) - Legal AI + privacy
 5. **Phase 5**: Revenue Platforms (21 weeks) - SentryIQ, Shop Quoter, Trade OS
 6. **Phase 6**: Consolidation (19 weeks) - C3UO merge, niche platforms
-7. **Phase 7**: DevOps (6 weeks) - PonduOps integration
+7. **Phase 7**: DevOps (6 weeks) - AgrimoOps integration
 
 ### [Portfolio Analysis](automation/data/)
 - [Legacy Portfolio Analysis](automation/data/legacy_portfolio_analysis.json) (39,822 lines) - 13 platforms analyzed

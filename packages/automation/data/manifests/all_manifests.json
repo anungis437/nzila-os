@@ -774,21 +774,21 @@
       ]
     }
   },
-  "ponduops": {
+  "agrimoops": {
     "template_version": "1.0.0",
-    "product_name": "Ponduops",
-    "repo_name": "ponduops-platform",
+    "product_name": "Agrimoops",
+    "repo_name": "agrimoops-platform",
     "owner_github": "anungis437",
     "primary_app_path": "src",
     "app_port": 3000,
     "tenant_key": "org_id",
-    "image_repo": "ponduops-app",
+    "image_repo": "agrimoops-app",
     "auth_provider": "clerk",
     "db_provider": "azure_postgresql",
     "deploy_provider": "azure_container_apps",
     "environments": {
-      "staging_url": "https://ponduops-staging.azurecontainerapps.io",
-      "production_url": "https://ponduops.azurecontainerapps.io",
+      "staging_url": "https://agrimoops-staging.azurecontainerapps.io",
+      "production_url": "https://agrimoops.azurecontainerapps.io",
       "api_base": "/api/v1"
     },
     "profile": "nextjs-aca-azurepg-clerk",

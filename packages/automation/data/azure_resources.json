@@ -559,8 +559,8 @@
   },
   {
     "location": "eastus",
-    "name": "pondu-ops-keyvault",
-    "rg": "pondu-ops-rg",
+    "name": "agrimo-ops-keyvault",
+    "rg": "agrimo-ops-rg",
     "type": "Microsoft.KeyVault/vaults"
   },
   {

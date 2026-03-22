@@ -1,5 +1,5 @@
 # Agrotech Market Strategy & GTM Playbook
-> Nzila Corp — CORA + PonduOps go-to-market strategy for Sub-Saharan African agricultural technology.
+> Nzila Corp — CORA + AgrimoOps go-to-market strategy for Sub-Saharan African agricultural technology.
 
 ---
 
@@ -15,7 +15,7 @@
 
 ### Market Segmentation by Value Chain
 - **Input supply & procurement**: $1.9B — fertilizer, seeds, equipment procurement optimization
-- **Farm management & ERP**: $1.4B — crop planning, harvest tracking, financial management (PonduOps core)
+- **Farm management & ERP**: $1.4B — crop planning, harvest tracking, financial management (AgrimoOps core)
 - **Supply chain & logistics**: $2.1B — post-harvest matching, transport, cold chain (CORA core)
 - **Marketplace & trading**: $1.8B — commodity trading, price discovery, buyer-seller matching
 - **Financial services (agri-fintech)**: $1.4B — crop insurance, credit scoring, mobile payments
@@ -34,15 +34,15 @@
 
 ### Direct Competitors
 
-| Competitor | Geography | Strengths | Weaknesses vs CORA+PonduOps |
+| Competitor | Geography | Strengths | Weaknesses vs CORA+AgrimoOps |
 |---|---|---|---|
 | **Twiga Foods** | Kenya | Strong logistics network, $150M+ funding, B2B fresh produce | No cooperative model, Kenya-only, no farm ERP, no offline support |
 | **AgroStar** | India (expanding) | AI crop advisory, large user base, input marketplace | India-focused, poor African localization, no supply chain matching |
 | **FarmCrowdy** | Nigeria | Crowdfunding model, Nigerian market knowledge | Limited tech stack, no ERP capabilities, single-country |
 | **Apollo Agriculture** | Kenya | Satellite imagery, credit scoring, insurance | Farmer-finance only, no cooperative management, no supply chain |
 
-### CORA + PonduOps Competitive Moat
-1. **Integrated platform**: Only solution combining supply chain matching (CORA) + farm ERP (PonduOps)
+### CORA + AgrimoOps Competitive Moat
+1. **Integrated platform**: Only solution combining supply chain matching (CORA) + farm ERP (AgrimoOps)
 2. **Offline-first architecture**: Critical for DRC where rural connectivity is <15%
 3. **Cooperative-centric design**: Built for cooperative governance structures, not individual farmers
 4. **Local language support**: Lingala, Swahili, French — competitors default to English only
@@ -59,7 +59,7 @@
 - **Target**: 45 cooperatives across Kinshasa, Bas-Congo, and Katanga provinces
 - **Entry point**: Cooperative federation leadership — top-down adoption through federation endorsement
 - **Onboarding model**: Field agent teams (3-person squads) deployed per province
-- **Product lead**: PonduOps cooperative management → CORA marketplace upsell
+- **Product lead**: AgrimoOps cooperative management → CORA marketplace upsell
 - **KPI**: 85% cooperative retention at 6 months, 500+ active farmers per cooperative
 
 ### Phase 2: East Africa Expansion (2027-2028)
@@ -91,7 +91,7 @@
 ### Government Agricultural Programs
 - **DRC Ministry of Agriculture**: Agricultural modernization budget ($120M World Bank program)
 - **PRONADEF** (National agricultural development fund): Subsidy pipeline for cooperative tech adoption
-- **Approach**: Position CORA+PonduOps as official digitization platform for government-funded programs
+- **Approach**: Position CORA+AgrimoOps as official digitization platform for government-funded programs
 
 ### Grain Elevator Networks (230+ Facilities)
 - **Value proposition**: Digitize intake, grading, storage, and buyer matching through CORA
@@ -111,9 +111,9 @@
 
 | Tier | Target | Monthly Price | Includes |
 |---|---|---|---|
-| **Farmer Free** | Individual smallholders | $0 | Basic PonduOps: crop calendar, weather alerts, market prices |
-| **Cooperative Standard** | Small cooperatives (50-200 members) | $50-100/mo | Full PonduOps + basic CORA matching, 5 admin seats |
-| **Cooperative Pro** | Large cooperatives (200-1000 members) | $100-200/mo | Full PonduOps + CORA pro, analytics dashboard, 15 admin seats |
+| **Farmer Free** | Individual smallholders | $0 | Basic AgrimoOps: crop calendar, weather alerts, market prices |
+| **Cooperative Standard** | Small cooperatives (50-200 members) | $50-100/mo | Full AgrimoOps + basic CORA matching, 5 admin seats |
+| **Cooperative Pro** | Large cooperatives (200-1000 members) | $100-200/mo | Full AgrimoOps + CORA pro, analytics dashboard, 15 admin seats |
 | **Enterprise** | Agribusinesses, grain traders, exporters | $500-2,000/mo | Full CORA suite, API access, custom integrations, SLA support |
 
 ### Transaction Fees
@@ -141,5 +141,5 @@
 
 ### Blended CAC Target
 - CORA: $120 → optimize to $85 by 2027 through federation channel scaling
-- PonduOps: $100 → optimize to $65 by 2027 through cooperative multiplier effect
+- AgrimoOps: $100 → optimize to $65 by 2027 through cooperative multiplier effect
 - Maintaining LTV/CAC ratios above 90x as CAC decreases and retention improves

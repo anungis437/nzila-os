@@ -119,7 +119,7 @@ for (const app of readdirSync(appsDir)) {
   // internal/admin: admin dashboards, not customer-facing
   const INTERNAL_APPS = new Set(['platform-admin'])
   // pilot-grade: verticals with limited test coverage or early-stage data integration
-  const PILOT_APPS = new Set(['mobility', 'mobility-client-portal', 'trade', 'pondu', 'cora'])
+  const PILOT_APPS = new Set(['mobility', 'mobility-client-portal', 'trade', 'agrimo', 'cora'])
 
   let maturity: Maturity
   if (INTERNAL_APPS.has(app)) {

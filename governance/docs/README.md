@@ -93,7 +93,7 @@ Analysis outputs and automation reports:
 8. Arts & Culture (CongoWave)
 9. Agrotech (CORA)
 10. Cybersecurity (CyberLearn)
-11. DevOps (PonduOps)
+11. DevOps (AgrimoOps)
 
 ---
 

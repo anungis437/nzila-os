@@ -1,16 +1,16 @@
 # Agrotech Technical Architecture
-> Deep dive into the CORA + PonduOps system architecture, infrastructure, and AI/ML pipelines under Nzila Corp.
+> Deep dive into the CORA + AgrimoOps system architecture, infrastructure, and AI/ML pipelines under Nzila Corp.
 
 ---
 
 ## 1. System Architecture Overview
 
 ### Current State: Django Monoliths
-Both CORA and PonduOps run as Django monoliths on Azure App Services. This is intentional for the early stage — monoliths reduce operational complexity while the team is small and the product is iterating rapidly.
+Both CORA and AgrimoOps run as Django monoliths on Azure App Services. This is intentional for the early stage — monoliths reduce operational complexity while the team is small and the product is iterating rapidly.
 
 ```
 ┌──────────────────┐     ┌──────────────────┐
-│   CORA Monolith  │     │ PonduOps Monolith │
+│   CORA Monolith  │     │ AgrimoOps Monolith │
 │  Django 5.x      │     │  Django 5.x       │
 │  80+ entities    │     │  70+ modules      │
 │  REST API        │     │  REST + GraphQL   │
@@ -23,11 +23,11 @@ Both CORA and PonduOps run as Django monoliths on Azure App Services. This is in
 ### Target State: Microservices (2027+)
 Migration follows the strangler fig pattern — extract bounded contexts as independent services behind an API gateway. Priority extraction order:
 
-1. **Authentication service** (shared across CORA + PonduOps)
+1. **Authentication service** (shared across CORA + AgrimoOps)
 2. **Notification service** (SMS, push, email — high-volume, independent lifecycle)
 3. **Supply chain matching service** (CORA core — compute-intensive, needs independent scaling)
 4. **Analytics service** (read-heavy, can tolerate eventual consistency)
-5. **Farm data service** (PonduOps core — offline sync complexity warrants isolation)
+5. **Farm data service** (AgrimoOps core — offline sync complexity warrants isolation)
 
 ---
 
@@ -45,7 +45,7 @@ Key entity groups organized by domain:
 - **Geography**: `provinces`, `territories`, `markets`, `collection_points`, `grain_elevators` (8 entities)
 - **Supporting**: `notifications`, `audits`, `analytics_events`, `api_keys`, `webhooks` (17+ entities)
 
-#### PonduOps Database (70+ modules)
+#### AgrimoOps Database (70+ modules)
 Module groups organized by farm lifecycle:
 - **Planning**: `crop_plans`, `planting_schedules`, `input_requirements`, `weather_data` (10 modules)
 - **Operations**: `field_activities`, `input_applications`, `irrigation_logs`, `pest_reports` (12 modules)
@@ -128,7 +128,7 @@ GET    /api/v1/market/prices?commodity= — Current market prices
 GET    /api/v1/analytics/cooperative/:id — Cooperative analytics
 ```
 
-### PonduOps GraphQL API
+### AgrimoOps GraphQL API
 Farm data queries use GraphQL to allow flexible querying across deeply nested cooperative → farm → crop → harvest hierarchies.
 
 ```graphql
@@ -156,7 +156,7 @@ query CooperativeDashboard($coopId: ID!) {
 | Component | Azure Service | Configuration |
 |---|---|---|
 | CORA API | Azure App Service (Linux) | B2 plan, auto-scale 1-4 instances |
-| PonduOps API | Azure App Service (Linux) | B2 plan, auto-scale 1-4 instances |
+| AgrimoOps API | Azure App Service (Linux) | B2 plan, auto-scale 1-4 instances |
 | Database | Azure Database for PostgreSQL Flexible | GP_Standard_D2s_v3, 128GB storage |
 | Cache | Azure Cache for Redis | Basic C1, session + query cache |
 | Storage | Azure Blob Storage | Farmer photos, documents, satellite imagery |
@@ -188,7 +188,7 @@ Output: Ranked match list with confidence scores (0-100)
 Training Data: Historical transactions, cooperative feedback, market outcomes
 ```
 
-### Crop Yield Prediction (PonduOps)
+### Crop Yield Prediction (AgrimoOps)
 - **Inputs**: Historical yield data, soil type, rainfall, temperature, input usage, planting date
 - **Model**: XGBoost regression, retrained monthly on cooperative-aggregated data
 - **Accuracy target**: ±15% yield prediction at planting time, ±8% at mid-season
@@ -205,14 +205,14 @@ Training Data: Historical transactions, cooperative feedback, market outcomes
 ## 7. Data Flow: Farmer → Market Pipeline
 
 ```
-1. FARMER registers via PonduOps (cooperative-mediated)
+1. FARMER registers via AgrimoOps (cooperative-mediated)
    └→ Profile stored locally (SQLite) + synced to PostgreSQL
 
-2. FARMER creates crop plan in PonduOps
-   └→ Input requirements generated → cooperative bulk order (PonduOps)
+2. FARMER creates crop plan in AgrimoOps
+   └→ Input requirements generated → cooperative bulk order (AgrimoOps)
    └→ Expected harvest data → supply forecast (synced to CORA)
 
-3. FARMER logs harvest in PonduOps
+3. FARMER logs harvest in AgrimoOps
    └→ Batch tagged (QR code), quality graded
    └→ Auto-creates CORA supply listing
 
@@ -222,7 +222,7 @@ Training Data: Historical transactions, cooperative feedback, market outcomes
 
 5. TRANSACTION confirmed on CORA
    └→ Logistics arranged, payment initiated (mobile money)
-   └→ Transaction recorded in both CORA + PonduOps financial modules
+   └→ Transaction recorded in both CORA + AgrimoOps financial modules
 
 6. ANALYTICS updated
    └→ Cooperative performance dashboard refreshed

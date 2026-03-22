@@ -50,7 +50,7 @@ const TS_AUTHORITATIVE_APPS = [
   'mobility-client-portal',
   'partners',
   'platform-admin',
-  'pondu',
+  'agrimo',
   'nacp-exams',
   'trade',
   'zonga',

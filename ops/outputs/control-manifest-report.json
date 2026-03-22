@@ -70,7 +70,7 @@
       "detail": "schema valid"
     },
     {
-      "name": "CM-002: pondu schema valid",
+      "name": "CM-002: agrimo schema valid",
       "status": "pass",
       "detail": "schema valid"
     },
@@ -155,7 +155,7 @@
       "detail": "no immutable controls waived"
     },
     {
-      "name": "CM-003: pondu immutable controls",
+      "name": "CM-003: agrimo immutable controls",
       "status": "pass",
       "detail": "no immutable controls waived"
     },
@@ -240,7 +240,7 @@
       "detail": "risk: none"
     },
     {
-      "name": "CM-004: pondu risk level consistent",
+      "name": "CM-004: agrimo risk level consistent",
       "status": "pass",
       "detail": "risk: none"
     },
@@ -325,7 +325,7 @@
       "detail": "no profile (allowed)"
     },
     {
-      "name": "CM-005: pondu profile valid",
+      "name": "CM-005: agrimo profile valid",
       "status": "pass",
       "detail": "no profile (allowed)"
     },
@@ -410,7 +410,7 @@
       "detail": "not high/critical risk"
     },
     {
-      "name": "CM-006: pondu high-risk controls",
+      "name": "CM-006: agrimo high-risk controls",
       "status": "pass",
       "detail": "not high/critical risk"
     },
@@ -495,7 +495,7 @@
       "detail": "no AI routes"
     },
     {
-      "name": "CM-007: pondu AI control",
+      "name": "CM-007: agrimo AI control",
       "status": "pass",
       "detail": "no AI routes"
     },
@@ -580,7 +580,7 @@
       "detail": "no webhook routes"
     },
     {
-      "name": "CM-008: pondu webhook audit",
+      "name": "CM-008: agrimo webhook audit",
       "status": "pass",
       "detail": "no webhook routes"
     },
@@ -665,7 +665,7 @@
       "detail": "1 exceptions, all dated"
     },
     {
-      "name": "CM-009: pondu exception expiry",
+      "name": "CM-009: agrimo exception expiry",
       "status": "pass",
       "detail": "1 exceptions, all dated"
     },

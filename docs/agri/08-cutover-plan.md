@@ -6,7 +6,7 @@
 
 | System | Source | Target |
 |--------|--------|--------|
-| Pondu Ops (legacy) | `pondu-ops-93470160.zip` | `apps/pondu` + shared packages |
+| Agrimo (legacy) | `agrimo-ops-93470160.zip` | `apps/agrimo` + shared packages |
 | Cora Insights (legacy) | `cora-agri-insights-9f05be41.zip` | `apps/cora` + shared packages |
 
 ### Migration Phases
@@ -20,8 +20,8 @@
 
 #### Phase 2 — Import Tool Development (Week 2)
 
-1. Build `import-pondu-legacy` CLI tool
-   - Read legacy Pondu data (CSV/JSON)
+1. Build `import-agrimo-legacy` CLI tool
+   - Read legacy Agrimo data (CSV/JSON)
    - Normalize to canonical tables
    - Generate org context (assign org_id)
    - Insert via audited scoped DB
@@ -48,7 +48,7 @@
 2. Take final export from legacy
 3. Run production import
 4. Verify reconciliation report
-5. Enable Pondu + Cora for org
+5. Enable Agrimo + Cora for org
 6. Monitor for 48h before decommissioning legacy
 
 ### Reconciliation Report Format
@@ -57,7 +57,7 @@
 ╔══════════════════════════════════════════════╗
 ║         AGRI MIGRATION RECONCILIATION        ║
 ╠══════════════════════════════════════════════╣
-║ Source: pondu-ops-93470160                   ║
+║ Source: agrimo-ops-93470160                   ║
 ║ Target: agri-db (staging)                    ║
 ║ Run at: 2026-02-27T10:00:00Z                ║
 ╠══════════════════════════════════════════════╣
@@ -81,7 +81,7 @@
 
 1. Keep legacy system in read-only mode for 30 days
 2. If rollback needed:
-   - Disable Pondu + Cora
+   - Disable Agrimo + Cora
    - Re-enable legacy write access
    - Export any new data created in NzilaOS
 3. Migration audit trail preserved regardless of rollback

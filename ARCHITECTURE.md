@@ -23,7 +23,7 @@ apps/
   partners/      Partner portal (entitlement-gated)
   web/           Public marketing/landing
   union-eyes/    UE case management
-  pondu/         Agri field operations (producers, harvests, lots, quality, warehouse, shipments, payments)
+  agrimo/         Agri field operations (producers, harvests, lots, quality, warehouse, shipments, payments)
   cora/          Agri intelligence dashboard (yield, pricing, risk, traceability)
 
 packages/

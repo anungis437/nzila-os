@@ -55,7 +55,7 @@
 | abr | INCUBATING | platform | audit | Audit/bridge/reconciliation engine. Health endpoint live. Specialised governance via bridge boundary contract tests. |
 | cora | INCUBATING | platform | compliance | Compliance and regulatory assurance. Health endpoint live. Tests expanding. |
 | trade | INCUBATING | commerce | trade | Trade and vehicle commerce. Health endpoint live. 2+ tests. Domain packages maturing. |
-| pondu | INCUBATING | platform | analytics | Data intelligence and analytics. Health endpoint live. Architecture solidifying. |
+| agrimo | INCUBATING | platform | analytics | Data intelligence and analytics. Health endpoint live. Architecture solidifying. |
 | platform-admin | INCUBATING | platform | platform | Platform configuration and governance admin. Health endpoint live. Functionality expanding. |
 | orchestrator-api | INCUBATING | platform | platform | API orchestration layer. 4+ tests. Health endpoint in progress. |
 | nacp-exams | EXPERIMENTAL | education | education | Examination and certification workflows. Health endpoint live. Early-stage vertical. |

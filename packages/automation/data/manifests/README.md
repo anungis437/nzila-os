@@ -87,8 +87,8 @@ Total Platforms: 14
 - **Migration**: 4 weeks (MEDIUM)
 - **Entities**: 50
 
-### Ponduops
-- **ID**: `ponduops`
+### Agrimoops
+- **ID**: `agrimoops`
 - **Profile**: `nextjs-aca-azurepg-clerk`
 - **Framework**: N/A
 - **Migration**: 4 weeks (MEDIUM)

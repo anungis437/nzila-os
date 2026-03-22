@@ -28,7 +28,7 @@ Examples:
 - `platform-admin` — platform configuration administration
 - `abr` — audit/bridge/reconciliation engine
 - `cora` — compliance and regulatory assurance
-- `pondu` — data intelligence and analytics
+- `agrimo` — data intelligence and analytics
 - `trade` — trade and vehicle commerce
 - `mobility` — mobility and transport operations
 - `mobility-client-portal` — mobility customer self-service

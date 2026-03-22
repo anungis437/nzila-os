@@ -36,7 +36,7 @@ Nzila Ventures is building the **infrastructure company for social impact techno
 | 9 | **Shop Quoter** | Commerce | 93 | HIGH-EXTREME | In Development |
 | 10 | **Trade OS** | Trade | 337 | MEDIUM-HIGH | In Development |
 | 11 | **eExports** | Trade | 78 | MEDIUM-HIGH | Django PoC |
-| 12 | **PonduOps** | Agrotech | 220 | HIGH | In Development |
+| 12 | **AgrimoOps** | Agrotech | 220 | HIGH | In Development |
 | 13 | **Insight CFO** | Fintech | 37 | HIGH | In Development |
 | 14 | **STSA/Lexora** | Fintech | 95 | HIGH | In Development |
 | 15 | **Memora** | Healthtech | 150 | MEDIUM | Healthtech |
@@ -47,7 +47,7 @@ Nzila Ventures is building the **infrastructure company for social impact techno
 |----------|-----|--------------|
 | **Uniontech** | $50B | Union Eyes - Union management, pension forecasting |
 | **Fintech** | $100B+ | DiasporaCore, Insight CFO, STSA/Lexora |
-| **Agrotech** | $8.6B | CORA, PonduOps - Farm management, supply chain |
+| **Agrotech** | $8.6B | CORA, AgrimoOps - Farm management, supply chain |
 | **EdTech/Legaltech** | $13B+ | ABR Insights, CyberLearn, Court Lens |
 | **Commerce/Trade** | $25B | Shop Quoter, Trade OS, eExports |
 | **Entertainment** | $50B | CongoWave - Music streaming |

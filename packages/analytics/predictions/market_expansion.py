@@ -7,9 +7,10 @@ import json
 from datetime import datetime
 from typing import Dict, List, Optional
 
+
 class MarketExpansionAnalyzer:
     """Analyze market expansion opportunities across verticals and geographies"""
-    
+
     def __init__(self):
         # TAM/SAM/SOM data by vertical (USD)
         self.vertical_markets = {
@@ -22,7 +23,7 @@ class MarketExpansionAnalyzer:
                 "geographic_focus": ["Canada", "USA"],
                 "competitive_intensity": "MEDIUM",
                 "regulatory_barriers": "MEDIUM",
-                "go_to_market_fit": "HIGH"
+                "go_to_market_fit": "HIGH",
             },
             "dei_training": {
                 "name": "DEI/Anti-Bias Training",
@@ -33,18 +34,18 @@ class MarketExpansionAnalyzer:
                 "geographic_focus": ["Canada", "USA", "UK"],
                 "competitive_intensity": "HIGH",
                 "regulatory_barriers": "LOW",
-                "go_to_market_fit": "MEDIUM"
+                "go_to_market_fit": "MEDIUM",
             },
             "agrotech": {
                 "name": "AgTech Supply Chain",
                 "tam": 8_600_000_000,  # $8.6B (farm management software)
                 "sam": 500_000_000,  # $500M (smallholder farmers)
-                "som_2026": 300_000,  # $300K (CORA + PonduOps)
+                "som_2026": 300_000,  # $300K (CORA + AgrimoOps)
                 "som_2030": 6_000_000,  # $6M
                 "geographic_focus": ["Canada", "USA", "Kenya", "Nigeria"],
                 "competitive_intensity": "MEDIUM-HIGH",
                 "regulatory_barriers": "LOW",
-                "go_to_market_fit": "MEDIUM"
+                "go_to_market_fit": "MEDIUM",
             },
             "fintech_remittance": {
                 "name": "Fintech Remittance",
@@ -55,7 +56,7 @@ class MarketExpansionAnalyzer:
                 "geographic_focus": ["Canada", "USA", "UK", "DRC", "Kenya", "Nigeria"],
                 "competitive_intensity": "EXTREME",
                 "regulatory_barriers": "HIGH",
-                "go_to_market_fit": "MEDIUM"
+                "go_to_market_fit": "MEDIUM",
             },
             "insurtech": {
                 "name": "Insurtech Claims Automation",
@@ -66,7 +67,7 @@ class MarketExpansionAnalyzer:
                 "geographic_focus": ["Canada", "USA"],
                 "competitive_intensity": "HIGH",
                 "regulatory_barriers": "HIGH",
-                "go_to_market_fit": "LOW-MEDIUM"
+                "go_to_market_fit": "LOW-MEDIUM",
             },
             "legaltech": {
                 "name": "Legaltech Research",
@@ -77,7 +78,7 @@ class MarketExpansionAnalyzer:
                 "geographic_focus": ["Canada"],
                 "competitive_intensity": "HIGH",
                 "regulatory_barriers": "MEDIUM",
-                "go_to_market_fit": "MEDIUM"
+                "go_to_market_fit": "MEDIUM",
             },
             "trade_commerce": {
                 "name": "Trade & Commerce",
@@ -88,7 +89,7 @@ class MarketExpansionAnalyzer:
                 "geographic_focus": ["Canada", "USA", "Africa"],
                 "competitive_intensity": "MEDIUM",
                 "regulatory_barriers": "MEDIUM",
-                "go_to_market_fit": "MEDIUM-HIGH"
+                "go_to_market_fit": "MEDIUM-HIGH",
             },
             "entertainment_streaming": {
                 "name": "Entertainment Streaming",
@@ -99,7 +100,7 @@ class MarketExpansionAnalyzer:
                 "geographic_focus": ["Canada", "USA", "DRC", "francophone Africa"],
                 "competitive_intensity": "EXTREME",
                 "regulatory_barriers": "MEDIUM",
-                "go_to_market_fit": "LOW"
+                "go_to_market_fit": "LOW",
             },
             "virtual_cfo": {
                 "name": "Virtual CFO Services",
@@ -110,7 +111,7 @@ class MarketExpansionAnalyzer:
                 "geographic_focus": ["Canada"],
                 "competitive_intensity": "MEDIUM",
                 "regulatory_barriers": "LOW",
-                "go_to_market_fit": "MEDIUM"
+                "go_to_market_fit": "MEDIUM",
             },
             "healthtech": {
                 "name": "HealthTech AI Companions",
@@ -121,7 +122,7 @@ class MarketExpansionAnalyzer:
                 "geographic_focus": ["Canada", "USA"],
                 "competitive_intensity": "HIGH",
                 "regulatory_barriers": "HIGH",
-                "go_to_market_fit": "MEDIUM"
+                "go_to_market_fit": "MEDIUM",
             },
             "edtech": {
                 "name": "EdTech Skills Training",
@@ -132,10 +133,10 @@ class MarketExpansionAnalyzer:
                 "geographic_focus": ["Canada", "USA"],
                 "competitive_intensity": "HIGH",
                 "regulatory_barriers": "LOW",
-                "go_to_market_fit": "MEDIUM"
-            }
+                "go_to_market_fit": "MEDIUM",
+            },
         }
-        
+
         # Geographic expansion priorities
         self.geographic_markets = {
             "canada": {
@@ -144,7 +145,7 @@ class MarketExpansionAnalyzer:
                 "ease_of_entry": "HIGH",
                 "regulatory_environment": "Familiar",
                 "current_platforms": 15,  # All platforms
-                "expansion_priority": "PRIMARY"
+                "expansion_priority": "PRIMARY",
             },
             "usa": {
                 "name": "United States",
@@ -153,7 +154,7 @@ class MarketExpansionAnalyzer:
                 "regulatory_environment": "State-by-state complexity",
                 "current_platforms": 0,
                 "expansion_priority": "HIGH",
-                "recommended_entry_date": "2027-Q1"
+                "recommended_entry_date": "2027-Q1",
             },
             "uk": {
                 "name": "United Kingdom",
@@ -162,7 +163,7 @@ class MarketExpansionAnalyzer:
                 "regulatory_environment": "GDPR compliance required",
                 "current_platforms": 0,
                 "expansion_priority": "MEDIUM",
-                "recommended_entry_date": "2028-Q1"
+                "recommended_entry_date": "2028-Q1",
             },
             "kenya": {
                 "name": "Kenya",
@@ -172,7 +173,7 @@ class MarketExpansionAnalyzer:
                 "current_platforms": 0,
                 "expansion_priority": "MEDIUM",
                 "recommended_entry_date": "2027-Q3",
-                "strategic_verticals": ["agrotech", "fintech_remittance"]
+                "strategic_verticals": ["agrotech", "fintech_remittance"],
             },
             "nigeria": {
                 "name": "Nigeria",
@@ -182,7 +183,7 @@ class MarketExpansionAnalyzer:
                 "current_platforms": 0,
                 "expansion_priority": "MEDIUM",
                 "recommended_entry_date": "2028-Q2",
-                "strategic_verticals": ["agrotech", "fintech_remittance"]
+                "strategic_verticals": ["agrotech", "fintech_remittance"],
             },
             "drc": {
                 "name": "Democratic Republic of Congo",
@@ -192,17 +193,20 @@ class MarketExpansionAnalyzer:
                 "current_platforms": 0,
                 "expansion_priority": "LOW",
                 "recommended_entry_date": "2029-Q1",
-                "strategic_verticals": ["fintech_remittance", "entertainment_streaming"]
-            }
+                "strategic_verticals": [
+                    "fintech_remittance",
+                    "entertainment_streaming",
+                ],
+            },
         }
-    
+
     def calculate_tam_sam_som(self, vertical_id: str, year: int = 2026) -> Dict:
         """Calculate TAM/SAM/SOM for specific vertical and year"""
         if vertical_id not in self.vertical_markets:
             return {"error": f"Vertical {vertical_id} not found"}
-        
+
         vertical = self.vertical_markets[vertical_id]
-        
+
         # Linear interpolation for SOM between 2026 and 2030
         if year < 2026:
             som = 0
@@ -212,11 +216,11 @@ class MarketExpansionAnalyzer:
             years_elapsed = year - 2026
             som_growth = (vertical["som_2030"] - vertical["som_2026"]) / 4
             som = vertical["som_2026"] + (som_growth * years_elapsed)
-        
+
         # Market penetration calculations
         sam_penetration = (som / vertical["sam"]) * 100 if vertical["sam"] > 0 else 0
         tam_penetration = (som / vertical["tam"]) * 100 if vertical["tam"] > 0 else 0
-        
+
         return {
             "vertical": vertical["name"],
             "year": year,
@@ -227,9 +231,9 @@ class MarketExpansionAnalyzer:
             "tam_penetration_pct": round(tam_penetration, 6),
             "geographic_focus": vertical["geographic_focus"],
             "competitive_intensity": vertical["competitive_intensity"],
-            "go_to_market_fit": vertical["go_to_market_fit"]
+            "go_to_market_fit": vertical["go_to_market_fit"],
         }
-    
+
     def market_prioritization_matrix(self) -> List[Dict]:
         """Generate market prioritization matrix for all verticals"""
         # Scoring model (0-100)
@@ -238,61 +242,80 @@ class MarketExpansionAnalyzer:
             "competitive_intensity": 0.20,  # Lower is better
             "go_to_market_fit": 0.20,  # Higher is better
             "regulatory_barriers": 0.15,  # Lower is better
-            "som_growth_rate": 0.20  # Higher is better
+            "som_growth_rate": 0.20,  # Higher is better
         }
-        
-        intensity_scores = {"LOW": 90, "MEDIUM-LOW": 75, "MEDIUM": 60, "MEDIUM-HIGH": 45, "HIGH": 30, "EXTREME": 10}
-        fit_scores = {"LOW": 20, "LOW-MEDIUM": 40, "MEDIUM": 60, "MEDIUM-HIGH": 80, "HIGH": 100}
-        
+
+        intensity_scores = {
+            "LOW": 90,
+            "MEDIUM-LOW": 75,
+            "MEDIUM": 60,
+            "MEDIUM-HIGH": 45,
+            "HIGH": 30,
+            "EXTREME": 10,
+        }
+        fit_scores = {
+            "LOW": 20,
+            "LOW-MEDIUM": 40,
+            "MEDIUM": 60,
+            "MEDIUM-HIGH": 80,
+            "HIGH": 100,
+        }
+
         results = []
-        
+
         for vertical_id, vertical in self.vertical_markets.items():
             # TAM size score (normalized 0-100)
             max_tam = 50_000_000_000
             tam_score = (vertical["tam"] / max_tam) * 100
-            
+
             # Competitive intensity score (inverted - lower intensity = higher score)
-            competitive_score = intensity_scores.get(vertical["competitive_intensity"], 60)
-            
+            competitive_score = intensity_scores.get(
+                vertical["competitive_intensity"], 60
+            )
+
             # Go-to-market fit score
             gtm_score = fit_scores.get(vertical["go_to_market_fit"], 60)
-            
+
             # Regulatory barriers score (inverted)
             regulatory_score = intensity_scores.get(vertical["regulatory_barriers"], 60)
-            
+
             # SOM growth rate (2026 to 2030 CAGR)
             som_2026 = vertical["som_2026"]
             som_2030 = vertical["som_2030"]
-            cagr = ((som_2030 / som_2026) ** (1/4) - 1) * 100 if som_2026 > 0 else 0
+            cagr = ((som_2030 / som_2026) ** (1 / 4) - 1) * 100 if som_2026 > 0 else 0
             growth_score = min(cagr * 2, 100)  # Cap at 100
-            
+
             # Weighted priority score
             priority_score = (
-                tam_score * scoring_weights["tam_size"] +
-                competitive_score * scoring_weights["competitive_intensity"] +
-                gtm_score * scoring_weights["go_to_market_fit"] +
-                regulatory_score * scoring_weights["regulatory_barriers"] +
-                growth_score * scoring_weights["som_growth_rate"]
+                tam_score * scoring_weights["tam_size"]
+                + competitive_score * scoring_weights["competitive_intensity"]
+                + gtm_score * scoring_weights["go_to_market_fit"]
+                + regulatory_score * scoring_weights["regulatory_barriers"]
+                + growth_score * scoring_weights["som_growth_rate"]
             )
-            
-            results.append({
-                "vertical": vertical["name"],
-                "vertical_id": vertical_id,
-                "priority_score": round(priority_score, 1),
-                "tam": vertical["tam"],
-                "som_2026": vertical["som_2026"],
-                "som_2030": vertical["som_2030"],
-                "cagr_pct": round(cagr, 1),
-                "competitive_intensity": vertical["competitive_intensity"],
-                "go_to_market_fit": vertical["go_to_market_fit"],
-                "recommendation": self._get_expansion_recommendation(priority_score)
-            })
-        
+
+            results.append(
+                {
+                    "vertical": vertical["name"],
+                    "vertical_id": vertical_id,
+                    "priority_score": round(priority_score, 1),
+                    "tam": vertical["tam"],
+                    "som_2026": vertical["som_2026"],
+                    "som_2030": vertical["som_2030"],
+                    "cagr_pct": round(cagr, 1),
+                    "competitive_intensity": vertical["competitive_intensity"],
+                    "go_to_market_fit": vertical["go_to_market_fit"],
+                    "recommendation": self._get_expansion_recommendation(
+                        priority_score
+                    ),
+                }
+            )
+
         # Sort by priority score descending
         results.sort(key=lambda x: x["priority_score"], reverse=True)
-        
+
         return results
-    
+
     def _get_expansion_recommendation(self, priority_score: float) -> str:
         """Get expansion recommendation based on priority score"""
         if priority_score >= 75:
@@ -305,18 +328,20 @@ class MarketExpansionAnalyzer:
             return "OPTIMIZE - Reduce cost, focus on efficiency"
         else:
             return "DIVEST - Consider strategic exit or pivot"
-    
-    def geographic_expansion_readiness(self, target_geography: str, vertical_id: str) -> Dict:
+
+    def geographic_expansion_readiness(
+        self, target_geography: str, vertical_id: str
+    ) -> Dict:
         """Assess readiness for geographic expansion"""
         if target_geography not in self.geographic_markets:
             return {"error": f"Geography {target_geography} not found"}
-        
+
         if vertical_id not in self.vertical_markets:
             return {"error": f"Vertical {vertical_id} not found"}
-        
+
         geo = self.geographic_markets[target_geography]
         vertical = self.vertical_markets[vertical_id]
-        
+
         # Readiness assessment
         readiness_factors = {
             "product_market_fit": "UNKNOWN",  # Requires validation
@@ -324,13 +349,13 @@ class MarketExpansionAnalyzer:
             "local_partnerships": "NOT_STARTED",
             "market_research": "NOT_STARTED",
             "sales_infrastructure": "NOT_STARTED",
-            "localization": "NOT_STARTED"
+            "localization": "NOT_STARTED",
         }
-        
+
         # Market opportunity estimate
         base_som = vertical["som_2026"]
         geographic_som = base_som * geo["market_size_modifier"]
-        
+
         return {
             "target_geography": geo["name"],
             "vertical": vertical["name"],
@@ -341,13 +366,13 @@ class MarketExpansionAnalyzer:
             "regulatory_environment": geo["regulatory_environment"],
             "readiness_assessment": readiness_factors,
             "recommended_entry_date": geo.get("recommended_entry_date", "TBD"),
-            "next_steps": self._get_geographic_next_steps(geo, vertical)
+            "next_steps": self._get_geographic_next_steps(geo, vertical),
         }
-    
+
     def _get_geographic_next_steps(self, geo: Dict, vertical: Dict) -> List[str]:
         """Get recommended next steps for geographic expansion"""
         steps = []
-        
+
         if geo["expansion_priority"] == "HIGH":
             steps.append("Conduct detailed market research (TAM/SAM validation)")
             steps.append("Identify and engage local strategic partners")
@@ -362,9 +387,9 @@ class MarketExpansionAnalyzer:
         else:  # LOW priority
             steps.append("Monitor annually")
             steps.append("Re-evaluate in 2028")
-        
+
         return steps
-    
+
     def vertical_expansion_synergies(self) -> List[Dict]:
         """Identify cross-vertical expansion synergies"""
         synergies = [
@@ -375,16 +400,16 @@ class MarketExpansionAnalyzer:
                 "opportunity": "Shared AI-powered legal research and training modules",
                 "estimated_arr_potential": 200_000,
                 "implementation_effort": "MEDIUM",
-                "timeline": "2026-Q3"
+                "timeline": "2026-Q3",
             },
             {
                 "synergy_id": "agrotech_consolidation",
                 "verticals": ["agrotech"],
-                "platforms": ["CORA", "PonduOps"],
+                "platforms": ["CORA", "AgrimoOps"],
                 "opportunity": "Unified supply chain management (farm to distributor)",
                 "estimated_arr_potential": 150_000,
                 "implementation_effort": "HIGH",
-                "timeline": "2027-Q1"
+                "timeline": "2027-Q1",
             },
             {
                 "synergy_id": "fintech_commerce_payments",
@@ -393,7 +418,7 @@ class MarketExpansionAnalyzer:
                 "opportunity": "Unified payment gateway (remittance + cross-border trade)",
                 "estimated_arr_potential": 100_000,
                 "implementation_effort": "HIGH",
-                "timeline": "2027-Q2"
+                "timeline": "2027-Q2",
             },
             {
                 "synergy_id": "edtech_entertainment_gamification",
@@ -402,29 +427,29 @@ class MarketExpansionAnalyzer:
                 "opportunity": "Shared gamification engine (badges, leaderboards, social)",
                 "estimated_arr_potential": 80_000,
                 "implementation_effort": "MEDIUM",
-                "timeline": "2026-Q4"
-            }
+                "timeline": "2026-Q4",
+            },
         ]
-        
+
         return synergies
 
 
 def main():
     """Example usage"""
     analyzer = MarketExpansionAnalyzer()
-    
+
     # TAM/SAM/SOM analysis
     uniontech_market = analyzer.calculate_tam_sam_som("uniontech", 2026)
     print(json.dumps(uniontech_market, indent=2))
-    
+
     # Market prioritization matrix
     priority_matrix = analyzer.market_prioritization_matrix()
     print(json.dumps(priority_matrix, indent=2))
-    
+
     # Geographic expansion readiness
     usa_expansion = analyzer.geographic_expansion_readiness("usa", "uniontech")
     print(json.dumps(usa_expansion, indent=2))
-    
+
     # Vertical synergies
     synergies = analyzer.vertical_expansion_synergies()
     print(json.dumps(synergies, indent=2))

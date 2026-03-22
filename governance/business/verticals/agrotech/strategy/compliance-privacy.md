@@ -1,15 +1,15 @@
 # Agrotech Compliance & Data Privacy
-> Regulatory compliance, data sovereignty, and security framework for CORA + PonduOps under Nzila Corp.
+> Regulatory compliance, data sovereignty, and security framework for CORA + AgrimoOps under Nzila Corp.
 
 ---
 
 ## 1. DRC Agricultural Regulations
 
 ### Regulatory Landscape
-The Democratic Republic of Congo's agricultural sector operates under multiple regulatory frameworks that CORA and PonduOps must comply with.
+The Democratic Republic of Congo's agricultural sector operates under multiple regulatory frameworks that CORA and AgrimoOps must comply with.
 
 ### Key Regulatory Bodies
-| Body | Jurisdiction | Relevance to CORA+PonduOps |
+| Body | Jurisdiction | Relevance to CORA+AgrimoOps |
 |---|---|---|
 | **Ministry of Agriculture** | Agricultural policy, cooperative registration | Cooperative registration validation, agricultural program compliance |
 | **ONAPAC** (Office National des Produits Agricoles) | Commodity grading, quality standards | CORA marketplace commodity grading alignment |
@@ -18,10 +18,10 @@ The Democratic Republic of Congo's agricultural sector operates under multiple r
 | **BCC** (Banque Centrale du Congo) | Financial transactions, mobile money | Transaction processing compliance, payment reporting |
 
 ### Cooperative Registration Compliance
-- All cooperatives on PonduOps must have valid ONAPAC registration number
+- All cooperatives on AgrimoOps must have valid ONAPAC registration number
 - Platform validates registration status during onboarding (manual verification → automated via government API when available)
 - Cooperative governance features align with DRC Cooperative Law (Loi n°002/2002): required quorum tracking, meeting minutes, election records
-- Annual cooperative reporting templates auto-generated from PonduOps data for government submission
+- Annual cooperative reporting templates auto-generated from AgrimoOps data for government submission
 
 ### Agricultural Standards
 - CORA commodity grades align with ONAPAC national grading standards (Grade A/B/C classification)
@@ -50,7 +50,7 @@ The Democratic Republic of Congo's agricultural sector operates under multiple r
 | **System-Internal** | API keys, sync logs, device fingerprints | Engineering team only | 90 days (logs), indefinite (keys) |
 
 ### GDPR-Aligned Protections
-Although DRC does not currently have a comprehensive data protection law equivalent to GDPR, CORA and PonduOps implement GDPR-level protections as a forward-looking standard:
+Although DRC does not currently have a comprehensive data protection law equivalent to GDPR, CORA and AgrimoOps implement GDPR-level protections as a forward-looking standard:
 
 - **Lawful basis**: Documented lawful basis for all data processing (consent or legitimate interest)
 - **Data minimization**: Collect only data necessary for platform functionality
@@ -151,22 +151,22 @@ CORA implements end-to-end traceability for commodities moving through the platf
 ## 6. Environmental Compliance
 
 ### Sustainable Farming Certifications
-PonduOps tracks and manages certification status for cooperatives pursuing:
+AgrimoOps tracks and manages certification status for cooperatives pursuing:
 - **Organic certification** (IFOAM standards): Input tracking ensures no prohibited substances logged
 - **Fair Trade certification**: Cooperative governance module tracks premium payments to members
-- **Rainforest Alliance**: Farm management practices documented through PonduOps activity logs
+- **Rainforest Alliance**: Farm management practices documented through AgrimoOps activity logs
 - **UTZ/Rainforest Alliance merged**: Coffee and cocoa cooperatives certified supply chain
 
 ### Carbon Credit Verification
 CORA marketplace carbon credit features require:
-- **Baseline documentation**: Historical land use data captured in PonduOps
-- **Monitoring**: Ongoing farm practice tracking (no-till, cover crops, agroforestry) through PonduOps activity logs
+- **Baseline documentation**: Historical land use data captured in AgrimoOps
+- **Monitoring**: Ongoing farm practice tracking (no-till, cover crops, agroforestry) through AgrimoOps activity logs
 - **Verification**: Third-party auditor access to anonymized cooperative-level data
 - **Registry integration**: Carbon credits minted on recognized registries (Verra, Gold Standard)
 - **Double-counting prevention**: Unique batch IDs prevent same offset from being sold twice
 
 ### Environmental Impact Reporting
-- Water usage tracking per farm (self-reported through PonduOps)
+- Water usage tracking per farm (self-reported through AgrimoOps)
 - Deforestation monitoring via satellite imagery (Sentinel-2 integration, 2026+)
 - Cooperative-level environmental impact scores displayed on dashboard
 
@@ -175,7 +175,7 @@ CORA marketplace carbon credit features require:
 ## 7. Audit Framework
 
 ### Agricultural Data Audit Trail
-Every data mutation in CORA and PonduOps generates an audit record:
+Every data mutation in CORA and AgrimoOps generates an audit record:
 ```
 {
   "audit_id": "uuid-v4",
@@ -194,7 +194,7 @@ Every data mutation in CORA and PonduOps generates an audit record:
 ```
 
 ### Cooperative Financial Audits
-- **Automated reconciliation**: PonduOps financial module generates monthly reconciliation reports
+- **Automated reconciliation**: AgrimoOps financial module generates monthly reconciliation reports
 - **Member contribution tracking**: Every contribution has audit trail (amount, date, contributor, recorder)
 - **Loan lifecycle auditing**: Disbursement → repayment → completion with full history
 - **External auditor access**: Read-only role with time-bounded access for annual cooperative audits

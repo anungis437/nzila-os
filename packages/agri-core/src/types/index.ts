@@ -4,6 +4,9 @@ import type {
   PaymentStatus, PaymentMethod, CertificationType,
   TraceabilityEntityType, WarehouseStatus,
   ForecastType, RiskType, RiskScope,
+  SupplyChainStepType, SupplyChainStepStatus, SupplyChainStatus,
+  ProvenanceSourceType, SyncStatus, ConflictResolutionStrategy,
+  ConfidenceLevel,
 } from '../enums'
 
 export type {
@@ -12,6 +15,9 @@ export type {
   PaymentStatus, PaymentMethod, CertificationType,
   AgriEvidenceType, TraceabilityEntityType, WarehouseStatus,
   ForecastType, RiskType, RiskScope,
+  SupplyChainStepType, SupplyChainStepStatus, SupplyChainStatus,
+  ProvenanceSourceType, SyncStatus, ConflictResolutionStrategy,
+  ConfidenceLevel,
 } from '../enums'
 
 // ─── Geo ───
@@ -355,4 +361,195 @@ export interface OrgAgriExport {
   readonly orgId: string
   readonly packs: readonly PackIndex[]
   readonly totalPacks: number
+}
+
+// ─── Field / Parcel ───
+
+export interface Field {
+  readonly id: string
+  readonly orgId: string
+  readonly producerId: string
+  readonly name: string
+  readonly location: GeoPoint | null
+  readonly areaHectares: number
+  readonly cropType: CropType
+  readonly soilType: string | null
+  readonly metadata: Record<string, unknown>
+  readonly createdAt: string
+}
+
+// ─── Crop Season ───
+
+export interface CropSeason {
+  readonly id: string
+  readonly orgId: string
+  readonly name: string
+  readonly cropId: string
+  readonly startDate: string
+  readonly endDate: string | null
+  readonly status: 'planning' | 'active' | 'complete'
+  readonly metadata: Record<string, unknown>
+  readonly createdAt: string
+}
+
+// ─── Collection Point ───
+
+export interface CollectionPoint {
+  readonly id: string
+  readonly orgId: string
+  readonly cooperativeId: string
+  readonly name: string
+  readonly location: Location | null
+  readonly capacityKg: number | null
+  readonly currentStockKg: number
+  readonly managerName: string | null
+  readonly status: 'active' | 'inactive'
+  readonly createdAt: string
+}
+
+// ─── Supply Chain ───
+
+export interface SupplyChainEvent {
+  readonly id: string
+  readonly orgId: string
+  readonly chainId: string
+  readonly stepType: SupplyChainStepType
+  readonly status: SupplyChainStepStatus
+  readonly timestamp: string
+  readonly completedAt: string | null
+  readonly location: GeoPoint | null
+  readonly responsibleParty: { readonly id: string; readonly name: string; readonly role: string }
+  readonly quantityKg: number | null
+  readonly qualityGrade: string | null
+  readonly notes: string | null
+  readonly deviceId: string | null
+  readonly provenanceRef: string | null
+}
+
+export interface SupplyChainRecord {
+  readonly id: string
+  readonly orgId: string
+  readonly batchId: string
+  readonly cropType: string
+  readonly originCooperativeId: string
+  readonly originProducerId: string
+  readonly destination: string | null
+  readonly events: readonly SupplyChainEvent[]
+  readonly status: SupplyChainStatus
+  readonly createdAt: string
+  readonly updatedAt: string
+}
+
+// ─── Provenance ───
+
+export interface ProvenanceTransformation {
+  readonly step: string
+  readonly description: string
+  readonly appliedAt: string
+  readonly appliedBy: string
+}
+
+export interface ProvenanceRecord {
+  readonly id: string
+  readonly orgId: string
+  readonly sourceType: ProvenanceSourceType
+  readonly source: string
+  readonly rawInputRef: string | null
+  readonly transformations: readonly ProvenanceTransformation[]
+  readonly transformationVersion: string
+  readonly outputHash: string
+  readonly deviceId: string | null
+  readonly verified: boolean
+  readonly createdAt: string
+}
+
+// ─── Sync Metadata ───
+
+export interface SyncMetadata {
+  readonly localId: string
+  readonly canonicalId: string | null
+  readonly deviceId: string
+  readonly lastSyncedAt: string | null
+  readonly syncStatus: SyncStatus
+  readonly conflictState: string | null
+  readonly resolutionStrategy: ConflictResolutionStrategy
+  readonly version: number
+}
+
+// ─── Intelligence Contracts ───
+
+export interface SourceDataRef {
+  readonly type: string
+  readonly id: string
+  readonly label?: string
+}
+
+export interface ExplainableOutput {
+  readonly explanation: string
+  readonly sourceDataRefs: readonly SourceDataRef[]
+  readonly confidenceLevel: ConfidenceLevel
+  readonly modelVersion: string
+  readonly generatedAt: string
+}
+
+export interface IntelligenceRecommendation extends ExplainableOutput {
+  readonly id: string
+  readonly type: string
+  readonly title: string
+  readonly priority: 'critical' | 'high' | 'medium' | 'low'
+  readonly actionable: boolean
+  readonly suggestedAction: string | null
+  readonly expiresAt: string | null
+}
+
+export interface IntelligenceAlert extends ExplainableOutput {
+  readonly id: string
+  readonly type: string
+  readonly severity: 'critical' | 'warning' | 'info'
+  readonly title: string
+  readonly affectedEntities: readonly string[]
+}
+
+export interface IntelligenceInsight extends ExplainableOutput {
+  readonly id: string
+  readonly type: string
+  readonly title: string
+  readonly metricValue: number | null
+  readonly metricUnit: string | null
+  readonly comparisonPeriod: string | null
+}
+
+// ─── Forecast Contracts ───
+
+export interface ForecastResult extends ExplainableOutput {
+  readonly id: string
+  readonly forecastType: ForecastType
+  readonly cropId: string | null
+  readonly regionId: string | null
+  readonly season: string | null
+  readonly predictedValue: number
+  readonly confidenceRange: { readonly low: number; readonly high: number }
+  readonly assumptions: readonly string[]
+  readonly inputRefs: readonly string[]
+}
+
+// ─── Reporting Contracts ───
+
+export interface ReportMetric {
+  readonly key: string
+  readonly label: string
+  readonly value: number
+  readonly unit: string
+  readonly period: string
+}
+
+export interface AgriReport {
+  readonly id: string
+  readonly orgId: string
+  readonly reportType: string
+  readonly title: string
+  readonly generatedAt: string
+  readonly period: { readonly start: string; readonly end: string }
+  readonly metrics: readonly ReportMetric[]
+  readonly metadata: Record<string, unknown>
 }

@@ -10,7 +10,7 @@ Every business action that matters — a payment, a trade, a harvest record, an 
 
 ## Business Domains
 
-### Agriculture (Pondu + Cora)
+### Agriculture (Agrimo + Cora)
 
 End-to-end digitisation of agricultural supply chains in Sub-Saharan Africa.
 
@@ -26,7 +26,7 @@ End-to-end digitisation of agricultural supply chains in Sub-Saharan Africa.
 | **Traceability** | Farm-to-buyer evidence chains (hash-verified) |
 | **Weather integration** | External weather data for risk assessment |
 
-**Apps**: Pondu (field operations), Cora (intelligence dashboard)
+**Apps**: Agrimo (field operations), Cora (intelligence dashboard)
 
 ### Commerce
 

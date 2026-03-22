@@ -4018,8 +4018,8 @@
       ]
     },
     {
-      "name": "@nzila/pondu",
-      "path": "apps/pondu",
+      "name": "@nzila/agrimo",
+      "path": "apps/agrimo",
       "maturity": "functional",
       "hasReadme": false,
       "hasTests": true,

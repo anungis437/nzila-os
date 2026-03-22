@@ -9,7 +9,8 @@
     "./yield": "./src/yield.ts",
     "./loss": "./src/loss.ts",
     "./payout": "./src/payout.ts",
-    "./providers": "./src/providers.ts"
+    "./providers": "./src/providers.ts",
+    "./explainability": "./src/explainability.ts"
   },
   "scripts": {
     "typecheck": "tsc --noEmit",

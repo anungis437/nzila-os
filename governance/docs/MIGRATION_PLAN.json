@@ -10,7 +10,7 @@
       "batch": 1,
       "name": "Standard Platforms Batch 1 (Parallel)",
       "platforms": [
-        "ponduops",
+        "agrimoops",
         "stsa-ac5f24e9",
         "insight-cfo-bad2ab5f",
         "nzila_eexports-main",

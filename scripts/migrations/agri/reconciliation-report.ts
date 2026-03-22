@@ -1,7 +1,7 @@
 /**
  * Agri Migration Reconciliation Report
  *
- * Runs post-migration validation for both Pondu Ops and Cora Insights imports.
+ * Runs post-migration validation for both Agrimo and Cora Insights imports.
  * Generates a JSON report comparing source counts against destination counts,
  * verifies data integrity, and detects orphaned records.
  *
@@ -10,7 +10,7 @@
  *
  * Requires:
  *   - DATABASE_URL env var (NzilaOS destination)
- *   - Optionally LEGACY_PONDU_DATABASE_URL (for Pondu source comparison)
+ *   - Optionally LEGACY_AGRIMO_DATABASE_URL (for Agrimo source comparison)
  *   - Optionally LEGACY_CORA_DATABASE_URL (for Cora source comparison)
  */
 
@@ -199,11 +199,11 @@ const CHECKS: Omit<ReconciliationCheck, 'status' | 'actual' | 'detail'>[] = [
 
   // ── Source tracking ───────────────────────────────────────────────────
   {
-    name: 'AGRI_RECON_040_PONDU_SOURCE_TAGGED',
-    description: 'Pondu-imported rows are tagged with source = pondu-ops',
+    name: 'AGRI_RECON_040_AGRIMO_SOURCE_TAGGED',
+    description: 'Agrimo-imported rows are tagged with source = agrimo-ops',
     query: `
       SELECT COUNT(*) AS cnt FROM agri_producers
-      WHERE metadata->>'legacySourceSystem' = 'pondu-ops'
+      WHERE metadata->>'legacySourceSystem' = 'agrimo-ops'
     `,
     expectedCondition: 'cnt >= 0',
   },

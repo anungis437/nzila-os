@@ -42261,9 +42261,9 @@
       "ui_library": null,
       "backend_tech": null
     },
-    "ponduops": {
-      "name": "ponduops",
-      "path": "D:\\APPS\\nzila-automation\\legacy-codebases\\ponduops",
+    "agrimoops": {
+      "name": "agrimoops",
+      "path": "D:\\APPS\\nzila-automation\\legacy-codebases\\agrimoops",
       "size_mb": 5.938772201538086,
       "tech_stack": {
         "is_react": false,
@@ -44455,8 +44455,8 @@
         "domain_specific_apps": []
       }
     },
-    "ponduops": {
-      "legacy_platform": "ponduops",
+    "agrimoops": {
+      "legacy_platform": "agrimoops",
       "target_vertical": "unknown",
       "technology": {
         "framework": null,

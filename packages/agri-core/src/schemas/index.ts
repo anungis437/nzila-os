@@ -3,6 +3,9 @@ import {
   CropType, UnitOfMeasure, ProducerStatus, LotStatus as _LotStatus, BatchStatus as _BatchStatus,
   PaymentMethod,
   CertificationType,
+  SupplyChainStepType, SupplyChainStepStatus, SupplyChainStatus,
+  ProvenanceSourceType, SyncStatus, ConflictResolutionStrategy,
+  ConfidenceLevel, ForecastType,
 } from '../enums'
 
 // ─── Shared ───
@@ -183,3 +186,158 @@ export type ExecutePaymentInput = z.infer<typeof executePaymentSchema>
 // ─── Inferred type helpers ───
 
 export type PaginationInput = z.infer<typeof paginationSchema>
+
+// ─── Field ───
+
+export const createFieldSchema = z.object({
+  producerId: uuidSchema,
+  name: z.string().min(1).max(200),
+  location: geoPointSchema.nullable().default(null),
+  areaHectares: z.number().positive(),
+  cropType: z.enum([CropType.COFFEE, CropType.COCOA, CropType.CASHEW, CropType.COTTON, CropType.SESAME, CropType.SOY, CropType.PALM_OIL, CropType.SPICE, CropType.OTHER]),
+  soilType: z.string().max(100).nullable().default(null),
+  metadata: z.record(z.unknown()).default({}),
+})
+export type CreateFieldInput = z.infer<typeof createFieldSchema>
+
+// ─── Collection Point ───
+
+export const createCollectionPointSchema = z.object({
+  cooperativeId: uuidSchema,
+  name: z.string().min(1).max(200),
+  location: locationSchema.nullable().default(null),
+  capacityKg: z.number().positive().nullable().default(null),
+  managerName: z.string().max(200).nullable().default(null),
+})
+export type CreateCollectionPointInput = z.infer<typeof createCollectionPointSchema>
+
+// ─── Supply Chain ───
+
+const supplyChainStepTypeValues = [
+  SupplyChainStepType.HARVEST, SupplyChainStepType.COLLECTION,
+  SupplyChainStepType.STORAGE, SupplyChainStepType.PROCESSING,
+  SupplyChainStepType.TRANSPORT, SupplyChainStepType.DELIVERY,
+] as const
+
+const supplyChainStepStatusValues = [
+  SupplyChainStepStatus.PENDING, SupplyChainStepStatus.IN_PROGRESS,
+  SupplyChainStepStatus.COMPLETED, SupplyChainStepStatus.FAILED,
+  SupplyChainStepStatus.SKIPPED,
+] as const
+
+export const recordSupplyChainEventSchema = z.object({
+  chainId: uuidSchema,
+  stepType: z.enum(supplyChainStepTypeValues),
+  status: z.enum(supplyChainStepStatusValues),
+  location: geoPointSchema.nullable().default(null),
+  responsibleParty: z.object({
+    id: z.string().min(1),
+    name: z.string().min(1),
+    role: z.string().min(1),
+  }),
+  quantityKg: z.number().nonnegative().nullable().default(null),
+  qualityGrade: z.string().max(50).nullable().default(null),
+  notes: z.string().max(2000).nullable().default(null),
+  deviceId: z.string().max(100).nullable().default(null),
+  provenanceRef: z.string().max(200).nullable().default(null),
+})
+export type RecordSupplyChainEventInput = z.infer<typeof recordSupplyChainEventSchema>
+
+const supplyChainStatusValues = [
+  SupplyChainStatus.ACTIVE, SupplyChainStatus.COMPLETED, SupplyChainStatus.CANCELLED,
+] as const
+
+export const createSupplyChainSchema = z.object({
+  batchId: uuidSchema,
+  cropType: z.string().min(1).max(100),
+  originCooperativeId: uuidSchema,
+  originProducerId: uuidSchema,
+  destination: z.string().max(500).nullable().default(null),
+})
+export type CreateSupplyChainInput = z.infer<typeof createSupplyChainSchema>
+
+// ─── Provenance ───
+
+const provenanceSourceTypeValues = [
+  ProvenanceSourceType.MANUAL_ENTRY, ProvenanceSourceType.SENSOR,
+  ProvenanceSourceType.IMPORT, ProvenanceSourceType.API,
+  ProvenanceSourceType.DERIVED, ProvenanceSourceType.EXTERNAL,
+] as const
+
+export const createProvenanceSchema = z.object({
+  source: z.string().min(1).max(500),
+  sourceType: z.enum(provenanceSourceTypeValues),
+  rawInputRef: z.string().max(500).nullable().default(null),
+  transformationVersion: z.string().max(50).default('1.0'),
+  deviceId: z.string().max(100).nullable().default(null),
+})
+export type CreateProvenanceInput = z.infer<typeof createProvenanceSchema>
+
+export const provenanceTransformationSchema = z.object({
+  step: z.string().min(1).max(200),
+  description: z.string().min(1).max(2000),
+  appliedBy: z.string().min(1).max(200),
+})
+export type ProvenanceTransformationInput = z.infer<typeof provenanceTransformationSchema>
+
+// ─── Sync ───
+
+const syncStatusValues = [
+  SyncStatus.PENDING, SyncStatus.SYNCED, SyncStatus.CONFLICT, SyncStatus.FAILED,
+] as const
+
+const conflictResolutionValues = [
+  ConflictResolutionStrategy.LAST_WRITE_WINS,
+  ConflictResolutionStrategy.DEVICE_PRIORITY,
+  ConflictResolutionStrategy.MANUAL,
+] as const
+
+export const syncMetadataSchema = z.object({
+  localId: z.string().min(1),
+  canonicalId: z.string().nullable().default(null),
+  deviceId: z.string().min(1),
+  lastSyncedAt: z.string().datetime().nullable().default(null),
+  syncStatus: z.enum(syncStatusValues),
+  conflictState: z.string().nullable().default(null),
+  resolutionStrategy: z.enum(conflictResolutionValues),
+  version: z.number().int().nonnegative(),
+})
+export type SyncMetadataInput = z.infer<typeof syncMetadataSchema>
+
+// ─── Intelligence ───
+
+const confidenceLevelValues = [
+  ConfidenceLevel.HIGH, ConfidenceLevel.MEDIUM, ConfidenceLevel.LOW,
+] as const
+
+export const sourceDataRefSchema = z.object({
+  type: z.string().min(1),
+  id: z.string().min(1),
+  label: z.string().optional(),
+})
+
+export const explainableOutputSchema = z.object({
+  explanation: z.string().min(1),
+  sourceDataRefs: z.array(sourceDataRefSchema),
+  confidenceLevel: z.enum(confidenceLevelValues),
+  modelVersion: z.string().min(1),
+  generatedAt: z.string().datetime(),
+})
+
+// ─── Forecast ───
+
+const forecastTypeValues = [
+  ForecastType.YIELD, ForecastType.PRICE, ForecastType.DEMAND,
+  ForecastType.COST, ForecastType.CLIMATE, ForecastType.PRODUCTION,
+  ForecastType.LOGISTICS,
+] as const
+
+export const createForecastSchema = z.object({
+  forecastType: z.enum(forecastTypeValues),
+  cropId: uuidSchema.nullable().default(null),
+  regionId: z.string().nullable().default(null),
+  season: seasonSchema.nullable().default(null),
+  assumptions: z.array(z.string()),
+  inputRefs: z.array(z.string()),
+})
+export type CreateForecastInput = z.infer<typeof createForecastSchema>

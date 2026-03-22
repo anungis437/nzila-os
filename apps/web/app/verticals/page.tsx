@@ -32,8 +32,8 @@ const verticals = [
     name: 'Agrotech',
     photo: 'https://images.unsplash.com/photo-1625246333195-78d9c38ad449?w=800',
     alt: 'Aerial view of green agricultural farmland with organized crop rows',
-    platforms: ['CORA (CA)', 'PonduOps (DRC/CA)'],
-    description: 'Farm management, supply chain, IoT integration, and agricultural market intelligence. CORA is built on Canadian data; PonduOps serves the DRC and Central African market.',
+    platforms: ['CORA (CA)', 'AgrimoOps (DRC/CA)'],
+    description: 'Farm management, supply chain, IoT integration, and agricultural market intelligence. CORA is built on Canadian data; AgrimoOps serves the DRC and Central African market.',
     tam: '$8.6B', orgs: '300', status: '2 platforms',
   },
   {

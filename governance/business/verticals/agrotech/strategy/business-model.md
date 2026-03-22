@@ -1,5 +1,5 @@
 # Agrotech Business Model & Unit Economics
-> Revenue model, financial projections, and growth metrics for CORA + PonduOps under Nzila Corp.
+> Revenue model, financial projections, and growth metrics for CORA + AgrimoOps under Nzila Corp.
 
 ---
 
@@ -8,13 +8,13 @@
 ### Primary Revenue
 | Stream | Platform | % of Revenue (2030 target) | Description |
 |---|---|---|---|
-| SaaS Subscriptions | PonduOps + CORA | 55% | Monthly/annual cooperative and enterprise subscriptions |
+| SaaS Subscriptions | AgrimoOps + CORA | 55% | Monthly/annual cooperative and enterprise subscriptions |
 | Marketplace Transaction Fees | CORA | 25% | 2-5% fee on CORA-facilitated commodity transactions |
 | Data Licensing | Both | 10% | Anonymized agricultural data sold to NGOs, governments, researchers |
 | Government Contracts | Both | 10% | Direct contracts for agricultural digitization programs |
 
 ### Secondary Revenue (2027+)
-- **Input marketplace commission**: 3-8% on fertilizer/seed orders placed through PonduOps
+- **Input marketplace commission**: 3-8% on fertilizer/seed orders placed through AgrimoOps
 - **Insurance premium share**: 10-15% referral fee on weather-indexed micro-insurance policies
 - **Carbon credit facilitation**: 5% fee on carbon credits traded through CORA marketplace
 - **Premium analytics**: $200-500/mo for enterprise-grade agricultural intelligence reports
@@ -28,12 +28,12 @@
 - Basic crop calendar and planting reminders
 - Market price alerts via SMS (3 commodities)
 - Weather forecasts (7-day)
-- Limited PonduOps: personal harvest log (max 5 fields)
+- Limited AgrimoOps: personal harvest log (max 5 fields)
 - **Purpose**: Drive cooperative sign-ups through farmer demand; farmer approaches cooperative manager requesting full features
 
 ### Cooperative Standard ($50-100/month)
 **Target**: Small cooperatives with 50-200 members
-- Full PonduOps farm ERP for all members
+- Full AgrimoOps farm ERP for all members
 - Basic CORA supply chain matching (10 listings/month)
 - Cooperative financial management (ledger, contributions)
 - 5 admin seats, offline sync for all members
@@ -78,7 +78,7 @@
 | **Gross Margin** | 82% | Low infrastructure cost per cooperative on Azure |
 | **Net Revenue Retention** | 115% | Cooperatives expand usage (more members, higher tiers) |
 
-### PonduOps Unit Economics
+### AgrimoOps Unit Economics
 | Metric | Value | Notes |
 |---|---|---|
 | **Customer LTV** | $9,400 | 5-year lifespan × $157/mo avg revenue |

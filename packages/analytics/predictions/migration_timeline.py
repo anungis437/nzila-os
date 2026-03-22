@@ -136,8 +136,8 @@ class MigrationTimeline:
                 "priority": 7,
             },
             {
-                "id": "ponduops",
-                "name": "PonduOps",
+                "id": "agrimoops",
+                "name": "AgrimoOps",
                 "complexity": "HIGH",
                 "orgs": 220,
                 "dependencies": ["NzilaOS"],
@@ -225,7 +225,7 @@ class MigrationTimeline:
                 "weeks": 22,
                 "platforms": ["congowave", "cyberlearn"],
             },
-            {"name": "Agrotech", "weeks": 18, "platforms": ["ponduops", "cora"]},
+            {"name": "Agrotech", "weeks": 18, "platforms": ["agrimoops", "cora"]},
         ]
 
         total_weeks = sum(p["weeks"] for p in phases)

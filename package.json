@@ -17,7 +17,7 @@
     "build:abr": "turbo build --filter=@nzila/abr...",
     "build:cfo": "turbo build --filter=@nzila/cfo...",
     "build:trade": "turbo build --filter=@nzila/trade...",
-    "build:pondu": "turbo build --filter=@nzila/pondu...",
+    "build:agrimo": "turbo build --filter=@nzila/agrimo...",
     "build:cora": "turbo build --filter=@nzila/cora...",
     "build:zonga": "turbo build --filter=@nzila/zonga...",
     "build:nacp-exams": "turbo build --filter=@nzila/nacp-exams...",

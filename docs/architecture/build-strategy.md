@@ -47,7 +47,7 @@ Consumer apps (Next.js) transpile them at build time. This eliminates:
 
 | App | Bundler | Build Time | Notes |
 |-----|---------|-----------|-------|
-| web, console, partners, abr, cfo, trade, pondu, cora, zonga, nacp-exams, flow | **Turbopack** | ~15-60s each | Next.js 16 default |
+| web, console, partners, abr, cfo, trade, agrimo, cora, zonga, nacp-exams, flow | **Turbopack** | ~15-60s each | Next.js 16 default |
 | union-eyes | **Webpack** | ~5 min | Requires `resolve.fallback`, `NormalModuleReplacementPlugin`, custom `splitChunks` |
 | orchestrator-api | None | 0s | tsx runtime, no build |
 

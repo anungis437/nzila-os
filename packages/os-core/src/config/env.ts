@@ -117,7 +117,7 @@ const mobilityClientPortalSchema = baseSchema.extend({
   ...clerkMixin,
 })
 
-const ponduSchema = baseSchema.extend({
+const agrimoSchema = baseSchema.extend({
   NEXT_PUBLIC_APP_URL: z.string().url().optional(),
   ...clerkMixin,
 })
@@ -154,7 +154,7 @@ type AppName =
   | 'orchestrator-api'
   | 'mobility'
   | 'mobility-client-portal'
-  | 'pondu'
+  | 'agrimo'
   | 'cora'
   | 'trade'
   | 'platform-admin'
@@ -174,7 +174,7 @@ const SCHEMAS: Record<AppName, ZodTypeAny> = {
   'orchestrator-api': orchestratorSchema,
   mobility: mobilitySchema,
   'mobility-client-portal': mobilityClientPortalSchema,
-  pondu: ponduSchema,
+  agrimo: agrimoSchema,
   cora: coraSchema,
   trade: tradeSchema,
   'platform-admin': platformAdminSchema,
@@ -204,8 +204,8 @@ export type ValidatedEnv<T extends AppName = 'base'> = T extends 'console'
                       ? z.infer<typeof mobilitySchema>
                       : T extends 'mobility-client-portal'
                         ? z.infer<typeof mobilityClientPortalSchema>
-                        : T extends 'pondu'
-                          ? z.infer<typeof ponduSchema>
+                        : T extends 'agrimo'
+                          ? z.infer<typeof agrimoSchema>
                           : T extends 'cora'
                             ? z.infer<typeof coraSchema>
                             : T extends 'trade'
@@ -256,7 +256,7 @@ export {
   orchestratorSchema,
   mobilitySchema,
   mobilityClientPortalSchema,
-  ponduSchema,
+  agrimoSchema,
   coraSchema,
   tradeSchema,
   platformAdminSchema,

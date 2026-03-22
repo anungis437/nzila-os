@@ -147,7 +147,7 @@ export default function MarketingPage() {
                   The Command Center for NzilaOS
                 </h2>
                 <p className="mt-6 text-lg leading-relaxed text-slate-600">
-                  Console aggregates data from every NzilaOS product — PonduOps,
+                  Console aggregates data from every NzilaOS product — AgrimoOps,
                   CORA Insights, TradeOps, ABR, and the entire portfolio — into
                   a single operational view for the Nzila Ventures team.
                 </p>

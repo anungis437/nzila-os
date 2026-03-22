@@ -1,0 +1,28 @@
+{
+  "name": "@nzila/agrimo-core",
+  "version": "0.2.0",
+  "private": true,
+  "type": "module",
+  "exports": {
+    ".": "./index.ts",
+    "./offline-engine": "./offline-engine.ts",
+    "./cooperative-model": "./cooperative-model.ts",
+    "./supply-chain": "./supply-chain.ts",
+    "./provenance": "./provenance.ts"
+  },
+  "scripts": {
+    "test": "vitest run",
+    "typecheck": "tsc --noEmit"
+  },
+  "dependencies": {
+    "@nzila/agri-core": "workspace:*",
+    "@nzila/agri-supply-chain": "workspace:*",
+    "@nzila/agri-provenance": "workspace:*",
+    "@nzila/agri-sync-contracts": "workspace:*",
+    "zod": "^3.24.0"
+  },
+  "devDependencies": {
+    "typescript": "^5",
+    "vitest": "^4.0.18"
+  }
+}

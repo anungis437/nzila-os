@@ -39,7 +39,7 @@ class VerticalPerformanceAnalyzer:
             },
             "agrotech": {
                 "name": "Agrotech",
-                "platforms": ["cora", "ponduops"],
+                "platforms": ["cora", "agrimoops"],
                 "tam": 8_600_000_000,
                 "som_2026": 300_000,
                 "som_2030": 6_000_000,
@@ -124,17 +124,19 @@ class VerticalPerformanceAnalyzer:
         benchmarks = []
         for vid, v in self.verticals.items():
             score = self._calculate_vertical_score(v)
-            benchmarks.append({
-                "vertical_id": vid,
-                "name": v["name"],
-                "platform_count": len(v["platforms"]),
-                "tam": v["tam"],
-                "som_2026": v["som_2026"],
-                "som_2030": v["som_2030"],
-                "maturity": v["maturity"],
-                "score": score,
-                "rank": 0,  # populated below
-            })
+            benchmarks.append(
+                {
+                    "vertical_id": vid,
+                    "name": v["name"],
+                    "platform_count": len(v["platforms"]),
+                    "tam": v["tam"],
+                    "som_2026": v["som_2026"],
+                    "som_2030": v["som_2030"],
+                    "maturity": v["maturity"],
+                    "score": score,
+                    "rank": 0,  # populated below
+                }
+            )
 
         # Assign ranks by score descending
         benchmarks.sort(key=lambda b: b["score"], reverse=True)
@@ -168,7 +170,9 @@ class VerticalPerformanceAnalyzer:
         platform_score = min(len(vertical["platforms"]) / 3, 1.0) * 15
         geo_score = min(len(vertical["geographic_focus"]) / 5, 1.0) * 10
 
-        return round(tam_score + som_score + maturity_score + platform_score + geo_score, 1)
+        return round(
+            tam_score + som_score + maturity_score + platform_score + geo_score, 1
+        )
 
     def get_vertical_detail(self, vertical_id: str) -> Optional[Dict[str, Any]]:
         """Get detailed performance data for a specific vertical."""
@@ -192,9 +196,7 @@ class VerticalPerformanceAnalyzer:
             "score": self._calculate_vertical_score(v),
         }
 
-    def compare_verticals(
-        self, vertical_ids: List[str]
-    ) -> Dict[str, Any]:
+    def compare_verticals(self, vertical_ids: List[str]) -> Dict[str, Any]:
         """Compare two or more verticals side by side."""
         comparisons = []
         for vid in vertical_ids:
@@ -217,18 +219,20 @@ class VerticalPerformanceAnalyzer:
             growth_multiple = v["som_2030"] / v["som_2026"]
             market_penetration = v["som_2030"] / v["tam"] * 100
 
-            opportunities.append({
-                "vertical_id": vid,
-                "name": v["name"],
-                "growth_multiple": round(growth_multiple, 1),
-                "market_penetration_2030_pct": round(market_penetration, 4),
-                "untapped_tam": v["tam"] - v["som_2030"],
-                "recommendation": (
-                    "HIGH PRIORITY" if growth_multiple >= 25 else
-                    "MEDIUM PRIORITY" if growth_multiple >= 15 else
-                    "SUSTAIN"
-                ),
-            })
+            opportunities.append(
+                {
+                    "vertical_id": vid,
+                    "name": v["name"],
+                    "growth_multiple": round(growth_multiple, 1),
+                    "market_penetration_2030_pct": round(market_penetration, 4),
+                    "untapped_tam": v["tam"] - v["som_2030"],
+                    "recommendation": (
+                        "HIGH PRIORITY"
+                        if growth_multiple >= 25
+                        else "MEDIUM PRIORITY" if growth_multiple >= 15 else "SUSTAIN"
+                    ),
+                }
+            )
 
         opportunities.sort(key=lambda o: o["growth_multiple"], reverse=True)
         return opportunities

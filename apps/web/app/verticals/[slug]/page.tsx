@@ -92,11 +92,11 @@ const verticalData: Record<string, {
     heroAlt: 'Aerial view of organised agricultural farmland rows stretching to the horizon',
     tam: '$8.6B',
     orgs: '300',
-    platforms: ['CORA', 'PonduOps'],
+    platforms: ['CORA', 'AgrimoOps'],
     status: '2 Platforms',
     color: 'from-emerald to-cyan-400',
     overview:
-      'Nzila\'s Agrotech vertical spans two distinct geographies and supply-chain realities: Canadian farm management (CORA) and the agri-logistics challenges of the DRC and Central African corridor (PonduOps). Each platform is data-rich where it matters most.',
+      'Nzila\'s Agrotech vertical spans two distinct geographies and supply-chain realities: Canadian farm management (CORA) and the agri-logistics challenges of the DRC and Central African corridor (AgrimoOps). Each platform is data-rich where it matters most.',
     capabilities: [
       {
         title: 'Farm Planning & Season Management',
@@ -114,7 +114,7 @@ const verticalData: Record<string, {
         title: 'Supply-Chain & Logistics Intelligence',
         icon: '🚜',
         description:
-          'End-to-end produce traceability, cold-chain monitoring, and logistics coordination — critical for DRC/CA export corridors (PonduOps).',
+          'End-to-end produce traceability, cold-chain monitoring, and logistics coordination — critical for DRC/CA export corridors (AgrimoOps).',
       },
       {
         title: 'Market Price Intelligence',
@@ -131,16 +131,16 @@ const verticalData: Record<string, {
     ],
     useCases: [
       { scenario: 'A Canadian grain farmer managing multiple fields and contractors', outcome: 'Centralised CORA dashboard with season-over-season benchmarking' },
-      { scenario: 'A DRC cooperative exporting produce to regional markets', outcome: 'PonduOps supply-chain visibility and buyer-seller matching' },
+      { scenario: 'A DRC cooperative exporting produce to regional markets', outcome: 'AgrimoOps supply-chain visibility and buyer-seller matching' },
       { scenario: 'An agri-investor evaluating farm portfolio performance', outcome: 'Cross-farm analytics with risk-adjusted yield projections' },
     ],
     differentiators: [
       'CORA built on verified Canadian agricultural data and government datasets',
-      'PonduOps purpose-built for DRC and Central African logistics realities',
+      'AgrimoOps purpose-built for DRC and Central African logistics realities',
       'IoT-ready architecture for sensor-equipped operations',
       'Aligned with B Corp environmental impact measurement frameworks',
     ],
-    note: 'CORA is trained on Canadian agricultural data. PonduOps is purpose-built for the DRC / Central African market.',
+    note: 'CORA is trained on Canadian agricultural data. AgrimoOps is purpose-built for the DRC / Central African market.',
   },
 
   uniontech: {

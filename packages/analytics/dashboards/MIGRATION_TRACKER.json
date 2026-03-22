@@ -212,7 +212,7 @@
               "status": "pending"
             },
             {
-              "platform": "PonduOps",
+              "platform": "AgrimoOps",
               "complexity": "HIGH",
               "profile": "django-aca-azurepg",
               "batch": "Batch 2",
@@ -310,7 +310,7 @@
             {"label": "Trade OS", "value": 65, "max": 100, "complexity": "HIGH"},
             {"label": "Court Lens", "value": 60, "max": 100, "complexity": "HIGH"},
             {"label": "CORA", "value": 55, "max": 100, "complexity": "HIGH"},
-            {"label": "PonduOps", "value": 50, "max": 100, "complexity": "HIGH"},
+            {"label": "AgrimoOps", "value": 50, "max": 100, "complexity": "HIGH"},
             {"label": "Shop Quoter", "value": 45, "max": 100, "complexity": "HIGH-EXTREME"},
             {"label": "SentryIQ360", "value": 40, "max": 100, "complexity": "HIGH-EXTREME"},
             {"label": "CongoWave", "value": 35, "max": 100, "complexity": "HIGH-EXTREME"},

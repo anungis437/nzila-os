@@ -39,7 +39,7 @@ graph TB
         A8[flow]
         A9[cfo]
         A10[trade]
-        A11[pondu]
+        A11[agrimo]
         A12[zonga]
         A13[mobility]
         A14[mobility-client-portal]
@@ -81,7 +81,7 @@ graph TB
 
 | Domain | Apps | Purpose |
 |--------|------|---------|
-| **Agriculture** | Pondu, Cora | Smallholder supply chains, harvest tracking, warehouse ops |
+| **Agriculture** | Agrimo, Cora | Smallholder supply chains, harvest tracking, warehouse ops |
 | **Commerce** | Shop Quoter | Multi-vertical quoting engine, order lifecycle |
 | **Trade** | Trade | Cross-border trade management, vehicle commerce |
 | **Finance** | CFO | Stripe payments, QuickBooks sync, tax calendar, FX |

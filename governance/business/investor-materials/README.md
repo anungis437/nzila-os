@@ -95,7 +95,7 @@ This folder contains all investor-facing materials for Nzila Ventures fundraisin
 **Tier 1: Strategic Fit (Priority)**
 - **Labor Tech / Future of Work VCs**: Union Eyes (4,773 entities, pension/insurance/grievance platform)
 - **Impact/ESG Funds**: African justice systems (ABR), agriculture (CORA), diaspora empowerment
-- **AgTech Investors**: CORA supply chain ERP, PonduOps farm management
+- **AgTech Investors**: CORA supply chain ERP, AgrimoOps farm management
 - **B2B SaaS Investors**: Union Eyes, ABR Insights, Shop Quoter, Trade OS
 - **Multi-Vertical Studios**: Rocket Internet-style platform investors
 

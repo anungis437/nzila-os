@@ -12,7 +12,7 @@
     { "name": "abr", "path": "apps/abr", "tier": "INCUBATING", "owner": "platform", "domain": "audit" },
     { "name": "cora", "path": "apps/cora", "tier": "INCUBATING", "owner": "platform", "domain": "compliance" },
     { "name": "trade", "path": "apps/trade", "tier": "INCUBATING", "owner": "commerce", "domain": "trade" },
-    { "name": "pondu", "path": "apps/pondu", "tier": "INCUBATING", "owner": "platform", "domain": "analytics" },
+    { "name": "agrimo", "path": "apps/agrimo", "tier": "INCUBATING", "owner": "platform", "domain": "analytics" },
     { "name": "platform-admin", "path": "apps/platform-admin", "tier": "INCUBATING", "owner": "platform", "domain": "platform" },
     { "name": "orchestrator-api", "path": "apps/orchestrator-api", "tier": "INCUBATING", "owner": "platform", "domain": "platform" },
     { "name": "nacp-exams", "path": "apps/nacp-exams", "tier": "EXPERIMENTAL", "owner": "education", "domain": "education" },
@@ -269,7 +269,7 @@
       "owner": "platform",
       "lifecycle": "EVOLVING",
       "apis": ["semantic search", "vector query"],
-      "used_by": ["pondu"],
+      "used_by": ["agrimo"],
       "control_plane_visible": false
     },
     {
