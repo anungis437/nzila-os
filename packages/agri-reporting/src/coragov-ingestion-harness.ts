@@ -2,18 +2,24 @@
 // @nzila/agri-reporting — CoraGov Ingestion Harness
 //
 // In-process test harness that simulates CoraGov ingestion accept/reject
-// without a real HTTP endpoint.  Uses only the contract types + Zod.
+// without a real HTTP endpoint.  Validates each canonical section
+// independently and returns per-section results.
 // ---------------------------------------------------------------------------
 
 import {
   coraGovPayloadSchema,
+  coraGovDatasetSchema,
+  CANONICAL_SECTIONS,
   type CoraGovPayload,
+  type CanonicalSection,
   type IngestionResult,
 } from './coragov-ingestion-contract.js'
 
 /**
  * Simulate CoraGov ingestion endpoint.
- * Validates inbound payload against contract schema, returns structured result.
+ * Validates inbound payload against contract schema, validates each section
+ * in every dataset independently, and returns structured result with
+ * validated_sections and scoped errors.
  */
 export function simulateCoraGovIngestion(
   rawPayload: unknown,
@@ -36,10 +42,48 @@ export function simulateCoraGovIngestion(
 
   const payload = result.data
 
+  // Per-section validation across all datasets
+  const sectionErrors: { section: CanonicalSection; path: string; message: string }[] = []
+  const validatedSectionsSet = new Set<CanonicalSection>()
+
+  for (let di = 0; di < payload.datasets.length; di++) {
+    const ds = payload.datasets[di]
+    const dsResult = coraGovDatasetSchema.safeParse(ds)
+    if (!dsResult.success) {
+      for (const issue of dsResult.error.issues) {
+        const sectionMatch = CANONICAL_SECTIONS.find((s) =>
+          issue.path[0] === s,
+        )
+        sectionErrors.push({
+          section: sectionMatch ?? 'metrics',
+          path: `datasets[${di}].${issue.path.join('.')}`,
+          message: issue.message,
+        })
+      }
+      continue
+    }
+
+    for (const section of CANONICAL_SECTIONS) {
+      if (ds[section].length > 0) {
+        validatedSectionsSet.add(section)
+      }
+    }
+  }
+
+  if (sectionErrors.length > 0) {
+    return {
+      accepted: false,
+      batch_id: payload.batch_id,
+      reason: 'Dataset section validation failed',
+      errors: sectionErrors,
+    }
+  }
+
   return {
     accepted: true,
     batch_id: payload.batch_id,
-    row_count: payload.rows.length,
+    dataset_count: payload.datasets.length,
+    validated_sections: [...validatedSectionsSet],
   }
 }
 

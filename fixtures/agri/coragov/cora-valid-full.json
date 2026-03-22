@@ -1,0 +1,62 @@
+{
+  "report_id": "crpt_fix_cora_full_01",
+  "org_id": "org_cora_full_01",
+  "source_app": "cora",
+  "schema_version": "1.0.0",
+  "reporting_period": {
+    "start": "2025-01-01T00:00:00.000Z",
+    "end": "2025-06-30T23:59:59.000Z"
+  },
+  "entity_scope": "cooperative",
+  "report_type": "cooperative_summary",
+  "title": "H1 2025 Full Cooperative Summary — Cora Fixture",
+  "generated_at": "2025-07-01T12:00:00.000Z",
+  "metrics": [
+    { "key": "compliance_rate", "label": "Compliance Rate", "value": 94.2, "unit": "%", "period": "H1-2025" },
+    { "key": "member_count", "label": "Active Members", "value": 128, "unit": "count", "period": "H1-2025" },
+    { "key": "revenue_total", "label": "Total Revenue", "value": 425000, "unit": "USD", "period": "H1-2025" }
+  ],
+  "forecasts": [
+    {
+      "forecast_type": "revenue",
+      "target_period": "H2-2025",
+      "predicted_value": 510000,
+      "confidence_level": "high",
+      "model_version": "cora-forecast-v1.3"
+    },
+    {
+      "forecast_type": "membership",
+      "target_period": "Q4-2025",
+      "predicted_value": 145,
+      "confidence_level": "medium"
+    }
+  ],
+  "risk_signals": [
+    { "risk_type": "regulatory", "severity": "low", "description": "Minor documentation gap in 3 cooperatives" },
+    { "risk_type": "financial", "severity": "medium", "description": "Late payment pattern in 2 member orgs", "affected_entity": "org_member_12", "mitigation": "Implement payment reminders and escalation workflow" }
+  ],
+  "supply_chain_events": [
+    {
+      "chain_id": "sc_cora_001",
+      "step_type": "collection",
+      "status": "completed",
+      "timestamp": "2025-06-10T08:00:00.000Z",
+      "location": "Northern Province",
+      "quantity_kg": 15000
+    },
+    {
+      "chain_id": "sc_cora_002",
+      "step_type": "processing",
+      "status": "in_progress",
+      "timestamp": "2025-06-20T14:00:00.000Z",
+      "location": "Central Facility"
+    }
+  ],
+  "provenance_refs": [
+    { "provenance_id": "prov_cora_full_001", "source_type": "audit_report", "hash": "sha256:aabbcc11", "verified": true },
+    { "provenance_id": "prov_cora_full_002", "source_type": "member_registry", "hash": "sha256:ddeeff22", "verified": true }
+  ],
+  "extensions": {
+    "cora": { "governance_tier": "A", "audit_cycle": "quarterly", "board_approval": true }
+  }
+}
