@@ -95,7 +95,7 @@ jobs:
           pnpm audit --audit-level=critical
 
       - name: TruffleHog secret scan
-        uses: trufflesecurity/trufflehog@v3.93.8 # pin to release tag, not mutable @main
+        uses: trufflesecurity/trufflehog@v3.94.0 # pin to release tag, not mutable @main
         with:
           path: ./
           base: HEAD~10
