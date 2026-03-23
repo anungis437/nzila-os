@@ -28,7 +28,7 @@
     "@typescript-eslint/eslint-plugin": "^8",
     "@typescript-eslint/parser": "^8",
     "typescript": "^5",
-    "vitest": "^4.0.18",
+    "vitest": "^4.1.0",
     "eslint": "^10"
   }
 }

@@ -40,6 +40,6 @@
   "devDependencies": {
     "drizzle-kit": "^0.30.0",
     "typescript": "^5",
-    "vitest": "^4.0.18"
+    "vitest": "^4.1.0"
   }
 }
