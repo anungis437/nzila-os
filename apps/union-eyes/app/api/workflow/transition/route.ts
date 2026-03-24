@@ -16,14 +16,15 @@ import {
 } from '@/lib/services/claim-workflow-fsm'
 import { db } from '@/db/db'
 import { claims } from '@/db/schema'
-import { eq } from 'drizzle-orm'
+import { eq, and } from 'drizzle-orm'
 import { logger } from '@/lib/logger'
+import { withRLSContext } from '@/lib/db/with-rls-context'
 
 export const dynamic = 'force-dynamic'
 
 export async function POST(request: NextRequest) {
   try {
-    const { userId, organizationId: _organizationId } = await requireApiAuth({
+    const { userId, organizationId } = await requireApiAuth({
       orgScoped: true,
       roles: ['steward', 'admin'],
     })
@@ -49,51 +50,58 @@ export async function POST(request: NextRequest) {
       )
     }
 
-    // Fetch claim for pre-flight validation
-    const [claim] = await db
-      .select()
-      .from(claims)
-      .where(eq(claims.claimNumber, claimNumber))
-      .limit(1)
+    // Fetch claim for pre-flight validation (org-scoped via RLS context)
+    return await withRLSContext(async () => {
+      const claimConditions = [eq(claims.claimNumber, claimNumber)];
+      if (organizationId) {
+        claimConditions.push(eq(claims.organizationId, organizationId));
+      }
 
-    if (!claim) {
-      return NextResponse.json(
-        { success: false, error: 'Claim not found' },
-        { status: 404 },
+      const [claim] = await db
+        .select()
+        .from(claims)
+        .where(and(...claimConditions))
+        .limit(1)
+
+      if (!claim) {
+        return NextResponse.json(
+          { success: false, error: 'Claim not found' },
+          { status: 404 },
+        )
+      }
+
+      const currentStatus = claim.status as ClaimStatus
+
+      // Pre-flight FSM guard — show allowed transitions
+      const allowed = getAllowedClaimTransitions(currentStatus, 'steward')
+      if (!allowed.includes(targetStatus as ClaimStatus)) {
+        return NextResponse.json(
+          {
+            success: false,
+            error: `Transition from '${currentStatus}' to '${targetStatus}' is not allowed`,
+            allowed_transitions: allowed,
+          },
+          { status: 422 },
+        )
+      }
+
+      // Execute transition (full FSM validation inside)
+      const result = await updateClaimStatus(
+        claimNumber,
+        targetStatus as ClaimStatus,
+        userId,
+        notes,
       )
-    }
 
-    const currentStatus = claim.status as ClaimStatus
+      if (!result.success) {
+        return NextResponse.json(
+          { success: false, error: result.error },
+          { status: 422 },
+        )
+      }
 
-    // Pre-flight FSM guard — show allowed transitions
-    const allowed = getAllowedClaimTransitions(currentStatus, 'steward')
-    if (!allowed.includes(targetStatus as ClaimStatus)) {
-      return NextResponse.json(
-        {
-          success: false,
-          error: `Transition from '${currentStatus}' to '${targetStatus}' is not allowed`,
-          allowed_transitions: allowed,
-        },
-        { status: 422 },
-      )
-    }
-
-    // Execute transition (full FSM validation inside)
-    const result = await updateClaimStatus(
-      claimNumber,
-      targetStatus as ClaimStatus,
-      userId,
-      notes,
-    )
-
-    if (!result.success) {
-      return NextResponse.json(
-        { success: false, error: result.error },
-        { status: 422 },
-      )
-    }
-
-    return NextResponse.json({ success: true, claim: result.claim })
+      return NextResponse.json({ success: true, claim: result.claim })
+    })
   } catch (err) {
     logger.error('Workflow transition failed', { error: String(err) })
     return NextResponse.json(

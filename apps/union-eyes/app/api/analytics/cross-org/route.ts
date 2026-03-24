@@ -6,6 +6,7 @@ import { withApi } from '@/lib/api/with-api';
 import { db } from '@/db/db';
 import { analyticsMetrics } from '@/db/schema';
 import { desc, count } from 'drizzle-orm';
+import { withRLSContext } from '@/lib/db/with-rls-context';
 
 export const dynamic = 'force-dynamic';
 
@@ -15,8 +16,10 @@ export const GET = withApi(
     openapi: { tags: ['Analytics'], summary: 'Cross-org analytics metrics' },
   },
   async () => {
-    const rows = await db.select().from(analyticsMetrics).orderBy(desc(analyticsMetrics.createdAt)).limit(200);
-    const [{ value: total }] = await db.select({ value: count() }).from(analyticsMetrics);
-    return { items: rows, total };
+    return withRLSContext(async () => {
+      const rows = await db.select().from(analyticsMetrics).orderBy(desc(analyticsMetrics.createdAt)).limit(200);
+      const [{ value: total }] = await db.select({ value: count() }).from(analyticsMetrics);
+      return { items: rows, total };
+    });
   },
 );
