@@ -176,6 +176,8 @@ export interface PilotMetrics {
   id: string;
   pilotId: string;
   organizationId: string;
+  organizationName?: string;
+  organizationSlug?: string;
   enrollmentDate: Date;
   daysActive: number;
   organizerAdoptionRate: number; // percentage 0-100
