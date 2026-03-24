@@ -24,7 +24,9 @@
       "@nzila/blob": ["../../packages/blob/src/index.ts"],
       "@nzila/ai-sdk": ["../../packages/ai-sdk/src/index.ts"],
       "@nzila/ai-sdk/types": ["../../packages/ai-sdk/src/types.ts"],
-      "@nzila/payments-stripe": ["../../packages/payments-stripe/src/index.ts"]
+      "@nzila/payments-stripe": ["../../packages/payments-stripe/src/index.ts"],
+      "@nzila/cupe-vocabulary": ["../../packages/cupe-vocabulary/src/index.ts"],
+      "@nzila/cupe-vocabulary/types": ["../../packages/cupe-vocabulary/src/types.ts"]
     }
   },
   "include": [

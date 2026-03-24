@@ -31,7 +31,7 @@ export async function GET(
   // Fetch case, notes, and audit trail in parallel
   const [caseRows, noteRows, auditRows] = await withRLSContext(async () => {
     return Promise.all([
-      db.select().from(claims).where(eq(claims.id, caseId)).limit(1),
+      db.select().from(claims).where(eq(claims.claimId, caseId)).limit(1),
       db
         .select()
         .from(claimUpdates)

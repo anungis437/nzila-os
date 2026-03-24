@@ -1575,6 +1575,9 @@ importers:
       '@nzila/blob':
         specifier: workspace:*
         version: link:../../packages/blob
+      '@nzila/cupe-vocabulary':
+        specifier: workspace:*
+        version: link:../../packages/cupe-vocabulary
       '@nzila/db':
         specifier: workspace:*
         version: link:../../packages/db
