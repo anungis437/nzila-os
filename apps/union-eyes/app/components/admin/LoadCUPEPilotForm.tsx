@@ -45,10 +45,6 @@ export function LoadCUPEPilotForm() {
       const data: LoadPilotDataResponse = await res.json();
       setResponse(data);
       setShowConfirm(false);
-
-      if (data.success) {
-        console.log('✅ CUPE pilot data loaded successfully');
-      }
     } catch (error) {
       setResponse({
         success: false,
@@ -73,10 +69,6 @@ export function LoadCUPEPilotForm() {
 
       const data: LoadPilotDataResponse = await res.json();
       setResponse(data);
-
-      if (data.success) {
-        console.log('✅ CUPE pilot data reset successfully');
-      }
     } catch (error) {
       setResponse({
         success: false,

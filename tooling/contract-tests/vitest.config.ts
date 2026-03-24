@@ -22,6 +22,8 @@ export default defineProject({
       '@nzila/platform-ops': join(__dirname, '..', '..', 'packages', 'platform-ops', 'src', 'index.ts'),
       // Governance packages used by proof harness
       '@nzila/enforcement': join(__dirname, '..', '..', 'packages', 'enforcement', 'src', 'index.ts'),
+      // CUPE vocabulary package used by vocabulary validation contract tests
+      '@nzila/cupe-vocabulary': join(__dirname, '..', '..', 'packages', 'cupe-vocabulary', 'src', 'index.ts'),
     },
   },
 })

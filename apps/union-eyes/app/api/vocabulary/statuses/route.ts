@@ -1,5 +1,9 @@
 import { NextRequest, NextResponse } from 'next/server';
 import { getCUPEVocabulary } from '@nzila/cupe-vocabulary';
+import { withApiAuth } from '@/lib/api-auth-guard';
+import { createLogger } from '@nzila/os-core';
+
+const logger = createLogger('vocabulary:statuses');
 
 /**
  * GET /api/vocabulary/statuses
@@ -8,7 +12,7 @@ import { getCUPEVocabulary } from '@nzila/cupe-vocabulary';
  * 
  * Response: Status[]
  */
-export async function GET(request: NextRequest) {
+export const GET = withApiAuth(async (request: NextRequest) => {
   try {
     const vocabulary = getCUPEVocabulary();
     
@@ -18,10 +22,10 @@ export async function GET(request: NextRequest) {
       },
     });
   } catch (error) {
-    console.error('[/api/vocabulary/statuses] Error:', error);
+    logger.error('[/api/vocabulary/statuses] Error:', error);
     return NextResponse.json(
       { error: 'Failed to retrieve statuses' },
       { status: 500 }
     );
   }
-}
+});

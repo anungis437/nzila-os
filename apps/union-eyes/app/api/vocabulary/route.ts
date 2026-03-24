@@ -1,5 +1,9 @@
 import { NextRequest, NextResponse } from 'next/server';
 import { getCUPEVocabulary } from '@nzila/cupe-vocabulary';
+import { withApiAuth } from '@/lib/api-auth-guard';
+import { createLogger } from '@nzila/os-core';
+
+const logger = createLogger('vocabulary');
 
 /**
  * GET /api/vocabulary
@@ -12,7 +16,7 @@ import { getCUPEVocabulary } from '@nzila/cupe-vocabulary';
  * 
  * Response: CUPEVocabulary
  */
-export async function GET(request: NextRequest) {
+export const GET = withApiAuth(async (request: NextRequest) => {
   try {
     const vocabulary = getCUPEVocabulary();
     
@@ -22,10 +26,10 @@ export async function GET(request: NextRequest) {
       },
     });
   } catch (error) {
-    console.error('[/api/vocabulary] Error:', error);
+    logger.error('[/api/vocabulary] Error:', error);
     return NextResponse.json(
       { error: 'Failed to retrieve vocabulary' },
       { status: 500 }
     );
   }
-}
+});

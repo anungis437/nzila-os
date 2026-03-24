@@ -1,5 +1,9 @@
 import { NextRequest, NextResponse } from 'next/server';
 import { getCUPEVocabulary } from '@nzila/cupe-vocabulary';
+import { withApiAuth } from '@/lib/api-auth-guard';
+import { createLogger } from '@nzila/os-core';
+
+const logger = createLogger('vocabulary:severities');
 
 /**
  * GET /api/vocabulary/severities
@@ -8,7 +12,7 @@ import { getCUPEVocabulary } from '@nzila/cupe-vocabulary';
  * 
  * Response: Severity[]
  */
-export async function GET(request: NextRequest) {
+export const GET = withApiAuth(async (request: NextRequest) => {
   try {
     const vocabulary = getCUPEVocabulary();
     
@@ -18,10 +22,10 @@ export async function GET(request: NextRequest) {
       },
     });
   } catch (error) {
-    console.error('[/api/vocabulary/severities] Error:', error);
+    logger.error('[/api/vocabulary/severities] Error:', error);
     return NextResponse.json(
       { error: 'Failed to retrieve severities' },
       { status: 500 }
     );
   }
-}
+});

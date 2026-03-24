@@ -9,6 +9,10 @@
 import { NextRequest, NextResponse } from 'next/server';
 import { readFile } from 'fs/promises';
 import { resolve } from 'path';
+import { withApiAuth } from '@/lib/api-auth-guard';
+import { createLogger } from '@nzila/os-core';
+
+const logger = createLogger('admin:seed-cupe-pilot');
 
 interface SeedRequest {
   reset?: boolean;
@@ -19,13 +23,8 @@ const CUPE_PILOT_JSON = resolve(
   'fixtures/cupe/pilot-org/cupe-pilot-setup.json'
 );
 
-export async function POST(request: NextRequest) {
+export const POST = withApiAuth(async (request: NextRequest) => {
   try {
-    // TODO: Add admin authentication check
-    // const user = await getUser(request);
-    // if (!user || user.role !== 'admin') {
-    //   return NextResponse.json({ error: 'Unauthorized' }, { status: 403 });
-    // }
 
     const body: SeedRequest = await request.json();
     const { reset = false } = body;
@@ -51,7 +50,7 @@ export async function POST(request: NextRequest) {
       },
     });
   } catch (error) {
-    console.error('[/api/admin/seed-cupe-pilot] Error:', error);
+    logger.error('[/api/admin/seed-cupe-pilot] Error:', error);
     return NextResponse.json(
       {
         success: false,
@@ -61,4 +60,4 @@ export async function POST(request: NextRequest) {
       { status: 500 }
     );
   }
-}
+});

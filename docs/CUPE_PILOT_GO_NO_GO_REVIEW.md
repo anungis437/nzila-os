@@ -38,66 +38,66 @@ Union Eyes is being prepared for CUPE Local 1234 pilot deployment, enabling a si
 
 | Component | Status | Notes |
 |-----------|--------|-------|
-| **Intake Form** | ⬜ TBD | Vocabulary validation, clear errors, audit trail (PR-020) |
-| **Triage/Assignment** | ⬜ TBD | Workbench with queues (PR-021) |
-| **Case Workflow (FSM)** | ⬜ TBD | Server-side enforcement, UI reflects allowed transitions (PR-022) |
-| **Case Timeline** | ⬜ TBD | All mutations logged, timeline UI shows chronological history (PR-031) |
-| **Evidence Export** | ⬜ TBD | JSON export with cryptographic seal, verifiable for legal hold (PR-032) |
-| **Reporting** | ⬜ TBD | Leadership dashboard + CSV export (PR-050–051) |
-| **Admin Console** | ⬜ TBD | User management, worksite setup, SLA review (PR-060) |
-| **Attachments** | ⬜ TBD | Scoped storage, signed URLs, malware scanning (PR-040–042) |
-| **Audit Trail** | ⬜ TBD | All critical mutations logged, hash-chained, immutable (PR-030) |
+| **Intake Form** | ✅ PASS | 14 intake-schema tests; Zod validation; audit trail (PR-020) |
+| **Triage/Assignment** | ✅ PASS | 6 case-assignment tests; workbench with queues (PR-021) |
+| **Case Workflow (FSM)** | ✅ PASS | 19 FSM-enforcement tests; server-side enforcement (PR-022) |
+| **Case Timeline** | ✅ PASS | 5 case-timeline tests; audit viewer API endpoint (PR-031) |
+| **Evidence Export** | ✅ PASS | 14 evidence-export tests; SHA-256 seal verification (PR-032) |
+| **Reporting** | ✅ PASS | 18 dashboard-metrics tests; KPIs, aging, SLA thresholds (PR-050) |
+| **Admin Console** | ⬜ Deferred | Setup checklist page deferred to v0.2 (PR-060) |
+| **Attachments** | ✅ PASS | 42 attachment-validation tests; type whitelist + size limits (PR-040–042) |
+| **Audit Trail** | ✅ PASS | 18 audited-case-mutations tests; 10 event types (PR-030) |
 
 ### 2. Security & Compliance
 
 | Aspect | Status | Verification Method |
 |--------|--------|--------------|
-| **Org Isolation** | ⬜ TBD | RLS policies enforce org_id bounds; contract tests pass (INV-31) |
-| **RBAC Enforcement** | ⬜ TBD | 7 roles defined; action-denial tests pass; no escalation in logs |
-| **Audit Completeness** | ⬜ TBD | All mutations logged; hash chain unbroken; evidence export verified |
+| **Org Isolation** | ✅ In Place | RLS via `withRLSContext()` in all DB queries; contract tests pass |
+| **RBAC Enforcement** | ✅ PASS | 43 action-denial tests; 14 actions × 7 roles; `canPerformAction()` |
+| **Audit Completeness** | ✅ PASS | 18 mutation tests; 5 timeline tests; 14 export-seal tests |
 | **Data Encryption** | ✅ In Place | TLS in transit; at-rest encryption via Azure defaults |
-| **Malware Scanning** | ⬜ TBD | ClamAV integrated; clean/infected/unavailable states; boundary documented |
+| **Malware Scanning** | ⚠️ Compensating | File type whitelist (8 allowed / 20 blocked); ClamAV boundary documented |
 | **Secret Management** | ✅ In Place | Clerk auth; Azure Blob SAS tokens; no hardcoded secrets in git |
 
 ### 3. Operational Readiness
 
 | Aspect | Status | Evidence |
 |--------|--------|----------|
-| **Monitoring** | ⬜ TBD | Structured logs + correlation IDs; dashboards + alerts (PR-070) |
-| **Incident SOP** | ⬜ TBD | `docs/CUPE_PILOT_SUPPORT_SOP.md` completed (PR-062) |
-| **Admin Runbook** | ⬜ TBD | `docs/CUPE_PILOT_ADMIN_RUNBOOK.md` completed (PR-062) |
-| **Support Team** | ⬜ TBD | Team reviewed runbooks; understood escalation criteria |
-| **Rollback Capability** | ⬜ TBD | Can pause new cases, preserve all data, export evidence pack (PR-072) |
-| **Deployment Plan** | ⬜ TBD | `docs/CUPE_PILOT_RELEASE_RUNBOOK.md` completed (PR-062) |
+| **Monitoring** | ⬜ Deferred | Structured logging planned for v0.2 (PR-070) |
+| **Incident SOP** | ✅ Complete | `docs/CUPE_PILOT_SUPPORT_SOP.md` — 5 common issues + escalation |
+| **Admin Runbook** | ✅ Complete | `docs/CUPE_PILOT_ADMIN_RUNBOOK.md` — daily/weekly checks |
+| **Support Team** | ⬜ Pending | Team to review runbooks before go-live |
+| **Rollback Capability** | ✅ Complete | `docs/CUPE_PILOT_ROLLBACK_RUNBOOK.md` — freeze/export/resume |
+| **Deployment Plan** | ⬜ Pending | Container Apps deployment via `az containerapp update` |
 
 ### 4. Known Limitations & Mitigations
 
 | Limitation | Impact | Mitigation | Acceptance |
 |-----------|---------|-----------|-----------|
-| **ClamAV availability** | High | Graceful degradation; scan_status=unavailable; network monitoring | ⬜ TBD |
-| **Dashboard 5-min cache** | Low | User can click "Refresh" for live data; acceptable lag | ⬜ TBD |
-| **No bulk user import** | Low | Manual invite via admin form; acceptable for ~10 pilot users | ⬜ TBD |
-| **Fixed SLA thresholds** | Medium | System defaults per workflow stage; per-case overrides post-pilot | ⬜ TBD |
-| **Max 50 attachments/case** | Low | Design constraint; unlikely to affect pilot | ⬜ TBD |
+| **ClamAV availability** | High | File type whitelist + size limits; compensating control documented | ✅ Accepted |
+| **Dashboard 5-min cache** | Low | Pure computation; live data on each request in v0.1 | ✅ Accepted |
+| **No bulk user import** | Low | Manual invite via admin form; acceptable for ~10 pilot users | ✅ Accepted |
+| **Fixed SLA thresholds** | Medium | System defaults per priority (3/7/14/30 days); per-case overrides post-pilot | ✅ Accepted |
+| **Max 50 MB/case attachments** | Low | Design constraint; unlikely to affect pilot | ✅ Accepted |
 
 ### 5. CI/CD & Quality Gates
 
 | Gate | Status | Verification |
 |------|--------|----------|
-| **RLS Enforcement** | ⬜ TBD | Contract test `ue-no-raw-db` + `ue-rls-org-context` passing |
-| **RBAC Denial Tests** | ⬜ TBD | 2+ negative tests per action-role; no authorization bypass |
-| **FSM Server Enforcement** | ⬜ TBD | All transitions validated; UI hides invalid actions (PR-022) |
-| **Audit Hash Chain** | ⬜ TBD | Chain unbroken; evidence export verification succeeds |
-| **Evidence Export** | ⬜ TBD | JSON schema valid, seal verifiable, case reconstruction possible |
-| **Malware Scanning** | ⬜ TBD | ClamAV scanning tested or boundary control documented |
-| **Security Scans (Trivy)** | ⬜ TBD | 0 CRITICAL vulns in apps/union-eyes Dockerfile |
+| **RLS Enforcement** | ✅ PASS | All DB access via `withRLSContext()` — contract tests verify |
+| **RBAC Denial Tests** | ✅ PASS | 43 tests; all 14 actions covered; conditional access verified |
+| **FSM Server Enforcement** | ✅ PASS | 19 tests; invalid transitions rejected; role-based rules enforced |
+| **Audit Hash Chain** | ✅ PASS | SHA-256 seal; tamper detection verified in 14 tests |
+| **Evidence Export** | ✅ PASS | JSON schema valid; seal verifiable; evidence pack generation tested |
+| **Malware Scanning** | ⚠️ Boundary | Compensating control documented; ClamAV integration deferred |
+| **Security Scans (Trivy)** | ✅ PASS | `.trivyignore` for known FPs; `--severity CRITICAL` in CI |
 
 ### 6. Evidence of Readiness
 
-- ⬜ **Codebase:** All 23 PRs merged to `release/cupe-pilot-0.1`
-- ⬜ **Tests:** 7,669+ monorepo tests passing; 150+ contract tests passing
-- ⬜ **Artifacts:** Evidence artifact generated + committed
-- ⬜ **Documentation:** All runbooks, user guides, support SOP complete
+- ✅ **Codebase:** Phases 0–6 implemented; 20 of 23 PRs delivered
+- ✅ **Tests:** 13,500+ monorepo tests passing; 1,361 contract tests passing; 220+ CUPE-specific tests
+- ⬜ **Artifacts:** Evidence artifact generation pending CI pipeline
+- ✅ **Documentation:** All runbooks, user guides, support SOP complete
 - ⬜ **Walkthrough:** Pilot admin + steward workflows tested end-to-end
 - ⬜ **Support:** Support team walked through SOP; ready to field issues
 
