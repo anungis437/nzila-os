@@ -112,6 +112,20 @@ export function getAllPriorityIds(): string[] {
 }
 
 /**
+ * Get all valid severity IDs.
+ */
+export function getAllSeverityIds(): string[] {
+  return CUPE_SEVERITIES.map((s) => s.id);
+}
+
+/**
+ * Get all valid role IDs.
+ */
+export function getAllRoleIds(): string[] {
+  return CUPE_ROLES.map((r) => r.id);
+}
+
+/**
  * Get all valid status IDs.
  */
 export function getAllStatusIds(): string[] {

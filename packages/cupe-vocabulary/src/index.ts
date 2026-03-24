@@ -11,3 +11,4 @@ export * from './types';
 export * from './vocabulary';
 export * from './validator';
 export * from './entity-schemas';
+export * from './intake-schema';

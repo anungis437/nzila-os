@@ -167,6 +167,8 @@ export default defineConfig({
       'packages/cfo-intelligence',
       // Services
       'services/media-worker',
+      // CUPE vocabulary
+      'packages/cupe-vocabulary',
       // E2E platform proof tests
       'tests/e2e/platform',
     ],
