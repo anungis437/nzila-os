@@ -1,0 +1,264 @@
+{
+  "version": "0.1.0",
+  "description": "CUPE Taxonomy Pack - Hardcoded vocabulary for Union Eyes pilot",
+  "caseTypes": [
+    {
+      "id": "discipline",
+      "label": "Discipline",
+      "description": "Disciplinary action by employer",
+      "defaultPriority": "high",
+      "defaultSeverity": "serious"
+    },
+    {
+      "id": "harassment",
+      "label": "Harassment",
+      "description": "Workplace harassment or bullying",
+      "defaultPriority": "high",
+      "defaultSeverity": "serious"
+    },
+    {
+      "id": "discrimination",
+      "label": "Discrimination",
+      "description": "Discrimination based on protected characteristics",
+      "defaultPriority": "critical",
+      "defaultSeverity": "critical"
+    },
+    {
+      "id": "wage_dispute",
+      "label": "Wage Dispute",
+      "description": "Pay, overtime, or benefits dispute",
+      "defaultPriority": "medium",
+      "defaultSeverity": "serious"
+    },
+    {
+      "id": "benefits_denial",
+      "label": "Benefits Denial",
+      "description": "Denial of earned benefits or entitlements",
+      "defaultPriority": "medium",
+      "defaultSeverity": "serious"
+    },
+    {
+      "id": "recall_rehire",
+      "label": "Recall/Rehire",
+      "description": "Issues with recall or rehiring process",
+      "defaultPriority": "medium",
+      "defaultSeverity": "moderate"
+    },
+    {
+      "id": "safety",
+      "label": "Health & Safety",
+      "description": "Workplace safety or health concerns",
+      "defaultPriority": "critical",
+      "defaultSeverity": "critical"
+    },
+    {
+      "id": "contracting",
+      "label": "Contracting Out",
+      "description": "Improper contracting out of union work",
+      "defaultPriority": "high",
+      "defaultSeverity": "serious"
+    },
+    {
+      "id": "dues",
+      "label": "Dues/Deduction Issue",
+      "description": "Issue with union dues or deductions",
+      "defaultPriority": "low",
+      "defaultSeverity": "minor"
+    },
+    {
+      "id": "other",
+      "label": "Other",
+      "description": "Grievance not covered by above categories",
+      "defaultPriority": "medium",
+      "defaultSeverity": "moderate"
+    }
+  ],
+  "priorities": [
+    {
+      "id": "low",
+      "label": "Low",
+      "slaHours": 168,
+      "escalationRequired": false
+    },
+    {
+      "id": "medium",
+      "label": "Medium",
+      "slaHours": 72,
+      "escalationRequired": false
+    },
+    {
+      "id": "high",
+      "label": "High",
+      "slaHours": 48,
+      "escalationRequired": true
+    },
+    {
+      "id": "critical",
+      "label": "Critical",
+      "slaHours": 24,
+      "escalationRequired": true
+    }
+  ],
+  "severities": [
+    {
+      "id": "minor",
+      "label": "Minor",
+      "description": "Minor issue, low impact",
+      "requiresLegal": false
+    },
+    {
+      "id": "moderate",
+      "label": "Moderate",
+      "description": "Moderate issue, affects individual",
+      "requiresLegal": false
+    },
+    {
+      "id": "serious",
+      "label": "Serious",
+      "description": "Serious issue, affects multiple members or has legal implications",
+      "requiresLegal": true
+    },
+    {
+      "id": "critical",
+      "label": "Critical",
+      "description": "Critical issue, safety threat, discrimination, or systemic violation",
+      "requiresLegal": true
+    }
+  ],
+  "roles": [
+    {
+      "id": "member",
+      "label": "Member",
+      "description": "Union member",
+      "canAssign": false,
+      "canEscalate": false,
+      "canSettle": false
+    },
+    {
+      "id": "steward",
+      "label": "Steward",
+      "description": "Workplace steward (LRO)",
+      "canAssign": true,
+      "canEscalate": true,
+      "canSettle": false
+    },
+    {
+      "id": "chief_steward",
+      "label": "Chief Steward",
+      "description": "Chief steward or lead representative",
+      "canAssign": true,
+      "canEscalate": true,
+      "canSettle": true
+    },
+    {
+      "id": "business_agent",
+      "label": "Business Agent",
+      "description": "National union representative",
+      "canAssign": true,
+      "canEscalate": true,
+      "canSettle": true
+    },
+    {
+      "id": "officer",
+      "label": "Officer",
+      "description": "Local union officer",
+      "canAssign": true,
+      "canEscalate": true,
+      "canSettle": true
+    },
+    {
+      "id": "admin",
+      "label": "Administrator",
+      "description": "System administrator",
+      "canAssign": true,
+      "canEscalate": true,
+      "canSettle": true
+    }
+  ],
+  "statuses": [
+    {
+      "id": "draft",
+      "label": "Draft",
+      "category": "open",
+      "allowTransitionsTo": ["filed"],
+      "allowedRoles": ["member", "steward"]
+    },
+    {
+      "id": "filed",
+      "label": "Filed",
+      "category": "open",
+      "allowTransitionsTo": ["acknowledged"],
+      "allowedRoles": ["steward", "chief_steward", "admin"]
+    },
+    {
+      "id": "acknowledged",
+      "label": "Acknowledged",
+      "category": "in_progress",
+      "allowTransitionsTo": ["investigating", "escalated"],
+      "allowedRoles": ["steward", "chief_steward", "admin"]
+    },
+    {
+      "id": "investigating",
+      "label": "Under Investigation",
+      "category": "in_progress",
+      "allowTransitionsTo": ["response_due", "escalated", "settled"],
+      "allowedRoles": ["steward", "chief_steward", "business_agent", "admin"]
+    },
+    {
+      "id": "response_due",
+      "label": "Awaiting Response",
+      "category": "in_progress",
+      "allowTransitionsTo": ["escalated", "settled", "denied"],
+      "allowedRoles": ["steward", "chief_steward", "business_agent", "admin"]
+    },
+    {
+      "id": "escalated",
+      "label": "Escalated",
+      "category": "in_progress",
+      "allowTransitionsTo": ["mediation", "denied", "settled"],
+      "allowedRoles": ["chief_steward", "business_agent", "officer", "admin"]
+    },
+    {
+      "id": "mediation",
+      "label": "In Mediation",
+      "category": "in_progress",
+      "allowTransitionsTo": ["arbitration", "settled", "denied"],
+      "allowedRoles": ["business_agent", "officer", "admin"]
+    },
+    {
+      "id": "arbitration",
+      "label": "In Arbitration",
+      "category": "in_progress",
+      "allowTransitionsTo": ["settled", "denied"],
+      "allowedRoles": ["business_agent", "officer", "admin"]
+    },
+    {
+      "id": "settled",
+      "label": "Settled",
+      "category": "resolved",
+      "allowTransitionsTo": ["closed"],
+      "allowedRoles": ["steward", "chief_steward", "business_agent", "officer", "admin"]
+    },
+    {
+      "id": "denied",
+      "label": "Denied",
+      "category": "resolved",
+      "allowTransitionsTo": ["closed", "escalated"],
+      "allowedRoles": ["steward", "chief_steward", "business_agent", "officer", "admin"]
+    },
+    {
+      "id": "withdrawn",
+      "label": "Withdrawn",
+      "category": "closed",
+      "allowTransitionsTo": [],
+      "allowedRoles": ["member", "steward", "chief_steward", "admin"]
+    },
+    {
+      "id": "closed",
+      "label": "Closed",
+      "category": "closed",
+      "allowTransitionsTo": [],
+      "allowedRoles": ["steward", "chief_steward", "business_agent", "officer", "admin"]
+    }
+  ]
+}

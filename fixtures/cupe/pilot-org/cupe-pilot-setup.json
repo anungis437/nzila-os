@@ -1,0 +1,199 @@
+{
+  "version": "0.1.0",
+  "description": "CUPE Pilot Org Setup - Demo union local with 3 worksites and sample members",
+  "org": {
+    "id": "cupe-local-123",
+    "name": "CUPE Local 123 (Demo)",
+    "slug": "cupe-local-123",
+    "type": "union_local",
+    "jurisdiction": "Ontario",
+    "contact_email": "contact@cupelocal123.ca",
+    "phone": "+1-416-555-0123"
+  },
+  "worksites": [
+    {
+      "id": "cupe-ws-001",
+      "org_id": "cupe-local-123",
+      "name": "City Hall - Downtown",
+      "address": "100 Queen Street West, Toronto, ON",
+      "city": "Toronto",
+      "province": "Ontario",
+      "member_count": 45
+    },
+    {
+      "id": "cupe-ws-002",
+      "org_id": "cupe-local-123",
+      "name": "City Hall - North",
+      "address": "1230 Bloor Street West, Toronto, ON",
+      "city": "Toronto",
+      "province": "Ontario",
+      "member_count": 38
+    },
+    {
+      "id": "cupe-ws-003",
+      "org_id": "cupe-local-123",
+      "name": "Toronto Public Library - Central Branch",
+      "address": "789 Yonge Street, Toronto, ON",
+      "city": "Toronto",
+      "province": "Ontario",
+      "member_count": 24
+    }
+  ],
+  "members": [
+    {
+      "id": "cupe-member-001",
+      "org_id": "cupe-local-123",
+      "worksite_id": "cupe-ws-001",
+      "first_name": "Alice",
+      "last_name": "Johnson",
+      "email": "alice.johnson@city.toronto.ca",
+      "role": "member",
+      "member_number": "CL123-001",
+      "hire_date": "2018-06-15"
+    },
+    {
+      "id": "cupe-member-002",
+      "org_id": "cupe-local-123",
+      "worksite_id": "cupe-ws-001",
+      "first_name": "Bob",
+      "last_name": "Smith",
+      "email": "bob.smith@city.toronto.ca",
+      "role": "steward",
+      "member_number": "CL123-002",
+      "hire_date": "2015-03-22"
+    },
+    {
+      "id": "cupe-member-003",
+      "org_id": "cupe-local-123",
+      "worksite_id": "cupe-ws-001",
+      "first_name": "Carol",
+      "last_name": "Chen",
+      "email": "carol.chen@city.toronto.ca",
+      "role": "member",
+      "member_number": "CL123-003",
+      "hire_date": "2019-09-10"
+    },
+    {
+      "id": "cupe-member-004",
+      "org_id": "cupe-local-123",
+      "worksite_id": "cupe-ws-002",
+      "first_name": "David",
+      "last_name": "Martinez",
+      "email": "david.martinez@city.toronto.ca",
+      "role": "steward",
+      "member_number": "CL123-004",
+      "hire_date": "2016-07-08"
+    },
+    {
+      "id": "cupe-member-005",
+      "org_id": "cupe-local-123",
+      "worksite_id": "cupe-ws-002",
+      "first_name": "Emma",
+      "last_name": "Wong",
+      "email": "emma.wong@city.toronto.ca",
+      "role": "chief_steward",
+      "member_number": "CL123-005",
+      "hire_date": "2012-01-20"
+    },
+    {
+      "id": "cupe-member-006",
+      "org_id": "cupe-local-123",
+      "worksite_id": "cupe-ws-003",
+      "first_name": "Frank",
+      "last_name": "Thompson",
+      "email": "frank.thompson@city.toronto.ca",
+      "role": "member",
+      "member_number": "CL123-006",
+      "hire_date": "2017-11-15"
+    },
+    {
+      "id": "cupe-admin-001",
+      "org_id": "cupe-local-123",
+      "worksite_id": "cupe-ws-001",
+      "first_name": "Grace",
+      "last_name": "Lee",
+      "email": "grace.lee@city.toronto.ca",
+      "role": "admin",
+      "member_number": "CL123-ADMIN-001",
+      "hire_date": "2020-01-01"
+    }
+  ],
+  "cases": [
+    {
+      "id": "cupe-case-001",
+      "org_id": "cupe-local-123",
+      "number": "CL123-2025-001",
+      "filed_by": "cupe-member-001",
+      "assigned_to": "cupe-member-002",
+      "case_type": "wage_dispute",
+      "priority": "high",
+      "severity": "serious",
+      "status": "filed",
+      "title": "Unpaid overtime hours (Q1 2025)",
+      "description": "Member claims 24 hours of uncompensated overtime in January and February",
+      "filed_at": "2025-03-01T10:30:00Z",
+      "created_at": "2025-03-01T10:30:00Z"
+    },
+    {
+      "id": "cupe-case-002",
+      "org_id": "cupe-local-123",
+      "number": "CL123-2025-002",
+      "filed_by": "cupe-member-003",
+      "assigned_to": "cupe-member-004",
+      "case_type": "harassment",
+      "priority": "high",
+      "severity": "serious",
+      "status": "acknowledged",
+      "title": "Ongoing workplace harassment from supervisor",
+      "description": "Pattern of inappropriate comments and exclusion from team activities",
+      "filed_at": "2025-02-28T14:15:00Z",
+      "created_at": "2025-02-28T14:15:00Z"
+    },
+    {
+      "id": "cupe-case-003",
+      "org_id": "cupe-local-123",
+      "number": "CL123-2025-003",
+      "filed_by": "cupe-member-006",
+      "assigned_to": "cupe-member-005",
+      "case_type": "discipline",
+      "priority": "high",
+      "severity": "serious",
+      "status": "investigating",
+      "title": "Unjust disciplinary letter",
+      "description": "Member received disciplinary letter for tardiness without prior warning",
+      "filed_at": "2025-03-10T09:00:00Z",
+      "created_at": "2025-03-10T09:00:00Z"
+    },
+    {
+      "id": "cupe-case-004",
+      "org_id": "cupe-local-123",
+      "number": "CL123-2025-004",
+      "filed_by": "cupe-member-002",
+      "assigned_to": null,
+      "case_type": "benefits_denial",
+      "priority": "medium",
+      "severity": "moderate",
+      "status": "filed",
+      "title": "Denied sick leave request",
+      "description": "Request for approved sick leave was denied without justification",
+      "filed_at": "2025-03-12T11:20:00Z",
+      "created_at": "2025-03-12T11:20:00Z"
+    },
+    {
+      "id": "cupe-case-005",
+      "org_id": "cupe-local-123",
+      "number": "CL123-2024-005",
+      "filed_by": "cupe-member-004",
+      "assigned_to": "cupe-member-005",
+      "case_type": "wage_dispute",
+      "priority": "medium",
+      "severity": "serious",
+      "status": "settled",
+      "title": "Retroactive pay adjustment (settled)",
+      "description": "Resolved: Member received full retroactive pay adjustment for prior period",
+      "filed_at": "2024-12-15T13:30:00Z",
+      "created_at": "2024-12-15T13:30:00Z",
+      "settlement_date": "2025-02-20T16:00:00Z"
+    }
+  ]
+}
