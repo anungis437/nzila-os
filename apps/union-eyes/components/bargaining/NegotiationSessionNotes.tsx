@@ -7,6 +7,7 @@
 "use client";
 
 import { useEffect, useState } from "react";
+import { useLocale } from "next-intl";
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "@/components/ui/card";
 import { Badge } from "@/components/ui/badge";
 import { Button } from "@/components/ui/button";
@@ -34,6 +35,7 @@ interface NegotiationSessionNotesProps {
 }
 
 export function NegotiationSessionNotes({ negotiationId: _negotiationId, cbaId }: NegotiationSessionNotesProps) {
+  const locale = useLocale();
   const [notes, setNotes] = useState<BargainingNote[]>([]);
   const [loading, setLoading] = useState(true);
 
@@ -75,7 +77,7 @@ export function NegotiationSessionNotes({ negotiationId: _negotiationId, cbaId }
             </CardDescription>
           </div>
           <Button size="sm" asChild>
-            <Link href="/dashboard/bargaining/notes/new">
+            <Link href={`/${locale}/dashboard/bargaining/notes/new`}>
               <Plus className="mr-2 h-4 w-4" />
               Add Note
             </Link>

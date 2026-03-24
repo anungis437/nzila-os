@@ -3,6 +3,7 @@
 import React, { useState } from "react";
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import { User, Star, MapPin, Briefcase, Loader2 } from "lucide-react";
+import { useTranslations } from "next-intl";
 
 // ─── Types ───────────────────────────────────────────────────────────────────
 
@@ -27,6 +28,7 @@ export function StewardRecommendations({
   grievanceId,
   onAssign,
 }: StewardRecommendationsProps) {
+  const t = useTranslations("steward.recommendations");
   const [candidates, setCandidates] = useState<StewardCandidate[]>([]);
   const [loading, setLoading] = useState(false);
   const [assigning, setAssigning] = useState<string | null>(null);
@@ -45,10 +47,10 @@ export function StewardRecommendations({
       if (json.data) {
         setCandidates(json.data);
       } else {
-        setError(json.error?.message ?? "Failed to get recommendations");
+        setError(json.error?.message ?? t("failedToGet"));
       }
     } catch {
-      setError("Network error");
+      setError(t("networkError"));
     } finally {
       setLoading(false);
     }
@@ -74,7 +76,7 @@ export function StewardRecommendations({
     <Card>
       <CardHeader className="flex flex-row items-center justify-between">
         <CardTitle className="flex items-center gap-2 text-sm">
-          <User className="h-4 w-4" /> Steward Recommendations
+          <User className="h-4 w-4" /> {t("title")}
         </CardTitle>
         <button
           onClick={fetchRecommendations}
@@ -86,7 +88,7 @@ export function StewardRecommendations({
           ) : (
             <Star className="h-3 w-3" />
           )}
-          {loading ? "Scoring…" : "Find Best Match"}
+          {loading ? t("scoring") : t("findBestMatch")}
         </button>
       </CardHeader>
       <CardContent>
@@ -95,8 +97,7 @@ export function StewardRecommendations({
         )}
         {candidates.length === 0 && !loading && (
           <p className="text-sm text-gray-400">
-            Click &quot;Find Best Match&quot; to rank available stewards by region, specialization,
-            and current workload.
+            {t("emptyState")}
           </p>
         )}
         {candidates.length > 0 && (
@@ -138,7 +139,7 @@ export function StewardRecommendations({
                     disabled={assigning === c.stewardId}
                     className="rounded bg-green-600 px-3 py-1 text-xs text-white hover:bg-green-700 disabled:opacity-50"
                   >
-                    {assigning === c.stewardId ? "Assigning…" : "Assign"}
+                    {assigning === c.stewardId ? t("assigning") : t("assignButton")}
                   </button>
                 </div>
               </li>

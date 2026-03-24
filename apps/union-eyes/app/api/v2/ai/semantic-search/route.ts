@@ -4,6 +4,9 @@ import { NextResponse } from 'next/server';
  * Migrated to withApi() framework
  */
 import { semanticClauseSearch, semanticPrecedentSearch, unifiedSemanticSearch, findSimilarClauses } from '@/lib/services/ai/vector-search-service';
+import { db } from '@/db/db';
+import { cbaClause } from '@/db/schema/cba-clauses-schema';
+import { arbitrationPrecedents } from '@/db/schema/arbitration-precedents-schema';
 
  
  
@@ -45,17 +48,26 @@ export const GET = withApi(
   },
   async ({ request: _request, userId: _userId, organizationId: _organizationId, user: _user, body: _body, query: _query }) => {
 
-          // This would query database to check how many clauses/precedents have embeddings
-          // For now, return a placeholder response
+          const clauseRows = await db
+            .select({ id: cbaClause.id, embedding: cbaClause.embedding })
+            .from(cbaClause);
+          const clauseTotal = clauseRows.length;
+          const clauseWithEmbed = clauseRows.filter((r) => r.embedding !== null).length;
+
+          const precedentRows = await db
+            .select({ id: arbitrationPrecedents.id })
+            .from(arbitrationPrecedents);
+          const precedentTotal = precedentRows.length;
+
           return NextResponse.json({
-            status: 'ready',
+            status: clauseWithEmbed > 0 ? 'ready' : 'pending',
             clauses: {
-              total: 0,
-              withEmbeddings: 0,
-              percentage: 0,
+              total: clauseTotal,
+              withEmbeddings: clauseWithEmbed,
+              percentage: clauseTotal > 0 ? Math.round((clauseWithEmbed / clauseTotal) * 100) : 0,
             },
             precedents: {
-              total: 0,
+              total: precedentTotal,
               withEmbeddings: 0,
               percentage: 0,
             },

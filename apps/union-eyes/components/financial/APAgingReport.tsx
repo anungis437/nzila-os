@@ -1,6 +1,7 @@
 'use client';
 
 import { useState, useEffect } from 'react';
+import { useTranslations } from 'next-intl';
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from '@/components/ui/card';
 import { Table, TableBody, TableCell, TableHead, TableHeader, TableRow } from '@/components/ui/table';
 import { Badge } from '@/components/ui/badge';
@@ -25,6 +26,7 @@ interface APAgingReportProps {
 }
 
 export default function APAgingReport({ organizationId }: APAgingReportProps) {
+  const t = useTranslations('financial.apAging');
   const [agingData, setAgingData] = useState<APAgingData[]>([]);
   const [loading, setLoading] = useState(true);
   const [summary, setSummary] = useState({
@@ -89,8 +91,8 @@ export default function APAgingReport({ organizationId }: APAgingReportProps) {
 
     } catch (_error) {
       toast({
-        title: 'Error',
-        description: 'Failed to load AP aging report',
+        title: t('error'),
+        description: t('loadFailed'),
         variant: 'destructive',
       });
     } finally {
@@ -111,9 +113,9 @@ export default function APAgingReport({ organizationId }: APAgingReportProps) {
     <div className="space-y-6">
       <div className="flex justify-between items-center">
         <div>
-          <h2 className="text-3xl font-bold tracking-tight">Accounts Payable Aging</h2>
+          <h2 className="text-3xl font-bold tracking-tight">{t('title')}</h2>
           <p className="text-muted-foreground">
-            Outstanding vendor invoices by aging period
+            {t('subtitle')}
           </p>
         </div>
       </div>
@@ -122,74 +124,74 @@ export default function APAgingReport({ organizationId }: APAgingReportProps) {
       <div className="grid gap-4 md:grid-cols-6">
         <Card>
           <CardHeader className="pb-2">
-            <CardTitle className="text-sm font-medium">Current</CardTitle>
+            <CardTitle className="text-sm font-medium">{t('current')}</CardTitle>
           </CardHeader>
           <CardContent>
             <div className="text-2xl font-bold">
               ${summary.totalCurrent.toLocaleString()}
             </div>
-            <p className="text-xs text-muted-foreground">0-30 days</p>
+            <p className="text-xs text-muted-foreground">{t('currentPeriod')}</p>
           </CardContent>
         </Card>
 
         <Card>
           <CardHeader className="pb-2">
-            <CardTitle className="text-sm font-medium">1-30 Days</CardTitle>
+            <CardTitle className="text-sm font-medium">{t('period1_30')}</CardTitle>
           </CardHeader>
           <CardContent>
             <div className="text-2xl font-bold">
               ${summary.total1_30.toLocaleString()}
             </div>
-            <p className="text-xs text-muted-foreground text-yellow-600">Attention needed</p>
+            <p className="text-xs text-muted-foreground text-yellow-600">{t('period1_30Desc')}</p>
           </CardContent>
         </Card>
 
         <Card>
           <CardHeader className="pb-2">
-            <CardTitle className="text-sm font-medium">31-60 Days</CardTitle>
+            <CardTitle className="text-sm font-medium">{t('period31_60')}</CardTitle>
           </CardHeader>
           <CardContent>
             <div className="text-2xl font-bold text-orange-600">
               ${summary.total31_60.toLocaleString()}
             </div>
-            <p className="text-xs text-muted-foreground">Overdue</p>
+            <p className="text-xs text-muted-foreground">{t('period31_60Desc')}</p>
           </CardContent>
         </Card>
 
         <Card>
           <CardHeader className="pb-2">
-            <CardTitle className="text-sm font-medium">61-90 Days</CardTitle>
+            <CardTitle className="text-sm font-medium">{t('period61_90')}</CardTitle>
           </CardHeader>
           <CardContent>
             <div className="text-2xl font-bold text-destructive">
               ${summary.total61_90.toLocaleString()}
             </div>
-            <p className="text-xs text-muted-foreground">Critical</p>
+            <p className="text-xs text-muted-foreground">{t('period61_90Desc')}</p>
           </CardContent>
         </Card>
 
         <Card>
           <CardHeader className="pb-2">
-            <CardTitle className="text-sm font-medium">90+ Days</CardTitle>
+            <CardTitle className="text-sm font-medium">{t('period90Plus')}</CardTitle>
           </CardHeader>
           <CardContent>
             <div className="text-2xl font-bold text-destructive">
               ${summary.total90Plus.toLocaleString()}
             </div>
-            <p className="text-xs text-muted-foreground">Very critical</p>
+            <p className="text-xs text-muted-foreground">{t('period90PlusDesc')}</p>
           </CardContent>
         </Card>
 
         <Card className="border-primary">
           <CardHeader className="pb-2">
-            <CardTitle className="text-sm font-medium">Total Due</CardTitle>
+            <CardTitle className="text-sm font-medium">{t('totalDue')}</CardTitle>
             <TrendingUp className="h-4 w-4 text-muted-foreground" />
           </CardHeader>
           <CardContent>
             <div className="text-2xl font-bold">
               ${summary.grandTotal.toLocaleString()}
             </div>
-            <p className="text-xs text-muted-foreground">All vendors</p>
+            <p className="text-xs text-muted-foreground">{t('allVendors')}</p>
           </CardContent>
         </Card>
       </div>
@@ -197,30 +199,30 @@ export default function APAgingReport({ organizationId }: APAgingReportProps) {
       {/* Detailed Table */}
       <Card>
         <CardHeader>
-          <CardTitle>Aging Details by Vendor</CardTitle>
+          <CardTitle>{t('agingDetails')}</CardTitle>
           <CardDescription>
-            Breakdown of payables by vendor and aging bucket
+            {t('agingDetailsDesc')}
           </CardDescription>
         </CardHeader>
         <CardContent>
           {loading ? (
-            <div className="text-center py-8 text-muted-foreground">Loading...</div>
+            <div className="text-center py-8 text-muted-foreground">{t('loading')}</div>
           ) : agingData.length === 0 ? (
             <div className="text-center py-8 text-muted-foreground">
-              No outstanding payables
+              {t('noOutstanding')}
             </div>
           ) : (
             <Table>
               <TableHeader>
                 <TableRow>
-                  <TableHead>Vendor</TableHead>
-                  <TableHead className="text-right">Current</TableHead>
-                  <TableHead className="text-right">1-30 Days</TableHead>
-                  <TableHead className="text-right">31-60 Days</TableHead>
-                  <TableHead className="text-right">61-90 Days</TableHead>
-                  <TableHead className="text-right">90+ Days</TableHead>
-                  <TableHead className="text-right">Total Due</TableHead>
-                  <TableHead>Status</TableHead>
+                  <TableHead>{t('vendor')}</TableHead>
+                  <TableHead className="text-right">{t('current')}</TableHead>
+                  <TableHead className="text-right">{t('period1_30')}</TableHead>
+                  <TableHead className="text-right">{t('period31_60')}</TableHead>
+                  <TableHead className="text-right">{t('period61_90')}</TableHead>
+                  <TableHead className="text-right">{t('period90Plus')}</TableHead>
+                  <TableHead className="text-right">{t('totalDue')}</TableHead>
+                  <TableHead>{t('status')}</TableHead>
                 </TableRow>
               </TableHeader>
               <TableBody>
@@ -250,7 +252,7 @@ export default function APAgingReport({ organizationId }: APAgingReportProps) {
                 ))}
                 {/* Summary Row */}
                 <TableRow className="bg-muted font-bold">
-                  <TableCell>Total</TableCell>
+                  <TableCell>{t('total')}</TableCell>
                   <TableCell className="text-right">
                     ${summary.totalCurrent.toLocaleString()}
                   </TableCell>
@@ -283,16 +285,15 @@ export default function APAgingReport({ organizationId }: APAgingReportProps) {
           <CardHeader>
             <div className="flex items-center gap-2">
               <AlertCircle className="h-5 w-5 text-destructive" />
-              <CardTitle>Critical Overdue Items</CardTitle>
+              <CardTitle>{t('criticalOverdue')}</CardTitle>
             </div>
             <CardDescription>
-              ${(summary.total61_90 + summary.total90Plus).toLocaleString()} in invoices over 60 days
+              {t('criticalOverdueAmount', { amount: (summary.total61_90 + summary.total90Plus).toLocaleString() })}
             </CardDescription>
           </CardHeader>
           <CardContent>
             <p className="text-sm">
-              Immediate action required to avoid late fees and maintain vendor relationships.
-              Consider prioritizing payment of the oldest invoices.
+              {t('criticalOverdueAction')}
             </p>
           </CardContent>
         </Card>

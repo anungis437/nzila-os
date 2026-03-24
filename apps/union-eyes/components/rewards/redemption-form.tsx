@@ -2,7 +2,7 @@
 
 import { useState } from 'react';
 import { useRouter } from 'next/navigation';
-import { useTranslations } from 'next-intl';
+import { useTranslations, useLocale } from 'next-intl';
 import { Button } from '@/components/ui/button';
 import { Input } from '@/components/ui/input';
 import { Label } from '@/components/ui/label';
@@ -23,6 +23,7 @@ interface RedemptionFormProps {
 
 export function RedemptionForm({ balance, mode, userId: _userId, orgId: _orgId }: RedemptionFormProps) {
   const t = useTranslations('rewards.redeem.form');
+  const locale = useLocale();
   const router = useRouter();
   const [loading, setLoading] = useState(false);
   const [error, setError] = useState<string | null>(null);
@@ -71,7 +72,7 @@ export function RedemptionForm({ balance, mode, userId: _userId, orgId: _orgId }
         window.location.href = safeUrl;
       } else {
         // Manual mode or no checkout URL: redirect to wallet with success message
-        router.push('/dashboard/rewards?redemption=success');
+        router.push(`/${locale}/dashboard/rewards?redemption=success`);
       }
     } catch (err) {
       setError((err as Error).message || t('errors.unknown', { defaultValue: 'An error occurred' }));

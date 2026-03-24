@@ -60,6 +60,7 @@ import {
  
  
 import { Textarea } from "@/components/ui/textarea";
+import { useTranslations } from "next-intl";
 
 // Eligibility rule schema
 const eligibilityRuleSchema = z.object({
@@ -144,6 +145,7 @@ export function VoterEligibilityManager({
   const [filterStatus, setFilterStatus] = React.useState<"all" | "eligible" | "ineligible">(
     "all"
   );
+  const t = useTranslations("voting.eligibility");
 
   const form = useForm<EligibilityConfig>({
     resolver: zodResolver(eligibilityConfigSchema),
@@ -224,41 +226,41 @@ export function VoterEligibilityManager({
         <Card>
           <CardContent className="p-6">
             <div className="text-2xl font-bold">{members.length}</div>
-            <div className="text-sm text-gray-600">Total Members</div>
+            <div className="text-sm text-gray-600">{t("totalMembers")}</div>
           </CardContent>
         </Card>
         <Card>
           <CardContent className="p-6">
             <div className="text-2xl font-bold text-green-600">{eligibilityStats.eligible}</div>
-            <div className="text-sm text-gray-600">Eligible Voters</div>
+            <div className="text-sm text-gray-600">{t("eligibleVoters")}</div>
           </CardContent>
         </Card>
         <Card>
           <CardContent className="p-6">
             <div className="text-2xl font-bold text-red-600">{eligibilityStats.ineligible}</div>
-            <div className="text-sm text-gray-600">Ineligible</div>
+            <div className="text-sm text-gray-600">{t("ineligible")}</div>
           </CardContent>
         </Card>
         <Card>
           <CardContent className="p-6">
             <div className="text-2xl font-bold text-orange-600">{eligibilityStats.overridden}</div>
-            <div className="text-sm text-gray-600">Manual Overrides</div>
+            <div className="text-sm text-gray-600">{t("manualOverrides")}</div>
           </CardContent>
         </Card>
       </div>
 
       <Tabs defaultValue="rules" className="w-full">
         <TabsList>
-          <TabsTrigger value="rules">Eligibility Rules</TabsTrigger>
-          <TabsTrigger value="members">Member Status</TabsTrigger>
-          <TabsTrigger value="report">Report</TabsTrigger>
+          <TabsTrigger value="rules">{t("rulesTab")}</TabsTrigger>
+          <TabsTrigger value="members">{t("membersTab")}</TabsTrigger>
+          <TabsTrigger value="report">{t("reportTab")}</TabsTrigger>
         </TabsList>
 
         {/* Rules Configuration */}
         <TabsContent value="rules">
           <Card>
             <CardHeader>
-              <CardTitle>Configure Eligibility Rules</CardTitle>
+              <CardTitle>{t("rulesTitle")}</CardTitle>
             </CardHeader>
             <CardContent>
               <Form {...form}>
@@ -267,7 +269,7 @@ export function VoterEligibilityManager({
                     {fields.map((field, index) => (
                       <div key={field.id} className="border rounded-lg p-4 space-y-4">
                         <div className="flex items-start justify-between">
-                          <h4 className="font-medium">Rule {index + 1}</h4>
+                          <h4 className="font-medium">{t("ruleNumber", { number: index + 1 })}</h4>
                           <Button
                             type="button"
                             variant="ghost"
@@ -285,7 +287,7 @@ export function VoterEligibilityManager({
                             name={`rules.${index}.field`}
                             render={({ field }) => (
                               <FormItem>
-                                <FormLabel>Field</FormLabel>
+                                <FormLabel>{t("fieldLabel")}</FormLabel>
                                 <Select
                                   onValueChange={field.onChange}
                                   defaultValue={field.value}
@@ -297,16 +299,16 @@ export function VoterEligibilityManager({
                                   </FormControl>
                                   <SelectContent>
                                     <SelectItem value="membershipStatus">
-                                      Membership Status
+                                      {t("fieldMembershipStatus")}
                                     </SelectItem>
                                     <SelectItem value="membershipDuration">
-                                      Membership Duration
+                                      {t("fieldMembershipDuration")}
                                     </SelectItem>
-                                    <SelectItem value="duesStatus">Dues Status</SelectItem>
-                                    <SelectItem value="jobStatus">Job Status</SelectItem>
-                                    <SelectItem value="chapter">Chapter</SelectItem>
-                                    <SelectItem value="workLocation">Work Location</SelectItem>
-                                    <SelectItem value="memberType">Member Type</SelectItem>
+                                    <SelectItem value="duesStatus">{t("fieldDuesStatus")}</SelectItem>
+                                    <SelectItem value="jobStatus">{t("fieldJobStatus")}</SelectItem>
+                                    <SelectItem value="chapter">{t("fieldChapter")}</SelectItem>
+                                    <SelectItem value="workLocation">{t("fieldWorkLocation")}</SelectItem>
+                                    <SelectItem value="memberType">{t("fieldMemberType")}</SelectItem>
                                   </SelectContent>
                                 </Select>
                                 <FormMessage />
@@ -319,7 +321,7 @@ export function VoterEligibilityManager({
                             name={`rules.${index}.operator`}
                             render={({ field }) => (
                               <FormItem>
-                                <FormLabel>Operator</FormLabel>
+                                <FormLabel>{t("operatorLabel")}</FormLabel>
                                 <Select
                                   onValueChange={field.onChange}
                                   defaultValue={field.value}
@@ -330,12 +332,12 @@ export function VoterEligibilityManager({
                                     </SelectTrigger>
                                   </FormControl>
                                   <SelectContent>
-                                    <SelectItem value="equals">Equals</SelectItem>
-                                    <SelectItem value="notEquals">Not Equals</SelectItem>
-                                    <SelectItem value="greaterThan">Greater Than</SelectItem>
-                                    <SelectItem value="lessThan">Less Than</SelectItem>
-                                    <SelectItem value="contains">Contains</SelectItem>
-                                    <SelectItem value="in">In List</SelectItem>
+                                    <SelectItem value="equals">{t("operatorEquals")}</SelectItem>
+                                    <SelectItem value="notEquals">{t("operatorNotEquals")}</SelectItem>
+                                    <SelectItem value="greaterThan">{t("operatorGreaterThan")}</SelectItem>
+                                    <SelectItem value="lessThan">{t("operatorLessThan")}</SelectItem>
+                                    <SelectItem value="contains">{t("operatorContains")}</SelectItem>
+                                    <SelectItem value="in">{t("operatorInList")}</SelectItem>
                                   </SelectContent>
                                 </Select>
                                 <FormMessage />
@@ -348,9 +350,9 @@ export function VoterEligibilityManager({
                             name={`rules.${index}.value`}
                             render={({ field }) => (
                               <FormItem>
-                                <FormLabel>Value</FormLabel>
+                                <FormLabel>{t("valueLabel")}</FormLabel>
                                 <FormControl>
-                                  <Input {...field} placeholder="Enter value..." />
+                                  <Input {...field} placeholder={t("valuePlaceholder")} />
                                 </FormControl>
                                 <FormMessage />
                               </FormItem>
@@ -363,9 +365,9 @@ export function VoterEligibilityManager({
                           name={`rules.${index}.description`}
                           render={({ field }) => (
                             <FormItem>
-                              <FormLabel>Description (Optional)</FormLabel>
+                              <FormLabel>{t("descriptionLabel")}</FormLabel>
                               <FormControl>
-                                <Input {...field} placeholder="Explain this rule..." />
+                                <Input {...field} placeholder={t("descriptionPlaceholder")} />
                               </FormControl>
                               <FormMessage />
                             </FormItem>
@@ -388,7 +390,7 @@ export function VoterEligibilityManager({
                     }
                   >
                     <Plus className="h-4 w-4 mr-2" />
-                    Add Rule
+                    {t("addRuleButton")}
                   </Button>
 
                   <div className="space-y-4 border-t pt-4">
@@ -398,9 +400,9 @@ export function VoterEligibilityManager({
                       render={({ field }) => (
                         <FormItem className="flex items-center justify-between rounded-lg border p-4">
                           <div className="space-y-0.5">
-                            <FormLabel>Require All Rules</FormLabel>
+                            <FormLabel>{t("requireAllRulesLabel")}</FormLabel>
                             <FormDescription>
-                              Member must satisfy all rules (AND logic) vs any rule (OR logic)
+                              {t("requireAllRulesHelp")}
                             </FormDescription>
                           </div>
                           <FormControl>
@@ -419,9 +421,9 @@ export function VoterEligibilityManager({
                       render={({ field }) => (
                         <FormItem className="flex items-center justify-between rounded-lg border p-4">
                           <div className="space-y-0.5">
-                            <FormLabel>Allow Manual Override</FormLabel>
+                            <FormLabel>{t("allowOverrideLabel")}</FormLabel>
                             <FormDescription>
-                              Administrators can manually override eligibility decisions
+                              {t("allowOverrideHelp")}
                             </FormDescription>
                           </div>
                           <FormControl>
@@ -440,9 +442,9 @@ export function VoterEligibilityManager({
                       render={({ field }) => (
                         <FormItem className="flex items-center justify-between rounded-lg border p-4">
                           <div className="space-y-0.5">
-                            <FormLabel>Send Notifications</FormLabel>
+                            <FormLabel>{t("notificationsLabel")}</FormLabel>
                             <FormDescription>
-                              Notify members about their eligibility status
+                              {t("notificationsHelp")}
                             </FormDescription>
                           </div>
                           <FormControl>
@@ -458,7 +460,7 @@ export function VoterEligibilityManager({
 
                   <div className="flex gap-2">
                     <Button type="submit" disabled={isLoading}>
-                      Save Configuration
+                      {t("saveConfigButton")}
                     </Button>
                     <Button
                       type="button"
@@ -466,7 +468,7 @@ export function VoterEligibilityManager({
                       onClick={checkAllEligibility}
                       disabled={isLoading}
                     >
-                      Check All Members
+                      {t("checkAllButton")}
                     </Button>
                   </div>
                 </form>
@@ -480,11 +482,11 @@ export function VoterEligibilityManager({
           <Card>
             <CardHeader>
               <div className="flex items-center justify-between">
-                <CardTitle>Member Eligibility Status</CardTitle>
+                <CardTitle>{t("memberStatusTitle")}</CardTitle>
                 <div className="flex gap-2">
                   <Button variant="outline" size="sm">
                     <Download className="h-4 w-4 mr-2" />
-                    Export
+                    {t("exportButton")}
                   </Button>
                 </div>
               </div>
@@ -496,7 +498,7 @@ export function VoterEligibilityManager({
                   <div className="relative flex-1">
                     <Search className="absolute left-3 top-1/2 -translate-y-1/2 h-4 w-4 text-gray-400" />
                     <Input
-                      placeholder="Search members..."
+                      placeholder={t("searchPlaceholder")}
                       value={searchTerm}
                       onChange={(e) => setSearchTerm(e.target.value)}
                       className="pl-10"
@@ -512,9 +514,9 @@ export function VoterEligibilityManager({
                       <SelectValue />
                     </SelectTrigger>
                     <SelectContent>
-                      <SelectItem value="all">All Members</SelectItem>
-                      <SelectItem value="eligible">Eligible Only</SelectItem>
-                      <SelectItem value="ineligible">Ineligible Only</SelectItem>
+                      <SelectItem value="all">{t("filterAll")}</SelectItem>
+                      <SelectItem value="eligible">{t("filterEligible")}</SelectItem>
+                      <SelectItem value="ineligible">{t("filterIneligible")}</SelectItem>
                     </SelectContent>
                   </Select>
                 </div>
@@ -543,7 +545,7 @@ export function VoterEligibilityManager({
         <TabsContent value="report">
           <Card>
             <CardHeader>
-              <CardTitle>Eligibility Report</CardTitle>
+              <CardTitle>{t("reportTitle")}</CardTitle>
             </CardHeader>
             <CardContent>
               <EligibilityReport
@@ -574,6 +576,7 @@ function MemberEligibilityRow({
   const [showOverrideDialog, setShowOverrideDialog] = React.useState(false);
   const [overrideReason, setOverrideReason] = React.useState("");
   const [isSubmitting, setIsSubmitting] = React.useState(false);
+  const t = useTranslations("voting.eligibility");
 
   const handleOverride = async (eligible: boolean) => {
     setIsSubmitting(true);
@@ -599,13 +602,13 @@ function MemberEligibilityRow({
                 ) : (
                   <XCircle className="h-3 w-3 mr-1" />
                 )}
-                {result.eligible ? "Eligible" : "Ineligible"}
+                {result.eligible ? t("badgeEligible") : t("badgeIneligible")}
               </Badge>
             )}
             {result?.manualOverride?.overridden && (
               <Badge variant="outline">
                 <AlertCircle className="h-3 w-3 mr-1" />
-                Manual Override
+                {t("badgeOverride")}
               </Badge>
             )}
           </div>
@@ -621,7 +624,7 @@ function MemberEligibilityRow({
           )}
           {result?.manualOverride?.overridden && (
             <div className="mt-2 text-sm text-orange-600">
-              Override by {result.manualOverride.by}: {result.manualOverride.reason}
+              {t("overrideBy", { name: result.manualOverride.by })}: {result.manualOverride.reason}
             </div>
           )}
         </div>
@@ -629,21 +632,21 @@ function MemberEligibilityRow({
           <Dialog open={showOverrideDialog} onOpenChange={setShowOverrideDialog}>
             <DialogTrigger asChild>
               <Button variant="outline" size="sm">
-                Override
+                {t("overrideButton")}
               </Button>
             </DialogTrigger>
             <DialogContent>
               <DialogHeader>
-                <DialogTitle>Override Eligibility</DialogTitle>
+                <DialogTitle>{t("overrideDialogTitle")}</DialogTitle>
               </DialogHeader>
               <div className="space-y-4">
                 <div>
                   <p className="text-sm text-gray-600">
-                    Override eligibility decision for {member.name}
+                    {t("overrideDialogDescription", { name: member.name })}
                   </p>
                 </div>
                 <Textarea
-                  placeholder="Reason for override..."
+                  placeholder={t("overrideReasonPlaceholder")}
                   value={overrideReason}
                   onChange={(e) => setOverrideReason(e.target.value)}
                   rows={4}
@@ -654,7 +657,7 @@ function MemberEligibilityRow({
                     disabled={!overrideReason || isSubmitting}
                     className="flex-1"
                   >
-                    Mark Eligible
+                    {t("markEligible")}
                   </Button>
                   <Button
                     onClick={() => handleOverride(false)}
@@ -662,7 +665,7 @@ function MemberEligibilityRow({
                     variant="destructive"
                     className="flex-1"
                   >
-                    Mark Ineligible
+                    {t("markIneligible")}
                   </Button>
                 </div>
               </div>
@@ -685,36 +688,37 @@ function EligibilityReport({
   results: EligibilityResult[];
   members: Member[];
 }) {
+  const t = useTranslations("voting.eligibility");
   return (
     <div className="space-y-6">
       <div>
-        <h3 className="font-semibold mb-4">Summary</h3>
+        <h3 className="font-semibold mb-4">{t("reportSummary")}</h3>
         <div className="space-y-2">
           <div className="flex justify-between">
-            <span>Total Members:</span>
+            <span>{t("reportTotalMembers")}:</span>
             <span className="font-medium">{stats.total}</span>
           </div>
           <div className="flex justify-between text-green-600">
-            <span>Eligible Voters:</span>
+            <span>{t("reportEligible")}:</span>
             <span className="font-medium">
               {stats.eligible} ({((stats.eligible / stats.total) * 100).toFixed(1)}%)
             </span>
           </div>
           <div className="flex justify-between text-red-600">
-            <span>Ineligible:</span>
+            <span>{t("reportIneligible")}:</span>
             <span className="font-medium">
               {stats.ineligible} ({((stats.ineligible / stats.total) * 100).toFixed(1)}%)
             </span>
           </div>
           <div className="flex justify-between text-orange-600">
-            <span>Manual Overrides:</span>
+            <span>{t("reportOverrides")}:</span>
             <span className="font-medium">{stats.overridden}</span>
           </div>
         </div>
       </div>
 
       <div>
-        <h3 className="font-semibold mb-4">Active Rules</h3>
+        <h3 className="font-semibold mb-4">{t("reportActiveRules")}</h3>
         <div className="space-y-2">
           {rules.map((rule, index) => (
             <div key={index} className="p-3 bg-gray-50 rounded-lg">
@@ -732,7 +736,7 @@ function EligibilityReport({
 
       <Button className="w-full">
         <Download className="h-4 w-4 mr-2" />
-        Download Full Report
+        {t("downloadReport")}
       </Button>
     </div>
   );

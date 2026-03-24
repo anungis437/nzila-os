@@ -8,6 +8,7 @@ import type { Metadata } from "next";
 import { OrganizationProvider } from "@/contexts/organization-context";
 import { CookieConsentProvider } from "@/components/gdpr/cookie-consent-provider";
 import { Poppins } from 'next/font/google';
+import { getLocale } from 'next-intl/server';
 import './globals.css';
 
 export const dynamic = 'force-dynamic'
@@ -29,12 +30,13 @@ export async function generateMetadata(): Promise<Metadata> {
   };
 }
 
-export default function RootLayout({ children }: { children: React.ReactNode }) {
+export default async function RootLayout({ children }: { children: React.ReactNode }) {
   // Note: Profile creation/claiming is now handled in protected routes
   // to avoid calling auth() in the root layout which causes middleware detection issues
+  const locale = await getLocale();
 
   return (
-    <html lang="en" suppressHydrationWarning>
+    <html lang={locale} suppressHydrationWarning>
       <body className={poppins.className} suppressHydrationWarning>
         <ClerkProvider
           signInUrl="/sign-in"

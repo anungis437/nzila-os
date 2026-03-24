@@ -15,6 +15,7 @@
 
 import * as React from "react";
 import { useRouter } from "next/navigation";
+import { useLocale } from "next-intl";
 import { Button } from "@/components/ui/button";
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "@/components/ui/card";
 import { Progress } from "@/components/ui/progress";
@@ -76,6 +77,7 @@ const STEPS = [
 
 export function StewardOnboardingWizard() {
   const router = useRouter();
+  const locale = useLocale();
   const [currentStep, setCurrentStep] = React.useState(0);
   const [data, setData] = React.useState<StewardOnboardingData>({
     chapter: "",
@@ -109,12 +111,12 @@ export function StewardOnboardingWizard() {
     if (typeof window !== 'undefined') {
       localStorage.setItem('steward_onboarding_completed', new Date().toISOString());
     }
-    router.push('/dashboard');
+    router.push(`/${locale}/dashboard`);
   };
 
   const handleSkip = () => {
     logger.info("Steward onboarding skipped");
-    router.push('/dashboard');
+    router.push(`/${locale}/dashboard`);
   };
 
   return (

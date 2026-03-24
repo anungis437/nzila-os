@@ -64,6 +64,7 @@ import { Textarea } from "@/components/ui/textarea";
 import { Badge } from "@/components/ui/badge";
 import { useToast } from "@/components/ui/use-toast";
 import { createBargainingUnitSchema } from "@/lib/validation/union-structure-schemas";
+import { useTranslations } from "next-intl";
 
 // Form schema (omit audit fields)
 const formSchema = createBargainingUnitSchema.omit({
@@ -109,6 +110,7 @@ export function BargainingUnitManagement({
   organizationId,
   onUpdate,
 }: BargainingUnitManagementProps) {
+  const t = useTranslations("unionStructure.bargainingUnits");
   const [units, setUnits] = useState<BargainingUnit[]>([]);
   const [employers, setEmployers] = useState<Employer[]>([]);
   const [worksites, setWorksites] = useState<Worksite[]>([]);
@@ -156,8 +158,8 @@ export function BargainingUnitManagement({
       setUnits(data.data || []);
     } catch (_error) {
       toast({
-        title: "Error",
-        description: "Failed to load bargaining units",
+        title: t("errorTitle"),
+        description: t("failedToLoad"),
         variant: "destructive",
       });
     } finally {
@@ -247,7 +249,7 @@ export function BargainingUnitManagement({
   };
 
   const handleDelete = async (id: string) => {
-    if (!confirm("Are you sure you want to delete this bargaining unit?"))
+    if (!confirm(t("deleteConfirm")))
       return;
 
     try {
@@ -258,16 +260,16 @@ export function BargainingUnitManagement({
       if (!response.ok) throw new Error("Failed to delete bargaining unit");
 
       toast({
-        title: "Success",
-        description: "Bargaining unit deleted successfully",
+        title: t("successTitle"),
+        description: t("deletedSuccess"),
       });
 
       await fetchUnits();
       onUpdate?.();
     } catch (_error) {
       toast({
-        title: "Error",
-        description: "Failed to delete bargaining unit",
+        title: t("errorTitle"),
+        description: t("failedToDelete"),
         variant: "destructive",
       });
     }
@@ -309,8 +311,8 @@ export function BargainingUnitManagement({
       }
 
       toast({
-        title: "Success",
-        description: `Bargaining unit ${editingUnit ? "updated" : "created"} successfully`,
+        title: t("successTitle"),
+        description: editingUnit ? t("updatedSuccess") : t("createdSuccess"),
       });
 
       setDialogOpen(false);
@@ -318,9 +320,9 @@ export function BargainingUnitManagement({
       onUpdate?.();
     } catch (error) {
       toast({
-        title: "Error",
+        title: t("errorTitle"),
         description:
-          error instanceof Error ? error.message : "Failed to save bargaining unit",
+          error instanceof Error ? error.message : t("failedToSave"),
         variant: "destructive",
       });
     }
@@ -369,14 +371,14 @@ export function BargainingUnitManagement({
       <Card>
         <CardHeader className="flex flex-row items-center justify-between space-y-0 pb-4">
           <div>
-            <CardTitle>Bargaining Units</CardTitle>
+            <CardTitle>{t("title")}</CardTitle>
             <CardDescription>
-              Manage certified bargaining units and their memberships
+              {t("description")}
             </CardDescription>
           </div>
           <Button onClick={handleCreate}>
             <Plus className="mr-2 h-4 w-4" />
-            Add Unit
+            {t("addUnit")}
           </Button>
         </CardHeader>
         <CardContent>
@@ -384,7 +386,7 @@ export function BargainingUnitManagement({
             <div className="relative">
               <Search className="absolute left-2 top-2.5 h-4 w-4 text-muted-foreground" />
               <Input
-                placeholder="Search bargaining units..."
+                placeholder={t("searchPlaceholder")}
                 value={searchQuery}
                 onChange={(e) => setSearchQuery(e.target.value)}
                 className="pl-8"
@@ -394,30 +396,30 @@ export function BargainingUnitManagement({
 
           {loading ? (
             <div className="flex items-center justify-center py-8">
-              <p className="text-sm text-muted-foreground">Loading...</p>
+              <p className="text-sm text-muted-foreground">{t("loading")}</p>
             </div>
           ) : filteredUnits.length === 0 ? (
             <div className="flex flex-col items-center justify-center py-8">
               <Building2 className="mb-2 h-8 w-8 text-muted-foreground" />
               <p className="text-sm text-muted-foreground">
                 {searchQuery
-                  ? "No bargaining units found"
-                  : "No bargaining units yet"}
+                  ? t("noUnitsFound")
+                  : t("noUnitsYet")}
               </p>
             </div>
           ) : (
             <Table>
               <TableHeader>
                 <TableRow>
-                  <TableHead>Name</TableHead>
-                  <TableHead>Unit #</TableHead>
-                  <TableHead>Type</TableHead>
-                  <TableHead>Employer</TableHead>
-                  <TableHead>Worksite</TableHead>
-                  <TableHead>Members</TableHead>
-                  <TableHead>Contract Expiry</TableHead>
-                  <TableHead>Status</TableHead>
-                  <TableHead className="w-[70px]">Actions</TableHead>
+                  <TableHead>{t("headerName")}</TableHead>
+                  <TableHead>{t("headerUnitNumber")}</TableHead>
+                  <TableHead>{t("headerType")}</TableHead>
+                  <TableHead>{t("headerEmployer")}</TableHead>
+                  <TableHead>{t("headerWorksite")}</TableHead>
+                  <TableHead>{t("headerMembers")}</TableHead>
+                  <TableHead>{t("headerContractExpiry")}</TableHead>
+                  <TableHead>{t("headerStatus")}</TableHead>
+                  <TableHead className="w-[70px]">{t("headerActions")}</TableHead>
                 </TableRow>
               </TableHeader>
               <TableBody>
@@ -452,14 +454,14 @@ export function BargainingUnitManagement({
                         <DropdownMenuContent align="end">
                           <DropdownMenuItem onClick={() => handleEdit(unit)}>
                             <Pencil className="mr-2 h-4 w-4" />
-                            Edit
+                            {t("editButton")}
                           </DropdownMenuItem>
                           <DropdownMenuItem
                             onClick={() => handleDelete(unit.id)}
                             className="text-destructive"
                           >
                             <Trash2 className="mr-2 h-4 w-4" />
-                            Delete
+                            {t("deleteButton")}
                           </DropdownMenuItem>
                         </DropdownMenuContent>
                       </DropdownMenu>
@@ -476,12 +478,12 @@ export function BargainingUnitManagement({
         <DialogContent className="max-w-2xl max-h-[90vh] overflow-y-auto">
           <DialogHeader>
             <DialogTitle>
-              {editingUnit ? "Edit Bargaining Unit" : "Create Bargaining Unit"}
+              {editingUnit ? t("editDialogTitle") : t("createDialogTitle")}
             </DialogTitle>
             <DialogDescription>
               {editingUnit
-                ? "Update bargaining unit information"
-                : "Add a new bargaining unit to your organization"}
+                ? t("editDialogDescription")
+                : t("createDialogDescription")}
             </DialogDescription>
           </DialogHeader>
 
@@ -489,21 +491,21 @@ export function BargainingUnitManagement({
             <form onSubmit={form.handleSubmit(onSubmit)} className="space-y-6">
               {/* Basic Information */}
               <div className="space-y-4">
-                <h3 className="text-sm font-medium">Basic Information</h3>
+                <h3 className="text-sm font-medium">{t("basicInformation")}</h3>
 
                 <FormField
                   control={form.control}
                   name="employerId"
                   render={({ field }) => (
                     <FormItem>
-                      <FormLabel>Employer *</FormLabel>
+                      <FormLabel>{t("employerLabel")} *</FormLabel>
                       <Select
                         onValueChange={field.onChange}
                         defaultValue={field.value}
                       >
                         <FormControl>
                           <SelectTrigger>
-                            <SelectValue placeholder="Select employer" />
+                            <SelectValue placeholder={t("employerPlaceholder")} />
                           </SelectTrigger>
                         </FormControl>
                         <SelectContent>
@@ -524,14 +526,14 @@ export function BargainingUnitManagement({
                   name="worksiteId"
                   render={({ field }) => (
                     <FormItem>
-                      <FormLabel>Worksite</FormLabel>
+                      <FormLabel>{t("worksiteLabel")}</FormLabel>
                       <Select
                         onValueChange={field.onChange}
                         value={field.value || ""}
                       >
                         <FormControl>
                           <SelectTrigger>
-                            <SelectValue placeholder="Select worksite (optional)" />
+                            <SelectValue placeholder={t("worksitePlaceholder")} />
                           </SelectTrigger>
                         </FormControl>
                         <SelectContent>
@@ -543,7 +545,7 @@ export function BargainingUnitManagement({
                         </SelectContent>
                       </Select>
                       <FormDescription>
-                        Optional - leave blank if unit spans multiple worksites
+                        {t("worksiteDescription")}
                       </FormDescription>
                       <FormMessage />
                     </FormItem>
@@ -555,10 +557,10 @@ export function BargainingUnitManagement({
                   name="name"
                   render={({ field }) => (
                     <FormItem>
-                      <FormLabel>Unit Name *</FormLabel>
+                      <FormLabel>{t("unitNameLabel")} *</FormLabel>
                       <FormControl>
                         <Input
-                          placeholder="e.g., Maintenance Workers Unit"
+                          placeholder={t("unitNamePlaceholder")}
                           {...field}
                         />
                       </FormControl>
@@ -573,9 +575,9 @@ export function BargainingUnitManagement({
                     name="unitNumber"
                     render={({ field }) => (
                       <FormItem>
-                        <FormLabel>Unit Number</FormLabel>
+                        <FormLabel>{t("unitNumberLabel")}</FormLabel>
                         <FormControl>
-                          <Input placeholder="e.g., 123" {...field} />
+                          <Input placeholder={t("unitNumberPlaceholder")} {...field} />
                         </FormControl>
                         <FormMessage />
                       </FormItem>
@@ -587,7 +589,7 @@ export function BargainingUnitManagement({
                     name="memberCount"
                     render={({ field }) => (
                       <FormItem>
-                        <FormLabel>Member Count</FormLabel>
+                        <FormLabel>{t("memberCountLabel")}</FormLabel>
                         <FormControl>
                           <Input
                             type="number"
@@ -610,7 +612,7 @@ export function BargainingUnitManagement({
                     name="unitType"
                     render={({ field }) => (
                       <FormItem>
-                        <FormLabel>Unit Type *</FormLabel>
+                        <FormLabel>{t("unitTypeLabel")} *</FormLabel>
                         <Select
                           onValueChange={field.onChange}
                           defaultValue={field.value}
@@ -621,14 +623,14 @@ export function BargainingUnitManagement({
                             </SelectTrigger>
                           </FormControl>
                           <SelectContent>
-                            <SelectItem value="full_time">Full-Time</SelectItem>
-                            <SelectItem value="part_time">Part-Time</SelectItem>
-                            <SelectItem value="casual">Casual</SelectItem>
-                            <SelectItem value="mixed">Mixed</SelectItem>
-                            <SelectItem value="craft">Craft</SelectItem>
-                            <SelectItem value="industrial">Industrial</SelectItem>
+                            <SelectItem value="full_time">{t("typeFullTime")}</SelectItem>
+                            <SelectItem value="part_time">{t("typePartTime")}</SelectItem>
+                            <SelectItem value="casual">{t("typeCasual")}</SelectItem>
+                            <SelectItem value="mixed">{t("typeMixed")}</SelectItem>
+                            <SelectItem value="craft">{t("typeCraft")}</SelectItem>
+                            <SelectItem value="industrial">{t("typeIndustrial")}</SelectItem>
                             <SelectItem value="professional">
-                              Professional
+                              {t("typeProfessional")}
                             </SelectItem>
                           </SelectContent>
                         </Select>
@@ -642,7 +644,7 @@ export function BargainingUnitManagement({
                     name="status"
                     render={({ field }) => (
                       <FormItem>
-                        <FormLabel>Status *</FormLabel>
+                        <FormLabel>{t("statusLabel")} *</FormLabel>
                         <Select
                           onValueChange={field.onChange}
                           defaultValue={field.value}
@@ -653,16 +655,16 @@ export function BargainingUnitManagement({
                             </SelectTrigger>
                           </FormControl>
                           <SelectContent>
-                            <SelectItem value="active">Active</SelectItem>
+                            <SelectItem value="active">{t("statusActive")}</SelectItem>
                             <SelectItem value="under_certification">
-                              Under Certification
+                              {t("statusUnderCertification")}
                             </SelectItem>
                             <SelectItem value="decertified">
-                              Decertified
+                              {t("statusDecertified")}
                             </SelectItem>
-                            <SelectItem value="merged">Merged</SelectItem>
-                            <SelectItem value="inactive">Inactive</SelectItem>
-                            <SelectItem value="archived">Archived</SelectItem>
+                            <SelectItem value="merged">{t("statusMerged")}</SelectItem>
+                            <SelectItem value="inactive">{t("statusInactive")}</SelectItem>
+                            <SelectItem value="archived">{t("statusArchived")}</SelectItem>
                           </SelectContent>
                         </Select>
                         <FormMessage />
@@ -674,7 +676,7 @@ export function BargainingUnitManagement({
 
               {/* Certification Information */}
               <div className="space-y-4">
-                <h3 className="text-sm font-medium">Certification</h3>
+                <h3 className="text-sm font-medium">{t("certificationSection")}</h3>
 
                 <div className="grid grid-cols-2 gap-4">
                   <FormField
@@ -682,9 +684,9 @@ export function BargainingUnitManagement({
                     name="certificationNumber"
                     render={({ field }) => (
                       <FormItem>
-                        <FormLabel>Certification Number</FormLabel>
+                        <FormLabel>{t("certificationNumberLabel")}</FormLabel>
                         <FormControl>
-                          <Input placeholder="e.g., CERT-2024-001" {...field} />
+                          <Input placeholder={t("certificationNumberPlaceholder")} {...field} />
                         </FormControl>
                         <FormMessage />
                       </FormItem>
@@ -696,9 +698,9 @@ export function BargainingUnitManagement({
                     name="certificationBody"
                     render={({ field }) => (
                       <FormItem>
-                        <FormLabel>Certification Body</FormLabel>
+                        <FormLabel>{t("certificationBodyLabel")}</FormLabel>
                         <FormControl>
-                          <Input placeholder="e.g., OLRB" {...field} />
+                          <Input placeholder={t("certificationBodyPlaceholder")} {...field} />
                         </FormControl>
                         <FormMessage />
                       </FormItem>
@@ -712,7 +714,7 @@ export function BargainingUnitManagement({
                     name="certificationDate"
                     render={({ field }) => (
                       <FormItem>
-                        <FormLabel>Certification Date</FormLabel>
+                        <FormLabel>{t("certificationDateLabel")}</FormLabel>
                         <FormControl>
                           <Input type="date" {...field} />
                         </FormControl>
@@ -726,7 +728,7 @@ export function BargainingUnitManagement({
                     name="certificationExpiryDate"
                     render={({ field }) => (
                       <FormItem>
-                        <FormLabel>Certification Expiry</FormLabel>
+                        <FormLabel>{t("certificationExpiryLabel")}</FormLabel>
                         <FormControl>
                           <Input type="date" {...field} />
                         </FormControl>
@@ -739,7 +741,7 @@ export function BargainingUnitManagement({
 
               {/* Bargaining Information */}
               <div className="space-y-4">
-                <h3 className="text-sm font-medium">Bargaining</h3>
+                <h3 className="text-sm font-medium">{t("bargainingSection")}</h3>
 
                 <div className="grid grid-cols-2 gap-4">
                   <FormField
@@ -747,7 +749,7 @@ export function BargainingUnitManagement({
                     name="contractExpiryDate"
                     render={({ field }) => (
                       <FormItem>
-                        <FormLabel>Contract Expiry Date</FormLabel>
+                        <FormLabel>{t("contractExpiryLabel")}</FormLabel>
                         <FormControl>
                           <Input type="date" {...field} />
                         </FormControl>
@@ -761,7 +763,7 @@ export function BargainingUnitManagement({
                     name="nextBargainingDate"
                     render={({ field }) => (
                       <FormItem>
-                        <FormLabel>Next Bargaining Date</FormLabel>
+                        <FormLabel>{t("nextBargainingLabel")}</FormLabel>
                         <FormControl>
                           <Input type="date" {...field} />
                         </FormControl>
@@ -774,17 +776,17 @@ export function BargainingUnitManagement({
 
               {/* Additional Information */}
               <div className="space-y-4">
-                <h3 className="text-sm font-medium">Additional Information</h3>
+                <h3 className="text-sm font-medium">{t("additionalInfoSection")}</h3>
 
                 <FormField
                   control={form.control}
                   name="description"
                   render={({ field }) => (
                     <FormItem>
-                      <FormLabel>Description</FormLabel>
+                      <FormLabel>{t("descriptionLabel")}</FormLabel>
                       <FormControl>
                         <Textarea
-                          placeholder="Brief description of the bargaining unit..."
+                          placeholder={t("descriptionPlaceholder")}
                           rows={3}
                           {...field}
                         />
@@ -799,10 +801,10 @@ export function BargainingUnitManagement({
                   name="notes"
                   render={({ field }) => (
                     <FormItem>
-                      <FormLabel>Notes</FormLabel>
+                      <FormLabel>{t("notesLabel")}</FormLabel>
                       <FormControl>
                         <Textarea
-                          placeholder="Internal notes..."
+                          placeholder={t("notesPlaceholder")}
                           rows={2}
                           {...field}
                         />
@@ -819,10 +821,10 @@ export function BargainingUnitManagement({
                   variant="outline"
                   onClick={() => setDialogOpen(false)}
                 >
-                  Cancel
+                  {t("cancelButton")}
                 </Button>
                 <Button type="submit">
-                  {editingUnit ? "Update" : "Create"} Unit
+                  {editingUnit ? t("updateButton") : t("createButton")}
                 </Button>
               </DialogFooter>
             </form>

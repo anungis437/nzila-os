@@ -8,6 +8,7 @@
  */
 
 import React from 'react';
+import { useTranslations } from 'next-intl';
 import { format } from 'date-fns';
 import { 
   ClockIcon, 
@@ -50,6 +51,7 @@ export function DeadlineWidget({
   loading = false,
   onViewAll,
 }: DeadlineWidgetProps) {
+  const t = useTranslations('deadlines.widget');
   if (loading) {
     return (
       <div className="bg-white rounded-lg shadow-sm border border-gray-200 p-6">
@@ -74,10 +76,10 @@ export function DeadlineWidget({
   };
 
   const getStatusLabel = (deadline: CriticalDeadline) => {
-    if (deadline.isOverdue) return `${deadline.daysOverdue}d overdue`;
-    if ((deadline.daysUntilDue || 0) === 0) return 'Due today';
-    if ((deadline.daysUntilDue || 0) === 1) return 'Due tomorrow';
-    return `${deadline.daysUntilDue}d remaining`;
+    if (deadline.isOverdue) return t('daysOverdue', { count: deadline.daysOverdue });
+    if ((deadline.daysUntilDue || 0) === 0) return t('dueToday');
+    if ((deadline.daysUntilDue || 0) === 1) return t('dueTomorrow');
+    return t('daysRemaining', { count: deadline.daysUntilDue });
   };
 
   return (
@@ -87,14 +89,14 @@ export function DeadlineWidget({
         <div className="flex items-center justify-between">
           <h3 className="text-lg font-medium text-gray-900 flex items-center gap-2">
             <ClockIcon className="h-5 w-5 text-gray-400" />
-            Deadlines
+            {t('title')}
           </h3>
           {onViewAll && (
             <button
               onClick={onViewAll}
               className="text-sm font-medium text-blue-600 hover:text-blue-900 flex items-center gap-1"
             >
-              View All
+              {t('viewAll')}
               <ArrowRightIcon className="h-4 w-4" />
             </button>
           )}
@@ -115,7 +117,7 @@ export function DeadlineWidget({
               <p className="text-2xl font-bold text-gray-900">
                 {summary.overdueCount}
               </p>
-              <p className="text-sm text-gray-600">Overdue</p>
+              <p className="text-sm text-gray-600">{t('overdue')}</p>
             </div>
           </div>
         </div>
@@ -132,7 +134,7 @@ export function DeadlineWidget({
               <p className="text-2xl font-bold text-red-900">
                 {summary.dueSoonCount}
               </p>
-              <p className="text-sm text-red-600">Due Soon</p>
+              <p className="text-sm text-red-600">{t('dueSoon')}</p>
             </div>
           </div>
         </div>
@@ -149,7 +151,7 @@ export function DeadlineWidget({
               <p className="text-2xl font-bold text-orange-900">
                 {summary.criticalCount}
               </p>
-              <p className="text-sm text-orange-600">Critical Priority</p>
+              <p className="text-sm text-orange-600">{t('criticalPriority')}</p>
             </div>
           </div>
         </div>
@@ -166,7 +168,7 @@ export function DeadlineWidget({
               <p className="text-2xl font-bold text-green-900">
                 {summary.onTimePercentage}%
               </p>
-              <p className="text-sm text-green-600">On Time</p>
+              <p className="text-sm text-green-600">{t('onTime')}</p>
             </div>
           </div>
         </div>
@@ -175,15 +177,15 @@ export function DeadlineWidget({
       {/* Critical Deadlines List */}
       <div className="p-6">
         <h4 className="text-sm font-medium text-gray-900 mb-4">
-          Critical Deadlines (Next 5)
+          {t('criticalDeadlines')}
         </h4>
 
         {criticalDeadlines.length === 0 ? (
           <div className="text-center py-8">
             <CheckCircleIcon className="mx-auto h-12 w-12 text-green-500 mb-3" />
-            <p className="text-sm font-medium text-gray-900">All caught up!</p>
+            <p className="text-sm font-medium text-gray-900">{t('allCaughtUp')}</p>
             <p className="text-sm text-gray-500 mt-1">
-              No critical deadlines at this time
+              {t('noCritical')}
             </p>
           </div>
         ) : (
@@ -209,7 +211,7 @@ export function DeadlineWidget({
                       </p>
                       {deadline.claimNumber && (
                         <p className="text-xs text-gray-500 mt-0.5">
-                          Claim {deadline.claimNumber}
+                          {t('claimNumber', { number: deadline.claimNumber })}
                         </p>
                       )}
                     </div>
@@ -254,7 +256,7 @@ export function DeadlineWidget({
               onClick={onViewAll}
               className="text-sm font-medium text-blue-600 hover:text-blue-900"
             >
-              View {criticalDeadlines.length - 5} more deadlines →
+              {t('viewMore', { count: criticalDeadlines.length - 5 })}
             </button>
           </div>
         )}
@@ -264,7 +266,7 @@ export function DeadlineWidget({
       {summary.avgDaysOverdue > 0 && (
         <div className="px-6 py-3 bg-gray-50 border-t border-gray-200">
           <p className="text-xs text-gray-600">
-            Average overdue time: <span className="font-medium text-gray-900">{summary.avgDaysOverdue.toFixed(1)} days</span>
+            {t('avgOverdue')} <span className="font-medium text-gray-900">{t('avgDays', { count: summary.avgDaysOverdue.toFixed(1) })}</span>
           </p>
         </div>
       )}

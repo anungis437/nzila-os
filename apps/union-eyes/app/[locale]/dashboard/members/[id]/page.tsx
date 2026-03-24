@@ -7,6 +7,7 @@
 
 export const dynamic = 'force-dynamic';
 import { useParams, useRouter } from "next/navigation";
+import { useLocale } from 'next-intl';
 import useSWR from "swr";
 import { motion } from "framer-motion";
 import {
@@ -73,6 +74,7 @@ const statusConfig: Record<MemberStatus, { label: string; color: string }> = {
 export default function MemberDetailPage() {
   const params = useParams();
   const router = useRouter();
+  const locale = useLocale();
   const memberId = params.id as string;
 
   // Fetch member data
@@ -109,7 +111,7 @@ export default function MemberDetailPage() {
           <h2 className="text-2xl font-bold text-gray-900 mb-2">Member Not Found</h2>
           <p className="text-gray-600 mb-4">Unable to load member details</p>
           <button
-            onClick={() => router.push('/dashboard/members')}
+            onClick={() => router.push(`/${locale}/dashboard/members`)}
             className="px-6 py-2 bg-blue-600 text-white rounded-lg hover:bg-blue-700 transition-colors"
           >
             Back to Members
@@ -129,7 +131,7 @@ export default function MemberDetailPage() {
         {/* Header */}
         <div className="mb-8">
           <button
-            onClick={() => router.push('/dashboard/members')}
+            onClick={() => router.push(`/${locale}/dashboard/members`)}
             className="flex items-center gap-2 text-gray-600 hover:text-gray-900 mb-4 transition-colors"
           >
             <ArrowLeft className="w-5 h-5" />

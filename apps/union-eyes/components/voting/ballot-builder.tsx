@@ -14,6 +14,7 @@
 "use client";
 
 import * as React from "react";
+import { useTranslations } from 'next-intl';
 import { useForm, useFieldArray } from "react-hook-form";
 import { zodResolver } from "@hookform/resolvers/zod";
 import * as z from "zod";
@@ -87,6 +88,8 @@ export function BallotBuilder({
   onCancel,
 }: BallotBuilderProps) {
   const { toast } = useToast();
+  const t = useTranslations('voting.ballotBuilder');
+  const tc = useTranslations('common');
   const [isSaving, setIsSaving] = React.useState(false);
 
   const form = useForm<BallotFormData>({
@@ -120,10 +123,10 @@ export function BallotBuilder({
     setIsSaving(true);
     try {
       await onSave(data);
-      toast({ title: "Ballot saved successfully" });
+      toast({ title: t('savedSuccess') });
     } catch (error) {
       toast({
-        title: "Failed to save ballot",
+        title: t('savedError'),
         description: error instanceof Error ? error.message : "An error occurred",
         variant: "destructive",
       });
@@ -150,11 +153,11 @@ export function BallotBuilder({
       {/* Ballot Configuration */}
       <Card>
         <CardHeader>
-          <CardTitle>Ballot Configuration</CardTitle>
+          <CardTitle>{t('title')}</CardTitle>
         </CardHeader>
         <CardContent className="space-y-4">
           <div className="space-y-2">
-            <Label htmlFor="title">Ballot Title *</Label>
+            <Label htmlFor="title">{t('ballotTitleRequired')}</Label>
             <Input
               id="title"
               {...form.register("title")}
@@ -168,7 +171,7 @@ export function BallotBuilder({
           </div>
 
           <div className="space-y-2">
-            <Label htmlFor="description">Description</Label>
+            <Label htmlFor="description">{t('description')}</Label>
             <Textarea
               id="description"
               {...form.register("description")}
@@ -179,7 +182,7 @@ export function BallotBuilder({
 
           <div className="grid grid-cols-3 gap-4">
             <div className="flex items-center justify-between space-x-2">
-              <Label htmlFor="isAnonymous">Anonymous Voting</Label>
+              <Label htmlFor="isAnonymous">{t('anonymousVoting')}</Label>
               <Switch
                 id="isAnonymous"
                 checked={form.watch("isAnonymous")}
@@ -188,7 +191,7 @@ export function BallotBuilder({
             </div>
 
             <div className="flex items-center justify-between space-x-2">
-              <Label htmlFor="requiresVerification">Require Verification</Label>
+              <Label htmlFor="requiresVerification">{t('requireVerification')}</Label>
               <Switch
                 id="requiresVerification"
                 checked={form.watch("requiresVerification")}
@@ -199,7 +202,7 @@ export function BallotBuilder({
             </div>
 
             <div className="flex items-center justify-between space-x-2">
-              <Label htmlFor="allowsAbstain">Allow Abstain</Label>
+              <Label htmlFor="allowsAbstain">{t('allowAbstain')}</Label>
               <Switch
                 id="allowsAbstain"
                 checked={form.watch("allowsAbstain")}
@@ -232,7 +235,7 @@ export function BallotBuilder({
       <Card>
         <CardContent className="p-6">
           <div className="flex items-center gap-3">
-            <span className="font-medium">Add Question:</span>
+            <span className="font-medium">{t('addQuestion')}</span>
             <Button
               type="button"
               variant="outline"
@@ -240,7 +243,7 @@ export function BallotBuilder({
               onClick={() => addQuestion("candidate")}
             >
               <Plus className="h-4 w-4 mr-2" />
-              Candidate Election
+              {t('candidateElection')}
             </Button>
             <Button
               type="button"
@@ -249,7 +252,7 @@ export function BallotBuilder({
               onClick={() => addQuestion("yes-no")}
             >
               <Plus className="h-4 w-4 mr-2" />
-              Yes/No Question
+              {t('yesNoQuestion')}
             </Button>
             <Button
               type="button"
@@ -258,7 +261,7 @@ export function BallotBuilder({
               onClick={() => addQuestion("multiple-choice")}
             >
               <Plus className="h-4 w-4 mr-2" />
-              Multiple Choice
+              {t('multipleChoice')}
             </Button>
           </div>
         </CardContent>
@@ -268,7 +271,7 @@ export function BallotBuilder({
       <div className="flex items-center justify-end gap-3">
         {onCancel && (
           <Button type="button" variant="outline" onClick={onCancel}>
-            Cancel
+            {tc('cancel')}
           </Button>
         )}
         {onPreview && (
@@ -278,12 +281,12 @@ export function BallotBuilder({
             onClick={() => onPreview(form.getValues())}
           >
             <Eye className="h-4 w-4 mr-2" />
-            Preview
+            {t('preview')}
           </Button>
         )}
         <Button type="submit" disabled={isSaving}>
           <Save className="h-4 w-4 mr-2" />
-          {isSaving ? "Saving..." : "Save Ballot"}
+          {isSaving ? t('saving') : t('saveBallot')}
         </Button>
       </div>
     </form>
@@ -313,13 +316,14 @@ function QuestionEditor({
   canMoveDown: boolean;
   canRemove: boolean;
 }) {
+  const t = useTranslations('voting.ballotBuilder');
   const questionType = form.watch(`questions.${index}.type`);
 
   return (
     <Card>
       <CardHeader>
         <div className="flex items-start justify-between">
-          <CardTitle className="text-lg">Question {index + 1}</CardTitle>
+          <CardTitle className="text-lg">{t('questionNumber', { number: index + 1 })}</CardTitle>
           <div className="flex gap-2">
             <Button
               type="button"
@@ -354,7 +358,7 @@ function QuestionEditor({
       </CardHeader>
       <CardContent className="space-y-4">
         <div className="space-y-2">
-          <Label>Question Type</Label>
+          <Label>{t('questionType')}</Label>
           <Select
             value={questionType}
             onValueChange={(value) => form.setValue(`questions.${index}.type`, value)}
@@ -363,26 +367,26 @@ function QuestionEditor({
               <SelectValue />
             </SelectTrigger>
             <SelectContent>
-              <SelectItem value="candidate">Candidate Election</SelectItem>
-              <SelectItem value="yes-no">Yes/No Question</SelectItem>
-              <SelectItem value="multiple-choice">Multiple Choice</SelectItem>
+              <SelectItem value="candidate">{t('candidateElection')}</SelectItem>
+              <SelectItem value="yes-no">{t('yesNoQuestion')}</SelectItem>
+              <SelectItem value="multiple-choice">{t('multipleChoice')}</SelectItem>
             </SelectContent>
           </Select>
         </div>
 
         <div className="space-y-2">
-          <Label>Question Title *</Label>
+          <Label>{t('questionTitle')}</Label>
           <Input {...form.register(`questions.${index}.title`)} />
         </div>
 
         <div className="space-y-2">
-          <Label>Description (optional)</Label>
+          <Label>{t('descriptionOptional')}</Label>
           <Textarea {...form.register(`questions.${index}.description`)} rows={2} />
         </div>
 
         {questionType === "candidate" && (
           <div className="space-y-2">
-            <Label>Allow Write-in Candidates</Label>
+            <Label>{t('allowWriteIn')}</Label>
             <Switch
               checked={form.watch(`questions.${index}.allowWriteIn`)}
               onCheckedChange={(checked) =>
@@ -394,7 +398,7 @@ function QuestionEditor({
 
         <div className="grid grid-cols-2 gap-4">
           <div className="space-y-2">
-            <Label>Minimum Selections</Label>
+            <Label>{t('minSelections')}</Label>
             <Input
               type="number"
               min={0}
@@ -404,7 +408,7 @@ function QuestionEditor({
             />
           </div>
           <div className="space-y-2">
-            <Label>Maximum Selections</Label>
+            <Label>{t('maxSelections')}</Label>
             <Input
               type="number"
               min={1}

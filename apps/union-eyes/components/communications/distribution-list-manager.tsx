@@ -15,7 +15,7 @@
 'use client';
 
 import { useState, useEffect, useCallback } from 'react';
- 
+import { useTranslations } from 'next-intl';
 import {
   Users,
   Plus,
@@ -115,6 +115,7 @@ interface Profile {
 
 export function DistributionListManager() {
   const { toast } = useToast();
+  const t = useTranslations('communications.distributionLists');
 
   const [lists, setLists] = useState<DistributionList[]>([]);
   const [selectedList, setSelectedList] = useState<DistributionList | null>(
@@ -251,8 +252,8 @@ toast({
       const data = await response.json();
 
       toast({
-        title: 'Success',
-        description: 'Distribution list created successfully',
+        title: t('listCreated'),
+        description: t('listCreated'),
       });
 
       setLists((prev) => [data.list, ...prev]);
@@ -262,7 +263,7 @@ toast({
     } catch (_error) {
 toast({
         title: 'Error',
-        description: 'Failed to create distribution list',
+        description: t('createFailed'),
         variant: 'destructive',
       });
     }
@@ -288,8 +289,8 @@ toast({
       }
 
       toast({
-        title: 'Success',
-        description: `Added ${selectedProfiles.size} subscriber(s)`,
+        title: t('listUpdated'),
+        description: t('subscriberCount', { count: selectedProfiles.size }),
       });
 
       fetchSubscribers(selectedList.id);
@@ -321,8 +322,8 @@ toast({
       }
 
       toast({
-        title: 'Success',
-        description: 'Subscriber removed',
+        title: t('listUpdated'),
+        description: t('removeMembers'),
       });
 
       setSubscribers((prev) => prev.filter((s) => s.id !== subscriberId));
@@ -350,8 +351,8 @@ toast({
       }
 
       toast({
-        title: 'Success',
-        description: 'Distribution list deleted',
+        title: t('listDeleted'),
+        description: t('listDeleted'),
       });
 
       setLists((prev) => prev.filter((l) => l.id !== listId));
@@ -362,7 +363,7 @@ toast({
     } catch (_error) {
 toast({
         title: 'Error',
-        description: 'Failed to delete list',
+        description: t('deleteFailed'),
         variant: 'destructive',
       });
     }
@@ -438,16 +439,16 @@ toast({
       <div className="flex items-center justify-between">
         <div>
           <h2 className="text-2xl font-bold text-gray-900">
-            Distribution Lists
+            {t('title')}
           </h2>
           <p className="text-sm text-gray-600">
-            Manage subscriber groups for targeted campaigns
+            {t('subtitle')}
           </p>
         </div>
 
         <Button onClick={() => setCreateDialogOpen(true)}>
           <Plus className="w-4 h-4 mr-2" />
-          Create List
+          {t('createList')}
         </Button>
       </div>
 
@@ -455,7 +456,7 @@ toast({
         {/* Lists Sidebar */}
         <Card className="lg:col-span-1">
           <CardHeader>
-            <CardTitle className="text-lg">Your Lists</CardTitle>
+            <CardTitle className="text-lg">{t('yourLists')}</CardTitle>
           </CardHeader>
           <CardContent>
             {loading ? (
@@ -467,7 +468,7 @@ toast({
             ) : lists.length === 0 ? (
               <div className="text-center py-8">
                 <Users className="w-12 h-12 mx-auto text-gray-400 mb-2" />
-                <p className="text-sm text-gray-600">No lists yet</p>
+                <p className="text-sm text-gray-600">{t('noLists')}</p>
               </div>
             ) : (
               <div className="space-y-2">
@@ -490,7 +491,7 @@ toast({
                               {list.listType}
                             </Badge>
                             <span className="text-xs text-gray-600">
-                              {list.subscriberCount} members
+                              {t('memberCount', { count: list.subscriberCount })}
                             </span>
                           </div>
                         </div>
@@ -514,7 +515,7 @@ toast({
                               }}
                             >
                               <Edit className="w-4 h-4 mr-2" />
-                              Edit
+                              {t('edit')}
                             </DropdownMenuItem>
                             <DropdownMenuItem
                               onClick={(e) => {
@@ -524,7 +525,7 @@ toast({
                               className="text-red-600"
                             >
                               <Trash2 className="w-4 h-4 mr-2" />
-                              Delete
+                              {t('delete')}
                             </DropdownMenuItem>
                           </DropdownMenuContent>
                         </DropdownMenu>
@@ -567,7 +568,7 @@ toast({
                       }}
                     >
                       <UserPlus className="w-4 h-4 mr-2" />
-                      Add Members
+                      {t('addMembers')}
                     </Button>
                   </div>
                 </div>
@@ -579,7 +580,7 @@ toast({
                   <div className="relative">
                     <Search className="absolute left-3 top-1/2 -translate-y-1/2 w-4 h-4 text-gray-400" />
                     <Input
-                      placeholder="Search subscribers..."
+                      placeholder={t('searchMembers')}
                       value={searchQuery}
                       onChange={(e) => setSearchQuery(e.target.value)}
                       className="pl-10"
@@ -672,30 +673,30 @@ toast({
       <Dialog open={createDialogOpen} onOpenChange={setCreateDialogOpen}>
         <DialogContent className="max-w-2xl">
           <DialogHeader>
-            <DialogTitle>Create Distribution List</DialogTitle>
+            <DialogTitle>{t('createList')}</DialogTitle>
             <DialogDescription>
-              Create a new subscriber group for your newsletter campaigns
+              {t('subtitle')}
             </DialogDescription>
           </DialogHeader>
 
           <div className="space-y-4">
             <div>
-              <Label htmlFor="list-name">List Name *</Label>
+              <Label htmlFor="list-name">{t('listName')}</Label>
               <Input
                 id="list-name"
                 value={listName}
                 onChange={(e) => setListName(e.target.value)}
-                placeholder="e.g., All Members, Active Union Reps"
+                placeholder={t('listNamePlaceholder')}
               />
             </div>
 
             <div>
-              <Label htmlFor="list-description">Description</Label>
+              <Label htmlFor="list-description">{t('listDescription')}</Label>
               <Textarea
                 id="list-description"
                 value={listDescription}
                 onChange={(e) => setListDescription(e.target.value)}
-                placeholder="Optional description"
+                placeholder={t('listDescriptionPlaceholder')}
                 rows={3}
               />
             </div>
@@ -762,7 +763,7 @@ toast({
             <Button variant="outline" onClick={() => setCreateDialogOpen(false)}>
               Cancel
             </Button>
-            <Button onClick={handleCreateList}>Create List</Button>
+            <Button onClick={handleCreateList}>{t('createList')}</Button>
           </DialogFooter>
         </DialogContent>
       </Dialog>
@@ -771,7 +772,7 @@ toast({
       <Dialog open={addSubscribersOpen} onOpenChange={setAddSubscribersOpen}>
         <DialogContent className="max-w-3xl max-h-[80vh]">
           <DialogHeader>
-            <DialogTitle>Add Subscribers</DialogTitle>
+            <DialogTitle>{t('addMembers')}</DialogTitle>
             <DialogDescription>
               Select members to add to {selectedList?.name}
             </DialogDescription>
@@ -826,7 +827,7 @@ toast({
             </div>
 
             <div className="text-sm text-gray-600">
-              {selectedProfiles.size} member(s) selected
+              {t('memberCount', { count: selectedProfiles.size })}
             </div>
           </div>
 
@@ -844,7 +845,7 @@ toast({
               onClick={handleAddSubscribers}
               disabled={selectedProfiles.size === 0}
             >
-              Add {selectedProfiles.size} Subscriber(s)
+              {t('addMembers')}
             </Button>
           </DialogFooter>
         </DialogContent>
@@ -854,7 +855,7 @@ toast({
       <Dialog open={!!deleteConfirm} onOpenChange={() => setDeleteConfirm(null)}>
         <DialogContent>
           <DialogHeader>
-            <DialogTitle>Delete Distribution List</DialogTitle>
+            <DialogTitle>{t('delete')}</DialogTitle>
             <DialogDescription>
               Are you sure you want to delete this list? This action cannot be
               undone.
@@ -869,7 +870,7 @@ toast({
               variant="destructive"
               onClick={() => deleteConfirm && handleDeleteList(deleteConfirm)}
             >
-              Delete List
+              {t('delete')}
             </Button>
           </DialogFooter>
         </DialogContent>

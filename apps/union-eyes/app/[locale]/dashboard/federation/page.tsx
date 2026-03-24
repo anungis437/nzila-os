@@ -107,7 +107,12 @@ async function getFederationMetrics(orgId: string) {
   }
 }
 
-export default async function FederationDashboardPage() {
+export default async function FederationDashboardPage({
+  params,
+}: {
+  params: Promise<{ locale: string }>;
+}) {
+  const { locale } = await params;
   const user = await requireUser();
   const userId = user.userId;
   const orgId = user.organizationId!;
@@ -137,13 +142,13 @@ export default async function FederationDashboardPage() {
         </div>
         <div className="flex gap-2">
           <Button variant="outline" asChild>
-            <Link href="/dashboard/federation/remittances">
+            <Link href={`/${locale}/dashboard/federation/remittances`}>
               <FileText className="mr-2 h-4 w-4" />
               {t('dashboard.viewRemittances', { defaultValue: 'Remittances' })}
             </Link>
           </Button>
           <Button asChild>
-            <Link href="/dashboard/federation/affiliates">
+            <Link href={`/${locale}/dashboard/federation/affiliates`}>
               <Users className="mr-2 h-4 w-4" />
               {t('dashboard.manageAffiliates', { defaultValue: 'Manage Affiliates' })}
             </Link>
@@ -235,7 +240,7 @@ export default async function FederationDashboardPage() {
           </CardHeader>
           <CardContent>
             <Button variant="destructive" asChild>
-              <Link href="/dashboard/federation/remittances?filter=overdue">
+              <Link href={`/${locale}/dashboard/federation/remittances?filter=overdue`}>
                 {t('alerts.overdue.action', { defaultValue: 'View Overdue Remittances' })}
               </Link>
             </Button>
@@ -259,13 +264,13 @@ export default async function FederationDashboardPage() {
           </CardHeader>
           <CardContent className="space-y-2">
             <Button variant="outline" className="w-full justify-start" asChild>
-              <Link href="/dashboard/federation/affiliates">
+              <Link href={`/${locale}/dashboard/federation/affiliates`}>
                 <Building2 className="mr-2 h-4 w-4" />
                 {t('quickActions.affiliates.viewAll', { defaultValue: 'View All Affiliates' })}
               </Link>
             </Button>
             <Button variant="outline" className="w-full justify-start" asChild>
-              <Link href="/dashboard/cross-union-analytics">
+              <Link href={`/${locale}/dashboard/cross-union-analytics`}>
                 <BarChart3 className="mr-2 h-4 w-4" />
                 {t('quickActions.affiliates.analytics', { defaultValue: 'Cross-Union Analytics' })}
               </Link>
@@ -287,13 +292,13 @@ export default async function FederationDashboardPage() {
           </CardHeader>
           <CardContent className="space-y-2">
             <Button variant="outline" className="w-full justify-start" asChild>
-              <Link href="/dashboard/federation/remittances">
+              <Link href={`/${locale}/dashboard/federation/remittances`}>
                 <FileText className="mr-2 h-4 w-4" />
                 {t('quickActions.remittances.viewAll', { defaultValue: 'View All Remittances' })}
               </Link>
             </Button>
             <Button variant="outline" className="w-full justify-start" asChild>
-              <Link href="/dashboard/federation/remittances?filter=pending">
+              <Link href={`/${locale}/dashboard/federation/remittances?filter=pending`}>
                 <Calendar className="mr-2 h-4 w-4" />
                 {t('quickActions.remittances.pending', { defaultValue: 'Pending This Month' })}
               </Link>
@@ -321,7 +326,7 @@ export default async function FederationDashboardPage() {
               <Building2 className="h-12 w-12 mx-auto mb-4 opacity-50" />
               <p>{t('recentAffiliates.empty', { defaultValue: 'No affiliated unions found' })}</p>
               <Button className="mt-4" variant="outline" asChild>
-                <Link href="/dashboard/federation/affiliates">
+                <Link href={`/${locale}/dashboard/federation/affiliates`}>
                   {t('recentAffiliates.manageAction', { defaultValue: 'Manage Affiliates' })}
                 </Link>
               </Button>
@@ -344,7 +349,7 @@ export default async function FederationDashboardPage() {
                     </div>
                   </div>
                   <Button variant="ghost" size="sm" asChild>
-                    <Link href={`/dashboard/federation/affiliates?id=${union.id}`}>
+                    <Link href={`/${locale}/dashboard/federation/affiliates?id=${union.id}`}>
                       {t('recentAffiliates.viewDetails', { defaultValue: 'View' })}
                     </Link>
                   </Button>
@@ -352,7 +357,7 @@ export default async function FederationDashboardPage() {
               ))}
               {metrics.memberUnions.length > 5 && (
                 <Button variant="outline" className="w-full" asChild>
-                  <Link href="/dashboard/federation/affiliates">
+                  <Link href={`/${locale}/dashboard/federation/affiliates`}>
                     {t('recentAffiliates.viewAll', { 
                       count: metrics.memberUnions.length,
                       defaultValue: `View All ${metrics.memberUnions.length} Affiliates` 

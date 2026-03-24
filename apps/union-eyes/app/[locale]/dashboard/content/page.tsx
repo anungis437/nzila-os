@@ -142,10 +142,13 @@ function computeStats(items: ContentItem[], courses: TrainingCourse[]): ContentS
 }
 
 export default async function ContentDashboard({
+  params: paramsPromise,
   searchParams,
 }: {
+  params: Promise<{ locale: string }>;
   searchParams: Promise<{ tab?: string; status?: string; type?: string }>;
 }) {
+  const { locale } = await paramsPromise;
   const params = await searchParams;
   const activeTab = params.tab ?? 'overview';
   const filterStatus = params.status ?? null;
@@ -203,23 +206,23 @@ export default async function ContentDashboard({
       <Tabs defaultValue={activeTab} className="space-y-4">
         <TabsList>
           <TabsTrigger value="overview">
-            <Link href="/dashboard/content" className="no-underline">Overview</Link>
+            <Link href={`/${locale}/dashboard/content`} className="no-underline">Overview</Link>
           </TabsTrigger>
           <TabsTrigger value="templates">
-            <Link href="/dashboard/content?tab=templates" className="no-underline">Templates ({stats.templates.total})</Link>
+            <Link href={`/${locale}/dashboard/content?tab=templates`} className="no-underline">Templates ({stats.templates.total})</Link>
           </TabsTrigger>
           <TabsTrigger value="resources">
-            <Link href="/dashboard/content?tab=resources" className="no-underline">Resources ({stats.resources.total})</Link>
+            <Link href={`/${locale}/dashboard/content?tab=resources`} className="no-underline">Resources ({stats.resources.total})</Link>
           </TabsTrigger>
           <TabsTrigger value="training">
-            <Link href="/dashboard/content?tab=training" className="no-underline">Training ({stats.training.total})</Link>
+            <Link href={`/${locale}/dashboard/content?tab=training`} className="no-underline">Training ({stats.training.total})</Link>
           </TabsTrigger>
         </TabsList>
 
         {/* Overview Tab */}
         <TabsContent value="overview" className="space-y-4">
           <div className="grid gap-4 md:grid-cols-2 lg:grid-cols-4">
-            <Link href="/dashboard/content?tab=templates" className="no-underline">
+            <Link href={`/${locale}/dashboard/content?tab=templates`} className="no-underline">
               <Card className="hover:border-primary/50 transition-colors cursor-pointer">
                 <CardHeader className="pb-2">
                   <CardTitle className="text-sm font-medium flex items-center gap-2">
@@ -234,7 +237,7 @@ export default async function ContentDashboard({
               </Card>
             </Link>
 
-            <Link href="/dashboard/content?tab=resources" className="no-underline">
+            <Link href={`/${locale}/dashboard/content?tab=resources`} className="no-underline">
               <Card className="hover:border-primary/50 transition-colors cursor-pointer">
                 <CardHeader className="pb-2">
                   <CardTitle className="text-sm font-medium flex items-center gap-2">
@@ -249,7 +252,7 @@ export default async function ContentDashboard({
               </Card>
             </Link>
 
-            <Link href="/dashboard/content?tab=training" className="no-underline">
+            <Link href={`/${locale}/dashboard/content?tab=training`} className="no-underline">
               <Card className="hover:border-primary/50 transition-colors cursor-pointer">
                 <CardHeader className="pb-2">
                   <CardTitle className="text-sm font-medium flex items-center gap-2">
@@ -313,19 +316,19 @@ export default async function ContentDashboard({
               </CardHeader>
               <CardContent>
                 <div className="space-y-3">
-                  <Link href="/dashboard/content?tab=templates&status=published" className="flex items-center justify-between hover:bg-muted/50 rounded-md px-2 py-1 -mx-2 transition-colors no-underline">
+                  <Link href={`/${locale}/dashboard/content?tab=templates&status=published`} className="flex items-center justify-between hover:bg-muted/50 rounded-md px-2 py-1 -mx-2 transition-colors no-underline">
                     <span className="text-sm">Published</span>
                     <Badge variant="default">{stats.templates.published + stats.resources.published}</Badge>
                   </Link>
-                  <Link href="/dashboard/content?tab=templates&status=draft" className="flex items-center justify-between hover:bg-muted/50 rounded-md px-2 py-1 -mx-2 transition-colors no-underline">
+                  <Link href={`/${locale}/dashboard/content?tab=templates&status=draft`} className="flex items-center justify-between hover:bg-muted/50 rounded-md px-2 py-1 -mx-2 transition-colors no-underline">
                     <span className="text-sm">In Draft</span>
                     <Badge variant="secondary">{stats.templates.draft}</Badge>
                   </Link>
-                  <Link href="/dashboard/content?tab=templates&status=review" className="flex items-center justify-between hover:bg-muted/50 rounded-md px-2 py-1 -mx-2 transition-colors no-underline">
+                  <Link href={`/${locale}/dashboard/content?tab=templates&status=review`} className="flex items-center justify-between hover:bg-muted/50 rounded-md px-2 py-1 -mx-2 transition-colors no-underline">
                     <span className="text-sm">Needs Review</span>
                     <Badge variant="outline">{stats.templates.review}</Badge>
                   </Link>
-                  <Link href="/dashboard/content?tab=templates&status=archived" className="flex items-center justify-between hover:bg-muted/50 rounded-md px-2 py-1 -mx-2 transition-colors no-underline">
+                  <Link href={`/${locale}/dashboard/content?tab=templates&status=archived`} className="flex items-center justify-between hover:bg-muted/50 rounded-md px-2 py-1 -mx-2 transition-colors no-underline">
                     <span className="text-sm">Archived</span>
                     <Badge variant="outline">{stats.templates.archived}</Badge>
                   </Link>
@@ -347,7 +350,7 @@ export default async function ContentDashboard({
                   .sort((a, b) => b.views - a.views)
                   .slice(0, 5)
                   .map((item) => (
-                    <Link key={item.id} href={item.type === 'template' ? `/dashboard/content/${item.slug}` : `/dashboard/content?tab=resources`} className="flex items-center justify-between border-b pb-3 last:border-0 hover:bg-muted/50 rounded-md px-2 py-1 -mx-2 transition-colors no-underline">
+                    <Link key={item.id} href={item.type === 'template' ? `/${locale}/dashboard/content/${item.slug}` : `/${locale}/dashboard/content?tab=resources`} className="flex items-center justify-between border-b pb-3 last:border-0 hover:bg-muted/50 rounded-md px-2 py-1 -mx-2 transition-colors no-underline">
                       <div className="space-y-1">
                         <div className="flex items-center gap-2">
                           <p className="text-sm font-medium">{item.title}</p>
@@ -378,7 +381,7 @@ export default async function ContentDashboard({
                 {filterStatus && (
                   <div className="flex items-center gap-2">
                     <Badge variant="secondary">Filtered: {filterStatus}</Badge>
-                    <Link href="/dashboard/content?tab=templates" className="text-xs text-muted-foreground hover:text-foreground">
+                    <Link href={`/${locale}/dashboard/content?tab=templates`} className="text-xs text-muted-foreground hover:text-foreground">
                       Clear filter
                     </Link>
                   </div>
@@ -394,7 +397,7 @@ export default async function ContentDashboard({
                     <div key={template.id} className="flex items-start justify-between border-b pb-4 last:border-0 gap-4">
                       <div className="space-y-1.5 flex-1 min-w-0">
                         <div className="flex items-center gap-2 flex-wrap">
-                          <Link href={`/dashboard/content?tab=templates&status=${template.status}`}>
+                          <Link href={`/${locale}/dashboard/content?tab=templates&status=${template.status}`}>
                             <Badge variant={
                               template.status === 'published' ? 'default' :
                               template.status === 'draft' ? 'secondary' :
@@ -403,7 +406,7 @@ export default async function ContentDashboard({
                               {template.status}
                             </Badge>
                           </Link>
-                          <Link href={`/dashboard/content/${template.slug}`} className="text-sm font-semibold hover:underline">{template.title}</Link>
+                          <Link href={`/${locale}/dashboard/content/${template.slug}`} className="text-sm font-semibold hover:underline">{template.title}</Link>
                         </div>
                         {template.description && (
                           <p className="text-xs text-muted-foreground line-clamp-2">{template.description}</p>
@@ -417,7 +420,7 @@ export default async function ContentDashboard({
                         </div>
                       </div>
                       <div className="flex gap-2 shrink-0">
-                        <Link href={`/dashboard/content/${template.slug}`} className="p-2 hover:bg-muted rounded-md" title="View">
+                        <Link href={`/${locale}/dashboard/content/${template.slug}`} className="p-2 hover:bg-muted rounded-md" title="View">
                           <Eye className="h-4 w-4" />
                         </Link>
                         <button className="p-2 hover:bg-muted rounded-md" title="Download">

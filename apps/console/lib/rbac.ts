@@ -1,4 +1,4 @@
-import { auth } from '@clerk/nextjs/server'
+import { auth, currentUser } from '@clerk/nextjs/server'
 
 /**
  * Nzila RBAC roles (stored in Clerk publicMetadata or org membership).
@@ -10,6 +10,12 @@ export type NzilaRole =
   | 'analyst'
   | 'viewer'
 
+/** Emails that always receive platform_admin, regardless of Clerk metadata. */
+const SUPER_ADMIN_EMAILS = new Set([
+  'info@nzilaventures.com',
+  ...(process.env.SUPER_ADMIN_EMAILS ?? '').split(',').map(s => s.trim()).filter(Boolean),
+])
+
 /**
  * Extract the user's Nzila role from Clerk session claims.
  * Falls back to 'viewer' if nothing is set.
@@ -18,6 +24,16 @@ export async function getUserRole(): Promise<NzilaRole> {
   const { sessionClaims } = await auth()
   const meta = sessionClaims?.publicMetadata as Record<string, unknown> | undefined
   const role = meta?.nzilaRole as NzilaRole | undefined
+  if (role === 'platform_admin') return 'platform_admin'
+
+  // Super-admin email override
+  const user = await currentUser()
+  const email = user?.primaryEmailAddress?.emailAddress
+              ?? user?.emailAddresses?.[0]?.emailAddress
+  if (email && SUPER_ADMIN_EMAILS.has(email.toLowerCase())) {
+    return 'platform_admin'
+  }
+
   return role || 'viewer'
 }
 

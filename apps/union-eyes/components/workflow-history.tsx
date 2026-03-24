@@ -6,6 +6,7 @@ import { Badge } from "@/components/ui/badge";
 import { Alert, AlertDescription } from "@/components/ui/alert";
 import { AlertCircle, Clock, User, MessageSquare } from "lucide-react";
 import { formatDistanceToNow } from "date-fns";
+import { useTranslations } from "next-intl";
 
 interface WorkflowEvent {
   id: string;
@@ -21,17 +22,6 @@ interface WorkflowHistoryProps {
   claimId: string;
 }
 
-const STATUS_LABELS: Record<string, string> = {
-  submitted: "Submitted",
-  under_review: "Under Review",
-  assigned: "Assigned",
-  investigation: "Investigation",
-  pending_documentation: "Pending Documentation",
-  resolved: "Resolved",
-  rejected: "Rejected",
-  closed: "Closed",
-};
-
 const STATUS_COLORS: Record<string, string> = {
   submitted: "bg-blue-100 text-blue-800",
   under_review: "bg-yellow-100 text-yellow-800",
@@ -44,6 +34,19 @@ const STATUS_COLORS: Record<string, string> = {
 };
 
 export function WorkflowHistory({ claimId }: WorkflowHistoryProps) {
+  const t = useTranslations("workflow.history");
+
+  const STATUS_LABELS: Record<string, string> = {
+    submitted: t("statusSubmitted"),
+    under_review: t("statusUnderReview"),
+    assigned: t("statusAssigned"),
+    investigation: t("statusInvestigation"),
+    pending_documentation: t("statusPendingDocumentation"),
+    resolved: t("statusResolved"),
+    rejected: t("statusRejected"),
+    closed: t("statusClosed"),
+  };
+
   const [history, setHistory] = useState<WorkflowEvent[]>([]);
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState<string | null>(null);
@@ -57,7 +60,7 @@ export function WorkflowHistory({ claimId }: WorkflowHistoryProps) {
         const data = await response.json();
         setHistory(data.history || []);
       } catch (_err) {
-setError("Failed to load workflow history");
+setError(t("failedToLoad"));
       } finally {
         setLoading(false);
       }
@@ -70,7 +73,7 @@ setError("Failed to load workflow history");
     return (
       <Card>
         <CardHeader>
-          <CardTitle>Workflow History</CardTitle>
+          <CardTitle>{t("title")}</CardTitle>
         </CardHeader>
         <CardContent>
           <div className="flex items-center justify-center py-8">
@@ -85,7 +88,7 @@ setError("Failed to load workflow history");
     return (
       <Card>
         <CardHeader>
-          <CardTitle>Workflow History</CardTitle>
+          <CardTitle>{t("title")}</CardTitle>
         </CardHeader>
         <CardContent>
           <Alert variant="destructive">
@@ -100,15 +103,15 @@ setError("Failed to load workflow history");
   return (
     <Card>
       <CardHeader>
-        <CardTitle>Workflow History</CardTitle>
+        <CardTitle>{t("title")}</CardTitle>
         <CardDescription>
-          Timeline of status changes and updates
+          {t("description")}
         </CardDescription>
       </CardHeader>
       <CardContent>
         {history.length === 0 ? (
           <div className="text-center py-8 text-muted-foreground">
-            No workflow history available
+            {t("noHistory")}
           </div>
         ) : (
           <div className="relative space-y-6">
@@ -130,7 +133,7 @@ setError("Failed to load workflow history");
                     </Badge>
                     {event.previousStatus && (
                       <>
-                        <span className="text-sm text-muted-foreground">from</span>
+                        <span className="text-sm text-muted-foreground">{t("from")}</span>
                         <Badge variant="outline">
                           {STATUS_LABELS[event.previousStatus]}
                         </Badge>

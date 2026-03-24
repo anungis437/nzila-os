@@ -15,6 +15,7 @@
 
 import * as React from "react";
 import { useRouter } from "next/navigation";
+import { useLocale } from "next-intl";
 import { Button } from "@/components/ui/button";
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "@/components/ui/card";
 import { Progress } from "@/components/ui/progress";
@@ -76,6 +77,7 @@ const STEPS = [
 
 export function AdminOnboardingWizard() {
   const router = useRouter();
+  const locale = useLocale();
   const [currentStep, setCurrentStep] = React.useState(0);
   const [data, setData] = React.useState<AdminOnboardingData>({
     adminLevel: "standard",
@@ -107,11 +109,11 @@ export function AdminOnboardingWizard() {
     if (typeof window !== 'undefined') {
       localStorage.setItem('admin_onboarding_completed', new Date().toISOString());
     }
-    router.push('/admin');
+    router.push(`/${locale}/admin`);
   };
 
   const handleSkip = () => {
-    router.push('/admin');
+    router.push(`/${locale}/admin`);
   };
 
   return (

@@ -20,6 +20,12 @@ import { eq, and, sql, desc } from 'drizzle-orm'
 export type PlatformRole = 'platform:admin' | 'platform:ops' | 'platform:finance'
 export type PartnerType = 'channel' | 'isv' | 'enterprise'
 
+/** Emails that always receive platform:admin, regardless of Clerk metadata. */
+const SUPER_ADMIN_EMAILS = new Set([
+  'info@nzilaventures.com',
+  ...(process.env.SUPER_ADMIN_EMAILS ?? '').split(',').map(s => s.trim()).filter(Boolean),
+])
+
 export type PartnerRole =
   | 'channel:admin' | 'channel:sales' | 'channel:executive'
   | 'isv:admin' | 'isv:technical' | 'isv:business'
@@ -168,6 +174,12 @@ export async function resolvePartnerEntityIdForView(
 export async function isPlatformAdmin(): Promise<boolean> {
   const session = await auth()
   if (!session.userId) return false
+
+  // Super-admin email override
+  const user = await _currentUser()
+  const email = user?.primaryEmailAddress?.emailAddress
+              ?? user?.emailAddresses?.[0]?.emailAddress
+  if (email && SUPER_ADMIN_EMAILS.has(email.toLowerCase())) return true
   
   // Check for platform roles
   const platformRoles: PlatformRole[] = ['platform:admin', 'platform:ops', 'platform:finance']
@@ -186,6 +198,14 @@ export async function requirePlatformAdmin(): Promise<{ userId: string; role: Pl
   const session = await auth()
   if (!session.userId) {
     throw new Error('Unauthenticated')
+  }
+
+  // Super-admin email override
+  const user = await _currentUser()
+  const email = user?.primaryEmailAddress?.emailAddress
+              ?? user?.emailAddresses?.[0]?.emailAddress
+  if (email && SUPER_ADMIN_EMAILS.has(email.toLowerCase())) {
+    return { userId: session.userId, role: 'platform:admin' }
   }
 
   const platformRoles: PlatformRole[] = ['platform:admin', 'platform:ops', 'platform:finance']

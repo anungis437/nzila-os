@@ -13,7 +13,7 @@
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "@/components/ui/card";
 import { motion } from "framer-motion";
 import Link from "next/link";
-import { useTranslations } from 'next-intl';
+import { useTranslations, useLocale } from 'next-intl';
 import { 
   FileText, 
   Mic, 
@@ -77,11 +77,11 @@ interface QuickLink {
 }
 
 // eslint-disable-next-line @typescript-eslint/no-explicit-any
-const getQuickLinks = (t: any): QuickLink[] => [
+const getQuickLinks = (t: any, locale: string): QuickLink[] => [
   {
     title: t('claims.submitNew'),
     description: t('dashboard.voiceEnabled'),
-    href: "/dashboard/claims/new",
+    href: `/${locale}/dashboard/claims/new`,
     icon: <Mic size={24} />,
     color: "from-blue-500 to-blue-600",
     roles: ["member", "steward", "officer", "admin"]
@@ -89,7 +89,7 @@ const getQuickLinks = (t: any): QuickLink[] => [
   {
     title: t('claims.myCases'),
     description: t('dashboard.trackSubmissions'),
-    href: "/dashboard/claims",
+    href: `/${locale}/dashboard/claims`,
     icon: <FileText size={24} />,
     color: "from-green-500 to-green-600",
     roles: ["member", "steward", "officer", "admin"]
@@ -97,7 +97,7 @@ const getQuickLinks = (t: any): QuickLink[] => [
   {
     title: t('navigation.vote'),
     description: t('dashboard.activeVotes'),
-    href: "/dashboard/voting",
+    href: `/${locale}/dashboard/voting`,
     icon: <Vote size={24} />,
     color: "from-purple-500 to-purple-600",
     roles: ["member", "steward", "officer", "admin"]
@@ -105,7 +105,7 @@ const getQuickLinks = (t: any): QuickLink[] => [
   {
     title: t('claims.caseQueue'),
     description: t('dashboard.reviewCases'),
-    href: "/dashboard/workbench",
+    href: `/${locale}/dashboard/workbench`,
     icon: <Shield size={24} />,
     color: "from-orange-500 to-orange-600",
     roles: ["steward", "officer", "admin"]
@@ -113,7 +113,7 @@ const getQuickLinks = (t: any): QuickLink[] => [
   {
     title: t('members.directory'),
     description: t('members.contactMembers'),
-    href: "/dashboard/members",
+    href: `/${locale}/dashboard/members`,
     icon: <Users size={24} />,
     color: "from-cyan-500 to-cyan-600",
     roles: ["steward", "officer", "admin"]
@@ -121,7 +121,7 @@ const getQuickLinks = (t: any): QuickLink[] => [
   {
     title: t('navigation.analytics'),
     description: t('analytics.unionInsights'),
-    href: "/dashboard/analytics",
+    href: `/${locale}/dashboard/analytics`,
     icon: <BarChart3 size={24} />,
     color: "from-indigo-500 to-indigo-600",
     roles: ["steward", "officer", "admin"]
@@ -129,7 +129,7 @@ const getQuickLinks = (t: any): QuickLink[] => [
   {
     title: t('grievance.title'),
     description: t('grievance.formalProcesses'),
-    href: "/dashboard/grievances",
+    href: `/${locale}/dashboard/grievances`,
     icon: <Scale size={24} />,
     color: "from-amber-500 to-amber-600",
     roles: ["officer", "admin"]
@@ -137,7 +137,7 @@ const getQuickLinks = (t: any): QuickLink[] => [
   {
     title: t('navigation.adminPanel'),
     description: t('dashboard.systemManagement'),
-    href: "/dashboard/admin",
+    href: `/${locale}/dashboard/admin`,
     icon: <Shield size={24} />,
     color: "from-red-500 to-red-600",
     roles: ["admin"]
@@ -194,6 +194,7 @@ export default function UnionDashboard() {
   const router = useRouter();
   const organizationId = useOrganizationId();
   const t = useTranslations();
+  const locale = useLocale();
   const [mounted, setMounted] = useState(false);
   const [userRole, setUserRole] = useState<UserRole>("member");
   const [dashboardStats, setDashboardStats] = useState<DashboardStats>({
@@ -408,7 +409,7 @@ export default function UnionDashboard() {
     return stat;
   });
   
-  const quickLinks = getQuickLinks(t);
+  const quickLinks = getQuickLinks(t, locale);
   const visibleQuickLinks = quickLinks.filter(link => link.roles.includes(userRole));
   const visibleStats = updatedStats.filter(stat => stat.roles.includes(userRole));
 
@@ -548,7 +549,7 @@ export default function UnionDashboard() {
           summary={deadlineSummary}
           criticalDeadlines={criticalDeadlines}
           loading={isLoadingDeadlines}
-          onViewAll={() => router.push('/dashboard/deadlines')}
+          onViewAll={() => router.push(`/${locale}/dashboard/deadlines`)}
         />
       </motion.div>
 
@@ -618,7 +619,7 @@ export default function UnionDashboard() {
                           <p className="text-sm text-gray-900">{activity.description}</p>
                           {activity.claimNumber && (
                             <Link 
-                              href={`/dashboard/claims/${activity.id}`}
+                              href={`/${locale}/dashboard/claims/${activity.id}`}
                               className="text-xs text-blue-600 hover:text-blue-700 font-medium"
                             >
                               {activity.claimNumber}
@@ -705,7 +706,7 @@ export default function UnionDashboard() {
                     </div>
                   ))}
                   <Link 
-                    href="/dashboard/notifications" 
+                    href={`/${locale}/dashboard/notifications`} 
                     className="block text-center text-sm text-blue-600 hover:text-blue-700 font-medium mt-4"
                   >
                     {t('common.viewAll')} <ArrowRight size={14} className="inline ml-1" />
@@ -745,12 +746,12 @@ export default function UnionDashboard() {
                     {t('help.supportMessage')}
                   </p>
                   <div className="flex gap-3">
-                    <Link href="/dashboard/claims/new">
+                    <Link href={`/${locale}/dashboard/claims/new`}>
                       <button className="px-4 py-2 bg-blue-600 text-white rounded-lg text-sm font-medium hover:bg-blue-700 transition-colors">
                         {t('claims.submitCase')}
                       </button>
                     </Link>
-                    <Link href="/dashboard/agreements">
+                    <Link href={`/${locale}/dashboard/agreements`}>
                       <button className="px-4 py-2 bg-white border border-blue-200 text-blue-600 rounded-lg text-sm font-medium hover:bg-blue-50 transition-colors">
                         {t('dashboard.viewAgreements')}
                       </button>

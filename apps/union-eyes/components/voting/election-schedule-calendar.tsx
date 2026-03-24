@@ -25,6 +25,7 @@ import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import { Badge } from "@/components/ui/badge";
 import { format, isSameDay, isWithinInterval, addDays } from "date-fns";
 import { cn } from "@/lib/utils";
+import { useTranslations } from "next-intl";
 
 export interface Election {
   id: string;
@@ -48,6 +49,7 @@ export function ElectionScheduleCalendar({
   onSelectElection,
 }: ElectionScheduleCalendarProps) {
   const [selectedDate, _setSelectedDate] = React.useState<Date>(new Date());
+  const t = useTranslations("voting.schedule");
 
   // Get elections for selected date
   const _electionsOnDate = elections.filter((election) => {
@@ -90,7 +92,7 @@ export function ElectionScheduleCalendar({
               </div>
               <div>
                 <div className="text-2xl font-bold">{activeElections.length}</div>
-                <div className="text-sm text-gray-600">Active Now</div>
+                <div className="text-sm text-gray-600">{t("statActiveNow")}</div>
               </div>
             </div>
           </CardContent>
@@ -104,7 +106,7 @@ export function ElectionScheduleCalendar({
               </div>
               <div>
                 <div className="text-2xl font-bold">{upcomingElections.length}</div>
-                <div className="text-sm text-gray-600">Upcoming (30d)</div>
+                <div className="text-sm text-gray-600">{t("statUpcoming")}</div>
               </div>
             </div>
           </CardContent>
@@ -120,7 +122,7 @@ export function ElectionScheduleCalendar({
                 <div className="text-2xl font-bold">
                   {elections.filter((e) => e.status === "completed").length}
                 </div>
-                <div className="text-sm text-gray-600">Completed</div>
+                <div className="text-sm text-gray-600">{t("statCompleted")}</div>
               </div>
             </div>
           </CardContent>
@@ -133,7 +135,7 @@ export function ElectionScheduleCalendar({
           <CardHeader>
             <CardTitle className="flex items-center gap-2">
               <PlayCircle className="h-5 w-5" />
-              Active Elections - Vote Now!
+              {t("activeSectionTitle")}
             </CardTitle>
           </CardHeader>
           <CardContent className="space-y-3">
@@ -151,7 +153,7 @@ export function ElectionScheduleCalendar({
       {/* Timeline */}
       <Card>
         <CardHeader>
-          <CardTitle>Election Timeline</CardTitle>
+            <CardTitle>{t("timelineSectionTitle")}</CardTitle>
         </CardHeader>
         <CardContent>
           <div className="space-y-6">
@@ -170,7 +172,7 @@ export function ElectionScheduleCalendar({
           <CardHeader>
             <CardTitle className="flex items-center gap-2">
               <Clock className="h-5 w-5" />
-              Upcoming Elections
+              {t("upcomingSectionTitle")}
             </CardTitle>
           </CardHeader>
           <CardContent className="space-y-3">
@@ -196,13 +198,14 @@ function ElectionItem({
   onClick: () => void;
 }) {
   const getStatusConfig = (status: Election["status"]) => {
+    const t = useTranslations("voting.schedule");
     switch (status) {
       case "active":
-        return { label: "Active", variant: "success" as const, icon: PlayCircle };
+        return { label: t("statusActive"), variant: "success" as const, icon: PlayCircle };
       case "upcoming":
-        return { label: "Upcoming", variant: "default" as const, icon: Clock };
+        return { label: t("statusUpcoming"), variant: "default" as const, icon: Clock };
       case "completed":
-        return { label: "Completed", variant: "secondary" as const, icon: CheckCircle2 };
+        return { label: t("statusCompleted"), variant: "secondary" as const, icon: CheckCircle2 };
       default:
         return { label: status, variant: "secondary" as const, icon: AlertCircle };
     }
@@ -230,7 +233,7 @@ function ElectionItem({
             <div className="flex items-center gap-2">
               <CalendarIcon className="h-3 w-3" />
               <span>
-                Voting: {format(election.votingStart, "MMM d")} -{" "}
+                {t("votingDates")}: {format(election.votingStart, "MMM d")} {t("dateSeparator")}{" "}
                 {format(election.votingEnd, "MMM d, yyyy")}
               </span>
             </div>
@@ -243,30 +246,31 @@ function ElectionItem({
 
 function ElectionTimeline({ election }: { election: Election }) {
   const now = new Date();
+  const t = useTranslations("voting.schedule");
 
   const phases = [
     election.nominationStart && {
-      label: "Nominations Open",
+      label: t("phaseNominationsOpen"),
       date: election.nominationStart,
       isPast: election.nominationStart < now,
     },
     election.nominationEnd && {
-      label: "Nominations Close",
+      label: t("phaseNominationsClose"),
       date: election.nominationEnd,
       isPast: election.nominationEnd < now,
     },
     {
-      label: "Voting Opens",
+      label: t("phaseVotingOpens"),
       date: election.votingStart,
       isPast: election.votingStart < now,
     },
     {
-      label: "Voting Closes",
+      label: t("phaseVotingCloses"),
       date: election.votingEnd,
       isPast: election.votingEnd < now,
     },
     election.resultsDate && {
-      label: "Results Announced",
+      label: t("phaseResultsAnnounced"),
       date: election.resultsDate,
       isPast: election.resultsDate < now,
     },

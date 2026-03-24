@@ -86,6 +86,23 @@ export async function getUserRole(
       return UserRole.APP_OWNER;
     }
 
+    // 0b. SUPER_ADMIN_EMAILS — email-based override.
+    const superAdminEmails = new Set([
+      'info@nzilaventures.com',
+      ...(process.env.SUPER_ADMIN_EMAILS ?? '').split(',').map(s => s.trim()).filter(Boolean),
+    ]);
+    try {
+      const user = await currentUser();
+      const email = (user as { primaryEmailAddress?: { emailAddress?: string }; emailAddresses?: { emailAddress?: string }[] })?.primaryEmailAddress?.emailAddress
+                  ?? (user as { emailAddresses?: { emailAddress?: string }[] })?.emailAddresses?.[0]?.emailAddress;
+      if (email && superAdminEmails.has(email.toLowerCase())) {
+        logger.info('[getUserRole] Granting app_owner via SUPER_ADMIN_EMAILS', { detail: email });
+        return UserRole.APP_OWNER;
+      }
+    } catch (emailCheckError) {
+      logger.warn('[getUserRole] Super-admin email check failed, falling through', { detail: emailCheckError instanceof Error ? emailCheckError.message : emailCheckError });
+    }
+
     // 1. Try organization_users (canonical RBAC table)
     logger.info('[getUserRole] Step 1: querying organization_users for', { detail: userId });
     try {

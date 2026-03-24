@@ -24,7 +24,12 @@ export const metadata: Metadata = {
   description: 'Manage recognition programs, awards, and budgets',
 };
 
-export default async function AdminRewardsPage() {
+export default async function AdminRewardsPage({
+  params,
+}: {
+  params: Promise<{ locale: string }>;
+}) {
+  const { locale } = await params;
   await requireUser();
 
   const hasAccess = await hasMinRole("admin");
@@ -140,7 +145,7 @@ export default async function AdminRewardsPage() {
         </h2>
         <div className="grid gap-4 md:grid-cols-2 lg:grid-cols-3">
           <Card className="hover:bg-accent/50 transition-colors cursor-pointer">
-            <Link href="/dashboard/admin/rewards/programs">
+            <Link href={`/${locale}/dashboard/admin/rewards/programs`}>
               <CardHeader>
                 <div className="flex items-center gap-3">
                   <div className="p-2 bg-primary/10 rounded-lg">
@@ -162,7 +167,7 @@ export default async function AdminRewardsPage() {
           </Card>
 
           <Card className="hover:bg-accent/50 transition-colors cursor-pointer">
-            <Link href="/dashboard/admin/rewards/awards">
+            <Link href={`/${locale}/dashboard/admin/rewards/awards`}>
               <CardHeader>
                 <div className="flex items-center gap-3">
                   <div className="p-2 bg-primary/10 rounded-lg">
@@ -184,7 +189,7 @@ export default async function AdminRewardsPage() {
           </Card>
 
           <Card className="hover:bg-accent/50 transition-colors cursor-pointer">
-            <Link href="/dashboard/admin/rewards/budgets">
+            <Link href={`/${locale}/dashboard/admin/rewards/budgets`}>
               <CardHeader>
                 <div className="flex items-center gap-3">
                   <div className="p-2 bg-primary/10 rounded-lg">
@@ -206,7 +211,7 @@ export default async function AdminRewardsPage() {
           </Card>
 
           <Card className="hover:bg-accent/50 transition-colors cursor-pointer">
-            <Link href="/dashboard/admin/rewards/shopify">
+            <Link href={`/${locale}/dashboard/admin/rewards/shopify`}>
               <CardHeader>
                 <div className="flex items-center gap-3">
                   <div className="p-2 bg-primary/10 rounded-lg">
@@ -228,7 +233,7 @@ export default async function AdminRewardsPage() {
           </Card>
 
           <Card className="hover:bg-accent/50 transition-colors cursor-pointer">
-            <Link href="/dashboard/admin/rewards/reports">
+            <Link href={`/${locale}/dashboard/admin/rewards/reports`}>
               <CardHeader>
                 <div className="flex items-center gap-3">
                   <div className="p-2 bg-primary/10 rounded-lg">
@@ -250,7 +255,7 @@ export default async function AdminRewardsPage() {
           </Card>
 
           <Card className="hover:bg-accent/50 transition-colors cursor-pointer">
-            <Link href="/dashboard/admin/rewards/members">
+            <Link href={`/${locale}/dashboard/admin/rewards/members`}>
               <CardHeader>
                 <div className="flex items-center gap-3">
                   <div className="p-2 bg-primary/10 rounded-lg">

@@ -5,7 +5,7 @@ export const dynamic = 'force-dynamic';
 import { useState, useRef, useEffect } from "react";
 import { motion } from "framer-motion";
 import { useRouter } from "next/navigation";
-import { useTranslations } from "next-intl";
+import { useTranslations, useLocale } from "next-intl";
 import { useUser } from "@clerk/nextjs";
 import { 
   Mic, 
@@ -29,6 +29,7 @@ type CasePriority = "low" | "medium" | "high" | "urgent";
 
 export default function NewClaimPage() {
   const t = useTranslations();
+  const locale = useLocale();
   const router = useRouter();
   const { user } = useUser();
 
@@ -300,7 +301,7 @@ setIsSubmitting(false);
           transition={{ duration: 0.5 }}
           className="mb-8"
         >
-          <Link href="/dashboard/claims">
+          <Link href={`/${locale}/dashboard/claims`}>
             <button className="flex items-center gap-2 text-gray-600 hover:text-gray-900 mb-4 transition-colors">
               <ArrowLeft size={20} />
               {t('claims.backToClaims')}
@@ -598,7 +599,7 @@ setIsSubmitting(false);
                     )}
                   </motion.button>
 
-                  <Link href="/dashboard/claims" className="shrink-0">
+                  <Link href={`/${locale}/dashboard/claims`} className="shrink-0">
                     <button
                       type="button"
                       className="px-6 py-4 bg-white border-2 border-gray-300 text-gray-700 rounded-lg font-semibold hover:bg-gray-50 transition-colors"

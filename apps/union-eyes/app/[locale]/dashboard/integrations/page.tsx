@@ -264,10 +264,13 @@ function maskUrl(url: string) {
 // ── Page ───────────────────────────────────────────────────────────────────
 
 export default async function IntegrationsDashboard({
+  params: paramsPromise,
   searchParams,
 }: {
+  params: Promise<{ locale: string }>;
   searchParams: Promise<{ tab?: string; status?: string }>;
 }) {
+  const { locale } = await paramsPromise;
   const params = await searchParams;
   const activeTab = params.tab ?? 'overview';
   const filterStatus = params.status ?? null;
@@ -276,7 +279,7 @@ export default async function IntegrationsDashboard({
 
   const hasAccess = await hasMinRole('integration_manager');
   if (!hasAccess) {
-    redirect('/dashboard');
+    redirect(`/${locale}/dashboard`);
   }
 
   const organizationId = user.organizationId;
@@ -334,22 +337,22 @@ export default async function IntegrationsDashboard({
       <Tabs defaultValue={activeTab} className="space-y-4">
         <TabsList>
           <TabsTrigger value="overview">
-            <Link href="/dashboard/integrations" className="no-underline">Overview</Link>
+            <Link href={`/${locale}/dashboard/integrations`} className="no-underline">Overview</Link>
           </TabsTrigger>
           <TabsTrigger value="api-keys">
-            <Link href="/dashboard/integrations?tab=api-keys" className="no-underline">
+            <Link href={`/${locale}/dashboard/integrations?tab=api-keys`} className="no-underline">
               API Keys ({stats.activeApiKeys})
             </Link>
           </TabsTrigger>
           <TabsTrigger value="webhooks">
-            <Link href="/dashboard/integrations?tab=webhooks" className="no-underline">
+            <Link href={`/${locale}/dashboard/integrations?tab=webhooks`} className="no-underline">
               Webhooks {stats.errorWebhooks > 0 && (
                 <Badge variant="destructive" className="ml-1.5 text-xs">{stats.errorWebhooks}</Badge>
               )}
             </Link>
           </TabsTrigger>
           <TabsTrigger value="partners">
-            <Link href="/dashboard/integrations?tab=partners" className="no-underline">
+            <Link href={`/${locale}/dashboard/integrations?tab=partners`} className="no-underline">
               Partners ({stats.connectedPartners})
             </Link>
           </TabsTrigger>
@@ -358,7 +361,7 @@ export default async function IntegrationsDashboard({
         {/* ── Overview Tab ─────────────────────────────────────────────── */}
         <TabsContent value="overview" className="space-y-4">
           <div className="grid gap-4 md:grid-cols-2 lg:grid-cols-4">
-            <Link href="/dashboard/integrations?tab=api-keys" className="no-underline">
+            <Link href={`/${locale}/dashboard/integrations?tab=api-keys`} className="no-underline">
               <Card className="hover:border-primary/50 transition-colors cursor-pointer">
                 <CardHeader className="pb-2">
                   <CardTitle className="text-sm font-medium flex items-center gap-2">
@@ -373,7 +376,7 @@ export default async function IntegrationsDashboard({
               </Card>
             </Link>
 
-            <Link href="/dashboard/integrations?tab=webhooks" className="no-underline">
+            <Link href={`/${locale}/dashboard/integrations?tab=webhooks`} className="no-underline">
               <Card className="hover:border-primary/50 transition-colors cursor-pointer">
                 <CardHeader className="pb-2">
                   <CardTitle className="text-sm font-medium flex items-center gap-2">
@@ -403,7 +406,7 @@ export default async function IntegrationsDashboard({
               </CardContent>
             </Card>
 
-            <Link href="/dashboard/integrations?tab=partners" className="no-underline">
+            <Link href={`/${locale}/dashboard/integrations?tab=partners`} className="no-underline">
               <Card className="hover:border-primary/50 transition-colors cursor-pointer">
                 <CardHeader className="pb-2">
                   <CardTitle className="text-sm font-medium flex items-center gap-2">
@@ -436,11 +439,11 @@ export default async function IntegrationsDashboard({
                     <span className="text-sm">Active Keys</span>
                     <span className="text-sm font-bold">{stats.activeApiKeys}</span>
                   </div>
-                  <Link href="/dashboard/integrations?tab=api-keys&status=revoked" className="flex items-center justify-between hover:bg-muted/50 rounded-md px-2 py-1 -mx-2 transition-colors no-underline">
+                  <Link href={`/${locale}/dashboard/integrations?tab=api-keys&status=revoked`} className="flex items-center justify-between hover:bg-muted/50 rounded-md px-2 py-1 -mx-2 transition-colors no-underline">
                     <span className="text-sm">Revoked Keys</span>
                     <Badge variant={stats.revokedApiKeys > 0 ? 'destructive' : 'outline'}>{stats.revokedApiKeys}</Badge>
                   </Link>
-                  <Link href="/dashboard/integrations?tab=api-keys&status=expired" className="flex items-center justify-between hover:bg-muted/50 rounded-md px-2 py-1 -mx-2 transition-colors no-underline">
+                  <Link href={`/${locale}/dashboard/integrations?tab=api-keys&status=expired`} className="flex items-center justify-between hover:bg-muted/50 rounded-md px-2 py-1 -mx-2 transition-colors no-underline">
                     <span className="text-sm">Expired Keys</span>
                     <Badge variant={stats.expiredApiKeys > 0 ? 'secondary' : 'outline'}>{stats.expiredApiKeys}</Badge>
                   </Link>
@@ -484,22 +487,22 @@ export default async function IntegrationsDashboard({
                 {filterStatus ? (
                   <div className="flex items-center gap-2">
                     <Badge variant="secondary">Filtered: {filterStatus}</Badge>
-                    <Link href="/dashboard/integrations?tab=api-keys" className="text-xs text-muted-foreground hover:text-foreground">
+                    <Link href={`/${locale}/dashboard/integrations?tab=api-keys`} className="text-xs text-muted-foreground hover:text-foreground">
                       Clear filter
                     </Link>
                   </div>
                 ) : (
                   <div className="flex gap-1">
-                    <Link href="/dashboard/integrations?tab=api-keys&status=active">
+                    <Link href={`/${locale}/dashboard/integrations?tab=api-keys&status=active`}>
                       <Badge variant="default" className="cursor-pointer hover:opacity-80">Active ({stats.activeApiKeys})</Badge>
                     </Link>
                     {stats.revokedApiKeys > 0 && (
-                      <Link href="/dashboard/integrations?tab=api-keys&status=revoked">
+                      <Link href={`/${locale}/dashboard/integrations?tab=api-keys&status=revoked`}>
                         <Badge variant="destructive" className="cursor-pointer hover:opacity-80">Revoked ({stats.revokedApiKeys})</Badge>
                       </Link>
                     )}
                     {stats.expiredApiKeys > 0 && (
-                      <Link href="/dashboard/integrations?tab=api-keys&status=expired">
+                      <Link href={`/${locale}/dashboard/integrations?tab=api-keys&status=expired`}>
                         <Badge variant="secondary" className="cursor-pointer hover:opacity-80">Expired ({stats.expiredApiKeys})</Badge>
                       </Link>
                     )}
@@ -560,22 +563,22 @@ export default async function IntegrationsDashboard({
                 {filterStatus ? (
                   <div className="flex items-center gap-2">
                     <Badge variant="secondary">Filtered: {filterStatus}</Badge>
-                    <Link href="/dashboard/integrations?tab=webhooks" className="text-xs text-muted-foreground hover:text-foreground">
+                    <Link href={`/${locale}/dashboard/integrations?tab=webhooks`} className="text-xs text-muted-foreground hover:text-foreground">
                       Clear filter
                     </Link>
                   </div>
                 ) : (
                   <div className="flex gap-1">
-                    <Link href="/dashboard/integrations?tab=webhooks&status=active">
+                    <Link href={`/${locale}/dashboard/integrations?tab=webhooks&status=active`}>
                       <Badge variant="default" className="cursor-pointer hover:opacity-80">Active ({stats.activeWebhooks})</Badge>
                     </Link>
                     {stats.errorWebhooks > 0 && (
-                      <Link href="/dashboard/integrations?tab=webhooks&status=error">
+                      <Link href={`/${locale}/dashboard/integrations?tab=webhooks&status=error`}>
                         <Badge variant="destructive" className="cursor-pointer hover:opacity-80">Error ({stats.errorWebhooks})</Badge>
                       </Link>
                     )}
                     {stats.pausedWebhooks > 0 && (
-                      <Link href="/dashboard/integrations?tab=webhooks&status=paused">
+                      <Link href={`/${locale}/dashboard/integrations?tab=webhooks&status=paused`}>
                         <Badge variant="secondary" className="cursor-pointer hover:opacity-80">Paused ({stats.pausedWebhooks})</Badge>
                       </Link>
                     )}

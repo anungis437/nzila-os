@@ -16,7 +16,12 @@ export const metadata: Metadata = {
   description: 'View your reward credits balance and transaction history',
 };
 
-export default async function RewardsWalletPage() {
+export default async function RewardsWalletPage({
+  params,
+}: {
+  params: Promise<{ locale: string }>;
+}) {
+  const { locale } = await params;
   const user = await requireUser();
   const userId = user.userId;
   const orgId = user.organizationId ?? '';
@@ -54,7 +59,7 @@ export default async function RewardsWalletPage() {
           </p>
         </div>
         <Button asChild size="lg">
-          <Link href="/dashboard/rewards/redeem">
+          <Link href={`/${locale}/dashboard/rewards/redeem`}>
             <Gift className="mr-2 h-5 w-5" />
             {t('wallet.redeemButton', { defaultValue: 'Redeem Credits' })}
           </Link>

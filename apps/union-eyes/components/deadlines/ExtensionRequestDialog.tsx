@@ -7,6 +7,7 @@
  */
 
 import React, { useState } from 'react';
+import { useTranslations } from 'next-intl';
 import { Dialog, Transition } from '@headlessui/react';
 import { Fragment } from 'react';
 import { 
@@ -40,6 +41,7 @@ export function ExtensionRequestDialog({
   onCancel,
   open,
 }: ExtensionRequestDialogProps) {
+  const t = useTranslations('deadlines.extensionRequest');
   const [daysRequested, setDaysRequested] = useState<number>(7);
   const [reason, setReason] = useState<string>('');
   const [errors, setErrors] = useState<{ days?: string; reason?: string }>({});
@@ -61,18 +63,18 @@ export function ExtensionRequestDialog({
 
     // Validate days
     if (!daysRequested || daysRequested < 1) {
-      newErrors.days = 'Please enter at least 1 day';
+      newErrors.days = t('minDaysError');
     } else if (daysRequested > maxExtensionDays) {
-      newErrors.days = `Maximum ${maxExtensionDays} days allowed`;
+      newErrors.days = t('maxDaysError', { max: maxExtensionDays });
     }
 
     // Validate reason
     if (!reason.trim()) {
-      newErrors.reason = 'Reason is required';
+      newErrors.reason = t('reasonRequired');
     } else if (reason.trim().length < 20) {
-      newErrors.reason = 'Please provide at least 20 characters';
+      newErrors.reason = t('reasonMinLength');
     } else if (reason.trim().length > 500) {
-      newErrors.reason = 'Reason cannot exceed 500 characters';
+      newErrors.reason = t('reasonMaxLength');
     }
 
     setErrors(newErrors);
@@ -96,7 +98,7 @@ export function ExtensionRequestDialog({
       handleClose();
     } catch (error) {
       setSubmitError(
-        error instanceof Error ? error.message : 'Failed to submit request'
+        error instanceof Error ? error.message : t('submitFailed')
       );
     } finally {
       setIsSubmitting(false);
@@ -142,7 +144,7 @@ export function ExtensionRequestDialog({
                     onClick={handleClose}
                     disabled={isSubmitting}
                   >
-                    <span className="sr-only">Close</span>
+                    <span className="sr-only">{t('close')}</span>
                     <XMarkIcon className="h-6 w-6" aria-hidden="true" />
                   </button>
                 </div>
@@ -152,7 +154,7 @@ export function ExtensionRequestDialog({
                     as="h3"
                     className="text-lg font-semibold leading-6 text-gray-900 pr-8"
                   >
-                    Request Deadline Extension
+                    {t('title')}
                   </Dialog.Title>
 
                   {/* Deadline Info */}
@@ -162,19 +164,19 @@ export function ExtensionRequestDialog({
                         {deadline.deadlineName}
                       </p>
                       <p className="text-xs text-gray-500 mt-0.5">
-                        Type: {deadline.deadlineType}
-                        {deadline.claimNumber && ` • Claim ${deadline.claimNumber}`}
+                        {t('typeLabel')}: {deadline.deadlineType}
+                        {deadline.claimNumber && ` • ${t('claimLabel')} ${deadline.claimNumber}`}
                       </p>
                     </div>
                     <div className="flex items-center justify-between text-sm">
-                      <span className="text-gray-600">Current deadline:</span>
+                      <span className="text-gray-600">{t('currentDeadline')}:</span>
                       <span className="font-medium text-gray-900">
                         {format(new Date(deadline.currentDeadline), 'MMM dd, yyyy')}
                       </span>
                     </div>
                     {deadline.extensionCount > 0 && (
                       <div className="flex items-center justify-between text-sm">
-                        <span className="text-gray-600">Previous extensions:</span>
+                        <span className="text-gray-600">{t('previousExtensions')}:</span>
                         <span className="font-medium text-gray-900">
                           {deadline.extensionCount}
                         </span>
@@ -190,7 +192,7 @@ export function ExtensionRequestDialog({
                         htmlFor="daysRequested"
                         className="block text-sm font-medium text-gray-700"
                       >
-                        Days Requested <span className="text-red-500">*</span>
+                        {t('daysRequested')} <span className="text-red-500">*</span>
                       </label>
                       <div className="mt-1">
                         <input
@@ -216,7 +218,7 @@ export function ExtensionRequestDialog({
                       )}
                       {!errors.days && daysRequested > 0 && (
                         <p className="mt-1 text-sm text-gray-500">
-                          New deadline: {format(estimatedNewDeadline, 'MMM dd, yyyy')}
+                          {t('newDeadline')}: {format(estimatedNewDeadline, 'MMM dd, yyyy')}
                         </p>
                       )}
                     </div>
@@ -227,7 +229,7 @@ export function ExtensionRequestDialog({
                         htmlFor="reason"
                         className="block text-sm font-medium text-gray-700"
                       >
-                        Reason for Extension <span className="text-red-500">*</span>
+                        {t('reasonLabel')} <span className="text-red-500">*</span>
                       </label>
                       <div className="mt-1">
                         <textarea
@@ -243,7 +245,7 @@ export function ExtensionRequestDialog({
                               ? 'border-red-300 focus:border-red-500 focus:ring-red-500'
                               : 'border-gray-300 focus:border-blue-500 focus:ring-blue-500'
                           }`}
-                          placeholder="Please explain why you need this extension..."
+                          placeholder={t('reasonPlaceholder')}
                           disabled={isSubmitting}
                         />
                       </div>
@@ -252,7 +254,7 @@ export function ExtensionRequestDialog({
                       )}
                       {!errors.reason && (
                         <p className="mt-1 text-sm text-gray-500">
-                          {reason.length}/500 characters (minimum 20 required)
+                          {t('characterCount', { count: reason.length })}
                         </p>
                       )}
                     </div>
@@ -269,8 +271,7 @@ export function ExtensionRequestDialog({
                           </div>
                           <div className="ml-3">
                             <p className="text-sm text-blue-700">
-                              Extensions longer than 7 days require officer approval.
-                              You&apos;ll be notified of the decision.
+                              {t('longExtensionWarning')}
                             </p>
                           </div>
                         </div>
@@ -302,14 +303,14 @@ export function ExtensionRequestDialog({
                         disabled={isSubmitting}
                         className="inline-flex justify-center rounded-md border border-gray-300 bg-white px-4 py-2 text-sm font-medium text-gray-700 shadow-sm hover:bg-gray-50 focus:outline-none focus:ring-2 focus:ring-blue-500 focus:ring-offset-2 disabled:opacity-50 disabled:cursor-not-allowed"
                       >
-                        Cancel
+                        {t('cancel')}
                       </button>
                       <button
                         type="submit"
                         disabled={isSubmitting}
                         className="inline-flex justify-center rounded-md border border-transparent bg-blue-600 px-4 py-2 text-sm font-medium text-white shadow-sm hover:bg-blue-700 focus:outline-none focus:ring-2 focus:ring-blue-500 focus:ring-offset-2 disabled:opacity-50 disabled:cursor-not-allowed"
                       >
-                        {isSubmitting ? 'Submitting...' : 'Submit Request'}
+                        {isSubmitting ? t('submitting') : t('submitRequest')}
                       </button>
                     </div>
                   </form>

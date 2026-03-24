@@ -12,6 +12,7 @@
 'use client';
 
 import { useEffect, useState, useCallback } from 'react';
+import { useLocale } from 'next-intl';
 import Link from 'next/link';
 import {
   detectAllSignals,
@@ -39,6 +40,7 @@ export function DashboardSignalsWidget({
   maxSignalsToShow = 10,
 }: DashboardSignalsWidgetProps) {
   // Feature flags
+  const locale = useLocale();
   const flags = useFeatureFlags([
     LRO_FEATURES.AUTO_REFRESH,
   ]);
@@ -168,7 +170,7 @@ export function DashboardSignalsWidget({
           {signals.length > maxSignalsToShow && (
             <div className="px-6 py-4 bg-gray-50 border-t">
               <Link
-                href="/cases?filter=signals"
+                href={`/${locale}/cases?filter=signals`}
                 className="text-sm text-blue-600 hover:text-blue-800 font-medium"
               >
                 View all {signals.length} signals →

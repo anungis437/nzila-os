@@ -4,7 +4,7 @@
 export const dynamic = 'force-dynamic';
 import { useState, useEffect } from 'react';
 import { useParams, useRouter } from 'next/navigation';
-import { useTranslations } from 'next-intl';
+import { useTranslations, useLocale } from 'next-intl';
 import { motion } from 'framer-motion';
 import { ArrowLeft, Calendar, MapPin, FileText, Clock, CheckCircle, AlertCircle } from 'lucide-react';
 import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card';
@@ -36,6 +36,7 @@ interface Claim {
 
 export default function ClaimDetailPage() {
   const t = useTranslations();
+  const locale = useLocale();
   
   const statusLabels: Record<string, { label: string; color: string }> = {
     submitted: { label: t('claimStatus.submitted'), color: 'bg-blue-100 text-blue-800' },
@@ -174,7 +175,7 @@ setError(err instanceof Error ? err.message : 'Failed to load claim');
             <AlertCircle className="w-12 h-12 text-red-500 mx-auto mb-4" />
             <h2 className="text-xl font-bold text-gray-900 mb-2">{t('errors.loadingError')}</h2>
             <p className="text-gray-600 mb-4">{error || t('claims.notFound')}</p>
-            <Link href="/dashboard/claims">
+            <Link href={`/${locale}/dashboard/claims`}>
               <Button>{t('claims.backToClaims')}</Button>
             </Link>
           </CardContent>
@@ -195,7 +196,7 @@ setError(err instanceof Error ? err.message : 'Failed to load claim');
           animate={{ opacity: 1, y: 0 }}
           className="mb-8"
         >
-          <Link href="/dashboard/claims">
+          <Link href={`/${locale}/dashboard/claims`}>
             <button className="flex items-center gap-2 text-gray-600 hover:text-gray-900 mb-4 transition-colors">
               <ArrowLeft size={20} />
               {t('claims.backToClaims')}

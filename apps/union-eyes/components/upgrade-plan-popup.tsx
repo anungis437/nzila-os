@@ -13,6 +13,7 @@ import { Switch } from "@/components/ui/switch";
 import { motion } from "framer-motion";
 import type { SelectProfile } from "@/db/schema/domains/member";
 import { validateRedirectUrl } from "@/lib/utils/sanitize";
+import { useTranslations } from "next-intl";
 
 interface UpgradePlanPopupProps {
   profile: SelectProfile;
@@ -35,6 +36,7 @@ export default function UpgradePlanPopup({
   const [isLoading, setIsLoading] = useState(false);
   const [error, setError] = useState<string | null>(null);
   const [manuallyDismissed, setManuallyDismissed] = useState(false);
+  const t = useTranslations("billing.upgradePlan");
   
   // Use external state if provided, otherwise use internal state
   const isOpen = externalIsOpen !== undefined ? externalIsOpen : internalIsOpen;
@@ -138,7 +140,7 @@ export default function UpgradePlanPopup({
       const planId = yearly ? yearlyPlanId : monthlyPlanId;
       
       if (!planId) {
-setError("Configuration issue detected. Please visit the pricing page to complete your purchase.");
+setError(t("configError"));
         return;
       }
       
@@ -158,14 +160,14 @@ setError("Configuration issue detected. Please visit the pricing page to complet
       
       if (!response.ok) {
         const _errorData = await response.json();
-setError('Failed to create checkout. Please try again later.');
+setError(t("checkoutFailed"));
         return;
       }
       
       const data = await response.json();
       
       if (!data.checkoutUrl) {
-setError('Failed to create checkout. Please try again.');
+setError(t("checkoutFailedRetry"));
         return;
       }
 // Store information in localStorage to help with state persistence across redirects
@@ -178,10 +180,10 @@ setError('Failed to create checkout. Please try again.');
       
       // Redirect to the checkout URL
       const safeUrl = validateRedirectUrl(data.checkoutUrl);
-      if (!safeUrl) { setError('Untrusted checkout URL'); return; }
+      if (!safeUrl) { setError(t("untrustedUrl")); return; }
       window.location.href = safeUrl;
     } catch (_error) {
-setError('An unexpected error occurred. Please try again later.');
+setError(t("unexpectedError"));
     } finally {
       setIsLoading(false);
     }
@@ -193,10 +195,10 @@ setError('An unexpected error occurred. Please try again later.');
   
   // Benefits list
   const benefits = [
-    "1,000 AI credits per billing cycle",
-    "AI-powered grievance triage & drafting",
-    "Precedent research & CBA extraction",
-    "Priority support from labour specialists"
+    t("benefit1"),
+    t("benefit2"),
+    t("benefit3"),
+    t("benefit4"),
   ];
   
   return (
@@ -214,7 +216,7 @@ setError('An unexpected error occurred. Please try again later.');
           <button
             onClick={() => onOpenChange(false)}
             className="absolute top-3 right-3 z-50 rounded-full w-8 h-8 flex items-center justify-center text-gray-500 hover:bg-gray-100 transition-colors"
-            title="Close"
+            title={t("close")}
           >
             <X size={16} />
           </button>
@@ -225,10 +227,10 @@ setError('An unexpected error occurred. Please try again later.');
               <div className="bg-purple-100 w-8 h-8 rounded-full flex items-center justify-center">
                 <Sparkles className="w-4 h-4 text-purple-600" />
               </div>
-              <h3 className="text-lg font-semibold text-gray-900">Upgrade to Pro</h3>
+              <h3 className="text-lg font-semibold text-gray-900">{t("title")}</h3>
             </div>
             <p className="text-sm text-gray-600 mb-3">
-              You&apos;ve used all your credits ({usedCredits}/{usageCredits}). Get more with Pro.
+              {t("subtitle", { used: usedCredits, total: usageCredits })}
             </p>
             
             {/* Credit usage progress bar */}
@@ -241,7 +243,7 @@ setError('An unexpected error occurred. Please try again later.');
           <div className="px-6 pb-4 pt-2">
             <div className="flex items-center justify-center mb-5 bg-gray-50 rounded-lg p-2.5">
               <span className={`text-sm mr-3 ${!yearly ? 'text-gray-900 font-medium' : 'text-gray-500'}`}>
-                Monthly
+                {t("monthly")}
               </span>
               <Switch 
                 checked={yearly} 
@@ -249,9 +251,9 @@ setError('An unexpected error occurred. Please try again later.');
                 className="data-[state=checked]:bg-purple-600"
               />
               <span className={`text-sm ml-3 flex items-center ${yearly ? 'text-gray-900 font-medium' : 'text-gray-500'}`}>
-                Yearly
+                {t("yearly")}
                 <span className="ml-1.5 text-[10px] font-bold text-purple-600 bg-purple-100 px-1.5 py-0.5 rounded-full">
-                  Save 33%
+                  {t("save33")}
                 </span>
               </span>
             </div>
@@ -259,13 +261,13 @@ setError('An unexpected error occurred. Please try again later.');
             {/* Price display */}
             <div className="text-center mb-3">
               <div className="flex items-baseline justify-center">
-                <span className="text-3xl font-bold">{yearly ? yearlyPriceMonthly : monthlyPrice}</span>
-                <span className="text-gray-500 text-sm ml-1">/month</span>
+                <span className="text-3xl font-bold">{yearly ? t("yearlyPriceMonthly") : t("monthlyPrice")}</span>
+                <span className="text-gray-500 text-sm ml-1">{t("perMonth")}</span>
               </div>
               <p className="text-xs text-gray-500 mt-1">
                 {yearly 
-                  ? `Billed annually at ${yearlyPrice}`
-                  : "Billed monthly, cancel anytime"}
+                  ? t("billedAnnually", { price: yearlyPrice })
+                  : t("billedMonthly")}
               </p>
             </div>
           
@@ -291,7 +293,7 @@ setError('An unexpected error occurred. Please try again later.');
               onClick={handleCheckout}
               disabled={isLoading}
             >
-              {isLoading ? "Processing..." : `Get Pro ${yearly ? 'Yearly' : 'Monthly'}`}
+              {isLoading ? t("processing") : yearly ? t("getProYearly") : t("getProMonthly")}
             </Button>
             
             {error && (
@@ -301,7 +303,7 @@ setError('An unexpected error occurred. Please try again later.');
             )}
             
             <p className="text-xs text-gray-400 text-center mt-3">
-              Next free renewal: {profile.nextCreditRenewal 
+              {t("nextFreeRenewal")}: {profile.nextCreditRenewal 
                 ? new Date(profile.nextCreditRenewal).toLocaleDateString()
                 : 'Not scheduled'}
             </p>

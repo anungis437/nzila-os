@@ -8,6 +8,7 @@
 "use client";
 
 import { useEffect, useState } from "react";
+import { useLocale } from "next-intl";
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "@/components/ui/card";
 import { Badge } from "@/components/ui/badge";
 import { Button } from "@/components/ui/button";
@@ -61,6 +62,7 @@ const statusLabels: Record<string, string> = {
 };
 
 export function NegotiationDashboard({ organizationId }: NegotiationDashboardProps) {
+  const locale = useLocale();
   const [negotiations, setNegotiations] = useState<Negotiation[]>([]);
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState<string | null>(null);
@@ -128,7 +130,7 @@ export function NegotiationDashboard({ organizationId }: NegotiationDashboardPro
           </p>
         </div>
         <Button asChild>
-          <Link href="/dashboard/bargaining/new">
+          <Link href={`/${locale}/dashboard/bargaining/new`}>
             <Plus className="mr-2 h-4 w-4" />
             New Negotiation
           </Link>
@@ -253,7 +255,7 @@ export function NegotiationDashboard({ organizationId }: NegotiationDashboardPro
                 Get started by creating your first negotiation
               </p>
               <Button className="mt-4" asChild>
-                <Link href="/dashboard/bargaining/new">
+                <Link href={`/${locale}/dashboard/bargaining/new`}>
                   <Plus className="mr-2 h-4 w-4" />
                   Create Negotiation
                 </Link>

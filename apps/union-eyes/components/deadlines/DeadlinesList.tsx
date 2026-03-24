@@ -9,6 +9,7 @@
  */
 
 import React, { useState, useMemo } from 'react';
+import { useTranslations } from 'next-intl';
 import { format } from 'date-fns';
 import { ClockIcon, ExclamationTriangleIcon, CheckCircleIcon, XCircleIcon } from '@heroicons/react/24/outline';
 
@@ -47,6 +48,7 @@ export function DeadlinesList({
   onExtend,
   onViewClaim,
 }: DeadlinesListProps) {
+  const t = useTranslations('deadlines.list');
   const [statusFilter, setStatusFilter] = useState<string>('all');
   const [priorityFilter, setPriorityFilter] = useState<string>('all');
   const [sortKey, setSortKey] = useState<SortKey>('currentDeadline');
@@ -55,26 +57,26 @@ export function DeadlinesList({
   // Get traffic light status
   const getDeadlineStatus = (deadline: Deadline) => {
     if (deadline.status !== 'pending') {
-      return { color: 'green', label: 'Completed', severity: 'safe' };
+      return { color: 'green', label: t('completed'), severity: 'safe' };
     }
     if (deadline.isOverdue) {
       return { 
         color: 'black', 
-        label: `${deadline.daysOverdue} days overdue`, 
+        label: t('daysOverdue', { count: deadline.daysOverdue }), 
         severity: 'overdue' 
       };
     }
     const daysUntil = deadline.daysUntilDue || 0;
     if (daysUntil === 0) {
-      return { color: 'red', label: 'Due today', severity: 'urgent' };
+      return { color: 'red', label: t('dueToday'), severity: 'urgent' };
     }
     if (daysUntil <= 1) {
-      return { color: 'red', label: 'Due tomorrow', severity: 'urgent' };
+      return { color: 'red', label: t('dueTomorrow'), severity: 'urgent' };
     }
     if (daysUntil <= 3) {
-      return { color: 'yellow', label: `Due in ${daysUntil} days`, severity: 'warning' };
+      return { color: 'yellow', label: t('daysLeft', { count: daysUntil }), severity: 'warning' };
     }
-    return { color: 'green', label: `Due in ${daysUntil} days`, severity: 'safe' };
+    return { color: 'green', label: t('daysLeft', { count: daysUntil }), severity: 'safe' };
   };
 
   // Filter and sort deadlines
@@ -182,36 +184,36 @@ export function DeadlinesList({
         <div className="flex flex-wrap gap-4">
           <div className="flex-1 min-w-[200px]">
             <label className="block text-sm font-medium text-gray-700 mb-1">
-              Status
+              {t('statusFilter')}
             </label>
             <select
               value={statusFilter}
               onChange={(e) => setStatusFilter(e.target.value)}
               className="block w-full rounded-md border-gray-300 shadow-sm focus:border-blue-500 focus:ring-blue-500 sm:text-sm"
             >
-              <option value="all">All Statuses</option>
-              <option value="overdue">Overdue</option>
-              <option value="due-soon">Due Soon (≤ 3 days)</option>
-              <option value="pending">Pending</option>
-              <option value="completed">Completed</option>
-              <option value="extended">Extended</option>
+              <option value="all">{t('allStatuses')}</option>
+              <option value="overdue">{t('overdue')}</option>
+              <option value="due-soon">{t('dueSoon')}</option>
+              <option value="pending">{t('pending')}</option>
+              <option value="completed">{t('completed')}</option>
+              <option value="extended">{t('extended')}</option>
             </select>
           </div>
 
           <div className="flex-1 min-w-[200px]">
             <label className="block text-sm font-medium text-gray-700 mb-1">
-              Priority
+              {t('priorityFilter')}
             </label>
             <select
               value={priorityFilter}
               onChange={(e) => setPriorityFilter(e.target.value)}
               className="block w-full rounded-md border-gray-300 shadow-sm focus:border-blue-500 focus:ring-blue-500 sm:text-sm"
             >
-              <option value="all">All Priorities</option>
-              <option value="critical">Critical</option>
-              <option value="high">High</option>
-              <option value="medium">Medium</option>
-              <option value="low">Low</option>
+              <option value="all">{t('allPriorities')}</option>
+              <option value="critical">{t('critical')}</option>
+              <option value="high">{t('high')}</option>
+              <option value="medium">{t('medium')}</option>
+              <option value="low">{t('low')}</option>
             </select>
           </div>
 
@@ -223,7 +225,7 @@ export function DeadlinesList({
               }}
               className="px-4 py-2 text-sm font-medium text-gray-700 bg-white border border-gray-300 rounded-md hover:bg-gray-50 focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-blue-500"
             >
-              Clear Filters
+              {t('clearFilters')}
             </button>
           </div>
         </div>
@@ -231,19 +233,19 @@ export function DeadlinesList({
         {/* Summary */}
         <div className="mt-4 flex items-center gap-6 text-sm text-gray-600">
           <span>
-            Showing <strong className="text-gray-900">{filteredDeadlines.length}</strong> of <strong className="text-gray-900">{deadlines.length}</strong> deadlines
+            {t('showing', { filtered: filteredDeadlines.length, total: deadlines.length })}
           </span>
           <span className="flex items-center gap-1">
             <XCircleIcon className="h-4 w-4 text-red-600" />
-            <strong className="text-red-600">{deadlines.filter(d => d.isOverdue).length}</strong> overdue
+            {t('overdueCount', { count: deadlines.filter(d => d.isOverdue).length })}
           </span>
           <span className="flex items-center gap-1">
             <ExclamationTriangleIcon className="h-4 w-4 text-yellow-600" />
-            <strong className="text-yellow-600">{deadlines.filter(d => !d.isOverdue && (d.daysUntilDue || 0) <= 3 && d.status === 'pending').length}</strong> due soon
+            {t('dueSoonCount', { count: deadlines.filter(d => !d.isOverdue && (d.daysUntilDue || 0) <= 3 && d.status === 'pending').length })}
           </span>
           <span className="flex items-center gap-1">
             <CheckCircleIcon className="h-4 w-4 text-green-600" />
-            <strong className="text-green-600">{deadlines.filter(d => d.status === 'completed').length}</strong> completed
+            {t('completedCount', { count: deadlines.filter(d => d.status === 'completed').length })}
           </span>
         </div>
       </div>
@@ -260,14 +262,14 @@ export function DeadlinesList({
                   onClick={() => handleSort('deadlineName')}
                 >
                   <div className="flex items-center gap-1">
-                    Deadline
+                    {t('deadline')}
                     {sortKey === 'deadlineName' && (
                       <span>{sortDirection === 'asc' ? '↑' : '↓'}</span>
                     )}
                   </div>
                 </th>
                 <th scope="col" className="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">
-                  Claim
+                  {t('claim')}
                 </th>
                 <th
                   scope="col"
@@ -275,7 +277,7 @@ export function DeadlinesList({
                   onClick={() => handleSort('currentDeadline')}
                 >
                   <div className="flex items-center gap-1">
-                    Due Date
+                    {t('dueDate')}
                     {sortKey === 'currentDeadline' && (
                       <span>{sortDirection === 'asc' ? '↑' : '↓'}</span>
                     )}
@@ -287,7 +289,7 @@ export function DeadlinesList({
                   onClick={() => handleSort('status')}
                 >
                   <div className="flex items-center gap-1">
-                    Status
+                    {t('status')}
                     {sortKey === 'status' && (
                       <span>{sortDirection === 'asc' ? '↑' : '↓'}</span>
                     )}
@@ -299,17 +301,17 @@ export function DeadlinesList({
                   onClick={() => handleSort('priority')}
                 >
                   <div className="flex items-center gap-1">
-                    Priority
+                    {t('priorityCol')}
                     {sortKey === 'priority' && (
                       <span>{sortDirection === 'asc' ? '↑' : '↓'}</span>
                     )}
                   </div>
                 </th>
                 <th scope="col" className="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">
-                  Extensions
+                  {t('extensions')}
                 </th>
                 <th scope="col" className="relative px-6 py-3">
-                  <span className="sr-only">Actions</span>
+                  <span className="sr-only">{t('actions')}</span>
                 </th>
               </tr>
             </thead>
@@ -318,8 +320,8 @@ export function DeadlinesList({
                 <tr>
                   <td colSpan={7} className="px-6 py-12 text-center text-sm text-gray-500">
                     <ClockIcon className="mx-auto h-12 w-12 text-gray-400 mb-3" />
-                    <p className="font-medium">No deadlines found</p>
-                    <p className="mt-1">Try adjusting your filters</p>
+                    <p className="font-medium">{t('noDeadlines')}</p>
+                    <p className="mt-1">{t('adjustFilters')}</p>
                   </td>
                 </tr>
               ) : (
@@ -367,7 +369,7 @@ export function DeadlinesList({
                           {deadline.extensionCount}x
                         </span>
                       ) : (
-                        <span>None</span>
+                        <span>{t('none')}</span>
                       )}
                     </td>
                     <td className="px-6 py-4 whitespace-nowrap text-right text-sm font-medium">
@@ -376,7 +378,7 @@ export function DeadlinesList({
                           <button
                             onClick={() => onComplete(deadline.id)}
                             className="text-green-600 hover:text-green-900"
-                            title="Mark as complete"
+                            title={t('markComplete')}
                           >
                             <CheckCircleIcon className="h-5 w-5" />
                           </button>
@@ -385,7 +387,7 @@ export function DeadlinesList({
                           <button
                             onClick={() => onExtend(deadline.id)}
                             className="text-blue-600 hover:text-blue-900"
-                            title="Request extension"
+                            title={t('requestExtension')}
                           >
                             <ClockIcon className="h-5 w-5" />
                           </button>

@@ -16,6 +16,7 @@ import { useRouter, useSearchParams } from "next/navigation";
 import confetti from 'canvas-confetti';
 import { getProfileByUserIdAction } from "@/actions/profiles-actions";
 import { useAuth } from "@clerk/nextjs";
+import { useTranslations } from "next-intl";
 
 interface PaymentSuccessPopupProps {
   profile: SelectProfile;
@@ -41,6 +42,7 @@ export default function PaymentSuccessPopup({ profile: initialProfile }: Payment
   const router = useRouter();
   const searchParams = useSearchParams();
   const { userId } = useAuth();
+  const t = useTranslations("billing.paymentSuccess");
   
   // Function to refresh profile data using server action
   // eslint-disable-next-line react-hooks/exhaustive-deps
@@ -201,10 +203,10 @@ const timer = setTimeout(checkProfileUpdate, backoffMs);
   
   // Pro plan benefits
   const planBenefits = [
-    `${creditCount} credits every billing cycle`,
-    "Access to all premium features",
-    "Priority support",
-    "Advanced analytics and exports"
+    t("benefit1", { count: creditCount }),
+    t("benefit2"),
+    t("benefit3"),
+    t("benefit4"),
   ];
   
   return (
@@ -233,10 +235,10 @@ const timer = setTimeout(checkProfileUpdate, backoffMs);
               <div className="bg-purple-100 w-8 h-8 rounded-full flex items-center justify-center mr-2">
                 <Sparkles className="w-4 h-4 text-purple-600" />
               </div>
-              <h3 className="text-xl font-bold text-gray-900">Payment Successful!</h3>
+              <h3 className="text-xl font-bold text-gray-900">{t("title")}</h3>
             </div>
             <p className="text-sm text-gray-600 text-center">
-              Thank you for upgrading to {planType}
+              {profile.planDuration === "yearly" ? t("subtitleYearly") : t("subtitleMonthly")}
             </p>
           </div>
           
@@ -247,7 +249,7 @@ const timer = setTimeout(checkProfileUpdate, backoffMs);
               <div className="flex items-center justify-between mb-3">
                 <h4 className="font-medium text-gray-800 flex items-center">
                   <Sparkles className="w-4 h-4 mr-2 text-purple-500" />
-                  Your Pro Plan is Active!
+                  {t("planActive")}
                 </h4>
                 
                 {/* Refresh button */}
@@ -259,27 +261,27 @@ const timer = setTimeout(checkProfileUpdate, backoffMs);
                   disabled={isLoading}
                 >
                   <RefreshCw className={`w-4 h-4 text-purple-500 ${isLoading ? 'animate-spin' : ''}`} />
-                  <span className="sr-only">Refresh</span>
+                  <span className="sr-only">{t("refresh")}</span>
                 </Button>
               </div>
               
               <div className="flex justify-between items-center mt-3 bg-white rounded-md p-3 border border-purple-100">
                 <div className="flex items-center">
                   <Gift className="w-5 h-5 text-purple-500 mr-2" />
-                  <span className="text-sm font-medium text-gray-700">Credits</span>
+                  <span className="text-sm font-medium text-gray-700">{t("credits")}</span>
                 </div>
                 <span className="text-lg font-bold text-purple-600">{creditCount}</span>
               </div>
               
               <div className="mt-3 text-xs text-gray-600 bg-white p-2 rounded border border-purple-100">
-                <span className="block font-medium mb-1">Credits renew on</span>
+                <span className="block font-medium mb-1">{t("creditsRenewOn")}</span>
                 {nextCreditRenewal}
               </div>
             </div>
             
             {/* What&apos;s included list */}
             <div className="mb-5">
-              <h5 className="text-sm font-medium text-gray-700 mb-2">Your Pro Plan Includes:</h5>
+              <h5 className="text-sm font-medium text-gray-700 mb-2">{t("planIncludes")}</h5>
               <ul className="space-y-2.5">
                 {planBenefits.map((item, i) => (
                   <li
@@ -299,7 +301,7 @@ const timer = setTimeout(checkProfileUpdate, backoffMs);
               className="w-full bg-linear-to-r from-purple-500 to-purple-600 hover:from-purple-600 hover:to-purple-700"
               onClick={handleClose}
             >
-              Get Started with Pro
+              {t("closeLabel")}
             </Button>
           </div>
         </motion.div>

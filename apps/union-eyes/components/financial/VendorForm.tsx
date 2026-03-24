@@ -8,6 +8,7 @@ import { Label } from '@/components/ui/label';
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from '@/components/ui/select';
 import { Textarea } from '@/components/ui/textarea';
 import { useToast } from '@/lib/hooks/use-toast';
+import { useLocale } from 'next-intl';
 import { useRouter } from 'next/navigation';
 
 interface VendorFormProps {
@@ -18,6 +19,7 @@ interface VendorFormProps {
 
 export default function VendorForm({ vendor, mode }: VendorFormProps) {
   const [loading, setLoading] = useState(false);
+  const locale = useLocale();
   const { toast } = useToast();
   const router = useRouter();
 
@@ -76,7 +78,7 @@ export default function VendorForm({ vendor, mode }: VendorFormProps) {
         description: `Vendor ${mode === 'create' ? 'created' : 'updated'} successfully`,
       });
 
-      router.push('/dashboard/financial/vendors');
+      router.push(`/${locale}/dashboard/financial/vendors`);
 
     } catch (error) {
       toast({

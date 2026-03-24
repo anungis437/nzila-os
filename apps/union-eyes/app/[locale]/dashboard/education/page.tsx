@@ -11,7 +11,12 @@ import { GraduationCap, BookOpen, Award, Calendar } from "lucide-react";
 import Link from "next/link";
 import { requireUser } from "@/lib/api-auth-guard";
 
-export default async function EducationDashboard() {
+export default async function EducationDashboard({
+  params,
+}: {
+  params: Promise<{ locale: string }>;
+}) {
+  const { locale } = await params;
   await requireUser();
 
   return (
@@ -30,7 +35,7 @@ export default async function EducationDashboard() {
       {/* Quick Actions Grid */}
       <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-4">
         <Card className="hover:shadow-lg transition-shadow cursor-pointer">
-          <Link href="/dashboard/education/courses">
+          <Link href={`/${locale}/dashboard/education/courses`}>
             <CardHeader className="pb-3">
               <div className="flex items-center justify-between">
                 <BookOpen className="h-5 w-5 text-blue-500" />
@@ -46,7 +51,7 @@ export default async function EducationDashboard() {
         </Card>
 
         <Card className="hover:shadow-lg transition-shadow cursor-pointer">
-          <Link href="/dashboard/education/my-courses">
+          <Link href={`/${locale}/dashboard/education/my-courses`}>
             <CardHeader className="pb-3">
               <div className="flex items-center justify-between">
                 <GraduationCap className="h-5 w-5 text-green-500" />
@@ -62,7 +67,7 @@ export default async function EducationDashboard() {
         </Card>
 
         <Card className="hover:shadow-lg transition-shadow cursor-pointer">
-          <Link href="/dashboard/education/certificates">
+          <Link href={`/${locale}/dashboard/education/certificates`}>
             <CardHeader className="pb-3">
               <div className="flex items-center justify-between">
                 <Award className="h-5 w-5 text-yellow-500" />
@@ -78,7 +83,7 @@ export default async function EducationDashboard() {
         </Card>
 
         <Card className="hover:shadow-lg transition-shadow cursor-pointer">
-          <Link href="/dashboard/education/courses">
+          <Link href={`/${locale}/dashboard/education/courses`}>
             <CardHeader className="pb-3">
               <div className="flex items-center justify-between">
                 <Calendar className="h-5 w-5 text-purple-500" />

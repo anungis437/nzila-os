@@ -30,7 +30,8 @@ interface PageProps {
   };
 }
 
-export default async function CreditHistoryPage({ searchParams }: PageProps) {
+export default async function CreditHistoryPage({ params, searchParams }: PageProps & { params: Promise<{ locale: string }> }) {
+  const { locale } = await params;
   const user = await requireUser();
   const userId = user.userId;
   const orgId = user.organizationId!;
@@ -76,7 +77,7 @@ export default async function CreditHistoryPage({ searchParams }: PageProps) {
           </h1>
           <p className="text-muted-foreground mt-2">{t('description')}</p>
         </div>
-        <Link href="/dashboard/rewards">
+        <Link href={`/${locale}/dashboard/rewards`}>
           <Button variant="outline">{t('backToWallet')}</Button>
         </Link>
       </div>

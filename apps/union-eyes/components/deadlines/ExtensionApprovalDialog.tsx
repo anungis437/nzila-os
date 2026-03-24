@@ -8,6 +8,7 @@
  */
 
 import React, { useState } from 'react';
+import { useTranslations } from 'next-intl';
 import { Dialog, Transition, Tab } from '@headlessui/react';
 import { Fragment } from 'react';
 import { 
@@ -49,6 +50,7 @@ export function ExtensionApprovalDialog({
   onCancel,
   open,
 }: ExtensionApprovalDialogProps) {
+  const t = useTranslations('deadlines.extensionApproval');
   const [selectedTab, setSelectedTab] = useState(0); // 0 = Approve, 1 = Deny
   
   // Approve form state
@@ -76,15 +78,15 @@ export function ExtensionApprovalDialog({
 
   const validateApproval = () => {
     if (!daysGranted || daysGranted < 1) {
-      setApprovalError('Please enter at least 1 day');
+      setApprovalError(t('daysExceedError'));
       return false;
     }
     if (daysGranted > extension.daysRequested) {
-      setApprovalError('Days granted cannot exceed days requested');
+      setApprovalError(t('daysExceedError'));
       return false;
     }
     if (approvalNotes && approvalNotes.length > 500) {
-      setApprovalError('Notes cannot exceed 500 characters');
+      setApprovalError(t('notesMaxError'));
       return false;
     }
     setApprovalError(null);
@@ -93,15 +95,15 @@ export function ExtensionApprovalDialog({
 
   const validateDeny = () => {
     if (!denyReason.trim()) {
-      setDenyError('Reason is required');
+      setDenyError(t('denialReason'));
       return false;
     }
     if (denyReason.trim().length < 20) {
-      setDenyError('Please provide at least 20 characters');
+      setDenyError(t('denialReason'));
       return false;
     }
     if (denyReason.trim().length > 500) {
-      setDenyError('Reason cannot exceed 500 characters');
+      setDenyError(t('denialReason'));
       return false;
     }
     setDenyError(null);
@@ -121,7 +123,7 @@ export function ExtensionApprovalDialog({
       handleClose();
     } catch (error) {
       setApprovalError(
-        error instanceof Error ? error.message : 'Failed to approve request'
+        error instanceof Error ? error.message : t('approveFailed')
       );
     } finally {
       setIsSubmitting(false);
@@ -140,7 +142,7 @@ export function ExtensionApprovalDialog({
       handleClose();
     } catch (error) {
       setDenyError(
-        error instanceof Error ? error.message : 'Failed to deny request'
+        error instanceof Error ? error.message : t('denyFailed')
       );
     } finally {
       setIsSubmitting(false);
@@ -185,7 +187,7 @@ export function ExtensionApprovalDialog({
                     onClick={handleClose}
                     disabled={isSubmitting}
                   >
-                    <span className="sr-only">Close</span>
+                    <span className="sr-only">{t('close')}</span>
                     <XMarkIcon className="h-6 w-6" aria-hidden="true" />
                   </button>
                 </div>
@@ -195,7 +197,7 @@ export function ExtensionApprovalDialog({
                     as="h3"
                     className="text-lg font-semibold leading-6 text-gray-900 pr-8"
                   >
-                    Review Extension Request
+                    {t('title')}
                   </Dialog.Title>
 
                   {/* Request Details */}
@@ -212,25 +214,25 @@ export function ExtensionApprovalDialog({
                     
                     <div className="grid grid-cols-2 gap-4 text-sm">
                       <div>
-                        <span className="text-gray-600">Requested by:</span>
+                        <span className="text-gray-600">{t('requestedBy')}:</span>
                         <p className="font-medium text-gray-900 mt-0.5">
                           {extension.requestedByName || extension.requestedBy}
                         </p>
                       </div>
                       <div>
-                        <span className="text-gray-600">Requested on:</span>
+                        <span className="text-gray-600">{t('requestedOn')}:</span>
                         <p className="font-medium text-gray-900 mt-0.5">
                           {format(new Date(extension.requestedAt), 'MMM dd, yyyy')}
                         </p>
                       </div>
                       <div>
-                        <span className="text-gray-600">Current deadline:</span>
+                        <span className="text-gray-600">{t('currentDeadline')}:</span>
                         <p className="font-medium text-gray-900 mt-0.5">
                           {format(new Date(extension.deadline.currentDeadline), 'MMM dd, yyyy')}
                         </p>
                       </div>
                       <div>
-                        <span className="text-gray-600">Days requested:</span>
+                        <span className="text-gray-600">{t('daysRequested')}:</span>
                         <p className="font-medium text-gray-900 mt-0.5">
                           {extension.daysRequested} days
                         </p>
@@ -238,7 +240,7 @@ export function ExtensionApprovalDialog({
                     </div>
 
                     <div>
-                      <span className="text-sm text-gray-600">Reason:</span>
+                      <span className="text-sm text-gray-600">{t('reason')}:</span>
                       <p className="text-sm text-gray-900 mt-1 whitespace-pre-wrap">
                         {extension.reason}
                       </p>
@@ -260,7 +262,7 @@ export function ExtensionApprovalDialog({
                       >
                         <div className="flex items-center justify-center gap-2">
                           <CheckCircleIcon className="h-5 w-5" />
-                          Approve
+                          {t('approveTab')}
                         </div>
                       </Tab>
                       <Tab
@@ -275,7 +277,7 @@ export function ExtensionApprovalDialog({
                       >
                         <div className="flex items-center justify-center gap-2">
                           <XCircleIcon className="h-5 w-5" />
-                          Deny
+                          {t('denyTab')}
                         </div>
                       </Tab>
                     </Tab.List>
@@ -290,7 +292,7 @@ export function ExtensionApprovalDialog({
                               htmlFor="daysGranted"
                               className="block text-sm font-medium text-gray-700"
                             >
-                              Days to Grant <span className="text-red-500">*</span>
+                              {t('daysToGrant')} <span className="text-red-500">*</span>
                             </label>
                             <div className="mt-1">
                               <input
@@ -308,11 +310,11 @@ export function ExtensionApprovalDialog({
                               />
                             </div>
                             <p className="mt-1 text-sm text-gray-500">
-                              You can grant fewer days than requested (max: {extension.daysRequested})
+                              {t('daysToGrantHelp', { max: extension.daysRequested })}
                             </p>
                             {daysGranted > 0 && (
                               <p className="mt-1 text-sm font-medium text-green-700">
-                                New deadline: {format(newDeadlineIfApproved, 'MMM dd, yyyy')}
+                                {t('newDeadline')}: {format(newDeadlineIfApproved, 'MMM dd, yyyy')}
                               </p>
                             )}
                           </div>
@@ -323,7 +325,7 @@ export function ExtensionApprovalDialog({
                               htmlFor="approvalNotes"
                               className="block text-sm font-medium text-gray-700"
                             >
-                              Notes (Optional)
+                              {t('notesOptional')}
                             </label>
                             <div className="mt-1">
                               <textarea
@@ -335,12 +337,12 @@ export function ExtensionApprovalDialog({
                                   setApprovalError(null);
                                 }}
                                 className="block w-full rounded-md border-gray-300 shadow-sm focus:border-green-500 focus:ring-green-500 sm:text-sm"
-                                placeholder="Add any notes for the requester..."
+                                placeholder={t('notesPlaceholder')}
                                 disabled={isSubmitting}
                               />
                             </div>
                             <p className="mt-1 text-sm text-gray-500">
-                              {approvalNotes.length}/500 characters
+                              {t('notesCharCount', { count: approvalNotes.length })}
                             </p>
                           </div>
 
@@ -362,14 +364,14 @@ export function ExtensionApprovalDialog({
                               disabled={isSubmitting}
                               className="inline-flex justify-center rounded-md border border-gray-300 bg-white px-4 py-2 text-sm font-medium text-gray-700 shadow-sm hover:bg-gray-50 disabled:opacity-50"
                             >
-                              Cancel
+                              {t('cancel')}
                             </button>
                             <button
                               type="submit"
                               disabled={isSubmitting}
                               className="inline-flex justify-center rounded-md border border-transparent bg-green-600 px-4 py-2 text-sm font-medium text-white shadow-sm hover:bg-green-700 disabled:opacity-50"
                             >
-                              {isSubmitting ? 'Approving...' : 'Approve Extension'}
+                              {isSubmitting ? t('approving') : t('approveExtension')}
                             </button>
                           </div>
                         </form>
@@ -384,7 +386,7 @@ export function ExtensionApprovalDialog({
                               htmlFor="denyReason"
                               className="block text-sm font-medium text-gray-700"
                             >
-                              Reason for Denial <span className="text-red-500">*</span>
+                              {t('denialReason')} <span className="text-red-500">*</span>
                             </label>
                             <div className="mt-1">
                               <textarea
@@ -396,12 +398,12 @@ export function ExtensionApprovalDialog({
                                   setDenyError(null);
                                 }}
                                 className="block w-full rounded-md border-gray-300 shadow-sm focus:border-red-500 focus:ring-red-500 sm:text-sm"
-                                placeholder="Explain why this extension cannot be granted..."
+                                placeholder={t('denialPlaceholder')}
                                 disabled={isSubmitting}
                               />
                             </div>
                             <p className="mt-1 text-sm text-gray-500">
-                              {denyReason.length}/500 characters (minimum 20 required)
+                              {t('denialCharCount', { count: denyReason.length })}
                             </p>
                           </div>
 
@@ -420,7 +422,7 @@ export function ExtensionApprovalDialog({
                             <div className="flex">
                               <ExclamationTriangleIcon className="h-5 w-5 text-amber-400" />
                               <p className="ml-3 text-sm text-amber-700">
-                                The requester will be notified and the original deadline will remain in effect.
+                                {t('denialWarning')}
                               </p>
                             </div>
                           </div>
@@ -433,14 +435,14 @@ export function ExtensionApprovalDialog({
                               disabled={isSubmitting}
                               className="inline-flex justify-center rounded-md border border-gray-300 bg-white px-4 py-2 text-sm font-medium text-gray-700 shadow-sm hover:bg-gray-50 disabled:opacity-50"
                             >
-                              Cancel
+                              {t('cancel')}
                             </button>
                             <button
                               type="submit"
                               disabled={isSubmitting}
                               className="inline-flex justify-center rounded-md border border-transparent bg-red-600 px-4 py-2 text-sm font-medium text-white shadow-sm hover:bg-red-700 disabled:opacity-50"
                             >
-                              {isSubmitting ? 'Denying...' : 'Deny Extension'}
+                              {isSubmitting ? t('denying') : t('denyExtension')}
                             </button>
                           </div>
                         </form>

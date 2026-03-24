@@ -266,10 +266,13 @@ function timeAgo(dateStr: string) {
 // ── Page ───────────────────────────────────────────────────────────────────
 
 export default async function BillingAdminDashboard({
+  params: paramsPromise,
   searchParams,
 }: {
+  params: Promise<{ locale: string }>;
   searchParams: Promise<{ tab?: string; status?: string }>;
 }) {
+  const { locale } = await paramsPromise;
   const params = await searchParams;
   const activeTab = params.tab ?? 'overview';
   const filterStatus = params.status ?? null;
@@ -319,22 +322,22 @@ export default async function BillingAdminDashboard({
       <Tabs defaultValue={activeTab} className="space-y-4">
         <TabsList>
           <TabsTrigger value="overview">
-            <Link href="/dashboard/billing-admin" className="no-underline">Overview</Link>
+            <Link href={`/${locale}/dashboard/billing-admin`} className="no-underline">Overview</Link>
           </TabsTrigger>
           <TabsTrigger value="subscriptions">
-            <Link href="/dashboard/billing-admin?tab=subscriptions" className="no-underline">
+            <Link href={`/${locale}/dashboard/billing-admin?tab=subscriptions`} className="no-underline">
               Subscriptions ({stats.activeSubscriptions})
             </Link>
           </TabsTrigger>
           <TabsTrigger value="invoices">
-            <Link href="/dashboard/billing-admin?tab=invoices" className="no-underline">
+            <Link href={`/${locale}/dashboard/billing-admin?tab=invoices`} className="no-underline">
               Invoices {stats.overdueInvoices > 0 && (
                 <Badge variant="destructive" className="ml-1.5 text-xs">{stats.overdueInvoices}</Badge>
               )}
             </Link>
           </TabsTrigger>
           <TabsTrigger value="payments">
-            <Link href="/dashboard/billing-admin?tab=payments" className="no-underline">
+            <Link href={`/${locale}/dashboard/billing-admin?tab=payments`} className="no-underline">
               Payments ({stats.totalPayments})
             </Link>
           </TabsTrigger>
@@ -343,7 +346,7 @@ export default async function BillingAdminDashboard({
         {/* ── Overview Tab ─────────────────────────────────────────────── */}
         <TabsContent value="overview" className="space-y-4">
           <div className="grid gap-4 md:grid-cols-2 lg:grid-cols-4">
-            <Link href="/dashboard/billing-admin?tab=subscriptions" className="no-underline">
+            <Link href={`/${locale}/dashboard/billing-admin?tab=subscriptions`} className="no-underline">
               <Card className="hover:border-primary/50 transition-colors cursor-pointer">
                 <CardHeader className="pb-2">
                   <CardTitle className="text-sm font-medium flex items-center gap-2">
@@ -360,7 +363,7 @@ export default async function BillingAdminDashboard({
               </Card>
             </Link>
 
-            <Link href="/dashboard/billing-admin?tab=subscriptions" className="no-underline">
+            <Link href={`/${locale}/dashboard/billing-admin?tab=subscriptions`} className="no-underline">
               <Card className="hover:border-primary/50 transition-colors cursor-pointer">
                 <CardHeader className="pb-2">
                   <CardTitle className="text-sm font-medium flex items-center gap-2">
@@ -375,7 +378,7 @@ export default async function BillingAdminDashboard({
               </Card>
             </Link>
 
-            <Link href="/dashboard/billing-admin?tab=payments" className="no-underline">
+            <Link href={`/${locale}/dashboard/billing-admin?tab=payments`} className="no-underline">
               <Card className="hover:border-primary/50 transition-colors cursor-pointer">
                 <CardHeader className="pb-2">
                   <CardTitle className="text-sm font-medium flex items-center gap-2">
@@ -394,7 +397,7 @@ export default async function BillingAdminDashboard({
               </Card>
             </Link>
 
-            <Link href="/dashboard/billing-admin?tab=invoices&status=overdue" className="no-underline">
+            <Link href={`/${locale}/dashboard/billing-admin?tab=invoices&status=overdue`} className="no-underline">
               <Card className="hover:border-primary/50 transition-colors cursor-pointer">
                 <CardHeader className="pb-2">
                   <CardTitle className="text-sm font-medium flex items-center gap-2">
@@ -455,19 +458,19 @@ export default async function BillingAdminDashboard({
               </CardHeader>
               <CardContent>
                 <div className="space-y-3">
-                  <Link href="/dashboard/billing-admin?tab=invoices" className="flex items-center justify-between hover:bg-muted/50 rounded-md px-2 py-1 -mx-2 transition-colors no-underline">
+                  <Link href={`/${locale}/dashboard/billing-admin?tab=invoices`} className="flex items-center justify-between hover:bg-muted/50 rounded-md px-2 py-1 -mx-2 transition-colors no-underline">
                     <span className="text-sm">Total Invoices</span>
                     <span className="text-sm font-bold">{stats.totalInvoices}</span>
                   </Link>
-                  <Link href="/dashboard/billing-admin?tab=invoices&status=paid" className="flex items-center justify-between hover:bg-muted/50 rounded-md px-2 py-1 -mx-2 transition-colors no-underline">
+                  <Link href={`/${locale}/dashboard/billing-admin?tab=invoices&status=paid`} className="flex items-center justify-between hover:bg-muted/50 rounded-md px-2 py-1 -mx-2 transition-colors no-underline">
                     <span className="text-sm">Paid</span>
                     <Badge variant="default">{stats.paidInvoices}</Badge>
                   </Link>
-                  <Link href="/dashboard/billing-admin?tab=invoices&status=issued" className="flex items-center justify-between hover:bg-muted/50 rounded-md px-2 py-1 -mx-2 transition-colors no-underline">
+                  <Link href={`/${locale}/dashboard/billing-admin?tab=invoices&status=issued`} className="flex items-center justify-between hover:bg-muted/50 rounded-md px-2 py-1 -mx-2 transition-colors no-underline">
                     <span className="text-sm">Issued (awaiting)</span>
                     <Badge variant="secondary">{stats.issuedInvoices}</Badge>
                   </Link>
-                  <Link href="/dashboard/billing-admin?tab=invoices&status=overdue" className="flex items-center justify-between hover:bg-muted/50 rounded-md px-2 py-1 -mx-2 transition-colors no-underline">
+                  <Link href={`/${locale}/dashboard/billing-admin?tab=invoices&status=overdue`} className="flex items-center justify-between hover:bg-muted/50 rounded-md px-2 py-1 -mx-2 transition-colors no-underline">
                     <span className="text-sm">Overdue</span>
                     <Badge variant={stats.overdueInvoices > 0 ? 'destructive' : 'outline'}>{stats.overdueInvoices}</Badge>
                   </Link>

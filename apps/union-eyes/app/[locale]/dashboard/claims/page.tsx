@@ -5,7 +5,7 @@ export const dynamic = 'force-dynamic';
 import { useState, useEffect } from "react";
 import { motion, AnimatePresence } from "framer-motion";
 import Link from "next/link";
-import { useTranslations } from "next-intl";
+import { useTranslations, useLocale } from "next-intl";
  
 import { 
   FileText, 
@@ -132,6 +132,7 @@ const mapDbClaimToCase = (claim: DbClaim): Case => ({
 
 export default function ClaimsPage() {
   const t = useTranslations();
+  const locale = useLocale();
   const [cases, setCases] = useState<Case[]>([]);
   const [isLoading, setIsLoading] = useState(true);
   const [error, setError] = useState<string | null>(null);
@@ -237,7 +238,7 @@ setError(err instanceof Error ? err.message : 'Failed to load claims');
               <h1 className="text-4xl font-bold text-gray-900 mb-2">{t('claims.myCases')}</h1>
               <p className="text-gray-600 text-lg">{t('claims.trackManage')}</p>
             </div>
-            <Link href="/dashboard/claims/new">
+            <Link href={`/${locale}/dashboard/claims/new`}>
               <motion.button
                 whileHover={{ scale: 1.02 }}
                 whileTap={{ scale: 0.98 }}
@@ -291,7 +292,7 @@ setError(err instanceof Error ? err.message : 'Failed to load claims');
             <FileText size={64} className="mx-auto text-gray-400 mb-4" />
             <h3 className="text-xl font-semibold text-gray-700 mb-2">{t('claims.noCasesYet')}</h3>
             <p className="text-gray-600 mb-6">{t('claims.submitFirst')}</p>
-            <Link href="/dashboard/claims/new">
+            <Link href={`/${locale}/dashboard/claims/new`}>
               <button className="px-6 py-3 bg-blue-600 text-white rounded-lg font-medium hover:bg-blue-700 inline-flex items-center gap-2">
                 <Plus size={20} />
                 {t('claims.createNew')}
@@ -382,7 +383,7 @@ setError(err instanceof Error ? err.message : 'Failed to load claims');
                         : t('claims.submitFirst')}
                     </p>
                     {!searchQuery && selectedFilter === "all" && (
-                      <Link href="/dashboard/claims/new">
+                      <Link href={`/${locale}/dashboard/claims/new`}>
                         <button className="px-6 py-3 bg-blue-600 text-white rounded-lg font-medium hover:bg-blue-700 transition-colors">
                           {t('claims.submitFirstCase')}
                         </button>
@@ -513,7 +514,7 @@ setError(err instanceof Error ? err.message : 'Failed to load claims');
                     <p className="text-gray-700 mb-4">
                       {t('claims.needHelpText')}
                     </p>
-                    <Link href="/dashboard/members">
+                    <Link href={`/${locale}/dashboard/members`}>
                       <button className="px-4 py-2 bg-blue-600 text-white rounded-lg text-sm font-medium hover:bg-blue-700 transition-colors">
                         {t('claims.contactSteward')}
                       </button>

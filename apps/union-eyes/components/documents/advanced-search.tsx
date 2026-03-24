@@ -41,6 +41,7 @@ import {
   Trash2,
 } from 'lucide-react';
 import { format } from 'date-fns';
+import { useTranslations } from 'next-intl';
 import { Calendar as CalendarComponent } from '@/components/ui/calendar';
 import { Popover, PopoverContent, PopoverTrigger } from '@/components/ui/popover';
 
@@ -84,19 +85,6 @@ const DEFAULT_FILTERS: SearchFilters = {
   ocrSearch: false,
 };
 
-const FILE_TYPES = [
-  { value: 'pdf', label: 'PDF' },
-  { value: 'doc', label: 'Word (DOC)' },
-  { value: 'docx', label: 'Word (DOCX)' },
-  { value: 'txt', label: 'Text' },
-  { value: 'jpg', label: 'JPEG' },
-  { value: 'jpeg', label: 'JPEG' },
-  { value: 'png', label: 'PNG' },
-  { value: 'gif', label: 'GIF' },
-  { value: 'zip', label: 'ZIP' },
-  { value: 'rar', label: 'RAR' },
-];
-
 const SIZE_PRESETS = [
   { value: '0-1', label: 'Under 1 MB', min: 0, max: 1024 * 1024 },
   { value: '1-5', label: '1-5 MB', min: 1024 * 1024, max: 5 * 1024 * 1024 },
@@ -106,6 +94,21 @@ const SIZE_PRESETS = [
 ];
 
 export function AdvancedSearch({ onSearch, onClear, initialFilters }: AdvancedSearchProps) {
+  const t = useTranslations('documents.advancedSearch');
+
+  const FILE_TYPES = [
+    { value: 'pdf', label: t('typePdf') },
+    { value: 'doc', label: t('typeDoc') },
+    { value: 'docx', label: t('typeDocx') },
+    { value: 'txt', label: t('typeText') },
+    { value: 'jpg', label: t('typeJpeg') },
+    { value: 'jpeg', label: t('typeJpeg') },
+    { value: 'png', label: t('typePng') },
+    { value: 'gif', label: t('typeGif') },
+    { value: 'zip', label: t('typeZip') },
+    { value: 'rar', label: t('typeRar') },
+  ];
+
   const [filters, setFilters] = useState<SearchFilters>({
     ...DEFAULT_FILTERS,
     ...initialFilters,
@@ -204,7 +207,7 @@ export function AdvancedSearch({ onSearch, onClear, initialFilters }: AdvancedSe
    */
   const handleSaveSearch = async () => {
     if (!searchName.trim()) {
-      alert('Please enter a name for this search');
+      alert(t('nameRequired'));
       return;
     }
 
@@ -225,7 +228,7 @@ export function AdvancedSearch({ onSearch, onClear, initialFilters }: AdvancedSe
       setSearchName('');
       setShowSaveDialog(false);
     } catch (err) {
-      alert(err instanceof Error ? err.message : 'Failed to save search');
+      alert(err instanceof Error ? err.message : t('saveSearchFailed'));
     }
   };
 
@@ -250,7 +253,7 @@ export function AdvancedSearch({ onSearch, onClear, initialFilters }: AdvancedSe
 
       setSavedSearches((prev) => prev.filter((s) => s.id !== searchId));
     } catch (err) {
-      alert(err instanceof Error ? err.message : 'Failed to delete search');
+      alert(err instanceof Error ? err.message : t('deleteSearchFailed'));
     }
   };
 
@@ -272,22 +275,22 @@ export function AdvancedSearch({ onSearch, onClear, initialFilters }: AdvancedSe
       <CardHeader>
         <div className="flex items-center justify-between">
           <div>
-            <CardTitle>Advanced Search</CardTitle>
+            <CardTitle>{t('title')}</CardTitle>
             <CardDescription>
-              Refine your search with multiple filters
-              {activeFilterCount > 0 && ` â€¢ ${activeFilterCount} filter${activeFilterCount > 1 ? 's' : ''} active`}
+              {t('subtitle')}
+              {activeFilterCount > 0 && ` • ${t('filtersActive', { count: activeFilterCount })}`}
             </CardDescription>
           </div>
           <div className="flex items-center gap-2">
             {activeFilterCount > 0 && (
               <Button variant="outline" size="sm" onClick={handleClear}>
                 <X className="mr-2 h-4 w-4" />
-                Clear All
+                {t('clearAll')}
               </Button>
             )}
             <Button size="sm" onClick={() => setShowSaveDialog(!showSaveDialog)}>
               <Save className="mr-2 h-4 w-4" />
-              Save Search
+              {t('saveSearch')}
             </Button>
           </div>
         </div>
@@ -295,16 +298,16 @@ export function AdvancedSearch({ onSearch, onClear, initialFilters }: AdvancedSe
         {/* Save Search Dialog */}
         {showSaveDialog && (
           <div className="mt-4 p-4 border rounded-lg bg-muted">
-            <Label>Search Name</Label>
+            <Label>{t('searchName')}</Label>
             <div className="flex gap-2 mt-2">
               <Input
-                placeholder="Enter a name for this search..."
+                placeholder={t('searchNamePlaceholder')}
                 value={searchName}
                 onChange={(e) => setSearchName(e.target.value)}
               />
-              <Button onClick={handleSaveSearch}>Save</Button>
+              <Button onClick={handleSaveSearch}>{t('save')}</Button>
               <Button variant="outline" onClick={() => setShowSaveDialog(false)}>
-                Cancel
+                {t('cancel')}
               </Button>
             </div>
           </div>
@@ -314,19 +317,19 @@ export function AdvancedSearch({ onSearch, onClear, initialFilters }: AdvancedSe
       <CardContent className="space-y-6">
         {/* Main Search Query */}
         <div className="space-y-2">
-          <Label>Search Query</Label>
+          <Label>{t('searchQuery')}</Label>
           <div className="flex gap-2">
             <div className="relative flex-1">
               <Search className="absolute left-3 top-1/2 -translate-y-1/2 h-4 w-4 text-muted-foreground" />
               <Input
-                placeholder="Enter keywords, document names, or content..."
+                placeholder={t('searchPlaceholder')}
                 value={filters.query}
                 onChange={(e) => updateFilter('query', e.target.value)}
                 className="pl-10"
                 onKeyDown={(e) => e.key === 'Enter' && handleSearch()}
               />
             </div>
-            <Button onClick={handleSearch}>Search</Button>
+            <Button onClick={handleSearch}>{t('search')}</Button>
           </div>
           <div className="flex items-center gap-2">
             <Checkbox
@@ -335,7 +338,7 @@ export function AdvancedSearch({ onSearch, onClear, initialFilters }: AdvancedSe
               onCheckedChange={(checked) => updateFilter('ocrSearch', checked as boolean)}
             />
             <Label htmlFor="ocr-search" className="text-sm font-normal cursor-pointer">
-              Include OCR text in search (slower but more comprehensive)
+              {t('includeOcr')}
             </Label>
           </div>
         </div>
@@ -349,7 +352,7 @@ export function AdvancedSearch({ onSearch, onClear, initialFilters }: AdvancedSe
             <AccordionTrigger>
               <div className="flex items-center gap-2">
                 <FileType className="h-4 w-4" />
-                File Types
+                {t('fileTypes')}
                 {filters.fileTypes.length > 0 && (
                   <Badge variant="secondary">{filters.fileTypes.length}</Badge>
                 )}
@@ -381,7 +384,7 @@ export function AdvancedSearch({ onSearch, onClear, initialFilters }: AdvancedSe
             <AccordionTrigger>
               <div className="flex items-center gap-2">
                 <Tag className="h-4 w-4" />
-                Tags
+                {t('tags')}
                 {filters.tags.length > 0 && (
                   <Badge variant="secondary">{filters.tags.length}</Badge>
                 )}
@@ -405,7 +408,7 @@ export function AdvancedSearch({ onSearch, onClear, initialFilters }: AdvancedSe
                   ))}
                 </div>
               ) : (
-                <p className="text-sm text-muted-foreground pt-2">No tags available</p>
+                <p className="text-sm text-muted-foreground pt-2">{t('noTags')}</p>
               )}
             </AccordionContent>
           </AccordionItem>
@@ -415,7 +418,7 @@ export function AdvancedSearch({ onSearch, onClear, initialFilters }: AdvancedSe
             <AccordionTrigger>
               <div className="flex items-center gap-2">
                 <User className="h-4 w-4" />
-                Uploaded By
+                {t('uploadedBy')}
                 {filters.uploadedBy.length > 0 && (
                   <Badge variant="secondary">{filters.uploadedBy.length}</Badge>
                 )}
@@ -441,7 +444,7 @@ export function AdvancedSearch({ onSearch, onClear, initialFilters }: AdvancedSe
                   ))}
                 </div>
               ) : (
-                <p className="text-sm text-muted-foreground pt-2">No users available</p>
+                <p className="text-sm text-muted-foreground pt-2">{t('noUsers')}</p>
               )}
             </AccordionContent>
           </AccordionItem>
@@ -451,7 +454,7 @@ export function AdvancedSearch({ onSearch, onClear, initialFilters }: AdvancedSe
             <AccordionTrigger>
               <div className="flex items-center gap-2">
                 <Calendar className="h-4 w-4" />
-                Date Range
+                {t('dateRange')}
                 {(filters.dateRange.start || filters.dateRange.end) && (
                   <Badge variant="secondary">1</Badge>
                 )}
@@ -460,14 +463,14 @@ export function AdvancedSearch({ onSearch, onClear, initialFilters }: AdvancedSe
             <AccordionContent>
               <div className="grid grid-cols-2 gap-4 pt-2">
                 <div className="space-y-2">
-                  <Label>Start Date</Label>
+                  <Label>{t('startDate')}</Label>
                   <Popover>
                     <PopoverTrigger asChild>
                       <Button variant="outline" className="w-full justify-start">
                         <Calendar className="mr-2 h-4 w-4" />
                         {filters.dateRange.start
                           ? format(filters.dateRange.start, 'MMM d, yyyy')
-                          : 'Select date'}
+                          : t('selectDate')}
                       </Button>
                     </PopoverTrigger>
                     <PopoverContent className="w-auto p-0">
@@ -482,14 +485,14 @@ export function AdvancedSearch({ onSearch, onClear, initialFilters }: AdvancedSe
                   </Popover>
                 </div>
                 <div className="space-y-2">
-                  <Label>End Date</Label>
+                  <Label>{t('endDate')}</Label>
                   <Popover>
                     <PopoverTrigger asChild>
                       <Button variant="outline" className="w-full justify-start">
                         <Calendar className="mr-2 h-4 w-4" />
                         {filters.dateRange.end
                           ? format(filters.dateRange.end, 'MMM d, yyyy')
-                          : 'Select date'}
+                          : t('selectDate')}
                       </Button>
                     </PopoverTrigger>
                     <PopoverContent className="w-auto p-0">

@@ -264,22 +264,22 @@ export const memberHistoryEvents = pgTable('member_history_events', {
 });
 
 // Relations
-export const memberContactPreferencesRelations = relations(memberContactPreferences, ({ _one }) => ({
+export const memberContactPreferencesRelations = relations(memberContactPreferences, () => ({
   // user: one(users, { fields: [memberContactPreferences.userId], references: [users.id] }),
 }));
 
-export const memberEmploymentDetailsRelations = relations(memberEmploymentDetails, ({ _one }) => ({
+export const memberEmploymentDetailsRelations = relations(memberEmploymentDetails, () => ({
   // user: one(users, { fields: [memberEmploymentDetails.userId], references: [users.id] }),
 }));
 
-export const memberConsentsRelations = relations(memberConsents, ({ _one }) => ({
+export const memberConsentsRelations = relations(memberConsents, () => ({
   // user: one(users, { fields: [memberConsents.userId], references: [users.id] }),
 }));
 
-export const memberDocumentsRelations = relations(memberDocuments, ({ _one }) => ({
+export const memberDocumentsRelations = relations(memberDocuments, () => ({
   // user: one(users, { fields: [memberDocuments.userId], references: [users.id] }),
 }));
 
-export const memberHistoryEventsRelations = relations(memberHistoryEvents, ({ _one }) => ({
+export const memberHistoryEventsRelations = relations(memberHistoryEvents, () => ({
   // user: one(users, { fields: [memberHistoryEvents.userId], references: [users.id] }),
 }));

@@ -14,6 +14,7 @@ import { motion } from "framer-motion";
 import type { SelectProfile } from "@/db/schema/domains/member";
 import Link from "next/link";
 import confetti from 'canvas-confetti';
+import { useTranslations } from "next-intl";
 
 interface WelcomeMessagePopupProps {
   profile: SelectProfile;
@@ -23,6 +24,7 @@ export default function WelcomeMessagePopup({ profile }: WelcomeMessagePopupProp
   const [isOpen, setIsOpen] = useState(false);
   const [isMounted, setIsMounted] = useState(false);
   const confettiShown = useRef(false);
+  const t = useTranslations("onboarding.welcome");
   
   // Prevent hydration issues
   useEffect(() => {
@@ -135,15 +137,15 @@ const timer = setTimeout(() => {
   
   // Benefits list - adjust based on plan type
   const planBenefits = isFree ? [
-    `${creditCount} free credits every ${renewalPeriod}`,
-    "Access to basic features",
-    "Automatic credit renewals",
-    "Upgrade to Pro anytime for more credits"
+    t("freeBenefit1", { count: creditCount, period: renewalPeriod }),
+    t("freeBenefit2"),
+    t("freeBenefit3"),
+    t("freeBenefit4"),
   ] : [
-    `${creditCount} credits every billing cycle`,
-    "Access to all premium features",
-    "Priority support",
-    "Advanced analytics"
+    t("proBenefit1", { count: creditCount }),
+    t("proBenefit2"),
+    t("proBenefit3"),
+    t("proBenefit4"),
   ];
   
   // Format renewal date for display
@@ -179,7 +181,7 @@ const timer = setTimeout(() => {
           {/* Close button */}
           <button
             onClick={handleClose}
-            aria-label="Close welcome message"
+            aria-label={t("closeLabel")}
             className="absolute top-3 right-3 z-50 rounded-full w-8 h-8 flex items-center justify-center text-gray-500 hover:bg-gray-100 transition-colors"
           >
             <X size={16} />
@@ -189,11 +191,11 @@ const timer = setTimeout(() => {
           <div className="px-6 pt-5 pb-3">
             <div className="flex items-center justify-center mb-3">
               <span className="text-2xl mr-2">Ã°Å¸Å½â€°</span>
-              <h3 className="text-xl font-bold text-gray-900">Welcome!</h3>
+              <h3 className="text-xl font-bold text-gray-900">{t("title")}</h3>
               <span className="text-2xl ml-2">Ã°Å¸Å½Å </span>
             </div>
             <p className="text-sm text-gray-600 mb-3 text-center">
-              Thanks for joining! We&apos;re excited to have you here.
+              {t("subtitle")}
             </p>
           </div>
           
@@ -203,25 +205,25 @@ const timer = setTimeout(() => {
             <div className="bg-purple-50 rounded-lg p-4 mb-4">
               <h4 className="font-medium text-gray-800 flex items-center justify-center">
                 <PartyPopper className="w-4 h-4 mr-2 text-purple-500" />
-                Your {planType} Plan is Active!
+                {isFree ? t("freePlanActive") : t("proPlanActive")}
               </h4>
               
               <div className="flex justify-between items-center mt-3 bg-white rounded-md p-3 border border-purple-100">
                 <div className="flex items-center">
                   <Gift className="w-5 h-5 text-purple-500 mr-2" />
-                  <span className="text-sm font-medium text-gray-700">Credits</span>
+                  <span className="text-sm font-medium text-gray-700">{t("credits")}</span>
                 </div>
                 <span className="text-lg font-bold text-purple-600">{creditCount}</span>
               </div>
               
               <p className="text-xs text-center text-gray-500 mt-2">
-                Next renewal: {nextRenewalDate}
+                {t("nextRenewal")}: {nextRenewalDate}
               </p>
             </div>
             
             {/* What&apos;s included list */}
             <div className="mb-5">
-              <h5 className="text-sm font-medium text-gray-700 mb-2">Your {planType} Plan Includes:</h5>
+              <h5 className="text-sm font-medium text-gray-700 mb-2">{isFree ? t("freePlanIncludes") : t("proPlanIncludes")}</h5>
               <ul className="space-y-2.5">
                 {planBenefits.map((item, i) => (
                   <li
@@ -242,7 +244,7 @@ const timer = setTimeout(() => {
                 className="w-full bg-linear-to-r from-purple-500 to-purple-600 hover:from-purple-600 hover:to-purple-700"
                 onClick={handleClose}
               >
-                Let&apos;s Get Started
+                {t("getStarted")}
               </Button>
               
               {isFree && (
@@ -251,7 +253,7 @@ const timer = setTimeout(() => {
                     variant="outline"
                     className="w-full border-purple-200 text-purple-600 hover:bg-purple-50"
                   >
-                    View Pro Plans
+                    {t("viewProPlans")}
                   </Button>
                 </Link>
               )}

@@ -58,6 +58,7 @@ import {
   DialogTrigger,
 } from "@/components/ui/dialog";
 import { cn } from "@/lib/utils";
+import { useTranslations } from "next-intl";
  
 import { format, formatDistanceToNow } from "date-fns";
 
@@ -142,6 +143,7 @@ export function ElectionAuditLog({
   const [searchTerm, setSearchTerm] = React.useState("");
   const [selectedEntry, setSelectedEntry] = React.useState<AuditEntry | null>(null);
   const [viewMode, setViewMode] = React.useState<"table" | "timeline">("table");
+  const t = useTranslations("voting.auditLog");
 
   const filteredEntries = React.useMemo(() => {
     return entries.filter((entry) => {
@@ -197,7 +199,7 @@ export function ElectionAuditLog({
     <div className="space-y-6">
       {/* Header */}
       <div>
-        <h1 className="text-3xl font-bold">Election Audit Log</h1>
+        <h1 className="text-3xl font-bold">{t("title")}</h1>
         <p className="text-gray-600 mt-2">{electionTitle}</p>
       </div>
 
@@ -206,31 +208,31 @@ export function ElectionAuditLog({
         <Card>
           <CardContent className="p-6">
             <div className="text-2xl font-bold">{stats.total}</div>
-            <div className="text-sm text-gray-600">Total Events</div>
+            <div className="text-sm text-gray-600">{t("statTotal")}</div>
           </CardContent>
         </Card>
         <Card>
           <CardContent className="p-6">
             <div className="text-2xl font-bold text-red-600">{stats.critical}</div>
-            <div className="text-sm text-gray-600">Critical</div>
+            <div className="text-sm text-gray-600">{t("statCritical")}</div>
           </CardContent>
         </Card>
         <Card>
           <CardContent className="p-6">
             <div className="text-2xl font-bold text-orange-600">{stats.warnings}</div>
-            <div className="text-sm text-gray-600">Warnings</div>
+            <div className="text-sm text-gray-600">{t("statWarnings")}</div>
           </CardContent>
         </Card>
         <Card>
           <CardContent className="p-6">
             <div className="text-2xl font-bold text-blue-600">{stats.votesCast}</div>
-            <div className="text-sm text-gray-600">Votes Cast</div>
+            <div className="text-sm text-gray-600">{t("statVotesCast")}</div>
           </CardContent>
         </Card>
         <Card>
           <CardContent className="p-6">
             <div className="text-2xl font-bold">{stats.uniqueActors}</div>
-            <div className="text-sm text-gray-600">Unique Users</div>
+            <div className="text-sm text-gray-600">{t("statUniqueUsers")}</div>
           </CardContent>
         </Card>
       </div>
@@ -240,7 +242,7 @@ export function ElectionAuditLog({
           <div className="flex items-center justify-between">
             <CardTitle className="flex items-center gap-2">
               <Shield className="h-5 w-5" />
-              Audit Trail
+              {t("trailTitle")}
             </CardTitle>
             <div className="flex gap-2">
               {/* eslint-disable-next-line @typescript-eslint/no-explicit-any */}
@@ -249,13 +251,13 @@ export function ElectionAuditLog({
                   <SelectValue />
                 </SelectTrigger>
                 <SelectContent>
-                  <SelectItem value="table">Table View</SelectItem>
-                  <SelectItem value="timeline">Timeline View</SelectItem>
+                  <SelectItem value="table">{t("viewTable")}</SelectItem>
+                  <SelectItem value="timeline">{t("viewTimeline")}</SelectItem>
                 </SelectContent>
               </Select>
               <Button variant="outline" onClick={handleExport}>
                 <Download className="h-4 w-4 mr-2" />
-                Export
+                {t("exportButton")}
               </Button>
             </div>
           </div>
@@ -267,7 +269,7 @@ export function ElectionAuditLog({
               <div className="relative flex-1">
                 <Search className="absolute left-3 top-1/2 -translate-y-1/2 h-4 w-4 text-gray-400" />
                 <Input
-                  placeholder="Search audit log..."
+                  placeholder={t("searchPlaceholder")}
                   value={searchTerm}
                   onChange={(e) => setSearchTerm(e.target.value)}
                   className="pl-10"
@@ -298,7 +300,7 @@ export function ElectionAuditLog({
                   onClick={() => setFilters({})}
                   className="h-6"
                 >
-                  Clear all
+                  {t("clearFilters")}
                 </Button>
               </div>
             )}
@@ -347,16 +349,17 @@ function TableView({
   entries: AuditEntry[];
   onSelectEntry: (entry: AuditEntry) => void;
 }) {
+  const t = useTranslations("voting.auditLog");
   return (
     <div className="border rounded-lg">
       <Table>
         <TableHeader>
           <TableRow>
-            <TableHead>Timestamp</TableHead>
-            <TableHead>Action</TableHead>
-            <TableHead>Actor</TableHead>
-            <TableHead>Target</TableHead>
-            <TableHead>Severity</TableHead>
+            <TableHead>{t("tableHeaderTimestamp")}</TableHead>
+            <TableHead>{t("tableHeaderAction")}</TableHead>
+            <TableHead>{t("tableHeaderActor")}</TableHead>
+            <TableHead>{t("tableHeaderTarget")}</TableHead>
+            <TableHead>{t("tableHeaderSeverity")}</TableHead>
             <TableHead></TableHead>
           </TableRow>
         </TableHeader>
@@ -474,6 +477,7 @@ function FilterDialog({
   filters: AuditFilters;
   onFiltersChange: (filters: AuditFilters) => void;
 }) {
+  const t = useTranslations("voting.auditLog");
   const [open, setOpen] = React.useState(false);
   const [localFilters, setLocalFilters] = React.useState(filters);
 
@@ -487,16 +491,16 @@ function FilterDialog({
       <DialogTrigger asChild>
         <Button variant="outline">
           <Filter className="h-4 w-4 mr-2" />
-          Filters
+          {t("filterButton")}
         </Button>
       </DialogTrigger>
       <DialogContent className="max-w-2xl">
         <DialogHeader>
-          <DialogTitle>Filter Audit Log</DialogTitle>
+          <DialogTitle>{t("filterDialogTitle")}</DialogTitle>
         </DialogHeader>
         <div className="space-y-4">
           <div>
-            <Label>Severity</Label>
+            <Label>{t("filterSeverityLabel")}</Label>
             <div className="flex gap-2 mt-2">
               {(["info", "warning", "critical"] as const).map((severity) => (
                 <Badge
@@ -522,9 +526,9 @@ function FilterDialog({
           </div>
 
           <div className="flex gap-2">
-            <Button onClick={handleApply}>Apply Filters</Button>
+            <Button onClick={handleApply}>{t("filterApply")}</Button>
             <Button variant="outline" onClick={() => setLocalFilters({})}>
-              Clear
+              {t("filterClear")}
             </Button>
           </div>
         </div>
@@ -542,6 +546,7 @@ function AuditEntryDetailDialog({
   open: boolean;
   onClose: () => void;
 }) {
+  const t = useTranslations("voting.auditLog");
   return (
     <Dialog open={open} onOpenChange={onClose}>
       <DialogContent className="max-w-3xl max-h-[80vh] overflow-y-auto">
@@ -556,11 +561,11 @@ function AuditEntryDetailDialog({
           {/* Summary */}
           <div className="grid grid-cols-2 gap-4">
             <div>
-              <Label className="text-gray-600">Timestamp</Label>
+              <Label className="text-gray-600">{t("entryTimestampLabel")}</Label>
               <div className="font-medium mt-1">{format(entry.timestamp, "PPpp")}</div>
             </div>
             <div>
-              <Label className="text-gray-600">Severity</Label>
+              <Label className="text-gray-600">{t("entrySeverityLabel")}</Label>
               <div className="mt-1">
                 <SeverityBadge severity={entry.severity} />
               </div>
@@ -569,7 +574,7 @@ function AuditEntryDetailDialog({
 
           {/* Actor */}
           <div>
-            <Label className="text-gray-600">Actor</Label>
+            <Label className="text-gray-600">{t("entryActorLabel")}</Label>
             <div className="mt-2 p-3 bg-gray-50 rounded-lg">
               <div className="font-medium">{entry.actor.name}</div>
               <div className="text-sm text-gray-600">{entry.actor.email}</div>
@@ -580,7 +585,7 @@ function AuditEntryDetailDialog({
           {/* Target */}
           {entry.target && (
             <div>
-              <Label className="text-gray-600">Target</Label>
+              <Label className="text-gray-600">{t("entryTargetLabel")}</Label>
               <div className="mt-2 p-3 bg-gray-50 rounded-lg">
                 <div className="flex items-center gap-2 mb-1">
                   <Badge variant="outline">{entry.target.type}</Badge>
@@ -593,7 +598,7 @@ function AuditEntryDetailDialog({
 
           {/* Details */}
           <div>
-            <Label className="text-gray-600">Details</Label>
+              <Label className="text-gray-600">{t("entryDetailsLabel")}</Label>
             <pre className="mt-2 p-3 bg-gray-50 rounded-lg text-sm overflow-auto">
               {JSON.stringify(entry.details, null, 2)}
             </pre>
@@ -601,17 +606,17 @@ function AuditEntryDetailDialog({
 
           {/* Metadata */}
           <div>
-            <Label className="text-gray-600">Metadata</Label>
+              <Label className="text-gray-600">{t("entryMetadataLabel")}</Label>
             <div className="mt-2 p-3 bg-gray-50 rounded-lg space-y-1 text-sm">
               {entry.metadata.ipAddress && (
-                <div>IP Address: {entry.metadata.ipAddress}</div>
+                <div>{t("entryIpAddress")}: {entry.metadata.ipAddress}</div>
               )}
               {entry.metadata.location && (
-                <div>Location: {entry.metadata.location}</div>
+                <div>{t("entryLocation")}: {entry.metadata.location}</div>
               )}
               {entry.metadata.userAgent && (
                 <div className="text-xs text-gray-600">
-                  User Agent: {entry.metadata.userAgent}
+                  {t("entryUserAgent")}: {entry.metadata.userAgent}
                 </div>
               )}
             </div>

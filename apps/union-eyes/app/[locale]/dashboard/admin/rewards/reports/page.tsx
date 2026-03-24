@@ -18,7 +18,12 @@ export const metadata: Metadata = {
   description: 'Rewards analytics and insights dashboard',
 };
 
-export default async function AdminRewardsReportsPage() {
+export default async function AdminRewardsReportsPage({
+  params,
+}: {
+  params: Promise<{ locale: string }>;
+}) {
+  const { locale } = await params;
   await requireUser();
   const hasAccess = await hasMinRole("admin");
   if (!hasAccess) {
@@ -107,7 +112,7 @@ export default async function AdminRewardsReportsPage() {
     <div className="container mx-auto py-8 space-y-8">
       <div>
         <Link
-          href="/dashboard/admin/rewards"
+          href={`/${locale}/dashboard/admin/rewards`}
           className="text-sm text-muted-foreground hover:text-foreground mb-2 inline-block"
         >
           &larr; {t('backToAdmin', { defaultValue: 'Back to Admin' })}

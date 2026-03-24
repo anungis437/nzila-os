@@ -18,7 +18,12 @@ export const metadata: Metadata = {
   description: 'Configure Shop Moi Ça integration for rewards redemption',
 };
 
-export default async function AdminShopifyPage() {
+export default async function AdminShopifyPage({
+  params,
+}: {
+  params: Promise<{ locale: string }>;
+}) {
+  const { locale } = await params;
   await requireUser();
   const hasAccess = await hasMinRole("admin");
   if (!hasAccess) {
@@ -55,7 +60,7 @@ export default async function AdminShopifyPage() {
       {/* Page Header */}
       <div>
         <Link
-          href="/dashboard/admin/rewards"
+          href={`/${locale}/dashboard/admin/rewards`}
           className="text-sm text-muted-foreground hover:text-foreground mb-2 inline-block"
         >
           ← {t('backToAdmin', { defaultValue: 'Back to Admin' })}

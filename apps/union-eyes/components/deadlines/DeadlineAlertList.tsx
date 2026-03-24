@@ -8,6 +8,7 @@
  */
 
 import React from 'react';
+import { useTranslations } from 'next-intl';
 import { formatDistanceToNow } from 'date-fns';
 import { 
   InformationCircleIcon,
@@ -49,6 +50,7 @@ export function DeadlineAlertList({
   onAcknowledge,
   onTakeAction,
 }: DeadlineAlertListProps) {
+  const t = useTranslations('deadlines.alerts');
   const getSeverityIcon = (severity: AlertSeverity) => {
     switch (severity) {
       case 'critical':
@@ -113,11 +115,11 @@ export function DeadlineAlertList({
         <div className="flex items-center justify-between">
           <h3 className="text-lg font-medium text-gray-900 flex items-center gap-2">
             <ClockIcon className="h-5 w-5 text-gray-400" />
-            Deadline Alerts
+            {t('title')}
           </h3>
           {sortedAlerts.length > 0 && (
             <span className="inline-flex items-center rounded-full bg-red-100 px-3 py-0.5 text-sm font-medium text-red-800">
-              {sortedAlerts.length} unread
+              {t('unreadCount', { count: sortedAlerts.length })}
             </span>
           )}
         </div>
@@ -129,9 +131,9 @@ export function DeadlineAlertList({
           // Empty State
           <div className="text-center py-12 px-6">
             <CheckCircleIcon className="mx-auto h-12 w-12 text-green-500 mb-3" />
-            <p className="text-sm font-medium text-gray-900">All caught up!</p>
+            <p className="text-sm font-medium text-gray-900">{t('allCaughtUp')}</p>
             <p className="text-sm text-gray-500 mt-1">
-              You have no unread deadline alerts
+              {t('noUnreadAlerts')}
             </p>
           </div>
         ) : (
@@ -192,7 +194,7 @@ export function DeadlineAlertList({
                         onClick={() => onTakeAction(alert.id, alert.actionUrl!)}
                         className="inline-flex items-center gap-1 text-xs font-medium text-blue-600 hover:text-blue-900"
                       >
-                        View Claim
+                        {t('viewClaim')}
                         <ArrowRightIcon className="h-3.5 w-3.5" />
                       </button>
                     )}
@@ -206,7 +208,7 @@ export function DeadlineAlertList({
                     className="rounded-md p-1 text-gray-400 hover:text-gray-600 hover:bg-white focus:outline-none focus:ring-2 focus:ring-blue-500"
                     title="Dismiss"
                   >
-                    <span className="sr-only">Dismiss</span>
+                    <span className="sr-only">{t('dismiss')}</span>
                     <XMarkIcon className="h-5 w-5" />
                   </button>
                 </div>
@@ -223,7 +225,7 @@ export function DeadlineAlertList({
             onClick={() => sortedAlerts.forEach(alert => onAcknowledge(alert.id))}
             className="w-full text-center text-sm font-medium text-gray-700 hover:text-gray-900"
           >
-            Mark all as read
+            {t('markAllRead')}
           </button>
         </div>
       )}

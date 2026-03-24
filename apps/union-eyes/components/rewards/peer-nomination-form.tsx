@@ -1,7 +1,7 @@
 'use client';
 
 import { useState } from 'react';
-import { useTranslations } from 'next-intl';
+import { useTranslations, useLocale } from 'next-intl';
 import { useRouter } from 'next/navigation';
 import { Button } from '@/components/ui/button';
 import { Label } from '@/components/ui/label';
@@ -46,6 +46,7 @@ export function PeerNominationForm({
   onSuccess,
 }: PeerNominationFormProps) {
   const t = useTranslations('rewards.peer');
+  const locale = useLocale();
   const router = useRouter();
   const [awardTypeId, setAwardTypeId] = useState('');
   const [recipientId, setRecipientId] = useState('');
@@ -100,7 +101,7 @@ export function PeerNominationForm({
           if (onSuccess) {
             onSuccess();
           } else {
-            router.push('/dashboard/rewards');
+            router.push(`/${locale}/dashboard/rewards`);
           }
         }, 2000);
       } else {

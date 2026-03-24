@@ -3,6 +3,7 @@
 import { Alert, AlertDescription, AlertTitle } from '@/components/ui/alert';
 import { Button } from '@/components/ui/button';
 import { AlertCircle, ArrowRight } from 'lucide-react';
+import { useLocale } from 'next-intl';
 import { formatDistanceToNow } from 'date-fns';
  
 import Link from 'next/link';
@@ -16,6 +17,8 @@ interface CreditExpirationBannerProps {
 }
 
 export function CreditExpirationBanner({ userId: _userId, expiringCredits }: CreditExpirationBannerProps) {
+  const locale = useLocale();
+
   if (!expiringCredits || expiringCredits.amount === 0) {
     return null;
   }
@@ -46,7 +49,7 @@ export function CreditExpirationBanner({ userId: _userId, expiringCredits }: Cre
             Redeem them now to avoid losing your rewards!
           </p>
         </div>
-        <Link href="/dashboard/rewards/redeem">
+        <Link href={`/${locale}/dashboard/rewards/redeem`}>
           <Button variant={isUrgent ? 'default' : 'outline'} size="sm" className="gap-2">
             Redeem Now
             <ArrowRight className="h-4 w-4" />

@@ -1,6 +1,7 @@
 'use client';
 
 import { useState } from 'react';
+import { useTranslations } from 'next-intl';
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from '@/components/ui/card';
 import { Button } from '@/components/ui/button';
 import { Table, TableBody, TableCell, TableHead, TableHeader, TableRow } from '@/components/ui/table';
@@ -32,6 +33,7 @@ interface BudgetLineItemEditorProps {
 }
 
 export default function BudgetLineItemEditor({ budgetId: _budgetId, lineItems, onUpdate: _onUpdate }: BudgetLineItemEditorProps) {
+  const t = useTranslations('financial.budgetLineItems');
   const [isDialogOpen, setIsDialogOpen] = useState(false);
   const [editingItem, _setEditingItem] = useState<BudgetLineItem | null>(null);
   const { toast: _toast } = useToast();
@@ -68,35 +70,35 @@ export default function BudgetLineItemEditor({ budgetId: _budgetId, lineItems, o
         <CardHeader>
           <div className="flex justify-between items-center">
             <div>
-              <CardTitle>Budget Line Items</CardTitle>
+              <CardTitle>{t('title')}</CardTitle>
               <CardDescription>
-                Detailed budget allocation by account
+                {t('subtitle')}
               </CardDescription>
             </div>
             <Button onClick={() => setIsDialogOpen(true)} size="sm">
               <Plus className="mr-2 h-4 w-4" />
-              Add Line Item
+              {t('addLineItem')}
             </Button>
           </div>
         </CardHeader>
         <CardContent>
           {lineItems.length === 0 ? (
             <div className="text-center py-8 text-muted-foreground">
-              No line items yet. Add line items to allocate your budget.
+              {t('noLineItems')}
             </div>
           ) : (
             <>
               <Table>
                 <TableHeader>
                   <TableRow>
-                    <TableHead>Account Code</TableHead>
-                    <TableHead>Account Name</TableHead>
-                    <TableHead>Allocated</TableHead>
-                    <TableHead>Spent</TableHead>
-                    <TableHead>Committed</TableHead>
-                    <TableHead>Remaining</TableHead>
-                    <TableHead>Utilization</TableHead>
-                    <TableHead>Actions</TableHead>
+                    <TableHead>{t('accountCode')}</TableHead>
+                    <TableHead>{t('accountName')}</TableHead>
+                    <TableHead>{t('allocated')}</TableHead>
+                    <TableHead>{t('spent')}</TableHead>
+                    <TableHead>{t('committed')}</TableHead>
+                    <TableHead>{t('remaining')}</TableHead>
+                    <TableHead>{t('utilization')}</TableHead>
+                    <TableHead>{t('actions')}</TableHead>
                   </TableRow>
                 </TableHeader>
                 <TableBody>
@@ -138,19 +140,19 @@ export default function BudgetLineItemEditor({ budgetId: _budgetId, lineItems, o
               <div className="mt-4 pt-4 border-t">
                 <div className="grid grid-cols-4 gap-4 text-sm">
                   <div>
-                    <div className="text-muted-foreground">Total Allocated</div>
+                    <div className="text-muted-foreground">{t('totalAllocated')}</div>
                     <div className="text-lg font-semibold">${getTotalAllocated().toLocaleString()}</div>
                   </div>
                   <div>
-                    <div className="text-muted-foreground">Total Spent</div>
+                    <div className="text-muted-foreground">{t('totalSpent')}</div>
                     <div className="text-lg font-semibold">${getTotalSpent().toLocaleString()}</div>
                   </div>
                   <div>
-                    <div className="text-muted-foreground">Total Remaining</div>
+                    <div className="text-muted-foreground">{t('totalRemaining')}</div>
                     <div className="text-lg font-semibold">${getTotalRemaining().toLocaleString()}</div>
                   </div>
                   <div>
-                    <div className="text-muted-foreground">Overall Utilization</div>
+                    <div className="text-muted-foreground">{t('overallUtilization')}</div>
                     <div className="text-lg font-semibold">
                       {getTotalAllocated() > 0 
                         ? ((getTotalSpent() / getTotalAllocated()) * 100).toFixed(1)
@@ -168,57 +170,57 @@ export default function BudgetLineItemEditor({ budgetId: _budgetId, lineItems, o
       <Dialog open={isDialogOpen} onOpenChange={setIsDialogOpen}>
         <DialogContent>
           <DialogHeader>
-            <DialogTitle>{editingItem ? 'Edit' : 'Add'} Line Item</DialogTitle>
+            <DialogTitle>{editingItem ? t('editLineItemDialog') : t('addLineItemDialog')}</DialogTitle>
             <DialogDescription>
-              {editingItem ? 'Update' : 'Add'} a budget line item
+              {editingItem ? t('editLineItemDesc') : t('addLineItemDesc')}
             </DialogDescription>
           </DialogHeader>
           <div className="grid gap-4 py-4">
             <div className="grid gap-2">
-              <Label htmlFor="accountCode">Account Code *</Label>
+              <Label htmlFor="accountCode">{t('accountCodeRequired')}</Label>
               <Input
                 id="accountCode"
                 value={formData.accountCode}
                 onChange={(e) => setFormData({ ...formData, accountCode: e.target.value })}
-                placeholder="e.g., 5000-100"
+                placeholder={t('accountCodePlaceholder')}
               />
             </div>
             <div className="grid gap-2">
-              <Label htmlFor="accountName">Account Name *</Label>
+              <Label htmlFor="accountName">{t('accountNameRequired')}</Label>
               <Input
                 id="accountName"
                 value={formData.accountName}
                 onChange={(e) => setFormData({ ...formData, accountName: e.target.value })}
-                placeholder="e.g., Office Supplies"
+                placeholder={t('accountNamePlaceholder')}
               />
             </div>
             <div className="grid gap-2">
-              <Label htmlFor="allocatedAmount">Allocated Amount *</Label>
+              <Label htmlFor="allocatedAmount">{t('allocatedRequired')}</Label>
               <Input
                 id="allocatedAmount"
                 type="number"
                 step="0.01"
                 value={formData.allocatedAmount}
                 onChange={(e) => setFormData({ ...formData, allocatedAmount: e.target.value })}
-                placeholder="0.00"
+                placeholder={t('amountPlaceholder')}
               />
             </div>
             <div className="grid gap-2">
-              <Label htmlFor="notes">Notes</Label>
+              <Label htmlFor="notes">{t('notes')}</Label>
               <Input
                 id="notes"
                 value={formData.notes}
                 onChange={(e) => setFormData({ ...formData, notes: e.target.value })}
-                placeholder="Optional notes..."
+                placeholder={t('notesPlaceholder')}
               />
             </div>
           </div>
           <DialogFooter>
             <Button variant="outline" onClick={() => setIsDialogOpen(false)}>
-              Cancel
+              {t('cancel')}
             </Button>
             <Button onClick={() => {}}>
-              {editingItem ? 'Update' : 'Add'} Line Item
+              {editingItem ? t('updateItem') : t('addItem')}
             </Button>
           </DialogFooter>
         </DialogContent>

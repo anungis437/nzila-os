@@ -17,6 +17,7 @@ import {
 } from "lucide-react";
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "@/components/ui/card";
 import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
+import { useTranslations } from "next-intl";
 import { EmployerManagement } from "./EmployerManagement";
 import { WorksiteManagement } from "./WorksiteManagement";
 import { BargainingUnitManagement } from "./BargainingUnitManagement";
@@ -37,6 +38,7 @@ interface StructureStats {
 }
 
 export function UnionStructureDashboard({ organizationId }: UnionStructureDashboardProps) {
+  const t = useTranslations("unionStructure.dashboard");
   const [stats, setStats] = useState<StructureStats>({
     employersCount: 0,
     worksitesCount: 0,
@@ -84,36 +86,36 @@ export function UnionStructureDashboard({ organizationId }: UnionStructureDashbo
 
   const statCards = [
     {
-      title: "Employers",
+      title: t("employers"),
       value: stats.employersCount,
       icon: Building2,
       color: "text-blue-600",
       bgColor: "bg-blue-50",
-      description: "Companies with union members",
+      description: t("employersDescription"),
     },
     {
-      title: "Worksites",
+      title: t("worksites"),
       value: stats.worksitesCount,
       icon: MapPin,
       color: "text-green-600",
       bgColor: "bg-green-50",
-      description: "Physical work locations",
+      description: t("worksitesDescription"),
     },
     {
-      title: "Bargaining Units",
+      title: t("bargainingUnits"),
       value: stats.bargainingUnitsCount,
       icon: Users,
       color: "text-purple-600",
       bgColor: "bg-purple-50",
-      description: "Certified bargaining units",
+      description: t("bargainingUnitsDescription"),
     },
     {
-      title: "Committees",
+      title: t("committees"),
       value: stats.committeesCount,
       icon: Building,
       color: "text-orange-600",
       bgColor: "bg-orange-50",
-      description: "Active committees",
+      description: t("committeesDescription"),
     },
   ];
 
@@ -122,9 +124,9 @@ export function UnionStructureDashboard({ organizationId }: UnionStructureDashbo
       {/* Header */}
       <div className="flex justify-between items-center">
         <div>
-          <h1 className="text-3xl font-bold tracking-tight">Union Structure</h1>
+          <h1 className="text-3xl font-bold tracking-tight">{t("title")}</h1>
           <p className="text-muted-foreground mt-1">
-            Manage organizational structure, employers, worksites, and bargaining units
+            {t("subtitle")}
           </p>
         </div>
       </div>
@@ -156,33 +158,32 @@ export function UnionStructureDashboard({ organizationId }: UnionStructureDashbo
         <TabsList>
           <TabsTrigger value="overview">
             <BarChart3 className="h-4 w-4 mr-2" />
-            Overview
+            {t("tabOverview")}
           </TabsTrigger>
           <TabsTrigger value="employers">
             <Building2 className="h-4 w-4 mr-2" />
-            Employers
+            {t("tabEmployers")}
           </TabsTrigger>
           <TabsTrigger value="worksites">
             <MapPin className="h-4 w-4 mr-2" />
-            Worksites
+            {t("tabWorksites")}
           </TabsTrigger>
           <TabsTrigger value="units">
             <Users className="h-4 w-4 mr-2" />
-            Bargaining Units
+            {t("tabBargainingUnits")}
           </TabsTrigger>
           <TabsTrigger value="committees">
             <Building className="h-4 w-4 mr-2" />
-            Committees
+            {t("tabCommittees")}
           </TabsTrigger>
         </TabsList>
 
         <TabsContent value="overview" className="space-y-4">
           <Card>
             <CardHeader>
-              <CardTitle>Organizational Structure</CardTitle>
+              <CardTitle>{t("orgStructureTitle")}</CardTitle>
               <CardDescription>
-                {/* eslint-disable-next-line react/no-unescaped-entities */}
-                Visual representation of your union's organizational hierarchy
+                {t("orgStructureDescription")}
               </CardDescription>
             </CardHeader>
             <CardContent>

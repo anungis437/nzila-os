@@ -51,6 +51,7 @@ import {
 import { Checkbox } from "@/components/ui/checkbox";
 import { Label } from "@/components/ui/label";
 import { cn } from "@/lib/utils";
+import { useTranslations } from "next-intl";
 
 // Nomination schema
 const nominationSchema = z.object({
@@ -125,6 +126,7 @@ export function NominationForm({
   const [isLoading, setIsLoading] = React.useState(false);
   const [selectedPosition, setSelectedPosition] = React.useState<Position | null>(null);
   const [uploadedFiles, setUploadedFiles] = React.useState<File[]>([]);
+  const t = useTranslations("voting.nomination");
 
   const form = useForm<NominationFormData>({
     resolver: zodResolver(nominationSchema),
@@ -193,7 +195,7 @@ export function NominationForm({
     <div className="max-w-4xl mx-auto space-y-6">
       {/* Header */}
       <div>
-        <h1 className="text-3xl font-bold">Submit Nomination</h1>
+        <h1 className="text-3xl font-bold">{t("title")}</h1>
         <p className="text-gray-600 mt-2">{election.title}</p>
       </div>
 
@@ -202,9 +204,7 @@ export function NominationForm({
         <Alert variant="destructive">
           <AlertCircle className="h-4 w-4" />
           <AlertDescription>
-            Nominations are not currently open. The nomination period is from{" "}
-            {election.nominationStart.toLocaleDateString()} to{" "}
-            {election.nominationEnd.toLocaleDateString()}.
+            {t("nominationsClosed")} {election.nominationStart.toLocaleDateString()} {t("dateSeparator")} {election.nominationEnd.toLocaleDateString()}.
           </AlertDescription>
         </Alert>
       )}
@@ -216,7 +216,7 @@ export function NominationForm({
             <CardHeader>
               <CardTitle className="flex items-center gap-2">
                 <User className="h-5 w-5" />
-                Nomination Type
+                {t("nominationType")}
               </CardTitle>
             </CardHeader>
             <CardContent>
@@ -244,9 +244,9 @@ export function NominationForm({
                           <div className="flex items-center gap-3">
                             <User className="h-6 w-6" />
                             <div>
-                              <div className="font-medium">Self-Nomination</div>
+                              <div className="font-medium">{t("selfLabel")}</div>
                               <div className="text-sm text-gray-600">
-                                Nominate yourself for a position
+                                {t("selfDescription")}
                               </div>
                             </div>
                           </div>
@@ -271,9 +271,9 @@ export function NominationForm({
                           <div className="flex items-center gap-3">
                             <Users className="h-6 w-6" />
                             <div>
-                              <div className="font-medium">Nominate Someone</div>
+                              <div className="font-medium">{t("nominatedLabel")}</div>
                               <div className="text-sm text-gray-600">
-                                Nominate another member
+                                {t("nominatedDescription")}
                               </div>
                             </div>
                           </div>
@@ -290,7 +290,7 @@ export function NominationForm({
           {/* Position Selection */}
           <Card>
             <CardHeader>
-              <CardTitle>Select Position</CardTitle>
+              <CardTitle>{t("selectPosition")}</CardTitle>
             </CardHeader>
             <CardContent className="space-y-4">
               <FormField
@@ -298,18 +298,18 @@ export function NominationForm({
                 name="positionId"
                 render={({ field }) => (
                   <FormItem>
-                    <FormLabel>Position</FormLabel>
+                    <FormLabel>{t("positionLabel")}</FormLabel>
                     <Select onValueChange={field.onChange} defaultValue={field.value}>
                       <FormControl>
                         <SelectTrigger>
-                          <SelectValue placeholder="Choose a position..." />
+                          <SelectValue placeholder={t("positionPlaceholder")} />
                         </SelectTrigger>
                       </FormControl>
                       <SelectContent>
                         {election.positions.map((position) => (
                           <SelectItem key={position.id} value={position.id}>
                             {position.title} ({position.currentNominees}
-                            {position.maxNominees && `/${position.maxNominees}`} nominees)
+                            {position.maxNominees && `/${position.maxNominees}`} {t("nomineesSuffix")})
                           </SelectItem>
                         ))}
                       </SelectContent>
@@ -331,7 +331,7 @@ export function NominationForm({
           {nominationType === "nominated" && (
             <Card>
               <CardHeader>
-                <CardTitle>Candidate Information</CardTitle>
+                <CardTitle>{t("candidateInfo")}</CardTitle>
               </CardHeader>
               <CardContent className="space-y-4">
                 <FormField
@@ -339,7 +339,7 @@ export function NominationForm({
                   name="candidateId"
                   render={({ field }) => (
                     <FormItem>
-                      <FormLabel>Select Candidate</FormLabel>
+                      <FormLabel>{t("candidateLabel")}</FormLabel>
                       <Select
                         onValueChange={(value) => {
                           const member = members.find((m) => m.id === value);
@@ -353,7 +353,7 @@ export function NominationForm({
                       >
                         <FormControl>
                           <SelectTrigger>
-                            <SelectValue placeholder="Choose a member..." />
+                            <SelectValue placeholder={t("candidatePlaceholder")} />
                           </SelectTrigger>
                         </FormControl>
                         <SelectContent>
@@ -377,7 +377,7 @@ export function NominationForm({
             <CardHeader>
               <CardTitle className="flex items-center gap-2">
                 <FileText className="h-5 w-5" />
-                Candidate Statement
+                {t("statementTitle")}
               </CardTitle>
             </CardHeader>
             <CardContent className="space-y-4">
@@ -386,16 +386,15 @@ export function NominationForm({
                 name="statement"
                 render={({ field }) => (
                   <FormItem>
-                    <FormLabel>Personal Statement *</FormLabel>
+                    <FormLabel>{t("statementLabel")}</FormLabel>
                     <FormDescription>
-                      Introduce yourself and explain why you want this position (100-2000
-                      characters)
+                      {t("statementHelp")}
                     </FormDescription>
                     <FormControl>
                       <Textarea
                         {...field}
                         rows={6}
-                        placeholder="I am running for this position because..."
+                        placeholder={t("statementPlaceholder")}
                       />
                     </FormControl>
                     <div className="flex justify-between text-sm text-gray-500">
@@ -413,15 +412,15 @@ export function NominationForm({
                 name="qualifications"
                 render={({ field }) => (
                   <FormItem>
-                    <FormLabel>Qualifications & Experience</FormLabel>
+                    <FormLabel>{t("qualificationsLabel")}</FormLabel>
                     <FormDescription>
-                      Describe your relevant experience and qualifications
+                      {t("qualificationsHelp")}
                     </FormDescription>
                     <FormControl>
                       <Textarea
                         {...field}
                         rows={4}
-                        placeholder="I have experience in..."
+                        placeholder={t("qualificationsPlaceholder")}
                       />
                     </FormControl>
                     <FormMessage />
@@ -434,15 +433,15 @@ export function NominationForm({
                 name="platformPoints"
                 render={({ field }) => (
                   <FormItem>
-                    <FormLabel>Platform & Goals (Optional)</FormLabel>
+                    <FormLabel>{t("platformLabel")}</FormLabel>
                     <FormDescription>
-                      What do you hope to accomplish in this role?
+                      {t("platformHelp")}
                     </FormDescription>
                     <FormControl>
                       <Textarea
                         {...field}
                         rows={4}
-                        placeholder="My goals for this position include..."
+                        placeholder={t("platformPlaceholder")}
                       />
                     </FormControl>
                     <FormMessage />
@@ -458,14 +457,13 @@ export function NominationForm({
               <CardHeader>
                 <CardTitle className="flex items-center gap-2">
                   <Users className="h-5 w-5" />
-                  Seconder Required
+                  {t("seconderTitle")}
                 </CardTitle>
               </CardHeader>
               <CardContent className="space-y-4">
                 <Alert>
                   <AlertDescription>
-                    This election requires a seconder. Please provide information for a
-                    member who supports your nomination.
+                    {t("seconderAlert")}
                   </AlertDescription>
                 </Alert>
 
@@ -474,7 +472,7 @@ export function NominationForm({
                   name="seconderId"
                   render={({ field }) => (
                     <FormItem>
-                      <FormLabel>Select Seconder</FormLabel>
+                      <FormLabel>{t("seconderLabel")}</FormLabel>
                       <Select
                         onValueChange={(value) => {
                           const member = members.find((m) => m.id === value);
@@ -488,7 +486,7 @@ export function NominationForm({
                       >
                         <FormControl>
                           <SelectTrigger>
-                            <SelectValue placeholder="Choose a seconder..." />
+                            <SelectValue placeholder={t("seconderPlaceholder")} />
                           </SelectTrigger>
                         </FormControl>
                         <SelectContent>
@@ -514,12 +512,12 @@ export function NominationForm({
             <CardHeader>
               <CardTitle className="flex items-center gap-2">
                 <Upload className="h-5 w-5" />
-                Supporting Documents (Optional)
+                {t("documentsTitle")}
               </CardTitle>
             </CardHeader>
             <CardContent className="space-y-4">
               <div>
-                <Label htmlFor="documents">Upload Documents</Label>
+                <Label htmlFor="documents">{t("documentsLabel")}</Label>
                 <Input
                   id="documents"
                   type="file"
@@ -529,7 +527,7 @@ export function NominationForm({
                   accept=".pdf,.doc,.docx,.jpg,.jpeg,.png"
                 />
                 <p className="text-sm text-gray-500 mt-1">
-                  PDF, DOC, DOCX, JPG, PNG (max 10MB each)
+                  {t("documentsHelp")}
                 </p>
               </div>
 
@@ -553,7 +551,7 @@ export function NominationForm({
                         size="sm"
                         onClick={() => removeFile(index)}
                       >
-                        Remove
+                        {t("documentsRemove")}
                       </Button>
                     </div>
                   ))}
@@ -575,12 +573,10 @@ export function NominationForm({
                     </FormControl>
                     <div className="space-y-1 leading-none">
                       <FormLabel>
-                        I accept the terms and conditions of this nomination *
+                        {t("termsAcceptLabel")}
                       </FormLabel>
                       <FormDescription>
-                        By checking this box, you confirm that all information provided is
-                        accurate and that you meet the eligibility requirements for this
-                        position.
+                        {t("termsAcceptHelp")}
                       </FormDescription>
                       <FormMessage />
                     </div>
@@ -597,10 +593,9 @@ export function NominationForm({
                       <Checkbox checked={field.value} onCheckedChange={field.onChange} />
                     </FormControl>
                     <div className="space-y-1 leading-none">
-                      <FormLabel>Consent to publish candidate information</FormLabel>
+                      <FormLabel>{t("consentLabel")}</FormLabel>
                       <FormDescription>
-                        Your name, statement, and qualifications may be shared with union
-                        members as part of the election process.
+                        {t("consentHelp")}
                       </FormDescription>
                     </div>
                   </FormItem>
@@ -613,16 +608,16 @@ export function NominationForm({
           <div className="flex gap-4">
             <Button type="submit" disabled={!isNominationOpen || isLoading} className="flex-1">
               {isLoading ? (
-                "Submitting..."
+                t("submitLoading")
               ) : (
                 <>
                   <CheckCircle2 className="h-4 w-4 mr-2" />
-                  Submit Nomination
+                  {t("submitButton")}
                 </>
               )}
             </Button>
             <Button type="button" variant="outline" disabled={isLoading}>
-              Save Draft
+              {t("draftButton")}
             </Button>
           </div>
         </form>

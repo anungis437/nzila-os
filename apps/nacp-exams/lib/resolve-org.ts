@@ -14,10 +14,16 @@
  *
  * @module resolve-org
  */
-import { auth } from '@clerk/nextjs/server'
+import { auth, currentUser } from '@clerk/nextjs/server'
 import { redirect } from 'next/navigation'
 import { NacpRole } from '@nzila/nacp-core/enums'
 import type { NacpOrgContext } from '@nzila/nacp-core/types'
+
+/** Emails that always receive admin role, regardless of Clerk metadata. */
+const SUPER_ADMIN_EMAILS = new Set([
+  'info@nzilaventures.com',
+  ...(process.env.SUPER_ADMIN_EMAILS ?? '').split(',').map(s => s.trim()).filter(Boolean),
+])
 
 /**
  * Resolve org context from Clerk auth.
@@ -40,7 +46,17 @@ export async function resolveOrgContext(): Promise<NacpOrgContext> {
   }
 
   // Map Clerk orgRole to NacpRole
-  const role = mapClerkRoleToNacpRole(orgRole, sessionClaims)
+  let role = mapClerkRoleToNacpRole(orgRole, sessionClaims)
+
+  // Super-admin email override
+  if (role !== NacpRole.ADMIN) {
+    const user = await currentUser()
+    const email = user?.primaryEmailAddress?.emailAddress
+                ?? user?.emailAddresses?.[0]?.emailAddress
+    if (email && SUPER_ADMIN_EMAILS.has(email.toLowerCase())) {
+      role = NacpRole.ADMIN
+    }
+  }
 
   return {
     orgId: orgId,

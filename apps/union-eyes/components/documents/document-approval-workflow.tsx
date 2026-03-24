@@ -59,6 +59,7 @@ import {
 } from "@/components/ui/dialog";
 import { cn } from "@/lib/utils";
 import { format } from "date-fns";
+import { useTranslations } from "next-intl";
 
 // Approval stage schema
 const approvalStageSchema = z.object({
@@ -129,6 +130,7 @@ export function DocumentApprovalWorkflow({
   onSaveConfig,
   onSubmitReview,
 }: DocumentApprovalWorkflowProps) {
+  const t = useTranslations('documents.approvalWorkflow');
   const [configMode, setConfigMode] = React.useState(!existingConfig);
   const [reviewDialogOpen, setReviewDialogOpen] = React.useState(false);
   const [reviewStatus, setReviewStatus] = React.useState<
@@ -187,12 +189,12 @@ export function DocumentApprovalWorkflow({
       {/* Header */}
       <div className="flex items-center justify-between">
         <div>
-          <h2 className="text-2xl font-bold">Approval Workflow</h2>
+          <h2 className="text-2xl font-bold">{t('title')}</h2>
           <p className="text-gray-600 mt-1">{documentName}</p>
         </div>
         {!configMode && existingConfig && (
           <Button variant="outline" onClick={() => setConfigMode(true)}>
-            Edit Workflow
+            {t('editWorkflow')}
           </Button>
         )}
       </div>
@@ -204,11 +206,11 @@ export function DocumentApprovalWorkflow({
           <AlertDescription className="text-blue-900">
             <div className="flex items-center justify-between">
               <span>
-                <strong>Action Required:</strong> You have been assigned to review this
+                <strong>{t('actionRequired')}:</strong> You have been assigned to review this
                 document.
               </span>
               <Button size="sm" onClick={() => setReviewDialogOpen(true)}>
-                Review Now
+                {t('reviewNow')}
               </Button>
             </div>
           </AlertDescription>
@@ -219,7 +221,7 @@ export function DocumentApprovalWorkflow({
         // Configuration Mode
         <Card>
           <CardHeader>
-            <CardTitle>Configure Approval Workflow</CardTitle>
+            <CardTitle>{t('configureWorkflow')}</CardTitle>
           </CardHeader>
           <CardContent>
             <Form {...form}>
@@ -228,7 +230,7 @@ export function DocumentApprovalWorkflow({
                   {fields.map((field, index) => (
                     <div key={field.id} className="border rounded-lg p-4 space-y-4">
                       <div className="flex items-start justify-between">
-                        <h4 className="font-medium">Stage {index + 1}</h4>
+                        <h4 className="font-medium">{t('stageNumber', { index: index + 1 })}</h4>
                         <Button
                           type="button"
                           variant="ghost"
@@ -245,9 +247,9 @@ export function DocumentApprovalWorkflow({
                         name={`stages.${index}.name`}
                         render={({ field }) => (
                           <FormItem>
-                            <FormLabel>Stage Name</FormLabel>
+                            <FormLabel>{t('stageName')}</FormLabel>
                             <FormControl>
-                              <input {...field} className="flex h-10 w-full rounded-md border border-input bg-background px-3 py-2" placeholder="e.g., Manager Review" />
+                              <input {...field} className="flex h-10 w-full rounded-md border border-input bg-background px-3 py-2" placeholder={t('stageNamePlaceholder')} />
                             </FormControl>
                             <FormMessage />
                           </FormItem>
@@ -259,7 +261,7 @@ export function DocumentApprovalWorkflow({
                         name={`stages.${index}.reviewerIds`}
                         render={({ field }) => (
                           <FormItem>
-                            <FormLabel>Reviewers</FormLabel>
+                            <FormLabel>{t('reviewers')}</FormLabel>
                             <div className="space-y-2">
                               <Select
                                 onValueChange={(value) => {
@@ -269,12 +271,12 @@ export function DocumentApprovalWorkflow({
                                 }}
                               >
                                 <SelectTrigger>
-                                  <SelectValue placeholder="Add reviewer..." />
+                                  <SelectValue placeholder={t('addReviewer')} />
                                 </SelectTrigger>
                                 <SelectContent>
                                   {reviewers.map((reviewer) => (
                                     <SelectItem key={reviewer.id} value={reviewer.id}>
-                                      {reviewer.name} ({reviewer.role})
+                                      {reviewer.name} {t('reviewerRole', { role: reviewer.role })}
                                     </SelectItem>
                                   ))}
                                 </SelectContent>
@@ -321,10 +323,10 @@ export function DocumentApprovalWorkflow({
                               />
                             </FormControl>
                             <FormLabel className="!mt-0">
-                              Require all reviewers to approve
+                              {t('requireAll')}
                             </FormLabel>
                             <FormDescription>
-                              If unchecked, only one approval is needed to pass this stage
+                              {t('requireAllDesc')}
                             </FormDescription>
                           </FormItem>
                         )}
@@ -335,11 +337,11 @@ export function DocumentApprovalWorkflow({
                         name={`stages.${index}.description`}
                         render={({ field }) => (
                           <FormItem>
-                            <FormLabel>Description (Optional)</FormLabel>
+                            <FormLabel>{t('descriptionOptional')}</FormLabel>
                             <FormControl>
                               <Textarea
                                 {...field}
-                                placeholder="Describe what reviewers should focus on..."
+                                placeholder={t('descriptionPlaceholder')}
                                 rows={2}
                               />
                             </FormControl>
@@ -365,12 +367,12 @@ export function DocumentApprovalWorkflow({
                   }
                 >
                   <Plus className="h-4 w-4 mr-2" />
-                  Add Stage
+                  {t('addStage')}
                 </Button>
 
                 <div className="flex gap-2">
                   <Button type="submit" disabled={isSubmitting}>
-                    {isSubmitting ? "Saving..." : "Save Workflow"}
+                    {isSubmitting ? t('savingWorkflow') : t('saveWorkflow')}
                   </Button>
                   {existingConfig && (
                     <Button
@@ -378,7 +380,7 @@ export function DocumentApprovalWorkflow({
                       variant="outline"
                       onClick={() => setConfigMode(false)}
                     >
-                      Cancel
+                      {t('cancel')}
                     </Button>
                   )}
                 </div>
@@ -396,24 +398,23 @@ export function DocumentApprovalWorkflow({
                 <CardContent className="p-6">
                   <div className="grid grid-cols-4 gap-6">
                     <div>
-                      <div className="text-sm text-gray-600 mb-1">Overall Status</div>
+                      <div className="text-sm text-gray-600 mb-1">{t('overallStatus')}</div>
                       <StatusBadge status={status.overallStatus} />
                     </div>
                     <div>
-                      <div className="text-sm text-gray-600 mb-1">Current Stage</div>
+                      <div className="text-sm text-gray-600 mb-1">{t('currentStage')}</div>
                       <div className="font-medium">
                         {existingConfig?.stages[status.currentStage]?.name || "N/A"}
                       </div>
                     </div>
                     <div>
-                      <div className="text-sm text-gray-600 mb-1">Progress</div>
+                      <div className="text-sm text-gray-600 mb-1">{t('progress')}</div>
                       <div className="font-medium">
-                        Stage {status.currentStage + 1} of{" "}
-                        {existingConfig?.stages.length || 0}
+                        {t('stageProgress', { current: status.currentStage + 1, total: existingConfig?.stages.length || 0 })}
                       </div>
                     </div>
                     <div>
-                      <div className="text-sm text-gray-600 mb-1">Completed</div>
+                      <div className="text-sm text-gray-600 mb-1">{t('completed')}</div>
                       <div className="font-medium">
                         {
                           status.approvals.filter((a) => a.status === "approved").length
@@ -428,7 +429,7 @@ export function DocumentApprovalWorkflow({
               {/* Workflow Stages */}
               <Card>
                 <CardHeader>
-                  <CardTitle>Approval Stages</CardTitle>
+                  <CardTitle>{t('approvalStages')}</CardTitle>
                 </CardHeader>
                 <CardContent>
                   <div className="space-y-6">
@@ -468,11 +469,11 @@ export function DocumentApprovalWorkflow({
                               <div className="flex items-center gap-2 mb-2">
                                 <h4 className="font-semibold">{stage.name}</h4>
                                 {isCurrentStage && (
-                                  <Badge variant="default">In Progress</Badge>
+                                  <Badge variant="default">{t('inProgress')}</Badge>
                                 )}
                                 {isPastStage && (
                                   <Badge variant="outline" className="text-green-600">
-                                    Completed
+                                    {t('completedBadge')}
                                   </Badge>
                                 )}
                               </div>

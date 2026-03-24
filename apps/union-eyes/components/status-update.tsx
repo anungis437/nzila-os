@@ -7,6 +7,7 @@ import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from '@
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from '@/components/ui/card';
 import { AlertCircle, CheckCircle, Loader2 } from 'lucide-react';
 import { Alert, AlertDescription } from '@/components/ui/alert';
+import { useTranslations } from "next-intl";
 
 interface StatusUpdateProps {
   claimId: string;
@@ -14,18 +15,20 @@ interface StatusUpdateProps {
   onStatusUpdated: () => void;
 }
 
-const statusOptions = [
-  { value: 'submitted', label: 'Submitted' },
-  { value: 'under_review', label: 'Under Review' },
-  { value: 'assigned', label: 'Assigned' },
-  { value: 'investigation', label: 'Investigation' },
-  { value: 'pending_documentation', label: 'Pending Documentation' },
-  { value: 'resolved', label: 'Resolved' },
-  { value: 'rejected', label: 'Rejected' },
-  { value: 'closed', label: 'Closed' },
-];
-
 export function StatusUpdate({ claimId, currentStatus, onStatusUpdated }: StatusUpdateProps) {
+  const t = useTranslations("ui.statusUpdate");
+
+  const statusOptions = [
+    { value: 'submitted', label: t("statusSubmitted") },
+    { value: 'under_review', label: t("statusUnderReview") },
+    { value: 'assigned', label: t("statusAssigned") },
+    { value: 'investigation', label: t("statusInvestigation") },
+    { value: 'pending_documentation', label: t("statusPendingDocumentation") },
+    { value: 'resolved', label: t("statusResolved") },
+    { value: 'rejected', label: t("statusRejected") },
+    { value: 'closed', label: t("statusClosed") },
+  ];
+
   const [selectedStatus, setSelectedStatus] = useState('');
   const [notes, setNotes] = useState('');
   const [loading, setLoading] = useState(false);
@@ -57,7 +60,7 @@ export function StatusUpdate({ claimId, currentStatus, onStatusUpdated }: Status
     e.preventDefault();
     
     if (!selectedStatus) {
-      setError('Please select a status');
+      setError(t("selectError"));
       return;
     }
 
@@ -107,18 +110,18 @@ setError(err instanceof Error ? err.message : 'Failed to update status');
   return (
     <Card>
       <CardHeader>
-        <CardTitle>Update Status</CardTitle>
+        <CardTitle>{t("title")}</CardTitle>
         <CardDescription>
-          Change the claim status and add notes about the update
+          {t("description")}
         </CardDescription>
       </CardHeader>
       <CardContent>
         <form onSubmit={handleSubmit} className="space-y-4">
           <div className="space-y-2">
-            <label className="text-sm font-medium">New Status</label>
+            <label className="text-sm font-medium">{t("newStatusLabel")}</label>
             <Select value={selectedStatus} onValueChange={setSelectedStatus}>
               <SelectTrigger>
-                <SelectValue placeholder="Select a status" />
+                <SelectValue placeholder={t("selectPlaceholder")} />
               </SelectTrigger>
               <SelectContent>
                 {availableStatusOptions.map((option) => (
@@ -127,7 +130,7 @@ setError(err instanceof Error ? err.message : 'Failed to update status');
                     value={option.value}
                     disabled={option.value === currentStatus}
                   >
-                    {option.label} {option.value === currentStatus && '(current)'}
+                    {option.label} {option.value === currentStatus && t("currentSuffix")}
                   </SelectItem>
                 ))}
               </SelectContent>
@@ -135,11 +138,11 @@ setError(err instanceof Error ? err.message : 'Failed to update status');
           </div>
 
           <div className="space-y-2">
-            <label className="text-sm font-medium">Notes (Optional)</label>
+            <label className="text-sm font-medium">{t("notesLabel")}</label>
             <Textarea
               value={notes}
               onChange={(e) => setNotes(e.target.value)}
-              placeholder="Add notes about this status change..."
+              placeholder={t("notesPlaceholder")}
               rows={4}
               disabled={loading}
             />
@@ -156,7 +159,7 @@ setError(err instanceof Error ? err.message : 'Failed to update status');
             <Alert className="bg-green-50 text-green-900 border-green-200">
               <CheckCircle className="h-4 w-4" />
               <AlertDescription>
-                Status updated successfully! Email notification sent.
+                {t("successMessage")}
               </AlertDescription>
             </Alert>
           )}
@@ -167,7 +170,7 @@ setError(err instanceof Error ? err.message : 'Failed to update status');
             className="w-full"
           >
             {loading && <Loader2 className="mr-2 h-4 w-4 animate-spin" />}
-            {loading ? 'Updating...' : 'Update Status'}
+            {loading ? t("updatingButton") : t("updateButton")}
           </Button>
         </form>
       </CardContent>

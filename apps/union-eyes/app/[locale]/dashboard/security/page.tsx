@@ -185,10 +185,13 @@ function timeAgo(dateStr: string) {
 // ── Page ───────────────────────────────────────────────────────────────────
 
 export default async function SecurityDashboard({
+  params: paramsPromise,
   searchParams,
 }: {
+  params: Promise<{ locale: string }>;
   searchParams: Promise<{ tab?: string; severity?: string; status?: string }>;
 }) {
+  const { locale } = await paramsPromise;
   const params = await searchParams;
   const activeTab = params.tab ?? 'overview';
   const filterSeverity = params.severity ?? null;
@@ -198,7 +201,7 @@ export default async function SecurityDashboard({
 
   const hasAccess = await hasMinRole('security_manager');
   if (!hasAccess) {
-    redirect('/dashboard');
+    redirect(`/${locale}/dashboard`);
   }
 
   const organizationId = user.organizationId;
@@ -244,30 +247,30 @@ export default async function SecurityDashboard({
       <Tabs defaultValue={activeTab} className="space-y-4">
         <TabsList>
           <TabsTrigger value="overview">
-            <Link href="/dashboard/security" className="no-underline">Overview</Link>
+            <Link href={`/${locale}/dashboard/security`} className="no-underline">Overview</Link>
           </TabsTrigger>
           <TabsTrigger value="alerts">
-            <Link href="/dashboard/security?tab=alerts" className="no-underline">
+            <Link href={`/${locale}/dashboard/security?tab=alerts`} className="no-underline">
               Alerts {stats.criticalAlerts + stats.highAlerts > 0 && (
                 <Badge variant="destructive" className="ml-1.5 text-xs">{stats.criticalAlerts + stats.highAlerts}</Badge>
               )}
             </Link>
           </TabsTrigger>
           <TabsTrigger value="threats">
-            <Link href="/dashboard/security?tab=threats" className="no-underline">Threats ({stats.blockedThreats})</Link>
+            <Link href={`/${locale}/dashboard/security?tab=threats`} className="no-underline">Threats ({stats.blockedThreats})</Link>
           </TabsTrigger>
           <TabsTrigger value="access">
-            <Link href="/dashboard/security?tab=access" className="no-underline">Access Logs</Link>
+            <Link href={`/${locale}/dashboard/security?tab=access`} className="no-underline">Access Logs</Link>
           </TabsTrigger>
           <TabsTrigger value="posture">
-            <Link href="/dashboard/security?tab=posture" className="no-underline">Posture</Link>
+            <Link href={`/${locale}/dashboard/security?tab=posture`} className="no-underline">Posture</Link>
           </TabsTrigger>
         </TabsList>
 
         {/* ── Overview Tab ─────────────────────────────────────────────── */}
         <TabsContent value="overview" className="space-y-4">
           <div className="grid gap-4 md:grid-cols-2 lg:grid-cols-4">
-            <Link href="/dashboard/security?tab=posture" className="no-underline">
+            <Link href={`/${locale}/dashboard/security?tab=posture`} className="no-underline">
               <Card className="hover:border-primary/50 transition-colors cursor-pointer">
                 <CardHeader className="pb-2">
                   <CardTitle className="text-sm font-medium flex items-center gap-2">
@@ -286,7 +289,7 @@ export default async function SecurityDashboard({
               </Card>
             </Link>
 
-            <Link href="/dashboard/security?tab=alerts&severity=critical" className="no-underline">
+            <Link href={`/${locale}/dashboard/security?tab=alerts&severity=critical`} className="no-underline">
               <Card className="hover:border-primary/50 transition-colors cursor-pointer">
                 <CardHeader className="pb-2">
                   <CardTitle className="text-sm font-medium flex items-center gap-2">
@@ -305,7 +308,7 @@ export default async function SecurityDashboard({
               </Card>
             </Link>
 
-            <Link href="/dashboard/security?tab=threats" className="no-underline">
+            <Link href={`/${locale}/dashboard/security?tab=threats`} className="no-underline">
               <Card className="hover:border-primary/50 transition-colors cursor-pointer">
                 <CardHeader className="pb-2">
                   <CardTitle className="text-sm font-medium flex items-center gap-2">
@@ -320,7 +323,7 @@ export default async function SecurityDashboard({
               </Card>
             </Link>
 
-            <Link href="/dashboard/security?tab=access" className="no-underline">
+            <Link href={`/${locale}/dashboard/security?tab=access`} className="no-underline">
               <Card className="hover:border-primary/50 transition-colors cursor-pointer">
                 <CardHeader className="pb-2">
                   <CardTitle className="text-sm font-medium flex items-center gap-2">
@@ -365,19 +368,19 @@ export default async function SecurityDashboard({
               </CardHeader>
               <CardContent>
                 <div className="space-y-3">
-                  <Link href="/dashboard/security?tab=access&status=open" className="flex items-center justify-between hover:bg-muted/50 rounded-md px-2 py-1 -mx-2 transition-colors no-underline">
+                  <Link href={`/${locale}/dashboard/security?tab=access&status=open`} className="flex items-center justify-between hover:bg-muted/50 rounded-md px-2 py-1 -mx-2 transition-colors no-underline">
                     <span className="text-sm">Open</span>
                     <Badge variant="destructive">{stats.openIncidents}</Badge>
                   </Link>
-                  <Link href="/dashboard/security?tab=access&status=investigating" className="flex items-center justify-between hover:bg-muted/50 rounded-md px-2 py-1 -mx-2 transition-colors no-underline">
+                  <Link href={`/${locale}/dashboard/security?tab=access&status=investigating`} className="flex items-center justify-between hover:bg-muted/50 rounded-md px-2 py-1 -mx-2 transition-colors no-underline">
                     <span className="text-sm">Investigating</span>
                     <Badge variant="secondary">{stats.investigatingCount}</Badge>
                   </Link>
-                  <Link href="/dashboard/security?tab=access&status=blocked" className="flex items-center justify-between hover:bg-muted/50 rounded-md px-2 py-1 -mx-2 transition-colors no-underline">
+                  <Link href={`/${locale}/dashboard/security?tab=access&status=blocked`} className="flex items-center justify-between hover:bg-muted/50 rounded-md px-2 py-1 -mx-2 transition-colors no-underline">
                     <span className="text-sm">Blocked</span>
                     <Badge variant="default">{stats.blockedThreats}</Badge>
                   </Link>
-                  <Link href="/dashboard/security?tab=access&status=resolved" className="flex items-center justify-between hover:bg-muted/50 rounded-md px-2 py-1 -mx-2 transition-colors no-underline">
+                  <Link href={`/${locale}/dashboard/security?tab=access&status=resolved`} className="flex items-center justify-between hover:bg-muted/50 rounded-md px-2 py-1 -mx-2 transition-colors no-underline">
                     <span className="text-sm">Resolved</span>
                     <Badge variant="outline">{stats.resolvedCount}</Badge>
                   </Link>
@@ -436,16 +439,16 @@ export default async function SecurityDashboard({
                 {filterSeverity ? (
                   <div className="flex items-center gap-2">
                     <Badge variant="secondary">Filtered: {filterSeverity}</Badge>
-                    <Link href="/dashboard/security?tab=alerts" className="text-xs text-muted-foreground hover:text-foreground">
+                    <Link href={`/${locale}/dashboard/security?tab=alerts`} className="text-xs text-muted-foreground hover:text-foreground">
                       Clear filter
                     </Link>
                   </div>
                 ) : (
                   <div className="flex gap-1">
-                    <Link href="/dashboard/security?tab=alerts&severity=critical">
+                    <Link href={`/${locale}/dashboard/security?tab=alerts&severity=critical`}>
                       <Badge variant="destructive" className="cursor-pointer hover:opacity-80">Critical ({stats.criticalAlerts})</Badge>
                     </Link>
-                    <Link href="/dashboard/security?tab=alerts&severity=high">
+                    <Link href={`/${locale}/dashboard/security?tab=alerts&severity=high`}>
                       <Badge variant="secondary" className="cursor-pointer hover:opacity-80">High ({stats.highAlerts})</Badge>
                     </Link>
                   </div>
@@ -546,7 +549,7 @@ export default async function SecurityDashboard({
                 {filterStatus && (
                   <div className="flex items-center gap-2">
                     <Badge variant="secondary">Filtered: {filterStatus}</Badge>
-                    <Link href="/dashboard/security?tab=access" className="text-xs text-muted-foreground hover:text-foreground">
+                    <Link href={`/${locale}/dashboard/security?tab=access`} className="text-xs text-muted-foreground hover:text-foreground">
                       Clear filter
                     </Link>
                   </div>

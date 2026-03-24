@@ -7,6 +7,7 @@
 
 import { db } from "@/db/db";
 import { grievances } from "@/db/schema/domains/claims/grievances";
+import { complianceAlerts } from "@/db/schema/domains/compliance/employer-compliance";
 import { withOrganizationAuth } from "@/lib/organization-middleware";
 import { hasMinRole } from "@/lib/api-auth-guard";
 import { emitCapeAuditEvent, CAPE_AUDIT_EVENTS } from "@/lib/audit/cape-audit-events";
@@ -123,15 +124,56 @@ export const GET = withOrganizationAuth(async (request, context) => {
         percentage: Math.round((cnt / total) * 100),
       }));
 
-    // Compliance (stub — production would aggregate from compliance tables)
+    // Compliance — real aggregation from compliance_alerts table
+    const allAlerts = await db
+      .select()
+      .from(complianceAlerts)
+      .where(eq(complianceAlerts.orgId, organizationId));
+
+    const openAlerts = allAlerts.filter((a) => a.resolvedAt === null);
+    const resolvedAlerts = allAlerts.filter((a) => a.resolvedAt !== null);
+
+    // Calculate avg response time in days for resolved alerts
+    let avgResponseTime = 0;
+    if (resolvedAlerts.length > 0) {
+      const totalDays = resolvedAlerts.reduce((sum, a) => {
+        const created = new Date(a.createdAt).getTime();
+        const resolved = new Date(a.resolvedAt!).getTime();
+        return sum + (resolved - created) / 86400000;
+      }, 0);
+      avgResponseTime = Math.round(totalDays / resolvedAlerts.length);
+    }
+
+    // Deadline adherence: % of resolved before 30-day threshold
+    const adherent = resolvedAlerts.filter((a) => {
+      const created = new Date(a.createdAt).getTime();
+      const resolved = new Date(a.resolvedAt!).getTime();
+      return (resolved - created) / 86400000 <= 30;
+    });
+    const deadlineAdherence = allAlerts.length > 0
+      ? Math.round((adherent.length / allAlerts.length) * 100)
+      : 100;
+
+    // Documentation rate: % of alerts that have a message (non-null)
+    const documented = allAlerts.filter((a) => a.message !== null && a.message !== '');
+    const documentationRate = allAlerts.length > 0
+      ? Math.round((documented.length / allAlerts.length) * 100)
+      : 100;
+
     const compliance = {
       metrics: {
-        deadlineAdherence: 87,
-        avgResponseTime: 4,
-        documentationRate: 92,
-        openAlerts: 2,
+        deadlineAdherence,
+        avgResponseTime,
+        documentationRate,
+        openAlerts: openAlerts.length,
       },
-      alerts: [],
+      alerts: openAlerts.slice(0, 10).map((a) => ({
+        id: a.id,
+        type: a.alertType,
+        severity: a.severity,
+        message: a.message,
+        createdAt: a.createdAt,
+      })),
     };
 
     // Audit

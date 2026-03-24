@@ -172,7 +172,7 @@ export default async function TemplateDetailPage({
 }: {
   params: Promise<{ locale: string; slug: string }>;
 }) {
-  const { slug } = await params;
+  const { slug, locale } = await params;
 
   const user = await requireUser();
 
@@ -199,7 +199,7 @@ export default async function TemplateDetailPage({
     <div className="container mx-auto p-6 space-y-6 max-w-4xl">
       {/* Back navigation */}
       <Link
-        href="/dashboard/content"
+        href={`/${locale}/dashboard/content`}
         className="inline-flex items-center gap-2 text-sm text-muted-foreground hover:text-foreground transition-colors"
       >
         <ArrowLeft className="h-4 w-4" />

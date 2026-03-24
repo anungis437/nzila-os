@@ -59,6 +59,7 @@ import { Label } from "@/components/ui/label";
 import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
 import { useToast } from "@/components/ui/use-toast";
 import { ScrollArea } from "@/components/ui/scroll-area";
+import { useTranslations } from "next-intl";
 
 interface Member {
   id: string;
@@ -108,6 +109,7 @@ export function ProxyVoting({
   const [searchQuery, setSearchQuery] = useState("");
   const [isSubmitting, setIsSubmitting] = useState(false);
   const { toast } = useToast();
+  const t = useTranslations("voting.proxy");
 
   const activeProxy = currentProxies.find((p) => p.status === "active");
   const pendingProxies = receivedProxies.filter((p) => p.status === "pending");
@@ -133,8 +135,8 @@ export function ProxyVoting({
           endDateTime
         );
         toast({
-          title: "Proxy assigned",
-          description: `${selectedMember.name} will vote on your behalf.`,
+          title: t("toastAssigned"),
+          description: t("toastAssignedDesc", { name: selectedMember.name }),
         });
         setShowAssignDialog(false);
         setSelectedMember(null);
@@ -143,8 +145,8 @@ export function ProxyVoting({
       }
     } catch (_error) {
       toast({
-        title: "Assignment failed",
-        description: "Failed to assign proxy. Please try again.",
+        title: t("toastAssignFailed"),
+        description: t("toastAssignFailedDesc"),
         variant: "destructive",
       });
     } finally {
@@ -161,14 +163,14 @@ export function ProxyVoting({
       if (onRevokeProxy) {
         await onRevokeProxy(proxyId);
         toast({
-          title: "Proxy revoked",
-          description: "The proxy assignment has been cancelled.",
+          title: t("toastRevoked"),
+          description: t("toastRevokedDesc"),
         });
       }
     } catch (_error) {
       toast({
-        title: "Revocation failed",
-        description: "Failed to revoke proxy. Please try again.",
+        title: t("toastRevokeFailed"),
+        description: t("toastRevokeFailedDesc"),
         variant: "destructive",
       });
     }
@@ -179,14 +181,14 @@ export function ProxyVoting({
       if (onAcceptProxy) {
         await onAcceptProxy(proxyId);
         toast({
-          title: "Proxy accepted",
-          description: "You can now vote on behalf of this member.",
+          title: t("toastAccepted"),
+          description: t("toastAcceptedDesc"),
         });
       }
     } catch (_error) {
       toast({
-        title: "Accept failed",
-        description: "Failed to accept proxy. Please try again.",
+        title: t("toastAcceptFailed"),
+        description: t("toastAcceptFailedDesc"),
         variant: "destructive",
       });
     }
@@ -197,14 +199,14 @@ export function ProxyVoting({
       if (onDeclineProxy) {
         await onDeclineProxy(proxyId);
         toast({
-          title: "Proxy declined",
-          description: "The proxy request has been declined.",
+          title: t("toastDeclined"),
+          description: t("toastDeclinedDesc"),
         });
       }
     } catch (_error) {
       toast({
-        title: "Decline failed",
-        description: "Failed to decline proxy. Please try again.",
+        title: t("toastDeclineFailed"),
+        description: t("toastDeclineFailedDesc"),
         variant: "destructive",
       });
     }
@@ -216,7 +218,7 @@ export function ProxyVoting({
       {activeProxy && (
         <Alert>
           <UserCheck className="w-4 h-4" />
-          <AlertTitle>Active Proxy Assignment</AlertTitle>
+          <AlertTitle>{t("alertActiveProxyTitle")}</AlertTitle>
           <AlertDescription>
             <div className="flex items-center justify-between mt-2">
               <div className="flex items-center gap-2">
@@ -229,7 +231,7 @@ export function ProxyVoting({
                 <div>
                   <p className="font-medium">{activeProxy.toMember.name}</p>
                   <p className="text-xs text-muted-foreground">
-                    {activeProxy.sessionTitle || "All voting sessions"}
+                    {activeProxy.sessionTitle || t("sessionAll")}
                   </p>
                 </div>
               </div>
@@ -238,7 +240,7 @@ export function ProxyVoting({
                 size="sm"
                 onClick={() => handleRevokeProxy(activeProxy.id)}
               >
-                Revoke
+                {t("revokeButton")}
               </Button>
             </div>
           </AlertDescription>
@@ -249,7 +251,7 @@ export function ProxyVoting({
       {pendingProxies.length > 0 && (
         <Alert>
           <AlertCircle className="w-4 h-4" />
-          <AlertTitle>Pending Proxy Requests ({pendingProxies.length})</AlertTitle>
+          <AlertTitle>{t("pendingRequestsTitle", { count: pendingProxies.length })}</AlertTitle>
           <AlertDescription>
             <div className="space-y-2 mt-2">
               {pendingProxies.map((proxy) => (
@@ -267,7 +269,7 @@ export function ProxyVoting({
                     <div>
                       <p className="font-medium">{proxy.fromMember.name}</p>
                       <p className="text-xs text-muted-foreground">
-                        {proxy.sessionTitle || "All sessions"}
+                        {proxy.sessionTitle || t("sessionAllShort")}
                       </p>
                     </div>
                   </div>
@@ -278,7 +280,7 @@ export function ProxyVoting({
                       onClick={() => handleAcceptProxy(proxy.id)}
                     >
                       <CheckCircle className="w-4 h-4 mr-1" />
-                      Accept
+                      {t("acceptButton")}
                     </Button>
                     <Button
                       variant="ghost"
@@ -286,7 +288,7 @@ export function ProxyVoting({
                       onClick={() => handleDeclineProxy(proxy.id)}
                     >
                       <XCircle className="w-4 h-4 mr-1" />
-                      Decline
+                      {t("declineButton")}
                     </Button>
                   </div>
                 </div>
@@ -298,16 +300,16 @@ export function ProxyVoting({
 
       <Tabs defaultValue="assign">
         <TabsList>
-          <TabsTrigger value="assign">Assign Proxy</TabsTrigger>
+          <TabsTrigger value="assign">{t("tabAssign")}</TabsTrigger>
           <TabsTrigger value="received">
-            Received Proxies
+            {t("tabReceived")}
             {receivedProxies.filter((p) => p.status === "active").length > 0 && (
               <Badge variant="secondary" className="ml-2">
                 {receivedProxies.filter((p) => p.status === "active").length}
               </Badge>
             )}
           </TabsTrigger>
-          <TabsTrigger value="history">History</TabsTrigger>
+          <TabsTrigger value="history">{t("tabHistory")}</TabsTrigger>
         </TabsList>
 
         {/* Assign Proxy Tab */}
@@ -315,13 +317,13 @@ export function ProxyVoting({
           <Card>
             <CardHeader>
               <div className="flex justify-between items-center">
-                <CardTitle>Assign Your Proxy</CardTitle>
+                <CardTitle>{t("assignTitle")}</CardTitle>
                 <Button
                   onClick={() => setShowAssignDialog(true)}
                   disabled={!!activeProxy}
                 >
                   <UserCheck className="w-4 h-4 mr-2" />
-                  Assign Proxy
+                  {t("assignButton")}
                 </Button>
               </div>
             </CardHeader>
@@ -329,24 +331,24 @@ export function ProxyVoting({
               {activeProxy ? (
                 <div className="text-center py-8 text-muted-foreground">
                   <UserCheck className="w-12 h-12 mx-auto mb-4" />
-                  <p>You have an active proxy assignment.</p>
+                  <p>{t("activeProxyMessage")}</p>
                   <p className="text-sm mt-1">
-                    Revoke your current proxy to assign a new one.
+                    {t("activeProxyHint")}
                   </p>
                 </div>
               ) : (
                 <div className="text-center py-8 text-muted-foreground">
                   <Users className="w-12 h-12 mx-auto mb-4" />
-                  <p>Select a member to vote on your behalf</p>
+                  <p>{t("noProxyMessage")}</p>
                   <p className="text-sm mt-1">
-                    Your proxy can vote in all sessions or specific ones
+                    {t("noProxyHint")}
                   </p>
                 </div>
               )}
 
               {currentProxies.length > 0 && (
                 <div className="mt-6">
-                  <h4 className="font-medium mb-3">Current Assignments</h4>
+                  <h4 className="font-medium mb-3">{t("currentAssignments")}</h4>
                   <div className="space-y-2">
                     {currentProxies.map((proxy) => (
                       <div
@@ -363,7 +365,7 @@ export function ProxyVoting({
                           <div>
                             <p className="font-medium">{proxy.toMember.name}</p>
                             <p className="text-xs text-muted-foreground">
-                              {proxy.sessionTitle || "All sessions"}
+                              {proxy.sessionTitle || t("sessionAllShort")}
                             </p>
                             {proxy.endDate && (
                               <p className="text-xs text-muted-foreground flex items-center gap-1 mt-1">
@@ -408,15 +410,15 @@ export function ProxyVoting({
         <TabsContent value="received" className="space-y-4">
           <Card>
             <CardHeader>
-              <CardTitle>Proxies You Can Vote For</CardTitle>
+              <CardTitle>{t("receivedTitle")}</CardTitle>
             </CardHeader>
             <CardContent>
               {receivedProxies.filter((p) => p.status === "active").length === 0 ? (
                 <div className="text-center py-8 text-muted-foreground">
                   <Users className="w-12 h-12 mx-auto mb-4" />
-                  <p>No active proxy assignments</p>
+                  <p>{t("noReceivedMessage")}</p>
                   <p className="text-sm mt-1">
-                    Members can assign you as their proxy
+                    {t("noReceivedHint")}
                   </p>
                 </div>
               ) : (
@@ -438,7 +440,7 @@ export function ProxyVoting({
                           <div>
                             <p className="font-medium">{proxy.fromMember.name}</p>
                             <p className="text-xs text-muted-foreground">
-                              {proxy.sessionTitle || "All sessions"}
+                              {proxy.sessionTitle || t("sessionAllShort")}
                             </p>
                             {proxy.endDate && (
                               <p className="text-xs text-muted-foreground flex items-center gap-1 mt-1">
@@ -448,7 +450,7 @@ export function ProxyVoting({
                             )}
                           </div>
                         </div>
-                        <Badge>Active</Badge>
+                        <Badge>{t("badgeActive")}</Badge>
                       </div>
                     ))}
                 </div>
@@ -463,7 +465,7 @@ export function ProxyVoting({
             <CardHeader>
               <CardTitle className="flex items-center gap-2">
                 <History className="w-5 h-5" />
-                Proxy History
+                {t("historyTitle")}
               </CardTitle>
             </CardHeader>
             <CardContent>
@@ -518,7 +520,7 @@ export function ProxyVoting({
                             </div>
                             <div>
                               <p className="text-sm font-medium">
-                                {isReceived ? "From" : "To"}{" "}
+                                {isReceived ? t("historyFrom") : t("historyTo")}{" "}
                                 {isReceived ? proxy.fromMember.name : proxy.toMember.name}
                               </p>
                               <p className="text-xs text-muted-foreground">
@@ -551,19 +553,19 @@ export function ProxyVoting({
       <Dialog open={showAssignDialog} onOpenChange={setShowAssignDialog}>
         <DialogContent className="max-w-2xl">
           <DialogHeader>
-            <DialogTitle>Assign Proxy Voter</DialogTitle>
+            <DialogTitle>{t("dialogAssignTitle")}</DialogTitle>
             <DialogDescription>
-              Select a member who will vote on your behalf
+              {t("dialogAssignDescription")}
             </DialogDescription>
           </DialogHeader>
 
           <div className="space-y-4">
             <div className="space-y-2">
-              <Label>Search Members</Label>
+              <Label>{t("searchMembersLabel")}</Label>
               <div className="relative">
                 <Search className="absolute left-3 top-1/2 -translate-y-1/2 w-4 h-4 text-muted-foreground" />
                 <Input
-                  placeholder="Search by name, email, or department..."
+                  placeholder={t("searchMembersPlaceholder")}
                   value={searchQuery}
                   onChange={(e) => setSearchQuery(e.target.value)}
                   className="pl-9"
@@ -606,20 +608,20 @@ export function ProxyVoting({
 
             <div className="grid grid-cols-2 gap-4">
               <div className="space-y-2">
-                <Label>Scope</Label>
+                <Label>{t("scopeLabel")}</Label>
                 <Select value={sessionScope} onValueChange={setSessionScope}>
                   <SelectTrigger>
                     <SelectValue />
                   </SelectTrigger>
                   <SelectContent>
-                    <SelectItem value="all">All Sessions</SelectItem>
-                    <SelectItem value="specific">Specific Session</SelectItem>
+                    <SelectItem value="all">{t("scopeAll")}</SelectItem>
+                    <SelectItem value="specific">{t("scopeSpecific")}</SelectItem>
                   </SelectContent>
                 </Select>
               </div>
 
               <div className="space-y-2">
-                <Label>End Date (Optional)</Label>
+                <Label>{t("endDateLabel")}</Label>
                 <Input
                   type="date"
                   value={endDate}
@@ -640,13 +642,13 @@ export function ProxyVoting({
                 setSessionScope("all");
               }}
             >
-              Cancel
+              {t("cancelButton")}
             </Button>
             <Button
               onClick={handleAssignProxy}
               disabled={!selectedMember || isSubmitting}
             >
-              {isSubmitting ? "Assigning..." : "Assign Proxy"}
+              {isSubmitting ? t("assigningButton") : t("assignButton")}
             </Button>
           </DialogFooter>
         </DialogContent>

@@ -1,6 +1,7 @@
 'use client';
 
 import { useState, useEffect } from 'react';
+import { useTranslations } from 'next-intl';
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from '@/components/ui/card';
 import { Button } from '@/components/ui/button';
 import { Badge } from '@/components/ui/badge';
@@ -39,6 +40,7 @@ interface BudgetManagerProps {
 }
 
 export default function BudgetManager({ organizationId: _organizationId }: BudgetManagerProps) {
+  const t = useTranslations('financial.budgetManager');
   const [budgets, setBudgets] = useState<Budget[]>([]);
   const [loading, setLoading] = useState(true);
   const [isCreateDialogOpen, setIsCreateDialogOpen] = useState(false);
@@ -74,8 +76,8 @@ export default function BudgetManager({ organizationId: _organizationId }: Budge
       setBudgets(data.data.budgets || []);
     } catch (_error) {
       toast({
-        title: 'Error',
-        description: 'Failed to load budgets',
+        title: t('error'),
+        description: t('loadFailed'),
         variant: 'destructive',
       });
     } finally {
@@ -97,8 +99,8 @@ export default function BudgetManager({ organizationId: _organizationId }: Budge
       }
 
       toast({
-        title: 'Success',
-        description: 'Budget created successfully',
+        title: t('success'),
+        description: t('budgetCreated'),
       });
 
       setIsCreateDialogOpen(false);
@@ -106,8 +108,8 @@ export default function BudgetManager({ organizationId: _organizationId }: Budge
       fetchBudgets();
     } catch (error) {
       toast({
-        title: 'Error',
-        description: error.message,
+        title: t('error'),
+        description: t('createFailed'),
         variant: 'destructive',
       });
     }
@@ -126,15 +128,15 @@ export default function BudgetManager({ organizationId: _organizationId }: Budge
       if (!response.ok) throw new Error('Failed to delete budget');
 
       toast({
-        title: 'Success',
-        description: 'Budget deleted successfully',
+        title: t('success'),
+        description: t('deleteBudget'),
       });
 
       fetchBudgets();
     } catch (_error) {
       toast({
-        title: 'Error',
-        description: 'Failed to delete budget',
+        title: t('error'),
+        description: t('deleteFailed'),
         variant: 'destructive',
       });
     }
@@ -151,15 +153,15 @@ export default function BudgetManager({ organizationId: _organizationId }: Budge
       if (!response.ok) throw new Error('Failed to approve budget');
 
       toast({
-        title: 'Success',
-        description: 'Budget approved successfully',
+        title: t('success'),
+        description: t('approve'),
       });
 
       fetchBudgets();
     } catch (_error) {
       toast({
-        title: 'Error',
-        description: 'Failed to approve budget',
+        title: t('error'),
+        description: t('approveFailed'),
         variant: 'destructive',
       });
     }
@@ -201,35 +203,35 @@ export default function BudgetManager({ organizationId: _organizationId }: Budge
       {/* Header */}
       <div className="flex justify-between items-center">
         <div>
-          <h2 className="text-3xl font-bold tracking-tight">Budget Management</h2>
+          <h2 className="text-3xl font-bold tracking-tight">{t('title')}</h2>
           <p className="text-muted-foreground">
-            Manage organizational budgets and track spending
+            {t('subtitle')}
           </p>
         </div>
         <Button onClick={() => setIsCreateDialogOpen(true)}>
           <Plus className="mr-2 h-4 w-4" />
-          Create Budget
+          {t('createBudget')}
         </Button>
       </div>
 
       {/* Filters */}
       <Card>
         <CardHeader>
-          <CardTitle>Filters</CardTitle>
+          <CardTitle>{t('filters')}</CardTitle>
         </CardHeader>
         <CardContent>
           <div className="flex gap-4">
             <div className="w-48">
-              <Label htmlFor="fiscalYear">Fiscal Year</Label>
+              <Label htmlFor="fiscalYear">{t('fiscalYear')}</Label>
               <Select
                 value={fiscalYearFilter}
                 onValueChange={setFiscalYearFilter}
               >
                 <SelectTrigger id="fiscalYear">
-                  <SelectValue placeholder="All Years" />
+                  <SelectValue placeholder={t('allYears')} />
                 </SelectTrigger>
                 <SelectContent>
-                  <SelectItem value="">All Years</SelectItem>
+                  <SelectItem value="">{t('allYears')}</SelectItem>
                   {Array.from({ length: 5 }, (_, i) => new Date().getFullYear() - i).map(year => (
                     <SelectItem key={year} value={year.toString()}>{year}</SelectItem>
                   ))}
@@ -243,30 +245,30 @@ export default function BudgetManager({ organizationId: _organizationId }: Budge
       {/* Budget List */}
       <Card>
         <CardHeader>
-          <CardTitle>Budgets</CardTitle>
+          <CardTitle>{t('budgets')}</CardTitle>
           <CardDescription>
-            {budgets.length} budget{budgets.length !== 1 ? 's' : ''} found
+            {t('budgetsFound', { count: budgets.length })}
           </CardDescription>
         </CardHeader>
         <CardContent>
           {loading ? (
-            <div className="text-center py-8 text-muted-foreground">Loading budgets...</div>
+            <div className="text-center py-8 text-muted-foreground">{t('loading')}</div>
           ) : budgets.length === 0 ? (
             <div className="text-center py-8 text-muted-foreground">
-              No budgets found. Create your first budget to get started.
+              {t('noBudgets')}
             </div>
           ) : (
             <Table>
               <TableHeader>
                 <TableRow>
-                  <TableHead>Budget Name</TableHead>
-                  <TableHead>Fiscal Year</TableHead>
-                  <TableHead>Period</TableHead>
-                  <TableHead>Total Budget</TableHead>
-                  <TableHead>Spent</TableHead>
-                  <TableHead>Utilization</TableHead>
-                  <TableHead>Status</TableHead>
-                  <TableHead>Actions</TableHead>
+                  <TableHead>{t('budgetName')}</TableHead>
+                  <TableHead>{t('fiscalYear')}</TableHead>
+                  <TableHead>{t('period')}</TableHead>
+                  <TableHead>{t('totalBudget')}</TableHead>
+                  <TableHead>{t('spent')}</TableHead>
+                  <TableHead>{t('utilization')}</TableHead>
+                  <TableHead>{t('status')}</TableHead>
+                  <TableHead>{t('actions')}</TableHead>
                 </TableRow>
               </TableHeader>
               <TableBody>
@@ -302,7 +304,7 @@ export default function BudgetManager({ organizationId: _organizationId }: Budge
                                 variant="default"
                                 onClick={() => handleApproveBudget(budget.id)}
                               >
-                                Approve
+                                {t('approve')}
                               </Button>
                               <Button
                                 size="sm"
@@ -328,24 +330,24 @@ export default function BudgetManager({ organizationId: _organizationId }: Budge
       <Dialog open={isCreateDialogOpen} onOpenChange={setIsCreateDialogOpen}>
         <DialogContent className="max-w-2xl">
           <DialogHeader>
-            <DialogTitle>Create New Budget</DialogTitle>
+            <DialogTitle>{t('createNewBudget')}</DialogTitle>
             <DialogDescription>
-              Create an organizational budget for fiscal planning and tracking.
+              {t('createDescription')}
             </DialogDescription>
           </DialogHeader>
           <div className="grid gap-4 py-4">
             <div className="grid gap-2">
-              <Label htmlFor="budgetName">Budget Name *</Label>
+              <Label htmlFor="budgetName">{t('budgetNameRequired')}</Label>
               <Input
                 id="budgetName"
                 value={formData.budgetName}
                 onChange={(e) => setFormData({ ...formData, budgetName: e.target.value })}
-                placeholder="e.g., 2026 Annual Operating Budget"
+                placeholder={t('budgetNamePlaceholder')}
               />
             </div>
             <div className="grid grid-cols-2 gap-4">
               <div className="grid gap-2">
-                <Label htmlFor="fiscalYear">Fiscal Year *</Label>
+                <Label htmlFor="fiscalYear">{t('fiscalYearRequired')}</Label>
                 <Input
                   id="fiscalYear"
                   type="number"
@@ -354,7 +356,7 @@ export default function BudgetManager({ organizationId: _organizationId }: Budge
                 />
               </div>
               <div className="grid gap-2">
-                <Label htmlFor="periodType">Period Type *</Label>
+                <Label htmlFor="periodType">{t('periodTypeRequired')}</Label>
                 <Select
                   value={formData.periodType}
                   onValueChange={(value) => setFormData({ ...formData, periodType: value })}
@@ -363,17 +365,17 @@ export default function BudgetManager({ organizationId: _organizationId }: Budge
                     <SelectValue />
                   </SelectTrigger>
                   <SelectContent>
-                    <SelectItem value="annual">Annual</SelectItem>
-                    <SelectItem value="quarterly">Quarterly</SelectItem>
-                    <SelectItem value="monthly">Monthly</SelectItem>
-                    <SelectItem value="project">Project</SelectItem>
+                    <SelectItem value="annual">{t('periodAnnual')}</SelectItem>
+                    <SelectItem value="quarterly">{t('periodQuarterly')}</SelectItem>
+                    <SelectItem value="monthly">{t('periodMonthly')}</SelectItem>
+                    <SelectItem value="project">{t('periodProject')}</SelectItem>
                   </SelectContent>
                 </Select>
               </div>
             </div>
             <div className="grid grid-cols-2 gap-4">
               <div className="grid gap-2">
-                <Label htmlFor="startDate">Start Date *</Label>
+                <Label htmlFor="startDate">{t('startDateRequired')}</Label>
                 <Input
                   id="startDate"
                   type="date"
@@ -382,7 +384,7 @@ export default function BudgetManager({ organizationId: _organizationId }: Budge
                 />
               </div>
               <div className="grid gap-2">
-                <Label htmlFor="endDate">End Date *</Label>
+                <Label htmlFor="endDate">{t('endDateRequired')}</Label>
                 <Input
                   id="endDate"
                   type="date"
@@ -392,32 +394,32 @@ export default function BudgetManager({ organizationId: _organizationId }: Budge
               </div>
             </div>
             <div className="grid gap-2">
-              <Label htmlFor="totalBudget">Total Budget Amount *</Label>
+              <Label htmlFor="totalBudget">{t('totalBudgetRequired')}</Label>
               <Input
                 id="totalBudget"
                 type="number"
                 step="0.01"
                 value={formData.totalBudget}
                 onChange={(e) => setFormData({ ...formData, totalBudget: e.target.value })}
-                placeholder="0.00"
+                placeholder={t('amountPlaceholder')}
               />
             </div>
             <div className="grid gap-2">
-              <Label htmlFor="notes">Notes</Label>
+              <Label htmlFor="notes">{t('notes')}</Label>
               <Textarea
                 id="notes"
                 value={formData.notes}
                 onChange={(e) => setFormData({ ...formData, notes: e.target.value })}
-                placeholder="Optional budget notes..."
+                placeholder={t('notesPlaceholder')}
                 rows={3}
               />
             </div>
           </div>
           <DialogFooter>
             <Button variant="outline" onClick={() => setIsCreateDialogOpen(false)}>
-              Cancel
+              {t('cancel')}
             </Button>
-            <Button onClick={handleCreateBudget}>Create Budget</Button>
+            <Button onClick={handleCreateBudget}>{t('createBudget')}</Button>
           </DialogFooter>
         </DialogContent>
       </Dialog>

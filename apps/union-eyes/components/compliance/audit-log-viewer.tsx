@@ -37,6 +37,7 @@ import { Label } from "@/components/ui/label";
 import { Checkbox } from "@/components/ui/checkbox";
  
 import { format } from "date-fns";
+import { useTranslations } from 'next-intl';
 
 export interface AuditLogEntry {
   id: string;
@@ -98,6 +99,7 @@ export function AuditLogViewer({
 }: AuditLogViewerProps) {
   const [searchInput, setSearchInput] = React.useState(filters.search || "");
   const [showFilters, setShowFilters] = React.useState(false);
+  const t = useTranslations('compliance.auditLog');
 
   const categoryIcons = {
     security: Shield,
@@ -110,38 +112,38 @@ export function AuditLogViewer({
   const severityConfig = {
     info: {
       color: "bg-blue-100 text-blue-800",
-      label: "Info",
+      label: t('severityInfo'),
     },
     warning: {
       color: "bg-yellow-100 text-yellow-800",
-      label: "Warning",
+      label: t('severityWarning'),
     },
     critical: {
       color: "bg-red-100 text-red-800",
-      label: "Critical",
+      label: t('severityCritical'),
     },
   };
 
   const categoryConfig = {
     security: {
       color: "bg-purple-100 text-purple-800",
-      label: "Security",
+      label: t('categorySecurity'),
     },
     data: {
       color: "bg-blue-100 text-blue-800",
-      label: "Data",
+      label: t('categoryData'),
     },
     access: {
       color: "bg-green-100 text-green-800",
-      label: "Access",
+      label: t('categoryAccess'),
     },
     configuration: {
       color: "bg-orange-100 text-orange-800",
-      label: "Configuration",
+      label: t('categoryConfiguration'),
     },
     system: {
       color: "bg-gray-100 text-gray-800",
-      label: "System",
+      label: t('categorySystem'),
     },
   };
 
@@ -188,7 +190,7 @@ export function AuditLogViewer({
         <div>
           <h2 className="text-2xl font-bold flex items-center gap-2">
             <Shield className="h-6 w-6" />
-            Audit Log
+            {t('title')}
           </h2>
           <p className="text-gray-600 mt-1">
             System activity and security events
@@ -197,7 +199,7 @@ export function AuditLogViewer({
         {onExport && (
           <Button variant="outline" onClick={onExport}>
             <Download className="h-4 w-4 mr-2" />
-            Export
+            {t('export')}
           </Button>
         )}
       </div>
@@ -208,7 +210,7 @@ export function AuditLogViewer({
           <div className="flex gap-2">
             <div className="flex-1 flex gap-2">
               <Input
-                placeholder="Search logs..."
+                placeholder={t('searchPlaceholder')}
                 value={searchInput}
                 onChange={(e) => setSearchInput(e.target.value)}
                 onKeyDown={(e) => e.key === "Enter" && handleSearch()}
@@ -224,7 +226,7 @@ export function AuditLogViewer({
               <PopoverTrigger asChild>
                 <Button variant="outline">
                   <Filter className="h-4 w-4 mr-2" />
-                  Filters
+                  {t('filters')}
                   {activeFilterCount > 0 && (
                     <Badge variant="secondary" className="ml-2">
                       {activeFilterCount}
@@ -235,7 +237,7 @@ export function AuditLogViewer({
               <PopoverContent className="w-80" align="end">
                 <div className="space-y-4">
                   <div>
-                    <Label className="text-sm font-medium mb-2 block">Category</Label>
+                    <Label className="text-sm font-medium mb-2 block">{t('category')}</Label>
                     <div className="space-y-2">
                       {Object.entries(categoryConfig).map(([key, config]) => (
                         <div key={key} className="flex items-center space-x-2">
@@ -250,7 +252,7 @@ export function AuditLogViewer({
                   </div>
 
                   <div>
-                    <Label className="text-sm font-medium mb-2 block">Severity</Label>
+                    <Label className="text-sm font-medium mb-2 block">{t('severity')}</Label>
                     <div className="space-y-2">
                       {Object.entries(severityConfig).map(([key, config]) => (
                         <div key={key} className="flex items-center space-x-2">
@@ -265,7 +267,7 @@ export function AuditLogViewer({
                   </div>
 
                   <div>
-                    <Label className="text-sm font-medium mb-2 block">Success Status</Label>
+                    <Label className="text-sm font-medium mb-2 block">{t('successStatus')}</Label>
                     <div className="flex items-center space-x-2">
                       <Checkbox
                         checked={filters.successOnly}
@@ -273,16 +275,16 @@ export function AuditLogViewer({
                           onFiltersChange?.({ ...filters, successOnly: !!checked })
                         }
                       />
-                      <Label className="text-sm">Show only successful actions</Label>
+                      <Label className="text-sm">{t('showOnlySuccessful')}</Label>
                     </div>
                   </div>
 
                   <div className="flex gap-2 pt-2">
                     <Button size="sm" variant="outline" onClick={clearFilters} className="flex-1">
-                      Clear
+                      {t('clear')}
                     </Button>
                     <Button size="sm" onClick={() => setShowFilters(false)} className="flex-1">
-                      Apply
+                      {t('apply')}
                     </Button>
                   </div>
                 </div>
@@ -297,16 +299,16 @@ export function AuditLogViewer({
         <CardContent className="p-0">
           {logs.length === 0 ? (
             <div className="text-center py-12 text-gray-600">
-              No audit logs found
+              {t('noLogsFound')}
             </div>
           ) : (
             <div className="divide-y">
               {logs.map((log) => {
                 const CategoryIcon = categoryIcons[log.category];
                 const severityConfig = {
-                  info: { color: "bg-blue-100 text-blue-800", label: "Info" },
-                  warning: { color: "bg-yellow-100 text-yellow-800", label: "Warning" },
-                  critical: { color: "bg-red-100 text-red-800", label: "Critical" },
+                  info: { color: "bg-blue-100 text-blue-800", label: t('severityInfo') },
+                  warning: { color: "bg-yellow-100 text-yellow-800", label: t('severityWarning') },
+                  critical: { color: "bg-red-100 text-red-800", label: t('severityCritical') },
                 }[log.severity];
 
                 return (
@@ -326,7 +328,7 @@ export function AuditLogViewer({
                             {severityConfig.label}
                           </Badge>
                           {!log.success && (
-                            <Badge variant="destructive">Failed</Badge>
+                            <Badge variant="destructive">{t('failed')}</Badge>
                           )}
                         </div>
 
@@ -341,13 +343,13 @@ export function AuditLogViewer({
                           </div>
                           <div className="flex items-center gap-3 text-xs text-gray-500">
                             <span>{format(log.timestamp, "MMM d, yyyy 'at' h:mm:ss a")}</span>
-                            <span>IP: {log.ipAddress}</span>
+                            <span>{t('ipAddress')}: {log.ipAddress}</span>
                           </div>
                         </div>
 
                         {log.changes && log.changes.length > 0 && (
                           <div className="mt-2 p-2 bg-gray-50 rounded text-xs">
-                            <div className="font-medium mb-1">Changes:</div>
+                            <div className="font-medium mb-1">{t('changes')}:</div>
                             {log.changes.map((change, idx) => (
                               <div key={idx} className="text-gray-600">
                                 <span className="font-medium">{change.field}:</span>{" "}

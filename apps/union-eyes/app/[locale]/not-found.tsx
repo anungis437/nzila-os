@@ -3,8 +3,11 @@
 import Link from 'next/link';
 import { Button } from '@/components/ui/button';
 import { FileQuestion } from 'lucide-react';
+import { useLocale } from 'next-intl';
 
 export default function NotFound() {
+  const locale = useLocale();
+
   return (
     <div className="flex min-h-screen items-center justify-center bg-background p-4">
       <div className="w-full max-w-md space-y-6 text-center">
@@ -23,10 +26,10 @@ export default function NotFound() {
 
         <div className="flex flex-col gap-3 sm:flex-row sm:justify-center">
           <Button asChild variant="default">
-            <Link href="/">Go to Home</Link>
+            <Link href={`/${locale}`}>Go to Home</Link>
           </Button>
           <Button asChild variant="outline">
-            <Link href="/dashboard">Go to Dashboard</Link>
+            <Link href={`/${locale}/dashboard`}>Go to Dashboard</Link>
           </Button>
         </div>
       </div>

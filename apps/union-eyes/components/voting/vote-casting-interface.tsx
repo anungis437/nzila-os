@@ -39,6 +39,7 @@ import {
 import { useToast } from "@/components/ui/use-toast";
  
 import { cn } from "@/lib/utils";
+import { useTranslations } from "next-intl";
 
 export interface BallotQuestion {
   id: string;
@@ -79,6 +80,7 @@ export function VoteCastingInterface({
   onCancel: _onCancel,
 }: VoteCastingInterfaceProps) {
   const { toast } = useToast();
+  const t = useTranslations("voting.casting");
   const [votes, setVotes] = React.useState<Record<string, string[]>>({});
   const [writeIns, setWriteIns] = React.useState<Record<string, string>>({});
   const [currentQuestionIndex, setCurrentQuestionIndex] = React.useState(0);
@@ -106,8 +108,8 @@ export function VoteCastingInterface({
     
     if (questionVotes.length < question.minSelections) {
       toast({
-        title: "Selection required",
-        description: `Please make at least ${question.minSelections} selection(s)`,
+        title: t("validationSelectionRequired"),
+        description: t("validationMinSelections", { count: question.minSelections }),
         variant: "destructive",
       });
       return false;
@@ -115,8 +117,8 @@ export function VoteCastingInterface({
 
     if (questionVotes.length > question.maxSelections) {
       toast({
-        title: "Too many selections",
-        description: `Please select no more than ${question.maxSelections} option(s)`,
+        title: t("validationTooMany"),
+        description: t("validationMaxSelections", { count: question.maxSelections }),
         variant: "destructive",
       });
       return false;
@@ -155,13 +157,13 @@ export function VoteCastingInterface({
       await onSubmit(finalVotes);
       
       toast({
-        title: "Vote submitted successfully",
-        description: "Thank you for participating in this election",
+        title: t("toastSuccess"),
+        description: t("toastSuccessDesc"),
       });
     } catch (error) {
       toast({
-        title: "Submission failed",
-        description: error instanceof Error ? error.message : "An error occurred",
+        title: t("toastError"),
+        description: error instanceof Error ? error.message : t("toastErrorDefault"),
         variant: "destructive",
       });
     } finally {
@@ -186,10 +188,10 @@ export function VoteCastingInterface({
               )}
               <div className="flex gap-2 mt-2">
                 {ballot.isAnonymous && (
-                  <Badge variant="secondary">Anonymous</Badge>
+                  <Badge variant="secondary">{t("badgeAnonymous")}</Badge>
                 )}
                 {ballot.requiresVerification && (
-                  <Badge variant="secondary">Verified</Badge>
+                  <Badge variant="secondary">{t("badgeVerified")}</Badge>
                 )}
               </div>
             </div>
@@ -200,7 +202,7 @@ export function VoteCastingInterface({
       {/* Progress */}
       <div className="flex items-center justify-between text-sm">
         <span className="font-medium">
-          Question {currentQuestionIndex + 1} of {ballot.questions.length}
+          {t("progressQuestion", { current: currentQuestionIndex + 1, total: ballot.questions.length })}
         </span>
         <div className="flex gap-1">
           {ballot.questions.map((_, index) => (
@@ -260,10 +262,9 @@ export function VoteCastingInterface({
 
           <div className="text-sm text-gray-600 bg-gray-50 p-3 rounded-lg">
             <p>
-              Select {currentQuestion.minSelections === currentQuestion.maxSelections
-                ? `exactly ${currentQuestion.minSelections}`
-                : `${currentQuestion.minSelections} to ${currentQuestion.maxSelections}`}{" "}
-              option(s)
+              {t("instructionSelect", { count: currentQuestion.minSelections === currentQuestion.maxSelections
+                ? currentQuestion.minSelections
+                : `${currentQuestion.minSelections}-${currentQuestion.maxSelections}` })}
             </p>
           </div>
         </CardContent>
@@ -276,16 +277,16 @@ export function VoteCastingInterface({
           onClick={handlePrevious}
           disabled={currentQuestionIndex === 0}
         >
-          Previous
+          {t("buttonPrevious")}
         </Button>
         <Button onClick={handleNext}>
           {currentQuestionIndex === ballot.questions.length - 1 ? (
             <>
               <Eye className="h-4 w-4 mr-2" />
-              Review Ballot
+              {t("buttonReview")}
             </>
           ) : (
-            "Next Question"
+            t("buttonNext")
           )}
         </Button>
       </div>
@@ -312,6 +313,7 @@ function CandidateQuestion({
   onWriteInChange,
 // eslint-disable-next-line @typescript-eslint/no-explicit-any
 }: any) {
+  const t = useTranslations("voting.casting");
   const multiSelect = question.maxSelections > 1;
 
   return (
@@ -361,11 +363,11 @@ function CandidateQuestion({
 
       {question.allowWriteIn && (
         <div className="border rounded-lg p-4">
-          <Label className="mb-2 block">Write-in Candidate</Label>
+          <Label className="mb-2 block">{t("writeInLabel")}</Label>
           <Input
             value={writeInValue}
             onChange={(e) => onWriteInChange(e.target.value)}
-            placeholder="Enter candidate name..."
+            placeholder={t("writeInPlaceholder")}
           />
         </div>
       )}
@@ -375,6 +377,7 @@ function CandidateQuestion({
 
 // eslint-disable-next-line @typescript-eslint/no-explicit-any
 function YesNoQuestion({ _question, selectedVote, onVoteChange }: any) {
+  const t = useTranslations("voting.casting");
   return (
     <RadioGroup value={selectedVote} onValueChange={onVoteChange}>
       <div className="space-y-3">
@@ -390,7 +393,7 @@ function YesNoQuestion({ _question, selectedVote, onVoteChange }: any) {
             <div className="flex items-center gap-3">
               <RadioGroupItem value={option} />
               <Label className="cursor-pointer capitalize font-medium">
-                {option}
+                {t(`option_${option}`)}
               </Label>
             </div>
           </div>
@@ -450,13 +453,14 @@ function ReviewDialog({
   isSubmitting,
 // eslint-disable-next-line @typescript-eslint/no-explicit-any
 }: any) {
+  const t = useTranslations("voting.casting");
   return (
     <Dialog open={isOpen} onOpenChange={onClose}>
       <DialogContent className="max-w-2xl max-h-[80vh] overflow-y-auto">
         <DialogHeader>
-          <DialogTitle>Review Your Ballot</DialogTitle>
+          <DialogTitle>{t("reviewTitle")}</DialogTitle>
           <DialogDescription>
-            Please review your selections before submitting. Once submitted, your vote cannot be changed.
+            {t("reviewDescription")}
           </DialogDescription>
         </DialogHeader>
 
@@ -465,7 +469,7 @@ function ReviewDialog({
             <Card key={question.id}>
               <CardHeader className="pb-3">
                 <CardTitle className="text-base">
-                  Question {index + 1}: {question.title}
+                  {t("reviewQuestion", { number: index + 1 })}: {question.title}
                 </CardTitle>
               </CardHeader>
               <CardContent>
@@ -475,7 +479,7 @@ function ReviewDialog({
                       return (
                         <div key={voteId} className="flex items-center gap-2">
                           <CheckCircle2 className="h-4 w-4 text-green-600" />
-                          <span className="font-medium">Write-in: {voteId.replace("write-in:", "")}</span>
+                          <span className="font-medium">{t("reviewWriteInPrefix")}: {voteId.replace("write-in:", "")}</span>
                         </div>
                       );
                     }
@@ -489,7 +493,7 @@ function ReviewDialog({
                   }) || (
                     <div className="flex items-center gap-2 text-gray-600">
                       <AlertTriangle className="h-4 w-4" />
-                      <span>No selection made</span>
+                      <span>{t("reviewNoSelection")}</span>
                     </div>
                   )}
                 </div>
@@ -500,10 +504,10 @@ function ReviewDialog({
 
         <DialogFooter>
           <Button variant="outline" onClick={onClose} disabled={isSubmitting}>
-            Go Back
+            {t("buttonGoBack")}
           </Button>
           <Button onClick={onSubmit} disabled={isSubmitting}>
-            {isSubmitting ? "Submitting..." : "Submit Ballot"}
+            {isSubmitting ? t("submitting") : t("buttonSubmit")}
           </Button>
         </DialogFooter>
       </DialogContent>

@@ -49,6 +49,7 @@ import { Checkbox } from "@/components/ui/checkbox";
 import { Label } from "@/components/ui/label";
 import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
 import { format } from "date-fns";
+import { useTranslations } from 'next-intl';
 
 const reportConfigSchema = z.object({
   name: z.string().min(1, "Report name is required"),
@@ -108,6 +109,7 @@ export function ComplianceReportGenerator({
 }: ComplianceReportGeneratorProps) {
   const [isGenerating, setIsGenerating] = React.useState(false);
   const [_selectedTemplate, setSelectedTemplate] = React.useState<ReportTemplate | null>(null);
+  const t = useTranslations('compliance.reportGenerator');
 
   const form = useForm<ReportConfig>({
     resolver: zodResolver(reportConfigSchema),
@@ -140,27 +142,27 @@ export function ComplianceReportGenerator({
 
   const reportTypeConfig = {
     gdpr: {
-      label: "GDPR Compliance",
+      label: t('templateGdpr'),
       description: "Data protection and privacy compliance report",
       framework: "GDPR",
     },
     "data-retention": {
-      label: "Data Retention",
+      label: t('templateDataRetention'),
       description: "Current data retention status and policy adherence",
       framework: "Internal",
     },
     security: {
-      label: "Security Audit",
+      label: t('templateSecurityAudit'),
       description: "Security events, access logs, and incidents",
       framework: "ISO 27001",
     },
     access: {
-      label: "Access Control",
+      label: t('templateAccessControl'),
       description: "User access patterns and permissions audit",
       framework: "Internal",
     },
     custom: {
-      label: "Custom Report",
+      label: t('templateCustom'),
       description: "Build a custom compliance report",
       framework: "Custom",
     },
@@ -172,21 +174,21 @@ export function ComplianceReportGenerator({
       <div>
         <h2 className="text-2xl font-bold flex items-center gap-2">
           <FileText className="h-6 w-6" />
-          Compliance Report Generator
+          {t('title')}
         </h2>
         <p className="text-gray-600 mt-1">
-          Generate and schedule compliance reports
+          {t('subtitle')}
         </p>
       </div>
 
       <Tabs defaultValue="generate" className="w-full">
         <TabsList>
-          <TabsTrigger value="generate">Generate Report</TabsTrigger>
+          <TabsTrigger value="generate">{t('generateReport')}</TabsTrigger>
           <TabsTrigger value="templates">
-            Templates ({templates.length})
+            {t('templates')} ({templates.length})
           </TabsTrigger>
           <TabsTrigger value="history">
-            History ({generatedReports.length})
+            {t('history')} ({generatedReports.length})
           </TabsTrigger>
         </TabsList>
 
@@ -194,7 +196,7 @@ export function ComplianceReportGenerator({
         <TabsContent value="generate">
           <Card>
             <CardHeader>
-              <CardTitle>New Report</CardTitle>
+              <CardTitle>{t('newReport')}</CardTitle>
             </CardHeader>
             <CardContent>
               <Form {...form}>
@@ -204,9 +206,9 @@ export function ComplianceReportGenerator({
                     name="name"
                     render={({ field }) => (
                       <FormItem>
-                        <FormLabel>Report Name</FormLabel>
+                        <FormLabel>{t('reportName')}</FormLabel>
                         <FormControl>
-                          <Input {...field} placeholder="e.g., Q1 2024 GDPR Compliance Report" />
+                          <Input {...field} placeholder={t('reportNamePlaceholder')} />
                         </FormControl>
                         <FormMessage />
                       </FormItem>
@@ -219,7 +221,7 @@ export function ComplianceReportGenerator({
                       name="reportType"
                       render={({ field }) => (
                         <FormItem>
-                          <FormLabel>Report Type</FormLabel>
+                          <FormLabel>{t('reportType')}</FormLabel>
                           <Select onValueChange={field.onChange} defaultValue={field.value}>
                             <FormControl>
                               <SelectTrigger>
@@ -247,7 +249,7 @@ export function ComplianceReportGenerator({
                       name="format"
                       render={({ field }) => (
                         <FormItem>
-                          <FormLabel>Export Format</FormLabel>
+                          <FormLabel>{t('exportFormat')}</FormLabel>
                           <Select onValueChange={field.onChange} defaultValue={field.value}>
                             <FormControl>
                               <SelectTrigger>
@@ -255,10 +257,10 @@ export function ComplianceReportGenerator({
                               </SelectTrigger>
                             </FormControl>
                             <SelectContent>
-                              <SelectItem value="pdf">PDF</SelectItem>
-                              <SelectItem value="csv">CSV</SelectItem>
-                              <SelectItem value="json">JSON</SelectItem>
-                              <SelectItem value="xlsx">Excel</SelectItem>
+                              <SelectItem value="pdf">{t('formatPdf')}</SelectItem>
+                              <SelectItem value="csv">{t('formatCsv')}</SelectItem>
+                              <SelectItem value="json">{t('formatJson')}</SelectItem>
+                              <SelectItem value="xlsx">{t('formatExcel')}</SelectItem>
                             </SelectContent>
                           </Select>
                           <FormMessage />
@@ -272,7 +274,7 @@ export function ComplianceReportGenerator({
                     name="schedule"
                     render={({ field }) => (
                       <FormItem>
-                        <FormLabel>Schedule</FormLabel>
+                        <FormLabel>{t('schedule')}</FormLabel>
                         <Select onValueChange={field.onChange} defaultValue={field.value}>
                           <FormControl>
                             <SelectTrigger>
@@ -280,16 +282,16 @@ export function ComplianceReportGenerator({
                             </SelectTrigger>
                           </FormControl>
                           <SelectContent>
-                            <SelectItem value="once">Generate Once</SelectItem>
-                            <SelectItem value="daily">Daily</SelectItem>
-                            <SelectItem value="weekly">Weekly</SelectItem>
-                            <SelectItem value="monthly">Monthly</SelectItem>
-                            <SelectItem value="quarterly">Quarterly</SelectItem>
-                            <SelectItem value="annual">Annual</SelectItem>
+                            <SelectItem value="once">{t('generateOnce')}</SelectItem>
+                            <SelectItem value="daily">{t('daily')}</SelectItem>
+                            <SelectItem value="weekly">{t('weekly')}</SelectItem>
+                            <SelectItem value="monthly">{t('monthly')}</SelectItem>
+                            <SelectItem value="quarterly">{t('quarterly')}</SelectItem>
+                            <SelectItem value="annual">{t('annual')}</SelectItem>
                           </SelectContent>
                         </Select>
                         <FormDescription>
-                          How often this report should be generated
+                          {t('scheduleDescription')}
                         </FormDescription>
                         <FormMessage />
                       </FormItem>
@@ -298,14 +300,14 @@ export function ComplianceReportGenerator({
 
                   <div className="space-y-4">
                     <div className="flex items-center justify-between">
-                      <Label>Recipients</Label>
+                      <Label>{t('recipients')}</Label>
                       <Button
                         type="button"
                         variant="outline"
                         size="sm"
                         onClick={() => append({ email: "", name: "" })}
                       >
-                        Add Recipient
+                        {t('addRecipient')}
                       </Button>
                     </div>
 
@@ -317,7 +319,7 @@ export function ComplianceReportGenerator({
                           render={({ field }) => (
                             <FormItem>
                               <FormControl>
-                                <Input {...field} placeholder="Name" />
+                                <Input {...field} placeholder={t('name')} />
                               </FormControl>
                               <FormMessage />
                             </FormItem>
@@ -330,7 +332,7 @@ export function ComplianceReportGenerator({
                             render={({ field }) => (
                               <FormItem className="flex-1">
                                 <FormControl>
-                                  <Input {...field} type="email" placeholder="Email" />
+                                  <Input {...field} type="email" placeholder={t('email')} />
                                 </FormControl>
                                 <FormMessage />
                               </FormItem>
@@ -343,7 +345,7 @@ export function ComplianceReportGenerator({
                               size="sm"
                               onClick={() => remove(index)}
                             >
-                              Remove
+                              {t('remove')}
                             </Button>
                           )}
                         </div>
@@ -352,7 +354,7 @@ export function ComplianceReportGenerator({
                   </div>
 
                   <div className="space-y-3">
-                    <Label>Report Options</Label>
+                    <Label>{t('reportOptions')}</Label>
                     <FormField
                       control={form.control}
                       name="includeSummary"
@@ -361,7 +363,7 @@ export function ComplianceReportGenerator({
                           <FormControl>
                             <Checkbox checked={field.value} onCheckedChange={field.onChange} />
                           </FormControl>
-                          <FormLabel className="!mt-0">Include Executive Summary</FormLabel>
+                          <FormLabel className="!mt-0">{t('includeExecutiveSummary')}</FormLabel>
                         </FormItem>
                       )}
                     />
@@ -373,7 +375,7 @@ export function ComplianceReportGenerator({
                           <FormControl>
                             <Checkbox checked={field.value} onCheckedChange={field.onChange} />
                           </FormControl>
-                          <FormLabel className="!mt-0">Include Charts and Visualizations</FormLabel>
+                          <FormLabel className="!mt-0">{t('includeCharts')}</FormLabel>
                         </FormItem>
                       )}
                     />
@@ -385,14 +387,14 @@ export function ComplianceReportGenerator({
                           <FormControl>
                             <Checkbox checked={field.value} onCheckedChange={field.onChange} />
                           </FormControl>
-                          <FormLabel className="!mt-0">Include Raw Data Appendix</FormLabel>
+                          <FormLabel className="!mt-0">{t('includeRawData')}</FormLabel>
                         </FormItem>
                       )}
                     />
                   </div>
 
                   <Button type="submit" disabled={isGenerating}>
-                    {isGenerating ? "Generating..." : "Generate Report"}
+                    {isGenerating ? t('generating') : t('generateReport')}
                   </Button>
                 </form>
               </Form>
@@ -432,7 +434,7 @@ export function ComplianceReportGenerator({
                         form.setValue("reportType", template.type);
                       }}
                     >
-                      Use Template
+                      {t('useTemplate')}
                     </Button>
                   </div>
                 </CardContent>
@@ -447,7 +449,7 @@ export function ComplianceReportGenerator({
             <CardContent className="p-0">
               {generatedReports.length === 0 ? (
                 <div className="text-center py-12 text-gray-600">
-                  No reports generated yet
+                  {t('noReportsYet')}
                 </div>
               ) : (
                 <div className="divide-y">
@@ -475,15 +477,14 @@ export function ComplianceReportGenerator({
                           </div>
 
                           <div className="text-sm text-gray-600">
-                            Generated by {report.generatedBy.name} on{" "}
-                            {format(report.generatedAt, "MMM d, yyyy 'at' h:mm a")}
+                            {t('generatedBy', { name: report.generatedBy.name, date: format(report.generatedAt, "MMM d, yyyy 'at' h:mm a") })}
                             {report.size && ` • ${report.size}`}
                           </div>
 
                           {report.recipients && report.recipients.length > 0 && (
                             <div className="text-xs text-gray-500 mt-1">
                               <Send className="h-3 w-3 inline mr-1" />
-                              Sent to: {report.recipients.join(", ")}
+                              {t('sentTo')}: {report.recipients.join(", ")}
                             </div>
                           )}
                         </div>
@@ -496,7 +497,7 @@ export function ComplianceReportGenerator({
                               onClick={() => onDownloadReport(report.id)}
                             >
                               <Download className="h-4 w-4 mr-2" />
-                              Download
+                              {t('download')}
                             </Button>
                           )}
                           {onDeleteReport && (

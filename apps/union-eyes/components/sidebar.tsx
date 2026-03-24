@@ -483,7 +483,7 @@ export default function Sidebar({ profile: _profile, userEmail, whopMonthlyPlanI
       <div className="mt-auto pt-4 relative z-10">
         <div className="h-px bg-linear-to-r from-transparent via-gray-200 to-transparent mb-3" />
 
-        <Link href="/dashboard/profile">
+        <Link href={`/${locale}/dashboard/profile`}>
           <motion.div
             className="flex items-center px-3 py-3 hover:bg-gray-100 rounded-lg mx-2 cursor-pointer transition-colors"
             whileHover={{ scale: 1.02, transition: { duration: 0.2 } }}

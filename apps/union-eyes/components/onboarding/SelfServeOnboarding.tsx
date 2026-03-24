@@ -8,6 +8,7 @@
 import Link from 'next/link';
 
 import { useState } from 'react';
+import { useLocale } from 'next-intl';
 import { useRouter } from 'next/navigation';
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from '@/components/ui/card';
 import { Button } from '@/components/ui/button';
@@ -54,6 +55,7 @@ const steps: OnboardingStep[] = [
 
 export function SelfServeOnboarding() {
   const router = useRouter();
+  const locale = useLocale();
   const [currentStep, setCurrentStep] = useState(0);
   const [formData, setFormData] = useState({
     // Organization info
@@ -99,7 +101,7 @@ export function SelfServeOnboarding() {
       });
 
       if (response.ok) {
-        router.push('/dashboard');
+        router.push(`/${locale}/dashboard`);
       }
     } catch (_error) {
 }

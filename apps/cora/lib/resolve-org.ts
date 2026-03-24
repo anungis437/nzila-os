@@ -7,9 +7,15 @@
  *
  * @module resolve-org
  */
-import { auth } from '@clerk/nextjs/server'
+import { auth, currentUser } from '@clerk/nextjs/server'
 import type { AgriOrgContext } from '@nzila/agri-core'
 import type { AgriOrgRole } from '@nzila/agri-core'
+
+/** Emails that always receive admin role, regardless of Clerk metadata. */
+const SUPER_ADMIN_EMAILS = new Set([
+  'info@nzilaventures.com',
+  ...(process.env.SUPER_ADMIN_EMAILS ?? '').split(',').map(s => s.trim()).filter(Boolean),
+])
 
 /**
  * Resolve org context from Clerk auth (read-only).
@@ -28,7 +34,17 @@ export async function resolveOrgContext(): Promise<AgriOrgContext> {
     throw new Error('No active organization — select an org before accessing Cora Insights.')
   }
 
-  const role = mapClerkRoleToAgriRole(orgRole, sessionClaims)
+  let role = mapClerkRoleToAgriRole(orgRole, sessionClaims)
+
+  // Super-admin email override
+  if (role !== 'admin') {
+    const user = await currentUser()
+    const email = user?.primaryEmailAddress?.emailAddress
+                ?? user?.emailAddresses?.[0]?.emailAddress
+    if (email && SUPER_ADMIN_EMAILS.has(email.toLowerCase())) {
+      role = 'admin' as AgriOrgRole
+    }
+  }
 
   return {
     orgId,

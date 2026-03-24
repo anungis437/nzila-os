@@ -94,10 +94,13 @@ async function getAffiliateData(federationId: string) {
 }
 
 export default async function FederationAffiliatesPage({
+  params: paramsPromise,
   searchParams: _searchParams,
 }: {
+  params: Promise<{ locale: string }>;
   searchParams: { [key: string]: string | string[] | undefined };
 }) {
+  const { locale } = await paramsPromise;
   const user = await requireUser();
   const userId = user.userId;
   const orgId = user.organizationId!;
@@ -117,7 +120,7 @@ export default async function FederationAffiliatesPage({
         <div>
           <div className="flex items-center gap-2 mb-2">
             <Link 
-              href="/dashboard/federation" 
+              href={`/${locale}/dashboard/federation`}
               className="text-sm text-muted-foreground hover:text-foreground"
             >
               {t('breadcrumb.federation', { defaultValue: 'Federation' })}

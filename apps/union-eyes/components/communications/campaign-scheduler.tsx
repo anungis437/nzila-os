@@ -15,6 +15,7 @@
 'use client';
 
 import { useState } from 'react';
+import { useTranslations } from 'next-intl';
 import {
   Calendar as CalendarIcon,
   Clock,
@@ -76,6 +77,7 @@ export function CampaignScheduler({
   onSendTest,
 }: CampaignSchedulerProps) {
   const { toast } = useToast();
+  const t = useTranslations('communications.campaignScheduler');
 
   const [sendType, setSendType] = useState<'now' | 'scheduled'>('now');
   const [selectedDate, setSelectedDate] = useState<Date>();
@@ -148,8 +150,8 @@ export function CampaignScheduler({
       }
 
       toast({
-        title: 'Test Sent',
-        description: `Test emails sent to ${emails.length} recipient(s)`,
+        title: t('testSent'),
+        description: t('recipientCount', { count: emails.length }),
       });
 
       if (onSendTest) {
@@ -161,7 +163,7 @@ export function CampaignScheduler({
     } catch (_error) {
 toast({
         title: 'Error',
-        description: 'Failed to send test emails',
+        description: t('testFailed'),
         variant: 'destructive',
       });
     }
@@ -199,11 +201,11 @@ toast({
       }
 
       toast({
-        title: 'Success',
+        title: sendType === 'now' ? t('campaignSent') : t('campaignScheduled'),
         description:
           sendType === 'now'
-            ? 'Campaign is being sent now'
-            : 'Campaign scheduled successfully',
+            ? t('campaignSent')
+            : t('campaignScheduled'),
       });
 
       if (onSchedule) {
@@ -214,7 +216,7 @@ toast({
     } catch (_error) {
 toast({
         title: 'Error',
-        description: 'Failed to schedule campaign',
+        description: t('scheduleFailed'),
         variant: 'destructive',
       });
     } finally {
@@ -246,10 +248,9 @@ toast({
   return (
     <Card>
       <CardHeader>
-        <CardTitle>Schedule Campaign</CardTitle>
+        <CardTitle>{t('title')}</CardTitle>
         <CardDescription>
-          {/* eslint-disable-next-line react/no-unescaped-entities */}
-          Choose when to send "{campaignName}" to {recipientCount} recipient(s)
+          {t('recipientCount', { count: recipientCount })}
         </CardDescription>
       </CardHeader>
 
@@ -267,9 +268,9 @@ toast({
               >
                 <Send className="w-4 h-4" />
                 <div>
-                  <div className="font-semibold">Send Now</div>
+                  <div className="font-semibold">{t('sendNow')}</div>
                   <div className="text-sm text-gray-600">
-                    Campaign will be sent immediately
+                    {t('immediate')}
                   </div>
                 </div>
               </Label>
@@ -283,7 +284,7 @@ toast({
               >
                 <Clock className="w-4 h-4" />
                 <div>
-                  <div className="font-semibold">Schedule for Later</div>
+                  <div className="font-semibold">{t('scheduleForLater')}</div>
                   <div className="text-sm text-gray-600">
                     Choose a specific date and time
                   </div>
@@ -298,7 +299,7 @@ toast({
           <div className="space-y-4 p-4 border rounded-lg bg-gray-50">
             {/* Date Selection */}
             <div className="space-y-2">
-              <Label>Date</Label>
+              <Label>{t('scheduledDate')}</Label>
               <Popover>
                 <PopoverTrigger asChild>
                   <Button
@@ -312,7 +313,7 @@ toast({
                     {selectedDate ? (
                       format(selectedDate, 'PPP')
                     ) : (
-                      <span>Pick a date</span>
+                      <span>{t('scheduledDate')}</span>
                     )}
                   </Button>
                 </PopoverTrigger>
@@ -332,7 +333,7 @@ toast({
 
             {/* Time Selection */}
             <div className="space-y-2">
-              <Label>Time</Label>
+              <Label>{t('scheduledTime')}</Label>
               <Input
                 type="time"
                 value={selectedTime}
@@ -344,7 +345,7 @@ toast({
             <div className="space-y-2">
               <Label>
                 <Globe className="w-4 h-4 inline mr-2" />
-                Timezone
+                {t('timezone')}
               </Label>
               <Select value={timezone} onValueChange={setTimezone}>
                 <SelectTrigger>
@@ -366,7 +367,7 @@ toast({
                 <CheckCircle2 className="w-5 h-5 text-blue-600 mt-0.5" />
                 <div>
                   <p className="text-sm font-semibold text-blue-900">
-                    Campaign will be sent on:
+                    {t('estimatedDelivery')}
                   </p>
                   <p className="text-sm text-blue-700">{formatScheduledTime()}</p>
                   <p className="text-xs text-blue-600 mt-1">{timezone}</p>
@@ -398,7 +399,7 @@ toast({
             onClick={() => setTestDialogOpen(true)}
           >
             <Mail className="w-4 h-4 mr-2" />
-            Send Test
+            {t('sendTest')}
           </Button>
 
           <Button
@@ -407,7 +408,7 @@ toast({
             disabled={!isValidSchedule()}
           >
             <Send className="w-4 h-4 mr-2" />
-            {sendType === 'now' ? 'Send Now' : 'Schedule Campaign'}
+            {sendType === 'now' ? t('sendNow') : t('schedule')}
           </Button>
         </div>
 
@@ -430,7 +431,7 @@ toast({
       <Dialog open={testDialogOpen} onOpenChange={setTestDialogOpen}>
         <DialogContent>
           <DialogHeader>
-            <DialogTitle>Send Test Email</DialogTitle>
+            <DialogTitle>{t('sendTestEmail')}</DialogTitle>
             <DialogDescription>
               Enter email addresses to receive a test version of your campaign
             </DialogDescription>
@@ -438,11 +439,11 @@ toast({
 
           <div className="space-y-4">
             <div>
-              <Label htmlFor="test-emails">Email Addresses</Label>
+              <Label htmlFor="test-emails">{t('testEmailAddress')}</Label>
               <Input
                 id="test-emails"
                 type="text"
-                placeholder="email1@example.com, email2@example.com"
+                placeholder={t('testEmailPlaceholder')}
                 value={testEmails}
                 onChange={(e) => setTestEmails(e.target.value)}
               />
@@ -454,11 +455,11 @@ toast({
 
           <DialogFooter>
             <Button variant="outline" onClick={() => setTestDialogOpen(false)}>
-              Cancel
+              {t('cancel')}
             </Button>
             <Button onClick={handleSendTest} disabled={!testEmails.trim()}>
               <Mail className="w-4 h-4 mr-2" />
-              Send Test
+              {t('sendTest')}
             </Button>
           </DialogFooter>
         </DialogContent>
@@ -469,7 +470,7 @@ toast({
         <DialogContent>
           <DialogHeader>
             <DialogTitle>
-              {sendType === 'now' ? 'Send Campaign Now?' : 'Schedule Campaign?'}
+              {sendType === 'now' ? t('confirmSend') : t('confirmSchedule')}
             </DialogTitle>
             <DialogDescription>
               Please confirm the following details before proceeding
@@ -504,8 +505,8 @@ toast({
               <CheckCircle2 className="w-5 h-5 text-blue-600 mt-0.5" />
               <p className="text-sm text-blue-800">
                 {sendType === 'now'
-                  ? 'Your campaign will be sent immediately to all recipients.'
-                  : 'Your campaign will be automatically sent at the scheduled time.'}
+                  ? t('confirmSendMessage', { count: recipientCount })
+                  : t('confirmScheduleMessage', { date: formatScheduledTime(), time: timezone })}
               </p>
             </div>
           </div>
@@ -516,15 +517,15 @@ toast({
               onClick={() => setConfirmDialogOpen(false)}
               disabled={sending}
             >
-              Cancel
+              {t('cancel')}
             </Button>
             <Button onClick={handleScheduleCampaign} disabled={sending}>
               {sending ? (
-                'Processing...'
+                t('sending')
               ) : (
                 <>
                   <Send className="w-4 h-4 mr-2" />
-                  {sendType === 'now' ? 'Send Now' : 'Schedule'}
+                  {sendType === 'now' ? t('send') : t('schedule')}
                 </>
               )}
             </Button>

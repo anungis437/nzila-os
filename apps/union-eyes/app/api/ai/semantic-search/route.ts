@@ -16,6 +16,9 @@ import { z } from "zod";
 import { withRoleAuth, BaseAuthContext } from '@/lib/api-auth-guard';
 import { checkRateLimit, RATE_LIMITS, createRateLimitHeaders } from '@/lib/rate-limiter';
 import { checkEntitlement } from '@/lib/services/entitlements';
+import { db } from '@/db/db';
+import { cbaClause } from '@/db/schema/cba-clauses-schema';
+import { arbitrationPrecedents } from '@/db/schema/arbitration-precedents-schema';
 
 import {
   ErrorCode,
@@ -176,17 +179,26 @@ export const POST = withRoleAuth('member', async (request: NextRequest, context:
 
 export const GET = withRoleAuth('member', async (_request: NextRequest, _context: BaseAuthContext) => {
   try {
-    // This would query database to check how many clauses/precedents have embeddings
-    // For now, return a placeholder response
+    const clauseRows = await db
+      .select({ id: cbaClause.id, embedding: cbaClause.embedding })
+      .from(cbaClause);
+    const clauseTotal = clauseRows.length;
+    const clauseWithEmbed = clauseRows.filter((r) => r.embedding !== null).length;
+
+    const precedentRows = await db
+      .select({ id: arbitrationPrecedents.id })
+      .from(arbitrationPrecedents);
+    const precedentTotal = precedentRows.length;
+
     return NextResponse.json({
-      status: 'ready',
+      status: clauseWithEmbed > 0 ? 'ready' : 'pending',
       clauses: {
-        total: 0,
-        withEmbeddings: 0,
-        percentage: 0,
+        total: clauseTotal,
+        withEmbeddings: clauseWithEmbed,
+        percentage: clauseTotal > 0 ? Math.round((clauseWithEmbed / clauseTotal) * 100) : 0,
       },
       precedents: {
-        total: 0,
+        total: precedentTotal,
         withEmbeddings: 0,
         percentage: 0,
       },

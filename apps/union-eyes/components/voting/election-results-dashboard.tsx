@@ -29,6 +29,7 @@ import { Badge } from "@/components/ui/badge";
 import { Progress } from "@/components/ui/progress";
 import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
 import { cn } from "@/lib/utils";
+import { useTranslations } from "next-intl";
 
 export interface Candidate {
   id: string;
@@ -74,6 +75,7 @@ export function ElectionResultsDashboard({
   onRefresh,
   onExport,
 }: ElectionResultsDashboardProps) {
+  const t = useTranslations("voting.results");
   const [isRefreshing, setIsRefreshing] = React.useState(false);
 
   const handleRefresh = async () => {
@@ -105,7 +107,7 @@ export function ElectionResultsDashboard({
               {results.status}
             </Badge>
             {results.status === "active" && (
-              <span className="text-sm text-gray-600">Real-time results</span>
+              <span className="text-sm text-gray-600">{t("statusRealTime")}</span>
             )}
           </div>
         </div>
@@ -117,13 +119,13 @@ export function ElectionResultsDashboard({
               disabled={isRefreshing}
             >
               <RefreshCw className={cn("h-4 w-4 mr-2", isRefreshing && "animate-spin")} />
-              Refresh
+              {t("refreshButton")}
             </Button>
           )}
           {onExport && (
             <Button variant="outline" onClick={() => onExport("csv")}>
               <Download className="h-4 w-4 mr-2" />
-              Export
+              {t("exportButton")}
             </Button>
           )}
         </div>
@@ -139,7 +141,7 @@ export function ElectionResultsDashboard({
               </div>
               <div>
                 <div className="text-2xl font-bold">{results.totalEligibleVoters}</div>
-                <div className="text-sm text-gray-600">Eligible Voters</div>
+                <div className="text-sm text-gray-600">{t("statEligibleVoters")}</div>
               </div>
             </div>
           </CardContent>
@@ -153,7 +155,7 @@ export function ElectionResultsDashboard({
               </div>
               <div>
                 <div className="text-2xl font-bold">{results.totalVotesCast}</div>
-                <div className="text-sm text-gray-600">Votes Cast</div>
+                <div className="text-sm text-gray-600">{t("statVotesCast")}</div>
               </div>
             </div>
           </CardContent>
@@ -167,7 +169,7 @@ export function ElectionResultsDashboard({
               </div>
               <div>
                 <div className="text-2xl font-bold">{results.turnoutPercentage}%</div>
-                <div className="text-sm text-gray-600">Turnout</div>
+                <div className="text-sm text-gray-600">{t("statTurnout")}</div>
               </div>
             </div>
           </CardContent>
@@ -179,9 +181,9 @@ export function ElectionResultsDashboard({
         <CardContent className="p-6">
           <div className="space-y-2">
             <div className="flex items-center justify-between text-sm">
-              <span className="font-medium">Voter Turnout</span>
+              <span className="font-medium">{t("progressLabel")}</span>
               <span className="text-gray-600">
-                {results.totalVotesCast} of {results.totalEligibleVoters} voters
+                {t("progressVoters", { cast: results.totalVotesCast, total: results.totalEligibleVoters })}
               </span>
             </div>
             <Progress value={results.turnoutPercentage} className="h-3" />
@@ -194,7 +196,7 @@ export function ElectionResultsDashboard({
         <TabsList>
           {results.questions.map((question, index) => (
             <TabsTrigger key={question.id} value={index.toString()}>
-              Question {index + 1}
+              {t("questionLabel", { number: index + 1 })}
             </TabsTrigger>
           ))}
         </TabsList>
@@ -210,12 +212,13 @@ export function ElectionResultsDashboard({
 }
 
 function QuestionResultCard({ question }: { question: QuestionResults }) {
+  const t = useTranslations("voting.results");
   return (
     <Card>
       <CardHeader>
         <CardTitle>{question.title}</CardTitle>
         <p className="text-sm text-gray-600">
-          Total votes: {question.totalVotes}
+          {t("questionTotalVotes")}: {question.totalVotes}
         </p>
       </CardHeader>
       <CardContent className="space-y-4">
@@ -232,7 +235,7 @@ function QuestionResultCard({ question }: { question: QuestionResults }) {
                       )}
                       <span className="font-medium">{candidate.name}</span>
                       {candidate.isWinner && (
-                        <Badge variant="success">Winner</Badge>
+                        <Badge variant="success">{t("candidateWinner")}</Badge>
                       )}
                     </div>
                     <div className="text-right">
@@ -252,7 +255,7 @@ function QuestionResultCard({ question }: { question: QuestionResults }) {
           <div className="space-y-3">
             <div className="space-y-2">
               <div className="flex items-center justify-between">
-                <span className="font-medium">Yes</span>
+                <span className="font-medium">{t("yesOption")}</span>
                 <div className="text-right">
                   <div className="font-bold">{question.yesVotes} votes</div>
                   <div className="text-sm text-gray-600">
@@ -268,7 +271,7 @@ function QuestionResultCard({ question }: { question: QuestionResults }) {
 
             <div className="space-y-2">
               <div className="flex items-center justify-between">
-                <span className="font-medium">No</span>
+                <span className="font-medium">{t("noOption")}</span>
                 <div className="text-right">
                   <div className="font-bold">{question.noVotes} votes</div>
                   <div className="text-sm text-gray-600">
@@ -285,7 +288,7 @@ function QuestionResultCard({ question }: { question: QuestionResults }) {
             {(question.abstainVotes || 0) > 0 && (
               <div className="space-y-2">
                 <div className="flex items-center justify-between">
-                  <span className="font-medium text-gray-600">Abstain</span>
+                  <span className="font-medium text-gray-600">{t("abstainOption")}</span>
                   <div className="text-right">
                     <div className="font-bold">{question.abstainVotes} votes</div>
                     <div className="text-sm text-gray-600">

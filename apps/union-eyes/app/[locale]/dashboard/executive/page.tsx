@@ -13,7 +13,12 @@ export const metadata: Metadata = {
   description: "Strategic overview and executive tools for union leadership",
 };
 
-export default async function ExecutiveDashboardPage() {
+export default async function ExecutiveDashboardPage({
+  params,
+}: {
+  params: Promise<{ locale: string }>;
+}) {
+  const { locale } = await params;
   const user = await requireUser();
   
   // Require at least vice_president level (85) to access executive dashboard
@@ -48,15 +53,15 @@ export default async function ExecutiveDashboardPage() {
           <div className="p-6 border rounded-lg">
             <h3 className="text-lg font-semibold mb-4">Quick Actions</h3>
             <div className="space-y-2">
-              <Link href="/dashboard/admin/governance" className="block p-3 hover:bg-accent rounded-lg transition-colors">
+              <Link href={`/${locale}/dashboard/admin/governance`} className="block p-3 hover:bg-accent rounded-lg transition-colors">
                 <div className="font-medium">Governance</div>
                 <div className="text-sm text-muted-foreground">Bylaws, policies, signatories</div>
               </Link>
-              <Link href="/dashboard/financial" className="block p-3 hover:bg-accent rounded-lg transition-colors">
+              <Link href={`/${locale}/dashboard/financial`} className="block p-3 hover:bg-accent rounded-lg transition-colors">
                 <div className="font-medium">Financial Reports</div>
                 <div className="text-sm text-muted-foreground">Budget, expenses, revenue</div>
               </Link>
-              <Link href="/dashboard/members" className="block p-3 hover:bg-accent rounded-lg transition-colors">
+              <Link href={`/${locale}/dashboard/members`} className="block p-3 hover:bg-accent rounded-lg transition-colors">
                 <div className="font-medium">Member Directory</div>
                 <div className="text-sm text-muted-foreground">View and manage members</div>
               </Link>

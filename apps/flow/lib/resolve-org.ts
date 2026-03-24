@@ -7,12 +7,18 @@
  *
  * @module resolve-org
  */
-import { auth } from '@clerk/nextjs/server'
+import { auth, currentUser } from '@clerk/nextjs/server'
 import type { OrgContext } from '@nzila/commerce-core/types'
 import { OrgRole } from '@nzila/commerce-core/enums'
 import type { OrgCommerceConfig } from '@nzila/platform-commerce-org/types'
 import { getOrgCommerceConfig } from '@nzila/platform-commerce-org/service'
 import { resolveInternalOrgId } from './clerk-org-resolver'
+
+/** Emails that always receive admin role, regardless of Clerk metadata. */
+const SUPER_ADMIN_EMAILS = new Set([
+  'info@nzilaventures.com',
+  ...(process.env.SUPER_ADMIN_EMAILS ?? '').split(',').map(s => s.trim()).filter(Boolean),
+])
 
 /**
  * Resolve org context from Clerk auth.
@@ -31,8 +37,18 @@ export async function resolveOrgContext(): Promise<OrgContext> {
     throw new Error('No active organization — select an org before using Flow.')
   }
 
-  const role = mapClerkRole(orgRole)
+  let role = mapClerkRole(orgRole)
   const internalOrgId = await resolveInternalOrgId(orgId)
+
+  // Super-admin email override
+  if (role !== OrgRole.ADMIN) {
+    const user = await currentUser()
+    const email = user?.primaryEmailAddress?.emailAddress
+                ?? user?.emailAddresses?.[0]?.emailAddress
+    if (email && SUPER_ADMIN_EMAILS.has(email.toLowerCase())) {
+      role = OrgRole.ADMIN
+    }
+  }
 
   return {
     orgId: internalOrgId,

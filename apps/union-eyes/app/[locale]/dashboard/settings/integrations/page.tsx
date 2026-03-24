@@ -291,10 +291,13 @@ function buildDomainCatalogue(
 // ── Page ───────────────────────────────────────────────────────────────────
 
 export default async function IntegrationSettingsPage({
+  params: paramsPromise,
   searchParams,
 }: {
+  params: Promise<{ locale: string }>;
   searchParams: Promise<{ tab?: string; domain?: string }>;
 }) {
+  const { locale } = await paramsPromise;
   const params = await searchParams;
   const activeTab = params.tab ?? 'overview';
   const filterDomain = params.domain ?? null;
@@ -302,7 +305,7 @@ export default async function IntegrationSettingsPage({
   const user = await requireUser();
   const hasAccess = await hasMinRole('integration_manager');
   if (!hasAccess) {
-    redirect('/dashboard');
+    redirect(`/${locale}/dashboard`);
   }
 
   const organizationId = user.organizationId;
@@ -351,17 +354,17 @@ export default async function IntegrationSettingsPage({
       <Tabs defaultValue={activeTab} className="space-y-4">
         <TabsList>
           <TabsTrigger value="overview">
-            <Link href="/dashboard/settings/integrations" className="no-underline">
+            <Link href={`/${locale}/dashboard/settings/integrations`} className="no-underline">
               Overview
             </Link>
           </TabsTrigger>
           <TabsTrigger value="domains">
-            <Link href="/dashboard/settings/integrations?tab=domains" className="no-underline">
+            <Link href={`/${locale}/dashboard/settings/integrations?tab=domains`} className="no-underline">
               Data Domains ({domains.length})
             </Link>
           </TabsTrigger>
           <TabsTrigger value="configs">
-            <Link href="/dashboard/settings/integrations?tab=configs" className="no-underline">
+            <Link href={`/${locale}/dashboard/settings/integrations?tab=configs`} className="no-underline">
               Active Configs ({configs.length})
             </Link>
           </TabsTrigger>
@@ -431,7 +434,7 @@ export default async function IntegrationSettingsPage({
               return (
                 <Link
                   key={domain.key}
-                  href={`/dashboard/settings/integrations?tab=domains&domain=${domain.key}`}
+                  href={`/${locale}/dashboard/settings/integrations?tab=domains&domain=${domain.key}`}
                   className="no-underline"
                 >
                   <Card className="hover:border-primary/50 transition-colors cursor-pointer h-full">
@@ -471,7 +474,7 @@ export default async function IntegrationSettingsPage({
                 Filtered: {domains.find((d) => d.key === filterDomain)?.label ?? filterDomain}
               </Badge>
               <Link
-                href="/dashboard/settings/integrations?tab=domains"
+                href={`/${locale}/dashboard/settings/integrations?tab=domains`}
                 className="text-xs text-muted-foreground hover:text-foreground"
               >
                 Show all

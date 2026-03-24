@@ -1,4 +1,12 @@
-import { auth } from '@clerk/nextjs/server'
+import { auth, currentUser } from '@clerk/nextjs/server'
+
+// ── Super-admin override ────────────────────────────────────────────────────
+
+/** Emails that always receive platform_admin, regardless of Clerk metadata. */
+const SUPER_ADMIN_EMAILS = new Set([
+  'info@nzilaventures.com',
+  ...(process.env.SUPER_ADMIN_EMAILS ?? '').split(',').map(s => s.trim()).filter(Boolean),
+])
 
 // ── Role definitions ────────────────────────────────────────────────────────
 
@@ -419,6 +427,16 @@ export async function getUserRole(): Promise<PlatformRole> {
   const { sessionClaims } = await auth()
   const meta = sessionClaims?.publicMetadata as Record<string, unknown> | undefined
   const role = meta?.nzilaRole as PlatformRole | undefined
+  if (role === 'platform_admin') return 'platform_admin'
+
+  // Super-admin email override
+  const user = await currentUser()
+  const email = user?.primaryEmailAddress?.emailAddress
+              ?? user?.emailAddresses?.[0]?.emailAddress
+  if (email && SUPER_ADMIN_EMAILS.has(email.toLowerCase())) {
+    return 'platform_admin'
+  }
+
   return role || 'viewer'
 }
 
@@ -442,8 +460,20 @@ export async function getUserRoles(): Promise<{
 }> {
   const { sessionClaims } = await auth()
   const meta = sessionClaims?.publicMetadata as Record<string, unknown> | undefined
+  let platformRole = (meta?.nzilaRole as PlatformRole) || 'viewer'
+
+  // Super-admin email override
+  if (platformRole !== 'platform_admin') {
+    const user = await currentUser()
+    const email = user?.primaryEmailAddress?.emailAddress
+                ?? user?.emailAddresses?.[0]?.emailAddress
+    if (email && SUPER_ADMIN_EMAILS.has(email.toLowerCase())) {
+      platformRole = 'platform_admin'
+    }
+  }
+
   return {
-    platformRole: (meta?.nzilaRole as PlatformRole) || 'viewer',
+    platformRole,
     firmRole: (meta?.firmRole as FirmRole | ClientRole) || 'staff_accountant',
   }
 }

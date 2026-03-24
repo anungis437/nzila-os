@@ -5,6 +5,7 @@ import { Button } from '@/components/ui/button';
 import { AlertCircle, RefreshCw, Home } from 'lucide-react';
 import Link from 'next/link';
 import * as Sentry from '@sentry/nextjs';
+import { useLocale } from 'next-intl';
 
 export default function DashboardError({
   error,
@@ -13,6 +14,7 @@ export default function DashboardError({
   error: Error & { digest?: string };
   reset: () => void;
 }) {
+  const locale = useLocale();
   useEffect(() => {
     // Log error to Sentry
     Sentry.captureException(error, {
@@ -67,7 +69,7 @@ export default function DashboardError({
               Try again
             </Button>
 
-            <Link href="/" className="w-full">
+            <Link href={`/${locale}`} className="w-full">
               <Button
                 variant="outline"
                 className="w-full"
@@ -88,7 +90,7 @@ export default function DashboardError({
 
         <p className="mt-6 text-center text-sm text-gray-600">
           If this problem persists, please{' '}
-          <Link href="/dashboard/support"
+          <Link href={`/${locale}/dashboard/support`}
             className="font-medium text-blue-600 hover:text-blue-700 underline"
           >
             contact support

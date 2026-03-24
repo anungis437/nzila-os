@@ -12,6 +12,7 @@
 import Link from 'next/link';
 
 import { useState } from 'react';
+import { useLocale } from 'next-intl';
 import { useRouter } from 'next/navigation';
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from '@/components/ui/card';
 import { Button } from '@/components/ui/button';
@@ -37,6 +38,7 @@ interface CaseStudyEditorFormProps {
 
 export default function CaseStudyEditorForm({ caseStudy }: CaseStudyEditorFormProps) {
   const router = useRouter();
+  const locale = useLocale();
   const isNew = !caseStudy;
 
   const [loading, setLoading] = useState(false);
@@ -117,7 +119,7 @@ export default function CaseStudyEditorForm({ caseStudy }: CaseStudyEditorFormPr
 
       // Redirect after 1 second
       setTimeout(() => {
-        router.push('/admin/case-studies');
+        router.push(`/${locale}/admin/case-studies`);
         router.refresh();
       }, 1000);
     } catch (err) {
@@ -417,7 +419,7 @@ export default function CaseStudyEditorForm({ caseStudy }: CaseStudyEditorFormPr
       {/* Action Buttons */}
       <div className="flex items-center justify-between">
         <Button variant="outline" asChild>
-          <Link href="/admin/case-studies">Cancel</Link>
+          <Link href={`/${locale}/admin/case-studies`}>Cancel</Link>
         </Button>
 
         <div className="flex items-center gap-2">

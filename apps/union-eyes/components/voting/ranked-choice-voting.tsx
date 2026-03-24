@@ -49,6 +49,7 @@ import {
   DialogFooter,
 } from "@/components/ui/dialog";
 import { useToast } from "@/components/ui/use-toast";
+import { useTranslations } from "next-intl";
 
 interface Candidate {
   id: string;
@@ -104,6 +105,7 @@ export function RankedChoiceVoting({
   const [isSubmitting, setIsSubmitting] = useState(false);
   const [showInstructions, setShowInstructions] = useState(true);
   const { toast } = useToast();
+  const t = useTranslations("voting.rankedChoice");
 
   const minRankings = session.minRankings || 1;
   const maxRankings = session.maxRankings || session.candidates.length;
@@ -174,8 +176,8 @@ export function RankedChoiceVoting({
   const addToRanked = (candidate: Candidate) => {
     if (rankedCandidates.length >= maxRankings) {
       toast({
-        title: "Maximum rankings reached",
-        description: `You can only rank up to ${maxRankings} candidates.`,
+        title: t("toastMaxRankings"),
+        description: t("toastMaxRankingsDesc", { count: maxRankings }),
         variant: "destructive",
       });
       return;
@@ -188,8 +190,8 @@ export function RankedChoiceVoting({
   const validateAndSubmit = () => {
     if (rankedCandidates.length < minRankings) {
       toast({
-        title: "Insufficient rankings",
-        description: `Please rank at least ${minRankings} candidate${minRankings > 1 ? "s" : ""}.`,
+        title: t("toastInsufficient"),
+        description: t("toastInsufficientDesc", { count: minRankings }),
         variant: "destructive",
       });
       return;
@@ -209,15 +211,15 @@ export function RankedChoiceVoting({
       if (onSubmit) {
         await onSubmit(votes);
         toast({
-          title: "Vote submitted",
-          description: "Your ranked choice vote has been recorded.",
+          title: t("toastSubmitted"),
+          description: t("toastSubmittedDesc"),
         });
         setShowConfirmation(false);
       }
     } catch (_error) {
       toast({
-        title: "Submission failed",
-        description: "Failed to submit your vote. Please try again.",
+        title: t("toastSubmitFailed"),
+        description: t("toastSubmitFailedDesc"),
         variant: "destructive",
       });
     } finally {
@@ -238,7 +240,7 @@ export function RankedChoiceVoting({
         className="flex items-center gap-1 min-w-[60px] justify-center"
       >
         {index < 3 && icons[index]}
-        Rank {index + 1}
+        {t("rankLabel", { rank: index + 1 })}
       </Badge>
     );
   };
@@ -248,13 +250,13 @@ export function RankedChoiceVoting({
       {showInstructions && (
         <Alert>
           <Info className="w-4 h-4" />
-          <AlertTitle>How Ranked Choice Voting Works</AlertTitle>
+          <AlertTitle>{t("instructionsTitle")}</AlertTitle>
           <AlertDescription>
             <ul className="list-disc list-inside space-y-1 mt-2">
-              <li>Drag candidates to rank them by preference (1st, 2nd, 3rd, etc.)</li>
-              <li>You must rank at least {minRankings} candidate{minRankings > 1 ? "s" : ""}</li>
-              <li>You can rank up to {maxRankings} candidates</li>
-              <li>Your vote will be counted for your highest-ranked candidate still in contention</li>
+              <li>{t("instructionLine1")}</li>
+              <li>{t("instructionMinPrefix", { count: minRankings })}</li>
+              <li>{t("instructionMaxPrefix", { count: maxRankings })}</li>
+              <li>{t("instructionLine4")}</li>
             </ul>
           </AlertDescription>
           <Button
@@ -263,7 +265,7 @@ export function RankedChoiceVoting({
             className="mt-2"
             onClick={() => setShowInstructions(false)}
           >
-            Got it
+            {t("gotIt")}
           </Button>
         </Alert>
       )}
@@ -281,7 +283,7 @@ export function RankedChoiceVoting({
             </div>
             {session.deadline && (
               <Badge variant="outline">
-                Deadline: {session.deadline.toLocaleDateString()}
+                {t("deadline")}: {session.deadline.toLocaleDateString()}
               </Badge>
             )}
           </div>
@@ -293,7 +295,7 @@ export function RankedChoiceVoting({
               />
             </div>
             <span className="text-sm text-muted-foreground">
-              {rankedCandidates.length} / {minRankings} minimum
+              {rankedCandidates.length} / {minRankings} {t("minimum")}
             </span>
           </div>
         </CardHeader>
@@ -306,7 +308,7 @@ export function RankedChoiceVoting({
             <CardHeader>
               <CardTitle className="flex items-center gap-2">
                 <CheckCircle className="w-5 h-5 text-green-500" />
-                Your Rankings ({rankedCandidates.length})
+                {t("yourRankings", { count: rankedCandidates.length })}
               </CardTitle>
             </CardHeader>
             <CardContent>
@@ -323,7 +325,7 @@ export function RankedChoiceVoting({
                   >
                     {rankedCandidates.length === 0 ? (
                       <div className="flex flex-col items-center justify-center h-[384px] text-muted-foreground">
-                        <p>Drag candidates here to rank them</p>
+                        <p>{t("dragHint")}</p>
                       </div>
                     ) : (
                       rankedCandidates.map((candidate, index) => (
@@ -404,7 +406,7 @@ export function RankedChoiceVoting({
           {/* Unranked Candidates */}
           <Card>
             <CardHeader>
-              <CardTitle>Available Candidates ({unrankedCandidates.length})</CardTitle>
+              <CardTitle>{t("availableCandidates", { count: unrankedCandidates.length })}</CardTitle>
             </CardHeader>
             <CardContent>
               <Droppable droppableId="unranked">
@@ -461,7 +463,7 @@ export function RankedChoiceVoting({
                                 onClick={() => addToRanked(candidate)}
                                 disabled={disabled}
                               >
-                                Rank
+                                {t("rankButton")}
                               </Button>
                             </div>
                           </div>
@@ -487,7 +489,7 @@ export function RankedChoiceVoting({
           }
           size="lg"
         >
-          Submit Vote
+          {t("submitVote")}
         </Button>
       </div>
 
@@ -495,10 +497,9 @@ export function RankedChoiceVoting({
       <Dialog open={showConfirmation} onOpenChange={setShowConfirmation}>
         <DialogContent>
           <DialogHeader>
-            <DialogTitle>Confirm Your Rankings</DialogTitle>
+            <DialogTitle>{t("confirmTitle")}</DialogTitle>
             <DialogDescription>
-              Please review your ranked choices before submitting. This action cannot
-              be undone.
+              {t("confirmDescription")}
             </DialogDescription>
           </DialogHeader>
 
@@ -517,10 +518,10 @@ export function RankedChoiceVoting({
               onClick={() => setShowConfirmation(false)}
               disabled={isSubmitting}
             >
-              Cancel
+              {t("cancelButton")}
             </Button>
             <Button onClick={handleSubmit} disabled={isSubmitting}>
-              {isSubmitting ? "Submitting..." : "Confirm & Submit"}
+              {isSubmitting ? t("submitting") : t("confirmSubmit")}
             </Button>
           </DialogFooter>
         </DialogContent>

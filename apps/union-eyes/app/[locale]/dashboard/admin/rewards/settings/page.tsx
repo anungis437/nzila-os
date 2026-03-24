@@ -17,7 +17,12 @@ export const metadata: Metadata = {
   description: 'Configure recognition programs and system settings',
 };
 
-export default async function RewardsSettingsPage() {
+export default async function RewardsSettingsPage({
+  params,
+}: {
+  params: Promise<{ locale: string }>;
+}) {
+  const { locale } = await params;
   await requireUser();
   const hasAccess = await hasMinRole("admin");
   if (!hasAccess) {
@@ -86,13 +91,13 @@ export default async function RewardsSettingsPage() {
                     )}
                     <div className="flex gap-4 mt-2 text-xs text-muted-foreground">
                       <Link
-                        href={`/dashboard/admin/rewards/awards?program=${program.id}`}
+                        href={`/${locale}/dashboard/admin/rewards/awards?program=${program.id}`}
                         className="hover:text-foreground"
                       >
                         View Awards
                       </Link>
                       <Link
-                        href={`/dashboard/admin/rewards/budgets?program=${program.id}`}
+                        href={`/${locale}/dashboard/admin/rewards/budgets?program=${program.id}`}
                         className="hover:text-foreground"
                       >
                         Manage Budgets
@@ -178,7 +183,7 @@ export default async function RewardsSettingsPage() {
                 {t('system.shopify.description')}
               </p>
             </div>
-            <Link href="/dashboard/admin/rewards/shopify">
+            <Link href={`/${locale}/dashboard/admin/rewards/shopify`}>
               <Button variant="outline" size="sm">
                 Manage
               </Button>

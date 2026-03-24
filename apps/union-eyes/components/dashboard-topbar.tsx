@@ -12,6 +12,7 @@ import { Input } from "@/components/ui/input";
 import { Badge } from "@/components/ui/badge";
 import Link from "next/link";
 import { usePathname } from "next/navigation";
+import { useLocale } from "next-intl";
 import { motion } from "framer-motion";
 import { useEffect, useState } from "react";
 import type { SelectProfile } from "@/db/schema/domains/member";
@@ -23,6 +24,7 @@ interface DashboardTopbarProps {
 
 export default function DashboardTopbar({ profile, onMenuClick }: DashboardTopbarProps) {
   const pathname = usePathname();
+  const locale = useLocale();
   const { user } = useUser();
   const [notificationCount, setNotificationCount] = useState(0);
   const [isAdmin, setIsAdmin] = useState(false);
@@ -155,7 +157,7 @@ setNotificationCount(0);
         <div className="flex items-center space-x-3 flex-1 justify-end">
           {/* Admin Badge */}
           {isAdmin && (
-            <Link href="/admin">
+            <Link href={`/${locale}/admin`}>
               <motion.div
                 whileHover={{ scale: 1.05 }}
                 whileTap={{ scale: 0.95 }}
