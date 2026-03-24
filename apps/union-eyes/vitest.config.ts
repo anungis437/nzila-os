@@ -13,6 +13,7 @@ export default defineProject({
       "**/node_modules/**",
       "**/.git/**",
       "e2e/**",
+      "services/**",
     ],
   },
 });
