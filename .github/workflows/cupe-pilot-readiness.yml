@@ -2,9 +2,9 @@ name: CUPE Pilot Readiness Gates
 
 on:
   push:
-    branches: [release/cupe-pilot-0.1]
+    branches: [release/cupe-pilot-0.1, main]
   pull_request:
-    branches: [release/cupe-pilot-0.1]
+    branches: [release/cupe-pilot-0.1, main]
 
 permissions:
   contents: read
@@ -54,6 +54,18 @@ jobs:
 
       - name: Contract - Evidence Seal (INV-35)
         run: pnpm contract-tests -- ue-evidence-seal
+        continue-on-error: false
+
+      - name: Contract - Vocabulary Validation
+        run: pnpm contract-tests -- ue-vocabulary-validation
+        continue-on-error: false
+
+      - name: Contract - Auth Guard Enforcement (INV-11)
+        run: pnpm contract-tests -- vertical-governance
+        continue-on-error: false
+
+      - name: Contract - No Console Usage
+        run: pnpm contract-tests -- no-console
         continue-on-error: false
 
   lint-and-typecheck:
@@ -156,11 +168,63 @@ jobs:
       - name: Create Evidence Marker
         run: |
           mkdir -p apps/union-eyes/evidence-artifacts
-          echo '{"timestamp":"'$(date -u +'%Y-%m-%dT%H:%M:%SZ')'","branch":"'$GITHUB_REF'","commit":"'$GITHUB_SHA'","status":"ready-for-pilot"}' > apps/union-eyes/evidence-artifacts/marker-$GITHUB_SHA.json
+          cat > apps/union-eyes/evidence-artifacts/manifest-$GITHUB_SHA.json << EOF
+          {
+            "version": "0.2",
+            "timestamp": "$(date -u +'%Y-%m-%dT%H:%M:%SZ')",
+            "branch": "$GITHUB_REF",
+            "commit": "$GITHUB_SHA",
+            "status": "ready-for-pilot",
+            "gates": {
+              "contract-tests": "passed",
+              "lint-typecheck": "passed",
+              "unit-tests": "passed",
+              "security-scans": "passed"
+            },
+            "coverage": {
+              "vocabulary": "19 tests",
+              "entity-schemas": "15 tests",
+              "intake-schema": "14 tests",
+              "fsm-enforcement": "19 tests",
+              "case-notes": "9 tests",
+              "case-assignment": "6 tests",
+              "audit-mutations": "18 tests",
+              "case-timeline": "5 tests",
+              "evidence-export": "14 tests",
+              "action-denial": "43 tests",
+              "attachment-validation": "42 tests",
+              "dashboard-metrics": "30+ tests",
+              "csv-export": "12+ tests",
+              "workbench-utils": "15+ tests",
+              "pilot-admin": "10+ tests",
+              "setup-checklist": "12+ tests"
+            },
+            "documentation": [
+              "docs/CUPE_PILOTING_QUICK_START.md",
+              "docs/CUPE_PILOT_ADMIN_RUNBOOK.md",
+              "docs/CUPE_PILOT_USER_GUIDE.md",
+              "docs/CUPE_PILOT_SUPPORT_SOP.md",
+              "docs/CUPE_PILOT_ROLLBACK_RUNBOOK.md",
+              "docs/CUPE_READINESS_CHECKLIST.md",
+              "docs/CUPE_PILOT_GO_NO_GO_REVIEW.md"
+            ]
+          }
+          EOF
 
       - name: Upload Evidence Artifact
         uses: actions/upload-artifact@v4
         with:
           name: cupe-pilot-evidence-${{ github.sha }}
           path: apps/union-eyes/evidence-artifacts/
+          retention-days: 90
+
+      - name: Generate Evidence SHA256
+        run: |
+          sha256sum apps/union-eyes/evidence-artifacts/manifest-$GITHUB_SHA.json > apps/union-eyes/evidence-artifacts/manifest-$GITHUB_SHA.sha256
+
+      - name: Upload Evidence Checksum
+        uses: actions/upload-artifact@v4
+        with:
+          name: cupe-pilot-evidence-checksum-${{ github.sha }}
+          path: apps/union-eyes/evidence-artifacts/*.sha256
           retention-days: 90

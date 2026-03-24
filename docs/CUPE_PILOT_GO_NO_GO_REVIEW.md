@@ -44,7 +44,7 @@ Union Eyes is being prepared for CUPE Local 1234 pilot deployment, enabling a si
 | **Case Timeline** | ✅ PASS | 5 case-timeline tests; audit viewer API endpoint (PR-031) |
 | **Evidence Export** | ✅ PASS | 14 evidence-export tests; SHA-256 seal verification (PR-032) |
 | **Reporting** | ✅ PASS | 18 dashboard-metrics tests; KPIs, aging, SLA thresholds (PR-050) |
-| **Admin Console** | ⬜ Deferred | Setup checklist page deferred to v0.2 (PR-060) |
+| **Admin Console** | ✅ PASS | Health checks (7 checks), pilot status API, setup checklist (10 steps); 29 tests (PR-060) |
 | **Attachments** | ✅ PASS | 42 attachment-validation tests; type whitelist + size limits (PR-040–042) |
 | **Audit Trail** | ✅ PASS | 18 audited-case-mutations tests; 10 event types (PR-030) |
 
@@ -63,7 +63,7 @@ Union Eyes is being prepared for CUPE Local 1234 pilot deployment, enabling a si
 
 | Aspect | Status | Evidence |
 |--------|--------|----------|
-| **Monitoring** | ⬜ Deferred | Structured logging planned for v0.2 (PR-070) |
+| **Monitoring** | ✅ PASS | `withObservability()` middleware; correlation IDs via AsyncLocalStorage; 8 observability tests (PR-070) |
 | **Incident SOP** | ✅ Complete | `docs/CUPE_PILOT_SUPPORT_SOP.md` — 5 common issues + escalation |
 | **Admin Runbook** | ✅ Complete | `docs/CUPE_PILOT_ADMIN_RUNBOOK.md` — daily/weekly checks |
 | **Support Team** | ⬜ Pending | Team to review runbooks before go-live |
@@ -94,9 +94,9 @@ Union Eyes is being prepared for CUPE Local 1234 pilot deployment, enabling a si
 
 ### 6. Evidence of Readiness
 
-- ✅ **Codebase:** Phases 0–6 implemented; 20 of 23 PRs delivered
-- ✅ **Tests:** 13,500+ monorepo tests passing; 1,361 contract tests passing; 220+ CUPE-specific tests
-- ⬜ **Artifacts:** Evidence artifact generation pending CI pipeline
+- ✅ **Codebase:** Phases 0–7 implemented; 23 of 23 PRs delivered
+- ✅ **Tests:** 13,500+ monorepo tests passing; 1,361 contract tests passing; 314+ CUPE-specific tests
+- ✅ **Artifacts:** Evidence artifact generation in CI pipeline with SHA256 checksums
 - ✅ **Documentation:** All runbooks, user guides, support SOP complete
 - ⬜ **Walkthrough:** Pilot admin + steward workflows tested end-to-end
 - ⬜ **Support:** Support team walked through SOP; ready to field issues

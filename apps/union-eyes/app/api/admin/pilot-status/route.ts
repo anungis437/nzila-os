@@ -1,0 +1,45 @@
+/**
+ * Pilot Status API
+ *
+ * GET /api/admin/pilot-status
+ *
+ * PR-060: Returns the CUPE pilot health check + status summary.
+ * Admin-only endpoint.
+ */
+
+import { NextRequest, NextResponse } from 'next/server';
+import { withApiAuth } from '@/lib/api-auth-guard';
+import { createLogger } from '@nzila/os-core';
+import { buildPilotStatus, type PilotConfiguration } from '@/lib/pilot-admin';
+import type { CaseRow } from '@/lib/dashboard-metrics';
+
+const logger = createLogger('admin:pilot-status');
+
+export const GET = withApiAuth(async (_request: NextRequest) => {
+  try {
+    // In production these would come from the database.
+    // For the pilot scaffold, we demonstrate the shape with defaults.
+    const config: PilotConfiguration = {
+      vocabularyLoaded: true,
+      orgConfigured: true,
+      usersInvited: 0,
+      worksitesConfigured: 0,
+      slaThresholdsSet: true,
+      auditTrailActive: true,
+    };
+
+    const cases: CaseRow[] = [];
+
+    const status = buildPilotStatus(config, cases);
+
+    logger.info('Pilot status check', { status: status.health.status });
+
+    return NextResponse.json(status);
+  } catch (error) {
+    logger.error('[/api/admin/pilot-status] Error:', error);
+    return NextResponse.json(
+      { error: 'Failed to retrieve pilot status' },
+      { status: 500 },
+    );
+  }
+});

@@ -40,6 +40,27 @@ export interface CategoryCount {
   count: number;
 }
 
+export interface WorksiteCount {
+  worksite: string;
+  count: number;
+}
+
+export interface AssigneeCount {
+  assignee: string;
+  count: number;
+}
+
+export interface ClosureTrendPoint {
+  week: string;        // ISO date of week start (Monday)
+  closedCount: number;
+}
+
+export interface CaseFilter {
+  timeframeDays?: number;
+  status?: string;
+  worksite?: string;
+}
+
 // ---------------------------------------------------------------------------
 // SLA thresholds (days)
 // ---------------------------------------------------------------------------
@@ -135,6 +156,137 @@ export function computeTypeCounts(cases: CaseRow[]): CategoryCount[] {
   return [...counts.entries()]
     .map(([type, count]) => ({ type, count }))
     .sort((a, b) => b.count - a.count);
+}
+
+/**
+ * Count open cases by worksite.
+ */
+export function computeWorksiteCounts(cases: CaseRow[]): WorksiteCount[] {
+  const openStatuses = new Set(['submitted', 'under_review', 'assigned', 'investigation', 'pending_documentation']);
+  const openCases = cases.filter((c) => openStatuses.has(c.status));
+  const counts = new Map<string, number>();
+  for (const c of openCases) {
+    const ws = c.worksite ?? 'Unassigned';
+    counts.set(ws, (counts.get(ws) ?? 0) + 1);
+  }
+  return [...counts.entries()]
+    .map(([worksite, count]) => ({ worksite, count }))
+    .sort((a, b) => b.count - a.count);
+}
+
+/**
+ * Count open cases by assignee.
+ */
+export function computeAssigneeCounts(cases: CaseRow[]): AssigneeCount[] {
+  const openStatuses = new Set(['submitted', 'under_review', 'assigned', 'investigation', 'pending_documentation']);
+  const openCases = cases.filter((c) => openStatuses.has(c.status));
+  const counts = new Map<string, number>();
+  for (const c of openCases) {
+    const assignee = c.assignee ?? 'Unassigned';
+    counts.set(assignee, (counts.get(assignee) ?? 0) + 1);
+  }
+  return [...counts.entries()]
+    .map(([assignee, count]) => ({ assignee, count }))
+    .sort((a, b) => b.count - a.count);
+}
+
+/**
+ * Compute weekly closure trends over the last N weeks.
+ * Returns one data point per ISO week (Monday start).
+ */
+export function computeClosureTrends(
+  cases: CaseRow[],
+  weeks: number = 12,
+  now: Date = new Date(),
+): ClosureTrendPoint[] {
+  const closedStatuses = new Set(['resolved', 'closed', 'denied']);
+  const closedCases = cases.filter(
+    (c) => closedStatuses.has(c.status) && c.resolvedAt != null,
+  );
+
+  // Build week buckets (Monday starts)
+  const points: ClosureTrendPoint[] = [];
+  for (let i = weeks - 1; i >= 0; i--) {
+    const weekStart = new Date(now);
+    weekStart.setDate(weekStart.getDate() - weekStart.getDay() + 1 - i * 7); // Monday
+    weekStart.setHours(0, 0, 0, 0);
+    const weekEnd = new Date(weekStart);
+    weekEnd.setDate(weekEnd.getDate() + 7);
+
+    const count = closedCases.filter(
+      (c) => c.resolvedAt! >= weekStart && c.resolvedAt! < weekEnd,
+    ).length;
+
+    points.push({
+      week: weekStart.toISOString().slice(0, 10),
+      closedCount: count,
+    });
+  }
+  return points;
+}
+
+/**
+ * Filter cases by timeframe, status, and worksite.
+ */
+export function filterCases(
+  cases: CaseRow[],
+  filter: CaseFilter,
+  now: Date = new Date(),
+): CaseRow[] {
+  let result = cases;
+
+  if (filter.timeframeDays != null) {
+    const cutoff = new Date(now);
+    cutoff.setDate(cutoff.getDate() - filter.timeframeDays);
+    result = result.filter((c) => c.createdAt >= cutoff);
+  }
+
+  if (filter.status) {
+    result = result.filter((c) => c.status === filter.status);
+  }
+
+  if (filter.worksite) {
+    result = result.filter((c) => c.worksite === filter.worksite);
+  }
+
+  return result;
+}
+
+// ---------------------------------------------------------------------------
+// Cache
+// ---------------------------------------------------------------------------
+
+interface CacheEntry<T> {
+  data: T;
+  expiresAt: number;
+}
+
+const cache = new Map<string, CacheEntry<unknown>>();
+
+/** Default TTL: 5 minutes */
+const DEFAULT_TTL_MS = 5 * 60 * 1000;
+
+/**
+ * Wrap a computation with a 5-minute TTL cache.
+ * Key should uniquely identify the query (e.g. orgId + filter hash).
+ */
+export function cachedComputation<T>(
+  key: string,
+  compute: () => T,
+  ttlMs: number = DEFAULT_TTL_MS,
+): T {
+  const existing = cache.get(key) as CacheEntry<T> | undefined;
+  if (existing && existing.expiresAt > Date.now()) {
+    return existing.data;
+  }
+  const data = compute();
+  cache.set(key, { data, expiresAt: Date.now() + ttlMs });
+  return data;
+}
+
+/** Clear all cached entries (useful for testing). */
+export function clearMetricsCache(): void {
+  cache.clear();
 }
 
 // ---------------------------------------------------------------------------
