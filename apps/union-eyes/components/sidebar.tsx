@@ -280,8 +280,8 @@ export default function Sidebar({ profile: _profile, userEmail, whopMonthlyPlanI
         { href: `/${locale}/dashboard/cross-union-analytics`, icon: <GitCompare size={16} />, label: 'Cross-Union Analytics', roles: [...clcRoles, mgmt] },
         { href: `/${locale}/dashboard/precedents`, icon: <Scale size={16} />, label: 'Precedent Database', roles: [...clcRoles, mgmt] },
         { href: `/${locale}/dashboard/clause-library`, icon: <Library size={16} />, label: 'Shared Clause Library', roles: [...clcRoles, mgmt] },
-        { href: `/${locale}/dashboard/admin/organizations`, icon: <Building2 size={16} />, label: 'Affiliate Management', roles: [...clcRoles, mgmt] },
-        { href: `/${locale}/dashboard/compliance`, icon: <FileBarChart size={16} />, label: 'Compliance Reports', roles: ["congress_staff", "federation_staff", "clc_staff", "clc_executive", "system_admin", "admin", mgmt] },
+        { href: `/${locale}/dashboard/admin/organizations`, icon: <Building2 size={16} />, label: 'Affiliate Management', roles: ["congress_staff", "federation_staff", "fed_staff", "fed_executive", "system_admin", "national_officer", "admin", mgmt] },
+        { href: `/${locale}/dashboard/compliance`, icon: <FileBarChart size={16} />, label: 'Compliance Reports', roles: ["congress_staff", "federation_staff", "fed_staff", "fed_executive", "system_admin", "admin", mgmt] },
         { href: `/${locale}/dashboard/sector-analytics`, icon: <BarChart3 size={16} />, label: 'Sector Analytics', roles: ["congress_staff", "clc_staff", "clc_executive", "system_admin", "admin", mgmt] },
       ],
     },
@@ -373,8 +373,8 @@ export default function Sidebar({ profile: _profile, userEmail, whopMonthlyPlanI
       } else if (isFederationOrg) {
         sections = [...effectiveOrgSections, ...fedSections];
       } else {
-        // Union / local: full union nav + federation services
-        sections = [...effectiveOrgSections, ...fedSections];
+        // Union / local: standard union nav only (federation services not applicable)
+        sections = [...effectiveOrgSections];
       }
     }
 
