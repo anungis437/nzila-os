@@ -47,7 +47,7 @@ import { auth, currentUser as clerkCurrentUser } from '@clerk/nextjs/server';
 import { eq } from 'drizzle-orm';
 import { db } from '@/db/db';
 // eslint-disable-next-line @typescript-eslint/no-unused-vars
-import { organizationMembers } from '@/db/schema';
+import { organizationMembers, organizations } from '@/db/schema';
 import { users } from '@/db/schema/domains/member';
 import {
   getMemberRoles,
@@ -372,7 +372,25 @@ export async function getCurrentUser(): Promise<AuthUser | null> {
       (publicMetadata.tenantId as string) || (privateMetadata.tenantId as string) || null;
     const metadataOrgId =
       (publicMetadata.organizationId as string) || (privateMetadata.organizationId as string) || null;
-    const resolvedOrganizationId = orgId || metadataOrgId || legacyTenantId || null;
+
+    // Resolve organizationId: Clerk orgId (org_xxx format) must be mapped to
+    // the database UUID via organizations.clerk_organization_id. DB columns are
+    // uuid type and will throw "invalid input syntax for type uuid" if given a
+    // Clerk-format string directly.
+    let resolvedOrganizationId = metadataOrgId || legacyTenantId || null;
+    if (orgId) {
+      try {
+        const [org] = await db
+          .select({ id: organizations.id })
+          .from(organizations)
+          .where(eq(organizations.clerkOrganizationId, orgId))
+          .limit(1);
+        resolvedOrganizationId = org?.id ?? resolvedOrganizationId;
+      } catch {
+        // Fallback to metadata if the lookup fails
+        logger.warn('Failed to resolve Clerk orgId to DB UUID', { orgId });
+      }
+    }
 
     // Resolve role: PLATFORM_ADMIN_USER_IDS override → Clerk metadata → default
     let role = (publicMetadata.role as string) || (privateMetadata.role as string) || 'member';

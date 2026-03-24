@@ -137,6 +137,9 @@ export const organizations = pgTable(
     updatedAt: timestamp('updated_at', { withTimezone: true }).defaultNow(),
     createdBy: uuid('created_by'),
     
+    // Clerk Integration
+    clerkOrganizationId: text('clerk_organization_id'),
+
     // Legacy & Migration
     legacyOrgId: uuid('legacy_tenant_id'),
     
