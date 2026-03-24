@@ -21,8 +21,8 @@ function mergeMessages(
   return { ...base, ...localeSpecific };
 }
 
-export default getRequestConfig(async ({ requestLocale, locale }) => {
-  const requested = locale ?? (await requestLocale);
+export default getRequestConfig(async ({ requestLocale }) => {
+  const requested = await requestLocale;
   const validLocale = requested && locales.includes(requested as Locale) ? requested : defaultLocale;
 
   const localeMessages = (await import(`./messages/${validLocale}.json`)).default;

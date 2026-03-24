@@ -13,6 +13,7 @@ import { motion } from "framer-motion";
 import Link from "next/link";
 import { useUser } from "@clerk/nextjs";
 import { useEffect, useState } from "react";
+import { useLocale } from "next-intl";
 import {
   Building2,
   Users,
@@ -44,7 +45,8 @@ interface CLCStats {
 // ── Component ────────────────────────────────────────────────────────────────
 export default function CLCDashboard() {
   const { user } = useUser();
-  const { organizationId } = useOrganization();
+  const { organizationId, organization } = useOrganization();
+  const locale = useLocale();
   const [mounted, setMounted] = useState(false);
   const [childOrgs, setChildOrgs] = useState<{ id: string; name: string; memberCount: number }[]>([]);
 
@@ -53,9 +55,9 @@ export default function CLCDashboard() {
     setMounted(true);
   }, []);
 
-  // Fetch actual child organizations (affiliates) instead of user memberships
+  // Fetch actual child organizations (affiliates) — only for congress-type orgs
   useEffect(() => {
-    if (!organizationId) return;
+    if (!organizationId || (organization && organization.type !== 'congress')) return;
     let cancelled = false;
     (async () => {
       try {
@@ -69,7 +71,7 @@ export default function CLCDashboard() {
       }
     })();
     return () => { cancelled = true; };
-  }, [organizationId]);
+  }, [organizationId, organization]);
 
   const totalAffiliateMembers = childOrgs.reduce((sum, o) => sum + (o.memberCount ?? 0), 0);
 
@@ -99,14 +101,14 @@ export default function CLCDashboard() {
   ];
 
   const quickActions = [
-    { title: "CLC Dashboard", description: "National overview", href: "/dashboard/clc", icon: <Building2 size={24} />, color: "from-blue-500 to-blue-600" },
-    { title: "Affiliates Management", description: "View & manage affiliates", href: "/dashboard/clc/affiliates", icon: <Network size={24} />, color: "from-cyan-500 to-cyan-600" },
-    { title: "Cross-Union Analytics", description: "Movement-wide trends", href: "/dashboard/cross-union-analytics", icon: <GitCompare size={24} />, color: "from-indigo-500 to-indigo-600" },
-    { title: "Precedent Database", description: "National precedent library", href: "/dashboard/precedents", icon: <Scale size={24} />, color: "from-amber-500 to-amber-600" },
-    { title: "Shared Clause Library", description: "Model language & clauses", href: "/dashboard/clause-library", icon: <Library size={24} />, color: "from-teal-500 to-teal-600" },
-    { title: "Sector Analytics", description: "Sector-level performance", href: "/dashboard/sector-analytics", icon: <BarChart3 size={24} />, color: "from-violet-500 to-violet-600" },
-    { title: "Compliance Reports", description: "Affiliate compliance status", href: "/dashboard/compliance", icon: <FileBarChart size={24} />, color: "from-red-500 to-red-600" },
-    { title: "CLC Staff Operations", description: "Staff tools & workflows", href: "/dashboard/clc/staff", icon: <Users size={24} />, color: "from-green-500 to-green-600" },
+    { title: "CLC Dashboard", description: "National overview", href: `/${locale}/dashboard/clc`, icon: <Building2 size={24} />, color: "from-blue-500 to-blue-600" },
+    { title: "Affiliates Management", description: "View & manage affiliates", href: `/${locale}/dashboard/clc/affiliates`, icon: <Network size={24} />, color: "from-cyan-500 to-cyan-600" },
+    { title: "Cross-Union Analytics", description: "Movement-wide trends", href: `/${locale}/dashboard/cross-union-analytics`, icon: <GitCompare size={24} />, color: "from-indigo-500 to-indigo-600" },
+    { title: "Precedent Database", description: "National precedent library", href: `/${locale}/dashboard/precedents`, icon: <Scale size={24} />, color: "from-amber-500 to-amber-600" },
+    { title: "Shared Clause Library", description: "Model language & clauses", href: `/${locale}/dashboard/clause-library`, icon: <Library size={24} />, color: "from-teal-500 to-teal-600" },
+    { title: "Sector Analytics", description: "Sector-level performance", href: `/${locale}/dashboard/sector-analytics`, icon: <BarChart3 size={24} />, color: "from-violet-500 to-violet-600" },
+    { title: "Compliance Reports", description: "Affiliate compliance status", href: `/${locale}/dashboard/compliance`, icon: <FileBarChart size={24} />, color: "from-red-500 to-red-600" },
+    { title: "CLC Staff Operations", description: "Staff tools & workflows", href: `/${locale}/dashboard/clc/staff`, icon: <Users size={24} />, color: "from-green-500 to-green-600" },
   ];
 
   if (!mounted || !user) {
@@ -130,7 +132,7 @@ export default function CLCDashboard() {
           {getGreeting()}, {user?.firstName || "Staff"}
         </h1>
         <p className="text-gray-600 text-lg">
-          Canadian Labour Congress &mdash; National Operations
+          {organization?.name ?? 'Canadian Labour Congress'} &mdash; National Operations
         </p>
       </motion.div>
 

@@ -13,6 +13,7 @@ import { motion } from "framer-motion";
 import Link from "next/link";
 import { useUser } from "@clerk/nextjs";
 import { useEffect, useState } from "react";
+import { useLocale } from "next-intl";
 import {
   Building2,
   Users,
@@ -46,6 +47,7 @@ interface FedStats {
 export default function FederationDashboard() {
   const { user } = useUser();
   const { organization, organizationId } = useOrganization();
+  const locale = useLocale();
   const [mounted, setMounted] = useState(false);
   const [childOrgs, setChildOrgs] = useState<{ id: string; name: string; memberCount: number }[]>([]);
 
@@ -55,9 +57,9 @@ export default function FederationDashboard() {
      
   }, []);
 
-  // Fetch actual child organizations (affiliated locals/unions)
+  // Fetch actual child organizations (affiliated locals/unions) — only for federation-type orgs
   useEffect(() => {
-    if (!organizationId) return;
+    if (!organizationId || (organization && organization.type !== 'federation')) return;
     let cancelled = false;
     (async () => {
       try {
@@ -71,7 +73,7 @@ export default function FederationDashboard() {
       }
     })();
     return () => { cancelled = true; };
-  }, [organizationId]);
+  }, [organizationId, organization]);
 
   const totalLocalMembers = childOrgs.reduce((sum, o) => sum + (o.memberCount ?? 0), 0);
 
@@ -103,14 +105,14 @@ export default function FederationDashboard() {
   ];
 
   const quickActions = [
-    { title: "Federation Dashboard", description: "Regional overview", href: "/dashboard/federation", icon: <Landmark size={24} />, color: "from-blue-500 to-blue-600" },
-    { title: "Affiliated Unions", description: "Manage local affiliates", href: "/dashboard/federation/affiliates", icon: <Building2 size={24} />, color: "from-cyan-500 to-cyan-600" },
-    { title: "Remittance Tracking", description: "Per-capita & dues tracking", href: "/dashboard/remittances", icon: <DollarSign size={24} />, color: "from-emerald-500 to-emerald-600" },
-    { title: "Provincial Analytics", description: "Regional trends & metrics", href: "/dashboard/analytics", icon: <BarChart3 size={24} />, color: "from-indigo-500 to-indigo-600" },
-    { title: "Precedent Database", description: "Provincial precedents", href: "/dashboard/precedents", icon: <Scale size={24} />, color: "from-amber-500 to-amber-600" },
-    { title: "Shared Clause Library", description: "Model contract language", href: "/dashboard/clause-library", icon: <Library size={24} />, color: "from-teal-500 to-teal-600" },
-    { title: "CBA Calendar", description: "Renewal & expiry dates", href: "/dashboard/calendar", icon: <Calendar size={24} />, color: "from-violet-500 to-violet-600" },
-    { title: "Provincial Reports", description: "Compliance & filing reports", href: "/dashboard/reports", icon: <FileBarChart size={24} />, color: "from-red-500 to-red-600" },
+    { title: "Federation Dashboard", description: "Regional overview", href: `/${locale}/dashboard/federation`, icon: <Landmark size={24} />, color: "from-blue-500 to-blue-600" },
+    { title: "Affiliated Unions", description: "Manage local affiliates", href: `/${locale}/dashboard/federation/affiliates`, icon: <Building2 size={24} />, color: "from-cyan-500 to-cyan-600" },
+    { title: "Remittance Tracking", description: "Per-capita & dues tracking", href: `/${locale}/dashboard/remittances`, icon: <DollarSign size={24} />, color: "from-emerald-500 to-emerald-600" },
+    { title: "Provincial Analytics", description: "Regional trends & metrics", href: `/${locale}/dashboard/analytics`, icon: <BarChart3 size={24} />, color: "from-indigo-500 to-indigo-600" },
+    { title: "Precedent Database", description: "Provincial precedents", href: `/${locale}/dashboard/precedents`, icon: <Scale size={24} />, color: "from-amber-500 to-amber-600" },
+    { title: "Shared Clause Library", description: "Model contract language", href: `/${locale}/dashboard/clause-library`, icon: <Library size={24} />, color: "from-teal-500 to-teal-600" },
+    { title: "CBA Calendar", description: "Renewal & expiry dates", href: `/${locale}/dashboard/calendar`, icon: <Calendar size={24} />, color: "from-violet-500 to-violet-600" },
+    { title: "Provincial Reports", description: "Compliance & filing reports", href: `/${locale}/dashboard/reports`, icon: <FileBarChart size={24} />, color: "from-red-500 to-red-600" },
   ];
 
   if (!mounted || !user) {

@@ -77,6 +77,7 @@ function classifyRole(role: string): DashboardTier {
 /** Map organization type to dashboard tier */
 function orgTypeToDashboardTier(orgType: string | undefined): DashboardTier {
   switch (orgType) {
+    case "platform": return "nzila";
     case "congress": return "clc";
     case "federation": return "federation";
     default: return "union";

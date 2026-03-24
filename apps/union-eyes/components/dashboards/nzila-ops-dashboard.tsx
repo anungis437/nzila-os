@@ -13,6 +13,7 @@ import { motion } from "framer-motion";
 import Link from "next/link";
 import { useUser } from "@clerk/nextjs";
 import { useEffect, useState } from "react";
+import { useTranslations, useLocale } from "next-intl";
 import {
   Activity,
   Users,
@@ -55,6 +56,8 @@ interface QuickAction {
 // ── Component ────────────────────────────────────────────────────────────────
 export default function NzilaOpsDashboard() {
   const { user } = useUser();
+  const t = useTranslations('platform');
+  const locale = useLocale();
   const [mounted, setMounted] = useState(false);
   const [platformData, setPlatformData] = useState<PlatformData | null>(null);
   const [loading, setLoading] = useState(true);
@@ -73,31 +76,31 @@ export default function NzilaOpsDashboard() {
 
   const getGreeting = () => {
     const hour = new Date().getHours();
-    if (hour < 12) return "Good morning";
-    if (hour < 18) return "Good afternoon";
-    return "Good evening";
+    if (hour < 12) return t('goodMorning');
+    if (hour < 18) return t('goodAfternoon');
+    return t('goodEvening');
   };
 
   const d = platformData;
 
   const kpis = [
-    { title: "Organizations", value: d?.totalOrganizations ?? 0, icon: <Building2 size={20} />, color: "text-blue-600 bg-blue-100", change: `${d?.activeOrganizations ?? 0} active` },
-    { title: "Total Members", value: (d?.totalMemberCount ?? 0).toLocaleString(), icon: <Users size={20} />, color: "text-purple-600 bg-purple-100", change: `${d?.registeredUsers ?? 0} registered users` },
-    { title: "Open Grievances", value: d?.grievances?.open ?? 0, icon: <AlertTriangle size={20} />, color: "text-orange-600 bg-orange-100", change: `${d?.grievances?.highPriority ?? 0} high priority` },
-    { title: "Active CBAs", value: d?.collectiveAgreements?.active ?? 0, icon: <FileText size={20} />, color: "text-green-600 bg-green-100", change: `${d?.collectiveAgreements?.negotiating ?? 0} under negotiation` },
-    { title: "Settlements", value: d?.settlements?.total ?? 0, icon: <Scale size={20} />, color: "text-emerald-600 bg-emerald-100", change: `$${(d?.settlements?.totalMonetaryValue ?? 0).toLocaleString()} total value` },
-    { title: "CLC Affiliated", value: d?.clcAffiliatedCount ?? 0, icon: <Globe size={20} />, color: "text-indigo-600 bg-indigo-100", change: "affiliated organizations" },
+    { title: t('organizations'), value: d?.totalOrganizations ?? 0, icon: <Building2 size={20} />, color: "text-blue-600 bg-blue-100", change: t('active', { count: d?.activeOrganizations ?? 0 }) },
+    { title: t('totalMembers'), value: (d?.totalMemberCount ?? 0).toLocaleString(), icon: <Users size={20} />, color: "text-purple-600 bg-purple-100", change: t('registeredUsers', { count: d?.registeredUsers ?? 0 }) },
+    { title: t('openGrievances'), value: d?.grievances?.open ?? 0, icon: <AlertTriangle size={20} />, color: "text-orange-600 bg-orange-100", change: t('highPriority', { count: d?.grievances?.highPriority ?? 0 }) },
+    { title: t('activeCBAs'), value: d?.collectiveAgreements?.active ?? 0, icon: <FileText size={20} />, color: "text-green-600 bg-green-100", change: t('underNegotiation', { count: d?.collectiveAgreements?.negotiating ?? 0 }) },
+    { title: t('settlements'), value: d?.settlements?.total ?? 0, icon: <Scale size={20} />, color: "text-emerald-600 bg-emerald-100", change: t('totalValue', { value: (d?.settlements?.totalMonetaryValue ?? 0).toLocaleString() }) },
+    { title: t('clcAffiliated'), value: d?.clcAffiliatedCount ?? 0, icon: <Globe size={20} />, color: "text-indigo-600 bg-indigo-100", change: t('affiliatedOrganizations') },
   ];
 
   const quickActions: QuickAction[] = [
-    { title: "Operations Center", description: "Platform health & incidents", href: "/dashboard/operations", icon: <Activity size={24} />, color: "from-blue-500 to-blue-600" },
-    { title: "Support Queue", description: "Open tickets & escalations", href: "/dashboard/support", icon: <AlertTriangle size={24} />, color: "from-orange-500 to-orange-600" },
-    { title: "Customer Success", description: "Onboarding & retention", href: "/dashboard/customer-success", icon: <Users size={24} />, color: "from-cyan-500 to-cyan-600" },
-    { title: "Platform Analytics", description: "Usage, growth & engagement", href: "/dashboard/analytics-admin", icon: <BarChart3 size={24} />, color: "from-indigo-500 to-indigo-600" },
-    { title: "Billing & Subscriptions", description: "Revenue & plan management", href: "/dashboard/billing-admin", icon: <DollarSign size={24} />, color: "from-green-500 to-green-600" },
-    { title: "Browse Organizations", description: "View all client organizations", href: "/dashboard/admin/organizations", icon: <Globe size={24} />, color: "from-violet-500 to-violet-600" },
-    { title: "Security & Compliance", description: "Platform security posture", href: "/dashboard/compliance", icon: <ShieldCheck size={24} />, color: "from-red-500 to-red-600" },
-    { title: "Sector Analytics", description: "Cross-sector performance data", href: "/dashboard/sector-analytics", icon: <TrendingUp size={24} />, color: "from-teal-500 to-teal-600" },
+    { title: t('operationsCenter'), description: t('platformHealthIncidents'), href: `/${locale}/dashboard/operations`, icon: <Activity size={24} />, color: "from-blue-500 to-blue-600" },
+    { title: t('supportQueue'), description: t('openTicketsEscalations'), href: `/${locale}/dashboard/support`, icon: <AlertTriangle size={24} />, color: "from-orange-500 to-orange-600" },
+    { title: t('customerSuccess'), description: t('onboardingRetention'), href: `/${locale}/dashboard/customer-success`, icon: <Users size={24} />, color: "from-cyan-500 to-cyan-600" },
+    { title: t('platformAnalytics'), description: t('usageGrowthEngagement'), href: `/${locale}/dashboard/analytics-admin`, icon: <BarChart3 size={24} />, color: "from-indigo-500 to-indigo-600" },
+    { title: t('billingSubscriptions'), description: t('revenuePlanManagement'), href: `/${locale}/dashboard/billing-admin`, icon: <DollarSign size={24} />, color: "from-green-500 to-green-600" },
+    { title: t('browseOrganizations'), description: t('viewAllClientOrgs'), href: `/${locale}/dashboard/admin/organizations`, icon: <Globe size={24} />, color: "from-violet-500 to-violet-600" },
+    { title: t('securityCompliance'), description: t('platformSecurityPosture'), href: `/${locale}/dashboard/compliance`, icon: <ShieldCheck size={24} />, color: "from-red-500 to-red-600" },
+    { title: t('sectorAnalytics'), description: t('crossSectorPerformance'), href: `/${locale}/dashboard/sector-analytics`, icon: <TrendingUp size={24} />, color: "from-teal-500 to-teal-600" },
   ];
 
   if (!mounted || !user || loading) {
@@ -118,10 +121,10 @@ export default function NzilaOpsDashboard() {
       {/* Welcome */}
       <motion.div initial={{ opacity: 0, y: 20 }} animate={{ opacity: 1, y: 0 }} transition={{ duration: 0.5 }} className="mb-8">
         <h1 className="text-4xl font-bold text-gray-900 mb-2">
-          {getGreeting()}, {user?.firstName || "Operator"}
+          {getGreeting()}, {user?.firstName || t('operator')}
         </h1>
         <p className="text-gray-600 text-lg">
-          Nzila Platform Operations &mdash; here&apos;s your overview.
+          {t('operationsOverview')}
         </p>
       </motion.div>
 
@@ -150,7 +153,7 @@ export default function NzilaOpsDashboard() {
 
       {/* Quick Actions */}
       <motion.div initial={{ opacity: 0, y: 20 }} animate={{ opacity: 1, y: 0 }} transition={{ duration: 0.5, delay: 0.2 }} className="mb-8">
-        <h2 className="text-2xl font-bold text-gray-900 mb-6">Command Center</h2>
+        <h2 className="text-2xl font-bold text-gray-900 mb-6">{t('commandCenter')}</h2>
         <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-4">
           {quickActions.map((action, i) => (
             <motion.div key={action.href} initial={{ opacity: 0, scale: 0.95 }} animate={{ opacity: 1, scale: 1 }} transition={{ duration: 0.3, delay: 0.2 + i * 0.04 }}>
@@ -163,7 +166,7 @@ export default function NzilaOpsDashboard() {
                     <h3 className="font-semibold text-gray-900 mb-2 text-lg group-hover:text-blue-600 transition-colors">{action.title}</h3>
                     <p className="text-sm text-gray-600 mb-3">{action.description}</p>
                     <div className="flex items-center text-blue-600 text-sm font-medium group-hover:translate-x-1 transition-transform">
-                      Open <ArrowRight size={16} className="ml-1" />
+                      {t('open')} <ArrowRight size={16} className="ml-1" />
                     </div>
                   </CardContent>
                 </Card>
@@ -181,18 +184,18 @@ export default function NzilaOpsDashboard() {
             <CardHeader>
               <CardTitle className="flex items-center gap-2">
                 <Server size={20} className="text-green-600" />
-                Platform Health
+                {t('platformHealth')}
               </CardTitle>
-              <CardDescription>System status and uptime</CardDescription>
+              <CardDescription>{t('systemStatusUptime')}</CardDescription>
             </CardHeader>
             <CardContent>
               <div className="space-y-4">
                 {[
-                  { name: "Organizations", value: `${d?.totalOrganizations ?? 0} total`, status: (d?.totalOrganizations ?? 0) > 0 ? "operational" : "degraded" },
-                  { name: "Registered Users", value: `${d?.registeredUsers ?? 0} users`, status: (d?.registeredUsers ?? 0) > 0 ? "operational" : "degraded" },
-                  { name: "Grievance Pipeline", value: `${d?.grievances?.open ?? 0} open / ${d?.grievances?.total ?? 0} total`, status: "operational" },
-                  { name: "Collective Agreements", value: `${d?.collectiveAgreements?.active ?? 0} active`, status: "operational" },
-                  { name: "Database", value: platformData ? "Connected" : "Unavailable", status: platformData ? "operational" : "degraded" },
+                  { name: t('organizations'), value: t('total', { count: d?.totalOrganizations ?? 0 }), status: (d?.totalOrganizations ?? 0) > 0 ? "operational" : "degraded" },
+                  { name: t('registeredUsersLabel'), value: t('users', { count: d?.registeredUsers ?? 0 }), status: (d?.registeredUsers ?? 0) > 0 ? "operational" : "degraded" },
+                  { name: t('grievancePipeline'), value: t('openOfTotal', { open: d?.grievances?.open ?? 0, total: d?.grievances?.total ?? 0 }), status: "operational" },
+                  { name: t('collectiveAgreements'), value: t('active', { count: d?.collectiveAgreements?.active ?? 0 }), status: "operational" },
+                  { name: t('database'), value: platformData ? t('connected') : t('unavailable'), status: platformData ? "operational" : "degraded" },
                 ].map(svc => (
                   <div key={svc.name} className="flex items-center justify-between p-3 rounded-lg border bg-gray-50 border-gray-200">
                     <div className="flex items-center gap-3">
@@ -213,27 +216,27 @@ export default function NzilaOpsDashboard() {
             <CardHeader>
               <CardTitle className="flex items-center gap-2">
                 <Clock size={20} className="text-blue-600" />
-                Recent Platform Events
+                {t('recentPlatformEvents')}
               </CardTitle>
-              <CardDescription>Latest system activity</CardDescription>
+              <CardDescription>{t('latestSystemActivity')}</CardDescription>
             </CardHeader>
             <CardContent>
               {d?.grievances?.total ? (
                 <div className="space-y-3">
                   <div className="flex items-center justify-between p-3 rounded-lg border bg-gray-50 border-gray-200">
-                    <span className="text-sm font-medium">Total Grievances</span>
+                    <span className="text-sm font-medium">{t('totalGrievances')}</span>
                     <span className="text-sm font-bold">{d.grievances.total}</span>
                   </div>
                   <div className="flex items-center justify-between p-3 rounded-lg border bg-gray-50 border-gray-200">
-                    <span className="text-sm font-medium">Resolved</span>
+                    <span className="text-sm font-medium">{t('resolved')}</span>
                     <span className="text-sm font-bold text-green-600">{d.grievances.resolved}</span>
                   </div>
                   <div className="flex items-center justify-between p-3 rounded-lg border bg-gray-50 border-gray-200">
-                    <span className="text-sm font-medium">In Arbitration</span>
+                    <span className="text-sm font-medium">{t('inArbitration')}</span>
                     <span className="text-sm font-bold text-orange-600">{d.grievances.inArbitration}</span>
                   </div>
                   <div className="flex items-center justify-between p-3 rounded-lg border bg-gray-50 border-gray-200">
-                    <span className="text-sm font-medium">CBAs Under Negotiation</span>
+                    <span className="text-sm font-medium">{t('cbasUnderNegotiation')}</span>
                     <span className="text-sm font-bold text-blue-600">{d.collectiveAgreements?.negotiating ?? 0}</span>
                   </div>
                 </div>
@@ -242,8 +245,8 @@ export default function NzilaOpsDashboard() {
                   <div className="inline-flex p-3 rounded-full bg-gray-100 mb-3">
                     <Activity size={24} className="text-gray-400" />
                   </div>
-                  <p className="text-gray-600">No data available</p>
-                  <p className="text-sm text-gray-500 mt-1">Platform activity will appear here</p>
+                  <p className="text-gray-600">{t('noDataAvailable')}</p>
+                  <p className="text-sm text-gray-500 mt-1">{t('platformActivityAppears')}</p>
                 </div>
               )}
             </CardContent>
