@@ -133,12 +133,26 @@ export default async function PlatformOverviewPage({
   // Org-scoped view (org admin or platform admin with orgId param)
   if (!orgId) {
     return (
-      <div className="p-8">
-        <h1 className="text-3xl font-bold text-gray-900">Platform Overview</h1>
-        <p className="text-gray-500 mt-4">
-          Select an organization to view metrics, or contact your platform
-          administrator for global access.
-        </p>
+      <div className={isExecutive ? 'p-12 bg-gray-50 min-h-screen' : 'p-8'}>
+        <div className="mb-8">
+          <h1 className="text-3xl font-bold text-gray-900">Platform Overview</h1>
+          <p className="text-gray-500 mt-1">
+            Organization-scoped view
+          </p>
+        </div>
+        <div className="bg-white border border-gray-200 rounded-xl p-8 max-w-lg">
+          <div className="flex items-center gap-3 mb-4">
+            <BuildingOffice2Icon className="h-8 w-8 text-blue-500" />
+            <h2 className="text-lg font-semibold text-gray-900">Select an Organization</h2>
+          </div>
+          <p className="text-gray-600 text-sm mb-4">
+            Choose an organization to view its metrics, or contact your platform
+            administrator for global access.
+          </p>
+          <p className="text-xs text-gray-400">
+            Append <code className="bg-gray-100 px-1 py-0.5 rounded text-gray-600">?orgId=your-org-id</code> to the URL to view organization-specific metrics.
+          </p>
+        </div>
       </div>
     )
   }

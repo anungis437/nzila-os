@@ -36,7 +36,7 @@ export async function GET() {
     }
 
     // Only NZILA Ventures (platform owner) can see the overview
-    const userOrgId = await getOrganizationIdForUser(user.id);
+    const userOrgId = await getOrganizationIdForUser(user.userId);
     if (userOrgId !== DEFAULT_ORGANIZATION_ID) {
       return standardErrorResponse(
         ErrorCode.FORBIDDEN,

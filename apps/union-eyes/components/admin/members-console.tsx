@@ -4,7 +4,7 @@
  */
 "use client";
 
-import { useState, useEffect } from "react";
+import { useState, useEffect, useCallback } from "react";
 import { Users, Upload, Download, Plus, Search, Filter } from "lucide-react";
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import { Button } from "@/components/ui/button";
@@ -17,10 +17,40 @@ import {
   SelectTrigger,
   SelectValue,
 } from "@/components/ui/select";
+import {
+  Table,
+  TableBody,
+  TableCell,
+  TableHead,
+  TableHeader,
+  TableRow,
+} from "@/components/ui/table";
+import { Badge } from "@/components/ui/badge";
 
 interface Organization {
   id: string;
   name: string;
+}
+
+interface MemberStats {
+  total: number;
+  active: number;
+  stewards: number;
+  officers: number;
+}
+
+interface Member {
+  id: string;
+  user_id: string;
+  organization_id: string;
+  role: string;
+  status: string;
+  name: string | null;
+  email: string | null;
+  phone: string | null;
+  department: string | null;
+  membership_number: string | null;
+  created_at: string | null;
 }
 
 export default function MembersConsole() {
@@ -29,6 +59,10 @@ export default function MembersConsole() {
   const [selectedOrg, setSelectedOrg] = useState<string>("all");
   const [organizations, setOrganizations] = useState<Organization[]>([]);
   const [isLoadingOrgs, setIsLoadingOrgs] = useState(true);
+  const [stats, setStats] = useState<MemberStats>({ total: 0, active: 0, stewards: 0, officers: 0 });
+  const [isLoadingStats, setIsLoadingStats] = useState(true);
+  const [members, setMembers] = useState<Member[]>([]);
+  const [isLoadingMembers, setIsLoadingMembers] = useState(false);
   const [_refreshKey, setRefreshKey] = useState(0);
 
   // Load organizations on mount
@@ -39,7 +73,7 @@ export default function MembersConsole() {
         const response = await fetch('/api/organizations');
         if (response.ok) {
           const data = await response.json();
-          setOrganizations(data.organizations || []);
+          setOrganizations(data.data || data.organizations || []);
         }
       } catch (error) {
         void error;
@@ -51,10 +85,89 @@ export default function MembersConsole() {
     fetchOrganizations();
   }, []);
 
+  // Fetch stats (all or filtered by org)
+  const fetchStats = useCallback(async () => {
+    try {
+      setIsLoadingStats(true);
+      const url = selectedOrg === "all"
+        ? '/api/admin/members/stats'
+        : `/api/admin/members/stats?organizationId=${selectedOrg}`;
+      const response = await fetch(url);
+      if (response.ok) {
+        const data = await response.json();
+        setStats(data);
+      }
+    } catch (error) {
+      void error;
+    } finally {
+      setIsLoadingStats(false);
+    }
+  }, [selectedOrg]);
+
+  // Fetch members list
+  const fetchMembers = useCallback(async () => {
+    if (selectedOrg === "all") {
+      // Fetch from all orgs
+      try {
+        setIsLoadingMembers(true);
+        const allMembers: Member[] = [];
+        for (const org of organizations) {
+          const response = await fetch(`/api/organizations/${org.id}/members`);
+          if (response.ok) {
+            const data = await response.json();
+            allMembers.push(...(data.data || []));
+          }
+        }
+        setMembers(allMembers);
+      } catch (error) {
+        void error;
+      } finally {
+        setIsLoadingMembers(false);
+      }
+    } else {
+      try {
+        setIsLoadingMembers(true);
+        const response = await fetch(`/api/organizations/${selectedOrg}/members`);
+        if (response.ok) {
+          const data = await response.json();
+          setMembers(data.data || []);
+        }
+      } catch (error) {
+        void error;
+      } finally {
+        setIsLoadingMembers(false);
+      }
+    }
+  }, [selectedOrg, organizations]);
+
+  useEffect(() => {
+    fetchStats();
+  }, [fetchStats]);
+
+  useEffect(() => {
+    if (!isLoadingOrgs) {
+      fetchMembers();
+    }
+  }, [fetchMembers, isLoadingOrgs]);
+
   // Function to trigger member list refresh
   const refreshMemberList = () => {
     setRefreshKey(prev => prev + 1);
+    fetchStats();
+    fetchMembers();
   };
+
+  // Filter members by search query
+  const filteredMembers = members.filter((member) => {
+    if (!searchQuery) return true;
+    const q = searchQuery.toLowerCase();
+    return (
+      member.name?.toLowerCase().includes(q) ||
+      member.email?.toLowerCase().includes(q) ||
+      member.role?.toLowerCase().includes(q) ||
+      member.membership_number?.toLowerCase().includes(q)
+    );
+  });
 
   return (
     <div className="container mx-auto p-6 space-y-6">
@@ -91,7 +204,7 @@ export default function MembersConsole() {
             <div className="flex items-center justify-between">
               <div>
                 <p className="text-sm text-muted-foreground">Total Members</p>
-                <p className="text-2xl font-bold">-</p>
+                <p className="text-2xl font-bold">{isLoadingStats ? '…' : stats.total}</p>
               </div>
               <Users className="w-8 h-8 text-muted-foreground" />
             </div>
@@ -103,7 +216,7 @@ export default function MembersConsole() {
             <div className="flex items-center justify-between">
               <div>
                 <p className="text-sm text-muted-foreground">Active Members</p>
-                <p className="text-2xl font-bold text-green-600">-</p>
+                <p className="text-2xl font-bold text-green-600">{isLoadingStats ? '…' : stats.active}</p>
               </div>
               <Users className="w-8 h-8 text-green-600" />
             </div>
@@ -115,7 +228,7 @@ export default function MembersConsole() {
             <div className="flex items-center justify-between">
               <div>
                 <p className="text-sm text-muted-foreground">Stewards</p>
-                <p className="text-2xl font-bold text-purple-600">-</p>
+                <p className="text-2xl font-bold text-purple-600">{isLoadingStats ? '…' : stats.stewards}</p>
               </div>
               <Users className="w-8 h-8 text-purple-600" />
             </div>
@@ -127,7 +240,7 @@ export default function MembersConsole() {
             <div className="flex items-center justify-between">
               <div>
                 <p className="text-sm text-muted-foreground">Officers</p>
-                <p className="text-2xl font-bold text-orange-600">-</p>
+                <p className="text-2xl font-bold text-orange-600">{isLoadingStats ? '…' : stats.officers}</p>
               </div>
               <Users className="w-8 h-8 text-orange-600" />
             </div>
@@ -260,9 +373,44 @@ export default function MembersConsole() {
           <CardTitle>All Members</CardTitle>
         </CardHeader>
         <CardContent>
-          <p className="text-sm text-muted-foreground">
-            Select an organization from the filters above to view and manage members.
-          </p>
+          {isLoadingMembers ? (
+            <p className="text-sm text-muted-foreground">Loading members…</p>
+          ) : filteredMembers.length === 0 ? (
+            <p className="text-sm text-muted-foreground">
+              No members found.
+            </p>
+          ) : (
+            <Table>
+              <TableHeader>
+                <TableRow>
+                  <TableHead>Name</TableHead>
+                  <TableHead>Email</TableHead>
+                  <TableHead>Role</TableHead>
+                  <TableHead>Status</TableHead>
+                  <TableHead>Department</TableHead>
+                  <TableHead>Member #</TableHead>
+                </TableRow>
+              </TableHeader>
+              <TableBody>
+                {filteredMembers.map((member) => (
+                  <TableRow key={member.id}>
+                    <TableCell className="font-medium">{member.name ?? '—'}</TableCell>
+                    <TableCell>{member.email ?? '—'}</TableCell>
+                    <TableCell>
+                      <Badge variant="outline">{member.role}</Badge>
+                    </TableCell>
+                    <TableCell>
+                      <Badge variant={member.status === 'active' ? 'default' : 'secondary'}>
+                        {member.status}
+                      </Badge>
+                    </TableCell>
+                    <TableCell>{member.department ?? '—'}</TableCell>
+                    <TableCell>{member.membership_number ?? '—'}</TableCell>
+                  </TableRow>
+                ))}
+              </TableBody>
+            </Table>
+          )}
         </CardContent>
       </Card>
 
