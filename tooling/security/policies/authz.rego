@@ -117,6 +117,5 @@ deny_reasons contains reason if {
 }
 
 deny_reasons contains reason if {
-  some reason
   reason := deny_reason
 }
