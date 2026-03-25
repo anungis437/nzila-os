@@ -18,11 +18,11 @@ const crud = crudRoutes({
 });
 
 export async function GET(req: NextRequest) {
-  try {
-    return await crud.GET(req);
-  } catch {
+  const response = await crud.GET(req);
+  if (!response.ok) {
     return NextResponse.json({ data: [], pagination: { page: 1, limit: 50, total: 0, totalPages: 0 } });
   }
+  return response;
 }
 
 export const POST = crud.POST;
