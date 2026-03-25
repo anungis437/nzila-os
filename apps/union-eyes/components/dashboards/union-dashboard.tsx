@@ -189,7 +189,11 @@ const getStats = (t: any): StatCard[] => [
   },
 ];
 
-export default function UnionDashboard() {
+interface UnionDashboardProps {
+  isPlatformViewer?: boolean;
+}
+
+export default function UnionDashboard({ isPlatformViewer = false }: UnionDashboardProps) {
   const { user } = useUser();
   const router = useRouter();
   const organizationId = useOrganizationId();
@@ -499,45 +503,47 @@ export default function UnionDashboard() {
         ))}
       </motion.div>
 
-      {/* Quick Links */}
-      <motion.div
-        initial={{ opacity: 0, y: 20 }}
-        animate={{ opacity: 1, y: 0 }}
-        transition={{ duration: 0.5, delay: 0.2 }}
-        className="mb-8"
-      >
-        <div className="flex items-center justify-between mb-6">
-          <h2 className="text-2xl font-bold text-gray-900">{t('dashboard.quickActions')}</h2>
-        </div>
-        
-        <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-4">
-          {visibleQuickLinks.map((link, index) => (
-            <motion.div
-              key={link.href}
-              initial={{ opacity: 0, scale: 0.95 }}
-              animate={{ opacity: 1, scale: 1 }}
-              transition={{ duration: 0.3, delay: 0.2 + index * 0.05 }}
-            >
-              <Link href={link.href}>
-                <Card className="border-white/50 bg-white/80 backdrop-blur-sm shadow-lg hover:shadow-xl transition-all hover:scale-[1.02] cursor-pointer group h-full">
-                  <CardContent className="p-6">
-                    <div className={`inline-flex p-3 rounded-xl bg-linear-to-br ${link.color} text-white mb-4 shadow-lg group-hover:scale-110 transition-transform`}>
-                      {link.icon}
-                    </div>
-                    <h3 className="font-semibold text-gray-900 mb-2 text-lg group-hover:text-blue-600 transition-colors">
-                      {link.title}
-                    </h3>
-                    <p className="text-sm text-gray-600 mb-3">{link.description}</p>
-                    <div className="flex items-center text-blue-600 text-sm font-medium group-hover:translate-x-1 transition-transform">
-                      {t('common.go')} <ArrowRight size={16} className="ml-1" />
-                    </div>
-                  </CardContent>
-                </Card>
-              </Link>
-            </motion.div>
-          ))}
-        </div>
-      </motion.div>
+      {/* Quick Links — hidden for platform admins viewing this org */}
+      {!isPlatformViewer && (
+        <motion.div
+          initial={{ opacity: 0, y: 20 }}
+          animate={{ opacity: 1, y: 0 }}
+          transition={{ duration: 0.5, delay: 0.2 }}
+          className="mb-8"
+        >
+          <div className="flex items-center justify-between mb-6">
+            <h2 className="text-2xl font-bold text-gray-900">{t('dashboard.quickActions')}</h2>
+          </div>
+          
+          <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-4">
+            {visibleQuickLinks.map((link, index) => (
+              <motion.div
+                key={link.href}
+                initial={{ opacity: 0, scale: 0.95 }}
+                animate={{ opacity: 1, scale: 1 }}
+                transition={{ duration: 0.3, delay: 0.2 + index * 0.05 }}
+              >
+                <Link href={link.href}>
+                  <Card className="border-white/50 bg-white/80 backdrop-blur-sm shadow-lg hover:shadow-xl transition-all hover:scale-[1.02] cursor-pointer group h-full">
+                    <CardContent className="p-6">
+                      <div className={`inline-flex p-3 rounded-xl bg-linear-to-br ${link.color} text-white mb-4 shadow-lg group-hover:scale-110 transition-transform`}>
+                        {link.icon}
+                      </div>
+                      <h3 className="font-semibold text-gray-900 mb-2 text-lg group-hover:text-blue-600 transition-colors">
+                        {link.title}
+                      </h3>
+                      <p className="text-sm text-gray-600 mb-3">{link.description}</p>
+                      <div className="flex items-center text-blue-600 text-sm font-medium group-hover:translate-x-1 transition-transform">
+                        {t('common.go')} <ArrowRight size={16} className="ml-1" />
+                      </div>
+                    </CardContent>
+                  </Card>
+                </Link>
+              </motion.div>
+            ))}
+          </div>
+        </motion.div>
+      )}
 
       {/* Deadline Widget */}
       <motion.div

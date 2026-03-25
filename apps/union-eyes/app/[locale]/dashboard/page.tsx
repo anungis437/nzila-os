@@ -171,12 +171,12 @@ export default function DashboardPage() {
       case "nzila":
         return <NzilaOpsDashboard />;
       case "clc":
-        return <CLCDashboard />;
+        return <CLCDashboard isPlatformViewer={isPlatformViewer} />;
       case "federation":
-        return <FederationDashboard />;
+        return <FederationDashboard isPlatformViewer={isPlatformViewer} />;
       case "union":
       default:
-        return <UnionDashboard />;
+        return <UnionDashboard isPlatformViewer={isPlatformViewer} />;
     }
   })();
 
