@@ -103,7 +103,7 @@ export default function MembersConsole() {
 
   // Extract members from API response
   // eslint-disable-next-line @typescript-eslint/no-explicit-any
-  const members: Member[] = data?.success ? data.data.members.map((m: any) => ({
+  const members: Member[] = data?.success && Array.isArray(data.data?.members) ? data.data.members.map((m: any) => ({
     id: m.id,
     name: m.name,
     email: m.email,

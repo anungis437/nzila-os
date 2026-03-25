@@ -39,7 +39,7 @@ export const GET = withApi(
 
     try {
 
-    return withSystemContext(async () => {
+    return await withSystemContext(async () => {
     const incidentRows = Array.from(
         await db.execute(sql`SELECT count(*)::int AS cnt FROM workplace_incidents WHERE ${orgFilter} AND ${dateFilter}`)
       );
