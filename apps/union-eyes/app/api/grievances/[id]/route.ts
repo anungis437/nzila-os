@@ -17,9 +17,11 @@ import {
   standardSuccessResponse,
 } from "@/lib/api/standardized-responses";
 import { eq, and, desc } from "drizzle-orm";
+import { requireEntitlement } from '@/services/platform-economics/entitlement-guard';
 
 export const GET = withOrganizationAuth(async (request, context, params?: { id: string }) => {
   const { organizationId } = context;
+  await requireEntitlement(organizationId, 'grievance_case_suite');
 
   try {
     if (!params?.id) return standardErrorResponse(ErrorCode.VALIDATION_ERROR, "Missing ID");

@@ -15,6 +15,7 @@ import { db } from '@/db/db';
 import { claimUpdates, claims } from '@/db/schema/claims-schema';
 import { auditDataMutation } from '@/lib/audit-logger';
 import { logger } from '@/lib/logger';
+import { requireEntitlement } from '@/services/platform-economics/entitlement-guard';
 
 export const dynamic = 'force-dynamic';
 
@@ -40,6 +41,7 @@ export async function GET(
         { status: 401 },
       );
     }
+    await requireEntitlement(orgId, 'grievance_case_suite');
 
     const notes = await withRLSContext(async (tx) => {
       // Verify the case exists (RLS enforces org isolation)
@@ -92,6 +94,7 @@ export async function POST(
         { status: 401 },
       );
     }
+    await requireEntitlement(orgId, 'grievance_case_suite');
 
     // Parse body
     let body: unknown;

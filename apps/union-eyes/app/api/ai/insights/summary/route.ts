@@ -12,6 +12,7 @@ import { AI_FEATURES } from '@/lib/services/feature-flags';
 import { guardAiFeature } from '@/lib/ai/ai-feature-guard';
 import { getInsightReports } from '@/lib/ai/executive-insights';
 import { standardErrorResponse, standardSuccessResponse, ErrorCode } from '@/lib/api/standardized-responses';
+import { requireEntitlement } from '@/services/platform-economics/entitlement-guard';
 
 export const GET = withRoleAuth('officer', async (_request: NextRequest, context: BaseAuthContext) => {
   const blocked = await guardAiFeature(AI_FEATURES.EXECUTIVE_INSIGHTS, {
@@ -19,6 +20,8 @@ export const GET = withRoleAuth('officer', async (_request: NextRequest, context
     organizationId: context.organizationId,
   });
   if (blocked) return blocked;
+
+  await requireEntitlement(context.organizationId!, 'ai_advanced_insights');
 
   try {
     // Fetch latest report for each type

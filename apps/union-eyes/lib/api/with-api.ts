@@ -58,6 +58,9 @@ import {
   createRateLimitHeaders,
   type RateLimitConfig,
 } from '@/lib/rate-limiter';
+import {
+  requireEntitlement,
+} from '@/services/platform-economics/entitlement-guard';
 
 // ─── Types ───────────────────────────────────────────────────────────────────
 
@@ -97,6 +100,11 @@ export interface WithApiOptions<
 
   /** Rate-limit config from `RATE_LIMITS.*`. Keyed by authenticated userId. */
   rateLimit?: RateLimitConfig;
+
+  // ── Entitlement ─────────────────────────────────────────────────────────
+
+  /** Platform module key (from PLATFORM_MODULES). Enforces org entitlement before handler runs. */
+  entitlement?: string;
 
   // ── OpenAPI ───────────────────────────────────────────────────────────────
 
@@ -268,6 +276,20 @@ export function withApi<
             ErrorCode.INSUFFICIENT_PERMISSIONS,
             'You do not have the required role for this endpoint',
             undefined,
+            traceId,
+          );
+        }
+      }
+
+      // ── 4b. Entitlement check ─────────────────────────────────────────
+      if (options.entitlement && user?.organizationId) {
+        try {
+          await requireEntitlement(user.organizationId, options.entitlement, user.id);
+        } catch (err) {
+          return standardErrorResponse(
+            ErrorCode.INSUFFICIENT_PERMISSIONS,
+            `Module access denied: ${options.entitlement}`,
+            { module: options.entitlement },
             traceId,
           );
         }

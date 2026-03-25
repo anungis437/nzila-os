@@ -10,7 +10,7 @@ import { withSystemContext } from '@/lib/db/with-rls-context';
 export const dynamic = 'force-dynamic';
 
 export const GET = withApi(
-  { auth: { required: true, minRole: 'admin' } },
+  { auth: { required: true, minRole: 'admin' }, entitlement: 'governance_suite' },
   async () => {
     return withSystemContext(async () => {
     const rows = await db.execute(sql`
@@ -27,6 +27,7 @@ export const GET = withApi(
 export const POST = withApi(
   {
     auth: { required: true, minRole: 'admin' },
+    entitlement: 'governance_suite',
     body: z.object({
       electionYear: z.number().int(),
       electionDate: z.string().min(1),

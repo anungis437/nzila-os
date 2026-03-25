@@ -19,6 +19,7 @@ import {
   paymentAllocations,
   billingAdjustments,
   subscriptionPlans,
+  organizations,
   type NewBillingAccount,
 } from '@/db/schema';
 import { eq, and, desc, sql, inArray } from 'drizzle-orm';
@@ -524,6 +525,85 @@ export async function getPayments(organizationId: string, invoiceId?: string, li
     .where(and(...conditions))
     .orderBy(desc(platformPayments.createdAt))
     .limit(limit);
+}
+
+// ============================================================================
+// Admin Cross-Org Queries (Billing Dashboard)
+// ============================================================================
+
+export async function getAdminSubscriptions() {
+  const rows = await db
+    .select({
+      id: orgSubscriptions.id,
+      organizationId: orgSubscriptions.organizationId,
+      orgName: organizations.name,
+      planName: subscriptionPlans.name,
+      planCode: subscriptionPlans.code,
+      pricingModel: subscriptionPlans.pricingModel,
+      baseFee: subscriptionPlans.baseFee,
+      currency: subscriptionPlans.currency,
+      billingInterval: subscriptionPlans.billingInterval,
+      status: orgSubscriptions.status,
+      startDate: orgSubscriptions.startDate,
+      endDate: orgSubscriptions.endDate,
+      localCount: orgSubscriptions.localCount,
+      seatCount: orgSubscriptions.seatCount,
+      discountPercent: orgSubscriptions.discountPercent,
+      memberCount: organizations.memberCount,
+      perCapitaRate: organizations.perCapitaRate,
+      createdAt: orgSubscriptions.createdAt,
+    })
+    .from(orgSubscriptions)
+    .innerJoin(subscriptionPlans, eq(orgSubscriptions.planId, subscriptionPlans.id))
+    .innerJoin(organizations, eq(orgSubscriptions.organizationId, organizations.id))
+    .orderBy(desc(subscriptionPlans.baseFee));
+
+  return rows;
+}
+
+export async function getAdminInvoices() {
+  const rows = await db
+    .select({
+      id: platformInvoices.id,
+      organizationId: platformInvoices.organizationId,
+      orgName: organizations.name,
+      invoiceNumber: platformInvoices.invoiceNumber,
+      status: platformInvoices.status,
+      subtotal: platformInvoices.subtotal,
+      taxAmount: platformInvoices.taxAmount,
+      totalAmount: platformInvoices.totalAmount,
+      amountPaid: platformInvoices.amountPaid,
+      dueDate: platformInvoices.dueDate,
+      issueDate: platformInvoices.issueDate,
+      notes: platformInvoices.notes,
+      createdAt: platformInvoices.createdAt,
+    })
+    .from(platformInvoices)
+    .innerJoin(organizations, eq(platformInvoices.organizationId, organizations.id))
+    .orderBy(desc(platformInvoices.createdAt));
+
+  return rows;
+}
+
+export async function getAdminPayments() {
+  const rows = await db
+    .select({
+      id: platformPayments.id,
+      organizationId: platformPayments.organizationId,
+      orgName: organizations.name,
+      amount: platformPayments.amount,
+      currency: platformPayments.currency,
+      status: platformPayments.status,
+      method: platformPayments.method,
+      failureReason: platformPayments.failureReason,
+      paidAt: platformPayments.paidAt,
+      createdAt: platformPayments.createdAt,
+    })
+    .from(platformPayments)
+    .innerJoin(organizations, eq(platformPayments.organizationId, organizations.id))
+    .orderBy(desc(platformPayments.createdAt));
+
+  return rows;
 }
 
 // Re-export NewPlatformCostLedgerEntry for billing service callers

@@ -1,17 +1,34 @@
 /**
- * CRUD collection route for perCapitaRemittances
+ * POST /api/billing/send-invoice — Generate an invoice for a billing period
  */
-import { crudRoutes } from '@/lib/api/crud-factory';
-import { perCapitaRemittances } from '@/db/schema';
+
+import { withApi, ApiError, z, RATE_LIMITS } from '@/lib/api/framework';
+import { generateInvoice } from '@/services/platform-economics';
 
 export const dynamic = 'force-dynamic';
 
-const { GET, POST } = crudRoutes({
-  table: perCapitaRemittances,
-  pk: 'id',
-  tags: ["Billing"],
-  orgScoped: true,
-  readRole: 'member',
-  writeRole: 'steward',
+const bodySchema = z.object({
+  billingPeriodId: z.string().uuid(),
 });
-export { GET, POST };
+
+export const POST = withApi(
+  {
+    auth: { minRole: 'steward' },
+    entitlement: 'financial_intelligence_suite',
+    body: bodySchema,
+    rateLimit: RATE_LIMITS.FINANCIAL_WRITE,
+    openapi: {
+      tags: ['Billing'],
+      summary: 'Generate an invoice for a billing period',
+    },
+  },
+  async ({ body, organizationId, userId }) => {
+    if (!organizationId) throw ApiError.badRequest('Organization context required');
+    const invoice = await generateInvoice({
+      organizationId,
+      billingPeriodId: body.billingPeriodId,
+      createdBy: userId ?? undefined,
+    });
+    return invoice;
+  },
+);

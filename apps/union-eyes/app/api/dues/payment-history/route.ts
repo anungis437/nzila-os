@@ -1,17 +1,33 @@
 /**
- * CRUD collection route for perCapitaRemittances
+ * GET /api/dues/payment-history — List payment history for the org
  */
-import { crudRoutes } from '@/lib/api/crud-factory';
-import { perCapitaRemittances } from '@/db/schema';
+
+import { withApi, ApiError } from '@/lib/api/framework';
+import { db } from '@/db';
+import { platformPayments } from '@/db/schema';
+import { eq, desc } from 'drizzle-orm';
 
 export const dynamic = 'force-dynamic';
 
-const { GET, POST } = crudRoutes({
-  table: perCapitaRemittances,
-  pk: 'id',
-  tags: ["Billing"],
-  orgScoped: true,
-  readRole: 'member',
-  writeRole: 'steward',
-});
-export { GET, POST };
+export const GET = withApi(
+  {
+    auth: { minRole: 'member' },
+    openapi: {
+      tags: ['Dues'],
+      summary: 'List payment history for the organization',
+    },
+  },
+  async ({ request, organizationId }) => {
+    if (!organizationId) throw ApiError.badRequest('Organization context required');
+    const url = new URL(request.url);
+    const limit = Math.min(100, Math.max(1, parseInt(url.searchParams.get('limit') || '50')));
+
+    const payments = await db
+      .select()
+      .from(platformPayments)
+      .where(eq(platformPayments.organizationId, organizationId))
+      .orderBy(desc(platformPayments.createdAt))
+      .limit(limit);
+    return { payments };
+  },
+);

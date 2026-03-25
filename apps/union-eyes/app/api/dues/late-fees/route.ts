@@ -1,17 +1,36 @@
 /**
- * CRUD collection route for perCapitaRemittances
+ * GET /api/dues/late-fees — List overdue invoices with late fee info
  */
-import { crudRoutes } from '@/lib/api/crud-factory';
-import { perCapitaRemittances } from '@/db/schema';
+
+import { withApi, ApiError } from '@/lib/api/framework';
+import { db } from '@/db';
+import { platformInvoices } from '@/db/schema';
+import { eq, and, lt, inArray } from 'drizzle-orm';
 
 export const dynamic = 'force-dynamic';
 
-const { GET, POST } = crudRoutes({
-  table: perCapitaRemittances,
-  pk: 'id',
-  tags: ["Billing"],
-  orgScoped: true,
-  readRole: 'member',
-  writeRole: 'steward',
-});
-export { GET, POST };
+export const GET = withApi(
+  {
+    auth: { minRole: 'officer' },
+    entitlement: 'financial_intelligence_suite',
+    openapi: {
+      tags: ['Dues'],
+      summary: 'List overdue invoices eligible for late fees',
+    },
+  },
+  async ({ organizationId }) => {
+    if (!organizationId) throw ApiError.badRequest('Organization context required');
+
+    const overdueInvoices = await db
+      .select()
+      .from(platformInvoices)
+      .where(
+        and(
+          eq(platformInvoices.organizationId, organizationId),
+          inArray(platformInvoices.status, ['issued', 'overdue']),
+          lt(platformInvoices.dueDate, new Date()),
+        ),
+      );
+    return { overdueInvoices };
+  },
+);

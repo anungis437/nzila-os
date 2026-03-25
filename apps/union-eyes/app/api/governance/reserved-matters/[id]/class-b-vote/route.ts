@@ -12,6 +12,7 @@ export const dynamic = 'force-dynamic';
 export const POST = withApi(
   {
     auth: { required: true, minRole: 'admin' },
+    entitlement: 'governance_suite',
     body: z.object({
       vote: z.enum(['approve', 'veto']),
       voteRationale: z.string().optional(),

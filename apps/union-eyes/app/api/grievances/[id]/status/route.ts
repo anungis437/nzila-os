@@ -22,6 +22,7 @@ import {
   standardSuccessResponse,
 } from "@/lib/api/standardized-responses";
 import { eq, and } from "drizzle-orm";
+import { requireEntitlement } from '@/services/platform-economics/entitlement-guard';
 
 // Map UE roles to FSM actor roles
 function mapToActorRole(hasAdmin: boolean, hasStaff: boolean): ActorRole {
@@ -41,6 +42,7 @@ const statusSchema = z.object({
 
 export const PATCH = withOrganizationAuth(async (request, context, params?: { id: string }) => {
   const { organizationId, userId } = context;
+  await requireEntitlement(organizationId, 'grievance_case_suite');
 
   try {
     if (!params?.id) return standardErrorResponse(ErrorCode.VALIDATION_ERROR, "Missing ID");

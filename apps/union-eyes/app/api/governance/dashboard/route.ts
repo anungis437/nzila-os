@@ -11,7 +11,7 @@ import { withSystemContext } from '@/lib/db/with-rls-context';
 export const dynamic = 'force-dynamic';
 
 export const GET = withApi(
-  { auth: { required: true, minRole: 'admin' } },
+  { auth: { required: true, minRole: 'admin' }, entitlement: 'governance_suite' },
   async () => {
     return withSystemContext(async () => {
     // Golden share (latest)

@@ -1,17 +1,47 @@
 /**
- * CRUD collection route for perCapitaRemittances
+ * POST /api/dues/create-payment-intent — Create a Stripe payment intent for dues
  */
-import { crudRoutes } from '@/lib/api/crud-factory';
-import { perCapitaRemittances } from '@/db/schema';
+
+import { withApi, ApiError, z, RATE_LIMITS } from '@/lib/api/framework';
+import { stripe } from '@/lib/stripe';
 
 export const dynamic = 'force-dynamic';
 
-const { GET, POST } = crudRoutes({
-  table: perCapitaRemittances,
-  pk: 'id',
-  tags: ["Billing"],
-  orgScoped: true,
-  readRole: 'member',
-  writeRole: 'steward',
+const paymentIntentSchema = z.object({
+  amount: z.number().int().positive(),
+  currency: z.string().length(3).default('cad'),
+  invoiceId: z.string().uuid().optional(),
+  description: z.string().max(500).optional(),
 });
-export { GET, POST };
+
+export const POST = withApi(
+  {
+    auth: { minRole: 'steward' },
+    body: paymentIntentSchema,
+    rateLimit: RATE_LIMITS.FINANCIAL_WRITE,
+    openapi: {
+      tags: ['Dues'],
+      summary: 'Create a Stripe payment intent for dues payment',
+    },
+  },
+  async ({ body, organizationId, userId }) => {
+    if (!organizationId) throw ApiError.badRequest('Organization context required');
+
+    const paymentIntent = await stripe.paymentIntents.create({
+      amount: body.amount,
+      currency: body.currency,
+      metadata: {
+        organization_id: organizationId,
+        invoice_id: body.invoiceId ?? '',
+        user_id: userId ?? '',
+        source: 'union-eyes-dues',
+      },
+      description: body.description ?? `Dues payment for org ${organizationId}`,
+    });
+
+    return {
+      clientSecret: paymentIntent.client_secret,
+      paymentIntentId: paymentIntent.id,
+    };
+  },
+);

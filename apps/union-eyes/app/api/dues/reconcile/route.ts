@@ -1,17 +1,36 @@
 /**
- * CRUD collection route for perCapitaRemittances
+ * POST /api/dues/reconcile — Run dues reconciliation
  */
-import { crudRoutes } from '@/lib/api/crud-factory';
-import { perCapitaRemittances } from '@/db/schema';
+
+import { withApi, ApiError, z, RATE_LIMITS } from '@/lib/api/framework';
+import { runReconciliation } from '@/services/platform-economics';
 
 export const dynamic = 'force-dynamic';
 
-const { GET, POST } = crudRoutes({
-  table: perCapitaRemittances,
-  pk: 'id',
-  tags: ["Billing"],
-  orgScoped: true,
-  readRole: 'member',
-  writeRole: 'steward',
+const reconcileSchema = z.object({
+  periodStart: z.coerce.date(),
+  periodEnd: z.coerce.date(),
 });
-export { GET, POST };
+
+export const POST = withApi(
+  {
+    auth: { minRole: 'admin' },
+    entitlement: 'financial_intelligence_suite',
+    body: reconcileSchema,
+    rateLimit: RATE_LIMITS.FINANCIAL_WRITE,
+    openapi: {
+      tags: ['Dues'],
+      summary: 'Run dues reconciliation for a period',
+    },
+  },
+  async ({ body, organizationId, userId }) => {
+    if (!organizationId) throw ApiError.badRequest('Organization context required');
+    const result = await runReconciliation({
+      organizationId,
+      periodStart: body.periodStart,
+      periodEnd: body.periodEnd,
+      runBy: userId ?? undefined,
+    });
+    return { ...result };
+  },
+);

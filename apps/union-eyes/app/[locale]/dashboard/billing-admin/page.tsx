@@ -16,60 +16,62 @@ import { Badge } from '@/components/ui/badge';
 import { requireUser, hasMinRole } from '@/lib/api-auth-guard';
 import { DollarSign, CreditCard, TrendingUp, Users, FileText, AlertCircle, CheckCircle2, XCircle, Clock } from 'lucide-react';
 import { logger } from '@/lib/logger';
-import { db } from '@/db/db';
-import { sql } from 'drizzle-orm';
-import { withSystemContext } from '@/lib/db/with-rls-context';
+import {
+  getAdminSubscriptions,
+  getAdminInvoices,
+  getAdminPayments,
+} from '@/services/platform-economics';
 
 // ── Types ──────────────────────────────────────────────────────────────────
 
 interface Subscription {
   id: string;
-  orgId: string;
+  organizationId: string;
   orgName: string;
   planName: string;
-  planTier: string;
-  status: string;
-  amountCents: number;
+  planCode: string;
+  pricingModel: string;
+  baseFee: string;
   currency: string;
   billingInterval: string;
-  currentPeriodStart: string | null;
-  currentPeriodEnd: string | null;
-  memberCount: number;
-  perCapitaRate: number;
-  createdAt: string;
+  status: string;
+  startDate: Date;
+  endDate: Date | null;
+  localCount: number | null;
+  seatCount: number | null;
+  discountPercent: string | null;
+  memberCount: number | null;
+  perCapitaRate: string | null;
+  createdAt: Date;
 }
 
 interface Invoice {
   id: string;
-  orgId: string;
+  organizationId: string;
   orgName: string;
   invoiceNumber: string;
   status: string;
-  subtotal: number;
-  taxTotal: number;
-  total: number;
-  amountPaid: number;
-  amountDue: number;
-  dueDate: string | null;
-  issuedAt: string | null;
-  paidAt: string | null;
-  description: string | null;
-  createdAt: string;
+  subtotal: string;
+  taxAmount: string;
+  totalAmount: string;
+  amountPaid: string;
+  dueDate: Date;
+  issueDate: Date;
+  notes: string | null;
+  createdAt: Date;
 }
 
 interface Payment {
   id: string;
-  orgId: string;
+  organizationId: string;
   orgName: string;
-  invoiceNumber: string | null;
-  amount: number;
+  amount: string;
   currency: string;
   status: string;
-  paymentMethod: string;
-  cardLast4: string | null;
-  cardBrand: string | null;
+  method: string;
   failureReason: string | null;
-  createdAt: string;
+  paidAt: Date | null;
+  createdAt: Date;
 }
 
 interface BillingStats {
@@ -91,94 +93,18 @@ interface BillingStats {
 // ── Data loaders ───────────────────────────────────────────────────────────
 
 async function loadSubscriptions(): Promise<Subscription[]> {
-  const result = await db.execute(sql`
-    SELECT
-      bs.id, bs.organization_id, o.name AS org_name,
-      bs.plan_name, bs.plan_tier, bs.status, bs.amount_cents,
-      bs.currency, bs.billing_interval,
-      bs.current_period_start, bs.current_period_end,
-      o.member_count, o.per_capita_rate, bs.created_at
-    FROM billing_subscriptions bs
-    JOIN organizations o ON o.id = bs.organization_id
-    ORDER BY bs.amount_cents DESC
-  `);
-
-  return Array.from(result).map((r: Record<string, unknown>) => ({
-    id: r.id as string,
-    orgId: r.organization_id as string,
-    orgName: r.org_name as string,
-    planName: r.plan_name as string,
-    planTier: r.plan_tier as string,
-    status: r.status as string,
-    amountCents: Number(r.amount_cents ?? 0),
-    currency: r.currency as string,
-    billingInterval: r.billing_interval as string,
-    currentPeriodStart: r.current_period_start as string | null,
-    currentPeriodEnd: r.current_period_end as string | null,
-    memberCount: Number(r.member_count ?? 0),
-    perCapitaRate: Number(r.per_capita_rate ?? 0),
-    createdAt: r.created_at as string,
-  }));
+  const rows = await getAdminSubscriptions();
+  return rows as Subscription[];
 }
 
 async function loadInvoices(): Promise<Invoice[]> {
-  const result = await db.execute(sql`
-    SELECT
-      bi.id, bi.organization_id, o.name AS org_name,
-      bi.invoice_number, bi.status, bi.subtotal, bi.tax_total,
-      bi.total, bi.amount_paid, bi.amount_due,
-      bi.due_date, bi.issued_at, bi.paid_at, bi.description, bi.created_at
-    FROM billing_invoices bi
-    JOIN organizations o ON o.id = bi.organization_id
-    ORDER BY bi.created_at DESC
-  `);
-
-  return Array.from(result).map((r: Record<string, unknown>) => ({
-    id: r.id as string,
-    orgId: r.organization_id as string,
-    orgName: r.org_name as string,
-    invoiceNumber: r.invoice_number as string,
-    status: r.status as string,
-    subtotal: Number(r.subtotal ?? 0),
-    taxTotal: Number(r.tax_total ?? 0),
-    total: Number(r.total ?? 0),
-    amountPaid: Number(r.amount_paid ?? 0),
-    amountDue: Number(r.amount_due ?? 0),
-    dueDate: r.due_date as string | null,
-    issuedAt: r.issued_at as string | null,
-    paidAt: r.paid_at as string | null,
-    description: r.description as string | null,
-    createdAt: r.created_at as string,
-  }));
+  const rows = await getAdminInvoices();
+  return rows as Invoice[];
 }
 
 async function loadPayments(): Promise<Payment[]> {
-  const result = await db.execute(sql`
-    SELECT
-      bp.id, bp.organization_id, o.name AS org_name,
-      bi.invoice_number,
-      bp.amount, bp.currency, bp.status, bp.payment_method,
-      bp.card_last4, bp.card_brand, bp.failure_reason, bp.created_at
-    FROM billing_payments bp
-    JOIN organizations o ON o.id = bp.organization_id
-    LEFT JOIN billing_invoices bi ON bi.id = bp.invoice_id
-    ORDER BY bp.created_at DESC
-  `);
-
-  return Array.from(result).map((r: Record<string, unknown>) => ({
-    id: r.id as string,
-    orgId: r.organization_id as string,
-    orgName: r.org_name as string,
-    invoiceNumber: r.invoice_number as string | null,
-    amount: Number(r.amount ?? 0),
-    currency: r.currency as string,
-    status: r.status as string,
-    paymentMethod: r.payment_method as string,
-    cardLast4: r.card_last4 as string | null,
-    cardBrand: r.card_brand as string | null,
-    failureReason: r.failure_reason as string | null,
-    createdAt: r.created_at as string,
-  }));
+  const rows = await getAdminPayments();
+  return rows as Payment[];
 }
 
 function computeStats(
@@ -189,23 +115,23 @@ function computeStats(
   const activeSubscriptions = subscriptions.filter(s => s.status === 'active').length;
   const totalMrr = subscriptions
     .filter(s => s.status === 'active')
-    .reduce((sum, s) => sum + s.amountCents, 0) / 100;
+    .reduce((sum, s) => sum + Number(s.baseFee), 0);
 
-  const succeededPayments = payments.filter(p => p.status === 'succeeded').length;
+  const completedPayments = payments.filter(p => p.status === 'completed').length;
   const failedPayments = payments.filter(p => p.status === 'failed').length;
   const totalPayments = payments.length;
   const paymentSuccessRate = totalPayments > 0
-    ? Math.round((succeededPayments / totalPayments) * 1000) / 10
+    ? Math.round((completedPayments / totalPayments) * 1000) / 10
     : 100;
 
   const overdueInvoices = invoices.filter(i => i.status === 'overdue').length;
   const issuedInvoices = invoices.filter(i => i.status === 'issued').length;
   const paidInvoices = invoices.filter(i => i.status === 'paid').length;
   const totalRevenue = payments
-    .filter(p => p.status === 'succeeded')
-    .reduce((sum, p) => sum + p.amount, 0);
+    .filter(p => p.status === 'completed')
+    .reduce((sum, p) => sum + Number(p.amount), 0);
   const totalOutstanding = invoices
-    .reduce((sum, i) => sum + i.amountDue, 0);
+    .reduce((sum, i) => sum + (Number(i.totalAmount) - Number(i.amountPaid)), 0);
 
   return {
     totalMrr,
@@ -213,7 +139,7 @@ function computeStats(
     totalSubscriptions: subscriptions.length,
     paymentSuccessRate,
     totalPayments,
-    succeededPayments,
+    succeededPayments: completedPayments,
     failedPayments,
     overdueInvoices,
     issuedInvoices,
@@ -238,7 +164,7 @@ function invoiceStatusVariant(status: string) {
 
 function paymentStatusVariant(status: string) {
   switch (status) {
-    case 'succeeded': return 'default' as const;
+    case 'completed': return 'default' as const;
     case 'failed': return 'destructive' as const;
     case 'pending': return 'secondary' as const;
     default: return 'outline' as const;
@@ -249,11 +175,11 @@ function formatCurrency(amount: number, currency = 'CAD') {
   return new Intl.NumberFormat('en-CA', { style: 'currency', currency }).format(amount);
 }
 
-function formatDate(dateStr: string) {
+function formatDate(dateStr: string | Date) {
   return new Date(dateStr).toLocaleDateString('en-CA', { year: 'numeric', month: 'short', day: 'numeric' });
 }
 
-function timeAgo(dateStr: string) {
+function timeAgo(dateStr: string | Date) {
   const diff = Date.now() - new Date(dateStr).getTime();
   const mins = Math.floor(diff / 60000);
   if (mins < 60) return `${mins}m ago`;
@@ -289,13 +215,11 @@ export default async function BillingAdminDashboard({
   let payments: Payment[] = [];
 
   try {
-    [subscriptions, invoices, payments] = await withSystemContext(() =>
-      Promise.all([
-        loadSubscriptions(),
-        loadInvoices(),
-        loadPayments(),
-      ])
-    );
+    [subscriptions, invoices, payments] = await Promise.all([
+      loadSubscriptions(),
+      loadInvoices(),
+      loadPayments(),
+    ]);
   } catch (error) {
     logger.error('Error loading billing data:', error);
   }
@@ -496,28 +420,28 @@ export default async function BillingAdminDashboard({
                       <div className="space-y-1 flex-1 min-w-0">
                         <div className="flex items-center gap-2 flex-wrap">
                           <span className="text-sm font-semibold">{sub.orgName}</span>
-                          <Badge variant="outline" className="text-xs capitalize">{sub.planTier}</Badge>
+                          <Badge variant="outline" className="text-xs capitalize">{sub.planCode}</Badge>
                         </div>
                         <p className="text-sm text-muted-foreground">{sub.planName}</p>
                         <div className="flex items-center gap-3 text-xs text-muted-foreground flex-wrap">
-                          <span>{sub.memberCount.toLocaleString()} members</span>
+                          <span>{(sub.memberCount ?? 0).toLocaleString()} members</span>
                           <span>&bull;</span>
-                          <span>Per-capita: {formatCurrency(sub.perCapitaRate)}</span>
+                          <span>Per-capita: {formatCurrency(Number(sub.perCapitaRate ?? 0))}</span>
                           <span>&bull;</span>
                           <span>Billed {sub.billingInterval}</span>
-                          {sub.currentPeriodEnd && (
+                          {sub.endDate && (
                             <>
                               <span>&bull;</span>
-                              <span>Renews {formatDate(sub.currentPeriodEnd)}</span>
+                              <span>Renews {formatDate(sub.endDate)}</span>
                             </>
                           )}
                         </div>
                       </div>
                       <div className="text-right space-y-1 shrink-0">
-                        <Badge variant={sub.status === 'active' ? 'default' : sub.status === 'canceled' ? 'destructive' : 'secondary'}>
+                        <Badge variant={sub.status === 'active' ? 'default' : sub.status === 'cancelled' ? 'destructive' : 'secondary'}>
                           {sub.status}
                         </Badge>
-                        <p className="text-sm font-bold">{formatCurrency(sub.amountCents / 100)}/mo</p>
+                        <p className="text-sm font-bold">{formatCurrency(Number(sub.baseFee))}/mo</p>
                       </div>
                     </div>
                   ))}
@@ -571,25 +495,16 @@ export default async function BillingAdminDashboard({
                           <span className="text-sm font-medium font-mono">{inv.invoiceNumber}</span>
                           <span className="text-sm text-muted-foreground">&mdash; {inv.orgName}</span>
                         </div>
-                        {inv.description && (
-                          <p className="text-xs text-muted-foreground">{inv.description}</p>
+                        {inv.notes && (
+                          <p className="text-xs text-muted-foreground">{inv.notes}</p>
                         )}
                         <div className="flex items-center gap-3 text-xs text-muted-foreground flex-wrap">
-                          {inv.issuedAt && <span>Issued {formatDate(inv.issuedAt)}</span>}
+                          {inv.issueDate && <span>Issued {formatDate(inv.issueDate)}</span>}
                           {inv.dueDate && (
                             <>
                               <span>&bull;</span>
                               <span className={inv.status === 'overdue' ? 'text-red-600 font-medium' : ''}>
                                 Due {formatDate(inv.dueDate)}
-                              </span>
-                            </>
-                          )}
-                          {inv.paidAt && (
-                            <>
-                              <span>&bull;</span>
-                              <span className="flex items-center gap-1 text-green-600">
-                                <CheckCircle2 className="h-3 w-3" />
-                                Paid {formatDate(inv.paidAt)}
                               </span>
                             </>
                           )}
@@ -599,9 +514,9 @@ export default async function BillingAdminDashboard({
                         <Badge variant={invoiceStatusVariant(inv.status)}>
                           {inv.status}
                         </Badge>
-                        <p className="text-sm font-bold">{formatCurrency(inv.total)}</p>
-                        {inv.amountDue > 0 && (
-                          <p className="text-xs text-orange-600">Due: {formatCurrency(inv.amountDue)}</p>
+                        <p className="text-sm font-bold">{formatCurrency(Number(inv.totalAmount))}</p>
+                        {Number(inv.totalAmount) - Number(inv.amountPaid) > 0 && (
+                          <p className="text-xs text-orange-600">Due: {formatCurrency(Number(inv.totalAmount) - Number(inv.amountPaid))}</p>
                         )}
                       </div>
                     </div>
@@ -678,14 +593,11 @@ export default async function BillingAdminDashboard({
                       <div className="space-y-1 flex-1 min-w-0">
                         <div className="flex items-center gap-2 flex-wrap">
                           <span className="text-sm font-medium">{pay.orgName}</span>
-                          {pay.invoiceNumber && (
-                            <span className="text-xs text-muted-foreground font-mono">{pay.invoiceNumber}</span>
-                          )}
                         </div>
                         <div className="flex items-center gap-3 text-xs text-muted-foreground flex-wrap">
                           <span className="flex items-center gap-1">
                             <CreditCard className="h-3 w-3" />
-                            {pay.cardBrand ?? 'Card'} {pay.cardLast4 ? `••••${pay.cardLast4}` : ''}
+                            {pay.method}
                           </span>
                           <span>&bull;</span>
                           <span>{timeAgo(pay.createdAt)}</span>
@@ -699,15 +611,15 @@ export default async function BillingAdminDashboard({
                       </div>
                       <div className="text-right space-y-1 shrink-0">
                         <Badge variant={paymentStatusVariant(pay.status)}>
-                          {pay.status === 'succeeded' ? (
-                            <span className="flex items-center gap-1"><CheckCircle2 className="h-3 w-3" />Succeeded</span>
+                          {pay.status === 'completed' ? (
+                            <span className="flex items-center gap-1"><CheckCircle2 className="h-3 w-3" />Completed</span>
                           ) : pay.status === 'failed' ? (
                             <span className="flex items-center gap-1"><XCircle className="h-3 w-3" />Failed</span>
                           ) : (
                             <span className="flex items-center gap-1"><Clock className="h-3 w-3" />{pay.status}</span>
                           )}
                         </Badge>
-                        <p className="text-sm font-bold">{formatCurrency(pay.amount, pay.currency)}</p>
+                        <p className="text-sm font-bold">{formatCurrency(Number(pay.amount), pay.currency)}</p>
                       </div>
                     </div>
                   ))}

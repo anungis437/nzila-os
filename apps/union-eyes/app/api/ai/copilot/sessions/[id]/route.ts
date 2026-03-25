@@ -13,6 +13,7 @@ import { AI_FEATURES } from '@/lib/services/feature-flags';
 import { guardAiFeature } from '@/lib/ai/ai-feature-guard';
 import { recordCopilotOutcome } from '@/lib/ai/steward-copilot';
 import { standardErrorResponse, standardSuccessResponse, ErrorCode } from '@/lib/api/standardized-responses';
+import { requireEntitlement } from '@/services/platform-economics/entitlement-guard';
 
 const outcomeSchema = z.object({
   outcome: z.enum(['accepted', 'edited', 'rejected']),
@@ -27,6 +28,8 @@ export const PATCH = withRoleAuth('steward', async (request: NextRequest, contex
     organizationId: context.organizationId,
   });
   if (blocked) return blocked;
+
+  await requireEntitlement(context.organizationId!, 'ai_advanced_insights');
 
   const id = (context.params as Record<string, string>)?.id;
   if (!id) return standardErrorResponse(ErrorCode.VALIDATION_ERROR, 'Missing session id');

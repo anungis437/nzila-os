@@ -38,6 +38,7 @@ export { registerApiRoute } from './openapi-registry';
 // ── Re-exports from existing modules (so routes don't need 5 imports) ────────
 export { RATE_LIMITS } from '@/lib/rate-limiter';
 export type { RateLimitConfig } from '@/lib/rate-limiter';
+export { PLATFORM_MODULES } from '@/services/platform-economics/entitlement-guard';
 
 // ── Re-export zod for inline schemas ─────────────────────────────────────────
 export { z } from 'zod';

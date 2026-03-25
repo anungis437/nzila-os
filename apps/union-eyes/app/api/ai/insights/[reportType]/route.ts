@@ -14,6 +14,7 @@ import { AI_FEATURES } from '@/lib/services/feature-flags';
 import { guardAiFeature } from '@/lib/ai/ai-feature-guard';
 import { generateInsightReport, getInsightReports, type InsightReportType, type InsightTimeframe } from '@/lib/ai/executive-insights';
 import { standardErrorResponse, standardSuccessResponse, ErrorCode } from '@/lib/api/standardized-responses';
+import { requireEntitlement } from '@/services/platform-economics/entitlement-guard';
 
 const validReportTypes: InsightReportType[] = [
   'trend_forecast',
@@ -34,6 +35,8 @@ export const GET = withRoleAuth('officer', async (_request: NextRequest, context
   });
   if (blocked) return blocked;
 
+  await requireEntitlement(context.organizationId!, 'ai_advanced_insights');
+
   const reportType = (context.params as Record<string, string>)?.reportType as InsightReportType;
   if (!validReportTypes.includes(reportType)) {
     return standardErrorResponse(ErrorCode.VALIDATION_ERROR, `Invalid report type: ${reportType}`);
@@ -49,6 +52,8 @@ export const POST = withRoleAuth('officer', async (request: NextRequest, context
     organizationId: context.organizationId,
   });
   if (blocked) return blocked;
+
+  await requireEntitlement(context.organizationId!, 'ai_advanced_insights');
 
   const reportType = (context.params as Record<string, string>)?.reportType as InsightReportType;
   if (!validReportTypes.includes(reportType)) {

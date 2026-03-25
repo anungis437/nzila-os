@@ -20,6 +20,7 @@ import { auditDataMutation } from '@/lib/audit-logger';
 import { logger } from '@/lib/logger';
 import { getUserRoleInOrganization } from '@/lib/organization-utils';
 import { wrapSchemaQuery } from '@/lib/schema-error';
+import { requireEntitlement } from '@/services/platform-economics/entitlement-guard';
 
 export const dynamic = 'force-dynamic';
 
@@ -43,6 +44,7 @@ export async function PATCH(
         { status: 401 },
       );
     }
+    await requireEntitlement(orgId, 'grievance_case_suite');
 
     // 2. Parse + validate body
     let body: unknown;

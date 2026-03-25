@@ -30,6 +30,7 @@ export const dynamic = 'force-dynamic';
 export const GET = withApi(
   {
     auth: { required: true, minRole: 'officer' },
+    entitlement: 'governance_suite',
     openapi: { tags: ['Governance'], summary: 'Get board packet by ID' },
   },
   async ({ request }) => {
@@ -44,6 +45,7 @@ export const GET = withApi(
 export const PATCH = withApi(
   {
     auth: { required: true, minRole: 'admin' },
+    entitlement: 'governance_suite',
     openapi: { tags: ['Governance'], summary: 'Update board packet' },
   },
   async ({ request, body }) => {
@@ -59,6 +61,7 @@ export const PATCH = withApi(
 export const DELETE = withApi(
   {
     auth: { required: true, minRole: 'admin' },
+    entitlement: 'governance_suite',
     openapi: { tags: ['Governance'], summary: 'Delete board packet' },
   },
   async ({ request }) => {

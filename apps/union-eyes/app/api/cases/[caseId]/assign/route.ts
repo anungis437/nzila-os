@@ -14,6 +14,7 @@ import { withRLSContext } from '@/lib/db/with-rls-context';
 import { claims, claimUpdates } from '@/db/schema/claims-schema';
 import { auditDataMutation } from '@/lib/audit-logger';
 import { logger } from '@/lib/logger';
+import { requireEntitlement } from '@/services/platform-economics/entitlement-guard';
 
 export const dynamic = 'force-dynamic';
 
@@ -39,6 +40,7 @@ export async function POST(
         { status: 401 },
       );
     }
+    await requireEntitlement(orgId, 'grievance_case_suite');
 
     let body: unknown;
     try {

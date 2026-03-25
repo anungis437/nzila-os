@@ -65,6 +65,8 @@ export interface CrudOptions {
   defaultLimit?: number;
   /** Resource name for error messages (auto-derived from table name) */
   resourceName?: string;
+  /** Platform module key for entitlement check (from PLATFORM_MODULES) */
+  entitlement?: string;
 }
 
 // eslint-disable-next-line @typescript-eslint/no-explicit-any
@@ -140,6 +142,7 @@ export function crudRoutes(opts: CrudOptions): CollectionHandlers | ItemHandlers
     const GET = withApi(
       {
         auth: { required: true, minRole: readRole },
+        entitlement: opts.entitlement,
         openapi: {
           tags,
           summary: `List ${resourceName}`,
@@ -197,6 +200,7 @@ export function crudRoutes(opts: CrudOptions): CollectionHandlers | ItemHandlers
     const POST = withApi(
       {
         auth: { required: true, minRole: writeRole },
+        entitlement: opts.entitlement,
         openapi: {
           tags,
           summary: `Create ${resourceName}`,
@@ -233,6 +237,7 @@ export function crudRoutes(opts: CrudOptions): CollectionHandlers | ItemHandlers
     const GET = withApi(
       {
         auth: { required: true, minRole: readRole },
+        entitlement: opts.entitlement,
         openapi: {
           tags,
           summary: `Get ${resourceName} by ID`,
@@ -255,6 +260,7 @@ export function crudRoutes(opts: CrudOptions): CollectionHandlers | ItemHandlers
     const PATCH = withApi(
       {
         auth: { required: true, minRole: writeRole },
+        entitlement: opts.entitlement,
         openapi: {
           tags,
           summary: `Update ${resourceName}`,
@@ -294,6 +300,7 @@ export function crudRoutes(opts: CrudOptions): CollectionHandlers | ItemHandlers
     const DELETE = withApi(
       {
         auth: { required: true, minRole: 'admin' },
+        entitlement: opts.entitlement,
         openapi: {
           tags,
           summary: `Delete ${resourceName}`,

@@ -1,29 +1,27 @@
 /**
- * Contract Clauses API
+ * Contract Line Items (Clauses) API
  *
- * GET /api/contracts/[id]/clauses — List clauses for a contract
+ * GET /api/contracts/[id]/clauses — List line items for a contract
  */
 
-import { withOrganizationAuth } from "@/lib/organization-middleware";
-import { hasMinRole } from "@/lib/api-auth-guard";
-import { listClauses } from "@/lib/services/clause-intelligence";
-import {
-  ErrorCode,
-  standardErrorResponse,
-  standardSuccessResponse,
-} from "@/lib/api/standardized-responses";
+import { withApi, ApiError } from '@/lib/api/framework';
+import { getContractLineItems } from '@/services/platform-economics';
 
-export const GET = withOrganizationAuth(async (_request, context, params?: { id: string }) => {
-  try {
-    if (!params?.id) return standardErrorResponse(ErrorCode.VALIDATION_ERROR, "Missing ID");
-    const canAccess = await hasMinRole("member");
-    if (!canAccess) {
-      return standardErrorResponse(ErrorCode.FORBIDDEN, "Unauthorized");
-    }
+export const dynamic = 'force-dynamic';
 
-    const clauses = await listClauses(params.id);
-    return standardSuccessResponse(clauses);
-  } catch (_error) {
-    return standardErrorResponse(ErrorCode.INTERNAL_ERROR, "Failed to list clauses");
-  }
-});
+export const GET = withApi(
+  {
+    auth: { minRole: 'member' },
+    openapi: {
+      tags: ['Contracts'],
+      summary: 'List line items (clauses) for a commercial contract',
+    },
+  },
+  async ({ params, organizationId }) => {
+    if (!organizationId) throw ApiError.badRequest('Organization context required');
+    const id = (params as Record<string, string>)?.id;
+    if (!id) throw ApiError.badRequest('Contract ID is required');
+    const lineItems = await getContractLineItems(id);
+    return { lineItems };
+  },
+);

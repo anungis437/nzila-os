@@ -20,6 +20,7 @@ import {
   standardSuccessResponse,
 } from "@/lib/api/standardized-responses";
 import { eq, and } from "drizzle-orm";
+import { requireEntitlement } from '@/services/platform-economics/entitlement-guard';
 
 const _linkSchema = z.object({
   clauseId: z.string().uuid(),
@@ -27,6 +28,7 @@ const _linkSchema = z.object({
 
 export const POST = withOrganizationAuth(async (request, context, params?: { id: string }) => {
   const { organizationId, userId } = context;
+  await requireEntitlement(organizationId, 'grievance_case_suite');
 
   try {
     if (!params?.id) return standardErrorResponse(ErrorCode.VALIDATION_ERROR, "Missing ID");

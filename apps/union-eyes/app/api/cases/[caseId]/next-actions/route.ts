@@ -16,6 +16,7 @@ import { db } from '@/db/db';
 import { claims } from '@/db/schema/claims-schema';
 import { logger } from '@/lib/logger';
 import { getUserRoleInOrganization } from '@/lib/organization-utils';
+import { requireEntitlement } from '@/services/platform-economics/entitlement-guard';
 
 export const dynamic = 'force-dynamic';
 
@@ -33,6 +34,7 @@ export async function GET(
         { status: 401 },
       );
     }
+    await requireEntitlement(orgId, 'grievance_case_suite');
 
     const claim = await withRLSContext(async (tx) => {
       const [row] = await tx

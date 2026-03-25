@@ -24,6 +24,7 @@ const distributePacketSchema = z.object({
 export const POST = withApi(
   {
     auth: { required: true, minRole: 'admin' },
+    entitlement: 'governance_suite',
     body: distributePacketSchema,
   },
   async ({ body, params }) => {

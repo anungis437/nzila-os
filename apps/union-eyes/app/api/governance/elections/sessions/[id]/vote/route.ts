@@ -25,6 +25,7 @@ export const dynamic = 'force-dynamic';
 export const GET = withApi(
   {
     auth: { required: true, minRole: 'member' },
+    entitlement: 'governance_suite',
     openapi: { tags: ['Governance'], summary: 'Get votes for session' },
   },
   async ({ request }) => {
@@ -44,6 +45,7 @@ export const GET = withApi(
 export const POST = withApi(
   {
     auth: { required: true, minRole: 'member' },
+    entitlement: 'governance_suite',
     openapi: { tags: ['Governance'], summary: 'Cast vote' },
   },
   async ({ request, body }) => {

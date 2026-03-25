@@ -1,17 +1,35 @@
 /**
- * CRUD collection route for remittanceApprovals
+ * POST /api/reconciliation/resolve — Resolve a reconciliation exception
  */
-import { crudRoutes } from '@/lib/api/crud-factory';
-import { remittanceApprovals } from '@/db/schema';
+
+import { withApi, ApiError, z, RATE_LIMITS } from '@/lib/api/framework';
+import { resolveException } from '@/services/platform-economics';
 
 export const dynamic = 'force-dynamic';
 
-const { GET, POST } = crudRoutes({
-  table: remittanceApprovals,
-  pk: 'id',
-  tags: ["Billing"],
-  orgScoped: true,
-  readRole: 'member',
-  writeRole: 'steward',
+const resolveSchema = z.object({
+  exceptionId: z.string().uuid(),
+  resolution: z.enum(['resolved', 'written_off']),
+  notes: z.string().max(2000),
 });
-export { GET, POST };
+
+export const POST = withApi(
+  {
+    auth: { minRole: 'admin' },
+    body: resolveSchema,
+    rateLimit: RATE_LIMITS.FINANCIAL_WRITE,
+    openapi: {
+      tags: ['Reconciliation'],
+      summary: 'Resolve a reconciliation exception',
+    },
+  },
+  async ({ body, organizationId, userId }) => {
+    if (!organizationId) throw ApiError.badRequest('Organization context required');
+    const result = await resolveException(body.exceptionId, {
+      status: body.resolution,
+      resolvedBy: userId ?? 'system',
+      notes: body.notes,
+    });
+    return result;
+  },
+);

@@ -12,6 +12,7 @@ export const dynamic = 'force-dynamic';
 export const PATCH = withApi(
   {
     auth: { required: true, minRole: 'admin' },
+    entitlement: 'governance_suite',
     body: z.object({
       votesFor: z.number().int(),
       votesAgainst: z.number().int(),

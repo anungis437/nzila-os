@@ -20,6 +20,7 @@ import {
   standardSuccessResponse,
 } from "@/lib/api/standardized-responses";
 import { eq, desc } from "drizzle-orm";
+import { requireEntitlement } from '@/services/platform-economics/entitlement-guard';
 
 // ── Validation ──────────────────────────────────────────────────────────────
 
@@ -40,6 +41,7 @@ const createGrievanceSchema = z.object({
 
 export const POST = withOrganizationAuth(async (request, context) => {
   const { organizationId, userId } = context;
+  await requireEntitlement(organizationId, 'grievance_case_suite');
 
   try {
     const body = await request.json();
@@ -105,6 +107,7 @@ export const POST = withOrganizationAuth(async (request, context) => {
 
 export const GET = withOrganizationAuth(async (request, context) => {
   const { organizationId } = context;
+  await requireEntitlement(organizationId, 'grievance_case_suite');
 
   try {
     const canAccess = await hasMinRole("steward");

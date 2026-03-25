@@ -13,9 +13,11 @@ import {
   standardErrorResponse,
   standardSuccessResponse,
 } from "@/lib/api/standardized-responses";
+import { requireEntitlement } from '@/services/platform-economics/entitlement-guard';
 
 export const POST = withOrganizationAuth(async (_request, context, params?: { id: string }) => {
   const { organizationId, userId } = context;
+  await requireEntitlement(organizationId, 'grievance_case_suite');
 
   try {
     if (!params?.id) return standardErrorResponse(ErrorCode.VALIDATION_ERROR, "Missing ID");

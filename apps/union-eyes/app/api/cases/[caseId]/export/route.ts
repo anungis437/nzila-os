@@ -16,6 +16,7 @@ import { eq, and, desc } from 'drizzle-orm';
 import { withRLSContext } from '@/lib/db/with-rls-context';
 import { buildEvidencePack } from '@/lib/evidence-export';
 import { auditCaseExport } from '@/lib/audited-case-mutations';
+import { requireEntitlement } from '@/services/platform-economics/entitlement-guard';
 
 export async function GET(
   _request: Request,
@@ -25,6 +26,7 @@ export async function GET(
   if (!userId || !orgId) {
     return NextResponse.json({ error: 'Unauthorized' }, { status: 401 });
   }
+  await requireEntitlement(orgId, 'grievance_case_suite');
 
   const { caseId } = await params;
 
