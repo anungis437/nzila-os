@@ -30,7 +30,7 @@ export const GET = withApi(
     const sharingLevels = url.searchParams.get('sharingLevels')?.split(',').filter(Boolean) || [];
     const includeExpired = url.searchParams.get('includeExpired') === 'true';
 
-    return withSystemContext(async () => {
+    return await withSystemContext(async () => {
       const conditions: ReturnType<typeof eq>[] = [];
 
       if (search) {
@@ -133,7 +133,7 @@ export const POST = withApi(
   async ({ request, userId }) => {
     const body = await request.json();
 
-    return withSystemContext(async () => {
+    return await withSystemContext(async () => {
       const [created] = await db
         .insert(sharedClauseLibrary)
         .values({

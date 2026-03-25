@@ -128,7 +128,8 @@ export function ClauseLibraryConsole() {
         
         if (response.ok) {
           const data = await response.json();
-          setClausesData(data);
+          // withApi wraps in { success, data: { clauses, ... }, timestamp }
+          setClausesData(data.data ?? data);
         } else if (response.status === 401) {
           setClausesData({ clauses: [], total: 0, page: currentPage, limit: pageSize });
         } else {
@@ -170,7 +171,8 @@ export function ClauseLibraryConsole() {
       const response = await fetch(`/api/clause-library/${clauseId}`);
       if (response.ok) {
         const data = await response.json();
-        setSelectedClause(data);
+        // withApi wraps in { success, data: {...}, timestamp }
+        setSelectedClause(data.data ?? data);
       } else {
         toast({
           title: "Error",
@@ -221,7 +223,8 @@ export function ClauseLibraryConsole() {
       
       if (response.ok) {
         const data = await response.json();
-        setComparisonData(data);
+        // withApi wraps in { success, data: {...}, timestamp }
+        setComparisonData(data.data ?? data);
       } else {
         toast({
           title: "Error",

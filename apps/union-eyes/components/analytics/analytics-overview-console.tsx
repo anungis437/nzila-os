@@ -72,7 +72,9 @@ export function AnalyticsOverviewConsole() {
     try {
       const res = await fetch(`/api/v2/analytics/overview?range=${timeRange}`);
       if (res.ok) {
-        const data = await res.json();
+        const raw = await res.json();
+        // withApi wraps in { success, data: { metrics, ... }, timestamp }
+        const data = raw.data ?? raw;
         if (data.metrics && Array.isArray(data.metrics)) {
           setMetrics(data.metrics.map((m: Record<string, unknown>) => ({
             label: (m.label as string) ?? '',

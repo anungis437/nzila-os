@@ -17,8 +17,7 @@ import { pilotMilestones } from "@/db/schema/domains/pilot/pilot-milestones";
 import { organizations } from "@/db/schema-organizations";
 import { eq, sql } from "drizzle-orm";
 import { withSystemContext } from "@/lib/db/with-rls-context";
-import { getOrganizationIdForUser } from "@/lib/organization-utils";
-import { DEFAULT_ORGANIZATION_ID } from "@/lib/organization-utils";
+import { getOrganizationIdForUser, DEFAULT_ORGANIZATION_ID } from "@/lib/organization-utils";
 import type { PilotMilestone } from "@/types/marketing";
 
 export const dynamic = "force-dynamic";
@@ -44,7 +43,7 @@ export async function GET() {
       );
     }
 
-    return withSystemContext(async () => {
+    return await withSystemContext(async () => {
       // Fetch all active enrollments with org names
       const enrollments = await db
         .select({

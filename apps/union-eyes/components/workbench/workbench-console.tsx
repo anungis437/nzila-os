@@ -11,7 +11,7 @@ import { motion, AnimatePresence } from "framer-motion";
 import { useUser } from "@clerk/nextjs";
 import { useTranslations } from 'next-intl';
 import Link from "next/link";
-import { useOrganizationId } from "@/lib/hooks/use-organization";
+import { useOrganization } from "@/lib/hooks/use-organization";
 import {
   Clipboard,
   Clock,
@@ -197,7 +197,8 @@ const statusConfig: Record<CaseStatus, { label: string; icon: React.ReactElement
 export default function WorkbenchConsole() {
   const t = useTranslations();
   const { user } = useUser();
-  const organizationId = useOrganizationId();
+  const { organizationId, organization } = useOrganization();
+  const isPlatformOrg = organization?.type === 'platform';
   const [cases, setCases] = useState<Case[]>([]);
   const [isLoading, setIsLoading] = useState(true);
   const [error, setError] = useState<string | null>(null);
@@ -223,7 +224,9 @@ export default function WorkbenchConsole() {
         setIsLoading(true);
         setError(null);
 
-        const url = organizationId
+        // Platform admins see all cases across all orgs;
+        // regular users see only their organization's cases
+        const url = organizationId && !isPlatformOrg
           ? `/api/workbench/assigned?organizationId=${organizationId}`
           : '/api/workbench/assigned';
         const response = await fetch(url);
@@ -233,7 +236,8 @@ export default function WorkbenchConsole() {
         }
 
         const data = await response.json();
-        const mappedCases = (data.claims ?? []).map(mapDbClaimToCase);
+        const claims = data.data?.claims ?? data.claims ?? [];
+        const mappedCases = claims.map(mapDbClaimToCase);
         setCases(mappedCases);
       } catch (err) {
         setError(err instanceof Error ? err.message : 'Failed to load assigned claims');
@@ -243,7 +247,7 @@ export default function WorkbenchConsole() {
     };
 
     fetchAssignedClaims();
-  }, [organizationId]);
+  }, [organizationId, isPlatformOrg]);
 
   // Filter and sort cases
   const filteredAndSortedCases = cases
@@ -374,9 +378,9 @@ export default function WorkbenchConsole() {
             className="text-center py-20"
           >
             <Clipboard size={64} className="mx-auto text-gray-400 mb-4" />
-            <h3 className="text-xl font-semibold text-gray-700 mb-2">No Cases Assigned</h3>
-            <p className="text-gray-600 mb-6">You don&apos;t have any cases assigned to you yet.</p>
-            <p className="text-sm text-gray-500">Cases will appear here when they are assigned to you by administrators or when you take ownership of pending cases.</p>
+            <h3 className="text-xl font-semibold text-gray-700 mb-2">{isPlatformOrg ? 'No Cases Filed' : 'No Cases Assigned'}</h3>
+            <p className="text-gray-600 mb-6">{isPlatformOrg ? 'No cases have been filed across the platform yet.' : "You don't have any cases assigned to you yet."}</p>
+            <p className="text-sm text-gray-500">{isPlatformOrg ? 'Cases from all organizations will appear here once members submit them.' : 'Cases will appear here when they are assigned to you by administrators or when you take ownership of pending cases.'}</p>
           </motion.div>
         )}
 
