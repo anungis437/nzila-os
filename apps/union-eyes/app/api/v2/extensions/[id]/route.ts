@@ -35,7 +35,7 @@ export const GET = withApi(
 
     if (!integration) throw ApiError.notFound('Integration');
 
-    return { data: integration };
+    return integration;
   },
 );
 
@@ -79,7 +79,7 @@ export const PATCH = withApi(
 
     if (!updated) throw ApiError.notFound('Integration');
 
-    return { data: updated };
+    return updated;
   },
 );
 
@@ -106,6 +106,6 @@ export const DELETE = withApi(
 
     if (!deleted) throw ApiError.notFound('Integration');
 
-    return { data: { id: deleted.id, deleted: true } };
+    return { id: deleted.id, deleted: true };
   },
 );

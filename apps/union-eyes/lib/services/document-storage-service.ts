@@ -135,20 +135,30 @@ class DocumentStorageService {
     };
 
     if (this.backend === "r2") {
+      const r2AccessKey = process.env.CLOUDFLARE_R2_ACCESS_KEY_ID;
+      const r2SecretKey = process.env.CLOUDFLARE_R2_SECRET_ACCESS_KEY;
+      if (!r2AccessKey || !r2SecretKey) {
+        throw new Error('Missing required environment variables: CLOUDFLARE_R2_ACCESS_KEY_ID, CLOUDFLARE_R2_SECRET_ACCESS_KEY');
+      }
       this.s3Client = new s3Module.S3Client({
         region: "us-east-1",
         endpoint: this.r2Endpoint,
         credentials: {
-          accessKeyId: process.env.CLOUDFLARE_R2_ACCESS_KEY_ID!,
-          secretAccessKey: process.env.CLOUDFLARE_R2_SECRET_ACCESS_KEY!,
+          accessKeyId: r2AccessKey,
+          secretAccessKey: r2SecretKey,
         },
       });
     } else {
+      const awsAccessKey = process.env.AWS_ACCESS_KEY_ID;
+      const awsSecretKey = process.env.AWS_SECRET_ACCESS_KEY;
+      if (!awsAccessKey || !awsSecretKey) {
+        throw new Error('Missing required environment variables: AWS_ACCESS_KEY_ID, AWS_SECRET_ACCESS_KEY');
+      }
       this.s3Client = new s3Module.S3Client({
         region: process.env.AWS_REGION || "us-east-1",
         credentials: {
-          accessKeyId: process.env.AWS_ACCESS_KEY_ID!,
-          secretAccessKey: process.env.AWS_SECRET_ACCESS_KEY!,
+          accessKeyId: awsAccessKey,
+          secretAccessKey: awsSecretKey,
         },
       });
     }

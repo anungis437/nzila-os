@@ -31,7 +31,7 @@ export const GET = withMinRole('officer', async (request, context: BaseAuthConte
     const url = new URL(request.url);
     const limit = Math.min(parseInt(url.searchParams.get('limit') ?? '50', 10), 200);
     const offset = parseInt(url.searchParams.get('offset') ?? '0', 10);
-    const invoices = await getInvoices(organizationId, limit, offset);
+    const invoices = await getInvoices(organizationId, limit);
     return standardSuccessResponse(invoices, { total: invoices.length, limit, offset });
   } catch (error) {
     return standardErrorResponse(ErrorCode.INTERNAL_ERROR, 'Failed to fetch invoices', error);

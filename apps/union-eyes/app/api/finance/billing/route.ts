@@ -23,7 +23,14 @@ const createSchema = z.object({
   billingEmail: z.string().email(),
   billingContactName: z.string().max(255).optional(),
   billingPhone: z.string().max(50).optional(),
-  billingAddress: z.record(z.string()).optional(),
+  billingAddress: z.object({
+    line1: z.string(),
+    line2: z.string().optional(),
+    city: z.string(),
+    province: z.string(),
+    postalCode: z.string(),
+    country: z.string(),
+  }).optional(),
   taxId: z.string().max(50).optional(),
   netTermsDays: z.number().int().min(1).max(120).optional(),
 });

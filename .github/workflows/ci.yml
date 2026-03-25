@@ -322,14 +322,16 @@ jobs:
         run: pnpm install --frozen-lockfile
 
       - name: Verify schema snapshot (no drift)
-        run: |
-          # If snapshot doesn't exist yet, create it and pass
-          if [ ! -f tooling/db/schema-snapshot.json ]; then
-            echo "No schema snapshot found — creating initial snapshot"
-            pnpm tsx tooling/db/schema-snapshot.ts write
-          else
-            pnpm tsx tooling/db/schema-snapshot.ts verify
-          fi
+        run: pnpm tsx tooling/db/schema-snapshot.ts verify
+
+      - name: Verify canonical schema (required tables + columns)
+        run: pnpm tsx tooling/db/canonical-schema/verify.ts
+
+      - name: DB preflight check (structural prerequisites)
+        run: pnpm tsx tooling/db/preflight-check.ts
+
+      - name: Staging parity check (env configuration)
+        run: pnpm tsx tooling/env/parity-check.ts
 
   # ─── Red-Team Adversarial Tests ───────────────────────────────────────────
   red-team:

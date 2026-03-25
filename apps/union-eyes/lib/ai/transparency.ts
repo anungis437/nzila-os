@@ -306,7 +306,7 @@ export class AITransparencyEngine {
     const assumptions = this.identifyAssumptions(params.query, factors);
 
     const explanation: AIExplanation = {
-      id: `exp_${Date.now()}_${Math.random().toString(36).substr(2, 9)}`,
+      id: `exp_${Date.now()}_${crypto.randomUUID().slice(0, 9)}`,
       requestId: params.requestId,
       querySummary: this.summarizeQuery(params.query),
       factorsConsidered: factors.sort((a, b) => b.weight - a.weight),
@@ -505,7 +505,7 @@ export class AIAppealManager {
     context: string;
   }): Promise<AIAppeal> {
     const appeal: AIAppeal = {
-      id: `appeal_${Date.now()}_${Math.random().toString(36).substr(2, 9)}`,
+      id: `appeal_${Date.now()}_${crypto.randomUUID().slice(0, 9)}`,
       requestId: params.requestId,
       filedBy: params.filedBy,
       reason: params.reason,

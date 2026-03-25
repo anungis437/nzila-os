@@ -78,7 +78,9 @@ export const GET = withApi(
       compliance_rate: complianceRate,
     };
     });
-    } catch {
+    } catch (error) {
+      const { logger: log } = await import('@/lib/logger');
+      log.error('Health-safety stats query failed', { error: error instanceof Error ? error.message : 'Unknown' });
       return {
         totalIncidents: 0, total_incidents: 0,
         openHazards: 0, open_hazards: 0,

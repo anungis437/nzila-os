@@ -52,7 +52,11 @@ const connectionOptions = {
 
 // Create a postgres client with optimized connection options
 // This is used when DATABASE_TYPE is 'postgresql' or not set
-export const client = postgres(process.env.DATABASE_URL!, connectionOptions);
+const databaseUrl = process.env.DATABASE_URL;
+if (!databaseUrl) {
+  throw new Error('Missing required environment variable: DATABASE_URL');
+}
+export const client = postgres(databaseUrl, connectionOptions);
 
 // Create a drizzle client (PostgreSQL only)
 export const db = drizzle(client, { schema });

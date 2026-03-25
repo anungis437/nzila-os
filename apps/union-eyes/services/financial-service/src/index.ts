@@ -38,6 +38,8 @@ import { startDuesCalculationWorkflow, stopDuesCalculationWorkflow } from './job
 import { startArrearsManagementWorkflow, stopArrearsManagementWorkflow } from './jobs/arrears-management-workflow';
 import { startPaymentCollectionWorkflow, stopPaymentCollectionWorkflow } from './jobs/payment-collection-workflow';
 import { startStipendProcessingWorkflow, stopStipendProcessingWorkflow } from './jobs/stipend-processing-workflow';
+import { requireIdempotencyKey } from './middleware/idempotency';
+import { runReconciliation } from './services/reconciliation-engine';
 import { logger } from '@/lib/logger';
 
 dotenv.config();
@@ -124,6 +126,9 @@ app.use((req: Request, res: Response, next: NextFunction) => {
   }
 });
 app.use(express.urlencoded({ extended: true }));
+
+// Idempotency-Key enforcement on mutating endpoints (skip webhooks/health)
+app.use('/api/', requireIdempotencyKey);
 
 // Request logging
 app.use((req: Request, res: Response, next: NextFunction) => {
@@ -308,6 +313,23 @@ app.use('/api/reports', authenticate, reportsRouter);
 
 // Public Donations (no auth required for donations)
 app.use('/api/donations', donationsRouter);
+
+// Reconciliation endpoint (admin-only)
+app.post('/api/reconciliation/run', authenticate, async (req: Request, res: Response) => {
+  try {
+    const { periodStart, periodEnd } = req.body || {};
+    const end = periodEnd || new Date().toISOString();
+    const start = periodStart || new Date(Date.now() - 24 * 60 * 60 * 1000).toISOString();
+    const report = await runReconciliation(start, end);
+    res.json({ success: true, report });
+  } catch (error) {
+    logger.error('Reconciliation failed', { error });
+    res.status(500).json({
+      success: false,
+      error: error instanceof Error ? error.message : 'Reconciliation failed',
+    });
+  }
+});
 
 // ============================================================================
 // ERROR HANDLING

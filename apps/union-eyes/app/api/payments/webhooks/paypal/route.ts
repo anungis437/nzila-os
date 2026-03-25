@@ -55,7 +55,12 @@ async function verifyPayPalWebhook(
   }
 
   const token = await getPayPalAccessToken(clientId, clientSecret, baseUrl);
-  const event = JSON.parse(payload);
+  let event: unknown;
+  try {
+    event = JSON.parse(payload);
+  } catch {
+    throw new Error('Invalid webhook payload');
+  }
 
   const verifyBody = {
     auth_algo: authAlgo,
@@ -135,9 +140,19 @@ export async function POST(request: NextRequest) {
       );
     }
 
-    const event = JSON.parse(payload);
+    let event: Record<string, unknown>;
+    try {
+      event = JSON.parse(payload);
+    } catch {
+      logger.error('PayPal webhook payload is not valid JSON');
+      return NextResponse.json(
+        { error: 'Invalid payload' },
+        { status: 400 }
+      );
+    }
     const eventType = event.event_type;
-    const resource = event.resource || {};
+    // eslint-disable-next-line @typescript-eslint/no-explicit-any
+    const resource = (event.resource || {}) as Record<string, any>;
 
     logger.info('PayPal webhook received', {
       eventId: event.id,

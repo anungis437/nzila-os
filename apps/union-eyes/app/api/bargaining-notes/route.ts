@@ -135,12 +135,22 @@ return standardErrorResponse(
 
 
 const bargainingNotesSchema = z.object({
-  map: z.unknown().optional(),
   organizationId: z.string().uuid('Invalid organizationId'),
-  sessionDate: z.string().datetime().optional(),
-  sessionType: z.unknown().optional(),
-  title: z.string().min(1, 'title is required'),
-  content: z.unknown().optional(),
+  cbaId: z.string().uuid().optional(),
+  sessionDate: z.coerce.date(),
+  sessionType: z.string().max(100),
+  sessionNumber: z.number().int().optional(),
+  title: z.string().min(1, 'title is required').max(300),
+  content: z.string().min(1, 'content is required'),
+  attendees: z.array(z.object({
+    name: z.string(),
+    role: z.string(),
+    organization: z.string(),
+  })).optional(),
+  relatedClauseIds: z.array(z.string().uuid()).optional(),
+  relatedDecisionIds: z.array(z.string().uuid()).optional(),
+  tags: z.array(z.string()).optional(),
+  confidentialityLevel: z.enum(['public', 'internal', 'restricted', 'confidential']).optional(),
 });
 
 export const POST = withRoleAuth('steward', async (request, context) => {
@@ -158,7 +168,7 @@ export const POST = withRoleAuth('steward', async (request, context) => {
       );
     }
     
-    const { map: _map, organizationId: _organizationId, sessionDate: _sessionDate, sessionType: _sessionType, title: _title, content: _content } = validation.data;
+    const { organizationId: _organizationId, sessionDate: _sessionDate, sessionType: _sessionType, title: _title, content: _content } = validation.data;
 
       // Check if bulk create
       if (Array.isArray(body)) {
@@ -185,48 +195,11 @@ export const POST = withRoleAuth('steward', async (request, context) => {
     );
       }
 
-      // Single note creation
-      // Validate required fields
-      if (!body.organizationId) {
-        return standardErrorResponse(
-      ErrorCode.MISSING_REQUIRED_FIELD,
-      'organizationId is required'
-    );
-      }
-
-      if (!body.sessionDate) {
-        return standardErrorResponse(
-      ErrorCode.MISSING_REQUIRED_FIELD,
-      'sessionDate is required'
-    );
-      }
-
-      if (!body.sessionType) {
-        return standardErrorResponse(
-      ErrorCode.MISSING_REQUIRED_FIELD,
-      'sessionType is required'
-    );
-      }
-
-      if (!body.title) {
-        return standardErrorResponse(
-      ErrorCode.MISSING_REQUIRED_FIELD,
-      'title is required'
-    );
-      }
-
-      if (!body.content) {
-        return standardErrorResponse(
-      ErrorCode.MISSING_REQUIRED_FIELD,
-      'content is required'
-    );
-      }
-
       // Create note
       const note = await createBargainingNote({
-        ...body,
-        createdBy: userId,
-        lastModifiedBy: userId,
+        ...validation.data,
+        createdBy: userId!,
+        lastModifiedBy: userId!,
       });
 
       return standardSuccessResponse(

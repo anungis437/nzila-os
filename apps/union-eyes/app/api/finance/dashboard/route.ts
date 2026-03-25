@@ -35,10 +35,10 @@ export const GET = withMinRole('officer', async (request, context: BaseAuthConte
       await Promise.all([
         getBillingAccount(organizationId),
         periodId
-          ? getLedgerSummary(organizationId, periodId)
+          ? getLedgerSummary({ organizationId, billingPeriodId: periodId })
           : Promise.resolve(null),
-        getInvoices(organizationId, 5, 0),
-        getChargebacks(organizationId, undefined, periodId),
+        getInvoices(organizationId, 5),
+        getChargebacks({ organizationId, billingPeriodId: periodId }),
       ]);
 
     const duesReport = await generateDuesAlignmentReport(

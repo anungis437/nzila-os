@@ -25,7 +25,9 @@ export const GET = withApiAuth(async (request: NextRequest) => {
   try {
     const summary = await getDashboardSummary(organizationId);
     return NextResponse.json(summary);
-  } catch {
+  } catch (error) {
+    const { logger: log } = await import('@/lib/logger');
+    log.error('Deadlines dashboard query failed', { error: error instanceof Error ? error.message : 'Unknown' });
     // claim_deadlines table may lack expected columns — return zeroed defaults
     return NextResponse.json({
       activeDeadlines: 0,

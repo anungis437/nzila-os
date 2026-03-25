@@ -198,11 +198,10 @@ export const POST = withRoleAuth('member', async (request: NextRequest, context:
             { status: 400 }
           );
       }
-    } catch (error) {
+    } catch {
 return NextResponse.json(
         {
           error: 'Classification failed',
-          details: error instanceof Error ? error.message : 'Unknown error',
         },
         { status: 500 }
       );

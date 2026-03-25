@@ -93,6 +93,15 @@ class Logger {
       'session_token',
       'bearerToken',
       'bearer_token',
+      'phoneNumber',
+      'phone_number',
+      'phone',
+      'from',
+      'to',
+      'body',
+      'bodyStr',
+      'fullName',
+      'full_name',
     ];
 
     const redacted = { ...context };

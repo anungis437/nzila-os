@@ -22,7 +22,7 @@
 
 import {
   pgTable, pgEnum, uuid, varchar, text, timestamp, decimal,
-  integer, boolean, jsonb, index, uniqueIndex,
+  integer, bigint, boolean, jsonb, index, uniqueIndex,
 } from 'drizzle-orm/pg-core';
 import { organizations } from '../../../schema-organizations';
 
@@ -330,3 +330,60 @@ export type PlatformPayment = typeof platformPayments.$inferSelect;
 export type PaymentAllocation = typeof paymentAllocations.$inferSelect;
 export type BillingAdjustment = typeof billingAdjustments.$inferSelect;
 export type BillingTerm = typeof billingTerms.$inferSelect;
+
+// ============================================================================
+// LEGACY BILLING TABLES (console / CFO dashboard)
+// ============================================================================
+
+export const billingInvoices = pgTable('billing_invoices', {
+  id: uuid('id').primaryKey().defaultRandom(),
+  organizationId: uuid('organization_id').notNull().references(() => organizations.id, { onDelete: 'restrict' }),
+  subscriptionId: uuid('subscription_id'),
+  invoiceNumber: text('invoice_number').notNull(),
+  status: text('status').notNull().default('draft'),
+  currency: varchar('currency', { length: 3 }).notNull().default('CAD'),
+  subtotal: decimal('subtotal', { precision: 14, scale: 2 }).notNull().default('0'),
+  taxTotal: decimal('tax_total', { precision: 14, scale: 2 }).notNull().default('0'),
+  total: decimal('total', { precision: 14, scale: 2 }).notNull().default('0'),
+  amountPaid: decimal('amount_paid', { precision: 14, scale: 2 }).notNull().default('0'),
+  amountDue: decimal('amount_due', { precision: 14, scale: 2 }).notNull().default('0'),
+  dueDate: timestamp('due_date', { withTimezone: true }),
+  issuedAt: timestamp('issued_at', { withTimezone: true }),
+  paidAt: timestamp('paid_at', { withTimezone: true }),
+  description: text('description'),
+  createdAt: timestamp('created_at', { withTimezone: true }).defaultNow().notNull(),
+});
+
+export const billingPayments = pgTable('billing_payments', {
+  id: uuid('id').primaryKey().defaultRandom(),
+  organizationId: uuid('organization_id').notNull().references(() => organizations.id, { onDelete: 'restrict' }),
+  invoiceId: uuid('invoice_id'),
+  amount: decimal('amount', { precision: 14, scale: 2 }).notNull(),
+  currency: varchar('currency', { length: 3 }).notNull().default('CAD'),
+  status: text('status').notNull().default('succeeded'),
+  paymentMethod: text('payment_method').notNull().default('card'),
+  cardLast4: varchar('card_last4', { length: 4 }),
+  cardBrand: text('card_brand'),
+  failureReason: text('failure_reason'),
+  createdAt: timestamp('created_at', { withTimezone: true }).defaultNow().notNull(),
+});
+
+export const billingSubscriptions = pgTable('billing_subscriptions', {
+  id: uuid('id').primaryKey().defaultRandom(),
+  organizationId: uuid('organization_id').notNull().references(() => organizations.id, { onDelete: 'restrict' }),
+  planName: text('plan_name').notNull(),
+  planTier: text('plan_tier').notNull().default('standard'),
+  status: text('status').notNull().default('active'),
+  amountCents: bigint('amount_cents', { mode: 'number' }).notNull().default(0),
+  currency: varchar('currency', { length: 3 }).notNull().default('CAD'),
+  billingInterval: text('billing_interval').notNull().default('monthly'),
+  currentPeriodStart: timestamp('current_period_start', { withTimezone: true }),
+  currentPeriodEnd: timestamp('current_period_end', { withTimezone: true }),
+  canceledAt: timestamp('canceled_at', { withTimezone: true }),
+  createdAt: timestamp('created_at', { withTimezone: true }).defaultNow().notNull(),
+  updatedAt: timestamp('updated_at', { withTimezone: true }).defaultNow().notNull(),
+});
+
+export type BillingInvoice = typeof billingInvoices.$inferSelect;
+export type BillingPayment = typeof billingPayments.$inferSelect;
+export type BillingSubscription = typeof billingSubscriptions.$inferSelect;

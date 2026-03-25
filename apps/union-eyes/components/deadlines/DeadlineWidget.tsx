@@ -79,7 +79,7 @@ export function DeadlineWidget({
     if (deadline.isOverdue) return t('daysOverdue', { count: deadline.daysOverdue });
     if ((deadline.daysUntilDue || 0) === 0) return t('dueToday');
     if ((deadline.daysUntilDue || 0) === 1) return t('dueTomorrow');
-    return t('daysRemaining', { count: deadline.daysUntilDue });
+    return t('daysRemaining', { count: deadline.daysUntilDue ?? 0 });
   };
 
   return (

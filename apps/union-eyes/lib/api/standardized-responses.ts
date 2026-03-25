@@ -251,6 +251,7 @@ export function standardErrorResponse(
     headers: {
       'X-Trace-ID': finalTraceId,
       'X-Error-Code': code,
+      'Cache-Control': 'private, no-store',
     },
   });
 }
@@ -283,7 +284,11 @@ export function standardSuccessResponse<T = any>(
     response.meta = meta;
   }
   
-  return NextResponse.json(response);
+  return NextResponse.json(response, {
+    headers: {
+      'Cache-Control': 'private, no-store',
+    },
+  });
 }
 
 /**

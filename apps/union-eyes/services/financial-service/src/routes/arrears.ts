@@ -123,7 +123,7 @@ router.post('/detect', async (req: Request, res: Response) => {
     }
     res.status(500).json({
       success: false,
-      error: error.message,
+      error: 'Internal server error',
     });
   }
 });
@@ -162,7 +162,7 @@ router.get('/', async (req: Request, res: Response) => {
   } catch (error) {
     res.status(500).json({
       success: false,
-      error: error.message,
+      error: 'Internal server error',
     });
   }
 });
@@ -222,7 +222,7 @@ router.get('/:id', async (req: Request, res: Response) => {
   } catch (error) {
     res.status(500).json({
       success: false,
-      error: error.message,
+      error: 'Internal server error',
     });
   }
 });
@@ -296,7 +296,7 @@ router.post('/', async (req: Request, res: Response) => {
     }
     res.status(500).json({
       success: false,
-      error: error.message,
+      error: 'Internal server error',
     });
   }
 });
@@ -396,7 +396,7 @@ router.post('/:id/payment-plan', async (req: Request, res: Response) => {
     }
     res.status(500).json({
       success: false,
-      error: error.message,
+      error: 'Internal server error',
     });
   }
 });
@@ -468,7 +468,7 @@ router.put('/:id/status', async (req: Request, res: Response) => {
     }
     res.status(500).json({
       success: false,
-      error: error.message,
+      error: 'Internal server error',
     });
   }
 });
@@ -540,7 +540,7 @@ router.post('/:id/contact', async (req: Request, res: Response) => {
     }
     res.status(500).json({
       success: false,
-      error: error.message,
+      error: 'Internal server error',
     });
   }
 });
@@ -627,7 +627,7 @@ router.post('/:id/payment', async (req: Request, res: Response) => {
     }
     res.status(500).json({
       success: false,
-      error: error.message,
+      error: 'Internal server error',
     });
   }
 });

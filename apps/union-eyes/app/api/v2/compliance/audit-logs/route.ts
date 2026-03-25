@@ -18,7 +18,7 @@ export const GET = withApi(
       .where(eq(auditLogs.organizationId, organizationId!))
       .orderBy(desc(auditLogs.createdAt))
       .limit(100);
-    return { data: rows, total: rows.length };
+    return rows;
   },
 );
 
@@ -43,6 +43,6 @@ export const POST = withApi(
         userId,
       })
       .returning();
-    return { data: row };
+    return row;
   },
 );

@@ -1,4 +1,4 @@
-import { pgTable, uuid, varchar, text, timestamp, integer, boolean, jsonb, pgEnum } from "drizzle-orm/pg-core";
+import { pgTable, uuid, varchar, text, timestamp, integer, boolean, jsonb, pgEnum, decimal } from "drizzle-orm/pg-core";
 import { sql } from "drizzle-orm";
 
 // Enums for claims
@@ -88,11 +88,11 @@ export const claims = pgTable("claims", {
   // Progress tracking
   progress: integer("progress").default(0),
   
-  // Financial information
-  claimAmount: varchar("claim_amount", { length: 20 }), // Stored as string to preserve precision
-  settlementAmount: varchar("settlement_amount", { length: 20 }),
-  legalCosts: varchar("legal_costs", { length: 20 }),
-  courtCosts: varchar("court_costs", { length: 20 }),
+  // Financial information (decimal for monetary precision)
+  claimAmount: decimal("claim_amount", { precision: 14, scale: 2 }).notNull().default('0'),
+  settlementAmount: decimal("settlement_amount", { precision: 14, scale: 2 }).notNull().default('0'),
+  legalCosts: decimal("legal_costs", { precision: 14, scale: 2 }).notNull().default('0'),
+  courtCosts: decimal("court_costs", { precision: 14, scale: 2 }).notNull().default('0'),
   
   // Resolution information
   resolutionOutcome: varchar("resolution_outcome", { length: 100 }),

@@ -132,6 +132,16 @@ export async function claimPendingProfile(
   token?: string
 ): Promise<{ success: boolean; error?: string }> {
   try {
+    // Verify the caller is authenticated and matches the userId being claimed
+    const { userId: authedUserId } = await auth();
+    if (!authedUserId) {
+      return { success: false, error: "Authentication required" };
+    }
+    if (authedUserId !== userId) {
+      logger.warn('claimPendingProfile userId mismatch', { authedUserId, requestedUserId: userId });
+      return { success: false, error: "Cannot claim profile for another user" };
+    }
+
     if (!userId || !email) {
       logger.warn('Missing required parameters in claimPendingProfile', { hasUserId: !!userId, hasEmail: !!email });
       return { success: false, error: "Missing required parameters for claiming profile" };

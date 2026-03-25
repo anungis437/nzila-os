@@ -1,0 +1,405 @@
+app/api/activities/route.ts(22,3): error TS2345: Argument of type '({ request, organizationId }: ApiContext<never, never>) => Promise<RowList<Record<string, unknown>[]>>' is not assignable to parameter of type 'HandlerFn<never, never>'.
+  Type 'Promise<RowList<Record<string, unknown>[]>>' is not assignable to type 'HandlerReturn | Promise<HandlerReturn>'.
+    Type 'Promise<RowList<Record<string, unknown>[]>>' is not assignable to type 'Promise<HandlerReturn>'.
+      Type 'RowList<Record<string, unknown>[]>' is not assignable to type 'HandlerReturn'.
+        Type 'RowList<Record<string, unknown>[]>' is not assignable to type 'Record<string, unknown>'.
+          Index signature for type 'string' is missing in type 'Record<string, unknown>[] & Iterable<Record<string, unknown>> & ResultQueryMeta<number, string>'.
+app/api/admin/alerts/executions/test/route.ts(32,3): error TS2345: Argument of type '() => Promise<never[]>' is not assignable to parameter of type 'HandlerFn<never, never>'.
+  Type 'Promise<never[]>' is not assignable to type 'HandlerReturn | Promise<HandlerReturn>'.
+    Type 'Promise<never[]>' is not assignable to type 'Promise<HandlerReturn>'.
+      Type 'never[]' is not assignable to type 'HandlerReturn'.
+        Type 'never[]' is not assignable to type 'Record<string, unknown>'.
+          Index signature for type 'string' is missing in type 'never[]'.
+app/api/admin/clc/remittances/[id]/export/route.ts(32,3): error TS2345: Argument of type '() => Promise<never[]>' is not assignable to parameter of type 'HandlerFn<never, never>'.
+  Type 'Promise<never[]>' is not assignable to type 'HandlerReturn | Promise<HandlerReturn>'.
+    Type 'Promise<never[]>' is not assignable to type 'Promise<HandlerReturn>'.
+      Type 'never[]' is not assignable to type 'HandlerReturn'.
+        Type 'never[]' is not assignable to type 'Record<string, unknown>'.
+          Index signature for type 'string' is missing in type 'never[]'.
+app/api/admin/clc/remittances/[id]/submit/route.ts(32,3): error TS2345: Argument of type '() => Promise<never[]>' is not assignable to parameter of type 'HandlerFn<never, never>'.
+  Type 'Promise<never[]>' is not assignable to type 'HandlerReturn | Promise<HandlerReturn>'.
+    Type 'Promise<never[]>' is not assignable to type 'Promise<HandlerReturn>'.
+      Type 'never[]' is not assignable to type 'HandlerReturn'.
+        Type 'never[]' is not assignable to type 'Record<string, unknown>'.
+          Index signature for type 'string' is missing in type 'never[]'.
+app/api/admin/clc/remittances/export/route.ts(32,3): error TS2345: Argument of type '() => Promise<never[]>' is not assignable to parameter of type 'HandlerFn<never, never>'.
+  Type 'Promise<never[]>' is not assignable to type 'HandlerReturn | Promise<HandlerReturn>'.
+    Type 'Promise<never[]>' is not assignable to type 'Promise<HandlerReturn>'.
+      Type 'never[]' is not assignable to type 'HandlerReturn'.
+        Type 'never[]' is not assignable to type 'Record<string, unknown>'.
+          Index signature for type 'string' is missing in type 'never[]'.
+app/api/admin/members/export/route.ts(32,3): error TS2345: Argument of type '() => Promise<never[]>' is not assignable to parameter of type 'HandlerFn<never, never>'.
+  Type 'Promise<never[]>' is not assignable to type 'HandlerReturn | Promise<HandlerReturn>'.
+    Type 'Promise<never[]>' is not assignable to type 'Promise<HandlerReturn>'.
+      Type 'never[]' is not assignable to type 'HandlerReturn'.
+        Type 'never[]' is not assignable to type 'Record<string, unknown>'.
+          Index signature for type 'string' is missing in type 'never[]'.
+app/api/admin/organizations/route.ts(14,3): error TS2345: Argument of type '(ctx: ApiContext<never, never>) => Promise<{ id: string; number: string; name: string; region: string; memberCount: number; activeCount: number; president: string; contact: string; status: "active" | "inactive"; }[]>' is not assignable to parameter of type 'HandlerFn<never, never>'.
+  Type 'Promise<{ id: string; number: string; name: string; region: string; memberCount: number; activeCount: number; president: string; contact: string; status: "active" | "inactive"; }[]>' is not assignable to type 'HandlerReturn | Promise<HandlerReturn>'.
+    Type 'Promise<{ id: string; number: string; name: string; region: string; memberCount: number; activeCount: number; president: string; contact: string; status: "active" | "inactive"; }[]>' is not assignable to type 'Promise<HandlerReturn>'.
+      Type '{ id: string; number: string; name: string; region: string; memberCount: number; activeCount: number; president: string; contact: string; status: "active" | "inactive"; }[]' is not assignable to type 'HandlerReturn'.
+        Type '{ id: string; number: string; name: string; region: string; memberCount: number; activeCount: number; president: string; contact: string; status: "active" | "inactive"; }[]' is not assignable to type 'Record<string, unknown>'.
+          Index signature for type 'string' is missing in type '{ id: string; number: string; name: string; region: string; memberCount: number; activeCount: number; president: string; contact: string; status: "active" | "inactive"; }[]'.
+app/api/admin/stats/activity/route.ts(14,3): error TS2345: Argument of type '(ctx: ApiContext<never, never>) => Promise<{ id: string; type: string; description: string; user: string; email: string; organizationName: string | null; timestamp: Date; }[]>' is not assignable to parameter of type 'HandlerFn<never, never>'.
+  Type 'Promise<{ id: string; type: string; description: string; user: string; email: string; organizationName: string | null; timestamp: Date; }[]>' is not assignable to type 'HandlerReturn | Promise<HandlerReturn>'.
+    Type 'Promise<{ id: string; type: string; description: string; user: string; email: string; organizationName: string | null; timestamp: Date; }[]>' is not assignable to type 'Promise<HandlerReturn>'.
+      Type '{ id: string; type: string; description: string; user: string; email: string; organizationName: string | null; timestamp: Date; }[]' is not assignable to type 'HandlerReturn'.
+        Type '{ id: string; type: string; description: string; user: string; email: string; organizationName: string | null; timestamp: Date; }[]' is not assignable to type 'Record<string, unknown>'.
+          Index signature for type 'string' is missing in type '{ id: string; type: string; description: string; user: string; email: string; organizationName: string | null; timestamp: Date; }[]'.
+app/api/admin/users/route.ts(14,3): error TS2345: Argument of type '(ctx: ApiContext<never, never>) => Promise<{ id: string; name: string; email: string; role: string; organizationId: string; organizationName: string; status: string; lastLogin: null; joinedAt: Date; }[]>' is not assignable to parameter of type 'HandlerFn<never, never>'.
+  Type 'Promise<{ id: string; name: string; email: string; role: string; organizationId: string; organizationName: string; status: string; lastLogin: null; joinedAt: Date; }[]>' is not assignable to type 'HandlerReturn | Promise<HandlerReturn>'.
+    Type 'Promise<{ id: string; name: string; email: string; role: string; organizationId: string; organizationName: string; status: string; lastLogin: null; joinedAt: Date; }[]>' is not assignable to type 'Promise<HandlerReturn>'.
+      Type '{ id: string; name: string; email: string; role: string; organizationId: string; organizationName: string; status: string; lastLogin: null; joinedAt: Date; }[]' is not assignable to type 'HandlerReturn'.
+        Type '{ id: string; name: string; email: string; role: string; organizationId: string; organizationName: string; status: string; lastLogin: null; joinedAt: Date; }[]' is not assignable to type 'Record<string, unknown>'.
+          Index signature for type 'string' is missing in type '{ id: string; name: string; email: string; role: string; organizationId: string; organizationName: string; status: string; lastLogin: null; joinedAt: Date; }[]'.
+app/api/claims/bulk/route.ts(32,3): error TS2345: Argument of type '() => Promise<never[]>' is not assignable to parameter of type 'HandlerFn<never, never>'.
+  Type 'Promise<never[]>' is not assignable to type 'HandlerReturn | Promise<HandlerReturn>'.
+    Type 'Promise<never[]>' is not assignable to type 'Promise<HandlerReturn>'.
+      Type 'never[]' is not assignable to type 'HandlerReturn'.
+        Type 'never[]' is not assignable to type 'Record<string, unknown>'.
+          Index signature for type 'string' is missing in type 'never[]'.
+app/api/communications/campaigns/[id]/analytics/export/route.ts(32,3): error TS2345: Argument of type '() => Promise<never[]>' is not assignable to parameter of type 'HandlerFn<never, never>'.
+  Type 'Promise<never[]>' is not assignable to type 'HandlerReturn | Promise<HandlerReturn>'.
+    Type 'Promise<never[]>' is not assignable to type 'Promise<HandlerReturn>'.
+      Type 'never[]' is not assignable to type 'HandlerReturn'.
+        Type 'never[]' is not assignable to type 'Record<string, unknown>'.
+          Index signature for type 'string' is missing in type 'never[]'.
+app/api/communications/distribution-lists/[id]/export/route.ts(32,3): error TS2345: Argument of type '() => Promise<never[]>' is not assignable to parameter of type 'HandlerFn<never, never>'.
+  Type 'Promise<never[]>' is not assignable to type 'HandlerReturn | Promise<HandlerReturn>'.
+    Type 'Promise<never[]>' is not assignable to type 'Promise<HandlerReturn>'.
+      Type 'never[]' is not assignable to type 'HandlerReturn'.
+        Type 'never[]' is not assignable to type 'Record<string, unknown>'.
+          Index signature for type 'string' is missing in type 'never[]'.
+app/api/communications/surveys/[surveyId]/export/route.ts(32,3): error TS2345: Argument of type '() => Promise<never[]>' is not assignable to parameter of type 'HandlerFn<never, never>'.
+  Type 'Promise<never[]>' is not assignable to type 'HandlerReturn | Promise<HandlerReturn>'.
+    Type 'Promise<never[]>' is not assignable to type 'Promise<HandlerReturn>'.
+      Type 'never[]' is not assignable to type 'HandlerReturn'.
+        Type 'never[]' is not assignable to type 'Record<string, unknown>'.
+          Index signature for type 'string' is missing in type 'never[]'.
+app/api/compliance/audit-logs/route.ts(14,3): error TS2345: Argument of type '({ organizationId }: ApiContext<never, never>) => Promise<{ auditId: string; organizationId: string | null; userId: string | null; action: string; resourceType: string; resourceId: string | null; ... 13 more ...; createdAt: Date | null; }[]>' is not assignable to parameter of type 'HandlerFn<never, never>'.
+  Type 'Promise<{ auditId: string; organizationId: string | null; userId: string | null; action: string; resourceType: string; resourceId: string | null; oldValues: unknown; newValues: unknown; ipAddress: string | null; ... 10 more ...; createdAt: Date | null; }[]>' is not assignable to type 'HandlerReturn | Promise<HandlerReturn>'.
+    Type 'Promise<{ auditId: string; organizationId: string | null; userId: string | null; action: string; resourceType: string; resourceId: string | null; oldValues: unknown; newValues: unknown; ipAddress: string | null; ... 10 more ...; createdAt: Date | null; }[]>' is not assignable to type 'Promise<HandlerReturn>'.
+      Type '{ auditId: string; organizationId: string | null; userId: string | null; action: string; resourceType: string; resourceId: string | null; oldValues: unknown; newValues: unknown; ipAddress: string | null; ... 10 more ...; createdAt: Date | null; }[]' is not assignable to type 'HandlerReturn'.
+        Type '{ auditId: string; organizationId: string | null; userId: string | null; action: string; resourceType: string; resourceId: string | null; oldValues: unknown; newValues: unknown; ipAddress: string | null; ... 10 more ...; createdAt: Date | null; }[]' is not assignable to type 'Record<string, unknown>'.
+          Index signature for type 'string' is missing in type '{ auditId: string; organizationId: string | null; userId: string | null; action: string; resourceType: string; resourceId: string | null; oldValues: unknown; newValues: unknown; ipAddress: string | null; ... 10 more ...; createdAt: Date | null; }[]'.
+app/api/enterprise/sso/providers/route.ts(22,3): error TS2345: Argument of type '({ organizationId }: ApiContext<never, never>) => Promise<{ id: string; organizationId: string; name: string; providerType: string; samlEntityId: string | null; samlSsoUrl: string | null; samlSloUrl: string | null; ... 21 more ...; updatedBy: string | null; }[]>' is not assignable to parameter of type 'HandlerFn<never, never>'.
+  Type 'Promise<{ id: string; organizationId: string; name: string; providerType: string; samlEntityId: string | null; samlSsoUrl: string | null; samlSloUrl: string | null; samlCertificate: string | null; ... 20 more ...; updatedBy: string | null; }[]>' is not assignable to type 'HandlerReturn | Promise<HandlerReturn>'.
+    Type 'Promise<{ id: string; organizationId: string; name: string; providerType: string; samlEntityId: string | null; samlSsoUrl: string | null; samlSloUrl: string | null; samlCertificate: string | null; ... 20 more ...; updatedBy: string | null; }[]>' is not assignable to type 'Promise<HandlerReturn>'.
+      Type '{ id: string; organizationId: string; name: string; providerType: string; samlEntityId: string | null; samlSsoUrl: string | null; samlSloUrl: string | null; samlCertificate: string | null; ... 20 more ...; updatedBy: string | null; }[]' is not assignable to type 'HandlerReturn'.
+        Type '{ id: string; organizationId: string; name: string; providerType: string; samlEntityId: string | null; samlSsoUrl: string | null; samlSloUrl: string | null; samlCertificate: string | null; ... 20 more ...; updatedBy: string | null; }[]' is not assignable to type 'Record<string, unknown>'.
+          Index signature for type 'string' is missing in type '{ id: string; organizationId: string; name: string; providerType: string; samlEntityId: string | null; samlSsoUrl: string | null; samlSloUrl: string | null; samlCertificate: string | null; ... 20 more ...; updatedBy: string | null; }[]'.
+app/api/finance/allocation/route.ts(69,45): error TS2345: Argument of type '{ createdBy: string; method: "hybrid" | "tiered" | "weighted_hybrid" | "manual_override" | "per_capita" | "proportional_revenue" | "fixed_share"; name: string; costType: string; effectiveFrom?: string | undefined; parameters?: Record<...> | undefined; organizationId: string; }' is not assignable to parameter of type 'CreateAllocationRuleInput'.
+  Types of property 'method' are incompatible.
+    Type '"hybrid" | "tiered" | "weighted_hybrid" | "manual_override" | "per_capita" | "proportional_revenue" | "fixed_share"' is not assignable to type '"per_member_count" | "per_active_user" | "per_case_volume" | "per_local_flat" | "weighted_hybrid" | "manual_override" | "subsidized"'.
+      Type '"hybrid"' is not assignable to type '"per_member_count" | "per_active_user" | "per_case_volume" | "per_local_flat" | "weighted_hybrid" | "manual_override" | "subsidized"'.
+app/api/finance/allocation/run/route.ts(51,7): error TS2561: Object literal may only specify known properties, but 'localBasisData' does not exist in type 'RunAllocationInput'. Did you mean to write 'localBasis'?
+app/api/finance/billing/route.ts(67,48): error TS2345: Argument of type '{ createdBy: string; displayName: string; billingEmail: string; billingContactName?: string | undefined; billingPhone?: string | undefined; billingAddress?: Record<string, string> | undefined; taxId?: string | undefined; netTermsDays?: number | undefined; organizationId: string; }' is not assignable to parameter of type 'CreateBillingAccountInput'.
+  Types of property 'billingAddress' are incompatible.
+    Type 'Record<string, string> | undefined' is not assignable to type '{ line1: string; line2?: string | undefined; city: string; province: string; postalCode: string; country: string; } | null | undefined'.
+      Type 'Record<string, string>' is missing the following properties from type '{ line1: string; line2?: string | undefined; city: string; province: string; postalCode: string; country: string; }': line1, city, province, postalCode, country
+app/api/finance/chargebacks/route.ts(25,62): error TS2554: Expected 1 arguments, but got 3.
+app/api/finance/dashboard/route.ts(38,46): error TS2554: Expected 1 arguments, but got 2.
+app/api/finance/dashboard/route.ts(40,40): error TS2554: Expected 1-2 arguments, but got 3.
+app/api/finance/dashboard/route.ts(41,40): error TS2554: Expected 1 arguments, but got 3.
+app/api/finance/invoices/[id]/payments/route.ts(38,56): error TS2345: Argument of type 'string' is not assignable to parameter of type 'number'.
+app/api/finance/invoices/[id]/route.ts(30,67): error TS2554: Expected 1 arguments, but got 2.
+app/api/finance/invoices/route.ts(34,63): error TS2554: Expected 1-2 arguments, but got 3.
+app/api/finance/simulation/route.ts(54,7): error TS2561: Object literal may only specify known properties, but 'localBasisData' does not exist in type 'RunAllocationInput'. Did you mean to write 'localBasis'?
+app/api/governance/board-packets/route.ts(17,3): error TS2345: Argument of type '({ request }: ApiContext<never, never>) => Promise<{ id: string; title: string; description: string | null; packetType: string; organizationId: string; periodStart: string; periodEnd: string; ... 23 more ...; metadata: unknown; }[]>' is not assignable to parameter of type 'HandlerFn<never, never>'.
+  Type 'Promise<{ id: string; title: string; description: string | null; packetType: string; organizationId: string; periodStart: string; periodEnd: string; fiscalYear: number; fiscalQuarter: number | null; ... 21 more ...; metadata: unknown; }[]>' is not assignable to type 'HandlerReturn | Promise<HandlerReturn>'.
+    Type 'Promise<{ id: string; title: string; description: string | null; packetType: string; organizationId: string; periodStart: string; periodEnd: string; fiscalYear: number; fiscalQuarter: number | null; ... 21 more ...; metadata: unknown; }[]>' is not assignable to type 'Promise<HandlerReturn>'.
+      Type '{ id: string; title: string; description: string | null; packetType: string; organizationId: string; periodStart: string; periodEnd: string; fiscalYear: number; fiscalQuarter: number | null; ... 21 more ...; metadata: unknown; }[]' is not assignable to type 'HandlerReturn'.
+        Type '{ id: string; title: string; description: string | null; packetType: string; organizationId: string; periodStart: string; periodEnd: string; fiscalYear: number; fiscalQuarter: number | null; ... 21 more ...; metadata: unknown; }[]' is not assignable to type 'Record<string, unknown>'.
+          Index signature for type 'string' is missing in type '{ id: string; title: string; description: string | null; packetType: string; organizationId: string; periodStart: string; periodEnd: string; fiscalYear: number; fiscalQuarter: number | null; ... 21 more ...; metadata: unknown; }[]'.
+app/api/governance/elections/sessions/route.ts(17,3): error TS2345: Argument of type '({ request }: ApiContext<never, never>) => Promise<{ id: string; title: string; description: string | null; type: string; status: string; meetingType: string; organizationId: string; createdBy: string; ... 10 more ...; metadata: unknown; }[]>' is not assignable to parameter of type 'HandlerFn<never, never>'.
+  Type 'Promise<{ id: string; title: string; description: string | null; type: string; status: string; meetingType: string; organizationId: string; createdBy: string; createdAt: Date | null; updatedAt: Date | null; ... 8 more ...; metadata: unknown; }[]>' is not assignable to type 'HandlerReturn | Promise<HandlerReturn>'.
+    Type 'Promise<{ id: string; title: string; description: string | null; type: string; status: string; meetingType: string; organizationId: string; createdBy: string; createdAt: Date | null; updatedAt: Date | null; ... 8 more ...; metadata: unknown; }[]>' is not assignable to type 'Promise<HandlerReturn>'.
+      Type '{ id: string; title: string; description: string | null; type: string; status: string; meetingType: string; organizationId: string; createdBy: string; createdAt: Date | null; updatedAt: Date | null; ... 8 more ...; metadata: unknown; }[]' is not assignable to type 'HandlerReturn'.
+        Type '{ id: string; title: string; description: string | null; type: string; status: string; meetingType: string; organizationId: string; createdBy: string; createdAt: Date | null; updatedAt: Date | null; ... 8 more ...; metadata: unknown; }[]' is not assignable to type 'Record<string, unknown>'.
+          Index signature for type 'string' is missing in type '{ id: string; title: string; description: string | null; type: string; status: string; meetingType: string; organizationId: string; createdBy: string; createdAt: Date | null; updatedAt: Date | null; ... 8 more ...; metadata: unknown; }[]'.
+app/api/governance/policies/rules/route.ts(17,3): error TS2345: Argument of type '({ request, organizationId }: ApiContext<never, never>) => Promise<{ id: string; organizationId: string; title: string; category: string; description: string | null; content: string | null; status: string; updatedBy: string | null; metadata: unknown; createdAt: Date; updatedAt: Date; }[]>' is not assignable to parameter of type 'HandlerFn<never, never>'.
+  Type 'Promise<{ id: string; organizationId: string; title: string; category: string; description: string | null; content: string | null; status: string; updatedBy: string | null; metadata: unknown; createdAt: Date; updatedAt: Date; }[]>' is not assignable to type 'HandlerReturn | Promise<HandlerReturn>'.
+    Type 'Promise<{ id: string; organizationId: string; title: string; category: string; description: string | null; content: string | null; status: string; updatedBy: string | null; metadata: unknown; createdAt: Date; updatedAt: Date; }[]>' is not assignable to type 'Promise<HandlerReturn>'.
+      Type '{ id: string; organizationId: string; title: string; category: string; description: string | null; content: string | null; status: string; updatedBy: string | null; metadata: unknown; createdAt: Date; updatedAt: Date; }[]' is not assignable to type 'HandlerReturn'.
+        Type '{ id: string; organizationId: string; title: string; category: string; description: string | null; content: string | null; status: string; updatedBy: string | null; metadata: unknown; createdAt: Date; updatedAt: Date; }[]' is not assignable to type 'Record<string, unknown>'.
+          Index signature for type 'string' is missing in type '{ id: string; organizationId: string; title: string; category: string; description: string | null; content: string | null; status: string; updatedBy: string | null; metadata: unknown; createdAt: Date; updatedAt: Date; }[]'.
+app/api/governance/policy-templates/route.ts(17,3): error TS2345: Argument of type '({ request, organizationId }: ApiContext<never, never>) => Promise<{ id: string; organizationId: string; title: string; category: string; description: string | null; content: string | null; status: string; updatedBy: string | null; metadata: unknown; createdAt: Date; updatedAt: Date; }[]>' is not assignable to parameter of type 'HandlerFn<never, never>'.
+  Type 'Promise<{ id: string; organizationId: string; title: string; category: string; description: string | null; content: string | null; status: string; updatedBy: string | null; metadata: unknown; createdAt: Date; updatedAt: Date; }[]>' is not assignable to type 'HandlerReturn | Promise<HandlerReturn>'.
+    Type 'Promise<{ id: string; organizationId: string; title: string; category: string; description: string | null; content: string | null; status: string; updatedBy: string | null; metadata: unknown; createdAt: Date; updatedAt: Date; }[]>' is not assignable to type 'Promise<HandlerReturn>'.
+      Type '{ id: string; organizationId: string; title: string; category: string; description: string | null; content: string | null; status: string; updatedBy: string | null; metadata: unknown; createdAt: Date; updatedAt: Date; }[]' is not assignable to type 'HandlerReturn'.
+        Type '{ id: string; organizationId: string; title: string; category: string; description: string | null; content: string | null; status: string; updatedBy: string | null; metadata: unknown; createdAt: Date; updatedAt: Date; }[]' is not assignable to type 'Record<string, unknown>'.
+          Index signature for type 'string' is missing in type '{ id: string; organizationId: string; title: string; category: string; description: string | null; content: string | null; status: string; updatedBy: string | null; metadata: unknown; createdAt: Date; updatedAt: Date; }[]'.
+app/api/members/[id]/history/route.ts(23,3): error TS2345: Argument of type '({ params, request }: ApiContext<never, never>) => Promise<{ id: string; userId: string; organizationId: string; eventType: string; eventCategory: string; eventDate: Date; eventTitle: string; ... 8 more ...; createdBy: string | null; }[]>' is not assignable to parameter of type 'HandlerFn<never, never>'.
+  Type 'Promise<{ id: string; userId: string; organizationId: string; eventType: string; eventCategory: string; eventDate: Date; eventTitle: string; eventDescription: string | null; eventData: { ...; } | null; ... 6 more ...; createdBy: string | null; }[]>' is not assignable to type 'HandlerReturn | Promise<HandlerReturn>'.
+    Type 'Promise<{ id: string; userId: string; organizationId: string; eventType: string; eventCategory: string; eventDate: Date; eventTitle: string; eventDescription: string | null; eventData: { ...; } | null; ... 6 more ...; createdBy: string | null; }[]>' is not assignable to type 'Promise<HandlerReturn>'.
+      Type '{ id: string; userId: string; organizationId: string; eventType: string; eventCategory: string; eventDate: Date; eventTitle: string; eventDescription: string | null; eventData: { [key: string]: any; previousValue?: any; newValue?: any; relatedId?: string | undefined; } | null; ... 6 more ...; createdBy: string | nul...' is not assignable to type 'HandlerReturn'.
+        Type '{ id: string; userId: string; organizationId: string; eventType: string; eventCategory: string; eventDate: Date; eventTitle: string; eventDescription: string | null; eventData: { [key: string]: any; previousValue?: any; newValue?: any; relatedId?: string | undefined; } | null; ... 6 more ...; createdBy: string | nul...' is not assignable to type 'Record<string, unknown>'.
+          Index signature for type 'string' is missing in type '{ id: string; userId: string; organizationId: string; eventType: string; eventCategory: string; eventDate: Date; eventTitle: string; eventDescription: string | null; eventData: { [key: string]: any; previousValue?: any; newValue?: any; relatedId?: string | undefined; } | null; ... 6 more ...; createdBy: string | nul...'.
+app/api/members/bulk/route.ts(32,3): error TS2345: Argument of type '() => Promise<never[]>' is not assignable to parameter of type 'HandlerFn<never, never>'.
+  Type 'Promise<never[]>' is not assignable to type 'HandlerReturn | Promise<HandlerReturn>'.
+    Type 'Promise<never[]>' is not assignable to type 'Promise<HandlerReturn>'.
+      Type 'never[]' is not assignable to type 'HandlerReturn'.
+        Type 'never[]' is not assignable to type 'Record<string, unknown>'.
+          Index signature for type 'string' is missing in type 'never[]'.
+app/api/members/export/route.ts(32,3): error TS2345: Argument of type '() => Promise<never[]>' is not assignable to parameter of type 'HandlerFn<never, never>'.
+  Type 'Promise<never[]>' is not assignable to type 'HandlerReturn | Promise<HandlerReturn>'.
+    Type 'Promise<never[]>' is not assignable to type 'Promise<HandlerReturn>'.
+      Type 'never[]' is not assignable to type 'HandlerReturn'.
+        Type 'never[]' is not assignable to type 'Record<string, unknown>'.
+          Index signature for type 'string' is missing in type 'never[]'.
+app/api/members/merge/route.ts(32,3): error TS2345: Argument of type '() => Promise<never[]>' is not assignable to parameter of type 'HandlerFn<never, never>'.
+  Type 'Promise<never[]>' is not assignable to type 'HandlerReturn | Promise<HandlerReturn>'.
+    Type 'Promise<never[]>' is not assignable to type 'Promise<HandlerReturn>'.
+      Type 'never[]' is not assignable to type 'HandlerReturn'.
+        Type 'never[]' is not assignable to type 'Record<string, unknown>'.
+          Index signature for type 'string' is missing in type 'never[]'.
+app/api/mobile/sync/route.ts(22,3): error TS2345: Argument of type '({ userId, organizationId }: ApiContext<never, never>) => Promise<{ id: string; deviceToken: string; deviceId: string; userId: string; organizationId: string | null; platform: string; deviceName: string | null; ... 19 more ...; metadata: Record<...> | null; }[]>' is not assignable to parameter of type 'HandlerFn<never, never>'.
+  Type 'Promise<{ id: string; deviceToken: string; deviceId: string; userId: string; organizationId: string | null; platform: string; deviceName: string | null; deviceModel: string | null; osVersion: string | null; ... 17 more ...; metadata: Record<...> | null; }[]>' is not assignable to type 'HandlerReturn | Promise<HandlerReturn>'.
+    Type 'Promise<{ id: string; deviceToken: string; deviceId: string; userId: string; organizationId: string | null; platform: string; deviceName: string | null; deviceModel: string | null; osVersion: string | null; ... 17 more ...; metadata: Record<...> | null; }[]>' is not assignable to type 'Promise<HandlerReturn>'.
+      Type '{ id: string; deviceToken: string; deviceId: string; userId: string; organizationId: string | null; platform: string; deviceName: string | null; deviceModel: string | null; osVersion: string | null; ... 17 more ...; metadata: Record<...> | null; }[]' is not assignable to type 'HandlerReturn'.
+        Type '{ id: string; deviceToken: string; deviceId: string; userId: string; organizationId: string | null; platform: string; deviceName: string | null; deviceModel: string | null; osVersion: string | null; ... 17 more ...; metadata: Record<...> | null; }[]' is not assignable to type 'Record<string, unknown>'.
+          Index signature for type 'string' is missing in type '{ id: string; deviceToken: string; deviceId: string; userId: string; organizationId: string | null; platform: string; deviceName: string | null; deviceModel: string | null; osVersion: string | null; ... 17 more ...; metadata: Record<...> | null; }[]'.
+app/api/organization/switch/route.ts(32,3): error TS2345: Argument of type '() => Promise<never[]>' is not assignable to parameter of type 'HandlerFn<never, never>'.
+  Type 'Promise<never[]>' is not assignable to type 'HandlerReturn | Promise<HandlerReturn>'.
+    Type 'Promise<never[]>' is not assignable to type 'Promise<HandlerReturn>'.
+      Type 'never[]' is not assignable to type 'HandlerReturn'.
+        Type 'never[]' is not assignable to type 'Record<string, unknown>'.
+          Index signature for type 'string' is missing in type 'never[]'.
+app/api/pension/benefits/route.ts(13,3): error TS2345: Argument of type '({ organizationId }: ApiContext<never, never>) => Promise<{ id: string; organizationId: string; memberId: string; memberName: string; claimType: string; status: string; amount: string; submittedDate: Date; ... 4 more ...; updatedAt: Date; }[]>' is not assignable to parameter of type 'HandlerFn<never, never>'.
+  Type 'Promise<{ id: string; organizationId: string; memberId: string; memberName: string; claimType: string; status: string; amount: string; submittedDate: Date; processedDate: Date | null; notes: string | null; metadata: unknown; createdAt: Date; updatedAt: Date; }[]>' is not assignable to type 'HandlerReturn | Promise<HandlerReturn>'.
+    Type 'Promise<{ id: string; organizationId: string; memberId: string; memberName: string; claimType: string; status: string; amount: string; submittedDate: Date; processedDate: Date | null; notes: string | null; metadata: unknown; createdAt: Date; updatedAt: Date; }[]>' is not assignable to type 'Promise<HandlerReturn>'.
+      Type '{ id: string; organizationId: string; memberId: string; memberName: string; claimType: string; status: string; amount: string; submittedDate: Date; processedDate: Date | null; notes: string | null; metadata: unknown; createdAt: Date; updatedAt: Date; }[]' is not assignable to type 'HandlerReturn'.
+        Type '{ id: string; organizationId: string; memberId: string; memberName: string; claimType: string; status: string; amount: string; submittedDate: Date; processedDate: Date | null; notes: string | null; metadata: unknown; createdAt: Date; updatedAt: Date; }[]' is not assignable to type 'Record<string, unknown>'.
+          Index signature for type 'string' is missing in type '{ id: string; organizationId: string; memberId: string; memberName: string; claimType: string; status: string; amount: string; submittedDate: Date; processedDate: Date | null; notes: string | null; metadata: unknown; createdAt: Date; updatedAt: Date; }[]'.
+app/api/pension/contributions/route.ts(13,3): error TS2345: Argument of type '({ request, organizationId }: ApiContext<never, never>) => Promise<{ id: string; organizationId: string; memberId: string; memberName: string; period: string; amount: string; paymentStatus: string; paymentDate: Date | null; metadata: unknown; createdAt: Date; updatedAt: Date; }[]>' is not assignable to parameter of type 'HandlerFn<never, never>'.
+  Type 'Promise<{ id: string; organizationId: string; memberId: string; memberName: string; period: string; amount: string; paymentStatus: string; paymentDate: Date | null; metadata: unknown; createdAt: Date; updatedAt: Date; }[]>' is not assignable to type 'HandlerReturn | Promise<HandlerReturn>'.
+    Type 'Promise<{ id: string; organizationId: string; memberId: string; memberName: string; period: string; amount: string; paymentStatus: string; paymentDate: Date | null; metadata: unknown; createdAt: Date; updatedAt: Date; }[]>' is not assignable to type 'Promise<HandlerReturn>'.
+      Type '{ id: string; organizationId: string; memberId: string; memberName: string; period: string; amount: string; paymentStatus: string; paymentDate: Date | null; metadata: unknown; createdAt: Date; updatedAt: Date; }[]' is not assignable to type 'HandlerReturn'.
+        Type '{ id: string; organizationId: string; memberId: string; memberName: string; period: string; amount: string; paymentStatus: string; paymentDate: Date | null; metadata: unknown; createdAt: Date; updatedAt: Date; }[]' is not assignable to type 'Record<string, unknown>'.
+          Index signature for type 'string' is missing in type '{ id: string; organizationId: string; memberId: string; memberName: string; period: string; amount: string; paymentStatus: string; paymentDate: Date | null; metadata: unknown; createdAt: Date; updatedAt: Date; }[]'.
+app/api/pension/members/route.ts(13,3): error TS2345: Argument of type '({ request, organizationId }: ApiContext<never, never>) => Promise<{ id: string; organizationId: string; planId: string; userId: string | null; name: string; planName: string; enrollmentDate: Date; ... 5 more ...; updatedAt: Date; }[]>' is not assignable to parameter of type 'HandlerFn<never, never>'.
+  Type 'Promise<{ id: string; organizationId: string; planId: string; userId: string | null; name: string; planName: string; enrollmentDate: Date; membershipStatus: string; yearsOfService: string; vestingStatus: string; metadata: unknown; createdAt: Date; updatedAt: Date; }[]>' is not assignable to type 'HandlerReturn | Promise<HandlerReturn>'.
+    Type 'Promise<{ id: string; organizationId: string; planId: string; userId: string | null; name: string; planName: string; enrollmentDate: Date; membershipStatus: string; yearsOfService: string; vestingStatus: string; metadata: unknown; createdAt: Date; updatedAt: Date; }[]>' is not assignable to type 'Promise<HandlerReturn>'.
+      Type '{ id: string; organizationId: string; planId: string; userId: string | null; name: string; planName: string; enrollmentDate: Date; membershipStatus: string; yearsOfService: string; vestingStatus: string; metadata: unknown; createdAt: Date; updatedAt: Date; }[]' is not assignable to type 'HandlerReturn'.
+        Type '{ id: string; organizationId: string; planId: string; userId: string | null; name: string; planName: string; enrollmentDate: Date; membershipStatus: string; yearsOfService: string; vestingStatus: string; metadata: unknown; createdAt: Date; updatedAt: Date; }[]' is not assignable to type 'Record<string, unknown>'.
+          Index signature for type 'string' is missing in type '{ id: string; organizationId: string; planId: string; userId: string | null; name: string; planName: string; enrollmentDate: Date; membershipStatus: string; yearsOfService: string; vestingStatus: string; metadata: unknown; createdAt: Date; updatedAt: Date; }[]'.
+app/api/pension/plans/route.ts(13,3): error TS2345: Argument of type '({ request, organizationId }: ApiContext<never, never>) => Promise<{ id: string; organizationId: string; planName: string; planType: string; status: string; activeMembers: number; totalAssets: string; fundingStatus: string; description: string | null; metadata: unknown; createdAt: Date; updatedAt: Date; }[]>' is not assignable to parameter of type 'HandlerFn<never, never>'.
+  Type 'Promise<{ id: string; organizationId: string; planName: string; planType: string; status: string; activeMembers: number; totalAssets: string; fundingStatus: string; description: string | null; metadata: unknown; createdAt: Date; updatedAt: Date; }[]>' is not assignable to type 'HandlerReturn | Promise<HandlerReturn>'.
+    Type 'Promise<{ id: string; organizationId: string; planName: string; planType: string; status: string; activeMembers: number; totalAssets: string; fundingStatus: string; description: string | null; metadata: unknown; createdAt: Date; updatedAt: Date; }[]>' is not assignable to type 'Promise<HandlerReturn>'.
+      Type '{ id: string; organizationId: string; planName: string; planType: string; status: string; activeMembers: number; totalAssets: string; fundingStatus: string; description: string | null; metadata: unknown; createdAt: Date; updatedAt: Date; }[]' is not assignable to type 'HandlerReturn'.
+        Type '{ id: string; organizationId: string; planName: string; planType: string; status: string; activeMembers: number; totalAssets: string; fundingStatus: string; description: string | null; metadata: unknown; createdAt: Date; updatedAt: Date; }[]' is not assignable to type 'Record<string, unknown>'.
+          Index signature for type 'string' is missing in type '{ id: string; organizationId: string; planName: string; planType: string; status: string; activeMembers: number; totalAssets: string; fundingStatus: string; description: string | null; metadata: unknown; createdAt: Date; updatedAt: Date; }[]'.
+app/api/pension/retirement-eligibility/route.ts(13,3): error TS2345: Argument of type '({ request, organizationId }: ApiContext<never, never>) => Promise<{ id: string; organizationId: string; planId: string; userId: string | null; name: string; planName: string; enrollmentDate: Date; ... 5 more ...; updatedAt: Date; }[]>' is not assignable to parameter of type 'HandlerFn<never, never>'.
+  Type 'Promise<{ id: string; organizationId: string; planId: string; userId: string | null; name: string; planName: string; enrollmentDate: Date; membershipStatus: string; yearsOfService: string; vestingStatus: string; metadata: unknown; createdAt: Date; updatedAt: Date; }[]>' is not assignable to type 'HandlerReturn | Promise<HandlerReturn>'.
+    Type 'Promise<{ id: string; organizationId: string; planId: string; userId: string | null; name: string; planName: string; enrollmentDate: Date; membershipStatus: string; yearsOfService: string; vestingStatus: string; metadata: unknown; createdAt: Date; updatedAt: Date; }[]>' is not assignable to type 'Promise<HandlerReturn>'.
+      Type '{ id: string; organizationId: string; planId: string; userId: string | null; name: string; planName: string; enrollmentDate: Date; membershipStatus: string; yearsOfService: string; vestingStatus: string; metadata: unknown; createdAt: Date; updatedAt: Date; }[]' is not assignable to type 'HandlerReturn'.
+        Type '{ id: string; organizationId: string; planId: string; userId: string | null; name: string; planName: string; enrollmentDate: Date; membershipStatus: string; yearsOfService: string; vestingStatus: string; metadata: unknown; createdAt: Date; updatedAt: Date; }[]' is not assignable to type 'Record<string, unknown>'.
+          Index signature for type 'string' is missing in type '{ id: string; organizationId: string; planId: string; userId: string | null; name: string; planName: string; enrollmentDate: Date; membershipStatus: string; yearsOfService: string; vestingStatus: string; metadata: unknown; createdAt: Date; updatedAt: Date; }[]'.
+app/api/pension/t4a/route.ts(13,3): error TS2345: Argument of type '({ request, organizationId }: ApiContext<never, never>) => Promise<{ id: string; organizationId: string; memberId: string; memberName: string; taxYear: number; pensionIncome: string; status: string; generatedDate: Date | null; metadata: unknown; createdAt: Date; updatedAt: Date; }[]>' is not assignable to parameter of type 'HandlerFn<never, never>'.
+  Type 'Promise<{ id: string; organizationId: string; memberId: string; memberName: string; taxYear: number; pensionIncome: string; status: string; generatedDate: Date | null; metadata: unknown; createdAt: Date; updatedAt: Date; }[]>' is not assignable to type 'HandlerReturn | Promise<HandlerReturn>'.
+    Type 'Promise<{ id: string; organizationId: string; memberId: string; memberName: string; taxYear: number; pensionIncome: string; status: string; generatedDate: Date | null; metadata: unknown; createdAt: Date; updatedAt: Date; }[]>' is not assignable to type 'Promise<HandlerReturn>'.
+      Type '{ id: string; organizationId: string; memberId: string; memberName: string; taxYear: number; pensionIncome: string; status: string; generatedDate: Date | null; metadata: unknown; createdAt: Date; updatedAt: Date; }[]' is not assignable to type 'HandlerReturn'.
+        Type '{ id: string; organizationId: string; memberId: string; memberName: string; taxYear: number; pensionIncome: string; status: string; generatedDate: Date | null; metadata: unknown; createdAt: Date; updatedAt: Date; }[]' is not assignable to type 'Record<string, unknown>'.
+          Index signature for type 'string' is missing in type '{ id: string; organizationId: string; memberId: string; memberName: string; taxYear: number; pensionIncome: string; status: string; generatedDate: Date | null; metadata: unknown; createdAt: Date; updatedAt: Date; }[]'.
+app/api/pension/trustee-meetings/route.ts(13,3): error TS2345: Argument of type '({ request, organizationId }: ApiContext<never, never>) => Promise<{ id: string; organizationId: string; title: string; scheduledDate: Date; location: string | null; agenda: string | null; minutes: string | null; ... 4 more ...; updatedAt: Date; }[]>' is not assignable to parameter of type 'HandlerFn<never, never>'.
+  Type 'Promise<{ id: string; organizationId: string; title: string; scheduledDate: Date; location: string | null; agenda: string | null; minutes: string | null; status: string; attendees: unknown; metadata: unknown; createdAt: Date; updatedAt: Date; }[]>' is not assignable to type 'HandlerReturn | Promise<HandlerReturn>'.
+    Type 'Promise<{ id: string; organizationId: string; title: string; scheduledDate: Date; location: string | null; agenda: string | null; minutes: string | null; status: string; attendees: unknown; metadata: unknown; createdAt: Date; updatedAt: Date; }[]>' is not assignable to type 'Promise<HandlerReturn>'.
+      Type '{ id: string; organizationId: string; title: string; scheduledDate: Date; location: string | null; agenda: string | null; minutes: string | null; status: string; attendees: unknown; metadata: unknown; createdAt: Date; updatedAt: Date; }[]' is not assignable to type 'HandlerReturn'.
+        Type '{ id: string; organizationId: string; title: string; scheduledDate: Date; location: string | null; agenda: string | null; minutes: string | null; status: string; attendees: unknown; metadata: unknown; createdAt: Date; updatedAt: Date; }[]' is not assignable to type 'Record<string, unknown>'.
+          Index signature for type 'string' is missing in type '{ id: string; organizationId: string; title: string; scheduledDate: Date; location: string | null; agenda: string | null; minutes: string | null; status: string; attendees: unknown; metadata: unknown; createdAt: Date; updatedAt: Date; }[]'.
+app/api/pension/trustees/route.ts(13,3): error TS2345: Argument of type '({ request, organizationId }: ApiContext<never, never>) => Promise<{ id: string; organizationId: string; userId: string | null; name: string; role: string; appointedDate: Date; termEndDate: Date | null; status: string; metadata: unknown; createdAt: Date; updatedAt: Date; }[]>' is not assignable to parameter of type 'HandlerFn<never, never>'.
+  Type 'Promise<{ id: string; organizationId: string; userId: string | null; name: string; role: string; appointedDate: Date; termEndDate: Date | null; status: string; metadata: unknown; createdAt: Date; updatedAt: Date; }[]>' is not assignable to type 'HandlerReturn | Promise<HandlerReturn>'.
+    Type 'Promise<{ id: string; organizationId: string; userId: string | null; name: string; role: string; appointedDate: Date; termEndDate: Date | null; status: string; metadata: unknown; createdAt: Date; updatedAt: Date; }[]>' is not assignable to type 'Promise<HandlerReturn>'.
+      Type '{ id: string; organizationId: string; userId: string | null; name: string; role: string; appointedDate: Date; termEndDate: Date | null; status: string; metadata: unknown; createdAt: Date; updatedAt: Date; }[]' is not assignable to type 'HandlerReturn'.
+        Type '{ id: string; organizationId: string; userId: string | null; name: string; role: string; appointedDate: Date; termEndDate: Date | null; status: string; metadata: unknown; createdAt: Date; updatedAt: Date; }[]' is not assignable to type 'Record<string, unknown>'.
+          Index signature for type 'string' is missing in type '{ id: string; organizationId: string; userId: string | null; name: string; role: string; appointedDate: Date; termEndDate: Date | null; status: string; metadata: unknown; createdAt: Date; updatedAt: Date; }[]'.
+app/api/tax/cra/export/route.ts(32,3): error TS2345: Argument of type '() => Promise<never[]>' is not assignable to parameter of type 'HandlerFn<never, never>'.
+  Type 'Promise<never[]>' is not assignable to type 'HandlerReturn | Promise<HandlerReturn>'.
+    Type 'Promise<never[]>' is not assignable to type 'Promise<HandlerReturn>'.
+      Type 'never[]' is not assignable to type 'HandlerReturn'.
+        Type 'never[]' is not assignable to type 'Record<string, unknown>'.
+          Index signature for type 'string' is missing in type 'never[]'.
+app/api/tax/t4a/route.ts(18,3): error TS2345: Argument of type '({ organizationId }: ApiContext<never, never>) => Promise<{ id: string; organizationId: string; memberId: string; memberName: string; taxYear: number; pensionIncome: string; status: string; generatedDate: Date | null; metadata: unknown; createdAt: Date; updatedAt: Date; }[]>' is not assignable to parameter of type 'HandlerFn<never, never>'.
+  Type 'Promise<{ id: string; organizationId: string; memberId: string; memberName: string; taxYear: number; pensionIncome: string; status: string; generatedDate: Date | null; metadata: unknown; createdAt: Date; updatedAt: Date; }[]>' is not assignable to type 'HandlerReturn | Promise<HandlerReturn>'.
+    Type 'Promise<{ id: string; organizationId: string; memberId: string; memberName: string; taxYear: number; pensionIncome: string; status: string; generatedDate: Date | null; metadata: unknown; createdAt: Date; updatedAt: Date; }[]>' is not assignable to type 'Promise<HandlerReturn>'.
+      Type '{ id: string; organizationId: string; memberId: string; memberName: string; taxYear: number; pensionIncome: string; status: string; generatedDate: Date | null; metadata: unknown; createdAt: Date; updatedAt: Date; }[]' is not assignable to type 'HandlerReturn'.
+        Type '{ id: string; organizationId: string; memberId: string; memberName: string; taxYear: number; pensionIncome: string; status: string; generatedDate: Date | null; metadata: unknown; createdAt: Date; updatedAt: Date; }[]' is not assignable to type 'Record<string, unknown>'.
+          Index signature for type 'string' is missing in type '{ id: string; organizationId: string; memberId: string; memberName: string; taxYear: number; pensionIncome: string; status: string; generatedDate: Date | null; metadata: unknown; createdAt: Date; updatedAt: Date; }[]'.
+app/api/v2/admin/alerts/executions/test/route.ts(32,3): error TS2345: Argument of type '() => Promise<never[]>' is not assignable to parameter of type 'HandlerFn<never, never>'.
+  Type 'Promise<never[]>' is not assignable to type 'HandlerReturn | Promise<HandlerReturn>'.
+    Type 'Promise<never[]>' is not assignable to type 'Promise<HandlerReturn>'.
+      Type 'never[]' is not assignable to type 'HandlerReturn'.
+        Type 'never[]' is not assignable to type 'Record<string, unknown>'.
+          Index signature for type 'string' is missing in type 'never[]'.
+app/api/v2/admin/clc/remittances/[id]/export/route.ts(32,3): error TS2345: Argument of type '() => Promise<never[]>' is not assignable to parameter of type 'HandlerFn<never, never>'.
+  Type 'Promise<never[]>' is not assignable to type 'HandlerReturn | Promise<HandlerReturn>'.
+    Type 'Promise<never[]>' is not assignable to type 'Promise<HandlerReturn>'.
+      Type 'never[]' is not assignable to type 'HandlerReturn'.
+        Type 'never[]' is not assignable to type 'Record<string, unknown>'.
+          Index signature for type 'string' is missing in type 'never[]'.
+app/api/v2/admin/clc/remittances/[id]/submit/route.ts(32,3): error TS2345: Argument of type '() => Promise<never[]>' is not assignable to parameter of type 'HandlerFn<never, never>'.
+  Type 'Promise<never[]>' is not assignable to type 'HandlerReturn | Promise<HandlerReturn>'.
+    Type 'Promise<never[]>' is not assignable to type 'Promise<HandlerReturn>'.
+      Type 'never[]' is not assignable to type 'HandlerReturn'.
+        Type 'never[]' is not assignable to type 'Record<string, unknown>'.
+          Index signature for type 'string' is missing in type 'never[]'.
+app/api/v2/admin/clc/remittances/export/route.ts(32,3): error TS2345: Argument of type '() => Promise<never[]>' is not assignable to parameter of type 'HandlerFn<never, never>'.
+  Type 'Promise<never[]>' is not assignable to type 'HandlerReturn | Promise<HandlerReturn>'.
+    Type 'Promise<never[]>' is not assignable to type 'Promise<HandlerReturn>'.
+      Type 'never[]' is not assignable to type 'HandlerReturn'.
+        Type 'never[]' is not assignable to type 'Record<string, unknown>'.
+          Index signature for type 'string' is missing in type 'never[]'.
+app/api/v2/admin/members/export/route.ts(32,3): error TS2345: Argument of type '() => Promise<never[]>' is not assignable to parameter of type 'HandlerFn<never, never>'.
+  Type 'Promise<never[]>' is not assignable to type 'HandlerReturn | Promise<HandlerReturn>'.
+    Type 'Promise<never[]>' is not assignable to type 'Promise<HandlerReturn>'.
+      Type 'never[]' is not assignable to type 'HandlerReturn'.
+        Type 'never[]' is not assignable to type 'Record<string, unknown>'.
+          Index signature for type 'string' is missing in type 'never[]'.
+app/api/v2/claims/bulk/route.ts(32,3): error TS2345: Argument of type '() => Promise<never[]>' is not assignable to parameter of type 'HandlerFn<never, never>'.
+  Type 'Promise<never[]>' is not assignable to type 'HandlerReturn | Promise<HandlerReturn>'.
+    Type 'Promise<never[]>' is not assignable to type 'Promise<HandlerReturn>'.
+      Type 'never[]' is not assignable to type 'HandlerReturn'.
+        Type 'never[]' is not assignable to type 'Record<string, unknown>'.
+          Index signature for type 'string' is missing in type 'never[]'.
+app/api/v2/communications/campaigns/[id]/analytics/export/route.ts(32,3): error TS2345: Argument of type '() => Promise<never[]>' is not assignable to parameter of type 'HandlerFn<never, never>'.
+  Type 'Promise<never[]>' is not assignable to type 'HandlerReturn | Promise<HandlerReturn>'.
+    Type 'Promise<never[]>' is not assignable to type 'Promise<HandlerReturn>'.
+      Type 'never[]' is not assignable to type 'HandlerReturn'.
+        Type 'never[]' is not assignable to type 'Record<string, unknown>'.
+          Index signature for type 'string' is missing in type 'never[]'.
+app/api/v2/communications/distribution-lists/[id]/export/route.ts(32,3): error TS2345: Argument of type '() => Promise<never[]>' is not assignable to parameter of type 'HandlerFn<never, never>'.
+  Type 'Promise<never[]>' is not assignable to type 'HandlerReturn | Promise<HandlerReturn>'.
+    Type 'Promise<never[]>' is not assignable to type 'Promise<HandlerReturn>'.
+      Type 'never[]' is not assignable to type 'HandlerReturn'.
+        Type 'never[]' is not assignable to type 'Record<string, unknown>'.
+          Index signature for type 'string' is missing in type 'never[]'.
+app/api/v2/communications/surveys/[surveyId]/export/route.ts(32,3): error TS2345: Argument of type '() => Promise<never[]>' is not assignable to parameter of type 'HandlerFn<never, never>'.
+  Type 'Promise<never[]>' is not assignable to type 'HandlerReturn | Promise<HandlerReturn>'.
+    Type 'Promise<never[]>' is not assignable to type 'Promise<HandlerReturn>'.
+      Type 'never[]' is not assignable to type 'HandlerReturn'.
+        Type 'never[]' is not assignable to type 'Record<string, unknown>'.
+          Index signature for type 'string' is missing in type 'never[]'.
+app/api/v2/compliance/audit-logs/route.ts(14,3): error TS2345: Argument of type '({ organizationId }: ApiContext<never, never>) => Promise<{ auditId: string; organizationId: string | null; userId: string | null; action: string; resourceType: string; resourceId: string | null; ... 13 more ...; createdAt: Date | null; }[]>' is not assignable to parameter of type 'HandlerFn<never, never>'.
+  Type 'Promise<{ auditId: string; organizationId: string | null; userId: string | null; action: string; resourceType: string; resourceId: string | null; oldValues: unknown; newValues: unknown; ipAddress: string | null; ... 10 more ...; createdAt: Date | null; }[]>' is not assignable to type 'HandlerReturn | Promise<HandlerReturn>'.
+    Type 'Promise<{ auditId: string; organizationId: string | null; userId: string | null; action: string; resourceType: string; resourceId: string | null; oldValues: unknown; newValues: unknown; ipAddress: string | null; ... 10 more ...; createdAt: Date | null; }[]>' is not assignable to type 'Promise<HandlerReturn>'.
+      Type '{ auditId: string; organizationId: string | null; userId: string | null; action: string; resourceType: string; resourceId: string | null; oldValues: unknown; newValues: unknown; ipAddress: string | null; ... 10 more ...; createdAt: Date | null; }[]' is not assignable to type 'HandlerReturn'.
+        Type '{ auditId: string; organizationId: string | null; userId: string | null; action: string; resourceType: string; resourceId: string | null; oldValues: unknown; newValues: unknown; ipAddress: string | null; ... 10 more ...; createdAt: Date | null; }[]' is not assignable to type 'Record<string, unknown>'.
+          Index signature for type 'string' is missing in type '{ auditId: string; organizationId: string | null; userId: string | null; action: string; resourceType: string; resourceId: string | null; oldValues: unknown; newValues: unknown; ipAddress: string | null; ... 10 more ...; createdAt: Date | null; }[]'.
+app/api/v2/enterprise/sso/providers/route.ts(22,3): error TS2345: Argument of type '({ organizationId }: ApiContext<never, never>) => Promise<{ id: string; organizationId: string; name: string; providerType: string; samlEntityId: string | null; samlSsoUrl: string | null; samlSloUrl: string | null; ... 21 more ...; updatedBy: string | null; }[]>' is not assignable to parameter of type 'HandlerFn<never, never>'.
+  Type 'Promise<{ id: string; organizationId: string; name: string; providerType: string; samlEntityId: string | null; samlSsoUrl: string | null; samlSloUrl: string | null; samlCertificate: string | null; ... 20 more ...; updatedBy: string | null; }[]>' is not assignable to type 'HandlerReturn | Promise<HandlerReturn>'.
+    Type 'Promise<{ id: string; organizationId: string; name: string; providerType: string; samlEntityId: string | null; samlSsoUrl: string | null; samlSloUrl: string | null; samlCertificate: string | null; ... 20 more ...; updatedBy: string | null; }[]>' is not assignable to type 'Promise<HandlerReturn>'.
+      Type '{ id: string; organizationId: string; name: string; providerType: string; samlEntityId: string | null; samlSsoUrl: string | null; samlSloUrl: string | null; samlCertificate: string | null; ... 20 more ...; updatedBy: string | null; }[]' is not assignable to type 'HandlerReturn'.
+        Type '{ id: string; organizationId: string; name: string; providerType: string; samlEntityId: string | null; samlSsoUrl: string | null; samlSloUrl: string | null; samlCertificate: string | null; ... 20 more ...; updatedBy: string | null; }[]' is not assignable to type 'Record<string, unknown>'.
+          Index signature for type 'string' is missing in type '{ id: string; organizationId: string; name: string; providerType: string; samlEntityId: string | null; samlSsoUrl: string | null; samlSloUrl: string | null; samlCertificate: string | null; ... 20 more ...; updatedBy: string | null; }[]'.
+app/api/v2/governance/board-packets/route.ts(14,3): error TS2345: Argument of type '() => Promise<{ id: string; title: string; description: string | null; packetType: string; organizationId: string; periodStart: string; periodEnd: string; fiscalYear: number; fiscalQuarter: number | null; ... 21 more ...; metadata: unknown; }[]>' is not assignable to parameter of type 'HandlerFn<never, never>'.
+  Type 'Promise<{ id: string; title: string; description: string | null; packetType: string; organizationId: string; periodStart: string; periodEnd: string; fiscalYear: number; fiscalQuarter: number | null; ... 21 more ...; metadata: unknown; }[]>' is not assignable to type 'HandlerReturn | Promise<HandlerReturn>'.
+    Type 'Promise<{ id: string; title: string; description: string | null; packetType: string; organizationId: string; periodStart: string; periodEnd: string; fiscalYear: number; fiscalQuarter: number | null; ... 21 more ...; metadata: unknown; }[]>' is not assignable to type 'Promise<HandlerReturn>'.
+      Type '{ id: string; title: string; description: string | null; packetType: string; organizationId: string; periodStart: string; periodEnd: string; fiscalYear: number; fiscalQuarter: number | null; ... 21 more ...; metadata: unknown; }[]' is not assignable to type 'HandlerReturn'.
+        Type '{ id: string; title: string; description: string | null; packetType: string; organizationId: string; periodStart: string; periodEnd: string; fiscalYear: number; fiscalQuarter: number | null; ... 21 more ...; metadata: unknown; }[]' is not assignable to type 'Record<string, unknown>'.
+          Index signature for type 'string' is missing in type '{ id: string; title: string; description: string | null; packetType: string; organizationId: string; periodStart: string; periodEnd: string; fiscalYear: number; fiscalQuarter: number | null; ... 21 more ...; metadata: unknown; }[]'.
+app/api/v2/governance/bylaws/route.ts(14,3): error TS2345: Argument of type '({ organizationId }: ApiContext<never, never>) => Promise<{ id: string; organizationId: string; article: string; title: string; content: string; version: number; status: string; metadata: unknown; createdAt: Date; updatedAt: Date; }[]>' is not assignable to parameter of type 'HandlerFn<never, never>'.
+  Type 'Promise<{ id: string; organizationId: string; article: string; title: string; content: string; version: number; status: string; metadata: unknown; createdAt: Date; updatedAt: Date; }[]>' is not assignable to type 'HandlerReturn | Promise<HandlerReturn>'.
+    Type 'Promise<{ id: string; organizationId: string; article: string; title: string; content: string; version: number; status: string; metadata: unknown; createdAt: Date; updatedAt: Date; }[]>' is not assignable to type 'Promise<HandlerReturn>'.
+      Type '{ id: string; organizationId: string; article: string; title: string; content: string; version: number; status: string; metadata: unknown; createdAt: Date; updatedAt: Date; }[]' is not assignable to type 'HandlerReturn'.
+        Type '{ id: string; organizationId: string; article: string; title: string; content: string; version: number; status: string; metadata: unknown; createdAt: Date; updatedAt: Date; }[]' is not assignable to type 'Record<string, unknown>'.
+          Index signature for type 'string' is missing in type '{ id: string; organizationId: string; article: string; title: string; content: string; version: number; status: string; metadata: unknown; createdAt: Date; updatedAt: Date; }[]'.
+app/api/v2/governance/elections/sessions/route.ts(14,3): error TS2345: Argument of type '() => Promise<{ id: string; title: string; description: string | null; type: string; status: string; meetingType: string; organizationId: string; createdBy: string; createdAt: Date | null; updatedAt: Date | null; ... 8 more ...; metadata: unknown; }[]>' is not assignable to parameter of type 'HandlerFn<never, never>'.
+  Type 'Promise<{ id: string; title: string; description: string | null; type: string; status: string; meetingType: string; organizationId: string; createdBy: string; createdAt: Date | null; updatedAt: Date | null; ... 8 more ...; metadata: unknown; }[]>' is not assignable to type 'HandlerReturn | Promise<HandlerReturn>'.
+    Type 'Promise<{ id: string; title: string; description: string | null; type: string; status: string; meetingType: string; organizationId: string; createdBy: string; createdAt: Date | null; updatedAt: Date | null; ... 8 more ...; metadata: unknown; }[]>' is not assignable to type 'Promise<HandlerReturn>'.
+      Type '{ id: string; title: string; description: string | null; type: string; status: string; meetingType: string; organizationId: string; createdBy: string; createdAt: Date | null; updatedAt: Date | null; ... 8 more ...; metadata: unknown; }[]' is not assignable to type 'HandlerReturn'.
+        Type '{ id: string; title: string; description: string | null; type: string; status: string; meetingType: string; organizationId: string; createdBy: string; createdAt: Date | null; updatedAt: Date | null; ... 8 more ...; metadata: unknown; }[]' is not assignable to type 'Record<string, unknown>'.
+          Index signature for type 'string' is missing in type '{ id: string; title: string; description: string | null; type: string; status: string; meetingType: string; organizationId: string; createdBy: string; createdAt: Date | null; updatedAt: Date | null; ... 8 more ...; metadata: unknown; }[]'.
+app/api/v2/governance/policies/rules/route.ts(14,3): error TS2345: Argument of type '({ organizationId }: ApiContext<never, never>) => Promise<{ id: string; organizationId: string; title: string; category: string; description: string | null; content: string | null; status: string; updatedBy: string | null; metadata: unknown; createdAt: Date; updatedAt: Date; }[]>' is not assignable to parameter of type 'HandlerFn<never, never>'.
+  Type 'Promise<{ id: string; organizationId: string; title: string; category: string; description: string | null; content: string | null; status: string; updatedBy: string | null; metadata: unknown; createdAt: Date; updatedAt: Date; }[]>' is not assignable to type 'HandlerReturn | Promise<HandlerReturn>'.
+    Type 'Promise<{ id: string; organizationId: string; title: string; category: string; description: string | null; content: string | null; status: string; updatedBy: string | null; metadata: unknown; createdAt: Date; updatedAt: Date; }[]>' is not assignable to type 'Promise<HandlerReturn>'.
+      Type '{ id: string; organizationId: string; title: string; category: string; description: string | null; content: string | null; status: string; updatedBy: string | null; metadata: unknown; createdAt: Date; updatedAt: Date; }[]' is not assignable to type 'HandlerReturn'.
+        Type '{ id: string; organizationId: string; title: string; category: string; description: string | null; content: string | null; status: string; updatedBy: string | null; metadata: unknown; createdAt: Date; updatedAt: Date; }[]' is not assignable to type 'Record<string, unknown>'.
+          Index signature for type 'string' is missing in type '{ id: string; organizationId: string; title: string; category: string; description: string | null; content: string | null; status: string; updatedBy: string | null; metadata: unknown; createdAt: Date; updatedAt: Date; }[]'.
+app/api/v2/governance/policy-templates/route.ts(14,3): error TS2345: Argument of type '({ organizationId }: ApiContext<never, never>) => Promise<{ id: string; organizationId: string; title: string; category: string; description: string | null; content: string | null; status: string; updatedBy: string | null; metadata: unknown; createdAt: Date; updatedAt: Date; }[]>' is not assignable to parameter of type 'HandlerFn<never, never>'.
+  Type 'Promise<{ id: string; organizationId: string; title: string; category: string; description: string | null; content: string | null; status: string; updatedBy: string | null; metadata: unknown; createdAt: Date; updatedAt: Date; }[]>' is not assignable to type 'HandlerReturn | Promise<HandlerReturn>'.
+    Type 'Promise<{ id: string; organizationId: string; title: string; category: string; description: string | null; content: string | null; status: string; updatedBy: string | null; metadata: unknown; createdAt: Date; updatedAt: Date; }[]>' is not assignable to type 'Promise<HandlerReturn>'.
+      Type '{ id: string; organizationId: string; title: string; category: string; description: string | null; content: string | null; status: string; updatedBy: string | null; metadata: unknown; createdAt: Date; updatedAt: Date; }[]' is not assignable to type 'HandlerReturn'.
+        Type '{ id: string; organizationId: string; title: string; category: string; description: string | null; content: string | null; status: string; updatedBy: string | null; metadata: unknown; createdAt: Date; updatedAt: Date; }[]' is not assignable to type 'Record<string, unknown>'.
+          Index signature for type 'string' is missing in type '{ id: string; organizationId: string; title: string; category: string; description: string | null; content: string | null; status: string; updatedBy: string | null; metadata: unknown; createdAt: Date; updatedAt: Date; }[]'.
+app/api/v2/governance/signatories/route.ts(14,3): error TS2345: Argument of type '({ organizationId }: ApiContext<never, never>) => Promise<{ id: string; organizationId: string; name: string; role: string; title: string; authority: string; activeFrom: Date; activeTo: Date | null; ... 4 more ...; updatedAt: Date; }[]>' is not assignable to parameter of type 'HandlerFn<never, never>'.
+  Type 'Promise<{ id: string; organizationId: string; name: string; role: string; title: string; authority: string; activeFrom: Date; activeTo: Date | null; status: string; documents: unknown; metadata: unknown; createdAt: Date; updatedAt: Date; }[]>' is not assignable to type 'HandlerReturn | Promise<HandlerReturn>'.
+    Type 'Promise<{ id: string; organizationId: string; name: string; role: string; title: string; authority: string; activeFrom: Date; activeTo: Date | null; status: string; documents: unknown; metadata: unknown; createdAt: Date; updatedAt: Date; }[]>' is not assignable to type 'Promise<HandlerReturn>'.
+      Type '{ id: string; organizationId: string; name: string; role: string; title: string; authority: string; activeFrom: Date; activeTo: Date | null; status: string; documents: unknown; metadata: unknown; createdAt: Date; updatedAt: Date; }[]' is not assignable to type 'HandlerReturn'.
+        Type '{ id: string; organizationId: string; name: string; role: string; title: string; authority: string; activeFrom: Date; activeTo: Date | null; status: string; documents: unknown; metadata: unknown; createdAt: Date; updatedAt: Date; }[]' is not assignable to type 'Record<string, unknown>'.
+          Index signature for type 'string' is missing in type '{ id: string; organizationId: string; name: string; role: string; title: string; authority: string; activeFrom: Date; activeTo: Date | null; status: string; documents: unknown; metadata: unknown; createdAt: Date; updatedAt: Date; }[]'.
+app/api/v2/members/[id]/history/route.ts(23,3): error TS2345: Argument of type '({ params, request }: ApiContext<never, never>) => Promise<{ id: string; userId: string; organizationId: string; eventType: string; eventCategory: string; eventDate: Date; eventTitle: string; ... 8 more ...; createdBy: string | null; }[]>' is not assignable to parameter of type 'HandlerFn<never, never>'.
+  Type 'Promise<{ id: string; userId: string; organizationId: string; eventType: string; eventCategory: string; eventDate: Date; eventTitle: string; eventDescription: string | null; eventData: { ...; } | null; ... 6 more ...; createdBy: string | null; }[]>' is not assignable to type 'HandlerReturn | Promise<HandlerReturn>'.
+    Type 'Promise<{ id: string; userId: string; organizationId: string; eventType: string; eventCategory: string; eventDate: Date; eventTitle: string; eventDescription: string | null; eventData: { ...; } | null; ... 6 more ...; createdBy: string | null; }[]>' is not assignable to type 'Promise<HandlerReturn>'.
+      Type '{ id: string; userId: string; organizationId: string; eventType: string; eventCategory: string; eventDate: Date; eventTitle: string; eventDescription: string | null; eventData: { [key: string]: any; previousValue?: any; newValue?: any; relatedId?: string | undefined; } | null; ... 6 more ...; createdBy: string | nul...' is not assignable to type 'HandlerReturn'.
+        Type '{ id: string; userId: string; organizationId: string; eventType: string; eventCategory: string; eventDate: Date; eventTitle: string; eventDescription: string | null; eventData: { [key: string]: any; previousValue?: any; newValue?: any; relatedId?: string | undefined; } | null; ... 6 more ...; createdBy: string | nul...' is not assignable to type 'Record<string, unknown>'.
+          Index signature for type 'string' is missing in type '{ id: string; userId: string; organizationId: string; eventType: string; eventCategory: string; eventDate: Date; eventTitle: string; eventDescription: string | null; eventData: { [key: string]: any; previousValue?: any; newValue?: any; relatedId?: string | undefined; } | null; ... 6 more ...; createdBy: string | nul...'.
+app/api/v2/members/bulk/route.ts(32,3): error TS2345: Argument of type '() => Promise<never[]>' is not assignable to parameter of type 'HandlerFn<never, never>'.
+  Type 'Promise<never[]>' is not assignable to type 'HandlerReturn | Promise<HandlerReturn>'.
+    Type 'Promise<never[]>' is not assignable to type 'Promise<HandlerReturn>'.
+      Type 'never[]' is not assignable to type 'HandlerReturn'.
+        Type 'never[]' is not assignable to type 'Record<string, unknown>'.
+          Index signature for type 'string' is missing in type 'never[]'.
+app/api/v2/members/export/route.ts(32,3): error TS2345: Argument of type '() => Promise<never[]>' is not assignable to parameter of type 'HandlerFn<never, never>'.
+  Type 'Promise<never[]>' is not assignable to type 'HandlerReturn | Promise<HandlerReturn>'.
+    Type 'Promise<never[]>' is not assignable to type 'Promise<HandlerReturn>'.
+      Type 'never[]' is not assignable to type 'HandlerReturn'.
+        Type 'never[]' is not assignable to type 'Record<string, unknown>'.
+          Index signature for type 'string' is missing in type 'never[]'.
+app/api/v2/members/merge/route.ts(32,3): error TS2345: Argument of type '() => Promise<never[]>' is not assignable to parameter of type 'HandlerFn<never, never>'.
+  Type 'Promise<never[]>' is not assignable to type 'HandlerReturn | Promise<HandlerReturn>'.
+    Type 'Promise<never[]>' is not assignable to type 'Promise<HandlerReturn>'.
+      Type 'never[]' is not assignable to type 'HandlerReturn'.
+        Type 'never[]' is not assignable to type 'Record<string, unknown>'.
+          Index signature for type 'string' is missing in type 'never[]'.
+app/api/v2/mobile/sync/route.ts(22,3): error TS2345: Argument of type '({ userId, organizationId }: ApiContext<never, never>) => Promise<{ id: string; deviceToken: string; deviceId: string; userId: string; organizationId: string | null; platform: string; deviceName: string | null; ... 19 more ...; metadata: Record<...> | null; }[]>' is not assignable to parameter of type 'HandlerFn<never, never>'.
+  Type 'Promise<{ id: string; deviceToken: string; deviceId: string; userId: string; organizationId: string | null; platform: string; deviceName: string | null; deviceModel: string | null; osVersion: string | null; ... 17 more ...; metadata: Record<...> | null; }[]>' is not assignable to type 'HandlerReturn | Promise<HandlerReturn>'.
+    Type 'Promise<{ id: string; deviceToken: string; deviceId: string; userId: string; organizationId: string | null; platform: string; deviceName: string | null; deviceModel: string | null; osVersion: string | null; ... 17 more ...; metadata: Record<...> | null; }[]>' is not assignable to type 'Promise<HandlerReturn>'.
+      Type '{ id: string; deviceToken: string; deviceId: string; userId: string; organizationId: string | null; platform: string; deviceName: string | null; deviceModel: string | null; osVersion: string | null; ... 17 more ...; metadata: Record<...> | null; }[]' is not assignable to type 'HandlerReturn'.
+        Type '{ id: string; deviceToken: string; deviceId: string; userId: string; organizationId: string | null; platform: string; deviceName: string | null; deviceModel: string | null; osVersion: string | null; ... 17 more ...; metadata: Record<...> | null; }[]' is not assignable to type 'Record<string, unknown>'.
+          Index signature for type 'string' is missing in type '{ id: string; deviceToken: string; deviceId: string; userId: string; organizationId: string | null; platform: string; deviceName: string | null; deviceModel: string | null; osVersion: string | null; ... 17 more ...; metadata: Record<...> | null; }[]'.
+app/api/v2/notifications/test/route.ts(32,3): error TS2345: Argument of type '() => Promise<never[]>' is not assignable to parameter of type 'HandlerFn<never, never>'.
+  Type 'Promise<never[]>' is not assignable to type 'HandlerReturn | Promise<HandlerReturn>'.
+    Type 'Promise<never[]>' is not assignable to type 'Promise<HandlerReturn>'.
+      Type 'never[]' is not assignable to type 'HandlerReturn'.
+        Type 'never[]' is not assignable to type 'Record<string, unknown>'.
+          Index signature for type 'string' is missing in type 'never[]'.
+app/api/v2/organization/switch/route.ts(32,3): error TS2345: Argument of type '() => Promise<never[]>' is not assignable to parameter of type 'HandlerFn<never, never>'.
+  Type 'Promise<never[]>' is not assignable to type 'HandlerReturn | Promise<HandlerReturn>'.
+    Type 'Promise<never[]>' is not assignable to type 'Promise<HandlerReturn>'.
+      Type 'never[]' is not assignable to type 'HandlerReturn'.
+        Type 'never[]' is not assignable to type 'Record<string, unknown>'.
+          Index signature for type 'string' is missing in type 'never[]'.
+app/api/v2/organizations/switch/route.ts(32,3): error TS2345: Argument of type '() => Promise<never[]>' is not assignable to parameter of type 'HandlerFn<never, never>'.
+  Type 'Promise<never[]>' is not assignable to type 'HandlerReturn | Promise<HandlerReturn>'.
+    Type 'Promise<never[]>' is not assignable to type 'Promise<HandlerReturn>'.
+      Type 'never[]' is not assignable to type 'HandlerReturn'.
+        Type 'never[]' is not assignable to type 'Record<string, unknown>'.
+          Index signature for type 'string' is missing in type 'never[]'.
+app/api/v2/rewards/export/route.ts(32,3): error TS2345: Argument of type '() => Promise<never[]>' is not assignable to parameter of type 'HandlerFn<never, never>'.
+  Type 'Promise<never[]>' is not assignable to type 'HandlerReturn | Promise<HandlerReturn>'.
+    Type 'Promise<never[]>' is not assignable to type 'Promise<HandlerReturn>'.
+      Type 'never[]' is not assignable to type 'HandlerReturn'.
+        Type 'never[]' is not assignable to type 'Record<string, unknown>'.
+          Index signature for type 'string' is missing in type 'never[]'.
+app/api/v2/stewards/escalations/route.ts(25,3): error TS2345: Argument of type '(_ctx: ApiContext<never, never>) => Promise<{ id: string; member: string; steward: string; reason: string; }[]>' is not assignable to parameter of type 'HandlerFn<never, never>'.
+  Type 'Promise<{ id: string; member: string; steward: string; reason: string; }[]>' is not assignable to type 'HandlerReturn | Promise<HandlerReturn>'.
+    Type 'Promise<{ id: string; member: string; steward: string; reason: string; }[]>' is not assignable to type 'Promise<HandlerReturn>'.
+      Type '{ id: string; member: string; steward: string; reason: string; }[]' is not assignable to type 'HandlerReturn'.
+        Type '{ id: string; member: string; steward: string; reason: string; }[]' is not assignable to type 'Record<string, unknown>'.
+          Index signature for type 'string' is missing in type '{ id: string; member: string; steward: string; reason: string; }[]'.
+app/api/v2/stewards/performance/route.ts(24,3): error TS2345: Argument of type '(_ctx: ApiContext<never, never>) => Promise<{ name: string; active: number; completed: number; successRate: number; }[]>' is not assignable to parameter of type 'HandlerFn<never, never>'.
+  Type 'Promise<{ name: string; active: number; completed: number; successRate: number; }[]>' is not assignable to type 'HandlerReturn | Promise<HandlerReturn>'.
+    Type 'Promise<{ name: string; active: number; completed: number; successRate: number; }[]>' is not assignable to type 'Promise<HandlerReturn>'.
+      Type '{ name: string; active: number; completed: number; successRate: number; }[]' is not assignable to type 'HandlerReturn'.
+        Type '{ name: string; active: number; completed: number; successRate: number; }[]' is not assignable to type 'Record<string, unknown>'.
+          Index signature for type 'string' is missing in type '{ name: string; active: number; completed: number; successRate: number; }[]'.
+app/api/v2/tax/cra/export/route.ts(32,3): error TS2345: Argument of type '() => Promise<never[]>' is not assignable to parameter of type 'HandlerFn<never, never>'.
+  Type 'Promise<never[]>' is not assignable to type 'HandlerReturn | Promise<HandlerReturn>'.
+    Type 'Promise<never[]>' is not assignable to type 'Promise<HandlerReturn>'.
+      Type 'never[]' is not assignable to type 'HandlerReturn'.
+        Type 'never[]' is not assignable to type 'Record<string, unknown>'.
+          Index signature for type 'string' is missing in type 'never[]'.
+components/deadlines/DeadlineWidget.tsx(82,33): error TS2322: Type 'number | undefined' is not assignable to type 'string | number | Date'.
+  Type 'undefined' is not assignable to type 'string | number | Date'.
+components/voting/election-schedule-calendar.tsx(236,18): error TS2304: Cannot find name 't'.
+components/voting/election-schedule-calendar.tsx(236,78): error TS2304: Cannot find name 't'.

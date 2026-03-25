@@ -11,7 +11,26 @@ import { eq, and, desc, sql } from 'drizzle-orm';
 import { RemittanceParser, ReconciliationEngine } from '@union-claims/financial';
 
 const router = Router();
-const upload = multer({ storage: multer.memoryStorage(), limits: { fileSize: 10 * 1024 * 1024 } }); // 10MB limit
+const ALLOWED_MIME_TYPES = new Set([
+  'text/csv',
+  'text/plain', // CSV files often detected as text/plain
+  'application/vnd.ms-excel',
+  'application/vnd.openxmlformats-officedocument.spreadsheetml.sheet',
+  'application/xml',
+  'text/xml',
+]);
+
+const upload = multer({
+  storage: multer.memoryStorage(),
+  limits: { fileSize: 10 * 1024 * 1024 }, // 10MB limit
+  fileFilter: (_req, file, cb) => {
+    if (ALLOWED_MIME_TYPES.has(file.mimetype)) {
+      cb(null, true);
+    } else {
+      cb(new Error('Invalid file type'));
+    }
+  },
+});
 
 // Validation schemas
 const createRemittanceSchema = z.object({
@@ -69,7 +88,7 @@ router.get('/', async (req: Request, res: Response) => {
   } catch (error) {
     res.status(500).json({
       success: false,
-      error: error.message,
+      error: 'Internal server error',
     });
   }
 });
@@ -117,7 +136,7 @@ router.get('/:id', async (req: Request, res: Response) => {
   } catch (error) {
     res.status(500).json({
       success: false,
-      error: error.message,
+      error: 'Internal server error',
     });
   }
 });
@@ -176,7 +195,7 @@ router.post('/', async (req: Request, res: Response) => {
     }
     res.status(500).json({
       success: false,
-      error: error.message,
+      error: 'Internal server error',
     });
   }
 });
@@ -326,7 +345,7 @@ router.post('/:id/reconcile', async (req: Request, res: Response) => {
     }
     res.status(500).json({
       success: false,
-      error: error.message,
+      error: 'Internal server error',
     });
   }
 });
@@ -391,7 +410,7 @@ router.put('/:id', async (req: Request, res: Response) => {
     }
     res.status(500).json({
       success: false,
-      error: error.message,
+      error: 'Internal server error',
     });
   }
 });
@@ -423,7 +442,17 @@ router.post('/upload', upload.single('file'), async (req: Request, res: Response
     const fileExtension = file.originalname.split('.').pop()?.toLowerCase();
 
     // Parse configuration from request body
-    const parserConfig = req.body.config ? JSON.parse(req.body.config) : {};
+    let parserConfig = {};
+    if (req.body.config) {
+      try {
+        parserConfig = JSON.parse(req.body.config);
+      } catch {
+        return res.status(400).json({
+          success: false,
+          error: 'Invalid parser configuration JSON',
+        });
+      }
+    }
 
     const parser = new RemittanceParser(parserConfig);
     let parseResult;
@@ -455,7 +484,7 @@ router.post('/upload', upload.single('file'), async (req: Request, res: Response
   } catch (error) {
     res.status(500).json({
       success: false,
-      error: error.message,
+      error: 'Internal server error',
     });
   }
 });
@@ -579,7 +608,7 @@ router.post('/:id/reconcile', async (req: Request, res: Response) => {
   } catch (error) {
     res.status(500).json({
       success: false,
-      error: error.message,
+      error: 'Internal server error',
     });
   }
 });
@@ -679,7 +708,7 @@ router.get('/:id/report', async (req: Request, res: Response) => {
   } catch (error) {
     res.status(500).json({
       success: false,
-      error: error.message,
+      error: 'Internal server error',
     });
   }
 });

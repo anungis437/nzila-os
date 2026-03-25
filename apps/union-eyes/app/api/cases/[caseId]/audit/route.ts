@@ -26,6 +26,7 @@ export async function GET(
 
   const { caseId } = await params;
 
+  try {
   const rows = await withRLSContext(async () => {
     return db
       .select({
@@ -58,4 +59,7 @@ export async function GET(
   });
 
   return NextResponse.json({ caseId, timeline: rows });
+  } catch {
+    return NextResponse.json({ error: 'Failed to retrieve audit timeline' }, { status: 500 });
+  }
 }

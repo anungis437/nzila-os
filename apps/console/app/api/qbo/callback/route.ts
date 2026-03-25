@@ -107,7 +107,12 @@ export async function GET(req: NextRequest) {
       .returning()
 
     // Store tokens against the connection
-    // TODO(prod): encrypt access_token + refresh_token before insert using Azure KMS
+    // SECURITY NOTE: Tokens are stored in plaintext in the database.
+    // For production, encrypt via Azure Key Vault before insert.
+    // See: docs/hardening/secrets.md for the token encryption pattern.
+    if (process.env.NODE_ENV === 'production' && !process.env.AZURE_KEYVAULT_URL) {
+      logger.warn('[qbo/callback] Storing QBO tokens without encryption — AZURE_KEYVAULT_URL not configured')
+    }
     await tx.insert(qboTokens).values({
       connectionId: connection.id,
       accessToken: tokenSet.access_token,

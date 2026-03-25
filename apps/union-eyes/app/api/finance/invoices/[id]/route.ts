@@ -27,7 +27,7 @@ export const GET = withMinRole('officer', async (
   }
 
   try {
-    const invoice = await getInvoiceWithLineItems(organizationId, id);
+    const invoice = await getInvoiceWithLineItems(id);
     if (!invoice) {
       return standardErrorResponse(ErrorCode.NOT_FOUND, 'Invoice not found');
     }

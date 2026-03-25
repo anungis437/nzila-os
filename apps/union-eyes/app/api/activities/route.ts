@@ -43,10 +43,7 @@ export const GET = withApi(
 
       const total = Number((countResult[0] as Record<string, unknown>)?.total ?? 0);
 
-      return {
-        data: rows,
-        pagination: { page, limit, total, totalPages: Math.ceil(total / limit) },
-      };
+      return rows;
     });
   },
 );

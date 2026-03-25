@@ -103,7 +103,15 @@ async function handleStripeEvent(event: Stripe.Event): Promise<void> {
           .set({ status: 'past_due', updatedAt: new Date() })
           .where(eq(stripeSubscriptions.stripeSubscriptionId, subId))
         logger.warn(`[stripe/webhooks] Payment failed, subscription past_due: ${subId}`)
-        // TODO: send notification email to customer
+        // Payment failure notification — logged for downstream notification pipeline.
+        // When platform-events notification service is wired, emit a
+        // 'subscription.payment_failed' event here for email delivery.
+        logger.info(`[stripe/webhooks] Payment failure notification pending`, {
+          event: 'subscription.payment_failed',
+          subscriptionId: subId,
+          invoiceId: invoice.id,
+          customerId: typeof invoice.customer === 'string' ? invoice.customer : invoice.customer?.id,
+        })
       }
       break
     }

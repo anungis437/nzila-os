@@ -39,7 +39,7 @@ export const GET = withApi(
         .orderBy(grievances.escalatedAt)
         .limit(50);
 
-      if (rows.length === 0) return { data: [] };
+      if (rows.length === 0) return [];
 
       // Look up steward names
       const stewardIds = [...new Set(rows.map(r => r.stewardId).filter(Boolean))] as string[];
@@ -65,12 +65,12 @@ export const GET = withApi(
         }
       }
 
-      return { data: rows.map(r => ({
+      return rows.map(r => ({
         id: r.grievanceNumber,
         member: r.grievantName ?? 'Unknown',
         steward: r.stewardId ? (stewardNameMap.get(r.stewardId) ?? 'Unassigned') : 'Unassigned',
         reason: r.title,
-      })) };
+      }));
     });
   },
 );

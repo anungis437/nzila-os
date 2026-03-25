@@ -76,7 +76,25 @@ export const GET = withRoleAuth('member', async (request, context) => {
 
 
 const cbasSchema = z.object({
-  status: z.unknown().optional(),
+  status: z.enum(['active', 'expired', 'under_negotiation', 'ratified_pending', 'archived']).optional(),
+  title: z.string().max(500).optional(),
+  jurisdiction: z.enum(['federal', 'ontario', 'bc', 'alberta', 'quebec', 'manitoba', 'saskatchewan', 'nova_scotia', 'new_brunswick', 'pei', 'newfoundland', 'northwest_territories', 'yukon', 'nunavut']).optional(),
+  language: z.enum(['en', 'fr', 'bilingual']).optional(),
+  employerName: z.string().max(300).optional(),
+  employerId: z.string().max(100).optional(),
+  unionName: z.string().max(300).optional(),
+  unionLocal: z.string().max(100).optional(),
+  unionId: z.string().max(100).optional(),
+  effectiveDate: z.coerce.date().optional(),
+  expiryDate: z.coerce.date().optional(),
+  signedDate: z.coerce.date().optional(),
+  ratificationDate: z.coerce.date().optional(),
+  industrySector: z.string().max(200).optional(),
+  sector: z.string().max(200).optional(),
+  employeeCoverage: z.number().int().optional(),
+  bargainingUnitDescription: z.string().optional(),
+  documentUrl: z.string().url().optional(),
+  isPublic: z.boolean().optional(),
 });
 
 export const PATCH = withRoleAuth('steward', async (request, context) => {
@@ -113,7 +131,7 @@ export const PATCH = withRoleAuth('steward', async (request, context) => {
 
       // Update CBA
       const updatedCba = await updateCBA(id, {
-        ...body,
+        ...validation.data,
         lastModifiedBy: userId,
       });
 

@@ -31,15 +31,7 @@ export const GET = withApi(
         ),
       );
 
-    return {
-      data: devices,
-      pagination: {
-        page: 1,
-        limit: 50,
-        total: devices.length,
-        totalPages: 1,
-      },
-    };
+    return devices;
   },
 );
 
@@ -101,6 +93,6 @@ export const POST = withApi(
       })
       .returning();
 
-    return { data: created };
+    return created;
   },
 );

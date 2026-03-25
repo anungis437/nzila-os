@@ -256,9 +256,10 @@ export function withValidatedBody(
       // Validate against schema
       const parseResult = schema.safeParse(body);
       if (!parseResult.success) {
+        const fieldNames = Object.keys(parseResult.error.flatten().fieldErrors || {});
         logger.warn('Request validation failed', {
           userId: user.id,
-          errors: parseResult.error.flatten(),
+          failedFields: fieldNames,
           endpoint: request.nextUrl.pathname,
         });
 

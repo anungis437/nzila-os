@@ -101,15 +101,12 @@ export async function POST(req: Request) {
 
     if (!response.ok) {
       const errorData = await response.json();
-      logger.error('Failed to create Whop checkout', undefined, { status: response.status, error: errorData });
-      
-      // Provide more specific error message based on the response
-      const errorMessage = errorData.error?.message || errorData.message || "Unknown error from Whop API";
+      const errorMessage = errorData.error?.message || errorData.message || 'Unknown error from Whop API';
+      logger.error('Failed to create Whop checkout', undefined, { status: response.status, error: errorMessage });
       
       return NextResponse.json(
         { 
-          error: `Failed to create checkout: ${errorMessage}`,
-          details: errorData
+          error: 'Failed to create checkout',
         },
         { 
           status: response.status,
@@ -120,7 +117,7 @@ export async function POST(req: Request) {
 
     const data = await response.json();
     
-    logger.info('Unauthenticated Whop checkout created', { email, planId, checkoutUrl: data.purchase_url, sessionId: data.id });
+    logger.info('Unauthenticated Whop checkout created', { planId, sessionId: data.id });
     
     // Return the checkout URL to redirect the user
     return NextResponse.json(
@@ -139,8 +136,7 @@ export async function POST(req: Request) {
     logger.error('Error creating unauthenticated Whop checkout', error as Error);
     return NextResponse.json(
       { 
-        error: "Internal server error",
-        message: error instanceof Error ? error.message : "Unknown error"
+        error: "Internal server error"
       },
       { 
         status: 500,

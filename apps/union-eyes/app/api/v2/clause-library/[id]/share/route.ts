@@ -7,6 +7,14 @@ import { db } from '@/db/db';
 import { sharedClauseLibrary } from '@/db/schema/domains/agreements/shared-library';
 import { eq } from 'drizzle-orm';
 import { withSystemContext } from '@/lib/db/with-rls-context';
+import { z } from 'zod';
+
+const updateSharingSchema = z.object({
+  sharingLevel: z.enum(['private', 'local', 'national', 'public']).optional(),
+  sharedWithOrgIds: z.array(z.string().uuid()).optional(),
+  isAnonymized: z.boolean().optional(),
+  anonymizedEmployerName: z.string().max(200).optional(),
+});
 
 export const dynamic = 'force-dynamic';
 
@@ -39,7 +47,8 @@ export const POST = withApi(
   async ({ request }) => {
     const url = new URL(request.url);
     const id = url.pathname.split('/clause-library/')[1]?.split('/share')[0];
-    const body = await request.json();
+    const raw = await request.json();
+    const body = updateSharingSchema.parse(raw);
     const updates: Record<string, unknown> = {};
     if (body.sharingLevel !== undefined) updates.sharingLevel = body.sharingLevel;
     if (body.sharedWithOrgIds !== undefined) updates.sharedWithOrgIds = body.sharedWithOrgIds;

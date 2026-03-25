@@ -332,28 +332,26 @@ export async function updateMappingStatus(
   errorLog?: string
 ): Promise<boolean> {
   try {
-    const updates: string[] = [
-      `migration_status = '${status}'`,
-      `updated_at = NOW()`,
-    ];
-
     if (status === "completed") {
-      updates.push(`migrated_at = NOW()`);
+      await db.execute(sql`
+        UPDATE tenant_org_mappings 
+        SET migration_status = ${status},
+            updated_at = NOW(),
+            migrated_at = NOW(),
+            record_count = ${recordCount ?? sql`record_count`},
+            error_log = ${errorLog ?? sql`error_log`}
+        WHERE tenant_id = ${tenantId}
+      `);
+    } else {
+      await db.execute(sql`
+        UPDATE tenant_org_mappings 
+        SET migration_status = ${status},
+            updated_at = NOW(),
+            record_count = ${recordCount ?? sql`record_count`},
+            error_log = ${errorLog ?? sql`error_log`}
+        WHERE tenant_id = ${tenantId}
+      `);
     }
-
-    if (recordCount !== undefined) {
-      updates.push(`record_count = ${recordCount}`);
-    }
-
-    if (errorLog !== undefined) {
-      updates.push(`error_log = '${errorLog.replace(/'/g, "''")}'`);
-    }
-
-    await db.execute(sql.raw(`
-      UPDATE tenant_org_mappings 
-      SET ${updates.join(", ")}
-      WHERE tenant_id = '${tenantId}'
-    `));
 
     cache.clear(); // Invalidate cache
     return true;

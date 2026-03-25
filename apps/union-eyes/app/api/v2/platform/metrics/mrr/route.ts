@@ -15,6 +15,6 @@ export const GET = withApi(
     },
   },
   async () => {
-    return { data: { activeUsers: 0, requestsToday: 0, errorRate: 0 } };
+    return { activeUsers: 0, requestsToday: 0, errorRate: 0 };
   },
 );

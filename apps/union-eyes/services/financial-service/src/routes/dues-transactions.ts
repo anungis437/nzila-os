@@ -145,7 +145,7 @@ router.post('/calculate', async (req: Request, res: Response) => {
     }
     res.status(500).json({
       success: false,
-      error: error.message,
+      error: 'Internal server error',
     });
   }
 });
@@ -328,7 +328,7 @@ router.post('/batch', async (req: Request, res: Response) => {
     }
     res.status(500).json({
       success: false,
-      error: error.message,
+      error: 'Internal server error',
     });
   }
 });
@@ -376,7 +376,7 @@ router.get('/', async (req: Request, res: Response) => {
   } catch (error) {
     res.status(500).json({
       success: false,
-      error: error.message,
+      error: 'Internal server error',
     });
   }
 });
@@ -416,7 +416,7 @@ router.get('/:id', async (req: Request, res: Response) => {
   } catch (error) {
     res.status(500).json({
       success: false,
-      error: error.message,
+      error: 'Internal server error',
     });
   }
 });

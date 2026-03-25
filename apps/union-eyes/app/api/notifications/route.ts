@@ -80,7 +80,9 @@ export const GET = withApi(
           totalPages: Math.ceil(total / limit),
         },
       };
-    } catch {
+    } catch (error) {
+      const { logger: log } = await import('@/lib/logger');
+      log.error('Notifications query failed', { error: error instanceof Error ? error.message : 'Unknown' });
       // in_app_notifications table may lack expected columns
       return {
         notifications: [],

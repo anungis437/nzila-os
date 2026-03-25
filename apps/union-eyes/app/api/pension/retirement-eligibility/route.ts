@@ -24,7 +24,7 @@ export const GET = withApi(
         ),
       )
       .orderBy(desc(pensionMembers.createdAt));
-    return { data: eligible };
+    return eligible;
   },
 );
 

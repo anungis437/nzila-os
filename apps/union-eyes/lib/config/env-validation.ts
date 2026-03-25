@@ -672,6 +672,19 @@ export function getEnvironmentValidationResult(): ValidationResult {
 }
 
 /**
+ * Require a non-empty environment variable or throw with a clear message.
+ * Use this instead of `process.env.X!` to get a descriptive error at the
+ * call-site rather than silent `undefined` propagation.
+ */
+export function requireEnv(key: string): string {
+  const value = process.env[key];
+  if (!value) {
+    throw new Error(`Missing required environment variable: ${key}`);
+  }
+  return value;
+}
+
+/**
  * Export manager for advanced use cases (testing, etc.)
  */
 export { EnvironmentManager };

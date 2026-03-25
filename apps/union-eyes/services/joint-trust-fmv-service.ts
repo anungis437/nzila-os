@@ -249,7 +249,7 @@ export class JointTrustFMVService {
     const requiresAppraisal = data.estimatedValue >= this.APPRAISAL_THRESHOLD;
 
     // Generate request number
-    const requestNumber = `PR-${Date.now()}-${Math.random().toString(36).substr(2, 9).toUpperCase()}`;
+    const requestNumber = `PR-${Date.now()}-${crypto.randomUUID().slice(0, 9).toUpperCase()}`;
 
     // Set bidding deadline (14 days from now)
     const biddingDeadline = new Date();

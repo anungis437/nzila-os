@@ -160,7 +160,7 @@ export async function createDisbursement(
   } catch (error) {
     return {
       success: false,
-      error: error.message || 'Failed to create disbursement',
+      error: 'Failed to create disbursement',
     };
   }
 }
@@ -208,7 +208,7 @@ export async function approveDisbursement(
   } catch (error) {
     return {
       success: false,
-      error: error.message || 'Failed to approve disbursement',
+      error: 'Failed to approve disbursement',
     };
   }
 }
@@ -256,7 +256,7 @@ export async function markDisbursementPaid(
   } catch (error) {
     return {
       success: false,
-      error: error.message || 'Failed to mark disbursement as paid',
+      error: 'Failed to mark disbursement as paid',
     };
   }
 }

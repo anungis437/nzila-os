@@ -1,17 +1,17 @@
 /**
- * CRUD collection route for grievances
+ * CRUD collection route for case studies
  */
 import { crudRoutes } from '@/lib/api/crud-factory';
-import { grievances } from '@/db/schema';
+import { caseStudies } from '@/db/schema';
 
 export const dynamic = 'force-dynamic';
 
 const { GET, POST } = crudRoutes({
-  table: grievances,
+  table: caseStudies,
   pk: 'id',
-  tags: ["Claims"],
-  orgScoped: true,
+  tags: ["Marketing"],
+  orgScoped: false,
   readRole: 'member',
-  writeRole: 'steward',
+  writeRole: 'admin',
 });
 export { GET, POST };

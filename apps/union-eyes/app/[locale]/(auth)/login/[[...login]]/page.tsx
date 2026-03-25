@@ -12,7 +12,11 @@ import { Loader2 } from "lucide-react";
 export default function LoginPage() {
   const { theme } = useTheme();
   const searchParams = useSearchParams();
-  const redirectUrl = searchParams.get("redirect_url");
+  const rawRedirect = searchParams.get("redirect_url");
+  // Prevent open redirect — only allow relative paths (not protocol-relative //)
+  const redirectUrl = rawRedirect && rawRedirect.startsWith('/') && !rawRedirect.startsWith('//') 
+    ? rawRedirect 
+    : null;
   const router = useRouter();
   const { isSignedIn, isLoaded } = useUser();
 

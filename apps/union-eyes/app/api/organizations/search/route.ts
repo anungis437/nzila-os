@@ -21,7 +21,7 @@ export async function GET(req: NextRequest) {
           ilike(organizations.slug, `%${q}%`),
         )
       : ne(organizations.organizationType, 'platform'),
-  );
+  ).limit(50);
 
   const mapped = rows.map(row => ({
     id: row.id,

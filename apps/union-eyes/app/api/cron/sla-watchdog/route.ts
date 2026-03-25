@@ -13,6 +13,7 @@ import { claims } from '@/db/schema'
 import { sql } from 'drizzle-orm'
 import { eventBus } from '@/lib/events/event-bus'
 import { logger } from '@/lib/logger'
+import { timingSafeEqual } from 'crypto'
 import {
   CLAIM_SLA_STANDARDS,
   type ClaimStatus,
@@ -42,8 +43,12 @@ function slaDeadline(
 
 export async function POST(request: NextRequest) {
   // Authenticate via shared secret
-  const secret = request.headers.get('x-cron-secret')
-  if (secret !== process.env.CRON_SECRET && process.env.NODE_ENV === 'production') {
+  const secret = request.headers.get('x-cron-secret') ?? ''
+  const expected = process.env.CRON_SECRET ?? ''
+  const secretsMatch =
+    secret.length === expected.length &&
+    timingSafeEqual(Buffer.from(secret), Buffer.from(expected))
+  if (!secretsMatch && process.env.NODE_ENV === 'production') {
     return NextResponse.json({ error: 'Unauthorized' }, { status: 401 })
   }
 

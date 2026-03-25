@@ -2,6 +2,16 @@ import { withApi } from '@/lib/api/framework';
 import { db } from '@/db/db';
 import { pensionContributions } from '@/db/schema';
 import { eq, desc } from 'drizzle-orm';
+import { z } from 'zod';
+
+const createContributionSchema = z.object({
+  memberId: z.string().uuid(),
+  memberName: z.string().max(255),
+  period: z.string().max(20),
+  amount: z.string(),
+  paymentStatus: z.enum(['pending', 'received', 'overdue', 'partial']).optional(),
+  paymentDate: z.coerce.date().optional(),
+});
 
 export const dynamic = 'force-dynamic';
 
@@ -16,7 +26,7 @@ export const GET = withApi(
       .from(pensionContributions)
       .where(eq(pensionContributions.organizationId, organizationId!))
       .orderBy(desc(pensionContributions.createdAt));
-    return { data: contributions };
+    return contributions;
   },
 );
 
@@ -26,10 +36,11 @@ export const POST = withApi(
     openapi: { tags: ['Pension'], summary: 'Record contribution', description: 'Record a new pension contribution' },
   },
   async ({ body, organizationId }) => {
+    const parsed = createContributionSchema.parse(body);
     const [contribution] = await db
       .insert(pensionContributions)
-      .values({ ...(body as Record<string, unknown>), organizationId: organizationId! } as typeof pensionContributions.$inferInsert)
+      .values({ ...parsed, organizationId: organizationId! })
       .returning();
-    return { data: contribution };
+    return contribution;
   },
 );

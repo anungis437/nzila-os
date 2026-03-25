@@ -74,6 +74,11 @@ const ORG_GUARD_PATTERNS = [
   /getCurrentUser\s*\(/,         // UE user auth utility
   /verifyShopifySignature\s*\(/, // Shopify webhook signature verification
   /CRON_SECRET/,                 // Cron job secret verification
+  /withMinRole\s*\(/,            // Role-based auth guard with minimum role check
+  /withApi\s*\(/,                // withApi() auth wrapper
+  /withApiAuth\s*\(/,            // withApiAuth() auth wrapper
+  /crudRoutes\s*\(/,             // crudRoutes() factory — auth internally
+  /withOrganizationAuth\s*\(/,   // Org-scoped auth wrapper
 ]
 
 function hasOrgGuard(content: string): boolean {

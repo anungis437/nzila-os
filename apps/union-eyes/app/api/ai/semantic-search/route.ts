@@ -166,11 +166,10 @@ export const POST = withRoleAuth('member', async (request: NextRequest, context:
       'Invalid searchType. Use: clauses, precedents, unified, or similar'
     );
       }
-    } catch (error) {
+    } catch {
       return NextResponse.json(
         {
           error: 'Semantic search failed',
-          details: error instanceof Error ? error.message : 'Unknown error',
         },
         { status: 500 }
       );

@@ -42,7 +42,7 @@ export const GET = withApi(
         if (orgIds.length > 0) {
           // organizationMembers.organizationId is a slug/text, not UUID
           // We need to match against organizations by slug or id
-          const allOrgs = await db.select().from(organizations);
+          const allOrgs = await db.select().from(organizations).limit(500);
           orgs = allOrgs.filter(o => orgIds.includes(o.id) || orgIds.includes(o.slug ?? ''));
         }
         return NextResponse.json({

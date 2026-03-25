@@ -101,7 +101,6 @@ export const GET = withApi(
     const s = Array.from(statsRows)[0] as Record<string, unknown>;
 
     return {
-      data: {
         goldenShare,
         recentVotes,
         pendingVotes,
@@ -114,8 +113,7 @@ export const GET = withApi(
           auditsPassed: Number(s.audits_passed ?? 0),
           auditsFailed: Number(s.audits_failed ?? 0),
         },
-      },
-    };
+      };
     });
   },
 );

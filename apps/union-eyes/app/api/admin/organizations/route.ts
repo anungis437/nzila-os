@@ -76,23 +76,21 @@ export const GET = withApi(
       }
     }
 
-    return {
-      data: orgs.map((o) => {
-        const mc = countMap.get(String(o.id));
-        const contact = contactMap.get(String(o.id));
-        return {
-          id: String(o.id),
-          number: o.slug ?? '',
-          name: o.name,
-          region: o.provinceTerritory ?? '',
-          memberCount: mc?.total ?? o.memberCount ?? 0,
-          activeCount: mc?.active ?? o.activeMemberCount ?? 0,
-          president: contact?.name ?? '',
-          contact: contact?.email ?? '',
-          status: (o.status ?? 'active') as 'active' | 'inactive',
-        };
-      }),
-    };
+    return orgs.map((o) => {
+      const mc = countMap.get(String(o.id));
+      const contact = contactMap.get(String(o.id));
+      return {
+        id: String(o.id),
+        number: o.slug ?? '',
+        name: o.name,
+        region: o.provinceTerritory ?? '',
+        memberCount: mc?.total ?? o.memberCount ?? 0,
+        activeCount: mc?.active ?? o.activeMemberCount ?? 0,
+        president: contact?.name ?? '',
+        contact: contact?.email ?? '',
+        status: (o.status ?? 'active') as 'active' | 'inactive',
+      };
+    });
   },
 );
 

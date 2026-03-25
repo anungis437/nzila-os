@@ -14,13 +14,29 @@ import {
   getAllowedClaimTransitions,
   type ClaimStatus,
 } from '@/lib/services/claim-workflow-fsm'
-import { db } from '@/db/db'
 import { claims } from '@/db/schema'
 import { eq, and } from 'drizzle-orm'
 import { logger } from '@/lib/logger'
 import { withRLSContext } from '@/lib/db/with-rls-context'
+import { wrapSchemaQuery } from '@/lib/schema-error'
+import { z } from 'zod'
 
 export const dynamic = 'force-dynamic'
+
+const transitionSchema = z.object({
+  claimNumber: z.string().min(1).max(100),
+  targetStatus: z.enum([
+    'submitted',
+    'under_review',
+    'assigned',
+    'investigation',
+    'pending_documentation',
+    'resolved',
+    'rejected',
+    'closed',
+  ]),
+  notes: z.string().max(5000).optional(),
+})
 
 export async function POST(request: NextRequest) {
   try {
@@ -36,32 +52,33 @@ export async function POST(request: NextRequest) {
       )
     }
 
-    const body = await request.json()
-    const { claimNumber, targetStatus, notes } = body as {
-      claimNumber?: string
-      targetStatus?: string
-      notes?: string
-    }
-
-    if (!claimNumber || !targetStatus) {
+    const rawBody = await request.json()
+    const parsed = transitionSchema.safeParse(rawBody)
+    if (!parsed.success) {
       return NextResponse.json(
-        { success: false, error: 'claimNumber and targetStatus are required' },
+        { success: false, error: 'Validation failed', details: parsed.error.issues.map(i => ({ path: i.path, message: i.message })) },
         { status: 400 },
       )
     }
 
-    // Fetch claim for pre-flight validation (org-scoped via RLS context)
-    return await withRLSContext(async () => {
+    const { claimNumber, targetStatus, notes } = parsed.data
+
+    // Fetch claim for pre-flight validation (org-scoped via RLS context, row-locked)
+    return await withRLSContext(async (tx) => {
       const claimConditions = [eq(claims.claimNumber, claimNumber)];
       if (organizationId) {
         claimConditions.push(eq(claims.organizationId, organizationId));
       }
 
-      const [claim] = await db
-        .select()
-        .from(claims)
-        .where(and(...claimConditions))
-        .limit(1)
+      const [claim] = await wrapSchemaQuery(
+        () => tx
+          .select()
+          .from(claims)
+          .where(and(...claimConditions))
+          .limit(1)
+          .for('update'),
+        { table: 'claims', route: '/api/workflow/transition', query: 'SELECT FOR UPDATE' }
+      );
 
       if (!claim) {
         return NextResponse.json(
@@ -74,7 +91,7 @@ export async function POST(request: NextRequest) {
 
       // Pre-flight FSM guard — show allowed transitions
       const allowed = getAllowedClaimTransitions(currentStatus, 'steward')
-      if (!allowed.includes(targetStatus as ClaimStatus)) {
+      if (!allowed.includes(targetStatus)) {
         return NextResponse.json(
           {
             success: false,
@@ -85,12 +102,13 @@ export async function POST(request: NextRequest) {
         )
       }
 
-      // Execute transition (full FSM validation inside)
+      // Execute transition (full FSM validation inside, using same transaction)
       const result = await updateClaimStatus(
         claimNumber,
-        targetStatus as ClaimStatus,
+        targetStatus,
         userId,
         notes,
+        tx,
       )
 
       if (!result.success) {

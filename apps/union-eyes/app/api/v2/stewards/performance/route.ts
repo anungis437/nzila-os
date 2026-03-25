@@ -37,7 +37,7 @@ export const GET = withApi(
         .where(eq(stewards.active, true))
         .groupBy(stewards.id, stewards.userId);
 
-      if (rows.length === 0) return { data: [] };
+      if (rows.length === 0) return [];
 
       // Look up steward names from organization members
       const userIds = rows.map(r => r.userId);
@@ -48,12 +48,12 @@ export const GET = withApi(
 
       const nameMap = new Map(members.map(m => [m.userId, m.name ?? 'Unknown']));
 
-      return { data: rows.map(r => ({
+      return rows.map(r => ({
         name: nameMap.get(r.userId) ?? 'Unknown',
         active: r.active,
         completed: r.completed,
         successRate: r.total > 0 ? Math.round((r.completed / r.total) * 100) : 0,
-      })) };
+      }));
     });
   },
 );

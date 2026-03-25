@@ -6,6 +6,19 @@ import { withApi, ApiError } from '@/lib/api/framework';
 import { db } from '@/db/db';
 import { votes, votingOptions, votingSessions } from '@/db/schema';
 import { eq, desc } from 'drizzle-orm';
+import { z } from 'zod';
+
+const castVoteSchema = z.object({
+  optionId: z.string().uuid(),
+  voterId: z.string().min(1).max(100),
+  voterHash: z.string().max(100).optional(),
+  signature: z.string().max(5000).optional(),
+  receiptId: z.string().max(255).optional(),
+  verificationCode: z.string().max(100).optional(),
+  auditHash: z.string().max(255).optional(),
+  isAnonymous: z.boolean().default(true),
+  voterType: z.enum(['member', 'delegate', 'proxy', 'observer']).default('member'),
+});
 
 export const dynamic = 'force-dynamic';
 
@@ -37,8 +50,9 @@ export const POST = withApi(
     const id = request.url.split('/sessions/')[1]?.split('/vote')[0];
     if (!id) throw ApiError.badRequest('Missing session ID');
 
-    const [vote] = await db.insert(votes).values({ ...(body as Record<string, unknown>), sessionId: id } as typeof votes.$inferInsert).returning();
-    return { data: vote };
+    const parsed = castVoteSchema.parse(body);
+    const [vote] = await db.insert(votes).values({ ...parsed, sessionId: id }).returning();
+    return vote;
   },
 );
 

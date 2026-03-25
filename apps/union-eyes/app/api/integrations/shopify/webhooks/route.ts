@@ -94,7 +94,16 @@ export async function POST(request: NextRequest) {
     }
 
     // 4. Parse webhook payload
-    const payload = JSON.parse(rawBody) as Record<string, unknown>;
+    let payload: Record<string, unknown>;
+    try {
+      payload = JSON.parse(rawBody) as Record<string, unknown>;
+    } catch {
+      logger.error('Shopify webhook payload is not valid JSON', { topic, webhookId });
+      return standardErrorResponse(
+        ErrorCode.VALIDATION_ERROR,
+        'Invalid payload format'
+      );
+    }
 
     // 5. Route by topic with idempotency
     const result = await processWebhookIdempotent(

@@ -59,7 +59,7 @@ export const POST = withApiAuth(async (req: NextRequest) => {
     );
   } catch (error) {
     return NextResponse.json(
-      { error: error instanceof Error ? error.message : "Failed to request location consent" },
+      { error: "Failed to request location consent" },
       { status: 500 }
     );
   }
@@ -87,7 +87,7 @@ export const GET = withApiAuth(async (req: NextRequest) => {
     });
   } catch (error) {
     return NextResponse.json(
-      { error: error instanceof Error ? error.message : "Failed to check consent status" },
+      { error: "Failed to check consent status" },
       { status: 500 }
     );
   }
@@ -114,7 +114,7 @@ export const DELETE = withApiAuth(async (req: NextRequest) => {
     });
   } catch (error) {
     return NextResponse.json(
-      { error: error instanceof Error ? error.message : "Failed to revoke consent" },
+      { error: "Failed to revoke consent" },
       { status: 500 }
     );
   }

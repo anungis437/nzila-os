@@ -118,7 +118,7 @@ router.post('/:fundId/check-in', async (req: Request, res: Response) => {
     }
     res.status(500).json({
       success: false,
-      error: error.message,
+      error: 'Internal server error',
     });
   }
 });
@@ -183,7 +183,7 @@ router.post('/:fundId/check-out', async (req: Request, res: Response) => {
     }
     res.status(500).json({
       success: false,
-      error: error.message,
+      error: 'Internal server error',
     });
   }
 });
@@ -267,7 +267,7 @@ router.post('/:fundId/stipends/calculate', async (req: Request, res: Response) =
     }
     res.status(500).json({
       success: false,
-      error: error.message,
+      error: 'Internal server error',
     });
   }
 });
@@ -295,7 +295,7 @@ router.get('/', async (req: Request, res: Response) => {
   } catch (error) {
     res.status(500).json({
       success: false,
-      error: error.message,
+      error: 'Internal server error',
     });
   }
 });
@@ -355,7 +355,7 @@ router.post('/', async (req: Request, res: Response) => {
     }
     res.status(500).json({
       success: false,
-      error: error.message,
+      error: 'Internal server error',
     });
   }
 });

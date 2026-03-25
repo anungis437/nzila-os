@@ -51,7 +51,7 @@ export const POST = withMinRole('officer', async (request, context: BaseAuthCont
       organizationId,
       billingPeriodId: parsed.data.billingPeriodId,
       ruleId: parsed.data.ruleId,
-      localBasisData: parsed.data.localBasisData,
+      localBasis: parsed.data.localBasisData as unknown as Parameters<typeof runAllocation>[0]['localBasis'],
       isSimulation: true,
       createdBy: userId,
     });

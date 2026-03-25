@@ -197,8 +197,9 @@ function ElectionItem({
   election: Election;
   onClick: () => void;
 }) {
+  const t = useTranslations("voting.schedule");
+
   const getStatusConfig = (status: Election["status"]) => {
-    const t = useTranslations("voting.schedule");
     switch (status) {
       case "active":
         return { label: t("statusActive"), variant: "success" as const, icon: PlayCircle };

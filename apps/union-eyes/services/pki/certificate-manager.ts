@@ -362,9 +362,18 @@ export async function getUserCertificate(
     return null;
   }
   
+  let parsedSubject: CertificateInfo['subject'] = { commonName: '' };
+  let parsedIssuer: CertificateInfo['issuer'] = { commonName: '' };
+  try {
+    parsedSubject = JSON.parse(cert.certificateSubject!);
+    parsedIssuer = JSON.parse(cert.certificateIssuer!);
+  } catch {
+    // Fallback for corrupted certificate data
+  }
+
   const certInfo: CertificateInfo = {
-    subject: JSON.parse(cert.certificateSubject!),
-    issuer: JSON.parse(cert.certificateIssuer!),
+    subject: parsedSubject,
+    issuer: parsedIssuer,
     serialNumber: cert.certificateSerialNumber!,
     validFrom: new Date(cert.certificateNotBefore!),
     validTo: new Date(cert.certificateNotAfter!),

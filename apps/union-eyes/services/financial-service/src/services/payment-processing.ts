@@ -344,7 +344,7 @@ export async function batchProcessStipendPayouts(
 
       // In production, would retrieve member bank account details
       // For now, simulate successful payout
-      const transactionId = `ACH-${Date.now()}-${Math.random().toString(36).substring(7)}`;
+      const transactionId = `ACH-${Date.now()}-${crypto.randomUUID().slice(0, 8)}`;
 
       await db.update(schema.stipendDisbursements)
         .set({
@@ -528,17 +528,65 @@ export interface StripeWebhookEvent {
 }
 
 /**
- * Process Stripe webhook events
+ * Process Stripe webhook events with signature verification and deduplication
  */
 export async function processStripeWebhook(
-  event: StripeWebhookEvent,
-  _signature: string,
-  _webhookSecret: string
+  rawBody: string | Buffer,
+  signature: string,
+  webhookSecret: string
 ): Promise<void> {
+  // Verify webhook signature (prevents forged events)
+  let event: StripeWebhookEvent;
   try {
-    // Verify webhook signature (in production)
-    // const event = stripe.webhooks.constructEvent(payload, signature, webhookSecret);
+    const verified = stripe.webhooks.constructEvent(
+      rawBody,
+      signature,
+      webhookSecret
+    );
+    event = verified as unknown as StripeWebhookEvent;
+  } catch (err) {
+    const message = err instanceof Error ? err.message : String(err);
+    logger.error('Stripe webhook signature verification failed', { error: message });
+    throw new Error(`Webhook signature verification failed: ${message}`);
+  }
 
+  // Deduplicate: INSERT event ID, skip if already processed
+  try {
+    const existing = await db
+      .select({ id: schema.stripeWebhookEvents.id, processed: schema.stripeWebhookEvents.processed })
+      .from(schema.stripeWebhookEvents)
+      .where(eq(schema.stripeWebhookEvents.stripeEventId, event.id))
+      .limit(1);
+
+    if (existing.length > 0) {
+      logger.info('Duplicate webhook event skipped', { eventId: event.id, eventType: event.type });
+      return;
+    }
+
+    // Record event before processing (pre-insert pattern)
+    const eventOrgId = event.data?.object?.metadata?.organizationId
+      || event.data?.object?.metadata?.tenantId;
+    // eslint-disable-next-line @typescript-eslint/no-explicit-any
+    await db.insert(schema.stripeWebhookEvents).values({
+      stripeEventId: event.id,
+      eventType: event.type,
+      organizationId: eventOrgId || '00000000-0000-0000-0000-000000000000',
+      stripePaymentIntentId: event.data?.object?.id || null,
+      stripeCustomerId: event.data?.object?.customer || null,
+      eventData: event.data?.object || {},
+      processed: false,
+    } as any);
+  } catch (dedupErr) {
+    // Unique constraint violation = already inserted by concurrent request
+    const msg = dedupErr instanceof Error ? dedupErr.message : String(dedupErr);
+    if (msg.includes('unique') || msg.includes('duplicate') || msg.includes('23505')) {
+      logger.info('Duplicate webhook event (concurrent)', { eventId: event.id });
+      return;
+    }
+    throw dedupErr;
+  }
+
+  try {
     switch (event.type) {
       case 'payment_intent.succeeded':
         await handlePaymentIntentSucceeded(event.data.object);
@@ -556,7 +604,17 @@ export async function processStripeWebhook(
         logger.info('Unhandled webhook event type', { eventType: event.type });
     }
 
+    // Mark as processed
+    await db.update(schema.stripeWebhookEvents)
+      .set({ processed: true, processedAt: new Date() })
+      .where(eq(schema.stripeWebhookEvents.stripeEventId, event.id));
+
   } catch (error) {
+    // Record processing error
+    const errMsg = error instanceof Error ? error.message : String(error);
+    await db.update(schema.stripeWebhookEvents)
+      .set({ processingError: errMsg })
+      .where(eq(schema.stripeWebhookEvents.stripeEventId, event.id));
     logger.error('Error processing webhook', { error, eventType: event.type });
     throw error;
   }

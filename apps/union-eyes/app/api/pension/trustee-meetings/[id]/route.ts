@@ -2,6 +2,17 @@ import { withApi } from '@/lib/api/framework';
 import { db } from '@/db/db';
 import { pensionTrusteeMeetings } from '@/db/schema';
 import { eq, and } from 'drizzle-orm';
+import { z } from 'zod';
+
+const updateMeetingSchema = z.object({
+  title: z.string().max(255).optional(),
+  scheduledDate: z.coerce.date().optional(),
+  location: z.string().max(255).optional(),
+  agenda: z.string().optional(),
+  minutes: z.string().optional(),
+  status: z.enum(['scheduled', 'completed', 'cancelled']).optional(),
+  attendees: z.array(z.unknown()).optional(),
+});
 
 export const dynamic = 'force-dynamic';
 
@@ -16,7 +27,7 @@ export const GET = withApi(
       .select()
       .from(pensionTrusteeMeetings)
       .where(and(eq(pensionTrusteeMeetings.id, id), eq(pensionTrusteeMeetings.organizationId, organizationId!)));
-    return { data: meeting ?? null };
+    return meeting ?? null;
   },
 );
 
@@ -29,10 +40,10 @@ export const PATCH = withApi(
     const id = params.id;
     const [meeting] = await db
       .update(pensionTrusteeMeetings)
-      .set({ ...(body as Record<string, unknown>), updatedAt: new Date() })
+      .set({ ...updateMeetingSchema.parse(body), updatedAt: new Date() })
       .where(and(eq(pensionTrusteeMeetings.id, id), eq(pensionTrusteeMeetings.organizationId, organizationId!)))
       .returning();
-    return { data: meeting ?? null };
+    return meeting ?? null;
   },
 );
 
@@ -47,7 +58,7 @@ export const DELETE = withApi(
       .delete(pensionTrusteeMeetings)
       .where(and(eq(pensionTrusteeMeetings.id, id), eq(pensionTrusteeMeetings.organizationId, organizationId!)))
       .returning();
-    return { data: meeting ?? null };
+    return meeting ?? null;
   },
 );
 

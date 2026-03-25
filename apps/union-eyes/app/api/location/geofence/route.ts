@@ -78,7 +78,7 @@ export const POST = withApiAuth(async (req: NextRequest) => {
     );
   } catch (error) {
     return NextResponse.json(
-      { error: error instanceof Error ? error.message : "Failed to create geofence" },
+      { error: "Failed to create geofence" },
       { status: 500 }
     );
   }
@@ -120,7 +120,7 @@ export const GET = withApiAuth(async (req: NextRequest) => {
     });
   } catch (error) {
     return NextResponse.json(
-      { error: error instanceof Error ? error.message : "Failed to check geofence" },
+      { error: "Failed to check geofence" },
       { status: 500 }
     );
   }

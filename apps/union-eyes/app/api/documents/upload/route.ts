@@ -118,7 +118,17 @@ export const POST = withRoleAuth('member', async (request, context) => {
     const name = (formData.get("name") as string) || file?.name;
     const description = formData.get("description") as string | null;
     const tagsString = formData.get("tags") as string | null;
-    const tags = tagsString ? JSON.parse(tagsString) : null;
+    let tags: string[] | null = null;
+    if (tagsString) {
+      try {
+        tags = JSON.parse(tagsString) as string[];
+      } catch {
+        return standardErrorResponse(
+          ErrorCode.VALIDATION_ERROR,
+          'Invalid tags format'
+        );
+      }
+    }
     const category = formData.get("category") as string | null;
     const isConfidential = formData.get("isConfidential") === "true";
     const accessLevel = (formData.get("accessLevel") as string) || "standard";

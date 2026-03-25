@@ -80,7 +80,7 @@ router.post('/calculate', async (req: Request, res: Response) => {
   } catch (error) {
     res.status(500).json({
       success: false,
-      error: error.message || 'Failed to calculate stipends',
+      error: 'Failed to calculate stipends',
     });
   }
 });
@@ -115,7 +115,7 @@ router.post('/disbursements', async (req: Request, res: Response) => {
   } catch (error) {
     res.status(500).json({
       success: false,
-      error: error.message || 'Failed to create disbursement',
+      error: 'Failed to create disbursement',
     });
   }
 });
@@ -145,7 +145,7 @@ router.post('/disbursements/batch', async (req: Request, res: Response) => {
   } catch (error) {
     res.status(500).json({
       success: false,
-      error: error.message || 'Failed to batch create disbursements',
+      error: 'Failed to batch create disbursements',
     });
   }
 });
@@ -173,7 +173,7 @@ router.get('/disbursements/pending/:strikeFundId', async (req: Request, res: Res
   } catch (error) {
     res.status(500).json({
       success: false,
-      error: error.message || 'Failed to get pending disbursements',
+      error: 'Failed to get pending disbursements',
     });
   }
 });
@@ -204,7 +204,7 @@ router.get('/disbursements/member/:memberId', async (req: Request, res: Response
   } catch (error) {
     res.status(500).json({
       success: false,
-      error: error.message || 'Failed to get member disbursements',
+      error: 'Failed to get member disbursements',
     });
   }
 });
@@ -237,7 +237,7 @@ router.post('/disbursements/:disbursementId/approve', async (req: Request, res: 
   } catch (error) {
     res.status(500).json({
       success: false,
-      error: error.message || 'Failed to approve disbursement',
+      error: 'Failed to approve disbursement',
     });
   }
 });
@@ -268,7 +268,7 @@ router.post('/disbursements/:disbursementId/paid', async (req: Request, res: Res
   } catch (error) {
     res.status(500).json({
       success: false,
-      error: error.message || 'Failed to mark disbursement as paid',
+      error: 'Failed to mark disbursement as paid',
     });
   }
 });
@@ -295,7 +295,7 @@ router.get('/summary/:strikeFundId', async (req: Request, res: Response) => {
   } catch (error) {
     res.status(500).json({
       success: false,
-      error: error.message || 'Failed to get disbursement summary',
+      error: 'Failed to get disbursement summary',
     });
   }
 });

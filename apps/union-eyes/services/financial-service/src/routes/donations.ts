@@ -117,7 +117,7 @@ router.post('/', async (req: Request, res: Response) => {
     }
     res.status(500).json({
       success: false,
-      error: error.message,
+      error: 'Internal server error',
     });
   }
 });
@@ -271,7 +271,7 @@ router.get('/campaigns/:fundId', async (req: Request, res: Response) => {
   } catch (error) {
     res.status(500).json({
       success: false,
-      error: error.message,
+      error: 'Internal server error',
     });
   }
 });
@@ -317,7 +317,7 @@ router.get('/:donationId', async (req: Request, res: Response) => {
   } catch (error) {
     res.status(500).json({
       success: false,
-      error: error.message,
+      error: 'Internal server error',
     });
   }
 });

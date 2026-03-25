@@ -238,3 +238,30 @@ export const comparativeAnalysesRelations = relations(comparativeAnalyses, ({ on
   }),
 }));
 
+// ============================================================================
+// CUSTOMER SUCCESS TABLES
+// ============================================================================
+
+export const customerNpsSurveys = pgTable('customer_nps_surveys', {
+  id: uuid('id').primaryKey().defaultRandom(),
+  organizationId: uuid('organization_id').notNull().references(() => organizations.id, { onDelete: 'restrict' }),
+  respondentName: varchar('respondent_name', { length: 255 }).notNull(),
+  score: integer('score').notNull(),
+  feedback: text('feedback'),
+  category: varchar('category', { length: 100 }),
+  submittedAt: timestamp('submitted_at', { withTimezone: true }).defaultNow().notNull(),
+});
+
+export const customerOnboardingMilestones = pgTable('customer_onboarding_milestones', {
+  id: uuid('id').primaryKey().defaultRandom(),
+  organizationId: uuid('organization_id').notNull().references(() => organizations.id, { onDelete: 'restrict' }),
+  milestone: varchar('milestone', { length: 255 }).notNull(),
+  status: varchar('status', { length: 50 }).notNull().default('pending'),
+  completedAt: timestamp('completed_at', { withTimezone: true }),
+  notes: text('notes'),
+  createdAt: timestamp('created_at', { withTimezone: true }).defaultNow().notNull(),
+});
+
+export type CustomerNpsSurvey = typeof customerNpsSurveys.$inferSelect;
+export type CustomerOnboardingMilestone = typeof customerOnboardingMilestones.$inferSelect;
+

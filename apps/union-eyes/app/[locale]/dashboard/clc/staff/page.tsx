@@ -372,12 +372,14 @@ export default async function CLCStaffDashboardPage() {
               'use server';
               const { revalidatePath } = await import('next/cache');
               const { logger: log } = await import('@/lib/logger');
+              const { z } = await import('zod');
+              const safeId = z.string().uuid().parse(id);
               try {
-                const res = await fetch(`${process.env.NEXT_PUBLIC_APP_URL ?? ''}/api/v2/clc/remittances/${id}/approve`, { method: 'POST' });
+                const res = await fetch(`${process.env.NEXT_PUBLIC_APP_URL ?? ''}/api/v2/clc/remittances/${safeId}/approve`, { method: 'POST' });
                 if (!res.ok) throw new Error(`Approve failed: ${res.status}`);
-                log.info('Approved remittance', { id });
+                log.info('Approved remittance', { id: safeId });
               } catch (error) {
-                log.error('Failed to approve remittance', { id, error });
+                log.error('Failed to approve remittance', { id: safeId, error });
                 throw error;
               }
               revalidatePath('/dashboard/clc/staff');
@@ -386,12 +388,14 @@ export default async function CLCStaffDashboardPage() {
               'use server';
               const { revalidatePath } = await import('next/cache');
               const { logger: log } = await import('@/lib/logger');
+              const { z } = await import('zod');
+              const safeId = z.string().uuid().parse(id);
               try {
-                const res = await fetch(`${process.env.NEXT_PUBLIC_APP_URL ?? ''}/api/v2/clc/remittances/${id}/reject`, { method: 'POST' });
+                const res = await fetch(`${process.env.NEXT_PUBLIC_APP_URL ?? ''}/api/v2/clc/remittances/${safeId}/reject`, { method: 'POST' });
                 if (!res.ok) throw new Error(`Reject failed: ${res.status}`);
-                log.info('Rejected remittance', { id });
+                log.info('Rejected remittance', { id: safeId });
               } catch (error) {
-                log.error('Failed to reject remittance', { id, error });
+                log.error('Failed to reject remittance', { id: safeId, error });
                 throw error;
               }
               revalidatePath('/dashboard/clc/staff');

@@ -24,7 +24,7 @@ export const GET = withApi(
     const orgId = url.searchParams.get('organization');
 
     if (!orgId) {
-      return { success: true, data: { members: [], stats: { total: 0, active: 0 } } };
+      return { members: [], stats: { total: 0, active: 0 } };
     }
 
     return withSystemContext(async () => {
@@ -65,11 +65,8 @@ export const GET = withApi(
       });
 
       return {
-        success: true,
-        data: {
-          members,
-          stats: { total: rows.length, active: activeCount },
-        },
+        members,
+        stats: { total: rows.length, active: activeCount },
       };
     });
   },

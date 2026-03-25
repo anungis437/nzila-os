@@ -2,6 +2,16 @@ import { withApi } from '@/lib/api/framework';
 import { db } from '@/db/db';
 import { pensionTrustees } from '@/db/schema';
 import { eq, desc } from 'drizzle-orm';
+import { z } from 'zod';
+
+const createTrusteeSchema = z.object({
+  userId: z.string().uuid().optional(),
+  name: z.string().max(255),
+  role: z.string().max(100).optional(),
+  appointedDate: z.coerce.date().optional(),
+  termEndDate: z.coerce.date().optional(),
+  status: z.enum(['active', 'inactive', 'removed']).optional(),
+});
 
 export const dynamic = 'force-dynamic';
 
@@ -16,7 +26,7 @@ export const GET = withApi(
       .from(pensionTrustees)
       .where(eq(pensionTrustees.organizationId, organizationId!))
       .orderBy(desc(pensionTrustees.createdAt));
-    return { data: trustees };
+    return trustees;
   },
 );
 
@@ -26,11 +36,12 @@ export const POST = withApi(
     openapi: { tags: ['Pension'], summary: 'Add trustee', description: 'Add a new pension trustee' },
   },
   async ({ body, organizationId }) => {
+    const parsed = createTrusteeSchema.parse(body);
     const [trustee] = await db
       .insert(pensionTrustees)
-      .values({ ...(body as Record<string, unknown>), organizationId: organizationId! } as typeof pensionTrustees.$inferInsert)
+      .values({ ...parsed, organizationId: organizationId! })
       .returning();
-    return { data: trustee };
+    return trustee;
   },
 );
 

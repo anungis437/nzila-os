@@ -6,6 +6,15 @@ import { withApi } from '@/lib/api/framework';
 import { db } from '@/db/db';
 import { governancePolicies } from '@/db/schema';
 import { eq, desc, count } from 'drizzle-orm';
+import { z } from 'zod';
+
+const createPolicySchema = z.object({
+  title: z.string().min(1).max(1000),
+  category: z.enum(['hr', 'finance', 'operations', 'safety', 'governance', 'legal', 'other']).default('hr'),
+  description: z.string().max(5000).optional(),
+  content: z.string().max(50000).optional(),
+  status: z.enum(['active', 'draft', 'archived']).default('active'),
+});
 
 export const dynamic = 'force-dynamic';
 
@@ -25,7 +34,7 @@ export const GET = withApi(
       db.select().from(governancePolicies).where(eq(governancePolicies.organizationId, organizationId!)).orderBy(desc(governancePolicies.createdAt)).limit(limit).offset(offset),
     ]);
 
-    return { data: policies, pagination: { page, limit, total: totalResult[0]?.total ?? 0 } };
+    return policies;
   },
 );
 
@@ -35,8 +44,9 @@ export const POST = withApi(
     openapi: { tags: ['Governance'], summary: 'Create governance policy' },
   },
   async ({ body, organizationId }) => {
-    const [policy] = await db.insert(governancePolicies).values({ ...(body as Record<string, unknown>), organizationId: organizationId! } as typeof governancePolicies.$inferInsert).returning();
-    return { data: policy };
+    const parsed = createPolicySchema.parse(body);
+    const [policy] = await db.insert(governancePolicies).values({ ...parsed, organizationId: organizationId! }).returning();
+    return policy;
   },
 );
 

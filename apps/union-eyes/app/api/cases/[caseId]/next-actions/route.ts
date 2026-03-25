@@ -15,6 +15,7 @@ import { withRLSContext } from '@/lib/db/with-rls-context';
 import { db } from '@/db/db';
 import { claims } from '@/db/schema/claims-schema';
 import { logger } from '@/lib/logger';
+import { getUserRoleInOrganization } from '@/lib/organization-utils';
 
 export const dynamic = 'force-dynamic';
 
@@ -52,8 +53,9 @@ export async function GET(
     // Map DB status to CUPE vocabulary
     const cupeStatus = mapDbStatusToCupe(claim.status);
 
-    // TODO: resolve actual actor role from org membership
-    const actorRole = 'steward';
+    // Resolve actor role from org membership
+    const resolvedRole = await getUserRoleInOrganization(userId, orgId);
+    const actorRole = resolvedRole ?? 'member';
 
     const transitions = getAllowedTransitions(cupeStatus, actorRole);
 

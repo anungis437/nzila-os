@@ -98,7 +98,7 @@ router.post('/check-in', async (req: Request, res: Response) => {
     }
     res.status(500).json({
       success: false,
-      error: error.message || 'Failed to check in',
+      error: 'Failed to check in',
     });
   }
 });
@@ -145,7 +145,7 @@ router.post('/check-out', async (req: Request, res: Response) => {
     }
     res.status(500).json({
       success: false,
-      error: error.message || 'Failed to check out',
+      error: 'Failed to check out',
     });
   }
 });
@@ -177,7 +177,7 @@ router.get('/active', async (req: Request, res: Response) => {
   } catch (error) {
     res.status(500).json({
       success: false,
-      error: error.message || 'Failed to fetch active check-ins',
+      error: 'Failed to fetch active check-ins',
     });
   }
 });
@@ -232,7 +232,7 @@ router.get('/history', async (req: Request, res: Response) => {
   } catch (error) {
     res.status(500).json({
       success: false,
-      error: error.message || 'Failed to fetch attendance history',
+      error: 'Failed to fetch attendance history',
     });
   }
 });
@@ -287,7 +287,7 @@ router.get('/summary', async (req: Request, res: Response) => {
   } catch (error) {
     res.status(500).json({
       success: false,
-      error: error.message || 'Failed to fetch attendance summary',
+      error: 'Failed to fetch attendance summary',
     });
   }
 });
@@ -319,7 +319,7 @@ router.post('/generate-qr', async (req: Request, res: Response) => {
   } catch (error) {
     res.status(500).json({
       success: false,
-      error: error.message || 'Failed to generate QR code',
+      error: 'Failed to generate QR code',
     });
   }
 });
@@ -358,7 +358,7 @@ router.post('/validate-qr', async (req: Request, res: Response) => {
   } catch (error) {
     res.status(500).json({
       success: false,
-      error: error.message || 'Failed to validate QR code',
+      error: 'Failed to validate QR code',
     });
   }
 });
@@ -415,7 +415,7 @@ router.post('/coordinator-override', async (req: Request, res: Response) => {
     }
     res.status(500).json({
       success: false,
-      error: error.message || 'Failed to create manual attendance',
+      error: 'Failed to create manual attendance',
     });
   }
 });
@@ -453,7 +453,7 @@ router.post('/calculate-distance', async (req: Request, res: Response) => {
   } catch (error) {
     res.status(500).json({
       success: false,
-      error: error.message || 'Failed to calculate distance',
+      error: 'Failed to calculate distance',
     });
   }
 });

@@ -1,17 +1,17 @@
 /**
- * CRUD collection route for pendingProfilesTable
+ * CRUD collection route for pilot applications
  */
 import { crudRoutes } from '@/lib/api/crud-factory';
-import { pendingProfilesTable } from '@/db/schema';
+import { pilotApplications } from '@/db/schema';
 
 export const dynamic = 'force-dynamic';
 
 const { GET, POST } = crudRoutes({
-  table: pendingProfilesTable,
+  table: pilotApplications,
   pk: 'id',
-  tags: ["Auth"],
-  orgScoped: true,
-  readRole: 'member',
+  tags: ["Marketing"],
+  orgScoped: false,
+  readRole: 'steward',
   writeRole: 'member',
 });
 export { GET, POST };

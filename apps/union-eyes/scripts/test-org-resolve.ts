@@ -1,5 +1,5 @@
-import { db } from './db/db';
-import { organizations } from './db/schema';
+import { db } from '../db/db';
+import { organizations } from '../db/schema';
 import { eq } from 'drizzle-orm';
 
 async function main() {

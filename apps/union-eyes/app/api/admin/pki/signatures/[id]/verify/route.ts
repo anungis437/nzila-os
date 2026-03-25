@@ -10,6 +10,7 @@ import { verifySignature, verifyDocumentIntegrity } from '@/services/pki/verific
 import { z } from "zod";
 import { withRoleAuth } from '@/lib/api-auth-guard';
 import { ErrorCode, standardErrorResponse } from '@/lib/api/standardized-responses';
+import { logger } from '@/lib/logger';
 
 
 const adminPkiSignaturesVerifySchema = z.object({
@@ -60,8 +61,9 @@ export const POST = withRoleAuth('admin', async (request, context) => {
       }
 
     } catch (error) {
+      logger.error('Failed to verify signature', { error });
 return NextResponse.json(
-        { error: 'Failed to verify signature', details: (error as Error).message },
+        { error: 'Failed to verify signature' },
         { status: 500 }
       );
     }

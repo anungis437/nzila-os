@@ -21,13 +21,13 @@ const createRuleSchema = z.object({
   name: z.string().min(1).max(255),
   costType: z.string(),
   method: z.enum([
-    'per_capita',
-    'proportional_revenue',
-    'fixed_share',
-    'tiered',
-    'hybrid',
+    'per_member_count',
+    'per_active_user',
+    'per_case_volume',
+    'per_local_flat',
     'weighted_hybrid',
     'manual_override',
+    'subsidized',
   ]),
   parameters: z.record(z.unknown()).optional(),
   effectiveFrom: z.string().datetime().optional(),
@@ -68,7 +68,12 @@ export const POST = withMinRole('admin', async (request, context: BaseAuthContex
   try {
     const rule = await createAllocationRule({
       organizationId,
-      ...parsed.data,
+      name: parsed.data.name,
+      method: parsed.data.method,
+      weights: parsed.data.parameters as Record<string, number> | undefined,
+      effectiveFrom: parsed.data.effectiveFrom
+        ? new Date(parsed.data.effectiveFrom)
+        : new Date(),
       createdBy: userId,
     });
     return standardSuccessResponse(rule);

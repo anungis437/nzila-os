@@ -24,7 +24,7 @@ import { ROOT, walkSync, readContent, relPath, formatViolations, type Violation 
 // ── Configuration ───────────────────────────────────────────────────────────
 
 const UE_DIR = join(ROOT, 'apps', 'union-eyes')
-const DASHBOARD_DIR = join(UE_DIR, 'app', 'dashboard')
+const DASHBOARD_DIR = join(UE_DIR, 'app', '[locale]', 'dashboard')
 const API_DIR = join(UE_DIR, 'app', 'api')
 
 // ── Role Hierarchy (mirrors api-auth-guard.ts) ──────────────────────────────
@@ -144,6 +144,126 @@ const PAGE_ACCESS_MATRIX: PageRule[] = [
   { path: 'admin/dues/payments/[id]/page.tsx',           minRole: 'member',               description: 'Admin payment detail' },
   { path: 'admin/dues/billing-cycles/page.tsx',          minRole: 'member',               description: 'Billing cycle management' },
   { path: 'admin/dues/reports/page.tsx',                 minRole: 'member',               description: 'Financial reports' },
+
+  // ── Admin pages (layout gates admin role, level 95) ────────────────────
+  { path: 'admin/page.tsx',                              minRole: 'admin',                description: 'Admin dashboard overview' },
+  { path: 'admin/governance/page.tsx',                   minRole: 'admin',                description: 'Governance console (golden share, reserved matters)' },
+  { path: 'admin/members/page.tsx',                      minRole: 'support_manager',      description: 'Platform member management (hasMinRole support_manager)' },
+  { path: 'admin/organizations/page.tsx',                minRole: 'admin',                description: 'Organization hierarchy list' },
+  { path: 'admin/organizations/new/page.tsx',            minRole: 'admin',                description: 'Create new organization' },
+  { path: 'admin/organizations/[id]/page.tsx',           minRole: 'admin',                description: 'Organization detail view' },
+  { path: 'admin/organizations/[id]/edit/page.tsx',      minRole: 'admin',                description: 'Edit organization details' },
+  { path: 'admin/scheduled-reports/page.tsx',            minRole: 'admin',                description: 'Scheduled report management' },
+
+  // ── Admin rewards (layout gates admin, each sub-page also checks admin) ─
+  { path: 'admin/rewards/page.tsx',                      minRole: 'admin',                description: 'Recognition & rewards admin overview' },
+  { path: 'admin/rewards/analytics/page.tsx',            minRole: 'admin',                description: 'Rewards analytics & ROI metrics' },
+  { path: 'admin/rewards/awards/page.tsx',               minRole: 'admin',                description: 'Awards approval and issuance' },
+  { path: 'admin/rewards/budgets/page.tsx',              minRole: 'admin',                description: 'Budget envelope management' },
+  { path: 'admin/rewards/members/page.tsx',              minRole: 'admin',                description: 'Member wallet balances' },
+  { path: 'admin/rewards/programs/page.tsx',             minRole: 'admin',                description: 'Recognition program management' },
+  { path: 'admin/rewards/reports/page.tsx',              minRole: 'admin',                description: 'Rewards reports & insights' },
+  { path: 'admin/rewards/settings/page.tsx',             minRole: 'admin',                description: 'Program settings configuration' },
+  { path: 'admin/rewards/shopify/page.tsx',              minRole: 'admin',                description: 'Shopify integration config' },
+
+  // ── Member-facing pages (any authenticated member) ─────────────────────
+  { path: 'agreements/page.tsx',                         minRole: 'member',               description: 'Collective agreements browser' },
+  { path: 'claims/page.tsx',                             minRole: 'member',               description: 'Claims list' },
+  { path: 'claims/new/page.tsx',                         minRole: 'member',               description: 'File new claim' },
+  { path: 'claims/[id]/page.tsx',                        minRole: 'member',               description: 'Claim detail view' },
+  { path: 'compliance/page.tsx',                         minRole: 'member',               description: 'Compliance dashboard (client-side)' },
+  { path: 'dispatch/page.tsx',                           minRole: 'member',               description: 'Dispatch requests (client-side)' },
+  { path: 'education/page.tsx',                          minRole: 'member',               description: 'Education & training portal' },
+  { path: 'education/courses/page.tsx',                  minRole: 'member',               description: 'Course catalog' },
+  { path: 'education/my-courses/page.tsx',               minRole: 'member',               description: 'Enrolled courses & progress' },
+  { path: 'education/certificates/page.tsx',             minRole: 'member',               description: 'Earned certifications' },
+  { path: 'financial/page.tsx',                          minRole: 'member',               description: 'Financial overview' },
+  { path: 'member/timeline/[caseId]/page.tsx',           minRole: 'member',               description: 'Case timeline journey view' },
+  { path: 'movement-insights/page.tsx',                  minRole: 'member',               description: 'Anonymized cross-union trends' },
+  { path: 'movement-insights/export/page.tsx',           minRole: 'member',               description: 'Legislative brief export' },
+  { path: 'notifications/page.tsx',                      minRole: 'member',               description: 'Notifications console' },
+  { path: 'organizing/page.tsx',                         minRole: 'member',               description: 'Organizing dashboard' },
+  { path: 'organizing/[campaignId]/page.tsx',            minRole: 'member',               description: 'Campaign detail' },
+  { path: 'pension/page.tsx',                            minRole: 'member',               description: 'Pension member console' },
+  { path: 'pension/trustee/page.tsx',                    minRole: 'member',               description: 'Pension trustee portal' },
+  { path: 'profile/page.tsx',                            minRole: 'member',               description: 'User profile settings' },
+  { path: 'rewards/page.tsx',                            minRole: 'member',               description: 'Rewards wallet & balance' },
+  { path: 'rewards/history/page.tsx',                    minRole: 'member',               description: 'Credit transaction history' },
+  { path: 'rewards/leaderboard/page.tsx',                minRole: 'member',               description: 'Recognition leaderboard' },
+  { path: 'rewards/recognition/page.tsx',                minRole: 'member',               description: 'Peer nomination form' },
+  { path: 'rewards/redeem/page.tsx',                     minRole: 'member',               description: 'Redeem credits for products' },
+  { path: 'settings/page.tsx',                           minRole: 'member',               description: 'Dashboard settings (role-adaptive)' },
+  { path: 'settings/data-sharing/page.tsx',              minRole: 'member',               description: 'Data sharing consent management' },
+  { path: 'settings/sharing/page.tsx',                   minRole: 'member',               description: 'Organization sharing settings' },
+  { path: 'strike-fund/page.tsx',                        minRole: 'member',               description: 'Strike fund dashboard' },
+  { path: 'strike-fund/[fundId]/page.tsx',               minRole: 'member',               description: 'Strike fund detail' },
+  { path: 'targets/page.tsx',                            minRole: 'member',               description: 'Targets console' },
+  { path: 'voting/page.tsx',                             minRole: 'member',               description: 'Voting & elections (client-side)' },
+  { path: 'organizer/impact/page.tsx',                   minRole: 'member',               description: 'Organizer impact dashboard (client-side)' },
+  { path: 'insights/page.tsx',                           minRole: 'member',               description: 'AI insights (client-side)' },
+
+  // ── Health & safety (client-side pages) ────────────────────────────────
+  { path: 'health-safety/page.tsx',                      minRole: 'member',               description: 'H&S dashboard overview (client-side)' },
+  { path: 'health-safety/hazards/page.tsx',              minRole: 'member',               description: 'Hazard reports (client-side)' },
+  { path: 'health-safety/incidents/page.tsx',            minRole: 'member',               description: 'Incident management (client-side)' },
+  { path: 'health-safety/incidents/new/page.tsx',        minRole: 'member',               description: 'Report new incident (client-side)' },
+  { path: 'health-safety/inspections/page.tsx',          minRole: 'member',               description: 'Inspection tracking (client-side)' },
+  { path: 'health-safety/training/page.tsx',             minRole: 'member',               description: 'Safety training compliance (client-side)' },
+
+  // ── Steward-level pages (level 50) ─────────────────────────────────────
+  { path: 'analytics/page.tsx',                          minRole: 'steward',              description: 'Analytics overview' },
+  { path: 'clause-library/page.tsx',                     minRole: 'steward',              description: 'Shared clause library' },
+  { path: 'communications/page.tsx',                     minRole: 'steward',              description: 'Communications hub' },
+  { path: 'communications/sms/page.tsx',                 minRole: 'steward',              description: 'SMS communications' },
+  { path: 'cross-union-analytics/page.tsx',              minRole: 'steward',              description: 'Cross-union analytics' },
+  { path: 'grievances/page.tsx',                         minRole: 'steward',              description: 'Grievances console' },
+  { path: 'grievances/[id]/page.tsx',                    minRole: 'steward',              description: 'Grievance detail' },
+  { path: 'members/page.tsx',                            minRole: 'steward',              description: 'Members directory' },
+  { path: 'members/new/page.tsx',                        minRole: 'steward',              description: 'Create new member' },
+  { path: 'members/[id]/page.tsx',                       minRole: 'steward',              description: 'Member detail' },
+  { path: 'pension/admin/page.tsx',                      minRole: 'steward',              description: 'Pension admin console' },
+  { path: 'precedents/page.tsx',                         minRole: 'steward',              description: 'Precedents library' },
+  { path: 'workbench/page.tsx',                          minRole: 'steward',              description: 'LRO workbench — case queue' },
+
+  // ── Officer-level pages (level 60) ─────────────────────────────────────
+  { path: 'audits/page.tsx',                             minRole: 'officer',              description: 'Audits & compliance' },
+  { path: 'governance/page.tsx',                         minRole: 'officer',              description: 'Governance dashboard' },
+  { path: 'pilot/page.tsx',                              minRole: 'officer',              description: 'Pilot program health metrics' },
+
+  // ── Chief steward (level 70) ───────────────────────────────────────────
+  { path: 'stewards/page.tsx',                           minRole: 'chief_steward',        description: 'Steward supervision dashboard' },
+
+  // ── Executive-level pages (level 85) ───────────────────────────────────
+  { path: 'executive/page.tsx',                          minRole: 'vice_president',       description: 'Executive dashboard' },
+
+  // ── CLC pages (clc_staff access) ──────────────────────────────────────
+  { path: 'clc/page.tsx',                                minRole: 'clc_staff',            description: 'CLC executive dashboard' },
+  { path: 'clc/affiliates/page.tsx',                     minRole: 'clc_staff',            description: 'CLC affiliates management' },
+  { path: 'clc/compliance/page.tsx',                     minRole: 'clc_staff',            description: 'CLC compliance tracking' },
+  { path: 'clc/staff/page.tsx',                          minRole: 'clc_staff',            description: 'CLC staff operations' },
+
+  // ── Federation pages (fed_staff access) ────────────────────────────────
+  { path: 'federation/page.tsx',                         minRole: 'fed_staff',            description: 'Federation executive dashboard' },
+  { path: 'federation/affiliates/page.tsx',              minRole: 'fed_staff',            description: 'Federation affiliates list' },
+  { path: 'federation/remittances/page.tsx',             minRole: 'fed_staff',            description: 'Federation remittances' },
+
+  // ── Platform-level pages (Nzila Ventures operations) ───────────────────
+  { path: 'analytics-admin/page.tsx',                    minRole: 'data_analyst',         description: 'Platform analytics' },
+  { path: 'billing-admin/page.tsx',                      minRole: 'billing_specialist',   description: 'Billing admin' },
+  { path: 'compliance-admin/page.tsx',                   minRole: 'compliance_manager',   description: 'Compliance & audit admin' },
+  { path: 'content/page.tsx',                            minRole: 'content_manager',      description: 'Content management' },
+  { path: 'content/[slug]/page.tsx',                     minRole: 'member',               description: 'Content detail view' },
+  { path: 'customer-success/page.tsx',                   minRole: 'customer_success_director', description: 'Customer success dashboard' },
+  { path: 'data-source/page.tsx',                        minRole: 'integration_manager',  description: 'Data source dashboard' },
+  { path: 'integrations/page.tsx',                       minRole: 'integration_manager',  description: 'Integrations dashboard' },
+  { path: 'operations/page.tsx',                         minRole: 'platform_lead',        description: 'Platform operations' },
+  { path: 'sector-analytics/page.tsx',                   minRole: 'platform_lead',        description: 'Sector analytics' },
+  { path: 'security/page.tsx',                           minRole: 'security_manager',     description: 'Security events dashboard' },
+  { path: 'settings/integrations/page.tsx',              minRole: 'integration_manager',  description: 'Enterprise integration settings' },
+  { path: 'support/page.tsx',                            minRole: 'support_agent',        description: 'Support operations' },
+
+  // ── Debug (dev-only, gated by NODE_ENV) ────────────────────────────────
+  { path: 'debug/page.tsx',                              minRole: 'admin',                description: 'Debug info (dev-only)' },
 ]
 
 // ── API routes backing dashboard pages ──────────────────────────────────────

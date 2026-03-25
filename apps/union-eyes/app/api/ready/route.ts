@@ -44,7 +44,7 @@ export async function GET() {
     return NextResponse.json({
       ready: false,
       timestamp: new Date().toISOString(),
-      message: `Readiness check failed: ${error instanceof Error ? error.message : String(error)}`,
+      message: 'Readiness check failed',
     }, { status: 503 });
   }
 }

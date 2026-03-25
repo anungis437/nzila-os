@@ -106,3 +106,42 @@ export type NewFailedLoginAttempt = typeof failedLoginAttempts.$inferInsert;
 export type RateLimitEvent = typeof rateLimitEvents.$inferSelect;
 export type NewRateLimitEvent = typeof rateLimitEvents.$inferInsert;
 
+// ============================================================================
+// PUBLIC SCHEMA SECURITY TABLES (console security dashboard)
+// ============================================================================
+import { pgTable, numeric } from 'drizzle-orm/pg-core';
+
+export const publicSecurityEvents = pgTable('security_events', {
+  id: uuid('id').primaryKey().defaultRandom(),
+  organizationId: uuid('organization_id').notNull().references(() => organizations.id, { onDelete: 'restrict' }),
+  eventType: text('event_type').notNull(),
+  severity: text('severity').notNull().default('low'),
+  status: text('status').notNull().default('open'),
+  sourceIp: text('source_ip'),
+  userEmail: text('user_email'),
+  userAgent: text('user_agent'),
+  description: text('description').notNull(),
+  resource: text('resource'),
+  actionTaken: text('action_taken'),
+  resolvedBy: text('resolved_by'),
+  resolvedAt: timestamp('resolved_at', { withTimezone: true }),
+  metadata: jsonb('metadata').$type<Record<string, unknown>>().default({}),
+  createdAt: timestamp('created_at', { withTimezone: true }).defaultNow().notNull(),
+  updatedAt: timestamp('updated_at', { withTimezone: true }).defaultNow().notNull(),
+});
+
+export const securityPostureChecks = pgTable('security_posture_checks', {
+  id: uuid('id').primaryKey().defaultRandom(),
+  organizationId: uuid('organization_id').notNull().references(() => organizations.id, { onDelete: 'restrict' }),
+  checkName: text('check_name').notNull(),
+  category: text('category').notNull(),
+  status: text('status').notNull().default('pass'),
+  score: numeric('score'),
+  details: text('details'),
+  lastCheckedAt: timestamp('last_checked_at', { withTimezone: true }).defaultNow().notNull(),
+  createdAt: timestamp('created_at', { withTimezone: true }).defaultNow().notNull(),
+});
+
+export type PublicSecurityEvent = typeof publicSecurityEvents.$inferSelect;
+export type SecurityPostureCheck = typeof securityPostureChecks.$inferSelect;
+

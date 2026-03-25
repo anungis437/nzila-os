@@ -25,7 +25,7 @@ export const GET = withApi(
     const q = url.searchParams.get('q') || '';
 
     if (!orgId) {
-      return { success: true, data: { members: [] } };
+      return { members: [] };
     }
 
     return withSystemContext(async () => {
@@ -59,7 +59,7 @@ export const GET = withApi(
         membershipNumber: m.membershipNumber || '',
       }));
 
-      return { success: true, data: { members } };
+      return { members };
     });
   },
 );

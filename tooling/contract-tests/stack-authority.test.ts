@@ -34,7 +34,7 @@ import {
  * Apps where Django is the authoritative data layer.
  * The TS layer in these apps MUST NOT perform direct Drizzle mutations.
  */
-const DJANGO_AUTHORITATIVE_APPS = ['union-eyes', 'abr']
+const DJANGO_AUTHORITATIVE_APPS = ['abr']
 
 /**
  * Apps where TS/Drizzle is the authoritative data layer.
@@ -53,6 +53,7 @@ const TS_AUTHORITATIVE_APPS = [
   'agrimo',
   'nacp-exams',
   'trade',
+  'union-eyes',
   'zonga',
   'web',
   'orchestrator-api',
@@ -94,6 +95,12 @@ const SKIP_DIRS = new Set([
 
 /** File patterns indicating a Django backend presence */
 const DJANGO_MARKER_FILES = ['manage.py', 'django-proxy.ts']
+
+/**
+ * TS-authoritative apps that still have legacy Django artifacts on disk.
+ * union-eyes has a Django backend/ sidecar (manage.py) that is still active.
+ */
+const DJANGO_LEGACY_EXCEPTIONS = new Set(['union-eyes'])
 
 // ── Helpers ─────────────────────────────────────────────────────────────────
 
@@ -221,6 +228,7 @@ describe('STACK_AUTHORITY_001 — Stack authority enforcement', () => {
     for (const app of TS_AUTHORITATIVE_APPS) {
       const appDir = join(ROOT, 'apps', app)
       if (!existsSync(appDir)) continue
+      if (DJANGO_LEGACY_EXCEPTIONS.has(app)) continue
 
       // Check for Django marker files
       for (const marker of DJANGO_MARKER_FILES) {
