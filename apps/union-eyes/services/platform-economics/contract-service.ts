@@ -17,8 +17,10 @@ import {
   type NewCommercialContract,
   type NewContractLineItem,
   type NewOrgEntitlement,
+  type ContractLineItem,
+  type OrgEntitlement,
 } from '@/db/schema';
-import { eq, and, lte, gte, isNull, or, sql, desc } from 'drizzle-orm';
+import { eq, and, lte, gte, isNull, or, sql, desc, inArray } from 'drizzle-orm';
 import { auditLog, AuditEventType, AuditSeverity } from '@/lib/audit-logger';
 import { v4 as uuidv4 } from 'uuid';
 
@@ -108,7 +110,7 @@ export async function createContract(
       .returning();
 
     // Insert line items + provision entitlements
-    const lines = [];
+    const lines: ContractLineItem[] = [];
     if (input.lineItems?.length) {
       for (const line of input.lineItems) {
         const [inserted] = await tx
@@ -183,7 +185,7 @@ export async function activateContract(
       .where(eq(contractLineItems.contractId, contractId));
 
     // Provision entitlements (upsert pattern)
-    const entitlements = [];
+    const entitlements: OrgEntitlement[] = [];
     for (const line of lines) {
       const [ent] = await tx
         .insert(orgEntitlements)
@@ -282,7 +284,7 @@ export async function terminateContract(
         .where(
           and(
             eq(orgEntitlements.organizationId, contract.organizationId),
-            sql`${orgEntitlements.contractLineItemId} = ANY(${lineIds})`,
+            inArray(orgEntitlements.contractLineItemId, lineIds),
           ),
         );
     }

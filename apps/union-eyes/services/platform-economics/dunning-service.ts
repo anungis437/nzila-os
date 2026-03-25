@@ -19,7 +19,7 @@ import {
   subscriptionEventsLog,
   orgSubscriptions,
 } from '@/db/schema';
-import { eq, and, lte, asc, sql } from 'drizzle-orm';
+import { eq, and, lte, asc, sql, inArray } from 'drizzle-orm';
 import { auditLog, AuditEventType, AuditSeverity } from '@/lib/audit-logger';
 
 // ============================================================================
@@ -89,7 +89,7 @@ export async function openDunningCase(input: OpenDunningInput): Promise<string> 
     .where(
       and(
         eq(dunningCases.subscriptionId, input.subscriptionId),
-        sql`${dunningCases.status} IN ('open', 'retrying', 'escalated')`,
+        inArray(dunningCases.status, ['open', 'retrying', 'escalated']),
       ),
     )
     .limit(1);
@@ -284,12 +284,15 @@ export async function resolveDunningCase(
   await auditLog({
     eventType: AuditEventType.BILLING_UPDATE,
     severity: AuditSeverity.MEDIUM,
-    actorId: resolvedBy ?? 'system',
+    userId: resolvedBy ?? 'system',
     organizationId: dCase.organizationId,
-    resourceType: 'dunning_case',
+    resource: 'dunning_case',
     resourceId: caseId,
-    description: `Dunning case resolved — subscription ${dCase.subscriptionId} reactivated`,
-    metadata: { subscriptionId: dCase.subscriptionId },
+    action: 'dunning_case_resolved',
+    metadata: {
+      subscriptionId: dCase.subscriptionId,
+      detail: `Dunning case resolved — subscription ${dCase.subscriptionId} reactivated`,
+    },
   });
 
   return dCase;
@@ -305,7 +308,7 @@ export async function processDueDunningCases(): Promise<StepResult[]> {
     .from(dunningCases)
     .where(
       and(
-        sql`${dunningCases.status} IN ('open', 'retrying', 'escalated')`,
+        inArray(dunningCases.status, ['open', 'retrying', 'escalated']),
         lte(dunningCases.nextRetryAt, new Date()),
       ),
     );

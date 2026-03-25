@@ -75,7 +75,7 @@ export async function PATCH(
     // 3. Load claim in RLS context (with row lock to prevent TOCTOU race)
     const result = await withRLSContext(async (tx) => {
       const [claim] = await wrapSchemaQuery(
-        () => tx
+        async () => await tx
           .select({
             claimId: claims.claimId,
             status: claims.status,

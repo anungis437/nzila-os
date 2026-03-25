@@ -7,6 +7,8 @@
  * Originated from tooling/db/schema-error.ts — imported here for application use.
  */
 
+import { logger } from '@/lib/logger';
+
 export interface SchemaErrorContext {
   table: string
   column?: string
@@ -74,7 +76,7 @@ export async function wrapSchemaQuery<T>(
         `Schema mismatch on table "${context.table}": ${message}`,
         context,
       )
-      console.error('[SchemaError]', JSON.stringify(schemaErr.toStructuredLog()))
+      logger.error('[SchemaError]', schemaErr.toStructuredLog())
       throw schemaErr
     }
 

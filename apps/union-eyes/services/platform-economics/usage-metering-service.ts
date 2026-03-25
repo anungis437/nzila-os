@@ -15,6 +15,7 @@ import {
   usageAggregates,
   type NewUsageMeter,
   type NewUsageEvent,
+  type UsageAggregate,
 } from '@/db/schema';
 import { eq, and, between, sql, desc, gte, lte } from 'drizzle-orm';
 import { auditLog, AuditEventType, AuditSeverity } from '@/lib/audit-logger';
@@ -213,7 +214,7 @@ export async function closeAggregatesForPeriod(
       ),
     );
 
-  const closed = [];
+  const closed: UsageAggregate[] = [];
   for (const agg of openAggs) {
     // Close the aggregate
     const [updated] = await db

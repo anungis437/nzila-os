@@ -52,6 +52,7 @@ export enum AuditEventType {
   PAYMENT_CREATED = 'payment.created',
   PAYMENT_PROCESSED = 'payment.processed',
   PAYMENT_FAILED = 'payment.failed',
+  BILLING_UPDATE = 'billing.update',
   DUES_PAID = 'dues.paid',
   STRIKE_FUND_DISBURSEMENT = 'strike_fund.disbursement',
   

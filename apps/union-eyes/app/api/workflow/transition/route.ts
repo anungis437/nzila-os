@@ -71,7 +71,7 @@ export async function POST(request: NextRequest) {
       }
 
       const [claim] = await wrapSchemaQuery(
-        () => tx
+        async () => await tx
           .select()
           .from(claims)
           .where(and(...claimConditions))
