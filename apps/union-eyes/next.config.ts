@@ -333,6 +333,15 @@ const nextConfig: NextConfig = {
   
   // Webpack optimizations
   webpack: (config, { dev, isServer }) => {
+    // swagger-ui-react imports `immutable` with a default import, but immutable v5
+    // ESM build has no default export. Force CJS build for webpack compatibility.
+    // (Turbopack uses resolveAlias above; this handles Next.js production builds.)
+    config.resolve = config.resolve || {};
+    config.resolve.alias = {
+      ...(config.resolve.alias || {}),
+      immutable: require.resolve('immutable/dist/immutable.js'),
+    };
+
     // Reduce memory usage
     config.infrastructureLogging = {
       level: 'error',

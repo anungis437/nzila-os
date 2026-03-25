@@ -219,6 +219,7 @@ jobs:
       - name: Run pip-audit [BLOCKING on CRITICAL]
         # Fail immediately on any vulnerability found in requirements.
         # No || true — this MUST block CI.
+        # CVE-2026-4539: pygments (transitive via ipython) — no fix version available yet.
         working-directory: tech-repo-scaffold/django-backbone
         run: |
           pip-audit \
@@ -226,7 +227,8 @@ jobs:
             --requirement requirements/development.txt \
             --format json \
             --output abr-audit-report.json \
-            --skip-editable
+            --skip-editable \
+            --ignore-vuln CVE-2026-4539
           echo "pip-audit passed (no vulnerabilities)"
 
       - name: Capture full pip-audit report (non-blocking, for artifact)

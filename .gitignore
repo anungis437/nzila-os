@@ -47,10 +47,10 @@ wheels/
 *.egg
 MANIFEST
 
-# Virtual environments
-venv/
-env/
-ENV/
+# Virtual environments (root-level only — /env/ prevents matching tooling/env/)
+/venv/
+/env/
+/ENV/
 .venv
 
 # ----- IDE ------

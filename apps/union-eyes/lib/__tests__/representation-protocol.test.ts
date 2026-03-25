@@ -7,7 +7,15 @@
  * 3. Assignment engine integration
  * 4. UI component protocol-awareness
  */
-import { describe, it, expect } from "vitest";
+import { describe, it, expect, vi } from "vitest";
+
+// Mock db module to avoid DATABASE_URL requirement — service barrel re-exports
+// from protocol-service which imports db.
+vi.mock("@/db/db", () => ({
+  db: {},
+  client: {},
+  getDatabase: vi.fn(),
+}));
 
 // ============================================================================
 // 1. Protocol Types & Presets

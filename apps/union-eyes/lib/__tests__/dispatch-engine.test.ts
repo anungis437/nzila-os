@@ -4,7 +4,15 @@
  * Tests the dispatch priority scoring, candidate ranking,
  * and rule-based worker assignment logic.
  */
-import { describe, it, expect } from "vitest";
+import { describe, it, expect, vi } from "vitest";
+
+// Mock db module to avoid DATABASE_URL requirement for pure-logic tests
+vi.mock("@/db/db", () => ({
+  db: {},
+  client: {},
+  getDatabase: vi.fn(),
+}));
+
 import {
   calculateDispatchPriority,
   type MemberCandidate,

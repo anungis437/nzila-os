@@ -8,7 +8,14 @@
  * getBasisValueForMethod) are private in allocation-engine.ts, so we
  * mirror them here for isolated unit testing.
  */
-import { describe, it, expect } from 'vitest';
+import { describe, it, expect, vi } from 'vitest';
+
+// Mock db module to avoid DATABASE_URL requirement for pure-logic tests
+vi.mock('@/db/db', () => ({
+  db: {},
+  client: {},
+  getDatabase: vi.fn(),
+}));
 
 // ---------------------------------------------------------------------------
 // Import pure functions that don't need DB
