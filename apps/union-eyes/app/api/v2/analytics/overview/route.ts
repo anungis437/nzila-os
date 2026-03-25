@@ -9,7 +9,6 @@ import { grievances } from '@/db/schema';
 import { claims } from '@/db/schema';
 import { organizationMembers } from '@/db/schema';
 import { sql, gte, and, inArray } from 'drizzle-orm';
-import { withSystemContext } from '@/lib/db/with-rls-context';
 
 export const dynamic = 'force-dynamic';
 
@@ -74,9 +73,8 @@ export const GET = withApi(
     const startDate = getStartDate(range);
     const prevStart = getPreviousPeriodStart(range);
 
-    return withSystemContext(async () => {
-      // --- Grievance counts ---
-      const grievanceDateFilter = startDate
+    // --- Grievance counts ---
+    const grievanceDateFilter = startDate
         ? gte(grievances.createdAt, startDate)
         : undefined;
       const prevGrievanceDateFilter = prevStart && startDate
@@ -324,6 +322,5 @@ export const GET = withApi(
       };
 
       return { metrics, chartData, categoryBreakdown, topStewards, quickStats };
-    });
   },
 );

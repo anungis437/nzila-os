@@ -29,5 +29,10 @@ export * from './transfer-pricing';
 export * from './billing-config';
 export * from './pension';
 
+// DAPL — Dues-Aware Platform Ledger (Layers 1-3)
+export * from './platform-billing';
+export * from './platform-ledger';
+export * from './allocation';
+
 // Explicit re-exports to resolve ambiguities
 export { paymentProcessorEnum } from './payments';
