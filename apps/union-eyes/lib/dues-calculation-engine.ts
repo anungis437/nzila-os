@@ -273,7 +273,8 @@ return 0;
   private static replaceFormulaVariables(formula: string, context: Record<string, number>): string {
     let substituted = formula;
     Object.entries(context).forEach(([key, value]) => {
-      substituted = substituted.replace(new RegExp(`\\b${key}\\b`, 'g'), value.toString());
+      const escaped = key.replace(/[.*+?^${}()|[\]\\]/g, '\\$&');
+      substituted = substituted.replace(new RegExp(`\\b${escaped}\\b`, 'g'), value.toString());
     });
     return substituted;
   }

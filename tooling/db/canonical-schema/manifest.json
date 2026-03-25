@@ -1,0 +1,60 @@
+{
+  "$schema": "canonical-schema-manifest-v1",
+  "description": "Critical tables and columns that MUST exist in the Drizzle ORM schema. Verified on every CI run. Adding a table here makes its presence a hard CI gate.",
+  "tables": {
+    "dues_transactions": {
+      "source": "apps/union-eyes/db/schema/domains/finance/dues.ts",
+      "requiredColumns": [
+        "id", "organization_id", "member_id", "transaction_type", "amount",
+        "period_start", "period_end", "due_date", "status",
+        "dues_amount", "cope_amount", "pac_amount", "strike_fund_amount",
+        "late_fee_amount", "adjustment_amount",
+        "processor_type", "processor_payment_id", "processor_customer_id",
+        "created_at", "updated_at"
+      ]
+    },
+    "billing_accounts": {
+      "source": "apps/union-eyes/db/schema/domains/finance/platform-billing.ts",
+      "requiredColumns": [
+        "id", "organization_id", "display_name", "billing_email",
+        "currency", "status", "net_terms_days", "created_at", "updated_at"
+      ]
+    },
+    "platform_invoices": {
+      "source": "apps/union-eyes/db/schema/domains/finance/platform-billing.ts",
+      "requiredColumns": [
+        "id", "billing_account_id", "organization_id", "invoice_number",
+        "issue_date", "due_date", "subtotal", "tax_amount", "total_amount",
+        "amount_paid", "currency", "status", "created_at"
+      ]
+    },
+    "platform_payments": {
+      "source": "apps/union-eyes/db/schema/domains/finance/platform-billing.ts",
+      "requiredColumns": [
+        "id", "billing_account_id", "organization_id", "amount",
+        "currency", "status", "method", "created_at"
+      ]
+    },
+    "audit_events": {
+      "source": "packages/db/src/schema/operations.ts",
+      "requiredColumns": [
+        "id", "org_id", "actor_clerk_user_id", "action",
+        "target_type", "hash", "created_at"
+      ]
+    },
+    "documents": {
+      "source": "packages/db/src/schema/operations.ts",
+      "requiredColumns": [
+        "id", "org_id", "category", "title", "sha256",
+        "uploaded_by", "created_at"
+      ]
+    },
+    "commerce_refunds": {
+      "source": "packages/db/src/schema/commerce.ts",
+      "requiredColumns": [
+        "id", "org_id", "payment_id", "invoice_id", "amount",
+        "reason", "status", "created_at"
+      ]
+    }
+  }
+}

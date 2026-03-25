@@ -1,5 +1,5 @@
-import { db } from './db/db';
-import { reports } from './db/schema';
+import { db } from '../db/db';
+import { reports } from '../db/schema';
 import { desc, count } from 'drizzle-orm';
 
 async function main() {

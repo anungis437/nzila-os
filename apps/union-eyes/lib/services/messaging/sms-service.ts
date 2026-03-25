@@ -318,7 +318,7 @@ export class MockSMSAdapter implements SMSProvider {
   private sentMessages: SMSMessage[] = [];
 
   async send(message: SMSMessage): Promise<SMSResult> {
-    logger.info('[MOCK SMS] Sending:', { to: message.to, body: message.body });
+    logger.info('[MOCK SMS] Sending:', { to: '[REDACTED]', bodyLength: message.body.length });
     this.sentMessages.push(message);
     
     return {

@@ -15,8 +15,8 @@ export const POST = withApi(
     },
   },
   async ({ request }) => {
-    const body = await request.json().catch(() => ({}));
-    return { data: { action: 'switch', status: 'accepted', ...body } };
+    await request.json().catch(() => ({}));
+    return { action: 'switch', status: 'accepted' };
   },
 );
 
@@ -30,6 +30,6 @@ export const GET = withApi(
     },
   },
   async () => {
-    return { data: [] };
+    return [];
   },
 );

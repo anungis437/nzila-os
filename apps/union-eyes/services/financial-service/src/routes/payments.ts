@@ -11,10 +11,9 @@
  * Week 7-8 Implementation
  */
 
-import { Router, Request, Response } from 'express';
+import express, { Router, Request, Response } from 'express';
 import { z } from 'zod';
 import * as PaymentService from '../services/payment-processing';
-import { logger } from '../../../lib/logger';
 import { logger } from '@/lib/logger';
 
 const router = Router();
@@ -281,12 +280,22 @@ router.post('/donations/confirm', async (req: Request, res: Response) => {
 
 /**
  * POST /api/payments/webhook/stripe
- * Handle Stripe webhook events
+ * Handle Stripe webhook events with signature verification
  */
-router.post('/webhook/stripe', async (req: Request, res: Response) => {
+router.post('/webhook/stripe', express.raw({ type: 'application/json' }), async (req: Request, res: Response) => {
   try {
     const signature = req.headers['stripe-signature'] as string;
     const webhookSecret = process.env.STRIPE_WEBHOOK_SECRET || '';
+
+    if (!signature) {
+      res.status(400).json({ success: false, error: 'Missing stripe-signature header' });
+      return;
+    }
+
+    if (!webhookSecret) {
+      res.status(500).json({ success: false, error: 'STRIPE_WEBHOOK_SECRET not configured' });
+      return;
+    }
 
     await PaymentService.processStripeWebhook(
       req.body,

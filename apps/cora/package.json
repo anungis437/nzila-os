@@ -27,7 +27,7 @@
     "@nzila/evidence": "workspace:*",
     "@nzila/ui": "workspace:*",
     "@nzila/db": "workspace:*",
-    "next": "16.1.6",
+    "next": "16.1.7",
     "react": "19.2.4",
     "react-dom": "19.2.4",
     "framer-motion": "^11.3.30",

@@ -233,3 +233,25 @@ export type IntegrationWebhook = typeof integrationWebhooks.$inferSelect;
 export type NewIntegrationWebhook = typeof integrationWebhooks.$inferInsert;
 export type WebhookDelivery = typeof webhookDeliveries.$inferSelect;
 export type NewWebhookDelivery = typeof webhookDeliveries.$inferInsert;
+
+// ============================================================================
+// INTEGRATION PARTNERS (console dashboard)
+// ============================================================================
+
+export const integrationPartners = pgTable('integration_partners', {
+  id: uuid('id').primaryKey().defaultRandom(),
+  organizationId: uuid('organization_id').notNull().references(() => organizations.id, { onDelete: 'restrict' }),
+  name: varchar('name', { length: 255 }).notNull(),
+  provider: varchar('provider', { length: 100 }).notNull(),
+  category: varchar('category', { length: 100 }).notNull(),
+  status: varchar('status', { length: 50 }).notNull().default('connected'),
+  description: text('description'),
+  icon: varchar('icon', { length: 500 }),
+  config: jsonb('config').$type<Record<string, unknown>>().default({}),
+  lastSyncAt: timestamp('last_sync_at', { withTimezone: true }),
+  createdAt: timestamp('created_at', { withTimezone: true }).defaultNow().notNull(),
+  updatedAt: timestamp('updated_at', { withTimezone: true }).defaultNow().notNull(),
+});
+
+export type IntegrationPartner = typeof integrationPartners.$inferSelect;
+export type NewIntegrationPartner = typeof integrationPartners.$inferInsert;

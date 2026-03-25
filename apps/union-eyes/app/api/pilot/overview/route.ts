@@ -150,7 +150,9 @@ export async function GET() {
 
       return NextResponse.json({ organizations: orgMetrics });
     });
-  } catch {
+  } catch (error) {
+    const { logger: log } = await import('@/lib/logger');
+    log.error('Pilot overview query failed', { error: error instanceof Error ? error.message : 'Unknown' });
     return standardErrorResponse(
       ErrorCode.INTERNAL_ERROR,
       "Failed to load pilot overview"

@@ -21,7 +21,7 @@ import {
   subscriptionPlans,
   type NewBillingAccount,
 } from '@/db/schema';
-import { eq, and, desc, sql } from 'drizzle-orm';
+import { eq, and, desc, sql, inArray } from 'drizzle-orm';
 import { auditLog, AuditEventType, AuditSeverity } from '@/lib/audit-logger';
 import { appendLedgerEntry } from './ledger-service';
 import { v4 as uuidv4 } from 'uuid';
@@ -507,11 +507,21 @@ export async function getInvoiceWithLineItems(invoiceId: string) {
   return { ...invoice, lineItems };
 }
 
-export async function getPayments(organizationId: string, limit = 50) {
+export async function getPayments(organizationId: string, invoiceId?: string, limit = 50) {
+  const conditions = [eq(platformPayments.organizationId, organizationId)];
+
+  if (invoiceId) {
+    const paymentIds = db
+      .select({ paymentId: paymentAllocations.paymentId })
+      .from(paymentAllocations)
+      .where(eq(paymentAllocations.invoiceId, invoiceId));
+    conditions.push(inArray(platformPayments.id, paymentIds));
+  }
+
   return db
     .select()
     .from(platformPayments)
-    .where(eq(platformPayments.organizationId, organizationId))
+    .where(and(...conditions))
     .orderBy(desc(platformPayments.createdAt))
     .limit(limit);
 }

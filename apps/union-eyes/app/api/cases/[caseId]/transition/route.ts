@@ -18,6 +18,8 @@ import { claims } from '@/db/schema/claims-schema';
 import { claimUpdates } from '@/db/schema/claims-schema';
 import { auditDataMutation } from '@/lib/audit-logger';
 import { logger } from '@/lib/logger';
+import { getUserRoleInOrganization } from '@/lib/organization-utils';
+import { wrapSchemaQuery } from '@/lib/schema-error';
 
 export const dynamic = 'force-dynamic';
 
@@ -70,25 +72,33 @@ export async function PATCH(
 
     const { targetStatus, reason } = parsed.data;
 
-    // 3. Load claim in RLS context
+    // 3. Load claim in RLS context (with row lock to prevent TOCTOU race)
     const result = await withRLSContext(async (tx) => {
-      const [claim] = await tx
-        .select({
-          claimId: claims.claimId,
-          status: claims.status,
-          priority: claims.priority,
-          organizationId: claims.organizationId,
-          assignedTo: claims.assignedTo,
-        })
-        .from(claims)
-        .where(eq(claims.claimId, caseId))
-        .limit(1);
+      const [claim] = await wrapSchemaQuery(
+        () => tx
+          .select({
+            claimId: claims.claimId,
+            status: claims.status,
+            priority: claims.priority,
+            organizationId: claims.organizationId,
+            assignedTo: claims.assignedTo,
+          })
+          .from(claims)
+          .where(eq(claims.claimId, caseId))
+          .limit(1)
+          .for('update'),
+        { table: 'claims', route: '/api/cases/[caseId]/transition', query: 'SELECT FOR UPDATE' }
+      );
 
       if (!claim) {
         return { found: false as const };
       }
 
-      // 4. Validate FSM transition
+      // 4. Resolve actor role from org membership
+      const resolvedRole = await getUserRoleInOrganization(userId, claim.organizationId);
+      const actorRole = resolvedRole ?? 'member';
+
+      // 5. Validate FSM transition
       // Map the DB status to CUPE vocabulary status
       const currentStatus = mapDbStatusToCupe(claim.status);
       const cupeTarget = targetStatus; // Already uses CUPE vocabulary IDs
@@ -97,7 +107,7 @@ export async function PATCH(
         caseId,
         currentStatus,
         targetStatus: cupeTarget,
-        actorRole: 'steward', // TODO: resolve actual role from org membership
+        actorRole,
         reason,
       });
 

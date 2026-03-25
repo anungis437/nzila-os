@@ -58,14 +58,12 @@ export const GET = withApi(
     const paged = members.slice(startIndex - 1, startIndex - 1 + count);
 
     return {
-      data: {
         schemas: ['urn:ietf:params:scim:api:messages:2.0:ListResponse'],
         totalResults: members.length,
         startIndex,
         itemsPerPage: paged.length,
         Resources: paged.map(toScimUser),
-      },
-    };
+      };
   },
 );
 
@@ -107,6 +105,6 @@ export const POST = withApi(
       })
       .returning();
 
-    return { data: toScimUser(created) };
+    return toScimUser(created);
   },
 );

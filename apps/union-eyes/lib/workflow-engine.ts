@@ -201,12 +201,13 @@ export async function updateClaimStatus(
   }
 
   try {
-    // Get current claim using provided transaction
+    // Get current claim using provided transaction (row-locked to prevent TOCTOU race)
     const [claim] = await tx
       .select()
       .from(claims)
       .where(eq(claims.claimNumber, claimNumber))
-      .limit(1);
+      .limit(1)
+      .for('update');
 
     if (!claim) {
       return { success: false, error: "Claim not found" };

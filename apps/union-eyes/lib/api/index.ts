@@ -26,7 +26,7 @@ async function fetchAPI<T>(
     const method = (init?.method ?? 'GET').toUpperCase();
     const isMutation = ['POST', 'PUT', 'PATCH', 'DELETE'].includes(method);
     const idempotencyHeaders: Record<string, string> = isMutation
-      ? { 'Idempotency-Key': `${endpoint}-${Date.now()}-${Math.random().toString(36).slice(2, 8)}` }
+      ? { 'Idempotency-Key': `${endpoint}-${Date.now()}-${crypto.randomUUID().slice(0, 8)}` }
       : {};
 
     const response = await fetch(endpoint, {

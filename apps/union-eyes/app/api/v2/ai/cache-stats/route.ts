@@ -35,13 +35,12 @@ export const GET = withApi(
             userId: user?.id,
             stats,
           });
-          return { data: {
+          return {
               ...stats,
               message: stats.hitRate > 0 
                 ? `Cache is working! ${stats.hitRate}% of requests are served from cache.`
                 : 'No cache hits yet. Cache will improve performance as data is accessed.',
-            },
-            timestamp: new Date().toISOString(), };
+            };
   },
 );
 

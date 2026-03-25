@@ -39,9 +39,9 @@ import { logger } from '@/lib/logger';
 // CONFIGURATION
 // ============================================================================
 
-const TWILIO_ACCOUNT_SID = process.env.TWILIO_ACCOUNT_SID!;
-const TWILIO_AUTH_TOKEN = process.env.TWILIO_AUTH_TOKEN!;
-const TWILIO_PHONE_NUMBER = process.env.TWILIO_PHONE_NUMBER!;
+const TWILIO_ACCOUNT_SID = process.env.TWILIO_ACCOUNT_SID || '';
+const TWILIO_AUTH_TOKEN = process.env.TWILIO_AUTH_TOKEN || '';
+const TWILIO_PHONE_NUMBER = process.env.TWILIO_PHONE_NUMBER || '';
 const _TWILIO_WEBHOOK_SECRET = process.env.TWILIO_WEBHOOK_SECRET;
 
 if (!TWILIO_ACCOUNT_SID || !TWILIO_AUTH_TOKEN || !TWILIO_PHONE_NUMBER) {
@@ -233,7 +233,8 @@ async function incrementRateLimit(organizationId: string): Promise<void> {
 export function renderSmsTemplate(template: string, variables: Record<string, any>): string {
   let rendered = template;
   for (const [key, value] of Object.entries(variables)) {
-    rendered = rendered.replace(new RegExp(`\\$\\{${key}\\}`, 'g'), String(value));
+    const escaped = key.replace(/[.*+?^${}()|[\]\\]/g, '\\$&');
+    rendered = rendered.replace(new RegExp(`\\$\\{${escaped}\\}`, 'g'), String(value));
   }
   return rendered;
 }
@@ -560,7 +561,7 @@ export async function handleInboundSms(data: TwilioWebhookData): Promise<void> {
 
     await db.insert(smsConversations).values(conversation);
 
-    logger.info('Inbound SMS received', { from: From, body: Body });
+    logger.info('Inbound SMS received', { from: '[REDACTED]', messageLength: (Body || '').length });
 
     if (TWILIO_PHONE_NUMBER) {
       await twilioClient.messages.create({
@@ -570,7 +571,7 @@ export async function handleInboundSms(data: TwilioWebhookData): Promise<void> {
       });
     }
   } catch (error) {
-    logger.error('Failed to handle inbound SMS', { error, from: From });
+    logger.error('Failed to handle inbound SMS', { error });
   }
 }
 

@@ -89,8 +89,6 @@ const _isPublicRoute = createRouteMatcher([
   "/:locale/signup(.*)",
   "/:locale/sign-in(.*)",
   "/:locale/sign-up(.*)",
-  // Debug (dev only — remove before production)
-  "/api/auth/debug-role",
   // Marketing pages (no locale prefix)
   "/story(.*)",
   "/pricing(.*)",

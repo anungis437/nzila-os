@@ -492,6 +492,19 @@ export async function requestESignature(
     };
 
     if (request.provider === "docusign") {
+      // Validate filePath is an allowed blob storage URL to prevent SSRF
+      const allowedHost = process.env.AZURE_STORAGE_ACCOUNT_NAME
+        ? `${process.env.AZURE_STORAGE_ACCOUNT_NAME}.blob.core.windows.net`
+        : null;
+      const fileUrl = new URL(document.filePath);
+      if (
+        !allowedHost ||
+        fileUrl.protocol !== 'https:' ||
+        fileUrl.hostname !== allowedHost
+      ) {
+        throw new Error('Document filePath is not a trusted blob storage URL');
+      }
+
       const response = await fetch(document.filePath);
       if (!response.ok) {
         throw new Error(`Failed to download document for signing: ${response.status}`);

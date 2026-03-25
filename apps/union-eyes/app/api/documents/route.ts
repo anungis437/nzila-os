@@ -203,7 +203,7 @@ export const GET = withRoleAuth('member', async (request, context) => {
       details: { dataType: 'DOCUMENTS', error: error instanceof Error ? error.message : 'Unknown error' },
     });
 return NextResponse.json(
-      { error: "Failed to list documents", details: error instanceof Error ? error.message : "Unknown error" },
+      { error: "Failed to list documents" },
       { status: 500 }
     );
   }
@@ -328,10 +328,10 @@ export const POST = withRoleAuth('member', async (request, context) => {
       details: { dataType: 'DOCUMENTS', error: error instanceof Error ? error.message : 'Unknown error' },
     });
 return NextResponse.json(
-      { error: "Failed to create document", details: error instanceof Error ? error.message : "Unknown error" },
+      { error: "Failed to create document" },
       { status: 500 }
     );
   }
 });
 
-
+

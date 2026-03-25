@@ -1,6 +1,7 @@
 import { NextResponse } from "next/server";
 import * as fs from "node:fs";
 import * as path from "node:path";
+import { requireApiAuth, handleAuthError } from "@/lib/api-auth";
 
 export const dynamic = "force-dynamic";
 
@@ -38,9 +39,12 @@ function countTestFiles(dirPath: string): number {
   return count;
 }
 
-export async function GET() {
-  const root = path.resolve(process.cwd(), "../..");
-  const packagesDir = path.join(root, "packages");
+export async function GET(request: Request) {
+  try {
+    await requireApiAuth(request);
+
+    const root = path.resolve(process.cwd(), "../..");
+    const packagesDir = path.join(root, "packages");
 
   // ── Load registries ───────────────────────────
 
@@ -250,4 +254,7 @@ export async function GET() {
           : 0,
     },
   });
+  } catch (error) {
+    return handleAuthError(error);
+  }
 }

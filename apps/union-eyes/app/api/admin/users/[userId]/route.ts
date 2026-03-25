@@ -26,21 +26,25 @@ export async function PUT(req: NextRequest, { params }: Params) {
 
   const { userId } = await params;
 
-  // Find current status and toggle
-  const [member] = await db
-    .select({ status: organizationMembers.status })
-    .from(organizationMembers)
-    .where(eq(organizationMembers.id, userId))
-    .limit(1);
+  try {
+    // Find current status and toggle
+    const [member] = await db
+      .select({ status: organizationMembers.status })
+      .from(organizationMembers)
+      .where(eq(organizationMembers.id, userId))
+      .limit(1);
 
-  const newStatus = member?.status === 'active' ? 'inactive' : 'active';
+    const newStatus = member?.status === 'active' ? 'inactive' : 'active';
 
-  await db
-    .update(organizationMembers)
-    .set({ status: newStatus, updatedAt: new Date() })
-    .where(eq(organizationMembers.id, userId));
+    await db
+      .update(organizationMembers)
+      .set({ status: newStatus, updatedAt: new Date() })
+      .where(eq(organizationMembers.id, userId));
 
-  return NextResponse.json({ success: true, status: newStatus });
+    return NextResponse.json({ success: true, status: newStatus });
+  } catch {
+    return NextResponse.json({ error: 'Failed to update user status' }, { status: 500 });
+  }
 }
 
 export async function DELETE(_req: NextRequest, { params }: Params) {
@@ -51,12 +55,16 @@ export async function DELETE(_req: NextRequest, { params }: Params) {
 
   const { userId } = await params;
 
-  // Soft delete
-  await db
-    .update(organizationMembers)
-    .set({ deletedAt: new Date(), updatedAt: new Date() })
-    .where(eq(organizationMembers.id, userId));
+  try {
+    // Soft delete
+    await db
+      .update(organizationMembers)
+      .set({ deletedAt: new Date(), updatedAt: new Date() })
+      .where(eq(organizationMembers.id, userId));
 
-  return NextResponse.json({ success: true });
+    return NextResponse.json({ success: true });
+  } catch {
+    return NextResponse.json({ error: 'Failed to delete user' }, { status: 500 });
+  }
 }
 

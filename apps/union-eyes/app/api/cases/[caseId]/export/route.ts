@@ -28,6 +28,7 @@ export async function GET(
 
   const { caseId } = await params;
 
+  try {
   // Fetch case, notes, and audit trail in parallel
   const [caseRows, noteRows, auditRows] = await withRLSContext(async () => {
     return Promise.all([
@@ -71,4 +72,7 @@ export async function GET(
       'Content-Disposition': `attachment; filename="evidence-${caseId}.json"`,
     },
   });
+  } catch {
+    return NextResponse.json({ error: 'Failed to export evidence' }, { status: 500 });
+  }
 }

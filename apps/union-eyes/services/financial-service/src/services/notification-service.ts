@@ -186,7 +186,12 @@ export async function sendNotification(notificationId: string): Promise<SendNoti
     .where(eq(notificationQueue.id, notificationId));
 
   const channelResults: SendNotificationResult['channelResults'] = [];
-  const data = JSON.parse(notification.data);
+  let data;
+  try {
+    data = JSON.parse(notification.data);
+  } catch {
+    throw new Error('Invalid notification data format');
+  }
 
   // Send through each channel
   for (const channel of notification.channels) {

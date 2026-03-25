@@ -8,6 +8,15 @@ import { withApi, ApiError } from '@/lib/api/framework';
 import { db } from '@/db/db';
 import { apiIntegrations } from '@/db/schema/integration-schema';
 import { eq, and } from 'drizzle-orm';
+import { z } from 'zod';
+
+const updateIntegrationSchema = z.object({
+  name: z.string().min(1).max(255).optional(),
+  enabled: z.boolean().optional(),
+  syncFrequency: z.string().max(50).optional(),
+  fieldMapping: z.record(z.unknown()).optional(),
+  apiEndpoint: z.string().url().max(2000).optional(),
+});
 
 export const dynamic = 'force-dynamic';
 
@@ -35,7 +44,7 @@ export const GET = withApi(
 
     if (!integration) throw ApiError.notFound('Integration');
 
-    return { data: integration };
+    return integration;
   },
 );
 
@@ -49,14 +58,8 @@ export const PATCH = withApi(
     },
   },
   async ({ params, request, organizationId }) => {
-    const body = await request.json();
-    const { name, enabled, syncFrequency, fieldMapping, apiEndpoint } = body as {
-      name?: string;
-      enabled?: boolean;
-      syncFrequency?: string;
-      fieldMapping?: Record<string, unknown>;
-      apiEndpoint?: string;
-    };
+    const raw = await request.json();
+    const { name, enabled, syncFrequency, fieldMapping, apiEndpoint } = updateIntegrationSchema.parse(raw);
 
     const updates: Record<string, unknown> = { updatedAt: new Date() };
     if (name !== undefined) updates.name = name;
@@ -79,7 +82,7 @@ export const PATCH = withApi(
 
     if (!updated) throw ApiError.notFound('Integration');
 
-    return { data: updated };
+    return updated;
   },
 );
 
@@ -106,6 +109,6 @@ export const DELETE = withApi(
 
     if (!deleted) throw ApiError.notFound('Integration');
 
-    return { data: { id: deleted.id, deleted: true } };
+    return { id: deleted.id, deleted: true };
   },
 );

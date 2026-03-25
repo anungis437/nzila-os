@@ -57,8 +57,20 @@ export async function register() {
         envValidation.errors.forEach((error, index) => {
           logger.error(`  ${index + 1}. ${error}`);
         });
-        // Log but do not crash — the server should start with degraded
-        // functionality so health probes and monitoring remain reachable.
+
+        // Fail-fast for truly critical variables — without these the app
+        // cannot serve any request (no DB, no auth).  Other missing vars
+        // only degrade optional features and are handled gracefully.
+        const critical = ['DATABASE_URL', 'CLERK_SECRET_KEY'];
+        const missingCritical = critical.filter(k => !process.env[k]);
+        if (missingCritical.length > 0) {
+          const msg = `FATAL: missing critical env vars: ${missingCritical.join(', ')}`;
+          logger.error(msg);
+          throw new Error(msg);
+        }
+
+        // Log but do not crash for non-critical gaps — the server should
+        // start with degraded functionality so health probes remain reachable.
         logger.warn('⚠️  Continuing with missing env vars — some features may be unavailable');
       } else {
         logger.info('Environment validation passed');

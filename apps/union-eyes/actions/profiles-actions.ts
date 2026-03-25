@@ -9,6 +9,11 @@ import { logger } from '@/lib/logger';
 
 export async function createProfileAction(data: InsertProfile): Promise<ActionResult<SelectProfile>> {
   try {
+    const { userId } = await auth();
+    if (!userId) {
+      return { isSuccess: false, message: "Unauthorized" };
+    }
+
     const newProfile = await createProfile(data);
     revalidatePath("/");
     return { isSuccess: true, message: "Profile created successfully", data: newProfile };
@@ -37,6 +42,11 @@ export async function getAllProfilesAction(): Promise<ActionResult<SelectProfile
 
 export async function updateProfileAction(userId: string, data: Partial<InsertProfile>): Promise<ActionResult<SelectProfile>> {
   try {
+    const { userId: authedUserId } = await auth();
+    if (!authedUserId) {
+      return { isSuccess: false, message: "Unauthorized" };
+    }
+
     const updatedProfile = await updateProfile(userId, data);
     revalidatePath("/");
     return { isSuccess: true, message: "Profile updated successfully", data: updatedProfile };
@@ -47,6 +57,11 @@ export async function updateProfileAction(userId: string, data: Partial<InsertPr
 
 export async function deleteProfileAction(userId: string): Promise<ActionResult<void>> {
   try {
+    const { userId: authedUserId } = await auth();
+    if (!authedUserId) {
+      return { isSuccess: false, message: "Unauthorized" };
+    }
+
     await deleteProfile(userId);
     revalidatePath("/");
     return { isSuccess: true, message: "Profile deleted successfully" };

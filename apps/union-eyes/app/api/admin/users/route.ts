@@ -44,19 +44,17 @@ export const GET = withApi(
 
     const users = await query.limit(100);
 
-    return {
-      data: users.map((u) => ({
-        id: u.id,
-        name: u.name,
-        email: u.email,
-        role: u.role,
-        organizationId: u.organizationId,
-        organizationName: u.organizationName ?? 'Unknown',
-        status: u.status ?? 'active',
-        lastLogin: null,
-        joinedAt: u.joinedAt ?? u.createdAt,
-      })),
-    };
+    return users.map((u) => ({
+      id: u.id,
+      name: u.name,
+      email: u.email,
+      role: u.role,
+      organizationId: u.organizationId,
+      organizationName: u.organizationName ?? 'Unknown',
+      status: u.status ?? 'active',
+      lastLogin: null,
+      joinedAt: u.joinedAt ?? u.createdAt,
+    }));
   },
 );
 

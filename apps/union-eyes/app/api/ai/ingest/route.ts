@@ -68,7 +68,7 @@ export async function POST(request: NextRequest) {
         const parsed = JSON.parse(bodyStr);
         metadata = { ...metadata, ...parsed };
       } catch {
-        logger.warn('Failed to parse metadata JSON', { bodyStr });
+        logger.warn('Failed to parse metadata JSON');
       }
     }
 
@@ -89,11 +89,16 @@ export async function POST(request: NextRequest) {
     const contentType = file.type || 'application/octet-stream';
     const filename = file.name || 'unknown';
 
-    // Get user ID - check what properties are available
-    // eslint-disable-next-line @typescript-eslint/no-explicit-any
-    const userId = (auth as any).userId || (auth as any).id || 'unknown';
-    // eslint-disable-next-line @typescript-eslint/no-explicit-any
-    const orgId = (auth as any).organizationId || (auth as any).orgId || 'default';
+    // AuthUser has typed `id` and `organizationId` properties
+    const userId = auth.id;
+    const orgId = auth.organizationId;
+
+    if (!orgId) {
+      return NextResponse.json(
+        { error: 'Organization context required for document ingestion' },
+        { status: 403 }
+      );
+    }
 
     logger.info('Processing document for AI ingestion', {
       filename,

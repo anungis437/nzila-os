@@ -10,6 +10,7 @@ import { recordSignature } from '@/services/pki/workflow-engine';
 import type { SignDocumentParams } from '@/services/pki/signature-service';
 import { z } from "zod";
 import { withRoleAuth, type BaseAuthContext } from '@/lib/api-auth-guard';
+import { logger } from '@/lib/logger';
 
 import {
   ErrorCode,
@@ -97,8 +98,9 @@ export const POST = withRoleAuth('admin', async (request, context: BaseAuthConte
       });
 
     } catch (error) {
+      logger.error('Failed to sign document', { error });
 return NextResponse.json(
-        { error: 'Failed to sign document', details: (error as Error).message },
+        { error: 'Failed to sign document' },
         { status: 500 }
       );
     }

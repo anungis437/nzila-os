@@ -5,6 +5,7 @@
 import { withApi } from '@/lib/api/framework';
 import { db } from '@/db/db';
 import { sql } from 'drizzle-orm';
+import { withRLSContext } from '@/lib/db/with-rls-context';
 
 export const dynamic = 'force-dynamic';
 
@@ -34,7 +35,7 @@ export const GET = withApi(
       ? sql`WHERE ${sql.join(conditions, sql` AND `)}`
       : sql``;
 
-    const rows = await db.execute(
+    const rows = await withRLSContext(async () => db.execute(
       sql`SELECT
             claim_id AS "claimId",
             claim_number AS "claimNumber",
@@ -71,7 +72,7 @@ export const GET = withApi(
             END,
             created_at DESC
           LIMIT 200`
-    );
+    ));
 
     return { claims: Array.from(rows) };
   },

@@ -22,7 +22,7 @@ export const GET = withMinRole('officer', async (request, context: BaseAuthConte
     const url = new URL(request.url);
     const localId = url.searchParams.get('localId') ?? undefined;
     const periodId = url.searchParams.get('periodId') ?? undefined;
-    const chargebacks = await getChargebacks(organizationId, localId, periodId);
+    const chargebacks = await getChargebacks({ organizationId, localId, billingPeriodId: periodId });
     return standardSuccessResponse(chargebacks);
   } catch (error) {
     return standardErrorResponse(ErrorCode.INTERNAL_ERROR, 'Failed to fetch chargebacks', error);

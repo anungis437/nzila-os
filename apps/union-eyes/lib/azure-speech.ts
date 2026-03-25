@@ -18,8 +18,8 @@ export function createSpeechConfig() {
   }
 
   const speechConfig = sdk.SpeechConfig.fromSubscription(
-    process.env.AZURE_SPEECH_KEY!,
-    process.env.AZURE_SPEECH_REGION!
+    process.env.AZURE_SPEECH_KEY,
+    process.env.AZURE_SPEECH_REGION
   );
 
   // Set recognition language (supports bilingual: English and French)

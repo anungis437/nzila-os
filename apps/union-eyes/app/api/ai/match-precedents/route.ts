@@ -138,11 +138,10 @@ export const POST = withRoleAuth('member', async (request: NextRequest, context:
       'Invalid action. Use: match, analyze, or memorandum'
     );
       }
-    } catch (error) {
+    } catch {
 return NextResponse.json(
         {
           error: 'Precedent matching failed',
-          details: error instanceof Error ? error.message : 'Unknown error',
         },
         { status: 500 }
       );

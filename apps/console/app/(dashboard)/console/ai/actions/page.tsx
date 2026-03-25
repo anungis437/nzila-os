@@ -12,9 +12,6 @@ import { redirect } from 'next/navigation'
 
 export const dynamic = 'force-dynamic'
 
-// TODO: get from session/auth context
-const DEFAULT_ENTITY_ID = process.env.NZILA_DEFAULT_ENTITY_ID ?? ''
-
 async function getActionsData(orgId: string) {
   const actions = await platformDb
     .select()
@@ -46,13 +43,13 @@ const STATUS_COLORS: Record<string, string> = {
 }
 
 export default async function AiActionsPage() {
-  const { userId } = await auth()
+  const { userId, orgId } = await auth()
   if (!userId) redirect('/sign-in')
-  if (!DEFAULT_ENTITY_ID) {
-    return <div className="p-8 text-red-600">NZILA_DEFAULT_ENTITY_ID not configured</div>
+  if (!orgId) {
+    return <div className="p-8 text-red-600">No active organization selected. Please select an organization.</div>
   }
 
-  const { actions, runs } = await getActionsData(DEFAULT_ENTITY_ID)
+  const { actions, runs } = await getActionsData(orgId)
 
   // Group runs by actionId
   const runsByAction = new Map<string, typeof runs>()

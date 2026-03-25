@@ -13,7 +13,7 @@ export const GET = withApi(
   { auth: { required: true, minRole: 'officer' } },
   async () => {
     const rows = await db.select().from(votingSessions).orderBy(desc(votingSessions.createdAt)).limit(50);
-    return { data: rows, total: rows.length };
+    return rows;
   },
 );
 
@@ -21,6 +21,6 @@ export const POST = withApi(
   { auth: { required: true, minRole: 'admin' } },
   async ({ body }) => {
     const [row] = await db.insert(votingSessions).values(body).returning();
-    return { data: row };
+    return row;
   },
 );

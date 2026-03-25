@@ -38,7 +38,7 @@ export const GET = withApi(
       .orderBy(desc(memberHistoryEvents.eventDate))
       .limit(limit);
 
-    return { data: events };
+    return events;
   },
 );
 
@@ -83,7 +83,7 @@ export const PATCH = withApi(
 
     if (!updated) throw ApiError.notFound('History event');
 
-    return { data: updated };
+    return updated;
   },
 );
 
@@ -115,6 +115,6 @@ export const DELETE = withApi(
 
     if (!deleted) throw ApiError.notFound('History event');
 
-    return { data: { id: deleted.id, deleted: true } };
+    return { id: deleted.id, deleted: true };
   },
 );

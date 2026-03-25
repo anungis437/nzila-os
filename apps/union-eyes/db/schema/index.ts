@@ -65,6 +65,15 @@ export * from "./domains/pilot";            // CAPE-CLC pilot onboarding and dem
 // Federation
 export * from "./domains/federation";       // Federation management and memberships
 
+// Marketing & Growth
+export * from "./domains/marketing";        // Impact metrics, case studies, pilot program
+
+// Dispatch
+export * from "./domains/dispatch/dispatch"; // Dispatch-hall automation
+
+// Board Packets
+export * from "./board-packet-schema";       // Governance meeting packet generation
+
 // ============================================================================
 // EXTERNAL EXPORTS (Outside Domain Structure)
 // ============================================================================

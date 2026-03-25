@@ -106,6 +106,6 @@ export const POST = withApi(
             })),
           });
         }
-    return { data: results, };
+    return results;
   },
 );

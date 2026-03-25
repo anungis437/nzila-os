@@ -26,15 +26,7 @@ export const GET = withApi(
       .from(ssoProviders)
       .where(eq(ssoProviders.organizationId, organizationId));
 
-    return {
-      data: providers,
-      pagination: {
-        page: 1,
-        limit: 50,
-        total: providers.length,
-        totalPages: 1,
-      },
-    };
+    return providers;
   },
 );
 
@@ -103,6 +95,6 @@ export const POST = withApi(
       })
       .returning();
 
-    return { data: created };
+    return created;
   },
 );

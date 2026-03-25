@@ -1,18 +1,19 @@
 /**
- * CRUD item route for grievances
+ * CRUD item route for case studies (by slug)
  */
 import { crudRoutes } from '@/lib/api/crud-factory';
-import { grievances } from '@/db/schema';
+import { caseStudies } from '@/db/schema';
 
 export const dynamic = 'force-dynamic';
 
 const { GET, PATCH, DELETE } = crudRoutes({
-  table: grievances,
-  pk: 'id',
-  tags: ["Claims"],
-  orgScoped: true,
+  table: caseStudies,
+  pk: 'slug',
+  paramName: 'slug',
+  tags: ["Marketing"],
+  orgScoped: false,
   itemRoute: true,
   readRole: 'member',
-  writeRole: 'steward',
+  writeRole: 'admin',
 });
 export { GET, PATCH, DELETE };

@@ -2,6 +2,17 @@ import { withApi } from '@/lib/api/framework';
 import { db } from '@/db/db';
 import { pensionPlans } from '@/db/schema';
 import { eq, and } from 'drizzle-orm';
+import { z } from 'zod';
+
+const updatePlanSchema = z.object({
+  planName: z.string().max(255).optional(),
+  planType: z.enum(['defined_benefit', 'defined_contribution', 'hybrid', 'target_benefit']).optional(),
+  status: z.enum(['active', 'frozen', 'terminated', 'pending_approval']).optional(),
+  activeMembers: z.number().int().min(0).optional(),
+  totalAssets: z.string().optional(),
+  fundingStatus: z.string().optional(),
+  description: z.string().optional(),
+});
 
 export const dynamic = 'force-dynamic';
 
@@ -16,7 +27,7 @@ export const GET = withApi(
       .select()
       .from(pensionPlans)
       .where(and(eq(pensionPlans.id, id), eq(pensionPlans.organizationId, organizationId!)));
-    return { data: plan ?? null };
+    return plan ?? null;
   },
 );
 
@@ -29,10 +40,10 @@ export const PATCH = withApi(
     const id = params.id;
     const [plan] = await db
       .update(pensionPlans)
-      .set({ ...(body as Record<string, unknown>), updatedAt: new Date() })
+      .set({ ...updatePlanSchema.parse(body), updatedAt: new Date() })
       .where(and(eq(pensionPlans.id, id), eq(pensionPlans.organizationId, organizationId!)))
       .returning();
-    return { data: plan ?? null };
+    return plan ?? null;
   },
 );
 
@@ -47,7 +58,7 @@ export const DELETE = withApi(
       .delete(pensionPlans)
       .where(and(eq(pensionPlans.id, id), eq(pensionPlans.organizationId, organizationId!)))
       .returning();
-    return { data: plan ?? null };
+    return plan ?? null;
   },
 );
 

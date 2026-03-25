@@ -24,6 +24,8 @@ export const claimTypeEnum = pgEnum("claim_type", [
   "grievance_discipline",
   "grievance_schedule",
   "grievance_pay",
+  "grievance_benefits",
+  "grievance_leave",
   "workplace_safety",
   "discrimination_age",
   "discrimination_gender",

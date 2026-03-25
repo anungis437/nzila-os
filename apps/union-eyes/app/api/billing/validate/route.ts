@@ -179,13 +179,13 @@ try {
         method: 'POST',
         eventType: 'unauthorized_access',
         severity: 'high',
-        details: { error: error instanceof Error ? error.message : 'Unknown error' },
+        details: { error: 'Billing validation failed' },
       });
 
       return NextResponse.json(
         {
           valid: false,
-          error: `Billing validation failed: ${error}`,
+          error: 'Billing validation failed',
           currency: 'CAD',
         },
         { status: 500 }
@@ -193,4 +193,4 @@ try {
     }
 });
 
-
+

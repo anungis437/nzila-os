@@ -81,7 +81,7 @@ export const GET = withApi(
           )
           .orderBy(desc(memberDuesLedger.transactionDate))
           .limit(5);
-        return { data: {
+        return {
             currentBalance: currentBalance.toFixed(2),
             balanceStatus: currentBalance <= 0 ? 'paid_up' : currentBalance > 0 ? 'owing' : 'credit',
             breakdown: {
@@ -93,6 +93,6 @@ export const GET = withApi(
             },
             transactionCount: parseInt(balanceRow?.transactionCount ?? '0', 10),
             recentTransactions,
-          }, };
+          };
   },
 );

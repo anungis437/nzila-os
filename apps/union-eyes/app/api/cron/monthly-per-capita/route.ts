@@ -43,11 +43,10 @@ return NextResponse.json({
       calculation: result,
       overdueMarked: overdueCount,
     });
-  } catch (error) {
+  } catch {
 return NextResponse.json(
       {
         error: 'Cron job failed',
-        message: error instanceof Error ? error.message : 'Unknown error',
       },
       { status: 500 }
     );

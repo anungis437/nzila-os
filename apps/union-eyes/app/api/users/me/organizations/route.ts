@@ -47,7 +47,7 @@ export async function GET(_req: NextRequest) {
 
     if (isAdmin) {
       // Platform admins can see ALL organizations
-      orgs = await db.select().from(organizations);
+      orgs = await db.select().from(organizations).limit(500);
       logger.info('[/api/users/me/organizations] Platform admin — returning all orgs', {
         userId,
         count: orgs.length,
@@ -57,7 +57,7 @@ export async function GET(_req: NextRequest) {
       const orgIds = [...new Set(memberships.map(m => m.organizationId))];
 
       if (orgIds.length > 0) {
-        const allOrgs = await db.select().from(organizations);
+        const allOrgs = await db.select().from(organizations).limit(500);
         orgs = allOrgs.filter(o => orgIds.includes(o.id) || orgIds.includes(o.slug ?? ''));
       }
     }

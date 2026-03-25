@@ -1,18 +1,18 @@
 /**
- * CRUD item route for publicContent
+ * CRUD item route for testimonials
  */
 import { crudRoutes } from '@/lib/api/crud-factory';
-import { publicContent } from '@/db/schema';
+import { testimonials } from '@/db/schema';
 
 export const dynamic = 'force-dynamic';
 
 const { GET, PATCH, DELETE } = crudRoutes({
-  table: publicContent,
+  table: testimonials,
   pk: 'id',
-  tags: ["Content"],
-  orgScoped: true,
+  tags: ["Marketing"],
+  orgScoped: false,
   itemRoute: true,
   readRole: 'member',
-  writeRole: 'steward',
+  writeRole: 'admin',
 });
 export { GET, PATCH, DELETE };

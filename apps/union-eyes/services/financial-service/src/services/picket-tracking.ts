@@ -250,7 +250,7 @@ export async function checkIn(
   } catch (error) {
 return {
       success: false,
-      error: error.message || 'Failed to check in',
+      error: 'Failed to check in',
     };
   }
 }
@@ -313,7 +313,7 @@ export async function checkOut(
   } catch (error) {
 return {
       success: false,
-      error: error.message || 'Failed to check out',
+      error: 'Failed to check out',
     };
   }
 }
@@ -469,7 +469,7 @@ export async function coordinatorOverride(
   } catch (error) {
     return {
       success: false,
-      error: error.message || 'Failed to create manual attendance record',
+      error: 'Failed to create manual attendance record',
     };
   }
 }

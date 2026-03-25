@@ -13,7 +13,8 @@ export async function GET() {
 
   const rows = await db.select().from(organizations)
     .where(ne(organizations.organizationType, 'platform'))
-    .orderBy(asc(organizations.hierarchyLevel), asc(organizations.name));
+    .orderBy(asc(organizations.hierarchyLevel), asc(organizations.name))
+    .limit(500);
 
   const mapped = rows.map(row => ({
     id: row.id,

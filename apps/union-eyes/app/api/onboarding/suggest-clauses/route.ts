@@ -86,7 +86,6 @@ export const POST = withRoleAuth('officer', async (request, context) => {
     return NextResponse.json(
       { 
         error: 'Failed to suggest clauses',
-        details: error instanceof Error ? error.message : 'Unknown error'
       },
       { status: 500 }
     );

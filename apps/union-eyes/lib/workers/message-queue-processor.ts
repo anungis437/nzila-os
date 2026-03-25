@@ -19,7 +19,7 @@
  * ```
  */
 
-import { db } from '@/database';
+import { db } from '@/db/db';
 import { 
   message_log, 
   campaigns, 
@@ -535,9 +535,10 @@ export async function getQueueStatus() {
 function substituteVariables(template: string, variables: Record<string, any>): string {
   let result = template;
   for (const [key, value] of Object.entries(variables)) {
+    const escaped = key.replace(/[.*+?^${}()|[\]\\]/g, '\\$&');
     // Support both {{variable}} and {variable} syntax
-    result = result.replace(new RegExp(`{{${key}}}`, 'g'), String(value));
-    result = result.replace(new RegExp(`{${key}}`, 'g'), String(value));
+    result = result.replace(new RegExp(`{{${escaped}}}`, 'g'), String(value));
+    result = result.replace(new RegExp(`{${escaped}}`, 'g'), String(value));
   }
   return result;
 }

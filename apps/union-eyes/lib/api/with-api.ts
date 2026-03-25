@@ -147,10 +147,11 @@ export interface ApiContext<
 /**
  * The return value of the handler. Can be:
  * - A plain object → wrapped in `standardSuccessResponse()`
+ * - An array → wrapped in `standardSuccessResponse()` as `data`
  * - A `NextResponse` → passed through unmodified (escape hatch)
  * - `void` / `undefined` → 204 No Content
  */
-type HandlerReturn = Record<string, unknown> | NextResponse | void | null;
+type HandlerReturn = Record<string, unknown> | unknown[] | NextResponse | void | null;
 
 type HandlerFn<TBody, TQuery> = (ctx: ApiContext<TBody, TQuery>) => Promise<HandlerReturn> | HandlerReturn;
 
@@ -360,6 +361,9 @@ export function withApi<
       // Escape-hatch: handler already returned a NextResponse
       if (result instanceof NextResponse) {
         result.headers.set('X-Trace-ID', traceId);
+        if (!result.headers.has('Cache-Control')) {
+          result.headers.set('Cache-Control', 'private, no-store');
+        }
         return result;
       }
 
@@ -367,7 +371,7 @@ export function withApi<
       if (result === undefined || result === null) {
         return new NextResponse(null, {
           status: 204,
-          headers: { 'X-Trace-ID': traceId },
+          headers: { 'X-Trace-ID': traceId, 'Cache-Control': 'private, no-store' },
         });
       }
 
@@ -379,7 +383,7 @@ export function withApi<
           data: result,
           timestamp: new Date().toISOString(),
         },
-        { status, headers: { 'X-Trace-ID': traceId } },
+        { status, headers: { 'X-Trace-ID': traceId, 'Cache-Control': 'private, no-store' } },
       );
       return response;
 

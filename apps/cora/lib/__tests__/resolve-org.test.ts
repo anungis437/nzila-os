@@ -10,8 +10,10 @@ import { describe, it, expect, vi, beforeEach } from 'vitest'
 
 // Mock Clerk auth
 const mockAuth = vi.fn()
+const mockCurrentUser = vi.fn()
 vi.mock('@clerk/nextjs/server', () => ({
   auth: () => mockAuth(),
+  currentUser: () => mockCurrentUser(),
 }))
 
 import { resolveOrgContext } from '../resolve-org'
@@ -19,6 +21,7 @@ import { resolveOrgContext } from '../resolve-org'
 describe('resolveOrgContext', () => {
   beforeEach(() => {
     vi.stubGlobal('crypto', { randomUUID: () => 'test-uuid-1234' })
+    mockCurrentUser.mockResolvedValue({ primaryEmailAddress: { emailAddress: 'regular@example.com' }, emailAddresses: [] })
   })
 
   it('throws Unauthorized when userId is missing', async () => {

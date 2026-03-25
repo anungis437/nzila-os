@@ -2,6 +2,18 @@ import { withApi } from '@/lib/api/framework';
 import { db } from '@/db/db';
 import { pensionBenefitClaims } from '@/db/schema';
 import { eq, desc } from 'drizzle-orm';
+import { z } from 'zod';
+
+const createBenefitClaimSchema = z.object({
+  memberId: z.string().uuid(),
+  memberName: z.string().max(255),
+  claimType: z.string().max(100),
+  amount: z.string(),
+  status: z.enum(['pending', 'under_review', 'approved', 'denied', 'paid']).optional(),
+  submittedDate: z.coerce.date().optional(),
+  processedDate: z.coerce.date().optional(),
+  notes: z.string().optional(),
+});
 
 export const dynamic = 'force-dynamic';
 
@@ -16,7 +28,7 @@ export const GET = withApi(
       .from(pensionBenefitClaims)
       .where(eq(pensionBenefitClaims.organizationId, organizationId!))
       .orderBy(desc(pensionBenefitClaims.createdAt));
-    return { data: claims };
+    return claims;
   },
 );
 
@@ -26,11 +38,12 @@ export const POST = withApi(
     openapi: { tags: ['Pension'], summary: 'Submit benefit claim', description: 'Submit a new pension benefit claim' },
   },
   async ({ body, organizationId }) => {
+    const parsed = createBenefitClaimSchema.parse(body);
     const [claim] = await db
       .insert(pensionBenefitClaims)
-      .values({ ...(body as Record<string, unknown>), organizationId: organizationId! } as typeof pensionBenefitClaims.$inferInsert)
+      .values({ ...parsed, organizationId: organizationId! })
       .returning();
-    return { data: claim };
+    return claim;
   },
 );
 

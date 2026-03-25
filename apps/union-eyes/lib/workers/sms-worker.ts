@@ -51,7 +51,7 @@ function validateTwilioConfig(): { valid: boolean; error?: string } {
 // Initialize Twilio client with proper validation
 const twilioConfig = validateTwilioConfig();
 const twilioClient = twilioConfig.valid
-  ? twilio(process.env.TWILIO_ACCOUNT_SID!, process.env.TWILIO_AUTH_TOKEN!)
+  ? twilio(process.env.TWILIO_ACCOUNT_SID, process.env.TWILIO_AUTH_TOKEN)
   : null;
 
 const TWILIO_PHONE_NUMBER = process.env.TWILIO_PHONE_NUMBER || '';

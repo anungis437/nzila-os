@@ -60,6 +60,11 @@ export async function createMemberEmploymentAction(
   data: NewMemberEmployment
 ): Promise<ActionResult<MemberEmployment>> {
   try {
+    const { userId } = await auth();
+    if (!userId) {
+      return { isSuccess: false, message: "Unauthorized" };
+    }
+
     const employment = await createMemberEmployment(data);
     revalidatePath("/dashboard/admin/employment");
     revalidatePath("/dashboard/members");
@@ -159,6 +164,11 @@ export async function updateMemberEmploymentAction(
   data: Partial<NewMemberEmployment>
 ): Promise<ActionResult<MemberEmployment>> {
   try {
+    const { userId } = await auth();
+    if (!userId) {
+      return { isSuccess: false, message: "Unauthorized" };
+    }
+
     const updatedEmployment = await updateMemberEmployment(id, data);
     revalidatePath("/dashboard/admin/employment");
     revalidatePath("/dashboard/members");
@@ -180,6 +190,11 @@ export async function deleteMemberEmploymentAction(
   id: string
 ): Promise<ActionResult<void>> {
   try {
+    const { userId } = await auth();
+    if (!userId) {
+      return { isSuccess: false, message: "Unauthorized" };
+    }
+
     await deleteMemberEmployment(id);
     revalidatePath("/dashboard/admin/employment");
     revalidatePath("/dashboard/members");
@@ -230,6 +245,11 @@ export async function createEmploymentHistoryAction(
   data: NewEmploymentHistory
 ): Promise<ActionResult<EmploymentHistory>> {
   try {
+    const { userId } = await auth();
+    if (!userId) {
+      return { isSuccess: false, message: "Unauthorized" };
+    }
+
     const history = await createEmploymentHistory(data);
     revalidatePath("/dashboard/admin/employment");
     return {
@@ -273,6 +293,11 @@ export async function createMemberLeaveAction(
   data: NewMemberLeave
 ): Promise<ActionResult<MemberLeave>> {
   try {
+    const { userId } = await auth();
+    if (!userId) {
+      return { isSuccess: false, message: "Unauthorized" };
+    }
+
     const leave = await createMemberLeave(data);
     revalidatePath("/dashboard/admin/employment");
     revalidatePath("/dashboard/members");
@@ -334,6 +359,11 @@ export async function updateMemberLeaveAction(
   data: Partial<NewMemberLeave>
 ): Promise<ActionResult<MemberLeave>> {
   try {
+    const { userId } = await auth();
+    if (!userId) {
+      return { isSuccess: false, message: "Unauthorized" };
+    }
+
     const updatedLeave = await updateMemberLeave(id, data);
     revalidatePath("/dashboard/admin/employment");
     revalidatePath("/dashboard/members");
@@ -392,6 +422,11 @@ export async function createJobClassificationAction(
   data: NewJobClassification
 ): Promise<ActionResult<JobClassification>> {
   try {
+    const { userId } = await auth();
+    if (!userId) {
+      return { isSuccess: false, message: "Unauthorized" };
+    }
+
     const classification = await createJobClassification(data);
     revalidatePath("/dashboard/admin/employment");
     return {
@@ -453,6 +488,11 @@ export async function updateJobClassificationAction(
   data: Partial<NewJobClassification>
 ): Promise<ActionResult<JobClassification>> {
   try {
+    const { userId } = await auth();
+    if (!userId) {
+      return { isSuccess: false, message: "Unauthorized" };
+    }
+
     const updatedClassification = await updateJobClassification(id, data);
     revalidatePath("/dashboard/admin/employment");
     return {

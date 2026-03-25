@@ -88,7 +88,7 @@ router.post('/queue', async (req: Request, res: Response) => {
     logger.error('Queue notification error', { error });
     res.status(400).json({
       success: false,
-      error: error.message,
+      error: 'Internal server error',
     });
   }
 });
@@ -119,7 +119,7 @@ router.get('/preferences', async (req: Request, res: Response) => {
     logger.error('Get preferences error', { error });
     res.status(500).json({
       success: false,
-      error: error.message,
+      error: 'Internal server error',
     });
   }
 });
@@ -152,7 +152,7 @@ router.put('/preferences', async (req: Request, res: Response) => {
     logger.error('Update preferences error', { error });
     res.status(400).json({
       success: false,
-      error: error.message,
+      error: 'Internal server error',
     });
   }
 });
@@ -185,7 +185,7 @@ router.get('/history', async (req: Request, res: Response) => {
     logger.error('Get history error', { error });
     res.status(500).json({
       success: false,
-      error: error.message,
+      error: 'Internal server error',
     });
   }
 });
@@ -209,7 +209,7 @@ router.post('/process', async (req: Request, res: Response) => {
     logger.error('Process notifications error', { error });
     res.status(500).json({
       success: false,
-      error: error.message,
+      error: 'Internal server error',
     });
   }
 });
@@ -233,7 +233,7 @@ router.post('/retry-failed', async (req: Request, res: Response) => {
     logger.error('Retry failed notifications error', { error });
     res.status(500).json({
       success: false,
-      error: error.message,
+      error: 'Internal server error',
     });
   }
 });
@@ -280,7 +280,7 @@ router.post('/test', async (req: Request, res: Response) => {
     logger.error('Test notification error', { error });
     res.status(500).json({
       success: false,
-      error: error.message,
+      error: 'Internal server error',
     });
   }
 });

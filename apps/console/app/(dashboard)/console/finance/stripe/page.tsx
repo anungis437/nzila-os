@@ -92,18 +92,17 @@ async function getStripeData(orgId: string) {
   }
 }
 
-// TODO: In production, orgId should come from the user's session context.
-// For now, we use a query param or first entity.
 export default async function StripeFinancePage({
   searchParams,
 }: {
   searchParams: Promise<{ orgId?: string }>
 }) {
-  const { userId } = await auth()
+  const { userId, orgId: sessionOrgId } = await auth()
   if (!userId) redirect('/sign-in')
 
   const params = await searchParams
-  const orgId = params.orgId
+  // Use session org as default, allow explicit override via query param for admin use
+  const orgId = params.orgId ?? sessionOrgId
 
   if (!orgId) {
     return (

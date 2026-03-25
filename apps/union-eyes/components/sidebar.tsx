@@ -178,7 +178,6 @@ export default function Sidebar({ profile: _profile, userEmail, whopMonthlyPlanI
       title: t('sidebar.administration'),
       roles: nzilaAll,
       items: [
-        { href: `/${locale}/dashboard/admin`, icon: <Shield size={16} />, label: t('navigation.adminPanel'), roles: ["app_owner", "coo", "cto", "platform_lead"] },
         { href: `/${locale}/dashboard/admin/organizations`, icon: <Globe size={16} />, label: t('sidebar.browseOrganizations'), roles: nzilaAll },
         { href: `/${locale}/dashboard/admin/governance`, icon: <FileText size={16} />, label: t('sidebar.governanceDashboard'), roles: ["app_owner", "coo", "platform_lead"] },
         { href: `/${locale}/dashboard/admin/members`, icon: <Users size={16} />, label: t('sidebar.memberManagement'), roles: ["app_owner", "coo", "platform_lead", "support_manager"] },

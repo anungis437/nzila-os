@@ -115,7 +115,9 @@ export const GET = withApi(
       },
     };
     });
-    } catch {
+    } catch (error) {
+      const { logger: log } = await import('@/lib/logger');
+      log.error('Health-safety dashboard query failed', { error: error instanceof Error ? error.message : 'Unknown' });
       return {
         success: true,
         metrics: {

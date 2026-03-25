@@ -26,7 +26,7 @@ export const GET = withApi(
     if (!row) {
       throw ApiError.notFound('Audit log');
     }
-    return { data: row };
+    return row;
   },
 );
 

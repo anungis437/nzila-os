@@ -18,8 +18,8 @@ export const GET = withApi(
     },
   },
   async ({ organizationId }) => {
-    const relationships = await db.select().from(organizationRelationships);
-    const orgs = await db.select().from(organizations);
-    return { data: { relationships, organizations: orgs } };
+    const relationships = await db.select().from(organizationRelationships).limit(1000);
+    const orgs = await db.select().from(organizations).limit(500);
+    return { relationships, organizations: orgs };
   },
 );

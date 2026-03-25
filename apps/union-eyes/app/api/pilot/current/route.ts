@@ -138,7 +138,9 @@ export const GET = withOrganizationAuth(async (_request, context) => {
 
       return NextResponse.json({ metrics });
     });
-  } catch {
+  } catch (error) {
+    const { logger: log } = await import('@/lib/logger');
+    log.error('Pilot current metrics query failed', { error: error instanceof Error ? error.message : 'Unknown' });
     return standardErrorResponse(
       ErrorCode.INTERNAL_ERROR,
       "Failed to load pilot metrics"
