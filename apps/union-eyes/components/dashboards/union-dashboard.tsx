@@ -415,7 +415,13 @@ export default function UnionDashboard({ isPlatformViewer = false }: UnionDashbo
   
   const quickLinks = getQuickLinks(t, locale);
   const visibleQuickLinks = quickLinks.filter(link => link.roles.includes(userRole));
-  const visibleStats = updatedStats.filter(stat => stat.roles.includes(userRole));
+
+  // Platform admins only see aggregate KPIs (Active Members, Resolution Rate)
+  // — personal stats (My Active Cases, Pending Reviews) are hidden
+  const oversightStatTitles = [t('members.activeMembers'), t('analytics.resolutionRate')];
+  const visibleStats = isPlatformViewer
+    ? updatedStats.filter(stat => oversightStatTitles.includes(stat.title))
+    : updatedStats.filter(stat => stat.roles.includes(userRole));
 
   const getGreeting = () => {
     const hour = new Date().getHours();
@@ -545,7 +551,8 @@ export default function UnionDashboard({ isPlatformViewer = false }: UnionDashbo
         </motion.div>
       )}
 
-      {/* Deadline Widget */}
+      {/* Deadline Widget — hidden for platform admins */}
+      {!isPlatformViewer && (
       <motion.div
         initial={{ opacity: 0, y: 20 }}
         animate={{ opacity: 1, y: 0 }}
@@ -558,8 +565,10 @@ export default function UnionDashboard({ isPlatformViewer = false }: UnionDashbo
           onViewAll={() => router.push(`/${locale}/dashboard/deadlines`)}
         />
       </motion.div>
+      )}
 
-      {/* Recent Activity & Alerts */}
+      {/* Recent Activity & Alerts — hidden for platform admins */}
+      {!isPlatformViewer && (
       <div className="grid grid-cols-1 lg:grid-cols-2 gap-6">
         {/* Recent Activity */}
         <motion.div
@@ -731,9 +740,10 @@ export default function UnionDashboard({ isPlatformViewer = false }: UnionDashbo
           </Card>
         </motion.div>
       </div>
+      )}
 
-      {/* Helpful Resources - For Members */}
-      {(userRole === "member" || userRole === "steward") && (
+      {/* Helpful Resources - For Members (not platform admins) */}
+      {!isPlatformViewer && (userRole === "member" || userRole === "steward") && (
         <motion.div
           initial={{ opacity: 0, y: 20 }}
           animate={{ opacity: 1, y: 0 }}
