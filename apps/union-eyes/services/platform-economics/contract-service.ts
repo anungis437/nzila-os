@@ -58,7 +58,7 @@ export interface CreateContractLineInput {
   expirationDate?: Date;
 }
 
-export interface EntitlementCheckResult {
+export interface ContractEntitlementResult {
   allowed: boolean;
   featureKey: string;
   reason?: string;
@@ -346,7 +346,7 @@ export async function getContractLineItems(contractId: string) {
 export async function checkContractEntitlement(
   organizationId: string,
   featureKey: string,
-): Promise<EntitlementCheckResult> {
+): Promise<ContractEntitlementResult> {
   const [ent] = await db
     .select()
     .from(orgEntitlements)

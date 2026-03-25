@@ -37,5 +37,11 @@ export * from './platform-billing';
 export * from './platform-ledger';
 export * from './allocation';
 
+// MIL Phase 2 — Transaction Fees, Pricing, Amendments, Reconciliation
+export * from './transaction-fees';
+export * from './pricing-templates';
+export * from './contract-amendments';
+export * from './reconciliation';
+
 // Explicit re-exports to resolve ambiguities
 export { paymentProcessorEnum } from './payments';

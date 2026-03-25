@@ -19,3 +19,9 @@ export * from './usage-metering-service';
 export * from './proration-engine';
 export * from './dunning-service';
 export * from './subscription-lifecycle-service';
+
+// MIL Phase 2 — Transaction Fees, Reconciliation, Entitlements, Pricing
+export * from './transaction-fee-engine';
+export * from './reconciliation-service';
+export * from './entitlement-guard';
+export * from './pricing-template-service';
