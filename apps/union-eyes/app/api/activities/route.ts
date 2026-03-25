@@ -27,19 +27,18 @@ export const GET = withApi(
 
     return withSystemContext(async () => {
       const rows = await db.execute(sql`
-        SELECT id, audit_id, user_id, organization_id, action,
-               resource_type, resource_id, ip_address, user_agent,
-               correlation_id, details, changes, created_at
-        FROM audit_logs
-        WHERE organization_id = ${organizationId}
+        SELECT id, actor_id AS user_id, org_id AS organization_id, action,
+               entity_type AS resource_type, metadata AS details, created_at
+        FROM audit_log
+        WHERE org_id = ${organizationId}
         ORDER BY created_at DESC
         LIMIT ${limit} OFFSET ${offset}
       `);
 
       const countResult = await db.execute(sql`
         SELECT count(*)::int AS total
-        FROM audit_logs
-        WHERE organization_id = ${organizationId}
+        FROM audit_log
+        WHERE org_id = ${organizationId}
       `);
 
       const total = Number((countResult[0] as Record<string, unknown>)?.total ?? 0);

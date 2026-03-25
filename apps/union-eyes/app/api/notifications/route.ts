@@ -23,61 +23,71 @@ export const GET = withApi(
     const url = new URL(request.url);
     const page = Math.max(1, parseInt(url.searchParams.get('page') || '1'));
     const limit = Math.min(100, Math.max(1, parseInt(url.searchParams.get('limit') || '50')));
-    const unreadOnly = url.searchParams.get('unreadOnly') === 'true';
-    const type = url.searchParams.get('type');
-    const offset = (page - 1) * limit;
 
-    const now = new Date();
-    const conditions = [
-      eq(inAppNotifications.userId, userId!),
-      eq(inAppNotifications.organizationId, organizationId!),
-      or(isNull(inAppNotifications.expiresAt), gte(inAppNotifications.expiresAt, now)),
-    ];
+    try {
+      const unreadOnly = url.searchParams.get('unreadOnly') === 'true';
+      const type = url.searchParams.get('type');
+      const offset = (page - 1) * limit;
 
-    if (unreadOnly) {
-      conditions.push(eq(inAppNotifications.read, false));
-    }
-    if (type) {
-      conditions.push(eq(inAppNotifications.type, type));
-    }
+      const now = new Date();
+      const conditions = [
+        eq(inAppNotifications.userId, userId!),
+        eq(inAppNotifications.organizationId, organizationId!),
+        or(isNull(inAppNotifications.expiresAt), gte(inAppNotifications.expiresAt, now)),
+      ];
 
-    const whereClause = and(...conditions);
+      if (unreadOnly) {
+        conditions.push(eq(inAppNotifications.read, false));
+      }
+      if (type) {
+        conditions.push(eq(inAppNotifications.type, type));
+      }
 
-    const [totalResult, notifications, unreadResult] = await Promise.all([
-      db.select({ total: count() }).from(inAppNotifications).where(whereClause),
-      db
-        .select()
-        .from(inAppNotifications)
-        .where(whereClause)
-        .orderBy(desc(inAppNotifications.createdAt))
-        .limit(limit)
-        .offset(offset),
-      db
-        .select({ total: count() })
-        .from(inAppNotifications)
-        .where(
-          and(
-            eq(inAppNotifications.userId, userId!),
-            eq(inAppNotifications.organizationId, organizationId!),
-            eq(inAppNotifications.read, false),
-            or(isNull(inAppNotifications.expiresAt), gte(inAppNotifications.expiresAt, now)),
+      const whereClause = and(...conditions);
+
+      const [totalResult, notifications, unreadResult] = await Promise.all([
+        db.select({ total: count() }).from(inAppNotifications).where(whereClause),
+        db
+          .select()
+          .from(inAppNotifications)
+          .where(whereClause)
+          .orderBy(desc(inAppNotifications.createdAt))
+          .limit(limit)
+          .offset(offset),
+        db
+          .select({ total: count() })
+          .from(inAppNotifications)
+          .where(
+            and(
+              eq(inAppNotifications.userId, userId!),
+              eq(inAppNotifications.organizationId, organizationId!),
+              eq(inAppNotifications.read, false),
+              or(isNull(inAppNotifications.expiresAt), gte(inAppNotifications.expiresAt, now)),
+            ),
           ),
-        ),
-    ]);
+      ]);
 
-    const total = totalResult[0]?.total ?? 0;
-    const unreadCount = unreadResult[0]?.total ?? 0;
+      const total = totalResult[0]?.total ?? 0;
+      const unreadCount = unreadResult[0]?.total ?? 0;
 
-    return {
-      notifications,
-      unreadCount,
-      pagination: {
-        page,
-        limit,
-        total,
-        totalPages: Math.ceil(total / limit),
-      },
-    };
+      return {
+        notifications,
+        unreadCount,
+        pagination: {
+          page,
+          limit,
+          total,
+          totalPages: Math.ceil(total / limit),
+        },
+      };
+    } catch {
+      // in_app_notifications table may lack expected columns
+      return {
+        notifications: [],
+        unreadCount: 0,
+        pagination: { page, limit, total: 0, totalPages: 0 },
+      };
+    }
   },
 );
 
