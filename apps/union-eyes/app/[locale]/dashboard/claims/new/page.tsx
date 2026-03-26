@@ -566,12 +566,12 @@ setIsSubmitting(false);
                     <Info size={20} className="text-blue-600 mt-0.5 shrink-0" />
                     <div>
                       <h4 className="font-semibold text-blue-900 mb-1">{t('forms.whatToInclude')}</h4>
-                      <ul className="space-y-1 text-sm text-blue-800">
-                        <li>â€¢ {t('forms.whatHappenedWhen')}</li>
-                        <li>â€¢ {t('forms.whoInvolved')}</li>
-                        <li>â€¢ {t('forms.whereTookPlace')}</li>
-                        <li>â€¢ {t('forms.anyWitnessesDocumentation')}</li>
-                        <li>â€¢ {t('forms.howAffected')}</li>
+                      <ul className="space-y-1 text-sm text-blue-800 list-disc list-inside">
+                        <li>{t('forms.whatHappenedWhen')}</li>
+                        <li>{t('forms.whoInvolved')}</li>
+                        <li>{t('forms.whereTookPlace')}</li>
+                        <li>{t('forms.anyWitnessesDocumentation')}</li>
+                        <li>{t('forms.howAffected')}</li>
                       </ul>
                     </div>
                   </div>
