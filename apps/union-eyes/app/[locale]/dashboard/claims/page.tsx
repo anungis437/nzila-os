@@ -59,6 +59,7 @@ type CasePriority = "low" | "medium" | "high" | "urgent";
 
 interface Case {
   id: string;
+  claimId: string;
   title: string;
   description: string;
   status: CaseStatus;
@@ -116,6 +117,7 @@ const mapDbPriorityToUi = (dbPriority: string): CasePriority => {
 // Convert database claim to UI case
 const mapDbClaimToCase = (claim: DbClaim): Case => ({
   id: claim.claimNumber,
+  claimId: claim.claimId,
   title: claimTypeLabels[claim.claimType] || claim.claimType,
   description: claim.description,
   status: mapDbStatusToUi(claim.status),
@@ -477,7 +479,7 @@ setError(err instanceof Error ? err.message : 'Failed to load claims');
                               )}
 
                               <div className="flex gap-3 pt-2">
-                                <Link href={`/${locale}/dashboard/claims/${caseItem.id}`}>
+                                <Link href={`/${locale}/dashboard/claims/${caseItem.claimId}`}>
                                   <button className="px-4 py-2 bg-blue-600 text-white rounded-lg text-sm font-medium hover:bg-blue-700 transition-colors">
                                     {t('claims.viewFullDetails')}
                                   </button>

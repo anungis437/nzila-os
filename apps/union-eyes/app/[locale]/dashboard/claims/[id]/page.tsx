@@ -93,11 +93,13 @@ export default function ClaimDetailPage() {
         }
         
         const data = await response.json();
-        setClaim(data.claim);
+        // withApi wraps in { success, data: { data: row }, timestamp }
+        const claimData = data?.data?.data ?? data?.data ?? data?.claim ?? data;
+        setClaim(claimData);
         
         // Fetch workflow history
         try {
-          const historyResponse = await fetch(`/api/claims/${claimId}/workflow/history`);
+          const historyResponse = await fetch(`/api/claims/${claimData?.claimId ?? claimId}/workflow/history`);
           if (historyResponse.ok) {
             const historyData = await historyResponse.json();
             setWorkflowHistory(historyData.history || []);
