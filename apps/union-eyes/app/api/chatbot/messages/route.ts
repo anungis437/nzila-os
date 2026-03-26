@@ -1,17 +1,36 @@
 /**
- * CRUD collection route for chatSessions
+ * POST /api/chatbot/messages
+ *
+ * Send a user message to the AI chatbot and receive an AI-generated response.
+ * Uses ChatbotService which performs RAG, safety filtering, and LLM generation.
  */
-import { crudRoutes } from '@/lib/api/crud-factory';
-import { chatSessions } from '@/db/schema';
+import { z } from 'zod';
+import { withApi } from '@/lib/api/with-api';
+import { ChatbotService } from '@/lib/ai/chatbot-service';
 
 export const dynamic = 'force-dynamic';
 
-const { GET, POST } = crudRoutes({
-  table: chatSessions,
-  pk: 'id',
-  tags: ["AI"],
-  orgScoped: true,
-  readRole: 'member',
-  writeRole: 'steward',
+const bodySchema = z.object({
+  sessionId: z.string().uuid(),
+  content: z.string().min(1).max(10_000),
+  useRAG: z.boolean().optional().default(true),
 });
-export { GET, POST };
+
+const chatbotService = new ChatbotService();
+
+export const POST = withApi(
+  {
+    body: bodySchema,
+    openapi: { tags: ['AI'], summary: 'Send chatbot message and get AI response' },
+  },
+  async ({ body, userId }) => {
+    const assistantMessage = await chatbotService.sendMessage({
+      sessionId: body.sessionId,
+      userId: userId!,
+      content: body.content,
+      useRAG: body.useRAG,
+    });
+
+    return { data: assistantMessage };
+  },
+);
