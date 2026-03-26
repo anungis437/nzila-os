@@ -9,6 +9,7 @@
  * STRIPE_SECRET_KEY is not available.
  */
 import { getStripeClient, verifyWebhookSignature } from '@nzila/payments-stripe'
+// eslint-disable-next-line no-restricted-imports -- this IS the stripe facade
 import type StripeType from 'stripe'
 
 export const stripe: StripeType = new Proxy({} as StripeType, {
