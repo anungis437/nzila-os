@@ -40,7 +40,7 @@ const ORGS = {
 
 // Users to create: [first, last, email, phone, org, clerkRole]
 // Clerk dev instance requires phone_number.
-// NZILA already has 12 users; CUPE has 3+2 platform admins.
+// NZILA already has 12 users.
 const USERS_TO_CREATE = [
   // CLC — 10 test users
   ['Hassan',  'Yussuff',       'h.yussuff@clc-ctc.ca',    '+16135210001', 'clc',  'org:admin'],
@@ -66,6 +66,14 @@ const USERS_TO_CREATE = [
   ['Jennifer','Walsh',         'j.walsh@acep-cape.ca',    '+16132360010', 'cape', 'org:member'],
   ['Pierre',  'Desmarais',     'p.desmarais@acep-cape.ca','+16132360011', 'cape', 'org:member'],
   ['Amira',   'Hassan',        'a.hassan@acep-cape.ca',   '+16132360012', 'cape', 'org:member'],
+  // CUPE Local 123 — 7 new users (3 francophone, 4 anglophone)
+  ['Marie-Claire','Dubois',    'mc.dubois@city.toronto.ca',    '+14165550201', 'cupe', 'org:member'],
+  ['Jean-Pierre', 'Tremblay', 'jp.tremblay@city.toronto.ca',  '+14165550202', 'cupe', 'org:member'],
+  ['David',   'Thompson',     'd.thompson@city.toronto.ca',    '+14165550203', 'cupe', 'org:member'],
+  ['Priya',   'Patel',        'p.patel@city.toronto.ca',       '+14165550204', 'cupe', 'org:member'],
+  ['Marco',   'Rossi',        'm.rossi@city.toronto.ca',       '+14165550205', 'cupe', 'org:member'],
+  ['Nathalie','Lafontaine',   'n.lafontaine@city.toronto.ca',  '+14165550206', 'cupe', 'org:member'],
+  ['Kevin',   'O Brien',      'k.obrien@city.toronto.ca',      '+14165550207', 'cupe', 'org:member'],
 ];
 
 // Existing NZILA users to add as NZILA org members (not yet in org)

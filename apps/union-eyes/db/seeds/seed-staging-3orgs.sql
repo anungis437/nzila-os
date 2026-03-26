@@ -206,9 +206,9 @@ VALUES (
   '+1-416-555-0123',
   'https://cupe.ca/local-123',
   '{"city":"Toronto","street":"100 Queen Street West","country":"CA","province":"ON","postalCode":"M5H 2N2"}'::jsonb,
-  7,
-  7,
-  '{"language":"en","fiscalYearEnd":"December 31","employer":"City of Toronto","bargainingGroups":["Inside Workers","Outside Workers","Library Workers"]}'::jsonb,
+  12,
+  12,
+  '{"language":"bilingual","fiscalYearEnd":"December 31","employer":"City of Toronto","bargainingGroups":["Inside Workers","Outside Workers","Library Workers"]}'::jsonb,
   '{dashboard,members,claims,grievances,communications,collective-bargaining,strike-fund}',
   'org_3BP6K4uezEa2CLEvUNDwhnJGNFg',
   'active'
@@ -235,14 +235,83 @@ WHERE organization_id = '9210418f-6a4f-4dab-a7d2-4450d581dc81';
 
 INSERT INTO organization_members (user_id, organization_id, role, status, name, email)
 VALUES
-  ('user_3BP6IkK6vgBW4XjSTqfd3CsBjjv', '9210418f-6a4f-4dab-a7d2-4450d581dc81', 'admin',   'active', 'Grace Lee',       'grace.lee@city.toronto.ca'),
-  ('user_3BP6Ienqg55Bk54Q8I3K5hh4Mk8', '9210418f-6a4f-4dab-a7d2-4450d581dc81', 'member',  'active', 'Alice Johnson',   'alice.johnson@city.toronto.ca'),
-  ('user_3BP6IlC0zg9MwHJDDNn7KCcR0MV', '9210418f-6a4f-4dab-a7d2-4450d581dc81', 'steward', 'active', 'Bob Smith',       'bob.smith@city.toronto.ca'),
-  ('user_35NlrrNcfTv0DMh2kzBHyXZRtpb', '9210418f-6a4f-4dab-a7d2-4450d581dc81', 'admin',   'active', 'Aubert Nungisa',  'aubert@nzila.app'),
-  ('user_37Zo7OrvP4jy0J0MU5APfkDtE2V', '9210418f-6a4f-4dab-a7d2-4450d581dc81', 'admin',   'active', 'Platform Admin',  'admin@nzila.io');
+  ('user_3BP6IkK6vgBW4XjSTqfd3CsBjjv', '9210418f-6a4f-4dab-a7d2-4450d581dc81', 'admin',   'active', 'Grace Lee',            'grace.lee@city.toronto.ca'),
+  ('user_3BP6Ienqg55Bk54Q8I3K5hh4Mk8', '9210418f-6a4f-4dab-a7d2-4450d581dc81', 'member',  'active', 'Alice Johnson',        'alice.johnson@city.toronto.ca'),
+  ('user_3BP6IlC0zg9MwHJDDNn7KCcR0MV', '9210418f-6a4f-4dab-a7d2-4450d581dc81', 'steward', 'active', 'Bob Smith',            'bob.smith@city.toronto.ca'),
+  ('user_3BSzhd4q6moCIlT3PhkWbdiAhtA', '9210418f-6a4f-4dab-a7d2-4450d581dc81', 'member',  'active', 'Marie-Claire Dubois',  'mc.dubois@city.toronto.ca'),
+  ('user_3BSzhdQTA7fsGN5kUPfXJpMTK1O', '9210418f-6a4f-4dab-a7d2-4450d581dc81', 'member',  'active', 'Jean-Pierre Tremblay', 'jp.tremblay@city.toronto.ca'),
+  ('user_3BSzhpCQGDtA22YfStHM5ksq6pI', '9210418f-6a4f-4dab-a7d2-4450d581dc81', 'member',  'active', 'David Thompson',       'd.thompson@city.toronto.ca'),
+  ('user_3BSzhnlEbmEnazjOxZdVE2eXO64', '9210418f-6a4f-4dab-a7d2-4450d581dc81', 'member',  'active', 'Priya Patel',          'p.patel@city.toronto.ca'),
+  ('user_3BSzhk06aD2b1kK5jUuMlmy7vGu', '9210418f-6a4f-4dab-a7d2-4450d581dc81', 'member',  'active', 'Marco Rossi',          'm.rossi@city.toronto.ca'),
+  ('user_3BSzhvBJ63gV7BmDQlH6VTLm18g', '9210418f-6a4f-4dab-a7d2-4450d581dc81', 'member',  'active', 'Nathalie Lafontaine',  'n.lafontaine@city.toronto.ca'),
+  ('user_3BSzhpyvCHVWm3o4QSYs87ufGGg', '9210418f-6a4f-4dab-a7d2-4450d581dc81', 'member',  'active', 'Kevin O''Brien',       'k.obrien@city.toronto.ca'),
+  ('user_35NlrrNcfTv0DMh2kzBHyXZRtpb', '9210418f-6a4f-4dab-a7d2-4450d581dc81', 'admin',   'active', 'Aubert Nungisa',       'aubert@nzila.app'),
+  ('user_37Zo7OrvP4jy0J0MU5APfkDtE2V', '9210418f-6a4f-4dab-a7d2-4450d581dc81', 'admin',   'active', 'Platform Admin',       'admin@nzila.io');
 
 -- ============================================================
--- 6. Remove extra organizations (not in core 4)
+-- 6. Seed user_management.users with locale data
+--    Locale-based users for i18n testing: en-CA, fr-CA
+--    Francophone users across CUPE, CLC, and CAPE orgs
+-- ============================================================
+INSERT INTO user_management.users (clerk_id, email, first_name, last_name, locale, timezone, is_active)
+VALUES
+  -- NZILA (all en-CA)
+  ('user_35NlrrNcfTv0DMh2kzBHyXZRtpb', 'aubert@nzila.app',                  'Aubert',       'Nungisa',      'en-CA', 'America/Toronto', true),
+  ('user_37Zo7OrvP4jy0J0MU5APfkDtE2V', 'admin@nzila.io',                    'Michel',       'Platform',     'en-CA', 'America/Toronto', true),
+  ('user_3A2c7Rsg6612F3BAxHxx5L29jRH', 'test.employer@nzilaventures.com',    'Sandra',       'Weatherby',    'en-CA', 'America/Toronto', true),
+  ('user_3A2c3b8lVI7gxi3Keb6xE4piwGv', 'test.fedexec@nzilaventures.com',     'Patty',        'Coates',       'en-CA', 'America/Toronto', true),
+  ('user_3A2c6sEcW7WdJSnLVVQFB28PjIU', 'test.localadmin@nzilaventures.com',  'Tania',        'Da Silva',     'en-CA', 'America/Toronto', true),
+  ('user_3A2c7AO7bbapxh9IdAgW5kXPhHu', 'test.member2@nzilaventures.com',     'Priya',        'Sharma',       'en-CA', 'America/Toronto', true),
+  ('user_3A2c75rcBNDcTYtkjnNgbYLqsEx', 'test.member1@nzilaventures.com',     'Carlos',       'Rivera',       'en-CA', 'America/Toronto', true),
+  ('user_3A2c7IXYOHgNMiIdOte7C5MEwFd', 'test.member3@nzilaventures.com',     'Ahmed',        'Hassan',       'en-CA', 'America/Toronto', true),
+  ('user_3A2c3apBW0oMKPX2CjIMd8b1ujq', 'test.nationaloff@nzilaventures.com', 'Mark',         'Hancock',      'en-CA', 'America/Toronto', true),
+  ('user_3A2c3SaKc0xFearcu0NbUL2lhDF', 'test.platformlead@nzilaventures.com','David',        'Nkemdirim',    'en-CA', 'America/Toronto', true),
+  ('user_3A2c6rLMOmF45HEkaU7XdQp05Zk', 'test.president@nzilaventures.com',   'Tim',          'Maguire',      'en-CA', 'America/Toronto', true),
+  ('user_3A2c729gwvVEXyC6vc2ICqzihxp', 'test.steward@nzilaventures.com',     'Keisha',       'Brown',        'en-CA', 'America/Toronto', true),
+  -- CLC (bilingual org — mix of en-CA and fr-CA)
+  ('user_3BSyEWUb0cnQ56CSS0W0fK8g35a', 'h.yussuff@clc-ctc.ca',    'Hassan',       'Yussuff',      'en-CA', 'America/Toronto', true),
+  ('user_3BSyEa51htBN51y0YxG9a9Elp2L', 'm.walker@clc-ctc.ca',     'Marie',        'Clarke Walker','en-CA', 'America/Toronto', true),
+  ('user_3BSzDRcx41T9Pq06KAhtQkFmi8T', 'd.bolduc@clc-ctc.ca',     'Denis',        'Bolduc',       'fr-CA', 'America/Toronto', true),
+  ('user_3BSzDdNeiCPn9x4M95Deq5vnWkv', 's.tremblay@clc-ctc.ca',   'Sophie',       'Tremblay',     'fr-CA', 'America/Toronto', true),
+  ('user_3BSzDYPQ9F0SAJkkkFk2pSisOii', 'j.nguyen@clc-ctc.ca',     'James',        'Nguyen',       'en-CA', 'America/Toronto', true),
+  ('user_3BSzDZezfNN1Nw6YvP9hoYDDuxK', 'r.martin@clc-ctc.ca',     'Rebecca',      'Martin',       'en-CA', 'America/Toronto', true),
+  ('user_3BSzDjuKqbDZAHQmjVJccs9r9mq', 'l.picard@clc-ctc.ca',     'Louis',        'Picard',       'fr-CA', 'America/Toronto', true),
+  ('user_3BSzDiXRbv3kAsmbUqzOjvVv7o7', 'a.varga@clc-ctc.ca',      'Angela',       'Varga',        'en-CA', 'America/Toronto', true),
+  ('user_3BSzDlKgwVGWHOKtHluyRSdJNTb', 'p.oconnor@clc-ctc.ca',    'Patrick',      'O''Connor',    'en-CA', 'America/Toronto', true),
+  ('user_3BSzDtwjg8WXJf36fw9wjVTu8yX', 'f.alrashid@clc-ctc.ca',   'Fatima',       'Al-Rashid',    'en-CA', 'America/Toronto', true),
+  -- CAPE (bilingual org — mix of en-CA and fr-CA)
+  ('user_3BSyETlaLS6t8wuol22bVECjPFM', 'g.phillips@acep-cape.ca',  'Greg',         'Phillips',     'en-CA', 'America/Toronto', true),
+  ('user_3BSyEi6TduTzKp2mZigpD6D746h', 'e.tremblay@acep-cape.ca',  'Emmanuelle',   'Tremblay',     'fr-CA', 'America/Toronto', true),
+  ('user_3BSzDo4cpXO7qTM0bY800AuLOd2', 'b.faulkner@acep-cape.ca',  'Brian',        'Faulkner',     'en-CA', 'America/Toronto', true),
+  ('user_3BSzDqnxMraAlxaRvhyrTabrTOE', 'c.bertrand@acep-cape.ca',  'Chantal',      'Bertrand',     'fr-CA', 'America/Toronto', true),
+  ('user_3BSzE0qWBvXm6eP75nAukpBbpvk', 'm.savard@acep-cape.ca',    'Mike',         'Savard',       'fr-CA', 'America/Toronto', true),
+  ('user_3BSzDyCmU8iKsYeD1tyBqkDfBFP', 'n.ouellet@acep-cape.ca',   'Nadia',        'Ouellet',      'fr-CA', 'America/Toronto', true),
+  ('user_3BSzEAPted20wutKC5lY8lTn9jZ', 'd.kim@acep-cape.ca',        'Daniel',       'Kim',          'en-CA', 'America/Toronto', true),
+  ('user_3BSzE9z6NFV3hbYd4Fu2ufoL4rI', 's.lefebvre@acep-cape.ca',   'Sarah',        'Lefebvre',     'fr-CA', 'America/Toronto', true),
+  ('user_3BSzE5AtIbImjHukqc0yM9EXQdu', 'a.moreau@acep-cape.ca',     'Alexandre',    'Moreau',       'fr-CA', 'America/Toronto', true),
+  ('user_3BSzEIjI6LSWANw6ssfwXcxxnhT', 'j.walsh@acep-cape.ca',      'Jennifer',     'Walsh',        'en-CA', 'America/Toronto', true),
+  ('user_3BSzEIXiSqVXnNYgymDZ1PY6ZhY', 'p.desmarais@acep-cape.ca',  'Pierre',       'Desmarais',    'fr-CA', 'America/Toronto', true),
+  ('user_3BSzEIf1ARXNRQOs3d5Qju58yNZ', 'a.hassan@acep-cape.ca',     'Amira',        'Hassan',       'en-CA', 'America/Toronto', true),
+  -- CUPE Local 123 (bilingual org — mix of en-CA and fr-CA)
+  ('user_3BP6IkK6vgBW4XjSTqfd3CsBjjv', 'grace.lee@city.toronto.ca',      'Grace',         'Lee',          'en-CA', 'America/Toronto', true),
+  ('user_3BP6Ienqg55Bk54Q8I3K5hh4Mk8', 'alice.johnson@city.toronto.ca',  'Alice',         'Johnson',      'en-CA', 'America/Toronto', true),
+  ('user_3BP6IlC0zg9MwHJDDNn7KCcR0MV', 'bob.smith@city.toronto.ca',      'Bob',           'Smith',        'en-CA', 'America/Toronto', true),
+  ('user_3BSzhd4q6moCIlT3PhkWbdiAhtA', 'mc.dubois@city.toronto.ca',      'Marie-Claire',  'Dubois',       'fr-CA', 'America/Toronto', true),
+  ('user_3BSzhdQTA7fsGN5kUPfXJpMTK1O', 'jp.tremblay@city.toronto.ca',    'Jean-Pierre',   'Tremblay',     'fr-CA', 'America/Toronto', true),
+  ('user_3BSzhpCQGDtA22YfStHM5ksq6pI', 'd.thompson@city.toronto.ca',     'David',         'Thompson',     'en-CA', 'America/Toronto', true),
+  ('user_3BSzhnlEbmEnazjOxZdVE2eXO64', 'p.patel@city.toronto.ca',        'Priya',         'Patel',        'en-CA', 'America/Toronto', true),
+  ('user_3BSzhk06aD2b1kK5jUuMlmy7vGu', 'm.rossi@city.toronto.ca',        'Marco',         'Rossi',        'en-CA', 'America/Toronto', true),
+  ('user_3BSzhvBJ63gV7BmDQlH6VTLm18g', 'n.lafontaine@city.toronto.ca',   'Nathalie',      'Lafontaine',   'fr-CA', 'America/Toronto', true),
+  ('user_3BSzhpyvCHVWm3o4QSYs87ufGGg', 'k.obrien@city.toronto.ca',       'Kevin',         'O''Brien',     'en-CA', 'America/Toronto', true)
+ON CONFLICT (clerk_id) DO UPDATE SET
+  locale     = EXCLUDED.locale,
+  first_name = EXCLUDED.first_name,
+  last_name  = EXCLUDED.last_name,
+  timezone   = EXCLUDED.timezone,
+  is_active  = EXCLUDED.is_active;
+
+-- ============================================================
+-- 7. Remove extra organizations (not in core 4)
 --    Clear FK references from populated tables first
 -- ============================================================
 

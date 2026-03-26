@@ -68,14 +68,15 @@ describe('CERT — Real Clerk User IDs per Org', () => {
     expect(capeUserMatches?.length ?? 0).toBeGreaterThanOrEqual(22)
   })
 
-  it('CUPE has at least 3 real Clerk user IDs (user_*)', () => {
+  it('CUPE has at least 10 real Clerk user IDs (user_*)', () => {
     const cupeUserMatches = seedSql.match(/\('user_[A-Za-z0-9]+',\s*'9210418f/g)
-    expect(cupeUserMatches?.length ?? 0).toBeGreaterThanOrEqual(3)
+    expect(cupeUserMatches?.length ?? 0).toBeGreaterThanOrEqual(10)
   })
 
-  it('no synthetic user IDs remain (clc-user-*, cape-user-*)', () => {
+  it('no synthetic user IDs remain (clc-user-*, cape-user-*, cupe-user-*)', () => {
     expect(seedSql).not.toMatch(/clc-user-\d+/)
     expect(seedSql).not.toMatch(/cape-user-\d+/)
+    expect(seedSql).not.toMatch(/cupe-user-\d+/)
   })
 
   it('platform admins appear in all 4 orgs', () => {
@@ -119,6 +120,34 @@ describe('CERT — Deploy Workflow Auth Vars', () => {
 
   it('deploy-union-eyes.yml passes CLERK_JWKS_URL for Django sidecar', () => {
     expect(deployWf).toContain('CLERK_JWKS_URL')
+  })
+})
+
+// --------------------------------------------------------------------------
+// Locale-Based Users (i18n Testing)
+// --------------------------------------------------------------------------
+describe('CERT — Locale-Based Users for i18n', () => {
+  it('seed SQL populates user_management.users table', () => {
+    expect(seedSql).toContain('user_management.users')
+  })
+
+  it('fr-CA locale users exist in seed (francophone)', () => {
+    const frCaMatches = seedSql.match(/'fr-CA'/g)
+    // At least 10 fr-CA users across CLC, CAPE, CUPE
+    expect(frCaMatches?.length ?? 0).toBeGreaterThanOrEqual(10)
+  })
+
+  it('en-CA locale users exist in seed', () => {
+    const enCaMatches = seedSql.match(/'en-CA'/g)
+    expect(enCaMatches?.length ?? 0).toBeGreaterThanOrEqual(20)
+  })
+
+  it('CUPE org settings are bilingual', () => {
+    expect(seedSql).toMatch(/cupe-local-123[\s\S]*"language"\s*:\s*"bilingual"/)
+  })
+
+  it('CLC org settings are bilingual', () => {
+    expect(seedSql).toMatch(/slug\s*=\s*'clc'[\s\S]*"language"\s*:\s*"bilingual"/)
   })
 })
 
