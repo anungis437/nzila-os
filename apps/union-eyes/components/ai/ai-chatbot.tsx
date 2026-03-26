@@ -20,7 +20,7 @@ import {
   DropdownMenuTrigger,
 } from "@/components/ui/dropdown-menu";
 import { ScrollArea } from "@/components/ui/scroll-area";
-import { Loader2, Send, ThumbsUp, ThumbsDown, FileText, MoreVertical, Archive, Trash2 } from "lucide-react";
+import { Loader2, Send, ThumbsUp, ThumbsDown, FileText, MoreVertical, Archive, Trash2, ClipboardList, Scale, FileSignature, ShieldAlert } from "lucide-react";
 import { useToast } from "@/lib/hooks/use-toast";
 
 interface Message {
@@ -58,10 +58,10 @@ export function AIChatbot() {
   
   // Sample suggestions
   const suggestions = [
-    { category: "Grievance", title: "How do I file a grievance?", icon: "ðŸ“‹" },
-    { category: "Rights", title: "What are my workplace rights?", icon: "âš–ï¸" },
-    { category: "Contract", title: "Explain my collective agreement", icon: "ðŸ“„" },
-    { category: "Safety", title: "Report a safety concern", icon: "âš ï¸" },
+    { category: "Grievance", title: "How do I file a grievance?", icon: <ClipboardList size={24} className="text-blue-600" /> },
+    { category: "Rights", title: "What are my workplace rights?", icon: <Scale size={24} className="text-blue-600" /> },
+    { category: "Contract", title: "Explain my collective agreement", icon: <FileSignature size={24} className="text-blue-600" /> },
+    { category: "Safety", title: "Report a safety concern", icon: <ShieldAlert size={24} className="text-amber-600" /> },
   ];
   
   // Load sessions
@@ -354,7 +354,7 @@ export function AIChatbot() {
                     >
                       <CardContent className="p-4">
                         <div className="flex items-center gap-2 mb-2">
-                          <span className="text-2xl">{suggestion.icon}</span>
+                          {suggestion.icon}
                           <Badge variant="secondary">{suggestion.category}</Badge>
                         </div>
                         <p className="text-sm font-medium">{suggestion.title}</p>
