@@ -227,7 +227,7 @@ alert('Failed to sync calendar');
   }
 
   return (
-    <div className="flex h-screen">
+    <div className="flex h-full min-h-screen">
       {/* Sidebar */}
       <CalendarSidebar
         calendars={calendars}
