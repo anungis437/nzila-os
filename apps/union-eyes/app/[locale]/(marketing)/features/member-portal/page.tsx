@@ -1,5 +1,5 @@
 /**
- * Locale-aware Member Portal feature page.
+ * Member Portal & Engagement module page.
  * Accessible at /{locale}/features/member-portal — fully translated.
  */
 export const dynamic = 'force-dynamic';

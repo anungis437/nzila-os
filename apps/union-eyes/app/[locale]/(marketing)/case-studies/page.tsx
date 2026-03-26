@@ -129,13 +129,13 @@ export default function LocaleCaseStudiesPage() {
         {/* CTA */}
         <div className="mt-12 text-center">
           <p className="text-lg text-gray-600 mb-4">
-            {isFr ? 'Votre syndicat pourrait être la prochaine réussite.' : 'Your union could be the next success story.'}
+            {isFr ? 'Votre organisation pourrait \u00eatre le prochain d\u00e9ploiement contr\u00f4l\u00e9.' : 'Your organization could be the next controlled deployment.'}
           </p>
           <Link
             href={`/${locale}/pilot-request`}
             className="inline-flex items-center px-6 py-3 bg-blue-700 text-white font-semibold rounded-lg hover:bg-blue-800 transition-colors"
           >
-            {isFr ? 'Demander un projet pilote' : 'Request a pilot program'}
+            {isFr ? 'D\u00e9marrer un pilote contr\u00f4l\u00e9' : 'Start a Controlled Pilot'}
           </Link>
         </div>
       </div>

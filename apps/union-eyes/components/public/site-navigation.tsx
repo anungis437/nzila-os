@@ -15,19 +15,20 @@ import { motion, AnimatePresence } from 'framer-motion';
 import LanguageSwitcher from '@/components/language-switcher';
 
 const navigation = [
-  { name: 'Home',         href: '/' },
-  { name: 'Story',        href: '/story' },
-  { name: 'Pricing',      href: '/pricing' },
-  { name: 'Case Studies', href: '/case-studies' },
-  { name: 'Status',       href: '/status' },
-  { name: 'Contact',      href: '/contact' },
+  { name: 'Home',                href: '/' },
+  { name: 'Story',               href: '/story' },
+  { name: 'Pricing',             href: '/pricing' },
+  { name: 'Trust & Compliance',  href: '/en-CA/trust' },
+  { name: 'Case Studies',        href: '/case-studies' },
+  { name: 'Status',              href: '/status' },
+  { name: 'Contact',             href: '/contact' },
 ];
 
 const platformLinks = [
-  { name: 'Grievance Tracking',    href: '/features/grievance-tracking' },
+  { name: 'Case Management',       href: '/features/grievance-tracking' },
   { name: 'Member Portal',         href: '/features/member-portal' },
-  { name: 'AI Workbench',          href: '/features/ai-workbench' },
-  { name: 'Analytics & Reporting', href: '/features/analytics' },
+  { name: 'Intelligence',          href: '/features/ai-workbench' },
+  { name: 'Financial Allocation',  href: '/features/analytics' },
 ];
 
 export default function SiteNavigation() {

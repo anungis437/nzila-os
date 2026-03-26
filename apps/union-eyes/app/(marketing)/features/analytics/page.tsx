@@ -1,5 +1,5 @@
 /**
- * Analytics & Reporting — Feature marketing page
+ * Financial Allocation & Billing — Platform module page
  *
  * Describes reporting, dashboards, and data tools.
  * Tone: Practical — leadership needs data, stewards need simplicity.

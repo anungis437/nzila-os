@@ -1,5 +1,5 @@
 /**
- * Locale-aware Analytics & Reporting feature page.
+ * Financial Allocation & Billing module page.
  * Accessible at /{locale}/features/analytics — fully translated.
  */
 export const dynamic = 'force-dynamic';

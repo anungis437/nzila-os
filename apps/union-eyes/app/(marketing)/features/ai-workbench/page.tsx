@@ -1,5 +1,5 @@
 /**
- * AI Workbench — Feature marketing page
+ * Intelligence & Insights — Platform module page
  *
  * Describes AI capabilities: triage, precedent matching, document intelligence.
  * Tone: Honest about AI — useful tool, not magic. Always under human control.

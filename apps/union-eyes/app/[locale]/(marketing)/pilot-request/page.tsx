@@ -22,63 +22,89 @@ import { logger } from '@/lib/logger';
 const SECTORS = [
   'Healthcare',
   'Education',
-  'Construction',
-  'Transportation',
+  'Construction & Trades',
+  'Transportation & Logistics',
   'Public Service',
   'Manufacturing',
+  'Protective Services',
+  'Hospitality & Service',
   'Other',
 ];
 
 const SECTOR_FR: Record<string, string> = {
   Healthcare: 'Santé',
   Education: 'Éducation',
-  Construction: 'Construction',
-  Transportation: 'Transport',
+  'Construction & Trades': 'Construction et métiers',
+  'Transportation & Logistics': 'Transport et logistique',
   'Public Service': 'Fonction publique',
   Manufacturing: 'Fabrication',
+  'Protective Services': 'Services de protection',
+  'Hospitality & Service': 'Hôtellerie et services',
   Other: 'Autre',
 };
 
 const PROVINCES = ['AB', 'BC', 'MB', 'NB', 'NL', 'NS', 'ON', 'PE', 'QC', 'SK'];
 
 const CHALLENGES_EN = [
-  'Lost or missing documents',
-  'Manual tracking processes',
-  'No audit trail',
-  'Inconsistent case handling',
-  'Long resolution times',
-  'Poor member communication',
-  'Difficult reporting',
-  'Limited transparency',
+  'No financial audit trail',
+  'Manual tracking or spreadsheets',
+  'Inconsistent case handling across locals',
+  'No role-based access control',
+  'Parent/local allocation opacity',
+  'Difficult compliance reporting',
+  'Limited member transparency',
+  'Fragmented document management',
+  'No centralized governance oversight',
 ];
 
 const CHALLENGES_FR: Record<string, string> = {
-  'Lost or missing documents': 'Documents perdus ou manquants',
-  'Manual tracking processes': 'Processus de suivi manuels',
-  'No audit trail': "Pas de piste d'audit",
-  'Inconsistent case handling': 'Traitement de dossiers incohérent',
-  'Long resolution times': 'Délais de résolution trop longs',
-  'Poor member communication': 'Communication insuffisante avec les membres',
-  'Difficult reporting': 'Rapports difficiles à produire',
-  'Limited transparency': 'Transparence limitée',
+  'No financial audit trail': "Aucune piste d'audit financière",
+  'Manual tracking or spreadsheets': 'Suivi manuel ou feuilles de calcul',
+  'Inconsistent case handling across locals': 'Traitement de dossiers incohérent entre les sections locales',
+  'No role-based access control': "Pas de contrôle d'accès basé sur les rôles",
+  'Parent/local allocation opacity': 'Opacité des allocations parent/local',
+  'Difficult compliance reporting': 'Rapports de conformité difficiles',
+  'Limited member transparency': 'Transparence limitée envers les membres',
+  'Fragmented document management': 'Gestion documentaire fragmentée',
+  'No centralized governance oversight': 'Aucune surveillance de gouvernance centralisée',
 };
 
 const GOALS_EN = [
-  'Faster grievance resolution',
-  'Better documentation',
-  'Member self-service',
-  'Real-time reporting',
-  'Improved transparency',
-  'AI-assisted case management',
+  'Auditable financial controls',
+  'Role-based access and entitlements',
+  'Structured grievance and case workflows',
+  'Parent-to-local fund allocation transparency',
+  'Real-time governance dashboards',
+  'Member self-service portal',
+  'Compliance-ready documentation',
+  'Intelligence-assisted decision support',
 ];
 
 const GOALS_FR: Record<string, string> = {
-  'Faster grievance resolution': 'Résolution plus rapide des griefs',
-  'Better documentation': 'Meilleure documentation',
-  'Member self-service': 'Libre-service pour les membres',
-  'Real-time reporting': 'Rapports en temps réel',
-  'Improved transparency': 'Transparence améliorée',
-  'AI-assisted case management': 'Gestion des dossiers assistée par IA',
+  'Auditable financial controls': 'Contrôles financiers vérifiables',
+  'Role-based access and entitlements': 'Accès et droits basés sur les rôles',
+  'Structured grievance and case workflows': 'Flux de travail structurés pour griefs et dossiers',
+  'Parent-to-local fund allocation transparency': 'Transparence de l\'allocation des fonds parent-local',
+  'Real-time governance dashboards': 'Tableaux de bord de gouvernance en temps réel',
+  'Member self-service portal': 'Portail libre-service pour les membres',
+  'Compliance-ready documentation': 'Documentation prête pour la conformité',
+  'Intelligence-assisted decision support': "Aide à la décision assistée par l'intelligence",
+};
+
+const MODULES_EN = [
+  'Case & Grievance Management',
+  'Member Portal & Engagement',
+  'Financial Allocation & Billing',
+  'Intelligence & Insights',
+  'Governance & Oversight',
+];
+
+const MODULES_FR: Record<string, string> = {
+  'Case & Grievance Management': 'Gestion des griefs et dossiers',
+  'Member Portal & Engagement': 'Portail et engagement des membres',
+  'Financial Allocation & Billing': 'Allocation financière et facturation',
+  'Intelligence & Insights': 'Intelligence et analyse',
+  'Governance & Oversight': 'Gouvernance et supervision',
 };
 
 export default function LocalePilotRequestPage() {
@@ -94,7 +120,7 @@ export default function LocalePilotRequestPage() {
     sectors: [],
     challenges: [],
     goals: [],
-    responses: {},
+    responses: { modules: [] as string[] },
   });
   const [assessment, setAssessment] = useState<ReadinessAssessmentResult | null>(null);
   const [submitting, setSubmitting] = useState(false);
@@ -109,6 +135,18 @@ export default function LocalePilotRequestPage() {
       return {
         ...prev,
         [field]: current.includes(value) ? current.filter((v) => v !== value) : [...current, value],
+      };
+    });
+
+  const toggleModule = (value: string) =>
+    setFormData((prev) => {
+      const current = ((prev.responses as Record<string, unknown>)?.modules as string[]) ?? [];
+      return {
+        ...prev,
+        responses: {
+          ...(prev.responses as object),
+          modules: current.includes(value) ? current.filter((v) => v !== value) : [...current, value],
+        },
       };
     });
 
@@ -155,8 +193,8 @@ export default function LocalePilotRequestPage() {
   };
 
   const stepLabels = isFr
-    ? ['Organisation', 'Contexte', 'Objectifs', 'Préparation', 'Évaluation']
-    : ['Organization', 'Context', 'Goals', 'Readiness', 'Assessment'];
+    ? ['Organisation', 'Contexte', 'Modules & Objectifs', 'Pr\u00e9paration', '\u00c9valuation']
+    : ['Organization', 'Context', 'Modules & Goals', 'Readiness', 'Assessment'];
 
   return (
     <div className="min-h-screen bg-gray-50 py-12 px-4 sm:px-6 lg:px-8">
@@ -171,8 +209,8 @@ export default function LocalePilotRequestPage() {
           variant="trust"
           message={
             isFr
-              ? "Ceci est une démarche sans pression. Vous obtiendrez une évaluation instantanée de préparation avant tout engagement."
-              : "This is a no-pressure exploration. You'll get an instant readiness assessment before any commitment."
+              ? "Chaque d\u00e9ploiement pilote est d\u00e9limit\u00e9 par contrat, contr\u00f4l\u00e9 par module et assujetti aux exigences de gouvernance de votre organisation."
+              : "Every pilot deployment is contract-scoped, module-controlled, and subject to your organization\u2019s governance requirements."
           }
           className="mb-8"
         />
@@ -208,7 +246,7 @@ export default function LocalePilotRequestPage() {
                   value={formData.organizationName ?? ''}
                   onChange={(e) => set('organizationName', e.target.value)}
                   className={inputCls}
-                  placeholder={isFr ? 'ex. Syndicat des travailleurs de la santé local 123' : 'e.g., Healthcare Workers Union Local 123'}
+                  placeholder={isFr ? 'ex. SCFP Section locale 123' : 'e.g., CUPE Local 123'}
                 />
               </Field>
 
@@ -253,7 +291,7 @@ export default function LocalePilotRequestPage() {
           {step === 2 && (
             <div className="space-y-6">
               <h2 className="text-2xl font-bold text-gray-900">
-                {isFr ? 'Votre contexte actuel' : 'Your current context'}
+                {isFr ? 'Votre contexte op\u00e9rationnel' : 'Your operational context'}
               </h2>
 
               <Field label={isFr ? 'Juridictions *' : 'Jurisdictions *'}>
@@ -282,11 +320,11 @@ export default function LocalePilotRequestPage() {
                   value={formData.currentSystem ?? ''}
                   onChange={(e) => set('currentSystem', e.target.value)}
                   className={inputCls}
-                  placeholder={isFr ? 'ex. Feuilles Excel, dossiers papier, logiciel existant' : 'e.g., Excel spreadsheets, paper files, existing software'}
+                  placeholder={isFr ? 'ex. Feuilles Excel, fichiers papier, logiciel existant' : 'e.g., Excel spreadsheets, paper files, legacy software'}
                 />
               </Field>
 
-              <Field label={isFr ? 'Défis actuels (cochez tout ce qui s\'applique)' : 'Current Challenges (Select all that apply)'}>
+              <Field label={isFr ? 'Défis de gouvernance actuels (cochez tout ce qui s\'applique)' : 'Current governance challenges (select all that apply)'}>
                 {CHALLENGES_EN.map((challenge) => (
                   <label key={challenge} className="flex items-center gap-2">
                     <input type="checkbox" checked={formData.challenges?.includes(challenge)} onChange={() => toggle('challenges', challenge)} />
@@ -306,10 +344,19 @@ export default function LocalePilotRequestPage() {
           {step === 3 && (
             <div className="space-y-6">
               <h2 className="text-2xl font-bold text-gray-900">
-                {isFr ? 'Vos objectifs' : 'Your goals'}
+                {isFr ? 'Modules et objectifs' : 'Modules & goals'}
               </h2>
 
-              <Field label={isFr ? 'Que souhaitez-vous accomplir? *' : 'What do you want to accomplish? *'}>
+              <Field label={isFr ? 'Modules d\u2019int\u00e9r\u00eat *' : 'Modules of Interest *'}>
+                {MODULES_EN.map((mod) => (
+                  <label key={mod} className="flex items-center gap-2">
+                    <input type="checkbox" checked={((formData.responses as Record<string, unknown>)?.modules as string[] ?? []).includes(mod)} onChange={() => toggleModule(mod)} />
+                    <span>{isFr ? MODULES_FR[mod] : mod}</span>
+                  </label>
+                ))}
+              </Field>
+
+              <Field label={isFr ? 'Objectifs de gouvernance (cochez tout ce qui s\u2019applique) *' : 'Governance objectives (select all that apply) *'}>
                 {GOALS_EN.map((goal) => (
                   <label key={goal} className="flex items-center gap-2">
                     <input type="checkbox" checked={formData.goals?.includes(goal)} onChange={() => toggle('goals', goal)} />
@@ -344,10 +391,10 @@ export default function LocalePilotRequestPage() {
           {step === 4 && (
             <div className="space-y-6">
               <h2 className="text-2xl font-bold text-gray-900">
-                {isFr ? 'Niveau de préparation' : 'Readiness level'}
+                {isFr ? 'Préparation de la gouvernance' : 'Governance readiness'}
               </h2>
 
-              <Field label={isFr ? 'Avez-vous le soutien de la direction? *' : 'Do you have leadership support? *'}>
+              <Field label={isFr ? 'Avez-vous le soutien de la direction exécutive?' : 'Do you have executive leadership support?'}>
                 {(['yes', 'no', 'unsure'] as const).map((v) => (
                   <label key={v} className="flex items-center gap-2 capitalize">
                     <input
@@ -369,7 +416,7 @@ export default function LocalePilotRequestPage() {
                 ))}
               </Field>
 
-              <Field label={isFr ? 'Quel est votre délai préféré?' : 'What is your preferred timeline?'}>
+              <Field label={isFr ? 'Quel est votre délai de déploiement préféré?' : 'What is your preferred deployment timeline?'}>
                 <select
                   value={(formData.responses as Record<string, string>)?.timeline ?? ''}
                   onChange={(e) =>
@@ -391,7 +438,7 @@ export default function LocalePilotRequestPage() {
               <div className="flex gap-4">
                 <Btn variant="secondary" onClick={() => setStep(3)}>{isFr ? 'Retour' : 'Back'}</Btn>
                 <Btn onClick={handleAssessReadiness} disabled={!isFormValid}>
-                  {isFr ? 'Évaluer ma préparation' : 'Assess my readiness'}
+                  {isFr ? 'Évaluer la préparation' : 'Assess deployment readiness'}
                 </Btn>
               </div>
             </div>
@@ -401,13 +448,13 @@ export default function LocalePilotRequestPage() {
           {step === 5 && assessment && (
             <div className="space-y-6">
               <h2 className="text-2xl font-bold text-gray-900">
-                {isFr ? 'Votre évaluation de préparation' : 'Your Readiness Assessment'}
+                {isFr ? 'Votre évaluation de déploiement' : 'Your Deployment Readiness Assessment'}
               </h2>
 
               <div className="text-center p-6 bg-blue-50 rounded-lg">
                 <p className="text-5xl font-bold text-blue-700">{assessment.score}/100</p>
                 <p className="text-lg font-medium text-blue-900 mt-2">{assessment.level}</p>
-                <p className="text-sm text-blue-700 mt-1">{isFr ? 'Délai estimé de mise en place :' : 'Estimated setup time:'} {assessment.estimatedSetupTime}</p>
+                <p className="text-sm text-blue-700 mt-1">{isFr ? 'Délai estimé de déploiement :' : 'Estimated deployment timeline:'} {assessment.estimatedSetupTime}</p>
               </div>
 
               <div>
@@ -452,7 +499,8 @@ export default function LocalePilotRequestPage() {
                 <Btn onClick={handleSubmit} disabled={submitting}>
                   {submitting
                     ? (isFr ? 'Envoi en cours…' : 'Submitting…')
-                    : (isFr ? 'Soumettre ma demande' : 'Submit my application')}
+                    : (isFr ? 'Soumettre la demande de pilote' : 'Submit pilot request')}
+                </Btn>
                 </Btn>
               </div>
             </div>
@@ -463,12 +511,12 @@ export default function LocalePilotRequestPage() {
             <div className="text-center space-y-4 py-8">
               <div className="text-5xl">🎉</div>
               <h2 className="text-2xl font-bold text-gray-900">
-                {isFr ? 'Demande reçue!' : 'Application received!'}
+                {isFr ? 'Demande de pilote reçue!' : 'Pilot request received!'}
               </h2>
               <p className="text-gray-600 max-w-md mx-auto">
                 {isFr
-                  ? "Merci de votre intérêt pour Union Eyes. Nous vous répondrons dans les 2 à 3 jours ouvrables."
-                  : "Thank you for your interest in Union Eyes. We'll be in touch within 2–3 business days."}
+                  ? "Merci de votre intérêt pour Union Eyes. Notre équipe de déploiement examinera votre demande et vous contactera dans les 2 à 3 jours ouvrables pour discuter du cadrage."
+                  : "Thank you for your interest in Union Eyes. Our deployment team will review your request and be in touch within 2\u20133 business days to discuss scoping."}
               </p>
             </div>
           )}

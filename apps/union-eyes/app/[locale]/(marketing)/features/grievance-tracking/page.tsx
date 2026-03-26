@@ -1,5 +1,5 @@
 /**
- * Locale-aware Grievance Tracking feature page.
+ * Case & Grievance Management module page.
  * Accessible at /{locale}/features/grievance-tracking — fully translated.
  */
 export const dynamic = 'force-dynamic';

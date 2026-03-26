@@ -1,5 +1,5 @@
 /**
- * Locale-aware AI Workbench feature page.
+ * Intelligence & Insights module page.
  * Accessible at /{locale}/features/ai-workbench — fully translated.
  */
 export const dynamic = 'force-dynamic';

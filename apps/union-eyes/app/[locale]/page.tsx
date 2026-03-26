@@ -3,7 +3,7 @@
  *
  * - Authenticated users → redirect to /{locale}/dashboard
  * - Unauthenticated users → render locale-aware marketing home
- *   (includes LocaleSiteNavigation + hero + CTA + LocaleSiteFooter)
+ *   (includes LocaleSiteNavigation + hero + sections + LocaleSiteFooter)
  */
 
 export const dynamic = 'force-dynamic';
@@ -26,7 +26,7 @@ export async function generateMetadata({
   const { locale } = await params;
   const t = await getTranslations({ locale, namespace: 'marketing.home' });
   return {
-    title: 'Union Eyes — AI-Powered Union Management',
+    title: 'Union Eyes — A Governed Operating System for Unions',
     description: t('heroDescription'),
   };
 }
@@ -39,7 +39,6 @@ export default async function LocaleRootPage({
   const { locale } = await params;
   const { userId } = await auth();
 
-  // Authenticated users go straight to their dashboard
   if (userId) {
     redirect(`/${locale}/dashboard`);
   }
@@ -47,13 +46,36 @@ export default async function LocaleRootPage({
   const t = await getTranslations({ locale, namespace: 'marketing.home' });
 
   const stats = [
-    { value: '35+', label: t('statsLabel.unionEntities') },
-    { value: '2',   label: t('statsLabel.timeSaved') },
+    { value: '5',      label: t('statsLabel.unionEntities') },
+    { value: '2',      label: t('statsLabel.timeSaved') },
     { value: 'PIPEDA', label: t('statsLabel.fasterResponses') },
-    { value: '5+',  label: t('statsLabel.platformUptime') },
+    { value: '5+',     label: t('statsLabel.platformUptime') },
   ];
 
-  const values = [t('value1'), t('value2'), t('value3'), t('value4')];
+  const pillars = [t('pillar1'), t('pillar2'), t('pillar3'), t('pillar4')];
+
+  const steps = [
+    { label: t('step1Label'), desc: t('step1Desc') },
+    { label: t('step2Label'), desc: t('step2Desc') },
+    { label: t('step3Label'), desc: t('step3Desc') },
+    { label: t('step4Label'), desc: t('step4Desc') },
+    { label: t('step5Label'), desc: t('step5Desc') },
+  ];
+
+  const govItems = [
+    { title: t('gov1Title'), desc: t('gov1Desc') },
+    { title: t('gov2Title'), desc: t('gov2Desc') },
+    { title: t('gov3Title'), desc: t('gov3Desc') },
+    { title: t('gov4Title'), desc: t('gov4Desc') },
+  ];
+
+  const modules = [
+    { name: t('module1'), desc: t('module1Desc') },
+    { name: t('module2'), desc: t('module2Desc') },
+    { name: t('module3'), desc: t('module3Desc') },
+    { name: t('module4'), desc: t('module4Desc') },
+    { name: t('module5'), desc: t('module5Desc') },
+  ];
 
   return (
     <>
@@ -82,8 +104,7 @@ export default async function LocaleRootPage({
 
             <ScrollReveal delay={0.1}>
               <h1 className="text-5xl md:text-7xl lg:text-8xl font-bold text-white mb-6 leading-tight">
-                {t('heroHeading').split(' ').slice(0, -2).join(' ')}<br />
-                <span className="gradient-text">{t('heroHeading').split(' ').slice(-2).join(' ')}</span>
+                {t('heroHeading')}
               </h1>
             </ScrollReveal>
 
@@ -135,8 +156,141 @@ export default async function LocaleRootPage({
           </div>
         </section>
 
-        {/* ═══════════════════════ MISSION ═══════════════════════ */}
+        {/* ═══════════════════════ PROBLEM ═══════════════════════ */}
         <section className="py-24 bg-gray-50">
+          <div className="max-w-4xl mx-auto px-4 sm:px-6 lg:px-8 text-center">
+            <ScrollReveal>
+              <span className="inline-block px-4 py-1.5 text-xs font-semibold tracking-widest uppercase rounded-full bg-red-100 text-red-700 mb-4">
+                {t('problemBadge')}
+              </span>
+              <h2 className="text-3xl md:text-5xl font-bold text-navy mb-6">
+                {t('problemHeading')}
+              </h2>
+              <p className="text-lg text-gray-700 leading-relaxed">
+                {t('problemDescription')}
+              </p>
+            </ScrollReveal>
+          </div>
+        </section>
+
+        {/* ═══════════════════════ SOLUTION ═══════════════════════ */}
+        <section className="py-24 bg-white">
+          <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
+            <div className="max-w-4xl mx-auto text-center mb-16">
+              <ScrollReveal>
+                <span className="inline-block px-4 py-1.5 text-xs font-semibold tracking-widest uppercase rounded-full bg-electric/10 text-electric mb-4">
+                  {t('solutionBadge')}
+                </span>
+                <h2 className="text-3xl md:text-5xl font-bold text-navy mb-6">
+                  {t('solutionHeading')}
+                </h2>
+                <p className="text-lg text-gray-700 leading-relaxed">
+                  {t('solutionDescription')}
+                </p>
+              </ScrollReveal>
+            </div>
+            <div className="grid grid-cols-2 md:grid-cols-4 gap-6 max-w-3xl mx-auto">
+              {pillars.map((pillar) => (
+                <ScrollReveal key={pillar}>
+                  <div className="flex items-center gap-2 justify-center">
+                    <div className="w-2 h-2 rounded-full bg-electric" />
+                    <span className="text-sm font-semibold text-navy">{pillar}</span>
+                  </div>
+                </ScrollReveal>
+              ))}
+            </div>
+          </div>
+        </section>
+
+        {/* ═══════════════════════ HOW IT WORKS ═══════════════════════ */}
+        <section className="py-24 bg-gray-50">
+          <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
+            <div className="text-center mb-16">
+              <ScrollReveal>
+                <span className="inline-block px-4 py-1.5 text-xs font-semibold tracking-widest uppercase rounded-full bg-electric/10 text-electric mb-4">
+                  {t('howItWorksBadge')}
+                </span>
+                <h2 className="text-3xl md:text-5xl font-bold text-navy">
+                  {t('howItWorksHeading')}
+                </h2>
+              </ScrollReveal>
+            </div>
+            <div className="grid md:grid-cols-5 gap-8">
+              {steps.map((step, i) => (
+                <ScrollReveal key={step.label} delay={i * 0.1}>
+                  <div className="text-center">
+                    <div className="w-12 h-12 rounded-full bg-electric text-white font-bold text-lg flex items-center justify-center mx-auto mb-4">
+                      {i + 1}
+                    </div>
+                    <h3 className="font-bold text-navy text-lg mb-2">{step.label}</h3>
+                    <p className="text-sm text-gray-600">{step.desc}</p>
+                  </div>
+                </ScrollReveal>
+              ))}
+            </div>
+          </div>
+        </section>
+
+        {/* ═══════════════════════ GOVERNANCE ═══════════════════════ */}
+        <section className="py-24 bg-white">
+          <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
+            <div className="text-center mb-16">
+              <ScrollReveal>
+                <span className="inline-block px-4 py-1.5 text-xs font-semibold tracking-widest uppercase rounded-full bg-electric/10 text-electric mb-4">
+                  {t('governanceBadge')}
+                </span>
+                <h2 className="text-3xl md:text-5xl font-bold text-navy mb-6">
+                  {t('governanceHeading')}
+                </h2>
+                <p className="text-lg text-gray-700 max-w-3xl mx-auto">
+                  {t('governanceDescription')}
+                </p>
+              </ScrollReveal>
+            </div>
+            <div className="grid md:grid-cols-2 lg:grid-cols-4 gap-8">
+              {govItems.map((item) => (
+                <ScrollReveal key={item.title}>
+                  <div className="bg-gray-50 rounded-2xl p-6 h-full">
+                    <h3 className="font-bold text-navy text-lg mb-3">{item.title}</h3>
+                    <p className="text-sm text-gray-600 leading-relaxed">{item.desc}</p>
+                  </div>
+                </ScrollReveal>
+              ))}
+            </div>
+          </div>
+        </section>
+
+        {/* ═══════════════════════ MODULES ═══════════════════════ */}
+        <section className="py-24 bg-gray-50">
+          <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
+            <div className="text-center mb-16">
+              <ScrollReveal>
+                <span className="inline-block px-4 py-1.5 text-xs font-semibold tracking-widest uppercase rounded-full bg-electric/10 text-electric mb-4">
+                  {t('modulesBadge')}
+                </span>
+                <h2 className="text-3xl md:text-5xl font-bold text-navy mb-6">
+                  {t('modulesHeading')}
+                </h2>
+                <p className="text-lg text-gray-700 max-w-3xl mx-auto">
+                  {t('modulesDescription')}
+                </p>
+              </ScrollReveal>
+            </div>
+            <div className="grid md:grid-cols-2 lg:grid-cols-3 gap-8">
+              {modules.map((mod) => (
+                <ScrollReveal key={mod.name}>
+                  <div className="bg-white rounded-2xl p-6 h-full border border-gray-100 shadow-sm">
+                    <h3 className="font-bold text-navy text-lg mb-3">{mod.name}</h3>
+                    <p className="text-sm text-gray-600 leading-relaxed">{mod.desc}</p>
+                  </div>
+                </ScrollReveal>
+              ))}
+            </div>
+          </div>
+        </section>
+
+        {/* ═══════════════════════ MISSION ═══════════════════════ */}
+        <section className="py-24 bg-white">
           <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
             <div className="grid lg:grid-cols-2 gap-16 items-center">
               <ScrollReveal direction="left">
@@ -150,7 +304,7 @@ export default async function LocaleRootPage({
                   {t('missionDescription')}
                 </p>
                 <div className="grid grid-cols-2 gap-4">
-                  {values.map((item) => (
+                  {[t('value1'), t('value2'), t('value3'), t('value4')].map((item) => (
                     <div key={item} className="flex items-center gap-2">
                       <div className="w-2 h-2 rounded-full bg-electric" />
                       <span className="text-sm font-medium text-gray-800">{item}</span>
@@ -193,19 +347,44 @@ export default async function LocaleRootPage({
           </div>
         </section>
 
-        {/* ═══════════════════════ CTA ═══════════════════════ */}
+        {/* ═══════════════════════ SOCIAL PROOF ═══════════════════════ */}
+        <section className="py-24 bg-gray-50">
+          <div className="max-w-4xl mx-auto px-4 sm:px-6 lg:px-8 text-center">
+            <ScrollReveal>
+              <span className="inline-block px-4 py-1.5 text-xs font-semibold tracking-widest uppercase rounded-full bg-green-100 text-green-700 mb-4">
+                {t('socialProofBadge')}
+              </span>
+              <h2 className="text-3xl md:text-5xl font-bold text-navy mb-6">
+                {t('socialProofHeading')}
+              </h2>
+              <p className="text-lg text-gray-700 leading-relaxed">
+                {t('socialProofDescription')}
+              </p>
+            </ScrollReveal>
+          </div>
+        </section>
+
+        {/* ═══════════════════════ FINAL CTA ═══════════════════════ */}
         <section className="py-24 bg-navy relative overflow-hidden">
           <div className="absolute inset-0 bg-mesh opacity-30" />
           <div className="relative z-10 max-w-4xl mx-auto px-4 sm:px-6 lg:px-8 text-center">
             <ScrollReveal>
-              <h2 className="text-3xl md:text-5xl font-bold text-white mb-6">{t('badge')}</h2>
-              <p className="text-xl text-gray-100 mb-10">{t('heroDescription')}</p>
-              <Link
-                href={`/${locale}/pilot-request`}
-                className="inline-flex items-center justify-center px-10 py-5 bg-electric text-white font-bold rounded-xl hover:bg-blue-700 transition-all text-lg shadow-lg shadow-electric/30 btn-press"
-              >
-                {t('ctaPrimary')}
-              </Link>
+              <h2 className="text-3xl md:text-5xl font-bold text-white mb-6">{t('finalCtaHeading')}</h2>
+              <p className="text-xl text-gray-100 mb-10">{t('finalCtaDescription')}</p>
+              <div className="flex flex-col sm:flex-row gap-4 justify-center">
+                <Link
+                  href={`/${locale}/pilot-request`}
+                  className="inline-flex items-center justify-center px-10 py-5 bg-electric text-white font-bold rounded-xl hover:bg-blue-700 transition-all text-lg shadow-lg shadow-electric/30 btn-press"
+                >
+                  {t('finalCtaPrimary')}
+                </Link>
+                <Link
+                  href={`/${locale}/trust`}
+                  className="inline-flex items-center justify-center px-8 py-4 bg-white/15 backdrop-blur text-white font-bold rounded-xl border border-white/30 hover:bg-white/25 transition-all text-lg btn-press"
+                >
+                  {t('finalCtaSecondary')}
+                </Link>
+              </div>
             </ScrollReveal>
           </div>
         </section>

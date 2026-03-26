@@ -25,6 +25,7 @@ export default function LocaleSiteNavigation() {
     { name: t('home'),        href: `/${locale}` },
     { name: t('story'),       href: `/${locale}/story` },
     { name: t('pricing'),     href: `/${locale}/pricing` },
+    { name: t('trust'),       href: `/${locale}/trust` },
     { name: t('caseStudies'), href: `/${locale}/case-studies` },
     { name: t('status'),      href: `/${locale}/status` },
     { name: t('contact'),     href: `/${locale}/contact` },

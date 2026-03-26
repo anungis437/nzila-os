@@ -1,5 +1,5 @@
 /**
- * Grievance Tracking — Feature marketing page
+ * Case & Grievance Management — Platform module page
  *
  * Describes the grievance lifecycle management system.
  * Tone: Practical, organizer-first. References real features in the app.

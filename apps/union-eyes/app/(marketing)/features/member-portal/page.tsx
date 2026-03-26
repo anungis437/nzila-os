@@ -1,5 +1,5 @@
 /**
- * Member Portal — Feature marketing page
+ * Member Portal & Engagement — Platform module page
  *
  * Describes member management, self-service portal, and engagement tools.
  * Tone: Practical, organizer-first.
