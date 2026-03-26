@@ -14,9 +14,8 @@
 -- (No unique constraint on (user_id, organization_id) so we
 --  delete-then-insert instead of upsert)
 --
--- NOTE: Clerk dev plan limits org membership to 5 per org.
--- Users with real Clerk IDs (user_*) can log in; synthetic
--- IDs (clc-user-*, cape-user-*) are DB-only placeholders.
+-- All users have real Clerk IDs (user_*) and can log in via
+-- the known-hagfish-67 Clerk instance. Password: NzilaTest2026!
 --
 -- Run via:
 --   $env:PGPASSWORD="<pw>"; & "C:\Program Files\PostgreSQL\17\bin\psql.exe" `
@@ -105,14 +104,14 @@ BEGIN
   VALUES
     ('user_3BSyEWUb0cnQ56CSS0W0fK8g35a', v_clc_id, 'admin',  'active', 'Hassan Yussuff',      'h.yussuff@clc-ctc.ca'),
     ('user_3BSyEa51htBN51y0YxG9a9Elp2L', v_clc_id, 'admin',  'active', 'Marie Clarke Walker', 'm.walker@clc-ctc.ca'),
-    ('clc-user-003', v_clc_id, 'member', 'active', 'Denis Bolduc',        'd.bolduc@clc-ctc.ca'),
-    ('clc-user-004', v_clc_id, 'member', 'active', 'Sophie Tremblay',     's.tremblay@clc-ctc.ca'),
-    ('clc-user-005', v_clc_id, 'member', 'active', 'James Nguyen',        'j.nguyen@clc-ctc.ca'),
-    ('clc-user-006', v_clc_id, 'member', 'active', 'Rebecca Martin',      'r.martin@clc-ctc.ca'),
-    ('clc-user-007', v_clc_id, 'member', 'active', 'Louis Picard',        'l.picard@clc-ctc.ca'),
-    ('clc-user-008', v_clc_id, 'member', 'active', 'Angela Varga',        'a.varga@clc-ctc.ca'),
-    ('clc-user-009', v_clc_id, 'member', 'active', 'Patrick O''Connor',   'p.oconnor@clc-ctc.ca'),
-    ('clc-user-010', v_clc_id, 'member', 'active', 'Fatima Al-Rashid',    'f.alrashid@clc-ctc.ca');
+    ('user_3BSzDRcx41T9Pq06KAhtQkFmi8T', v_clc_id, 'member', 'active', 'Denis Bolduc',        'd.bolduc@clc-ctc.ca'),
+    ('user_3BSzDdNeiCPn9x4M95Deq5vnWkv', v_clc_id, 'member', 'active', 'Sophie Tremblay',     's.tremblay@clc-ctc.ca'),
+    ('user_3BSzDYPQ9F0SAJkkkFk2pSisOii', v_clc_id, 'member', 'active', 'James Nguyen',        'j.nguyen@clc-ctc.ca'),
+    ('user_3BSzDZezfNN1Nw6YvP9hoYDDuxK', v_clc_id, 'member', 'active', 'Rebecca Martin',      'r.martin@clc-ctc.ca'),
+    ('user_3BSzDjuKqbDZAHQmjVJccs9r9mq', v_clc_id, 'member', 'active', 'Louis Picard',        'l.picard@clc-ctc.ca'),
+    ('user_3BSzDiXRbv3kAsmbUqzOjvVv7o7', v_clc_id, 'member', 'active', 'Angela Varga',        'a.varga@clc-ctc.ca'),
+    ('user_3BSzDlKgwVGWHOKtHluyRSdJNTb', v_clc_id, 'member', 'active', 'Patrick O''Connor',   'p.oconnor@clc-ctc.ca'),
+    ('user_3BSzDtwjg8WXJf36fw9wjVTu8yX', v_clc_id, 'member', 'active', 'Fatima Al-Rashid',    'f.alrashid@clc-ctc.ca');
 END $$;
 
 -- ============================================================
@@ -166,16 +165,16 @@ BEGIN
   VALUES
     ('user_3BSyETlaLS6t8wuol22bVECjPFM', v_cape_id::text, 'admin',  'active', 'Greg Phillips',        'g.phillips@acep-cape.ca'),
     ('user_3BSyEi6TduTzKp2mZigpD6D746h', v_cape_id::text, 'admin',  'active', 'Emmanuelle Tremblay',  'e.tremblay@acep-cape.ca'),
-    ('cape-user-003', v_cape_id::text, 'member', 'active', 'Brian Faulkner',       'b.faulkner@acep-cape.ca'),
-    ('cape-user-004', v_cape_id::text, 'member', 'active', 'Chantal Bertrand',     'c.bertrand@acep-cape.ca'),
-    ('cape-user-005', v_cape_id::text, 'member', 'active', 'Mike Savard',          'm.savard@acep-cape.ca'),
-    ('cape-user-006', v_cape_id::text, 'member', 'active', 'Nadia Ouellet',        'n.ouellet@acep-cape.ca'),
-    ('cape-user-007', v_cape_id::text, 'member', 'active', 'Daniel Kim',           'd.kim@acep-cape.ca'),
-    ('cape-user-008', v_cape_id::text, 'member', 'active', 'Sarah Lefebvre',       's.lefebvre@acep-cape.ca'),
-    ('cape-user-009', v_cape_id::text, 'member', 'active', 'Alexandre Moreau',     'a.moreau@acep-cape.ca'),
-    ('cape-user-010', v_cape_id::text, 'member', 'active', 'Jennifer Walsh',       'j.walsh@acep-cape.ca'),
-    ('cape-user-011', v_cape_id::text, 'member', 'active', 'Pierre Desmarais',     'p.desmarais@acep-cape.ca'),
-    ('cape-user-012', v_cape_id::text, 'member', 'active', 'Amira Hassan',         'a.hassan@acep-cape.ca');
+    ('user_3BSzDo4cpXO7qTM0bY800AuLOd2', v_cape_id::text, 'member', 'active', 'Brian Faulkner',       'b.faulkner@acep-cape.ca'),
+    ('user_3BSzDqnxMraAlxaRvhyrTabrTOE', v_cape_id::text, 'member', 'active', 'Chantal Bertrand',     'c.bertrand@acep-cape.ca'),
+    ('user_3BSzE0qWBvXm6eP75nAukpBbpvk', v_cape_id::text, 'member', 'active', 'Mike Savard',          'm.savard@acep-cape.ca'),
+    ('user_3BSzDyCmU8iKsYeD1tyBqkDfBFP', v_cape_id::text, 'member', 'active', 'Nadia Ouellet',        'n.ouellet@acep-cape.ca'),
+    ('user_3BSzEAPted20wutKC5lY8lTn9jZ', v_cape_id::text, 'member', 'active', 'Daniel Kim',           'd.kim@acep-cape.ca'),
+    ('user_3BSzE9z6NFV3hbYd4Fu2ufoL4rI', v_cape_id::text, 'member', 'active', 'Sarah Lefebvre',       's.lefebvre@acep-cape.ca'),
+    ('user_3BSzE5AtIbImjHukqc0yM9EXQdu', v_cape_id::text, 'member', 'active', 'Alexandre Moreau',     'a.moreau@acep-cape.ca'),
+    ('user_3BSzEIjI6LSWANw6ssfwXcxxnhT', v_cape_id::text, 'member', 'active', 'Jennifer Walsh',       'j.walsh@acep-cape.ca'),
+    ('user_3BSzEIXiSqVXnNYgymDZ1PY6ZhY', v_cape_id::text, 'member', 'active', 'Pierre Desmarais',     'p.desmarais@acep-cape.ca'),
+    ('user_3BSzEIf1ARXNRQOs3d5Qju58yNZ', v_cape_id::text, 'member', 'active', 'Amira Hassan',         'a.hassan@acep-cape.ca');
 
   -- Platform admins as CAPE members (org-picker visibility)
   INSERT INTO organization_members (user_id, organization_id, role, status, name, email)

@@ -39,15 +39,33 @@ const ORGS = {
 };
 
 // Users to create: [first, last, email, phone, org, clerkRole]
-// Clerk dev instance requires phone_number; org membership capped at 5.
-// NZILA=5/5, CUPE=5/5 (maxed). CLC=3/5, CAPE=3/5 → 2 slots each.
+// Clerk dev instance requires phone_number.
+// NZILA already has 12 users; CUPE has 3+2 platform admins.
 const USERS_TO_CREATE = [
-  // CLC — 2 test users (slots 4 & 5)
+  // CLC — 10 test users
   ['Hassan',  'Yussuff',       'h.yussuff@clc-ctc.ca',    '+16135210001', 'clc',  'org:admin'],
   ['Marie',   'Clarke Walker', 'm.walker@clc-ctc.ca',     '+16135210002', 'clc',  'org:member'],
-  // CAPE — 2 test users (slots 4 & 5)
+  ['Denis',   'Bolduc',        'd.bolduc@clc-ctc.ca',     '+16135210003', 'clc',  'org:member'],
+  ['Sophie',  'Tremblay',      's.tremblay@clc-ctc.ca',   '+16135210004', 'clc',  'org:member'],
+  ['James',   'Nguyen',        'j.nguyen@clc-ctc.ca',     '+16135210005', 'clc',  'org:member'],
+  ['Rebecca', 'Martin',        'r.martin@clc-ctc.ca',     '+16135210006', 'clc',  'org:member'],
+  ['Louis',   'Picard',        'l.picard@clc-ctc.ca',     '+16135210007', 'clc',  'org:member'],
+  ['Angela',  'Varga',         'a.varga@clc-ctc.ca',      '+16135210008', 'clc',  'org:member'],
+  ['Patrick', 'O Connor',      'p.oconnor@clc-ctc.ca',    '+16135210009', 'clc',  'org:member'],
+  ['Fatima',  'Al-Rashid',     'f.alrashid@clc-ctc.ca',   '+16135210010', 'clc',  'org:member'],
+  // CAPE — 12 test users
   ['Greg',    'Phillips',      'g.phillips@acep-cape.ca', '+16132360001', 'cape', 'org:admin'],
   ['Emmanuelle','Tremblay',    'e.tremblay@acep-cape.ca', '+16132360002', 'cape', 'org:member'],
+  ['Brian',   'Faulkner',      'b.faulkner@acep-cape.ca', '+16132360003', 'cape', 'org:member'],
+  ['Chantal', 'Bertrand',      'c.bertrand@acep-cape.ca', '+16132360004', 'cape', 'org:member'],
+  ['Mike',    'Savard',        'm.savard@acep-cape.ca',   '+16132360005', 'cape', 'org:member'],
+  ['Nadia',   'Ouellet',       'n.ouellet@acep-cape.ca',  '+16132360006', 'cape', 'org:member'],
+  ['Daniel',  'Kim',           'd.kim@acep-cape.ca',      '+16132360007', 'cape', 'org:member'],
+  ['Sarah',   'Lefebvre',      's.lefebvre@acep-cape.ca', '+16132360008', 'cape', 'org:member'],
+  ['Alexandre','Moreau',       'a.moreau@acep-cape.ca',   '+16132360009', 'cape', 'org:member'],
+  ['Jennifer','Walsh',         'j.walsh@acep-cape.ca',    '+16132360010', 'cape', 'org:member'],
+  ['Pierre',  'Desmarais',     'p.desmarais@acep-cape.ca','+16132360011', 'cape', 'org:member'],
+  ['Amira',   'Hassan',        'a.hassan@acep-cape.ca',   '+16132360012', 'cape', 'org:member'],
 ];
 
 // Existing NZILA users to add as NZILA org members (not yet in org)
@@ -161,9 +179,13 @@ async function main() {
     }
   }
 
-  // 2. NZILA and CUPE already at 5/5 org member limit — skip adding more
-  console.log('\n── NZILA org: 5/5 members (maxed) ──');
-  console.log('── CUPE org: 5/5 members (maxed) ──');
+  // 2. Add remaining NZILA users to NZILA org
+  console.log('\n── Adding NZILA users to org ──');
+  for (const uid of NZILA_USERS_TO_ADD) {
+    process.stdout.write(`  ${uid.slice(-8)} → NZILA... `);
+    const added = await addOrgMember(ORGS.nzila, uid, 'org:member');
+    console.log(added ? '✓' : '✗');
+  }
 
   // 3. Platform admins already in CLC, CAPE, CUPE from previous run
   console.log('\n── Verifying platform admins in CLC & CAPE ──');

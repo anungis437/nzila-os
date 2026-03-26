@@ -56,21 +56,26 @@ describe('CERT — Real Clerk User IDs per Org', () => {
     expect(userIdMatches?.length ?? 0).toBeGreaterThanOrEqual(3)
   })
 
-  it('CLC has at least 2 real Clerk user IDs (user_*)', () => {
-    // Check for user_ IDs near CLC context
-    const clcUserMatches = seedSql.match(/user_3BSyE[A-Za-z0-9]+/g)
-    expect(clcUserMatches?.length ?? 0).toBeGreaterThanOrEqual(2)
+  it('CLC has at least 10 real Clerk user IDs (user_*)', () => {
+    // CLC members all use user_3BSy* or user_3BSzD* prefixes
+    const clcUserMatches = seedSql.match(/user_3BS[yz][A-Za-z0-9]+/g)
+    expect(clcUserMatches?.length ?? 0).toBeGreaterThanOrEqual(10)
   })
 
-  it('CAPE has at least 2 real Clerk user IDs (user_*)', () => {
-    const capeUserMatches = seedSql.match(/user_3BSyE[A-Za-z0-9]+/g)
-    // CLC + CAPE share the prefix; verify CAPE-specific ones exist
-    expect(capeUserMatches?.length ?? 0).toBeGreaterThanOrEqual(4) // 2 CLC + 2 CAPE
+  it('CAPE has at least 12 real Clerk user IDs (user_*)', () => {
+    const capeUserMatches = seedSql.match(/user_3BS[yz][A-Za-z0-9]+/g)
+    // CLC(10) + CAPE(12) share similar prefixes; verify total >= 22
+    expect(capeUserMatches?.length ?? 0).toBeGreaterThanOrEqual(22)
   })
 
   it('CUPE has at least 3 real Clerk user IDs (user_*)', () => {
     const cupeUserMatches = seedSql.match(/\('user_[A-Za-z0-9]+',\s*'9210418f/g)
     expect(cupeUserMatches?.length ?? 0).toBeGreaterThanOrEqual(3)
+  })
+
+  it('no synthetic user IDs remain (clc-user-*, cape-user-*)', () => {
+    expect(seedSql).not.toMatch(/clc-user-\d+/)
+    expect(seedSql).not.toMatch(/cape-user-\d+/)
   })
 
   it('platform admins appear in all 4 orgs', () => {
