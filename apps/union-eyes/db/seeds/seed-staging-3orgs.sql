@@ -1,11 +1,22 @@
 -- ============================================================
--- STAGING SEED — 3 Core Organizations (match local dev state)
+-- STAGING SEED — 4 Pilot Organizations (match local dev state)
 --
--- Orgs: NZILA Ventures, Canadian Labour Congress, CAPE-ACEP
+-- Orgs: NZILA Ventures, Canadian Labour Congress, CAPE-ACEP,
+--       CUPE Local 123
+--
+-- Clerk Orgs (provisioned in known-hagfish-67 instance):
+--   NZILA  → org_3A1qYmVHWmeSbbZhlPMwVIrGHFQ
+--   CLC    → org_3B3NjHnvzeSJBZQE8PGQf0nmgts
+--   CAPE   → org_3B3Nj6NGSY6rT9ibI8bgFhZdMRN
+--   CUPE   → org_3BP6K4uezEa2CLEvUNDwhnJGNFg
 --
 -- Strategy: UPDATE existing orgs + DELETE/INSERT members
 -- (No unique constraint on (user_id, organization_id) so we
 --  delete-then-insert instead of upsert)
+--
+-- NOTE: Clerk dev plan limits org membership to 5 per org.
+-- Users with real Clerk IDs (user_*) can log in; synthetic
+-- IDs (clc-user-*, cape-user-*) are DB-only placeholders.
 --
 -- Run via:
 --   $env:PGPASSWORD="<pw>"; & "C:\Program Files\PostgreSQL\17\bin\psql.exe" `
@@ -77,7 +88,8 @@ SET display_name     = 'CLC',
     clc_affiliate_code = 'CLC',
     per_capita_rate  = 0.54,
     remittance_day   = 15,
-    fiscal_year_end  = '2024-12-31'
+    fiscal_year_end  = '2024-12-31',
+    clerk_organization_id = 'org_3B3NjHnvzeSJBZQE8PGQf0nmgts'
 WHERE slug = 'clc';
 
 -- Replace CLC members
@@ -91,8 +103,8 @@ BEGIN
 
   INSERT INTO organization_members (user_id, organization_id, role, status, name, email)
   VALUES
-    ('clc-user-001', v_clc_id, 'admin',  'active', 'Hassan Yussuff',      'h.yussuff@clc-ctc.ca'),
-    ('clc-user-002', v_clc_id, 'admin',  'active', 'Marie Clarke Walker', 'm.walker@clc-ctc.ca'),
+    ('user_3BSyEWUb0cnQ56CSS0W0fK8g35a', v_clc_id, 'admin',  'active', 'Hassan Yussuff',      'h.yussuff@clc-ctc.ca'),
+    ('user_3BSyEa51htBN51y0YxG9a9Elp2L', v_clc_id, 'admin',  'active', 'Marie Clarke Walker', 'm.walker@clc-ctc.ca'),
     ('clc-user-003', v_clc_id, 'member', 'active', 'Denis Bolduc',        'd.bolduc@clc-ctc.ca'),
     ('clc-user-004', v_clc_id, 'member', 'active', 'Sophie Tremblay',     's.tremblay@clc-ctc.ca'),
     ('clc-user-005', v_clc_id, 'member', 'active', 'James Nguyen',        'j.nguyen@clc-ctc.ca'),
@@ -137,7 +149,8 @@ BEGIN
       clc_affiliate_code = 'CAPE',
       per_capita_rate  = 0.54,
       remittance_day   = 15,
-      fiscal_year_end  = '2024-12-31'
+      fiscal_year_end  = '2024-12-31',
+      clerk_organization_id = 'org_3B3Nj6NGSY6rT9ibI8bgFhZdMRN'
   WHERE id = v_cape_id;
 
   -- Platform admins as CLC members (org-picker visibility)
@@ -151,8 +164,8 @@ BEGIN
 
   INSERT INTO organization_members (user_id, organization_id, role, status, name, email)
   VALUES
-    ('cape-user-001', v_cape_id::text, 'admin',  'active', 'Greg Phillips',        'g.phillips@acep-cape.ca'),
-    ('cape-user-002', v_cape_id::text, 'admin',  'active', 'Emmanuelle Tremblay',  'e.tremblay@acep-cape.ca'),
+    ('user_3BSyETlaLS6t8wuol22bVECjPFM', v_cape_id::text, 'admin',  'active', 'Greg Phillips',        'g.phillips@acep-cape.ca'),
+    ('user_3BSyEi6TduTzKp2mZigpD6D746h', v_cape_id::text, 'admin',  'active', 'Emmanuelle Tremblay',  'e.tremblay@acep-cape.ca'),
     ('cape-user-003', v_cape_id::text, 'member', 'active', 'Brian Faulkner',       'b.faulkner@acep-cape.ca'),
     ('cape-user-004', v_cape_id::text, 'member', 'active', 'Chantal Bertrand',     'c.bertrand@acep-cape.ca'),
     ('cape-user-005', v_cape_id::text, 'member', 'active', 'Mike Savard',          'm.savard@acep-cape.ca'),
@@ -172,7 +185,65 @@ BEGIN
 END $$;
 
 -- ============================================================
--- 5. Remove extra organizations (not in core 3)
+-- 5. CUPE Local 123 — insert or update pilot org
+--    UUID: 9210418f-6a4f-4dab-a7d2-4450d581dc81
+--    Clerk: org_3BP6K4uezEa2CLEvUNDwhnJGNFg
+-- ============================================================
+INSERT INTO organizations (id, name, slug, display_name, short_name, organization_type,
+  parent_id, hierarchy_level, province_territory, sectors, email, phone, website, address,
+  member_count, active_member_count, settings, features_enabled, clerk_organization_id, status)
+VALUES (
+  '9210418f-6a4f-4dab-a7d2-4450d581dc81',
+  'CUPE Local 123',
+  'cupe-local-123',
+  'CUPE Local 123',
+  'CUPE L123',
+  'local',
+  NULL, -- parent_id set below
+  2,
+  'ON',
+  '{public_service}',
+  'contact@cupelocal123.ca',
+  '+1-416-555-0123',
+  'https://cupe.ca/local-123',
+  '{"city":"Toronto","street":"100 Queen Street West","country":"CA","province":"ON","postalCode":"M5H 2N2"}'::jsonb,
+  7,
+  7,
+  '{"language":"en","fiscalYearEnd":"December 31","employer":"City of Toronto","bargainingGroups":["Inside Workers","Outside Workers","Library Workers"]}'::jsonb,
+  '{dashboard,members,claims,grievances,communications,collective-bargaining,strike-fund}',
+  'org_3BP6K4uezEa2CLEvUNDwhnJGNFg',
+  'active'
+)
+ON CONFLICT (slug) DO UPDATE SET
+  display_name     = EXCLUDED.display_name,
+  short_name       = EXCLUDED.short_name,
+  organization_type = EXCLUDED.organization_type,
+  province_territory = EXCLUDED.province_territory,
+  sectors          = EXCLUDED.sectors,
+  email            = EXCLUDED.email,
+  phone            = EXCLUDED.phone,
+  website          = EXCLUDED.website,
+  address          = EXCLUDED.address,
+  member_count     = EXCLUDED.member_count,
+  active_member_count = EXCLUDED.active_member_count,
+  settings         = EXCLUDED.settings,
+  features_enabled = EXCLUDED.features_enabled,
+  clerk_organization_id = EXCLUDED.clerk_organization_id;
+
+-- CUPE members (all have real Clerk user IDs)
+DELETE FROM organization_members
+WHERE organization_id = '9210418f-6a4f-4dab-a7d2-4450d581dc81';
+
+INSERT INTO organization_members (user_id, organization_id, role, status, name, email)
+VALUES
+  ('user_3BP6IkK6vgBW4XjSTqfd3CsBjjv', '9210418f-6a4f-4dab-a7d2-4450d581dc81', 'admin',   'active', 'Grace Lee',       'grace.lee@city.toronto.ca'),
+  ('user_3BP6Ienqg55Bk54Q8I3K5hh4Mk8', '9210418f-6a4f-4dab-a7d2-4450d581dc81', 'member',  'active', 'Alice Johnson',   'alice.johnson@city.toronto.ca'),
+  ('user_3BP6IlC0zg9MwHJDDNn7KCcR0MV', '9210418f-6a4f-4dab-a7d2-4450d581dc81', 'steward', 'active', 'Bob Smith',       'bob.smith@city.toronto.ca'),
+  ('user_35NlrrNcfTv0DMh2kzBHyXZRtpb', '9210418f-6a4f-4dab-a7d2-4450d581dc81', 'admin',   'active', 'Aubert Nungisa',  'aubert@nzila.app'),
+  ('user_37Zo7OrvP4jy0J0MU5APfkDtE2V', '9210418f-6a4f-4dab-a7d2-4450d581dc81', 'admin',   'active', 'Platform Admin',  'admin@nzila.io');
+
+-- ============================================================
+-- 6. Remove extra organizations (not in core 4)
 --    Clear FK references from populated tables first
 -- ============================================================
 
@@ -180,40 +251,40 @@ END $$;
 DELETE FROM organization_members
 WHERE organization_id NOT IN (
   SELECT id::text FROM organizations
-  WHERE slug IN ('default', 'clc', 'cape-acep')
+  WHERE slug IN ('default', 'clc', 'cape-acep', 'cupe-local-123')
 );
 
 -- Clean organization_relationships for non-core orgs
 DELETE FROM organization_relationships
 WHERE parent_org_id::text NOT IN (
-  SELECT id::text FROM organizations WHERE slug IN ('default', 'clc', 'cape-acep')
+  SELECT id::text FROM organizations WHERE slug IN ('default', 'clc', 'cape-acep', 'cupe-local-123')
 )
 OR child_org_id::text NOT IN (
-  SELECT id::text FROM organizations WHERE slug IN ('default', 'clc', 'cape-acep')
+  SELECT id::text FROM organizations WHERE slug IN ('default', 'clc', 'cape-acep', 'cupe-local-123')
 );
 
 -- Clean organization_billing_config
 DELETE FROM organization_billing_config
 WHERE organization_id NOT IN (
-  SELECT id FROM organizations WHERE slug IN ('default', 'clc', 'cape-acep')
+  SELECT id FROM organizations WHERE slug IN ('default', 'clc', 'cape-acep', 'cupe-local-123')
 );
 
 -- Clean organization_contacts
 DELETE FROM organization_contacts
 WHERE organization_id NOT IN (
-  SELECT id FROM organizations WHERE slug IN ('default', 'clc', 'cape-acep')
+  SELECT id FROM organizations WHERE slug IN ('default', 'clc', 'cape-acep', 'cupe-local-123')
 );
 
 -- Clean organization_sharing_settings
 DELETE FROM organization_sharing_settings
 WHERE organization_id NOT IN (
-  SELECT id FROM organizations WHERE slug IN ('default', 'clc', 'cape-acep')
+  SELECT id FROM organizations WHERE slug IN ('default', 'clc', 'cape-acep', 'cupe-local-123')
 );
 
 -- Clean organization_benchmark_snapshots
 DELETE FROM organization_benchmark_snapshots
 WHERE organization_id NOT IN (
-  SELECT id FROM organizations WHERE slug IN ('default', 'clc', 'cape-acep')
+  SELECT id FROM organizations WHERE slug IN ('default', 'clc', 'cape-acep', 'cupe-local-123')
 );
 
 -- Dynamically clean ALL tables with FK to organizations
@@ -225,7 +296,7 @@ BEGIN
   SELECT string_agg('''' || id::text || '''', ',')
     INTO keep_ids
     FROM organizations
-    WHERE slug IN ('default', 'clc', 'cape-acep');
+    WHERE slug IN ('default', 'clc', 'cape-acep', 'cupe-local-123');
 
   FOR rec IN
     SELECT DISTINCT tc.table_name, kcu.column_name
@@ -258,11 +329,11 @@ END $$;
 
 -- Now delete the extra organizations (children first)
 DELETE FROM organizations
-WHERE slug NOT IN ('default', 'clc', 'cape-acep')
+WHERE slug NOT IN ('default', 'clc', 'cape-acep', 'cupe-local-123')
   AND parent_id IS NOT NULL;
 
 DELETE FROM organizations
-WHERE slug NOT IN ('default', 'clc', 'cape-acep');
+WHERE slug NOT IN ('default', 'clc', 'cape-acep', 'cupe-local-123');
 
 COMMIT;
 

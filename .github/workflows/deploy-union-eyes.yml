@@ -143,6 +143,7 @@ jobs:
               "DJANGO_API_URL=http://localhost:8000" \
               "NEXT_PUBLIC_CLERK_IS_SATELLITE=false" \
               "PLATFORM_ADMIN_USER_IDS=${{ secrets.PLATFORM_ADMIN_USER_IDS }}" \
+              "SUPER_ADMIN_ORG_ID=${{ secrets.SUPER_ADMIN_ORG_ID }}" \
             --container-name ${{ env.APP_NAME }} \
             --image ${{ env.IMAGE }}:${{ github.sha }}
           # Backend runs migrations automatically on startup (Dockerfile CMD)
