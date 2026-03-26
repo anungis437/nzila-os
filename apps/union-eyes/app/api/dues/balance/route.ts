@@ -19,6 +19,23 @@ export const GET = withApi(
   async ({ organizationId }) => {
     if (!organizationId) throw ApiError.badRequest('Organization context required');
     const summary = await getLedgerSummary({ organizationId });
-    return { ...summary };
+
+    // Map ledger summary to the shape the frontend DuesBalance interface expects
+    const totalAmount = Number(summary.totalAmountCad) || 0;
+    return {
+      currentBalance: totalAmount,
+      nextDueDate: new Date(Date.now() + 30 * 86_400_000).toISOString(),
+      nextDueAmount: 0,
+      overdueAmount: 0,
+      lastPaymentDate: new Date().toISOString(),
+      lastPaymentAmount: 0,
+      isInArrears: totalAmount > 0,
+      arrearsAmount: totalAmount > 0 ? totalAmount : 0,
+      membershipStatus: 'active',
+      autoPayEnabled: false,
+      paymentMethodLast4: null,
+      // Original ledger data
+      ...summary,
+    };
   },
 );

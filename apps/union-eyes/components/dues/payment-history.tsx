@@ -42,8 +42,9 @@ export default function PaymentHistory({ userId }: PaymentHistoryProps) {
     try {
       const response = await fetch(`/api/dues/payment-history?userId=${userId}`);
       if (!response.ok) throw new Error('Failed to load payment history');
-      const data = await response.json();
-      setPayments(data);
+      const json = await response.json();
+      const items = Array.isArray(json?.data) ? json.data : Array.isArray(json) ? json : [];
+      setPayments(items);
     } catch (_error) {
 toast({
         title: 'Error',

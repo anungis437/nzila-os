@@ -45,8 +45,8 @@ export default function DuesPaymentPortal({ userId }: DuesPaymentPortalProps) {
     try {
       const response = await fetch(`/api/dues/balance?userId=${userId}`);
       if (!response.ok) throw new Error('Failed to load dues balance');
-      const data = await response.json();
-      setBalance(data);
+      const json = await response.json();
+      setBalance(json?.data ?? json);
     } catch (_error) {
 toast({
         title: 'Error',

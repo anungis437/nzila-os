@@ -44,9 +44,9 @@
 
 import { NextRequest, NextResponse } from 'next/server';
 import { auth, currentUser as clerkCurrentUser } from '@clerk/nextjs/server';
-import { eq } from 'drizzle-orm';
+import { cookies } from 'next/headers';
+import { eq, and } from 'drizzle-orm';
 import { db } from '@/db/db';
-// eslint-disable-next-line @typescript-eslint/no-unused-vars
 import { organizationMembers, organizations } from '@/db/schema';
 import { users } from '@/db/schema/domains/member';
 import {
@@ -389,6 +389,53 @@ export async function getCurrentUser(): Promise<AuthUser | null> {
       } catch {
         // Fallback to metadata if the lookup fails
         logger.warn('Failed to resolve Clerk orgId to DB UUID', { orgId });
+      }
+    }
+
+    // Cookie fallback: the client-side org picker stores the selected org UUID
+    // in the "selected_organization_id" (or "selected_org_id") cookie. If Clerk
+    // session has no active org and metadata didn't provide one, honour the
+    // cookie so that org-scoped API routes work correctly.
+    if (!resolvedOrganizationId) {
+      try {
+        const cookieStore = await cookies();
+        const cookieOrgId =
+          cookieStore.get('selected_organization_id')?.value ||
+          cookieStore.get('selected_org_id')?.value ||
+          null;
+        // Basic UUID format validation to prevent injection
+        if (cookieOrgId && /^[0-9a-f]{8}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{12}$/i.test(cookieOrgId)) {
+          // Verify the org exists in the DB
+          const [org] = await db
+            .select({ id: organizations.id })
+            .from(organizations)
+            .where(eq(organizations.id, cookieOrgId))
+            .limit(1);
+          if (org) {
+            // Platform admins can access any org; others need membership
+            const platformAdminIds = (process.env.PLATFORM_ADMIN_USER_IDS || '')
+              .split(',').map(id => id.trim()).filter(Boolean);
+            if (platformAdminIds.includes(userId)) {
+              resolvedOrganizationId = org.id;
+            } else {
+              const [membership] = await db
+                .select({ id: organizationMembers.id })
+                .from(organizationMembers)
+                .where(
+                  and(
+                    eq(organizationMembers.userId, userId),
+                    eq(organizationMembers.organizationId, cookieOrgId),
+                  ),
+                )
+                .limit(1);
+              if (membership) {
+                resolvedOrganizationId = org.id;
+              }
+            }
+          }
+        }
+      } catch {
+        // cookies() can throw in non-request contexts; ignore
       }
     }
 

@@ -212,7 +212,8 @@ export default function DuesPaymentForm(props: DuesPaymentFormProps) {
 
   useEffect(() => {
     // Don't initialize if balance is 0 or negative, Stripe not configured, or if we already have an error
-    if (props.currentBalance <= 0 || !stripeConfigured || initError) {
+    const amount = typeof props.currentBalance === 'number' ? Math.round(props.currentBalance * 100) : 0;
+    if (amount <= 0 || !stripeConfigured || initError) {
       setLoading(false);
       return;
     }
@@ -225,17 +226,20 @@ export default function DuesPaymentForm(props: DuesPaymentFormProps) {
           method: 'POST',
           headers: { 'Content-Type': 'application/json' },
           body: JSON.stringify({
-            amount: Math.round(props.currentBalance * 100),
+            amount,
           }),
           signal: controller.signal,
         });
 
         if (!response.ok) {
+          const errorBody = await response.json().catch(() => ({}));
+          console.error('[dues] create-payment-intent failed:', response.status, errorBody);
           setInitError(true);
           throw new Error('Failed to initialize payment');
         }
 
-        const { clientSecret } = await response.json();
+        const json = await response.json();
+        const clientSecret = json?.data?.clientSecret ?? json?.clientSecret;
         setClientSecret(clientSecret);
       } catch (error) {
         if ((error as Error).name === 'AbortError') return;
@@ -277,7 +281,7 @@ export default function DuesPaymentForm(props: DuesPaymentFormProps) {
   }
 
   // Show message if balance is zero or negative
-  if (props.currentBalance <= 0) {
+  if (typeof props.currentBalance !== 'number' || props.currentBalance <= 0) {
     return (
       <Card>
         <CardHeader>

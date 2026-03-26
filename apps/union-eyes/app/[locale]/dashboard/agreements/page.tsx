@@ -110,7 +110,28 @@ export default function AgreementsPage() {
         const res = await fetch('/api/v2/agreements');
         if (res.ok) {
           const json = await res.json();
-          const items = Array.isArray(json) ? json : json?.agreements ?? json?.data ?? [];
+          const raw = Array.isArray(json) ? json : json?.agreements ?? json?.data ?? [];
+          // Map DB shape to Agreement interface
+          // eslint-disable-next-line @typescript-eslint/no-explicit-any
+          const items: Agreement[] = raw.map((r: any) => ({
+            id: r.id,
+            title: r.title ?? 'Untitled Agreement',
+            type: r.type ?? 'collective-bargaining',
+            status: r.status === 'under_negotiation' ? 'pending'
+              : r.status === 'ratified_pending' ? 'pending'
+              : r.status === 'expired' ? 'expired'
+              : r.status === 'archived' ? 'expired'
+              : 'active',
+            effectiveDate: r.effectiveDate ?? r.effective_date ?? '',
+            expirationDate: r.expiryDate ?? r.expiry_date ?? r.expirationDate ?? '',
+            description: r.description ?? r.bargainingUnitDescription ?? r.bargaining_unit_description ?? '',
+            fileSize: r.fileSize ?? '',
+            pageCount: r.pageCount ?? 0,
+            lastUpdated: r.updatedAt ?? r.updated_at ?? r.lastUpdated ?? '',
+            version: r.version ? String(r.version) : '1.0',
+            keyTerms: Array.isArray(r.keyTerms ?? r.key_terms) ? (r.keyTerms ?? r.key_terms) : [],
+            summary: r.summaryGenerated ?? r.summary_generated ?? r.summary ?? '',
+          }));
           if (items.length > 0) setAgreements(items);
         }
       } catch {
