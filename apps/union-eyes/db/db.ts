@@ -52,14 +52,38 @@ const connectionOptions = {
 
 // Create a postgres client with optimized connection options
 // This is used when DATABASE_TYPE is 'postgresql' or not set
+// Lazy initialization: defer connection until first use so `next build`
+// can statically analyze pages without a real DATABASE_URL.
 const databaseUrl = process.env.DATABASE_URL;
-if (!databaseUrl) {
-  throw new Error('Missing required environment variable: DATABASE_URL');
-}
-export const client = postgres(databaseUrl, connectionOptions);
 
-// Create a drizzle client (PostgreSQL only)
-export const db = drizzle(client, { schema });
+let _client: ReturnType<typeof postgres> | undefined;
+let _db: ReturnType<typeof drizzle> | undefined;
+
+function getClient() {
+  if (!_client) {
+    if (!databaseUrl) {
+      throw new Error('Missing required environment variable: DATABASE_URL');
+    }
+    _client = postgres(databaseUrl, connectionOptions);
+  }
+  return _client;
+}
+
+function getDb() {
+  if (!_db) {
+    _db = drizzle(getClient(), { schema });
+  }
+  return _db;
+}
+
+export const client = new Proxy({} as ReturnType<typeof postgres>, {
+  get(_target, prop) { return (getClient() as Record<string | symbol, unknown>)[prop]; },
+  apply(_target, thisArg, args) { return (getClient() as unknown as Function).apply(thisArg, args); },
+});
+
+export const db = new Proxy({} as ReturnType<typeof drizzle>, {
+  get(_target, prop) { return (getDb() as Record<string | symbol, unknown>)[prop]; },
+});
 
 // Export unified database client (supports PostgreSQL and Azure SQL)
 export const getDatabase = getUnifiedDatabase;
