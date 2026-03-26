@@ -477,9 +477,11 @@ setError(err instanceof Error ? err.message : 'Failed to load claims');
                               )}
 
                               <div className="flex gap-3 pt-2">
-                                <button className="px-4 py-2 bg-blue-600 text-white rounded-lg text-sm font-medium hover:bg-blue-700 transition-colors">
-                                  {t('claims.viewFullDetails')}
-                                </button>
+                                <Link href={`/${locale}/dashboard/claims/${caseItem.id}`}>
+                                  <button className="px-4 py-2 bg-blue-600 text-white rounded-lg text-sm font-medium hover:bg-blue-700 transition-colors">
+                                    {t('claims.viewFullDetails')}
+                                  </button>
+                                </Link>
                                 <button className="px-4 py-2 bg-white border border-gray-300 text-gray-700 rounded-lg text-sm font-medium hover:bg-gray-50 transition-colors">
                                   {t('claims.addComment')}
                                 </button>
