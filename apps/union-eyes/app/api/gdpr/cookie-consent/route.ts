@@ -1,17 +1,14 @@
 /**
  * GDPR Cookie Consent API
- * POST /api/gdpr/cookie-consent
+ * POST /api/gdpr/cookie-consent — public (cookie consent must work without auth)
+ * GET  /api/gdpr/cookie-consent — public
  */
 
 import { z } from 'zod';
 import { NextRequest, NextResponse } from "next/server";
-import { withApiAuth, getCurrentUser } from '@/lib/api-auth-guard';
+import { getCurrentUser } from '@/lib/api-auth-guard';
 import { CookieConsentManager } from "@/lib/gdpr/consent-manager";
-
-import {
-  ErrorCode,
-  standardErrorResponse,
-} from '@/lib/api/standardized-responses';
+import { logger } from '@/lib/logger';
 
 const gdprCookieConsentSchema = z.object({
   consentId: z.string().uuid('Invalid consentId'),
@@ -23,36 +20,25 @@ const gdprCookieConsentSchema = z.object({
   userAgent: z.string().optional(),
 });
 
-export const POST = withApiAuth(async (request: NextRequest) => {
+export const POST = async (request: NextRequest) => {
   try {
-    const user = await getCurrentUser();
+    let userId: string | undefined;
+    try { const user = await getCurrentUser(); userId = user?.id ?? undefined; } catch { /* unauthenticated */ }
+
     const body = await request.json();
-    // Validate request body
     const validation = gdprCookieConsentSchema.safeParse(body);
     if (!validation.success) {
-      return standardErrorResponse(
-        ErrorCode.VALIDATION_ERROR,
-        'Invalid request data',
-        validation.error.errors
-      );
+      return NextResponse.json({ error: 'Invalid request data' }, { status: 400 });
     }
     
     const { consentId, organizationId, essential, functional, analytics, marketing, userAgent } = validation.data;
 
-    if (!consentId || !organizationId) {
-      return standardErrorResponse(
-      ErrorCode.VALIDATION_ERROR,
-      'Missing required fields'
-    );
-    }
-
-    // Get IP address from request
     const ipAddress = request.headers.get("x-forwarded-for") || 
                       request.headers.get("x-real-ip") || 
                       "unknown";
 
     const consent = await CookieConsentManager.saveCookieConsent({
-      userId: user?.id ?? undefined,
+      userId,
       organizationId,
       consentId,
       essential: essential ?? true,
@@ -65,13 +51,10 @@ export const POST = withApiAuth(async (request: NextRequest) => {
 
     return NextResponse.json(consent);
   } catch (error) {
-return standardErrorResponse(
-      ErrorCode.INTERNAL_ERROR,
-      'Failed to save cookie consent',
-      error
-    );
+    logger.error('[cookie-consent] POST error', { error });
+    return NextResponse.json({ error: 'Failed to save cookie consent' }, { status: 500 });
   }
-});
+};
 
 export const GET = async (request: NextRequest) => {
   try {
@@ -79,28 +62,21 @@ export const GET = async (request: NextRequest) => {
     const consentId = searchParams.get("consentId");
 
     if (!consentId) {
-      return standardErrorResponse(
-      ErrorCode.MISSING_REQUIRED_FIELD,
-      'Consent ID required'
-    );
+      // No consent ID — return empty (cookie banner initial check)
+      return NextResponse.json({ consent: null });
     }
 
     const consent = await CookieConsentManager.getCookieConsent(consentId);
 
     if (!consent) {
-      return standardErrorResponse(
-      ErrorCode.RESOURCE_NOT_FOUND,
-      'Consent not found'
-    );
+      return NextResponse.json({ consent: null });
     }
 
     return NextResponse.json(consent);
   } catch (error) {
-return standardErrorResponse(
-      ErrorCode.INTERNAL_ERROR,
-      'Failed to retrieve cookie consent',
-      error
-    );
+    // Gracefully handle missing table / DB errors — don't block the page
+    logger.error('[cookie-consent] GET error', { error });
+    return NextResponse.json({ consent: null });
   }
 };
 

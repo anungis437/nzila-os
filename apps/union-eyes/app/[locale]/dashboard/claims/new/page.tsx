@@ -23,6 +23,7 @@ import {
   Info
 } from "lucide-react";
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
+import { useToast } from "@/components/ui/use-toast";
 import Link from "next/link";
 
 type CasePriority = "low" | "medium" | "high" | "urgent";
@@ -32,6 +33,7 @@ export default function NewClaimPage() {
   const locale = useLocale();
   const router = useRouter();
   const { user } = useUser();
+  const { toast } = useToast();
 
   const categories = [
     { key: "wageHour", label: t('categories.wageHour'), original: "Wage & Hour" },
@@ -238,7 +240,7 @@ alert('Unable to access microphone. Please ensure you have granted permission.')
       }
 
       const result = await response.json();
-      const claimId = result.claim.claimId;
+      const claimId = result.data.claimId;
 
       // Upload files if any
       if (formData.documents.length > 0) {
@@ -268,7 +270,11 @@ alert('Unable to access microphone. Please ensure you have granted permission.')
       }, 2000);
     } catch (error) {
 setIsSubmitting(false);
-      alert(error instanceof Error ? error.message : "Failed to submit claim");
+      toast({
+        variant: "destructive",
+        title: "Error",
+        description: error instanceof Error ? error.message : "Failed to submit claim",
+      });
     }
   };
 

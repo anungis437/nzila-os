@@ -227,7 +227,7 @@ export function ContactForm() {
 
       <p className="text-xs text-slate-500 text-center">
         By submitting this form, you agree to our{' '}
-        <Link href="/privacy" className="underline hover:text-slate-700">Privacy Policy</Link>.
+        <Link href="/legal/privacy" className="underline hover:text-slate-700">Privacy Policy</Link>.
         We&apos;ll never share your information with third parties.
       </p>
     </form>
