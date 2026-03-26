@@ -26,9 +26,13 @@ let _stripePromise: Promise<Stripe | null> | null = null
  */
 export function getStripePromise(): Promise<Stripe | null> {
   if (!_stripePromise) {
-    _stripePromise = loadStripe(
-      process.env.NEXT_PUBLIC_STRIPE_PUBLISHABLE_KEY || '',
-    )
+    const key = process.env.NEXT_PUBLIC_STRIPE_PUBLISHABLE_KEY
+    if (!key) {
+      // Return null when Stripe is not configured — callers must handle this
+      _stripePromise = Promise.resolve(null)
+    } else {
+      _stripePromise = loadStripe(key)
+    }
   }
   return _stripePromise
 }

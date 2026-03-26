@@ -15,6 +15,7 @@ import { Elements, PaymentElement, useStripe, useElements } from '@stripe/react-
 import { Alert, AlertDescription } from '@/components/ui/alert';
 
 const stripePromise = getStripePromise();
+const stripeConfigured = !!process.env.NEXT_PUBLIC_STRIPE_PUBLISHABLE_KEY;
 
 interface DuesPaymentFormProps {
   userId: string;
@@ -305,6 +306,27 @@ setInitError(true);
             <AlertCircle className="h-4 w-4" />
             <AlertDescription>
               Unable to load payment form. Please try again later.
+            </AlertDescription>
+          </Alert>
+        </CardContent>
+      </Card>
+    );
+  }
+
+  if (!stripeConfigured) {
+    return (
+      <Card>
+        <CardHeader>
+          <CardTitle>Make a Payment</CardTitle>
+          <CardDescription>
+            Pay your union dues securely using credit card or ACH
+          </CardDescription>
+        </CardHeader>
+        <CardContent>
+          <Alert>
+            <AlertCircle className="h-4 w-4" />
+            <AlertDescription>
+              Online payments are not yet configured for this environment. Please contact your union administrator.
             </AlertDescription>
           </Alert>
         </CardContent>
