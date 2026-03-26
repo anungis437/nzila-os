@@ -140,7 +140,8 @@
       "fast-xml-parser": ">=5.5.7",
       "socket.io-parser": ">=4.2.6",
       "@vitejs/plugin-react": "^4.7.0",
-      "@tootallnate/once": ">=3.0.1"
+      "@tootallnate/once": ">=3.0.1",
+      "picomatch": ">=4.0.4"
     }
   },
   "dependencies": {
