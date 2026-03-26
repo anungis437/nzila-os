@@ -14,7 +14,7 @@
  * ```
  */
 // eslint-disable-next-line no-restricted-imports -- this IS the stripe-elements facade
-import { loadStripe } from '@stripe/stripe-js'
+import { loadStripe } from '@stripe/stripe-js/pure'
 // eslint-disable-next-line no-restricted-imports -- this IS the stripe-elements facade
 import type { Stripe } from '@stripe/stripe-js'
 
@@ -31,7 +31,10 @@ export function getStripePromise(): Promise<Stripe | null> {
       // Return null when Stripe is not configured — callers must handle this
       _stripePromise = Promise.resolve(null)
     } else {
-      _stripePromise = loadStripe(key)
+      _stripePromise = loadStripe(key).catch(() => {
+        console.warn('[stripe-elements] Failed to load Stripe.js — payments disabled')
+        return null
+      })
     }
   }
   return _stripePromise

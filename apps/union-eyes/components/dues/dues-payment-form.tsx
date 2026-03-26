@@ -211,8 +211,8 @@ export default function DuesPaymentForm(props: DuesPaymentFormProps) {
   const { toast } = useToast();
 
   useEffect(() => {
-    // Don&apos;t initialize if balance is 0 or negative, or if we already have an error
-    if (props.currentBalance <= 0 || initError) {
+    // Don&apos;t initialize if balance is 0 or negative, Stripe not configured, or if we already have an error
+    if (props.currentBalance <= 0 || !stripeConfigured || initError) {
       setLoading(false);
       return;
     }
@@ -292,27 +292,6 @@ setInitError(true);
     );
   }
 
-  if (!clientSecret) {
-    return (
-      <Card>
-        <CardHeader>
-          <CardTitle>Make a Payment</CardTitle>
-          <CardDescription>
-            Pay your union dues securely using credit card or ACH
-          </CardDescription>
-        </CardHeader>
-        <CardContent>
-          <Alert variant="destructive">
-            <AlertCircle className="h-4 w-4" />
-            <AlertDescription>
-              Unable to load payment form. Please try again later.
-            </AlertDescription>
-          </Alert>
-        </CardContent>
-      </Card>
-    );
-  }
-
   if (!stripeConfigured) {
     return (
       <Card>
@@ -327,6 +306,27 @@ setInitError(true);
             <AlertCircle className="h-4 w-4" />
             <AlertDescription>
               Online payments are not yet configured for this environment. Please contact your union administrator.
+            </AlertDescription>
+          </Alert>
+        </CardContent>
+      </Card>
+    );
+  }
+
+  if (!clientSecret) {
+    return (
+      <Card>
+        <CardHeader>
+          <CardTitle>Make a Payment</CardTitle>
+          <CardDescription>
+            Pay your union dues securely using credit card or ACH
+          </CardDescription>
+        </CardHeader>
+        <CardContent>
+          <Alert variant="destructive">
+            <AlertCircle className="h-4 w-4" />
+            <AlertDescription>
+              Unable to load payment form. Please try again later.
             </AlertDescription>
           </Alert>
         </CardContent>

@@ -73,14 +73,15 @@ const ContentSecurityPolicy = [
   // Scripts: SECURITY HARDENED - Removed 'unsafe-eval' (Feb 2026)
   // 'unsafe-inline' still required by Clerk SDK, monitoring for nonce support
   // *.clerk.accounts.dev covers per-instance CDN subdomains (e.g. known-hagfish-67.clerk.accounts.dev)
-  "script-src 'self' 'unsafe-inline' https://clerk.accounts.dev https://*.clerk.accounts.dev https://*.clerk.com https://challenges.cloudflare.com",
+  // js.stripe.com required for Stripe.js payment elements
+  "script-src 'self' 'unsafe-inline' https://clerk.accounts.dev https://*.clerk.accounts.dev https://*.clerk.com https://challenges.cloudflare.com https://js.stripe.com",
   
   // Connections: SECURITY TRADEOFF - Permissive for dynamic integrations
   // Core domains whitelisted; https:/wss: required for user-configured webhooks
   "connect-src 'self' https: wss: https://*.clerk.com https://*.clerk.accounts.dev https://*.sentry.io https://*.supabase.co https://api.stripe.com https://*.upstash.io",
   
-  // Iframes: Allow Clerk authentication flows and Cloudflare challenges
-  "frame-src 'self' https://clerk.accounts.dev https://*.clerk.accounts.dev https://*.clerk.com https://challenges.cloudflare.com",
+  // Iframes: Allow Clerk authentication flows, Cloudflare challenges, and Stripe Elements
+  "frame-src 'self' https://clerk.accounts.dev https://*.clerk.accounts.dev https://*.clerk.com https://challenges.cloudflare.com https://js.stripe.com",
   
   // Web Workers: Allow blob URLs for dynamic worker creation
   "worker-src 'self' blob:",
