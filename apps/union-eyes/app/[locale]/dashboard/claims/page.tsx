@@ -194,7 +194,8 @@ export default function ClaimsPage() {
         }
 
         const data = await response.json();
-        const mappedCases = (data.data || data.claims || []).map(mapDbClaimToCase);
+        const rows = data?.data?.data ?? data?.data ?? data?.claims ?? [];
+        const mappedCases = Array.isArray(rows) ? rows.map(mapDbClaimToCase) : [];
         setCases(mappedCases);
       } catch (err) {
 setError(err instanceof Error ? err.message : 'Failed to load claims');
