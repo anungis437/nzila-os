@@ -4,11 +4,10 @@
  * and applies the dashboard-specific styling
  */
 import React, { ReactNode } from "react";
-import { auth, currentUser } from "@clerk/nextjs/server";
+import { auth, clerkClient, currentUser } from "@clerk/nextjs/server";
 import { redirect } from "next/navigation";
 import Sidebar from "@/components/sidebar";
 import CancellationPopup from "@/components/cancellation-popup";
-import WelcomeMessagePopup from "@/components/welcome-message-popup";
 import PaymentSuccessPopup from "@/components/payment-success-popup";
 import { OrganizationSelector } from "@/components/organization/organization-selector";
 import { OrganizationBreadcrumb } from "@/components/organization/organization-breadcrumb";
@@ -18,7 +17,8 @@ import { getOrganizationIdForUser, DEFAULT_ORGANIZATION_ID } from "@/lib/organiz
 import { getUserRole } from "@/lib/auth/rbac-server";
 import { db } from "@/db/db";
 import { profiles } from "@/db/schema";
-import { eq } from "drizzle-orm";
+import { organizations, organizationMembers } from "@/db/schema-organizations";
+import { eq, and } from "drizzle-orm";
 // Credits system disabled — platform does not require credits
 // import { ExpiredCreditsChecker } from "@/components/billing/expired-credits-checker";
 
@@ -73,6 +73,61 @@ export default async function DashboardLayout({ children }: { children: ReactNod
   // Get the current user to extract email
   const user = await currentUser();
   const userEmail = user?.emailAddresses?.[0]?.emailAddress || "";
+
+  // Auto-sync Clerk org memberships to local DB if missing
+  try {
+    const localMemberships = await db
+      .select({ id: organizationMembers.id })
+      .from(organizationMembers)
+      .where(eq(organizationMembers.userId, userId))
+      .limit(1);
+
+    if (localMemberships.length === 0) {
+      const clerk = await clerkClient();
+      const clerkOrgs = await clerk.users.getOrganizationMembershipList({ userId, limit: 20 });
+
+      for (const membership of clerkOrgs.data) {
+        const clerkOrgId = membership.organization.id;
+        // Find matching local org by clerk_organization_id
+        const [localOrg] = await db
+          .select({ id: organizations.id })
+          .from(organizations)
+          .where(eq(organizations.clerkOrganizationId, clerkOrgId))
+          .limit(1);
+
+        if (localOrg) {
+          // Check no duplicate
+          const [existing] = await db
+            .select({ id: organizationMembers.id })
+            .from(organizationMembers)
+            .where(
+              and(
+                eq(organizationMembers.userId, userId),
+                eq(organizationMembers.organizationId, localOrg.id),
+              )
+            )
+            .limit(1);
+
+          if (!existing) {
+            const fullName = [user?.firstName, user?.lastName].filter(Boolean).join(' ') || userEmail;
+            await db.insert(organizationMembers).values({
+              userId,
+              organizationId: localOrg.id,
+              name: fullName,
+              email: userEmail,
+              role: membership.role === 'org:admin' ? 'admin' : 'member',
+              status: 'active',
+              isPrimary: clerkOrgs.data.length === 1,
+            });
+            logger.info(`Auto-synced org membership for ${userId} → ${localOrg.id} (Clerk: ${clerkOrgId})`);
+          }
+        }
+      }
+    }
+  } catch (syncError) {
+    // Non-fatal — user can still access dashboard with fallback org
+    logger.warn('Clerk org membership sync failed', syncError);
+  }
   
   // Get user's organization and role via proper RBAC chain
   const organizationId = await getOrganizationIdForUser(userId);
@@ -96,8 +151,7 @@ export default async function DashboardLayout({ children }: { children: ReactNod
   return (
     <div className="flex h-screen bg-gray-50 relative overflow-hidden">
       {/* Credits system disabled — no credit checks needed */}
-      {/* Show welcome message popup - component handles visibility logic */}
-      <WelcomeMessagePopup profile={profile} />
+      {/* Welcome popup disabled — users cannot manage plans or credits */}
         
         {/* Show payment success popup - component handles visibility logic */}
         <PaymentSuccessPopup profile={profile} />
