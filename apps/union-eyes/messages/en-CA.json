@@ -2241,7 +2241,8 @@
     "affiliateUnions": "Affiliate Unions",
     "remittanceTracking": "Remittance Tracking",
     "platformAdminView": "Platform Admin View",
-    "viewingAsAdmin": "You are viewing {orgName} as a platform administrator. This is an oversight view, not a membership view."
+    "viewingAsAdmin": "You are viewing {orgName} as a platform administrator. This is an oversight view, not a membership view.",
+    "aiAssistant": "AI Assistant"
   },
   "marketing": {
     "nav": {

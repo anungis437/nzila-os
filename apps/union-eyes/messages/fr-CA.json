@@ -2243,6 +2243,7 @@
     "affiliateUnions": "Syndicats affiliés",
     "remittanceTracking": "Suivi des remises",
     "platformAdminView": "Vue d'administration de la plateforme",
+    "aiAssistant": "Assistant IA",
     "viewingAsAdmin": "Vous consultez {orgName} en tant qu'administrateur de la plateforme. Ceci est une vue de supervision, pas une vue de membre."
   },
   "marketing": {
