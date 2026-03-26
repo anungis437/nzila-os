@@ -229,6 +229,7 @@ const PAGE_ACCESS_MATRIX: PageRule[] = [
   { path: 'audits/page.tsx',                             minRole: 'officer',              description: 'Audits & compliance' },
   { path: 'governance/page.tsx',                         minRole: 'officer',              description: 'Governance dashboard' },
   { path: 'pilot/page.tsx',                              minRole: 'officer',              description: 'Pilot program health metrics' },
+  { path: 'trust/page.tsx',                              minRole: 'officer',              description: 'Trust & system integrity dashboard' },
 
   // ── Chief steward (level 70) ───────────────────────────────────────────
   { path: 'stewards/page.tsx',                           minRole: 'chief_steward',        description: 'Steward supervision dashboard' },
