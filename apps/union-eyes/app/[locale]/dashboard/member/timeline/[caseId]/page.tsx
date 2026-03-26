@@ -251,7 +251,7 @@ export default async function CaseTimelinePage({ params }: TimelinePageProps) {
         <div className="mt-8 text-center text-sm text-gray-600">
           <p>
             Your case data is protected by our{' '}
-            <Link href="/trust" className="text-blue-600 hover:underline">
+            <Link href="/dashboard/trust" className="text-blue-600 hover:underline">
               trust infrastructure
             </Link>
             . Only you and your assigned steward can see these details.

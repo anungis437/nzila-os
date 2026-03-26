@@ -320,7 +320,7 @@ function PlatformOverview({
               Pilot Support
             </a>
             <Link
-              href="/trust"
+              href="/dashboard/trust"
               className="bg-indigo-700 text-white px-6 py-3 rounded-md font-medium hover:bg-indigo-800 transition-colors"
             >
               System Trust Dashboard
@@ -538,7 +538,7 @@ function OrgPilotDetail({ metrics }: { metrics: PilotMetrics }) {
           >
             Email Support
           </a>
-          <Link href="/trust"
+          <Link href="/dashboard/trust"
             className="bg-blue-700 text-white px-6 py-3 rounded-md font-medium hover:bg-blue-800 transition-colors"
           >
             System Trust Dashboard

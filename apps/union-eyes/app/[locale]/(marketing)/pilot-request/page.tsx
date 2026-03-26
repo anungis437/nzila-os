@@ -501,7 +501,6 @@ export default function LocalePilotRequestPage() {
                     ? (isFr ? 'Envoi en cours…' : 'Submitting…')
                     : (isFr ? 'Soumettre la demande de pilote' : 'Submit pilot request')}
                 </Btn>
-                </Btn>
               </div>
             </div>
           )}
