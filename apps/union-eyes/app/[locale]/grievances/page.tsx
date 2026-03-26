@@ -142,7 +142,7 @@ export default function GrievancesPage() {
       ) : (
         <GrievanceQueueTable
           data={filteredGrievances}
-          onView={(row) => router.push(`/cases/${row.id}`)}
+          onView={(row) => router.push(`/dashboard/cases/${row.id}`)}
           onExport={(fmt) => logger.info(`Export requested: ${fmt}`)}
         />
       )}

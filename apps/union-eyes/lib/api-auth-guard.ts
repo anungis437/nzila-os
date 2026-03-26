@@ -439,6 +439,23 @@ export async function getCurrentUser(): Promise<AuthUser | null> {
       }
     }
 
+    // Final fallback: if all methods failed, try looking up the user's
+    // organization membership. For single-org users this is unambiguous.
+    if (!resolvedOrganizationId && userId) {
+      try {
+        const memberships = await db
+          .select({ organizationId: organizationMembers.organizationId })
+          .from(organizationMembers)
+          .where(eq(organizationMembers.userId, userId))
+          .limit(1);
+        if (memberships[0]) {
+          resolvedOrganizationId = memberships[0].organizationId;
+        }
+      } catch {
+        // Ignore — non-critical fallback
+      }
+    }
+
     // Resolve role: PLATFORM_ADMIN_USER_IDS override → Clerk metadata → default
     let role = (publicMetadata.role as string) || (privateMetadata.role as string) || 'member';
     const platformAdminIds = (process.env.PLATFORM_ADMIN_USER_IDS || '')

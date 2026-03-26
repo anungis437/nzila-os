@@ -37,39 +37,57 @@ export function useUserRole() {
 
       try {
         // Try to get role from Clerk metadata first (faster)
+        const roleMap: Record<string, UserRole> = {
+          // Current roles
+          app_owner: UserRole.APP_OWNER,
+          coo: UserRole.COO,
+          cto: UserRole.CTO,
+          platform_lead: UserRole.PLATFORM_LEAD,
+          system_admin: UserRole.SYSTEM_ADMIN,
+          admin: UserRole.ADMIN,
+          president: UserRole.PRESIDENT,
+          vice_president: UserRole.VICE_PRESIDENT,
+          secretary_treasurer: UserRole.SECRETARY_TREASURER,
+          chief_steward: UserRole.CHIEF_STEWARD,
+          officer: UserRole.OFFICER,
+          steward: UserRole.STEWARD,
+          bargaining_committee: UserRole.BARGAINING_COMMITTEE,
+          health_safety_rep: UserRole.HEALTH_SAFETY_REP,
+          member: UserRole.MEMBER,
+          national_officer: UserRole.NATIONAL_OFFICER,
+          clc_executive: UserRole.CLC_EXECUTIVE,
+          clc_staff: UserRole.CLC_STAFF,
+          fed_executive: UserRole.FED_EXECUTIVE,
+          fed_staff: UserRole.FED_STAFF,
+          // Legacy aliases
+          congress_staff: UserRole.CONGRESS_STAFF,
+          federation_staff: UserRole.FEDERATION_STAFF,
+          union_rep: UserRole.UNION_REP,
+          staff_rep: UserRole.STAFF_REP,
+          guest: UserRole.GUEST,
+        };
+
         if (user.publicMetadata?.role) {
           const metadataRole = String(user.publicMetadata.role).toLowerCase();
-          switch (metadataRole) {
-            case "admin":
-              setRole(UserRole.ADMIN);
-              break;
-            case "congress_staff":
-              setRole(UserRole.CONGRESS_STAFF);
-              break;
-            case "federation_staff":
-              setRole(UserRole.FEDERATION_STAFF);
-              break;
-            case "union_rep":
-              setRole(UserRole.UNION_REP);
-              break;
-            case "staff_rep":
-              setRole(UserRole.STAFF_REP);
-              break;
-            case "member":
-              setRole(UserRole.MEMBER);
-              break;
-            case "guest":
-              setRole(UserRole.GUEST);
-              break;
-            default:
-              setRole(UserRole.MEMBER);
-          }
+          setRole(roleMap[metadataRole] ?? UserRole.MEMBER);
           setLoading(false);
           return;
         }
 
+        // Try Clerk organization membership role (e.g. "org:steward" → "steward")
+        const orgMembership = user.organizationMemberships?.[0];
+        if (orgMembership?.role) {
+          const orgRole = orgMembership.role.replace(/^org:/, '').toLowerCase();
+          const mapped = roleMap[orgRole];
+          if (mapped) {
+            setRole(mapped);
+            setLoading(false);
+            return;
+          }
+        }
+
         // Fallback: fetch from API
-        const response = await fetch("/api/auth/role");
+        const response = await fetch("/api/auth/user-role");
         if (response.ok) {
           const data = await response.json();
           setRole(data.role as UserRole);

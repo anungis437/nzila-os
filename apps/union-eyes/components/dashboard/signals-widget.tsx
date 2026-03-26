@@ -258,7 +258,7 @@ interface SignalRowProps {
 function SignalRow({ signal }: SignalRowProps) {
   return (
     <Link
-      href={`/cases/${signal.caseId}`}
+      href={`/dashboard/cases/${signal.caseId}`}
       className="block px-6 py-4 hover:bg-gray-50 transition-colors"
     >
       <div className="flex items-start justify-between gap-4">

@@ -43,7 +43,7 @@ import {
   RefreshCw,
   UserPlus,
 } from 'lucide-react';
-import { useTranslations } from "next-intl";
+import { useTranslations, useLocale } from "next-intl";
 
 // ---------------------------------------------------------------------------
 // Types
@@ -131,6 +131,7 @@ function formatDate(iso: string): string {
 export default function WorkbenchPage() {
   const router = useRouter();
   const t = useTranslations("workbench");
+  const locale = useLocale();
   const [cases, setCases] = useState<WorkbenchCase[]>([]);
   const [loading, setLoading] = useState(true);
   const [activeTab, setActiveTab] = useState<QueueTab>('assigned');
@@ -291,7 +292,7 @@ export default function WorkbenchPage() {
           <CaseQueueTable
             cases={currentQueue()}
             activeTab={activeTab}
-            onRowClick={(c) => router.push(`/cases/${c.claimId}`)}
+            onRowClick={(c) => router.push(`/${locale}/dashboard/cases/${c.claimId}`)}
             onAssign={(c) =>
               setAssignDialog({
                 open: true,

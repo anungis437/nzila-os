@@ -100,7 +100,7 @@ export default function EditCasePage({ params }: { params: { id: string } }) {
     try {
       await api.cases.update(params.id, formData);
       alert('Case updated successfully!');
-      router.push(`/cases/${params.id}`);
+      router.push(`/dashboard/cases/${params.id}`);
     } catch (error) {
       logger.error('Error updating case', error);
       alert('Error updating case. Please try again.');

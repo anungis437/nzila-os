@@ -6,20 +6,19 @@ import { useState, useEffect } from 'react';
 import { useParams, useRouter } from 'next/navigation';
 import { useTranslations, useLocale } from 'next-intl';
 import { motion } from 'framer-motion';
-import { ArrowLeft, Calendar, MapPin, FileText, Clock, CheckCircle, AlertCircle } from 'lucide-react';
+import { ArrowLeft, Calendar, MapPin, FileText, Clock, AlertCircle } from 'lucide-react';
 import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card';
 import { FileUpload } from '@/components/file-upload';
 import { Button } from '@/components/ui/button';
-import { StatusUpdate } from '@/components/status-update';
 import { ClaimJurisdictionInfo } from '@/components/claims/claim-jurisdiction-info';
-import { useHasPermission } from '@/lib/auth/rbac-hooks';
-import { Permission } from '@/lib/auth/roles';
 import Link from 'next/link';
 
 interface Claim {
   claimId: string;
   claimNumber: string;
   organizationId: string;
+  memberId: string;
+  isAnonymous: boolean;
   claimType: string;
   status: string;
   priority: string;
@@ -40,8 +39,6 @@ export default function ClaimDetailPage() {
   const t = useTranslations();
   const locale = useLocale();
   
-  const canManageClaims = useHasPermission(Permission.EDIT_ALL_CLAIMS);
-
   const statusLabels: Record<string, { label: string; color: string }> = {
     submitted: { label: t('claimStatus.submitted'), color: 'bg-blue-100 text-blue-800' },
     under_review: { label: t('claimStatus.underReview'), color: 'bg-yellow-100 text-yellow-800' },
@@ -93,7 +90,8 @@ export default function ClaimDetailPage() {
         const response = await fetch(`/api/claims/${claimId}`);
         
         if (!response.ok) {
-          throw new Error('Failed to fetch claim');
+          const body = await response.json().catch(() => ({}));
+          throw new Error(body?.message || `HTTP ${response.status} ${response.statusText}`);
         }
         
         const data = await response.json();
@@ -142,24 +140,6 @@ setError(err instanceof Error ? err.message : 'Failed to load claim');
         attachments: (claim.attachments || []).filter((a: any) => a.url !== url),
       });
     }
-  };
-
-  const handleStatusUpdated = async () => {
-    // Refetch claim and history after status update
-    try {
-      const response = await fetch(`/api/claims/${claimId}`);
-      if (response.ok) {
-        const data = await response.json();
-        setClaim(data.claim);
-      }
-      
-      const historyResponse = await fetch(`/api/claims/${claimId}/workflow/history`);
-      if (historyResponse.ok) {
-        const historyData = await historyResponse.json();
-        setWorkflowHistory(historyData.history || []);
-      }
-    } catch (_err) {
-}
   };
 
   if (loading) {
@@ -302,21 +282,6 @@ setError(err instanceof Error ? err.message : 'Failed to load claim');
               />
             </motion.div>
 
-            {/* Status Update — officer / steward only */}
-            {canManageClaims && (
-              <motion.div
-                initial={{ opacity: 0, y: 20 }}
-                animate={{ opacity: 1, y: 0 }}
-                transition={{ delay: 0.3 }}
-              >
-                <StatusUpdate
-                  claimId={claim.claimId}
-                  currentStatus={claim.status}
-                  onStatusUpdated={handleStatusUpdated}
-                />
-              </motion.div>
-            )}
-
             {/* Workflow History */}
             {workflowHistory.length > 0 && (
               <motion.div
@@ -357,26 +322,7 @@ setError(err instanceof Error ? err.message : 'Failed to load claim');
               </motion.div>
             )}
 
-            {/* Assignment Information — officer / steward only */}
-            {canManageClaims && (
-              <motion.div
-                initial={{ opacity: 0, y: 20 }}
-                animate={{ opacity: 1, y: 0 }}
-                transition={{ delay: 0.35 }}
-              >
-                <Card className="bg-green-50 border-green-200">
-                  <CardContent className="p-4">
-                    <h3 className="font-semibold text-green-900 mb-2 flex items-center gap-2">
-                      <CheckCircle size={18} />
-                      {t('claims.assignedToYou')}
-                    </h3>
-                    <p className="text-sm text-green-800">
-                      {t('claims.assignedDescription')}
-                    </p>
-                  </CardContent>
-                </Card>
-              </motion.div>
-            )}
+
 
             {/* Incident Information */}
             <motion.div
@@ -424,32 +370,7 @@ setError(err instanceof Error ? err.message : 'Failed to load claim');
               </Card>
             </motion.div>
 
-            {/* Status Help — officer / steward only */}
-            {canManageClaims && (
-              <motion.div
-                initial={{ opacity: 0, y: 20 }}
-                animate={{ opacity: 1, y: 0 }}
-                transition={{ delay: 0.5 }}
-              >
-                <Card className="bg-blue-50 border-blue-200">
-                  <CardContent className="p-4">
-                    <h3 className="font-semibold text-blue-900 mb-2 flex items-center gap-2">
-                      <CheckCircle size={18} />
-                      {t('claims.caseStatus')}
-                    </h3>
-                    <p className="text-sm text-blue-800">
-                      {claim.status === 'submitted' && 'This claim has been submitted and is awaiting initial review.'}
-                      {claim.status === 'under_review' && 'This claim is currently under review. Contact the member if additional information is needed.'}
-                      {claim.status === 'investigation' && 'This claim is under investigation. The member may be contacted for additional information.'}
-                      {claim.status === 'pending_documentation' && 'Additional documentation is needed from the member.'}
-                      {claim.status === 'resolved' && 'This claim has been resolved.'}
-                      {!['submitted', 'under_review', 'investigation', 'pending_documentation', 'resolved'].includes(claim.status) && 
-                        'This claim is assigned to you for handling.'}
-                    </p>
-                  </CardContent>
-              </Card>
-            </motion.div>
-            )}
+
           </div>
         </div>
       </div>

@@ -1,6 +1,7 @@
 import { NextRequest, NextResponse } from "next/server";
 import { withApiAuth, auth } from "@/lib/api-auth-guard";
 import { getUserRole } from "@/lib/auth/rbac-server";
+import { getOrganizationIdForUser } from "@/lib/organization-utils";
 
 const logger = createLogger('auth:user-role')
 
@@ -27,8 +28,11 @@ export const GET = withApiAuth(async (request: NextRequest, _context) => {
       return standardErrorResponse(ErrorCode.AUTH_REQUIRED, 'Not authenticated');
     }
 
+    // Resolve the user's organization so the role lookup is org-scoped
+    const organizationId = await getOrganizationIdForUser(targetUserId);
+
     // Fetch role from database/Clerk
-    const role = await getUserRole(targetUserId);
+    const role = await getUserRole(targetUserId, organizationId);
 
     return NextResponse.json({ role });
   } catch (error) {

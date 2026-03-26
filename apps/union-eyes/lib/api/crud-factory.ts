@@ -51,6 +51,8 @@ export interface CrudOptions {
   tags: string[];
   /** Whether the table has an organization_id column for scoping */
   orgScoped?: boolean;
+  /** Column name to auto-filter by authenticated userId (e.g. 'memberId'). Restricts reads to the current user's own rows. */
+  ownerColumn?: string;
   /** Whether this is an item route ([id]/route.ts) vs collection */
   itemRoute?: boolean;
   /** URL param name for the item ID (default: 'id') */
@@ -131,6 +133,7 @@ export function crudRoutes(opts: CrudOptions): CollectionHandlers | ItemHandlers
   }
 
   const orgCol = orgScoped ? getColumn(table, 'organizationId') : undefined;
+  const ownerCol = opts.ownerColumn ? getColumn(table, opts.ownerColumn) : undefined;
   const orderCol = getColumn(table, orderBy);
 
   if (itemRoute) {
@@ -149,7 +152,7 @@ export function crudRoutes(opts: CrudOptions): CollectionHandlers | ItemHandlers
           description: `Returns a paginated list of ${resourceName}.`,
         },
       },
-      async ({ request, organizationId }) => {
+      async ({ request, organizationId, userId }) => {
         const url = new URL(request.url);
         const page = Math.max(1, parseInt(url.searchParams.get('page') || '1'));
         const limit = Math.min(100, Math.max(1, parseInt(url.searchParams.get('limit') || String(defaultLimit))));
@@ -158,6 +161,9 @@ export function crudRoutes(opts: CrudOptions): CollectionHandlers | ItemHandlers
         const conditions: SQL[] = [];
         if (orgScoped && orgCol && organizationId) {
           conditions.push(eq(orgCol, organizationId));
+        }
+        if (ownerCol && userId) {
+          conditions.push(eq(ownerCol, userId));
         }
 
         const whereClause = conditions.length > 0

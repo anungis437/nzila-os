@@ -115,7 +115,7 @@ export default async function DashboardLayout({ children }: { children: ReactNod
               organizationId: localOrg.id,
               name: fullName,
               email: userEmail,
-              role: membership.role === 'org:admin' ? 'admin' : 'member',
+              role: membership.role.startsWith('org:') ? membership.role.replace('org:', '') : 'member',
               status: 'active',
               isPrimary: clerkOrgs.data.length === 1,
             });

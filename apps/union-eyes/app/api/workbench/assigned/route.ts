@@ -25,10 +25,10 @@ export const GET = withApi(
 
     const conditions: ReturnType<typeof sql>[] = [];
     if (organizationId) {
-      conditions.push(sql`organization_id = ${organizationId}`);
+      conditions.push(sql`c.organization_id = ${organizationId}`);
     }
     if (status) {
-      conditions.push(sql`status = ${status}`);
+      conditions.push(sql`c.status = ${status}`);
     }
 
     const where = conditions.length > 0
@@ -37,40 +37,46 @@ export const GET = withApi(
 
     const rows = await withRLSContext(async () => db.execute(
       sql`SELECT
-            claim_id AS "claimId",
-            claim_number AS "claimNumber",
-            organization_id AS "organizationId",
-            member_id AS "memberId",
-            is_anonymous AS "isAnonymous",
-            claim_type AS "claimType",
-            status,
-            priority,
-            incident_date AS "incidentDate",
-            location,
-            description,
-            desired_outcome AS "desiredOutcome",
-            witnesses_present AS "witnessesPresent",
-            witness_details AS "witnessDetails",
-            previously_reported AS "previouslyReported",
-            previous_report_details AS "previousReportDetails",
-            assigned_to AS "assignedTo",
-            assigned_at AS "assignedAt",
-            COALESCE(attachments, '[]'::jsonb) AS attachments,
-            COALESCE(voice_transcriptions, '[]'::jsonb) AS "voiceTranscriptions",
-            COALESCE(metadata, '{}'::jsonb) AS metadata,
-            created_at AS "createdAt",
-            updated_at AS "updatedAt",
-            closed_at AS "closedAt"
-          FROM claims
+            c.claim_id AS "claimId",
+            c.claim_number AS "claimNumber",
+            c.organization_id AS "organizationId",
+            c.member_id AS "memberId",
+            c.is_anonymous AS "isAnonymous",
+            c.claim_type AS "claimType",
+            c.status,
+            c.priority,
+            c.incident_date AS "incidentDate",
+            c.location,
+            c.description,
+            c.desired_outcome AS "desiredOutcome",
+            c.witnesses_present AS "witnessesPresent",
+            c.witness_details AS "witnessDetails",
+            c.previously_reported AS "previouslyReported",
+            c.previous_report_details AS "previousReportDetails",
+            c.assigned_to AS "assignedTo",
+            c.assigned_at AS "assignedAt",
+            COALESCE(c.attachments, '[]'::jsonb) AS attachments,
+            COALESCE(c.voice_transcriptions, '[]'::jsonb) AS "voiceTranscriptions",
+            COALESCE(c.metadata, '{}'::jsonb) AS metadata,
+            c.created_at AS "createdAt",
+            c.updated_at AS "updatedAt",
+            c.closed_at AS "closedAt",
+            m.name AS "memberName",
+            m.email AS "memberEmail",
+            m.phone AS "memberPhone"
+          FROM claims c
+          LEFT JOIN organization_members m
+            ON m.user_id = c.member_id
+            AND m.organization_id = c.organization_id::text
           ${where}
           ORDER BY
-            CASE priority
+            CASE c.priority
               WHEN 'critical' THEN 1
               WHEN 'high' THEN 2
               WHEN 'medium' THEN 3
               WHEN 'low' THEN 4
             END,
-            created_at DESC
+            c.created_at DESC
           LIMIT 200`
     ));
 

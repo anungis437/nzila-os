@@ -58,7 +58,19 @@ export async function GET(_req: NextRequest) {
 
       if (orgIds.length > 0) {
         const allOrgs = await db.select().from(organizations).limit(500);
-        orgs = allOrgs.filter(o => orgIds.includes(o.id) || orgIds.includes(o.slug ?? ''));
+        orgs = allOrgs.filter(o =>
+          orgIds.includes(o.id) ||
+          orgIds.includes(o.slug ?? '') ||
+          orgIds.includes(o.clerkOrganizationId ?? '')
+        );
+      }
+    }
+
+    // Build a lookup from Clerk org IDs to org UUIDs for normalization
+    const clerkIdToUuid = new Map<string, string>();
+    for (const o of orgs) {
+      if (o.clerkOrganizationId) {
+        clerkIdToUuid.set(o.clerkOrganizationId, o.id);
       }
     }
 
@@ -77,7 +89,7 @@ export async function GET(_req: NextRequest) {
       })),
       memberships: memberships.map(m => ({
         id: m.id,
-        organizationId: m.organizationId,
+        organizationId: clerkIdToUuid.get(m.organizationId) ?? m.organizationId,
         userId: m.userId,
         role: m.role,
         isPrimary: m.isPrimary ?? false,

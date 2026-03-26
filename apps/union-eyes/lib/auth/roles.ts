@@ -987,6 +987,7 @@ export const ROLE_PERMISSIONS: Record<UserRole, Permission[]> = {
     Permission.VIEW_ALL_CLAIMS,
     Permission.VIEW_OWN_CLAIMS,
     Permission.CREATE_CLAIM,
+    Permission.EDIT_ALL_CLAIMS,
     Permission.EDIT_OWN_CLAIMS,
     Permission.ASSIGN_CLAIMS,
     Permission.VIEW_ALL_MEMBERS,

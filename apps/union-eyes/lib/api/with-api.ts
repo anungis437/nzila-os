@@ -257,8 +257,23 @@ export function withApi<
 
       // ── 4. Role / permission checks ────────────────────────────────────
       if (user && minRoleLevel !== null) {
-        const userRole = (user.role ?? 'member') as UserRole;
-        const userLevel = ROLE_HIERARCHY[userRole] ?? 0;
+        let userRole = (user.role ?? 'member') as UserRole;
+        let userLevel = ROLE_HIERARCHY[userRole] ?? 0;
+
+        // If Clerk metadata role is insufficient, resolve from DB via getUserRole
+        if (userLevel < minRoleLevel) {
+          try {
+            const { getUserRole } = await import('@/lib/auth/rbac-server');
+            const { auth } = await import('@clerk/nextjs/server');
+            const { orgId } = await auth();
+            const dbRole = await getUserRole(user.id, orgId ?? user.organizationId ?? undefined);
+            userRole = (dbRole ?? 'member') as UserRole;
+            userLevel = ROLE_HIERARCHY[userRole] ?? 0;
+          } catch {
+            // DB role resolution failed — keep Clerk metadata role
+          }
+        }
+
         if (userLevel < minRoleLevel) {
           return standardErrorResponse(
             ErrorCode.INSUFFICIENT_PERMISSIONS,
@@ -270,7 +285,19 @@ export function withApi<
       }
 
       if (user && allowedRoles) {
-        const userRole = (user.role ?? 'member') as UserRole;
+        let userRole = (user.role ?? 'member') as UserRole;
+        if (!allowedRoles.includes(userRole)) {
+          // Resolve from DB before rejecting
+          try {
+            const { getUserRole } = await import('@/lib/auth/rbac-server');
+            const { auth } = await import('@clerk/nextjs/server');
+            const { orgId } = await auth();
+            const dbRole = await getUserRole(user.id, orgId ?? user.organizationId ?? undefined);
+            userRole = (dbRole ?? 'member') as UserRole;
+          } catch {
+            // DB role resolution failed — keep Clerk metadata role
+          }
+        }
         if (!allowedRoles.includes(userRole)) {
           return standardErrorResponse(
             ErrorCode.INSUFFICIENT_PERMISSIONS,

@@ -11,6 +11,7 @@ const { GET, POST } = crudRoutes({
   pk: 'claimId',
   tags: ["Claims"],
   orgScoped: true,
+  ownerColumn: 'memberId',
   readRole: 'member',
   writeRole: 'steward',
 });

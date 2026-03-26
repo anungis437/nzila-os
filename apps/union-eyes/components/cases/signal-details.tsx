@@ -112,16 +112,16 @@ function formatTimestamp(date: Date): string {
 function handleAction(caseId: string, signal: Signal) {
   // Map signal types to actions
   const actionMap: Record<Signal['type'], string> = {
-    acknowledgment_overdue: `/cases/${caseId}?action=acknowledge`,
-    member_waiting: `/cases/${caseId}?action=send_update`,
-    escalation_needed: `/cases/${caseId}?action=escalate`,
-    sla_breached: `/cases/${caseId}?action=review`,
-    sla_at_risk: `/cases/${caseId}?action=prioritize`,
-    case_stale: `/cases/${caseId}?action=update_status`,
-    urgent_state: `/cases/${caseId}`,
+    acknowledgment_overdue: `/dashboard/cases/${caseId}?action=acknowledge`,
+    member_waiting: `/dashboard/cases/${caseId}?action=send_update`,
+    escalation_needed: `/dashboard/cases/${caseId}?action=escalate`,
+    sla_breached: `/dashboard/cases/${caseId}?action=review`,
+    sla_at_risk: `/dashboard/cases/${caseId}?action=prioritize`,
+    case_stale: `/dashboard/cases/${caseId}?action=update_status`,
+    urgent_state: `/dashboard/cases/${caseId}`,
   };
 
-  const url = actionMap[signal.type] || `/cases/${caseId}`;
+  const url = actionMap[signal.type] || `/dashboard/cases/${caseId}`;
   window.location.href = url;
 }
 

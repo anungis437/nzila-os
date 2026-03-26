@@ -148,7 +148,7 @@ export function PrecedentViewer({
           </h2>
           <div className="flex items-center gap-2 text-sm text-muted-foreground">
             <Building2 className="h-4 w-4" />
-            <span>{precedent.organization?.name || "Unknown Organization"}</span>
+            <span>{precedent.organization?.name || precedent.unionName || precedent.union || "Unknown Organization"}</span>
             {precedent.isPartiesAnonymized && (
               <Badge variant="secondary" className="ml-2">
                 Parties Anonymized

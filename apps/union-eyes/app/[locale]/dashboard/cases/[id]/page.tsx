@@ -1,7 +1,8 @@
 /**
- * Case Detail Page
+ * Case Detail Page (Dashboard)
  * 
- * Comprehensive case view with timeline, evidence, and actions
+ * Comprehensive case view with timeline, evidence, and actions.
+ * This page lives under /dashboard so it inherits the sidebar layout.
  */
 
 'use client';
@@ -38,7 +39,6 @@ import {
   CheckCircle,
   Brain,
   DollarSign,
-  UserCheck,
   Edit,
 } from 'lucide-react';
 
@@ -107,6 +107,8 @@ export default function CaseDetailPage() {
   const [note, setNote] = useState('');
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState<string | null>(null);
+  const [editing, setEditing] = useState(false);
+  const [editFields, setEditFields] = useState<{ status: string; priority: string; description: string }>({ status: '', priority: '', description: '' });
 
   useEffect(() => {
     fetchCaseDetail();
@@ -195,6 +197,28 @@ export default function CaseDetailPage() {
     }
   };
 
+  const startEditing = () => {
+    if (!caseDetail) return;
+    setEditFields({
+      status: caseDetail.status,
+      priority: caseDetail.priority,
+      description: caseDetail.description,
+    });
+    setEditing(true);
+  };
+
+  const cancelEditing = () => setEditing(false);
+
+  const saveEdits = async () => {
+    try {
+      await api.cases.update(caseId, editFields);
+      setCaseDetail((prev) => prev ? { ...prev, ...editFields } : prev);
+      setEditing(false);
+    } catch (err) {
+      logger.error('Error saving case edits', err);
+    }
+  };
+
   const getStatusColor = (status: string) => {
     switch (status) {
       case 'investigation':
@@ -260,10 +284,18 @@ export default function CaseDetailPage() {
             </p>
           </div>
           <div className="flex gap-2">
-            <Button variant="outline" size="sm">
-              <Edit className="mr-2 h-4 w-4" />
-              Edit
-            </Button>
+            {canManageClaims && !editing && (
+              <Button variant="outline" size="sm" onClick={startEditing}>
+                <Edit className="mr-2 h-4 w-4" />
+                Edit
+              </Button>
+            )}
+            {editing && (
+              <>
+                <Button size="sm" onClick={saveEdits}>Save</Button>
+                <Button variant="outline" size="sm" onClick={cancelEditing}>Cancel</Button>
+              </>
+            )}
             <Button variant="outline" size="sm">
               <Download className="mr-2 h-4 w-4" />
               Export
@@ -287,9 +319,21 @@ export default function CaseDetailPage() {
             <FileText className="h-4 w-4 text-muted-foreground" />
             <span className="text-sm text-muted-foreground">Status</span>
           </div>
-          <Badge className={getStatusColor(caseDetail.status)}>
-            {caseDetail.status}
-          </Badge>
+          {editing ? (
+            <select
+              value={editFields.status}
+              onChange={(e) => setEditFields({ ...editFields, status: e.target.value })}
+              className="w-full border rounded px-2 py-1 text-sm"
+            >
+              {['submitted', 'under_review', 'assigned', 'investigation', 'pending_documentation', 'resolved', 'rejected', 'closed'].map((s) => (
+                <option key={s} value={s}>{s.replace('_', ' ')}</option>
+              ))}
+            </select>
+          ) : (
+            <Badge className={getStatusColor(caseDetail.status)}>
+              {caseDetail.status}
+            </Badge>
+          )}
         </Card>
 
         <Card className="p-4">
@@ -297,9 +341,21 @@ export default function CaseDetailPage() {
             <AlertCircle className="h-4 w-4 text-muted-foreground" />
             <span className="text-sm text-muted-foreground">Priority</span>
           </div>
-          <Badge className={getPriorityColor(caseDetail.priority)}>
-            {caseDetail.priority}
-          </Badge>
+          {editing ? (
+            <select
+              value={editFields.priority}
+              onChange={(e) => setEditFields({ ...editFields, priority: e.target.value })}
+              className="w-full border rounded px-2 py-1 text-sm"
+            >
+              {['low', 'medium', 'high', 'critical'].map((p) => (
+                <option key={p} value={p}>{p}</option>
+              ))}
+            </select>
+          ) : (
+            <Badge className={getPriorityColor(caseDetail.priority)}>
+              {caseDetail.priority}
+            </Badge>
+          )}
         </Card>
 
         <Card className="p-4">
@@ -319,7 +375,15 @@ export default function CaseDetailPage() {
         <div className="md:col-span-2 space-y-6">
           <Card className="p-6">
             <h3 className="font-semibold mb-2">Description</h3>
-            <p className="text-muted-foreground">{caseDetail.description}</p>
+            {editing ? (
+              <Textarea
+                value={editFields.description}
+                onChange={(e) => setEditFields({ ...editFields, description: e.target.value })}
+                rows={4}
+              />
+            ) : (
+              <p className="text-muted-foreground">{caseDetail.description}</p>
+            )}
           </Card>
 
           <Tabs defaultValue="timeline" className="space-y-4">

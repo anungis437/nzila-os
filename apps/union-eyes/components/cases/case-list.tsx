@@ -282,7 +282,7 @@ function CaseListItem({ caseData, signal, currentUserId }: CaseListItemProps) {
 
   return (
     <div className="bg-white border rounded-lg hover:shadow-md transition-shadow">
-      <Link href={`/cases/${caseData.id}`}>
+      <Link href={`/dashboard/cases/${caseData.id}`}>
         <div className="p-4">
           <div className="flex items-start justify-between gap-4">
             {/* Left side: Case info */}

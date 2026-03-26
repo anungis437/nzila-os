@@ -19,7 +19,7 @@ export const GET = withApi(
       summary: 'GET user-role',
     },
   },
-  async ({ request, userId, organizationId: _organizationId, user: _user, body: _body, query: _query }) => {
+  async ({ request, userId, organizationId, user: _user, body: _body, query: _query }) => {
 
         // Use userId from URL params if provided (for admin use), otherwise use authenticated user
         const searchParams = request.nextUrl.searchParams;
@@ -28,8 +28,8 @@ export const GET = withApi(
         if (!targetUserId) {
           throw ApiError.internal('Not authenticated');
         }
-        // Fetch role from database/Clerk
-        const role = await getUserRole(targetUserId);
+        // Fetch role from database/Clerk (org-scoped)
+        const role = await getUserRole(targetUserId, organizationId);
         return NextResponse.json({ role });
   },
 );

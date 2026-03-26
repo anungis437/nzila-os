@@ -58,6 +58,24 @@ const OUTCOME_COLORS = {
   withdrawn: "bg-gray-100 text-gray-800 dark:bg-gray-900 dark:text-gray-200",
 };
 
+// Normalize arbitrationDecisions fields to arbitrationPrecedents field names
+// eslint-disable-next-line @typescript-eslint/no-explicit-any
+function normalizePrecedent(p: any): any {
+  if (!p) return p;
+  return {
+    ...p,
+    arbitratorName: p.arbitratorName || p.arbitrator,
+    unionName: p.unionName || p.union,
+    employerName: p.employerName || p.employer,
+    grievanceType: p.grievanceType || (Array.isArray(p.issueTypes) ? p.issueTypes[0] : null),
+    issueSummary: p.issueSummary || p.summary || p.precedentSummary,
+    decisionSummary: p.decisionSummary || p.summary,
+    precedentLevel: p.precedentLevel || p.precedentValue,
+    grievorNames: p.grievorNames || p.grievor,
+    sharingLevel: p.sharingLevel || (p.isPublic ? 'public' : 'private'),
+  };
+}
+
 export function PrecedentsConsole() {
   const t = useTranslations();
   const { toast } = useToast();
@@ -200,8 +218,14 @@ export function PrecedentsConsole() {
         });
 
         if (response.ok) {
-          const data = await response.json();
-          setPrecedentsData(data);
+          const json = await response.json();
+          // Unwrap withApi envelope: { success, data: { data: rows, pagination } }
+          const payload = json.data ?? json;
+          const items = payload.data ?? payload.precedents ?? [];
+          setPrecedentsData({
+            precedents: items.map(normalizePrecedent),
+            pagination: payload.pagination ?? null,
+          });
         } else if (response.status === 401) {
           setPrecedentsData({
             precedents: [],
@@ -255,8 +279,8 @@ export function PrecedentsConsole() {
       try {
         const response = await fetch(`/api/arbitration/precedents/${selectedPrecedentId}`);
         if (response.ok) {
-          const data = await response.json();
-          setSelectedPrecedent(data);
+          const json = await response.json();
+          setSelectedPrecedent(normalizePrecedent(json.data ?? json));
         }
       } catch (_error) {
         // silently fail
@@ -401,7 +425,7 @@ export function PrecedentsConsole() {
       }
 
       const updated = await response.json();
-      setSelectedPrecedent(updated);
+      setSelectedPrecedent(normalizePrecedent(updated.data ?? updated));
       toast({
         title: "Precedent updated",
         description: "Your changes have been saved.",
@@ -443,7 +467,7 @@ export function PrecedentsConsole() {
       }
 
       const updated = await response.json();
-      setSelectedPrecedent(updated);
+      setSelectedPrecedent(normalizePrecedent(updated.data ?? updated));
       toast({
         title: "Sharing updated",
         description: "Precedent sharing settings have been updated.",
@@ -614,7 +638,7 @@ export function PrecedentsConsole() {
                             {precedent.caseTitle}
                           </CardTitle>
                           <CardDescription className="mt-1">
-                            {precedent.organization?.name}
+                            {precedent.organization?.name || precedent.union}
                           </CardDescription>
                         </div>
                         <Checkbox
@@ -627,12 +651,12 @@ export function PrecedentsConsole() {
                     <CardContent onClick={() => handleViewPrecedent(precedent.id)}>
                       <div className="space-y-2">
                         <p className="text-sm text-muted-foreground line-clamp-2">
-                          {precedent.issueSummary || precedent.decisionSummary}
+                          {precedent.issueSummary || precedent.decisionSummary || precedent.summary || precedent.precedentSummary}
                         </p>
                         <div className="flex flex-wrap gap-2">
                           <Badge variant="outline">
-                            {precedent.grievanceType
-                              ?.split("_")
+                            {(precedent.grievanceType || (Array.isArray(precedent.issueTypes) ? precedent.issueTypes[0] : null) || '')
+                              .split("_")
                               .map((w: string) => w.charAt(0).toUpperCase() + w.slice(1))
                               .join(" ")}
                           </Badge>

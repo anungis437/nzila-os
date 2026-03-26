@@ -8,7 +8,7 @@ import { db } from '@/db/db';
 import { grievances } from '@/db/schema';
 import { claims } from '@/db/schema';
 import { organizationMembers } from '@/db/schema';
-import { sql, gte, and, inArray } from 'drizzle-orm';
+import { sql, gte, lt, and, inArray, eq } from 'drizzle-orm';
 
 export const dynamic = 'force-dynamic';
 
@@ -67,18 +67,23 @@ export const GET = withApi(
       description: 'Aggregates grievances, claims and members into dashboard metrics, chart data, category breakdown, top stewards, and quick stats.',
     },
   },
-  async ({ request }) => {
+  async ({ request, organizationId }) => {
     const url = new URL(request.url);
     const range = url.searchParams.get('range') || '30d';
     const startDate = getStartDate(range);
     const prevStart = getPreviousPeriodStart(range);
 
+    // --- Org-scoped filters ---
+    const grievanceOrgFilter = organizationId ? eq(grievances.organizationId, organizationId) : undefined;
+    const claimOrgFilter = organizationId ? eq(claims.organizationId, organizationId) : undefined;
+    const memberOrgFilter = organizationId ? eq(organizationMembers.organizationId, organizationId) : undefined;
+
     // --- Grievance counts ---
     const grievanceDateFilter = startDate
-        ? gte(grievances.createdAt, startDate)
-        : undefined;
+        ? and(gte(grievances.createdAt, startDate), grievanceOrgFilter)
+        : grievanceOrgFilter;
       const prevGrievanceDateFilter = prevStart && startDate
-        ? and(gte(grievances.createdAt, prevStart), sql`${grievances.createdAt} < ${startDate}`)
+        ? and(gte(grievances.createdAt, prevStart), lt(grievances.createdAt, startDate), grievanceOrgFilter)
         : undefined;
 
       const [
@@ -129,34 +134,37 @@ export const GET = withApi(
         // Current period claims
         db.select({ count: sql<number>`count(*)::int` })
           .from(claims)
-          .where(startDate ? gte(claims.createdAt, startDate) : undefined)
+          .where(startDate ? and(gte(claims.createdAt, startDate), claimOrgFilter) : claimOrgFilter)
           .then(r => r[0]?.count ?? 0),
 
         // Current period resolved claims
         db.select({ count: sql<number>`count(*)::int` })
           .from(claims)
           .where(startDate
-            ? and(gte(claims.createdAt, startDate), inArray(claims.status, [...RESOLVED_CLAIM_STATUSES]))
-            : inArray(claims.status, [...RESOLVED_CLAIM_STATUSES]))
+            ? and(gte(claims.createdAt, startDate), inArray(claims.status, [...RESOLVED_CLAIM_STATUSES]), claimOrgFilter)
+            : and(inArray(claims.status, [...RESOLVED_CLAIM_STATUSES]), claimOrgFilter))
           .then(r => r[0]?.count ?? 0),
 
         // Previous period claims
         prevStart && startDate
           ? db.select({ count: sql<number>`count(*)::int` })
               .from(claims)
-              .where(and(gte(claims.createdAt, prevStart), sql`${claims.createdAt} < ${startDate}`))
+              .where(and(gte(claims.createdAt, prevStart), lt(claims.createdAt, startDate), claimOrgFilter))
               .then(r => r[0]?.count ?? 0)
           : Promise.resolve(0),
 
         // Total members
         db.select({ count: sql<number>`count(*)::int` })
           .from(organizationMembers)
+          .where(memberOrgFilter)
           .then(r => r[0]?.count ?? 0),
 
         // Active stewards (role contains 'steward')
         db.select({ count: sql<number>`count(*)::int` })
           .from(organizationMembers)
-          .where(sql`lower(${organizationMembers.role}) LIKE '%steward%'`)
+          .where(memberOrgFilter
+            ? and(sql`lower(${organizationMembers.role}) LIKE '%steward%'`, memberOrgFilter)
+            : sql`lower(${organizationMembers.role}) LIKE '%steward%'`)
           .then(r => r[0]?.count ?? 0),
 
         // Grievances by type
@@ -199,7 +207,7 @@ export const GET = withApi(
           .from(grievances)
           .where(grievanceDateFilter
             ? and(grievanceDateFilter, sql`${grievances.unionRepId} IS NOT NULL`)
-            : sql`${grievances.unionRepId} IS NOT NULL`)
+            : and(sql`${grievances.unionRepId} IS NOT NULL`, grievanceOrgFilter))
           .groupBy(grievances.unionRepId)
           .orderBy(sql`count(*) DESC`)
           .limit(5),
@@ -214,7 +222,7 @@ export const GET = withApi(
           .from(grievances)
           .where(grievanceDateFilter
             ? and(grievanceDateFilter, sql`${grievances.resolvedAt} IS NOT NULL`, sql`${grievances.filedDate} IS NOT NULL`)
-            : and(sql`${grievances.resolvedAt} IS NOT NULL`, sql`${grievances.filedDate} IS NOT NULL`))
+            : and(sql`${grievances.resolvedAt} IS NOT NULL`, sql`${grievances.filedDate} IS NOT NULL`, grievanceOrgFilter))
           .then(r => r[0]?.avgHrs ?? 0),
       ]);
 

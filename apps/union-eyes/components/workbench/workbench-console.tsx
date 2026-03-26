@@ -83,6 +83,7 @@ interface Case {
   category: string;
   submittedDate: string;
   lastUpdate: string;
+  memberId: string;
   memberName: string;
   memberEmail: string;
   memberPhone: string;
@@ -153,6 +154,7 @@ const mapDbClaimToCase = (claim: DbClaim & { memberName?: string; memberEmail?: 
   category: claimTypeLabels[claim.claimType] || claim.claimType,
   submittedDate: new Date(claim.createdAt).toISOString().split('T')[0],
   lastUpdate: new Date(claim.updatedAt).toISOString().split('T')[0],
+  memberId: claim.memberId,
   memberName: claim.memberName || (claim.isAnonymous ? "Anonymous Member" : "Unknown Member"),
   memberEmail: claim.memberEmail || (claim.isAnonymous ? "" : ""),
   memberPhone: claim.memberPhone || (claim.isAnonymous ? "" : ""),
@@ -810,7 +812,7 @@ export default function WorkbenchConsole() {
 
                               {/* Action Buttons */}
                               <div className="flex flex-wrap gap-3">
-                                {!caseItem.assignedTo && (
+                                {!caseItem.assignedTo && caseItem.memberId !== user?.id && (
                                   <button
                                     onClick={() => handleAssignToMe(caseItem.id)}
                                     className="flex items-center gap-2 px-6 py-3 bg-orange-600 text-white rounded-lg hover:bg-orange-700 transition-colors"
@@ -819,14 +821,16 @@ export default function WorkbenchConsole() {
                                     Assign to Me
                                   </button>
                                 )}
-                                <Link href={`/dashboard/claims/${caseItem.id}`} className="flex items-center gap-2 px-6 py-3 bg-blue-600 text-white rounded-lg hover:bg-blue-700 transition-colors">
+                                <Link href={`/dashboard/cases/${caseItem.id}`} className="flex items-center gap-2 px-6 py-3 bg-blue-600 text-white rounded-lg hover:bg-blue-700 transition-colors">
                                   <Eye className="w-5 h-5" />
                                   View Full Details
                                 </Link>
-                                <button className="flex items-center gap-2 px-6 py-3 bg-green-600 text-white rounded-lg hover:bg-green-700 transition-colors">
-                                  <Phone className="w-5 h-5" />
-                                  Contact Member
-                                </button>
+                                {caseItem.memberId !== user?.id && (
+                                  <button className="flex items-center gap-2 px-6 py-3 bg-green-600 text-white rounded-lg hover:bg-green-700 transition-colors">
+                                    <Phone className="w-5 h-5" />
+                                    Contact Member
+                                  </button>
+                                )}
                                 <button className="flex items-center gap-2 px-6 py-3 bg-gray-100 text-gray-700 rounded-lg hover:bg-gray-200 transition-colors">
                                   <Edit className="w-5 h-5" />
                                   Update Status

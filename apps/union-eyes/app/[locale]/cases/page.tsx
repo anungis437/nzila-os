@@ -275,7 +275,7 @@ export default function CasesDashboardPage() {
               <TableRow
                 key={caseItem.id}
                 className="cursor-pointer hover:bg-muted/50"
-                onClick={() => router.push(`/cases/${caseItem.id}`)}
+                onClick={() => router.push(`/dashboard/cases/${caseItem.id}`)}
               >
                 <TableCell className="font-medium">{caseItem.caseNumber}</TableCell>
                 <TableCell>{caseItem.memberName}</TableCell>

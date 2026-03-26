@@ -156,6 +156,14 @@ export function OrganizationProvider({ children }: OrganizationProviderProps) {
 
         setOrganizationId(selectedOrgId || null);
 
+        // Persist to cookie so server-side getCurrentUser() can resolve the org
+        // (Clerk satellite mode doesn't provide orgId, and this is the initial
+        // auto-selection — switchOrganization sets the cookie on explicit switch)
+        if (selectedOrgId) {
+          document.cookie = `selected_org_id=${selectedOrgId}; path=/; max-age=${60 * 60 * 24 * 365}; SameSite=Lax`;
+          document.cookie = `selected_organization_id=${selectedOrgId}; path=/; max-age=${60 * 60 * 24 * 365}; SameSite=Lax`;
+        }
+
         // Load organization details (by UUID)
         const org = data.organizations.find((o: Organization) => o.id === selectedOrgId);
         if (org) {
