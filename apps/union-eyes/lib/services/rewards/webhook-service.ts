@@ -53,7 +53,7 @@ export function verifyShopifySignature(
  * @returns True if webhook was already processed
  */
 export async function isWebhookProcessed(
-  provider: 'shopify',
+  provider: 'shopify' | 'paypal',
   webhookId: string
 ): Promise<boolean> {
   const existing = await db.query.webhookReceipts.findFirst({

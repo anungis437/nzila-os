@@ -240,7 +240,7 @@ export async function runAllocation(
       ruleVersionId: ruleVersion.id,
       status: input.isSimulation ? 'simulated' : 'posted',
       isSimulation: input.isSimulation ?? false,
-      totalAmount: totalCost.toFixed(2),
+      totalAmount: fromCents(totalCostCents),
       lineCount: lines.length,
       startedAt: new Date(),
       completedAt: new Date(),
@@ -334,7 +334,7 @@ export async function runAllocation(
     action: input.isSimulation ? 'allocation_simulated' : 'allocation_posted',
     userId: input.createdBy,
     details: {
-      totalAmount: totalCost.toFixed(2),
+      totalAmount: fromCents(totalCostCents),
       lineCount: lines.length,
       method: ruleVersion.method,
     },
@@ -343,7 +343,7 @@ export async function runAllocation(
   return {
     runId,
     isSimulation: input.isSimulation ?? false,
-    totalAmount: totalCost.toFixed(2),
+    totalAmount: fromCents(totalCostCents),
     lines,
   };
 }

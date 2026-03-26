@@ -89,6 +89,7 @@ export const redemptionProviderEnum = pgEnum('redemption_provider', [
 
 export const webhookProviderEnum = pgEnum('webhook_provider', [
   'shopify',
+  'paypal',
 ]);
 
 // =====================================================

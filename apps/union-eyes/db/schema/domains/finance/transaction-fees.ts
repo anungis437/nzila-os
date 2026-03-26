@@ -57,6 +57,7 @@ export const settlementBatchStatusEnum = pgEnum('settlement_batch_status', [
 
 export const feeAdjustmentTypeEnum = pgEnum('fee_adjustment_type', [
   'reversal',
+  'partial_reversal',
   'waiver',
   'correction',
   'dispute_credit',

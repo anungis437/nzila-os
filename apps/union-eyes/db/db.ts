@@ -15,7 +15,7 @@ if (!process.env.DATABASE_URL && process.env.NODE_ENV !== 'production') {
   config({ path: resolve(process.cwd(), '.env.local') });
 }
 
-import { drizzle } from "drizzle-orm/postgres-js";
+import { drizzle, type PostgresJsDatabase } from "drizzle-orm/postgres-js";
 import postgres from "postgres";
 import * as schema from "./schema";
 import { getDatabase as getUnifiedDatabase, checkDatabaseHealth } from "@/lib/database/multi-db-client";
@@ -57,7 +57,7 @@ const connectionOptions = {
 const databaseUrl = process.env.DATABASE_URL;
 
 let _client: ReturnType<typeof postgres> | undefined;
-let _db: ReturnType<typeof drizzle> | undefined;
+let _db: PostgresJsDatabase<typeof schema> | undefined;
 
 function getClient() {
   if (!_client) {
@@ -77,12 +77,12 @@ function getDb() {
 }
 
 export const client = new Proxy({} as ReturnType<typeof postgres>, {
-  get(_target, prop) { return (getClient() as Record<string | symbol, unknown>)[prop]; },
+  get(_target, prop) { return (getClient() as unknown as Record<string | symbol, unknown>)[prop]; },
   apply(_target, thisArg, args) { return (getClient() as unknown as ((...a: unknown[]) => unknown)).apply(thisArg, args); },
 });
 
-export const db = new Proxy({} as ReturnType<typeof drizzle>, {
-  get(_target, prop) { return (getDb() as Record<string | symbol, unknown>)[prop]; },
+export const db = new Proxy({} as PostgresJsDatabase<typeof schema>, {
+  get(_target, prop) { return (getDb() as unknown as Record<string | symbol, unknown>)[prop]; },
 });
 
 // Export unified database client (supports PostgreSQL and Azure SQL)

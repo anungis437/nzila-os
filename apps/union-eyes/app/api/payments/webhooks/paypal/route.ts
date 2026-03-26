@@ -157,7 +157,7 @@ export async function POST(request: NextRequest) {
     const resource = (event.resource || {}) as Record<string, any>;
 
     // Idempotency: skip already-processed events
-    if (eventId && await isWebhookProcessed(eventId)) {
+    if (eventId && await isWebhookProcessed('paypal', eventId)) {
       return NextResponse.json({ received: true, status: 'duplicate' }, { status: 200 });
     }
 
@@ -208,7 +208,12 @@ export async function POST(request: NextRequest) {
 
     // Record successful processing for idempotency
     if (eventId) {
-      await recordWebhookProcessed(eventId, 'paypal', { eventType });
+      await recordWebhookProcessed({
+        provider: 'paypal',
+        webhookId: eventId,
+        eventType: String(eventType || 'unknown'),
+        payloadJson: event,
+      });
     }
 
     return NextResponse.json({ received: true }, { status: 200 });

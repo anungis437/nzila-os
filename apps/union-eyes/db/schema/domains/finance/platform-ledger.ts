@@ -30,6 +30,8 @@ export const costTypeEnum = pgEnum('platform_cost_type', [
   'usage_fee',
   'onboarding_fee',
   'support_fee',
+  'transaction_fee',
+  'settlement',
   'adjustment',
   'credit',
   'subsidy',
@@ -46,6 +48,8 @@ export const ledgerEventTypeEnum = pgEnum('ledger_event_type', [
   'writeoff_posted',
   'period_closed',
   'reversal',
+  'fee_captured',
+  'settlement_closed',
 ]);
 
 export const ledgerSourceTypeEnum = pgEnum('ledger_source_type', [
@@ -56,6 +60,8 @@ export const ledgerSourceTypeEnum = pgEnum('ledger_source_type', [
   'allocation',
   'manual',
   'system',
+  'transaction_fee',
+  'settlement_batch',
 ]);
 
 export const allocationStatusEnum = pgEnum('allocation_status', [
