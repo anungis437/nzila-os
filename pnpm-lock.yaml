@@ -1753,9 +1753,6 @@ importers:
       '@upstash/redis':
         specifier: ^1.35.8
         version: 1.37.0
-      '@whop-apps/sdk':
-        specifier: ^0.0.1-canary.109
-        version: 0.0.1-canary.117(react@19.2.4)
       axios:
         specifier: ^1.9.0
         version: 1.13.6
@@ -10912,9 +10909,6 @@ packages:
   '@types/hast@3.0.4':
     resolution: {integrity: sha512-WPs+bbQw5aCj+x6laNGWLH3wviHtoCv/P3+otBhbOhJgG8qtpdAMlTCxLtsTWA7LH1Oh/bFCHsBn0TPS5m30EQ==}
 
-  '@types/http-proxy@1.17.17':
-    resolution: {integrity: sha512-ED6LB+Z1AVylNTu7hdzuBqOgMnvG/ld6wGCG8wFnAzKX5uyW2K3WD52v0gnLCTK/VLpXtKckgWuyScYK6cSPaw==}
-
   '@types/js-yaml@4.0.9':
     resolution: {integrity: sha512-k4MGaQl5TGo/iipqb2UDG2UwjXziSWkh0uysQelTlJpX1qGlpUZYm8PnO4DxG1qBomtJUdYJ6qR6xdIah10JLg==}
 
@@ -11394,41 +11388,6 @@ packages:
   '@whatwg-node/server@0.10.18':
     resolution: {integrity: sha512-kMwLlxUbduttIgaPdSkmEarFpP+mSY8FEm+QWMBRJwxOHWkri+cxd8KZHO9EMrB9vgUuz+5WEaCawaL5wGVoXg==}
     engines: {node: '>=18.0.0'}
-
-  '@whop-apps/api@0.0.1-canary.117':
-    resolution: {integrity: sha512-tvMezS7vegiMqTAAVfu8FbKKAkDuMP3AsPRBWVczVFGTfgT5NH5siY6+eQ2SeNzBDyBq4hlrAEPcKSgSeCdqFQ==}
-
-  '@whop-apps/auth@0.0.1-canary.117':
-    resolution: {integrity: sha512-RuUezWK337vbOqstbSTl4YHtnw7e5dI3e/97vEoT4XxpNBkqsSCvmIZej988JypH3mK5rjm3Ve7n08L6OAt98A==}
-
-  '@whop-apps/core@0.0.1-canary.117':
-    resolution: {integrity: sha512-blZKhIF4lCcmHCtfo0rYf1XCwvGsLpRUMvmTpfPJ5ly14ecpJU4DDJFNOvGRrgYRhmjrcDP/Ghj/FMVPrfoYXw==}
-
-  '@whop-apps/dev-proxy@0.0.1-canary.117':
-    resolution: {integrity: sha512-JpJSX0ui/Y4ybIKarMU542LscsP5iPZPSN27wos6I8mrUAJBXcZV1GrWBIt6aVoEXArbtx39Ic4+R5van7txtQ==}
-    hasBin: true
-
-  '@whop-apps/iframe@0.0.1-canary.117':
-    resolution: {integrity: sha512-UqPSjXhBfh5rf87diNhmMT//I7u7baSjtzO+dlDeMHSTS3JC33Ll0vkzHAS9bZyoogAo49MvIv9hbRfdDGAPuw==}
-
-  '@whop-apps/oauth@0.0.1-canary.117':
-    resolution: {integrity: sha512-XxDPuS+ZBEtcpIBu/6ppNhOcBVxrP1RIdskfP4T3LYGw3HNajxGqZcMw6auBhbluroU/V9rg139p7IIv51+VQA==}
-
-  '@whop-apps/sdk@0.0.1-canary.117':
-    resolution: {integrity: sha512-2HQtHhP7hsarSy/qcf7OM/ZtwX6yOemZBCNNgEahlD7z+b4VtAIXrHYVOK5Q8To7nGWzQEh7q5iNKmNAEzrf7A==}
-    hasBin: true
-
-  '@whop-apps/theme@0.0.1-canary.117':
-    resolution: {integrity: sha512-bYP8jMFSDMa4OIETrGD7kmF09pFISSLoK7ALgYuyXgwRI8f4uWVdyZAoAq1gvRYlsS5U/xTR0EctddPoIAUQrQ==}
-    peerDependencies:
-      react: ^18.2.0
-
-  '@whop-apps/typed-api@0.0.1-canary.117':
-    resolution: {integrity: sha512-EQHTUHnSykDzQlOxxZtFlopnWLQYrRJAlgLnttVCBNGSP8D8omK62ZK9n1aXl9TOKJYjo4PBnHyeYe9W7soHqw==}
-    hasBin: true
-
-  '@whop-apps/typed-transport@0.0.1-canary.117':
-    resolution: {integrity: sha512-VP7U4nyQE35HODYFbt/mKuT+0a0Jn5zqQWgxse3nEBgy8KTKD2ugWtZj8PMF3yl/wpHbPngOYnd2uegaT3S8UA==}
 
   '@xmldom/xmldom@0.8.11':
     resolution: {integrity: sha512-cQzWCtO6C8TQiYl1ruKNn2U6Ao4o4WBBcbL61yJl84x+j5sOWWFU9X7DpND8XZG3daDppSsigMdfAIl2upQBRw==}
@@ -12076,10 +12035,6 @@ packages:
   cookie@0.7.2:
     resolution: {integrity: sha512-yki5XnKuf750l50uGTllt6kKILY4nQ1eNIQatoXEByZ5dWgnKqbnqmTrBE5B4N7lrMJKQ2ytWMiTO2o0v6Ew/w==}
     engines: {node: '>= 0.6'}
-
-  cookie@1.0.2:
-    resolution: {integrity: sha512-9Kr/j4O16ISv8zBBhJoi4bXOYNTkFLOqSL3UDB0njXxCXNezjeyVrJyGOWtgfs/q2km1gwBcfH8q1yEGoMYunA==}
-    engines: {node: '>=18'}
 
   cookie@1.1.1:
     resolution: {integrity: sha512-ei8Aos7ja0weRpFzJnEA9UHJ/7XQmqglbRwnf2ATjcB9Wq874VKH9kfjjirM6UhU2/E5fFYadylyhFldcqSidQ==}
@@ -12919,9 +12874,6 @@ packages:
     resolution: {integrity: sha512-i/2XbnSz/uxRCU6+NdVJgKWDTM427+MqYbkQzD321DuCQJUqOuJKIA0IM2+W2xtYHdKOmZ4dR6fExsd4SXL+WQ==}
     engines: {node: '>=6'}
 
-  eventemitter3@4.0.7:
-    resolution: {integrity: sha512-8guHBZCwKnFhYdHr2ysuRWErTwhoN2X8XELRlrRwpmfeY2jjuUN4taQMsULKUVo1K4DvZl+0pgfyoysHxvmvEw==}
-
   eventemitter3@5.0.4:
     resolution: {integrity: sha512-mlsTRyGaPBjPedk6Bvw+aqbsXDtoAyAzm5MO7JgU+yVRyMQ5O8bD4Kcci7BS85f93veegeCPkL8R4GLClnjLFw==}
 
@@ -13509,10 +13461,6 @@ packages:
   http-proxy-agent@7.0.2:
     resolution: {integrity: sha512-T1gkAiYYDWYx3V5Bmyu7HcfcvL7mUrTWiM6yOfa3PIphViJ/gFPbvidQ+veqSOHci/PxBcDabeUNCzpOODJZig==}
     engines: {node: '>= 14'}
-
-  http-proxy@1.18.1:
-    resolution: {integrity: sha512-7mz/721AbnJwIVbnaSv1Cz3Am0ZLT/UBwkC92VlxhXv/k/BBQfM2fXElQNC27BVGr0uwUpplYPQM9LnaBMR5NQ==}
-    engines: {node: '>=8.0.0'}
 
   https-proxy-agent@2.2.4:
     resolution: {integrity: sha512-OmvfoQ53WLjtA9HeYP9RNrWMJzzAz1JGaSFr1nijg0PVR1JaD/xbJq1mdEIIlxGpXp9eSe/O2LgU9DJmTPd0Eg==}
@@ -14896,9 +14844,6 @@ packages:
   openapi-server-url-templating@1.3.0:
     resolution: {integrity: sha512-DPlCms3KKEbjVQb0spV6Awfn6UWNheuG/+folQPzh/wUaKwuqvj8zt5gagD7qoyxtE03cIiKPgLFS3Q8Bz00uQ==}
     engines: {node: '>=12.20.0'}
-
-  openapi-typescript-helpers@0.0.2:
-    resolution: {integrity: sha512-r5Z4tlGa2l6jYO1ENT9Giqo/ZWzWPmsYUR41O01kjYr7vg4iBFaMh0W0g8Ef72SpeU2F+TY6CAdKxTv7aq+WXA==}
 
   openapi3-ts@4.5.0:
     resolution: {integrity: sha512-jaL+HgTq2Gj5jRcfdutgRGLosCy/hT8sQf6VOy+P+g36cZOjI1iukdPnijC+4CmeRzg/jEllJUboEic2FhxhtQ==}
@@ -24037,10 +23982,6 @@ snapshots:
     dependencies:
       '@types/unist': 3.0.3
 
-  '@types/http-proxy@1.17.17':
-    dependencies:
-      '@types/node': 25.5.0
-
   '@types/js-yaml@4.0.9': {}
 
   '@types/json-schema@7.0.15': {}
@@ -24637,70 +24578,6 @@ snapshots:
       '@whatwg-node/fetch': 0.10.13
       '@whatwg-node/promise-helpers': 1.3.2
       tslib: 2.8.1
-
-  '@whop-apps/api@0.0.1-canary.117':
-    dependencies:
-      '@whop-apps/auth': 0.0.1-canary.117
-      '@whop-apps/core': 0.0.1-canary.117
-      '@whop-apps/typed-api': 0.0.1-canary.117
-      openapi-typescript-helpers: 0.0.2
-
-  '@whop-apps/auth@0.0.1-canary.117':
-    dependencies:
-      '@whop-apps/core': 0.0.1-canary.117
-      cookie: 1.0.2
-      jose: 4.15.9
-
-  '@whop-apps/core@0.0.1-canary.117': {}
-
-  '@whop-apps/dev-proxy@0.0.1-canary.117':
-    dependencies:
-      '@types/http-proxy': 1.17.17
-      '@whop-apps/core': 0.0.1-canary.117
-      cookie: 1.0.2
-      http-proxy: 1.18.1
-      jose: 4.15.9
-    transitivePeerDependencies:
-      - debug
-
-  '@whop-apps/iframe@0.0.1-canary.117':
-    dependencies:
-      '@whop-apps/core': 0.0.1-canary.117
-      '@whop-apps/typed-transport': 0.0.1-canary.117
-      zod: 3.25.76
-
-  '@whop-apps/oauth@0.0.1-canary.117':
-    dependencies:
-      '@whop-apps/auth': 0.0.1-canary.117
-      '@whop-apps/core': 0.0.1-canary.117
-      '@whop-apps/iframe': 0.0.1-canary.117
-      '@whop-apps/typed-api': 0.0.1-canary.117
-      zod: 3.25.76
-
-  '@whop-apps/sdk@0.0.1-canary.117(react@19.2.4)':
-    dependencies:
-      '@whop-apps/api': 0.0.1-canary.117
-      '@whop-apps/auth': 0.0.1-canary.117
-      '@whop-apps/core': 0.0.1-canary.117
-      '@whop-apps/dev-proxy': 0.0.1-canary.117
-      '@whop-apps/iframe': 0.0.1-canary.117
-      '@whop-apps/oauth': 0.0.1-canary.117
-      '@whop-apps/theme': 0.0.1-canary.117(react@19.2.4)
-    transitivePeerDependencies:
-      - debug
-      - react
-
-  '@whop-apps/theme@0.0.1-canary.117(react@19.2.4)':
-    dependencies:
-      react: 19.2.4
-
-  '@whop-apps/typed-api@0.0.1-canary.117':
-    dependencies:
-      '@whop-apps/core': 0.0.1-canary.117
-
-  '@whop-apps/typed-transport@0.0.1-canary.117':
-    dependencies:
-      zod: 3.25.76
 
   '@xmldom/xmldom@0.8.11': {}
 
@@ -25365,8 +25242,6 @@ snapshots:
   cookie-signature@1.2.2: {}
 
   cookie@0.7.2: {}
-
-  cookie@1.0.2: {}
 
   cookie@1.1.1: {}
 
@@ -26300,8 +26175,6 @@ snapshots:
 
   event-target-shim@5.0.1: {}
 
-  eventemitter3@4.0.7: {}
-
   eventemitter3@5.0.4: {}
 
   events-universal@1.0.1:
@@ -27087,14 +26960,6 @@ snapshots:
       debug: 4.4.3
     transitivePeerDependencies:
       - supports-color
-
-  http-proxy@1.18.1:
-    dependencies:
-      eventemitter3: 4.0.7
-      follow-redirects: 1.15.11
-      requires-port: 1.0.0
-    transitivePeerDependencies:
-      - debug
 
   https-proxy-agent@2.2.4:
     dependencies:
@@ -28683,8 +28548,6 @@ snapshots:
   openapi-server-url-templating@1.3.0:
     dependencies:
       apg-lite: 1.0.5
-
-  openapi-typescript-helpers@0.0.2: {}
 
   openapi3-ts@4.5.0:
     dependencies:
