@@ -82,11 +82,13 @@ export function AIChatbot() {
       const response = await fetch("/api/chatbot/sessions");
       if (response.ok) {
         const data = await response.json();
-        setSessions(data.sessions);
+        // withApi envelope: { success, data: { data: rows } }
+        const rows = data?.data?.data ?? data?.data ?? data?.sessions ?? [];
+        setSessions(rows);
         
         // Load first session if available
-        if (data.sessions.length > 0) {
-          loadSession(data.sessions[0].id);
+        if (rows.length > 0) {
+          loadSession(rows[0].id);
         }
       }
     } catch (_error) {
@@ -98,11 +100,13 @@ export function AIChatbot() {
       const response = await fetch(`/api/chatbot/sessions/${sessionId}/messages`);
       if (response.ok) {
         const data = await response.json();
-        setMessages(data.messages);
+        // withApi envelope: { success, data: { data: rows } }
+        const msgs = data?.data?.data ?? data?.data ?? data?.messages ?? [];
+        setMessages(msgs);
         
         const session = sessions.find((s) => s.id === sessionId);
         setCurrentSession(session || null);
-        setShowSuggestions(data.messages.length === 0);
+        setShowSuggestions(msgs.length === 0);
       }
     } catch (_error) {
 }
@@ -120,8 +124,10 @@ export function AIChatbot() {
       
       if (response.ok) {
         const data = await response.json();
-        setSessions([data.session, ...sessions]);
-        setCurrentSession(data.session);
+        // withApi envelope: { success, data: { data: row } }
+        const created = data?.data?.data ?? data?.data ?? data?.session;
+        setSessions([created, ...sessions]);
+        setCurrentSession(created);
         setMessages([]);
         setShowSuggestions(true);
       }
@@ -175,6 +181,8 @@ export function AIChatbot() {
       }
       
       const data = await response.json();
+      // withApi envelope: { success, data: { data: row } }
+      const msg = data?.data?.data ?? data?.data ?? data?.message;
       
       // Replace temp message with real one and add assistant response
       setMessages((prev) => [
@@ -185,12 +193,12 @@ export function AIChatbot() {
           content: messageContent,
         },
         {
-          id: data.message.id,
+          id: msg.id,
           role: "assistant",
-          content: data.message.content,
-          retrievedDocuments: data.message.retrievedDocuments,
-          tokensUsed: data.message.tokensUsed,
-          responseTimeMs: data.message.responseTimeMs,
+          content: msg.content,
+          retrievedDocuments: msg.retrievedDocuments,
+          tokensUsed: msg.tokensUsed,
+          responseTimeMs: msg.responseTimeMs,
         },
       ]);
       
