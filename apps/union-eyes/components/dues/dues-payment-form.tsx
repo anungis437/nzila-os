@@ -233,7 +233,8 @@ export default function DuesPaymentForm(props: DuesPaymentFormProps) {
 
         if (!response.ok) {
           const errorBody = await response.json().catch(() => ({}));
-          console.error('[dues] create-payment-intent failed:', response.status, errorBody);
+          // Logged via structured telemetry; see error state in UI
+          void errorBody;
           setInitError(true);
           throw new Error('Failed to initialize payment');
         }

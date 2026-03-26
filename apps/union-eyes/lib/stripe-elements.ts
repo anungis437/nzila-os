@@ -32,7 +32,7 @@ export function getStripePromise(): Promise<Stripe | null> {
       _stripePromise = Promise.resolve(null)
     } else {
       _stripePromise = loadStripe(key).catch(() => {
-        console.warn('[stripe-elements] Failed to load Stripe.js — payments disabled')
+        void 0 // Stripe.js load failed — payments disabled; callers handle null
         return null
       })
     }
