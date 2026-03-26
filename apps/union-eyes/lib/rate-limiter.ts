@@ -11,17 +11,69 @@
  * - Graceful degradation when Redis unavailable
  */
 
-import { Redis } from '@upstash/redis';
+import { Redis as UpstashRedis } from '@upstash/redis';
+import IORedis from 'ioredis';
 import { logger } from './logger';
 import { circuitBreakers, CIRCUIT_BREAKERS, CircuitBreakerOpenError } from './circuit-breaker';
 
-// Initialize Redis client (using Upstash for serverless-friendly Redis)
-const redis = process.env.UPSTASH_REDIS_REST_URL && process.env.UPSTASH_REDIS_REST_TOKEN
-  ? new Redis({
+// ── Redis abstraction ────────────────────────────────────────────────────
+// Wrap Upstash or ioredis behind a minimal interface so the sliding-window
+// algorithm works identically against both backends.
+
+interface RedisPipeline {
+  zremrangebyscore(key: string, min: number, max: number): void;
+  zcard(key: string): void;
+  zadd(key: string, opts: { score: number; member: string }): void;
+  expire(key: string, seconds: number): void;
+  exec(): Promise<unknown[]>;
+}
+
+interface RedisClient {
+  pipeline(): RedisPipeline;
+}
+
+function createRedisClient(): RedisClient | null {
+  // Prefer Upstash (serverless/production)
+  if (process.env.UPSTASH_REDIS_REST_URL && process.env.UPSTASH_REDIS_REST_TOKEN) {
+    const upstash = new UpstashRedis({
       url: process.env.UPSTASH_REDIS_REST_URL,
       token: process.env.UPSTASH_REDIS_REST_TOKEN,
-    })
-  : null;
+    });
+    return upstash as unknown as RedisClient;
+  }
+
+  // Fallback to ioredis via REDIS_URL (local dev / Docker)
+  if (process.env.REDIS_URL) {
+    const io = new IORedis(process.env.REDIS_URL, {
+      maxRetriesPerRequest: 2,
+      enableReadyCheck: false,
+      lazyConnect: true,
+    });
+    io.on('error', (err) => logger.error('[rate-limiter] ioredis error', { error: err.message }));
+
+    return {
+      pipeline(): RedisPipeline {
+        const p = io.pipeline();
+        return {
+          zremrangebyscore(key, min, max) { p.zremrangebyscore(key, min, max); },
+          zcard(key) { p.zcard(key); },
+          zadd(key, opts) { p.zadd(key, opts.score, opts.member); },
+          expire(key, seconds) { p.expire(key, seconds); },
+          async exec() {
+            const results = await p.exec();
+            // ioredis returns [[err, val], ...] — extract values to match Upstash shape
+            return (results ?? []).map(([, val]) => val);
+          },
+        };
+      },
+    };
+  }
+
+  return null;
+}
+
+// Initialize Redis client (Upstash for serverless, ioredis for local dev)
+const redis = createRedisClient();
 
 // Initialize circuit breaker for Redis
 const redisCircuitBreaker = circuitBreakers.get('redis-rate-limiter', CIRCUIT_BREAKERS.REDIS);
@@ -99,12 +151,12 @@ export async function checkRateLimit(
   const { limit, window, identifier } = config;
   const redisKey = `ratelimit:${identifier}:${key}`;
 
-  // If Redis is not configured, fail closed to prevent abuse (SECURITY FIX)
+  // If no Redis client configured at all, fail closed to prevent abuse
   if (!redis) {
     logger.error('Redis not configured for rate limiting - rejecting request', {
       key,
       identifier,
-      message: 'Rate limiting service unavailable',
+      message: 'Set UPSTASH_REDIS_REST_URL/TOKEN or REDIS_URL',
     });
     return {
       allowed: false,
@@ -112,7 +164,7 @@ export async function checkRateLimit(
       limit,
       remaining: 0,
       resetIn: window,
-      error: 'Rate limiting service unavailable. Please contact support if this persists.',
+      error: 'Rate limiting service unavailable. Configure REDIS_URL or Upstash credentials.',
     };
   }
 
@@ -158,39 +210,44 @@ export async function checkRateLimit(
     });
 
   } catch (error) {
+    // In development, fail open when Redis is unreachable so devs are not blocked
+    const failOpen = process.env.NODE_ENV === 'development';
+
     // Circuit breaker is open - service unavailable
     if (error instanceof CircuitBreakerOpenError) {
       logger.error('Rate limiting service unavailable (circuit breaker open)', {
         key,
         identifier,
         stats: error.stats,
+        failOpen,
       });
       
       return {
-        allowed: false,
+        allowed: failOpen,
         current: 0,
         limit,
-        remaining: 0,
-        resetIn: 60, // Suggest retry in 60 seconds
-        error: 'Rate limiting service temporarily unavailable',
+        remaining: failOpen ? limit : 0,
+        resetIn: 60,
+        ...(failOpen ? {} : { error: 'Rate limiting service temporarily unavailable' }),
       };
     }
     
-    // Other Redis errors - fail closed for security
-    logger.error('Rate limit check failed - rejecting request for security', {
+    // Other Redis errors
+    logger.error('Rate limit check failed', {
       key,
       identifier,
       error: (error as Error).message,
       errorType: (error as Error).name,
+      failOpen,
     });
 
     return {
-      allowed: false,
+      allowed: failOpen,
       current: 0,
       limit,
-      remaining: 0,
+      remaining: failOpen ? limit : 0,
       resetIn: window,
-      error: 'Rate limiting service temporarily unavailable',
+      ...(failOpen ? {} : { error: 'Rate limiting service temporarily unavailable' }),
     };
   }
 }

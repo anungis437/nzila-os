@@ -40,8 +40,9 @@ export default function PaymentMethodManager({
     try {
       const response = await fetch(`/api/dues/payment-methods?userId=${userId}`);
       if (!response.ok) throw new Error('Failed to load payment methods');
-      const data = await response.json();
-      setPaymentMethods(data);
+      const json = await response.json();
+      const methods = Array.isArray(json?.data) ? json.data : [];
+      setPaymentMethods(methods);
     } catch (_error) {
 toast({
         title: 'Error',
