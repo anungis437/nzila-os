@@ -3,6 +3,7 @@ import { z } from 'zod';
 import { DuesCalculationEngine } from '@/lib/dues-calculation-engine';
 import { logApiAuditEvent } from '@/lib/middleware/api-security';
 import { withRoleAuth, type BaseAuthContext } from '@/lib/api-auth-guard';
+import { requireEntitlement } from '@/services/platform-economics/entitlement-guard';
 import { checkRateLimit, RATE_LIMITS, createRateLimitHeaders } from '@/lib/rate-limiter';
 
 import {
@@ -43,6 +44,7 @@ export const POST = withRoleAuth('steward', async (request, context: BaseAuthCon
   if (!userId || !organizationId) {
     return standardErrorResponse(ErrorCode.AUTH_REQUIRED, 'Unauthorized');
   }
+  await requireEntitlement(organizationId, 'financial_intelligence_suite', userId);
 
   // Rate limiting: 100 financial read operations per hour per user
   const rateLimitResult = await checkRateLimit(userId, RATE_LIMITS.FINANCIAL_READ);
@@ -129,4 +131,4 @@ try {
     }
 });
 
-
+

@@ -13,6 +13,7 @@ import { db } from '@/db/db';
 import { memberDuesLedger } from '@/db/schema/dues-finance-schema';
 import { eq, and, desc, sql } from 'drizzle-orm';
 import { z } from 'zod';
+import { moneyToNumber, subtractMoney } from '@/lib/decimal-safe';
 import { createLogger } from '@nzila/os-core'
 
 const logger = createLogger('portal:dues:pay')
@@ -124,8 +125,8 @@ export async function POST(req: NextRequest) {
         ),
       );
 
-    const balanceBefore = parseFloat(current?.balance ?? '0');
-    const balanceAfter = balanceBefore - amount;
+    const balanceBefore = moneyToNumber(current?.balance ?? '0');
+    const balanceAfter = moneyToNumber(subtractMoney(balanceBefore, amount));
 
     // Insert ledger entry
     const [entry] = await db

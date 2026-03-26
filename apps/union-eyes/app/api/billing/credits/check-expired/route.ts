@@ -12,6 +12,7 @@ export const dynamic = 'force-dynamic';
 export const POST = withApi(
   {
     auth: { minRole: 'steward' },
+    entitlement: 'financial_intelligence_suite',
     openapi: { tags: ['Billing'], summary: 'Expire past-due trials and credits' },
   },
   async ({ organizationId, userId }) => {

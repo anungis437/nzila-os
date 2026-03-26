@@ -31,6 +31,7 @@ import {
 } from '@/db/schema';
 import { eq, and, inArray } from 'drizzle-orm';
 import { auditLog, AuditEventType, AuditSeverity } from '@/lib/audit-logger';
+import { getActiveContract } from './contract-service';
 
 // ============================================================================
 // Types
@@ -265,6 +266,12 @@ export async function instantiateTemplate(
   const tmpl = await getTemplate(templateCode);
   if (!tmpl) {
     throw new Error(`Pricing template '${templateCode}' not found`);
+  }
+
+  // Guard: require active contract before creating subscription
+  const contract = await getActiveContract(organizationId);
+  if (!contract) {
+    throw new Error(`Cannot instantiate template: no active contract for org ${organizationId}`);
   }
 
   const { template } = tmpl;

@@ -14,6 +14,7 @@ import {
 import { eq, and, lte, isNull } from "drizzle-orm";
 import { createAuditLog } from "./audit-service";
 import { logger } from "@/lib/logger";
+import { toCents, moneyToNumber } from "@/lib/decimal-safe";
 
 // ============================================================================
 // TYPES
@@ -258,8 +259,8 @@ export async function reverseGLTransaction(
     return {
       id: reversalTx.id,
       transactionNumber: reversalNumber,
-      debitAmount: Number(reversalTx.creditAmount),
-      creditAmount: Number(reversalTx.debitAmount),
+      debitAmount: moneyToNumber(reversalTx.creditAmount),
+      creditAmount: moneyToNumber(reversalTx.debitAmount),
       isPosted: true,
       createdAt: reversalTx.createdAt,
     };
@@ -313,27 +314,29 @@ export async function generateTrialBalance(
           )
         );
 
-      let debitBalance = Number(account.openingBalance || 0);
-      let creditBalance = 0;
+      let debitCents = toCents(account.openingBalance);
+      let creditCents = 0;
 
       for (const tx of transactions) {
-        debitBalance += Number(tx.debitAmount || 0);
-        creditBalance += Number(tx.creditAmount || 0);
+        debitCents += toCents(tx.debitAmount);
+        creditCents += toCents(tx.creditAmount);
       }
 
-      totalDebits += debitBalance;
-      totalCredits += creditBalance;
+      totalDebits += debitCents;
+      totalCredits += creditCents;
 
       accountBalances.push({
         accountNumber: account.accountNumber,
         accountName: account.accountName,
-        debitBalance,
-        creditBalance,
+        debitBalance: debitCents / 100,
+        creditBalance: creditCents / 100,
       });
     }
 
-    const difference = totalDebits - totalCredits;
-    const isBalanced = Math.abs(difference) < 0.01; // Allow for rounding errors
+    const differenceDollars = (totalDebits - totalCredits) / 100;
+    const isBalanced = Math.abs(totalDebits - totalCredits) < 1; // 1 cent tolerance
+    const totalDebitsDollars = totalDebits / 100;
+    const totalCreditsDollars = totalCredits / 100;
 
     // Create trial balance snapshot
     const [trialBalance] = await db
@@ -343,9 +346,9 @@ export async function generateTrialBalance(
         // eslint-disable-next-line @typescript-eslint/no-explicit-any
         chartOfAccountsId: null as any, // Null for combined TB
         periodEndDate,
-        debitTotal: totalDebits.toString(),
-        creditTotal: totalCredits.toString(),
-        balance: difference.toString(),
+        debitTotal: totalDebitsDollars.toString(),
+        creditTotal: totalCreditsDollars.toString(),
+        balance: differenceDollars.toString(),
         isBalanced,
         isFinalized: false,
         createdBy: userId,
@@ -362,18 +365,18 @@ export async function generateTrialBalance(
       description: `Generated trial balance for period ending ${periodEndDate.toISOString()}`,
       metadata: {
         periodEndDate: periodEndDate.toISOString(),
-        totalDebits,
-        totalCredits,
-        difference,
+        totalDebits: totalDebitsDollars,
+        totalCredits: totalCreditsDollars,
+        difference: differenceDollars,
         isBalanced,
         accountCount: accountBalances.length,
       },
     });
 
     return {
-      debitTotal: totalDebits,
-      creditTotal: totalCredits,
-      difference,
+      debitTotal: totalDebitsDollars,
+      creditTotal: totalCreditsDollars,
+      difference: differenceDollars,
       isBalanced,
       accounts: accountBalances,
     };
@@ -508,8 +511,8 @@ export async function getUnreconciledTransactions(
     return transactions.map((tx) => ({
       id: tx.id,
       transactionNumber: tx.transactionNumber,
-      debitAmount: Number(tx.debitAmount),
-      creditAmount: Number(tx.creditAmount),
+      debitAmount: moneyToNumber(tx.debitAmount),
+      creditAmount: moneyToNumber(tx.creditAmount),
       isPosted: tx.isPosted ?? false,
       createdAt: tx.createdAt,
     }));

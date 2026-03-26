@@ -21,6 +21,7 @@ import {
   getAdminInvoices,
   getAdminPayments,
 } from '@/services/platform-economics';
+import { formatCurrency } from '@/lib/utils';
 
 // ── Types ──────────────────────────────────────────────────────────────────
 
@@ -169,10 +170,6 @@ function paymentStatusVariant(status: string) {
     case 'pending': return 'secondary' as const;
     default: return 'outline' as const;
   }
-}
-
-function formatCurrency(amount: number, currency = 'CAD') {
-  return new Intl.NumberFormat('en-CA', { style: 'currency', currency }).format(amount);
 }
 
 function formatDate(dateStr: string | Date) {

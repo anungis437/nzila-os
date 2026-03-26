@@ -30,6 +30,7 @@ import {
 } from '@/db/schema';
 import { eq, and, lte, gte, isNull, or, desc, sql, inArray } from 'drizzle-orm';
 import { auditLog, AuditEventType, AuditSeverity } from '@/lib/audit-logger';
+import { appendLedgerEntry } from './ledger-service';
 import { v4 as uuidv4 } from 'uuid';
 
 // ============================================================================
@@ -316,6 +317,25 @@ export async function captureTransactionFee(
     })
     .returning();
 
+  // Bridge fee capture into the canonical DAPL ledger
+  await appendLedgerEntry({
+    organizationId: input.organizationId,
+    billingPeriodId: input.billingPeriodId,
+    costType: 'transaction_fee',
+    eventType: 'fee_captured',
+    sourceType: 'transaction_fee',
+    sourceId: event.id,
+    unitPriceCad: input.feeAmountCad,
+    amountCad: input.feeAmountCad,
+    description: `Fee captured: ${input.sourceTransactionType} (${input.sourceTransactionId})`,
+    metadata: {
+      grossAmountCad: input.grossAmountCad,
+      netAmountCad: input.netAmountCad,
+      feeModel: input.feeModel,
+      ruleId: input.ruleId,
+    },
+  });
+
   await auditLog({
     eventType: AuditEventType.DATA_CREATE,
     severity: AuditSeverity.HIGH,
@@ -339,14 +359,21 @@ export async function captureTransactionFee(
 // ============================================================================
 
 /**
- * Reverse a captured fee (e.g. on refund). Creates a fee adjustment
- * and marks the event as reversed. Idempotent — cannot reverse twice.
+ * Reverse a captured fee (e.g. on refund). Creates a fee adjustment,
+ * a contra ledger entry, and marks the event as reversed.
+ *
+ * Supports partial refunds: when `partialRefundAmount` is provided,
+ * the fee reversal is proportional to the refund relative to the
+ * gross transaction amount.
+ *
+ * Idempotent — cannot reverse a fee that is already reversed.
  */
 export async function reverseTransactionFee(
   feeEventId: string,
   sourceRefundId: string,
   reason: string,
   approvedBy?: string,
+  partialRefundAmount?: string,
 ): Promise<{ event: TransactionFeeEvent; adjustment: typeof feeAdjustments.$inferSelect }> {
   return await db.transaction(async (tx) => {
     const [event] = await tx
@@ -364,10 +391,21 @@ export async function reverseTransactionFee(
       throw new Error(`Fee event ${feeEventId} not found or already reversed`);
     }
 
-    // Mark as reversed
+    // Calculate reversal amount: proportional if partial, full otherwise
+    let reversalAmount: string;
+    if (partialRefundAmount) {
+      // Proportional fee reversal: (refundAmount / grossAmount) × feeAmount
+      const ratio = divideDecimal(partialRefundAmount, event.grossAmountCad);
+      reversalAmount = multiplyDecimal(event.feeAmountCad, ratio);
+    } else {
+      reversalAmount = event.feeAmountCad;
+    }
+
+    // Mark as reversed (full) or keep captured (partial — may have further refunds)
+    const newStatus = partialRefundAmount ? 'captured' : 'reversed';
     const [updatedEvent] = await tx
       .update(transactionFeeEvents)
-      .set({ status: 'reversed' })
+      .set({ status: newStatus })
       .where(eq(transactionFeeEvents.id, feeEventId))
       .returning();
 
@@ -377,14 +415,35 @@ export async function reverseTransactionFee(
       .values({
         feeEventId,
         organizationId: event.organizationId,
-        adjustmentType: 'reversal',
-        amountCad: `-${event.feeAmountCad}`,
+        adjustmentType: partialRefundAmount ? 'partial_reversal' : 'reversal',
+        amountCad: `-${reversalAmount}`,
         reason,
         sourceRefundId,
         approvedBy,
         approvedAt: approvedBy ? new Date() : undefined,
       })
       .returning();
+
+    // Bridge fee reversal into the canonical DAPL ledger as contra entry
+    await appendLedgerEntry({
+      organizationId: event.organizationId,
+      billingPeriodId: event.billingPeriodId ?? undefined,
+      costType: 'transaction_fee',
+      eventType: 'reversal',
+      sourceType: 'transaction_fee',
+      sourceId: event.id,
+      unitPriceCad: `-${reversalAmount}`,
+      amountCad: `-${reversalAmount}`,
+      description: `Fee ${partialRefundAmount ? 'partial ' : ''}reversal: ${reason}`,
+      metadata: {
+        feeEventId,
+        sourceRefundId,
+        originalFeeAmountCad: event.feeAmountCad,
+        reversalAmountCad: reversalAmount,
+        isPartial: !!partialRefundAmount,
+      },
+      createdBy: approvedBy,
+    });
 
     await auditLog({
       eventType: AuditEventType.DATA_UPDATE,
@@ -395,7 +454,9 @@ export async function reverseTransactionFee(
       action: 'fee_reversed',
       userId: approvedBy,
       metadata: {
-        reversalAmount: `-${event.feeAmountCad}`,
+        reversalAmount: `-${reversalAmount}`,
+        isPartial: !!partialRefundAmount,
+        partialRefundAmount,
         sourceRefundId,
         reason,
       },
@@ -501,7 +562,7 @@ export async function closeSettlementBatch(
   batchId: string,
   closedBy: string,
 ) {
-  return await db.transaction(async (tx) => {
+  const result = await db.transaction(async (tx) => {
     // Update batch status
     const [batch] = await tx
       .update(feeSettlementBatches)
@@ -541,6 +602,26 @@ export async function closeSettlementBatch(
 
     return batch;
   });
+
+  // Bridge settlement into the canonical DAPL ledger
+  await appendLedgerEntry({
+    organizationId: 'platform', // Settlement is platform-level
+    costType: 'settlement',
+    eventType: 'settlement_closed',
+    sourceType: 'settlement_batch',
+    sourceId: result.id,
+    unitPriceCad: result.totalFeesCad,
+    amountCad: result.totalFeesCad,
+    description: `Settlement batch ${result.batchNumber} closed (${result.eventCount} events)`,
+    metadata: {
+      batchNumber: result.batchNumber,
+      totalGrossCad: result.totalGrossCad,
+      totalNetCad: result.totalNetCad,
+    },
+    createdBy: closedBy,
+  });
+
+  return result;
 }
 
 // ============================================================================
@@ -631,4 +712,12 @@ function multiplyDecimal(amount: string, rate: string): string {
 
 function compareDecimal(a: string, b: string): number {
   return Math.round(Number(a) * 100) - Math.round(Number(b) * 100);
+}
+
+function divideDecimal(numerator: string, denominator: string): string {
+  const d = Number(denominator);
+  if (d === 0) return '0.00';
+  const result = Number(numerator) / d;
+  // Return as ratio string with higher precision for intermediate calc
+  return result.toString();
 }

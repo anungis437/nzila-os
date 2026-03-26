@@ -4,6 +4,7 @@
 
 import { z } from 'zod';
 import { withMinRole, type BaseAuthContext } from '@/lib/api-auth-guard';
+import { requireEntitlement } from '@/services/platform-economics/entitlement-guard';
 import {
   ErrorCode,
   standardErrorResponse,
@@ -30,6 +31,7 @@ export const POST = withMinRole('admin', async (request, context: BaseAuthContex
   if (!organizationId || !userId) {
     return standardErrorResponse(ErrorCode.AUTH_REQUIRED, 'Unauthorized');
   }
+  await requireEntitlement(organizationId, 'allocation_engine', userId);
 
   let rawBody: unknown;
   try {

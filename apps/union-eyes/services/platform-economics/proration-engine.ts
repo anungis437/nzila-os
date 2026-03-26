@@ -10,6 +10,8 @@
  * @layer 1.5 — Billing Lifecycle
  */
 
+import { multiplyMoney, subtractMoney } from '@/lib/decimal-safe';
+
 // ============================================================================
 // Types
 // ============================================================================
@@ -73,17 +75,14 @@ export function calculateProration(input: ProrationInput): ProrationResult {
 
   const fraction = daysRemaining / totalDays;
 
-  const prevAmount = Number(input.previousAmountCad);
-  const newAmount = Number(input.newAmountCad);
-
-  const credit = prevAmount * fraction;
-  const charge = newAmount * fraction;
-  const net = charge - credit;
+  const credit = multiplyMoney(input.previousAmountCad, fraction);
+  const charge = multiplyMoney(input.newAmountCad, fraction);
+  const net = subtractMoney(charge, credit);
 
   return {
-    creditAmountCad: credit.toFixed(2),
-    chargeAmountCad: charge.toFixed(2),
-    netAmountCad: net.toFixed(2),
+    creditAmountCad: credit,
+    chargeAmountCad: charge,
+    netAmountCad: net,
     daysRemaining,
     totalDays,
     fractionRemaining: fraction.toFixed(6),
@@ -100,13 +99,13 @@ export function prorateSeats(
   periodStart: Date,
   periodEnd: Date,
 ): ProrationResult {
-  const monthlyCost = seatDelta * Number(perSeatFee);
+  const monthlyCost = multiplyMoney(perSeatFee, seatDelta);
   return calculateProration({
     changeDate,
     periodStart,
     periodEnd,
     previousAmountCad: '0',
-    newAmountCad: monthlyCost.toFixed(2),
+    newAmountCad: monthlyCost,
   });
 }
 
@@ -120,12 +119,12 @@ export function prorateModules(
   periodStart: Date,
   periodEnd: Date,
 ): ProrationResult {
-  const monthlyCost = moduleDelta * Number(perModuleFee);
+  const monthlyCost = multiplyMoney(perModuleFee, moduleDelta);
   return calculateProration({
     changeDate,
     periodStart,
     periodEnd,
     previousAmountCad: '0',
-    newAmountCad: monthlyCost.toFixed(2),
+    newAmountCad: monthlyCost,
   });
 }

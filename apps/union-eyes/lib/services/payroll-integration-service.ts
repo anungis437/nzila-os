@@ -156,12 +156,12 @@ export class GenericCsvConnector implements PayrollConnector {
 
     const rows: PayrollDeductionRow[] = [];
     const warnings: string[] = [];
-    let total = 0;
+    let totalCents = 0;
 
     for (let i = 1; i < lines.length; i++) {
       const cols = lines[i].split(',').map(c => c.trim().replace(/^"|"$/g, ''));
       try {
-        const duesAmt = parseFloat(cols[duesColIdx]);
+        const duesAmt = moneyToNumber(cols[duesColIdx]);
         if (isNaN(duesAmt)) {
           warnings.push(`Row ${i + 1}: invalid dues amount "${cols[duesColIdx]}"`);
           continue;
@@ -172,13 +172,13 @@ export class GenericCsvConnector implements PayrollConnector {
           employeeName: cols[nameColIdx],
           periodStart: new Date(cols[startColIdx]),
           periodEnd: new Date(cols[endColIdx]),
-          grossWages: grossColIdx >= 0 ? parseFloat(cols[grossColIdx]) || undefined : undefined,
+          grossWages: grossColIdx >= 0 ? moneyToNumber(cols[grossColIdx]) || undefined : undefined,
           duesAmount: duesAmt,
-          copeAmount: copeColIdx >= 0 ? parseFloat(cols[copeColIdx]) || 0 : 0,
+          copeAmount: copeColIdx >= 0 ? moneyToNumber(cols[copeColIdx]) || 0 : 0,
           rawLine: lines[i],
         });
 
-        total += duesAmt;
+        totalCents += toCents(duesAmt);
       } catch {
         warnings.push(`Row ${i + 1}: parse error — skipped`);
       }
@@ -190,7 +190,7 @@ export class GenericCsvConnector implements PayrollConnector {
       periodStart: rows[0]?.periodStart ?? new Date(),
       periodEnd: rows[0]?.periodEnd ?? new Date(),
       rows,
-      totalAmount: total,
+      totalAmount: totalCents / 100,
       rowCount: rows.length,
       warnings,
     };
@@ -217,8 +217,8 @@ export class ManualEntryConnector implements PayrollConnector {
       periodStart: new Date(r.periodStart),
       periodEnd: new Date(r.periodEnd),
       grossWages: r.grossWages,
-      duesAmount: parseFloat(r.duesAmount) || 0,
-      copeAmount: parseFloat(r.copeAmount) || 0,
+      duesAmount: moneyToNumber(r.duesAmount) || 0,
+      copeAmount: moneyToNumber(r.copeAmount) || 0,
     }));
 
     const total = rows.reduce((sum: number, r: PayrollDeductionRow) => sum + r.duesAmount, 0);

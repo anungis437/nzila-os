@@ -34,6 +34,7 @@ import {
 import { Label } from '@/components/ui/label';
 import { Textarea } from '@/components/ui/textarea';
 import { AlertCircle, DollarSign, FileText, Mail, Phone } from 'lucide-react';
+import { formatCurrency } from '@/lib/utils';
 import { logger } from '@/lib/logger';
 import { useTranslations } from 'next-intl';
 
@@ -133,7 +134,7 @@ export default function ArrearsPage() {
             <div>
               <p className="text-sm text-muted-foreground">{t('totalArrears')}</p>
               <p className="text-2xl font-bold text-red-600">
-                ${totalArrears.toLocaleString()}
+                {formatCurrency(totalArrears)}
               </p>
             </div>
             <DollarSign className="h-8 w-8 text-red-600" />
@@ -203,7 +204,7 @@ export default function ArrearsPage() {
                 </TableCell>
                 <TableCell>
                   <span className="font-bold text-red-600">
-                    ${member.amountOwed.toFixed(2)}
+                    {formatCurrency(member.amountOwed)}
                   </span>
                 </TableCell>
                 <TableCell>
@@ -246,7 +247,7 @@ export default function ArrearsPage() {
                           <div className="space-y-2">
                             <Label>{t('amountOwedLabel')}</Label>
                             <p className="text-2xl font-bold text-red-600">
-                              ${member.amountOwed.toFixed(2)}
+                              {formatCurrency(member.amountOwed)}
                             </p>
                           </div>
                           <div className="space-y-2">

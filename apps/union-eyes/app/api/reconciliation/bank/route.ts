@@ -12,6 +12,7 @@ export const dynamic = 'force-dynamic';
 export const GET = withApi(
   {
     auth: { minRole: 'officer' },
+    entitlement: 'commercial_reporting',
     openapi: {
       tags: ['Reconciliation'],
       summary: 'List reconciliation runs for the organization',

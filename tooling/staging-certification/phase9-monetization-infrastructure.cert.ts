@@ -400,12 +400,12 @@ describe('CERT-MIL — Proration Math Invariants', () => {
     expect(engineSrc).toContain('Invalid billing period')
   })
 
-  it('proration uses .toFixed(2) for monetary output', () => {
-    expect(engineSrc).toContain('.toFixed(2)')
+  it('proration uses cents-safe math for monetary output', () => {
+    expect(engineSrc).toContain('multiplyMoney')
   })
 
-  it('net = charge − credit formula', () => {
-    expect(engineSrc).toContain('charge - credit')
+  it('net = charge − credit formula (via subtractMoney)', () => {
+    expect(engineSrc).toContain('subtractMoney(charge, credit)')
   })
 })
 

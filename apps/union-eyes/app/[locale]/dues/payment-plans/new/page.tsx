@@ -24,6 +24,7 @@ import {
 } from '@/components/ui/select';
 import { Alert, AlertDescription } from '@/components/ui/alert';
 import { ArrowLeft, Calculator, Save } from 'lucide-react';
+import { formatCurrency } from '@/lib/utils';
 import { logger } from '@/lib/logger';
 import { api } from '@/lib/api/index';
 
@@ -151,7 +152,7 @@ function NewPaymentPlanContent() {
         <Alert>
           <AlertDescription>
             Creating payment plan for <strong>{member.name}</strong> ({member.memberId})
-            - Arrears: <strong className="text-red-600">${member.arrearsAmount.toFixed(2)}</strong>
+            - Arrears: <strong className="text-red-600">{formatCurrency(member.arrearsAmount)}</strong>
           </AlertDescription>
         </Alert>
       )}

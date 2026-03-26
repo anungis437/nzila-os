@@ -28,6 +28,7 @@ import {
 } from '@/db/schema';
 import { eq, and, gte, lte, inArray } from 'drizzle-orm';
 import { auditLog, AuditEventType, AuditSeverity } from '@/lib/audit-logger';
+import { addMoney, subtractMoney, absMoney, toCents } from '@/lib/decimal-safe';
 
 // ============================================================================
 // Types
@@ -50,22 +51,6 @@ export interface ReconciliationResult {
   invoiceAmountCad: string;
   paymentAmountCad: string;
   varianceCad: string;
-}
-
-// ============================================================================
-// Decimal Helpers
-// ============================================================================
-
-function addDec(a: string, b: string): string {
-  return ((Math.round(Number(a) * 100) + Math.round(Number(b) * 100)) / 100).toFixed(2);
-}
-
-function subDec(a: string, b: string): string {
-  return ((Math.round(Number(a) * 100) - Math.round(Number(b) * 100)) / 100).toFixed(2);
-}
-
-function absDec(a: string): string {
-  return Math.abs(Number(a)).toFixed(2);
 }
 
 // ============================================================================
@@ -130,10 +115,10 @@ export async function runReconciliation(
     let paymentAmountCad = '0.00';
 
     for (const inv of invoices) {
-      invoiceAmountCad = addDec(invoiceAmountCad, inv.totalAmount ?? '0.00');
+      invoiceAmountCad = addMoney(invoiceAmountCad, inv.totalAmount ?? '0.00');
     }
     for (const pmt of payments) {
-      paymentAmountCad = addDec(paymentAmountCad, pmt.amount ?? '0.00');
+      paymentAmountCad = addMoney(paymentAmountCad, pmt.amount ?? '0.00');
     }
 
     // 5. Fetch payment allocations to link payments → invoices
@@ -195,7 +180,7 @@ export async function runReconciliation(
         // Match found — check allocated amount vs invoice total
         const allocAmt = alloc.amount ?? '0.00';
         const invAmt = inv.totalAmount ?? '0.00';
-        const variance = subDec(allocAmt, invAmt);
+        const variance = subtractMoney(allocAmt, invAmt);
 
         await tx.insert(reconciliationMatches).values({
           runId: run.id,
@@ -214,7 +199,7 @@ export async function runReconciliation(
         matchedPaymentIds.add(pmt.id);
 
         // Flag amount discrepancy if variance exceeds tolerance (1 cent)
-        if (Math.abs(Number(variance)) > 0.01) {
+        if (Math.abs(toCents(variance)) > 1) {
           await tx.insert(reconciliationExceptions).values({
             runId: run.id,
             organizationId: inv.organizationId,
@@ -281,7 +266,7 @@ export async function runReconciliation(
     }
 
     // 8. Finalize run
-    const varianceCad = subDec(invoiceAmountCad, paymentAmountCad);
+    const varianceCad = subtractMoney(invoiceAmountCad, paymentAmountCad);
 
     await tx
       .update(reconciliationRuns)
@@ -314,6 +299,26 @@ export async function runReconciliation(
         varianceCad,
       },
     });
+
+    // CRITICAL variance alert: flag net variance above $100 as critical audit event
+    const varianceCents = Math.abs(toCents(varianceCad));
+    if (varianceCents > 10000) {
+      await auditLog({
+        eventType: AuditEventType.DATA_CREATE,
+        severity: AuditSeverity.CRITICAL,
+        organizationId: input.organizationId,
+        resource: 'reconciliation_run',
+        resourceId: run.id,
+        action: 'reconciliation_critical_variance',
+        userId: input.runBy,
+        metadata: {
+          varianceCad,
+          threshold: '100.00',
+          totalExceptions,
+          message: `Reconciliation variance $${absMoney(varianceCad)} exceeds $100 threshold — requires immediate review`,
+        },
+      });
+    }
 
     return {
       runId: run.id,
@@ -412,4 +417,47 @@ export async function listExceptions(
         inArray(reconciliationExceptions.status, statusFilter),
       ),
     );
+}
+
+/**
+ * Guard: require a completed reconciliation run before period closure.
+ * Returns the latest completed run or throws if none exists or open exceptions remain.
+ */
+export async function requireReconciliation(
+  billingPeriodId: string,
+): Promise<ReconciliationRun> {
+  const [run] = await db
+    .select()
+    .from(reconciliationRuns)
+    .where(
+      and(
+        eq(reconciliationRuns.billingPeriodId, billingPeriodId),
+        eq(reconciliationRuns.status, 'completed'),
+      ),
+    )
+    .limit(1);
+
+  if (!run) {
+    throw new Error(
+      `Billing period ${billingPeriodId} cannot be closed: no completed reconciliation run found`,
+    );
+  }
+
+  const openExceptions = await db
+    .select()
+    .from(reconciliationExceptions)
+    .where(
+      and(
+        eq(reconciliationExceptions.runId, run.id),
+        inArray(reconciliationExceptions.status, ['open', 'under_review']),
+      ),
+    );
+
+  if (openExceptions.length > 0) {
+    throw new Error(
+      `Billing period ${billingPeriodId} cannot be closed: ${openExceptions.length} unresolved reconciliation exception(s)`,
+    );
+  }
+
+  return run;
 }

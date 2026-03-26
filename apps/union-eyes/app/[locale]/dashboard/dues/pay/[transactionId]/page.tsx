@@ -30,6 +30,7 @@ import {
 } from 'lucide-react';
 import { format } from 'date-fns';
 import { logger } from '@/lib/logger';
+import { formatCurrency } from '@/lib/utils';
 
 // =============================================================================
 // TYPES
@@ -66,14 +67,6 @@ interface CheckoutSession {
 // =============================================================================
 // UTILITIES
 // =============================================================================
-
-function formatCurrency(amount: string | number): string {
-  const numAmount = typeof amount === 'string' ? parseFloat(amount) : amount;
-  return new Intl.NumberFormat('en-CA', {
-    style: 'currency',
-    currency: 'CAD',
-  }).format(numAmount);
-}
 
 function formatDate(date: string | null): string {
   if (!date) return 'N/A';
@@ -124,41 +117,41 @@ function TransactionSummary({ transaction }: { transaction: DuesTransaction }) {
         <div className="space-y-2">
           <div className="flex justify-between text-sm">
             <span>Dues</span>
-            <span className="font-medium">{formatCurrency(transaction.duesAmount)}</span>
+            <span className="font-medium">{formatCurrency(Number(transaction.duesAmount))}</span>
           </div>
 
           {parseFloat(transaction.copeAmount) > 0 && (
             <div className="flex justify-between text-sm">
               <span>COPE Contribution</span>
-              <span className="font-medium">{formatCurrency(transaction.copeAmount)}</span>
+              <span className="font-medium">{formatCurrency(Number(transaction.copeAmount))}</span>
             </div>
           )}
 
           {parseFloat(transaction.pacAmount) > 0 && (
             <div className="flex justify-between text-sm">
               <span>PAC Contribution</span>
-              <span className="font-medium">{formatCurrency(transaction.pacAmount)}</span>
+              <span className="font-medium">{formatCurrency(Number(transaction.pacAmount))}</span>
             </div>
           )}
 
           {parseFloat(transaction.strikeFundAmount) > 0 && (
             <div className="flex justify-between text-sm">
               <span>Strike Fund</span>
-              <span className="font-medium">{formatCurrency(transaction.strikeFundAmount)}</span>
+              <span className="font-medium">{formatCurrency(Number(transaction.strikeFundAmount))}</span>
             </div>
           )}
 
           {parseFloat(transaction.lateFeeAmount) > 0 && (
             <div className="flex justify-between text-sm text-destructive">
               <span>Late Fee</span>
-              <span className="font-medium">{formatCurrency(transaction.lateFeeAmount)}</span>
+              <span className="font-medium">{formatCurrency(Number(transaction.lateFeeAmount))}</span>
             </div>
           )}
 
           {parseFloat(transaction.adjustmentAmount) !== 0 && (
             <div className="flex justify-between text-sm">
               <span>Adjustment</span>
-              <span className="font-medium">{formatCurrency(transaction.adjustmentAmount)}</span>
+              <span className="font-medium">{formatCurrency(Number(transaction.adjustmentAmount))}</span>
             </div>
           )}
         </div>
@@ -168,7 +161,7 @@ function TransactionSummary({ transaction }: { transaction: DuesTransaction }) {
         {/* Total */}
         <div className="flex justify-between items-center pt-2">
           <span className="text-lg font-semibold">Total Amount</span>
-          <span className="text-2xl font-bold">{formatCurrency(transaction.totalAmount)}</span>
+          <span className="text-2xl font-bold">{formatCurrency(Number(transaction.totalAmount))}</span>
         </div>
 
         {/* Additional Info */}

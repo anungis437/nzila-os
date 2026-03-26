@@ -20,6 +20,7 @@ import {
   TrendingUp,
   AlertCircle
 } from "lucide-react";
+import { formatCurrency } from '@/lib/utils';
 
 interface DuesBalance {
   totalOwed: number;
@@ -123,7 +124,7 @@ export default function MemberDuesPage() {
               <div>
                 <p className="text-sm text-gray-600 mb-1">Total Balance</p>
                 <p className="text-3xl font-bold text-blue-600">
-                  ${balance?.totalOwed?.toFixed(2) || '0.00'}
+                  {formatCurrency(balance?.totalOwed ?? 0)}
                 </p>
                 {balance?.nextDueDate && (
                   <p className="text-sm text-gray-600 mt-2">
@@ -147,7 +148,7 @@ export default function MemberDuesPage() {
                 <Receipt className="h-8 w-8 text-blue-600" />
                 <div>
                   <p className="text-sm text-gray-600">Dues</p>
-                  <p className="text-xl font-bold">${balance?.duesAmount?.toFixed(2) || '0.00'}</p>
+                  <p className="text-xl font-bold">{formatCurrency(balance?.duesAmount ?? 0)}</p>
                 </div>
               </div>
 
@@ -155,7 +156,7 @@ export default function MemberDuesPage() {
                 <TrendingUp className="h-8 w-8 text-green-600" />
                 <div>
                   <p className="text-sm text-gray-600">COPE</p>
-                  <p className="text-xl font-bold">${balance?.copeAmount?.toFixed(2) || '0.00'}</p>
+                  <p className="text-xl font-bold">{formatCurrency(balance?.copeAmount ?? 0)}</p>
                 </div>
               </div>
 
@@ -163,7 +164,7 @@ export default function MemberDuesPage() {
                 <DollarSign className="h-8 w-8 text-purple-600" />
                 <div>
                   <p className="text-sm text-gray-600">PAC</p>
-                  <p className="text-xl font-bold">${balance?.pacAmount?.toFixed(2) || '0.00'}</p>
+                  <p className="text-xl font-bold">{formatCurrency(balance?.pacAmount ?? 0)}</p>
                 </div>
               </div>
 
@@ -171,7 +172,7 @@ export default function MemberDuesPage() {
                 <DollarSign className="h-8 w-8 text-orange-600" />
                 <div>
                   <p className="text-sm text-gray-600">Strike Fund</p>
-                  <p className="text-xl font-bold">${balance?.strikeFundAmount?.toFixed(2) || '0.00'}</p>
+                  <p className="text-xl font-bold">{formatCurrency(balance?.strikeFundAmount ?? 0)}</p>
                 </div>
               </div>
             </div>
@@ -182,7 +183,7 @@ export default function MemberDuesPage() {
                 <div>
                   <p className="font-medium text-red-900">Late Fees</p>
                   <p className="text-sm text-red-700">
-                    ${balance.lateFees.toFixed(2)} in late fees have been applied
+                    {formatCurrency(balance.lateFees)} in late fees have been applied
                   </p>
                 </div>
               </div>
@@ -224,7 +225,7 @@ export default function MemberDuesPage() {
                     </div>
                   </div>
                   <div className="flex items-center gap-4">
-                    <p className="font-bold">${transaction.totalAmount.toFixed(2)}</p>
+                    <p className="font-bold">{formatCurrency(transaction.totalAmount)}</p>
                     <span
                       className={`px-3 py-1 rounded-full text-xs font-medium ${getPaymentStatusColor(transaction.paymentStatus)}`}
                     >

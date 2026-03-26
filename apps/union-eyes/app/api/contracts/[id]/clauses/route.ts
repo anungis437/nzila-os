@@ -12,6 +12,7 @@ export const dynamic = 'force-dynamic';
 export const GET = withApi(
   {
     auth: { minRole: 'member' },
+    entitlement: 'commercial_reporting',
     openapi: {
       tags: ['Contracts'],
       summary: 'List line items (clauses) for a commercial contract',

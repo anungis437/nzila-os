@@ -8,6 +8,7 @@
 import { db } from '@/db';
 import { financialAuditLog } from '@/db/schema/domains/infrastructure';
 import { eq, and, gte, lte, desc } from 'drizzle-orm';
+import { moneyToNumber } from '@/lib/decimal-safe';
 
 export interface AuditLogEntry {
   id: string;
@@ -448,8 +449,8 @@ export class AuditTrailService {
       if (log.action !== 'update' || !log.changes) return false;
       return log.changes.some(change => {
         if (change.field.includes('amount') || change.field.includes('balance')) {
-          const oldVal = parseFloat(change.oldValue as string);
-          const newVal = parseFloat(change.newValue as string);
+          const oldVal = moneyToNumber(change.oldValue as string);
+          const newVal = moneyToNumber(change.newValue as string);
           return Math.abs(newVal - oldVal) > 10000;  // $10,000+ changes
         }
         return false;

@@ -15,6 +15,7 @@ import { Document, Page, StyleSheet, Text, renderToBuffer } from '@react-pdf/ren
 import React from 'react';
 import { getEmailService } from '@/lib/services/messaging/email-service';
 import { logger } from '@/lib/logger';
+import { moneyToNumber } from '@/lib/decimal-safe';
 
 interface BoardPacketData {
   title: string;
@@ -129,11 +130,11 @@ export class BoardPacketGenerator {
         total: 0,
       },
       expenses: {
-        strikePayments: Number(strikeActivity.totalAmount) || 0,
+        strikePayments: moneyToNumber(strikeActivity.totalAmount) || 0,
         operational: 0,
-        total: Number(strikeActivity.totalAmount) || 0,
+        total: moneyToNumber(strikeActivity.totalAmount) || 0,
       },
-      netPosition: 0 - (Number(strikeActivity.totalAmount) || 0),
+      netPosition: 0 - (moneyToNumber(strikeActivity.totalAmount) || 0),
       reserves: {
         strikeReserve: 0,
         operatingReserve: 0,
@@ -144,7 +145,7 @@ export class BoardPacketGenerator {
         membersInArrears: 0,
         over90Days: 0,
       },
-      summary: `${strikeActivity.count} strike actions totaling $${Number(strikeActivity.totalAmount || 0).toFixed(2)}`,
+      summary: `${strikeActivity.count} strike actions totaling $${moneyToNumber(strikeActivity.totalAmount || 0).toFixed(2)}`,
     };
   }
   

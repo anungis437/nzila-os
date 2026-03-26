@@ -26,6 +26,8 @@ import { eq, and, desc, sql, inArray } from 'drizzle-orm';
 import { auditLog, AuditEventType, AuditSeverity } from '@/lib/audit-logger';
 import { appendLedgerEntry } from './ledger-service';
 import { v4 as uuidv4 } from 'uuid';
+import { requireReconciliation } from './reconciliation-service';
+import { getActiveContract } from './contract-service';
 
 // ============================================================================
 // Types
@@ -55,6 +57,7 @@ export interface RecordPaymentInput {
   amount: string;
   method: string;
   externalReference?: string;
+  idempotencyKey?: string;
   createdBy?: string;
 }
 
@@ -177,6 +180,9 @@ export async function closeBillingPeriod(
   if (!period) throw new Error(`Billing period ${billingPeriodId} not found`);
   if (period.isClosed) throw new Error(`Period ${period.label} is already closed`);
 
+  // Guard: require completed reconciliation with no open exceptions
+  await requireReconciliation(billingPeriodId);
+
   const [updated] = await db
     .update(billingPeriods)
     .set({ isClosed: true, closedAt: new Date(), closedBy })
@@ -204,6 +210,41 @@ export async function closeBillingPeriod(
 export async function generateInvoice(input: GenerateInvoiceInput) {
   const account = await getBillingAccount(input.organizationId);
   if (!account) throw new Error(`No billing account for org ${input.organizationId}`);
+
+  // Guard: prevent invoicing against a closed billing period
+  const [period] = await db
+    .select()
+    .from(billingPeriods)
+    .where(eq(billingPeriods.id, input.billingPeriodId))
+    .limit(1);
+
+  if (period?.isClosed) {
+    throw new Error(`Cannot generate invoice: billing period ${period.label} is closed`);
+  }
+
+  // Guard: prevent duplicate invoices for same org+period
+  const [existingInvoice] = await db
+    .select({ id: platformInvoices.id, invoiceNumber: platformInvoices.invoiceNumber })
+    .from(platformInvoices)
+    .where(
+      and(
+        eq(platformInvoices.organizationId, input.organizationId),
+        eq(platformInvoices.billingPeriodId, input.billingPeriodId),
+      ),
+    )
+    .limit(1);
+
+  if (existingInvoice) {
+    throw new Error(
+      `Invoice ${existingInvoice.invoiceNumber} already exists for this org+period`,
+    );
+  }
+
+  // Guard: require active contract before invoicing
+  const contract = await getActiveContract(input.organizationId);
+  if (!contract) {
+    throw new Error(`Cannot generate invoice: no active contract for org ${input.organizationId}`);
+  }
 
   // Get active subscription
   const [subscription] = await db
@@ -237,7 +278,7 @@ export async function generateInvoice(input: GenerateInvoiceInput) {
     amount: string;
   }> = [];
 
-  const baseFee = parseFloat(plan.baseFee);
+  const baseFee = centsSafe(plan.baseFee);
   if (baseFee > 0) {
     lineItems.push({
       description: `${plan.name} — Base Subscription`,
@@ -248,71 +289,73 @@ export async function generateInvoice(input: GenerateInvoiceInput) {
     });
   }
 
-  const perLocalFee = parseFloat(plan.perLocalFee ?? '0');
+  const perLocalFeeCents = centsSafe(plan.perLocalFee ?? '0');
   const localCount = subscription.localCount ?? 0;
-  if (perLocalFee > 0 && localCount > 0) {
+  if (perLocalFeeCents > 0 && localCount > 0) {
     lineItems.push({
       description: `Local Fee × ${localCount}`,
       costType: 'local_fee',
       quantity: String(localCount),
       unitPrice: plan.perLocalFee!,
-      amount: (perLocalFee * localCount).toFixed(2),
+      amount: centsToDecimal(perLocalFeeCents * localCount),
     });
   }
 
-  const perSeatFee = parseFloat(plan.perSeatFee ?? '0');
+  const perSeatFeeCents = centsSafe(plan.perSeatFee ?? '0');
   const seatCount = subscription.seatCount ?? 0;
-  if (perSeatFee > 0 && seatCount > 0) {
+  if (perSeatFeeCents > 0 && seatCount > 0) {
     lineItems.push({
       description: `Seat Fee × ${seatCount}`,
       costType: 'seat_fee',
       quantity: String(seatCount),
       unitPrice: plan.perSeatFee!,
-      amount: (perSeatFee * seatCount).toFixed(2),
+      amount: centsToDecimal(perSeatFeeCents * seatCount),
     });
   }
 
   const modules = subscription.moduleList as string[] | null;
-  const perModuleFee = parseFloat(plan.perModuleFee ?? '0');
-  if (perModuleFee > 0 && modules && modules.length > 0) {
+  const perModuleFeeCents = centsSafe(plan.perModuleFee ?? '0');
+  if (perModuleFeeCents > 0 && modules && modules.length > 0) {
     lineItems.push({
       description: `Module Fee × ${modules.length}`,
       costType: 'module_fee',
       quantity: String(modules.length),
       unitPrice: plan.perModuleFee!,
-      amount: (perModuleFee * modules.length).toFixed(2),
+      amount: centsToDecimal(perModuleFeeCents * modules.length),
     });
   }
 
-  // Apply discount
-  let subtotal = lineItems.reduce((s, li) => s + parseFloat(li.amount), 0);
-  const discountPct = parseFloat(subscription.discountPercent ?? '0');
+  // Apply discount — cents-safe arithmetic
+  let subtotalCents = lineItems.reduce((s, li) => s + centsSafe(li.amount), 0);
+  const discountPct = centsSafe(subscription.discountPercent ?? '0');
   if (discountPct > 0) {
-    const discountAmount = (subtotal * discountPct / 100);
+    const discountCents = Math.round(subtotalCents * discountPct / 10000);
+    const discountStr = centsToDecimal(discountCents);
     lineItems.push({
-      description: `Discount (${discountPct}%)`,
+      description: `Discount (${centsToDecimal(discountPct)}%)`,
       costType: 'credit',
       quantity: '1',
-      unitPrice: `-${discountAmount.toFixed(2)}`,
-      amount: `-${discountAmount.toFixed(2)}`,
+      unitPrice: `-${discountStr}`,
+      amount: `-${discountStr}`,
     });
-    subtotal -= discountAmount;
+    subtotalCents -= discountCents;
   }
 
   // Apply subsidy
-  const subsidyAmt = parseFloat(subscription.subsidyAmount ?? '0');
-  if (subsidyAmt > 0) {
+  const subsidyCents = centsSafe(subscription.subsidyAmount ?? '0');
+  if (subsidyCents > 0) {
+    const subsidyStr = centsToDecimal(subsidyCents);
     lineItems.push({
       description: 'Platform Subsidy',
       costType: 'subsidy',
       quantity: '1',
-      unitPrice: `-${subsidyAmt.toFixed(2)}`,
-      amount: `-${subsidyAmt.toFixed(2)}`,
+      unitPrice: `-${subsidyStr}`,
+      amount: `-${subsidyStr}`,
     });
-    subtotal -= subsidyAmt;
+    subtotalCents -= subsidyCents;
   }
 
-  const totalAmount = Math.max(subtotal, 0);
+  const totalCents = Math.max(subtotalCents, 0);
   const invoiceNumber = `INV-${input.organizationId.slice(0, 8).toUpperCase()}-${Date.now()}`;
   const issueDate = new Date();
   const dueDate = new Date(issueDate.getTime() + account.netTermsDays * 86400000);
@@ -328,8 +371,8 @@ export async function generateInvoice(input: GenerateInvoiceInput) {
         invoiceNumber,
         issueDate,
         dueDate,
-        subtotal: subtotal.toFixed(2),
-        totalAmount: totalAmount.toFixed(2),
+        subtotal: centsToDecimal(subtotalCents),
+        totalAmount: centsToDecimal(totalCents),
         currency: 'CAD',
         status: 'issued',
         createdBy: input.createdBy,
@@ -354,7 +397,7 @@ export async function generateInvoice(input: GenerateInvoiceInput) {
 
   // Create ledger entries for each positive line item
   for (const li of lineItems) {
-    const amt = parseFloat(li.amount);
+    const amt = centsSafe(li.amount);
     if (amt === 0) continue;
 
     await appendLedgerEntry({
@@ -380,7 +423,7 @@ export async function generateInvoice(input: GenerateInvoiceInput) {
     resourceId: result.id,
     action: 'invoice_generated',
     userId: input.createdBy,
-    details: { invoiceNumber, totalAmount: totalAmount.toFixed(2), lineItemCount: lineItems.length },
+    details: { invoiceNumber, totalAmount: centsToDecimal(totalCents), lineItemCount: lineItems.length },
   });
 
   return result;
@@ -394,6 +437,17 @@ export async function recordPayment(input: RecordPaymentInput) {
   const account = await getBillingAccount(input.organizationId);
   if (!account) throw new Error(`No billing account for org ${input.organizationId}`);
 
+  // Idempotency guard: if a key is provided, return existing payment
+  if (input.idempotencyKey) {
+    const [existing] = await db
+      .select()
+      .from(platformPayments)
+      .where(eq(platformPayments.externalReference, input.idempotencyKey))
+      .limit(1);
+
+    if (existing) return existing;
+  }
+
   // Get invoice
   const [invoice] = await db
     .select()
@@ -405,8 +459,8 @@ export async function recordPayment(input: RecordPaymentInput) {
     throw new Error('Invoice does not belong to this organization');
   }
 
-  const paymentAmount = parseFloat(input.amount);
-  if (paymentAmount <= 0) throw new Error('Payment amount must be positive');
+  const paymentAmountCents = centsSafe(input.amount);
+  if (paymentAmountCents <= 0) throw new Error('Payment amount must be positive');
 
   const result = await db.transaction(async (tx) => {
     // Insert payment
@@ -433,15 +487,15 @@ export async function recordPayment(input: RecordPaymentInput) {
       createdBy: input.createdBy,
     });
 
-    // Update invoice paid amount + status
-    const newAmountPaid = parseFloat(invoice.amountPaid) + paymentAmount;
-    const totalDue = parseFloat(invoice.totalAmount);
-    const newStatus = newAmountPaid >= totalDue ? 'paid' : 'partially_paid';
+    // Update invoice paid amount + status (cents-safe)
+    const newAmountPaidCents = centsSafe(invoice.amountPaid) + paymentAmountCents;
+    const totalDueCents = centsSafe(invoice.totalAmount);
+    const newStatus = newAmountPaidCents >= totalDueCents ? 'paid' : 'partially_paid';
 
     await tx
       .update(platformInvoices)
       .set({
-        amountPaid: newAmountPaid.toFixed(2),
+        amountPaid: centsToDecimal(newAmountPaidCents),
         status: newStatus,
         updatedAt: new Date(),
       })
@@ -608,3 +662,20 @@ export async function getAdminPayments() {
 
 // Re-export NewPlatformCostLedgerEntry for billing service callers
 import type { NewPlatformCostLedgerEntry } from '@/db/schema';
+
+// ============================================================================
+// Decimal Helpers (cents-safe)
+// ============================================================================
+
+/** Convert a decimal string (e.g. "99.95") to integer cents for safe arithmetic. */
+function centsSafe(value: string | null | undefined): number {
+  if (!value) return 0;
+  const n = Number(value);
+  if (Number.isNaN(n)) return 0;
+  return Math.round(n * 100);
+}
+
+/** Convert integer cents back to a "0.00" string. */
+function centsToDecimal(cents: number): string {
+  return (cents / 100).toFixed(2);
+}

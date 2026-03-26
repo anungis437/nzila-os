@@ -15,6 +15,7 @@ import {
 } from '@/db/schema';
 import { eq, and, lte, sql } from 'drizzle-orm';
 import { auditLog, AuditEventType, AuditSeverity } from '@/lib/audit-logger';
+import { getActiveContract } from './contract-service';
 
 // ============================================================================
 // Types
@@ -246,10 +247,21 @@ export async function processAutoRenewals(
   const renewed: string[] = [];
 
   for (const sub of expiring) {
+    // Guard: do not extend subscription beyond contract expiration
+    const contract = await getActiveContract(sub.organizationId);
+    if (!contract) {
+      continue; // No active contract — skip renewal
+    }
+
     // Extend by billing interval (default 1 month)
     const currentEnd = sub.endDate ?? new Date();
     const newEnd = new Date(currentEnd);
     newEnd.setMonth(newEnd.getMonth() + 1);
+
+    // Cap renewal at contract expiration
+    if (contract.expirationDate && newEnd > contract.expirationDate) {
+      newEnd.setTime(contract.expirationDate.getTime());
+    }
 
     await db
       .update(orgSubscriptions)

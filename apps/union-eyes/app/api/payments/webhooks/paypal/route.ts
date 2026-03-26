@@ -12,6 +12,7 @@
 import { NextRequest, NextResponse } from 'next/server';
 import { logger } from '@/lib/logger';
 import { PaymentService } from '@/lib/services/payment-service';
+import { isWebhookProcessed, recordWebhookProcessed } from '@/lib/services/rewards/webhook-service';
 
 export const runtime = 'nodejs';
 export const maxDuration = 30;
@@ -151,11 +152,17 @@ export async function POST(request: NextRequest) {
       );
     }
     const eventType = event.event_type;
+    const eventId = event.id as string;
     // eslint-disable-next-line @typescript-eslint/no-explicit-any
     const resource = (event.resource || {}) as Record<string, any>;
 
+    // Idempotency: skip already-processed events
+    if (eventId && await isWebhookProcessed(eventId)) {
+      return NextResponse.json({ received: true, status: 'duplicate' }, { status: 200 });
+    }
+
     logger.info('PayPal webhook received', {
-      eventId: event.id,
+      eventId,
       eventType,
     });
 
@@ -199,12 +206,15 @@ export async function POST(request: NextRequest) {
         logger.info('Unhandled PayPal webhook event', { eventType });
     }
 
+    // Record successful processing for idempotency
+    if (eventId) {
+      await recordWebhookProcessed(eventId, 'paypal', { eventType });
+    }
+
     return NextResponse.json({ received: true }, { status: 200 });
   } catch (error) {
     logger.error('Error processing PayPal webhook', { error });
-    return NextResponse.json(
-      { error: 'Webhook processing failed' },
-      { status: 500 }
-    );
+    // Always return 200 to prevent PayPal retries on internal errors
+    return NextResponse.json({ received: true, error: 'Internal processing error' }, { status: 200 });
   }
 }

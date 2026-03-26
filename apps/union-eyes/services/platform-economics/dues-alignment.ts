@@ -13,6 +13,7 @@
 
 import { db } from '@/db';
 import { sql } from 'drizzle-orm';
+import { divideMoney, toCents } from '@/lib/decimal-safe';
 
 // ============================================================================
 // Types
@@ -97,7 +98,7 @@ export async function getOrgDuesSnapshot(
   const totalMembers = Number(memberResult?.total_members ?? 0);
   const totalRemittances = String(remittanceResult?.total_remittances ?? '0');
   const avgDues = totalMembers > 0
-    ? (parseFloat(totalRemittances) / totalMembers).toFixed(2)
+    ? divideMoney(totalRemittances, totalMembers).toFixed(2)
     : '0.00';
 
   return {
@@ -202,7 +203,7 @@ export function detectAnomalies(
 
   // Per-local remittance gaps
   for (const local of localSnapshots) {
-    if (local.memberCount > 0 && parseFloat(local.remittanceTotalCad) === 0) {
+    if (local.memberCount > 0 && toCents(local.remittanceTotalCad) === 0) {
       anomalies.push({
         type: 'remittance_gap',
         localId: local.localId,

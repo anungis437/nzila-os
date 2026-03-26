@@ -20,6 +20,7 @@ import {
   TableRow,
 } from '@/components/ui/table';
 import { BarChart3, Play, AlertCircle } from 'lucide-react';
+import { formatCurrency } from '@/lib/utils';
 
 interface AllocationRule {
   id: string;
@@ -171,7 +172,7 @@ export default function AllocationPage() {
             Allocation Preview
           </h2>
           <p className="text-sm text-muted-foreground mb-3">
-            Total cost pool: ${simResult.totalCostPoolCad} CAD — No records written
+            Total cost pool: {formatCurrency(Number(simResult.totalCostPoolCad))} — No records written
           </p>
           {simResult.lines.length > 0 ? (
             <Table>
@@ -187,7 +188,7 @@ export default function AllocationPage() {
                   <TableRow key={i}>
                     <TableCell className="font-mono text-xs">{line.localId}</TableCell>
                     <TableCell>{line.sharePercent}%</TableCell>
-                    <TableCell>${line.allocatedAmountCad}</TableCell>
+                    <TableCell>{formatCurrency(Number(line.allocatedAmountCad))}</TableCell>
                   </TableRow>
                 ))}
               </TableBody>

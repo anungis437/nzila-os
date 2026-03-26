@@ -28,6 +28,7 @@ import {
   Loader2,
 } from 'lucide-react';
 import { format } from 'date-fns';
+import { formatCurrency } from '@/lib/utils';
 import { logger } from '@/lib/logger';
 
 // =============================================================================
@@ -70,14 +71,6 @@ interface ReceiptData {
 // =============================================================================
 // UTILITIES
 // =============================================================================
-
-function formatCurrency(amount: string | number): string {
-  const numAmount = typeof amount === 'string' ? parseFloat(amount) : amount;
-  return new Intl.NumberFormat('en-CA', {
-    style: 'currency',
-    currency: 'CAD',
-  }).format(numAmount);
-}
 
 function formatDate(date: string): string {
   try {
@@ -202,20 +195,20 @@ function ReceiptDetails({ receipt }: { receipt: ReceiptData }) {
         <div className="space-y-2 pl-6">
           <div className="flex justify-between">
             <span className="text-sm">Dues Amount</span>
-            <span className="text-sm font-medium">{formatCurrency(receipt.duesAmount)}</span>
+            <span className="text-sm font-medium">{formatCurrency(Number(receipt.duesAmount))}</span>
           </div>
 
           {receipt.copeAmount && parseFloat(receipt.copeAmount) > 0 && (
             <div className="flex justify-between">
               <span className="text-sm">COPE Contribution</span>
-              <span className="text-sm font-medium">{formatCurrency(receipt.copeAmount)}</span>
+              <span className="text-sm font-medium">{formatCurrency(Number(receipt.copeAmount))}</span>
             </div>
           )}
 
           {receipt.pacAmount && parseFloat(receipt.pacAmount) > 0 && (
             <div className="flex justify-between">
               <span className="text-sm">PAC Contribution</span>
-              <span className="text-sm font-medium">{formatCurrency(receipt.pacAmount)}</span>
+              <span className="text-sm font-medium">{formatCurrency(Number(receipt.pacAmount))}</span>
             </div>
           )}
 
@@ -223,7 +216,7 @@ function ReceiptDetails({ receipt }: { receipt: ReceiptData }) {
             <div className="flex justify-between">
               <span className="text-sm">Strike Fund</span>
               <span className="text-sm font-medium">
-                {formatCurrency(receipt.strikeFundAmount)}
+                {formatCurrency(Number(receipt.strikeFundAmount))}
               </span>
             </div>
           )}
@@ -231,7 +224,7 @@ function ReceiptDetails({ receipt }: { receipt: ReceiptData }) {
           {receipt.lateFee && parseFloat(receipt.lateFee) > 0 && (
             <div className="flex justify-between text-orange-600">
               <span className="text-sm">Late Fee</span>
-              <span className="text-sm font-medium">{formatCurrency(receipt.lateFee)}</span>
+              <span className="text-sm font-medium">{formatCurrency(Number(receipt.lateFee))}</span>
             </div>
           )}
 
@@ -239,7 +232,7 @@ function ReceiptDetails({ receipt }: { receipt: ReceiptData }) {
             <div className="flex justify-between">
               <span className="text-sm">Adjustment</span>
               <span className="text-sm font-medium">
-                {formatCurrency(receipt.adjustmentAmount)}
+                {formatCurrency(Number(receipt.adjustmentAmount))}
               </span>
             </div>
           )}
@@ -249,7 +242,7 @@ function ReceiptDetails({ receipt }: { receipt: ReceiptData }) {
           <div className="flex justify-between items-center pt-2">
             <span className="text-base font-semibold">Total Amount</span>
             <span className="text-2xl font-bold text-green-600">
-              {formatCurrency(receipt.totalAmount)}
+              {formatCurrency(Number(receipt.totalAmount))}
             </span>
           </div>
         </div>

@@ -26,6 +26,7 @@ import {
   DollarSign, TrendingUp, AlertCircle, FileText, 
   Download, Upload, RefreshCw 
 } from 'lucide-react';
+import { formatCurrency } from '@/lib/utils';
 import { api } from '@/lib/api/index';
 import { useTranslations } from 'next-intl';
 
@@ -126,7 +127,7 @@ export default function DuesDashboardPage() {
             <div>
               <p className="text-sm text-muted-foreground">{t('totalCollected')}</p>
               <p className="text-2xl font-bold text-green-600">
-                ${stats.totalCollected.toLocaleString()}
+                {formatCurrency(stats.totalCollected)}
               </p>
             </div>
             <DollarSign className="h-8 w-8 text-green-600" />
@@ -138,7 +139,7 @@ export default function DuesDashboardPage() {
             <div>
               <p className="text-sm text-muted-foreground">{t('pendingRemittances')}</p>
               <p className="text-2xl font-bold text-yellow-600">
-                ${stats.pendingRemittances.toLocaleString()}
+                {formatCurrency(stats.pendingRemittances)}
               </p>
             </div>
             <TrendingUp className="h-8 w-8 text-yellow-600" />
@@ -150,7 +151,7 @@ export default function DuesDashboardPage() {
             <div>
               <p className="text-sm text-muted-foreground">{t('totalArrears')}</p>
               <p className="text-2xl font-bold text-red-600">
-                ${stats.inArrears.toLocaleString()}
+                {formatCurrency(stats.inArrears)}
               </p>
             </div>
             <AlertCircle className="h-8 w-8 text-red-600" />
@@ -241,7 +242,7 @@ export default function DuesDashboardPage() {
                   {new Date(remittance.periodStart).toLocaleDateString()} - {' '}
                   {new Date(remittance.periodEnd).toLocaleDateString()}
                 </TableCell>
-                <TableCell>${remittance.amount.toLocaleString()}</TableCell>
+                <TableCell>{formatCurrency(remittance.amount)}</TableCell>
                 <TableCell>{remittance.memberCount}</TableCell>
                 <TableCell>
                   <Badge className={getStatusColor(remittance.status)}>

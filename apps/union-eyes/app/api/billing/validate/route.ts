@@ -8,6 +8,7 @@ import {
 import type { BillingValidationResponse } from '@/lib/types/compliance-api-types';
 import { logApiAuditEvent } from '@/lib/middleware/api-security';
 import { withRoleAuth } from '@/lib/api-auth-guard';
+import { requireEntitlement } from '@/services/platform-economics/entitlement-guard';
 
  
 import {
@@ -32,6 +33,8 @@ const billingValidationSchema = z.object({
  * Validate billing request for CAD currency compliance and T106 requirements
  */
 export const POST = withRoleAuth('steward', async (request, context) => {
+  await requireEntitlement(context.organizationId as string, 'financial_intelligence_suite', context.userId);
+
   let rawBody: unknown;
   try {
     rawBody = await request.json();

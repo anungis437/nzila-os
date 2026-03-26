@@ -9,6 +9,7 @@
  */
 
 import { logger } from '@/lib/logger';
+import { moneyToNumber } from '@/lib/decimal-safe';
 
 export interface Invoice {
   invoiceId: string;
@@ -117,7 +118,7 @@ export async function getBankOfCanadaNoonRate(date: Date): Promise<number> {
       throw new Error(`No rate data for ${dateStr}`);
     }
 
-    const rate = parseFloat(data.observations[0].FXUSDCAD.v);
+    const rate = moneyToNumber(data.observations[0].FXUSDCAD.v);
 
     if (isNaN(rate)) {
       throw new Error(`Invalid rate value: ${data.observations[0].FXUSDCAD.v}`);

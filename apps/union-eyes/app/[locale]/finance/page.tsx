@@ -32,6 +32,7 @@ import {
   BarChart3,
   ArrowRight,
 } from 'lucide-react';
+import { formatCurrency } from '@/lib/utils';
 
 interface DashboardData {
   billingAccount: {
@@ -181,7 +182,7 @@ export default function FinanceDashboardPage() {
             {data.ledgerSummary?.entryCount ?? 0}
           </div>
           <p className="text-xs text-muted-foreground mt-1">
-            Total: ${data.ledgerSummary?.totalAmountCad ?? '0.00'} CAD
+            Total: {formatCurrency(Number(data.ledgerSummary?.totalAmountCad ?? 0))}
           </p>
         </Card>
 
@@ -247,7 +248,7 @@ export default function FinanceDashboardPage() {
                   onClick={() => router.push(`/finance/invoices/${inv.id}`)}
                 >
                   <TableCell className="font-medium">{inv.invoiceNumber}</TableCell>
-                  <TableCell>${inv.totalCad}</TableCell>
+                  <TableCell>{formatCurrency(Number(inv.totalCad))}</TableCell>
                   <TableCell>
                     <Badge variant={statusColor(inv.status)}>{inv.status}</Badge>
                   </TableCell>
@@ -296,7 +297,7 @@ export default function FinanceDashboardPage() {
               {data.recentChargebacks.map((cb) => (
                 <TableRow key={cb.id}>
                   <TableCell className="font-mono text-xs">{cb.localId}</TableCell>
-                  <TableCell>${cb.netAmountCad}</TableCell>
+                  <TableCell>{formatCurrency(Number(cb.netAmountCad))}</TableCell>
                   <TableCell>
                     <Badge variant={statusColor(cb.status)}>{cb.status}</Badge>
                   </TableCell>
@@ -317,7 +318,7 @@ export default function FinanceDashboardPage() {
                 <p className="text-xs text-muted-foreground capitalize">
                   {type.replace(/_/g, ' ')}
                 </p>
-                <p className="text-sm font-semibold">${amount} CAD</p>
+                <p className="text-sm font-semibold">{formatCurrency(Number(amount))}</p>
               </div>
             ))}
           </div>

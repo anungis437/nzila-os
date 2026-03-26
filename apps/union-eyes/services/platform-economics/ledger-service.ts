@@ -163,8 +163,8 @@ export async function reverseLedgerEntry(
     throw new Error(`Ledger entry ${originalEntryId} not found`);
   }
 
-  const reversalAmount = (parseFloat(original.amountCad) * -1).toFixed(2);
-  const reversalUnitPrice = (parseFloat(original.unitPriceCad) * -1).toFixed(2);
+  const reversalAmount = negateDecimal(original.amountCad);
+  const reversalUnitPrice = negateDecimal(original.unitPriceCad);
 
   return appendLedgerEntry({
     organizationId: original.organizationId,
@@ -248,7 +248,7 @@ export async function getLedgerSummary(params: {
 
   for (const row of rows) {
     byCostType[row.costType] = row.total;
-    totalAmount += parseFloat(row.total);
+    totalAmount = (Math.round(totalAmount * 100) + Math.round(Number(row.total) * 100)) / 100;
     totalCount += row.count;
   }
 
@@ -287,4 +287,13 @@ export async function getLocalLedgerBalance(params: {
     totalAmountCad: result.total,
     entryCount: result.count,
   };
+}
+
+// ============================================================================
+// Decimal Helpers (cents-safe)
+// ============================================================================
+
+function negateDecimal(value: string): string {
+  const cents = Math.round(Number(value) * 100);
+  return ((-cents) / 100).toFixed(2);
 }

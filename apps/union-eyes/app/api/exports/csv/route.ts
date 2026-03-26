@@ -13,5 +13,6 @@ const { GET, POST } = crudRoutes({
   orgScoped: true,
   readRole: 'member',
   writeRole: 'steward',
+  entitlement: 'export_suite',
 });
 export { GET, POST };

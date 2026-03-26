@@ -23,6 +23,7 @@ import { DuesCalculationEngine } from '@/lib/dues-calculation-engine';
 import { eq, and } from 'drizzle-orm';
 import { logger } from '@/lib/logger';
 import { withRLSContext } from '@/lib/db/with-rls-context';
+import { moneyToNumber } from '@/lib/decimal-safe';
 import type { NodePgDatabase } from 'drizzle-orm/node-postgres';
 
 // =============================================================================
@@ -310,10 +311,10 @@ export class BillingCycleService {
       periodStart,
       periodEnd,
       memberData: {
-        grossWages: member.grossWages ? parseFloat(member.grossWages) : undefined,
-        baseSalary: member.baseSalary ? parseFloat(member.baseSalary) : undefined,
-        hourlyRate: member.hourlyRate ? parseFloat(member.hourlyRate) : undefined,
-        hoursWorked: member.regularHoursPerWeek ? parseFloat(member.regularHoursPerWeek) * this.getWeeksInPeriod(periodStart, periodEnd) : undefined,
+        grossWages: member.grossWages ? moneyToNumber(member.grossWages) : undefined,
+        baseSalary: member.baseSalary ? moneyToNumber(member.baseSalary) : undefined,
+        hourlyRate: member.hourlyRate ? moneyToNumber(member.hourlyRate) : undefined,
+        hoursWorked: member.regularHoursPerWeek ? moneyToNumber(member.regularHoursPerWeek) * this.getWeeksInPeriod(periodStart, periodEnd) : undefined,
       },
     });
 

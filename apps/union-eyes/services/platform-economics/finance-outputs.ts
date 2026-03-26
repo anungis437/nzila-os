@@ -345,14 +345,17 @@ export async function exportChargebackReport(
   const data = rows as unknown as Array<Record<string, unknown>>;
   const localName = data.length > 0 ? String(data[0].local_name) : localId;
 
-  let totalGross = 0;
-  let totalSubsidy = 0;
-  let totalNet = 0;
+  let totalGrossCents = 0;
+  let totalSubsidyCents = 0;
+  let totalNetCents = 0;
   for (const r of data) {
-    totalGross += parseFloat(String(r.gross_amount_cad ?? '0'));
-    totalSubsidy += parseFloat(String(r.subsidy_applied_cad ?? '0'));
-    totalNet += parseFloat(String(r.net_amount_cad ?? '0'));
+    totalGrossCents += Math.round(Number(String(r.gross_amount_cad ?? '0')) * 100);
+    totalSubsidyCents += Math.round(Number(String(r.subsidy_applied_cad ?? '0')) * 100);
+    totalNetCents += Math.round(Number(String(r.net_amount_cad ?? '0')) * 100);
   }
+  const totalGross = totalGrossCents / 100;
+  const totalSubsidy = totalSubsidyCents / 100;
+  const totalNet = totalNetCents / 100;
 
   const meta = makeMeta(
     'chargeback_report',

@@ -12,6 +12,7 @@ export const dynamic = 'force-dynamic';
 export const GET = withApi(
   {
     auth: { minRole: 'member' },
+    entitlement: 'financial_intelligence_suite',
     openapi: {
       tags: ['Dues'],
       summary: 'List payment history for the organization',

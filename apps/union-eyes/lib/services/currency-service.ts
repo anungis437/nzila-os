@@ -19,6 +19,7 @@ import { db } from '@/db';
 import { eq, and, gte, lte } from 'drizzle-orm';
 import { crossBorderTransactions, exchangeRates } from '@/db/schema/domains/finance';
 import { logger } from '@/lib/logger';
+import { moneyToNumber } from '@/lib/decimal-safe';
 
 export type Currency = 'CAD' | 'USD' | 'EUR' | 'GBP' | 'MXN';
 
@@ -130,7 +131,7 @@ export class CurrencyService {
 
       if (cachedRate) {
         logger.info('Using cached BOC rate', { rate: cachedRate.exchangeRate });
-        return parseFloat(cachedRate.exchangeRate);
+        return moneyToNumber(cachedRate.exchangeRate);
       }
 
       // Fallback to default rate (would fetch from BOC API in production)

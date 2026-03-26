@@ -9,6 +9,7 @@
  */
 
 import { db } from '@/db';
+import { toCents, fromCents, multiplyMoney, compareMoney } from '@/lib/decimal-safe';
 import {
   allocationRules,
   allocationRuleVersions,
@@ -193,8 +194,8 @@ export async function runAllocation(
       ),
     );
 
-  const totalCost = parseFloat(costResult.total);
-  if (totalCost <= 0 && !input.isSimulation) {
+  const totalCostCents = toCents(costResult.total);
+  if (totalCostCents <= 0 && !input.isSimulation) {
     throw new Error('No unallocated costs for this period');
   }
 
@@ -204,7 +205,7 @@ export async function runAllocation(
   // Allocate to each local
   const lines = input.localBasis.map((local) => {
     const share = computeLocalShare(local, basisTotals, ruleVersion);
-    const allocatedAmount = (totalCost * share).toFixed(2);
+    const allocatedAmount = multiplyMoney(fromCents(totalCostCents), share);
 
     return {
       localId: local.localId,
@@ -218,14 +219,14 @@ export async function runAllocation(
   });
 
   // Reconciliation: ensure allocations sum to total (distribute rounding to largest)
-  const allocatedSum = lines.reduce((s, l) => s + parseFloat(l.allocatedAmount), 0);
-  const rounding = totalCost - allocatedSum;
-  if (Math.abs(rounding) > 0.001 && lines.length > 0) {
+  const allocatedSumCents = lines.reduce((s, l) => s + toCents(l.allocatedAmount), 0);
+  const roundingCents = totalCostCents - allocatedSumCents;
+  if (Math.abs(roundingCents) > 0 && lines.length > 0) {
     // Apply rounding difference to largest allocation
     const maxLine = lines.reduce((a, b) =>
-      parseFloat(a.allocatedAmount) >= parseFloat(b.allocatedAmount) ? a : b,
+      compareMoney(a.allocatedAmount, b.allocatedAmount) >= 0 ? a : b,
     );
-    maxLine.allocatedAmount = (parseFloat(maxLine.allocatedAmount) + rounding).toFixed(2);
+    maxLine.allocatedAmount = fromCents(toCents(maxLine.allocatedAmount) + roundingCents);
   }
 
   // Persist

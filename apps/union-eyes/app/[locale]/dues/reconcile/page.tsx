@@ -16,6 +16,7 @@ import { Alert, AlertDescription } from '@/components/ui/alert';
 import { 
   CheckCircle, XCircle, AlertTriangle, Search, RefreshCw 
 } from 'lucide-react';
+import { formatCurrency } from '@/lib/utils';
 import { api } from '@/lib/api/index';
 import { logger } from '@/lib/logger';
 import { useTranslations } from 'next-intl';
@@ -167,7 +168,7 @@ export default function ReconciliationPage() {
               <div>
                 <h3 className="font-semibold text-lg">{item.employerName}</h3>
                 <p className="text-sm text-muted-foreground">
-                  {t('employerId')}: {item.employerMemberId} | {t('amount')}: ${item.amount}
+                  {t('employerId')}: {item.employerMemberId} | {t('amount')}: {formatCurrency(item.amount)}
                 </p>
                 <p className="text-sm text-muted-foreground">
                   Period: {new Date(item.periodStart).toLocaleDateString()} - {' '}

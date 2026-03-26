@@ -12,6 +12,7 @@ export const dynamic = 'force-dynamic';
 export const GET = withApi(
   {
     auth: { minRole: 'officer' },
+    entitlement: 'financial_intelligence_suite',
     openapi: {
       tags: ['Dues'],
       summary: 'List billing periods and subscription cycles',

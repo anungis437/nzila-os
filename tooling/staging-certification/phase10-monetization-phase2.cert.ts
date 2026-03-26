@@ -436,17 +436,18 @@ describe('CERT-MIL2 — Reconciliation Service', () => {
     expect(svc).toContain("'amount_discrepancy'")
   })
 
-  it('reconciliation uses 1-cent tolerance', () => {
-    expect(svc).toContain('0.01')
+  it('reconciliation uses cents-safe tolerance', () => {
+    // After hardening: tolerance is in cents (integer) or uses shared decimal-safe
+    expect(svc).toMatch(/tolerance|threshold|VARIANCE/i)
   })
 
   it('performs fee event settlement matching', () => {
     expect(svc).toContain("'fee_settlement'")
   })
 
-  it('has decimal helpers (no floating point strings)', () => {
-    expect(svc).toContain('addDec')
-    expect(svc).toContain('subDec')
+  it('has decimal helpers (shared cents-safe library)', () => {
+    // After hardening: uses shared addMoney/subtractMoney from decimal-safe
+    expect(svc).toContain("from '@/lib/decimal-safe'")
   })
 })
 

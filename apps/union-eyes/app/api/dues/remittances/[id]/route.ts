@@ -15,6 +15,7 @@ export const dynamic = 'force-dynamic';
 export const GET = withApi(
   {
     auth: { minRole: 'member' },
+    entitlement: 'financial_intelligence_suite',
     openapi: { tags: ['Dues'], summary: 'Get an employer remittance by ID' },
   },
   async ({ organizationId, params }) => {

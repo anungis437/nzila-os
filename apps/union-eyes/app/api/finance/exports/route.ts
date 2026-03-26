@@ -12,6 +12,7 @@
 
 import { NextResponse } from 'next/server';
 import { withMinRole, type BaseAuthContext } from '@/lib/api-auth-guard';
+import { requireEntitlement } from '@/services/platform-economics/entitlement-guard';
 import {
   ErrorCode,
   standardErrorResponse,
@@ -29,10 +30,11 @@ import {
 export const dynamic = 'force-dynamic';
 
 export const GET = withMinRole('officer', async (request, context: BaseAuthContext) => {
-  const { organizationId } = context;
+  const { organizationId, userId } = context;
   if (!organizationId) {
     return standardErrorResponse(ErrorCode.AUTH_REQUIRED, 'Unauthorized');
   }
+  await requireEntitlement(organizationId, 'financial_intelligence_suite', userId);
 
   const url = new URL(request.url);
   const type = url.searchParams.get('type');

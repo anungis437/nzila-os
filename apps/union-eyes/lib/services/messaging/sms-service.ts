@@ -17,6 +17,7 @@
  */
 
 import { logger } from '@/lib/logger';
+import { moneyToNumber } from '@/lib/decimal-safe';
 
 // ============================================================================
 // TYPES
@@ -297,7 +298,7 @@ export class TwilioAdapter implements SMSProvider {
       }
 
       const data = await response.json();
-      return parseFloat(data.balance || '0');
+      return moneyToNumber(data.balance || '0');
     } catch (error) {
       logger.error('Failed to check Twilio balance:', error);
       return 0;

@@ -5,6 +5,7 @@
 
 import { z } from 'zod';
 import { withMinRole, type BaseAuthContext } from '@/lib/api-auth-guard';
+import { requireEntitlement } from '@/services/platform-economics/entitlement-guard';
 import {
   ErrorCode,
   standardErrorResponse,
@@ -34,10 +35,11 @@ const createRuleSchema = z.object({
 });
 
 export const GET = withMinRole('officer', async (_request, context: BaseAuthContext) => {
-  const { organizationId } = context;
+  const { organizationId, userId } = context;
   if (!organizationId) {
     return standardErrorResponse(ErrorCode.AUTH_REQUIRED, 'Unauthorized');
   }
+  await requireEntitlement(organizationId, 'allocation_engine', userId);
 
   try {
     const rules = await getAllocationRules(organizationId);
@@ -52,6 +54,7 @@ export const POST = withMinRole('admin', async (request, context: BaseAuthContex
   if (!organizationId || !userId) {
     return standardErrorResponse(ErrorCode.AUTH_REQUIRED, 'Unauthorized');
   }
+  await requireEntitlement(organizationId, 'allocation_engine', userId);
 
   let rawBody: unknown;
   try {

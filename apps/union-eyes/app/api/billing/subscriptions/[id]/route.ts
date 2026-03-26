@@ -16,6 +16,7 @@ export const dynamic = 'force-dynamic';
 export const GET = withApi(
   {
     auth: { minRole: 'member' },
+    entitlement: 'financial_intelligence_suite',
     openapi: { tags: ['Billing'], summary: 'Get a subscription by ID' },
   },
   async ({ organizationId, params }) => {
@@ -47,6 +48,7 @@ const patchSchema = z.object({
 export const PATCH = withApi(
   {
     auth: { minRole: 'steward' },
+    entitlement: 'financial_intelligence_suite',
     openapi: { tags: ['Billing'], summary: 'Update a subscription' },
   },
   async ({ organizationId, userId, params, request }) => {
@@ -77,6 +79,7 @@ export const PATCH = withApi(
 export const DELETE = withApi(
   {
     auth: { minRole: 'steward' },
+    entitlement: 'financial_intelligence_suite',
     openapi: { tags: ['Billing'], summary: 'Cancel a subscription' },
   },
   async ({ organizationId, userId, params }) => {

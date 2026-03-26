@@ -8,13 +8,13 @@ export function cn(...inputs: ClassValue[]) {
 /**
  * Format a number as currency
  * @param amount - The amount to format
- * @param currency - The currency code (default: USD)
- * @param locale - The locale for formatting (default: en-US)
+ * @param currency - The currency code (default: CAD)
+ * @param locale - The locale for formatting (default: en-CA)
  */
 export function formatCurrency(
   amount: number,
-  currency: string = 'USD',
-  locale: string = 'en-US'
+  currency: string = 'CAD',
+  locale: string = 'en-CA'
 ): string {
   return new Intl.NumberFormat(locale, {
     style: 'currency',

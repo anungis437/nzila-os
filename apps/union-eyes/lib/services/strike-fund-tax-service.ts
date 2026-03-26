@@ -16,6 +16,7 @@ import { eq, and, sql } from 'drizzle-orm';
 import { users, strikeFundDisbursements } from '@/db/schema';
 import { decryptSIN } from '@/lib/encryption';
 import { logger } from '@/lib/logger';
+import { moneyToNumber } from '@/lib/decimal-safe';
 
 export interface T4ASlip {
   slipType: 'T4A';
@@ -336,7 +337,7 @@ async function getYearlyStrikePay(
   )
   .catch(() => [{ totalAmount: 0 }]);
 
-  return Number(payments[0]?.totalAmount || 0);
+  return moneyToNumber(payments[0]?.totalAmount || 0);
 }
 
 /**

@@ -14,6 +14,7 @@ const setupIntentSchema = z.object({
 export const POST = withApi(
   {
     auth: { minRole: 'steward' },
+    entitlement: 'financial_intelligence_suite',
     body: setupIntentSchema,
     rateLimit: RATE_LIMITS.FINANCIAL_WRITE,
     openapi: {

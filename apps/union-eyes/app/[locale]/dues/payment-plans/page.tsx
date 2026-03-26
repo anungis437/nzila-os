@@ -24,6 +24,7 @@ import {
   TableRow,
 } from '@/components/ui/table';
 import { FileText, Plus, CheckCircle, Clock } from 'lucide-react';
+import { formatCurrency } from '@/lib/utils';
 import { logger } from '@/lib/logger';
 import { useTranslations } from 'next-intl';
 
@@ -165,14 +166,14 @@ export default function PaymentPlansPage() {
                   </TableCell>
                   <TableCell>
                     <div>
-                      <p className="font-medium">${plan.totalAmount.toFixed(2)}</p>
+                      <p className="font-medium">{formatCurrency(plan.totalAmount)}</p>
                       <p className="text-sm text-muted-foreground">
-                        {t('paid')}: ${plan.paidAmount.toFixed(2)}
+                        {t('paid')}: {formatCurrency(plan.paidAmount)}
                       </p>
                     </div>
                   </TableCell>
                   <TableCell>
-                    <span className="font-medium">${plan.monthlyPayment.toFixed(2)}</span>
+                    <span className="font-medium">{formatCurrency(plan.monthlyPayment)}</span>
                   </TableCell>
                   <TableCell>
                     <div className="space-y-1 min-w-[150px]">

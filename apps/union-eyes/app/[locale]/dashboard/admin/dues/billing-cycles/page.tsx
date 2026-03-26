@@ -28,6 +28,7 @@ import {
   SelectTrigger,
   SelectValue,
 } from '@/components/ui/select';
+import { formatCurrency } from '@/lib/utils';
 import {
   Dialog,
   DialogContent,
@@ -79,13 +80,6 @@ interface BillingCycleResult {
 // =============================================================================
 // UTILITY FUNCTIONS
 // =============================================================================
-
-function formatCurrency(amount: number): string {
-  return new Intl.NumberFormat('en-CA', {
-    style: 'currency',
-    currency: 'CAD',
-  }).format(amount);
-}
 
 function formatDate(date: string): string {
   return format(new Date(date), 'MMM dd, yyyy');

@@ -21,6 +21,7 @@ import {
   TableRow,
 } from '@/components/ui/table';
 import { FileText, AlertCircle } from 'lucide-react';
+import { formatCurrency } from '@/lib/utils';
 
 interface Invoice {
   id: string;
@@ -124,9 +125,9 @@ export default function InvoicesPage() {
                   onClick={() => router.push(`/finance/invoices/${inv.id}`)}
                 >
                   <TableCell className="font-medium">{inv.invoiceNumber}</TableCell>
-                  <TableCell>${inv.totalCad}</TableCell>
-                  <TableCell>${inv.paidAmountCad}</TableCell>
-                  <TableCell>${inv.balanceDueCad}</TableCell>
+                  <TableCell>{formatCurrency(Number(inv.totalCad))}</TableCell>
+                  <TableCell>{formatCurrency(Number(inv.paidAmountCad))}</TableCell>
+                  <TableCell>{formatCurrency(Number(inv.balanceDueCad))}</TableCell>
                   <TableCell>
                     <Badge variant={statusColor(inv.status)}>{inv.status}</Badge>
                   </TableCell>

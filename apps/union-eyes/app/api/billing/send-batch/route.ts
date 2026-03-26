@@ -17,6 +17,7 @@ const bodySchema = z.object({
 export const POST = withApi(
   {
     auth: { minRole: 'admin' },
+    entitlement: 'financial_intelligence_suite',
     body: bodySchema,
     rateLimit: RATE_LIMITS.FINANCIAL_WRITE,
     openapi: {

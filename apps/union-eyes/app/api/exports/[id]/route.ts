@@ -14,5 +14,6 @@ const { GET, PATCH, DELETE } = crudRoutes({
   itemRoute: true,
   readRole: 'member',
   writeRole: 'steward',
+  entitlement: 'export_suite',
 });
 export { GET, PATCH, DELETE };

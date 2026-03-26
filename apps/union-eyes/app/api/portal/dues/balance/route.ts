@@ -10,6 +10,7 @@ import { db } from '@/db/db';
 import { memberDuesLedger } from '@/db/schema/dues-finance-schema';
 import { eq, and, sql, desc } from 'drizzle-orm';
 import { createLogger } from '@nzila/os-core'
+import { toCents, fromCents } from '@/lib/decimal-safe'
 
 const logger = createLogger('portal:dues:balance')
 
@@ -52,14 +53,15 @@ export async function GET(req: NextRequest) {
         ),
       );
 
-    const charges = parseFloat(balanceRow?.totalCharges ?? '0');
-    const payments = parseFloat(balanceRow?.totalPayments ?? '0');
-    const credits = parseFloat(balanceRow?.totalCredits ?? '0');
-    const adjustments = parseFloat(balanceRow?.totalAdjustments ?? '0');
-    const writeOffs = parseFloat(balanceRow?.totalWriteOffs ?? '0');
+    const chargesCents = toCents(balanceRow?.totalCharges ?? '0');
+    const paymentsCents = toCents(balanceRow?.totalPayments ?? '0');
+    const creditsCents = toCents(balanceRow?.totalCredits ?? '0');
+    const adjustmentsCents = toCents(balanceRow?.totalAdjustments ?? '0');
+    const writeOffsCents = toCents(balanceRow?.totalWriteOffs ?? '0');
 
     // Balance = charges - (payments + credits + adjustments + write-offs)
-    const currentBalance = charges - payments - credits - adjustments - writeOffs;
+    const balanceCents = chargesCents - paymentsCents - creditsCents - adjustmentsCents - writeOffsCents;
+    const currentBalance = balanceCents / 100;
 
     // Last 5 transactions for recent-activity summary
     const recentTransactions = await db
@@ -88,11 +90,11 @@ export async function GET(req: NextRequest) {
         currentBalance: currentBalance.toFixed(2),
         balanceStatus: currentBalance <= 0 ? 'paid_up' : currentBalance > 0 ? 'owing' : 'credit',
         breakdown: {
-          totalCharges: charges.toFixed(2),
-          totalPayments: payments.toFixed(2),
-          totalCredits: credits.toFixed(2),
-          totalAdjustments: adjustments.toFixed(2),
-          totalWriteOffs: writeOffs.toFixed(2),
+          totalCharges: fromCents(chargesCents),
+          totalPayments: fromCents(paymentsCents),
+          totalCredits: fromCents(creditsCents),
+          totalAdjustments: fromCents(adjustmentsCents),
+          totalWriteOffs: fromCents(writeOffsCents),
         },
         transactionCount: parseInt(balanceRow?.transactionCount ?? '0', 10),
         recentTransactions,

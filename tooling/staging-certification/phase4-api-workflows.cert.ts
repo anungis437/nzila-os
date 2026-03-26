@@ -61,6 +61,8 @@ const AUTH_PATTERNS = [
   /\brequireOrgAccess\b/,       // requireOrgAccess console guard
   /\bverifyWebhookSignature\b/, // webhook signature verification
   /\bverifyPayPalWebhook\b/,    // PayPal webhook verification
+  /\bverifyStripeSignature\b/,   // Stripe webhook signature verification
+  /\bverifyShopifyHmac\b/,       // Shopify webhook HMAC verification
 ]
 
 const VALIDATION_PATTERNS = [

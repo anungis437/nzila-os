@@ -22,6 +22,7 @@ import React from 'react';
 // Platform Stripe integration via @nzila/payments-stripe
 import { getStripeClient } from '@nzila/payments-stripe';
 import { sendPaymentConfirmation, sendPaymentFailure } from '@/lib/services/dues-notifications';
+import { toCents } from '@/lib/decimal-safe';
 
 // =============================================================================
 // TYPES
@@ -173,7 +174,7 @@ export class PaymentService {
     const stripe = getStripeClient();
 
     // Convert amount to cents (Stripe uses smallest currency unit)
-    const amountInCents = Math.round(parseFloat(params.amount) * 100);
+    const amountInCents = toCents(params.amount);
 
     // Create checkout session
     const session = await stripe.checkout.sessions.create({

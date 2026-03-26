@@ -6,6 +6,7 @@
  */
 
 import { withMinRole, type BaseAuthContext } from '@/lib/api-auth-guard';
+import { requireEntitlement } from '@/services/platform-economics/entitlement-guard';
 import {
   ErrorCode,
   standardErrorResponse,
@@ -22,10 +23,11 @@ import { generateDuesAlignmentReport } from '@/services/platform-economics/dues-
 export const dynamic = 'force-dynamic';
 
 export const GET = withMinRole('officer', async (request, context: BaseAuthContext) => {
-  const { organizationId } = context;
+  const { organizationId, userId } = context;
   if (!organizationId) {
     return standardErrorResponse(ErrorCode.AUTH_REQUIRED, 'Unauthorized');
   }
+  await requireEntitlement(organizationId, 'financial_intelligence_suite', userId);
 
   try {
     const url = new URL(request.url);

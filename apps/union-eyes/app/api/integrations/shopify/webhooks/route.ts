@@ -14,6 +14,7 @@ import {
 } from '@/lib/services/rewards/redemption-service';
 import { checkRateLimit, RATE_LIMITS, createRateLimitHeaders } from '@/lib/rate-limiter';
 import { logger } from '@/lib/logger';
+import { toCents } from '@/lib/decimal-safe';
 
 import {
   ErrorCode,
@@ -136,11 +137,8 @@ export async function POST(request: NextRequest) {
 
   } catch (error) {
     logger.error('[Webhook] Processing error', { error });
-    return standardErrorResponse(
-      ErrorCode.INTERNAL_ERROR,
-      'Internal server error',
-      error
-    );
+    // Always return 200 to prevent Shopify retries on internal errors
+    return NextResponse.json({ received: true, error: 'Internal processing error' }, { status: 200 });
   }
 }
 
@@ -271,9 +269,10 @@ async function handleRefundCreated(payload: Record<string, unknown>) {
   }
 
   // Calculate total refund amount (in cents/minor units)
-  const totalRefund = refundLineItems.reduce((sum: number, item: Record<string, unknown>) => {
-    return sum + parseFloat(String(item.subtotal || 0));
+  const totalRefundCents = refundLineItems.reduce((sum: number, item: Record<string, unknown>) => {
+    return sum + toCents(String(item.subtotal || 0));
   }, 0);
+  const totalRefund = totalRefundCents / 100;
 
   // Process refund (returns credits to wallet)
   await processRedemptionRefund(

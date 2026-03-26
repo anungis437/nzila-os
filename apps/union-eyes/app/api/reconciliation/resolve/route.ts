@@ -16,6 +16,7 @@ const resolveSchema = z.object({
 export const POST = withApi(
   {
     auth: { minRole: 'admin' },
+    entitlement: 'commercial_reporting',
     body: resolveSchema,
     rateLimit: RATE_LIMITS.FINANCIAL_WRITE,
     openapi: {

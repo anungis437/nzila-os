@@ -21,6 +21,7 @@ import { eq, and, between, sql, desc, gte, lte } from 'drizzle-orm';
 import { auditLog, AuditEventType, AuditSeverity } from '@/lib/audit-logger';
 import { v4 as uuidv4 } from 'uuid';
 import { appendLedgerEntry } from './ledger-service';
+import { multiplyMoney, toCents } from '@/lib/decimal-safe';
 
 // ============================================================================
 // Types
@@ -162,7 +163,7 @@ export async function aggregateUsageForPeriod(
   const included = meter.includedQuantity ?? 0;
   const billable = Math.max(0, Number(totalQuantity) - included);
   const unitPrice = meter.pricePerUnit ?? '0';
-  const totalAmount = (billable * Number(unitPrice)).toFixed(2);
+  const totalAmount = multiplyMoney(unitPrice, billable);
 
   // Upsert aggregate
   const [agg] = await db
@@ -228,7 +229,7 @@ export async function closeAggregatesForPeriod(
       .returning();
 
     // Post to DAPL ledger if requested and amount > 0
-    if (input.postToLedger && Number(agg.totalAmount) > 0) {
+    if (input.postToLedger && toCents(agg.totalAmount) > 0) {
       await appendLedgerEntry({
         organizationId: input.organizationId,
         billingPeriodId: input.billingPeriodId,

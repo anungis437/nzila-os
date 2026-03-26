@@ -271,7 +271,7 @@ describe('ADVERSARIAL-9 — Proration Input Validation', () => {
 
   it('handles edge case where credit equals charge (same amount upgrade)', () => {
     // net should be 0 when amounts are equal — ensure subtraction exists
-    expect(src).toContain('charge - credit')
+    expect(src).toContain('subtractMoney(charge, credit)')
   })
 
   it('no division without zero-check', () => {

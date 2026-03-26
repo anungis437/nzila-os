@@ -5,6 +5,7 @@
 
 import { z } from 'zod';
 import { withMinRole, type BaseAuthContext } from '@/lib/api-auth-guard';
+import { requireEntitlement } from '@/services/platform-economics/entitlement-guard';
 import {
   ErrorCode,
   standardErrorResponse,
@@ -27,10 +28,11 @@ export const GET = withMinRole('officer', async (
   _request,
   context: BaseAuthContext & { params: Promise<{ id: string }> },
 ) => {
-  const { organizationId } = context;
+  const { organizationId, userId } = context;
   if (!organizationId) {
     return standardErrorResponse(ErrorCode.AUTH_REQUIRED, 'Unauthorized');
   }
+  await requireEntitlement(organizationId, 'financial_intelligence_suite', userId);
 
   const { id: invoiceId } = await context.params;
 
@@ -50,6 +52,7 @@ export const POST = withMinRole('admin', async (
   if (!organizationId || !userId) {
     return standardErrorResponse(ErrorCode.AUTH_REQUIRED, 'Unauthorized');
   }
+  await requireEntitlement(organizationId, 'financial_intelligence_suite', userId);
 
   const { id: invoiceId } = await context.params;
 

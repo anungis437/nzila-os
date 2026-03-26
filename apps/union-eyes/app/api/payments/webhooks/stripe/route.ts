@@ -58,6 +58,10 @@ export async function POST(request: NextRequest) {
     if (STRIPE_WEBHOOK_SECRET && !verifyStripeSignature(body, signature, STRIPE_WEBHOOK_SECRET)) {
       return NextResponse.json({ error: 'Invalid signature' }, { status: 401 });
     }
+    if (!STRIPE_WEBHOOK_SECRET) {
+      logger.error('[stripe-payment-webhook] STRIPE_WEBHOOK_SECRET not configured — rejecting request');
+      return NextResponse.json({ error: 'Webhook secret not configured' }, { status: 500 });
+    }
 
     const event = JSON.parse(body);
     const eventType = event?.type as string;
@@ -140,6 +144,7 @@ export async function POST(request: NextRequest) {
     return NextResponse.json({ received: true });
   } catch (error) {
     logger.error('[stripe-payment-webhook] Error processing webhook:', error);
-    return NextResponse.json({ error: 'Webhook processing failed' }, { status: 500 });
+    // Always return 200 to prevent Stripe retries on internal errors
+    return NextResponse.json({ received: true, error: 'Internal processing error' });
   }
 }
