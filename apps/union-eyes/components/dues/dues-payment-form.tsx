@@ -223,8 +223,7 @@ export default function DuesPaymentForm(props: DuesPaymentFormProps) {
           method: 'POST',
           headers: { 'Content-Type': 'application/json' },
           body: JSON.stringify({
-            userId: props.userId,
-            amount: props.currentBalance,
+            amount: Math.round(props.currentBalance * 100),
           }),
         });
 

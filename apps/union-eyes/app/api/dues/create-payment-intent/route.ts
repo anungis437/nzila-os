@@ -16,7 +16,7 @@ const paymentIntentSchema = z.object({
 
 export const POST = withApi(
   {
-    auth: { minRole: 'steward' },
+    auth: { minRole: 'member' },
     entitlement: 'financial_intelligence_suite',
     body: paymentIntentSchema,
     rateLimit: RATE_LIMITS.FINANCIAL_WRITE,
