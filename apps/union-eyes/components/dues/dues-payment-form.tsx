@@ -211,11 +211,13 @@ export default function DuesPaymentForm(props: DuesPaymentFormProps) {
   const { toast } = useToast();
 
   useEffect(() => {
-    // Don&apos;t initialize if balance is 0 or negative, Stripe not configured, or if we already have an error
+    // Don't initialize if balance is 0 or negative, Stripe not configured, or if we already have an error
     if (props.currentBalance <= 0 || !stripeConfigured || initError) {
       setLoading(false);
       return;
     }
+
+    const controller = new AbortController();
 
     const initializePayment = async () => {
       try {
@@ -225,6 +227,7 @@ export default function DuesPaymentForm(props: DuesPaymentFormProps) {
           body: JSON.stringify({
             amount: Math.round(props.currentBalance * 100),
           }),
+          signal: controller.signal,
         });
 
         if (!response.ok) {
@@ -234,19 +237,23 @@ export default function DuesPaymentForm(props: DuesPaymentFormProps) {
 
         const { clientSecret } = await response.json();
         setClientSecret(clientSecret);
-      } catch (_error) {
-setInitError(true);
+      } catch (error) {
+        if ((error as Error).name === 'AbortError') return;
+        setInitError(true);
         toast({
           title: 'Error',
           description: 'Failed to initialize payment form',
           variant: 'destructive',
         });
       } finally {
-        setLoading(false);
+        if (!controller.signal.aborted) {
+          setLoading(false);
+        }
       }
     };
 
     initializePayment();
+    return () => controller.abort();
     // Only run once on mount or when userId changes
     // eslint-disable-next-line react-hooks/exhaustive-deps
   }, [props.userId]);
