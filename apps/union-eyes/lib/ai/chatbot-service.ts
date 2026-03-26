@@ -128,11 +128,15 @@ export class ChatSessionManager {
     userId: string,
     options: {
       status?: string;
+      organizationId?: string;
       limit?: number;
       offset?: number;
     } = {}
   ): Promise<ChatSession[]> {
     const conditions = [eq(chatSessions.userId, userId)];
+    if (options.organizationId) {
+      conditions.push(eq(chatSessions.organizationId, options.organizationId));
+    }
     if (options.status) {
       // eslint-disable-next-line @typescript-eslint/no-explicit-any
       conditions.push(eq(chatSessions.status, options.status as any));
