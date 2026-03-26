@@ -8,6 +8,7 @@ import { db } from '@/db/db';
 import { sql } from 'drizzle-orm';
 import { claims } from '@/db/schema';
 import { eq, and } from 'drizzle-orm';
+import { withRLSContext } from '@/lib/db/with-rls-context';
 
 export const dynamic = 'force-dynamic';
 
@@ -22,16 +23,14 @@ export const GET = withApi(
   },
   async ({ params, organizationId, userId }) => {
     const id = params.caseId;
-    console.warn('[cases/GET] caseId=%s, organizationId=%s, userId=%s', id, organizationId, userId);
 
     // Resolve organizationId: if null, fall back to the user's membership org
     let orgId = organizationId;
     if (!orgId && userId) {
-      const memberRows = await db.execute(
+      const memberRows = await withRLSContext(async () => db.execute(
         sql`SELECT organization_id FROM organization_members WHERE user_id = ${userId} LIMIT 1`,
-      );
+      ));
       orgId = (memberRows[0] as { organization_id?: string } | undefined)?.organization_id ?? null;
-      console.warn('[cases/GET] membership fallback orgId=%s', orgId);
     }
 
     // Build WHERE clause: org-scoped when possible, owner-fallback when not
@@ -40,9 +39,8 @@ export const GET = withApi(
       : userId
         ? sql`AND c.member_id = ${userId}`
         : sql`AND FALSE`;
-    console.warn('[cases/GET] filter: orgId=%s, userId=%s, mode=%s', orgId, userId, orgId ? 'org' : userId ? 'owner' : 'deny');
 
-    const rows = await db.execute(sql`
+    const rows = await withRLSContext(async () => db.execute(sql`
       SELECT c.claim_id        AS "claimId",
              c.claim_number    AS "claimNumber",
              c.organization_id AS "organizationId",
@@ -85,9 +83,8 @@ export const GET = withApi(
       WHERE (c.claim_number = ${id} OR c.claim_id::text = ${id})
         ${orgFilter}
       LIMIT 1
-    `);
+    `));
     const row = rows[0];
-    console.warn('[cases/GET] rows=%d, found=%s', rows.length, !!row);
     if (!row) throw ApiError.notFound('Case not found');
     return row;
   },
@@ -119,9 +116,9 @@ export const PATCH = withApi(
     // Resolve organizationId fallback
     let orgId = organizationId;
     if (!orgId && userId) {
-      const memberRows = await db.execute(
+      const memberRows = await withRLSContext(async () => db.execute(
         sql`SELECT organization_id FROM organization_members WHERE user_id = ${userId} LIMIT 1`,
-      );
+      ));
       orgId = (memberRows[0] as { organization_id?: string } | undefined)?.organization_id ?? null;
     }
 
@@ -130,12 +127,12 @@ export const PATCH = withApi(
       ? sql`AND organization_id = ${orgId}::uuid`
       : sql`AND FALSE`;
 
-    const existing = await db.execute(sql`
+    const existing = await withRLSContext(async () => db.execute(sql`
       SELECT claim_id FROM claims
       WHERE (claim_number = ${id} OR claim_id::text = ${id})
         ${orgFilter}
       LIMIT 1
-    `);
+    `));
     if (!existing[0]) throw ApiError.notFound('Case not found');
     const claimId = (existing[0] as { claim_id: string }).claim_id;
 

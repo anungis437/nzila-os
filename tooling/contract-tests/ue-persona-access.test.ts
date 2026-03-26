@@ -226,6 +226,7 @@ const PAGE_ACCESS_MATRIX: PageRule[] = [
   { path: 'pension/admin/page.tsx',                      minRole: 'steward',              description: 'Pension admin console' },
   { path: 'precedents/page.tsx',                         minRole: 'steward',              description: 'Precedents library' },
   { path: 'workbench/page.tsx',                          minRole: 'steward',              description: 'LRO workbench — case queue' },
+  { path: 'cases/[id]/page.tsx',                         minRole: 'steward',              description: 'Case detail view' },
 
   // ── Officer-level pages (level 60) ─────────────────────────────────────
   { path: 'audits/page.tsx',                             minRole: 'officer',              description: 'Audits & compliance' },

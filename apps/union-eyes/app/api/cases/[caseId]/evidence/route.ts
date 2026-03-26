@@ -5,6 +5,7 @@ import { withApi } from '@/lib/api/with-api';
 import { ApiError } from '@/lib/api/errors';
 import { db } from '@/db/db';
 import { sql } from 'drizzle-orm';
+import { withRLSContext } from '@/lib/db/with-rls-context';
 
 export const dynamic = 'force-dynamic';
 
@@ -23,9 +24,9 @@ export const GET = withApi(
     // Resolve organizationId fallback
     let orgId = organizationId;
     if (!orgId && userId) {
-      const memberRows = await db.execute(
+      const memberRows = await withRLSContext(async () => db.execute(
         sql`SELECT organization_id FROM organization_members WHERE user_id = ${userId} LIMIT 1`,
-      );
+      ));
       orgId = (memberRows[0] as { organization_id?: string } | undefined)?.organization_id ?? null;
     }
 
@@ -35,13 +36,13 @@ export const GET = withApi(
         ? sql`AND c.member_id = ${userId}`
         : sql`AND FALSE`;
 
-    const rows = await db.execute(sql`
+    const rows = await withRLSContext(async () => db.execute(sql`
       SELECT c.attachments
       FROM claims c
       WHERE (c.claim_number = ${id} OR c.claim_id::text = ${id})
         ${orgFilter}
       LIMIT 1
-    `);
+    `));
 
     const row = rows[0] as { attachments?: unknown } | undefined;
     if (!row) throw ApiError.notFound('Case not found');

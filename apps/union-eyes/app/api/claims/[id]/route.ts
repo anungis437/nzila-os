@@ -8,6 +8,7 @@ import { ApiError } from '@/lib/api/errors';
 import { db } from '@/db/db';
 import { claims } from '@/db/schema';
 import { sql } from 'drizzle-orm';
+import { withRLSContext } from '@/lib/db/with-rls-context';
 
 export const dynamic = 'force-dynamic';
 
@@ -23,16 +24,14 @@ const GET = withApi(
   },
   async ({ params, organizationId, userId }) => {
     const id = params.id;
-    console.warn('[claims/GET] id=%s, organizationId=%s, userId=%s', id, organizationId, userId);
 
     // Resolve organizationId: if null, fall back to the user's membership org
     let orgId = organizationId;
     if (!orgId && userId) {
-      const memberRows = await db.execute(
+      const memberRows = await withRLSContext(async () => db.execute(
         sql`SELECT organization_id FROM organization_members WHERE user_id = ${userId} LIMIT 1`,
-      );
+      ));
       orgId = (memberRows[0] as { organization_id?: string } | undefined)?.organization_id ?? null;
-      console.warn('[claims/GET] membership fallback orgId=%s', orgId);
     }
 
     // Build WHERE clause: org-scoped when possible, owner-fallback when not
@@ -41,9 +40,8 @@ const GET = withApi(
       : userId
         ? sql`AND c.member_id = ${userId}`
         : sql`AND FALSE`;
-    console.warn('[claims/GET] filter: orgId=%s, userId=%s, mode=%s', orgId, userId, orgId ? 'org' : userId ? 'owner' : 'deny');
 
-    const rows = await db.execute(sql`
+    const rows = await withRLSContext(async () => db.execute(sql`
       SELECT c.claim_id        AS "claimId",
              c.claim_number    AS "claimNumber",
              c.organization_id AS "organizationId",
@@ -86,9 +84,8 @@ const GET = withApi(
       WHERE (c.claim_number = ${id} OR c.claim_id::text = ${id})
         ${orgFilter}
       LIMIT 1
-    `);
+    `));
     const row = rows[0];
-    console.warn('[claims/GET] rows=%d, found=%s', rows.length, !!row);
     if (!row) throw ApiError.notFound('Claim not found');
     return { data: row };
   },
@@ -103,6 +100,6 @@ const { PATCH, DELETE } = crudRoutes({
   itemRoute: true,
   readRole: 'member',
   writeRole: 'steward',
-}) as { PATCH: typeof GET; DELETE: typeof GET };
+}) as unknown as { PATCH: typeof GET; DELETE: typeof GET };
 
 export { GET, PATCH, DELETE };
