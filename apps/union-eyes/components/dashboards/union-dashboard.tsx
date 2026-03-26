@@ -362,9 +362,12 @@ export default function UnionDashboard({ isPlatformViewer = false }: UnionDashbo
     fetchActivities();
   }, [organizationId]);
 
-  // Fetch deadline data
+  // Fetch deadline data (members don't see the deadline widget)
   useEffect(() => {
-    if (!organizationId) return;
+    if (!organizationId || userRole === 'member') {
+      setIsLoadingDeadlines(false);
+      return;
+    }
 
     const fetchDeadlines = async () => {
       try {
@@ -393,7 +396,7 @@ export default function UnionDashboard({ isPlatformViewer = false }: UnionDashbo
     };
 
     fetchDeadlines();
-  }, [organizationId]);
+  }, [organizationId, userRole]);
   
   // Update stats with real data
   const stats = getStats(t);
@@ -551,8 +554,8 @@ export default function UnionDashboard({ isPlatformViewer = false }: UnionDashbo
         </motion.div>
       )}
 
-      {/* Deadline Widget — hidden for platform admins */}
-      {!isPlatformViewer && (
+      {/* Deadline Widget — hidden for platform admins and members */}
+      {!isPlatformViewer && userRole !== 'member' && (
       <motion.div
         initial={{ opacity: 0, y: 20 }}
         animate={{ opacity: 1, y: 0 }}
