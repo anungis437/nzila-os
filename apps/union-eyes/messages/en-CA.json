@@ -1886,7 +1886,21 @@
     "pendingDocumentation": "Pending Documentation",
     "resolved": "Resolved",
     "closed": "Closed",
-    "terminalState": "This claim is in a terminal state. No further status changes are allowed."
+    "terminalState": "This claim is in a terminal state. No further status changes are allowed.",
+    "grievanceDiscipline": "Grievance – Discipline",
+    "grievanceSchedule": "Grievance – Scheduling",
+    "grievancePay": "Grievance – Pay",
+    "workplaceSafety": "Workplace Safety",
+    "discriminationAge": "Discrimination – Age",
+    "discriminationGender": "Discrimination – Gender",
+    "discriminationRace": "Discrimination – Race",
+    "discriminationDisability": "Discrimination – Disability",
+    "harassmentVerbal": "Harassment – Verbal",
+    "harassmentPhysical": "Harassment – Physical",
+    "harassmentSexual": "Harassment – Sexual",
+    "contractDispute": "Contract Dispute",
+    "retaliation": "Retaliation",
+    "other": "Other"
   },
   "grievance": {
     "title": "Grievances",

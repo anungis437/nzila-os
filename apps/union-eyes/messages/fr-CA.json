@@ -1888,7 +1888,21 @@
     "pendingDocumentation": "Documentation en attente",
     "resolved": "Résolue",
     "closed": "Fermée",
-    "terminalState": "Cette réclamation est dans un état terminal. Aucune modification de statut n'est permise."
+    "terminalState": "Cette réclamation est dans un état terminal. Aucune modification de statut n'est permise.",
+    "grievanceDiscipline": "Grief – Discipline",
+    "grievanceSchedule": "Grief – Horaire",
+    "grievancePay": "Grief – Rémunération",
+    "workplaceSafety": "Sécurité au travail",
+    "discriminationAge": "Discrimination – Âge",
+    "discriminationGender": "Discrimination – Genre",
+    "discriminationRace": "Discrimination – Race",
+    "discriminationDisability": "Discrimination – Handicap",
+    "harassmentVerbal": "Harcèlement – Verbal",
+    "harassmentPhysical": "Harcèlement – Physique",
+    "harassmentSexual": "Harcèlement – Sexuel",
+    "contractDispute": "Litige contractuel",
+    "retaliation": "Représailles",
+    "other": "Autre"
   },
   "grievance": {
     "title": "Griefs",
