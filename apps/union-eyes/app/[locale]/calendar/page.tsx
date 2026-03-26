@@ -65,13 +65,14 @@ export default function CalendarPage() {
   const fetchCalendars = async () => {
     try {
       const response = await fetch('/api/calendars');
-      const data = await response.json();
+      const json = await response.json();
+      const rows = json?.data?.data ?? json?.data ?? json?.calendars ?? [];
       
-      setCalendars(data.calendars || []);
+      setCalendars(rows);
       
       // Select first calendar by default
-      if (data.calendars && data.calendars.length > 0) {
-        setSelectedCalendarId(data.calendars[0].id);
+      if (rows.length > 0) {
+        setSelectedCalendarId(rows[0].id);
       }
     } catch (_error) {
     } finally {
@@ -82,9 +83,10 @@ export default function CalendarPage() {
   const fetchEvents = async (calendarId: string) => {
     try {
       const response = await fetch(`/api/calendars/${calendarId}/events`);
-      const data = await response.json();
+      const json = await response.json();
+      const rows = json?.data?.data ?? json?.data ?? json?.events ?? [];
       
-      setEvents(data.events || []);
+      setEvents(Array.isArray(rows) ? rows : []);
     } catch (_error) {
     }
   };
@@ -173,11 +175,12 @@ export default function CalendarPage() {
         throw new Error('Failed to create calendar');
       }
 
-      const data = await response.json();
+      const json = await response.json();
       await fetchCalendars();
 
-      if (data?.calendar?.id) {
-        setSelectedCalendarId(data.calendar.id);
+      const created = json?.data;
+      if (created?.id) {
+        setSelectedCalendarId(created.id);
       }
 
       setCreateCalendarOpen(false);
