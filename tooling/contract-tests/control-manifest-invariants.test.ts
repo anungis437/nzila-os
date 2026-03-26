@@ -15,8 +15,11 @@ import { join } from 'node:path'
 const ROOT = join(__dirname, '..', '..')
 const APPS_DIR = join(ROOT, 'apps')
 
+/** Exclude ephemeral scaffold dirs created by golden-path-invariants tests */
+const SCAFFOLD_EXCLUSIONS = ['test-scaffold-gp']
+
 const APP_NAMES = readdirSync(APPS_DIR).filter(d =>
-  statSync(join(APPS_DIR, d)).isDirectory()
+  statSync(join(APPS_DIR, d)).isDirectory() && !SCAFFOLD_EXCLUSIONS.includes(d)
 )
 
 const REQUIRED_FIELDS = ['app', 'version', 'riskLevel', 'policyProfile', 'controls', 'exceptions']
