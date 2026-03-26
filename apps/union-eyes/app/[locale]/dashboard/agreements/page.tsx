@@ -110,10 +110,11 @@ export default function AgreementsPage() {
         const res = await fetch('/api/v2/agreements');
         if (res.ok) {
           const json = await res.json();
-          const raw = Array.isArray(json) ? json : json?.agreements ?? json?.data ?? [];
-          // Map DB shape to Agreement interface
+          // withApi envelope: { success, data: { data: rows, pagination } }
+          const raw = json?.data?.data ?? json?.data ?? json?.agreements ?? [];
+          const list = Array.isArray(raw) ? raw : [];
           // eslint-disable-next-line @typescript-eslint/no-explicit-any
-          const items: Agreement[] = raw.map((r: any) => ({
+          const items: Agreement[] = list.map((r: any) => ({
             id: r.id,
             title: r.title ?? 'Untitled Agreement',
             type: r.type ?? 'collective-bargaining',
@@ -132,7 +133,7 @@ export default function AgreementsPage() {
             keyTerms: Array.isArray(r.keyTerms ?? r.key_terms) ? (r.keyTerms ?? r.key_terms) : [],
             summary: r.summaryGenerated ?? r.summary_generated ?? r.summary ?? '',
           }));
-          if (items.length > 0) setAgreements(items);
+          setAgreements(items);
         }
       } catch {
         // API not available — use fallback data
