@@ -169,6 +169,8 @@ export default defineConfig({
       'services/media-worker',
       // CUPE vocabulary
       'packages/cupe-vocabulary',
+      // UE AI Assistant
+      'packages/ue-assistant',
       // E2E platform proof tests
       'tests/e2e/platform',
     ],

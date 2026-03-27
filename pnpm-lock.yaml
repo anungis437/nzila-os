@@ -5142,6 +5142,28 @@ importers:
         specifier: ^4.0.18
         version: 4.1.0(@opentelemetry/api@1.9.0)(@types/node@25.5.0)(jsdom@28.1.0(@noble/hashes@2.0.1))(vite@7.3.1(@types/node@25.5.0)(jiti@2.6.1)(lightningcss@1.32.0)(terser@5.46.1)(tsx@4.21.0)(yaml@2.8.2))
 
+  packages/ue-assistant:
+    dependencies:
+      '@nzila/os-core':
+        specifier: workspace:*
+        version: link:../os-core
+      '@nzila/platform-events':
+        specifier: workspace:*
+        version: link:../platform-events
+      '@nzila/platform-governed-ai':
+        specifier: workspace:*
+        version: link:../platform-governed-ai
+      zod:
+        specifier: ^3.25.0
+        version: 3.25.76
+    devDependencies:
+      typescript:
+        specifier: ^5
+        version: 5.9.3
+      vitest:
+        specifier: ^4.0.0
+        version: 4.1.0(@opentelemetry/api@1.9.0)(@types/node@25.5.0)(jsdom@28.1.0(@noble/hashes@2.0.1))(vite@7.3.1(@types/node@25.5.0)(jiti@2.6.1)(lightningcss@1.32.0)(terser@5.46.1)(tsx@4.21.0)(yaml@2.8.2))
+
   packages/ui:
     dependencies:
       react:

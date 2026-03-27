@@ -1,8 +1,9 @@
-import { defineConfig } from 'vitest/config'
+import { defineProject } from 'vitest/config'
 
-export default defineConfig({
+export default defineProject({
   test: {
-    globals: false,
+    name: 'ue-assistant',
     environment: 'node',
+    include: ['src/**/*.test.ts'],
   },
 })
