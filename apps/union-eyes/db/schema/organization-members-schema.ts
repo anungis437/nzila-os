@@ -1,4 +1,4 @@
-import { pgTable, text, timestamp, uuid, varchar, pgEnum, boolean } from "drizzle-orm/pg-core";
+import { pgTable, text, timestamp, uuid, varchar, pgEnum, boolean, integer, jsonb } from "drizzle-orm/pg-core";
 import { organizations } from "../schema-organizations";
 
 // Enums
@@ -27,6 +27,12 @@ export const organizationMembers = pgTable("organization_members", {
   
   // Union Info
   membershipNumber: text("membership_number"),
+  position: text("position"),
+  location: text("location"),
+  hireDate: timestamp("hire_date", { withTimezone: true }),
+  seniority: integer("seniority"),
+  unionJoinDate: timestamp("union_join_date", { withTimezone: true }),
+  metadata: jsonb("metadata"),
   
   // Membership Details
   isPrimary: boolean("is_primary"),

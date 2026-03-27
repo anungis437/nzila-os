@@ -34,6 +34,7 @@ import {
   DollarSign,
   GraduationCap,
   MessageSquare,
+  Mail,
   AlertTriangle,
   Handshake,
   Receipt,
@@ -211,6 +212,8 @@ export default function Sidebar({ profile: _profile, userEmail, whopMonthlyPlanI
         { href: `/${locale}/dashboard/claims/new`, icon: <Mic size={16} />, label: t('claims.submitNew'), roles: unionAll },
         { href: `/${locale}/dashboard/pension`, icon: <Briefcase size={16} />, label: t('sidebar.pensionBenefits'), roles: unionAll },
         { href: `/${locale}/dashboard/dues`, icon: <DollarSign size={16} />, label: t('sidebar.duesPayments'), roles: unionAll },
+        { href: `/${locale}/dashboard/messages`, icon: <Mail size={16} />, label: t('sidebar.messages'), roles: unionAll },
+        { href: `/${locale}/dashboard/notifications`, icon: <Bell size={16} />, label: t('sidebar.notifications'), roles: unionAll },
       ],
     },
     {

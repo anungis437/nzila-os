@@ -41,10 +41,7 @@ export const GET = withApi(
       const activeCount = rows.filter(r => r.status === 'active').length;
 
       const members = rows.map(m => {
-        let metadata: Record<string, unknown> = {};
-        if (m.metadata) {
-          try { metadata = JSON.parse(m.metadata); } catch { /* ignore */ }
-        }
+        const metadata = (m.metadata && typeof m.metadata === 'object') ? m.metadata as Record<string, unknown> : {};
         return {
           id: m.id,
           userId: m.userId,
@@ -54,6 +51,7 @@ export const GET = withApi(
           role: m.role,
           status: m.status,
           department: m.department || 'Administration',
+          location: m.location || '',
           position: m.position || 'Union Member',
           hireDate: m.hireDate?.toISOString() ?? null,
           seniority: m.seniority ?? 0,

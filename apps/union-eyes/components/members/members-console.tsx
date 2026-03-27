@@ -125,7 +125,7 @@ export default function MembersConsole() {
     position: m.position || "Union Member",
     hireDate: m.hireDate || m.createdAt,
     seniority: m.seniority || 0,
-    location: m.metadata?.location || "",
+    location: m.location || m.metadata?.location || "",
     activeCases: m.metadata?.activeCases || 0,
     joinDate: m.unionJoinDate || m.createdAt,
     membershipNumber: m.membershipNumber || "",

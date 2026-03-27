@@ -176,16 +176,18 @@ export default function DashboardNavbar({ profile, onMenuClick: _onMenuClick }: 
         {/* Right: Actions + User */}
         <div className="flex items-center space-x-2">
           {/* Notifications */}
-          <Button variant="ghost" size="icon" className="relative">
-            <Bell className="h-5 w-5" />
-            {notificationCount > 0 && (
-              <Badge
-                variant="destructive"
-                className="absolute -top-1 -right-1 h-5 w-5 rounded-full p-0 flex items-center justify-center text-xs"
-              >
-                {notificationCount}
-              </Badge>
-            )}
+          <Button variant="ghost" size="icon" className="relative" asChild>
+            <Link href={`/${locale}/dashboard/notifications`}>
+              <Bell className="h-5 w-5" />
+              {notificationCount > 0 && (
+                <Badge
+                  variant="destructive"
+                  className="absolute -top-1 -right-1 h-5 w-5 rounded-full p-0 flex items-center justify-center text-xs"
+                >
+                  {notificationCount}
+                </Badge>
+              )}
+            </Link>
           </Button>
 
           {/* Settings (Desktop) */}
