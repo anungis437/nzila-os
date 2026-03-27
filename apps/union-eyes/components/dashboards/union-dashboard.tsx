@@ -325,8 +325,10 @@ export default function UnionDashboard({ isPlatformViewer = false }: UnionDashbo
         });
         if (response.ok) {
           const data = await response.json();
-          setNotifications(data.notifications || []);
-          setUnreadNotificationsCount(data.unreadCount || 0);
+          // withApi wraps result as { success, data: { notifications, unreadCount, pagination }, timestamp }
+          const inner = data?.data ?? data;
+          setNotifications(inner?.notifications ?? []);
+          setUnreadNotificationsCount(inner?.unreadCount ?? 0);
         }
       } catch (_error) {
         // silently fail
@@ -388,7 +390,9 @@ export default function UnionDashboard({ isPlatformViewer = false }: UnionDashbo
         });
         if (upcomingResponse.ok) {
           const upcomingData = await upcomingResponse.json();
-          setCriticalDeadlines(upcomingData.deadlines || []);
+          // crudRoutes + withApi: { success, data: { data: rows, pagination }, timestamp }
+          const rows = upcomingData?.data?.data ?? upcomingData?.data ?? upcomingData?.deadlines ?? [];
+          setCriticalDeadlines(Array.isArray(rows) ? rows : []);
         }
       } catch (_error) {
         // silently fail
