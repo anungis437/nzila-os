@@ -32,7 +32,7 @@
     "@azure/ms-rest-js": "^2.7.0",
     "@azure/msal-node": "^3.8.4",
     "@azure/storage-blob": "^12.26.0",
-    "@clerk/backend": "^3.2.0",
+    "@clerk/backend": "^3.2.3",
     "@clerk/nextjs": "^7.0.4",
     "@google-cloud/vision": "^5.3.4",
     "@headlessui/react": "^2.2.9",
