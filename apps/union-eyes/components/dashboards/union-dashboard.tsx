@@ -392,7 +392,12 @@ export default function UnionDashboard({ isPlatformViewer = false }: UnionDashbo
           const upcomingData = await upcomingResponse.json();
           // crudRoutes + withApi: { success, data: { data: rows, pagination }, timestamp }
           const rows = upcomingData?.data?.data ?? upcomingData?.data ?? upcomingData?.deadlines ?? [];
-          setCriticalDeadlines(Array.isArray(rows) ? rows : []);
+          const mapped = (Array.isArray(rows) ? rows : []).map((r: Record<string, unknown>) => ({
+            ...r,
+            currentDeadline: r.currentDeadline ?? r.dueDate ?? r.due_date ?? '',
+            claimNumber: r.claimNumber ?? r.claimId ?? r.claim_id,
+          }));
+          setCriticalDeadlines(mapped as CriticalDeadline[]);
         }
       } catch (_error) {
         // silently fail

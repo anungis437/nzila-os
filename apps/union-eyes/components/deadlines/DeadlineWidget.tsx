@@ -9,7 +9,7 @@
 
 import React from 'react';
 import { useTranslations } from 'next-intl';
-import { format } from 'date-fns';
+import { format, isValid } from 'date-fns';
 import { 
   ClockIcon, 
   ExclamationTriangleIcon, 
@@ -225,7 +225,7 @@ export function DeadlineWidget({
                   <div className="flex items-center gap-4 mt-2 text-xs text-gray-500">
                     <span className="flex items-center gap-1">
                       <ClockIcon className="h-3.5 w-3.5" />
-                      {format(new Date(deadline.currentDeadline), 'MMM dd')}
+                      {(() => { const d = new Date(deadline.currentDeadline); return isValid(d) ? format(d, 'MMM dd') : '—'; })()}
                     </span>
                     {deadline.priority && (
                       <span
