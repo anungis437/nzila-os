@@ -52,10 +52,16 @@ export default function DeadlinesPage() {
     try {
       setLoading(true);
       setError(null);
-      const response = await fetch('/api/deadlines');
+      const response = await fetch('/api/deadlines?limit=100');
       if (!response.ok) throw new Error('Failed to fetch deadlines');
-      const data = await response.json();
-      setDeadlines(data.deadlines || []);
+      const json = await response.json();
+      // withApi wraps in { success, data: { data: rows, pagination } }
+      const rawRows = json?.data?.data ?? json?.data ?? [];
+      const rows = (Array.isArray(rawRows) ? rawRows : []).map((row: Record<string, unknown>) => ({
+        ...row,
+        currentDeadline: row.dueDate ?? row.currentDeadline,
+      }));
+      setDeadlines(rows);
     } catch (err) {
       setError(err instanceof Error ? err.message : t("failedToLoad"));
     } finally {

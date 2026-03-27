@@ -112,7 +112,7 @@ export function AIChatbot() {
 }
   };
   
-  const createNewSession = async () => {
+  const createNewSession = async (): Promise<ChatSession | null> => {
     try {
       const response = await fetch("/api/chatbot/sessions", {
         method: "POST",
@@ -130,13 +130,16 @@ export function AIChatbot() {
         setCurrentSession(created);
         setMessages([]);
         setShowSuggestions(true);
+        return created;
       }
+      return null;
     } catch (_error) {
       toast({
         title: "Error",
         description: "Failed to create new chat session",
         variant: "destructive",
       });
+      return null;
     }
   };
   
@@ -146,10 +149,10 @@ export function AIChatbot() {
     if (!messageContent || isLoading) return;
     
     // Create session if none exists
-    if (!currentSession) {
-      await createNewSession();
-      // Wait a bit for session creation
-      await new Promise((resolve) => setTimeout(resolve, 500));
+    let activeSession = currentSession;
+    if (!activeSession) {
+      activeSession = await createNewSession();
+      if (!activeSession) return; // session creation failed
     }
     
     setInputValue("");
@@ -170,7 +173,7 @@ export function AIChatbot() {
         method: "POST",
         headers: { "Content-Type": "application/json" },
         body: JSON.stringify({
-          sessionId: currentSession?.id,
+          sessionId: activeSession.id,
           content: messageContent,
           useRAG: true,
         }),

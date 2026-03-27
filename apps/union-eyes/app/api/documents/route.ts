@@ -13,7 +13,7 @@ import {
   searchDocuments,
   getDocumentStatistics 
 } from "@/lib/services/document-service";
-import { withRoleAuth } from '@/lib/api-auth-guard';
+import { withRoleAuth, getCurrentUser } from '@/lib/api-auth-guard';
 import {
   ErrorCode,
   standardErrorResponse,
@@ -58,8 +58,10 @@ const createDocumentSchema = z.object({
  * - statistics: boolean - returns statistics instead of list
  * - search: boolean - uses advanced search
  */
-export const GET = withRoleAuth('member', async (request, context) => {
-  const { userId, organizationId } = context as { userId: string; organizationId: string };
+export const GET = withRoleAuth('member', async (request, _context) => {
+  const user = await getCurrentUser();
+  const userId = user?.id ?? '';
+  const organizationId = user?.organizationId ?? '';
 
   try {
     const { searchParams } = new URL(request.url);
@@ -228,8 +230,10 @@ return NextResponse.json(
  * - accessLevel: string
  * - metadata: object
  */
-export const POST = withRoleAuth('member', async (request, context) => {
-  const { userId, organizationId } = context as { userId: string; organizationId: string };
+export const POST = withRoleAuth('member', async (request, _context) => {
+  const postUser = await getCurrentUser();
+  const userId = postUser?.id ?? '';
+  const organizationId = postUser?.organizationId ?? '';
 
   let rawBody: unknown;
   try {

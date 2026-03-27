@@ -33,7 +33,9 @@
     "goodAfternoon": "Good afternoon",
     "goodEvening": "Good evening",
     "member": "Member",
-    "go": "Go"
+    "go": "Go",
+    "new": "New",
+    "viewAll": "View All"
   },
   "navigation": {
     "home": "Home",
@@ -2244,7 +2246,8 @@
     "remittanceTracking": "Remittance Tracking",
     "platformAdminView": "Platform Admin View",
     "viewingAsAdmin": "You are viewing {orgName} as a platform administrator. This is an oversight view, not a membership view.",
-    "aiAssistant": "AI Assistant"
+    "aiAssistant": "AI Assistant",
+    "deadlines": "Deadlines"
   },
   "marketing": {
     "nav": {

@@ -41,6 +41,7 @@ import {
   Activity,
   ChevronDown,
   Globe,
+  Clock,
 } from "lucide-react";
 import Link from "next/link";
 import { usePathname } from "next/navigation";
@@ -213,7 +214,6 @@ export default function Sidebar({ profile: _profile, userEmail, whopMonthlyPlanI
         { href: `/${locale}/dashboard/pension`, icon: <Briefcase size={16} />, label: t('sidebar.pensionBenefits'), roles: unionAll },
         { href: `/${locale}/dashboard/dues`, icon: <DollarSign size={16} />, label: t('sidebar.duesPayments'), roles: unionAll },
         { href: `/${locale}/dashboard/messages`, icon: <Mail size={16} />, label: t('sidebar.messages'), roles: unionAll },
-        { href: `/${locale}/dashboard/notifications`, icon: <Bell size={16} />, label: t('sidebar.notifications'), roles: unionAll },
       ],
     },
     {
@@ -232,11 +232,12 @@ export default function Sidebar({ profile: _profile, userEmail, whopMonthlyPlanI
       roles: [...repsAndAbove, mgmt],
       items: [
         { href: `/${locale}/dashboard/workbench`, icon: <FileBarChart size={16} />, label: t('claims.caseQueue'), roles: [...repsAndAbove, mgmt] },
-        { href: `/${locale}/dashboard/health-safety`, icon: <Shield size={16} />, label: t('sidebar.healthSafety'), roles: [...repsAndAbove, "health_safety_rep", mgmt] },
+        { href: `/${locale}/dashboard/deadlines`, icon: <Clock size={16} />, label: t('sidebar.deadlines'), roles: [...repsAndAbove, mgmt] },
         { href: `/${locale}/dashboard/members`, icon: <Users size={16} />, label: t('members.directory'), roles: [...repsAndAbove, mgmt] },
         { href: `/${locale}/dashboard/clause-library`, icon: <Library size={16} />, label: t('sidebar.clauseLibrary'), roles: [...repsAndAbove, mgmt] },
-        { href: `/${locale}/dashboard/analytics`, icon: <BarChart3 size={16} />, label: t('sidebar.insights'), roles: [...repsAndAbove, mgmt] },
         { href: `/${locale}/dashboard/precedents`, icon: <Scale size={16} />, label: t('sidebar.precedents'), roles: [...repsAndAbove, mgmt] },
+        { href: `/${locale}/dashboard/health-safety`, icon: <Shield size={16} />, label: t('sidebar.healthSafety'), roles: [...repsAndAbove, "health_safety_rep", mgmt] },
+        { href: `/${locale}/dashboard/analytics`, icon: <BarChart3 size={16} />, label: t('sidebar.insights'), roles: [...repsAndAbove, mgmt] },
         { href: `/${locale}/dashboard/stewards`, icon: <Users size={16} />, label: t('sidebar.stewardManagement'), roles: ["chief_steward", "officer", "president", "vice_president", "national_officer", "admin", mgmt] },
         { href: `/${locale}/dashboard/cross-union-analytics`, icon: <GitCompare size={16} />, label: t('sidebar.crossUnionAnalytics'), roles: ["officer", "president", "vice_president", "secretary_treasurer", "national_officer", "admin", mgmt] },
       ],

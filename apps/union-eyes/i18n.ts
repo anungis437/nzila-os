@@ -18,7 +18,24 @@ function mergeMessages(
   base: Record<string, unknown>,
   localeSpecific: Record<string, unknown>
 ): Record<string, unknown> {
-  return { ...base, ...localeSpecific };
+  const merged: Record<string, unknown> = { ...base };
+  for (const key of Object.keys(localeSpecific)) {
+    const baseVal = base[key];
+    const overrideVal = localeSpecific[key];
+    if (
+      baseVal && overrideVal &&
+      typeof baseVal === 'object' && !Array.isArray(baseVal) &&
+      typeof overrideVal === 'object' && !Array.isArray(overrideVal)
+    ) {
+      merged[key] = mergeMessages(
+        baseVal as Record<string, unknown>,
+        overrideVal as Record<string, unknown>
+      );
+    } else {
+      merged[key] = overrideVal;
+    }
+  }
+  return merged;
 }
 
 export default getRequestConfig(async ({ requestLocale }) => {

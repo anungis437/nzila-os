@@ -33,7 +33,9 @@
     "goodAfternoon": "Bon après-midi",
     "goodEvening": "Bonsoir",
     "member": "Membre",
-    "go": "Aller"
+    "go": "Aller",
+    "new": "Nouveau",
+    "viewAll": "Voir tout"
   },
   "navigation": {
     "home": "Accueil",
@@ -2246,7 +2248,8 @@
     "remittanceTracking": "Suivi des remises",
     "platformAdminView": "Vue d'administration de la plateforme",
     "aiAssistant": "Assistant IA",
-    "viewingAsAdmin": "Vous consultez {orgName} en tant qu'administrateur de la plateforme. Ceci est une vue de supervision, pas une vue de membre."
+    "viewingAsAdmin": "Vous consultez {orgName} en tant qu'administrateur de la plateforme. Ceci est une vue de supervision, pas une vue de membre.",
+    "deadlines": "Échéances"
   },
   "marketing": {
     "nav": {
