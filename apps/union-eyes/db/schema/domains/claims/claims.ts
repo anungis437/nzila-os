@@ -52,23 +52,26 @@ export const visibilityScopeEnum = pgEnum("visibility_scope", [
 ]);
 
 // Claims table
+// NOTE: Django BaseModel is the canonical source. Drizzle mirrors it.
+// PK = id (Django BaseModel auto-PK), claim_id is UNIQUE.
 export const claims = pgTable("claims", {
-  claimId: uuid("claim_id").primaryKey().defaultRandom(),
-  claimNumber: varchar("claim_number", { length: 50 }).notNull().unique(),
-  organizationId: uuid("organization_id").notNull(),
-  memberId: varchar("member_id", { length: 255 }).notNull(),
+  id: uuid("id").primaryKey().defaultRandom(),
+  claimId: uuid("claim_id").notNull().unique().defaultRandom(),
+  claimNumber: varchar("claim_number", { length: 50 }).unique(),
+  organizationId: uuid("organization_id"),
+  memberId: varchar("member_id", { length: 255 }),
   isAnonymous: boolean("is_anonymous").default(true),
   
   // Claim details
-  claimType: claimTypeEnum("claim_type").notNull(),
+  claimType: claimTypeEnum("claim_type"),
   status: claimStatusEnum("status").notNull().default("submitted"),
   priority: claimPriorityEnum("priority").notNull().default("medium"),
   
   // Incident information
-  incidentDate: timestamp("incident_date", { withTimezone: true }).notNull(),
-  location: text("location").notNull(),
-  description: text("description").notNull(),
-  desiredOutcome: text("desired_outcome").notNull(),
+  incidentDate: timestamp("incident_date", { withTimezone: true }),
+  location: text("location"),
+  description: text("description"),
+  desiredOutcome: text("desired_outcome"),
   
   // Witness and reporting information
   witnessesPresent: boolean("witnesses_present").default(false),

@@ -173,21 +173,66 @@ class ClaimUpdates(BaseModel):
         verbose_name = 'ClaimUpdates'
 
 class DeadlineRules(BaseModel):
-    """Migrated from drizzle: deadlines-schema.ts"""
+    """Canonical model for deadline_rules table.
+    Defines grievance-processing deadline templates per org."""
     organization_id = models.UUIDField(null=True, blank=True)
+    rule_name = models.CharField(max_length=255, null=True, blank=True)
+    rule_code = models.CharField(max_length=100, null=True, blank=True)
+    description = models.TextField(null=True, blank=True)
+    claim_type = models.CharField(max_length=100, null=True, blank=True)
+    priority_level = models.CharField(max_length=50, null=True, blank=True)
+    step_number = models.IntegerField(null=True, blank=True)
+    days_from_event = models.IntegerField(null=True, blank=True)
+    event_type = models.CharField(max_length=100, default='', blank=True)
+    business_days_only = models.BooleanField(default=False)
+    allows_extension = models.BooleanField(default=False)
+    max_extension_days = models.IntegerField(default=0)
+    requires_approval = models.BooleanField(default=False)
+    escalate_to_role = models.CharField(max_length=255, null=True, blank=True)
+    escalation_delay_days = models.IntegerField(default=0)
+    is_active = models.BooleanField(default=False)
+    is_system_rule = models.BooleanField(default=False)
+    created_by = models.TextField(null=True, blank=True)
 
     class Meta:
         db_table = 'deadline_rules'
         verbose_name = 'DeadlineRules'
 
 class ClaimDeadlines(BaseModel):
-    """Migrated from drizzle: deadlines-schema.ts"""
+    """Canonical model for claim_deadlines table.
+    Tracks individual deadline instances linked to claims."""
     claim_id = models.UUIDField()
     organization_id = models.UUIDField(null=True, blank=True)
+    deadline_rule_id = models.UUIDField(null=True, blank=True)
+    deadline_name = models.CharField(max_length=255, null=True, blank=True)
+    deadline_type = models.CharField(max_length=100, null=True, blank=True)
+    event_date = models.DateTimeField(null=True, blank=True)
+    original_deadline = models.DateTimeField(null=True, blank=True)
+    due_date = models.DateTimeField(null=True, blank=True)
+    completed_at = models.DateTimeField(null=True, blank=True)
+    status = models.CharField(max_length=20, default='pending')
+    priority = models.CharField(max_length=20, default='medium')
+    extension_count = models.IntegerField(default=0)
+    total_extension_days = models.IntegerField(default=0)
+    last_extension_date = models.DateTimeField(null=True, blank=True)
+    last_extension_reason = models.TextField(null=True, blank=True)
+    completed_by = models.CharField(max_length=255, null=True, blank=True)
+    completion_notes = models.TextField(null=True, blank=True)
+    is_overdue = models.BooleanField(default=False)
+    days_until_due = models.IntegerField(null=True, blank=True)
+    days_overdue = models.IntegerField(default=0)
+    escalated_at = models.DateTimeField(null=True, blank=True)
+    escalated_to = models.CharField(max_length=255, null=True, blank=True)
+    alert_count = models.IntegerField(default=0)
+    last_alert_sent = models.DateTimeField(null=True, blank=True)
 
     class Meta:
         db_table = 'claim_deadlines'
         verbose_name = 'ClaimDeadlines'
+        indexes = [
+            models.Index(fields=['organization_id'], name='idx_claim_deadlines_org'),
+            models.Index(fields=['status'], name='idx_claim_deadlines_status'),
+        ]
 
 class DeadlineExtensions(BaseModel):
     """Migrated from drizzle: deadlines-schema.ts"""

@@ -2,7 +2,19 @@
 
 ## Overview
 
-UnionEyes uses a **Drizzle-first** database architecture with PostgreSQL/Azure SQL backend.
+UnionEyes uses a **dual-ORM** database architecture:
+
+| Layer | ORM | Role |
+|-------|-----|------|
+| **Django** (Python backend) | Django ORM | **Canonical source of truth** for `public` schema tables. All tables inherit `BaseModel` which provides `id` UUID PK, `created_at`, `updated_at`. |
+| **Drizzle** (Next.js frontend) | Drizzle ORM | **Read-only mirror** of Django schemas for type-safe queries. Also manages the `ue_cache` namespace for frontend-only tables. |
+
+> **Rule:** When adding/modifying a table that exists in both ORMs, update Django first,
+> then mirror the change in the Drizzle schema. Run `pnpm tsx tooling/db/dual-orm-parity-check.ts`
+> to verify alignment. The CI canonical-schema check (`tooling/db/canonical-schema/verify.ts`) also gates PRs.
+
+> **PK Convention:** Every table MUST use `id` (UUID) as its primary key. Other natural keys
+> (e.g. `claim_id`, `member_id`) should be `.unique()` but NOT `.primaryKey()`.
 
 > **Legacy note – "tenant" in DB artefacts**
 > Migration snapshots and some column names (e.g. `tenant_id`, `tenantId`) still use

@@ -43,15 +43,15 @@ function verify(): void {
 
     const content = readFileSync(sourcePath, 'utf-8')
 
-    // Verify pgTable definition references this table name
-    if (!content.includes(`'${tableName}'`)) {
+    // Verify pgTable definition references this table name (single or double quotes)
+    if (!content.includes(`'${tableName}'`) && !content.includes(`"${tableName}"`)) {
       errors.push(`Table "${tableName}": pgTable('${tableName}', …) not found in ${def.source}`)
       continue
     }
 
-    // Verify each required column is present (Drizzle uses 'column_name' in the definition)
+    // Verify each required column is present (Drizzle uses 'column_name' or "column_name")
     for (const col of def.requiredColumns) {
-      if (!content.includes(`'${col}'`)) {
+      if (!content.includes(`'${col}'`) && !content.includes(`"${col}"`)) {
         errors.push(`Table "${tableName}": required column '${col}' not found in ${def.source}`)
       }
     }

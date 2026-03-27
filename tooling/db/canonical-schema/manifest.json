@@ -55,6 +55,28 @@
         "id", "org_id", "payment_id", "invoice_id", "amount",
         "reason", "status", "created_at"
       ]
+    },
+    "claims": {
+      "source": "apps/union-eyes/db/schema/domains/claims/claims.ts",
+      "requiredColumns": [
+        "id", "claim_id", "claim_number", "organization_id", "member_id",
+        "claim_type", "status", "priority", "incident_date", "location",
+        "description", "desired_outcome", "created_at", "updated_at"
+      ]
+    },
+    "claim_deadlines": {
+      "source": "apps/union-eyes/db/schema/domains/claims/deadlines.ts",
+      "requiredColumns": [
+        "id", "claim_id", "deadline_name", "deadline_type",
+        "due_date", "status", "created_at", "updated_at"
+      ]
+    },
+    "deadline_rules": {
+      "source": "apps/union-eyes/db/schema/domains/claims/deadlines.ts",
+      "requiredColumns": [
+        "id", "rule_name", "rule_code", "claim_type",
+        "days_from_event", "is_active", "created_at", "updated_at"
+      ]
     }
   }
 }
