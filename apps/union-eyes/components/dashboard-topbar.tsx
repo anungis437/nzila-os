@@ -174,22 +174,24 @@ setNotificationCount(0);
           )}
 
           {/* Notifications */}
-          <Button
-            variant="ghost"
-            size="sm"
-            className="relative"
-          >
-            <Bell className="w-5 h-5" />
-            {notificationCount > 0 && (
-              <motion.span
-                initial={{ scale: 0 }}
-                animate={{ scale: 1 }}
-                className="absolute -top-1 -right-1 bg-red-500 text-white text-xs rounded-full w-5 h-5 flex items-center justify-center font-semibold"
-              >
-                {notificationCount}
-              </motion.span>
-            )}
-          </Button>
+          <Link href={`/${locale}/dashboard/notifications`}>
+            <Button
+              variant="ghost"
+              size="sm"
+              className="relative"
+            >
+              <Bell className="w-5 h-5" />
+              {notificationCount > 0 && (
+                <motion.span
+                  initial={{ scale: 0 }}
+                  animate={{ scale: 1 }}
+                  className="absolute -top-1 -right-1 bg-red-500 text-white text-xs rounded-full w-5 h-5 flex items-center justify-center font-semibold"
+                >
+                  {notificationCount}
+                </motion.span>
+              )}
+            </Button>
+          </Link>
 
           {/* User Menu */}
           <div className="flex items-center space-x-3">
