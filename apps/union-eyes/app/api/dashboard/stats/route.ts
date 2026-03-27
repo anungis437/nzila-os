@@ -4,19 +4,21 @@
  * for the current organization.
  */
 import { NextResponse } from 'next/server';
-import { withApiAuth } from '@/lib/api-auth-guard';
+import { withApi } from '@/lib/api/framework';
 import { db } from '@/db/db';
 import { sql } from 'drizzle-orm';
 
 export const dynamic = 'force-dynamic';
 
-export const GET = withApiAuth(async (request) => {
-  const url = new URL(request.url);
-  const organizationId =
-    url.searchParams.get('organizationId') ??
-    url.searchParams.get('orgId') ??
-    url.searchParams.get('organization_id');
-
+export const GET = withApi(
+  {
+    auth: { required: true, minRole: 'member' },
+    openapi: {
+      tags: ['Dashboard'],
+      summary: 'Dashboard statistics for the current organization',
+    },
+  },
+  async ({ organizationId }) => {
   if (!organizationId) {
     return NextResponse.json(
       { error: 'Organization ID required' },

@@ -3,18 +3,23 @@
  * Dashboard summary with counts and metrics
  */
 
-import { NextRequest, NextResponse } from 'next/server';
+import { NextResponse } from 'next/server';
 import { getDashboardSummary } from '@/lib/deadline-service';
-import { withApiAuth } from '@/lib/api-auth-guard';
+import { withApi } from '@/lib/api/framework';
 
 import {
   ErrorCode,
   standardErrorResponse,
 } from '@/lib/api/standardized-responses';
-export const GET = withApiAuth(async (request: NextRequest) => {
-  const { searchParams } = new URL(request.url);
-  const organizationId = searchParams.get('organizationId') ?? searchParams.get('orgId') ?? searchParams.get('organization_id') ?? searchParams.get('org_id');
-  
+export const GET = withApi(
+  {
+    auth: { required: true, minRole: 'member' },
+    openapi: {
+      tags: ['Deadlines'],
+      summary: 'Deadline dashboard summary for the current organization',
+    },
+  },
+  async ({ organizationId }) => {
   if (!organizationId) {
     return standardErrorResponse(
       ErrorCode.MISSING_REQUIRED_FIELD,
