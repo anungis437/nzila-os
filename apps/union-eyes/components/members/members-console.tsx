@@ -9,8 +9,9 @@ import React from 'react';
 import { useState } from "react";
 import useSWR from "swr";
 import { motion, AnimatePresence } from "framer-motion";
-import { useTranslations } from 'next-intl';
+import { useTranslations, useLocale } from 'next-intl';
 import { useUser } from "@clerk/nextjs";
+import { useRouter } from "next/navigation";
 import { useOrganizationId } from "@/lib/hooks/use-organization";
 import {
   Users,
@@ -36,6 +37,14 @@ import {
 } from "lucide-react";
  
 import { Card, CardContent } from "@/components/ui/card";
+import {
+  DropdownMenu,
+  DropdownMenuContent,
+  DropdownMenuItem,
+  DropdownMenuLabel,
+  DropdownMenuSeparator,
+  DropdownMenuTrigger,
+} from "@/components/ui/dropdown-menu";
 
 type MemberRole = "member" | "steward" | "officer" | "admin" | "super_admin";
 type MemberStatus = "active" | "inactive" | "on-leave";
@@ -65,6 +74,8 @@ export default function MembersConsole() {
   const t = useTranslations();
   const { user } = useUser();
   const organizationId = useOrganizationId();
+  const router = useRouter();
+  const locale = useLocale();
   
   // Role configuration with translated labels
   const roleConfig: Record<MemberRole, { label: string; color: string; icon: React.ReactElement }> = {
@@ -592,28 +603,64 @@ export default function MembersConsole() {
 
                               {/* Action Buttons */}
                               <div className="flex flex-wrap gap-3">
-                                <button className="flex items-center gap-2 px-6 py-3 bg-blue-600 text-white rounded-lg hover:bg-blue-700 transition-colors">
+                                <a
+                                  href={`mailto:${member.email}`}
+                                  className="flex items-center gap-2 px-6 py-3 bg-blue-600 text-white rounded-lg hover:bg-blue-700 transition-colors"
+                                >
                                   <Mail className="w-5 h-5" />
                                   Send Email
-                                </button>
-                                <button className="flex items-center gap-2 px-6 py-3 bg-green-600 text-white rounded-lg hover:bg-green-700 transition-colors">
+                                </a>
+                                <a
+                                  href={`tel:${member.phone}`}
+                                  className="flex items-center gap-2 px-6 py-3 bg-green-600 text-white rounded-lg hover:bg-green-700 transition-colors"
+                                >
                                   <Phone className="w-5 h-5" />
                                   Call Member
-                                </button>
-                                <button className="flex items-center gap-2 px-6 py-3 bg-purple-600 text-white rounded-lg hover:bg-purple-700 transition-colors">
+                                </a>
+                                <a
+                                  href={`mailto:${member.email}?subject=${encodeURIComponent(`Message for ${member.name}`)}`}
+                                  className="flex items-center gap-2 px-6 py-3 bg-purple-600 text-white rounded-lg hover:bg-purple-700 transition-colors"
+                                >
                                   <MessageSquare className="w-5 h-5" />
                                   Send Message
-                                </button>
+                                </a>
                                 {member.activeCases > 0 && (
-                                  <button className="flex items-center gap-2 px-6 py-3 bg-orange-600 text-white rounded-lg hover:bg-orange-700 transition-colors">
+                                  <button
+                                    onClick={() => router.push(`/${locale}/dashboard/members/${member.id}`)}
+                                    className="flex items-center gap-2 px-6 py-3 bg-orange-600 text-white rounded-lg hover:bg-orange-700 transition-colors"
+                                  >
                                     <FileText className="w-5 h-5" />
                                     View Cases
                                   </button>
                                 )}
-                                <button className="flex items-center gap-2 px-6 py-3 bg-gray-100 text-gray-700 rounded-lg hover:bg-gray-200 transition-colors">
-                                  <MoreVertical className="w-5 h-5" />
-                                  More Options
-                                </button>
+                                <DropdownMenu>
+                                  <DropdownMenuTrigger asChild>
+                                    <button className="flex items-center gap-2 px-6 py-3 bg-gray-100 text-gray-700 rounded-lg hover:bg-gray-200 transition-colors">
+                                      <MoreVertical className="w-5 h-5" />
+                                      More Options
+                                    </button>
+                                  </DropdownMenuTrigger>
+                                  <DropdownMenuContent align="end">
+                                    <DropdownMenuLabel>Actions</DropdownMenuLabel>
+                                    <DropdownMenuItem onClick={() => router.push(`/${locale}/dashboard/members/${member.id}`)}>
+                                      <Users className="w-4 h-4 mr-2" />
+                                      View Profile
+                                    </DropdownMenuItem>
+                                    <DropdownMenuItem onClick={() => router.push(`/${locale}/members/${member.id}/edit`)}>
+                                      <Briefcase className="w-4 h-4 mr-2" />
+                                      Edit Member
+                                    </DropdownMenuItem>
+                                    <DropdownMenuSeparator />
+                                    <DropdownMenuItem onClick={() => window.open(`mailto:${member.email}`, '_self')}>
+                                      <Mail className="w-4 h-4 mr-2" />
+                                      Send Email
+                                    </DropdownMenuItem>
+                                    <DropdownMenuItem onClick={() => window.open(`tel:${member.phone}`, '_self')}>
+                                      <Phone className="w-4 h-4 mr-2" />
+                                      Call
+                                    </DropdownMenuItem>
+                                  </DropdownMenuContent>
+                                </DropdownMenu>
                               </div>
                             </motion.div>
                           )}
