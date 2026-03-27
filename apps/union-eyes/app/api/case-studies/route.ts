@@ -38,7 +38,7 @@ export const GET = withApi(
 
     const conditions: SQL[] = [];
     if (status) {
-      const statusCol = (caseStudies as Record<string, unknown>)['status'];
+      const statusCol = (caseStudies as unknown as Record<string, unknown>)['status'];
       if (statusCol) conditions.push(eq(statusCol as never, status as never));
     }
 
@@ -49,7 +49,7 @@ export const GET = withApi(
 
     const [rows, totalResult] = await Promise.all([
       (whereClause ? baseQuery.where(whereClause) : baseQuery)
-        .orderBy(desc((caseStudies as Record<string, unknown>)['createdAt'] as never))
+        .orderBy(desc((caseStudies as unknown as Record<string, unknown>)['createdAt'] as never))
         .limit(limit)
         .offset(offset),
       whereClause ? countQuery.where(whereClause) : countQuery,
