@@ -171,7 +171,7 @@
   },
   "devDependencies": {
     "@asteasolutions/zod-to-openapi": "^8.4.0",
-    "@next/bundle-analyzer": "^16.1.6",
+    "@next/bundle-analyzer": "^16.2.1",
     "@nzila/config": "workspace:*",
     "@nzila/evidence": "workspace:*",
     "@opentelemetry/api": "^1.9.0",
