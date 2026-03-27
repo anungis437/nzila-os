@@ -177,6 +177,13 @@ jobs:
           BUILD_ARGS="${BUILD_ARGS} --build-arg NEXT_PUBLIC_ABR_URL=https://nzila-os-abr.${DOMAIN}"
           BUILD_ARGS="${BUILD_ARGS} --build-arg NEXT_PUBLIC_CFO_URL=https://nzila-os-cfo.${DOMAIN}"
 
+          # Clerk satellite configuration for union-eyes (baked into client bundle)
+          if [ "$APP" = "union-eyes" ]; then
+            BUILD_ARGS="${BUILD_ARGS} --build-arg NEXT_PUBLIC_CLERK_IS_SATELLITE=true"
+            BUILD_ARGS="${BUILD_ARGS} --build-arg NEXT_PUBLIC_CLERK_DOMAIN=nzila-os-union-eyes.${DOMAIN}"
+            BUILD_ARGS="${BUILD_ARGS} --build-arg NEXT_PUBLIC_CLERK_SIGN_IN_URL=https://nzila-os-web.${DOMAIN}/sign-in"
+          fi
+
           docker build \
             --target "$APP" \
             --tag "$IMAGE" \
