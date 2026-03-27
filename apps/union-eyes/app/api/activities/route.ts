@@ -26,10 +26,11 @@ export const GET = withApi(
     const offset = (page - 1) * limit;
 
     return withSystemContext(async () => {
+      // Table lives in audit_security schema; PK is audit_id, metadata holds details
       const rows = await db.execute(sql`
-        SELECT id, user_id, organization_id, action,
-               resource_type, details, created_at
-        FROM audit_logs
+        SELECT audit_id AS id, user_id, organization_id, action,
+               resource_type, metadata AS details, created_at
+        FROM audit_security.audit_logs
         WHERE organization_id = ${organizationId}
         ORDER BY created_at DESC
         LIMIT ${limit} OFFSET ${offset}
@@ -37,7 +38,7 @@ export const GET = withApi(
 
       const countResult = await db.execute(sql`
         SELECT count(*)::int AS total
-        FROM audit_logs
+        FROM audit_security.audit_logs
         WHERE organization_id = ${organizationId}
       `);
 

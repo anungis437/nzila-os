@@ -350,7 +350,9 @@ export default function UnionDashboard({ isPlatformViewer = false }: UnionDashbo
         });
         if (response.ok) {
           const data = await response.json();
-          setActivities(data.activities || []);
+          // withApi wraps result as { success, data: rows, timestamp }
+          const rows = data?.data ?? data?.activities ?? [];
+          setActivities(Array.isArray(rows) ? rows : []);
         }
       } catch (_error) {
         // silently fail
