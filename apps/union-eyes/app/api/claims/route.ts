@@ -70,7 +70,7 @@ export const POST = withApi(
         claimNumber,
         organizationId,
         memberId: userId,
-      };
+      } as typeof claims.$inferInsert;
 
       const [row] = await db.insert(claims).values(values).returning();
       return { data: row };
