@@ -128,6 +128,7 @@
     "overrides": {
       "tar": ">=7.5.11",
       "minimatch": ">=10.2.3",
+      "node-forge": ">=1.4.0",
       "cjs-module-lexer": ">=2.2.0",
       "jspdf": ">=4.2.1",
       "@firebase/util": ">=1.10.3",
