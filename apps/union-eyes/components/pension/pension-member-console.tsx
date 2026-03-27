@@ -2,7 +2,7 @@
 
 import { useState, useEffect, useCallback } from 'react';
 import { useOrganizationId } from '@/lib/hooks/use-organization';
-import { Briefcase, TrendingUp, Calendar, DollarSign, FileText, AlertCircle, CheckCircle, Clock } from 'lucide-react';
+import { Briefcase, TrendingUp, Calendar, DollarSign, FileText, AlertCircle, CheckCircle, Clock, Download } from 'lucide-react';
 import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card';
 import { Badge } from '@/components/ui/badge';
 import { Button } from '@/components/ui/button';
@@ -34,12 +34,31 @@ interface BenefitEstimate {
   vestingPercentage: number;
 }
 
+interface PensionDocument {
+  id: string;
+  name: string;
+  category: string | null;
+  fileType: string;
+  createdAt: string;
+}
+
+interface T4aRecord {
+  id: string;
+  memberName: string;
+  taxYear: number;
+  pensionIncome: string;
+  status: string;
+  generatedDate: string | null;
+}
+
 export default function PensionMemberConsole() {
   const organizationId = useOrganizationId();
   const [loading, setLoading] = useState(true);
   const [plan, setPlan] = useState<PensionPlan | null>(null);
   const [contributions, setContributions] = useState<Contribution[]>([]);
   const [benefitEstimate, setBenefitEstimate] = useState<BenefitEstimate | null>(null);
+  const [documents, setDocuments] = useState<PensionDocument[]>([]);
+  const [t4aRecords, setT4aRecords] = useState<T4aRecord[]>([]);
   const [error, setError] = useState<string | null>(null);
 
   const fetchPensionData = useCallback(async () => {
@@ -80,6 +99,24 @@ export default function PensionMemberConsole() {
         const contribData = await contribRes.json();
         if (contribData.data && contribData.data.length > 0) {
           setContributions(contribData.data);
+        }
+      }
+
+      // Fetch pension-related documents
+      const docsRes = await fetch(`/api/documents?organizationId=${encodeURIComponent(organizationId)}&category=pension&limit=20`);
+      if (docsRes.ok) {
+        const docsData = await docsRes.json();
+        if (docsData.data && docsData.data.length > 0) {
+          setDocuments(docsData.data);
+        }
+      }
+
+      // Fetch T4A tax records
+      const t4aRes = await fetch(`/api/pension/t4a?organizationId=${encodeURIComponent(organizationId)}`);
+      if (t4aRes.ok) {
+        const t4aData = await t4aRes.json();
+        if (t4aData.data && t4aData.data.length > 0) {
+          setT4aRecords(t4aData.data);
         }
       }
     } catch {
@@ -451,6 +488,40 @@ export default function PensionMemberConsole() {
         </TabsContent>
 
         <TabsContent value="documents" className="space-y-4">
+          {/* T4A Tax Records */}
+          <Card>
+            <CardHeader>
+              <CardTitle className="flex items-center gap-2">
+                <DollarSign className="w-5 h-5" />
+                T4A Tax Slips
+              </CardTitle>
+            </CardHeader>
+            <CardContent>
+              {t4aRecords.length === 0 ? (
+                <p className="text-sm text-muted-foreground text-center py-4">
+                  No T4A records available yet.
+                </p>
+              ) : (
+                <div className="space-y-2">
+                  {t4aRecords.map((record) => (
+                    <div key={record.id} className="flex justify-between items-center p-3 border rounded">
+                      <div>
+                        <p className="font-medium">T4A — {record.taxYear}</p>
+                        <p className="text-sm text-muted-foreground">
+                          {record.memberName} · Pension Income: ${parseFloat(record.pensionIncome).toLocaleString(undefined, { minimumFractionDigits: 2, maximumFractionDigits: 2 })}
+                        </p>
+                      </div>
+                      <Badge variant={record.status === 'filed' ? 'default' : 'secondary'}>
+                        {record.status}
+                      </Badge>
+                    </div>
+                  ))}
+                </div>
+              )}
+            </CardContent>
+          </Card>
+
+          {/* Pension Documents */}
           <Card>
             <CardHeader>
               <CardTitle className="flex items-center gap-2">
@@ -459,28 +530,35 @@ export default function PensionMemberConsole() {
               </CardTitle>
             </CardHeader>
             <CardContent>
-              <div className="space-y-2">
-                <Button variant="outline" className="w-full justify-start">
-                  <FileText className="w-4 h-4 mr-2" />
-                  Annual Pension Statement (2024)
-                </Button>
-                <Button variant="outline" className="w-full justify-start">
-                  <FileText className="w-4 h-4 mr-2" />
-                  Plan Member Handbook
-                </Button>
-                <Button variant="outline" className="w-full justify-start">
-                  <FileText className="w-4 h-4 mr-2" />
-                  Beneficiary Designation Form
-                </Button>
-                <Button variant="outline" className="w-full justify-start">
-                  <FileText className="w-4 h-4 mr-2" />
-                  Retirement Application Form
-                </Button>
-                <Button variant="outline" className="w-full justify-start">
-                  <FileText className="w-4 h-4 mr-2" />
-                  Tax Information (T4A Slips)
-                </Button>
-              </div>
+              {documents.length === 0 ? (
+                <div className="text-center py-8">
+                  <FileText className="w-12 h-12 mx-auto mb-4 text-muted-foreground" />
+                  <p className="text-muted-foreground">
+                    No pension documents available. Documents will appear here once uploaded by your plan administrator.
+                  </p>
+                </div>
+              ) : (
+                <div className="space-y-2">
+                  {documents.map((doc) => (
+                    <a
+                      key={doc.id}
+                      href={`/api/documents/${doc.id}/download`}
+                      className="flex justify-between items-center p-3 border rounded hover:bg-muted transition-colors"
+                    >
+                      <div className="flex items-center gap-3">
+                        <FileText className="w-4 h-4 text-muted-foreground shrink-0" />
+                        <div>
+                          <p className="font-medium">{doc.name}</p>
+                          <p className="text-sm text-muted-foreground">
+                            {doc.fileType.toUpperCase()} · {new Date(doc.createdAt).toLocaleDateString()}
+                          </p>
+                        </div>
+                      </div>
+                      <Download className="w-4 h-4 text-muted-foreground" />
+                    </a>
+                  ))}
+                </div>
+              )}
 
               <div className="mt-6 p-4 bg-muted rounded">
                 <p className="text-sm text-muted-foreground">
