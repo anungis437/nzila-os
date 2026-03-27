@@ -28,11 +28,11 @@ export const GET = withApiAuth(async (request) => {
     const [claimsResult, membersResult] = await Promise.all([
       db.execute(sql`
         SELECT
-          count(*) FILTER (WHERE status NOT IN ('resolved','closed','dismissed'))::int AS "activeClaims",
+          count(*) FILTER (WHERE status NOT IN ('resolved','closed','rejected'))::int AS "activeClaims",
           count(*) FILTER (WHERE status IN ('submitted','under_review'))::int          AS "pendingReviews",
           count(*) FILTER (WHERE status IN ('resolved','closed'))::int                 AS "resolvedCases",
           count(*) FILTER (WHERE priority IN ('high','critical')
-                           AND status NOT IN ('resolved','closed','dismissed'))::int   AS "highPriorityClaims"
+                           AND status NOT IN ('resolved','closed','rejected'))::int    AS "highPriorityClaims"
         FROM claims
         WHERE organization_id = ${organizationId}
       `),
