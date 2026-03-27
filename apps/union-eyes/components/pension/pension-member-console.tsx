@@ -62,13 +62,15 @@ export default function PensionMemberConsole() {
         return;
       }
 
-      const firstPlanId = plansData.data[0].id;
+      const firstPlan = plansData.data[0];
+      const firstPlanId = firstPlan.id;
 
       const planRes = await fetch(`/api/pension/members?planId=${encodeURIComponent(firstPlanId)}`);
       if (planRes.ok) {
         const planData = await planRes.json();
         if (planData.data && planData.data.length > 0) {
-          setPlan(planData.data[0]);
+          // Merge planType from the plans response into the member record
+          setPlan({ ...planData.data[0], planType: firstPlan.planType });
         }
       }
 
