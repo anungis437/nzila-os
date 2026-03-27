@@ -60,7 +60,7 @@ export default function DeadlinesPage() {
       const rows = (Array.isArray(rawRows) ? rawRows : []).map((row: Record<string, unknown>) => ({
         ...row,
         currentDeadline: row.dueDate ?? row.currentDeadline,
-      }));
+      })) as Deadline[];
       setDeadlines(rows);
     } catch (err) {
       setError(err instanceof Error ? err.message : t("failedToLoad"));

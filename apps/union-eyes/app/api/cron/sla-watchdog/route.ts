@@ -103,7 +103,7 @@ export async function POST(request: NextRequest) {
             assignedTo: c.assignedTo,
           },
         }, {
-          organizationId: c.organizationId,
+          organizationId: c.organizationId ?? undefined,
           source: 'sla-watchdog',
         })
       } else if (atRisk) {
@@ -123,7 +123,7 @@ export async function POST(request: NextRequest) {
             assignedTo: c.assignedTo,
           },
         }, {
-          organizationId: c.organizationId,
+          organizationId: c.organizationId ?? undefined,
           source: 'sla-watchdog',
         })
       }

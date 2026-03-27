@@ -61,6 +61,7 @@ const cacheWarmingJob: JobConfig = {
         .from(claims);
 
       for (const { organizationId } of orgs) {
+        if (!organizationId) continue;
         await warmAnalyticsCache(organizationId);
       }
 

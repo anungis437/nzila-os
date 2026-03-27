@@ -73,11 +73,11 @@ export async function getMemberVisibleTimeline(
 
   // Map to common timeline format
   const events: TimelineEvent[] = updates.map((update) => ({
-    id: update.updateId,
+    id: update.updateId!,
     type: 'update',
     timestamp: update.createdAt!,
-    message: update.message,
-    createdBy: update.createdBy,
+    message: update.message ?? '',
+    createdBy: update.createdBy ?? 'system',
     visibilityScope: update.visibilityScope as VisibilityScope,
     metadata: update.metadata,
   }));
@@ -136,11 +136,11 @@ export async function getLroVisibleTimeline(
   // Combine and format events
   const events: TimelineEvent[] = [
     ...updates.map((update) => ({
-      id: update.updateId,
+      id: update.updateId!,
       type: 'update' as const,
       timestamp: update.createdAt!,
-      message: update.message,
-      createdBy: update.createdBy,
+      message: update.message ?? '',
+      createdBy: update.createdBy ?? 'system',
       visibilityScope: update.visibilityScope as VisibilityScope,
       metadata: update.metadata,
     })),
@@ -149,7 +149,7 @@ export async function getLroVisibleTimeline(
       type: 'transition' as const,
       timestamp: transition.transitionedAt!,
       message: `Stage transition: ${transition.reason || 'Status changed'}`,
-      createdBy: transition.transitionedBy,
+      createdBy: transition.transitionedBy ?? 'system',
       visibilityScope: transition.visibilityScope as VisibilityScope,
       metadata: {
         fromStageId: transition.fromStageId,
@@ -222,7 +222,7 @@ export async function addCaseEvent(payload: {
     logger.error('Signal recomputation failed for case', { error, claimId: payload.claimId });
   }
 
-  return update.updateId;
+  return update.updateId!;
 }
 
 /**
@@ -289,14 +289,14 @@ async function recomputeSignalsForCase(claimId: string): Promise<void> {
   // Map to signal-compatible format
   const timeline = updates.map(u => ({
     timestamp: u.createdAt!,
-    type: mapUpdateTypeToTimelineType(u.updateType),
+    type: mapUpdateTypeToTimelineType(u.updateType!),
   }));
 
   // Fetch member name from organizationMembers table
   const memberResult = await db
     .select({ name: organizationMembers.name })
     .from(organizationMembers)
-    .where(eq(organizationMembers.userId, claimData.memberId))
+    .where(eq(organizationMembers.userId, claimData.memberId!))
     .limit(1);
   
   const memberName = memberResult[0]?.name || 'Member';
@@ -304,7 +304,7 @@ async function recomputeSignalsForCase(claimId: string): Promise<void> {
   const caseForSignals: CaseForSignals = {
     id: claimData.claimId,
     title: claimData.description || 'Untitled',
-    memberId: claimData.memberId,
+    memberId: claimData.memberId!,
     memberName,
     // eslint-disable-next-line @typescript-eslint/no-explicit-any
     currentState: claimData.status as any, // Map claim status to case state
@@ -345,8 +345,8 @@ async function recomputeSignalsForCase(claimId: string): Promise<void> {
           if (assignedOfficer?.email) {
             const notificationService = new NotificationService();
             await notificationService.send({
-              organizationId: claimData.organizationId,
-              recipientId: claimData.assignedTo,
+              organizationId: claimData.organizationId!,
+              recipientId: claimData.assignedTo!,
               recipientEmail: assignedOfficer.email,
               type: 'email',
               priority: 'urgent',

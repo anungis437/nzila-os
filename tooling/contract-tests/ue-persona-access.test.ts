@@ -202,7 +202,9 @@ const PAGE_ACCESS_MATRIX: PageRule[] = [
   { path: 'organizer/impact/page.tsx',                   minRole: 'member',               description: 'Organizer impact dashboard (client-side)' },
   { path: 'ai-assistant/page.tsx',                       minRole: 'member',               description: 'AI Assistant chatbot (client-side)' },
   { path: 'calendar/page.tsx',                           minRole: 'member',               description: 'Calendar & events (client-side)' },
+  { path: 'deadlines/page.tsx',                          minRole: 'member',               description: 'Deadline tracking (client-side)' },
   { path: 'insights/page.tsx',                           minRole: 'member',               description: 'AI insights (client-side)' },
+  { path: 'messages/page.tsx',                           minRole: 'member',               description: 'Messages inbox (client-side)' },
 
   // ── Health & safety (client-side pages) ────────────────────────────────
   { path: 'health-safety/page.tsx',                      minRole: 'member',               description: 'H&S dashboard overview (client-side)' },

@@ -64,7 +64,7 @@ export async function sendClaimStatusNotification(
     }
 
     // Get member details from Clerk
-    const member = await (await clerkClient()).users.getUser(claim.memberId);
+    const member = await (await clerkClient()).users.getUser(claim.memberId!);
 
     if (!member || !member.emailAddresses?.[0]?.emailAddress) {
       return { success: false, error: 'Member email not found' };
@@ -97,7 +97,7 @@ export async function sendClaimStatusNotification(
     const notificationData: ClaimNotificationData = {
       claimId: claim.claimId,
       claimTitle: `${claim.claimType} Claim`,
-      claimType: claim.claimType,
+      claimType: claim.claimType!,
       previousStatus,
       newStatus,
       notes,
@@ -107,7 +107,7 @@ export async function sendClaimStatusNotification(
       memberName,
       assignedStewardEmail,
       assignedStewardName,
-      organizationId: claim.organizationId,
+      organizationId: claim.organizationId!,
     };
 
     // Send notification
@@ -272,7 +272,7 @@ export async function sendOverdueClaimNotification(
       return { success: false, error: 'No overdue deadlines found' };
     }
 
-    const member = await (await clerkClient()).users.getUser(claim.memberId);
+    const member = await (await clerkClient()).users.getUser(claim.memberId!);
     const memberEmail = member?.emailAddresses?.[0]?.emailAddress;
     if (!memberEmail) {
       return { success: false, error: 'Member email not found' };

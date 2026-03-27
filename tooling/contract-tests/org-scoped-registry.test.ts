@@ -104,11 +104,11 @@ function introspectSchemaFiles(): TableInfo[] {
 
       const tableBody = content.slice(startIdx, endIdx + 1)
 
-      // Check if org_id column exists in this table definition
-      // Look for: orgId: uuid('org_id') pattern
+      // Check if org_id or entity_id column exists in this table definition
+      // Look for: orgId: uuid('org_id') or orgId: uuid('entity_id') pattern
       const hasEntityId =
-        /orgId:\s*uuid\s*\(\s*['"]org_id['"]\s*\)/.test(tableBody) ||
-        /['"]org_id['"]\s*\)/.test(tableBody)
+        /orgId:\s*uuid\s*\(\s*['"](?:org_id|entity_id)['"]\s*\)/.test(tableBody) ||
+        /['"](?:org_id|entity_id)['"]\s*\)/.test(tableBody)
 
       tables.push({ exportName, hasEntityId, sourceFile: file })
     }

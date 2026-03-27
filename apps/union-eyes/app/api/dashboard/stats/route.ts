@@ -5,8 +5,8 @@
  */
 import { NextResponse } from 'next/server';
 import { withApi } from '@/lib/api/framework';
-import { db } from '@/db/db';
 import { sql } from 'drizzle-orm';
+import { withRLSContext } from '@/lib/db/with-rls-context';
 
 export const dynamic = 'force-dynamic';
 
@@ -27,24 +27,27 @@ export const GET = withApi(
   }
 
   try {
-    const [claimsResult, membersResult] = await Promise.all([
-      db.execute(sql`
-        SELECT
-          count(*) FILTER (WHERE status NOT IN ('resolved','closed','rejected'))::int AS "activeClaims",
-          count(*) FILTER (WHERE status IN ('submitted','under_review'))::int          AS "pendingReviews",
-          count(*) FILTER (WHERE status IN ('resolved','closed'))::int                 AS "resolvedCases",
-          count(*) FILTER (WHERE priority IN ('high','critical')
-                           AND status NOT IN ('resolved','closed','rejected'))::int    AS "highPriorityClaims"
-        FROM claims
-        WHERE organization_id = ${organizationId}
-      `),
-      db.execute(sql`
-        SELECT count(*)::int AS "activeMembers"
-        FROM organization_members
-        WHERE organization_id = ${organizationId}
-          AND status = 'active'
-      `),
-    ]);
+    const [claimsResult, membersResult] = await withRLSContext(
+      { organizationId },
+      async (rlsDb) => Promise.all([
+        rlsDb.execute(sql`
+          SELECT
+            count(*) FILTER (WHERE status NOT IN ('resolved','closed','rejected'))::int AS "activeClaims",
+            count(*) FILTER (WHERE status IN ('submitted','under_review'))::int          AS "pendingReviews",
+            count(*) FILTER (WHERE status IN ('resolved','closed'))::int                 AS "resolvedCases",
+            count(*) FILTER (WHERE priority IN ('high','critical')
+                             AND status NOT IN ('resolved','closed','rejected'))::int    AS "highPriorityClaims"
+          FROM claims
+          WHERE organization_id = ${organizationId}
+        `),
+        rlsDb.execute(sql`
+          SELECT count(*)::int AS "activeMembers"
+          FROM organization_members
+          WHERE organization_id = ${organizationId}
+            AND status = 'active'
+        `),
+      ])
+    );
 
     const claims = (claimsResult[0] as Record<string, number>) ?? {};
     const members = (membersResult[0] as Record<string, number>) ?? {};

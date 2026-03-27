@@ -416,7 +416,7 @@ describe('STACK_POLYGLOT_004 — Embedding writes must go through ai_embeddings 
     const content = readContent(schemaFile)
     expect(content).toContain('ai_embeddings')
     expect(content).toContain('embedding')
-    expect(content).toContain('org_id')
+    expect(content).toContain('entity_id')
     expect(content).toContain('chunk_text')
   })
 

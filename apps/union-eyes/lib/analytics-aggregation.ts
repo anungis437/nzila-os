@@ -259,6 +259,7 @@ class AnalyticsAggregationService {
 
     // Compute aggregations for each organization
         for (const { organizationId } of organizations) {
+      if (!organizationId) continue;
       try {
         await this.computeDailyAggregation(organizationId, yesterday);
 } catch (_error) {

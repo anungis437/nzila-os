@@ -355,12 +355,12 @@ export async function updateClaimStatus(
             : 'other';
 
           return {
-          id: update.updateId,
+          id: update.updateId!,
           caseId: claim.claimId,
           timestamp: update.createdAt ?? new Date(),
           type,
-          description: update.message,
-          actorId: update.createdBy,
+          description: update.message ?? '',
+          actorId: update.createdBy ?? 'system',
           actorRole: update.isInternal ? 'staff' : 'member',
           visibilityScope: update.isInternal ? ('staff' as const) : ('member' as const),
           metadata: update.metadata as Record<string, unknown> | undefined,
@@ -369,10 +369,10 @@ export async function updateClaimStatus(
         
         // Build audit trail from updates
         const auditTrail: AuditEntry[] = updates.map((update) => ({
-          id: update.updateId,
+          id: update.updateId!,
           timestamp: update.createdAt ?? new Date(),
-          userId: update.createdBy,
-          action: update.updateType,
+          userId: update.createdBy ?? 'system',
+          action: update.updateType ?? 'unknown',
           resourceType: 'claim',
           resourceId: claim.claimId,
           sanitizedMetadata: (update.metadata as Record<string, unknown>) || {},
@@ -397,7 +397,7 @@ export async function updateClaimStatus(
               fromState: meta.previousStatus || 'unknown',
               toState: meta.newStatus || 'unknown',
               actorRole: u.isInternal ? 'staff' : 'member',
-              reason: u.message,
+              reason: u.message ?? undefined,
               validationPassed: meta.fsmValidation?.slaCompliant !== false,
             };
           });
@@ -416,8 +416,8 @@ export async function updateClaimStatus(
             generatedBy: 'system',
             caseSummary: {
               title: claim.description?.slice(0, 80) || `Claim ${claim.claimNumber}`,
-              memberId: claim.memberId,
-              memberName: await getMemberName(claim.memberId, tx),
+              memberId: claim.memberId!,
+              memberName: await getMemberName(claim.memberId!, tx),
               currentState: newStatus,
               createdAt: claim.createdAt ?? new Date(),
               lastUpdated: updatedClaim.updatedAt ?? new Date(),
@@ -430,8 +430,8 @@ export async function updateClaimStatus(
         // Store pack in database
         await tx.insert(defensibilityPacks).values({
           caseId: claim.claimId,
-          caseNumber: claim.claimNumber,
-          organizationId: claim.organizationId,
+          caseNumber: claim.claimNumber ?? '',
+          organizationId: claim.organizationId!,
           packVersion: pack.exportVersion,
           generatedAt: pack.generatedAt,
           generatedBy: pack.generatedBy,
@@ -473,7 +473,7 @@ export async function updateClaimStatus(
         notes: notes ?? null,
       },
     }, {
-      organizationId: claim.organizationId,
+      organizationId: claim.organizationId ?? undefined,
       userId,
       source: 'workflow-engine',
     });
