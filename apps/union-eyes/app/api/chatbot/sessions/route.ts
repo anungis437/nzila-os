@@ -4,6 +4,7 @@
  */
 import { z } from 'zod';
 import { withApi } from '@/lib/api/with-api';
+import { ApiError } from '@/lib/api/errors';
 import { ChatSessionManager } from '@/lib/ai/chatbot-service';
 
 export const dynamic = 'force-dynamic';
@@ -32,9 +33,12 @@ export const POST = withApi(
     openapi: { tags: ['AI'], summary: 'Create new chat session' },
   },
   async ({ body, userId, organizationId }) => {
+    if (!organizationId) {
+      throw ApiError.badRequest('No active organization. Please select an organization and try again.');
+    }
     const session = await sessionManager.createSession({
       userId: userId!,
-      organizationId: organizationId ?? '',
+      organizationId: organizationId,
       title: body.title,
     });
     return { data: session };
