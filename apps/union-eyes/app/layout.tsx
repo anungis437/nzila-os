@@ -39,8 +39,6 @@ export default async function RootLayout({ children }: { children: React.ReactNo
     <html lang={locale} suppressHydrationWarning>
       <body className={poppins.className} suppressHydrationWarning>
         <ClerkProvider
-          signInUrl="/sign-in"
-          signUpUrl="/sign-up"
           signInFallbackRedirectUrl="/en-CA/dashboard"
           signUpFallbackRedirectUrl="/en-CA/dashboard"
           afterSignOutUrl="/"
