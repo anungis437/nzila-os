@@ -294,6 +294,7 @@ export const organizationMembers = pgTable(
     
     // Additional fields
     department: text('department'),
+    location: text('location'),
     position: text('position'),
     hireDate: timestamp('hire_date', { withTimezone: true }),
     membershipNumber: text('membership_number'),
