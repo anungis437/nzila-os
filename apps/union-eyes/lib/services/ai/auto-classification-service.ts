@@ -11,7 +11,7 @@
  * - Cross-reference detection
  */
 
-import { getAiClient, UE_APP_KEY, UE_PROFILES } from '@/lib/ai/ai-client';
+import { getAiClient, UE_APP_KEY, UE_PROFILES, UE_SYSTEM_ORG_ID } from '@/lib/ai/ai-client';
 import type { ClauseType } from '@/db/schema/domains/agreements';
 import type { PrecedentValueEnum, OutcomeEnum } from '@/db/schema/domains/agreements';
 import { logger } from '@/lib/logger';
@@ -158,7 +158,7 @@ Return JSON with:
   try {
     const ai = getAiClient();
     const response = await ai.extract({
-      orgId: 'system',
+      orgId: UE_SYSTEM_ORG_ID,
       appKey: UE_APP_KEY,
       profileKey: UE_PROFILES.TAG_GENERATION,
       promptKey: UE_PROFILES.TAG_GENERATION,
@@ -201,7 +201,7 @@ Return JSON with:
   try {
     const ai = getAiClient();
     const response = await ai.extract({
-      orgId: 'system',
+      orgId: UE_SYSTEM_ORG_ID,
       appKey: UE_APP_KEY,
       profileKey: UE_PROFILES.CROSS_REFERENCE,
       promptKey: UE_PROFILES.CROSS_REFERENCE,
@@ -269,7 +269,7 @@ Return JSON with:
   try {
     const ai = getAiClient();
     const response = await ai.extract({
-      orgId: 'system',
+      orgId: UE_SYSTEM_ORG_ID,
       appKey: UE_APP_KEY,
       profileKey: UE_PROFILES.PRECEDENT_CLASSIFICATION,
       promptKey: UE_PROFILES.PRECEDENT_CLASSIFICATION,

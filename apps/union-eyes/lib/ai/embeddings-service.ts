@@ -6,7 +6,7 @@
  */
 
 import { logger } from '@/lib/logger';
-import { getAiClient, UE_APP_KEY, UE_PROFILES } from '@/lib/ai/ai-client';
+import { getAiClient, UE_APP_KEY, UE_PROFILES, UE_SYSTEM_ORG_ID } from '@/lib/ai/ai-client';
 
 // Embedding configuration
 export interface EmbeddingsConfig {
@@ -152,7 +152,7 @@ export class EmbeddingsService {
   private async generateEmbedding(text: string): Promise<number[]> {
     const ai = getAiClient();
     const response = await ai.embed({
-      orgId: 'system',
+      orgId: UE_SYSTEM_ORG_ID,
       appKey: UE_APP_KEY,
       profileKey: UE_PROFILES.EMBEDDINGS,
       input: text,
@@ -167,7 +167,7 @@ export class EmbeddingsService {
   private async generateBatchEmbeddings(texts: string[]): Promise<number[][]> {
     const ai = getAiClient();
     const response = await ai.embed({
-      orgId: 'system',
+      orgId: UE_SYSTEM_ORG_ID,
       appKey: UE_APP_KEY,
       profileKey: UE_PROFILES.EMBEDDINGS,
       input: texts,

@@ -14,7 +14,7 @@
  * - Legal argument generation
  */
 
-import { getAiClient, UE_APP_KEY, UE_PROFILES } from '@/lib/ai/ai-client';
+import { getAiClient, UE_APP_KEY, UE_PROFILES, UE_SYSTEM_ORG_ID } from '@/lib/ai/ai-client';
 import { db } from '@/db';
 import { arbitrationDecisions } from '@/db/schema';
 import { eq } from 'drizzle-orm';
@@ -192,7 +192,7 @@ async function extractClaimKeywords(claimText: string): Promise<string[]> {
   try {
     const ai = getAiClient();
     const response = await ai.extract({
-      orgId: 'system',
+      orgId: UE_SYSTEM_ORG_ID,
       appKey: UE_APP_KEY,
       profileKey: UE_PROFILES.PRECEDENT_KEYWORDS,
       promptKey: UE_PROFILES.PRECEDENT_KEYWORDS,
@@ -283,7 +283,7 @@ async function analyzePrecedentApplicability(
   try {
     const ai = getAiClient();
     const response = await ai.extract({
-      orgId: 'system',
+      orgId: UE_SYSTEM_ORG_ID,
       appKey: UE_APP_KEY,
       profileKey: UE_PROFILES.PRECEDENT_APPLICABILITY,
       promptKey: UE_PROFILES.PRECEDENT_APPLICABILITY,
@@ -394,7 +394,7 @@ async function generateClaimAnalysis(
   try {
     const ai = getAiClient();
     const response = await ai.extract({
-      orgId: 'system',
+      orgId: UE_SYSTEM_ORG_ID,
       appKey: UE_APP_KEY,
       profileKey: UE_PROFILES.CLAIM_ANALYSIS,
       promptKey: UE_PROFILES.CLAIM_ANALYSIS,
@@ -448,7 +448,7 @@ export async function generateLegalMemorandum(
   try {
     const ai = getAiClient();
     const response = await ai.generate({
-      orgId: 'system',
+      orgId: UE_SYSTEM_ORG_ID,
       appKey: UE_APP_KEY,
       profileKey: UE_PROFILES.LEGAL_MEMORANDUM,
       input: `Generate a professional legal memorandum for a labour arbitration case.

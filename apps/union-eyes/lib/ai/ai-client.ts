@@ -40,6 +40,12 @@ export function getAiClient(): AiClient {
 export const UE_APP_KEY = 'union-eyes'
 
 /**
+ * System-level org UUID for AI calls that aren't tied to a specific org.
+ * Must match a row in the `entities` table and have AI profiles seeded.
+ */
+export const UE_SYSTEM_ORG_ID = '00000000-0000-0000-0000-000000000000'
+
+/**
  * Profile keys registered in the AI control plane for union-eyes.
  * Each maps to a centrally managed prompt + model + guardrails config.
  */

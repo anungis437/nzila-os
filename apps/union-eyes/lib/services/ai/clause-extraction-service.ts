@@ -5,7 +5,7 @@
  * Supports both document upload and URL-based processing.
  */
 
-import { getAiClient, UE_APP_KEY, UE_PROFILES } from '@/lib/ai/ai-client';
+import { getAiClient, UE_APP_KEY, UE_PROFILES, UE_SYSTEM_ORG_ID } from '@/lib/ai/ai-client';
 import { db } from '@/db';
 import { cbaClause, collectiveAgreements } from '@/db/schema';
 import { eq } from 'drizzle-orm';
@@ -105,7 +105,7 @@ async function extractTextFromPDF(pdfUrl: string): Promise<string> {
   try {
     const ai = getAiClient();
     const response = await ai.generate({
-      orgId: 'system',
+      orgId: UE_SYSTEM_ORG_ID,
       appKey: UE_APP_KEY,
       profileKey: UE_PROFILES.CLAUSE_EXTRACTION,
       input: `Extract all text from this collective bargaining agreement document at URL: ${pdfUrl}. Maintain the structure including article numbers, section numbers, and clause text. Format as plain text with clear section breaks.`,
@@ -176,7 +176,7 @@ Return a JSON array of extracted clauses.`;
   try {
     const ai = getAiClient();
     const response = await ai.extract({
-      orgId: 'system',
+      orgId: UE_SYSTEM_ORG_ID,
       appKey: UE_APP_KEY,
       profileKey: UE_PROFILES.CLAUSE_EXTRACTION,
       promptKey: UE_PROFILES.CLAUSE_EXTRACTION,
@@ -269,7 +269,7 @@ export async function reExtractClause(
   try {
     const ai = getAiClient();
     const response = await ai.extract({
-      orgId: 'system',
+      orgId: UE_SYSTEM_ORG_ID,
       appKey: UE_APP_KEY,
       profileKey: UE_PROFILES.CLAUSE_EXTRACTION,
       promptKey: UE_PROFILES.CLAUSE_EXTRACTION,
@@ -292,7 +292,7 @@ export async function generateClauseSummary(clauseContent: string): Promise<stri
   try {
     const ai = getAiClient();
     const response = await ai.generate({
-      orgId: 'system',
+      orgId: UE_SYSTEM_ORG_ID,
       appKey: UE_APP_KEY,
       profileKey: UE_PROFILES.CLAUSE_SUMMARY,
       input: `Provide a concise 1-2 sentence summary of this collective bargaining agreement clause:\n\n${clauseContent}`,
@@ -323,7 +323,7 @@ export async function analyzeClauseQuality(
   try {
     const ai = getAiClient();
     const response = await ai.extract({
-      orgId: 'system',
+      orgId: UE_SYSTEM_ORG_ID,
       appKey: UE_APP_KEY,
       profileKey: UE_PROFILES.CLAUSE_QUALITY,
       promptKey: UE_PROFILES.CLAUSE_QUALITY,

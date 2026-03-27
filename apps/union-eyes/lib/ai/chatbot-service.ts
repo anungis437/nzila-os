@@ -18,7 +18,7 @@ import {
 import { eq, and, desc, sql } from "drizzle-orm";
 import { embeddingCache } from "@/lib/services/ai/embedding-cache";
 import { logger } from "@/lib/logger";
-import { getAiClient, UE_APP_KEY, UE_PROFILES } from '@/lib/ai/ai-client';
+import { getAiClient, UE_APP_KEY, UE_PROFILES, UE_SYSTEM_ORG_ID } from '@/lib/ai/ai-client';
 import type { ChatMessage as _AiChatMessage } from '@nzila/ai-sdk/types';
 
 /**
@@ -35,7 +35,7 @@ async function aiGenerate(
   const ai = getAiClient();
   const input = messages.map(m => ({ role: m.role as 'system' | 'user' | 'assistant', content: m.content }));
   const response = await ai.generate({
-    orgId: 'system',
+    orgId: UE_SYSTEM_ORG_ID,
     appKey: UE_APP_KEY,
     profileKey: UE_PROFILES.CHATBOT,
     input,
@@ -58,7 +58,7 @@ async function aiEmbed(text: string): Promise<number[]> {
 
   const ai = getAiClient();
   const response = await ai.embed({
-    orgId: 'system',
+    orgId: UE_SYSTEM_ORG_ID,
     appKey: UE_APP_KEY,
     profileKey: UE_PROFILES.EMBEDDINGS,
     input: text,
