@@ -25,17 +25,21 @@ import { ArrowLeft, Upload } from "lucide-react";
 export default function NewClaimPage() {
   const router = useRouter();
   const [submitting, setSubmitting] = useState(false);
+  const [error, setError] = useState<string | null>(null);
   const [formData, setFormData] = useState({
-    claimType: '',
+    claimType: '' as string,
     incidentDate: '',
     description: '',
     location: '',
-    witnesses: '',
+    desiredOutcome: '',
+    witnessesPresent: false,
+    witnessDetails: '',
   });
 
   const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
     setSubmitting(true);
+    setError(null);
 
     try {
       const response = await fetch('/api/claims', {
@@ -46,9 +50,13 @@ export default function NewClaimPage() {
 
       if (response.ok) {
         router.push('../claims');
+      } else {
+        const data = await response.json().catch(() => ({}));
+        setError((data as { message?: string }).message ?? 'Failed to submit claim. Please try again.');
       }
     } catch (_error) {
-} finally {
+      setError('Network error — please check your connection and try again.');
+    } finally {
       setSubmitting(false);
     }
   };
@@ -67,6 +75,12 @@ export default function NewClaimPage() {
         </CardHeader>
         <CardContent>
           <form onSubmit={handleSubmit} className="space-y-6">
+            {error && (
+              <div className="rounded-md bg-red-50 border border-red-200 p-4 text-sm text-red-700">
+                {error}
+              </div>
+            )}
+
             <div>
               <Label htmlFor="claimType">Claim Type *</Label>
               <Select
@@ -77,13 +91,23 @@ export default function NewClaimPage() {
                   <SelectValue placeholder="Select claim type" />
                 </SelectTrigger>
                 <SelectContent>
-                  <SelectItem value="disciplinary">Disciplinary Action</SelectItem>
-                  <SelectItem value="workplace-safety">Workplace Safety</SelectItem>
-                  <SelectItem value="discrimination">Discrimination</SelectItem>
-                  <SelectItem value="harassment">Harassment</SelectItem>
-                  <SelectItem value="wage-dispute">Wage Dispute</SelectItem>
-                  <SelectItem value="benefits">Benefits Issue</SelectItem>
-                  <SelectItem value="scheduling">Scheduling Dispute</SelectItem>
+                  <SelectItem value="grievance_discipline">Disciplinary Action (Grievance)</SelectItem>
+                  <SelectItem value="grievance_schedule">Scheduling Dispute (Grievance)</SelectItem>
+                  <SelectItem value="grievance_pay">Pay Dispute (Grievance)</SelectItem>
+                  <SelectItem value="workplace_safety">Workplace Safety</SelectItem>
+                  <SelectItem value="discrimination_age">Discrimination — Age</SelectItem>
+                  <SelectItem value="discrimination_gender">Discrimination — Gender</SelectItem>
+                  <SelectItem value="discrimination_race">Discrimination — Race</SelectItem>
+                  <SelectItem value="discrimination_disability">Discrimination — Disability</SelectItem>
+                  <SelectItem value="discrimination_other">Discrimination — Other</SelectItem>
+                  <SelectItem value="harassment_sexual">Harassment — Sexual</SelectItem>
+                  <SelectItem value="harassment_workplace">Harassment — Workplace</SelectItem>
+                  <SelectItem value="harassment_verbal">Harassment — Verbal</SelectItem>
+                  <SelectItem value="harassment_physical">Harassment — Physical</SelectItem>
+                  <SelectItem value="wage_dispute">Wage Dispute</SelectItem>
+                  <SelectItem value="contract_dispute">Contract Dispute</SelectItem>
+                  <SelectItem value="retaliation">Retaliation</SelectItem>
+                  <SelectItem value="wrongful_termination">Wrongful Termination</SelectItem>
                   <SelectItem value="other">Other</SelectItem>
                 </SelectContent>
               </Select>
@@ -101,12 +125,13 @@ export default function NewClaimPage() {
             </div>
 
             <div>
-              <Label htmlFor="location">Location</Label>
+              <Label htmlFor="location">Location *</Label>
               <Input
                 id="location"
                 placeholder="Where did the incident occur?"
                 value={formData.location}
                 onChange={(e) => setFormData({ ...formData, location: e.target.value })}
+                required
               />
             </div>
 
@@ -123,14 +148,40 @@ export default function NewClaimPage() {
             </div>
 
             <div>
-              <Label htmlFor="witnesses">Witnesses</Label>
+              <Label htmlFor="desiredOutcome">Desired Outcome *</Label>
               <Textarea
-                id="witnesses"
-                placeholder="List any witnesses (names and contact info if available)"
-                value={formData.witnesses}
-                onChange={(e) => setFormData({ ...formData, witnesses: e.target.value })}
+                id="desiredOutcome"
+                placeholder="What outcome are you seeking?"
+                value={formData.desiredOutcome}
+                onChange={(e) => setFormData({ ...formData, desiredOutcome: e.target.value })}
                 rows={3}
+                required
               />
+            </div>
+
+            <div className="space-y-3">
+              <div className="flex items-center gap-2">
+                <input
+                  id="witnessesPresent"
+                  type="checkbox"
+                  checked={formData.witnessesPresent}
+                  onChange={(e) => setFormData({ ...formData, witnessesPresent: e.target.checked })}
+                  className="h-4 w-4 rounded border-gray-300"
+                />
+                <Label htmlFor="witnessesPresent">Were witnesses present?</Label>
+              </div>
+              {formData.witnessesPresent && (
+                <div>
+                  <Label htmlFor="witnessDetails">Witness Details</Label>
+                  <Textarea
+                    id="witnessDetails"
+                    placeholder="List any witnesses (names and contact info if available)"
+                    value={formData.witnessDetails}
+                    onChange={(e) => setFormData({ ...formData, witnessDetails: e.target.value })}
+                    rows={3}
+                  />
+                </div>
+              )}
             </div>
 
             <div>
