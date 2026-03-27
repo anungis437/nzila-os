@@ -3,6 +3,7 @@
  */
 import { crudRoutes } from '@/lib/api/crud-factory';
 import { withApi } from '@/lib/api/with-api';
+import { ApiError } from '@/lib/api/errors';
 import { db } from '@/db/db';
 import { claims } from '@/db/schema';
 import { sql } from 'drizzle-orm';
@@ -36,7 +37,11 @@ export const POST = withApi(
     },
   },
   async ({ request, organizationId, userId }) => {
-    const body = await request.json();
+    const body = await request.json() as Record<string, unknown>;
+
+    if (!organizationId) {
+      throw ApiError.badRequest('No active organization. Please select an organization and try again.');
+    }
 
     return withSystemContext(async () => {
       // Generate claim number: CLM-YYYYMMDD-XXXX
@@ -56,8 +61,12 @@ export const POST = withApi(
       }
       const claimNumber = `${prefix}${String(seq).padStart(4, '0')}`;
 
+      // Extract incidentDate separately — Drizzle's PgTimestamp.mapToDriverValue
+      // calls .toISOString() and requires a Date object, not a raw date string.
+      const { incidentDate: rawIncidentDate, ...restBody } = body;
       const values = {
-        ...body,
+        ...restBody,
+        incidentDate: rawIncidentDate ? new Date(String(rawIncidentDate)) : undefined,
         claimNumber,
         organizationId,
         memberId: userId,
