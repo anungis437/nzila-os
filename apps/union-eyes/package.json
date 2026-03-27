@@ -170,7 +170,7 @@
     "zod": "^3.23.8"
   },
   "devDependencies": {
-    "@asteasolutions/zod-to-openapi": "^8.4.0",
+    "@asteasolutions/zod-to-openapi": "^8.5.0",
     "@next/bundle-analyzer": "^16.1.6",
     "@nzila/config": "workspace:*",
     "@nzila/evidence": "workspace:*",
