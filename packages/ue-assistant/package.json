@@ -1,0 +1,39 @@
+{
+  "name": "@nzila/ue-assistant",
+  "version": "0.1.0",
+  "private": true,
+  "type": "module",
+  "exports": {
+    ".": "./src/index.ts",
+    "./types": "./src/types.ts",
+    "./roles": "./src/roles.ts",
+    "./intents": "./src/intents.ts",
+    "./context": "./src/context.ts",
+    "./knowledge": "./src/knowledge.ts",
+    "./tools": "./src/tools.ts",
+    "./response-policy": "./src/response-policy.ts",
+    "./domain-rules": "./src/domain-rules.ts",
+    "./steward-intelligence": "./src/steward-intelligence.ts",
+    "./escalation": "./src/escalation.ts",
+    "./localization": "./src/localization.ts",
+    "./audit": "./src/audit.ts",
+    "./guardrails": "./src/guardrails.ts",
+    "./assistant": "./src/assistant.ts"
+  },
+  "scripts": {
+    "test": "vitest run",
+    "test:watch": "vitest",
+    "typecheck": "tsc --noEmit",
+    "lint": "eslint src/"
+  },
+  "dependencies": {
+    "@nzila/os-core": "workspace:*",
+    "@nzila/platform-events": "workspace:*",
+    "@nzila/platform-governed-ai": "workspace:*",
+    "zod": "^3.25.0"
+  },
+  "devDependencies": {
+    "typescript": "^5",
+    "vitest": "^4.0.0"
+  }
+}
