@@ -146,7 +146,7 @@ export interface KnowledgeCitation {
 export interface ToolInvocation {
   readonly tool: ToolName
   readonly params: Record<string, unknown>
-  readonly result: Record<string, unknown>
+  readonly result: ToolResult
   readonly timestamp: string
 }
 

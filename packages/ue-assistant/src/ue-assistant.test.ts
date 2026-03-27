@@ -1096,7 +1096,7 @@ describe('Phase 13 — Safety & Guardrails', () => {
 
   it('computeConfidence returns higher with good citations', () => {
     const citations = [
-      { sourceType: KnowledgeSourceTypes.COLLECTIVE_AGREEMENT as const, sourceId: 'doc-1', title: 'test', excerpt: 'test', relevanceScore: 0.9 },
+      { sourceType: KnowledgeSourceTypes.COLLECTIVE_AGREEMENT, sourceId: 'doc-1', title: 'test', excerpt: 'test', relevanceScore: 0.9 },
     ]
     expect(computeConfidence(citations, 0.8)).toBeGreaterThan(0.5)
   })

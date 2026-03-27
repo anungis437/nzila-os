@@ -237,7 +237,7 @@ export function executeTool(
     const invocation: ToolInvocation = {
       tool,
       params,
-      result: { success: false, error: `Tool '${tool}' not allowed for role '${ctx.userRole}'` },
+      result: { success: false, data: {}, error: `Tool '${tool}' not allowed for role '${ctx.userRole}'` },
       timestamp: new Date().toISOString(),
     }
     toolLog.push(invocation)
@@ -249,7 +249,7 @@ export function executeTool(
     const invocation: ToolInvocation = {
       tool,
       params,
-      result: { success: false, error: `Unknown tool: ${tool}` },
+      result: { success: false, data: {}, error: `Unknown tool: ${tool}` },
       timestamp: new Date().toISOString(),
     }
     toolLog.push(invocation)
