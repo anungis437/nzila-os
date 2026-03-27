@@ -19,10 +19,11 @@ interface PensionPlan {
 
 interface Contribution {
   id: string;
-  contributionPeriodStart: string;
-  contributionPeriodEnd: string;
-  totalContributionAmount: string;
+  memberName: string;
+  period: string;
+  amount: string;
   paymentStatus: string;
+  paymentDate: string | null;
 }
 
 interface BenefitEstimate {
@@ -38,7 +39,7 @@ export default function PensionMemberConsole() {
   const [loading, setLoading] = useState(true);
   const [plan, setPlan] = useState<PensionPlan | null>(null);
   const [contributions, setContributions] = useState<Contribution[]>([]);
-  const [_benefitEstimate, _setBenefitEstimate] = useState<BenefitEstimate | null>(null);
+  const [benefitEstimate, setBenefitEstimate] = useState<BenefitEstimate | null>(null);
   const [error, setError] = useState<string | null>(null);
 
   const fetchPensionData = useCallback(async () => {
@@ -71,7 +72,14 @@ export default function PensionMemberConsole() {
         }
       }
 
-      setContributions([]);
+      // Fetch contributions
+      const contribRes = await fetch(`/api/pension/contributions?organizationId=${encodeURIComponent(organizationId)}`);
+      if (contribRes.ok) {
+        const contribData = await contribRes.json();
+        if (contribData.data && contribData.data.length > 0) {
+          setContributions(contribData.data);
+        }
+      }
     } catch {
       setError('Unable to load pension information. Please try again later.');
     } finally {
@@ -82,6 +90,37 @@ export default function PensionMemberConsole() {
   useEffect(() => {
     fetchPensionData();
   }, [fetchPensionData]);
+
+  // Compute benefit estimate from real data
+  useEffect(() => {
+    if (!plan) {
+      setBenefitEstimate(null);
+      return;
+    }
+
+    const years = plan.yearsOfService || 0;
+    // Standard 5-year graded vesting: 20% per year, fully vested at 5+
+    const vestingPct = Math.min(years * 20, 100);
+
+    const totalContributions = contributions.reduce(
+      (sum, c) => sum + parseFloat(c.amount || '0'),
+      0,
+    );
+
+    // Estimate: use a 2% accrual factor × years × average annual contribution
+    const yearsWithContributions = Math.max(years, 1);
+    const avgAnnualContrib = totalContributions / yearsWithContributions;
+    const estimatedAnnual = years * 0.02 * avgAnnualContrib * 12 * (vestingPct / 100);
+    const estimatedMonthly = estimatedAnnual / 12;
+
+    setBenefitEstimate({
+      eligibilityAge: 65,
+      estimatedMonthlyBenefit: Math.round(estimatedMonthly * 100) / 100,
+      estimatedAnnualPension: Math.round(estimatedAnnual * 100) / 100,
+      yearsOfService: years,
+      vestingPercentage: vestingPct,
+    });
+  }, [plan, contributions]);
 
   if (loading) {
     return (
@@ -331,14 +370,14 @@ export default function PensionMemberConsole() {
                     <div key={contrib.id} className="flex justify-between items-center p-3 border rounded">
                       <div>
                         <p className="font-medium">
-                          {contrib.contributionPeriodStart} - {contrib.contributionPeriodEnd}
+                          {contrib.period}
                         </p>
                         <p className="text-sm text-muted-foreground">
-                          Status: {contrib.paymentStatus}
+                          {contrib.memberName} · {contrib.paymentStatus}
                         </p>
                       </div>
                       <div className="text-right">
-                        <p className="font-semibold">${contrib.totalContributionAmount}</p>
+                        <p className="font-semibold">${parseFloat(contrib.amount).toLocaleString(undefined, { minimumFractionDigits: 2, maximumFractionDigits: 2 })}</p>
                       </div>
                     </div>
                   ))}
@@ -360,22 +399,30 @@ export default function PensionMemberConsole() {
               <div className="space-y-6">
                 <div className="text-center p-6 bg-muted rounded-lg">
                   <p className="text-sm text-muted-foreground mb-2">Estimated Monthly Benefit at Age 65</p>
-                  <p className="text-4xl font-bold">$--</p>
-                  <p className="text-sm text-muted-foreground mt-1">Based on current service and earnings</p>
+                  <p className="text-4xl font-bold">
+                    {benefitEstimate
+                      ? `$${benefitEstimate.estimatedMonthlyBenefit.toLocaleString(undefined, { minimumFractionDigits: 2, maximumFractionDigits: 2 })}`
+                      : '$--'}
+                  </p>
+                  <p className="text-sm text-muted-foreground mt-1">Based on current service and contributions</p>
                 </div>
 
                 <div className="grid grid-cols-1 md:grid-cols-3 gap-4">
                   <div className="text-center p-4 border rounded">
                     <p className="text-sm text-muted-foreground mb-1">Years of Service</p>
-                    <p className="text-2xl font-bold">{plan.yearsOfService || '0'}</p>
+                    <p className="text-2xl font-bold">{benefitEstimate?.yearsOfService ?? plan.yearsOfService ?? '0'}</p>
                   </div>
                   <div className="text-center p-4 border rounded">
                     <p className="text-sm text-muted-foreground mb-1">Vesting</p>
-                    <p className="text-2xl font-bold">--%</p>
+                    <p className="text-2xl font-bold">{benefitEstimate ? `${benefitEstimate.vestingPercentage}%` : '--%'}</p>
                   </div>
                   <div className="text-center p-4 border rounded">
                     <p className="text-sm text-muted-foreground mb-1">Annual Pension</p>
-                    <p className="text-2xl font-bold">$--</p>
+                    <p className="text-2xl font-bold">
+                      {benefitEstimate
+                        ? `$${benefitEstimate.estimatedAnnualPension.toLocaleString(undefined, { minimumFractionDigits: 2, maximumFractionDigits: 2 })}`
+                        : '$--'}
+                    </p>
                   </div>
                 </div>
 
