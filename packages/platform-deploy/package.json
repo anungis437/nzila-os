@@ -22,7 +22,7 @@
   "devDependencies": {
     "@nzila/config": "workspace:*",
     "eslint": "^10",
-    "typescript": "^5",
-    "vitest": "^4.0.18"
+    "typescript": "^6",
+    "vitest": "^4.1.2"
   }
 }
