@@ -16,6 +16,7 @@ import { db } from '@/db/db';
 import { claimUpdates } from '@/db/schema';
 import { grievanceTimeline } from '@/db/schema';
 import { eq, desc, sql } from 'drizzle-orm';
+import { withRLSContext } from '@/lib/db/with-rls-context';
 
 export const dynamic = 'force-dynamic';
 
@@ -35,11 +36,13 @@ export const GET = withApi(
     }
 
     // 1. Fetch claimUpdates scoped to this case
-    const updates = await db
-      .select()
-      .from(claimUpdates)
-      .where(eq(claimUpdates.claimId, caseId))
-      .orderBy(desc(claimUpdates.createdAt));
+    const updates = await withRLSContext(() =>
+      db
+        .select()
+        .from(claimUpdates)
+        .where(eq(claimUpdates.claimId, caseId))
+        .orderBy(desc(claimUpdates.createdAt)),
+    );
 
     const mapped = updates.map((u) => ({
       id: u.updateId,
@@ -54,18 +57,22 @@ export const GET = withApi(
     //    to grievances, so attempt a raw lookup and gracefully skip if
     //    the column doesn't exist.
     try {
-      const linkResult = await db.execute(
-        sql`SELECT grievance_id FROM claims WHERE claim_id = ${caseId} AND grievance_id IS NOT NULL LIMIT 1`
+      const linkResult = await withRLSContext(() =>
+        db.execute(
+          sql`SELECT grievance_id FROM claims WHERE claim_id = ${caseId} AND grievance_id IS NOT NULL LIMIT 1`,
+        ),
       );
       const rows = Array.from(linkResult);
       const grievanceId = (rows[0] as Record<string, unknown> | undefined)?.grievance_id as string | undefined;
 
       if (grievanceId) {
-        const gEvents = await db
-          .select()
-          .from(grievanceTimeline)
-          .where(eq(grievanceTimeline.grievanceId, grievanceId))
-          .orderBy(desc(grievanceTimeline.eventDate));
+        const gEvents = await withRLSContext(() =>
+          db
+            .select()
+            .from(grievanceTimeline)
+            .where(eq(grievanceTimeline.grievanceId, grievanceId))
+            .orderBy(desc(grievanceTimeline.eventDate)),
+        );
 
         for (const ev of gEvents) {
           mapped.push({
