@@ -15,6 +15,12 @@ interface PensionPlan {
   membershipStatus: string;
   vestingStatus: string;
   yearsOfService: number;
+  enrollmentDate: string | null;
+  totalAssets: string;
+  fundingStatus: string;
+  activeMembers: number;
+  status: string;
+  description: string | null;
 }
 
 interface Contribution {
@@ -88,8 +94,16 @@ export default function PensionMemberConsole() {
       if (planRes.ok) {
         const planData = await planRes.json();
         if (planData.data && planData.data.length > 0) {
-          // Merge planType from the plans response into the member record
-          setPlan({ ...planData.data[0], planType: firstPlan.planType });
+          // Merge plan-level fields into the member record
+          setPlan({
+            ...planData.data[0],
+            planType: firstPlan.planType,
+            totalAssets: firstPlan.totalAssets,
+            fundingStatus: firstPlan.fundingStatus,
+            activeMembers: firstPlan.activeMembers,
+            status: firstPlan.status,
+            description: firstPlan.description,
+          });
         }
       }
 
@@ -321,39 +335,49 @@ export default function PensionMemberConsole() {
                     <span className="font-semibold">55 years</span>
                   </div>
                   <div className="flex justify-between items-center p-3 bg-muted rounded">
-                    <span className="text-sm">Estimated Years to Normal Retirement</span>
-                    <span className="font-semibold">-- years</span>
+                    <span className="text-sm">Years of Service</span>
+                    <span className="font-semibold">{plan.yearsOfService || 0} years</span>
                   </div>
+                  {plan.enrollmentDate && (
+                    <div className="flex justify-between items-center p-3 bg-muted rounded">
+                      <span className="text-sm">Enrolled Since</span>
+                      <span className="font-semibold">{new Date(plan.enrollmentDate).toLocaleDateString()}</span>
+                    </div>
+                  )}
                 </div>
               </CardContent>
             </Card>
 
-            {/* Quick Actions */}
+            {/* Fund Health */}
             <Card>
               <CardHeader>
                 <CardTitle className="flex items-center gap-2">
-                  <FileText className="w-5 h-5" />
-                  Quick Actions
+                  <TrendingUp className="w-5 h-5" />
+                  Fund Health
                 </CardTitle>
               </CardHeader>
               <CardContent>
-                <div className="space-y-2">
-                  <Button variant="outline" className="w-full justify-start">
-                    <DollarSign className="w-4 h-4 mr-2" />
-                    Request Benefit Estimate
-                  </Button>
-                  <Button variant="outline" className="w-full justify-start">
-                    <FileText className="w-4 h-4 mr-2" />
-                    View Benefit Summary
-                  </Button>
-                  <Button variant="outline" className="w-full justify-start">
-                    <Calendar className="w-4 h-4 mr-2" />
-                    Update Beneficiaries
-                  </Button>
-                  <Button variant="outline" className="w-full justify-start">
-                    <Briefcase className="w-4 h-4 mr-2" />
-                    Download Pension Handbook
-                  </Button>
+                <div className="space-y-4">
+                  <div className="flex justify-between items-center p-3 bg-muted rounded">
+                    <span className="text-sm">Total Plan Assets</span>
+                    <span className="font-semibold">
+                      ${parseFloat(plan.totalAssets || '0').toLocaleString(undefined, { minimumFractionDigits: 2, maximumFractionDigits: 2 })}
+                    </span>
+                  </div>
+                  <div className="flex justify-between items-center p-3 bg-muted rounded">
+                    <span className="text-sm">Funding Status</span>
+                    <span className="font-semibold">{parseFloat(plan.fundingStatus || '0')}%</span>
+                  </div>
+                  <div className="flex justify-between items-center p-3 bg-muted rounded">
+                    <span className="text-sm">Active Members</span>
+                    <span className="font-semibold">{plan.activeMembers || 0}</span>
+                  </div>
+                  <div className="flex justify-between items-center p-3 bg-muted rounded">
+                    <span className="text-sm">Plan Status</span>
+                    <Badge variant={plan.status === 'active' ? 'default' : 'secondary'}>
+                      {plan.status || 'active'}
+                    </Badge>
+                  </div>
                 </div>
               </CardContent>
             </Card>
@@ -375,19 +399,57 @@ export default function PensionMemberConsole() {
                   <p className="font-medium">{plan.planType}</p>
                 </div>
                 <div>
-                  <p className="text-sm text-muted-foreground mb-1">Plan Administrator</p>
-                  <p className="font-medium">Contact Union Office</p>
+                  <p className="text-sm text-muted-foreground mb-1">Vesting Status</p>
+                  <Badge variant={plan.vestingStatus === 'fully_vested' ? 'default' : 'secondary'}>
+                    {plan.vestingStatus || 'Not Vested'}
+                  </Badge>
                 </div>
                 <div>
-                  <p className="text-sm text-muted-foreground mb-1">Registration Number</p>
-                  <p className="font-medium">--</p>
+                  <p className="text-sm text-muted-foreground mb-1">Total Contributions</p>
+                  <p className="font-medium">
+                    ${contributions.reduce((sum, c) => sum + parseFloat(c.amount || '0'), 0).toLocaleString(undefined, { minimumFractionDigits: 2, maximumFractionDigits: 2 })}
+                  </p>
                 </div>
               </div>
+              {plan.description && (
+                <div className="mt-4 pt-4 border-t">
+                  <p className="text-sm text-muted-foreground mb-1">Description</p>
+                  <p className="text-sm">{plan.description}</p>
+                </div>
+              )}
             </CardContent>
           </Card>
         </TabsContent>
 
         <TabsContent value="contributions" className="space-y-4">
+          {/* Contribution Summary */}
+          {contributions.length > 0 && (
+            <div className="grid grid-cols-1 md:grid-cols-3 gap-4">
+              <Card>
+                <CardContent className="pt-6">
+                  <p className="text-sm text-muted-foreground">Total Contributions</p>
+                  <p className="text-2xl font-bold">
+                    ${contributions.reduce((sum, c) => sum + parseFloat(c.amount || '0'), 0).toLocaleString(undefined, { minimumFractionDigits: 2, maximumFractionDigits: 2 })}
+                  </p>
+                </CardContent>
+              </Card>
+              <Card>
+                <CardContent className="pt-6">
+                  <p className="text-sm text-muted-foreground">Contribution Periods</p>
+                  <p className="text-2xl font-bold">{contributions.length}</p>
+                </CardContent>
+              </Card>
+              <Card>
+                <CardContent className="pt-6">
+                  <p className="text-sm text-muted-foreground">Latest Status</p>
+                  <Badge variant={contributions[0]?.paymentStatus === 'received' ? 'default' : 'secondary'} className="mt-1">
+                    {contributions[0]?.paymentStatus || 'N/A'}
+                  </Badge>
+                </CardContent>
+              </Card>
+            </div>
+          )}
+
           <Card>
             <CardHeader>
               <CardTitle className="flex items-center gap-2">
@@ -412,10 +474,13 @@ export default function PensionMemberConsole() {
                           {contrib.period}
                         </p>
                         <p className="text-sm text-muted-foreground">
-                          {contrib.memberName} · {contrib.paymentStatus}
+                          {contrib.memberName}
                         </p>
                       </div>
-                      <div className="text-right">
+                      <div className="flex items-center gap-3">
+                        <Badge variant={contrib.paymentStatus === 'received' ? 'default' : contrib.paymentStatus === 'overdue' ? 'destructive' : 'secondary'}>
+                          {contrib.paymentStatus}
+                        </Badge>
                         <p className="font-semibold">${parseFloat(contrib.amount).toLocaleString(undefined, { minimumFractionDigits: 2, maximumFractionDigits: 2 })}</p>
                       </div>
                     </div>
