@@ -242,7 +242,7 @@ export const grievanceTransitions = pgTable("grievance_transitions", {
   // Transition metadata
   reason: text("reason"),
   notes: text("notes"),
-  transitionedBy: varchar("transitioned_by", { length: 255 }).notNull(),
+  transitionedBy: varchar("transitioned_by", { length: 255 }),
   transitionedAt: timestamp("transitioned_at", { withTimezone: true }).defaultNow(),
   
   // Approval tracking
@@ -259,6 +259,10 @@ export const grievanceTransitions = pgTable("grievance_transitions", {
   // Metadata
   // eslint-disable-next-line @typescript-eslint/no-explicit-any
   metadata: jsonb("metadata").$type<Record<string, any>>().default({}),
+  
+  // BaseModel timestamps
+  createdAt: timestamp("created_at", { withTimezone: true }).notNull().defaultNow(),
+  updatedAt: timestamp("updated_at", { withTimezone: true }).notNull().defaultNow(),
 }, (table) => ({
   organizationIdx: index("idx_grievance_transitions_organization").on(table.organizationId),
   claimIdx: index("idx_grievance_transitions_claim").on(table.claimId),

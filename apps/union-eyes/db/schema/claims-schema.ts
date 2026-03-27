@@ -119,15 +119,17 @@ export const claims = pgTable("claims", {
 
 // Claim updates/notes table
 export const claimUpdates = pgTable("claim_updates", {
-  updateId: uuid("update_id").primaryKey().defaultRandom(),
+  id: uuid("id").primaryKey().defaultRandom(),
+  updateId: uuid("update_id").unique().defaultRandom(),
   claimId: uuid("claim_id").notNull().references(() => claims.claimId, { onDelete: "cascade" }),
-  updateType: varchar("update_type", { length: 50 }).notNull(),
-  message: text("message").notNull(),
-  createdBy: varchar("created_by", { length: 255 }).notNull(),
+  updateType: varchar("update_type", { length: 50 }),
+  message: text("message"),
+  createdBy: varchar("created_by", { length: 255 }),
   isInternal: boolean("is_internal").default(false),
   visibilityScope: visibilityScopeEnum("visibility_scope").default("member").notNull(),
   metadata: jsonb("metadata").default(sql`'{}'::jsonb`),
   createdAt: timestamp("created_at", { withTimezone: true }).defaultNow(),
+  updatedAt: timestamp("updated_at", { withTimezone: true }).defaultNow(),
 });
 
 // Type exports
