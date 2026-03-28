@@ -116,6 +116,72 @@
       "role": "admin",
       "member_number": "CL123-ADMIN-001",
       "hire_date": "2020-01-01"
+    },
+    {
+      "id": "cupe-member-007",
+      "org_id": "cupe-local-123",
+      "worksite_id": "cupe-ws-002",
+      "first_name": "Hassan",
+      "last_name": "Ali",
+      "email": "hassan.ali@city.toronto.ca",
+      "role": "health_safety_rep",
+      "member_number": "CL123-007",
+      "hire_date": "2017-04-12"
+    },
+    {
+      "id": "cupe-member-008",
+      "org_id": "cupe-local-123",
+      "worksite_id": "cupe-ws-001",
+      "first_name": "Ingrid",
+      "last_name": "Bergstrom",
+      "email": "ingrid.bergstrom@city.toronto.ca",
+      "role": "bargaining_committee",
+      "member_number": "CL123-008",
+      "hire_date": "2014-08-25"
+    },
+    {
+      "id": "cupe-member-009",
+      "org_id": "cupe-local-123",
+      "worksite_id": "cupe-ws-003",
+      "first_name": "James",
+      "last_name": "Okafor",
+      "email": "james.okafor@city.toronto.ca",
+      "role": "officer",
+      "member_number": "CL123-009",
+      "hire_date": "2013-02-10"
+    },
+    {
+      "id": "cupe-exec-001",
+      "org_id": "cupe-local-123",
+      "worksite_id": "cupe-ws-001",
+      "first_name": "Karen",
+      "last_name": "Whitfield",
+      "email": "karen.whitfield@city.toronto.ca",
+      "role": "president",
+      "member_number": "CL123-EXEC-001",
+      "hire_date": "2010-06-01"
+    },
+    {
+      "id": "cupe-exec-002",
+      "org_id": "cupe-local-123",
+      "worksite_id": "cupe-ws-002",
+      "first_name": "Luis",
+      "last_name": "Ramirez",
+      "email": "luis.ramirez@city.toronto.ca",
+      "role": "vice_president",
+      "member_number": "CL123-EXEC-002",
+      "hire_date": "2011-09-14"
+    },
+    {
+      "id": "cupe-exec-003",
+      "org_id": "cupe-local-123",
+      "worksite_id": "cupe-ws-003",
+      "first_name": "Mei",
+      "last_name": "Tanaka",
+      "email": "mei.tanaka@city.toronto.ca",
+      "role": "secretary_treasurer",
+      "member_number": "CL123-EXEC-003",
+      "hire_date": "2012-03-20"
     }
   ],
   "cases": [
