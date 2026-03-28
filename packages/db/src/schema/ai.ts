@@ -128,7 +128,7 @@ export const aiCapabilityProfiles = pgTable(
   'ai_capability_profiles',
   {
     id: uuid('id').primaryKey().defaultRandom(),
-    orgId: uuid('entity_id')
+    orgId: uuid('org_id')
       .notNull()
       .references(() => orgs.id),
     appKey: varchar('app_key', { length: 60 }).notNull(),
@@ -211,7 +211,7 @@ export const aiRequests = pgTable(
   'ai_requests',
   {
     id: uuid('id').primaryKey().defaultRandom(),
-    orgId: uuid('entity_id')
+    orgId: uuid('org_id')
       .notNull()
       .references(() => orgs.id),
     appKey: varchar('app_key', { length: 60 }).notNull(),
@@ -258,7 +258,7 @@ export const aiUsageBudgets = pgTable(
   'ai_usage_budgets',
   {
     id: uuid('id').primaryKey().defaultRandom(),
-    orgId: uuid('entity_id')
+    orgId: uuid('org_id')
       .notNull()
       .references(() => orgs.id),
     appKey: varchar('app_key', { length: 60 }).notNull(),
@@ -286,7 +286,7 @@ export const aiKnowledgeSources = pgTable(
   'ai_knowledge_sources',
   {
     id: uuid('id').primaryKey().defaultRandom(),
-    orgId: uuid('entity_id')
+    orgId: uuid('org_id')
       .notNull()
       .references(() => orgs.id),
     appKey: varchar('app_key', { length: 60 }).notNull(),
@@ -322,7 +322,7 @@ export const aiEmbeddings = pgTable(
   'ai_embeddings',
   {
     id: uuid('id').primaryKey().defaultRandom(),
-    orgId: uuid('entity_id')
+    orgId: uuid('org_id')
       .notNull()
       .references(() => orgs.id),
     appKey: varchar('app_key', { length: 60 }).notNull(),
@@ -349,7 +349,7 @@ export const aiActions = pgTable(
   'ai_actions',
   {
     id: uuid('id').primaryKey().defaultRandom(),
-    orgId: uuid('entity_id')
+    orgId: uuid('org_id')
       .notNull()
       .references(() => orgs.id),
     appKey: varchar('app_key', { length: 60 }).notNull(),
@@ -386,7 +386,7 @@ export const aiActionRuns = pgTable(
     actionId: uuid('action_id')
       .notNull()
       .references(() => aiActions.id),
-    orgId: uuid('entity_id')
+    orgId: uuid('org_id')
       .notNull()
       .references(() => orgs.id),
     status: aiActionRunStatusEnum('status').notNull().default('started'),
@@ -411,7 +411,7 @@ export const aiKnowledgeIngestionRuns = pgTable(
   'ai_knowledge_ingestion_runs',
   {
     id: uuid('id').primaryKey().defaultRandom(),
-    orgId: uuid('entity_id')
+    orgId: uuid('org_id')
       .notNull()
       .references(() => orgs.id),
     sourceId: uuid('source_id')
@@ -475,7 +475,7 @@ export const aiDeploymentRoutes = pgTable(
     deploymentId: uuid('deployment_id')
       .notNull()
       .references(() => aiDeployments.id),
-    orgId: uuid('entity_id')
+    orgId: uuid('org_id')
       .notNull()
       .references(() => orgs.id),
     appKey: varchar('app_key', { length: 60 }).notNull(),

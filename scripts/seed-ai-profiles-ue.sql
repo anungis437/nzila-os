@@ -1,14 +1,14 @@
 -- Seed AI capability profiles for union-eyes on staging
--- Requires: entities table with a system entity
+-- Requires: orgs table with a system org
 
--- 1. Insert system entity (nil UUID) if not exists
-INSERT INTO entities (id, legal_name, jurisdiction, status)
-VALUES ('00000000-0000-0000-0000-000000000000', 'SYSTEM', 'CA', 'active')
+-- 1. Insert system org (nil UUID) if not exists
+INSERT INTO orgs (id, legal_name, jurisdiction, status, created_at, updated_at)
+VALUES ('00000000-0000-0000-0000-000000000000', 'SYSTEM', 'CA', 'active', now(), now())
 ON CONFLICT (id) DO NOTHING;
 
 -- 2. Insert AI capability profiles for union-eyes
 INSERT INTO ai_capability_profiles
-  (id, entity_id, app_key, environment, profile_key, enabled,
+  (id, org_id, app_key, environment, profile_key, enabled,
    allowed_providers, allowed_models, modalities, features,
    data_classes_allowed, streaming_allowed, determinism_required,
    redaction_mode, created_by)
