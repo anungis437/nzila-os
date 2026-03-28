@@ -460,6 +460,21 @@ setIsSubmitting(false);
                       errors.description ? "border-red-500" : "border-gray-300"
                     }`}
                   />
+                  <div className="mt-2 p-3 bg-blue-50 rounded-md border border-blue-100">
+                    <div className="flex items-start gap-2">
+                      <Info size={16} className="text-blue-600 mt-0.5 shrink-0" />
+                      <div>
+                        <p className="text-sm font-medium text-blue-900">{t('forms.whatToInclude')}</p>
+                        <ul className="mt-1 space-y-0.5 text-xs text-blue-800 list-disc list-inside">
+                          <li>{t('forms.whatHappenedWhen')}</li>
+                          <li>{t('forms.whoInvolved')}</li>
+                          <li>{t('forms.whereTookPlace')}</li>
+                          <li>{t('forms.anyWitnessesDocumentation')}</li>
+                          <li>{t('forms.howAffected')}</li>
+                        </ul>
+                      </div>
+                    </div>
+                  </div>
                   {errors.description && (
                     <p className="text-sm text-red-600 mt-1 flex items-center gap-1">
                       <AlertCircle size={14} />
@@ -564,23 +579,6 @@ setIsSubmitting(false);
                       ))}
                     </div>
                   )}
-                </div>
-
-                {/* Help Box */}
-                <div className="p-4 bg-blue-50 rounded-lg border border-blue-200">
-                  <div className="flex items-start gap-3">
-                    <Info size={20} className="text-blue-600 mt-0.5 shrink-0" />
-                    <div>
-                      <h4 className="font-semibold text-blue-900 mb-1">{t('forms.whatToInclude')}</h4>
-                      <ul className="space-y-1 text-sm text-blue-800 list-disc list-inside">
-                        <li>{t('forms.whatHappenedWhen')}</li>
-                        <li>{t('forms.whoInvolved')}</li>
-                        <li>{t('forms.whereTookPlace')}</li>
-                        <li>{t('forms.anyWitnessesDocumentation')}</li>
-                        <li>{t('forms.howAffected')}</li>
-                      </ul>
-                    </div>
-                  </div>
                 </div>
 
                 {/* Submit Button */}

@@ -334,6 +334,16 @@ function IncidentStep({ form }: { form: any }) {
           rows={6}
           {...form.register("description")}
         />
+        <div className="p-3 bg-blue-50 rounded-md border border-blue-100">
+          <p className="text-sm font-medium text-blue-900">What to include:</p>
+          <ul className="mt-1 space-y-0.5 text-xs text-blue-800 list-disc list-inside">
+            <li>What happened and when it occurred</li>
+            <li>Who was involved (names, positions)</li>
+            <li>Where it took place</li>
+            <li>Any witnesses or supporting documentation</li>
+            <li>How this affected you or others</li>
+          </ul>
+        </div>
         {form.formState.errors.description && (
           <p className="text-sm text-red-500">
             {form.formState.errors.description.message}
