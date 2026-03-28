@@ -9,6 +9,7 @@
     "lint": "eslint",
     "typecheck": "node --max-old-space-size=8192 ../../node_modules/typescript/lib/tsc.js --noEmit",
     "test": "vitest run",
+    "test:coverage": "vitest run --coverage",
     "test:services": "vitest run services/",
     "e2e": "playwright test",
     "clean": "rm -rf .next .turbo node_modules",

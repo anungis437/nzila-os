@@ -15,5 +15,24 @@ export default defineProject({
       "e2e/**",
       "services/**",
     ],
+    coverage: {
+      provider: "v8",
+      include: [
+        "lib/ai/**",
+        "lib/services/**",
+      ],
+      exclude: [
+        "**/__tests__/**",
+        "**/*.test.ts",
+        "**/node_modules/**",
+      ],
+      thresholds: {
+        // Tier 4 coverage gates — AI & service layer
+        lines: 40,
+        functions: 40,
+        branches: 30,
+        statements: 40,
+      },
+    },
   },
 });

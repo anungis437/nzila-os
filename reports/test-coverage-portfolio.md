@@ -2,8 +2,8 @@
 
 **Generated**: 2026-03-15  
 **Runner**: Vitest 4.0.18  
-**Total test files**: 617 (*.test.ts) + 36 (*.test.tsx)  
-**Contract tests**: 149 files in `tooling/contract-tests/`
+**Total test files**: 623 (*.test.ts) + 36 (*.test.tsx)  
+**Contract tests**: 165 files in `tooling/contract-tests/`
 
 ---
 
@@ -13,7 +13,7 @@
 
 | App | Test Files | Test Types | Notes |
 |-----|:---------:|------------|-------|
-| union-eyes | 21 | Unit + contract + integration | Representation protocol, FSM, evidence |
+| union-eyes | 27 | Unit + contract + integration + AI | Representation protocol, FSM, evidence, AI safety, resilience, template engine, auto-classification, precedent matching, token costs |
 | orchestrator-api | 3 | Unit + contract + store integration | Schema, workflows, in-memory store lifecycle |
 | cfo | 2 | Smoke + integration | Platform integration |
 | console | 2 | Smoke + integration | Platform integration |
