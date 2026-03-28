@@ -80,12 +80,20 @@ export function AnalyticsOverviewConsole({ canViewTopPerformers = false }: Analy
         // withApi wraps in { success, data: { metrics, ... }, timestamp }
         const data = raw.data ?? raw;
         if (data.metrics && Array.isArray(data.metrics)) {
+          const iconMap: Record<string, React.ReactElement> = {
+            'Total Cases': <FileText className="w-5 h-5" />,
+            'Resolved': <CheckCircle className="w-5 h-5" />,
+            'Active Members': <Users className="w-5 h-5" />,
+            'Open Cases': <Clock className="w-5 h-5" />,
+            'Avg Response Time': <TrendingUp className="w-5 h-5" />,
+            'Resolution Rate': <Target className="w-5 h-5" />,
+          };
           setMetrics(data.metrics.map((m: Record<string, unknown>) => ({
             label: (m.label as string) ?? '',
             value: String(m.value ?? 0),
             change: Number(m.change ?? 0),
             changeLabel: (m.changeLabel as string) ?? '',
-            icon: <BarChart3 className="w-5 h-5" />,
+            icon: iconMap[(m.label as string) ?? ''] ?? <BarChart3 className="w-5 h-5" />,
             color: (m.color as string) ?? 'text-blue-600 bg-blue-100',
           })));
         }
@@ -231,10 +239,6 @@ export function AnalyticsOverviewConsole({ canViewTopPerformers = false }: Analy
                 <div className="space-y-4">
                   <div className="flex items-center gap-4 text-sm">
                     <div className="flex items-center gap-2">
-                      <div className="w-3 h-3 bg-blue-500 rounded-full"></div>
-                      <span className="text-gray-600">{t('analytics.totalCases')}</span>
-                    </div>
-                    <div className="flex items-center gap-2">
                       <div className="w-3 h-3 bg-green-500 rounded-full"></div>
                       <span className="text-gray-600">{t('analytics.resolved')}</span>
                     </div>
@@ -248,20 +252,15 @@ export function AnalyticsOverviewConsole({ canViewTopPerformers = false }: Analy
                       <div key={dataPoint.month} className="space-y-2">
                         <div className="flex items-center justify-between text-sm">
                           <span className="text-gray-600 font-medium w-12">{dataPoint.month}</span>
-                          <div className="flex-1 mx-4 flex gap-1">
+                          <div className="flex-1 mx-4 flex">
                             <div
-                              className="h-8 bg-blue-500 rounded-l transition-all hover:bg-blue-600"
-                              style={{ width: `${(dataPoint.cases / maxCaseValue) * 100}%` }}
-                              title={`Total: ${dataPoint.cases}`}
-                            />
-                            <div
-                              className="h-8 bg-green-500 transition-all hover:bg-green-600"
-                              style={{ width: `${(dataPoint.resolved / maxCaseValue) * 100}%` }}
+                              className="h-8 bg-green-500 rounded-l transition-all hover:bg-green-600"
+                              style={{ width: `${maxCaseValue > 0 ? (dataPoint.resolved / maxCaseValue) * 100 : 0}%` }}
                               title={`Resolved: ${dataPoint.resolved}`}
                             />
                             <div
                               className="h-8 bg-orange-500 rounded-r transition-all hover:bg-orange-600"
-                              style={{ width: `${(dataPoint.pending / maxCaseValue) * 100}%` }}
+                              style={{ width: `${maxCaseValue > 0 ? (dataPoint.pending / maxCaseValue) * 100 : 0}%` }}
                               title={`Pending: ${dataPoint.pending}`}
                             />
                           </div>
@@ -313,7 +312,7 @@ export function AnalyticsOverviewConsole({ canViewTopPerformers = false }: Analy
         </div>
 
         {/* Bottom Row */}
-        <div className="grid grid-cols-1 lg:grid-cols-2 gap-6">
+        <div className={`grid grid-cols-1 ${canViewTopPerformers ? 'lg:grid-cols-2' : ''} gap-6`}>
           {/* Top Performing Stewards — chief_steward+ only */}
           {canViewTopPerformers && (
           <motion.div
