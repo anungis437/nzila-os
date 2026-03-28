@@ -12,6 +12,7 @@ import PaymentSuccessPopup from "@/components/payment-success-popup";
 import { OrganizationSelector } from "@/components/organization/organization-selector";
 import { OrganizationBreadcrumb } from "@/components/organization/organization-breadcrumb";
 import LanguageSwitcher from "@/components/language-switcher";
+import { HeaderActions } from "@/components/header-actions";
 import { logger } from "@/lib/logger";
 import { getOrganizationIdForUser, DEFAULT_ORGANIZATION_ID } from "@/lib/organization-utils";
 import { getUserRole } from "@/lib/auth/rbac-server";
@@ -179,6 +180,7 @@ export default async function DashboardLayout({ children }: { children: ReactNod
             <div className="flex items-center gap-3">
               <LanguageSwitcher />
               <OrganizationSelector />
+              <HeaderActions />
             </div>
           </div>
           
