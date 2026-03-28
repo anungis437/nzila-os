@@ -35,7 +35,10 @@
     "member": "Membre",
     "go": "Aller",
     "new": "Nouveau",
-    "viewAll": "Voir tout"
+    "viewAll": "Voir tout",
+    "all": "Tout",
+    "total": "Total",
+    "retry": "Réessayer"
   },
   "navigation": {
     "home": "Accueil",
