@@ -1,13 +1,13 @@
 /**
- * CRUD collection route for messages
+ * CRUD collection route for message threads
  */
 import { crudRoutes } from '@/lib/api/crud-factory';
-import { messages } from '@/db/schema';
+import { messageThreads } from '@/db/schema';
 
 export const dynamic = 'force-dynamic';
 
 const { GET, POST } = crudRoutes({
-  table: messages,
+  table: messageThreads,
   pk: 'id',
   tags: ["Notifications"],
   orgScoped: true,
