@@ -28,7 +28,7 @@ export const GET = withApi(
       const { ApiError } = await import('@/lib/api/errors');
       throw ApiError.notFound('Voting session');
     }
-    return session;
+    return { ...session };
   }
 );
 

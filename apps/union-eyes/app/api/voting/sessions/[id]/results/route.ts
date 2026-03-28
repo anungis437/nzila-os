@@ -35,10 +35,10 @@ export const GET = withApi(
     const statistics = await getSessionStatistics(sessionId);
 
     // Include ranked-choice results if applicable
-    let rankedChoiceResults = null;
+    let rankedChoiceResults: Record<string, unknown> | null = null;
     if (session.type === 'convention') {
       try {
-        rankedChoiceResults = await calculateRankedChoiceResults(sessionId);
+        rankedChoiceResults = { ...(await calculateRankedChoiceResults(sessionId)) };
       } catch { /* Not enough data for IRV */ }
     }
 

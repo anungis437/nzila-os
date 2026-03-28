@@ -112,12 +112,14 @@ export default function VotingPage() {
               onSubmit={async (selectedVotes) => {
                 try {
                   // Cast votes via the real API
-                  for (const vote of selectedVotes) {
-                    await fetch(`/api/voting/sessions/${activeElection.id}/vote`, {
-                      method: 'POST',
-                      headers: { 'Content-Type': 'application/json' },
-                      body: JSON.stringify({ optionId: vote.optionId ?? vote }),
-                    });
+                  for (const optionIds of Object.values(selectedVotes)) {
+                    for (const optionId of optionIds) {
+                      await fetch(`/api/voting/sessions/${activeElection.id}/vote`, {
+                        method: 'POST',
+                        headers: { 'Content-Type': 'application/json' },
+                        body: JSON.stringify({ optionId }),
+                      });
+                    }
                   }
                 } catch { /* handled by API */ }
                 setActiveElection(null);

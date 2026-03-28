@@ -18,6 +18,6 @@ export const GET = withApi(
   },
   async ({ params, organizationId }) => {
     const performance = await getLroPerformance(params.lroId, organizationId ?? undefined);
-    return performance;
+    return { ...performance };
   }
 );
