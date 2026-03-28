@@ -5,6 +5,7 @@
 import { withApi } from '@/lib/api/framework';
 import { db } from '@/db/db';
 import { sql } from 'drizzle-orm';
+import { withRLSContext } from '@/lib/db/with-rls-context';
 
 export const dynamic = 'force-dynamic';
 
@@ -37,7 +38,7 @@ export const GET = withApi(
     let rows: Record<string, unknown>[];
     if (organizationId) {
       if (isMonthly) {
-        rows = Array.from(await db.execute(sql`
+        rows = Array.from(await withRLSContext(async () => db.execute(sql`
           SELECT to_char(date_trunc('month', incident_date), 'YYYY-MM-DD') AS date,
             COUNT(*) FILTER (WHERE severity IN ('near_miss','minor')) AS minor,
             COUNT(*) FILTER (WHERE severity IN ('moderate','serious')) AS major,
@@ -48,9 +49,9 @@ export const GET = withApi(
             AND incident_date >= ${startISO}::timestamptz
           GROUP BY date_trunc('month', incident_date)
           ORDER BY date_trunc('month', incident_date) ASC
-        `));
+        `)));
       } else {
-        rows = Array.from(await db.execute(sql`
+        rows = Array.from(await withRLSContext(async () => db.execute(sql`
           SELECT to_char(date_trunc('day', incident_date), 'YYYY-MM-DD') AS date,
             COUNT(*) FILTER (WHERE severity IN ('near_miss','minor')) AS minor,
             COUNT(*) FILTER (WHERE severity IN ('moderate','serious')) AS major,
@@ -61,11 +62,11 @@ export const GET = withApi(
             AND incident_date >= ${startISO}::timestamptz
           GROUP BY date_trunc('day', incident_date)
           ORDER BY date_trunc('day', incident_date) ASC
-        `));
+        `)));
       }
     } else {
       if (isMonthly) {
-        rows = Array.from(await db.execute(sql`
+        rows = Array.from(await withRLSContext(async () => db.execute(sql`
           SELECT to_char(date_trunc('month', incident_date), 'YYYY-MM-DD') AS date,
             COUNT(*) FILTER (WHERE severity IN ('near_miss','minor')) AS minor,
             COUNT(*) FILTER (WHERE severity IN ('moderate','serious')) AS major,
@@ -75,9 +76,9 @@ export const GET = withApi(
           WHERE incident_date >= ${startISO}::timestamptz
           GROUP BY date_trunc('month', incident_date)
           ORDER BY date_trunc('month', incident_date) ASC
-        `));
+        `)));
       } else {
-        rows = Array.from(await db.execute(sql`
+        rows = Array.from(await withRLSContext(async () => db.execute(sql`
           SELECT to_char(date_trunc('day', incident_date), 'YYYY-MM-DD') AS date,
             COUNT(*) FILTER (WHERE severity IN ('near_miss','minor')) AS minor,
             COUNT(*) FILTER (WHERE severity IN ('moderate','serious')) AS major,
@@ -87,7 +88,7 @@ export const GET = withApi(
           WHERE incident_date >= ${startISO}::timestamptz
           GROUP BY date_trunc('day', incident_date)
           ORDER BY date_trunc('day', incident_date) ASC
-        `));
+        `)));
       }
     }
 

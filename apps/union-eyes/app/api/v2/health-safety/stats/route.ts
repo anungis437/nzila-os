@@ -6,6 +6,7 @@
 import { withApi } from '@/lib/api/framework';
 import { db } from '@/db/db';
 import { sql } from 'drizzle-orm';
+import { withRLSContext } from '@/lib/db/with-rls-context';
 
 export const dynamic = 'force-dynamic';
 
@@ -39,6 +40,7 @@ export const GET = withApi(
     const dateFilter = sql`created_at >= ${startDate}`;
 
     try {
+    return await withRLSContext(async () => {
     const incRows = Array.from(await db.execute(sql`SELECT count(*)::int AS total_incidents FROM workplace_incidents WHERE ${orgFilter} AND ${dateFilter}`));
       const total_incidents = Number((incRows[0] as Record<string, unknown>)?.total_incidents ?? 0);
 
@@ -75,6 +77,7 @@ export const GET = withApi(
       complianceRate,
       compliance_rate: complianceRate,
     };
+    }); // withRLSContext
     } catch (error) {
       const { logger: log } = await import('@/lib/logger');
       log.error('Health-safety stats query failed', { error: error instanceof Error ? error.message : 'Unknown' });

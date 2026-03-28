@@ -238,6 +238,7 @@ const PAGE_ACCESS_MATRIX: PageRule[] = [
 
   // ── Chief steward (level 70) ───────────────────────────────────────────
   { path: 'stewards/page.tsx',                           minRole: 'chief_steward',        description: 'Steward supervision dashboard' },
+  { path: 'stewards/ratings/page.tsx',                   minRole: 'chief_steward',        description: 'Rep ratings & satisfaction dashboard' },
 
   // ── Executive-level pages (level 85) ───────────────────────────────────
   { path: 'executive/page.tsx',                          minRole: 'vice_president',       description: 'Executive dashboard' },
