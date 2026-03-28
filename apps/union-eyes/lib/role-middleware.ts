@@ -9,6 +9,7 @@ import { NextRequest, NextResponse } from "next/server";
 import { withOrganizationAuth } from "@/lib/organization-middleware";
 import { getMemberByUserId } from "@/db/queries/organization-members-queries";
 import { logger } from '@/lib/logger';
+import { UserRole, getRoleLevel } from "@/lib/auth/roles";
 
 /**
  * Super-admin organization ID — the platform-level org whose admins
@@ -24,7 +25,13 @@ const SUPER_ADMIN_ORG_ID = (() => {
   return id ?? null;
 })();
 
-export type MemberRole = "member" | "steward" | "officer" | "admin" | "super_admin";
+/**
+ * MemberRole includes all UserRole values plus "super_admin" for cross-org
+ * platform access.  Previously this was a simplified 5-value union; it now
+ * covers every role defined in the RBAC system so that fine-grained roles
+ * (e.g. health_safety_rep, bargaining_committee) are not collapsed.
+ */
+export type MemberRole = UserRole | "super_admin";
 
 export interface RoleContext {
   organizationId: string;
@@ -34,15 +41,14 @@ export interface RoleContext {
 }
 
 /**
- * Role hierarchy levels (higher = more permissions)
+ * Resolve the numeric privilege level for any MemberRole.
+ * Delegates to the canonical getRoleLevel() from roles.ts;
+ * "super_admin" is treated as the highest possible level.
  */
-const ROLE_HIERARCHY: Record<MemberRole, number> = {
-  super_admin: 5,
-  admin: 4,
-  officer: 3,
-  steward: 2,
-  member: 1,
-};
+function getLevel(role: MemberRole): number {
+  if (role === "super_admin") return 999;
+  return getRoleLevel(role as UserRole);
+}
 
 /**
  * Check if a role has permission to access a resource
@@ -51,7 +57,7 @@ export function hasRolePermission(
   userRole: MemberRole,
   requiredRole: MemberRole
 ): boolean {
-  return ROLE_HIERARCHY[userRole] >= ROLE_HIERARCHY[requiredRole];
+  return getLevel(userRole) >= getLevel(requiredRole);
 }
 
 /**
