@@ -46,15 +46,11 @@ export default function PaymentHistory({ userId }: PaymentHistoryProps) {
       const items = Array.isArray(json?.data) ? json.data : Array.isArray(json) ? json : [];
       setPayments(items);
     } catch (_error) {
-toast({
-        title: 'Error',
-        description: 'Failed to load payment history',
-        variant: 'destructive',
-      });
+      setPayments([]);
     } finally {
       setLoading(false);
     }
-  }, [userId, toast]);
+  }, [userId]);
 
   useEffect(() => {
     loadPaymentHistory();

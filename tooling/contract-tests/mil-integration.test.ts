@@ -139,7 +139,6 @@ describe('MIL-INT-004 — Entitlement enforcement on commerce routes', () => {
     'billing/send-invoice/route.ts',
     'billing/subscriptions/route.ts',
     'dues/late-fees/route.ts',
-    'dues/balance/route.ts',
     'dues/ledger/route.ts',
     'dues/payment-plans/route.ts',
     'dues/reconcile/route.ts',

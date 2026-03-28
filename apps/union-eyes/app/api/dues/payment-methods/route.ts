@@ -11,7 +11,6 @@ export const dynamic = 'force-dynamic';
 export const GET = withApi(
   {
     auth: { minRole: 'member' },
-    entitlement: 'financial_intelligence_suite',
     openapi: {
       tags: ['Dues'],
       summary: 'List saved payment methods for the authenticated user',
