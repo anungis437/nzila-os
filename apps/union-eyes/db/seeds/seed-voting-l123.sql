@@ -25,12 +25,12 @@ VALUES
    true, true, 50, 12, now(), now())
 ON CONFLICT (id) DO NOTHING;
 
-INSERT INTO voting_options (id, session_id, text, description, order_index, created_at)
+INSERT INTO voting_options (id, session_id, text, description, order_index, created_at, updated_at)
 VALUES
   ('bb100001-0001-4000-8000-000000000001', 'aa100001-0001-4000-8000-000000000001',
-   'Accept Agreement', 'Accept the tentative 2026-2030 Inside Workers CBA as negotiated', 1, now()),
+   'Accept Agreement', 'Accept the tentative 2026-2030 Inside Workers CBA as negotiated', 1, now(), now()),
   ('bb100001-0001-4000-8000-000000000002', 'aa100001-0001-4000-8000-000000000001',
-   'Reject Agreement', 'Reject the tentative agreement and direct the bargaining team to return to the table', 2, now())
+   'Reject Agreement', 'Reject the tentative agreement and direct the bargaining team to return to the table', 2, now(), now())
 ON CONFLICT (id) DO NOTHING;
 
 -- 1b. Policy vote – workplace surveillance
@@ -49,14 +49,14 @@ VALUES
    true, true, 33, 12, now(), now())
 ON CONFLICT (id) DO NOTHING;
 
-INSERT INTO voting_options (id, session_id, text, description, order_index, created_at)
+INSERT INTO voting_options (id, session_id, text, description, order_index, created_at, updated_at)
 VALUES
   ('bb100001-0001-4000-8000-000000000003', 'aa100001-0001-4000-8000-000000000002',
-   'Support – Ban Surveillance', 'Mandate the bargaining team to negotiate a full ban on AI-driven surveillance and keystroke logging', 1, now()),
+   'Support – Ban Surveillance', 'Mandate the bargaining team to negotiate a full ban on AI-driven surveillance and keystroke logging', 1, now(), now()),
   ('bb100001-0001-4000-8000-000000000004', 'aa100001-0001-4000-8000-000000000002',
-   'Support – With Conditions', 'Allow limited monitoring with union oversight, advance notice, and 30-day data retention caps', 2, now()),
+   'Support – With Conditions', 'Allow limited monitoring with union oversight, advance notice, and 30-day data retention caps', 2, now(), now()),
   ('bb100001-0001-4000-8000-000000000005', 'aa100001-0001-4000-8000-000000000002',
-   'Oppose Resolution', 'No change; leave current employer practices in place', 3, now())
+   'Oppose Resolution', 'No change; leave current employer practices in place', 3, now(), now())
 ON CONFLICT (id) DO NOTHING;
 
 -- ─────────────────────────────────────────────────────────────────────────────
@@ -79,14 +79,14 @@ VALUES
    true, true, 25, 12, now(), now())
 ON CONFLICT (id) DO NOTHING;
 
-INSERT INTO voting_options (id, session_id, text, description, order_index, created_at)
+INSERT INTO voting_options (id, session_id, text, description, order_index, created_at, updated_at)
 VALUES
   ('bb100001-0001-4000-8000-000000000006', 'aa100001-0001-4000-8000-000000000003',
-   'Jean-Pierre Tremblay', 'Candidate for President – Senior Inspector, 12 years with the City, former steward', 1, now()),
+   'Jean-Pierre Tremblay', 'Candidate for President – Senior Inspector, 12 years with the City, former steward', 1, now(), now()),
   ('bb100001-0001-4000-8000-000000000007', 'aa100001-0001-4000-8000-000000000003',
-   'Priya Patel', 'Candidate for President – IT Support Analyst, current grievance committee chair', 2, now()),
+   'Priya Patel', 'Candidate for President – IT Support Analyst, current grievance committee chair', 2, now(), now()),
   ('bb100001-0001-4000-8000-000000000008', 'aa100001-0001-4000-8000-000000000003',
-   'Abstain', 'Abstain from voting', 3, now())
+   'Abstain', 'Abstain from voting', 3, now(), now())
 ON CONFLICT (id) DO NOTHING;
 
 -- 2b. Bylaw amendment – dues adjustment
@@ -105,14 +105,14 @@ VALUES
    false, true, 66, 12, now(), now())
 ON CONFLICT (id) DO NOTHING;
 
-INSERT INTO voting_options (id, session_id, text, description, order_index, created_at)
+INSERT INTO voting_options (id, session_id, text, description, order_index, created_at, updated_at)
 VALUES
   ('bb100001-0001-4000-8000-000000000009', 'aa100001-0001-4000-8000-000000000004',
-   'Approve – $8/month', 'Approve the increase to $8/month effective June 2026', 1, now()),
+   'Approve – $8/month', 'Approve the increase to $8/month effective June 2026', 1, now(), now()),
   ('bb100001-0001-4000-8000-000000000010', 'aa100001-0001-4000-8000-000000000004',
-   'Compromise – $5/month', 'Approve a reduced increase to $5/month', 2, now()),
+   'Compromise – $5/month', 'Approve a reduced increase to $5/month', 2, now(), now()),
   ('bb100001-0001-4000-8000-000000000011', 'aa100001-0001-4000-8000-000000000004',
-   'Reject', 'Keep the current $3/month contribution', 3, now())
+   'Reject', 'Keep the current $3/month contribution', 3, now(), now())
 ON CONFLICT (id) DO NOTHING;
 
 -- 2c. Pulse check – return-to-office
@@ -131,16 +131,16 @@ VALUES
    true, false, 0, 12, now(), now())
 ON CONFLICT (id) DO NOTHING;
 
-INSERT INTO voting_options (id, session_id, text, description, order_index, created_at)
+INSERT INTO voting_options (id, session_id, text, description, order_index, created_at, updated_at)
 VALUES
   ('bb100001-0001-4000-8000-000000000012', 'aa100001-0001-4000-8000-000000000005',
-   'Full Remote', 'Prefer to work fully remote (5 days/week from home)', 1, now()),
+   'Full Remote', 'Prefer to work fully remote (5 days/week from home)', 1, now(), now()),
   ('bb100001-0001-4000-8000-000000000013', 'aa100001-0001-4000-8000-000000000005',
-   'Hybrid – 2 Days In', 'Prefer 2 days in-office, 3 days remote', 2, now()),
+   'Hybrid – 2 Days In', 'Prefer 2 days in-office, 3 days remote', 2, now(), now()),
   ('bb100001-0001-4000-8000-000000000014', 'aa100001-0001-4000-8000-000000000005',
-   'Hybrid – 3 Days In', 'Prefer 3 days in-office, 2 days remote', 3, now()),
+   'Hybrid – 3 Days In', 'Prefer 3 days in-office, 2 days remote', 3, now(), now()),
   ('bb100001-0001-4000-8000-000000000015', 'aa100001-0001-4000-8000-000000000005',
-   'Full In-Office', 'Prefer to work fully in-office (5 days/week)', 4, now())
+   'Full In-Office', 'Prefer to work fully in-office (5 days/week)', 4, now(), now())
 ON CONFLICT (id) DO NOTHING;
 
 -- ─────────────────────────────────────────────────────────────────────────────
@@ -163,12 +163,12 @@ VALUES
    true, true, 50, 12, now(), now())
 ON CONFLICT (id) DO NOTHING;
 
-INSERT INTO voting_options (id, session_id, text, description, order_index, created_at)
+INSERT INTO voting_options (id, session_id, text, description, order_index, created_at, updated_at)
 VALUES
   ('bb100001-0001-4000-8000-000000000016', 'aa100001-0001-4000-8000-000000000006',
-   'Yes – Authorize Strike', 'Authorize the executive to call a legal strike if negotiations fail', 1, now()),
+   'Yes – Authorize Strike', 'Authorize the executive to call a legal strike if negotiations fail', 1, now(), now()),
   ('bb100001-0001-4000-8000-000000000017', 'aa100001-0001-4000-8000-000000000006',
-   'No – Continue Negotiating', 'Do not authorize a strike at this time', 2, now())
+   'No – Continue Negotiating', 'Do not authorize a strike at this time', 2, now(), now())
 ON CONFLICT (id) DO NOTHING;
 
 -- 3b. Previous collective agreement ratification (closed, passed)
@@ -187,12 +187,12 @@ VALUES
    true, true, 50, 12, now(), now())
 ON CONFLICT (id) DO NOTHING;
 
-INSERT INTO voting_options (id, session_id, text, description, order_index, created_at)
+INSERT INTO voting_options (id, session_id, text, description, order_index, created_at, updated_at)
 VALUES
   ('bb100001-0001-4000-8000-000000000018', 'aa100001-0001-4000-8000-000000000007',
-   'Accept Agreement', 'Accept the tentative 2022-2026 CBA', 1, now()),
+   'Accept Agreement', 'Accept the tentative 2022-2026 CBA', 1, now(), now()),
   ('bb100001-0001-4000-8000-000000000019', 'aa100001-0001-4000-8000-000000000007',
-   'Reject Agreement', 'Reject and return to bargaining', 2, now())
+   'Reject Agreement', 'Reject and return to bargaining', 2, now(), now())
 ON CONFLICT (id) DO NOTHING;
 
 -- 3c. Workplace safety policy (closed, passed unanimously)
@@ -211,12 +211,12 @@ VALUES
    true, true, 33, 12, now(), now())
 ON CONFLICT (id) DO NOTHING;
 
-INSERT INTO voting_options (id, session_id, text, description, order_index, created_at)
+INSERT INTO voting_options (id, session_id, text, description, order_index, created_at, updated_at)
 VALUES
   ('bb100001-0001-4000-8000-000000000020', 'aa100001-0001-4000-8000-000000000008',
-   'Adopt Protocol', 'Adopt the strengthened right-to-refuse protocol and notify the employer', 1, now()),
+   'Adopt Protocol', 'Adopt the strengthened right-to-refuse protocol and notify the employer', 1, now(), now()),
   ('bb100001-0001-4000-8000-000000000021', 'aa100001-0001-4000-8000-000000000008',
-   'Reject Protocol', 'Maintain current right-to-refuse procedures', 2, now())
+   'Reject Protocol', 'Maintain current right-to-refuse procedures', 2, now(), now())
 ON CONFLICT (id) DO NOTHING;
 
 COMMIT;
