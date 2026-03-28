@@ -61,7 +61,9 @@ setIsAdmin(false);
         });
 
         if (response.ok) {
-          const data = await response.json();
+          const json = await response.json();
+          // withApi wraps responses in { success, data: { ... } }
+          const data = json.data ?? json;
           setNotificationCount(data.count || 0);
         }
       } catch (_error) {

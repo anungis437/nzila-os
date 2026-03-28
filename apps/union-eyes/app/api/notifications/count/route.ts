@@ -20,20 +20,24 @@ export const GET = withApi(
     },
   },
   async ({ userId, organizationId }) => {
-    const now = new Date();
-    const [result] = await db
-      .select({ count: count() })
-      .from(inAppNotifications)
-      .where(
-        and(
-          eq(inAppNotifications.userId, userId!),
-          eq(inAppNotifications.organizationId, organizationId!),
-          eq(inAppNotifications.read, false),
-          or(isNull(inAppNotifications.expiresAt), gte(inAppNotifications.expiresAt, now)),
-        ),
-      );
+    try {
+      const now = new Date();
+      const [result] = await db
+        .select({ count: count() })
+        .from(inAppNotifications)
+        .where(
+          and(
+            eq(inAppNotifications.userId, userId!),
+            eq(inAppNotifications.organizationId, organizationId!),
+            eq(inAppNotifications.read, false),
+            or(isNull(inAppNotifications.expiresAt), gte(inAppNotifications.expiresAt, now)),
+          ),
+        );
 
-    return { count: result?.count ?? 0 };
+      return { count: result?.count ?? 0 };
+    } catch {
+      return { count: 0 };
+    }
   },
 );
 

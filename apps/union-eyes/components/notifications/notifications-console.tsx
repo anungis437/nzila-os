@@ -190,9 +190,11 @@ export default function NotificationsConsole() {
 
       const res = await fetch(`/api/notifications?${params.toString()}`);
       if (!res.ok) throw new Error('Failed to fetch notifications');
-      const data: ApiResponse = await res.json();
-      setNotifications(data.notifications);
-      setUnreadCount(data.unreadCount);
+      const json = await res.json();
+      // withApi wraps responses in { success, data: { ... } }
+      const data: ApiResponse = json.data ?? json;
+      setNotifications(data.notifications ?? []);
+      setUnreadCount(data.unreadCount ?? 0);
     } catch {
       setError('Unable to load notifications');
     } finally {
