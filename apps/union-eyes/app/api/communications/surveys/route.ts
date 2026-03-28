@@ -1,15 +1,15 @@
 /**
- * CRUD collection route for campaigns
+ * CRUD collection route for surveys
  */
 import { crudRoutes } from '@/lib/api/crud-factory';
-import { campaigns } from '@/db/schema';
+import { surveys } from '@/db/schema';
 
 export const dynamic = 'force-dynamic';
 
 const { GET, POST } = crudRoutes({
-  table: campaigns,
+  table: surveys,
   pk: 'id',
-  tags: ["Notifications"],
+  tags: ["Surveys"],
   orgScoped: true,
   readRole: 'member',
   writeRole: 'steward',

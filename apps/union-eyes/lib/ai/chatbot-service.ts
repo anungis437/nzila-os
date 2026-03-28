@@ -320,7 +320,15 @@ export class ChatbotService {
     // Safety filter on input
     const safetyCheck = await this.checkContentSafety(data.content);
     if (safetyCheck.flagged) {
-      throw new Error("Message flagged by content safety filter");
+      // If the safety system itself is unavailable, skip blocking (fail-open for availability)
+      // Only block when the moderation API explicitly flags the content
+      if (safetyCheck.reason === 'Safety system unavailable') {
+        logger?.warn('[ChatbotService] Content safety system unavailable — proceeding with message', {
+          sessionId: data.sessionId,
+        });
+      } else {
+        throw new Error("Message flagged by content safety filter");
+      }
     }
     
     // Save user message
@@ -346,10 +354,17 @@ export class ChatbotService {
     // Perform RAG if enabled
     let retrievedDocs: Array<{ documentId: string; title: string; relevanceScore: number; excerpt: string }> = [];
     if (data.useRAG !== false) {
-      retrievedDocs = await this.ragService.searchDocuments(data.content, {
-        organizationId: session.organizationId,
-        limit: 3,
-      });
+      try {
+        retrievedDocs = await this.ragService.searchDocuments(data.content, {
+          organizationId: session.organizationId,
+          limit: 3,
+        });
+      } catch (ragError) {
+        logger?.warn('[ChatbotService] RAG search failed — proceeding without context', {
+          error: ragError instanceof Error ? ragError.message : String(ragError),
+          sessionId: data.sessionId,
+        });
+      }
       
       // Add context to conversation
       if (retrievedDocs.length > 0) {
@@ -365,10 +380,26 @@ export class ChatbotService {
     }
     
     // Get AI response
-    const response = await aiGenerate(conversationMessages, {
-      temperature: parseFloat(session.temperature || "0.7"),
-      model: session.model,
-    });
+    let response: { content: string; tokensUsed: number; model: string };
+    try {
+      response = await aiGenerate(conversationMessages, {
+        temperature: parseFloat(session.temperature || "0.7"),
+        model: session.model,
+      });
+    } catch (aiError) {
+      logger?.error('[ChatbotService] AI generation failed — returning fallback response', {
+        error: aiError instanceof Error ? aiError.message : String(aiError),
+        sessionId: data.sessionId,
+      });
+      response = {
+        content:
+          "I'm sorry, the AI assistant is temporarily unavailable. " +
+          "Please try again in a few moments. If the issue persists, " +
+          "contact your union representative for assistance.",
+        tokensUsed: 0,
+        model: 'fallback',
+      };
+    }
     
     const responseTime = Date.now() - startTime;
     

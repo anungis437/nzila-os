@@ -64,7 +64,7 @@ export function IncidentTrendChart({
 
       const result = await response.json();
       if (result.success) {
-        setData(result.data);
+        setData(Array.isArray(result.data) ? result.data : []);
       } else {
         throw new Error(result.error);
       }
@@ -91,7 +91,7 @@ export function IncidentTrendChart({
     );
   }
 
-  if (data.length === 0) {
+  if (!data || data.length === 0) {
     return (
       <div className="h-[300px] w-full flex items-center justify-center">
         <p className="text-muted-foreground">No incident data available</p>
@@ -101,7 +101,7 @@ export function IncidentTrendChart({
 
   return (
     <div className="h-[300px] w-full">
-      <ResponsiveContainer width="100%" height="100%">
+      <ResponsiveContainer width="100%" height="100%" minWidth={0} minHeight={0}>
         {chartType === "line" ? (
           <LineChart data={data} margin={{ top: 5, right: 30, left: 20, bottom: 5 }}>
             <CartesianGrid strokeDasharray="3 3" className="stroke-muted" />

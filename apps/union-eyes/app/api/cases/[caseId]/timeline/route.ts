@@ -35,12 +35,23 @@ export const GET = withApi(
       return { data: [] };
     }
 
+    // Resolve caseId (could be claim_number like "L123-2026-007" or a UUID)
+    const claimRows = await withRLSContext(() =>
+      db.execute(
+        sql`SELECT claim_id FROM claims WHERE claim_number = ${caseId} OR claim_id::text = ${caseId} LIMIT 1`,
+      ),
+    );
+    const resolvedClaimId = (claimRows[0] as { claim_id?: string } | undefined)?.claim_id;
+    if (!resolvedClaimId) {
+      return { data: [] };
+    }
+
     // 1. Fetch claimUpdates scoped to this case
     const updates = await withRLSContext(() =>
       db
         .select()
         .from(claimUpdates)
-        .where(eq(claimUpdates.claimId, caseId))
+        .where(eq(claimUpdates.claimId, resolvedClaimId))
         .orderBy(desc(claimUpdates.createdAt)),
     );
 
@@ -59,7 +70,7 @@ export const GET = withApi(
     try {
       const linkResult = await withRLSContext(() =>
         db.execute(
-          sql`SELECT grievance_id FROM claims WHERE claim_id = ${caseId} AND grievance_id IS NOT NULL LIMIT 1`,
+          sql`SELECT grievance_id FROM claims WHERE claim_id = ${resolvedClaimId} AND grievance_id IS NOT NULL LIMIT 1`,
         ),
       );
       const rows = Array.from(linkResult);

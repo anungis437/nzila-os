@@ -63,10 +63,27 @@ const incidentSchema = z.object({
   witnessContacts: z.string().optional(),
   correctiveActions: z.string().optional(),
   preventiveMeasures: z.string().optional(),
-  reportedBy: z.string().min(1, "Reporter name is required"),
-  reporterContact: z.string().min(1, "Reporter contact is required"),
+  isAnonymous: z.boolean().default(false),
+  reportedBy: z.string().optional(),
+  reporterContact: z.string().optional(),
 }).refine((data) => {
-  if (data.injuriesOccurred &&!data.injuryDetails) {
+  if (!data.isAnonymous && (!data.reportedBy || data.reportedBy.length === 0)) {
+    return false;
+  }
+  return true;
+}, {
+  message: "Reporter name is required unless reporting anonymously",
+  path: ["reportedBy"],
+}).refine((data) => {
+  if (!data.isAnonymous && (!data.reporterContact || data.reporterContact.length === 0)) {
+    return false;
+  }
+  return true;
+}, {
+  message: "Reporter contact is required unless reporting anonymously",
+  path: ["reporterContact"],
+}).refine((data) => {
+  if (data.injuriesOccurred && !data.injuryDetails) {
     return false;
   }
   return true;
@@ -123,6 +140,7 @@ export function IncidentReportForm({
       witnessContacts: "",
       correctiveActions: "",
       preventiveMeasures: "",
+      isAnonymous: false,
       reportedBy: "",
       reporterContact: "",
     },
@@ -225,6 +243,7 @@ export function IncidentReportForm({
 
   const injuriesOccurred = form.watch("injuriesOccurred");
   const witnessesPresent = form.watch("witnessesPresent");
+  const isAnonymous = form.watch("isAnonymous");
 
   return (
     <form onSubmit={form.handleSubmit(handleSubmit)} className="space-y-6">
@@ -507,31 +526,58 @@ export function IncidentReportForm({
           <CardTitle>Reporter Information</CardTitle>
         </CardHeader>
         <CardContent className="space-y-4">
-          <div className="grid gap-4 md:grid-cols-2">
-            <div className="space-y-2">
-              <Label htmlFor="reportedBy">Your Name *</Label>
-              <Input
-                id="reportedBy"
-                placeholder="Full name"
-                {...form.register("reportedBy")}
+          {/* Anonymous Reporting Toggle */}
+          <div className="space-y-3">
+            <div className="flex items-center space-x-2">
+              <Checkbox
+                id="isAnonymous"
+                checked={isAnonymous}
+                onCheckedChange={(checked) => {
+                  form.setValue("isAnonymous", checked as boolean);
+                  if (checked) {
+                    form.setValue("reportedBy", "");
+                    form.setValue("reporterContact", "");
+                  }
+                }}
               />
-              {form.formState.errors.reportedBy && (
-                <p className="text-sm text-red-600">{form.formState.errors.reportedBy.message}</p>
-              )}
+              <Label htmlFor="isAnonymous" className="cursor-pointer">
+                Report anonymously
+              </Label>
             </div>
-
-            <div className="space-y-2">
-              <Label htmlFor="reporterContact">Your Contact *</Label>
-              <Input
-                id="reporterContact"
-                placeholder="Email or phone"
-                {...form.register("reporterContact")}
-              />
-              {form.formState.errors.reporterContact && (
-                <p className="text-sm text-red-600">{form.formState.errors.reporterContact.message}</p>
-              )}
-            </div>
+            {isAnonymous && (
+              <p className="text-sm text-muted-foreground ml-6">
+                Your identity will not be recorded. You can still be contacted if you provide optional contact info below.
+              </p>
+            )}
           </div>
+
+          {!isAnonymous && (
+            <div className="grid gap-4 md:grid-cols-2">
+              <div className="space-y-2">
+                <Label htmlFor="reportedBy">Your Name *</Label>
+                <Input
+                  id="reportedBy"
+                  placeholder="Full name"
+                  {...form.register("reportedBy")}
+                />
+                {form.formState.errors.reportedBy && (
+                  <p className="text-sm text-red-600">{form.formState.errors.reportedBy.message}</p>
+                )}
+              </div>
+
+              <div className="space-y-2">
+                <Label htmlFor="reporterContact">Your Contact *</Label>
+                <Input
+                  id="reporterContact"
+                  placeholder="Email or phone"
+                  {...form.register("reporterContact")}
+                />
+                {form.formState.errors.reporterContact && (
+                  <p className="text-sm text-red-600">{form.formState.errors.reporterContact.message}</p>
+                )}
+              </div>
+            </div>
+          )}
 
           {/* File Attachments */}
           <div className="space-y-2">

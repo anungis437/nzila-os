@@ -99,12 +99,27 @@ export function IncidentListTable({
         throw new Error("Failed to load incidents");
       }
 
-      const data = await response.json();
-      if (data.success) {
-        setIncidents(data.incidents);
-        setTotalPages(Math.ceil(data.total / itemsPerPage));
+      const json = await response.json();
+      if (json.success) {
+        const payload = json.data;
+        const rows = Array.isArray(payload.data) ? payload.data : [];
+        // eslint-disable-next-line @typescript-eslint/no-explicit-any
+        setIncidents(rows.map((r: any) => ({
+          id: r.id,
+          incidentNumber: r.incidentNumber ?? '',
+          reportedDate: new Date(r.reportedDate ?? Date.now()),
+          incidentDate: new Date(r.incidentDate ?? r.reportedDate ?? Date.now()),
+          type: r.incidentType ?? r.type ?? '',
+          severity: r.severity ?? 'minor',
+          status: r.status ?? 'open',
+          location: r.locationDescription ?? r.location ?? '',
+          reportedBy: r.reportedByName ?? r.reportedBy ?? '',
+          assignedTo: r.assignedToName ?? r.assignedTo,
+          description: r.description ?? '',
+        })));
+        setTotalPages(payload.pagination?.totalPages ?? 1);
       } else {
-        throw new Error(data.error);
+        throw new Error(json.error);
       }
     } catch {
       toast({

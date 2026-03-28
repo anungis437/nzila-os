@@ -37,25 +37,39 @@ export default function VotingPage() {
   const [latestResults, setLatestResults] = React.useState<any>(null);
 
   React.useEffect(() => {
-    async function loadElections() {
+    async function loadSessions() {
       try {
-        const res = await fetch('/api/v2/elections');
+        const res = await fetch('/api/voting/sessions');
         if (res.ok) {
-          const data = await res.json();
-          const items = Array.isArray(data) ? data : data?.elections ?? data?.data ?? [];
+          const json = await res.json();
+          const items = Array.isArray(json) ? json : json?.data ?? [];
           setElections(items);
           const active = items.find((e: { status: string }) => e.status === 'active');
           if (active) {
             setActiveElection(active);
+            // Load options for the active session
+            const optRes = await fetch(`/api/voting/sessions/${active.id}`);
+            if (optRes.ok) {
+              const optJson = await optRes.json();
+              const session = optJson?.data ?? optJson;
+              setActiveElection(session);
+            }
           }
-          const completed = items.find((e: { status: string }) => e.status === 'completed');
+          const completed = items.find((e: { status: string }) => e.status === 'closed');
           if (completed) {
-            setLatestResults(completed);
+            // Load calculated results
+            const resResults = await fetch(`/api/voting/sessions/${completed.id}/results`);
+            if (resResults.ok) {
+              const resJson = await resResults.json();
+              setLatestResults(resJson?.data ?? resJson);
+            } else {
+              setLatestResults(completed);
+            }
           }
         }
       } catch { /* API not available */ }
     }
-    loadElections();
+    loadSessions();
   }, []);
 
   return (
@@ -95,7 +109,17 @@ export default function VotingPage() {
                 requiresVerification: activeElection.requiresVerification ?? false,
                 allowsAbstain: activeElection.allowsAbstain ?? false,
               }}
-              onSubmit={async (_votes) => {
+              onSubmit={async (selectedVotes) => {
+                try {
+                  // Cast votes via the real API
+                  for (const vote of selectedVotes) {
+                    await fetch(`/api/voting/sessions/${activeElection.id}/vote`, {
+                      method: 'POST',
+                      headers: { 'Content-Type': 'application/json' },
+                      body: JSON.stringify({ optionId: vote.optionId ?? vote }),
+                    });
+                  }
+                } catch { /* handled by API */ }
                 setActiveElection(null);
               }}
               onCancel={() => setActiveElection(null)}
@@ -150,8 +174,21 @@ export default function VotingPage() {
       {/* Ballot Builder Modal */}
       {showBallotBuilder && (
         <BallotBuilder
-          onSave={async (_ballot) => {
-setShowBallotBuilder(false);
+          onSave={async (ballot) => {
+            try {
+              await fetch('/api/voting/sessions', {
+                method: 'POST',
+                headers: { 'Content-Type': 'application/json' },
+                body: JSON.stringify(ballot),
+              });
+              // Reload sessions
+              const res = await fetch('/api/voting/sessions');
+              if (res.ok) {
+                const json = await res.json();
+                setElections(Array.isArray(json) ? json : json?.data ?? []);
+              }
+            } catch { /* handled by API */ }
+            setShowBallotBuilder(false);
           }}
           onCancel={() => setShowBallotBuilder(false)}
         />

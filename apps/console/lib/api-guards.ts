@@ -16,6 +16,7 @@ import { platformDb } from '@nzila/db/platform'
 import { orgMembers } from '@nzila/db/schema'
 import { eq, and } from 'drizzle-orm'
 import { auth } from '@clerk/nextjs/server'
+import { headers } from 'next/headers'
 import { getUserRole, type NzilaRole } from '@/lib/rbac'
 import { createRequestContext, runWithContext } from '@nzila/os-core'
 
@@ -36,14 +37,29 @@ export interface AuthContext {
 }
 
 /**
- * Authenticate the user and optionally verify org membership.
+ * Authenticate the user via Clerk session or service-to-service key.
+ *
+ * Service auth: if AI_SERVICE_KEY is set and the request sends
+ * `Authorization: Bearer <key>` with a matching value, the caller
+ * is treated as an internal service with app_owner privileges.
  *
  * @returns AuthContext or a NextResponse error (401/403)
  */
 export async function authenticateUser(): Promise<
-  | { ok: true; userId: string; platformRole: NzilaRole }
+  | { ok: true; userId: string; platformRole: NzilaRole; isService?: boolean }
   | { ok: false; response: NextResponse }
 > {
+  // ── Service-to-service auth (cross-app AI gateway calls) ────────────
+  const serviceKey = process.env.AI_SERVICE_KEY
+  if (serviceKey) {
+    const hdrs = await headers()
+    const authHeader = hdrs.get('authorization')
+    if (authHeader === `Bearer ${serviceKey}`) {
+      return { ok: true, userId: 'svc:ai-gateway', platformRole: 'app_owner' as NzilaRole, isService: true }
+    }
+  }
+
+  // ── Normal Clerk session auth ──────────────────────────────────────
   const { userId } = await auth()
   if (!userId) {
     return {
@@ -100,6 +116,14 @@ export async function requireOrgAccess(
   if (!authResult.ok) return authResult
 
   const { userId, platformRole } = authResult
+
+  // Service accounts bypass org membership (inter-service AI calls)
+  if ('isService' in authResult && authResult.isService) {
+    return {
+      ok: true,
+      context: { userId, platformRole, membership: null },
+    }
+  }
 
   // Platform admins can bypass org membership
   if (options?.platformBypass?.includes(platformRole)) {

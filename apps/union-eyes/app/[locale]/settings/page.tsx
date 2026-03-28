@@ -17,6 +17,7 @@ import * as React from "react";
 import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
 import { NotificationPreferences } from "@/components/communication/notification-preferences";
 import { PrivacySettingsPanel } from "@/components/compliance/privacy-settings-panel";
+import { JurisdictionPreferences } from "@/components/precedents/JurisdictionPreferences";
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "@/components/ui/card";
 import { Label } from "@/components/ui/label";
 import { Input } from "@/components/ui/input";
@@ -77,13 +78,16 @@ export default function SettingsPage() {
         </TabsContent>
 
         <TabsContent value="preferences">
-          <Card>
-            <CardHeader>
-              <CardTitle>System Preferences</CardTitle>
-              <CardDescription>
-                Customize your experience and interface
-              </CardDescription>
-            </CardHeader>
+          <div className="space-y-6">
+            <JurisdictionPreferences />
+
+            <Card>
+              <CardHeader>
+                <CardTitle>System Preferences</CardTitle>
+                <CardDescription>
+                  Customize your experience and interface
+                </CardDescription>
+              </CardHeader>
             <CardContent className="space-y-4">
               <div className="flex items-center justify-between">
                 <div>
@@ -109,6 +113,7 @@ export default function SettingsPage() {
               <Button>Save Preferences</Button>
             </CardContent>
           </Card>
+          </div>
         </TabsContent>
       </Tabs>
     </div>

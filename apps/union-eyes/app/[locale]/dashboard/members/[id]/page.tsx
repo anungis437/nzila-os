@@ -71,6 +71,18 @@ const statusConfig: Record<MemberStatus, { label: string; color: string }> = {
   "on-leave": { label: "On Leave", color: "text-yellow-700 bg-yellow-100 border-yellow-200" }
 };
 
+const defaultBadge = { label: "Unknown", color: "text-gray-700 bg-gray-100 border-gray-200" };
+
+function getRoleConfig(role: string | null | undefined) {
+  if (!role) return defaultBadge;
+  return roleConfig[role as MemberRole] ?? { ...defaultBadge, label: role.replace(/_/g, ' ').replace(/\b\w/g, c => c.toUpperCase()) };
+}
+
+function getStatusConfig(status: string | null | undefined) {
+  if (!status) return defaultBadge;
+  return statusConfig[status as MemberStatus] ?? { ...defaultBadge, label: status.replace(/_/g, ' ').replace(/\b\w/g, c => c.toUpperCase()) };
+}
+
 export default function MemberDetailPage() {
   const params = useParams();
   const router = useRouter();
@@ -89,8 +101,11 @@ export default function MemberDetailPage() {
     fetcher
   );
 
-  const member: Member | null = memberData?.success ? memberData.data : null;
-  const claims: Claim[] = claimsData?.success ? claimsData.data : [];
+  // CRUD factory returns { data: row } inside the withApi envelope { success, data: { data: row } }
+  const member: Member | null = memberData?.success ? (memberData.data?.data ?? memberData.data) : null;
+  // Claims list returns array directly inside the envelope
+  const claimsRaw = claimsData?.success ? claimsData.data : [];
+  const claims: Claim[] = Array.isArray(claimsRaw) ? claimsRaw : (claimsRaw?.data ?? []);
 
   if (memberLoading) {
     return (
@@ -166,14 +181,14 @@ export default function MemberDetailPage() {
                 <h3 className="text-lg font-semibold text-gray-900 mb-4">Status</h3>
                 <div className="space-y-3">
                   <div>
-                    <span className={`inline-flex items-center px-3 py-1 rounded-full text-sm font-medium border ${roleConfig[member.role].color}`}>
+                    <span className={`inline-flex items-center px-3 py-1 rounded-full text-sm font-medium border ${getRoleConfig(member.role).color}`}>
                       <Shield className="w-3 h-3 mr-2" />
-                      {roleConfig[member.role].label}
+                      {getRoleConfig(member.role).label}
                     </span>
                   </div>
                   <div>
-                    <span className={`inline-flex items-center px-3 py-1 rounded-full text-sm font-medium border ${statusConfig[member.status].color}`}>
-                      {statusConfig[member.status].label}
+                    <span className={`inline-flex items-center px-3 py-1 rounded-full text-sm font-medium border ${getStatusConfig(member.status).color}`}>
+                      {getStatusConfig(member.status).label}
                     </span>
                   </div>
                 </div>

@@ -26,11 +26,11 @@ export const votingSessions = pgTable("voting_sessions", {
   metadata: jsonb("metadata").default(sql`'{}'::jsonb`),
 }, (table) => ({
   checkType: check("valid_type", 
-    sql`${table.type} IN ('convention', 'ratification', 'special_vote')`),
+    sql`${table.type} IN ('convention', 'ratification', 'special_vote', 'election', 'strike_authorization', 'bylaw_amendment', 'policy', 'pulse_check')`),
   checkStatus: check("valid_status", 
     sql`${table.status} IN ('draft', 'active', 'paused', 'closed', 'cancelled')`),
   checkMeetingType: check("valid_meeting_type", 
-    sql`${table.meetingType} IN ('convention', 'ratification', 'emergency', 'special')`),
+    sql`${table.meetingType} IN ('convention', 'ratification', 'emergency', 'special', 'general_membership', 'annual_general_meeting', 'special_meeting', 'executive_board')`),
   checkTimeRange: check("valid_time_range", 
     sql`${table.endTime} IS NULL OR ${table.startTime} IS NULL OR ${table.endTime} > ${table.startTime}`),
   checkScheduledEnd: check("valid_scheduled_end", 

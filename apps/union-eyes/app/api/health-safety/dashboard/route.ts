@@ -5,19 +5,18 @@
  */
 import { withApi } from '@/lib/api/framework';
 import { db } from '@/db/db';
-import { withSystemContext } from '@/lib/db/with-rls-context';
 import { sql } from 'drizzle-orm';
 
 export const dynamic = 'force-dynamic';
 
-function getStartDate(period: string): Date {
+function getStartDate(period: string): string {
   const now = new Date();
   switch (period) {
-    case '7d': return new Date(now.getTime() - 7 * 86_400_000);
-    case '30d': return new Date(now.getTime() - 30 * 86_400_000);
-    case '90d': return new Date(now.getTime() - 90 * 86_400_000);
-    case '12m': return new Date(now.getFullYear() - 1, now.getMonth(), now.getDate());
-    default: return new Date(now.getTime() - 30 * 86_400_000);
+    case '7d': return new Date(now.getTime() - 7 * 86_400_000).toISOString();
+    case '30d': return new Date(now.getTime() - 30 * 86_400_000).toISOString();
+    case '90d': return new Date(now.getTime() - 90 * 86_400_000).toISOString();
+    case '12m': return new Date(now.getFullYear() - 1, now.getMonth(), now.getDate()).toISOString();
+    default: return new Date(now.getTime() - 30 * 86_400_000).toISOString();
   }
 }
 
@@ -35,19 +34,18 @@ export const GET = withApi(
     const period = url.searchParams.get('period') || '30d';
     const startDate = getStartDate(period);
     const orgFilter = organizationId ? sql`organization_id = ${organizationId}` : sql`1=1`;
-    const dateFilter = sql`created_at >= ${startDate}`;
+    const dateFilter = sql`created_at >= ${startDate}::timestamptz`;
 
     try {
-
-    return await withSystemContext(async () => {
     const incidentRows = Array.from(
         await db.execute(sql`SELECT count(*)::int AS cnt FROM workplace_incidents WHERE ${orgFilter} AND ${dateFilter}`)
       );
       const totalIncidents = Number((incidentRows[0] as Record<string, unknown>)?.cnt ?? 0);
 
-      const prevStart = new Date(startDate.getTime() - (Date.now() - startDate.getTime()));
+      const startMs = new Date(startDate).getTime();
+      const prevStart = new Date(startMs - (Date.now() - startMs)).toISOString();
       const prevRows = Array.from(
-        await db.execute(sql`SELECT count(*)::int AS cnt FROM workplace_incidents WHERE ${orgFilter} AND created_at >= ${prevStart} AND created_at < ${startDate}`)
+        await db.execute(sql`SELECT count(*)::int AS cnt FROM workplace_incidents WHERE ${orgFilter} AND created_at >= ${prevStart}::timestamptz AND created_at < ${startDate}::timestamptz`)
       );
       const prevIncidents = Number((prevRows[0] as Record<string, unknown>)?.cnt ?? 0);
       const incidentChange = prevIncidents > 0
@@ -114,7 +112,6 @@ export const GET = withApi(
         ppeInventoryLow,
       },
     };
-    });
     } catch (error) {
       const { logger: log } = await import('@/lib/logger');
       log.error('Health-safety dashboard query failed', { error: error instanceof Error ? error.message : 'Unknown' });

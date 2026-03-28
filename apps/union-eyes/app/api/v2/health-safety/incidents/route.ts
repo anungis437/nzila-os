@@ -11,6 +11,6 @@ const { GET, POST } = crudRoutes({
   tags: ["Health-safety"],
   orgScoped: true,
   readRole: 'member',
-  writeRole: 'admin',
+  writeRole: 'member',
 });
 export { GET, POST };

@@ -89,15 +89,24 @@ export function HazardsList({
         throw new Error("Failed to load hazards");
       }
 
-      const data = await response.json();
-      if (data.success) {
+      const json = await response.json();
+      if (json.success) {
+        const rows = Array.isArray(json.data?.data) ? json.data.data : [];
         // eslint-disable-next-line @typescript-eslint/no-explicit-any
-        setHazards(data.hazards.map((h: any) => ({
-          ...h,
-          reportedDate: new Date(h.reportedDate)
+        setHazards(rows.map((h: any) => ({
+          id: h.id,
+          hazardNumber: h.reportNumber ?? h.hazardNumber ?? '',
+          type: h.hazardCategory ?? h.type ?? '',
+          priority: h.hazardLevel ?? h.priority ?? 'low',
+          status: h.status ?? 'open',
+          location: h.specificLocation ?? h.location ?? '',
+          description: h.hazardDescription ?? h.description ?? '',
+          reportedDate: new Date(h.reportedDate ?? h.reported_date ?? Date.now()),
+          reportedBy: h.reportedByName ?? h.reportedBy,
+          assignedTo: h.assignedToName ?? h.assignedTo,
         })));
       } else {
-        throw new Error(data.error);
+        throw new Error(json.error);
       }
     } catch (_error) {
       toast({
@@ -218,7 +227,7 @@ export function HazardsList({
                         {hazard.hazardNumber}
                       </CardTitle>
                       <CardDescription className="text-xs mt-1">
-                        {hazard.type.replace(/_/g, ' ')}
+                        {(hazard.type || '').replace(/_/g, ' ')}
                       </CardDescription>
                     </div>
                     <HazardPriorityBadge priority={hazard.priority} />

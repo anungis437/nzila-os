@@ -120,13 +120,15 @@ interface SearchFilters {
 interface PrecedentSearchProps {
   onSearch: (filters: SearchFilters) => void;
   isLoading?: boolean;
+  /** Pre-selected jurisdictions from user preferences */
+  initialJurisdictions?: string[];
 }
 
-export function PrecedentSearch({ onSearch, isLoading }: PrecedentSearchProps) {
+export function PrecedentSearch({ onSearch, isLoading, initialJurisdictions }: PrecedentSearchProps) {
   const [query, setQuery] = useState("");
   const [selectedGrievanceTypes, setSelectedGrievanceTypes] = useState<string[]>([]);
   const [selectedOutcomes, setSelectedOutcomes] = useState<string[]>([]);
-  const [selectedJurisdictions, setSelectedJurisdictions] = useState<string[]>([]);
+  const [selectedJurisdictions, setSelectedJurisdictions] = useState<string[]>(initialJurisdictions ?? []);
   const [selectedPrecedentLevels, setSelectedPrecedentLevels] = useState<string[]>([]);
   const [selectedSectors, setSelectedSectors] = useState<string[]>([]);
   const [selectedSharingLevels, setSelectedSharingLevels] = useState<string[]>([]);
@@ -137,6 +139,13 @@ export function PrecedentSearch({ onSearch, isLoading }: PrecedentSearchProps) {
 
   const debouncedQuery = useDebounce(query, 500);
   const debouncedArbitrator = useDebounce(arbitratorName, 500);
+
+  // Sync when initialJurisdictions changes (preferences loaded async)
+  useEffect(() => {
+    if (initialJurisdictions && initialJurisdictions.length > 0) {
+      setSelectedJurisdictions(initialJurisdictions);
+    }
+  }, [initialJurisdictions]);
 
   // Trigger search when filters change
   useEffect(() => {

@@ -7,9 +7,10 @@
 
 export const dynamic = 'force-dynamic';
 import { useEffect, useState } from "react";
-import { useRouter } from "next/navigation";
+import { useRouter, useSearchParams } from "next/navigation";
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "@/components/ui/card";
 import { Button } from "@/components/ui/button";
+import { SatisfactionSurvey } from "@/components/satisfaction/satisfaction-survey";
 import { 
   ArrowLeft,
   CheckCircle, 
@@ -18,7 +19,8 @@ import {
   FileText,
   Calendar,
   MapPin,
-  Users
+  Users,
+  Star,
 } from "lucide-react";
 
 interface ClaimDetail {
@@ -35,20 +37,44 @@ interface ClaimDetail {
   updatedAt: string;
   resolution?: string;
   resolutionDate?: string;
+  assignedToName?: string;
+}
+
+interface SurveyInfo {
+  id: string;
+  status: string;
 }
 
 export default function ClaimDetailPage({ params }: { params: { id: string } }) {
   const router = useRouter();
+  const searchParams = useSearchParams();
   const [claim, setClaim] = useState<ClaimDetail | null>(null);
+  const [survey, setSurvey] = useState<SurveyInfo | null>(null);
+  const [surveyCompleted, setSurveyCompleted] = useState(false);
   const [loading, setLoading] = useState(true);
 
   useEffect(() => {
     async function fetchClaim() {
       try {
-        const response = await fetch(`/api/claims/${params.id}`);
-        if (response.ok) {
-          const data = await response.json();
+        const [claimRes, surveyRes] = await Promise.all([
+          fetch(`/api/claims/${params.id}`),
+          fetch(`/api/satisfaction?claimId=${params.id}`),
+        ]);
+
+        if (claimRes.ok) {
+          const data = await claimRes.json();
           setClaim(data);
+        }
+
+        if (surveyRes.ok) {
+          const surveyData = await surveyRes.json();
+          const surveys = surveyData?.data ?? surveyData;
+          if (Array.isArray(surveys) && surveys.length > 0) {
+            const pending = surveys.find((s: SurveyInfo) => s.status === 'pending' || s.status === 'sent');
+            const completed = surveys.find((s: SurveyInfo) => s.status === 'completed');
+            if (pending) setSurvey(pending);
+            if (completed) setSurveyCompleted(true);
+          }
         }
       } catch (_error) {
 } finally {
@@ -206,6 +232,32 @@ export default function ClaimDetailPage({ params }: { params: { id: string } }) 
           </CardHeader>
           <CardContent>
             <p className="text-gray-700 whitespace-pre-wrap">{claim.resolution}</p>
+          </CardContent>
+        </Card>
+      )}
+
+      {/* Satisfaction Survey */}
+      {survey && !surveyCompleted && (
+        <SatisfactionSurvey
+          surveyId={survey.id}
+          claimNumber={claim.claimNumber}
+          lroName={claim.assignedToName}
+          onComplete={() => {
+            setSurveyCompleted(true);
+            setSurvey(null);
+          }}
+          onDecline={() => setSurvey(null)}
+        />
+      )}
+
+      {/* Survey Completed Confirmation */}
+      {surveyCompleted && (
+        <Card className="border-green-200 bg-green-50">
+          <CardContent className="flex items-center gap-3 py-4">
+            <Star className="h-5 w-5 text-green-600" />
+            <p className="text-sm text-green-800 font-medium">
+              Thank you for rating your representative on this case.
+            </p>
           </CardContent>
         </Card>
       )}

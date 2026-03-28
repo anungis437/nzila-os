@@ -24,6 +24,12 @@ ALTER TABLE pension_members ALTER COLUMN updated_at SET DEFAULT now();
 ALTER TABLE pension_contributions ALTER COLUMN id SET DEFAULT gen_random_uuid();
 ALTER TABLE pension_contributions ALTER COLUMN created_at SET DEFAULT now();
 ALTER TABLE pension_contributions ALTER COLUMN updated_at SET DEFAULT now();
+ALTER TABLE member_employment ALTER COLUMN id SET DEFAULT gen_random_uuid();
+ALTER TABLE member_employment ALTER COLUMN created_at SET DEFAULT now();
+ALTER TABLE member_employment ALTER COLUMN updated_at SET DEFAULT now();
+ALTER TABLE employment_history ALTER COLUMN id SET DEFAULT gen_random_uuid();
+ALTER TABLE employment_history ALTER COLUMN created_at SET DEFAULT now();
+ALTER TABLE employment_history ALTER COLUMN updated_at SET DEFAULT now();
 
 -- ============================================================
 -- 0b. Clean previous data for idempotency

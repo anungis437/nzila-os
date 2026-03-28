@@ -6,6 +6,7 @@
 
 // Core Dashboard Components
 export { HealthSafetyDashboard } from "./HealthSafetyDashboard";
+export { default as HealthSafetyOverview } from "./HealthSafetyOverview";
 export { SafetyMetricsCard } from "./SafetyMetricsCard";
 export { IncidentTrendChart } from "./IncidentTrendChart";
 

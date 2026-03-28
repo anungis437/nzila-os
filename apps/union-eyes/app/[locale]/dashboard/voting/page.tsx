@@ -48,6 +48,32 @@ interface Vote {
   currentParticipation?: number;
 }
 
+/* eslint-disable @typescript-eslint/no-explicit-any */
+function mapSessions(apiSessions: any[]): Vote[] {
+  return apiSessions.map((s: any) => ({
+    id: s.id,
+    title: s.title,
+    description: s.description || '',
+    type: (['ratification', 'convention', 'strike_authorization'].includes(s.type)
+      ? 'yes-no' : 'multiple-choice') as VoteType,
+    status: (s.status === 'draft' ? 'upcoming' : s.status === 'completed' ? 'closed' : s.status) as VoteStatus,
+    startDate: s.startTime || s.start_time || '',
+    endDate: s.endTime || s.end_time || '',
+    options: (s.options || []).map((o: any) => ({
+      id: o.id,
+      label: o.text || o.label || '',
+      votes: o.votes || 0,
+      percentage: o.percentage || 0,
+    })),
+    totalVotes: s.totalVotes || 0,
+    hasVoted: s.hasVoted || false,
+    userVote: s.userVote || undefined,
+    quorum: s.quorumThreshold || s.quorum,
+    currentParticipation: s.currentParticipation || 0,
+  }));
+}
+/* eslint-enable @typescript-eslint/no-explicit-any */
+
 export default function VotingPage() {
   const { user: _user } = useUser();
   const [votes, setVotes] = useState<Vote[]>([]);
@@ -71,8 +97,10 @@ export default function VotingPage() {
           throw new Error(`Failed to fetch voting sessions: ${response.statusText}`);
         }
 
-        const data = await response.json();
-        setVotes(data.sessions || []);
+        const res = await response.json();
+        // withApi wraps as { success, data: { sessions, ... }, timestamp }
+        const apiSessions = res.data?.sessions || res.sessions || [];
+        setVotes(mapSessions(apiSessions));
       } catch (err) {
 setError(err instanceof Error ? err.message : 'Failed to load voting sessions');
       } finally {
@@ -117,8 +145,9 @@ setError(err instanceof Error ? err.message : 'Failed to load voting sessions');
       // Refresh votes to get updated counts
       const refreshResponse = await fetch('/api/voting/sessions');
       if (refreshResponse.ok) {
-        const data = await refreshResponse.json();
-        setVotes(data.sessions || []);
+        const res = await refreshResponse.json();
+        const apiSessions = res.data?.sessions || res.sessions || [];
+        setVotes(mapSessions(apiSessions));
       }
     } catch (err) {
 alert(err instanceof Error ? err.message : 'Failed to submit vote');
@@ -535,11 +564,11 @@ alert(err instanceof Error ? err.message : 'Failed to submit vote');
                     Your vote matters! Participate in union decisions to shape workplace policies, 
                     elect representatives, and ratify agreements. All votes are confidential and secure.
                   </p>
-                  <ul className="space-y-1 text-sm text-gray-700">
-                    <li>â€¢ Votes are anonymous and confidential</li>
-                    <li>â€¢ You can only vote once per ballot</li>
-                    <li>â€¢ Results are shown after voting closes or you cast your vote</li>
-                    <li>â€¢ Email reminders sent before voting deadline</li>
+                  <ul className="space-y-1 text-sm text-gray-700 list-disc list-inside">
+                    <li>Votes are anonymous and confidential</li>
+                    <li>You can only vote once per ballot</li>
+                    <li>Results are shown after voting closes or you cast your vote</li>
+                    <li>Email reminders sent before voting deadline</li>
                   </ul>
                 </div>
               </div>

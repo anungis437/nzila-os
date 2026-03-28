@@ -22,10 +22,15 @@ export interface HazardPriorityBadgeProps {
   className?: string;
 }
 
-const PRIORITY_CONFIG = {
+const PRIORITY_CONFIG: Record<string, { label: string; className: string; icon: typeof AlertTriangle }> = {
   critical: {
     label: "Critical",
     className: "bg-red-600 text-white dark:bg-red-600 dark:text-white",
+    icon: AlertTriangle
+  },
+  extreme: {
+    label: "Extreme",
+    className: "bg-red-800 text-white dark:bg-red-800 dark:text-white",
     icon: AlertTriangle
   },
   high: {
@@ -35,6 +40,11 @@ const PRIORITY_CONFIG = {
   },
   medium: {
     label: "Medium",
+    className: "bg-yellow-100 text-yellow-800 dark:bg-yellow-950 dark:text-yellow-300",
+    icon: AlertCircle
+  },
+  moderate: {
+    label: "Moderate",
     className: "bg-yellow-100 text-yellow-800 dark:bg-yellow-950 dark:text-yellow-300",
     icon: AlertCircle
   },
@@ -50,7 +60,7 @@ export function HazardPriorityBadge({
   showIcon = true,
   className 
 }: HazardPriorityBadgeProps) {
-  const config = PRIORITY_CONFIG[priority];
+  const config = PRIORITY_CONFIG[priority] ?? PRIORITY_CONFIG.low;
   const Icon = config.icon;
 
   return (

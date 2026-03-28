@@ -22,6 +22,7 @@ export * from './grievances';
 export * from './deadlines';
 export * from './workflows';
 export * from './grievance-lifecycle';
+export * from './satisfaction';
 
 // Explicit re-exports to resolve ambiguities
 // grievanceDeadlines and GrievanceDeadline exist in both grievances.ts and workflows.ts

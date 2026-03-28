@@ -406,6 +406,7 @@ export const workplaceIncidents = pgTable("workplace_incidents", {
   reportedById: uuid("reported_by_id"), // Profile of reporter
   reportedByName: varchar("reported_by_name", { length: 255 }),
   reportedByJobTitle: varchar("reported_by_job_title", { length: 255 }),
+  isAnonymous: boolean("is_anonymous").default(false),
   supervisorNotifiedId: uuid("supervisor_notified_id"),
   supervisorNotifiedName: varchar("supervisor_notified_name", { length: 255 }),
   supervisorNotifiedDate: timestamp("supervisor_notified_date", { withTimezone: true }),

@@ -20,7 +20,6 @@ import { Button } from "@/components/ui/button";
 import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
 import { Badge } from "@/components/ui/badge";
 import { 
-  Shield, 
   AlertTriangle, 
   ClipboardCheck,
   Users,
@@ -34,6 +33,10 @@ import {
 import { useToast } from "@/components/ui/use-toast";
 import { SafetyMetricsCard } from "./SafetyMetricsCard";
 import { IncidentTrendChart } from "./IncidentTrendChart";
+import { IncidentListTable } from "./IncidentListTable";
+import { InspectionScheduleCalendar } from "./InspectionScheduleCalendar";
+import { HazardsList } from "./HazardsList";
+import { Progress } from "@/components/ui/progress";
 import { cn } from "@/lib/utils";
 
 export interface SafetyMetrics {
@@ -77,11 +80,12 @@ export function HealthSafetyDashboard({
         throw new Error("Failed to load dashboard data");
       }
 
-      const data = await response.json();
-      if (data.success) {
+      const json = await response.json();
+      const data = json.data ?? json;
+      if (data.success ?? json.success) {
         setMetrics(data.metrics);
       } else {
-        throw new Error(data.error || "Failed to load metrics");
+        throw new Error(data.error || json.error || "Failed to load metrics");
       }
     } catch {
       toast({
@@ -158,36 +162,25 @@ export function HealthSafetyDashboard({
 
   return (
     <div className="space-y-6">
-      {/* Header */}
-      <div className="flex flex-col gap-4 md:flex-row md:items-center md:justify-between">
-        <div>
-          <h1 className="text-3xl font-bold tracking-tight flex items-center gap-2">
-            <Shield className="h-8 w-8 text-primary" />
-            Health & Safety Dashboard
-          </h1>
-          <p className="text-muted-foreground">
-            Monitor workplace safety metrics and compliance
-          </p>
-        </div>
-        <div className="flex flex-wrap gap-2">
-          <Button
-            variant="outline"
-            size="sm"
-            onClick={refreshDashboard}
-            disabled={isRefreshing}
-          >
-            <RefreshCw className={cn("h-4 w-4 mr-2", isRefreshing && "animate-spin")} />
-            Refresh
-          </Button>
-          <Button
-            variant="outline"
-            size="sm"
-            onClick={exportReport}
-          >
-            <Download className="h-4 w-4 mr-2" />
-            Export Report
-          </Button>
-        </div>
+      {/* Actions */}
+      <div className="flex flex-wrap gap-2 justify-end">
+        <Button
+          variant="outline"
+          size="sm"
+          onClick={refreshDashboard}
+          disabled={isRefreshing}
+        >
+          <RefreshCw className={cn("h-4 w-4 mr-2", isRefreshing && "animate-spin")} />
+          Refresh
+        </Button>
+        <Button
+          variant="outline"
+          size="sm"
+          onClick={exportReport}
+        >
+          <Download className="h-4 w-4 mr-2" />
+          Export Report
+        </Button>
       </div>
 
       {/* Critical Alerts */}
@@ -320,78 +313,105 @@ export function HealthSafetyDashboard({
         </TabsContent>
 
         <TabsContent value="incidents">
-          <Card>
-            <CardHeader>
-              <CardTitle>Recent Incidents</CardTitle>
-              <CardDescription>
-                Latest workplace safety incidents
-              </CardDescription>
-            </CardHeader>
-            <CardContent>
-              <p className="text-sm text-muted-foreground">
-                Use the Incident List component to view detailed incident records.
-              </p>
-            </CardContent>
-          </Card>
+          <IncidentListTable organizationId={organizationId} />
         </TabsContent>
 
         <TabsContent value="inspections">
-          <Card>
-            <CardHeader>
-              <CardTitle>Inspection Schedule</CardTitle>
-              <CardDescription>
-                Upcoming and overdue inspections
-              </CardDescription>
-            </CardHeader>
-            <CardContent>
-              <p className="text-sm text-muted-foreground">
-                Use the Inspection Calendar component to manage inspections.
-              </p>
-            </CardContent>
-          </Card>
+          <InspectionScheduleCalendar organizationId={organizationId} />
         </TabsContent>
 
         <TabsContent value="hazards">
-          <Card>
-            <CardHeader>
-              <CardTitle>Hazard Reports</CardTitle>
-              <CardDescription>
-                Active workplace hazards requiring attention
-              </CardDescription>
-            </CardHeader>
-            <CardContent>
-              <p className="text-sm text-muted-foreground">
-                Use the Hazards List component to view and manage hazards.
-              </p>
-            </CardContent>
-          </Card>
+          <HazardsList organizationId={organizationId} />
         </TabsContent>
 
         <TabsContent value="compliance">
-          <Card>
-            <CardHeader>
-              <CardTitle>Compliance Overview</CardTitle>
-              <CardDescription>
-                Safety compliance metrics and requirements
-              </CardDescription>
-            </CardHeader>
-            <CardContent>
-              <div className="space-y-4">
-                <div className="flex items-center justify-between">
-                  <span className="text-sm font-medium">OH&S Training</span>
-                  <Badge variant={metrics.trainingCompliance >= 90 ? "default" : "secondary"}>
-                    {metrics.trainingCompliance}%
-                  </Badge>
+          <div className="space-y-4">
+            <Card>
+              <CardHeader>
+                <CardTitle>Compliance Overview</CardTitle>
+                <CardDescription>
+                  Safety compliance metrics and requirements
+                </CardDescription>
+              </CardHeader>
+              <CardContent>
+                <div className="space-y-6">
+                  <div className="space-y-2">
+                    <div className="flex items-center justify-between">
+                      <span className="text-sm font-medium">OH&S Training Compliance</span>
+                      <Badge variant={metrics.trainingCompliance >= 90 ? "default" : "secondary"}>
+                        {metrics.trainingCompliance}%
+                      </Badge>
+                    </div>
+                    <Progress value={metrics.trainingCompliance} className="h-2" />
+                    <p className="text-xs text-muted-foreground">Members with up-to-date safety training</p>
+                  </div>
+
+                  <div className="space-y-2">
+                    <div className="flex items-center justify-between">
+                      <span className="text-sm font-medium">Inspection Compliance</span>
+                      <Badge variant={metrics.inspectionComplianceRate >= 90 ? "default" : "secondary"}>
+                        {metrics.inspectionComplianceRate}%
+                      </Badge>
+                    </div>
+                    <Progress value={metrics.inspectionComplianceRate} className="h-2" />
+                    <p className="text-xs text-muted-foreground">
+                      {metrics.inspectionsCompleted} of {metrics.inspectionsDue + metrics.inspectionsCompleted} inspections completed on time
+                    </p>
+                  </div>
+
+                  <div className="space-y-2">
+                    <div className="flex items-center justify-between">
+                      <span className="text-sm font-medium">PPE Inventory Status</span>
+                      <Badge variant={metrics.ppeInventoryLow === 0 ? "default" : "secondary"}>
+                        {metrics.ppeInventoryLow === 0 ? "Fully stocked" : `${metrics.ppeInventoryLow} low`}
+                      </Badge>
+                    </div>
+                    <p className="text-xs text-muted-foreground">
+                      {metrics.ppeInventoryLow > 0
+                        ? `${metrics.ppeInventoryLow} PPE item(s) below reorder level`
+                        : "All PPE items above reorder levels"}
+                    </p>
+                  </div>
                 </div>
-                <div className="flex items-center justify-between">
-                  <span className="text-sm font-medium">Inspection Compliance</span>
-                  <Badge variant={metrics.inspectionComplianceRate >= 90 ? "default" : "secondary"}>
-                    {metrics.inspectionComplianceRate}%
-                  </Badge>
-                </div>
-              </div>
-            </CardContent>
-          </Card>
+              </CardContent>
+            </Card>
+
+            <div className="grid gap-4 md:grid-cols-3">
+              <Card>
+                <CardHeader className="pb-3">
+                  <CardTitle className="text-sm font-medium">Days Without Incident</CardTitle>
+                </CardHeader>
+                <CardContent>
+                  <div className="text-2xl font-bold text-green-600">{metrics.daysWithoutIncident}</div>
+                  <p className="text-xs text-muted-foreground mt-1">Current safety streak</p>
+                </CardContent>
+              </Card>
+
+              <Card>
+                <CardHeader className="pb-3">
+                  <CardTitle className="text-sm font-medium">Critical Alerts</CardTitle>
+                </CardHeader>
+                <CardContent>
+                  <div className={cn("text-2xl font-bold", metrics.criticalAlerts > 0 ? "text-red-600" : "text-green-600")}>
+                    {metrics.criticalAlerts}
+                  </div>
+                  <p className="text-xs text-muted-foreground mt-1">Open critical safety issues</p>
+                </CardContent>
+              </Card>
+
+              <Card>
+                <CardHeader className="pb-3">
+                  <CardTitle className="text-sm font-medium">Open Hazards</CardTitle>
+                </CardHeader>
+                <CardContent>
+                  <div className={cn("text-2xl font-bold", metrics.openHazards > 0 ? "text-orange-600" : "text-green-600")}>
+                    {metrics.openHazards}
+                  </div>
+                  <p className="text-xs text-muted-foreground mt-1">Unresolved workplace hazards</p>
+                </CardContent>
+              </Card>
+            </div>
+          </div>
         </TabsContent>
       </Tabs>
 

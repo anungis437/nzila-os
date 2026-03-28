@@ -450,6 +450,29 @@ export async function updateClaimStatus(
 } catch (_error) {
 // Don&apos;t fail the status update if pack generation fails
       }
+
+      // AUTO-CREATE SATISFACTION SURVEY ("Rate My LRO")
+      // When a claim is resolved or closed with an assigned LRO, send
+      // the member a satisfaction survey to rate their experience
+      if (claim.memberId && claim.assignedTo) {
+        try {
+          const { createSatisfactionSurvey } = await import('@/lib/services/satisfaction-service');
+          await createSatisfactionSurvey({
+            organizationId: claim.organizationId!,
+            claimId: claim.id,
+            memberId: claim.memberId,
+            lroId: claim.assignedTo,
+          });
+          logger.info('Satisfaction survey created on case closure', {
+            claimId: claim.claimId,
+            memberId: claim.memberId,
+            lroId: claim.assignedTo,
+          });
+        } catch (_satisfactionError) {
+          // Don't fail the status update if satisfaction survey creation fails
+          logger.error('Failed to create satisfaction survey', { error: _satisfactionError, claimId: claim.claimId });
+        }
+      }
     }
 
     // Send email notification (async, don&apos;t block on email sending)

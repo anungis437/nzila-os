@@ -66,7 +66,7 @@ export const GET = withApi(
       const trainRows = Array.from(await db.execute(sql`SELECT count(*)::int AS cnt FROM safety_training_records WHERE ${orgFilter}`));
       const trainingCompliance = Number((trainRows[0] as Record<string, unknown>)?.cnt ?? 0) > 0 ? 92 : 100;
 
-      const ppeRows = Array.from(await db.execute(sql`SELECT count(*)::int AS cnt FROM ppe_equipment WHERE ${orgFilter} AND current_stock < minimum_stock`));
+      const ppeRows = Array.from(await db.execute(sql`SELECT count(*)::int AS cnt FROM ppe_equipment WHERE ${orgFilter} AND quantity_in_stock < reorder_level`));
       const ppeInventoryLow = Number((ppeRows[0] as Record<string, unknown>)?.cnt ?? 0);
 
       return {

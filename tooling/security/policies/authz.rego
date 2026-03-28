@@ -27,14 +27,11 @@ role_hierarchy := {
   "viewer": [],
 }
 
-# Check if role A inherits role B
+# Check if role A inherits role B (transitive, non-recursive)
 inherits(role_a, role_b) if {
-  role_b in role_hierarchy[role_a]
-}
-
-inherits(role_a, role_b) if {
-  some intermediate in role_hierarchy[role_a]
-  inherits(intermediate, role_b)
+  reachable := graph.reachable(role_hierarchy, {role_a})
+  role_b in reachable
+  role_b != role_a
 }
 
 # ── Scope permissions ─────────────────────────────────────────────────────────

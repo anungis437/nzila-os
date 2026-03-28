@@ -87,14 +87,20 @@ export function InspectionScheduleCalendar({
         throw new Error("Failed to load inspections");
       }
 
-      const data = await response.json();
-      if (data.success) {
-        setInspections(data.inspections.map((i: InspectionData) => ({
-          ...i,
-          date: new Date(i.date)
+      const json = await response.json();
+      if (json.success) {
+        const rows = Array.isArray(json.data?.data) ? json.data.data : [];
+        // eslint-disable-next-line @typescript-eslint/no-explicit-any
+        setInspections(rows.map((i: any) => ({
+          id: i.id,
+          title: i.inspectionType ?? i.inspectionNumber ?? i.title ?? 'Inspection',
+          date: new Date(i.scheduledDate ?? i.date ?? Date.now()),
+          status: i.status ?? 'scheduled',
+          inspector: i.leadInspectorName ?? i.inspector,
+          location: i.workplaceName ?? i.specificLocation ?? i.location ?? '',
         })));
       } else {
-        throw new Error(data.error);
+        throw new Error(json.error);
       }
     } catch {
       toast({

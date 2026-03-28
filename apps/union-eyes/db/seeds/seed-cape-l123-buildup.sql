@@ -252,16 +252,16 @@ ON CONFLICT (id) DO NOTHING;
 -- ─────────────────────────────────────────────────────────────────────────────
 -- 5. Steward Assignments
 -- ─────────────────────────────────────────────────────────────────────────────
-INSERT INTO steward_assignments (id, organization_id, steward_id, steward_type, status, department, start_date, members_covered, training_completed, training_completion_date, certification_date, certification_expiry, preferred_contact_method, notes, created_at)
+INSERT INTO steward_assignments (id, organization_id, steward_id, steward_type, status, department, start_date, members_covered, training_completed, training_completion_date, certification_date, certification_expiry, preferred_contact_method, notes, created_at, updated_at)
 VALUES
-  (gen_random_uuid(), 'c09173ad-5ba4-498e-a483-b371fb5e248e', 'cc000001-0001-4000-8000-000000000001', 'chief_steward', 'active', 'Translation Bureau', '2024-06-01', 85, true, '2024-05-15', '2024-06-01', '2027-06-01', 'email', 'Chief steward – PA Group NCR', now()),
-  (gen_random_uuid(), 'c09173ad-5ba4-498e-a483-b371fb5e248e', 'cc000001-0001-4000-8000-000000000002', 'steward', 'active', 'Policy and Programs', '2025-01-10', 60, true, '2024-12-20', '2025-01-10', '2028-01-10', 'phone', 'Handles harassment cases in Policy branch', now()),
-  (gen_random_uuid(), 'c09173ad-5ba4-498e-a483-b371fb5e248e', 'cc000001-0001-4000-8000-000000000003', 'steward', 'active', 'Regional Operations', '2025-03-01', 45, true, '2025-02-15', '2025-03-01', '2028-03-01', 'email', 'Western Canada regional steward', now()),
-  (gen_random_uuid(), 'c09173ad-5ba4-498e-a483-b371fb5e248e', 'cc000001-0001-4000-8000-000000000004', 'steward', 'active', 'Financial Services', '2024-09-15', 70, true, '2024-09-01', '2024-09-15', '2027-09-15', 'email', 'Specializes in pay equity and classification grievances', now()),
+  (gen_random_uuid(), 'c09173ad-5ba4-498e-a483-b371fb5e248e', 'cc000001-0001-4000-8000-000000000001', 'chief_steward', 'active', 'Translation Bureau', '2024-06-01', 85, true, '2024-05-15', '2024-06-01', '2027-06-01', 'email', 'Chief steward – PA Group NCR', now(), now()),
+  (gen_random_uuid(), 'c09173ad-5ba4-498e-a483-b371fb5e248e', 'cc000001-0001-4000-8000-000000000002', 'steward', 'active', 'Policy and Programs', '2025-01-10', 60, true, '2024-12-20', '2025-01-10', '2028-01-10', 'phone', 'Handles harassment cases in Policy branch', now(), now()),
+  (gen_random_uuid(), 'c09173ad-5ba4-498e-a483-b371fb5e248e', 'cc000001-0001-4000-8000-000000000003', 'steward', 'active', 'Regional Operations', '2025-03-01', 45, true, '2025-02-15', '2025-03-01', '2028-03-01', 'email', 'Western Canada regional steward', now(), now()),
+  (gen_random_uuid(), 'c09173ad-5ba4-498e-a483-b371fb5e248e', 'cc000001-0001-4000-8000-000000000004', 'steward', 'active', 'Financial Services', '2024-09-15', 70, true, '2024-09-01', '2024-09-15', '2027-09-15', 'email', 'Specializes in pay equity and classification grievances', now(), now()),
 
-  (gen_random_uuid(), '4a20966a-2f17-46b5-9b84-b3efea57b50a', 'cc000001-0001-4000-8000-000000000005', 'chief_steward', 'active', 'Administrative Services', '2024-01-15', 120, true, '2024-01-10', '2024-01-15', '2027-01-15', 'phone', 'Chief steward for Inside Workers unit', now()),
-  (gen_random_uuid(), '4a20966a-2f17-46b5-9b84-b3efea57b50a', 'cc000001-0001-4000-8000-000000000006', 'steward', 'active', 'Parks and Roads', '2025-04-01', 95, true, '2025-03-20', '2025-04-01', '2028-04-01', 'phone', 'Health & Safety lead for outdoor crews', now()),
-  (gen_random_uuid(), '4a20966a-2f17-46b5-9b84-b3efea57b50a', 'cc000001-0001-4000-8000-000000000007', 'steward', 'active', 'Public Works', '2024-06-01', 80, true, '2024-05-28', '2024-06-01', '2027-06-01', 'email', 'Handles discipline and discharge cases', now())
+  (gen_random_uuid(), '4a20966a-2f17-46b5-9b84-b3efea57b50a', 'cc000001-0001-4000-8000-000000000005', 'chief_steward', 'active', 'Administrative Services', '2024-01-15', 120, true, '2024-01-10', '2024-01-15', '2027-01-15', 'phone', 'Chief steward for Inside Workers unit', now(), now()),
+  (gen_random_uuid(), '4a20966a-2f17-46b5-9b84-b3efea57b50a', 'cc000001-0001-4000-8000-000000000006', 'steward', 'active', 'Parks and Roads', '2025-04-01', 95, true, '2025-03-20', '2025-04-01', '2028-04-01', 'phone', 'Health & Safety lead for outdoor crews', now(), now()),
+  (gen_random_uuid(), '4a20966a-2f17-46b5-9b84-b3efea57b50a', 'cc000001-0001-4000-8000-000000000007', 'steward', 'active', 'Public Works', '2024-06-01', 80, true, '2024-05-28', '2024-06-01', '2027-06-01', 'email', 'Handles discipline and discharge cases', now(), now())
 ON CONFLICT (id) DO NOTHING;
 
 -- ─────────────────────────────────────────────────────────────────────────────
@@ -291,13 +291,13 @@ VALUES
   ('dd000001-0001-4000-8000-000000000002', 'Board of Directors Election 2026', 'Election for four board positions: President, Vice-President, Secretary-Treasurer, and Member-at-Large.', 'election', 'active', 'annual_general_meeting', 'c09173ad-5ba4-498e-a483-b371fb5e248e', 'admin@cape-acep.ca', now(), now(), '2026-04-01 09:00:00-04', '2026-04-03 17:00:00-04', true, 33, 2400)
 ON CONFLICT (id) DO NOTHING;
 
-INSERT INTO voting_options (id, session_id, text, description, order_index, created_at)
+INSERT INTO voting_options (id, session_id, text, description, order_index, created_at, updated_at)
 VALUES
-  (gen_random_uuid(), 'dd000001-0001-4000-8000-000000000001', 'Accept', 'Accept the tentative agreement as presented', 1, now()),
-  (gen_random_uuid(), 'dd000001-0001-4000-8000-000000000001', 'Reject', 'Reject the tentative agreement and return to bargaining', 2, now()),
-  (gen_random_uuid(), 'dd000001-0001-4000-8000-000000000002', 'Marie-France Gauthier', 'Candidate for President – 12 years CAPE experience', 1, now()),
-  (gen_random_uuid(), 'dd000001-0001-4000-8000-000000000002', 'Robert Bhérer', 'Candidate for President – Former VP, 8 years service', 2, now()),
-  (gen_random_uuid(), 'dd000001-0001-4000-8000-000000000002', 'Abstain', 'Abstain from voting', 3, now())
+  (gen_random_uuid(), 'dd000001-0001-4000-8000-000000000001', 'Accept', 'Accept the tentative agreement as presented', 1, now(), now()),
+  (gen_random_uuid(), 'dd000001-0001-4000-8000-000000000001', 'Reject', 'Reject the tentative agreement and return to bargaining', 2, now(), now()),
+  (gen_random_uuid(), 'dd000001-0001-4000-8000-000000000002', 'Marie-France Gauthier', 'Candidate for President – 12 years CAPE experience', 1, now(), now()),
+  (gen_random_uuid(), 'dd000001-0001-4000-8000-000000000002', 'Robert Bhérer', 'Candidate for President – Former VP, 8 years service', 2, now(), now()),
+  (gen_random_uuid(), 'dd000001-0001-4000-8000-000000000002', 'Abstain', 'Abstain from voting', 3, now(), now())
 ON CONFLICT (id) DO NOTHING;
 
 -- L123 – Strike vote and bylaw amendment
@@ -308,15 +308,15 @@ VALUES
   ('dd000001-0001-4000-8000-000000000005', 'Annual General Meeting – Executive Elections', 'Election of executive officers for the 2026-2028 term.', 'election', 'active', 'annual_general_meeting', '4a20966a-2f17-46b5-9b84-b3efea57b50a', 'president@cupe123.ca', now(), now(), '2026-04-15 18:30:00-04', '2026-04-15 22:00:00-04', true, 25, 770)
 ON CONFLICT (id) DO NOTHING;
 
-INSERT INTO voting_options (id, session_id, text, description, order_index, created_at)
+INSERT INTO voting_options (id, session_id, text, description, order_index, created_at, updated_at)
 VALUES
-  (gen_random_uuid(), 'dd000001-0001-4000-8000-000000000003', 'Yes – Authorize Strike', 'Authorize the executive to call a legal strike if negotiations fail', 1, now()),
-  (gen_random_uuid(), 'dd000001-0001-4000-8000-000000000003', 'No – Continue Negotiating', 'Do not authorize a strike at this time', 2, now()),
-  (gen_random_uuid(), 'dd000001-0001-4000-8000-000000000004', 'Approve Dues Increase', 'Approve the $5/month dues increase effective July 2026', 1, now()),
-  (gen_random_uuid(), 'dd000001-0001-4000-8000-000000000004', 'Reject Dues Increase', 'Reject the proposed dues increase', 2, now()),
-  (gen_random_uuid(), 'dd000001-0001-4000-8000-000000000005', 'Jean-Pierre Tremblay', 'Candidate for President – Steward, 12 years with the City', 1, now()),
-  (gen_random_uuid(), 'dd000001-0001-4000-8000-000000000005', 'Grace Lee', 'Candidate for President – Current Secretary-Treasurer', 2, now()),
-  (gen_random_uuid(), 'dd000001-0001-4000-8000-000000000005', 'Abstain', 'Abstain from voting', 3, now())
+  (gen_random_uuid(), 'dd000001-0001-4000-8000-000000000003', 'Yes – Authorize Strike', 'Authorize the executive to call a legal strike if negotiations fail', 1, now(), now()),
+  (gen_random_uuid(), 'dd000001-0001-4000-8000-000000000003', 'No – Continue Negotiating', 'Do not authorize a strike at this time', 2, now(), now()),
+  (gen_random_uuid(), 'dd000001-0001-4000-8000-000000000004', 'Approve Dues Increase', 'Approve the $5/month dues increase effective July 2026', 1, now(), now()),
+  (gen_random_uuid(), 'dd000001-0001-4000-8000-000000000004', 'Reject Dues Increase', 'Reject the proposed dues increase', 2, now(), now()),
+  (gen_random_uuid(), 'dd000001-0001-4000-8000-000000000005', 'Jean-Pierre Tremblay', 'Candidate for President – Steward, 12 years with the City', 1, now(), now()),
+  (gen_random_uuid(), 'dd000001-0001-4000-8000-000000000005', 'Grace Lee', 'Candidate for President – Current Secretary-Treasurer', 2, now(), now()),
+  (gen_random_uuid(), 'dd000001-0001-4000-8000-000000000005', 'Abstain', 'Abstain from voting', 3, now(), now())
 ON CONFLICT (id) DO NOTHING;
 
 -- ─────────────────────────────────────────────────────────────────────────────

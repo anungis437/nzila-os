@@ -24,9 +24,12 @@ let _client: AiClient | null = null
 
 export function getAiClient(): AiClient {
   if (!_client) {
+    const serviceKey = process.env.AI_SERVICE_KEY
     _client = createAiClient({
       baseUrl: AI_BASE_URL,
       getToken: async () => {
+        // Prefer service key for cross-app auth (different Clerk instances)
+        if (serviceKey) return serviceKey
         const session = await auth()
         const token = await session.getToken()
         return token ?? ''

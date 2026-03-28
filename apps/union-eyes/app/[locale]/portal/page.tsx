@@ -18,9 +18,11 @@ import {
   AlertCircle,
   CheckCircle,
   Clock,
-  ArrowRight
+  ArrowRight,
+  Star,
 } from "lucide-react";
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "@/components/ui/card";
+import { Badge } from "@/components/ui/badge";
 import { Button } from "@/components/ui/button";
 import Link from "next/link";
 
@@ -52,19 +54,28 @@ interface Activity {
   timestamp: string;
 }
 
+interface PendingSurvey {
+  id: string;
+  claimNumber?: string;
+  lroName?: string;
+  createdAt: string;
+}
+
 export default function MemberPortalDashboard() {
   const { user } = useUser();
   const [stats, setStats] = useState<MemberStats | null>(null);
   const [recentClaims, setRecentClaims] = useState<RecentClaim[]>([]);
   const [activities, setActivities] = useState<Activity[]>([]);
+  const [pendingSurveys, setPendingSurveys] = useState<PendingSurvey[]>([]);
   const [loading, setLoading] = useState(true);
 
   const fetchMemberData = useCallback(async () => {
     try {
-      // Fetch member stats and claims
-      const [memberResponse, duesResponse] = await Promise.all([
+      // Fetch member stats, claims, and pending satisfaction surveys
+      const [memberResponse, duesResponse, surveysResponse] = await Promise.all([
         fetch('/api/members/me'),
-        fetch('/api/portal/dues/balance')
+        fetch('/api/portal/dues/balance'),
+        fetch('/api/satisfaction'),
       ]);
 
       if (memberResponse.ok) {
@@ -81,6 +92,15 @@ export default function MemberPortalDashboard() {
           duesBalance: duesData.balance?.totalOwed || 0,
           nextDuesDate: duesData.balance?.nextDueDate || null
         } : null);
+      }
+
+      // Load pending satisfaction surveys
+      if (surveysResponse.ok) {
+        const surveyData = await surveysResponse.json();
+        const surveys = surveyData?.data ?? surveyData;
+        if (Array.isArray(surveys)) {
+          setPendingSurveys(surveys);
+        }
       }
 
       // Build activity feed from recent claims and transactions
@@ -218,6 +238,57 @@ export default function MemberPortalDashboard() {
           </Card>
         </motion.div>
       </div>
+
+      {/* Pending Satisfaction Surveys */}
+      {pendingSurveys.length > 0 && (
+        <motion.div
+          initial={{ opacity: 0, y: 20 }}
+          animate={{ opacity: 1, y: 0 }}
+          transition={{ delay: 0.5 }}
+        >
+          <Card className="border-yellow-300 bg-yellow-50">
+            <CardHeader className="pb-2">
+              <div className="flex items-center gap-2">
+                <Star className="h-5 w-5 text-yellow-600" />
+                <CardTitle className="text-base">Rate Your Representative</CardTitle>
+              </div>
+              <CardDescription>
+                Help us improve by rating your LRO&apos;s performance on {pendingSurveys.length === 1 ? 'a recent case' : `${pendingSurveys.length} recent cases`}
+              </CardDescription>
+            </CardHeader>
+            <CardContent>
+              <div className="space-y-2">
+                {pendingSurveys.slice(0, 3).map((survey) => (
+                  <Link
+                    key={survey.id}
+                    href={`/portal/claims/${survey.id}?survey=true`}
+                    className="block"
+                  >
+                    <div className="flex items-center justify-between p-3 bg-white border rounded-lg hover:bg-yellow-25 transition-colors">
+                      <div className="flex items-center gap-3">
+                        <Star className="h-4 w-4 text-yellow-500" />
+                        <div>
+                          <p className="text-sm font-medium">
+                            {survey.claimNumber ? `Case ${survey.claimNumber}` : 'Satisfaction Survey'}
+                          </p>
+                          {survey.lroName && (
+                            <p className="text-xs text-muted-foreground">
+                              Representative: {survey.lroName}
+                            </p>
+                          )}
+                        </div>
+                      </div>
+                      <Badge variant="outline" className="text-yellow-700 border-yellow-300">
+                        Pending
+                      </Badge>
+                    </div>
+                  </Link>
+                ))}
+              </div>
+            </CardContent>
+          </Card>
+        </motion.div>
+      )}
 
       {/* Quick Actions */}
       <Card>

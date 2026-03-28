@@ -7,7 +7,7 @@
 
 import { useState, useEffect, useRef, useMemo, useCallback } from "react";
 import { useTranslations } from 'next-intl';
-import { Plus, Scale } from "lucide-react";
+import { Plus, Scale, Settings } from "lucide-react";
 import { Button } from "@/components/ui/button";
 import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
 import { Checkbox } from "@/components/ui/checkbox";
@@ -31,6 +31,7 @@ import {
 import { PrecedentSearch } from "@/components/precedents/PrecedentSearch";
 import { PrecedentViewer } from "@/components/precedents/PrecedentViewer";
 import { PrecedentCompareView } from "@/components/precedents/PrecedentCompareView";
+import { JurisdictionPreferences } from "@/components/precedents/JurisdictionPreferences";
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "@/components/ui/card";
 import { Badge } from "@/components/ui/badge";
 import { useToast } from "@/lib/hooks/use-toast";
@@ -80,7 +81,7 @@ export function PrecedentsConsole() {
   const t = useTranslations();
   const { toast } = useToast();
   const [mounted, setMounted] = useState(false);
-  const [activeTab, setActiveTab] = useState<"browse" | "view" | "compare">("browse");
+  const [activeTab, setActiveTab] = useState<"browse" | "view" | "compare" | "setup">("browse");
   const [searchFilters, setSearchFilters] = useState<SearchFilters>({
     query: "",
     grievanceTypes: [],
@@ -119,6 +120,8 @@ export function PrecedentsConsole() {
     sharingLevel: "private",
     sharedWithOrgIds: "",
   });
+  const [showJurisdictionSetup, setShowJurisdictionSetup] = useState(false);
+  const [jurisdictionPrefsLoaded, setJurisdictionPrefsLoaded] = useState(false);
   const pageSize = 20;
 
   // Use ref to track if we're currently fetching to prevent race conditions
@@ -161,6 +164,42 @@ export function PrecedentsConsole() {
   useEffect(() => {
     setMounted(true);
   }, []);
+
+  // Load jurisdiction preferences and auto-apply to filters
+  useEffect(() => {
+    if (!mounted || jurisdictionPrefsLoaded) return;
+    const loadPrefs = async () => {
+      try {
+        const res = await fetch("/api/precedents/jurisdiction-preferences");
+        if (!res.ok) return;
+        const json = await res.json();
+        const data = json.data ?? json;
+
+        if (!data.isConfigured) {
+          setShowJurisdictionSetup(true);
+          setJurisdictionPrefsLoaded(true);
+          return;
+        }
+
+        if (data.autoApply && data.preferredJurisdictions?.length > 0) {
+          // Build the effective jurisdiction list
+          let jurisdictions: string[] = [...data.preferredJurisdictions];
+          if (data.includeNational && !jurisdictions.includes("federal")) {
+            jurisdictions = ["federal", ...jurisdictions];
+          }
+          setSearchFilters((prev) => ({
+            ...prev,
+            jurisdictions,
+          }));
+        }
+      } catch {
+        // Preferences not available — proceed without filtering
+      } finally {
+        setJurisdictionPrefsLoaded(true);
+      }
+    };
+    loadPrefs();
+  }, [mounted, jurisdictionPrefsLoaded]);
 
   // Fetch precedent list
   useEffect(() => {
@@ -571,7 +610,37 @@ export function PrecedentsConsole() {
       </div>
 
       {/* Search */}
-      <PrecedentSearch onSearch={handleSearch} isLoading={isLoadingPrecedents} />
+      <PrecedentSearch
+        onSearch={handleSearch}
+        isLoading={isLoadingPrecedents}
+        initialJurisdictions={searchFilters.jurisdictions}
+      />
+
+      {/* Jurisdiction Setup Banner — shown when user hasn't configured preferences */}
+      {showJurisdictionSetup && (
+        <Card className="border-primary/50 bg-primary/5">
+          <CardContent className="flex items-center justify-between py-4">
+            <div className="flex items-center gap-3">
+              <Settings className="h-5 w-5 text-primary" />
+              <div>
+                <p className="font-medium text-sm">Set up your jurisdiction preferences</p>
+                <p className="text-sm text-muted-foreground">
+                  Select your province and jurisdiction level to see the most relevant precedents first.
+                </p>
+              </div>
+            </div>
+            <Button
+              variant="outline"
+              size="sm"
+              onClick={() => {
+                setActiveTab("setup" as "browse");
+              }}
+            >
+              Configure
+            </Button>
+          </CardContent>
+        </Card>
+      )}
 
       {/* Comparison Bar */}
       {selectedPrecedentIds.length > 0 && (
@@ -606,6 +675,10 @@ export function PrecedentsConsole() {
           </TabsTrigger>
           <TabsTrigger value="compare" disabled={selectedPrecedentIds.length < 2}>
             {t('precedents.compare')} ({selectedPrecedentIds.length})
+          </TabsTrigger>
+          <TabsTrigger value="setup">
+            <Settings className="mr-1.5 h-3.5 w-3.5" />
+            Jurisdictions
           </TabsTrigger>
         </TabsList>
 
@@ -753,6 +826,21 @@ export function PrecedentsConsole() {
               onNotesChange={setComparisonNotes}
             />
           )}
+        </TabsContent>
+
+        {/* Jurisdiction Setup Tab */}
+        <TabsContent value="setup" className="space-y-4">
+          <JurisdictionPreferences
+            compact
+            onSaved={() => {
+              setShowJurisdictionSetup(false);
+              // Reload preferences and re-apply filters
+              setJurisdictionPrefsLoaded(false);
+              setActiveTab("browse");
+              // Reset fetch params so precedents reload
+              lastFetchParamsRef.current = "";
+            }}
+          />
         </TabsContent>
       </Tabs>
 

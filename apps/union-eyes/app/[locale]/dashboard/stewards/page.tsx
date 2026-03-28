@@ -5,7 +5,9 @@ import { requireUser, hasMinRole } from "@/lib/api-auth-guard";
 import { redirect } from "next/navigation";
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "@/components/ui/card";
 import { Badge } from "@/components/ui/badge";
-import { Users, FileText, TrendingUp, AlertCircle, Calendar } from "lucide-react";
+import { Button } from "@/components/ui/button";
+import { Users, FileText, TrendingUp, AlertCircle, Calendar, Star } from "lucide-react";
+import Link from "next/link";
 
 export const metadata: Metadata = {
   title: "Chief Steward Dashboard | UnionEyes",
@@ -142,6 +144,28 @@ export default async function StewardsDashboardPage() {
 
       {/* Content Sections */}
       <div className="grid gap-6 md:grid-cols-2">
+        {/* LRO Satisfaction Ratings Link */}
+        <div className="md:col-span-2">
+          <Card className="border-yellow-200 bg-yellow-50/50">
+            <CardContent className="flex items-center justify-between py-4">
+              <div className="flex items-center gap-3">
+                <Star className="h-5 w-5 text-yellow-600" />
+                <div>
+                  <p className="font-medium">LRO Satisfaction Ratings</p>
+                  <p className="text-sm text-muted-foreground">
+                    View member feedback and performance rankings for all representatives
+                  </p>
+                </div>
+              </div>
+              <Link href="/dashboard/stewards/ratings">
+                <Button variant="outline" size="sm">
+                  View Ratings
+                </Button>
+              </Link>
+            </CardContent>
+          </Card>
+        </div>
+
         {/* Steward Performance */}
         <Card>
           <CardHeader>

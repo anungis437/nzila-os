@@ -26,12 +26,17 @@ export default function NewIncidentPage() {
   const router = useRouter();
   const organizationId = useOrganizationId();
 
-  const handleSubmit = async () => {
+  const handleSubmit = async (data: Record<string, unknown>) => {
     try {
-      await fetch('/api/v2/health-safety/incidents', {
+      const res = await fetch('/api/v2/health-safety/incidents', {
         method: 'POST',
         headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({ ...data, organizationId }),
       });
+
+      if (!res.ok) {
+        throw new Error("Failed to submit incident report");
+      }
       
       toast.success("Incident report submitted successfully", {
         description: "The safety team has been notified.",
