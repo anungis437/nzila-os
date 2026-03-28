@@ -48,7 +48,11 @@ interface CategoryBreakdown {
   color: string;
 }
 
-export function AnalyticsOverviewConsole() {
+interface AnalyticsOverviewConsoleProps {
+  canViewTopPerformers?: boolean;
+}
+
+export function AnalyticsOverviewConsole({ canViewTopPerformers = false }: AnalyticsOverviewConsoleProps) {
   const t = useTranslations();
   const [timeRange, setTimeRange] = useState<TimeRange>("30d");
   const [_selectedCategory, _setSelectedCategory] = useState<MetricCategory>("cases");
@@ -310,7 +314,8 @@ export function AnalyticsOverviewConsole() {
 
         {/* Bottom Row */}
         <div className="grid grid-cols-1 lg:grid-cols-2 gap-6">
-          {/* Top Performing Stewards */}
+          {/* Top Performing Stewards — chief_steward+ only */}
+          {canViewTopPerformers && (
           <motion.div
             initial={{ opacity: 0, y: 20 }}
             animate={{ opacity: 1, y: 0 }}
@@ -344,6 +349,7 @@ export function AnalyticsOverviewConsole() {
               </CardContent>
             </Card>
           </motion.div>
+          )}
 
           {/* Quick Stats */}
           <motion.div

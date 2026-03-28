@@ -15,5 +15,6 @@ export default async function AnalyticsPage() {
   if (!hasAccess) {
     redirect("/dashboard");
   }
-  return <AnalyticsOverviewConsole />;
+  const canViewTopPerformers = await hasMinRole("chief_steward");
+  return <AnalyticsOverviewConsole canViewTopPerformers={canViewTopPerformers} />;
 }
