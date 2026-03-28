@@ -52,7 +52,8 @@
     "viewAll": "View All",
     "all": "All",
     "total": "Total",
-    "retry": "Retry"
+    "retry": "Retry",
+    "noData": "No data available"
   },
   "navigation": {
     "dashboard": "Dashboard",

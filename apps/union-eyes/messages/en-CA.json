@@ -38,7 +38,9 @@
     "viewAll": "View All",
     "all": "All",
     "total": "Total",
-    "retry": "Retry"
+    "retry": "Retry",
+    "refresh": "Refresh",
+    "noData": "No data available"
   },
   "navigation": {
     "home": "Home",

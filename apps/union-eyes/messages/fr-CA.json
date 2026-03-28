@@ -38,7 +38,9 @@
     "viewAll": "Voir tout",
     "all": "Tout",
     "total": "Total",
-    "retry": "Réessayer"
+    "retry": "Réessayer",
+    "refresh": "Actualiser",
+    "noData": "Aucune donnée disponible"
   },
   "navigation": {
     "home": "Accueil",

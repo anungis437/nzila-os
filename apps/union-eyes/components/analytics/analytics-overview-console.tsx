@@ -9,6 +9,7 @@ import {
   BarChart3,
   TrendingUp,
   TrendingDown,
+  Minus,
   Users,
   FileText,
   CheckCircle,
@@ -18,8 +19,8 @@ import {
   Briefcase,
   Target,
   Download,
-  Filter,
-  ChevronDown,
+  RefreshCw,
+  Loader2,
 } from "lucide-react";
 
 type TimeRange = "7d" | "30d" | "90d" | "1y" | "all";
@@ -66,6 +67,7 @@ export function AnalyticsOverviewConsole({ canViewTopPerformers = false }: Analy
   };
 
   // Metrics from API
+  const [loading, setLoading] = useState(true);
   const [metrics, setMetrics] = useState<Metric[]>([]);
   const [chartData, setChartData] = useState<ChartDataPoint[]>([]);
   const [categoryBreakdown, setCategoryBreakdown] = useState<CategoryBreakdown[]>([]);
@@ -73,6 +75,7 @@ export function AnalyticsOverviewConsole({ canViewTopPerformers = false }: Analy
   const [quickStats, setQuickStats] = useState({ openCases: 0, resolved: 0, avgResponseHrs: 0, activeStewards: 0, openPct: '0%', resolvedPct: '0%', stewardPct: '0%' });
 
   const loadAnalytics = useCallback(async () => {
+    setLoading(true);
     try {
       const res = await fetch(`/api/v2/analytics/overview?range=${timeRange}`);
       if (res.ok) {
@@ -113,7 +116,9 @@ export function AnalyticsOverviewConsole({ canViewTopPerformers = false }: Analy
           });
         }
       }
-    } catch { /* API not available */ }
+    } catch { /* API not available */ } finally {
+      setLoading(false);
+    }
   }, [timeRange]);
 
   useEffect(() => {
@@ -170,12 +175,30 @@ export function AnalyticsOverviewConsole({ canViewTopPerformers = false }: Analy
                   </div>
                 </div>
                 <div className="flex gap-2">
-                  <button className="flex items-center gap-2 px-4 py-2 bg-white border border-gray-300 text-gray-700 rounded-lg hover:bg-gray-50 transition-colors">
-                    <Filter className="w-4 h-4" />
-                    <span className="text-sm font-medium">{t('common.filter')}</span>
-                    <ChevronDown className="w-4 h-4" />
+                  <button
+                    onClick={() => loadAnalytics()}
+                    disabled={loading}
+                    className="flex items-center gap-2 px-4 py-2 bg-white border border-gray-300 text-gray-700 rounded-lg hover:bg-gray-50 transition-colors disabled:opacity-50"
+                  >
+                    <RefreshCw className={`w-4 h-4 ${loading ? 'animate-spin' : ''}`} />
+                    <span className="text-sm font-medium">{t('common.refresh')}</span>
                   </button>
-                  <button className="flex items-center gap-2 px-4 py-2 bg-indigo-600 text-white rounded-lg hover:bg-indigo-700 transition-colors">
+                  <button
+                    onClick={() => {
+                      const csv = [
+                        ['Month', 'Total Cases', 'Resolved', 'Pending'].join(','),
+                        ...chartData.map(d => [d.month, d.cases, d.resolved, d.pending].join(',')),
+                      ].join('\n');
+                      const blob = new Blob([csv], { type: 'text/csv' });
+                      const url = URL.createObjectURL(blob);
+                      const a = document.createElement('a');
+                      a.href = url;
+                      a.download = `analytics-${timeRange}.csv`;
+                      a.click();
+                      URL.revokeObjectURL(url);
+                    }}
+                    className="flex items-center gap-2 px-4 py-2 bg-indigo-600 text-white rounded-lg hover:bg-indigo-700 transition-colors"
+                  >
                     <Download className="w-4 h-4" />
                     <span className="text-sm font-medium">{t('analytics.exportReport')}</span>
                   </button>
@@ -187,7 +210,19 @@ export function AnalyticsOverviewConsole({ canViewTopPerformers = false }: Analy
 
         {/* Key Metrics Grid */}
         <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6 mb-6">
-          {metrics.map((metric, index) => (
+          {loading ? (
+            Array.from({ length: 6 }).map((_, i) => (
+              <div key={i} className="bg-white/80 rounded-xl border border-white/50 shadow-lg p-6 animate-pulse">
+                <div className="flex items-start justify-between mb-3">
+                  <div className="w-9 h-9 bg-gray-200 rounded-lg" />
+                  <div className="w-12 h-5 bg-gray-200 rounded" />
+                </div>
+                <div className="w-24 h-4 bg-gray-200 rounded mb-2" />
+                <div className="w-16 h-8 bg-gray-200 rounded mb-1" />
+                <div className="w-20 h-3 bg-gray-200 rounded" />
+              </div>
+            ))
+          ) : metrics.map((metric, index) => (
             <motion.div
               key={metric.label}
               initial={{ opacity: 0, y: 20 }}
@@ -201,12 +236,14 @@ export function AnalyticsOverviewConsole({ canViewTopPerformers = false }: Analy
                       {metric.icon}
                     </div>
                     <div className={`flex items-center gap-1 text-sm font-medium ${
-                      metric.change > 0 ? "text-green-600" : "text-red-600"
+                      metric.change > 0 ? "text-green-600" : metric.change < 0 ? "text-red-600" : "text-gray-500"
                     }`}>
                       {metric.change > 0 ? (
                         <TrendingUp className="w-4 h-4" />
-                      ) : (
+                      ) : metric.change < 0 ? (
                         <TrendingDown className="w-4 h-4" />
+                      ) : (
+                        <Minus className="w-4 h-4" />
                       )}
                       <span>{Math.abs(metric.change)}%</span>
                     </div>
@@ -227,16 +264,17 @@ export function AnalyticsOverviewConsole({ canViewTopPerformers = false }: Analy
             initial={{ opacity: 0, x: -20 }}
             animate={{ opacity: 1, x: 0 }}
             transition={{ delay: 0.8 }}
+            className="flex"
           >
-            <Card className="bg-white/80 backdrop-blur-sm border-white/50 shadow-lg">
+            <Card className="bg-white/80 backdrop-blur-sm border-white/50 shadow-lg flex flex-col w-full">
               <CardHeader>
                 <CardTitle className="flex items-center gap-2">
                   <BarChart3 className="w-5 h-5 text-indigo-600" />
                   {t('analytics.casesTrend')}
                 </CardTitle>
               </CardHeader>
-              <CardContent>
-                <div className="space-y-4">
+              <CardContent className="flex-1 flex flex-col">
+                <div className="flex-1 flex flex-col space-y-4">
                   <div className="flex items-center gap-4 text-sm">
                     <div className="flex items-center gap-2">
                       <div className="w-3 h-3 bg-green-500 rounded-full"></div>
@@ -247,7 +285,16 @@ export function AnalyticsOverviewConsole({ canViewTopPerformers = false }: Analy
                       <span className="text-gray-600">{t('analytics.pending')}</span>
                     </div>
                   </div>
-                  <div className="space-y-3">
+                  {loading ? (
+                    <div className="flex-1 flex items-center justify-center py-8">
+                      <Loader2 className="w-8 h-8 text-indigo-400 animate-spin" />
+                    </div>
+                  ) : chartData.length === 0 ? (
+                    <div className="flex-1 flex items-center justify-center py-8 text-gray-400 text-sm">
+                      {t('common.noData')}
+                    </div>
+                  ) : (
+                  <div className="flex-1 space-y-3">
                     {chartData.map((dataPoint) => (
                       <div key={dataPoint.month} className="space-y-2">
                         <div className="flex items-center justify-between text-sm">
@@ -269,6 +316,7 @@ export function AnalyticsOverviewConsole({ canViewTopPerformers = false }: Analy
                       </div>
                     ))}
                   </div>
+                  )}
                 </div>
               </CardContent>
             </Card>
@@ -279,16 +327,26 @@ export function AnalyticsOverviewConsole({ canViewTopPerformers = false }: Analy
             initial={{ opacity: 0, x: 20 }}
             animate={{ opacity: 1, x: 0 }}
             transition={{ delay: 0.9 }}
+            className="flex"
           >
-            <Card className="bg-white/80 backdrop-blur-sm border-white/50 shadow-lg">
+            <Card className="bg-white/80 backdrop-blur-sm border-white/50 shadow-lg flex flex-col w-full">
               <CardHeader>
                 <CardTitle className="flex items-center gap-2">
                   <Target className="w-5 h-5 text-indigo-600" />
                   {t('analytics.casesByCategory')}
                 </CardTitle>
               </CardHeader>
-              <CardContent>
-                <div className="space-y-4">
+              <CardContent className="flex-1 flex flex-col">
+                {loading ? (
+                  <div className="flex-1 flex items-center justify-center py-8">
+                    <Loader2 className="w-8 h-8 text-indigo-400 animate-spin" />
+                  </div>
+                ) : categoryBreakdown.length === 0 ? (
+                  <div className="flex-1 flex items-center justify-center py-8 text-gray-400 text-sm">
+                    {t('common.noData')}
+                  </div>
+                ) : (
+                <div className="flex-1 space-y-4">
                   {categoryBreakdown.map((category) => (
                     <div key={category.category} className="space-y-2">
                       <div className="flex items-center justify-between text-sm">
@@ -306,6 +364,7 @@ export function AnalyticsOverviewConsole({ canViewTopPerformers = false }: Analy
                     </div>
                   ))}
                 </div>
+                )}
               </CardContent>
             </Card>
           </motion.div>
@@ -403,31 +462,19 @@ export function AnalyticsOverviewConsole({ canViewTopPerformers = false }: Analy
           </motion.div>
         </div>
 
-        {/* Help Section */}
+        {/* Help Tip */}
         <motion.div
           initial={{ opacity: 0, y: 20 }}
           animate={{ opacity: 1, y: 0 }}
           transition={{ delay: 1.2 }}
           className="mt-6"
         >
-          <Card className="bg-linear-to-br from-indigo-50 to-purple-50 border-indigo-200 shadow-lg">
-            <CardContent className="p-6">
-              <div className="flex items-start gap-4">
-                <div className="p-3 bg-indigo-100 rounded-lg">
-                  <BarChart3 className="w-6 h-6 text-indigo-600" />
-                </div>
-                <div className="flex-1">
-                  <h3 className="text-lg font-semibold text-gray-900 mb-2">{t('analytics.understandingAnalytics')}</h3>
-                  <p className="text-gray-700 mb-4">
-                    {t('analytics.analyticsDescription')}
-                  </p>
-                  <button className="px-4 py-2 bg-indigo-600 text-white rounded-lg hover:bg-indigo-700 transition-colors font-medium">
-                    {t('analytics.viewAnalyticsGuide')}
-                  </button>
-                </div>
-              </div>
-            </CardContent>
-          </Card>
+          <div className="flex items-center gap-3 px-4 py-3 bg-indigo-50 border border-indigo-200 rounded-lg text-sm">
+            <BarChart3 className="w-5 h-5 text-indigo-600 shrink-0" />
+            <p className="text-gray-700">
+              {t('analytics.analyticsDescription')}
+            </p>
+          </div>
         </motion.div>
       </div>
     </div>
