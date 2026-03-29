@@ -268,7 +268,45 @@ describe("RAGPipeline", () => {
       const results = await pipeline.search("overtime compensation");
       expect(results.length).toBeGreaterThanOrEqual(1);
     });
-  });
+
+      it("bm25Search: term not in any document hits df=0 branch", async () => {
+        await pipeline.addDocuments([makeDoc("d-1", longContent)]);
+        // "xyzzy" is not in longContent — hits df === 0 false branch in bm25Search
+        const results = await pipeline.search("xyzzy notaword qqqqq");
+        expect(results).toBeDefined();
+      });
+
+      it("filter with type only (no jurisdiction) hits binary-expr right side", async () => {
+        await pipeline.addDocuments([
+          makeDoc("d-1", longContent, "policy", "ON"),
+          makeDoc("d-2", longContent.replace("Union", "Workers"), "contract", "BC"),
+        ]);
+        // Pass options with type but no jurisdiction — hits the || right side evaluation
+        const results = await pipeline.search("grievance", { type: "policy" });
+        for (const r of results) {
+          expect(r.chunk.metadata.type).toBe("policy");
+        }
+      });
+
+      it("search with jurisdiction AND type filters both branches", async () => {
+        await pipeline.addDocuments([
+          makeDoc("d-1", longContent, "policy", "ON"),
+          makeDoc("d-2", longContent.replace("Union", "Federal"), "contract", "BC"),
+        ]);
+        const results = await pipeline.search("grievance", { jurisdiction: "BC", type: "contract" });
+        for (const r of results) {
+          expect(r.chunk.metadata.jurisdiction).toBe("BC");
+          expect(r.chunk.metadata.type).toBe("contract");
+        }
+      });
+
+      it("avgDocumentLength fallback: BM25 on fresh pipeline with search returns empty", async () => {
+        // Empty pipeline — avgDocumentLength is 0, search returns empty
+        const fresh = new RAGPipeline();
+        const results = await fresh.search("grievance");
+        expect(results).toEqual([]);
+      });
+    });
 });
 
 // ── singleton ──────────────────────────────────────────────────────

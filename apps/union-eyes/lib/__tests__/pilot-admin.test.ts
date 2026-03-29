@@ -28,6 +28,7 @@ vi.mock('../dashboard-metrics', () => ({
 }));
 
 import { runHealthChecks, buildPilotStatus, type PilotConfiguration, type CaseRow } from '../pilot-admin';
+import { computeKPIs } from '../dashboard-metrics';
 
 const baseConfig: PilotConfiguration = {
   vocabularyLoaded: true,
@@ -83,6 +84,71 @@ describe('pilot-admin', () => {
       expect(result.timestamp).toBeDefined();
       expect(new Date(result.timestamp).getTime()).not.toBeNaN();
     });
+
+      it('gives fail for Users when usersInvited is 0', () => {
+        const result = runHealthChecks({ ...baseConfig, usersInvited: 0 }, mockCases);
+        const users = result.checks.find(c => c.name === 'Users');
+        expect(users?.status).toBe('fail');
+        expect(result.status).toBe('critical');
+      });
+
+      it('gives fail for Audit Trail when auditTrailActive is false', () => {
+        const result = runHealthChecks({ ...baseConfig, auditTrailActive: false }, mockCases);
+        const audit = result.checks.find(c => c.name === 'Audit Trail');
+        expect(audit?.status).toBe('fail');
+        expect(audit?.message).toContain('not active');
+      });
+
+      it('gives warn for SLA compliance when overdueRatio < 0.25', () => {
+        vi.mocked(computeKPIs).mockReturnValueOnce({
+          totalOpen: 10,
+          totalClosed: 5,
+          totalEscalated: 0,
+          overdueResolution: 2,
+          avgResolutionDays: 5,
+          resolvedLast30Days: 5,
+          closedThisMonth: 5,
+          openedThisMonth: 10,
+          escalatedThisMonth: 0,
+        });
+        const result = runHealthChecks(baseConfig, mockCases);
+        const sla = result.checks.find(c => c.name === 'SLA Compliance');
+        expect(sla?.status).toBe('warn');
+        expect(sla?.message).toContain('2 of 10');
+      });
+
+      it('gives fail for SLA compliance when overdueRatio >= 0.25', () => {
+        vi.mocked(computeKPIs).mockReturnValueOnce({
+          totalOpen: 10,
+          totalClosed: 5,
+          totalEscalated: 0,
+          overdueResolution: 4,
+          avgResolutionDays: 5,
+          resolvedLast30Days: 5,
+          closedThisMonth: 5,
+          openedThisMonth: 10,
+          escalatedThisMonth: 0,
+        });
+        const result = runHealthChecks(baseConfig, mockCases);
+        const sla = result.checks.find(c => c.name === 'SLA Compliance');
+        expect(sla?.status).toBe('fail');
+      });
+
+      it('correctly sets critical status from failing SLA check', () => {
+        vi.mocked(computeKPIs).mockReturnValueOnce({
+          totalOpen: 8,
+          totalClosed: 0,
+          totalEscalated: 0,
+          overdueResolution: 3,
+          avgResolutionDays: 9,
+          resolvedLast30Days: 0,
+          closedThisMonth: 0,
+          openedThisMonth: 8,
+          escalatedThisMonth: 0,
+        });
+        const result = runHealthChecks(baseConfig, mockCases);
+        expect(result.status).toBe('critical');
+      });
   });
 
   describe('buildPilotStatus', () => {
