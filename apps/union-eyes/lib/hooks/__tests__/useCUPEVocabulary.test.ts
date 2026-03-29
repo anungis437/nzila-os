@@ -116,4 +116,29 @@ describe('useCUPEVocabulary', () => {
     expect(result.current.error).toBeInstanceOf(Error);
     expect(result.current.vocabulary).toBeNull();
   });
+
+  it('wraps non-Error throws into Error with Unknown message', async () => {
+    mocks.mockFetch.mockRejectedValue('string-rejection');
+
+    const { result } = renderHook(() => useCUPEVocabulary());
+
+    await waitFor(() => expect(result.current.isLoading).toBe(false));
+    expect(result.current.error).toBeInstanceOf(Error);
+    expect(result.current.error?.message).toBe('Unknown error');
+    expect(result.current.vocabulary).toBeNull();
+  });
+
+  it('getStatusesByCategory returns empty array when vocabulary is null', async () => {
+    mocks.mockFetch.mockResolvedValue({
+      ok: false,
+      status: 500,
+    });
+
+    const { result } = renderHook(() => useCUPEVocabulary());
+
+    await waitFor(() => expect(result.current.isLoading).toBe(false));
+    // vocabulary is null after failure
+    const statuses = result.current.getStatusesByCategory('open');
+    expect(statuses).toEqual([]);
+  });
 });

@@ -93,6 +93,12 @@ describe('error-handler', () => {
         safeAsync(() => Promise.reject(new Error('boom')), 'oops'),
       ).rejects.toThrow('boom');
     });
+
+    it('handles non-Error throw and logs string', async () => {
+      await expect(
+        safeAsync(() => Promise.reject('string-error'), 'oops'),
+      ).rejects.toBe('string-error');
+    });
   });
 
   describe('safeAsyncWithDefault', () => {
@@ -104,6 +110,23 @@ describe('error-handler', () => {
     it('returns default on error', async () => {
       const r = await safeAsyncWithDefault(() => Promise.reject(new Error('x')), 99, 'warn');
       expect(r).toBe(99);
+    });
+
+    it('returns default on error without errorMessage (no logging)', async () => {
+      const r = await safeAsyncWithDefault(
+        () => Promise.reject(new Error('silent')),
+        'fallback',
+      );
+      expect(r).toBe('fallback');
+    });
+
+    it('handles non-Error throw with errorMessage', async () => {
+      const r = await safeAsyncWithDefault(
+        () => Promise.reject('string-error'),
+        42,
+        'warning-msg',
+      );
+      expect(r).toBe(42);
     });
   });
 
@@ -250,6 +273,15 @@ describe('error-handler', () => {
         );
       }
     });
+
+    it('handles non-Error throw in withDatabaseErrorHandling', async () => {
+      await expect(
+        withDatabaseErrorHandling(
+          () => Promise.reject('string-db-error'),
+          'insertRecord',
+        )
+      ).rejects.toThrow('insertRecord failed');
+    });
   });
 
   describe('errorBoundary', () => {
@@ -285,6 +317,23 @@ describe('error-handler', () => {
         'Error during operation',
         expect.objectContaining({ error: 'test' })
       );
+    });
+
+    it('handles non-Error throw in errorBoundary', async () => {
+      const result = await errorBoundary(
+        () => Promise.reject('non-error-value'),
+        'safe-default',
+        'caught non-error',
+      );
+      expect(result).toBe('safe-default');
+    });
+
+    it('returns fallback without logging when no logMessage', async () => {
+      const result = await errorBoundary(
+        () => Promise.reject('silent-error'),
+        'default',
+      );
+      expect(result).toBe('default');
     });
   });
 });

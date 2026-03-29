@@ -92,5 +92,28 @@ describe('observability', () => {
         expect.objectContaining({ appName: 'custom-app' }),
       );
     });
+
+    it('passes undefined userId/orgId when auth returns null', async () => {
+      mocks.mockAuth.mockResolvedValue({ userId: null, orgId: null });
+      const { withObservability } = await import('../observability');
+
+      const innerHandler = vi.fn().mockResolvedValue(NextResponse.json({ ok: true }));
+      const wrapped = withObservability(innerHandler);
+      await wrapped(new NextRequest('http://localhost/api/null-auth'));
+
+      expect(mocks.mockCreateRequestContext).toHaveBeenCalledWith(
+        expect.anything(),
+        expect.objectContaining({ userId: undefined, orgId: undefined }),
+      );
+    });
+
+    it('logs non-Error throws as string in catch block', async () => {
+      const { withObservability } = await import('../observability');
+
+      const innerHandler = vi.fn().mockRejectedValue('string-error');
+      const wrapped = withObservability(innerHandler);
+
+      await expect(wrapped(new NextRequest('http://localhost/api/test'))).rejects.toBe('string-error');
+    });
   });
 });

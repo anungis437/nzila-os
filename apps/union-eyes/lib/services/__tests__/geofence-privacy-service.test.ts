@@ -139,6 +139,14 @@ describe("geofence-privacy-service", () => {
       expect(result.success).toBe(false);
       expect(result.error).toContain("Failed to track location");
     });
+
+    it("handles findFirst DB error via .catch fallback", async () => {
+      mocks.mockDb.query.memberLocationConsent.findFirst.mockRejectedValueOnce(new Error("db down"));
+      const result = await trackLocation("u1", { latitude: 45.5, longitude: -73.5 }, "safety");
+      // .catch(() => null) ⇒ consent is null ⇒ returns consent error
+      expect(result.success).toBe(false);
+      expect(result.error).toContain("explicit opt-in consent");
+    });
   });
 
   // ── purgeExpiredLocations ────────────────────────────────────────────────
@@ -228,6 +236,14 @@ describe("geofence-privacy-service", () => {
       mocks.mockDb.query.locationTracking.findMany.mockResolvedValueOnce([]);
       const result = await verifyNoBackgroundTracking();
       expect(result.compliant).toBe(true);
+    });
+
+    it("returns compliant when findMany rejects (DB error)", async () => {
+      mocks.mockDb.query.locationTracking.findMany.mockRejectedValueOnce(new Error("db fail"));
+      // .catch(() => []) ⇒ empty array ⇒ compliant
+      const result = await verifyNoBackgroundTracking();
+      expect(result.compliant).toBe(true);
+      expect(result.backgroundTrackingDetected).toBe(false);
     });
   });
 
