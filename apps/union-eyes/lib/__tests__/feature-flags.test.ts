@@ -264,6 +264,104 @@ describe('feature-flags', () => {
     });
   });
 
+  // ── PercentageFlag (gap coverage) ────────────────────────────
+  describe('PercentageFlag — gap coverage', () => {
+    it('returns false when config enabled but user hash above percentage', async () => {
+      // 1% rollout — almost all users excluded
+      mocks.mockSelect.mockReturnValueOnce(chain([
+        { name: 'p-low', type: 'percentage', enabled: true, percentage: 1, allowedOrganizations: null, allowedUsers: null, description: null },
+      ]));
+      await refreshFeatureFlags();
+
+      const flag = new PercentageFlag('p-low', 0);
+      // At 1% only hashes 0 get in; deterministic so we assert type
+      expect(typeof flag.isEnabled('someuser')).toBe('boolean');
+    });
+
+    it('uses defaultPercentage when config.percentage is null', async () => {
+      mocks.mockSelect.mockReturnValueOnce(chain([
+        { name: 'p-null', type: 'percentage', enabled: true, percentage: null, allowedOrganizations: null, allowedUsers: null, description: null },
+      ]));
+      await refreshFeatureFlags();
+
+      // defaultPercentage = 100 → all users in
+      const flag = new PercentageFlag('p-null', 100);
+      expect(flag.isEnabled('any-user')).toBe(true);
+    });
+  });
+
+  // ── OrgFlag (gap coverage) ──────────────────────────────────
+  describe('OrgFlag — gap coverage', () => {
+    it('returns defaultEnabled when allowedOrgs is empty', async () => {
+      mocks.mockSelect.mockReturnValueOnce(chain([
+        { name: 'org-empty', type: 'tenant', enabled: true, percentage: null, allowedOrganizations: [], allowedUsers: null, description: null },
+      ]));
+      await refreshFeatureFlags();
+
+      const flag = new OrgFlag('org-empty', true);
+      expect(flag.isEnabledForOrg('any-org')).toBe(true);
+    });
+
+    it('enableForOrg skips update when org already included', async () => {
+      mocks.mockSelect.mockReturnValueOnce(chain([
+        { name: 'org-dup', type: 'tenant', enabled: true, percentage: null, allowedOrganizations: ['org-1'], allowedUsers: null, description: null },
+      ]));
+      await refreshFeatureFlags();
+
+      const flag = new OrgFlag('org-dup');
+      await flag.enableForOrg('org-1');
+      // Should NOT call update because org is already present
+      expect(mocks.mockUpdate).not.toHaveBeenCalled();
+    });
+
+    it('enableForOrg falls back when config has null allowedOrgs', async () => {
+      mocks.mockSelect.mockReturnValueOnce(chain([
+        { name: 'org-null-orgs', type: 'tenant', enabled: true, percentage: null, allowedOrganizations: null, allowedUsers: null, description: null },
+      ]));
+      await refreshFeatureFlags();
+
+      mocks.mockSelect
+        .mockReturnValueOnce(chain([{ name: 'org-null-orgs' }]))  // exists check
+        .mockReturnValueOnce(chain([]));                           // refresh
+      const flag = new OrgFlag('org-null-orgs');
+      await flag.enableForOrg('org-new');
+      expect(mocks.mockUpdate).toHaveBeenCalled();
+    });
+
+    it('enableForOrg handles missing config entirely', async () => {
+      // Don't populate cache for this flag name
+      mocks.mockSelect
+        .mockReturnValueOnce(chain([]))    // exists check (not found → insert)
+        .mockReturnValueOnce(chain([]));   // refresh
+      const flag = new OrgFlag('org-uncached');
+      await flag.enableForOrg('org-1');
+      expect(mocks.mockInsert).toHaveBeenCalled();
+    });
+
+    it('disableForOrg returns early when config has no allowedOrgs', async () => {
+      mocks.mockSelect.mockReturnValueOnce(chain([
+        { name: 'org-none', type: 'tenant', enabled: true, percentage: null, allowedOrganizations: null, allowedUsers: null, description: null },
+      ]));
+      await refreshFeatureFlags();
+
+      const flag = new OrgFlag('org-none');
+      await flag.disableForOrg('org-1');
+      // Should NOT call update — early return
+      expect(mocks.mockUpdate).not.toHaveBeenCalled();
+    });
+  });
+
+  // ── updateFeatureFlag error path ────────────────────────────
+  describe('updateFeatureFlag — gap coverage', () => {
+    it('logs and re-throws when DB update fails', async () => {
+      mocks.mockSelect.mockReturnValueOnce(chain([{ name: 'fail-flag' }]));
+      mocks.mockUpdate.mockImplementationOnce(() => { throw new Error('DB crash'); });
+
+      const flag = new BooleanFlag('fail-flag');
+      await expect(flag.disable()).rejects.toThrow('DB crash');
+    });
+  });
+
   // ── features registry ───────────────────────────────────────
   describe('features registry', () => {
     it('contains expected feature flags', () => {

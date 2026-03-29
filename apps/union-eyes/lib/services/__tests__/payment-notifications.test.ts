@@ -249,6 +249,99 @@ describe('payment-notifications', () => {
       // does not throw
     });
   });
+  // ── conditional-branch gap coverage ───────────────────────────────────────────
+  describe('conditional branches (gap coverage)', () => {
+    it('sendPaymentReceivedNotification skips push when no firebaseToken', async () => {
+      mocks.mockSelect.mockReturnValue(chain([{ id: 'u-1', email: 'a@b.com', phone: null, firebaseToken: null }]));
+      await sendPaymentReceivedNotification('org-1', 'u-1', 100, 'card', 'txn-1', 'adm');
+      expect(mocks.mockSend).toHaveBeenCalledWith(expect.objectContaining({ type: 'email' }));
+      expect(mocks.mockQueue).not.toHaveBeenCalled();
+    });
+
+    it('sendPaymentFailedNotification skips SMS when no phone', async () => {
+      mocks.mockSelect.mockReturnValue(chain([{ id: 'u-1', email: 'a@b.com', phone: null, firebaseToken: null }]));
+      await sendPaymentFailedNotification('org-1', 'u-1', 50, 'reason', 'url', 'adm');
+      expect(mocks.mockSend).toHaveBeenCalledWith(expect.objectContaining({ type: 'email' }));
+      // No SMS queued because no phone
+      expect(mocks.mockQueue).not.toHaveBeenCalled();
+    });
+
+    it('sendDuesReminderNotification uses urgent priority when daysUntilDue <= 1', async () => {
+      mocks.mockSelect.mockReturnValue(chain([{ id: 'u-1', email: 'a@b.com', phone: '+1234', firebaseToken: null }]));
+      await sendDuesReminderNotification('org-1', 'u-1', 75, new Date(), 1, 'url', 'adm');
+      expect(mocks.mockSend).toHaveBeenCalledWith(expect.objectContaining({ priority: 'urgent', type: 'sms' }));
+    });
+
+    it('sendDuesOverdueNotification skips SMS when no phone', async () => {
+      mocks.mockSelect.mockReturnValue(chain([{ id: 'u-1', email: 'a@b.com', phone: null, firebaseToken: null }]));
+      await sendDuesOverdueNotification('org-1', 'u-1', 100, new Date(), 10, 'url', 'adm');
+      expect(mocks.mockSend).toHaveBeenCalledTimes(1); // only email, no SMS
+    });
+
+    it('sendStrikeBenefitNotification skips push when no firebaseToken', async () => {
+      mocks.mockSelect.mockReturnValue(chain([{ id: 'u-1', email: 'a@b.com', phone: null, firebaseToken: null }]));
+      await sendStrikeBenefitNotification('org-1', 'u-1', 500, new Date(), 'url', 'adm');
+      expect(mocks.mockSend).toHaveBeenCalledWith(expect.objectContaining({ type: 'email' }));
+      expect(mocks.mockQueue).not.toHaveBeenCalled();
+    });
+
+    it('sendBulkNotification skips unknown recipientIds', async () => {
+      mocks.mockSelect.mockReturnValue(chain([{ id: 'u-1', email: 'a@b.com', phone: null, firebaseToken: null }]));
+      await sendBulkNotification('org-1', ['u-1', 'unknown-user'], 'Subj', 'Body', 'email', 'normal', 'adm');
+      expect(mocks.mockSendBulk).toHaveBeenCalledWith(
+        expect.arrayContaining([expect.objectContaining({ recipientEmail: 'a@b.com' })]),
+      );
+    });
+
+    it('sendBulkNotification push skips recipients without firebaseToken', async () => {
+      mocks.mockSelect.mockReturnValue(chain([{ id: 'u-1', email: null, phone: null, firebaseToken: null }]));
+      await sendBulkNotification('org-1', ['u-1'], 'Subj', 'Body', 'push', 'normal', 'adm');
+      // No payloads should be built
+      expect(mocks.mockSendBulk).toHaveBeenCalledWith([]);
+    });
+  });
+  // ── catch-block gap coverage ────────────────────────────────────────────────
+  describe('notification catch blocks (gap coverage)', () => {
+    const withThrowingService = () => {
+      mocks.mockGetNotificationService.mockReturnValue({
+        send: vi.fn().mockRejectedValue(new Error('send fail')),
+        queue: vi.fn().mockRejectedValue(new Error('queue fail')),
+        sendBulk: vi.fn().mockRejectedValue(new Error('bulk fail')),
+        retryFailed: vi.fn().mockRejectedValue(new Error('retry fail')),
+      });
+    };
+
+    it('sendPaymentFailedNotification catches internal error', async () => {
+      mocks.mockSelect.mockReturnValue(chain([{ id: 'u-1', email: 'a@b.com', phone: '+1234', firebaseToken: null }]));
+      withThrowingService();
+      await sendPaymentFailedNotification('org-1', 'u-1', 50, 'reason', 'url', 'adm');
+      // Should not throw — error is caught
+    });
+
+    it('sendDuesReminderNotification catches internal error', async () => {
+      mocks.mockSelect.mockReturnValue(chain([{ id: 'u-1', email: 'a@b.com', phone: '+1234', firebaseToken: null }]));
+      withThrowingService();
+      await sendDuesReminderNotification('org-1', 'u-1', 75, new Date(), 2, 'url', 'adm');
+    });
+
+    it('sendDuesOverdueNotification catches internal error', async () => {
+      mocks.mockSelect.mockReturnValue(chain([{ id: 'u-1', email: 'a@b.com', phone: '+1234', firebaseToken: null }]));
+      withThrowingService();
+      await sendDuesOverdueNotification('org-1', 'u-1', 100, new Date(), 10, 'url', 'adm');
+    });
+
+    it('sendStrikeBenefitNotification catches internal error', async () => {
+      mocks.mockSelect.mockReturnValue(chain([{ id: 'u-1', email: 'a@b.com', phone: null, firebaseToken: 'tok' }]));
+      withThrowingService();
+      await sendStrikeBenefitNotification('org-1', 'u-1', 500, new Date(), 'url', 'adm');
+    });
+
+    it('sendBulkNotification catches internal error', async () => {
+      mocks.mockSelect.mockReturnValue(chain([{ id: 'u-1', email: 'a@b.com', phone: null, firebaseToken: null }]));
+      withThrowingService();
+      await sendBulkNotification('org-1', ['u-1'], 'Subj', 'Body', 'email', 'normal', 'adm');
+    });
+  });
 
   // ── default export ─────────────────────────────────────────────────────────
   describe('default export', () => {

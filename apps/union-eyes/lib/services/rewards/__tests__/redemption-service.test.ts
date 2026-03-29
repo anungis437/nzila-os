@@ -321,6 +321,14 @@ describe('redemption-service', () => {
 
       expect(result).toEqual({ id: 'r-1' });
     });
+
+    it('returns null when not found', async () => {
+      mocks.mockQueryRewardRedemptions.findFirst.mockResolvedValue(null);
+
+      const result = await getRedemptionByIdInternal('missing');
+
+      expect(result).toBeNull();
+    });
   });
 
   /* ============================= getRedemptionByOrderId ============================= */
@@ -355,6 +363,120 @@ describe('redemption-service', () => {
 
       expect(result.redemptions).toHaveLength(1);
       expect(result.total).toBe(5);
+    });
+  });
+
+  /* ============================= cancelRedemption — gap coverage ============================= */
+  describe('cancelRedemption — gap coverage', () => {
+    it('handles null providerPayloadJson in cancel', async () => {
+      const redemption = {
+        id: 'r-pj', orgId: 'org-1', userId: 'u-1', creditsSpent: 50,
+        status: 'initiated', providerPayloadJson: null,
+      };
+
+      mocks.mockTransaction.mockImplementation(async (cb: any) => {
+        const tx = {
+          query: { rewardRedemptions: { findFirst: vi.fn().mockResolvedValue(redemption) } },
+          update: vi.fn().mockReturnValue({
+            set: vi.fn().mockReturnValue({
+              where: vi.fn().mockReturnValue({
+                returning: vi.fn().mockResolvedValue([{ ...redemption, status: 'cancelled' }]),
+              }),
+            }),
+          }),
+        };
+        return cb(tx);
+      });
+      mocks.mockApplyLedgerEntry.mockResolvedValue({ balanceAfter: 100 });
+
+      const result = await cancelRedemption('r-pj', 'org-1', 'test');
+      expect(result.redemption.status).toBe('cancelled');
+    });
+
+    it('throws when status is cancelled (not an allowed status)', async () => {
+      const redemption = {
+        id: 'r-can', orgId: 'org-1', userId: 'u-1', creditsSpent: 50,
+        status: 'cancelled', providerPayloadJson: {},
+      };
+
+      mocks.mockTransaction.mockImplementation(async (cb: any) => {
+        const tx = {
+          query: { rewardRedemptions: { findFirst: vi.fn().mockResolvedValue(redemption) } },
+        };
+        return cb(tx);
+      });
+
+      await expect(cancelRedemption('r-can', 'org-1', 'dup')).rejects.toThrow('Cannot cancel redemption with status: cancelled');
+    });
+  });
+
+  /* ============================= processRedemptionRefund — gap coverage ============================= */
+  describe('processRedemptionRefund — gap coverage', () => {
+    it('handles null providerPayloadJson in refund', async () => {
+      const redemption = {
+        id: 'r-rpj', orgId: 'org-1', userId: 'u-1', creditsSpent: 100,
+        status: 'ordered', providerPayloadJson: null,
+      };
+
+      mocks.mockTransaction.mockImplementation(async (cb: any) => {
+        const tx = {
+          query: { rewardRedemptions: { findFirst: vi.fn().mockResolvedValue(redemption) } },
+          update: vi.fn().mockReturnValue({
+            set: vi.fn().mockReturnValue({
+              where: vi.fn().mockReturnValue({
+                returning: vi.fn().mockResolvedValue([{ ...redemption, status: 'refunded' }]),
+              }),
+            }),
+          }),
+        };
+        return cb(tx);
+      });
+      mocks.mockApplyLedgerEntry.mockResolvedValue({ balanceAfter: 300 });
+
+      const result = await processRedemptionRefund('r-rpj', 'org-1', { reason: 'test' });
+      expect(result.redemption.status).toBe('refunded');
+    });
+
+    it('throws when redemption not found', async () => {
+      mocks.mockTransaction.mockImplementation(async (cb: any) => {
+        const tx = {
+          query: { rewardRedemptions: { findFirst: vi.fn().mockResolvedValue(null) } },
+        };
+        return cb(tx);
+      });
+
+      await expect(processRedemptionRefund('nope', 'org-1', {})).rejects.toThrow('Redemption not found');
+    });
+  });
+
+  /* ============================= getRedemptionByOrderId — gap coverage ============================= */
+  describe('getRedemptionByOrderId — gap coverage', () => {
+    it('queries WITHOUT orgId (else branch)', async () => {
+      mocks.mockQueryRewardRedemptions.findFirst.mockResolvedValue({ id: 'r-no-org', providerOrderId: 'ord-7' });
+
+      const result = await getRedemptionByOrderId('ord-7');
+      expect(result?.id).toBe('r-no-org');
+    });
+
+    it('queries WITH orgId', async () => {
+      mocks.mockQueryRewardRedemptions.findFirst.mockResolvedValue({ id: 'r-org', providerOrderId: 'ord-8' });
+
+      const result = await getRedemptionByOrderId('ord-8', 'org-1');
+      expect(result?.id).toBe('r-org');
+    });
+
+    it('returns null when order not found', async () => {
+      mocks.mockQueryRewardRedemptions.findFirst.mockResolvedValue(null);
+
+      const result = await getRedemptionByOrderId('missing-order');
+      expect(result).toBeNull();
+    });
+
+    it('returns null when order not found with orgId', async () => {
+      mocks.mockQueryRewardRedemptions.findFirst.mockResolvedValue(undefined);
+
+      const result = await getRedemptionByOrderId('missing-order', 'org-1');
+      expect(result).toBeNull();
     });
   });
 
