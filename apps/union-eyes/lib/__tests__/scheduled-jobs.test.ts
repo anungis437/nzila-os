@@ -267,14 +267,15 @@ describe('scheduled-jobs', () => {
       expect(() => initializeAnalyticsJobs()).not.toThrow();
     });
 
-      it('skips cron scheduling in browser-like environment', () => {
-        // Simulate browser env where typeof window !== 'undefined'
-        (global as unknown as Record<string, unknown>).window = {};
-        try {
-          expect(() => initializeAnalyticsJobs()).not.toThrow();
-        } finally {
-          delete (global as unknown as Record<string, unknown>).window;
-        }
-      });
+    it('skips cron scheduling in browser-like environment', () => {
+      // Simulate browser env where typeof window !== 'undefined'
+      (global as unknown as Record<string, unknown>).window = {};
+      try {
+        expect(() => initializeAnalyticsJobs()).not.toThrow();
+      } finally {
+        delete (global as unknown as Record<string, unknown>).window;
+      }
     });
+
+  });
 });

@@ -257,6 +257,23 @@ describe('SelectiveContextManager', () => {
         // 'big' item exceeds budget so only 'small' might be selected
         expect(selected.length).toBeGreaterThanOrEqual(1);
       });
+      it('typeWeights fallback to 0.5 for unregistered type', () => {
+        // Pass a type string not in typeWeights to trigger `|| 0.5` fallback
+        manager.addItem({ id: 'unk', content: 'Unknown type content here', type: 'CUSTOM' as any, timestamp: Date.now() });
+        // calculateImportance is called on addItem — typeWeights['CUSTOM'] = undefined → || 0.5
+        expect(manager.getInfo().itemCount).toBe(1);
+        const results = manager.selectForQuery('content');
+        expect(results.length).toBeGreaterThan(0);
+      });
+
+      it('calculateRecency returns 0.8 for item between 1h and 24h old', () => {
+        // age between 1h and 24h → reaches `if (age < day) return 0.8` branch
+        const twoHoursAgo = Date.now() - 2 * 60 * 60 * 1000;
+        const mgr = new SelectiveContextManager({ maxContextTokens: 4096, retentionStrategy: 'recency' });
+        mgr.addItem({ id: 'two-h', content: 'Two hour old item content here', type: 'user', timestamp: twoHoursAgo });
+        const results = mgr.selectForQuery('item');
+        expect(results.length).toBe(1);
+      });
   });
 });
 
