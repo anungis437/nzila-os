@@ -17,6 +17,9 @@ import {
   safeAsyncWithDefault,
   handleAPIError,
   isOperationalError,
+  retryWithBackoff,
+  withDatabaseErrorHandling,
+  errorBoundary,
 } from '../error-handler';
 
 describe('error-handler', () => {
@@ -129,6 +132,159 @@ describe('error-handler', () => {
 
     it('returns false for non-AppErrors', () => {
       expect(isOperationalError(new Error('x'))).toBe(false);
+    });
+  });
+
+  describe('retryWithBackoff', () => {
+    it('returns value on first success', async () => {
+      const fn = vi.fn().mockResolvedValue('ok');
+      const result = await retryWithBackoff(fn);
+      expect(result).toBe('ok');
+      expect(fn).toHaveBeenCalledTimes(1);
+    });
+
+    it('retries on failure then succeeds', async () => {
+      const fn = vi.fn()
+        .mockRejectedValueOnce(new Error('fail1'))
+        .mockResolvedValue('ok');
+
+      const result = await retryWithBackoff(fn, {
+        maxRetries: 3,
+        initialDelay: 1,
+        maxDelay: 10,
+      });
+      expect(result).toBe('ok');
+      expect(fn).toHaveBeenCalledTimes(2);
+    });
+
+    it('throws after exhausting max retries', async () => {
+      const fn = vi.fn().mockRejectedValue(new Error('always-fail'));
+
+      await expect(
+        retryWithBackoff(fn, { maxRetries: 2, initialDelay: 1 })
+      ).rejects.toThrow('always-fail');
+      expect(fn).toHaveBeenCalledTimes(2);
+    });
+
+    it('invokes onRetry callback', async () => {
+      const onRetry = vi.fn();
+      const fn = vi.fn()
+        .mockRejectedValueOnce(new Error('fail'))
+        .mockResolvedValue('ok');
+
+      await retryWithBackoff(fn, {
+        maxRetries: 3,
+        initialDelay: 1,
+        onRetry,
+      });
+      expect(onRetry).toHaveBeenCalledTimes(1);
+      expect(onRetry).toHaveBeenCalledWith(1, expect.any(Error));
+    });
+
+    it('caps delay at maxDelay', async () => {
+      const fn = vi.fn()
+        .mockRejectedValueOnce(new Error('a'))
+        .mockRejectedValueOnce(new Error('b'))
+        .mockResolvedValue('ok');
+
+      const start = Date.now();
+      await retryWithBackoff(fn, {
+        maxRetries: 3,
+        initialDelay: 1,
+        maxDelay: 5,
+        backoffMultiplier: 100,
+      });
+      // Should complete very quickly since maxDelay caps at 5ms
+      expect(Date.now() - start).toBeLessThan(500);
+      expect(fn).toHaveBeenCalledTimes(3);
+    });
+
+    it('wraps non-Error throws into Error', async () => {
+      const fn = vi.fn().mockRejectedValue('string-error');
+
+      await expect(
+        retryWithBackoff(fn, { maxRetries: 1, initialDelay: 1 })
+      ).rejects.toThrow('string-error');
+    });
+  });
+
+  describe('withDatabaseErrorHandling', () => {
+    it('returns value on success', async () => {
+      const result = await withDatabaseErrorHandling(
+        () => Promise.resolve(42),
+        'fetchUser'
+      );
+      expect(result).toBe(42);
+    });
+
+    it('wraps error into DatabaseError', async () => {
+      await expect(
+        withDatabaseErrorHandling(
+          () => Promise.reject(new Error('connection reset')),
+          'updateUser',
+          { userId: '123' }
+        )
+      ).rejects.toThrow(DatabaseError);
+    });
+
+    it('includes operation name in thrown error message', async () => {
+      await expect(
+        withDatabaseErrorHandling(
+          () => Promise.reject(new Error('timeout')),
+          'deleteRecord'
+        )
+      ).rejects.toThrow('deleteRecord failed');
+    });
+
+    it('preserves context in DatabaseError', async () => {
+      try {
+        await withDatabaseErrorHandling(
+          () => Promise.reject(new Error('err')),
+          'op',
+          { table: 'claims' }
+        );
+      } catch (e) {
+        expect(e).toBeInstanceOf(DatabaseError);
+        expect((e as DatabaseError).context).toEqual(
+          expect.objectContaining({ table: 'claims' })
+        );
+      }
+    });
+  });
+
+  describe('errorBoundary', () => {
+    it('returns value on success', async () => {
+      const result = await errorBoundary(() => Promise.resolve('ok'));
+      expect(result).toBe('ok');
+    });
+
+    it('returns null on error when no fallback', async () => {
+      const result = await errorBoundary(() => Promise.reject(new Error('boom')));
+      expect(result).toBeNull();
+    });
+
+    it('returns custom fallback on error', async () => {
+      const result = await errorBoundary(
+        () => Promise.reject(new Error('boom')),
+        'default-val',
+        'Something went wrong'
+      );
+      expect(result).toBe('default-val');
+    });
+
+    it('logs error when logMessage provided', async () => {
+      const { logger } = await import('@/lib/logger');
+
+      await errorBoundary(
+        () => Promise.reject(new Error('test')),
+        null,
+        'Error during operation'
+      );
+
+      expect(logger.error).toHaveBeenCalledWith(
+        'Error during operation',
+        expect.objectContaining({ error: 'test' })
+      );
     });
   });
 });

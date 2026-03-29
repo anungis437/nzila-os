@@ -74,4 +74,84 @@ describe('env-validator', () => {
       expect(result.warnings.length).toBeGreaterThan(0);
     });
   });
+
+  describe('isEnvSet', () => {
+    it('returns true when variable is set', async () => {
+      process.env.TEST_VAR_IS_SET = 'some-value';
+      const { isEnvSet } = await import('../env-validator');
+      expect(isEnvSet('TEST_VAR_IS_SET')).toBe(true);
+    });
+
+    it('returns false when variable is empty string', async () => {
+      process.env.TEST_VAR_EMPTY = '';
+      const { isEnvSet } = await import('../env-validator');
+      expect(isEnvSet('TEST_VAR_EMPTY')).toBe(false);
+    });
+
+    it('returns false when variable is not set', async () => {
+      delete process.env.TEST_VAR_MISSING;
+      const { isEnvSet } = await import('../env-validator');
+      expect(isEnvSet('TEST_VAR_MISSING')).toBe(false);
+    });
+  });
+
+  describe('requireEnv', () => {
+    it('returns value when variable is set', async () => {
+      process.env.TEST_REQUIRED = 'my-value';
+      const { requireEnv } = await import('../env-validator');
+      expect(requireEnv('TEST_REQUIRED')).toBe('my-value');
+    });
+
+    it('throws when variable is not set', async () => {
+      delete process.env.TEST_REQUIRED_MISSING;
+      const { requireEnv } = await import('../env-validator');
+      expect(() => requireEnv('TEST_REQUIRED_MISSING')).toThrow(
+        'Required environment variable TEST_REQUIRED_MISSING is not set'
+      );
+    });
+
+    it('includes description in error message when provided', async () => {
+      delete process.env.TEST_REQ_DESC;
+      const { requireEnv } = await import('../env-validator');
+      expect(() => requireEnv('TEST_REQ_DESC', 'The API key')).toThrow(
+        'Description: The API key'
+      );
+    });
+
+    it('throws when variable is empty', async () => {
+      process.env.TEST_REQUIRED_EMPTY = '';
+      const { requireEnv } = await import('../env-validator');
+      expect(() => requireEnv('TEST_REQUIRED_EMPTY')).toThrow();
+    });
+  });
+
+  describe('getEnv', () => {
+    it('returns value when variable is set', async () => {
+      process.env.TEST_GET_ENV = 'production';
+      const { getEnv } = await import('../env-validator');
+      expect(getEnv('TEST_GET_ENV', 'default')).toBe('production');
+    });
+
+    it('returns default when variable is not set', async () => {
+      delete process.env.TEST_GET_ENV_MISSING;
+      const { getEnv } = await import('../env-validator');
+      expect(getEnv('TEST_GET_ENV_MISSING', 'fallback')).toBe('fallback');
+    });
+
+    it('returns default when variable is empty', async () => {
+      process.env.TEST_GET_ENV_EMPTY = '';
+      const { getEnv } = await import('../env-validator');
+      expect(getEnv('TEST_GET_ENV_EMPTY', 'fallback')).toBe('fallback');
+    });
+  });
+
+  describe('checkEnv', () => {
+    it('returns validation result without throwing', async () => {
+      delete process.env.DATABASE_URL;
+      const { checkEnv } = await import('../env-validator');
+      const result = checkEnv();
+      expect(result).toHaveProperty('valid');
+      expect(result).toHaveProperty('errors');
+    });
+  });
 });

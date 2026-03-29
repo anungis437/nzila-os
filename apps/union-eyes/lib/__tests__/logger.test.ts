@@ -6,8 +6,10 @@
  * - Correlation ID management
  * - Log level routing
  * - Performance timing
+ * - HTTP request logging
+ * - withLogging wrapper
  */
-import { describe, it, expect, vi, beforeEach } from 'vitest';
+import { describe, it, expect, vi, beforeEach, afterEach } from 'vitest';
 
 // Mock Sentry before importing logger
 vi.mock('@sentry/nextjs', () => ({
@@ -89,6 +91,156 @@ describe('Logger', () => {
 
     it('has error method', () => {
       expect(typeof loggerModule.logger.error).toBe('function');
+    });
+  });
+
+  describe('redactSensitiveData (via info)', () => {
+    let writeSpy: ReturnType<typeof vi.spyOn>;
+
+    beforeEach(() => {
+      writeSpy = vi.spyOn(process.stdout, 'write').mockImplementation(() => true);
+    });
+
+    afterEach(() => {
+      writeSpy.mockRestore();
+    });
+
+    it('redacts password field', () => {
+      loggerModule.logger.info('test', { password: 'secret123' });
+      const output = writeSpy.mock.calls[0]?.[0] as string;
+      expect(output).toContain('[REDACTED]');
+      expect(output).not.toContain('secret123');
+    });
+
+    it('redacts token field', () => {
+      loggerModule.logger.info('test', { accessToken: 'tok_abc' });
+      const output = writeSpy.mock.calls[0]?.[0] as string;
+      expect(output).toContain('[REDACTED]');
+      expect(output).not.toContain('tok_abc');
+    });
+
+    it('partially redacts email field', () => {
+      loggerModule.logger.info('test', { email: 'user@example.com' });
+      const output = writeSpy.mock.calls[0]?.[0] as string;
+      expect(output).toContain('u***@example.com');
+      expect(output).not.toContain('user@example.com');
+    });
+
+    it('redacts secret field', () => {
+      loggerModule.logger.info('test', { secret: 'my-secret-val' });
+      const output = writeSpy.mock.calls[0]?.[0] as string;
+      expect(output).toContain('[REDACTED]');
+      expect(output).not.toContain('my-secret-val');
+    });
+
+    it('does not redact non-sensitive fields', () => {
+      loggerModule.logger.info('test', { userId: 'u1' });
+      const output = writeSpy.mock.calls[0]?.[0] as string;
+      expect(output).toContain('u1');
+    });
+  });
+
+  describe('httpRequest', () => {
+    let stdoutSpy: ReturnType<typeof vi.spyOn>;
+    let stderrSpy: ReturnType<typeof vi.spyOn>;
+
+    beforeEach(() => {
+      stdoutSpy = vi.spyOn(process.stdout, 'write').mockImplementation(() => true);
+      stderrSpy = vi.spyOn(process.stderr, 'write').mockImplementation(() => true);
+    });
+
+    afterEach(() => {
+      stdoutSpy.mockRestore();
+      stderrSpy.mockRestore();
+    });
+
+    it('logs 200 at info level', () => {
+      loggerModule.logger.httpRequest('GET', '/api/test', 200, 50);
+      expect(stdoutSpy).toHaveBeenCalledWith(
+        expect.stringContaining('HTTP GET /api/test 200')
+      );
+    });
+
+    it('logs 404 at warn level', () => {
+      loggerModule.logger.httpRequest('GET', '/api/missing', 404, 10);
+      expect(stderrSpy).toHaveBeenCalledWith(
+        expect.stringContaining('HTTP GET /api/missing 404')
+      );
+    });
+
+    it('logs 500 at error level', () => {
+      loggerModule.logger.httpRequest('POST', '/api/crash', 500, 100);
+      expect(stderrSpy).toHaveBeenCalledWith(
+        expect.stringContaining('HTTP POST /api/crash 500')
+      );
+    });
+  });
+
+  describe('withLogging', () => {
+    it('wraps handler and sets correlation ID', async () => {
+      const mockResponse = new Response('ok', { status: 200 });
+      const handler = vi.fn().mockResolvedValue(mockResponse);
+
+      const wrapped = loggerModule.withLogging(handler, '/api/test');
+      const req = new Request('http://localhost/api/test', {
+        headers: { 'x-correlation-id': 'test-corr-id' },
+      });
+
+      const result = await wrapped(req);
+      expect(handler).toHaveBeenCalledWith(req);
+      expect(result.headers.get('x-correlation-id')).toBe('test-corr-id');
+    });
+
+    it('re-throws handler errors after logging', async () => {
+      const handler = vi.fn().mockRejectedValue(new Error('handler-boom'));
+      const wrapped = loggerModule.withLogging(handler, '/api/fail');
+      const req = new Request('http://localhost/api/fail');
+
+      await expect(wrapped(req)).rejects.toThrow('handler-boom');
+    });
+  });
+
+  describe('error method', () => {
+    let stderrSpy: ReturnType<typeof vi.spyOn>;
+
+    beforeEach(() => {
+      stderrSpy = vi.spyOn(process.stderr, 'write').mockImplementation(() => true);
+    });
+
+    afterEach(() => {
+      stderrSpy.mockRestore();
+    });
+
+    it('logs error with cause', () => {
+      const err = new Error('fail');
+      err.cause = 'root cause';
+      loggerModule.logger.error('Operation failed', err);
+      expect(stderrSpy).toHaveBeenCalledWith(
+        expect.stringContaining('Operation failed')
+      );
+    });
+
+    it('handles non-Error objects', () => {
+      loggerModule.logger.error('Bad thing', 'string-error' as unknown as Error);
+      expect(stderrSpy).toHaveBeenCalledWith(
+        expect.stringContaining('Bad thing')
+      );
+    });
+  });
+
+  describe('debug suppression in production', () => {
+    const originalEnv = process.env.NODE_ENV;
+
+    afterEach(() => {
+      process.env.NODE_ENV = originalEnv;
+    });
+
+    it('suppresses debug in production', () => {
+      const stdoutSpy = vi.spyOn(process.stdout, 'write').mockImplementation(() => true);
+      process.env.NODE_ENV = 'production';
+      loggerModule.logger.debug('should not appear');
+      expect(stdoutSpy).not.toHaveBeenCalled();
+      stdoutSpy.mockRestore();
     });
   });
 });
