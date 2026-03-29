@@ -223,6 +223,16 @@ describe('document-service', () => {
       mocks.mockSelect.mockImplementation(() => { throw new Error('fail'); });
       await expect(listDocuments()).rejects.toThrow('Failed to list documents');
     });
+
+    it('uses createdAt as sort fallback when sortBy is not name/uploadedAt', async () => {
+      mocks.mockSelect
+        .mockReturnValueOnce(chain([{ count: 0 }]))
+        .mockReturnValueOnce(chain([]));
+
+      const result = await listDocuments({}, { sortBy: 'createdAt', sortOrder: 'desc' });
+      expect(result.documents).toEqual([]);
+      expect(result.total).toBe(0);
+    });
   });
 
   // ================================================================
@@ -289,6 +299,14 @@ describe('document-service', () => {
       mocks.mockFindFirstFolder.mockResolvedValue({ ...FOLDER, deletedAt: new Date() });
       expect(await getFolderById('f1')).toBeNull();
     });
+
+    it('falls back to documentCount 0 when count row is missing', async () => {
+      mocks.mockFindFirstFolder.mockResolvedValue(FOLDER);
+      mocks.mockSelect.mockReturnValue(chain([]));
+
+      const result = await getFolderById('f1');
+      expect(result).toEqual({ ...FOLDER, documentCount: 0 });
+    });
   });
 
   describe('listFolders', () => {
@@ -309,6 +327,25 @@ describe('document-service', () => {
       const result = await listFolders('org-1', null);
       expect(result).toEqual([]);
     });
+
+    it('filters by non-null parentFolderId', async () => {
+      mocks.mockSelect
+        .mockReturnValueOnce(chain([FOLDER]))
+        .mockReturnValueOnce(chain([{ count: 1 }]));
+
+      const result = await listFolders('org-1', 'parent-1');
+      expect(result).toHaveLength(1);
+      expect(result[0].documentCount).toBe(1);
+    });
+
+    it('falls back documentCount to 0 when count query returns empty', async () => {
+      mocks.mockSelect
+        .mockReturnValueOnce(chain([FOLDER]))
+        .mockReturnValueOnce(chain([]));
+
+      const result = await listFolders('org-1');
+      expect(result[0].documentCount).toBe(0);
+    });
   });
 
   describe('createFolder', () => {
@@ -325,6 +362,12 @@ describe('document-service', () => {
       mocks.mockUpdate.mockReturnValue(chain([updated]));
       const result = await updateFolder('f1', { name: 'Renamed' } as never);
       expect(result).toEqual(updated);
+    });
+
+    it('returns null when update yields no row', async () => {
+      mocks.mockUpdate.mockReturnValue(chain([undefined]));
+      const result = await updateFolder('missing', { name: 'Nope' } as never);
+      expect(result).toBeNull();
     });
   });
 
@@ -365,6 +408,14 @@ describe('document-service', () => {
     it('returns empty array when no folders', async () => {
       mocks.mockSelect.mockReturnValue(chain([]));
       expect(await getFolderTree('org-1')).toEqual([]);
+    });
+
+    it('keeps orphaned folders out of root when parent is missing', async () => {
+      const orphan = { id: 'f3', name: 'Orphan', organizationId: 'org-1', parentFolderId: 'missing-parent', deletedAt: null };
+      mocks.mockSelect.mockReturnValue(chain([orphan]));
+
+      const tree = await getFolderTree('org-1');
+      expect(tree).toEqual([]);
     });
   });
 
@@ -418,6 +469,14 @@ describe('document-service', () => {
       expect(result.processed).toBe(1);
       expect(result.failed).toBe(1);
     });
+
+    it('uses fallback message when non-Error is thrown during OCR', async () => {
+      mocks.mockUpdate.mockImplementationOnce(() => { throw 'bad-ocr'; });
+
+      const result = await bulkProcessOCR(['d1']);
+      expect(result.success).toBe(false);
+      expect(result.errors?.[0].error).toBe('Failed to process document OCR');
+    });
   });
 
   // ================================================================
@@ -441,6 +500,15 @@ describe('document-service', () => {
 
       const result = await searchDocuments('org-1', 'term', { category: 'legal', fileType: 'pdf', tags: ['x'], uploadedBy: 'u1' });
       expect(result.documents).toEqual([]);
+    });
+
+    it('skips full-text condition when searchQuery is empty', async () => {
+      mocks.mockSelect
+        .mockReturnValueOnce(chain([{ count: 0 }]))
+        .mockReturnValueOnce(chain([]));
+
+      const result = await searchDocuments('org-1', '', { fileType: 'pdf' });
+      expect(result.total).toBe(0);
     });
   });
 
@@ -480,6 +548,14 @@ describe('document-service', () => {
       mocks.mockSelect.mockReturnValue(chain([{ ...DOC, tags: ['keep', 'remove'] }]));
       mocks.mockUpdate.mockReturnValue(chain([DOC]));
       const result = await bulkUpdateTags(['d1'], ['remove'], 'remove');
+      expect(result.success).toBe(true);
+    });
+
+    it('treats missing tags as empty list in add operation', async () => {
+      mocks.mockSelect.mockReturnValue(chain([{ ...DOC, tags: undefined }]));
+      mocks.mockUpdate.mockReturnValue(chain([DOC]));
+
+      const result = await bulkUpdateTags(['d1'], ['first'], 'add');
       expect(result.success).toBe(true);
     });
   });
@@ -524,6 +600,19 @@ describe('document-service', () => {
       const stats = await getDocumentStatistics('org-1');
       expect(stats.total).toBe(0);
       expect(stats.totalSize).toBe(0);
+    });
+
+    it('handles docs without category and fileSize', async () => {
+      const docs = [
+        { category: undefined, fileType: 'pdf', fileSize: undefined, isConfidential: false },
+      ];
+      mocks.mockSelect.mockReturnValue(chain(docs));
+
+      const stats = await getDocumentStatistics('org-1');
+      expect(stats.byCategory).toEqual({});
+      expect(stats.byFileType).toEqual({ pdf: 1 });
+      expect(stats.totalSize).toBe(0);
+      expect(stats.confidential).toBe(0);
     });
   });
 });
