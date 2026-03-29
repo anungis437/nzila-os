@@ -36,7 +36,7 @@ vi.mock('pdfkit', () => {
   return { default: PDFDocument };
 });
 
-import { generatePDF, addHeader, addFooter } from '../utils/pdf-generator';
+import { generatePDF, addHeader, addFooter, __testInternals } from '../utils/pdf-generator';
 
 // ── Tests ────────────────────────────────────────────────────────────────────
 
@@ -132,6 +132,69 @@ describe('generatePDF', () => {
       data: { key: 'value' } as unknown as unknown[],
     });
     expect(mocks.fakeDoc.fontSize).toHaveBeenCalledWith(12);
+  });
+
+  it('renders usage report grievances section when provided', async () => {
+    await generatePDF({
+      title: 'Usage with Grievances',
+      data: {
+        period: { start: '2025-01', end: '2025-06' },
+        claims: { total: 1, byStatus: {}, byPriority: {} },
+        members: { total: 2, active: 1, new: 1 },
+        grievances: { total: 3, resolved: 2 },
+      } as unknown as unknown[],
+      template: 'usage-report',
+    });
+
+    expect(mocks.fakeDoc.text).toHaveBeenCalledWith('Grievances', { underline: true });
+    expect(mocks.fakeDoc.text).toHaveBeenCalledWith('Total Grievances: 3');
+    expect(mocks.fakeDoc.text).toHaveBeenCalledWith('Resolved: 2');
+  });
+
+  it('rejects when document rendering throws synchronously', async () => {
+    mocks.fakeDoc.fontSize.mockImplementationOnce(() => {
+      throw new Error('render-fail');
+    });
+
+    await expect(generatePDF({ title: 'Boom', data: [] })).rejects.toThrow('render-fail');
+  });
+});
+
+describe('pdf test internals', () => {
+  beforeEach(() => vi.clearAllMocks());
+
+  it('covers table cell formatters and page break branch', () => {
+    mocks.fakeDoc.y = 740;
+
+    __testInternals.renderTable(
+      mocks.fakeDoc as unknown as typeof import('pdfkit'),
+      [{ header: 'Value', key: 'value' }],
+      [
+        { value: new Date('2025-01-01') },
+        { value: { nested: true } },
+        { value: null },
+      ],
+    );
+
+    expect(mocks.fakeDoc.addPage).toHaveBeenCalled();
+    expect(mocks.fakeDoc.text).toHaveBeenCalled();
+  });
+
+  it('accepts non-array data for specific report renderers', () => {
+    __testInternals.renderClaimsReport(
+      mocks.fakeDoc as unknown as typeof import('pdfkit'),
+      { title: 'Claims Single', data: { claimNumber: 'C-1' } as unknown as unknown[] },
+    );
+    __testInternals.renderMembersReport(
+      mocks.fakeDoc as unknown as typeof import('pdfkit'),
+      { title: 'Members Single', data: { name: 'A' } as unknown as unknown[] },
+    );
+    __testInternals.renderGrievancesReport(
+      mocks.fakeDoc as unknown as typeof import('pdfkit'),
+      { title: 'Grievance Single', data: { claimNumber: 'G-1' } as unknown as unknown[] },
+    );
+
+    expect(mocks.fakeDoc.text).toHaveBeenCalled();
   });
 });
 
