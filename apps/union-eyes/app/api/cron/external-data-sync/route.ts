@@ -219,14 +219,12 @@ export async function GET(request: NextRequest) {
 
     return NextResponse.json(results);
   } catch (error) {
-    const errorMsg = error instanceof Error ? error.message : 'Unknown error';
     logger.error('[CRON] Fatal error in external data sync:', error);
 
     return NextResponse.json(
       {
         success: false,
         error: 'Cron job failed',
-        message: errorMsg,
         duration: Date.now() - startTime,
       },
       { status: 500 }

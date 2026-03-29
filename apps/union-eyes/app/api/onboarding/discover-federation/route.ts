@@ -12,7 +12,7 @@
 
 import { z } from 'zod';
 import { NextResponse } from 'next/server';
-import { withRoleAuth } from '@/lib/role-middleware';
+import { withRoleAuth, type MemberRole } from '@/lib/role-middleware';
 import { autoDetectParentFederation } from '@/lib/utils/smart-onboarding';
 import { logger } from '@/lib/logger';
 import { eventBus, AppEvents } from '@/lib/events';
@@ -30,7 +30,7 @@ const onboardingDiscoverFederationSchema = z.object({
   estimatedMemberCount: z.number().int().positive(),
 });
 
-export const POST = withRoleAuth('officer', async (request, context) => {
+export const POST = withRoleAuth('officer' as MemberRole, async (request, context) => {
   const { userId, organizationId: _organizationId } = context;
 
   try {
@@ -103,7 +103,6 @@ export const POST = withRoleAuth('officer', async (request, context) => {
     return NextResponse.json(
       { 
         error: 'Failed to discover federations',
-        details: error instanceof Error ? error.message : 'Unknown error'
       },
       { status: 500 }
     );

@@ -56,7 +56,7 @@ export const POST = withApiAuth(async (_request: NextRequest) => {
 
     return standardErrorResponse(
       ErrorCode.INTERNAL_ERROR,
-      error instanceof Error ? error.message : 'Failed to trigger payment retry'
+      'Failed to trigger payment retry'
     );
   }
 });

@@ -90,7 +90,7 @@ export const POST = withApiAuth(async (request: NextRequest) => {
 
     return standardErrorResponse(
       ErrorCode.INTERNAL_ERROR,
-      error instanceof Error ? error.message : 'Failed to preview billing cycle'
+      'Failed to preview billing cycle'
     );
   }
 });

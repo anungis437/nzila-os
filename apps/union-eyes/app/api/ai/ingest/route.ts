@@ -181,7 +181,7 @@ export async function POST(request: NextRequest) {
     logger.error('AI ingestion error', { error });
 
     return NextResponse.json(
-      { error: 'Failed to process document', details: error instanceof Error ? error.message : 'Unknown error' },
+      { error: 'Failed to process document' },
       { status: 500 }
     );
   }

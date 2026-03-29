@@ -31,7 +31,7 @@ export async function POST() {
     });
   } catch (error) {
     return NextResponse.json(
-      { success: false, error: error instanceof Error ? error.message : 'Optimization failed' },
+      { success: false, error: 'Optimization failed' },
       { status: 500 },
     );
   }
