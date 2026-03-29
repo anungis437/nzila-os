@@ -320,5 +320,46 @@ describe('Logger', () => {
       vi.mocked(sentry.captureException).mockImplementation(() => undefined);
       (globalThis as unknown as Record<string, unknown>).window = originalWindow;
     });
+
+    it('covers singleton getInstance when instance already exists', async () => {
+      const mod = await import('@/lib/logger');
+      const first = mod.logger;
+      const second = mod.__loggerTestInternals.getSingletonInstance();
+      expect(second).toBe(first);
+    });
+
+    it('covers warn branch when Sentry loader returns null', async () => {
+      const mod = await import('@/lib/logger');
+      mod.__loggerTestInternals.setSentryLoaderOverride(async () => null);
+      mod.logger.warn('warn-no-sentry');
+      await Promise.resolve();
+      await Promise.resolve();
+      mod.__loggerTestInternals.setSentryLoaderOverride(null);
+    });
+
+    it('covers warn else-if branch when Sentry exists', async () => {
+      const captureMessage = vi.fn();
+      const mod = await import('@/lib/logger');
+      mod.__loggerTestInternals.setSentryLoaderOverride(async () => ({
+        captureMessage,
+        captureException: vi.fn(),
+      } as unknown as typeof import('@sentry/nextjs')));
+
+      mod.logger.warn('warn-with-sentry');
+      await Promise.resolve();
+      await Promise.resolve();
+
+      expect(captureMessage).toHaveBeenCalled();
+      mod.__loggerTestInternals.setSentryLoaderOverride(null);
+    });
+
+    it('covers error branch when Sentry loader returns null', async () => {
+      const mod = await import('@/lib/logger');
+      mod.__loggerTestInternals.setSentryLoaderOverride(async () => null);
+      mod.logger.error('error-no-sentry', new Error('x'));
+      await Promise.resolve();
+      await Promise.resolve();
+      mod.__loggerTestInternals.setSentryLoaderOverride(null);
+    });
   });
 });
