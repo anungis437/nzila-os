@@ -1,2 +1,0 @@
-components/deadlines/DeadlineWidget.tsx(82,33): error TS2322: Type 'number | undefined' is not assignable to type 'string | number | Date'.
-  Type 'undefined' is not assignable to type 'string | number | Date'.
