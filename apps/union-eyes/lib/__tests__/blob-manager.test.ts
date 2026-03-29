@@ -6,6 +6,7 @@ import {
   ALLOWED_EXTENSIONS,
   MAX_FILE_SIZE,
   MAX_CASE_TOTAL_SIZE,
+  __blobManagerInternals,
 } from '../blob-manager';
 
 describe('blob-manager', () => {
@@ -80,6 +81,20 @@ describe('blob-manager', () => {
 
     it('MAX_CASE_TOTAL_SIZE is 50 MB', () => {
       expect(MAX_CASE_TOTAL_SIZE).toBe(50 * 1024 * 1024);
+    });
+  });
+
+  describe('internal helpers', () => {
+    it('getExtension returns empty string when filename has no dot', () => {
+      expect(__blobManagerInternals.getExtension('README')).toBe('');
+    });
+
+    it('formatBytes returns bytes for values under 1KB', () => {
+      expect(__blobManagerInternals.formatBytes(512)).toBe('512 B');
+    });
+
+    it('formatBytes returns KB for values under 1MB', () => {
+      expect(__blobManagerInternals.formatBytes(2048)).toBe('2.0 KB');
     });
   });
 });
