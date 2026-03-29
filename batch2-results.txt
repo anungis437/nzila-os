@@ -1,0 +1,24 @@
+
+[1m[46m RUN [49m[22m [36mv4.1.2 [39m[90mC:/APPS/nzila-automation[39m
+
+ [32mΓ£ô[39m [30m[46m union-eyes [49m[39m lib/__tests__/analytics-aggregation.test.ts [2m([22m[2m3 tests[22m[2m)[22m[32m 8[2mms[22m[39m
+ [32mΓ£ô[39m [30m[46m union-eyes [49m[39m lib/__tests__/rate-limit.test.ts [2m([22m[2m7 tests[22m[2m)[22m[32m 37[2mms[22m[39m
+ [32mΓ£ô[39m [30m[46m union-eyes [49m[39m lib/__tests__/action-enforcer.test.ts [2m([22m[2m10 tests[22m[2m)[22m[32m 8[2mms[22m[39m
+ [32mΓ£ô[39m [30m[46m union-eyes [49m[39m lib/__tests__/client-logger.test.ts [2m([22m[2m2 tests[22m[2m)[22m[32m 9[2mms[22m[39m
+ [32mΓ£ô[39m [30m[46m union-eyes [49m[39m lib/__tests__/audit-logger.test.ts [2m([22m[2m5 tests[22m[2m)[22m[32m 13[2mms[22m[39m
+ [32mΓ£ô[39m [30m[46m union-eyes [49m[39m lib/__tests__/feature-flags.test.ts [2m([22m[2m6 tests[22m[2m)[22m[32m 10[2mms[22m[39m
+ [32mΓ£ô[39m [30m[46m union-eyes [49m[39m lib/__tests__/api-server.test.ts [2m([22m[2m5 tests[22m[2m)[22m[32m 10[2mms[22m[39m
+ [32mΓ£ô[39m [30m[46m union-eyes [49m[39m lib/__tests__/analytics-performance.test.ts [2m([22m[2m5 tests[22m[2m)[22m[32m 15[2mms[22m[39m
+ [32mΓ£ô[39m [30m[46m union-eyes [49m[39m lib/__tests__/analytics-cache.test.ts [2m([22m[2m7 tests[22m[2m)[22m[32m 16[2mms[22m[39m
+ [32mΓ£ô[39m [30m[46m union-eyes [49m[39m lib/__tests__/case-assignment-engine.test.ts [2m([22m[2m3 tests[22m[2m)[22m[32m 10[2mms[22m[39m
+ [32mΓ£ô[39m [30m[46m union-eyes [49m[39m lib/__tests__/analytics-middleware.test.ts [2m([22m[2m6 tests[22m[2m)[22m[32m 9[2mms[22m[39m
+ [32mΓ£ô[39m [30m[46m union-eyes [49m[39m lib/__tests__/api-guards.test.ts [2m([22m[2m6 tests[22m[2m)[22m[32m 14[2mms[22m[39m
+ [32mΓ£ô[39m [30m[46m union-eyes [49m[39m lib/__tests__/circuit-breaker.test.ts [2m([22m[2m11 tests[22m[2m)[22m[32m 267[2mms[22m[39m
+ [32mΓ£ô[39m [30m[46m union-eyes [49m[39m lib/__tests__/api-client.test.ts [2m([22m[2m5 tests[22m[2m)[22m[32m 12[2mms[22m[39m
+ [32mΓ£ô[39m [30m[46m union-eyes [49m[39m lib/__tests__/api.test.ts [2m([22m[2m6 tests[22m[2m)[22m[32m 8[2mms[22m[39m
+
+[2m Test Files [22m [1m[32m15 passed[39m[22m[90m (15)[39m
+[2m      Tests [22m [1m[32m87 passed[39m[22m[90m (87)[39m
+[2m   Start at [22m 20:32:20
+[2m   Duration [22m 1.49s[2m (transform 2.33s, setup 0ms, import 3.43s, tests 446ms, environment 1.83s)[22m
+

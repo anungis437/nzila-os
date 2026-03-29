@@ -1,0 +1,198 @@
+      table_name      |       column_name        |          data_type          | is_nullable |           column_default            
+----------------------+--------------------------+-----------------------------+-------------+-------------------------------------
+ claim_deadlines      | id                       | uuid                        | NO          | 
+ claim_deadlines      | created_at               | timestamp with time zone    | NO          | 
+ claim_deadlines      | updated_at               | timestamp with time zone    | NO          | 
+ claim_deadlines      | claim_id                 | uuid                        | NO          | 
+ claim_deadlines      | organization_id          | uuid                        | YES         | 
+ claim_deadlines      | deadline_rule_id         | uuid                        | YES         | 
+ claim_deadlines      | deadline_name            | character varying           | YES         | 
+ claim_deadlines      | deadline_type            | character varying           | YES         | 
+ claim_deadlines      | event_date               | timestamp without time zone | YES         | 
+ claim_deadlines      | original_deadline        | timestamp without time zone | YES         | 
+ claim_deadlines      | due_date                 | timestamp without time zone | YES         | 
+ claim_deadlines      | completed_at             | timestamp without time zone | YES         | 
+ claim_deadlines      | status                   | USER-DEFINED                | NO          | 
+ claim_deadlines      | priority                 | USER-DEFINED                | NO          | 
+ claim_deadlines      | extension_count          | integer                     | NO          | 0
+ claim_deadlines      | total_extension_days     | integer                     | NO          | 0
+ claim_deadlines      | last_extension_date      | timestamp without time zone | YES         | 
+ claim_deadlines      | last_extension_reason    | text                        | YES         | 
+ claim_deadlines      | completed_by             | character varying           | YES         | 
+ claim_deadlines      | completion_notes         | text                        | YES         | 
+ claim_deadlines      | is_overdue               | boolean                     | NO          | false
+ claim_deadlines      | days_until_due           | integer                     | YES         | 
+ claim_deadlines      | days_overdue             | integer                     | NO          | 0
+ claim_deadlines      | escalated_at             | timestamp without time zone | YES         | 
+ claim_deadlines      | escalated_to             | character varying           | YES         | 
+ claim_deadlines      | alert_count              | integer                     | NO          | 0
+ claim_deadlines      | last_alert_sent          | timestamp without time zone | YES         | 
+ claims               | id                       | uuid                        | NO          | 
+ claims               | created_at               | timestamp with time zone    | NO          | 
+ claims               | updated_at               | timestamp with time zone    | NO          | 
+ claims               | claim_id                 | uuid                        | NO          | 
+ claims               | claim_number             | character varying           | YES         | 
+ claims               | ai_analysis              | jsonb                       | YES         | 
+ claims               | ai_score                 | integer                     | YES         | 
+ claims               | assigned_at              | timestamp with time zone    | YES         | 
+ claims               | assigned_to              | character varying           | YES         | 
+ claims               | attachments              | jsonb                       | YES         | 
+ claims               | claim_amount             | character varying           | YES         | 
+ claims               | claim_type               | USER-DEFINED                | YES         | 
+ claims               | closed_at                | timestamp with time zone    | YES         | 
+ claims               | complexity_score         | integer                     | YES         | 
+ claims               | court_costs              | character varying           | YES         | 
+ claims               | description              | text                        | YES         | 
+ claims               | desired_outcome          | text                        | YES         | 
+ claims               | filed_date               | timestamp with time zone    | YES         | 
+ claims               | incident_date            | timestamp with time zone    | YES         | 
+ claims               | is_anonymous             | boolean                     | NO          | 
+ claims               | legal_costs              | character varying           | YES         | 
+ claims               | location                 | text                        | YES         | 
+ claims               | member_id                | character varying           | YES         | 
+ claims               | merit_confidence         | integer                     | YES         | 
+ claims               | metadata                 | jsonb                       | YES         | 
+ claims               | organization_id          | uuid                        | YES         | 
+ claims               | precedent_match          | integer                     | YES         | 
+ claims               | previous_report_details  | text                        | YES         | 
+ claims               | previously_reported      | boolean                     | NO          | 
+ claims               | priority                 | USER-DEFINED                | NO          | 
+ claims               | progress                 | integer                     | NO          | 
+ claims               | resolution_outcome       | character varying           | YES         | 
+ claims               | resolved_at              | timestamp with time zone    | YES         | 
+ claims               | settlement_amount        | character varying           | YES         | 
+ claims               | status                   | USER-DEFINED                | NO          | 
+ claims               | voice_transcriptions     | jsonb                       | YES         | 
+ claims               | witness_details          | text                        | YES         | 
+ claims               | witnesses_present        | boolean                     | NO          | 
+ deadline_rules       | id                       | uuid                        | NO          | 
+ deadline_rules       | created_at               | timestamp with time zone    | NO          | 
+ deadline_rules       | updated_at               | timestamp with time zone    | NO          | 
+ deadline_rules       | organization_id          | uuid                        | YES         | 
+ deadline_rules       | rule_name                | character varying           | YES         | 
+ deadline_rules       | rule_code                | character varying           | YES         | 
+ deadline_rules       | description              | text                        | YES         | 
+ deadline_rules       | claim_type               | character varying           | YES         | 
+ deadline_rules       | priority_level           | character varying           | YES         | 
+ deadline_rules       | step_number              | integer                     | YES         | 
+ deadline_rules       | days_from_event          | integer                     | YES         | 
+ deadline_rules       | event_type               | character varying           | NO          | ''::character varying
+ deadline_rules       | business_days_only       | boolean                     | NO          | false
+ deadline_rules       | allows_extension         | boolean                     | NO          | false
+ deadline_rules       | max_extension_days       | integer                     | NO          | 0
+ deadline_rules       | requires_approval        | boolean                     | NO          | false
+ deadline_rules       | escalate_to_role         | character varying           | YES         | 
+ deadline_rules       | escalation_delay_days    | integer                     | NO          | 0
+ deadline_rules       | is_active                | boolean                     | NO          | false
+ deadline_rules       | is_system_rule           | boolean                     | NO          | false
+ documents            | id                       | uuid                        | NO          | gen_random_uuid()
+ documents            | org_id                   | uuid                        | NO          | 
+ documents            | category                 | text                        | NO          | 
+ documents            | title                    | text                        | NO          | 
+ documents            | blob_container           | text                        | NO          | 
+ documents            | blob_path                | text                        | NO          | 
+ documents            | content_type             | text                        | NO          | 
+ documents            | size_bytes               | bigint                      | YES         | 
+ documents            | sha256                   | text                        | NO          | 
+ documents            | uploaded_by              | text                        | NO          | 
+ documents            | uploaded_at              | timestamp with time zone    | NO          | now()
+ documents            | classification           | USER-DEFINED                | NO          | 'internal'::document_classification
+ documents            | linked_type              | text                        | YES         | 
+ documents            | linked_id                | uuid                        | YES         | 
+ documents            | created_at               | timestamp with time zone    | NO          | now()
+ documents            | updated_at               | timestamp with time zone    | NO          | now()
+ documents            | organization_id          | uuid                        | YES         | 
+ documents            | folder_id                | uuid                        | YES         | 
+ documents            | name                     | text                        | YES         | 
+ documents            | file_url                 | text                        | YES         | 
+ documents            | file_size                | integer                     | YES         | 
+ documents            | file_type                | text                        | YES         | 
+ documents            | mime_type                | text                        | YES         | 
+ documents            | description              | text                        | YES         | 
+ documents            | tags                     | ARRAY                       | YES         | 
+ documents            | content_text             | text                        | YES         | 
+ documents            | is_confidential          | boolean                     | YES         | 
+ documents            | access_level             | text                        | YES         | 
+ documents            | deleted_at               | timestamp without time zone | YES         | 
+ documents            | metadata                 | jsonb                       | YES         | 
+ in_app_notifications | id                       | uuid                        | NO          | 
+ in_app_notifications | created_at               | timestamp with time zone    | NO          | 
+ in_app_notifications | updated_at               | timestamp with time zone    | NO          | 
+ in_app_notifications | user_id                  | text                        | NO          | 
+ in_app_notifications | organization_id          | uuid                        | YES         | 
+ in_app_notifications | title                    | text                        | YES         | 
+ in_app_notifications | message                  | text                        | YES         | 
+ in_app_notifications | type                     | text                        | NO          | ''::text
+ in_app_notifications | action_label             | text                        | YES         | 
+ in_app_notifications | action_url               | text                        | YES         | 
+ in_app_notifications | data                     | jsonb                       | YES         | 
+ in_app_notifications | read                     | boolean                     | NO          | false
+ in_app_notifications | read_at                  | timestamp without time zone | YES         | 
+ in_app_notifications | expires_at               | timestamp without time zone | YES         | 
+ organization_members | id                       | uuid                        | NO          | gen_random_uuid()
+ organization_members | user_id                  | text                        | NO          | 
+ organization_members | organization_id          | text                        | NO          | 
+ organization_members | tenant_id                | uuid                        | YES         | 
+ organization_members | name                     | text                        | NO          | 
+ organization_members | email                    | text                        | NO          | 
+ organization_members | phone                    | text                        | YES         | 
+ organization_members | role                     | text                        | NO          | 
+ organization_members | status                   | text                        | NO          | 'active'::text
+ organization_members | is_primary               | boolean                     | YES         | false
+ organization_members | department               | text                        | YES         | 
+ organization_members | position                 | text                        | YES         | 
+ organization_members | hire_date                | timestamp with time zone    | YES         | 
+ organization_members | membership_number        | text                        | YES         | 
+ organization_members | seniority                | integer                     | YES         | 
+ organization_members | union_join_date          | timestamp with time zone    | YES         | 
+ organization_members | preferred_contact_method | text                        | YES         | 
+ organization_members | metadata                 | text                        | YES         | 
+ organization_members | created_at               | timestamp with time zone    | NO          | now()
+ organization_members | joined_at                | timestamp with time zone    | YES         | now()
+ organization_members | updated_at               | timestamp with time zone    | YES         | now()
+ organization_members | deleted_at               | timestamp with time zone    | YES         | 
+ organization_members | clerk_user_id            | text                        | YES         | 
+ organization_members | member_category          | character varying           | YES         | 
+ organization_members | exempt_from_per_capita   | boolean                     | YES         | false
+ organization_members | exemption_reason         | text                        | YES         | 
+ organization_members | exemption_approved_by    | character varying           | YES         | 
+ organization_members | location                 | text                        | YES         | 
+ organizations        | id                       | uuid                        | NO          | gen_random_uuid()
+ organizations        | name                     | text                        | NO          | 
+ organizations        | slug                     | text                        | NO          | 
+ organizations        | display_name             | text                        | YES         | 
+ organizations        | short_name               | text                        | YES         | 
+ organizations        | description              | text                        | YES         | 
+ organizations        | organization_type        | USER-DEFINED                | NO          | 
+ organizations        | parent_id                | uuid                        | YES         | 
+ organizations        | hierarchy_path           | ARRAY                       | NO          | '{}'::text[]
+ organizations        | hierarchy_level          | integer                     | NO          | 0
+ organizations        | province_territory       | text                        | YES         | 
+ organizations        | sectors                  | ARRAY                       | YES         | '{}'::labour_sector[]
+ organizations        | email                    | text                        | YES         | 
+ organizations        | phone                    | text                        | YES         | 
+ organizations        | website                  | text                        | YES         | 
+ organizations        | address                  | jsonb                       | YES         | 
+ organizations        | clc_affiliated           | boolean                     | YES         | false
+ organizations        | affiliation_date         | date                        | YES         | 
+ organizations        | charter_number           | text                        | YES         | 
+ organizations        | member_count             | integer                     | YES         | 0
+ organizations        | active_member_count      | integer                     | YES         | 0
+ organizations        | last_member_count_update | timestamp with time zone    | YES         | 
+ organizations        | subscription_tier        | text                        | YES         | 
+ organizations        | billing_contact_id       | uuid                        | YES         | 
+ organizations        | settings                 | jsonb                       | YES         | '{}'::jsonb
+ organizations        | features_enabled         | ARRAY                       | YES         | '{}'::text[]
+ organizations        | status                   | text                        | YES         | 'active'::text
+ organizations        | created_at               | timestamp with time zone    | YES         | now()
+ organizations        | updated_at               | timestamp with time zone    | YES         | now()
+ organizations        | created_by               | uuid                        | YES         | 
+ organizations        | legacy_tenant_id         | uuid                        | YES         | 
+ organizations        | clc_affiliate_code       | character varying           | YES         | 
+ organizations        | per_capita_rate          | numeric                     | YES         | 
+ organizations        | remittance_day           | integer                     | YES         | 15
+ organizations        | last_remittance_date     | timestamp with time zone    | YES         | 
+ organizations        | fiscal_year_end          | date                        | YES         | '2024-12-31'::date
+ organizations        | clerk_organization_id    | text                        | YES         | 
+(194 rows)
+

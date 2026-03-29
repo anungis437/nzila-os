@@ -9,12 +9,25 @@
  */
 import { describe, it, expect, vi } from "vitest";
 
-// Mock db module to avoid DATABASE_URL requirement — service barrel re-exports
-// from protocol-service which imports db.
+// Mock db/drizzle modules to avoid DATABASE_URL requirement — service barrel
+// re-exports from protocol-service which imports db, schema, drizzle-orm.
 vi.mock("@/db/db", () => ({
   db: {},
   client: {},
   getDatabase: vi.fn(),
+}));
+
+vi.mock("@/db/schema", () => ({
+  orgConfigurations: {},
+}));
+
+vi.mock("drizzle-orm", () => ({
+  eq: vi.fn((...a: unknown[]) => a),
+  and: vi.fn((...a: unknown[]) => a),
+  or: vi.fn((...a: unknown[]) => a),
+  desc: vi.fn((a: unknown) => a),
+  sql: vi.fn(),
+  relations: vi.fn(() => ({})),
 }));
 
 // ============================================================================

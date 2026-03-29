@@ -1,0 +1,30 @@
+ Γ¥» Module.getTicketById lib/services/support-service.ts:176:6
+    174|     .from(supportTickets)
+    175|     .where(eq(supportTickets.id, ticketId))
+    176|     .limit(1);
+       |      ^
+    177|
+    178|   return ticket || null;
+ Γ¥» lib/services/__tests__/support-service.test.ts:80:26
+
+ΓÄ»ΓÄ»ΓÄ»ΓÄ»ΓÄ»ΓÄ»ΓÄ»ΓÄ»ΓÄ»ΓÄ»ΓÄ»ΓÄ»ΓÄ»ΓÄ»ΓÄ»ΓÄ»ΓÄ»ΓÄ»ΓÄ»ΓÄ»ΓÄ»ΓÄ»[12/13]ΓÄ»
+
+ FAIL   union-eyes  lib/services/__tests__/voting-service.test.ts > VotingService > listVotingSessions returns paginated results
+Error: Failed to list voting sessions
+ Γ¥» Module.listVotingSessions lib/services/voting-service.ts:176:11
+    174|   } catch (error) {
+    175|     logger.error("Error listing voting sessions", { error, filters, paΓÇª
+    176|     throw new Error("Failed to list voting sessions");
+       |           ^
+    177|   }
+    178| }
+ Γ¥» lib/services/__tests__/voting-service.test.ts:158:26
+
+ΓÄ»ΓÄ»ΓÄ»ΓÄ»ΓÄ»ΓÄ»ΓÄ»ΓÄ»ΓÄ»ΓÄ»ΓÄ»ΓÄ»ΓÄ»ΓÄ»ΓÄ»ΓÄ»ΓÄ»ΓÄ»ΓÄ»ΓÄ»ΓÄ»ΓÄ»[13/13]ΓÄ»
+
+
+[2m Test Files [22m [1m[31m8 failed[39m[22m[2m | [22m[1m[32m224 passed[39m[22m[90m (232)[39m
+[2m      Tests [22m [1m[31m10 failed[39m[22m[2m | [22m[1m[32m2262 passed[39m[22m[90m (2272)[39m
+[2m   Start at [22m 21:26:32
+[2m   Duration [22m 33.20s[2m (transform 97.85s, setup 0ms, import 219.10s, tests 48.67s, environment 24.79s)[22m
+

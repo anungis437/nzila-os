@@ -70,6 +70,8 @@ vi.mock('@/lib/services/ocr-service', () => ({
   processPDFOCR: vi.fn().mockResolvedValue('pdf text'),
 }));
 
+import { uploadDocument } from '../document-management-system';
+
 describe('document-management-system', () => {
   beforeEach(() => {
     vi.clearAllMocks();
@@ -77,7 +79,6 @@ describe('document-management-system', () => {
 
   it('uploadDocument uploads file and creates record', async () => {
     const file = new File(['hello'], 'test.pdf', { type: 'application/pdf' });
-    const { uploadDocument } = await import('../document-management-system');
     const result = await uploadDocument('claim1', 'org1', file, 'evidence', 'user1');
 
     expect(result.success).toBe(true);
@@ -90,15 +91,13 @@ describe('document-management-system', () => {
     mocks.mockPutBlob.mockRejectedValue(new Error('Blob error'));
     const file = new File(['hello'], 'test.pdf', { type: 'application/pdf' });
 
-    const { uploadDocument } = await import('../document-management-system');
     const result = await uploadDocument('claim1', 'org1', file, 'evidence', 'user1');
 
     expect(result.success).toBe(false);
     expect(result.error).toBe('Blob error');
   });
 
-  it('exports type definitions', async () => {
-    const mod = await import('../document-management-system');
-    expect(typeof mod.uploadDocument).toBe('function');
+  it('exports type definitions', () => {
+    expect(typeof uploadDocument).toBe('function');
   });
 });

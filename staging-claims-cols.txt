@@ -1,0 +1,37 @@
+claim_id|uuid|NO
+claim_number|character varying|NO
+organization_id|uuid|NO
+member_id|character varying|NO
+is_anonymous|boolean|YES
+claim_type|USER-DEFINED|NO
+status|USER-DEFINED|NO
+priority|USER-DEFINED|NO
+incident_date|timestamp with time zone|NO
+location|text|NO
+description|text|NO
+desired_outcome|text|NO
+witnesses_present|boolean|YES
+witness_details|text|YES
+previously_reported|boolean|YES
+previous_report_details|text|YES
+assigned_to|character varying|YES
+assigned_at|timestamp with time zone|YES
+ai_score|integer|YES
+ai_analysis|jsonb|YES
+merit_confidence|integer|YES
+precedent_match|integer|YES
+complexity_score|integer|YES
+progress|integer|YES
+claim_amount|character varying|YES
+settlement_amount|character varying|YES
+legal_costs|character varying|YES
+court_costs|character varying|YES
+resolution_outcome|character varying|YES
+filed_date|timestamp with time zone|YES
+resolved_at|timestamp with time zone|YES
+attachments|jsonb|YES
+voice_transcriptions|jsonb|YES
+metadata|jsonb|YES
+created_at|timestamp with time zone|YES
+updated_at|timestamp with time zone|YES
+closed_at|timestamp with time zone|YES

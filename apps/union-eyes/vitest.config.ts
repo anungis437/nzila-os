@@ -18,20 +18,24 @@ export default defineProject({
     coverage: {
       provider: "v8",
       include: [
-        "lib/ai/**",
-        "lib/services/**",
+        "lib/**",
       ],
       exclude: [
         "**/__tests__/**",
         "**/*.test.ts",
+        "**/*.test.tsx",
         "**/node_modules/**",
+        "lib/locales/**",
+        "lib/shared-ui.*",
+        "lib/console-wrapper.*",
+        "lib/stripe-elements.*",
+        "lib/public-routes.*",
       ],
       thresholds: {
-        // Tier 4 coverage gates — AI & service layer
-        lines: 40,
-        functions: 40,
-        branches: 30,
-        statements: 40,
+        lines: 95,
+        functions: 95,
+        branches: 95,
+        statements: 95,
       },
     },
   },

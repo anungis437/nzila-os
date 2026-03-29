@@ -1,0 +1,377 @@
+npm warn Unknown project config "node-linker". This will stop working in the next major version of npm.
+
+[1m[46m RUN [49m[22m [36mv4.1.2 [39m[90mC:/APPS/nzila-automation[39m
+      [2mCoverage enabled with [22m[33mv8[39m
+
+ [32mΓ£ô[39m [30m[46m union-eyes [49m[39m lib/__tests__/deadline-tracking-system.test.ts [2m([22m[2m5 tests[22m[2m)[22m[32m 190[2mms[22m[39m
+ [32mΓ£ô[39m [30m[46m union-eyes [49m[39m lib/__tests__/encryption.test.ts [2m([22m[2m3 tests[22m[2m)[22m[33m 330[2mms[22m[39m
+     [33m[2mΓ£ô[22m[39m exports an EncryptionService default export [33m 323[2mms[22m[39m
+ [32mΓ£ô[39m [30m[46m union-eyes [49m[39m lib/__tests__/dues-calculation-engine.test.ts [2m([22m[2m6 tests[22m[2m)[22m[32m 250[2mms[22m[39m
+ [32mΓ£ô[39m [30m[46m union-eyes [49m[39m lib/__tests__/deadline-service.test.ts [2m([22m[2m5 tests[22m[2m)[22m[32m 239[2mms[22m[39m
+ [32mΓ£ô[39m [30m[46m union-eyes [49m[39m lib/__tests__/calendar-reminder-scheduler.test.ts [2m([22m[2m3 tests[22m[2m)[22m[32m 240[2mms[22m[39m
+ [32mΓ£ô[39m [30m[46m union-eyes [49m[39m lib/__tests__/csrf-client.test.ts [2m([22m[2m5 tests[22m[2m)[22m[32m 239[2mms[22m[39m
+ [32mΓ£ô[39m [30m[46m union-eyes [49m[39m lib/__tests__/circuit-breaker.test.ts [2m([22m[2m11 tests[22m[2m)[22m[32m 271[2mms[22m[39m
+ [32mΓ£ô[39m [30m[46m union-eyes [49m[39m lib/__tests__/claim-notifications.test.ts [2m([22m[2m4 tests[22m[2m)[22m[32m 297[2mms[22m[39m
+≡ƒÉ¢ [2026-03-29T01:38:25.244Z] [DEBUG] [7d0b451a-242a-4eab-b4e0-cb51d0cb0052] Event subscriber registered
+  Context: {
+  "eventType": "claim_events"
+}
+≡ƒÉ¢ [2026-03-29T01:38:25.246Z] [DEBUG] [7d0b451a-242a-4eab-b4e0-cb51d0cb0052] Emitting event
+  Context: {
+  "eventType": "claim_events",
+  "subscriberCount": 1,
+  "eventId": "evt_1774748305246_tjxvm9kwu"
+}
+ [32mΓ£ô[39m [30m[46m union-eyes [49m[39m lib/__tests__/staging-hardening.integration.test.ts [2m([22m[2m23 tests[22m[2m)[22m[33m 530[2mms[22m[39m
+     [33m[2mΓ£ô[22m[39m EventBus can be imported [33m 453[2mms[22m[39m
+(node:32732) [DEP0040] DeprecationWarning: The `punycode` module is deprecated. Please use a userland alternative instead.
+(Use `node --trace-deprecation ...` to show where the warning was created)
+ [32mΓ£ô[39m [30m[46m union-eyes [49m[39m lib/services/__tests__/ocr-service.test.ts [2m([22m[2m10 tests[22m[2m)[22m[33m 1216[2mms[22m[39m
+       [33m[2mΓ£ô[22m[39m throws on missing SDK [33m 930[2mms[22m[39m
+ [32mΓ£ô[39m [30m[46m union-eyes [49m[39m lib/__tests__/data-export-import.test.ts [2m([22m[2m6 tests[22m[2m)[22m[32m 218[2mms[22m[39m
+ [32mΓ£ô[39m [30m[46m union-eyes [49m[39m lib/__tests__/organization-utils.test.ts [2m([22m[2m8 tests[22m[2m)[22m[32m 219[2mms[22m[39m
+ [32mΓ£ô[39m [30m[46m union-eyes [49m[39m lib/__tests__/env-validator.test.ts [2m([22m[2m5 tests[22m[2m)[22m[32m 169[2mms[22m[39m
+ [32mΓ£ô[39m [30m[46m union-eyes [49m[39m lib/ai/__tests__/rag-pipeline.test.ts [2m([22m[2m7 tests[22m[2m)[22m[32m 164[2mms[22m[39m
+ [32mΓ£ô[39m [30m[46m union-eyes [49m[39m lib/__tests__/ml-client.test.ts [2m([22m[2m4 tests[22m[2m)[22m[32m 171[2mms[22m[39m
+ [32mΓ£ô[39m [30m[46m union-eyes [49m[39m lib/services/__tests__/cache-service.test.ts [2m([22m[2m5 tests[22m[2m)[22m[32m 211[2mms[22m[39m
+ [32mΓ£ô[39m [30m[46m union-eyes [49m[39m lib/__tests__/rate-limiter.test.ts [2m([22m[2m4 tests[22m[2m)[22m[33m 322[2mms[22m[39m
+       [33m[2mΓ£ô[22m[39m allows requests under the limit [33m 312[2mms[22m[39m
+ [32mΓ£ô[39m [30m[46m union-eyes [49m[39m lib/services/__tests__/voting-crypto-service.test.ts [2m([22m[2m8 tests[22m[2m)[22m[33m 1945[2mms[22m[39m
+       [33m[2mΓ£ô[22m[39m produces deterministic output for same inputs [33m 486[2mms[22m[39m
+ [32mΓ£ô[39m [30m[46m union-eyes [49m[39m lib/__tests__/azure-keyvault.test.ts [2m([22m[2m6 tests[22m[2m)[22m[33m 853[2mms[22m[39m
+     [33m[2mΓ£ô[22m[39m getEncryptionKey retrieves secret from key vault [33m 838[2mms[22m[39m
+Γä╣∩╕Å [2026-03-29T01:38:27.361Z] [INFO] [5880f561-328a-4817-8b72-84776dcd8394] Performance: test-operation
+  Context: {
+  "durationMs": 0
+}
+ [32mΓ£ô[39m [30m[46m union-eyes [49m[39m lib/__tests__/logger.test.ts [2m([22m[2m10 tests[22m[2m)[22m[32m 94[2mms[22m[39m
+ [32mΓ£ô[39m [30m[46m union-eyes [49m[39m lib/__tests__/blob-client.test.ts [2m([22m[2m5 tests[22m[2m)[22m[32m 122[2mms[22m[39m
+ [32mΓ£ô[39m [30m[46m union-eyes [49m[39m lib/ai/__tests__/mamba-service.test.ts [2m([22m[2m11 tests[22m[2m)[22m[33m 2881[2mms[22m[39m
+       [33m[2mΓ£ô[22m[39m chunks and processes long documents [33m 2105[2mms[22m[39m
+ [32mΓ£ô[39m [30m[46m union-eyes [49m[39m lib/services/__tests__/multi-provider-geocoding-service.test.ts [2m([22m[2m11 tests[22m[2m)[22m[32m 127[2mms[22m[39m
+ [32mΓ£ô[39m [30m[46m union-eyes [49m[39m lib/ai/__tests__/transparency.test.ts [2m([22m[2m24 tests[22m[2m)[22m[32m 59[2mms[22m[39m
+ [32mΓ£ô[39m [30m[46m union-eyes [49m[39m lib/__tests__/websocket.test.ts [2m([22m[2m9 tests[22m[2m)[22m[32m 75[2mms[22m[39m
+ [32mΓ£ô[39m [30m[46m union-eyes [49m[39m lib/__tests__/org-context.test.tsx [2m([22m[2m8 tests[22m[2m)[22m[33m 508[2mms[22m[39m
+ [32mΓ£ô[39m [30m[46m union-eyes [49m[39m lib/__tests__/rate-limit.test.ts [2m([22m[2m7 tests[22m[2m)[22m[32m 111[2mms[22m[39m
+ [32mΓ£ô[39m [30m[46m union-eyes [49m[39m lib/services/__tests__/financial-email-service.test.ts [2m([22m[2m12 tests[22m[2m)[22m[32m 73[2mms[22m[39m
+ [32mΓ£ô[39m [30m[46m union-eyes [49m[39m lib/__tests__/observability.test.ts [2m([22m[2m4 tests[22m[2m)[22m[32m 131[2mms[22m[39m
+ [32mΓ£ô[39m [30m[46m union-eyes [49m[39m lib/hooks/__tests__/useCUPEVocabulary.test.ts [2m([22m[2m8 tests[22m[2m)[22m[33m 718[2mms[22m[39m
+ [32mΓ£ô[39m [30m[46m union-eyes [49m[39m lib/__tests__/useUEMlSignals.test.ts [2m([22m[2m8 tests[22m[2m)[22m[33m 621[2mms[22m[39m
+ [32mΓ£ô[39m [30m[46m union-eyes [49m[39m lib/__tests__/db-validator.test.ts [2m([22m[2m9 tests[22m[2m)[22m[32m 86[2mms[22m[39m
+ [32mΓ£ô[39m [30m[46m union-eyes [49m[39m lib/services/__tests__/document-storage-service.test.ts [2m([22m[2m4 tests[22m[2m)[22m[32m 170[2mms[22m[39m
+ [32mΓ£ô[39m [30m[46m union-eyes [49m[39m lib/__tests__/utils.test.ts [2m([22m[2m5 tests[22m[2m)[22m[32m 64[2mms[22m[39m
+ [32mΓ£ô[39m [30m[46m union-eyes [49m[39m lib/__tests__/azure-speech.test.ts [2m([22m[2m4 tests[22m[2m)[22m[32m 201[2mms[22m[39m
+ [32mΓ£ô[39m [30m[46m union-eyes [49m[39m lib/__tests__/api-guards.test.ts [2m([22m[2m6 tests[22m[2m)[22m[32m 30[2mms[22m[39m
+ [32mΓ£ô[39m [30m[46m union-eyes [49m[39m lib/services/__tests__/api-cache.test.ts [2m([22m[2m4 tests[22m[2m)[22m[32m 71[2mms[22m[39m
+ [32mΓ£ô[39m [30m[46m union-eyes [49m[39m lib/auth/__tests__/index.test.ts [2m([22m[2m6 tests[22m[2m)[22m[33m 4670[2mms[22m[39m
+     [33m[2mΓ£ô[22m[39m exports Permission [33m 4663[2mms[22m[39m
+ [32mΓ£ô[39m [30m[46m union-eyes [49m[39m lib/hooks/__tests__/use-feature-flags.test.tsx [2m([22m[2m6 tests[22m[2m)[22m[32m 150[2mms[22m[39m
+ [32mΓ£ô[39m [30m[46m union-eyes [49m[39m lib/auth/__tests__/policy-adapter.test.ts [2m([22m[2m9 tests[22m[2m)[22m[32m 74[2mms[22m[39m
+ [32mΓ£ô[39m [30m[46m union-eyes [49m[39m lib/services/__tests__/clause-service.test.ts [2m([22m[2m4 tests[22m[2m)[22m[32m 32[2mms[22m[39m
+ [32mΓ£ô[39m [30m[46m union-eyes [49m[39m lib/services/__tests__/general-ledger-service.test.ts [2m([22m[2m4 tests[22m[2m)[22m[32m 68[2mms[22m[39m
+ [32mΓ£ô[39m [30m[46m union-eyes [49m[39m lib/services/__tests__/clause-intelligence.test.ts [2m([22m[2m4 tests[22m[2m)[22m[32m 54[2mms[22m[39m
+ [32mΓ£ô[39m [30m[46m union-eyes [49m[39m lib/services/__tests__/location-tracking-service.test.ts [2m([22m[2m3 tests[22m[2m)[22m[32m 46[2mms[22m[39m
+ [32mΓ£ô[39m [30m[46m union-eyes [49m[39m lib/hooks/__tests__/use-toast.test.ts [2m([22m[2m6 tests[22m[2m)[22m[32m 70[2mms[22m[39m
+ [32mΓ£ô[39m [30m[46m union-eyes [49m[39m lib/services/__tests__/feature-flags.test.ts [2m([22m[2m5 tests[22m[2m)[22m[32m 26[2mms[22m[39m
+ [32mΓ£ô[39m [30m[46m union-eyes [49m[39m lib/__tests__/email-service.test.ts [2m([22m[2m5 tests[22m[2m)[22m[32m 120[2mms[22m[39m
+ [32mΓ£ô[39m [30m[46m union-eyes [49m[39m lib/__tests__/receipt-generator.test.ts [2m([22m[2m3 tests[22m[2m)[22m[32m 56[2mms[22m[39m
+ [32mΓ£ô[39m [30m[46m union-eyes [49m[39m lib/services/rewards/__tests__/webhook-service.test.ts [2m([22m[2m15 tests[22m[2m)[22m[32m 74[2mms[22m[39m
+ [32mΓ£ô[39m [30m[46m union-eyes [49m[39m lib/services/__tests__/grievance-notifications.test.ts [2m([22m[2m12 tests[22m[2m)[22m[32m 62[2mms[22m[39m
+ [32mΓ£ô[39m [30m[46m union-eyes [49m[39m lib/__tests__/i18n-utils.test.ts [2m([22m[2m7 tests[22m[2m)[22m[32m 55[2mms[22m[39m
+ [32mΓ£ô[39m [30m[46m union-eyes [49m[39m lib/ai/__tests__/insights-generator.test.ts [2m([22m[2m6 tests[22m[2m)[22m[32m 38[2mms[22m[39m
+ [31mΓ¥»[39m [30m[46m union-eyes [49m[39m lib/__tests__/document-management-system.test.ts [2m([22m[2m3 tests[22m[2m | [22m[31m1 failed[39m[2m)[22m[33m 6299[2mms[22m[39m
+[31m     [31m├ù[31m uploadDocument uploads file and creates record[39m[33m 5022[2mms[22m[39m
+     [33m[2mΓ£ô[22m[39m uploadDocument returns error on failure [33m 1271[2mms[22m[39m
+     [32mΓ£ô[39m exports type definitions[32m 1[2mms[22m[39m
+ [32mΓ£ô[39m [30m[46m union-eyes [49m[39m lib/__tests__/date-utils.test.ts [2m([22m[2m11 tests[22m[2m)[22m[32m 60[2mms[22m[39m
+ [32mΓ£ô[39m [30m[46m union-eyes [49m[39m lib/__tests__/chart-utils.test.ts [2m([22m[2m20 tests[22m[2m)[22m[32m 65[2mms[22m[39m
+ [32mΓ£ô[39m [30m[46m union-eyes [49m[39m lib/auth/__tests__/roles.test.ts [2m([22m[2m47 tests[22m[2m)[22m[32m 51[2mms[22m[39m
+ [32mΓ£ô[39m [30m[46m union-eyes [49m[39m lib/services/__tests__/education-service.test.ts [2m([22m[2m5 tests[22m[2m)[22m[32m 40[2mms[22m[39m
+ [32mΓ£ô[39m [30m[46m union-eyes [49m[39m lib/services/__tests__/invoice-generator.test.ts [2m([22m[2m7 tests[22m[2m)[22m[32m 83[2mms[22m[39m
+ [32mΓ£ô[39m [30m[46m union-eyes [49m[39m lib/ai/__tests__/template-engine.test.ts [2m([22m[2m33 tests[22m[2m)[22m[32m 59[2mms[22m[39m
+ [32mΓ£ô[39m [30m[46m union-eyes [49m[39m lib/services/messaging/__tests__/sms-service.test.ts [2m([22m[2m26 tests[22m[2m)[22m[32m 35[2mms[22m[39m
+ [32mΓ£ô[39m [30m[46m union-eyes [49m[39m lib/hooks/__tests__/use-debounce.test.ts [2m([22m[2m5 tests[22m[2m)[22m[32m 104[2mms[22m[39m
+ [32mΓ£ô[39m [30m[46m union-eyes [49m[39m lib/__tests__/action-flows.integration.test.ts [2m([22m[2m8 tests[22m[2m)[22m[32m 27[2mms[22m[39m
+ [32mΓ£ô[39m [30m[46m union-eyes [49m[39m lib/services/__tests__/satisfaction-service.test.ts [2m([22m[2m4 tests[22m[2m)[22m[32m 49[2mms[22m[39m
+ [32mΓ£ô[39m [30m[46m union-eyes [49m[39m lib/services/__tests__/currency-service.test.ts [2m([22m[2m4 tests[22m[2m)[22m[32m 11[2mms[22m[39m
+ [32mΓ£ô[39m [30m[46m union-eyes [49m[39m lib/__tests__/ai-feature-guard.test.ts [2m([22m[2m10 tests[22m[2m)[22m[32m 27[2mms[22m[39m
+ [32mΓ£ô[39m [30m[46m union-eyes [49m[39m lib/services/__tests__/support-service.test.ts [2m([22m[2m4 tests[22m[2m)[22m[32m 30[2mms[22m[39m
+ [32mΓ£ô[39m [30m[46m union-eyes [49m[39m lib/__tests__/action-dtos.test.ts [2m([22m[2m26 tests[22m[2m)[22m[32m 31[2mms[22m[39m
+ [32mΓ£ô[39m [30m[46m union-eyes [49m[39m lib/__tests__/voting-crypto-service.test.ts [2m([22m[2m29 tests[22m[2m)[22m[33m 7659[2mms[22m[39m
+     [33m[2mΓ£ô[22m[39m is deterministic ΓÇö same inputs produce same key [33m 475[2mms[22m[39m
+     [33m[2mΓ£ô[22m[39m different session IDs produce different keys [33m 452[2mms[22m[39m
+     [33m[2mΓ£ô[22m[39m different secrets produce different keys [33m 487[2mms[22m[39m
+     [33m[2mΓ£ô[22m[39m returns false when using wrong session key [33m 556[2mms[22m[39m
+     [33m[2mΓ£ô[22m[39m detects tampering if wrong session key used for verification [33m 484[2mms[22m[39m
+ [32mΓ£ô[39m [30m[46m union-eyes [49m[39m lib/services/__tests__/board-packet-generator.test.ts [2m([22m[2m8 tests[22m[2m)[22m[32m 31[2mms[22m[39m
+ [32mΓ£ô[39m [30m[46m union-eyes [49m[39m lib/services/__tests__/case-timeline-service.test.ts [2m([22m[2m3 tests[22m[2m)[22m[32m 60[2mms[22m[39m
+ [32mΓ£ô[39m [30m[46m union-eyes [49m[39m lib/services/__tests__/payment-notifications.test.ts [2m([22m[2m3 tests[22m[2m)[22m[32m 65[2mms[22m[39m
+ [32mΓ£ô[39m [30m[46m union-eyes [49m[39m lib/services/__tests__/dues-notifications.test.ts [2m([22m[2m3 tests[22m[2m)[22m[32m 31[2mms[22m[39m
+ [32mΓ£ô[39m [30m[46m union-eyes [49m[39m lib/__tests__/validation.test.ts [2m([22m[2m32 tests[22m[2m)[22m[32m 44[2mms[22m[39m
+ [32mΓ£ô[39m [30m[46m union-eyes [49m[39m lib/services/__tests__/negotiations-service.test.ts [2m([22m[2m4 tests[22m[2m)[22m[32m 39[2mms[22m[39m
+ [32mΓ£ô[39m [30m[46m union-eyes [49m[39m app/api/claims/__tests__/claims-post.test.ts [2m([22m[2m7 tests[22m[2m)[22m[32m 20[2mms[22m[39m
+ [32mΓ£ô[39m [30m[46m union-eyes [49m[39m lib/services/__tests__/policy-engine.test.ts [2m([22m[2m3 tests[22m[2m)[22m[32m 34[2mms[22m[39m
+ [32mΓ£ô[39m [30m[46m union-eyes [49m[39m lib/services/messaging/__tests__/email-service.test.ts [2m([22m[2m17 tests[22m[2m)[22m[32m 36[2mms[22m[39m
+ [32mΓ£ô[39m [30m[46m union-eyes [49m[39m lib/__tests__/email-templates.test.tsx [2m([22m[2m4 tests[22m[2m)[22m[32m 247[2mms[22m[39m
+ [32mΓ£ô[39m [30m[46m union-eyes [49m[39m lib/__tests__/workflow-automation-engine.test.ts [2m([22m[2m22 tests[22m[2m)[22m[32m 33[2mms[22m[39m
+ [32mΓ£ô[39m [30m[46m union-eyes [49m[39m lib/services/__tests__/exchange-rate-service.test.ts [2m([22m[2m4 tests[22m[2m)[22m[32m 36[2mms[22m[39m
+ [32mΓ£ô[39m [30m[46m union-eyes [49m[39m lib/services/__tests__/steward-assignment.test.ts [2m([22m[2m7 tests[22m[2m)[22m[32m 19[2mms[22m[39m
+ [32mΓ£ô[39m [30m[46m union-eyes [49m[39m lib/__tests__/error-handler.test.ts [2m([22m[2m17 tests[22m[2m)[22m[32m 31[2mms[22m[39m
+ [32mΓ£ô[39m [30m[46m union-eyes [49m[39m lib/services/__tests__/audit-trail-service.test.ts [2m([22m[2m3 tests[22m[2m)[22m[32m 16[2mms[22m[39m
+ [32mΓ£ô[39m [30m[46m union-eyes [49m[39m lib/services/external-data/__tests__/statcan-client.test.ts [2m([22m[2m21 tests[22m[2m)[22m[32m 34[2mms[22m[39m
+ [32mΓ£ô[39m [30m[46m union-eyes [49m[39m lib/services/rewards/__tests__/redemption-service.test.ts [2m([22m[2m16 tests[22m[2m)[22m[32m 35[2mms[22m[39m
+ [32mΓ£ô[39m [30m[46m union-eyes [49m[39m lib/ai/__tests__/resilience.test.ts [2m([22m[2m19 tests[22m[2m)[22m[32m 37[2mms[22m[39m
+ [32mΓ£ô[39m [30m[46m union-eyes [49m[39m lib/services/messaging/__tests__/campaign-service.test.ts [2m([22m[2m10 tests[22m[2m)[22m[32m 29[2mms[22m[39m
+ [32mΓ£ô[39m [30m[46m union-eyes [49m[39m lib/services/__tests__/entitlements.test.ts [2m([22m[2m13 tests[22m[2m)[22m[32m 46[2mms[22m[39m
+ [32mΓ£ô[39m [30m[46m union-eyes [49m[39m lib/services/__tests__/bargaining-notes-service.test.ts [2m([22m[2m3 tests[22m[2m)[22m[32m 13[2mms[22m[39m
+ [32mΓ£ô[39m [30m[46m union-eyes [49m[39m lib/services/rewards/__tests__/template-service.test.ts [2m([22m[2m32 tests[22m[2m)[22m[32m 35[2mms[22m[39m
+ [32mΓ£ô[39m [30m[46m union-eyes [49m[39m lib/services/rewards/__tests__/budget-service.test.ts [2m([22m[2m28 tests[22m[2m)[22m[32m 29[2mms[22m[39m
+ [32mΓ£ô[39m [30m[46m union-eyes [49m[39m lib/auth/__tests__/rbac-server.test.ts [2m([22m[2m12 tests[22m[2m)[22m[32m 23[2mms[22m[39m
+ [32mΓ£ô[39m [30m[46m union-eyes [49m[39m lib/services/__tests__/spatial-query-service.test.ts [2m([22m[2m4 tests[22m[2m)[22m[32m 34[2mms[22m[39m
+ [32mΓ£ô[39m [30m[46m union-eyes [49m[39m lib/services/rewards/__tests__/export-service.test.ts [2m([22m[2m20 tests[22m[2m)[22m[32m 29[2mms[22m[39m
+ [32mΓ£ô[39m [30m[46m union-eyes [49m[39m lib/ai/__tests__/safety.test.ts [2m([22m[2m50 tests[22m[2m)[22m[32m 33[2mms[22m[39m
+ [32mΓ£ô[39m [30m[46m union-eyes [49m[39m lib/__tests__/claim-workflow-fsm.test.ts [2m([22m[2m41 tests[22m[2m)[22m[32m 31[2mms[22m[39m
+ [32mΓ£ô[39m [30m[46m union-eyes [49m[39m lib/__tests__/organization-middleware.test.ts [2m([22m[2m10 tests[22m[2m)[22m[32m 32[2mms[22m[39m
+ [32mΓ£ô[39m [30m[46m union-eyes [49m[39m lib/services/__tests__/defensibility-pack.test.ts [2m([22m[2m5 tests[22m[2m)[22m[32m 19[2mms[22m[39m
+ [32mΓ£ô[39m [30m[46m union-eyes [49m[39m lib/services/__tests__/pci-compliance-service.test.ts [2m([22m[2m10 tests[22m[2m)[22m[32m 24[2mms[22m[39m
+ [32mΓ£ô[39m [30m[46m union-eyes [49m[39m lib/services/rewards/__tests__/email-service.test.ts [2m([22m[2m17 tests[22m[2m)[22m[32m 29[2mms[22m[39m
+ [32mΓ£ô[39m [30m[46m union-eyes [49m[39m lib/services/rewards/__tests__/award-service.test.ts [2m([22m[2m14 tests[22m[2m)[22m[32m 31[2mms[22m[39m
+ [32mΓ£ô[39m [30m[46m union-eyes [49m[39m lib/__tests__/job-queue.test.ts [2m([22m[2m12 tests[22m[2m)[22m[32m 30[2mms[22m[39m
+ [32mΓ£ô[39m [30m[46m union-eyes [49m[39m lib/auth/__tests__/hierarchy-access-control.test.ts [2m([22m[2m13 tests[22m[2m)[22m[32m 20[2mms[22m[39m
+ [32mΓ£ô[39m [30m[46m union-eyes [49m[39m lib/services/ai/__tests__/vector-search-service.test.ts [2m([22m[2m13 tests[22m[2m)[22m[32m 26[2mms[22m[39m
+ [32mΓ£ô[39m [30m[46m union-eyes [49m[39m lib/__tests__/api-auth-guard.test.ts [2m([22m[2m21 tests[22m[2m)[22m[32m 22[2mms[22m[39m
+ [32mΓ£ô[39m [30m[46m union-eyes [49m[39m lib/services/external-data/__tests__/wage-enrichment-service.test.ts [2m([22m[2m11 tests[22m[2m)[22m[32m 25[2mms[22m[39m
+ [32mΓ£ô[39m [30m[46m union-eyes [49m[39m lib/services/__tests__/payment-service.test.ts [2m([22m[2m9 tests[22m[2m)[22m[32m 28[2mms[22m[39m
+ [32mΓ£ô[39m [30m[46m union-eyes [49m[39m lib/services/ai/__tests__/auto-classification-service.test.ts [2m([22m[2m16 tests[22m[2m)[22m[32m 28[2mms[22m[39m
+ [32mΓ£ô[39m [30m[46m union-eyes [49m[39m lib/services/external-data/__tests__/clc-partnership-service.test.ts [2m([22m[2m9 tests[22m[2m)[22m[32m 29[2mms[22m[39m
+ [32mΓ£ô[39m [30m[46m union-eyes [49m[39m lib/services/__tests__/indigenous-data-service.test.ts [2m([22m[2m4 tests[22m[2m)[22m[32m 35[2mms[22m[39m
+ [32mΓ£ô[39m [30m[46m union-eyes [49m[39m lib/ai/__tests__/entity-extraction.test.ts [2m([22m[2m14 tests[22m[2m)[22m[32m 26[2mms[22m[39m
+ [32mΓ£ô[39m [30m[46m union-eyes [49m[39m lib/__tests__/audit-logger.test.ts [2m([22m[2m5 tests[22m[2m)[22m[32m 24[2mms[22m[39m
+ [32mΓ£ô[39m [30m[46m union-eyes [49m[39m lib/services/__tests__/calendar-service.test.ts [2m([22m[2m5 tests[22m[2m)[22m[32m 27[2mms[22m[39m
+ [32mΓ£ô[39m [30m[46m union-eyes [49m[39m lib/ai/services/__tests__/cost-tracking-wrapper.test.ts [2m([22m[2m3 tests[22m[2m)[22m[32m 27[2mms[22m[39m
+ [32mΓ£ô[39m [30m[46m union-eyes [49m[39m lib/services/rewards/__tests__/wallet-service.test.ts [2m([22m[2m11 tests[22m[2m)[22m[32m 28[2mms[22m[39m
+ [32mΓ£ô[39m [30m[46m union-eyes [49m[39m lib/ai/__tests__/data-ingestion.test.ts [2m([22m[2m25 tests[22m[2m)[22m[32m 31[2mms[22m[39m
+ [32mΓ£ô[39m [30m[46m union-eyes [49m[39m lib/ai/__tests__/performance-monitor.test.ts [2m([22m[2m13 tests[22m[2m)[22m[32m 20[2mms[22m[39m
+ [32mΓ£ô[39m [30m[46m union-eyes [49m[39m lib/__tests__/recurring-events-service.test.ts [2m([22m[2m16 tests[22m[2m)[22m[32m 25[2mms[22m[39m
+ [32mΓ£ô[39m [30m[46m union-eyes [49m[39m lib/services/ai/__tests__/embedding-cache.test.ts [2m([22m[2m11 tests[22m[2m)[22m[32m 27[2mms[22m[39m
+ [32mΓ£ô[39m [30m[46m union-eyes [49m[39m lib/services/__tests__/signature-providers.test.ts [2m([22m[2m11 tests[22m[2m)[22m[32m 23[2mms[22m[39m
+ [32mΓ£ô[39m [30m[46m union-eyes [49m[39m lib/ai/__tests__/embeddings-service.test.ts [2m([22m[2m10 tests[22m[2m)[22m[32m 25[2mms[22m[39m
+ [32mΓ£ô[39m [30m[46m union-eyes [49m[39m lib/__tests__/org-scope-middleware.test.ts [2m([22m[2m4 tests[22m[2m)[22m[32m 23[2mms[22m[39m
+ [32mΓ£ô[39m [30m[46m union-eyes [49m[39m lib/__tests__/employer-risk.test.ts [2m([22m[2m12 tests[22m[2m)[22m[32m 18[2mms[22m[39m
+ [32mΓ£ô[39m [30m[46m union-eyes [49m[39m lib/services/__tests__/precedent-service.test.ts [2m([22m[2m3 tests[22m[2m)[22m[32m 31[2mms[22m[39m
+ [32mΓ£ô[39m [30m[46m union-eyes [49m[39m lib/services/__tests__/vote-crypto-service.test.ts [2m([22m[2m17 tests[22m[2m)[22m[32m 22[2mms[22m[39m
+ [32mΓ£ô[39m [30m[46m union-eyes [49m[39m lib/services/__tests__/signature-workflow-service.test.ts [2m([22m[2m8 tests[22m[2m)[22m[32m 25[2mms[22m[39m
+ [32mΓ£ô[39m [30m[46m union-eyes [49m[39m lib/services/__tests__/document-service.test.ts [2m([22m[2m4 tests[22m[2m)[22m[32m 70[2mms[22m[39m
+ [32mΓ£ô[39m [30m[46m union-eyes [49m[39m lib/ai/services/__tests__/rate-limiter.test.ts [2m([22m[2m3 tests[22m[2m)[22m[32m 46[2mms[22m[39m
+ [32mΓ£ô[39m [30m[46m union-eyes [49m[39m lib/services/rewards/__tests__/shopify-service.test.ts [2m([22m[2m9 tests[22m[2m)[22m[32m 22[2mms[22m[39m
+ [32mΓ£ô[39m [30m[46m union-eyes [49m[39m lib/services/external-data/__tests__/lrb-unified-service.test.ts [2m([22m[2m11 tests[22m[2m)[22m[32m 26[2mms[22m[39m
+ [32mΓ£ô[39m [30m[46m union-eyes [49m[39m lib/services/__tests__/strike-fund-tax-service.test.ts [2m([22m[2m4 tests[22m[2m)[22m[32m 28[2mms[22m[39m
+ [32mΓ£ô[39m [30m[46m union-eyes [49m[39m lib/__tests__/enterprise-role-middleware.test.ts [2m([22m[2m3 tests[22m[2m)[22m[32m 25[2mms[22m[39m
+ [32mΓ£ô[39m [30m[46m union-eyes [49m[39m lib/__tests__/dashboard-metrics.test.ts [2m([22m[2m14 tests[22m[2m)[22m[32m 20[2mms[22m[39m
+ [32mΓ£ô[39m [30m[46m union-eyes [49m[39m lib/services/rewards/__tests__/notification-service.test.ts [2m([22m[2m11 tests[22m[2m)[22m[32m 20[2mms[22m[39m
+ [32mΓ£ô[39m [30m[46m union-eyes [49m[39m lib/services/rewards/__tests__/automation-service.test.ts [2m([22m[2m14 tests[22m[2m)[22m[32m 25[2mms[22m[39m
+ [32mΓ£ô[39m [30m[46m union-eyes [49m[39m lib/ai/__tests__/learning.test.ts [2m([22m[2m22 tests[22m[2m)[22m[32m 24[2mms[22m[39m
+ [32mΓ£ô[39m [30m[46m union-eyes [49m[39m lib/ai/__tests__/experiments.test.ts [2m([22m[2m13 tests[22m[2m)[22m[32m 26[2mms[22m[39m
+ [32mΓ£ô[39m [30m[46m union-eyes [49m[39m lib/__tests__/csrf-protection.test.ts [2m([22m[2m9 tests[22m[2m)[22m[32m 21[2mms[22m[39m
+ [32mΓ£ô[39m [30m[46m union-eyes [49m[39m lib/__tests__/analytics-middleware.test.ts [2m([22m[2m6 tests[22m[2m)[22m[32m 17[2mms[22m[39m
+ [32mΓ£ô[39m [30m[46m union-eyes [49m[39m lib/__tests__/cape-pilot-polish.test.ts [2m([22m[2m25 tests[22m[2m)[22m[32m 22[2mms[22m[39m
+ [32mΓ£ô[39m [30m[46m union-eyes [49m[39m lib/services/__tests__/feature-flags-service.test.ts [2m([22m[2m4 tests[22m[2m)[22m[32m 14[2mms[22m[39m
+ [32mΓ£ô[39m [30m[46m union-eyes [49m[39m lib/services/rewards/__tests__/program-service.test.ts [2m([22m[2m13 tests[22m[2m)[22m[32m 21[2mms[22m[39m
+ [32mΓ£ô[39m [30m[46m union-eyes [49m[39m lib/services/__tests__/t106-compliance-service.test.ts [2m([22m[2m4 tests[22m[2m)[22m[32m 22[2mms[22m[39m
+ [32mΓ£ô[39m [30m[46m union-eyes [49m[39m lib/__tests__/seed-cape-acep.test.ts [2m([22m[2m6 tests[22m[2m)[22m[32m 14[2mms[22m[39m
+ [32mΓ£ô[39m [30m[46m union-eyes [49m[39m lib/services/__tests__/claim-workflow-fsm.test.ts [2m([22m[2m15 tests[22m[2m)[22m[32m 19[2mms[22m[39m
+ [32mΓ£ô[39m [30m[46m union-eyes [49m[39m lib/__tests__/scheduled-jobs.test.ts [2m([22m[2m8 tests[22m[2m)[22m[32m 18[2mms[22m[39m
+ [32mΓ£ô[39m [30m[46m union-eyes [49m[39m lib/services/ai/__tests__/precedent-matching-service.test.ts [2m([22m[2m6 tests[22m[2m)[22m[32m 19[2mms[22m[39m
+ [32mΓ£ô[39m [30m[46m union-eyes [49m[39m lib/ai/__tests__/selective-context.test.ts [2m([22m[2m11 tests[22m[2m)[22m[32m 17[2mms[22m[39m
+ [32mΓ£ô[39m [30m[46m union-eyes [49m[39m lib/__tests__/action-enforcer.test.ts [2m([22m[2m10 tests[22m[2m)[22m[32m 19[2mms[22m[39m
+ [32mΓ£ô[39m [30m[46m union-eyes [49m[39m lib/__tests__/executive-insights.test.ts [2m([22m[2m9 tests[22m[2m)[22m[32m 22[2mms[22m[39m
+ [32mΓ£ô[39m [30m[46m union-eyes [49m[39m lib/__tests__/webhook-security.test.ts [2m([22m[2m15 tests[22m[2m)[22m[32m 21[2mms[22m[39m
+ [32mΓ£ô[39m [30m[46m union-eyes [49m[39m lib/services/ai/__tests__/clause-extraction-service.test.ts [2m([22m[2m8 tests[22m[2m)[22m[32m 19[2mms[22m[39m
+ [32mΓ£ô[39m [30m[46m union-eyes [49m[39m lib/__tests__/cape-demo-data.test.ts [2m([22m[2m14 tests[22m[2m)[22m[32m 21[2mms[22m[39m
+ [32mΓ£ô[39m [30m[46m union-eyes [49m[39m lib/__tests__/config.test.ts [2m([22m[2m22 tests[22m[2m)[22m[32m 24[2mms[22m[39m
+ [32mΓ£ô[39m [30m[46m union-eyes [49m[39m lib/__tests__/audited-case-mutations.test.ts [2m([22m[2m4 tests[22m[2m)[22m[32m 21[2mms[22m[39m
+ [32mΓ£ô[39m [30m[46m union-eyes [49m[39m lib/__tests__/analytics-cache.test.ts [2m([22m[2m7 tests[22m[2m)[22m[32m 17[2mms[22m[39m
+ [32mΓ£ô[39m [30m[46m union-eyes [49m[39m lib/__tests__/evidence.test.ts [2m([22m[2m4 tests[22m[2m)[22m[32m 17[2mms[22m[39m
+ [32mΓ£ô[39m [30m[46m union-eyes [49m[39m lib/__tests__/analytics-performance.test.ts [2m([22m[2m5 tests[22m[2m)[22m[32m 17[2mms[22m[39m
+ [32mΓ£ô[39m [30m[46m union-eyes [49m[39m lib/__tests__/pilot-admin.test.ts [2m([22m[2m8 tests[22m[2m)[22m[32m 15[2mms[22m[39m
+ [32mΓ£ô[39m [30m[46m union-eyes [49m[39m lib/ai/__tests__/role-templates.test.ts [2m([22m[2m15 tests[22m[2m)[22m[32m 17[2mms[22m[39m
+ [32mΓ£ô[39m [30m[46m union-eyes [49m[39m lib/services/__tests__/lro-metrics.test.ts [2m([22m[2m14 tests[22m[2m)[22m[32m 18[2mms[22m[39m
+ [31mΓ¥»[39m [30m[46m union-eyes [49m[39m lib/__tests__/representation-protocol.test.ts [2m([22m[2m33 tests[22m[2m | [22m[31m1 failed[39m[2m)[22m[33m 15044[2mms[22m[39m
+     [32mΓ£ô[39m provides four presets[32m 6[2mms[22m[39m
+     [32mΓ£ô[39m all presets have version 1[32m 1[2mms[22m[39m
+     [32mΓ£ô[39m PROTOCOL_STEWARD_LED gives stewards full permissions[32m 1[2mms[22m[39m
+     [32mΓ£ô[39m PROTOCOL_LRO_LED disables all steward permissions (CAPE model)[32m 1[2mms[22m[39m
+     [32mΓ£ô[39m PROTOCOL_NATIONAL_REP_LED allows steward employer contact only (CUPE model)[32m 1[2mms[22m[39m
+     [32mΓ£ô[39m PROTOCOL_OFFICER_LED allows steward assignment + employer contact[32m 0[2mms[22m[39m
+     [32mΓ£ô[39m returns true for steward-led protocol[32m 0[2mms[22m[39m
+     [32mΓ£ô[39m returns false for LRO-led protocol[32m 0[2mms[22m[39m
+     [32mΓ£ô[39m returns false for national-rep-led protocol[32m 0[2mms[22m[39m
+     [32mΓ£ô[39m returns false for officer-led protocol[32m 0[2mms[22m[39m
+     [32mΓ£ô[39m returns true only for steward-led protocol[32m 0[2mms[22m[39m
+     [32mΓ£ô[39m returns 'Assign Steward' for steward-led[32m 0[2mms[22m[39m
+     [32mΓ£ô[39m returns 'Assign Labour Relations Officer' for LRO-led[32m 0[2mms[22m[39m
+     [32mΓ£ô[39m returns 'Assign National Representative' for national-rep-led[32m 0[2mms[22m[39m
+     [32mΓ£ô[39m returns 'Assign Union Officer' for officer-led[32m 0[2mms[22m[39m
+     [32mΓ£ô[39m returns protocol-specific description[32m 1[2mms[22m[39m
+     [32mΓ£ô[39m returns steward description for default[32m 0[2mms[22m[39m
+     [32mΓ£ô[39m maps steward ΓåÆ 'steward'[32m 0[2mms[22m[39m
+     [32mΓ£ô[39m maps lro ΓåÆ 'labor_relations_officer'[32m 0[2mms[22m[39m
+     [32mΓ£ô[39m maps national_rep ΓåÆ 'national_representative'[32m 0[2mms[22m[39m
+     [32mΓ£ô[39m maps officer ΓåÆ 'primary_officer'[32m 0[2mms[22m[39m
+[31m     [31m├ù[31m re-exports all type helpers from protocol-types[39m[33m 15021[2mms[22m[39m
+     [32mΓ£ô[39m exports a component function[32m 0[2mms[22m[39m
+     [32mΓ£ô[39m accepts protocol in props shape[32m 0[2mms[22m[39m
+     [32mΓ£ô[39m exports a component function[32m 0[2mms[22m[39m
+     [32mΓ£ô[39m accepts protocol in props shape[32m 0[2mms[22m[39m
+     [32mΓ£ô[39m exports a component function[32m 0[2mms[22m[39m
+     [32mΓ£ô[39m accepts protocol in props shape[32m 0[2mms[22m[39m
+     [32mΓ£ô[39m preset 'steward' has all required fields[32m 1[2mms[22m[39m
+     [32mΓ£ô[39m preset 'lro' has all required fields[32m 1[2mms[22m[39m
+     [32mΓ£ô[39m preset 'national_rep' has all required fields[32m 0[2mms[22m[39m
+     [32mΓ£ô[39m preset 'officer' has all required fields[32m 0[2mms[22m[39m
+     [32mΓ£ô[39m PROTOCOL_PRESETS covers all RepresentativeType values[32m 0[2mms[22m[39m
+ [32mΓ£ô[39m [30m[46m union-eyes [49m[39m lib/services/__tests__/email-templates.test.ts [2m([22m[2m7 tests[22m[2m)[22m[32m 17[2mms[22m[39m
+ [32mΓ£ô[39m [30m[46m union-eyes [49m[39m lib/services/__tests__/notification-service.test.ts [2m([22m[2m8 tests[22m[2m)[22m[32m 17[2mms[22m[39m
+ [32mΓ£ô[39m [30m[46m union-eyes [49m[39m lib/__tests__/grievance-lifecycle.test.ts [2m([22m[2m24 tests[22m[2m)[22m[32m 19[2mms[22m[39m
+ [32mΓ£ô[39m [30m[46m union-eyes [49m[39m lib/services/__tests__/case-workflow-fsm.test.ts [2m([22m[2m17 tests[22m[2m)[22m[32m 18[2mms[22m[39m
+ [32mΓ£ô[39m [30m[46m union-eyes [49m[39m lib/services/__tests__/multi-currency-gl-helper.test.ts [2m([22m[2m5 tests[22m[2m)[22m[32m 18[2mms[22m[39m
+ [32mΓ£ô[39m [30m[46m union-eyes [49m[39m lib/__tests__/settlement-recommendation-engine.test.ts [2m([22m[2m4 tests[22m[2m)[22m[32m 17[2mms[22m[39m
+ [32mΓ£ô[39m [30m[46m union-eyes [49m[39m lib/__tests__/cape-audit-events.test.ts [2m([22m[2m8 tests[22m[2m)[22m[32m 19[2mms[22m[39m
+ [32mΓ£ô[39m [30m[46m union-eyes [49m[39m lib/auth/__tests__/permissions.test.ts [2m([22m[2m12 tests[22m[2m)[22m[32m 17[2mms[22m[39m
+ [32mΓ£ô[39m [30m[46m union-eyes [49m[39m lib/__tests__/db-adapter.test.ts [2m([22m[2m14 tests[22m[2m)[22m[32m 16[2mms[22m[39m
+ [32mΓ£ô[39m [30m[46m union-eyes [49m[39m lib/__tests__/schema-error.test.ts [2m([22m[2m6 tests[22m[2m)[22m[32m 15[2mms[22m[39m
+ [32mΓ£ô[39m [30m[46m union-eyes [49m[39m lib/__tests__/evidence-export.test.ts [2m([22m[2m8 tests[22m[2m)[22m[32m 16[2mms[22m[39m
+ [32mΓ£ô[39m [30m[46m union-eyes [49m[39m lib/services/__tests__/lro-signals.test.ts [2m([22m[2m9 tests[22m[2m)[22m[32m 19[2mms[22m[39m
+ [32mΓ£ô[39m [30m[46m union-eyes [49m[39m lib/__tests__/entitlement-sat-validator.test.ts [2m([22m[2m10 tests[22m[2m)[22m[32m 15[2mms[22m[39m
+ [32mΓ£ô[39m [30m[46m union-eyes [49m[39m lib/__tests__/workflow-engine.test.ts [2m([22m[2m11 tests[22m[2m)[22m[32m 17[2mms[22m[39m
+ [32mΓ£ô[39m [30m[46m union-eyes [49m[39m lib/__tests__/analytics-aggregation.test.ts [2m([22m[2m3 tests[22m[2m)[22m[32m 16[2mms[22m[39m
+ [32mΓ£ô[39m [30m[46m union-eyes [49m[39m lib/__tests__/engagement-scoring.test.ts [2m([22m[2m4 tests[22m[2m)[22m[32m 16[2mms[22m[39m
+ [32mΓ£ô[39m [30m[46m union-eyes [49m[39m lib/ai/__tests__/pipeline.test.ts [2m([22m[2m6 tests[22m[2m)[22m[32m 15[2mms[22m[39m
+ [32mΓ£ô[39m [30m[46m union-eyes [49m[39m lib/__tests__/blob-manager.test.ts [2m([22m[2m13 tests[22m[2m)[22m[32m 26[2mms[22m[39m
+ [32mΓ£ô[39m [30m[46m union-eyes [49m[39m lib/__tests__/scheduled-report-executor.test.ts [2m([22m[2m3 tests[22m[2m)[22m[32m 16[2mms[22m[39m
+ [32mΓ£ô[39m [30m[46m union-eyes [49m[39m lib/__tests__/client-logger.test.ts [2m([22m[2m2 tests[22m[2m)[22m[32m 15[2mms[22m[39m
+ [32mΓ£ô[39m [30m[46m union-eyes [49m[39m lib/__tests__/clause-intelligence.test.ts [2m([22m[2m7 tests[22m[2m)[22m[32m 15[2mms[22m[39m
+ [32mΓ£ô[39m [30m[46m union-eyes [49m[39m lib/services/__tests__/sla-calculator.test.ts [2m([22m[2m10 tests[22m[2m)[22m[32m 19[2mms[22m[39m
+[90mstdout[2m | lib/api/__tests__/with-api.test.ts
+[22m[39m[dotenv@17.3.1] injecting env (0) from .env.local -- tip: ≡ƒöÉ prevent building .env in docker: https://dotenvx.com/prebuild
+
+[90mstdout[2m | lib/__tests__/billing-cycle-service.test.ts
+[22m[39m[dotenv@17.3.1] injecting env (0) from .env.local -- tip: ΓÜÖ∩╕Å  load multiple .env files with { path: ['.env.local', '.env'] }
+
+ [32mΓ£ô[39m [30m[46m union-eyes [49m[39m lib/ai/__tests__/executive-insights.test.ts [2m([22m[2m2 tests[22m[2m)[22m[32m 22[2mms[22m[39m
+ [32mΓ£ô[39m [30m[46m union-eyes [49m[39m lib/ai/__tests__/employer-risk.test.ts [2m([22m[2m3 tests[22m[2m)[22m[32m 23[2mms[22m[39m
+ [32mΓ£ô[39m [30m[46m union-eyes [49m[39m lib/ai/__tests__/grievance-triage.test.ts [2m([22m[2m3 tests[22m[2m)[22m[32m 20[2mms[22m[39m
+ [32mΓ£ô[39m [30m[46m union-eyes [49m[39m lib/services/__tests__/audit-service.test.ts [2m([22m[2m3 tests[22m[2m)[22m[32m 18[2mms[22m[39m
+ [32mΓ£ô[39m [30m[46m union-eyes [49m[39m lib/ai/__tests__/clause-reasoning.test.ts [2m([22m[2m3 tests[22m[2m)[22m[32m 23[2mms[22m[39m
+ [32mΓ£ô[39m [30m[46m union-eyes [49m[39m lib/ai/__tests__/steward-copilot.test.ts [2m([22m[2m4 tests[22m[2m)[22m[32m 22[2mms[22m[39m
+ [32mΓ£ô[39m [30m[46m union-eyes [49m[39m lib/__tests__/csv-export.test.ts [2m([22m[2m8 tests[22m[2m)[22m[32m 15[2mms[22m[39m
+ [32mΓ£ô[39m [30m[46m union-eyes [49m[39m lib/__tests__/steward-copilot.test.ts [2m([22m[2m8 tests[22m[2m)[22m[32m 15[2mms[22m[39m
+ [32mΓ£ô[39m [30m[46m union-eyes [49m[39m lib/__tests__/error-codes.test.ts [2m([22m[2m9 tests[22m[2m)[22m[32m 16[2mms[22m[39m
+ [32mΓ£ô[39m [30m[46m union-eyes [49m[39m lib/__tests__/report-executor.test.ts [2m([22m[2m8 tests[22m[2m)[22m[32m 15[2mms[22m[39m
+ [32mΓ£ô[39m [30m[46m union-eyes [49m[39m lib/__tests__/api-client.test.ts [2m([22m[2m5 tests[22m[2m)[22m[32m 16[2mms[22m[39m
+ [32mΓ£ô[39m [30m[46m union-eyes [49m[39m lib/services/__tests__/precedent-document-service.test.ts [2m([22m[2m4 tests[22m[2m)[22m[32m 17[2mms[22m[39m
+ [32mΓ£ô[39m [30m[46m union-eyes [49m[39m lib/__tests__/dapl-platform-economics.test.ts [2m([22m[2m36 tests[22m[2m)[22m[32m 29[2mms[22m[39m
+ [32mΓ£ô[39m [30m[46m union-eyes [49m[39m lib/__tests__/feature-flags.test.ts [2m([22m[2m6 tests[22m[2m)[22m[32m 14[2mms[22m[39m
+ [32mΓ£ô[39m [30m[46m union-eyes [49m[39m lib/services/__tests__/voting-service.test.ts [2m([22m[2m4 tests[22m[2m)[22m[32m 16[2mms[22m[39m
+ [32mΓ£ô[39m [30m[46m union-eyes [49m[39m lib/ai/__tests__/ai-feature-guard.test.ts [2m([22m[2m6 tests[22m[2m)[22m[32m 16[2mms[22m[39m
+ [32mΓ£ô[39m [30m[46m union-eyes [49m[39m lib/__tests__/jurisdiction-helpers.test.ts [2m([22m[2m7 tests[22m[2m)[22m[32m 15[2mms[22m[39m
+ [32mΓ£ô[39m [30m[46m union-eyes [49m[39m lib/__tests__/workbench-utils.test.ts [2m([22m[2m14 tests[22m[2m)[22m[32m 15[2mms[22m[39m
+ [32mΓ£ô[39m [30m[46m union-eyes [49m[39m lib/__tests__/billing-cycle-service.test.ts [2m([22m[2m29 tests[22m[2m)[22m[32m 24[2mms[22m[39m
+ [32mΓ£ô[39m [30m[46m union-eyes [49m[39m lib/services/__tests__/break-glass-service.test.ts [2m([22m[2m5 tests[22m[2m)[22m[32m 14[2mms[22m[39m
+ [32mΓ£ô[39m [30m[46m union-eyes [49m[39m lib/__tests__/case-fsm-enforcement.test.ts [2m([22m[2m7 tests[22m[2m)[22m[32m 14[2mms[22m[39m
+ [32mΓ£ô[39m [30m[46m union-eyes [49m[39m lib/services/__tests__/claims-service.test.ts [2m([22m[2m3 tests[22m[2m)[22m[32m 13[2mms[22m[39m
+ [32mΓ£ô[39m [30m[46m union-eyes [49m[39m lib/auth/__tests__/types.test.ts [2m([22m[2m8 tests[22m[2m)[22m[32m 14[2mms[22m[39m
+ [32mΓ£ô[39m [30m[46m union-eyes [49m[39m lib/services/__tests__/ip-geolocation-service.test.ts [2m([22m[2m8 tests[22m[2m)[22m[32m 15[2mms[22m[39m
+ [32mΓ£ô[39m [30m[46m union-eyes [49m[39m lib/__tests__/grievance-triage.test.ts [2m([22m[2m6 tests[22m[2m)[22m[32m 14[2mms[22m[39m
+ [32mΓ£ô[39m [30m[46m union-eyes [49m[39m lib/services/__tests__/transfer-pricing-service.test.ts [2m([22m[2m4 tests[22m[2m)[22m[32m 13[2mms[22m[39m
+ [32mΓ£ô[39m [30m[46m union-eyes [49m[39m lib/__tests__/clause-reasoning.test.ts [2m([22m[2m5 tests[22m[2m)[22m[32m 12[2mms[22m[39m
+ [32mΓ£ô[39m [30m[46m union-eyes [49m[39m lib/__tests__/decimal-safe.test.ts [2m([22m[2m17 tests[22m[2m)[22m[32m 15[2mms[22m[39m
+ [32mΓ£ô[39m [30m[46m union-eyes [49m[39m lib/services/__tests__/billing-cycle-service.test.ts [2m([22m[2m4 tests[22m[2m)[22m[32m 12[2mms[22m[39m
+ [32mΓ£ô[39m [30m[46m union-eyes [49m[39m lib/__tests__/setup-checklist.test.ts [2m([22m[2m7 tests[22m[2m)[22m[32m 12[2mms[22m[39m
+ [32mΓ£ô[39m [30m[46m union-eyes [49m[39m lib/__tests__/api-server.test.ts [2m([22m[2m5 tests[22m[2m)[22m[32m 13[2mms[22m[39m
+ [32mΓ£ô[39m [30m[46m union-eyes [49m[39m lib/services/__tests__/member-service.test.ts [2m([22m[2m4 tests[22m[2m)[22m[32m 25[2mms[22m[39m
+ [32mΓ£ô[39m [30m[46m union-eyes [49m[39m lib/services/__tests__/geofence-privacy-service.test.ts [2m([22m[2m4 tests[22m[2m)[22m[32m 25[2mms[22m[39m
+stderr | lib/ai/__tests__/token-cost-calculator.test.ts
+
+ΓòÉΓòÉΓòÉΓòÉΓòÉΓòÉΓòÉΓòÉΓòÉΓòÉΓòÉΓòÉΓòÉΓòÉΓòÉΓòÉΓòÉΓòÉΓòÉΓòÉΓòÉΓòÉΓòÉΓòÉΓòÉΓòÉΓòÉΓòÉΓòÉΓòÉΓòÉΓòÉΓòÉΓòÉΓòÉΓòÉΓòÉΓòÉΓòÉΓòÉΓòÉΓòÉΓòÉΓòÉΓòÉΓòÉΓòÉΓòÉΓòÉΓòÉΓòÉΓòÉΓòÉΓòÉΓòÉΓòÉΓòÉΓòÉΓòÉΓòÉΓòÉΓòÉΓòÉΓòÉΓòÉΓòÉΓòÉΓòÉΓòÉΓòÉΓòÉΓòÉ
+NZILA OS ΓÇö BOOT ASSERTION FAILURES
+ΓòÉΓòÉΓòÉΓòÉΓòÉΓòÉΓòÉΓòÉΓòÉΓòÉΓòÉΓòÉΓòÉΓòÉΓòÉΓòÉΓòÉΓòÉΓòÉΓòÉΓòÉΓòÉΓòÉΓòÉΓòÉΓòÉΓòÉΓòÉΓòÉΓòÉΓòÉΓòÉΓòÉΓòÉΓòÉΓòÉΓòÉΓòÉΓòÉΓòÉΓòÉΓòÉΓòÉΓòÉΓòÉΓòÉΓòÉΓòÉΓòÉΓòÉΓòÉΓòÉΓòÉΓòÉΓòÉΓòÉΓòÉΓòÉΓòÉΓòÉΓòÉΓòÉΓòÉΓòÉΓòÉΓòÉΓòÉΓòÉΓòÉΓòÉΓòÉΓòÉ
+
+  Γ£ù BOOT ASSERTION FAILED: DATABASE_URL is not set. The API cannot function without a database connection.
+
+ΓòÉΓòÉΓòÉΓòÉΓòÉΓòÉΓòÉΓòÉΓòÉΓòÉΓòÉΓòÉΓòÉΓòÉΓòÉΓòÉΓòÉΓòÉΓòÉΓòÉΓòÉΓòÉΓòÉΓòÉΓòÉΓòÉΓòÉΓòÉΓòÉΓòÉΓòÉΓòÉΓòÉΓòÉΓòÉΓòÉΓòÉΓòÉΓòÉΓòÉΓòÉΓòÉΓòÉΓòÉΓòÉΓòÉΓòÉΓòÉΓòÉΓòÉΓòÉΓòÉΓòÉΓòÉΓòÉΓòÉΓòÉΓòÉΓòÉΓòÉΓòÉΓòÉΓòÉΓòÉΓòÉΓòÉΓòÉΓòÉΓòÉΓòÉΓòÉΓòÉ
+The API will not serve traffic until all assertions pass.
+ΓòÉΓòÉΓòÉΓòÉΓòÉΓòÉΓòÉΓòÉΓòÉΓòÉΓòÉΓòÉΓòÉΓòÉΓòÉΓòÉΓòÉΓòÉΓòÉΓòÉΓòÉΓòÉΓòÉΓòÉΓòÉΓòÉΓòÉΓòÉΓòÉΓòÉΓòÉΓòÉΓòÉΓòÉΓòÉΓòÉΓòÉΓòÉΓòÉΓòÉΓòÉΓòÉΓòÉΓòÉΓòÉΓòÉΓòÉΓòÉΓòÉΓòÉΓòÉΓòÉΓòÉΓòÉΓòÉΓòÉΓòÉΓòÉΓòÉΓòÉΓòÉΓòÉΓòÉΓòÉΓòÉΓòÉΓòÉΓòÉΓòÉΓòÉΓòÉΓòÉ
+
+
+ [32mΓ£ô[39m [30m[46m union-eyes [49m[39m lib/__tests__/safe-sql-identifiers.test.ts [2m([22m[2m8 tests[22m[2m)[22m[32m 13[2mms[22m[39m
+ [32mΓ£ô[39m [30m[46m union-eyes [49m[39m lib/ai/__tests__/ai-client.test.ts [2m([22m[2m10 tests[22m[2m)[22m[32m 11[2mms[22m[39m
+ [32mΓ£ô[39m [30m[46m union-eyes [49m[39m lib/services/__tests__/payroll-integration-service.test.ts [2m([22m[2m4 tests[22m[2m)[22m[32m 11[2mms[22m[39m
+ [32mΓ£ô[39m [30m[46m union-eyes [49m[39m lib/__tests__/jurisdiction-helpers-client.test.ts [2m([22m[2m12 tests[22m[2m)[22m[32m 12[2mms[22m[39m
+ [32mΓ£ô[39m [30m[46m union-eyes [49m[39m lib/__tests__/case-assignment-engine.test.ts [2m([22m[2m3 tests[22m[2m)[22m[32m 12[2mms[22m[39m
+ [32mΓ£ô[39m [30m[46m union-eyes [49m[39m lib/services/__tests__/cba-service.test.ts [2m([22m[2m3 tests[22m[2m)[22m[32m 13[2mms[22m[39m
+{"level":"warn","message":"[token-cost-calculator] No pricing data for model: nonexistent-model. Returning 0 cost.","timestamp":"2026-03-29T01:38:47.744Z"}
+{"level":"warn","message":"[token-cost-calculator] No pricing data for model: unknown-model. Returning 0 cost.","timestamp":"2026-03-29T01:38:47.749Z"}
+{"level":"warn","message":"[token-cost-calculator] No pricing data for model: unknown. Returning 0 cost.","timestamp":"2026-03-29T01:38:47.756Z"}
+{"level":"warn","message":"[token-cost-calculator] No pricing data for model: unknown. Returning 0 cost.","timestamp":"2026-03-29T01:38:47.756Z"}
+ [32mΓ£ô[39m [30m[46m union-eyes [49m[39m lib/ai/__tests__/token-cost-calculator.test.ts [2m([22m[2m25 tests[22m[2m)[22m[32m 22[2mms[22m[39m
+ [32mΓ£ô[39m [30m[46m union-eyes [49m[39m lib/services/__tests__/multi-currency-treasury-service.test.ts [2m([22m[2m3 tests[22m[2m)[22m[32m 26[2mms[22m[39m
+ [32mΓ£ô[39m [30m[46m union-eyes [49m[39m lib/ai/__tests__/chatbot-service.test.ts [2m([22m[2m1 test[22m[2m)[22m[32m 10[2mms[22m[39m
+ [32mΓ£ô[39m [30m[46m union-eyes [49m[39m lib/__tests__/api.test.ts [2m([22m[2m6 tests[22m[2m)[22m[32m 15[2mms[22m[39m
+ [32mΓ£ô[39m [30m[46m union-eyes [49m[39m lib/services/__tests__/provincial-privacy-service.test.ts [2m([22m[2m5 tests[22m[2m)[22m[32m 20[2mms[22m[39m
+ [32mΓ£ô[39m [30m[46m union-eyes [49m[39m lib/services/__tests__/dispatch-engine.test.ts [2m([22m[2m4 tests[22m[2m)[22m[32m 9[2mms[22m[39m
+ [32mΓ£ô[39m [30m[46m union-eyes [49m[39m lib/api/__tests__/with-api.test.ts [2m([22m[2m17 tests[22m[2m)[22m[32m 68[2mms[22m[39m
+ [32mΓ£ô[39m [30m[46m union-eyes [49m[39m lib/__tests__/dispatch-engine.test.ts [2m([22m[2m6 tests[22m[2m)[22m[32m 6[2mms[22m[39m
+[90mstdout[2m | lib/__tests__/role-middleware.test.ts
+[22m[39m[dotenv@17.3.1] injecting env (0) from .env.local -- tip: ΓÜÖ∩╕Å  load multiple .env files with { path: ['.env.local', '.env'] }
+
+stderr | lib/__tests__/role-middleware.test.ts
+
+ΓòÉΓòÉΓòÉΓòÉΓòÉΓòÉΓòÉΓòÉΓòÉΓòÉΓòÉΓòÉΓòÉΓòÉΓòÉΓòÉΓòÉΓòÉΓòÉΓòÉΓòÉΓòÉΓòÉΓòÉΓòÉΓòÉΓòÉΓòÉΓòÉΓòÉΓòÉΓòÉΓòÉΓòÉΓòÉΓòÉΓòÉΓòÉΓòÉΓòÉΓòÉΓòÉΓòÉΓòÉΓòÉΓòÉΓòÉΓòÉΓòÉΓòÉΓòÉΓòÉΓòÉΓòÉΓòÉΓòÉΓòÉΓòÉΓòÉΓòÉΓòÉΓòÉΓòÉΓòÉΓòÉΓòÉΓòÉΓòÉΓòÉΓòÉΓòÉΓòÉ
+NZILA OS ΓÇö BOOT ASSERTION FAILURES
+ΓòÉΓòÉΓòÉΓòÉΓòÉΓòÉΓòÉΓòÉΓòÉΓòÉΓòÉΓòÉΓòÉΓòÉΓòÉΓòÉΓòÉΓòÉΓòÉΓòÉΓòÉΓòÉΓòÉΓòÉΓòÉΓòÉΓòÉΓòÉΓòÉΓòÉΓòÉΓòÉΓòÉΓòÉΓòÉΓòÉΓòÉΓòÉΓòÉΓòÉΓòÉΓòÉΓòÉΓòÉΓòÉΓòÉΓòÉΓòÉΓòÉΓòÉΓòÉΓòÉΓòÉΓòÉΓòÉΓòÉΓòÉΓòÉΓòÉΓòÉΓòÉΓòÉΓòÉΓòÉΓòÉΓòÉΓòÉΓòÉΓòÉΓòÉΓòÉΓòÉ
+
+  Γ£ù BOOT ASSERTION FAILED: DATABASE_URL is not set. The API cannot function without a database connection.
+
+ΓòÉΓòÉΓòÉΓòÉΓòÉΓòÉΓòÉΓòÉΓòÉΓòÉΓòÉΓòÉΓòÉΓòÉΓòÉΓòÉΓòÉΓòÉΓòÉΓòÉΓòÉΓòÉΓòÉΓòÉΓòÉΓòÉΓòÉΓòÉΓòÉΓòÉΓòÉΓòÉΓòÉΓòÉΓòÉΓòÉΓòÉΓòÉΓòÉΓòÉΓòÉΓòÉΓòÉΓòÉΓòÉΓòÉΓòÉΓòÉΓòÉΓòÉΓòÉΓòÉΓòÉΓòÉΓòÉΓòÉΓòÉΓòÉΓòÉΓòÉΓòÉΓòÉΓòÉΓòÉΓòÉΓòÉΓòÉΓòÉΓòÉΓòÉΓòÉΓòÉ
+The API will not serve traffic until all assertions pass.
+ΓòÉΓòÉΓòÉΓòÉΓòÉΓòÉΓòÉΓòÉΓòÉΓòÉΓòÉΓòÉΓòÉΓòÉΓòÉΓòÉΓòÉΓòÉΓòÉΓòÉΓòÉΓòÉΓòÉΓòÉΓòÉΓòÉΓòÉΓòÉΓòÉΓòÉΓòÉΓòÉΓòÉΓòÉΓòÉΓòÉΓòÉΓòÉΓòÉΓòÉΓòÉΓòÉΓòÉΓòÉΓòÉΓòÉΓòÉΓòÉΓòÉΓòÉΓòÉΓòÉΓòÉΓòÉΓòÉΓòÉΓòÉΓòÉΓòÉΓòÉΓòÉΓòÉΓòÉΓòÉΓòÉΓòÉΓòÉΓòÉΓòÉΓòÉΓòÉΓòÉ
+
+
+ΓÜá∩╕Å [2026-03-29T01:38:50.574Z] [WARN] [016d682f-24d6-4b27-9dd6-b6d1d1734a82] [role-middleware] SUPER_ADMIN_ORG_ID is not set. Super-admin cross-org access will be disabled.
+ [32mΓ£ô[39m [30m[46m union-eyes [49m[39m lib/__tests__/role-middleware.test.ts [2m([22m[2m16 tests[22m[2m)[22m[32m 8[2mms[22m[39m
+
+ΓÄ»ΓÄ»ΓÄ»ΓÄ»ΓÄ»ΓÄ»ΓÄ» Failed Tests 2 ΓÄ»ΓÄ»ΓÄ»ΓÄ»ΓÄ»ΓÄ»ΓÄ»
+
+ FAIL   union-eyes  lib/__tests__/document-management-system.test.ts > document-management-system > uploadDocument uploads file and creates record
+Error: Test timed out in 5000ms.
+If this is a long-running test, pass a timeout value as the last argument or configure it globally with "testTimeout".
+ Γ¥» lib/__tests__/document-management-system.test.ts:78:3
+     76|   });
+     77|
+     78|   it('uploadDocument uploads file and creates record', async () => {
+       |   ^
+     79|     const file = new File(['hello'], 'test.pdf', { type: 'application/ΓÇª
+     80|     const { uploadDocument } = await import('../document-management-syΓÇª
+
+ΓÄ»ΓÄ»ΓÄ»ΓÄ»ΓÄ»ΓÄ»ΓÄ»ΓÄ»ΓÄ»ΓÄ»ΓÄ»ΓÄ»ΓÄ»ΓÄ»ΓÄ»ΓÄ»ΓÄ»ΓÄ»ΓÄ»ΓÄ»ΓÄ»ΓÄ»ΓÄ»ΓÄ»[1/2]ΓÄ»
+
+ FAIL   union-eyes  lib/__tests__/representation-protocol.test.ts > Barrel export (lib/representation/index.ts) > re-exports all type helpers from protocol-types
+Error: Test timed out in 15000ms.
+If this is a long-running test, pass a timeout value as the last argument or configure it globally with "testTimeout".
+ Γ¥» lib/__tests__/representation-protocol.test.ts:184:3
+    182|
+    183| describe("Barrel export (lib/representation/index.ts)", () => {
+    184|   it("re-exports all type helpers from protocol-types", { timeout: 15_ΓÇª
+       |   ^
+    185|     const barrel = await import("@/lib/representation");
+    186|     expect(barrel.PROTOCOL_STEWARD_LED).toBeDefined();
+
+ΓÄ»ΓÄ»ΓÄ»ΓÄ»ΓÄ»ΓÄ»ΓÄ»ΓÄ»ΓÄ»ΓÄ»ΓÄ»ΓÄ»ΓÄ»ΓÄ»ΓÄ»ΓÄ»ΓÄ»ΓÄ»ΓÄ»ΓÄ»ΓÄ»ΓÄ»ΓÄ»ΓÄ»[2/2]ΓÄ»
+
+
+[2m Test Files [22m [1m[31m2 failed[39m[22m[2m | [22m[1m[32m230 passed[39m[22m[90m (232)[39m
+[2m      Tests [22m [1m[31m2 failed[39m[22m[2m | [22m[1m[32m2296 passed[39m[22m[90m (2298)[39m
+[2m   Start at [22m 21:38:23
+[2m   Duration [22m 38.63s[2m (transform 116.27s, setup 0ms, import 188.39s, tests 53.39s, environment 21.77s)[22m
+
