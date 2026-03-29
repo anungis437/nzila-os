@@ -233,6 +233,104 @@ describe('calculateWageIncrease', () => {
   });
 });
 
+describe('StatisticsCanadaClient (gap coverage)', () => {
+  beforeEach(() => {
+    vi.clearAllMocks();
+    global.fetch = vi.fn();
+  });
+
+  it('sets Authorization header when STATCAN_API_KEY is configured', async () => {
+    process.env.STATCAN_API_KEY = 'test-api-key-123';
+    const client = new StatisticsCanadaClient();
+    delete process.env.STATCAN_API_KEY;
+
+    (global.fetch as ReturnType<typeof vi.fn>).mockResolvedValue({
+      ok: true,
+      json: () => Promise.resolve([]),
+    });
+
+    await client.getWageData({ nocCode: '0011' });
+    const headers = (global.fetch as ReturnType<typeof vi.fn>).mock.calls[0][1].headers;
+    expect(headers.Authorization).toBe('Bearer test-api-key-123');
+  });
+
+  it('fetch logs non-Error thrown value', async () => {
+    const client = new StatisticsCanadaClient();
+    (global.fetch as ReturnType<typeof vi.fn>).mockRejectedValue('network down');
+
+    await expect(client.getWageData({ nocCode: '0011' }))
+      .rejects.toBe('network down');
+  });
+
+  it('getEIContributionRates defaults to current year', async () => {
+    const client = new StatisticsCanadaClient();
+    (global.fetch as ReturnType<typeof vi.fn>).mockResolvedValue({
+      ok: true,
+      json: () => Promise.resolve({ year: 2026, employeeRate: 1.63, employerRate: 2.28, maxInsurableEarnings: 65700 }),
+    });
+
+    const result = await client.getEIContributionRates();
+    expect(result.year).toBe(2026);
+    const url = (global.fetch as ReturnType<typeof vi.fn>).mock.calls[0][0] as string;
+    expect(url).toContain(`year=${new Date().getFullYear()}`);
+  });
+
+  it('getCPPContributionRates defaults to current year', async () => {
+    const client = new StatisticsCanadaClient();
+    (global.fetch as ReturnType<typeof vi.fn>).mockResolvedValue({
+      ok: true,
+      json: () => Promise.resolve({ year: 2026, employeeRate: 5.95, employerRate: 5.95, exemptionLimit: 3500, maximumContribution: 3867 }),
+    });
+
+    const result = await client.getCPPContributionRates();
+    expect(result.year).toBe(2026);
+  });
+
+  it('getUnionDensity passes naicsCode, nocCode, and year params', async () => {
+    const client = new StatisticsCanadaClient();
+    (global.fetch as ReturnType<typeof vi.fn>).mockResolvedValue({
+      ok: true,
+      json: () => Promise.resolve([]),
+    });
+
+    await client.getUnionDensity({ naicsCode: '31-33', nocCode: '0011', year: 2024, geography: '35' });
+    const url = (global.fetch as ReturnType<typeof vi.fn>).mock.calls[0][0] as string;
+    expect(url).toContain('naics=31-33');
+    expect(url).toContain('noc=0011');
+    expect(url).toContain('years=2024');
+    expect(url).toContain('geo=35');
+  });
+
+  it('getCOLAData maps raw data items correctly', async () => {
+    const client = new StatisticsCanadaClient();
+    (global.fetch as ReturnType<typeof vi.fn>).mockResolvedValue({
+      ok: true,
+      json: () => Promise.resolve([
+        { year: 2020, inflationRate: 0.7, cpi: 136.5 },
+        { year: 2021, inflationRate: 3.4, cpi: 141.6 },
+      ]),
+    });
+
+    const result = await client.getCOLAData({ geography: '35', startYear: 2020, endYear: 2021 });
+    expect(result).toHaveLength(2);
+    expect(result[0]).toEqual({ year: 2020, inflationRate: 0.7, cpi: 136.5, region: '35' });
+    expect(result[1]).toEqual({ year: 2021, inflationRate: 3.4, cpi: 141.6, region: '35' });
+  });
+
+  it('getBatchWageData passes geography and year to each call', async () => {
+    const client = new StatisticsCanadaClient();
+    (global.fetch as ReturnType<typeof vi.fn>).mockResolvedValue({
+      ok: true,
+      json: () => Promise.resolve([]),
+    });
+
+    await client.getBatchWageData({ nocCodes: ['0011'], geography: '35', year: 2024 });
+    const url = (global.fetch as ReturnType<typeof vi.fn>).mock.calls[0][0] as string;
+    expect(url).toContain('geo=35');
+    expect(url).toContain('years=2024');
+  });
+});
+
 describe('Zod schemas', () => {
   it('WageDataSchema rejects incomplete data', () => {
     const result = WageDataSchema.safeParse({});

@@ -226,6 +226,49 @@ describe("RAGPipeline", () => {
       expect(results.length).toBeLessThanOrEqual(3);
     });
   });
+
+  // ── gap coverage ────────────────────────────────────────────────
+  describe("gap coverage", () => {
+    it("chunks document where sentence boundary is in first half (no break adjustment)", async () => {
+      // Content with periods only near the start — breakPoint won't be > startIndex + chunkSize/2
+      const noGoodBreak = "Short sentence. " + "x".repeat(600);
+      const count = await pipeline.addDocuments([makeDoc("d-nobreak", noGoodBreak)]);
+      expect(count).toBeGreaterThanOrEqual(1);
+    });
+
+    it("getStats returns empty jurisdictions for docs without jurisdiction", async () => {
+      await pipeline.addDocuments([makeDoc("d-nojur", longContent, "policy")]);
+      const stats = pipeline.getStats();
+      expect(stats.totalDocuments).toBe(1);
+      expect(stats.jurisdictions).toEqual([]);
+    });
+
+    it("rerank calculates density boost for matching terms", async () => {
+      pipeline.updateConfig({ rerank: true });
+      await pipeline.addDocuments([
+        makeDoc("d-dense", "grievance grievance grievance arbitration arbitration procedures filing".repeat(10), "grievance"),
+      ]);
+      const results = await pipeline.search("grievance arbitration");
+      expect(results.length).toBeGreaterThanOrEqual(1);
+      for (const r of results) {
+        expect(r.rerankScore).toBeGreaterThan(r.score);
+      }
+    });
+
+    it("hybridSearch combines semantic and keyword results", async () => {
+      await pipeline.addDocuments([
+        makeDoc("d-h1", longContent, "policy", "ON"),
+        makeDoc("d-h2",
+          "Overtime compensation rates for unionized workers in the manufacturing sector. " +
+          "Double time after ten hours. Premium pay for statutory holidays. " +
+          "Shift differentials apply to evening and night shifts. " +
+          "Break periods are mandated by the collective agreement.",
+          "contract", "BC"),
+      ]);
+      const results = await pipeline.search("overtime compensation");
+      expect(results.length).toBeGreaterThanOrEqual(1);
+    });
+  });
 });
 
 // ── singleton ──────────────────────────────────────────────────────

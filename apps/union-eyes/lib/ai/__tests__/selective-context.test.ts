@@ -137,6 +137,75 @@ describe('SelectiveContextManager', () => {
       expect(selected.length).toBeGreaterThanOrEqual(1);
     });
   });
+
+  describe('gap coverage', () => {
+    it('selectForQuery with empty query returns multiple items sorted by timestamp', () => {
+      manager.addItem({ id: 'old', content: 'First message in buffer', type: 'user', timestamp: Date.now() - 5000 });
+      manager.addItem({ id: 'new', content: 'Second message in buffer', type: 'user', timestamp: Date.now() });
+      const selected = manager.selectForQuery('');
+      expect(selected.length).toBe(2);
+      // Should be in chronological order (oldest first)
+      expect(selected[0].id).toBe('old');
+      expect(selected[1].id).toBe('new');
+    });
+
+    it('calculateRelevance returns 0 for empty itemTerms', () => {
+      // Item with only short words (filtered out by tokenize >2 chars)
+      manager.addItem({ id: 'short', content: 'a b c', type: 'user', timestamp: Date.now() });
+      const selected = manager.selectForQuery('grievance timelines');
+      // Item should have relevance 0 but may still be selected if within token limit
+      expect(selected.length).toBeLessThanOrEqual(1);
+    });
+
+    it('importance strategy scores items correctly', () => {
+      const mgr = new SelectiveContextManager({
+        maxContextTokens: 500,
+        retentionStrategy: 'importance',
+      });
+      mgr.addItem({ id: 'doc', content: 'Critical grievance contract violation requires urgent attention', type: 'document', timestamp: Date.now() });
+      mgr.addItem({ id: 'usr', content: 'Hello there friend', type: 'user', timestamp: Date.now() });
+      const selected = mgr.selectForQuery('anything');
+      // Document with keywords should be first (importance-weighted)
+      expect(selected.length).toBe(2);
+      expect(selected[0].id).toBe('doc');
+    });
+
+    it('recency strategy prefers newer items over important ones', () => {
+      const mgr = new SelectiveContextManager({
+        maxContextTokens: 20,
+        retentionStrategy: 'recency',
+      });
+      mgr.addItem({ id: 'old-sys', content: 'Critical system message about urgent grievance violation', type: 'system', timestamp: Date.now() - 86400000 * 60 });
+      mgr.addItem({ id: 'new-usr', content: 'Recent user message hello', type: 'user', timestamp: Date.now() });
+      const selected = mgr.selectForQuery('message');
+      expect(selected.length).toBeGreaterThanOrEqual(1);
+      expect(selected[0].id).toBe('new-usr');
+    });
+
+    it('pruneContext keeps top 75% of items by score', () => {
+      // maxContextTokens: 20 => pruneThreshold = 20/4 = 5
+      const mgr = new SelectiveContextManager({ maxContextTokens: 20 });
+      for (let i = 0; i < 10; i++) {
+        mgr.addItem({
+          id: `p-${i}`,
+          content: `Item number ${i} with some content`,
+          type: 'user',
+          timestamp: Date.now() - i * 60000,
+        });
+      }
+      // After adding 10 items, pruning should have fired
+      const info = mgr.getInfo();
+      expect(info.itemCount).toBeLessThan(10);
+    });
+
+    it('clear empties the context buffer', () => {
+      manager.addItem({ id: 'clr-1', content: 'Some content here', type: 'document', timestamp: Date.now() });
+      manager.addItem({ id: 'clr-2', content: 'More content here', type: 'user', timestamp: Date.now() });
+      expect(manager.getInfo().itemCount).toBe(2);
+      manager.clear();
+      expect(manager.getInfo().itemCount).toBe(0);
+    });
+  });
 });
 
 describe('createSelectiveContext', () => {

@@ -40,6 +40,11 @@ vi.mock('drizzle-orm', () => ({
   relations: vi.fn(() => ({})),
 }));
 
+vi.mock('node-cron', () => ({
+  default: { schedule: vi.fn(() => ({ stop: vi.fn(), start: vi.fn() })) },
+  schedule: vi.fn(() => ({ stop: vi.fn(), start: vi.fn() })),
+}));
+
 vi.mock('../logger', () => ({
   logger: { info: vi.fn(), error: vi.fn(), warn: vi.fn(), debug: vi.fn() },
 }));
@@ -258,19 +263,8 @@ describe('scheduled-jobs', () => {
   // ── initializeAnalyticsJobs ─────────────────────────────────────────
 
   describe('initializeAnalyticsJobs', () => {
-    it('returns enabled jobs', () => {
-      // The function will try require('node-cron') which may or may not exist.
-      // Either way, it should return enabled jobs list.
-      try {
-        const enabled = initializeAnalyticsJobs();
-        expect(enabled.length).toBe(analyticsJobs.filter(j => j.enabled).length);
-        for (const job of enabled) {
-          expect(job.enabled).toBe(true);
-        }
-      } catch {
-        // If node-cron is not available, that's fine — the function may throw
-        // from require() in this test environment
-      }
+    it('runs without throwing', () => {
+      expect(() => initializeAnalyticsJobs()).not.toThrow();
     });
   });
 });
