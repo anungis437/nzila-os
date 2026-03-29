@@ -20,7 +20,7 @@ vi.mock('@/db/db', () => ({
           // Execute orderBy callback for coverage (drizzle passes it as function)
           const opts = args[0] as Record<string, unknown> | undefined;
           if (opts && typeof opts.orderBy === 'function') {
-            (opts.orderBy as Function)({}, { desc: (x: unknown) => x, asc: (x: unknown) => x });
+            (opts.orderBy as (...args: unknown[]) => unknown)({}, { desc: (x: unknown) => x, asc: (x: unknown) => x });
           }
           return mocks.mockOrgFindMany();
         },
@@ -29,7 +29,7 @@ vi.mock('@/db/db', () => ({
         findMany: (...args: unknown[]) => {
           const opts = args[0] as Record<string, unknown> | undefined;
           if (opts && typeof opts.orderBy === 'function') {
-            (opts.orderBy as Function)({}, { desc: (x: unknown) => x, asc: (x: unknown) => x });
+            (opts.orderBy as (...args: unknown[]) => unknown)({}, { desc: (x: unknown) => x, asc: (x: unknown) => x });
           }
           return mocks.mockClauseFindMany();
         },
@@ -132,7 +132,7 @@ describe('smart-onboarding', () => {
   const originalEnv = { ...process.env };
 
   beforeEach(() => {
-    vi.clearAllMocks();
+    vi.resetAllMocks();
     mockFetch.mockReset();
     delete process.env.CLC_API_KEY;
     delete process.env.CLC_API_URL;

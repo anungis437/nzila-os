@@ -6,9 +6,16 @@
  */
 import type {
   SendRequest,
+  SendResult,
   IntegrationType,
 } from '@nzila/integrations-core'
-import type { IntegrationDispatcher } from '@nzila/integrations-runtime'
+import type { ResilientDispatcher } from '@nzila/integrations-runtime'
+
+/** Any dispatcher with a compatible dispatch() method (IntegrationDispatcher or ResilientDispatcher). */
+type Dispatcher = { dispatch(request: SendRequest): Promise<SendResult> }
+
+/** Re-export for consumers that wire up the dispatcher. */
+export type { ResilientDispatcher }
 
 // ── ABR Integration Event Types ───────────────────────────────────────────
 
@@ -74,7 +81,7 @@ export function buildAbrSendRequest(req: AbrNotificationRequest): SendRequest {
  * Convenience wrapper that builds the request and dispatches it.
  */
 export async function dispatchAbrNotification(
-  dispatcher: IntegrationDispatcher,
+  dispatcher: Dispatcher,
   req: AbrNotificationRequest,
 ): Promise<void> {
   const sendRequest = buildAbrSendRequest(req)

@@ -15,7 +15,7 @@ const mocks = vi.hoisted(() => ({
 }));
 
 vi.mock('../organization-middleware', () => ({
-  withOrganizationAuth: vi.fn((handler: Function) => {
+  withOrganizationAuth: vi.fn((handler: (...args: unknown[]) => unknown) => {
     return async (req: NextRequest) => {
       const ctx = mocks.mockWithOrgAuth();
       return handler(req, ctx);

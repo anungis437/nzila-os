@@ -26,8 +26,8 @@ export * from './satisfaction';
 
 // Explicit re-exports to resolve ambiguities
 // grievanceDeadlines and GrievanceDeadline exist in both grievances.ts and workflows.ts
-// Use the main definitions from grievances.ts
-export { grievanceDeadlines, type GrievanceDeadline } from './grievances';
+// Use the extended definitions from workflows.ts (has escalation, assignment, isMet etc.)
+export { grievanceDeadlines, type GrievanceDeadline } from './workflows';
 
 // grievanceDocuments and GrievanceDocument exist in both workflows.ts and grievance-lifecycle.ts
 // Use the full definitions from workflows.ts (has organizationId, documentName, versioning, OCR etc.)

@@ -25,7 +25,7 @@ describe('org-scope-middleware', () => {
 
   describe('withOrgAuth', () => {
     it('delegates to withOrganizationAuth and maps context', () => {
-      mocks.mockWithOrganizationAuth.mockImplementation((handler: Function) => handler);
+      mocks.mockWithOrganizationAuth.mockImplementation((handler: (...args: unknown[]) => unknown) => handler);
 
       const handler = vi.fn();
       withOrgAuth(handler);

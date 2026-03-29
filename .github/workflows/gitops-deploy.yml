@@ -119,7 +119,7 @@ jobs:
     name: Build Images
     strategy:
       matrix:
-        app: [web, console, partners, union-eyes, orchestrator-api, cfo, zonga]
+        app: [web, console, partners, union-eyes, orchestrator-api, cfo, zonga, abr, flow, agrimo, cora, trade, mobility, mobility-client-portal, control-plane, platform-admin, nacp-exams]
 
     steps:
       - uses: actions/checkout@v4
@@ -236,7 +236,7 @@ jobs:
           fi
 
           # Update each Container App with the newly built image
-          ALL_APPS=(web console partners union-eyes orchestrator-api cfo zonga)
+          ALL_APPS=(web console partners union-eyes orchestrator-api cfo zonga abr flow agrimo cora trade mobility mobility-client-portal control-plane platform-admin nacp-exams)
           FAILED=()
 
           for APP in "${ALL_APPS[@]}"; do
@@ -302,7 +302,7 @@ jobs:
             --query "properties.defaultDomain" -o tsv 2>/dev/null || echo "delightfulisland-0d503d3c.eastus.azurecontainerapps.io")
 
           # Verify all app health endpoints
-          APPS=(web console partners union-eyes)
+          APPS=(web console partners union-eyes cfo zonga abr flow agrimo cora trade mobility mobility-client-portal control-plane platform-admin nacp-exams)
           for APP in "${APPS[@]}"; do
             echo "Checking $APP health..."
             STATUS=$(curl -sf -o /dev/null -w "%{http_code}" "https://nzila-os-${APP}.${DOMAIN}/" 2>/dev/null || echo "000")
