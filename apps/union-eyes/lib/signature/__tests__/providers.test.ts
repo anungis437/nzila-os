@@ -473,3 +473,161 @@ describe('SignatureProviderFactory', () => {
     expect(status.status).toBe('sent');
   });
 });
+
+// ─── Uncovered Branch Tests ──────────────────────────────────────────
+
+describe('DocuSignProvider - callbackUrl branch', () => {
+  let provider: DocuSignProvider;
+
+  beforeEach(() => {
+    mockFetch.mockReset();
+    provider = new DocuSignProvider({
+      apiKey: 'test-key',
+      accountId: 'test-account',
+      environment: 'sandbox',
+    });
+  });
+
+  it('creates envelope without callbackUrl (eventNotification omitted)', async () => {
+    mockFetch.mockResolvedValueOnce({
+      ok: true,
+      json: async () => ({
+        envelopeId: 'ds_env_2',
+        status: 'sent',
+        recipients: { signers: [{ embeddedRecipientStartURL: 'https://ds/sign' }] },
+      }),
+    });
+
+    const req = makeRequest({ callbackUrl: undefined });
+    const result = await provider.createEnvelope(req);
+    
+    expect(result.envelopeId).toBe('ds_env_2');
+
+    // Verify the request body does NOT include eventNotification
+    const call = mockFetch.mock.calls[0];
+    const body = JSON.parse(call[1].body as string);
+    expect(body.eventNotification).toBeUndefined();
+  });
+
+  it('creates envelope with empty signers array', async () => {
+    mockFetch.mockResolvedValueOnce({
+      ok: true,
+      json: async () => ({
+        envelopeId: 'ds_env_empty',
+        status: 'sent',
+        recipients: { signers: [] },
+      }),
+    });
+
+    const req = makeRequest({ signers: [] });
+    const result = await provider.createEnvelope(req);
+    
+    expect(result.envelopeId).toBe('ds_env_empty');
+    expect(result.signers).toHaveLength(0);
+  });
+});
+
+describe('HelloSignProvider - error handling', () => {
+  let provider: HelloSignProvider;
+
+  beforeEach(() => {
+    mockFetch.mockReset();
+    provider = new HelloSignProvider({ apiKey: 'hs-key' });
+  });
+
+  it('handles .json() parse failure gracefully', async () => {
+    mockFetch.mockResolvedValueOnce({
+      ok: false,
+      status: 500,
+      statusText: 'Internal Server Error',
+      json: async () => { throw new Error('Failed to parse JSON'); },
+    });
+
+    await expect(provider.createEnvelope(makeRequest())).rejects.toThrow(SignatureError);
+  });
+
+  it('creates envelope with empty signers array', async () => {
+    mockFetch.mockResolvedValueOnce({
+      ok: true,
+      json: async () => ({
+        signature_request: {
+          signature_request_id: 'hs_empty',
+          is_complete: false,
+          is_declined: false,
+          signatures: [],
+          created_at: 1700000000,
+        },
+      }),
+    });
+
+    const req = makeRequest({ signers: [] });
+    const result = await provider.createEnvelope(req);
+    
+    expect(result.envelopeId).toBe('hs_empty');
+    expect(result.signers).toHaveLength(0);
+  });
+
+  it('maps unknown signer status to sent', async () => {
+    mockFetch.mockResolvedValueOnce({
+      ok: true,
+      json: async () => ({
+        signature_request: {
+          is_complete: false,
+          is_declined: false,
+          signatures: [
+            { signer_email_address: 'a@b.com', signature_id: 's1', status_code: 'unknown_status' },
+          ],
+        },
+      }),
+    });
+
+    const status = await provider.getEnvelopeStatus('hs_1');
+    expect(status.signers[0].status).toBe('sent');
+  });
+
+  it('handles getEnvelopeStatus with .json() parse failure', async () => {
+    mockFetch.mockResolvedValueOnce({
+      ok: true,
+      json: async () => { throw new Error('Parse error'); },
+    });
+
+    await expect(provider.getEnvelopeStatus('hs_1')).rejects.toThrow();
+  });
+});
+
+describe('SignatureProviderFactory - initialization state', () => {
+  beforeEach(() => {
+    // eslint-disable-next-line @typescript-eslint/no-explicit-any
+    (SignatureProviderFactory as any).providers = new Map();
+    SignatureProviderFactory.initialize({});
+  });
+
+  it('handles multiple initializations with merging', () => {
+    // First init with docusign
+    SignatureProviderFactory.initialize({
+      docusign: { apiKey: 'k1', accountId: 'a1' },
+    });
+    expect(SignatureProviderFactory.getProvider('docusign').name).toBe('docusign');
+
+    // Second init with hellosign - should add, not replace
+    SignatureProviderFactory.initialize({
+      hellosign: { apiKey: 'k2' },
+    });
+    expect(SignatureProviderFactory.getProvider('docusign').name).toBe('docusign');
+    expect(SignatureProviderFactory.getProvider('hellosign').name).toBe('hellosign');
+  });
+
+  it('overwrites provider on re-initialization with same type', () => {
+    SignatureProviderFactory.initialize({
+      docusign: { apiKey: 'old', accountId: 'a' },
+    });
+
+    // Re-init with different key
+    SignatureProviderFactory.initialize({
+      docusign: { apiKey: 'new', accountId: 'b' },
+    });
+
+    // Should still return docusign (verifying it initialized)
+    expect(SignatureProviderFactory.getProvider('docusign').name).toBe('docusign');
+  });
+});

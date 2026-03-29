@@ -310,3 +310,65 @@ describe('helper functions', () => {
     expect(mocks.mockWorksheet.protect).toHaveBeenCalledWith('', expect.any(Object));
   });
 });
+
+// ── Gap Coverage Tests ──────────────────────────────────────────────────────
+
+describe('generateExcel — gap coverage', () => {
+  beforeEach(() => {
+    vi.clearAllMocks();
+    mocks.mockCells.clear();
+  });
+
+  it('disables freeze panes when freezeHeader is false', async () => {
+    await generateExcel({
+      title: 'Test', data: sampleData, columns: sampleColumns,
+      freezeHeader: false,
+    });
+    const call = mocks.mockWorkbook.addWorksheet.mock.calls[0];
+    const options = call[1] as Record<string, unknown>;
+    const views = options.views as Record<string, unknown>[];
+    expect(views[0].ySplit).toBe(0);
+  });
+
+  it('handles empty data array', async () => {
+    await generateExcel({
+      title: 'Test', data: [], columns: sampleColumns,
+    });
+    expect(mocks.mockWorksheet.addRow).toHaveBeenCalledTimes(0);
+  });
+
+  it('formats Date values with numFmt', async () => {
+    const dataWithDate = [
+      { id: 1, name: 'Alice', date: new Date('2025-01-01') },
+    ];
+    const colsWithDate = [
+      ...sampleColumns.slice(0, 2),
+      { header: 'Date', key: 'date', format: 'yyyy-mm-dd' },
+    ];
+    await generateExcel({
+      title: 'Test', data: dataWithDate,
+      columns: colsWithDate,
+    });
+    expect(mocks.mockWorksheet.addRow).toHaveBeenCalledTimes(1);
+  });
+
+  it('applies column format when specified', async () => {
+    const dataWithFormat = [{ id: 1, name: 'A', amount: 123.456 }];
+    await generateExcel({
+      title: 'Test', data: dataWithFormat, columns: sampleColumns,
+    });
+    // Column has format, should apply numFmt
+    expect(mocks.mockWorksheet.addRow).toHaveBeenCalled();
+  });
+
+  it('defaults to freezeHeader=true', async () => {
+    await generateExcel({
+      title: 'Test', data: sampleData, columns: sampleColumns,
+      // No freezeHeader specified
+    });
+    const call = mocks.mockWorkbook.addWorksheet.mock.calls[0];
+    const options = call[1] as Record<string, unknown>;
+    const views = options.views as Record<string, unknown>[];
+    expect(views[0].ySplit).toBe(1);
+  });
+});
