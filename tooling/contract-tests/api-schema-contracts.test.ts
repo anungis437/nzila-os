@@ -32,6 +32,7 @@ const SCHEMA_VALIDATION_PATTERNS = [
   /verifyWebhookSignature\s*\(/, // Stripe webhook signature verification
   /constructEvent\s*\(/,    // Stripe SDK event construction
   /req\.formData\s*\(\)/,   // multipart form data (documents upload)
+  /CRON_SECRET/,              // cron routes with bearer token auth (no user body)
 ]
 
 function findRouteFiles(app: string): string[] {

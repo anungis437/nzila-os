@@ -192,7 +192,8 @@ export async function createDeadline(
     const [deadline] = await db
       .insert(grievanceDeadlines)
       .values({
-        grievanceId: claimId, // Using claimId as grievanceId for now
+        claimId,
+        organizationId,
         deadlineType,
         dueDate,
         description: options.description || rule?.description || `${deadlineType} deadline`,
@@ -309,8 +310,9 @@ export async function requestDeadlineExtension(
       await db
         .update(grievanceDeadlines)
         .set({
-          newDeadline: request.newDate,
-          extensionGranted: true,
+          extendedTo: request.newDate.toISOString().split('T')[0],
+          isExtended: true,
+          extensionReason: request.reason,
           status: "extended",
           notes: `Extended: ${request.reason}`,
         })
@@ -362,14 +364,14 @@ export async function approveDeadlineExtension(
       return { success: false, error: "No pending extension request found" };
     }
 
-    // Apply extension using newDeadline field
-    const newDate = deadline.newDeadline || new Date();
+    // Apply extension using extendedTo field
+    const newDate = deadline.extendedTo ? new Date(deadline.extendedTo) : new Date();
 
     await db
       .update(grievanceDeadlines)
       .set({
         dueDate: newDate,
-        extensionGranted: true,
+        isExtended: true,
         status: "extended",
         notes: `${deadline.notes}\n\nExtension approved by ${approvedBy} on ${new Date().toISOString()}`,
       })
@@ -446,7 +448,7 @@ export async function getGrievanceDeadlines(
 ): Promise<GrievanceDeadline[]> {
   try {
     const deadlines = await db.query.grievanceDeadlines.findMany({
-      where: eq(grievanceDeadlines.grievanceId, claimId),
+      where: eq(grievanceDeadlines.claimId, claimId),
       orderBy: [asc(grievanceDeadlines.dueDate)],
     });
 
@@ -504,13 +506,13 @@ function createDeadlineAlert(deadline: GrievanceDeadline): DeadlineAlert {
 
   return {
     deadlineId: deadline.id,
-    claimId: deadline.grievanceId,
+    claimId: deadline.claimId,
     deadlineType: deadline.deadlineType as DeadlineType,
     dueDate,
     daysRemaining,
     status,
-    priority: "medium", // Default priority since not stored in deadline
-    assignedTo: undefined, // Not stored in deadline table
+    priority: deadline.priority || "medium",
+    assignedTo: deadline.assignedTo || undefined,
     description: deadline.description || "",
   };
 }

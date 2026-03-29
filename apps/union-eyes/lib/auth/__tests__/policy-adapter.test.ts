@@ -4,7 +4,7 @@ import { UserRole } from '../roles';
 // Mock os-core/policy
 vi.mock('@nzila/os-core/policy', () => ({
   authorize: vi.fn().mockResolvedValue({ userId: 'u1', role: 'viewer' }),
-  withAuth: vi.fn((opts: unknown, handler: Function) => handler),
+  withAuth: vi.fn((opts: unknown, handler: (...args: unknown[]) => unknown) => handler),
   authorizeOrgAccess: vi.fn().mockResolvedValue(true),
   AuthorizationError: class AuthorizationError extends Error {},
   UERole: {

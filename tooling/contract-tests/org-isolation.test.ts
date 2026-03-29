@@ -53,6 +53,7 @@ const AUTH_CALL_PATTERNS = [
 function isPublicRoute(routeFile: string): boolean {
   const normalized = routeFile.replace(/\\/g, '/')
   return normalized.includes('/api/health/') || normalized.endsWith('/api/health/route.ts')
+    || normalized.includes('/api/cron/')  // cron routes use CRON_SECRET bearer auth
 }
 
 describe('PR9: Org isolation — authorize() called in protected routes', () => {

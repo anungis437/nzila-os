@@ -167,7 +167,7 @@ ENV NEXT_PUBLIC_CFO_URL=$NEXT_PUBLIC_CFO_URL
 
 # Build only apps that have deps installed in the Docker image (turbo filters)
 # Default: all apps. Override via --build-arg TURBO_FILTER for single-app builds.
-ARG TURBO_FILTER="--filter=@nzila/web --filter=@nzila/console --filter=@nzila/partners --filter=@nzila/union-eyes --filter=@nzila/abr --filter=@nzila/orchestrator-api --filter=@nzila/cfo --filter=@nzila/zonga"
+ARG TURBO_FILTER="--filter=@nzila/web --filter=@nzila/console --filter=@nzila/partners --filter=@nzila/union-eyes --filter=@nzila/abr --filter=@nzila/orchestrator-api --filter=@nzila/cfo --filter=@nzila/zonga --filter=@nzila/flow --filter=@nzila/agrimo --filter=@nzila/cora --filter=@nzila/trade --filter=@nzila/mobility --filter=@nzila/mobility-client-portal --filter=@nzila/control-plane --filter=@nzila/platform-admin --filter=@nzila/nacp-exams"
 ENV NODE_OPTIONS="--max-old-space-size=4096"
 RUN pnpm turbo build ${TURBO_FILTER} --concurrency=1
 # ============================================
@@ -407,6 +407,258 @@ HEALTHCHECK --interval=30s --timeout=5s --start-period=30s --retries=3 \
 EXPOSE 3006
 
 CMD ["node", "apps/zonga/server.js"]
+
+# ============================================
+# Flow production stage
+# ============================================
+FROM base AS flow
+WORKDIR /app
+
+ENV NODE_ENV=production
+ENV NEXT_TELEMETRY_DISABLED=1
+ENV PORT=3007
+
+COPY --from=builder /app/apps/flow/.next/standalone ./
+COPY --from=builder /app/apps/flow/.next/static ./apps/flow/.next/static
+COPY --from=builder /app/apps/flow/messages ./apps/flow/messages
+COPY --from=builder /app/content ./content
+
+RUN groupadd --system --gid 1001 nodejs && \
+    useradd --system --uid 1001 --no-create-home nextjs && \
+    chown -R nextjs:nodejs /app
+
+USER nextjs
+
+HEALTHCHECK --interval=30s --timeout=5s --start-period=30s --retries=3 \
+    CMD wget --no-verbose --tries=1 --spider http://localhost:3007/ || exit 1
+
+EXPOSE 3007
+
+CMD ["node", "apps/flow/server.js"]
+
+# ============================================
+# Agrimo production stage
+# ============================================
+FROM base AS agrimo
+WORKDIR /app
+
+ENV NODE_ENV=production
+ENV NEXT_TELEMETRY_DISABLED=1
+ENV PORT=3008
+
+COPY --from=builder /app/apps/agrimo/.next/standalone ./
+COPY --from=builder /app/apps/agrimo/.next/static ./apps/agrimo/.next/static
+COPY --from=builder /app/apps/agrimo/messages ./apps/agrimo/messages
+COPY --from=builder /app/content ./content
+
+RUN groupadd --system --gid 1001 nodejs && \
+    useradd --system --uid 1001 --no-create-home nextjs && \
+    chown -R nextjs:nodejs /app
+
+USER nextjs
+
+HEALTHCHECK --interval=30s --timeout=5s --start-period=30s --retries=3 \
+    CMD wget --no-verbose --tries=1 --spider http://localhost:3008/ || exit 1
+
+EXPOSE 3008
+
+CMD ["node", "apps/agrimo/server.js"]
+
+# ============================================
+# Cora production stage
+# ============================================
+FROM base AS cora
+WORKDIR /app
+
+ENV NODE_ENV=production
+ENV NEXT_TELEMETRY_DISABLED=1
+ENV PORT=3009
+
+COPY --from=builder /app/apps/cora/.next/standalone ./
+COPY --from=builder /app/apps/cora/.next/static ./apps/cora/.next/static
+COPY --from=builder /app/apps/cora/messages ./apps/cora/messages
+COPY --from=builder /app/content ./content
+
+RUN groupadd --system --gid 1001 nodejs && \
+    useradd --system --uid 1001 --no-create-home nextjs && \
+    chown -R nextjs:nodejs /app
+
+USER nextjs
+
+HEALTHCHECK --interval=30s --timeout=5s --start-period=30s --retries=3 \
+    CMD wget --no-verbose --tries=1 --spider http://localhost:3009/ || exit 1
+
+EXPOSE 3009
+
+CMD ["node", "apps/cora/server.js"]
+
+# ============================================
+# Trade production stage
+# ============================================
+FROM base AS trade
+WORKDIR /app
+
+ENV NODE_ENV=production
+ENV NEXT_TELEMETRY_DISABLED=1
+ENV PORT=3010
+
+COPY --from=builder /app/apps/trade/.next/standalone ./
+COPY --from=builder /app/apps/trade/.next/static ./apps/trade/.next/static
+COPY --from=builder /app/apps/trade/messages ./apps/trade/messages
+COPY --from=builder /app/content ./content
+
+RUN groupadd --system --gid 1001 nodejs && \
+    useradd --system --uid 1001 --no-create-home nextjs && \
+    chown -R nextjs:nodejs /app
+
+USER nextjs
+
+HEALTHCHECK --interval=30s --timeout=5s --start-period=30s --retries=3 \
+    CMD wget --no-verbose --tries=1 --spider http://localhost:3010/ || exit 1
+
+EXPOSE 3010
+
+CMD ["node", "apps/trade/server.js"]
+
+# ============================================
+# Mobility production stage
+# ============================================
+FROM base AS mobility
+WORKDIR /app
+
+ENV NODE_ENV=production
+ENV NEXT_TELEMETRY_DISABLED=1
+ENV PORT=3011
+
+COPY --from=builder /app/apps/mobility/.next/standalone ./
+COPY --from=builder /app/apps/mobility/.next/static ./apps/mobility/.next/static
+COPY --from=builder /app/apps/mobility/messages ./apps/mobility/messages
+COPY --from=builder /app/content ./content
+
+RUN groupadd --system --gid 1001 nodejs && \
+    useradd --system --uid 1001 --no-create-home nextjs && \
+    chown -R nextjs:nodejs /app
+
+USER nextjs
+
+HEALTHCHECK --interval=30s --timeout=5s --start-period=30s --retries=3 \
+    CMD wget --no-verbose --tries=1 --spider http://localhost:3011/ || exit 1
+
+EXPOSE 3011
+
+CMD ["node", "apps/mobility/server.js"]
+
+# ============================================
+# Mobility Client Portal production stage
+# ============================================
+FROM base AS mobility-client-portal
+WORKDIR /app
+
+ENV NODE_ENV=production
+ENV NEXT_TELEMETRY_DISABLED=1
+ENV PORT=3012
+
+COPY --from=builder /app/apps/mobility-client-portal/.next/standalone ./
+COPY --from=builder /app/apps/mobility-client-portal/.next/static ./apps/mobility-client-portal/.next/static
+COPY --from=builder /app/apps/mobility-client-portal/messages ./apps/mobility-client-portal/messages
+COPY --from=builder /app/content ./content
+
+RUN groupadd --system --gid 1001 nodejs && \
+    useradd --system --uid 1001 --no-create-home nextjs && \
+    chown -R nextjs:nodejs /app
+
+USER nextjs
+
+HEALTHCHECK --interval=30s --timeout=5s --start-period=30s --retries=3 \
+    CMD wget --no-verbose --tries=1 --spider http://localhost:3012/ || exit 1
+
+EXPOSE 3012
+
+CMD ["node", "apps/mobility-client-portal/server.js"]
+
+# ============================================
+# Control Plane production stage
+# ============================================
+FROM base AS control-plane
+WORKDIR /app
+
+ENV NODE_ENV=production
+ENV NEXT_TELEMETRY_DISABLED=1
+ENV PORT=3013
+
+COPY --from=builder /app/apps/control-plane/.next/standalone ./
+COPY --from=builder /app/apps/control-plane/.next/static ./apps/control-plane/.next/static
+COPY --from=builder /app/apps/control-plane/messages ./apps/control-plane/messages
+COPY --from=builder /app/content ./content
+
+RUN groupadd --system --gid 1001 nodejs && \
+    useradd --system --uid 1001 --no-create-home nextjs && \
+    chown -R nextjs:nodejs /app
+
+USER nextjs
+
+HEALTHCHECK --interval=30s --timeout=5s --start-period=30s --retries=3 \
+    CMD wget --no-verbose --tries=1 --spider http://localhost:3013/ || exit 1
+
+EXPOSE 3013
+
+CMD ["node", "apps/control-plane/server.js"]
+
+# ============================================
+# Platform Admin production stage
+# ============================================
+FROM base AS platform-admin
+WORKDIR /app
+
+ENV NODE_ENV=production
+ENV NEXT_TELEMETRY_DISABLED=1
+ENV PORT=3014
+
+COPY --from=builder /app/apps/platform-admin/.next/standalone ./
+COPY --from=builder /app/apps/platform-admin/.next/static ./apps/platform-admin/.next/static
+COPY --from=builder /app/apps/platform-admin/messages ./apps/platform-admin/messages
+COPY --from=builder /app/content ./content
+
+RUN groupadd --system --gid 1001 nodejs && \
+    useradd --system --uid 1001 --no-create-home nextjs && \
+    chown -R nextjs:nodejs /app
+
+USER nextjs
+
+HEALTHCHECK --interval=30s --timeout=5s --start-period=30s --retries=3 \
+    CMD wget --no-verbose --tries=1 --spider http://localhost:3014/ || exit 1
+
+EXPOSE 3014
+
+CMD ["node", "apps/platform-admin/server.js"]
+
+# ============================================
+# NACP Exams production stage
+# ============================================
+FROM base AS nacp-exams
+WORKDIR /app
+
+ENV NODE_ENV=production
+ENV NEXT_TELEMETRY_DISABLED=1
+ENV PORT=3015
+
+COPY --from=builder /app/apps/nacp-exams/.next/standalone ./
+COPY --from=builder /app/apps/nacp-exams/.next/static ./apps/nacp-exams/.next/static
+COPY --from=builder /app/apps/nacp-exams/messages ./apps/nacp-exams/messages
+COPY --from=builder /app/content ./content
+
+RUN groupadd --system --gid 1001 nodejs && \
+    useradd --system --uid 1001 --no-create-home nextjs && \
+    chown -R nextjs:nodejs /app
+
+USER nextjs
+
+HEALTHCHECK --interval=30s --timeout=5s --start-period=30s --retries=3 \
+    CMD wget --no-verbose --tries=1 --spider http://localhost:3015/ || exit 1
+
+EXPOSE 3015
+
+CMD ["node", "apps/nacp-exams/server.js"]
 
 # ============================================
 # Dev stage - for development with hot reload

@@ -42,7 +42,7 @@ vi.mock('@/lib/logger', () => ({
 }));
 
 vi.mock('react', () => ({
-  cache: vi.fn((fn: Function) => fn),
+  cache: vi.fn((fn: (...args: unknown[]) => unknown) => fn),
 }));
 
 import {

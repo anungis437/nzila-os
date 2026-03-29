@@ -176,7 +176,7 @@ describe('LocationTrackingService', () => {
       mocks.locationFindMany.mockImplementation((opts: Record<string, unknown>) => {
         // invoke the orderBy callback so v8 sees function coverage
         if (typeof opts?.orderBy === 'function') {
-          (opts.orderBy as Function)({}, { desc: (col: unknown) => col });
+          (opts.orderBy as (...args: unknown[]) => unknown)({}, { desc: (col: unknown) => col });
         }
         return Promise.resolve([{ id: 'loc-1' }, { id: 'loc-2' }]);
       });

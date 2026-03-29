@@ -150,6 +150,9 @@ jobs:
       - name: Contract tests
         run: pnpm contract-tests
 
+      - name: GA gate check
+        run: pnpm ga-check
+
       - name: Governance fail-closed gate
         run: pnpm validate:governance:gate
 

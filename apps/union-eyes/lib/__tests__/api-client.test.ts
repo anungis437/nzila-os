@@ -198,10 +198,11 @@ describe('api-client', () => {
       });
     });
 
-    const request = timeoutClient.get('/slow');
+    const request = timeoutClient.get('/slow').catch((e: unknown) => e);
     await vi.advanceTimersByTimeAsync(60);
 
-    await expect(request).rejects.toMatchObject({
+    const err = await request;
+    expect(err).toMatchObject({
       name: 'TimeoutError',
       isTimeout: true,
     });

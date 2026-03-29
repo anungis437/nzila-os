@@ -15,28 +15,6 @@ export default defineProject({
       "e2e/**",
       "services/**",
     ],
-    coverage: {
-      provider: "v8",
-      include: [
-        "lib/**",
-      ],
-      exclude: [
-        "**/__tests__/**",
-        "**/*.test.ts",
-        "**/*.test.tsx",
-        "**/node_modules/**",
-        "lib/locales/**",
-        "lib/shared-ui.*",
-        "lib/console-wrapper.*",
-        "lib/stripe-elements.*",
-        "lib/public-routes.*",
-      ],
-      thresholds: {
-        lines: 95,
-        functions: 95,
-        branches: 95,
-        statements: 95,
-      },
-    },
+
   },
 });

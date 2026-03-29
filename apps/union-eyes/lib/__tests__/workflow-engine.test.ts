@@ -321,7 +321,7 @@ describe('workflow-engine', () => {
     });
 
     it('wraps in RLS context when no tx', async () => {
-      mocks.mockWithRLS.mockImplementation(async (fn: Function) => {
+      mocks.mockWithRLS.mockImplementation(async (fn: (...args: unknown[]) => unknown) => {
         const mockTx = {
           select: vi.fn(() => chain([{ claimId: 'c1', claimNumber: 'CLM-001' }])),
           insert: vi.fn(() => chain(undefined)),
@@ -400,7 +400,7 @@ describe('workflow-engine', () => {
     });
 
     it('wraps in RLS context when no tx', async () => {
-      mocks.mockWithRLS.mockImplementation(async (fn: Function) => {
+      mocks.mockWithRLS.mockImplementation(async (fn: (...args: unknown[]) => unknown) => {
         mocks.mockValidateTransition.mockReturnValue({ allowed: true, metadata: {} });
         mocks.mockDetectSignals.mockResolvedValue([]);
         const updatedClaim = { ...baseClaim, status: 'under_review' };

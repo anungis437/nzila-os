@@ -117,6 +117,7 @@ import {
   getTemplateHistory,
   cloneTemplate,
   getTemplateStats,
+  archiveOldTemplates,
 } from '../template-service';
 
 describe('template-service', () => {
@@ -144,6 +145,16 @@ describe('template-service', () => {
     it('applies category filter', async () => {
       mocks.mockQueryTemplates.mockResolvedValue([]);
       const result = await listAwardTemplates('org-1', { category: 'performance' });
+      expect(result.success).toBe(true);
+      expect(mocks.mockQueryTemplates).toHaveBeenCalled();
+    });
+
+    it('applies type and status filters', async () => {
+      mocks.mockQueryTemplates.mockResolvedValue([]);
+      const result = await listAwardTemplates('org-1', {
+        type: 'points',
+        status: 'active',
+      });
       expect(result.success).toBe(true);
       expect(mocks.mockQueryTemplates).toHaveBeenCalled();
     });
@@ -234,6 +245,12 @@ describe('template-service', () => {
       const result = await updateAwardTemplate('missing', { name: 'X' });
       expect(result.success).toBe(false);
     });
+
+    it('handles update errors', async () => {
+      mocks.mockUpdate.mockImplementationOnce(() => { throw new Error('update fail'); });
+      const result = await updateAwardTemplate('t1', { name: 'X' });
+      expect(result.success).toBe(false);
+    });
   });
 
   // ──────────────── deleteAwardTemplate ────────────────
@@ -274,7 +291,7 @@ describe('template-service', () => {
     });
 
     it('handles errors', async () => {
-      mocks.mockUpdate.mockImplementation(() => { throw new Error('fail'); });
+      mocks.mockUpdate.mockImplementationOnce(() => { throw new Error('fail'); });
       const result = await incrementTemplateUseCount('t1');
       expect(result.success).toBe(false);
     });
@@ -296,6 +313,12 @@ describe('template-service', () => {
       const result = await getPopularTemplates('org-1');
       expect(result.success).toBe(true);
       expect(result.data).toEqual([]);
+    });
+
+    it('handles query errors', async () => {
+      mocks.mockQueryTemplates.mockRejectedValue(new Error('popular fail'));
+      const result = await getPopularTemplates('org-1');
+      expect(result.success).toBe(false);
     });
   });
 
@@ -370,6 +393,25 @@ describe('template-service', () => {
       const result = await recordTemplateUsage('t1', 'u1', 'r1', 'A', 'e@x.com', 0, 0, 'x');
       expect(result.success).toBe(false);
     });
+
+    it('uses monetary value fallback when value is undefined', async () => {
+      mocks.mockTransaction.mockImplementation(async (fn: (tx: unknown) => Promise<unknown>) => {
+        const txMock = {
+          update: vi.fn().mockReturnValue({
+            set: vi.fn().mockReturnValue({
+              where: vi.fn().mockResolvedValue(undefined),
+            }),
+          }),
+          insert: vi.fn().mockReturnValue({
+            values: vi.fn().mockResolvedValue(undefined),
+          }),
+        };
+        return fn(txMock);
+      });
+
+      const result = await recordTemplateUsage('t1', 'u1', 'r1', 'Bob', undefined, 10, undefined as unknown as number, 'N/A');
+      expect(result.success).toBe(true);
+    });
   });
 
   // ──────────────── getTemplateHistory ────────────────
@@ -388,6 +430,12 @@ describe('template-service', () => {
       const result = await getTemplateHistory('t1');
       expect(result.success).toBe(true);
       expect(result.data).toEqual([]);
+    });
+
+    it('handles history query errors', async () => {
+      mocks.mockQueryHistory.mockRejectedValue(new Error('history fail'));
+      const result = await getTemplateHistory('t1');
+      expect(result.success).toBe(false);
     });
   });
 
@@ -413,6 +461,12 @@ describe('template-service', () => {
     it('returns error when source not found', async () => {
       mocks.mockQueryTemplates.mockResolvedValue(null);
       const result = await cloneTemplate('missing', 'org-2', 'u2');
+      expect(result.success).toBe(false);
+    });
+
+    it('handles clone errors', async () => {
+      mocks.mockQueryTemplates.mockRejectedValue(new Error('clone fail'));
+      const result = await cloneTemplate('t1', 'org-2', 'u2');
       expect(result.success).toBe(false);
     });
   });
@@ -444,6 +498,57 @@ describe('template-service', () => {
     it('handles errors', async () => {
       mocks.mockQueryTemplates.mockRejectedValue(new Error('fail'));
       const result = await getTemplateStats('org-1');
+      expect(result.success).toBe(false);
+    });
+
+    it('handles templates with missing counters via fallback zeros', async () => {
+      mocks.mockQueryTemplates.mockResolvedValue([
+        { status: 'active', useCount: undefined, totalValueAwarded: undefined },
+      ]);
+
+      const result = await getTemplateStats('org-1');
+      expect(result.success).toBe(true);
+      expect(result.data?.totalUses).toBe(0);
+      expect(result.data?.totalValueAwarded).toBe(0);
+    });
+
+    it('calculates top template when some useCount values are undefined', async () => {
+      mocks.mockQueryTemplates.mockResolvedValue([
+        { id: 'a', status: 'active', useCount: undefined, totalValueAwarded: 0 },
+        { id: 'b', status: 'active', useCount: 5, totalValueAwarded: 10 },
+      ]);
+
+      const result = await getTemplateStats('org-1');
+      expect(result.success).toBe(true);
+      expect(result.data?.topTemplate?.id).toBe('b');
+    });
+  });
+
+  // ──────────────── archiveOldTemplates ────────────────
+  describe('archiveOldTemplates', () => {
+    it('archives old templates using default days', async () => {
+      const mockWhere = vi.fn().mockResolvedValue({ rowCount: 2 });
+      mocks.mockSet.mockReturnValue({ where: mockWhere });
+      mocks.mockUpdate.mockReturnValue({ set: mocks.mockSet });
+
+      const result = await archiveOldTemplates('org-1');
+      expect(result.success).toBe(true);
+      expect(result.archivedCount).toBe(2);
+    });
+
+    it('archives with custom day threshold', async () => {
+      const mockWhere = vi.fn().mockResolvedValue({ rowCount: 1 });
+      mocks.mockSet.mockReturnValue({ where: mockWhere });
+      mocks.mockUpdate.mockReturnValue({ set: mocks.mockSet });
+
+      const result = await archiveOldTemplates('org-1', 30);
+      expect(result.success).toBe(true);
+      expect(result.archivedCount).toBe(1);
+    });
+
+    it('returns failure when archiving throws', async () => {
+      mocks.mockUpdate.mockImplementationOnce(() => { throw new Error('archive failed'); });
+      const result = await archiveOldTemplates('org-1');
       expect(result.success).toBe(false);
     });
   });
