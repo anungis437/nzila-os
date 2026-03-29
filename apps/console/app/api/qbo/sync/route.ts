@@ -27,6 +27,7 @@ import type { QboTokenSet } from '@nzila/qbo/types'
 import { createHash } from 'crypto'
 import { uploadBuffer } from '@nzila/blob'
 import { createLogger } from '@nzila/os-core'
+import { encryptToken, decryptToken } from '@/lib/qbo-token-crypto'
 
 const logger = createLogger('qbo:sync')
 
@@ -88,10 +89,10 @@ export async function POST(req: NextRequest) {
     return NextResponse.json({ error: 'No tokens found for connection' }, { status: 404 })
   }
 
-  // Reconstruct QboTokenSet from the DB row
+  // Reconstruct QboTokenSet from the DB row (decrypt from storage)
   let tokenSet: QboTokenSet = {
-    access_token: tokenRow.accessToken,
-    refresh_token: tokenRow.refreshToken,
+    access_token: decryptToken(tokenRow.accessToken),
+    refresh_token: decryptToken(tokenRow.refreshToken),
     token_type: 'bearer',
     expires_in: Math.max(
       0,
@@ -114,8 +115,8 @@ export async function POST(req: NextRequest) {
       )
       await platformDb.insert(qboTokens).values({
         connectionId: connection.id,
-        accessToken: refreshed.access_token,
-        refreshToken: refreshed.refresh_token,
+        accessToken: encryptToken(refreshed.access_token),
+        refreshToken: encryptToken(refreshed.refresh_token),
         accessTokenExpiresAt: newAccessExpiresAt,
         refreshTokenExpiresAt: newRefreshExpiresAt,
       })

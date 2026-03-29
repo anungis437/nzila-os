@@ -119,7 +119,7 @@ export const POST = withRoleAuth('member', async (request: NextRequest, context)
 
     if (errorMessage.includes('Cannot cancel')) {
       return NextResponse.json(
-        { error: errorMessage },
+        { error: 'Cannot cancel this redemption' },
         { status: 400 }
       );
     }

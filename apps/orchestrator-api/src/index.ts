@@ -7,6 +7,7 @@ import { proofCenterRoutes } from './routes/proof-center.js'
 import { workflowRoutes } from './routes/workflows.js'
 import { jobRoutes } from './routes/jobs.js'
 import { runRoutes } from './routes/runs.js'
+import { metricsRoutes } from './routes/metrics.js'
 import { statusRoutes } from './routes/status.js'
 import { createLogger } from '@nzila/os-core'
 import { getEventBus, getAIRunStore, getPolicyEvaluator } from './platform.js'
@@ -97,8 +98,8 @@ await app.register(rateLimit, {
 
 // ── API Key authentication hook (skip /health) ──────────────────────────────
 app.addHook('onRequest', async (req, reply) => {
-  // Health endpoint is always public (k8s probes, uptime monitors)
-  if (req.url === '/health') return
+  // Health and metrics endpoints are always public (k8s probes, uptime monitors)
+  if (req.url === '/health' || req.url === '/metrics') return
 
   if (!API_KEY) {
     // No key configured — allow in dev, block in prod
@@ -144,6 +145,7 @@ app.addHook('onRequest', async (req, reply) => {
 
 // ── Routes ──
 app.register(healthRoutes)
+app.register(metricsRoutes)
 app.register(telemetryHooks)
 app.register(commandRoutes, { prefix: '/commands' })
 app.register(workflowRoutes, { prefix: '/workflows' })

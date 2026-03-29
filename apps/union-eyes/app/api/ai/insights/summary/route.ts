@@ -43,7 +43,7 @@ export const GET = withRoleAuth('officer', async (_request: NextRequest, context
   } catch (error) {
     return standardErrorResponse(
       ErrorCode.INTERNAL_ERROR,
-      error instanceof Error ? error.message : 'Failed to fetch insight summary',
+      'Failed to fetch insight summary',
     );
   }
 });

@@ -82,7 +82,7 @@ export const POST = withApiAuth(async (request: NextRequest) => {
 
     return standardErrorResponse(
       ErrorCode.INTERNAL_ERROR,
-      error instanceof Error ? error.message : 'Failed to trigger scheduled billing'
+      'Failed to trigger scheduled billing'
     );
   }
 });

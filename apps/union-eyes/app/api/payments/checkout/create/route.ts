@@ -79,7 +79,7 @@ export async function POST(request: NextRequest) {
 
     return standardErrorResponse(
       ErrorCode.INTERNAL_ERROR,
-      error instanceof Error ? error.message : 'Failed to create checkout session'
+      'Failed to create checkout session'
     );
   }
 }

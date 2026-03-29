@@ -56,7 +56,7 @@ export const POST = withRoleAuth('steward', async (_request: NextRequest, contex
   } catch (error) {
     return standardErrorResponse(
       ErrorCode.INTERNAL_ERROR,
-      error instanceof Error ? error.message : 'Triage failed',
+      'Triage failed',
     );
   }
 });

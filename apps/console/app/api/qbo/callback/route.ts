@@ -19,6 +19,7 @@ import { qboConnections, qboTokens } from '@nzila/db/schema'
 import { exchangeCodeForTokens } from '@nzila/qbo/oauth'
 import { eq, and } from 'drizzle-orm'
 import { createLogger } from '@nzila/os-core'
+import { encryptToken } from '@/lib/qbo-token-crypto'
 
 const logger = createLogger('qbo:callback')
 
@@ -106,17 +107,11 @@ export async function GET(req: NextRequest) {
       })
       .returning()
 
-    // Store tokens against the connection
-    // SECURITY NOTE: Tokens are stored in plaintext in the database.
-    // For production, encrypt via Azure Key Vault before insert.
-    // See: docs/hardening/secrets.md for the token encryption pattern.
-    if (process.env.NODE_ENV === 'production' && !process.env.AZURE_KEYVAULT_URL) {
-      logger.warn('[qbo/callback] Storing QBO tokens without encryption — AZURE_KEYVAULT_URL not configured')
-    }
+    // Encrypt tokens before storage (AES-256-GCM envelope encryption)
     await tx.insert(qboTokens).values({
       connectionId: connection.id,
-      accessToken: tokenSet.access_token,
-      refreshToken: tokenSet.refresh_token,
+      accessToken: encryptToken(tokenSet.access_token),
+      refreshToken: encryptToken(tokenSet.refresh_token),
       accessTokenExpiresAt,
       refreshTokenExpiresAt,
     })

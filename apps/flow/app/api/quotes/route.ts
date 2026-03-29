@@ -18,9 +18,9 @@ export async function GET(request: Request) {
       const ctx = await resolveOrgContext()
       const quotes = await quoteRepo.findAll(ctx.orgId)
       return NextResponse.json({ ok: true, data: quotes })
-    } catch (err) {
+    } catch (_err) {
       return NextResponse.json(
-        { ok: false, error: err instanceof Error ? err.message : 'Unknown error' },
+        { ok: false, error: 'Internal server error' },
         { status: 500 },
       )
     }

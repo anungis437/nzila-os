@@ -241,7 +241,6 @@ export const POST = withRoleAuth('steward', async (request: NextRequest, context
 return NextResponse.json(
         {
           error: 'Failed to initiate OAuth flow',
-          details: error instanceof Error ? error.message : 'Unknown error',
         },
         { status: 500 }
       );
@@ -348,7 +347,6 @@ return standardErrorResponse(
 return NextResponse.json(
         {
           error: 'Failed to disconnect account',
-          details: error instanceof Error ? error.message : 'Unknown error',
         },
         { status: 500 }
       );
@@ -482,7 +480,6 @@ export const PUT = withRoleAuth('member', async (request: NextRequest, context: 
 return NextResponse.json(
         {
           error: 'Failed to refresh token',
-          details: error instanceof Error ? error.message : 'Unknown error',
         },
         { status: 500 }
       );

@@ -381,7 +381,7 @@ export async function checkRateLimit(
     }
     
     // Add current request
-    await redis.zadd(cacheKey, now, `${now}-${Math.random()}`);
+    await redis.zadd(cacheKey, now, `${now}-${crypto.randomUUID()}`);
     await redis.expire(cacheKey, windowSeconds);
     
     return {
@@ -466,7 +466,7 @@ export async function acquireLock(
 ): Promise<string | null> {
   const redis = getRedis();
   const lockKey = `${namespace}:${lockName}`;
-  const token = `${Date.now()}-${Math.random()}`;
+  const token = `${Date.now()}-${crypto.randomUUID()}`;
   
   try {
     // Try to set NX (only if not exists)

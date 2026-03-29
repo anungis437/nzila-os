@@ -26,7 +26,7 @@ export async function GET(req: NextRequest) {
     await authorize(req, { requiredScope: 'governance:read' as const })
   } catch (err: unknown) {
     const e = err as { message?: string; statusCode?: number }
-    return NextResponse.json({ error: e.message ?? 'Forbidden' }, { status: e.statusCode ?? 403 })
+    return NextResponse.json({ error: 'Forbidden' }, { status: e.statusCode ?? 403 })
   }
   const verifiedAt = new Date().toISOString()
 
@@ -82,7 +82,7 @@ export async function GET(req: NextRequest) {
       verifiedAt,
       entryCount: 0,
       chainValid: false,
-      error: error instanceof Error ? error.message : 'Unknown error',
+      error: 'Verification failed',
     })
   }
 }

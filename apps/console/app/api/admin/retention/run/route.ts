@@ -23,7 +23,7 @@ export async function POST(req: NextRequest) {
     })
   } catch (err: unknown) {
     const e = err as { message?: string; statusCode?: number }
-    return NextResponse.json({ error: e.message ?? 'Forbidden' }, { status: e.statusCode ?? 403 })
+    return NextResponse.json({ error: 'Forbidden' }, { status: e.statusCode ?? 403 })
   }
 
   const body = await req.json().catch(() => ({}))

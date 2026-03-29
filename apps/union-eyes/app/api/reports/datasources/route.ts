@@ -59,7 +59,7 @@ async function getHandler(_req: NextRequest, _context) {
     });
   } catch (error: unknown) {
     return NextResponse.json(
-      { error: 'Failed to fetch data sources', details: error instanceof Error ? error.message : 'Unknown error' },
+      { error: 'Failed to fetch data sources' },
       { status: 500 }
     );
   }

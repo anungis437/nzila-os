@@ -68,7 +68,7 @@ export async function POST(req: NextRequest) {
   } catch (error) {
     logger.error('Entity audit chain verification failed', { orgId, error })
     return NextResponse.json(
-      { error: 'Chain verification failed', message: (error as Error).message },
+      { error: 'Chain verification failed' },
       { status: 500 },
     )
   }

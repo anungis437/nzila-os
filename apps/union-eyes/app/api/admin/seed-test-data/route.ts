@@ -12,14 +12,14 @@
  * Requires app_owner / admin role.
  */
 import { NextResponse } from 'next/server';
-import { withRoleAuth } from '@/lib/role-middleware';
+import { withRoleAuth, type MemberRole } from '@/lib/role-middleware';
 import { seedOrganizationHierarchy } from '@/db/seeds/seed-org-hierarchy';
 import { seedChildOrganizations } from '@/db/seeds/seed-child-orgs';
 import { logger } from '@/lib/logger';
 
 export const dynamic = 'force-dynamic';
 
-export const GET = withRoleAuth('admin', async (_request, context) => {
+export const GET = withRoleAuth('admin' as MemberRole, async (_request, context) => {
   try {
     const hierarchy = await seedOrganizationHierarchy();
     const children = await seedChildOrganizations();
@@ -32,13 +32,13 @@ export const GET = withRoleAuth('admin', async (_request, context) => {
   } catch (error) {
     logger.error('Seed org hierarchy failed', { error });
     return NextResponse.json(
-      { success: false, error: error instanceof Error ? error.message : 'Unknown error' },
+      { success: false, error: 'Internal server error' },
       { status: 500 },
     );
   }
 });
 
-export const POST = withRoleAuth('admin', async (_request, context) => {
+export const POST = withRoleAuth('admin' as MemberRole, async (_request, context) => {
   try {
     const hierarchy = await seedOrganizationHierarchy();
     const children = await seedChildOrganizations();
@@ -51,7 +51,7 @@ export const POST = withRoleAuth('admin', async (_request, context) => {
   } catch (error) {
     logger.error('Seed org hierarchy failed', { error });
     return NextResponse.json(
-      { success: false, error: error instanceof Error ? error.message : 'Unknown error' },
+      { success: false, error: 'Internal server error' },
       { status: 500 },
     );
   }

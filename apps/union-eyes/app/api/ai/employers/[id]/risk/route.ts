@@ -50,7 +50,7 @@ export const POST = withRoleAuth('officer', async (_request: NextRequest, contex
   } catch (error) {
     return standardErrorResponse(
       ErrorCode.INTERNAL_ERROR,
-      error instanceof Error ? error.message : 'Risk scoring failed',
+      'Risk scoring failed',
     );
   }
 });

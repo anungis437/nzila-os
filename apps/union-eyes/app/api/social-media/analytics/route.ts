@@ -159,7 +159,6 @@ return standardErrorResponse(
 return NextResponse.json(
         {
           error: 'Internal server error',
-          details: error instanceof Error ? error.message : 'Unknown error',
         },
         { status: 500 }
       );
@@ -314,7 +313,6 @@ return standardErrorResponse(
 return NextResponse.json(
         {
           error: 'Failed to fetch post analytics',
-          details: error instanceof Error ? error.message : 'Unknown error',
         },
         { status: 500 }
       );
@@ -510,7 +508,6 @@ export const PUT = withRoleAuth('member', async (request: NextRequest, context: 
 return NextResponse.json(
         {
           error: 'Failed to fetch campaign analytics',
-          details: error instanceof Error ? error.message : 'Unknown error',
         },
         { status: 500 }
       );
@@ -734,7 +731,6 @@ export const DELETE = withRoleAuth('member', async (request: NextRequest, contex
 return NextResponse.json(
         {
           error: 'Failed to export analytics',
-          details: error instanceof Error ? error.message : 'Unknown error',
         },
         { status: 500 }
       );
