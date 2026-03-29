@@ -126,6 +126,9 @@ jobs:
       - name: Install dependencies
         run: pnpm install --frozen-lockfile
 
+      - name: Build workspace dependencies
+        run: pnpm --filter @nzila/union-eyes... build
+
       - name: Union Eyes Unit Tests
         run: pnpm --filter @nzila/union-eyes test
         env:
