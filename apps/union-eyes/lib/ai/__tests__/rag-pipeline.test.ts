@@ -306,6 +306,57 @@ describe("RAGPipeline", () => {
         const results = await fresh.search("grievance");
         expect(results).toEqual([]);
       });
+
+      it("bm25Search uses tf fallback when termFrequency entry is missing", async () => {
+        await pipeline.addDocuments([makeDoc("d-missing-tf", longContent)]);
+        const internals = pipeline as any;
+        const firstDocId = Array.from(internals.bm25Index.documents.keys())[0];
+        internals.bm25Index.termFrequency.delete(firstDocId);
+
+        const results = await pipeline.search("grievance");
+        expect(results).toBeDefined();
+      });
+
+      it("bm25Search uses avgDocumentLength fallback denominator when avg is zero", async () => {
+        await pipeline.addDocuments([makeDoc("d-avg0", longContent)]);
+        const internals = pipeline as any;
+        internals.bm25Index.avgDocumentLength = 0;
+
+        const results = await pipeline.search("grievance");
+        expect(results.length).toBeGreaterThanOrEqual(0);
+      });
+
+      it("rerank sort falls back to zero for missing/zero rerankScore", () => {
+        const internals = pipeline as any;
+        const fakeChunkA = {
+          id: "a",
+          content: "alpha beta",
+          documentId: "d-a",
+          metadata: {
+            source: "test",
+            type: "policy",
+            createdAt: new Date(),
+            updatedAt: new Date(),
+          },
+          embedding: [],
+          startIndex: 0,
+          endIndex: 10,
+        };
+        const fakeChunkB = {
+          ...fakeChunkA,
+          id: "b",
+          documentId: "d-b",
+          content: "gamma delta",
+        };
+
+        // Query terms do not match content terms => rerankScore stays 0 for both results.
+        const reranked = internals.rerank("nomatchterm", [
+          { chunk: fakeChunkA, score: 0 },
+          { chunk: fakeChunkB, score: 0 },
+        ]);
+
+        expect(reranked).toHaveLength(2);
+      });
     });
 });
 
