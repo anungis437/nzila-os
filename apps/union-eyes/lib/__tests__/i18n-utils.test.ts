@@ -42,6 +42,13 @@ describe('i18n-utils', () => {
       expect(result).toContain('15');
       expect(result).toContain('2026');
     });
+
+    it('accepts a Date object directly (Batch 34)', () => {
+      const result = formatDate(new Date('2026-03-15T12:00:00Z'), 'en-CA');
+      expect(result).toContain('March');
+      expect(result).toContain('15');
+      expect(result).toContain('2026');
+    });
   });
 
   describe('formatCurrency', () => {

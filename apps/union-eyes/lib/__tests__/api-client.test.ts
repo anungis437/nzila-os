@@ -342,4 +342,22 @@ describe('api-client', () => {
     const fetchCall = (globalThis.fetch as ReturnType<typeof vi.fn>).mock.calls[0];
     expect(fetchCall[1].body).toBeUndefined();
   });
+
+  /* ── Batch 34: branch gap-fill ── */
+
+  it('stripeClient is non-null when STRIPE_SECRET_KEY is set', async () => {
+    // L286: stripeClient ternary truthy arm
+    const original = process.env.STRIPE_SECRET_KEY;
+    process.env.STRIPE_SECRET_KEY = 'sk_test_fake';
+    vi.resetModules();
+    const mod = await import('../api-client');
+    expect(mod.stripeClient).not.toBeNull();
+    expect(mod.stripeClient!.get).toBeDefined();
+    // Restore
+    if (original === undefined) {
+      delete process.env.STRIPE_SECRET_KEY;
+    } else {
+      process.env.STRIPE_SECRET_KEY = original;
+    }
+  });
 });

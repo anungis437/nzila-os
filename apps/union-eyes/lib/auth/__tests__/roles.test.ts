@@ -323,3 +323,14 @@ describe('NAV_ITEMS / ADMIN_NAV_ITEMS', () => {
     }
   });
 });
+
+// ─── Batch 34: branch gap-fill ──────────────────────────────────────────────
+describe('Batch 34: branch gap-fill', () => {
+  it('hasPermission returns false for an unknown role', () => {
+    expect(hasPermission('totally_fake_role' as UserRole, Permission.VIEW_ALL_CLAIMS)).toBe(false);
+  });
+
+  it('getRoleLevel returns 0 for an unknown role', () => {
+    expect(getRoleLevel('totally_fake_role' as UserRole)).toBe(0);
+  });
+});

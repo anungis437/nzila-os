@@ -65,4 +65,17 @@ describe('action-enforcer', () => {
     const result = canPerformAction('note_add_internal', 'member');
     expect(result.allowed).toBe(false);
   });
+
+  // ─── Batch 34: branch gap-fill ──────────────────────────────────────────────
+  it('chief_steward cannot close case without context (Batch 34)', () => {
+    const result = canPerformAction('case_close', 'chief_steward');
+    expect(result.allowed).toBe(false);
+    expect(result.reason).toContain('resolved or rejected');
+  });
+
+  it('denies case_close for unknown action (Batch 34)', () => {
+    const result = canPerformAction('totally_unknown' as CUPEAction, 'admin');
+    expect(result.allowed).toBe(false);
+    expect(result.reason).toContain('Unknown action');
+  });
 });

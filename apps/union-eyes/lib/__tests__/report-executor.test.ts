@@ -861,4 +861,49 @@ describe('report-executor', () => {
       expect(result.success).toBe(true);
     });
   });
+
+  /* ── Batch 34: branch gap-fill ── */
+
+  describe('ReportExecutor - gap-fill', () => {
+    it('returns fallback error message when error has no .message', async () => {
+      // L217: error.message || 'Report execution failed' — false arm
+      mocks.mockExecute.mockRejectedValue('raw string error');
+      const executor = new ReportExecutor('org-1');
+      const result = await executor.execute({
+        dataSourceId: 'claims',
+        fields: [{ fieldId: 'id', fieldName: 'ID' }],
+      });
+      expect(result.success).toBe(false);
+      expect(result.error).toBe('Report execution failed');
+    });
+
+    it('skips filter with unknown operator (switch default)', async () => {
+      // L502: switch default → continue; L535: conditions empty → return null
+      // L279: filterSQL falsy → if(filterSQL) false arm
+      mocks.mockExecute.mockResolvedValue([]);
+      const executor = new ReportExecutor('org-1');
+      const result = await executor.execute({
+        dataSourceId: 'claims',
+        fields: [{ fieldId: 'id', fieldName: 'ID' }],
+        filters: [{ fieldId: 'status', operator: 'contains' as 'eq', value: 'open' }],
+      });
+      expect(result.success).toBe(true);
+    });
+
+    it('closes OR group when transitioning to AND', async () => {
+      // L517: currentGroupOperator === 'OR' truthy arm in group close
+      mocks.mockExecute.mockResolvedValue([]);
+      const executor = new ReportExecutor('org-1');
+      const result = await executor.execute({
+        dataSourceId: 'claims',
+        fields: [{ fieldId: 'id', fieldName: 'ID' }],
+        filters: [
+          { fieldId: 'status', operator: 'eq', value: 'open', logicalOperator: 'OR' },
+          { fieldId: 'priority', operator: 'eq', value: 'high', logicalOperator: 'OR' },
+          { fieldId: 'status', operator: 'ne', value: 'closed', logicalOperator: 'AND' },
+        ],
+      });
+      expect(result.success).toBe(true);
+    });
+  });
 });

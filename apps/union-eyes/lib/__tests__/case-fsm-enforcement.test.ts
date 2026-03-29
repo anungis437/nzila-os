@@ -152,4 +152,56 @@ describe('case-fsm-enforcement', () => {
       );
     });
   });
+
+  // ─── Batch 34: branch gap-fill ──────────────────────────────────────────────
+  describe('Batch 34: branch gap-fill', () => {
+    it('falls back to -1 when actorRole is not in ROLE_LEVEL', () => {
+      mocks.getStatusById
+        .mockReturnValueOnce({
+          id: 'filed', label: 'Filed',
+          allowTransitionsTo: ['investigation'],
+          allowedRoles: ['steward'],
+        })
+        .mockReturnValueOnce({
+          id: 'investigation', label: 'Investigation',
+          allowTransitionsTo: [],
+          allowedRoles: ['member'],
+        });
+
+      const result = validateCUPETransition({
+        caseId: 'c-1',
+        currentStatus: 'filed',
+        targetStatus: 'investigation',
+        actorRole: 'unknown_actor',
+      });
+
+      expect(result.allowed).toBe(false);
+      expect(result.reason).toContain("Role 'unknown_actor'");
+    });
+
+    it('falls back to Infinity for unknown required role in allowedRoles', () => {
+      mocks.getStatusById
+        .mockReturnValueOnce({
+          id: 'filed', label: 'Filed',
+          allowTransitionsTo: ['investigation'],
+          allowedRoles: ['steward'],
+        })
+        .mockReturnValueOnce({
+          id: 'investigation', label: 'Investigation',
+          allowTransitionsTo: [],
+          allowedRoles: ['nonexistent_role', 'member'],
+        });
+
+      // admin (level 4) >= member (level 0) → true via some()
+      // also exercises ROLE_LEVEL['nonexistent_role'] ?? Infinity path
+      const result = validateCUPETransition({
+        caseId: 'c-1',
+        currentStatus: 'filed',
+        targetStatus: 'investigation',
+        actorRole: 'admin',
+      });
+
+      expect(result.allowed).toBe(true);
+    });
+  });
 });
