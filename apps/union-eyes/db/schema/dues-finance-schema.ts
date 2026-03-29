@@ -403,6 +403,139 @@ export const financialPeriods = pgTable('financial_periods', {
 });
 
 // ============================================================================
+// PAYROLL DEDUCTIONS (Member-facing deduction visibility)
+// ============================================================================
+
+export const payrollDeductions = pgTable('payroll_deductions', {
+  id: uuid('id').primaryKey().defaultRandom(),
+
+  // Scope
+  organizationId: uuid('organization_id').notNull(),
+  userId: uuid('user_id').notNull(),
+  employerId: uuid('employer_id').notNull(),
+
+  // Pay Period
+  payPeriodStart: timestamp('pay_period_start').notNull(),
+  payPeriodEnd: timestamp('pay_period_end').notNull(),
+
+  // Pay Details (optional — may not be available from all sources)
+  grossPay: decimal('gross_pay', { precision: 12, scale: 2 }),
+  netPay: decimal('net_pay', { precision: 12, scale: 2 }),
+
+  // Deduction
+  unionDuesAmount: decimal('union_dues_amount', { precision: 10, scale: 2 }).notNull(),
+  // eslint-disable-next-line @typescript-eslint/no-explicit-any
+  otherDeductions: jsonb('other_deductions').$type<Record<string, any>>(),
+
+  // Source
+  source: text('source').notNull().default('remittance'), // remittance, payroll_api, manual_entry, pay_stub_upload
+  remittanceLineItemId: uuid('remittance_line_item_id'),
+
+  // Verification
+  verified: boolean('verified').default(false),
+  verifiedAt: timestamp('verified_at'),
+  verifiedBy: text('verified_by'),
+
+  // Metadata
+  // eslint-disable-next-line @typescript-eslint/no-explicit-any
+  metadata: jsonb('metadata').$type<Record<string, any>>(),
+
+  // Audit
+  createdAt: timestamp('created_at').notNull().defaultNow(),
+  updatedAt: timestamp('updated_at').notNull().defaultNow(),
+});
+
+// ============================================================================
+// MEMBER DUES ISSUES (Dispute / exception reporting by members)
+// ============================================================================
+
+export const memberDuesIssues = pgTable('member_dues_issues', {
+  id: uuid('id').primaryKey().defaultRandom(),
+
+  // Scope
+  organizationId: uuid('organization_id').notNull(),
+  userId: uuid('user_id').notNull(),
+
+  // Issue Details
+  issueType: text('issue_type').notNull(), // missing_deduction, incorrect_amount, duplicate_deduction, unrecognized_deduction, other
+  subject: text('subject').notNull(),
+  description: text('description').notNull(),
+
+  // Related records (optional)
+  payrollDeductionId: uuid('payroll_deduction_id'),
+  payPeriodStart: timestamp('pay_period_start'),
+  payPeriodEnd: timestamp('pay_period_end'),
+  expectedAmount: decimal('expected_amount', { precision: 10, scale: 2 }),
+  actualAmount: decimal('actual_amount', { precision: 10, scale: 2 }),
+
+  // Status
+  status: text('status').notNull().default('open'), // open, under_review, resolved, escalated, closed
+  priority: integer('priority').default(3), // 1=highest, 5=lowest
+
+  // Assignment
+  assignedTo: text('assigned_to'),
+
+  // Resolution
+  resolvedAt: timestamp('resolved_at'),
+  resolvedBy: text('resolved_by'),
+  resolutionType: text('resolution_type'), // corrected, confirmed_accurate, adjusted, referred_to_employer
+  resolutionNotes: text('resolution_notes'),
+
+  // Metadata
+  // eslint-disable-next-line @typescript-eslint/no-explicit-any
+  metadata: jsonb('metadata').$type<Record<string, any>>(),
+
+  // Audit
+  createdAt: timestamp('created_at').notNull().defaultNow(),
+  updatedAt: timestamp('updated_at').notNull().defaultNow(),
+});
+
+// ============================================================================
+// DUES POLICIES (Org-scoped rules governing dues rates & deduction expectations)
+// ============================================================================
+
+export const duesPolicies = pgTable('dues_policies', {
+  id: uuid('id').primaryKey().defaultRandom(),
+
+  // Scope
+  organizationId: uuid('organization_id').notNull(),
+  localId: uuid('local_id'),
+
+  // Policy Details
+  policyName: text('policy_name').notNull(),
+  policyType: text('policy_type').notNull(), // flat_rate, percentage_of_gross, tiered, formula
+  description: text('description'),
+
+  // Rate/Rule
+  flatAmount: decimal('flat_amount', { precision: 10, scale: 2 }),
+  percentageRate: decimal('percentage_rate', { precision: 5, scale: 4 }),
+  // eslint-disable-next-line @typescript-eslint/no-explicit-any
+  tierRules: jsonb('tier_rules').$type<Record<string, any>>(),
+  formulaExpression: text('formula_expression'),
+
+  // Applicability
+  employmentTypes: text('employment_types'), // Comma-separated: full_time,part_time,casual
+  classifications: text('classifications'), // Comma-separated job classifications
+
+  // Effective Dates
+  effectiveFrom: timestamp('effective_from').notNull(),
+  effectiveTo: timestamp('effective_to'),
+
+  // Status
+  status: text('status').notNull().default('active'), // active, draft, superseded, inactive
+
+  // Metadata
+  // eslint-disable-next-line @typescript-eslint/no-explicit-any
+  metadata: jsonb('metadata').$type<Record<string, any>>(),
+
+  // Audit
+  createdAt: timestamp('created_at').notNull().defaultNow(),
+  updatedAt: timestamp('updated_at').notNull().defaultNow(),
+  createdBy: text('created_by'),
+  lastModifiedBy: text('last_modified_by'),
+});
+
+// ============================================================================
 // RELATIONS
 // ============================================================================
 
@@ -449,4 +582,22 @@ export const paymentPlansRelations = relations(paymentPlans, ({ one }) => ({
     fields: [paymentPlans.userId],
     references: [memberArrears.userId],
   }),
+}));
+
+export const payrollDeductionsRelations = relations(payrollDeductions, ({ one }) => ({
+  remittanceLineItem: one(remittanceLineItems, {
+    fields: [payrollDeductions.remittanceLineItemId],
+    references: [remittanceLineItems.id],
+  }),
+}));
+
+export const memberDuesIssuesRelations = relations(memberDuesIssues, ({ one }) => ({
+  payrollDeduction: one(payrollDeductions, {
+    fields: [memberDuesIssues.payrollDeductionId],
+    references: [payrollDeductions.id],
+  }),
+}));
+
+export const duesPoliciesRelations = relations(duesPolicies, ({ many }) => ({
+  rates: many(duesRates),
 }));

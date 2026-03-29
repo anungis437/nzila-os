@@ -212,7 +212,7 @@ export default function Sidebar({ profile: _profile, userEmail, whopMonthlyPlanI
         { href: `/${locale}/dashboard/claims`, icon: <FileText size={16} />, label: t('claims.myCases'), roles: unionAll },
         { href: `/${locale}/dashboard/claims/new`, icon: <Mic size={16} />, label: t('claims.submitNew'), roles: unionAll },
         { href: `/${locale}/dashboard/pension`, icon: <Briefcase size={16} />, label: t('sidebar.pensionBenefits'), roles: unionAll },
-        { href: `/${locale}/dashboard/dues`, icon: <DollarSign size={16} />, label: t('sidebar.duesPayments'), roles: unionAll },
+        { href: `/${locale}/dashboard/dues`, icon: <DollarSign size={16} />, label: t('sidebar.duesDeductions'), roles: unionAll },
         { href: `/${locale}/dashboard/messages`, icon: <Mail size={16} />, label: t('sidebar.messages'), roles: unionAll },
       ],
     },
