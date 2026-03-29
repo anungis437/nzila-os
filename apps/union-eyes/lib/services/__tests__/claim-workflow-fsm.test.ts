@@ -5,6 +5,7 @@ import {
   validateClaimTransition,
   getAllowedClaimTransitions,
   getTransitionRequirements,
+  __claimWorkflowFsmInternals,
   type ClaimTransitionContext,
 } from '../claim-workflow-fsm';
 
@@ -105,6 +106,20 @@ describe('claim-workflow-fsm', () => {
       );
       expect(result.allowed).toBe(true);
     });
+
+    it('uses system fallback when requiredRoles omits system', () => {
+      const original = [...CLAIM_FSM.submitted.requiresRole.under_review];
+      CLAIM_FSM.submitted.requiresRole.under_review = ['admin'];
+
+      try {
+        const result = validateClaimTransition(
+          makeContext({ targetStatus: 'under_review', userRole: 'system' })
+        );
+        expect(result.allowed).toBe(true);
+      } finally {
+        CLAIM_FSM.submitted.requiresRole.under_review = original;
+      }
+    });
   });
 
   describe('validateClaimTransition — minTimeInState', () => {
@@ -151,6 +166,29 @@ describe('claim-workflow-fsm', () => {
     it('returns empty array for closed', () => {
       const transitions = getAllowedClaimTransitions('closed', 'admin');
       expect(transitions).toHaveLength(0);
+    });
+
+    it('includes transition for system via fallback when role map excludes system', () => {
+      const original = [...CLAIM_FSM.submitted.requiresRole.under_review];
+      CLAIM_FSM.submitted.requiresRole.under_review = ['admin'];
+
+      try {
+        const transitions = getAllowedClaimTransitions('submitted', 'system');
+        expect(transitions).toContain('under_review');
+      } finally {
+        CLAIM_FSM.submitted.requiresRole.under_review = original;
+      }
+    });
+  });
+
+  describe('SLA internals', () => {
+    it('treats closed status as SLA compliant immediately', () => {
+      const compliant = __claimWorkflowFsmInternals.isSLACompliant(
+        'closed',
+        'high',
+        new Date(Date.now() - 365 * 24 * 60 * 60 * 1000)
+      );
+      expect(compliant).toBe(true);
     });
   });
 
