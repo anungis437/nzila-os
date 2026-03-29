@@ -1,0 +1,28 @@
+{
+  "common": {
+    "appName": "Mobility",
+    "loading": "Chargement...",
+    "save": "Enregistrer",
+    "cancel": "Annuler",
+    "delete": "Supprimer",
+    "edit": "Modifier",
+    "create": "Créer"
+  },
+  "nav": {
+    "dashboard": "Tableau de bord",
+    "applications": "Demandes",
+    "investments": "Investissements",
+    "properties": "Propriétés",
+    "portfolio": "Portefeuille",
+    "documents": "Documents",
+    "settings": "Paramètres"
+  },
+  "migration": {
+    "applications": "Demandes",
+    "investments": "Investissements",
+    "properties": "Propriétés",
+    "portfolio": "Portefeuille",
+    "visaTracking": "Suivi des visas",
+    "settlement": "Établissement"
+  }
+}

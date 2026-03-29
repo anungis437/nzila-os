@@ -1,0 +1,29 @@
+{
+  "common": {
+    "appName": "Trade",
+    "loading": "Chargement...",
+    "save": "Enregistrer",
+    "cancel": "Annuler",
+    "delete": "Supprimer",
+    "edit": "Modifier",
+    "create": "Créer"
+  },
+  "nav": {
+    "dashboard": "Tableau de bord",
+    "orders": "Commandes",
+    "inventory": "Inventaire",
+    "logistics": "Logistique",
+    "contracts": "Contrats",
+    "partners": "Partenaires",
+    "settlements": "Règlements",
+    "settings": "Paramètres"
+  },
+  "commerce": {
+    "orders": "Commandes",
+    "inventory": "Inventaire",
+    "logistics": "Logistique",
+    "contracts": "Contrats",
+    "settlements": "Règlements",
+    "tradeFinance": "Financement du commerce"
+  }
+}

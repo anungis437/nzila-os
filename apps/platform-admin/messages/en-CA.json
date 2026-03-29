@@ -1,0 +1,30 @@
+{
+  "common": {
+    "appName": "Platform Admin",
+    "loading": "Loading...",
+    "save": "Save",
+    "cancel": "Cancel",
+    "delete": "Delete",
+    "edit": "Edit",
+    "create": "Create"
+  },
+  "nav": {
+    "dashboard": "Dashboard",
+    "ontology": "Ontology",
+    "schemas": "Schemas",
+    "tenants": "Tenants",
+    "users": "Users",
+    "roles": "Roles",
+    "audit": "Audit Log",
+    "settings": "Settings"
+  },
+  "admin": {
+    "ontology": "Ontology",
+    "schemas": "Schemas",
+    "tenants": "Tenants",
+    "users": "Users",
+    "roles": "Roles",
+    "permissions": "Permissions",
+    "auditLog": "Audit Log"
+  }
+}

@@ -1,0 +1,29 @@
+{
+  "common": {
+    "appName": "Control Plane",
+    "loading": "Loading...",
+    "save": "Save",
+    "cancel": "Cancel",
+    "delete": "Delete",
+    "edit": "Edit",
+    "create": "Create"
+  },
+  "nav": {
+    "dashboard": "Dashboard",
+    "tenants": "Tenants",
+    "services": "Services",
+    "deployments": "Deployments",
+    "monitoring": "Monitoring",
+    "configuration": "Configuration",
+    "audit": "Audit Log",
+    "settings": "Settings"
+  },
+  "platform": {
+    "tenants": "Tenants",
+    "services": "Services",
+    "deployments": "Deployments",
+    "healthChecks": "Health Checks",
+    "featureFlags": "Feature Flags",
+    "auditLog": "Audit Log"
+  }
+}

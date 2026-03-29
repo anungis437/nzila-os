@@ -1,0 +1,26 @@
+{
+  "common": {
+    "appName": "Client Portal",
+    "loading": "Loading...",
+    "save": "Save",
+    "cancel": "Cancel",
+    "submit": "Submit",
+    "back": "Back"
+  },
+  "nav": {
+    "dashboard": "Dashboard",
+    "myCase": "My Case",
+    "documents": "Documents",
+    "messages": "Messages",
+    "payments": "Payments",
+    "profile": "Profile"
+  },
+  "portal": {
+    "caseStatus": "Case Status",
+    "documents": "Documents",
+    "uploadDocument": "Upload Document",
+    "messages": "Messages",
+    "payments": "Payments",
+    "timeline": "Timeline"
+  }
+}

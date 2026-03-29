@@ -1,0 +1,40 @@
+{
+  "common": {
+    "appName": "Nzila Ventures",
+    "loading": "Loading...",
+    "learnMore": "Learn more",
+    "getStarted": "Get Started",
+    "contactUs": "Contact Us",
+    "backToHome": "Back to Home"
+  },
+  "nav": {
+    "home": "Home",
+    "about": "About",
+    "products": "Products",
+    "platform": "Platform",
+    "verticals": "Verticals",
+    "investors": "Investors",
+    "contact": "Contact",
+    "partners": "Partners",
+    "resources": "Resources",
+    "portfolio": "Portfolio",
+    "legal": "Legal",
+    "signIn": "Sign In"
+  },
+  "hero": {
+    "title": "The APEX of AI in Social Impact",
+    "subtitle": "Venture studio building 15 AI-powered platforms across 10+ verticals — healthcare, finance, agriculture, labour rights, and justice.",
+    "cta": "Explore Our Platform"
+  },
+  "legal": {
+    "privacy": "Privacy Policy",
+    "terms": "Terms of Service",
+    "ipGovernance": "IP Governance",
+    "cookiePolicy": "Cookie Policy",
+    "dataProtection": "Data Protection"
+  },
+  "footer": {
+    "copyright": "© {year} Nzila Ventures. All rights reserved.",
+    "madeIn": "Made in Canada"
+  }
+}

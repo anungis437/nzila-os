@@ -1,0 +1,25 @@
+{
+  "common": {
+    "appName": "Cora",
+    "loading": "Loading...",
+    "save": "Save",
+    "cancel": "Cancel",
+    "delete": "Delete",
+    "edit": "Edit",
+    "create": "Create"
+  },
+  "nav": {
+    "dashboard": "Dashboard",
+    "intelligence": "Intelligence",
+    "analysis": "Analysis",
+    "recommendations": "Recommendations",
+    "reports": "Reports",
+    "settings": "Settings"
+  },
+  "intelligence": {
+    "insights": "Insights",
+    "predictions": "Predictions",
+    "advisory": "Advisory",
+    "marketData": "Market Data"
+  }
+}

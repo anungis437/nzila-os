@@ -1,0 +1,10 @@
+{
+  "common": {
+    "appName": "Client Portal",
+    "loading": "Loading...",
+    "save": "Save",
+    "cancel": "Cancel",
+    "submit": "Submit",
+    "back": "Back"
+  }
+}

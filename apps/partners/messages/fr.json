@@ -1,0 +1,11 @@
+{
+  "common": {
+    "appName": "Portail partenaire Nzila",
+    "loading": "Chargement...",
+    "save": "Enregistrer",
+    "cancel": "Annuler",
+    "delete": "Supprimer",
+    "edit": "Modifier",
+    "create": "Créer"
+  }
+}
