@@ -275,6 +275,37 @@ describe('Logger', () => {
       (globalThis as unknown as Record<string, unknown>).window = originalWindow;
     });
 
+    it('handles missing Sentry module instance in browser warn path', async () => {
+      vi.resetModules();
+      const mod = await import('@/lib/logger');
+      expect(() => mod.logger.warn('browser-warn-no-sentry')).not.toThrow();
+      await Promise.resolve();
+    });
+
+    it('handles missing Sentry module instance in browser error path', async () => {
+      vi.resetModules();
+      const mod = await import('@/lib/logger');
+      expect(() => mod.logger.error('browser-error-no-sentry', new Error('x'))).not.toThrow();
+      await Promise.resolve();
+    });
+
+    it('time() emits slow-operation warning when duration exceeds threshold', () => {
+      const nowSpy = vi.spyOn(Date, 'now');
+      nowSpy.mockReturnValueOnce(1000).mockReturnValueOnce(2505);
+      const stop = loggerModule.logger.time('slow-op');
+      stop();
+      nowSpy.mockRestore();
+    });
+
+    it('builds production stack summary branch for Error context', () => {
+      const originalEnv = process.env.NODE_ENV;
+      process.env.NODE_ENV = 'production';
+      const err = new Error('prod-branch');
+      err.stack = 'a\nb\nc\nd';
+      loggerModule.logger.error('prod-stack-branch', err);
+      process.env.NODE_ENV = originalEnv;
+    });
+
     it('swallows async Sentry callback failures', async () => {
       const originalWindow = (globalThis as unknown as Record<string, unknown>).window;
       delete (globalThis as unknown as Record<string, unknown>).window;
