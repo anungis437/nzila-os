@@ -404,4 +404,58 @@ describe('IndigenousDataService (branch gaps)', () => {
     expect(report.bandCouncilAgreements).toBe(1);
     expect(report.onPremiseStoragePercent).toBe(50);
   });
+
+  /* ── Batch 33: branch gap-fill ── */
+
+  it('verifyBandCouncilOwnership returns undefined bandName when bandCouncil has no name', async () => {
+    const svc = new IndigenousDataService('org-1', 'user-1');
+    mocks.indigenousMemberDataFindFirst.mockResolvedValue({
+      bandCouncilId: 'bc-1',
+      userId: 'member-1',
+    });
+    mocks.bandCouncilConsentFindFirst.mockResolvedValue({ id: 'consent-1', expiresAt: null });
+    mocks.bandCouncilsFindFirst.mockResolvedValue({ id: 'bc-1', bandName: '' });
+    const result = await svc.verifyBandCouncilOwnership('member-1');
+    expect(result.hasAgreement).toBe(true);
+    expect(result.bandName).toBeUndefined();
+  });
+
+  it('getStorageConfig includes endpoint when bandCouncil has storageLocation', async () => {
+    const svc = new IndigenousDataService('org-1', 'user-1');
+    mocks.bandCouncilsFindFirst.mockResolvedValue({
+      id: 'bc-1',
+      onReserveStorageEnabled: true,
+      storageLocation: 'https://storage.band.ca',
+      dataResidencyRequired: true,
+    });
+    const config = await svc.getStorageConfig('reserve-1');
+    expect(config.hasOnPremiseServer).toBe(true);
+    expect(config.endpoint).toBe('https://storage.band.ca');
+    expect(config.storageLocation).toBe('canada_only');
+  });
+
+  it('getStorageConfig omits endpoint when storageLocation is empty', async () => {
+    const svc = new IndigenousDataService('org-1', 'user-1');
+    mocks.bandCouncilsFindFirst.mockResolvedValue({
+      id: 'bc-1',
+      onReserveStorageEnabled: false,
+      storageLocation: '',
+      dataResidencyRequired: false,
+    });
+    const config = await svc.getStorageConfig('reserve-1');
+    expect(config.endpoint).toBeUndefined();
+    expect(config.storageLocation).toBe('global');
+  });
+
+  it('generateComplianceReport returns 0% storage when no band councils', async () => {
+    const svc = new IndigenousDataService('org-1', 'user-1');
+    mocks.bandCouncilConsentFindMany.mockResolvedValue([]);
+    mocks.bandCouncilsFindMany
+      .mockResolvedValueOnce([]) // with storage
+      .mockResolvedValueOnce([]); // all
+    mocks.accessLogFindMany.mockResolvedValue([]);
+    const report = await svc.generateComplianceReport();
+    expect(report.onPremiseStoragePercent).toBe(0);
+    expect(report.ocapPrinciples.ownership.compliant).toBe(false);
+  });
 });

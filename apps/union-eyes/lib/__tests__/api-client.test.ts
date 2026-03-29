@@ -328,4 +328,18 @@ describe('api-client', () => {
     expect(client.get).toBeDefined();
     expect(client.post).toBeDefined();
   });
+
+  /* ── Batch 33: branch gap-fill ── */
+
+  it('PUT without body sends undefined body', async () => {
+    await client.put('/items/1');
+    const fetchCall = (globalThis.fetch as ReturnType<typeof vi.fn>).mock.calls[0];
+    expect(fetchCall[1].body).toBeUndefined();
+  });
+
+  it('PATCH without body sends undefined body', async () => {
+    await client.patch('/items/1');
+    const fetchCall = (globalThis.fetch as ReturnType<typeof vi.fn>).mock.calls[0];
+    expect(fetchCall[1].body).toBeUndefined();
+  });
 });

@@ -344,4 +344,23 @@ describe('wallet-service', () => {
       expect(result.get('u-2')).toBe(0);
     });
   });
+
+  /* ── Batch 33: branch gap-fill ── */
+
+  describe('getLedgerSummary (partial date range)', () => {
+    it('skips date filter when only startDate provided (endDate undefined)', async () => {
+      const { db } = await import('@/db');
+      const mockWhere = vi.fn().mockResolvedValue([
+        { totalIssued: 500, totalSpent: 100, activeMembers: 2 },
+      ]);
+      const mockFrom = vi.fn().mockReturnValue({ where: mockWhere });
+      (db.select as any).mockReturnValue({ from: mockFrom });
+      mocks.mockExecute.mockResolvedValue([{ total: 400 }]);
+
+      const start = new Date('2026-01-01');
+      const result = await getLedgerSummary('org-1', start);
+
+      expect(result.totalCreditsIssued).toBe(500);
+    });
+  });
 });

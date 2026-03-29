@@ -436,4 +436,37 @@ describe('getImpactSummary', () => {
     const casesHandled = results.find((r) => r.metric === 'Cases Handled')!;
     expect(casesHandled.changePercent).toBe(0); // 0 ÷ 0 prevented
   });
+
+  /* ── Batch 33: calculateOrganizerImpact branch gaps ── */
+
+  it('handles resolved cases with no resolvedAt (avgResolutionTime = 0)', () => {
+    const impact = calculateOrganizerImpact({
+      organizerId: 'org-1',
+      organizationId: 'tenant-1',
+      periodStart: new Date('2025-01-01'),
+      periodEnd: new Date('2025-12-31'),
+      casesData: [
+        { status: 'resolved', createdAt: new Date('2025-03-01'), escalated: false },
+      ],
+    });
+    expect(impact.avgResolutionTime).toBe(0);
+  });
+
+  it('handles cases with no memberSatisfaction (avg = 0)', () => {
+    const impact = calculateOrganizerImpact({
+      organizerId: 'org-1',
+      organizationId: 'tenant-1',
+      periodStart: new Date('2025-01-01'),
+      periodEnd: new Date('2025-12-31'),
+      casesData: [
+        { status: 'open', createdAt: new Date('2025-03-01'), escalated: false },
+      ],
+    });
+    expect(impact.memberSatisfactionAvg).toBe(0);
+  });
+
+  it('singular member in highlight when casesWon = 1', () => {
+    const result = getImpactSummary(makeImpact({ casesWon: 1, casesHandled: 5 }));
+    expect(result.highlights.some((h) => h.includes('1 member achieve'))).toBe(true);
+  });
 });

@@ -366,4 +366,18 @@ describe('getUnreconciledTransactions', () => {
     });
     await expect(getUnreconciledTransactions('org-1', 'acct-1')).rejects.toThrow('query timeout');
   });
+
+  /* ── Batch 33: branch gap-fill ── */
+
+  it('maps isPosted to false when null (L516 ?? false)', async () => {
+    mocks.mockLimit.mockResolvedValue([
+      { id: 'tx-1', transactionNumber: 'GL-1', debitAmount: '10.00', creditAmount: '0.00', isPosted: null, createdAt: new Date() },
+    ]);
+    mocks.mockWhere.mockReturnValue({ limit: mocks.mockLimit });
+    mocks.mockFrom.mockReturnValue({ where: mocks.mockWhere });
+    mocks.mockSelect.mockReturnValue({ from: mocks.mockFrom });
+
+    const result = await getUnreconciledTransactions('org-1', 'acct-1');
+    expect(result[0].isPosted).toBe(false);
+  });
 });

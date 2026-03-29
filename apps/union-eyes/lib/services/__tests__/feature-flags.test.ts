@@ -428,4 +428,40 @@ describe('feature-flags service', () => {
     expect(result.enabled).toBe(false);
     expect(result.reason).toContain('UserId required');
   });
+
+  /* ── Batch 33: branch gap-fill ── */
+
+  it('evaluateFeature shows "Unknown error" for non-Error throws', async () => {
+    mockFindFirst.mockRejectedValue('string-error');
+    const result = await evaluateFeature('broken', { userId: 'u-1' });
+    expect(result.enabled).toBe(false);
+    expect(result.reason).toContain('Unknown error');
+  });
+
+  it('percentage flag puts user outside rollout bucket', async () => {
+    mockFindFirst.mockResolvedValue({
+      id: 'flag-1', name: 'pct-flag', enabled: true, type: 'percentage', percentage: 1,
+    });
+    // With percentage=1, most user IDs will hash to bucket >= 1
+    const result = await evaluateFeature('pct-flag', { userId: 'definitely-outside' });
+    expect(result.reason).toContain('bucket');
+  });
+
+  it('addOrganizationToPilot handles null allowedOrganizations', async () => {
+    mockFindFirst.mockResolvedValue({
+      id: 'flag-1', name: 'f1', allowedOrganizations: null,
+    });
+    mockUpdate.mockReturnValue(chain(undefined));
+    await addOrganizationToPilot('f1', 'org-new', 'actor-1');
+    expect(mockUpdate).toHaveBeenCalled();
+  });
+
+  it('removeOrganizationFromPilot handles null allowedOrganizations', async () => {
+    mockFindFirst.mockResolvedValue({
+      id: 'flag-1', name: 'f1', allowedOrganizations: null,
+    });
+    mockUpdate.mockReturnValue(chain(undefined));
+    await removeOrganizationFromPilot('f1', 'org-1', 'actor-1');
+    expect(mockUpdate).toHaveBeenCalled();
+  });
 });

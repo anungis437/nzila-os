@@ -409,4 +409,62 @@ describe('AuditTrailService', () => {
       expect(mocks.mockInsert).toHaveBeenCalled();
     });
   });
+
+  /* ── Batch 33: branch gap-fill ── */
+
+  describe('generateComplianceReport (balance-field branch)', () => {
+    it('detects large modifications via balance field', async () => {
+      mocks.mockSelect.mockReturnValue(chain([
+        makeEntry({
+          action: 'update', userId: 'u-1', userName: 'Alice', timestamp: new Date('2026-03-15T10:00:00'),
+          changes: [{ field: 'balance', oldValue: '100', newValue: '50000' }],
+        }),
+      ]));
+      const report = await AuditTrailService.generateComplianceReport(
+        'org-1', new Date('2026-01-01'), new Date(),
+      );
+      const sus = report.suspiciousActivities.find((s: any) => s.type === 'large_modification');
+      expect(sus).toBeDefined();
+    });
+
+    it('ignores small balance modifications', async () => {
+      mocks.mockSelect.mockReturnValue(chain([
+        makeEntry({
+          action: 'update', userId: 'u-1', userName: 'Alice', timestamp: new Date('2026-03-15T10:00:00'),
+          changes: [{ field: 'balance', oldValue: '100', newValue: '200' }],
+        }),
+      ]));
+      const report = await AuditTrailService.generateComplianceReport(
+        'org-1', new Date('2026-01-01'), new Date(),
+      );
+      const sus = report.suspiciousActivities.find((s: any) => s.type === 'large_modification');
+      expect(sus).toBeUndefined();
+    });
+
+    it('ignores update without changes array', async () => {
+      mocks.mockSelect.mockReturnValue(chain([
+        makeEntry({
+          action: 'update', userId: 'u-1', userName: 'Alice', timestamp: new Date('2026-03-15T10:00:00'),
+          changes: null,
+        }),
+      ]));
+      const report = await AuditTrailService.generateComplianceReport(
+        'org-1', new Date('2026-01-01'), new Date(),
+      );
+      expect(report.suspiciousActivities).toHaveLength(0);
+    });
+  });
+
+  describe('logPrivilegedAction (no metadata)', () => {
+    it('handles undefined metadata gracefully', async () => {
+      mocks.mockInsert.mockReturnValue(chain([{ id: 'pa-3' }]));
+      const result = await AuditTrailService.logPrivilegedAction({
+        actorId: 'u-1', actorRole: 'admin', organizationId: 'org-1',
+        actionType: 'view_data', entityType: 'report', orgId: 'rpt-1',
+        visibilityScope: 'admin',
+        // metadata intentionally omitted
+      });
+      expect(result).toBeDefined();
+    });
+  });
 });

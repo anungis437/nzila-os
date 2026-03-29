@@ -251,4 +251,60 @@ describe('SatisfactionService', () => {
       expect(result).toEqual([]);
     });
   });
+
+  /* ── Batch 33: branch gap-fill ── */
+
+  describe('createSatisfactionSurvey (error path)', () => {
+    it('throws on DB insert failure', async () => {
+      mocks.mockFindFirst.mockResolvedValue(undefined); // no existing survey
+      mocks.mockInsert.mockReturnValue({
+        values: vi.fn().mockReturnValue({
+          returning: vi.fn().mockRejectedValue(new Error('DB write error')),
+        }),
+      });
+      const { createSatisfactionSurvey } = await import('../satisfaction-service');
+      await expect(
+        createSatisfactionSurvey({ organizationId: 'org-1', claimId: 'c-err', memberId: 'm-err', lroId: 'lro-1' })
+      ).rejects.toThrow('Failed to create satisfaction survey');
+    });
+  });
+
+  describe('submitSatisfactionRatings (isAnonymous default)', () => {
+    it('defaults isAnonymous to false when omitted', async () => {
+      const survey = { id: 's-1', memberId: 'm-1', status: 'pending' };
+      mocks.mockFindFirst.mockResolvedValue(survey);
+      mocks.mockUpdate.mockReturnValueOnce(chain([{ ...survey, status: 'completed' }]));
+      const { submitSatisfactionRatings } = await import('../satisfaction-service');
+      const result = await submitSatisfactionRatings('s-1', 'm-1', {
+        communicationRating: 5,
+        responsivenessRating: 5,
+        knowledgeRating: 5,
+        advocacyRating: 5,
+        professionalismRating: 5,
+        outcomeRating: 5,
+        // no isAnonymous, no wouldRecommend, no feedback
+      });
+      expect(result.status).toBe('completed');
+    });
+  });
+
+  describe('getLroPerformance (error path)', () => {
+    it('throws on DB query failure', async () => {
+      mocks.mockSelect.mockImplementation(() => {
+        throw new Error('connection lost');
+      });
+      const { getLroPerformance } = await import('../satisfaction-service');
+      await expect(getLroPerformance('lro-err')).rejects.toThrow('Failed to get LRO performance');
+    });
+  });
+
+  describe('getOrganizationLroRankings (error path)', () => {
+    it('throws on DB query failure', async () => {
+      mocks.mockSelectDistinct.mockImplementation(() => {
+        throw new Error('connection lost');
+      });
+      const { getOrganizationLroRankings } = await import('../satisfaction-service');
+      await expect(getOrganizationLroRankings('org-err')).rejects.toThrow('Failed to get LRO rankings');
+    });
+  });
 });

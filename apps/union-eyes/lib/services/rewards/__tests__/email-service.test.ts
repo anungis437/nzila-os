@@ -225,4 +225,26 @@ describe('email-service', () => {
       expect(htmlArg).not.toContain('1 days');
     });
   });
+
+  /* ── Batch 33: branch gap-fill ── */
+
+  describe('sendAwardReceivedEmail (icon branch)', () => {
+    it('renders WITH awardTypeIcon (truthy L214 branch)', async () => {
+      const dataWithIcon = {
+        recipientName: 'Alice',
+        recipientEmail: 'alice@example.com',
+        issuerName: 'Bob',
+        awardTypeName: 'Team Player',
+        awardTypeIcon: '🏆',
+        message: 'Great job!',
+        creditsAwarded: 100,
+        awardId: 'award-icon',
+        orgName: 'TestOrg',
+      };
+      const result = await sendAwardReceivedEmail(dataWithIcon);
+      expect(result.success).toBe(true);
+      const htmlArg = mocks.mockSend.mock.calls[0][0].html;
+      expect(htmlArg).toContain('🏆');
+    });
+  });
 });

@@ -58,5 +58,16 @@ describe('schema-error', () => {
         ),
       ).rejects.toBe(err);
     });
+
+    /* ── Batch 33: non-Error thrown ── */
+
+    it('handles non-Error thrown values', async () => {
+      await expect(
+        wrapSchemaQuery(
+          () => Promise.reject('string error'),
+          { table: 'users' },
+        ),
+      ).rejects.toBe('string error');
+    });
   });
 });

@@ -102,4 +102,19 @@ describe('sanitizeHtml', () => {
     const result = validateRedirectUrl('https://evil.example.com/phish');
     expect(result).toBeNull();
   });
+
+  /* ── Batch 33: catch-block coverage ── */
+
+  it('returns null when URL parsing throws', () => {
+    // Force URL constructor to throw by providing an invalid URL with no valid base
+    const origURL = globalThis.URL;
+    globalThis.URL = class {
+      constructor() { throw new TypeError('Invalid URL'); }
+    } as unknown as typeof URL;
+    try {
+      expect(validateRedirectUrl('not-a-url')).toBeNull();
+    } finally {
+      globalThis.URL = origURL;
+    }
+  });
 });

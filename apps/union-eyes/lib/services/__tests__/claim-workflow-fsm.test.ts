@@ -326,5 +326,29 @@ describe('claim-workflow-fsm', () => {
       expect(transitions).toContain('assigned');
       expect(transitions).toContain('rejected');
     });
+
+    /* ── Batch 33: branch gap-fill ── */
+
+    it('getTransitionRequirements returns blockIfCriticalSignals=false for submitted', () => {
+      const reqs = getTransitionRequirements('submitted', 'under_review');
+      expect(reqs.blockIfCriticalSignals).toBe(false);
+    });
+
+    it('getTransitionRequirements returns blockIfCriticalSignals=true for resolved→closed', () => {
+      const reqs = getTransitionRequirements('resolved', 'closed');
+      expect(reqs.blockIfCriticalSignals).toBe(true);
+    });
+
+    it('getTransitionRequirements falls back to ["member"] when no requiresRole entry', () => {
+      // closed has empty requiresRole and no transitions; query any targetStatus
+      const reqs = getTransitionRequirements('closed', 'submitted');
+      expect(reqs.requiresRole).toEqual(['member']);
+    });
+
+    it('getAllowedClaimTransitions with default member role filters correctly', () => {
+      // member role should get no transitions for submitted (only steward/admin can move it)
+      const transitions = getAllowedClaimTransitions('submitted');
+      expect(transitions).toHaveLength(0);
+    });
   });
 });
