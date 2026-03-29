@@ -15,11 +15,14 @@ import {
   getQueryPatterns,
   clearQueryPatterns,
   getQueryPerformanceSummary,
+  getCurrentlyRunningQueries,
+  getQueryPerformanceStats,
   type QueryPerformanceConfig,
   type SlowQueryLog,
   type QueryPattern,
   type QueryPerformanceSummary,
 } from '../query-performance-monitor';
+import { db } from '@/db/db';
 import { dbQueryDuration } from '@/lib/observability/metrics';
 
 describe('query-performance-monitor', () => {
@@ -331,6 +334,68 @@ describe('query-performance-monitor', () => {
       );
       const logs = getRecentSlowQueries(1);
       expect(logs[0].recommendation).toContain('EXPLAIN ANALYZE');
+    });
+  });
+
+  describe('gap coverage', () => {
+    it('logs non-Error thrown from query function', async () => {
+      await expect(
+        withQueryMonitoring('failString', async () => {
+          throw 'raw string error';
+        }),
+      ).rejects.toBe('raw string error');
+    });
+
+    it('truncates long query names in slow query logs', async () => {
+      const longName = 'A'.repeat(600);
+      await withQueryMonitoring(
+        longName,
+        async () => {
+          const start = Date.now();
+          while (Date.now() - start < 15) { /* spin */ }
+          return null;
+        },
+        { slowQueryThreshold: 1, sampleRate: 1, maxQueryLength: 50 },
+      );
+      const logs = getRecentSlowQueries(1);
+      expect(logs[0].query.length).toBeLessThan(600);
+      expect(logs[0].query).toContain('...');
+    });
+
+    it('shifts oldest slow query when history exceeds max', async () => {
+      // Log 101 slow queries to exceed MAX_SLOW_QUERY_HISTORY (100)
+      for (let i = 0; i < 101; i++) {
+        await withQueryMonitoring(
+          `overflow_${i}`,
+          async () => {
+            const start = Date.now();
+            while (Date.now() - start < 5) { /* spin */ }
+            return null;
+          },
+          { slowQueryThreshold: 1, sampleRate: 1 },
+        );
+      }
+      const logs = getRecentSlowQueries(200);
+      expect(logs.length).toBeLessThanOrEqual(100);
+    });
+
+    it('getCurrentlyRunningQueries calls db.execute', async () => {
+      (db.execute as ReturnType<typeof vi.fn>).mockResolvedValue([]);
+      const result = await getCurrentlyRunningQueries();
+      expect(Array.isArray(result)).toBe(true);
+      expect(db.execute).toHaveBeenCalled();
+    });
+
+    it('getQueryPerformanceStats returns data from pg_stat_statements', async () => {
+      (db.execute as ReturnType<typeof vi.fn>).mockResolvedValue([]);
+      const result = await getQueryPerformanceStats();
+      expect(Array.isArray(result)).toBe(true);
+    });
+
+    it('getQueryPerformanceStats returns empty on error', async () => {
+      (db.execute as ReturnType<typeof vi.fn>).mockRejectedValue(new Error('not available'));
+      const result = await getQueryPerformanceStats();
+      expect(result).toEqual([]);
     });
   });
 });

@@ -163,6 +163,97 @@ describe('LearningService', () => {
       expect(service.clearOldFeedback(90)).toBe(0);
     });
   });
+
+  describe('gap coverage', () => {
+    it('detectKnowledgeGap skips when results are found with count > 0', () => {
+      service.detectKnowledgeGap('known topic', { found: true, count: 5 });
+      // No pattern should be created for found results
+      const patterns = service.getUrgentPatterns('any-org');
+      expect(patterns.every(p => p.type !== 'missing_knowledge')).toBe(true);
+    });
+
+    it('getUrgentPatterns with organizationId returns all patterns and sorts', () => {
+      // Record 2+ patterns so the sort comparator actually executes
+      service.recordFeedback(makeFeedback({ type: 'correction', query: 'q1', correction: 'fix1' }));
+      service.recordFeedback(makeFeedback({ type: 'correction', query: 'q1', correction: 'fix2' }));
+      service.recordFeedback(makeFeedback({ type: 'downvote', query: 'q2' }));
+      const patterns = service.getUrgentPatterns('org-1');
+      expect(patterns.length).toBeGreaterThanOrEqual(2);
+    });
+
+    it('getStats handles neutral rating', () => {
+      service.recordFeedback(makeFeedback({ type: 'upvote', rating: 'neutral' as 'positive' }));
+      const stats = service.getStats();
+      expect(stats.totalFeedback).toBe(1);
+    });
+
+    it('getImprovementData includes knowledge gap descriptions', () => {
+      service.detectKnowledgeGap('gap topic', { found: false, count: 0 });
+      const data = service.getImprovementData();
+      expect(data.knowledgeGaps.length).toBeGreaterThanOrEqual(1);
+    });
+
+    it('applyAutoFix correctly applies when pattern exists and is auto-fixable', () => {
+      service.detectKnowledgeGap('fixable', { found: false, count: 0 });
+      // The map key is `gap:${normalize('fixable')}` = 'gap:fixable'
+      expect(service.applyAutoFix('gap:fixable')).toBe(true);
+    });
+
+    it('applyAutoFix returns false for non-auto-fixable pattern', () => {
+      // correction patterns are not autoFixable — use normalized map key
+      service.recordFeedback(makeFeedback({
+        type: 'correction',
+        query: 'same query',
+        correction: 'fix',
+      }));
+      // The map key for correction patterns is the normalized query
+      expect(service.applyAutoFix('same query')).toBe(false);
+    });
+
+    it('records escalation feedback (covers getEventType escalation case)', () => {
+      const result = service.recordFeedback(makeFeedback({ type: 'escalation' }));
+      expect(result.type).toBe('escalation');
+      const events = service.getEvents();
+      expect(events.some(e => e.type === 'pattern_detected')).toBe(true);
+    });
+
+    it('records completion feedback (covers getEventType completion case)', () => {
+      const result = service.recordFeedback(makeFeedback({ type: 'completion' }));
+      expect(result.type).toBe('completion');
+      const events = service.getEvents();
+      expect(events.some(e => e.type === 'template_updated')).toBe(true);
+    });
+
+    it('clearOldFeedback removes old entries', () => {
+      const fb = service.recordFeedback(makeFeedback());
+      // Manually set timestamp to the past
+      (fb as { timestamp: Date }).timestamp = new Date('2020-01-01');
+      const cleared = service.clearOldFeedback(1);
+      expect(cleared).toBe(1);
+    });
+
+    it('getImprovementData includes correction with response field', () => {
+      service.recordFeedback(makeFeedback({
+        type: 'correction',
+        query: 'test query',
+        response: 'original response',
+        correction: 'corrected response',
+      }));
+      const data = service.getImprovementData();
+      expect(data.corrections.length).toBe(1);
+      expect(data.corrections[0].original).toBe('original response');
+    });
+
+    it('getImprovementData uses empty string when correction has no response', () => {
+      service.recordFeedback(makeFeedback({
+        type: 'correction',
+        query: 'no response query',
+        correction: 'fixed',
+      }));
+      const data = service.getImprovementData();
+      expect(data.corrections[0].original).toBe('');
+    });
+  });
 });
 
 describe('learningService singleton', () => {

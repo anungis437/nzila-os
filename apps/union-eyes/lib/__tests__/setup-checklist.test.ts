@@ -92,4 +92,18 @@ describe('setup-checklist', () => {
       expect(getNextStep(ctx)).toBeNull();
     });
   });
+
+  describe('gap coverage', () => {
+    it('returns 0% when steps array is empty (covers steps.length === 0 branch)', () => {
+      const saved = [...SETUP_STEPS];
+      SETUP_STEPS.length = 0;
+      try {
+        const progress = computeSetupProgress(createEmptyContext());
+        expect(progress.percentage).toBe(0);
+        expect(progress.totalCount).toBe(0);
+      } finally {
+        SETUP_STEPS.push(...saved);
+      }
+    });
+  });
 });

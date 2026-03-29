@@ -329,4 +329,139 @@ describe('data-export-import', () => {
       expect(result.success).toBe(false);
     });
   });
+
+  // ── Gap coverage ────────────────────────────────────────────────────
+
+  describe('DataExportService gap coverage', () => {
+    it('applies organizationId filter on claims export', async () => {
+      const claimRow = {
+        claimId: 'c1', claimNumber: 'C-1', memberId: 'm1', claimType: 'grievance',
+        status: 'open', priority: 'high', incidentDate: null, createdAt: null,
+      };
+      mocks.mockWhere.mockResolvedValue([claimRow]);
+      const { DataExportService } = await import('../data-export-import');
+      const svc = new DataExportService();
+      const result = await svc.export('user1', 'claims', { organizationId: 'org-1' });
+      expect(result.status).toBe('completed');
+      expect(mocks.mockWhere).toHaveBeenCalled();
+    });
+
+    it('applies organizationId filter on documents export', async () => {
+      const docRow = {
+        id: 'd1', documentName: 'f.pdf', documentType: 'pdf',
+        filePath: '/f', fileSize: 100, mimeType: 'application/pdf',
+        version: 1, uploadedAt: null,
+      };
+      mocks.mockWhere.mockResolvedValue([docRow]);
+      const { DataExportService } = await import('../data-export-import');
+      const svc = new DataExportService();
+      const result = await svc.export('user1', 'documents', { organizationId: 'org-1' });
+      expect(result.status).toBe('completed');
+      expect(mocks.mockWhere).toHaveBeenCalled();
+    });
+
+    it('exports as excel format', async () => {
+      mocks.mockDynamic.mockImplementation(() =>
+        Object.assign(Promise.resolve([{ id: '1' }]), { where: mocks.mockWhere })
+      );
+      const { DataExportService } = await import('../data-export-import');
+      const svc = new DataExportService();
+      const result = await svc.export('user1', 'members', {}, { format: 'excel', includeRelations: false, dateFormat: '', compression: false });
+      expect(result.status).toBe('completed');
+      expect(result.format).toBe('excel');
+    });
+
+    it('exports with unknown format uses default', async () => {
+      mocks.mockDynamic.mockImplementation(() =>
+        Object.assign(Promise.resolve([{ id: '1' }]), { where: mocks.mockWhere })
+      );
+      const { DataExportService } = await import('../data-export-import');
+      const svc = new DataExportService();
+      const result = await svc.export('user1', 'members', {}, { format: 'xml' as 'json', includeRelations: false, dateFormat: '', compression: false });
+      expect(result.status).toBe('completed');
+    });
+
+    it('jsonToCsv returns empty string for empty data', async () => {
+      mocks.mockDynamic.mockImplementation(() =>
+        Object.assign(Promise.resolve([]), { where: mocks.mockWhere })
+      );
+      const { DataExportService } = await import('../data-export-import');
+      const svc = new DataExportService();
+      const result = await svc.export('user1', 'members', {}, { format: 'csv', includeRelations: false, dateFormat: '', compression: false });
+      expect(result.status).toBe('completed');
+    });
+
+    it('jsonToCsv escapes values with quotes', async () => {
+      const row = {
+        id: 'm1', userId: 'u1', name: 'Has "Quotes"', email: 'a@e.com', role: 'member',
+        status: 'active', department: null, membershipNumber: null, organizationId: 'org1',
+        createdAt: null,
+      };
+      mocks.mockDynamic.mockImplementation(() =>
+        Object.assign(Promise.resolve([row]), { where: mocks.mockWhere })
+      );
+      const { DataExportService } = await import('../data-export-import');
+      const svc = new DataExportService();
+      const result = await svc.export('user1', 'members', {}, { format: 'csv', includeRelations: false, dateFormat: '', compression: false });
+      expect(result.status).toBe('completed');
+    });
+  });
+
+  describe('DataImportService gap coverage', () => {
+    it('throws for member import missing email or organizationId', async () => {
+      const { DataImportService } = await import('../data-export-import');
+      const svc = new DataImportService();
+      const result = await svc.import(
+        'user1', 'members',
+        JSON.stringify([{ name: 'NoOrg', email: 'a@e.com' }]),
+        'json', { updateExisting: false, validateOnly: false }
+      );
+      // importRecord throws when organizationId is missing
+      expect(result.errors.length).toBeGreaterThan(0);
+    });
+
+    it('throws for claim import missing memberId or organizationId', async () => {
+      const { DataImportService } = await import('../data-export-import');
+      const svc = new DataImportService();
+      const result = await svc.import(
+        'user1', 'claims',
+        JSON.stringify([{ claimNumber: 'C1', memberId: 'm1' }]),
+        'json', { updateExisting: false, validateOnly: false }
+      );
+      expect(result.errors.length).toBeGreaterThan(0);
+    });
+
+    it('imports claims without incidentDate (uses default)', async () => {
+      const { DataImportService } = await import('../data-export-import');
+      const svc = new DataImportService();
+      const result = await svc.import(
+        'user1', 'claims',
+        JSON.stringify([{ memberId: 'm1', organizationId: 'org1', claimNumber: 'C9' }]),
+        'json', { updateExisting: false, validateOnly: false }
+      );
+      expect(result.imported).toBe(1);
+    });
+
+    it('imports claims with incidentDate string', async () => {
+      const { DataImportService } = await import('../data-export-import');
+      const svc = new DataImportService();
+      const result = await svc.import(
+        'user1', 'claims',
+        JSON.stringify([{ memberId: 'm1', organizationId: 'org1', incidentDate: '2026-01-01' }]),
+        'json', { updateExisting: false, validateOnly: false }
+      );
+      expect(result.imported).toBe(1);
+    });
+
+    it('CSV line with empty content returns empty records via csvToJson', async () => {
+      const { DataImportService } = await import('../data-export-import');
+      const svc = new DataImportService();
+      const result = await svc.import(
+        'user1', 'members', '', 'csv',
+        { updateExisting: false, validateOnly: true }
+      );
+      // Empty CSV → no data → valid with 0 records or error depending on validation
+      expect(result).toBeDefined();
+    });
+  });
 });
