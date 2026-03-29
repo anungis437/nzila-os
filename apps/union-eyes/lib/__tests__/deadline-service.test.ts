@@ -336,4 +336,32 @@ describe('deadline-service', () => {
   it('runDailyDigestJob runs without error', async () => {
     await expect(runDailyDigestJob('o1')).resolves.toBeUndefined();
   });
+
+  // ── Batch 35: branch gap-fill — non-Error catch fallbacks ────────────────
+  describe('Batch 35: non-Error catch branches', () => {
+    it('initializeClaimDeadlines wraps non-Error throw (L69)', async () => {
+      mocks.mockAutoCreate.mockRejectedValue('raw string error');
+      await expect(initializeClaimDeadlines('c1', 'o1', 'g', 'h', new Date(), 'u1')).rejects.toBe('raw string error');
+    });
+
+    it('updateDeadlineStatuses wraps non-Error throw (L120)', async () => {
+      mocks.mockMarkOverdue.mockRejectedValue(42);
+      await expect(updateDeadlineStatuses()).rejects.toBe(42);
+    });
+
+    it('generateDeadlineAlerts wraps non-Error throw (L163)', async () => {
+      mocks.mockGenerateAlerts.mockRejectedValue({ code: 'ERR' });
+      await expect(generateDeadlineAlerts('org1')).rejects.toEqual({ code: 'ERR' });
+    });
+
+    it('sendDailyDeadlineDigest wraps non-Error throw (L187)', async () => {
+      mocks.mockGetMemberSummary.mockRejectedValue('digest fail');
+      await expect(sendDailyDeadlineDigest('m1', 'o1')).rejects.toBe('digest fail');
+    });
+
+    it('escalateOverdueDeadlines wraps non-Error throw (L316)', async () => {
+      mocks.mockGetOverdue.mockRejectedValue(null);
+      await expect(escalateOverdueDeadlines('o1')).rejects.toBeNull();
+    });
+  });
 });

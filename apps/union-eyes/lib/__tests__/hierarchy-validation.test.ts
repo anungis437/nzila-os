@@ -7,6 +7,7 @@ import { describe, it, expect, vi, beforeEach } from 'vitest';
 
 const mocks = vi.hoisted(() => ({
   mockFindFirst: vi.fn(),
+  mockFindMany: vi.fn(),
   mockExecute: vi.fn(),
   mockUpdate: vi.fn(),
   mockSet: vi.fn(),
@@ -18,6 +19,7 @@ vi.mock('@/db/db', () => ({
     query: {
       organizations: {
         findFirst: mocks.mockFindFirst,
+        findMany: mocks.mockFindMany,
       },
     },
     execute: mocks.mockExecute,
@@ -59,6 +61,7 @@ import {
   validatePathConsistency,
   validateTypeHierarchy,
   validateOrganizationHierarchy,
+  validateAllOrganizations,
   MAX_HIERARCHY_DEPTH,
   HIERARCHY_TYPES,
 } from '../utils/hierarchy-validation';
@@ -320,6 +323,75 @@ describe('hierarchy-validation', () => {
 
       const result = await validateOrganizationHierarchy('org-2');
       expect(result.valid).toBe(true);
+    });
+
+    it('validates org with null hierarchyPath (|| [] fallback)', async () => {
+      mocks.mockFindFirst.mockResolvedValue({
+        id: 'org-1',
+        parentId: null,
+        hierarchyPath: null,
+        organizationType: 'congress',
+      });
+      const result = await validateOrganizationHierarchy('org-1');
+      // null path is replaced with [], which gives invalid root path
+      expect(result.valid).toBe(false);
+    });
+  });
+
+  // ── Batch 35: branch gap-fill ──────────────────────────────────────────────
+  describe('Batch 35: branch gap-fill', () => {
+    it('validatePathConsistency with parent having null hierarchyPath (|| [] fallback)', async () => {
+      mocks.mockFindFirst.mockResolvedValue({
+        hierarchyPath: null,
+        name: 'Parent',
+      });
+      const result = await validatePathConsistency('org-2', 'org-1', ['org-2']);
+      // null path → [] so expected = [...[], 'org-2'] = ['org-2'] which matches
+      expect(result.valid).toBe(true);
+    });
+
+    it('validateTypeHierarchy with both unknown org types uses ?? 99 fallback', () => {
+      const result = validateTypeHierarchy('some_custom', 'another_custom');
+      // Both map to 99, so orgLevel(99) <= parentLevel(99) → warning
+      expect(result.valid).toBe(true);
+      expect(result.warnings[0]).toContain('Unusual hierarchy');
+    });
+
+    it('validateAllOrganizations with all valid orgs', async () => {
+      mocks.mockFindMany.mockResolvedValue([
+        { id: 'org-1', name: 'Root Org' },
+      ]);
+      // validateOrganizationHierarchy('org-1') → findFirst returns root org
+      mocks.mockFindFirst.mockResolvedValue({
+        id: 'org-1',
+        parentId: null,
+        hierarchyPath: ['org-1'],
+        organizationType: 'congress',
+      });
+      // findOrphanedOrganizations → execute
+      mocks.mockExecute.mockResolvedValue({ rows: [] });
+
+      const result = await validateAllOrganizations();
+      expect(result.total).toBe(1);
+      expect(result.valid).toBe(1);
+      expect(result.invalid).toBe(0);
+      expect(result.orphans).toBe(0);
+      expect(result.issues).toHaveLength(0);
+    });
+
+    it('validateAllOrganizations with an invalid org', async () => {
+      mocks.mockFindMany.mockResolvedValue([
+        { id: 'org-bad', name: 'Bad Org' },
+      ]);
+      // validateOrganizationHierarchy('org-bad') → org not found
+      mocks.mockFindFirst.mockResolvedValue(null);
+      mocks.mockExecute.mockResolvedValue({ rows: [] });
+
+      const result = await validateAllOrganizations();
+      expect(result.total).toBe(1);
+      expect(result.valid).toBe(0);
+      expect(result.invalid).toBe(1);
+      expect(result.issues[0].orgId).toBe('org-bad');
     });
   });
 });

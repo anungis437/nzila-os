@@ -257,6 +257,34 @@ describe("dispatch-engine", () => {
         rankCandidates("org-1", "nonexistent", [])
       ).rejects.toThrow("Dispatch request not found.");
     });
+
+    it("handles null requiredSkills via fallback (Batch 35)", async () => {
+      const requestWhere = vi.fn().mockResolvedValue([
+        { id: "req-1", orgId: "org-1", requiredSkills: null, requestedWorkers: 1 },
+      ]);
+      const requestFrom = vi.fn().mockReturnValue({ where: requestWhere });
+
+      const rulesOrderBy = vi.fn().mockResolvedValue([
+        { ruleType: "seniority", ruleDefinition: {}, priority: 1 },
+      ]);
+      const rulesWhere = vi.fn().mockReturnValue({ orderBy: rulesOrderBy });
+      const rulesFrom = vi.fn().mockReturnValue({ where: rulesWhere });
+
+      let callCount = 0;
+      mocks.mockDb.select.mockImplementation(() => {
+        callCount++;
+        if (callCount === 1) return { from: requestFrom };
+        return { from: rulesFrom };
+      });
+
+      const candidates: MemberCandidate[] = [
+        { memberId: "m1", skills: ["welding"], seniorityYears: 5, available: true },
+      ];
+
+      const ranked = await rankCandidates("org-1", "req-1", candidates);
+      expect(ranked).toHaveLength(1);
+      expect(ranked[0].score).toBeGreaterThanOrEqual(0);
+    });
   });
 
   // ── assignWorkersToDispatch ──────────────────────────────────────────────
@@ -297,6 +325,22 @@ describe("dispatch-engine", () => {
 
       await assignWorkersToDispatch("r1", ["m1"]);
       expect(setFn).toHaveBeenCalledWith(expect.objectContaining({ status: "partially_filled" }));
+    });
+
+    it("skips status update when request not found after insert (Batch 35)", async () => {
+      mocks.mockReturning.mockResolvedValueOnce([{ requestId: "r1", memberId: "m1" }]);
+      const requestWhere = vi.fn().mockResolvedValue([]);
+      const requestFrom = vi.fn().mockReturnValue({ where: requestWhere });
+      mocks.mockDb.select.mockReturnValue({ from: requestFrom });
+
+      const setWhere = vi.fn().mockResolvedValue(undefined);
+      const setFn = vi.fn().mockReturnValue({ where: setWhere });
+      mocks.mockDb.update.mockReturnValue({ set: setFn });
+
+      const result = await assignWorkersToDispatch("r1", ["m1"]);
+      expect(result).toHaveLength(1);
+      // Update should not be called when request not found
+      expect(setFn).not.toHaveBeenCalled();
     });
   });
 });

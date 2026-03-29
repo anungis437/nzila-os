@@ -297,4 +297,58 @@ describe("cba-service", () => {
       expect(result).toEqual([]);
     });
   });
+
+  // ── Batch 35: branch gap-fill ────────────────────────────────────────────
+  describe("Batch 35: branch gap-fill", () => {
+    it("getCBAById with includeClauses: true covers L62 truthy arm", async () => {
+      mocks.mockDb.query.collectiveAgreements.findFirst.mockResolvedValueOnce({ id: "cba-1", title: "CBA" });
+      const result = await getCBAById("cba-1", { includeClauses: true });
+      expect(result).toEqual({ id: "cba-1", title: "CBA" });
+    });
+
+    it("listCBAs with unrecognised sortBy falls back to createdAt (L194)", async () => {
+      // Setup: two select calls — count then data
+      const countFrom = vi.fn().mockReturnValue({ where: vi.fn().mockResolvedValue([{ count: 0 }]) });
+      const dataOffset = vi.fn().mockResolvedValue([]);
+      const dataLimit = vi.fn().mockReturnValue({ offset: dataOffset });
+      const dataOrderBy = vi.fn().mockReturnValue({ limit: dataLimit });
+      const dataWhere = vi.fn().mockReturnValue({ orderBy: dataOrderBy });
+      const dataFrom = vi.fn().mockReturnValue({ where: dataWhere });
+      let n = 0;
+      mocks.mockDb.select.mockImplementation(() => { n++; return n === 1 ? { from: countFrom } : { from: dataFrom }; });
+
+      const result = await listCBAs({}, { sortBy: "title" as never });
+      expect(result.cbas).toEqual([]);
+    });
+
+    it("updateCBA throws on DB error (catch block)", async () => {
+      mocks.mockUpdate.mockImplementationOnce(() => { throw new Error("update-fail"); });
+      await expect(updateCBA("cba-1", {} as never)).rejects.toThrow("Failed to update CBA");
+    });
+
+    it("deleteCBA throws on DB error (catch block)", async () => {
+      mocks.mockUpdate.mockImplementationOnce(() => { throw new Error("del-fail"); });
+      await expect(deleteCBA("cba-1")).rejects.toThrow("Failed to delete CBA");
+    });
+
+    it("updateCBAStatus throws on DB error (catch block)", async () => {
+      mocks.mockUpdate.mockImplementationOnce(() => { throw new Error("status-fail"); });
+      await expect(updateCBAStatus("cba-1", "expired" as never)).rejects.toThrow("Failed to update CBA status");
+    });
+
+    it("getCBAsExpiringSoon throws on DB error (catch block)", async () => {
+      mocks.mockDb.select.mockImplementationOnce(() => { throw new Error("expire-fail"); });
+      await expect(getCBAsExpiringSoon("org-1")).rejects.toThrow("Failed to fetch expiring CBAs");
+    });
+
+    it("getCBAStatistics throws on DB error (catch block)", async () => {
+      mocks.mockDb.select.mockImplementationOnce(() => { throw new Error("stats-fail"); });
+      await expect(getCBAStatistics("org-1")).rejects.toThrow("Failed to fetch CBA statistics");
+    });
+
+    it("searchCBAs throws on DB error (catch block)", async () => {
+      mocks.mockDb.select.mockImplementationOnce(() => { throw new Error("search-fail"); });
+      await expect(searchCBAs("q")).rejects.toThrow("Failed to search CBAs");
+    });
+  });
 });

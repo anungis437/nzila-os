@@ -657,3 +657,38 @@ describe('fileValidation', () => {
     expect(fileValidation.maxFileSize).toBe(10 * 1024 * 1024);
   });
 });
+
+// ---------------------------------------------------------------------------
+// Batch 35: branch gap-fill — zod errorMap callbacks
+// ---------------------------------------------------------------------------
+describe('Batch 35: branch gap-fill', () => {
+  it('createVotingSession rejects invalid type enum with custom errorMap message', () => {
+    const result = bodySchemas.createVotingSession.safeParse({
+      title: 'Valid Title',
+      type: 'invalid_type',
+      meetingType: 'convention',
+      organizationId: '550e8400-e29b-41d4-a716-446655440000',
+      startTime: '2026-06-01T10:00:00Z',
+    });
+    expect(result.success).toBe(false);
+    if (!result.success) {
+      const typeIssue = result.error.issues.find(i => i.path.includes('type'));
+      expect(typeIssue?.message).toContain('Invalid type');
+    }
+  });
+
+  it('createVotingSession rejects invalid meetingType enum with custom errorMap message', () => {
+    const result = bodySchemas.createVotingSession.safeParse({
+      title: 'Valid Title',
+      type: 'convention',
+      meetingType: 'invalid_meeting',
+      organizationId: '550e8400-e29b-41d4-a716-446655440000',
+      startTime: '2026-06-01T10:00:00Z',
+    });
+    expect(result.success).toBe(false);
+    if (!result.success) {
+      const mtIssue = result.error.issues.find(i => i.path.includes('meetingType'));
+      expect(mtIssue?.message).toContain('Invalid meeting type');
+    }
+  });
+});

@@ -171,6 +171,34 @@ describe('grievance-notifications', () => {
         }),
       );
     });
+
+    it('skips grievant notification when no grievant email (Batch 35)', async () => {
+      await sendGrievanceStageChangeNotification({
+        ...CTX,
+        grievantEmail: undefined,
+        previousStage: 'step1',
+        newStage: 'step2',
+      });
+      // Only officer notification
+      expect(mocks.mockSend).toHaveBeenCalledTimes(1);
+      expect(mocks.mockSend).toHaveBeenCalledWith(
+        expect.objectContaining({ recipientEmail: 'officer@example.com' }),
+      );
+    });
+
+    it('skips officer notification when no officer email (Batch 35)', async () => {
+      await sendGrievanceStageChangeNotification({
+        ...CTX,
+        assignedOfficerEmail: undefined,
+        previousStage: 'step1',
+        newStage: 'step2',
+      });
+      // Only grievant notification
+      expect(mocks.mockSend).toHaveBeenCalledTimes(1);
+      expect(mocks.mockSend).toHaveBeenCalledWith(
+        expect.objectContaining({ recipientEmail: 'jane@example.com' }),
+      );
+    });
   });
 
   // ================================================================
@@ -290,6 +318,32 @@ describe('grievance-notifications', () => {
         resolutionType: 'withdrawn',
       });
       expect(mocks.mockSend).toHaveBeenCalledTimes(2);
+    });
+
+    it('skips grievant notification when no grievant email (Batch 35)', async () => {
+      await sendGrievanceResolvedNotification({
+        ...CTX,
+        grievantEmail: undefined,
+        resolutionType: 'settled',
+      });
+      // Only officer notification
+      expect(mocks.mockSend).toHaveBeenCalledTimes(1);
+      expect(mocks.mockSend).toHaveBeenCalledWith(
+        expect.objectContaining({ recipientEmail: 'officer@example.com' }),
+      );
+    });
+
+    it('skips officer notification when no officer email (Batch 35)', async () => {
+      await sendGrievanceResolvedNotification({
+        ...CTX,
+        assignedOfficerEmail: undefined,
+        resolutionType: 'denied',
+      });
+      // Only grievant notification
+      expect(mocks.mockSend).toHaveBeenCalledTimes(1);
+      expect(mocks.mockSend).toHaveBeenCalledWith(
+        expect.objectContaining({ recipientEmail: 'jane@example.com' }),
+      );
     });
   });
 

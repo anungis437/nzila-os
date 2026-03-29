@@ -280,6 +280,27 @@ describe('date-utils', () => {
       const result = formatRelativeTime(past, base);
       expect(result).toContain('year');
     });
+
+    it('formats future dates (Batch 35)', () => {
+      const base = '2026-03-15T12:00:00Z';
+      const futureYear = '2028-03-15T12:00:00Z';
+      expect(formatRelativeTime(futureYear, base)).toContain('year');
+
+      const futureMonth = '2026-05-20T12:00:00Z';
+      expect(formatRelativeTime(futureMonth, base)).toContain('month');
+
+      const futureWeek = '2026-03-25T12:00:00Z';
+      expect(formatRelativeTime(futureWeek, base)).toContain('week');
+
+      const futureHour = '2026-03-15T16:00:00Z';
+      expect(formatRelativeTime(futureHour, base)).toContain('hour');
+
+      const futureMin = '2026-03-15T12:10:00Z';
+      expect(formatRelativeTime(futureMin, base)).toContain('minute');
+
+      const futureSec = '2026-03-15T12:00:10Z';
+      expect(formatRelativeTime(futureSec, base)).toContain('second');
+    });
   });
 
   describe('TIMEZONES', () => {

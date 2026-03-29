@@ -178,6 +178,30 @@ describe("member-service", () => {
       });
       await expect(listMembers()).rejects.toThrow();
     });
+
+    it("sorts by createdAt by default when sortBy is unrecognized (Batch 35)", async () => {
+      const members = [{ id: "m-1" }];
+      let n = 0;
+      mocks.mockSelect.mockImplementation(() => {
+        n++;
+        if (n === 1) return { from: sfw([{ count: 1 }]).from };
+        return { from: sfwolo(members).from };
+      });
+      const result = await listMembers({}, { sortBy: "unknown_field" });
+      expect(result.members).toEqual(members);
+    });
+
+    it("sorts by hireDate when specified (Batch 35)", async () => {
+      const members = [{ id: "m-1" }];
+      let n = 0;
+      mocks.mockSelect.mockImplementation(() => {
+        n++;
+        if (n === 1) return { from: sfw([{ count: 1 }]).from };
+        return { from: sfwolo(members).from };
+      });
+      const result = await listMembers({}, { sortBy: "hireDate" });
+      expect(result.members).toEqual(members);
+    });
   });
 
   // ── CRUD ────────────────────────────────────────────────────────────
@@ -239,6 +263,18 @@ describe("member-service", () => {
       expect(result.success).toBe(true);
       expect(result.processed).toBe(2);
     });
+
+    it("captures error message during import (Batch 35)", async () => {
+      mocks.mockInsert.mockImplementation(() => {
+        throw new Error("DB constraint");
+      });
+      const result = await bulkImportMembers([
+        { organizationId: "o1", firstName: "A" } as never,
+      ]);
+      expect(result.success).toBe(false);
+      expect(result.errors).toBeDefined();
+      expect(result.errors![0].error).toContain("member");
+    });
   });
 
   describe("bulkUpdateMemberStatus", () => {
@@ -283,6 +319,26 @@ describe("member-service", () => {
         };
       });
       const result = await searchMembers("org-1", "Jane");
+      expect(result.members).toEqual(members);
+    });
+
+    it("searches without searchQuery (Batch 35)", async () => {
+      const members = [{ id: "m-1" }];
+      let n = 0;
+      mocks.mockSelect.mockImplementation(() => {
+        n++;
+        if (n === 1) return { from: sfw([{ count: 1 }]).from };
+        return {
+          from: vi.fn().mockReturnValue({
+            where: vi.fn().mockReturnValue({
+              limit: vi.fn().mockReturnValue({
+                offset: vi.fn().mockResolvedValue(members),
+              }),
+            }),
+          }),
+        };
+      });
+      const result = await searchMembers("org-1");
       expect(result.members).toEqual(members);
     });
   });
