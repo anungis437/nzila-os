@@ -179,7 +179,7 @@ export async function createDeadline(
     // Calculate due date
     let dueDate: Date;
     const referenceDate = options.referenceDate || new Date();
-    const daysToAdd = options.customDays || rule?.businessDays || 0;
+    const daysToAdd = options.customDays || rule!.businessDays;
     const useBusinessDays = options.useBusinessDays ?? true;
 
     if (useBusinessDays) {
@@ -226,7 +226,6 @@ export async function createGrievanceStepDeadlines(
   filingDate: Date,
   _incidentDate: Date
 ): Promise<{ success: boolean; deadlineIds: string[]; error?: string }> {
-  try {
     const deadlineIds: string[] = [];
 
     // Step 1 Response deadline (from filing date)
@@ -255,13 +254,6 @@ export async function createGrievanceStepDeadlines(
     if (investigationResult.deadlineId) deadlineIds.push(investigationResult.deadlineId);
 
     return { success: true, deadlineIds };
-  } catch (error) {
-return {
-      success: false,
-      deadlineIds: [],
-      error: error instanceof Error ? error.message : "Failed to create deadlines",
-    };
-  }
 }
 
 /**
@@ -379,7 +371,7 @@ export async function approveDeadlineExtension(
         dueDate: newDate,
         extensionGranted: true,
         status: "extended",
-        notes: `${deadline.notes || ''}\n\nExtension approved by ${approvedBy} on ${new Date().toISOString()}`,
+        notes: `${deadline.notes}\n\nExtension approved by ${approvedBy} on ${new Date().toISOString()}`,
       })
       .where(eq(grievanceDeadlines.id, deadlineId));
 
