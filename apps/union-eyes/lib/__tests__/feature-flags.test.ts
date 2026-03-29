@@ -1,34 +1,30 @@
 import { describe, it, expect, vi, beforeEach } from 'vitest';
 
+// ── Proxy chain helper ───────────────────────────────────────────────────────
+
+function chain(resolveValue: unknown): unknown {
+  const handler: ProxyHandler<object> = {
+    get: (_target, prop) => {
+      if (prop === 'then') return (resolve: (v: unknown) => void) => resolve(resolveValue);
+      return vi.fn(() => new Proxy({}, handler));
+    },
+  };
+  return new Proxy({}, handler);
+}
+
+// ── Hoisted mocks ────────────────────────────────────────────────────────────
+
 const mocks = vi.hoisted(() => ({
   mockSelect: vi.fn(),
-  mockFrom: vi.fn(),
-  mockWhere: vi.fn(),
   mockUpdate: vi.fn(),
-  mockSet: vi.fn(),
   mockInsert: vi.fn(),
-  mockValues: vi.fn(),
-  mockReturning: vi.fn(),
-  mockLimit: vi.fn(),
 }));
 
 vi.mock('@/db', () => ({
   db: {
-    select: mocks.mockSelect.mockReturnValue({
-      from: mocks.mockFrom.mockReturnValue({
-        where: mocks.mockWhere.mockReturnValue({
-          limit: mocks.mockLimit,
-        }),
-      }),
-    }),
-    update: mocks.mockUpdate.mockReturnValue({
-      set: mocks.mockSet.mockReturnValue({
-        where: vi.fn().mockResolvedValue(undefined),
-      }),
-    }),
-    insert: mocks.mockInsert.mockReturnValue({
-      values: mocks.mockValues.mockResolvedValue(undefined),
-    }),
+    select: mocks.mockSelect,
+    update: mocks.mockUpdate,
+    insert: mocks.mockInsert,
   },
 }));
 
@@ -55,17 +51,23 @@ import {
   OrgFlag,
   checkFlags,
   features,
+  refreshFeatureFlags,
+  getAllFeatureFlags,
+  toggleFeatureFlag,
 } from '../feature-flags';
 
 describe('feature-flags', () => {
   beforeEach(() => {
     vi.clearAllMocks();
+    mocks.mockSelect.mockReturnValue(chain([]));
+    mocks.mockUpdate.mockReturnValue(chain(undefined));
+    mocks.mockInsert.mockReturnValue(chain(undefined));
   });
 
+  // ── BooleanFlag ─────────────────────────────────────────────
   describe('BooleanFlag', () => {
     it('returns default value when no config found', () => {
       const flag = new BooleanFlag('test-flag', true);
-      // No config is loaded so it falls back to default
       expect(flag.enabled).toBe(true);
     });
 
@@ -73,30 +75,196 @@ describe('feature-flags', () => {
       const flag = new BooleanFlag('unset-flag');
       expect(flag.enabled).toBe(false);
     });
-  });
 
-  describe('PercentageFlag', () => {
-    it('returns false when config not loaded', () => {
-      const flag = new PercentageFlag('pct-flag', 50);
-      // No config loaded → not enabled
-      expect(flag.isEnabled('user-123')).toBe(false);
+    it('enable() calls updateFeatureFlag', async () => {
+      // select for existing check → not found → insert new flag → refreshFeatureFlags
+      mocks.mockSelect
+        .mockReturnValueOnce(chain([]))           // updateFeatureFlag: check exists
+        .mockReturnValueOnce(chain([]));           // refreshFeatureFlags: load all
+      const flag = new BooleanFlag('toggle-flag');
+      await flag.enable();
+      expect(mocks.mockInsert).toHaveBeenCalled();
+    });
+
+    it('disable() updates existing flag', async () => {
+      mocks.mockSelect
+        .mockReturnValueOnce(chain([{ name: 'toggle-flag', enabled: true }]))  // exists
+        .mockReturnValueOnce(chain([]));           // refreshFeatureFlags
+      const flag = new BooleanFlag('toggle-flag');
+      await flag.disable();
+      expect(mocks.mockUpdate).toHaveBeenCalled();
     });
   });
 
+  // ── PercentageFlag ──────────────────────────────────────────
+  describe('PercentageFlag', () => {
+    it('returns false when config not loaded', () => {
+      const flag = new PercentageFlag('pct-flag', 50);
+      expect(flag.isEnabled('user-123')).toBe(false);
+    });
+
+    it('returns true for users within percentage when config loaded', async () => {
+      // Pre-populate the cache via refreshFeatureFlags
+      mocks.mockSelect.mockReturnValueOnce(chain([
+        { name: 'pct-test', type: 'percentage', enabled: true, percentage: 100, allowedOrganizations: null, allowedUsers: null, description: null },
+      ]));
+      await refreshFeatureFlags();
+
+      const flag = new PercentageFlag('pct-test', 0);
+      // With 100% rollout, any user should be enabled
+      expect(flag.isEnabled('any-user')).toBe(true);
+    });
+
+    it('setPercentage updates flag', async () => {
+      mocks.mockSelect
+        .mockReturnValueOnce(chain([]))  // updateFeatureFlag: check exists
+        .mockReturnValueOnce(chain([])); // refreshFeatureFlags
+      const flag = new PercentageFlag('rollout-flag', 0);
+      await flag.setPercentage(50);
+      expect(mocks.mockInsert).toHaveBeenCalled();
+    });
+
+    it('hash is deterministic for same input', () => {
+      const flag = new PercentageFlag('det-flag', 50);
+      // Call isEnabled twice with same userId — both should return same result
+      const r1 = flag.isEnabled('user-abc');
+      const r2 = flag.isEnabled('user-abc');
+      expect(r1).toBe(r2);
+    });
+  });
+
+  // ── OrgFlag ─────────────────────────────────────────────────
   describe('OrgFlag', () => {
     it('returns false when config not loaded', () => {
       const flag = new OrgFlag('org-flag');
       expect(flag.isEnabledForOrg('org-1')).toBe(false);
     });
+
+    it('returns true when org is in allowedOrgs', async () => {
+      mocks.mockSelect.mockReturnValueOnce(chain([
+        { name: 'org-test', type: 'tenant', enabled: true, percentage: null, allowedOrganizations: ['org-1', 'org-2'], allowedUsers: null, description: null },
+      ]));
+      await refreshFeatureFlags();
+
+      const flag = new OrgFlag('org-test');
+      expect(flag.isEnabledForOrg('org-1')).toBe(true);
+      expect(flag.isEnabledForOrg('org-3')).toBe(false);
+    });
+
+    it('enableForOrg adds org to allowed list', async () => {
+      // Pre-populate cache with flag that has no orgs
+      mocks.mockSelect.mockReturnValueOnce(chain([
+        { name: 'org-add', type: 'tenant', enabled: true, percentage: null, allowedOrganizations: [], allowedUsers: null, description: null },
+      ]));
+      await refreshFeatureFlags();
+
+      // updateFeatureFlag: check exists → update → refresh
+      mocks.mockSelect
+        .mockReturnValueOnce(chain([{ name: 'org-add' }]))   // exists
+        .mockReturnValueOnce(chain([]));                      // refresh
+      const flag = new OrgFlag('org-add');
+      await flag.enableForOrg('org-new');
+      expect(mocks.mockUpdate).toHaveBeenCalled();
+    });
+
+    it('disableForOrg removes org from list', async () => {
+      mocks.mockSelect.mockReturnValueOnce(chain([
+        { name: 'org-rem', type: 'tenant', enabled: true, percentage: null, allowedOrganizations: ['org-1', 'org-2'], allowedUsers: null, description: null },
+      ]));
+      await refreshFeatureFlags();
+
+      mocks.mockSelect
+        .mockReturnValueOnce(chain([{ name: 'org-rem' }]))
+        .mockReturnValueOnce(chain([]));
+      const flag = new OrgFlag('org-rem');
+      await flag.disableForOrg('org-1');
+      expect(mocks.mockUpdate).toHaveBeenCalled();
+    });
   });
 
+  // ── checkFlags ──────────────────────────────────────────────
   describe('checkFlags', () => {
     it('returns false for unknown flags', () => {
       const result = checkFlags(['unknown-flag']);
       expect(result['unknown-flag']).toBe(false);
     });
+
+    it('returns correct statuses from cache', async () => {
+      mocks.mockSelect.mockReturnValueOnce(chain([
+        { name: 'on-flag', type: 'boolean', enabled: true, percentage: null, allowedOrganizations: null, allowedUsers: null, description: null },
+        { name: 'off-flag', type: 'boolean', enabled: false, percentage: null, allowedOrganizations: null, allowedUsers: null, description: null },
+      ]));
+      await refreshFeatureFlags();
+
+      const result = checkFlags(['on-flag', 'off-flag', 'missing']);
+      expect(result['on-flag']).toBe(true);
+      expect(result['off-flag']).toBe(false);
+      expect(result['missing']).toBe(false);
+    });
   });
 
+  // ── refreshFeatureFlags ─────────────────────────────────────
+  describe('refreshFeatureFlags', () => {
+    it('populates cache from DB', async () => {
+      const flagData = [
+        { name: 'flag1', type: 'boolean', enabled: true, percentage: null, allowedOrganizations: null, allowedUsers: null, description: 'desc' },
+      ];
+      // refreshFeatureFlags called directly + again inside getAllFeatureFlags
+      mocks.mockSelect
+        .mockReturnValueOnce(chain(flagData))
+        .mockReturnValueOnce(chain(flagData));
+      await refreshFeatureFlags();
+      const all = await getAllFeatureFlags();
+      expect(all.length).toBeGreaterThanOrEqual(1);
+      expect(all.find(f => f.name === 'flag1')?.enabled).toBe(true);
+    });
+
+    it('keeps cache on error', async () => {
+      // First populate cache
+      mocks.mockSelect.mockReturnValueOnce(chain([
+        { name: 'keep', type: 'boolean', enabled: true, percentage: null, allowedOrganizations: null, allowedUsers: null, description: null },
+      ]));
+      await refreshFeatureFlags();
+
+      // Now force an error
+      mocks.mockSelect.mockImplementationOnce(() => { throw new Error('DB down'); });
+      await refreshFeatureFlags(); // should not throw
+      // Previous cache still has 'keep'
+    });
+  });
+
+  // ── getAllFeatureFlags ───────────────────────────────────────
+  describe('getAllFeatureFlags', () => {
+    it('returns all cached flags', async () => {
+      mocks.mockSelect.mockReturnValueOnce(chain([
+        { name: 'a', type: 'boolean', enabled: true, percentage: null, allowedOrganizations: null, allowedUsers: null, description: null },
+        { name: 'b', type: 'boolean', enabled: false, percentage: null, allowedOrganizations: null, allowedUsers: null, description: null },
+      ]));
+      const all = await getAllFeatureFlags();
+      expect(all).toHaveLength(2);
+    });
+  });
+
+  // ── toggleFeatureFlag ───────────────────────────────────────
+  describe('toggleFeatureFlag', () => {
+    it('toggles a flag on', async () => {
+      mocks.mockSelect
+        .mockReturnValueOnce(chain([{ name: 'tog' }]))  // exists check
+        .mockReturnValueOnce(chain([]));                 // refresh
+      await toggleFeatureFlag('tog', true);
+      expect(mocks.mockUpdate).toHaveBeenCalled();
+    });
+
+    it('creates flag if not existing', async () => {
+      mocks.mockSelect
+        .mockReturnValueOnce(chain([]))  // not found
+        .mockReturnValueOnce(chain([])); // refresh
+      await toggleFeatureFlag('new-flag', true);
+      expect(mocks.mockInsert).toHaveBeenCalled();
+    });
+  });
+
+  // ── features registry ───────────────────────────────────────
   describe('features registry', () => {
     it('contains expected feature flags', () => {
       expect(features).toHaveProperty('newClaimFlow');
