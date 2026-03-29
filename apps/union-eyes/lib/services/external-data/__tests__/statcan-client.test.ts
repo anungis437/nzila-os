@@ -329,6 +329,46 @@ describe('StatisticsCanadaClient (gap coverage)', () => {
     expect(url).toContain('geo=35');
     expect(url).toContain('years=2024');
   });
+
+  it('getUnionDensity filters invalid records and hits parse-error logging path', async () => {
+    const client = new StatisticsCanadaClient();
+    (global.fetch as ReturnType<typeof vi.fn>).mockResolvedValue({
+      ok: true,
+      json: () => Promise.resolve([{ invalid: true }]),
+    });
+
+    const result = await client.getUnionDensity({ geography: '35' });
+    expect(result).toHaveLength(0);
+  });
+
+  it('getWageData handles non-Error parse throws with fallback message', async () => {
+    const client = new StatisticsCanadaClient();
+    const parseSpy = vi.spyOn(WageDataSchema, 'parse').mockImplementation(() => {
+      throw 'schema parse exploded';
+    });
+
+    try {
+      (global.fetch as ReturnType<typeof vi.fn>).mockResolvedValue({
+        ok: true,
+        json: () => Promise.resolve([{
+          GEO: '01', GEOUID: '01', GEOName: 'Canada',
+          NAICS: '11', NAICSName: 'Agri',
+          NOC: '1234', NOCName: 'Test',
+          Wages: { UOM: 'Hourly', Vector: 'v1', Coordinate: 1, Value: 28.5, Decimals: 2 },
+          Sex: 'B', AgeGroup: '15+', AgeGroupName: '15+',
+          Education: '1', EducationName: 'T',
+          Statistics: 'med', StatisticsName: 'Median',
+          DataType: '1', DataTypeName: 'T1',
+          RefDate: '2025-01', Source: 'StatCan',
+        }]),
+      });
+
+      const result = await client.getWageData({ nocCode: '1234' });
+      expect(result).toHaveLength(0);
+    } finally {
+      parseSpy.mockRestore();
+    }
+  });
 });
 
 describe('Zod schemas', () => {
