@@ -109,7 +109,7 @@ return NextResponse.json({
     });
   } catch (error: unknown) {
     return NextResponse.json(
-      { error: error instanceof Error ? error.message : 'Failed to execute scheduled tasks' },
+      { error: 'Failed to execute scheduled tasks' },
       { status: 500 }
     );
   }

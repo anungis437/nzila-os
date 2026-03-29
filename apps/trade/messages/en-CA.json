@@ -1,0 +1,29 @@
+{
+  "common": {
+    "appName": "Trade",
+    "loading": "Loading...",
+    "save": "Save",
+    "cancel": "Cancel",
+    "delete": "Delete",
+    "edit": "Edit",
+    "create": "Create"
+  },
+  "nav": {
+    "dashboard": "Dashboard",
+    "orders": "Orders",
+    "inventory": "Inventory",
+    "logistics": "Logistics",
+    "contracts": "Contracts",
+    "partners": "Partners",
+    "settlements": "Settlements",
+    "settings": "Settings"
+  },
+  "commerce": {
+    "orders": "Orders",
+    "inventory": "Inventory",
+    "logistics": "Logistics",
+    "contracts": "Contracts",
+    "settlements": "Settlements",
+    "tradeFinance": "Trade Finance"
+  }
+}

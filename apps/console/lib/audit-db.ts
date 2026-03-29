@@ -23,7 +23,7 @@
 import { platformDb } from '@nzila/db/platform'
 import { auditEvents } from '@nzila/db/schema'
 import { computeEntryHash } from '@nzila/os-core/hash'
-import { eq, desc } from 'drizzle-orm'
+import { eq, desc, and, gte, lte, asc, SQL } from 'drizzle-orm'
 import { createLogger } from '@nzila/os-core'
 
 const logger = createLogger('audit-db')
@@ -278,4 +278,82 @@ export async function exportAuditTrailBuffer(
     (e) => e.targetType === targetType && e.targetId === targetId,
   )
   return Buffer.from(JSON.stringify(filtered, null, 2))
+}
+
+// ── Query audit events with filters ─────────────────────────────────────────
+
+export interface QueryAuditEventsInput {
+  orgId: string
+  actorId?: string
+  action?: string
+  targetType?: string
+  targetId?: string
+  startTime?: Date
+  endTime?: Date
+  limit?: number
+  offset?: number
+}
+
+export interface QueryAuditEventsResult {
+  events: AuditEventRow[]
+  total: number
+  limit: number
+  offset: number
+}
+
+/**
+ * Query audit events with optional filters for actor, action, target, and time range.
+ * Results are org-scoped (mandatory) and ordered newest-first.
+ * Maximum 200 rows per page.
+ */
+export async function queryAuditEvents(
+  input: QueryAuditEventsInput,
+): Promise<QueryAuditEventsResult> {
+  const pageLimit = Math.min(input.limit ?? 50, 200)
+  const pageOffset = input.offset ?? 0
+
+  const conditions: SQL[] = [eq(auditEvents.orgId, input.orgId)]
+
+  if (input.actorId) {
+    conditions.push(eq(auditEvents.actorClerkUserId, input.actorId))
+  }
+  if (input.action) {
+    conditions.push(eq(auditEvents.action, input.action))
+  }
+  if (input.targetType) {
+    conditions.push(eq(auditEvents.targetType, input.targetType))
+  }
+  if (input.targetId) {
+    conditions.push(eq(auditEvents.targetId, input.targetId))
+  }
+  if (input.startTime) {
+    conditions.push(gte(auditEvents.createdAt, input.startTime))
+  }
+  if (input.endTime) {
+    conditions.push(lte(auditEvents.createdAt, input.endTime))
+  }
+
+  const where = and(...conditions)!
+
+  const [countResult, events] = await Promise.all([
+    platformDb
+      .select({ count: auditEvents.id })
+      .from(auditEvents)
+      .where(where)
+      .then((rows) => rows.length),
+    platformDb
+      .select()
+      .from(auditEvents)
+      .where(where)
+      .orderBy(desc(auditEvents.createdAt))
+      .limit(pageLimit)
+      .offset(pageOffset) as unknown as Promise<AuditEventRow[]>,
+  ])
+
+  return {
+    events,
+    total: countResult,
+    limit: pageLimit,
+    offset: pageOffset,
+  }
 }

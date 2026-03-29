@@ -10,7 +10,7 @@
  */
 
 import { NextResponse } from 'next/server';
-import { withRoleAuth } from '@/lib/role-middleware';
+import { withRoleAuth, type MemberRole } from '@/lib/role-middleware';
 import { getSmartDefaults } from '@/lib/utils/smart-onboarding';
 import { logger } from '@/lib/logger';
  
@@ -19,7 +19,7 @@ import {
   standardErrorResponse,
 } from '@/lib/api/standardized-responses';
 
-export const GET = withRoleAuth('member', async (request, context) => {
+export const GET = withRoleAuth('member' as MemberRole, async (request, context) => {
   const { userId, organizationId: _organizationId } = context;
 
   try {

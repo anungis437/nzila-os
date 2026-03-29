@@ -431,9 +431,7 @@ export class PaymentService {
       // Generate receipt number (format: DUES-YYYYMMDD-XXXXX)
       const date = new Date();
       const dateStr = date.toISOString().slice(0, 10).replace(/-/g, '');
-      const random = Math.floor(Math.random() * 100000)
-        .toString()
-        .padStart(5, '0');
+      const random = crypto.randomUUID().slice(0, 5).toUpperCase();
       const receiptNumber = `DUES-${dateStr}-${random}`;
 
       const receiptUrl = transaction.receiptUrl || await PaymentService.generateReceiptPdfUrl({

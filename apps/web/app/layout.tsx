@@ -1,6 +1,8 @@
 import type { Metadata } from "next";
 import { ClerkProvider } from "@clerk/nextjs";
 import { Poppins } from "next/font/google";
+import { NextIntlClientProvider } from 'next-intl';
+import { getLocale, getMessages } from 'next-intl/server';
 import "./globals.css";
 import Navigation from "@/components/public/Navigation";
 import Footer from "@/components/public/Footer";
@@ -65,24 +67,29 @@ export const metadata: Metadata = {
   },
 };
 
-export default function RootLayout({
+export default async function RootLayout({
   children,
 }: Readonly<{
   children: React.ReactNode;
 }>) {
+  const locale = await getLocale();
+  const messages = await getMessages();
+
   return (
     <ClerkProvider>
-      <html lang="en">
+      <html lang={locale}>
         <head>
           <JsonLd />
         </head>
         <body className={`${poppins.className} custom-scrollbar`}>
-          <Navigation />
-          <PageTransition>
-            {children}
-          </PageTransition>
-          <Footer />
-          <BackToTop />
+          <NextIntlClientProvider locale={locale} messages={messages}>
+            <Navigation />
+            <PageTransition>
+              {children}
+            </PageTransition>
+            <Footer />
+            <BackToTop />
+          </NextIntlClientProvider>
         </body>
       </html>
     </ClerkProvider>

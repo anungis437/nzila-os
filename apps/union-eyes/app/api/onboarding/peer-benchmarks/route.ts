@@ -11,7 +11,7 @@
  */
 
 import { NextResponse } from 'next/server';
-import { withRoleAuth } from '@/lib/role-middleware';
+import { withRoleAuth, type MemberRole } from '@/lib/role-middleware';
 import { getPeerBenchmarks } from '@/lib/utils/smart-onboarding';
 import { logger } from '@/lib/logger';
 import { eventBus, AppEvents } from '@/lib/events';
@@ -22,7 +22,7 @@ import {
   ErrorCode,
   standardErrorResponse,
 } from '@/lib/api/standardized-responses';
-export const GET = withRoleAuth('member', async (request, context) => {
+export const GET = withRoleAuth('member' as MemberRole, async (request, context) => {
   const { userId, organizationId: _organizationId } = context;
 
   try {
@@ -78,7 +78,6 @@ export const GET = withRoleAuth('member', async (request, context) => {
     return NextResponse.json(
       { 
         error: 'Failed to get peer benchmarks',
-        details: error instanceof Error ? error.message : 'Unknown error'
       },
       { status: 500 }
     );

@@ -55,7 +55,7 @@ export const POST = withApiAuth(async (_request: NextRequest) => {
 
     return standardErrorResponse(
       ErrorCode.INTERNAL_ERROR,
-      error instanceof Error ? error.message : 'Failed to trigger dues reminders'
+      'Failed to trigger dues reminders'
     );
   }
 });

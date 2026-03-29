@@ -1,0 +1,26 @@
+{
+  "common": {
+    "appName": "Portail Client",
+    "loading": "Chargement...",
+    "save": "Enregistrer",
+    "cancel": "Annuler",
+    "submit": "Soumettre",
+    "back": "Retour"
+  },
+  "nav": {
+    "dashboard": "Tableau de bord",
+    "myCase": "Mon dossier",
+    "documents": "Documents",
+    "messages": "Messages",
+    "payments": "Paiements",
+    "profile": "Profil"
+  },
+  "portal": {
+    "caseStatus": "État du dossier",
+    "documents": "Documents",
+    "uploadDocument": "Téléverser un document",
+    "messages": "Messages",
+    "payments": "Paiements",
+    "timeline": "Chronologie"
+  }
+}

@@ -1,0 +1,10 @@
+{
+  "common": {
+    "appName": "Portail Client",
+    "loading": "Chargement...",
+    "save": "Enregistrer",
+    "cancel": "Annuler",
+    "submit": "Soumettre",
+    "back": "Retour"
+  }
+}

@@ -162,7 +162,7 @@ export const POST = withApiAuth(async (request: NextRequest) => {
       {
         success: false,
         message: 'Failed to seed CUPE pilot data',
-        error: error instanceof Error ? error.message : 'Unknown error',
+        error: 'Internal server error',
       },
       { status: 500 },
     );

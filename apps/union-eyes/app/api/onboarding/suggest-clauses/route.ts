@@ -11,7 +11,7 @@
 
 import { z } from 'zod';
 import { NextResponse } from 'next/server';
-import { withRoleAuth } from '@/lib/role-middleware';
+import { withRoleAuth, type MemberRole } from '@/lib/role-middleware';
 import { suggestRelevantClauses } from '@/lib/utils/smart-onboarding';
 import { logger } from '@/lib/logger';
 import { eventBus, AppEvents } from '@/lib/events';
@@ -27,7 +27,7 @@ const onboardingSuggestClausesSchema = z.object({
   organizationId: z.string().uuid('Invalid organizationId'),
 });
 
-export const POST = withRoleAuth('officer', async (request, context) => {
+export const POST = withRoleAuth('officer' as MemberRole, async (request, context) => {
   const { userId, organizationId: _organizationId } = context;
 
   try {

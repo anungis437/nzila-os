@@ -162,7 +162,6 @@ return standardErrorResponse(
 return NextResponse.json(
         {
           error: 'Internal server error',
-          details: error instanceof Error ? error.message : 'Unknown error',
         },
         { status: 500 }
       );
@@ -304,7 +303,6 @@ return standardErrorResponse(
 return NextResponse.json(
         {
           error: 'Failed to create campaign',
-          details: error instanceof Error ? error.message : 'Unknown error',
         },
         { status: 500 }
       );
@@ -415,7 +413,6 @@ return standardErrorResponse(
 return NextResponse.json(
         {
           error: 'Failed to update campaign',
-          details: error instanceof Error ? error.message : 'Unknown error',
         },
         { status: 500 }
       );
@@ -496,7 +493,6 @@ return standardErrorResponse(
 return NextResponse.json(
         {
           error: 'Failed to delete campaign',
-          details: error instanceof Error ? error.message : 'Unknown error',
         },
         { status: 500 }
       );

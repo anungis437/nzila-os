@@ -122,7 +122,7 @@ export const POST = withApiAuth(async (request: NextRequest) => {
 
     return standardErrorResponse(
       ErrorCode.INTERNAL_ERROR,
-      error instanceof Error ? error.message : 'Failed to generate billing cycle'
+      'Failed to generate billing cycle'
     );
   }
 });
@@ -168,7 +168,7 @@ export const GET = withApiAuth(async (request: NextRequest) => {
 
     return standardErrorResponse(
       ErrorCode.INTERNAL_ERROR,
-      error instanceof Error ? error.message : 'Failed to retrieve billing cycle history'
+      'Failed to retrieve billing cycle history'
     );
   }
 });

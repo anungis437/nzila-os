@@ -2,6 +2,15 @@ import { clerkMiddleware, createRouteMatcher } from '@clerk/nextjs/server'
 import { NextResponse } from 'next/server'
 import { checkRateLimit, rateLimitHeaders } from '@nzila/os-core/rateLimit'
 import { checkOrgRateLimit, orgRateLimitHeaders } from '@nzila/os-core/orgRateLimit'
+import createIntlMiddleware from 'next-intl/middleware'
+import { locales, defaultLocale } from './lib/locales'
+
+const intlMiddleware = createIntlMiddleware({
+  locales,
+  defaultLocale,
+  localePrefix: 'never',
+  localeDetection: true,
+})
 
 /**
  * Public routes — everything else requires authentication.
@@ -171,6 +180,21 @@ export default clerkMiddleware(async (auth, request) => {
   // ── Request-ID propagation ────────────────────────────────────────────
   const requestId =
     request.headers.get('x-request-id') ?? crypto.randomUUID()
+
+  // ── i18n locale detection (cookie / Accept-Language) ──────────────────
+  // For non-API routes, run intl middleware for locale detection.
+  // localePrefix: 'never' means no URL rewriting — locale is stored in cookie.
+  if (!request.nextUrl.pathname.startsWith('/api')) {
+    const intlResponse = intlMiddleware(request)
+    if (intlResponse instanceof NextResponse) {
+      intlResponse.headers.set('x-request-id', requestId)
+      return intlResponse
+    }
+    const nr = NextResponse.next({ headers: new Headers((intlResponse as Response).headers) })
+    nr.headers.set('x-request-id', requestId)
+    return nr
+  }
+
   const response = NextResponse.next()
   response.headers.set('x-request-id', requestId)
   return response

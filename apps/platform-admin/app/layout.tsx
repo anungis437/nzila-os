@@ -1,4 +1,6 @@
 import type { Metadata } from 'next'
+import { NextIntlClientProvider } from 'next-intl'
+import { getLocale, getMessages } from 'next-intl/server'
 import './globals.css'
 
 export const metadata: Metadata = {
@@ -19,35 +21,40 @@ const NAV_ITEMS = [
   { href: '/data-fabric', label: 'Data Fabric' },
 ] as const
 
-export default function RootLayout({
+export default async function RootLayout({
   children,
 }: Readonly<{ children: React.ReactNode }>) {
-  return (
-    <html lang="en">
-      <body className="bg-gray-50 text-gray-900 antialiased">
-        <div className="flex min-h-screen">
-          {/* Sidebar */}
-          <nav className="w-64 border-r border-gray-200 bg-white px-4 py-6">
-            <h1 className="mb-8 text-lg font-bold tracking-tight">
-              NzilaOS Admin
-            </h1>
-            <ul className="space-y-1">
-              {NAV_ITEMS.map((item) => (
-                <li key={item.href}>
-                  <a
-                    href={item.href}
-                    className="block rounded-md px-3 py-2 text-sm font-medium text-gray-700 hover:bg-gray-100 hover:text-gray-900"
-                  >
-                    {item.label}
-                  </a>
-                </li>
-              ))}
-            </ul>
-          </nav>
+  const locale = await getLocale()
+  const messages = await getMessages()
 
-          {/* Main content */}
-          <main className="flex-1 overflow-y-auto p-8">{children}</main>
-        </div>
+  return (
+    <html lang={locale}>
+      <body className="bg-gray-50 text-gray-900 antialiased">
+        <NextIntlClientProvider locale={locale} messages={messages}>
+          <div className="flex min-h-screen">
+            {/* Sidebar */}
+            <nav className="w-64 border-r border-gray-200 bg-white px-4 py-6">
+              <h1 className="mb-8 text-lg font-bold tracking-tight">
+                NzilaOS Admin
+              </h1>
+              <ul className="space-y-1">
+                {NAV_ITEMS.map((item) => (
+                  <li key={item.href}>
+                    <a
+                      href={item.href}
+                      className="block rounded-md px-3 py-2 text-sm font-medium text-gray-700 hover:bg-gray-100 hover:text-gray-900"
+                    >
+                      {item.label}
+                    </a>
+                  </li>
+                ))}
+              </ul>
+            </nav>
+
+            {/* Main content */}
+            <main className="flex-1 overflow-y-auto p-8">{children}</main>
+          </div>
+        </NextIntlClientProvider>
       </body>
     </html>
   )

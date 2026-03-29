@@ -1,6 +1,14 @@
 import { clerkMiddleware, createRouteMatcher } from '@clerk/nextjs/server'
 import { NextResponse } from 'next/server'
 import { checkRateLimit, rateLimitHeaders } from '@nzila/os-core/rateLimit'
+import createIntlMiddleware from 'next-intl/middleware'
+import { locales, defaultLocale } from './lib/locales'
+
+const intlMiddleware = createIntlMiddleware({
+  locales,
+  defaultLocale,
+  localePrefix: 'never',
+})
 
 /**
  * Platform Admin Edge Middleware — Three-layer protection.
@@ -45,6 +53,14 @@ export default clerkMiddleware(async (auth, request) => {
   // ── Authentication (skip in dev — prevents Clerk handshake loops) ────
   if (process.env.NODE_ENV !== 'development' && !isPublicRoute(request)) {
     await auth.protect()
+  }
+
+  // ── Internationalisation ──────────────────────────────────────────────
+  if (!request.nextUrl.pathname.startsWith('/api')) {
+    const intlResponse = intlMiddleware(request)
+    const requestId = request.headers.get('x-request-id') ?? crypto.randomUUID()
+    intlResponse.headers.set('x-request-id', requestId)
+    return intlResponse
   }
 
   // ── Request-ID propagation ────────────────────────────────────────────

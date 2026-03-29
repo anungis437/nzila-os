@@ -1,0 +1,25 @@
+{
+  "common": {
+    "appName": "Cora",
+    "loading": "Chargement...",
+    "save": "Enregistrer",
+    "cancel": "Annuler",
+    "delete": "Supprimer",
+    "edit": "Modifier",
+    "create": "Créer"
+  },
+  "nav": {
+    "dashboard": "Tableau de bord",
+    "intelligence": "Intelligence",
+    "analysis": "Analyse",
+    "recommendations": "Recommandations",
+    "reports": "Rapports",
+    "settings": "Paramètres"
+  },
+  "intelligence": {
+    "insights": "Perspectives",
+    "predictions": "Prédictions",
+    "advisory": "Conseil",
+    "marketData": "Données de marché"
+  }
+}

@@ -116,7 +116,7 @@ export async function postGLTransaction(
     }
 
     // Generate transaction number
-    const transactionNumber = `GL-${new Date().getTime()}-${Math.random().toString(36).substr(2, 9)}`;
+    const transactionNumber = `GL-${new Date().getTime()}-${crypto.randomUUID().slice(0, 9)}`;
 
     // Create GL transaction
     const [transaction] = await db

@@ -1,0 +1,29 @@
+{
+  "common": {
+    "appName": "Nzila Partner Portal",
+    "loading": "Loading...",
+    "save": "Save",
+    "cancel": "Cancel",
+    "delete": "Delete",
+    "edit": "Edit",
+    "create": "Create"
+  },
+  "nav": {
+    "dashboard": "Dashboard",
+    "deals": "Deals",
+    "commissions": "Commissions",
+    "certifications": "Certifications",
+    "coMarketing": "Co-Marketing",
+    "integrations": "Integrations",
+    "settings": "Settings"
+  },
+  "portal": {
+    "welcome": "Welcome to the Partner Portal",
+    "dealRegistration": "Deal Registration",
+    "commissionTracking": "Commission Tracking",
+    "partnerTier": "Partner Tier",
+    "revenue": "Revenue",
+    "activeDeal": "Active Deals",
+    "pendingApprovals": "Pending Approvals"
+  }
+}

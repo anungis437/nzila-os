@@ -56,7 +56,7 @@ export const POST = withRoleAuth('steward', async (request: NextRequest, context
   } catch (error) {
     return standardErrorResponse(
       ErrorCode.INTERNAL_ERROR,
-      error instanceof Error ? error.message : 'Copilot query failed',
+      'Copilot query failed',
     );
   }
 });

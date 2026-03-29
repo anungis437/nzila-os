@@ -1,0 +1,30 @@
+{
+  "common": {
+    "appName": "Administration de la plateforme",
+    "loading": "Chargement...",
+    "save": "Enregistrer",
+    "cancel": "Annuler",
+    "delete": "Supprimer",
+    "edit": "Modifier",
+    "create": "Créer"
+  },
+  "nav": {
+    "dashboard": "Tableau de bord",
+    "ontology": "Ontologie",
+    "schemas": "Schémas",
+    "tenants": "Locataires",
+    "users": "Utilisateurs",
+    "roles": "Rôles",
+    "audit": "Journal d'audit",
+    "settings": "Paramètres"
+  },
+  "admin": {
+    "ontology": "Ontologie",
+    "schemas": "Schémas",
+    "tenants": "Locataires",
+    "users": "Utilisateurs",
+    "roles": "Rôles",
+    "permissions": "Permissions",
+    "auditLog": "Journal d'audit"
+  }
+}

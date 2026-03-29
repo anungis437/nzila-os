@@ -75,7 +75,7 @@ export const POST = withRoleAuth('officer', async (request: NextRequest, context
   } catch (error) {
     return standardErrorResponse(
       ErrorCode.INTERNAL_ERROR,
-      error instanceof Error ? error.message : 'Insight generation failed',
+      'Insight generation failed',
     );
   }
 });

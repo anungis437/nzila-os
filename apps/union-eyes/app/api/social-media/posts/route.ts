@@ -252,7 +252,6 @@ export const POST = withRoleAuth('member', async (request: NextRequest, context:
 return NextResponse.json(
         {
           error: 'Internal server error',
-          details: error instanceof Error ? error.message : 'Unknown error',
         },
         { status: 500 }
       );
@@ -314,7 +313,6 @@ export const DELETE = withRoleAuth('member', async (request: NextRequest, contex
 return NextResponse.json(
         {
           error: 'Failed to delete post',
-          details: error instanceof Error ? error.message : 'Unknown error',
         },
         { status: 500 }
       );
