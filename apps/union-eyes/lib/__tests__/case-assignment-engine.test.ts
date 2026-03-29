@@ -122,6 +122,7 @@ vi.mock('@/lib/representation', () => ({
 
 import {
   autoAssignGrievance,
+  __testInternals,
   manuallyAssignGrievance,
   reassignGrievance,
   getAssignmentRecommendations,
@@ -236,11 +237,36 @@ describe('case-assignment-engine', () => {
       expect(r.error).toContain('minimum qualification');
     });
 
+    it('returns manual-assignment error when overloaded officer still meets min score', async () => {
+      mocks.mockMembersFindMany.mockResolvedValue([
+        { ...baseOfficer, userId: 'off-1' },
+      ]);
+      const activeCases = Array.from({ length: 21 }, (_, i) => ({
+        ...baseAssignment,
+        id: `a-${i}`,
+        status: 'assigned',
+        estimatedHours: '2',
+        claim: baseClaim,
+      }));
+      mocks.mockAssignmentsFindMany.mockResolvedValue(activeCases);
+
+      const r = await autoAssignGrievance('claim-1', 'org-1', {}, 'admin', { minScore: 0 });
+      expect(r.success).toBe(false);
+      expect(r.error).toContain('Manual assignment required');
+    });
+
     it('handles thrown errors gracefully', async () => {
       mocks.mockGetProtocol.mockRejectedValue(new Error('DB error'));
       const r = await autoAssignGrievance('claim-1', 'org-1', {}, 'admin');
       expect(r.success).toBe(false);
       expect(r.error).toBe('DB error');
+    });
+
+    it('returns unknown error when non-Error is thrown', async () => {
+      mocks.mockGetProtocol.mockRejectedValue('boom');
+      const r = await autoAssignGrievance('claim-1', 'org-1', {}, 'admin');
+      expect(r.success).toBe(false);
+      expect(r.error).toBe('Unknown error');
     });
 
     it('uses protocol-derived role from getPrimaryAssignmentRole', async () => {
@@ -323,6 +349,13 @@ describe('case-assignment-engine', () => {
       expect(r.success).toBe(false);
       expect(r.error).toBe('RLS fail');
     });
+
+    it('returns unknown error when non-Error is thrown', async () => {
+      mocks.mockWithRLS.mockRejectedValue('boom');
+      const r = await manuallyAssignGrievance('claim-1', 'org-1', 'off-1', 'admin');
+      expect(r.success).toBe(false);
+      expect(r.error).toBe('Unknown error');
+    });
   });
 
   // ── reassignGrievance ─────────────────────────────────────────────
@@ -340,6 +373,13 @@ describe('case-assignment-engine', () => {
       const r = await reassignGrievance('claim-1', 'org-1', 'asgn-x', 'off-2', 'admin', 'reason');
       expect(r.success).toBe(false);
       expect(r.error).toContain('not found');
+    });
+
+    it('returns unknown error when non-Error is thrown', async () => {
+      mocks.mockWithRLS.mockRejectedValue('boom');
+      const r = await reassignGrievance('claim-1', 'org-1', 'asgn-1', 'off-2', 'admin', 'reason');
+      expect(r.success).toBe(false);
+      expect(r.error).toBe('Unknown error');
     });
   });
 
@@ -364,6 +404,89 @@ describe('case-assignment-engine', () => {
     it('returns empty on error', async () => {
       mocks.mockWithRLS.mockRejectedValue(new Error('fail'));
       expect(await getAssignmentRecommendations('claim-1', 'org-1', {})).toEqual([]);
+    });
+
+    it('scores expertise/location/success and capacity branches via internals', async () => {
+      const officers = [
+        {
+          userId: 'expert-1',
+          name: 'Expert',
+          role: 'union_officer',
+          expertise: ['grievance'],
+          maxCaseload: 20,
+          currentCaseload: 4,
+          availableHours: 40,
+          locations: ['Kigali'],
+          successRate: 85,
+          avgResolutionDays: 10,
+          languages: ['English'],
+          certifications: [],
+        },
+        {
+          userId: 'general-1',
+          name: 'Generalist',
+          role: 'union_officer',
+          expertise: ['discipline'],
+          maxCaseload: 20,
+          currentCaseload: 12,
+          availableHours: 20,
+          locations: ['Butare'],
+          successRate: 65,
+          avgResolutionDays: 12,
+          languages: ['English'],
+          certifications: [],
+        },
+        {
+          userId: 'over-1',
+          name: 'Overloaded',
+          role: 'union_officer',
+          expertise: [],
+          maxCaseload: 20,
+          currentCaseload: 21,
+          availableHours: 10,
+          locations: [],
+          successRate: 10,
+          avgResolutionDays: 20,
+          languages: ['English'],
+          certifications: [],
+        },
+      ];
+
+      const recs = await __testInternals.scoreOfficers(
+        officers,
+        {},
+        { claimType: 'grievance', location: 'Kigali', estimatedHours: 8 },
+        'org-1',
+      );
+
+      expect(recs.length).toBe(3);
+      expect(recs[0].userId).toBe('expert-1');
+      expect(recs.find((r) => r.userId === 'expert-1')?.reasons).toContain('Expertise in claim type');
+      expect(recs.find((r) => r.userId === 'general-1')?.reasons).toContain('General expertise');
+      expect(recs.find((r) => r.userId === 'over-1')?.availability).toBe('overloaded');
+    });
+
+    it('falls back to userId when membershipNumber is missing', async () => {
+      mocks.mockMembersFindMany.mockResolvedValue([
+        { ...baseOfficer, userId: 'off-fallback', membershipNumber: null },
+      ]);
+      mocks.mockAssignmentsFindMany.mockResolvedValue([]);
+      const recs = await getAssignmentRecommendations('claim-1', 'org-1', {});
+      expect(recs[0].name).toBe('off-fallback');
+    });
+
+    it('returns empty when internal eligible-officer query fails', async () => {
+      mocks.mockWithRLS.mockRejectedValue(new Error('eligible-fail'));
+      const officers = await __testInternals.getEligibleOfficers('org-1', {}, undefined);
+      expect(officers).toEqual([]);
+    });
+
+    it('supports steward assignment role filter branch', async () => {
+      mocks.mockGetProtocol.mockResolvedValue({ stewardPermissions: { canBeAssigned: true } });
+      mocks.mockMembersFindMany.mockResolvedValue([{ ...baseOfficer, role: 'union_steward' }]);
+      mocks.mockAssignmentsFindMany.mockResolvedValue([]);
+      const r = await autoAssignGrievance('claim-1', 'org-1', {}, 'admin', { minScore: 20 });
+      expect(r.success).toBe(true);
     });
   });
 
@@ -409,6 +532,51 @@ describe('case-assignment-engine', () => {
       const stats = await getOfficerWorkload('officer-1', 'org-1');
       expect(stats!.avgResolutionDays).toBe(10);
     });
+
+    it('handles incomplete completed records and invalid estimated hours', async () => {
+      mocks.mockAssignmentsFindMany.mockResolvedValue([
+        {
+          ...baseAssignment,
+          status: 'completed',
+          assignedAt: new Date('2025-01-01'),
+          completedAt: null,
+          claim: { ...baseClaim, status: 'resolved' },
+        },
+        {
+          ...baseAssignment,
+          id: 'active-1',
+          status: 'assigned',
+          estimatedHours: 'abc',
+          claim: baseClaim,
+        },
+      ]);
+      mocks.mockMembersFindFirst.mockResolvedValue({ userId: 'fallback-user', membershipNumber: null });
+
+      const stats = await getOfficerWorkload('fallback-user', 'org-1');
+      expect(stats).not.toBeNull();
+      expect(stats!.name).toBe('fallback-user');
+      expect(stats!.avgResolutionDays).toBe(0);
+      expect(stats!.estimatedHoursRemaining).toBe(0);
+    });
+
+    it('counts favorable outcome when status is not resolved', async () => {
+      mocks.mockAssignmentsFindMany.mockResolvedValue([
+        {
+          ...baseAssignment,
+          status: 'completed',
+          claim: { ...baseClaim, status: 'open', resolutionOutcome: 'favorable' },
+        },
+      ]);
+      const stats = await getOfficerWorkload('officer-1', 'org-1');
+      expect(stats!.successRate).toBe(100);
+    });
+
+    it('uses Unknown name when officer profile is missing', async () => {
+      mocks.mockAssignmentsFindMany.mockResolvedValue([]);
+      mocks.mockMembersFindFirst.mockResolvedValue(null);
+      const stats = await getOfficerWorkload('officer-1', 'org-1');
+      expect(stats!.name).toBe('Unknown');
+    });
   });
 
   // ── getOrgWorkloadReport ──────────────────────────────────────────
@@ -426,6 +594,20 @@ describe('case-assignment-engine', () => {
     it('returns empty on error', async () => {
       mocks.mockWithRLS.mockRejectedValue(new Error('fail'));
       expect(await getOrgWorkloadReport('org-1')).toEqual([]);
+    });
+
+    it('skips officers whose workload cannot be computed', async () => {
+      mocks.mockMembersFindMany.mockResolvedValue([
+        { ...baseOfficer, userId: 'off-1' },
+        { ...baseOfficer, userId: 'off-2', membershipNumber: 'OFF-2' },
+      ]);
+      mocks.mockAssignmentsFindMany
+        .mockRejectedValueOnce(new Error('transient'))
+        .mockResolvedValueOnce([]);
+
+      const report = await getOrgWorkloadReport('org-1');
+      expect(report).toHaveLength(1);
+      expect(report[0].userId).toBe('off-2');
     });
   });
 
@@ -483,6 +665,46 @@ describe('case-assignment-engine', () => {
     it('returns empty on error', async () => {
       mocks.mockWithRLS.mockRejectedValue(new Error('fail'));
       expect(await suggestWorkloadBalancing('org-1')).toEqual([]);
+    });
+
+    it('returns empty when recent-assignment lookup throws inside balancing loop', async () => {
+      mocks.mockMembersFindMany.mockResolvedValue([
+        { ...baseOfficer, userId: 'busy-1', membershipNumber: 'BUSY' },
+        { ...baseOfficer, userId: 'free-1', membershipNumber: 'FREE' },
+      ]);
+
+      let assignmentsCall = 0;
+      mocks.mockAssignmentsFindMany.mockImplementation(() => {
+        assignmentsCall++;
+        if (assignmentsCall === 1) {
+          return Promise.resolve(
+            Array.from({ length: 19 }, (_, i) => ({
+              ...baseAssignment,
+              id: `b-${i}`,
+              assignedTo: 'busy-1',
+              status: 'assigned',
+              estimatedHours: '2',
+              claim: baseClaim,
+            })),
+          );
+        }
+        if (assignmentsCall === 2) {
+          return Promise.resolve([]);
+        }
+        return Promise.resolve([]);
+      });
+
+      let withRlsCalls = 0;
+      mocks.mockWithRLS.mockImplementation((_opts: unknown, fn: (db: unknown) => unknown) => {
+        withRlsCalls++;
+        if (withRlsCalls === 6) {
+          throw new Error('recent-fetch-fail');
+        }
+        return fn(makeRlsDb());
+      });
+
+      const suggestions = await suggestWorkloadBalancing('org-1');
+      expect(suggestions).toEqual([]);
     });
   });
 
@@ -542,6 +764,13 @@ describe('case-assignment-engine', () => {
       const r = await removeCollaborator('asgn-1', 'org-1', 'admin', 'reason');
       expect(r.success).toBe(false);
       expect(r.error).toBe('fail');
+    });
+
+    it('returns unknown error when non-Error is thrown', async () => {
+      mocks.mockWithRLS.mockRejectedValue('boom');
+      const r = await removeCollaborator('asgn-1', 'org-1', 'admin', 'reason');
+      expect(r.success).toBe(false);
+      expect(r.error).toBe('Unknown error');
     });
   });
 

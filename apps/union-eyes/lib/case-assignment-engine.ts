@@ -132,7 +132,7 @@ export async function autoAssignGrievance(
     );
 
     // Filter by minimum score threshold
-    const minScore = options.minScore || 60;
+    const minScore = options.minScore ?? 60;
     const qualifiedRecommendations = recommendations.filter(
       (r) => r.score >= minScore
     );
@@ -853,4 +853,9 @@ export async function getGrievanceTeam(
 return [];
   }
 }
+
+export const __testInternals = {
+  getEligibleOfficers,
+  scoreOfficers,
+};
 

@@ -1,9 +1,10 @@
 import { describe, it, expect, vi, beforeEach } from 'vitest';
 
-const { mockFindFirst, mockGenerate, mockInsertValues } = vi.hoisted(() => ({
+const { mockFindFirst, mockGenerate, mockInsertValues, mockWhere } = vi.hoisted(() => ({
   mockFindFirst: vi.fn(),
   mockGenerate: vi.fn(),
   mockInsertValues: vi.fn(),
+  mockWhere: vi.fn(),
 }));
 
 vi.mock('@/db/db', () => ({
@@ -14,7 +15,7 @@ vi.mock('@/db/db', () => ({
     insert: vi.fn(() => ({ values: mockInsertValues })),
     select: vi.fn(() => ({
       from: vi.fn(() => ({
-        where: vi.fn(async () => [{ value: 0 }]),
+        where: mockWhere,
       })),
     })),
   },
@@ -55,7 +56,7 @@ vi.mock('@/lib/logger', () => ({
   logger: { info: vi.fn(), error: vi.fn(), warn: vi.fn(), debug: vi.fn() },
 }));
 
-import { calculateEmployerRisk } from '../employer-risk';
+import { calculateEmployerRisk, deriveRiskSignals } from '../employer-risk';
 
 describe('calculateEmployerRisk', () => {
   beforeEach(() => {
@@ -75,6 +76,7 @@ describe('calculateEmployerRisk', () => {
       }),
     });
     mockInsertValues.mockResolvedValue(undefined);
+    mockWhere.mockResolvedValue([{ value: 0 }]);
   });
 
   it('returns an AI envelope with risk result', async () => {
@@ -103,5 +105,73 @@ describe('calculateEmployerRisk', () => {
       userId: 'user-1',
     });
     expect(mockGenerate).toHaveBeenCalledOnce();
+  });
+
+  it('applies JSON defaults when AI fields are missing or invalid', async () => {
+    mockGenerate.mockResolvedValue({
+      content: JSON.stringify({
+        overallScore: 'not-a-number',
+        signals: 'not-an-array',
+      }),
+    });
+
+    const result = await calculateEmployerRisk({
+      employerId: 'emp-1',
+      organizationId: 'org-1',
+      userId: 'user-1',
+    });
+
+    expect(result.data.overallScore).toBe(0);
+    expect(result.data.riskBand).toBe('low');
+    expect(result.data.trendDirection).toBe('stable');
+    expect(result.data.signals).toEqual([]);
+    expect(result.confidence).toBe(0.5);
+    expect(result.explanation).toBe('AI-generated risk assessment.');
+  });
+
+  it('falls back to heuristic scoring when AI response is malformed', async () => {
+    mockGenerate.mockResolvedValue({ content: '{invalid-json' });
+    mockWhere
+      .mockResolvedValueOnce([{ value: 2 }])
+      .mockResolvedValueOnce([{ value: 1 }])
+      .mockResolvedValueOnce([{ value: 1 }]);
+
+    const result = await calculateEmployerRisk({
+      employerId: 'emp-1',
+      organizationId: 'org-1',
+      userId: 'user-1',
+    });
+
+    expect(result.data.overallScore).toBeCloseTo(0.55, 4);
+    expect(result.data.riskBand).toBe('elevated');
+    expect(result.confidence).toBe(0.3);
+    expect(result.explanation).toContain('Heuristic score applied');
+  });
+
+  it('handles missing AI content via nullish fallback', async () => {
+    mockGenerate.mockResolvedValue({});
+
+    const result = await calculateEmployerRisk({
+      employerId: 'emp-1',
+      organizationId: 'org-1',
+      userId: 'user-1',
+    });
+
+    expect(result.available).toBe(true);
+    expect(result.data).toBeDefined();
+  });
+
+  it('defaults signal counts to zero when count rows are missing', async () => {
+    mockWhere
+      .mockResolvedValueOnce([])
+      .mockResolvedValueOnce([])
+      .mockResolvedValueOnce([]);
+
+    const signals = await deriveRiskSignals('emp-1', 'org-1');
+    expect(signals).toEqual({
+      grievanceCount30d: 0,
+      complianceAlertCount30d: 0,
+      arbitrationCount12m: 0,
+    });
   });
 });
