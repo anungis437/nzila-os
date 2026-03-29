@@ -410,4 +410,48 @@ describe("member-service", () => {
       expect(await getMembersByRole("org-1", "steward")).toEqual(members);
     });
   });
+
+  // ── Batch 36: catch-block coverage ──────────────────────────────────
+  describe("Batch 36: catch-block coverage", () => {
+    it("getMemberByUserId throws on error", async () => {
+      mocks.mockFindFirst.mockRejectedValueOnce(new Error("DB"));
+      await expect(getMemberByUserId("u1", "org-1")).rejects.toThrow("Failed to fetch member by user ID");
+    });
+
+    it("getMemberByMembershipNumber throws on error", async () => {
+      mocks.mockFindFirst.mockRejectedValueOnce(new Error("DB"));
+      await expect(getMemberByMembershipNumber("MEM-001", "org-1")).rejects.toThrow("Failed to fetch member by membership number");
+    });
+
+    it("updateMember throws on error", async () => {
+      mocks.mockUpdate.mockImplementationOnce(() => { throw new Error("DB"); });
+      await expect(updateMember("m-1", { lastName: "X" } as never)).rejects.toThrow("Failed to update member");
+    });
+
+    it("deleteMember throws on error", async () => {
+      mocks.mockUpdate.mockImplementationOnce(() => { throw new Error("DB"); });
+      await expect(deleteMember("m-1")).rejects.toThrow("Failed to delete member");
+    });
+
+    it("permanentlyDeleteMember throws on error", async () => {
+      mocks.mockDelete.mockImplementationOnce(() => { throw new Error("DB"); });
+      await expect(permanentlyDeleteMember("m-1")).rejects.toThrow("Failed to permanently delete member");
+    });
+
+    it("getMemberStatistics throws on error", async () => {
+      mocks.mockSelect.mockImplementationOnce(() => { throw new Error("DB"); });
+      await expect(getMemberStatistics("org-1")).rejects.toThrow("Failed to get member statistics");
+    });
+
+    it("calculateSeniority returns N/A on error", async () => {
+      mocks.mockFindFirst.mockRejectedValueOnce(new Error("DB"));
+      expect(await calculateSeniority("m-1")).toBe("N/A");
+    });
+
+    it("bulkImportMembers outer catch throws on critical failure", async () => {
+      // Make the entire function fail (e.g. iteration itself throws)
+      const badInput = null as never;
+      await expect(bulkImportMembers(badInput)).rejects.toThrow();
+    });
+  });
 });

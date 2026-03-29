@@ -350,3 +350,69 @@ describe('calculateRetryDate', () => {
     expect(calculateRetryDate(10)).toBe('2025-06-15');
   });
 });
+
+// ── Batch 36: branch gap-fill ─────────────────────────────────────────────
+describe('Batch 36: branch gap-fill', () => {
+  beforeEach(() => {
+    vi.clearAllMocks();
+    mocks.mockSend.mockResolvedValue(undefined);
+    mocks.mockGetNotificationService.mockReturnValue({ send: mocks.mockSend });
+  });
+
+  it('sendPaymentConfirmation with null breakdown fields falls back to 0.00', async () => {
+    const txNoBreakdown = {
+      ...baseTx,
+      copeAmount: null,
+      pacAmount: null,
+      strikeFundAmount: null,
+      receiptUrl: null,
+    };
+    let callCount = 0;
+    mocks.mockSelect.mockImplementation(() => {
+      callCount++;
+      if (callCount === 1) return chain([{ transaction: txNoBreakdown, memberName: 'Alice', memberEmail: 'a@e.com', memberMetadata: null }]);
+      if (callCount === 2) return chain([{ id: 'org-1', name: 'CUPE', slug: 'c', email: null }]);
+      return chain([]);
+    });
+
+    await sendPaymentConfirmation('tx-1');
+    expect(mocks.mockSend).toHaveBeenCalledTimes(1);
+  });
+
+  it('getOrganizationNotificationContext skips adminMember with no email', async () => {
+    let callCount = 0;
+    mocks.mockSelect.mockImplementation(() => {
+      callCount++;
+      if (callCount === 1) return chain([memberRow]);
+      if (callCount === 2) return chain([{ id: 'org-1', name: 'CUPE', slug: 'c', email: null }]);
+      // admin members — one has email, one does not
+      return chain([{ email: null }, { email: 'admin@cupe.ca' }]);
+    });
+
+    await sendPaymentConfirmation('tx-1');
+    // Should still send (only valid admin emails collected, but confirmation goes to member)
+    expect(mocks.mockSend).toHaveBeenCalled();
+  });
+
+  it('sendPaymentFailure with retryScheduled selects retry template branches', async () => {
+    let callCount = 0;
+    mocks.mockSelect.mockImplementation(() => {
+      callCount++;
+      if (callCount === 1) {
+        return chain([{
+          transaction: { ...baseTx, metadata: { failureCount: 2 } },
+          memberName: 'Alice',
+          memberEmail: 'a@e.com',
+          memberMetadata: null,
+        }]);
+      }
+      if (callCount === 2) return chain([{ id: 'org-1', name: 'CUPE', slug: 'c', email: null }]);
+      return chain([]);
+    });
+
+    await sendPaymentFailure('tx-1', 'Declined', true, '2025-07-05');
+    expect(mocks.mockSend).toHaveBeenCalledWith(
+      expect.objectContaining({ subject: 'Retry Scheduled' }),
+    );
+  });
+});

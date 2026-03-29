@@ -407,4 +407,59 @@ describe('clause-service', () => {
       await expect(getMostViewedClauses()).rejects.toThrow('Failed to fetch most viewed clauses');
     });
   });
+
+  // ================================================================
+  // Batch 36: catch-block and branch coverage
+  // ================================================================
+  describe('Batch 36: catch-block and branch coverage', () => {
+    it('createClause throws on error', async () => {
+      mocks.mockInsert.mockImplementation(() => { throw new Error('fail'); });
+      await expect(createClause(CLAUSE as never)).rejects.toThrow('Failed to create clause');
+    });
+
+    it('updateClause throws on error', async () => {
+      mocks.mockUpdate.mockImplementation(() => { throw new Error('fail'); });
+      await expect(updateClause('cl1', {} as never)).rejects.toThrow('Failed to update clause');
+    });
+
+    it('searchClauses throws on error', async () => {
+      mocks.mockSelect.mockImplementation(() => { throw new Error('fail'); });
+      await expect(searchClauses('test')).rejects.toThrow('Failed to search clauses');
+    });
+
+    it('getClausesByType throws on error', async () => {
+      mocks.mockSelect.mockImplementation(() => { throw new Error('fail'); });
+      await expect(getClausesByType('wages')).rejects.toThrow('Failed to fetch clauses by type');
+    });
+
+    it('getClauseHierarchy throws on error', async () => {
+      mocks.mockFindFirst.mockRejectedValue(new Error('fail'));
+      await expect(getClauseHierarchy('cl1')).rejects.toThrow('Failed to fetch clause hierarchy');
+    });
+
+    it('saveClauseComparison throws on error', async () => {
+      mocks.mockInsert.mockImplementation(() => { throw new Error('fail'); });
+      await expect(saveClauseComparison('Test', 'wages', ['cl1'], 'org-1', 'u1')).rejects.toThrow('Failed to save clause comparison');
+    });
+
+    it('getWageProgressions throws on error', async () => {
+      mocks.mockSelect.mockImplementation(() => { throw new Error('fail'); });
+      await expect(getWageProgressions('cba1')).rejects.toThrow('Failed to fetch wage progressions');
+    });
+
+    it('createWageProgression throws on error', async () => {
+      mocks.mockInsert.mockImplementation(() => { throw new Error('fail'); });
+      await expect(createWageProgression(WAGE as never)).rejects.toThrow('Failed to create wage progression');
+    });
+
+    it('getClauseTypeDistribution throws on error', async () => {
+      mocks.mockSelect.mockImplementation(() => { throw new Error('fail'); });
+      await expect(getClauseTypeDistribution('cba1')).rejects.toThrow('Failed to fetch clause type distribution');
+    });
+
+    it('listClauses throws on error', async () => {
+      mocks.mockSelect.mockImplementation(() => { throw new Error('fail'); });
+      await expect(listClauses()).rejects.toThrow('Failed to list clauses');
+    });
+  });
 });

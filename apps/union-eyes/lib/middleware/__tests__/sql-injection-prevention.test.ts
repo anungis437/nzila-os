@@ -53,6 +53,17 @@ describe('SQLInjectionScanner.scanRequest', () => {
     expect(r.detectedPatterns).toContain('sqlComments');
   });
 
+  it('detects SQL concatenation pattern (high severity)', () => {
+    const r = SQLInjectionScanner.scanRequest(
+      { code: 'sql + userInput' },
+      {}
+    );
+    expect(r.isSafe).toBe(false);
+    expect(r.detectedPatterns).toContain('sqlConcatenation');
+    expect(r.severity).toBe('high');
+    expect(r.recommendations.length).toBeGreaterThan(0);
+  });
+
   it('provides recommendations for detected patterns', () => {
     const r = SQLInjectionScanner.scanRequest(
       { q: "' UNION ALL SELECT 1,2,3 --" },
@@ -97,6 +108,12 @@ describe('SQLInjectionScanner.validateORMUsage', () => {
 
   it('detects raw sql template with interpolation', () => {
     const code = 'sql`SELECT * FROM users WHERE id = ${userId}`';
+    const r = SQLInjectionScanner.validateORMUsage(code);
+    expect(r.isValid).toBe(false);
+    expect(r.issues.length).toBeGreaterThan(0);
+  });
+  it('detects query string concatenation', () => {
+    const code = 'const result = query + someVariable';
     const r = SQLInjectionScanner.validateORMUsage(code);
     expect(r.isValid).toBe(false);
     expect(r.issues.length).toBeGreaterThan(0);
@@ -149,6 +166,16 @@ describe('SQLSecurityAuditLog', () => {
     SQLSecurityAuditLog.clear();
     SQLSecurityAuditLog.logEvent({ eventType: 'SAFE_REQUEST', severity: 'low', detectedPatterns: [] });
     expect(SQLSecurityAuditLog.getEvents({ eventType: 'SAFE_REQUEST' }).length).toBe(1);
+  });
+
+  it('trims events beyond MAX_EVENTS', () => {
+    SQLSecurityAuditLog.clear();
+    // Fill past 10000 limit
+    for (let i = 0; i < 10002; i++) {
+      SQLSecurityAuditLog.logEvent({ eventType: 'SAFE_REQUEST', severity: 'low', detectedPatterns: [] });
+    }
+    const events = SQLSecurityAuditLog.getEvents();
+    expect(events.length).toBeLessThanOrEqual(10000);
   });
 
   it('clears all events', () => {

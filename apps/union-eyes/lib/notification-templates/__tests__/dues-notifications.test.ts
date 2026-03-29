@@ -290,4 +290,31 @@ describe('DuesNotificationTemplates', () => {
       expect(data.memberEmail).toBe('jane@example.com');
     });
   });
+
+  // ── Batch 36: branch gap-fill — paymentUrl truthy arms ─────────────────
+  describe('Batch 36: paymentUrl truthy branches', () => {
+    it('DUES_REMINDER_1_DAY htmlBody includes pay-now link when paymentUrl set', () => {
+      const t = DuesNotificationTemplates.DUES_REMINDER_1_DAY;
+      const html = t.htmlBody(makeData({ paymentUrl: 'https://pay.example.com/p1' }));
+      expect(html).toContain('https://pay.example.com/p1');
+    });
+
+    it('DUES_OVERDUE htmlBody includes pay-now link when paymentUrl set', () => {
+      const t = DuesNotificationTemplates.DUES_OVERDUE;
+      const html = t.htmlBody(makeData({ paymentUrl: 'https://pay.example.com/p2' }));
+      expect(html).toContain('https://pay.example.com/p2');
+    });
+
+    it('DUES_PAYMENT_FAILED htmlBody includes pay-now link when paymentUrl set', () => {
+      const t = DuesNotificationTemplates.DUES_PAYMENT_FAILED;
+      const html = t.htmlBody(makeData({ paymentUrl: 'https://pay.example.com/p3' }));
+      expect(html).toContain('https://pay.example.com/p3');
+    });
+
+    it('DUES_PAYMENT_RETRY_SCHEDULED htmlBody includes pay-now link when paymentUrl set', () => {
+      const t = DuesNotificationTemplates.DUES_PAYMENT_RETRY_SCHEDULED;
+      const html = t.htmlBody(makeData({ paymentUrl: 'https://pay.example.com/p4' }));
+      expect(html).toContain('https://pay.example.com/p4');
+    });
+  });
 });

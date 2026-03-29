@@ -438,8 +438,8 @@ describe('grievance-notifications', () => {
       await expect(
         sendGrievanceEscalationNotification({
           ...CTX,
-          escalatedTo: ['mgr@example.com'],
-          escalationReason: 'test',
+          escalatedTo: ['mgr1@example.com'],
+          escalationReason: 'Deadline missed',
         }),
       ).resolves.toBeUndefined();
     });
@@ -449,17 +449,17 @@ describe('grievance-notifications', () => {
   // sendSettlementProposalNotification
   // ================================================================
   describe('sendSettlementProposalNotification', () => {
-    it('sends high-priority email to grievant', async () => {
+    it('sends settlement proposal to grievant', async () => {
       await sendSettlementProposalNotification({
         ...CTX,
         proposedBy: 'officer@example.com',
-        settlementSummary: 'Back pay of $5000',
+        settlementSummary: 'Proposed 3 days back pay',
       });
       expect(mocks.mockSend).toHaveBeenCalledWith(
         expect.objectContaining({
           recipientEmail: 'jane@example.com',
           priority: 'high',
-          body: expect.stringContaining('Back pay of $5000'),
+          body: expect.stringContaining('Proposed 3 days back pay'),
         }),
       );
     });
@@ -469,9 +469,84 @@ describe('grievance-notifications', () => {
         ...CTX,
         grievantEmail: undefined,
         proposedBy: 'officer@example.com',
-        settlementSummary: 'test',
+        settlementSummary: 'Details',
       });
       expect(mocks.mockSend).not.toHaveBeenCalled();
+    });
+  });
+
+  // ================================================================
+  // Batch 36: catch-block coverage
+  // ================================================================
+  describe('Batch 36: catch-block coverage', () => {
+    it('sendGrievanceAssignedNotification does not throw on error', async () => {
+      mocks.mockSend.mockRejectedValue(new Error('fail'));
+      await expect(sendGrievanceAssignedNotification(CTX)).resolves.toBeUndefined();
+    });
+
+    it('sendGrievanceStageChangeNotification does not throw on error', async () => {
+      mocks.mockSend.mockRejectedValue(new Error('fail'));
+      await expect(
+        sendGrievanceStageChangeNotification({
+          ...CTX,
+          previousStage: 'step1',
+          newStage: 'step2',
+        }),
+      ).resolves.toBeUndefined();
+    });
+
+    it('sendGrievanceDeadlineReminder does not throw on error', async () => {
+      mocks.mockSend.mockRejectedValue(new Error('fail'));
+      await expect(
+        sendGrievanceDeadlineReminder({
+          ...CTX,
+          deadlineDate: new Date(2026, 5, 15),
+          daysRemaining: 5,
+        }),
+      ).resolves.toBeUndefined();
+    });
+
+    it('sendGrievanceResolvedNotification does not throw on error', async () => {
+      mocks.mockSend.mockRejectedValue(new Error('fail'));
+      await expect(
+        sendGrievanceResolvedNotification({
+          ...CTX,
+          resolutionType: 'settled',
+        }),
+      ).resolves.toBeUndefined();
+    });
+
+    it('sendGrievanceDocumentAddedNotification does not throw on error', async () => {
+      mocks.mockSend.mockRejectedValue(new Error('fail'));
+      await expect(
+        sendGrievanceDocumentAddedNotification({
+          ...CTX,
+          documentName: 'doc.pdf',
+          uploadedBy: 'other@example.com',
+        }),
+      ).resolves.toBeUndefined();
+    });
+
+    it('sendGrievanceCommentNotification does not throw on error', async () => {
+      mocks.mockSend.mockRejectedValue(new Error('fail'));
+      await expect(
+        sendGrievanceCommentNotification({
+          ...CTX,
+          commentAuthor: 'other@example.com',
+          commentPreview: 'Test',
+        }),
+      ).resolves.toBeUndefined();
+    });
+
+    it('sendSettlementProposalNotification does not throw on error', async () => {
+      mocks.mockSend.mockRejectedValue(new Error('fail'));
+      await expect(
+        sendSettlementProposalNotification({
+          ...CTX,
+          proposedBy: 'officer@example.com',
+          settlementSummary: 'Proposal details',
+        }),
+      ).resolves.toBeUndefined();
     });
   });
 });
