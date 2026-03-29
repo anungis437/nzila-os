@@ -270,3 +270,37 @@ describe('scheduledLocationPurge', () => {
     expect(result.deletedCount).toBe(0);
   });
 });
+
+// ── Batch 37: uncovered branch & function coverage ─────────────────────────
+describe('Batch 37 branch coverage', () => {
+  let service: LocationTrackingService;
+
+  beforeEach(() => {
+    vi.clearAllMocks();
+    service = new LocationTrackingService();
+    mocks.mockInsert.mockReturnValue(chain([{ id: 'loc-1' }]));
+    mocks.mockDelete.mockReturnValue(chain([]));
+  });
+
+  it('trackLocation returns generic message when non-Error is thrown', async () => {
+    // eslint-disable-next-line @typescript-eslint/no-explicit-any
+    vi.spyOn(service as any, 'verifyLocationPermission').mockRejectedValue('string-error');
+    const result = await service.trackLocation('m-1', {
+      latitude: 45.0, longitude: -75.0, timestamp: new Date(),
+    }, 'strike_line_tracking');
+    expect(result.success).toBe(false);
+    expect(result.message).toBe('Permission denied');
+  });
+
+  it('trackLocation handles undefined accuracy and geofenceId', async () => {
+    mocks.consentFindFirst.mockResolvedValue({ consentStatus: 'opted_in' });
+    mocks.mockInsert.mockReturnValue(chain([{ id: 'loc-2' }]));
+    const result = await service.trackLocation('m-1', {
+      latitude: 45.0, longitude: -75.0, timestamp: new Date(),
+      // no accuracy
+    }, 'safety_checkin');
+    // geofenceId defaults to undefined → null
+    expect(result.success).toBe(true);
+    expect(result.locationId).toBe('loc-2');
+  });
+});

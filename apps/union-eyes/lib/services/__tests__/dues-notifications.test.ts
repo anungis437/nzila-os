@@ -415,4 +415,60 @@ describe('Batch 36: branch gap-fill', () => {
       expect.objectContaining({ subject: 'Retry Scheduled' }),
     );
   });
+
+  // ── Batch 37: push-notification + admin-intervention branches ──────
+  it('sendPaymentFailure sends push when firebaseToken present (retryScheduled=true)', async () => {
+    let callCount = 0;
+    mocks.mockSelect.mockImplementation(() => {
+      callCount++;
+      if (callCount === 1) {
+        return chain([{
+          transaction: { ...baseTx, metadata: { failureCount: 1 } },
+          memberName: 'Bob',
+          memberEmail: 'b@e.com',
+          memberMetadata: { firebaseToken: 'fcm-token-123' },
+        }]);
+      }
+      if (callCount === 2) return chain([{ id: 'org-1', name: 'CUPE', slug: 'c', email: null }]);
+      return chain([]);
+    });
+
+    await sendPaymentFailure('tx-1', 'Declined', true, '2025-07-10');
+    // push notification should have been sent
+    const pushCall = mocks.mockSend.mock.calls.find(
+      (c: unknown[]) => (c[0] as Record<string, unknown>).type === 'push',
+    );
+    expect(pushCall).toBeDefined();
+    expect((pushCall![0] as Record<string, unknown>).title).toBe('Payment Retry Scheduled');
+  });
+
+  it('sendPaymentFailure sends push when firebaseToken present (retryScheduled=false)', async () => {
+    let callCount = 0;
+    mocks.mockSelect.mockImplementation(() => {
+      callCount++;
+      if (callCount === 1) {
+        return chain([{
+          transaction: { ...baseTx, metadata: {} },
+          memberName: 'Carol',
+          memberEmail: 'c@e.com',
+          memberMetadata: { firebaseToken: 'fcm-xyz' },
+        }]);
+      }
+      if (callCount === 2) return chain([{ id: 'org-1', name: 'CUPE', slug: 'c', email: null }]);
+      return chain([]);
+    });
+
+    await sendPaymentFailure('tx-1', 'Insufficient funds', false);
+    const pushCall = mocks.mockSend.mock.calls.find(
+      (c: unknown[]) => (c[0] as Record<string, unknown>).type === 'push',
+    );
+    expect(pushCall).toBeDefined();
+    expect((pushCall![0] as Record<string, unknown>).title).toBe('⚠️ Payment Failed');
+  });
+
+  it('sendAdminIntervention returns early when result is null', async () => {
+    mocks.mockSelect.mockImplementation(() => chain(null));
+    await sendAdminIntervention('tx-nonexistent');
+    expect(mocks.mockSend).not.toHaveBeenCalled();
+  });
 });

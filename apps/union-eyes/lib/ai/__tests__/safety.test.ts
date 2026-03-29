@@ -242,4 +242,79 @@ describe('AISafetyService', () => {
       expect(result.safe).toBe(true);
     });
   });
+
+  // ── Batch 37: uncovered branch coverage ────────────────────────────────
+  describe('blocked topics detection', () => {
+    it('flags blocked topic when blockTopics is enabled', () => {
+      const safety = new AISafetyService({
+        detectInjection: false,
+        detectPII: false,
+        detectSensitive: false,
+        blockTopics: true,
+      });
+      const result = safety.checkInput('how to fire someone at the office');
+      const blockedFlags = result.flags.filter(f => f.type === 'blocked');
+      expect(blockedFlags.length).toBeGreaterThan(0);
+      expect(blockedFlags[0].severity).toBe('high');
+      expect(result.safe).toBe(false);
+    });
+  });
+
+  describe('checkOutput — PII and sensitive detection', () => {
+    it('detects and redacts PII in output when redactPII is true', () => {
+      const safety = new AISafetyService({
+        detectInjection: false,
+        detectPII: true,
+        detectSensitive: false,
+        blockTopics: false,
+        redactPII: true,
+      });
+      const result = safety.checkOutput('Contact alice@example.com for details');
+      expect(result.sanitizedOutput).toBeDefined();
+      expect(result.sanitizedOutput).not.toContain('alice@example.com');
+      const piiFlags = result.flags.filter(f => f.type === 'pii');
+      expect(piiFlags.length).toBeGreaterThan(0);
+    });
+
+    it('detects sensitive content in output when detectSensitive is true', () => {
+      const safety = new AISafetyService({
+        detectInjection: false,
+        detectPII: false,
+        detectSensitive: true,
+        blockTopics: false,
+      });
+      const result = safety.checkOutput('here is the password for the system');
+      const sensitiveFlags = result.flags.filter(f => f.type === 'sensitive');
+      expect(sensitiveFlags.length).toBeGreaterThan(0);
+    });
+  });
+
+  describe('PII redaction types', () => {
+    it('redacts email addresses with partial masking', () => {
+      const safety = new AISafetyService({
+        detectInjection: false,
+        detectSensitive: false,
+        blockTopics: false,
+        detectPII: true,
+        redactPII: true,
+      });
+      const result = safety.checkInput('email is bob@example.com');
+      expect(result.sanitizedInput).toBeDefined();
+      expect(result.sanitizedInput).toContain('***@example.com');
+    });
+
+    it('redacts postal codes with first/last masking', () => {
+      const safety = new AISafetyService({
+        detectInjection: false,
+        detectSensitive: false,
+        blockTopics: false,
+        detectPII: true,
+        redactPII: true,
+      });
+      const result = safety.checkInput('postal code K1A 0B1');
+      expect(result.sanitizedInput).toBeDefined();
+      // First char + *** + last char
+      expect(result.sanitizedInput).toContain('***');
+    });
+  });
 });

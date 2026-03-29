@@ -480,6 +480,122 @@ describe("precedent-service", () => {
       expect(r).toHaveLength(1);
     });
   });
+
+  // ── Batch 37: sort-column branches + catch-block + empty-decisions ────
+  describe("listPrecedents — sort column branches", () => {
+    it("sorts by decisionDate", async () => {
+      (db.select as ReturnType<typeof vi.fn>)
+        .mockReturnValueOnce(sfw([{ count: 0 }]))
+        .mockReturnValueOnce(sfwol([]));
+      const r = await listPrecedents({}, { sortBy: "decisionDate" });
+      expect(r.total).toBe(0);
+    });
+
+    it("sorts by citationCount", async () => {
+      (db.select as ReturnType<typeof vi.fn>)
+        .mockReturnValueOnce(sfw([{ count: 0 }]))
+        .mockReturnValueOnce(sfwol([]));
+      const r = await listPrecedents({}, { sortBy: "citationCount" });
+      expect(r.total).toBe(0);
+    });
+
+    it("sorts by default (createdAt) for unknown sortBy", async () => {
+      (db.select as ReturnType<typeof vi.fn>)
+        .mockReturnValueOnce(sfw([{ count: 0 }]))
+        .mockReturnValueOnce(sfwol([]));
+      const r = await listPrecedents({}, { sortBy: "unknown" });
+      expect(r.total).toBe(0);
+    });
+  });
+
+  describe("updateArbitratorStats — empty decisions", () => {
+    it("returns early with no decisions", async () => {
+      (db.select as ReturnType<typeof vi.fn>).mockReturnValueOnce(sfw([]));
+      await updateArbitratorStats("Nobody");
+      // Should not attempt insert/update
+      expect(mocks.mockInsertValues).not.toHaveBeenCalled();
+    });
+  });
+
+  describe("catch-block coverage", () => {
+    it("getPrecedentByCaseNumber throws on error", async () => {
+      mocks.mockFindFirst.mockRejectedValue(new Error("db"));
+      await expect(getPrecedentByCaseNumber("X")).rejects.toThrow(
+        "Failed to fetch precedent by case number",
+      );
+    });
+
+    it("createPrecedent throws on error", async () => {
+      mocks.mockReturning.mockRejectedValue(new Error("db"));
+      await expect(createPrecedent({} as never)).rejects.toThrow(
+        "Failed to create precedent",
+      );
+    });
+
+    it("updatePrecedent throws on error", async () => {
+      mocks.mockUpdateSet.mockImplementation(() => ({
+        where: vi.fn(() => ({
+          returning: vi.fn().mockRejectedValue(new Error("db")),
+        })),
+      }));
+      await expect(updatePrecedent("id", {})).rejects.toThrow(
+        "Failed to update precedent",
+      );
+    });
+
+    it("searchPrecedents throws on error", async () => {
+      (db.select as ReturnType<typeof vi.fn>).mockReturnValueOnce({
+        from: vi.fn(() => { throw new Error("db"); }),
+      });
+      await expect(searchPrecedents("query")).rejects.toThrow(
+        "Failed to search precedents",
+      );
+    });
+
+    it("getPrecedentsByIssueType throws on error", async () => {
+      (db.select as ReturnType<typeof vi.fn>).mockReturnValueOnce({
+        from: vi.fn(() => { throw new Error("db"); }),
+      });
+      await expect(getPrecedentsByIssueType("discipline")).rejects.toThrow(
+        "Failed to fetch precedents by issue type",
+      );
+    });
+
+    it("getRelatedPrecedents throws on DB error", async () => {
+      mocks.mockFindFirst.mockResolvedValue(dec);
+      (db.select as ReturnType<typeof vi.fn>).mockReturnValueOnce({
+        from: vi.fn(() => { throw new Error("db"); }),
+      });
+      await expect(getRelatedPrecedents("d-1")).rejects.toThrow(
+        "Failed to fetch related precedents",
+      );
+    });
+
+    it("getArbitratorProfile throws on error", async () => {
+      mocks.mockFindFirstArb.mockRejectedValue(new Error("db"));
+      await expect(getArbitratorProfile("Smith")).rejects.toThrow(
+        "Failed to fetch arbitrator profile",
+      );
+    });
+
+    it("getTopArbitrators throws on error", async () => {
+      (db.select as ReturnType<typeof vi.fn>).mockReturnValueOnce({
+        from: vi.fn(() => { throw new Error("db"); }),
+      });
+      await expect(getTopArbitrators()).rejects.toThrow(
+        "Failed to fetch top arbitrators",
+      );
+    });
+
+    it("getMostCitedPrecedents throws on error", async () => {
+      (db.select as ReturnType<typeof vi.fn>).mockReturnValueOnce({
+        from: vi.fn(() => { throw new Error("db"); }),
+      });
+      await expect(getMostCitedPrecedents()).rejects.toThrow(
+        "Failed to fetch most cited precedents",
+      );
+    });
+  });
 });
 
 /* sf: select→from (no where/orderBy) */

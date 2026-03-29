@@ -394,4 +394,78 @@ describe("MultiCurrencyTreasuryService", () => {
       expect(entries).toHaveLength(0);
     });
   });
+
+  // ── Batch 37: calculateFXGainLoss branch coverage ─────────────────────
+  describe("calculateFXGainLoss — additional branches", () => {
+    it("aggregates loss when gainLoss < 0", async () => {
+      mocks.mockSelect.mockReturnValueOnce(
+        sfwNoOrder([
+          {
+            id: "t-loss",
+            transactionDate: new Date("2026-03-01"),
+            originalCurrency: "USD",
+            originalAmount: "1000",
+            cadAmount: "1400",
+            fxRateUsed: "1.40",
+            fxRateDate: new Date(),
+          },
+        ])
+      );
+      // getExchangeRate returns a lower current rate → loss
+      mocks.mockSelect.mockReturnValueOnce(
+        sfwol([{ ...mockRate, rate: "1.25" }])
+      );
+      const r = await MultiCurrencyTreasuryService.calculateFXGainLoss({
+        startDate: new Date("2026-01-01"),
+        endDate: new Date("2026-12-31"),
+        baseCurrency: "CAD",
+      });
+      expect(r.transactions).toHaveLength(1);
+      // currentValue=1000*1.25=1250, historical=1400, gain=1250-1400=-150
+      expect(r.totalLoss.toNumber()).toBe(150);
+      expect(r.totalGain.toNumber()).toBe(0);
+    });
+
+    it("uses fallback rate 1 when getExchangeRate returns null", async () => {
+      mocks.mockSelect.mockReturnValueOnce(
+        sfwNoOrder([
+          {
+            id: "t-null",
+            transactionDate: new Date("2026-06-01"),
+            originalCurrency: "GBP",
+            originalAmount: "500",
+            cadAmount: "800",
+            fxRateUsed: "1.60",
+            fxRateDate: new Date(),
+          },
+        ])
+      );
+      // getExchangeRate returns no rate → null ?.rate → undefined → fallback 1
+      mocks.mockSelect.mockReturnValueOnce(sfwol([]));
+      const r = await MultiCurrencyTreasuryService.calculateFXGainLoss({
+        startDate: new Date("2026-01-01"),
+        endDate: new Date("2026-12-31"),
+        baseCurrency: "CAD",
+      });
+      expect(r.transactions).toHaveLength(1);
+      // currentValue=500*1=500, historical=800, gain=500-800=-300 (loss)
+      expect(r.totalLoss.toNumber()).toBe(300);
+    });
+
+    it("returns zeros on DB error", async () => {
+      mocks.mockSelect.mockReturnValueOnce({
+        from: vi.fn(() => ({
+          where: vi.fn(() => { throw new Error("db-fail"); }),
+        })),
+      });
+      const r = await MultiCurrencyTreasuryService.calculateFXGainLoss({
+        startDate: new Date("2026-01-01"),
+        endDate: new Date("2026-12-31"),
+        baseCurrency: "CAD",
+      });
+      expect(r.totalGain.toNumber()).toBe(0);
+      expect(r.totalLoss.toNumber()).toBe(0);
+      expect(r.transactions).toHaveLength(0);
+    });
+  });
 });

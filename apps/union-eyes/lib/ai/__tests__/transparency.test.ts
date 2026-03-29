@@ -294,3 +294,78 @@ describe('singletons', () => {
     expect(overrideManager).toBeInstanceOf(HumanOverrideManager);
   });
 });
+
+// ── Batch 37: uncovered branch, function, and statement coverage ─────────
+describe('AITransparencyEngine — additional branches', () => {
+  let engine: AITransparencyEngine;
+  beforeEach(() => { engine = new AITransparencyEngine(); });
+
+  it('truncates long snippets but leaves short ones intact', async () => {
+    const shortSnippet = 'Short text';
+    const explanation = await engine.generateExplanation({
+      requestId: 'req-short',
+      query: 'test',
+      attentionBreakdown: { userQuery: 0.5, contextDocs: 0.3 },
+      sourcesUsed: [{ title: 'Doc', type: 'policy', relevance: 0.8, snippet: shortSnippet }],
+      contextUsed: [],
+    });
+    // snippet ≤ 200 chars → no ellipsis
+    expect(explanation.sourcesUsed[0].snippet).toBe(shortSnippet);
+    expect(explanation.sourcesUsed[0].snippet).not.toContain('...');
+  });
+
+  it('adds low-weight limitation when >2 factors have weight < 0.1', async () => {
+    const explanation = await engine.generateExplanation({
+      requestId: 'req-lw',
+      query: 'test query',
+      attentionBreakdown: {
+        factorA: 0.5,
+        factorB: 0.09,
+        factorC: 0.08,
+        factorD: 0.07,
+      },
+      sourcesUsed: [],
+      contextUsed: [],
+    });
+    // 3 factors < 0.1 → limitation about limited weight
+    expect(explanation.limitations.some(l => l.includes('limited weight'))).toBe(true);
+  });
+});
+
+describe('AIAppealManager — getUserAppeals', () => {
+  it('returns appeals filed by user sorted by date', async () => {
+    await appealManager.fileAppeal({
+      requestId: 'r-1', filedBy: 'user-a', reason: 'wrong', context: 'ctx',
+    });
+    await appealManager.fileAppeal({
+      requestId: 'r-2', filedBy: 'user-a', reason: 'incorrect', context: 'ctx2',
+    });
+    await appealManager.fileAppeal({
+      requestId: 'r-3', filedBy: 'user-b', reason: 'other', context: 'ctx3',
+    });
+    const appeals = await appealManager.getUserAppeals('user-a');
+    expect(appeals).toHaveLength(2);
+    expect(appeals.every(a => a.filedBy === 'user-a')).toBe(true);
+  });
+
+  it('updateAppeal returns null for nonexistent appeal', async () => {
+    const result = await appealManager.updateAppeal({
+      appealId: 'nonexistent',
+      status: 'rejected',
+      reviewer: 'admin',
+    });
+    expect(result).toBeNull();
+  });
+});
+
+describe('HumanOverrideManager — resolveOverride', () => {
+  it('returns null for nonexistent override', async () => {
+    const result = await overrideManager.resolveOverride({
+      requestId: 'nonexistent',
+      assignedTo: 'admin',
+      status: 'denied',
+      resolution: 'Not valid',
+    });
+    expect(result).toBeNull();
+  });
+});
