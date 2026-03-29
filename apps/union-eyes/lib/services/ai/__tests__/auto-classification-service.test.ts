@@ -277,4 +277,65 @@ describe('AutoClassificationService', () => {
       expect(result.suggestedType).toBeUndefined();
     });
   });
+
+  // ────────────────────────────────────────────────────────────────
+  // Error paths for catch branches
+  // ────────────────────────────────────────────────────────────────
+  describe('error handling', () => {
+    it('generateClauseTags returns fallback on AI error', async () => {
+      mockExtract.mockRejectedValue(new Error('AI service down'));
+
+      const result = await generateClauseTags('content', 'wages_compensation');
+      expect(result.tags).toEqual([]);
+      expect(result.confidence).toBe(0.1);
+    });
+
+    it('detectCrossReferences returns fallback on AI error', async () => {
+      mockExtract.mockRejectedValue(new Error('timeout'));
+
+      const result = await detectCrossReferences('Some clause content');
+      expect(result.references).toEqual([]);
+      expect(result.confidence).toBe(0.1);
+    });
+
+    it('classifyPrecedent returns fallback on AI error', async () => {
+      mockExtract.mockRejectedValue(new Error('model unavailable'));
+
+      const result = await classifyPrecedent('Title', 'Facts', 'Reasoning', 'Decision');
+      expect(result.precedentValue).toBe('medium');
+      expect(result.outcome).toBe('split');
+      expect(result.issueType).toBe('other');
+      expect(result.confidence).toBe(0.1);
+      expect(result.reasoning).toBe('Classification failed');
+    });
+  });
+
+  describe('fallback defaults when AI returns incomplete data', () => {
+    it('generateClauseTags uses defaults for missing fields', async () => {
+      mockExtract.mockResolvedValue({ data: {} });
+
+      const result = await generateClauseTags('content', 'wages_compensation');
+      expect(result.tags).toEqual([]);
+      expect(result.confidence).toBe(0.5);
+    });
+
+    it('detectCrossReferences uses defaults for missing fields', async () => {
+      mockExtract.mockResolvedValue({ data: {} });
+
+      const result = await detectCrossReferences('clause text');
+      expect(result.references).toEqual([]);
+      expect(result.confidence).toBe(0.5);
+    });
+
+    it('classifyPrecedent uses defaults for missing fields', async () => {
+      mockExtract.mockResolvedValue({ data: {} });
+
+      const result = await classifyPrecedent('Title', 'Facts', 'Reasoning', 'Decision');
+      expect(result.precedentValue).toBe('medium');
+      expect(result.outcome).toBe('split');
+      expect(result.issueType).toBe('other');
+      expect(result.confidence).toBe(0.5);
+      expect(result.reasoning).toBe('Classification based on case analysis');
+    });
+  });
 });

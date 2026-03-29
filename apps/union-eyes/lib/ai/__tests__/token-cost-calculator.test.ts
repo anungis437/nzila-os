@@ -140,6 +140,22 @@ describe('TokenCostCalculator', () => {
         expect(entry.pricing.outputPerMillion).toBeGreaterThanOrEqual(0);
       }
     });
+
+    it('assigns unknown provider for unrecognized model prefix', () => {
+      MODEL_PRICING['custom-internal-model'] = {
+        inputPerMillion: 1,
+        outputPerMillion: 1,
+      };
+
+      try {
+        const all = getAllModelPricing();
+        const custom = all.find(m => m.model === 'custom-internal-model');
+        expect(custom).toBeDefined();
+        expect(custom!.provider).toBe('unknown');
+      } finally {
+        delete MODEL_PRICING['custom-internal-model'];
+      }
+    });
   });
 
   // ────────────────────────────────────────────────────────────────
@@ -191,6 +207,25 @@ describe('TokenCostCalculator', () => {
       const embedding = getCheapestModel(100000, 0, 'embedding')!;
       const completion = getCheapestModel(100000, 100000, 'completion')!;
       expect(embedding.cost).toBeLessThan(completion.cost);
+    });
+
+    it('returns null when no models satisfy required capability', () => {
+      const original = { ...MODEL_PRICING };
+
+      for (const key of Object.keys(MODEL_PRICING)) {
+        delete MODEL_PRICING[key];
+      }
+      MODEL_PRICING['gpt-test-only'] = { inputPerMillion: 1, outputPerMillion: 1 };
+
+      try {
+        const result = getCheapestModel(1000, 0, 'embedding');
+        expect(result).toBeNull();
+      } finally {
+        for (const key of Object.keys(MODEL_PRICING)) {
+          delete MODEL_PRICING[key];
+        }
+        Object.assign(MODEL_PRICING, original);
+      }
     });
   });
 });

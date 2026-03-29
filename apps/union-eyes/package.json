@@ -142,6 +142,7 @@
     "pdfkit": "^0.15.0",
     "pg": "^8.20.0",
     "postgres": "^3.4.4",
+    "prom-client": "^15.1.3",
     "qrcode": "^1.5.4",
     "react": "19.2.4",
     "react-chartjs-2": "^5.3.1",

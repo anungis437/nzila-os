@@ -242,4 +242,170 @@ describe('AISafetyService', () => {
       expect(result.safe).toBe(true);
     });
   });
+
+  // ── Batch 37: uncovered branch coverage ────────────────────────────────
+  describe('blocked topics detection', () => {
+    it('flags blocked topic when blockTopics is enabled', () => {
+      const safety = new AISafetyService({
+        detectInjection: false,
+        detectPII: false,
+        detectSensitive: false,
+        blockTopics: true,
+      });
+      const result = safety.checkInput('how to fire someone at the office');
+      const blockedFlags = result.flags.filter(f => f.type === 'blocked');
+      expect(blockedFlags.length).toBeGreaterThan(0);
+      expect(blockedFlags[0].severity).toBe('high');
+      expect(result.safe).toBe(false);
+    });
+  });
+
+  describe('checkOutput — PII and sensitive detection', () => {
+    it('detects and redacts PII in output when redactPII is true', () => {
+      const safety = new AISafetyService({
+        detectInjection: false,
+        detectPII: true,
+        detectSensitive: false,
+        blockTopics: false,
+        redactPII: true,
+      });
+      const result = safety.checkOutput('Contact alice@example.com for details');
+      expect(result.sanitizedOutput).toBeDefined();
+      expect(result.sanitizedOutput).not.toContain('alice@example.com');
+      const piiFlags = result.flags.filter(f => f.type === 'pii');
+      expect(piiFlags.length).toBeGreaterThan(0);
+    });
+
+    it('detects sensitive content in output when detectSensitive is true', () => {
+      const safety = new AISafetyService({
+        detectInjection: false,
+        detectPII: false,
+        detectSensitive: true,
+        blockTopics: false,
+      });
+      const result = safety.checkOutput('here is the password for the system');
+      const sensitiveFlags = result.flags.filter(f => f.type === 'sensitive');
+      expect(sensitiveFlags.length).toBeGreaterThan(0);
+    });
+  });
+
+  describe('PII redaction types', () => {
+    it('redacts email addresses with partial masking', () => {
+      const safety = new AISafetyService({
+        detectInjection: false,
+        detectSensitive: false,
+        blockTopics: false,
+        detectPII: true,
+        redactPII: true,
+      });
+      const result = safety.checkInput('email is bob@example.com');
+      expect(result.sanitizedInput).toBeDefined();
+      expect(result.sanitizedInput).toContain('***@example.com');
+    });
+
+    it('redacts postal codes with first/last masking', () => {
+      const safety = new AISafetyService({
+        detectInjection: false,
+        detectSensitive: false,
+        blockTopics: false,
+        detectPII: true,
+        redactPII: true,
+      });
+      const result = safety.checkInput('postal code K1A 0B1');
+      expect(result.sanitizedInput).toBeDefined();
+      // First char + *** + last char
+      expect(result.sanitizedInput).toContain('***');
+    });
+
+    it('redacts DOB with default masking', () => {
+      const safety = new AISafetyService({
+        detectInjection: false,
+        detectSensitive: false,
+        blockTopics: false,
+        detectPII: true,
+        redactPII: true,
+      });
+      const result = safety.checkInput('born on 01/15/1990');
+      expect(result.sanitizedInput).toBeDefined();
+      expect(result.sanitizedInput).toContain('***');
+      expect(result.sanitizedInput).not.toContain('01/15/1990');
+    });
+  });
+
+  describe('checkOutput — edge branches', () => {
+    it('skips PII detection when detectPII is false', () => {
+      const safety = new AISafetyService({
+        detectPII: false,
+        detectInjection: false,
+        detectSensitive: false,
+        blockTopics: false,
+      });
+      const result = safety.checkOutput('Contact alice@example.com');
+      expect(result.flags).toHaveLength(0);
+      expect(result.safe).toBe(true);
+    });
+
+    it('returns no sanitizedOutput when redactPII is false', () => {
+      const safety = new AISafetyService({
+        detectPII: true,
+        redactPII: false,
+        detectInjection: false,
+        detectSensitive: false,
+        blockTopics: false,
+      });
+      const result = safety.checkOutput('Your SIN is 123-456-789');
+      expect(result.sanitizedOutput).toBeUndefined();
+      const piiFlags = result.flags.filter(f => f.type === 'pii');
+      expect(piiFlags.length).toBeGreaterThan(0);
+    });
+
+    it('skips sensitive detection when detectSensitive is false', () => {
+      const safety = new AISafetyService({
+        detectPII: false,
+        detectInjection: false,
+        detectSensitive: false,
+        blockTopics: false,
+      });
+      const result = safety.checkOutput('here is the password');
+      expect(result.flags).toHaveLength(0);
+    });
+  });
+
+  describe('custom injection pattern — non-matching branch', () => {
+    it('does not flag when custom pattern does not match', () => {
+      const safety = new AISafetyService({ detectPII: false, detectSensitive: false, blockTopics: false });
+      safety.addCustomPattern(/bypass\s+all\s+guards/i);
+      safety.addCustomPattern(/secret\s+override/i);
+      const result = safety.checkInput('please bypass all guards now');
+      const injFlags = result.flags.filter(f => f.type === 'injection');
+      // first pattern matches, second does not → covers L241 false branch
+      expect(injFlags.length).toBeGreaterThan(0);
+    });
+  });
+
+  describe('empty input — sanitized fallback branch', () => {
+    it('checkInput handles empty string sanitized fallback', () => {
+      const safety = new AISafetyService({
+        detectInjection: false,
+        detectSensitive: false,
+        blockTopics: false,
+        detectPII: true,
+        redactPII: true,
+      });
+      const result = safety.checkInput('');
+      expect(result.safe).toBe(true);
+    });
+
+    it('checkOutput handles empty string sanitized fallback', () => {
+      const safety = new AISafetyService({
+        detectInjection: false,
+        detectSensitive: false,
+        blockTopics: false,
+        detectPII: true,
+        redactPII: true,
+      });
+      const result = safety.checkOutput('');
+      expect(result.safe).toBe(true);
+    });
+  });
 });

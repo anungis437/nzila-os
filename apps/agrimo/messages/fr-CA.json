@@ -1,0 +1,30 @@
+{
+  "common": {
+    "appName": "Agrimo",
+    "loading": "Chargement...",
+    "save": "Enregistrer",
+    "cancel": "Annuler",
+    "delete": "Supprimer",
+    "edit": "Modifier",
+    "create": "Créer"
+  },
+  "nav": {
+    "dashboard": "Tableau de bord",
+    "producers": "Producteurs",
+    "harvests": "Récoltes",
+    "lots": "Lots",
+    "warehousing": "Entreposage",
+    "shipments": "Expéditions",
+    "payments": "Paiements",
+    "settings": "Paramètres"
+  },
+  "operations": {
+    "producers": "Producteurs",
+    "harvests": "Récoltes",
+    "lots": "Lots",
+    "warehousing": "Entreposage",
+    "shipments": "Expéditions",
+    "payments": "Paiements",
+    "traceability": "Traçabilité"
+  }
+}

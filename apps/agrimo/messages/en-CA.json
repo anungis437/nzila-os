@@ -1,0 +1,30 @@
+{
+  "common": {
+    "appName": "Agrimo",
+    "loading": "Loading...",
+    "save": "Save",
+    "cancel": "Cancel",
+    "delete": "Delete",
+    "edit": "Edit",
+    "create": "Create"
+  },
+  "nav": {
+    "dashboard": "Dashboard",
+    "producers": "Producers",
+    "harvests": "Harvests",
+    "lots": "Lots",
+    "warehousing": "Warehousing",
+    "shipments": "Shipments",
+    "payments": "Payments",
+    "settings": "Settings"
+  },
+  "operations": {
+    "producers": "Producers",
+    "harvests": "Harvests",
+    "lots": "Lots",
+    "warehousing": "Warehousing",
+    "shipments": "Shipments",
+    "payments": "Payments",
+    "traceability": "Traceability"
+  }
+}

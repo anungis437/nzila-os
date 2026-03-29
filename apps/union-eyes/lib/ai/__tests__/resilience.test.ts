@@ -160,13 +160,18 @@ describe('CircuitBreaker', () => {
 
 describe('TokenBucketRateLimiter', () => {
   it('allows requests within capacity', () => {
-    const limiter = new TokenBucketRateLimiter({
-      capacity: 10,
-      refillRate: 1,
-      windowMs: 60000,
-    });
-    expect(limiter.tryConsume('user1', 1)).toBe(true);
-    expect(limiter.getRemaining('user1')).toBe(9);
+    vi.useFakeTimers();
+    try {
+      const limiter = new TokenBucketRateLimiter({
+        capacity: 10,
+        refillRate: 1,
+        windowMs: 60000,
+      });
+      expect(limiter.tryConsume('user1', 1)).toBe(true);
+      expect(limiter.getRemaining('user1')).toBe(9);
+    } finally {
+      vi.useRealTimers();
+    }
   });
 
   it('rejects when tokens exhausted', () => {
@@ -259,15 +264,20 @@ describe('TokenBucketRateLimiter', () => {
   });
 
   it('handles high-cost consumption', () => {
-    const limiter = new TokenBucketRateLimiter({
-      capacity: 100,
-      refillRate: 1,
-      windowMs: 60000,
-    });
-    expect(limiter.tryConsume('user1', 50)).toBe(true);
-    expect(limiter.getRemaining('user1')).toBe(50);
-    expect(limiter.tryConsume('user1', 51)).toBe(false);
-    expect(limiter.tryConsume('user1', 50)).toBe(true);
-    expect(limiter.getRemaining('user1')).toBe(0);
+    vi.useFakeTimers();
+    try {
+      const limiter = new TokenBucketRateLimiter({
+        capacity: 100,
+        refillRate: 1,
+        windowMs: 60000,
+      });
+      expect(limiter.tryConsume('user1', 50)).toBe(true);
+      expect(limiter.getRemaining('user1')).toBe(50);
+      expect(limiter.tryConsume('user1', 51)).toBe(false);
+      expect(limiter.tryConsume('user1', 50)).toBe(true);
+      expect(limiter.getRemaining('user1')).toBe(0);
+    } finally {
+      vi.useRealTimers();
+    }
   });
 });

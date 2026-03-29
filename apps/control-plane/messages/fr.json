@@ -1,0 +1,11 @@
+{
+  "common": {
+    "appName": "Panneau de contrôle",
+    "loading": "Chargement...",
+    "save": "Enregistrer",
+    "cancel": "Annuler",
+    "delete": "Supprimer",
+    "edit": "Modifier",
+    "create": "Créer"
+  }
+}

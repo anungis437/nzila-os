@@ -1,0 +1,29 @@
+{
+  "common": {
+    "appName": "Panneau de contrôle",
+    "loading": "Chargement...",
+    "save": "Enregistrer",
+    "cancel": "Annuler",
+    "delete": "Supprimer",
+    "edit": "Modifier",
+    "create": "Créer"
+  },
+  "nav": {
+    "dashboard": "Tableau de bord",
+    "tenants": "Locataires",
+    "services": "Services",
+    "deployments": "Déploiements",
+    "monitoring": "Surveillance",
+    "configuration": "Configuration",
+    "audit": "Journal d'audit",
+    "settings": "Paramètres"
+  },
+  "platform": {
+    "tenants": "Locataires",
+    "services": "Services",
+    "deployments": "Déploiements",
+    "healthChecks": "Vérifications de santé",
+    "featureFlags": "Indicateurs de fonctionnalité",
+    "auditLog": "Journal d'audit"
+  }
+}

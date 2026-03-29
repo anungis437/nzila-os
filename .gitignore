@@ -8,8 +8,14 @@ legacy-codebases/
 notion_export/
 *.zip
 
-# ----- Staging migration SQL files ------
+# ----- Staging / seed / ad-hoc SQL & CSV at repo root ------
 staging-*.sql
+staging-*.csv
+staging-*.txt
+seed-*.sql
+temp-staging-*.sql
+/audit-*.sql
+/audit-*.json
 
 # ----- Node / JS / TS ------
 **/node_modules/
@@ -136,16 +142,46 @@ snyk-*.txt
 *.bak
 *.cache
 tmp-*
+.tmp-*
 .pilot-check/
 docker-build.log
 build-output.txt
+build-output.log
 install-err.txt
 install-log.txt
 install-out.txt
 tsc-output.txt
 *.tsbuildinfo
 
-# Temp diagnostic outputs
+# Temp diagnostic / scratch outputs
 contract-test-results.txt
+contract-test-output.txt
 ct-output.txt
+ct-output2.txt
+ct-audit-out.txt
 ts-errors*.txt
+ts-audit-output.txt
+ts-check-*.txt
+ts-out.txt
+/audit-output*.txt
+/audit-post-typefix.txt
+/audit-temp.json
+batch*-results.txt
+batch*-*.txt
+full-test-results*.txt
+db-columns*.txt
+db-tables.txt
+local-*.txt
+migration-*.txt
+missing-*.txt
+orphan-*.txt
+schema-drift-report.txt
+schema-tables-from-code.txt
+tenant-files*.txt
+docker-build-output.txt
+pnpm-install-log.txt
+wh-test.txt
+ue-*.txt
+cov-*.txt
+coverage-output*.txt
+**/coverage-report*.txt

@@ -1,0 +1,28 @@
+{
+  "common": {
+    "appName": "Mobility",
+    "loading": "Loading...",
+    "save": "Save",
+    "cancel": "Cancel",
+    "delete": "Delete",
+    "edit": "Edit",
+    "create": "Create"
+  },
+  "nav": {
+    "dashboard": "Dashboard",
+    "applications": "Applications",
+    "investments": "Investments",
+    "properties": "Properties",
+    "portfolio": "Portfolio",
+    "documents": "Documents",
+    "settings": "Settings"
+  },
+  "migration": {
+    "applications": "Applications",
+    "investments": "Investments",
+    "properties": "Properties",
+    "portfolio": "Portfolio",
+    "visaTracking": "Visa Tracking",
+    "settlement": "Settlement"
+  }
+}

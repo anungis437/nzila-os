@@ -206,6 +206,11 @@ function daysUntilSLABreach(
   return Math.ceil(diffMs / (1000 * 60 * 60 * 24));
 }
 
+// Test-only internals for deterministic coverage of private SLA helper paths.
+export const __claimWorkflowFsmInternals = {
+  isSLACompliant,
+};
+
 /**
  * Validate if a claim state transition is allowed (ENFORCEMENT LAYER)
  * 

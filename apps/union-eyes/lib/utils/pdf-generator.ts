@@ -385,5 +385,13 @@ export function addFooter(
   }
 }
 
+export const __testInternals = {
+  renderTable,
+  renderClaimsReport,
+  renderMembersReport,
+  renderGrievancesReport,
+  renderUsageReport,
+};
+
 export default generatePDF;
 

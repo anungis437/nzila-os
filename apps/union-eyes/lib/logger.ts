@@ -13,7 +13,16 @@
 
 // Lazy-load Sentry to avoid bundling during Next.js build phase
 let Sentry: typeof import('@sentry/nextjs') | null = null;
+let sentryLoaderOverride: (() => Promise<typeof import('@sentry/nextjs') | null>) | null = null;
 const getSentry = async () => {
+  if (sentryLoaderOverride) {
+    try {
+      return await sentryLoaderOverride();
+    } catch {
+      return null;
+    }
+  }
+
   if (!Sentry && typeof window === 'undefined') {
     try {
       Sentry = await import('@sentry/nextjs');
@@ -306,6 +315,15 @@ class Logger {
 
 // Export singleton instance
 export const logger = Logger.getInstance();
+
+// Test-only hooks to deterministically exercise internal branches.
+export const __loggerTestInternals = {
+  getSingletonInstance: () => Logger.getInstance(),
+  setSentryLoaderOverride: (loader: (() => Promise<typeof import('@sentry/nextjs') | null>) | null) => {
+    sentryLoaderOverride = loader;
+    Sentry = null;
+  },
+};
 
 /**
  * Middleware helper to set correlation ID from request headers

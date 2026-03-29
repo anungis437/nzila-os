@@ -1,4 +1,12 @@
 import { NextResponse, type NextRequest } from 'next/server'
+import createIntlMiddleware from 'next-intl/middleware'
+import { locales, defaultLocale } from './lib/locales'
+
+const intlMiddleware = createIntlMiddleware({
+  locales,
+  defaultLocale,
+  localePrefix: 'never',
+})
 
 export function middleware(request: NextRequest) {
   // ── Idempotency-Key enforcement (fail-closed in pilot/prod) ──────────
@@ -22,6 +30,14 @@ export function middleware(request: NextRequest) {
         )
       }
     }
+  }
+
+  // ── Internationalisation ──────────────────────────────────────────────
+  if (!request.nextUrl.pathname.startsWith('/api')) {
+    const intlResponse = intlMiddleware(request)
+    const requestId = request.headers.get('x-request-id') ?? crypto.randomUUID()
+    intlResponse.headers.set('x-request-id', requestId)
+    return intlResponse
   }
 
   // ── Request-ID propagation ────────────────────────────────────────────

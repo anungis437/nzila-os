@@ -1,0 +1,11 @@
+{
+  "common": {
+    "appName": "Agrimo",
+    "loading": "Chargement...",
+    "save": "Enregistrer",
+    "cancel": "Annuler",
+    "delete": "Supprimer",
+    "edit": "Modifier",
+    "create": "Créer"
+  }
+}

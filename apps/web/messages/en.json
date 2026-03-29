@@ -1,0 +1,10 @@
+{
+  "common": {
+    "appName": "Nzila Ventures",
+    "loading": "Loading...",
+    "learnMore": "Learn more",
+    "getStarted": "Get Started",
+    "contactUs": "Contact Us",
+    "backToHome": "Back to Home"
+  }
+}
