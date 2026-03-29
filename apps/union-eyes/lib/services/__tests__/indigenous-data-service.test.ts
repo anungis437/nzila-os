@@ -331,3 +331,77 @@ describe('setupOnPremiseStorage', () => {
     expect(result.config?.hasOnPremiseServer).toBe(true);
   });
 });
+
+/* ── Batch 32: branch gap-fill ── */
+
+describe('IndigenousDataService (branch gaps)', () => {
+  beforeEach(() => {
+    vi.clearAllMocks();
+    mocks.mockInsert.mockReturnValue(chain(undefined));
+    mocks.mockSelect.mockReturnValue(chain([]));
+    mocks.mockUpdate.mockReturnValue(chain(undefined));
+  });
+
+  it('verifyBandCouncilOwnership returns false on DB error', async () => {
+    const svc = new IndigenousDataService('org-1', 'user-1');
+    mocks.indigenousMemberDataFindFirst.mockRejectedValue(new Error('DB error'));
+    const result = await svc.verifyBandCouncilOwnership('member-1');
+    expect(result.hasAgreement).toBe(false);
+    expect(result.reason).toContain('Database error');
+  });
+
+  it('verifyBandCouncilOwnership returns bandName from bandCouncil lookup', async () => {
+    const svc = new IndigenousDataService('org-1', 'user-1');
+    mocks.indigenousMemberDataFindFirst.mockResolvedValue({
+      bandCouncilId: 'bc-1',
+      userId: 'member-1',
+    });
+    mocks.bandCouncilConsentFindFirst.mockResolvedValue({
+      id: 'consent-1',
+      expiresAt: null,
+    });
+    mocks.bandCouncilsFindFirst.mockResolvedValue({
+      id: 'bc-1',
+      bandName: 'Treaty 7 Band Council',
+    });
+    const result = await svc.verifyBandCouncilOwnership('member-1');
+    expect(result.hasAgreement).toBe(true);
+    expect(result.bandName).toBe('Treaty 7 Band Council');
+  });
+
+  it('requestDataAccess throws when band council required but user not associated', async () => {
+    const svc = new IndigenousDataService('org-1', 'user-1');
+    mocks.mockSelect.mockReturnValue(chain([])); // no requesterData
+    await expect(
+      svc.requestDataAccess('req-1', 'health', 'research', 'sensitive'),
+    ).rejects.toThrow('Band Council approval required');
+  });
+
+  it('getStorageConfig returns defaults when bandCouncil not found', async () => {
+    const svc = new IndigenousDataService('org-1', 'user-1');
+    mocks.bandCouncilsFindFirst.mockResolvedValue(null);
+    const config = await svc.getStorageConfig('reserve-1');
+    expect(config.hasOnPremiseServer).toBe(false);
+    expect(config.storageLocation).toBe('canada_only');
+  });
+
+  it('getStorageConfig returns error defaults on DB failure', async () => {
+    const svc = new IndigenousDataService('org-1', 'user-1');
+    mocks.bandCouncilsFindFirst.mockRejectedValue(new Error('timeout'));
+    const config = await svc.getStorageConfig('reserve-1');
+    expect(config.hasOnPremiseServer).toBe(false);
+  });
+
+  it('generateComplianceReport counts active agreements', async () => {
+    const svc = new IndigenousDataService('org-1', 'user-1');
+    mocks.bandCouncilConsentFindMany.mockResolvedValue([{ id: 'c-1', consentGiven: true }]);
+    mocks.bandCouncilsFindMany
+      .mockResolvedValueOnce([{ id: 'bc-1', onReserveStorageEnabled: true }]) // with storage
+      .mockResolvedValueOnce([{ id: 'bc-1' }, { id: 'bc-2' }]); // all
+    mocks.accessLogFindMany.mockResolvedValue([]);
+    const report = await svc.generateComplianceReport();
+    expect(report.ocapPrinciples.ownership.compliant).toBe(true);
+    expect(report.bandCouncilAgreements).toBe(1);
+    expect(report.onPremiseStoragePercent).toBe(50);
+  });
+});

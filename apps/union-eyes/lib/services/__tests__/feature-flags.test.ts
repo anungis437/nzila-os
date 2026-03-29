@@ -382,4 +382,50 @@ describe('feature-flags service', () => {
       'Feature flag not found'
     );
   });
+
+  /* ── Batch 32: branch gap-fill ── */
+
+  it('evaluateFeature returns disabled for unknown flag type', async () => {
+    mockFindFirst.mockResolvedValue({
+      id: 'flag-1', name: 'f1', enabled: true, type: 'exotic_type',
+    });
+    const result = await evaluateFeature('f1', { userId: 'u-1' });
+    expect(result.enabled).toBe(false);
+    expect(result.reason).toContain('Unknown flag type');
+  });
+
+  it('evaluateFeature returns disabled and logs error on exception', async () => {
+    mockFindFirst.mockRejectedValue(new Error('DB crash'));
+    const result = await evaluateFeature('broken', { userId: 'u-1' });
+    expect(result.enabled).toBe(false);
+    expect(result.reason).toContain('Evaluation error');
+  });
+
+  it('addOrganizationToPilot is a no-op when org is already in list', async () => {
+    mockFindFirst.mockResolvedValue({
+      id: 'flag-1', name: 'f1',
+      allowedOrganizations: ['org-1', 'org-2'],
+    });
+    await addOrganizationToPilot('f1', 'org-1', 'actor-1');
+    // update should NOT be called because org-1 is already present
+    expect(mockUpdate).not.toHaveBeenCalled();
+  });
+
+  it('evaluatePercentageFlag returns disabled when percentage not set', async () => {
+    mockFindFirst.mockResolvedValue({
+      id: 'flag-1', name: 'pct-flag', enabled: true, type: 'percentage', percentage: undefined,
+    });
+    const result = await evaluateFeature('pct-flag', { userId: 'u-1' });
+    expect(result.enabled).toBe(false);
+    expect(result.reason).toContain('Percentage not configured');
+  });
+
+  it('evaluatePercentageFlag returns disabled when userId missing', async () => {
+    mockFindFirst.mockResolvedValue({
+      id: 'flag-1', name: 'pct-flag', enabled: true, type: 'percentage', percentage: 50,
+    });
+    const result = await evaluateFeature('pct-flag', {}); // no userId
+    expect(result.enabled).toBe(false);
+    expect(result.reason).toContain('UserId required');
+  });
 });

@@ -710,4 +710,155 @@ describe('report-executor', () => {
       expect(result.rowCount).toBe(1);
     });
   });
+
+  /* ── Batch 32: branch gap-fill (aggregation, filters, errors) ── */
+
+  describe('ReportExecutor - aggregation types', () => {
+    it('builds SUM aggregation', async () => {
+      mocks.mockExecute.mockResolvedValue([{ amount_sum: 1000 }]);
+      const executor = new ReportExecutor('org-1');
+      const result = await executor.execute({
+        dataSourceId: 'claims',
+        fields: [{ fieldId: 'id', fieldName: 'Sum', aggregation: 'sum' }],
+        groupBy: ['status'],
+      });
+      expect(result.success).toBe(true);
+    });
+
+    it('builds AVG aggregation', async () => {
+      mocks.mockExecute.mockResolvedValue([{ avg: 42 }]);
+      const executor = new ReportExecutor('org-1');
+      const result = await executor.execute({
+        dataSourceId: 'claims',
+        fields: [{ fieldId: 'id', fieldName: 'Avg', aggregation: 'avg' }],
+        groupBy: ['status'],
+      });
+      expect(result.success).toBe(true);
+    });
+
+    it('builds MIN aggregation', async () => {
+      mocks.mockExecute.mockResolvedValue([{ min: 1 }]);
+      const executor = new ReportExecutor('org-1');
+      const result = await executor.execute({
+        dataSourceId: 'claims',
+        fields: [{ fieldId: 'id', fieldName: 'Min', aggregation: 'min' }],
+        groupBy: ['status'],
+      });
+      expect(result.success).toBe(true);
+    });
+
+    it('builds MAX aggregation', async () => {
+      mocks.mockExecute.mockResolvedValue([{ max: 999 }]);
+      const executor = new ReportExecutor('org-1');
+      const result = await executor.execute({
+        dataSourceId: 'claims',
+        fields: [{ fieldId: 'id', fieldName: 'Max', aggregation: 'max' }],
+        groupBy: ['status'],
+      });
+      expect(result.success).toBe(true);
+    });
+
+    it('builds COUNT(DISTINCT) aggregation', async () => {
+      mocks.mockExecute.mockResolvedValue([{ ct: 5 }]);
+      const executor = new ReportExecutor('org-1');
+      const result = await executor.execute({
+        dataSourceId: 'claims',
+        fields: [{ fieldId: 'status', fieldName: 'Unique', aggregation: 'count_distinct' }],
+        groupBy: ['priority'],
+      });
+      expect(result.success).toBe(true);
+    });
+
+    it('builds STRING_AGG aggregation', async () => {
+      mocks.mockExecute.mockResolvedValue([{ agg: 'a, b' }]);
+      const executor = new ReportExecutor('org-1');
+      const result = await executor.execute({
+        dataSourceId: 'claims',
+        fields: [{ fieldId: 'status', fieldName: 'Statuses', aggregation: 'string_agg' }],
+        groupBy: ['priority'],
+      });
+      expect(result.success).toBe(true);
+    });
+
+    it('falls back to raw column for unknown aggregation', async () => {
+      mocks.mockExecute.mockResolvedValue([]);
+      const executor = new ReportExecutor('org-1');
+      const result = await executor.execute({
+        dataSourceId: 'claims',
+        fields: [{ fieldId: 'status', fieldName: 'Status', aggregation: 'median' as 'count' }],
+      });
+      expect(result.success).toBe(true);
+    });
+  });
+
+  describe('ReportExecutor - error handling', () => {
+    it('returns error result on query failure', async () => {
+      mocks.mockExecute.mockRejectedValue(new Error('syntax error'));
+      const executor = new ReportExecutor('org-1');
+      const result = await executor.execute({
+        dataSourceId: 'claims',
+        fields: [{ fieldId: 'id', fieldName: 'ID' }],
+      });
+      expect(result.success).toBe(false);
+      expect(result.error).toContain('syntax error');
+    });
+  });
+
+  describe('ReportExecutor - filter operators (ne/gt/lt)', () => {
+    it('applies ne (not equal) filter', async () => {
+      mocks.mockExecute.mockResolvedValue([]);
+      const executor = new ReportExecutor('org-1');
+      const result = await executor.execute({
+        dataSourceId: 'claims',
+        fields: [{ fieldId: 'id', fieldName: 'ID' }],
+        filters: [{ fieldId: 'status', operator: 'ne', value: 'closed' }],
+      });
+      expect(result.success).toBe(true);
+    });
+
+    it('applies gt (greater than) filter', async () => {
+      mocks.mockExecute.mockResolvedValue([]);
+      const executor = new ReportExecutor('org-1');
+      const result = await executor.execute({
+        dataSourceId: 'claims',
+        fields: [{ fieldId: 'id', fieldName: 'ID' }],
+        filters: [{ fieldId: 'priority', operator: 'gt', value: 3 }],
+      });
+      expect(result.success).toBe(true);
+    });
+
+    it('applies lt (less than) filter', async () => {
+      mocks.mockExecute.mockResolvedValue([]);
+      const executor = new ReportExecutor('org-1');
+      const result = await executor.execute({
+        dataSourceId: 'claims',
+        fields: [{ fieldId: 'id', fieldName: 'ID' }],
+        filters: [{ fieldId: 'priority', operator: 'lt', value: 5 }],
+      });
+      expect(result.success).toBe(true);
+    });
+
+    it('applies lte (less than or equal) filter', async () => {
+      mocks.mockExecute.mockResolvedValue([]);
+      const executor = new ReportExecutor('org-1');
+      const result = await executor.execute({
+        dataSourceId: 'claims',
+        fields: [{ fieldId: 'id', fieldName: 'ID' }],
+        filters: [{ fieldId: 'priority', operator: 'lte', value: 3 }],
+      });
+      expect(result.success).toBe(true);
+    });
+  });
+
+  describe('ReportExecutor - field with table prefix', () => {
+    it('uses table-qualified column name when field.table is set', async () => {
+      mocks.mockExecute.mockResolvedValue([]);
+      const executor = new ReportExecutor('org-1');
+      const result = await executor.execute({
+        dataSourceId: 'claims',
+        fields: [{ fieldId: 'id', fieldName: 'ID', table: 'claims' }],
+      });
+      expect(result.success).toBe(true);
+    });
+  });
 });

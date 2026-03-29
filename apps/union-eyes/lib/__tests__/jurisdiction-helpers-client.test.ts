@@ -75,4 +75,26 @@ describe('jurisdiction-helpers-client', () => {
       expect(getDeadlineUrgency(10).label).toBe('On Track');
     });
   });
+
+  /* ── Batch 32: branch gap-fill ── */
+
+  describe('mapJurisdictionValue edge cases', () => {
+    it('falls back to CA-FED for unknown CA- prefix', () => {
+      // CA-XX not in mapping → fallback to 'CA-FED'
+      const result = mapJurisdictionValue('CA-XX');
+      expect(result).toBe('CA-FED');
+    });
+
+    it('falls back to CA-FED for non-CA prefix not in mapping', () => {
+      const result = mapJurisdictionValue('US-NY');
+      expect(result).toBe('CA-FED');
+    });
+  });
+
+  describe('getJurisdictionName edge cases', () => {
+    it('returns Unknown for unmapped jurisdiction', () => {
+      const result = getJurisdictionName('ZZ-NOWHERE');
+      expect(result).toBe('Unknown');
+    });
+  });
 });

@@ -120,6 +120,39 @@ describe("with-rls-context", () => {
       const result = await withRLSContext(async () => "ok");
       expect(result).toBe("ok");
     });
+
+    /* ── Batch 32: branch gap-fill ── */
+
+    it("falls back to privateMetadata.organizationId", async () => {
+      mocks.mockAuth.mockResolvedValueOnce({ userId: "user-1", orgId: null });
+      mocks.mockCurrentUser.mockResolvedValueOnce({
+        publicMetadata: {},
+        privateMetadata: { organizationId: "org-priv" },
+      });
+      const result = await withRLSContext(async () => "ok");
+      expect(result).toBe("ok");
+      expect(mocks.mockTxExecute).toHaveBeenCalledTimes(2);
+    });
+
+    it("falls back to privateMetadata.tenantId", async () => {
+      mocks.mockAuth.mockResolvedValueOnce({ userId: "user-1", orgId: null });
+      mocks.mockCurrentUser.mockResolvedValueOnce({
+        publicMetadata: {},
+        privateMetadata: { tenantId: "tenant-priv" },
+      });
+      const result = await withRLSContext(async () => "ok");
+      expect(result).toBe("ok");
+      expect(mocks.mockTxExecute).toHaveBeenCalledTimes(2);
+    });
+
+    it("returns null user from currentUser() — no orgId", async () => {
+      mocks.mockAuth.mockResolvedValueOnce({ userId: "user-1", orgId: null });
+      mocks.mockCurrentUser.mockResolvedValueOnce(null);
+      const result = await withRLSContext(async () => "ok");
+      expect(result).toBe("ok");
+      // Only user_id is set, no org call
+      expect(mocks.mockTxExecute).toHaveBeenCalledTimes(1);
+    });
   });
 
   // ── withExplicitUserContext ───────────────────────────────────────

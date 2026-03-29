@@ -187,4 +187,42 @@ describe('email-service', () => {
       expect(result.success).toBe(true);
     });
   });
+
+  /* ── Batch 32: branch gap-fill ── */
+
+  describe('sendAwardReceivedEmail (branch gaps)', () => {
+    it('renders without awardTypeIcon when not provided', async () => {
+      const dataNoIcon = {
+        recipientName: 'Alice',
+        recipientEmail: 'alice@example.com',
+        issuerName: 'Bob',
+        awardTypeName: 'Team Player',
+        message: 'Great job!',
+        creditsAwarded: 100,
+        awardId: 'award-1',
+        orgName: 'TestOrg',
+        // No awardTypeIcon ← hits the falsy branch at L214
+      };
+      const result = await sendAwardReceivedEmail(dataNoIcon);
+      expect(result.success).toBe(true);
+    });
+  });
+
+  describe('sendCreditExpirationEmail (branch gaps)', () => {
+    it('uses singular "day" when expiration is 1 day away', async () => {
+      const tomorrow = new Date(Date.now() + 1 * 24 * 60 * 60 * 1000);
+      const result = await sendCreditExpirationEmail({
+        recipientName: 'Eve',
+        recipientEmail: 'eve@example.com',
+        expiringAmount: 50,
+        expirationDate: tomorrow,
+        orgName: 'TestOrg',
+      });
+      expect(result.success).toBe(true);
+      // The HTML should contain "1 day" (singular), not "1 days"
+      const htmlArg = mocks.mockSend.mock.calls[0][0].html;
+      expect(htmlArg).toContain('1 day');
+      expect(htmlArg).not.toContain('1 days');
+    });
+  });
 });

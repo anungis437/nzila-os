@@ -310,4 +310,22 @@ describe('api-client', () => {
       successThreshold: 2,
     });
   });
+
+  /* ── Batch 32: branch gap-fill ── */
+
+  it('stripeClient is null when STRIPE_SECRET_KEY is not set', async () => {
+    const { stripeClient } = await import('../api-client');
+    // STRIPE_SECRET_KEY is not set in test env → should be null
+    expect(stripeClient).toBeNull();
+  });
+
+  it('createExternalApiClient creates one-off clients', () => {
+    const client = createExternalApiClient('test-ext', {
+      baseURL: 'https://api.example.com',
+      timeout: 5000,
+    });
+    // Should have standard methods
+    expect(client.get).toBeDefined();
+    expect(client.post).toBeDefined();
+  });
 });

@@ -344,4 +344,26 @@ describe('getUnreconciledTransactions', () => {
     const result = await getUnreconciledTransactions('org-1', 'acct-1');
     expect(result).toHaveLength(0);
   });
+
+  /* ── Batch 32: branch gap-fill (error paths) ── */
+
+  it('throws on generateTrialBalance DB failure', async () => {
+    mocks.mockSelect.mockReturnValue({
+      from: vi.fn().mockReturnValue({
+        where: vi.fn().mockRejectedValue(new Error('DB connection lost')),
+      }),
+    });
+    await expect(generateTrialBalance('org-1', new Date(), 'u-1')).rejects.toThrow('DB connection lost');
+  });
+
+  it('throws on getUnreconciledTransactions DB failure', async () => {
+    mocks.mockSelect.mockReturnValue({
+      from: vi.fn().mockReturnValue({
+        where: vi.fn().mockReturnValue({
+          limit: vi.fn().mockRejectedValue(new Error('query timeout')),
+        }),
+      }),
+    });
+    await expect(getUnreconciledTransactions('org-1', 'acct-1')).rejects.toThrow('query timeout');
+  });
 });

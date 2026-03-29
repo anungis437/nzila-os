@@ -380,4 +380,60 @@ describe('getImpactSummary', () => {
     );
     expect(result.highlights).toEqual(['Getting started—every case matters']);
   });
+
+  /* ── Batch 32: branch gap-fill ── */
+
+  it('suggests feedback when satisfaction is low with enough cases', () => {
+    const result = getImpactSummary(
+      makeImpact({
+        casesHandled: 10,
+        casesWon: 5,
+        memberSatisfactionAvg: 2.5,
+        democraticParticipationRate: 70,
+      }),
+    );
+    expect(result.areasForGrowth.some((g) => g.includes('feedback'))).toBe(true);
+  });
+
+  it('suggests democratic engagement when participation is low', () => {
+    const result = getImpactSummary(
+      makeImpact({
+        casesHandled: 15,
+        casesWon: 10,
+        memberSatisfactionAvg: 4.5,
+        democraticParticipationRate: 20,
+      }),
+    );
+    expect(result.areasForGrowth.some((g) => g.includes('democratic'))).toBe(true);
+  });
+
+  it('assignes "Experienced Advocate" headline for >= 50 wins', () => {
+    const result = getImpactSummary(makeImpact({ casesWon: 55, casesHandled: 60 }));
+    expect(result.headline).toBe('Experienced Advocate');
+  });
+
+  it('assigns "Strong Track Record" headline for >= 25 wins', () => {
+    const result = getImpactSummary(makeImpact({ casesWon: 30, casesHandled: 40 }));
+    expect(result.headline).toBe('Strong Track Record');
+  });
+
+  it('assigns "Building Momentum" headline for >= 10 wins', () => {
+    const result = getImpactSummary(makeImpact({ casesWon: 10, casesHandled: 15 }));
+    expect(result.headline).toBe('Building Momentum');
+  });
+
+  it('highlights efficient resolution when avgResolutionTime is ≤ 30', () => {
+    const result = getImpactSummary(
+      makeImpact({ casesWon: 5, avgResolutionTime: 10 }),
+    );
+    expect(result.highlights.some((h) => h.includes('Efficient'))).toBe(true);
+  });
+
+  it('computes zero-based changePercent when previous value is 0', () => {
+    const current = makeImpact({ casesHandled: 10 });
+    const previous = makeImpact({ casesHandled: 0 });
+    const results = compareImpactPeriods(current, previous);
+    const casesHandled = results.find((r) => r.metric === 'Cases Handled')!;
+    expect(casesHandled.changePercent).toBe(0); // 0 ÷ 0 prevented
+  });
 });

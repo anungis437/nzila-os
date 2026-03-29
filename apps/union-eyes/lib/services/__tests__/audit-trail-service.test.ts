@@ -333,5 +333,80 @@ describe('AuditTrailService', () => {
       });
       expect(result.tags).toEqual(['a', 'b']);
     });
+
+    /* ── Batch 32: branch gap-fill ── */
+
+    it('recursively sanitizes nested objects', () => {
+      const result = AuditTrailService.sanitizeMetadata({
+        user: {
+          name: 'Alice',
+          secretKey: 'should-be-hidden',
+        },
+      });
+      expect(result.user.name).toBe('Alice');
+      expect(result.user.secretKey).toBe('[REDACTED]');
+    });
+
+    it('redacts SIN and SSN fields', () => {
+      const result = AuditTrailService.sanitizeMetadata({
+        sin: '123-456-789',
+        ssn: '999-00-0000',
+        normalField: 'visible',
+      });
+      expect(result.sin).toBe('[REDACTED]');
+      expect(result.ssn).toBe('[REDACTED]');
+      expect(result.normalField).toBe('visible');
+    });
+  });
+
+  /* ── Batch 32: additional branch coverage ── */
+
+  describe('getUserActivity (no date range)', () => {
+    it('queries without date range', async () => {
+      mocks.mockSelect.mockReturnValue(chain([]));
+      const result = await AuditTrailService.getUserActivity('org-1', 'u-1');
+      expect(Array.isArray(result)).toBe(true);
+    });
+  });
+
+  describe('generateComplianceReport (edge cases)', () => {
+    it('handles empty logs with no suspicious activities', async () => {
+      mocks.mockSelect.mockReturnValue(chain([]));
+      const report = await AuditTrailService.generateComplianceReport(
+        'org-1', new Date('2026-01-01'), new Date(),
+      );
+      expect(report.totalEvents).toBe(0);
+      expect(report.suspiciousActivities).toEqual([]);
+    });
+  });
+
+  describe('logPrivilegedAction', () => {
+    it('logs action with metadata', async () => {
+      const result = await AuditTrailService.logPrivilegedAction({
+        actorId: 'u-1',
+        actorRole: 'admin',
+        organizationId: 'org-1',
+        actionType: 'role_change',
+        entityType: 'user',
+        orgId: 'target-u',
+        metadata: { fromRole: 'member', toRole: 'admin' },
+        visibilityScope: 'admin',
+      });
+      expect(result).toBeDefined();
+    });
+
+    it('sanitizes metadata when present', async () => {
+      await AuditTrailService.logPrivilegedAction({
+        actorId: 'u-1',
+        actorRole: 'admin',
+        organizationId: 'org-1',
+        actionType: 'config_change',
+        entityType: 'settings',
+        orgId: 'settings-1',
+        metadata: { apiKey: 'secret123', setting: 'dark-mode' },
+        visibilityScope: 'system',
+      });
+      expect(mocks.mockInsert).toHaveBeenCalled();
+    });
   });
 });

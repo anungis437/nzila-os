@@ -305,6 +305,24 @@ describe('wallet-service', () => {
       expect(result.totalCreditsSpent).toBe(2000);
       expect(result.activeMembers).toBe(15);
     });
+
+    it('applies date range when startDate and endDate are provided', async () => {
+      const { db } = await import('@/db');
+
+      const mockWhere = vi.fn().mockResolvedValue([
+        { totalIssued: 1000, totalSpent: 200, activeMembers: 3 },
+      ]);
+      const mockFrom = vi.fn().mockReturnValue({ where: mockWhere });
+      (db.select as any).mockReturnValue({ from: mockFrom });
+      mocks.mockExecute.mockResolvedValue([{ total: 800 }]);
+
+      const start = new Date('2026-01-01');
+      const end = new Date('2026-03-31');
+      const result = await getLedgerSummary('org-1', start, end);
+
+      expect(result.totalCreditsIssued).toBe(1000);
+      expect(result.activeMembers).toBe(3);
+    });
   });
 
   /* ============================= getBulkBalances ============================= */

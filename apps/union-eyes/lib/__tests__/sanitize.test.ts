@@ -95,4 +95,11 @@ describe('sanitizeHtml', () => {
       globalThis.window = origWindow;
     }
   });
+
+  /* ── Batch 32: branch gap-fill ── */
+
+  it('rejects redirect to untrusted domain', () => {
+    const result = validateRedirectUrl('https://evil.example.com/phish');
+    expect(result).toBeNull();
+  });
 });
