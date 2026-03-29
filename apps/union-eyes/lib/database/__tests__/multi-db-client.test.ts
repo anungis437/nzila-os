@@ -77,6 +77,7 @@ import {
   createBooleanQuery,
   createNullCheck,
   getDatabase,
+  checkDatabaseHealth,
 } from "../multi-db-client";
 
 /* ── tests ──────────────────────────────────────────────────────────── */
@@ -114,6 +115,22 @@ describe("multi-db-client", () => {
       delete process.env.DB_POOL_MAX;
       const cfg = getDatabaseConfig();
       expect(cfg.options?.max).toBe(1);
+    });
+
+    it("uses AZURE_SQL_CONNECTION_STRING when DATABASE_URL is missing", () => {
+      delete process.env.DATABASE_URL;
+      process.env.AZURE_SQL_CONNECTION_STRING = "mssql://azure-host/db";
+      const cfg = getDatabaseConfig();
+      expect(cfg.connectionString).toBe("mssql://azure-host/db");
+    });
+
+    it("uses non-test default max=20 when NODE_ENV and VITEST are not test", () => {
+      delete process.env.DB_POOL_MAX;
+      process.env.NODE_ENV = "development";
+      delete process.env.VITEST;
+
+      const cfg = getDatabaseConfig();
+      expect(cfg.options?.max).toBe(20);
     });
   });
 
@@ -312,6 +329,35 @@ describe("multi-db-client", () => {
       process.env.DATABASE_URL = "postgres://localhost/test";
       const db = await getDatabase();
       expect(db).toBeDefined();
+    });
+  });
+
+  // ── checkDatabaseHealth ──────────────────────────────────────────
+  describe("checkDatabaseHealth", () => {
+    it("returns healthy status when execute succeeds", async () => {
+      vi.resetModules();
+      process.env.DATABASE_TYPE = "postgresql";
+      process.env.DATABASE_URL = "postgres://localhost/test";
+      mocks.mockDrizzlePg.mockReturnValue({ execute: vi.fn().mockResolvedValue([]) });
+
+      const mod = await import("../multi-db-client");
+      const result = await mod.checkDatabaseHealth();
+      expect(result.ok).toBe(true);
+      expect(result.type).toBe("postgresql");
+    });
+
+    it("returns unhealthy status when execute fails", async () => {
+      vi.resetModules();
+      process.env.DATABASE_TYPE = "azure-sql";
+      delete process.env.DATABASE_URL;
+      process.env.AZURE_SQL_CONNECTION_STRING = "mssql://azure-host/db";
+      mocks.mockDrizzleMssql.mockReturnValue({ execute: vi.fn().mockRejectedValue(new Error("db down")) });
+
+      const mod = await import("../multi-db-client");
+      const result = await mod.checkDatabaseHealth();
+      expect(result.ok).toBe(false);
+      expect(result.message).toContain("db down");
+      expect(result.type).toBe("azure-sql");
     });
   });
 });
