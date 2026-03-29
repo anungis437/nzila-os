@@ -2,7 +2,6 @@
 
 import { useState, useEffect, useCallback } from 'react';
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from '@/components/ui/card';
-import { Button } from '@/components/ui/button';
 import { Badge } from '@/components/ui/badge';
 import { Tabs, TabsContent, TabsList, TabsTrigger } from '@/components/ui/tabs';
 import {
@@ -13,9 +12,11 @@ import {
   Clock,
 } from 'lucide-react';
 import { formatCurrency } from '@/lib/utils';
-import PaymentMethodManager from './payment-method-manager';
-import DuesPaymentForm from './dues-payment-form';
+import DeductionHistory from './deduction-history';
+import ReportDeductionIssue from './report-deduction-issue';
 import PaymentHistory from './payment-history';
+import DuesPaymentForm from './dues-payment-form';
+import PaymentMethodManager from './payment-method-manager';
 
 interface DuesBalance {
   currentBalance: number;
@@ -38,6 +39,7 @@ interface DuesPaymentPortalProps {
 export default function DuesPaymentPortal({ userId }: DuesPaymentPortalProps) {
   const [balance, setBalance] = useState<DuesBalance | null>(null);
   const [loading, setLoading] = useState(true);
+  const [selectedDeductionId, setSelectedDeductionId] = useState<string | undefined>();
 
   const loadDuesBalance = useCallback(async () => {
     try {
@@ -81,7 +83,7 @@ export default function DuesPaymentPortal({ userId }: DuesPaymentPortalProps) {
 
   return (
     <div className="space-y-6">
-      {/* Balance Overview */}
+      {/* Status Overview */}
       <div className="grid gap-4 md:grid-cols-3">
         <Card>
           <CardHeader className="flex flex-row items-center justify-between space-y-0 pb-2">
@@ -103,7 +105,7 @@ export default function DuesPaymentPortal({ userId }: DuesPaymentPortalProps) {
 
         <Card>
           <CardHeader className="flex flex-row items-center justify-between space-y-0 pb-2">
-            <CardTitle className="text-sm font-medium">Next Payment Due</CardTitle>
+            <CardTitle className="text-sm font-medium">Next Deduction Expected</CardTitle>
             <Calendar className="h-4 w-4 text-muted-foreground" />
           </CardHeader>
           <CardContent>
@@ -111,7 +113,7 @@ export default function DuesPaymentPortal({ userId }: DuesPaymentPortalProps) {
               {formatCurrency(balance.nextDueAmount)}
             </div>
             <p className="text-xs text-muted-foreground mt-2">
-              Due {new Date(balance.nextDueDate).toLocaleDateString()}
+              Expected {new Date(balance.nextDueDate).toLocaleDateString()}
             </p>
           </CardContent>
         </Card>
@@ -147,44 +149,63 @@ export default function DuesPaymentPortal({ userId }: DuesPaymentPortalProps) {
               Overdue Balance
             </CardTitle>
             <CardDescription>
-              You have {formatCurrency(balance.overdueAmount)} in overdue dues payments
+              You have {formatCurrency(balance.overdueAmount)} in overdue dues.
+              If your employer has not deducted dues recently, please report an issue below.
             </CardDescription>
           </CardHeader>
-          <CardContent>
-            <Button variant="destructive" size="lg">
-              Pay Overdue Amount Now
-            </Button>
-          </CardContent>
         </Card>
       )}
 
-      {/* Main Tabs */}
-      <Tabs defaultValue="make-payment" className="space-y-4">
-        <TabsList className="grid w-full grid-cols-3">
-          <TabsTrigger value="make-payment">Make Payment</TabsTrigger>
-          <TabsTrigger value="payment-methods">Payment Methods</TabsTrigger>
+      {/* Main Tabs — Deduction visibility is primary */}
+      <Tabs defaultValue="deductions" className="space-y-4">
+        <TabsList className="grid w-full grid-cols-4">
+          <TabsTrigger value="deductions">Deduction History</TabsTrigger>
+          <TabsTrigger value="report-issue">Report Issue</TabsTrigger>
           <TabsTrigger value="history">Payment History</TabsTrigger>
+          <TabsTrigger value="manual-payment">Manual Payment</TabsTrigger>
         </TabsList>
 
-        <TabsContent value="make-payment" className="space-y-4">
+        <TabsContent value="deductions" className="space-y-4">
+          <DeductionHistory
+            userId={userId}
+            onReportIssue={(deductionId) => {
+              setSelectedDeductionId(deductionId);
+            }}
+          />
+        </TabsContent>
+
+        <TabsContent value="report-issue" className="space-y-4">
+          <ReportDeductionIssue
+            userId={userId}
+            deductionId={selectedDeductionId}
+          />
+        </TabsContent>
+
+        <TabsContent value="history" className="space-y-4">
+          <PaymentHistory userId={userId} />
+        </TabsContent>
+
+        <TabsContent value="manual-payment" className="space-y-4">
+          <Card className="mb-4">
+            <CardContent className="pt-6">
+              <p className="text-sm text-muted-foreground">
+                <strong>Note:</strong> Most members have dues automatically deducted from payroll.
+                Manual payment is only needed for edge cases such as catch-up payments, arrears
+                settlement, special levies, or non-payroll members.
+              </p>
+            </CardContent>
+          </Card>
           <DuesPaymentForm 
             userId={userId}
             currentBalance={balance.currentBalance}
             overdueAmount={balance.overdueAmount}
             onPaymentComplete={loadDuesBalance}
           />
-        </TabsContent>
-
-        <TabsContent value="payment-methods" className="space-y-4">
           <PaymentMethodManager 
             userId={userId}
             autoPayEnabled={balance.autoPayEnabled}
             onUpdate={loadDuesBalance}
           />
-        </TabsContent>
-
-        <TabsContent value="history" className="space-y-4">
-          <PaymentHistory userId={userId} />
         </TabsContent>
       </Tabs>
     </div>

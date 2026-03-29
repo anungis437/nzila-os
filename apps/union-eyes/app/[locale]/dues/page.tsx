@@ -1,7 +1,7 @@
 /**
  * Dues Dashboard Page
  * 
- * Overview of dues collection, remittances, and financial status
+ * Overview of dues reconciliation, remittance status, and exception management
  */
 
 'use client';
@@ -187,6 +187,19 @@ export default function DuesDashboardPage() {
         </Card>
 
         <Card className="p-6 cursor-pointer hover:bg-muted/50"
+          onClick={() => router.push('/dues/exceptions')}>
+          <div className="flex items-center gap-4">
+            <AlertCircle className="h-8 w-8 text-orange-600" />
+            <div>
+              <h3 className="font-semibold">Exception Queue</h3>
+              <p className="text-sm text-muted-foreground">
+                Review unmatched deductions, member issues, and remittance exceptions
+              </p>
+            </div>
+          </div>
+        </Card>
+
+        <Card className="p-6 cursor-pointer hover:bg-muted/50"
           onClick={() => router.push('/dues/arrears')}>
           <div className="flex items-center gap-4">
             <AlertCircle className="h-8 w-8 text-red-600" />
@@ -194,19 +207,6 @@ export default function DuesDashboardPage() {
               <h3 className="font-semibold">{t('manageArrears')}</h3>
               <p className="text-sm text-muted-foreground">
                 {t('arrearsDescription')}
-              </p>
-            </div>
-          </div>
-        </Card>
-
-        <Card className="p-6 cursor-pointer hover:bg-muted/50"
-          onClick={() => router.push('/dues/payment-plans')}>
-          <div className="flex items-center gap-4">
-            <FileText className="h-8 w-8 text-blue-600" />
-            <div>
-              <h3 className="font-semibold">{t('paymentPlans')}</h3>
-              <p className="text-sm text-muted-foreground">
-                {t('paymentPlansDescription')}
               </p>
             </div>
           </div>

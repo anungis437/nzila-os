@@ -1,13 +1,14 @@
 /**
- * Dues Payment Notification Templates
+ * Dues Notification Templates
  * Templates for all dues-related notifications
  * 
  * Templates:
- * - dues_reminder_7days - 7 days before due date
- * - dues_reminder_1day - 1 day before due date
- * - dues_overdue - Payment is overdue
- * - dues_payment_confirmation - Payment received
- * - dues_payment_failed - Payment failed
+ * - dues_deduction_summary - Periodic deduction summary for members
+ * - dues_reminder_7days - 7 days before due date (edge-case: non-payroll members)
+ * - dues_reminder_1day - 1 day before due date (edge-case: non-payroll members)
+ * - dues_overdue - Deduction missing or payment overdue
+ * - dues_payment_confirmation - Payment/deduction confirmed
+ * - dues_payment_failed - Payment failed (edge-case: manual payments)
  * - dues_payment_retry_scheduled - Retry scheduled after failure
  * - dues_admin_intervention - Requires admin assistance
  * 
@@ -41,27 +42,31 @@ export interface DuesNotificationData {
  */
 export const DuesNotificationTemplates = {
   /**
-   * 7-day reminder: Payment due in 7 days
+   * 7-day reminder: Deduction expected in 7 days (for non-payroll members or manual-pay scenarios)
    */
   DUES_REMINDER_7_DAYS: {
     id: 'dues_reminder_7days',
     subject: (data: DuesNotificationData) => 
-      `Reminder: Union Dues Payment Due ${data.dueDate}`,
+      `Reminder: Union Dues Due ${data.dueDate}`,
     
     title: (_data: DuesNotificationData) => 
-      `Dues Payment Due Soon`,
+      `Dues Due Soon`,
     
     body: (data: DuesNotificationData) => 
-      `Hi ${data.memberName},\n\nThis is a reminder that your union dues payment of $${data.amount} is due on ${data.dueDate}.\n\nPayment Period: ${data.periodStart} to ${data.periodEnd}\n\nPlease make your payment by the due date to avoid any late fees.\n\nThank you for your continued membership!\n\n${data.organizationName}`,
+      `Hi ${data.memberName},\n\nThis is a reminder that your union dues of $${data.amount} are due on ${data.dueDate}.\n\nPayment Period: ${data.periodStart} to ${data.periodEnd}\n\nIf your dues are deducted from payroll, no action is needed — your employer will remit them automatically. Otherwise, please arrange payment by the due date.\n\nThank you for your continued membership!\n\n${data.organizationName}`,
     
     htmlBody: (data: DuesNotificationData) => `
       <div style="font-family: Arial, sans-serif; max-width: 600px; margin: 0 auto;">
-        <h2 style="color: #2c3e50;">Dues Payment Reminder</h2>
+        <h2 style="color: #2c3e50;">Dues Reminder</h2>
         <p>Hi ${data.memberName},</p>
-        <p>This is a reminder that your union dues payment is <strong>due on ${data.dueDate}</strong>.</p>
+        <p>This is a reminder that your union dues are <strong>due on ${data.dueDate}</strong>.</p>
+        
+        <div style="background: #d1ecf1; border-left: 4px solid #17a2b8; padding: 15px; margin: 20px 0;">
+          <p style="margin: 0; color: #0c5460;"><strong>If your dues are deducted from payroll, no action is needed.</strong> Your employer will remit them automatically.</p>
+        </div>
         
         <div style="background: #f8f9fa; padding: 20px; border-radius: 8px; margin: 20px 0;">
-          <h3 style="margin-top: 0; color: #2c3e50;">Payment Details</h3>
+          <h3 style="margin-top: 0; color: #2c3e50;">Details</h3>
           <table style="width: 100%; border-collapse: collapse;">
             <tr>
               <td style="padding: 8px 0; border-bottom: 1px solid #dee2e6;"><strong>Amount Due:</strong></td>
@@ -100,12 +105,12 @@ export const DuesNotificationTemplates = {
         </div>
         
         ${data.paymentUrl ? `
-          <div style="text-align: center; margin: 30px 0;">
-            <a href="${data.paymentUrl}" style="background: #007bff; color: white; padding: 12px 30px; text-decoration: none; border-radius: 5px; display: inline-block;">Pay Now</a>
+          <p style="color: #6c757d; font-size: 14px;">If you need to make a manual payment:</p>
+          <div style="text-align: center; margin: 20px 0;">
+            <a href="${data.paymentUrl}" style="background: #6c757d; color: white; padding: 10px 24px; text-decoration: none; border-radius: 5px; display: inline-block; font-size: 14px;">Make Manual Payment</a>
           </div>
         ` : ''}
         
-        <p style="color: #6c757d; font-size: 14px;">Please make your payment by the due date to avoid any late fees.</p>
         <p>Thank you for your continued membership!</p>
         <p style="margin-top: 30px; color: #6c757d; font-size: 14px;">
           ${data.organizationName}<br>
@@ -116,36 +121,40 @@ export const DuesNotificationTemplates = {
   },
 
   /**
-   * 1-day reminder: Payment due tomorrow
+   * 1-day reminder: Deduction expected tomorrow (for non-payroll members)
    */
   DUES_REMINDER_1_DAY: {
     id: 'dues_reminder_1day',
     subject: (_data: DuesNotificationData) => 
-      `⚠️ Urgent: Union Dues Payment Due Tomorrow`,
+      `⚠️ Reminder: Union Dues Due Tomorrow`,
     
     title: (_data: DuesNotificationData) => 
-      `Payment Due Tomorrow`,
+      `Dues Due Tomorrow`,
     
     body: (data: DuesNotificationData) => 
-      `Hi ${data.memberName},\n\n⚠️ URGENT REMINDER: Your union dues payment of $${data.amount} is due TOMORROW (${data.dueDate}).\n\nPlease make your payment today to avoid late fees.\n\n${data.organizationName}`,
+      `Hi ${data.memberName},\n\n⚠️ REMINDER: Your union dues of $${data.amount} are due TOMORROW (${data.dueDate}).\n\nIf your dues are deducted from payroll, no action is needed. Otherwise, please arrange payment today.\n\n${data.organizationName}`,
     
     htmlBody: (data: DuesNotificationData) => `
       <div style="font-family: Arial, sans-serif; max-width: 600px; margin: 0 auto;">
         <div style="background: #fff3cd; border-left: 4px solid #ffc107; padding: 15px; margin-bottom: 20px;">
-          <strong style="color: #856404;">⚠️ URGENT REMINDER</strong>
+          <strong style="color: #856404;">⚠️ REMINDER</strong>
         </div>
         
-        <h2 style="color: #2c3e50;">Payment Due Tomorrow</h2>
+        <h2 style="color: #2c3e50;">Dues Due Tomorrow</h2>
         <p>Hi ${data.memberName},</p>
-        <p>This is an urgent reminder that your union dues payment of <strong>$${data.amount}</strong> is due <strong>tomorrow (${data.dueDate})</strong>.</p>
+        <p>Your union dues of <strong>$${data.amount}</strong> are due <strong>tomorrow (${data.dueDate})</strong>.</p>
+        
+        <div style="background: #d1ecf1; border-left: 4px solid #17a2b8; padding: 15px; margin: 20px 0;">
+          <p style="margin: 0; color: #0c5460;"><strong>If your dues are deducted from payroll, no action is needed.</strong></p>
+        </div>
         
         ${data.paymentUrl ? `
-          <div style="text-align: center; margin: 30px 0;">
-            <a href="${data.paymentUrl}" style="background: #dc3545; color: white; padding: 15px 40px; text-decoration: none; border-radius: 5px; display: inline-block; font-weight: bold;">Pay Now</a>
+          <p style="color: #6c757d; font-size: 14px;">For non-payroll members who need to make a manual payment:</p>
+          <div style="text-align: center; margin: 20px 0;">
+            <a href="${data.paymentUrl}" style="background: #6c757d; color: white; padding: 10px 24px; text-decoration: none; border-radius: 5px; display: inline-block; font-size: 14px;">Make Manual Payment</a>
           </div>
         ` : ''}
         
-        <p style="color: #dc3545; font-weight: bold;">Please make your payment today to avoid late fees.</p>
         <p style="margin-top: 30px; color: #6c757d; font-size: 14px;">
           ${data.organizationName}
         </p>
@@ -154,28 +163,32 @@ export const DuesNotificationTemplates = {
   },
 
   /**
-   * Overdue notice: Payment is overdue
+   * Overdue notice: Deduction missing or dues overdue
    */
   DUES_OVERDUE: {
     id: 'dues_overdue',
     subject: (_data: DuesNotificationData) => 
-      `🔴 Overdue: Union Dues Payment Required`,
+      `🔴 Action Needed: Union Dues Overdue`,
     
     title: (_data: DuesNotificationData) => 
-      `Payment Overdue`,
+      `Dues Overdue`,
     
     body: (data: DuesNotificationData) => 
-      `Hi ${data.memberName},\n\nYour union dues payment of $${data.amount} was due on ${data.dueDate} and is now OVERDUE.\n\nPlease make your payment immediately to maintain your membership in good standing.\n\nIf you&apos;re experiencing financial hardship, please contact us to discuss payment options.\n\n${data.organizationName}`,
+      `Hi ${data.memberName},\n\nYour union dues of $${data.amount} were due on ${data.dueDate} and are now overdue.\n\nThis may indicate a missed payroll deduction. Please check your recent pay stubs and contact your union if you believe the deduction was missed by your employer.\n\nIf you need to make a manual payment, please visit your account dashboard.\n\n${data.organizationName}`,
     
     htmlBody: (data: DuesNotificationData) => `
       <div style="font-family: Arial, sans-serif; max-width: 600px; margin: 0 auto;">
         <div style="background: #f8d7da; border-left: 4px solid #dc3545; padding: 15px; margin-bottom: 20px;">
-          <strong style="color: #721c24;">🔴 PAYMENT OVERDUE</strong>
+          <strong style="color: #721c24;">🔴 DUES OVERDUE</strong>
         </div>
         
-        <h2 style="color: #dc3545;">Overdue Payment Notice</h2>
+        <h2 style="color: #dc3545;">Overdue Dues Notice</h2>
         <p>Hi ${data.memberName},</p>
-        <p>Your union dues payment of <strong>$${data.amount}</strong> was due on <strong>${data.dueDate}</strong> and is now <strong style="color: #dc3545;">OVERDUE</strong>.</p>
+        <p>Your union dues of <strong>$${data.amount}</strong> were due on <strong>${data.dueDate}</strong> and are now <strong style="color: #dc3545;">overdue</strong>.</p>
+        
+        <div style="background: #d1ecf1; border-left: 4px solid #17a2b8; padding: 15px; margin: 20px 0;">
+          <p style="margin: 0; color: #0c5460;"><strong>This may indicate a missed payroll deduction.</strong> Please check your recent pay stubs. If you believe the deduction was missed by your employer, report it through your Union Eyes dashboard.</p>
+        </div>
         
         <div style="background: #f8f9fa; padding: 20px; border-radius: 8px; margin: 20px 0;">
           <p style="margin: 0 0 10px 0;"><strong>Amount Overdue:</strong> $${data.amount}</p>
@@ -183,13 +196,14 @@ export const DuesNotificationTemplates = {
         </div>
         
         ${data.paymentUrl ? `
-          <div style="text-align: center; margin: 30px 0;">
-            <a href="${data.paymentUrl}" style="background: #dc3545; color: white; padding: 15px 40px; text-decoration: none; border-radius: 5px; display: inline-block; font-weight: bold;">Pay Now</a>
+          <p style="color: #6c757d; font-size: 14px;">If you need to make a manual payment:</p>
+          <div style="text-align: center; margin: 20px 0;">
+            <a href="${data.paymentUrl}" style="background: #6c757d; color: white; padding: 10px 24px; text-decoration: none; border-radius: 5px; display: inline-block; font-size: 14px;">Make Manual Payment</a>
           </div>
         ` : ''}
         
-        <p><strong>Please make your payment immediately to maintain your membership in good standing.</strong></p>
-        <p style="color: #6c757d;">If you&apos;re experiencing financial hardship, please contact us to discuss payment options.</p>
+        <p><strong>Please review your deduction status to maintain your membership in good standing.</strong></p>
+        <p style="color: #6c757d;">If you&apos;re experiencing financial hardship, please contact us to discuss options.</p>
         <p style="margin-top: 30px; color: #6c757d; font-size: 14px;">
           ${data.organizationName}
         </p>
