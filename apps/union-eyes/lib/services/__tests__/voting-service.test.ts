@@ -137,25 +137,34 @@ describe('VotingService', () => {
 
   it('listVotingSessions returns paginated results', async () => {
     const mockSessions = [{ id: 's1' }, { id: 's2' }];
-    mockSelect
-      .mockReturnValueOnce({
-        from: vi.fn().mockReturnValue({
-          where: vi.fn().mockReturnValue({
-            orderBy: vi.fn().mockReturnValue({
-              limit: vi.fn().mockReturnValue({
-                offset: vi.fn().mockResolvedValue(mockSessions),
-              }),
+
+    // Promise.all runs two queries simultaneously:
+    // 1. count query: select({ count }).from().where() → resolves to [{ count: 2 }]
+    // 2. sessions query: select().from().where().orderBy().limit().offset() → resolves to sessions
+    const countChain = {
+      from: vi.fn().mockReturnValue({
+        where: vi.fn().mockResolvedValue([{ count: 2 }]),
+      }),
+    };
+
+    const sessionsChain = {
+      from: vi.fn().mockReturnValue({
+        where: vi.fn().mockReturnValue({
+          orderBy: vi.fn().mockReturnValue({
+            limit: vi.fn().mockReturnValue({
+              offset: vi.fn().mockResolvedValue(mockSessions),
             }),
           }),
         }),
-      })
-      .mockReturnValueOnce({
-        from: vi.fn().mockReturnValue({
-          where: vi.fn().mockResolvedValue([{ count: 2 }]),
-        }),
-      });
+      }),
+    };
+
+    mockSelect
+      .mockReturnValueOnce(countChain)
+      .mockReturnValueOnce(sessionsChain);
 
     const result = await listVotingSessions({}, { page: 1, limit: 20 });
     expect(result.sessions).toEqual(mockSessions);
+    expect(result.total).toBe(2);
   });
 });

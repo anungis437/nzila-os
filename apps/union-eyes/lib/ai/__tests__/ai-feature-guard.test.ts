@@ -1,7 +1,9 @@
 import { describe, it, expect, vi, beforeEach } from 'vitest';
 
-const mockIsFeatureEnabled = vi.fn();
-const mockAuditLog = vi.fn();
+const { mockIsFeatureEnabled, mockAuditLog } = vi.hoisted(() => ({
+  mockIsFeatureEnabled: vi.fn(),
+  mockAuditLog: vi.fn(),
+}));
 
 vi.mock('@/lib/services/feature-flags', () => ({
   isFeatureEnabled: mockIsFeatureEnabled,

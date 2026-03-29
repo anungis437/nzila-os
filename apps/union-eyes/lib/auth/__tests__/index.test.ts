@@ -1,4 +1,52 @@
-import { describe, it, expect } from 'vitest';
+import { describe, it, expect, vi } from 'vitest';
+
+// Mock heavy dependencies that the barrel import chain pulls in
+vi.mock('@clerk/nextjs/server', () => ({
+  auth: vi.fn(() => ({ userId: null, getToken: vi.fn() })),
+  currentUser: vi.fn(),
+}));
+
+vi.mock('next/server', () => ({
+  NextRequest: vi.fn(),
+  NextResponse: { json: vi.fn((b: unknown, i?: { status?: number }) => ({ body: b, status: i?.status || 200 })), redirect: vi.fn() },
+}));
+
+vi.mock('next/headers', () => ({
+  cookies: vi.fn(() => ({ get: vi.fn(), set: vi.fn() })),
+}));
+
+vi.mock('@/db/db', () => ({
+  db: {
+    select: vi.fn(() => ({ from: vi.fn(() => ({ where: vi.fn(() => ({ limit: vi.fn().mockResolvedValue([]) })) })) })),
+    query: {},
+  },
+}));
+
+vi.mock('@/db', () => ({
+  db: {
+    select: vi.fn(() => ({ from: vi.fn(() => ({ where: vi.fn(() => ({ limit: vi.fn().mockResolvedValue([]) })) })) })),
+    query: {},
+  },
+}));
+
+vi.mock('@/db/schema', () => ({
+  organizationMembers: {},
+  organizations: {},
+  users: {},
+}));
+
+vi.mock('@/db/schema/organization-members-schema', () => ({
+  organizationMembers: {},
+}));
+
+vi.mock('drizzle-orm', async (importOriginal) => {
+  const actual = await importOriginal<typeof import('drizzle-orm')>();
+  return { ...actual, relations: vi.fn(() => ({})) };
+});
+
+vi.mock('@/lib/logger', () => ({
+  logger: { info: vi.fn(), warn: vi.fn(), error: vi.fn(), debug: vi.fn() },
+}));
 
 // The index.ts just re-exports from other modules.
 // Verify it re-exports correctly.

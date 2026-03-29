@@ -43,8 +43,11 @@ import { CurrencyService } from '../currency-service';
 // ── Tests ────────────────────────────────────────────────────────────────────
 
 describe('CurrencyService', () => {
+  let service: CurrencyService;
+
   beforeEach(() => {
     vi.clearAllMocks();
+    service = new CurrencyService();
     mockSelect.mockReturnValue({
       from: vi.fn().mockReturnValue({
         where: vi.fn().mockResolvedValue([]),
@@ -63,8 +66,8 @@ describe('CurrencyService', () => {
       counterpartyCountry: 'CA',
     };
 
-    const result = CurrencyService.enforceCurrencyCAD(invoice);
-    expect(result.isCompliant).toBe(true);
+    const result = service.enforceCurrencyCAD(invoice);
+    expect(result.compliant).toBe(true);
   });
 
   it('enforceCurrencyCAD returns non-compliant for USD invoice', () => {
@@ -78,14 +81,14 @@ describe('CurrencyService', () => {
       counterpartyCountry: 'US',
     };
 
-    const result = CurrencyService.enforceCurrencyCAD(invoice);
-    expect(result.isCompliant).toBe(false);
-    expect(result.reason).toBeDefined();
+    const result = service.enforceCurrencyCAD(invoice);
+    expect(result.compliant).toBe(false);
+    expect(result.message).toBeDefined();
   });
 
   it('T106 threshold is set to 1,000,000 CAD', () => {
-    // The T106_THRESHOLD constant should be 1_000_000
-    expect(CurrencyService.T106_THRESHOLD).toBe(1_000_000);
+    // The T106_THRESHOLD constant should be 1_000_000 (instance property)
+    expect((service as any).T106_THRESHOLD).toBe(1_000_000);
   });
 
   it('identifies related-party transactions for T106 reporting', () => {
@@ -99,7 +102,7 @@ describe('CurrencyService', () => {
       counterpartyCountry: 'US',
     };
 
-    const result = CurrencyService.enforceCurrencyCAD(invoice);
-    expect(result.isCompliant).toBe(true); // CAD is compliant
+    const result = service.enforceCurrencyCAD(invoice);
+    expect(result.compliant).toBe(true); // CAD is compliant
   });
 });

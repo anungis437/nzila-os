@@ -18,12 +18,12 @@ vi.mock('@/db', () => ({
 }));
 
 vi.mock('@/db/schema-organizations', () => ({
-  organizationMembers: {},
-  organizations: {},
+  organizationMembers: { id: 'id', email: 'email', name: 'name', role: 'role', organizationId: 'organization_id', metadata: 'metadata' },
+  organizations: { id: 'id', name: 'name', slug: 'slug', email: 'email' },
 }));
 
 vi.mock('@/db/schema/domains/finance/dues', () => ({
-  duesTransactions: {},
+  duesTransactions: { id: 'id', memberId: 'member_id', organizationId: 'org_id' },
 }));
 
 vi.mock('drizzle-orm', async (importOriginal) => {
@@ -37,14 +37,20 @@ vi.mock('@/lib/services/notification-service', () => ({
 
 vi.mock('@/lib/notification-templates/dues-notifications', () => ({
   DuesNotificationTemplates: {
-    paymentConfirmation: vi.fn(() => ({
-      subject: 'Payment Confirmed',
-      body: 'Your dues payment has been confirmed',
-    })),
-    paymentFailure: vi.fn(() => ({
-      subject: 'Payment Failed',
-      body: 'Your dues payment failed',
-    })),
+    DUES_PAYMENT_CONFIRMATION: {
+      id: 'dues-payment-confirmation',
+      subject: vi.fn(() => 'Payment Confirmed'),
+      title: vi.fn(() => 'Payment Confirmed'),
+      body: vi.fn(() => 'Your dues payment has been confirmed'),
+      htmlBody: vi.fn(() => '<p>Your dues payment has been confirmed</p>'),
+    },
+    DUES_PAYMENT_FAILURE: {
+      id: 'dues-payment-failure',
+      subject: vi.fn(() => 'Payment Failed'),
+      title: vi.fn(() => 'Payment Failed'),
+      body: vi.fn(() => 'Your dues payment failed'),
+      htmlBody: vi.fn(() => '<p>Your dues payment failed</p>'),
+    },
   },
   DuesNotificationData: {},
 }));
@@ -63,21 +69,45 @@ describe('DuesNotifications', () => {
   beforeEach(() => {
     vi.clearAllMocks();
     mockGetNotificationService.mockReturnValue({ send: mockSend });
-    mockSelect.mockReturnValue({
-      from: vi.fn().mockReturnValue({
-        where: vi.fn().mockReturnValue({
-          limit: vi.fn().mockResolvedValue([]),
-          orderBy: vi.fn().mockReturnValue({
-            limit: vi.fn().mockResolvedValue([]),
-          }),
-        }),
-      }),
-    });
   });
 
   it('sendPaymentConfirmation fetches transaction context', async () => {
-    // Mock org lookup
-    const orgSelectChain = {
+    // Mock the innerJoin query chain: select().from().innerJoin().where().limit()
+    const mockLimit = vi.fn().mockResolvedValue([
+      {
+        transaction: {
+          id: 'txn-123',
+          memberId: 'member-1',
+          organizationId: 'org-1',
+          totalAmount: '100.00',
+          duesAmount: '80.00',
+          copeAmount: '10.00',
+          pacAmount: '5.00',
+          strikeFundAmount: '5.00',
+          dueDate: '2026-01-01',
+          periodStart: '2026-01-01',
+          periodEnd: '2026-01-31',
+          receiptUrl: null,
+        },
+        memberName: 'Test Member',
+        memberEmail: 'member@test.com',
+        memberMetadata: null,
+      },
+    ]);
+
+    // Transaction lookup (innerJoin chain)
+    const txnChain = {
+      from: vi.fn().mockReturnValue({
+        innerJoin: vi.fn().mockReturnValue({
+          where: vi.fn().mockReturnValue({
+            limit: mockLimit,
+          }),
+        }),
+      }),
+    };
+
+    // Org lookup: select().from().where(or(...)).limit()
+    const orgChain = {
       from: vi.fn().mockReturnValue({
         where: vi.fn().mockReturnValue({
           limit: vi.fn().mockResolvedValue([
@@ -87,50 +117,72 @@ describe('DuesNotifications', () => {
       }),
     };
 
-    // Mock admin members lookup
-    const adminSelectChain = {
+    // Admin members lookup: select().from().where()
+    const adminChain = {
       from: vi.fn().mockReturnValue({
         where: vi.fn().mockResolvedValue([{ email: 'admin@test.com' }]),
       }),
     };
 
     mockSelect
-      .mockReturnValueOnce(orgSelectChain)
-      .mockReturnValueOnce(adminSelectChain);
+      .mockReturnValueOnce(txnChain)
+      .mockReturnValueOnce(orgChain)
+      .mockReturnValueOnce(adminChain);
 
-    await sendPaymentConfirmation(
-      'org-1',
-      'member-1',
-      'member@test.com',
-      'txn-123',
-      100,
-      'monthly'
-    );
+    await sendPaymentConfirmation('txn-123');
 
     expect(mockSend).toHaveBeenCalled();
   });
 
   it('handles missing organization gracefully', async () => {
-    mockSelect.mockReturnValue({
+    // Transaction not found → empty result → early return
+    const txnChain = {
       from: vi.fn().mockReturnValue({
-        where: vi.fn().mockReturnValue({
-          limit: vi.fn().mockResolvedValue([]),
+        innerJoin: vi.fn().mockReturnValue({
+          where: vi.fn().mockReturnValue({
+            limit: vi.fn().mockResolvedValue([]),
+          }),
         }),
       }),
-    });
+    };
+
+    mockSelect.mockReturnValueOnce(txnChain);
 
     // Should not throw
-    await sendPaymentConfirmation(
-      'nonexistent-org',
-      'member-1',
-      'member@test.com',
-      'txn-123',
-      100,
-      'monthly'
-    );
+    await sendPaymentConfirmation('nonexistent-txn');
   });
 
   it('sends notification with correct template data', async () => {
+    const txnChain = {
+      from: vi.fn().mockReturnValue({
+        innerJoin: vi.fn().mockReturnValue({
+          where: vi.fn().mockReturnValue({
+            limit: vi.fn().mockResolvedValue([
+              {
+                transaction: {
+                  id: 'txn-456',
+                  memberId: 'member-1',
+                  organizationId: 'org-1',
+                  totalAmount: '250.50',
+                  duesAmount: '200.00',
+                  copeAmount: '25.00',
+                  pacAmount: '15.00',
+                  strikeFundAmount: '10.50',
+                  dueDate: '2026-02-01',
+                  periodStart: '2026-02-01',
+                  periodEnd: '2026-02-14',
+                  receiptUrl: null,
+                },
+                memberName: 'Member Two',
+                memberEmail: 'member2@test.com',
+                memberMetadata: null,
+              },
+            ]),
+          }),
+        }),
+      }),
+    };
+
     const orgChain = {
       from: vi.fn().mockReturnValue({
         where: vi.fn().mockReturnValue({
@@ -147,16 +199,9 @@ describe('DuesNotifications', () => {
       }),
     };
 
-    mockSelect.mockReturnValueOnce(orgChain).mockReturnValueOnce(adminChain);
+    mockSelect.mockReturnValueOnce(txnChain).mockReturnValueOnce(orgChain).mockReturnValueOnce(adminChain);
 
-    await sendPaymentConfirmation(
-      'org-1',
-      'member-1',
-      'member@test.com',
-      'txn-456',
-      250.50,
-      'bi_weekly'
-    );
+    await sendPaymentConfirmation('txn-456');
 
     expect(mockSend).toHaveBeenCalled();
   });

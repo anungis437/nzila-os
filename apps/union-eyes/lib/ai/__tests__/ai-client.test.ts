@@ -1,8 +1,10 @@
 import { describe, it, expect, vi, beforeEach } from 'vitest';
 
-const mockCreateAiClient = vi.fn(() => ({
-  generate: vi.fn(),
-  embed: vi.fn(),
+const { mockCreateAiClient } = vi.hoisted(() => ({
+  mockCreateAiClient: vi.fn(() => ({
+    generate: vi.fn(),
+    embed: vi.fn(),
+  })),
 }));
 
 vi.mock('@nzila/ai-sdk', () => ({

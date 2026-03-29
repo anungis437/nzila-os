@@ -64,6 +64,13 @@ describe('SupportService', () => {
 
   it('getTicketById returns null when not found', async () => {
     mockFindFirst.mockResolvedValue(undefined);
+    mockSelect.mockReturnValue({
+      from: vi.fn().mockReturnValue({
+        where: vi.fn().mockReturnValue({
+          limit: vi.fn().mockResolvedValue([]),
+        }),
+      }),
+    });
     const result = await getTicketById('nonexistent');
     expect(result).toBeNull();
   });
@@ -75,7 +82,13 @@ describe('SupportService', () => {
       subject: 'Test issue',
       status: 'open',
     };
-    mockFindFirst.mockResolvedValue(mockTicket);
+    mockSelect.mockReturnValue({
+      from: vi.fn().mockReturnValue({
+        where: vi.fn().mockReturnValue({
+          limit: vi.fn().mockResolvedValue([mockTicket]),
+        }),
+      }),
+    });
 
     const result = await getTicketById('ticket-1');
     expect(result).toEqual(mockTicket);

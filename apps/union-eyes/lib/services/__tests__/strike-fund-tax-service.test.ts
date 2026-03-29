@@ -78,12 +78,12 @@ describe('StrikeFundTaxService', () => {
     // Mock annual total near threshold
     mockSelect.mockReturnValue({
       from: vi.fn().mockReturnValue({
-        where: vi.fn().mockResolvedValue([{ total: '25500' }]),
+        where: vi.fn().mockResolvedValue([{ totalAmount: '25500' }]),
       }),
     });
 
     const result = await checkStrikePaymentTaxability('member-1', 400);
-    // $400 weekly is under $500, but annual + 400 = 25900 still under 26000
+    // $400 weekly is under $500, and annual 25500 is under 26000
     expect(result).toBeDefined();
     expect(result.requiresT4A).toBe(false);
   });
@@ -91,12 +91,12 @@ describe('StrikeFundTaxService', () => {
   it('detects annual threshold breach', async () => {
     mockSelect.mockReturnValue({
       from: vi.fn().mockReturnValue({
-        where: vi.fn().mockResolvedValue([{ total: '25800' }]),
+        where: vi.fn().mockResolvedValue([{ totalAmount: '27000' }]),
       }),
     });
 
     const result = await checkStrikePaymentTaxability('member-1', 400);
-    // $400 weekly is under $500, but annual + 400 = 26200 > 26000
+    // $400 weekly is under $500, but annual total $27,000 > $26,000
     expect(result.requiresT4A).toBe(true);
   });
 });

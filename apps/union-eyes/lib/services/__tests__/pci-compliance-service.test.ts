@@ -1,20 +1,26 @@
 import { describe, it, expect, vi, beforeEach } from 'vitest';
 
-const mocks = vi.hoisted(() => ({
-  mockInsert: vi.fn(),
-  mockSelect: vi.fn(),
-  mockUpdate: vi.fn(),
-  mockValues: vi.fn(),
-  mockReturning: vi.fn(),
-  mockFrom: vi.fn(),
-  mockWhere: vi.fn(),
-  mockOrderBy: vi.fn(),
-  mockLimit: vi.fn(),
-  mockSet: vi.fn(),
-  mockSupabaseFrom: vi.fn(),
-  mockSupabaseSelect: vi.fn(),
-  mockCreateClient: vi.fn(),
-}));
+const mocks = vi.hoisted(() => {
+  // Set env vars early so the singleton constructor doesn't throw
+  process.env.NEXT_PUBLIC_SUPABASE_URL = 'https://test.supabase.co';
+  process.env.SUPABASE_SERVICE_ROLE_KEY = 'test-key';
+
+  return {
+    mockInsert: vi.fn(),
+    mockSelect: vi.fn(),
+    mockUpdate: vi.fn(),
+    mockValues: vi.fn(),
+    mockReturning: vi.fn(),
+    mockFrom: vi.fn(),
+    mockWhere: vi.fn(),
+    mockOrderBy: vi.fn(),
+    mockLimit: vi.fn(),
+    mockSet: vi.fn(),
+    mockSupabaseFrom: vi.fn(),
+    mockSupabaseSelect: vi.fn(),
+    mockCreateClient: vi.fn(),
+  };
+});
 
 vi.mock('@/db', () => ({
   db: {
@@ -61,9 +67,7 @@ vi.mock('@supabase/supabase-js', () => ({
   createClient: mocks.mockCreateClient,
 }));
 
-// Stub env vars before module import (constructor checks them)
-vi.stubEnv('NEXT_PUBLIC_SUPABASE_URL', 'https://test.supabase.co');
-vi.stubEnv('SUPABASE_SERVICE_ROLE_KEY', 'test-key');
+// Env vars are set in vi.hoisted() above
 
 import { PCIComplianceService } from '../pci-compliance-service';
 
@@ -76,8 +80,10 @@ describe('PCIComplianceService', () => {
     process.env.NEXT_PUBLIC_SUPABASE_URL = 'https://test.supabase.co';
     process.env.SUPABASE_SERVICE_ROLE_KEY = 'test-key';
 
-    mocks.mockSupabaseSelect.mockResolvedValue({ data: [], error: null });
-    mocks.mockSupabaseFrom.mockReturnValue({ select: mocks.mockSupabaseSelect, order: vi.fn().mockReturnThis() });
+    // Supabase mock: from().select().order() → { data, error }
+    const mockOrder = vi.fn().mockResolvedValue({ data: [], error: null });
+    mocks.mockSupabaseSelect.mockReturnValue({ order: mockOrder });
+    mocks.mockSupabaseFrom.mockReturnValue({ select: mocks.mockSupabaseSelect });
     mocks.mockCreateClient.mockReturnValue({ from: mocks.mockSupabaseFrom });
 
     // Chain: select().from().where().orderBy().limit()
@@ -117,14 +123,20 @@ describe('PCIComplianceService', () => {
     });
 
     it('returns assessment report when data exists', async () => {
-      // First call: get assessment
-      mocks.mockLimit.mockResolvedValueOnce([{
-        id: 'a1',
-        organizationId: 'org-1',
-        assessmentDate: '2026-01-01',
-        overallStatus: 'completed',
-      }]);
-      // Second call: get requirements
+      // First call: get assessment — select().from().where().orderBy().limit()
+      mocks.mockFrom.mockReturnValueOnce({
+        where: vi.fn().mockReturnValue({
+          orderBy: vi.fn().mockReturnValue({
+            limit: vi.fn().mockResolvedValue([{
+              id: 'a1',
+              organizationId: 'org-1',
+              assessmentDate: '2026-01-01',
+              overallStatus: 'completed',
+            }]),
+          }),
+        }),
+      });
+      // Second call: get requirements — select().from().where()
       mocks.mockFrom.mockReturnValueOnce({
         where: vi.fn().mockResolvedValue([
           { id: 'r1', requirementNumber: '1.1', requirementDescription: 'Req 1', complianceStatus: 'compliant', evidence: null, remediationNotes: null },
@@ -168,7 +180,14 @@ describe('PCIComplianceService', () => {
 
   describe('getLatestQuarterlyScan', () => {
     it('returns null when no scans exist', async () => {
-      mocks.mockLimit.mockResolvedValue([]);
+      // Override the entire chain for this test
+      mocks.mockFrom.mockReturnValueOnce({
+        where: vi.fn().mockReturnValue({
+          orderBy: vi.fn().mockReturnValue({
+            limit: vi.fn().mockResolvedValue([]),
+          }),
+        }),
+      });
       const result = await service.getLatestQuarterlyScan('org-1');
       expect(result).toBeNull();
     });
