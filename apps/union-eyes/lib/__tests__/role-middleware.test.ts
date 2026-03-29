@@ -4,9 +4,36 @@
  * Validates that the runtime role hierarchy matches the full RBAC system
  * and that fine-grained roles (health_safety_rep, bargaining_committee, etc.)
  * are NOT collapsed into the simplified "member" tier.
+ * Also tests the withRoleAuth / withAnyRole middleware wrappers.
  */
-import { describe, it, expect } from 'vitest';
-import { hasRolePermission, type MemberRole } from '../role-middleware';
+import { describe, it, expect, vi, beforeEach } from 'vitest';
+
+// ── Hoisted mocks ────────────────────────────────────────────────────────────
+
+const mocks = vi.hoisted(() => ({
+  mockGetMemberByUserId: vi.fn(),
+}));
+
+vi.mock('@/db/queries/organization-members-queries', () => ({
+  getMemberByUserId: mocks.mockGetMemberByUserId,
+}));
+
+vi.mock('@/lib/organization-middleware', () => ({
+  withOrganizationAuth: vi.fn((innerHandler: any) => {
+    return (request: any, params?: any) => {
+      const orgContext = { organizationId: 'org-1', userId: 'user-1' };
+      return innerHandler(request, orgContext, params);
+    };
+  }),
+}));
+
+vi.mock('@/lib/logger', () => ({
+  logger: { info: vi.fn(), warn: vi.fn(), error: vi.fn(), debug: vi.fn() },
+}));
+
+// ── Static imports (safe — only pure functions, not middleware) ───────────
+
+import { hasRolePermission, checkRole, requireAdmin, type MemberRole, type RoleContext } from '../role-middleware';
 import { UserRole } from '../auth/roles';
 
 // ── Hierarchy ordering ──────────────────────────────────────────────────────
@@ -148,5 +175,130 @@ describe('near-equal roles', () => {
   it('vice_president outranks secretary_treasurer', () => {
     expect(hasRolePermission(UserRole.VICE_PRESIDENT, UserRole.SECRETARY_TREASURER)).toBe(true);
     expect(hasRolePermission(UserRole.SECRETARY_TREASURER, UserRole.VICE_PRESIDENT)).toBe(false);
+  });
+});
+
+// ── checkRole / requireAdmin helpers ─────────────────────────────────────────
+
+describe('checkRole', () => {
+  const ctx: RoleContext = {
+    organizationId: 'org-1',
+    userId: 'u-1',
+    role: UserRole.STEWARD,
+    memberId: 'm-1',
+  };
+
+  it('returns true when role is sufficient', () => {
+    expect(checkRole(ctx, UserRole.MEMBER)).toBe(true);
+  });
+
+  it('returns false when role is insufficient', () => {
+    expect(checkRole(ctx, UserRole.ADMIN)).toBe(false);
+  });
+});
+
+describe('requireAdmin', () => {
+  it('does not throw for admin role', () => {
+    const ctx: RoleContext = { organizationId: 'o', userId: 'u', role: UserRole.ADMIN, memberId: 'm' };
+    expect(() => requireAdmin(ctx)).not.toThrow();
+  });
+
+  it('throws for non-admin role', () => {
+    const ctx: RoleContext = { organizationId: 'o', userId: 'u', role: UserRole.MEMBER, memberId: 'm' };
+    expect(() => requireAdmin(ctx)).toThrow('Admin role required');
+  });
+});
+
+// ── withRoleAuth middleware ──────────────────────────────────────────────────
+
+describe('withRoleAuth', () => {
+  beforeEach(() => {
+    vi.clearAllMocks();
+  });
+
+  it('calls handler when member has sufficient role', async () => {
+    mocks.mockGetMemberByUserId.mockResolvedValue({ id: 'm-1', role: 'admin' });
+    const { withRoleAuth } = await import('../role-middleware');
+    const handler = vi.fn().mockResolvedValue(new Response(JSON.stringify({ ok: true })));
+    const route = withRoleAuth('member', handler);
+    await route({} as any);
+    expect(handler).toHaveBeenCalledWith(
+      expect.anything(),
+      expect.objectContaining({ organizationId: 'org-1', userId: 'user-1', role: 'admin', memberId: 'm-1' }),
+      undefined,
+    );
+  });
+
+  it('returns 403 when role is insufficient', async () => {
+    mocks.mockGetMemberByUserId.mockResolvedValue({ id: 'm-1', role: 'member' });
+    const { withRoleAuth } = await import('../role-middleware');
+    const handler = vi.fn();
+    const route = withRoleAuth('admin', handler);
+    const response = await route({} as any);
+    expect(response.status).toBe(403);
+    expect(handler).not.toHaveBeenCalled();
+  });
+
+  it('returns 403 when member not found', async () => {
+    mocks.mockGetMemberByUserId.mockResolvedValue(null);
+    const { withRoleAuth } = await import('../role-middleware');
+    const handler = vi.fn();
+    const route = withRoleAuth('member', handler);
+    const response = await route({} as any);
+    expect(response.status).toBe(403);
+  });
+
+  it('returns 500 on internal error', async () => {
+    mocks.mockGetMemberByUserId.mockRejectedValue(new Error('DB down'));
+    const { withRoleAuth } = await import('../role-middleware');
+    const handler = vi.fn();
+    const route = withRoleAuth('member', handler);
+    const response = await route({} as any);
+    expect(response.status).toBe(500);
+  });
+});
+
+// ── withAnyRole middleware ────────────────────────────────────────────────────
+
+describe('withAnyRole', () => {
+  beforeEach(() => {
+    vi.clearAllMocks();
+  });
+
+  it('allows access when member has one of the allowed roles', async () => {
+    mocks.mockGetMemberByUserId.mockResolvedValue({ id: 'm-1', role: 'steward' });
+    const { withAnyRole } = await import('../role-middleware');
+    const handler = vi.fn().mockResolvedValue(new Response('ok'));
+    const route = withAnyRole(['steward', 'admin'], handler);
+    await route({} as any);
+    expect(handler).toHaveBeenCalled();
+  });
+
+  it('returns 403 when member has none of the allowed roles', async () => {
+    mocks.mockGetMemberByUserId.mockResolvedValue({ id: 'm-1', role: 'member' });
+    const { withAnyRole } = await import('../role-middleware');
+    const handler = vi.fn();
+    const route = withAnyRole(['admin', 'president'], handler);
+    const response = await route({} as any);
+    expect(response.status).toBe(403);
+    expect(handler).not.toHaveBeenCalled();
+  });
+
+  it('returns 403 when member not found', async () => {
+    mocks.mockGetMemberByUserId.mockResolvedValue(null);
+    const { withAnyRole } = await import('../role-middleware');
+    const handler = vi.fn();
+    const route = withAnyRole(['admin'], handler);
+    const response = await route({} as any);
+    expect(response.status).toBe(403);
+  });
+
+  it('returns 500 on internal error', async () => {
+    mocks.mockGetMemberByUserId.mockRejectedValue(new Error('fail'));
+    const { withAnyRole } = await import('../role-middleware');
+    const handler = vi.fn();
+    const route = withAnyRole(['admin'], handler);
+    const response = await route({} as any);
+    expect(response.status).toBe(500);
   });
 });
