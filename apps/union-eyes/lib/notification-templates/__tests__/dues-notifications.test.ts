@@ -97,12 +97,12 @@ describe('DuesNotificationTemplates', () => {
     it('htmlBody includes payment URL when provided', () => {
       const html = t.htmlBody(makeData({ paymentUrl: 'https://pay.example.com' }));
       expect(html).toContain('https://pay.example.com');
-      expect(html).toContain('Pay Now');
+      expect(html).toContain('Make Manual Payment');
     });
 
     it('htmlBody excludes payment link when not provided', () => {
       const html = t.htmlBody(makeData());
-      expect(html).not.toContain('Pay Now');
+      expect(html).not.toContain('Make Manual Payment');
     });
   });
 
@@ -113,12 +113,12 @@ describe('DuesNotificationTemplates', () => {
       expect(t.id).toBe('dues_reminder_1day');
     });
 
-    it('subject contains urgent', () => {
-      expect(t.subject(makeData())).toMatch(/urgent/i);
+    it('subject contains reminder', () => {
+      expect(t.subject(makeData())).toMatch(/reminder/i);
     });
 
-    it('body is marked urgent', () => {
-      expect(t.body(makeData())).toContain('URGENT');
+    it('body is marked as reminder', () => {
+      expect(t.body(makeData())).toContain('REMINDER');
     });
 
     it('body contains amount and due date', () => {
@@ -139,12 +139,12 @@ describe('DuesNotificationTemplates', () => {
       expect(t.subject(makeData())).toMatch(/overdue/i);
     });
 
-    it('body mentions membership standing', () => {
-      expect(t.body(makeData())).toContain('membership in good standing');
+    it('body mentions missed deduction possibility', () => {
+      expect(t.body(makeData())).toContain('missed payroll deduction');
     });
 
-    it('body mentions financial hardship option', () => {
-      expect(t.body(makeData())).toContain('financial hardship');
+    it('body mentions contacting union', () => {
+      expect(t.body(makeData())).toContain('contact your union');
     });
 
     it('htmlBody contains overdue styling', () => {

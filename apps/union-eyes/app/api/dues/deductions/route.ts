@@ -17,8 +17,8 @@ export const GET = withApi(
       summary: 'List payroll deductions for a member',
     },
   },
-  async ({ organizationId, searchParams }) => {
-    const userId = searchParams?.get?.('userId');
+  async ({ organizationId, request }) => {
+    const userId = request.nextUrl.searchParams.get('userId');
 
     if (!organizationId || !userId) {
       return { data: [] };
