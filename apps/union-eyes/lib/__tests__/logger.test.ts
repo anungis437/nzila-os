@@ -243,4 +243,51 @@ describe('Logger', () => {
       stdoutSpy.mockRestore();
     });
   });
+
+  describe('gap coverage', () => {
+    it('logs without context object', () => {
+      const stdoutSpy = vi.spyOn(process.stdout, 'write').mockImplementation(() => true);
+      loggerModule.logger.info('no-context-message');
+      expect(stdoutSpy).toHaveBeenCalled();
+      stdoutSpy.mockRestore();
+    });
+
+    it('skips stdout/stderr write branch in production', () => {
+      const originalEnv = process.env.NODE_ENV;
+      const stdoutSpy = vi.spyOn(process.stdout, 'write').mockImplementation(() => true);
+      process.env.NODE_ENV = 'production';
+      loggerModule.logger.info('prod-log');
+      expect(stdoutSpy).not.toHaveBeenCalled();
+      process.env.NODE_ENV = originalEnv;
+      stdoutSpy.mockRestore();
+    });
+
+    it('warn method routes through Sentry warning path on server side', async () => {
+      const originalWindow = (globalThis as unknown as Record<string, unknown>).window;
+      delete (globalThis as unknown as Record<string, unknown>).window;
+      const sentry = await import('@sentry/nextjs');
+      vi.mocked(sentry.captureMessage).mockClear();
+
+      loggerModule.logger.warn('server-warn', { a: 1 });
+      await Promise.resolve();
+
+      expect(vi.mocked(sentry.captureMessage)).toHaveBeenCalled();
+      (globalThis as unknown as Record<string, unknown>).window = originalWindow;
+    });
+
+    it('swallows async Sentry callback failures', async () => {
+      const originalWindow = (globalThis as unknown as Record<string, unknown>).window;
+      delete (globalThis as unknown as Record<string, unknown>).window;
+      const sentry = await import('@sentry/nextjs');
+      vi.mocked(sentry.captureException).mockImplementation(() => {
+        throw new Error('sentry-fail');
+      });
+
+      expect(() => loggerModule.logger.error('error-with-sentry-fail', new Error('x'))).not.toThrow();
+      await Promise.resolve();
+
+      vi.mocked(sentry.captureException).mockImplementation(() => undefined);
+      (globalThis as unknown as Record<string, unknown>).window = originalWindow;
+    });
+  });
 });
