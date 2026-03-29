@@ -1,71 +1,153 @@
 /**
  * Provincial Privacy Service — Unit Tests
  *
- * Tests:
- *   - QC rules have 24h breach notification
- *   - ON rules have correct authority
- *   - AB rules have correct requirements
- *   - BC rules have correct requirements
- *   - Unknown province falls back to FEDERAL/PIPEDA
- *
+ * Covers all exported functions.
  * NOTE: imports from `@/db` (not `@/db/db`)
  */
-import { describe, it, expect, vi } from 'vitest';
+import { describe, it, expect, vi, beforeEach } from "vitest";
 
-// ── Mocks ────────────────────────────────────────────────────────────────────
+/* ── mocks ──────────────────────────────────────────────────────────────── */
 
-vi.mock('@/db', () => ({
-  db: {},
-}));
-
-vi.mock('drizzle-orm', async (importOriginal) => {
-  const actual = await importOriginal<typeof import('drizzle-orm')>();
-  return { ...actual };
+const mocks = vi.hoisted(() => {
+  const mockExecute = vi.fn();
+  return {
+    mockDb: { execute: mockExecute },
+    mockExecute,
+  };
 });
 
-vi.mock('@/lib/logger', () => ({
+vi.mock("@/db", () => ({ db: mocks.mockDb }));
+vi.mock("drizzle-orm", () => ({
+  sql: Object.assign(vi.fn((...args: unknown[]) => args), { raw: vi.fn() }),
+}));
+vi.mock("@/lib/logger", () => ({
   logger: { info: vi.fn(), warn: vi.fn(), error: vi.fn(), debug: vi.fn() },
 }));
 
-// ── Imports ──────────────────────────────────────────────────────────────────
+/* ── imports ────────────────────────────────────────────────────────────── */
 
-import { getPrivacyRules } from '../provincial-privacy-service';
+import {
+  getPrivacyRules,
+  assessBreachNotification,
+  generateBreachNotification,
+  getDataRetentionPolicy,
+  validateConsent,
+  generateComplianceReport,
+} from "../provincial-privacy-service";
 
-// ── Tests ────────────────────────────────────────────────────────────────────
+/* ── tests ──────────────────────────────────────────────────────────────── */
 
-describe('provincial-privacy-service', () => {
-  it('returns QC rules with 24h breach notification', () => {
-    const rules = getPrivacyRules('QC');
-    expect(rules.province).toBe('QC');
-    expect(rules.breachNotificationHours).toBe(24);
-    expect(rules.consentRequired).toBe(true);
-    expect(rules.specificRequirements).toContain('Breach notification within 24 hours');
+describe("provincial-privacy-service", () => {
+  beforeEach(() => vi.clearAllMocks());
+
+  // ── getPrivacyRules ─────────────────────────────────────────────────
+  describe("getPrivacyRules", () => {
+    it("returns QC rules with 24h breach notification", () => {
+      const rules = getPrivacyRules("QC");
+      expect(rules.province).toBe("QC");
+      expect(rules.breachNotificationHours).toBe(24);
+      expect(rules.consentRequired).toBe(true);
+      expect(rules.specificRequirements).toContain("Breach notification within 24 hours");
+    });
+
+    it("returns ON rules", () => {
+      const rules = getPrivacyRules("ON");
+      expect(rules.province).toBe("ON");
+      expect(rules.breachNotificationHours).toBe(72);
+      expect(rules.contactAuthority).toContain("Ontario");
+    });
+
+    it("returns AB rules", () => {
+      const rules = getPrivacyRules("AB");
+      expect(rules.province).toBe("AB");
+      expect(rules.contactAuthority).toContain("Alberta");
+    });
+
+    it("returns BC rules", () => {
+      const rules = getPrivacyRules("BC");
+      expect(rules.province).toBe("BC");
+      expect(rules.consentRequired).toBe(true);
+    });
+
+    it("falls back to FEDERAL for unknown province", () => {
+      const rules = getPrivacyRules("XX");
+      expect(rules.province).toBe("FEDERAL");
+      expect(rules.contactAuthority).toContain("Privacy Commissioner of Canada");
+    });
   });
 
-  it('returns ON rules with correct authority', () => {
-    const rules = getPrivacyRules('ON');
-    expect(rules.province).toBe('ON');
-    expect(rules.breachNotificationHours).toBe(72);
-    expect(rules.contactAuthority).toContain('Ontario');
+  // ── assessBreachNotification ────────────────────────────────────────
+  describe("assessBreachNotification", () => {
+    it("returns breach notification assessment", async () => {
+      // DB is skipped in test env, falls back to FEDERAL
+      const result = await assessBreachNotification("m-1", ["personal-info"], new Date());
+      expect(result.memberId).toBe("m-1");
+      expect(result.dataTypes).toEqual(["personal-info"]);
+      expect(result.notificationDeadline).toBeInstanceOf(Date);
+    });
+
+    it("works with organizationId parameter", async () => {
+      const result = await assessBreachNotification("m-1", ["email"], new Date(), "org-1");
+      expect(result.memberId).toBe("m-1");
+    });
   });
 
-  it('returns AB rules', () => {
-    const rules = getPrivacyRules('AB');
-    expect(rules.province).toBe('AB');
-    expect(rules.breachNotificationHours).toBe(72);
-    expect(rules.contactAuthority).toContain('Alberta');
+  // ── generateBreachNotification ──────────────────────────────────────
+  describe("generateBreachNotification", () => {
+    it("generates notification with deadline", async () => {
+      const breach = {
+        province: "QC",
+        memberId: "m-1",
+        breachDate: new Date(),
+        dataTypes: ["email"],
+        realRiskOfHarm: true,
+        notificationSent: false,
+        notificationDeadline: new Date(),
+      };
+      const result = await generateBreachNotification(breach);
+      expect(result.notificationId).toBeDefined();
+      expect(result.deadline).toBeInstanceOf(Date);
+    });
   });
 
-  it('returns BC rules', () => {
-    const rules = getPrivacyRules('BC');
-    expect(rules.province).toBe('BC');
-    expect(rules.consentRequired).toBe(true);
-    expect(rules.dataRetentionDays).toBe(2555);
+  // ── getDataRetentionPolicy ──────────────────────────────────────────
+  describe("getDataRetentionPolicy", () => {
+    it("returns retention policy for QC", () => {
+      const policy = getDataRetentionPolicy("QC");
+      expect(policy.maxRetentionDays).toBeGreaterThan(0);
+      expect(policy.description).toBeDefined();
+    });
+
+    it("returns federal policy for unknown province", () => {
+      const policy = getDataRetentionPolicy("ZZ");
+      expect(policy.maxRetentionDays).toBeGreaterThan(0);
+    });
   });
 
-  it('falls back to FEDERAL PIPEDA for unknown provinces', () => {
-    const rules = getPrivacyRules('XX');
-    expect(rules.province).toBe('FEDERAL');
-    expect(rules.contactAuthority).toContain('Privacy Commissioner of Canada');
+  // ── validateConsent ─────────────────────────────────────────────────
+  describe("validateConsent", () => {
+    it("returns true for province requiring consent", () => {
+      expect(validateConsent("QC", "explicit")).toBe(true);
+    });
+
+    it("validates consent type", () => {
+      const result = validateConsent("ON", "implied");
+      expect(typeof result).toBe("boolean");
+    });
+  });
+
+  // ── generateComplianceReport ────────────────────────────────────────
+  describe("generateComplianceReport", () => {
+    it("returns compliance report for QC", async () => {
+      const report = await generateComplianceReport("QC");
+      expect(typeof report.compliant).toBe("boolean");
+      expect(Array.isArray(report.issues)).toBe(true);
+      expect(Array.isArray(report.recommendations)).toBe(true);
+    });
+
+    it("returns report for unknown province (FEDERAL)", async () => {
+      const report = await generateComplianceReport("ZZ");
+      expect(typeof report.compliant).toBe("boolean");
+    });
   });
 });

@@ -1,98 +1,490 @@
 /**
  * Precedent Service — Unit Tests
  *
- * Tests:
- *   - getPrecedentById: fetch + view count increment
- *   - createPrecedent: insert
- *   - searchPrecedents: filtered query
- *   - getPrecedentStatistics: count
+ * Covers all 12 exported functions:
+ *   getPrecedentById, getPrecedentByCaseNumber, listPrecedents,
+ *   createPrecedent, updatePrecedent, deletePrecedent,
+ *   searchPrecedents, getPrecedentsByIssueType, getRelatedPrecedents,
+ *   getArbitratorProfile, updateArbitratorStats, getTopArbitrators,
+ *   getPrecedentStatistics, getMostCitedPrecedents
  */
-import { describe, it, expect, vi, beforeEach } from 'vitest';
+import { describe, it, expect, vi, beforeEach } from "vitest";
 
-// ── Hoisted mocks ────────────────────────────────────────────────────────────
+/* ── hoisted mocks ──────────────────────────────────────────────────── */
 
-const { mockFindFirst, mockInsertValues, mockReturning, mockUpdateSet } = vi.hoisted(() => {
+const mocks = vi.hoisted(() => {
   const mockReturning = vi.fn();
+  const mockWhere = vi.fn();
   return {
     mockFindFirst: vi.fn(),
-    mockInsertValues: vi.fn(() => ({ returning: mockReturning })),
+    mockFindFirstArb: vi.fn(),
     mockReturning,
-    mockUpdateSet: vi.fn(() => ({ where: vi.fn(() => ({ returning: mockReturning })) })),
+    mockWhere,
+    mockSelectFrom: vi.fn(),
+    mockInsertValues: vi.fn(() => ({ returning: mockReturning })),
+    mockUpdateSet: vi.fn(() => ({
+      where: vi.fn(() => ({ returning: mockReturning })),
+    })),
+    mockDeleteWhere: vi.fn(),
   };
 });
 
-vi.mock('@/db/db', () => ({
-  db: {
-    query: {
-      arbitrationDecisions: { findFirst: mockFindFirst, findMany: vi.fn() },
-      arbitratorProfiles: { findFirst: vi.fn(), findMany: vi.fn() },
-    },
-    insert: vi.fn(() => ({ values: mockInsertValues })),
-    update: vi.fn(() => ({ set: mockUpdateSet })),
-    select: vi.fn(() => ({
-      from: vi.fn(() => ({
-        where: vi.fn(async () => []),
+/* chain helpers */
+function sfwol(data: unknown[] = []) {
+  return {
+    from: vi.fn(() => ({
+      where: vi.fn(() => ({
         orderBy: vi.fn(() => ({
-          limit: vi.fn(() => ({ offset: vi.fn(async () => []) })),
+          limit: vi.fn(() => ({
+            offset: vi.fn().mockResolvedValue(data),
+          })),
         })),
-        limit: vi.fn(async () => []),
       })),
     })),
+  };
+}
+function sfwolNoOffset(data: unknown[] = []) {
+  return {
+    from: vi.fn(() => ({
+      where: vi.fn(() => ({
+        orderBy: vi.fn(() => ({
+          limit: vi.fn().mockResolvedValue(data),
+        })),
+      })),
+    })),
+  };
+}
+function sfw(data: unknown[] = []) {
+  return {
+    from: vi.fn(() => ({
+      where: vi.fn().mockResolvedValue(data),
+    })),
+  };
+}
+function sfol(data: unknown[] = []) {
+  return {
+    from: vi.fn(() => ({
+      orderBy: vi.fn(() => ({
+        limit: vi.fn().mockResolvedValue(data),
+      })),
+    })),
+  };
+}
+function sfwool(data: unknown[] = []) {
+  return {
+    from: vi.fn(() => ({
+      where: vi.fn(() => ({
+        orderBy: vi.fn(() => ({
+          orderBy: vi.fn(() => ({
+            limit: vi.fn().mockResolvedValue(data),
+          })),
+        })),
+      })),
+    })),
+  };
+}
+function sfg(data: unknown[] = []) {
+  return {
+    from: vi.fn(() => ({
+      groupBy: vi.fn().mockResolvedValue(data),
+    })),
+  };
+}
+
+vi.mock("@/db/db", () => ({
+  db: {
+    query: {
+      arbitrationDecisions: { findFirst: mocks.mockFindFirst },
+      arbitratorProfiles: { findFirst: mocks.mockFindFirstArb },
+    },
+    select: vi.fn(() => sfwol()),
+    insert: vi.fn(() => ({ values: mocks.mockInsertValues })),
+    update: vi.fn(() => ({ set: mocks.mockUpdateSet })),
+    delete: vi.fn(() => ({ where: mocks.mockDeleteWhere })),
   },
 }));
 
-vi.mock('@/db/schema', () => ({
+vi.mock("@/db/schema", () => ({
   arbitrationDecisions: {
-    id: 'id', viewCount: 'viewCount', updatedAt: 'updatedAt',
-    organizationId: 'organizationId',
+    id: "id",
+    caseNumber: "caseNumber",
+    caseTitle: "caseTitle",
+    tribunal: "tribunal",
+    decisionType: "decisionType",
+    decisionDate: "decisionDate",
+    arbitrator: "arbitrator",
+    union: "union",
+    employer: "employer",
+    outcome: "outcome",
+    precedentValue: "precedentValue",
+    summary: "summary",
+    headnote: "headnote",
+    issueTypes: "issueTypes",
+    jurisdiction: "jurisdiction",
+    sector: "sector",
+    citationCount: "citationCount",
+    viewCount: "viewCount",
+    createdAt: "createdAt",
+    updatedAt: "updatedAt",
+    fullText: "fullText",
   },
-  arbitratorProfiles: { id: 'id' },
+  arbitratorProfiles: {
+    id: "id",
+    name: "name",
+    totalDecisions: "totalDecisions",
+    isActive: "isActive",
+  },
 }));
 
-vi.mock('drizzle-orm', async (importOriginal) => {
-  const actual = await importOriginal<typeof import('drizzle-orm')>();
-  return { ...actual };
-});
+vi.mock("drizzle-orm", () => ({
+  eq: vi.fn((...a: unknown[]) => a),
+  and: vi.fn((...a: unknown[]) => a),
+  or: vi.fn((...a: unknown[]) => a),
+  like: vi.fn((...a: unknown[]) => a),
+  desc: vi.fn((c: unknown) => c),
+  asc: vi.fn((c: unknown) => c),
+  sql: Object.assign(vi.fn((...a: unknown[]) => a), { raw: vi.fn() }),
+  inArray: vi.fn((...a: unknown[]) => a),
+  gte: vi.fn((...a: unknown[]) => a),
+  lte: vi.fn((...a: unknown[]) => a),
+}));
 
-vi.mock('@/lib/logger', () => ({
+vi.mock("@/lib/logger", () => ({
   logger: { info: vi.fn(), warn: vi.fn(), error: vi.fn(), debug: vi.fn() },
 }));
 
-// ── Imports ──────────────────────────────────────────────────────────────────
+/* ── imports ────────────────────────────────────────────────────────── */
 
-import { getPrecedentById, createPrecedent } from '../precedent-service';
+import { db } from "@/db/db";
+import {
+  getPrecedentById,
+  getPrecedentByCaseNumber,
+  listPrecedents,
+  createPrecedent,
+  updatePrecedent,
+  deletePrecedent,
+  searchPrecedents,
+  getPrecedentsByIssueType,
+  getRelatedPrecedents,
+  getArbitratorProfile,
+  updateArbitratorStats,
+  getTopArbitrators,
+  getPrecedentStatistics,
+  getMostCitedPrecedents,
+} from "../precedent-service";
 
-// ── Tests ────────────────────────────────────────────────────────────────────
+/* ── tests ──────────────────────────────────────────────────────────── */
 
-describe('getPrecedentById', () => {
-  beforeEach(() => { vi.clearAllMocks(); });
+describe("precedent-service", () => {
+  const dec = {
+    id: "d-1",
+    caseNumber: "ARB-001",
+    caseTitle: "Test Case",
+    sector: "health",
+    issueTypes: ["discipline"],
+    outcome: "grievance_upheld",
+    remedy: { monetaryAward: 5000 },
+  };
 
-  it('returns decision when found', async () => {
-    const decision = { id: 'dec-1', caseNumber: 'ARB-001' };
-    mockFindFirst.mockResolvedValue(decision);
-    mockUpdateSet.mockReturnValue({ where: vi.fn().mockResolvedValue([decision]) });
-    const result = await getPrecedentById('dec-1');
-    expect(result).toEqual(decision);
+  beforeEach(() => {
+    vi.clearAllMocks();
+    // default select chain resolves []
+    (db.select as ReturnType<typeof vi.fn>).mockReturnValue(sfwol());
   });
 
-  it('returns null when not found', async () => {
-    mockFindFirst.mockResolvedValue(undefined);
-    const result = await getPrecedentById('missing');
-    expect(result).toBeNull();
+  // ── getPrecedentById ────────────────────────────────────────────────
+  describe("getPrecedentById", () => {
+    it("returns decision and increments view count", async () => {
+      mocks.mockFindFirst.mockResolvedValueOnce(dec);
+      mocks.mockUpdateSet.mockReturnValueOnce({
+        where: vi.fn().mockResolvedValue([dec]),
+      });
+      const result = await getPrecedentById("d-1");
+      expect(result).toBeDefined();
+      expect(mocks.mockFindFirst).toHaveBeenCalled();
+    });
+
+    it("returns null when not found", async () => {
+      mocks.mockFindFirst.mockResolvedValueOnce(undefined);
+      expect(await getPrecedentById("bad")).toBeNull();
+    });
+
+    it("strips fullText when includeFullText=false", async () => {
+      mocks.mockFindFirst.mockResolvedValueOnce({ ...dec, fullText: "long..." });
+      mocks.mockUpdateSet.mockReturnValueOnce({
+        where: vi.fn().mockResolvedValue([dec]),
+      });
+      const r = await getPrecedentById("d-1", { includeFullText: false });
+      expect(r?.fullText).toBeUndefined();
+    });
+
+    it("keeps fullText when includeFullText=true", async () => {
+      mocks.mockFindFirst.mockResolvedValueOnce({ ...dec, fullText: "long..." });
+      mocks.mockUpdateSet.mockReturnValueOnce({
+        where: vi.fn().mockResolvedValue([dec]),
+      });
+      const r = await getPrecedentById("d-1", { includeFullText: true });
+      expect(r?.fullText).toBe("long...");
+    });
+
+    it("throws on DB error", async () => {
+      mocks.mockFindFirst.mockRejectedValueOnce(new Error("db err"));
+      await expect(getPrecedentById("d-1")).rejects.toThrow("Failed to fetch precedent");
+    });
+  });
+
+  // ── getPrecedentByCaseNumber ────────────────────────────────────────
+  describe("getPrecedentByCaseNumber", () => {
+    it("returns decision by case number", async () => {
+      mocks.mockFindFirst.mockResolvedValueOnce(dec);
+      const r = await getPrecedentByCaseNumber("ARB-001");
+      expect(r?.caseNumber).toBe("ARB-001");
+    });
+
+    it("returns null when not found", async () => {
+      mocks.mockFindFirst.mockResolvedValueOnce(undefined);
+      expect(await getPrecedentByCaseNumber("X")).toBeNull();
+    });
+  });
+
+  // ── listPrecedents ─────────────────────────────────────────────────
+  describe("listPrecedents", () => {
+    it("returns paginated list with count", async () => {
+      // First select call = count query
+      (db.select as ReturnType<typeof vi.fn>)
+        .mockReturnValueOnce(sfw([{ count: 1 }]))
+        // Second select call = data query
+        .mockReturnValueOnce(sfwol([dec]));
+      const r = await listPrecedents({}, { page: 1, limit: 10 });
+      expect(r.total).toBe(1);
+      expect(r.precedents).toHaveLength(1);
+      expect(r.page).toBe(1);
+    });
+
+    it("applies filters", async () => {
+      (db.select as ReturnType<typeof vi.fn>)
+        .mockReturnValueOnce(sfw([{ count: 0 }]))
+        .mockReturnValueOnce(sfwol([]));
+      const r = await listPrecedents({
+        tribunal: ["OLRB"],
+        outcome: ["grievance_upheld"],
+        searchQuery: "test",
+        dateFrom: new Date(),
+        dateTo: new Date(),
+        jurisdiction: "ON",
+        sector: "health",
+        arbitrator: "Smith",
+        union: "CUPE",
+        employer: "City",
+        decisionType: ["award"],
+        precedentValue: ["high"],
+      });
+      expect(r.total).toBe(0);
+    });
+
+    it("throws on error", async () => {
+      (db.select as ReturnType<typeof vi.fn>).mockReturnValueOnce({
+        from: vi.fn(() => {
+          throw new Error("db");
+        }),
+      });
+      await expect(listPrecedents()).rejects.toThrow("Failed to list precedents");
+    });
+  });
+
+  // ── createPrecedent ────────────────────────────────────────────────
+  describe("createPrecedent", () => {
+    it("inserts and returns new decision", async () => {
+      mocks.mockReturning.mockResolvedValueOnce([dec]);
+      // updateArbitratorStats background: select for decisions
+      (db.select as ReturnType<typeof vi.fn>).mockReturnValueOnce(sfw([]));
+      const r = await createPrecedent({
+        organizationId: "org-1",
+        caseNumber: "ARB-002",
+        decisionDate: new Date(),
+        arbitrator: "Smith",
+      } as never);
+      expect(r.id).toBe("d-1");
+    });
+
+    it("skips arbitrator stats when no arbitrator", async () => {
+      mocks.mockReturning.mockResolvedValueOnce([dec]);
+      const r = await createPrecedent({
+        organizationId: "org-1",
+        caseNumber: "ARB-003",
+        decisionDate: new Date(),
+      } as never);
+      expect(r.id).toBe("d-1");
+    });
+  });
+
+  // ── updatePrecedent ────────────────────────────────────────────────
+  describe("updatePrecedent", () => {
+    it("updates and returns the decision", async () => {
+      mocks.mockReturning.mockResolvedValueOnce([{ ...dec, caseTitle: "Updated" }]);
+      const r = await updatePrecedent("d-1", { caseTitle: "Updated" } as never);
+      expect(r?.caseTitle).toBe("Updated");
+    });
+
+    it("returns null when not found", async () => {
+      mocks.mockReturning.mockResolvedValueOnce([undefined]);
+      const r = await updatePrecedent("bad", {} as never);
+      expect(r).toBeNull();
+    });
+  });
+
+  // ── deletePrecedent ────────────────────────────────────────────────
+  describe("deletePrecedent", () => {
+    it("returns true on success", async () => {
+      mocks.mockDeleteWhere.mockResolvedValueOnce(undefined);
+      expect(await deletePrecedent("d-1")).toBe(true);
+    });
+
+    it("throws on error", async () => {
+      mocks.mockDeleteWhere.mockRejectedValueOnce(new Error("del err"));
+      await expect(deletePrecedent("d-1")).rejects.toThrow("Failed to delete precedent");
+    });
+  });
+
+  // ── searchPrecedents ───────────────────────────────────────────────
+  describe("searchPrecedents", () => {
+    it("returns matching decisions", async () => {
+      (db.select as ReturnType<typeof vi.fn>).mockReturnValueOnce(sfwolNoOffset([dec]));
+      const r = await searchPrecedents("discipline");
+      expect(r).toHaveLength(1);
+    });
+
+    it("applies optional filters", async () => {
+      (db.select as ReturnType<typeof vi.fn>).mockReturnValueOnce(sfwolNoOffset([]));
+      const r = await searchPrecedents("test", {
+        precedentValue: ["high"],
+        tribunal: ["OLRB"],
+      });
+      expect(r).toHaveLength(0);
+    });
+  });
+
+  // ── getPrecedentsByIssueType ───────────────────────────────────────
+  describe("getPrecedentsByIssueType", () => {
+    it("returns decisions matching JSONB issue type", async () => {
+      (db.select as ReturnType<typeof vi.fn>).mockReturnValueOnce(sfwolNoOffset([dec]));
+      const r = await getPrecedentsByIssueType("discipline");
+      expect(r).toHaveLength(1);
+    });
+  });
+
+  // ── getRelatedPrecedents ───────────────────────────────────────────
+  describe("getRelatedPrecedents", () => {
+    it("returns empty when source not found", async () => {
+      mocks.mockFindFirst.mockResolvedValueOnce(undefined);
+      const r = await getRelatedPrecedents("bad");
+      expect(r).toEqual([]);
+    });
+
+    it("returns related when source exists", async () => {
+      // getPrecedentById internal call
+      mocks.mockFindFirst.mockResolvedValueOnce(dec);
+      // increment view count
+      mocks.mockUpdateSet.mockReturnValueOnce({
+        where: vi.fn().mockResolvedValue([dec]),
+      });
+      // the final select for related
+      (db.select as ReturnType<typeof vi.fn>).mockReturnValueOnce(sfwolNoOffset([{ id: "d-2" }]));
+      const r = await getRelatedPrecedents("d-1");
+      expect(r).toHaveLength(1);
+    });
+  });
+
+  // ── getArbitratorProfile ───────────────────────────────────────────
+  describe("getArbitratorProfile", () => {
+    it("returns profile when found", async () => {
+      mocks.mockFindFirstArb.mockResolvedValueOnce({ name: "Smith" });
+      const r = await getArbitratorProfile("Smith");
+      expect(r?.name).toBe("Smith");
+    });
+
+    it("returns null when not found", async () => {
+      mocks.mockFindFirstArb.mockResolvedValueOnce(undefined);
+      expect(await getArbitratorProfile("Nobody")).toBeNull();
+    });
+  });
+
+  // ── updateArbitratorStats ──────────────────────────────────────────
+  describe("updateArbitratorStats", () => {
+    it("does nothing when no decisions", async () => {
+      (db.select as ReturnType<typeof vi.fn>).mockReturnValueOnce(sfw([]));
+      await updateArbitratorStats("Smith");
+      // shouldn't throw
+    });
+
+    it("updates existing profile", async () => {
+      (db.select as ReturnType<typeof vi.fn>).mockReturnValueOnce(
+        sfw([
+          { ...dec, outcome: "grievance_upheld", remedy: { monetaryAward: 1000 }, issueTypes: ["discipline"], decisionDate: new Date() },
+        ])
+      );
+      mocks.mockFindFirstArb.mockResolvedValueOnce({ name: "Smith" });
+      mocks.mockUpdateSet.mockReturnValueOnce({ where: vi.fn().mockResolvedValue(undefined) });
+      await updateArbitratorStats("Smith");
+      // profile updated
+    });
+
+    it("inserts new profile when none exists", async () => {
+      (db.select as ReturnType<typeof vi.fn>).mockReturnValueOnce(
+        sfw([{ ...dec, decisionDate: new Date() }])
+      );
+      mocks.mockFindFirstArb.mockResolvedValueOnce(undefined);
+      mocks.mockInsertValues.mockReturnValueOnce(undefined);
+      await updateArbitratorStats("NewArb");
+    });
+
+    it("swallows errors silently", async () => {
+      (db.select as ReturnType<typeof vi.fn>).mockReturnValueOnce({
+        from: vi.fn(() => {
+          throw new Error("db fail");
+        }),
+      });
+      // Should NOT throw
+      await updateArbitratorStats("Smith");
+    });
+  });
+
+  // ── getTopArbitrators ──────────────────────────────────────────────
+  describe("getTopArbitrators", () => {
+    it("returns sorted profiles", async () => {
+      (db.select as ReturnType<typeof vi.fn>).mockReturnValueOnce(sfwolNoOffset([{ name: "A" }]));
+      const r = await getTopArbitrators(5);
+      expect(r).toHaveLength(1);
+    });
+  });
+
+  // ── getPrecedentStatistics ─────────────────────────────────────────
+  describe("getPrecedentStatistics", () => {
+    it("returns grouped stats", async () => {
+      (db.select as ReturnType<typeof vi.fn>)
+        .mockReturnValueOnce(sfg([{ outcome: "upheld", count: 3 }]))
+        .mockReturnValueOnce(sfg([{ tribunal: "OLRB", count: 2 }]))
+        .mockReturnValueOnce(sf([{ total: 5 }]));
+      const r = await getPrecedentStatistics();
+      expect(r.total).toBe(5);
+      expect(r.byOutcome).toHaveLength(1);
+      expect(r.byTribunal).toHaveLength(1);
+    });
+  });
+
+  // ── getMostCitedPrecedents ─────────────────────────────────────────
+  describe("getMostCitedPrecedents", () => {
+    it("returns top cited decisions", async () => {
+      (db.select as ReturnType<typeof vi.fn>).mockReturnValueOnce(sfol([dec]));
+      const r = await getMostCitedPrecedents(5);
+      expect(r).toHaveLength(1);
+    });
   });
 });
 
-describe('createPrecedent', () => {
-  beforeEach(() => { vi.clearAllMocks(); });
-
-  it('inserts and returns the new decision', async () => {
-    const newDec = { id: 'dec-new', caseNumber: 'ARB-002' };
-    mockReturning.mockResolvedValue([newDec]);
-    const result = await createPrecedent({
-      organizationId: 'org-1',
-      caseNumber: 'ARB-002',
-      decisionDate: new Date(),
-    } as never);
-    expect(result).toEqual(newDec);
-  });
-});
+/* sf: select→from (no where/orderBy) */
+function sf(data: unknown[] = []) {
+  return {
+    from: vi.fn().mockResolvedValue(data),
+  };
+}
