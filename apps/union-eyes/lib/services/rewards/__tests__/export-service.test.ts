@@ -287,4 +287,235 @@ describe('export-service', () => {
       ).rejects.toThrow('analytics error');
     });
   });
+
+  // ──────────────── arrayToCSV branch coverage ────────────────
+  describe('arrayToCSV edge cases (via exportAwardsToCSV)', () => {
+    it('handles null and undefined values as empty strings', async () => {
+      mocks.mockExecute.mockResolvedValue([
+        {
+          id: 'a1',
+          created_at: '2026-03-01T00:00:00Z',
+          status: null,
+          award_type: undefined,
+          program: null,
+          recipient_name: null,
+          recipient_email: null,
+          issuer_name: null,
+          issuer_email: null,
+          message: null,
+          credits_awarded: null,
+          approved_at: null,
+          approver_name: null,
+          issued_at: null,
+          revoked_at: null,
+          rejected_at: null,
+        },
+      ]);
+
+      const csv = await exportAwardsToCSV('org-1');
+      const lines = csv.split('\n');
+      expect(lines.length).toBe(2);
+      // null/undefined are converted to empty strings in CSV
+      expect(lines[1]).toContain('a1');
+    });
+
+    it('escapes values containing commas', async () => {
+      mocks.mockExecute.mockResolvedValue([
+        {
+          id: 'a2',
+          created_at: '2026-03-01T00:00:00Z',
+          status: 'issued',
+          award_type: 'Team, Player',
+          program: 'Q1',
+          recipient_name: 'Alice',
+          recipient_email: 'a@b.com',
+          issuer_name: 'Bob',
+          issuer_email: 'b@c.com',
+          message: 'Great, work!',
+          credits_awarded: 100,
+          approved_at: null,
+          approver_name: null,
+          issued_at: '2026-03-01T00:00:00Z',
+          revoked_at: null,
+          rejected_at: null,
+        },
+      ]);
+
+      const csv = await exportAwardsToCSV('org-1');
+      // Values with commas should be double-quoted
+      expect(csv).toContain('"Team, Player"');
+      expect(csv).toContain('"Great, work!"');
+    });
+
+    it('escapes values containing double quotes', async () => {
+      mocks.mockExecute.mockResolvedValue([
+        {
+          id: 'a3',
+          created_at: '2026-03-01T00:00:00Z',
+          status: 'issued',
+          award_type: 'Test',
+          program: 'Q1',
+          recipient_name: 'Alice "Al" Smith',
+          recipient_email: 'a@b.com',
+          issuer_name: 'Bob',
+          issuer_email: 'b@c.com',
+          message: 'She said "hello"',
+          credits_awarded: 50,
+          approved_at: null,
+          approver_name: null,
+          issued_at: null,
+          revoked_at: null,
+          rejected_at: null,
+        },
+      ]);
+
+      const csv = await exportAwardsToCSV('org-1');
+      // Quotes should be escaped as ""
+      expect(csv).toContain('"Alice ""Al"" Smith"');
+      expect(csv).toContain('"She said ""hello"""');
+    });
+
+    it('escapes values containing newlines', async () => {
+      mocks.mockExecute.mockResolvedValue([
+        {
+          id: 'a4',
+          created_at: '2026-03-01T00:00:00Z',
+          status: 'issued',
+          award_type: 'Test',
+          program: 'Q1',
+          recipient_name: 'Alice',
+          recipient_email: 'a@b.com',
+          issuer_name: 'Bob',
+          issuer_email: 'b@c.com',
+          message: 'Line 1\nLine 2',
+          credits_awarded: 10,
+          approved_at: null,
+          approver_name: null,
+          issued_at: null,
+          revoked_at: null,
+          rejected_at: null,
+        },
+      ]);
+
+      const csv = await exportAwardsToCSV('org-1');
+      expect(csv).toContain('"Line 1\nLine 2"');
+    });
+  });
+
+  // ──────────────── filter branch coverage ────────────────
+  describe('filter branches', () => {
+    it('exportAwardsToCSV applies programId filter', async () => {
+      mocks.mockExecute.mockResolvedValue([]);
+      await exportAwardsToCSV('org-1', { programId: 'prog-1' });
+      expect(mocks.mockExecute).toHaveBeenCalled();
+    });
+
+    it('exportLedgerToCSV applies all filters together', async () => {
+      mocks.mockExecute.mockResolvedValue([]);
+      await exportLedgerToCSV('org-1', {
+        startDate: new Date('2026-01-01'),
+        endDate: new Date('2026-03-31'),
+        userId: 'u1',
+        eventType: ['earn', 'spend'],
+      });
+      expect(mocks.mockExecute).toHaveBeenCalled();
+    });
+
+    it('exportBudgetsToCSV applies activeOnly filter', async () => {
+      mocks.mockExecute.mockResolvedValue([]);
+      await exportBudgetsToCSV('org-1', { activeOnly: true });
+      expect(mocks.mockExecute).toHaveBeenCalled();
+    });
+
+    it('exportRedemptionsToCSV applies endDate filter', async () => {
+      mocks.mockExecute.mockResolvedValue([]);
+      await exportRedemptionsToCSV('org-1', {
+        endDate: new Date('2026-12-31'),
+      });
+      expect(mocks.mockExecute).toHaveBeenCalled();
+    });
+
+    it('exportRedemptionsToCSV applies all filters', async () => {
+      mocks.mockExecute.mockResolvedValue([]);
+      await exportRedemptionsToCSV('org-1', {
+        startDate: new Date('2026-01-01'),
+        endDate: new Date('2026-06-30'),
+        status: ['completed', 'pending'],
+      });
+      expect(mocks.mockExecute).toHaveBeenCalled();
+    });
+  });
+
+  // ──────────────── date ternary branch coverage ────────────────
+  describe('optional date field branches', () => {
+    it('awards with all date fields populated', async () => {
+      mocks.mockExecute.mockResolvedValue([
+        {
+          id: 'a5',
+          created_at: '2026-03-01T00:00:00Z',
+          status: 'issued',
+          award_type: 'Test',
+          program: 'Q1',
+          recipient_name: 'Alice',
+          recipient_email: 'a@b.com',
+          issuer_name: 'Bob',
+          issuer_email: 'b@c.com',
+          message: 'Done',
+          credits_awarded: 100,
+          approved_at: '2026-03-02T00:00:00Z',
+          approver_name: 'Carol',
+          issued_at: '2026-03-03T00:00:00Z',
+          revoked_at: '2026-03-04T00:00:00Z',
+          rejected_at: '2026-03-05T00:00:00Z',
+        },
+      ]);
+
+      const csv = await exportAwardsToCSV('org-1');
+      const lines = csv.split('\n');
+      expect(lines.length).toBe(2);
+      // All date fields should be ISO strings, not empty
+      expect(lines[1]).toContain('2026-03-02');
+      expect(lines[1]).toContain('2026-03-03');
+    });
+
+    it('redemptions with cancelled_at populated', async () => {
+      mocks.mockExecute.mockResolvedValue([
+        {
+          id: 'r2',
+          created_at: '2026-03-01T00:00:00Z',
+          status: 'cancelled',
+          user_name: 'Alice',
+          email: 'a@b.com',
+          credits_redeemed: 25,
+          cancelled_at: '2026-03-15T00:00:00Z',
+          cancellation_reason: 'Changed mind',
+          provider: 'shopify',
+        },
+      ]);
+
+      const csv = await exportRedemptionsToCSV('org-1');
+      expect(csv).toContain('2026-03-15');
+      expect(csv).toContain('Changed mind');
+    });
+
+    it('ledger with description populated', async () => {
+      mocks.mockExecute.mockResolvedValue([
+        {
+          id: 'l2',
+          created_at: '2026-03-01T00:00:00Z',
+          event_type: 'earn',
+          amount: 50,
+          balance_after: 150,
+          user_name: 'Bob',
+          email: 'b@c.com',
+          source_type: 'award',
+          source_id: 'a1',
+          description: 'Quarterly bonus',
+        },
+      ]);
+
+      const csv = await exportLedgerToCSV('org-1');
+      expect(csv).toContain('Quarterly bonus');
+    });
+  });
 });

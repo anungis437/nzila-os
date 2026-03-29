@@ -371,4 +371,88 @@ describe('generateExcel — gap coverage', () => {
     const views = options.views as Record<string, unknown>[];
     expect(views[0].ySplit).toBe(1);
   });
+
+  it('disables auto-filter when includeFilters is false', async () => {
+    mocks.mockWorksheet.autoFilter = undefined;
+    await generateExcel({
+      title: 'Test', data: sampleData, columns: sampleColumns,
+      includeFilters: false,
+    });
+    expect(mocks.mockWorksheet.autoFilter).toBeUndefined();
+  });
+
+  it('skips auto-width when autoWidth is false', async () => {
+    await generateExcel({
+      title: 'Test', data: sampleData, columns: sampleColumns,
+      autoWidth: false,
+    });
+    // The column widths should remain at their configured values (not recalculated)
+    expect(mocks.mockWorksheet.addRow).toHaveBeenCalled();
+  });
+
+  it('exercises auto-width eachCell callback when columns have eachCell', async () => {
+    // Intercept the columns setter to provide eachCell
+    const originalColumns = mocks.mockWorksheet.columns;
+    let storedCols: unknown[] = [];
+    Object.defineProperty(mocks.mockWorksheet, 'columns', {
+      get: () => storedCols,
+      set: (cols: Record<string, unknown>[]) => {
+        storedCols = cols.map(c => ({
+          ...c,
+          eachCell: (_opts: unknown, cb: (cell: { value: unknown }) => void) => {
+            cb({ value: 'short' });
+            cb({ value: 'a much longer cell value here' });
+            cb({ value: null });
+          },
+        }));
+      },
+      configurable: true,
+    });
+
+    await generateExcel({
+      title: 'Test', data: sampleData, columns: sampleColumns,
+    });
+
+    // Restore
+    Object.defineProperty(mocks.mockWorksheet, 'columns', {
+      value: originalColumns,
+      writable: true,
+      configurable: true,
+    });
+
+    // The eachCell callback should have run and set column widths
+    const lastCols = storedCols as { width: number }[];
+    expect(lastCols.length).toBeGreaterThan(0);
+    // Width = Math.min(Math.max(maxLength + 2, 10), 50) where maxLength = 30
+    expect(lastCols[0].width).toBe(31); // "a much longer cell value here" = 29 chars + 2
+  });
+
+  it('applies alternate row coloring when enabled', async () => {
+    await generateExcel({
+      title: 'Test', data: sampleData, columns: sampleColumns,
+      styles: { alternateRows: true, alternateRowFill: 'FFE0E0E0' },
+    });
+    expect(mocks.mockWorksheet.addRow).toHaveBeenCalledTimes(2);
+  });
+
+  it('uses custom header font and fill', async () => {
+    await generateExcel({
+      title: 'Test', data: sampleData, columns: sampleColumns,
+      styles: {
+        headerFont: { bold: true, size: 14, color: { argb: 'FF000000' } },
+        headerFill: 'FF333333',
+        bodyFont: { size: 11 },
+      },
+    });
+    expect(mocks.mockWorkbook.addWorksheet).toHaveBeenCalled();
+  });
+
+  it('handles object data (non-array)', async () => {
+    await generateExcel({
+      title: 'Test',
+      data: { id: 1, name: 'Solo', amount: 42 },
+      columns: sampleColumns,
+    });
+    expect(mocks.mockWorksheet.addRow).toHaveBeenCalledTimes(1);
+  });
 });

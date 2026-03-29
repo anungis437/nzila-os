@@ -631,3 +631,358 @@ describe('SignatureProviderFactory - initialization state', () => {
     expect(SignatureProviderFactory.getProvider('docusign').name).toBe('docusign');
   });
 });
+
+// ─── Branch Coverage: DocuSign catch instanceof branches ─────────────
+
+describe('DocuSignProvider - branch coverage', () => {
+  let provider: DocuSignProvider;
+
+  beforeEach(() => {
+    mockFetch.mockReset();
+    provider = new DocuSignProvider({
+      apiKey: 'test-key',
+      accountId: 'test-account',
+      environment: 'sandbox',
+    });
+  });
+
+  it('createEnvelope wraps non-Error throws', async () => {
+    mockFetch.mockRejectedValueOnce('string error');
+    await expect(provider.createEnvelope(makeRequest())).rejects.toThrow(
+      'Failed to create DocuSign envelope: Unknown error'
+    );
+  });
+
+  it('getEnvelopeStatus wraps non-Error throws', async () => {
+    mockFetch.mockRejectedValueOnce({ code: 'net' });
+    await expect(provider.getEnvelopeStatus('env-1')).rejects.toThrow(
+      'Failed to get DocuSign envelope status: Unknown error'
+    );
+  });
+
+  it('getEnvelopeStatus handles undefined completedDateTime', async () => {
+    mockFetch.mockResolvedValueOnce({
+      ok: true,
+      json: async () => ({
+        envelopeId: 'ds_env_3',
+        status: 'Sent',
+        recipients: { signers: [] },
+        // completedDateTime omitted
+      }),
+    });
+    const status = await provider.getEnvelopeStatus('ds_env_3');
+    expect(status.completedAt).toBeUndefined();
+  });
+
+  it('getEnvelopeStatus handles signer without signedDateTime/deliveredDateTime', async () => {
+    mockFetch.mockResolvedValueOnce({
+      ok: true,
+      json: async () => ({
+        envelopeId: 'ds_env_4',
+        status: 'Sent',
+        recipients: {
+          signers: [
+            { recipientId: '1', email: 'a@b.com', status: 'sent' },
+          ],
+        },
+      }),
+    });
+    const status = await provider.getEnvelopeStatus('ds_env_4');
+    expect(status.signers[0].signedAt).toBeUndefined();
+    expect(status.signers[0].viewedAt).toBeUndefined();
+  });
+
+  it('downloadDocument wraps non-Error throws', async () => {
+    mockFetch.mockRejectedValueOnce(42);
+    await expect(provider.downloadDocument('env-1')).rejects.toThrow(
+      'Failed to download DocuSign document: Unknown error'
+    );
+  });
+
+  it('voidEnvelope wraps non-Error throws', async () => {
+    mockFetch.mockRejectedValueOnce(null);
+    await expect(provider.voidEnvelope('env-1', 'test')).rejects.toThrow(
+      'Failed to void DocuSign envelope: Unknown error'
+    );
+  });
+
+  it('sendReminder wraps non-Error throws', async () => {
+    mockFetch.mockRejectedValueOnce(undefined);
+    await expect(provider.sendReminder('env-1', 's1')).rejects.toThrow(
+      'Failed to send DocuSign reminder: Unknown error'
+    );
+  });
+
+  it('createEnvelope uses signer.order fallback to index+1', async () => {
+    mockFetch.mockResolvedValueOnce({
+      ok: true,
+      json: async () => ({
+        envelopeId: 'ds_env_order',
+        status: 'sent',
+        recipients: { signers: [] },
+      }),
+    });
+
+    const req = makeRequest({
+      signers: [
+        { email: 'a@b.com', name: 'Alice' }, // no order property
+      ],
+    });
+    await provider.createEnvelope(req);
+
+    const body = JSON.parse(mockFetch.mock.calls[0][1].body as string);
+    // order fallback: 0 || (0 + 1) = 1
+    expect(body.recipients.signers[0].routingOrder).toBe(1);
+  });
+});
+
+// ─── Branch Coverage: HelloSign failure paths ────────────────────────
+
+describe('HelloSignProvider - failure branches', () => {
+  let provider: HelloSignProvider;
+
+  beforeEach(() => {
+    mockFetch.mockReset();
+    provider = new HelloSignProvider({ apiKey: 'hs-key' });
+  });
+
+  it('downloadDocument throws on failed response', async () => {
+    mockFetch.mockResolvedValueOnce({
+      ok: false,
+      status: 500,
+      statusText: 'Internal Server Error',
+    });
+    await expect(provider.downloadDocument('hs_bad')).rejects.toThrow(SignatureError);
+  });
+
+  it('downloadDocument wraps network error', async () => {
+    mockFetch.mockRejectedValueOnce(new Error('Network failure'));
+    await expect(provider.downloadDocument('hs_bad')).rejects.toThrow('Network failure');
+  });
+
+  it('voidEnvelope throws on failed response', async () => {
+    mockFetch.mockResolvedValueOnce({
+      ok: false,
+      status: 403,
+      statusText: 'Forbidden',
+    });
+    await expect(provider.voidEnvelope('hs_bad', 'cancel')).rejects.toThrow(SignatureError);
+  });
+
+  it('voidEnvelope wraps non-Error throw', async () => {
+    mockFetch.mockRejectedValueOnce('oops');
+    await expect(provider.voidEnvelope('hs_bad', 'cancel')).rejects.toThrow();
+  });
+
+  it('sendReminder throws on failed response', async () => {
+    mockFetch.mockResolvedValueOnce({
+      ok: false,
+      status: 422,
+      statusText: 'Unprocessable Entity',
+    });
+    await expect(provider.sendReminder('hs_bad', 'a@b.com')).rejects.toThrow(SignatureError);
+  });
+
+  it('sendReminder wraps non-Error throw', async () => {
+    mockFetch.mockRejectedValueOnce(99);
+    await expect(provider.sendReminder('hs_bad', 'a@b.com')).rejects.toThrow();
+  });
+
+  it('getEnvelopeStatus wraps non-Error throw', async () => {
+    mockFetch.mockRejectedValueOnce('bad');
+    await expect(provider.getEnvelopeStatus('hs_bad')).rejects.toThrow();
+  });
+
+  it('createEnvelope wraps non-Error throw', async () => {
+    mockFetch.mockRejectedValueOnce({ reason: 'timeout' });
+    await expect(provider.createEnvelope(makeRequest())).rejects.toThrow();
+  });
+
+  it('createEnvelope uses fallback when json parse fails on error response', async () => {
+    mockFetch.mockResolvedValueOnce({
+      ok: false,
+      status: 500,
+      statusText: 'Server Error',
+      json: async () => { throw new Error('not json'); },
+    });
+    await expect(provider.createEnvelope(makeRequest())).rejects.toThrow(
+      'Unknown error'
+    );
+  });
+
+  it('maps error signer status', async () => {
+    mockFetch.mockResolvedValueOnce({
+      ok: true,
+      json: async () => ({
+        signature_request: {
+          is_complete: false,
+          is_declined: false,
+          signatures: [
+            { signer_email_address: 'a@b.com', signature_id: 's1', status_code: 'error' },
+          ],
+        },
+      }),
+    });
+    const status = await provider.getEnvelopeStatus('hs_1');
+    expect(status.signers[0].status).toBe('error');
+  });
+
+  it('maps declined signer status inside createEnvelope response', async () => {
+    mockFetch.mockResolvedValueOnce({
+      ok: true,
+      json: async () => ({
+        signature_request: {
+          signature_request_id: 'hs_dec',
+          is_complete: false,
+          is_declined: true,
+          signatures: [
+            { signer_email_address: 'a@b.com', signature_id: 's1', status_code: 'declined' },
+          ],
+          created_at: 1700000000,
+        },
+      }),
+    });
+    const result = await provider.createEnvelope(makeRequest());
+    expect(result.status).toBe('declined');
+    expect(result.signers[0].status).toBe('declined');
+  });
+});
+
+// ─── Branch Coverage: DocuSign missing optional fields ───────────────
+
+describe('DocuSignProvider - optional field branches', () => {
+  let provider: DocuSignProvider;
+
+  beforeEach(() => {
+    mockFetch.mockReset();
+    provider = new DocuSignProvider({
+      apiKey: 'ds-key',
+      accountId: 'ds-acct',
+    });
+  });
+
+  it('createEnvelope with no message uses empty string fallback', async () => {
+    mockFetch.mockResolvedValueOnce({
+      ok: true,
+      json: async () => ({
+        envelopeId: 'ds_nomsg',
+        status: 'sent',
+        recipients: { signers: [] },
+      }),
+    });
+
+    const req = makeRequest({ message: undefined });
+    await provider.createEnvelope(req);
+
+    const body = JSON.parse(mockFetch.mock.calls[0][1].body as string);
+    expect(body.emailBlurb).toBe('');
+  });
+
+  it('getEnvelopeStatus fallbacks for missing status and signers', async () => {
+    mockFetch.mockResolvedValueOnce({
+      ok: true,
+      json: async () => ({
+        envelopeId: 'ds_no_status',
+        // no status field
+        // no recipients field
+      }),
+    });
+
+    const result = await provider.getEnvelopeStatus('ds_no_status');
+    expect(result.status).toBe('sent'); // || "sent" fallback
+    expect(result.signers).toEqual([]); // || [] fallback
+  });
+
+  it('getEnvelopeStatus maps signer without status to sent', async () => {
+    mockFetch.mockResolvedValueOnce({
+      ok: true,
+      json: async () => ({
+        envelopeId: 'ds_nostatus',
+        status: 'InProgress',
+        recipients: {
+          signers: [
+            {
+              recipientId: 'r1',
+              email: 'a@b.com',
+              // no status, no signedDateTime, no deliveredDateTime
+            },
+          ],
+        },
+      }),
+    });
+
+    const result = await provider.getEnvelopeStatus('ds_nostatus');
+    expect(result.signers[0].status).toBe('sent');
+    expect(result.signers[0].signedAt).toBeUndefined();
+    expect(result.signers[0].viewedAt).toBeUndefined();
+  });
+});
+
+// ─── Branch Coverage: HelloSign additional branches ──────────────────
+
+describe('HelloSignProvider - additional branches', () => {
+  let provider: HelloSignProvider;
+
+  beforeEach(() => {
+    mockFetch.mockReset();
+    provider = new HelloSignProvider({ apiKey: 'hs-key' });
+  });
+
+  it('createEnvelope with no message uses empty string', async () => {
+    mockFetch.mockResolvedValueOnce({
+      ok: true,
+      json: async () => ({
+        signature_request: {
+          signature_request_id: 'hs_nomsg',
+          is_complete: false,
+          is_declined: false,
+          signatures: [],
+          created_at: 1700000000,
+        },
+      }),
+    });
+
+    const req = makeRequest({ message: undefined });
+    await provider.createEnvelope(req);
+    expect(mockFetch).toHaveBeenCalledTimes(1);
+  });
+
+  it('createEnvelope signer without order uses 0 fallback', async () => {
+    mockFetch.mockResolvedValueOnce({
+      ok: true,
+      json: async () => ({
+        signature_request: {
+          signature_request_id: 'hs_noord',
+          is_complete: false,
+          is_declined: false,
+          signatures: [
+            { signer_email_address: 'a@b.com', signature_id: 's1', status_code: 'awaiting_signature' },
+          ],
+          created_at: 1700000000,
+        },
+      }),
+    });
+
+    const req = makeRequest({
+      signers: [{ email: 'a@b.com', name: 'Alice' }], // no order
+    });
+    await provider.createEnvelope(req);
+    expect(mockFetch).toHaveBeenCalledTimes(1);
+  });
+
+  it('createEnvelope error response with missing error_msg falls back to statusText', async () => {
+    mockFetch.mockResolvedValueOnce({
+      ok: false,
+      status: 400,
+      statusText: 'Bad Request',
+      json: async () => ({ error: {} }),
+    });
+
+    await expect(provider.createEnvelope(makeRequest())).rejects.toThrow('Bad Request');
+  });
+
+  it('downloadDocument wraps non-Error throw in logger', async () => {
+    mockFetch.mockRejectedValueOnce('not an error');
+    await expect(provider.downloadDocument('hs_bad')).rejects.toBe('not an error');
+  });
+});

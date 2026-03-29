@@ -82,6 +82,8 @@ import {
   escalateMissedDeadlines,
 } from "../deadline-tracking-system";
 
+import { differenceInDays } from "date-fns";
+
 /* ── tests ──────────────────────────────────────────────────────────── */
 
 describe("deadline-tracking-system", () => {
@@ -472,6 +474,328 @@ describe("deadline-tracking-system", () => {
       ]);
       const alerts = await getOverdueDeadlines("org-1");
       expect(alerts).toHaveLength(1);
+    });
+  });
+
+  // ── Branch Coverage: createDeadlineAlert status paths ──────────────
+  describe("createDeadlineAlert — status branches", () => {
+    it("maps overdue status when daysRemaining < 0", async () => {
+      vi.mocked(differenceInDays).mockReturnValueOnce(-3);
+      mocks.mockFindManyDeadlines.mockResolvedValueOnce([
+        {
+          id: "dl-o",
+          grievanceId: "c-1",
+          deadlineType: "filing_deadline",
+          dueDate: new Date(Date.now() - 3 * 86400000),
+          description: "Overdue",
+        },
+      ]);
+      const alerts = await getUpcomingDeadlines("org-1");
+      expect(alerts).toHaveLength(1);
+      expect(alerts[0].status).toBe("overdue");
+    });
+
+    it("maps warning status when 0 <= daysRemaining <= 3", async () => {
+      vi.mocked(differenceInDays).mockReturnValueOnce(2);
+      mocks.mockFindManyDeadlines.mockResolvedValueOnce([
+        {
+          id: "dl-w",
+          grievanceId: "c-1",
+          deadlineType: "step_1_response",
+          dueDate: new Date(Date.now() + 2 * 86400000),
+          description: "Warning",
+        },
+      ]);
+      const alerts = await getUpcomingDeadlines("org-1");
+      expect(alerts).toHaveLength(1);
+      expect(alerts[0].status).toBe("warning");
+    });
+
+    it("uses new Date() fallback when dueDate is null", async () => {
+      vi.mocked(differenceInDays).mockReturnValueOnce(0);
+      mocks.mockFindManyDeadlines.mockResolvedValueOnce([
+        {
+          id: "dl-n",
+          grievanceId: "c-1",
+          deadlineType: "step_1_response",
+          dueDate: null,
+          description: null,
+        },
+      ]);
+      const alerts = await getUpcomingDeadlines("org-1");
+      expect(alerts).toHaveLength(1);
+      expect(alerts[0].dueDate).toBeInstanceOf(Date);
+      expect(alerts[0].description).toBe("");
+    });
+  });
+
+  // ── Branch Coverage: createGrievanceStepDeadlines ────────────────
+  describe("createGrievanceStepDeadlines — dueDate branch", () => {
+    it("creates appeal deadline when step1 returns dueDate", async () => {
+      mocks.mockFindFirstClaims.mockResolvedValue({ claimId: "c-1" });
+      mocks.mockInsertReturning.mockResolvedValue([{ id: "dl-step" }]);
+      mocks.mockFindFirstDeadlines.mockResolvedValue({ id: "dl-step" });
+
+      const r = await createGrievanceStepDeadlines("c-1", "org-1", new Date(), new Date());
+      expect(r.success).toBe(true);
+      // Step1 + appeal + investigation = 3 deadlines
+      expect(r.deadlineIds.length).toBe(3);
+    });
+
+    it("skips appeal deadline when step1 fails (no dueDate)", async () => {
+      // First call (step1): claim not found → no dueDate
+      // But we need claim found for step1 to succeed... let's make it fail differently
+      mocks.mockFindFirstClaims
+        .mockResolvedValueOnce({ claimId: "c-1" }) // step1 claim lookup
+        .mockResolvedValueOnce({ claimId: "c-1" }); // investigation claim lookup
+      mocks.mockInsertReturning
+        .mockRejectedValueOnce(new Error("insert fail")) // step1 insert fails
+        .mockResolvedValueOnce([{ id: "dl-inv" }]); // investigation succeeds
+      mocks.mockFindFirstDeadlines.mockResolvedValue({ id: "dl-inv" });
+
+      const r = await createGrievanceStepDeadlines("c-1", "org-1", new Date(), new Date());
+      expect(r.success).toBe(true);
+      // Only investigation succeeded, step1 failed (no dueDate) so no appeal
+      expect(r.deadlineIds.length).toBe(1);
+    });
+  });
+
+  // ── Branch Coverage: completeDeadline update ─────────────────────
+  describe("completeDeadline — notes branch", () => {
+    it("completes without notes argument", async () => {
+      const r = await completeDeadline("dl-1", "org-1", "user-1");
+      expect(r.success).toBe(true);
+    });
+  });
+
+  // ── Branch Coverage: requestDeadlineExtension ─────────────────────
+  describe("requestDeadlineExtension — error handling", () => {
+    it("handles error during immediate extension", async () => {
+      mocks.mockFindFirstDeadlines.mockResolvedValueOnce({ id: "dl-1", reminderDays: [7] });
+      mocks.mockUpdateWhere.mockRejectedValueOnce(new Error("update err"));
+      const r = await requestDeadlineExtension({
+        deadlineId: "dl-1",
+        requestedBy: "user-1",
+        newDate: new Date(),
+        reason: "Need time",
+        requiresApproval: false,
+      });
+      expect(r.success).toBe(false);
+      expect(r.error).toContain("update err");
+    });
+  });
+
+  // ── Branch Coverage: escalateMissedDeadlines update ──────────────
+  describe("escalateMissedDeadlines — update path", () => {
+    it("updates overdue deadline status and sends notification", async () => {
+      vi.mocked(differenceInDays).mockReturnValue(-2);
+      mocks.mockFindManyDeadlines.mockResolvedValue([
+        {
+          id: "dl-esc",
+          grievanceId: "c-1",
+          deadlineType: "filing_deadline",
+          dueDate: new Date(Date.now() - 2 * 86400000),
+          description: "Missed deadline",
+        },
+      ]);
+      mocks.mockFindFirstDeadlines.mockResolvedValue({ id: "dl-esc" });
+
+      const count = await escalateMissedDeadlines("org-1");
+      expect(count).toBe(1);
+      expect(mocks.mockUpdateWhere).toHaveBeenCalled();
+    });
+  });
+
+  // ── Branch Coverage: useBusinessDays=false ────────────────────────
+  describe("createDeadline — useBusinessDays false branch", () => {
+    it("uses addDays when useBusinessDays is false", async () => {
+      mocks.mockFindFirstClaims.mockResolvedValueOnce({ claimId: "c-1" });
+      mocks.mockInsertReturning.mockResolvedValueOnce([{ id: "dl-bd" }]);
+
+      const r = await createDeadline("c-1", "org-1", "filing_deadline", {
+        useBusinessDays: false,
+      });
+      expect(r.success).toBe(true);
+      expect(r.deadlineId).toBe("dl-bd");
+    });
+  });
+
+  // ── Branch Coverage: non-Error throws in catch blocks ─────────────
+  describe("catch blocks — non-Error throws", () => {
+    it("createDeadline wraps non-Error throw", async () => {
+      mocks.mockFindFirstClaims.mockResolvedValueOnce({ claimId: "c-1" });
+      mocks.mockInsertReturning.mockRejectedValueOnce("string error");
+
+      const r = await createDeadline("c-1", "org-1", "filing_deadline");
+      expect(r.success).toBe(false);
+      expect(r.error).toBe("Failed to create deadline");
+    });
+
+    it("createGrievanceStepDeadlines returns success with empty IDs when all createDeadline fail", async () => {
+      // All createDeadline calls fail internally (return success:false)
+      mocks.mockFindFirstClaims.mockResolvedValue(undefined);
+
+      const r = await createGrievanceStepDeadlines("c-1", "org-1", new Date(), new Date());
+      // Individual failures are swallowed; outer function returns success with no IDs
+      expect(r.success).toBe(true);
+      expect(r.deadlineIds).toEqual([]);
+    });
+
+    it("completeDeadline wraps non-Error throw", async () => {
+      mocks.mockUpdateWhere.mockRejectedValueOnce(null);
+
+      const r = await completeDeadline("dl-1", "org-1", "user-1");
+      expect(r.success).toBe(false);
+      expect(r.error).toBe("Failed to complete deadline");
+    });
+
+    it("requestDeadlineExtension wraps non-Error throw", async () => {
+      mocks.mockFindFirstDeadlines.mockRejectedValueOnce("boom");
+
+      const r = await requestDeadlineExtension({
+        deadlineId: "dl-1",
+        requestedBy: "user-1",
+        newDate: new Date(),
+        reason: "Need more time",
+        requiresApproval: false,
+      });
+      expect(r.success).toBe(false);
+      expect(r.error).toBe("Failed to request extension");
+    });
+
+    it("approveDeadlineExtension wraps non-Error throw", async () => {
+      mocks.mockFindFirstDeadlines.mockRejectedValueOnce(undefined);
+
+      const r = await approveDeadlineExtension("dl-1", "admin");
+      expect(r.success).toBe(false);
+      expect(r.error).toBe("Failed to approve extension");
+    });
+  });
+
+  // ── Branch Coverage: requestDeadlineExtension with approval ───────
+  describe("requestDeadlineExtension — requiresApproval=true", () => {
+    it("saves extension request note without applying extension", async () => {
+      mocks.mockFindFirstDeadlines.mockResolvedValueOnce({ id: "dl-1", reminderDays: [7] });
+
+      const r = await requestDeadlineExtension({
+        deadlineId: "dl-1",
+        requestedBy: "user-1",
+        newDate: new Date(),
+        reason: "Union conference",
+        requiresApproval: true,
+      });
+      expect(r.success).toBe(true);
+    });
+
+    it("applies immediate extension and reschedules reminders", async () => {
+      mocks.mockFindFirstDeadlines
+        .mockResolvedValueOnce({ id: "dl-1", reminderDays: [7, 3] }) // lookup
+        .mockResolvedValueOnce({ id: "dl-1" }); // scheduleReminders lookup
+
+      const r = await requestDeadlineExtension({
+        deadlineId: "dl-1",
+        requestedBy: "user-1",
+        newDate: new Date(),
+        reason: "More time needed",
+        requiresApproval: false,
+      });
+      expect(r.success).toBe(true);
+    });
+
+    it("applies immediate extension with null reminderDays fallback", async () => {
+      mocks.mockFindFirstDeadlines
+        .mockResolvedValueOnce({ id: "dl-1", reminderDays: null }) // lookup, null triggers || [7,3,1]
+        .mockResolvedValueOnce({ id: "dl-1" }); // scheduleReminders
+
+      const r = await requestDeadlineExtension({
+        deadlineId: "dl-1",
+        requestedBy: "user-1",
+        newDate: new Date(),
+        reason: "Fallback test",
+        requiresApproval: false,
+      });
+      expect(r.success).toBe(true);
+    });
+  });
+
+  // ── Branch Coverage: approveDeadlineExtension ─────────────────────
+  describe("approveDeadlineExtension — branches", () => {
+    it("returns error when deadline not found", async () => {
+      mocks.mockFindFirstDeadlines.mockResolvedValueOnce(null);
+      const r = await approveDeadlineExtension("dl-missing", "admin");
+      expect(r.success).toBe(false);
+      expect(r.error).toBe("Deadline not found");
+    });
+
+    it("returns error when no pending extension", async () => {
+      mocks.mockFindFirstDeadlines.mockResolvedValueOnce({ id: "dl-1", notes: "just notes" });
+      const r = await approveDeadlineExtension("dl-1", "admin");
+      expect(r.success).toBe(false);
+      expect(r.error).toBe("No pending extension request found");
+    });
+
+    it("returns error when notes is null", async () => {
+      mocks.mockFindFirstDeadlines.mockResolvedValueOnce({ id: "dl-1", notes: null });
+      const r = await approveDeadlineExtension("dl-1", "admin");
+      expect(r.success).toBe(false);
+      expect(r.error).toBe("No pending extension request found");
+    });
+
+    it("approves extension with newDeadline", async () => {
+      const nd = new Date("2026-06-01");
+      mocks.mockFindFirstDeadlines
+        .mockResolvedValueOnce({
+          id: "dl-1",
+          notes: "Extension requested by user-1: reason",
+          newDeadline: nd,
+          reminderDays: [5, 2],
+        })
+        .mockResolvedValueOnce({ id: "dl-1" }); // scheduleReminders lookup
+
+      const r = await approveDeadlineExtension("dl-1", "admin");
+      expect(r.success).toBe(true);
+      expect(mocks.mockUpdateWhere).toHaveBeenCalled();
+    });
+
+    it("approves extension without newDeadline (fallback to new Date)", async () => {
+      mocks.mockFindFirstDeadlines
+        .mockResolvedValueOnce({
+          id: "dl-1",
+          notes: "Extension requested by user-1: reason",
+          newDeadline: null,
+          reminderDays: null,
+        })
+        .mockResolvedValueOnce({ id: "dl-1" }); // scheduleReminders
+
+      const r = await approveDeadlineExtension("dl-1", "admin");
+      expect(r.success).toBe(true);
+    });
+  });
+
+  // ── Branch Coverage: escalateMissedDeadlines error ────────────────
+  describe("escalateMissedDeadlines — error path", () => {
+    it("returns 0 on error", async () => {
+      mocks.mockFindManyDeadlines.mockRejectedValueOnce(new Error("db down"));
+      const count = await escalateMissedDeadlines("org-1");
+      expect(count).toBe(0);
+    });
+
+    it("handles sendEscalationNotification when deadline not found", async () => {
+      vi.mocked(differenceInDays).mockReturnValue(-1);
+      mocks.mockFindManyDeadlines.mockResolvedValueOnce([
+        {
+          id: "dl-gone",
+          grievanceId: "c-1",
+          deadlineType: "filing_deadline",
+          dueDate: new Date(Date.now() - 86400000),
+          description: "Missing",
+        },
+      ]);
+      // sendEscalationNotification does findFirst — return null
+      mocks.mockFindFirstDeadlines.mockResolvedValueOnce(null);
+
+      const count = await escalateMissedDeadlines("org-1");
+      expect(count).toBe(1);
     });
   });
 });
