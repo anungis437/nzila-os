@@ -180,6 +180,33 @@ describe('api-client', () => {
     }
   });
 
+  it('executes timeout abort callback when request hangs', async () => {
+    const timeoutClient = createApiClient('timeout-test', {
+      baseURL: 'https://api.example.com',
+      timeout: 50,
+      retries: 0,
+    });
+
+    (globalThis.fetch as ReturnType<typeof vi.fn>).mockImplementation((_, init?: RequestInit) => {
+      return new Promise((_, reject) => {
+        const signal = init?.signal as AbortSignal;
+        signal.addEventListener('abort', () => {
+          const err = new Error('aborted by signal');
+          err.name = 'AbortError';
+          reject(err);
+        });
+      });
+    });
+
+    const request = timeoutClient.get('/slow');
+    await vi.advanceTimersByTimeAsync(60);
+
+    await expect(request).rejects.toMatchObject({
+      name: 'TimeoutError',
+      isTimeout: true,
+    });
+  });
+
   // ── Non-retryable status codes ────────────────────────────────────
 
   it.each([400, 401, 403, 404])(
