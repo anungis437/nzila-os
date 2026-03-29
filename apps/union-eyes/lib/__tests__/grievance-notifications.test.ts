@@ -29,7 +29,7 @@ vi.mock('@/db/schema/user-management-schema', () => ({
   users: { email: 'email', phone: 'phone', displayName: 'displayName' },
 }));
 
-vi.mock('./notification-service', () => ({
+vi.mock('@/lib/services/notification-service', () => ({
   getNotificationService: () => ({
     send: mocks.mockSend,
     queue: mocks.mockQueue,
@@ -38,6 +38,10 @@ vi.mock('./notification-service', () => ({
 
 vi.mock('drizzle-orm', () => ({
   eq: vi.fn((...a: unknown[]) => ({ _t: 'eq', _a: a })),
+  relations: vi.fn((...a: unknown[]) => a),
+  sql: Object.assign(vi.fn((...a: unknown[]) => a), {
+    raw: vi.fn((...a: unknown[]) => a),
+  }),
 }));
 
 vi.mock('@/lib/logger', () => ({
