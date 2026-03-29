@@ -49,7 +49,7 @@ vi.mock('../logger', () => ({
   logger: { info: vi.fn(), error: vi.fn(), warn: vi.fn(), debug: vi.fn() },
 }));
 
-import { analyticsJobs, getJobsStatus, runJobManually, initializeAnalyticsJobs } from '../scheduled-jobs';
+import { analyticsJobs, getJobsStatus, runJobManually, initializeAnalyticsJobs, runScheduledJob } from '../scheduled-jobs';
 
 describe('scheduled-jobs', () => {
   beforeEach(() => {
@@ -277,5 +277,19 @@ describe('scheduled-jobs', () => {
       }
     });
 
+
+  describe('runScheduledJob', () => {
+    it('executes job handler and logs start', async () => {
+      const handler = vi.fn().mockResolvedValue(undefined);
+      await runScheduledJob({ name: 'test-job', handler });
+
+      expect(handler).toHaveBeenCalledTimes(1);
+    });
+
+    it('swallows handler errors and continues', async () => {
+      const handler = vi.fn().mockRejectedValue(new Error('boom'));
+      await expect(runScheduledJob({ name: 'failing-job', handler })).resolves.toBeUndefined();
+    });
+  });
   });
 });

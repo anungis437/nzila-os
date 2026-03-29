@@ -169,6 +169,18 @@ export const analyticsJobs: JobConfig[] = [
 ];
 
 /**
+ * Execute a scheduled job with consistent start/failure logging.
+ */
+export async function runScheduledJob(job: Pick<JobConfig, 'name' | 'handler'>): Promise<void> {
+  logger.info('CRON: Starting job', { jobName: job.name });
+  try {
+    await job.handler();
+  } catch (error) {
+    logger.error('CRON: Job failed', error, { jobName: job.name });
+  }
+}
+
+/**
  * Initialize scheduled jobs
  * Call this from your application startup
  */
@@ -187,14 +199,8 @@ export function initializeAnalyticsJobs() {
     const cron = require('node-cron');
     
     enabledJobs.forEach(job => {
-      const _task = cron.schedule(job.schedule, async () => {
-        logger.info('CRON: Starting job', { jobName: job.name });
-        try {
-          await job.handler();
-        } catch (error) {
-          logger.error('CRON: Job failed', error, { jobName: job.name });
-        }
-      }, {
+      const scheduledHandler = runScheduledJob.bind(null, job);
+      const _task = cron.schedule(job.schedule, scheduledHandler, {
         scheduled: true,
         timezone: "America/Toronto" // Adjust based on your requirements
       });
