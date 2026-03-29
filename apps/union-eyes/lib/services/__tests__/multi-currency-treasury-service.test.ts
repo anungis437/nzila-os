@@ -168,6 +168,18 @@ describe("MultiCurrencyTreasuryService", () => {
       );
       vi.unstubAllGlobals();
     });
+
+    it("handles missing observation data gracefully", async () => {
+      const mockResponse = {
+        ok: true,
+        json: vi.fn().mockResolvedValue({ observations: [{}] }),
+      };
+      vi.stubGlobal("fetch", vi.fn().mockResolvedValue(mockResponse));
+      await MultiCurrencyTreasuryService.fetchBOCRates("org-1");
+      // No FXUSDCAD → insert not called
+      expect(mocks.mockInsertValues).not.toHaveBeenCalled();
+      vi.unstubAllGlobals();
+    });
   });
 
   // ── revaluateAccount ───────────────────────────────────────────────

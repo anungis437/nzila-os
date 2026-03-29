@@ -102,6 +102,40 @@ describe('AITransparencyEngine', () => {
       });
       expect(explanation.limitations.some(l => l.includes('Complex query'))).toBe(true);
     });
+
+    it('keeps short source snippets without ellipsis', async () => {
+      const explanation = await engine.generateExplanation({
+        requestId: 'req-short-snip',
+        query: 'test short snippet',
+        attentionBreakdown: { userQuery: 0.8 },
+        sourcesUsed: [{ title: 'Doc1', type: 'document', relevance: 0.9, snippet: 'A brief excerpt' }],
+        contextUsed: [],
+      });
+      expect(explanation.sourcesUsed[0].snippet).toBe('A brief excerpt');
+      expect(explanation.sourcesUsed[0].snippet).not.toContain('...');
+    });
+
+    it('omits reasoning chain step when no factors', async () => {
+      const explanation = await engine.generateExplanation({
+        requestId: 'req-no-factors',
+        query: 'test no factors',
+        attentionBreakdown: {},
+        sourcesUsed: [],
+        contextUsed: [],
+      });
+      expect(explanation.reasoningChain.some(s => s.includes('Key information'))).toBe(false);
+    });
+
+    it('assumes employer perspective when query mentions employer', async () => {
+      const explanation = await engine.generateExplanation({
+        requestId: 'req-employer',
+        query: 'What should the employer do about overtime?',
+        attentionBreakdown: { userQuery: 0.5 },
+        sourcesUsed: [],
+        contextUsed: [],
+      });
+      expect(explanation.assumptions.some(a => a.includes('union member perspective'))).toBe(false);
+    });
   });
 
   describe('calculateConfidence', () => {

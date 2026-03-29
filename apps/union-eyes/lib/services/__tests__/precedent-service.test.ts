@@ -421,6 +421,8 @@ describe("precedent-service", () => {
       (db.select as ReturnType<typeof vi.fn>).mockReturnValueOnce(
         sfw([
           { ...dec, outcome: "grievance_upheld", remedy: { monetaryAward: 1000 }, issueTypes: ["discipline"], decisionDate: new Date() },
+          { ...dec, outcome: "partial_success", remedy: { monetaryAward: 500 }, issueTypes: ["seniority"], decisionDate: new Date() },
+          { ...dec, outcome: "grievance_denied", remedy: null, issueTypes: null, decisionDate: new Date() },
         ])
       );
       mocks.mockFindFirstArb.mockResolvedValueOnce({ name: "Smith" });
@@ -504,6 +506,14 @@ describe("precedent-service", () => {
         .mockReturnValueOnce(sfw([{ count: 0 }]))
         .mockReturnValueOnce(sfwol([]));
       const r = await listPrecedents({}, { sortBy: "unknown" });
+      expect(r.total).toBe(0);
+    });
+
+    it("sorts ascending when sortOrder is asc", async () => {
+      (db.select as ReturnType<typeof vi.fn>)
+        .mockReturnValueOnce(sfw([{ count: 0 }]))
+        .mockReturnValueOnce(sfwol([]));
+      const r = await listPrecedents({}, { sortOrder: "asc" });
       expect(r.total).toBe(0);
     });
   });

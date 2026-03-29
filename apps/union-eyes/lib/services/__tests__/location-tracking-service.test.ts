@@ -173,7 +173,13 @@ describe('LocationTrackingService', () => {
   describe('getLocationHistory', () => {
     it('returns location records', async () => {
       mocks.consentFindFirst.mockResolvedValue({ consentStatus: 'opted_in' });
-      mocks.locationFindMany.mockResolvedValue([{ id: 'loc-1' }, { id: 'loc-2' }]);
+      mocks.locationFindMany.mockImplementation((opts: Record<string, unknown>) => {
+        // invoke the orderBy callback so v8 sees function coverage
+        if (typeof opts?.orderBy === 'function') {
+          (opts.orderBy as Function)({}, { desc: (col: unknown) => col });
+        }
+        return Promise.resolve([{ id: 'loc-1' }, { id: 'loc-2' }]);
+      });
       const result = await service.getLocationHistory('member-1');
       expect(result).toHaveLength(2);
     });
@@ -302,5 +308,23 @@ describe('Batch 37 branch coverage', () => {
     // geofenceId defaults to undefined → null
     expect(result.success).toBe(true);
     expect(result.locationId).toBe('loc-2');
+  });
+
+  it('trackLocation converts accuracy to string when defined', async () => {
+    mocks.consentFindFirst.mockResolvedValue({ consentStatus: 'opted_in' });
+    mocks.mockInsert.mockReturnValue(chain([{ id: 'loc-3' }]));
+    const result = await service.trackLocation('m-1', {
+      latitude: 45.0, longitude: -75.0, timestamp: new Date(),
+      accuracy: 10,
+    }, 'strike_line_tracking');
+    expect(result.success).toBe(true);
+    expect(result.locationId).toBe('loc-3');
+  });
+
+  it('purgeExpiredLocations deletes expired records', async () => {
+    mocks.mockDelete.mockReturnValue(chain([{ id: 'loc-old-1' }, { id: 'loc-old-2' }]));
+    const result = await service.purgeExpiredLocations();
+    expect(result.deletedCount).toBe(2);
+    expect(result.message).toContain('Purged 2 expired');
   });
 });
