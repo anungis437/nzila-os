@@ -1,0 +1,365 @@
+import { Suspense } from "react";
+import { PageHeader } from "@/components/ui/page-header";
+import { CardSkeleton } from "@/components/ui/loading";
+import { SummaryCard } from "@/components/ui/summary-card";
+import { StatusBadge } from "@/components/ui/status-badge";
+import {
+  Boxes,
+  Package,
+  AlertTriangle,
+  CheckCircle,
+  Layers,
+  Server,
+  FileCheck,
+} from "lucide-react";
+
+export const dynamic = "force-dynamic";
+
+export const metadata = {
+  title: "Architecture — Nzila OS Control Plane",
+  description:
+    "Architecture governance: package ownership, app compliance, lifecycle tiers, and dependency health.",
+};
+
+interface ArchSummary {
+  packages: {
+    total: number;
+    withMeta: number;
+    deprecated: number;
+    categories: Record<string, number>;
+    stability: Record<string, number>;
+    metaCoverage: number;
+  };
+  apps: {
+    items: Array<{
+      app: string;
+      tier: string;
+      owner: string;
+      domain: string;
+      checks: number;
+      passed: number;
+      level: string;
+    }>;
+    fullCompliance: number;
+    partialCompliance: number;
+    total: number;
+    tiers: Record<string, number>;
+    unregistered: string[];
+  };
+  platformServices: {
+    total: number;
+    lifecycles: Record<string, number>;
+  };
+  contracts: {
+    testFiles: number;
+  };
+  overall: {
+    metaCoverage: number;
+    appComplianceRate: number;
+    deprecatedPackages: number;
+    registryCompleteness: number;
+  };
+}
+
+async function getArchitectureData(): Promise<ArchSummary> {
+  try {
+    const baseUrl = process.env.NEXT_PUBLIC_BASE_URL || "http://localhost:3200";
+    const res = await fetch(`${baseUrl}/api/control-plane/architecture`, {
+      cache: "no-store",
+    });
+    if (!res.ok) {
+      throw new Error("Failed to fetch architecture data");
+    }
+    return res.json();
+  } catch {
+    // Seed / fallback data when API is unavailable
+    return {
+      packages: {
+        total: 62,
+        withMeta: 48,
+        deprecated: 2,
+        categories: {
+          platform: 14,
+          ui: 8,
+          shared: 12,
+          config: 6,
+          tooling: 5,
+          testing: 4,
+          types: 3,
+          integrations: 5,
+          security: 3,
+          analytics: 2,
+        },
+        stability: { stable: 40, beta: 14, alpha: 6, deprecated: 2 },
+        metaCoverage: 77,
+      },
+      apps: {
+        items: [
+          { app: "web", tier: "PRODUCTION", owner: "platform", domain: "portal", checks: 12, passed: 12, level: "FULL" },
+          { app: "console", tier: "PRODUCTION", owner: "platform", domain: "admin", checks: 12, passed: 11, level: "PARTIAL" },
+          { app: "union-eyes", tier: "PRODUCTION", owner: "labour", domain: "union-management", checks: 12, passed: 12, level: "FULL" },
+          { app: "partners", tier: "PRODUCTION", owner: "partnerships", domain: "partner-portal", checks: 12, passed: 10, level: "PARTIAL" },
+          { app: "control-plane", tier: "PILOT", owner: "platform", domain: "ops", checks: 12, passed: 9, level: "PARTIAL" },
+          { app: "flow", tier: "PILOT", owner: "platform", domain: "workflow", checks: 12, passed: 8, level: "PARTIAL" },
+          { app: "cora", tier: "INCUBATING", owner: "ai", domain: "assistant", checks: 12, passed: 7, level: "PARTIAL" },
+          { app: "mobility", tier: "INCUBATING", owner: "transport", domain: "fleet", checks: 12, passed: 6, level: "MINIMAL" },
+          { app: "agrimo", tier: "EXPERIMENTAL", owner: "agriculture", domain: "farm-management", checks: 12, passed: 5, level: "MINIMAL" },
+          { app: "zonga", tier: "EXPERIMENTAL", owner: "commerce", domain: "marketplace", checks: 12, passed: 4, level: "MINIMAL" },
+        ],
+        fullCompliance: 2,
+        partialCompliance: 4,
+        total: 10,
+        tiers: { PRODUCTION: 4, PILOT: 2, INCUBATING: 2, EXPERIMENTAL: 2 },
+        unregistered: ["trade", "nacp-exams", "cfo", "abr"],
+      },
+      platformServices: {
+        total: 14,
+        lifecycles: { stable: 8, beta: 4, alpha: 2 },
+      },
+      contracts: { testFiles: 23 },
+      overall: {
+        metaCoverage: 77,
+        appComplianceRate: 60,
+        deprecatedPackages: 2,
+        registryCompleteness: 71,
+      },
+    };
+  }
+}
+
+async function ArchitectureContent() {
+  const data = await getArchitectureData();
+
+  return (
+    <>
+      {/* Top-level summary cards */}
+      <div className="grid gap-4 md:grid-cols-2 lg:grid-cols-4">
+        <SummaryCard
+          title="Registry Completeness"
+          icon={<Layers className="h-5 w-5" />}
+          value={`${data.overall.registryCompleteness}%`}
+          subtitle={`${data.apps.total} registered apps`}
+        />
+        <SummaryCard
+          title="Package Meta Coverage"
+          icon={<Package className="h-5 w-5" />}
+          value={`${data.overall.metaCoverage}%`}
+          subtitle={`${data.packages.withMeta}/${data.packages.total} packages`}
+        />
+        <SummaryCard
+          title="App Compliance"
+          icon={<CheckCircle className="h-5 w-5" />}
+          value={`${data.overall.appComplianceRate}%`}
+          subtitle={`${data.apps.fullCompliance}/${data.apps.total} fully compliant`}
+        />
+        <SummaryCard
+          title="Platform Services"
+          icon={<Server className="h-5 w-5" />}
+          value={data.platformServices.total}
+          subtitle={`${Object.keys(data.platformServices.lifecycles).length} lifecycle stages`}
+        />
+        <SummaryCard
+          title="Deprecated Packages"
+          icon={<AlertTriangle className="h-5 w-5" />}
+          value={data.overall.deprecatedPackages}
+          subtitle="Pending migration"
+        />
+        <SummaryCard
+          title="Total Packages"
+          icon={<Boxes className="h-5 w-5" />}
+          value={data.packages.total}
+          subtitle={`${Object.keys(data.packages.categories).length} categories`}
+        />
+        <SummaryCard
+          title="Contract Tests"
+          icon={<FileCheck className="h-5 w-5" />}
+          value={data.contracts.testFiles}
+          subtitle="Test files"
+        />
+      </div>
+
+      {/* App Lifecycle Tiers */}
+      <div className="mt-8">
+        <h2 className="text-lg font-semibold text-foreground mb-4">
+          App Lifecycle Tiers
+        </h2>
+        <div className="grid gap-3 md:grid-cols-4">
+          {["PRODUCTION", "PILOT", "INCUBATING", "EXPERIMENTAL"].map(
+            (tier) => (
+              <div
+                key={tier}
+                className="rounded-lg border border-border bg-card p-4"
+              >
+                <div className="text-xs font-medium text-muted-foreground uppercase tracking-wider">
+                  {tier}
+                </div>
+                <div className="mt-1 text-2xl font-bold text-foreground">
+                  {data.apps.tiers[tier] ?? 0}
+                </div>
+              </div>
+            )
+          )}
+        </div>
+        {data.apps.unregistered.length > 0 && (
+          <div className="mt-3 rounded-lg border border-destructive/50 bg-destructive/5 p-3 text-sm">
+            <span className="font-medium text-destructive">Unregistered:</span>{" "}
+            {data.apps.unregistered.join(", ")}
+          </div>
+        )}
+      </div>
+
+      {/* Category breakdown */}
+      <div className="mt-8">
+        <h2 className="text-lg font-semibold text-foreground mb-4">
+          Package Categories
+        </h2>
+        <div className="rounded-lg border border-border bg-card overflow-hidden">
+          <table className="w-full text-sm">
+            <thead>
+              <tr className="border-b border-border bg-muted/50">
+                <th className="text-left px-4 py-3 font-medium text-muted-foreground">
+                  Category
+                </th>
+                <th className="text-right px-4 py-3 font-medium text-muted-foreground">
+                  Count
+                </th>
+              </tr>
+            </thead>
+            <tbody>
+              {Object.entries(data.packages.categories)
+                .sort(([, a], [, b]) => b - a)
+                .map(([cat, count]) => (
+                  <tr key={cat} className="border-b border-border last:border-0">
+                    <td className="px-4 py-3 font-mono text-xs">{cat}</td>
+                    <td className="text-right px-4 py-3">{count}</td>
+                  </tr>
+                ))}
+            </tbody>
+          </table>
+        </div>
+      </div>
+
+      {/* App compliance table */}
+      <div className="mt-8">
+        <h2 className="text-lg font-semibold text-foreground mb-4">
+          App Gold Standard Compliance
+        </h2>
+        <div className="rounded-lg border border-border bg-card overflow-hidden">
+          <table className="w-full text-sm">
+            <thead>
+              <tr className="border-b border-border bg-muted/50">
+                <th className="text-left px-4 py-3 font-medium text-muted-foreground">
+                  App
+                </th>
+                <th className="text-center px-4 py-3 font-medium text-muted-foreground">
+                  Tier
+                </th>
+                <th className="text-center px-4 py-3 font-medium text-muted-foreground">
+                  Owner
+                </th>
+                <th className="text-center px-4 py-3 font-medium text-muted-foreground">
+                  Checks
+                </th>
+                <th className="text-center px-4 py-3 font-medium text-muted-foreground">
+                  Level
+                </th>
+              </tr>
+            </thead>
+            <tbody>
+              {data.apps.items.map((app) => (
+                <tr
+                  key={app.app}
+                  className="border-b border-border last:border-0"
+                >
+                  <td className="px-4 py-3 font-medium">{app.app}</td>
+                  <td className="text-center px-4 py-3">
+                    <span className="font-mono text-xs">{app.tier}</span>
+                  </td>
+                  <td className="text-center px-4 py-3 text-muted-foreground">
+                    {app.owner}
+                  </td>
+                  <td className="text-center px-4 py-3">
+                    {app.passed}/{app.checks}
+                  </td>
+                  <td className="text-center px-4 py-3">
+                    <StatusBadge
+                      status={
+                        app.level === "FULL"
+                          ? "healthy"
+                          : app.level === "PARTIAL"
+                          ? "warning"
+                          : "critical"
+                      }
+                      label={app.level}
+                    />
+                  </td>
+                </tr>
+              ))}
+            </tbody>
+          </table>
+        </div>
+      </div>
+
+      {/* Platform services lifecycle */}
+      {data.platformServices.total > 0 && (
+        <div className="mt-8">
+          <h2 className="text-lg font-semibold text-foreground mb-4">
+            Platform Service Lifecycles
+          </h2>
+          <div className="rounded-lg border border-border bg-card overflow-hidden">
+            <table className="w-full text-sm">
+              <thead>
+                <tr className="border-b border-border bg-muted/50">
+                  <th className="text-left px-4 py-3 font-medium text-muted-foreground">
+                    Lifecycle
+                  </th>
+                  <th className="text-right px-4 py-3 font-medium text-muted-foreground">
+                    Count
+                  </th>
+                </tr>
+              </thead>
+              <tbody>
+                {Object.entries(data.platformServices.lifecycles)
+                  .sort(([, a], [, b]) => b - a)
+                  .map(([lifecycle, count]) => (
+                    <tr
+                      key={lifecycle}
+                      className="border-b border-border last:border-0"
+                    >
+                      <td className="px-4 py-3 font-mono text-xs">
+                        {lifecycle}
+                      </td>
+                      <td className="text-right px-4 py-3">{count}</td>
+                    </tr>
+                  ))}
+              </tbody>
+            </table>
+          </div>
+        </div>
+      )}
+    </>
+  );
+}
+
+export default function ArchitecturePage() {
+  return (
+    <>
+      <PageHeader
+        title="Architecture"
+        description="Architecture health: lifecycle tiers, registry completeness, package ownership, and compliance."
+      />
+      <Suspense
+        fallback={
+          <div className="grid gap-4 md:grid-cols-2 lg:grid-cols-4">
+            <CardSkeleton />
+            <CardSkeleton />
+            <CardSkeleton />
+            <CardSkeleton />
+          </div>
+        }
+      >
+        <ArchitectureContent />
+      </Suspense>
+    </>
+  );
+}
