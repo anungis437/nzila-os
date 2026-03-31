@@ -56,7 +56,7 @@ export function ModerationActions({
         onChange={(e) => setNotes(e.target.value)}
         placeholder="Add resolution notes…"
         rows={3}
-        className="w-full rounded-lg border border-gray-200 px-3 py-2 text-sm focus:ring-2 focus:ring-electric focus:border-transparent resize-none"
+        className="w-full rounded-lg border border-border px-3 py-2 text-sm focus:ring-2 focus:ring-electric focus:border-transparent resize-none"
       />
 
       {error && (
@@ -76,7 +76,7 @@ export function ModerationActions({
           type="button"
           disabled={isPending}
           onClick={() => handleAction('dismissed')}
-          className="w-full rounded-lg bg-gray-200 px-3 py-2 text-xs font-medium text-gray-700 hover:bg-gray-300 transition disabled:opacity-50"
+          className="w-full rounded-lg bg-muted px-3 py-2 text-xs font-medium text-foreground hover:bg-muted/80 transition disabled:opacity-50"
         >
           Dismiss
         </button>
@@ -93,7 +93,7 @@ export function ModerationActions({
             type="button"
             disabled={isPending}
             onClick={handleAssign}
-            className="w-full rounded-lg border border-gray-200 px-3 py-2 text-xs font-medium text-navy hover:bg-gray-50 transition disabled:opacity-50"
+            className="w-full rounded-lg border border-border px-3 py-2 text-xs font-medium text-foreground hover:bg-muted/50 transition disabled:opacity-50"
           >
             Assign to Me
           </button>

@@ -108,8 +108,8 @@ export default async function RevenuePage() {
   return (
     <div className="space-y-8">
       <div>
-        <h1 className="text-2xl font-bold text-navy">Revenue</h1>
-        <p className="text-gray-500 mt-1">
+        <h1 className="text-2xl font-bold text-foreground">Revenue</h1>
+        <p className="text-muted-foreground mt-1">
           {overview.eventCount.toLocaleString()} revenue events tracked
         </p>
       </div>
@@ -141,7 +141,7 @@ export default async function RevenuePage() {
           <Card key={card.label}>
             <div className="p-5">
               <div className="mb-1">
-                <p className="text-xs text-gray-500">{card.label}</p>
+                <p className="text-xs text-muted-foreground">{card.label}</p>
               </div>
               <p className={`text-xl font-bold ${card.color}`}>{card.value}</p>
             </div>
@@ -153,11 +153,11 @@ export default async function RevenuePage() {
       {sourceMix.length > 0 && (
         <Card>
           <div className="p-5">
-            <h2 className="text-sm font-semibold text-navy mb-3">
+            <h2 className="text-sm font-semibold text-foreground mb-3">
               Revenue Mix
             </h2>
             {/* Stacked bar */}
-            <div className="flex h-4 rounded-full overflow-hidden bg-gray-100 mb-3">
+            <div className="flex h-4 rounded-full overflow-hidden bg-muted mb-3">
               {sourceMix.map((s) => (
                 <div
                   key={s.label}
@@ -171,10 +171,10 @@ export default async function RevenuePage() {
               {sourceMix.map((s) => (
                 <div key={s.label} className="flex items-center gap-1.5">
                   <div className={`h-2.5 w-2.5 rounded-full ${s.bar}`} />
-                  <span className="text-gray-600">
+                  <span className="text-muted-foreground">
                     {s.label}
                   </span>
-                  <span className="font-semibold text-navy">{s.pct}%</span>
+                  <span className="font-semibold text-foreground">{s.pct}%</span>
                 </div>
               ))}
             </div>
@@ -185,13 +185,13 @@ export default async function RevenuePage() {
       <div className="grid gap-6 lg:grid-cols-2">
         {/* Revenue by Creator */}
         <div>
-          <h2 className="text-lg font-semibold text-navy mb-3">
+          <h2 className="text-lg font-semibold text-foreground mb-3">
             Revenue by Artist
           </h2>
           {byCreator.length === 0 ? (
             <Card>
               <div className="p-8 text-center">
-                <p className="text-sm text-gray-500">
+                <p className="text-sm text-muted-foreground">
                   No artist revenue data available. Revenue will appear here once listeners engage with your catalog.
                 </p>
               </div>
@@ -210,20 +210,20 @@ export default async function RevenuePage() {
                     <Link
                       key={c.creatorId}
                       href={`creators/${c.creatorId}`}
-                      className="flex items-center gap-3 px-5 py-3 hover:bg-gray-50 transition"
+                      className="flex items-center gap-3 px-5 py-3 hover:bg-muted/50 transition"
                     >
                       <div className="flex-1 min-w-0">
-                        <p className="text-sm font-medium text-navy truncate">
+                        <p className="text-sm font-medium text-foreground truncate">
                           {c.creatorName}
                         </p>
                         <div className="flex items-center gap-2 mt-1">
-                          <div className="flex-1 h-1.5 bg-gray-100 rounded-full overflow-hidden">
+                          <div className="flex-1 h-1.5 bg-muted rounded-full overflow-hidden">
                             <div
                               className="h-full bg-emerald-400 rounded-full"
                               style={{ width: `${barWidth}%` }}
                             />
                           </div>
-                          <span className="text-[10px] text-gray-400">
+                          <span className="text-[10px] text-muted-foreground/70">
                             {c.events} events
                           </span>
                         </div>
@@ -241,13 +241,13 @@ export default async function RevenuePage() {
 
         {/* Recent Revenue Events */}
         <div>
-          <h2 className="text-lg font-semibold text-navy mb-3">
+          <h2 className="text-lg font-semibold text-foreground mb-3">
             Recent Activity
           </h2>
           {overview.recentEvents.length === 0 ? (
             <Card>
               <div className="p-8 text-center">
-                <p className="text-sm text-gray-500">
+                <p className="text-sm text-muted-foreground">
                   No revenue events recorded. Events will appear here as your catalog generates income.
                 </p>
               </div>
@@ -272,14 +272,14 @@ export default async function RevenuePage() {
                       className="flex items-center justify-between px-5 py-3"
                     >
                       <div className="flex items-center gap-3 min-w-0">
-                        <span className="text-xs font-bold text-gray-400 bg-gray-100 rounded px-1.5 py-0.5 shrink-0 uppercase tracking-wide">
+                        <span className="text-xs font-bold text-muted-foreground/70 bg-muted rounded px-1.5 py-0.5 shrink-0 uppercase tracking-wide">
                           {TYPE_ICONS[event.type ?? ''] ?? 'REV'}
                         </span>
                         <div className="min-w-0">
-                          <p className="text-sm font-medium text-navy truncate">
+                          <p className="text-sm font-medium text-foreground truncate">
                             {event.assetTitle ?? 'Unknown'}
                           </p>
-                          <p className="text-xs text-gray-400">
+                          <p className="text-xs text-muted-foreground/70">
                             {event.source ?? event.type} ·{' '}
                             {event.createdAt
                               ? new Date(
@@ -303,7 +303,7 @@ export default async function RevenuePage() {
 
       {/* Payout Rails */}
       <div>
-        <h2 className="text-lg font-semibold text-navy mb-3">
+        <h2 className="text-lg font-semibold text-foreground mb-3">
           Supported Payout Rails
         </h2>
         <div className="grid grid-cols-2 sm:grid-cols-4 gap-3">

@@ -56,7 +56,7 @@ export function LifecycleTimeline({
 
   return (
     <div className={`relative ${className}`}>
-      <div className="absolute left-[9px] top-2 bottom-2 w-px bg-gray-200" />
+      <div className="absolute left-2.25 top-2 bottom-2 w-px bg-border" />
 
       <div className="space-y-4">
         {events.map((event, idx) => {
@@ -68,16 +68,16 @@ export function LifecycleTimeline({
           return (
             <div key={idx} className="flex items-start gap-3 relative">
               <div
-                className={`mt-0.5 h-[18px] w-[18px] rounded-full ${dotColor} flex items-center justify-center shrink-0 z-10`}
+                className={`mt-0.5 h-4.5 w-4.5 rounded-full ${dotColor} flex items-center justify-center shrink-0 z-10`}
               >
                 <Icon className="h-2.5 w-2.5 text-white" />
               </div>
               <div className="min-w-0">
-                <p className="text-sm font-medium text-navy">{event.label}</p>
+                <p className="text-sm font-medium text-foreground">{event.label}</p>
                 {event.description && (
-                  <p className="text-xs text-gray-500">{event.description}</p>
+                  <p className="text-xs text-muted-foreground">{event.description}</p>
                 )}
-                <p className="text-[10px] text-gray-400 mt-0.5">
+                <p className="text-[10px] text-muted-foreground mt-0.5">
                   {ts.toLocaleString('en-CA')}
                   {event.actor ? ` · ${event.actor}` : ''}
                 </p>

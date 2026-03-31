@@ -19,7 +19,7 @@ export default function DashboardError({
   return (
     <div className="flex min-h-[400px] flex-col items-center justify-center rounded-xl border border-red-200 bg-red-50 p-8 text-center">
       <span className="mb-4 text-4xl">⚠️</span>
-      <h2 className="text-navy text-xl font-bold">Something went wrong</h2>
+      <h2 className="text-foreground text-xl font-bold">Something went wrong</h2>
       <p className="mt-2 max-w-md text-sm text-muted-foreground">
         An unexpected error occurred. The error has been logged and our team has been notified.
       </p>

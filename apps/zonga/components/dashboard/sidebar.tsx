@@ -37,12 +37,15 @@ import {
   ChevronDown,
   Menu,
   X,
+  Podcast,
+  PlusCircle,
 } from 'lucide-react'
 import Link from 'next/link'
 import { usePathname } from 'next/navigation'
 import { useState } from 'react'
 import { motion, AnimatePresence } from 'framer-motion'
 import type { ZongaRole } from '@nzila/zonga-core/types'
+import { MobileAccountFooter } from './clerk-widgets'
 
 // ── Types ────────────────────────────────────────────────────────────────────
 
@@ -62,11 +65,14 @@ interface SidebarProps {
   role: ZongaRole
   locale: string
   isPlatformOrg: boolean
+  /** Whether the user has a creator profile (even without an org). */
+  hasCreatorProfile: boolean
 }
 
 // ── Role groups ──────────────────────────────────────────────────────────────
 
 const allRoles: ZongaRole[] = ['admin', 'manager', 'creator', 'viewer']
+const adminOnly: ZongaRole[] = ['admin']
 const adminManager: ZongaRole[] = ['admin', 'manager']
 const creatorAndAbove: ZongaRole[] = ['admin', 'manager', 'creator']
 
@@ -169,37 +175,43 @@ function buildLabelSections(locale: string): NavSection[] {
       ],
     },
     {
-      title: 'Creator Studio',
-      items: [
-        { href: `${p}/catalog`, icon: <Music size={16} />, label: 'Catalog', roles: creatorAndAbove },
-        { href: `${p}/releases`, icon: <Disc3 size={16} />, label: 'Releases', roles: creatorAndAbove },
-        { href: `${p}/artists`, icon: <Mic2 size={16} />, label: 'Artists', roles: creatorAndAbove },
-        { href: `${p}/tracks`, icon: <Music size={16} />, label: 'Tracks', roles: creatorAndAbove },
-        { href: `${p}/rights`, icon: <Lock size={16} />, label: 'Rights', roles: creatorAndAbove },
-      ],
-    },
-    {
-      title: 'Business',
-      items: [
-        { href: `${p}/revenue`, icon: <DollarSign size={16} />, label: 'Revenue', roles: adminManager },
-        { href: `${p}/payouts`, icon: <Zap size={16} />, label: 'Payouts', roles: adminManager },
-        { href: `${p}/analytics`, icon: <BarChart3 size={16} />, label: 'Analytics', roles: adminManager },
-        { href: `${p}/creators`, icon: <Users size={16} />, label: 'Creators', roles: adminManager },
-      ],
-    },
-    {
       title: 'Events',
       items: [
         { href: `${p}/events`, icon: <CalendarDays size={16} />, label: 'Events', roles: allRoles },
       ],
     },
     {
+      title: 'Podcasts',
+      items: [
+        { href: `${p}/podcasts`, icon: <Podcast size={16} />, label: 'Podcasts', roles: allRoles },
+      ],
+    },
+    {
+      title: 'Business',
+      items: [
+        { href: `${p}/revenue`, icon: <DollarSign size={16} />, label: 'Revenue', roles: adminManager },
+        { href: `${p}/payouts`, icon: <Zap size={16} />, label: 'Payouts', roles: adminOnly },
+        { href: `${p}/analytics`, icon: <BarChart3 size={16} />, label: 'Analytics', roles: adminManager },
+        { href: `${p}/creators`, icon: <Users size={16} />, label: 'Creators', roles: adminManager },
+      ],
+    },
+    {
+      title: 'Creator Studio',
+      items: [
+        { href: `${p}/catalog`, icon: <Music size={16} />, label: 'Catalog', roles: creatorAndAbove },
+        { href: `${p}/releases`, icon: <Disc3 size={16} />, label: 'Releases', roles: creatorAndAbove },
+        { href: `${p}/artists`, icon: <Mic2 size={16} />, label: 'Artists', roles: adminManager },
+        { href: `${p}/tracks`, icon: <Music size={16} />, label: 'Tracks', roles: creatorAndAbove },
+        { href: `${p}/rights`, icon: <Lock size={16} />, label: 'Rights', roles: adminOnly },
+        { href: `${p}/events/new`, icon: <PlusCircle size={16} />, label: 'Create Event', roles: creatorAndAbove },
+        { href: `${p}/podcasts/new`, icon: <PlusCircle size={16} />, label: 'New Podcast', roles: creatorAndAbove },
+      ],
+    },
+    {
       title: 'Admin',
       items: [
-        { href: `${p}/moderation`, icon: <Shield size={16} />, label: 'Moderation', roles: adminManager },
-        { href: `${p}/integrity`, icon: <Lock size={16} />, label: 'Integrity', roles: adminManager },
         { href: `${p}/notifications`, icon: <Bell size={16} />, label: 'Notifications', roles: allRoles },
-        { href: `${p}/settings`, icon: <Settings size={16} />, label: 'Settings', roles: adminManager },
+        { href: `${p}/settings`, icon: <Settings size={16} />, label: 'Settings', roles: allRoles },
       ],
     },
   ]
@@ -207,7 +219,7 @@ function buildLabelSections(locale: string): NavSection[] {
 
 // ── Sidebar component ────────────────────────────────────────────────────────
 
-export function Sidebar({ role, locale, isPlatformOrg }: SidebarProps) {
+export function Sidebar({ role, locale, isPlatformOrg, hasCreatorProfile }: SidebarProps) {
   const pathname = usePathname()
   const [mobileOpen, setMobileOpen] = useState(false)
 
@@ -251,6 +263,40 @@ export function Sidebar({ role, locale, isPlatformOrg }: SidebarProps) {
           ))}
         </NavSectionGroup>
       ))}
+
+      {/* CTA for listeners who haven't applied as creators yet */}
+      {role === 'viewer' && !hasCreatorProfile && (
+        <div className="px-3 pt-4">
+          <Link
+            href={`/${locale}/dashboard/creators/apply`}
+            onClick={() => setMobileOpen(false)}
+            className="flex items-center gap-3 rounded-xl border border-electric/30 bg-electric/5 px-3 py-3 text-sm font-semibold text-white hover:bg-electric/10 transition-colors"
+          >
+            <div className="flex h-8 w-8 items-center justify-center rounded-lg bg-electric/20">
+              <Mic2 size={16} className="text-electric" />
+            </div>
+            <div>
+              <p className="text-sm font-semibold">Become a Creator</p>
+              <p className="text-[10px] text-gray-400">Distribute your music on Zonga</p>
+            </div>
+          </Link>
+        </div>
+      )}
+
+      {/* CTA for creators without an org — nudge them to join/create a label */}
+      {role === 'viewer' && hasCreatorProfile && (
+        <div className="px-3 pt-4">
+          <div className="rounded-xl border border-amber-500/30 bg-amber-500/5 px-3 py-3 text-sm">
+            <div className="flex items-center gap-2 mb-1">
+              <Building2 size={14} className="text-amber-500" />
+              <p className="text-xs font-semibold text-white">Join a Label</p>
+            </div>
+            <p className="text-[10px] text-gray-400">
+              Create or join an organization to unlock Creator Studio, uploads, and payouts.
+            </p>
+          </div>
+        </div>
+      )}
     </>
   )
 
@@ -302,6 +348,9 @@ export function Sidebar({ role, locale, isPlatformOrg }: SidebarProps) {
               <nav className="flex-1 px-3 py-4 space-y-3 overflow-y-auto sidebar-scrollbar">
                 {navContent}
               </nav>
+              <div className="px-4 py-4 border-t border-white/10">
+                <MobileAccountFooter locale={locale} />
+              </div>
             </motion.aside>
           </>
         )}

@@ -25,7 +25,7 @@ export default async function AssetDetailPage({
   if (!asset) notFound()
 
   const statusColors: Record<string, string> = {
-    draft: 'bg-gray-100 text-gray-600',
+    draft: 'bg-muted text-muted-foreground',
     review: 'bg-amber-100 text-amber-700',
     published: 'bg-emerald-100 text-emerald-700',
     archived: 'bg-red-100 text-red-600',
@@ -37,7 +37,7 @@ export default async function AssetDetailPage({
       {/* Back nav */}
       <Link
         href="../catalog"
-        className="inline-flex items-center gap-1 text-sm text-gray-500 hover:text-navy"
+        className="inline-flex items-center gap-1 text-sm text-muted-foreground hover:text-foreground"
       >
         ← Back to Catalog
       </Link>
@@ -45,7 +45,7 @@ export default async function AssetDetailPage({
       {/* Header */}
       <div className="flex items-start justify-between">
         <div>
-          <h1 className="text-2xl font-bold text-navy">{asset.title}</h1>
+          <h1 className="text-2xl font-bold text-foreground">{asset.title}</h1>
           <div className="mt-2 flex flex-wrap items-center gap-2">
             <span
               className={`inline-flex rounded-full px-2.5 py-0.5 text-xs font-medium ${
@@ -54,9 +54,9 @@ export default async function AssetDetailPage({
             >
               {asset.status}
             </span>
-            <span className="text-xs text-gray-500">{asset.type}</span>
+            <span className="text-xs text-muted-foreground">{asset.type}</span>
             {asset.genre && (
-              <span className="inline-flex rounded-full bg-navy/10 px-2 py-0.5 text-xs text-navy">
+              <span className="inline-flex rounded-full bg-navy/10 px-2 py-0.5 text-xs text-foreground">
                 {asset.genre.replace(/_/g, ' ')}
               </span>
             )}
@@ -75,15 +75,15 @@ export default async function AssetDetailPage({
           {/* Metadata */}
           <Card>
             <div className="p-5">
-              <h2 className="mb-3 text-sm font-semibold text-navy">📋 Metadata</h2>
+              <h2 className="mb-3 text-sm font-semibold text-foreground">📋 Metadata</h2>
               <dl className="grid grid-cols-1 gap-3 text-sm sm:grid-cols-2">
                 <div>
-                  <dt className="text-xs text-gray-500">Creator</dt>
-                  <dd className="font-medium text-navy">{(asset.metadata?.creatorName as string) ?? '—'}</dd>
+                  <dt className="text-xs text-muted-foreground">Creator</dt>
+                  <dd className="font-medium text-foreground">{(asset.metadata?.creatorName as string) ?? '—'}</dd>
                 </div>
                 <div>
-                  <dt className="text-xs text-gray-500">Duration</dt>
-                  <dd className="font-medium text-navy">
+                  <dt className="text-xs text-muted-foreground">Duration</dt>
+                  <dd className="font-medium text-foreground">
                     {asset.durationSeconds
                       ? `${Math.floor(asset.durationSeconds / 60)}:${String(
                           asset.durationSeconds % 60,
@@ -92,12 +92,12 @@ export default async function AssetDetailPage({
                   </dd>
                 </div>
                 <div>
-                  <dt className="text-xs text-gray-500">ISRC</dt>
-                  <dd className="font-mono text-xs text-navy">{asset.isrc ?? '—'}</dd>
+                  <dt className="text-xs text-muted-foreground">ISRC</dt>
+                  <dd className="font-mono text-xs text-foreground">{asset.isrc ?? '—'}</dd>
                 </div>
                 <div>
-                  <dt className="text-xs text-gray-500">Created</dt>
-                  <dd className="font-medium text-navy">
+                  <dt className="text-xs text-muted-foreground">Created</dt>
+                  <dd className="font-medium text-foreground">
                     {asset.createdAt
                       ? new Date(asset.createdAt).toLocaleDateString('en-CA')
                       : '—'}
@@ -111,14 +111,14 @@ export default async function AssetDetailPage({
           {asset.collaborators && asset.collaborators.length > 0 && (
             <Card>
               <div className="p-5">
-                <h2 className="mb-3 text-sm font-semibold text-navy">
+                <h2 className="mb-3 text-sm font-semibold text-foreground">
                   👥 Collaborators
                 </h2>
                 <div className="flex flex-wrap gap-2">
                   {asset.collaborators.map((collab: string) => (
                     <span
                       key={collab}
-                      className="inline-flex rounded-full bg-gray-100 px-3 py-1 text-xs font-medium text-gray-700"
+                      className="inline-flex rounded-full bg-muted px-3 py-1 text-xs font-medium text-foreground"
                     >
                       {collab}
                     </span>
@@ -132,10 +132,10 @@ export default async function AssetDetailPage({
           {asset.audioFingerprint && (
             <Card>
               <div className="p-5">
-                <h2 className="mb-3 text-sm font-semibold text-navy">
+                <h2 className="mb-3 text-sm font-semibold text-foreground">
                   🔐 Audio Fingerprint
                 </h2>
-                <p className="break-all font-mono text-xs text-gray-500">
+                <p className="break-all font-mono text-xs text-muted-foreground">
                   SHA-256: {asset.audioFingerprint}
                 </p>
               </div>
@@ -145,21 +145,21 @@ export default async function AssetDetailPage({
           {/* Revenue Summary */}
           <Card>
             <div className="p-5">
-              <h2 className="mb-3 text-sm font-semibold text-navy">
+              <h2 className="mb-3 text-sm font-semibold text-foreground">
                 💰 Revenue Summary
               </h2>
               <div className="grid grid-cols-3 gap-4 text-center">
                 <div>
-                  <p className="text-2xl font-bold text-navy">
+                  <p className="text-2xl font-bold text-foreground">
                     {((asset.metadata?.streams as number) ?? 0).toLocaleString()}
                   </p>
-                  <p className="text-xs text-gray-500">Streams</p>
+                  <p className="text-xs text-muted-foreground">Streams</p>
                 </div>
                 <div>
-                  <p className="text-2xl font-bold text-navy">
+                  <p className="text-2xl font-bold text-foreground">
                     {((asset.metadata?.downloads as number) ?? 0).toLocaleString()}
                   </p>
-                  <p className="text-xs text-gray-500">Downloads</p>
+                  <p className="text-xs text-muted-foreground">Downloads</p>
                 </div>
                 <div>
                   <p className="text-2xl font-bold text-emerald-600">
@@ -168,7 +168,7 @@ export default async function AssetDetailPage({
                       'USD',
                     )}
                   </p>
-                  <p className="text-xs text-gray-500">Revenue</p>
+                  <p className="text-xs text-muted-foreground">Revenue</p>
                 </div>
               </div>
             </div>
@@ -180,7 +180,7 @@ export default async function AssetDetailPage({
           {/* Quality Tiers */}
           <Card>
             <div className="p-5">
-              <h2 className="mb-3 text-sm font-semibold text-navy">
+              <h2 className="mb-3 text-sm font-semibold text-foreground">
                 🎵 Quality Tiers
               </h2>
               {asset.qualityTiers && asset.qualityTiers.length > 0 ? (
@@ -196,18 +196,18 @@ export default async function AssetDetailPage({
                     return (
                       <div
                         key={tier}
-                        className="flex items-center justify-between rounded-lg bg-gray-50 px-3 py-2"
+                        className="flex items-center justify-between rounded-lg bg-muted px-3 py-2"
                       >
-                        <span className="text-xs font-medium text-navy">
+                        <span className="text-xs font-medium text-foreground">
                           {info.label}
                         </span>
-                        <span className="text-xs text-gray-500">{info.kbps}</span>
+                        <span className="text-xs text-muted-foreground">{info.kbps}</span>
                       </div>
                     )
                   })}
                 </div>
               ) : (
-                <p className="text-xs text-gray-500">
+                <p className="text-xs text-muted-foreground">
                   No quality tiers configured yet.
                 </p>
               )}
@@ -217,10 +217,10 @@ export default async function AssetDetailPage({
           {/* Actions */}
           <Card>
             <div className="space-y-2 p-5">
-              <h2 className="mb-3 text-sm font-semibold text-navy">⚡ Actions</h2>
+              <h2 className="mb-3 text-sm font-semibold text-foreground">⚡ Actions</h2>
               <Link
                 href={`../releases/new?assetId=${id}`}
-                className="block w-full rounded-lg border border-border px-3 py-2 text-center text-xs font-medium text-navy hover:bg-gray-50"
+                className="block w-full rounded-lg border border-border px-3 py-2 text-center text-xs font-medium text-foreground hover:bg-muted/50"
               >
                 Add to Release
               </Link>
@@ -233,25 +233,25 @@ export default async function AssetDetailPage({
           {/* Technical Info */}
           <Card>
             <div className="p-5">
-              <h2 className="mb-3 text-sm font-semibold text-navy">🔧 Technical</h2>
+              <h2 className="mb-3 text-sm font-semibold text-foreground">🔧 Technical</h2>
               <dl className="space-y-2 text-xs">
                 <div className="flex justify-between">
-                  <dt className="text-gray-500">Content Type</dt>
-                  <dd className="font-mono text-navy">
+                  <dt className="text-muted-foreground">Content Type</dt>
+                  <dd className="font-mono text-foreground">
                     {String(asset.type)}
                   </dd>
                 </div>
                 <div className="flex justify-between">
-                  <dt className="text-gray-500">File Size</dt>
-                  <dd className="font-mono text-navy">
+                  <dt className="text-muted-foreground">File Size</dt>
+                  <dd className="font-mono text-foreground">
                     {(asset.metadata?.sizeBytes as number)
                       ? `${((asset.metadata.sizeBytes as number) / (1024 * 1024)).toFixed(1)} MB`
                       : '—'}
                   </dd>
                 </div>
                 <div className="flex justify-between">
-                  <dt className="text-gray-500">Asset ID</dt>
-                  <dd className="font-mono text-navy">{id.slice(0, 12)}…</dd>
+                  <dt className="text-muted-foreground">Asset ID</dt>
+                  <dd className="font-mono text-foreground">{id.slice(0, 12)}…</dd>
                 </div>
               </dl>
             </div>

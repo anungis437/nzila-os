@@ -8,7 +8,7 @@
  */
 'use server'
 
-import { resolveOrgContext } from '@/lib/resolve-org'
+import { resolveOrgContext, resolveListenerContext } from '@/lib/resolve-org'
 import { platformDb } from '@nzila/db/platform'
 import { sql } from 'drizzle-orm'
 import { revalidatePath } from 'next/cache'
@@ -38,6 +38,7 @@ export interface ZongaEvent {
   status: 'draft' | 'published' | 'sold_out' | 'cancelled' | 'completed'
   imageUrl?: string
   creatorId?: string
+  creatorName?: string
   ticketPrice?: number
   currency?: string
   totalTickets?: number
@@ -91,7 +92,11 @@ export async function listEvents(opts?: {
   page?: number
   status?: string
 }): Promise<EventListResult> {
-  const ctx = await resolveOrgContext()
+  const ctx = await resolveListenerContext()
+
+  if (!ctx.orgId) {
+    return { events: [], total: 0 }
+  }
 
   const page = opts?.page ?? 1
   const offset = (page - 1) * 25
@@ -115,14 +120,14 @@ export async function listEvents(opts?: {
       WHERE e.org_id = ${ctx.orgId}
       ORDER BY e.starts_at DESC
       LIMIT 25 OFFSET ${offset}`,
-    )) as unknown as { rows: ZongaEvent[] }
+    )) as unknown as ZongaEvent[]
 
     const [cnt] = (await platformDb.execute(
       sql`SELECT COUNT(*) as total FROM zonga_events WHERE org_id = ${ctx.orgId}`,
     )) as unknown as [{ total: number }]
 
     return {
-      events: rows.rows ?? [],
+      events: rows,
       total: Number(cnt?.total ?? 0),
     }
   } catch (error) {
@@ -169,9 +174,9 @@ export async function getEventDetail(eventId: string): Promise<{
       JOIN zonga_ticket_types tt ON tt.id = tp.ticket_type_id
       WHERE tp.event_id = ${eventId} AND tp.org_id = ${ctx.orgId}
       ORDER BY tp.created_at DESC`,
-    )) as unknown as { rows: Ticket[] }
+    )) as unknown as Ticket[]
 
-    const tickets = ticketRows.rows ?? []
+    const tickets = ticketRows
     const ticketsSold = tickets.filter(t => t.status === 'confirmed').length
     const ticketRevenue = tickets
       .filter(t => t.status === 'confirmed')
@@ -181,6 +186,40 @@ export async function getEventDetail(eventId: string): Promise<{
   } catch (error) {
     logger.error('getEventDetail failed', { error })
     return { event: null, tickets: [], ticketsSold: 0, ticketRevenue: 0 }
+  }
+}
+
+/* ─── Published Event Detail (listeners) ─── */
+
+export async function getPublishedEventDetail(eventId: string): Promise<{
+  event: ZongaEvent | null
+  creatorName: string | null
+}> {
+  await resolveListenerContext()
+
+  try {
+    const [event] = (await platformDb.execute(
+      sql`SELECT
+        e.id, e.title, e.description, e.venue, e.city, e.country,
+        e.starts_at as "startsAt", e.ends_at as "endsAt",
+        e.status, e.image_url as "imageUrl",
+        e.creator_id as "creatorId",
+        c.display_name as "creatorName",
+        e.created_at as "createdAt"
+      FROM zonga_events e
+      LEFT JOIN zonga_creators c ON c.id = e.creator_id
+      WHERE e.id = ${eventId} AND e.status IN ('published', 'sold_out')`,
+    )) as unknown as [
+      (ZongaEvent & { creatorName?: string }) | undefined,
+    ]
+
+    return {
+      event: event ?? null,
+      creatorName: event?.creatorName ?? null,
+    }
+  } catch (error) {
+    logger.error('getPublishedEventDetail failed', { error })
+    return { event: null, creatorName: null }
   }
 }
 
@@ -335,7 +374,7 @@ export async function purchaseTicket(data: {
   successUrl: string
   cancelUrl: string
 }): Promise<{ success: boolean; checkoutUrl?: string; error?: unknown }> {
-  const ctx = await resolveOrgContext()
+  const ctx = await resolveListenerContext()
 
   const parsed = PurchaseTicketSchema.safeParse(data)
   if (!parsed.success) {
@@ -378,9 +417,9 @@ export async function purchaseTicket(data: {
         WHERE ticket_type_id = ${data.ticketTypeId} AND status IN ('confirmed', 'pending')
       ) < ${ticketType.quantity_available}
       RETURNING id`,
-    )) as unknown as { rows: { id: string }[] }
+    )) as unknown as { id: string }[]
 
-    const inserted = insertResult.rows ?? []
+    const inserted = insertResult
     if (inserted.length === 0) {
       return { success: false, error: 'Sold out — capacity reached during purchase' }
     }
@@ -465,7 +504,7 @@ export async function listTickets(opts?: {
       WHERE tp.org_id = ${ctx.orgId} ${eventFilter}
       ORDER BY tp.created_at DESC
       LIMIT 25 OFFSET ${offset}`,
-    )) as unknown as { rows: Ticket[] }
+    )) as unknown as Ticket[]
 
     const [totals] = (await platformDb.execute(
       sql`SELECT
@@ -476,7 +515,7 @@ export async function listTickets(opts?: {
     )) as unknown as [{ total: number; total_revenue: number }]
 
     return {
-      tickets: rows.rows ?? [],
+      tickets: rows,
       total: Number(totals?.total ?? 0),
       totalRevenue: Number(totals?.total_revenue ?? 0),
     }

@@ -19,8 +19,8 @@ export default function BrowseError({
   return (
     <div className="flex min-h-[400px] flex-col items-center justify-center rounded-xl border border-red-200 bg-red-50 p-8 text-center">
       <span className="mb-4 text-4xl">🌍</span>
-      <h2 className="text-navy text-xl font-bold">Browse error</h2>
-      <p className="mt-2 max-w-md text-sm text-gray-500">
+      <h2 className="text-foreground text-xl font-bold">Browse error</h2>
+      <p className="mt-2 max-w-md text-sm text-muted-foreground">
         Something went wrong loading content. Please try again.
       </p>
       <button

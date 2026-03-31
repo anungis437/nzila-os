@@ -145,14 +145,14 @@ export default function SplitsEditorPage({
     <div className="max-w-3xl space-y-6">
       <Link
         href={`../`}
-        className="inline-flex items-center gap-1 text-sm text-gray-500 hover:text-navy"
+        className="inline-flex items-center gap-1 text-sm text-muted-foreground hover:text-foreground"
       >
         ← Back to Release
       </Link>
 
       <div>
-        <h1 className="text-2xl font-bold text-navy">Royalty Splits</h1>
-        <p className="mt-1 text-sm text-gray-500">
+        <h1 className="text-2xl font-bold text-foreground">Royalty Splits</h1>
+        <p className="mt-1 text-sm text-muted-foreground">
           Configure how revenue is distributed among collaborators.
           Splits must total exactly 100%. Each collaborator receives their share after platform and processing fees are deducted.
         </p>
@@ -162,7 +162,7 @@ export default function SplitsEditorPage({
       <Card>
         <div className="p-5 space-y-4">
           <div className="flex items-center justify-between">
-            <h2 className="text-sm font-semibold text-navy">Split Configuration</h2>
+            <h2 className="text-sm font-semibold text-foreground">Split Configuration</h2>
             <button
               type="button"
               onClick={distributeEvenly}
@@ -176,17 +176,17 @@ export default function SplitsEditorPage({
             {splits.map((split, idx) => (
               <div
                 key={idx}
-                className="grid grid-cols-12 gap-3 items-end rounded-lg bg-gray-50 p-3"
+                className="grid grid-cols-12 gap-3 items-end rounded-lg bg-muted p-3"
               >
                 {/* Creator */}
                 <div className="col-span-4">
-                  <label className="block text-xs font-medium text-gray-600 mb-1">
+                  <label className="block text-xs font-medium text-muted-foreground mb-1">
                     Creator
                   </label>
                   <select
                     value={split.creatorId}
                     onChange={(e) => updateSplit(idx, 'creatorId', e.target.value)}
-                    className="w-full rounded-lg border border-gray-200 px-2 py-1.5 text-sm focus:ring-2 focus:ring-electric focus:border-transparent"
+                    className="w-full rounded-lg border border-border px-2 py-1.5 text-sm focus:ring-2 focus:ring-electric focus:border-transparent"
                   >
                     <option value="">Select creator…</option>
                     {creators.map((c) => (
@@ -199,13 +199,13 @@ export default function SplitsEditorPage({
 
                 {/* Role */}
                 <div className="col-span-3">
-                  <label className="block text-xs font-medium text-gray-600 mb-1">
+                  <label className="block text-xs font-medium text-muted-foreground mb-1">
                     Role
                   </label>
                   <select
                     value={split.role}
                     onChange={(e) => updateSplit(idx, 'role', e.target.value)}
-                    className="w-full rounded-lg border border-gray-200 px-2 py-1.5 text-sm focus:ring-2 focus:ring-electric focus:border-transparent"
+                    className="w-full rounded-lg border border-border px-2 py-1.5 text-sm focus:ring-2 focus:ring-electric focus:border-transparent"
                   >
                     {SPLIT_ROLES.map((r) => (
                       <option key={r} value={r}>{r}</option>
@@ -215,7 +215,7 @@ export default function SplitsEditorPage({
 
                 {/* Percent */}
                 <div className="col-span-3">
-                  <label className="block text-xs font-medium text-gray-600 mb-1">
+                  <label className="block text-xs font-medium text-muted-foreground mb-1">
                     Share %
                   </label>
                   <div className="flex items-center gap-2">
@@ -228,9 +228,9 @@ export default function SplitsEditorPage({
                       onChange={(e) =>
                         updateSplit(idx, 'sharePercent', e.target.value)
                       }
-                      className="w-full rounded-lg border border-gray-200 px-2 py-1.5 text-sm text-right font-mono focus:ring-2 focus:ring-electric focus:border-transparent"
+                      className="w-full rounded-lg border border-border px-2 py-1.5 text-sm text-right font-mono focus:ring-2 focus:ring-electric focus:border-transparent"
                     />
-                    <span className="text-xs text-gray-500">%</span>
+                    <span className="text-xs text-muted-foreground">%</span>
                   </div>
                 </div>
 
@@ -240,7 +240,7 @@ export default function SplitsEditorPage({
                     type="button"
                     onClick={() => removeSplit(idx)}
                     disabled={splits.length <= 1}
-                    className="rounded-lg border border-gray-200 px-2.5 py-1.5 text-xs text-red-500 hover:bg-red-50 transition disabled:opacity-30"
+                    className="rounded-lg border border-border px-2.5 py-1.5 text-xs text-red-500 hover:bg-red-50 transition disabled:opacity-30"
                   >
                     Remove
                   </button>
@@ -252,7 +252,7 @@ export default function SplitsEditorPage({
           <button
             type="button"
             onClick={addSplit}
-            className="inline-flex items-center gap-1 rounded-lg border border-dashed border-gray-300 px-3 py-2 text-xs text-gray-500 hover:border-electric hover:text-electric transition"
+            className="inline-flex items-center gap-1 rounded-lg border border-dashed border-border px-3 py-2 text-xs text-muted-foreground hover:border-electric hover:text-electric transition"
           >
             + Add Collaborator
           </button>
@@ -263,9 +263,9 @@ export default function SplitsEditorPage({
       <Card>
         <div className="p-5">
           <div className="flex items-center justify-between">
-            <span className="text-sm font-medium text-gray-700">Total</span>
+            <span className="text-sm font-medium text-foreground">Total</span>
             <div className="flex items-center gap-3">
-              <div className="h-3 w-48 overflow-hidden rounded-full bg-gray-200">
+              <div className="h-3 w-48 overflow-hidden rounded-full bg-muted">
                 <div
                   className={`h-full rounded-full transition-all ${
                     isValid
@@ -299,8 +299,8 @@ export default function SplitsEditorPage({
       {/* Visual Preview */}
       <Card>
         <div className="p-5">
-          <h2 className="mb-3 text-sm font-semibold text-navy">Preview</h2>
-          <div className="flex h-8 overflow-hidden rounded-full bg-gray-200">
+          <h2 className="mb-3 text-sm font-semibold text-foreground">Preview</h2>
+          <div className="flex h-8 overflow-hidden rounded-full bg-muted">
             {splits
               .filter((s) => s.sharePercent > 0)
               .map((s, i) => {
@@ -341,7 +341,7 @@ export default function SplitsEditorPage({
                   'bg-indigo-400',
                 ]
                 return (
-                  <div key={i} className="flex items-center gap-1.5 text-xs text-gray-600">
+                  <div key={i} className="flex items-center gap-1.5 text-xs text-muted-foreground">
                     <span className={`inline-block h-2.5 w-2.5 rounded-full ${colors[i % colors.length]}`} />
                     {s.creatorName || 'Unassigned'} ({s.role}) — {s.sharePercent}%
                   </div>
@@ -374,7 +374,7 @@ export default function SplitsEditorPage({
         <button
           type="button"
           onClick={() => router.back()}
-          className="px-6 py-2.5 rounded-lg text-sm font-medium border border-gray-200 text-gray-600 hover:bg-gray-50 transition"
+          className="px-6 py-2.5 rounded-lg text-sm font-medium border border-border text-muted-foreground hover:bg-muted/50 transition"
         >
           Cancel
         </button>

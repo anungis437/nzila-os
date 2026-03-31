@@ -1,14 +1,26 @@
 /**
  * Zonga — Events Page (Server Component).
  *
- * Live events listing with status filters and ticket stats.
+ * All users see a polished discovery view of published events.
  */
 import { auth } from '@clerk/nextjs/server'
 import { redirect } from 'next/navigation'
 import Link from 'next/link'
-import { Card } from '@nzila/ui'
-import { listEvents } from '@/lib/actions/event-actions'
-import { formatCurrencyAmount } from '@/lib/stripe'
+import { browsePublishedEvents } from '@/lib/actions/browse-actions'
+import { Calendar, MapPin, Clock, Mic2 } from 'lucide-react'
+
+/* ── Helpers ── */
+
+function formatEventDate(iso: string) {
+  const d = new Date(iso)
+  return {
+    weekday: d.toLocaleDateString('en-US', { weekday: 'short' }),
+    month: d.toLocaleDateString('en-US', { month: 'short' }),
+    day: d.getDate(),
+    time: d.toLocaleTimeString('en-US', { hour: 'numeric', minute: '2-digit' }),
+    full: d.toLocaleDateString('en-US', { weekday: 'long', month: 'long', day: 'numeric', year: 'numeric' }),
+  }
+}
 
 export default async function EventsPage({
   searchParams,
@@ -19,129 +31,131 @@ export default async function EventsPage({
   if (!userId) redirect('/sign-in')
 
   const params = await searchParams
-  const { events, total } = await listEvents({
-    page: Number(params.page ?? '1'),
-    status: params.status,
-  })
+  const page = Number(params.page ?? '1')
 
-  const statusOptions = ['all', 'draft', 'published', 'sold_out', 'completed', 'cancelled']
+  // Events is a discovery page — all users browse published events
+  const { events, total } = await browsePublishedEvents({ page })
 
+  return <ListenerEventsView events={events} total={total} />
+}
+
+/* ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━ */
+/*  Listener View                                                              */
+/* ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━ */
+
+function ListenerEventsView({
+  events,
+  total,
+}: {
+  events: Array<Record<string, unknown>>
+  total: number
+}) {
   return (
-    <div className="space-y-6">
-      {/* Header */}
-      <div className="flex items-center justify-between">
-        <div>
-          <h1 className="text-2xl font-bold text-navy">Events</h1>
-          <p className="text-gray-500 mt-1">Live events & ticketing</p>
+    <div className="space-y-8">
+      {/* Hero */}
+      <div className="relative overflow-hidden rounded-2xl bg-linear-to-br from-navy via-navy/95 to-amber-600/70 p-8 text-white">
+        <div className="absolute inset-0 bg-[radial-gradient(ellipse_at_top_right,rgba(251,191,36,0.12),transparent_50%)]" />
+        <div className="absolute -top-24 -right-24 h-64 w-64 rounded-full bg-amber-500/10 blur-3xl" />
+        <div className="relative z-10">
+          <div className="flex items-center gap-3 mb-2">
+            <div className="flex h-10 w-10 items-center justify-center rounded-xl bg-white/10 backdrop-blur-sm">
+              <Calendar size={22} />
+            </div>
+            <h1 className="text-2xl font-bold sm:text-3xl">Live Events</h1>
+          </div>
+          <p className="text-white/70 text-sm max-w-lg">
+            Concerts, festivals, and live sessions from your favorite Afrobeats artists.
+            {total > 0 && ` ${total} upcoming event${total !== 1 ? 's' : ''} available.`}
+          </p>
         </div>
-        <Link
-          href="events/new"
-          className="inline-flex items-center gap-2 rounded-lg bg-electric px-4 py-2 text-sm font-medium text-white hover:bg-electric/90"
-        >
-          🎪 New Event
-        </Link>
       </div>
 
-      {/* Status Tabs */}
-      <div className="flex gap-2 flex-wrap">
-        {statusOptions.map((s) => (
-          <a
-            key={s}
-            href={`?status=${s === 'all' ? '' : s}`}
-            className={`rounded-full px-3 py-1 text-xs font-medium transition-colors ${
-              (params.status ?? '') === (s === 'all' ? '' : s)
-                ? 'bg-navy text-white'
-                : 'bg-gray-100 text-gray-600 hover:bg-gray-200'
-            }`}
-          >
-            {s.replace(/_/g, ' ').replace(/\b\w/g, (c) => c.toUpperCase())}
-          </a>
-        ))}
-      </div>
-
-      {/* Stats */}
-      <div className="grid grid-cols-1 sm:grid-cols-2 gap-4">
-        <Card>
-          <div className="p-5">
-            <p className="text-xs text-gray-500">Total Events</p>
-            <p className="text-2xl font-bold text-navy">{total}</p>
-          </div>
-        </Card>
-        <Card>
-          <div className="p-5">
-            <p className="text-xs text-gray-500">Showing</p>
-            <p className="text-2xl font-bold text-navy">{events.length}</p>
-          </div>
-        </Card>
-      </div>
-
-      {/* Event Grid */}
+      {/* Event Cards */}
       {events.length === 0 ? (
-        <Card>
-          <div className="p-12 text-center">
-            <div className="text-5xl mb-4">🎪</div>
-            <p className="font-semibold text-navy text-lg">No events found</p>
-            <p className="text-gray-500 text-sm mt-1">
-              Create your first event to start selling tickets.
-            </p>
-            <Link
-              href="events/new"
-              className="mt-4 inline-flex items-center gap-2 rounded-lg bg-electric px-4 py-2 text-sm font-medium text-white"
-            >
-              🎪 New Event
-            </Link>
-          </div>
-        </Card>
+        <div className="rounded-xl border border-dashed border-border bg-muted/50 p-14 text-center">
+          <Calendar size={36} className="mx-auto text-muted-foreground/50 mb-4" />
+          <p className="font-semibold text-foreground text-lg">No upcoming events</p>
+          <p className="text-muted-foreground text-sm mt-1 max-w-sm mx-auto">
+            We&apos;re working on bringing amazing live experiences to you. Check back soon!
+          </p>
+        </div>
       ) : (
-        <div className="grid grid-cols-1 md:grid-cols-2 xl:grid-cols-3 gap-5">
-          {events.map((event) => (
-            <Link key={event.id} href={`events/${event.id}`}>
-              <Card>
-                <div className="p-5 space-y-3 hover:bg-gray-50 transition-colors rounded-xl">
-                  <div className="flex items-start justify-between">
-                    <div>
-                      <h3 className="font-semibold text-navy">{event.title}</h3>
-                      <p className="text-xs text-gray-500 mt-0.5">
-                        {event.venue} · {event.city}, {event.country}
-                      </p>
+        <div className="space-y-4">
+          {(events as Array<{
+            id: string; title: string; description?: string; venue: string;
+            city: string; country: string; startsAt: string; endsAt?: string;
+            status: string; imageUrl?: string; creatorName?: string;
+          }>).map((event) => {
+            const dt = formatEventDate(event.startsAt)
+            const endDt = event.endsAt ? formatEventDate(event.endsAt) : null
+
+            return (
+              <Link key={event.id} href={`events/${event.id}`} className="block group">
+                <div className="relative overflow-hidden rounded-xl border border-border bg-card transition-all hover:shadow-lg hover:shadow-electric/5 hover:border-electric/20">
+                  <div className="flex">
+                    {/* Date Column */}
+                    <div className="hidden sm:flex flex-col items-center justify-center w-24 shrink-0 bg-linear-to-b from-amber-500/10 to-amber-600/5 border-r border-border px-3 py-5">
+                      <span className="text-[11px] font-bold uppercase tracking-wider text-amber-600">{dt.month}</span>
+                      <span className="text-3xl font-black text-foreground leading-none mt-1">{dt.day}</span>
+                      <span className="text-[11px] font-medium text-muted-foreground mt-1">{dt.weekday}</span>
                     </div>
-                    <span className={`inline-flex rounded-full px-2 py-0.5 text-xs font-medium ${
-                      event.status === 'published'
-                        ? 'bg-emerald-500/10 text-emerald-600'
-                        : event.status === 'sold_out'
-                          ? 'bg-red-500/10 text-red-600'
-                          : event.status === 'completed'
-                            ? 'bg-blue-500/10 text-blue-600'
-                            : event.status === 'draft'
-                              ? 'bg-amber-500/10 text-amber-600'
-                              : 'bg-gray-100 text-gray-500'
-                    }`}>
-                      {event.status?.replace(/_/g, ' ') ?? 'draft'}
-                    </span>
-                  </div>
 
-                  <div className="flex items-center gap-4 text-xs text-gray-500">
-                    <span>📅 {new Date(event.startsAt).toLocaleDateString('en-CA')}</span>
-                    <span>🎟️ {event.soldTickets}/{event.totalTickets}</span>
-                  </div>
+                    {/* Content */}
+                    <div className="flex-1 p-5 space-y-3">
+                      <div className="flex items-start justify-between gap-3">
+                        <div className="min-w-0">
+                          <h3 className="font-semibold text-foreground text-base group-hover:text-electric transition-colors truncate">
+                            {event.title}
+                          </h3>
+                          {event.creatorName && (
+                            <div className="flex items-center gap-1.5 mt-1">
+                              <Mic2 size={12} className="text-electric shrink-0" />
+                              <span className="text-xs font-medium text-electric">{event.creatorName}</span>
+                            </div>
+                          )}
+                        </div>
+                        {event.status === 'sold_out' && (
+                          <span className="inline-flex rounded-full bg-red-500/10 px-2.5 py-0.5 text-xs font-semibold text-red-600 shrink-0">
+                            Sold Out
+                          </span>
+                        )}
+                      </div>
 
-                  <div className="flex items-center justify-between text-xs">
-                    <span className="font-medium text-navy">
-                      {formatCurrencyAmount(Math.round(Number(event.ticketPrice) * 100), event.currency ?? 'USD')}
-                      /ticket
-                    </span>
-                    {event.genre && (
-                      <span className="rounded-full bg-navy/10 px-2 py-0.5 text-navy">
-                        {event.genre.replace(/_/g, ' ')}
-                      </span>
-                    )}
+                      {event.description && (
+                        <p className="text-sm text-muted-foreground line-clamp-2">{event.description}</p>
+                      )}
+
+                      <div className="flex flex-wrap items-center gap-x-4 gap-y-1.5 text-xs text-muted-foreground">
+                        <span className="inline-flex items-center gap-1.5">
+                          <MapPin size={13} className="text-rose-500 shrink-0" />
+                          {event.venue}{event.city ? `, ${event.city}` : ''}{event.country ? ` · ${event.country}` : ''}
+                        </span>
+                        <span className="inline-flex items-center gap-1.5">
+                          <Clock size={13} className="text-amber-500 shrink-0" />
+                          {dt.time}{endDt ? ` – ${endDt.time}` : ''}
+                        </span>
+                        {/* Mobile date (hidden on sm+) */}
+                        <span className="inline-flex items-center gap-1.5 sm:hidden">
+                          <Calendar size={13} className="text-electric shrink-0" />
+                          {dt.full}
+                        </span>
+                      </div>
+                    </div>
+
+                    {/* Hover arrow */}
+                    <div className="hidden sm:flex items-center pr-5 text-muted-foreground/30 group-hover:text-electric transition-colors">
+                      <svg width="20" height="20" viewBox="0 0 20 20" fill="none">
+                        <path d="M7.5 5L12.5 10L7.5 15" stroke="currentColor" strokeWidth="1.5" strokeLinecap="round" strokeLinejoin="round" />
+                      </svg>
+                    </div>
                   </div>
                 </div>
-              </Card>
-            </Link>
-          ))}
+              </Link>
+            )
+          })}
         </div>
       )}
     </div>
   )
 }
+

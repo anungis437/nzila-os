@@ -188,9 +188,8 @@ export const zongaCreatorAccounts = pgTable('zonga_creator_accounts', {
 export const zongaCreators = pgTable('zonga_creators', {
   id: uuid('id').primaryKey().defaultRandom(),
   orgId: uuid('org_id')
-    .notNull()
     .references(() => orgs.id),
-  userId: uuid('user_id').notNull(),
+  userId: text('user_id').notNull(),
   displayName: varchar('display_name', { length: 255 }).notNull(),
   bio: text('bio'),
   avatarUrl: text('avatar_url'),
@@ -422,10 +421,12 @@ export const zongaPlaylistItems = pgTable('zonga_playlist_items', {
 export const zongaListeners = pgTable('zonga_listeners', {
   id: uuid('id').primaryKey().defaultRandom(),
   orgId: uuid('org_id')
-    .notNull()
     .references(() => orgs.id),
+  userId: text('user_id'),
   displayName: varchar('display_name', { length: 255 }).notNull(),
   email: varchar('email', { length: 255 }),
+  avatarUrl: text('avatar_url'),
+  bio: text('bio'),
   city: varchar('city', { length: 100 }),
   country: varchar('country', { length: 100 }),
   plan: zongaListenerPlanEnum('plan').notNull().default('free'),
@@ -494,6 +495,22 @@ export const zongaListenerActivity = pgTable('zonga_listener_activity', {
   createdAt: timestamp('created_at', { withTimezone: true }).notNull().defaultNow(),
 })
 
+// ── Eventbrite Connections ───────────────────────────────────────────────────
+
+export const zongaEventbriteConnections = pgTable('zonga_eventbrite_connections', {
+  id: uuid('id').primaryKey().defaultRandom(),
+  orgId: uuid('org_id')
+    .notNull()
+    .references(() => orgs.id),
+  creatorId: uuid('creator_id')
+    .notNull()
+    .references(() => zongaCreators.id),
+  eventbriteOrgId: varchar('eventbrite_org_id', { length: 50 }),
+  accessToken: text('access_token').notNull(),
+  connectedAt: timestamp('connected_at', { withTimezone: true }).notNull().defaultNow(),
+  updatedAt: timestamp('updated_at', { withTimezone: true }).notNull().defaultNow(),
+})
+
 // ── Events ──────────────────────────────────────────────────────────────────
 
 export const zongaEvents = pgTable('zonga_events', {
@@ -514,6 +531,9 @@ export const zongaEvents = pgTable('zonga_events', {
   ticketingStatus: varchar('ticketing_status', { length: 50 }),
   imageUrl: text('image_url'),
   metadata: jsonb('metadata').notNull().default({}),
+  source: varchar('source', { length: 20 }).notNull().default('zonga'),
+  eventbriteId: varchar('eventbrite_id', { length: 50 }),
+  eventbriteUrl: text('eventbrite_url'),
   createdAt: timestamp('created_at', { withTimezone: true }).notNull().defaultNow(),
   updatedAt: timestamp('updated_at', { withTimezone: true }).notNull().defaultNow(),
 })
@@ -530,6 +550,7 @@ export const zongaTicketTypes = pgTable('zonga_ticket_types', {
   price: numeric('price', { precision: 18, scale: 2 }).notNull(),
   currency: varchar('currency', { length: 3 }).notNull().default('USD'),
   quantityAvailable: integer('quantity_available').notNull(),
+  eventbriteTicketClassId: varchar('eventbrite_ticket_class_id', { length: 50 }),
   createdAt: timestamp('created_at', { withTimezone: true }).notNull().defaultNow(),
 })
 
@@ -675,6 +696,18 @@ export const zongaShareTypeEnum = pgEnum('zonga_share_type', [
   'playlist',
   'event',
   'artist',
+])
+
+export const zongaPodcastStatusEnum = pgEnum('zonga_podcast_status', [
+  'draft',
+  'published',
+  'archived',
+])
+
+export const zongaEpisodeStatusEnum = pgEnum('zonga_episode_status', [
+  'draft',
+  'published',
+  'archived',
 ])
 
 // ── Wallets ─────────────────────────────────────────────────────────────────
@@ -900,4 +933,50 @@ export const zongaCreatorAnalytics = pgTable('zonga_creator_analytics', {
   followerGrowth: integer('follower_growth').notNull().default(0),
   metadata: jsonb('metadata').notNull().default({}),
   createdAt: timestamp('created_at', { withTimezone: true }).notNull().defaultNow(),
+})
+
+// ── Podcasts ────────────────────────────────────────────────────────────────
+
+export const zongaPodcasts = pgTable('zonga_podcasts', {
+  id: uuid('id').primaryKey().defaultRandom(),
+  orgId: uuid('org_id')
+    .notNull()
+    .references(() => orgs.id),
+  creatorId: uuid('creator_id').references(() => zongaCreators.id),
+  title: varchar('title', { length: 255 }).notNull(),
+  description: text('description'),
+  coverUrl: text('cover_url'),
+  language: varchar('language', { length: 10 }).notNull().default('en'),
+  category: varchar('category', { length: 100 }),
+  explicit: boolean('explicit').notNull().default(false),
+  status: zongaPodcastStatusEnum('status').notNull().default('draft'),
+  episodeCount: integer('episode_count').notNull().default(0),
+  rssFeedUrl: text('rss_feed_url'),
+  websiteUrl: text('website_url'),
+  metadata: jsonb('metadata').notNull().default({}),
+  createdAt: timestamp('created_at', { withTimezone: true }).notNull().defaultNow(),
+  updatedAt: timestamp('updated_at', { withTimezone: true }).notNull().defaultNow(),
+})
+
+export const zongaPodcastEpisodes = pgTable('zonga_podcast_episodes', {
+  id: uuid('id').primaryKey().defaultRandom(),
+  podcastId: uuid('podcast_id')
+    .notNull()
+    .references(() => zongaPodcasts.id, { onDelete: 'cascade' }),
+  orgId: uuid('org_id')
+    .notNull()
+    .references(() => orgs.id),
+  title: varchar('title', { length: 255 }).notNull(),
+  description: text('description'),
+  audioUrl: text('audio_url'),
+  durationSecs: integer('duration_secs'),
+  episodeNumber: integer('episode_number'),
+  seasonNumber: integer('season_number').default(1),
+  explicit: boolean('explicit').notNull().default(false),
+  status: zongaEpisodeStatusEnum('status').notNull().default('draft'),
+  publishedAt: timestamp('published_at', { withTimezone: true }),
+  coverUrl: text('cover_url'),
+  metadata: jsonb('metadata').notNull().default({}),
+  createdAt: timestamp('created_at', { withTimezone: true }).notNull().defaultNow(),
+  updatedAt: timestamp('updated_at', { withTimezone: true }).notNull().defaultNow(),
 })

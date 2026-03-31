@@ -6,7 +6,7 @@
  */
 'use server'
 
-import { resolveOrgContext } from '@/lib/resolve-org'
+import { resolveListenerContext, resolveListenerUUID } from '@/lib/resolve-org'
 import { platformDb } from '@nzila/db/platform'
 import { sql } from 'drizzle-orm'
 import { logger } from '@/lib/logger'
@@ -34,7 +34,7 @@ export interface SearchResults {
 /* ─── Global Search ─── */
 
 export async function globalSearch(query: string): Promise<SearchResults> {
-  const ctx = await resolveOrgContext()
+  await resolveListenerContext()
 
   if (!query || query.trim().length < 2) {
     return { assets: [], creators: [], events: [], playlists: [], total: 0 }
@@ -54,7 +54,7 @@ export async function globalSearch(query: string): Promise<SearchResults> {
         a.created_at as "createdAt"
       FROM zonga_content_assets a
       LEFT JOIN zonga_creators c ON c.id = a.creator_id
-      WHERE a.org_id = ${ctx.orgId}
+      WHERE a.status = 'published'
         AND (
           LOWER(a.title) LIKE ${pattern}
           OR LOWER(c.display_name) LIKE ${pattern}
@@ -62,7 +62,7 @@ export async function globalSearch(query: string): Promise<SearchResults> {
         )
       ORDER BY a.created_at DESC
       LIMIT 20`,
-    )) as unknown as { rows: Omit<SearchResult, 'type'>[] }
+    )) as unknown as Omit<SearchResult, 'type'>[]
 
     // Search creators
     const creatorRows = (await platformDb.execute(
@@ -74,7 +74,7 @@ export async function globalSearch(query: string): Promise<SearchResults> {
         genre,
         created_at as "createdAt"
       FROM zonga_creators
-      WHERE org_id = ${ctx.orgId}
+      WHERE status = 'active'
         AND (
           LOWER(display_name) LIKE ${pattern}
           OR LOWER(genre) LIKE ${pattern}
@@ -82,7 +82,7 @@ export async function globalSearch(query: string): Promise<SearchResults> {
         )
       ORDER BY created_at DESC
       LIMIT 20`,
-    )) as unknown as { rows: Omit<SearchResult, 'type'>[] }
+    )) as unknown as Omit<SearchResult, 'type'>[]
 
     // Search events
     const eventRows = (await platformDb.execute(
@@ -94,7 +94,7 @@ export async function globalSearch(query: string): Promise<SearchResults> {
         NULL as genre,
         created_at as "createdAt"
       FROM zonga_events
-      WHERE org_id = ${ctx.orgId}
+      WHERE status = 'published'
         AND (
           LOWER(title) LIKE ${pattern}
           OR LOWER(venue) LIKE ${pattern}
@@ -102,7 +102,7 @@ export async function globalSearch(query: string): Promise<SearchResults> {
         )
       ORDER BY created_at DESC
       LIMIT 20`,
-    )) as unknown as { rows: Omit<SearchResult, 'type'>[] }
+    )) as unknown as Omit<SearchResult, 'type'>[]
 
     // Search playlists
     const playlistRows = (await platformDb.execute(
@@ -114,19 +114,19 @@ export async function globalSearch(query: string): Promise<SearchResults> {
         NULL as genre,
         created_at as "createdAt"
       FROM zonga_playlists
-      WHERE org_id = ${ctx.orgId}
+      WHERE visibility = 'public'
         AND (
           LOWER(title) LIKE ${pattern}
           OR LOWER(description) LIKE ${pattern}
         )
       ORDER BY created_at DESC
       LIMIT 20`,
-    )) as unknown as { rows: Omit<SearchResult, 'type'>[] }
+    )) as unknown as Omit<SearchResult, 'type'>[]
 
-    const assets = (assetRows.rows ?? []).map((r) => ({ ...r, type: 'asset' as const }))
-    const creators = (creatorRows.rows ?? []).map((r) => ({ ...r, type: 'creator' as const }))
-    const events = (eventRows.rows ?? []).map((r) => ({ ...r, type: 'event' as const }))
-    const playlists = (playlistRows.rows ?? []).map((r) => ({ ...r, type: 'playlist' as const }))
+    const assets = assetRows.map((r) => ({ ...r, type: 'asset' as const }))
+    const creators = creatorRows.map((r) => ({ ...r, type: 'creator' as const }))
+    const events = eventRows.map((r) => ({ ...r, type: 'event' as const }))
+    const playlists = playlistRows.map((r) => ({ ...r, type: 'playlist' as const }))
 
     return {
       assets,
@@ -144,7 +144,7 @@ export async function globalSearch(query: string): Promise<SearchResults> {
 /* ─── Trending / Featured ─── */
 
 export async function getTrending(): Promise<SearchResult[]> {
-  const ctx = await resolveOrgContext()
+  await resolveListenerContext()
 
   try {
     // Assets with most favorites in the last 30 days
@@ -160,13 +160,13 @@ export async function getTrending(): Promise<SearchResult[]> {
       LEFT JOIN zonga_listener_favorites f
         ON f.entity_id = a.id AND f.entity_type = 'asset'
         AND f.created_at >= NOW() - INTERVAL '30 days'
-      WHERE a.org_id = ${ctx.orgId} AND a.status = 'published'
+      WHERE a.status = 'published'
       GROUP BY a.id, a.title, c.display_name, a.genre
       ORDER BY fav_count DESC
       LIMIT 10`,
-    )) as unknown as { rows: Array<{ id: string; title: string; subtitle: string; genre: string }> }
+    )) as unknown as Array<{ id: string; title: string; subtitle: string; genre: string }>
 
-    return (rows.rows ?? []).map((r) => ({
+    return rows.map((r) => ({
       ...r,
       type: 'asset' as const,
     }))
@@ -179,9 +179,10 @@ export async function getTrending(): Promise<SearchResult[]> {
 /* ─── Recently Played ─── */
 
 export async function getRecentlyPlayed(): Promise<SearchResult[]> {
-  const ctx = await resolveOrgContext()
+  const ctx = await resolveListenerContext()
 
   try {
+    const listenerId = await resolveListenerUUID(ctx)
     const rows = (await platformDb.execute(
       sql`SELECT
         a.id,
@@ -192,15 +193,14 @@ export async function getRecentlyPlayed(): Promise<SearchResult[]> {
       FROM zonga_listener_activity la
       JOIN zonga_content_assets a ON a.id = la.entity_id
       LEFT JOIN zonga_creators c ON c.id = a.creator_id
-      WHERE la.listener_id = ${ctx.actorId}
-        AND la.org_id = ${ctx.orgId}
+      WHERE la.listener_id = ${listenerId}
         AND la.activity_type = 'stream'
         AND la.entity_type = 'asset'
       ORDER BY la.created_at DESC
       LIMIT 20`,
-    )) as unknown as { rows: Omit<SearchResult, 'type'>[] }
+    )) as unknown as Omit<SearchResult, 'type'>[]
 
-    return (rows.rows ?? []).map((r) => ({ ...r, type: 'asset' as const }))
+    return rows.map((r) => ({ ...r, type: 'asset' as const }))
   } catch (error) {
     logger.error('getRecentlyPlayed failed', { error })
     return []

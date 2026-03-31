@@ -25,7 +25,7 @@ export default async function PlaylistDetailPage({
   return (
     <div className="space-y-6">
       {/* Back Link */}
-      <Link href="../playlists" className="inline-flex items-center gap-1 text-sm text-gray-500 hover:text-navy transition">
+      <Link href="../playlists" className="inline-flex items-center gap-1 text-sm text-muted-foreground hover:text-foreground transition">
         ← All Playlists
       </Link>
 
@@ -36,23 +36,23 @@ export default async function PlaylistDetailPage({
             🎶
           </div>
           <div>
-            <h1 className="text-2xl font-bold text-navy">{playlist.title}</h1>
+            <h1 className="text-2xl font-bold text-foreground">{playlist.title}</h1>
             {playlist.description && (
-              <p className="text-gray-500 mt-1">{playlist.description}</p>
+              <p className="text-muted-foreground mt-1">{playlist.description}</p>
             )}
             <div className="flex items-center gap-2 mt-2">
               <span className={`inline-flex rounded-full px-2 py-0.5 text-xs font-medium ${
                 playlist.visibility === 'public'
                   ? 'bg-emerald-500/10 text-emerald-600'
-                  : 'bg-gray-100 text-gray-500'
+                  : 'bg-muted text-muted-foreground'
               }`}>
                 {playlist.visibility === 'public' ? 'Public' : 'Private'}
               </span>
-              <span className="text-xs text-gray-400">
+              <span className="text-xs text-muted-foreground/70">
                 {tracks.length} track{tracks.length !== 1 ? 's' : ''}
               </span>
               {playlist.genre && (
-                <span className="inline-flex rounded-full bg-navy/10 px-2 py-0.5 text-[10px] text-navy">
+                <span className="inline-flex rounded-full bg-navy/10 px-2 py-0.5 text-[10px] text-foreground">
                   {playlist.genre.replace(/_/g, ' ')}
                 </span>
               )}
@@ -65,20 +65,20 @@ export default async function PlaylistDetailPage({
       <div className="grid grid-cols-2 sm:grid-cols-3 gap-4">
         <Card>
           <div className="p-5">
-            <p className="text-xs text-gray-500">Tracks</p>
-            <p className="text-2xl font-bold text-navy">{tracks.length}</p>
+            <p className="text-xs text-muted-foreground">Tracks</p>
+            <p className="text-2xl font-bold text-foreground">{tracks.length}</p>
           </div>
         </Card>
         <Card>
           <div className="p-5">
-            <p className="text-xs text-gray-500">Visibility</p>
-            <p className="text-2xl font-bold text-navy">{playlist.visibility === 'public' ? 'Public' : 'Private'}</p>
+            <p className="text-xs text-muted-foreground">Visibility</p>
+            <p className="text-2xl font-bold text-foreground">{playlist.visibility === 'public' ? 'Public' : 'Private'}</p>
           </div>
         </Card>
         <Card>
           <div className="p-5">
-            <p className="text-xs text-gray-500">Created</p>
-            <p className="text-lg font-bold text-navy">
+            <p className="text-xs text-muted-foreground">Created</p>
+            <p className="text-lg font-bold text-foreground">
               {playlist.createdAt
                 ? new Date(playlist.createdAt).toLocaleDateString('en-CA')
                 : '—'}
@@ -91,7 +91,7 @@ export default async function PlaylistDetailPage({
       <Card>
         <div className="p-5">
           <div className="flex items-center justify-between mb-4">
-            <h2 className="text-sm font-semibold text-navy">🎵 Tracks</h2>
+            <h2 className="text-sm font-semibold text-foreground">🎵 Tracks</h2>
             <Link
               href={`../../catalog?addToPlaylist=${id}`}
               className="text-xs text-electric hover:underline"
@@ -102,7 +102,7 @@ export default async function PlaylistDetailPage({
 
           {tracks.length === 0 ? (
             <div className="py-8 text-center">
-              <p className="text-sm text-gray-500">No tracks in this playlist yet.</p>
+              <p className="text-sm text-muted-foreground">No tracks in this playlist yet.</p>
               <Link
                 href={`../../catalog?addToPlaylist=${id}`}
                 className="mt-3 inline-flex items-center gap-1 rounded-lg bg-electric px-4 py-2 text-sm font-medium text-white"
@@ -115,16 +115,16 @@ export default async function PlaylistDetailPage({
               {tracks.map((track, idx) => (
                 <div key={track.id} className="flex items-center justify-between py-3">
                   <div className="flex items-center gap-3">
-                    <span className="w-6 text-center text-xs font-medium text-gray-400">
+                    <span className="w-6 text-center text-xs font-medium text-muted-foreground/70">
                       {idx + 1}
                     </span>
                     <div>
-                      <p className="text-sm font-medium text-navy">{track.title}</p>
-                      <p className="text-xs text-gray-500">{track.creatorName ?? 'Unknown artist'}</p>
+                      <p className="text-sm font-medium text-foreground">{track.title}</p>
+                      <p className="text-xs text-muted-foreground">{track.creatorName ?? 'Unknown artist'}</p>
                     </div>
                   </div>
                   {track.genre && (
-                    <span className="rounded-full bg-navy/10 px-2 py-0.5 text-[10px] text-navy">
+                    <span className="rounded-full bg-navy/10 px-2 py-0.5 text-[10px] text-foreground">
                       {track.genre.replace(/_/g, ' ')}
                     </span>
                   )}

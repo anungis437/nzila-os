@@ -161,7 +161,7 @@ function Stepper({ current }: { current: Step }) {
       {STEPS.map((s, i) => (
         <div key={s.key} className="flex items-center gap-2">
           {i > 0 && (
-            <div className={`h-0.5 w-8 rounded-full transition-colors ${i <= idx ? 'bg-electric' : 'bg-gray-200'}`} />
+            <div className={`h-0.5 w-8 rounded-full transition-colors ${i <= idx ? 'bg-electric' : 'bg-muted'}`} />
           )}
           <div className="flex items-center gap-1.5">
             <div className={`flex h-7 w-7 items-center justify-center rounded-full text-xs font-bold transition-colors ${
@@ -169,11 +169,11 @@ function Stepper({ current }: { current: Step }) {
                 ? 'bg-emerald-500 text-white'
                 : i === idx
                   ? 'bg-electric text-white'
-                  : 'bg-gray-200 text-gray-500'
+                  : 'bg-muted text-muted-foreground'
             }`}>
               {i < idx ? '✓' : i + 1}
             </div>
-            <span className={`text-sm font-medium ${i <= idx ? 'text-navy' : 'text-gray-400'}`}>
+            <span className={`text-sm font-medium ${i <= idx ? 'text-foreground' : 'text-muted-foreground/70'}`}>
               {s.label}
             </span>
           </div>
@@ -280,14 +280,14 @@ export default function UploadPage() {
           <div className="inline-flex h-20 w-20 items-center justify-center rounded-full bg-emerald-500/10 text-5xl mb-4">
             ✅
           </div>
-          <h2 className="text-2xl font-bold text-navy">Upload Complete</h2>
-          <p className="text-gray-500 mt-2 max-w-md mx-auto">
+          <h2 className="text-2xl font-bold text-foreground">Upload Complete</h2>
+          <p className="text-muted-foreground mt-2 max-w-md mx-auto">
             Your content is now in the catalog as a draft. Review it and publish when ready.
           </p>
           {uploadResult?.sha256 && (
             <div className="mt-4 max-w-md mx-auto">
-              <p className="text-xs text-gray-400 mb-1">Content Fingerprint (SHA-256)</p>
-              <p className="text-xs font-mono text-gray-500 bg-gray-50 px-3 py-2 rounded-lg break-all">
+              <p className="text-xs text-muted-foreground/70 mb-1">Content Fingerprint (SHA-256)</p>
+              <p className="text-xs font-mono text-muted-foreground bg-muted px-3 py-2 rounded-lg break-all">
                 {uploadResult.sha256}
               </p>
             </div>
@@ -308,7 +308,7 @@ export default function UploadPage() {
                 setUploadProgress('idle')
                 setError(null)
               }}
-              className="border border-gray-200 text-navy px-6 py-2.5 rounded-lg text-sm font-medium hover:bg-gray-50 transition"
+              className="border border-border text-foreground px-6 py-2.5 rounded-lg text-sm font-medium hover:bg-muted/50 transition"
             >
               Upload Another
             </button>
@@ -324,10 +324,10 @@ export default function UploadPage() {
     <div className="max-w-2xl mx-auto">
       <Stepper current={step} />
 
-      <h1 className="text-2xl font-bold text-navy mb-2">
+      <h1 className="text-2xl font-bold text-foreground mb-2">
         {step === 'meta' ? 'New Content' : 'Upload Files'}
       </h1>
-      <p className="text-gray-500 text-sm mb-6">
+      <p className="text-muted-foreground text-sm mb-6">
         {step === 'meta'
           ? 'Fill in the track or content details before uploading your files.'
           : 'Upload your audio file and optional cover art.'}
@@ -339,7 +339,7 @@ export default function UploadPage() {
           <form onSubmit={handleMetaSubmit} className="p-6 space-y-5">
             {/* Type Selector (visual chips) */}
             <div>
-              <label className="block text-sm font-medium text-gray-700 mb-2">Content Type</label>
+              <label className="block text-sm font-medium text-foreground mb-2">Content Type</label>
               <div className="flex flex-wrap gap-2">
                 {ASSET_TYPES.map((t) => (
                   <label key={t.value} className="cursor-pointer">
@@ -354,7 +354,7 @@ export default function UploadPage() {
                     <span className={`inline-flex items-center gap-1.5 rounded-lg px-4 py-2 text-sm font-medium transition-all ${
                       selectedType === t.value
                         ? 'bg-electric text-white shadow-sm'
-                        : 'bg-gray-100 text-gray-600 hover:bg-gray-200'
+                        : 'bg-muted text-muted-foreground hover:bg-muted'
                     }`}>
                       {t.icon} {t.label}
                     </span>
@@ -365,11 +365,11 @@ export default function UploadPage() {
 
             {/* Title */}
             <div>
-              <label className="block text-sm font-medium text-gray-700 mb-1">Title</label>
+              <label className="block text-sm font-medium text-foreground mb-1">Title</label>
               <input
                 name="title"
                 required
-                className="w-full rounded-lg border border-gray-200 px-3 py-2 text-sm focus:ring-2 focus:ring-electric focus:border-transparent"
+                className="w-full rounded-lg border border-border px-3 py-2 text-sm focus:ring-2 focus:ring-electric focus:border-transparent"
                 placeholder="Track or album title"
               />
             </div>
@@ -377,10 +377,10 @@ export default function UploadPage() {
             {/* Genre + Language */}
             <div className="grid grid-cols-1 sm:grid-cols-2 gap-4">
               <div>
-                <label className="block text-sm font-medium text-gray-700 mb-1">Genre</label>
+                <label className="block text-sm font-medium text-foreground mb-1">Genre</label>
                 <select
                   name="genre"
-                  className="w-full rounded-lg border border-gray-200 px-3 py-2 text-sm focus:ring-2 focus:ring-electric focus:border-transparent"
+                  className="w-full rounded-lg border border-border px-3 py-2 text-sm focus:ring-2 focus:ring-electric focus:border-transparent"
                 >
                   <option value="">Select genre</option>
                   {GENRE_GROUPS.map((group) => (
@@ -393,10 +393,10 @@ export default function UploadPage() {
                 </select>
               </div>
               <div>
-                <label className="block text-sm font-medium text-gray-700 mb-1">Language</label>
+                <label className="block text-sm font-medium text-foreground mb-1">Language</label>
                 <select
                   name="language"
-                  className="w-full rounded-lg border border-gray-200 px-3 py-2 text-sm focus:ring-2 focus:ring-electric focus:border-transparent"
+                  className="w-full rounded-lg border border-border px-3 py-2 text-sm focus:ring-2 focus:ring-electric focus:border-transparent"
                 >
                   <option value="">Select language</option>
                   {LANGUAGES.map((l) => (
@@ -409,20 +409,20 @@ export default function UploadPage() {
             {/* Creator + Duration */}
             <div className="grid grid-cols-1 sm:grid-cols-2 gap-4">
               <div>
-                <label className="block text-sm font-medium text-gray-700 mb-1">Creator / Artist</label>
+                <label className="block text-sm font-medium text-foreground mb-1">Creator / Artist</label>
                 <input
                   name="creatorName"
-                  className="w-full rounded-lg border border-gray-200 px-3 py-2 text-sm focus:ring-2 focus:ring-electric focus:border-transparent"
+                  className="w-full rounded-lg border border-border px-3 py-2 text-sm focus:ring-2 focus:ring-electric focus:border-transparent"
                   placeholder="Artist name"
                 />
               </div>
               <div>
-                <label className="block text-sm font-medium text-gray-700 mb-1">Duration (seconds)</label>
+                <label className="block text-sm font-medium text-foreground mb-1">Duration (seconds)</label>
                 <input
                   name="duration"
                   type="number"
                   min="0"
-                  className="w-full rounded-lg border border-gray-200 px-3 py-2 text-sm focus:ring-2 focus:ring-electric focus:border-transparent"
+                  className="w-full rounded-lg border border-border px-3 py-2 text-sm focus:ring-2 focus:ring-electric focus:border-transparent"
                   placeholder="e.g. 210"
                 />
               </div>
@@ -430,7 +430,7 @@ export default function UploadPage() {
 
             {/* Collaborators / Featuring */}
             <div>
-              <label className="block text-sm font-medium text-gray-700 mb-1">
+              <label className="block text-sm font-medium text-foreground mb-1">
                 Collaborators / Featuring
               </label>
               <div className="flex gap-2">
@@ -443,13 +443,13 @@ export default function UploadPage() {
                       addCollaborator()
                     }
                   }}
-                  className="flex-1 rounded-lg border border-gray-200 px-3 py-2 text-sm focus:ring-2 focus:ring-electric focus:border-transparent"
+                  className="flex-1 rounded-lg border border-border px-3 py-2 text-sm focus:ring-2 focus:ring-electric focus:border-transparent"
                   placeholder="Add artist name and press Enter"
                 />
                 <button
                   type="button"
                   onClick={addCollaborator}
-                  className="rounded-lg bg-gray-100 px-3 py-2 text-sm font-medium text-gray-600 hover:bg-gray-200 transition"
+                  className="rounded-lg bg-muted px-3 py-2 text-sm font-medium text-muted-foreground hover:bg-muted transition"
                 >
                   Add
                 </button>
@@ -491,7 +491,7 @@ export default function UploadPage() {
               <button
                 type="button"
                 onClick={() => router.back()}
-                className="px-6 py-2.5 rounded-lg text-sm font-medium border border-gray-200 text-gray-600 hover:bg-gray-50 transition"
+                className="px-6 py-2.5 rounded-lg text-sm font-medium border border-border text-muted-foreground hover:bg-muted/50 transition"
               >
                 Cancel
               </button>
@@ -505,32 +505,32 @@ export default function UploadPage() {
         <Card>
           <form onSubmit={handleFileUpload} className="p-6 space-y-6">
             {/* Audio File */}
-            <div className="rounded-lg border-2 border-dashed border-gray-200 p-6 text-center hover:border-electric transition-colors">
+            <div className="rounded-lg border-2 border-dashed border-border p-6 text-center hover:border-electric transition-colors">
               <div className="text-3xl mb-2">🎵</div>
-              <label className="block text-sm font-medium text-gray-700 mb-2">Audio File</label>
+              <label className="block text-sm font-medium text-foreground mb-2">Audio File</label>
               <input
                 name="file"
                 type="file"
                 required
                 accept=".wav,.flac,.mp3,.aac,.ogg"
-                className="w-full text-sm text-gray-500 file:mr-3 file:py-2 file:px-4 file:rounded-lg file:border-0 file:text-sm file:font-medium file:bg-electric file:text-white hover:file:bg-electric/90"
+                className="w-full text-sm text-muted-foreground file:mr-3 file:py-2 file:px-4 file:rounded-lg file:border-0 file:text-sm file:font-medium file:bg-electric file:text-white hover:file:bg-electric/90"
               />
-              <p className="mt-2 text-xs text-gray-400">
+              <p className="mt-2 text-xs text-muted-foreground/70">
                 WAV, FLAC, MP3, AAC, or OGG · Max 500 MB · Lossless recommended
               </p>
             </div>
 
             {/* Cover Art */}
-            <div className="rounded-lg border-2 border-dashed border-gray-200 p-6 text-center hover:border-gold transition-colors">
+            <div className="rounded-lg border-2 border-dashed border-border p-6 text-center hover:border-gold transition-colors">
               <div className="text-3xl mb-2">🖼️</div>
-              <label className="block text-sm font-medium text-gray-700 mb-2">Cover Art (optional)</label>
+              <label className="block text-sm font-medium text-foreground mb-2">Cover Art (optional)</label>
               <input
                 name="cover"
                 type="file"
                 accept=".jpg,.jpeg,.png,.webp"
-                className="w-full text-sm text-gray-500 file:mr-3 file:py-2 file:px-4 file:rounded-lg file:border-0 file:text-sm file:font-medium file:bg-gray-100 file:text-gray-700 hover:file:bg-gray-200"
+                className="w-full text-sm text-muted-foreground file:mr-3 file:py-2 file:px-4 file:rounded-lg file:border-0 file:text-sm file:font-medium file:bg-muted file:text-foreground hover:file:bg-muted"
               />
-              <p className="mt-2 text-xs text-gray-400">
+              <p className="mt-2 text-xs text-muted-foreground/70">
                 JPG, PNG, or WebP · Max 10 MB · 3000×3000 recommended
               </p>
             </div>
@@ -564,7 +564,7 @@ export default function UploadPage() {
                   setStep('meta')
                   setError(null)
                 }}
-                className="px-6 py-2.5 rounded-lg text-sm font-medium border border-gray-200 text-gray-600 hover:bg-gray-50 transition"
+                className="px-6 py-2.5 rounded-lg text-sm font-medium border border-border text-muted-foreground hover:bg-muted/50 transition"
               >
                 ← Back
               </button>

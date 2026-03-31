@@ -59,8 +59,8 @@ export default async function AnalyticsPage() {
   return (
     <div className="space-y-8">
       <div>
-        <h1 className="text-2xl font-bold text-navy">Analytics</h1>
-        <p className="text-gray-500 mt-1">
+        <h1 className="text-2xl font-bold text-foreground">Analytics</h1>
+        <p className="text-muted-foreground mt-1">
           Platform performance &amp; content metrics
         </p>
       </div>
@@ -72,13 +72,13 @@ export default async function AnalyticsPage() {
             icon: '🎧',
             label: 'Total Streams',
             value: formatCompact(analytics.totalStreams ?? 0),
-            color: 'text-navy',
+            color: 'text-foreground',
           },
           {
             icon: '⬇️',
             label: 'Downloads',
             value: formatCompact(analytics.totalDownloads ?? 0),
-            color: 'text-navy',
+            color: 'text-foreground',
           },
           {
             icon: '💰',
@@ -90,14 +90,14 @@ export default async function AnalyticsPage() {
             icon: '👤',
             label: 'Unique Listeners',
             value: formatCompact(analytics.uniqueListeners ?? 0),
-            color: 'text-navy',
+            color: 'text-foreground',
           },
         ].map((kpi) => (
           <Card key={kpi.label}>
             <div className="p-5">
               <div className="flex items-center gap-2 mb-1">
                 <span className="text-lg">{kpi.icon}</span>
-                <p className="text-xs text-gray-500">{kpi.label}</p>
+                <p className="text-xs text-muted-foreground">{kpi.label}</p>
               </div>
               <p className={`text-2xl font-bold ${kpi.color}`}>{kpi.value}</p>
             </div>
@@ -117,9 +117,9 @@ export default async function AnalyticsPage() {
             <div className="p-5">
               <div className="flex items-center gap-2 mb-1">
                 <span className="text-lg">{kpi.icon}</span>
-                <p className="text-xs text-gray-500">{kpi.label}</p>
+                <p className="text-xs text-muted-foreground">{kpi.label}</p>
               </div>
-              <p className="text-2xl font-bold text-navy">
+              <p className="text-2xl font-bold text-foreground">
                 {formatCompact(kpi.value)}
               </p>
             </div>
@@ -130,13 +130,13 @@ export default async function AnalyticsPage() {
       <div className="grid grid-cols-1 lg:grid-cols-3 gap-6">
         {/* Monthly Revenue — 2/3 */}
         <div className="lg:col-span-2">
-          <h2 className="text-lg font-semibold text-navy mb-3">
+          <h2 className="text-lg font-semibold text-foreground mb-3">
             📊 Monthly Revenue
           </h2>
           {(analytics.revenueByMonth ?? []).length === 0 ? (
             <Card>
               <div className="p-8 text-center">
-                <p className="text-gray-500 text-sm">
+                <p className="text-muted-foreground text-sm">
                   No monthly revenue data yet.
                 </p>
               </div>
@@ -155,16 +155,16 @@ export default async function AnalyticsPage() {
                     const width = (m.amount / max) * 100
                     return (
                       <div key={m.month} className="flex items-center gap-3">
-                        <span className="w-20 text-xs text-gray-500 font-mono shrink-0">
+                        <span className="w-20 text-xs text-muted-foreground font-mono shrink-0">
                           {m.month}
                         </span>
-                        <div className="flex-1 h-6 bg-gray-100 rounded-full overflow-hidden">
+                        <div className="flex-1 h-6 bg-muted rounded-full overflow-hidden">
                           <div
                             className="h-full bg-electric rounded-full transition-all"
                             style={{ width: `${Math.max(width, 2)}%` }}
                           />
                         </div>
-                        <span className="w-24 text-right text-xs font-semibold text-navy shrink-0">
+                        <span className="w-24 text-right text-xs font-semibold text-foreground shrink-0">
                           {formatUSD(m.amount)}
                         </span>
                       </div>
@@ -177,7 +177,7 @@ export default async function AnalyticsPage() {
 
         {/* Geographic Breakdown — 1/3 */}
         <div>
-          <h2 className="text-lg font-semibold text-navy mb-3">
+          <h2 className="text-lg font-semibold text-foreground mb-3">
             🌍 Regional Streams
           </h2>
           <Card>
@@ -185,14 +185,14 @@ export default async function AnalyticsPage() {
               {regionStats.map((r) => (
                 <div key={r.label}>
                   <div className="flex justify-between text-xs mb-1">
-                    <span className="text-gray-600">
+                    <span className="text-muted-foreground">
                       {r.emoji} {r.label}
                     </span>
-                    <span className="font-medium text-navy">
+                    <span className="font-medium text-foreground">
                       {formatCompact(r.streams)} ({r.pct}%)
                     </span>
                   </div>
-                  <div className="h-2 bg-gray-100 rounded-full overflow-hidden">
+                  <div className="h-2 bg-muted rounded-full overflow-hidden">
                     <div
                       className="h-full bg-electric/80 rounded-full"
                       style={{ width: `${r.pct}%` }}
@@ -209,13 +209,13 @@ export default async function AnalyticsPage() {
       <div className="grid grid-cols-1 lg:grid-cols-2 gap-6">
         {/* Top Assets */}
         <div>
-          <h2 className="text-lg font-semibold text-navy mb-3">
+          <h2 className="text-lg font-semibold text-foreground mb-3">
             🏆 Top Tracks
           </h2>
           {(analytics.topAssets ?? []).length === 0 ? (
             <Card>
               <div className="p-8 text-center">
-                <p className="text-gray-500 text-sm">
+                <p className="text-muted-foreground text-sm">
                   No asset data available yet.
                 </p>
               </div>
@@ -232,23 +232,23 @@ export default async function AnalyticsPage() {
                   return (
                     <div
                       key={a.assetId}
-                      className="flex items-center gap-3 px-5 py-3 hover:bg-gray-50 transition"
+                      className="flex items-center gap-3 px-5 py-3 hover:bg-muted/50 transition"
                     >
-                      <span className="w-6 text-center text-xs font-bold text-gray-400">
+                      <span className="w-6 text-center text-xs font-bold text-muted-foreground/70">
                         {i + 1}
                       </span>
                       <div className="flex-1 min-w-0">
-                        <p className="text-sm font-medium text-navy truncate">
+                        <p className="text-sm font-medium text-foreground truncate">
                           {a.title ?? 'Untitled'}
                         </p>
-                        <div className="h-1.5 bg-gray-100 rounded-full overflow-hidden mt-1">
+                        <div className="h-1.5 bg-muted rounded-full overflow-hidden mt-1">
                           <div
                             className="h-full bg-electric rounded-full"
                             style={{ width: `${barWidth}%` }}
                           />
                         </div>
                       </div>
-                      <span className="text-xs font-semibold text-navy shrink-0 tabular-nums">
+                      <span className="text-xs font-semibold text-foreground shrink-0 tabular-nums">
                         {formatCompact(a.streams)}
                       </span>
                     </div>
@@ -261,13 +261,13 @@ export default async function AnalyticsPage() {
 
         {/* Top Creators */}
         <div>
-          <h2 className="text-lg font-semibold text-navy mb-3">
+          <h2 className="text-lg font-semibold text-foreground mb-3">
             🎤 Top Creators
           </h2>
           {(analytics.topCreators ?? []).length === 0 ? (
             <Card>
               <div className="p-8 text-center">
-                <p className="text-gray-500 text-sm">
+                <p className="text-muted-foreground text-sm">
                   No creator data available yet.
                 </p>
               </div>
@@ -285,23 +285,23 @@ export default async function AnalyticsPage() {
                     <Link
                       key={c.creatorId}
                       href={`creators/${c.creatorId}`}
-                      className="flex items-center gap-3 px-5 py-3 hover:bg-gray-50 transition"
+                      className="flex items-center gap-3 px-5 py-3 hover:bg-muted/50 transition"
                     >
-                      <span className="w-6 text-center text-xs font-bold text-gray-400">
+                      <span className="w-6 text-center text-xs font-bold text-muted-foreground/70">
                         {i + 1}
                       </span>
                       <div className="flex-1 min-w-0">
-                        <p className="text-sm font-medium text-navy truncate">
+                        <p className="text-sm font-medium text-foreground truncate">
                           {c.name}
                         </p>
-                        <div className="h-1.5 bg-gray-100 rounded-full overflow-hidden mt-1">
+                        <div className="h-1.5 bg-muted rounded-full overflow-hidden mt-1">
                           <div
                             className="h-full bg-emerald-400 rounded-full"
                             style={{ width: `${barWidth}%` }}
                           />
                         </div>
                       </div>
-                      <span className="text-xs font-semibold text-navy shrink-0 tabular-nums">
+                      <span className="text-xs font-semibold text-foreground shrink-0 tabular-nums">
                         {formatCompact(c.streams)}
                       </span>
                     </Link>

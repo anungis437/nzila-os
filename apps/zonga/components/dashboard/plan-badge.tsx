@@ -4,12 +4,12 @@
 import type { ListenerPlan, CreatorPlan } from '@/lib/plans'
 
 const PLAN_STYLES: Record<string, { bg: string; text: string; icon: string }> = {
-  free: { bg: 'bg-gray-100', text: 'text-gray-600', icon: '🎵' },
+  free: { bg: 'bg-muted', text: 'text-muted-foreground', icon: '🎵' },
   premium: { bg: 'bg-gold/10', text: 'text-gold', icon: '⭐' },
   starter: { bg: 'bg-electric/10', text: 'text-electric', icon: '🎤' },
   pro_creator: { bg: 'bg-purple-500/10', text: 'text-purple-600', icon: '🎵' },
   business: { bg: 'bg-amber-500/10', text: 'text-amber-600', icon: '🏷️' },
-  enterprise: { bg: 'bg-navy/10', text: 'text-navy', icon: '🏢' },
+  enterprise: { bg: 'bg-foreground/10', text: 'text-foreground', icon: '🏢' },
 }
 
 export function PlanBadge({ plan }: { plan: ListenerPlan | CreatorPlan }) {

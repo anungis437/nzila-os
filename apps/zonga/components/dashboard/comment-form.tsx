@@ -30,12 +30,12 @@ export function CommentForm({ assetId }: { assetId: string }) {
         value={content}
         onChange={(e) => setContent(e.target.value)}
         placeholder="Add a comment…"
-        className="flex-1 rounded-lg border border-gray-200 px-3 py-2 text-sm text-navy placeholder:text-gray-400 focus:border-electric focus:outline-none focus:ring-1 focus:ring-electric/20"
+        className="flex-1 rounded-lg border border-border px-3 py-2 text-sm text-foreground placeholder:text-muted-foreground focus:border-electric focus:outline-none focus:ring-1 focus:ring-electric/20"
       />
       <button
         type="submit"
         disabled={pending || !content.trim()}
-        className="rounded-lg bg-navy px-4 py-2 text-sm font-medium text-white hover:bg-navy/90 transition-colors disabled:opacity-50"
+        className="rounded-lg bg-foreground px-4 py-2 text-sm font-medium text-background hover:bg-foreground/90 transition-colors disabled:opacity-50"
       >
         {pending ? '…' : 'Post'}
       </button>

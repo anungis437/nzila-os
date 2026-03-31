@@ -33,8 +33,8 @@ export default async function NotificationsPage() {
     <div className="space-y-6">
       <div className="flex items-center justify-between">
         <div>
-          <h1 className="text-2xl font-bold text-navy">Notifications</h1>
-          <p className="mt-1 text-sm text-gray-500">
+          <h1 className="text-2xl font-bold text-foreground">Notifications</h1>
+          <p className="mt-1 text-sm text-muted-foreground">
             {unreadCount > 0 ? `${unreadCount} unread` : 'All caught up'}
           </p>
         </div>
@@ -45,8 +45,8 @@ export default async function NotificationsPage() {
         <Card>
           <div className="p-12 text-center">
             <p className="text-4xl">🔔</p>
-            <p className="mt-3 text-sm font-medium text-navy">No notifications yet</p>
-            <p className="mt-1 text-xs text-gray-500">
+            <p className="mt-3 text-sm font-medium text-foreground">No notifications yet</p>
+            <p className="mt-1 text-xs text-muted-foreground">
               You&apos;ll see updates about your releases, payouts, and social activity here.
             </p>
           </div>
@@ -65,17 +65,17 @@ export default async function NotificationsPage() {
                 </span>
                 <div className="flex-1 min-w-0">
                   <div className="flex items-center gap-2">
-                    <p className={`text-sm font-medium ${!n.read ? 'text-navy' : 'text-gray-700'}`}>
+                    <p className={`text-sm font-medium ${!n.read ? 'text-foreground' : 'text-muted-foreground'}`}>
                       {n.title}
                     </p>
                     {!n.read && (
-                      <span className="flex-shrink-0 w-2 h-2 rounded-full bg-electric" />
+                      <span className="shrink-0 w-2 h-2 rounded-full bg-electric" />
                     )}
                   </div>
                   {n.body && (
-                    <p className="mt-0.5 text-xs text-gray-500 truncate">{n.body}</p>
+                    <p className="mt-0.5 text-xs text-muted-foreground truncate">{n.body}</p>
                   )}
-                  <p className="mt-1 text-xs text-gray-400">
+                  <p className="mt-1 text-xs text-muted-foreground/70">
                     {n.createdAt
                       ? new Date(n.createdAt).toLocaleDateString('en-CA', {
                           month: 'short',

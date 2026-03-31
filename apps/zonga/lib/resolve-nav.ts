@@ -7,8 +7,7 @@
  */
 import { auth, currentUser } from '@clerk/nextjs/server'
 import { platformDb } from '@nzila/db/platform'
-import { orgs, orgMembers } from '@nzila/db'
-import { eq, and } from 'drizzle-orm'
+import { sql } from 'drizzle-orm'
 import type { ZongaRole } from '@nzila/zonga-core/types'
 
 /** Clerk user IDs that always receive admin role. */
@@ -28,32 +27,62 @@ export interface NavContext {
   role: ZongaRole
   isPlatformOrg: boolean
   locale: string
+  /** True when the user has a row in zonga_creators (even without an org). */
+  hasCreatorProfile: boolean
 }
 
 export async function resolveNavContext(locale: string): Promise<NavContext | null> {
   const { userId, orgId, orgRole, sessionClaims } = await auth()
 
-  if (!userId || !orgId) return null
+  if (!userId) return null
 
-  // Resolve platform UUID
+  // When the user has no active org, check for a creator profile.
+  // Creators without an org still get 'creator' role so they see Creator Studio nav.
+  if (!orgId) {
+    let hasCreatorProfile = false
+    try {
+      const { sql } = await import('drizzle-orm')
+      const rows = (await platformDb.execute(
+        sql`SELECT 1 FROM zonga_creators WHERE user_id = ${userId} LIMIT 1`,
+      )) as unknown as { '?column?': number }[]
+      hasCreatorProfile = rows.length > 0
+    } catch {
+      // DB failure — conservative default
+    }
+
+    // Check publicMetadata from both sessionClaims and currentUser() for zongaRole
+    const claimsMeta = (sessionClaims as { publicMetadata?: { zongaRole?: string } } | undefined)
+      ?.publicMetadata?.zongaRole
+    let metaRole = claimsMeta
+    if (!metaRole) {
+      const user = await currentUser()
+      metaRole = (user?.publicMetadata as { zongaRole?: string } | undefined)?.zongaRole
+    }
+
+    const isCreator = hasCreatorProfile || metaRole === 'creator'
+    const role: ZongaRole = isCreator ? 'creator' : 'viewer'
+
+    return { role, isPlatformOrg: false, locale, hasCreatorProfile: hasCreatorProfile || isCreator }
+  }
+
+  // Resolve platform UUID — raw SQL against actual `organizations` table
   let platformOrgId: string | null = null
   let isPlatformOrg = false
   try {
-    const org = await platformDb
-      .select({ id: orgs.id, legalName: orgs.legalName })
-      .from(orgs)
-      .where(eq(orgs.clerkOrgId, orgId))
-      .limit(1)
+    const org = await platformDb.execute(
+      sql`SELECT id, name FROM organizations WHERE clerk_org_id = ${orgId} LIMIT 1`,
+    )
 
-    platformOrgId = org[0]?.id ?? null
-    isPlatformOrg = org[0]?.legalName === PLATFORM_ORG_NAME
+    const row = org[0] as { id: string; name: string } | undefined
+    platformOrgId = row?.id ?? null
+    isPlatformOrg = row?.name?.startsWith(PLATFORM_ORG_NAME) ?? false
   } catch {
     // DB failure — fall through to Clerk-only resolution
   }
 
   // 1. PLATFORM_ADMIN_USER_IDS
   if (PLATFORM_ADMIN_USER_IDS.has(userId)) {
-    return { role: 'admin', isPlatformOrg, locale }
+    return { role: 'admin', isPlatformOrg, locale, hasCreatorProfile: true }
   }
 
   // 2. SUPER_ADMIN_EMAILS
@@ -61,21 +90,20 @@ export async function resolveNavContext(locale: string): Promise<NavContext | nu
   const email =
     user?.primaryEmailAddress?.emailAddress ?? user?.emailAddresses?.[0]?.emailAddress
   if (email && SUPER_ADMIN_EMAILS.has(email.toLowerCase())) {
-    return { role: 'admin', isPlatformOrg, locale }
+    return { role: 'admin', isPlatformOrg, locale, hasCreatorProfile: true }
   }
 
-  // 3. DB org_members
+  // 3. DB organization_members
   if (platformOrgId) {
     try {
-      const member = await platformDb
-        .select({ role: orgMembers.role })
-        .from(orgMembers)
-        .where(and(eq(orgMembers.orgId, platformOrgId), eq(orgMembers.clerkUserId, userId)))
-        .limit(1)
+      const member = await platformDb.execute(
+        sql`SELECT role FROM organization_members WHERE organization_id = ${platformOrgId} AND user_id = ${userId} LIMIT 1`,
+      )
 
-      if (member[0]?.role) {
-        const mapped = mapDbRole(member[0].role)
-        if (mapped) return { role: mapped, isPlatformOrg, locale }
+      const memberRow = member[0] as { role: string } | undefined
+      if (memberRow?.role) {
+        const mapped = mapDbRole(memberRow.role)
+        if (mapped) return { role: mapped, isPlatformOrg, locale, hasCreatorProfile: true }
       }
     } catch {
       // fall through
@@ -83,15 +111,28 @@ export async function resolveNavContext(locale: string): Promise<NavContext | nu
   }
 
   // 4/5. Clerk metadata / orgRole
-  const role = mapClerkRole(orgRole, sessionClaims)
-  return { role, isPlatformOrg, locale }
+  // sessionClaims may not include publicMetadata (depends on JWT template),
+  // so also check currentUser() which always has it.
+  let role = mapClerkRole(orgRole, sessionClaims)
+  if (role === 'viewer' && user) {
+    const userMeta = (user.publicMetadata as { zongaRole?: string } | undefined)?.zongaRole
+    if (userMeta && ['admin', 'creator', 'manager'].includes(userMeta)) {
+      role = userMeta as ZongaRole
+    }
+  }
+  return { role, isPlatformOrg, locale, hasCreatorProfile: role !== 'viewer' }
 }
 
 function mapDbRole(dbRole: string): ZongaRole | null {
   switch (dbRole) {
+    case 'admin':
     case 'org_admin': return 'admin'
+    case 'manager':
     case 'org_secretary': return 'manager'
+    case 'creator':
     case 'org_creator': return 'creator'
+    case 'member':
+    case 'viewer':
     case 'org_viewer': return 'viewer'
     default: return null
   }

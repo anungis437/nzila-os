@@ -42,7 +42,7 @@ export function LikeButton({
       className={`flex items-center gap-2 rounded-lg border px-4 py-2 text-sm font-medium transition-colors disabled:opacity-50 ${
         liked
           ? 'border-red-300 bg-red-50 text-red-600'
-          : 'border-gray-200 bg-white text-gray-700 hover:bg-gray-50'
+          : 'border-border bg-card text-foreground hover:bg-muted'
       }`}
     >
       {liked ? '❤️' : '🤍'} {count}

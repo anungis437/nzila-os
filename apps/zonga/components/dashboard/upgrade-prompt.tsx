@@ -20,10 +20,10 @@ export function UpgradePrompt({ feature, requiredPlan, locale }: UpgradePromptPr
         <span className="text-lg">🔒</span>
       </div>
       <div className="flex-1 min-w-0">
-        <p className="text-sm font-semibold text-navy">
+        <p className="text-sm font-semibold text-foreground">
           {feature} requires {requiredPlan}
         </p>
-        <p className="text-xs text-gray-500 mt-0.5">
+        <p className="text-xs text-muted-foreground mt-0.5">
           Upgrade your plan to unlock this feature.
         </p>
       </div>

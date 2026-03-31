@@ -26,7 +26,7 @@ function ResultCard({ result, locale }: { result: SearchResult; locale: string }
   return (
     <Link href={`/${locale}/dashboard/${config.basePath}/${result.id}`}>
       <Card>
-        <div className="flex items-center gap-4 p-4 hover:bg-gray-50 transition-colors rounded-lg">
+        <div className="flex items-center gap-4 p-4 hover:bg-muted/50 transition-colors rounded-lg">
           {result.type === 'asset' ? (
             <PlayButton
               track={toPlayerTrack({
@@ -40,14 +40,14 @@ function ResultCard({ result, locale }: { result: SearchResult; locale: string }
             <span className="text-2xl">{config.icon}</span>
           )}
           <div className="flex-1 min-w-0">
-            <p className="text-sm font-medium text-navy truncate">{result.title ?? 'Untitled'}</p>
+            <p className="text-sm font-medium text-foreground truncate">{result.title ?? 'Untitled'}</p>
             {result.subtitle && (
-              <p className="text-xs text-gray-500 truncate">{result.subtitle}</p>
+              <p className="text-xs text-muted-foreground truncate">{result.subtitle}</p>
             )}
           </div>
           <div className="flex items-center gap-2 flex-shrink-0">
             {result.genre && (
-              <span className="rounded-full bg-navy/10 px-2 py-0.5 text-xs text-navy">
+              <span className="rounded-full bg-navy/10 px-2 py-0.5 text-xs text-foreground">
                 {result.genre.replace(/_/g, ' ')}
               </span>
             )}
@@ -90,8 +90,8 @@ export default function SearchPage() {
   return (
     <div className="space-y-6">
       <div>
-        <h1 className="text-2xl font-bold text-navy">Search & Discovery</h1>
-        <p className="mt-1 text-sm text-gray-500">
+        <h1 className="text-2xl font-bold text-foreground">Search & Discovery</h1>
+        <p className="mt-1 text-sm text-muted-foreground">
           Search tracks, creators, events, and playlists across the platform.
         </p>
       </div>
@@ -103,13 +103,13 @@ export default function SearchPage() {
           value={query}
           onChange={(e) => handleSearch(e.target.value)}
           placeholder="Search by name, genre, city, or keyword…"
-          className="w-full rounded-xl border border-gray-200 bg-white px-5 py-3 pl-12 text-sm text-navy shadow-sm placeholder:text-gray-400 focus:border-electric focus:outline-none focus:ring-2 focus:ring-electric/20"
+          className="w-full rounded-xl border border-border bg-card px-5 py-3 pl-12 text-sm text-foreground shadow-sm placeholder:text-muted-foreground focus:border-electric focus:outline-none focus:ring-2 focus:ring-electric/20"
         />
-        <span className="absolute left-4 top-1/2 -translate-y-1/2 text-gray-400">
+        <span className="absolute left-4 top-1/2 -translate-y-1/2 text-muted-foreground/70">
           🔍
         </span>
         {pending && (
-          <span className="absolute right-4 top-1/2 -translate-y-1/2 text-xs text-gray-400">
+          <span className="absolute right-4 top-1/2 -translate-y-1/2 text-xs text-muted-foreground/70">
             Searching…
           </span>
         )}
@@ -118,7 +118,7 @@ export default function SearchPage() {
       {/* Results */}
       {results && results.total > 0 && (
         <div className="space-y-6">
-          <p className="text-xs text-gray-500">
+          <p className="text-xs text-muted-foreground">
             {results.total} result{results.total !== 1 ? 's' : ''} found
           </p>
 
@@ -127,7 +127,7 @@ export default function SearchPage() {
             if (!items || items.length === 0) return null
             return (
               <div key={key}>
-                <h2 className="mb-2 text-sm font-semibold text-navy">{label}</h2>
+                <h2 className="mb-2 text-sm font-semibold text-foreground">{label}</h2>
                 <div className="space-y-1">
                   {items.map((r) => (
                     <ResultCard key={r.id} result={r} locale={locale} />
@@ -144,8 +144,8 @@ export default function SearchPage() {
         <Card>
           <div className="p-12 text-center">
             <p className="text-4xl">🔍</p>
-            <p className="mt-3 text-sm font-medium text-navy">No results found</p>
-            <p className="mt-1 text-xs text-gray-500">
+            <p className="mt-3 text-sm font-medium text-foreground">No results found</p>
+            <p className="mt-1 text-xs text-muted-foreground">
               Try a different search term or browse by category.
             </p>
           </div>
@@ -157,10 +157,10 @@ export default function SearchPage() {
         <Card>
           <div className="p-12 text-center">
             <p className="text-4xl">🌍</p>
-            <p className="mt-3 text-sm font-medium text-navy">
+            <p className="mt-3 text-sm font-medium text-foreground">
               Discover African music & culture
             </p>
-            <p className="mt-1 text-xs text-gray-500">
+            <p className="mt-1 text-xs text-muted-foreground">
               Search for afrobeats, rumba, highlife, amapiano, and more.
             </p>
           </div>

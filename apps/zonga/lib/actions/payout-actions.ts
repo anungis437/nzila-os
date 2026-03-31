@@ -136,9 +136,9 @@ export async function computeRoyaltySplits(
       FROM zonga_royalty_splits
       WHERE release_id = ${releaseId} AND org_id = ${ctx.orgId}
       ORDER BY share_percent DESC`,
-    )) as unknown as { rows: Array<{ creatorId: string; creatorName: string; sharePercent: number }> }
+    )) as unknown as Array<{ creatorId: string; creatorName: string; sharePercent: number }>
 
-    const splits = splitRows.rows ?? []
+    const splits = splitRows
     if (splits.length === 0) return null
 
     // Fetch total revenue for this release (org-scoped)
@@ -172,6 +172,11 @@ export async function executeRoyaltySplitPayout(
   releaseId: string,
 ): Promise<{ success: boolean; payoutCount: number }> {
   const ctx = await resolveOrgContext()
+
+  if (ctx.role !== 'admin') {
+    logger.warn('executeRoyaltySplitPayout denied: admin role required', { role: ctx.role, actorId: ctx.actorId })
+    return { success: false, payoutCount: 0 }
+  }
 
   try {
     const result = await computeRoyaltySplits(releaseId)
@@ -241,7 +246,7 @@ export async function listPayouts(opts?: {
       WHERE org_id = ${ctx.orgId} ${creatorFilter}
       ORDER BY created_at DESC
       LIMIT 25 OFFSET ${offset}`,
-    )) as unknown as { rows: Payout[] }
+    )) as unknown as Payout[]
 
     const [totals] = (await platformDb.execute(
       sql`SELECT
@@ -252,7 +257,7 @@ export async function listPayouts(opts?: {
     )) as unknown as [{ total: number; total_paid: number }]
 
     return {
-      payouts: rows.rows ?? [],
+      payouts: rows,
       total: Number(totals?.total ?? 0),
       totalPaid: Number(totals?.total_paid ?? 0),
     }
@@ -328,6 +333,11 @@ export async function executePayout(data: {
   creatorName?: string
 }): Promise<{ success: boolean; transferId?: string; error?: unknown }> {
   const ctx = await resolveOrgContext()
+
+  if (ctx.role !== 'admin') {
+    logger.warn('executePayout denied: admin role required', { role: ctx.role, actorId: ctx.actorId })
+    return { success: false, error: 'Forbidden: admin role required to execute payouts' }
+  }
 
   const result = await executeCommand({
     type: 'execute_payout' as const,

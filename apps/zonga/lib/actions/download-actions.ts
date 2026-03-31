@@ -6,7 +6,7 @@
  */
 'use server'
 
-import { resolveOrgContext } from '@/lib/resolve-org'
+import { resolveListenerContext } from '@/lib/resolve-org'
 import { platformDb } from '@nzila/db/platform'
 import { sql } from 'drizzle-orm'
 import { logger } from '@/lib/logger'
@@ -25,7 +25,7 @@ export interface DownloadResult {
  * Gated by S4 (premium only) and S6 (active subscription).
  */
 export async function requestDownload(assetId: string): Promise<DownloadResult> {
-  const ctx = await resolveOrgContext()
+  const ctx = await resolveListenerContext()
 
   try {
     const planInfo = await getListenerPlan(ctx.actorId, ctx.orgId)
@@ -46,7 +46,7 @@ export async function requestDownload(assetId: string): Promise<DownloadResult> 
     const [asset] = (await platformDb.execute(
       sql`SELECT storage_url, title
       FROM zonga_content_assets
-      WHERE id = ${assetId} AND org_id = ${ctx.orgId} AND status = 'published'`,
+      WHERE id = ${assetId} AND status = 'published'`,
     )) as unknown as [{ storage_url: string | null; title: string } | undefined]
 
     if (!asset?.storage_url) {
@@ -78,7 +78,7 @@ export async function requestDownload(assetId: string): Promise<DownloadResult> 
  * Check whether the current listener can download content (without generating a URL).
  */
 export async function canDownload(): Promise<{ allowed: boolean; reason?: string }> {
-  const ctx = await resolveOrgContext()
+  const ctx = await resolveListenerContext()
 
   const planInfo = await getListenerPlan(ctx.actorId, ctx.orgId)
   const check = guardCanDownload(planInfo.plan)

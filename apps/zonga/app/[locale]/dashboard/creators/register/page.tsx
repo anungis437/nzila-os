@@ -172,12 +172,12 @@ export default function RegisterCreatorPage() {
   }
 
   const inputClass =
-    'w-full rounded-lg border border-gray-200 px-3 py-2 text-sm focus:ring-2 focus:ring-electric focus:border-transparent'
+    'w-full rounded-lg border border-border px-3 py-2 text-sm focus:ring-2 focus:ring-electric focus:border-transparent'
 
   return (
     <div className="max-w-2xl">
-      <h1 className="text-2xl font-bold text-navy mb-2">Register Creator</h1>
-      <p className="text-gray-500 text-sm mb-6">
+      <h1 className="text-2xl font-bold text-foreground mb-2">Register Creator</h1>
+      <p className="text-muted-foreground text-sm mb-6">
         Onboard a new artist or rights-holder onto the Zonga platform.
       </p>
 
@@ -193,14 +193,14 @@ export default function RegisterCreatorPage() {
                 ? 'bg-electric/10 border-2 border-electric'
                 : i < step
                   ? 'bg-emerald-50 border-2 border-emerald-400 cursor-pointer'
-                  : 'bg-gray-50 border-2 border-gray-200'
+                  : 'bg-muted border-2 border-border'
             }`}
           >
-            <span className="text-xs font-semibold text-gray-500">
+            <span className="text-xs font-semibold text-muted-foreground">
               Step {i + 1}
             </span>
-            <p className="text-sm font-medium text-navy">{s.label}</p>
-            <p className="text-xs text-gray-400">{s.description}</p>
+            <p className="text-sm font-medium text-foreground">{s.label}</p>
+            <p className="text-xs text-muted-foreground/70">{s.description}</p>
           </button>
         ))}
       </div>
@@ -211,7 +211,7 @@ export default function RegisterCreatorPage() {
           <div className={step !== 0 ? 'hidden' : undefined}>
             <div className="space-y-4">
               <div>
-                <label className="block text-sm font-medium text-gray-700 mb-1">
+                <label className="block text-sm font-medium text-foreground mb-1">
                   Artist / Creator Name *
                 </label>
                 <input
@@ -223,7 +223,7 @@ export default function RegisterCreatorPage() {
               </div>
 
               <div>
-                <label className="block text-sm font-medium text-gray-700 mb-1">
+                <label className="block text-sm font-medium text-foreground mb-1">
                   Email *
                 </label>
                 <input
@@ -236,7 +236,7 @@ export default function RegisterCreatorPage() {
               </div>
 
               <div>
-                <label className="block text-sm font-medium text-gray-700 mb-1">
+                <label className="block text-sm font-medium text-foreground mb-1">
                   Bio
                 </label>
                 <textarea
@@ -254,7 +254,7 @@ export default function RegisterCreatorPage() {
             <div className="space-y-4">
               <div className="grid grid-cols-1 sm:grid-cols-2 gap-4">
                 <div>
-                  <label className="block text-sm font-medium text-gray-700 mb-1">
+                  <label className="block text-sm font-medium text-foreground mb-1">
                     Primary Genre
                   </label>
                   <select name="genre" className={inputClass}>
@@ -272,7 +272,7 @@ export default function RegisterCreatorPage() {
                 </div>
 
                 <div>
-                  <label className="block text-sm font-medium text-gray-700 mb-1">
+                  <label className="block text-sm font-medium text-foreground mb-1">
                     Country
                   </label>
                   <select name="country" className={inputClass}>
@@ -288,7 +288,7 @@ export default function RegisterCreatorPage() {
 
               <div className="grid grid-cols-1 sm:grid-cols-2 gap-4">
                 <div>
-                  <label className="block text-sm font-medium text-gray-700 mb-1">
+                  <label className="block text-sm font-medium text-foreground mb-1">
                     Primary Language
                   </label>
                   <select name="language" className={inputClass}>
@@ -302,7 +302,7 @@ export default function RegisterCreatorPage() {
                 </div>
 
                 <div>
-                  <label className="block text-sm font-medium text-gray-700 mb-1">
+                  <label className="block text-sm font-medium text-foreground mb-1">
                     Preferred Payout Rail
                   </label>
                   <select name="payoutRail" className={inputClass}>
@@ -329,7 +329,7 @@ export default function RegisterCreatorPage() {
               <button
                 type="button"
                 onClick={() => setStep(step - 1)}
-                className="px-6 py-2.5 rounded-lg text-sm font-medium border border-gray-200 text-gray-600 hover:bg-gray-50 transition"
+                className="px-6 py-2.5 rounded-lg text-sm font-medium border border-border text-muted-foreground hover:bg-muted/50 transition"
               >
                 Back
               </button>
@@ -348,7 +348,7 @@ export default function RegisterCreatorPage() {
             <button
               type="button"
               onClick={() => router.back()}
-              className="px-6 py-2.5 rounded-lg text-sm font-medium border border-gray-200 text-gray-600 hover:bg-gray-50 transition"
+              className="px-6 py-2.5 rounded-lg text-sm font-medium border border-border text-muted-foreground hover:bg-muted/50 transition"
             >
               Cancel
             </button>

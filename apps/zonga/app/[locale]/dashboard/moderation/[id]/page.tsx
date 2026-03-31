@@ -19,7 +19,7 @@ function severityBadge(severity: string) {
     critical: 'bg-red-100 text-red-700',
     high: 'bg-orange-100 text-orange-700',
     medium: 'bg-yellow-100 text-yellow-700',
-    low: 'bg-gray-100 text-gray-600',
+    low: 'bg-muted text-muted-foreground',
   }
   return (
     <span className={`inline-block rounded-full px-2.5 py-1 text-xs font-medium ${colors[severity] ?? colors.low}`}>
@@ -33,7 +33,7 @@ function statusBadge(status: string) {
     open: 'bg-blue-100 text-blue-700',
     under_review: 'bg-purple-100 text-purple-700',
     resolved: 'bg-green-100 text-green-700',
-    dismissed: 'bg-gray-100 text-gray-600',
+    dismissed: 'bg-muted text-muted-foreground',
     escalated: 'bg-red-100 text-red-700',
   }
   return (
@@ -66,7 +66,7 @@ export default async function ModerationCaseDetailPage({
     <div className="space-y-8">
       <Link
         href="../"
-        className="inline-flex items-center gap-1 text-sm text-gray-500 hover:text-navy"
+        className="inline-flex items-center gap-1 text-sm text-muted-foreground hover:text-foreground"
       >
         ← Back to Moderation
       </Link>
@@ -74,13 +74,13 @@ export default async function ModerationCaseDetailPage({
       {/* Header */}
       <div className="flex items-center justify-between">
         <div>
-          <h1 className="text-2xl font-bold text-navy">
+          <h1 className="text-2xl font-bold text-foreground">
             🔒 Case: {modCase.caseType.replace(/_/g, ' ')}
           </h1>
           <div className="mt-1 flex items-center gap-2">
             {severityBadge(modCase.severity)}
             {statusBadge(modCase.status)}
-            <span className="text-xs text-gray-400">
+            <span className="text-xs text-muted-foreground/70">
               ID: {id.slice(0, 12)}…
             </span>
           </div>
@@ -93,43 +93,43 @@ export default async function ModerationCaseDetailPage({
           {/* Case Details */}
           <Card>
             <div className="p-5">
-              <h2 className="mb-3 text-sm font-semibold text-navy">📋 Case Details</h2>
+              <h2 className="mb-3 text-sm font-semibold text-foreground">📋 Case Details</h2>
               <dl className="space-y-3 text-sm">
                 <div className="grid grid-cols-3 gap-2">
-                  <dt className="text-gray-500">Case Type</dt>
-                  <dd className="col-span-2 font-medium text-navy">
+                  <dt className="text-muted-foreground">Case Type</dt>
+                  <dd className="col-span-2 font-medium text-foreground">
                     {modCase.caseType.replace(/_/g, ' ')}
                   </dd>
                 </div>
                 <div className="grid grid-cols-3 gap-2">
-                  <dt className="text-gray-500">Entity Type</dt>
-                  <dd className="col-span-2 text-navy">{modCase.entityType}</dd>
+                  <dt className="text-muted-foreground">Entity Type</dt>
+                  <dd className="col-span-2 text-foreground">{modCase.entityType}</dd>
                 </div>
                 <div className="grid grid-cols-3 gap-2">
-                  <dt className="text-gray-500">Target Entity</dt>
-                  <dd className="col-span-2 font-mono text-xs text-navy">
+                  <dt className="text-muted-foreground">Target Entity</dt>
+                  <dd className="col-span-2 font-mono text-xs text-foreground">
                     {modCase.targetEntityId}
                   </dd>
                 </div>
                 <div className="grid grid-cols-3 gap-2">
-                  <dt className="text-gray-500">Severity</dt>
+                  <dt className="text-muted-foreground">Severity</dt>
                   <dd className="col-span-2">{severityBadge(modCase.severity)}</dd>
                 </div>
                 <div className="grid grid-cols-3 gap-2">
-                  <dt className="text-gray-500">Status</dt>
+                  <dt className="text-muted-foreground">Status</dt>
                   <dd className="col-span-2">{statusBadge(modCase.status)}</dd>
                 </div>
                 {modCase.assignedTo && (
                   <div className="grid grid-cols-3 gap-2">
-                    <dt className="text-gray-500">Assigned To</dt>
-                    <dd className="col-span-2 font-mono text-xs text-navy">
+                    <dt className="text-muted-foreground">Assigned To</dt>
+                    <dd className="col-span-2 font-mono text-xs text-foreground">
                       {modCase.assignedTo}
                     </dd>
                   </div>
                 )}
                 <div className="grid grid-cols-3 gap-2">
-                  <dt className="text-gray-500">Created</dt>
-                  <dd className="col-span-2 text-navy">
+                  <dt className="text-muted-foreground">Created</dt>
+                  <dd className="col-span-2 text-foreground">
                     {modCase.createdAt
                       ? new Date(modCase.createdAt).toLocaleString()
                       : '—'}
@@ -137,17 +137,17 @@ export default async function ModerationCaseDetailPage({
                 </div>
                 {modCase.resolvedAt && (
                   <div className="grid grid-cols-3 gap-2">
-                    <dt className="text-gray-500">Resolved</dt>
-                    <dd className="col-span-2 text-navy">
+                    <dt className="text-muted-foreground">Resolved</dt>
+                    <dd className="col-span-2 text-foreground">
                       {new Date(modCase.resolvedAt).toLocaleString()}
                     </dd>
                   </div>
                 )}
               </dl>
               {modCase.notes && (
-                <div className="mt-4 rounded-lg bg-gray-50 p-3">
-                  <p className="text-xs font-medium text-gray-500 mb-1">Notes</p>
-                  <p className="text-sm text-navy whitespace-pre-wrap">{modCase.notes}</p>
+                <div className="mt-4 rounded-lg bg-muted p-3">
+                  <p className="text-xs font-medium text-muted-foreground mb-1">Notes</p>
+                  <p className="text-sm text-foreground whitespace-pre-wrap">{modCase.notes}</p>
                 </div>
               )}
             </div>
@@ -156,11 +156,11 @@ export default async function ModerationCaseDetailPage({
           {/* Related Integrity Signals */}
           <Card>
             <div className="p-5">
-              <h2 className="mb-3 text-sm font-semibold text-navy">
+              <h2 className="mb-3 text-sm font-semibold text-foreground">
                 🚨 Related Integrity Signals ({signals.length})
               </h2>
               {signals.length === 0 ? (
-                <p className="py-4 text-center text-sm text-gray-400">
+                <p className="py-4 text-center text-sm text-muted-foreground/70">
                   No integrity signals for this entity
                 </p>
               ) : (
@@ -168,16 +168,16 @@ export default async function ModerationCaseDetailPage({
                   {signals.map((s) => (
                     <div key={s.id} className="py-3 flex items-center justify-between">
                       <div>
-                        <p className="text-sm font-medium text-navy">
+                        <p className="text-sm font-medium text-foreground">
                           {s.signalType.replace(/_/g, ' ')}
                         </p>
-                        <p className="text-xs text-gray-500">
+                        <p className="text-xs text-muted-foreground">
                           {s.explanation ?? 'No details'}
                         </p>
                       </div>
                       <div className="flex items-center gap-2">
                         {severityBadge(s.severity)}
-                        <span className="text-xs text-gray-400">
+                        <span className="text-xs text-muted-foreground/70">
                           {s.createdAt
                             ? new Date(s.createdAt).toLocaleDateString()
                             : ''}
@@ -197,7 +197,7 @@ export default async function ModerationCaseDetailPage({
           {isOpen && (
             <Card>
               <div className="p-5">
-                <h2 className="mb-3 text-sm font-semibold text-navy">⚡ Actions</h2>
+                <h2 className="mb-3 text-sm font-semibold text-foreground">⚡ Actions</h2>
                 <ModerationActions caseId={id} currentStatus={modCase.status} />
               </div>
             </Card>
@@ -206,11 +206,11 @@ export default async function ModerationCaseDetailPage({
           {/* Timeline */}
           <Card>
             <div className="p-5">
-              <h2 className="mb-3 text-sm font-semibold text-navy">📅 Timeline</h2>
+              <h2 className="mb-3 text-sm font-semibold text-foreground">📅 Timeline</h2>
               <div className="space-y-3 text-sm">
                 <div className="flex items-center gap-2">
                   <span className="h-2 w-2 rounded-full bg-blue-500" />
-                  <span className="text-gray-600">
+                  <span className="text-muted-foreground">
                     Case opened{' '}
                     {modCase.createdAt
                       ? new Date(modCase.createdAt).toLocaleDateString()
@@ -220,7 +220,7 @@ export default async function ModerationCaseDetailPage({
                 {modCase.assignedTo && (
                   <div className="flex items-center gap-2">
                     <span className="h-2 w-2 rounded-full bg-purple-500" />
-                    <span className="text-gray-600">
+                    <span className="text-muted-foreground">
                       Assigned to {modCase.assignedTo.slice(0, 8)}…
                     </span>
                   </div>
@@ -228,7 +228,7 @@ export default async function ModerationCaseDetailPage({
                 {modCase.resolvedAt && (
                   <div className="flex items-center gap-2">
                     <span className="h-2 w-2 rounded-full bg-emerald-500" />
-                    <span className="text-gray-600">
+                    <span className="text-muted-foreground">
                       {modCase.status === 'dismissed' ? 'Dismissed' : 'Resolved'}{' '}
                       {new Date(modCase.resolvedAt).toLocaleDateString()}
                     </span>

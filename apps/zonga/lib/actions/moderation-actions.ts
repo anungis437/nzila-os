@@ -80,9 +80,9 @@ export async function listModerationCases(opts?: {
         CASE severity WHEN 'critical' THEN 0 WHEN 'high' THEN 1 WHEN 'medium' THEN 2 ELSE 3 END,
         created_at DESC
       LIMIT 200`,
-    )) as unknown as { rows: ModerationCase[] }
+    )) as unknown as ModerationCase[]
 
-    return rows.rows ?? []
+    return rows
   } catch (error) {
     logger.error('listModerationCases failed', { error })
     return []
@@ -245,9 +245,9 @@ export async function listIntegritySignals(opts?: {
       ${entityFilter} ${typeFilter} ${severityFilter}
       ORDER BY created_at DESC
       LIMIT 200`,
-    )) as unknown as { rows: IntegritySignal[] }
+    )) as unknown as IntegritySignal[]
 
-    return rows.rows ?? []
+    return rows
   } catch (error) {
     logger.error('listIntegritySignals failed', { error })
     return []

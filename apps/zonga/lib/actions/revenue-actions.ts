@@ -182,9 +182,9 @@ export async function getRevenueByCreator(): Promise<
       GROUP BY re.creator_id, COALESCE(c.display_name, re.creator_id)
       ORDER BY total DESC
       LIMIT 50`,
-    )) as unknown as { rows: Array<{ creatorId: string; creatorName: string; total: number; events: number }> }
+    )) as unknown as Array<{ creatorId: string; creatorName: string; total: number; events: number }>
 
-    return rows.rows ?? []
+    return rows
   } catch (error) {
     logger.error('getRevenueByCreator failed', { error })
     return []

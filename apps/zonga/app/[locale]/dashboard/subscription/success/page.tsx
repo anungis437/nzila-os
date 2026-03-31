@@ -22,10 +22,10 @@ export default async function SubscriptionSuccessPage({
       <Card>
         <div className="p-12 text-center max-w-md">
           <div className="text-6xl mb-6">🎉</div>
-          <h1 className="text-2xl font-bold text-navy mb-3">
+          <h1 className="text-2xl font-bold text-foreground mb-3">
             Welcome to Premium!
           </h1>
-          <p className="text-gray-500 mb-8">
+          <p className="text-muted-foreground mb-8">
             Your subscription is now active. Enjoy ad-free streaming, offline
             downloads, hi-fi audio, and exclusive releases.
           </p>
@@ -39,7 +39,7 @@ export default async function SubscriptionSuccessPage({
             </Link>
             <Link
               href={`/${locale}/dashboard/subscription`}
-              className="inline-flex w-full items-center justify-center gap-2 rounded-xl border border-gray-200 px-6 py-3 text-sm font-medium text-navy hover:bg-gray-50 transition-colors"
+              className="inline-flex w-full items-center justify-center gap-2 rounded-xl border border-border px-6 py-3 text-sm font-medium text-foreground hover:bg-muted/50 transition-colors"
             >
               Manage Subscription
             </Link>

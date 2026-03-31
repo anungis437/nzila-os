@@ -47,8 +47,8 @@ export default async function PayoutsPage({
     <div className="space-y-8">
       <div className="flex items-center justify-between">
         <div>
-          <h1 className="text-2xl font-bold text-navy">Payouts</h1>
-          <p className="text-gray-500 mt-1">Creator earnings and payout history</p>
+          <h1 className="text-2xl font-bold text-foreground">Payouts</h1>
+          <p className="text-muted-foreground mt-1">Creator earnings and payout history</p>
         </div>
         <a
           href="payouts/new"
@@ -62,20 +62,20 @@ export default async function PayoutsPage({
       <div className="grid grid-cols-1 sm:grid-cols-3 gap-4">
         <Card>
           <div className="p-5">
-            <p className="text-xs text-gray-500">Total Payouts</p>
-            <p className="text-2xl font-bold text-navy">{total}</p>
+            <p className="text-xs text-muted-foreground">Total Payouts</p>
+            <p className="text-2xl font-bold text-foreground">{total}</p>
           </div>
         </Card>
         <Card>
           <div className="p-5">
-            <p className="text-xs text-gray-500">Total Paid Out</p>
+            <p className="text-xs text-muted-foreground">Total Paid Out</p>
             <p className="text-2xl font-bold text-emerald-600">{formatAmount(Math.round(totalPaid * 100))}</p>
           </div>
         </Card>
         <Card>
           <div className="p-5">
-            <p className="text-xs text-gray-500">Average Payout</p>
-            <p className="text-2xl font-bold text-navy">
+            <p className="text-xs text-muted-foreground">Average Payout</p>
+            <p className="text-2xl font-bold text-foreground">
               {total > 0 ? formatAmount(Math.round((totalPaid / total) * 100)) : '—'}
             </p>
           </div>
@@ -86,8 +86,8 @@ export default async function PayoutsPage({
       {payouts.length === 0 ? (
         <Card>
           <div className="p-12 text-center">
-            <p className="font-semibold text-navy text-lg">No payouts yet</p>
-            <p className="text-gray-500 text-sm mt-1">
+            <p className="font-semibold text-foreground text-lg">No payouts yet</p>
+            <p className="text-muted-foreground text-sm mt-1">
               Artist payouts will appear here once earnings have been distributed.
             </p>
           </div>
@@ -96,21 +96,21 @@ export default async function PayoutsPage({
         <Card>
           <div className="overflow-x-auto">
             <table className="w-full text-left text-sm">
-              <thead className="border-b border-gray-100">
+              <thead className="border-b border-border">
                 <tr>
-                  <th className="px-5 py-3 text-xs font-medium text-gray-500">Creator</th>
-                  <th className="px-5 py-3 text-xs font-medium text-gray-500">Amount</th>
-                  <th className="px-5 py-3 text-xs font-medium text-gray-500">Rail</th>
-                  <th className="px-5 py-3 text-xs font-medium text-gray-500">Status</th>
-                  <th className="px-5 py-3 text-xs font-medium text-gray-500">Date</th>
-                  <th className="px-5 py-3 text-xs font-medium text-gray-500">Reference</th>
+                  <th className="px-5 py-3 text-xs font-medium text-muted-foreground">Creator</th>
+                  <th className="px-5 py-3 text-xs font-medium text-muted-foreground">Amount</th>
+                  <th className="px-5 py-3 text-xs font-medium text-muted-foreground">Rail</th>
+                  <th className="px-5 py-3 text-xs font-medium text-muted-foreground">Status</th>
+                  <th className="px-5 py-3 text-xs font-medium text-muted-foreground">Date</th>
+                  <th className="px-5 py-3 text-xs font-medium text-muted-foreground">Reference</th>
                 </tr>
               </thead>
               <tbody className="divide-y divide-gray-50">
                 {payouts.map((p: { id: string; creatorName?: string; creatorId?: string; amount?: number; currency?: string; payoutRail?: string | null; status?: string; createdAt?: string; stripeTransferId?: string; reference?: string }) => (
-                  <tr key={p.id} className="hover:bg-gray-50">
+                  <tr key={p.id} className="hover:bg-muted/50">
                     <td className="px-5 py-3">
-                      <span className="font-medium text-navy">
+                      <span className="font-medium text-foreground">
                         {p.creatorName ?? p.creatorId?.slice(0, 8) ?? '—'}
                       </span>
                     </td>
@@ -128,15 +128,15 @@ export default async function PayoutsPage({
                           ? 'bg-emerald-500/10 text-emerald-600'
                           : p.status === 'pending'
                             ? 'bg-amber-500/10 text-amber-600'
-                            : 'bg-gray-100 text-gray-500'
+                            : 'bg-muted text-muted-foreground'
                       }`}>
                         {(p.status ?? 'unknown').charAt(0).toUpperCase() + (p.status ?? 'unknown').slice(1)}
                       </span>
                     </td>
-                    <td className="px-5 py-3 text-gray-500">
+                    <td className="px-5 py-3 text-muted-foreground">
                       {p.createdAt ? new Date(p.createdAt).toLocaleDateString('en-CA') : '—'}
                     </td>
-                    <td className="px-5 py-3 text-xs text-gray-400 font-mono">
+                    <td className="px-5 py-3 text-xs text-muted-foreground/70 font-mono">
                       {(p.stripeTransferId ?? p.reference) ? (p.stripeTransferId ?? p.reference ?? '').slice(0, 16) + '…' : '—'}
                     </td>
                   </tr>

@@ -59,8 +59,8 @@ export default async function CatalogPage({
       {/* Header */}
       <div className="flex items-center justify-between">
         <div>
-          <h1 className="text-2xl font-bold text-navy">Catalog</h1>
-          <p className="text-gray-500 mt-1">{displayTotal} asset{displayTotal !== 1 ? 's' : ''} in your library{withCollaborators > 0 && ` · ${withCollaborators} with collaborators`}{languages.size > 0 && ` · ${languages.size} language${languages.size !== 1 ? 's' : ''}`}</p>
+          <h1 className="text-2xl font-bold text-foreground">Catalog</h1>
+          <p className="text-muted-foreground mt-1">{displayTotal} asset{displayTotal !== 1 ? 's' : ''} in your library{withCollaborators > 0 && ` · ${withCollaborators} with collaborators`}{languages.size > 0 && ` · ${languages.size} language${languages.size !== 1 ? 's' : ''}`}</p>
         </div>
         <Link
           href="catalog/upload"
@@ -78,7 +78,7 @@ export default async function CatalogPage({
             name="search"
             defaultValue={params.search ?? ''}
             placeholder="Search tracks, albums…"
-            className="w-full rounded-lg border border-gray-200 bg-white py-2 pl-4 pr-4 text-sm text-navy placeholder:text-gray-400 focus:outline-none focus:ring-2 focus:ring-electric/40"
+            className="w-full rounded-lg border border-border bg-card py-2 pl-4 pr-4 text-sm text-foreground placeholder:text-muted-foreground focus:outline-none focus:ring-2 focus:ring-electric/40"
           />
         </form>
         <div className="flex gap-2">
@@ -89,7 +89,7 @@ export default async function CatalogPage({
               className={`rounded-lg border px-3 py-1.5 text-xs font-medium transition-colors ${
                 (params.status ?? '') === (s === 'all' ? '' : s) || (!params.status && s === 'all')
                   ? 'border-electric bg-electric/10 text-electric'
-                  : 'border-gray-200 text-gray-500 hover:text-navy'
+                  : 'border-border text-muted-foreground hover:text-foreground'
               }`}
             >
               {s.charAt(0).toUpperCase() + s.slice(1)}
@@ -107,7 +107,7 @@ export default async function CatalogPage({
             className={`rounded-full px-3 py-1 text-xs font-medium transition-colors ${
               (params.genre ?? '') === g.value
                 ? 'bg-navy text-white'
-                : 'bg-gray-100 text-gray-600 hover:bg-gray-200'
+                : 'bg-muted text-muted-foreground hover:bg-muted'
             }`}
           >
             {g.label}
@@ -120,10 +120,10 @@ export default async function CatalogPage({
         <Card>
           <div className="p-12 text-center">
             <div className="text-5xl mb-4">🎵</div>
-            <p className="font-semibold text-navy text-lg">
+            <p className="font-semibold text-foreground text-lg">
               {params.search || params.genre ? 'No matching assets' : 'Your catalog is empty'}
             </p>
-            <p className="text-gray-500 text-sm mt-1">
+            <p className="text-muted-foreground text-sm mt-1">
               {params.search || params.genre ? 'Try different filters.' : 'Upload your first track to get started.'}
             </p>
             {!params.search && !params.genre && (
@@ -151,15 +151,15 @@ export default async function CatalogPage({
       {/* Pagination */}
       {total > 24 && (
         <div className="flex items-center justify-between">
-          <p className="text-sm text-gray-500">Page {page} · {total} total</p>
+          <p className="text-sm text-muted-foreground">Page {page} · {total} total</p>
           <div className="flex gap-2">
             {page > 1 && (
-              <Link href={`?page=${page - 1}`} className="rounded-lg border border-gray-200 px-3 py-1.5 text-xs font-medium text-navy hover:bg-gray-50">
+              <Link href={`?page=${page - 1}`} className="rounded-lg border border-border px-3 py-1.5 text-xs font-medium text-foreground hover:bg-muted/50">
                 Previous
               </Link>
             )}
             {hasMore && (
-              <Link href={`?page=${page + 1}`} className="rounded-lg border border-gray-200 px-3 py-1.5 text-xs font-medium text-navy hover:bg-gray-50">
+              <Link href={`?page=${page + 1}`} className="rounded-lg border border-border px-3 py-1.5 text-xs font-medium text-foreground hover:bg-muted/50">
                 Next
               </Link>
             )}

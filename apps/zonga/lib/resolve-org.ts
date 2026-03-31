@@ -68,6 +68,70 @@ export async function resolveOrgContext(): Promise<ZongaOrgContext> {
 }
 
 /**
+ * Lightweight context for listener-facing reads.
+ *
+ * Unlike `resolveOrgContext()`, this does NOT require an active
+ * organization. Listeners are individual users who browse cross-org
+ * content — they should never be forced to select a label.
+ *
+ * Actions that only need the authenticated user ID (and optionally
+ * an org hint for scoped sub-queries) should use this resolver.
+ *
+ * @throws Error('Unauthorized') if unauthenticated
+ */
+export interface ListenerContext {
+  actorId: string
+  /** Present only when the user has an active org selected. */
+  orgId: string | null
+}
+
+export async function resolveListenerContext(): Promise<ListenerContext> {
+  const { userId, orgId } = await auth()
+
+  if (!userId) {
+    throw new Error('Unauthorized')
+  }
+
+  return {
+    actorId: userId,
+    orgId: orgId ?? null,
+  }
+}
+
+/**
+ * Resolve the internal UUID for the current listener from zonga_listeners.
+ *
+ * Child tables (activity, follows, favorites, playlist_saves) use
+ * `listener_id` (UUID) as a FK → `zonga_listeners.id`.
+ * Clerk userId is stored in `zonga_listeners.user_id` (text).
+ *
+ * This helper returns the UUID `id`, creating the listener row on the
+ * fly via ensureListenerProfile when it doesn't exist yet.
+ */
+export async function resolveListenerUUID(ctx: ListenerContext): Promise<string> {
+  const { platformDb } = await import('@nzila/db/platform')
+  const { sql } = await import('drizzle-orm')
+
+  const [row] = (await platformDb.execute(
+    sql`SELECT id FROM zonga_listeners WHERE user_id = ${ctx.actorId} LIMIT 1`,
+  )) as unknown as [{ id: string } | undefined]
+
+  if (row) return row.id
+
+  // Auto-create a minimal listener profile (atomic upsert)
+  // org_id is a UUID FK — Clerk orgId is NOT a UUID, so always pass null here.
+  // The org_id can be linked later via org resolution if needed.
+  const [created] = (await platformDb.execute(
+    sql`INSERT INTO zonga_listeners (user_id, org_id, display_name)
+    VALUES (${ctx.actorId}, ${null}, 'Listener')
+    ON CONFLICT (user_id) DO UPDATE SET updated_at = NOW()
+    RETURNING id`,
+  )) as unknown as [{ id: string }]
+
+  return created.id
+}
+
+/**
  * Map Clerk organization role to ZongaRole.
  */
 function mapClerkRoleToZongaRole(

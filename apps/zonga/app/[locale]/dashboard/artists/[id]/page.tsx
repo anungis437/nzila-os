@@ -41,15 +41,15 @@ export default async function ArtistProfilePage({
     <div className="space-y-8">
       <Link
         href={`/${locale}/dashboard/browse`}
-        className="inline-flex items-center gap-1 text-sm text-gray-500 hover:text-navy"
+        className="inline-flex items-center gap-1 text-sm text-muted-foreground hover:text-foreground"
       >
         ← Back to Browse
       </Link>
 
       {/* Artist Hero */}
-      <div className="rounded-2xl bg-gradient-to-br from-navy via-navy/90 to-electric/70 p-8 text-white">
+      <div className="rounded-2xl bg-linear-to-br from-navy via-navy/90 to-electric/70 p-8 text-white">
         <div className="flex flex-col items-start gap-6 md:flex-row md:items-center">
-          <div className="h-28 w-28 flex-shrink-0 rounded-full bg-white/10 border-2 border-white/20 flex items-center justify-center">
+          <div className="h-28 w-28 shrink-0 rounded-full bg-white/10 border-2 border-white/20 flex items-center justify-center">
             <span className="text-5xl">🎤</span>
           </div>
           <div className="flex-1">
@@ -90,35 +90,35 @@ export default async function ArtistProfilePage({
         <div className="space-y-6 lg:col-span-2">
           <Card>
             <div className="p-5">
-              <h2 className="mb-4 text-sm font-semibold text-navy">
+              <h2 className="mb-4 text-sm font-semibold text-foreground">
                 📀 Discography ({creatorAssets.length})
               </h2>
               {creatorAssets.length === 0 ? (
-                <p className="text-xs text-gray-500">No published tracks yet.</p>
+                <p className="text-xs text-muted-foreground">No published tracks yet.</p>
               ) : (
                 <div className="space-y-2">
                   {creatorAssets.map((asset, i) => (
                     <Link
                       key={asset.id}
                       href={`/${locale}/dashboard/tracks/${asset.id}`}
-                      className="flex items-center gap-4 rounded-lg p-3 hover:bg-gray-50 transition-colors"
+                      className="flex items-center gap-4 rounded-lg p-3 hover:bg-muted/50 transition-colors"
                     >
-                      <span className="w-6 text-center text-xs text-gray-400">
+                      <span className="w-6 text-center text-xs text-muted-foreground/70">
                         {i + 1}
                       </span>
-                      <div className="h-10 w-10 flex-shrink-0 rounded bg-navy/10 flex items-center justify-center">
+                      <div className="h-10 w-10 shrink-0 rounded bg-navy/10 flex items-center justify-center">
                         <span>🎵</span>
                       </div>
                       <div className="flex-1 min-w-0">
-                        <p className="text-sm font-medium text-navy truncate">
+                        <p className="text-sm font-medium text-foreground truncate">
                           {asset.title}
                         </p>
-                        <p className="text-xs text-gray-500">
+                        <p className="text-xs text-muted-foreground">
                           {asset.type ?? 'Track'}
                           {asset.genre && ` · ${asset.genre.replace(/_/g, ' ')}`}
                         </p>
                       </div>
-                      <span className="text-xs text-gray-400">
+                      <span className="text-xs text-muted-foreground/70">
                         {((asset.metadata?.streams as number) ?? 0).toLocaleString()} plays
                       </span>
                     </Link>
@@ -134,24 +134,24 @@ export default async function ArtistProfilePage({
           {/* Bio / About */}
           <Card>
             <div className="p-5">
-              <h2 className="mb-3 text-sm font-semibold text-navy">📝 About</h2>
+              <h2 className="mb-3 text-sm font-semibold text-foreground">📝 About</h2>
               <dl className="space-y-2 text-xs">
                 <div>
-                  <dt className="text-gray-500">Status</dt>
-                  <dd className="font-medium text-navy capitalize">
+                  <dt className="text-muted-foreground">Status</dt>
+                  <dd className="font-medium text-foreground capitalize">
                     {creator.status ?? 'active'}
                   </dd>
                 </div>
                 {creator.bio && (
                   <div>
-                    <dt className="text-gray-500">Bio</dt>
-                    <dd className="font-medium text-navy">{creator.bio}</dd>
+                    <dt className="text-muted-foreground">Bio</dt>
+                    <dd className="font-medium text-foreground">{creator.bio}</dd>
                   </div>
                 )}
                 {creator.createdAt && (
                   <div>
-                    <dt className="text-gray-500">Joined</dt>
-                    <dd className="font-medium text-navy">
+                    <dt className="text-muted-foreground">Joined</dt>
+                    <dd className="font-medium text-foreground">
                       {new Date(creator.createdAt).toLocaleDateString('en-CA', {
                         year: 'numeric',
                         month: 'long',
@@ -166,23 +166,23 @@ export default async function ArtistProfilePage({
           {/* Social Stats */}
           <Card>
             <div className="p-5">
-              <h2 className="mb-3 text-sm font-semibold text-navy">📊 Social</h2>
+              <h2 className="mb-3 text-sm font-semibold text-foreground">📊 Social</h2>
               <div className="grid grid-cols-2 gap-3 text-center">
-                <div className="rounded-lg bg-gray-50 p-3">
-                  <p className="text-lg font-bold text-navy">{socialStats.followers}</p>
-                  <p className="text-xs text-gray-500">Followers</p>
+                <div className="rounded-lg bg-muted p-3">
+                  <p className="text-lg font-bold text-foreground">{socialStats.followers}</p>
+                  <p className="text-xs text-muted-foreground">Followers</p>
                 </div>
-                <div className="rounded-lg bg-gray-50 p-3">
-                  <p className="text-lg font-bold text-navy">{socialStats.following}</p>
-                  <p className="text-xs text-gray-500">Following</p>
+                <div className="rounded-lg bg-muted p-3">
+                  <p className="text-lg font-bold text-foreground">{socialStats.following}</p>
+                  <p className="text-xs text-muted-foreground">Following</p>
                 </div>
-                <div className="rounded-lg bg-gray-50 p-3">
-                  <p className="text-lg font-bold text-navy">{socialStats.comments}</p>
-                  <p className="text-xs text-gray-500">Comments</p>
+                <div className="rounded-lg bg-muted p-3">
+                  <p className="text-lg font-bold text-foreground">{socialStats.comments}</p>
+                  <p className="text-xs text-muted-foreground">Comments</p>
                 </div>
-                <div className="rounded-lg bg-gray-50 p-3">
-                  <p className="text-lg font-bold text-navy">{socialStats.likes}</p>
-                  <p className="text-xs text-gray-500">Likes</p>
+                <div className="rounded-lg bg-muted p-3">
+                  <p className="text-lg font-bold text-foreground">{socialStats.likes}</p>
+                  <p className="text-xs text-muted-foreground">Likes</p>
                 </div>
               </div>
             </div>

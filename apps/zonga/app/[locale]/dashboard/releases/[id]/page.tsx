@@ -107,7 +107,7 @@ export default async function ReleaseDetailPage({
       {/* Back nav */}
       <Link
         href="../releases"
-        className="inline-flex items-center gap-1 text-sm text-gray-500 hover:text-navy"
+        className="inline-flex items-center gap-1 text-sm text-muted-foreground hover:text-foreground"
       >
         ← Back to Releases
       </Link>
@@ -119,10 +119,10 @@ export default async function ReleaseDetailPage({
             {typeLabels[release.type as string]?.slice(0, 2) ?? '💿'}
           </span>
           <div>
-            <h1 className="text-2xl font-bold text-navy">
+            <h1 className="text-2xl font-bold text-foreground">
               {release.title as string}
             </h1>
-            <div className="mt-1 flex items-center gap-2 text-sm text-gray-500">
+            <div className="mt-1 flex items-center gap-2 text-sm text-muted-foreground">
               <StatusBadge status={(release.status as string) ?? 'draft'} />
               <span>
                 {typeLabels[(release.type as string) ?? ''] ?? String(release.type)}
@@ -160,11 +160,11 @@ export default async function ReleaseDetailPage({
           {/* Track Listing */}
           <Card>
             <div className="p-5">
-              <h2 className="mb-3 text-sm font-semibold text-navy">
+              <h2 className="mb-3 text-sm font-semibold text-foreground">
                 🎵 Track Listing ({String(release.trackCount ?? tracks.length)})
               </h2>
               {tracks.length === 0 ? (
-                <p className="text-center text-sm text-gray-500 py-8">
+                <p className="text-center text-sm text-muted-foreground py-8">
                   No tracks added yet. Add tracks from the{' '}
                   <Link href="../catalog" className="text-electric underline">
                     catalog
@@ -182,14 +182,14 @@ export default async function ReleaseDetailPage({
                         className="flex items-center justify-between py-3"
                       >
                         <div className="flex items-center gap-3">
-                          <span className="w-6 text-center text-xs font-medium text-gray-400">
+                          <span className="w-6 text-center text-xs font-medium text-muted-foreground/70">
                             {idx + 1}
                           </span>
                           <div>
-                            <p className="text-sm font-medium text-navy">
+                            <p className="text-sm font-medium text-foreground">
                               {track.title as string}
                             </p>
-                            <p className="text-xs text-gray-500">
+                            <p className="text-xs text-muted-foreground">
                               {track.creatorName as string}
                               {track.collaborators &&
                                 Array.isArray(track.collaborators) &&
@@ -206,7 +206,7 @@ export default async function ReleaseDetailPage({
                             </span>
                           ) : null}
                           {track.genre ? (
-                            <span className="rounded-full bg-navy/10 px-2 py-0.5 text-[10px] text-navy">
+                            <span className="rounded-full bg-navy/10 px-2 py-0.5 text-[10px] text-foreground">
                               {(track.genre as string).replace(/_/g, ' ')}
                             </span>
                           ) : null}
@@ -223,7 +223,7 @@ export default async function ReleaseDetailPage({
           <Card>
             <div className="p-5">
               <div className="flex items-center justify-between mb-3">
-                <h2 className="text-sm font-semibold text-navy">
+                <h2 className="text-sm font-semibold text-foreground">
                   💰 Royalty Splits
                 </h2>
                 <Link
@@ -234,7 +234,7 @@ export default async function ReleaseDetailPage({
                 </Link>
               </div>
               {royaltySplits.length === 0 ? (
-                <p className="text-center text-sm text-gray-500 py-6">
+                <p className="text-center text-sm text-muted-foreground py-6">
                   No royalty splits configured. All revenue goes to the primary
                   creator.
                 </p>
@@ -243,28 +243,28 @@ export default async function ReleaseDetailPage({
                   {royaltySplits.map((split) => (
                     <div
                       key={split.creatorId}
-                      className="flex items-center justify-between rounded-lg bg-gray-50 px-4 py-3"
+                      className="flex items-center justify-between rounded-lg bg-muted px-4 py-3"
                     >
                       <div>
-                        <p className="text-sm font-medium text-navy">
+                        <p className="text-sm font-medium text-foreground">
                           {split.displayName}
                         </p>
-                        <p className="text-xs text-gray-500">{split.role}</p>
+                        <p className="text-xs text-muted-foreground">{split.role}</p>
                       </div>
                       <div className="flex items-center gap-3">
-                        <div className="h-2 w-24 overflow-hidden rounded-full bg-gray-200">
+                        <div className="h-2 w-24 overflow-hidden rounded-full bg-muted">
                           <div
                             className="h-full rounded-full bg-electric"
                             style={{ width: `${split.sharePercent}%` }}
                           />
                         </div>
-                        <span className="text-sm font-bold text-navy">
+                        <span className="text-sm font-bold text-foreground">
                           {split.sharePercent}%
                         </span>
                       </div>
                     </div>
                   ))}
-                  <div className="mt-2 text-right text-xs text-gray-500">
+                  <div className="mt-2 text-right text-xs text-muted-foreground">
                     Total:{' '}
                     {royaltySplits.reduce(
                       (sum, s) => sum + s.sharePercent,
@@ -283,19 +283,19 @@ export default async function ReleaseDetailPage({
           {/* Release Info */}
           <Card>
             <div className="p-5">
-              <h2 className="mb-3 text-sm font-semibold text-navy">
+              <h2 className="mb-3 text-sm font-semibold text-foreground">
                 📋 Release Info
               </h2>
               <dl className="space-y-3 text-sm">
                 <div className="flex justify-between">
-                  <dt className="text-gray-500">UPC</dt>
-                  <dd className="font-mono text-xs text-navy">
+                  <dt className="text-muted-foreground">UPC</dt>
+                  <dd className="font-mono text-xs text-foreground">
                     {(release.upc as string) ?? 'Not assigned'}
                   </dd>
                 </div>
                 <div className="flex justify-between">
-                  <dt className="text-gray-500">Release Date</dt>
-                  <dd className="text-navy">
+                  <dt className="text-muted-foreground">Release Date</dt>
+                  <dd className="text-foreground">
                     {release.releaseDate
                       ? new Date(release.releaseDate as string).toLocaleDateString(
                           'en-CA',
@@ -304,8 +304,8 @@ export default async function ReleaseDetailPage({
                   </dd>
                 </div>
                 <div className="flex justify-between">
-                  <dt className="text-gray-500">Created</dt>
-                  <dd className="text-navy">
+                  <dt className="text-muted-foreground">Created</dt>
+                  <dd className="text-foreground">
                     {release.createdAt
                       ? new Date(release.createdAt as string).toLocaleDateString(
                           'en-CA',
@@ -314,8 +314,8 @@ export default async function ReleaseDetailPage({
                   </dd>
                 </div>
                 <div className="flex justify-between">
-                  <dt className="text-gray-500">Release ID</dt>
-                  <dd className="font-mono text-xs text-navy">
+                  <dt className="text-muted-foreground">Release ID</dt>
+                  <dd className="font-mono text-xs text-foreground">
                     {id.slice(0, 12)}…
                   </dd>
                 </div>
@@ -326,10 +326,10 @@ export default async function ReleaseDetailPage({
           {/* Distribution */}
           <Card>
             <div className="p-5">
-              <h2 className="mb-3 text-sm font-semibold text-navy">
+              <h2 className="mb-3 text-sm font-semibold text-foreground">
                 🌍 Distribution
               </h2>
-              <p className="text-xs text-gray-500">
+              <p className="text-xs text-muted-foreground">
                 {(release.status as string) === 'released'
                   ? 'This release is live on all configured distribution channels.'
                   : 'This release has not been distributed yet. Publish to make it available.'}
@@ -340,7 +340,7 @@ export default async function ReleaseDetailPage({
           {/* Actions */}
           <Card>
             <div className="space-y-2 p-5">
-              <h2 className="mb-3 text-sm font-semibold text-navy">
+              <h2 className="mb-3 text-sm font-semibold text-foreground">
                 ⚡ Actions
               </h2>
               {(release.status as string) === 'draft' && (
@@ -348,7 +348,7 @@ export default async function ReleaseDetailPage({
               )}
               <Link
                 href={`../catalog?releaseId=${id}`}
-                className="block w-full rounded-lg border border-border px-3 py-2 text-center text-xs font-medium text-navy hover:bg-gray-50"
+                className="block w-full rounded-lg border border-border px-3 py-2 text-center text-xs font-medium text-foreground hover:bg-muted/50"
               >
                 Manage Tracks
               </Link>

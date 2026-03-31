@@ -59,14 +59,14 @@ export async function listReleases(opts?: {
       WHERE r.org_id = ${ctx.orgId}
       ORDER BY r.created_at DESC
       LIMIT 25 OFFSET ${offset}`,
-    )) as unknown as { rows: Release[] }
+    )) as unknown as Release[]
 
     const [cnt] = (await platformDb.execute(
       sql`SELECT COUNT(*) as total FROM zonga_releases WHERE org_id = ${ctx.orgId}`,
     )) as unknown as [{ total: number }]
 
     return {
-      releases: rows.rows ?? [],
+      releases: rows,
       total: Number(cnt?.total ?? 0),
     }
   } catch (error) {

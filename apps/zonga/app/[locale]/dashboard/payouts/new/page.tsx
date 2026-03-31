@@ -91,12 +91,12 @@ export default function NewPayoutPage() {
 
   return (
     <div className="max-w-2xl">
-      <h1 className="text-2xl font-bold text-navy mb-6">New Payout</h1>
+      <h1 className="text-2xl font-bold text-foreground mb-6">New Payout</h1>
 
       <Card>
         <div className="p-6 space-y-5">
           <div>
-            <label className="block text-sm font-medium text-gray-700 mb-1">Select Artist</label>
+            <label className="block text-sm font-medium text-foreground mb-1">Select Artist</label>
             <select
               value={selectedCreator}
               onChange={(e) => {
@@ -104,7 +104,7 @@ export default function NewPayoutPage() {
                 setPreview(null)
                 setConfirmed(false)
               }}
-              className="w-full rounded-lg border border-gray-200 px-3 py-2 text-sm focus:ring-2 focus:ring-electric focus:border-transparent"
+              className="w-full rounded-lg border border-border px-3 py-2 text-sm focus:ring-2 focus:ring-electric focus:border-transparent"
             >
               <option value="">Choose an artist…</option>
               {creators.map((c) => (
@@ -116,8 +116,8 @@ export default function NewPayoutPage() {
           </div>
 
           <div>
-            <label className="block text-sm font-medium text-gray-700 mb-1">Payout Rail</label>
-            <select className="w-full rounded-lg border border-gray-200 px-3 py-2 text-sm focus:ring-2 focus:ring-electric focus:border-transparent">
+            <label className="block text-sm font-medium text-foreground mb-1">Payout Rail</label>
+            <select className="w-full rounded-lg border border-border px-3 py-2 text-sm focus:ring-2 focus:ring-electric focus:border-transparent">
               {PAYOUT_RAILS.map((r) => (
                 <option key={r.value} value={r.value}>{r.label}</option>
               ))}
@@ -138,40 +138,40 @@ export default function NewPayoutPage() {
           {/* Preview Card */}
           {preview && (
             <div className="rounded-lg border border-electric/20 bg-electric/5 p-5 space-y-3">
-              <h3 className="text-sm font-semibold text-navy">Payout Preview</h3>
+              <h3 className="text-sm font-semibold text-foreground">Payout Preview</h3>
               <div className="grid grid-cols-2 gap-3 text-sm">
                 <div>
-                  <p className="text-xs text-gray-500">Gross Amount</p>
-                  <p className="font-medium text-navy">
+                  <p className="text-xs text-muted-foreground">Gross Amount</p>
+                  <p className="font-medium text-foreground">
                     {preview.currency} {preview.grossAmount.toFixed(2)}
                   </p>
                 </div>
                 <div>
-                  <p className="text-xs text-gray-500">Service Fee</p>
+                  <p className="text-xs text-muted-foreground">Service Fee</p>
                   <p className="font-medium text-red-500">
                     − {preview.currency} {(preview.platformFee * 0.8).toFixed(2)}
                   </p>
                 </div>
                 <div>
-                  <p className="text-xs text-gray-500">Processing Fee</p>
+                  <p className="text-xs text-muted-foreground">Processing Fee</p>
                   <p className="font-medium text-red-500">
                     − {preview.currency} {(preview.platformFee * 0.2).toFixed(2)}
                   </p>
                 </div>
                 <div className="col-span-2 border-t pt-2">
-                  <p className="text-xs text-gray-500">Net Payout</p>
+                  <p className="text-xs text-muted-foreground">Net Payout</p>
                   <p className="text-lg font-bold text-emerald-600">
                     {preview.currency} {preview.netAmount.toFixed(2)}
                   </p>
                 </div>
               </div>
 
-              <label className="flex items-center gap-2 text-sm text-gray-600">
+              <label className="flex items-center gap-2 text-sm text-muted-foreground">
                 <input
                   type="checkbox"
                   checked={confirmed}
                   onChange={(e) => setConfirmed(e.target.checked)}
-                  className="rounded border-gray-300 text-electric focus:ring-electric"
+                  className="rounded border-border text-electric focus:ring-electric"
                 />
                 I confirm this payout
               </label>
@@ -195,7 +195,7 @@ export default function NewPayoutPage() {
               <button
                 type="button"
                 onClick={() => router.back()}
-                className="px-6 py-2.5 rounded-lg text-sm font-medium border border-gray-200 text-gray-600 hover:bg-gray-50 transition"
+                className="px-6 py-2.5 rounded-lg text-sm font-medium border border-border text-muted-foreground hover:bg-muted/50 transition"
               >
                 Cancel
               </button>

@@ -20,8 +20,8 @@ export function NowPlayingWidget() {
       <Card>
         <div className="p-6 text-center">
           <p className="text-3xl mb-2">🎧</p>
-          <p className="text-sm font-medium text-navy">Nothing playing</p>
-          <p className="text-xs text-gray-500 mt-1">Browse or search for music to start listening</p>
+          <p className="text-sm font-medium text-foreground">Nothing playing</p>
+          <p className="text-xs text-muted-foreground mt-1">Browse or search for music to start listening</p>
         </div>
       </Card>
     )
@@ -33,15 +33,15 @@ export function NowPlayingWidget() {
   return (
     <Card>
       <div className="p-5">
-        <p className="text-xs text-gray-500 mb-3">Now Playing</p>
+        <p className="text-xs text-muted-foreground mb-3">Now Playing</p>
         <div className="flex items-center gap-4">
-          <div className="h-14 w-14 rounded-lg bg-gradient-to-br from-electric/20 to-navy/20 flex items-center justify-center flex-shrink-0">
+          <div className="h-14 w-14 rounded-lg bg-linear-to-br from-electric/20 to-navy/20 flex items-center justify-center shrink-0">
             <span className="text-2xl">🎵</span>
           </div>
           <div className="flex-1 min-w-0">
-            <p className="text-sm font-semibold text-navy truncate">{currentTrack.title}</p>
-            <p className="text-xs text-gray-500 truncate">{currentTrack.artistName}</p>
-            <div className="mt-2 h-1 rounded-full bg-gray-200">
+            <p className="text-sm font-semibold text-foreground truncate">{currentTrack.title}</p>
+            <p className="text-xs text-muted-foreground truncate">{currentTrack.artistName}</p>
+            <div className="mt-2 h-1 rounded-full bg-muted">
               <div
                 className="h-full rounded-full bg-electric transition-all"
                 style={{ width: `${progress}%` }}
@@ -52,7 +52,7 @@ export function NowPlayingWidget() {
             <button
               type="button"
               onClick={skipPrevious}
-              className="h-7 w-7 rounded-full hover:bg-gray-100 flex items-center justify-center text-xs"
+              className="h-7 w-7 rounded-full hover:bg-muted flex items-center justify-center text-xs"
               aria-label="Previous"
             >
               ⏮
@@ -68,7 +68,7 @@ export function NowPlayingWidget() {
             <button
               type="button"
               onClick={skipNext}
-              className="h-7 w-7 rounded-full hover:bg-gray-100 flex items-center justify-center text-xs"
+              className="h-7 w-7 rounded-full hover:bg-muted flex items-center justify-center text-xs"
               aria-label="Next"
             >
               ⏭
@@ -76,7 +76,7 @@ export function NowPlayingWidget() {
           </div>
         </div>
         {state.queue.length > 1 && (
-          <p className="text-xs text-gray-400 mt-2">
+          <p className="text-xs text-muted-foreground mt-2">
             Track {state.currentIndex + 1} of {state.queue.length} in queue
           </p>
         )}
@@ -105,18 +105,18 @@ export function ReleaseRow({ id, title, creatorName, releaseType, trackCount, pu
   })
 
   return (
-    <div className="px-5 py-3 flex items-center justify-between group hover:bg-gray-50 transition-colors">
+    <div className="px-5 py-3 flex items-center justify-between group hover:bg-muted/50 transition-colors">
       <div className="flex items-center gap-3 min-w-0">
         <PlayButton track={pt} variant="icon" />
         <Link href={`/${locale}/dashboard/releases/${id}`} className="min-w-0">
-          <p className="text-sm font-medium text-navy truncate hover:text-electric transition-colors">{title}</p>
-          <p className="text-xs text-gray-400">
+          <p className="text-sm font-medium text-foreground truncate hover:text-electric transition-colors">{title}</p>
+          <p className="text-xs text-muted-foreground">
             {creatorName} · {releaseType ?? 'single'} · {trackCount} tracks
           </p>
         </Link>
       </div>
       {publishedAt && (
-        <p className="text-xs text-gray-400 flex-shrink-0">
+        <p className="text-xs text-muted-foreground shrink-0">
           {new Date(publishedAt).toLocaleDateString()}
         </p>
       )}
@@ -135,10 +135,10 @@ export function QueueView() {
     <Card>
       <div className="p-5">
         <div className="flex items-center justify-between mb-3">
-          <h2 className="text-sm font-semibold text-navy">Queue</h2>
-          <span className="text-xs text-gray-400">{state.queue.length} tracks</span>
+          <h2 className="text-sm font-semibold text-foreground">Queue</h2>
+          <span className="text-xs text-muted-foreground">{state.queue.length} tracks</span>
         </div>
-        <div className="divide-y divide-gray-50 max-h-64 overflow-y-auto">
+        <div className="divide-y divide-border max-h-64 overflow-y-auto">
           {state.queue.map((track, idx) => (
             <div
               key={`${track.assetId}-${idx}`}
@@ -146,18 +146,18 @@ export function QueueView() {
                 idx === state.currentIndex ? 'bg-electric/5 -mx-2 px-2 rounded' : ''
               }`}
             >
-              <span className="text-xs text-gray-400 w-5 text-right">
+              <span className="text-xs text-muted-foreground w-5 text-right">
                 {idx === state.currentIndex ? '▶' : idx + 1}
               </span>
               <div className="flex-1 min-w-0">
-                <p className="text-sm text-navy truncate">{track.title}</p>
-                <p className="text-xs text-gray-400 truncate">{track.artistName}</p>
+                <p className="text-sm text-foreground truncate">{track.title}</p>
+                <p className="text-xs text-muted-foreground truncate">{track.artistName}</p>
               </div>
               {idx !== state.currentIndex && (
                 <button
                   type="button"
                   onClick={() => removeFromQueue(idx)}
-                  className="text-xs text-gray-400 hover:text-red-500 transition-colors"
+                  className="text-xs text-muted-foreground hover:text-red-500 transition-colors"
                   aria-label={`Remove ${track.title} from queue`}
                 >
                   ✕

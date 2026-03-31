@@ -83,14 +83,14 @@ export async function listPlaylists(opts?: {
       ${searchFilter} ${creatorFilter}
       ORDER BY p.created_at DESC
       LIMIT 25 OFFSET ${offset}`,
-    )) as unknown as { rows: Playlist[] }
+    )) as unknown as Playlist[]
 
     const [cnt] = (await platformDb.execute(
       sql`SELECT COUNT(*) as total FROM zonga_playlists WHERE org_id = ${ctx.orgId}`,
     )) as unknown as [{ total: number }]
 
     return {
-      playlists: rows.rows ?? [],
+      playlists: rows,
       total: Number(cnt?.total ?? 0),
     }
   } catch (error) {
@@ -135,11 +135,11 @@ export async function getPlaylistDetail(playlistId: string): Promise<{
       LEFT JOIN zonga_creators c ON c.id = a.creator_id
       WHERE i.playlist_id = ${playlistId}
       ORDER BY i.position ASC`,
-    )) as unknown as { rows: PlaylistTrack[] }
+    )) as unknown as PlaylistTrack[]
 
     return {
       playlist: playlist ?? null,
-      tracks: trackRows.rows ?? [],
+      tracks: trackRows,
     }
   } catch (error) {
     logger.error('getPlaylistDetail failed', { error })

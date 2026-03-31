@@ -7,11 +7,12 @@
  */
 import { auth } from '@clerk/nextjs/server'
 import { redirect } from 'next/navigation'
-import { Card } from '@nzila/ui'
-import { listCatalogAssets } from '@/lib/actions/catalog-actions'
-import { listEvents } from '@/lib/actions/event-actions'
-import { listPlaylists } from '@/lib/actions/playlist-actions'
-import { getTrending } from '@/lib/actions/search-actions'
+import {
+  browsePublishedAssets,
+  browsePublishedEvents,
+  browsePublicPlaylists,
+  browseTrending,
+} from '@/lib/actions/browse-actions'
 import { BrowseGrid } from '@/components/dashboard/browse-grid'
 
 export default async function BrowsePage({
@@ -24,23 +25,21 @@ export default async function BrowsePage({
   const { locale } = await params
 
   const [publishedAssets, upcomingEvents, playlists, trending] = await Promise.all([
-    listCatalogAssets({ status: 'published' }),
-    listEvents({ status: 'published' }),
-    listPlaylists(),
-    getTrending(),
+    browsePublishedAssets(),
+    browsePublishedEvents(),
+    browsePublicPlaylists(),
+    browseTrending(),
   ])
 
   return (
-    <Card>
-      <div className="text-navy">
-        <BrowseGrid
-          locale={locale}
-          trending={trending}
-          assets={publishedAssets.assets}
-          playlists={playlists.playlists}
-          events={upcomingEvents.events}
-        />
-      </div>
-    </Card>
+    <div className="text-foreground">
+      <BrowseGrid
+        locale={locale}
+        trending={trending}
+        assets={publishedAssets.assets}
+        playlists={playlists.playlists}
+        events={upcomingEvents.events}
+      />
+    </div>
   )
 }

@@ -36,13 +36,13 @@ export default async function TrackPage({
     <div className="space-y-8">
       <Link
         href={`/${locale}/dashboard/browse`}
-        className="inline-flex items-center gap-1 text-sm text-gray-500 hover:text-navy"
+        className="inline-flex items-center gap-1 text-sm text-muted-foreground hover:text-foreground"
       >
         ← Back to Browse
       </Link>
 
       {/* Hero */}
-      <div className="rounded-2xl bg-gradient-to-br from-navy via-navy/90 to-electric/80 p-8 text-white">
+      <div className="rounded-2xl bg-linear-to-br from-navy via-navy/90 to-electric/80 p-8 text-white">
         <div className="flex flex-col items-start gap-6 md:flex-row md:items-center">
           <div className="h-40 w-40 flex-shrink-0 rounded-xl bg-white/10 flex items-center justify-center">
             <span className="text-6xl">🎵</span>
@@ -91,7 +91,7 @@ export default async function TrackPage({
           {/* Player */}
           <Card>
             <div className="p-5">
-              <h2 className="mb-3 text-sm font-semibold text-navy">▶️ Now Playing</h2>
+              <h2 className="mb-3 text-sm font-semibold text-foreground">▶️ Now Playing</h2>
               <TrackPlayer
                 assetId={id}
                 title={asset.title}
@@ -113,14 +113,14 @@ export default async function TrackPage({
           {/* Comments */}
           <Card>
             <div className="p-5">
-              <h2 className="mb-4 text-sm font-semibold text-navy">
+              <h2 className="mb-4 text-sm font-semibold text-foreground">
                 💬 Comments ({comments.length})
               </h2>
 
               <CommentForm assetId={id} />
 
               {comments.length === 0 ? (
-                <p className="mt-4 text-xs text-gray-500">
+                <p className="mt-4 text-xs text-muted-foreground">
                   No comments yet. Be the first to share your thoughts!
                 </p>
               ) : (
@@ -128,13 +128,13 @@ export default async function TrackPage({
                   {comments.map((c) => (
                     <div
                       key={c.id}
-                      className="rounded-lg bg-gray-50 p-3"
+                      className="rounded-lg bg-muted p-3"
                     >
                       <div className="flex items-center justify-between">
-                        <p className="text-xs font-medium text-navy">
+                        <p className="text-xs font-medium text-foreground">
                           {c.userName ?? 'Anonymous'}
                         </p>
-                        <p className="text-xs text-gray-400">
+                        <p className="text-xs text-muted-foreground/70">
                           {c.createdAt
                             ? new Date(c.createdAt).toLocaleDateString('en-CA', {
                                 month: 'short',
@@ -143,7 +143,7 @@ export default async function TrackPage({
                             : ''}
                         </p>
                       </div>
-                      <p className="mt-1 text-sm text-gray-700">{c.content}</p>
+                      <p className="mt-1 text-sm text-foreground">{c.content}</p>
                     </div>
                   ))}
                 </div>
@@ -157,27 +157,27 @@ export default async function TrackPage({
           {/* Stats */}
           <Card>
             <div className="p-5">
-              <h2 className="mb-3 text-sm font-semibold text-navy">📊 Stats</h2>
+              <h2 className="mb-3 text-sm font-semibold text-foreground">📊 Stats</h2>
               <div className="grid grid-cols-2 gap-4 text-center">
                 <div>
-                  <p className="text-xl font-bold text-navy">
+                  <p className="text-xl font-bold text-foreground">
                     {((asset.metadata?.streams as number) ?? 0).toLocaleString()}
                   </p>
-                  <p className="text-xs text-gray-500">Streams</p>
+                  <p className="text-xs text-muted-foreground">Streams</p>
                 </div>
                 <div>
-                  <p className="text-xl font-bold text-navy">{likeCount}</p>
-                  <p className="text-xs text-gray-500">Likes</p>
+                  <p className="text-xl font-bold text-foreground">{likeCount}</p>
+                  <p className="text-xs text-muted-foreground">Likes</p>
                 </div>
                 <div>
-                  <p className="text-xl font-bold text-navy">{comments.length}</p>
-                  <p className="text-xs text-gray-500">Comments</p>
+                  <p className="text-xl font-bold text-foreground">{comments.length}</p>
+                  <p className="text-xs text-muted-foreground">Comments</p>
                 </div>
                 <div>
-                  <p className="text-xl font-bold text-navy">
+                  <p className="text-xl font-bold text-foreground">
                     {((asset.metadata?.downloads as number) ?? 0).toLocaleString()}
                   </p>
-                  <p className="text-xs text-gray-500">Downloads</p>
+                  <p className="text-xs text-muted-foreground">Downloads</p>
                 </div>
               </div>
             </div>
@@ -187,13 +187,13 @@ export default async function TrackPage({
           {(asset.metadata?.creatorName as string) && (
             <Card>
               <div className="p-5">
-                <h2 className="mb-3 text-sm font-semibold text-navy">🎤 Creator</h2>
+                <h2 className="mb-3 text-sm font-semibold text-foreground">🎤 Creator</h2>
                 <div className="flex items-center gap-3">
                   <div className="h-10 w-10 rounded-full bg-navy/10 flex items-center justify-center">
                     <span className="text-sm">🎤</span>
                   </div>
                   <div>
-                    <p className="text-sm font-medium text-navy">{(asset.metadata?.creatorName as string)}</p>
+                    <p className="text-sm font-medium text-foreground">{(asset.metadata?.creatorName as string)}</p>
                     <Link
                       href={`/${locale}/dashboard/creators/${asset.creatorId ?? ''}`}
                       className="text-xs text-electric hover:underline"
@@ -210,14 +210,14 @@ export default async function TrackPage({
           {asset.qualityTiers && asset.qualityTiers.length > 0 && (
             <Card>
               <div className="p-5">
-                <h2 className="mb-3 text-sm font-semibold text-navy">🎵 Quality</h2>
+                <h2 className="mb-3 text-sm font-semibold text-foreground">🎵 Quality</h2>
                 <div className="space-y-1">
                   {asset.qualityTiers.map((tier: string) => (
                     <div
                       key={tier}
-                      className="flex items-center justify-between rounded bg-gray-50 px-3 py-1.5 text-xs"
+                      className="flex items-center justify-between rounded bg-muted px-3 py-1.5 text-xs"
                     >
-                      <span className="font-medium text-navy capitalize">{tier}</span>
+                      <span className="font-medium text-foreground capitalize">{tier}</span>
                     </div>
                   ))}
                 </div>

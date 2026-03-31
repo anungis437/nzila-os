@@ -100,6 +100,13 @@ export default clerkMiddleware(async (auth, request: NextRequest) => {
     await auth.protect();
   }
 
+  /* Skip i18n for API routes — they don't need locale prefixing */
+  if (request.nextUrl.pathname.startsWith('/api')) {
+    const response = NextResponse.next();
+    response.headers.set('x-request-id', crypto.randomUUID());
+    return response;
+  }
+
   /* Apply i18n routing for dashboard and other locale paths */
   const response = intlMiddleware(request);
   response.headers.set('x-request-id', crypto.randomUUID());

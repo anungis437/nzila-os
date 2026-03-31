@@ -99,55 +99,55 @@ export default function NewEventPage() {
 
   return (
     <div className="max-w-2xl">
-      <h1 className="text-2xl font-bold text-navy mb-6">New Event</h1>
+      <h1 className="text-2xl font-bold text-foreground mb-6">New Event</h1>
 
       <Card>
         <form onSubmit={handleSubmit} className="p-6 space-y-5">
           <div>
-            <label className="block text-sm font-medium text-gray-700 mb-1">Event Title</label>
+            <label className="block text-sm font-medium text-foreground mb-1">Event Title</label>
             <input
               name="title"
               required
-              className="w-full rounded-lg border border-gray-200 px-3 py-2 text-sm focus:ring-2 focus:ring-electric focus:border-transparent"
+              className="w-full rounded-lg border border-border px-3 py-2 text-sm focus:ring-2 focus:ring-electric focus:border-transparent"
               placeholder="e.g. Afrobeats Live Lagos"
             />
           </div>
 
           <div>
-            <label className="block text-sm font-medium text-gray-700 mb-1">Description</label>
+            <label className="block text-sm font-medium text-foreground mb-1">Description</label>
             <textarea
               name="description"
               rows={3}
-              className="w-full rounded-lg border border-gray-200 px-3 py-2 text-sm focus:ring-2 focus:ring-electric focus:border-transparent resize-none"
+              className="w-full rounded-lg border border-border px-3 py-2 text-sm focus:ring-2 focus:ring-electric focus:border-transparent resize-none"
               placeholder="Describe the event…"
             />
           </div>
 
           <div className="grid grid-cols-1 sm:grid-cols-3 gap-4">
             <div>
-              <label className="block text-sm font-medium text-gray-700 mb-1">Venue</label>
+              <label className="block text-sm font-medium text-foreground mb-1">Venue</label>
               <input
                 name="venue"
                 required
-                className="w-full rounded-lg border border-gray-200 px-3 py-2 text-sm focus:ring-2 focus:ring-electric focus:border-transparent"
+                className="w-full rounded-lg border border-border px-3 py-2 text-sm focus:ring-2 focus:ring-electric focus:border-transparent"
                 placeholder="e.g. Eko Convention Centre"
               />
             </div>
             <div>
-              <label className="block text-sm font-medium text-gray-700 mb-1">City</label>
+              <label className="block text-sm font-medium text-foreground mb-1">City</label>
               <input
                 name="city"
                 required
-                className="w-full rounded-lg border border-gray-200 px-3 py-2 text-sm focus:ring-2 focus:ring-electric focus:border-transparent"
+                className="w-full rounded-lg border border-border px-3 py-2 text-sm focus:ring-2 focus:ring-electric focus:border-transparent"
                 placeholder="e.g. Lagos"
               />
             </div>
             <div>
-              <label className="block text-sm font-medium text-gray-700 mb-1">Country</label>
+              <label className="block text-sm font-medium text-foreground mb-1">Country</label>
               <select
                 name="country"
                 required
-                className="w-full rounded-lg border border-gray-200 px-3 py-2 text-sm focus:ring-2 focus:ring-electric focus:border-transparent"
+                className="w-full rounded-lg border border-border px-3 py-2 text-sm focus:ring-2 focus:ring-electric focus:border-transparent"
               >
                 <option value="">Select</option>
                 {COUNTRIES.map((c) => (
@@ -159,43 +159,43 @@ export default function NewEventPage() {
 
           <div className="grid grid-cols-1 sm:grid-cols-2 gap-4">
             <div>
-              <label className="block text-sm font-medium text-gray-700 mb-1">Start Date</label>
+              <label className="block text-sm font-medium text-foreground mb-1">Start Date</label>
               <input
                 name="startDate"
                 type="datetime-local"
                 required
-                className="w-full rounded-lg border border-gray-200 px-3 py-2 text-sm focus:ring-2 focus:ring-electric focus:border-transparent"
+                className="w-full rounded-lg border border-border px-3 py-2 text-sm focus:ring-2 focus:ring-electric focus:border-transparent"
               />
             </div>
             <div>
-              <label className="block text-sm font-medium text-gray-700 mb-1">End Date (optional)</label>
+              <label className="block text-sm font-medium text-foreground mb-1">End Date (optional)</label>
               <input
                 name="endDate"
                 type="datetime-local"
-                className="w-full rounded-lg border border-gray-200 px-3 py-2 text-sm focus:ring-2 focus:ring-electric focus:border-transparent"
+                className="w-full rounded-lg border border-border px-3 py-2 text-sm focus:ring-2 focus:ring-electric focus:border-transparent"
               />
             </div>
           </div>
 
           <div className="grid grid-cols-1 sm:grid-cols-3 gap-4">
             <div>
-              <label className="block text-sm font-medium text-gray-700 mb-1">Ticket Price</label>
+              <label className="block text-sm font-medium text-foreground mb-1">Ticket Price</label>
               <input
                 name="ticketPrice"
                 type="number"
                 min="0"
                 step="0.01"
                 required
-                className="w-full rounded-lg border border-gray-200 px-3 py-2 text-sm focus:ring-2 focus:ring-electric focus:border-transparent"
+                className="w-full rounded-lg border border-border px-3 py-2 text-sm focus:ring-2 focus:ring-electric focus:border-transparent"
                 placeholder="e.g. 25.00"
               />
             </div>
             <div>
-              <label className="block text-sm font-medium text-gray-700 mb-1">Currency</label>
+              <label className="block text-sm font-medium text-foreground mb-1">Currency</label>
               <select
                 name="currency"
                 required
-                className="w-full rounded-lg border border-gray-200 px-3 py-2 text-sm focus:ring-2 focus:ring-electric focus:border-transparent"
+                className="w-full rounded-lg border border-border px-3 py-2 text-sm focus:ring-2 focus:ring-electric focus:border-transparent"
               >
                 {CURRENCIES.map((c) => (
                   <option key={c.value} value={c.value}>{c.label}</option>
@@ -203,23 +203,23 @@ export default function NewEventPage() {
               </select>
             </div>
             <div>
-              <label className="block text-sm font-medium text-gray-700 mb-1">Total Tickets</label>
+              <label className="block text-sm font-medium text-foreground mb-1">Total Tickets</label>
               <input
                 name="totalTickets"
                 type="number"
                 min="1"
                 required
-                className="w-full rounded-lg border border-gray-200 px-3 py-2 text-sm focus:ring-2 focus:ring-electric focus:border-transparent"
+                className="w-full rounded-lg border border-border px-3 py-2 text-sm focus:ring-2 focus:ring-electric focus:border-transparent"
                 placeholder="e.g. 500"
               />
             </div>
           </div>
 
           <div>
-            <label className="block text-sm font-medium text-gray-700 mb-1">Genre</label>
+            <label className="block text-sm font-medium text-foreground mb-1">Genre</label>
             <select
               name="genre"
-              className="w-full rounded-lg border border-gray-200 px-3 py-2 text-sm focus:ring-2 focus:ring-electric focus:border-transparent"
+              className="w-full rounded-lg border border-border px-3 py-2 text-sm focus:ring-2 focus:ring-electric focus:border-transparent"
             >
               <option value="">Select genre</option>
               {GENRES.map((g) => (
@@ -230,7 +230,7 @@ export default function NewEventPage() {
 
           {/* Performers */}
           <div>
-            <label className="block text-sm font-medium text-gray-700 mb-1">Performers</label>
+            <label className="block text-sm font-medium text-foreground mb-1">Performers</label>
             <div className="flex gap-2">
               <input
                 type="text"
@@ -239,13 +239,13 @@ export default function NewEventPage() {
                 onKeyDown={(e) => {
                   if (e.key === 'Enter') { e.preventDefault(); addPerformer() }
                 }}
-                className="flex-1 rounded-lg border border-gray-200 px-3 py-2 text-sm focus:ring-2 focus:ring-electric focus:border-transparent"
+                className="flex-1 rounded-lg border border-border px-3 py-2 text-sm focus:ring-2 focus:ring-electric focus:border-transparent"
                 placeholder="Add performer name…"
               />
               <button
                 type="button"
                 onClick={addPerformer}
-                className="rounded-lg bg-gray-100 px-3 py-2 text-sm font-medium text-gray-700 hover:bg-gray-200"
+                className="rounded-lg bg-muted px-3 py-2 text-sm font-medium text-foreground hover:bg-muted"
               >
                 Add
               </button>
@@ -286,7 +286,7 @@ export default function NewEventPage() {
             <button
               type="button"
               onClick={() => router.back()}
-              className="px-6 py-2.5 rounded-lg text-sm font-medium border border-gray-200 text-gray-600 hover:bg-gray-50 transition"
+              className="px-6 py-2.5 rounded-lg text-sm font-medium border border-border text-muted-foreground hover:bg-muted/50 transition"
             >
               Cancel
             </button>

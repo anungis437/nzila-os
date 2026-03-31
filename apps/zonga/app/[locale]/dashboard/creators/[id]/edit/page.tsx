@@ -153,7 +153,7 @@ export default function EditCreatorPage() {
     return (
       <div className="max-w-2xl mx-auto mt-16 text-center">
         <div className="animate-pulse text-3xl mb-4">⏳</div>
-        <p className="text-sm text-gray-500">Loading creator profile…</p>
+        <p className="text-sm text-muted-foreground">Loading creator profile…</p>
       </div>
     )
   }
@@ -162,7 +162,7 @@ export default function EditCreatorPage() {
     return (
       <div className="max-w-2xl mx-auto mt-16 text-center">
         <div className="text-5xl mb-4">🔍</div>
-        <h2 className="text-xl font-bold text-navy">Creator Not Found</h2>
+        <h2 className="text-xl font-bold text-foreground">Creator Not Found</h2>
         <button
           onClick={() => router.back()}
           className="mt-4 text-sm text-electric underline"
@@ -174,30 +174,30 @@ export default function EditCreatorPage() {
   }
 
   const inputClass =
-    'w-full rounded-lg border border-gray-200 px-3 py-2 text-sm focus:ring-2 focus:ring-electric focus:border-transparent'
+    'w-full rounded-lg border border-border px-3 py-2 text-sm focus:ring-2 focus:ring-electric focus:border-transparent'
 
   return (
     <div className="max-w-2xl">
       <div className="flex items-center gap-3 mb-6">
         <button
           onClick={() => router.back()}
-          className="text-sm text-gray-400 hover:text-navy transition"
+          className="text-sm text-muted-foreground/70 hover:text-foreground transition"
         >
           ← Back
         </button>
-        <h1 className="text-2xl font-bold text-navy">Edit Creator Profile</h1>
+        <h1 className="text-2xl font-bold text-foreground">Edit Creator Profile</h1>
       </div>
 
       <Card>
         <form onSubmit={handleSubmit} className="p-6 space-y-6">
           {/* Identity Section */}
           <fieldset className="space-y-4">
-            <legend className="text-sm font-semibold text-navy mb-2">
+            <legend className="text-sm font-semibold text-foreground mb-2">
               🎤 Identity
             </legend>
 
             <div>
-              <label className="block text-sm font-medium text-gray-700 mb-1">
+              <label className="block text-sm font-medium text-foreground mb-1">
                 Display Name
               </label>
               <input
@@ -209,7 +209,7 @@ export default function EditCreatorPage() {
             </div>
 
             <div>
-              <label className="block text-sm font-medium text-gray-700 mb-1">
+              <label className="block text-sm font-medium text-foreground mb-1">
                 Email
               </label>
               <input
@@ -222,7 +222,7 @@ export default function EditCreatorPage() {
             </div>
 
             <div>
-              <label className="block text-sm font-medium text-gray-700 mb-1">
+              <label className="block text-sm font-medium text-foreground mb-1">
                 Bio
               </label>
               <textarea
@@ -236,13 +236,13 @@ export default function EditCreatorPage() {
 
           {/* Music Profile */}
           <fieldset className="space-y-4">
-            <legend className="text-sm font-semibold text-navy mb-2">
+            <legend className="text-sm font-semibold text-foreground mb-2">
               🎵 Music Profile
             </legend>
 
             <div className="grid grid-cols-1 sm:grid-cols-2 gap-4">
               <div>
-                <label className="block text-sm font-medium text-gray-700 mb-1">
+                <label className="block text-sm font-medium text-foreground mb-1">
                   Primary Genre
                 </label>
                 <select
@@ -264,7 +264,7 @@ export default function EditCreatorPage() {
               </div>
 
               <div>
-                <label className="block text-sm font-medium text-gray-700 mb-1">
+                <label className="block text-sm font-medium text-foreground mb-1">
                   Country
                 </label>
                 <select
@@ -285,12 +285,12 @@ export default function EditCreatorPage() {
 
           {/* Payout Setup */}
           <fieldset className="space-y-4">
-            <legend className="text-sm font-semibold text-navy mb-2">
+            <legend className="text-sm font-semibold text-foreground mb-2">
               🏦 Payout Setup
             </legend>
 
             <div>
-              <label className="block text-sm font-medium text-gray-700 mb-1">
+              <label className="block text-sm font-medium text-foreground mb-1">
                 Preferred Payout Rail
               </label>
               <select name="payoutRail" className={inputClass}>
@@ -301,7 +301,7 @@ export default function EditCreatorPage() {
                   </option>
                 ))}
               </select>
-              <p className="text-xs text-gray-400 mt-1">
+              <p className="text-xs text-muted-foreground/70 mt-1">
                 Mobile money rails are available across 30+ African countries.
               </p>
             </div>
@@ -309,18 +309,18 @@ export default function EditCreatorPage() {
 
           {/* Verification */}
           <fieldset className="space-y-3">
-            <legend className="text-sm font-semibold text-navy mb-2">
+            <legend className="text-sm font-semibold text-foreground mb-2">
               ✅ Verification Status
             </legend>
-            <div className="flex items-center gap-3 rounded-lg bg-gray-50 p-4">
+            <div className="flex items-center gap-3 rounded-lg bg-muted p-4">
               <span className="text-2xl">
                 {creator.status === 'active' ? '🟢' : '🟡'}
               </span>
               <div>
-                <p className="text-sm font-medium text-navy capitalize">
+                <p className="text-sm font-medium text-foreground capitalize">
                   {creator.status ?? 'pending'}
                 </p>
-                <p className="text-xs text-gray-400">
+                <p className="text-xs text-muted-foreground/70">
                   Verified creators get a badge and priority in recommendations.
                 </p>
               </div>
@@ -350,7 +350,7 @@ export default function EditCreatorPage() {
             <button
               type="button"
               onClick={() => router.back()}
-              className="px-6 py-2.5 rounded-lg text-sm font-medium border border-gray-200 text-gray-600 hover:bg-gray-50 transition"
+              className="px-6 py-2.5 rounded-lg text-sm font-medium border border-border text-muted-foreground hover:bg-muted/50 transition"
             >
               Cancel
             </button>

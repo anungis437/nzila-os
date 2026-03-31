@@ -6,7 +6,7 @@
  */
 'use server'
 
-import { resolveOrgContext } from '@/lib/resolve-org'
+import { resolveListenerContext } from '@/lib/resolve-org'
 import { platformDb } from '@nzila/db/platform'
 import { sql } from 'drizzle-orm'
 import { revalidatePath } from 'next/cache'
@@ -30,10 +30,11 @@ export interface Notification {
 export async function listNotifications(opts?: {
   unreadOnly?: boolean
 }): Promise<Notification[]> {
-  const ctx = await resolveOrgContext()
+  const ctx = await resolveListenerContext()
 
   try {
     const readFilter = opts?.unreadOnly ? sql` AND read = false` : sql``
+    const orgFilter = ctx.orgId ? sql` AND org_id = ${ctx.orgId}` : sql``
 
     const rows = (await platformDb.execute(
       sql`SELECT
@@ -46,13 +47,14 @@ export async function listNotifications(opts?: {
         read,
         created_at as "createdAt"
       FROM zonga_notifications
-      WHERE user_id = ${ctx.actorId} AND org_id = ${ctx.orgId}
+      WHERE user_id = ${ctx.actorId}
+      ${orgFilter}
       ${readFilter}
       ORDER BY created_at DESC
       LIMIT 100`,
-    )) as unknown as { rows: Notification[] }
+    )) as unknown as Notification[]
 
-    return rows.rows ?? []
+    return rows ?? []
   } catch (error) {
     logger.error('listNotifications failed', { error })
     return []
@@ -62,12 +64,14 @@ export async function listNotifications(opts?: {
 /* ─── Unread count ─── */
 
 export async function getUnreadCount(): Promise<number> {
-  const ctx = await resolveOrgContext()
+  const ctx = await resolveListenerContext()
 
   try {
+    const orgFilter = ctx.orgId ? sql` AND org_id = ${ctx.orgId}` : sql``
+
     const [result] = (await platformDb.execute(
       sql`SELECT COUNT(*) as total FROM zonga_notifications
-      WHERE user_id = ${ctx.actorId} AND org_id = ${ctx.orgId} AND read = false`,
+      WHERE user_id = ${ctx.actorId}${orgFilter} AND read = false`,
     )) as unknown as [{ total: number }]
 
     return Number(result?.total ?? 0)
@@ -80,12 +84,14 @@ export async function getUnreadCount(): Promise<number> {
 /* ─── Mark single as read ─── */
 
 export async function markAsRead(notificationId: string): Promise<{ success: boolean }> {
-  const ctx = await resolveOrgContext()
+  const ctx = await resolveListenerContext()
 
   try {
+    const orgFilter = ctx.orgId ? sql` AND org_id = ${ctx.orgId}` : sql``
+
     await platformDb.execute(
       sql`UPDATE zonga_notifications SET read = true
-      WHERE id = ${notificationId} AND user_id = ${ctx.actorId} AND org_id = ${ctx.orgId}`,
+      WHERE id = ${notificationId} AND user_id = ${ctx.actorId}${orgFilter}`,
     )
 
     revalidatePath('/dashboard/notifications')
@@ -99,12 +105,14 @@ export async function markAsRead(notificationId: string): Promise<{ success: boo
 /* ─── Mark all as read ─── */
 
 export async function markAllRead(): Promise<{ success: boolean }> {
-  const ctx = await resolveOrgContext()
+  const ctx = await resolveListenerContext()
 
   try {
+    const orgFilter = ctx.orgId ? sql` AND org_id = ${ctx.orgId}` : sql``
+
     await platformDb.execute(
       sql`UPDATE zonga_notifications SET read = true
-      WHERE user_id = ${ctx.actorId} AND org_id = ${ctx.orgId} AND read = false`,
+      WHERE user_id = ${ctx.actorId}${orgFilter} AND read = false`,
     )
 
     revalidatePath('/dashboard/notifications')

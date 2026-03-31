@@ -6,7 +6,7 @@
  */
 'use server'
 
-import { resolveOrgContext } from '@/lib/resolve-org'
+import { resolveOrgContext, resolveListenerContext } from '@/lib/resolve-org'
 import { platformDb } from '@nzila/db/platform'
 import { sql } from 'drizzle-orm'
 import { logger } from '@/lib/logger'
@@ -37,10 +37,10 @@ export interface CreatorSubscription {
 /* ─── Read Plan Status ─── */
 
 export async function getListenerSubscription(): Promise<ListenerSubscription | null> {
-  const ctx = await resolveOrgContext()
+  const ctx = await resolveListenerContext()
 
   try {
-    const [row] = (await platformDb.execute(
+    const rows = (await platformDb.execute(
       sql`SELECT
         plan,
         subscription_status as "subscriptionStatus",
@@ -48,10 +48,12 @@ export async function getListenerSubscription(): Promise<ListenerSubscription | 
         stripe_subscription_id as "stripeSubscriptionId",
         current_period_end as "currentPeriodEnd"
       FROM zonga_listeners
-      WHERE id = ${ctx.actorId} AND org_id = ${ctx.orgId}`,
-    )) as unknown as [ListenerSubscription | undefined]
+      WHERE user_id = ${ctx.actorId}
+      ORDER BY created_at DESC
+      LIMIT 1`,
+    )) as unknown as ListenerSubscription[]
 
-    return row ?? null
+    return rows[0] ?? null
   } catch (error) {
     logger.error('getListenerSubscription failed', { error })
     return null
@@ -79,13 +81,53 @@ export async function getCreatorSubscription(creatorId: string): Promise<Creator
   }
 }
 
+/* ─── My Creator Plan (by user_id, no org required) ─── */
+
+export interface MyCreatorSubscription {
+  id: string
+  plan: string
+  subscriptionStatus: string | null
+  stripeCustomerId: string | null
+  stripeSubscriptionId: string | null
+  displayName: string | null
+}
+
+/**
+ * Fetch the current user's creator profile & plan by Clerk user_id.
+ * Does NOT require org context — avoids the Clerk-orgId→UUID mismatch.
+ */
+export async function getMyCreatorSubscription(): Promise<MyCreatorSubscription | null> {
+  const ctx = await resolveListenerContext()
+
+  try {
+    const rows = (await platformDb.execute(
+      sql`SELECT
+        id,
+        plan,
+        subscription_status as "subscriptionStatus",
+        stripe_customer_id as "stripeCustomerId",
+        stripe_subscription_id as "stripeSubscriptionId",
+        display_name as "displayName"
+      FROM zonga_creators
+      WHERE user_id = ${ctx.actorId}
+      ORDER BY created_at DESC
+      LIMIT 1`,
+    )) as unknown as MyCreatorSubscription[]
+
+    return rows[0] ?? null
+  } catch (error) {
+    logger.error('getMyCreatorSubscription failed', { error })
+    return null
+  }
+}
+
 /* ─── Listener Premium Checkout ─── */
 
 export async function createListenerPremiumCheckout(): Promise<{
   url: string | null
   error?: string
 }> {
-  const ctx = await resolveOrgContext()
+  const ctx = await resolveListenerContext()
 
   try {
     // Get or create Stripe customer
@@ -94,7 +136,7 @@ export async function createListenerPremiumCheckout(): Promise<{
     const [listener] = (await platformDb.execute(
       sql`SELECT stripe_customer_id as "stripeCustomerId", email, display_name as "displayName"
       FROM zonga_listeners
-      WHERE id = ${ctx.actorId} AND org_id = ${ctx.orgId}`,
+      WHERE user_id = ${ctx.actorId}`,
     )) as unknown as [{ stripeCustomerId: string | null; email: string; displayName: string } | undefined]
 
     if (!listener) {
@@ -107,7 +149,7 @@ export async function createListenerPremiumCheckout(): Promise<{
       const customer = await createCustomer({
         email: listener.email,
         name: listener.displayName,
-        orgId: ctx.orgId,
+        orgId: ctx.orgId ?? 'listener',
         metadata: { listener_id: ctx.actorId, plan_type: 'listener_premium' },
       })
       stripeCustomerId = customer.id
@@ -115,7 +157,7 @@ export async function createListenerPremiumCheckout(): Promise<{
       await platformDb.execute(
         sql`UPDATE zonga_listeners
         SET stripe_customer_id = ${stripeCustomerId}, updated_at = NOW()
-        WHERE id = ${ctx.actorId} AND org_id = ${ctx.orgId}`,
+        WHERE user_id = ${ctx.actorId}`,
       )
     }
 
@@ -124,10 +166,10 @@ export async function createListenerPremiumCheckout(): Promise<{
 
     const { url } = await createSubscriptionCheckoutSession({
       priceId,
-      orgId: ctx.orgId,
+      orgId: ctx.orgId ?? 'listener',
       customerId: stripeCustomerId,
       successUrl: `${baseUrl}/subscription/success?session_id={CHECKOUT_SESSION_ID}`,
-      cancelUrl: `${baseUrl}/pricing`,
+      cancelUrl: `${baseUrl}/dashboard/subscription`,
       trialDays: 7,
       metadata: {
         listener_id: ctx.actorId,
@@ -208,13 +250,13 @@ export async function createListenerPortalSession(): Promise<{
   url: string | null
   error?: string
 }> {
-  const ctx = await resolveOrgContext()
+  const ctx = await resolveListenerContext()
 
   try {
     const [listener] = (await platformDb.execute(
       sql`SELECT stripe_customer_id as "stripeCustomerId"
       FROM zonga_listeners
-      WHERE id = ${ctx.actorId} AND org_id = ${ctx.orgId}`,
+      WHERE user_id = ${ctx.actorId}`,
     )) as unknown as [{ stripeCustomerId: string | null } | undefined]
 
     if (!listener?.stripeCustomerId) {
@@ -225,13 +267,17 @@ export async function createListenerPortalSession(): Promise<{
 
     const session = await createPortalSession({
       customerId: listener.stripeCustomerId,
-      returnUrl: `${baseUrl}/settings`,
+      returnUrl: `${baseUrl}/dashboard/settings`,
     })
 
     return { url: session.url }
   } catch (error) {
     logger.error('createListenerPortalSession failed', { error })
-    return { url: null, error: 'Failed to create portal session' }
+    const msg =
+      error instanceof Error && error.message.includes('No such customer')
+        ? 'Stripe customer not found — subscription may need to be re-created'
+        : 'Failed to create portal session'
+    return { url: null, error: msg }
   }
 }
 

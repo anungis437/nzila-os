@@ -47,7 +47,7 @@ export function TrackPlayer({
   return (
     <div className="space-y-3">
       {/* Waveform visualization */}
-      <div className="h-16 rounded-lg bg-navy/5 flex items-end gap-0.5 px-2 py-1 overflow-hidden">
+      <div className="h-16 rounded-lg bg-foreground/5 flex items-end gap-0.5 px-2 py-1 overflow-hidden">
         {Array.from({ length: 60 }).map((_, i) => {
           const h = 20 + Math.sin(i * 0.5) * 30 + Math.cos(i * 0.3) * 20
           const active = (i / 60) * 100 <= progress
@@ -55,7 +55,7 @@ export function TrackPlayer({
             <div
               key={i}
               className={`flex-1 rounded-t transition-colors ${
-                active ? 'bg-electric' : 'bg-navy/20'
+                active ? 'bg-electric' : 'bg-foreground/20'
               }`}
               style={{ height: `${Math.max(10, h)}%` }}
             />
@@ -78,25 +78,25 @@ export function TrackPlayer({
           <button
             type="button"
             onClick={() => addToQueue(track)}
-            className="rounded-lg border border-gray-200 px-3 py-2 text-sm text-gray-600 hover:bg-gray-50 transition-colors"
+            className="rounded-lg border border-border px-3 py-2 text-sm text-muted-foreground hover:bg-muted transition-colors"
           >
             + Queue
           </button>
         </div>
-        <div className="flex items-center gap-2 text-xs text-gray-500">
+        <div className="flex items-center gap-2 text-xs text-muted-foreground">
           {isThisTrack && state.duration > 0 && (
             <span>{formatTime(state.currentTime)} / {formatTime(state.duration)}</span>
           )}
           {!isThisTrack && durationSeconds && (
             <span>{formatTime(durationSeconds)}</span>
           )}
-          <span className="truncate max-w-[150px]">{title}</span>
+          <span className="truncate max-w-37.5">{title}</span>
         </div>
       </div>
 
       {/* Error display */}
       {isThisTrack && state.error && (
-        <p className="text-xs text-red-500 bg-red-50 rounded px-2 py-1">{state.error}</p>
+        <p className="text-xs text-red-500 bg-red-500/10 rounded px-2 py-1">{state.error}</p>
       )}
     </div>
   )

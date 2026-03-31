@@ -47,36 +47,36 @@ export default function NewPlaylistPage() {
 
   return (
     <div className="max-w-2xl">
-      <h1 className="text-2xl font-bold text-navy mb-6">New Playlist</h1>
+      <h1 className="text-2xl font-bold text-foreground mb-6">New Playlist</h1>
 
       <Card>
         <form onSubmit={handleSubmit} className="p-6 space-y-5">
           <div>
-            <label className="block text-sm font-medium text-gray-700 mb-1">Playlist Name</label>
+            <label className="block text-sm font-medium text-foreground mb-1">Playlist Name</label>
             <input
               name="title"
               required
-              className="w-full rounded-lg border border-gray-200 px-3 py-2 text-sm focus:ring-2 focus:ring-electric focus:border-transparent"
+              className="w-full rounded-lg border border-border px-3 py-2 text-sm focus:ring-2 focus:ring-electric focus:border-transparent"
               placeholder="e.g. Afro Chill Vibes"
             />
           </div>
 
           <div>
-            <label className="block text-sm font-medium text-gray-700 mb-1">Description</label>
+            <label className="block text-sm font-medium text-foreground mb-1">Description</label>
             <textarea
               name="description"
               rows={3}
-              className="w-full rounded-lg border border-gray-200 px-3 py-2 text-sm focus:ring-2 focus:ring-electric focus:border-transparent resize-none"
+              className="w-full rounded-lg border border-border px-3 py-2 text-sm focus:ring-2 focus:ring-electric focus:border-transparent resize-none"
               placeholder="What's this playlist about?"
             />
           </div>
 
           <div className="grid grid-cols-1 sm:grid-cols-2 gap-4">
             <div>
-              <label className="block text-sm font-medium text-gray-700 mb-1">Genre</label>
+              <label className="block text-sm font-medium text-foreground mb-1">Genre</label>
               <select
                 name="genre"
-                className="w-full rounded-lg border border-gray-200 px-3 py-2 text-sm focus:ring-2 focus:ring-electric focus:border-transparent"
+                className="w-full rounded-lg border border-border px-3 py-2 text-sm focus:ring-2 focus:ring-electric focus:border-transparent"
               >
                 <option value="">Any genre</option>
                 {GENRES.map((g) => (
@@ -85,10 +85,10 @@ export default function NewPlaylistPage() {
               </select>
             </div>
             <div>
-              <label className="block text-sm font-medium text-gray-700 mb-1">Visibility</label>
+              <label className="block text-sm font-medium text-foreground mb-1">Visibility</label>
               <select
                 name="visibility"
-                className="w-full rounded-lg border border-gray-200 px-3 py-2 text-sm focus:ring-2 focus:ring-electric focus:border-transparent"
+                className="w-full rounded-lg border border-border px-3 py-2 text-sm focus:ring-2 focus:ring-electric focus:border-transparent"
               >
                 <option value="public">Public</option>
                 <option value="private">Private</option>
@@ -111,7 +111,7 @@ export default function NewPlaylistPage() {
             <button
               type="button"
               onClick={() => router.back()}
-              className="px-6 py-2.5 rounded-lg text-sm font-medium border border-gray-200 text-gray-600 hover:bg-gray-50 transition"
+              className="px-6 py-2.5 rounded-lg text-sm font-medium border border-border text-muted-foreground hover:bg-muted/50 transition"
             >
               Cancel
             </button>

@@ -41,27 +41,27 @@ export default function NewReleasePage() {
 
   return (
     <div className="max-w-2xl">
-      <h1 className="text-2xl font-bold text-navy mb-6">New Release</h1>
+      <h1 className="text-2xl font-bold text-foreground mb-6">New Release</h1>
 
       <Card>
         <form onSubmit={handleSubmit} className="p-6 space-y-5">
           <div>
-            <label className="block text-sm font-medium text-gray-700 mb-1">Release Title</label>
+            <label className="block text-sm font-medium text-foreground mb-1">Release Title</label>
             <input
               name="title"
               required
-              className="w-full rounded-lg border border-gray-200 px-3 py-2 text-sm focus:ring-2 focus:ring-electric focus:border-transparent"
+              className="w-full rounded-lg border border-border px-3 py-2 text-sm focus:ring-2 focus:ring-electric focus:border-transparent"
               placeholder="e.g. Afro Sessions Vol. 2"
             />
           </div>
 
           <div className="grid grid-cols-1 sm:grid-cols-2 gap-4">
             <div>
-              <label className="block text-sm font-medium text-gray-700 mb-1">Release Type</label>
+              <label className="block text-sm font-medium text-foreground mb-1">Release Type</label>
               <select
                 name="type"
                 required
-                className="w-full rounded-lg border border-gray-200 px-3 py-2 text-sm focus:ring-2 focus:ring-electric focus:border-transparent"
+                className="w-full rounded-lg border border-border px-3 py-2 text-sm focus:ring-2 focus:ring-electric focus:border-transparent"
               >
                 {RELEASE_TYPES.map((t) => (
                   <option key={t.value} value={t.value}>{t.label}</option>
@@ -69,12 +69,12 @@ export default function NewReleasePage() {
               </select>
             </div>
             <div>
-              <label className="block text-sm font-medium text-gray-700 mb-1">Track Count</label>
+              <label className="block text-sm font-medium text-foreground mb-1">Track Count</label>
               <input
                 name="trackCount"
                 type="number"
                 min="1"
-                className="w-full rounded-lg border border-gray-200 px-3 py-2 text-sm focus:ring-2 focus:ring-electric focus:border-transparent"
+                className="w-full rounded-lg border border-border px-3 py-2 text-sm focus:ring-2 focus:ring-electric focus:border-transparent"
                 placeholder="e.g. 12"
               />
             </div>
@@ -82,19 +82,19 @@ export default function NewReleasePage() {
 
           <div className="grid grid-cols-1 sm:grid-cols-2 gap-4">
             <div>
-              <label className="block text-sm font-medium text-gray-700 mb-1">Artist / Creator</label>
+              <label className="block text-sm font-medium text-foreground mb-1">Artist / Creator</label>
               <input
                 name="creatorName"
-                className="w-full rounded-lg border border-gray-200 px-3 py-2 text-sm focus:ring-2 focus:ring-electric focus:border-transparent"
+                className="w-full rounded-lg border border-border px-3 py-2 text-sm focus:ring-2 focus:ring-electric focus:border-transparent"
                 placeholder="Primary artist name"
               />
             </div>
             <div>
-              <label className="block text-sm font-medium text-gray-700 mb-1">Release Date</label>
+              <label className="block text-sm font-medium text-foreground mb-1">Release Date</label>
               <input
                 name="releaseDate"
                 type="date"
-                className="w-full rounded-lg border border-gray-200 px-3 py-2 text-sm focus:ring-2 focus:ring-electric focus:border-transparent"
+                className="w-full rounded-lg border border-border px-3 py-2 text-sm focus:ring-2 focus:ring-electric focus:border-transparent"
               />
             </div>
           </div>
@@ -114,7 +114,7 @@ export default function NewReleasePage() {
             <button
               type="button"
               onClick={() => router.back()}
-              className="px-6 py-2.5 rounded-lg text-sm font-medium border border-gray-200 text-gray-600 hover:bg-gray-50 transition"
+              className="px-6 py-2.5 rounded-lg text-sm font-medium border border-border text-muted-foreground hover:bg-muted/50 transition"
             >
               Cancel
             </button>

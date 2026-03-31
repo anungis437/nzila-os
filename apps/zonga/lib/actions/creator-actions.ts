@@ -34,11 +34,26 @@ export async function listCreators(opts?: {
 }): Promise<CreatorListResult> {
   const ctx = await resolveOrgContext()
 
+  // Resolve Clerk org ID → DB org UUID via organizations table
+  const [orgRow] = (await platformDb.execute(
+    sql`SELECT id FROM organizations WHERE clerk_org_id = ${ctx.orgId} LIMIT 1`,
+  )) as unknown as [{ id: string } | undefined]
+  const dbOrgId = orgRow?.id
+
+  if (!dbOrgId) {
+    logger.warn('listCreators: no DB org found for Clerk org', { clerkOrgId: ctx.orgId })
+    return { creators: [], total: 0 }
+  }
+
   const page = opts?.page ?? 1
   const pageSize = opts?.pageSize ?? 25
   const offset = (page - 1) * pageSize
 
   try {
+    const searchFilter = opts?.search
+      ? sql`AND LOWER(c.display_name) LIKE ${'%' + opts.search.toLowerCase() + '%'}`
+      : sql``
+
     const rows = (await platformDb.execute(
       sql`SELECT
         c.id, c.display_name as name,
@@ -51,17 +66,18 @@ export async function listCreators(opts?: {
         c.created_at as "createdAt"
       FROM zonga_creators c
       LEFT JOIN zonga_creator_accounts ca ON ca.creator_id = c.id
-      WHERE c.org_id = ${ctx.orgId}
+      WHERE c.org_id = ${dbOrgId}
+        ${searchFilter}
       ORDER BY c.created_at DESC
       LIMIT ${pageSize} OFFSET ${offset}`,
-    )) as unknown as { rows: Creator[] }
+    )) as unknown as Creator[]
 
     const [cnt] = (await platformDb.execute(
-      sql`SELECT COUNT(*) as total FROM zonga_creators WHERE org_id = ${ctx.orgId}`,
+      sql`SELECT COUNT(*) as total FROM zonga_creators c WHERE c.org_id = ${dbOrgId} ${searchFilter}`,
     )) as unknown as [{ total: number }]
 
     return {
-      creators: rows.rows ?? [],
+      creators: rows,
       total: Number(cnt?.total ?? 0),
     }
   } catch (error) {
@@ -169,5 +185,72 @@ export async function getCreatorDetail(creatorId: string): Promise<{
   } catch (error) {
     logger.error('getCreatorDetail failed', { error })
     return { creator: null, assets: 0, revenue: 0, payouts: 0 }
+  }
+}
+
+/**
+ * Self-service creator application for listeners.
+ *
+ * Unlike `registerCreator()` (which requires an active org), this action
+ * lets an unauthenticated-to-org listener apply as a creator. The creator
+ * profile is created with org_id = NULL and status = 'applied'. Once
+ * approved, the user can create/join an organization to unlock uploads,
+ * royalties, and the full Creator Studio.
+ */
+export async function applyAsCreator(data: {
+  name: string
+  email: string
+  genre?: string
+  country?: string
+  bio?: string
+  language?: string
+  payoutRail?: string
+}): Promise<{ success: boolean; creatorId?: string; error?: string }> {
+  const { resolveListenerContext } = await import('@/lib/resolve-org')
+  const ctx = await resolveListenerContext()
+
+  const creatorId = crypto.randomUUID()
+
+  try {
+    // Check for existing application
+    const existing = (await platformDb.execute(
+      sql`SELECT id FROM zonga_creators WHERE user_id = ${ctx.actorId} LIMIT 1`,
+    )) as unknown as { id: string }[]
+    if (existing.length > 0) {
+      return { success: false, error: 'You have already applied as a creator.' }
+    }
+
+    // Persist creator profile (org_id = NULL)
+    await platformDb.execute(
+      sql`INSERT INTO zonga_creators (id, org_id, user_id, display_name, status, genre, country)
+      VALUES (${creatorId}, NULL, ${ctx.actorId}, ${data.name},
+        'applied', ${data.genre ?? null}, ${data.country ?? null})`,
+    )
+
+    // Persist creator account
+    await platformDb.execute(
+      sql`INSERT INTO zonga_creator_accounts (org_id, creator_id, email, onboarding_status)
+      VALUES (NULL, ${creatorId}, ${data.email}, 'registered')`,
+    )
+
+    // Audit trail
+    await platformDb.execute(
+      sql`INSERT INTO audit_log (action, actor_id, entity_type, entity_id, metadata, org_id)
+      VALUES ('creator.applied', ${ctx.actorId}, 'creator', ${creatorId},
+        ${JSON.stringify({ name: data.name, email: data.email, self_service: true })}::jsonb, NULL)`,
+    )
+
+    logger.info('Listener applied as creator (self-service)', {
+      creatorId,
+      actorId: ctx.actorId,
+      name: data.name,
+    })
+
+    revalidatePath('/dashboard/creators')
+    revalidatePath('/dashboard/listener')
+    return { success: true, creatorId }
+  } catch (error) {
+    logger.error('applyAsCreator failed', { error })
+    return { success: false, error: 'Something went wrong. Please try again.' }
   }
 }

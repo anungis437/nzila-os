@@ -16,10 +16,10 @@ function disputeStatusBadge(status: string) {
     open: 'bg-red-100 text-red-700',
     under_review: 'bg-amber-100 text-amber-700',
     resolved: 'bg-emerald-100 text-emerald-700',
-    dismissed: 'bg-gray-100 text-gray-600',
+    dismissed: 'bg-muted text-muted-foreground',
   }
   return (
-    <span className={`inline-block rounded-full px-2 py-0.5 text-[10px] font-medium ${map[status] ?? 'bg-gray-100 text-gray-600'}`}>
+    <span className={`inline-block rounded-full px-2 py-0.5 text-[10px] font-medium ${map[status] ?? 'bg-muted text-muted-foreground'}`}>
       {status.replace(/_/g, ' ')}
     </span>
   )
@@ -29,11 +29,11 @@ function licenseStatusBadge(status: string) {
   const map: Record<string, string> = {
     pending: 'bg-amber-100 text-amber-700',
     active: 'bg-emerald-100 text-emerald-700',
-    expired: 'bg-gray-100 text-gray-600',
+    expired: 'bg-muted text-muted-foreground',
     revoked: 'bg-red-100 text-red-700',
   }
   return (
-    <span className={`inline-block rounded-full px-2 py-0.5 text-[10px] font-medium ${map[status] ?? 'bg-gray-100 text-gray-600'}`}>
+    <span className={`inline-block rounded-full px-2 py-0.5 text-[10px] font-medium ${map[status] ?? 'bg-muted text-muted-foreground'}`}>
       {status}
     </span>
   )
@@ -57,8 +57,8 @@ export default async function RightsPage() {
     <div className="space-y-8">
       <div className="flex items-center justify-between">
         <div>
-          <h1 className="text-2xl font-bold text-navy">⚖️ Rights Management</h1>
-          <p className="mt-1 text-sm text-gray-500">
+          <h1 className="text-2xl font-bold text-foreground">⚖️ Rights Management</h1>
+          <p className="mt-1 text-sm text-muted-foreground">
             Royalty splits, rights disputes, and sync licensing
           </p>
         </div>
@@ -68,20 +68,20 @@ export default async function RightsPage() {
       <div className="grid grid-cols-2 gap-4 md:grid-cols-4">
         <Card>
           <div className="p-4 text-center">
-            <p className="text-2xl font-bold text-navy">{releasesResult.total}</p>
-            <p className="text-xs text-gray-500">Releases with Splits</p>
+            <p className="text-2xl font-bold text-foreground">{releasesResult.total}</p>
+            <p className="text-xs text-muted-foreground">Releases with Splits</p>
           </div>
         </Card>
         <Card>
           <div className="p-4 text-center">
             <p className="text-2xl font-bold text-red-600">{openDisputes.length}</p>
-            <p className="text-xs text-gray-500">Open Disputes</p>
+            <p className="text-xs text-muted-foreground">Open Disputes</p>
           </div>
         </Card>
         <Card>
           <div className="p-4 text-center">
             <p className="text-2xl font-bold text-emerald-600">{activeLicenses.length}</p>
-            <p className="text-xs text-gray-500">Active Licenses</p>
+            <p className="text-xs text-muted-foreground">Active Licenses</p>
           </div>
         </Card>
         <Card>
@@ -89,7 +89,7 @@ export default async function RightsPage() {
             <p className="text-2xl font-bold text-electric">
               ${totalLicenseFees.toLocaleString()}
             </p>
-            <p className="text-xs text-gray-500">License Revenue</p>
+            <p className="text-xs text-muted-foreground">License Revenue</p>
           </div>
         </Card>
       </div>
@@ -98,12 +98,12 @@ export default async function RightsPage() {
         {/* Releases with Splits — quick access */}
         <Card>
           <div className="p-5">
-            <h2 className="mb-3 text-sm font-semibold text-navy">📀 Release Splits</h2>
-            <p className="mb-3 text-xs text-gray-500">
+            <h2 className="mb-3 text-sm font-semibold text-foreground">📀 Release Splits</h2>
+            <p className="mb-3 text-xs text-muted-foreground">
               Manage royalty splits for each release
             </p>
             {releasesResult.releases.length === 0 ? (
-              <p className="py-6 text-center text-sm text-gray-400">No releases yet</p>
+              <p className="py-6 text-center text-sm text-muted-foreground/70">No releases yet</p>
             ) : (
               <div className="divide-y divide-gray-100">
                 {releasesResult.releases.slice(0, 10).map((release) => (
@@ -114,11 +114,11 @@ export default async function RightsPage() {
                     <div>
                       <Link
                         href={`releases/${release.id}`}
-                        className="text-sm font-medium text-navy hover:text-electric"
+                        className="text-sm font-medium text-foreground hover:text-electric"
                       >
                         {release.title}
                       </Link>
-                      <p className="text-xs text-gray-500">{release.status}</p>
+                      <p className="text-xs text-muted-foreground">{release.status}</p>
                     </div>
                     <Link
                       href={`releases/${release.id}/splits`}
@@ -136,11 +136,11 @@ export default async function RightsPage() {
         {/* Rights Disputes */}
         <Card>
           <div className="p-5">
-            <h2 className="mb-3 text-sm font-semibold text-navy">🔒 Rights Disputes</h2>
+            <h2 className="mb-3 text-sm font-semibold text-foreground">🔒 Rights Disputes</h2>
             {disputes.length === 0 ? (
               <div className="py-6 text-center">
-                <p className="text-sm text-gray-400">No disputes filed</p>
-                <p className="mt-1 text-xs text-gray-400">
+                <p className="text-sm text-muted-foreground/70">No disputes filed</p>
+                <p className="mt-1 text-xs text-muted-foreground/70">
                   Disputes protect creator rights when ownership is contested
                 </p>
               </div>
@@ -150,16 +150,16 @@ export default async function RightsPage() {
                   <div key={d.id} className="py-3">
                     <div className="flex items-center justify-between">
                       <div>
-                        <p className="text-sm font-medium text-navy">
+                        <p className="text-sm font-medium text-foreground">
                           {d.disputeType.replace(/_/g, ' ')}
                         </p>
-                        <p className="text-xs text-gray-500">
+                        <p className="text-xs text-muted-foreground">
                           by {d.claimantName} · {new Date(d.createdAt).toLocaleDateString('en-CA')}
                         </p>
                       </div>
                       {disputeStatusBadge(d.status)}
                     </div>
-                    <p className="mt-1 text-xs text-gray-500 line-clamp-1">
+                    <p className="mt-1 text-xs text-muted-foreground line-clamp-1">
                       {d.description}
                     </p>
                   </div>
@@ -174,12 +174,12 @@ export default async function RightsPage() {
       <Card>
         <div className="p-5">
           <div className="flex items-center justify-between mb-3">
-            <h2 className="text-sm font-semibold text-navy">🎬 Sync Licenses</h2>
+            <h2 className="text-sm font-semibold text-foreground">🎬 Sync Licenses</h2>
           </div>
           {licenses.length === 0 ? (
             <div className="py-8 text-center">
-              <p className="text-sm text-gray-400">No sync licenses</p>
-              <p className="mt-1 text-xs text-gray-400">
+              <p className="text-sm text-muted-foreground/70">No sync licenses</p>
+              <p className="mt-1 text-xs text-muted-foreground/70">
                 Sync licenses track usage rights for film, TV, advertising, and other media
               </p>
             </div>
@@ -187,7 +187,7 @@ export default async function RightsPage() {
             <div className="overflow-x-auto">
               <table className="w-full text-left text-sm">
                 <thead>
-                  <tr className="border-b border-gray-100 text-xs text-gray-500">
+                  <tr className="border-b border-border text-xs text-muted-foreground">
                     <th className="py-2 pr-4 font-medium">Track</th>
                     <th className="py-2 pr-4 font-medium">Licensee</th>
                     <th className="py-2 pr-4 font-medium">Usage</th>
@@ -200,19 +200,19 @@ export default async function RightsPage() {
                 <tbody>
                   {licenses.map((l) => (
                     <tr key={l.id} className="border-b border-gray-50">
-                      <td className="py-2.5 pr-4 font-medium text-navy">
+                      <td className="py-2.5 pr-4 font-medium text-foreground">
                         {l.assetTitle ?? l.assetId.slice(0, 8)}
                       </td>
-                      <td className="py-2.5 pr-4 text-gray-600">{l.licensee}</td>
-                      <td className="py-2.5 pr-4 text-gray-600">
+                      <td className="py-2.5 pr-4 text-muted-foreground">{l.licensee}</td>
+                      <td className="py-2.5 pr-4 text-muted-foreground">
                         {l.usageType.replace(/_/g, ' ')}
                       </td>
-                      <td className="py-2.5 pr-4 text-gray-600">{l.territory}</td>
-                      <td className="py-2.5 pr-4 font-mono text-navy">
+                      <td className="py-2.5 pr-4 text-muted-foreground">{l.territory}</td>
+                      <td className="py-2.5 pr-4 font-mono text-foreground">
                         {l.currency} {Number(l.fee).toLocaleString()}
                       </td>
                       <td className="py-2.5 pr-4">{licenseStatusBadge(l.status)}</td>
-                      <td className="py-2.5 text-gray-500 text-xs">
+                      <td className="py-2.5 text-muted-foreground text-xs">
                         {l.expiresAt
                           ? new Date(l.expiresAt).toLocaleDateString('en-CA')
                           : 'Perpetual'}

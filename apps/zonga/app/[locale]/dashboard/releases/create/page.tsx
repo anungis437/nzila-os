@@ -58,7 +58,7 @@ function Stepper({ current }: { current: Step }) {
       {STEPS.map((s, i) => (
         <div key={s.key} className="flex items-center gap-1.5">
           {i > 0 && (
-            <div className={`h-0.5 w-6 rounded-full transition-colors ${i <= idx ? 'bg-electric' : 'bg-gray-200'}`} />
+            <div className={`h-0.5 w-6 rounded-full transition-colors ${i <= idx ? 'bg-electric' : 'bg-muted'}`} />
           )}
           <div className="flex items-center gap-1">
             <div className={`flex h-6 w-6 items-center justify-center rounded-full text-[10px] font-bold transition-colors ${
@@ -66,11 +66,11 @@ function Stepper({ current }: { current: Step }) {
                 ? 'bg-emerald-500 text-white'
                 : i === idx
                   ? 'bg-electric text-white'
-                  : 'bg-gray-200 text-gray-500'
+                  : 'bg-muted text-muted-foreground'
             }`}>
               {i < idx ? '✓' : i + 1}
             </div>
-            <span className={`text-xs font-medium hidden sm:inline ${i <= idx ? 'text-navy' : 'text-gray-400'}`}>
+            <span className={`text-xs font-medium hidden sm:inline ${i <= idx ? 'text-foreground' : 'text-muted-foreground/70'}`}>
               {s.label}
             </span>
           </div>
@@ -202,8 +202,8 @@ export default function CreateReleasePage() {
     <div className="max-w-3xl mx-auto">
       <Stepper current={step} />
 
-      <h1 className="text-2xl font-bold text-navy mb-2">Create Release</h1>
-      <p className="text-gray-500 text-sm mb-6">
+      <h1 className="text-2xl font-bold text-foreground mb-2">Create Release</h1>
+      <p className="text-muted-foreground text-sm mb-6">
         Bundle tracks, set distribution targets, and configure royalty splits.
       </p>
 
@@ -217,7 +217,7 @@ export default function CreateReleasePage() {
           <div className="p-6 space-y-5">
             {/* Release Type Chips */}
             <div>
-              <label className="block text-sm font-medium text-gray-700 mb-2">Release Type</label>
+              <label className="block text-sm font-medium text-foreground mb-2">Release Type</label>
               <div className="grid grid-cols-2 sm:grid-cols-4 gap-2">
                 {RELEASE_TYPES.map((t) => (
                   <button
@@ -226,56 +226,56 @@ export default function CreateReleasePage() {
                     onClick={() => setReleaseType(t.value as 'single' | 'ep' | 'album' | 'compilation')}
                     className={`rounded-lg px-3 py-3 text-center transition-all border ${
                       releaseType === t.value
-                        ? 'border-electric bg-electric/5 text-navy'
-                        : 'border-gray-200 text-gray-500 hover:bg-gray-50'
+                        ? 'border-electric bg-electric/5 text-foreground'
+                        : 'border-border text-muted-foreground hover:bg-muted/50'
                     }`}
                   >
                     <div className="text-xl mb-1">{t.icon}</div>
                     <div className="text-sm font-medium">{t.label}</div>
-                    <div className="text-[10px] text-gray-400">{t.desc}</div>
+                    <div className="text-[10px] text-muted-foreground/70">{t.desc}</div>
                   </button>
                 ))}
               </div>
             </div>
 
             <div>
-              <label className="block text-sm font-medium text-gray-700 mb-1">Title</label>
+              <label className="block text-sm font-medium text-foreground mb-1">Title</label>
               <input
                 value={title}
                 onChange={(e) => setTitle(e.target.value)}
-                className="w-full rounded-lg border border-gray-200 px-3 py-2 text-sm focus:ring-2 focus:ring-electric focus:border-transparent"
+                className="w-full rounded-lg border border-border px-3 py-2 text-sm focus:ring-2 focus:ring-electric focus:border-transparent"
                 placeholder="Release title"
               />
             </div>
 
             <div className="grid grid-cols-1 sm:grid-cols-2 gap-4">
               <div>
-                <label className="block text-sm font-medium text-gray-700 mb-1">Release Date</label>
+                <label className="block text-sm font-medium text-foreground mb-1">Release Date</label>
                 <input
                   type="date"
                   value={releaseDate}
                   onChange={(e) => setReleaseDate(e.target.value)}
-                  className="w-full rounded-lg border border-gray-200 px-3 py-2 text-sm focus:ring-2 focus:ring-electric focus:border-transparent"
+                  className="w-full rounded-lg border border-border px-3 py-2 text-sm focus:ring-2 focus:ring-electric focus:border-transparent"
                 />
               </div>
               <div>
-                <label className="block text-sm font-medium text-gray-700 mb-1">UPC (optional)</label>
+                <label className="block text-sm font-medium text-foreground mb-1">UPC (optional)</label>
                 <input
                   value={upc}
                   onChange={(e) => setUpc(e.target.value)}
-                  className="w-full rounded-lg border border-gray-200 px-3 py-2 text-sm focus:ring-2 focus:ring-electric focus:border-transparent"
+                  className="w-full rounded-lg border border-border px-3 py-2 text-sm focus:ring-2 focus:ring-electric focus:border-transparent"
                   placeholder="e.g. 123456789012"
                 />
               </div>
             </div>
 
             <div>
-              <label className="block text-sm font-medium text-gray-700 mb-1">Description (optional)</label>
+              <label className="block text-sm font-medium text-foreground mb-1">Description (optional)</label>
               <textarea
                 value={description}
                 onChange={(e) => setDescription(e.target.value)}
                 rows={3}
-                className="w-full rounded-lg border border-gray-200 px-3 py-2 text-sm focus:ring-2 focus:ring-electric focus:border-transparent resize-none"
+                className="w-full rounded-lg border border-border px-3 py-2 text-sm focus:ring-2 focus:ring-electric focus:border-transparent resize-none"
                 placeholder="Album notes, credits…"
               />
             </div>
@@ -307,23 +307,23 @@ export default function CreateReleasePage() {
           {/* Selected tracks */}
           <Card>
             <div className="p-6">
-              <h2 className="text-sm font-semibold text-navy mb-3">
+              <h2 className="text-sm font-semibold text-foreground mb-3">
                 Selected Tracks ({selectedTracks.length})
               </h2>
               {selectedTracks.length === 0 ? (
-                <p className="text-xs text-gray-400">No tracks selected. Pick from the catalog below.</p>
+                <p className="text-xs text-muted-foreground/70">No tracks selected. Pick from the catalog below.</p>
               ) : (
                 <div className="space-y-2">
                   {selectedTracks.map((t) => (
                     <div
                       key={t.assetId}
-                      className="flex items-center justify-between rounded-lg bg-gray-50 px-3 py-2"
+                      className="flex items-center justify-between rounded-lg bg-muted px-3 py-2"
                     >
                       <div className="flex items-center gap-2">
-                        <span className="text-xs font-mono text-gray-400 w-5 text-center">
+                        <span className="text-xs font-mono text-muted-foreground/70 w-5 text-center">
                           {t.trackNumber}
                         </span>
-                        <span className="text-sm font-medium text-navy">{t.title}</span>
+                        <span className="text-sm font-medium text-foreground">{t.title}</span>
                       </div>
                       <button
                         type="button"
@@ -342,9 +342,9 @@ export default function CreateReleasePage() {
           {/* Available tracks */}
           <Card>
             <div className="p-6">
-              <h2 className="text-sm font-semibold text-navy mb-3">Available Tracks</h2>
+              <h2 className="text-sm font-semibold text-foreground mb-3">Available Tracks</h2>
               {availableTracks.length === 0 ? (
-                <p className="text-xs text-gray-400">
+                <p className="text-xs text-muted-foreground/70">
                   No published tracks found. Upload and publish tracks first.
                 </p>
               ) : (
@@ -356,9 +356,9 @@ export default function CreateReleasePage() {
                         key={a.id}
                         type="button"
                         onClick={() => addTrack(a.id, a.title ?? 'Untitled')}
-                        className="w-full flex items-center justify-between rounded-lg px-3 py-2 text-sm text-left hover:bg-gray-50 transition"
+                        className="w-full flex items-center justify-between rounded-lg px-3 py-2 text-sm text-left hover:bg-muted/50 transition"
                       >
-                        <span className="text-navy">{a.title ?? 'Untitled'}</span>
+                        <span className="text-foreground">{a.title ?? 'Untitled'}</span>
                         <span className="text-electric text-xs font-medium">+ Add</span>
                       </button>
                     ))}
@@ -371,7 +371,7 @@ export default function CreateReleasePage() {
             <button
               type="button"
               onClick={() => setStep('meta')}
-              className="px-6 py-2.5 rounded-lg text-sm font-medium border border-gray-200 text-gray-600 hover:bg-gray-50 transition"
+              className="px-6 py-2.5 rounded-lg text-sm font-medium border border-border text-muted-foreground hover:bg-muted/50 transition"
             >
               ← Back
             </button>
@@ -398,8 +398,8 @@ export default function CreateReleasePage() {
         <Card>
           <div className="p-6 space-y-5">
             <div>
-              <h2 className="text-sm font-semibold text-navy mb-1">Distribution Targets</h2>
-              <p className="text-xs text-gray-400 mb-4">
+              <h2 className="text-sm font-semibold text-foreground mb-1">Distribution Targets</h2>
+              <p className="text-xs text-muted-foreground/70 mb-4">
                 Choose where this release will be distributed. Zonga is always included.
               </p>
               <div className="grid grid-cols-2 sm:grid-cols-3 gap-2">
@@ -411,8 +411,8 @@ export default function CreateReleasePage() {
                     onClick={() => !dsp.default && toggleDsp(dsp.value)}
                     className={`rounded-lg px-3 py-3 text-center transition-all border ${
                       distributionTargets.includes(dsp.value)
-                        ? 'border-electric bg-electric/5 text-navy'
-                        : 'border-gray-200 text-gray-400 hover:bg-gray-50'
+                        ? 'border-electric bg-electric/5 text-foreground'
+                        : 'border-border text-muted-foreground/70 hover:bg-muted/50'
                     } ${dsp.default ? 'opacity-70 cursor-default' : ''}`}
                   >
                     <div className="text-lg mb-0.5">{dsp.icon}</div>
@@ -429,7 +429,7 @@ export default function CreateReleasePage() {
               <button
                 type="button"
                 onClick={() => setStep('tracks')}
-                className="px-6 py-2.5 rounded-lg text-sm font-medium border border-gray-200 text-gray-600 hover:bg-gray-50 transition"
+                className="px-6 py-2.5 rounded-lg text-sm font-medium border border-border text-muted-foreground hover:bg-muted/50 transition"
               >
                 ← Back
               </button>
@@ -453,8 +453,8 @@ export default function CreateReleasePage() {
         <Card>
           <div className="p-6 space-y-5">
             <div>
-              <h2 className="text-sm font-semibold text-navy mb-1">Royalty Splits</h2>
-              <p className="text-xs text-gray-400 mb-4">
+              <h2 className="text-sm font-semibold text-foreground mb-1">Royalty Splits</h2>
+              <p className="text-xs text-muted-foreground/70 mb-4">
                 Define how revenue is split among creators. Must total 100%.
               </p>
 
@@ -464,7 +464,7 @@ export default function CreateReleasePage() {
                     <input
                       value={split.creatorName}
                       onChange={(e) => updateSplit(idx, 'creatorName', e.target.value)}
-                      className="flex-1 rounded-lg border border-gray-200 px-3 py-2 text-sm focus:ring-2 focus:ring-electric focus:border-transparent"
+                      className="flex-1 rounded-lg border border-border px-3 py-2 text-sm focus:ring-2 focus:ring-electric focus:border-transparent"
                       placeholder="Creator name"
                     />
                     <div className="flex items-center gap-1">
@@ -475,9 +475,9 @@ export default function CreateReleasePage() {
                         step="0.01"
                         value={split.sharePercent}
                         onChange={(e) => updateSplit(idx, 'sharePercent', Number(e.target.value))}
-                        className="w-20 rounded-lg border border-gray-200 px-2 py-2 text-sm text-right focus:ring-2 focus:ring-electric focus:border-transparent"
+                        className="w-20 rounded-lg border border-border px-2 py-2 text-sm text-right focus:ring-2 focus:ring-electric focus:border-transparent"
                       />
-                      <span className="text-sm text-gray-400">%</span>
+                      <span className="text-sm text-muted-foreground/70">%</span>
                     </div>
                     {splits.length > 1 && (
                       <button
@@ -514,7 +514,7 @@ export default function CreateReleasePage() {
               <button
                 type="button"
                 onClick={() => setStep('distribute')}
-                className="px-6 py-2.5 rounded-lg text-sm font-medium border border-gray-200 text-gray-600 hover:bg-gray-50 transition"
+                className="px-6 py-2.5 rounded-lg text-sm font-medium border border-border text-muted-foreground hover:bg-muted/50 transition"
               >
                 ← Back
               </button>
@@ -539,35 +539,35 @@ export default function CreateReleasePage() {
           {/* Summary */}
           <Card>
             <div className="p-6 space-y-4">
-              <h2 className="text-sm font-semibold text-navy">Release Summary</h2>
+              <h2 className="text-sm font-semibold text-foreground">Release Summary</h2>
 
               <div className="grid grid-cols-2 gap-4 text-sm">
                 <div>
-                  <p className="text-xs text-gray-400">Title</p>
-                  <p className="font-medium text-navy">{title}</p>
+                  <p className="text-xs text-muted-foreground/70">Title</p>
+                  <p className="font-medium text-foreground">{title}</p>
                 </div>
                 <div>
-                  <p className="text-xs text-gray-400">Type</p>
-                  <p className="font-medium text-navy capitalize">{releaseType}</p>
+                  <p className="text-xs text-muted-foreground/70">Type</p>
+                  <p className="font-medium text-foreground capitalize">{releaseType}</p>
                 </div>
                 <div>
-                  <p className="text-xs text-gray-400">Release Date</p>
-                  <p className="font-medium text-navy">{releaseDate || 'Not set'}</p>
+                  <p className="text-xs text-muted-foreground/70">Release Date</p>
+                  <p className="font-medium text-foreground">{releaseDate || 'Not set'}</p>
                 </div>
                 <div>
-                  <p className="text-xs text-gray-400">UPC</p>
-                  <p className="font-medium text-navy font-mono">{upc || '—'}</p>
+                  <p className="text-xs text-muted-foreground/70">UPC</p>
+                  <p className="font-medium text-foreground font-mono">{upc || '—'}</p>
                 </div>
               </div>
 
               {/* Tracks */}
               <div>
-                <p className="text-xs text-gray-400 mb-1">Tracks ({selectedTracks.length})</p>
+                <p className="text-xs text-muted-foreground/70 mb-1">Tracks ({selectedTracks.length})</p>
                 <div className="space-y-1">
                   {selectedTracks.map((t) => (
                     <div key={t.assetId} className="flex items-center gap-2 text-sm">
-                      <span className="text-xs font-mono text-gray-400 w-4">{t.trackNumber}.</span>
-                      <span className="text-navy">{t.title}</span>
+                      <span className="text-xs font-mono text-muted-foreground/70 w-4">{t.trackNumber}.</span>
+                      <span className="text-foreground">{t.title}</span>
                     </div>
                   ))}
                 </div>
@@ -575,7 +575,7 @@ export default function CreateReleasePage() {
 
               {/* Distribution */}
               <div>
-                <p className="text-xs text-gray-400 mb-1">Distribution</p>
+                <p className="text-xs text-muted-foreground/70 mb-1">Distribution</p>
                 <div className="flex flex-wrap gap-1.5">
                   {distributionTargets.map((d) => {
                     const dsp = DSPs.find((x) => x.value === d)
@@ -593,12 +593,12 @@ export default function CreateReleasePage() {
 
               {/* Splits */}
               <div>
-                <p className="text-xs text-gray-400 mb-1">Royalty Splits</p>
+                <p className="text-xs text-muted-foreground/70 mb-1">Royalty Splits</p>
                 <div className="space-y-1">
                   {splits.filter((s) => s.creatorName.trim()).map((s, i) => (
                     <div key={i} className="flex items-center justify-between text-sm">
-                      <span className="text-navy">{s.creatorName}</span>
-                      <span className="font-medium text-navy">{s.sharePercent}%</span>
+                      <span className="text-foreground">{s.creatorName}</span>
+                      <span className="font-medium text-foreground">{s.sharePercent}%</span>
                     </div>
                   ))}
                 </div>
@@ -610,7 +610,7 @@ export default function CreateReleasePage() {
             <button
               type="button"
               onClick={() => setStep('splits')}
-              className="px-6 py-2.5 rounded-lg text-sm font-medium border border-gray-200 text-gray-600 hover:bg-gray-50 transition"
+              className="px-6 py-2.5 rounded-lg text-sm font-medium border border-border text-muted-foreground hover:bg-muted/50 transition"
             >
               ← Back
             </button>

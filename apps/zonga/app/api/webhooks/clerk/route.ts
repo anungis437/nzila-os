@@ -12,8 +12,7 @@
 import { NextResponse } from 'next/server'
 import { createHmac, timingSafeEqual } from 'node:crypto'
 import { platformDb } from '@nzila/db/platform'
-import { orgs, orgMembers } from '@nzila/db'
-import { eq, and } from 'drizzle-orm'
+import { sql } from 'drizzle-orm'
 import { createLogger } from '@nzila/os-core'
 
 const logger = createLogger('zonga:clerk-webhook')
@@ -62,11 +61,12 @@ function isTimestampValid(timestamp: string): boolean {
 
 /* ── Clerk → DB role mapping ──────────────────────────────────────────────── */
 
-function mapClerkRole(clerkRole: string): 'org_admin' | 'org_secretary' | 'org_viewer' {
+function mapClerkRole(clerkRole: string): 'admin' | 'manager' | 'member' {
   switch (clerkRole) {
-    case 'org:admin': return 'org_admin'
-    case 'org:secretary': return 'org_secretary'
-    default: return 'org_viewer'
+    case 'org:admin': return 'admin'
+    case 'org:manager':
+    case 'org:secretary': return 'manager'
+    default: return 'member'
   }
 }
 
@@ -77,19 +77,15 @@ async function handleOrganizationCreated(data: Record<string, unknown>) {
   const name = (data.name as string) ?? 'Unnamed Organization'
 
   // Upsert org — link Clerk org ID to platform org
-  const existing = await platformDb
-    .select({ id: orgs.id })
-    .from(orgs)
-    .where(eq(orgs.clerkOrgId, clerkOrgId))
-    .limit(1)
+  const existing = await platformDb.execute(
+    sql`SELECT id FROM organizations WHERE clerk_org_id = ${clerkOrgId} LIMIT 1`,
+  )
 
-  if (existing.length === 0) {
-    await platformDb.insert(orgs).values({
-      clerkOrgId,
-      legalName: name,
-      jurisdiction: 'CA-ON',
-      status: 'active',
-    })
+  if ((existing as unknown[]).length === 0) {
+    await platformDb.execute(
+      sql`INSERT INTO organizations (name, clerk_org_id, organization_type, status, created_at, updated_at)
+          VALUES (${name}, ${clerkOrgId}, 'local', 'active', NOW(), NOW())`,
+    )
     logger.info('[clerk-webhook] Organization created', { detail: clerkOrgId })
   }
 }
@@ -99,10 +95,9 @@ async function handleOrganizationUpdated(data: Record<string, unknown>) {
   const name = (data.name as string) ?? undefined
 
   if (name) {
-    await platformDb
-      .update(orgs)
-      .set({ legalName: name, updatedAt: new Date() })
-      .where(eq(orgs.clerkOrgId, clerkOrgId))
+    await platformDb.execute(
+      sql`UPDATE organizations SET name = ${name}, updated_at = NOW() WHERE clerk_org_id = ${clerkOrgId}`,
+    )
     logger.info('[clerk-webhook] Organization updated', { detail: clerkOrgId })
   }
 }
@@ -120,39 +115,34 @@ async function handleMembershipCreated(data: Record<string, unknown>) {
   }
 
   // Resolve org UUID from Clerk org ID
-  const org = await platformDb
-    .select({ id: orgs.id })
-    .from(orgs)
-    .where(eq(orgs.clerkOrgId, clerkOrgId))
-    .limit(1)
+  const org = await platformDb.execute(
+    sql`SELECT id FROM organizations WHERE clerk_org_id = ${clerkOrgId} LIMIT 1`,
+  )
+  const orgRow = (org as unknown as { id: string }[])[0]
 
-  if (org.length === 0) {
+  if (!orgRow) {
     logger.warn('[clerk-webhook] Membership created for unknown org', { detail: clerkOrgId })
     return
   }
 
-  const orgId = org[0].id
+  const orgId = orgRow.id
   const mappedRole = mapClerkRole(role)
 
   // Upsert member
-  const existing = await platformDb
-    .select({ id: orgMembers.id })
-    .from(orgMembers)
-    .where(and(eq(orgMembers.orgId, orgId), eq(orgMembers.clerkUserId, clerkUserId)))
-    .limit(1)
+  const existing = await platformDb.execute(
+    sql`SELECT id FROM organization_members WHERE organization_id = ${orgId}::text AND user_id = ${clerkUserId} LIMIT 1`,
+  )
+  const existingRow = (existing as unknown as { id: string }[])[0]
 
-  if (existing.length === 0) {
-    await platformDb.insert(orgMembers).values({
-      orgId,
-      clerkUserId,
-      role: mappedRole,
-      status: 'active',
-    })
+  if (!existingRow) {
+    await platformDb.execute(
+      sql`INSERT INTO organization_members (user_id, organization_id, role, status, created_at, updated_at)
+          VALUES (${clerkUserId}, ${orgId}::text, ${mappedRole}, 'active', NOW(), NOW())`,
+    )
   } else {
-    await platformDb
-      .update(orgMembers)
-      .set({ role: mappedRole, status: 'active', updatedAt: new Date() })
-      .where(eq(orgMembers.id, existing[0].id))
+    await platformDb.execute(
+      sql`UPDATE organization_members SET role = ${mappedRole}, status = 'active', updated_at = NOW() WHERE id = ${existingRow.id}`,
+    )
   }
 
   logger.info('[clerk-webhook] Membership created/updated', { detail: `${clerkUserId} → ${clerkOrgId}` })
@@ -166,18 +156,17 @@ async function handleMembershipDeleted(data: Record<string, unknown>) {
 
   if (!clerkOrgId || !clerkUserId) return
 
-  const org = await platformDb
-    .select({ id: orgs.id })
-    .from(orgs)
-    .where(eq(orgs.clerkOrgId, clerkOrgId))
-    .limit(1)
+  const org = await platformDb.execute(
+    sql`SELECT id FROM organizations WHERE clerk_org_id = ${clerkOrgId} LIMIT 1`,
+  )
+  const orgRow = (org as unknown as { id: string }[])[0]
 
-  if (org.length === 0) return
+  if (!orgRow) return
 
-  await platformDb
-    .update(orgMembers)
-    .set({ status: 'removed', updatedAt: new Date() })
-    .where(and(eq(orgMembers.orgId, org[0].id), eq(orgMembers.clerkUserId, clerkUserId)))
+  await platformDb.execute(
+    sql`UPDATE organization_members SET status = 'removed', updated_at = NOW()
+        WHERE organization_id = ${orgRow.id}::text AND user_id = ${clerkUserId}`,
+  )
 
   logger.info('[clerk-webhook] Membership removed', { detail: `${clerkUserId} from ${clerkOrgId}` })
 }
@@ -187,10 +176,9 @@ async function handleUserDeleted(data: Record<string, unknown>) {
   if (!clerkUserId) return
 
   // Mark all memberships as removed
-  await platformDb
-    .update(orgMembers)
-    .set({ status: 'removed', updatedAt: new Date() })
-    .where(eq(orgMembers.clerkUserId, clerkUserId))
+  await platformDb.execute(
+    sql`UPDATE organization_members SET status = 'removed', updated_at = NOW() WHERE user_id = ${clerkUserId}`,
+  )
 
   logger.info('[clerk-webhook] User deleted — memberships removed', { detail: clerkUserId })
 }

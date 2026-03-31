@@ -38,7 +38,7 @@ export function ProgressStepper({
                     ? 'bg-electric text-white'
                     : isCurrent
                       ? 'bg-electric/10 text-electric ring-2 ring-electric/30'
-                      : 'bg-gray-100 text-gray-400'
+                      : 'bg-muted text-muted-foreground'
                 }`}
               >
                 {isComplete ? (
@@ -51,7 +51,7 @@ export function ProgressStepper({
               </div>
               <span
                 className={`text-[10px] mt-1.5 font-medium ${
-                  isCurrent ? 'text-electric' : isComplete ? 'text-navy' : 'text-gray-400'
+                  isCurrent ? 'text-electric' : isComplete ? 'text-foreground' : 'text-muted-foreground'
                 }`}
               >
                 {step.label}
@@ -59,8 +59,8 @@ export function ProgressStepper({
             </div>
             {index < steps.length - 1 && (
               <div
-                className={`flex-1 h-0.5 mx-2 mt-[-14px] rounded-full ${
-                  index < currentIndex ? 'bg-electric' : 'bg-gray-200'
+                className={`flex-1 h-0.5 mx-2 -mt-3.5 rounded-full ${
+                  index < currentIndex ? 'bg-electric' : 'bg-border'
                 }`}
               />
             )}

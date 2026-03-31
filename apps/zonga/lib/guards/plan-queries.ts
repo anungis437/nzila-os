@@ -21,13 +21,19 @@ export interface CreatorPlanInfo {
 
 export async function getListenerPlan(
   listenerId: string,
-  orgId: string,
+  orgId: string | null,
 ): Promise<ListenerPlanInfo> {
   try {
+    const whereClause = orgId
+      ? sql`WHERE user_id = ${listenerId} AND org_id = ${orgId}`
+      : sql`WHERE user_id = ${listenerId}`
+
     const [row] = (await platformDb.execute(
       sql`SELECT plan, subscription_status as "subscriptionStatus"
       FROM zonga_listeners
-      WHERE id = ${listenerId} AND org_id = ${orgId}`,
+      ${whereClause}
+      ORDER BY created_at DESC
+      LIMIT 1`,
     )) as unknown as [ListenerPlanInfo | undefined]
 
     return row ?? { plan: 'free', subscriptionStatus: null }

@@ -34,14 +34,14 @@ export function CatalogCard({ asset, basePath }: { asset: CatalogCardAsset; base
     <div className="group relative">
       <Link href={`${basePath}/${asset.id}`}>
         <Card>
-          <div className="p-4 hover:bg-gray-50 transition-colors rounded-xl">
+            <div className="p-4 hover:bg-muted transition-colors rounded-xl">
             <div className="flex items-center gap-3 mb-3">
               <div className="flex h-12 w-12 items-center justify-center rounded-lg bg-electric/10 text-2xl">
                 {asset.type === 'album' ? '💿' : asset.type === 'video' ? '🎬' : '🎵'}
               </div>
               <div className="flex-1 min-w-0">
-                <p className="font-semibold text-navy truncate">{asset.title ?? 'Untitled'}</p>
-                <p className="text-xs text-gray-500">
+                <p className="font-semibold text-foreground truncate">{asset.title ?? 'Untitled'}</p>
+                <p className="text-xs text-muted-foreground">
                   {(asset.metadata?.creatorName as string) ?? 'Unknown'}
                   {asset.collaborators?.length ? ` ft. ${asset.collaborators.join(', ')}` : ''}
                 </p>
@@ -49,9 +49,9 @@ export function CatalogCard({ asset, basePath }: { asset: CatalogCardAsset; base
             </div>
             <div className="flex items-center justify-between">
               <div className="flex items-center gap-2">
-                <span className="text-xs text-gray-400">{asset.genre?.replace(/_/g, ' ') ?? '—'}</span>
+                <span className="text-xs text-muted-foreground">{asset.genre?.replace(/_/g, ' ') ?? '—'}</span>
                 {asset.language && (
-                  <span className="inline-flex rounded-full bg-gray-100 px-1.5 py-0.5 text-[10px] font-medium text-gray-500 uppercase">
+                  <span className="inline-flex rounded-full bg-muted px-1.5 py-0.5 text-[10px] font-medium text-muted-foreground uppercase">
                     {asset.language}
                   </span>
                 )}

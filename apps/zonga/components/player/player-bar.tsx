@@ -61,7 +61,7 @@ export function PlayerBar() {
       <div className="mx-auto flex max-w-screen-2xl items-center gap-4 px-4 py-2">
         {/* Track Info */}
         <div className="flex items-center gap-3 min-w-0 w-1/4">
-          <div className="h-10 w-10 flex-shrink-0 rounded bg-white/10 flex items-center justify-center overflow-hidden relative">
+          <div className="h-10 w-10 shrink-0 rounded bg-white/10 flex items-center justify-center overflow-hidden relative">
             {currentTrack.coverArtUrl ? (
               <Image
                 src={currentTrack.coverArtUrl}

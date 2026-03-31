@@ -4,7 +4,6 @@
 'use client'
 
 import { useState, useTransition } from 'react'
-import { useRouter } from 'next/navigation'
 
 interface ButtonProps {
   action: string
@@ -15,7 +14,6 @@ interface ButtonProps {
 export function UpgradeButton({ action, label, creatorId }: ButtonProps) {
   const [pending, startTransition] = useTransition()
   const [error, setError] = useState<string | null>(null)
-  const router = useRouter()
 
   return (
     <div>
@@ -30,9 +28,13 @@ export function UpgradeButton({ action, label, creatorId }: ButtonProps) {
               headers: { 'Content-Type': 'application/json' },
               body: JSON.stringify({ action, creatorId }),
             })
+            if (!res.headers.get('content-type')?.includes('application/json')) {
+              setError(`Server error (${res.status})`)
+              return
+            }
             const data = await res.json()
             if (data.ok && data.data?.url) {
-              router.push(data.data.url)
+              window.location.href = data.data.url
             } else {
               setError(data.error ?? 'Something went wrong')
             }
@@ -50,7 +52,6 @@ export function UpgradeButton({ action, label, creatorId }: ButtonProps) {
 export function ManageSubscriptionButton({ action, label, creatorId }: ButtonProps) {
   const [pending, startTransition] = useTransition()
   const [error, setError] = useState<string | null>(null)
-  const router = useRouter()
 
   return (
     <div>
@@ -65,15 +66,19 @@ export function ManageSubscriptionButton({ action, label, creatorId }: ButtonPro
               headers: { 'Content-Type': 'application/json' },
               body: JSON.stringify({ action, creatorId }),
             })
+            if (!res.headers.get('content-type')?.includes('application/json')) {
+              setError(`Server error (${res.status})`)
+              return
+            }
             const data = await res.json()
             if (data.ok && data.data?.url) {
-              router.push(data.data.url)
+              window.location.href = data.data.url
             } else {
               setError(data.error ?? 'Something went wrong')
             }
           })
         }
-        className="inline-flex items-center gap-2 rounded-xl border border-gray-200 px-5 py-2.5 text-sm font-medium text-navy hover:bg-gray-50 transition-colors disabled:opacity-50"
+        className="inline-flex items-center gap-2 rounded-xl border border-border px-5 py-2.5 text-sm font-medium text-foreground hover:bg-muted transition-colors disabled:opacity-50"
       >
         {pending ? '...' : `⚙️ ${label}`}
       </button>

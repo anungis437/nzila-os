@@ -6,7 +6,7 @@
  */
 'use server'
 
-import { resolveOrgContext } from '@/lib/resolve-org'
+import { resolveListenerContext } from '@/lib/resolve-org'
 import { platformDb } from '@nzila/db/platform'
 import { sql } from 'drizzle-orm'
 import { logger } from '@/lib/logger'
@@ -32,7 +32,7 @@ export async function requestStream(
   assetId: string,
   requestedQuality?: AudioQuality,
 ): Promise<StreamResult> {
-  const ctx = await resolveOrgContext()
+  const ctx = await resolveListenerContext()
 
   try {
     const planInfo = await getListenerPlan(ctx.actorId, ctx.orgId)
@@ -48,7 +48,7 @@ export async function requestStream(
 
       const [asset] = (await platformDb.execute(
         sql`SELECT storage_url FROM zonga_content_assets
-        WHERE id = ${assetId} AND org_id = ${ctx.orgId} AND status = 'published'`,
+        WHERE id = ${assetId} AND status = 'published'`,
       )) as unknown as [{ storage_url: string | null } | undefined]
 
       if (!asset?.storage_url) {
@@ -71,7 +71,7 @@ export async function requestStream(
 
     const [asset] = (await platformDb.execute(
       sql`SELECT storage_url FROM zonga_content_assets
-      WHERE id = ${assetId} AND org_id = ${ctx.orgId} AND status = 'published'`,
+      WHERE id = ${assetId} AND status = 'published'`,
     )) as unknown as [{ storage_url: string | null } | undefined]
 
     if (!asset?.storage_url) {
@@ -104,7 +104,7 @@ export async function getMaxQuality(): Promise<{
   codec: string
   label: string
 }> {
-  const ctx = await resolveOrgContext()
+  const ctx = await resolveListenerContext()
   const planInfo = await getListenerPlan(ctx.actorId, ctx.orgId)
   const quality = maxAudioQuality(planInfo.plan)
   const tier = AUDIO_QUALITY[quality]
