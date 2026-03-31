@@ -12,7 +12,7 @@ describe('Card', () => {
   it('applies default variant with border', () => {
     render(<Card data-testid="card">Content</Card>)
     const card = screen.getByTestId('card')
-    expect(card.className).toContain('border-gray-200')
+    expect(card.className).toContain('border-border')
   })
 
   it('applies bordered variant', () => {

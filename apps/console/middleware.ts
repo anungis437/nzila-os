@@ -183,16 +183,19 @@ export default clerkMiddleware(async (auth, request) => {
 
   // ── i18n locale detection (cookie / Accept-Language) ──────────────────
   // For non-API routes, run intl middleware for locale detection.
-  // localePrefix: 'never' means no URL rewriting — locale is stored in cookie.
+  // localePrefix: 'never' — we use the intl middleware only to negotiate
+  // the locale and set the NEXT_LOCALE cookie. The internal rewrite to
+  // /<locale>/ is stripped because this app has no [locale] route segment.
   if (!request.nextUrl.pathname.startsWith('/api')) {
     const intlResponse = intlMiddleware(request)
-    if (intlResponse instanceof NextResponse) {
-      intlResponse.headers.set('x-request-id', requestId)
-      return intlResponse
-    }
-    const nr = NextResponse.next({ headers: new Headers((intlResponse as Response).headers) })
-    nr.headers.set('x-request-id', requestId)
-    return nr
+
+    // Build a pass-through response and copy cookies (locale) from intl
+    const response = NextResponse.next({
+      request: { headers: new Headers(request.headers) },
+    })
+    intlResponse.cookies.getAll().forEach((c) => response.cookies.set(c))
+    response.headers.set('x-request-id', requestId)
+    return response
   }
 
   const response = NextResponse.next()

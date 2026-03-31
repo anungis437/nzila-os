@@ -10,10 +10,10 @@ export function Card({
   children,
   ...props
 }: CardProps) {
-  const base = 'rounded-xl bg-white overflow-hidden'
+  const base = 'rounded-xl bg-card text-card-foreground overflow-hidden'
   const variants = {
-    default: 'border border-gray-200',
-    bordered: 'border-2 border-gray-300',
+    default: 'border border-border',
+    bordered: 'border-2 border-border',
     elevated: 'shadow-lg',
   }
   return (
@@ -29,7 +29,7 @@ Card.Header = function CardHeader({
   ...props
 }: React.HTMLAttributes<HTMLDivElement>) {
   return (
-    <div className={`px-6 py-4 border-b border-gray-100 ${className}`} {...props}>
+    <div className={`px-6 py-4 border-b border-border ${className}`} {...props}>
       {children}
     </div>
   )
@@ -53,7 +53,7 @@ Card.Footer = function CardFooter({
   ...props
 }: React.HTMLAttributes<HTMLDivElement>) {
   return (
-    <div className={`px-6 py-4 border-t border-gray-100 ${className}`} {...props}>
+    <div className={`px-6 py-4 border-t border-border ${className}`} {...props}>
       {children}
     </div>
   )
