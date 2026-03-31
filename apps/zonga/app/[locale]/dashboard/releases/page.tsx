@@ -29,7 +29,7 @@ export default async function ReleasesPage({
     <div className="space-y-8">
       <div className="flex items-center justify-between">
         <div>
-          <h1 className="text-2xl font-bold text-foreground">Releases</h1>
+          <h1 className="text-2xl font-bold text-navy">Releases</h1>
           <p className="text-muted-foreground mt-1">Albums, EPs, singles & compilations</p>
         </div>
         <Link
@@ -62,13 +62,13 @@ export default async function ReleasesPage({
         <Card>
           <div className="p-5">
             <p className="text-xs text-muted-foreground">Total Releases</p>
-            <p className="text-2xl font-bold text-foreground">{total}</p>
+            <p className="text-2xl font-bold text-navy">{total}</p>
           </div>
         </Card>
         <Card>
           <div className="p-5">
             <p className="text-xs text-muted-foreground">Showing</p>
-            <p className="text-2xl font-bold text-foreground">{releases.length}</p>
+            <p className="text-2xl font-bold text-navy">{releases.length}</p>
           </div>
         </Card>
       </div>

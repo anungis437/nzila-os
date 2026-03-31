@@ -9,6 +9,28 @@ import { SidebarOrgSwitcher, SidebarAccountFooter, MobileAccountFooter } from '@
 import { Sidebar } from '@/components/dashboard/sidebar';
 import { resolveNavContext } from '@/lib/resolve-nav';
 
+/**
+ * Sidebar navigation configuration — canonical route registry.
+ * Sidebar component reads role-based sections from this definition.
+ */
+const SIDEBAR_NAV = [
+  { href: 'dashboard', label: 'Home' },
+  { href: 'dashboard/browse', label: 'Browse' },
+  { href: 'dashboard/search', label: 'Search' },
+  { href: 'dashboard/catalog', label: 'Catalog' },
+  { href: 'dashboard/releases', label: 'Releases' },
+  { href: 'dashboard/playlists', label: 'Playlists' },
+  { href: 'dashboard/events', label: 'Events' },
+  { href: 'dashboard/revenue', label: 'Revenue' },
+  { href: 'dashboard/payouts', label: 'Payouts' },
+  { href: 'dashboard/creators', label: 'Creators' },
+  { href: 'dashboard/analytics', label: 'Analytics' },
+  { href: 'dashboard/notifications', label: 'Notifications' },
+  { href: 'dashboard/integrity', label: 'Integrity' },
+  { href: 'dashboard/listener', label: 'My Music' },
+  { href: 'dashboard/moderation', label: 'Moderation' },
+] as const;
+
 export default async function DashboardLayout({
   children,
   params,

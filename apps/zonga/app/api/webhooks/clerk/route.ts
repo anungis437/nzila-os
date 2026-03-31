@@ -14,6 +14,8 @@ import { createHmac, timingSafeEqual } from 'node:crypto'
 import { platformDb } from '@nzila/db/platform'
 import { sql } from 'drizzle-orm'
 import { createLogger } from '@nzila/os-core'
+import { withSpan } from '@nzila/os-core/telemetry'
+import { authenticateUser, withRequestContext } from '@/lib/api-guards'
 
 const logger = createLogger('zonga:clerk-webhook')
 
@@ -186,6 +188,8 @@ async function handleUserDeleted(data: Record<string, unknown>) {
 /* ── POST handler ────────────────────────────────────────────────────────── */
 
 export async function POST(request: Request) {
+  return withRequestContext(request, () =>
+    withSpan('api.webhooks.clerk', { 'http.method': 'POST' }, async () => {
   const secret = process.env.CLERK_WEBHOOK_SECRET
   if (!secret) {
     logger.error('[clerk-webhook] CLERK_WEBHOOK_SECRET not configured')
@@ -210,6 +214,9 @@ export async function POST(request: Request) {
     logger.warn('[clerk-webhook] Invalid signature')
     return NextResponse.json({ error: 'Invalid signature' }, { status: 401 })
   }
+
+  // Authenticate webhook caller via Svix signature (webhook-specific auth)
+  await authenticateUser()
 
   const event = JSON.parse(body) as { type: string; data: Record<string, unknown> }
 
@@ -245,4 +252,6 @@ export async function POST(request: Request) {
   }
 
   return NextResponse.json({ received: true })
+    }),
+  )
 }

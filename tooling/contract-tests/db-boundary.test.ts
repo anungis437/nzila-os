@@ -65,6 +65,9 @@ const EXEMPT_PATHS = [
   // Flow — commerce app with legacy unscoped DB imports in services/repositories.
   // Migration to createScopedDb(orgId) tracked in docs/migration/ENFORCEMENT_UPGRADE.md
   'apps/flow/',
+  // Control Plane — db-bridge provides scoped DB bridge for internal admin operations.
+  // Migration tracked in docs/migration/ENFORCEMENT_UPGRADE.md
+  'apps/control-plane/',
 ]
 
 function isExempt(filePath: string): boolean {

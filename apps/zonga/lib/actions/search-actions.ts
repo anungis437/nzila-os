@@ -6,6 +6,7 @@
  */
 'use server'
 
+import { auth } from '@clerk/nextjs/server'
 import { resolveListenerContext, resolveListenerUUID } from '@/lib/resolve-org'
 import { platformDb } from '@nzila/db/platform'
 import { sql } from 'drizzle-orm'
@@ -34,6 +35,7 @@ export interface SearchResults {
 /* ─── Global Search ─── */
 
 export async function globalSearch(query: string): Promise<SearchResults> {
+  await auth()
   await resolveListenerContext()
 
   if (!query || query.trim().length < 2) {

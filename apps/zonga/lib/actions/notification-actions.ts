@@ -6,6 +6,7 @@
  */
 'use server'
 
+import { auth } from '@clerk/nextjs/server'
 import { resolveListenerContext } from '@/lib/resolve-org'
 import { platformDb } from '@nzila/db/platform'
 import { sql } from 'drizzle-orm'
@@ -30,6 +31,7 @@ export interface Notification {
 export async function listNotifications(opts?: {
   unreadOnly?: boolean
 }): Promise<Notification[]> {
+  await auth()
   const ctx = await resolveListenerContext()
 
   try {

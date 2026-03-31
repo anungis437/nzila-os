@@ -55,9 +55,10 @@ const SECONDARY_STORE_ALLOWLIST: Record<string, string[]> = {
   'cfo': ['redis'],
   'partners': ['redis'],
   'orchestrator-api': ['redis'],
+  'agrimo': ['redis'],
   'web': [],
   'nacp-exams': [],
-  'zonga': [],
+  'zonga': ['redis'],
 }
 
 /**

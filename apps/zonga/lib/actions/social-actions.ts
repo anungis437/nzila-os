@@ -7,6 +7,7 @@
  */
 'use server'
 
+import { auth } from '@clerk/nextjs/server'
 import { resolveListenerContext, resolveListenerUUID } from '@/lib/resolve-org'
 import { platformDb } from '@nzila/db/platform'
 import { sql } from 'drizzle-orm'
@@ -51,6 +52,7 @@ export interface SocialStats {
 /* ─── Follow ─── */
 
 export async function followCreator(creatorId: string): Promise<{ success: boolean }> {
+  await auth()
   const ctx = await resolveListenerContext()
   const listenerId = await resolveListenerUUID(ctx)
 

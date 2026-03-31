@@ -176,7 +176,7 @@ export default function RegisterCreatorPage() {
 
   return (
     <div className="max-w-2xl">
-      <h1 className="text-2xl font-bold text-foreground mb-2">Register Creator</h1>
+      <h1 className="text-2xl font-bold text-navy mb-2">Register Creator</h1>
       <p className="text-muted-foreground text-sm mb-6">
         Onboard a new artist or rights-holder onto the Zonga platform.
       </p>

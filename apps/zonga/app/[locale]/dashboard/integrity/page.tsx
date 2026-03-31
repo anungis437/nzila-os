@@ -34,7 +34,7 @@ export default async function IntegrityPage() {
   return (
     <div className="space-y-8">
       <div>
-        <h1 className="text-2xl font-bold text-foreground">Content Integrity</h1>
+        <h1 className="text-2xl font-bold text-navy">Content Integrity</h1>
         <p className="text-muted-foreground mt-1">
           ML-powered content verification &amp; compliance monitoring
         </p>
@@ -48,7 +48,7 @@ export default async function IntegrityPage() {
               <span className="text-lg">🛡️</span>
               <p className="text-xs text-muted-foreground">Total Checks</p>
             </div>
-            <p className="text-2xl font-bold text-foreground">{summary.total ?? 0}</p>
+            <p className="text-2xl font-bold text-navy">{summary.total ?? 0}</p>
           </div>
         </Card>
         <Card>

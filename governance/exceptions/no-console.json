@@ -70,13 +70,13 @@
       "expiresOn": "2026-09-01"
     },
     {
-      "path": "apps/partners/app/admin/error.tsx",
+      "path": "apps/partners/app/**/admin/error.tsx",
       "owner": "platform-team",
       "justification": "Client-side error boundary runs in browser context where @nzila/os-core is not available — console.error is needed for Next.js error reporting.",
       "expiresOn": "2026-09-01"
     },
     {
-      "path": "apps/partners/app/portal/error.tsx",
+      "path": "apps/partners/app/**/portal/error.tsx",
       "owner": "platform-team",
       "justification": "Client-side error boundary runs in browser context where @nzila/os-core is not available — console.error is needed for Next.js error reporting.",
       "expiresOn": "2026-09-01"

@@ -47,7 +47,7 @@ export default async function PayoutsPage({
     <div className="space-y-8">
       <div className="flex items-center justify-between">
         <div>
-          <h1 className="text-2xl font-bold text-foreground">Payouts</h1>
+          <h1 className="text-2xl font-bold text-navy">Payouts</h1>
           <p className="text-muted-foreground mt-1">Creator earnings and payout history</p>
         </div>
         <a
@@ -63,7 +63,7 @@ export default async function PayoutsPage({
         <Card>
           <div className="p-5">
             <p className="text-xs text-muted-foreground">Total Payouts</p>
-            <p className="text-2xl font-bold text-foreground">{total}</p>
+            <p className="text-2xl font-bold text-navy">{total}</p>
           </div>
         </Card>
         <Card>
@@ -75,7 +75,7 @@ export default async function PayoutsPage({
         <Card>
           <div className="p-5">
             <p className="text-xs text-muted-foreground">Average Payout</p>
-            <p className="text-2xl font-bold text-foreground">
+            <p className="text-2xl font-bold text-navy">
               {total > 0 ? formatAmount(Math.round((totalPaid / total) * 100)) : '—'}
             </p>
           </div>

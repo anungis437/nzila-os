@@ -99,7 +99,7 @@ export default function NewEventPage() {
 
   return (
     <div className="max-w-2xl">
-      <h1 className="text-2xl font-bold text-foreground mb-6">New Event</h1>
+      <h1 className="text-2xl font-bold text-navy mb-6">New Event</h1>
 
       <Card>
         <form onSubmit={handleSubmit} className="p-6 space-y-5">

@@ -159,6 +159,9 @@ export const ORG_SCOPED_TABLES = [
   'zongaSharedContent',
   'zongaRecommendationCache',
   'zongaCreatorAnalytics',
+  'zongaEventbriteConnections',
+  'zongaPodcasts',
+  'zongaPodcastEpisodes',
 
   // ── commerce.ts ─────────────────────────────────────────
   'commerceCustomers',

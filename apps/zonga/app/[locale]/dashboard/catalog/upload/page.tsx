@@ -324,7 +324,7 @@ export default function UploadPage() {
     <div className="max-w-2xl mx-auto">
       <Stepper current={step} />
 
-      <h1 className="text-2xl font-bold text-foreground mb-2">
+      <h1 className="text-2xl font-bold text-navy mb-2">
         {step === 'meta' ? 'New Content' : 'Upload Files'}
       </h1>
       <p className="text-muted-foreground text-sm mb-6">

@@ -50,7 +50,7 @@ export default async function CreatorsPage({
       {/* Header */}
       <div className="flex items-center justify-between">
         <div>
-          <h1 className="text-2xl font-bold text-foreground">Creators</h1>
+          <h1 className="text-2xl font-bold text-navy">Creators</h1>
           <p className="text-muted-foreground mt-1">{total} creator{total !== 1 ? 's' : ''} registered</p>
         </div>
         <Link

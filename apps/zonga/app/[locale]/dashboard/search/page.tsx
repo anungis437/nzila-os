@@ -90,7 +90,7 @@ export default function SearchPage() {
   return (
     <div className="space-y-6">
       <div>
-        <h1 className="text-2xl font-bold text-foreground">Search & Discovery</h1>
+        <h1 className="text-2xl font-bold text-navy">Search & Discovery</h1>
         <p className="mt-1 text-sm text-muted-foreground">
           Search tracks, creators, events, and playlists across the platform.
         </p>

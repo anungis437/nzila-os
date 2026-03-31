@@ -58,6 +58,8 @@ const AUTH_PATTERNS = [
   'withRoleAuth(',
   'getReadContext(',            // Flow clerk-org-resolver — calls auth() internally
   'getDbContext(',              // Flow clerk-org-resolver — calls auth() internally
+  'resolveListenerContext(',    // Zonga listener-scoped auth wrapper — calls auth() internally
+  'resolveListenerUUID(',       // Zonga listener UUID resolver — calls auth() internally
 ]
 
 /** Paths explicitly allowed to have no auth (e.g. health/status endpoints, DAL layers) */

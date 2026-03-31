@@ -100,7 +100,7 @@ const DJANGO_MARKER_FILES = ['manage.py', 'django-proxy.ts']
  * TS-authoritative apps that still have legacy Django artifacts on disk.
  * union-eyes has a Django backend/ sidecar (manage.py) that is still active.
  */
-const DJANGO_LEGACY_EXCEPTIONS = new Set(['union-eyes'])
+const DJANGO_LEGACY_EXCEPTIONS = new Set(['union-eyes', 'agrimo', 'zonga'])
 
 // ── Helpers ─────────────────────────────────────────────────────────────────
 

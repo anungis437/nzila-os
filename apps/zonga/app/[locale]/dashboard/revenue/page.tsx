@@ -108,7 +108,7 @@ export default async function RevenuePage() {
   return (
     <div className="space-y-8">
       <div>
-        <h1 className="text-2xl font-bold text-foreground">Revenue</h1>
+        <h1 className="text-2xl font-bold text-navy">Revenue</h1>
         <p className="text-muted-foreground mt-1">
           {overview.eventCount.toLocaleString()} revenue events tracked
         </p>

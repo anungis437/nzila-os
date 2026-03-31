@@ -32,6 +32,18 @@
       "owner": "commerce-team",
       "justification": "Flow commerce app — legacy direct DB access in API routes. Migration to service layer tracked in docs/migration/ENFORCEMENT_UPGRADE.md",
       "expiresOn": "2026-09-01"
+    },
+    {
+      "path": "apps/agrimo/**",
+      "owner": "agri-team",
+      "justification": "Agrimo webhook handler imports @nzila/db for org/member sync. Migration to service layer planned.",
+      "expiresOn": "2026-09-01"
+    },
+    {
+      "path": "apps/control-plane/**",
+      "owner": "platform-team",
+      "justification": "Control plane db-bridge provides scoped DB bridge for internal admin operations. Migration tracked in docs/migration/ENFORCEMENT_UPGRADE.md",
+      "expiresOn": "2026-09-01"
     }
   ]
 }

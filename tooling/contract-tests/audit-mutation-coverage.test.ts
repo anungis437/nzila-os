@@ -82,6 +82,8 @@ const MUTATION_ALLOWLIST = [
   // Flow — commerce app with legacy direct DB mutations in services/repositories.
   // Tracked for migration to createAuditedScopedDb.
   'apps/flow/',
+  // Test scaffold — ephemeral directory created/destroyed by golden-path tests.
+  'apps/test-scaffold-gp/',
 ]
 
 function isAllowlisted(filePath: string): boolean {

@@ -8,6 +8,7 @@ import { redirect } from 'next/navigation'
 import Link from 'next/link'
 import { Card } from '@nzila/ui'
 import { browsePublicPlaylists } from '@/lib/actions/browse-actions'
+import type { PlaylistListResult } from '@/lib/actions/playlist-actions'
 
 export default async function PlaylistsPage({
   searchParams,
@@ -26,7 +27,7 @@ export default async function PlaylistsPage({
       {/* Header */}
       <div className="flex items-center justify-between">
         <div>
-          <h1 className="text-2xl font-bold text-foreground">Playlists</h1>
+          <h1 className="text-2xl font-bold text-navy">Playlists</h1>
           <p className="text-muted-foreground mt-1">{total} playlist{total !== 1 ? 's' : ''}</p>
         </div>
         <Link

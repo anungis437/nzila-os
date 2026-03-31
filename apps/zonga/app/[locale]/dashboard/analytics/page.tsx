@@ -59,7 +59,7 @@ export default async function AnalyticsPage() {
   return (
     <div className="space-y-8">
       <div>
-        <h1 className="text-2xl font-bold text-foreground">Analytics</h1>
+        <h1 className="text-2xl font-bold text-navy">Analytics</h1>
         <p className="text-muted-foreground mt-1">
           Platform performance &amp; content metrics
         </p>
@@ -119,7 +119,7 @@ export default async function AnalyticsPage() {
                 <span className="text-lg">{kpi.icon}</span>
                 <p className="text-xs text-muted-foreground">{kpi.label}</p>
               </div>
-              <p className="text-2xl font-bold text-foreground">
+              <p className="text-2xl font-bold text-navy">
                 {formatCompact(kpi.value)}
               </p>
             </div>

@@ -91,7 +91,7 @@ export default function NewPayoutPage() {
 
   return (
     <div className="max-w-2xl">
-      <h1 className="text-2xl font-bold text-foreground mb-6">New Payout</h1>
+      <h1 className="text-2xl font-bold text-navy mb-6">New Payout</h1>
 
       <Card>
         <div className="p-6 space-y-5">

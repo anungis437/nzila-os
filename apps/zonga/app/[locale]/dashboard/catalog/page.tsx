@@ -59,7 +59,7 @@ export default async function CatalogPage({
       {/* Header */}
       <div className="flex items-center justify-between">
         <div>
-          <h1 className="text-2xl font-bold text-foreground">Catalog</h1>
+          <h1 className="text-2xl font-bold text-navy">Catalog</h1>
           <p className="text-muted-foreground mt-1">{displayTotal} asset{displayTotal !== 1 ? 's' : ''} in your library{withCollaborators > 0 && ` · ${withCollaborators} with collaborators`}{languages.size > 0 && ` · ${languages.size} language${languages.size !== 1 ? 's' : ''}`}</p>
         </div>
         <Link

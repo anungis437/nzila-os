@@ -163,6 +163,42 @@
       "owner": "@nzila/union-eyes",
       "justification": "UE uses auth from api-auth-guard — resolveOrgContext migration pending",
       "expiresOn": "2026-09-30"
+    },
+    {
+      "path": "apps/zonga/lib/actions/download-actions.ts",
+      "owner": "@nzila/zonga",
+      "justification": "Zonga listener-scoped action — uses resolveListenerContext instead of resolveOrgContext",
+      "expiresOn": "2026-09-30"
+    },
+    {
+      "path": "apps/zonga/lib/actions/listener-actions.ts",
+      "owner": "@nzila/zonga",
+      "justification": "Zonga listener-scoped action — uses resolveListenerContext instead of resolveOrgContext",
+      "expiresOn": "2026-09-30"
+    },
+    {
+      "path": "apps/zonga/lib/actions/notification-actions.ts",
+      "owner": "@nzila/zonga",
+      "justification": "Zonga listener-scoped action — uses resolveListenerContext instead of resolveOrgContext",
+      "expiresOn": "2026-09-30"
+    },
+    {
+      "path": "apps/zonga/lib/actions/search-actions.ts",
+      "owner": "@nzila/zonga",
+      "justification": "Zonga listener-scoped action — uses resolveListenerContext instead of resolveOrgContext",
+      "expiresOn": "2026-09-30"
+    },
+    {
+      "path": "apps/zonga/lib/actions/social-actions.ts",
+      "owner": "@nzila/zonga",
+      "justification": "Zonga listener-scoped action — uses resolveListenerContext instead of resolveOrgContext",
+      "expiresOn": "2026-09-30"
+    },
+    {
+      "path": "apps/zonga/lib/actions/streaming-actions.ts",
+      "owner": "@nzila/zonga",
+      "justification": "Zonga listener-scoped action — uses resolveListenerContext instead of resolveOrgContext",
+      "expiresOn": "2026-09-30"
     }
   ]
 }
