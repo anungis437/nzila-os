@@ -35,6 +35,9 @@ export async function POST(request: NextRequest) {
     const authHeader = request.headers.get('authorization');
     const secret = authHeader?.replace('Bearer ', '') ?? '';
     const expected = process.env.CRON_SECRET ?? '';
+    if (!expected) {
+      return standardErrorResponse(ErrorCode.AUTH_REQUIRED, 'CRON_SECRET not configured');
+    }
     const secretBuf = Buffer.from(secret);
     const expectedBuf = Buffer.from(expected);
 

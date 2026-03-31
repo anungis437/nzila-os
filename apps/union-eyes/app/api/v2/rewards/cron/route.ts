@@ -50,6 +50,9 @@ export const POST = withApi(
         const authHeader = request.headers.get('authorization');
         const secret = authHeader?.replace('Bearer ', '') ?? '';
         const expected = process.env.CRON_SECRET ?? '';
+        if (!expected) {
+          throw ApiError.unauthorized('CRON_SECRET not configured');
+        }
         const secretBuf = Buffer.from(secret);
         const expectedBuf = Buffer.from(expected);
         if (secretBuf.length !== expectedBuf.length || !timingSafeEqual(secretBuf, expectedBuf)) {

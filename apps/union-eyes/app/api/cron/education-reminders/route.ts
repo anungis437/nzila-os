@@ -39,10 +39,13 @@ export async function GET(request: NextRequest) {
     const authHeader = request.headers.get("authorization");
     const secret = authHeader?.replace('Bearer ', '') ?? '';
     const cronSecret = process.env.CRON_SECRET ?? '';
+    if (!cronSecret) {
+      return standardErrorResponse(ErrorCode.AUTH_REQUIRED, 'CRON_SECRET not configured');
+    }
     const secretBuf = Buffer.from(secret);
     const expectedBuf = Buffer.from(cronSecret);
 
-    if (cronSecret && (secretBuf.length !== expectedBuf.length || !timingSafeEqual(secretBuf, expectedBuf))) {
+    if (secretBuf.length !== expectedBuf.length || !timingSafeEqual(secretBuf, expectedBuf)) {
       logger.warn("Unauthorized cron job attempt", {
         authHeader: authHeader?.substring(0, 20),
       });

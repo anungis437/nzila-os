@@ -45,10 +45,13 @@ export async function POST(request: NextRequest) {
   // Authenticate via shared secret
   const secret = request.headers.get('x-cron-secret') ?? ''
   const expected = process.env.CRON_SECRET ?? ''
+  if (!expected) {
+    return NextResponse.json({ error: 'CRON_SECRET not configured' }, { status: 401 })
+  }
   const secretsMatch =
     secret.length === expected.length &&
     timingSafeEqual(Buffer.from(secret), Buffer.from(expected))
-  if (!secretsMatch && process.env.NODE_ENV === 'production') {
+  if (!secretsMatch) {
     return NextResponse.json({ error: 'Unauthorized' }, { status: 401 })
   }
 
