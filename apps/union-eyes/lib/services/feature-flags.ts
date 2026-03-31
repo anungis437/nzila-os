@@ -26,7 +26,7 @@
  */
 
 import { db } from '@/db/db';
-import { featureFlags, type FeatureFlag } from '@/db/schema/feature-flags-schema';
+import { featureFlags, type FeatureFlag } from '@/db/schema';
 import { eq } from 'drizzle-orm';
 import { logger } from '@/lib/logger';
 

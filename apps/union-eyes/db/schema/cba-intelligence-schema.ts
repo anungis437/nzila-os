@@ -1,6 +1,7 @@
 import { pgTable, uuid, varchar, text, timestamp, integer, decimal, jsonb, pgEnum, index, boolean } from "drizzle-orm/pg-core";
 import { collectiveAgreements } from "./collective-agreements-schema";
 import { cbaClause } from "./cba-clauses-schema";
+import { claims } from "./domains/claims/claims";
 
 // Enums for Arbitration and Legal
 export const tribunalTypeEnum = pgEnum("tribunal_type", [
@@ -288,7 +289,7 @@ export const cbaFootnotes = pgTable("cba_footnotes", {
 // Claim-to-precedent analysis (connects claims module to CBA intelligence)
 export const claimPrecedentAnalysis = pgTable("claim_precedent_analysis", {
   id: uuid("id").primaryKey().defaultRandom(),
-  claimId: uuid("claim_id").notNull(), // References claims.claim_id
+  claimId: uuid("claim_id").notNull().references(() => claims.claimId), // References claims.claim_id
   
   // Matching decisions
   precedentMatches: jsonb("precedent_matches").$type<Array<{

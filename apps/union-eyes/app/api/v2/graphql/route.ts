@@ -1,24 +1,7 @@
 /**
- * GET POST /api/graphql
- * Migrated to withApi() framework
+ * GET POST /api/v2/graphql
+ * GraphQL endpoint — not yet available, use REST API endpoints.
  */
-// eslint-disable-next-line @typescript-eslint/no-unused-vars
-import { createYoga } from 'graphql-yoga';
-// eslint-disable-next-line @typescript-eslint/no-unused-vars
-import { schema } from '@/lib/graphql/schema';
-// eslint-disable-next-line @typescript-eslint/no-unused-vars
-import { resolvers } from '@/lib/graphql/resolvers';
- 
- 
- 
- 
- 
- 
- 
- 
- 
- 
- 
 import { withApi, ApiError } from '@/lib/api/framework';
 
 export const GET = withApi(

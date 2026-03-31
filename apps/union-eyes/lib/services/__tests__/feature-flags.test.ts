@@ -41,12 +41,16 @@ vi.mock('@/db/db', () => ({
   },
 }));
 
-vi.mock('@/db/schema/feature-flags-schema', () => ({
-  featureFlags: {
-    name: 'name', enabled: 'enabled', type: 'type', id: 'id',
-    percentage: 'percentage', allowedOrganizations: 'allowedOrganizations',
-  },
-}));
+vi.mock('@/db/schema', async (importOriginal) => {
+  const actual = await importOriginal() as Record<string, unknown>;
+  return {
+    ...actual,
+    featureFlags: {
+      name: 'name', enabled: 'enabled', type: 'type', id: 'id',
+      percentage: 'percentage', allowedOrganizations: 'allowedOrganizations',
+    },
+  };
+});
 
 vi.mock('drizzle-orm', async (importOriginal) => {
   const actual = await importOriginal<typeof import('drizzle-orm')>();

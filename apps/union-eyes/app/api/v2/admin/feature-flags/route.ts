@@ -1,19 +1,11 @@
 /**
- * GET PATCH /api/admin/feature-flags
- * Migrated to withApi() framework
+ * GET PATCH /api/v2/admin/feature-flags
+ * Feature flag management (admin-only)
  */
- 
- 
- 
- 
- 
- 
- 
- 
- 
- 
- 
- 
+import { db } from '@/db';
+import { featureFlags } from '@/db/schema';
+import { eq } from 'drizzle-orm';
+
 import { withApi, ApiError, z } from '@/lib/api/framework';
 
 const toggleFlagSchema = z.object({
@@ -30,7 +22,8 @@ export const GET = withApi(
     },
   },
   async () => {
-    throw ApiError.notImplemented('Feature flags management is not yet available.');
+    const flags = await db.select().from(featureFlags);
+    return { success: true, data: flags };
   },
 );
 
@@ -43,7 +36,16 @@ export const PATCH = withApi(
       summary: 'PATCH feature-flags',
     },
   },
-  async () => {
-    throw ApiError.notImplemented('Feature flags management is not yet available.');
+  async ({ body, userId }) => {
+    const existing = await db.select().from(featureFlags).where(eq(featureFlags.name, body.name));
+    if (existing.length === 0) {
+      throw ApiError.notFound(`Feature flag "${body.name}" not found.`);
+    }
+    const [updated] = await db
+      .update(featureFlags)
+      .set({ enabled: body.enabled, updatedAt: new Date(), lastModifiedBy: userId })
+      .where(eq(featureFlags.name, body.name))
+      .returning();
+    return { success: true, data: updated };
   },
 );
