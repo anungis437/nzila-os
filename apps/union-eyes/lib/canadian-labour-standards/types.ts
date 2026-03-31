@@ -69,13 +69,12 @@ export interface StatutoryHoliday {
 
 /** Workers' compensation board info */
 export interface WorkersCompBoard {
-  code: string;
   name: string;
-  abbreviation: string;
+  acronym: string;
   statute: string;
-  claimFilingDeadline: string;
-  website: string;
-  appealBody: string;
+  portalUrl: string;
+  claimDeadlineDays: number;
+  notes?: string;
 }
 
 /** Labour relations board info */

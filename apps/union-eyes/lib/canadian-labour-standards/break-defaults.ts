@@ -19,21 +19,15 @@ function ruleToPolicy(
   orgId: string,
   jurisdiction: CanadianJurisdiction,
 ): NewBreakPolicy {
-  const frequency = rule.type === 'meal'
-    ? 'per_shift'
-    : rule.type === 'weekly_rest'
-      ? 'per_week'
-      : 'per_day';
-
   return {
     organizationId: orgId,
     name: `${rule.statute} — ${rule.description.slice(0, 60)}`,
     breakType: rule.type === 'meal' ? 'meal' : 'rest',
     durationMinutes: rule.durationMinutes,
     compensation: rule.paid ? 'paid' : 'unpaid',
-    frequency,
-    eligibilityHoursWorked: rule.consecutiveHoursTrigger,
-    description: `${rule.description}\n\nStatutory reference: ${rule.statute}, ${rule.article}\nJurisdiction: ${jurisdiction}`,
+    frequencyPerShift: 1,
+    minHoursForEligibility: rule.consecutiveHoursTrigger,
+    notes: `${rule.description}\n\nStatutory reference: ${rule.statute}, ${rule.article}\nJurisdiction: ${jurisdiction}`,
     cbaClauseRef: null,
     isActive: true,
   };

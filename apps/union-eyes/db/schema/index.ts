@@ -52,6 +52,21 @@ export {
   // Relations
   workplaceIncidentsRelations, safetyInspectionsRelations, hazardReportsRelations,
   correctiveActionsRelations, injuryLogsRelations,
+  // CNESST enums
+  cneesstFilingTypeEnum, cneesstFilingStatusEnum,
+  preventiveWithdrawalReasonEnum, rightOfRefusalOutcomeEnum,
+  payEquityStatusEnum, antiScabViolationTypeEnum,
+  // CNESST tables
+  cneesstFilings, rightOfRefusalEvents, preventiveWithdrawals,
+  jointHsCommittees, payEquityExercises, antiScabViolations,
+  // CNESST relations
+  cneesstFilingsRelations, rightOfRefusalEventsRelations, preventiveWithdrawalsRelations,
+  // Provincial WCB enums
+  wcbJurisdictionEnum, wcbClaimStatusEnum, wcbClaimTypeEnum, wcbReturnToWorkStatusEnum,
+  // Provincial WCB tables
+  wcbClaims, wcbEmployerAssessments,
+  // Provincial WCB relations
+  wcbClaimsRelations, wcbEmployerAssessmentsRelations,
 } from "./domains/health-safety";
 
 // Advanced Feature Domains

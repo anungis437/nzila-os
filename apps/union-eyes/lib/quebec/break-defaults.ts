@@ -28,9 +28,9 @@ function lntRuleToPolicy(
     breakType: rule.type === 'meal' ? 'meal' : 'rest',
     durationMinutes: rule.durationMinutes,
     compensation: rule.paid ? 'paid' : 'unpaid',
-    frequency: rule.type === 'meal' ? 'per_shift' : 'per_week',
-    eligibilityHoursWorked: rule.consecutiveHoursTrigger,
-    description: `${rule.descriptionFr}\n\nStatutory reference: ${rule.article}`,
+    frequencyPerShift: 1,
+    minHoursForEligibility: rule.consecutiveHoursTrigger,
+    notes: `${rule.descriptionFr}\n\nStatutory reference: ${rule.article}`,
     cbaClauseRef: null,
     isActive: true,
   };

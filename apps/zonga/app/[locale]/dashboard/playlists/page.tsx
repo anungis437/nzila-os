@@ -7,6 +7,7 @@ import { auth } from '@clerk/nextjs/server'
 import { redirect } from 'next/navigation'
 import Link from 'next/link'
 import { Card } from '@nzila/ui'
+import type { PlaylistListResult } from '@/lib/actions/playlist-actions'
 import { browsePublicPlaylists } from '@/lib/actions/browse-actions'
 
 export default async function PlaylistsPage({
@@ -19,7 +20,7 @@ export default async function PlaylistsPage({
 
   const params = await searchParams
   const page = Number(params.page ?? '1')
-  const { playlists, total } = await browsePublicPlaylists({ page, search: params.search })
+  const { playlists, total } = await browsePublicPlaylists({ page, search: params.search }) as PlaylistListResult
 
   return (
     <div className="space-y-6">
