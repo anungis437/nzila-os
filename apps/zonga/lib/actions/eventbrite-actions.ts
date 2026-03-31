@@ -14,7 +14,6 @@ import { logger } from '@/lib/logger'
 import {
   EventbriteClient,
   EventbriteApiError,
-  type EventbriteEvent,
   type EventbriteTicketClass,
 } from '@/lib/eventbrite'
 
@@ -269,8 +268,8 @@ export async function importEventbriteEvent(
 
     // Resolve venue info
     let venue = ebEvent.venue?.name ?? ''
-    let city = ebEvent.venue?.address?.city ?? ''
-    let country = ebEvent.venue?.address?.country ?? ''
+    const city = ebEvent.venue?.address?.city ?? ''
+    const country = ebEvent.venue?.address?.country ?? ''
     if (!venue && ebEvent.online_event) {
       venue = 'Online Event'
     }
@@ -389,8 +388,8 @@ export async function syncEventbriteEvent(
     const zongaStatus = statusMap[ebEvent.status] ?? 'draft'
 
     let venue = ebEvent.venue?.name ?? ''
-    let city = ebEvent.venue?.address?.city ?? ''
-    let country = ebEvent.venue?.address?.country ?? ''
+    const city = ebEvent.venue?.address?.city ?? ''
+    const country = ebEvent.venue?.address?.country ?? ''
     if (!venue && ebEvent.online_event) venue = 'Online Event'
 
     const startsAt = new Date(ebEvent.start.utc).toISOString()

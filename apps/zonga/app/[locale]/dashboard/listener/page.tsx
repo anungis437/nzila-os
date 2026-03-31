@@ -22,11 +22,14 @@ import {
   Library,
   Mic2,
   ArrowRight,
+  Sparkles,
+  Play,
 } from 'lucide-react'
 import {
   getListenerProfile,
   getListenerFeed,
   listSavedPlaylists,
+  getRecommendationsForUser,
 } from '@/lib/actions/listener-actions'
 import { listFollowing } from '@/lib/actions/social-actions'
 import { getListenerSubscription } from '@/lib/actions/subscription-actions'
@@ -49,11 +52,12 @@ export default async function ListenerPage({
   const meta = user?.publicMetadata as { listenerPlan?: string; zongaRole?: string } | undefined
   const clerkPlan = meta?.listenerPlan ?? 'free'
 
-  const [profile, feed, following, savedPlaylists] = await Promise.all([
+  const [profile, feed, following, savedPlaylists, aiRecs] = await Promise.all([
     getListenerProfile(),
     getListenerFeed({ limit: 30 }),
     listFollowing(),
     listSavedPlaylists(),
+    getRecommendationsForUser({ limit: 8 }).catch(() => ({ items: [], strategy: 'fallback' })),
   ])
 
   const [listenerSub, publicPlaylists, creatorRows] = await Promise.all([
@@ -339,6 +343,50 @@ export default async function ListenerPage({
             </div>
           </div>
         </div>
+      )}
+
+      {/* ── AI Recommendations ── */}
+      {isPremium && (
+      <div>
+        <div className="flex items-center gap-2 mb-4">
+          <Sparkles size={18} className="text-purple-500" />
+          <h2 className="text-lg font-semibold text-foreground">Recommended for You</h2>
+          <span className="text-[10px] font-bold uppercase tracking-wider bg-linear-to-r from-purple-500 to-indigo-500 text-white px-2 py-0.5 rounded-full">
+            AI
+          </span>
+        </div>
+        {aiRecs.items.length === 0 ? (
+          <div className="rounded-xl border border-dashed border-border bg-muted/50 p-10 text-center">
+            <Headphones size={32} className="mx-auto text-muted-foreground/50 mb-3" />
+            <p className="text-sm font-medium text-muted-foreground">Listen to more music to unlock personalized picks</p>
+            <Link
+              href={`${p}/browse`}
+              className="mt-3 inline-flex items-center gap-1.5 text-xs font-semibold text-electric hover:underline"
+            >
+              <Play size={12} /> Start exploring
+            </Link>
+          </div>
+        ) : (
+          <div className="grid grid-cols-2 sm:grid-cols-4 gap-3">
+            {aiRecs.items.map((rec) => (
+              <div
+                key={rec.itemId}
+                className="group relative overflow-hidden rounded-xl border border-border bg-card transition-all hover:shadow-lg hover:shadow-purple-500/5"
+              >
+                <div className="aspect-square bg-linear-to-br from-purple-500/10 via-indigo-500/10 to-electric/10 flex items-center justify-center">
+                  <Music size={28} className="text-purple-300 group-hover:text-purple-400 transition-colors" />
+                </div>
+                <div className="p-3">
+                  <p className="text-sm font-medium text-foreground truncate">{rec.reason}</p>
+                  <p className="text-xs text-muted-foreground mt-0.5 capitalize">
+                    {rec.itemType} · {Math.round(rec.score * 100)}% match
+                  </p>
+                </div>
+              </div>
+            ))}
+          </div>
+        )}
+      </div>
       )}
 
       {/* ── Premium Features ── */}

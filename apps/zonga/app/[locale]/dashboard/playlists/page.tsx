@@ -8,7 +8,6 @@ import { redirect } from 'next/navigation'
 import Link from 'next/link'
 import { Card } from '@nzila/ui'
 import { browsePublicPlaylists } from '@/lib/actions/browse-actions'
-import type { PlaylistListResult } from '@/lib/actions/playlist-actions'
 
 export default async function PlaylistsPage({
   searchParams,

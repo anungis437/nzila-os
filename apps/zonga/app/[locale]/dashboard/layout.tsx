@@ -13,7 +13,7 @@ import { resolveNavContext } from '@/lib/resolve-nav';
  * Sidebar navigation configuration — canonical route registry.
  * Sidebar component reads role-based sections from this definition.
  */
-const SIDEBAR_NAV = [
+export const SIDEBAR_NAV = [
   { href: 'dashboard', label: 'Home' },
   { href: 'dashboard/browse', label: 'Browse' },
   { href: 'dashboard/search', label: 'Search' },

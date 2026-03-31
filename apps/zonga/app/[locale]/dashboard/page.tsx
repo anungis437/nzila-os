@@ -31,7 +31,6 @@ import {
   Play,
   Music,
   Users,
-  Gem,
   Zap,
   Star,
 } from 'lucide-react'

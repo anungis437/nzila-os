@@ -293,7 +293,7 @@ export async function discoverArtists(opts?: {
   country?: string
   limit?: number
 }): Promise<DiscoverArtist[]> {
-  const ctx = await resolveListenerContext()
+  const _ctx = await resolveListenerContext()
   const limit = opts?.limit ?? 20
 
   try {

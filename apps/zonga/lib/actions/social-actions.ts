@@ -135,7 +135,7 @@ export async function listFollowers(creatorId: string): Promise<Follow[]> {
   }
 }
 
-export async function listFollowing(userId_?: string): Promise<Follow[]> {
+export async function listFollowing(_userId?: string): Promise<Follow[]> {
   const ctx = await resolveListenerContext()
   const listenerId = await resolveListenerUUID(ctx)
 

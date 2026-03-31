@@ -7,17 +7,12 @@
  */
 import { auth } from '@clerk/nextjs/server'
 import { redirect } from 'next/navigation'
-import { Card } from '@nzila/ui'
 import {
   browsePublishedAssets,
   browsePublishedEvents,
   browsePublicPlaylists,
   browseTrending,
 } from '@/lib/actions/browse-actions'
-import type { CatalogListResult } from '@/lib/actions/catalog-actions'
-import type { EventListResult } from '@/lib/actions/event-actions'
-import type { PlaylistListResult } from '@/lib/actions/playlist-actions'
-import type { SearchResult } from '@/lib/actions/search-actions'
 import { BrowseGrid } from '@/components/dashboard/browse-grid'
 
 export default async function BrowsePage({
