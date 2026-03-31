@@ -884,7 +884,33 @@ ELECTION PROCESS:
       
       'ontario': `Ontario Employment Standards Act + Labour Relations Act. Key features: Card-based certification, First contract arbitration, Essential services provisions. Major tribunals: Ontario Labour Relations Board (OLRB), Employment Standards Tribunal.`,
       
-      'quebec': `Quebec Labour Code + National Assembly. Unique features: Francoeur system (pre-1977 certification), Council of Arbitrators. Key rights: Voluntary recognition, Strike/replacement worker rules.`,
+      'quebec': `Code du travail du Québec (C.t.) + Loi sur les normes du travail (LNT) + LSST + LATMP.
+      
+      KEY INSTITUTIONS:
+      - TAT (Tribunal administratif du travail): certification (art. 21–46), unfair practices (art. 12–14), essential services (art. 111.0.15–111.0.26)
+      - CNESST: labour standards, pay equity, occupational health and safety (LSST, LATMP)
+      
+      CERTIFICATION:
+      - Card-check with 50%+1 (art. 28) — no mandatory vote unless evidence contested (art. 37)
+      - Cards valid 12 months (art. 22(d))
+      - Automatic certification if employer fails to post employee list (art. 25)
+      - Successor rights follow the enterprise on sale/transfer (art. 45–46)
+      
+      UNIQUE FEATURES:
+      - Anti-scab law (art. 109.1) — strongest in Canada — employer cannot use replacement workers during strike/lockout
+      - Psychological harassment protection (LNT art. 81.18–81.20) — employer has obligation of prevention
+      - Essential services determination for public/parapublic sectors
+      - QPP (Régime de rentes du Québec) instead of CPP — 6.4% employee rate vs 5.95% CPP
+      - RL-1 tax slips (Revenu Québec) instead of T4
+      - Bilingual CBA documentation (French is language of work — Charte de la langue française)
+      
+      KEY LABOUR STANDARDS (LNT):
+      - Meal break: 30 minutes after 5 consecutive hours of work (art. 79)
+      - Weekly rest: 32 consecutive hours per week (art. 78)
+      - Overtime after 40 hours/week at 1.5× (art. 55)
+      - 2–8 weeks notice of termination depending on tenure (art. 82–83)
+      - Unjust dismissal complaint after 2 years of continuous service (art. 124)
+      - Right of refusal for dangerous work (LSST art. 12–31)`,
       
       'british-columbia': `BC Labour Relations Code. Features: Decertification cooling-off, Essential services, Successor rights. Tribunal: BC Labour Relations Board.`,
       

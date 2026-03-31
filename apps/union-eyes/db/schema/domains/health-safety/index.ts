@@ -7,6 +7,8 @@
  */
 
 export * from './health-safety-schema';
+export * from './cnesst-schema';
+export * from './provincial-wcb-schema';
 
 // Re-export commonly used types for convenience
 export type {
@@ -33,3 +35,27 @@ export type {
   InsertSafetyCertification,
   SelectSafetyCertification,
 } from './health-safety-schema';
+
+// Quebec CNESST types
+export type {
+  InsertCneesstFiling,
+  SelectCneesstFiling,
+  InsertRightOfRefusalEvent,
+  SelectRightOfRefusalEvent,
+  InsertPreventiveWithdrawal,
+  SelectPreventiveWithdrawal,
+  InsertJointHsCommittee,
+  SelectJointHsCommittee,
+  InsertPayEquityExercise,
+  SelectPayEquityExercise,
+  InsertAntiScabViolation,
+  SelectAntiScabViolation,
+} from './cnesst-schema';
+
+// Provincial WCB types
+export type {
+  InsertWcbClaim,
+  SelectWcbClaim,
+  InsertWcbEmployerAssessment,
+  SelectWcbEmployerAssessment,
+} from './provincial-wcb-schema';

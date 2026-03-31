@@ -224,6 +224,68 @@ const AFFILIATES: AffiliateDef[] = [
 ];
 
 // ──────────────────────────────────────────────────────────────────
+// Quebec Independent Centrals (not CLC-affiliated)
+//
+// Quebec has a unique labour landscape: alongside the CLC-affiliated
+// FTQ, there are four major independent centrales syndicales that
+// operate exclusively under the Quebec Labour Code.
+// ──────────────────────────────────────────────────────────────────
+
+interface QuebecCentralDef {
+  name: string;
+  nameFr: string;
+  slug: string;
+  shortName: string;
+  memberCount: number;
+  sectors: AffiliateDef['sectors'];
+  website: string;
+  description: string;
+}
+
+const QUEBEC_CENTRALS: QuebecCentralDef[] = [
+  {
+    name: 'Confederation of National Trade Unions',
+    nameFr: 'Confédération des syndicats nationaux',
+    slug: 'csn',
+    shortName: 'CSN',
+    memberCount: 330_000,
+    sectors: ['healthcare', 'education', 'public_service', 'manufacturing', 'hospitality'],
+    website: 'https://csn.qc.ca',
+    description: 'Quebec\'s second-largest central — 330,000 members in healthcare, education, public services, manufacturing, and hospitality. Founded 1921.',
+  },
+  {
+    name: 'Quebec Federation of Labour',
+    nameFr: 'Centrale des syndicats du Québec',
+    slug: 'csq',
+    shortName: 'CSQ',
+    memberCount: 200_000,
+    sectors: ['education', 'healthcare', 'public_service'],
+    website: 'https://lacsq.org',
+    description: 'Quebec\'s education and public-sector central — 200,000 members, primarily teachers, early childhood educators, and support staff. Founded 1946.',
+  },
+  {
+    name: 'Central of Democratic Trade Unions',
+    nameFr: 'Centrale des syndicats démocratiques',
+    slug: 'csd',
+    shortName: 'CSD',
+    memberCount: 72_000,
+    sectors: ['manufacturing', 'retail', 'construction', 'hospitality'],
+    website: 'https://csd.qc.ca',
+    description: 'Quebec independent central — 72,000 members in manufacturing, retail, construction, and services. Founded 1972.',
+  },
+  {
+    name: 'Quebec Government Employees Union',
+    nameFr: 'Syndicat de la fonction publique et parapublique du Québec',
+    slug: 'sfpq',
+    shortName: 'SFPQ',
+    memberCount: 40_000,
+    sectors: ['public_service'],
+    website: 'https://sfpq.qc.ca',
+    description: 'Union of Quebec provincial government and parapublic employees — 40,000 members in ministries, agencies, and Crown corporations. Founded 1962.',
+  },
+];
+
+// ──────────────────────────────────────────────────────────────────
 // Seeder
 // ──────────────────────────────────────────────────────────────────
 
@@ -231,6 +293,7 @@ export interface SeedResult {
   clcId: string | null;
   federationsCreated: number;
   affiliatesCreated: number;
+  quebecCentralsCreated: number;
   relationshipsCreated: number;
   skipped: string[];
 }
@@ -244,6 +307,7 @@ export async function seedOrganizationHierarchy(): Promise<SeedResult> {
     clcId: null,
     federationsCreated: 0,
     affiliatesCreated: 0,
+    quebecCentralsCreated: 0,
     relationshipsCreated: 0,
     skipped: [],
   };
@@ -389,6 +453,60 @@ export async function seedOrganizationHierarchy(): Promise<SeedResult> {
     }
   }
 
+  // 4. Upsert Quebec Independent Centrals ──────────────────────
+  // These are NOT CLC-affiliated. They are autonomous centrales
+  // syndicales operating exclusively under the Quebec Labour Code.
+  for (const qc of QUEBEC_CENTRALS) {
+    const qcValues = {
+      name: qc.name,
+      slug: qc.slug,
+      displayName: qc.shortName,
+      shortName: qc.shortName,
+      description: qc.description,
+      organizationType: 'federation' as const,
+      parentId: null,              // Independent — no CLC parent
+      hierarchyPath: [] as string[],
+      hierarchyLevel: 0,           // Root-level central
+      provinceTerritory: 'QC',
+      sectors: qc.sectors,
+      email: null,
+      website: qc.website,
+      clcAffiliated: false,
+      memberCount: qc.memberCount,
+      activeMemberCount: qc.memberCount,
+      status: 'active',
+      settings: {
+        perCapitaRate: 0,           // Each central sets its own
+        remittanceDay: 15,
+        fiscalYearEnd: 'December 31',
+        nameFr: qc.nameFr,
+        jurisdiction: 'quebec',
+        labourCode: 'Code du travail du Québec',
+        labourBoard: 'Tribunal administratif du travail (TAT)',
+        workplaceStandards: 'CNESST',
+      },
+      featuresEnabled: [
+        'grievance-management',
+        'member-portal',
+        'contract-management',
+        'dues-tracking',
+        'quebec-compliance',
+      ],
+    };
+
+    const [qcRow] = await db
+      .insert(organizations)
+      .values(qcValues)
+      .onConflictDoNothing({ target: organizations.slug })
+      .returning({ id: organizations.id });
+
+    if (qcRow) {
+      result.quebecCentralsCreated++;
+    } else {
+      result.skipped.push(`${qc.slug} (already exists)`);
+    }
+  }
+
   return result;
 }
 
@@ -403,6 +521,7 @@ async function main() {
   console.log(`   CLC id:               ${result.clcId}`);
   console.log(`   Federations created:   ${result.federationsCreated}`);
   console.log(`   Affiliates created:    ${result.affiliatesCreated}`);
+  console.log(`   QC centrals created:   ${result.quebecCentralsCreated}`);
   console.log(`   Relationships created: ${result.relationshipsCreated}`);
   if (result.skipped.length) {
     console.log(`   Skipped (idempotent):  ${result.skipped.join(', ')}`);

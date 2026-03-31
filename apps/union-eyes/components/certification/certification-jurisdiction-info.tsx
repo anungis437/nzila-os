@@ -193,17 +193,27 @@ export function CertificationJurisdictionInfo({
                 cardCheckThreshold: 50,
                 supportCardCheckMethod: true,
                 supportMandatoryVote: false,
-                supportAutomatic: false,
+                supportAutomatic: true,
+                legalReference: 'Code du travail du Québec, art. 21–46',
                 specialRules: [
-                  'Card-check certification with absolute majority (50%+1)',
-                  'TAT (Tribunal administratif du travail) reviews application',
-                  'Bilingual documentation required'
+                  'Card-check (vérification des cartes) with absolute majority (50%+1) — Code du travail art. 28',
+                  'TAT (Tribunal administratif du travail) — Division des relations du travail reviews application',
+                  'Automatic certification if employer fails to post employee list within required delay (art. 25)',
+                  'TAT may order a vote if membership evidence is contested (art. 37)',
+                  'Cards must be signed within 12 months preceding application (art. 22(d))',
+                  'Bilingual documentation (FR required, EN accepted)',
+                  'Anti-scab provisions (art. 109.1) — strongest in Canada — apply once strike/lockout begins',
+                  'Essential services determination required for public/parapublic sectors (art. 111.0.15–111.0.26)',
+                  'Successor rights: certification follows the enterprise on sale or transfer (art. 45–46)',
                 ],
                 formRequirements: [
-                  'Application to TAT with membership evidence',
-                  'List of employees (from union and employer)',
-                  'Bilingual forms and documentation',
-                  'Union constitution and bylaws'
+                  'Requête en accréditation (Application for Certification) filed at TAT',
+                  'Signed membership cards (cartes d\'adhésion) — 50%+1 of bargaining unit',
+                  'List of employees in the proposed bargaining unit',
+                  'Union constitution and bylaws (statuts et règlements)',
+                  'Description of the bargaining unit (unité de négociation)',
+                  'Filing fee as per TAT tariff',
+                  'Authorization resolution from the union',
                 ]
               },
               'CA-SK': {

@@ -17,6 +17,7 @@ export * from './profiles';
 export * from './pending-profiles';
 export * from './user-management';
 export * from './member-employment';
+export * from './member-breaks';
 export * from './member-segments';
 export * from './addresses';
 export * from './stewards';

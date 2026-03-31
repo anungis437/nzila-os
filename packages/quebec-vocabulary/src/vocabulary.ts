@@ -1,0 +1,220 @@
+/**
+ * Quebec Vocabulary Loader and Manager
+ * 
+ * v1.0: Hardcoded Quebec defaults with full bilingual labels and legal references.
+ * Covers Code du travail, LNT, LSST, LATMP, CNESST, TAT.
+ */
+
+import {
+  QuebecVocabulary,
+  QCCaseType,
+  QCPriority,
+  QCSeverity,
+  QCRole,
+  QCStatus,
+  TribunalInfo,
+  LegalReference,
+} from './types';
+
+// ---------------------------------------------------------------------------
+// CASE TYPES
+// ---------------------------------------------------------------------------
+const QC_CASE_TYPES: QCCaseType[] = [
+  { id: 'mesure_disciplinaire', label: 'Mesure disciplinaire', labelEn: 'Disciplinary Action', description: 'Avis, suspension ou congédiement imposé par l\'employeur', descriptionEn: 'Verbal/written warning, suspension, or dismissal imposed by the employer', defaultPriority: 'high', defaultSeverity: 'serious', legalBasis: 'Code du travail, art. 100.12' },
+  { id: 'harcelement_psychologique', label: 'Harcèlement psychologique', labelEn: 'Psychological Harassment', description: 'Conduite vexatoire répétée portant atteinte à la dignité ou à l\'intégrité (LNT art. 81.18–81.20)', descriptionEn: 'Repeated vexatious conduct undermining dignity or integrity (LNT s.81.18–81.20)', defaultPriority: 'critical', defaultSeverity: 'critical', legalBasis: 'Loi sur les normes du travail, art. 81.18–81.20' },
+  { id: 'discrimination', label: 'Discrimination', labelEn: 'Discrimination', description: 'Traitement inégal fondé sur un motif interdit par la Charte québécoise', descriptionEn: 'Unequal treatment based on a ground prohibited by the Quebec Charter', defaultPriority: 'critical', defaultSeverity: 'critical', legalBasis: 'Charte des droits et libertés de la personne, art. 10, 16' },
+  { id: 'litige_salarial', label: 'Litige salarial', labelEn: 'Wage Dispute', description: 'Désaccord sur le salaire, les heures supplémentaires, les primes, ou les avantages sociaux', descriptionEn: 'Dispute regarding wages, overtime, premiums, or benefits', defaultPriority: 'medium', defaultSeverity: 'serious', legalBasis: 'LNT, art. 39.1–51; convention collective applicable' },
+  { id: 'sante_securite', label: 'Santé et sécurité au travail', labelEn: 'Occupational Health & Safety', description: 'Manquement aux obligations de prévention ou d\'élimination des dangers', descriptionEn: 'Failure to meet prevention or hazard elimination obligations', defaultPriority: 'critical', defaultSeverity: 'critical', legalBasis: 'LSST, art. 10, 12, 51; LATMP' },
+  { id: 'sous_traitance', label: 'Sous-traitance', labelEn: 'Contracting Out', description: 'Attribution de travaux à un sous-traitant en violation de la convention collective', descriptionEn: 'Assignment of bargaining-unit work to a subcontractor in violation of the CBA', defaultPriority: 'high', defaultSeverity: 'serious', legalBasis: 'Convention collective; C.t. art. 45-46' },
+  { id: 'anciennete', label: 'Ancienneté', labelEn: 'Seniority', description: 'Non-respect des droits d\'ancienneté (mouvement de personnel, mise à pied, rappel)', descriptionEn: 'Violation of seniority rights in staffing, layoff, or recall', defaultPriority: 'high', defaultSeverity: 'serious', legalBasis: 'Convention collective applicable' },
+  { id: 'conge_abusif', label: 'Congédiement / Fin d\'emploi', labelEn: 'Dismissal / Termination', description: 'Congédiement sans cause juste et suffisante ou congédiement déguisé', descriptionEn: 'Dismissal without just and sufficient cause or constructive dismissal', defaultPriority: 'critical', defaultSeverity: 'critical', legalBasis: 'LNT, art. 124; C.t. art. 15–17' },
+  { id: 'normes_travail', label: 'Normes du travail', labelEn: 'Employment Standards', description: 'Violation des normes minimales prévues par la LNT (pauses, congés, avis de cessation)', descriptionEn: 'Violation of minimum standards under the LNT (breaks, leaves, notice of termination)', defaultPriority: 'medium', defaultSeverity: 'moderate', legalBasis: 'Loi sur les normes du travail (LNT)' },
+  { id: 'droit_refus', label: 'Droit de refus', labelEn: 'Right of Refusal', description: 'Exercice du droit de refuser un travail dangereux (LSST art. 12–31)', descriptionEn: 'Exercise of the right to refuse dangerous work (LSST s.12–31)', defaultPriority: 'critical', defaultSeverity: 'critical', legalBasis: 'LSST, art. 12–31' },
+  { id: 'pratique_deloyale', label: 'Pratique déloyale', labelEn: 'Unfair Labour Practice', description: 'Ingérence, intimidation, ou entrave de la part de l\'employeur', descriptionEn: 'Employer interference, intimidation, or obstruction', defaultPriority: 'high', defaultSeverity: 'serious', legalBasis: 'Code du travail, art. 12–14' },
+  { id: 'cotisation_syndicale', label: 'Cotisation syndicale', labelEn: 'Union Dues Issue', description: 'Problème lié au prélèvement ou à la remise des cotisations syndicales', descriptionEn: 'Issue with union dues deduction or remittance', defaultPriority: 'low', defaultSeverity: 'minor', legalBasis: 'Code du travail, art. 47' },
+  { id: 'autre', label: 'Autre', labelEn: 'Other', description: 'Grief ne relevant pas des catégories ci-dessus', descriptionEn: 'Grievance not covered by the above categories', defaultPriority: 'medium', defaultSeverity: 'moderate', legalBasis: 'Convention collective applicable' },
+];
+
+// ---------------------------------------------------------------------------
+// PRIORITIES
+// ---------------------------------------------------------------------------
+const QC_PRIORITIES: QCPriority[] = [
+  { id: 'low', label: 'Faible', labelEn: 'Low', slaHours: 168, escalationRequired: false },
+  { id: 'medium', label: 'Moyen', labelEn: 'Medium', slaHours: 72, escalationRequired: false },
+  { id: 'high', label: 'Élevé', labelEn: 'High', slaHours: 48, escalationRequired: true },
+  { id: 'critical', label: 'Critique', labelEn: 'Critical', slaHours: 24, escalationRequired: true },
+];
+
+// ---------------------------------------------------------------------------
+// SEVERITIES
+// ---------------------------------------------------------------------------
+const QC_SEVERITIES: QCSeverity[] = [
+  { id: 'minor', label: 'Mineur', labelEn: 'Minor', description: 'Impact limité, aucune conséquence juridique directe', descriptionEn: 'Limited impact, no direct legal consequences', requiresLegal: false },
+  { id: 'moderate', label: 'Modéré', labelEn: 'Moderate', description: 'Impact individuel, peut nécessiter un suivi syndical', descriptionEn: 'Individual impact, may require union follow-up', requiresLegal: false },
+  { id: 'serious', label: 'Grave', labelEn: 'Serious', description: 'Impact sur plusieurs membres ou implications juridiques', descriptionEn: 'Affects multiple members or has legal implications', requiresLegal: true },
+  { id: 'critical', label: 'Critique', labelEn: 'Critical', description: 'Menace à la sécurité, discrimination systémique, ou violation fondamentale', descriptionEn: 'Safety threat, systemic discrimination, or fundamental rights violation', requiresLegal: true },
+];
+
+// ---------------------------------------------------------------------------
+// ROLES (Quebec union hierarchy)
+// ---------------------------------------------------------------------------
+const QC_ROLES: QCRole[] = [
+  { id: 'membre', label: 'Membre', labelEn: 'Member', description: 'Membre du syndicat', canAssign: false, canEscalate: false, canSettle: false },
+  { id: 'delegue', label: 'Délégué syndical', labelEn: 'Shop Steward', description: 'Représentant syndical au niveau du plancher', canAssign: true, canEscalate: true, canSettle: false },
+  { id: 'delegue_chef', label: 'Délégué en chef', labelEn: 'Chief Steward', description: 'Délégué principal ou coordonnateur des griefs', canAssign: true, canEscalate: true, canSettle: true },
+  { id: 'conseiller_syndical', label: 'Conseiller syndical', labelEn: 'Union Advisor', description: 'Représentant permanent de la centrale ou fédération (CSN, FTQ, CSQ)', canAssign: true, canEscalate: true, canSettle: true },
+  { id: 'officier', label: 'Officier du syndicat local', labelEn: 'Local Union Officer', description: 'Président, vice-président, secrétaire-trésorier du syndicat local', canAssign: true, canEscalate: true, canSettle: true },
+  { id: 'admin', label: 'Administrateur', labelEn: 'Administrator', description: 'Administrateur du système', canAssign: true, canEscalate: true, canSettle: true },
+];
+
+// ---------------------------------------------------------------------------
+// STATUSES (Quebec grievance flow – French labels)
+// ---------------------------------------------------------------------------
+const QC_STATUSES: QCStatus[] = [
+  { id: 'brouillon', label: 'Brouillon', labelEn: 'Draft', category: 'open', allowTransitionsTo: ['depose'], allowedRoles: ['membre', 'delegue'] },
+  { id: 'depose', label: 'Déposé', labelEn: 'Filed', category: 'open', allowTransitionsTo: ['accuse_reception'], allowedRoles: ['delegue', 'delegue_chef', 'admin'] },
+  { id: 'accuse_reception', label: 'Accusé de réception', labelEn: 'Acknowledged', category: 'in_progress', allowTransitionsTo: ['enquete', 'escalade'], allowedRoles: ['delegue', 'delegue_chef', 'admin'] },
+  { id: 'enquete', label: 'En enquête', labelEn: 'Under Investigation', category: 'in_progress', allowTransitionsTo: ['reponse_attendue', 'escalade', 'regle'], allowedRoles: ['delegue', 'delegue_chef', 'conseiller_syndical', 'admin'] },
+  { id: 'reponse_attendue', label: 'Réponse attendue', labelEn: 'Awaiting Response', category: 'in_progress', allowTransitionsTo: ['escalade', 'regle', 'refuse'], allowedRoles: ['delegue', 'delegue_chef', 'conseiller_syndical', 'admin'] },
+  { id: 'escalade', label: 'Escaladé', labelEn: 'Escalated', category: 'in_progress', allowTransitionsTo: ['mediation', 'refuse', 'regle'], allowedRoles: ['delegue_chef', 'conseiller_syndical', 'officier', 'admin'] },
+  { id: 'mediation', label: 'En médiation', labelEn: 'In Mediation', category: 'in_progress', allowTransitionsTo: ['arbitrage', 'regle', 'refuse'], allowedRoles: ['conseiller_syndical', 'officier', 'admin'] },
+  { id: 'arbitrage', label: 'En arbitrage', labelEn: 'In Arbitration', category: 'in_progress', allowTransitionsTo: ['regle', 'refuse'], allowedRoles: ['conseiller_syndical', 'officier', 'admin'] },
+  { id: 'regle', label: 'Réglé', labelEn: 'Settled', category: 'resolved', allowTransitionsTo: ['ferme'], allowedRoles: ['delegue', 'delegue_chef', 'conseiller_syndical', 'officier', 'admin'] },
+  { id: 'refuse', label: 'Refusé', labelEn: 'Denied', category: 'resolved', allowTransitionsTo: ['ferme', 'escalade'], allowedRoles: ['delegue', 'delegue_chef', 'conseiller_syndical', 'officier', 'admin'] },
+  { id: 'retire', label: 'Retiré', labelEn: 'Withdrawn', category: 'closed', allowTransitionsTo: [], allowedRoles: ['membre', 'delegue', 'delegue_chef', 'admin'] },
+  { id: 'ferme', label: 'Fermé', labelEn: 'Closed', category: 'closed', allowTransitionsTo: [], allowedRoles: ['delegue', 'delegue_chef', 'conseiller_syndical', 'officier', 'admin'] },
+];
+
+// ---------------------------------------------------------------------------
+// TRIBUNALS
+// ---------------------------------------------------------------------------
+const QC_TRIBUNALS: Record<string, TribunalInfo> = {
+  tat: {
+    name: 'Tribunal administratif du travail',
+    nameEn: 'Administrative Labour Tribunal',
+    abbreviation: 'TAT',
+    divisions: [
+      { id: 'relations_travail', name: 'Division des relations du travail', nameEn: 'Labour Relations Division', jurisdiction: ['Accréditation syndicale', 'Pratiques déloyales (art. 12–14 C.t.)', 'Services essentiels (art. 111.0.15–111.0.26 C.t.)'] },
+      { id: 'sante_securite', name: 'Division de la santé et de la sécurité du travail', nameEn: 'Occupational Health and Safety Division', jurisdiction: ['Droit de refus (LSST art. 12–31)', 'Retrait préventif (art. 40–48 LSST)', 'Contestation de décisions de la CNESST'] },
+      { id: 'services_essentiels', name: 'Division des services essentiels', nameEn: 'Essential Services Division', jurisdiction: ['Détermination des services essentiels en cas de grève', 'Secteurs public et parapublic'] },
+    ],
+  },
+  cnesst: {
+    name: 'Commission des normes, de l\'équité, de la santé et de la sécurité du travail',
+    nameEn: 'Commission for Labour Standards, Pay Equity and Workplace Health and Safety',
+    abbreviation: 'CNESST',
+    mandates: [
+      { id: 'normes_travail', name: 'Normes du travail', nameEn: 'Labour Standards', scope: 'Application et surveillance de la Loi sur les normes du travail' },
+      { id: 'equite_salariale', name: 'Équité salariale', nameEn: 'Pay Equity', scope: 'Application de la Loi sur l\'équité salariale' },
+      { id: 'sante_securite', name: 'Santé et sécurité du travail', nameEn: 'Occupational Health and Safety', scope: 'Prévention, inspection et indemnisation des lésions professionnelles' },
+    ],
+  },
+};
+
+// ---------------------------------------------------------------------------
+// LEGAL REFERENCES
+// ---------------------------------------------------------------------------
+const QC_LEGAL_REFERENCES: Record<string, LegalReference> = {
+  codeDuTravail: {
+    shortName: 'C.t.',
+    fullName: 'Code du travail',
+    fullNameEn: 'Labour Code',
+    keyArticles: { certification: 'art. 21–46', antiScab: 'art. 109.1', strikeRight: 'art. 58', lockoutDefinition: 'art. 109', essentialServices: 'art. 111.0.15–111.0.26', unfairPractices: 'art. 12–14', successorRights: 'art. 45–46', arbitration: 'art. 100' },
+  },
+  loiNormesTravail: {
+    shortName: 'LNT',
+    fullName: 'Loi sur les normes du travail',
+    fullNameEn: 'Act respecting labour standards',
+    keyArticles: { mealBreak: 'art. 79', weeklyRestDay: 'art. 78', overtime: 'art. 55', minimumWage: 'art. 40', annualLeave: 'art. 66–77', statutoryHolidays: 'art. 60–65', psychologicalHarassment: 'art. 81.18–81.20', unjustDismissal: 'art. 124', noticeOfTermination: 'art. 82–83', prohibitedPractices: 'art. 122' },
+  },
+  lsst: {
+    shortName: 'LSST',
+    fullName: 'Loi sur la santé et la sécurité du travail',
+    fullNameEn: 'Act respecting occupational health and safety',
+    keyArticles: { rightOfRefusal: 'art. 12–31', preventiveWithdrawal: 'art. 40–48', jointCommittee: 'art. 68–86', safetyRepresentative: 'art. 87–97' },
+  },
+  latmp: {
+    shortName: 'LATMP',
+    fullName: 'Loi sur les accidents du travail et les maladies professionnelles',
+    fullNameEn: 'Act respecting industrial accidents and occupational diseases',
+    keyArticles: { workAccident: 'art. 2', occupationalDisease: 'art. 29', rightToRehab: 'art. 145–178', compensation: 'art. 44–91' },
+  },
+};
+
+// ---------------------------------------------------------------------------
+// PUBLIC API
+// ---------------------------------------------------------------------------
+
+export function getQuebecVocabulary(): QuebecVocabulary {
+  return {
+    caseTypes: QC_CASE_TYPES,
+    priorities: QC_PRIORITIES,
+    severities: QC_SEVERITIES,
+    roles: QC_ROLES,
+    statuses: QC_STATUSES,
+    tribunals: QC_TRIBUNALS,
+    legalReferences: QC_LEGAL_REFERENCES,
+    lastUpdated: new Date().toISOString(),
+    version: '1.0.0',
+    locale: 'fr-CA',
+    jurisdiction: 'quebec',
+  };
+}
+
+export function getCaseTypeById(caseTypeId: string): QCCaseType | undefined {
+  return QC_CASE_TYPES.find((ct) => ct.id === caseTypeId);
+}
+
+export function getPriorityById(priorityId: string): QCPriority | undefined {
+  return QC_PRIORITIES.find((p) => p.id === priorityId);
+}
+
+export function getStatusById(statusId: string): QCStatus | undefined {
+  return QC_STATUSES.find((s) => s.id === statusId);
+}
+
+export function getRoleById(roleId: string): QCRole | undefined {
+  return QC_ROLES.find((r) => r.id === roleId);
+}
+
+export function getAllCaseTypeIds(): string[] {
+  return QC_CASE_TYPES.map((ct) => ct.id);
+}
+
+export function getAllPriorityIds(): string[] {
+  return QC_PRIORITIES.map((p) => p.id);
+}
+
+export function getAllSeverityIds(): string[] {
+  return QC_SEVERITIES.map((s) => s.id);
+}
+
+export function getAllStatusIds(): string[] {
+  return QC_STATUSES.map((s) => s.id);
+}
+
+export function getAllRoleIds(): string[] {
+  return QC_ROLES.map((r) => r.id);
+}
+
+export function getTribunal(key: string): TribunalInfo | undefined {
+  return QC_TRIBUNALS[key];
+}
+
+export function getLegalReference(key: string): LegalReference | undefined {
+  return QC_LEGAL_REFERENCES[key];
+}
+
+export function getArticle(lawKey: string, articleKey: string): string | undefined {
+  return QC_LEGAL_REFERENCES[lawKey]?.keyArticles[articleKey];
+}
+
+/**
+ * Get label in the requested locale (defaults to French).
+ */
+export function getLocalizedLabel<T extends { label: string; labelEn: string }>(
+  item: T,
+  locale: 'fr' | 'en' = 'fr',
+): string {
+  return locale === 'en' ? item.labelEn : item.label;
+}
