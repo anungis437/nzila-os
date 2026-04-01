@@ -11,6 +11,7 @@ import { eq, and } from 'drizzle-orm'
 import { appendAiAuditEvent } from '../logging'
 import { ACTION_TYPES } from '../schemas'
 import type { ActionType } from '../schemas'
+import { checkKillSwitch } from './killSwitch'
 
 // ── Types ───────────────────────────────────────────────────────────────────
 
@@ -56,6 +57,29 @@ export async function checkActionPolicy(
 ): Promise<PolicyDecision> {
   const reasons: string[] = []
   let allowed = true
+
+  // 0. Kill-switch check — highest priority gate
+  const killSwitchResult = await checkKillSwitch(input.actionType)
+  if (killSwitchResult.killed) {
+    await appendAiAuditEvent({
+      orgId: input.orgId,
+      appKey: input.appKey,
+      eventType: 'action_killed',
+      actor: 'system:kill-switch',
+      detail: {
+        actionType: input.actionType,
+        reason: killSwitchResult.reason,
+        source: killSwitchResult.source,
+      },
+    })
+    return {
+      allowed: false,
+      reasons: [`Kill-switch active: ${killSwitchResult.reason}`],
+      riskTier: 'high',
+      approvalsRequired: null,
+      autoApproved: false,
+    }
+  }
 
   const environment = (process.env.NODE_ENV === 'production' ? 'prod' : 'dev') as 'dev' | 'staging' | 'prod'
 
