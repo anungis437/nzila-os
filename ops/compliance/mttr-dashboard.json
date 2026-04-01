@@ -1,0 +1,130 @@
+{
+  "generatedAt": "2026-04-01T19:30:14.153Z",
+  "summary": {
+    "totalDependencies": 2717,
+    "currentVulnerabilities": 0,
+    "vulnFreeRate": 100,
+    "openHighCritical": 0,
+    "overallMttrHours": 0,
+    "criticalMttrHours": 0,
+    "highMttrHours": 0,
+    "slaMet": true
+  },
+  "slaTargets": {
+    "criticalMttrHours": 24,
+    "highMttrHours": 72,
+    "vulnFreeRateTarget": 98
+  },
+  "mttrBySeverity": [
+    {
+      "severity": "critical",
+      "count": 0,
+      "avgMttrHours": 0,
+      "maxMttrHours": 0,
+      "minMttrHours": 0,
+      "withinSla": 0,
+      "slaTarget": 24
+    },
+    {
+      "severity": "high",
+      "count": 0,
+      "avgMttrHours": 0,
+      "maxMttrHours": 0,
+      "minMttrHours": 0,
+      "withinSla": 0,
+      "slaTarget": 72
+    },
+    {
+      "severity": "moderate",
+      "count": 0,
+      "avgMttrHours": 0,
+      "maxMttrHours": 0,
+      "minMttrHours": 0,
+      "withinSla": 0,
+      "slaTarget": 168
+    },
+    {
+      "severity": "low",
+      "count": 0,
+      "avgMttrHours": 0,
+      "maxMttrHours": 0,
+      "minMttrHours": 0,
+      "withinSla": 0,
+      "slaTarget": 720
+    }
+  ],
+  "activeVulnerabilities": [],
+  "waiverStatus": {
+    "total": 8,
+    "active": 8,
+    "expiringSoon": 0,
+    "expired": 0,
+    "waivers": [
+      {
+        "id": "CVE-2026-26996",
+        "package": "minimatch",
+        "severity": "high",
+        "expiresAt": "2026-05-21",
+        "daysRemaining": 50,
+        "status": "active"
+      },
+      {
+        "id": "1108110",
+        "package": "xlsx",
+        "severity": "high",
+        "expiresAt": "2026-05-24",
+        "daysRemaining": 53,
+        "status": "active"
+      },
+      {
+        "id": "1108111",
+        "package": "xlsx",
+        "severity": "high",
+        "expiresAt": "2026-05-24",
+        "daysRemaining": 53,
+        "status": "active"
+      },
+      {
+        "id": "1113545",
+        "package": "minimatch",
+        "severity": "high",
+        "expiresAt": "2026-05-28",
+        "daysRemaining": 57,
+        "status": "active"
+      },
+      {
+        "id": "1113553",
+        "package": "minimatch",
+        "severity": "high",
+        "expiresAt": "2026-05-28",
+        "daysRemaining": 57,
+        "status": "active"
+      },
+      {
+        "id": "1113633",
+        "package": "serialize-javascript",
+        "severity": "high",
+        "expiresAt": "2026-05-28",
+        "daysRemaining": 57,
+        "status": "active"
+      },
+      {
+        "id": "1113686",
+        "package": "minimatch",
+        "severity": "high",
+        "expiresAt": "2026-06-04",
+        "daysRemaining": 64,
+        "status": "active"
+      },
+      {
+        "id": "1113984",
+        "package": "immutable",
+        "severity": "high",
+        "expiresAt": "2026-06-04",
+        "daysRemaining": 64,
+        "status": "active"
+      }
+    ]
+  },
+  "remediationHistory": []
+}

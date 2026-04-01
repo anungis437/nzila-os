@@ -110,7 +110,7 @@ Pilot onboarding uses a persistent 7-item checklist stored in `pilot_checklist_i
 
 ### 3.1 KPI Cards
 
-6 real-time metrics with period-over-period comparison:
+6 operational metrics (updated on latest available data) with period-over-period comparison:
 
 | Metric | Description |
 |--------|-------------|

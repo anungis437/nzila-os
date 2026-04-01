@@ -1,0 +1,36 @@
+# ZAP scan rule configuration
+# Format: rule_id	action	name
+# Actions: IGNORE, WARN, FAIL
+# See: https://www.zaproxy.org/docs/docker/baseline-scan/
+
+# Informational — IGNORE
+10003	IGNORE	Vulnerable JS Library (flagged by SCA instead)
+10015	IGNORE	Re-examine Cache-control Directives
+10049	IGNORE	Storable and Cacheable Content
+
+# Low — WARN only (Nzila uses CSP + HSTS via middleware)
+10021	WARN	X-Content-Type-Options Header Missing
+10036	WARN	Server Leaks Version Information
+10038	WARN	Content Security Policy (CSP) Header Not Set
+10063	WARN	Permissions Policy Header Not Set
+
+# Medium — FAIL (must investigate)
+10010	FAIL	Cookie Without Secure Flag
+10011	FAIL	Cookie Without HttpOnly Flag
+10017	FAIL	Cross-Domain JavaScript Source File Inclusion
+10020	FAIL	X-Frame-Options Header Not Set
+10035	FAIL	Strict-Transport-Security Header Not Set
+40012	FAIL	Cross Site Scripting (Reflected)
+40014	FAIL	Cross Site Scripting (Persistent)
+40018	FAIL	SQL Injection
+
+# High / Critical — FAIL (block release)
+40003	FAIL	CRLF Injection
+40008	FAIL	Parameter Tampering
+40009	FAIL	Server Side Include
+40016	FAIL	Cross Site Scripting (DOM Based)
+40019	FAIL	External Redirect
+90001	FAIL	Insecure JSF ViewState
+90019	FAIL	Server Side Code Injection
+90020	FAIL	Remote OS Command Injection
+90023	FAIL	XML External Entity Attack

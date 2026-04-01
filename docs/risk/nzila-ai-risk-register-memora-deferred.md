@@ -1,7 +1,7 @@
 # Nzila OS — AI Risk Register (Memora — Deferred)
 
 **Status:** PRE-DEPLOYMENT — these risks must be addressed before Memora ships to production  
-**Date:** 2026-03-31  
+**Date:** 2026-04-01  
 **Parent register:** `docs/risk/nzila-ai-risk-register.md`  
 
 ---

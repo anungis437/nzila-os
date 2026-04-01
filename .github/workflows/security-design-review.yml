@@ -1,0 +1,62 @@
+name: Security Design Review Gate
+
+# iSSDLC W2-3: Require security design review for PRs touching auth/policy/AI paths
+
+on:
+  pull_request:
+    branches: [main]
+    paths:
+      - 'packages/ai-core/**'
+      - 'packages/ai-sdk/**'
+      - 'packages/ml-core/**'
+      - 'packages/os-core/src/policy/**'
+      - 'packages/os-core/src/rateLimit*'
+      - 'packages/db/src/schema/ai*'
+      - 'packages/db/src/scoped*'
+      - 'tooling/security/**'
+      - 'security/**'
+      - 'governance/security/**'
+      - 'governance/ai/**'
+      - 'ops/policies/**'
+      - '**/middleware.ts'
+      - '**/auth/**'
+      - '**/api/admin/**'
+
+permissions:
+  contents: read
+  pull-requests: write
+
+jobs:
+  security-design-review:
+    runs-on: ubuntu-latest
+    name: Security Design Review Required
+    steps:
+      - uses: actions/checkout@v4
+
+      - name: Check for security-design-reviewed label
+        id: label_check
+        uses: actions/github-script@60a0d83039c74a4aee543508d2ffcb1c3799cdea # v7.0.1
+        with:
+          script: |
+            const { data: labels } = await github.rest.issues.listLabelsOnIssue({
+              owner: context.repo.owner,
+              repo: context.repo.repo,
+              issue_number: context.issue.number,
+            });
+            const hasLabel = labels.some(l => l.name === 'security-design-reviewed');
+            if (!hasLabel) {
+              core.setFailed(
+                '🔒 This PR modifies security-sensitive paths (auth/policy/AI) and requires ' +
+                'the `security-design-reviewed` label from @nzila/security before merge.\n\n' +
+                'Paths requiring review:\n' +
+                '  - packages/ai-core, ai-sdk, ml-core\n' +
+                '  - packages/os-core/src/policy\n' +
+                '  - packages/db/src/schema/ai*, scoped*\n' +
+                '  - tooling/security, security/\n' +
+                '  - governance/security, governance/ai\n' +
+                '  - ops/policies, middleware.ts, auth/, api/admin/\n\n' +
+                'To proceed: request review from a security team member who will add the label after review.'
+              );
+            } else {
+              core.info('✅ Security design review label found.');
+            }

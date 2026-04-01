@@ -1,0 +1,44 @@
+{
+  "$schema": "https://threatdragon.org/schemas/threat-model-1.json",
+  "summary": {
+    "title": "Nzila OS Threat Model",
+    "owner": "Security Lead",
+    "description": "OWASP Threat Dragon model for Nzila OS multi-tenant SaaS platform",
+    "id": "nzila-os-threat-model"
+  },
+  "detail": {
+    "contributors": [
+      {
+        "name": "Platform Team"
+      },
+      {
+        "name": "Security Lead"
+      }
+    ],
+    "diagrams": [
+      {
+        "id": 1,
+        "title": "Nzila OS — High Level Data Flow",
+        "diagramType": "STRIDE",
+        "placeholder": "See docs/architecture/threat-model.md for diagram details",
+        "cells": []
+      },
+      {
+        "id": 2,
+        "title": "AI Gateway — Data Flow",
+        "diagramType": "STRIDE",
+        "placeholder": "AI request flow: User → API → ai-core gateway → LLM provider",
+        "cells": []
+      },
+      {
+        "id": 3,
+        "title": "Authentication — Data Flow",
+        "diagramType": "STRIDE",
+        "placeholder": "Clerk OIDC flow: Browser → Clerk → App → API",
+        "cells": []
+      }
+    ],
+    "reviewer": "Security Lead",
+    "threatTop": 0
+  }
+}

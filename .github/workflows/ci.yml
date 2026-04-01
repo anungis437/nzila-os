@@ -128,6 +128,31 @@ jobs:
           CLERK_SECRET_KEY: ${{ secrets.CLERK_SECRET_KEY }}
           NODE_OPTIONS: "--max-old-space-size=8192"
 
+  # ── W1-5: IaC Security Scan (Checkov) ──────────────────────────────────────
+  iac-scan:
+    runs-on: ubuntu-latest
+    name: IaC Security Scan
+    needs: [lint-and-typecheck]
+    steps:
+      - uses: actions/checkout@v4
+
+      - name: Run Checkov on Bicep templates
+        uses: bridgecrewio/checkov-action@99bb2caf247dfd9f03cf984373bc6043d4e32ebf # v12.1347.0
+        with:
+          directory: infrastructure/bicep
+          framework: bicep
+          output_format: cli,sarif
+          output_file_path: console,results.sarif
+          soft_fail: false
+          skip_check: CKV_AZURE_99  # Skip specific checks if needed
+
+      - name: Upload Checkov SARIF
+        if: always()
+        uses: github/codeql-action/upload-sarif@v3
+        with:
+          sarif_file: results.sarif
+          category: checkov
+
   governance-gates:
     runs-on: ubuntu-latest
     name: Governance Gates

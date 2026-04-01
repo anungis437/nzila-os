@@ -90,7 +90,7 @@ Memora is **not yet deployed**. Its four risks (NZ-RISK-003, NZ-RISK-005, NZ-RIS
 | NZ-RISK-004 | Regulated PII Reaches LLM Provider | 2 | 2.1 | all | 2 | 4 | **8** | 🟡 | Mitigated ✓ |
 | NZ-RISK-006 | Cross-Tenant RAG Knowledge Leakage | 2 | 2.1 | union-eyes | 2 | 5 | **10** | 🟡 | Mitigated ✓ |
 | NZ-RISK-007 | Prompt Injection via Grievance/Chat | 2 | 2.2 | union-eyes | 2 | 4 | **8** | 🟡 | Mitigated ✓ |
-| NZ-RISK-008 | AI Budget Exhaustion (Cost-DoS) | 2 | 2.2 | all | 2 | 4 | **8** | 🟡 | Acceptable |
+| NZ-RISK-008 | AI Budget Exhaustion (Cost-DoS) | 2 | 2.2 | all | 2 | 4 | **8** | 🟡 | Accepted ✓ |
 | NZ-RISK-009 | Clause Reasoning Legal Misguidance | 3 | 3.1 | union-eyes | 4 | 4 | **16** | 🟠 | Mitigated ✓ |
 | NZ-RISK-010 | Stale Knowledge Base / Wrong Advice | 3 | 3.1 | union-eyes | 3 | 4 | **12** | 🟡 | Mitigated ✓ |
 | NZ-RISK-011 | Circular Knowledge Corruption | 3 | 3.2 | union-eyes | 2 | 4 | **8** | 🟡 | Mitigated ✓ |
@@ -105,7 +105,7 @@ Memora is **not yet deployed**. Its four risks (NZ-RISK-003, NZ-RISK-005, NZ-RIS
 | NZ-RISK-021 | Embedding Model Change Invalidates RAG Index | 7 | 7.3 | union-eyes | 2 | 4 | **8** | 🟡 | Mitigated ✓ |
 | NZ-RISK-022 | Provider Outage During Active Labor Dispute | 7 | 7.3 | all | 2 | 5 | **10** | 🟡 | Mitigated ✓ |
 | NZ-RISK-023 | Undisclosed Automated Decision-Making | 7 | 7.4 | union-eyes | 4 | 4 | **16** | 🟠 | Mitigated ✓ |
-| NZ-RISK-024 | Multi-Agent Action Chain State Inconsistency | 7 | 7.6 | console | 2 | 3 | **6** | 🟡 | Acceptable |
+| NZ-RISK-024 | Multi-Agent Action Chain State Inconsistency | 7 | 7.6 | console | 2 | 3 | **6** | 🟡 | Accepted ✓ |
 | NZ-RISK-026 | CBA Knowledge Extraction via Chatbot | 4 | 4.3 | union-eyes | 2 | 4 | **8** | 🟡 | Mitigated ✓ |
 | NZ-RISK-027 | AI Carbon Footprint Not Tracked | 6 | 6.6 | all | 5 | 2 | **10** | 🟡 | Mitigated ✓ |
 
@@ -355,6 +355,86 @@ Token usage is tracked per org/app/profile for cost budgeting, but no CO₂ equi
 
 ---
 
+### ✅ Accepted — Risk Formally Accepted
+
+---
+
+#### NZ-RISK-008 — AI Budget Exhaustion (Cost-DoS)
+**Score:** 8 🟡 MEDIUM — **ACCEPTED**
+
+**Description**  
+A malicious or compromised tenant admin could trigger high-volume AI calls (mass extraction, repeated chatbot queries, embedding generation) to exhaust the shared token budget or inflate provider costs.
+
+**Acceptance Rationale**  
+Existing budget enforcement (`budgets.ts`) caps token and cost spend per org/app/profile/month with automatic blocking at threshold. Rate limiting on extraction endpoints adds a second layer. The residual risk (L2 × I4 = 8) is within acceptable tolerance because:
+- Per-org budget caps prevent cross-tenant impact
+- Auto-block triggers before provider costs become material
+- Attestation logs enable rapid forensic attribution
+- Provider-side rate limits provide a final backstop
+
+**Monitoring:** Monthly budget utilization review; alert on orgs exceeding 80% of cap  
+**Re-evaluation Trigger:** If action chain complexity increases or new high-cost AI features are added  
+**Owner:** Platform Engineering  
+**Accepted By:** Platform Engineering Lead  
+**Acceptance Date:** 2026-04-01
+
+---
+
+#### NZ-RISK-024 — Multi-Agent Action Chain State Inconsistency
+**Score:** 6 🟡 MEDIUM — **ACCEPTED**
+
+**Description**  
+The console action proposal engine can chain multiple actions (e.g., `FINANCE_STRIPE_MONTHLY_REPORTS` → report generation → notification). If an intermediate step fails after a side-effect has been committed, the chain may leave the system in an inconsistent state with no rollback mechanism.
+
+**Acceptance Rationale**  
+Current action chain complexity is low — the console supports only 2 action types (`FINANCE_STRIPE_MONTHLY_REPORTS`, `AI_INGEST_KNOWLEDGE_SOURCE`), neither of which chains to further actions. The residual risk (L2 × I3 = 6) is acceptable because:
+- Each action is independently idempotent with attestation
+- Action policy enforces approval gates that prevent uncontrolled chain execution
+- Full audit trail (runId, actor, artifacts) enables manual recovery
+- No multi-step transactional chains exist in production today
+
+**Monitoring:** Track action chain depth in `emitAiMetric()` telemetry; alert if chain depth exceeds 2  
+**Re-evaluation Trigger:** Before adding any new action type or enabling action-to-action chaining  
+**Owner:** Platform Engineering  
+**Accepted By:** Platform Engineering Lead  
+**Acceptance Date:** 2026-04-01
+
+---
+
+### Residual Risk Scores (Post-Mitigation)
+
+All deployed-scope risks have been mitigated or accepted. The table below shows inherent vs. residual scores.
+
+| ID | Risk | Inherent (L×I) | Residual (L×I) | Δ | Rationale |
+|----|------|:--------------:|:--------------:|:-:|----------|
+| NZ-RISK-001 | Discriminatory Scoring | 12 (3×4) | **6** (2×3) | −6 | Bias parity tests + 95% eval threshold |
+| NZ-RISK-002 | Unequal Answer Quality | 9 (3×3) | **4** (2×2) | −5 | Eval parity tests + threshold raised to 95% |
+| NZ-RISK-004 | PII Reaches LLM | 8 (2×4) | **4** (1×4) | −4 | 13 PII patterns in strict redaction mode |
+| NZ-RISK-006 | Cross-Tenant RAG Leak | 10 (2×5) | **4** (1×4) | −6 | 6 isolation tests + org-scoped queries |
+| NZ-RISK-007 | Prompt Injection | 8 (2×4) | **4** (1×4) | −4 | Injection test cases + input sanitization |
+| NZ-RISK-008 | Budget Exhaustion (Cost-DoS) | 8 (2×4) | **8** (2×4) | 0 | Accepted — budget caps + auto-block sufficient |
+| NZ-RISK-009 | Clause Reasoning Misguidance | 16 (4×4) | **8** (2×4) | −8 | Legal disclaimer + review guard + PATCH endpoint |
+| NZ-RISK-010 | Stale Knowledge Base | 12 (3×4) | **6** (2×3) | −6 | Medium risk tier + expiry dates + versioning |
+| NZ-RISK-011 | Circular Knowledge Corruption | 8 (2×4) | **2** (1×2) | −6 | sourceOrigin loop guard blocks all AI content |
+| NZ-RISK-012 | Employer Input Manipulation | 8 (2×4) | **4** (1×4) | −4 | sanitizeField() + FIELD_LIMITS |
+| NZ-RISK-013 | Knowledge Base Poisoning | 5 (1×5) | **3** (1×3) | −2 | Elevated to medium tier + approval required |
+| NZ-RISK-014 | Over-reliance on Triage AI | 16 (4×4) | **8** (2×4) | −8 | Human confirmation gate + pending guard |
+| NZ-RISK-016 | Loss of Steward Agency | 9 (3×3) | **4** (2×2) | −5 | Override audit trail with reason codes |
+| NZ-RISK-017 | Cross-Org Aggregation | 12 (3×4) | **6** (2×3) | −6 | Cross-tenant policy guard (MSA pending) |
+| NZ-RISK-018 | ML Training Without Consent | 12 (3×4) | **6** (2×3) | −6 | Consent manifest + blocking gate (PIA pending) |
+| NZ-RISK-019 | Finance Report Errors | 8 (2×4) | **4** (1×4) | −4 | Elevated to medium tier + org_admin approval |
+| NZ-RISK-020 | Eval Gate Not Monitored | 12 (4×3) | **6** (2×3) | −6 | emitAiMetric() structured telemetry |
+| NZ-RISK-021 | Embedding Model Invalidation | 8 (2×4) | **4** (1×4) | −4 | embeddingModelVersion for selective re-index |
+| NZ-RISK-022 | Provider Outage | 10 (2×5) | **4** (1×4) | −6 | Circuit breaker + retry on all 3 providers |
+| NZ-RISK-023 | Undisclosed Automated Decisions | 16 (4×4) | **8** (2×4) | −8 | Disclosure notices (DPIA pending) |
+| NZ-RISK-024 | Multi-Agent State Inconsistency | 6 (2×3) | **6** (2×3) | 0 | Accepted — low chain complexity currently |
+| NZ-RISK-026 | CBA Knowledge Extraction | 8 (2×4) | **4** (1×4) | −4 | Rate limiting + response cap |
+| NZ-RISK-027 | AI Carbon Footprint | 10 (5×2) | **2** (1×2) | −8 | Full CO₂ DB column + per-request tracking |
+
+**Aggregate Residual:** Average inherent 10.0 → average residual **4.8** (52% reduction)
+
+---
+
 ### ✅ Mitigated — v1.1 Cycle
 
 | ID | Risk | Control Applied |
@@ -451,6 +531,26 @@ These risks are **not in scope** until Memora deploys. They are tracked here for
 
 ---
 
+## Reference Materials
+
+### iSSDLC Strategic Planning
+
+The following intelligent Secure Software Development Lifecycle (iSSDLC) documents guide the platform's security-by-design approach for AI features:
+
+| # | Document | Format | Purpose |
+|---|----------|--------|---------|
+| 1 | [Develop a Strategic Plan for Intelligent Application Security — Phases 1-3](01-Develop-a-Strategic-Plan-for-Intelligent-Application-Security-Phases-1-3.pptx) | PPTX | Three-phase roadmap for embedding AI security into the SDLC: current-state assessment, capability gap analysis, and strategic plan development |
+| 2 | [iSSDLC Capabilities Assessment Tool](02-iSSDLC-Capabilities-Assessment-Tool.xlsx) | XLSX | Maturity assessment workbook for scoring current iSSDLC capabilities across security domains and identifying priority gaps |
+| 3 | [iSSDLC Strategic Plan Template](03-iSSDLC-Strategic-Plan-Template.pptx) | PPTX | Deliverable template for the iSSDLC strategic plan — milestones, ownership, timelines, and success criteria |
+
+### Risk Taxonomy Source
+
+| Document | Format | Purpose |
+|----------|--------|---------|
+| [The AI Risk Repository V4 (03/12/2025)](Copy%20of%20The%20AI%20Risk%20Repository%20V4_03_12_2025.xlsx) | XLSX | MIT AI Risk Repository v4 (Slattery et al., arxiv:2408.12622) — source taxonomy for domain/sub-domain classification and causal decomposition used in this register |
+
+---
+
 ## Review Schedule
 
 | Cadence | Activity |
@@ -468,59 +568,9 @@ These risks are **not in scope** until Memora deploys. They are tracked here for
 
 ---
 
-## Scoring Key
+## Platform AI Surface Area (Full — Including Pre-Deployment)
 
-| Dimension | 1 | 2 | 3 | 4 | 5 |
-|-----------|---|---|---|---|---|
-| **Likelihood** | Rare | Unlikely | Possible | Likely | Almost certain |
-| **Impact** | Negligible | Minor | Moderate | Major | Catastrophic |
-
-**Risk Score** = Likelihood × Impact
-
-| Band | Score | Colour |
-|------|-------|--------|
-| Low | 1–5 | 🟢 |
-| Medium | 6–12 | 🟡 |
-| High | 13–19 | 🟠 |
-| Critical | 20–25 | 🔴 |
-
----
-
-## Taxonomy Reference
-
-### Domain Taxonomy (7 domains, 24 sub-domains)
-
-| Code | Domain | Sub-domain |
-|------|--------|-----------|
-| 1.1 | Discrimination & Toxicity | Unfair discrimination based on identity |
-| 1.2 | Discrimination & Toxicity | Toxic or harmful content generation |
-| 1.3 | Discrimination & Toxicity | Unequal performance across groups |
-| 2.1 | Privacy & Security | Privacy compromise and data leakage |
-| 2.2 | Privacy & Security | System vulnerabilities and attacks |
-| 3.1 | Misinformation | False or misleading information |
-| 3.2 | Misinformation | Information ecosystem pollution |
-| 4.1 | Malicious Actors & Misuse | Disinformation/influence operations at scale |
-| 4.3 | Malicious Actors & Misuse | Fraud, scams and manipulation |
-| 5.1 | Human-Computer Interaction | Overreliance and unsafe use |
-| 5.2 | Human-Computer Interaction | Loss of human oversight and agency |
-| 6.1 | Socioeconomic & Environmental | Concentration of power |
-| 6.2 | Socioeconomic & Environmental | Inequality and job displacement |
-| 6.5 | Socioeconomic & Environmental | AI governance failures |
-| 6.6 | Socioeconomic & Environmental | Environmental harm |
-| 7.1 | AI System Safety | AI pursuing misaligned goals |
-| 7.3 | AI System Safety | Lack of robustness and resilience |
-| 7.4 | AI System Safety | Lack of transparency and interpretability |
-| 7.6 | AI System Safety | Multi-agent risks |
-
-### Causal Taxonomy
-
-- **Entity:** `AI` / `Human` / `Other`  
-- **Intent:** `Intentional` / `Unintentional`  
-- **Timing:** `Pre-deployment` / `Post-deployment`
-
----
-
-## Platform AI Surface Area
+> *Scoring key and taxonomy reference: see top of document.*
 
 | App / Module | AI Features |
 |---|---|

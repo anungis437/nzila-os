@@ -79,3 +79,38 @@ jobs:
       - name: Validate licenses against policy
         run: pnpm tsx tooling/security/supply-chain-policy.ts check-licenses sbom.json
 
+  # ── W3-4 / W3-6: Cosign SBOM Signing with Sigstore ──────────────────────
+  sign-sbom:
+    name: Sign SBOM with Cosign
+    needs: generate-sbom
+    runs-on: ubuntu-latest
+    permissions:
+      contents: read
+      id-token: write
+    steps:
+      - uses: actions/checkout@v4
+
+      - name: Install Cosign
+        uses: sigstore/cosign-installer@v3
+
+      - name: Download SBOM
+        uses: actions/download-artifact@v8
+        with:
+          name: sbom-${{ github.run_id }}
+          path: .
+
+      - name: Sign SBOM with keyless Sigstore
+        run: cosign sign-blob --yes --output-signature sbom.json.sig --output-certificate sbom.json.cert sbom.json
+        env:
+          COSIGN_EXPERIMENTAL: "1"
+
+      - name: Upload signed SBOM artifacts
+        uses: actions/upload-artifact@v4
+        with:
+          name: sbom-signed-${{ github.run_id }}
+          path: |
+            sbom.json
+            sbom.json.sig
+            sbom.json.cert
+          retention-days: 365
+
