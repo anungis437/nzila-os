@@ -7,17 +7,21 @@
  */
 import { NextRequest, NextResponse } from 'next/server'
 import { auth } from '@clerk/nextjs/server'
+import { z } from 'zod'
 import {
   checkKillSwitch,
   setKillSwitchOverride,
   getKillSwitchDashboard,
 } from '@nzila/ai-core/policy/killSwitch'
 import { ACTION_TYPES } from '@nzila/ai-core/schemas'
+import { createLogger } from '@nzila/os-core'
+
+const logger = createLogger('admin:ai-actions')
 
 // ── GET: Dashboard status ────────────────────────────────────────────────
 
 export async function GET() {
-  const { userId, orgRole } = await auth()
+  const { userId, orgId, orgRole } = await auth()
   if (!userId || orgRole !== 'org:platform_admin') {
     return NextResponse.json({ error: 'Forbidden' }, { status: 403 })
   }
@@ -31,6 +35,8 @@ export async function GET() {
     full[actionType] = dashboard[actionType] ?? checkKillSwitch(actionType)
   }
 
+  logger.info('ai-actions dashboard viewed', { userId, orgId })
+
   return NextResponse.json({
     globalKillSwitch: process.env.AI_KILL_SWITCH === 'true',
     actionTypes: full,
@@ -40,25 +46,28 @@ export async function GET() {
 
 // ── POST: Toggle kill-switch ─────────────────────────────────────────────
 
+const ToggleSchema = z.object({
+  actionType: z.string().min(1),
+  killed: z.boolean(),
+  reason: z.string().min(1),
+})
+
 export async function POST(request: NextRequest) {
-  const { userId, orgRole } = await auth()
+  const { userId, orgId, orgRole } = await auth()
   if (!userId || orgRole !== 'org:platform_admin') {
     return NextResponse.json({ error: 'Forbidden' }, { status: 403 })
   }
 
   const body = await request.json()
-  const { actionType, killed, reason } = body as {
-    actionType: string
-    killed: boolean
-    reason: string
-  }
-
-  if (!actionType || typeof killed !== 'boolean' || !reason) {
+  const parsed = ToggleSchema.safeParse(body)
+  if (!parsed.success) {
     return NextResponse.json(
       { error: 'Missing required fields: actionType, killed, reason' },
       { status: 400 },
     )
   }
+
+  const { actionType, killed, reason } = parsed.data
 
   const validTypes = Object.values(ACTION_TYPES) as string[]
   if (!validTypes.includes(actionType)) {
@@ -74,6 +83,8 @@ export async function POST(request: NextRequest) {
     reason,
     actor: userId,
   })
+
+  logger.info('ai-actions kill-switch toggled', { userId, orgId, actionType, killed })
 
   return NextResponse.json({
     success: true,

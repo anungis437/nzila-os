@@ -6,6 +6,7 @@
 import { withApi } from '@/lib/api/framework';
 import { db } from '@/db/db';
 import { sql } from 'drizzle-orm';
+import { withRLSContext } from '@/lib/db/with-rls-context';
 
 export const dynamic = 'force-dynamic';
 
@@ -31,7 +32,7 @@ export const GET = withApi(
 
     query = sql`${query} ORDER BY updated_at DESC LIMIT ${limit}`;
 
-    const result = await db.execute(query);
+    const result = await withRLSContext(async () => db.execute(query));
     const rows = Array.from(result);
 
     const templates = rows.map((r: Record<string, unknown>) => ({

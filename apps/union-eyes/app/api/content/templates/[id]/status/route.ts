@@ -12,6 +12,7 @@
 import { withApi, z, ApiError } from '@/lib/api/framework';
 import { db } from '@/db/db';
 import { sql } from 'drizzle-orm';
+import { withRLSContext } from '@/lib/db/with-rls-context';
 
 export const dynamic = 'force-dynamic';
 
@@ -35,11 +36,11 @@ export const PATCH = withApi(
     const newStatus = ctx.body.status;
 
     // Fetch current status
-    const result = await db.execute(sql`
+    const result = await withRLSContext(async () => db.execute(sql`
       SELECT id, status, title FROM cms_pages
       WHERE id = ${itemId}::uuid AND organization_id = ${orgId}::uuid
       LIMIT 1
-    `);
+    `));
 
     const rows = Array.from(result);
     if (rows.length === 0) {
@@ -67,14 +68,14 @@ export const PATCH = withApi(
       ? sql`, published_at = now()`
       : sql``;
 
-    await db.execute(sql`
+    await withRLSContext(async () => db.execute(sql`
       UPDATE cms_pages
       SET status = ${newStatus},
           updated_by = ${ctx.userId},
           updated_at = now()
           ${publishedClause}
       WHERE id = ${itemId}::uuid AND organization_id = ${orgId}::uuid
-    `);
+    `));
 
     return {
       id: itemId,

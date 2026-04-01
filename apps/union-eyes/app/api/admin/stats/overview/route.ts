@@ -7,6 +7,7 @@ import { organizations } from '@/db/schema';
 import { organizationMembers } from '@/db/schema';
 import { count, sql, ne } from 'drizzle-orm';
 import { withApi } from '@/lib/api/framework';
+import { withSystemContext } from '@/lib/db/with-rls-context';
 
 export const dynamic = 'force-dynamic';
 
@@ -26,8 +27,10 @@ export const GET = withApi(
       .where(ne(organizations.organizationType, 'platform'));
 
     // Estimate storage from table sizes
-    const storageResult = await db.execute(
-      sql`SELECT pg_database_size(current_database()) as db_size`
+    const storageResult = await withSystemContext(async () =>
+      db.execute(
+        sql`SELECT pg_database_size(current_database()) as db_size`
+      )
     );
     const rows = Array.from(storageResult);
     const dbSizeBytes = Number((rows[0] as Record<string, unknown>)?.db_size ?? 0);

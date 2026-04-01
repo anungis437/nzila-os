@@ -6,6 +6,7 @@ import { db } from '@/db/db';
 import { sql } from 'drizzle-orm';
 import { NextResponse } from 'next/server';
 import { auth } from '@clerk/nextjs/server';
+import { withSystemContext } from '@/lib/db/with-rls-context';
 
 export const dynamic = 'force-dynamic';
 
@@ -22,7 +23,9 @@ export async function POST() {
   }
 
   try {
-    await db.execute(sql`ANALYZE`);
+    await withSystemContext(async () => {
+      await db.execute(sql`ANALYZE`);
+    });
     return NextResponse.json({
       success: true,
       message: 'Database ANALYZE completed — query planner statistics updated',

@@ -32,11 +32,6 @@
 | 0056 | 0056_add_missing_fk_constraints.sql | `d8eb5fc9...9acfaa2a` | 1.65 KB | Adds FK constraints for course_registrations, member_certifications, and program_enrollments |
 | 0057 | 0057_recreate_training_views.sql | `a2e92bce...c44a5ce3` | 11.04 KB | Recreates views dropped in migration 0055, updated for varchar(255) user IDs |
 | 0058 | 0058_world_class_rls_policies.sql | `274ae655...5bba3ac1` | 23.12 KB | Implements comprehensive Row-Level Security for all user-related tables |
-| 0000 | 0059B_convert_existing_user_ids.sql | `b532b92b...3822e54f` | 15.47 KB | Date: 2026-02-08 |
-| 0000 | 0059C_convert_existing_user_ids_explicit.sql | `69bd9a75...c8bd83d6` | 17.64 KB | Date: 2026-02-08 |
-| 0000 | 0059D_convert_user_ids_dynamic.sql | `8b41f317...f0e3c2a3` | 14.27 KB | Date: 2026-02-08 |
-| 0000 | 0059E_complete_conversion_with_rls_disable.sql | `37999850...e6711958` | 17.79 KB | Date: 2026-02-08 |
-| 0000 | 0059F_recreate_dropped_views.sql | `c8e337b0...5e21039b` | 10.99 KB | Date: 2026-02-08 |
 | 0059 | 0059_convert_remaining_user_ids.sql | `0f719819...3c911b78` | 20.16 KB | Phase 2 of Clerk User ID alignment - handles tables missed in migration 0055 |
 | 0060 | 0060_add_visibility_scopes.sql | `e46f1629...72ef38f7` | 1.52 KB | ============================================================================ |
 | 0061 | 0061_add_defensibility_packs.sql | `b1a0d1ac...69421899` | 10.85 KB | ============================================================================ |

@@ -5,6 +5,7 @@
 import { withApi } from '@/lib/api/framework';
 import { db } from '@/db/db';
 import { sql } from 'drizzle-orm';
+import { withRLSContext } from '@/lib/db/with-rls-context';
 
 export const dynamic = 'force-dynamic';
 
@@ -13,21 +14,45 @@ export const GET = withApi(
   async (ctx) => {
     const orgId = ctx.organizationId;
 
-    // Templates stats
-    const templateResult = await db.execute(sql`
-      SELECT
-        count(*) FILTER (WHERE content_type = 'template') AS total_templates,
-        count(*) FILTER (WHERE content_type = 'template' AND status = 'published') AS published_templates,
-        count(*) FILTER (WHERE content_type = 'template' AND status = 'draft') AS draft_templates,
-        count(*) FILTER (WHERE content_type = 'template' AND status = 'review') AS review_templates,
-        count(*) FILTER (WHERE content_type = 'template' AND status = 'archived') AS archived_templates,
-        count(*) FILTER (WHERE content_type = 'resource') AS total_resources,
-        count(*) FILTER (WHERE content_type = 'resource' AND status = 'published') AS published_resources,
-        COALESCE(sum(view_count), 0) AS total_views,
-        COALESCE(sum(download_count), 0) AS total_downloads
-      FROM cms_pages
-      WHERE organization_id = ${orgId}::uuid
-    `);
+    const { templateResult, topResult, trainingResult } = await withRLSContext(async () => {
+      // Templates stats
+      const templateResult = await db.execute(sql`
+        SELECT
+          count(*) FILTER (WHERE content_type = 'template') AS total_templates,
+          count(*) FILTER (WHERE content_type = 'template' AND status = 'published') AS published_templates,
+          count(*) FILTER (WHERE content_type = 'template' AND status = 'draft') AS draft_templates,
+          count(*) FILTER (WHERE content_type = 'template' AND status = 'review') AS review_templates,
+          count(*) FILTER (WHERE content_type = 'template' AND status = 'archived') AS archived_templates,
+          count(*) FILTER (WHERE content_type = 'resource') AS total_resources,
+          count(*) FILTER (WHERE content_type = 'resource' AND status = 'published') AS published_resources,
+          COALESCE(sum(view_count), 0) AS total_views,
+          COALESCE(sum(download_count), 0) AS total_downloads
+        FROM cms_pages
+        WHERE organization_id = ${orgId}::uuid
+      `);
+
+      // Most viewed content
+      const topResult = await db.execute(sql`
+        SELECT title, category, view_count
+        FROM cms_pages
+        WHERE organization_id = ${orgId}::uuid AND view_count > 0
+        ORDER BY view_count DESC
+        LIMIT 1
+      `);
+
+      // Training stats
+      const trainingResult = await db.execute(sql`
+        SELECT
+          count(*) AS total_courses,
+          count(*) FILTER (WHERE is_active = true) AS active_courses,
+          COALESCE(sum(completion_count), 0) AS total_completions
+        FROM training_courses
+        WHERE organization_id = ${orgId}::uuid
+      `);
+
+      return { templateResult, topResult, trainingResult };
+    });
+
     const tRows = Array.from(templateResult);
     const stats = tRows[0] as Record<string, unknown>;
 
