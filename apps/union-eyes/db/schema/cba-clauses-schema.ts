@@ -54,6 +54,7 @@ export const cbaClause = pgTable("cba_clauses", {
   // Content
   content: text("content").notNull(),
   contentPlainText: text("content_plain_text"), // Stripped of formatting for search
+  contentHash: varchar("content_hash", { length: 64 }), // SHA-256 hash for dedup
   pageNumber: integer("page_number"),
   
   // Hierarchy and structure

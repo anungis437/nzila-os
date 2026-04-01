@@ -5,6 +5,9 @@ const mocks = vi.hoisted(() => ({
   mockDbInsert: vi.fn(),
   mockDbUpdate: vi.fn(),
   mockDbQuery: vi.fn(),
+  mockDbSelect: vi.fn(),
+  mockSelectFrom: vi.fn(),
+  mockSelectWhere: vi.fn(),
   mockValues: vi.fn(),
   mockSet: vi.fn(),
   mockWhere: vi.fn(),
@@ -26,6 +29,7 @@ vi.mock('@/db', () => ({
   db: {
     insert: mocks.mockDbInsert,
     update: mocks.mockDbUpdate,
+    select: mocks.mockDbSelect,
     query: {
       collectiveAgreements: {
         findFirst: mocks.mockDbQuery,
@@ -35,7 +39,7 @@ vi.mock('@/db', () => ({
 }));
 
 vi.mock('@/db/schema', () => ({
-  cbaClause: { id: 'id' },
+  cbaClause: { id: 'id', contentHash: 'contentHash', cbaId: 'cbaId' },
   collectiveAgreements: { id: 'id', jurisdiction: 'jurisdiction', sector: 'sector' },
 }));
 
@@ -85,6 +89,11 @@ describe('extractClausesFromPDF', () => {
     // insert().values()
     mocks.mockValues.mockResolvedValue(undefined);
     mocks.mockDbInsert.mockReturnValue({ values: mocks.mockValues });
+
+    // select().from().where() — for duplicate-hash check
+    mocks.mockSelectWhere.mockResolvedValue([]);
+    mocks.mockSelectFrom.mockReturnValue({ where: mocks.mockSelectWhere });
+    mocks.mockDbSelect.mockReturnValue({ from: mocks.mockSelectFrom });
 
     // update().set().where()
     mocks.mockWhere.mockResolvedValue(undefined);
@@ -155,6 +164,9 @@ describe('batchExtractClauses', () => {
     mocks.mockDbQuery.mockResolvedValue({ id: 'cba-1', jurisdiction: 'ON', sector: 'Public' });
     mocks.mockValues.mockResolvedValue(undefined);
     mocks.mockDbInsert.mockReturnValue({ values: mocks.mockValues });
+    mocks.mockSelectWhere.mockResolvedValue([]);
+    mocks.mockSelectFrom.mockReturnValue({ where: mocks.mockSelectWhere });
+    mocks.mockDbSelect.mockReturnValue({ from: mocks.mockSelectFrom });
     mocks.mockWhere.mockResolvedValue(undefined);
     mocks.mockSet.mockReturnValue({ where: mocks.mockWhere });
     mocks.mockDbUpdate.mockReturnValue({ set: mocks.mockSet });

@@ -210,6 +210,68 @@ export const featureFlagEvaluations = new Counter({
 });
 
 // ============================================
+// CBA Intelligence Metrics
+// ============================================
+
+export const cbaIntelIngestionJobsTotal = new Counter({
+  name: 'union_eyes_cba_intel_ingestion_jobs_total',
+  help: 'Total CBA intelligence ingestion jobs',
+  labelNames: ['status', 'source_type'],
+  registers: [register],
+});
+
+export const cbaIntelIngestionDuration = new Histogram({
+  name: 'union_eyes_cba_intel_ingestion_duration_seconds',
+  help: 'Duration of CBA ingestion jobs in seconds',
+  labelNames: ['source_type'],
+  buckets: [1, 5, 10, 30, 60, 300, 600],
+  registers: [register],
+});
+
+export const cbaIntelDocumentsIngested = new Counter({
+  name: 'union_eyes_cba_intel_documents_ingested_total',
+  help: 'Total CBA documents ingested',
+  labelNames: ['document_type', 'language'],
+  registers: [register],
+});
+
+export const cbaIntelExtractionConfidence = new Histogram({
+  name: 'union_eyes_cba_intel_extraction_confidence',
+  help: 'Distribution of extraction confidence scores',
+  labelNames: ['clause_family'],
+  buckets: [0.1, 0.2, 0.3, 0.4, 0.5, 0.6, 0.7, 0.8, 0.9, 1.0],
+  registers: [register],
+});
+
+export const cbaIntelReviewQueueDepth = new Gauge({
+  name: 'union_eyes_cba_intel_review_queue_depth',
+  help: 'Number of items pending review',
+  labelNames: ['target_type'],
+  registers: [register],
+});
+
+export const cbaIntelReviewDecisionsTotal = new Counter({
+  name: 'union_eyes_cba_intel_review_decisions_total',
+  help: 'Total review decisions made',
+  labelNames: ['decision', 'target_type'],
+  registers: [register],
+});
+
+export const cbaIntelSourceFreshness = new Gauge({
+  name: 'union_eyes_cba_intel_source_freshness_status',
+  help: 'Source freshness status (1=fresh, 2=aging, 3=stale, 4=expired, 0=unknown)',
+  labelNames: ['source_slug'],
+  registers: [register],
+});
+
+export const cbaIntelAgreementsTotal = new Gauge({
+  name: 'union_eyes_cba_intel_agreements_total',
+  help: 'Total number of extracted agreements',
+  labelNames: ['jurisdiction', 'review_status'],
+  registers: [register],
+});
+
+// ============================================
 // Export Registry
 // ============================================
 

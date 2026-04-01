@@ -108,7 +108,7 @@ export function CBAClauseAnalyticsDashboard() {
         <div>
           <h2 className="text-3xl font-bold tracking-tight">CBA Intelligence Analytics</h2>
           <p className="text-muted-foreground">
-            AI-powered clause extraction and precedent matching insights
+            AI-assisted clause extraction and precedent matching — all outputs are advisory and subject to review
           </p>
         </div>
         <div className="flex gap-2">

@@ -1,0 +1,570 @@
+openapi: "3.0.3"
+info:
+  title: CBA Intelligence API
+  description: |
+    Public-source CBA Intelligence subsystem for Union-Eyes.
+    Provides endpoints for managing data sources, ingestion pipelines,
+    document management, review workflows, freshness monitoring,
+    agreement exploration, and benchmark computation.
+
+    All endpoints require Clerk authentication and the `commercial_reporting`
+    entitlement.
+  version: "1.0.0"
+  contact:
+    name: Nzila Platform Team
+  license:
+    name: Proprietary
+
+servers:
+  - url: /api/cba-intelligence
+    description: Relative to Union-Eyes base URL
+
+tags:
+  - name: Sources
+    description: Public data source registry
+  - name: Ingestion
+    description: Ingestion job management
+  - name: Documents
+    description: Ingested document storage
+  - name: Review
+    description: Human-review queue and decisions
+  - name: Freshness
+    description: Source freshness monitoring
+  - name: Agreements
+    description: Extracted agreement browser
+  - name: Benchmark
+    description: Agreement benchmarking
+
+paths:
+  /sources:
+    get:
+      tags: [Sources]
+      summary: List sources
+      description: Paginated list of registered data sources with optional filters.
+      operationId: listSources
+      parameters:
+        - $ref: "#/components/parameters/page"
+        - $ref: "#/components/parameters/limit"
+        - name: sourceType
+          in: query
+          schema:
+            $ref: "#/components/schemas/SourceType"
+        - name: jurisdiction
+          in: query
+          schema: { type: string }
+        - name: healthStatus
+          in: query
+          schema:
+            $ref: "#/components/schemas/HealthStatus"
+        - name: isActive
+          in: query
+          schema: { type: boolean }
+      responses:
+        "200":
+          description: Paginated source list
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/PaginatedSources"
+        "401": { $ref: "#/components/responses/Unauthorized" }
+    post:
+      tags: [Sources]
+      summary: Register source
+      description: Create a new public data source (admin only).
+      operationId: createSource
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              $ref: "#/components/schemas/NewSource"
+      responses:
+        "201":
+          description: Source created
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/Source"
+        "401": { $ref: "#/components/responses/Unauthorized" }
+        "403": { $ref: "#/components/responses/Forbidden" }
+
+  /sources/{id}:
+    parameters:
+      - $ref: "#/components/parameters/resourceId"
+    get:
+      tags: [Sources]
+      summary: Get source
+      operationId: getSource
+      responses:
+        "200":
+          description: Source detail
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/Source"
+        "404": { $ref: "#/components/responses/NotFound" }
+    patch:
+      tags: [Sources]
+      summary: Update source
+      operationId: updateSource
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              $ref: "#/components/schemas/SourcePatch"
+      responses:
+        "200":
+          description: Updated source
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/Source"
+        "404": { $ref: "#/components/responses/NotFound" }
+
+  /ingestion:
+    get:
+      tags: [Ingestion]
+      summary: List ingestion jobs
+      operationId: listIngestionJobs
+      parameters:
+        - $ref: "#/components/parameters/page"
+        - $ref: "#/components/parameters/limit"
+        - name: sourceId
+          in: query
+          schema: { type: string, format: uuid }
+        - name: status
+          in: query
+          schema:
+            $ref: "#/components/schemas/IngestionStatus"
+      responses:
+        "200":
+          description: Paginated ingestion jobs
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/PaginatedIngestionJobs"
+    post:
+      tags: [Ingestion]
+      summary: Trigger ingestion
+      operationId: triggerIngestion
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              type: object
+              required: [sourceId]
+              properties:
+                sourceId:
+                  type: string
+                  format: uuid
+                triggerType:
+                  type: string
+                  enum: [manual, scheduled, retry]
+                  default: manual
+      responses:
+        "201":
+          description: Ingestion job created
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/IngestionJob"
+
+  /documents:
+    get:
+      tags: [Documents]
+      summary: List documents
+      operationId: listDocuments
+      parameters:
+        - $ref: "#/components/parameters/page"
+        - $ref: "#/components/parameters/limit"
+        - name: sourceId
+          in: query
+          schema: { type: string, format: uuid }
+        - name: jurisdiction
+          in: query
+          schema: { type: string }
+        - name: sector
+          in: query
+          schema: { type: string }
+        - name: isLatest
+          in: query
+          schema: { type: boolean }
+      responses:
+        "200":
+          description: Paginated documents
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/PaginatedDocuments"
+
+  /review:
+    get:
+      tags: [Review]
+      summary: Get review queue
+      operationId: getReviewQueue
+      parameters:
+        - $ref: "#/components/parameters/page"
+        - $ref: "#/components/parameters/limit"
+        - name: targetType
+          in: query
+          schema:
+            type: string
+            enum: [finding, agreement, wage_adjustment, clause]
+        - name: minConfidence
+          in: query
+          schema: { type: number, minimum: 0, maximum: 1 }
+        - name: maxConfidence
+          in: query
+          schema: { type: number, minimum: 0, maximum: 1 }
+        - name: counts
+          in: query
+          description: If "true", returns aggregate counts instead of items
+          schema: { type: boolean }
+      responses:
+        "200":
+          description: Review queue or counts
+          content:
+            application/json:
+              schema:
+                oneOf:
+                  - $ref: "#/components/schemas/PaginatedReviewItems"
+                  - $ref: "#/components/schemas/ReviewCounts"
+    post:
+      tags: [Review]
+      summary: Submit review decision
+      operationId: submitReview
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              type: object
+              required: [targetType, targetId, decision]
+              properties:
+                targetType:
+                  type: string
+                  enum: [finding, agreement, wage_adjustment, clause]
+                targetId:
+                  type: string
+                  format: uuid
+                decision:
+                  type: string
+                  enum: [approved, rejected, needs_followup, superseded]
+                reason:
+                  type: string
+                  maxLength: 1000
+                comment:
+                  type: string
+                  maxLength: 5000
+      responses:
+        "201":
+          description: Review decision created
+
+  /freshness:
+    get:
+      tags: [Freshness]
+      summary: Freshness overview
+      operationId: getFreshnessOverview
+      parameters:
+        - name: agingDays
+          in: query
+          schema: { type: integer, default: 14 }
+        - name: staleDays
+          in: query
+          schema: { type: integer, default: 30 }
+        - name: expiredDays
+          in: query
+          schema: { type: integer, default: 90 }
+      responses:
+        "200":
+          description: Freshness status for all active sources
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/FreshnessOverview"
+
+  /agreements:
+    get:
+      tags: [Agreements]
+      summary: List extracted agreements
+      operationId: listAgreements
+      parameters:
+        - $ref: "#/components/parameters/page"
+        - $ref: "#/components/parameters/limit"
+        - name: jurisdiction
+          in: query
+          schema: { type: string }
+        - name: sector
+          in: query
+          schema: { type: string }
+        - name: search
+          in: query
+          schema: { type: string, maxLength: 200 }
+        - name: reviewStatus
+          in: query
+          schema: { type: string }
+      responses:
+        "200":
+          description: Paginated agreements
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/PaginatedAgreements"
+
+  /agreements/{id}:
+    parameters:
+      - $ref: "#/components/parameters/resourceId"
+    get:
+      tags: [Agreements]
+      summary: Get agreement detail
+      operationId: getAgreement
+      responses:
+        "200":
+          description: Agreement with wage adjustments and clauses
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/AgreementDetail"
+        "404": { $ref: "#/components/responses/NotFound" }
+
+  /benchmark/{id}:
+    parameters:
+      - $ref: "#/components/parameters/resourceId"
+    get:
+      tags: [Benchmark]
+      summary: Compute or retrieve benchmark
+      operationId: getBenchmark
+      parameters:
+        - name: jurisdiction
+          in: query
+          schema: { type: string }
+        - name: sector
+          in: query
+          schema: { type: string }
+        - name: union
+          in: query
+          schema: { type: string }
+        - name: employerClass
+          in: query
+          schema: { type: string }
+        - name: minComparables
+          in: query
+          schema: { type: integer }
+        - name: save
+          in: query
+          description: Persist benchmark snapshot
+          schema: { type: boolean }
+        - name: history
+          in: query
+          description: Return saved snapshots instead of computing
+          schema: { type: boolean }
+        - $ref: "#/components/parameters/page"
+        - name: limit
+          in: query
+          schema: { type: integer, maximum: 50 }
+      responses:
+        "200":
+          description: Benchmark result or snapshot history
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/BenchmarkResult"
+
+components:
+  parameters:
+    page:
+      name: page
+      in: query
+      schema: { type: integer, minimum: 1, default: 1 }
+    limit:
+      name: limit
+      in: query
+      schema: { type: integer, minimum: 1, maximum: 100, default: 20 }
+    resourceId:
+      name: id
+      in: path
+      required: true
+      schema: { type: string, format: uuid }
+
+  responses:
+    Unauthorized:
+      description: Authentication required
+    Forbidden:
+      description: Insufficient permissions
+    NotFound:
+      description: Resource not found
+
+  schemas:
+    SourceType:
+      type: string
+      enum:
+        - federal_labour
+        - provincial_labour_board
+        - provincial_ministry
+        - quebec_labour
+        - legal_arbitration
+        - union_bulletin
+        - stats_benchmark
+        - academic
+        - news
+
+    HealthStatus:
+      type: string
+      enum: [healthy, degraded, unreachable, unknown]
+
+    IngestionStatus:
+      type: string
+      enum: [queued, running, completed, completed_with_errors, failed, cancelled]
+
+    Source:
+      type: object
+      properties:
+        id: { type: string, format: uuid }
+        slug: { type: string }
+        nameEn: { type: string }
+        nameFr: { type: string }
+        description: { type: string }
+        sourceType: { $ref: "#/components/schemas/SourceType" }
+        trustTier: { type: string, enum: [official, authoritative, curated, unverified] }
+        healthStatus: { $ref: "#/components/schemas/HealthStatus" }
+        jurisdictions: { type: array, items: { type: string } }
+        baseUrl: { type: string, format: uri }
+        isActive: { type: boolean }
+        createdAt: { type: string, format: date-time }
+        updatedAt: { type: string, format: date-time }
+
+    NewSource:
+      type: object
+      required: [slug, nameEn, sourceType, collectionMethod, baseUrl]
+      properties:
+        slug: { type: string, maxLength: 120 }
+        nameEn: { type: string, maxLength: 300 }
+        nameFr: { type: string, maxLength: 300 }
+        description: { type: string }
+        sourceType: { $ref: "#/components/schemas/SourceType" }
+        formatTypes: { type: array, items: { type: string } }
+        collectionMethod: { type: string, enum: [manual_upload, scheduled_fetch, api_sync, rss_feed, email_ingest] }
+        trustTier: { type: string, enum: [official, authoritative, curated, unverified] }
+        jurisdictions: { type: array, items: { type: string } }
+        sectors: { type: array, items: { type: string } }
+        baseUrl: { type: string, format: uri }
+        adapterKey: { type: string }
+
+    SourcePatch:
+      type: object
+      properties:
+        nameEn: { type: string }
+        nameFr: { type: string }
+        description: { type: string }
+        isActive: { type: boolean }
+        trustTier: { type: string }
+        adapterKey: { type: string }
+
+    PaginatedSources:
+      type: object
+      properties:
+        items: { type: array, items: { $ref: "#/components/schemas/Source" } }
+        total: { type: integer }
+        page: { type: integer }
+        limit: { type: integer }
+
+    IngestionJob:
+      type: object
+      properties:
+        id: { type: string, format: uuid }
+        sourceId: { type: string, format: uuid }
+        status: { $ref: "#/components/schemas/IngestionStatus" }
+        documentsFound: { type: integer }
+        documentsNew: { type: integer }
+        documentsUpdated: { type: integer }
+        startedAt: { type: string, format: date-time }
+        completedAt: { type: string, format: date-time }
+        durationMs: { type: integer }
+        createdAt: { type: string, format: date-time }
+
+    PaginatedIngestionJobs:
+      type: object
+      properties:
+        items: { type: array, items: { $ref: "#/components/schemas/IngestionJob" } }
+        total: { type: integer }
+        page: { type: integer }
+        limit: { type: integer }
+
+    PaginatedDocuments:
+      type: object
+      properties:
+        items: { type: array, items: { type: object } }
+        total: { type: integer }
+        page: { type: integer }
+        limit: { type: integer }
+
+    PaginatedReviewItems:
+      type: object
+      properties:
+        items: { type: array, items: { type: object } }
+        total: { type: integer }
+        page: { type: integer }
+        limit: { type: integer }
+
+    ReviewCounts:
+      type: object
+      properties:
+        total: { type: integer }
+        byTargetType: { type: object }
+        byDecision: { type: object }
+
+    FreshnessOverview:
+      type: object
+      properties:
+        sources:
+          type: array
+          items:
+            type: object
+            properties:
+              sourceId: { type: string, format: uuid }
+              name: { type: string }
+              status: { type: string, enum: [fresh, aging, stale, expired] }
+              lastIngestionAt: { type: string, format: date-time }
+              daysSinceUpdate: { type: integer }
+        summary:
+          type: object
+          properties:
+            fresh: { type: integer }
+            aging: { type: integer }
+            stale: { type: integer }
+            expired: { type: integer }
+
+    PaginatedAgreements:
+      type: object
+      properties:
+        items: { type: array, items: { type: object } }
+        total: { type: integer }
+        page: { type: integer }
+        limit: { type: integer }
+
+    AgreementDetail:
+      type: object
+      properties:
+        agreement: { type: object }
+        wageAdjustments: { type: array, items: { type: object } }
+        clauses: { type: array, items: { type: object } }
+
+    BenchmarkResult:
+      type: object
+      properties:
+        agreementId: { type: string, format: uuid }
+        comparableCount: { type: integer }
+        snapshotId: { type: string, format: uuid }
+        data: { type: object }
+
+  securitySchemes:
+    clerk:
+      type: http
+      scheme: bearer
+      bearerFormat: JWT
+      description: Clerk session JWT
+
+security:
+  - clerk: []
