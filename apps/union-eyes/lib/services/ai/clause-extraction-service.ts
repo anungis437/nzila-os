@@ -5,10 +5,11 @@
  * Supports both document upload and URL-based processing.
  */
 
+import { createHash } from 'crypto';
 import { getAiClient, UE_APP_KEY, UE_PROFILES, UE_SYSTEM_ORG_ID } from '@/lib/ai/ai-client';
 import { db } from '@/db';
 import { cbaClause, collectiveAgreements } from '@/db/schema';
-import { eq } from 'drizzle-orm';
+import { eq, and } from 'drizzle-orm';
 import type { ClauseType } from '@/db/schema/domains/agreements';
 import { logger } from '@/lib/logger';
 
@@ -193,33 +194,62 @@ Return a JSON array of extracted clauses.`;
 }
 
 /**
- * Save extracted clauses to database
+ * Save extracted clauses to database with content-hash deduplication.
+ * Skips clauses whose content already exists for the same CBA.
  */
 async function saveExtractedClauses(
   clauses: ExtractedClause[],
   cbaId: string,
   organizationId: string
 ): Promise<void> {
-  const clausesToInsert = clauses.map(clause => ({
-    organizationId,
-    cbaId,
-    clauseType: clause.clauseType,
-    clauseNumber: clause.clauseNumber,
-    title: clause.title,
-    content: clause.content,
-    articleNumber: clause.articleNumber || null,
-    sectionNumber: clause.sectionNumber || null,
-    effectiveDate: new Date(),
-    tags: clause.tags,
-    crossReferences: clause.crossReferences,
-    aiExtracted: true,
-    confidence: clause.confidence,
-  }));
+  const clausesToInsert = clauses.map(clause => {
+    const contentHash = createHash('sha256')
+      .update(clause.content)
+      .digest('hex');
+    return {
+      organizationId,
+      cbaId,
+      clauseType: clause.clauseType,
+      clauseNumber: clause.clauseNumber,
+      title: clause.title,
+      content: clause.content,
+      contentHash,
+      articleNumber: clause.articleNumber || null,
+      sectionNumber: clause.sectionNumber || null,
+      effectiveDate: new Date(),
+      tags: clause.tags,
+      crossReferences: clause.crossReferences,
+      aiExtracted: true,
+      confidence: clause.confidence,
+    };
+  });
+
+  // Fetch existing content hashes for this CBA to skip duplicates
+  const existing = await db
+    .select({ contentHash: cbaClause.contentHash })
+    .from(cbaClause)
+    .where(eq(cbaClause.cbaId, cbaId));
+  const existingHashes = new Set(
+    existing.map((r) => r.contentHash).filter(Boolean),
+  );
+
+  const deduped = clausesToInsert.filter(
+    (c) => !existingHashes.has(c.contentHash),
+  );
+
+  if (deduped.length < clausesToInsert.length) {
+    logger.info('Skipped duplicate clauses during extraction', {
+      total: clausesToInsert.length,
+      duplicates: clausesToInsert.length - deduped.length,
+      inserted: deduped.length,
+      cbaId,
+    });
+  }
 
   // Insert in batches to avoid overwhelming the database
   const batchSize = 50;
-  for (let i = 0; i < clausesToInsert.length; i += batchSize) {
-    const batch = clausesToInsert.slice(i, i + batchSize);
+  for (let i = 0; i < deduped.length; i += batchSize) {
+    const batch = deduped.slice(i, i + batchSize);
     await db.insert(cbaClause).values(batch);
   }
 }

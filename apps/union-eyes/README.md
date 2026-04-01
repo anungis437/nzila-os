@@ -136,7 +136,7 @@ Django is the **authoritative** data layer. The Next.js frontend may read via Dr
 | Feature | Description |
 |---------|-------------|
 | **CBA management** | Track collective agreements, expiry, renewal status |
-| **Clause library** | Searchable clause repository with cross-CBA comparisons |
+| **Clause library** | Searchable clause repository with manual cross-CBA comparison capability |
 | **Election management** | Auditable nomination and voting workflows |
 | **Governance dashboard** | Policy compliance, executive oversight, committee tracking |
 | **Federation management** | CLC hierarchy — locals, regionals, nationals, sectors |

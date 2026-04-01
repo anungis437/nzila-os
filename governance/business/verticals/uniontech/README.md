@@ -11,7 +11,7 @@
 
 ### **Product Overview**
 
-**Union Eyes** is the modern operating system for labor unions — a comprehensive platform managing membership, grievances, collective bargaining agreements (CBA), pension forecasting, elections, campaigns, and financial operations.
+**Union Eyes** is the modern operating system for labor unions — an integrated platform managing membership, grievances, collective bargaining agreements (CBA), pension forecasting, elections, campaigns, and financial operations (public data integration in development).
 
 ### **Technical Specifications**
 
@@ -130,7 +130,7 @@
 ### **Product Roadmap (2026-2028)**
 
 **Q2 2026 — Commercial Launch:**
-- ✅ Core modules production-ready (Membership, Grievances, CBA, Pension, Elections, Financial)
+- ✅ Core modules in active development (Membership, Grievances, CBA, Pension, Elections, Financial)
 - ✅ Onboard 10 pilot unions (5 paying, 5 design partners)
 - ✅ Clerk auth integration (SSO, 2FA)
 

@@ -33,6 +33,9 @@ export * from "./domains/scheduling";       // Priority 8: Calendar, events, tra
 export * from "./domains/compliance";       // Priority 9: Regulatory compliance and privacy
 export * from "./domains/data";             // Priority 10: External data integration
 
+// CBA Intelligence (Public Source Intelligence Layer)
+export * from "./domains/cba-intelligence"; // Source registry, ingestion, extraction, review, benchmarks
+
 // Health & Safety — re-export excluding auditStatusEnum (conflicts with infrastructure/accessibility)
 export {
   // Enums (sans auditStatusEnum)
