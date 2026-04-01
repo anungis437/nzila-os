@@ -1,0 +1,38 @@
+# ──────────────────────────────────────────────────────────────────────────────
+# iSSDLC W2-5: Branch protection rules as code
+# Requires: https://github.com/apps/settings (Probot Settings app)
+# ──────────────────────────────────────────────────────────────────────────────
+
+repository:
+  name: nzila-os
+  private: true
+  has_issues: true
+  has_projects: true
+  has_wiki: false
+  default_branch: main
+  allow_squash_merge: true
+  allow_merge_commit: false
+  allow_rebase_merge: true
+  delete_branch_on_merge: true
+
+branches:
+  - name: main
+    protection:
+      required_pull_request_reviews:
+        required_approving_review_count: 1
+        dismiss_stale_reviews: true
+        require_code_owner_reviews: true
+        dismissal_restrictions:
+          teams:
+            - security
+      required_status_checks:
+        strict: true
+        contexts:
+          - "Lint & Typecheck"
+          - "Test"
+          - "Contract Tests"
+          - "Governance Check"
+      enforce_admins: false  # Allow admin bypass for emergency fixes
+      required_linear_history: true
+      restrictions: null  # No push restrictions beyond PR requirement
+      required_signatures: false  # W2-5: evaluate commit signing requirement

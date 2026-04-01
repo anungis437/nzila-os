@@ -10,6 +10,8 @@ on:
     paths:
       - 'packages/db/**'
       - 'packages/os-core/**'
+      - 'packages/ai-core/**'
+      - 'packages/ml-core/**'
       - 'security/redteam/**'
       - 'tooling/contract-tests/**'
 

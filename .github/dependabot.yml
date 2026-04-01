@@ -41,6 +41,10 @@ updates:
       time: "08:00"
       timezone: "UTC"
     open-pull-requests-limit: 5
+    labels:
+      - "dependencies"
+      - "github-actions"
+      - "auto-merge"   # W2-11: Auto-merge patch updates
 
   # ── Python (automation package) ──────────────────────────────────────────
   - package-ecosystem: pip

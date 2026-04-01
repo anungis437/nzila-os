@@ -1,0 +1,155 @@
+# Nzila OS — OPA Runtime Enforcement Sidecar
+# iSSDLC W3-5: Open Policy Agent configuration for Container Apps
+#
+# Deployed as a sidecar container alongside each app container.
+# Intercepts API requests and enforces authorization policies.
+
+apiVersion: v1
+kind: ConfigMap
+metadata:
+  name: nzila-opa-config
+  labels:
+    app: nzila-os
+    component: opa
+data:
+  # OPA configuration
+  config.yaml: |
+    services:
+      nzila-policy-bundle:
+        url: https://nzilastagingacr.azurecr.io
+        type: oci
+        credentials:
+          bearer:
+            token: "${OPA_BUNDLE_TOKEN}"
+
+    bundles:
+      nzila-policies:
+        service: nzila-policy-bundle
+        resource: nzila/opa-policies:latest
+        polling:
+          min_delay_seconds: 30
+          max_delay_seconds: 120
+
+    decision_logs:
+      console: true
+      reporting:
+        min_delay_seconds: 10
+        max_delay_seconds: 60
+
+    status:
+      console: true
+
+    labels:
+      app: nzila-os
+      environment: "${ENVIRONMENT}"
+
+---
+# OPA sidecar container definition for Azure Container Apps
+# Add this to each containerapp's containers array
+apiVersion: apps/v1
+kind: Deployment
+metadata:
+  name: nzila-opa-sidecar-template
+  annotations:
+    description: "Template for OPA sidecar — adapt for azure containerapp update"
+spec:
+  template:
+    spec:
+      containers:
+        # App container (existing)
+        - name: app
+          ports:
+            - containerPort: 3000
+        # OPA sidecar
+        - name: opa
+          image: openpolicyagent/opa:0.67.0-static
+          args:
+            - "run"
+            - "--server"
+            - "--addr=0.0.0.0:8181"
+            - "--config-file=/config/config.yaml"
+            - "--log-level=info"
+            - "--log-format=json"
+          ports:
+            - containerPort: 8181
+              protocol: TCP
+          livenessProbe:
+            httpGet:
+              path: /health?bundles
+              port: 8181
+            initialDelaySeconds: 5
+            periodSeconds: 15
+          readinessProbe:
+            httpGet:
+              path: /health?plugins&bundles
+              port: 8181
+            initialDelaySeconds: 5
+            periodSeconds: 10
+          resources:
+            requests:
+              cpu: 100m
+              memory: 128Mi
+            limits:
+              cpu: 250m
+              memory: 256Mi
+          volumeMounts:
+            - name: opa-config
+              mountPath: /config
+              readOnly: true
+      volumes:
+        - name: opa-config
+          configMap:
+            name: nzila-opa-config
+
+---
+# Sample Rego policy for cross-tenant isolation
+# Store in ops/policies/rego/cross-tenant.rego
+apiVersion: v1
+kind: ConfigMap
+metadata:
+  name: nzila-opa-policies
+data:
+  cross-tenant.rego: |
+    package nzila.authz
+
+    import rego.v1
+
+    # Default deny
+    default allow := false
+
+    # Allow if user's org matches the requested resource's org
+    allow if {
+      input.user.orgId == input.resource.orgId
+    }
+
+    # Platform admins can access any org
+    allow if {
+      input.user.role == "platform_admin"
+    }
+
+    # Deny cross-org AI context access
+    deny_ai_cross_org if {
+      input.action == "ai_query"
+      input.user.orgId != input.resource.orgId
+      input.user.role != "platform_admin"
+    }
+
+  rate-limit.rego: |
+    package nzila.ratelimit
+
+    import rego.v1
+
+    # Rate limit tiers
+    limits := {
+      "free":       {"requests_per_minute": 60,   "ai_requests_per_hour": 10},
+      "standard":   {"requests_per_minute": 300,  "ai_requests_per_hour": 100},
+      "enterprise": {"requests_per_minute": 1000, "ai_requests_per_hour": 500},
+    }
+
+    # Get applicable limit
+    applicable_limit := limits[input.user.tier]
+
+    # Check if rate limit exceeded
+    rate_limited if {
+      input.current_count > applicable_limit.requests_per_minute
+    }

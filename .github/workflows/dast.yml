@@ -1,0 +1,108 @@
+name: DAST Security Scan
+
+# iSSDLC W1-3: OWASP ZAP DAST against staging endpoints
+
+on:
+  schedule:
+    # Weekly Monday at 03:00 UTC
+    - cron: '0 3 * * 1'
+  workflow_dispatch:
+    inputs:
+      target:
+        description: 'Target URL (staging default)'
+        required: false
+        default: 'https://nzila-os-web.delightfulisland-0d503d3c.eastus.azurecontainerapps.io'
+
+permissions:
+  contents: read
+  security-events: write
+  issues: write
+
+env:
+  WEB_URL: https://nzila-os-web.delightfulisland-0d503d3c.eastus.azurecontainerapps.io
+  CONSOLE_URL: https://nzila-os-console.delightfulisland-0d503d3c.eastus.azurecontainerapps.io
+  UNION_EYES_URL: https://nzila-os-union-eyes.delightfulisland-0d503d3c.eastus.azurecontainerapps.io
+
+jobs:
+  zap-baseline:
+    runs-on: ubuntu-latest
+    name: OWASP ZAP Baseline Scan
+    strategy:
+      fail-fast: false
+      matrix:
+        target:
+          - name: web
+            url: https://nzila-os-web.delightfulisland-0d503d3c.eastus.azurecontainerapps.io
+          - name: console
+            url: https://nzila-os-console.delightfulisland-0d503d3c.eastus.azurecontainerapps.io
+          - name: union-eyes
+            url: https://nzila-os-union-eyes.delightfulisland-0d503d3c.eastus.azurecontainerapps.io
+
+    steps:
+      - uses: actions/checkout@v4
+
+      - name: ZAP Baseline Scan — ${{ matrix.target.name }}
+        uses: zaproxy/action-baseline@7cea08522cd386f6c7671dd71b8d5cebe5e7a009 # v0.14.0
+        with:
+          target: ${{ matrix.target.url }}
+          rules_file_name: '.zap/rules.tsv'
+          cmd_options: '-a -j'
+          allow_issue_writing: false
+
+      - name: Upload ZAP report
+        if: always()
+        uses: actions/upload-artifact@v4
+        with:
+          name: zap-report-${{ matrix.target.name }}-${{ github.run_id }}
+          path: report_html.html
+          retention-days: 90
+
+  zap-api-scan:
+    runs-on: ubuntu-latest
+    name: OWASP ZAP API Scan
+    steps:
+      - uses: actions/checkout@v4
+
+      - name: ZAP API Scan — orchestrator-api
+        uses: zaproxy/action-api-scan@8a8b3b4db4fe0e1c102e0ccfa49c5e7a2cc1dce0 # v0.9.0
+        with:
+          target: https://nzila-os-web.delightfulisland-0d503d3c.eastus.azurecontainerapps.io/api/health
+          format: openapi
+          cmd_options: '-a -j'
+          allow_issue_writing: false
+        continue-on-error: true
+
+      - name: Upload API scan report
+        if: always()
+        uses: actions/upload-artifact@v4
+        with:
+          name: zap-api-report-${{ github.run_id }}
+          path: report_html.html
+          retention-days: 90
+
+  # ── Evidence collection ──────────────────────────────────────────────────
+  collect-evidence:
+    runs-on: ubuntu-latest
+    needs: [zap-baseline, zap-api-scan]
+    if: always()
+    name: Collect DAST Evidence
+    steps:
+      - name: Create DAST evidence summary
+        run: |
+          mkdir -p artifacts/dast
+          echo '{
+            "type": "dast",
+            "tool": "OWASP ZAP",
+            "runId": "${{ github.run_id }}",
+            "timestamp": "'$(date -u +%Y-%m-%dT%H:%M:%SZ)'",
+            "sha": "${{ github.sha }}",
+            "targets": ["web", "console", "union-eyes"],
+            "status": "${{ needs.zap-baseline.result }}"
+          }' > artifacts/dast/dast-evidence.json
+
+      - name: Upload DAST evidence
+        uses: actions/upload-artifact@v4
+        with:
+          name: dast-evidence-${{ github.run_id }}
+          path: artifacts/dast/
+          retention-days: 365
