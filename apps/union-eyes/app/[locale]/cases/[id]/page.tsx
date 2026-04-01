@@ -38,7 +38,6 @@ import {
   CheckCircle,
   Brain,
   DollarSign,
-  UserCheck,
   Edit,
 } from 'lucide-react';
 

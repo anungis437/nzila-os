@@ -4,7 +4,7 @@
  *
  * @role integration_manager
  */
-import { withApi, z } from '@/lib/api/framework';
+import { withApi } from '@/lib/api/framework';
 import { sql } from 'drizzle-orm';
 import { withRLSContext } from '@/lib/db/with-rls-context';
 

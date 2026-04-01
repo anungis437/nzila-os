@@ -8,7 +8,7 @@
 
 
 export const dynamic = 'force-dynamic';
-import { useState, useEffect } from 'react';
+import { useState, useEffect, useCallback } from 'react';
 import { useRouter } from 'next/navigation';
 import { Button } from '@/components/ui/button';
 import { Card } from '@/components/ui/card';
@@ -23,7 +23,7 @@ import {
   TableRow,
 } from '@/components/ui/table';
 import { 
-  DollarSign, TrendingUp, AlertCircle, FileText, 
+  DollarSign, TrendingUp, AlertCircle, 
   Download, Upload, RefreshCw 
 } from 'lucide-react';
 import { formatCurrency } from '@/lib/utils';
@@ -60,11 +60,7 @@ export default function DuesDashboardPage() {
   const [remittances, setRemittances] = useState<Remittance[]>([]);
   const [loading, setLoading] = useState(true);
 
-  useEffect(() => {
-    fetchDashboardData();
-  }, []);
-
-  const fetchDashboardData = async () => {
+  const fetchDashboardData = useCallback(async () => {
     try {
       const [statsData, remittancesData] = await Promise.all([
         api.dues.dashboard(),
@@ -79,7 +75,11 @@ export default function DuesDashboardPage() {
     } finally {
       setLoading(false);
     }
-  };
+  }, [t]);
+
+  useEffect(() => {
+    fetchDashboardData();
+  }, [fetchDashboardData]);
 
   const getStatusColor = (status: string) => {
     switch (status) {

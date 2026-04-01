@@ -142,7 +142,7 @@ export default function APAgingReport({ organizationId }: APAgingReportProps) {
             <div className="text-2xl font-bold">
               ${summary.total1_30.toLocaleString()}
             </div>
-            <p className="text-xs text-muted-foreground text-yellow-600">{t('period1_30Desc')}</p>
+            <p className="text-xs text-yellow-600">{t('period1_30Desc')}</p>
           </CardContent>
         </Card>
 

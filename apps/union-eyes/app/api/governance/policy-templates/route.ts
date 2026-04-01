@@ -31,7 +31,7 @@ export const GET = withApi(
 
     const where = and(eq(governancePolicies.organizationId, organizationId!), eq(governancePolicies.status, 'draft'));
 
-    const [totalResult, templates] = await Promise.all([
+    const [_totalResult, templates] = await Promise.all([
       db.select({ total: count() }).from(governancePolicies).where(where),
       db.select().from(governancePolicies).where(where).orderBy(desc(governancePolicies.createdAt)).limit(limit).offset(offset),
     ]);

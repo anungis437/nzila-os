@@ -50,7 +50,6 @@ import {
   validateHierarchyAccess,
   validateSharingLevel,
   getAccessibleOrganizations,
-  validateCongressMembership,
 } from '../hierarchy-access-control';
 
 beforeEach(() => {

@@ -12,7 +12,7 @@ import {
   sharedClauseLibrary,
   arbitrationPrecedents,
 } from '@/db/schema';
-import { sql, gte, lte, eq, desc, and, ne, type SQL } from 'drizzle-orm';
+import { sql, gte, lte, eq, desc, and, type SQL } from 'drizzle-orm';
 import { withSystemContext } from '@/lib/db/with-rls-context';
 
 export const dynamic = 'force-dynamic';

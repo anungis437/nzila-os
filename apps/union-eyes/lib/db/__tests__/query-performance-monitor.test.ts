@@ -1,4 +1,4 @@
-import { describe, it, expect, vi, beforeEach, afterEach } from 'vitest';
+import { describe, it, expect, vi, beforeEach } from 'vitest';
 
 vi.mock('@/db/db', () => ({ db: { execute: vi.fn() } }));
 vi.mock('drizzle-orm', () => ({ sql: vi.fn() }));

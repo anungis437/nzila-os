@@ -153,11 +153,27 @@ export interface IngestionResult {
 /**
  * Ingest a knowledge source: resolve text, chunk, embed, store.
  * Idempotent by source + chunking params.
+ *
+ * NZ-RISK-011 guard: rejects AI-generated sources to prevent circular
+ * knowledge corruption (LLM output → KB → retrieval → LLM → KB loop).
  */
 export async function ingestKnowledgeSource(
   proposal: AiIngestKnowledgeSourceProposal,
   actorClerkUserId: string,
 ): Promise<IngestionResult> {
+  // ── NZ-RISK-011: Circular knowledge corruption guard ──────────────────
+  // AI-generated content must never be fed back into the knowledge base.
+  // Only curated, human-authored sources (manual text, uploaded documents,
+  // verified external URLs) are acceptable.
+  const BLOCKED_ORIGINS = ['ai_generated', 'llm_output', 'chatbot_response', 'triage_output', 'clause_reasoning']
+  const sourceOrigin = (proposal as Record<string, unknown>).sourceOrigin as string | undefined
+  if (sourceOrigin && BLOCKED_ORIGINS.includes(sourceOrigin)) {
+    throw new Error(
+      `Knowledge ingestion blocked: source origin "${sourceOrigin}" is AI-generated. ` +
+      'Feeding AI outputs back into the knowledge base creates circular corruption risk (NZ-RISK-011). ' +
+      'Only human-authored content may be ingested.',
+    )
+  }
   const toolCalls: ToolCallEntry[] = []
   const { source, ingestion, retention, citations } = proposal
   const orgId = proposal.orgId

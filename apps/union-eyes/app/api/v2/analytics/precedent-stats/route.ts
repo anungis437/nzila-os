@@ -5,7 +5,7 @@
  */
 import { withApi } from '@/lib/api/framework';
 import { db } from '@/db/db';
-import { arbitrationPrecedents, organizations } from '@/db/schema';
+import { arbitrationPrecedents } from '@/db/schema';
 import { sql, eq, desc, and, ne } from 'drizzle-orm';
 import { withSystemContext } from '@/lib/db/with-rls-context';
 

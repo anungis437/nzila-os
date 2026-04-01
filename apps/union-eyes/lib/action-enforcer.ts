@@ -3,7 +3,7 @@
  *
  * PR-033: Privileged Action Matrix + Denial Tests
  *
- * See docs/CUPE_RBAC_MATRIX.md for the full matrix.
+ * See docs/pilot/cupe/CUPE_RBAC_MATRIX.md for the full matrix.
  */
 
 // ---------------------------------------------------------------------------

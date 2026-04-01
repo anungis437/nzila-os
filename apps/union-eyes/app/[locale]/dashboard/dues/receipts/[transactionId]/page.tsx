@@ -176,7 +176,7 @@ function ReceiptDetails({ receipt }: { receipt: ReceiptData }) {
           {receipt.paymentReference && (
             <div className="flex justify-between">
               <span className="text-sm text-muted-foreground">Reference</span>
-              <span className="text-sm font-medium font-mono text-xs">
+              <span className="text-xs font-medium font-mono">
                 {receipt.paymentReference}
               </span>
             </div>

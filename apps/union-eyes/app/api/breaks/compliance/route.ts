@@ -9,7 +9,7 @@
 import { withApi } from '@/lib/api/with-api';
 import { db } from '@/db/db';
 import { memberBreaks } from '@/db/schema';
-import { sql, eq, and } from 'drizzle-orm';
+import { sql, eq } from 'drizzle-orm';
 import { ApiError } from '@/lib/api/errors';
 
 export const dynamic = 'force-dynamic';

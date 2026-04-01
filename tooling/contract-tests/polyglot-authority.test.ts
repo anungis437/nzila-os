@@ -422,7 +422,7 @@ describe('STACK_POLYGLOT_004 — Embedding writes must go through ai_embeddings 
   })
 
   it('pgvector migration exists with HNSW index', () => {
-    const migrationFile = join(ROOT, 'packages', 'db', 'migrations', 'ai-control-plane-pgvector.sql')
+    const migrationFile = join(ROOT, 'migrations', 'platform', 'ai-control-plane-pgvector.sql')
     expect(
       existsSync(migrationFile),
       'pgvector migration (ai-control-plane-pgvector.sql) must exist',

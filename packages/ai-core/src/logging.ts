@@ -197,3 +197,59 @@ async function appendAiAuditEvent(input: {
 }
 
 export { appendAiAuditEvent }
+
+// ── Structured metric emission ──────────────────────────────────────────────
+
+/**
+ * Emit a structured AI metric to stdout in a format compatible with
+ * Azure Monitor / Application Insights custom metrics.
+ *
+ * Each metric line is a JSON object on a single line tagged with the
+ * "nzila.ai.metric" prefix so that Azure Monitor log-based alerts or
+ * Log Analytics workspace queries can filter and aggregate them.
+ *
+ * NZ-RISK-020 — AI gateway telemetry instrumentation.
+ */
+export interface AiMetricPayload {
+  /** Which app originated this call (e.g. "union-eyes", "console"). */
+  appKey: string
+  /** The AI feature being measured (e.g. "grievance_triage"). */
+  feature: string
+  /** Providing model (e.g. "openai", "azure_openai", "anthropic"). */
+  provider: string
+  /** End-to-end latency in milliseconds. */
+  latencyMs: number
+  /** Input token count (null if embedding). */
+  tokensIn: number | null
+  /** Output token count (null if embedding). */
+  tokensOut: number | null
+  /** Estimated USD cost for this call. */
+  costUsd: number | null
+  /**
+   * Estimated CO₂ in grams for this call (NZ-RISK-027).
+   * Computed from token count × per-model carbon intensity constant.
+   * Stored in the metric stream; DB column pending migration.
+   */
+  co2EstimateGrams?: number
+  /** Whether the model refused the request. */
+  refused: boolean
+  /** Whether the call resulted in an error. */
+  errored: boolean
+  /** Org identifier (opaque — NOT a PII-bearing value). */
+  orgId: string
+  /** Optional correlation ID for distributed tracing. */
+  correlationId?: string
+}
+
+export function emitAiMetric(payload: AiMetricPayload): void {
+  // The structured log line is intentionally synchronous and non-blocking.
+  // Azure Monitor / Application Insights ingests stdout in containerized workloads.
+  const metric = {
+    _type: 'nzila.ai.metric',
+    timestamp: new Date().toISOString(),
+    ...payload,
+  }
+  // Write to stdout, not stderr, so it is captured by log-forwarding agents.
+  process.stdout.write(JSON.stringify(metric) + '\n')
+}
+

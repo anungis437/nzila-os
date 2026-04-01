@@ -284,7 +284,7 @@ export default async function CLCAffiliatesPage({
               />
             </div>
             <Select defaultValue="all">
-              <SelectTrigger className="w-[200px]">
+              <SelectTrigger className="w-50">
                 <SelectValue placeholder={t('filter.type', { defaultValue: 'Organization Type' })} />
               </SelectTrigger>
               <SelectContent>
@@ -296,7 +296,7 @@ export default async function CLCAffiliatesPage({
               </SelectContent>
             </Select>
             <Select defaultValue="all">
-              <SelectTrigger className="w-[200px]">
+              <SelectTrigger className="w-50">
                 <SelectValue placeholder={t('filter.status', { defaultValue: 'Status' })} />
               </SelectTrigger>
               <SelectContent>

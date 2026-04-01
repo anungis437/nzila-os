@@ -377,9 +377,9 @@ gate('CODEOWNERS: Governance files have ownership', () => {
 // ── 13. Hash Chain Immutability Triggers ────────────────────────────────────
 
 gate('HASH-CHAIN-TRIGGERS: Immutability triggers migration exists', () => {
-  const migrationDir = join(ROOT, 'packages/db/migrations')
+  const migrationDir = join(ROOT, 'migrations/platform')
   if (!existsSync(migrationDir)) {
-    return { passed: false, details: 'packages/db/migrations/ not found' }
+    return { passed: false, details: 'migrations/platform/ not found' }
   }
 
   const files = readdirSync(migrationDir)

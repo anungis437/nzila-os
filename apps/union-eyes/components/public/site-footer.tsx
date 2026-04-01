@@ -12,6 +12,7 @@
  */
 'use client';
 
+import Image from 'next/image';
 import Link from 'next/link';
 import { ArrowRight, Linkedin, Twitter, Github, Mail } from 'lucide-react';
 
@@ -89,9 +90,11 @@ export default function SiteFooter() {
           {/* Brand Column (spans 2) */}
           <div className="lg:col-span-2 space-y-6">
             <Link href="/" className="flex items-center gap-3 group">
-              <img
+              <Image
                 src="/images/brand/icon.png"
                 alt="Union Eyes"
+                width={40}
+                height={40}
                 className="w-10 h-10 rounded-lg shadow-lg shadow-electric/20 group-hover:shadow-electric/40 transition-shadow"
               />
               <span className="text-2xl font-bold text-white">Union Eyes</span>

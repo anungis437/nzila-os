@@ -132,7 +132,7 @@ const timer = setTimeout(() => {
   // Get the appropriate number of credits based on plan
   const isFree = profile.membership === "free";
   const creditCount = isFree ? (profile.usageCredits ?? 5) : (profile.usageCredits ?? 1000);
-  const planType = isFree ? "Free" : "Pro";
+  const _planType = isFree ? "Free" : "Pro";
   const renewalPeriod = "4 weeks";
   
   // Benefits list - adjust based on plan type
@@ -170,7 +170,7 @@ const timer = setTimeout(() => {
   return (
     <Dialog open={isOpen} onOpenChange={setIsOpen}>
       {isOpen && <div className="fixed inset-0 bg-white/80 backdrop-blur-sm z-40" />}
-      <DialogContent className="fixed left-[50%] top-[50%] z-50 w-[400px] translate-x-[-50%] translate-y-[-50%] border-none p-0 shadow-lg rounded-xl bg-transparent [&>button]:hidden">
+      <DialogContent className="fixed left-[50%] top-[50%] z-50 w-100 translate-x-[-50%] translate-y-[-50%] border-none p-0 shadow-lg rounded-xl bg-transparent [&>button]:hidden">
         <motion.div
           initial={{ opacity: 0, scale: 0.95 }}
           animate={{ opacity: 1, scale: 1 }}

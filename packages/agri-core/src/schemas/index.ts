@@ -243,10 +243,6 @@ export const recordSupplyChainEventSchema = z.object({
 })
 export type RecordSupplyChainEventInput = z.infer<typeof recordSupplyChainEventSchema>
 
-const supplyChainStatusValues = [
-  SupplyChainStatus.ACTIVE, SupplyChainStatus.COMPLETED, SupplyChainStatus.CANCELLED,
-] as const
-
 export const createSupplyChainSchema = z.object({
   batchId: uuidSchema,
   cropType: z.string().min(1).max(100),

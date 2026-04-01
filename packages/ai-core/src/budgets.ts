@@ -9,6 +9,51 @@ import { aiUsageBudgets } from '@nzila/db/schema'
 import { eq, and, sql } from 'drizzle-orm'
 import { AiControlPlaneError } from './types'
 
+// ── CO₂ estimation (NZ-RISK-027) ────────────────────────────────────────────
+
+/**
+ * Carbon intensity constants (grams CO₂ per 1 000 tokens).
+ *
+ * Values are conservative approximations derived from published model-card
+ * estimates and third-party carbon-footprint analyses:
+ *  - GPT-4o:         ~0.002 kg CO₂ / 1 000 tokens  → 2 g/1 000 tokens
+ *  - GPT-3.5-turbo:  ~0.001 kg CO₂ / 1 000 tokens  → 1 g/1 000 tokens
+ *  - claude-sonnet:  ~0.0015 kg CO₂ / 1 000 tokens → 1.5 g/1 000 tokens
+ *  - Embeddings:     ~0.0002 kg CO₂ / 1 000 tokens → 0.2 g/1 000 tokens
+ *
+ * Sources: Lottick et al. (2019), Patterson et al. (2021), Anthropic model card.
+ * NZ-RISK-027: co2EstimateGrams column added to ai_usage_budgets schema;
+ * recordSpend() now accumulates per-request CO₂ alongside monetary spend.
+ */
+const CO2_GRAMS_PER_1K_TOKENS: Record<string, number> = {
+  'gpt-4o':             2.0,
+  'gpt-4':              3.5,
+  'gpt-3.5-turbo':      1.0,
+  'claude-sonnet-4-6':  1.5,
+  'claude-3-5-sonnet':  1.5,
+  'claude-3-opus':      3.0,
+  'text-embedding-3-small': 0.2,
+  'text-embedding-ada-002': 0.2,
+  default:              2.0, // conservative fallback
+}
+
+/**
+ * Estimate CO₂ emissions for an AI request in grams.
+ *
+ * @param totalTokens  Combined input + output token count.
+ * @param model        Model name as returned by the provider.
+ * @returns Estimated CO₂ in grams (floating-point, rounded to 4 d.p.).
+ */
+export function estimateCo2Grams(totalTokens: number, model: string): number {
+  const normalisedModel = model.toLowerCase().split('/').pop() ?? ''
+  const rate =
+    CO2_GRAMS_PER_1K_TOKENS[normalisedModel] ??
+    Object.entries(CO2_GRAMS_PER_1K_TOKENS).find(([k]) => normalisedModel.includes(k))?.[1] ??
+    CO2_GRAMS_PER_1K_TOKENS['default']
+  return Number(((totalTokens / 1000) * rate).toFixed(4))
+}
+
+
 // ── Budget check ────────────────────────────────────────────────────────────
 
 /**
@@ -66,6 +111,7 @@ export async function recordSpend(opts: {
   appKey: string
   profileKey: string
   costUsd: number
+  co2Grams?: number
 }): Promise<void> {
   if (opts.costUsd <= 0) return
 
@@ -101,6 +147,10 @@ export async function recordSpend(opts: {
     .update(aiUsageBudgets)
     .set({
       spentUsd: String(newSpent),
+      // NZ-RISK-027: Accumulate CO₂ estimate alongside monetary spend
+      co2EstimateGrams: String(
+        Number(existing.co2EstimateGrams ?? '0') + (opts.co2Grams ?? 0),
+      ),
       status: newStatus,
       updatedAt: new Date(),
     })

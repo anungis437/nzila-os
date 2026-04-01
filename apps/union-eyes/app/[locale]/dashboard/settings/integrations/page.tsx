@@ -27,8 +27,6 @@ import {
   Calculator,
   MessageSquare,
   BarChart3,
-  RefreshCw,
-  AlertTriangle,
   Database,
 } from 'lucide-react';
 import { logger } from '@/lib/logger';
@@ -94,7 +92,7 @@ async function loadIntegrationConfigs(orgId: string): Promise<IntegrationConfig[
   }));
 }
 
-async function loadDomainTableStats(orgId: string): Promise<DomainStats[]> {
+async function loadDomainTableStats(_orgId: string): Promise<DomainStats[]> {
   try {
     const result = await db.execute(sql`
       SELECT

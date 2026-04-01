@@ -56,7 +56,7 @@ describe('validateRedirectUrl', () => {
   });
 
   it('blocks javascript: protocol', () => {
-    // eslint-disable-next-line no-script-url
+     
     expect(validateRedirectUrl('javascript:alert(1)')).toBeNull();
   });
 

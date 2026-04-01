@@ -423,7 +423,7 @@ describe('AuditTrailService', () => {
       const report = await AuditTrailService.generateComplianceReport(
         'org-1', new Date('2026-01-01'), new Date(),
       );
-      const sus = report.suspiciousActivities.find((s: any) => s.type === 'large_modification');
+      const sus = report.suspiciousActivities.find((s: unknown) => (s as { type: string }).type === 'large_modification');
       expect(sus).toBeDefined();
     });
 
@@ -437,7 +437,7 @@ describe('AuditTrailService', () => {
       const report = await AuditTrailService.generateComplianceReport(
         'org-1', new Date('2026-01-01'), new Date(),
       );
-      const sus = report.suspiciousActivities.find((s: any) => s.type === 'large_modification');
+      const sus = report.suspiciousActivities.find((s: unknown) => (s as { type: string }).type === 'large_modification');
       expect(sus).toBeUndefined();
     });
 

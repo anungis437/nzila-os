@@ -13,7 +13,6 @@ import { z } from 'zod';
 import { eq } from 'drizzle-orm';
 import { validateCUPETransition } from '@/lib/case-fsm-enforcement';
 import { withRLSContext } from '@/lib/db/with-rls-context';
-import { db } from '@/db/db';
 import { claims } from '@/db/schema/claims-schema';
 import { claimUpdates } from '@/db/schema/claims-schema';
 import { auditDataMutation } from '@/lib/audit-logger';

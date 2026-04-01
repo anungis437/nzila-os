@@ -268,7 +268,7 @@ export function GrievanceDetailConsole() {
             <ul className="space-y-3">
               {grievance.events.map((ev) => (
                 <li key={ev.id} className="flex items-start gap-3 text-sm">
-                  <CheckCircle className="mt-0.5 h-4 w-4 text-green-500 flex-shrink-0" />
+                  <CheckCircle className="mt-0.5 h-4 w-4 text-green-500 shrink-0" />
                   <div>
                     <p className="font-medium">{ev.eventType.replace(/_/g, " ")}</p>
                     {ev.notes && <p className="text-gray-500">{ev.notes}</p>}

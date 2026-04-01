@@ -68,7 +68,7 @@ export const POST = withApi({
     : params.jurisdiction?.toUpperCase();
 
   if (!code || !VALID_JURISDICTIONS.has(code)) {
-    throw new ApiError(400, `Invalid jurisdiction: "${params.jurisdiction}"`);
+    throw ApiError.badRequest(`Invalid jurisdiction: "${params.jurisdiction}"`);
   }
 
   const jurisdiction = code as CanadianJurisdiction;
@@ -101,7 +101,7 @@ export const POST = withApi({
   // ── Overtime ──────────────────────────────────────────────────────────
   const overtimeRule = OVERTIME_RULES[jurisdiction];
   if (overtimeRule && body.weeklyHours != null) {
-    const result = calculateOvertime(jurisdiction, body.dailyHours ?? 0, body.weeklyHours);
+    const result = calculateOvertime(jurisdiction, body.dailyHours ?? 0, body.weeklyHours, 1);
     if (result.overtimeHours > 0) {
       findings.push({
         severity: 'info',
@@ -115,12 +115,12 @@ export const POST = withApi({
   // ── Termination notice ────────────────────────────────────────────────
   if (body.tenureYears != null && body.terminationNoticeWeeks != null) {
     const required = calculateTerminationNotice(jurisdiction, body.tenureYears);
-    if (body.terminationNoticeWeeks < required.weeksRequired) {
+    if (body.terminationNoticeWeeks < required.weeks) {
       const schedule = TERMINATION_NOTICE[jurisdiction];
       findings.push({
         severity: 'violation',
         category: 'termination_notice',
-        message: `${required.weeksRequired} weeks notice required for ${body.tenureYears} years tenure; ${body.terminationNoticeWeeks} given`,
+        message: `${required.weeks} weeks notice required for ${body.tenureYears} years tenure; ${body.terminationNoticeWeeks} given`,
         legalReference: `${schedule.statute}, ${schedule.article}`,
       });
     }

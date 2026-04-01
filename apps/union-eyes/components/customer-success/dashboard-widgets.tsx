@@ -91,9 +91,11 @@ export function CustomerHealthScoresWidget({ detailed: _detailed = false, organi
 }
 
 export function OnboardingProgressWidget({ detailed: _detailed = false, organizations = [] }: WidgetProps) {
+  // eslint-disable-next-line react-hooks/purity
+  const now = Date.now();
   const onboardingCustomers = organizations.map(org => {
     const daysSinceCreation = org.createdAt 
-      ? Math.floor((Date.now() - new Date(org.createdAt).getTime()) / (1000 * 60 * 60 * 24))
+      ? Math.floor((now - new Date(org.createdAt).getTime()) / (1000 * 60 * 60 * 24))
       : 0;
     const hasMembers = org.memberCount > 0;
     const hasSectors = org.sectors.length > 0;

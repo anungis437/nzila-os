@@ -74,13 +74,15 @@ Post-pilot features deferred to maintain **2-4 week pilot timeline** for single 
 **These are NOT deferred; they are accepted constraints for v0.1:**
 
 ### Operational Constraints
-- **ClamAV availability:** If scanning fails, attachment uploads marked `scan_status=unavailable`. Control boundary documented in `docs/CUPE_MALWARE_CONTROL_BOUNDARY.md`. Network isolation + user training compensate.
+
+- **ClamAV availability:** If scanning fails, attachment uploads marked `scan_status=unavailable`. Control boundary documented in `docs/pilot/cupe/CUPE_MALWARE_CONTROL_BOUNDARY.md`. Network isolation + user training compensate.
 - **Dashboard caching:** 5-minute TTL. Users may see slightly stale metrics. Manual "Refresh" button available.
 - **User invites:** No bulk import; manual form entry only. Acceptable for ~10 pilot users.
 - **SLA thresholds:** Fixed per workflow stage (no per-case overrides). Platform admin can adjust before pilot.
 - **Attachment count limit:** Max 50 attachments per case. Unlikely to affect pilot; soft-documented limit.
 
 ### Feature Constraints
+
 - **Export scope:** Single case export only; multi-case export deferred.
 - **Taxonomy:** System-wide defaults; no per-org customization.
 - **Support scope:** Business hours Monday–Friday, 8am–6pm Eastern. Escalations 24/7 on-call.
@@ -88,6 +90,7 @@ Post-pilot features deferred to maintain **2-4 week pilot timeline** for single 
 - **Vocabulary:** CUPE defaults fixed; customization post-pilot.
 
 ### Security Trade-Offs (Intentional Design Decisions)
+
 - **Malware scanning:** ClamAV covers file-based threats; social engineering/phishing out of scope (user education).
 - **Attachment versions:** Single version per upload; version history deferred.
 - **Role-based access:** 7 pre-defined roles; custom roles post-pilot.
@@ -98,6 +101,7 @@ Post-pilot features deferred to maintain **2-4 week pilot timeline** for single 
 ## Post-Pilot Backlog (Candidate Features for Q2/Q3)
 
 ### Phase 8 — Advanced Configuration & Federation (Q2/2026)
+
 - [ ] Per-org vocabulary customization (overrides on CUPE defaults)
 - [ ] Multi-CUPE-local federation with cross-local reporting
 - [ ] Role-based workspace customization
@@ -107,6 +111,7 @@ Post-pilot features deferred to maintain **2-4 week pilot timeline** for single 
 - [ ] Retention policies + auto-archive
 
 ### Phase 9 — Analytics & Insights (Q3/2026)
+
 - [ ] Advanced analytics dashboard (composition trends, disparity analysis)
 - [ ] Anomaly detection + proactive SLA alerts
 - [ ] Steward performance analytics + coaching recommendations
@@ -114,6 +119,7 @@ Post-pilot features deferred to maintain **2-4 week pilot timeline** for single 
 - [ ] Integration with CUPE education platform
 
 ### Phase 10+ — Platform Extension (Q4/2026+)
+
 - [ ] Mobile app + offline-capable workbench
 - [ ] SMS/voice notifications for assignments
 - [ ] Chatbot case assistant (FAQ, status queries)

@@ -129,7 +129,7 @@ describe('budget-service', () => {
       const envelope = { id: 'env-1', orgId: 'org-1', amountLimit: 1000, amountUsed: 0 };
       mocks.mockReturning.mockResolvedValueOnce([envelope]);
 
-      const result = await createBudgetEnvelope({ orgId: 'org-1', amountLimit: 1000 } as any);
+      const result = await createBudgetEnvelope({ orgId: 'org-1', amountLimit: 1000 } as unknown as Parameters<typeof createBudgetEnvelope>[0]);
 
       expect(result).toEqual(envelope);
       expect(mocks.mockInsert).toHaveBeenCalled();
@@ -182,7 +182,7 @@ describe('budget-service', () => {
       const updated = { id: 'e-1', name: 'Updated', orgId: 'org-1' };
       mocks.mockReturning.mockResolvedValueOnce([updated]);
 
-      const result = await updateBudgetEnvelope('e-1', 'org-1', { name: 'Updated' } as any);
+      const result = await updateBudgetEnvelope('e-1', 'org-1', { name: 'Updated' } as unknown as Parameters<typeof updateBudgetEnvelope>[2]);
 
       expect(result).toEqual(updated);
       expect(mocks.mockUpdate).toHaveBeenCalled();

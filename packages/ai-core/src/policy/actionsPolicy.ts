@@ -34,8 +34,15 @@ export interface PolicyDecision {
 // ── Risk tier mapping ───────────────────────────────────────────────────────
 
 const ACTION_RISK_TIERS: Record<string, 'low' | 'medium' | 'high'> = {
-  [ACTION_TYPES.FINANCE_STRIPE_MONTHLY_REPORTS]: 'low',
-  [ACTION_TYPES.AI_INGEST_KNOWLEDGE_SOURCE]: 'low',
+  // NZ-RISK-019: Elevated from 'low' to 'medium' — auto-generated financial summaries
+  // can misstate dues, per-capita figures, or fund balances. Medium tier requires
+  // explicit org_admin approval before the report is executed, ensuring a human
+  // reviews the parameters before financial data is produced.
+  [ACTION_TYPES.FINANCE_STRIPE_MONTHLY_REPORTS]: 'medium',
+  // Elevated to medium: bulk knowledge ingestion affects RAG outputs for all org members.
+  // Stale, poisoned, or outdated documents (e.g. expired CBA) cause org-wide misinformation.
+  // Medium tier requires explicit human approval before execution.
+  [ACTION_TYPES.AI_INGEST_KNOWLEDGE_SOURCE]: 'medium',
 }
 
 // ── Policy check ────────────────────────────────────────────────────────────

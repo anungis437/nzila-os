@@ -76,7 +76,7 @@ export const POST = withApiAuth(async (req: NextRequest) => {
       { geofence,
         message: "Geofence created successfully" }
     );
-  } catch (error) {
+  } catch (_error) {
     return NextResponse.json(
       { error: "Failed to create geofence" },
       { status: 500 }
@@ -118,7 +118,7 @@ export const GET = withApiAuth(async (req: NextRequest) => {
       distance: result.distance,
       message: result.inside ? "User is inside geofence" : "User is outside geofence",
     });
-  } catch (error) {
+  } catch (_error) {
     return NextResponse.json(
       { error: "Failed to check geofence" },
       { status: 500 }

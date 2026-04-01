@@ -413,7 +413,7 @@ describe('workflow-engine', () => {
         };
         return fn(mockTx);
       });
-      const result = await updateClaimStatus('CLM-001', 'under_review' as any, 'user1', 'notes');
+      const result = await updateClaimStatus('CLM-001', 'under_review' as unknown as Parameters<typeof updateClaimStatus>[1], 'user1', 'notes');
       expect(result.success).toBe(true);
       expect(mocks.mockWithRLS).toHaveBeenCalled();
     });

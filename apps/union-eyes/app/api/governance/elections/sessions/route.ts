@@ -38,7 +38,7 @@ export const GET = withApi(
     const limit = Math.min(100, Math.max(1, parseInt(url.searchParams.get('limit') || '20')));
     const offset = (page - 1) * limit;
 
-    const [totalResult, sessions] = await Promise.all([
+    const [_totalResult, sessions] = await Promise.all([
       db.select({ total: count() }).from(votingSessions),
       db.select().from(votingSessions).orderBy(desc(votingSessions.createdAt)).limit(limit).offset(offset),
     ]);

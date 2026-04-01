@@ -15,3 +15,13 @@ export type {
   MlAnomalySummary,
   TopTxnAnomaly,
 } from './evidence/collector'
+
+// Training data consent manifest (NZ-RISK-018)
+export {
+  TRAINING_DATA_CONSENT_MANIFEST,
+  getPendingPiaDatasets,
+  assertTrainingConsent,
+  type TrainingDatasetConsentRecord,
+  type ConsentBasis,
+  type DataSensitivity,
+} from './evidence/training-consent'

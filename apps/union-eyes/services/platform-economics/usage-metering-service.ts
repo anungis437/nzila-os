@@ -14,10 +14,9 @@ import {
   usageEvents,
   usageAggregates,
   type NewUsageMeter,
-  type NewUsageEvent,
   type UsageAggregate,
 } from '@/db/schema';
-import { eq, and, between, sql, desc, gte, lte } from 'drizzle-orm';
+import { eq, and, sql, gte, lte } from 'drizzle-orm';
 import { auditLog, AuditEventType, AuditSeverity } from '@/lib/audit-logger';
 import { v4 as uuidv4 } from 'uuid';
 import { appendLedgerEntry } from './ledger-service';

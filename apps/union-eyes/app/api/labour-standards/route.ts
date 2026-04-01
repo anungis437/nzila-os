@@ -51,10 +51,10 @@ export const GET = withApi({
     weeklyOvertimeThreshold: OVERTIME_RULES[code]?.weeklyThresholdHours ?? null,
     terminationNoticeTiers: TERMINATION_NOTICE[code]?.tiers.length ?? 0,
     statutoryHolidayCount: STATUTORY_HOLIDAYS[code]?.length ?? 0,
-    wcbBoard: WCB_BOARDS[code]?.abbreviation ?? null,
-    lrbBoard: LRB_BOARDS[code]?.abbreviation ?? null,
+    wcbBoard: WCB_BOARDS[code]?.acronym ?? null,
+    lrbBoard: LRB_BOARDS[code]?.acronym ?? null,
     hasAntiScab: ANTI_SCAB_PROVISIONS[code]?.hasAntiScab ?? false,
-    hasPayEquityLegislation: PAY_EQUITY_REGIMES[code]?.hasLegislation ?? false,
+    hasPayEquityLegislation: PAY_EQUITY_REGIMES[code]?.hasProactivePayEquity ?? false,
   }));
 
   return jurisdictions;

@@ -16,7 +16,7 @@ describe('case-workflow-fsm', () => {
     actorRole: 'member',
   };
 
-  const adminCtx: TransitionContext = {
+  const _adminCtx: TransitionContext = {
     actorRole: 'admin',
   };
 

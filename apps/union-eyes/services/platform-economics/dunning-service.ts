@@ -19,7 +19,7 @@ import {
   subscriptionEventsLog,
   orgSubscriptions,
 } from '@/db/schema';
-import { eq, and, lte, asc, sql, inArray } from 'drizzle-orm';
+import { eq, and, lte, asc, inArray } from 'drizzle-orm';
 import { auditLog, AuditEventType, AuditSeverity } from '@/lib/audit-logger';
 
 // ============================================================================

@@ -46,7 +46,7 @@ export const GET = withApi(
     const limit = Math.min(100, Math.max(1, parseInt(url.searchParams.get('limit') || '20')));
     const offset = (page - 1) * limit;
 
-    const [totalResult, packets] = await Promise.all([
+    const [_totalResult, packets] = await Promise.all([
       db.select({ total: count() }).from(boardPackets),
       db.select().from(boardPackets).orderBy(desc(boardPackets.createdAt)).limit(limit).offset(offset),
     ]);

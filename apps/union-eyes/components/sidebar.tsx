@@ -10,6 +10,8 @@
  */
 "use client";
 
+import Image from "next/image";
+
 import { 
   Home, 
   Settings, 
@@ -448,15 +450,19 @@ export default function Sidebar({ profile: _profile, userEmail, whopMonthlyPlanI
             whileHover={{ scale: 1.02 }}
             transition={{ duration: 0.2 }}
           >
-            <img
+            <Image
               src="/images/brand/icon.png"
               alt="Union Eyes"
+              width={32}
+              height={32}
               className="w-8 h-8 rounded-lg object-contain"
             />
             <div className="hidden md:block">
-              <img
+              <Image
                 src="/images/brand/logo.png"
                 alt="Union Eyes"
+                width={96}
+                height={24}
                 className="h-6 object-contain"
               />
             </div>

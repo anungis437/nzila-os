@@ -175,7 +175,7 @@ try {
         requiresT106: t106Check.requiresT106,
         t106Notes: t106Check.reason,
       } as BillingValidationResponse);
-    } catch (error) {
+    } catch (_error) {
       logApiAuditEvent({
         timestamp: new Date().toISOString(), userId,
         endpoint: '/api/billing/validate',

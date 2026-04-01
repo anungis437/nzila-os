@@ -155,7 +155,7 @@ return standardErrorResponse(
           end_date: endDate,
         },
       });
-    } catch (error) {
+    } catch (_error) {
 return NextResponse.json(
         {
           error: 'Internal server error',
@@ -309,7 +309,7 @@ return standardErrorResponse(
           end_date: endDateStr,
         },
       });
-    } catch (error) {
+    } catch (_error) {
 return NextResponse.json(
         {
           error: 'Failed to fetch post analytics',
@@ -504,7 +504,7 @@ export const PUT = withRoleAuth('member', async (request: NextRequest, context: 
         timeline: Object.values(timeline),
         top_posts: [...(posts || [])].sort((a, b) => (b.engagement || 0) - (a.engagement || 0)).slice(0, 5),
       });
-    } catch (error) {
+    } catch (_error) {
 return NextResponse.json(
         {
           error: 'Failed to fetch campaign analytics',
@@ -727,7 +727,7 @@ export const DELETE = withRoleAuth('member', async (request: NextRequest, contex
         },
         exported_at: new Date().toISOString(),
       });
-    } catch (error) {
+    } catch (_error) {
 return NextResponse.json(
         {
           error: 'Failed to export analytics',

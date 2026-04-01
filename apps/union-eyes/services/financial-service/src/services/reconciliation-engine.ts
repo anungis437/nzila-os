@@ -8,7 +8,7 @@
  */
 import { db } from '../db';
 import * as schema from '../db/schema';
-import { eq, and, gte, lte, isNull, sql } from 'drizzle-orm';
+import { eq, and, gte, lte, sql } from 'drizzle-orm';
 import { logger } from '@/lib/logger';
 
 export interface ReconciliationMismatch {

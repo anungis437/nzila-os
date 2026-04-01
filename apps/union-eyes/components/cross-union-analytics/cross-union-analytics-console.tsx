@@ -111,7 +111,7 @@ export default function CrossUnionAnalyticsConsole() {
               <span className="text-sm font-medium">Date Range:</span>
             </div>
             <Select value={dateRange} onValueChange={setDateRange}>
-              <SelectTrigger className="w-[180px]">
+              <SelectTrigger className="w-45">
                 <SelectValue />
               </SelectTrigger>
               <SelectContent>
@@ -128,7 +128,7 @@ export default function CrossUnionAnalyticsConsole() {
               <span className="text-sm font-medium">Sector:</span>
             </div>
             <Select value={sector} onValueChange={setSector}>
-              <SelectTrigger className="w-[180px]">
+              <SelectTrigger className="w-45">
                 <SelectValue />
               </SelectTrigger>
               <SelectContent>
@@ -153,7 +153,7 @@ export default function CrossUnionAnalyticsConsole() {
               <span className="text-sm font-medium">Org Level:</span>
             </div>
             <Select value={organizationLevel} onValueChange={setOrganizationLevel}>
-              <SelectTrigger className="w-[180px]">
+              <SelectTrigger className="w-45">
                 <SelectValue />
               </SelectTrigger>
               <SelectContent>

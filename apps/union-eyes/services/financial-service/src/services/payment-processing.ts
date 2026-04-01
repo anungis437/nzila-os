@@ -566,7 +566,7 @@ export async function processStripeWebhook(
     // Record event before processing (pre-insert pattern)
     const eventOrgId = event.data?.object?.metadata?.organizationId
       || event.data?.object?.metadata?.tenantId;
-    // eslint-disable-next-line @typescript-eslint/no-explicit-any
+     
     await db.insert(schema.stripeWebhookEvents).values({
       stripeEventId: event.id,
       eventType: event.type,
@@ -575,7 +575,7 @@ export async function processStripeWebhook(
       stripeCustomerId: event.data?.object?.customer || null,
       eventData: event.data?.object || {},
       processed: false,
-    } as any);
+    } as unknown as typeof schema.stripeWebhookEvents.$inferInsert);
   } catch (dedupErr) {
     // Unique constraint violation = already inserted by concurrent request
     const msg = dedupErr instanceof Error ? dedupErr.message : String(dedupErr);

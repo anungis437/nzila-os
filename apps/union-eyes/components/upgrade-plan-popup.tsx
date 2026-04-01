@@ -71,9 +71,9 @@ export default function UpgradePlanPopup({
   }, [isOpen]);
   
   // Pricing details
-  const monthlyPrice = "$30";
+  const _monthlyPrice = "$30";
   const yearlyPrice = "$249";
-  const yearlyPriceMonthly = "$20";
+  const _yearlyPriceMonthly = "$20";
   
   useEffect(() => {
     // Only auto-show if using internal state (not externally controlled)

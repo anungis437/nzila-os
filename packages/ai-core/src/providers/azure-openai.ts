@@ -14,6 +14,7 @@
  * Supports chat completions and embeddings.
  */
 import { getAiEnv } from '@nzila/os-core/ai-env'
+import { withRetry } from './retry'
 import type {
   AiProviderClient,
   AiStreamChunk,
@@ -43,37 +44,39 @@ export function createAzureOpenAIProvider(): AiProviderClient {
 
   return {
     async generate(params: ProviderGenerateParams): Promise<ProviderGenerateResult> {
-      const deployment = params.model || env.AZURE_OPENAI_DEPLOYMENT_TEXT!
-      const body = {
-        messages: params.messages,
-        temperature: params.temperature,
-        max_tokens: params.maxTokens,
-        top_p: params.topP,
-        ...(params.responseFormat === 'json'
-          ? { response_format: { type: 'json_object' } }
-          : {}),
-      }
+      return withRetry(async () => {
+        const deployment = params.model || env.AZURE_OPENAI_DEPLOYMENT_TEXT!
+        const body = {
+          messages: params.messages,
+          temperature: params.temperature,
+          max_tokens: params.maxTokens,
+          top_p: params.topP,
+          ...(params.responseFormat === 'json'
+            ? { response_format: { type: 'json_object' } }
+            : {}),
+        }
 
-      const res = await fetch(chatUrl(deployment), {
-        method: 'POST',
-        headers,
-        body: JSON.stringify(body),
-      })
+        const res = await fetch(chatUrl(deployment), {
+          method: 'POST',
+          headers,
+          body: JSON.stringify(body),
+        })
 
-      if (!res.ok) {
-        const errorText = await res.text()
-        throw new Error(`Azure OpenAI error ${res.status}: ${errorText}`)
-      }
+        if (!res.ok) {
+          const errorText = await res.text()
+          throw new Error(`Azure OpenAI error ${res.status}: ${errorText}`)
+        }
 
-      const json = (await res.json()) as AzureChatResponse
-      const choice = json.choices?.[0]
+        const json = (await res.json()) as AzureChatResponse
+        const choice = json.choices?.[0]
 
-      return {
-        content: choice?.message?.content ?? '',
-        tokensIn: json.usage?.prompt_tokens ?? 0,
-        tokensOut: json.usage?.completion_tokens ?? 0,
-        model: json.model ?? deployment,
-      }
+        return {
+          content: choice?.message?.content ?? '',
+          tokensIn: json.usage?.prompt_tokens ?? 0,
+          tokensOut: json.usage?.completion_tokens ?? 0,
+          model: json.model ?? deployment,
+        }
+      }, { providerName: 'azure_openai' })
     },
 
     async *generateStream(
@@ -138,27 +141,29 @@ export function createAzureOpenAIProvider(): AiProviderClient {
     },
 
     async embed(params: ProviderEmbedParams): Promise<ProviderEmbedResult> {
-      const deployment = params.model || env.AZURE_OPENAI_DEPLOYMENT_EMBEDDINGS!
-      const body = { input: params.input }
+      return withRetry(async () => {
+        const deployment = params.model || env.AZURE_OPENAI_DEPLOYMENT_EMBEDDINGS!
+        const body = { input: params.input }
 
-      const res = await fetch(embeddingsUrl(deployment), {
-        method: 'POST',
-        headers,
-        body: JSON.stringify(body),
-      })
+        const res = await fetch(embeddingsUrl(deployment), {
+          method: 'POST',
+          headers,
+          body: JSON.stringify(body),
+        })
 
-      if (!res.ok) {
-        const errorText = await res.text()
-        throw new Error(`Azure OpenAI embeddings error ${res.status}: ${errorText}`)
-      }
+        if (!res.ok) {
+          const errorText = await res.text()
+          throw new Error(`Azure OpenAI embeddings error ${res.status}: ${errorText}`)
+        }
 
-      const json = (await res.json()) as AzureEmbeddingResponse
+        const json = (await res.json()) as AzureEmbeddingResponse
 
-      return {
-        embeddings: json.data.map((d) => d.embedding),
-        tokensUsed: json.usage?.total_tokens ?? 0,
-        model: json.model ?? deployment,
-      }
+        return {
+          embeddings: json.data.map((d) => d.embedding),
+          tokensUsed: json.usage?.total_tokens ?? 0,
+          model: json.model ?? deployment,
+        }
+      }, { providerName: 'azure_openai' })
     },
   }
 }

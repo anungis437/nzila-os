@@ -8,7 +8,7 @@
 
 
 export const dynamic = 'force-dynamic';
-import { useState, useEffect } from 'react';
+import { useState, useEffect, useCallback } from 'react';
 import { Button } from '@/components/ui/button';
 import { Card } from '@/components/ui/card';
 import { Badge } from '@/components/ui/badge';
@@ -46,11 +46,7 @@ export default function ReconciliationPage() {
   const [_selectedItem, _setSelectedItem] = useState<ReconciliationItem | null>(null);
   const t = useTranslations('dues.reconcile');
 
-  useEffect(() => {
-    fetchReconciliationQueue();
-  }, []);
-
-  const fetchReconciliationQueue = async () => {
+  const fetchReconciliationQueue = useCallback(async () => {
     try {
       const data = await api.dues.reconciliation.queue() as unknown as { items: ReconciliationItem[] };
       setItems(data.items || []);
@@ -60,7 +56,11 @@ export default function ReconciliationPage() {
     } finally {
       setLoading(false);
     }
-  };
+  }, [t]);
+
+  useEffect(() => {
+    fetchReconciliationQueue();
+  }, [fetchReconciliationQueue]);
 
   const handleMatch = async (itemId: string, memberId: string) => {
     try {

@@ -123,7 +123,7 @@ export async function calculateWeeklyStipends(
     });
 
     return eligibilityResults;
-  } catch (error) {
+  } catch (_error) {
     logger.error('Stipend calculation error', { error, organizationId: request.organizationId, strikeFundId: request.strikeFundId });
     throw new Error(`Failed to calculate stipends: ${error.message}`);
   }
@@ -157,7 +157,7 @@ export async function createDisbursement(
       success: true,
       disbursementId: disbursement.id,
     };
-  } catch (error) {
+  } catch (_error) {
     return {
       success: false,
       error: 'Failed to create disbursement',
@@ -205,7 +205,7 @@ export async function approveDisbursement(
       .where(eq(schema.stipendDisbursements.id, approval.disbursementId));
 
     return { success: true };
-  } catch (error) {
+  } catch (_error) {
     return {
       success: false,
       error: 'Failed to approve disbursement',
@@ -253,7 +253,7 @@ export async function markDisbursementPaid(
       .where(eq(schema.stipendDisbursements.id, disbursementId));
 
     return { success: true };
-  } catch (error) {
+  } catch (_error) {
     return {
       success: false,
       error: 'Failed to mark disbursement as paid',
@@ -290,7 +290,7 @@ export async function getMemberDisbursements(
       ...d,
       amount: parseFloat(d.totalAmount),
     }));
-  } catch (error) {
+  } catch (_error) {
     logger.error('Get disbursements error', { error, organizationId, memberId, strikeFundId });
     return [];
   }
@@ -321,7 +321,7 @@ export async function getPendingDisbursements(
       ...d,
       amount: parseFloat(d.totalAmount),
     }));
-  } catch (error) {
+  } catch (_error) {
     logger.error('Get pending disbursements error', { error, organizationId, strikeFundId });
     return [];
   }
@@ -371,7 +371,7 @@ export async function getStrikeFundDisbursementSummary(
     });
 
     return summary;
-  } catch (error) {
+  } catch (_error) {
     logger.error('Get disbursement summary error', { error, organizationId, strikeFundId });
     return {
       totalPending: 0,
@@ -429,7 +429,7 @@ export async function batchCreateDisbursements(
       disbursementIds,
       errors,
     };
-  } catch (error) {
+  } catch (_error) {
     return {
       success: false,
       created: 0,

@@ -163,7 +163,7 @@ describe('ROLE_PERMISSIONS mapping', () => {
 
   it('all permission arrays contain only valid Permission enum values', () => {
     const validPermissions = new Set(Object.values(Permission));
-    for (const [role, perms] of Object.entries(ROLE_PERMISSIONS)) {
+    for (const [_role, perms] of Object.entries(ROLE_PERMISSIONS)) {
       for (const perm of perms) {
         expect(validPermissions.has(perm)).toBe(true);
       }

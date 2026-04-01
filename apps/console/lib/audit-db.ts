@@ -23,7 +23,7 @@
 import { platformDb } from '@nzila/db/platform'
 import { auditEvents } from '@nzila/db/schema'
 import { computeEntryHash } from '@nzila/os-core/hash'
-import { eq, desc, and, gte, lte, asc, SQL } from 'drizzle-orm'
+import { eq, desc, and, gte, lte, SQL } from 'drizzle-orm'
 import { createLogger } from '@nzila/os-core'
 
 const logger = createLogger('audit-db')

@@ -20,7 +20,6 @@ import Link from 'next/link';
 import {
   Heart,
   Users,
-  TrendingDown,
   Zap,
   ThumbsUp,
   MessageSquare,

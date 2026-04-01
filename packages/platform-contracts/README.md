@@ -23,5 +23,5 @@ import { isValidHealthResponse } from '@nzila/platform-contracts/schemas'
 ## Related
 
 - `@nzila/platform-ai-contract` — AI output contracts (separate package, narrower scope)
-- `docs/PLATFORM_SURFACE_MODEL.md` — Operating shell model
-- `docs/APP_DOMAIN_CORE_STANDARD.md` — Internal app architecture standard
+- `docs/platform/PLATFORM_SURFACE_MODEL.md` — Operating shell model
+- `docs/architecture/APP_DOMAIN_CORE_STANDARD.md` — Internal app architecture standard

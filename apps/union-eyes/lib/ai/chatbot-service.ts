@@ -19,6 +19,7 @@ import { eq, and, desc, sql } from "drizzle-orm";
 import { embeddingCache } from "@/lib/services/ai/embedding-cache";
 import { logger } from "@/lib/logger";
 import { getAiClient, UE_APP_KEY, UE_PROFILES, UE_SYSTEM_ORG_ID } from '@/lib/ai/ai-client';
+import { checkRateLimit } from '@/lib/rate-limiter';
 import type { ChatMessage as _AiChatMessage } from '@nzila/ai-sdk/types';
 
 /**
@@ -294,6 +295,13 @@ export class RAGService {
 }
 
 /**
+ * NZ-RISK-026: Rate limit and response cap for chatbot
+ * Prevents CBA knowledge extraction via rapid, bulk querying.
+ */
+const CHATBOT_RATE_LIMIT = { limit: 30, window: 60, identifier: 'chatbot' } as const;
+const MAX_RESPONSE_LENGTH = 4_000; // characters — prevents full CBA clause dumps
+
+/**
  * Chatbot Service
  */
 export class ChatbotService {
@@ -310,6 +318,14 @@ export class ChatbotService {
     useRAG?: boolean;
   }): Promise<ChatMessage> {
     const startTime = Date.now();
+
+    // NZ-RISK-026: Per-user rate limiting to prevent bulk extraction
+    const rl = await checkRateLimit(data.userId, CHATBOT_RATE_LIMIT);
+    if (!rl.allowed) {
+      throw new Error(
+        `Rate limit exceeded — try again in ${rl.resetIn}s (${rl.remaining}/${rl.limit} remaining)`,
+      );
+    }
     
     // Get session
     const session = await this.sessionManager.getSession(data.sessionId);
@@ -401,6 +417,13 @@ export class ChatbotService {
       };
     }
     
+    // NZ-RISK-026: Cap response length to prevent full CBA clause extraction
+    if (response.content.length > MAX_RESPONSE_LENGTH) {
+      response.content =
+        response.content.slice(0, MAX_RESPONSE_LENGTH) +
+        '\n\n[Response truncated — ask a more specific question for detailed information.]';
+    }
+
     const responseTime = Date.now() - startTime;
     
     // Save assistant message

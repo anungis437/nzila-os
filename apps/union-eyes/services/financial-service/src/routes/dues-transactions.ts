@@ -135,7 +135,7 @@ router.post('/calculate', async (req: Request, res: Response) => {
         },
       },
     });
-  } catch (error) {
+  } catch (_error) {
     if (error instanceof z.ZodError) {
       return res.status(400).json({
         success: false,
@@ -318,7 +318,7 @@ router.post('/batch', async (req: Request, res: Response) => {
         errors: batchResult.results.filter((r: any) => r.errors && r.errors.length > 0),
       },
     });
-  } catch (error) {
+  } catch (_error) {
     if (error instanceof z.ZodError) {
       return res.status(400).json({
         success: false,
@@ -373,7 +373,7 @@ router.get('/', async (req: Request, res: Response) => {
       success: true,
       data: transactions,
     });
-  } catch (error) {
+  } catch (_error) {
     res.status(500).json({
       success: false,
       error: 'Internal server error',
@@ -413,7 +413,7 @@ router.get('/:id', async (req: Request, res: Response) => {
       success: true,
       data: transaction,
     });
-  } catch (error) {
+  } catch (_error) {
     res.status(500).json({
       success: false,
       error: 'Internal server error',

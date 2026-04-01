@@ -143,6 +143,7 @@ export function PrecedentSearch({ onSearch, isLoading, initialJurisdictions }: P
   // Sync when initialJurisdictions changes (preferences loaded async)
   useEffect(() => {
     if (initialJurisdictions && initialJurisdictions.length > 0) {
+      // eslint-disable-next-line react-hooks/set-state-in-effect
       setSelectedJurisdictions(initialJurisdictions);
     }
   }, [initialJurisdictions]);
@@ -264,7 +265,7 @@ export function PrecedentSearch({ onSearch, isLoading, initialJurisdictions }: P
               )}
             </Button>
           </SheetTrigger>
-          <SheetContent className="w-[400px] sm:w-[540px] overflow-y-auto">
+          <SheetContent className="w-100 sm:w-135 overflow-y-auto">
             <SheetHeader>
               <SheetTitle>Search Filters</SheetTitle>
               <SheetDescription>

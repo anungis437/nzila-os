@@ -2,7 +2,7 @@
  * Tests for org-scope-middleware.ts
  */
 import { describe, it, expect, vi, beforeEach } from 'vitest';
-import { NextRequest, NextResponse } from 'next/server';
+import { NextRequest } from 'next/server';
 
 const mocks = vi.hoisted(() => ({
   mockWithOrganizationAuth: vi.fn(),

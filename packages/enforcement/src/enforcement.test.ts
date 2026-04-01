@@ -2,7 +2,7 @@ import { describe, it, expect, vi } from "vitest";
 import { composePipeline } from "./pipeline.js";
 import { traceLayer, authLayer, rateLimitLayer, governanceLayer, auditLayer } from "./layers.js";
 import { createContext, createEnforcedHandler } from "./handler.js";
-import type { EnforcementContext, EnforcementLayer, EnforcementResult } from "./pipeline.js";
+import type { EnforcementContext, EnforcementLayer } from "./pipeline.js";
 
 function makeCtx(overrides: Partial<EnforcementContext> = {}): EnforcementContext {
   return createContext({

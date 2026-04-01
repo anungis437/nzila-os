@@ -106,7 +106,7 @@
           },
           "C2_AppendOnlyAuditTables": {
             "status": "PASS",
-            "migrationFile": "packages/db/migrations/hash-chain-immutability-triggers.sql",
+            "migrationFile": "migrations/platform/hash-chain-immutability-triggers.sql",
             "triggers": [
               "trg_audit_events_no_update (BEFORE UPDATE)",
               "trg_audit_events_no_delete (BEFORE DELETE)",
@@ -283,7 +283,7 @@
           },
           "C2_AppendOnlyAuditTables": {
             "status": "PASS",
-            "migrationFile": "packages/db/migrations/hash-chain-immutability-triggers.sql",
+            "migrationFile": "migrations/platform/hash-chain-immutability-triggers.sql",
             "ueArchiveMigration": "apps/union-eyes/db/migrations/0063_add_audit_log_archive_support.sql",
             "notes": "Archive support explicitly states logs must NEVER be deleted, only archived."
           },

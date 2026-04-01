@@ -6,6 +6,7 @@
  * Translates nav labels and uses locale-prefixed hrefs.
  */
 
+import Image from 'next/image';
 import Link from 'next/link';
 import { usePathname, useParams } from 'next/navigation';
 import { useState, useEffect, useCallback, useRef } from 'react';
@@ -51,6 +52,7 @@ export default function LocaleSiteNavigation() {
   }, []);
 
   useEffect(() => {
+    // eslint-disable-next-line react-hooks/set-state-in-effect
     setMobileMenuOpen(false);
   }, [pathname]);
 
@@ -59,6 +61,7 @@ export default function LocaleSiteNavigation() {
     return () => { document.body.style.overflow = ''; };
   }, [mobileMenuOpen]);
 
+  // eslint-disable-next-line react-hooks/preserve-manual-memoization
   const handleKeyDown = useCallback((e: KeyboardEvent) => {
     if (e.key === 'Escape') setMobileMenuOpen(false);
   }, []);
@@ -83,9 +86,11 @@ export default function LocaleSiteNavigation() {
           {/* Logo */}
           <div className="flex items-center">
             <Link href={`/${locale}`} className="flex items-center gap-3 group">
-              <img
+              <Image
                 src="/images/brand/icon.png"
                 alt="Union Eyes"
+                width={36}
+                height={36}
                 className="w-9 h-9 rounded-lg shadow-lg shadow-electric/20 group-hover:shadow-electric/40 transition-shadow"
               />
               <span className={`text-xl font-bold transition-colors ${scrolled ? 'text-navy' : 'text-white'}`}>

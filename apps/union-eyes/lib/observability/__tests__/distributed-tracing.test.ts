@@ -225,7 +225,7 @@ describe('DistributedTracing — gap coverage', () => {
     tracingService.startTrace('root-only');
     const rootSpan = tracingService.startSpan('root-span');
     // Manually clear parentId to simulate root span
-    (rootSpan as any).parentId = undefined;
+    (rootSpan as unknown as { parentId: string | undefined }).parentId = undefined;
     tracingService.endSpan(rootSpan, 'ok');
     expect(tracingService.getCurrentTrace()).toBeNull();
   });

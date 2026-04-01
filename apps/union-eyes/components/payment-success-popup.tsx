@@ -184,7 +184,7 @@ const timer = setTimeout(checkProfileUpdate, backoffMs);
   };
   
   // Get plan details - use optimistic UI if the database is lagging
-  const planType = profile.planDuration === "yearly" ? "Pro Yearly" : "Pro Monthly";
+  const _planType = profile.planDuration === "yearly" ? "Pro Yearly" : "Pro Monthly";
   const creditCount = profile.membership === "pro" ? (profile.usageCredits ?? 1000) : 1000;
   
   // Format renewal date for display
@@ -212,7 +212,7 @@ const timer = setTimeout(checkProfileUpdate, backoffMs);
   return (
     <Dialog open={isOpen} onOpenChange={setIsOpen}>
       {isOpen && <div className="fixed inset-0 bg-white/80 backdrop-blur-sm z-40" />}
-      <DialogContent className="fixed left-[50%] top-[50%] z-50 w-[420px] translate-x-[-50%] translate-y-[-50%] border-none p-0 shadow-lg rounded-xl bg-transparent [&>button]:hidden">
+      <DialogContent className="fixed left-[50%] top-[50%] z-50 w-105 translate-x-[-50%] translate-y-[-50%] border-none p-0 shadow-lg rounded-xl bg-transparent [&>button]:hidden">
         <motion.div
           initial={{ opacity: 0, scale: 0.95 }}
           animate={{ opacity: 1, scale: 1 }}

@@ -35,7 +35,7 @@ export const POST = withApi(
     auth: { minRole: 'steward' },
     openapi: { tags: ['Dues'], summary: 'Calculate arrears summary for organization' },
   },
-  async ({ organizationId, userId }) => {
+  async ({ organizationId, _userId }) => {
     if (!organizationId) throw ApiError.badRequest('Organization context required');
 
     const [summary] = await db

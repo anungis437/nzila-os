@@ -16,7 +16,7 @@ const logger = createLogger('vocabulary');
  * 
  * Response: CUPEVocabulary
  */
-export const GET = withApiAuth(async (request: NextRequest) => {
+export const GET = withApiAuth(async (_request: NextRequest) => {
   try {
     const vocabulary = getCUPEVocabulary();
     

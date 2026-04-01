@@ -118,7 +118,7 @@ export const GET = withOrganizationAuth(async (request, context) => {
     const { searchParams } = new URL(request.url);
     const status = searchParams.get("status");
 
-    let query = db
+    const query = db
       .select()
       .from(grievances)
       .where(eq(grievances.organizationId, organizationId))

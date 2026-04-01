@@ -67,7 +67,7 @@ setError(t("failedToLoad"));
     }
 
     fetchHistory();
-  }, [claimId]);
+  }, [claimId, t]);
 
   if (loading) {
     return (

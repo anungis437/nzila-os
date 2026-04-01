@@ -13,7 +13,6 @@ import {
   FileText,
   Search,
   ShieldCheck,
-  BarChart3,
   Clock,
   ArrowRight,
   Scale,

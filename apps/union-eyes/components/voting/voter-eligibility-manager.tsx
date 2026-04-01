@@ -509,7 +509,7 @@ export function VoterEligibilityManager({
                     // eslint-disable-next-line @typescript-eslint/no-explicit-any
                     onValueChange={(value: any) => setFilterStatus(value)}
                   >
-                    <SelectTrigger className="w-[180px]">
+                    <SelectTrigger className="w-45">
                       <Filter className="h-4 w-4 mr-2" />
                       <SelectValue />
                     </SelectTrigger>

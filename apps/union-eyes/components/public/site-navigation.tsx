@@ -7,6 +7,7 @@
  */
 'use client';
 
+import Image from 'next/image';
 import Link from 'next/link';
 import { usePathname } from 'next/navigation';
 import { useState, useEffect, useCallback, useRef } from 'react';
@@ -85,9 +86,11 @@ export default function SiteNavigation() {
           {/* Logo */}
           <div className="flex items-center">
             <Link href="/" className="flex items-center gap-3 group">
-              <img
+              <Image
                 src="/images/brand/icon.png"
                 alt="Union Eyes"
+                width={36}
+                height={36}
                 className="w-9 h-9 rounded-lg shadow-lg shadow-electric/20 group-hover:shadow-electric/40 transition-shadow"
               />
               <span

@@ -56,8 +56,6 @@ vi.mock('drizzle-orm', () => ({
 
 import {
   UnionEyesAIController,
-  type PromptTemplate,
-  type AttentionWeights,
   type Jurisdiction,
 } from '../template-engine';
 
@@ -300,7 +298,7 @@ describe('TemplateEngine', () => {
   describe('Attention Weight Invariants', () => {
     it('all weights are between 0 and 1', () => {
       for (const template of controller.listTemplates()) {
-        for (const [key, value] of Object.entries(template.attentionWeights)) {
+        for (const [_key, value] of Object.entries(template.attentionWeights)) {
           expect(value).toBeGreaterThanOrEqual(0);
           expect(value).toBeLessThanOrEqual(1);
         }

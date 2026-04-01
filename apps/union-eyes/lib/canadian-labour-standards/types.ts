@@ -80,30 +80,31 @@ export interface WorkersCompBoard {
 /** Labour relations board info */
 export interface LabourRelationsBoard {
   name: string;
-  abbreviation: string;
+  acronym: string;
   statute: string;
-  certificationProcess: string;
-  website: string;
+  filingUrl: string;
+  notes?: string;
 }
 
 /** Anti-scab provision */
 export interface AntiScabProvision {
   hasAntiScab: boolean;
   statute?: string;
-  article?: string;
+  section?: string;
   effectiveDate?: string;
-  summary?: string;
+  description?: string;
   penalties?: string;
+  exceptions?: string;
 }
 
 /** Pay equity regime */
 export interface PayEquityRegime {
-  hasLegislation: boolean;
+  hasProactivePayEquity: boolean;
   statute?: string;
-  appliesToPrivateSector: boolean;
-  appliesToPublicSector: boolean;
-  enforcementBody?: string;
-  maintenanceCycleYears?: number;
+  administeredBy?: string;
+  description?: string;
+  threshold?: number;
+  notes?: string;
 }
 
 /** Full jurisdiction profile */

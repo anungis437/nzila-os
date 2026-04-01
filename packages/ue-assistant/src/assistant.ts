@@ -14,12 +14,12 @@ import {
   ResponseTypes,
   assistantRequestSchema,
 } from './types'
-import { getRoleCapability, getRoleMode } from './roles'
+import { getRoleCapability } from './roles'
 import { classifyIntentForRole, getIntentConfidence } from './intents'
 import { validateOrgScope } from './context'
 import { type KnowledgeStore, retrieveKnowledge } from './knowledge'
 import { executeTool } from './tools'
-import { determineResponseType, requiresCitations } from './response-policy'
+import { determineResponseType } from './response-policy'
 import { getActionsForRole, getRequiredDisclaimers, isSafetyUrgent } from './domain-rules'
 import { evaluateEscalation } from './escalation'
 import { resolveLanguage, getLocalizedMessage } from './localization'

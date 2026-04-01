@@ -22,7 +22,6 @@ import {
   type AllocationRuleVersion,
 } from '@/db/schema';
 import { eq, and, desc, lte, gte, isNull, or, sql } from 'drizzle-orm';
-import { appendLedgerEntry } from './ledger-service';
 import { auditLog, AuditEventType, AuditSeverity } from '@/lib/audit-logger';
 import { v4 as uuidv4 } from 'uuid';
 
@@ -354,7 +353,7 @@ export async function runAllocation(
 
 function computeBasisTotals(
   locals: LocalBasis[],
-  ruleVersion: AllocationRuleVersion,
+  _ruleVersion: AllocationRuleVersion,
 ): Record<string, number> {
   const totals: Record<string, number> = {
     memberCount: 0,

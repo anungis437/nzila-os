@@ -62,7 +62,7 @@ jobs:
 
       - name: Upload SLO summary
         if: always()
-        uses: actions/upload-artifact@v7
+        uses: actions/upload-artifact@v4
         with:
           name: slo-summary-console
           path: slo-summary.txt
@@ -86,7 +86,7 @@ jobs:
 
       - name: Upload release attestation
         if: always()
-        uses: actions/upload-artifact@v7
+        uses: actions/upload-artifact@v4
         with:
           name: release-attestation-console
           path: release-attestation.json

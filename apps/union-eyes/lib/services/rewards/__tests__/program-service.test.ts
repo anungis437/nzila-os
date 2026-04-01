@@ -102,7 +102,7 @@ describe('program-service', () => {
       const program = { id: 'p-1', orgId: 'org-1', name: 'Kudos Program' };
       mocks.mockReturning.mockResolvedValueOnce([program]);
 
-      const result = await createProgram({ orgId: 'org-1', name: 'Kudos Program' } as any);
+      const result = await createProgram({ orgId: 'org-1', name: 'Kudos Program' } as unknown as Parameters<typeof createProgram>[0]);
 
       expect(result).toEqual(program);
       expect(mocks.mockInsert).toHaveBeenCalled();
@@ -163,7 +163,7 @@ describe('program-service', () => {
       const updated = { id: 'p-1', name: 'Updated Name' };
       mocks.mockReturning.mockResolvedValueOnce([updated]);
 
-      const result = await updateProgram('p-1', 'org-1', { name: 'Updated Name' } as any);
+      const result = await updateProgram('p-1', 'org-1', { name: 'Updated Name' } as unknown as Parameters<typeof updateProgram>[2]);
 
       expect(result).toEqual(updated);
       expect(mocks.mockUpdate).toHaveBeenCalled();
@@ -188,7 +188,7 @@ describe('program-service', () => {
       const awardType = { id: 'at-1', name: 'Kudos', programId: 'p-1' };
       mocks.mockReturning.mockResolvedValueOnce([awardType]);
 
-      const result = await createAwardType({ name: 'Kudos', programId: 'p-1' } as any);
+      const result = await createAwardType({ name: 'Kudos', programId: 'p-1' } as unknown as Parameters<typeof createAwardType>[0]);
 
       expect(result).toEqual(awardType);
     });
@@ -232,7 +232,7 @@ describe('program-service', () => {
       const updated = { id: 'at-1', name: 'Super Kudos' };
       mocks.mockReturning.mockResolvedValueOnce([updated]);
 
-      const result = await updateAwardType('at-1', 'org-1', { name: 'Super Kudos' } as any);
+      const result = await updateAwardType('at-1', 'org-1', { name: 'Super Kudos' } as unknown as Parameters<typeof updateAwardType>[2]);
 
       expect(result).toEqual(updated);
       expect(mocks.mockUpdate).toHaveBeenCalled();

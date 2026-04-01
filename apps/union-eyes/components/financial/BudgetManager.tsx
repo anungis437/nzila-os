@@ -106,7 +106,7 @@ export default function BudgetManager({ organizationId: _organizationId }: Budge
       setIsCreateDialogOpen(false);
       resetForm();
       fetchBudgets();
-    } catch (error) {
+    } catch (_error) {
       toast({
         title: t('error'),
         description: t('createFailed'),

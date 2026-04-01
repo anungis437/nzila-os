@@ -48,7 +48,7 @@ export interface Inspection {
   location: string;
 }
 
-interface InspectionData {
+interface _InspectionData {
   id: string;
   title: string;
   date: string;
@@ -193,7 +193,7 @@ export function InspectionScheduleCalendar({
       </CardHeader>
       <CardContent>
         {isLoading ? (
-          <Skeleton className="h-[500px] w-full" />
+          <Skeleton className="h-125 w-full" />
         ) : (
           <div className="space-y-4">
             {/* Calendar Grid */}
@@ -218,7 +218,7 @@ export function InspectionScheduleCalendar({
                   <div
                     key={day.toString()}
                     className={cn(
-                      "min-h-[100px] p-2 border rounded-lg",
+                      "min-h-25 p-2 border rounded-lg",
                       isCurrentMonth 
                         ? "bg-background" 
                         : "bg-muted/50 text-muted-foreground",

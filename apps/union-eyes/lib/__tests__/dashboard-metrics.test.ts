@@ -5,7 +5,6 @@ import {
   computeTypeCounts,
   computeWorksiteCounts,
   computeAssigneeCounts,
-  computeClosureTrends,
   filterCases,
   cachedComputation,
   clearMetricsCache,

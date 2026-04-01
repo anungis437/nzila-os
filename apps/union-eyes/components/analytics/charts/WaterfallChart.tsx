@@ -119,13 +119,13 @@ export function WaterfallChart({
           <XAxis dataKey="name" angle={-45} textAnchor="end" height={100} />
           <YAxis />
           <Tooltip content={<CustomTooltip />} />
-          {/* eslint-disable-next-line @typescript-eslint/no-explicit-any */}
+          { }
           <Legend
             {...({ payload: [
               { value: 'Increase', type: 'square', color: positiveColor },
               { value: 'Decrease', type: 'square', color: negativeColor },
               { value: 'Total', type: 'square', color: totalColor },
-            ] } as any)}
+            ] } as unknown as React.ComponentProps<typeof Legend>)}
           />
           <ReferenceLine y={0} stroke="#666" />
           <Bar dataKey="value" stackId="a">

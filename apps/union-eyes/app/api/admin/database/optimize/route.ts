@@ -4,7 +4,6 @@
  */
 import { db } from '@/db/db';
 import { sql } from 'drizzle-orm';
-import { withSystemContext } from '@/lib/db/with-rls-context';
 import { NextResponse } from 'next/server';
 import { auth } from '@clerk/nextjs/server';
 
@@ -29,7 +28,7 @@ export async function POST() {
       message: 'Database ANALYZE completed — query planner statistics updated',
       optimizedAt: new Date().toISOString(),
     });
-  } catch (error) {
+  } catch (_error) {
     return NextResponse.json(
       { success: false, error: 'Optimization failed' },
       { status: 500 },

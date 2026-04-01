@@ -12,7 +12,6 @@ import { auth } from '@clerk/nextjs/server';
 import { eq } from 'drizzle-orm';
 import { getAllowedTransitions } from '@/lib/case-fsm-enforcement';
 import { withRLSContext } from '@/lib/db/with-rls-context';
-import { db } from '@/db/db';
 import { claims } from '@/db/schema/claims-schema';
 import { logger } from '@/lib/logger';
 import { getUserRoleInOrganization } from '@/lib/organization-utils';

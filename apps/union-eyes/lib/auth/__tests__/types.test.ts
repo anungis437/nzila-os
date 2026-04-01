@@ -1,6 +1,6 @@
 import { describe, it, expect } from 'vitest';
 import { AuthError, AuthErrorType } from '../types';
-import type { UserContext, OrganizationContext, AuthResult, PermissionCheckOptions, RoleCheckOptions, AuthMiddlewareContext } from '../types';
+import type { UserContext, OrganizationContext, AuthResult } from '../types';
 
 describe('AuthErrorType enum', () => {
   it('defines all error types', () => {

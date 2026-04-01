@@ -101,7 +101,7 @@ return standardErrorResponse(
       } as any);
 
       return NextResponse.json({ accounts: accounts || [] });
-    } catch (error) {
+    } catch (_error) {
 return standardErrorResponse(
       ErrorCode.INTERNAL_ERROR,
       'Internal server error',
@@ -237,7 +237,7 @@ export const POST = withRoleAuth('steward', async (request: NextRequest, context
       } as any);
 
       return NextResponse.json({ auth_url: authUrl });
-    } catch (error) {
+    } catch (_error) {
 return NextResponse.json(
         {
           error: 'Failed to initiate OAuth flow',
@@ -343,7 +343,7 @@ return standardErrorResponse(
         message: 'Account disconnected successfully',
         account_id: accountId,
       });
-    } catch (error) {
+    } catch (_error) {
 return NextResponse.json(
         {
           error: 'Failed to disconnect account',
@@ -464,7 +464,7 @@ export const PUT = withRoleAuth('member', async (request: NextRequest, context: 
           message: 'Token refreshed successfully',
           expires_at: expiresAt.toISOString(),
         });
-      } catch (error) {
+      } catch (_error) {
         // Update account status to error
         await getSupabaseClient()
           .from('social_accounts')
@@ -476,7 +476,7 @@ export const PUT = withRoleAuth('member', async (request: NextRequest, context: 
 
         throw error;
       }
-    } catch (error) {
+    } catch (_error) {
 return NextResponse.json(
         {
           error: 'Failed to refresh token',

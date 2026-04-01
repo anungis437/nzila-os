@@ -77,7 +77,6 @@ import {
   createBooleanQuery,
   createNullCheck,
   getDatabase,
-  checkDatabaseHealth,
 } from "../multi-db-client";
 
 /* ── tests ──────────────────────────────────────────────────────────── */

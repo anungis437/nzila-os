@@ -10,7 +10,7 @@
 
 import { db } from '@/db';
 import { platformCostLedgerEntries, type NewPlatformCostLedgerEntry } from '@/db/schema';
-import { eq, and, sql, between, desc } from 'drizzle-orm';
+import { eq, and, sql, desc } from 'drizzle-orm';
 import { auditLog, AuditEventType, AuditSeverity } from '@/lib/audit-logger';
 import { v4 as uuidv4 } from 'uuid';
 

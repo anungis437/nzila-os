@@ -58,14 +58,14 @@ describe('db-adapter', () => {
     it('applyFilter calls eq on query with orgId', () => {
       const scoped = createOrgScopedQuery('org-6');
       const mockQuery = { eq: (col: string, val: string) => ({ col, val }) };
-      const result = scoped.applyFilter(mockQuery as any);
+      const result = scoped.applyFilter(mockQuery as unknown as Parameters<typeof scoped.applyFilter>[0]);
       expect(result).toEqual({ col: 'organization_id', val: 'org-6' });
     });
 
     it('applyFilter uses custom column name', () => {
       const scoped = createOrgScopedQuery('org-7');
       const mockQuery = { eq: (col: string, val: string) => ({ col, val }) };
-      const result = scoped.applyFilter(mockQuery as any, 'tenant_id');
+      const result = scoped.applyFilter(mockQuery as unknown as Parameters<typeof scoped.applyFilter>[0], 'tenant_id');
       expect(result).toEqual({ col: 'tenant_id', val: 'org-7' });
     });
 

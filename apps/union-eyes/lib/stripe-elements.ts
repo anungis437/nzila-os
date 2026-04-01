@@ -13,7 +13,7 @@
  * </Elements>
  * ```
  */
-// eslint-disable-next-line no-restricted-imports -- this IS the stripe-elements facade
+ 
 import { loadStripe } from '@stripe/stripe-js/pure'
 // eslint-disable-next-line no-restricted-imports -- this IS the stripe-elements facade
 import type { Stripe } from '@stripe/stripe-js'

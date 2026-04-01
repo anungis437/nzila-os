@@ -22,7 +22,7 @@ import { logger } from './logger';
 // Console access helpers — avoid the literal "console.log" pattern so the
 // codebase grep stays clean while still allowing the wrapper to do its job.
 // ---------------------------------------------------------------------------
-/* eslint-disable @typescript-eslint/no-explicit-any */
+ 
 const _con: Console = Reflect.get(globalThis, 'console');
 
 const origLog   = Reflect.get(_con, 'log')   as (...a: unknown[]) => void;
@@ -30,7 +30,7 @@ const origInfo  = Reflect.get(_con, 'info')  as (...a: unknown[]) => void;
 const origWarn  = Reflect.get(_con, 'warn')  as (...a: unknown[]) => void;
 const origError = Reflect.get(_con, 'error') as (...a: unknown[]) => void;
 const origDebug = Reflect.get(_con, 'debug') as (...a: unknown[]) => void;
-/* eslint-enable @typescript-eslint/no-explicit-any */
+ 
 
 /**
  * Initialize console wrapper for production.

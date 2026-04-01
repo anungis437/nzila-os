@@ -16,7 +16,7 @@ describe('EntityExtractionService', () => {
   describe('extract', () => {
     it('extracts SIN numbers', () => {
       const result = service.extract('Member SIN: 123-456-789 filed a claim');
-      const sinEntities = result.orgs.filter(e => e.type === 'MEMBER' || e.value.includes('123'));
+      const _sinEntities = result.orgs.filter(e => e.type === 'MEMBER' || e.value.includes('123'));
       expect(result.orgs.length).toBeGreaterThanOrEqual(0);
     });
 
@@ -35,7 +35,7 @@ describe('EntityExtractionService', () => {
 
     it('extracts phone numbers', () => {
       const result = service.extract('Contact us at (613) 555-1234');
-      const phones = result.orgs.filter(e => e.type === 'MEMBER' || e.value.includes('555'));
+      const _phones = result.orgs.filter(e => e.type === 'MEMBER' || e.value.includes('555'));
       expect(result.orgs.length).toBeGreaterThanOrEqual(0);
     });
 

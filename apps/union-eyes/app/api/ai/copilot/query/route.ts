@@ -53,7 +53,7 @@ export const POST = withRoleAuth('steward', async (request: NextRequest, context
       ...parsed.data,
     });
     return standardSuccessResponse(result);
-  } catch (error) {
+  } catch (_error) {
     return standardErrorResponse(
       ErrorCode.INTERNAL_ERROR,
       'Copilot query failed',

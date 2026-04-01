@@ -322,7 +322,7 @@ export function DocumentApprovalWorkflow({
                                 className="h-4 w-4 rounded border-gray-300"
                               />
                             </FormControl>
-                            <FormLabel className="!mt-0">
+                            <FormLabel className="mt-0!">
                               {t('requireAll')}
                             </FormLabel>
                             <FormDescription>
@@ -461,7 +461,7 @@ export function DocumentApprovalWorkflow({
                                 )}
                               </div>
                               {index < (existingConfig?.stages.length || 0) - 1 && (
-                                <div className="w-0.5 h-full min-h-[4rem] bg-gray-200 mt-2" />
+                                <div className="w-0.5 h-full min-h-16 bg-gray-200 mt-2" />
                               )}
                             </div>
 

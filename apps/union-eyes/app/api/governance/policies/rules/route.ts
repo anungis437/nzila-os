@@ -30,7 +30,7 @@ export const GET = withApi(
     const limit = Math.min(100, Math.max(1, parseInt(url.searchParams.get('limit') || '20')));
     const offset = (page - 1) * limit;
 
-    const [totalResult, policies] = await Promise.all([
+    const [_totalResult, policies] = await Promise.all([
       db.select({ total: count() }).from(governancePolicies).where(eq(governancePolicies.organizationId, organizationId!)),
       db.select().from(governancePolicies).where(eq(governancePolicies.organizationId, organizationId!)).orderBy(desc(governancePolicies.createdAt)).limit(limit).offset(offset),
     ]);

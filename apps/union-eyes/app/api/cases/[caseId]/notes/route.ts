@@ -11,7 +11,6 @@ import { auth } from '@clerk/nextjs/server';
 import { z } from 'zod';
 import { eq, desc } from 'drizzle-orm';
 import { withRLSContext } from '@/lib/db/with-rls-context';
-import { db } from '@/db/db';
 import { claimUpdates, claims } from '@/db/schema/claims-schema';
 import { auditDataMutation } from '@/lib/audit-logger';
 import { logger } from '@/lib/logger';

@@ -247,7 +247,7 @@ export function ElectionAuditLog({
             <div className="flex gap-2">
               {/* eslint-disable-next-line @typescript-eslint/no-explicit-any */}
               <Select value={viewMode} onValueChange={(v: any) => setViewMode(v)}>
-                <SelectTrigger className="w-[140px]">
+                <SelectTrigger className="w-35">
                   <SelectValue />
                 </SelectTrigger>
                 <SelectContent>

@@ -1,6 +1,6 @@
 'use client';
 
-import { useState, useEffect } from 'react';
+import { useState, useEffect, useMemo } from 'react';
 import { Button } from '@/components/ui/button';
 import { Textarea } from '@/components/ui/textarea';
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from '@/components/ui/select';
@@ -18,7 +18,7 @@ interface StatusUpdateProps {
 export function StatusUpdate({ claimId, currentStatus, onStatusUpdated }: StatusUpdateProps) {
   const t = useTranslations("ui.statusUpdate");
 
-  const statusOptions = [
+  const statusOptions = useMemo(() => [
     { value: 'submitted', label: t("statusSubmitted") },
     { value: 'under_review', label: t("statusUnderReview") },
     { value: 'assigned', label: t("statusAssigned") },
@@ -27,7 +27,7 @@ export function StatusUpdate({ claimId, currentStatus, onStatusUpdated }: Status
     { value: 'resolved', label: t("statusResolved") },
     { value: 'rejected', label: t("statusRejected") },
     { value: 'closed', label: t("statusClosed") },
-  ];
+  ], [t]);
 
   const [selectedStatus, setSelectedStatus] = useState('');
   const [notes, setNotes] = useState('');
@@ -54,7 +54,7 @@ export function StatusUpdate({ claimId, currentStatus, onStatusUpdated }: Status
     if (claimId) {
       fetchWorkflowInfo();
     }
-  }, [claimId]);
+  }, [claimId, statusOptions]);
 
   const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault();

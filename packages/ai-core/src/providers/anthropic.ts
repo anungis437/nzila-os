@@ -15,6 +15,7 @@
  * Used for local dev; Azure OpenAI is used in staging/prod.
  */
 import { getAiEnv } from '@nzila/os-core/ai-env'
+import { withRetry } from './retry'
 import type {
   AiProviderClient,
   AiStreamChunk,
@@ -59,41 +60,43 @@ export function createAnthropicProvider(): AiProviderClient {
 
   return {
     async generate(params: ProviderGenerateParams): Promise<ProviderGenerateResult> {
-      const model = params.model || env.ANTHROPIC_MODEL_TEXT || 'claude-sonnet-4-6'
-      const { system, messages } = toAnthropicMessages(params.messages)
+      return withRetry(async () => {
+        const model = params.model || env.ANTHROPIC_MODEL_TEXT || 'claude-sonnet-4-6'
+        const { system, messages } = toAnthropicMessages(params.messages)
 
-      const body: Record<string, unknown> = {
-        model,
-        max_tokens: params.maxTokens ?? 1024,
-        messages,
-        ...(system ? { system } : {}),
-        ...(params.temperature !== undefined ? { temperature: params.temperature } : {}),
-        ...(params.topP !== undefined ? { top_p: params.topP } : {}),
-        ...(params.responseFormat === 'json'
-          ? { system: [system, 'Respond with valid JSON only.'].filter(Boolean).join('\n') }
-          : {}),
-      }
+        const body: Record<string, unknown> = {
+          model,
+          max_tokens: params.maxTokens ?? 1024,
+          messages,
+          ...(system ? { system } : {}),
+          ...(params.temperature !== undefined ? { temperature: params.temperature } : {}),
+          ...(params.topP !== undefined ? { top_p: params.topP } : {}),
+          ...(params.responseFormat === 'json'
+            ? { system: [system, 'Respond with valid JSON only.'].filter(Boolean).join('\n') }
+            : {}),
+        }
 
-      const res = await fetch(MESSAGES_URL, {
-        method: 'POST',
-        headers,
-        body: JSON.stringify(body),
-      })
+        const res = await fetch(MESSAGES_URL, {
+          method: 'POST',
+          headers,
+          body: JSON.stringify(body),
+        })
 
-      if (!res.ok) {
-        const errorText = await res.text()
-        throw new Error(`Anthropic error ${res.status}: ${errorText}`)
-      }
+        if (!res.ok) {
+          const errorText = await res.text()
+          throw new Error(`Anthropic error ${res.status}: ${errorText}`)
+        }
 
-      const json = (await res.json()) as AnthropicResponse
-      const textBlock = json.content.find((b) => b.type === 'text')
+        const json = (await res.json()) as AnthropicResponse
+        const textBlock = json.content.find((b) => b.type === 'text')
 
-      return {
-        content: textBlock?.text ?? '',
-        tokensIn: json.usage?.input_tokens ?? 0,
-        tokensOut: json.usage?.output_tokens ?? 0,
-        model: json.model ?? model,
-      }
+        return {
+          content: textBlock?.text ?? '',
+          tokensIn: json.usage?.input_tokens ?? 0,
+          tokensOut: json.usage?.output_tokens ?? 0,
+          model: json.model ?? model,
+        }
+      }, { providerName: 'anthropic' })
     },
 
     async *generateStream(

@@ -58,7 +58,7 @@ async function fetchNegotiationData(id: string) {
 }
 
 async function NegotiationDetailContent({ params }: PageProps) {
-  const user = await requireUser();
+  const _user = await requireUser();
   const hasAccess = await hasMinRole("bargaining_committee");
   
   if (!hasAccess) {

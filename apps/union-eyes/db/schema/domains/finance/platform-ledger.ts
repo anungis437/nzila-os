@@ -12,7 +12,7 @@
 
 import {
   pgTable, pgEnum, uuid, varchar, text, timestamp, decimal,
-  integer, boolean, jsonb, index,
+  jsonb, index,
 } from 'drizzle-orm/pg-core';
 import { organizations } from '../../../schema-organizations';
 import { billingPeriods } from './platform-billing';

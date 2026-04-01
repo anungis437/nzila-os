@@ -409,11 +409,11 @@ toast({
                 <XAxis dataKey="month" />
                 <YAxis />
                 <Tooltip 
-                  // eslint-disable-next-line @typescript-eslint/no-explicit-any
+                   
                   formatter={((value: number | undefined, name: string) => {
                     if (name === 'amount') return [`$${(value ?? 0).toFixed(2)}`, 'Total Amount'];
                     return [value ?? 0, 'Count'];
-                  }) as any}
+                  }) as unknown as (value: number, name: string) => [string | number, string]}
                 />
                 <Legend />
                 <Line type="monotone" dataKey="amount" stroke="#8884d8" name="Total Amount" />

@@ -70,7 +70,7 @@ function sfol(data: unknown[] = []) {
     })),
   };
 }
-function sfwool(data: unknown[] = []) {
+function _sfwool(data: unknown[] = []) {
   return {
     from: vi.fn(() => ({
       where: vi.fn(() => ({

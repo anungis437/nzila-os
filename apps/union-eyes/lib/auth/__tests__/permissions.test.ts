@@ -1,4 +1,4 @@
-import { describe, it, expect, vi, beforeEach } from 'vitest';
+import { describe, it, expect, vi } from 'vitest';
 import { UserRole, Permission, ROLE_PERMISSIONS } from '../roles';
 
 // Mock drizzle DB

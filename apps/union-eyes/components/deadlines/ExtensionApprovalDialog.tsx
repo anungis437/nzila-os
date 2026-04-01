@@ -255,7 +255,7 @@ export function ExtensionApprovalDialog({
                           `w-full rounded-md py-2.5 text-sm font-medium leading-5 transition-all ${
                             selected
                               ? 'bg-white text-green-700 shadow'
-                              : 'text-gray-700 hover:bg-white/[0.12] hover:text-gray-900'
+                              : 'text-gray-700 hover:bg-white/12 hover:text-gray-900'
                           }`
                         }
                         disabled={isSubmitting}
@@ -270,7 +270,7 @@ export function ExtensionApprovalDialog({
                           `w-full rounded-md py-2.5 text-sm font-medium leading-5 transition-all ${
                             selected
                               ? 'bg-white text-red-700 shadow'
-                              : 'text-gray-700 hover:bg-white/[0.12] hover:text-gray-900'
+                              : 'text-gray-700 hover:bg-white/12 hover:text-gray-900'
                           }`
                         }
                         disabled={isSubmitting}

@@ -4,9 +4,9 @@
  */
 import { withApi } from '@/lib/api/framework';
 import { db } from '@/db/db';
-import { sharedClauseLibrary, clauseLibraryTags } from '@/db/schema/domains/agreements/shared-library';
+import { sharedClauseLibrary } from '@/db/schema/domains/agreements/shared-library';
 import { organizations } from '@/db/schema-organizations';
-import { eq, ilike, inArray, sql, and, or, lte, gte, isNull } from 'drizzle-orm';
+import { eq, ilike, inArray, sql, and, or, gte, isNull } from 'drizzle-orm';
 import { withSystemContext } from '@/lib/db/with-rls-context';
 
 export const dynamic = 'force-dynamic';

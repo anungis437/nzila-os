@@ -7,9 +7,11 @@
 ## Phase 0 — Baseline Audit Results
 
 ### Lint (`pnpm -C apps/union-eyes lint`)
+
 - **Result: PASS** — 0 errors, 0 warnings reported
 
 ### Typecheck (`pnpm -C apps/union-eyes typecheck`)
+
 - **Result: PASS** — 0 errors
 
 > **Note:** `tsconfig.json` currently excludes `services/**`, `backend/**`, `infra/**`,
@@ -19,26 +21,31 @@
 > files under the include scope or tightens the compiler.
 
 ### Tests (`pnpm -C apps/union-eyes test`)
+
 - **Result:** "No test files found" — passes only via `--passWithNoTests`
 - **0 actual test files** exist under union-eyes today.
 - `vitest.config.ts` excludes `services/**` from the test runner.
 
 ### Console Usage
+
 - 0 runtime `console.*` calls in `actions/`, `services/`, `lib/`, `app/`, `components/`
 - Structured logger at `lib/logger.ts` already in use everywhere
 - `console.log` only in seed scripts + doc examples (allowed)
 
 ### `any` Usage
+
 | Layer | Count | Files |
 |-------|-------|-------|
 | `actions/` | 32 | admin-actions, analytics-actions, credits-actions, member-segments-actions, whop-actions |
 | `services/` | 100+ | 16+ files — pki/signature-service (25+), clc/compliance-reports (12+), fcm-service (11) |
 
 ### Architecture Boundary Violations
+
 - Existing contract tests (`ue-no-raw-db`, `ue-org-scoped-registry`, `ue-rls-org-context`, etc.) cover DB access guarding
 - **Missing:** No explicit contract for component → db/infra import boundaries
 
 ### Existing UE Contract Tests (in `tooling/contract-tests/`)
+
 - `ue-no-raw-db.test.ts` — app-layer can't use raw DB without RLS
 - `ue-org-scoped-registry.test.ts` — org-scoped table registry consistency
 - `ue-rls-org-context.test.ts` — RLS org context enforcement
@@ -52,17 +59,19 @@
 ## Hardening Epics
 
 ### Epic 1 — Type Purity (Phase 1)
+
 **Goal:** Eliminate reliance on `noImplicitAny: false` and `tsconfig.exclude` for type safety.
 
 | PR | Acceptance | Files Impacted |
 |----|-----------|----------------|
 | PR-1a: Fix `any` in actions | All action files use typed DTOs | `actions/*.ts`, `types/actions/actions-types.ts` |
 | PR-1b: Add Zod schemas for action inputs | All external inputs validated via Zod | `actions/*.ts`, `lib/validation.ts` |
-| PR-1c: Move ts-errors-*.txt to plans/ | App root clean | `ts-errors-210.txt`, `ts-errors-272.txt` → `plans/tech-debt/` |
+| PR-1c: Move ts-errors-*.txt to plans/ | App root clean | `ts-errors-210.txt`, `ts-errors-272.txt` → `docs/plans/tech-debt/` |
 
 **Acceptance:** `pnpm -C apps/union-eyes typecheck` passes with 0 errors (already passes; maintain it)
 
 ### Epic 2 — Architecture Contracts (Phase 2)
+
 **Goal:** Enforce import boundaries at the app layer.
 
 | PR | Acceptance | Files Impacted |
@@ -73,6 +82,7 @@
 **Acceptance:** new contract tests fail on violations, pass on current code
 
 ### Epic 3 — Test Stack (Phase 3)
+
 **Goal:** Real unit + integration + E2E coverage.
 
 | PR | Acceptance | Files Impacted |
@@ -85,6 +95,7 @@
 **Acceptance:** `pnpm -C apps/union-eyes test` runs real tests; `pnpm -C apps/union-eyes e2e` runs headless
 
 ### Epic 4 — A11y + Perf + Error UX (Phase 4)
+
 **Goal:** Accessible, performant, user-friendly error handling.
 
 | PR | Acceptance | Files Impacted |
@@ -96,6 +107,7 @@
 **Acceptance:** 0 critical axe violations, no raw stack traces in UI
 
 ### Epic 5 — CAPE-ACEP Pilot Hardening (Phase 5)
+
 **Goal:** Pilot-ready environment with org scoping and evidence export.
 
 | PR | Acceptance | Files Impacted |

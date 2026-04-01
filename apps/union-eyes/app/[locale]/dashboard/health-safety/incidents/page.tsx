@@ -94,7 +94,7 @@ export default function IncidentsPage() {
 
   useEffect(() => {
     if (organizationId) {
-      // eslint-disable-next-line react-hooks/immutability
+      // eslint-disable-next-line react-hooks/set-state-in-effect
       loadStats();
     }
   }, [organizationId, dateRange, loadStats]);

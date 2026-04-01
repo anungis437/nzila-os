@@ -385,7 +385,7 @@ export function GrievanceIntakeForm({
 
 // ─── Step 1: Member Details ──────────────────────────────────
 
-function MemberStep({ form }: { form: UseFormReturn<GrievanceFormData, any, GrievanceFormData> }) {
+function MemberStep({ form }: { form: UseFormReturn<GrievanceFormData, undefined, GrievanceFormData> }) {
   return (
     <div className="space-y-6">
       <StepHeader
@@ -407,7 +407,7 @@ function MemberStep({ form }: { form: UseFormReturn<GrievanceFormData, any, Grie
 
 // ─── Step 2: Employer / Workplace ────────────────────────────
 
-function EmployerStep({ form }: { form: UseFormReturn<GrievanceFormData, any, GrievanceFormData> }) {
+function EmployerStep({ form }: { form: UseFormReturn<GrievanceFormData, undefined, GrievanceFormData> }) {
   return (
     <div className="space-y-6">
       <StepHeader
@@ -429,7 +429,7 @@ function EmployerStep({ form }: { form: UseFormReturn<GrievanceFormData, any, Gr
 
 // ─── Step 3: Issue Type ──────────────────────────────────────
 
-function IssueStep({ form }: { form: UseFormReturn<GrievanceFormData, any, GrievanceFormData> }) {
+function IssueStep({ form }: { form: UseFormReturn<GrievanceFormData, undefined, GrievanceFormData> }) {
   const [dateOpen, setDateOpen] = React.useState(false);
 
   return (
@@ -553,7 +553,7 @@ function IssueStep({ form }: { form: UseFormReturn<GrievanceFormData, any, Griev
 
 // ─── Step 4: Description ─────────────────────────────────────
 
-function DescriptionStep({ form }: { form: UseFormReturn<GrievanceFormData, any, GrievanceFormData> }) {
+function DescriptionStep({ form }: { form: UseFormReturn<GrievanceFormData, undefined, GrievanceFormData> }) {
   return (
     <div className="space-y-6">
       <StepHeader
@@ -601,7 +601,7 @@ function DescriptionStep({ form }: { form: UseFormReturn<GrievanceFormData, any,
 
 // ─── Step 5: Documents ───────────────────────────────────────
 
-function DocumentStep({ form: _form }: { form: UseFormReturn<GrievanceFormData, any, GrievanceFormData> }) {
+function DocumentStep({ form: _form }: { form: UseFormReturn<GrievanceFormData, undefined, GrievanceFormData> }) {
   return (
     <div className="space-y-6">
       <StepHeader
@@ -725,7 +725,7 @@ function FormField({
   type = "text",
   className,
 }: {
-  form: UseFormReturn<GrievanceFormData, any, GrievanceFormData>;
+  form: UseFormReturn<GrievanceFormData, undefined, GrievanceFormData>;
   name: keyof GrievanceFormData;
   label: string;
   required?: boolean;
@@ -749,7 +749,7 @@ function FormField({
   );
 }
 
-function FieldError({ form, name }: { form: UseFormReturn<GrievanceFormData, any, GrievanceFormData>; name: string }) {
+function FieldError({ form, name }: { form: UseFormReturn<GrievanceFormData, undefined, GrievanceFormData>; name: string }) {
   const error = form.formState.errors[name as keyof GrievanceFormData];
   if (!error?.message) return null;
   return (
@@ -764,7 +764,7 @@ function FlagCheckbox({
   name,
   label,
 }: {
-  form: UseFormReturn<GrievanceFormData, any, GrievanceFormData>;
+  form: UseFormReturn<GrievanceFormData, undefined, GrievanceFormData>;
   name: keyof GrievanceFormData;
   label: string;
 }) {
@@ -787,7 +787,7 @@ function FlagCheckbox({
 function HelpTip({ children }: { children: React.ReactNode }) {
   return (
     <div className="flex items-start gap-2 bg-muted/40 rounded-md p-3 text-xs text-muted-foreground">
-      <HelpCircle className="h-3.5 w-3.5 mt-0.5 flex-shrink-0" />
+      <HelpCircle className="h-3.5 w-3.5 mt-0.5 shrink-0" />
       <div>{children}</div>
     </div>
   );

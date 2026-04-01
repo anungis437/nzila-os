@@ -124,7 +124,7 @@ export default async function AdminCaseStudiesPage({ params, searchParams }: Adm
             </div>
 
             <Select defaultValue={status || 'all'} name="status">
-              <SelectTrigger className="w-[180px]">
+              <SelectTrigger className="w-45">
                 <SelectValue placeholder="Status" />
               </SelectTrigger>
               <SelectContent>
@@ -136,7 +136,7 @@ export default async function AdminCaseStudiesPage({ params, searchParams }: Adm
             </Select>
 
             <Select defaultValue={category || 'all'} name="category">
-              <SelectTrigger className="w-[180px]">
+              <SelectTrigger className="w-45">
                 <SelectValue placeholder="Category" />
               </SelectTrigger>
               <SelectContent>
