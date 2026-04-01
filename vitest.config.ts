@@ -173,6 +173,12 @@ export default defineConfig({
       'packages/ue-assistant',
       // E2E platform proof tests
       'tests/e2e/platform',
+      // Platform unification packages
+      'packages/platform-contracts',
+      'packages/platform-auth',
+      'packages/platform-shell',
+      'packages/platform-notifications',
+      'packages/platform-billing',
     ],
   },
 })

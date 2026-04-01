@@ -31,6 +31,27 @@
       "problemMatcher": []
     },
     {
+      "label": "Test (fast — skip contracts)",
+      "type": "shell",
+      "command": "pnpm test:fast",
+      "group": "test",
+      "problemMatcher": []
+    },
+    {
+      "label": "Test (changed packages only)",
+      "type": "shell",
+      "command": "pnpm test:changed",
+      "group": "test",
+      "problemMatcher": []
+    },
+    {
+      "label": "Test (platform packages)",
+      "type": "shell",
+      "command": "pnpm test:platform",
+      "group": "test",
+      "problemMatcher": []
+    },
+    {
       "label": "Contract tests",
       "type": "shell",
       "command": "pnpm contract-tests",

@@ -7,14 +7,19 @@
   "types": "./src/index.ts",
   "exports": {
     ".": "./src/index.ts",
-    "./context": "./src/context/types.ts"
+    "./context": "./src/context/types.ts",
+    "./schemas": "./src/context/schemas.ts",
+    "./guards": "./src/context/guards.ts",
+    "./legacy": "./src/context/legacy.ts"
   },
   "scripts": {
     "typecheck": "tsc --noEmit",
     "test": "vitest run",
     "lint": "eslint src/"
   },
-  "dependencies": {},
+  "dependencies": {
+    "zod": "^3.24.0"
+  },
   "devDependencies": {
     "@nzila/config": "workspace:*",
     "typescript": "^5",

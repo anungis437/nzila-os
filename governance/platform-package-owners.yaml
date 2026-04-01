@@ -199,6 +199,31 @@ packages:
     tier: service
     description: "Integration lifecycle and health management"
 
+  # ── Platform unification layer ────────────────────────────────────────────
+  platform-auth:
+    owner: "@nzila/platform"
+    steward: null
+    tier: foundational
+    description: "Cross-app authentication adapters and session utilities"
+
+  platform-billing:
+    owner: "@nzila/commerce"
+    steward: null
+    tier: service
+    description: "Billing plan enforcement and usage metering"
+
+  platform-notifications:
+    owner: "@nzila/platform"
+    steward: null
+    tier: service
+    description: "Unified notification dispatch (email, in-app, push)"
+
+  platform-shell:
+    owner: "@nzila/platform"
+    steward: null
+    tier: foundational
+    description: "App shell registry, context providers, and shared UI chrome"
+
   platform-rfp-generator:
     owner: "@nzila/governance"
     steward: null
