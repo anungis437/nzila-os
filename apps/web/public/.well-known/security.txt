@@ -1,0 +1,11 @@
+Contact: mailto:security@nzila.io
+Expires: 2026-12-31T23:59:59.000Z
+Preferred-Languages: en, fr
+Canonical: https://nzila.io/.well-known/security.txt
+Policy: https://nzila.io/security/vulnerability-disclosure-policy
+Hiring: https://nzila.io/careers
+
+# Nzila OS — Coordinated Vulnerability Disclosure
+# Please report security vulnerabilities responsibly.
+# We will acknowledge receipt within 48 hours.
+# See our full policy at the URL above.
