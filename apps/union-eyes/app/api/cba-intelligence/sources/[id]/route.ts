@@ -2,7 +2,6 @@ import { withApi, ApiError, z } from "@/lib/api/framework";
 import {
   getSourceById,
   updateSource,
-  updateSourceHealth,
   deactivateSource,
 } from "@/lib/services/cba-intelligence/source-registry-service";
 

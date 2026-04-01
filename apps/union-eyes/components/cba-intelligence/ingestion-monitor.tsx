@@ -27,7 +27,6 @@ import {
   SelectValue,
 } from "@/components/ui/select";
 import {
-  Play,
   Loader2,
   CheckCircle2,
   XCircle,
@@ -119,7 +118,7 @@ export function IngestionMonitor() {
     refetchInterval: 10_000, // Poll every 10s for running jobs
   });
 
-  const triggerMutation = useMutation({
+  const _triggerMutation = useMutation({
     mutationFn: (sourceId: string) =>
       fetch("/api/cba-intelligence/ingestion", {
         method: "POST",

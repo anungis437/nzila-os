@@ -22,7 +22,7 @@ import { eq } from "drizzle-orm";
 
 // ── Fixed IDs for determinism ───────────────────────────────────────────────
 
-const DEMO_ORG_ID = "458a56cb-251a-4c91-a0b5-81bb8ac39087";
+const _DEMO_ORG_ID = "458a56cb-251a-4c91-a0b5-81bb8ac39087";
 const REVIEWER_ID = "demo-admin-001";
 
 const SOURCES = [
@@ -138,9 +138,9 @@ async function main() {
     .from(cbaIntelIngestionJobs)
     .where(eq(cbaIntelIngestionJobs.sourceId, fslrb.id));
 
-  let jobId: string;
+  let _jobId: string;
   if (existingJob.length > 0) {
-    jobId = existingJob[0].id;
+    _jobId = existingJob[0].id;
     console.log("  ✓ Ingestion job already exists");
   } else {
     const [job] = await db
@@ -160,7 +160,7 @@ async function main() {
         triggeredBy: REVIEWER_ID,
       })
       .returning({ id: cbaIntelIngestionJobs.id });
-    jobId = job.id;
+    _jobId = job.id;
     console.log("  + Ingestion job created");
   }
 

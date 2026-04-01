@@ -9,7 +9,7 @@ import { createHash } from 'crypto';
 import { getAiClient, UE_APP_KEY, UE_PROFILES, UE_SYSTEM_ORG_ID } from '@/lib/ai/ai-client';
 import { db } from '@/db';
 import { cbaClause, collectiveAgreements } from '@/db/schema';
-import { eq, and } from 'drizzle-orm';
+import { eq } from 'drizzle-orm';
 import type { ClauseType } from '@/db/schema/domains/agreements';
 import { logger } from '@/lib/logger';
 

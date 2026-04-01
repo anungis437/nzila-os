@@ -52,7 +52,7 @@ export const GET = withApi(
     const agreement = await getAgreementById(agreementId);
     if (!agreement) throw ApiError.notFound("Agreement not found");
 
-    const { save, history, page, limit, ...filters } = query;
+    const { save, history: _history, page: _page, limit: _limit, ...filters } = query;
     const result = await findComparableAgreements(agreementId, filters);
 
     // Persist snapshot if requested

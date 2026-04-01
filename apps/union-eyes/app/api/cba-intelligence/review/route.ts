@@ -37,7 +37,7 @@ export const GET = withApi(
       return getReviewQueueCounts();
     }
 
-    const { page, limit, counts, ...filters } = query;
+    const { page, limit, counts: _counts, ...filters } = query;
     return getReviewQueue(filters, { page, limit });
   },
 );

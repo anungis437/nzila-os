@@ -1,7 +1,6 @@
 import { db } from "@/db/db";
 import {
   cbaIntelIngestionJobs,
-  cbaIntelSources,
   ingestionStatusEnum,
 } from "@/db/schema";
 import { eq, and, desc, sql, type SQL } from "drizzle-orm";

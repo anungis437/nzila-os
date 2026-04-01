@@ -11,12 +11,31 @@
     "./evidence": "./src/evidence.ts",
     "./environment": "./src/environment.ts",
     "./change": "./src/change.ts",
-    "./schemas": "./src/schemas.ts"
+    "./schemas": "./src/schemas.ts",
+    "./identity": "./src/identity.ts",
+    "./org-scope": "./src/org-scope.ts",
+    "./role": "./src/role.ts",
+    "./module-registry": "./src/module-registry.ts",
+    "./error": "./src/error.ts",
+    "./pagination": "./src/pagination.ts",
+    "./mutation": "./src/mutation.ts",
+    "./platform-event": "./src/platform-event.ts",
+    "./notification": "./src/notification.ts",
+    "./entitlement": "./src/entitlement.ts",
+    "./file-metadata": "./src/file-metadata.ts",
+    "./audit-event": "./src/audit-event.ts"
   },
   "scripts": {
-    "typecheck": "tsc --noEmit"
+    "typecheck": "tsc --noEmit",
+    "test": "vitest run",
+    "lint": "eslint src/"
   },
   "dependencies": {
-    "@nzila/platform-ai-contract": "workspace:*"
+    "@nzila/platform-ai-contract": "workspace:*",
+    "zod": "^3.24.0"
+  },
+  "devDependencies": {
+    "typescript": "^5",
+    "vitest": "^4.0.18"
   }
 }

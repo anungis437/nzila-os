@@ -102,7 +102,7 @@ const AGREEMENT_ID = "agr-psac-pa-001";
 const WAGE_ADJ_ID = "wage-001";
 const CLAUSE_ID = "clause-001";
 const REVIEW_ID = "review-001";
-const BENCHMARK_SNAPSHOT_ID = "bench-001";
+const _BENCHMARK_SNAPSHOT_ID = "bench-001";
 const ORG_ID = "org-test-001";
 
 const SOURCE_FIXTURE = {
@@ -191,11 +191,13 @@ describe("CBA Intelligence – Integration pipeline", () => {
   });
 
   it("Step 1: creates a source via source-registry", async () => {
-    const returning = makeDbChain([SOURCE_FIXTURE]);
+    const _returning = makeDbChain([SOURCE_FIXTURE]);
     mocks.mockInsert.mockReturnValueOnce(makeDbChain([SOURCE_FIXTURE]));
 
     const { createSource } = await import("@/lib/services/cba-intelligence/source-registry-service");
-    const result = await createSource(SOURCE_FIXTURE as any);
+    const result = await createSource(
+      SOURCE_FIXTURE as unknown as Parameters<typeof createSource>[0],
+    );
 
     expect(mocks.mockInsert).toHaveBeenCalled();
     expect(result).toMatchObject({ id: SOURCE_ID, slug: "fslrb-decisions" });
@@ -205,11 +207,13 @@ describe("CBA Intelligence – Integration pipeline", () => {
     mocks.mockInsert.mockReturnValueOnce(makeDbChain([JOB_FIXTURE]));
 
     const { createIngestionJob } = await import("@/lib/services/cba-intelligence/ingestion-service");
-    const result = await createIngestionJob({
-      sourceId: SOURCE_ID,
-      orgId: ORG_ID,
-      triggerType: "manual",
-    } as any);
+    const result = await createIngestionJob(
+      {
+        sourceId: SOURCE_ID,
+        orgId: ORG_ID,
+        triggerType: "manual",
+      } as unknown as Parameters<typeof createIngestionJob>[0],
+    );
 
     expect(mocks.mockInsert).toHaveBeenCalled();
     expect(result).toMatchObject({ id: JOB_ID, sourceId: SOURCE_ID });
@@ -220,16 +224,18 @@ describe("CBA Intelligence – Integration pipeline", () => {
     mocks.mockInsert.mockReturnValueOnce(makeDbChain([DOC_FIXTURE]));
 
     const { upsertDocument } = await import("@/lib/services/cba-intelligence/document-service");
-    const result = await upsertDocument({
-      sourceId: SOURCE_ID,
-      orgId: ORG_ID,
-      title: DOC_FIXTURE.title,
-      sourceUrl: DOC_FIXTURE.sourceUrl,
-      documentType: "cba",
-      rawContent: "Full text of the agreement...",
-      language: "en",
-      jurisdiction: "federal",
-    } as any);
+    const result = await upsertDocument(
+      {
+        sourceId: SOURCE_ID,
+        orgId: ORG_ID,
+        title: DOC_FIXTURE.title,
+        sourceUrl: DOC_FIXTURE.sourceUrl,
+        documentType: "cba",
+        rawContent: "Full text of the agreement...",
+        language: "en",
+        jurisdiction: "federal",
+      } as unknown as Parameters<typeof upsertDocument>[0],
+    );
 
     expect(result).toHaveProperty("document");
     expect(result).toHaveProperty("action");
@@ -247,11 +253,13 @@ describe("CBA Intelligence – Integration pipeline", () => {
     mocks.mockInsert.mockReturnValueOnce(makeDbChain([runFixture]));
 
     const { createExtractionRun } = await import("@/lib/services/cba-intelligence/extraction-service");
-    const result = await createExtractionRun({
-      documentId: DOC_ID,
-      orgId: ORG_ID,
-      method: "rule_based",
-    } as any);
+    const result = await createExtractionRun(
+      {
+        documentId: DOC_ID,
+        orgId: ORG_ID,
+        method: "rule_based",
+      } as unknown as Parameters<typeof createExtractionRun>[0],
+    );
 
     expect(mocks.mockInsert).toHaveBeenCalled();
     expect(result).toMatchObject({ id: EXTRACTION_RUN_ID, documentId: DOC_ID });
@@ -261,16 +269,18 @@ describe("CBA Intelligence – Integration pipeline", () => {
     mocks.mockInsert.mockReturnValueOnce(makeDbChain([FINDING_FIXTURE]));
 
     const { createFinding } = await import("@/lib/services/cba-intelligence/extraction-service");
-    const result = await createFinding({
-      documentId: DOC_ID,
-      extractionRunId: EXTRACTION_RUN_ID,
-      orgId: ORG_ID,
-      findingType: "wage_increase",
-      clauseFamily: "wages",
-      confidence: 0.92,
-      summary: FINDING_FIXTURE.summary,
-      rawText: FINDING_FIXTURE.rawText,
-    } as any);
+    const result = await createFinding(
+      {
+        documentId: DOC_ID,
+        extractionRunId: EXTRACTION_RUN_ID,
+        orgId: ORG_ID,
+        findingType: "wage_increase",
+        clauseFamily: "wages",
+        confidence: 0.92,
+        summary: FINDING_FIXTURE.summary,
+        rawText: FINDING_FIXTURE.rawText,
+      } as unknown as Parameters<typeof createFinding>[0],
+    );
 
     expect(mocks.mockInsert).toHaveBeenCalled();
     expect(result).toMatchObject({ findingType: "wage_increase", confidence: 0.92 });
@@ -280,15 +290,17 @@ describe("CBA Intelligence – Integration pipeline", () => {
     mocks.mockInsert.mockReturnValueOnce(makeDbChain([AGREEMENT_FIXTURE]));
 
     const { createAgreement } = await import("@/lib/services/cba-intelligence/extraction-service");
-    const result = await createAgreement({
-      documentId: DOC_ID,
-      orgId: ORG_ID,
-      employer: "Treasury Board of Canada",
-      union: "PSAC",
-      bargainingUnit: "PA Group",
-      jurisdiction: "federal",
-      sector: "public_admin",
-    } as any);
+    const result = await createAgreement(
+      {
+        documentId: DOC_ID,
+        orgId: ORG_ID,
+        employer: "Treasury Board of Canada",
+        union: "PSAC",
+        bargainingUnit: "PA Group",
+        jurisdiction: "federal",
+        sector: "public_admin",
+      } as unknown as Parameters<typeof createAgreement>[0],
+    );
 
     expect(mocks.mockInsert).toHaveBeenCalled();
     expect(result).toMatchObject({ employer: "Treasury Board of Canada", union: "PSAC" });
@@ -307,13 +319,15 @@ describe("CBA Intelligence – Integration pipeline", () => {
     mocks.mockInsert.mockReturnValueOnce(makeDbChain([wageFixture]));
 
     const { createWageAdjustment } = await import("@/lib/services/cba-intelligence/extraction-service");
-    const result = await createWageAdjustment({
-      agreementId: AGREEMENT_ID,
-      orgId: ORG_ID,
-      effectiveDate: new Date("2025-04-01"),
-      increasePct: "2.80",
-      increaseType: "general",
-    } as any);
+    const result = await createWageAdjustment(
+      {
+        agreementId: AGREEMENT_ID,
+        orgId: ORG_ID,
+        effectiveDate: new Date("2025-04-01"),
+        increasePct: "2.80",
+        increaseType: "general",
+      } as unknown as Parameters<typeof createWageAdjustment>[0],
+    );
 
     expect(mocks.mockInsert).toHaveBeenCalled();
     expect(result).toMatchObject({ agreementId: AGREEMENT_ID });
@@ -334,13 +348,15 @@ describe("CBA Intelligence – Integration pipeline", () => {
     mocks.mockInsert.mockReturnValueOnce(makeDbChain([clauseFixture]));
 
     const { createClause } = await import("@/lib/services/cba-intelligence/extraction-service");
-    const result = await createClause({
-      agreementId: AGREEMENT_ID,
-      orgId: ORG_ID,
-      clauseFamily: "wages",
-      title: "Annual Pay Increases",
-      rawText: "Annual rate of pay shall be increased...",
-    } as any);
+    const result = await createClause(
+      {
+        agreementId: AGREEMENT_ID,
+        orgId: ORG_ID,
+        clauseFamily: "wages",
+        title: "Annual Pay Increases",
+        rawText: "Annual rate of pay shall be increased...",
+      } as unknown as Parameters<typeof createClause>[0],
+    );
 
     expect(mocks.mockInsert).toHaveBeenCalled();
     expect(result).toMatchObject({ clauseFamily: "wages" });
@@ -364,7 +380,7 @@ describe("CBA Intelligence – Integration pipeline", () => {
     mocks.mockUpdate.mockReturnValueOnce(makeDbChain([{ ...FINDING_FIXTURE, reviewStatus: "approved" }]));
 
     const { submitReview } = await import("@/lib/services/cba-intelligence/review-service");
-    const result = await submitReview({
+    const _result = await submitReview({
       targetType: "finding",
       targetId: FINDING_ID,
       decision: "approved",
@@ -401,7 +417,7 @@ describe("CBA Intelligence – Integration pipeline", () => {
     ]));
 
     const { findComparableAgreements } = await import("@/lib/services/cba-intelligence/benchmark-service");
-    const result = await findComparableAgreements(AGREEMENT_ID, {
+    const _result = await findComparableAgreements(AGREEMENT_ID, {
       jurisdiction: "federal",
       sector: "public_admin",
     });

@@ -1,4 +1,4 @@
-import { describe, it, expect, vi, beforeEach } from "vitest";
+import { describe, it, expect, vi } from "vitest";
 import { getAdapter, getRegisteredAdapterKeys } from "@/lib/services/cba-intelligence/adapters";
 
 vi.mock("@/lib/logger", () => ({

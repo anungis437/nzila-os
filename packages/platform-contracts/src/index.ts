@@ -44,3 +44,147 @@ export {
   isValidGovernanceTelemetry,
   isValidEvidenceExport,
 } from './schemas.js'
+
+// ── Identity ──
+export {
+  userIdentitySchema,
+  sessionIdentitySchema,
+  userDisplayProfileSchema,
+  type UserIdentity,
+  type SessionIdentity,
+  type UserDisplayProfile,
+} from './identity.js'
+
+// ── Org Scope ──
+export {
+  orgScopeSchema,
+  orgScopeMembershipSchema,
+  orgScopeRoleAssignmentSchema,
+  orgScopedActorContextSchema,
+  orgScopedRequestContextSchema,
+  orgScopeStatusValues,
+  toOrgScopeId,
+  type OrgScopeId,
+  type OrgScope,
+  type OrgScopeStatus,
+  type OrgScopeMembership,
+  type OrgScopeRoleAssignment,
+  type OrgScopedActorContext,
+  type OrgScopedRequestContext,
+} from './org-scope.js'
+
+// ── Role / Permission ──
+export {
+  roleDefinitionSchema,
+  permissionCheckSchema,
+  permissionResultSchema,
+  platformRoleValues,
+  meetsRoleRequirement,
+  type PlatformRole,
+  type RoleDefinition,
+  type PermissionCheck,
+  type PermissionResult,
+} from './role.js'
+
+// ── Module / App Registry ──
+export {
+  moduleRegistrationSchema,
+  moduleManifestSchema,
+  moduleTierValues,
+  type ModuleRegistration,
+  type ModuleManifest,
+  type ModuleTier,
+} from './module-registry.js'
+
+// ── Error Envelope ──
+export {
+  platformErrorSchema,
+  fieldErrorSchema,
+  platformErrorCodeValues,
+  createPlatformError,
+  getHttpStatus,
+  type PlatformError,
+  type PlatformErrorCode,
+  type FieldError,
+} from './error.js'
+
+// ── Pagination ──
+export {
+  paginationMetaSchema,
+  cursorMetaSchema,
+  paginatedListSchema,
+  cursorListSchema,
+  paginationInputSchema,
+  buildPaginationMeta,
+  type PaginationMeta,
+  type CursorMeta,
+  type PaginatedList,
+  type CursorList,
+  type PaginationInput,
+} from './pagination.js'
+
+// ── Mutation / Action Result ──
+export {
+  actionResultSchema,
+  actionFailureSchema,
+  partialSuccessSchema,
+  ok,
+  fail,
+  type ActionResult,
+  type ActionFailure,
+  type ActionResponse,
+  type PartialSuccess,
+} from './mutation.js'
+
+// ── Platform Event ──
+export {
+  platformEventSchema,
+  platformEventTypeValues,
+  orgScopeSelectedPayloadSchema,
+  appLaunchedPayloadSchema,
+  moduleEnabledPayloadSchema,
+  roleAssignedPayloadSchema,
+  entitlementChangedPayloadSchema,
+  type PlatformEvent,
+  type PlatformEventType,
+} from './platform-event.js'
+
+// ── Notification ──
+export {
+  notificationSchema,
+  unreadCountSchema,
+  notificationChannelValues,
+  notificationPriorityValues,
+  type Notification,
+  type UnreadCount,
+  type NotificationChannel,
+  type NotificationPriority,
+} from './notification.js'
+
+// ── Entitlement / Subscription ──
+export {
+  entitlementSchema,
+  subscriptionSchema,
+  featureAccessSchema,
+  planTierValues,
+  subscriptionStatusValues,
+  type Entitlement,
+  type Subscription,
+  type FeatureAccess,
+  type PlanTier,
+  type SubscriptionStatus,
+} from './entitlement.js'
+
+// ── File Metadata ──
+export {
+  fileMetadataSchema,
+  type FileMetadata,
+} from './file-metadata.js'
+
+// ── Audit Event (Platform) ──
+export {
+  platformAuditEventSchema,
+  platformAuditInputSchema,
+  type PlatformAuditEvent,
+  type PlatformAuditInput,
+} from './audit-event.js'

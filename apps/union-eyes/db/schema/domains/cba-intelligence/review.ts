@@ -8,7 +8,6 @@ import {
   index,
 } from "drizzle-orm/pg-core";
 import { relations } from "drizzle-orm";
-import { cbaIntelFindings, cbaIntelAgreements } from "./extraction";
 
 // ---------------------------------------------------------------------------
 // Enums

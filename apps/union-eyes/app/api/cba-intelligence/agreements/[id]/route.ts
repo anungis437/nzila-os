@@ -1,4 +1,4 @@
-import { withApi, ApiError, z } from "@/lib/api/framework";
+import { withApi, ApiError } from "@/lib/api/framework";
 import {
   getAgreementById,
   listWageAdjustments,

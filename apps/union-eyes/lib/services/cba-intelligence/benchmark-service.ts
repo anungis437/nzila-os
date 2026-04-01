@@ -5,7 +5,7 @@ import {
   cbaIntelWageAdjustments,
   cbaIntelClauses,
 } from "@/db/schema";
-import { eq, and, gte, lte, sql, desc, type SQL, ne, ilike } from "drizzle-orm";
+import { eq, and, sql, desc, type SQL, ne, ilike } from "drizzle-orm";
 import { logger } from "@/lib/logger";
 
 // ---------------------------------------------------------------------------

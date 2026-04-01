@@ -4,7 +4,7 @@ import {
   cbaIntelSources,
   cbaIntelDocuments,
 } from "@/db/schema";
-import { eq, desc, sql, and, lt, type SQL } from "drizzle-orm";
+import { eq, desc, sql, and, lt } from "drizzle-orm";
 import { logger } from "@/lib/logger";
 
 // ---------------------------------------------------------------------------

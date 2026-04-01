@@ -1,0 +1,39 @@
+{
+  "name": "@nzila/platform-auth",
+  "version": "0.1.0",
+  "private": true,
+  "type": "module",
+  "main": "./src/index.ts",
+  "types": "./src/index.ts",
+  "exports": {
+    ".": "./src/index.ts",
+    "./identity": "./src/identity.ts",
+    "./authorization": "./src/authorization.ts",
+    "./guards": "./src/guards.ts",
+    "./middleware": "./src/middleware.ts",
+    "./clerk-adapter": "./src/clerk-adapter.ts"
+  },
+  "scripts": {
+    "typecheck": "tsc --noEmit",
+    "test": "vitest run",
+    "lint": "eslint src/"
+  },
+  "dependencies": {
+    "@nzila/org": "workspace:*",
+    "@nzila/platform-contracts": "workspace:*",
+    "zod": "^3.24.0"
+  },
+  "peerDependencies": {
+    "@clerk/nextjs": ">=6.0.0"
+  },
+  "peerDependenciesMeta": {
+    "@clerk/nextjs": { "optional": true }
+  },
+  "devDependencies": {
+    "@nzila/config": "workspace:*",
+    "@clerk/nextjs": "^7.0.4",
+    "next": "^16.0.0",
+    "typescript": "^5",
+    "vitest": "^4.0.18"
+  }
+}
