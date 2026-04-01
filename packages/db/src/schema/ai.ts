@@ -266,6 +266,8 @@ export const aiUsageBudgets = pgTable(
     month: varchar('month', { length: 7 }).notNull(), // YYYY-MM
     budgetUsd: numeric('budget_usd', { precision: 12, scale: 2 }).notNull(),
     spentUsd: numeric('spent_usd', { precision: 12, scale: 6 }).notNull().default('0'),
+    /** NZ-RISK-027: Accumulated CO₂ estimate (grams) for the billing period */
+    co2EstimateGrams: numeric('co2_estimate_grams', { precision: 12, scale: 4 }).notNull().default('0'),
     status: aiBudgetStatusEnum('status').notNull().default('ok'),
     createdAt: timestamp('created_at', { withTimezone: true }).notNull().defaultNow(),
     updatedAt: timestamp('updated_at', { withTimezone: true }).notNull().defaultNow(),

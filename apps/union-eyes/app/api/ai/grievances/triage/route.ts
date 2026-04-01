@@ -50,7 +50,7 @@ export const POST = withRoleAuth('steward', async (request: NextRequest, context
       userId: context.userId!,
     });
     return standardSuccessResponse(result);
-  } catch (error) {
+  } catch (_error) {
     return standardErrorResponse(
       ErrorCode.INTERNAL_ERROR,
       'Triage analysis failed',

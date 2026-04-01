@@ -20,7 +20,6 @@ import {
   Headphones,
   Clock,
   CheckCircle2,
-  TrendingUp,
   AlertTriangle,
   TicketIcon,
   MessageSquare,

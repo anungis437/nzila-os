@@ -342,7 +342,7 @@ export default async function CLCCompliancePage() {
             </div>
             <div className="flex gap-2">
               <Select defaultValue="all">
-                <SelectTrigger className="w-[180px]">
+                <SelectTrigger className="w-45">
                   <SelectValue placeholder={t('provincial.filter', { defaultValue: 'Filter by province' })} />
                 </SelectTrigger>
                 <SelectContent>

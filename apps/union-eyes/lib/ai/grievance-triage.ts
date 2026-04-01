@@ -43,9 +43,36 @@ export interface TriageResult {
   suggestedStep: string | null;
   similarGrievanceIds: string[];
   factors: Array<{ name: string; weight: number; description: string }>;
+  /**
+   * Always true — triage results are advisory and may NEVER drive case updates
+   * without an explicit PATCH /api/ai/grievances/[id]/triage (reviewTriage) call.
+   */
+  requiresHumanConfirmation: true;
 }
 
 const MODEL_VERSION = '1.0.0';
+
+// ── NZ-RISK-012: Input sanitization limits ──────────────────────────────────
+// Cap field lengths to prevent abuse (e.g. employer-crafted adversarial text
+// injected into grievance fields to manipulate triage scoring). Also strips
+// null bytes and excessive whitespace.
+
+const FIELD_LIMITS = {
+  title: 500,
+  description: 10_000,
+  background: 5_000,
+  desiredOutcome: 3_000,
+} as const;
+
+function sanitizeField(value: string | null | undefined, maxLength: number): string {
+  if (!value) return '';
+  return value
+    .replace(/\0/g, '')              // strip null bytes
+    .replace(/[\r\n]{3,}/g, '\n\n') // collapse excessive newlines
+    .replace(/ {4,}/g, '   ')       // collapse excessive spaces
+    .slice(0, maxLength)
+    .trim();
+}
 
 // ============================================================================
 // SERVICE
@@ -143,6 +170,12 @@ export async function getTriageHistory(
 
 /**
  * Accept or reject a pending triage.
+ * Throws if the triage is not in 'pending' status — prevents double-review
+ * and ensures the human-confirmation gate cannot be bypassed.
+ *
+ * NZ-RISK-016: When a steward overrides the AI-suggested priority the override
+ * and its reason are persisted in the reviewNotes (structured JSON prefix) and
+ * audit log, preserving a full audit trail of human vs. AI judgement.
  */
 export async function reviewTriage(
   triageId: string,
@@ -150,14 +183,55 @@ export async function reviewTriage(
   reviewedBy: string,
   accept: boolean,
   notes?: string,
+  override?: { priority: string; reason: string },
 ) {
+  // Guard: only pending triages may be reviewed
+  const [existing] = await db
+    .select({ id: aiGrievanceTriages.id, status: aiGrievanceTriages.status, suggestedPriority: aiGrievanceTriages.suggestedPriority })
+    .from(aiGrievanceTriages)
+    .where(and(eq(aiGrievanceTriages.id, triageId), eq(aiGrievanceTriages.organizationId, organizationId)))
+    .limit(1);
+
+  if (!existing) {
+    throw new Error(`Triage ${triageId} not found in org ${organizationId}`);
+  }
+  if (existing.status !== 'pending') {
+    throw new Error(
+      `Triage ${triageId} is already '${existing.status}' and cannot be re-reviewed. Create a new triage to get a fresh AI assessment.`,
+    );
+  }
+
+  // NZ-RISK-016: Build structured review notes preserving override audit trail
+  let reviewNotes = notes ?? null;
+  if (override) {
+    const overrideLog = JSON.stringify({
+      overridePriority: override.priority,
+      originalPriority: existing.suggestedPriority,
+      overrideReason: override.reason,
+      reviewedBy,
+      reviewedAt: new Date().toISOString(),
+    });
+    reviewNotes = reviewNotes
+      ? `[OVERRIDE] ${overrideLog}\n${reviewNotes}`
+      : `[OVERRIDE] ${overrideLog}`;
+
+    logger.info('[grievance-triage] Priority override applied', {
+      triageId,
+      organizationId,
+      reviewedBy,
+      originalPriority: existing.suggestedPriority,
+      overridePriority: override.priority,
+      reason: override.reason,
+    });
+  }
+
   await db
     .update(aiGrievanceTriages)
     .set({
       status: accept ? 'accepted' : 'rejected',
       reviewedBy,
       reviewedAt: new Date(),
-      reviewNotes: notes ?? null,
+      reviewNotes,
       humanApproved: accept,
     })
     .where(and(eq(aiGrievanceTriages.id, triageId), eq(aiGrievanceTriages.organizationId, organizationId)));
@@ -168,6 +242,12 @@ export async function reviewTriage(
 // ============================================================================
 
 function buildTriagePrompt(g: typeof grievances.$inferSelect): string {
+  // NZ-RISK-012: sanitize and cap all user-supplied fields before prompt injection
+  const title = sanitizeField(g.title, FIELD_LIMITS.title);
+  const description = sanitizeField(g.description, FIELD_LIMITS.description);
+  const background = sanitizeField(g.background, FIELD_LIMITS.background);
+  const desiredOutcome = sanitizeField(g.desiredOutcome, FIELD_LIMITS.desiredOutcome);
+
   return [
     'You are a union grievance triage assistant.',
     'Analyse the following grievance and return a JSON object with:',
@@ -185,10 +265,10 @@ function buildTriagePrompt(g: typeof grievances.$inferSelect): string {
     `Type: ${g.type}`,
     `Current status: ${g.status}`,
     `Priority: ${g.priority ?? 'not set'}`,
-    `Title: ${g.title}`,
-    `Description: ${g.description}`,
-    g.background ? `Background: ${g.background}` : '',
-    g.desiredOutcome ? `Desired outcome: ${g.desiredOutcome}` : '',
+    `Title: ${title}`,
+    `Description: ${description}`,
+    background ? `Background: ${background}` : '',
+    desiredOutcome ? `Desired outcome: ${desiredOutcome}` : '',
     g.incidentDate ? `Incident date: ${g.incidentDate.toISOString()}` : '',
     '',
     'Respond ONLY with valid JSON. No markdown.',
@@ -213,6 +293,7 @@ function parseTriageResponse(raw: string): {
         suggestedStep: json.suggestedStep ?? null,
         similarGrievanceIds: json.similarGrievanceIds ?? [],
         factors: json.factors ?? [],
+        requiresHumanConfirmation: true as const,
       },
       confidence: Math.min(1, Math.max(0, Number(json.confidence) || 0.5)),
       explanation: json.explanation ?? 'No explanation provided by model.',
@@ -228,6 +309,7 @@ function parseTriageResponse(raw: string): {
         suggestedStep: null,
         similarGrievanceIds: [],
         factors: [],
+        requiresHumanConfirmation: true as const,
       },
       confidence: 0.3,
       explanation: 'AI response could not be parsed. Manual triage recommended.',

@@ -57,7 +57,7 @@ export const POST = withApiAuth(async (req: NextRequest) => {
       { consent,
         message: "Location tracking consent granted. Data will be retained for 24 hours maximum." }
     );
-  } catch (error) {
+  } catch (_error) {
     return NextResponse.json(
       { error: "Failed to request location consent" },
       { status: 500 }
@@ -85,7 +85,7 @@ export const GET = withApiAuth(async (req: NextRequest) => {
       hasConsent,
       context,
     });
-  } catch (error) {
+  } catch (_error) {
     return NextResponse.json(
       { error: "Failed to check consent status" },
       { status: 500 }
@@ -112,7 +112,7 @@ export const DELETE = withApiAuth(async (req: NextRequest) => {
       success: true,
       message: "Location tracking consent revoked. All location data has been deleted.",
     });
-  } catch (error) {
+  } catch (_error) {
     return NextResponse.json(
       { error: "Failed to revoke consent" },
       { status: 500 }

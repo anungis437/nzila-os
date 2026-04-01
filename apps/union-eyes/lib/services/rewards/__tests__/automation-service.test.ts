@@ -178,7 +178,7 @@ describe('automation-service', () => {
       const mockSelectWhere = vi.fn().mockResolvedValue([]);
       const mockSelectFrom = vi.fn().mockReturnValue({ where: mockSelectWhere });
       const { db } = await import('@/db');
-      (db.select as any).mockReturnValue({ from: mockSelectFrom });
+      vi.mocked(db.select).mockReturnValue({ from: mockSelectFrom });
 
       const result = await processMilestoneAwards('org-1', 'user-1', 'contracts_closed', 5);
 
@@ -200,7 +200,7 @@ describe('automation-service', () => {
       const mockSelectWhere = vi.fn().mockResolvedValue([rule]);
       const mockSelectFrom = vi.fn().mockReturnValue({ where: mockSelectWhere });
       const { db } = await import('@/db');
-      (db.select as any).mockReturnValue({ from: mockSelectFrom });
+      vi.mocked(db.select).mockReturnValue({ from: mockSelectFrom });
 
       mocks.mockQueryRecognitionAwards.findFirst.mockResolvedValue(null);
       mocks.mockQueryRecognitionAwardTypes.findFirst.mockResolvedValue({
@@ -226,7 +226,7 @@ describe('automation-service', () => {
       const mockSelectWhere = vi.fn().mockResolvedValue([rule]);
       const mockSelectFrom = vi.fn().mockReturnValue({ where: mockSelectWhere });
       const { db } = await import('@/db');
-      (db.select as any).mockReturnValue({ from: mockSelectFrom });
+      vi.mocked(db.select).mockReturnValue({ from: mockSelectFrom });
 
       mocks.mockQueryRecognitionAwards.findFirst.mockResolvedValue({ id: 'existing-award' });
 
@@ -243,7 +243,7 @@ describe('automation-service', () => {
       const mockSelectWhere = vi.fn().mockResolvedValue([]);
       const mockSelectFrom = vi.fn().mockReturnValue({ where: mockSelectWhere });
       const { db } = await import('@/db');
-      (db.select as any).mockReturnValue({ from: mockSelectFrom });
+      vi.mocked(db.select).mockReturnValue({ from: mockSelectFrom });
 
       const result = await processMetricAwards('org-1', 'u-1', 'satisfaction_score', 95);
 
@@ -260,7 +260,7 @@ describe('automation-service', () => {
       const mockSelectWhere = vi.fn().mockResolvedValue(rules);
       const mockSelectFrom = vi.fn().mockReturnValue({ where: mockSelectWhere });
       const { db } = await import('@/db');
-      (db.select as any).mockReturnValue({ from: mockSelectFrom });
+      vi.mocked(db.select).mockReturnValue({ from: mockSelectFrom });
 
       const result = await processScheduledAwards('org-1');
 

@@ -66,7 +66,7 @@ export default function DuesPaymentPortal({ userId }: DuesPaymentPortalProps) {
     } finally {
       setLoading(false);
     }
-  // eslint-disable-next-line react-hooks/exhaustive-deps
+   
   }, [userId]);
 
   useEffect(() => {

@@ -348,13 +348,13 @@
 | `docs/platform/semantic-convergence-entity-to-org.md` | L78 | org/tenant mapping table | RENAME |
 | `docs/tutorials/README.md` | L14 | "Multi-Tenant Data Access" link | RENAME |
 | `docs/README.md` | L55,80,149 | doc refs | RENAME |
-| `docs/SAAS_ENABLEMENT_ARCHITECTURE.md` | L9 | multi-tenant | RENAME |
-| `docs/GOLDEN_PATH_DEVELOPER_GUIDE.md` | L62 | `tenantId: decoded.orgId` | RENAME |
+| `docs/architecture/SAAS_ENABLEMENT_ARCHITECTURE.md` | L9 | multi-tenant | RENAME |
+| `docs/how-to/GOLDEN_PATH_DEVELOPER_GUIDE.md` | L62 | `tenantId: decoded.orgId` | RENAME |
 | `docs/how-to/README.md` | L11 | "Add a New Tenant" link | RENAME |
 | `docs/how-to/create-model-card.md` | L16 | users/tenants | RENAME |
 | `docs/migration/legacy-trade-domain-models.md` | L1341 | Tenant/Organization | RENAME |
 | `docs/architecture/AI_PLATFORM_CONTRACT.md` | L26 | multi-tenant isolation | RENAME |
-| `docs/APP_DOMAIN_CORE_STANDARD.md` | L160 | multi-tenant isolation | RENAME |
+| `docs/architecture/APP_DOMAIN_CORE_STANDARD.md` | L160 | multi-tenant isolation | RENAME |
 | `docs/pilot/*.md` (4 files) | various | multi-tenant refs | RENAME |
 | `docs/decision-layer/*.md` | various | multi-tenant refs | RENAME |
 | `docs/agri/01-market-map.md` | L33 | multi-tenant | RENAME |
@@ -471,12 +471,12 @@
 
 ---
 
-## 22. `plans/`
+## 22. `docs/plans/`
 
 | File | Lines | Content | Tag |
 |------|-------|---------|-----|
-| `plans/REPO_ASSESSMENT.md` | L103,124,195,256 | Tenant entity, tenant isolation, multi-tenant | RENAME |
-| `plans/IMPLEMENTATION_PLAN_FINAL.md` | L172,192 | '"org" usage never "tenant"' | **REPORT_SELF_REF** |
+| `docs/plans/REPO_ASSESSMENT.md` | L103,124,195,256 | Tenant entity, tenant isolation, multi-tenant | RENAME |
+| `docs/plans/IMPLEMENTATION_PLAN_FINAL.md` | L172,192 | '"org" usage never "tenant"' | **REPORT_SELF_REF** |
 
 ---
 

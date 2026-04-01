@@ -14,7 +14,7 @@
  *   });
  */
 
-import type { EnforcementContext, EnforcementLayer, EnforcementResult } from "./pipeline.js";
+import type { EnforcementLayer, EnforcementResult } from "./pipeline.js";
 import { createContext } from "./handler.js";
 import { composePipeline } from "./pipeline.js";
 

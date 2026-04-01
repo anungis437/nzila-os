@@ -35,6 +35,9 @@ export type {
 
 export { AiControlPlaneError } from './types'
 
+// Provider resilience
+export { AiProviderOutageError, withRetry } from './providers/retry'
+
 // Errors (standard taxonomy)
 export {
   profileNotFound,
@@ -67,6 +70,8 @@ export {
   ensureBudgetRow,
   logAiRequest,
   appendAiAuditEvent,
+  emitAiMetric,
+  estimateCo2Grams,
   redactText,
 } from './gateway'
 export type { ResolvedDeployment } from './gateway'
@@ -103,6 +108,20 @@ export { ensureBudgetRow as createBudgetRow } from './budgets'
 
 // Policy
 export { checkActionPolicy, type PolicyCheckInput, type PolicyDecision } from './policy/actionsPolicy'
+export {
+  assertNoCrossTenantAggregation,
+  checkCrossTenantPolicy,
+  type CrossTenantAnalyticsRequest,
+  type DataGovernanceResult,
+} from './policy/data-governance'
+
+// Disclosure (NZ-RISK-023)
+export {
+  getAiDisclosureNotice,
+  getAiDisclaimerText,
+  type AiDisclosureContext,
+  type AiDisclosureNotice,
+} from './disclosure'
 
 // Actions (Phase C)
 export { executeAction, type ExecuteActionResult } from './actions/executeAction'

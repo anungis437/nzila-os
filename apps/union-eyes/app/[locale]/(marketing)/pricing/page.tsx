@@ -30,7 +30,7 @@ export default async function LocalePricingPage({
 }) {
   const { locale } = await params;
   const t = await getTranslations({ locale, namespace: 'marketing.pricingBody' });
-  const tp = await getTranslations({ locale, namespace: 'marketing.pricing' });
+  const _tp = await getTranslations({ locale, namespace: 'marketing.pricing' });
 
   const modules = [
     t('moduleList.caseManagement'),

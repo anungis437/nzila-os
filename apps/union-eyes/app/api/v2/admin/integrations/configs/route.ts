@@ -5,8 +5,8 @@
  *
  * @role integration_manager
  */
-import { withApi, ApiError, z, zUUID } from '@/lib/api/framework';
-import { sql, eq, and, desc, count } from 'drizzle-orm';
+import { withApi, ApiError, z } from '@/lib/api/framework';
+import { sql } from 'drizzle-orm';
 import { withRLSContext } from '@/lib/db/with-rls-context';
 import { logger } from '@/lib/logger';
 
@@ -92,7 +92,7 @@ export const POST = withApi(
     },
   },
   async ({ body, organizationId, userId }) => {
-    const { existing, result } = await withRLSContext(async (db) => {
+    const { _existing, result } = await withRLSContext(async (db) => {
       // Check for duplicate provider in same org
       const existing = await db.execute(sql`
         SELECT id FROM integration_configs

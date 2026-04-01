@@ -237,7 +237,7 @@ export function RankedChoiceVoting({
     return (
       <Badge
         variant={index < 3 ? "default" : "secondary"}
-        className="flex items-center gap-1 min-w-[60px] justify-center"
+        className="flex items-center gap-1 min-w-15 justify-center"
       >
         {index < 3 && icons[index]}
         {t("rankLabel", { rank: index + 1 })}
@@ -324,7 +324,7 @@ export function RankedChoiceVoting({
                     }`}
                   >
                     {rankedCandidates.length === 0 ? (
-                      <div className="flex flex-col items-center justify-center h-[384px] text-muted-foreground">
+                      <div className="flex flex-col items-center justify-center h-96 text-muted-foreground">
                         <p>{t("dragHint")}</p>
                       </div>
                     ) : (

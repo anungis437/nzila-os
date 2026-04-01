@@ -26,10 +26,6 @@ import {
 } from 'lucide-react';
 
 /* ─── types ─── */
-interface TableStats {
-  table_name: string;
-  row_count: number;
-}
 
 interface SyncLogEntry {
   id: string;

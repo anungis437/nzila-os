@@ -88,7 +88,7 @@ router.post('/check-in', async (req: Request, res: Response) => {
         message: 'Checked in successfully',
       },
     });
-  } catch (error) {
+  } catch (_error) {
     if (error.name === 'ZodError') {
       return res.status(400).json({
         success: false,
@@ -135,7 +135,7 @@ router.post('/check-out', async (req: Request, res: Response) => {
         message: 'Checked out successfully',
       },
     });
-  } catch (error) {
+  } catch (_error) {
     if (error.name === 'ZodError') {
       return res.status(400).json({
         success: false,
@@ -174,7 +174,7 @@ router.get('/active', async (req: Request, res: Response) => {
       data: records,
       count: records.length,
     });
-  } catch (error) {
+  } catch (_error) {
     res.status(500).json({
       success: false,
       error: 'Failed to fetch active check-ins',
@@ -229,7 +229,7 @@ router.get('/history', async (req: Request, res: Response) => {
       data: records,
       count: records.length,
     });
-  } catch (error) {
+  } catch (_error) {
     res.status(500).json({
       success: false,
       error: 'Failed to fetch attendance history',
@@ -284,7 +284,7 @@ router.get('/summary', async (req: Request, res: Response) => {
       data: summary,
       count: summary.length,
     });
-  } catch (error) {
+  } catch (_error) {
     res.status(500).json({
       success: false,
       error: 'Failed to fetch attendance summary',
@@ -316,7 +316,7 @@ router.post('/generate-qr', async (req: Request, res: Response) => {
         expiresIn: '5 minutes',
       },
     });
-  } catch (error) {
+  } catch (_error) {
     res.status(500).json({
       success: false,
       error: 'Failed to generate QR code',
@@ -355,7 +355,7 @@ router.post('/validate-qr', async (req: Request, res: Response) => {
         memberId: validation.memberId,
       },
     });
-  } catch (error) {
+  } catch (_error) {
     res.status(500).json({
       success: false,
       error: 'Failed to validate QR code',
@@ -405,7 +405,7 @@ router.post('/coordinator-override', async (req: Request, res: Response) => {
         message: 'Manual attendance record created successfully',
       },
     });
-  } catch (error) {
+  } catch (_error) {
     if (error.name === 'ZodError') {
       return res.status(400).json({
         success: false,
@@ -450,7 +450,7 @@ router.post('/calculate-distance', async (req: Request, res: Response) => {
         distanceMiles: (distance / 1609.34).toFixed(2),
       },
     });
-  } catch (error) {
+  } catch (_error) {
     res.status(500).json({
       success: false,
       error: 'Failed to calculate distance',

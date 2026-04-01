@@ -15,14 +15,14 @@ const HAS_DB = Boolean(process.env.DATABASE_URL);
 // Dynamically import DB-dependent modules only when DATABASE_URL is available
 const dbImports = HAS_DB
   ? await import('../db')
-  : { db: null as any };
+  : { db: null as unknown };
 const schemaImports = HAS_DB
   ? await import('../db/schema')
-  : { members: null, duesAssignments: null, duesRules: null, duesTransactions: null, arrears: null, picketAttendance: null, stipendDisbursements: null, strikeFunds: null } as any;
-const duesCalcImport = HAS_DB ? await import('../jobs/dues-calculation-workflow') : { processMonthlyDuesCalculation: null as any };
-const arrearsImport = HAS_DB ? await import('../jobs/arrears-management-workflow') : { processArrearsManagement: null as any };
-const paymentImport = HAS_DB ? await import('../jobs/payment-collection-workflow') : { processPaymentCollection: null as any };
-const stipendImport = HAS_DB ? await import('../jobs/stipend-processing-workflow') : { processWeeklyStipends: null as any };
+  : { members: null, duesAssignments: null, duesRules: null, duesTransactions: null, arrears: null, picketAttendance: null, stipendDisbursements: null, strikeFunds: null } as unknown as Record<string, unknown>;
+const duesCalcImport = HAS_DB ? await import('../jobs/dues-calculation-workflow') : { processMonthlyDuesCalculation: null as unknown };
+const arrearsImport = HAS_DB ? await import('../jobs/arrears-management-workflow') : { processArrearsManagement: null as unknown };
+const paymentImport = HAS_DB ? await import('../jobs/payment-collection-workflow') : { processPaymentCollection: null as unknown };
+const stipendImport = HAS_DB ? await import('../jobs/stipend-processing-workflow') : { processWeeklyStipends: null as unknown };
 
 const { db } = dbImports;
 const { members, duesAssignments, duesRules, duesTransactions, arrears, picketAttendance, stipendDisbursements, strikeFunds } = schemaImports;

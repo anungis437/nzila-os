@@ -1,6 +1,6 @@
 // @vitest-environment jsdom
 import { describe, it, expect, vi, beforeEach } from 'vitest';
-import { renderHook, waitFor, act } from '@testing-library/react';
+import { renderHook, waitFor } from '@testing-library/react';
 
 const mocks = vi.hoisted(() => ({
   mockGetUEPriorityScores: vi.fn(),
@@ -69,7 +69,7 @@ describe('useUEMlSignals', () => {
     });
 
     it('does not fetch when orgId is empty', async () => {
-      const { result } = renderHook(() =>
+      const { result: _result } = renderHook(() =>
         useCasePrioritySignal('', 'case-1', getToken),
       );
 

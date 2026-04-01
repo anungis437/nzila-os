@@ -419,7 +419,7 @@ export function BargainingUnitManagement({
                   <TableHead>{t("headerMembers")}</TableHead>
                   <TableHead>{t("headerContractExpiry")}</TableHead>
                   <TableHead>{t("headerStatus")}</TableHead>
-                  <TableHead className="w-[70px]">{t("headerActions")}</TableHead>
+                  <TableHead className="w-17.5">{t("headerActions")}</TableHead>
                 </TableRow>
               </TableHeader>
               <TableBody>

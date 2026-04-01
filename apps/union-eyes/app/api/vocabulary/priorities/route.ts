@@ -12,7 +12,7 @@ const logger = createLogger('vocabulary:priorities');
  * 
  * Response: Priority[]
  */
-export const GET = withApiAuth(async (request: NextRequest) => {
+export const GET = withApiAuth(async (_request: NextRequest) => {
   try {
     const vocabulary = getCUPEVocabulary();
     

@@ -56,7 +56,7 @@ function getDb() {
 // eslint-disable-next-line @typescript-eslint/no-explicit-any
 export const db: ReturnType<typeof drizzle<any>> = new Proxy({} as any, {
   get(_target, prop) {
-    return (getDb() as any)[prop];
+    return (getDb() as unknown as Record<string | symbol, unknown>)[prop];
   },
 });
 

@@ -22,6 +22,7 @@ const eslintConfig = defineConfig([
     'out/**',
     'build/**',
     'next-env.d.ts',
+    '*.cjs',
     'backend/.venv/**',
     'backend/**/migrations/**',
   ]),
@@ -72,6 +73,11 @@ const eslintConfig = defineConfig([
       'react-hooks/preserve-manual-memoization': 'warn',
       'react-hooks/refs': 'warn',
     },
+  },
+  // Allow console.log in CLI scripts and test helpers — they are not production code
+  {
+    files: ['scripts/**'],
+    rules: { 'no-console': 'off' },
   },
 ])
 

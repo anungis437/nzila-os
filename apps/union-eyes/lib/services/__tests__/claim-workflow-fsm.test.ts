@@ -212,7 +212,7 @@ describe('claim-workflow-fsm', () => {
     });
 
     it('returns default ["member"] role for unknown target status', () => {
-      const req = getTransitionRequirements('submitted', 'closed' as any);
+      const req = getTransitionRequirements('submitted', 'closed' as unknown as Parameters<typeof getTransitionRequirements>[1]);
       expect(req.requiresRole).toEqual(['member']);
     });
 

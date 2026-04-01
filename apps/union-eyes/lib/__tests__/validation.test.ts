@@ -4,7 +4,7 @@
  * Tests Zod validation schemas, SQL injection prevention,
  * error formatting, and utility functions for the Union-Eyes validation layer.
  */
-import { describe, it, expect, vi } from 'vitest';
+import { describe, it, expect } from 'vitest';
 import { ZodError, z } from 'zod';
 import {
   commonSchemas,

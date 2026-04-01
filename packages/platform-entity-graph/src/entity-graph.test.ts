@@ -11,12 +11,13 @@ import {
   resolveRelationshipPath,
 } from './traversal'
 import type { EntityNode, EntityEdge } from './types'
+import type { OntologyEntityType, RelationshipType } from '@nzila/platform-ontology'
 
 const TENANT = '550e8400-e29b-41d4-a716-446655440000'
 
 function node(type: string, id: string, name: string): EntityNode {
   return {
-    entityType: type as any,
+    entityType: type as OntologyEntityType,
     entityId: id,
     tenantId: TENANT,
     canonicalName: name,
@@ -35,11 +36,11 @@ function edge(
 ): EntityEdge {
   return {
     id,
-    sourceEntityType: srcType as any,
+    sourceEntityType: srcType as OntologyEntityType,
     sourceEntityId: srcId,
-    targetEntityType: tgtType as any,
+    targetEntityType: tgtType as OntologyEntityType,
     targetEntityId: tgtId,
-    relationshipType: relType as any,
+    relationshipType: relType as RelationshipType,
     metadata: {},
   }
 }

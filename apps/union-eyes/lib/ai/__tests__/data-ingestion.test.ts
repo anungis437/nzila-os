@@ -5,7 +5,7 @@ vi.mock('@/lib/logger', () => ({
 }));
 
 import { DataIngestionService, DataValidator, Deduplicator, dataIngestion } from '../data-ingestion';
-import type { FileType, IngestedDocument } from '../data-ingestion';
+import type { FileType } from '../data-ingestion';
 
 describe('DataValidator', () => {
   it('validates required field present', () => {

@@ -3,15 +3,14 @@ import { auth } from '@clerk/nextjs/server';
 import { db } from '@/db/db';
 import { organizations } from '@/db/schema-organizations';
 import { eq, sql } from 'drizzle-orm';
-import { withSystemContext } from '@/lib/db/with-rls-context';
 
 export const dynamic = 'force-dynamic';
 
-const ACTIVE_STATUSES = [
+const _ACTIVE_STATUSES = [
   'draft', 'filed', 'acknowledged', 'investigating',
   'response_due', 'response_received', 'escalated', 'mediation', 'arbitration',
 ];
-const RESOLVED_STATUSES = ['settled', 'closed', 'withdrawn', 'denied'];
+const _RESOLVED_STATUSES = ['settled', 'closed', 'withdrawn', 'denied'];
 
 type Params = { params: Promise<{ id: string }> };
 

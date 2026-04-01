@@ -11,7 +11,6 @@
 export const dynamic = "force-dynamic";
 
 import { requireUser, getUserRole } from "@/lib/api-auth-guard";
-import { redirect } from "next/navigation";
 import { db } from "@/db/db";
 import { sql } from "drizzle-orm";
 import { withSystemContext } from '@/lib/db/with-rls-context';

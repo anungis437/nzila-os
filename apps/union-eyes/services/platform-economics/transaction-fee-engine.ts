@@ -28,7 +28,7 @@ import {
   type NewTransactionFeeRule,
   type TransactionFeeEvent,
 } from '@/db/schema';
-import { eq, and, lte, gte, isNull, or, desc, sql, inArray } from 'drizzle-orm';
+import { eq, and, lte, gte, isNull, or, desc, inArray } from 'drizzle-orm';
 import { auditLog, AuditEventType, AuditSeverity } from '@/lib/audit-logger';
 import { appendLedgerEntry } from './ledger-service';
 import { v4 as uuidv4 } from 'uuid';

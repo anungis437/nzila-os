@@ -17,15 +17,13 @@ import {
   platformInvoiceLineItems,
   platformPayments,
   paymentAllocations,
-  billingAdjustments,
   subscriptionPlans,
   organizations,
   type NewBillingAccount,
 } from '@/db/schema';
-import { eq, and, desc, sql, inArray } from 'drizzle-orm';
+import { eq, and, desc, inArray } from 'drizzle-orm';
 import { auditLog, AuditEventType, AuditSeverity } from '@/lib/audit-logger';
 import { appendLedgerEntry } from './ledger-service';
-import { v4 as uuidv4 } from 'uuid';
 import { requireReconciliation } from './reconciliation-service';
 import { getActiveContract } from './contract-service';
 

@@ -5,7 +5,7 @@
 import { withApi } from '@/lib/api/framework';
 import { db } from '@/db/db';
 import { organizationMembers } from '@/db/schema-organizations';
-import { eq, and, isNull, sql } from 'drizzle-orm';
+import { eq, and, isNull } from 'drizzle-orm';
 import { withSystemContext } from '@/lib/db/with-rls-context';
 
 export const dynamic = 'force-dynamic';

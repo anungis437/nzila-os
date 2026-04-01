@@ -10,7 +10,6 @@
  *   npx tsx scripts/seed-union-eyes-demo.ts
  */
 
-/* eslint-disable no-console */
 import { db } from '@/db/db'
 import { claims, claimUpdates } from '@/db/schema'
 import { organizationMembers } from '@/db/schema/organization-members-schema'

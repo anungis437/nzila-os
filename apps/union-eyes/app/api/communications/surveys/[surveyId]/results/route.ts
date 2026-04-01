@@ -20,7 +20,7 @@ export const GET = withApi(
   async ({ params }) => {
     const surveyId = params.surveyId;
 
-    const [responseCount, questions, answers] = await Promise.all([
+    const [responseCount, questions, _answers] = await Promise.all([
       db.select({ count: count() }).from(surveyResponses).where(eq(surveyResponses.surveyId, surveyId)),
       db.select().from(surveyQuestions).where(eq(surveyQuestions.surveyId, surveyId)),
       db.select().from(surveyAnswers),

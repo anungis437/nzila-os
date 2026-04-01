@@ -7,6 +7,7 @@ import { describe, it, expect, vi, beforeEach } from 'vitest';
 
 vi.hoisted(() => {
   // Must use require() inside vi.hoisted — ESM imports aren't available yet
+  // eslint-disable-next-line @typescript-eslint/no-require-imports
   const nodeCrypto = require('node:crypto');
   const testKey = nodeCrypto.randomBytes(32).toString('base64');
   process.env.NODE_ENV = 'test';

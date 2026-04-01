@@ -40,8 +40,10 @@ export const DEFAULT_THRESHOLDS: EvalThresholds = {
   maxTotalCostUsd: 10,
   perApp: {
     console: { minPassRate: 95 },
-    // memora has fewer golden tests, slightly lower bar
-    memora: { minPassRate: 85 },
+    // union-eyes handles regulated member data and legal guidance — high bar required
+    'union-eyes': { minPassRate: 95 },
+    // memora not yet deployed — threshold preserved for when it ships
+    memora: { minPassRate: 90 },
   },
 }
 

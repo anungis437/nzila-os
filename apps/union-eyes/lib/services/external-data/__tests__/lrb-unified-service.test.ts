@@ -62,7 +62,7 @@ describe('UnifiedLRBService', () => {
       where: vi.fn().mockImplementation(() => ({
         limit: mocks.mockLimit,
         orderBy: vi.fn().mockImplementation(() => ({
-          limit: vi.fn().mockImplementation((n: number) => ({
+          limit: vi.fn().mockImplementation((_n: number) => ({
             offset: mocks.mockOffset,
           })),
         })),

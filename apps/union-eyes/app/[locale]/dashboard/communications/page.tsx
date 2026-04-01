@@ -14,7 +14,7 @@ import { redirect } from "next/navigation";
 import { requireUser, hasMinRole } from "@/lib/api-auth-guard";
 
 export default async function CommunicationsDashboard() {
-  const user = await requireUser();
+  const _user = await requireUser();
   if (!(await hasMinRole("steward"))) {
     redirect(`/dashboard`);
   }

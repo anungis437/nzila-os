@@ -31,7 +31,7 @@ vi.mock("@/db", () => ({
         returning: mocks.mockInsertReturning,
       }),
     })),
-    select: vi.fn((cols?: unknown) => ({
+    select: vi.fn((_cols?: unknown) => ({
       from: mocks.mockSelectFrom.mockReturnValue({
         where: mocks.mockSelectWhere.mockReturnValue({
           orderBy: mocks.mockSelectOrderBy.mockReturnValue({
@@ -113,9 +113,19 @@ vi.mock("@/lib/logger", () => ({
   logger: { info: vi.fn(), error: vi.fn(), warn: vi.fn(), debug: vi.fn() },
 }));
 
+vi.mock("@/lib/rate-limiter", () => ({
+  checkRateLimit: vi.fn(async () => ({ allowed: true, remaining: 29, limit: 30, resetIn: 60 })),
+}));
+
 /* ── imports ────────────────────────────────────────────────────────── */
 
 import { ChatSessionManager, RAGService, ChatbotService } from "../chatbot-service";
+
+/* ── helpers ─────────────────────────────────────────────────────────── */
+
+function limitResult(data: unknown[]) {
+  return Object.assign(Promise.resolve(data), { offset: mocks.mockSelectOffset });
+}
 
 /* ── tests ──────────────────────────────────────────────────────────── */
 
@@ -137,7 +147,7 @@ describe("ChatSessionManager", () => {
     vi.clearAllMocks();
     mgr = new ChatSessionManager();
     mocks.mockInsertReturning.mockResolvedValue([session]);
-    mocks.mockSelectLimit.mockResolvedValue([session]);
+    mocks.mockSelectLimit.mockReturnValue(limitResult([session]));
     mocks.mockSelectOffset.mockResolvedValue([session]);
     mocks.mockUpdateWhere.mockResolvedValue(undefined);
   });
@@ -251,7 +261,7 @@ describe("ChatbotService", () => {
     vi.clearAllMocks();
     bot = new ChatbotService();
     // Session lookup
-    mocks.mockSelectLimit.mockResolvedValue([session]);
+    mocks.mockSelectLimit.mockReturnValue(limitResult([session]));
     mocks.mockSelectOffset.mockResolvedValue([]);
     // AI responses
     mocks.mockAiGenerate.mockResolvedValue({

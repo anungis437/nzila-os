@@ -59,15 +59,15 @@ echo ""
 echo "── Phase 3: Documentation ──"
 
 DOCS=(
-  "docs/CUPE_RBAC_MATRIX.md"
-  "docs/CUPE_MALWARE_CONTROL_BOUNDARY.md"
-  "docs/CUPE_PILOTING_QUICK_START.md"
-  "docs/CUPE_PILOT_ADMIN_RUNBOOK.md"
-  "docs/CUPE_PILOT_USER_GUIDE.md"
-  "docs/CUPE_PILOT_SUPPORT_SOP.md"
-  "docs/CUPE_PILOT_ROLLBACK_RUNBOOK.md"
-  "docs/CUPE_READINESS_CHECKLIST.md"
-  "docs/CUPE_PILOT_GO_NO_GO_REVIEW.md"
+  "docs/pilot/cupe/CUPE_RBAC_MATRIX.md"
+  "docs/pilot/cupe/CUPE_MALWARE_CONTROL_BOUNDARY.md"
+  "docs/pilot/cupe/CUPE_PILOTING_QUICK_START.md"
+  "docs/pilot/cupe/CUPE_PILOT_ADMIN_RUNBOOK.md"
+  "docs/pilot/cupe/CUPE_PILOT_USER_GUIDE.md"
+  "docs/pilot/cupe/CUPE_PILOT_SUPPORT_SOP.md"
+  "docs/pilot/cupe/CUPE_PILOT_ROLLBACK_RUNBOOK.md"
+  "docs/pilot/cupe/CUPE_READINESS_CHECKLIST.md"
+  "docs/pilot/cupe/CUPE_PILOT_GO_NO_GO_REVIEW.md"
 )
 
 for doc in "${DOCS[@]}"; do

@@ -206,11 +206,21 @@ export const knowledgeBase = pgTable(
     // Embeddings for semantic search
     embedding: vector("embedding", { dimensions: 1536 }), // OpenAI ada-002
     embeddingModel: text("embedding_model").default("text-embedding-ada-002"),
-    
+    // Version of the embedding model used to produce the vector above.
+    // When the embedding model changes, this field drives selective re-indexing.
+    // All vectors produced by a different model version are semantically incompatible.
+    embeddingModelVersion: text("embedding_model_version").default("text-embedding-ada-002@1"),
+
     // Metadata
     tags: jsonb("tags").$type<string[]>(),
     keywords: jsonb("keywords").$type<string[]>(),
     language: text("language").notNull().default("en"),
+
+    // Document currency — critical for CBA-backed knowledge.
+    // Queries SHOULD filter `expiryDate > now() OR expiryDate IS NULL`.
+    // Admin tooling warns when a document is within 30 days of expiry.
+    effectiveDate: timestamp("effective_date"),
+    expiryDate: timestamp("expiry_date"),
     
     // Version control
     version: integer("version").notNull().default(1),

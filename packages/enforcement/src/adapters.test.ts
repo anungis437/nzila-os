@@ -2,7 +2,7 @@ import { describe, it, expect, vi } from "vitest";
 import { withEnforcement, healthHandler } from "./nextjs.js";
 import { enforcementPlugin } from "./fastify.js";
 import { traceLayer } from "./layers.js";
-import type { EnforcementLayer, EnforcementContext, EnforcementResult } from "./pipeline.js";
+import type { EnforcementLayer } from "./pipeline.js";
 
 // ── Next.js adapter tests ───────────────────────────────────
 

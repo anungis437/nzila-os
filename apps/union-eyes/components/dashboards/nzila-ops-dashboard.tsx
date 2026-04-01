@@ -24,10 +24,8 @@ import {
   TrendingUp,
   ArrowRight,
   Server,
-  Zap,
   ShieldCheck,
   Globe,
-  HeartPulse,
   Clock,
   FileText,
   Scale,
@@ -63,6 +61,7 @@ export default function NzilaOpsDashboard() {
   const [loading, setLoading] = useState(true);
 
   useEffect(() => {
+    // eslint-disable-next-line react-hooks/set-state-in-effect
     setMounted(true);
     fetch('/api/platform/stats')
       .then(res => res.ok ? res.json() : null)

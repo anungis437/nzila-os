@@ -90,7 +90,7 @@ router.get('/', async (req: Request, res: Response) => {
       data: rules,
       total: rules.length,
     });
-  } catch (error) {
+  } catch (_error) {
     res.status(500).json({
       success: false,
       error: 'Internal server error',
@@ -127,7 +127,7 @@ router.get('/:id', async (req: Request, res: Response) => {
       success: true,
       data: rule,
     });
-  } catch (error) {
+  } catch (_error) {
     res.status(500).json({
       success: false,
       error: 'Internal server error',
@@ -183,7 +183,7 @@ router.post('/', async (req: Request, res: Response) => {
       data: newRule[0],
       message: 'Dues rule created successfully',
     });
-  } catch (error) {
+  } catch (_error) {
     if (error instanceof z.ZodError) {
       return res.status(400).json({
         success: false,
@@ -258,7 +258,7 @@ router.put('/:id', async (req: Request, res: Response) => {
       data: updatedRule[0],
       message: 'Dues rule updated successfully',
     });
-  } catch (error) {
+  } catch (_error) {
     if (error instanceof z.ZodError) {
       return res.status(400).json({
         success: false,
@@ -312,7 +312,7 @@ router.delete('/:id', async (req: Request, res: Response) => {
       success: true,
       message: 'Dues rule deactivated successfully',
     });
-  } catch (error) {
+  } catch (_error) {
     res.status(500).json({
       success: false,
       error: 'Internal server error',
@@ -381,7 +381,7 @@ router.post('/:id/duplicate', async (req: Request, res: Response) => {
       data: duplicatedRule[0],
       message: 'Dues rule duplicated successfully',
     });
-  } catch (error) {
+  } catch (_error) {
     res.status(500).json({
       success: false,
       error: 'Internal server error',

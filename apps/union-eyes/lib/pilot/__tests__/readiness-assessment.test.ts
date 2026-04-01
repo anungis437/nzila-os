@@ -2,7 +2,6 @@ import { describe, it, expect } from 'vitest';
 
 import {
   calculateReadinessScore,
-  type ReadinessAssessmentResult,
 } from '../readiness-assessment';
 import type { PilotApplicationInput } from '@/types/marketing';
 

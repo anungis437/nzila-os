@@ -10,7 +10,6 @@ export default function PortalError({
   reset: () => void
 }) {
   useEffect(() => {
-    // eslint-disable-next-line no-console
     console.error('[partners/portal]', error)
   }, [error])
 

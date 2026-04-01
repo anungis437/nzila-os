@@ -8,7 +8,7 @@
 
 
 export const dynamic = 'force-dynamic';
-import { useState, useEffect } from 'react';
+import { useState, useEffect, useCallback } from 'react';
 import { useRouter } from 'next/navigation';
 import { Button } from '@/components/ui/button';
 import { Card } from '@/components/ui/card';
@@ -60,11 +60,7 @@ export default function ArrearsPage() {
   const [paymentAmount, setPaymentAmount] = useState('');
   const [notes, setNotes] = useState('');
 
-  useEffect(() => {
-    fetchMembersInArrears();
-  }, []);
-
-  const fetchMembersInArrears = async () => {
+  const fetchMembersInArrears = useCallback(async () => {
     try {
       const data = await api.dues.arrears.list() as unknown as { members: MemberInArrears[] };
       setMembers(data.members || []);
@@ -74,7 +70,11 @@ export default function ArrearsPage() {
     } finally {
       setLoading(false);
     }
-  };
+  }, [t]);
+
+  useEffect(() => {
+    fetchMembersInArrears();
+  }, [fetchMembersInArrears]);
 
   const recordPayment = async () => {
     if (!selectedMember || !paymentAmount) return;

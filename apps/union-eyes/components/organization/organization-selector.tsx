@@ -56,7 +56,7 @@ export function OrganizationSelector() {
   // Prevent hydration mismatch - render placeholder until mounted
   if (!mounted) {
     return (
-      <div className="w-[280px] h-10 flex items-center border rounded-md px-3 bg-background">
+      <div className="w-70 h-10 flex items-center border rounded-md px-3 bg-background">
         <Building2 className="h-4 w-4 text-muted-foreground mr-2" />
         <span className="text-sm text-muted-foreground">Loading...</span>
       </div>
@@ -74,7 +74,7 @@ export function OrganizationSelector() {
     return (
       <Button 
         variant="outline" 
-        className="w-[280px] justify-between text-red-600"
+        className="w-70 justify-between text-red-600"
         onClick={() => refreshOrganizations()}
       >
         <span className="flex items-center gap-2">
@@ -87,7 +87,7 @@ export function OrganizationSelector() {
 
   if (isLoading || !organization) {
     return (
-      <Button variant="outline" disabled className="w-[280px] justify-between">
+      <Button variant="outline" disabled className="w-70 justify-between">
         <span className="flex items-center gap-2">
           <Building2 className="h-4 w-4" />
           Loading...
@@ -101,7 +101,7 @@ export function OrganizationSelector() {
   // Single-org users don't need a picker — show static label
   if (userOrganizations.length <= 1) {
     return (
-      <div className="w-[280px] h-10 flex items-center border rounded-md px-3 bg-background">
+      <div className="w-70 h-10 flex items-center border rounded-md px-3 bg-background">
         <Icon className="h-4 w-4 text-muted-foreground mr-2 shrink-0" />
         <span className="text-sm truncate">{organization.name}</span>
       </div>
@@ -115,7 +115,7 @@ export function OrganizationSelector() {
           variant="outline"
           role="combobox"
           aria-expanded={open}
-          className="w-[280px] justify-between"
+          className="w-70 justify-between"
         >
           <span className="flex items-center gap-2 truncate">
             <Icon className="h-4 w-4 shrink-0" />
@@ -124,7 +124,7 @@ export function OrganizationSelector() {
           <ChevronsUpDown className="ml-2 h-4 w-4 shrink-0 opacity-50" />
         </Button>
       </PopoverTrigger>
-      <PopoverContent className="w-[280px] p-0">
+      <PopoverContent className="w-70 p-0">
         <Command>
           <CommandInput placeholder="Search organizations..." />
           <CommandList>
@@ -161,4 +161,5 @@ export function OrganizationSelector() {
     </Popover>
   );
 }
+
 

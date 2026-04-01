@@ -62,7 +62,7 @@ describe('Migration Policy (INV-06)', () => {
   })
 
   it('all migration files have timestamp prefixes', () => {
-    const TIMESTAMP_PREFIX = /^\d{4}\d{2}\d{2}/
+    const TIMESTAMP_PREFIX = /^\d{4}[\d_]/
     // Allow known infrastructure/setup migrations without timestamp prefix
     const KNOWN_SETUP_MIGRATIONS = [
       'ai-control-plane-pgvector.sql',

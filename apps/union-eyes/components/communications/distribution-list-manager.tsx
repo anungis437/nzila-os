@@ -597,7 +597,7 @@ toast({
                         <TableHead>Name</TableHead>
                         <TableHead>Status</TableHead>
                         <TableHead>Subscribed</TableHead>
-                        <TableHead className="w-[80px]"></TableHead>
+                        <TableHead className="w-20"></TableHead>
                       </TableRow>
                     </TableHeader>
                     <TableBody>
@@ -788,7 +788,7 @@ toast({
               <Table>
                 <TableHeader>
                   <TableRow>
-                    <TableHead className="w-[50px]"></TableHead>
+                    <TableHead className="w-12.5"></TableHead>
                     <TableHead>Email</TableHead>
                     <TableHead>Name</TableHead>
                     <TableHead>Role</TableHead>

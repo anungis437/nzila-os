@@ -141,7 +141,7 @@ jobs:
       - uses: actions/checkout@v4
 
       - name: Trivy Container Scan
-        uses: aquasecurity/trivy-action@master
+        uses: aquasecurity/trivy-action@57a97c7e7821a5776cebc9bb87c984fa69cba8f1 # v0.35.0
         with:
           scan-type: fs
           scan-ref: apps/union-eyes
@@ -203,13 +203,13 @@ jobs:
               "setup-checklist": "12+ tests"
             },
             "documentation": [
-              "docs/CUPE_PILOTING_QUICK_START.md",
-              "docs/CUPE_PILOT_ADMIN_RUNBOOK.md",
-              "docs/CUPE_PILOT_USER_GUIDE.md",
-              "docs/CUPE_PILOT_SUPPORT_SOP.md",
-              "docs/CUPE_PILOT_ROLLBACK_RUNBOOK.md",
-              "docs/CUPE_READINESS_CHECKLIST.md",
-              "docs/CUPE_PILOT_GO_NO_GO_REVIEW.md"
+              "docs/pilot/cupe/CUPE_PILOTING_QUICK_START.md",
+              "docs/pilot/cupe/CUPE_PILOT_ADMIN_RUNBOOK.md",
+              "docs/pilot/cupe/CUPE_PILOT_USER_GUIDE.md",
+              "docs/pilot/cupe/CUPE_PILOT_SUPPORT_SOP.md",
+              "docs/pilot/cupe/CUPE_PILOT_ROLLBACK_RUNBOOK.md",
+              "docs/pilot/cupe/CUPE_READINESS_CHECKLIST.md",
+              "docs/pilot/cupe/CUPE_PILOT_GO_NO_GO_REVIEW.md"
             ]
           }
           EOF

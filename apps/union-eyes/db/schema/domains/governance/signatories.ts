@@ -1,4 +1,4 @@
-import { pgTable, uuid, varchar, text, timestamp, jsonb } from "drizzle-orm/pg-core";
+import { pgTable, uuid, varchar, timestamp, jsonb } from "drizzle-orm/pg-core";
 import { sql } from "drizzle-orm";
 
 export const signatories = pgTable("governance_signatories", {

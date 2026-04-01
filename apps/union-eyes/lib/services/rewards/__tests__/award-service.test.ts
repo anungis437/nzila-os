@@ -201,7 +201,7 @@ describe('award-service', () => {
       };
       const ledgerEntry = { balanceAfter: 200 };
 
-      mocks.mockTransaction.mockImplementation(async (cb: any) => {
+      mocks.mockTransaction.mockImplementation(async (cb: (tx: unknown) => unknown) => {
         const txUpdateWhere = vi.fn().mockReturnValue({ returning: vi.fn().mockResolvedValue([{ ...award, status: 'issued' }]) });
         const txSet = vi.fn().mockReturnValue({ where: txUpdateWhere });
         const tx = {
@@ -222,7 +222,7 @@ describe('award-service', () => {
     });
 
     it('throws when award not found in transaction', async () => {
-      mocks.mockTransaction.mockImplementation(async (cb: any) => {
+      mocks.mockTransaction.mockImplementation(async (cb: (tx: unknown) => unknown) => {
         const tx = {
           query: { recognitionAwards: { findFirst: vi.fn().mockResolvedValue(null) } },
         };
@@ -235,7 +235,7 @@ describe('award-service', () => {
     });
 
     it('throws when award is not approved', async () => {
-      mocks.mockTransaction.mockImplementation(async (cb: any) => {
+      mocks.mockTransaction.mockImplementation(async (cb: (tx: unknown) => unknown) => {
         const tx = {
           query: {
             recognitionAwards: {
@@ -265,7 +265,7 @@ describe('award-service', () => {
         awardType: { name: 'X', defaultCreditAmount: 999 },
       };
 
-      mocks.mockTransaction.mockImplementation(async (cb: any) => {
+      mocks.mockTransaction.mockImplementation(async (cb: (tx: unknown) => unknown) => {
         const tx = {
           query: { recognitionAwards: { findFirst: vi.fn().mockResolvedValue(award) } },
         };
@@ -293,7 +293,7 @@ describe('award-service', () => {
         awardType: { name: 'X', defaultCreditAmount: 100 },
       };
 
-      mocks.mockTransaction.mockImplementation(async (cb: any) => {
+      mocks.mockTransaction.mockImplementation(async (cb: (tx: unknown) => unknown) => {
         const txUpdateWhere = vi.fn().mockReturnValue({ returning: vi.fn().mockResolvedValue([{ ...award, status: 'revoked' }]) });
         const txSet = vi.fn().mockReturnValue({ where: txUpdateWhere });
         const tx = {
@@ -312,7 +312,7 @@ describe('award-service', () => {
     });
 
     it('throws when award not found for revocation', async () => {
-      mocks.mockTransaction.mockImplementation(async (cb: any) => {
+      mocks.mockTransaction.mockImplementation(async (cb: (tx: unknown) => unknown) => {
         const tx = {
           query: { recognitionAwards: { findFirst: vi.fn().mockResolvedValue(null) } },
         };
@@ -325,7 +325,7 @@ describe('award-service', () => {
     });
 
     it('throws when revoking a non-issued award', async () => {
-      mocks.mockTransaction.mockImplementation(async (cb: any) => {
+      mocks.mockTransaction.mockImplementation(async (cb: (tx: unknown) => unknown) => {
         const tx = {
           query: {
             recognitionAwards: { findFirst: vi.fn().mockResolvedValue({ id: 'a', status: 'pending', awardType: {} }) },

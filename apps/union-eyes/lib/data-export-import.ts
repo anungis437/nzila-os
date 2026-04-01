@@ -401,14 +401,14 @@ export class DataImportService {
             })
             .where(eq(organizationMembers.id, data.id as string));
         } else {
-          // eslint-disable-next-line @typescript-eslint/no-explicit-any -- import data is untyped
+           
           await db.insert(organizationMembers).values({
             userId: (data.userId as string) || '',
             organizationId: data.organizationId as string,
             name: (data.name as string) || '',
             email: data.email as string,
             role: (data.role as string) || 'member',
-          } as any);
+          } as unknown as typeof organizationMembers.$inferInsert);
         }
         break;
       }
@@ -417,7 +417,7 @@ export class DataImportService {
           throw new Error('memberId and organizationId are required for claim import');
         }
         // Claims are append-only for audit compliance — always insert
-        // eslint-disable-next-line @typescript-eslint/no-explicit-any -- import data is untyped
+         
         await db.insert(claims).values({
           claimNumber: (data.claimNumber as string) || `IMP-${Date.now()}`,
           organizationId: data.organizationId as string,
@@ -429,7 +429,7 @@ export class DataImportService {
           location: (data.location as string) || 'Imported',
           description: (data.description as string) || 'Imported claim',
           desiredOutcome: (data.desiredOutcome as string) || 'Imported',
-        } as any);
+        } as unknown as typeof claims.$inferInsert);
         break;
       }
       default:

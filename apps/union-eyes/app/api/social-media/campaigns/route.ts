@@ -158,7 +158,7 @@ return standardErrorResponse(
         limit,
         offset,
       });
-    } catch (error) {
+    } catch (_error) {
 return NextResponse.json(
         {
           error: 'Internal server error',
@@ -299,7 +299,7 @@ return standardErrorResponse(
       return standardSuccessResponse(
       {  campaign  }
     );
-    } catch (error) {
+    } catch (_error) {
 return NextResponse.json(
         {
           error: 'Failed to create campaign',
@@ -409,7 +409,7 @@ return standardErrorResponse(
       }
 
       return NextResponse.json({ campaign: updatedCampaign });
-    } catch (error) {
+    } catch (_error) {
 return NextResponse.json(
         {
           error: 'Failed to update campaign',
@@ -489,7 +489,7 @@ return standardErrorResponse(
         message: 'Campaign deleted successfully',
         campaign_id: campaignId,
       });
-    } catch (error) {
+    } catch (_error) {
 return NextResponse.json(
         {
           error: 'Failed to delete campaign',

@@ -1,4 +1,4 @@
-import { describe, it, expect, vi } from 'vitest';
+import { describe, it, expect } from 'vitest';
 
 import {
   calculatePilotHealth,
@@ -11,7 +11,6 @@ import {
 import type {
   PilotMetrics,
   PilotMilestone,
-  PilotHealthScoreBreakdown,
 } from '@/types/marketing';
 
 function makeMilestones(

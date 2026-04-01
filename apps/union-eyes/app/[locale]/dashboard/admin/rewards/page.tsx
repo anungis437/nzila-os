@@ -40,10 +40,9 @@ export default async function AdminRewardsPage({
   const t = await getTranslations('rewards.admin');
 
   // Fetch summary metrics — catch errors to avoid page crash
-  // eslint-disable-next-line @typescript-eslint/no-explicit-any
-  let summary: { success: boolean; data?: Record<string, any>; error?: string } = { success: false, error: 'not loaded' };
+  let summary: { success: boolean; data?: Record<string, unknown>; error?: string } = { success: false, error: 'not loaded' };
   try {
-    summary = await getRewardsSummary() as { success: boolean; data?: Record<string, any>; error?: string };
+    summary = await getRewardsSummary() as { success: boolean; data?: Record<string, unknown>; error?: string };
   } catch (e) {
     logger.error('[REWARDS] getRewardsSummary failed', e instanceof Error ? e : new Error(String(e)));
     summary = { success: false, error: String(e) };

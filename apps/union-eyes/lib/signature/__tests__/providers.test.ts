@@ -14,7 +14,6 @@ import {
   HelloSignProvider,
   InternalSignatureProvider,
   SignatureProviderFactory,
-  type SignatureProvider,
   type CreateEnvelopeRequest,
   type EnvelopeResponse,
   type EnvelopeStatus,

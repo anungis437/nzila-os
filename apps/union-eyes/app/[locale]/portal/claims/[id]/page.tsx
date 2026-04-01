@@ -47,7 +47,7 @@ interface SurveyInfo {
 
 export default function ClaimDetailPage({ params }: { params: { id: string } }) {
   const router = useRouter();
-  const searchParams = useSearchParams();
+  const _searchParams = useSearchParams();
   const [claim, setClaim] = useState<ClaimDetail | null>(null);
   const [survey, setSurvey] = useState<SurveyInfo | null>(null);
   const [surveyCompleted, setSurveyCompleted] = useState(false);

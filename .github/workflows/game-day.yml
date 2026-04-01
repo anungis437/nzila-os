@@ -153,7 +153,7 @@ jobs:
           handle failure modes gracefully with proper evidence trails.
           EOF
 
-      - uses: actions/upload-artifact@v7
+      - uses: actions/upload-artifact@v4
         with:
           name: game-day-report-${{ github.run_id }}
           path: evidence/game-day-report.md

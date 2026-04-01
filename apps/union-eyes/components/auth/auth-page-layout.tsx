@@ -77,9 +77,11 @@ export default function AuthPageLayout({
             transition={{ duration: 0.5 }}
           >
             <Link href="/" className="inline-flex items-center gap-3 group">
-              <img
+              <Image
                 src="/images/brand/icon.png"
                 alt="Union Eyes"
+                width={40}
+                height={40}
                 className="w-10 h-10 rounded-xl shadow-lg shadow-electric/25"
               />
               <span className="text-xl font-bold text-white group-hover:text-electric-light transition-colors">

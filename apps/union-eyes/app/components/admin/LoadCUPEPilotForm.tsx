@@ -98,9 +98,9 @@ export function LoadCUPEPilotForm() {
           }`}
         >
           {response.success ? (
-            <CheckCircle2 className="h-5 w-5 flex-shrink-0 text-green-600" />
+            <CheckCircle2 className="h-5 w-5 shrink-0 text-green-600" />
           ) : (
-            <AlertCircle className="h-5 w-5 flex-shrink-0 text-red-600" />
+            <AlertCircle className="h-5 w-5 shrink-0 text-red-600" />
           )}
 
           <div className="flex-1">

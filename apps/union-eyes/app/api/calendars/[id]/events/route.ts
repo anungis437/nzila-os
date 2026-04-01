@@ -5,7 +5,6 @@ import { withApi } from '@/lib/api/with-api';
 import { db } from '@/db/db';
 import { calendarEvents } from '@/db/schema';
 import { eq, and, desc, count } from 'drizzle-orm';
-import type { NextRequest } from 'next/server';
 
 export const dynamic = 'force-dynamic';
 

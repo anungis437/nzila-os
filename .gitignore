@@ -17,6 +17,27 @@ temp-staging-*.sql
 /audit-*.sql
 /audit-*.json
 
+# ----- Scratch / temp / exploratory files at repo root ------
+/*.tmp
+/*.log
+/tmp-*
+/ct-output.txt
+/contract-test-results.txt
+/ts-errors*.txt
+/*-empty*.txt
+/*-cols*.txt
+/*-fks*.txt
+/*-columns*.txt
+/all-*.txt
+/core-*.txt
+/enum-*.txt
+/fk-*.txt
+/schema-*.txt
+/table-*.txt
+/uncovered-*.txt
+/remaining-*.txt
+/count-*.sql
+
 # ----- Node / JS / TS ------
 **/node_modules/
 **/.next/

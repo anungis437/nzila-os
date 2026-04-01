@@ -20,6 +20,18 @@ const PII_PATTERNS: { label: string; pattern: RegExp; modes: RedactionMode[] }[]
   { label: 'DATE_OF_BIRTH', pattern: /\b(?:DOB|date of birth|born)[:\s]*\d{1,2}[/\-.]\d{1,2}[/\-.]\d{2,4}\b/gi, modes: ['strict'] },
   { label: 'IP_ADDRESS', pattern: /\b(?:\d{1,3}\.){3}\d{1,3}\b/g, modes: ['strict'] },
   { label: 'BANK_ACCOUNT', pattern: /\b\d{8,17}\b/g, modes: ['strict'] }, // overly broad but safe
+
+  // Labour / union context — strict only
+  // Medical diagnoses and injury descriptions (GDPR Art. 9 / PIPEDA special category)
+  { label: 'MEDICAL_CONDITION', pattern: /\b(?:diagnosed with|suffering from|injury to|injured (?:my|his|her|their)\s+\w+|medical condition|disability|mental health|depression|anxiety|chronic|surgery|prescription|medication)\b[^.]{0,80}/gi, modes: ['strict'] },
+  // Immigration and work authorisation identifiers
+  { label: 'IMMIGRATION_STATUS', pattern: /\b(?:work permit|study permit|permanent resident|PR card|citizenship|visa expires?|immigration status|refugee claimant|LMIA|open work permit)\b[^.]{0,60}/gi, modes: ['strict'] },
+  // Union membership identifiers
+  { label: 'UNION_MEMBERSHIP_ID', pattern: /\b(?:member(?:ship)?\s*(?:card|number|no\.?|#)\s*[:\s]?\s*\d[\d\s-]{3,20}|local\s+\d{1,6}\s+card\s+\d+)\b/gi, modes: ['strict'] },
+  // OHIP / provincial health card numbers (Ontario 10-digit, other provinces vary)
+  { label: 'HEALTH_CARD', pattern: /\b(?:OHIP|health card)[:\s#]*\d{4}[\s-]?\d{3}[\s-]?\d{3}[A-Z]?\b/gi, modes: ['strict'] },
+  // Employee/payroll IDs commonly present in grievance docs
+  { label: 'EMPLOYEE_ID', pattern: /\b(?:employee\s+(?:no\.?|number|id|#)[:\s]*[A-Z0-9]{4,15}|EMP-\d{4,12})\b/gi, modes: ['strict'] },
 ]
 
 // ── Public API ──────────────────────────────────────────────────────────────

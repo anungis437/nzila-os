@@ -12,8 +12,8 @@ import { createAzureOpenAIProvider } from './providers/azure-openai'
 import { createOpenAIProvider } from './providers/openai'
 import { createAnthropicProvider } from './providers/anthropic'
 import { redactText } from './redact'
-import { checkBudget, recordSpend } from './budgets'
-import { logAiRequest, sha256, appendAiAuditEvent } from './logging'
+import { checkBudget, recordSpend, estimateCo2Grams } from './budgets'
+import { logAiRequest, sha256, appendAiAuditEvent, emitAiMetric } from './logging'
 import { resolvePrompt } from './prompts'
 import type {
   AiGenerateRequest,
@@ -353,8 +353,25 @@ export async function generate(req: AiGenerateRequest): Promise<AiGenerateRespon
       appKey: req.appKey,
       profileKey: req.profileKey,
       costUsd,
+      co2Grams: estimateCo2Grams((result.tokensIn ?? 0) + (result.tokensOut ?? 0), result.model),
     })
   }
+
+  // 10. Emit structured metric for Azure Monitor / observability pipeline (NZ-RISK-020, NZ-RISK-027)
+  emitAiMetric({
+    appKey: req.appKey,
+    feature: 'generate',
+    provider: providerKey,
+    latencyMs,
+    tokensIn: result.tokensIn,
+    tokensOut: result.tokensOut,
+    costUsd,
+    co2EstimateGrams: estimateCo2Grams((result.tokensIn ?? 0) + (result.tokensOut ?? 0), result.model),
+    refused: false,
+    errored: false,
+    orgId: req.orgId,
+    correlationId: req.trace?.correlationId,
+  })
 
   return {
     requestId: logged.requestId,
@@ -487,6 +504,7 @@ export async function* chatStream(
       appKey: req.appKey,
       profileKey: req.profileKey,
       costUsd,
+      co2Grams: estimateCo2Grams((approxTokensIn ?? 0) + (approxTokensOut ?? 0), req.model ?? 'default'),
     })
   }
 }
@@ -547,7 +565,13 @@ export async function embed(req: AiEmbedRequest): Promise<AiEmbedResponse> {
   })
 
   if (costUsd) {
-    await recordSpend({ orgId: req.orgId, appKey: req.appKey, profileKey: req.profileKey, costUsd })
+    await recordSpend({
+      orgId: req.orgId,
+      appKey: req.appKey,
+      profileKey: req.profileKey,
+      costUsd,
+      co2Grams: estimateCo2Grams(result.tokensUsed ?? 0, result.model),
+    })
   }
 
   return {
@@ -570,6 +594,6 @@ function estimateCost(tokensIn: number, tokensOut: number): number {
 // ── Re-exports ──────────────────────────────────────────────────────────────
 
 export { resolvePrompt } from './prompts'
-export { checkBudget, recordSpend, ensureBudgetRow } from './budgets'
-export { logAiRequest, appendAiAuditEvent } from './logging'
+export { checkBudget, recordSpend, ensureBudgetRow, estimateCo2Grams } from './budgets'
+export { logAiRequest, appendAiAuditEvent, emitAiMetric } from './logging'
 export { redactText } from './redact'

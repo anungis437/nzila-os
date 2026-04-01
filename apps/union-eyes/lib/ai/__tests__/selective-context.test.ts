@@ -4,8 +4,7 @@ vi.mock('@/lib/logger', () => ({
   logger: { info: vi.fn(), error: vi.fn(), warn: vi.fn(), debug: vi.fn() },
 }));
 
-import { SelectiveContextManager, createSelectiveContext, selectiveContext } from '../selective-context';
-import type { SelectiveConfig, ContextItem } from '../selective-context';
+import { SelectiveContextManager, createSelectiveContext, selectiveContext, type ContextItem } from '../selective-context';
 
 describe('SelectiveContextManager', () => {
   let manager: SelectiveContextManager;
@@ -259,7 +258,7 @@ describe('SelectiveContextManager', () => {
       });
       it('typeWeights fallback to 0.5 for unregistered type', () => {
         // Pass a type string not in typeWeights to trigger `|| 0.5` fallback
-        manager.addItem({ id: 'unk', content: 'Unknown type content here', type: 'CUSTOM' as any, timestamp: Date.now() });
+        manager.addItem({ id: 'unk', content: 'Unknown type content here', type: 'CUSTOM' as unknown as ContextItem['type'], timestamp: Date.now() });
         // calculateImportance is called on addItem — typeWeights['CUSTOM'] = undefined → || 0.5
         expect(manager.getInfo().itemCount).toBe(1);
         const results = manager.selectForQuery('content');

@@ -73,7 +73,7 @@ describe('INV-10 — Hash chain structural integrity', () => {
 // ── INV-11: Immutability triggers SQL migration exists ──────────────────────
 
 describe('INV-11 — Append-only immutability triggers present', () => {
-  const TRIGGER_FILE = 'packages/db/migrations/hash-chain-immutability-triggers.sql'
+  const TRIGGER_FILE = 'migrations/platform/hash-chain-immutability-triggers.sql'
 
   it('trigger migration file exists', () => {
     expect(

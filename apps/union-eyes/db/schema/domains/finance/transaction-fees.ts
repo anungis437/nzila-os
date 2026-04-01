@@ -18,7 +18,7 @@
 
 import {
   pgTable, pgEnum, uuid, varchar, text, timestamp, decimal,
-  integer, boolean, jsonb, index, uniqueIndex,
+  integer, jsonb, index, uniqueIndex,
 } from 'drizzle-orm/pg-core';
 import { organizations } from '../../../schema-organizations';
 import { commercialContracts } from './contracts';

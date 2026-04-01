@@ -171,7 +171,7 @@ describe('withOrganizationAuth', () => {
 
     const handler = vi.fn();
     const wrapped = withOrganizationAuth(handler);
-    const result = await wrapped({} as NextRequest);
+    const _result = await wrapped({} as NextRequest);
 
     expect(handler).not.toHaveBeenCalled();
     expect(NextResponse.json).toHaveBeenCalledWith(
@@ -184,19 +184,19 @@ describe('withOrganizationAuth', () => {
     mockRequireUser.mockResolvedValue({
       userId: 'user_1',
       organizationId: 'org-1',
-    } as any);
+    } as unknown as Awaited<ReturnType<typeof mockRequireUser>>);
     mockGetOrgIdForUser.mockResolvedValue('org-1');
     mockRequireUserForOrg.mockResolvedValue({
       userId: 'user_1',
       organizationId: 'org-1',
       memberId: 'mem-1',
-    } as any);
+    } as unknown as Awaited<ReturnType<typeof mockRequireUserForOrg>>);
 
     const mockResponse = { body: 'ok', status: 200 } as unknown as NextResponse;
     const handler = vi.fn().mockResolvedValue(mockResponse);
     const wrapped = withOrganizationAuth(handler);
 
-    const result = await wrapped({} as NextRequest);
+    const _result = await wrapped({} as NextRequest);
 
     expect(handler).toHaveBeenCalledWith(
       expect.anything(),

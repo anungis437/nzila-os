@@ -1,7 +1,7 @@
 # Architecture Shape — control-plane
 
 > Domain-core architecture status for the Control Plane application.
-> See: [APP_DOMAIN_CORE_STANDARD.md](../../../docs/APP_DOMAIN_CORE_STANDARD.md)
+> See: [APP_DOMAIN_CORE_STANDARD.md](../../../docs/architecture/APP_DOMAIN_CORE_STANDARD.md)
 
 ## Current Structure
 

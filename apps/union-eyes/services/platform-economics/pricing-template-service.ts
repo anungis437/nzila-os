@@ -25,11 +25,10 @@ import {
   type NewPricingTemplate,
   type PricingTemplate,
   type PricingTemplateModule,
-  type NewPricingTemplateModule,
   subscriptionPlans,
   orgSubscriptions,
 } from '@/db/schema';
-import { eq, and, inArray } from 'drizzle-orm';
+import { eq, inArray } from 'drizzle-orm';
 import { auditLog, AuditEventType, AuditSeverity } from '@/lib/audit-logger';
 import { getActiveContract } from './contract-service';
 

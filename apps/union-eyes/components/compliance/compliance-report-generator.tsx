@@ -363,7 +363,7 @@ export function ComplianceReportGenerator({
                           <FormControl>
                             <Checkbox checked={field.value} onCheckedChange={field.onChange} />
                           </FormControl>
-                          <FormLabel className="!mt-0">{t('includeExecutiveSummary')}</FormLabel>
+                          <FormLabel className="mt-0!">{t('includeExecutiveSummary')}</FormLabel>
                         </FormItem>
                       )}
                     />
@@ -375,7 +375,7 @@ export function ComplianceReportGenerator({
                           <FormControl>
                             <Checkbox checked={field.value} onCheckedChange={field.onChange} />
                           </FormControl>
-                          <FormLabel className="!mt-0">{t('includeCharts')}</FormLabel>
+                          <FormLabel className="mt-0!">{t('includeCharts')}</FormLabel>
                         </FormItem>
                       )}
                     />
@@ -387,7 +387,7 @@ export function ComplianceReportGenerator({
                           <FormControl>
                             <Checkbox checked={field.value} onCheckedChange={field.onChange} />
                           </FormControl>
-                          <FormLabel className="!mt-0">{t('includeRawData')}</FormLabel>
+                          <FormLabel className="mt-0!">{t('includeRawData')}</FormLabel>
                         </FormItem>
                       )}
                     />
@@ -522,4 +522,5 @@ export function ComplianceReportGenerator({
     </div>
   );
 }
+
 

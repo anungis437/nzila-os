@@ -291,4 +291,105 @@ describe('ADVERSARIAL-6 — Failure Simulation & Graceful Degradation', () => {
       expect(catches401).toBe(true)
     })
   })
+
+  // ── NZ-RISK-006: Cross-Tenant RAG Isolation ───────────────────────────────
+  describe('ADVERSARIAL-6-RAG — Cross-tenant knowledge isolation', () => {
+    /**
+     * These tests assert that every code path that reads from embeddings,
+     * knowledge_base, or chatbot document tables includes an organizationId
+     * (or orgId) scope filter. They are static analysis tests — they do not
+     * make live DB or API calls but verify the source code contracts that
+     * prevent org-A data from leaking into org-B search results.
+     *
+     * NZ-RISK-006 — Cross-tenant RAG knowledge leakage.
+     */
+
+    it('chatbot-service.ts always filters embeddings queries by organizationId', () => {
+      const chatbotService = join(UE, 'lib', 'ai', 'chatbot-service.ts')
+      expect(existsSync(chatbotService)).toBe(true)
+      const c = read(chatbotService)
+
+      // Every vector / similarity search must include org filter
+      // The file should reference organizationId in proximity to any similarity/embeddings query
+      expect(c).toMatch(/organizationId|organization_id|orgId|org_id/)
+
+      // Must NOT perform an unscoped "SELECT ... FROM knowledge_base" without org condition
+      const lines = c.split('\n')
+      for (let i = 0; i < lines.length; i++) {
+        const line = lines[i]
+        if (/knowledge_base|chatbot_documents|chatbot_knowledge/i.test(line)) {
+          // Look backward and forward within ±10 lines for org filter
+          const window = lines.slice(Math.max(0, i - 10), i + 10).join('\n')
+          const hasOrgFilter = /organizationId|organization_id|orgId|org_id/i.test(window)
+          if (!hasOrgFilter) {
+            throw new Error(
+              `[RAG-ISOLATION] chatbot-service.ts line ${i + 1} may query knowledge without org scope:\n  ${line.trim()}`,
+            )
+          }
+        }
+      }
+    })
+
+    it('embeddings-service.ts scopes all upsert/search operations to an org', () => {
+      const embeddingsService = join(UE, 'lib', 'ai', 'embeddings-service.ts')
+      if (!existsSync(embeddingsService)) return // optional service
+      const c = read(embeddingsService)
+      expect(c).toMatch(/organizationId|organization_id|orgId|org_id/)
+    })
+
+    it('grievance-triage.ts scopes all queries to organizationId', () => {
+      const triageSvc = join(UE, 'lib', 'ai', 'grievance-triage.ts')
+      expect(existsSync(triageSvc)).toBe(true)
+      const c = read(triageSvc)
+      // Every DB query builder call should include org scope
+      const queryBlocks = c.match(/\.where\([^)]+\)/g) ?? []
+      for (const block of queryBlocks) {
+        if (!block.includes('organizationId') && !block.includes('organization_id')) {
+          throw new Error(
+            `[RAG-ISOLATION] grievance-triage.ts has a .where() clause without org filter:\n  ${block}`,
+          )
+        }
+      }
+    })
+
+    it('clause-reasoning.ts scopes all queries to organizationId', () => {
+      const clauseSvc = join(UE, 'lib', 'ai', 'clause-reasoning.ts')
+      expect(existsSync(clauseSvc)).toBe(true)
+      const c = read(clauseSvc)
+      const queryBlocks = c.match(/\.where\([^)]+\)/g) ?? []
+      for (const block of queryBlocks) {
+        if (!block.includes('organizationId') && !block.includes('organization_id')) {
+          throw new Error(
+            `[RAG-ISOLATION] clause-reasoning.ts has a .where() clause without org filter:\n  ${block}`,
+          )
+        }
+      }
+    })
+
+    it('AI API routes pass organizationId from authenticated context — never from user input', () => {
+      const aiRoutes = walkFiles(join(UE, 'app', 'api', 'ai'), /route\.ts$/)
+      expect(aiRoutes.length).toBeGreaterThan(0)
+
+      for (const routeFile of aiRoutes) {
+        const c = read(routeFile)
+        // Route must source orgId from context (auth), not from request body/params
+        const usesContextOrg = /context\.organizationId|context\.orgId/i.test(c)
+        // If the route touches AI features, it must use context-sourced org
+        if (/guardAiFeature|analyzeGrievance|suggestClause|chatbot|embed/i.test(c)) {
+          expect(usesContextOrg).toBe(true)
+        }
+      }
+    })
+
+    it('knowledge_base table has org-scoped rows — no cross-tenant wildcard selects in source', () => {
+      const chatbotSchema = join(UE, 'db', 'schema', 'domains', 'ml', 'chatbot.ts')
+      const altSchema = join(UE, 'db', 'schema', 'ai-chatbot-schema.ts')
+      const schemaFile = existsSync(chatbotSchema) ? chatbotSchema : altSchema
+      const c = read(schemaFile)
+
+      // knowledge_base must have an organizationId FK column
+      expect(c).toMatch(/organization_id|organizationId/)
+    })
+  })
 })
+

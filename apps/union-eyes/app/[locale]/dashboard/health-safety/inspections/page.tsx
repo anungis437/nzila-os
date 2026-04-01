@@ -112,9 +112,9 @@ export default function InspectionsPage() {
 
   useEffect(() => {
     if (organizationId) {
-      // eslint-disable-next-line react-hooks/immutability
+      // eslint-disable-next-line react-hooks/set-state-in-effect
       loadStats();
-      // eslint-disable-next-line react-hooks/immutability
+       
       loadFindings();
     }
   }, [organizationId, dateRange, loadFindings, loadStats]);

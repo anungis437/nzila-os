@@ -29,7 +29,7 @@ import {
 } from "../defensibility-pack";
 
 // ── Fixtures ─────────────────────────────────────────────────────────────────
-const now = new Date("2026-01-15T12:00:00Z");
+const _now = new Date("2026-01-15T12:00:00Z");
 
 function makeTimeline(overrides: Partial<TimelineEvent>[] = []): TimelineEvent[] {
   const defaults: TimelineEvent[] = [

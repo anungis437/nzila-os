@@ -85,7 +85,7 @@ router.get('/', async (req: Request, res: Response) => {
       success: true,
       data: remittances,
     });
-  } catch (error) {
+  } catch (_error) {
     res.status(500).json({
       success: false,
       error: 'Internal server error',
@@ -133,7 +133,7 @@ router.get('/:id', async (req: Request, res: Response) => {
         matchedTransactions: transactions,
       },
     });
-  } catch (error) {
+  } catch (_error) {
     res.status(500).json({
       success: false,
       error: 'Internal server error',
@@ -185,7 +185,7 @@ router.post('/', async (req: Request, res: Response) => {
       success: true,
       data: remittance,
     });
-  } catch (error) {
+  } catch (_error) {
     if (error instanceof z.ZodError) {
       return res.status(400).json({
         success: false,
@@ -335,7 +335,7 @@ router.post('/:id/reconcile', async (req: Request, res: Response) => {
         status: newStatus,
       },
     });
-  } catch (error) {
+  } catch (_error) {
     if (error instanceof z.ZodError) {
       return res.status(400).json({
         success: false,
@@ -400,7 +400,7 @@ router.put('/:id', async (req: Request, res: Response) => {
       success: true,
       data: updatedRemittance,
     });
-  } catch (error) {
+  } catch (_error) {
     if (error instanceof z.ZodError) {
       return res.status(400).json({
         success: false,
@@ -481,7 +481,7 @@ router.post('/upload', upload.single('file'), async (req: Request, res: Response
         errors: parseResult.errors,
       },
     });
-  } catch (error) {
+  } catch (_error) {
     res.status(500).json({
       success: false,
       error: 'Internal server error',
@@ -605,7 +605,7 @@ router.post('/:id/reconcile', async (req: Request, res: Response) => {
         report,
       },
     });
-  } catch (error) {
+  } catch (_error) {
     res.status(500).json({
       success: false,
       error: 'Internal server error',
@@ -705,7 +705,7 @@ router.get('/:id/report', async (req: Request, res: Response) => {
         data: reportData,
       });
     }
-  } catch (error) {
+  } catch (_error) {
     res.status(500).json({
       success: false,
       error: 'Internal server error',

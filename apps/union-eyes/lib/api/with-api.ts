@@ -312,7 +312,7 @@ export function withApi<
       if (options.entitlement && user?.organizationId) {
         try {
           await requireEntitlement(user.organizationId, options.entitlement, user.id);
-        } catch (err) {
+        } catch (_err) {
           return standardErrorResponse(
             ErrorCode.INSUFFICIENT_PERMISSIONS,
             `Module access denied: ${options.entitlement}`,

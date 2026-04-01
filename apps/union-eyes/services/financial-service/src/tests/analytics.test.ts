@@ -19,12 +19,12 @@ import { randomUUID } from 'crypto';
 const HAS_DB = Boolean(process.env.DATABASE_URL);
 
 // Dynamically import DB-dependent modules only when DATABASE_URL is available
-const requestMod = HAS_DB ? await import('supertest') : { default: null as any };
-const appMod = HAS_DB ? await import('../index') : { default: null as any };
-const dbMod = HAS_DB ? await import('../db') : { db: null as any };
+const requestMod = HAS_DB ? await import('supertest') : { default: null as unknown };
+const appMod = HAS_DB ? await import('../index') : { default: null as unknown };
+const dbMod = HAS_DB ? await import('../db') : { db: null as unknown };
 const schemaMod = HAS_DB
   ? await import('../db/schema')
-  : { strikeFunds: null, donations: null, stipendDisbursements: null, members: null } as any;
+  : { strikeFunds: null, donations: null, stipendDisbursements: null, members: null } as unknown as Record<string, unknown>;
 const { eq } = await import('drizzle-orm');
 
 const request = requestMod.default;

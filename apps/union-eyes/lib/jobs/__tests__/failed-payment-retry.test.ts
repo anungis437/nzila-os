@@ -96,7 +96,7 @@ describe('FailedPaymentRetryService', () => {
         ]),
       };
 
-      vi.mocked(db.select).mockReturnValue(mockSelectResult as any);
+      vi.mocked(db.select).mockReturnValue(mockSelectResult as unknown as never);
 
       const result = await FailedPaymentRetryService.runRetryJob();
       expect(result.totalProcessed).toBeGreaterThanOrEqual(0);

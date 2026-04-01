@@ -125,7 +125,7 @@ describe('SupportService', () => {
     mocks.mockInsert.mockReturnValueOnce(chain(undefined));
 
     const { updateTicket } = await import('../support-service');
-    const result = await updateTicket('t-1', { status: 'in_progress' as any }, 'user-1');
+    const result = await updateTicket('t-1', { status: 'in_progress' as unknown as Parameters<typeof updateTicket>[1]['status'] }, 'user-1');
     expect(result).toEqual(updated);
   });
 

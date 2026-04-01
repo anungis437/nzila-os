@@ -35,7 +35,7 @@ export function LanguageToggle() {
     <div className="flex items-center gap-2">
       <Globe className="w-4 h-4 text-gray-600" />
       <Select value={locale} onValueChange={(value) => handleLanguageChange(value as Locale)}>
-        <SelectTrigger className="w-[140px] border-gray-300">
+        <SelectTrigger className="w-35 border-gray-300">
           <SelectValue placeholder={t('selectLanguage')} />
         </SelectTrigger>
         <SelectContent>

@@ -6,7 +6,7 @@ import { withApi, ApiError, z, RATE_LIMITS } from '@/lib/api/framework';
 import { generateInvoice } from '@/services/platform-economics';
 import { db } from '@/db';
 import { orgSubscriptions, billingPeriods } from '@/db/schema';
-import { eq, and } from 'drizzle-orm';
+import { eq } from 'drizzle-orm';
 
 export const dynamic = 'force-dynamic';
 

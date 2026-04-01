@@ -331,7 +331,7 @@ setVersionHistory([]);
               <Button variant="outline" size="icon" onClick={handleZoomOut} disabled={zoom <= 25}>
                 <ZoomOut className="h-4 w-4" />
               </Button>
-              <span className="text-sm font-medium min-w-[60px] text-center">{zoom}%</span>
+              <span className="text-sm font-medium min-w-15 text-center">{zoom}%</span>
               <Button variant="outline" size="icon" onClick={handleZoomIn} disabled={zoom >= 300}>
                 <ZoomIn className="h-4 w-4" />
               </Button>

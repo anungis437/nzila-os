@@ -469,7 +469,7 @@ export function ProxyVoting({
               </CardTitle>
             </CardHeader>
             <CardContent>
-              <ScrollArea className="h-[400px]">
+              <ScrollArea className="h-100">
                 <div className="space-y-2">
                   {[...currentProxies, ...receivedProxies]
                     .sort((a, b) => b.createdAt.getTime() - a.createdAt.getTime())
@@ -573,7 +573,7 @@ export function ProxyVoting({
               </div>
             </div>
 
-            <ScrollArea className="h-[300px] border rounded-lg p-2">
+            <ScrollArea className="h-75 border rounded-lg p-2">
               <div className="space-y-2">
                 {filteredMembers.map((member) => (
                   <button

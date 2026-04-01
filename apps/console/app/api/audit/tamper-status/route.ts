@@ -76,7 +76,7 @@ export async function GET(req: NextRequest) {
       entryCount,
       chainValid,
     })
-  } catch (error) {
+  } catch (_error) {
     return NextResponse.json({
       status: 'fail',
       verifiedAt,

@@ -8,7 +8,7 @@ import { withRLSContext } from '@/lib/db/with-rls-context';
 export const dynamic = 'force-dynamic';
 
 /** Active grievance statuses (not closed/settled/withdrawn/denied) */
-const ACTIVE_CLAIM_STATUSES = [
+const _ACTIVE_CLAIM_STATUSES = [
   'draft', 'filed', 'acknowledged', 'investigating',
   'response_due', 'response_received', 'escalated', 'mediation', 'arbitration',
 ];
@@ -35,8 +35,8 @@ export async function GET(req: NextRequest) {
     const rows = await db.select().from(organizations).where(where);
 
     // When include_stats is requested, count active claims and children per org
-    let claimsByOrg: Record<string, number> = {};
-    let childrenByOrg: Record<string, number> = {};
+    const claimsByOrg: Record<string, number> = {};
+    const childrenByOrg: Record<string, number> = {};
     if (includeStats && rows.length > 0) {
       const orgIds = rows.map(r => r.id);
       const claimCounts = await db.execute(

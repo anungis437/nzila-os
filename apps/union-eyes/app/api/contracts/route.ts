@@ -5,9 +5,8 @@
  * POST /api/contracts — Create a new commercial contract
  */
 
-import { withApi, ApiError, z, RATE_LIMITS } from '@/lib/api/framework';
+import { withApi, ApiError, z } from '@/lib/api/framework';
 import {
-  getActiveContract,
   createContract,
 } from '@/services/platform-economics';
 import { db } from '@/db';

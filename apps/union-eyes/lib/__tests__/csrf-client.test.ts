@@ -11,6 +11,8 @@ const mocks = vi.hoisted(() => ({
 vi.stubGlobal('fetch', mocks.mockFetch);
 
 describe('csrf-client', () => {
+  const browserGlobal = globalThis as unknown as { document: { cookie: string } };
+
   beforeEach(() => {
     vi.clearAllMocks();
     vi.resetModules();
@@ -28,7 +30,7 @@ describe('csrf-client', () => {
   // ── fetchWithCSRF ─────────────────────────────────────────────────────
   describe('fetchWithCSRF', () => {
     it('includes CSRF token header on POST requests', async () => {
-      (globalThis as any).document.cookie = '__Host-csrf-token=test-csrf-token-value';
+      browserGlobal.document.cookie = '__Host-csrf-token=test-csrf-token-value';
 
       const { fetchWithCSRF } = await import('../csrf-client');
       await fetchWithCSRF('/api/test', { method: 'POST', body: '{}' });
@@ -50,7 +52,7 @@ describe('csrf-client', () => {
     });
 
     it('includes CSRF token on DELETE requests', async () => {
-      (globalThis as any).document.cookie = '__Host-csrf-token=delete-token';
+      browserGlobal.document.cookie = '__Host-csrf-token=delete-token';
 
       const { fetchWithCSRF } = await import('../csrf-client');
       await fetchWithCSRF('/api/item/1', { method: 'DELETE' });
@@ -61,7 +63,7 @@ describe('csrf-client', () => {
     });
 
     it('handles missing CSRF cookie gracefully', async () => {
-      (globalThis as any).document.cookie = '';
+      browserGlobal.document.cookie = '';
 
       const { fetchWithCSRF } = await import('../csrf-client');
       await fetchWithCSRF('/api/test', { method: 'PUT', body: '{}' });
@@ -70,7 +72,7 @@ describe('csrf-client', () => {
     });
 
     it('does not add token on HEAD requests', async () => {
-      (globalThis as any).document.cookie = '__Host-csrf-token=head-token';
+      browserGlobal.document.cookie = '__Host-csrf-token=head-token';
 
       const { fetchWithCSRF } = await import('../csrf-client');
       await fetchWithCSRF('/api/test', { method: 'HEAD' });
@@ -80,7 +82,7 @@ describe('csrf-client', () => {
     });
 
     it('does not add token on OPTIONS requests', async () => {
-      (globalThis as any).document.cookie = '__Host-csrf-token=opt-token';
+      browserGlobal.document.cookie = '__Host-csrf-token=opt-token';
 
       const { fetchWithCSRF } = await import('../csrf-client');
       await fetchWithCSRF('/api/test', { method: 'OPTIONS' });
@@ -90,7 +92,7 @@ describe('csrf-client', () => {
     });
 
     it('includes CSRF token on PATCH requests', async () => {
-      (globalThis as any).document.cookie = '__Host-csrf-token=patch-token';
+      browserGlobal.document.cookie = '__Host-csrf-token=patch-token';
 
       const { fetchWithCSRF } = await import('../csrf-client');
       await fetchWithCSRF('/api/resource', { method: 'PATCH', body: '{}' });
@@ -101,7 +103,7 @@ describe('csrf-client', () => {
     });
 
     it('defaults to GET when no method specified', async () => {
-      (globalThis as any).document.cookie = '__Host-csrf-token=some-token';
+      browserGlobal.document.cookie = '__Host-csrf-token=some-token';
 
       const { fetchWithCSRF } = await import('../csrf-client');
       await fetchWithCSRF('/api/data');
@@ -112,7 +114,7 @@ describe('csrf-client', () => {
     });
 
     it('preserves existing headers on POST', async () => {
-      (globalThis as any).document.cookie = '__Host-csrf-token=merge-token';
+      browserGlobal.document.cookie = '__Host-csrf-token=merge-token';
 
       const { fetchWithCSRF } = await import('../csrf-client');
       await fetchWithCSRF('/api/test', {
@@ -128,7 +130,7 @@ describe('csrf-client', () => {
     });
 
     it('decodes URL-encoded cookie value', async () => {
-      (globalThis as any).document.cookie = '__Host-csrf-token=token%20with%20spaces';
+      browserGlobal.document.cookie = '__Host-csrf-token=token%20with%20spaces';
 
       const { fetchWithCSRF } = await import('../csrf-client');
       await fetchWithCSRF('/api/test', { method: 'POST', body: '{}' });
@@ -155,7 +157,7 @@ describe('csrf-client', () => {
     });
 
     it('interceptor adds token for POST config', async () => {
-      (globalThis as any).document.cookie = '__Host-csrf-token=axios-token';
+      browserGlobal.document.cookie = '__Host-csrf-token=axios-token';
 
       const { setupAxiosCSRF } = await import('../csrf-client');
       const mockAxios = {
@@ -170,7 +172,7 @@ describe('csrf-client', () => {
     });
 
     it('interceptor skips token for GET config', async () => {
-      (globalThis as any).document.cookie = '__Host-csrf-token=axios-token';
+      browserGlobal.document.cookie = '__Host-csrf-token=axios-token';
 
       const { setupAxiosCSRF } = await import('../csrf-client');
       const mockAxios = {
@@ -199,13 +201,13 @@ describe('csrf-client', () => {
   // ── getToken / hasCSRFToken ───────────────────────────────────────────
   describe('getToken', () => {
     it('returns token when cookie exists', async () => {
-      (globalThis as any).document.cookie = '__Host-csrf-token=my-token';
+      browserGlobal.document.cookie = '__Host-csrf-token=my-token';
       const { getToken } = await import('../csrf-client');
       expect(getToken()).toBe('my-token');
     });
 
     it('returns null when cookie is absent', async () => {
-      (globalThis as any).document.cookie = 'other-cookie=value';
+      browserGlobal.document.cookie = 'other-cookie=value';
       const { getToken } = await import('../csrf-client');
       expect(getToken()).toBeNull();
     });
@@ -223,13 +225,13 @@ describe('csrf-client', () => {
 
   describe('hasCSRFToken', () => {
     it('returns true when token exists', async () => {
-      (globalThis as any).document.cookie = '__Host-csrf-token=exists';
+      browserGlobal.document.cookie = '__Host-csrf-token=exists';
       const { hasCSRFToken } = await import('../csrf-client');
       expect(hasCSRFToken()).toBe(true);
     });
 
     it('returns false when token absent', async () => {
-      (globalThis as any).document.cookie = '';
+      browserGlobal.document.cookie = '';
       const { hasCSRFToken } = await import('../csrf-client');
       expect(hasCSRFToken()).toBe(false);
     });
@@ -246,7 +248,7 @@ describe('csrf-client', () => {
   // ── createCSRFMutation ────────────────────────────────────────────────
   describe('createCSRFMutation', () => {
     it('calls underlying mutation when token exists', async () => {
-      (globalThis as any).document.cookie = '__Host-csrf-token=mut-token';
+      browserGlobal.document.cookie = '__Host-csrf-token=mut-token';
       const { createCSRFMutation } = await import('../csrf-client');
 
       const mockMutation = vi.fn().mockResolvedValue({ id: 1 });
@@ -258,7 +260,7 @@ describe('csrf-client', () => {
     });
 
     it('throws when no CSRF token', async () => {
-      (globalThis as any).document.cookie = '';
+      browserGlobal.document.cookie = '';
       const { createCSRFMutation } = await import('../csrf-client');
 
       const wrapped = createCSRFMutation(vi.fn());
@@ -269,7 +271,7 @@ describe('csrf-client', () => {
   // ── submitFormWithCSRF ────────────────────────────────────────────────
   describe('submitFormWithCSRF', () => {
     it('submits form data with CSRF header', async () => {
-      (globalThis as any).document.cookie = '__Host-csrf-token=form-token';
+      browserGlobal.document.cookie = '__Host-csrf-token=form-token';
       const { submitFormWithCSRF } = await import('../csrf-client');
 
       // Minimal HTMLFormElement mock
@@ -287,7 +289,7 @@ describe('csrf-client', () => {
     });
 
     it('throws when no CSRF token', async () => {
-      (globalThis as any).document.cookie = '';
+      browserGlobal.document.cookie = '';
       const { submitFormWithCSRF } = await import('../csrf-client');
 
       const mockForm = {} as HTMLFormElement;
@@ -300,7 +302,7 @@ describe('csrf-client', () => {
   // ── submitJSONWithCSRF ────────────────────────────────────────────────
   describe('submitJSONWithCSRF', () => {
     it('submits JSON with CSRF header and returns parsed response', async () => {
-      (globalThis as any).document.cookie = '__Host-csrf-token=json-token';
+      browserGlobal.document.cookie = '__Host-csrf-token=json-token';
       mocks.mockFetch.mockResolvedValue(new Response(JSON.stringify({ ok: true }), { status: 200 }));
 
       const { submitJSONWithCSRF } = await import('../csrf-client');
@@ -316,14 +318,14 @@ describe('csrf-client', () => {
     });
 
     it('throws when no CSRF token', async () => {
-      (globalThis as any).document.cookie = '';
+      browserGlobal.document.cookie = '';
       const { submitJSONWithCSRF } = await import('../csrf-client');
 
       await expect(submitJSONWithCSRF('/api/users', {})).rejects.toThrow('CSRF token not found');
     });
 
     it('throws on non-OK response', async () => {
-      (globalThis as any).document.cookie = '__Host-csrf-token=err-token';
+      browserGlobal.document.cookie = '__Host-csrf-token=err-token';
       mocks.mockFetch.mockResolvedValue(new Response('', { status: 403, statusText: 'Forbidden' }));
 
       const { submitJSONWithCSRF } = await import('../csrf-client');
@@ -331,7 +333,7 @@ describe('csrf-client', () => {
     });
 
     it('uses custom method when provided', async () => {
-      (globalThis as any).document.cookie = '__Host-csrf-token=put-token';
+      browserGlobal.document.cookie = '__Host-csrf-token=put-token';
       mocks.mockFetch.mockResolvedValue(new Response(JSON.stringify({ updated: true }), { status: 200 }));
 
       const { submitJSONWithCSRF } = await import('../csrf-client');

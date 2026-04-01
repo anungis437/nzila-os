@@ -182,7 +182,7 @@ export function DeadlinesList({
       {/* Filters */}
       <div className="bg-white p-4 rounded-lg shadow-sm border border-gray-200">
         <div className="flex flex-wrap gap-4">
-          <div className="flex-1 min-w-[200px]">
+          <div className="flex-1 min-w-50">
             <label className="block text-sm font-medium text-gray-700 mb-1">
               {t('statusFilter')}
             </label>
@@ -200,7 +200,7 @@ export function DeadlinesList({
             </select>
           </div>
 
-          <div className="flex-1 min-w-[200px]">
+          <div className="flex-1 min-w-50">
             <label className="block text-sm font-medium text-gray-700 mb-1">
               {t('priorityFilter')}
             </label>

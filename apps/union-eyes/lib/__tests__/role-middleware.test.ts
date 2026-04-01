@@ -7,6 +7,7 @@
  * Also tests the withRoleAuth / withAnyRole middleware wrappers.
  */
 import { describe, it, expect, vi, beforeEach } from 'vitest';
+import type { NextRequest } from 'next/server';
 
 // ── Hoisted mocks ────────────────────────────────────────────────────────────
 
@@ -19,8 +20,8 @@ vi.mock('@/db/queries/organization-members-queries', () => ({
 }));
 
 vi.mock('@/lib/organization-middleware', () => ({
-  withOrganizationAuth: vi.fn((innerHandler: any) => {
-    return (request: any, params?: any) => {
+  withOrganizationAuth: vi.fn((innerHandler: (req: unknown, ctx: unknown, params?: unknown) => unknown) => {
+    return (request: unknown, params?: unknown) => {
       const orgContext = { organizationId: 'org-1', userId: 'user-1' };
       return innerHandler(request, orgContext, params);
     };
@@ -221,7 +222,7 @@ describe('withRoleAuth', () => {
     const { withRoleAuth } = await import('../role-middleware');
     const handler = vi.fn().mockResolvedValue(new Response(JSON.stringify({ ok: true })));
     const route = withRoleAuth('member', handler);
-    await route({} as any);
+    await route({} as unknown as NextRequest);
     expect(handler).toHaveBeenCalledWith(
       expect.anything(),
       expect.objectContaining({ organizationId: 'org-1', userId: 'user-1', role: 'admin', memberId: 'm-1' }),
@@ -234,7 +235,7 @@ describe('withRoleAuth', () => {
     const { withRoleAuth } = await import('../role-middleware');
     const handler = vi.fn();
     const route = withRoleAuth('admin', handler);
-    const response = await route({} as any);
+    const response = await route({} as unknown as NextRequest);
     expect(response.status).toBe(403);
     expect(handler).not.toHaveBeenCalled();
   });
@@ -244,7 +245,7 @@ describe('withRoleAuth', () => {
     const { withRoleAuth } = await import('../role-middleware');
     const handler = vi.fn();
     const route = withRoleAuth('member', handler);
-    const response = await route({} as any);
+    const response = await route({} as unknown as NextRequest);
     expect(response.status).toBe(403);
   });
 
@@ -253,7 +254,7 @@ describe('withRoleAuth', () => {
     const { withRoleAuth } = await import('../role-middleware');
     const handler = vi.fn();
     const route = withRoleAuth('member', handler);
-    const response = await route({} as any);
+    const response = await route({} as unknown as NextRequest);
     expect(response.status).toBe(500);
   });
 });
@@ -270,7 +271,7 @@ describe('withAnyRole', () => {
     const { withAnyRole } = await import('../role-middleware');
     const handler = vi.fn().mockResolvedValue(new Response('ok'));
     const route = withAnyRole(['steward', 'admin'], handler);
-    await route({} as any);
+    await route({} as unknown as NextRequest);
     expect(handler).toHaveBeenCalled();
   });
 
@@ -279,7 +280,7 @@ describe('withAnyRole', () => {
     const { withAnyRole } = await import('../role-middleware');
     const handler = vi.fn();
     const route = withAnyRole(['admin', 'president'], handler);
-    const response = await route({} as any);
+    const response = await route({} as unknown as NextRequest);
     expect(response.status).toBe(403);
     expect(handler).not.toHaveBeenCalled();
   });
@@ -289,7 +290,7 @@ describe('withAnyRole', () => {
     const { withAnyRole } = await import('../role-middleware');
     const handler = vi.fn();
     const route = withAnyRole(['admin'], handler);
-    const response = await route({} as any);
+    const response = await route({} as unknown as NextRequest);
     expect(response.status).toBe(403);
   });
 
@@ -298,7 +299,7 @@ describe('withAnyRole', () => {
     const { withAnyRole } = await import('../role-middleware');
     const handler = vi.fn();
     const route = withAnyRole(['admin'], handler);
-    const response = await route({} as any);
+    const response = await route({} as unknown as NextRequest);
     expect(response.status).toBe(500);
   });
 });

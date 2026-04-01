@@ -64,10 +64,13 @@ import { BulkImportOrganizations } from "@/components/admin/bulk-import-organiza
  
 import type { Organization, OrganizationType, OrganizationStatus } from "@/types/organization";
 
-const fetcher = (url: string) => fetch(url).then(res => {
-  if (!res.ok) throw new Error(`Request failed: ${res.status}`);
-  return res.json();
-});
+const fetcher = (url: string) => {
+  if (!url.startsWith('/')) throw new Error('Only relative URLs are allowed');
+  return fetch(url).then(res => {
+    if (!res.ok) throw new Error(`Request failed: ${res.status}`);
+    return res.json();
+  });
+};
 
 // Organization type configurations
 const typeConfig: Record<OrganizationType, { label: string; icon: React.ReactElement; color: string }> = {
@@ -96,7 +99,7 @@ interface OrganizationWithStats extends Organization {
 
 export default function OrganizationsPage() {
   const router = useRouter();
-  const { organizationId } = useOrganization();
+  const { organizationId: _organizationId } = useOrganization();
   
   const [searchQuery, setSearchQuery] = useState("");
   const [typeFilter, setTypeFilter] = useState<string>("all");

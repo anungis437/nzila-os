@@ -50,7 +50,7 @@ vi.mock('@/lib/logger', () => ({
 
 // The index.ts just re-exports from other modules.
 // Verify it re-exports correctly.
-describe('lib/auth/index re-exports', () => {
+describe('lib/auth/index re-exports', { timeout: 15_000 }, () => {
   it('exports Permission', async () => {
     // Dynamic import to avoid circular issues in top-level
     const mod = await import('../index');

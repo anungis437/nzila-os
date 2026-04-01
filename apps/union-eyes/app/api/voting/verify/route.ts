@@ -5,7 +5,7 @@
 import { withApi, z } from '@/lib/api/framework';
 import { db } from '@/db/db';
 import { votes, votingOptions, votingSessions } from '@/db/schema';
-import { eq, and } from 'drizzle-orm';
+import { eq } from 'drizzle-orm';
 
 export const dynamic = 'force-dynamic';
 

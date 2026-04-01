@@ -14,7 +14,7 @@ vi.mock('@/lib/logger', () => ({
   logger: { info: vi.fn(), warn: vi.fn(), error: vi.fn(), debug: vi.fn() },
 }));
 
-import { MultiProviderGeocodingService, getGeocodingService, geocodeAddress } from '../multi-provider-geocoding-service';
+import { MultiProviderGeocodingService, getGeocodingService } from '../multi-provider-geocoding-service';
 
 describe('MultiProviderGeocodingService', () => {
   let service: MultiProviderGeocodingService;

@@ -1,7 +1,7 @@
 # Architecture Shape — cfo
 
 > Domain-core architecture status for the CFO application.
-> See: [APP_DOMAIN_CORE_STANDARD.md](../../../docs/APP_DOMAIN_CORE_STANDARD.md)
+> See: [APP_DOMAIN_CORE_STANDARD.md](../../../docs/architecture/APP_DOMAIN_CORE_STANDARD.md)
 
 ## Current Structure
 

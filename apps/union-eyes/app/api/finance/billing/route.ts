@@ -3,7 +3,6 @@
  * POST /api/finance/billing — Create billing account
  */
 
-import { NextResponse } from 'next/server';
 import { z } from 'zod';
 import { withMinRole, type BaseAuthContext } from '@/lib/api-auth-guard';
 import { requireEntitlement } from '@/services/platform-economics/entitlement-guard';

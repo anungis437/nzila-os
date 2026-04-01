@@ -2,7 +2,7 @@
 
 
 export const dynamic = 'force-dynamic';
-import React, { useState, useEffect } from 'react';
+import React, { useState, useEffect, useCallback } from 'react';
 import { useRouter } from 'next/navigation';
 import {
   DeadlinesList,
@@ -44,11 +44,7 @@ export default function DeadlinesPage() {
   const [extensionDialogOpen, setExtensionDialogOpen] = useState(false);
 
   // Fetch deadlines
-  useEffect(() => {
-    fetchDeadlines();
-  }, []);
-
-  const fetchDeadlines = async () => {
+  const fetchDeadlines = useCallback(async () => {
     try {
       setLoading(true);
       setError(null);
@@ -67,7 +63,11 @@ export default function DeadlinesPage() {
     } finally {
       setLoading(false);
     }
-  };
+  }, [t]);
+
+  useEffect(() => {
+    fetchDeadlines();
+  }, [fetchDeadlines]);
 
   const handleCompleteDeadline = async (deadlineId: string) => {
     try {

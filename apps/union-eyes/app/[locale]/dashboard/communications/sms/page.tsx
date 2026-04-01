@@ -10,7 +10,7 @@ import { requireUser, hasMinRole } from '@/lib/api-auth-guard';
 import { SmsConsole } from '@/components/communications/sms-console';
 
 export default async function SmsPage() {
-  const user = await requireUser();
+  const _user = await requireUser();
   if (!(await hasMinRole('steward'))) {
     redirect('/dashboard');
   }

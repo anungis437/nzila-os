@@ -208,7 +208,7 @@ export async function ensureOrgAlias(client: Client, orgId: string, docType: str
 
 - `packages/db/src/schema/ai.ts` defines the `ai_embeddings` table with `org_id`, `app_key`,
   `source_id`, `chunk_id`, `chunk_text`, and an `embedding` column (text placeholder, migrated
-  to `vector(1536)` via `packages/db/migrations/ai-control-plane-pgvector.sql`)
+  to `vector(1536)` via `migrations/platform/ai-control-plane-pgvector.sql`)
 - HNSW index (m=16, ef_construction=64) for cosine similarity is already created
 - `tooling/ai-evals/ingest-rag.ts` provides a working RAG ingestion pipeline
 - `packages/ai-core/src/rag/chunker.ts` implements deterministic text chunking with SHA-256 IDs

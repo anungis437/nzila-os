@@ -15,7 +15,7 @@ import { db } from '@/db/db';
 import { organizations } from '@/db/schema-organizations';
 import { organizationMembers } from '@/db/schema/organization-members-schema';
 import { grievances } from '@/db/schema/domains/claims/grievances';
-import { eq, sql } from 'drizzle-orm';
+import { eq } from 'drizzle-orm';
 
 const logger = createLogger('admin:seed-cupe-pilot');
 
@@ -96,7 +96,7 @@ export const POST = withApiAuth(async (request: NextRequest) => {
       const grievantMember = fixture.members.find(
         (m: { id: string }) => m.id === c.filed_by,
       );
-      const assignedMember = c.assigned_to
+      const _assignedMember = c.assigned_to
         ? fixture.members.find(
             (m: { id: string }) => m.id === c.assigned_to,
           )

@@ -111,7 +111,7 @@ function setupInsertChain() {
 }
 
 // ── Helper to set up DB select chain ─────────────────────────────────────────
-function setupSelectChain(rows: unknown[]) {
+function _setupSelectChain(rows: unknown[]) {
   mocks.mockLimit.mockResolvedValue(rows);
   mocks.mockWhere.mockReturnValue({
     orderBy: vi.fn().mockReturnValue({ limit: mocks.mockLimit }),
@@ -521,7 +521,7 @@ describe('NotificationService', () => {
     });
 
     it('determines SMS type from template channels', async () => {
-      // eslint-disable-next-line @typescript-eslint/no-explicit-any
+       
       const mockSend = vi.fn().mockResolvedValue({ id: 'sms-msg', status: 'sent', sentAt: new Date() });
       // eslint-disable-next-line @typescript-eslint/no-explicit-any
       (service as any).providers.set('sms', { name: 'twilio', send: mockSend });

@@ -1,4 +1,4 @@
-import { describe, it, expect, vi, beforeEach } from 'vitest';
+import { describe, it, expect, vi, beforeEach, afterEach } from 'vitest';
 
 vi.mock('@/lib/logger', () => ({
   logger: { info: vi.fn(), warn: vi.fn(), error: vi.fn(), debug: vi.fn() },
@@ -10,8 +10,20 @@ import {
   getTraceContext,
 } from '../opentelemetry';
 
+const origOtelEnabled = process.env.OTEL_ENABLED;
+
 beforeEach(() => {
   vi.clearAllMocks();
+  // Disable real SDK initialisation so tests don't hang connecting to a collector
+  process.env.OTEL_ENABLED = 'false';
+});
+
+afterEach(() => {
+  if (origOtelEnabled === undefined) {
+    delete process.env.OTEL_ENABLED;
+  } else {
+    process.env.OTEL_ENABLED = origOtelEnabled;
+  }
 });
 
 describe('initializeTracing', () => {

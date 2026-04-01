@@ -112,7 +112,7 @@ return standardErrorResponse(
         limit,
         offset,
       });
-    } catch (error) {
+    } catch (_error) {
 return standardErrorResponse(
       ErrorCode.INTERNAL_ERROR,
       'Internal server error',
@@ -248,7 +248,7 @@ export const POST = withRoleAuth('member', async (request: NextRequest, context:
         success: successCount,
         failed: failureCount,
       });
-    } catch (error) {
+    } catch (_error) {
 return NextResponse.json(
         {
           error: 'Internal server error',
@@ -309,7 +309,7 @@ export const DELETE = withRoleAuth('member', async (request: NextRequest, contex
         message: 'Post deleted successfully',
         post_id: postId,
       });
-    } catch (error) {
+    } catch (_error) {
 return NextResponse.json(
         {
           error: 'Failed to delete post',

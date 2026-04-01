@@ -110,7 +110,7 @@ describe('wallet-service', () => {
       const mockOrderBy = vi.fn().mockReturnValue({ limit: mockLimit });
       const mockWhere = vi.fn().mockReturnValue({ orderBy: mockOrderBy });
       const mockFrom = vi.fn().mockReturnValue({ where: mockWhere });
-      (db.select as any).mockReturnValue({ from: mockFrom });
+      vi.mocked(db.select).mockReturnValue({ from: mockFrom });
 
       const result = await getBalance('org-1', 'user-1');
 
@@ -123,7 +123,7 @@ describe('wallet-service', () => {
       const mockOrderBy = vi.fn().mockReturnValue({ limit: mockLimit });
       const mockWhere = vi.fn().mockReturnValue({ orderBy: mockOrderBy });
       const mockFrom = vi.fn().mockReturnValue({ where: mockWhere });
-      (db.select as any).mockReturnValue({ from: mockFrom });
+      vi.mocked(db.select).mockReturnValue({ from: mockFrom });
 
       const result = await getBalance('org-1', 'user-1');
 
@@ -148,7 +148,7 @@ describe('wallet-service', () => {
       const mockCountWhere = vi.fn().mockResolvedValue([{ count: 42 }]);
       const mockCountFrom = vi.fn().mockReturnValue({ where: mockCountWhere });
 
-      (db.select as any)
+      vi.mocked(db.select)
         .mockReturnValueOnce({ from: mockFrom })
         .mockReturnValueOnce({ from: mockCountFrom });
 
@@ -169,7 +169,7 @@ describe('wallet-service', () => {
       const mockOrderBy = vi.fn().mockReturnValue({ limit: mockLimit });
       const mockWhere = vi.fn().mockReturnValue({ orderBy: mockOrderBy });
       const mockFrom = vi.fn().mockReturnValue({ where: mockWhere });
-      (db.select as any).mockReturnValue({ from: mockFrom });
+      vi.mocked(db.select).mockReturnValue({ from: mockFrom });
 
       // Mock insert
       const newEntry = { id: 'le-1', balanceAfter: 150, amountCredits: 50 };
@@ -194,7 +194,7 @@ describe('wallet-service', () => {
       const mockOrderBy = vi.fn().mockReturnValue({ limit: mockLimit });
       const mockWhere = vi.fn().mockReturnValue({ orderBy: mockOrderBy });
       const mockFrom = vi.fn().mockReturnValue({ where: mockWhere });
-      (db.select as any).mockReturnValue({ from: mockFrom });
+      vi.mocked(db.select).mockReturnValue({ from: mockFrom });
 
       await expect(
         applyLedgerEntry(db, {
@@ -214,7 +214,7 @@ describe('wallet-service', () => {
       const mockOrderBy = vi.fn().mockReturnValue({ limit: mockLimit });
       const mockWhere = vi.fn().mockReturnValue({ orderBy: mockOrderBy });
       const mockFrom = vi.fn().mockReturnValue({ where: mockWhere });
-      (db.select as any).mockReturnValue({ from: mockFrom });
+      vi.mocked(db.select).mockReturnValue({ from: mockFrom });
 
       const newEntry = { id: 'le-1', balanceAfter: -40 };
       mocks.mockReturning.mockResolvedValueOnce([newEntry]);
@@ -241,7 +241,7 @@ describe('wallet-service', () => {
       const mockOrderBy = vi.fn().mockReturnValue({ limit: mockLimit });
       const mockWhere = vi.fn().mockReturnValue({ orderBy: mockOrderBy });
       const mockFrom = vi.fn().mockReturnValue({ where: mockWhere });
-      (db.select as any).mockReturnValue({ from: mockFrom });
+      vi.mocked(db.select).mockReturnValue({ from: mockFrom });
 
       const newEntry = { id: 'le-1', balanceAfter: 100 };
       mocks.mockReturning.mockResolvedValueOnce([newEntry]);
@@ -263,7 +263,7 @@ describe('wallet-service', () => {
     it('creates adjustment through transaction', async () => {
       const entry = { id: 'le-1', balanceAfter: 200 };
 
-      mocks.mockTransaction.mockImplementation(async (cb: any) => {
+      mocks.mockTransaction.mockImplementation(async (cb: (tx: unknown) => unknown) => {
         // Mock the TX with select and insert chains
         const mockLimit = vi.fn().mockResolvedValue([{ balanceAfter: 100 }]);
         const mockOrderBy = vi.fn().mockReturnValue({ limit: mockLimit });
@@ -296,7 +296,7 @@ describe('wallet-service', () => {
         { totalIssued: 5000, totalSpent: 2000, activeMembers: 15 },
       ]);
       const mockFrom = vi.fn().mockReturnValue({ where: mockWhere });
-      (db.select as any).mockReturnValue({ from: mockFrom });
+      vi.mocked(db.select).mockReturnValue({ from: mockFrom });
       mocks.mockExecute.mockResolvedValue([{ total: 3000 }]);
 
       const result = await getLedgerSummary('org-1');
@@ -313,7 +313,7 @@ describe('wallet-service', () => {
         { totalIssued: 1000, totalSpent: 200, activeMembers: 3 },
       ]);
       const mockFrom = vi.fn().mockReturnValue({ where: mockWhere });
-      (db.select as any).mockReturnValue({ from: mockFrom });
+      vi.mocked(db.select).mockReturnValue({ from: mockFrom });
       mocks.mockExecute.mockResolvedValue([{ total: 800 }]);
 
       const start = new Date('2026-01-01');
@@ -354,7 +354,7 @@ describe('wallet-service', () => {
         { totalIssued: 500, totalSpent: 100, activeMembers: 2 },
       ]);
       const mockFrom = vi.fn().mockReturnValue({ where: mockWhere });
-      (db.select as any).mockReturnValue({ from: mockFrom });
+      vi.mocked(db.select).mockReturnValue({ from: mockFrom });
       mocks.mockExecute.mockResolvedValue([{ total: 400 }]);
 
       const start = new Date('2026-01-01');

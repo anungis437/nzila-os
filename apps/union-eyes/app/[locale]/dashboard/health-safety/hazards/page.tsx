@@ -98,7 +98,7 @@ export default function HazardsPage() {
 
   useEffect(() => {
     if (organizationId) {
-      // eslint-disable-next-line react-hooks/immutability
+      // eslint-disable-next-line react-hooks/set-state-in-effect
       loadStats();
     }
   }, [organizationId, loadStats]);

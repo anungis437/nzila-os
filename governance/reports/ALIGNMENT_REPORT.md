@@ -125,7 +125,7 @@ No `apps/abr-insights/`, `verticals/`, or `cloned/` directories exist.
 
 | Table | Update Trigger | Delete Trigger | Migration |
 |-------|---------------|---------------|-----------|
-| `audit_events` | `trg_audit_events_no_update` | `trg_audit_events_no_delete` | `packages/db/migrations/hash-chain-immutability-triggers.sql:31-42` |
+| `audit_events` | `trg_audit_events_no_update` | `trg_audit_events_no_delete` | `migrations/platform/hash-chain-immutability-triggers.sql:31-42` |
 | `share_ledger_entries` | `trg_share_ledger_entries_no_update` | `trg_share_ledger_entries_no_delete` | Same file:47-58 |
 | `automation_events` | `trg_automation_events_no_update` | `trg_automation_events_no_delete` | Same file:63-74 |
 
@@ -143,7 +143,7 @@ UE archive migration (`0063_add_audit_log_archive_support.sql`) adds archive col
 | Schema: `hash: text('hash').notNull()` + `previousHash: text('previous_hash')` | `packages/db/src/schema/operations.ts:178-179` |
 | ABR migration: `content_hash` + `previous_hash` | `apps/abr/backend/auth_core/migrations/0002_audit_hash_chain.py` |
 | UE migration: `content_hash` + `previous_hash` | `apps/union-eyes/backend/core/migrations/0002_audit_hash_chain.py` |
-| INSERT trigger: `nzila_validate_hash_chain()` ensures hash NOT NULL | `packages/db/migrations/hash-chain-immutability-triggers.sql:83-120` |
+| INSERT trigger: `nzila_validate_hash_chain()` ensures hash NOT NULL | `migrations/platform/hash-chain-immutability-triggers.sql:83-120` |
 
 **Contract Test:** `tooling/contract-tests/hash-chain-drift.test.ts` (INV-10, INV-11)
 

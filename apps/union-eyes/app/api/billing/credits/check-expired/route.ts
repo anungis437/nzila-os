@@ -15,7 +15,7 @@ export const POST = withApi(
     entitlement: 'financial_intelligence_suite',
     openapi: { tags: ['Billing'], summary: 'Expire past-due trials and credits' },
   },
-  async ({ organizationId, userId }) => {
+  async ({ organizationId, _userId }) => {
     if (!organizationId) throw ApiError.badRequest('Organization context required');
 
     // expireTrials requires a payment-method checker callback

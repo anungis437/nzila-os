@@ -3,6 +3,7 @@
 import { Button } from "@/components/ui/button";
 import { UserButton } from "@clerk/nextjs";
 import Link from "next/link";
+import Image from "next/image";
 import { Menu, X, Bell, Settings, LayoutDashboard, FileText, Vote, BarChart3, Users, Scale, Library, FileBarChart, Shield, GitCompare, Target, Flag, DollarSign } from "lucide-react";
 import { useEffect, useState } from "react";
 import { usePathname } from "next/navigation";
@@ -118,7 +119,7 @@ export default function DashboardNavbar({ profile, onMenuClick: _onMenuClick }: 
   };
 
   return (
-    <nav className="sticky top-0 z-50 w-full border-b bg-background/95 backdrop-blur supports-[backdrop-filter]:bg-background/60">
+    <nav className="sticky top-0 z-50 w-full border-b bg-background/95 backdrop-blur supports-backdrop-filter:bg-background/60">
       <div className="container mx-auto flex h-16 items-center justify-between px-4">
         {/* Left: Logo + Mobile Menu */}
         <div className="flex items-center space-x-4">
@@ -137,14 +138,18 @@ export default function DashboardNavbar({ profile, onMenuClick: _onMenuClick }: 
 
           {/* Logo */}
           <Link href={`/${locale}/dashboard`} className="flex items-center space-x-2">
-            <img
+            <Image
               src="/images/brand/icon.png"
               alt="Union Eyes"
+              width={32}
+              height={32}
               className="h-8 w-8 object-contain"
             />
-            <img
+            <Image
               src="/images/brand/logo.png"
               alt="Union Eyes"
+              width={96}
+              height={24}
               className="h-6 object-contain hidden sm:block"
             />
           </Link>

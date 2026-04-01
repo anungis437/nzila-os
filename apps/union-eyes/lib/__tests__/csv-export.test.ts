@@ -69,7 +69,7 @@ describe('csv-export', () => {
         overdueAcknowledgement: 1,
         overdueResolution: 2,
       };
-      const rows = kpiCardsToRows(kpis as any);
+      const rows = kpiCardsToRows(kpis as unknown as Parameters<typeof kpiCardsToRows>[0]);
       expect(rows).toHaveLength(4);
       expect(rows[0]).toEqual({ metric: 'Total Open', value: 10 });
     });

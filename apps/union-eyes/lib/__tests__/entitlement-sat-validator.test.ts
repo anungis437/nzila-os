@@ -84,8 +84,8 @@ describe('entitlement-sat-validator', () => {
 
     it('validates compatible entitlements', () => {
       const validator = new EntitlementValidator(
-        [{ entitlement: 'ai_search' as any }],
-        [{ role: 'admin' as any, entitlements: ['ai_search' as any] }],
+        [{ entitlement: 'ai_search' as unknown as string }],
+        [{ role: 'admin' as unknown as string, entitlements: ['ai_search' as unknown as string] }],
       );
       const result = validator.validateSystem();
       expect(result.isValid).toBe(true);
@@ -99,8 +99,8 @@ describe('entitlement-sat-validator', () => {
     it('getRequiredEntitlements resolves dependency chain', () => {
       const validator = new EntitlementValidator(
         [
-          { entitlement: 'predictive_models' as any, requires: ['advanced_analytics' as any] },
-          { entitlement: 'advanced_analytics' as any, requires: ['ai_search' as any] },
+          { entitlement: 'predictive_models' as unknown as string, requires: ['advanced_analytics' as unknown as string] },
+          { entitlement: 'advanced_analytics' as unknown as string, requires: ['ai_search' as unknown as string] },
         ],
         [],
       );

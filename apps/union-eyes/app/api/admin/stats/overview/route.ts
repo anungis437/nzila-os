@@ -6,7 +6,6 @@ import { db } from '@/db/db';
 import { organizations } from '@/db/schema';
 import { organizationMembers } from '@/db/schema';
 import { count, sql, ne } from 'drizzle-orm';
-import { withSystemContext } from '@/lib/db/with-rls-context';
 import { withApi } from '@/lib/api/framework';
 
 export const dynamic = 'force-dynamic';

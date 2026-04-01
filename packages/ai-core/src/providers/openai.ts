@@ -14,6 +14,7 @@
  * Used for local dev; Azure OpenAI is used in staging/prod.
  */
 import { getAiEnv } from '@nzila/os-core/ai-env'
+import { withRetry } from './retry'
 import type {
   AiProviderClient,
   AiStreamChunk,
@@ -41,6 +42,7 @@ export function createOpenAIProvider(): AiProviderClient {
 
   return {
     async generate(params: ProviderGenerateParams): Promise<ProviderGenerateResult> {
+      return withRetry(async () => {
       const model = params.model || env.OPENAI_MODEL_TEXT || 'gpt-4o'
       const body = {
         model,
@@ -73,6 +75,7 @@ export function createOpenAIProvider(): AiProviderClient {
         tokensOut: json.usage?.completion_tokens ?? 0,
         model: json.model ?? model,
       }
+      }, { providerName: 'openai' })
     },
 
     async *generateStream(
@@ -136,6 +139,7 @@ export function createOpenAIProvider(): AiProviderClient {
     },
 
     async embed(params: ProviderEmbedParams): Promise<ProviderEmbedResult> {
+      return withRetry(async () => {
       const model = params.model || env.OPENAI_MODEL_EMBEDDINGS || 'text-embedding-3-small'
       const body = { model, input: params.input }
 
@@ -157,6 +161,7 @@ export function createOpenAIProvider(): AiProviderClient {
         tokensUsed: json.usage?.total_tokens ?? 0,
         model: json.model ?? model,
       }
+      }, { providerName: 'openai' })
     },
   }
 }

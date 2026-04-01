@@ -128,7 +128,7 @@ describe('AuthenticationService', () => {
 describe('AuthenticationAuditLog', () => {
   beforeEach(() => {
     // Ensure clean state by reading events
-    const existing = AuthenticationAuditLog.getEvents();
+    const _existing = AuthenticationAuditLog.getEvents();
     // We can't clear directly, so we accept cumulative state
   });
 

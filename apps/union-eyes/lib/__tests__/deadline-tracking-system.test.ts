@@ -364,7 +364,7 @@ describe("deadline-tracking-system", () => {
   // ── Coverage Gap Tests ────────────────────────────────────────────
   describe("approveDeadlineExtension - edge cases", () => {
     it("uses new Date() fallback when newDeadline is missing", async () => {
-      const beforeCall = new Date();
+      const _beforeCall = new Date();
       mocks.mockFindFirstDeadlines
         .mockResolvedValueOnce({
           id: "dl-1",

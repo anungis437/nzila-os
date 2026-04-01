@@ -1,4 +1,4 @@
-import type { DomainEvent, EventMetadata } from '@nzila/contracts'
+import type { DomainEvent } from '@nzila/contracts'
 
 // ─── Event Handler Type ─────────────────────────────────────────────────────
 

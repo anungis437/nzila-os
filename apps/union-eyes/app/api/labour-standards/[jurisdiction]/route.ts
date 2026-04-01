@@ -18,7 +18,6 @@ import {
   ANTI_SCAB_PROVISIONS,
   PAY_EQUITY_REGIMES,
   type CanadianJurisdiction,
-  type JurisdictionProfile,
 } from '@/lib/canadian-labour-standards';
 
 export const dynamic = 'force-dynamic';
@@ -71,15 +70,14 @@ export const GET = withApi({
     : params.jurisdiction?.toUpperCase();
 
   if (!code || !VALID_JURISDICTIONS.has(code)) {
-    throw new ApiError(
-      400,
+    throw ApiError.badRequest(
       `Invalid jurisdiction: "${params.jurisdiction}". Valid values: ${[...VALID_JURISDICTIONS].join(', ')}`,
     );
   }
 
   const jurisdiction = code as CanadianJurisdiction;
 
-  const profile: JurisdictionProfile = {
+  const profile = {
     code: jurisdiction,
     name: JURISDICTION_NAMES[jurisdiction],
     employmentStandardsAct: ESA_NAMES[jurisdiction],

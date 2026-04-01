@@ -40,7 +40,7 @@ export async function GET() {
     };
 
     return NextResponse.json(response, { status: ready ? 200 : 503 });
-  } catch (error) {
+  } catch (_error) {
     return NextResponse.json({
       ready: false,
       timestamp: new Date().toISOString(),

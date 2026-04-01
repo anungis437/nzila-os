@@ -1,6 +1,6 @@
 import { describe, it, expect, vi, beforeEach } from 'vitest';
 
-const { mockGenerate, mockInsertValues, mockSelectChain } = vi.hoisted(() => ({
+const { mockGenerate, mockInsertValues, mockSelectChain: _mockSelectChain } = vi.hoisted(() => ({
   mockGenerate: vi.fn(),
   mockInsertValues: vi.fn(),
   mockSelectChain: vi.fn(() => []),

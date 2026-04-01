@@ -190,6 +190,64 @@ export async function explainClauseRelevance(
 }
 
 /**
+ * Legal disclaimer surfaced in every clause-reasoning response.
+ * Clause suggestions are AI-generated and do NOT constitute legal advice.
+ */
+export const CLAUSE_REASONING_LEGAL_DISCLAIMER =
+  'AI-suggested clauses are advisory only and do not constitute legal advice. ' +
+  'A qualified steward or labour relations officer must assess the applicability of any clause ' +
+  'before citing it in a grievance. Nzila assumes no liability for outcomes arising from ' +
+  'reliance on AI-generated clause suggestions.';
+
+/**
+ * Record a steward's accept/reject/supersede decision on a clause suggestion.
+ * Prevents re-review of an already-actioned suggestion.
+ */
+export async function reviewClauseReasoning(opts: {
+  clauseReasoningId: string;
+  organizationId: string;
+  reviewedBy: string;
+  action: 'accepted' | 'rejected' | 'superseded';
+}): Promise<void> {
+  const { clauseReasoningId, organizationId, reviewedBy, action } = opts;
+
+  const [existing] = await db
+    .select({ id: aiClauseReasonings.id, status: aiClauseReasonings.status })
+    .from(aiClauseReasonings)
+    .where(
+      and(
+        eq(aiClauseReasonings.id, clauseReasoningId),
+        eq(aiClauseReasonings.organizationId, organizationId),
+      ),
+    )
+    .limit(1);
+
+  if (!existing) {
+    throw new Error(`Clause reasoning ${clauseReasoningId} not found in org ${organizationId}`);
+  }
+  if (existing.status !== 'suggested') {
+    throw new Error(
+      `Clause reasoning ${clauseReasoningId} is already '${existing.status}' and cannot be re-reviewed.`,
+    );
+  }
+
+  await db
+    .update(aiClauseReasonings)
+    .set({
+      status: action,
+      reviewedBy,
+      reviewedAt: new Date(),
+      humanApproved: action === 'accepted',
+    })
+    .where(
+      and(
+        eq(aiClauseReasonings.id, clauseReasoningId),
+        eq(aiClauseReasonings.organizationId, organizationId),
+      ),
+    );
+}
+
+/**
  * Get clause reasoning history for a grievance.
  */
 export async function getClauseReasoningHistory(
