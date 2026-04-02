@@ -1,4 +1,5 @@
-import { NextResponse, type NextRequest } from 'next/server'
+import { clerkMiddleware, createRouteMatcher } from '@clerk/nextjs/server'
+import { NextResponse } from 'next/server'
 import createIntlMiddleware from 'next-intl/middleware'
 import { locales, defaultLocale } from './lib/locales'
 
@@ -8,7 +9,14 @@ const intlMiddleware = createIntlMiddleware({
   localePrefix: 'never',
 })
 
-export function middleware(request: NextRequest) {
+const isPublicRoute = createRouteMatcher([
+  '/',
+  '/sign-in(.*)',
+  '/sign-up(.*)',
+  '/api/health(.*)',
+])
+
+export default clerkMiddleware(async (auth, request) => {
   // ── Idempotency-Key enforcement (fail-closed in pilot/prod) ──────────
   if (process.env.NODE_ENV !== 'development') {
     if (
@@ -32,6 +40,11 @@ export function middleware(request: NextRequest) {
     }
   }
 
+  // ── Authentication (skip in dev — prevents Clerk handshake loops) ────
+  if (process.env.NODE_ENV !== 'development' && !isPublicRoute(request)) {
+    await auth.protect()
+  }
+
   // ── Internationalisation ──────────────────────────────────────────────
   if (!request.nextUrl.pathname.startsWith('/api')) {
     const intlResponse = intlMiddleware(request)
@@ -46,7 +59,7 @@ export function middleware(request: NextRequest) {
   const response = NextResponse.next()
   response.headers.set('x-request-id', requestId)
   return response
-}
+})
 
 export const config = {
   matcher: [
