@@ -118,6 +118,7 @@
     "@nzila/platform-rfp-generator": "workspace:*",
     "@nzila/platform-utils": "workspace:*",
     "@tailwindcss/oxide": "^4.2.0",
+    "fast-check": "^4.6.0",
     "lefthook": "^2.1.1",
     "prettier": "^3.4.2",
     "tailwindcss": "^4.2.0",

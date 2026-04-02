@@ -27,6 +27,7 @@ paths = [
   '''governance/.*\.md$''',            # Governance docs
   '''tmp-.*''',                        # Temporary analysis files (not committed to production)
   '''db/seeds/.*\.sql$''',             # Seed files use env-var placeholders, not real secrets
+  '''auth_core/tests_clerk_webhooks\.py$''',  # Test file with synthetic webhook secret
 ]
 
 commits = [
