@@ -2,6 +2,7 @@ import { withApi, z } from "@/lib/api/framework";
 import {
   listSources,
   createSource,
+  type NewCbaIntelSource,
 } from "@/lib/services/cba-intelligence/source-registry-service";
 
 // ---------------------------------------------------------------------------
@@ -32,7 +33,7 @@ export const GET = withApi(
   },
   async ({ query }) => {
     const { page, limit, ...filters } = query;
-    return listSources(filters, { page, limit });
+    return { data: await listSources(filters as Record<string, unknown>, { page, limit }) };
   },
 );
 
@@ -76,6 +77,6 @@ export const POST = withApi(
     },
   },
   async ({ body }) => {
-    return createSource(body);
+    return { data: await createSource(body as unknown as NewCbaIntelSource) };
   },
 );

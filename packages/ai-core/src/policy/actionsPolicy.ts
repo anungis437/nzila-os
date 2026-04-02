@@ -60,13 +60,14 @@ export async function checkActionPolicy(
 
   // 0. Kill-switch check — highest priority gate
   const killSwitchResult = await checkKillSwitch(input.actionType)
-  if (killSwitchResult.killed) {
+  if (killSwitchResult.globalKilled || killSwitchResult.actionKilled) {
     await appendAiAuditEvent({
       orgId: input.orgId,
-      appKey: input.appKey,
-      eventType: 'action_killed',
-      actor: 'system:kill-switch',
-      detail: {
+      actorClerkUserId: 'system:kill-switch',
+      action: 'ai.action_killed',
+      targetType: 'ai_action',
+      afterJson: {
+        appKey: input.appKey,
         actionType: input.actionType,
         reason: killSwitchResult.reason,
         source: killSwitchResult.source,

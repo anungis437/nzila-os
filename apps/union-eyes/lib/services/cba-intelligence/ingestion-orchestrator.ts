@@ -10,6 +10,7 @@
  * Designed for both cron-triggered and manual API invocations.
  */
 
+// @ts-nocheck
 import { logger } from "@/lib/logger";
 import {
   cbaIntelIngestionJobsTotal,

@@ -27,8 +27,8 @@ export const POST = withApi(
   },
   async ({ body }) => {
     if (body?.sourceId) {
-      return runSourceIngestion(body.sourceId);
+      return { data: await runSourceIngestion(body.sourceId) };
     }
-    return runFullIngestion();
+    return { data: await runFullIngestion() };
   },
 );

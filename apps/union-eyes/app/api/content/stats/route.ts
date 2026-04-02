@@ -56,26 +56,9 @@ export const GET = withApi(
     const tRows = Array.from(templateResult);
     const stats = tRows[0] as Record<string, unknown>;
 
-    // Most viewed content
-    const topResult = await db.execute(sql`
-      SELECT title, category, view_count
-      FROM cms_pages
-      WHERE organization_id = ${orgId}::uuid AND view_count > 0
-      ORDER BY view_count DESC
-      LIMIT 1
-    `);
     const topRows = Array.from(topResult);
     const topContent = topRows[0] as Record<string, unknown> | undefined;
 
-    // Training stats
-    const trainingResult = await db.execute(sql`
-      SELECT
-        count(*) AS total_courses,
-        count(*) FILTER (WHERE is_active = true) AS active_courses,
-        COALESCE(sum(completion_count), 0) AS total_completions
-      FROM training_courses
-      WHERE organization_id = ${orgId}::uuid
-    `);
     const trRows = Array.from(trainingResult);
     const trStats = trRows[0] as Record<string, unknown>;
 

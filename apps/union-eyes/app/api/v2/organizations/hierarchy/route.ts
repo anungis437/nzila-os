@@ -16,7 +16,7 @@ export const GET = withApi(
       description: 'Returns the organization hierarchy tree.',
     },
   },
-  async ({ _organizationId }) => {
+  async ({ organizationId: _organizationId }) => {
     const relationships = await db.select().from(organizationRelationships).limit(1000);
     const orgs = await db.select().from(organizations).limit(500);
     return { relationships, organizations: orgs };

@@ -63,6 +63,8 @@ import type {
   ExportFormat,
 } from '../enums'
 
+export type { ZongaRole } from '../enums'
+
 // ── Branded Types ───────────────────────────────────────────────────────────
 
 /** Unique creator reference. */

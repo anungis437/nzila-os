@@ -38,6 +38,7 @@ export default async function AdminRewardsPage({
   }
 
   const t = await getTranslations('rewards.admin');
+  const tr = (key: string, def: string) => String(t(key, { defaultValue: def }));
 
   // Fetch summary metrics — catch errors to avoid page crash
   let summary: { success: boolean; data?: Record<string, unknown>; error?: string } = { success: false, error: 'not loaded' };
@@ -53,12 +54,10 @@ export default async function AdminRewardsPage({
       {/* Page Header */}
       <div>
         <h1 className="text-3xl font-bold tracking-tight">
-          {t('overview.title', { defaultValue: 'Recognition & Rewards Administration' })}
+          {tr('overview.title', 'Recognition & Rewards Administration')}
         </h1>
         <p className="text-muted-foreground mt-2">
-          {t('overview.description', {
-            defaultValue: 'Manage recognition programs, approve awards, and track budget allocations',
-          })}
+          {tr('overview.description', 'Manage recognition programs, approve awards, and track budget allocations')}
         </p>
       </div>
 
@@ -67,13 +66,13 @@ export default async function AdminRewardsPage({
         <Card>
           <CardHeader className="flex flex-row items-center justify-between space-y-0 pb-2">
             <CardTitle className="text-sm font-medium">
-              {t('metrics.activePrograms', { defaultValue: 'Active Programs' })}
+              {tr('metrics.activePrograms', 'Active Programs')}
             </CardTitle>
             <Award className="h-4 w-4 text-muted-foreground" />
           </CardHeader>
           <CardContent>
             <div className="text-2xl font-bold">
-              {summary.success ? summary.data?.active_programs_count || 0 : '-'}
+              {summary.success ? Number(summary.data?.active_programs_count ?? 0) : '-'}
             </div>
             <p className="text-xs text-muted-foreground">
               {t('metrics.programsSubtext', { defaultValue: 'Recognition programs' })}
@@ -84,13 +83,13 @@ export default async function AdminRewardsPage({
         <Card>
           <CardHeader className="flex flex-row items-center justify-between space-y-0 pb-2">
             <CardTitle className="text-sm font-medium">
-              {t('metrics.pendingApprovals', { defaultValue: 'Pending Approvals' })}
+              {tr('metrics.pendingApprovals', 'Pending Approvals')}
             </CardTitle>
             <Gift className="h-4 w-4 text-muted-foreground" />
           </CardHeader>
           <CardContent>
             <div className="text-2xl font-bold">
-              {summary.success ? summary.data?.pending_awards_count || 0 : '-'}
+              {summary.success ? Number(summary.data?.pending_awards_count ?? 0) : '-'}
             </div>
             <p className="text-xs text-muted-foreground">
               {t('metrics.approvalsSubtext', { defaultValue: 'Awards awaiting review' })}

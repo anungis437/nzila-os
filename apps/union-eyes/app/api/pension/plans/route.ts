@@ -21,7 +21,7 @@ export const GET = withApi(
     auth: { required: true, minRole: 'member' },
     openapi: { tags: ['Pension'], summary: 'List pension plans', description: 'List all pension plans for the organization' },
   },
-  async ({ _request, organizationId }) => {
+  async ({ request: _request, organizationId }) => {
     const plans = await db
       .select()
       .from(pensionPlans)

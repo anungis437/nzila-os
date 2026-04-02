@@ -413,7 +413,7 @@ toast({
                   formatter={((value: number | undefined, name: string) => {
                     if (name === 'amount') return [`$${(value ?? 0).toFixed(2)}`, 'Total Amount'];
                     return [value ?? 0, 'Count'];
-                  }) as unknown as (value: number, name: string) => [string | number, string]}
+                  }) as any}
                 />
                 <Legend />
                 <Line type="monotone" dataKey="amount" stroke="#8884d8" name="Total Amount" />

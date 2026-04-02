@@ -19,7 +19,10 @@ import {
   platformCostBudgetBreaches,
 } from "@nzila/db";
 import { desc, count, eq } from "drizzle-orm";
-import type { GovernanceAuditTimelineEntry } from "@nzila/platform-governance/types";
+import type {
+  GovernanceAuditTimelineEntry,
+  GovernanceEventType,
+} from "@nzila/platform-governance/types";
 import type { Anomaly } from "@nzila/platform-anomaly-engine/types";
 
 // ── Governance Timeline from audit_events ───────────────
@@ -56,7 +59,7 @@ export async function fetchLiveGovernanceTimeline(): Promise<
   }
 }
 
-function mapActionToEventType(action: string): string {
+function mapActionToEventType(action: string): GovernanceEventType {
   if (action.includes("approval") || action.includes("approve"))
     return "approval_granted";
   if (action.includes("compliance") || action.includes("check"))
@@ -65,7 +68,7 @@ function mapActionToEventType(action: string): string {
     return "evidence_exported";
   if (action.includes("policy") || action.includes("evaluat"))
     return "policy_evaluated";
-  return action;
+  return "policy_evaluated";
 }
 
 // ── Governance Status from live data ────────────────────
@@ -173,7 +176,7 @@ export async function fetchLiveEvidenceSummary(): Promise<LiveEvidenceSummary | 
     const [pending] = await db
       .select({ total: count() })
       .from(evidencePacks)
-      .where(eq(evidencePacks.status, "pending"));
+      .where(eq(evidencePacks.status, "draft"));
 
     const latest = await db
       .select({ verifiedAt: evidencePacks.verifiedAt })

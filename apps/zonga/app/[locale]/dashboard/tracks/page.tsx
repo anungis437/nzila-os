@@ -130,17 +130,17 @@ export default async function TracksPage({
                       </Link>
                     </td>
                     <td className="px-4 py-3 text-muted-foreground">
-                      {(track as Record<string, unknown>).creatorName as string ?? '—'}
+                      {(track as unknown as Record<string, unknown>).creatorName as string ?? '—'}
                     </td>
                     <td className="px-4 py-3 text-muted-foreground">
-                      {formatDuration((track as Record<string, unknown>).duration as number | null)}
+                      {formatDuration((track as unknown as Record<string, unknown>).duration as number | null)}
                     </td>
                     <td className="px-4 py-3 text-muted-foreground">
-                      {(track as Record<string, unknown>).genre as string ?? '—'}
+                      {(track as unknown as Record<string, unknown>).genre as string ?? '—'}
                     </td>
                     <td className="px-4 py-3">{statusBadge(track.status)}</td>
                     <td className="px-4 py-3 text-muted-foreground">
-                      {((track as Record<string, unknown>).streamCount as number ?? 0).toLocaleString()}
+                      {((track as unknown as Record<string, unknown>).streamCount as number ?? 0).toLocaleString()}
                     </td>
                   </tr>
                 ))}

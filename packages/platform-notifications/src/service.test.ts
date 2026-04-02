@@ -14,10 +14,11 @@ describe('InMemoryNotificationService', () => {
   it('sends a notification and returns it', async () => {
     const result = await svc.send({
       orgId: 'org-1',
-      recipientUserId: 'user-1',
+      recipientId: 'user-1',
       title: 'Test',
       body: 'Hello',
       channels: ['in_app'],
+      priority: 'normal',
     })
 
     expect(result.id).toBeDefined()
@@ -28,17 +29,19 @@ describe('InMemoryNotificationService', () => {
   it('lists unread notifications', async () => {
     await svc.send({
       orgId: 'org-1',
-      recipientUserId: 'user-1',
+      recipientId: 'user-1',
       title: 'N1',
       body: 'B1',
       channels: ['in_app'],
+      priority: 'normal',
     })
     await svc.send({
       orgId: 'org-1',
-      recipientUserId: 'user-1',
+      recipientId: 'user-1',
       title: 'N2',
       body: 'B2',
       channels: ['email'],
+      priority: 'normal',
     })
 
     const unread = await svc.listUnread('org-1', 'user-1')
@@ -48,10 +51,11 @@ describe('InMemoryNotificationService', () => {
   it('marks a single notification as read', async () => {
     const n = await svc.send({
       orgId: 'org-1',
-      recipientUserId: 'user-1',
+      recipientId: 'user-1',
       title: 'N1',
       body: 'B1',
       channels: ['in_app'],
+      priority: 'normal',
     })
 
     await svc.markRead('org-1', n.id)
@@ -60,8 +64,8 @@ describe('InMemoryNotificationService', () => {
   })
 
   it('marks all notifications as read', async () => {
-    await svc.send({ orgId: 'org-1', recipientUserId: 'user-1', title: 'A', body: 'a', channels: ['in_app'] })
-    await svc.send({ orgId: 'org-1', recipientUserId: 'user-1', title: 'B', body: 'b', channels: ['in_app'] })
+    await svc.send({ orgId: 'org-1', recipientId: 'user-1', title: 'A', body: 'a', channels: ['in_app'], priority: 'normal' })
+    await svc.send({ orgId: 'org-1', recipientId: 'user-1', title: 'B', body: 'b', channels: ['in_app'], priority: 'normal' })
 
     await svc.markAllRead('org-1', 'user-1')
     const unread = await svc.listUnread('org-1', 'user-1')
@@ -69,7 +73,7 @@ describe('InMemoryNotificationService', () => {
   })
 
   it('returns correct unread count per channel', async () => {
-    await svc.send({ orgId: 'org-1', recipientUserId: 'user-1', title: 'T', body: 'B', channels: ['in_app', 'email'] })
+    await svc.send({ orgId: 'org-1', recipientId: 'user-1', title: 'T', body: 'B', channels: ['in_app', 'email'], priority: 'normal' })
 
     const count = await svc.getUnreadCount('org-1', 'user-1')
     expect(count.total).toBe(1)
@@ -79,8 +83,8 @@ describe('InMemoryNotificationService', () => {
   })
 
   it('scopes notifications by org', async () => {
-    await svc.send({ orgId: 'org-1', recipientUserId: 'user-1', title: 'T', body: 'B', channels: ['in_app'] })
-    await svc.send({ orgId: 'org-2', recipientUserId: 'user-1', title: 'T', body: 'B', channels: ['in_app'] })
+    await svc.send({ orgId: 'org-1', recipientId: 'user-1', title: 'T', body: 'B', channels: ['in_app'], priority: 'normal' })
+    await svc.send({ orgId: 'org-2', recipientId: 'user-1', title: 'T', body: 'B', channels: ['in_app'], priority: 'normal' })
 
     const unread = await svc.listUnread('org-1', 'user-1')
     expect(unread).toHaveLength(1)

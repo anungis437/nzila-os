@@ -1,8 +1,8 @@
 import { db } from "@/db/db";
 import {
   cbaIntelDocuments,
-  docTypeEnum,
-  docProcessingStatusEnum,
+  documentTypeEnum,
+  documentProcessingStatusEnum,
 } from "@/db/schema";
 import { eq, and, desc, sql, type SQL } from "drizzle-orm";
 import { logger } from "@/lib/logger";
@@ -17,8 +17,8 @@ export type NewCbaIntelDocument = typeof cbaIntelDocuments.$inferInsert;
 
 export interface DocumentFilters {
   sourceId?: string;
-  documentType?: (typeof docTypeEnum.enumValues)[number];
-  processingStatus?: (typeof docProcessingStatusEnum.enumValues)[number];
+  documentType?: (typeof documentTypeEnum.enumValues)[number];
+  processingStatus?: (typeof documentProcessingStatusEnum.enumValues)[number];
   jurisdiction?: string;
   isLatest?: boolean;
   language?: string;
@@ -166,7 +166,7 @@ export async function upsertDocument(
 
 export async function updateDocumentStatus(
   id: string,
-  status: (typeof docProcessingStatusEnum.enumValues)[number],
+  status: (typeof documentProcessingStatusEnum.enumValues)[number],
   extra?: { normalizedText?: string; parsedMetadata?: Record<string, unknown>; pageCount?: number; wordCount?: number },
 ): Promise<CbaIntelDocument | null> {
   try {

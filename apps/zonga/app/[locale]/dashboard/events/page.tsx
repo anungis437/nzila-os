@@ -7,6 +7,7 @@ import { auth } from '@clerk/nextjs/server'
 import { redirect } from 'next/navigation'
 import Link from 'next/link'
 import { browsePublishedEvents } from '@/lib/actions/browse-actions'
+import type { EventListResult } from '@/lib/actions/event-actions'
 import { Calendar, MapPin, Clock, Mic2 } from 'lucide-react'
 
 /* ── Helpers ── */
@@ -47,7 +48,7 @@ function ListenerEventsView({
   events,
   total,
 }: {
-  events: Array<Record<string, unknown>>
+  events: EventListResult['events']
   total: number
 }) {
   return (

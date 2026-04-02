@@ -38,6 +38,7 @@ import { NowPlayingWidget, QueueView } from '@/components/dashboard/listener-sec
 import { PlanBadge } from '@/components/dashboard/plan-badge'
 import { platformDb } from '@nzila/db/platform'
 import { sql } from 'drizzle-orm'
+import type { ListenerPlan } from '@/lib/plans'
 
 export default async function ListenerPage({
   params,
@@ -71,7 +72,8 @@ export default async function ListenerPage({
   const playlists = publicPlaylists.playlists
 
   // DB subscription takes precedence when available; otherwise fall back to Clerk metadata
-  const listenerPlan = listenerSub?.plan ?? clerkPlan
+  const listenerPlan: ListenerPlan =
+    listenerSub?.plan === 'premium' || clerkPlan === 'premium' ? 'premium' : 'free'
   const isPremium =
     listenerPlan === 'premium' &&
     (listenerSub?.subscriptionStatus === 'active' ||

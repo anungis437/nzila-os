@@ -13,6 +13,7 @@
 import { db } from "@/db/db";
 import { cbaIntelSources } from "@/db/schema";
 import { logger } from "@/lib/logger";
+import { eq } from "drizzle-orm";
 
 export interface SeedSource {
   name: string;

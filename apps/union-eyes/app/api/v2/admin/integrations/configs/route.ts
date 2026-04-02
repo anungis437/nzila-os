@@ -92,7 +92,7 @@ export const POST = withApi(
     },
   },
   async ({ body, organizationId, userId }) => {
-    const { _existing, result } = await withRLSContext(async (db) => {
+    const { result } = await withRLSContext(async (db) => {
       // Check for duplicate provider in same org
       const existing = await db.execute(sql`
         SELECT id FROM integration_configs

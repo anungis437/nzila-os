@@ -27,8 +27,8 @@ export const POST = withApi(
   },
   async ({ body }) => {
     if (body?.documentId) {
-      return extractDocument(body.documentId);
+      return { data: await extractDocument(body.documentId) };
     }
-    return runBulkExtraction();
+    return { data: await runBulkExtraction() };
   },
 );

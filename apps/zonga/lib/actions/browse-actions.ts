@@ -62,7 +62,7 @@ export async function browsePublishedAssets(opts?: {
 
     const total = Number(countResult?.total ?? 0)
     return {
-      assets: (assets.rows ?? assets) as CatalogListResult['assets'],
+      assets: (assets.rows ?? assets) as unknown as CatalogListResult['assets'],
       total,
       hasMore: offset + pageSize < total,
     }
@@ -110,7 +110,7 @@ export async function browsePublicPlaylists(opts?: {
     )) as unknown as [{ total: number }]
 
     return {
-      playlists: rows as PlaylistListResult['playlists'],
+      playlists: rows as unknown as PlaylistListResult['playlists'],
       total: Number(cnt?.total ?? 0),
     }
   } catch (error) {
@@ -191,7 +191,7 @@ export async function browsePublishedEvents(opts?: {
     )) as unknown as [{ total: number }]
 
     return {
-      events: rows as EventListResult['events'],
+      events: rows as unknown as EventListResult['events'],
       total: Number(cnt?.total ?? 0),
     }
   } catch (error) {

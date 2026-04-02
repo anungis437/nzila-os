@@ -8,8 +8,6 @@ import Image from 'next/image'
 export function SidebarOrgSwitcher() {
   return (
     <OrganizationSwitcher
-      hidePersonal
-      hideCreateOrganization
       appearance={{
         elements: {
           rootBox: 'w-full',

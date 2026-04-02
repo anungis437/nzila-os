@@ -4,6 +4,7 @@ import {
   createIngestionJob,
 } from "@/lib/services/cba-intelligence/ingestion-service";
 import { getSourceById } from "@/lib/services/cba-intelligence/source-registry-service";
+import type { IngestionJobFilters } from "@/lib/services/cba-intelligence/ingestion-service";
 
 // ---------------------------------------------------------------------------
 // GET /api/cba-intelligence/ingestion — List ingestion jobs
@@ -28,7 +29,7 @@ export const GET = withApi(
   },
   async ({ query }) => {
     const { page, limit, ...filters } = query;
-    return listIngestionJobs(filters, { page, limit });
+    return { data: await listIngestionJobs(filters as IngestionJobFilters, { page, limit }) };
   },
 );
 
@@ -57,10 +58,10 @@ export const POST = withApi(
     if (!source) throw ApiError.notFound("Source not found");
     if (!source.isActive) throw ApiError.badRequest("Source is inactive");
 
-    return createIngestionJob({
+    return { data: await createIngestionJob({
       sourceId: body.sourceId,
       triggerType: body.triggerType,
       triggeredBy: userId,
-    });
+    }) };
   },
 );

@@ -126,10 +126,15 @@ export async function setKillSwitchOverride(opts: {
   emitAiMetric({
     appKey: 'platform',
     feature: 'kill_switch',
-    event: opts.killed ? 'activated' : 'deactivated',
-    actionType: opts.actionType,
-    reason: opts.reason,
-    actor: opts.actor,
+    provider: 'platform',
+    latencyMs: 0,
+    tokensIn: null,
+    tokensOut: null,
+    costUsd: null,
+    refused: false,
+    errored: false,
+    orgId: opts.orgId ?? 'platform',
+    correlationId: `kill-switch:${opts.actionType}:${opts.killed ? 'on' : 'off'}`,
   })
 }
 

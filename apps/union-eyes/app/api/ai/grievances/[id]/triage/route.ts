@@ -9,10 +9,8 @@ import { NextRequest } from 'next/server';
 import { withRoleAuth, BaseAuthContext } from '@/lib/api-auth-guard';
 import { standardErrorResponse, ErrorCode } from '@/lib/api/standardized-responses';
 
-type Params = { params: Promise<{ id: string }> };
-
-export const POST = withRoleAuth('steward', async (_request: NextRequest, _context: BaseAuthContext, { params }: Params) => {
-  const { id } = await params;
+export const POST = withRoleAuth('steward', async (request: NextRequest, _context: BaseAuthContext) => {
+  const id = request.nextUrl.pathname.split('/').at(-2) ?? 'unknown';
   return standardErrorResponse(
     ErrorCode.NOT_IMPLEMENTED,
     `Grievance triage for ${id} is not yet available`,

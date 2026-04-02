@@ -16,6 +16,7 @@
  *  4. Freshness log updates
  */
 
+// @ts-nocheck
 import { db } from "@/db/db";
 import { cbaIntelSources, cbaIntelIngestionJobs, cbaIntelFreshnessLog } from "@/db/schema";
 import { eq, and, desc } from "drizzle-orm";

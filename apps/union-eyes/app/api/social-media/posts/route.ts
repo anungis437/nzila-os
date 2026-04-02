@@ -112,7 +112,7 @@ return standardErrorResponse(
         limit,
         offset,
       });
-    } catch (_error) {
+    } catch (error) {
 return standardErrorResponse(
       ErrorCode.INTERNAL_ERROR,
       'Internal server error',

@@ -20,7 +20,7 @@ export const GET = withApi(
     auth: { required: true, minRole: 'member' },
     openapi: { tags: ['Pension'], summary: 'List T4A records', description: 'List all T4A tax records for the organization' },
   },
-  async ({ _request, organizationId }) => {
+  async ({ request: _request, organizationId }) => {
     const records = await db
       .select()
       .from(pensionT4aRecords)

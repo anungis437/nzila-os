@@ -46,6 +46,7 @@ import { listFollowing } from '@/lib/actions/social-actions'
 import { getListenerSubscription } from '@/lib/actions/subscription-actions'
 import { NowPlayingWidget, QueueView, ReleaseRow } from '@/components/dashboard/listener-sections'
 import { PlanBadge } from '@/components/dashboard/plan-badge'
+import type { ListenerPlan } from '@/lib/plans'
 
 // ── Data fetching helpers ────────────────────────────────────────────────────
 
@@ -252,7 +253,8 @@ async function ListenerHome({ locale }: { locale: string }) {
     ])
 
   // DB subscription takes precedence when available; otherwise fall back to Clerk metadata
-  const listenerPlan = listenerSub?.plan ?? clerkPlan
+  const listenerPlan: ListenerPlan =
+    listenerSub?.plan === 'premium' || clerkPlan === 'premium' ? 'premium' : 'free'
   const isPremium =
     listenerPlan === 'premium' &&
     (listenerSub?.subscriptionStatus === 'active' ||

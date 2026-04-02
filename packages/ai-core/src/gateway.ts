@@ -504,7 +504,7 @@ export async function* chatStream(
       appKey: req.appKey,
       profileKey: req.profileKey,
       costUsd,
-      co2Grams: estimateCo2Grams((approxTokensIn ?? 0) + (approxTokensOut ?? 0), req.model ?? 'default'),
+      co2Grams: estimateCo2Grams((approxTokensIn ?? 0) + (approxTokensOut ?? 0), model),
     })
   }
 }

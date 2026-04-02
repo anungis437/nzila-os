@@ -14,10 +14,10 @@ import type { OrgContext } from '@nzila/org'
 function makeCtx(overrides?: Partial<OrgContext>): OrgContext {
   return {
     orgId: 'org-1',
-    userId: 'user-1',
     actorId: 'user-1',
     role: 'org_admin',
     permissions: ['read', 'write', 'manage_users'],
+    requestId: 'req-1',
     ...overrides,
   }
 }

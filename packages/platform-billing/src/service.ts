@@ -3,8 +3,8 @@ import type {
   Subscription,
   Entitlement,
   PlanTier,
-  SubscriptionStatus,
 } from '@nzila/platform-contracts/entitlement';
+import { planTierValues } from '@nzila/platform-contracts/entitlement';
 
 // ---------------------------------------------------------------------------
 // Service inputs
@@ -12,9 +12,11 @@ import type {
 
 export const createSubscriptionInputSchema = z.object({
   orgId: z.string().min(1),
-  planTier: z.enum(['free', 'starter', 'professional', 'enterprise', 'government']),
-  billingEmail: z.string().email(),
-  startDate: z.string().datetime().optional(),
+  plan: z.enum(planTierValues),
+  status: z.enum(['active', 'trialing', 'past_due', 'canceled', 'paused']).optional(),
+  currentPeriodStart: z.string().datetime().optional(),
+  currentPeriodEnd: z.string().datetime().optional(),
+  externalId: z.string().optional(),
 });
 
 export type CreateSubscriptionInput = z.infer<typeof createSubscriptionInputSchema>;
@@ -76,7 +78,7 @@ const TIER_ENTITLEMENTS: Record<PlanTier, string[]> = {
     'custom_branding',
     'priority_support',
   ],
-  government: [
+  custom: [
     'dashboard',
     'basic_reports',
     'document_generation',
@@ -88,9 +90,6 @@ const TIER_ENTITLEMENTS: Record<PlanTier, string[]> = {
     'audit_trail',
     'custom_branding',
     'priority_support',
-    'data_residency',
-    'compliance_reports',
-    'sovereign_hosting',
   ],
 };
 
@@ -108,14 +107,25 @@ export function createInMemoryBillingService(): BillingService {
 
     async upsertSubscription(input) {
       const parsed = createSubscriptionInputSchema.parse(input);
+      const now = new Date();
+      const currentPeriodStart = parsed.currentPeriodStart ?? now.toISOString();
+      const currentPeriodEnd =
+        parsed.currentPeriodEnd ?? new Date(now.getTime() + 30 * 24 * 60 * 60 * 1000).toISOString();
+      const entitlements: Entitlement[] = TIER_ENTITLEMENTS[parsed.plan].map((key) => ({
+        key,
+        active: true,
+      }));
+
       const sub: Subscription = {
         id: crypto.randomUUID(),
         orgId: parsed.orgId,
-        planTier: parsed.planTier,
-        status: 'active' as SubscriptionStatus,
-        billingEmail: parsed.billingEmail,
-        startDate: parsed.startDate ?? new Date().toISOString(),
-        features: TIER_ENTITLEMENTS[parsed.planTier],
+        plan: parsed.plan,
+        status: parsed.status ?? 'active',
+        entitlements,
+        enabledModules: [...TIER_ENTITLEMENTS[parsed.plan]],
+        currentPeriodStart,
+        currentPeriodEnd,
+        externalId: parsed.externalId,
       };
       subscriptions.set(parsed.orgId, sub);
       return sub;
@@ -124,28 +134,24 @@ export function createInMemoryBillingService(): BillingService {
     async checkEntitlement(orgId, featureKey) {
       const sub = subscriptions.get(orgId);
       if (!sub || sub.status !== 'active') {
-        return { featureKey, enabled: false, reason: 'no_active_subscription' };
+        return { key: featureKey, active: false };
       }
-      const enabled = TIER_ENTITLEMENTS[sub.planTier].includes(featureKey);
+      const active = TIER_ENTITLEMENTS[sub.plan].includes(featureKey);
       return {
-        featureKey,
-        enabled,
-        reason: enabled ? undefined : 'not_in_plan',
+        key: featureKey,
+        active,
       };
     },
 
     async listEntitlements(orgId) {
       const sub = subscriptions.get(orgId);
       if (!sub || sub.status !== 'active') return [];
-      return TIER_ENTITLEMENTS[sub.planTier].map((featureKey) => ({
-        featureKey,
-        enabled: true,
-      }));
+      return sub.entitlements;
     },
 
     async canAccessModule(orgId, moduleId) {
       const ent = await this.checkEntitlement(orgId, moduleId);
-      return ent.enabled;
+      return ent.active;
     },
   };
 }

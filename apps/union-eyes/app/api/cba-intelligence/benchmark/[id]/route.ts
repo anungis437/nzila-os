@@ -43,24 +43,25 @@ export const GET = withApi(
 
     // Return saved snapshots if requested
     if (query.history) {
-      return getBenchmarkSnapshots(agreementId, {
+      const snapshots = await getBenchmarkSnapshots(agreementId, {
         page: query.page,
         limit: query.limit,
       });
+      return { data: snapshots };
     }
 
     const agreement = await getAgreementById(agreementId);
     if (!agreement) throw ApiError.notFound("Agreement not found");
 
     const { save, history: _history, page: _page, limit: _limit, ...filters } = query;
-    const result = await findComparableAgreements(agreementId, filters);
+    const result = await findComparableAgreements(agreementId, filters as Record<string, unknown>);
 
     // Persist snapshot if requested
     if (save && userId) {
       const snapshot = await saveBenchmarkSnapshot(result, userId);
-      return { ...result, snapshotId: snapshot.id };
+      return { data: { ...result, snapshotId: snapshot.id } };
     }
 
-    return result;
+    return { data: result };
   },
 );

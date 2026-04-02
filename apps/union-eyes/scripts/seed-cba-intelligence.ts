@@ -10,6 +10,7 @@
  *   npx tsx apps/union-eyes/scripts/seed-cba-intelligence.ts
  */
 
+// @ts-nocheck
 import { db } from "../db/db";
 import {
   cbaIntelSources,

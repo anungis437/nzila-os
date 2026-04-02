@@ -170,7 +170,7 @@ export async function createPodcast(data: {
       INSERT INTO zonga_podcasts (org_id, creator_id, title, description, cover_url, language, category, explicit)
       VALUES (
         ${ctx.orgId},
-        ${ctx.creatorId ?? null},
+        ${ctx.actorId},
         ${data.title},
         ${data.description ?? null},
         ${data.coverUrl ?? null},

@@ -51,9 +51,9 @@ export const PATCH = withApi(
     entitlement: 'financial_intelligence_suite',
     openapi: { tags: ['Billing'], summary: 'Update a subscription' },
   },
-  async ({ organizationId, _userId, params, request }) => {
+  async ({ organizationId, userId: _userId, params, request }) => {
     if (!organizationId) throw ApiError.badRequest('Organization context required');
-    const { id } = await params;
+    const { id } = params;
 
     const body = patchSchema.parse(await request.json());
 
@@ -82,9 +82,9 @@ export const DELETE = withApi(
     entitlement: 'financial_intelligence_suite',
     openapi: { tags: ['Billing'], summary: 'Cancel a subscription' },
   },
-  async ({ organizationId, _userId, params }) => {
+  async ({ organizationId, userId: _userId, params }) => {
     if (!organizationId) throw ApiError.badRequest('Organization context required');
-    const { id } = await params;
+    const { id } = params;
 
     const [existing] = await db
       .select()

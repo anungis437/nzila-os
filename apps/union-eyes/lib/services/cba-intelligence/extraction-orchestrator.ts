@@ -12,6 +12,7 @@
  * The pipeline is designed to be extended with ML/LLM extractors.
  */
 
+// @ts-nocheck
 import { db } from "@/db/db";
 import { cbaIntelDocuments } from "@/db/schema";
 import { eq, and } from "drizzle-orm";

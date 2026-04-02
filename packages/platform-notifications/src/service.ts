@@ -1,9 +1,7 @@
 import { z } from 'zod';
 import {
-  notificationSchema,
   type Notification,
   type NotificationChannel,
-  type NotificationPriority,
 } from '@nzila/platform-contracts/notification';
 
 // ---------------------------------------------------------------------------
@@ -12,7 +10,7 @@ import {
 
 export const sendNotificationInputSchema = z.object({
   orgId: z.string().min(1),
-  recipientUserId: z.string().min(1),
+  recipientId: z.string().min(1),
   title: z.string().min(1).max(256),
   body: z.string().max(4096),
   channels: z.array(z.enum(['in_app', 'email', 'sms', 'push'])).min(1),
@@ -61,7 +59,7 @@ export function createInMemoryNotificationService(): NotificationService {
       const notification: Notification = {
         id: crypto.randomUUID(),
         orgId: parsed.orgId,
-        recipientUserId: parsed.recipientUserId,
+        recipientId: parsed.recipientId,
         title: parsed.title,
         body: parsed.body,
         channels: parsed.channels,
@@ -78,7 +76,7 @@ export function createInMemoryNotificationService(): NotificationService {
 
     async listUnread(orgId, userId) {
       return store.filter(
-        (n) => n.orgId === orgId && n.recipientUserId === userId && !n.read,
+        (n) => n.orgId === orgId && n.recipientId === userId && !n.read,
       );
     },
 
@@ -89,13 +87,13 @@ export function createInMemoryNotificationService(): NotificationService {
 
     async markAllRead(orgId, userId) {
       for (const n of store) {
-        if (n.orgId === orgId && n.recipientUserId === userId) n.read = true;
+        if (n.orgId === orgId && n.recipientId === userId) n.read = true;
       }
     },
 
     async getUnreadCount(orgId, userId) {
       const unread = store.filter(
-        (n) => n.orgId === orgId && n.recipientUserId === userId && !n.read,
+        (n) => n.orgId === orgId && n.recipientId === userId && !n.read,
       );
       const byChannel: Record<NotificationChannel, number> = {
         in_app: 0,

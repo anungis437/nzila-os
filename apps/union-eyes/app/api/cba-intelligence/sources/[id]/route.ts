@@ -21,7 +21,7 @@ export const GET = withApi(
   async ({ params }) => {
     const source = await getSourceById(params.id);
     if (!source) throw ApiError.notFound("Source not found");
-    return source;
+    return { data: source };
   },
 );
 
@@ -72,11 +72,11 @@ export const PATCH = withApi(
     }
 
     if (Object.keys(updateData).length > 0) {
-      return updateSource(params.id, updateData);
+      return { data: await updateSource(params.id, updateData as Record<string, unknown>) };
     }
 
     const source = await getSourceById(params.id);
     if (!source) throw ApiError.notFound("Source not found");
-    return source;
+    return { data: source };
   },
 );

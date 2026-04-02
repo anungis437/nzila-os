@@ -109,6 +109,13 @@ export { ensureBudgetRow as createBudgetRow } from './budgets'
 // Policy
 export { checkActionPolicy, type PolicyCheckInput, type PolicyDecision } from './policy/actionsPolicy'
 export {
+  checkKillSwitch,
+  setKillSwitchOverride,
+  clearKillSwitchCache,
+  getKillSwitchDashboard,
+  type KillSwitchStatus,
+} from './policy/killSwitch'
+export {
   assertNoCrossTenantAggregation,
   checkCrossTenantPolicy,
   type CrossTenantAnalyticsRequest,

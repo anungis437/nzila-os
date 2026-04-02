@@ -1,5 +1,6 @@
 import { withApi, z } from "@/lib/api/framework";
 import { listDocuments } from "@/lib/services/cba-intelligence/document-service";
+import type { DocumentFilters } from "@/lib/services/cba-intelligence/document-service";
 
 // ---------------------------------------------------------------------------
 // GET /api/cba-intelligence/documents — List source documents
@@ -32,6 +33,6 @@ export const GET = withApi(
   },
   async ({ query }) => {
     const { page, limit, ...filters } = query;
-    return listDocuments(filters, { page, limit });
+    return { data: await listDocuments(filters as DocumentFilters, { page, limit }) };
   },
 );

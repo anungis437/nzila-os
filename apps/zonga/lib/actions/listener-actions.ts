@@ -398,7 +398,7 @@ export async function getRecommendationsForUser(opts?: {
           LIMIT 200`,
         )) as unknown as Array<Record<string, unknown>>
         return rows.map((r) => ({
-          userId,
+          userId: _userId,
           signalType: String(r.signalType ?? 'stream') as 'play' | 'skip' | 'save' | 'share' | 'purchase',
           targetId: String(r.itemId),
           targetType: (String(r.itemType ?? 'track')) as 'track' | 'artist' | 'event' | 'playlist',

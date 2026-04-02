@@ -20,7 +20,7 @@ export const GET = withApi(
     auth: { required: true, minRole: 'member' },
     openapi: { tags: ['Pension'], summary: 'List trustees', description: 'List all pension trustees for the organization' },
   },
-  async ({ _request, organizationId }) => {
+  async ({ request: _request, organizationId }) => {
     const trustees = await db
       .select()
       .from(pensionTrustees)

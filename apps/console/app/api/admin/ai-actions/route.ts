@@ -12,7 +12,7 @@ import {
   checkKillSwitch,
   setKillSwitchOverride,
   getKillSwitchDashboard,
-} from '@nzila/ai-core/policy/killSwitch'
+} from '@nzila/ai-core'
 import { ACTION_TYPES } from '@nzila/ai-core/schemas'
 import { createLogger } from '@nzila/os-core'
 
