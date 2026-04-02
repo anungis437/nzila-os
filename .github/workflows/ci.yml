@@ -8,6 +8,7 @@ on:
 
 permissions:
   contents: read
+  security-events: write
 
 env:
   TURBO_TELEMETRY_DISABLED: 1

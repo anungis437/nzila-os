@@ -182,10 +182,11 @@ jobs:
             BUILD_ARGS="${BUILD_ARGS} --build-arg NEXT_PUBLIC_CLERK_SIGN_IN_URL=https://nzila-os-web.${DOMAIN}/sign-in"
           fi
 
-          DOCKER_BUILDKIT=1 docker build \
+          docker buildx build \
             --target "$APP" \
             --tag "$IMAGE" \
             --tag "${{ env.ACR_NAME }}.azurecr.io/nzila/${APP}:latest" \
+            --load \
             ${BUILD_ARGS} \
             .
 
