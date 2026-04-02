@@ -13,16 +13,24 @@ import {
   FreshnessDashboard,
 } from "@/components/cba-intelligence";
 import { useFeatureFlag } from "@/lib/hooks/use-feature-flags";
+import { useOrganization } from "@/lib/hooks/use-organization";
 import { Database } from "lucide-react";
+
+const CBA_ELIGIBLE_ORG_TYPES = ['congress', 'federation', 'union'] as const;
 
 export default function CbaIntelligencePage() {
   const enabled = useFeatureFlag("cba_intelligence");
+  const { organization } = useOrganization();
 
-  if (!enabled) {
+  const orgEligible = organization
+    ? (CBA_ELIGIBLE_ORG_TYPES as readonly string[]).includes(organization.type)
+    : false;
+
+  if (!enabled || !orgEligible) {
     return (
       <div className="p-8 text-center text-muted-foreground">
         <Database className="h-8 w-8 mx-auto mb-3 text-muted-foreground/50" />
-        <p>CBA Intelligence is not enabled for your organization.</p>
+        <p>CBA Intelligence is available to national unions, federations, and congress-level organizations only.</p>
       </div>
     );
   }
