@@ -308,6 +308,7 @@ ENV PORT=3006
 # Copy necessary files
 COPY --from=builder /app/apps/zonga/.next/standalone ./
 COPY --from=builder /app/apps/zonga/.next/static ./apps/zonga/.next/static
+COPY --from=builder /app/apps/zonga/public ./apps/zonga/public
 COPY --from=builder /app/apps/zonga/messages ./apps/zonga/messages
 COPY --from=builder /app/content ./content
 
