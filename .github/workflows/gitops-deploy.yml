@@ -135,6 +135,12 @@ jobs:
             echo "should_build=false" >> "$GITHUB_OUTPUT"
           fi
 
+      - name: Set up Docker Buildx
+        if: steps.check.outputs.should_build == 'true'
+        uses: docker/setup-buildx-action@v3
+        with:
+          driver: docker-container
+
       - name: Azure Login
         if: steps.check.outputs.should_build == 'true'
         uses: azure/login@v2
