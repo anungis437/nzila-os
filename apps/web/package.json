@@ -45,9 +45,9 @@
     "@types/react-dom": "^19",
     "babel-plugin-react-compiler": "1.0.0",
     "eslint": "^10",
-    "eslint-config-next": "16.2.0",
+    "eslint-config-next": "16.2.2",
     "tailwindcss": "^4",
-    "typescript": "^5",
-    "vitest": "^4.0.18"
+    "typescript": "^6",
+    "vitest": "^4.1.2"
   }
 }

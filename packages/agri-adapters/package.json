@@ -20,8 +20,8 @@
     "@nzila/agri-core": "workspace:*"
   },
   "devDependencies": {
-    "typescript": "^5",
-    "vitest": "^4.0.18",
+    "typescript": "^6",
+    "vitest": "^4.1.2",
     "eslint": "^10"
   }
 }
