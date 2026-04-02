@@ -7,7 +7,7 @@
  *
  * All monetary amounts are in integer minor units (cents).
  */
-import type { FeeRule, SplitRule, Currency, RevenueSource } from '@nzila/zonga-economics'
+import type { FeeRule, Currency, RevenueSource } from '@nzila/zonga-economics'
 import { FeeType } from '@nzila/zonga-economics'
 import type { TicketTier, TierCapacity } from './types'
 

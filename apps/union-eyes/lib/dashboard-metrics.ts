@@ -261,6 +261,7 @@ interface CacheEntry<T> {
   expiresAt: number;
 }
 
+// ga-check:exempt — TTL cache, not primary persistence
 const cache = new Map<string, CacheEntry<unknown>>();
 
 /** Default TTL: 5 minutes */

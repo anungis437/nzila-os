@@ -9,6 +9,8 @@
  */
 import { createHash } from 'node:crypto'
 import { execSync } from 'node:child_process'
+import { readdirSync, statSync } from 'node:fs'
+import { join } from 'node:path'
 
 // ── Seeded RNG ──────────────────────────────────────────────────────────────
 
@@ -150,4 +152,23 @@ export function getDefaultSeed(): number {
     if (!Number.isNaN(parsed)) return parsed
   }
   return 42
+}
+
+// ── File System Helpers ─────────────────────────────────────────────────────
+
+/**
+ * Recursively walk a directory and return all files matching the given extensions.
+ */
+export function walkSync(dir: string, extensions: string[]): string[] {
+  const results: string[] = []
+  for (const entry of readdirSync(dir)) {
+    const full = join(dir, entry)
+    const stat = statSync(full)
+    if (stat.isDirectory()) {
+      results.push(...walkSync(full, extensions))
+    } else if (extensions.some((ext) => full.endsWith(ext))) {
+      results.push(full)
+    }
+  }
+  return results
 }

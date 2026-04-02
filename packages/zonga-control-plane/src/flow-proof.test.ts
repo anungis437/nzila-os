@@ -8,7 +8,7 @@
  *   FLW-4: Invariant checker completeness — all 9 invariant IDs exercised
  *   FLW-5: Compensation correctness — rollback reverses side effects
  */
-import { describe, it, expect, beforeEach } from 'vitest'
+import { describe, it, expect, beforeEach as _beforeEach } from 'vitest'
 import {
   registerWorkflow,
   getWorkflowDefinition,
@@ -36,7 +36,7 @@ import {
 import type {
   ControlPlaneContext,
   WorkflowDefinition,
-  WorkflowStepResult,
+  WorkflowStepResult as _WorkflowStepResult,
 } from './types'
 
 // ── Helpers ───────────────────────────────────────────────────────────────
@@ -58,7 +58,7 @@ function makeContext(overrides: Partial<ControlPlaneContext> = {}): ControlPlane
 
 function makeWorkflowDef(overrides: Partial<WorkflowDefinition> = {}): WorkflowDefinition {
   return {
-    id: `test_wf_${nextId()}` as any,
+    id: `test_wf_${nextId()}` as unknown as WorkflowId,
     name: 'Test Workflow',
     description: 'A test workflow',
     steps: [
@@ -127,7 +127,7 @@ describe('FLW-1: Workflow exclusivity — duplicate registration rejected', () =
 
   it('executing unregistered workflow throws WorkflowNotFoundError', async () => {
     const ctx = makeContext()
-    await expect(executeWorkflow('nonexistent-wf' as any, ctx, {}))
+    await expect(executeWorkflow('nonexistent-wf' as unknown as WorkflowId, ctx, {}))
       .rejects.toThrow(WorkflowNotFoundError)
   })
 })

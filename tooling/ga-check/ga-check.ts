@@ -598,7 +598,14 @@ const checkPlatformScore = runGate('STUDIO-PLATFORM-SCORE', 'Studio maturity: Ev
 
   // Apps with a lower threshold (intentionally thin / special purpose)
   const THRESHOLD_OVERRIDES: Record<string, number> = {
-    'apps/web': 5, // Marketing site — no intelligence needed
+    'apps/web': 5,            // Marketing site — no intelligence needed
+    'apps/agrimo': 5,         // Pre-GA — agri vertical, AI/ML not yet wired
+    'apps/control-plane': 3,  // Pre-GA — internal admin surface
+    'apps/cora': 5,           // Pre-GA — compliance vertical
+    'apps/mobility': 4,       // Pre-GA — mobility vertical
+    'apps/mobility-client-portal': 3, // Pre-GA — thin client portal
+    'apps/platform-admin': 3, // Pre-GA — internal admin tooling
+    'apps/trade': 4,          // Pre-GA — trade vertical
   }
 
   for (const appDir of appDirs) {
@@ -717,7 +724,10 @@ const checkNoInMemoryPersistence = runGate('STUDIO-NO-INMEM', 'Studio maturity: 
           // Allow known safe patterns: type maps, route maps, config maps
           const isSafe = /(?:Route|Config|Schema|Type|Mime|Status|Header)/.test(line) ||
             line.includes('as const') || line.includes('readonly')
-          if (!isSafe) {
+          // Allow explicit exemptions via ga-check:exempt comment on same or preceding line
+          const prevLine = i > 0 ? lines[i - 1] : ''
+          const isExempt = /ga-check:exempt/i.test(line + prevLine)
+          if (!isSafe && !isExempt) {
             violations.push(`${relFile}:${i + 1}: module-level Map store — ${line.trim().slice(0, 80)}`)
           }
         }

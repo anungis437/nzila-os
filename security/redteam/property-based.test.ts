@@ -80,7 +80,7 @@ describe('PROP-002 — orgId validation rejects injection attempts', () => {
   it('rejects strings with special characters', () => {
     fc.assert(
       fc.property(
-        fc.stringOf(fc.constantFrom("'", '"', ';', '-', ' ', '<', '>', '&')),
+        fc.array(fc.constantFrom("'", '"', ';', '-', ' ', '<', '>', '&'), { minLength: 1, maxLength: 50 }).map((a) => a.join('')),
         (input) => {
           expect(isValidOrgId(input)).toBe(false)
         },
@@ -92,7 +92,7 @@ describe('PROP-002 — orgId validation rejects injection attempts', () => {
   it('accepts valid org IDs', () => {
     fc.assert(
       fc.property(
-        fc.stringOf(fc.constantFrom(...'abcdefghijklmnopqrstuvwxyz0123456789'.split('')), { minLength: 10, maxLength: 30 }),
+        fc.array(fc.constantFrom(...'abcdefghijklmnopqrstuvwxyz0123456789'.split('')), { minLength: 10, maxLength: 30 }).map((a) => a.join('')),
         (suffix) => {
           expect(isValidOrgId(`org_${suffix}`)).toBe(true)
         },

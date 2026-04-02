@@ -136,15 +136,17 @@ jobs:
     steps:
       - uses: actions/checkout@v4
 
+      - name: Install Checkov
+        run: pip install checkov
+
       - name: Run Checkov on Bicep templates
-        uses: bridgecrewio/checkov-action@99bb2caf247dfd9f03cf984373bc6043d4e32ebf # v12.1347.0
-        with:
-          directory: infrastructure/bicep
-          framework: bicep
-          output_format: cli,sarif
-          output_file_path: console,results.sarif
-          soft_fail: false
-          skip_check: CKV_AZURE_99  # Skip specific checks if needed
+        run: |
+          checkov \
+            --directory infrastructure/bicep \
+            --framework bicep \
+            --output cli --output sarif \
+            --output-file-path console,results.sarif \
+            --skip-check CKV_AZURE_99
 
       - name: Upload Checkov SARIF
         if: always()

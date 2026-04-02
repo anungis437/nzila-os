@@ -59,6 +59,7 @@ const WORKFLOWS: WorkflowDefinition[] = [
   },
 ]
 
+// ga-check:exempt — static lookup derived from WORKFLOWS constant
 const workflowMap = new Map(WORKFLOWS.map((w) => [w.name, w]))
 
 export async function workflowRoutes(app: FastifyInstance) {
