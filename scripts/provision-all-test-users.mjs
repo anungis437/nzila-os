@@ -11,7 +11,9 @@
  *
  * Requires:
  *   - CLERK_SECRET_KEY env var or reads from apps/union-eyes/.env.local
- *   - PostgreSQL on localhost:5433 (nzila/nzila_dev)
+ *   - PROVISION_USER_PASSWORD env var (password for new Clerk test users)
+ *   - PGPASSWORD env var (PostgreSQL password, default: reads from env)
+ *   - PostgreSQL on localhost:5433
  */
 import { readFileSync, writeFileSync } from 'node:fs';
 import { join, dirname } from 'node:path';
@@ -39,6 +41,10 @@ function loadClerkKey() {
 }
 
 const CLERK_KEY = loadClerkKey();
+const TEST_USER_PASSWORD = process.env.PROVISION_USER_PASSWORD;
+if (!TEST_USER_PASSWORD) throw new Error('PROVISION_USER_PASSWORD env var is required');
+const PG_PASSWORD = process.env.PGPASSWORD;
+if (!PG_PASSWORD) throw new Error('PGPASSWORD env var is required');
 
 const PSQL = String.raw`C:\Program Files\PostgreSQL\17\bin\psql.exe`;
 const DB_CONN = '-U nzila -d nzila_automation -p 5433 -h localhost';
@@ -93,7 +99,7 @@ async function createUser(first, last, email, phone) {
     last_name: last,
     email_address: [email],
     phone_number: [phone],
-    password: 'NzilaTest2026!',
+    password: TEST_USER_PASSWORD,
     skip_password_checks: true,
   });
   if (res.status === 200 || res.status === 201) return res.body.id;
@@ -160,7 +166,7 @@ function runSQL(sql) {
   try {
     const result = execSync(
       `"${PSQL}" ${DB_CONN} -t -A --pset=pager=off -c "${sql.replace(/"/g, '\\"')}"`,
-      { env: { ...process.env, PGPASSWORD: 'nzila_dev' }, encoding: 'utf-8' },
+      { env: { ...process.env, PGPASSWORD: PG_PASSWORD }, encoding: 'utf-8' },
     );
     return result.trim();
   } catch (err) {
@@ -173,7 +179,7 @@ function runSQLFile(filePath) {
   try {
     const result = execSync(
       `"${PSQL}" ${DB_CONN} --pset=pager=off -f "${filePath}"`,
-      { env: { ...process.env, PGPASSWORD: 'nzila_dev' }, encoding: 'utf-8' },
+      { env: { ...process.env, PGPASSWORD: PG_PASSWORD }, encoding: 'utf-8' },
     );
     return result.trim();
   } catch (err) {
