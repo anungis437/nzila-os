@@ -155,4 +155,6 @@ jobs:
             --container-name django-backend \
             --set-env-vars \
               "CLERK_JWKS_URL=https://known-hagfish-67.clerk.accounts.dev/.well-known/jwks.json" \
+              "CLERK_WEBHOOK_SECRET=secretref:clerk-webhook-secret" \
+              "DJANGO_ALLOWED_HOSTS=${{ secrets.DJANGO_ALLOWED_HOSTS }}" \
             --image ${{ env.BACKEND_IMAGE }}:${{ github.sha }}
