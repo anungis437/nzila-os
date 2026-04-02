@@ -1,5 +1,3 @@
-# syntax=docker/dockerfile:1.7
-
 # ============================================
 # Base stage - pnpm setup
 # Use Debian slim for glibc-based OpenSSL 3 (Clerk middleware WebCrypto requires working legacy provider)
@@ -24,12 +22,15 @@ WORKDIR /app
 COPY package.json pnpm-workspace.yaml pnpm-lock.yaml* ./
 
 # Copy all workspace package.json files preserving directory structure.
-# Uses COPY --parents (BuildKit 1.7+) so new apps/packages are picked up
-# automatically — no need to add a COPY line per package.
-COPY --parents apps/*/package.json ./
-COPY --parents packages/*/package.json ./
-COPY --parents services/*/package.json ./
-COPY --parents tooling/*/package.json ./
+# Uses bind mount to extract only package.json files (cache-friendly, no
+# COPY --parents / Dockerfile 1.7 frontend dependency).
+RUN --mount=type=bind,target=/ctx \
+    for dir in apps packages services tooling; do \
+      find "/ctx/$dir" -maxdepth 2 -name 'package.json' 2>/dev/null | while read f; do \
+        rel="${f#/ctx/}"; \
+        mkdir -p "$(dirname "$rel")" && cp "$f" "$rel"; \
+      done; \
+    done
 
 # Override .npmrc — keep node-linker=hoisted (required for module resolution)
 # but remove exFAT workarounds that are unnecessary on ext4
