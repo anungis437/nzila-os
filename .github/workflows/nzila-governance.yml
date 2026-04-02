@@ -54,7 +54,7 @@ jobs:
           GITLEAKS_LICENSE: ${{ secrets.GITLEAKS_LICENSE }}
 
       - name: TruffleHog OSS
-        uses: trufflesecurity/trufflehog@v3.93.8 # pin to release tag, not mutable @main
+        uses: trufflesecurity/trufflehog@v3.94.2 # pin to release tag, not mutable @main
         with:
           extra_args: --only-verified
 
