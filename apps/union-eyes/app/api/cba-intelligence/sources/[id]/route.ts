@@ -11,7 +11,7 @@ import {
 
 export const GET = withApi(
   {
-    auth: { minRole: "member" },
+    auth: { minRole: "steward" },
     entitlement: "commercial_reporting",
     openapi: {
       tags: ["CBA Intelligence"],

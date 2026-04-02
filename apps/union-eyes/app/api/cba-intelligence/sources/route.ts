@@ -23,7 +23,7 @@ const listQuerySchema = z.object({
 
 export const GET = withApi(
   {
-    auth: { minRole: "member" },
+    auth: { minRole: "steward" },
     entitlement: "commercial_reporting",
     query: listQuerySchema,
     openapi: {

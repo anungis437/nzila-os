@@ -12,8 +12,21 @@ import {
   BenchmarkView,
   FreshnessDashboard,
 } from "@/components/cba-intelligence";
+import { useFeatureFlag } from "@/lib/hooks/use-feature-flags";
+import { Database } from "lucide-react";
 
 export default function CbaIntelligencePage() {
+  const enabled = useFeatureFlag("cba_intelligence");
+
+  if (!enabled) {
+    return (
+      <div className="p-8 text-center text-muted-foreground">
+        <Database className="h-8 w-8 mx-auto mb-3 text-muted-foreground/50" />
+        <p>CBA Intelligence is not enabled for your organization.</p>
+      </div>
+    );
+  }
+
   return (
     <div className="container mx-auto py-8 space-y-6">
       {/* Page Header */}
