@@ -30,6 +30,7 @@ export function registerPreExecutionGuard(guard: PreExecutionGuard): void {
   preGuards.push(guard)
 }
 
+// ga-check:exempt — command handler registry, not data persistence
 const registry = new Map<string, CommandHandler<unknown>>()
 
 export function registerHandler<T>(handler: CommandHandler<T>): void {

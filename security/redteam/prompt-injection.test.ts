@@ -8,6 +8,7 @@
  * @security PROMPT-INJ-001 through PROMPT-INJ-012
  */
 import { describe, it, expect } from 'vitest'
+import { walkSync } from './deterministic'
 import { readFileSync, existsSync } from 'node:fs'
 import { join } from 'node:path'
 
@@ -145,7 +146,6 @@ describe('PROMPT-INJ-007 — No eval() or Function() in AI processing paths', ()
 
   it('ai-core source has no eval/Function usage', () => {
     if (!existsSync(aiCorePath)) return
-    const { walkSync } = require('./deterministic')
     const files = walkSync(aiCorePath, ['.ts'])
     for (const file of files) {
       const content = readFileSync(file, 'utf-8')

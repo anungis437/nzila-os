@@ -13,9 +13,9 @@ import {
   listPolicies,
   validateGovernancePolicy,
   executeAdminAction,
-  payoutPolicy,
-  releasePolicy,
-  eventPolicy,
+  payoutPolicy as _payoutPolicy,
+  releasePolicy as _releasePolicy,
+  eventPolicy as _eventPolicy,
   type GovernancePolicy,
 } from './governance-enforcer'
 import {

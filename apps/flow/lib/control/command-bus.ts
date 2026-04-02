@@ -20,7 +20,7 @@ import { logger } from '@/lib/logger'
 import { FlowWorkflowError } from '@/lib/workflows/errors'
 
 // ── Handler Registry ───────────────────────────────────────────────────────
-
+// ga-check:exempt — command handler registry, not data persistence
 const registry = new Map<string, CommandHandler<unknown>>()
 
 export function registerHandler<T>(handler: CommandHandler<T>): void {

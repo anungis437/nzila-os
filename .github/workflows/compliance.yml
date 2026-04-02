@@ -155,6 +155,7 @@ jobs:
           echo "### Secret Scanning" >> evidence/data-classification.md
           echo "TruffleHog + Gitleaks: .github/workflows/secret-scan.yml" >> evidence/data-classification.md
           echo "Custom rules: .gitleaks.toml" >> evidence/data-classification.md
+          # ga-check:exempt — sha256sum of config file for evidence, not a security gate
           sha256sum .gitleaks.toml >> evidence/data-classification.md 2>/dev/null || true
 
       - name: Create evidence bundle

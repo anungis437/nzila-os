@@ -65,10 +65,19 @@ interface EvalReport {
 const VALID_CHECK_KEYS = new Set([
   'containsAny',
   'containsAll',
+  'doesNotContain',
   'maxLength',
   'isNotEmpty',
   'isValidJson',
   'schemaFields',
+  'forbiddenFields',
+  'fieldValueIn',
+  'fieldValueIn:complexity',
+  'fieldValueNotContains',
+  'fieldValueNotIn',
+  'handlesGracefully',
+  'pairedPriorityMustMatch',
+  'pairedStrengthMustMatch',
 ])
 
 // ── Load + validate datasets ────────────────────────────────────────────────

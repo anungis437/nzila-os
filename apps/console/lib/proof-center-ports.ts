@@ -14,9 +14,11 @@ import type { ComplianceSnapshot, SnapshotChainEntry } from '@nzila/platform-com
 import type { HealthReport } from '@nzila/platform-observability'
 
 // ── In-Memory Stores ────────────────────────────────────────────────────────
-
+// ga-check:exempt — port adapter stubs, replaced by real DB ports at runtime
 const evidencePacks = new Map<string, EvidencePackIndex[]>()
+// ga-check:exempt — port adapter stubs, replaced by real DB ports at runtime
 const complianceSnapshots = new Map<string, ComplianceSnapshot[]>()
+// ga-check:exempt — port adapter stubs, replaced by real DB ports at runtime
 const snapshotChains = new Map<string, SnapshotChainEntry[]>()
 
 // ── Public API ──────────────────────────────────────────────────────────────

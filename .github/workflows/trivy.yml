@@ -39,12 +39,16 @@ jobs:
     steps:
       - uses: actions/checkout@v4
 
+      - name: Set up Docker Buildx
+        uses: docker/setup-buildx-action@v3
+
       - name: Build image (${{ matrix.image }})
         run: |
-          docker build \
+          docker buildx build \
             -f ${{ matrix.dockerfile }} \
             -t ${{ matrix.image }}:scan \
             --target base \
+            --load \
             .
 
       - name: Run Trivy (table output — blocks on CRITICAL)

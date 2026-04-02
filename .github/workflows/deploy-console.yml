@@ -111,6 +111,7 @@ jobs:
         run: |
           docker build \
             --target console \
+            --build-arg TURBO_FILTER="--filter=@nzila/console" \
             --build-arg NEXT_PUBLIC_CLERK_PUBLISHABLE_KEY=${{ secrets.CLERK_PUBLISHABLE_KEY }} \
             -t ${{ env.IMAGE }}:${{ github.sha }} \
             -t ${{ env.IMAGE }}:latest \

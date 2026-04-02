@@ -1,4 +1,4 @@
-# syntax=docker/dockerfile:1
+# syntax=docker/dockerfile:1.7
 
 # ============================================
 # Base stage - pnpm setup
@@ -23,97 +23,13 @@ WORKDIR /app
 # Copy package files
 COPY package.json pnpm-workspace.yaml pnpm-lock.yaml* ./
 
-# Apps
-COPY apps/abr/package.json ./apps/abr/
-COPY apps/cfo/package.json ./apps/cfo/
-COPY apps/console/package.json ./apps/console/
-COPY apps/cora/package.json ./apps/cora/
-COPY apps/nacp-exams/package.json ./apps/nacp-exams/
-COPY apps/orchestrator-api/package.json ./apps/orchestrator-api/
-COPY apps/partners/package.json ./apps/partners/
-COPY apps/agrimo/package.json ./apps/agrimo/
-COPY apps/trade/package.json ./apps/trade/
-COPY apps/union-eyes/package.json ./apps/union-eyes/
-COPY apps/web/package.json ./apps/web/
-COPY apps/zonga/package.json ./apps/zonga/
-
-# Packages
-COPY packages/agri-adapters/package.json ./packages/agri-adapters/
-COPY packages/agri-core/package.json ./packages/agri-core/
-COPY packages/agri-db/package.json ./packages/agri-db/
-COPY packages/agri-events/package.json ./packages/agri-events/
-COPY packages/agri-intelligence/package.json ./packages/agri-intelligence/
-COPY packages/agri-traceability/package.json ./packages/agri-traceability/
-COPY packages/ai-core/package.json ./packages/ai-core/
-COPY packages/ai-sdk/package.json ./packages/ai-sdk/
-COPY packages/blob/package.json ./packages/blob/
-COPY packages/chatops-slack/package.json ./packages/chatops-slack/
-COPY packages/chatops-teams/package.json ./packages/chatops-teams/
-COPY packages/cli/package.json ./packages/cli/
-COPY packages/commerce-audit/package.json ./packages/commerce-audit/
-COPY packages/commerce-core/package.json ./packages/commerce-core/
-COPY packages/commerce-db/package.json ./packages/commerce-db/
-COPY packages/commerce-events/package.json ./packages/commerce-events/
-COPY packages/commerce-evidence/package.json ./packages/commerce-evidence/
-COPY packages/commerce-governance/package.json ./packages/commerce-governance/
-COPY packages/commerce-integration-tests/package.json ./packages/commerce-integration-tests/
-COPY packages/commerce-observability/package.json ./packages/commerce-observability/
-COPY packages/commerce-services/package.json ./packages/commerce-services/
-COPY packages/commerce-state/package.json ./packages/commerce-state/
-COPY packages/comms-email/package.json ./packages/comms-email/
-COPY packages/comms-push/package.json ./packages/comms-push/
-COPY packages/comms-sms/package.json ./packages/comms-sms/
-COPY packages/config/package.json ./packages/config/
-COPY packages/crm-hubspot/package.json ./packages/crm-hubspot/
-COPY packages/data-lifecycle/package.json ./packages/data-lifecycle/
-COPY packages/db/package.json ./packages/db/
-COPY packages/evidence/package.json ./packages/evidence/
-COPY packages/fx/package.json ./packages/fx/
-COPY packages/integrations-core/package.json ./packages/integrations-core/
-COPY packages/integrations-db/package.json ./packages/integrations-db/
-COPY packages/integrations-runtime/package.json ./packages/integrations-runtime/
-COPY packages/ml-core/package.json ./packages/ml-core/
-COPY packages/ml-sdk/package.json ./packages/ml-sdk/
-COPY packages/nacp-core/package.json ./packages/nacp-core/
-COPY packages/org/package.json ./packages/org/
-COPY packages/os-core/package.json ./packages/os-core/
-COPY packages/payments-stripe/package.json ./packages/payments-stripe/
-COPY packages/platform-assurance/package.json ./packages/platform-assurance/
-COPY packages/platform-compliance-snapshots/package.json ./packages/platform-compliance-snapshots/
-COPY packages/platform-cost/package.json ./packages/platform-cost/
-COPY packages/platform-deploy/package.json ./packages/platform-deploy/
-COPY packages/platform-events/package.json ./packages/platform-events/
-COPY packages/platform-evidence-pack/package.json ./packages/platform-evidence-pack/
-COPY packages/platform-export/package.json ./packages/platform-export/
-COPY packages/platform-integrations-control-plane/package.json ./packages/platform-integrations-control-plane/
-COPY packages/platform-isolation/package.json ./packages/platform-isolation/
-COPY packages/platform-marketplace/package.json ./packages/platform-marketplace/
-COPY packages/platform-metrics/package.json ./packages/platform-metrics/
-COPY packages/platform-observability/package.json ./packages/platform-observability/
-COPY packages/platform-ops/package.json ./packages/platform-ops/
-COPY packages/platform-performance/package.json ./packages/platform-performance/
-COPY packages/platform-policy-engine/package.json ./packages/platform-policy-engine/
-COPY packages/platform-procurement-proof/package.json ./packages/platform-procurement-proof/
-COPY packages/platform-proof/package.json ./packages/platform-proof/
-COPY packages/platform-rfp-generator/package.json ./packages/platform-rfp-generator/
-COPY packages/pricing-engine/package.json ./packages/pricing-engine/
-COPY packages/qbo/package.json ./packages/qbo/
-COPY packages/scripts-book/package.json ./packages/scripts-book/
-COPY packages/tax/package.json ./packages/tax/
-COPY packages/tools-runtime/package.json ./packages/tools-runtime/
-COPY packages/trade-adapters/package.json ./packages/trade-adapters/
-COPY packages/trade-cars/package.json ./packages/trade-cars/
-COPY packages/trade-core/package.json ./packages/trade-core/
-COPY packages/trade-db/package.json ./packages/trade-db/
-COPY packages/ui/package.json ./packages/ui/
-COPY packages/webhooks/package.json ./packages/webhooks/
-COPY packages/zonga-core/package.json ./packages/zonga-core/
-COPY packages/zonga-economics/package.json ./packages/zonga-economics/
-COPY packages/zonga-payments/package.json ./packages/zonga-payments/
-COPY packages/zonga-growth/package.json ./packages/zonga-growth/
-
-# Services
-COPY services/media-worker/package.json ./services/media-worker/
+# Copy all workspace package.json files preserving directory structure.
+# Uses COPY --parents (BuildKit 1.7+) so new apps/packages are picked up
+# automatically — no need to add a COPY line per package.
+COPY --parents apps/*/package.json ./
+COPY --parents packages/*/package.json ./
+COPY --parents services/*/package.json ./
+COPY --parents tooling/*/package.json ./
 
 # Override .npmrc — keep node-linker=hoisted (required for module resolution)
 # but remove exFAT workarounds that are unnecessary on ext4
@@ -672,97 +588,11 @@ ENV PATH="/app/node_modules/.bin:$PATH"
 # Copy package files
 COPY package.json pnpm-workspace.yaml pnpm-lock.yaml* ./
 
-# Apps
-COPY apps/abr/package.json ./apps/abr/
-COPY apps/cfo/package.json ./apps/cfo/
-COPY apps/console/package.json ./apps/console/
-COPY apps/cora/package.json ./apps/cora/
-COPY apps/nacp-exams/package.json ./apps/nacp-exams/
-COPY apps/orchestrator-api/package.json ./apps/orchestrator-api/
-COPY apps/partners/package.json ./apps/partners/
-COPY apps/agrimo/package.json ./apps/agrimo/
-COPY apps/trade/package.json ./apps/trade/
-COPY apps/union-eyes/package.json ./apps/union-eyes/
-COPY apps/web/package.json ./apps/web/
-COPY apps/zonga/package.json ./apps/zonga/
-
-# Packages
-COPY packages/agri-adapters/package.json ./packages/agri-adapters/
-COPY packages/agri-core/package.json ./packages/agri-core/
-COPY packages/agri-db/package.json ./packages/agri-db/
-COPY packages/agri-events/package.json ./packages/agri-events/
-COPY packages/agri-intelligence/package.json ./packages/agri-intelligence/
-COPY packages/agri-traceability/package.json ./packages/agri-traceability/
-COPY packages/ai-core/package.json ./packages/ai-core/
-COPY packages/ai-sdk/package.json ./packages/ai-sdk/
-COPY packages/blob/package.json ./packages/blob/
-COPY packages/chatops-slack/package.json ./packages/chatops-slack/
-COPY packages/chatops-teams/package.json ./packages/chatops-teams/
-COPY packages/cli/package.json ./packages/cli/
-COPY packages/commerce-audit/package.json ./packages/commerce-audit/
-COPY packages/commerce-core/package.json ./packages/commerce-core/
-COPY packages/commerce-db/package.json ./packages/commerce-db/
-COPY packages/commerce-events/package.json ./packages/commerce-events/
-COPY packages/commerce-evidence/package.json ./packages/commerce-evidence/
-COPY packages/commerce-governance/package.json ./packages/commerce-governance/
-COPY packages/commerce-integration-tests/package.json ./packages/commerce-integration-tests/
-COPY packages/commerce-observability/package.json ./packages/commerce-observability/
-COPY packages/commerce-services/package.json ./packages/commerce-services/
-COPY packages/commerce-state/package.json ./packages/commerce-state/
-COPY packages/comms-email/package.json ./packages/comms-email/
-COPY packages/comms-push/package.json ./packages/comms-push/
-COPY packages/comms-sms/package.json ./packages/comms-sms/
-COPY packages/config/package.json ./packages/config/
-COPY packages/crm-hubspot/package.json ./packages/crm-hubspot/
-COPY packages/data-lifecycle/package.json ./packages/data-lifecycle/
-COPY packages/db/package.json ./packages/db/
-COPY packages/evidence/package.json ./packages/evidence/
-COPY packages/fx/package.json ./packages/fx/
-COPY packages/integrations-core/package.json ./packages/integrations-core/
-COPY packages/integrations-db/package.json ./packages/integrations-db/
-COPY packages/integrations-runtime/package.json ./packages/integrations-runtime/
-COPY packages/ml-core/package.json ./packages/ml-core/
-COPY packages/ml-sdk/package.json ./packages/ml-sdk/
-COPY packages/nacp-core/package.json ./packages/nacp-core/
-COPY packages/org/package.json ./packages/org/
-COPY packages/os-core/package.json ./packages/os-core/
-COPY packages/payments-stripe/package.json ./packages/payments-stripe/
-COPY packages/platform-assurance/package.json ./packages/platform-assurance/
-COPY packages/platform-compliance-snapshots/package.json ./packages/platform-compliance-snapshots/
-COPY packages/platform-cost/package.json ./packages/platform-cost/
-COPY packages/platform-deploy/package.json ./packages/platform-deploy/
-COPY packages/platform-events/package.json ./packages/platform-events/
-COPY packages/platform-evidence-pack/package.json ./packages/platform-evidence-pack/
-COPY packages/platform-export/package.json ./packages/platform-export/
-COPY packages/platform-integrations-control-plane/package.json ./packages/platform-integrations-control-plane/
-COPY packages/platform-isolation/package.json ./packages/platform-isolation/
-COPY packages/platform-marketplace/package.json ./packages/platform-marketplace/
-COPY packages/platform-metrics/package.json ./packages/platform-metrics/
-COPY packages/platform-observability/package.json ./packages/platform-observability/
-COPY packages/platform-ops/package.json ./packages/platform-ops/
-COPY packages/platform-performance/package.json ./packages/platform-performance/
-COPY packages/platform-policy-engine/package.json ./packages/platform-policy-engine/
-COPY packages/platform-procurement-proof/package.json ./packages/platform-procurement-proof/
-COPY packages/platform-proof/package.json ./packages/platform-proof/
-COPY packages/platform-rfp-generator/package.json ./packages/platform-rfp-generator/
-COPY packages/pricing-engine/package.json ./packages/pricing-engine/
-COPY packages/qbo/package.json ./packages/qbo/
-COPY packages/scripts-book/package.json ./packages/scripts-book/
-COPY packages/tax/package.json ./packages/tax/
-COPY packages/tools-runtime/package.json ./packages/tools-runtime/
-COPY packages/trade-adapters/package.json ./packages/trade-adapters/
-COPY packages/trade-cars/package.json ./packages/trade-cars/
-COPY packages/trade-core/package.json ./packages/trade-core/
-COPY packages/trade-db/package.json ./packages/trade-db/
-COPY packages/ui/package.json ./packages/ui/
-COPY packages/webhooks/package.json ./packages/webhooks/
-COPY packages/zonga-core/package.json ./packages/zonga-core/
-COPY packages/zonga-economics/package.json ./packages/zonga-economics/
-COPY packages/zonga-payments/package.json ./packages/zonga-payments/
-COPY packages/zonga-growth/package.json ./packages/zonga-growth/
-
-# Services
-COPY services/media-worker/package.json ./services/media-worker/
+# Copy all workspace package.json files (same wildcard approach as deps stage)
+COPY --parents apps/*/package.json ./
+COPY --parents packages/*/package.json ./
+COPY --parents services/*/package.json ./
+COPY --parents tooling/*/package.json ./
 
 # Override .npmrc — keep node-linker=hoisted (required for module resolution)
 # but remove exFAT workarounds that are unnecessary on ext4

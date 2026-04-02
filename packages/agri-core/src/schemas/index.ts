@@ -3,7 +3,7 @@ import {
   CropType, UnitOfMeasure, ProducerStatus, LotStatus as _LotStatus, BatchStatus as _BatchStatus,
   PaymentMethod,
   CertificationType,
-  SupplyChainStepType, SupplyChainStepStatus, SupplyChainStatus,
+  SupplyChainStepType, SupplyChainStepStatus,
   ProvenanceSourceType, SyncStatus, ConflictResolutionStrategy,
   ConfidenceLevel, ForecastType,
 } from '../enums'

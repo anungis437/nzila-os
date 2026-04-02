@@ -11,6 +11,7 @@ import { auth } from '@clerk/nextjs/server'
 import type { CommerceDbContext, CommerceReadContext } from '@nzila/commerce-db'
 
 /** In-process cache (per-instance, cleared on deploy). */
+// ga-check:exempt — TTL cache, not primary persistence
 const cache = new Map<string, { uuid: string; ts: number }>()
 const CACHE_TTL_MS = 5 * 60 * 1000 // 5 min
 

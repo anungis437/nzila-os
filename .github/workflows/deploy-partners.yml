@@ -104,6 +104,7 @@ jobs:
         run: |
           docker build \
             --target partners \
+            --build-arg TURBO_FILTER="--filter=@nzila/partners" \
             --build-arg NEXT_PUBLIC_CLERK_PUBLISHABLE_KEY=${{ secrets.CLERK_PUBLISHABLE_KEY }} \
             -t ${{ env.IMAGE }}:${{ github.sha }} \
             -t ${{ env.IMAGE }}:latest \

@@ -116,7 +116,7 @@ jobs:
           docker build \
             --target union-eyes \
             --build-arg TURBO_FILTER="--filter=@nzila/union-eyes" \
-            --build-arg NEXT_PUBLIC_CLERK_PUBLISHABLE_KEY=${{ secrets.CLERK_PK_UNION_EYES }} \
+            --build-arg NEXT_PUBLIC_CLERK_PUBLISHABLE_KEY=${{ secrets.CLERK_PUBLISHABLE_KEY }} \
             --build-arg NEXT_PUBLIC_APP_URL=${{ secrets.UE_APP_URL }} \
             --build-arg NEXT_PUBLIC_CLERK_IS_SATELLITE=false \
             -t ${{ env.IMAGE }}:${{ github.sha }} \
@@ -155,4 +155,6 @@ jobs:
             --container-name django-backend \
             --set-env-vars \
               "CLERK_JWKS_URL=https://known-hagfish-67.clerk.accounts.dev/.well-known/jwks.json" \
+              "CLERK_WEBHOOK_SECRET=secretref:clerk-webhook-secret" \
+              "DJANGO_ALLOWED_HOSTS=${{ secrets.DJANGO_ALLOWED_HOSTS }}" \
             --image ${{ env.BACKEND_IMAGE }}:${{ github.sha }}

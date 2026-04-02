@@ -8,7 +8,7 @@
  * @module @nzila/zonga-economics/pricing-tiers
  */
 
-import type { FeeRule, Currency, RevenueSource } from './types'
+import type { FeeRule, RevenueSource } from './types'
 import { FeeType } from './types'
 import { DEFAULT_FEE_RULES } from './fees'
 

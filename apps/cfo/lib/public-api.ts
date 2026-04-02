@@ -142,6 +142,7 @@ const DEFAULT_RATE_LIMITS = {
 }
 
 /** In-memory rate limit tracker (use Redis in production) */
+// ga-check:exempt — ephemeral rate-limit counters, not primary persistence
 const rateLimitCounters = new Map<string, { count: number; windowStart: number }>()
 
 /**
