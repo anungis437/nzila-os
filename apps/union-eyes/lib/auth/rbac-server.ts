@@ -10,7 +10,6 @@
 
 import { auth, currentUser } from '@/lib/api-auth-guard';
 import { db } from "@/db/db";
-import { organizationUsers } from "@/db/schema/domains/member";
 import { organizationMembers, organizations } from "@/db/schema-organizations";
 import { eq, and } from "drizzle-orm";
 import { UserRole, Permission, hasPermission, hasAnyPermission, hasAllPermissions, canAccessRoute } from "./roles";
@@ -63,11 +62,9 @@ function resolveNzilaRole(raw: string | null | undefined): UserRole | null {
  * Get user role from database.
  *
  * Resolution order:
- *   1. `organization_users` table (canonical RBAC source)
- *   2. `organization_members` table (org-membership source, checked when
- *      an organizationId is provided)
- *   3. Clerk `publicMetadata.role`
- *   4. Fail-closed: throws if none of the above resolve.
+ *   1. `organization_members` table (canonical RBAC source, org-scoped)
+ *   2. Clerk `publicMetadata.role` / `publicMetadata.nzilaRole`
+ *   3. Fail-closed: throws if none of the above resolve.
  */
 export async function getUserRole(
   userId: string,
@@ -103,23 +100,7 @@ export async function getUserRole(
       logger.warn('[getUserRole] Super-admin email check failed, falling through', { detail: emailCheckError instanceof Error ? emailCheckError.message : emailCheckError });
     }
 
-    // 1. Try organization_users (canonical RBAC table)
-    logger.info('[getUserRole] Step 1: querying organization_users for', { detail: userId });
-    try {
-      const orgUser = await db
-        .select({ role: organizationUsers.role })
-        .from(organizationUsers)
-        .where(eq(organizationUsers.userId, userId))
-        .limit(1);
-      logger.info('[getUserRole] Step 1 result:', { detail: JSON.stringify(orgUser) });
-
-      const fromOrgUsers = resolveUserRole(orgUser[0]?.role);
-      if (fromOrgUsers) return fromOrgUsers;
-    } catch (step1Error) {
-      logger.warn('[getUserRole] organization_users query failed, falling through', { detail: step1Error instanceof Error ? step1Error.message : step1Error });
-    }
-
-    // 2. Try organization_members (org-scoped membership)
+    // 1. Try organization_members (org-scoped membership)
     if (organizationId) {
       // Clerk auth() returns Clerk org IDs (org_xxx), but organization_members
       // stores UUID references. Resolve Clerk ID → UUID when needed.
@@ -155,16 +136,16 @@ export async function getUserRole(
       if (fromOrgMembers) return fromOrgMembers;
     }
 
-    // 3. Fallback to Clerk publicMetadata
+    // 2. Fallback to Clerk publicMetadata
     const user = await currentUser();
 
-    // 3a. publicMetadata.role (union-eyes native key)
+    // 2a. publicMetadata.role (union-eyes native key)
     const fromClerk = resolveUserRole(
       user?.publicMetadata?.role as string | undefined,
     );
     if (fromClerk) return fromClerk;
 
-    // 3b. publicMetadata.nzilaRole (used by the rest of the Nzila platform —
+    // 2b. publicMetadata.nzilaRole (used by the rest of the Nzila platform —
     //     console, CFO, partners apps all write to this key)
     const fromNzilaRole = resolveNzilaRole(
       user?.publicMetadata?.nzilaRole as string | undefined,
