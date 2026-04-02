@@ -16,10 +16,6 @@ import hmac
 import json
 import time
 
-from django.contrib.auth import get_user_model
-from django.test import TestCase, override_settings
-from django.test.client import RequestFactory
-
 from auth_core.models import OrganizationMembers, Organizations
 from auth_core.views import (
     _handle_membership_created,
@@ -32,6 +28,9 @@ from auth_core.views import (
     _handle_user_updated,
     _verify_clerk_webhook,
 )
+from django.contrib.auth import get_user_model
+from django.test import TestCase, override_settings
+from django.test.client import RequestFactory
 
 User = get_user_model()
 
@@ -46,7 +45,7 @@ def _build_svix_headers(body: bytes, secret: str = TEST_WEBHOOK_SECRET):
     signed_content = f"{svix_id}.{svix_timestamp}.{body.decode('utf-8')}"
 
     if secret.startswith("whsec_"):
-        secret_bytes = base64.b64decode(secret[len("whsec_"):])
+        secret_bytes = base64.b64decode(secret[len("whsec_") :])
     else:
         secret_bytes = secret.encode("utf-8")
 
@@ -123,7 +122,7 @@ class ClerkWebhookVerificationTest(TestCase):
         # Re-sign with the stale timestamp
         svix_id = headers["HTTP_SVIX_ID"]
         signed = f"{svix_id}.{headers['HTTP_SVIX_TIMESTAMP']}.{body.decode()}"
-        secret_bytes = base64.b64decode(TEST_WEBHOOK_SECRET[len("whsec_"):])
+        secret_bytes = base64.b64decode(TEST_WEBHOOK_SECRET[len("whsec_") :])
         sig = base64.b64encode(
             hmac.new(secret_bytes, signed.encode(), hashlib.sha256).digest()
         ).decode()
@@ -136,9 +135,7 @@ class ClerkWebhookVerificationTest(TestCase):
         body = b'{"type":"user.created","data":{}}'
         headers = _build_svix_headers(body)
         real_sig = headers["HTTP_SVIX_SIGNATURE"]
-        headers["HTTP_SVIX_SIGNATURE"] = (
-            f"v1,aW52YWxpZC1zaWduYXR1cmU= {real_sig}"
-        )
+        headers["HTTP_SVIX_SIGNATURE"] = f"v1,aW52YWxpZC1zaWduYXR1cmU= {real_sig}"
         request = _make_webhook_request(self.factory, body, headers)
         self.assertTrue(_verify_clerk_webhook(request))
 
@@ -187,9 +184,7 @@ class ClerkUserHandlerTest(TestCase):
     def test_handle_user_created(self):
         data = {
             "id": "user_test_create_001",
-            "email_addresses": [
-                {"email_address": "alice@example.com", "id": "idn_1"}
-            ],
+            "email_addresses": [{"email_address": "alice@example.com", "id": "idn_1"}],
             "first_name": "Alice",
             "last_name": "Smith",
         }
@@ -211,9 +206,7 @@ class ClerkUserHandlerTest(TestCase):
         }
         _handle_user_created(data)
         _handle_user_created(data)  # no error
-        self.assertEqual(
-            User.objects.filter(username="user_test_idem").count(), 1
-        )
+        self.assertEqual(User.objects.filter(username="user_test_idem").count(), 1)
 
     def test_handle_user_created_no_email(self):
         """Missing email_addresses array should default to empty string."""
@@ -318,9 +311,7 @@ class ClerkOrganizationHandlerTest(TestCase):
         _handle_organization_created(data)
 
         self.assertEqual(
-            Organizations.objects.filter(
-                clerk_organization_id="org_test_idem"
-            ).count(),
+            Organizations.objects.filter(clerk_organization_id="org_test_idem").count(),
             1,
         )
         org = Organizations.objects.get(clerk_organization_id="org_test_idem")
@@ -338,9 +329,7 @@ class ClerkOrganizationHandlerTest(TestCase):
         """Missing org id should return early without creating."""
         data = {"name": "No ID Org"}
         _handle_organization_created(data)
-        self.assertFalse(
-            Organizations.objects.filter(name="No ID Org").exists()
-        )
+        self.assertFalse(Organizations.objects.filter(name="No ID Org").exists())
 
     def test_handle_organization_updated(self):
         Organizations.objects.create(
@@ -533,9 +522,7 @@ class ClerkWebhookEndpointTest(TestCase):
         }
         resp = self._post_webhook(payload)
         self.assertEqual(resp.status_code, 200)
-        self.assertTrue(
-            User.objects.filter(username="user_e2e_create").exists()
-        )
+        self.assertTrue(User.objects.filter(username="user_e2e_create").exists())
 
     def test_organization_created_end_to_end(self):
         payload = {
@@ -573,9 +560,7 @@ class ClerkWebhookEndpointTest(TestCase):
         resp = self._post_webhook(payload)
         self.assertEqual(resp.status_code, 200)
         self.assertTrue(
-            OrganizationMembers.objects.filter(
-                user_id="user_e2e_mem"
-            ).exists()
+            OrganizationMembers.objects.filter(user_id="user_e2e_mem").exists()
         )
 
     def test_membership_updated_end_to_end(self):
@@ -617,9 +602,7 @@ class ClerkWebhookEndpointTest(TestCase):
             HTTP_SVIX_SIGNATURE="v1,aW52YWxpZC1zaWc=",
         )
         self.assertEqual(resp.status_code, 401)
-        self.assertFalse(
-            User.objects.filter(username="user_bad_sig").exists()
-        )
+        self.assertFalse(User.objects.filter(username="user_bad_sig").exists())
 
     def test_unhandled_event_returns_200(self):
         """Unknown event types should return 200 (acknowledged, not retried)."""
