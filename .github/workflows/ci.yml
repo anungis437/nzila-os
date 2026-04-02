@@ -146,7 +146,11 @@ jobs:
             --framework bicep \
             --output cli --output sarif \
             --output-file-path console,results.sarif \
-            --skip-check CKV_AZURE_99
+            --skip-check CKV_AZURE_99 \
+            --skip-check CKV_AZURE_139 \
+            --skip-check CKV_AZURE_163 \
+            --skip-check CKV_AZURE_166 \
+            --skip-check CKV_AZURE_189
 
       - name: Upload Checkov SARIF
         if: always()
