@@ -26,9 +26,6 @@ vi.mock('@/db/db', () => ({
   },
 }));
 
-vi.mock('@/db/schema/domains/member', () => ({
-  organizationUsers: { userId: 'userId', role: 'role' },
-}));
 
 vi.mock('@/db/schema-organizations', () => ({
   organizationMembers: { userId: 'userId', organizationId: 'organizationId', role: 'role', status: 'status' },
@@ -128,18 +125,18 @@ describe('getUserRole', () => {
     expect(role).toBe(UserRole.APP_OWNER);
   });
 
-  it('resolves role from organization_users table (step 1)', async () => {
+  it('resolves role from organization_members table (step 1)', async () => {
     // Email check falls through (no super admin email)
     mockCurrentUser.mockResolvedValue({
       emailAddresses: [{ emailAddress: 'user@example.com' }],
       publicMetadata: {},
     } as unknown as Awaited<ReturnType<typeof mockCurrentUserRaw>>);
 
-    // First select call: organization_users returns admin
+    // organization_members returns admin for this org
     const chain = mockSelectChain([{ role: 'admin' }]);
     mockDbSelect.mockReturnValue(chain as unknown as never);
 
-    const role = await getUserRole('user_123');
+    const role = await getUserRole('user_123', 'org-uuid-123');
     expect(role).toBe(UserRole.ADMIN);
   });
 
@@ -169,11 +166,11 @@ describe('getUserRole', () => {
       publicMetadata: {},
     } as unknown as Awaited<ReturnType<typeof mockCurrentUserRaw>>);
 
-    // organization_users returns legacy 'super_admin'
+    // organization_members returns legacy 'super_admin' — resolved to admin via alias map
     const chain = mockSelectChain([{ role: 'super_admin' }]);
     mockDbSelect.mockReturnValue(chain as unknown as never);
 
-    const role = await getUserRole('user_123');
+    const role = await getUserRole('user_123', 'org-uuid-123');
     expect(role).toBe(UserRole.ADMIN);
   });
 

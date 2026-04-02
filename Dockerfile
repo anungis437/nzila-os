@@ -590,11 +590,14 @@ ENV PATH="/app/node_modules/.bin:$PATH"
 # Copy package files
 COPY package.json pnpm-workspace.yaml pnpm-lock.yaml* ./
 
-# Copy all workspace package.json files (same wildcard approach as deps stage)
-COPY --parents apps/*/package.json ./
-COPY --parents packages/*/package.json ./
-COPY --parents services/*/package.json ./
-COPY --parents tooling/*/package.json ./
+# Copy all workspace package.json files (same bind-mount approach as deps stage)
+RUN --mount=type=bind,target=/ctx \
+    for dir in apps packages services tooling; do \
+      find "/ctx/$dir" -maxdepth 2 -name 'package.json' 2>/dev/null | while read f; do \
+        rel="${f#/ctx/}"; \
+        mkdir -p "$(dirname "$rel")" && cp "$f" "$rel"; \
+      done; \
+    done
 
 # Override .npmrc — keep node-linker=hoisted (required for module resolution)
 # but remove exFAT workarounds that are unnecessary on ext4
