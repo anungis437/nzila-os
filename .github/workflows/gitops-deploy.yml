@@ -149,13 +149,8 @@ jobs:
         if: steps.check.outputs.should_build == 'true'
         id: clerk
         run: |
-          APP="${{ matrix.app }}"
-          case "$APP" in
-            web|console)   PK="${{ secrets.CLERK_PK_WEB }}" ;;
-            partners)      PK="${{ secrets.CLERK_PK_PARTNERS }}" ;;
-            union-eyes)    PK="${{ secrets.CLERK_PK_UNION_EYES }}" ;;            zonga)         PK="${{ secrets.CLERK_PK_ZONGA }}" ;;            *)             PK="" ;;
-          esac
-          echo "pk=$PK" >> "$GITHUB_OUTPUT"
+          # All apps share the same Clerk instance (known-hagfish-67)
+          echo "pk=${{ secrets.CLERK_PUBLISHABLE_KEY }}" >> "$GITHUB_OUTPUT"
 
       - name: Build and push
         if: steps.check.outputs.should_build == 'true'
@@ -179,10 +174,11 @@ jobs:
           BUILD_ARGS="${BUILD_ARGS} --build-arg NEXT_PUBLIC_ABR_URL=https://nzila-os-abr.${DOMAIN}"
           BUILD_ARGS="${BUILD_ARGS} --build-arg NEXT_PUBLIC_CFO_URL=https://nzila-os-cfo.${DOMAIN}"
 
-          # Clerk satellite configuration for union-eyes (baked into client bundle)
-          if [ "$APP" = "union-eyes" ]; then
+          # Clerk satellite configuration for apps with their own domain
+          # web is the primary sign-in host; all other apps are satellites
+          if [ "$APP" != "web" ]; then
             BUILD_ARGS="${BUILD_ARGS} --build-arg NEXT_PUBLIC_CLERK_IS_SATELLITE=true"
-            BUILD_ARGS="${BUILD_ARGS} --build-arg NEXT_PUBLIC_CLERK_DOMAIN=nzila-os-union-eyes.${DOMAIN}"
+            BUILD_ARGS="${BUILD_ARGS} --build-arg NEXT_PUBLIC_CLERK_DOMAIN=nzila-os-${APP}.${DOMAIN}"
             BUILD_ARGS="${BUILD_ARGS} --build-arg NEXT_PUBLIC_CLERK_SIGN_IN_URL=https://nzila-os-web.${DOMAIN}/sign-in"
           fi
 
