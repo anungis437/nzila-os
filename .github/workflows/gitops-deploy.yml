@@ -118,6 +118,7 @@ jobs:
     runs-on: ubuntu-latest
     name: Build Images
     strategy:
+      fail-fast: false
       matrix:
         app: [web, console, partners, union-eyes, orchestrator-api, cfo, zonga, abr, flow, agrimo, cora, trade, mobility, mobility-client-portal, control-plane, platform-admin, nacp-exams]
 
@@ -164,6 +165,7 @@ jobs:
           IMAGE="${{ env.ACR_NAME }}.azurecr.io/nzila/${APP}:${VERSION}"
 
           BUILD_ARGS="--build-arg APP_NAME=${APP}"
+          BUILD_ARGS="${BUILD_ARGS} --build-arg TURBO_FILTER=--filter=@nzila/${APP}"
           if [ -n "${{ steps.clerk.outputs.pk }}" ]; then
             BUILD_ARGS="${BUILD_ARGS} --build-arg NEXT_PUBLIC_CLERK_PUBLISHABLE_KEY=${{ steps.clerk.outputs.pk }}"
           fi
