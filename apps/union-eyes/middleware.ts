@@ -341,7 +341,7 @@ const clerkHandler = clerkMiddleware(async (auth, req) => {
 import type { NextFetchEvent } from "next/server";
 export default async function middleware(req: NextRequest, event: NextFetchEvent): Promise<NextResponse> {
   try {
-    return (await clerkHandler(req, event)) ?? NextResponse.next();
+    return ((await clerkHandler(req, event)) ?? NextResponse.next()) as NextResponse;
   } catch (outerError) {
     console.error('[middleware] Clerk/outer error:', outerError);
     return new NextResponse(
