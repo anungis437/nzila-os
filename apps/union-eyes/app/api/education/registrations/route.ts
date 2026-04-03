@@ -1,17 +1,18 @@
 /**
- * CRUD collection route for trainingCourses
+ * CRUD collection route for courseRegistrations
  */
 import { crudRoutes } from '@/lib/api/crud-factory';
-import { trainingCourses } from '@/db/schema';
+import { courseRegistrations } from '@/db/schema';
 
 export const dynamic = 'force-dynamic';
 
 const { GET, POST } = crudRoutes({
-  table: trainingCourses,
+  table: courseRegistrations,
   pk: 'id',
   tags: ["Scheduling"],
   orgScoped: true,
+  ownerColumn: 'memberId',
   readRole: 'member',
-  writeRole: 'steward',
+  writeRole: 'member',
 });
 export { GET, POST };
