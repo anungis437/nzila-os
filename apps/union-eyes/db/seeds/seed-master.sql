@@ -409,45 +409,42 @@ BEGIN
 
   INSERT INTO organization_members (user_id, organization_id, role, status, name, email)
   VALUES
-    ('user_3BSyETlaLS6t8wuol22bVECjPFM', v_cape_id, 'admin',  'active', 'Greg Phillips',        'g.phillips@acep-cape.ca'),
-    ('user_3BSyEi6TduTzKp2mZigpD6D746h', v_cape_id, 'admin',  'active', 'Emmanuelle Tremblay',  'e.tremblay@acep-cape.ca'),
-    ('user_3BSzDo4cpXO7qTM0bY800AuLOd2', v_cape_id, 'member', 'active', 'Brian Faulkner',       'b.faulkner@acep-cape.ca'),
-    ('user_3BSzDqnxMraAlxaRvhyrTabrTOE', v_cape_id, 'member', 'active', 'Chantal Bertrand',     'c.bertrand@acep-cape.ca'),
-    ('user_3BSzE0qWBvXm6eP75nAukpBbpvk', v_cape_id, 'member', 'active', 'Mike Savard',          'm.savard@acep-cape.ca'),
-    ('user_3BSzDyCmU8iKsYeD1tyBqkDfBFP', v_cape_id, 'member', 'active', 'Nadia Ouellet',        'n.ouellet@acep-cape.ca'),
-    ('user_3BSzEAPted20wutKC5lY8lTn9jZ', v_cape_id, 'member', 'active', 'Daniel Kim',           'd.kim@acep-cape.ca'),
-    ('user_3BSzE9z6NFV3hbYd4Fu2ufoL4rI', v_cape_id, 'member', 'active', 'Sarah Lefebvre',       's.lefebvre@acep-cape.ca'),
-    ('user_3BSzE5AtIbImjHukqc0yM9EXQdu', v_cape_id, 'member', 'active', 'Alexandre Moreau',     'a.moreau@acep-cape.ca'),
-    ('user_3BSzEIjI6LSWANw6ssfwXcxxnhT', v_cape_id, 'member', 'active', 'Jennifer Walsh',       'j.walsh@acep-cape.ca'),
-    ('user_3BSzEIXiSqVXnNYgymDZ1PY6ZhY', v_cape_id, 'member', 'active', 'Pierre Desmarais',     'p.desmarais@acep-cape.ca'),
-    ('user_3BSzEIf1ARXNRQOs3d5Qju58yNZ', v_cape_id, 'member', 'active', 'Amira Hassan',         'a.hassan@acep-cape.ca'),
+    ('user_3BSyETlaLS6t8wuol22bVECjPFM', v_cape_id, 'president',     'active', 'Greg Phillips',        'g.phillips@acep-cape.ca'),
+    ('user_3BSyEi6TduTzKp2mZigpD6D746h', v_cape_id, 'vice_president', 'active', 'Emmanuelle Tremblay',  'e.tremblay@acep-cape.ca'),
+    ('user_3BSzDo4cpXO7qTM0bY800AuLOd2', v_cape_id, 'admin',         'active', 'Brian Faulkner',       'b.faulkner@acep-cape.ca'),
+    ('user_3BSzDqnxMraAlxaRvhyrTabrTOE', v_cape_id, 'member',        'active', 'Chantal Bertrand',     'c.bertrand@acep-cape.ca'),
+    ('user_3BSzE0qWBvXm6eP75nAukpBbpvk', v_cape_id, 'member',        'active', 'Mike Savard',          'm.savard@acep-cape.ca'),
+    ('user_3BSzDyCmU8iKsYeD1tyBqkDfBFP', v_cape_id, 'member',        'active', 'Nadia Ouellet',        'n.ouellet@acep-cape.ca'),
+    ('user_3BSzEAPted20wutKC5lY8lTn9jZ', v_cape_id, 'member',        'active', 'Daniel Kim',           'd.kim@acep-cape.ca'),
+    ('user_3BSzE9z6NFV3hbYd4Fu2ufoL4rI', v_cape_id, 'chief_steward', 'active', 'Sarah Lefebvre',       's.lefebvre@acep-cape.ca'),
+    ('user_3BSzE5AtIbImjHukqc0yM9EXQdu', v_cape_id, 'member',        'active', 'Alexandre Moreau',     'a.moreau@acep-cape.ca'),
+    ('user_3BSzEIjI6LSWANw6ssfwXcxxnhT', v_cape_id, 'member',        'active', 'Jennifer Walsh',       'j.walsh@acep-cape.ca'),
+    ('user_3BSzEIXiSqVXnNYgymDZ1PY6ZhY', v_cape_id, 'member',        'active', 'Pierre Desmarais',     'p.desmarais@acep-cape.ca'),
+    ('user_3BSzEIf1ARXNRQOs3d5Qju58yNZ', v_cape_id, 'member',        'active', 'Amira Hassan',         'a.hassan@acep-cape.ca'),
     -- Platform admins
-    ('user_35NlrrNcfTv0DMh2kzBHyXZRtpb', v_cape_id, 'admin',  'active', 'Aubert Nungisa',       'aubert@nzila.app'),
-    ('user_37Zo7OrvP4jy0J0MU5APfkDtE2V', v_cape_id, 'admin',  'active', 'Platform Admin',       'admin@nzila.io');
+    ('user_35NlrrNcfTv0DMh2kzBHyXZRtpb', v_cape_id, 'admin',         'active', 'Aubert Nungisa',       'aubert@nzila.app'),
+    ('user_37Zo7OrvP4jy0J0MU5APfkDtE2V', v_cape_id, 'admin',         'active', 'Platform Admin',       'admin@nzila.io');
 END $$;
 
 -- 3d. CUPE National members (6 — national office staff)
--- NOTE: These user IDs are placeholders until Clerk users are provisioned
--- for CUPE National. They can log in to CUPE L123 which has its own Clerk org.
+-- Real Clerk user IDs — same users as Nzila platform org, cross-org assigned.
+-- getUserRole() resolves org-scoped role from organization_members, so each user
+-- gets their CUPE-specific role when their org context is the CUPE org.
 DO $$
 DECLARE v_cupe_id text;
 BEGIN
   SELECT id::text INTO v_cupe_id FROM organizations WHERE slug = 'cupe';
 
+  DELETE FROM organization_members WHERE organization_id = v_cupe_id;
+
   INSERT INTO organization_members (user_id, organization_id, role, status, name, email, department, position)
-  SELECT v.user_id, v_cupe_id, v.role, 'active', v.name, v.email, v.department, v.position
-  FROM (VALUES
-    ('cupe-natl-001', 'admin',  'Mark Hancock',       'president@cupe.ca',      'Executive',        'National President'),
-    ('cupe-natl-002', 'admin',  'Candace Rennick',    'c.rennick@cupe.ca',      'Executive',        'National Secretary-Treasurer'),
-    ('cupe-natl-003', 'member', 'Charles Fleury',     'c.fleury@cupe.ca',       'Operations',       'General Vice-President'),
-    ('cupe-natl-004', 'member', 'Fred Hahn',          'f.hahn@cupe.ca',         'Ontario Division', 'Ontario President'),
-    ('cupe-natl-005', 'member', 'Judy Henley',        'j.henley@cupe.ca',       'Policy',           'National Director of Policy'),
-    ('cupe-natl-006', 'member', 'Patrick Gloutney',   'p.gloutney@cupe.ca',     'Organizing',       'National Director of Organizing')
-  ) AS v(user_id, role, name, email, department, position)
-  WHERE NOT EXISTS (
-    SELECT 1 FROM organization_members om
-    WHERE om.user_id = v.user_id AND om.organization_id = v_cupe_id
-  );
+  VALUES
+    ('user_3A2c3apBW0oMKPX2CjIMd8b1ujq', v_cupe_id, 'national_officer', 'active', 'Mark Hancock',     'president@cupe.ca',    'Executive',        'National President'),
+    ('user_3A2c6rLMOmF45HEkaU7XdQp05Zk', v_cupe_id, 'admin',           'active', 'Candace Rennick',  'c.rennick@cupe.ca',    'Executive',        'National Secretary-Treasurer'),
+    ('user_3A2c7AO7bbapxh9IdAgW5kXPhHu', v_cupe_id, 'member',          'active', 'Charles Fleury',   'c.fleury@cupe.ca',     'Operations',       'General Vice-President'),
+    ('user_3A2c75rcBNDcTYtkjnNgbYLqsEx', v_cupe_id, 'member',          'active', 'Fred Hahn',        'f.hahn@cupe.ca',       'Ontario Division', 'Ontario President'),
+    ('user_3A2c7IXYOHgNMiIdOte7C5MEwFd', v_cupe_id, 'member',          'active', 'Judy Henley',      'j.henley@cupe.ca',     'Policy',           'National Director of Policy'),
+    ('user_3A2c729gwvVEXyC6vc2ICqzihxp', v_cupe_id, 'member',          'active', 'Patrick Gloutney', 'p.gloutney@cupe.ca',   'Organizing',       'National Director of Organizing');
 END $$;
 
 -- 3e. CUPE Local 123 members (10 + 2 platform admins)
