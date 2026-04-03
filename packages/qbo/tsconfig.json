@@ -11,7 +11,6 @@
     "declaration": true,
     "declarationMap": true,
     "sourceMap": true,
-    "outDir": "./dist",
     "rootDir": "./src",
     "composite": true,
     "noEmit": true,
