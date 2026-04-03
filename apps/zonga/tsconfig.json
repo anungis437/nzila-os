@@ -1,7 +1,6 @@
 {
   "extends": "@nzila/config/tsconfig/nextjs",
   "compilerOptions": {
-    "baseUrl": ".",
     "paths": {
       "@/*": ["./*"],
       "@nzila/db": ["../../packages/db/src"],
