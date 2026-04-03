@@ -81,7 +81,6 @@ export async function requireAdmin(
 > {
   try {
     // Get authentication from Clerk
-    // @ts-expect-error — Clerk bundles its own next types; NextRequest [Internal] symbol differs
     const { userId } = getAuth(request);
 
     if (!userId) {

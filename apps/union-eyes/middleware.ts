@@ -318,7 +318,6 @@ const clerkHandler = clerkMiddleware(async (auth, req) => {
   }
 
   // For non-API routes, run i18n middleware and return its response
-  // @ts-expect-error — Clerk and root next may bundle different NextRequest types
   const intlResponse = intlMiddleware(req);
   // intlMiddleware returns a Response; wrap it so we can attach our header
   if (intlResponse instanceof NextResponse) {
@@ -342,7 +341,6 @@ const clerkHandler = clerkMiddleware(async (auth, req) => {
 import type { NextFetchEvent } from "next/server";
 export default async function middleware(req: NextRequest, event: NextFetchEvent): Promise<NextResponse> {
   try {
-    // @ts-expect-error — Clerk and root next may bundle different NextRequest types
     return await clerkHandler(req, event);
   } catch (outerError) {
     console.error('[middleware] Clerk/outer error:', outerError);
