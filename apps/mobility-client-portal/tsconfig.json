@@ -1,7 +1,6 @@
 {
   "extends": "@nzila/config/tsconfig/nextjs",
   "compilerOptions": {
-    "allowArbitraryExtensions": true,
     "paths": {
       "@/*": ["./*"],
       "@nzila/mobility-core": ["../../packages/mobility-core/src"],
