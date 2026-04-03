@@ -4,7 +4,7 @@
   "private": true,
   "scripts": {
     "dev": "next dev --port 3003",
-    "build": "next build --webpack",
+    "build": "next build",
     "start": "next start",
     "lint": "eslint",
     "typecheck": "node --max-old-space-size=8192 ../../node_modules/typescript/lib/tsc.js --noEmit",

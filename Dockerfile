@@ -72,8 +72,9 @@ ARG NEXT_PUBLIC_CONTROL_PLANE_URL=https://nzila-os-control-plane.delightfulislan
 ARG NEXT_PUBLIC_PLATFORM_ADMIN_URL=https://nzila-os-platform-admin.delightfulisland-0d503d3c.eastus.azurecontainerapps.io
 
 # Set as env vars for build
+# CLERK_SECRET_KEY is intentionally NOT set as ENV to avoid baking it into an image layer.
+# It is passed inline to the RUN command below (available during build, not persisted).
 ENV NEXT_PUBLIC_CLERK_PUBLISHABLE_KEY=$NEXT_PUBLIC_CLERK_PUBLISHABLE_KEY
-ENV CLERK_SECRET_KEY=$CLERK_SECRET_KEY
 ENV NEXT_PUBLIC_CLERK_IS_SATELLITE=$NEXT_PUBLIC_CLERK_IS_SATELLITE
 ENV NEXT_PUBLIC_CLERK_DOMAIN=$NEXT_PUBLIC_CLERK_DOMAIN
 ENV NEXT_PUBLIC_CLERK_SIGN_IN_URL=$NEXT_PUBLIC_CLERK_SIGN_IN_URL
@@ -89,8 +90,9 @@ ENV NEXT_PUBLIC_PLATFORM_ADMIN_URL=$NEXT_PUBLIC_PLATFORM_ADMIN_URL
 # Build only apps that have deps installed in the Docker image (turbo filters)
 # Default: all apps. Override via --build-arg TURBO_FILTER for single-app builds.
 ARG TURBO_FILTER="--filter=@nzila/web --filter=@nzila/console --filter=@nzila/partners --filter=@nzila/union-eyes --filter=@nzila/abr --filter=@nzila/orchestrator-api --filter=@nzila/cfo --filter=@nzila/zonga --filter=@nzila/flow --filter=@nzila/agrimo --filter=@nzila/cora --filter=@nzila/trade --filter=@nzila/mobility --filter=@nzila/mobility-client-portal --filter=@nzila/control-plane --filter=@nzila/platform-admin --filter=@nzila/nacp-exams"
-ENV NODE_OPTIONS="--max-old-space-size=4096"
-RUN pnpm turbo build ${TURBO_FILTER} --concurrency=1
+ENV NODE_OPTIONS="--max-old-space-size=8192"
+# Pass CLERK_SECRET_KEY inline so it is available during `next build` but NOT baked into a layer.
+RUN CLERK_SECRET_KEY=${CLERK_SECRET_KEY} pnpm turbo build ${TURBO_FILTER} --concurrency=1
 # ============================================
 # Web production stage
 # ============================================
