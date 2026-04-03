@@ -9,6 +9,7 @@ import { db } from '@/db';
 import { remittanceLineItems } from '@/db/schema/dues-finance-schema';
 import { eq, and, isNull, sql } from 'drizzle-orm';
 import { logger } from '@/lib/logger';
+import { withRLSContext } from '@/lib/db/with-rls-context';
 
 export const dynamic = 'force-dynamic';
 
@@ -44,11 +45,13 @@ export const POST = withApi(
       if (!item.employeeNumber) continue;
 
       try {
-        const memberRows = await db.execute(
-          sql`SELECT user_id FROM organization_members
-              WHERE organization_id = ${organizationId}::uuid
-                AND employee_number = ${item.employeeNumber}
-              LIMIT 1`,
+        const memberRows = await withRLSContext(() =>
+          db.execute(
+            sql`SELECT user_id FROM organization_members
+                WHERE organization_id = ${organizationId}::uuid
+                  AND employee_number = ${item.employeeNumber}
+                LIMIT 1`,
+          ),
         );
 
         const memberId = (memberRows[0] as { user_id?: string } | undefined)?.user_id;

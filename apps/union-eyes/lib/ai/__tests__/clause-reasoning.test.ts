@@ -24,6 +24,7 @@ vi.mock('@/lib/ai/ai-client', () => ({
   getAiClient: vi.fn(() => ({ generate: mockGenerate })),
   UE_APP_KEY: 'union-eyes',
   UE_PROFILES: { CLAUSE_REASONING: 'ue-clause-reasoning' },
+  UE_SYSTEM_ORG_ID: '00000000-0000-0000-0000-000000000000',
 }));
 
 vi.mock('@/db/schema/domains/ml/ai-clause-reasoning', () => ({

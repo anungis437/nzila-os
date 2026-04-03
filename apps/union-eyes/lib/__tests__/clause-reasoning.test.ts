@@ -67,6 +67,7 @@ vi.mock("@/lib/ai/ai-client", () => ({
     STEWARD_COPILOT: "ue-steward-copilot",
     EXECUTIVE_INSIGHTS: "ue-executive-insights",
   },
+  UE_SYSTEM_ORG_ID: "00000000-0000-0000-0000-000000000000",
 }));
 
 vi.mock("@/lib/ai/ai-feature-guard", () => ({

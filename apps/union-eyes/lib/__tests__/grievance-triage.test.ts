@@ -69,6 +69,7 @@ vi.mock("@/lib/ai/ai-client", () => ({
     STEWARD_COPILOT: "ue-steward-copilot",
     EXECUTIVE_INSIGHTS: "ue-executive-insights",
   },
+  UE_SYSTEM_ORG_ID: "00000000-0000-0000-0000-000000000000",
 }));
 
 vi.mock("@/lib/ai/ai-feature-guard", () => ({
@@ -145,7 +146,7 @@ describe("Grievance Triage AI", () => {
       expect(mockGenerate).toHaveBeenCalledTimes(1);
       const callArgs = mockGenerate.mock.calls[0][0];
       expect(callArgs.profileKey).toBe("ue-grievance-triage");
-      expect(callArgs.orgId).toBe("org-1");
+      expect(callArgs.orgId).toBe("00000000-0000-0000-0000-000000000000");
     });
   });
 
