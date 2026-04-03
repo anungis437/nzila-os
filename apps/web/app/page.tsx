@@ -41,8 +41,8 @@ const flagships = [
 ];
 
 const aiCapabilities = [
-  { name: 'Natural Language Processing', metric: '200+ prompts', image: 'https://images.unsplash.com/photo-1677442136019-21780ecad995?w=800', alt: 'AI neural network processing natural language with glowing data nodes', description: 'Context-aware AI across legal, healthcare, and education' },
-  { name: 'Predictive Analytics', metric: '512 models', image: 'https://images.unsplash.com/photo-1551288049-bebda4e38f71?w=800', alt: 'Predictive analytics dashboard with colorful data visualizations', description: 'Pension forecasting, crop yields, insurance risk scoring' },
+  { name: 'Natural Language Processing', metric: 'Domain-specific', image: 'https://images.unsplash.com/photo-1677442136019-21780ecad995?w=800', alt: 'AI neural network processing natural language with glowing data nodes', description: 'Context-aware AI across legal, healthcare, and education' },
+  { name: 'Predictive Analytics', metric: 'Purpose-built', image: 'https://images.unsplash.com/photo-1551288049-bebda4e38f71?w=800', alt: 'Predictive analytics dashboard with colorful data visualizations', description: 'Pension forecasting, crop yields, insurance risk scoring' },
   { name: 'Anomaly Detection', metric: 'Real-time', image: 'https://images.unsplash.com/photo-1558494949-ef010cbdcc31?w=800', alt: 'Real-time network monitoring console detecting anomalies', description: 'Fraud prevention, compliance monitoring, threat intelligence' },
   { name: 'Computer Vision', metric: 'Multi-modal', image: 'https://images.unsplash.com/photo-1535378917042-10a22c95931a?w=800', alt: 'Computer vision system analyzing visual data with recognition overlays', description: 'Document processing, agricultural imaging, identity verification' },
 ];
@@ -342,7 +342,7 @@ export default function Home() {
           <div className="grid md:grid-cols-3 gap-8">
             {[
               { value: '$5.7M–$7.5M', label: 'IP Portfolio Value', color: 'from-electric to-violet' },
-              { value: '200+', label: 'AI Prompts (Trade Secret)', color: 'from-gold to-gold-light' },
+              { value: 'Proprietary', label: 'AI Prompt Library', color: 'from-gold to-gold-light' },
               { value: '12,000+', label: 'Database Entities', color: 'from-emerald to-cyan-400' },
             ].map((item, i) => (
               <ScrollReveal key={item.label} delay={i * 0.15}>

@@ -161,7 +161,7 @@ const verticalData: Record<string, {
         title: 'Pension Forecasting Engine',
         icon: '📋',
         description:
-          'Actuarial-grade projections integrating contribution history, defined-benefit rules, and economic scenarios — helping union leaders spot funding gaps early.',
+          'Benefit projections and funding-ratio monitoring integrating contribution history, vesting rules, and trustee-level dashboards to help leaders spot funding risks early.',
       },
       {
         title: 'Grievance Tracking & Case Management',
@@ -173,7 +173,7 @@ const verticalData: Record<string, {
         title: 'Collective Bargaining AI',
         icon: '🤝',
         description:
-          'Contract clause analysis, pattern recognition across past agreements, and negotiation benchmarking to strengthen bargaining positions.',
+          'Contract clause analysis, pattern recognition across past agreements, and negotiation benchmarking to strengthen bargaining positions. Available for local unions, federations, and congress-tier organizations.',
       },
       {
         title: 'Member Analytics & Engagement',
@@ -189,7 +189,7 @@ const verticalData: Record<string, {
       },
     ],
     useCases: [
-      { scenario: 'A pension fund trustee assessing 20-year liability', outcome: 'Instant actuarial scenario modelling with plain-language summaries' },
+      { scenario: 'A pension fund trustee assessing 20-year liability', outcome: 'Funding-ratio dashboard with benefit projections and trustee-level reporting' },
       { scenario: 'A union steward managing an active grievance file', outcome: 'Centralised timeline, evidence vault, and deadline alerts' },
       { scenario: 'A union executive preparing for contract negotiations', outcome: 'AI-powered clause comparison and historical benchmarking' },
     ],
