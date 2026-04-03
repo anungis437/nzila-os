@@ -101,10 +101,10 @@ export default function HomePage() {
         <div className="relative z-10 max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
           <div className="grid grid-cols-2 md:grid-cols-4 gap-8">
             {[
-              { value: '35+', label: 'Union Roles Supported' },
+              { value: '35+', label: 'Organizational Roles' },
               { value: '2', label: 'Languages' },
               { value: 'PIPEDA', label: 'Compliant' },
-              { value: '5+', label: 'Pilot Partners' },
+              { value: '5', label: 'Pilot Partners' },
             ].map((stat) => (
               <ScrollReveal key={stat.label}>
                 <div className="text-center">

@@ -48,7 +48,7 @@ const features = [
     icon: ShieldCheck,
     title: 'Tamper-Evident Evidence Packs',
     description:
-      'Bundle documents into evidence packs with SHA-256 hash chain verification stored in immutable cloud storage. Built for arbitration.',
+      'Bundle documents into evidence packs with SHA-256 hash chain verification for arbitration proceedings. Full immutable cloud storage integration in progress.',
   },
   {
     icon: Clock,

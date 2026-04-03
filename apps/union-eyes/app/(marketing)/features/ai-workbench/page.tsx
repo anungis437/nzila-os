@@ -15,7 +15,6 @@ import {
   FileText,
   ShieldCheck,
   ToggleRight,
-  Eye,
   ArrowRight,
   Scale,
 } from 'lucide-react';
@@ -49,13 +48,7 @@ const capabilities = [
     icon: Brain,
     title: 'Draft Generation',
     description:
-      'Generate structured legal memorandums, argument summaries, and case briefs for arbitration prep. Always reviewed and edited by stewards before use.',
-  },
-  {
-    icon: Eye,
-    title: 'Executive Insights',
-    description:
-      'Trend forecasts, hotspot predictions, and pattern detection across grievance data. Help leadership see the bigger picture and allocate resources proactively.',
+      'Generate structured legal memorandums, argument summaries, and case briefs for arbitration prep. Always reviewed and edited by stewards before use. Requires the Intelligence & Insights module.',
   },
 ];
 
