@@ -8,7 +8,6 @@
 import { withApi, ApiError } from '@/lib/api/framework';
 import { db } from '@/db/db';
 import { sql } from 'drizzle-orm';
-import { claims } from '@/db/schema';
 import { withRLSContext } from '@/lib/db/with-rls-context';
 import { NextResponse } from 'next/server';
 
@@ -126,25 +125,38 @@ export const POST = withApi(
       throw ApiError.badRequest('claimType and description are required');
     }
 
-    const [inserted] = await db
-      .insert(claims)
-      .values({
-        organizationId,
-        memberId: userId ?? '',
-        claimType: claimType as string,
-        description: description as string,
-        incidentDate: incidentDate ? new Date(incidentDate as string) : undefined,
-        location: location as string | undefined,
-        desiredOutcome: desiredOutcome as string | undefined,
-        witnessesPresent: typeof witnessesPresent === 'boolean' ? witnessesPresent : false,
-        witnessDetails: witnessDetails as string | undefined,
-        priority: priority as string,
-        isAnonymous: isAnonymous as boolean,
-        claimAmount: claimAmount != null ? String(claimAmount) : undefined,
-        status: 'draft',
-        filedDate: new Date(),
-      })
-      .returning();
+    const rows = await withRLSContext(async () =>
+      db.execute(sql`
+        INSERT INTO claims (
+          organization_id, member_id, claim_type, description,
+          incident_date, location, desired_outcome,
+          witnesses_present, witness_details,
+          priority, is_anonymous, claim_amount,
+          status, filed_date
+        ) VALUES (
+          ${organizationId}::uuid,
+          ${userId ?? ''},
+          ${claimType as string},
+          ${description as string},
+          ${incidentDate ? new Date(incidentDate as string).toISOString() : null}::timestamptz,
+          ${location as string | null},
+          ${desiredOutcome as string | null},
+          ${typeof witnessesPresent === 'boolean' ? witnessesPresent : false},
+          ${witnessDetails as string | null},
+          ${priority as string},
+          ${isAnonymous as boolean},
+          ${claimAmount != null ? String(claimAmount) : null},
+          'submitted',
+          NOW()
+        )
+        RETURNING claim_id AS "claimId", claim_number AS "claimNumber",
+                  claim_type AS "claimType", status, priority,
+                  description, filed_date AS "filedDate",
+                  created_at AS "createdAt"
+      `),
+    );
+
+    const inserted = rows[0];
 
     return NextResponse.json({ data: inserted }, { status: 201 });
   },

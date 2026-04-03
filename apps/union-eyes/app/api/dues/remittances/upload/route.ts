@@ -64,6 +64,8 @@ export const POST = withApi(
         remittanceDate: new Date(),
         fileName: file.name,
         processingStatus: 'pending',
+        memberCount: 0,
+        totalAmount: '0',
         createdBy: userId ?? undefined,
       })
       .returning();

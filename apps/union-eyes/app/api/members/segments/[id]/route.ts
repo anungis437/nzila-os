@@ -66,7 +66,7 @@ export const PATCH = withApi(
     const updateValues: Partial<typeof memberSegments.$inferInsert> = {};
     if (name !== undefined) updateValues.name = name;
     if (description !== undefined) updateValues.description = description;
-    if (filters !== undefined) updateValues.filters = filters;
+    if (filters !== undefined) updateValues.filters = filters as NonNullable<typeof updateValues['filters']>;
 
     if (Object.keys(updateValues).length === 0) {
       throw ApiError.badRequest('No fields to update');
