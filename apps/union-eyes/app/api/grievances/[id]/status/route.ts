@@ -11,6 +11,8 @@ import { grievanceEvents } from "@/db/schema/domains/claims/grievance-lifecycle"
 import { withOrganizationAuth } from "@/lib/organization-middleware";
 import { hasMinRole } from "@/lib/api-auth-guard";
 import { auditDataMutation } from "@/lib/audit-logger";
+import { buildUnionEvidencePack } from '@/lib/evidence';
+import { logger } from '@/lib/logger';
 import {
   validateTransition,
   type GrievanceLifecycleStatus,
@@ -117,6 +119,13 @@ export const PATCH = withOrganizationAuth(async (request, context, params?: { id
       previousState,
       newState: { status: newStatus },
     });
+
+    buildUnionEvidencePack({
+      actionType: 'GRIEVANCE_STATUS_CHANGED',
+      orgId: organizationId,
+      actorId: userId,
+      artifacts: [{ type: 'grievance', data: { grievanceId: params.id, from: currentStatus, to: newStatus } }],
+    }).catch((err) => logger.warn('Evidence pack failed', { error: String(err), actionType: 'GRIEVANCE_STATUS_CHANGED' }));
 
     return standardSuccessResponse(updated);
   } catch (_error) {

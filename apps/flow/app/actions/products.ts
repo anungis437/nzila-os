@@ -10,6 +10,7 @@ import {
   deleteProduct,
 } from '@nzila/commerce-db'
 import { getDbContext, getReadContext } from '@/lib/clerk-org-resolver'
+import { buildEvidencePackFromAction, processEvidencePack } from '@/lib/evidence'
 
 // ── Read Actions ──────────────────────────────────────────────────────────
 
@@ -61,7 +62,9 @@ export async function createProductAction(data: {
   customizable?: boolean
 }) {
   const ctx = await getDbContext()
-  return createProduct(ctx, data)
+  const result = await createProduct(ctx, data)
+  await processEvidencePack(buildEvidencePackFromAction({ actionType: 'PRODUCT_CREATED', orgId: ctx.orgId, actorId: ctx.actorId }))
+  return result
 }
 
 export async function updateProductAction(
@@ -87,10 +90,14 @@ export async function updateProductAction(
   }>,
 ) {
   const ctx = await getDbContext()
-  return updateProduct(ctx, productId, data)
+  const result = await updateProduct(ctx, productId, data)
+  await processEvidencePack(buildEvidencePackFromAction({ actionType: 'PRODUCT_UPDATED', orgId: ctx.orgId, actorId: ctx.actorId, metadata: { productId } }))
+  return result
 }
 
 export async function deleteProductAction(productId: string) {
   const ctx = await getDbContext()
-  return deleteProduct(ctx, productId)
+  const result = await deleteProduct(ctx, productId)
+  await processEvidencePack(buildEvidencePackFromAction({ actionType: 'PRODUCT_DELETED', orgId: ctx.orgId, actorId: ctx.actorId, metadata: { productId } }))
+  return result
 }

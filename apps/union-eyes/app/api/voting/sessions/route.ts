@@ -11,6 +11,8 @@ import {
 import { db } from '@/db/db';
 import { votingOptions, votes as votesTable } from '@/db/schema';
 import { inArray, count } from 'drizzle-orm';
+import { buildUnionEvidencePack } from '@/lib/evidence';
+import { logger } from '@/lib/logger';
 
 export const dynamic = 'force-dynamic';
 
@@ -117,6 +119,14 @@ export const POST = withApi(
       startTime: body.startTime ? new Date(body.startTime) : undefined,
       endTime: body.endTime ? new Date(body.endTime) : undefined,
     });
+
+    // Evidence: democratic governance audit trail
+    buildUnionEvidencePack({
+      actionType: 'VOTING_SESSION_CREATED',
+      orgId: organizationId!,
+      actorId: userId!,
+      artifacts: [{ type: 'voting_session', data: { sessionId: session.id, type: body.type, meetingType: body.meetingType } }],
+    }).catch((err) => logger.warn('Evidence pack failed', { error: String(err), actionType: 'VOTING_SESSION_CREATED' }))
 
     return session;
   }

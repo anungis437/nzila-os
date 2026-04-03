@@ -14,6 +14,7 @@ import { withRLSContext } from '@/lib/db/with-rls-context';
 import { claimUpdates, claims } from '@/db/schema/claims-schema';
 import { auditDataMutation } from '@/lib/audit-logger';
 import { logger } from '@/lib/logger';
+import { buildUnionEvidencePack } from '@/lib/evidence';
 import { requireEntitlement } from '@/services/platform-economics/entitlement-guard';
 
 export const dynamic = 'force-dynamic';
@@ -175,6 +176,13 @@ export async function POST(
       noteId: note.updateId,
       isInternal,
     });
+
+    buildUnionEvidencePack({
+      actionType: 'CASE_NOTE_ADDED',
+      orgId: orgId,
+      actorId: userId,
+      artifacts: [{ type: 'case_note', data: { caseId, noteId: note.updateId, isInternal } }],
+    }).catch((err) => logger.warn('Evidence pack failed', { error: String(err), actionType: 'CASE_NOTE_ADDED' }));
 
     return NextResponse.json(
       { success: true, noteId: note.updateId },

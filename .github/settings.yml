@@ -30,9 +30,9 @@ branches:
         contexts:
           - "Lint & Typecheck"
           - "Test"
-          - "Contract Tests"
-          - "Governance Check"
-      enforce_admins: false  # Allow admin bypass for emergency fixes
+          - "Build All"
+          - "Governance Gates"
+      enforce_admins: true  # No bypass — use revert PRs for emergencies
       required_linear_history: true
       restrictions: null  # No push restrictions beyond PR requirement
       required_signatures: false  # W2-5: evaluate commit signing requirement

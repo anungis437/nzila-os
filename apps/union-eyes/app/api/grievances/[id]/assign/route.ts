@@ -11,6 +11,8 @@ import { grievanceEvents } from "@/db/schema/domains/claims/grievance-lifecycle"
 import { withOrganizationAuth } from "@/lib/organization-middleware";
 import { hasMinRole } from "@/lib/api-auth-guard";
 import { auditDataMutation } from "@/lib/audit-logger";
+import { buildUnionEvidencePack } from '@/lib/evidence';
+import { logger } from '@/lib/logger';
 import { assignSteward } from "@/lib/services/steward-assignment";
 import {
   ErrorCode,
@@ -81,6 +83,13 @@ export const PATCH = withOrganizationAuth(async (request, context, params?: { id
       resourceId: params.id,
       newState: { assignedStewardId: parsed.data.stewardId },
     });
+
+    buildUnionEvidencePack({
+      actionType: 'GRIEVANCE_ASSIGNED',
+      orgId: organizationId,
+      actorId: userId,
+      artifacts: [{ type: 'grievance', data: { grievanceId: params.id, stewardId: parsed.data.stewardId } }],
+    }).catch((err) => logger.warn('Evidence pack failed', { error: String(err), actionType: 'GRIEVANCE_ASSIGNED' }));
 
     return standardSuccessResponse(assignment);
   } catch (_error) {

@@ -13,6 +13,7 @@ import { sql } from 'drizzle-orm'
 import { logger } from '@/lib/logger'
 import { getCreatorPlan } from '@/lib/guards/plan-queries'
 import { guardCreatorFeature } from '@/lib/guards/subscription-guards'
+import { buildEvidencePackFromAction, processEvidencePack } from '@/lib/evidence'
 
 export type ExportFormat = 'json' | 'csv'
 export type ExportType = 'revenue' | 'royalties' | 'audit_trail' | 'moderation'
@@ -84,6 +85,14 @@ export async function generateComplianceExport(opts: {
       format,
       rowCount: rows.length,
     })
+
+    const pack = buildEvidencePackFromAction({
+      actionType: 'COMPLIANCE_EXPORT_GENERATED',
+      orgId: ctx.orgId,
+      executedBy: ctx.actorId,
+      actionId: crypto.randomUUID(),
+    })
+    await processEvidencePack(pack)
 
     return { ok: true, data, format, type: opts.type, rowCount: rows.length }
   } catch (error) {

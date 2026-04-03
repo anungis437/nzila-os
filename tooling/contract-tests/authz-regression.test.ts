@@ -19,7 +19,7 @@ function readContent(path: string): string {
 
 // ── 1. Every protected app must have a middleware.ts ─────────────────────
 
-const PROTECTED_APPS = ['console', 'partners']
+const PROTECTED_APPS = ['console', 'partners', 'union-eyes', 'flow', 'cfo', 'zonga']
 
 describe('PR8: AuthZ — middleware presence', () => {
   for (const app of PROTECTED_APPS) {

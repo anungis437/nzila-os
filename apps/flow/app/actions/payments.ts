@@ -4,6 +4,7 @@ import { getReadContext } from '@/lib/clerk-org-resolver'
 import { db, commercePayments, commerceInvoices, commerceCustomers } from '@nzila/db'
 import { eq, desc, and } from 'drizzle-orm'
 import { executeCommand } from '@/lib/control/control-adapter'
+import { buildEvidencePackFromAction, processEvidencePack } from '@/lib/evidence'
 
 export async function getPaymentsAction(opts?: { limit?: number; offset?: number }) {
   const ctx = await getReadContext()
@@ -70,5 +71,6 @@ export async function recordPaymentAction(data: {
   })
 
   if (!result.ok) throw new Error(result.error ?? 'Payment recording failed')
+  await processEvidencePack(buildEvidencePackFromAction({ actionType: 'PAYMENT_RECORDED', orgId: ctx.orgId, actorId: ctx.orgId, metadata: { invoiceId: data.invoiceId, amount: data.amount } }))
   return result.data
 }

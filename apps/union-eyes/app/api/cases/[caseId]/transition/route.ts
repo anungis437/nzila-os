@@ -20,6 +20,7 @@ import { logger } from '@/lib/logger';
 import { getUserRoleInOrganization } from '@/lib/organization-utils';
 import { wrapSchemaQuery } from '@/lib/schema-error';
 import { requireEntitlement } from '@/services/platform-economics/entitlement-guard';
+import { buildUnionEvidencePack } from '@/lib/evidence';
 
 export const dynamic = 'force-dynamic';
 
@@ -210,6 +211,14 @@ export async function PATCH(
       from: result.fromStatus,
       to: result.toStatus,
     });
+
+    // Evidence: case status transition audit trail
+    buildUnionEvidencePack({
+      actionType: 'CASE_TRANSITIONED',
+      orgId: orgId,
+      actorId: userId,
+      artifacts: [{ type: 'case_transition', data: { caseId, from: result.cupeFromStatus, to: result.cupeToStatus, reason } }],
+    }).catch((err) => logger.warn('Evidence pack failed', { error: String(err), actionType: 'CASE_TRANSITIONED' }))
 
     return NextResponse.json({
       success: true,

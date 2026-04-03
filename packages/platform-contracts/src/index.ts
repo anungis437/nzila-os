@@ -9,6 +9,36 @@
  * See @nzila/platform-ai-contract for AI-specific output contracts.
  */
 
+// ── App Registry (Control-Plane Authority) ──
+export {
+  governanceRequirementSchema,
+  integrationDependencySchema,
+  reportingBindingSchema,
+  healthBindingSchema,
+  deploymentMetadataSchema,
+  appManifestSchema,
+  validateAppManifest,
+  validateAppRegistry,
+  type GovernanceRequirement,
+  type IntegrationDependency,
+  type ReportingBinding,
+  type HealthBinding,
+  type DeploymentMetadata,
+  type AppManifest,
+  type AppRegistryEntry,
+} from './app-registry.js'
+
+// ── App Registry Data ──
+export {
+  APP_REGISTRY,
+  getAppManifest,
+  getAppsByTier,
+  getAppsByDomain,
+  getAppsWithCapability,
+  getProductionApps,
+  validateBuiltInRegistry,
+} from './registry.js'
+
 // ── Health ──
 export type { HealthStatus, ComponentHealth, HealthResponse, HealthContract } from './health.js'
 
@@ -166,12 +196,19 @@ export {
   entitlementSchema,
   subscriptionSchema,
   featureAccessSchema,
+  featureGateSchema,
+  featureGateManifestSchema,
+  checkFeatureGate,
   planTierValues,
   subscriptionStatusValues,
+  partnerTierValues,
   type Entitlement,
   type Subscription,
   type FeatureAccess,
+  type FeatureGate,
+  type FeatureGateManifest,
   type PlanTier,
+  type PartnerTier,
   type SubscriptionStatus,
 } from './entitlement.js'
 

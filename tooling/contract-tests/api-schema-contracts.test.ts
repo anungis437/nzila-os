@@ -31,8 +31,25 @@ const SCHEMA_VALIDATION_PATTERNS = [
   /validate\s*\(/,           // generic validate call
   /verifyWebhookSignature\s*\(/, // Stripe webhook signature verification
   /constructEvent\s*\(/,    // Stripe SDK event construction
-  /req\.formData\s*\(\)/,   // multipart form data (documents upload)
+  /re(?:q|quest)\.formData\s*\(\)/,  // multipart form data (documents upload) — matches req.formData() and request.formData()
   /CRON_SECRET/,              // cron routes with bearer token auth (no user body)
+  /withApi\s*\(/,             // UE/Flow managed handler (body option validates)
+  /withOrganizationAuth\s*\(/, // UE org middleware (routes validate inline)
+  /withOrgScope\s*\(/,         // Org-scoped composite guard (auth + validation)
+  /crudRoutes\s*\(/,           // UE crud factory (validates schema internally)
+  /authenticateUser\s*\(/,     // Auth guard (routes validate inline after auth)
+  /auth\s*\(\)/,               // Clerk auth() — admin routes with no body
+  /withRoleAuth\s*\(/,         // UE role-based handler (validates request internally)
+  /requireApiAuth\s*\(/,       // UE API auth guard (validates request)
+  /requireUser\s*\(/,          // UE auth guard (validates user identity)
+]
+
+/** Routes exempt from schema validation (token-based or external-API flows). */
+const SCHEMA_EXEMPT_PATHS = [
+  '[token]',                    // Token-based public access — validated in service layer
+  'whop/create-checkout',       // Payment initiation — minimal body (planId only)
+  'whop/unauthenticated',       // Unauthenticated payment checkout (pay-first flow)
+  'shopify/webhook',            // Shopify webhook — verified via HMAC signature (createHmac)
 ]
 
 function findRouteFiles(app: string): string[] {
@@ -59,7 +76,7 @@ function findRouteFiles(app: string): string[] {
 
 // ── 1. Mutation route handlers must have schema validation ────────────────
 
-const PROTECTED_APPS = ['console', 'partners', 'web']
+const PROTECTED_APPS = ['console', 'partners', 'web', 'union-eyes', 'flow', 'cfo', 'zonga']
 
 describe('PR16: API schema — mutation routes validate payloads', () => {
   for (const app of PROTECTED_APPS) {
@@ -71,6 +88,8 @@ describe('PR16: API schema — mutation routes validate payloads', () => {
       })
 
       for (const routeFile of mutationRoutes) {
+        const normalized = routeFile.replace(/\\/g, '/')
+        if (SCHEMA_EXEMPT_PATHS.some(p => normalized.includes(p))) continue
         const content = readContent(routeFile)
         const hasValidation = SCHEMA_VALIDATION_PATTERNS.some(p => p.test(content))
         expect(

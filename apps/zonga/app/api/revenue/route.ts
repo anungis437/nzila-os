@@ -4,16 +4,13 @@
  * POST → record a new revenue event
  */
 import { NextResponse } from 'next/server'
-import { authenticateUser, withRequestContext } from '@/lib/api-guards'
+import { withOrgScope } from '@/lib/api-guards'
 import { withSpan } from '@nzila/os-core/telemetry'
 import { getRevenueOverview, recordRevenueEvent } from '@/lib/actions/revenue-actions'
 
 export async function GET(request: Request) {
-  return withRequestContext(request, () =>
+  return withOrgScope(request, () =>
     withSpan('api.revenue.overview', { 'http.method': 'GET' }, async () => {
-      const auth = await authenticateUser()
-      if (!auth.ok) return auth.response
-
       const data = await getRevenueOverview()
       return NextResponse.json({ ok: true, data })
     }),
@@ -21,10 +18,8 @@ export async function GET(request: Request) {
 }
 
 export async function POST(request: Request) {
-  return withRequestContext(request, () =>
+  return withOrgScope(request, () =>
     withSpan('api.revenue.record', { 'http.method': 'POST' }, async () => {
-      const auth = await authenticateUser()
-      if (!auth.ok) return auth.response
 
       try {
         const body = await request.json()

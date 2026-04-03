@@ -111,14 +111,16 @@ describe('API Route OTel Instrumentation — STUDIO-OTEL-01 contract', () => {
           it('uses withRequestContext for log correlation', () => {
             expect(
               content.includes('withRequestContext') ||
-                content.includes('createRequestContext'),
+                content.includes('createRequestContext') ||
+                content.includes('withOrgScope'),
               `${relPath} must use withRequestContext() for log correlation`,
             ).toBe(true)
           })
 
           it('calls authenticateUser for auth gating', () => {
             expect(
-              content.includes('authenticateUser'),
+              content.includes('authenticateUser') ||
+                content.includes('withOrgScope'),
               `${relPath} must call authenticateUser() for auth`,
             ).toBe(true)
           })

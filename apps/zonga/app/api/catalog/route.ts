@@ -4,16 +4,13 @@
  * POST → create a new content asset
  */
 import { NextResponse } from 'next/server'
-import { authenticateUser, withRequestContext } from '@/lib/api-guards'
+import { withOrgScope } from '@/lib/api-guards'
 import { withSpan } from '@nzila/os-core/telemetry'
 import { listCatalogAssets, createContentAsset } from '@/lib/actions/catalog-actions'
 
 export async function GET(request: Request) {
-  return withRequestContext(request, () =>
+  return withOrgScope(request, () =>
     withSpan('api.catalog.list', { 'http.method': 'GET' }, async () => {
-      const auth = await authenticateUser()
-      if (!auth.ok) return auth.response
-
       const url = new URL(request.url)
       const page = Number(url.searchParams.get('page') ?? '1')
       const search = url.searchParams.get('search') ?? undefined
@@ -27,11 +24,8 @@ export async function GET(request: Request) {
 }
 
 export async function POST(request: Request) {
-  return withRequestContext(request, () =>
+  return withOrgScope(request, () =>
     withSpan('api.catalog.create', { 'http.method': 'POST' }, async () => {
-      const auth = await authenticateUser()
-      if (!auth.ok) return auth.response
-
       try {
         const body = await request.json()
         const result = await createContentAsset(body)

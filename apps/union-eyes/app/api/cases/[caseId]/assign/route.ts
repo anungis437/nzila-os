@@ -15,6 +15,7 @@ import { claims, claimUpdates } from '@/db/schema/claims-schema';
 import { auditDataMutation } from '@/lib/audit-logger';
 import { logger } from '@/lib/logger';
 import { requireEntitlement } from '@/services/platform-economics/entitlement-guard';
+import { buildUnionEvidencePack } from '@/lib/evidence';
 
 export const dynamic = 'force-dynamic';
 
@@ -141,6 +142,14 @@ export async function POST(
       fromAssignee: result.previousAssignee,
       toAssignee: assigneeId,
     });
+
+    // Evidence: case assignment audit trail
+    buildUnionEvidencePack({
+      actionType: 'CASE_ASSIGNED',
+      orgId: orgId,
+      actorId: userId,
+      artifacts: [{ type: 'case_assignment', data: { caseId, fromAssignee: result.previousAssignee, toAssignee: assigneeId } }],
+    }).catch((err) => logger.warn('Evidence pack failed', { error: String(err), actionType: 'CASE_ASSIGNED' }))
 
     return NextResponse.json(
       {

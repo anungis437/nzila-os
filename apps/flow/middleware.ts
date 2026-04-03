@@ -1,6 +1,7 @@
 import { clerkMiddleware, createRouteMatcher } from "@clerk/nextjs/server";
 import { NextResponse } from "next/server";
 import { checkRateLimit, rateLimitHeaders } from "@nzila/os-core/rateLimit";
+import { checkOrgRateLimit, orgRateLimitHeaders } from "@nzila/os-core/orgRateLimit";
 
 /* ── Layer 1 — Public route matcher ── */
 const isPublicRoute = createRouteMatcher([
@@ -68,6 +69,31 @@ export default clerkMiddleware(async (auth, request) => {
   /* ── Layer 3 — Auth protection ── */
   if (!isPublicRoute(request)) {
     await auth.protect();
+  }
+
+  /* ── Layer 3b — Org-scoped rate limiting (per-org + route-group buckets) ── */
+  if (process.env.NODE_ENV !== "development") {
+    const orgId = request.headers.get("x-org-id");
+    if (orgId && request.nextUrl.pathname.startsWith("/api")) {
+      const orgRl = checkOrgRateLimit(
+        orgId,
+        request.nextUrl.pathname,
+        request.method,
+      );
+      if (!orgRl.allowed) {
+        return NextResponse.json(
+          {
+            error: "Org Rate Limit Exceeded",
+            message: `Rate limit exceeded for route group: ${orgRl.routeGroup}`,
+            code: "ORG_RATE_LIMIT_EXCEEDED",
+          },
+          {
+            status: 429,
+            headers: orgRateLimitHeaders(orgRl),
+          },
+        );
+      }
+    }
   }
 
   /* ── Layer 4 — Request-ID propagation ── */

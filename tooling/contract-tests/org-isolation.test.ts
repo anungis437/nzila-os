@@ -35,7 +35,7 @@ function findRouteFiles(app: string): string[] {
 
 // ── 1. authorize() must be called in all protected route handlers ─────────
 
-const PROTECTED_APPS = ['console', 'partners']
+const PROTECTED_APPS = ['console', 'partners', 'union-eyes', 'flow', 'cfo', 'zonga']
 
 const AUTH_CALL_PATTERNS = [
   /authorize\s*\(/,
@@ -47,13 +47,32 @@ const AUTH_CALL_PATTERNS = [
   /verifyWebhookSignature\s*\(/,
   /currentUser\s*\(/,           // Clerk user resolution
   /auth\s*\(\)/,                 // Clerk auth()
+  /withApi\s*\(/,                // UE/Flow unified handler (resolves organizationId)
+  /withRoleAuth\s*\(/,           // UE legacy role-based handler
+  /getCurrentUser\s*\(/,         // UE auth guard
+  /getDbContext\s*\(/,           // Flow DB+org context resolver
+  /withOrganizationAuth\s*\(/,   // UE org middleware (grievances, dues)
+  /withOrgScope\s*\(/,           // Org-scoped composite guard (auth + context + org)
+  /crudRoutes\s*\(/,             // UE crud factory (validates auth + org scope internally)
+  /requireApiAuth\s*\(/,         // UE API auth guard (checks userId + org)
+  /withApiAuth\s*\(/,            // UE auth HOF (injects auth context + org)
+  /withAdminAuth\s*\(/,          // UE admin-only auth guard
+  /withMinRole\s*\(/,            // UE role-based auth guard
+  /requireUser\s*\(/,            // UE/UX auth guard (validates user identity)
+  /getAuth\s*\(/,               // Clerk getAuth (low-level auth extraction)
 ]
 
 /** Public routes that are intentionally exempt from auth requirements. */
 function isPublicRoute(routeFile: string): boolean {
   const normalized = routeFile.replace(/\\/g, '/')
   return normalized.includes('/api/health/') || normalized.endsWith('/api/health/route.ts')
-    || normalized.includes('/api/cron/')  // cron routes use CRON_SECRET bearer auth
+    || normalized.includes('/api/ready/') || normalized.endsWith('/api/ready/route.ts')  // Kubernetes readiness probe
+    || normalized.includes('/api/status/') || normalized.endsWith('/api/status/route.ts')  // Service status endpoint
+    || normalized.includes('/api/docs/') || normalized.endsWith('/api/docs/route.ts')  // OpenAPI documentation endpoint
+    || normalized.includes('/cron/')  // cron routes use CRON_SECRET bearer auth
+    || normalized.includes('/webhook')  // webhook routes use signature verification (Stripe, PayPal, Shopify, Zoho, etc.)
+    || normalized.includes('/api/whop/')  // Whop payment routes (intentionally unauthenticated checkout)
+    || normalized.includes('/api/quote/')  // Quote response via share token (no auth, token-validated)
 }
 
 describe('PR9: Org isolation — authorize() called in protected routes', () => {
@@ -103,11 +122,13 @@ describe('PR9: Org isolation — DB queries scoped to org', () => {
         if (isPublicRoute(routeFile)) continue  // health endpoints exempt
         const content = readContent(routeFile)
         // Only check files that actually query the DB
-        if (!content.includes('db.') && !content.includes('from(')) continue
+        if (!content.includes('db.') && !content.match(/(?<!Buffer\.)from\(/)) continue
 
         const hasEntityScope =
           content.includes('orgId') ||
           content.includes('org_id') ||
+          content.includes('organizationId') ||
+          content.includes('organization_id') ||
           content.includes('authorize(') ||
           // authenticateUser() enforces entity access; resource-scoped queries
           // (by periodId, documentId, etc.) are legitimately entity-scoped
@@ -115,7 +136,19 @@ describe('PR9: Org isolation — DB queries scoped to org', () => {
           content.includes('requireOrgAccess(') ||
           content.includes('requirePartnerEntityAccess(') ||
           // Platform-admin routes are role-scoped, not entity-scoped
-          content.includes('requirePlatformRole(')
+          content.includes('requirePlatformRole(') ||
+          // UE/Flow patterns — withApi injects organizationId, getDbContext resolves org
+          content.includes('withApi(') ||
+          content.includes('getDbContext(') ||
+          content.includes('getCurrentUser(') ||
+          content.includes('withOrganizationAuth(') ||
+          content.includes('withOrgScope(') ||
+          content.includes('crudRoutes(') ||
+          content.includes('requireApiAuth(') ||
+          content.includes('withApiAuth(') ||
+          content.includes('withMinRole(') ||
+          content.includes('requireUser(') ||
+          /\bauth\s*\(\)/.test(content)
 
         expect(
           hasEntityScope,

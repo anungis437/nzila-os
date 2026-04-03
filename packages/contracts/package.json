@@ -7,6 +7,7 @@
   "types": "./src/index.ts",
   "exports": {
     ".": "./src/index.ts",
+    "./canonical": "./src/canonical.ts",
     "./domain": "./src/domain.ts",
     "./registry": "./src/registry.ts",
     "./validators": "./src/validators.ts"

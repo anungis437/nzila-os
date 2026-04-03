@@ -63,3 +63,12 @@ export {
   resolveCorrelationId,
   createPlatformHeaders,
 } from './middleware.js'
+
+// ── Clerk Webhook Verification ──────────────────────────────────────────────
+export {
+  verifySvixSignature,
+  isSvixTimestampValid,
+  extractSvixHeaders,
+  verifyClerkWebhook,
+  type SvixHeaders,
+} from './clerk-webhook.js'

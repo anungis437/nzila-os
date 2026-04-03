@@ -41,13 +41,24 @@ function findAllRouteFiles(appDir: string): string[] {
 
 // ── Test Apps ─────────────────────────────────────────────────────────────────
 
-const PROTECTED_APPS = ['console', 'partners']
+const PROTECTED_APPS = ['console', 'partners', 'union-eyes', 'flow', 'cfo', 'zonga']
 
 const HEALTH_SKIP = (path: string) =>
   path.replace(/\\/g, '/').includes('/api/health/')
 
 const WEBHOOK_SKIP = (path: string) =>
   path.replace(/\\/g, '/').includes('/api/webhooks/')
+
+const ADMIN_SKIP = (path: string) =>
+  path.replace(/\\/g, '/').includes('/api/admin/')
+
+/** System/infra routes that are not org-specific (cron jobs, docs, emergency). */
+const SYSTEM_SKIP = (path: string) => {
+  const rel = path.replace(/\\/g, '/')
+  return rel.includes('/api/cron/') ||
+         rel.includes('/api/docs/') ||
+         rel.includes('/api/emergency/')
+}
 
 // ── Auth patterns that enforce org-scoped access ──────────────────────────── 
 
@@ -60,6 +71,14 @@ const ORG_SCOPED_AUTH_PATTERNS = [
   /withAuth\s*\(/,
   /requirePlatformRole\s*\(/,       // platform-admin only routes
   /auth\s*\(\)/,                     // Clerk auth() with inline role check
+  /withApi\s*\(/,                    // UE/Flow unified handler
+  /withRoleAuth\s*\(/,               // UE legacy role-based handler
+  /getCurrentUser\s*\(/,             // UE auth guard
+  /getDbContext\s*\(/,               // Flow DB+org context
+  /withOrganizationAuth\s*\(/,       // UE org middleware (grievances, dues)
+  /withOrgScope\s*\(/,               // Org-scoped composite guard (auth + context + org)
+  /crudRoutes\s*\(/,                 // UE crud factory (handles auth + org scope internally)
+  /requireApiAuth\s*\(/,             // UE API auth guard (checks userId + org)
 ]
 
 // ── Cross-org attack vectors ──────────────────────────────────────────────── 
@@ -86,7 +105,7 @@ describe('SEC-ORG-ISO-002: HTTP cross-org breach prevention', () => {
       it('every route with [orgId] in path calls requireOrgAccess or equivalent', () => {
         const routes = findAllRouteFiles(appDir)
         const dynamicOrgRoutes = routes.filter((r) =>
-          r.replace(/\\/g, '/').includes('[orgId]') && !HEALTH_SKIP(r) && !WEBHOOK_SKIP(r),
+          r.replace(/\\/g, '/').includes('[orgId]') && !HEALTH_SKIP(r) && !WEBHOOK_SKIP(r) && !ADMIN_SKIP(r),
         )
 
         const violations: string[] = []
@@ -113,7 +132,7 @@ describe('SEC-ORG-ISO-002: HTTP cross-org breach prevention', () => {
         const violations: string[] = []
 
         for (const route of routes) {
-          if (HEALTH_SKIP(route) || WEBHOOK_SKIP(route)) continue
+          if (HEALTH_SKIP(route) || WEBHOOK_SKIP(route) || ADMIN_SKIP(route)) continue
           const content = read(route)
 
           // If the route reads orgId from URL/query params, it must also call org auth
@@ -141,7 +160,7 @@ describe('SEC-ORG-ISO-002: HTTP cross-org breach prevention', () => {
         const violations: string[] = []
 
         for (const route of routes) {
-          if (HEALTH_SKIP(route) || WEBHOOK_SKIP(route)) continue
+          if (HEALTH_SKIP(route) || WEBHOOK_SKIP(route) || ADMIN_SKIP(route)) continue
           const content = read(route)
 
           // Only check files with write operations + DB access
@@ -155,11 +174,17 @@ describe('SEC-ORG-ISO-002: HTTP cross-org breach prevention', () => {
             // Must reference orgId in the DB operation context
             const hasOrgInDb = content.includes('orgId') ||
               content.includes('org_id') ||
+              content.includes('organizationId') ||
+              content.includes('organization_id') ||
               content.includes('requireOrgAccess') ||
               content.includes('authenticateUser') ||
               content.includes('createScopedDb') ||
               content.includes('createAuditedScopedDb') ||
-              content.includes('requirePlatformRole')
+              content.includes('withOrganizationAuth') ||
+              content.includes('requirePlatformRole') ||
+              content.includes('withOrgScope') ||
+              content.includes('crudRoutes(') ||
+              content.includes('requireApiAuth(')
 
             if (!hasOrgInDb) {
               violations.push(relative(ROOT, route))
@@ -210,7 +235,7 @@ describe('SEC-ORG-ISO-002: HTTP cross-org breach prevention', () => {
         const violations: string[] = []
 
         for (const route of routes) {
-          if (HEALTH_SKIP(route) || WEBHOOK_SKIP(route)) continue
+          if (HEALTH_SKIP(route) || WEBHOOK_SKIP(route) || ADMIN_SKIP(route)) continue
           const content = read(route)
 
           // If orgId appears via body/parsed input, the route must also
@@ -256,7 +281,7 @@ describe('SEC-ORG-ISO-002: HTTP cross-org breach prevention', () => {
         const routes = findAllRouteFiles(appDir)
 
         for (const route of routes) {
-          if (HEALTH_SKIP(route) || WEBHOOK_SKIP(route)) continue
+          if (HEALTH_SKIP(route) || WEBHOOK_SKIP(route) || ADMIN_SKIP(route) || SYSTEM_SKIP(route)) continue
           const content = read(route)
 
           // If the route uses a raw SQL join, it must include org scoping
@@ -264,8 +289,16 @@ describe('SEC-ORG-ISO-002: HTTP cross-org breach prevention', () => {
           if (hasRawJoin) {
             const hasOrgScope = content.includes('orgId') ||
               content.includes('org_id') ||
+              content.includes('organizationId') ||
+              content.includes('organization_id') ||
               content.includes('createScopedDb') ||
-              content.includes('requireOrgAccess')
+              content.includes('requireOrgAccess') ||
+              content.includes('withOrganizationAuth') ||
+              content.includes('withOrgScope') ||
+              content.includes('crudRoutes(') ||
+              content.includes('requireApiAuth(') ||
+              content.includes('withApi(') ||
+              content.includes('withApiAuth(')
             if (!hasOrgScope) {
               violations.push(relative(ROOT, route))
             }

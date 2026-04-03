@@ -283,6 +283,26 @@ jobs:
           fi
           echo "- **Status**: ✅ Success" >> "$GITHUB_STEP_SUMMARY"
 
+      - name: Set Sentry DSN on error-monitored apps
+        if: success()
+        run: |
+          ENV="${{ needs.plan.outputs.environment }}"
+          RG="nzila-${ENV}-rg"
+          DSN="${{ secrets.SENTRY_DSN }}"
+          if [ -z "$DSN" ]; then
+            echo "::notice::SENTRY_DSN secret not set — skipping Sentry env injection"
+            exit 0
+          fi
+          for APP in union-eyes zonga; do
+            CA_NAME="nzila-os-${APP}"
+            echo "Setting SENTRY_DSN on $CA_NAME ..."
+            az containerapp update \
+              --name "$CA_NAME" \
+              --resource-group "$RG" \
+              --set-env-vars "SENTRY_DSN=secretref:sentry-dsn" \
+              --output none 2>&1 || echo "::warning::Failed to set SENTRY_DSN on $CA_NAME"
+          done
+
   # ── Post-deployment verification ──────────────────────────────────────────
   verify:
     needs: [plan, deploy]

@@ -70,6 +70,8 @@ const ENTITY_ID_EXCEPTIONS = [
   /filter\.entityId/,       // domain event filter usage
   /readonly\s+entityId/,    // domain event entity ref property (e.g. EntityNotFoundError)
   /entityId\?\s*:/,         // optional domain event entity ref field (e.g. EventQueryFilter)
+  /entityId:\s*z\.string/,  // Zod schema definition in canonical event/workflow schemas
+  /entityId:\s*UUID/,       // test fixture referencing canonical schema entityId field
 ]
 
 function isExceptionLine(line: string): boolean {

@@ -14,6 +14,7 @@ import {
   allocateStock,
 } from '@nzila/commerce-db'
 import { getDbContext, getReadContext } from '@/lib/clerk-org-resolver'
+import { buildEvidencePackFromAction, processEvidencePack } from '@/lib/evidence'
 
 // ── Read Actions ──────────────────────────────────────────────────────────
 
@@ -70,7 +71,9 @@ export async function createInventoryAction(data: {
   location?: string | null
 }) {
   const ctx = await getDbContext()
-  return createInventoryRecord(ctx, data)
+  const result = await createInventoryRecord(ctx, data)
+  await processEvidencePack(buildEvidencePackFromAction({ actionType: 'INVENTORY_CREATED', orgId: ctx.orgId, actorId: ctx.actorId, metadata: { productId: data.productId } }))
+  return result
 }
 
 export async function updateInventoryAction(
@@ -85,7 +88,9 @@ export async function updateInventoryAction(
   }>,
 ) {
   const ctx = await getDbContext()
-  return updateInventory(ctx, inventoryId, data)
+  const result = await updateInventory(ctx, inventoryId, data)
+  await processEvidencePack(buildEvidencePackFromAction({ actionType: 'INVENTORY_UPDATED', orgId: ctx.orgId, actorId: ctx.actorId, metadata: { inventoryId } }))
+  return result
 }
 
 export async function recordStockMovementAction(data: {
@@ -98,7 +103,9 @@ export async function recordStockMovementAction(data: {
   reason?: string | null
 }) {
   const ctx = await getDbContext()
-  return recordStockMovement(ctx, data)
+  const result = await recordStockMovement(ctx, data)
+  await processEvidencePack(buildEvidencePackFromAction({ actionType: 'STOCK_MOVEMENT_RECORDED', orgId: ctx.orgId, actorId: ctx.actorId, metadata: { movementType: data.movementType, inventoryId: data.inventoryId } }))
+  return result
 }
 
 export async function adjustStockAction(
@@ -107,7 +114,9 @@ export async function adjustStockAction(
   reason: string,
 ) {
   const ctx = await getDbContext()
-  return adjustStock(ctx, inventoryId, newQuantity, reason)
+  const result = await adjustStock(ctx, inventoryId, newQuantity, reason)
+  await processEvidencePack(buildEvidencePackFromAction({ actionType: 'STOCK_ADJUSTED', orgId: ctx.orgId, actorId: ctx.actorId, metadata: { inventoryId, newQuantity } }))
+  return result
 }
 
 export async function allocateStockAction(
@@ -116,5 +125,7 @@ export async function allocateStockAction(
   orderId: string,
 ) {
   const ctx = await getDbContext()
-  return allocateStock(ctx, inventoryId, quantity, orderId)
+  const result = await allocateStock(ctx, inventoryId, quantity, orderId)
+  await processEvidencePack(buildEvidencePackFromAction({ actionType: 'STOCK_ALLOCATED', orgId: ctx.orgId, actorId: ctx.actorId, metadata: { inventoryId, quantity, orderId } }))
+  return result
 }

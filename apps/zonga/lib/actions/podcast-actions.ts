@@ -12,6 +12,7 @@ import { platformDb } from '@nzila/db/platform'
 import { sql } from 'drizzle-orm'
 import { revalidatePath } from 'next/cache'
 import { logger } from '@/lib/logger'
+import { buildEvidencePackFromAction, processEvidencePack } from '@/lib/evidence'
 
 /* ─── Types ─── */
 
@@ -182,6 +183,15 @@ export async function createPodcast(data: {
     `)
 
     const newId = ((rows as unknown[])[0] as { id: string })?.id
+
+    const pack = buildEvidencePackFromAction({
+      actionType: 'PODCAST_CREATED',
+      orgId: ctx.orgId,
+      executedBy: ctx.actorId,
+      actionId: crypto.randomUUID(),
+    })
+    await processEvidencePack(pack)
+
     revalidatePath('/dashboard/podcasts')
     return { success: true, podcastId: newId }
   } catch (err) {
@@ -220,6 +230,14 @@ export async function updatePodcast(
         updated_at = now()
       WHERE id = ${podcastId} AND org_id = ${ctx.orgId}
     `)
+
+    const pack = buildEvidencePackFromAction({
+      actionType: 'PODCAST_UPDATED',
+      orgId: ctx.orgId,
+      executedBy: ctx.actorId,
+      actionId: crypto.randomUUID(),
+    })
+    await processEvidencePack(pack)
 
     revalidatePath('/dashboard/podcasts')
     return { success: true }
@@ -267,6 +285,15 @@ export async function createEpisode(
     `)
 
     const newId = ((rows as unknown[])[0] as { id: string })?.id
+
+    const pack = buildEvidencePackFromAction({
+      actionType: 'PODCAST_EPISODE_CREATED',
+      orgId: ctx.orgId,
+      executedBy: ctx.actorId,
+      actionId: crypto.randomUUID(),
+    })
+    await processEvidencePack(pack)
+
     revalidatePath('/dashboard/podcasts')
     return { success: true, episodeId: newId }
   } catch (err) {
@@ -313,6 +340,14 @@ export async function updateEpisode(
         updated_at = now()
       WHERE id = ${episodeId} AND org_id = ${ctx.orgId}
     `)
+
+    const pack = buildEvidencePackFromAction({
+      actionType: 'PODCAST_EPISODE_UPDATED',
+      orgId: ctx.orgId,
+      executedBy: ctx.actorId,
+      actionId: crypto.randomUUID(),
+    })
+    await processEvidencePack(pack)
 
     revalidatePath('/dashboard/podcasts')
     return { success: true }

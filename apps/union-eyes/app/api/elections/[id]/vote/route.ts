@@ -13,6 +13,8 @@ import { withApi, ApiError } from '@/lib/api/framework';
 import { db } from '@/db';
 import { councilElections } from '@/db/schema/governance-schema';
 import { eq } from 'drizzle-orm';
+import { buildUnionEvidencePack } from '@/lib/evidence';
+import { logger } from '@/lib/logger';
 
 export const dynamic = 'force-dynamic';
 
@@ -32,7 +34,7 @@ export const POST = withApi(
       description: 'Increments candidate vote counts for the specified election.',
     },
   },
-  async ({ request, params }) => {
+  async ({ request, params, organizationId, userId }) => {
     const body = await request.json() as { votes?: Record<string, number> };
     const votes = body.votes ?? {};
 
@@ -69,6 +71,13 @@ export const POST = withApi(
       })
       .where(eq(councilElections.id, params.id))
       .returning();
+
+    buildUnionEvidencePack({
+      actionType: 'ELECTION_VOTE_CAST',
+      orgId: organizationId!,
+      actorId: userId!,
+      artifacts: [{ type: 'election_vote', data: { electionId: params.id, candidateCount: Object.keys(votes).length, additionalVotes } }],
+    }).catch((err) => logger.warn('Evidence pack failed', { error: String(err), actionType: 'ELECTION_VOTE_CAST' }));
 
     return { data: updated };
   },

@@ -12,7 +12,8 @@
     "./context": "./src/context.ts",
     "./logger": "./src/logger.ts",
     "./spans": "./src/spans.ts",
-    "./exporter": "./src/exporter.ts"
+    "./exporter": "./src/exporter.ts",
+    "./app-telemetry": "./src/app-telemetry.ts"
   },
   "scripts": {
     "typecheck": "tsc --noEmit",

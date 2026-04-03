@@ -13,6 +13,7 @@ import { revalidatePath } from 'next/cache'
 import { logger } from '@/lib/logger'
 import { getCreatorPlan } from '@/lib/guards/plan-queries'
 import { guardCreatorFeature } from '@/lib/guards/subscription-guards'
+import { buildEvidencePackFromAction, processEvidencePack } from '@/lib/evidence'
 
 /* ─── Types ─── */
 
@@ -147,6 +148,14 @@ export async function saveSplits(
         })}::jsonb)`,
     )
 
+    const pack = buildEvidencePackFromAction({
+      actionType: 'ROYALTY_SPLITS_UPDATED',
+      orgId: ctx.orgId,
+      executedBy: ctx.actorId,
+      actionId: crypto.randomUUID(),
+    })
+    await processEvidencePack(pack)
+
     revalidatePath(`/dashboard/releases/${releaseId}`)
     revalidatePath(`/dashboard/releases/${releaseId}/splits`)
     return { success: true }
@@ -240,6 +249,14 @@ export async function fileRightsDispute(data: {
       releaseId: data.releaseId,
     })
 
+    const pack = buildEvidencePackFromAction({
+      actionType: 'RIGHTS_DISPUTE_FILED',
+      orgId: ctx.orgId,
+      executedBy: ctx.actorId,
+      actionId: crypto.randomUUID(),
+    })
+    await processEvidencePack(pack)
+
     revalidatePath('/dashboard/rights')
     return { success: true, disputeId: row.id }
   } catch (error) {
@@ -307,6 +324,14 @@ export async function resolveRightsDispute(
       VALUES ('rights.dispute.resolved', ${ctx.actorId}, 'dispute', ${ctx.orgId},
         ${JSON.stringify({ disputeId, newStatus, resolution })}::jsonb)`,
     )
+
+    const pack = buildEvidencePackFromAction({
+      actionType: 'RIGHTS_DISPUTE_RESOLVED',
+      orgId: ctx.orgId,
+      executedBy: ctx.actorId,
+      actionId: crypto.randomUUID(),
+    })
+    await processEvidencePack(pack)
 
     revalidatePath('/dashboard/rights')
     return { success: true }
@@ -401,6 +426,14 @@ export async function createSyncLicense(data: {
           currency: data.currency,
         })}::jsonb)`,
     )
+
+    const pack = buildEvidencePackFromAction({
+      actionType: 'SYNC_LICENSE_CREATED',
+      orgId: ctx.orgId,
+      executedBy: ctx.actorId,
+      actionId: crypto.randomUUID(),
+    })
+    await processEvidencePack(pack)
 
     revalidatePath('/dashboard/rights')
     return { success: true, licenseId: row.id }

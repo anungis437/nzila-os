@@ -14,6 +14,7 @@ import { sql } from 'drizzle-orm'
 import { revalidatePath } from 'next/cache'
 import { logger } from '@/lib/logger'
 import { RevenueType } from '@/lib/zonga-services'
+import { buildEvidencePackFromAction, processEvidencePack } from '@/lib/evidence'
 
 /* ─── Types ─── */
 
@@ -337,6 +338,15 @@ export async function tipCreator(data: {
     )
 
     logger.info('Tip sent', { senderId: ctx.actorId, creatorId: data.creatorId, amount: data.amount })
+
+    const pack = buildEvidencePackFromAction({
+      actionType: 'CREATOR_TIP_SENT',
+      orgId: ctx.orgId,
+      executedBy: ctx.actorId,
+      actionId: crypto.randomUUID(),
+    })
+    await processEvidencePack(pack)
+
     return { success: true }
   } catch (error) {
     logger.error('tipCreator failed', { error })

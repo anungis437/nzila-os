@@ -79,6 +79,7 @@ const ORG_GUARD_PATTERNS = [
   /withApiAuth\s*\(/,            // withApiAuth() auth wrapper
   /crudRoutes\s*\(/,             // crudRoutes() factory — auth internally
   /withOrganizationAuth\s*\(/,   // Org-scoped auth wrapper
+  /withOrgScope\s*\(/,           // Org-scoped composite guard (auth + context + org)
 ]
 
 function hasOrgGuard(content: string): boolean {

@@ -36,6 +36,7 @@
     "./mtls": "./src/mtls/index.ts",
     "./idempotency": "./src/idempotency.ts",
     "./ai-env": "./src/ai-env.ts",
+    "./audited-action": "./src/audited-action.ts",
     "./boot-assert": "./src/boot-assert.ts",
     "./classification": "./src/classification/index.ts",
     "./abr/confidential-reporting": "./src/abr/confidential-reporting.ts",

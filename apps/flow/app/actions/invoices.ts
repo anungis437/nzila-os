@@ -12,6 +12,7 @@ import {
   deleteInvoiceLine,
 } from '@nzila/commerce-db'
 import { getDbContext, getReadContext } from '@/lib/clerk-org-resolver'
+import { buildEvidencePackFromAction, processEvidencePack } from '@/lib/evidence'
 
 // ── Read Actions ──────────────────────────────────────────────────────────
 
@@ -55,7 +56,9 @@ export async function createInvoiceAction(data: {
   notes?: string | null
 }) {
   const ctx = await getDbContext()
-  return createInvoice(ctx, { ...data, createdBy: ctx.actorId })
+  const result = await createInvoice(ctx, { ...data, createdBy: ctx.actorId })
+  await processEvidencePack(buildEvidencePackFromAction({ actionType: 'INVOICE_CREATED', orgId: ctx.orgId, actorId: ctx.actorId, metadata: { orderId: data.orderId } }))
+  return result
 }
 
 export async function updateInvoiceAction(
@@ -70,7 +73,9 @@ export async function updateInvoiceAction(
   }>,
 ) {
   const ctx = await getDbContext()
-  return updateInvoice(ctx, invoiceId, data)
+  const result = await updateInvoice(ctx, invoiceId, data)
+  await processEvidencePack(buildEvidencePackFromAction({ actionType: 'INVOICE_UPDATED', orgId: ctx.orgId, actorId: ctx.actorId, metadata: { invoiceId } }))
+  return result
 }
 
 export async function createInvoiceLineAction(
@@ -85,7 +90,9 @@ export async function createInvoiceLineAction(
   },
 ) {
   const ctx = await getDbContext()
-  return createInvoiceLine(ctx, { invoiceId, ...data })
+  const result = await createInvoiceLine(ctx, { invoiceId, ...data })
+  await processEvidencePack(buildEvidencePackFromAction({ actionType: 'INVOICE_LINE_CREATED', orgId: ctx.orgId, actorId: ctx.actorId, metadata: { invoiceId } }))
+  return result
 }
 
 export async function updateInvoiceLineAction(
@@ -99,10 +106,14 @@ export async function updateInvoiceLineAction(
   }>,
 ) {
   const ctx = await getDbContext()
-  return updateInvoiceLine(ctx, lineId, data)
+  const result = await updateInvoiceLine(ctx, lineId, data)
+  await processEvidencePack(buildEvidencePackFromAction({ actionType: 'INVOICE_LINE_UPDATED', orgId: ctx.orgId, actorId: ctx.actorId, metadata: { lineId } }))
+  return result
 }
 
 export async function deleteInvoiceLineAction(lineId: string) {
   const ctx = await getDbContext()
-  return deleteInvoiceLine(ctx, lineId)
+  const result = await deleteInvoiceLine(ctx, lineId)
+  await processEvidencePack(buildEvidencePackFromAction({ actionType: 'INVOICE_LINE_DELETED', orgId: ctx.orgId, actorId: ctx.actorId, metadata: { lineId } }))
+  return result
 }

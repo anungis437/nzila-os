@@ -5,6 +5,8 @@
   "type": "module",
   "exports": {
     ".": "./src/index.ts",
+    "./app-registry": "./src/app-registry.ts",
+    "./registry": "./src/registry.ts",
     "./health": "./src/health.ts",
     "./metrics": "./src/metrics.ts",
     "./governance": "./src/governance.ts",

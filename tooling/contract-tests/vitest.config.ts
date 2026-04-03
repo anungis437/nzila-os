@@ -24,6 +24,10 @@ export default defineProject({
       '@nzila/enforcement': join(__dirname, '..', '..', 'packages', 'enforcement', 'src', 'index.ts'),
       // CUPE vocabulary package used by vocabulary validation contract tests
       '@nzila/cupe-vocabulary': join(__dirname, '..', '..', 'packages', 'cupe-vocabulary', 'src', 'index.ts'),
+      // Platform contracts sub-path imports used by registry + org-scope tests
+      '@nzila/platform-contracts/registry': join(__dirname, '..', '..', 'packages', 'platform-contracts', 'src', 'registry.ts'),
+      '@nzila/platform-contracts/org-scope': join(__dirname, '..', '..', 'packages', 'platform-contracts', 'src', 'org-scope.ts'),
+      '@nzila/platform-contracts': join(__dirname, '..', '..', 'packages', 'platform-contracts', 'src', 'index.ts'),
     },
   },
 })

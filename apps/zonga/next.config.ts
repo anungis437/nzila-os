@@ -1,4 +1,5 @@
 import type { NextConfig } from 'next';
+import { withSentryConfig } from '@sentry/nextjs';
 import createNextIntlPlugin from 'next-intl/plugin';
 
 const withNextIntl = createNextIntlPlugin();
@@ -47,7 +48,7 @@ const nextConfig: NextConfig = {
               "style-src 'self' 'unsafe-inline' https://fonts.googleapis.com https://clerk.accounts.dev https://*.clerk.accounts.dev https://*.clerk.com",
               "font-src 'self' https://fonts.gstatic.com data: https:",
               "img-src 'self' https://images.unsplash.com https://img.clerk.com data: blob: https:",
-              "connect-src 'self' https: wss: https://*.clerk.com https://*.clerk.accounts.dev https://api.stripe.com",
+              "connect-src 'self' https: wss: https://*.clerk.com https://*.clerk.accounts.dev https://*.sentry.io https://api.stripe.com",
               "frame-src 'self' https://challenges.cloudflare.com https://clerk.accounts.dev https://*.clerk.accounts.dev https://*.clerk.com https://js.stripe.com",
               "worker-src 'self' blob:",
               "media-src 'self' https:",
@@ -81,4 +82,18 @@ const nextConfig: NextConfig = {
   },
 };
 
-export default withNextIntl(nextConfig);
+// Disable Sentry during build to prevent "self is not defined" errors from bundled workers.
+// Sentry is still active at runtime via instrumentation.ts when SENTRY_DSN is set.
+const useSentryInBuild = false;
+
+export default useSentryInBuild
+  ? withSentryConfig(withNextIntl(nextConfig), {
+      org: 'nzila-ventures',
+      project: 'zonga',
+      silent: !process.env.CI,
+      widenClientFileUpload: true,
+      tunnelRoute: '/monitoring',
+      disableLogger: true,
+      sourcemaps: { disable: process.env.NODE_ENV === 'development' },
+    })
+  : withNextIntl(nextConfig);

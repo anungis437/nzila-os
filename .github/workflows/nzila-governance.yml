@@ -341,6 +341,47 @@ jobs:
             tech-repo-scaffold/django-backbone/ci-outputs/audit-report.json
           retention-days: 365
 
+  # ── Supply Chain Waiver Expiry Check ──────────────────────────────────────
+  waiver-expiry:
+    runs-on: ubuntu-latest
+    name: Supply Chain Waiver Expiry
+    steps:
+      - uses: actions/checkout@v4
+
+      - name: Setup pnpm
+        uses: pnpm/action-setup@fc06bc1257f339d1d5d8b3a19a8cae5388b55320 # v5.0.0
+
+      - name: Setup Node.js
+        uses: actions/setup-node@v4
+        with:
+          node-version: 22
+          cache: pnpm
+
+      - name: Install dependencies
+        run: pnpm install --frozen-lockfile
+
+      - name: Check waiver expiry dates
+        run: |
+          pnpm tsx -e "
+            import { ACTIVE_WAIVERS } from './tooling/security/supply-chain-policy.ts';
+            const now = new Date();
+            const WARN_DAYS = 30;
+            let hasExpired = false;
+            for (const w of ACTIVE_WAIVERS) {
+              const exp = new Date(w.expiresAt);
+              const daysLeft = Math.ceil((exp.getTime() - now.getTime()) / 86_400_000);
+              if (daysLeft < 0) {
+                console.log(\`::error::EXPIRED waiver: \${w.id} (\${w.package}) expired \${Math.abs(daysLeft)} days ago — re-approve or remediate\`);
+                hasExpired = true;
+              } else if (daysLeft <= WARN_DAYS) {
+                console.log(\`::warning::Waiver \${w.id} (\${w.package}) expires in \${daysLeft} days (\${w.expiresAt}) — renew or remediate\`);
+              } else {
+                console.log(\`✓ \${w.id} (\${w.package}) — \${daysLeft} days remaining\`);
+              }
+            }
+            if (hasExpired) { process.exit(1); }
+          "
+
   # ── Evidence Pack Generation + Seal ─────────────────────────────────────
   # Produces pack.json + seal.json, uploads both as required artifacts.
   # The verify-seal job then asserts integrity of those artifacts.
@@ -509,6 +550,7 @@ jobs:
       - evidence-pack
       - verify-seal
       - sbom
+      - waiver-expiry
     if: always()
     steps:
       - name: Check all governance jobs passed
@@ -522,6 +564,7 @@ jobs:
           echo "Evidence Pack:     ${{ needs.evidence-pack.result }}"
           echo "Verify Seal:       ${{ needs.verify-seal.result }}"
           echo "SBOM:              ${{ needs.sbom.result }}"
+          echo "Waiver Expiry:     ${{ needs.waiver-expiry.result }}"
           echo "======================================"
 
           # Fail if any required job failed
@@ -555,6 +598,10 @@ jobs:
           fi
           if [[ "${{ needs.sbom.result }}" == "failure" ]]; then
             echo "❌ SBOM generation failed"
+            exit 1
+          fi
+          if [[ "${{ needs.waiver-expiry.result }}" == "failure" ]]; then
+            echo "❌ Supply chain waiver(s) expired — renew or remediate"
             exit 1
           fi
 

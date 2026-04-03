@@ -16,6 +16,7 @@ import { createClaim } from '@/db/queries/claims-queries';
 import { auditDataMutation } from '@/lib/audit-logger';
 import { logger } from '@/lib/logger';
 import { requireEntitlement } from '@/services/platform-economics/entitlement-guard';
+import { buildUnionEvidencePack } from '@/lib/evidence';
 
 export const dynamic = 'force-dynamic';
 
@@ -115,6 +116,14 @@ export async function POST(request: Request) {
       caseType: data.caseType,
       priority: data.priority,
     });
+
+    // Evidence: tamper-proof case intake trail
+    buildUnionEvidencePack({
+      actionType: 'CASE_INTAKE_SUBMITTED',
+      orgId: orgId,
+      actorId: userId,
+      artifacts: [{ type: 'case_intake', data: { claimId: claim.claimId, claimNumber: claim.claimNumber, caseType: data.caseType, severity } }],
+    }).catch((err) => logger.warn('Evidence pack failed', { error: String(err), actionType: 'CASE_INTAKE_SUBMITTED' }))
 
     return NextResponse.json(
       {

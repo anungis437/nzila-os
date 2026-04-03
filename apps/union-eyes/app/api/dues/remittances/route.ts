@@ -9,6 +9,7 @@ import { db } from '@/db';
 import { employerRemittances } from '@/db/schema/dues-finance-schema';
 import { eq, desc } from 'drizzle-orm';
 import { logger } from '@/lib/logger';
+import { buildUnionEvidencePack } from '@/lib/evidence';
 
 export const dynamic = 'force-dynamic';
 
@@ -67,6 +68,14 @@ export const POST = withApi(
       .returning();
 
     logger.info('Employer remittance created', { remittanceId: remittance.id, organizationId });
+
+    // Evidence: fiduciary audit trail for remittance
+    buildUnionEvidencePack({
+      actionType: 'REMITTANCE_CREATED',
+      orgId: organizationId,
+      actorId: userId ?? 'unknown',
+      artifacts: [{ type: 'remittance', data: { remittanceId: remittance.id, totalAmount: body.totalAmount, memberCount: body.memberCount } }],
+    }).catch((err) => logger.warn('Evidence pack failed', { error: String(err), actionType: 'REMITTANCE_CREATED' }))
 
     return { data: remittance };
   },

@@ -140,6 +140,7 @@ describe('INV-11 — Every API route has authorization', () => {
     'withOrganizationAuth(',      // Organization-scoped auth wrapper (union-eyes)
     'crudRoutes(',               // crudRoutes() factory — wraps withApi() internally
     'withMinRole(',              // Role-based auth guard with minimum role check
+    'withOrgScope(',              // Org-scoped composite guard (auth + context + org validation)
   ]
 
   // Routes that are explicitly public

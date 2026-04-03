@@ -3,6 +3,13 @@
  */
 export * from './types'
 export { checkRateLimit, rateLimitHeaders } from './rateLimit'
+export { auditedAction } from './audited-action'
+export type {
+  AuditedActionInput,
+  AuditedActionContext,
+  AuditedActionResult,
+  AuditRecord,
+} from './audited-action'
 export { evaluateGovernanceRequirements } from './policy'
 export { getResolutionTemplate, listAvailableTemplates } from './templates'
 export { computeEntryHash, verifyChain } from './hash'

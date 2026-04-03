@@ -13,6 +13,7 @@ import {
 } from '@nzila/commerce-db'
 import { getDbContext, getReadContext } from '@/lib/clerk-org-resolver'
 import { executeCommand } from '@/lib/control/control-adapter'
+import { buildEvidencePackFromAction, processEvidencePack } from '@/lib/evidence'
 
 // ── Read Actions ──────────────────────────────────────────────────────────
 
@@ -56,7 +57,9 @@ export async function createOrderAction(data: {
   notes?: string | null
 }) {
   const ctx = await getDbContext()
-  return createOrder(ctx, { ...data, createdBy: ctx.actorId })
+  const result = await createOrder(ctx, { ...data, createdBy: ctx.actorId })
+  await processEvidencePack(buildEvidencePackFromAction({ actionType: 'ORDER_CREATED', orgId: ctx.orgId, actorId: ctx.actorId }))
+  return result
 }
 
 /**
@@ -94,14 +97,18 @@ export async function updateOrderAction(
       const { status: _, ...rest } = data
       if (Object.keys(rest).length > 0) {
         const ctx = await getDbContext()
-        return updateOrder(ctx, orderId, rest)
+        const result = await updateOrder(ctx, orderId, rest)
+        await processEvidencePack(buildEvidencePackFromAction({ actionType: 'ORDER_UPDATED', orgId: ctx.orgId, actorId: ctx.actorId, metadata: { orderId } }))
+        return result
       }
       return result
     }
   }
   // Non-status updates go direct
   const ctx = await getDbContext()
-  return updateOrder(ctx, orderId, data)
+  const result = await updateOrder(ctx, orderId, data)
+  await processEvidencePack(buildEvidencePackFromAction({ actionType: 'ORDER_UPDATED', orgId: ctx.orgId, actorId: ctx.actorId, metadata: { orderId } }))
+  return result
 }
 
 export async function createOrderLineAction(
@@ -118,7 +125,9 @@ export async function createOrderLineAction(
   },
 ) {
   const ctx = await getDbContext()
-  return createOrderLine(ctx, { orderId, ...data })
+  const result = await createOrderLine(ctx, { orderId, ...data })
+  await processEvidencePack(buildEvidencePackFromAction({ actionType: 'ORDER_LINE_CREATED', orgId: ctx.orgId, actorId: ctx.actorId, metadata: { orderId } }))
+  return result
 }
 
 export async function updateOrderLineAction(
@@ -133,10 +142,14 @@ export async function updateOrderLineAction(
   }>,
 ) {
   const ctx = await getDbContext()
-  return updateOrderLine(ctx, lineId, data)
+  const result = await updateOrderLine(ctx, lineId, data)
+  await processEvidencePack(buildEvidencePackFromAction({ actionType: 'ORDER_LINE_UPDATED', orgId: ctx.orgId, actorId: ctx.actorId, metadata: { lineId } }))
+  return result
 }
 
 export async function deleteOrderLineAction(lineId: string) {
   const ctx = await getDbContext()
-  return deleteOrderLine(ctx, lineId)
+  const result = await deleteOrderLine(ctx, lineId)
+  await processEvidencePack(buildEvidencePackFromAction({ actionType: 'ORDER_LINE_DELETED', orgId: ctx.orgId, actorId: ctx.actorId, metadata: { lineId } }))
+  return result
 }

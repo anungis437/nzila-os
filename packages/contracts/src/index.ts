@@ -2,6 +2,32 @@
 // Versioned domain event contracts with Zod schemas, contract registry,
 // and runtime validation for cross-app interoperability.
 
+// ── Canonical Platform Schema ───────────────────────────────────────────────
+export {
+  CANONICAL_SCHEMA_VERSION,
+  canonicalEntitySchema,
+  canonicalEventSchema,
+  canonicalMetricSchema,
+  canonicalAuditRecordSchema,
+  canonicalWorkflowStateSchema,
+  canonicalIntegrationRecordSchema,
+  canonicalFinancialRecordSchema,
+  canonicalUserContextSchema,
+  canonicalOrgContextSchema,
+  createCanonicalMapper,
+  createSafeCanonicalMapper,
+  type NzilaCanonicalEntity,
+  type NzilaCanonicalEvent,
+  type NzilaCanonicalMetric,
+  type NzilaCanonicalAuditRecord,
+  type NzilaCanonicalWorkflowState,
+  type NzilaCanonicalIntegrationRecord,
+  type NzilaCanonicalFinancialRecord,
+  type NzilaCanonicalUserContext,
+  type NzilaCanonicalOrgContext,
+} from './canonical.js'
+
+// ── Domain Events ───────────────────────────────────────────────────────────
 export {
   type DomainEvent,
   type EventMetadata,

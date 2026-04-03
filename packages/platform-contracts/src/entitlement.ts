@@ -80,3 +80,64 @@ export const featureAccessSchema = z.object({
 })
 
 export type FeatureAccess = z.infer<typeof featureAccessSchema>
+
+// ── Partner Tier Gate ───────────────────────────────────────────────────────
+
+export const partnerTierValues = [
+  'registered',
+  'select',
+  'certified',
+  'professional',
+  'premier',
+  'advanced',
+  'enterprise',
+  'elite',
+  'strategic',
+] as const
+export type PartnerTier = (typeof partnerTierValues)[number]
+
+export const featureGateSchema = z.object({
+  /** Dotted feature key (e.g. 'deals:pipeline'). */
+  feature: z.string().regex(/^[a-z][a-z0-9]*(?:[:.][a-z][a-z0-9-]*)*$/),
+  /** Minimum partner tier required. */
+  minTier: z.enum(partnerTierValues),
+  /** If true, all access attempts are logged to the audit trail. */
+  audited: z.boolean().default(false),
+  /** Human-readable description for governance reports. */
+  description: z.string().optional(),
+})
+export type FeatureGate = z.infer<typeof featureGateSchema>
+
+export const featureGateManifestSchema = z.object({
+  /** App ID owning these gates. */
+  appId: z.string(),
+  /** Tier hierarchy (lowest → highest). */
+  tierOrder: z.array(z.enum(partnerTierValues)).min(2),
+  /** Feature gates. */
+  gates: z.array(featureGateSchema).min(1),
+})
+export type FeatureGateManifest = z.infer<typeof featureGateManifestSchema>
+
+/**
+ * Evaluate whether a partner tier satisfies a feature gate.
+ */
+export function checkFeatureGate(
+  manifest: FeatureGateManifest,
+  feature: string,
+  currentTier: PartnerTier,
+): FeatureAccess {
+  const gate = manifest.gates.find((g) => g.feature === feature)
+  if (!gate) {
+    return { key: feature, granted: true }
+  }
+  const current = manifest.tierOrder.indexOf(currentTier)
+  const required = manifest.tierOrder.indexOf(gate.minTier)
+  if (current === -1 || required === -1) {
+    return { key: feature, granted: false, reason: `Unknown tier` }
+  }
+  return {
+    key: feature,
+    granted: current >= required,
+    reason: current < required ? `Requires ${gate.minTier} tier` : undefined,
+  }
+}

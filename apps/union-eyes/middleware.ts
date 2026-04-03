@@ -46,6 +46,7 @@ import type { NextRequest } from "next/server";
 import createIntlMiddleware from 'next-intl/middleware';
 import { locales, defaultLocale } from './lib/locales';
 import { CRON_API_ROUTES, isPublicRoute as isPublicApiRoute } from './lib/public-routes';
+import { checkOrgRateLimit, orgRateLimitHeaders } from '@nzila/os-core/orgRateLimit';
 
 // Edge-safe logger — os-core's createLogger uses Node.js APIs (process.stdout,
 // node:crypto, node:async_hooks) that are unavailable on the Edge Runtime.
@@ -254,6 +255,32 @@ const clerkHandler = clerkMiddleware(async (auth, req) => {
     // API auth enforcement moved to route handlers / RLS context layer.
     // Edge middleware's crypto.subtle fails with OpenSSL 3 OperationError
     // on Azure Container Apps; auth() in API routes runs on Node.js.
+
+    // ── Org-scoped rate limiting (per-org + route-group buckets) ─────────
+    if (process.env.NODE_ENV !== 'development') {
+      const orgId = req.headers.get('x-org-id');
+      if (orgId && req.nextUrl.pathname.startsWith('/api')) {
+        const orgRl = checkOrgRateLimit(
+          orgId,
+          req.nextUrl.pathname,
+          req.method,
+        );
+        if (!orgRl.allowed) {
+          return withRequestId(NextResponse.json(
+            {
+              error: 'Org Rate Limit Exceeded',
+              message: `Rate limit exceeded for route group: ${orgRl.routeGroup}`,
+              code: 'ORG_RATE_LIMIT_EXCEEDED',
+            },
+            {
+              status: 429,
+              headers: orgRateLimitHeaders(orgRl),
+            },
+          ), requestId);
+        }
+      }
+    }
+
     return withRequestId(NextResponse.next(), requestId);
   }
 

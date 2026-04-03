@@ -9,6 +9,8 @@ import { db } from '@/db';
 import { councilElections } from '@/db/schema/governance-schema';
 import { desc } from 'drizzle-orm';
 import { NextResponse } from 'next/server';
+import { buildUnionEvidencePack } from '@/lib/evidence';
+import { logger } from '@/lib/logger';
 
 export const dynamic = 'force-dynamic';
 
@@ -32,7 +34,7 @@ export const POST = withApi(
     auth: { minRole: 'steward' },
     openapi: { tags: ['Governance'], summary: 'Create a council election record' },
   },
-  async ({ request }) => {
+  async ({ request, organizationId, userId }) => {
     const body = await request.json();
     const {
       electionYear,
@@ -77,6 +79,14 @@ export const POST = withApi(
         contestedResults,
       })
       .returning();
+
+    // Evidence: election record creation audit trail
+    buildUnionEvidencePack({
+      actionType: 'ELECTION_CREATED',
+      orgId: organizationId ?? 'global',
+      actorId: userId ?? 'unknown',
+      artifacts: [{ type: 'election', data: { electionId: election.id, electionYear, positionsAvailable } }],
+    }).catch((err) => logger.warn('Evidence pack failed', { error: String(err), actionType: 'ELECTION_CREATED' }))
 
     return NextResponse.json({ data: election }, { status: 201 });
   },

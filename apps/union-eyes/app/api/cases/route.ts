@@ -10,6 +10,8 @@ import { db } from '@/db/db';
 import { sql } from 'drizzle-orm';
 import { withRLSContext } from '@/lib/db/with-rls-context';
 import { NextResponse } from 'next/server';
+import { buildUnionEvidencePack } from '@/lib/evidence';
+import { logger } from '@/lib/logger';
 
 export const dynamic = 'force-dynamic';
 
@@ -157,6 +159,14 @@ export const POST = withApi(
     );
 
     const inserted = rows[0];
+
+    // Evidence: tamper-proof audit trail for case creation
+    buildUnionEvidencePack({
+      actionType: 'CASE_CREATED',
+      orgId: organizationId,
+      actorId: userId ?? 'unknown',
+      artifacts: [{ type: 'case', data: { claimId: (inserted as Record<string, unknown>)?.claimId, claimType, priority } }],
+    }).catch((err) => logger.warn('Evidence pack failed', { error: String(err), actionType: 'CASE_CREATED' }))
 
     return NextResponse.json({ data: inserted }, { status: 201 });
   },

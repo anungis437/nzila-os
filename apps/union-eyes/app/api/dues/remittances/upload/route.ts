@@ -13,6 +13,7 @@ import { withApi, ApiError } from '@/lib/api/framework';
 import { db } from '@/db';
 import { employerRemittances } from '@/db/schema/dues-finance-schema';
 import { logger } from '@/lib/logger';
+import { buildUnionEvidencePack } from '@/lib/evidence';
 
 export const dynamic = 'force-dynamic';
 
@@ -75,6 +76,13 @@ export const POST = withApi(
       fileName: file.name,
       organizationId,
     });
+
+    buildUnionEvidencePack({
+      actionType: 'REMITTANCE_FILE_UPLOADED',
+      orgId: organizationId!,
+      actorId: userId!,
+      artifacts: [{ type: 'remittance', data: { remittanceId: remittance.id, fileName: file.name } }],
+    }).catch((err) => logger.warn('Evidence pack failed', { error: String(err), actionType: 'REMITTANCE_FILE_UPLOADED' }));
 
     return { remittance };
   },

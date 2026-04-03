@@ -13,6 +13,7 @@ import { revalidatePath } from 'next/cache'
 import { logger } from '@/lib/logger'
 import { createNotification } from '@/lib/actions/notification-actions'
 import { executeCommand } from '@/lib/control'
+import { buildEvidencePackFromAction, processEvidencePack } from '@/lib/evidence'
 
 /* ─── Types ─── */
 
@@ -136,6 +137,14 @@ export async function createModerationCase(data: {
     return { success: false }
   }
 
+  const pack = buildEvidencePackFromAction({
+    actionType: 'MODERATION_CASE_CREATED',
+    orgId: 'system',
+    executedBy: 'system',
+    actionId: crypto.randomUUID(),
+  })
+  await processEvidencePack(pack)
+
   revalidatePath('/dashboard/moderation')
   return { success: true, caseId: result.data?.entity_id }
 }
@@ -183,6 +192,14 @@ export async function resolveModerationCase(
     }
   }
 
+  const pack = buildEvidencePackFromAction({
+    actionType: 'MODERATION_CASE_RESOLVED',
+    orgId: ctx.orgId,
+    executedBy: ctx.actorId,
+    actionId: crypto.randomUUID(),
+  })
+  await processEvidencePack(pack)
+
   revalidatePath('/dashboard/moderation')
   return { success: true }
 }
@@ -207,6 +224,14 @@ export async function assignModerationCase(
     )
 
     logger.info('Moderation case assigned', { caseId, assignedTo, actorId: ctx.actorId })
+
+    const pack = buildEvidencePackFromAction({
+      actionType: 'MODERATION_CASE_ASSIGNED',
+      orgId: ctx.orgId,
+      executedBy: ctx.actorId,
+      actionId: crypto.randomUUID(),
+    })
+    await processEvidencePack(pack)
 
     revalidatePath('/dashboard/moderation')
     return { success: true }
@@ -285,6 +310,15 @@ export async function recordIntegritySignal(data: {
     }
 
     logger.info('Integrity signal recorded', { signalId: row?.id, signalType: data.signalType })
+
+    const pack = buildEvidencePackFromAction({
+      actionType: 'INTEGRITY_SIGNAL_RECORDED',
+      orgId: ctx.orgId,
+      executedBy: ctx.actorId,
+      actionId: crypto.randomUUID(),
+    })
+    await processEvidencePack(pack)
+
     return { success: true, signalId: row?.id }
   } catch (error) {
     logger.error('recordIntegritySignal failed', { error })

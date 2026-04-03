@@ -8,6 +8,8 @@ import { withApi, ApiError } from '@/lib/api/framework';
 import { db } from '@/db';
 import { councilElections } from '@/db/schema/governance-schema';
 import { eq } from 'drizzle-orm';
+import { buildUnionEvidencePack } from '@/lib/evidence';
+import { logger } from '@/lib/logger';
 
 export const dynamic = 'force-dynamic';
 
@@ -32,7 +34,7 @@ export const PATCH = withApi(
     auth: { minRole: 'steward' },
     openapi: { tags: ['Governance'], summary: 'Update a council election' },
   },
-  async ({ request, params }) => {
+  async ({ request, params, organizationId, userId }) => {
     const body = await request.json();
 
     const ALLOWED: Array<keyof typeof councilElections.$inferInsert> = [
@@ -69,6 +71,14 @@ export const PATCH = withApi(
       .returning();
 
     if (!updated) throw ApiError.notFound('Election not found');
+
+    buildUnionEvidencePack({
+      actionType: 'ELECTION_UPDATED',
+      orgId: organizationId!,
+      actorId: userId!,
+      artifacts: [{ type: 'election', data: { electionId: params.id, fields: Object.keys(updates) } }],
+    }).catch((err) => logger.warn('Evidence pack failed', { error: String(err), actionType: 'ELECTION_UPDATED' }));
+
     return { data: updated };
   },
 );

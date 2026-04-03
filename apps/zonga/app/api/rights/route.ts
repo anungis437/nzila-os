@@ -3,7 +3,7 @@
  * GET → list royalty splits, disputes, or sync licenses
  */
 import { NextResponse } from 'next/server'
-import { authenticateUser, withRequestContext } from '@/lib/api-guards'
+import { withOrgScope } from '@/lib/api-guards'
 import { withSpan } from '@nzila/os-core/telemetry'
 import {
   listSplitsForRelease,
@@ -12,10 +12,8 @@ import {
 } from '@/lib/actions/rights-actions'
 
 export async function GET(request: Request) {
-  return withRequestContext(request, () =>
+  return withOrgScope(request, () =>
     withSpan('api.rights.list', { 'http.method': 'GET' }, async () => {
-      const auth = await authenticateUser()
-      if (!auth.ok) return auth.response
 
       const url = new URL(request.url)
       const resource = url.searchParams.get('resource') ?? 'splits'

@@ -8,6 +8,7 @@ import {
   deleteCustomer,
 } from '@nzila/commerce-db'
 import { getDbContext, getReadContext } from '@/lib/clerk-org-resolver'
+import { buildEvidencePackFromAction, processEvidencePack } from '@/lib/evidence'
 
 // ── Read Actions ──────────────────────────────────────────────────────────
 
@@ -38,7 +39,9 @@ export async function createCustomerAction(data: {
   notes?: string | null
 }) {
   const ctx = await getDbContext()
-  return createCustomer(ctx, data)
+  const result = await createCustomer(ctx, data)
+  await processEvidencePack(buildEvidencePackFromAction({ actionType: 'CUSTOMER_CREATED', orgId: ctx.orgId, actorId: ctx.actorId }))
+  return result
 }
 
 export async function updateCustomerAction(
@@ -55,10 +58,14 @@ export async function updateCustomerAction(
   }>,
 ) {
   const ctx = await getDbContext()
-  return updateCustomer(ctx, customerId, data)
+  const result = await updateCustomer(ctx, customerId, data)
+  await processEvidencePack(buildEvidencePackFromAction({ actionType: 'CUSTOMER_UPDATED', orgId: ctx.orgId, actorId: ctx.actorId, metadata: { customerId } }))
+  return result
 }
 
 export async function deleteCustomerAction(customerId: string) {
   const ctx = await getDbContext()
-  return deleteCustomer(ctx, customerId)
+  const result = await deleteCustomer(ctx, customerId)
+  await processEvidencePack(buildEvidencePackFromAction({ actionType: 'CUSTOMER_DELETED', orgId: ctx.orgId, actorId: ctx.actorId, metadata: { customerId } }))
+  return result
 }

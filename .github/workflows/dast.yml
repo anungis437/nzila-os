@@ -22,6 +22,7 @@ env:
   WEB_URL: https://nzila-os-web.delightfulisland-0d503d3c.eastus.azurecontainerapps.io
   CONSOLE_URL: https://nzila-os-console.delightfulisland-0d503d3c.eastus.azurecontainerapps.io
   UNION_EYES_URL: https://nzila-os-union-eyes.delightfulisland-0d503d3c.eastus.azurecontainerapps.io
+  ZONGA_URL: https://nzila-os-zonga.delightfulisland-0d503d3c.eastus.azurecontainerapps.io
 
 jobs:
   zap-baseline:
@@ -37,6 +38,8 @@ jobs:
             url: https://nzila-os-console.delightfulisland-0d503d3c.eastus.azurecontainerapps.io
           - name: union-eyes
             url: https://nzila-os-union-eyes.delightfulisland-0d503d3c.eastus.azurecontainerapps.io
+          - name: zonga
+            url: https://nzila-os-zonga.delightfulisland-0d503d3c.eastus.azurecontainerapps.io
 
     steps:
       - uses: actions/checkout@v4
@@ -96,7 +99,7 @@ jobs:
             "runId": "${{ github.run_id }}",
             "timestamp": "'$(date -u +%Y-%m-%dT%H:%M:%SZ)'",
             "sha": "${{ github.sha }}",
-            "targets": ["web", "console", "union-eyes"],
+            "targets": ["web", "console", "union-eyes", "zonga"],
             "status": "${{ needs.zap-baseline.result }}"
           }' > artifacts/dast/dast-evidence.json
 

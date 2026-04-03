@@ -1,0 +1,41 @@
+MM|platform|user_35NlrrNcfTv0DMh2kzBHyXZRtpb|Super Admin|aubert@nzila.app|info@nzilaventures.com
+MM|platform|user_37Zo7OrvP4jy0J0MU5APfkDtE2V|Michel Nungisa|admin@nzila.io|michel@nungisalaw.ca
+OK|cape|user_3BSyETlaLS6t8wuol22bVECjPFM|Greg Phillips|g.phillips@acep-cape.ca|g.phillips@acep-cape.ca
+OK|cape|user_3BSyEi6TduTzKp2mZigpD6D746h|Emmanuelle Tremblay|e.tremblay@acep-cape.ca|e.tremblay@acep-cape.ca
+OK|cape|user_3BSzDo4cpXO7qTM0bY800AuLOd2|Brian Faulkner|b.faulkner@acep-cape.ca|b.faulkner@acep-cape.ca
+OK|cape|user_3BSzDqnxMraAlxaRvhyrTabrTOE|Chantal Bertrand|c.bertrand@acep-cape.ca|c.bertrand@acep-cape.ca
+OK|cape|user_3BSzE0qWBvXm6eP75nAukpBbpvk|Mike Savard|m.savard@acep-cape.ca|m.savard@acep-cape.ca
+OK|cape|user_3BSzDyCmU8iKsYeD1tyBqkDfBFP|Nadia Ouellet|n.ouellet@acep-cape.ca|n.ouellet@acep-cape.ca
+OK|cape|user_3BSzEAPted20wutKC5lY8lTn9jZ|Daniel Kim|d.kim@acep-cape.ca|d.kim@acep-cape.ca
+OK|cape|user_3BSzE9z6NFV3hbYd4Fu2ufoL4rI|Sarah Lefebvre|s.lefebvre@acep-cape.ca|s.lefebvre@acep-cape.ca
+OK|cape|user_3BSzE5AtIbImjHukqc0yM9EXQdu|Alexandre Moreau|a.moreau@acep-cape.ca|a.moreau@acep-cape.ca
+OK|cape|user_3BSzEIjI6LSWANw6ssfwXcxxnhT|Jennifer Walsh|j.walsh@acep-cape.ca|j.walsh@acep-cape.ca
+OK|cape|user_3BSzEIXiSqVXnNYgymDZ1PY6ZhY|Pierre Desmarais|p.desmarais@acep-cape.ca|p.desmarais@acep-cape.ca
+OK|cape|user_3BSzEIf1ARXNRQOs3d5Qju58yNZ|Amira Hassan|a.hassan@acep-cape.ca|a.hassan@acep-cape.ca
+OK|clc|user_3BSyEWUb0cnQ56CSS0W0fK8g35a|Hassan Yussuff|h.yussuff@clc-ctc.ca|h.yussuff@clc-ctc.ca
+OK|clc|user_3BSyEa51htBN51y0YxG9a9Elp2L|Marie Clarke Walker|m.walker@clc-ctc.ca|m.walker@clc-ctc.ca
+OK|clc|user_3BSzDRcx41T9Pq06KAhtQkFmi8T|Denis Bolduc|d.bolduc@clc-ctc.ca|d.bolduc@clc-ctc.ca
+OK|clc|user_3BSzDdNeiCPn9x4M95Deq5vnWkv|Sophie Tremblay|s.tremblay@clc-ctc.ca|s.tremblay@clc-ctc.ca
+OK|clc|user_3BSzDYPQ9F0SAJkkkFk2pSisOii|James Nguyen|j.nguyen@clc-ctc.ca|j.nguyen@clc-ctc.ca
+OK|clc|user_3BSzDZezfNN1Nw6YvP9hoYDDuxK|Rebecca Martin|r.martin@clc-ctc.ca|r.martin@clc-ctc.ca
+OK|clc|user_3BSzDjuKqbDZAHQmjVJccs9r9mq|Louis Picard|l.picard@clc-ctc.ca|l.picard@clc-ctc.ca
+OK|clc|user_3BSzDiXRbv3kAsmbUqzOjvVv7o7|Angela Varga|a.varga@clc-ctc.ca|a.varga@clc-ctc.ca
+OK|clc|user_3BSzDlKgwVGWHOKtHluyRSdJNTb|Patrick O Connor|p.oconnor@clc-ctc.ca|p.oconnor@clc-ctc.ca
+OK|clc|user_3BSzDtwjg8WXJf36fw9wjVTu8yX|Fatima Al-Rashid|f.alrashid@clc-ctc.ca|f.alrashid@clc-ctc.ca
+OK|cupe|user_3BnpKGiePftiVYeaYF24EIplB8S|Mark Hancock|m.hancock@cupe.ca|m.hancock@cupe.ca
+OK|cupe|user_3BnpKX2MbXVFmlOSguGMnHX6Riq|Fred Hahn|f.hahn@cupe.ca|f.hahn@cupe.ca
+OK|cupe|user_3BnpKMnWNBWdDzVnP56lM1d328P|Sherry Farnell|s.farnell@cupe.ca|s.farnell@cupe.ca
+OK|cupe|user_3BnpKFTn2rOTLSM2MkUTsD1NU1b|Candace Rennick|c.rennick@cupe.ca|c.rennick@cupe.ca
+OK|cupe|user_3BnpKeS5NZ5H5xquydhJnth0gYs|Kevin Thompson2|k.thompson2@cupe.ca|k.thompson2@cupe.ca
+OK|cupe|user_3BnpKZ9uQKKBsmqXz2eksrUud6F|Laura Bentley|l.bentley@cupe.ca|l.bentley@cupe.ca
+OK|cupe|user_3BnpKjP8KVVfFGSEozJifxfgJZQ|Diane Bhullar|d.bhullar@cupe.ca|d.bhullar@cupe.ca
+OK|l123|user_3BP6IkK6vgBW4XjSTqfd3CsBjjv|Grace Lee|grace.lee@city.toronto.ca|grace.lee@city.toronto.ca
+OK|l123|user_3BP6Ienqg55Bk54Q8I3K5hh4Mk8|Alice Johnson|alice.johnson@city.toronto.ca|alice.johnson@city.toronto.ca
+OK|l123|user_3BP6IlC0zg9MwHJDDNn7KCcR0MV|Bob Smith|bob.smith@city.toronto.ca|bob.smith@city.toronto.ca
+OK|l123|user_3BSzhd4q6moCIlT3PhkWbdiAhtA|Marie-Claire Dubois|mc.dubois@city.toronto.ca|mc.dubois@city.toronto.ca
+OK|l123|user_3BSzhdQTA7fsGN5kUPfXJpMTK1O|Jean-Pierre Tremblay|jp.tremblay@city.toronto.ca|jp.tremblay@city.toronto.ca
+OK|l123|user_3BSzhpCQGDtA22YfStHM5ksq6pI|David Thompson|d.thompson@city.toronto.ca|d.thompson@city.toronto.ca
+OK|l123|user_3BSzhnlEbmEnazjOxZdVE2eXO64|Priya Patel|p.patel@city.toronto.ca|p.patel@city.toronto.ca
+OK|l123|user_3BSzhk06aD2b1kK5jUuMlmy7vGu|Marco Rossi|m.rossi@city.toronto.ca|m.rossi@city.toronto.ca
+OK|l123|user_3BSzhvBJ63gV7BmDQlH6VTLm18g|Nathalie Lafontaine|n.lafontaine@city.toronto.ca|n.lafontaine@city.toronto.ca
+OK|l123|user_3BSzhpyvCHVWm3o4QSYs87ufGGg|Kevin O Brien|k.obrien@city.toronto.ca|k.obrien@city.toronto.ca

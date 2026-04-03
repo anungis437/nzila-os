@@ -11,6 +11,7 @@ import { platformDb } from '@nzila/db/platform'
 import { sql } from 'drizzle-orm'
 import { revalidatePath } from 'next/cache'
 import { logger } from '@/lib/logger'
+import { buildEvidencePackFromAction, processEvidencePack } from '@/lib/evidence'
 import {
   EventbriteClient,
   EventbriteApiError,
@@ -110,6 +111,15 @@ export async function connectEventbrite(
     )
 
     revalidatePath('/dashboard/settings/integrations')
+
+    const pack = buildEvidencePackFromAction({
+      actionType: 'EVENTBRITE_CONNECTED',
+      orgId: ctx.orgId,
+      executedBy: ctx.actorId,
+      actionId: crypto.randomUUID(),
+    })
+    await processEvidencePack(pack)
+
     return { success: true }
   } catch (error) {
     if (error instanceof EventbriteApiError && error.statusCode === 401) {
@@ -129,6 +139,15 @@ export async function disconnectEventbrite(): Promise<{ success: boolean }> {
     await platformDb.execute(
       sql`DELETE FROM zonga_eventbrite_connections WHERE org_id = ${ctx.orgId}`,
     )
+
+    const pack = buildEvidencePackFromAction({
+      actionType: 'EVENTBRITE_DISCONNECTED',
+      orgId: ctx.orgId,
+      executedBy: ctx.actorId,
+      actionId: crypto.randomUUID(),
+    })
+    await processEvidencePack(pack)
+
     revalidatePath('/dashboard/settings/integrations')
     return { success: true }
   } catch (error) {
@@ -333,6 +352,14 @@ export async function importEventbriteEvent(
       ticketTypes: ticketClasses.length,
     })
 
+    const pack = buildEvidencePackFromAction({
+      actionType: 'EVENTBRITE_EVENT_IMPORTED',
+      orgId: ctx.orgId,
+      executedBy: ctx.actorId,
+      actionId: crypto.randomUUID(),
+    })
+    await processEvidencePack(pack)
+
     revalidatePath('/dashboard/events')
     return { success: true, eventId: inserted.id }
   } catch (error) {
@@ -436,6 +463,15 @@ export async function syncEventbriteEvent(
     }
 
     logger.info('Eventbrite event synced', { eventId, eventbriteId: event.eventbriteId })
+
+    const pack = buildEvidencePackFromAction({
+      actionType: 'EVENTBRITE_EVENT_SYNCED',
+      orgId: ctx.orgId,
+      executedBy: ctx.actorId,
+      actionId: crypto.randomUUID(),
+    })
+    await processEvidencePack(pack)
+
     revalidatePath(`/dashboard/events/${eventId}`)
     revalidatePath('/dashboard/events')
     return { success: true }

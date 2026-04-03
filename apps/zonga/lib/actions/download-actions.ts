@@ -13,6 +13,7 @@ import { logger } from '@/lib/logger'
 import { getListenerPlan } from '@/lib/guards/plan-queries'
 import { guardCanDownload, guardSubscriptionActive } from '@/lib/guards/subscription-guards'
 import { getAudioStreamUrl } from '@/lib/blob'
+import { buildEvidencePackFromAction, processEvidencePack } from '@/lib/evidence'
 
 export interface DownloadResult {
   ok: boolean
@@ -67,6 +68,15 @@ export async function requestDownload(assetId: string): Promise<DownloadResult> 
     )
 
     logger.info('Download granted', { listenerId: ctx.actorId, assetId })
+
+    const pack = buildEvidencePackFromAction({
+      actionType: 'CONTENT_DOWNLOAD_GRANTED',
+      orgId: ctx.orgId,
+      executedBy: ctx.actorId,
+      actionId: crypto.randomUUID(),
+    })
+    await processEvidencePack(pack)
+
     return { ok: true, downloadUrl }
   } catch (error) {
     logger.error('requestDownload failed', { error })

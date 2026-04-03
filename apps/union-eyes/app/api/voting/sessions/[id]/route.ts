@@ -10,6 +10,8 @@ import {
   updateVotingSession,
   deleteVotingSession,
 } from '@/lib/services/voting-service';
+import { buildUnionEvidencePack } from '@/lib/evidence';
+import { logger } from '@/lib/logger';
 
 export const dynamic = 'force-dynamic';
 
@@ -48,7 +50,7 @@ export const PATCH = withApi(
       description: 'Update a voting session. Requires steward role.',
     },
   },
-  async ({ params, body }) => {
+  async ({ params, body, organizationId, userId }) => {
     const updated = await updateVotingSession(params.id, {
       ...body,
       startTime: body.startTime ? new Date(body.startTime) : undefined,
@@ -58,6 +60,14 @@ export const PATCH = withApi(
       const { ApiError } = await import('@/lib/api/errors');
       throw ApiError.notFound('Voting session');
     }
+
+    buildUnionEvidencePack({
+      actionType: 'VOTING_SESSION_UPDATED',
+      orgId: organizationId!,
+      actorId: userId!,
+      artifacts: [{ type: 'voting_session', data: { sessionId: params.id, changes: body } }],
+    }).catch((err) => logger.warn('Evidence pack failed', { error: String(err), actionType: 'VOTING_SESSION_UPDATED' }));
+
     return updated;
   }
 );
@@ -71,8 +81,16 @@ export const DELETE = withApi(
       description: 'Delete a voting session. Requires steward role.',
     },
   },
-  async ({ params }) => {
+  async ({ params, organizationId, userId }) => {
     await deleteVotingSession(params.id);
+
+    buildUnionEvidencePack({
+      actionType: 'VOTING_SESSION_DELETED',
+      orgId: organizationId!,
+      actorId: userId!,
+      artifacts: [{ type: 'voting_session', data: { sessionId: params.id } }],
+    }).catch((err) => logger.warn('Evidence pack failed', { error: String(err), actionType: 'VOTING_SESSION_DELETED' }));
+
     return { deleted: true };
   }
 );

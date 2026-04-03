@@ -88,6 +88,16 @@ export interface WithApiOptions<
     cron?: boolean;
   };
 
+  // ── Org Scope ────────────────────────────────────────────────────────────────
+
+  /**
+   * Require a resolved organizationId before running the handler.
+   * Defaults to `true` for authenticated routes. Set `false` only for
+   * user-profile or onboarding routes that legitimately operate outside
+   * an org context.
+   */
+  requireOrg?: boolean;
+
   // ── Validation ────────────────────────────────────────────────────────────
 
   /** Zod schema for request body (automatically parsed from `request.json()`) */
@@ -209,6 +219,7 @@ export function withApi<
   // Pre-compute auth requirements
   const requireAuth = options.auth?.required !== false && !options.auth?.cron;
   const requireCron = options.auth?.cron === true;
+  const requireOrg = options.requireOrg ?? requireAuth; // default: enforce org for auth'd routes
   const minRoleLevel = options.auth?.minRole
     ? (ROLE_HIERARCHY[options.auth.minRole] ?? 0)
     : null;
@@ -308,7 +319,17 @@ export function withApi<
         }
       }
 
-      // ── 4b. Entitlement check ─────────────────────────────────────────
+      // ── 4b. Org-scope enforcement ─────────────────────────────────────
+      if (requireOrg && user && !user.organizationId) {
+        return standardErrorResponse(
+          ErrorCode.INSUFFICIENT_PERMISSIONS,
+          'Organization context required — select an organization before accessing this resource',
+          undefined,
+          traceId,
+        );
+      }
+
+      // ── 4c. Entitlement check ─────────────────────────────────────────
       if (options.entitlement && user?.organizationId) {
         try {
           await requireEntitlement(user.organizationId, options.entitlement, user.id);

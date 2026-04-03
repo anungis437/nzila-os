@@ -14,6 +14,8 @@ import {
 import { withOrganizationAuth } from "@/lib/organization-middleware";
 import { hasMinRole } from "@/lib/api-auth-guard";
 import { auditDataMutation } from "@/lib/audit-logger";
+import { buildUnionEvidencePack } from '@/lib/evidence';
+import { logger } from '@/lib/logger';
 import {
   ErrorCode,
   standardErrorResponse,
@@ -90,6 +92,13 @@ export const POST = withOrganizationAuth(async (request, context, params?: { id:
       resourceId: doc.id,
       newState: doc,
     });
+
+    buildUnionEvidencePack({
+      actionType: 'GRIEVANCE_DOCUMENT_UPLOADED',
+      orgId: organizationId,
+      actorId: userId,
+      artifacts: [{ type: 'grievance_document', data: { grievanceId: params.id, documentId: doc.id, documentType: parsed.data.documentType } }],
+    }).catch((err) => logger.warn('Evidence pack failed', { error: String(err), actionType: 'GRIEVANCE_DOCUMENT_UPLOADED' }));
 
     return standardSuccessResponse(doc);
   } catch (_error) {

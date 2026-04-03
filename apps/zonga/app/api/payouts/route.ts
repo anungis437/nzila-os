@@ -4,16 +4,13 @@
  * POST → execute a payout
  */
 import { NextResponse } from 'next/server'
-import { authenticateUser, withRequestContext } from '@/lib/api-guards'
+import { withOrgScope } from '@/lib/api-guards'
 import { withSpan } from '@nzila/os-core/telemetry'
 import { listPayouts, executePayout } from '@/lib/actions/payout-actions'
 
 export async function GET(request: Request) {
-  return withRequestContext(request, () =>
+  return withOrgScope(request, () =>
     withSpan('api.payouts.list', { 'http.method': 'GET' }, async () => {
-      const auth = await authenticateUser()
-      if (!auth.ok) return auth.response
-
       const url = new URL(request.url)
       const page = Number(url.searchParams.get('page') ?? '1')
       const creatorId = url.searchParams.get('creatorId') ?? undefined
@@ -25,10 +22,8 @@ export async function GET(request: Request) {
 }
 
 export async function POST(request: Request) {
-  return withRequestContext(request, () =>
+  return withOrgScope(request, () =>
     withSpan('api.payouts.execute', { 'http.method': 'POST' }, async () => {
-      const auth = await authenticateUser()
-      if (!auth.ok) return auth.response
 
       try {
         const body = await request.json()

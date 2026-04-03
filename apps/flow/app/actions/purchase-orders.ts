@@ -15,6 +15,7 @@ import {
 } from '@nzila/commerce-db'
 import { getDbContext, getReadContext } from '@/lib/clerk-org-resolver'
 import { executeCommand } from '@/lib/control/control-adapter'
+import { buildEvidencePackFromAction, processEvidencePack } from '@/lib/evidence'
 
 type POStatus =
   | 'draft'
@@ -67,7 +68,9 @@ export async function createPurchaseOrderAction(data: {
 }) {
   const ctx = await getDbContext()
   const ref = data.ref ?? (await generatePORef(ctx))
-  return createPurchaseOrder(ctx, { ...data, ref })
+  const result = await createPurchaseOrder(ctx, { ...data, ref })
+  await processEvidencePack(buildEvidencePackFromAction({ actionType: 'PURCHASE_ORDER_CREATED', orgId: ctx.orgId, actorId: ctx.actorId }))
+  return result
 }
 
 export async function addPurchaseOrderLineAction(
@@ -83,7 +86,9 @@ export async function addPurchaseOrderLineAction(
   },
 ) {
   const ctx = await getDbContext()
-  return addPurchaseOrderLine(ctx, purchaseOrderId, data)
+  const result = await addPurchaseOrderLine(ctx, purchaseOrderId, data)
+  await processEvidencePack(buildEvidencePackFromAction({ actionType: 'PO_LINE_ADDED', orgId: ctx.orgId, actorId: ctx.actorId, metadata: { purchaseOrderId } }))
+  return result
 }
 
 export async function updatePurchaseOrderAction(
@@ -99,7 +104,9 @@ export async function updatePurchaseOrderAction(
   }>,
 ) {
   const ctx = await getDbContext()
-  return updatePurchaseOrder(ctx, purchaseOrderId, data)
+  const result = await updatePurchaseOrder(ctx, purchaseOrderId, data)
+  await processEvidencePack(buildEvidencePackFromAction({ actionType: 'PURCHASE_ORDER_UPDATED', orgId: ctx.orgId, actorId: ctx.actorId, metadata: { purchaseOrderId } }))
+  return result
 }
 
 export async function updatePurchaseOrderLineAction(
@@ -113,17 +120,23 @@ export async function updatePurchaseOrderLineAction(
   }>,
 ) {
   const ctx = await getDbContext()
-  return updatePurchaseOrderLine(ctx, lineId, data)
+  const result = await updatePurchaseOrderLine(ctx, lineId, data)
+  await processEvidencePack(buildEvidencePackFromAction({ actionType: 'PO_LINE_UPDATED', orgId: ctx.orgId, actorId: ctx.actorId, metadata: { lineId } }))
+  return result
 }
 
 export async function deletePurchaseOrderLineAction(lineId: string) {
   const ctx = await getDbContext()
-  return deletePurchaseOrderLine(ctx, lineId)
+  const result = await deletePurchaseOrderLine(ctx, lineId)
+  await processEvidencePack(buildEvidencePackFromAction({ actionType: 'PO_LINE_DELETED', orgId: ctx.orgId, actorId: ctx.actorId, metadata: { lineId } }))
+  return result
 }
 
 export async function deletePurchaseOrderAction(purchaseOrderId: string) {
   const ctx = await getDbContext()
-  return deletePurchaseOrder(ctx, purchaseOrderId)
+  const result = await deletePurchaseOrder(ctx, purchaseOrderId)
+  await processEvidencePack(buildEvidencePackFromAction({ actionType: 'PURCHASE_ORDER_DELETED', orgId: ctx.orgId, actorId: ctx.actorId, metadata: { purchaseOrderId } }))
+  return result
 }
 
 // ── Workflow Actions ──────────────────────────────────────────────────────

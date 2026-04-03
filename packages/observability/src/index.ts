@@ -58,3 +58,9 @@ export {
   type TraceMiddlewareOptions,
   type GenericRequest,
 } from './middleware.js'
+
+export {
+  createAppTelemetry,
+  type AppTelemetry,
+  type AppTelemetryConfig,
+} from './app-telemetry.js'

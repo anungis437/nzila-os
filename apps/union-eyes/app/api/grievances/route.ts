@@ -21,6 +21,8 @@ import {
 } from "@/lib/api/standardized-responses";
 import { eq, desc } from "drizzle-orm";
 import { requireEntitlement } from '@/services/platform-economics/entitlement-guard';
+import { buildUnionEvidencePack } from '@/lib/evidence';
+import { logger } from '@/lib/logger';
 
 // ── Validation ──────────────────────────────────────────────────────────────
 
@@ -96,6 +98,14 @@ export const POST = withOrganizationAuth(async (request, context) => {
       resourceId: grievance.id,
       details: { grievanceNumber: grievance.grievanceNumber, type: data.type },
     });
+
+    // Evidence: tamper-proof grievance filing trail
+    buildUnionEvidencePack({
+      actionType: 'GRIEVANCE_FILED',
+      orgId: organizationId,
+      actorId: userId,
+      artifacts: [{ type: 'grievance', data: { grievanceId: grievance.id, grievanceNumber: grievance.grievanceNumber, type: data.type } }],
+    }).catch((err) => logger.warn('Evidence pack failed', { error: String(err), actionType: 'GRIEVANCE_FILED' }))
 
     return standardSuccessResponse(grievance);
   } catch (_error) {

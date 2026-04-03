@@ -83,6 +83,7 @@ describe('API Authorization Contract (INV-04)', () => {
       /getCurrentUser\(/,        // UE user auth utility
       /verifyShopifySignature\(/, // Shopify webhook signature verification
       /CRON_SECRET/,             // Cron job secret verification
+      /withOrgScope\(/,           // Org-scoped composite guard (auth + context + org)
     ]
 
     const violations: string[] = []

@@ -47,27 +47,36 @@ function getAppDirs(): string[] {
     .map((d) => join(APPS_DIR, d.name))
 }
 
-// Exemptions: services that have their own DB client for structural reasons.
-// These are documented and scheduled for migration to scopedDb.
+// Exemptions: narrowed to specific infrastructure files (not entire apps).
+// Each app's DB setup and schema files are exempt; route handlers are NOT.
 const EXEMPT_PATHS = [
   // Orchestrator API is a standalone non-Next.js service with its own DB client.
-  // Migration planned — see docs/migration/ENFORCEMENT_UPGRADE.md
   'apps/orchestrator-api/',
-  // Console app has legacy unscoped db imports across ~30 routes.
-  // Migration to createScopedDb(orgId) tracked in docs/migration/ENFORCEMENT_UPGRADE.md
-  'apps/console/',
-  // Partners app has legacy unscoped db import in partner-auth.
-  // Migration to createScopedDb(orgId) tracked in docs/migration/ENFORCEMENT_UPGRADE.md
-  'apps/partners/',
-  // Union-Eyes — Django-migrated app with direct DB access patterns.
-  // Migration to createScopedDb(orgId) tracked alongside console/partners.
-  'apps/union-eyes/',
-  // Flow — commerce app with legacy unscoped DB imports in services/repositories.
-  // Migration to createScopedDb(orgId) tracked in docs/migration/ENFORCEMENT_UPGRADE.md
-  'apps/flow/',
-  // Control Plane — db-bridge provides scoped DB bridge for internal admin operations.
-  // Migration tracked in docs/migration/ENFORCEMENT_UPGRADE.md
-  'apps/control-plane/',
+  // Console/Partners — only db setup files are exempt, not route handlers
+  'apps/console/db/',
+  'apps/console/lib/db',
+  'apps/partners/db/',
+  'apps/partners/lib/db',
+  // Union-Eyes — db setup + schema + multi-db client are exempt.
+  // API routes are now enforced via withApi `requireOrg` + contract tests.
+  'apps/union-eyes/db/',
+  'apps/union-eyes/lib/database/',
+  'apps/union-eyes/lib/db/',
+  // Union-Eyes — financial-service is a sidecar with its own DB client + migration scripts
+  'apps/union-eyes/services/',
+  // Flow — db setup files exempt, route handlers enforced via getDbContext.
+  // Flow uses the repository pattern: lib/ contains typed DAL repositories.
+  'apps/flow/db/',
+  'apps/flow/lib/',
+  'apps/flow/queries/',
+  'apps/flow/app/actions/',
+  // Flow ops/admin routes — system-wide aggregate metrics, no per-org scoping needed
+  'apps/flow/app/api/governance/telemetry/',
+  'apps/flow/app/api/metrics/',
+  'apps/flow/app/api/ops/summary/',
+  // Control Plane — db-bridge for internal admin operations
+  'apps/control-plane/server/',
+  'apps/control-plane/db/',
 ]
 
 function isExempt(filePath: string): boolean {

@@ -16,6 +16,7 @@ import {
   createPortalSession,
 } from '@nzila/payments-stripe'
 import { getStripePriceId, type ListenerPlan, type CreatorPlan } from '@/lib/plans'
+import { buildEvidencePackFromAction, processEvidencePack } from '@/lib/evidence'
 
 /* ─── Types ─── */
 
@@ -177,6 +178,14 @@ export async function createListenerPremiumCheckout(): Promise<{
       },
     })
 
+    const pack = buildEvidencePackFromAction({
+      actionType: 'LISTENER_PREMIUM_CHECKOUT_CREATED',
+      orgId: ctx.orgId ?? 'listener',
+      executedBy: ctx.actorId,
+      actionId: crypto.randomUUID(),
+    })
+    await processEvidencePack(pack)
+
     return { url }
   } catch (error) {
     logger.error('createListenerPremiumCheckout failed', { error })
@@ -237,6 +246,14 @@ export async function createLabelPlanCheckout(creatorId: string): Promise<{
       },
     })
 
+    const pack = buildEvidencePackFromAction({
+      actionType: 'LABEL_PLAN_CHECKOUT_CREATED',
+      orgId: ctx.orgId,
+      executedBy: ctx.actorId,
+      actionId: crypto.randomUUID(),
+    })
+    await processEvidencePack(pack)
+
     return { url }
   } catch (error) {
     logger.error('createLabelPlanCheckout failed', { error })
@@ -269,6 +286,14 @@ export async function createListenerPortalSession(): Promise<{
       customerId: listener.stripeCustomerId,
       returnUrl: `${baseUrl}/dashboard/settings`,
     })
+
+    const pack = buildEvidencePackFromAction({
+      actionType: 'LISTENER_PORTAL_SESSION_CREATED',
+      orgId: ctx.orgId ?? 'listener',
+      executedBy: ctx.actorId,
+      actionId: crypto.randomUUID(),
+    })
+    await processEvidencePack(pack)
 
     return { url: session.url }
   } catch (error) {
@@ -304,6 +329,14 @@ export async function createCreatorPortalSession(creatorId: string): Promise<{
       customerId: creator.stripeCustomerId,
       returnUrl: `${baseUrl}/dashboard/settings`,
     })
+
+    const pack = buildEvidencePackFromAction({
+      actionType: 'CREATOR_PORTAL_SESSION_CREATED',
+      orgId: ctx.orgId,
+      executedBy: ctx.actorId,
+      actionId: crypto.randomUUID(),
+    })
+    await processEvidencePack(pack)
 
     return { url: session.url }
   } catch (error) {

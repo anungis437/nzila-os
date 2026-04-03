@@ -10,7 +10,7 @@
  *   { action: 'portal_creator', creatorId: string }
  */
 import { NextResponse } from 'next/server'
-import { authenticateUser, withRequestContext } from '@/lib/api-guards'
+import { withOrgScope } from '@/lib/api-guards'
 import { withSpan } from '@nzila/os-core/telemetry'
 import {
   getListenerSubscription,
@@ -21,11 +21,8 @@ import {
 } from '@/lib/actions/subscription-actions'
 
 export async function GET(request: Request) {
-  return withRequestContext(request, () =>
+  return withOrgScope(request, () =>
     withSpan('api.subscriptions.status', { 'http.method': 'GET' }, async () => {
-      const auth = await authenticateUser()
-      if (!auth.ok) return auth.response
-
       const subscription = await getListenerSubscription()
       return NextResponse.json({ ok: true, data: subscription })
     }),
@@ -33,10 +30,8 @@ export async function GET(request: Request) {
 }
 
 export async function POST(request: Request) {
-  return withRequestContext(request, () =>
+  return withOrgScope(request, () =>
     withSpan('api.subscriptions.action', { 'http.method': 'POST' }, async () => {
-      const auth = await authenticateUser()
-      if (!auth.ok) return auth.response
 
       const body = await request.json()
       const action = body?.action

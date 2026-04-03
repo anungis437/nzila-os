@@ -9,6 +9,7 @@ import { db } from '@/db';
 import { employerRemittances } from '@/db/schema/dues-finance-schema';
 import { eq, and } from 'drizzle-orm';
 import { logger } from '@/lib/logger';
+import { buildUnionEvidencePack } from '@/lib/evidence';
 
 export const dynamic = 'force-dynamic';
 
@@ -73,6 +74,13 @@ export const PATCH = withApi(
       .returning();
 
     logger.info('Employer remittance updated', { remittanceId: id, organizationId });
+
+    buildUnionEvidencePack({
+      actionType: 'REMITTANCE_UPDATED',
+      orgId: organizationId!,
+      actorId: userId!,
+      artifacts: [{ type: 'remittance', data: { remittanceId: id, fields: Object.keys(body) } }],
+    }).catch((err) => logger.warn('Evidence pack failed', { error: String(err), actionType: 'REMITTANCE_UPDATED' }));
 
     return { data: updated };
   },

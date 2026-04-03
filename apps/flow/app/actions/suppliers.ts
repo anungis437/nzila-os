@@ -8,6 +8,7 @@ import {
   deleteSupplier,
 } from '@nzila/commerce-db'
 import { getDbContext, getReadContext } from '@/lib/clerk-org-resolver'
+import { buildEvidencePackFromAction, processEvidencePack } from '@/lib/evidence'
 
 // ── Read Actions ──────────────────────────────────────────────────────────
 
@@ -40,7 +41,9 @@ export async function createSupplierAction(data: {
   tags?: string[]
 }) {
   const ctx = await getDbContext()
-  return createSupplier(ctx, data)
+  const result = await createSupplier(ctx, data)
+  await processEvidencePack(buildEvidencePackFromAction({ actionType: 'SUPPLIER_CREATED', orgId: ctx.orgId, actorId: ctx.actorId }))
+  return result
 }
 
 export async function updateSupplierAction(
@@ -59,10 +62,14 @@ export async function updateSupplierAction(
   }>,
 ) {
   const ctx = await getDbContext()
-  return updateSupplier(ctx, supplierId, data)
+  const result = await updateSupplier(ctx, supplierId, data)
+  await processEvidencePack(buildEvidencePackFromAction({ actionType: 'SUPPLIER_UPDATED', orgId: ctx.orgId, actorId: ctx.actorId, metadata: { supplierId } }))
+  return result
 }
 
 export async function deleteSupplierAction(supplierId: string) {
   const ctx = await getDbContext()
-  return deleteSupplier(ctx, supplierId)
+  const result = await deleteSupplier(ctx, supplierId)
+  await processEvidencePack(buildEvidencePackFromAction({ actionType: 'SUPPLIER_DELETED', orgId: ctx.orgId, actorId: ctx.actorId, metadata: { supplierId } }))
+  return result
 }
