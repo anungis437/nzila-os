@@ -6,7 +6,7 @@
 import { withApi, ApiError } from '@/lib/api/framework';
 import { db } from '@/db';
 import { grievances } from '@/db/schema/domains/claims/grievances';
-import { eq, and, sql, gte } from 'drizzle-orm';
+import { eq } from 'drizzle-orm';
 
 export const dynamic = 'force-dynamic';
 

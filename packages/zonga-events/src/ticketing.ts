@@ -8,10 +8,7 @@ import type {
   TicketOrder,
   TicketTransfer,
   PromoCode,
-  RefundRequest,
   TicketTier,
-  PromoCodeType,
-  RefundStatus,
   TransferStatus,
 } from './types'
 import { TicketStatus } from './types'

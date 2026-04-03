@@ -237,7 +237,7 @@ export const POST = withRoleAuth('steward', async (request: NextRequest, context
       } as any);
 
       return NextResponse.json({ auth_url: authUrl });
-    } catch (error) {
+    } catch (_error) {
 return NextResponse.json(
         {
           error: 'Failed to initiate OAuth flow',
@@ -476,7 +476,7 @@ export const PUT = withRoleAuth('member', async (request: NextRequest, context: 
 
         throw error;
       }
-    } catch (error) {
+    } catch (_error) {
 return NextResponse.json(
         {
           error: 'Failed to refresh token',

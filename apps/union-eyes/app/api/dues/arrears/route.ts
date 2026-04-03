@@ -9,8 +9,7 @@
  */
 import { withApi, ApiError } from '@/lib/api/framework';
 import { db } from '@/db';
-import { memberArrears } from '@/db/schema/dues-finance-schema';
-import { eq, ne, sql } from 'drizzle-orm';
+import { sql } from 'drizzle-orm';
 import { withRLSContext } from '@/lib/db/with-rls-context';
 
 export const dynamic = 'force-dynamic';

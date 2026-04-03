@@ -408,12 +408,11 @@ toast({
                 <CartesianGrid strokeDasharray="3 3" />
                 <XAxis dataKey="month" />
                 <YAxis />
-                <Tooltip 
-                   
-                  formatter={((value: number | undefined, name: string) => {
-                    if (name === 'amount') return [`$${(value ?? 0).toFixed(2)}`, 'Total Amount'];
-                    return [value ?? 0, 'Count'];
-                  }) as any}
+                <Tooltip
+                  formatter={(value: number, name: string) => {
+                    if (name === 'amount') return [`$${value.toFixed(2)}`, 'Total Amount'] as [string, string];
+                    return [value, 'Count'] as [number, string];
+                  }}
                 />
                 <Legend />
                 <Line type="monotone" dataKey="amount" stroke="#8884d8" name="Total Amount" />

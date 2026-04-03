@@ -15,6 +15,7 @@ import {
   applyFees,
   calculateSplits,
   DEFAULT_FEE_RULES,
+  RevenueSource,
 } from '@nzila/zonga-economics'
 import type { EventSettlement, Event, TicketOrder } from './types'
 
@@ -46,17 +47,17 @@ const now = new Date('2024-01-01')
  */
 export const DEFAULT_EVENT_SPLITS: readonly SplitRule[] = [
   {
-    id: 'evt-split-platform', orgId: '*', revenueSource: 'ticket_sale' as any,
+    id: 'evt-split-platform', orgId: '*', revenueSource: RevenueSource.TICKET_SALE,
     recipientAccountId: 'platform', recipientName: 'Platform',
     sharePercent: 7.5, priority: 0, isActive: true, effectiveFrom: now, effectiveUntil: null,
   },
   {
-    id: 'evt-split-promoter', orgId: '*', revenueSource: 'ticket_sale' as any,
+    id: 'evt-split-promoter', orgId: '*', revenueSource: RevenueSource.TICKET_SALE,
     recipientAccountId: 'promoter', recipientName: 'Promoter',
     sharePercent: 32.5, priority: 1, isActive: true, effectiveFrom: now, effectiveUntil: null,
   },
   {
-    id: 'evt-split-artist', orgId: '*', revenueSource: 'ticket_sale' as any,
+    id: 'evt-split-artist', orgId: '*', revenueSource: RevenueSource.TICKET_SALE,
     recipientAccountId: 'artist', recipientName: 'Artist(s)',
     sharePercent: 60, priority: 2, isActive: true, effectiveFrom: now, effectiveUntil: null,
   },
@@ -117,7 +118,7 @@ export function computeEventRevenue(
   const feeResult = applyFees({
     grossAmount: netRevenue,
     currency: 'USD' as Currency,
-    revenueSource: 'ticket_sale' as any,
+    revenueSource: RevenueSource.TICKET_SALE,
     rules: applicableFees,
   })
 
@@ -125,7 +126,7 @@ export function computeEventRevenue(
     revenueEventId: `event-revenue-${eventId}`,
     grossAmount: netRevenue,
     currency: 'USD' as Currency,
-    revenueSource: 'ticket_sale' as any,
+    revenueSource: RevenueSource.TICKET_SALE,
     splitRules: rules,
     feeRules: applicableFees,
   })
@@ -147,7 +148,7 @@ export function computeEventRevenue(
 export function buildEventSettlement(
   breakdown: EventRevenueBreakdown,
   artistId: string,
-  promoterId: string,
+  _promoterId: string,
 ): EventSettlement {
   const artistSplit =
     breakdown.splits.distributions.find((d) => d.recipientName === 'Artist(s)')?.amount ?? 0

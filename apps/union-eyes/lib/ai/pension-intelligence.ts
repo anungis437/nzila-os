@@ -16,7 +16,7 @@
  */
 
 import { db } from '@/db/db';
-import { eq, and, desc, sum, count } from 'drizzle-orm';
+import { eq, and, sum, count } from 'drizzle-orm';
 import { getAiClient, UE_APP_KEY, UE_PROFILES, UE_SYSTEM_ORG_ID } from '@/lib/ai/ai-client';
 import {
   pensionPlans,

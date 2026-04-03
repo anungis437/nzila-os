@@ -14,7 +14,7 @@ import { describe, it, expect } from 'vitest'
 import { checkCapacity, buildCapacityModel, computeSellThrough } from './capacity'
 import { validatePromoCode, computeOrderTotal, validateTransfer, checkRefundEligibility } from './ticketing'
 import { validateScan, resolveOfflineConflicts, buildOfflineCache, computeCheckInStats } from './checkin'
-import type { OfflineScanRecord, CheckInResult } from './checkin'
+import type { OfflineScanRecord } from './checkin'
 import { checkSettlementReadiness, computeEventRevenue, buildEventSettlement, DEFAULT_EVENT_SPLITS } from './event-settlement'
 import type {
   TicketInventory,
