@@ -18,7 +18,7 @@
 
 import { db } from '@/db/db';
 import { eq, and, desc, gte, count, sql } from 'drizzle-orm';
-import { getAiClient, UE_APP_KEY, UE_PROFILES } from '@/lib/ai/ai-client';
+import { getAiClient, UE_APP_KEY, UE_PROFILES, UE_SYSTEM_ORG_ID } from '@/lib/ai/ai-client';
 import { aiInsightReports, type AiInsightReportInsert } from '@/db/schema/domains/ml/ai-insight-reports';
 import { grievances } from '@/db/schema/domains/claims/grievances';
 import { employers } from '@/db/schema/domains/compliance/employer-compliance';
@@ -98,7 +98,7 @@ export async function generateInsightReport(params: {
   const ai = getAiClient();
   const prompt = buildInsightPrompt(reportType, timeframe, context);
   const aiResult = await ai.generate({
-    orgId: organizationId,
+    orgId: UE_SYSTEM_ORG_ID,
     appKey: UE_APP_KEY,
     profileKey: UE_PROFILES.EXECUTIVE_INSIGHTS,
     input: prompt,

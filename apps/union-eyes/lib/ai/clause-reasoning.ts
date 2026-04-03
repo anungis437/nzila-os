@@ -15,7 +15,7 @@
 
 import { db } from '@/db/db';
 import { eq, and, desc } from 'drizzle-orm';
-import { getAiClient, UE_APP_KEY, UE_PROFILES } from '@/lib/ai/ai-client';
+import { getAiClient, UE_APP_KEY, UE_PROFILES, UE_SYSTEM_ORG_ID } from '@/lib/ai/ai-client';
 import { aiClauseReasonings, type AiClauseReasoningInsert } from '@/db/schema/domains/ml/ai-clause-reasoning';
 import { grievances } from '@/db/schema/domains/claims/grievances';
 import { auditAiInteraction, buildAiEnvelope, type AiResponseEnvelope } from './ai-feature-guard';
@@ -75,7 +75,7 @@ export async function suggestClausesForGrievance(
   const ai = getAiClient();
   const prompt = buildClausePrompt(grievance);
   const aiResult = await ai.generate({
-    orgId: organizationId,
+    orgId: UE_SYSTEM_ORG_ID,
     appKey: UE_APP_KEY,
     profileKey: UE_PROFILES.CLAUSE_REASONING,
     input: prompt,
@@ -154,7 +154,7 @@ export async function explainClauseRelevance(
   ].join('\n');
 
   const aiResult = await ai.generate({
-    orgId: organizationId,
+    orgId: UE_SYSTEM_ORG_ID,
     appKey: UE_APP_KEY,
     profileKey: UE_PROFILES.CLAUSE_REASONING,
     input: prompt,
