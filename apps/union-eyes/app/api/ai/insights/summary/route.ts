@@ -13,8 +13,15 @@ import { guardAiFeature } from '@/lib/ai/ai-feature-guard';
 import { getInsightReports } from '@/lib/ai/executive-insights';
 import { standardErrorResponse, standardSuccessResponse, ErrorCode } from '@/lib/api/standardized-responses';
 import { requireEntitlement } from '@/services/platform-economics/entitlement-guard';
+import { checkRateLimit, RATE_LIMITS } from '@/lib/rate-limiter';
 
 export const GET = withRoleAuth('officer', async (_request: NextRequest, context: BaseAuthContext) => {
+  // Rate limit — AI_COMPLETION is the most expensive tier (20/hr per user)
+  const rl = await checkRateLimit(`ai-insights-summary:${context.userId}`, RATE_LIMITS.AI_COMPLETION);
+  if (!rl.allowed) {
+    return standardErrorResponse(ErrorCode.RATE_LIMIT_EXCEEDED, 'AI rate limit exceeded. Try again later.');
+  }
+
   const blocked = await guardAiFeature(AI_FEATURES.EXECUTIVE_INSIGHTS, {
     userId: context.userId,
     organizationId: context.organizationId,

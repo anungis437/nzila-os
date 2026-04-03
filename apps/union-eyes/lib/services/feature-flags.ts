@@ -93,6 +93,12 @@ export const AI_FEATURES = {
   STEWARD_COPILOT: 'ai_steward_copilot',
   /** Executive insights: trend forecasts, hotspot predictions */
   EXECUTIVE_INSIGHTS: 'ai_executive_insights',
+  /** Pension funding analysis: funding ratio interpretation + trustee recommendations */
+  PENSION_FUNDING_ANALYSIS: 'ai_pension_funding_analysis',
+  /** Pension benefit projection: member benefit estimates at target retirement age */
+  PENSION_BENEFIT_PROJECTION: 'ai_pension_benefit_projection',
+  /** Pension trustee summary: plain-language summary of actuarial valuations */
+  PENSION_TRUSTEE_SUMMARY: 'ai_pension_trustee_summary',
 } as const;
 
 /**

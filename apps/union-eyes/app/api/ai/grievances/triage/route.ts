@@ -16,6 +16,7 @@ import { guardAiFeature } from '@/lib/ai/ai-feature-guard';
 import { analyzeGrievance } from '@/lib/ai/grievance-triage';
 import { standardErrorResponse, standardSuccessResponse, ErrorCode } from '@/lib/api/standardized-responses';
 import { checkRateLimit, RATE_LIMITS, createRateLimitHeaders as _createRateLimitHeaders } from '@/lib/rate-limiter';
+import { requireEntitlement } from '@/services/platform-economics/entitlement-guard';
 
 const triageSchema = z.object({
   grievanceId: z.string().uuid(),
@@ -35,7 +36,10 @@ export const POST = withRoleAuth('steward', async (request: NextRequest, context
   });
   if (blocked) return blocked;
 
-  // 3. Validate
+  // 3. Entitlement (billing gate)
+  await requireEntitlement(context.organizationId!, 'ai_advanced_insights', context.userId);
+
+  // 4. Validate
   const body = await request.json();
   const parsed = triageSchema.safeParse(body);
   if (!parsed.success) {
