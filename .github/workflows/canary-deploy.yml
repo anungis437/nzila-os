@@ -53,7 +53,7 @@ jobs:
     name: Pre-Canary Gates
     steps:
       - uses: actions/checkout@v4
-      - uses: pnpm/action-setup@41ff72655975bd51cab0327fa583b6e92b6d3061
+      - uses: pnpm/action-setup@fc06bc1257f339d1d5d8b3a19a8cae5388b55320
       - uses: actions/setup-node@v4
         with:
           node-version: '22'
