@@ -78,10 +78,13 @@ export default function MemberPortalDashboard() {
         fetch('/api/satisfaction'),
       ]);
 
+      let freshClaims: RecentClaim[] = [];
+
       if (memberResponse.ok) {
         const data = await memberResponse.json();
         setStats(data.stats);
-        setRecentClaims(data.recentClaims || []);
+        freshClaims = data.recentClaims || [];
+        setRecentClaims(freshClaims);
       }
 
       // Integrate real dues balance from financial service
@@ -103,11 +106,10 @@ export default function MemberPortalDashboard() {
         }
       }
 
-      // Build activity feed from recent claims and transactions
+      // Build activity feed from recent claims — use freshClaims (not stale state)
       const activityItems: Activity[] = [];
       
-      // Add recent claims to activity
-      recentClaims.slice(0, 3).forEach(claim => {
+      freshClaims.slice(0, 3).forEach(claim => {
         activityItems.push({
           id: claim.claimId,
           type: 'claim_submitted',
@@ -124,7 +126,7 @@ export default function MemberPortalDashboard() {
 } finally {
       setLoading(false);
     }
-  }, [recentClaims]);
+  }, []);
 
   useEffect(() => {
     fetchMemberData();

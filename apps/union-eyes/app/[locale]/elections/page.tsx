@@ -32,7 +32,7 @@ import { useTranslations } from 'next-intl';
 interface ElectionStats {
   activeElections: number;
   totalVoters: number;
-  votesCase: number;
+  votesCast: number;
   upcomingElections: number;
 }
 
@@ -54,7 +54,7 @@ export default function ElectionsDashboardPage() {
   const [stats, setStats] = useState<ElectionStats>({
     activeElections: 0,
     totalVoters: 0,
-    votesCase: 0,
+    votesCast: 0,
     upcomingElections: 0,
   });
   const [elections, setElections] = useState<Election[]>([]);
@@ -83,7 +83,7 @@ export default function ElectionsDashboardPage() {
       setStats({
         activeElections: active,
         totalVoters,
-        votesCase: votesCast,
+        votesCast,
         upcomingElections: upcoming,
       });
     } catch (error) {
@@ -163,7 +163,7 @@ export default function ElectionsDashboardPage() {
             <div>
               <p className="text-sm text-muted-foreground">{t("votesCast")}</p>
               <p className="text-2xl font-bold text-purple-600">
-                {stats.votesCase}
+                {stats.votesCast}
               </p>
             </div>
             <CheckCircle className="h-8 w-8 text-purple-600" />
