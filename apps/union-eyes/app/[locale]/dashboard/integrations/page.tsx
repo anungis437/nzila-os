@@ -26,7 +26,6 @@ interface ApiKey {
   id: string;
   name: string;
   keyPrefix: string;
-  environment: string;
   status: string;
   scopes: string[];
   lastUsedAt: string | null;
@@ -83,12 +82,23 @@ interface IntegrationStats {
 
 async function loadApiKeys(orgId: string): Promise<ApiKey[]> {
   const result = await db.execute(sql`
-    SELECT id, name, key_prefix, environment, status, scopes,
-           last_used_at, expires_at, request_count, created_by, created_at
+    SELECT id, name, key_prefix,
+      CASE
+        WHEN revoked_at IS NOT NULL THEN 'revoked'
+        WHEN expires_at IS NOT NULL AND expires_at < NOW() THEN 'expired'
+        WHEN is_active THEN 'active'
+        ELSE 'inactive'
+      END AS status,
+      scopes, last_used_at, expires_at, usage_count AS request_count,
+      created_by, created_at
     FROM integration_api_keys
     WHERE organization_id = ${orgId}::uuid
     ORDER BY
-      CASE status WHEN 'active' THEN 0 WHEN 'expired' THEN 1 ELSE 2 END,
+      CASE
+        WHEN revoked_at IS NOT NULL THEN 2
+        WHEN expires_at IS NOT NULL AND expires_at < NOW() THEN 1
+        ELSE 0
+      END,
       created_at DESC
   `);
 
@@ -96,7 +106,6 @@ async function loadApiKeys(orgId: string): Promise<ApiKey[]> {
     id: r.id as string,
     name: r.name as string,
     keyPrefix: r.key_prefix as string,
-    environment: r.environment as string,
     status: r.status as string,
     scopes: (r.scopes as string[]) ?? [],
     lastUsedAt: r.last_used_at as string | null,
@@ -109,12 +118,19 @@ async function loadApiKeys(orgId: string): Promise<ApiKey[]> {
 
 async function loadWebhooks(orgId: string): Promise<WebhookEntry[]> {
   const result = await db.execute(sql`
-    SELECT id, name, url, events, status, last_triggered_at, last_status,
-           last_response_code, success_count, failure_count, created_at
+    SELECT id,
+      COALESCE(description, url) AS name,
+      url, events,
+      CASE WHEN is_active THEN 'active' ELSE 'paused' END AS status,
+      last_triggered_at,
+      NULL::text AS last_status,
+      NULL::int AS last_response_code,
+      GREATEST(delivery_count - failure_count, 0) AS success_count,
+      failure_count, created_at
     FROM integration_webhooks
     WHERE organization_id = ${orgId}::uuid
     ORDER BY
-      CASE status WHEN 'error' THEN 0 WHEN 'active' THEN 1 WHEN 'paused' THEN 2 ELSE 3 END,
+      CASE WHEN failure_count > 0 AND is_active THEN 0 WHEN is_active THEN 1 ELSE 2 END,
       created_at DESC
   `);
 
@@ -125,8 +141,8 @@ async function loadWebhooks(orgId: string): Promise<WebhookEntry[]> {
     events: (r.events as string[]) ?? [],
     status: r.status as string,
     lastTriggeredAt: r.last_triggered_at as string | null,
-    lastStatus: r.last_status as string | null,
-    lastResponseCode: r.last_response_code ? Number(r.last_response_code) : null,
+    lastStatus: null,
+    lastResponseCode: null,
     successCount: Number(r.success_count ?? 0),
     failureCount: Number(r.failure_count ?? 0),
     createdAt: r.created_at as string,
@@ -520,7 +536,6 @@ export default async function IntegrationsDashboard({
                       <div className="space-y-1 flex-1 min-w-0">
                         <div className="flex items-center gap-2 flex-wrap">
                           <span className="text-sm font-medium">{key.name}</span>
-                          <Badge variant="outline" className="text-xs">{key.environment}</Badge>
                         </div>
                         <p className="text-xs text-muted-foreground font-mono">{key.keyPrefix}••••••••</p>
                         <div className="flex items-center gap-3 text-xs text-muted-foreground flex-wrap">

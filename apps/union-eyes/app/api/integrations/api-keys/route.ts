@@ -1,17 +1,17 @@
 /**
- * CRUD collection route for oauthProviders
+ * CRUD collection route for integrationApiKeys
  */
 import { crudRoutes } from '@/lib/api/crud-factory';
-import { oauthProviders } from '@/db/schema';
+import { integrationApiKeys } from '@/db/schema';
 
 export const dynamic = 'force-dynamic';
 
 const { GET, POST } = crudRoutes({
-  table: oauthProviders,
-  pk: 'providerId',
-  tags: ["Auth"],
+  table: integrationApiKeys,
+  pk: 'id',
+  tags: ["Integrations"],
   orgScoped: true,
-  readRole: 'member',
+  readRole: 'admin',
   writeRole: 'admin',
 });
 export { GET, POST };
