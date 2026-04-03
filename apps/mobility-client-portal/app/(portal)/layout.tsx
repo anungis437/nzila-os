@@ -41,7 +41,7 @@ export default async function PortalLayout({ children }: { children: React.React
               ))}
             </nav>
 
-            <UserButton afterSignOutUrl="/sign-in" />
+            <UserButton />
           </div>
         </div>
       </header>

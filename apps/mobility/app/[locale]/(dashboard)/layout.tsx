@@ -43,7 +43,7 @@ export default async function DashboardLayout({ children }: { children: React.Re
         </nav>
 
         <div className="p-4 border-t border-gray-200">
-          <UserButton afterSignOutUrl="/sign-in" />
+          <UserButton />
         </div>
       </aside>
 

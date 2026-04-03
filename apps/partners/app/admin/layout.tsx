@@ -81,7 +81,7 @@ export default async function AdminLayout({ children }: { children: React.ReactN
 
         {/* User */}
         <div className="px-4 py-4 border-t border-slate-800 flex items-center gap-3">
-          <UserButton afterSignOutUrl="/" />
+          <UserButton />
           <span className="text-xs text-slate-400 truncate">Admin Account</span>
         </div>
       </aside>

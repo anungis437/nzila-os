@@ -41,7 +41,6 @@ export default async function RootLayout({ children }: { children: React.ReactNo
         <ClerkProvider
           signInFallbackRedirectUrl="/en-CA/dashboard"
           signUpFallbackRedirectUrl="/en-CA/dashboard"
-          afterSignOutUrl="/"
         >
           <Providers
             attribute="class"

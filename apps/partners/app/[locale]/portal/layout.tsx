@@ -92,7 +92,7 @@ export default async function PortalLayout({ children }: { children: React.React
 
         {/* User */}
         <div className="px-4 py-4 border-t border-slate-100 flex items-center gap-3">
-          <UserButton afterSignOutUrl="/" />
+          <UserButton />
           <span className="text-xs text-slate-500 truncate">Partner Account</span>
         </div>
       </aside>

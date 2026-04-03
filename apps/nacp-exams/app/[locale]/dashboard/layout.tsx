@@ -74,7 +74,6 @@ export default async function DashboardLayout({
           {/* Bottom user area */}
           <div className="px-4 py-4 border-t border-white/10">
             <UserButton
-              afterSignOutUrl="/"
               appearance={{
                 elements: {
                   avatarBox: 'w-8 h-8',
@@ -98,7 +97,7 @@ export default async function DashboardLayout({
           </div>
           <div className="flex items-center gap-4">
             <div className="md:hidden">
-              <UserButton afterSignOutUrl="/" />
+              <UserButton />
             </div>
           </div>
         </header>

@@ -151,7 +151,7 @@ export default async function ConsoleLayout({ children }: { children: React.Reac
         ))}
       </div>
       <div className="p-4 border-t border-gray-100 flex items-center gap-3">
-        <UserButton afterSignOutUrl="/" />
+        <UserButton />
         <span className="text-sm text-gray-500">Account</span>
       </div>
     </aside>

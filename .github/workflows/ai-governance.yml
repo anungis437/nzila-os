@@ -40,7 +40,7 @@ permissions:
   pull-requests: write
 
 env:
-  NODE_VERSION: '22'
+  NODE_VERSION: '22'
 
 jobs:
   # ── AI Code Quality ──────────────────────────────────────────────────────

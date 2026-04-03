@@ -7,7 +7,7 @@ export default function SignInPage() {
         <h1 className="text-2xl font-bold text-[var(--primary)] mb-2">Global Mobility OS</h1>
         <p className="text-gray-500">Client Portal</p>
       </div>
-      <SignIn afterSignInUrl="/my-cases" />
+      <SignIn fallbackRedirectUrl="/my-cases" />
     </div>
   )
 }
