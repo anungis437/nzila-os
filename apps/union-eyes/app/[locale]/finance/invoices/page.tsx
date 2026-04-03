@@ -25,12 +25,11 @@ import { formatCurrency } from '@/lib/utils';
 interface Invoice {
   id: string;
   invoiceNumber: string;
-  totalCad: string;
+  totalAmount: string;
   status: string;
   issueDate: string;
   dueDate: string;
-  paidAmountCad: string;
-  balanceDueCad: string;
+  amountPaid: string;
 }
 
 export default function InvoicesPage() {
@@ -124,9 +123,9 @@ export default function InvoicesPage() {
                   onClick={() => router.push(`/finance/invoices/${inv.id}`)}
                 >
                   <TableCell className="font-medium">{inv.invoiceNumber}</TableCell>
-                  <TableCell>{formatCurrency(Number(inv.totalCad))}</TableCell>
-                  <TableCell>{formatCurrency(Number(inv.paidAmountCad))}</TableCell>
-                  <TableCell>{formatCurrency(Number(inv.balanceDueCad))}</TableCell>
+                  <TableCell>{formatCurrency(Number(inv.totalAmount))}</TableCell>
+                  <TableCell>{formatCurrency(Number(inv.amountPaid))}</TableCell>
+                  <TableCell>{formatCurrency(Number(inv.totalAmount) - Number(inv.amountPaid))}</TableCell>
                   <TableCell>
                     <Badge variant={statusColor(inv.status)}>{inv.status}</Badge>
                   </TableCell>
