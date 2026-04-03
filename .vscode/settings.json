@@ -52,8 +52,9 @@
   "search.followSymlinks": false,
 
   // ── Python ──────────────────────────────────────────────
-  // Cross-platform: Linux-first (VPS), Windows fallback via env override
-  "python.defaultInterpreterPath": "${workspaceFolder}/.venv/bin/python",
+  // Cross-platform: Linux uses bin/python, Windows uses Scripts/python.exe.
+  // VS Code's Python extension auto-discovers .venv — this is a hint.
+  "python.defaultInterpreterPath": "${workspaceFolder}/.venv/Scripts/python.exe",
   "python.terminal.activateEnvironment": true,
   "python.analysis.typeCheckingMode": "basic",
   "python.analysis.autoImportCompletions": true,

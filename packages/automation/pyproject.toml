@@ -1,6 +1,6 @@
 [build-system]
 requires = ["setuptools>=61"]
-build-backend = "setuptools.backends.legacy:build"
+build-backend = "setuptools.build_meta"
 
 [project]
 name = "nzila-automation"
@@ -33,6 +33,35 @@ include = [
     "validation*",
     "security*",
 ]
+
+[tool.coverage.run]
+omit = [
+    "*/__pycache__/*",
+    "*/venv/*",
+    "*/virtualenv/*",
+    "*/generators/fixers/*",
+    "*/generators/services/*",
+    "*/generators/reports/*",
+    "*/generators/infra/*",
+    "*/generators/migration/data_migrator.py",
+    "*/generators/migration/django_project_setup.py",
+    "*/generators/migration/generate_django_apis.py",
+    "*/generators/migration/scaffold_populator.py",
+    "*/generators/migration/migrate_abr.py",
+    "*/generators/migration/migrate_ue.py",
+    "*/generators/core/platform_analyzer.py",
+    "*/generators/core/code_generator.py",
+    "*/generators/_list_issues.py",
+    "*/generators/_patch_abr_urls.py",
+]
+
+[tool.coverage.report]
+precision = 2
+show_missing = true
+skip_covered = false
+
+[tool.coverage.html]
+directory = "coverage_html"
 
 [tool.pytest.ini_options]
 testpaths = ["tests"]

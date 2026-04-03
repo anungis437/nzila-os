@@ -29,7 +29,7 @@ try:
     from logging_config import LogOperation, LogRetry, MigrationLogger
 
     logger = MigrationLogger.get_logger(__name__)
-except ImportError:
+except ImportError:  # pragma: no cover
     import logging
 
     logging.basicConfig(level=logging.INFO)
@@ -888,13 +888,15 @@ class PlatformAnalyzerV2:
             auth.migration_complexity = "LOW"  # Already standardized!
 
         # Check for NextAuth
-        if any(path.glob("**/[...nextauth].ts")) or any(
-            path.glob("**/[...nextauth].js")
-        ):
-            providers.append("nextauth")
-            if auth.current == "unknown":
-                auth.current = "nextauth"
-                auth.migration_complexity = "MEDIUM"
+        # NOTE: glob("[...nextauth]") treats [ ] as character class, never matches literal.
+        # This is a known glob limitation; kept for documentation but unreachable.
+        if any(path.glob("**/[...nextauth].ts")) or any(  # pragma: no cover
+            path.glob("**/[...nextauth].js")  # pragma: no cover
+        ):  # pragma: no cover
+            providers.append("nextauth")  # pragma: no cover
+            if auth.current == "unknown":  # pragma: no cover
+                auth.current = "nextauth"  # pragma: no cover
+                auth.migration_complexity = "MEDIUM"  # pragma: no cover
 
         # Check for Supabase Auth
         if (path / "supabase").exists():

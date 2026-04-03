@@ -28,8 +28,8 @@ Or use the convenience helper that returns a pre-wired container::
     slack = get_integration_container().resolve(SlackIntegration)
 """
 
-from .github import GitHubIntegration
 from .azure import AzureDevOpsIntegration
+from .github import GitHubIntegration
 from .notion import NotionIntegration
 from .slack import SlackIntegration
 
@@ -53,13 +53,15 @@ def register_integrations(container: "Container") -> "Container":
     # Import here to avoid a hard dependency if di.py is not on sys.path
     try:
         from di import Lifetime  # type: ignore[import]
-    except ImportError:
-        from ..di import Lifetime  # type: ignore[import]
+    except ImportError:  # pragma: no cover
+        from ..di import Lifetime  # type: ignore[import]  # pragma: no cover
 
     container.register(SlackIntegration, SlackIntegration, Lifetime.SINGLETON)
     container.register(GitHubIntegration, GitHubIntegration, Lifetime.SINGLETON)
     container.register(NotionIntegration, NotionIntegration, Lifetime.SINGLETON)
-    container.register(AzureDevOpsIntegration, AzureDevOpsIntegration, Lifetime.SINGLETON)
+    container.register(
+        AzureDevOpsIntegration, AzureDevOpsIntegration, Lifetime.SINGLETON
+    )
     return container
 
 
@@ -73,8 +75,8 @@ def get_integration_container() -> "Container":
     if _integration_container is None:
         try:
             from di import Container  # type: ignore[import]
-        except ImportError:
-            from ..di import Container  # type: ignore[import]
+        except ImportError:  # pragma: no cover
+            from ..di import Container  # type: ignore[import]  # pragma: no cover
         _integration_container = register_integrations(Container())
     return _integration_container
 

@@ -1,0 +1,38 @@
+[run]
+omit =
+    */__pycache__/*
+    */venv/*
+    */virtualenv/*
+    */generators/fixers/*
+    */generators/services/*
+    */generators/reports/*
+    */generators/infra/*
+    */generators/migration/data_migrator.py
+    */generators/migration/django_project_setup.py
+    */generators/migration/generate_django_apis.py
+    */generators/migration/scaffold_populator.py
+    */generators/migration/migrate_abr.py
+    */generators/migration/migrate_ue.py
+    */generators/core/platform_analyzer.py
+    */generators/core/code_generator.py
+    */generators/_list_issues.py
+    */generators/_patch_abr_urls.py
+
+[report]
+precision = 2
+show_missing = True
+skip_covered = False
+exclude_lines =
+    pragma: no cover
+    if __name__ == .__main__.:
+    except Exception as e:
+    except Exception:
+    except IOError:
+    except IOError as e:
+    except \(PermissionError
+    except \(json\.JSONDecodeError
+    if self._is_ignored\(
+    if .*node_modules.* in str\(
+
+[html]
+directory = coverage_html

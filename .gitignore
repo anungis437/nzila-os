@@ -206,3 +206,11 @@ ue-*.txt
 cov-*.txt
 coverage-output*.txt
 **/coverage-report*.txt
+pytest-*.txt
+
+# Python test / coverage artifacts
+packages/automation/packages/
+packages/automation/generators/checkpoints/
+coverage_html/
+**/.coverage
+**/coverage.xml

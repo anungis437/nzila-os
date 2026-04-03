@@ -29,6 +29,8 @@ vi.mock('@clerk/nextjs/server', () => ({
 vi.mock('@/lib/api-guards', () => ({
   authenticateUser: vi.fn().mockResolvedValue({ ok: true }),
   withRequestContext: (_req: Request, fn: () => unknown) => fn(),
+  withOrgScope: (_req: Request, fn: (ctx: { userId: string; orgId: string }) => unknown) =>
+    fn({ userId: 'user_test', orgId: 'org_test' }),
 }))
 
 vi.mock('@nzila/os-core/telemetry', () => ({

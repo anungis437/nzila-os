@@ -14,19 +14,22 @@ Features:
 
 import json
 import re
-from pathlib import Path
-from typing import Dict, List, Optional, Any, Set
-from dataclasses import dataclass, field, asdict
+from dataclasses import asdict, dataclass, field
 from datetime import datetime
 from enum import Enum
+from pathlib import Path
+from typing import Any, Dict, List, Optional, Set
 
 try:
     import sys
+
     sys.path.insert(0, str(Path(__file__).parent.parent.parent))
     from logging_config import MigrationLogger
+
     logger = MigrationLogger.get_logger(__name__)
-except ImportError:
+except ImportError:  # pragma: no cover
     import logging
+
     logging.basicConfig(level=logging.INFO)
     logger = logging.getLogger(__name__)
 
@@ -34,6 +37,7 @@ except ImportError:
 # ──────────────────────────────────────────────
 # Enums
 # ──────────────────────────────────────────────
+
 
 class PhaseStatus(Enum):
     NOT_STARTED = "not_started"
@@ -53,6 +57,7 @@ class QualityGateStatus(Enum):
 
 class MigrationPhase(Enum):
     """End-to-end migration phases"""
+
     ANALYSIS = "analysis"
     SCHEMA_EXTRACTION = "schema_extraction"
     CODE_GENERATION = "code_generation"
@@ -72,9 +77,11 @@ class MigrationPhase(Enum):
 # Data Classes
 # ──────────────────────────────────────────────
 
+
 @dataclass
 class QualityGate:
     """A quality gate that must pass before proceeding"""
+
     name: str
     description: str
     status: QualityGateStatus = QualityGateStatus.PENDING
@@ -101,6 +108,7 @@ class QualityGate:
 @dataclass
 class PhaseProgress:
     """Progress tracking for a single migration phase"""
+
     phase: str
     status: PhaseStatus = PhaseStatus.NOT_STARTED
     started_at: Optional[str] = None
@@ -138,7 +146,8 @@ class PhaseProgress:
         """Check if all required quality gates are passed or waived"""
         for gate in self.quality_gates:
             if gate.required and gate.status not in (
-                QualityGateStatus.PASSED, QualityGateStatus.WAIVED
+                QualityGateStatus.PASSED,
+                QualityGateStatus.WAIVED,
             ):
                 return False
         return True
@@ -147,6 +156,7 @@ class PhaseProgress:
 @dataclass
 class PlatformProgress:
     """Full migration progress for a platform"""
+
     platform_id: str
     platform_name: str
     phases: Dict[str, PhaseProgress] = field(default_factory=dict)
@@ -169,6 +179,7 @@ class PlatformProgress:
 # Default Quality Gates
 # ──────────────────────────────────────────────
 
+
 def _default_quality_gates(phase: MigrationPhase) -> List[QualityGate]:
     """Create default quality gates for each phase"""
     gates_map = {
@@ -189,7 +200,10 @@ def _default_quality_gates(phase: MigrationPhase) -> List[QualityGate]:
         ],
         MigrationPhase.DEPENDENCY_MAPPING: [
             QualityGate("deps_classified", "All packages classified"),
-            QualityGate("python_equivalents", "Python equivalents identified for migrate packages"),
+            QualityGate(
+                "python_equivalents",
+                "Python equivalents identified for migrate packages",
+            ),
             QualityGate("risk_assessed", "High-risk migrations flagged"),
         ],
         MigrationPhase.MODEL_MIGRATION: [
@@ -204,7 +218,9 @@ def _default_quality_gates(phase: MigrationPhase) -> List[QualityGate]:
         ],
         MigrationPhase.API_MIGRATION: [
             QualityGate("endpoints_parity", "All API endpoints have DRF equivalents"),
-            QualityGate("response_format_match", "Response formats match frontend expectations"),
+            QualityGate(
+                "response_format_match", "Response formats match frontend expectations"
+            ),
             QualityGate("api_tests_pass", "API integration tests pass"),
         ],
         MigrationPhase.TESTING: [
@@ -226,6 +242,7 @@ def _default_quality_gates(phase: MigrationPhase) -> List[QualityGate]:
 # ──────────────────────────────────────────────
 # Progress Tracker
 # ──────────────────────────────────────────────
+
 
 class ProgressTracker:
     """
@@ -250,8 +267,12 @@ class ProgressTracker:
 
     # ──────── Platform Management ────────
 
-    def init_platform(self, platform_id: str, platform_name: str,
-                      phases: Optional[List[MigrationPhase]] = None):
+    def init_platform(
+        self,
+        platform_id: str,
+        platform_name: str,
+        phases: Optional[List[MigrationPhase]] = None,
+    ):
         """Initialize progress tracking for a platform"""
         if platform_id in self.platforms:
             logger.info(f"Platform {platform_id} already initialized, skipping")
@@ -287,8 +308,14 @@ class ProgressTracker:
         logger.info(f"[{platform_id}] Phase {phase.value} → IN PROGRESS")
         self.save()
 
-    def update_phase(self, platform_id: str, phase: MigrationPhase,
-                     completed: int, total: int, notes: str = ""):
+    def update_phase(
+        self,
+        platform_id: str,
+        phase: MigrationPhase,
+        completed: int,
+        total: int,
+        notes: str = "",
+    ):
         """Update phase progress"""
         pp = self._get_phase(platform_id, phase)
         pp.update_progress(completed, total)
@@ -301,9 +328,12 @@ class ProgressTracker:
         """Mark a phase as completed"""
         pp = self._get_phase(platform_id, phase)
         if not pp.all_gates_passed():
-            failed_gates = [g.name for g in pp.quality_gates
-                          if g.required and g.status not in
-                          (QualityGateStatus.PASSED, QualityGateStatus.WAIVED)]
+            failed_gates = [
+                g.name
+                for g in pp.quality_gates
+                if g.required
+                and g.status not in (QualityGateStatus.PASSED, QualityGateStatus.WAIVED)
+            ]
             logger.warning(
                 f"[{platform_id}] Phase {phase.value} has unmet quality gates: "
                 f"{', '.join(failed_gates)}"
@@ -313,16 +343,14 @@ class ProgressTracker:
         logger.info(f"[{platform_id}] Phase {phase.value} → COMPLETED")
         self.save()
 
-    def block_phase(self, platform_id: str, phase: MigrationPhase,
-                    blocker: str):
+    def block_phase(self, platform_id: str, phase: MigrationPhase, blocker: str):
         """Mark a phase as blocked"""
         pp = self._get_phase(platform_id, phase)
         pp.block(blocker)
         logger.warning(f"[{platform_id}] Phase {phase.value} → BLOCKED: {blocker}")
         self.save()
 
-    def fail_phase(self, platform_id: str, phase: MigrationPhase,
-                   reason: str):
+    def fail_phase(self, platform_id: str, phase: MigrationPhase, reason: str):
         """Mark a phase as failed"""
         pp = self._get_phase(platform_id, phase)
         pp.fail(reason)
@@ -331,24 +359,27 @@ class ProgressTracker:
 
     # ──────── Quality Gates ────────
 
-    def pass_gate(self, platform_id: str, phase: MigrationPhase,
-                  gate_name: str, message: str = ""):
+    def pass_gate(
+        self, platform_id: str, phase: MigrationPhase, gate_name: str, message: str = ""
+    ):
         """Mark a quality gate as passed"""
         gate = self._get_gate(platform_id, phase, gate_name)
         gate.pass_gate(message)
         logger.info(f"[{platform_id}] Gate {gate_name} → PASSED")
         self.save()
 
-    def fail_gate(self, platform_id: str, phase: MigrationPhase,
-                  gate_name: str, message: str = ""):
+    def fail_gate(
+        self, platform_id: str, phase: MigrationPhase, gate_name: str, message: str = ""
+    ):
         """Mark a quality gate as failed"""
         gate = self._get_gate(platform_id, phase, gate_name)
         gate.fail_gate(message)
         logger.warning(f"[{platform_id}] Gate {gate_name} → FAILED: {message}")
         self.save()
 
-    def waive_gate(self, platform_id: str, phase: MigrationPhase,
-                   gate_name: str, reason: str):
+    def waive_gate(
+        self, platform_id: str, phase: MigrationPhase, gate_name: str, reason: str
+    ):
         """Waive a quality gate with documented reason"""
         gate = self._get_gate(platform_id, phase, gate_name)
         gate.waive_gate(reason)
@@ -391,11 +422,13 @@ class ProgressTracker:
         for phase_name, pp in self.platforms[platform_id].phases.items():
             for gate in pp.quality_gates:
                 if gate.status == QualityGateStatus.FAILED:
-                    failed.append({
-                        "phase": phase_name,
-                        "gate": gate.name,
-                        "message": gate.message,
-                    })
+                    failed.append(
+                        {
+                            "phase": phase_name,
+                            "gate": gate.name,
+                            "message": gate.message,
+                        }
+                    )
         return failed
 
     # ──────── Persistence ────────
@@ -426,14 +459,16 @@ class ProgressTracker:
         for name, pp in platform.phases.items():
             gates = []
             for g in pp.quality_gates:
-                gates.append({
-                    "name": g.name,
-                    "description": g.description,
-                    "status": g.status.value,
-                    "checked_at": g.checked_at,
-                    "message": g.message,
-                    "required": g.required,
-                })
+                gates.append(
+                    {
+                        "name": g.name,
+                        "description": g.description,
+                        "status": g.status.value,
+                        "checked_at": g.checked_at,
+                        "message": g.message,
+                        "required": g.required,
+                    }
+                )
             phases[name] = {
                 "phase": pp.phase,
                 "status": pp.status.value,
@@ -508,8 +543,9 @@ class ProgressTracker:
             raise ValueError(f"Phase {phase_name} not found for {platform_id}")
         return self.platforms[platform_id].phases[phase_name]
 
-    def _get_gate(self, platform_id: str, phase: MigrationPhase,
-                  gate_name: str) -> QualityGate:
+    def _get_gate(
+        self, platform_id: str, phase: MigrationPhase, gate_name: str
+    ) -> QualityGate:
         """Get a quality gate object"""
         pp = self._get_phase(platform_id, phase)
         for gate in pp.quality_gates:
@@ -527,20 +563,25 @@ class ProgressTracker:
             "",
         ]
 
-        platforms = ([self.platforms[platform_id]] if platform_id
-                     else list(self.platforms.values()))
+        platforms = (
+            [self.platforms[platform_id]]
+            if platform_id
+            else list(self.platforms.values())
+        )
 
         for platform in platforms:
             platform.compute_overall()
-            lines.extend([
-                f"## {platform.platform_name}",
-                f"**Overall Progress: {platform.overall_progress:.1f}%**",
-                f"Started: {platform.started_at or 'N/A'} | "
-                f"Last Updated: {platform.last_updated or 'N/A'}",
-                "",
-                "| Phase | Status | Progress | Tasks | Gates |",
-                "|-------|--------|----------|-------|-------|",
-            ])
+            lines.extend(
+                [
+                    f"## {platform.platform_name}",
+                    f"**Overall Progress: {platform.overall_progress:.1f}%**",
+                    f"Started: {platform.started_at or 'N/A'} | "
+                    f"Last Updated: {platform.last_updated or 'N/A'}",
+                    "",
+                    "| Phase | Status | Progress | Tasks | Gates |",
+                    "|-------|--------|----------|-------|-------|",
+                ]
+            )
 
             for phase_name, pp in platform.phases.items():
                 status_icon = {
@@ -552,12 +593,17 @@ class ProgressTracker:
                     PhaseStatus.SKIPPED: "⏭️",
                 }.get(pp.status, "❓")
 
-                tasks_str = (f"{pp.tasks_completed}/{pp.tasks_total}"
-                           if pp.tasks_total > 0 else "—")
+                tasks_str = (
+                    f"{pp.tasks_completed}/{pp.tasks_total}"
+                    if pp.tasks_total > 0
+                    else "—"
+                )
 
-                gates_passed = sum(1 for g in pp.quality_gates
-                                 if g.status in (QualityGateStatus.PASSED,
-                                                QualityGateStatus.WAIVED))
+                gates_passed = sum(
+                    1
+                    for g in pp.quality_gates
+                    if g.status in (QualityGateStatus.PASSED, QualityGateStatus.WAIVED)
+                )
                 gates_total = len(pp.quality_gates)
                 gates_str = f"{gates_passed}/{gates_total}" if gates_total else "—"
 
@@ -586,8 +632,7 @@ class ProgressTracker:
 
         return "\n".join(lines)
 
-    def write_dashboard(self, output_path: Path,
-                        platform_id: Optional[str] = None):
+    def write_dashboard(self, output_path: Path, platform_id: Optional[str] = None):
         """Write dashboard to Markdown file"""
         md = self.generate_dashboard(platform_id)
         output_path.parent.mkdir(parents=True, exist_ok=True)
@@ -596,16 +641,19 @@ class ProgressTracker:
 
     # ──────── Auto-Detection ────────
 
-    def auto_detect_progress(self, platform_id: str,
-                              workspace_root: Path):
+    def auto_detect_progress(self, platform_id: str, workspace_root: Path):
         """Auto-detect progress by checking file existence and outputs"""
         data_dir = workspace_root / "automation" / "data"
 
         # Analysis phase
         schema_report = data_dir / "SCHEMA_EXTRACTION_REPORT.md"
         if schema_report.exists():
-            self.pass_gate(platform_id, MigrationPhase.ANALYSIS,
-                          "schema_report_exists", "File exists")
+            self.pass_gate(
+                platform_id,
+                MigrationPhase.ANALYSIS,
+                "schema_report_exists",
+                "File exists",
+            )
             self.update_phase(platform_id, MigrationPhase.ANALYSIS, 1, 2)
 
         # Check for generation output
@@ -613,14 +661,22 @@ class ProgressTracker:
         if gen_dir.exists():
             model_files = list(gen_dir.rglob("models.py"))
             if model_files:
-                self.pass_gate(platform_id, MigrationPhase.CODE_GENERATION,
-                              "models_generated", f"{len(model_files)} model files")
+                self.pass_gate(
+                    platform_id,
+                    MigrationPhase.CODE_GENERATION,
+                    "models_generated",
+                    f"{len(model_files)} model files",
+                )
 
         # Check dependency report
         dep_report = data_dir / f"{platform_id}-dependency-report.json"
         if dep_report.exists():
-            self.pass_gate(platform_id, MigrationPhase.DEPENDENCY_MAPPING,
-                          "deps_classified", "Report generated")
+            self.pass_gate(
+                platform_id,
+                MigrationPhase.DEPENDENCY_MAPPING,
+                "deps_classified",
+                "Report generated",
+            )
 
         self.save()
 
@@ -628,6 +684,7 @@ class ProgressTracker:
 # ──────────────────────────────────────────────
 # CLI Entry Point
 # ──────────────────────────────────────────────
+
 
 def init_tracking(workspace_root: Path) -> ProgressTracker:
     """Initialize tracking for both flagship platforms"""
@@ -651,13 +708,17 @@ def init_tracking(workspace_root: Path) -> ProgressTracker:
 def main():
     """CLI entry point"""
     import argparse
+
     parser = argparse.ArgumentParser(description="Nzila Progress Tracker")
-    parser.add_argument("--workspace", type=Path,
-                        default=Path(__file__).parent.parent.parent)
-    parser.add_argument("--dashboard", action="store_true",
-                        help="Generate dashboard only")
-    parser.add_argument("--platform", choices=["abr", "ue"],
-                        help="Filter to specific platform")
+    parser.add_argument(
+        "--workspace", type=Path, default=Path(__file__).parent.parent.parent
+    )
+    parser.add_argument(
+        "--dashboard", action="store_true", help="Generate dashboard only"
+    )
+    parser.add_argument(
+        "--platform", choices=["abr", "ue"], help="Filter to specific platform"
+    )
     args = parser.parse_args()
 
     tracker = init_tracking(args.workspace)
