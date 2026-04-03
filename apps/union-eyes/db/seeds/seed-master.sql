@@ -361,8 +361,8 @@ WHERE organization_id = '458a56cb-251a-4c91-a0b5-81bb8ac39087';
 
 INSERT INTO organization_members (user_id, organization_id, role, status, name, email)
 VALUES
-  ('user_35NlrrNcfTv0DMh2kzBHyXZRtpb', '458a56cb-251a-4c91-a0b5-81bb8ac39087', 'app_owner',        'active', 'Aubert Nungisa',    'aubert@nzila.app'),
-  ('user_37Zo7OrvP4jy0J0MU5APfkDtE2V', '458a56cb-251a-4c91-a0b5-81bb8ac39087', 'app_owner',        'active', 'Platform Admin',    'admin@nzila.io'),
+  ('user_35NlrrNcfTv0DMh2kzBHyXZRtpb', '458a56cb-251a-4c91-a0b5-81bb8ac39087', 'app_owner',        'active', 'Aubert Nungisa',    'info@nzilaventures.com'),
+  ('user_37Zo7OrvP4jy0J0MU5APfkDtE2V', '458a56cb-251a-4c91-a0b5-81bb8ac39087', 'app_owner',        'active', 'Platform Admin',    'michel@nungisalaw.ca'),
   ('user_3A2c7Rsg6612F3BAxHxx5L29jRH', '458a56cb-251a-4c91-a0b5-81bb8ac39087', 'system_admin',     'active', 'Sandra Weatherby',  'test.employer@nzilaventures.com'),
   ('user_3A2c3b8lVI7gxi3Keb6xE4piwGv', '458a56cb-251a-4c91-a0b5-81bb8ac39087', 'fed_executive',    'active', 'Patty Coates',      'test.fedexec@nzilaventures.com'),
   ('user_3A2c6sEcW7WdJSnLVVQFB28PjIU', '458a56cb-251a-4c91-a0b5-81bb8ac39087', 'fed_staff',        'active', 'Tania Da Silva',    'test.localadmin@nzilaventures.com'),
@@ -395,8 +395,8 @@ BEGIN
     ('user_3BSzDlKgwVGWHOKtHluyRSdJNTb', v_clc_id, 'member', 'active', 'Patrick O''Connor',   'p.oconnor@clc-ctc.ca'),
     ('user_3BSzDtwjg8WXJf36fw9wjVTu8yX', v_clc_id, 'member', 'active', 'Fatima Al-Rashid',    'f.alrashid@clc-ctc.ca'),
     -- Platform admins (cross-org visibility)
-    ('user_35NlrrNcfTv0DMh2kzBHyXZRtpb', v_clc_id, 'admin',  'active', 'Aubert Nungisa',      'aubert@nzila.app'),
-    ('user_37Zo7OrvP4jy0J0MU5APfkDtE2V', v_clc_id, 'admin',  'active', 'Platform Admin',      'admin@nzila.io');
+    ('user_35NlrrNcfTv0DMh2kzBHyXZRtpb', v_clc_id, 'admin',  'active', 'Aubert Nungisa',      'info@nzilaventures.com'),
+    ('user_37Zo7OrvP4jy0J0MU5APfkDtE2V', v_clc_id, 'admin',  'active', 'Platform Admin',      'michel@nungisalaw.ca');
 END $$;
 
 -- 3c. CAPE-ACEP members (12 + 2 platform admins)
@@ -422,8 +422,8 @@ BEGIN
     ('user_3BSzEIXiSqVXnNYgymDZ1PY6ZhY', v_cape_id, 'health_safety_rep',   'active', 'Pierre Desmarais',     'p.desmarais@acep-cape.ca'),
     ('user_3BSzEIf1ARXNRQOs3d5Qju58yNZ', v_cape_id, 'member',              'active', 'Amira Hassan',         'a.hassan@acep-cape.ca'),
     -- Platform admins
-    ('user_35NlrrNcfTv0DMh2kzBHyXZRtpb', v_cape_id, 'admin',         'active', 'Aubert Nungisa',       'aubert@nzila.app'),
-    ('user_37Zo7OrvP4jy0J0MU5APfkDtE2V', v_cape_id, 'admin',         'active', 'Platform Admin',       'admin@nzila.io');
+    ('user_35NlrrNcfTv0DMh2kzBHyXZRtpb', v_cape_id, 'admin',         'active', 'Aubert Nungisa',       'info@nzilaventures.com'),
+    ('user_37Zo7OrvP4jy0J0MU5APfkDtE2V', v_cape_id, 'admin',         'active', 'Platform Admin',       'michel@nungisalaw.ca');
 END $$;
 
 -- 3d. CUPE National members (7 — national office staff, real Clerk IDs from staging DB)
@@ -465,8 +465,8 @@ VALUES
   (gen_random_uuid(), 'user_3BSzhvBJ63gV7BmDQlH6VTLm18g', '9210418f-6a4f-4dab-a7d2-4450d581dc81', 'member',               'active', 'Nathalie Lafontaine',  'n.lafontaine@city.toronto.ca'),
   (gen_random_uuid(), 'user_3BSzhpyvCHVWm3o4QSYs87ufGGg', '9210418f-6a4f-4dab-a7d2-4450d581dc81', 'health_safety_rep',    'active', 'Kevin O''Brien',       'k.obrien@city.toronto.ca'),
   -- Platform admins
-  (gen_random_uuid(), 'user_35NlrrNcfTv0DMh2kzBHyXZRtpb', '9210418f-6a4f-4dab-a7d2-4450d581dc81', 'admin',   'active', 'Aubert Nungisa',       'aubert@nzila.app'),
-  (gen_random_uuid(), 'user_37Zo7OrvP4jy0J0MU5APfkDtE2V', '9210418f-6a4f-4dab-a7d2-4450d581dc81', 'admin',   'active', 'Platform Admin',       'admin@nzila.io')
+  (gen_random_uuid(), 'user_35NlrrNcfTv0DMh2kzBHyXZRtpb', '9210418f-6a4f-4dab-a7d2-4450d581dc81', 'admin',   'active', 'Aubert Nungisa',       'info@nzilaventures.com'),
+  (gen_random_uuid(), 'user_37Zo7OrvP4jy0J0MU5APfkDtE2V', '9210418f-6a4f-4dab-a7d2-4450d581dc81', 'admin',   'active', 'Platform Admin',       'michel@nungisalaw.ca')
 ON CONFLICT (organization_id, user_id) DO UPDATE SET
   role   = EXCLUDED.role,
   name   = EXCLUDED.name,
@@ -481,8 +481,8 @@ ON CONFLICT (organization_id, user_id) DO UPDATE SET
 INSERT INTO user_management.users (user_id, email, first_name, last_name, locale, timezone, is_active)
 VALUES
   -- NZILA (all en-CA)
-  ('user_35NlrrNcfTv0DMh2kzBHyXZRtpb', 'aubert@nzila.app',                  'Aubert',       'Nungisa',      'en-CA', 'America/Toronto', true),
-  ('user_37Zo7OrvP4jy0J0MU5APfkDtE2V', 'admin@nzila.io',                    'Michel',       'Platform',     'en-CA', 'America/Toronto', true),
+  ('user_35NlrrNcfTv0DMh2kzBHyXZRtpb', 'info@nzilaventures.com',                  'Aubert',       'Nungisa',      'en-CA', 'America/Toronto', true),
+  ('user_37Zo7OrvP4jy0J0MU5APfkDtE2V', 'michel@nungisalaw.ca',                    'Michel',       'Platform',     'en-CA', 'America/Toronto', true),
   ('user_3A2c7Rsg6612F3BAxHxx5L29jRH', 'test.employer@nzilaventures.com',    'Sandra',       'Weatherby',    'en-CA', 'America/Toronto', true),
   ('user_3A2c3b8lVI7gxi3Keb6xE4piwGv', 'test.fedexec@nzilaventures.com',     'Patty',        'Coates',       'en-CA', 'America/Toronto', true),
   ('user_3A2c6sEcW7WdJSnLVVQFB28PjIU', 'test.localadmin@nzilaventures.com',  'Tania',        'Da Silva',     'en-CA', 'America/Toronto', true),
@@ -529,6 +529,7 @@ VALUES
   ('user_3BSzhvBJ63gV7BmDQlH6VTLm18g', 'n.lafontaine@city.toronto.ca',   'Nathalie',      'Lafontaine',   'fr-CA', 'America/Toronto', true),
   ('user_3BSzhpyvCHVWm3o4QSYs87ufGGg', 'k.obrien@city.toronto.ca',       'Kevin',         'O''Brien',     'en-CA', 'America/Toronto', true)
 ON CONFLICT (user_id) DO UPDATE SET
+  email      = EXCLUDED.email,
   locale     = EXCLUDED.locale,
   first_name = EXCLUDED.first_name,
   last_name  = EXCLUDED.last_name,
@@ -546,6 +547,7 @@ VALUES
   ('user_3BnpKZ9uQKKBsmqXz2eksrUud6F', 'l.bentley@cupe.ca',    'Laura',   'Bentley',   'en-CA', 'America/Toronto', true),
   ('user_3BnpKjP8KVVfFGSEozJifxfgJZQ', 'd.bhullar@cupe.ca',    'Diane',   'Bhullar',   'en-CA', 'America/Toronto', true)
 ON CONFLICT (user_id) DO UPDATE SET
+  email      = EXCLUDED.email,
   locale     = EXCLUDED.locale,
   first_name = EXCLUDED.first_name,
   last_name  = EXCLUDED.last_name,
