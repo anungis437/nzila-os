@@ -34,7 +34,7 @@
     "@azure/msal-node": "^3.8.4",
     "@azure/storage-blob": "^12.26.0",
     "@clerk/backend": "^3.2.3",
-    "@clerk/nextjs": "^7.0.4",
+    "@clerk/nextjs": "^7.0.8",
     "@google-cloud/vision": "^5.3.4",
     "@headlessui/react": "^2.2.9",
     "@hello-pangea/dnd": "^18.0.1",
