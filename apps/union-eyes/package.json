@@ -209,7 +209,7 @@
     "husky": "^9.1.7",
     "js-yaml": "^4.1.1",
     "jsdom": "^28.1.0",
-    "markdownlint-cli": "^0.47.0",
+    "markdownlint-cli": "^0.48.0",
     "postcss": "^8",
     "supertest": "^7.1.4",
     "tailwindcss": "^4",
