@@ -11,6 +11,15 @@ vi.mock("@/lib/logger", () => ({
   logger: { info: vi.fn(), error: vi.fn(), warn: vi.fn(), debug: vi.fn() },
 }));
 
+vi.mock("@/lib/ai/ai-client", () => ({
+  getAiClient: vi.fn(() => ({
+    embed: vi.fn(async () => ({ embeddings: [[0.1, 0.2, 0.3]] })),
+  })),
+  UE_APP_KEY: "union-eyes",
+  UE_PROFILES: { EMBEDDINGS: "ue-embeddings" },
+  UE_SYSTEM_ORG_ID: "00000000-0000-0000-0000-000000000000",
+}));
+
 import { RAGPipeline, ragPipeline, type Document } from "../rag-pipeline";
 
 /* ── helpers ────────────────────────────────────────────────────────── */
