@@ -329,7 +329,7 @@ const clerkHandler = clerkMiddleware(async (auth, req) => {
   return nr;
   } catch (middlewareError) {
     // Log error for debugging — this catch prevents silent 500s
-    console.error('[middleware] Unhandled error:', middlewareError);
+    logger.error('[middleware] Unhandled error:', { error: middlewareError });
     return new NextResponse(
       JSON.stringify({ error: 'Middleware error', message: String(middlewareError) }),
       { status: 500, headers: { 'content-type': 'application/json' } }
@@ -343,7 +343,7 @@ export default async function middleware(req: NextRequest, event: NextFetchEvent
   try {
     return ((await clerkHandler(req, event)) ?? NextResponse.next()) as NextResponse;
   } catch (outerError) {
-    console.error('[middleware] Clerk/outer error:', outerError);
+    logger.error('[middleware] Clerk/outer error:', { error: outerError });
     return new NextResponse(
       JSON.stringify({ error: 'Clerk middleware error', message: String(outerError) }),
       { status: 500, headers: { 'content-type': 'application/json' } }
