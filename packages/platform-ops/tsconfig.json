@@ -1,8 +1,7 @@
 {
   "extends": "../config/tsconfig.base.json",
   "compilerOptions": {
-    "outDir": "dist",
-    "types": ["node"],
+        "types": ["node"],
     "paths": {
       "@nzila/db": ["../db/src/index.ts"],
       "@nzila/db/platform": ["../db/src/platform.ts"]
