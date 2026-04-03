@@ -13,7 +13,8 @@
       "@nzila/db": ["../../packages/db/src"],
       "@nzila/db/*": ["../../packages/db/src/*"],
       "@nzila/db/schema": ["../../packages/db/src/schema/index"]
-    }
+    },
+    "types": ["node"]
   },
   "include": ["src/**/*.ts"],
   "exclude": ["node_modules", "dist"]
