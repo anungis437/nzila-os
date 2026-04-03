@@ -179,6 +179,8 @@ jobs:
           BUILD_ARGS="${BUILD_ARGS} --build-arg NEXT_PUBLIC_UNION_EYES_URL=https://nzila-os-union-eyes.${DOMAIN}"
           BUILD_ARGS="${BUILD_ARGS} --build-arg NEXT_PUBLIC_ABR_URL=https://nzila-os-abr.${DOMAIN}"
           BUILD_ARGS="${BUILD_ARGS} --build-arg NEXT_PUBLIC_CFO_URL=https://nzila-os-cfo.${DOMAIN}"
+          BUILD_ARGS="${BUILD_ARGS} --build-arg NEXT_PUBLIC_CONTROL_PLANE_URL=https://nzila-os-control-plane.${DOMAIN}"
+          BUILD_ARGS="${BUILD_ARGS} --build-arg NEXT_PUBLIC_PLATFORM_ADMIN_URL=https://nzila-os-platform-admin.${DOMAIN}"
 
           # Clerk satellite configuration for apps with their own domain
           # web is the primary sign-in host; all other apps are satellites

@@ -68,6 +68,8 @@ ARG NEXT_PUBLIC_PARTNERS_URL=https://nzila-os-partners.delightfulisland-0d503d3c
 ARG NEXT_PUBLIC_UNION_EYES_URL=https://nzila-os-union-eyes.delightfulisland-0d503d3c.eastus.azurecontainerapps.io
 ARG NEXT_PUBLIC_ABR_URL=https://nzila-os-abr.delightfulisland-0d503d3c.eastus.azurecontainerapps.io
 ARG NEXT_PUBLIC_CFO_URL=https://nzila-os-cfo.delightfulisland-0d503d3c.eastus.azurecontainerapps.io
+ARG NEXT_PUBLIC_CONTROL_PLANE_URL=https://nzila-os-control-plane.delightfulisland-0d503d3c.eastus.azurecontainerapps.io
+ARG NEXT_PUBLIC_PLATFORM_ADMIN_URL=https://nzila-os-platform-admin.delightfulisland-0d503d3c.eastus.azurecontainerapps.io
 
 # Set as env vars for build
 ENV NEXT_PUBLIC_CLERK_PUBLISHABLE_KEY=$NEXT_PUBLIC_CLERK_PUBLISHABLE_KEY
@@ -81,6 +83,8 @@ ENV NEXT_PUBLIC_PARTNERS_URL=$NEXT_PUBLIC_PARTNERS_URL
 ENV NEXT_PUBLIC_UNION_EYES_URL=$NEXT_PUBLIC_UNION_EYES_URL
 ENV NEXT_PUBLIC_ABR_URL=$NEXT_PUBLIC_ABR_URL
 ENV NEXT_PUBLIC_CFO_URL=$NEXT_PUBLIC_CFO_URL
+ENV NEXT_PUBLIC_CONTROL_PLANE_URL=$NEXT_PUBLIC_CONTROL_PLANE_URL
+ENV NEXT_PUBLIC_PLATFORM_ADMIN_URL=$NEXT_PUBLIC_PLATFORM_ADMIN_URL
 
 # Build only apps that have deps installed in the Docker image (turbo filters)
 # Default: all apps. Override via --build-arg TURBO_FILTER for single-app builds.
