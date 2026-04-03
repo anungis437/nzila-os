@@ -90,13 +90,17 @@ export default function PensionMemberConsole() {
       const firstPlan = plansData.data[0];
       const firstPlanId = firstPlan.id;
 
+      let memberPensionId: string | null = null;
+
       const planRes = await fetch(`/api/pension/members?planId=${encodeURIComponent(firstPlanId)}`);
       if (planRes.ok) {
         const planData = await planRes.json();
         if (planData.data && planData.data.length > 0) {
+          const memberRecord = planData.data[0];
+          memberPensionId = memberRecord.id;
           // Merge plan-level fields into the member record
           setPlan({
-            ...planData.data[0],
+            ...memberRecord,
             planType: firstPlan.planType,
             totalAssets: firstPlan.totalAssets,
             fundingStatus: firstPlan.fundingStatus,
@@ -107,12 +111,14 @@ export default function PensionMemberConsole() {
         }
       }
 
-      // Fetch contributions
-      const contribRes = await fetch(`/api/pension/contributions?organizationId=${encodeURIComponent(organizationId)}`);
-      if (contribRes.ok) {
-        const contribData = await contribRes.json();
-        if (contribData.data && contribData.data.length > 0) {
-          setContributions(contribData.data);
+      // Fetch contributions scoped to this member's pension enrollment
+      if (memberPensionId) {
+        const contribRes = await fetch(`/api/pension/contributions?memberId=${encodeURIComponent(memberPensionId)}`);
+        if (contribRes.ok) {
+          const contribData = await contribRes.json();
+          if (contribData.data && contribData.data.length > 0) {
+            setContributions(contribData.data);
+          }
         }
       }
 
@@ -125,12 +131,14 @@ export default function PensionMemberConsole() {
         }
       }
 
-      // Fetch T4A tax records
-      const t4aRes = await fetch(`/api/pension/t4a?organizationId=${encodeURIComponent(organizationId)}`);
-      if (t4aRes.ok) {
-        const t4aData = await t4aRes.json();
-        if (t4aData.data && t4aData.data.length > 0) {
-          setT4aRecords(t4aData.data);
+      // Fetch T4A tax records scoped to this member's pension enrollment
+      if (memberPensionId) {
+        const t4aRes = await fetch(`/api/pension/t4a?memberId=${encodeURIComponent(memberPensionId)}`);
+        if (t4aRes.ok) {
+          const t4aData = await t4aRes.json();
+          if (t4aData.data && t4aData.data.length > 0) {
+            setT4aRecords(t4aData.data);
+          }
         }
       }
     } catch {

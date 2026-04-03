@@ -1,7 +1,7 @@
 import { withApi } from '@/lib/api/framework';
 import { db } from '@/db/db';
 import { pensionContributions } from '@/db/schema';
-import { eq, desc } from 'drizzle-orm';
+import { eq, and, desc } from 'drizzle-orm';
 import { z } from 'zod';
 
 const createContributionSchema = z.object({
@@ -20,11 +20,21 @@ export const GET = withApi(
     auth: { required: true, minRole: 'member' },
     openapi: { tags: ['Pension'], summary: 'List contributions', description: 'List all pension contributions for the organization' },
   },
-  async ({ request: _request, organizationId }) => {
+  async ({ request, organizationId }) => {
+    const url = new URL(request.url);
+    const memberId = url.searchParams.get('memberId');
+
     const contributions = await db
       .select()
       .from(pensionContributions)
-      .where(eq(pensionContributions.organizationId, organizationId!))
+      .where(
+        memberId
+          ? and(
+              eq(pensionContributions.organizationId, organizationId!),
+              eq(pensionContributions.memberId, memberId),
+            )
+          : eq(pensionContributions.organizationId, organizationId!),
+      )
       .orderBy(desc(pensionContributions.createdAt));
     return contributions;
   },

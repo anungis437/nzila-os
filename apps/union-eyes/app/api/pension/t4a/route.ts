@@ -1,7 +1,7 @@
 import { withApi } from '@/lib/api/framework';
 import { db } from '@/db/db';
 import { pensionT4aRecords } from '@/db/schema';
-import { eq, desc } from 'drizzle-orm';
+import { eq, and, desc } from 'drizzle-orm';
 import { z } from 'zod';
 
 const createT4aSchema = z.object({
@@ -20,11 +20,21 @@ export const GET = withApi(
     auth: { required: true, minRole: 'member' },
     openapi: { tags: ['Pension'], summary: 'List T4A records', description: 'List all T4A tax records for the organization' },
   },
-  async ({ request: _request, organizationId }) => {
+  async ({ request, organizationId }) => {
+    const url = new URL(request.url);
+    const memberId = url.searchParams.get('memberId');
+
     const records = await db
       .select()
       .from(pensionT4aRecords)
-      .where(eq(pensionT4aRecords.organizationId, organizationId!))
+      .where(
+        memberId
+          ? and(
+              eq(pensionT4aRecords.organizationId, organizationId!),
+              eq(pensionT4aRecords.memberId, memberId),
+            )
+          : eq(pensionT4aRecords.organizationId, organizationId!),
+      )
       .orderBy(desc(pensionT4aRecords.createdAt));
     return records;
   },

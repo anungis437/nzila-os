@@ -1,7 +1,7 @@
 import { withApi } from '@/lib/api/framework';
 import { db } from '@/db/db';
 import { pensionMembers } from '@/db/schema';
-import { eq, and, desc } from 'drizzle-orm';
+import { eq, and, desc, sql } from 'drizzle-orm';
 import { z } from 'zod';
 
 const createMemberSchema = z.object({
@@ -22,12 +22,26 @@ export const GET = withApi(
     auth: { required: true, minRole: 'member' },
     openapi: { tags: ['Pension'], summary: 'List pension members', description: 'List pension members by organization and optionally by plan' },
   },
-  async ({ request, organizationId }) => {
+  async ({ request, organizationId, userId }) => {
     const url = new URL(request.url);
     const planId = url.searchParams.get('planId');
 
     const conditions = [eq(pensionMembers.organizationId, organizationId!)];
     if (planId) conditions.push(eq(pensionMembers.planId, planId));
+
+    // Scope to the calling user's own pension enrollment.
+    // pensionMembers.userId stores the organization_members.id (UUID PK),
+    // not the Clerk string ID — resolve via subquery.
+    if (userId) {
+      conditions.push(
+        sql`${pensionMembers.userId} = (
+          SELECT id FROM organization_members
+          WHERE user_id = ${userId}
+            AND organization_id = ${organizationId}::uuid
+          LIMIT 1
+        )`,
+      );
+    }
 
     const members = await db
       .select()
