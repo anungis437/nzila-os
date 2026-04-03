@@ -14,6 +14,7 @@
 
 export const dynamic = 'force-dynamic';
 
+import { redirect } from 'next/navigation';
 import { db } from '@/db';
 import { dataAggregationConsent, movementTrends } from '@/db/schema/domains/marketing';
 import { eq, and, desc, gte } from 'drizzle-orm';
@@ -22,9 +23,18 @@ import { Badge } from '@/components/ui/badge';
 import { Button } from '@/components/ui/button';
 import { AlertCircle, TrendingUp, TrendingDown, Shield, Users, FileText } from 'lucide-react';
 import { Alert, AlertDescription, AlertTitle } from '@/components/ui/alert';
- 
 import { requireUser } from '@/lib/api-auth-guard';
+import { getUserRoleInOrganization } from '@/lib/organization-utils';
 import Link from 'next/link';
+
+/** Roles permitted to view cross-union movement analytics. */
+const MOVEMENT_INSIGHTS_ROLES = [
+  'admin', 'president', 'vice_president', 'secretary_treasurer',
+  'chief_steward', 'officer', 'national_officer',
+  'fed_executive', 'fed_staff',
+  'clc_executive', 'clc_staff',
+  'system_admin',
+] as const;
 
 interface MovementInsightsPageProps {
   params: {
@@ -44,9 +54,13 @@ export default async function MovementInsightsPage({
   const { locale } = params;
   const { timeframe = 'quarter', sector: _sector, jurisdiction: _jurisdiction } = searchParams;
 
-  // Get user's organization consent status
+  // Require officer-level role to view cross-union analytics.
   const user = await requireUser();
   const organizationId = user.organizationId ?? '';
+  const userRole = await getUserRoleInOrganization(user.userId, organizationId);
+  if (!MOVEMENT_INSIGHTS_ROLES.includes(userRole as typeof MOVEMENT_INSIGHTS_ROLES[number])) {
+    redirect('/dashboard');
+  }
   
   const [consent] = await db
     .select()

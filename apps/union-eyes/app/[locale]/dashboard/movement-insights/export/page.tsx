@@ -2,11 +2,16 @@
  * Legislative Brief Export Page
  * 
  * Generate PDF briefs for union advocacy based on movement insights.
+ *
+ * GATED: Same officer-level role requirement as the parent movement-insights
+ * page. requireUser() call here makes the data access explicit even though
+ * dashboard/layout.tsx also enforces authentication.
  */
 
 
 export const dynamic = 'force-dynamic';
 
+import { redirect } from 'next/navigation';
 import { db } from '@/db';
 import { movementTrends } from '@/db/schema/domains/marketing';
 import { gte } from 'drizzle-orm';
@@ -16,8 +21,18 @@ import { Badge } from '@/components/ui/badge';
 import { FileText, Download, Shield } from 'lucide-react';
 import { generateLegislativeBrief } from '@/lib/movement-insights/aggregation-service';
 import { MovementTrend } from '@/types/marketing';
- 
+import { requireUser } from '@/lib/api-auth-guard';
+import { getUserRoleInOrganization } from '@/lib/organization-utils';
 import Link from 'next/link';
+
+/** Roles permitted to export cross-union legislative briefs (mirrors movement-insights). */
+const MOVEMENT_INSIGHTS_ROLES = [
+  'admin', 'president', 'vice_president', 'secretary_treasurer',
+  'chief_steward', 'officer', 'national_officer',
+  'fed_executive', 'fed_staff',
+  'clc_executive', 'clc_staff',
+  'system_admin',
+] as const;
 
 interface ExportPageProps {
   params: {
@@ -36,6 +51,14 @@ export default async function LegislativeBriefExportPage({
 }: ExportPageProps) {
   const { locale } = params;
   const { focusArea = 'Workplace Dispute Resolution', jurisdiction, timeframe: _timeframe = 'quarter' } = searchParams;
+
+  // Role gate — same requirement as the parent movement-insights page.
+  const user = await requireUser();
+  const organizationId = user.organizationId ?? '';
+  const userRole = await getUserRoleInOrganization(user.userId, organizationId);
+  if (!MOVEMENT_INSIGHTS_ROLES.includes(userRole as typeof MOVEMENT_INSIGHTS_ROLES[number])) {
+    redirect('/dashboard');
+  }
 
   // Get relevant trends
   const thirtyDaysAgo = new Date();
