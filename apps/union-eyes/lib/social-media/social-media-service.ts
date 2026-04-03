@@ -11,7 +11,9 @@
 import { MetaAPIClient, createMetaClient } from './meta-api-client';
 import { TwitterAPIClient, createTwitterClient } from './twitter-api-client';
 import { LinkedInAPIClient, createLinkedInClient } from './linkedin-api-client';
-import { createClient } from '@supabase/supabase-js';
+import { db } from '@/db';
+import { socialAccounts, socialPosts, socialAnalytics } from '@/db/schema/social-media-schema';
+import { eq, and, inArray } from 'drizzle-orm';
 import type {
   SocialAccount,
   SocialPlatform,
@@ -77,11 +79,7 @@ export interface RateLimitStatus {
  * Provides a unified interface for all social media operations
  */
 export class SocialMediaService {
-  private supabase: ReturnType<typeof createClient>;
-
-  constructor(supabaseUrl: string, supabaseKey: string) {
-    this.supabase = createClient(supabaseUrl, supabaseKey);
-  }
+  constructor() {}
 
   /**
    * Get API client for a specific account
@@ -89,18 +87,15 @@ export class SocialMediaService {
   private async getClient(
     accountId: string
   ): Promise<MetaAPIClient | TwitterAPIClient | LinkedInAPIClient> {
-    const { data: account, error } = await this.supabase
-      .from('social_accounts')
-      .select('*')
-      .eq('id', accountId)
-      .single();
+    const [typedAccount] = await db
+      .select()
+      .from(socialAccounts)
+      .where(eq(socialAccounts.id, accountId))
+      .limit(1);
 
-    if (error || !account) {
+    if (!typedAccount) {
       throw new Error(`Account not found: ${accountId}`);
     }
-
-    // Type assertion for the account data
-    const typedAccount = account as SocialAccount;
 
     // Check if token is expired and needs refresh
     if (typedAccount.tokenExpiresAt && new Date(typedAccount.tokenExpiresAt) < new Date()) {
@@ -128,18 +123,15 @@ export class SocialMediaService {
    * Refresh access token for an account
    */
   async refreshAccessToken(accountId: string): Promise<void> {
-    const { data: account, error } = await this.supabase
-      .from('social_accounts')
-      .select('*')
-      .eq('id', accountId)
-      .single();
+    const [typedAccount] = await db
+      .select()
+      .from(socialAccounts)
+      .where(eq(socialAccounts.id, accountId))
+      .limit(1);
 
-    if (error || !account) {
+    if (!typedAccount) {
       throw new Error(`Account not found: ${accountId}`);
     }
-
-    // Type assertion for the account data
-    const typedAccount = account as SocialAccount;
 
     try {
       let newAccessToken: string;
@@ -189,19 +181,18 @@ export class SocialMediaService {
 
       // Update account with new tokens
       const expiresAt = new Date(Date.now() + expiresIn * 1000);
-      const updateData = {
-        access_token: newAccessToken,
-        token_expires_at: expiresAt.toISOString(),
-        updated_at: new Date().toISOString(),
-        ...(newRefreshToken && { refresh_token: newRefreshToken }),
-      };
-
-      // @ts-expect-error - Supabase client without Database type
-      await this.supabase.from('social_accounts').update(updateData).eq('id', accountId);
+      await db.update(socialAccounts).set({
+        accessToken: newAccessToken,
+        tokenExpiresAt: expiresAt,
+        updatedAt: new Date(),
+        ...(newRefreshToken ? { refreshToken: newRefreshToken } : {}),
+      }).where(eq(socialAccounts.id, accountId));
     } catch (error) {
       // Update account status to error
-      // @ts-expect-error - Supabase client without Database type
-      await this.supabase.from('social_accounts').update({ status: 'error', error_message: error instanceof Error ? error.message : 'Token refresh failed' }).eq('id', accountId);
+      await db.update(socialAccounts).set({
+        status: 'expired',
+        updatedAt: new Date(),
+      }).where(eq(socialAccounts.id, accountId));
 
       throw error;
     }
@@ -218,19 +209,20 @@ export class SocialMediaService {
     const results: PlatformPostResult[] = [];
 
     // Get accounts for specified platforms
-    const { data: accounts, error } = await this.supabase
-      .from('social_accounts')
-      .select('*')
-      .eq('organization_id', organizationId)
-      .in('platform', content.platforms)
-      .eq('status', 'active');
+    const typedAccounts = await db
+      .select()
+      .from(socialAccounts)
+      .where(
+        and(
+          eq(socialAccounts.organizationId, organizationId),
+          inArray(socialAccounts.platform, content.platforms),
+          eq(socialAccounts.status, 'active'),
+        )
+      );
 
-    if (error || !accounts || accounts.length === 0) {
+    if (typedAccounts.length === 0) {
       throw new Error('No active accounts found for specified platforms');
     }
-
-    // Type assertion for accounts array
-    const typedAccounts = accounts as SocialAccount[];
 
     // Publish to each platform
     for (const account of typedAccounts) {
@@ -349,25 +341,21 @@ export class SocialMediaService {
         }
 
         // Save post to database
-        const postData = {
-          organization_id: organizationId,
-          account_id: account.id,
-          platform: account.platform,
-          platform_post_id: postId,
-          post_type: this.detectPostType(content),
+        await db.insert(socialPosts).values({
+          organizationId,
+          accountId: account.id,
+          platformPostId: postId,
+          postType: this.detectPostType(content),
           content: content.text,
-          media_urls: content.media_urls || [],
+          mediaUrls: content.media_urls || [],
           hashtags: content.hashtags || [],
           mentions: content.mentions || [],
           status: content.scheduled_for ? 'scheduled' : 'published',
-          scheduled_for: content.scheduled_for?.toISOString(),
-          published_at: content.scheduled_for ? null : new Date().toISOString(),
-          permalink: permalink || null,
-          created_by: createdById,
-        };
-
-        // @ts-expect-error - Supabase client without Database type
-        await this.supabase.from('social_posts').insert(postData);
+          scheduledFor: content.scheduled_for ?? null,
+          publishedAt: content.scheduled_for ? null : new Date(),
+          platformUrl: permalink ?? null,
+          createdBy: createdById,
+        });
 
         results.push({
           platform: account.platform,
@@ -391,48 +379,57 @@ export class SocialMediaService {
    * Delete a post from a platform
    */
   async deletePost(postId: string): Promise<void> {
-    const { data: post, error } = await this.supabase
-      .from('social_posts')
-      .select('*, account:social_accounts(*)')
-      .eq('id', postId)
-      .single();
+    const [result] = await db
+      .select({
+        id: socialPosts.id,
+        accountId: socialPosts.accountId,
+        platformPostId: socialPosts.platformPostId,
+        platform: socialAccounts.platform,
+        accessToken: socialAccounts.accessToken,
+      })
+      .from(socialPosts)
+      .leftJoin(socialAccounts, eq(socialPosts.accountId, socialAccounts.id))
+      .where(eq(socialPosts.id, postId))
+      .limit(1);
 
-    if (error || !post) {
+    if (!result?.id) {
       throw new Error(`Post not found: ${postId}`);
     }
 
-    // eslint-disable-next-line @typescript-eslint/no-explicit-any
-    const typedPost = post as any;
-    const client = await this.getClient(typedPost.account_id);
+    const typedPost = result;
+    const client = await this.getClient(result.accountId!);
 
     try {
       switch (typedPost.platform) {
         case 'facebook':
         case 'instagram': {
           const metaClient = client as MetaAPIClient;
-          await metaClient.deletePost(typedPost.platform_post_id, typedPost.account.access_token);
+          await metaClient.deletePost(typedPost.platformPostId!, typedPost.accessToken!);
           break;
         }
 
         case 'twitter': {
           const twitterClient = client as TwitterAPIClient;
-          await twitterClient.deleteTweet(typedPost.platform_post_id);
+          await twitterClient.deleteTweet(typedPost.platformPostId!);
           break;
         }
 
         case 'linkedin': {
           const linkedInClient = client as LinkedInAPIClient;
-          await linkedInClient.deletePost(typedPost.platform_post_id);
+          await linkedInClient.deletePost(typedPost.platformPostId!);
           break;
         }
 
         default:
-          throw new Error(`Unsupported platform: ${typedPost.platform}`);
+          throw new Error(`Unsupported platform: ${typedPost.platform ?? 'unknown'}`);
       }
 
       // Update post status in database
-      // @ts-expect-error - Supabase client without Database type
-      await this.supabase.from('social_posts').update({ status: 'deleted', deleted_at: new Date().toISOString() }).eq('id', postId);
+      await db.update(socialPosts).set({
+        status: 'deleted',
+        deletedAt: new Date(),
+        updatedAt: new Date(),
+      }).where(eq(socialPosts.id, postId));
     } catch (error) {
       throw new Error(`Failed to delete post: ${error instanceof Error ? error.message : 'Unknown error'}`);
     }
@@ -446,17 +443,16 @@ export class SocialMediaService {
     startDate: Date,
     endDate: Date
   ): Promise<UnifiedAnalytics[]> {
-    const { data: account, error } = await this.supabase
-      .from('social_accounts')
-      .select('*')
-      .eq('id', accountId)
-      .single();
+    const [typedAccount] = await db
+      .select()
+      .from(socialAccounts)
+      .where(eq(socialAccounts.id, accountId))
+      .limit(1);
 
-    if (error || !account) {
+    if (!typedAccount) {
       throw new Error(`Account not found: ${accountId}`);
     }
 
-    const typedAccount = account as SocialAccount;
     const client = await this.getClient(accountId);
     const analytics: UnifiedAnalytics[] = [];
 
@@ -518,20 +514,32 @@ export class SocialMediaService {
 
       // Save analytics to database
       for (const data of analytics) {
-        // @ts-expect-error - Supabase client without Database type
-        await this.supabase.from('social_analytics').upsert({
-          organization_id: typedAccount.organizationId,
-          account_id: accountId,
-          platform: data.platform,
-          date: data.date.toISOString().split('T')[0],
-          impressions: data.impressions,
-          reach: data.reach,
-          engagement_count: data.engagement,
-          likes_count: data.likes,
-          comments_count: data.comments,
-          shares_count: data.shares,
-          clicks_count: data.clicks,
-          follower_count: data.follower_count,
+        const dateStr = data.date.toISOString().split('T')[0];
+        await db.insert(socialAnalytics).values({
+          organizationId: typedAccount.organizationId,
+          accountId,
+          analyticsDate: dateStr,
+          totalImpressions: data.impressions,
+          totalReach: data.reach,
+          totalEngagements: data.engagement,
+          totalLikes: data.likes,
+          totalComments: data.comments,
+          totalShares: data.shares,
+          linkClicks: data.clicks,
+          followerCount: data.follower_count,
+        }).onConflictDoUpdate({
+          target: [socialAnalytics.accountId, socialAnalytics.analyticsDate],
+          set: {
+            totalImpressions: data.impressions,
+            totalReach: data.reach,
+            totalEngagements: data.engagement,
+            totalLikes: data.likes,
+            totalComments: data.comments,
+            totalShares: data.shares,
+            linkClicks: data.clicks,
+            followerCount: data.follower_count,
+            updatedAt: new Date(),
+          },
         });
       }
     } catch (error) {
@@ -545,17 +553,19 @@ throw error;
    * Get rate limit status for all connected accounts
    */
   async getRateLimitStatus(organizationId: string): Promise<RateLimitStatus[]> {
-    const { data: accounts, error } = await this.supabase
-      .from('social_accounts')
-      .select('*')
-      .eq('organization_id', organizationId)
-      .eq('status', 'active');
+    const typedAccounts = await db
+      .select()
+      .from(socialAccounts)
+      .where(
+        and(
+          eq(socialAccounts.organizationId, organizationId),
+          eq(socialAccounts.status, 'active'),
+        )
+      );
 
-    if (error || !accounts) {
+    if (!typedAccounts.length) {
       return [];
     }
-
-    const typedAccounts = accounts as SocialAccount[];
     const statuses: RateLimitStatus[] = [];
 
     for (const account of typedAccounts) {
@@ -644,14 +654,7 @@ throw error;
  * Helper function to create social media service from environment
  */
 export function createSocialMediaService(): SocialMediaService {
-  const supabaseUrl = process.env.NEXT_PUBLIC_SUPABASE_URL;
-  const supabaseKey = process.env.SUPABASE_SERVICE_ROLE_KEY;
-
-  if (!supabaseUrl || !supabaseKey) {
-    throw new Error('NEXT_PUBLIC_SUPABASE_URL and SUPABASE_SERVICE_ROLE_KEY required');
-  }
-
-  return new SocialMediaService(supabaseUrl, supabaseKey);
+  return new SocialMediaService();
 }
 
 export default SocialMediaService;

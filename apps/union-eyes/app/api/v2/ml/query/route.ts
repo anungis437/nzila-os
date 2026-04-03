@@ -83,7 +83,8 @@ export const POST = withApi(
         const { question, context: queryContext } = QuerySchema.parse(body);
         const organizationScopeId = organizationId || userId || '';
         // Call AI service for natural language query
-        const aiServiceUrl = process.env.AI_SERVICE_URL || 'http://localhost:3005';
+        const aiServiceUrl = process.env.AI_SERVICE_URL;
+        if (!aiServiceUrl) throw new Error('AI_SERVICE_URL is not configured');
         const response = await fetch(`${aiServiceUrl}/api/query`, {
           method: 'POST',
           headers: {

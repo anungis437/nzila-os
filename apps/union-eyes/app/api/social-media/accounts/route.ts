@@ -12,30 +12,16 @@ import { createMetaClient } from '@/lib/social-media/meta-api-client';
 import { createTwitterClient, generatePKCE } from '@/lib/social-media/twitter-api-client';
 import { createLinkedInClient } from '@/lib/social-media/linkedin-api-client';
 import { cookies } from 'next/headers';
-import { createClient } from '@supabase/supabase-js';
+import { db } from '@/db';
+import { socialAccounts } from '@/db/schema/social-media-schema';
+import { eq, and, desc } from 'drizzle-orm';
 import { z } from "zod";
 import { BaseAuthContext, withRoleAuth } from '@/lib/api-auth-guard';
 
- 
 import {
   ErrorCode,
   standardErrorResponse,
 } from '@/lib/api/standardized-responses';
-// Lazy initialization to avoid build-time execution
-// eslint-disable-next-line @typescript-eslint/no-explicit-any
-let supabaseClient: any = null;
-
-function getSupabaseClient() {
-  if (!supabaseClient) {
-    const supabaseUrl = process.env.NEXT_PUBLIC_SUPABASE_URL;
-    const supabaseServiceKey = process.env.SUPABASE_SERVICE_ROLE_KEY;
-    if (!supabaseUrl || !supabaseServiceKey) {
-      throw new Error('Missing required environment variables: NEXT_PUBLIC_SUPABASE_URL, SUPABASE_SERVICE_ROLE_KEY');
-    }
-    supabaseClient = createClient(supabaseUrl, supabaseServiceKey);
-  }
-  return supabaseClient;
-}
 
 export const GET = withRoleAuth('member', async (request: NextRequest, context: BaseAuthContext) => {
   try {
@@ -62,32 +48,25 @@ export const GET = withRoleAuth('member', async (request: NextRequest, context: 
       }
 
       // Fetch accounts
-      const { data: accounts, error } = await getSupabaseClient()
-        .from('social_accounts')
-        .select(`
-        id,
-        platform,
-        platform_account_id,
-        platform_username,
-        platform_account_name,
-        profile_image_url,
-        follower_count,
-        engagement_rate,
-        status,
-        connected_at,
-        last_synced_at,
-        rate_limit_remaining,
-        rate_limit_reset_at
-      `)
-        .eq('organization_id', organizationId)
-        .order('connected_at', { ascending: false });
-
-      if (error) {
-return standardErrorResponse(
-      ErrorCode.INTERNAL_ERROR,
-      'Failed to fetch accounts'
-    );
-      }
+      const accounts = await db
+        .select({
+          id: socialAccounts.id,
+          platform: socialAccounts.platform,
+          platformUserId: socialAccounts.platformUserId,
+          username: socialAccounts.username,
+          displayName: socialAccounts.displayName,
+          profileImageUrl: socialAccounts.profileImageUrl,
+          followerCount: socialAccounts.followerCount,
+          engagementRate: socialAccounts.engagementRate,
+          status: socialAccounts.status,
+          connectedAt: socialAccounts.connectedAt,
+          lastSyncedAt: socialAccounts.lastSyncedAt,
+          rateLimitRemaining: socialAccounts.rateLimitRemaining,
+          rateLimitResetAt: socialAccounts.rateLimitResetAt,
+        })
+        .from(socialAccounts)
+        .where(eq(socialAccounts.organizationId, organizationId))
+        .orderBy(desc(socialAccounts.connectedAt));
 
       // Audit log
       await logApiAuditEvent({
@@ -96,11 +75,11 @@ return standardErrorResponse(
         action: 'LIST_SOCIAL_ACCOUNTS',
         dataType: 'SOCIAL_MEDIA',
         success: true,
-        metadata: { count: accounts?.length || 0 },
+        metadata: { count: accounts.length },
       // eslint-disable-next-line @typescript-eslint/no-explicit-any
       } as any);
 
-      return NextResponse.json({ accounts: accounts || [] });
+      return NextResponse.json({ accounts });
     } catch (error) {
 return standardErrorResponse(
       ErrorCode.INTERNAL_ERROR,
@@ -276,20 +255,20 @@ export const DELETE = withRoleAuth('steward', async (request: NextRequest, conte
       }
 
       // Verify user has access to this account
-      const { data: account, error: fetchError } = await getSupabaseClient()
-        .from('social_accounts')
-        .select('*')
-        .eq('id', accountId)
-        .single();
+      const [account] = await db
+        .select()
+        .from(socialAccounts)
+        .where(eq(socialAccounts.id, accountId))
+        .limit(1);
 
-      if (fetchError || !account) {
+      if (!account) {
         return standardErrorResponse(
       ErrorCode.RESOURCE_NOT_FOUND,
       'Account not found'
     );
       }
 
-      if (organizationId !== account.organization_id) {
+      if (organizationId !== account.organizationId) {
         return standardErrorResponse(
           ErrorCode.FORBIDDEN,
           'Unauthorized'
@@ -301,8 +280,8 @@ export const DELETE = withRoleAuth('steward', async (request: NextRequest, conte
         switch (account.platform) {
           case 'twitter': {
             const twitterClient = createTwitterClient(
-              account.access_token,
-              account.refresh_token || undefined
+              account.accessToken,
+              account.refreshToken || undefined
             );
             await twitterClient.revokeToken();
             break;
@@ -314,18 +293,7 @@ export const DELETE = withRoleAuth('steward', async (request: NextRequest, conte
       }
 
       // Delete account from database
-      const { error: deleteError } = await getSupabaseClient()
-        .from('social_accounts')
-        .delete()
-        .eq('id', accountId);
-
-      if (deleteError) {
-return standardErrorResponse(
-      ErrorCode.INTERNAL_ERROR,
-      'Failed to delete account',
-      deleteError
-    );
-      }
+      await db.delete(socialAccounts).where(eq(socialAccounts.id, accountId));
 
       // Audit log
       await logApiAuditEvent({
@@ -375,14 +343,13 @@ export const PUT = withRoleAuth('member', async (request: NextRequest, context: 
       }
 
       // Verify user has access to this account
-      const { data: account, error: fetchError } = await getSupabaseClient()
-        .from('social_accounts')
-        .select('*')
-        .eq('id', account_id)
-        .eq('organization_id', organizationId) // Use organizationId from Clerk auth
-        .single();
+      const [account] = await db
+        .select()
+        .from(socialAccounts)
+        .where(and(eq(socialAccounts.id, account_id), eq(socialAccounts.organizationId, organizationId)))
+        .limit(1);
 
-      if (fetchError || !account) {
+      if (!account) {
         return standardErrorResponse(
       ErrorCode.RESOURCE_NOT_FOUND,
       'Account not found'
@@ -398,20 +365,20 @@ export const PUT = withRoleAuth('member', async (request: NextRequest, context: 
         switch (account.platform) {
           case 'facebook':
           case 'instagram': {
-            const metaClient = createMetaClient(account.access_token);
-            const tokenData = await metaClient.getLongLivedToken(account.access_token);
+            const metaClient = createMetaClient(account.accessToken);
+            const tokenData = await metaClient.getLongLivedToken(account.accessToken);
             newAccessToken = tokenData.access_token;
             expiresIn = tokenData.expires_in;
             break;
           }
 
           case 'twitter': {
-            if (!account.refresh_token) {
+            if (!account.refreshToken) {
               throw new Error('No refresh token available');
             }
             const twitterClient = createTwitterClient(
-              account.access_token,
-              account.refresh_token
+              account.accessToken,
+              account.refreshToken
             );
             const tokenData = await twitterClient.refreshAccessToken();
             newAccessToken = tokenData.access_token;
@@ -421,11 +388,11 @@ export const PUT = withRoleAuth('member', async (request: NextRequest, context: 
           }
 
           case 'linkedin': {
-            if (!account.refresh_token) {
+            if (!account.refreshToken) {
               throw new Error('No refresh token available');
             }
-            const linkedInClient = createLinkedInClient(account.access_token);
-            const tokenData = await linkedInClient.refreshAccessToken(account.refresh_token);
+            const linkedInClient = createLinkedInClient(account.accessToken);
+            const tokenData = await linkedInClient.refreshAccessToken(account.refreshToken);
             newAccessToken = tokenData.access_token;
             newRefreshToken = tokenData.refresh_token || null;
             expiresIn = tokenData.expires_in;
@@ -438,27 +405,13 @@ export const PUT = withRoleAuth('member', async (request: NextRequest, context: 
 
         // Update account with new tokens
         const expiresAt = new Date(Date.now() + expiresIn * 1000);
-        // eslint-disable-next-line @typescript-eslint/no-explicit-any
-        const updateData: Record<string, any> = {
-          access_token: newAccessToken,
-          token_expires_at: expiresAt.toISOString(),
+        await db.update(socialAccounts).set({
+          accessToken: newAccessToken,
+          tokenExpiresAt: expiresAt,
           status: 'active',
-          error_message: null,
-          updated_at: new Date().toISOString(),
-        };
-
-        if (newRefreshToken) {
-          updateData.refresh_token = newRefreshToken;
-        }
-
-        const { error: updateError } = await getSupabaseClient()
-          .from('social_accounts')
-          .update(updateData)
-          .eq('id', account_id);
-
-        if (updateError) {
-          throw updateError;
-        }
+          updatedAt: new Date(),
+          ...(newRefreshToken ? { refreshToken: newRefreshToken } : {}),
+        }).where(eq(socialAccounts.id, account_id));
 
         return NextResponse.json({
           message: 'Token refreshed successfully',
@@ -466,13 +419,10 @@ export const PUT = withRoleAuth('member', async (request: NextRequest, context: 
         });
       } catch (error) {
         // Update account status to error
-        await getSupabaseClient()
-          .from('social_accounts')
-          .update({
-            status: 'error',
-            error_message: error instanceof Error ? error.message : 'Token refresh failed',
-          })
-          .eq('id', account_id);
+        await db.update(socialAccounts).set({
+          status: 'expired',
+          updatedAt: new Date(),
+        }).where(eq(socialAccounts.id, account_id));
 
         throw error;
       }

@@ -9,6 +9,7 @@
  */
 
 import { logger } from '@/lib/logger';
+import { getAiClient, UE_APP_KEY, UE_PROFILES, UE_SYSTEM_ORG_ID } from '@/lib/ai/ai-client';
 
 // Document types
 export interface Document {
@@ -64,23 +65,17 @@ interface BM25Index {
   documents: Map<string, TextChunk>;
 }
 
-// Simple in-memory embedding placeholder
-function generateEmbedding(text: string): number[] {
-  // Simple hash-based embedding for demo
-  const hash = text.split('').reduce((acc, char) => {
-    return ((acc << 5) - acc) + char.charCodeAt(0);
-  }, 0);
-  
-  // Generate deterministic pseudo-embedding
-  const embedding: number[] = [];
-  for (let i = 0; i < 384; i++) {
-    const seed = hash + i * 31;
-    embedding.push(Math.sin(seed) * Math.cos(seed % 100));
-  }
-  
-  // Normalize
-  const norm = Math.sqrt(embedding.reduce((sum, v) => sum + v * v, 0));
-  return embedding.map(v => v / norm);
+// Real embedding via the AI SDK
+async function generateEmbedding(text: string): Promise<number[]> {
+  const ai = getAiClient();
+  const result = await ai.embed({
+    orgId: UE_SYSTEM_ORG_ID,
+    appKey: UE_APP_KEY,
+    profileKey: UE_PROFILES.EMBEDDINGS,
+    input: text,
+    dataClass: 'internal',
+  });
+  return result.embeddings[0] ?? [];
 }
 
 function cosineSimilarity(a: number[], b: number[]): number {
@@ -133,7 +128,7 @@ class RAGPipeline {
       const chunks = this.chunkDocument(doc);
       
       for (const chunk of chunks) {
-        chunk.embedding = generateEmbedding(chunk.content);
+        chunk.embedding = await generateEmbedding(chunk.content);
         this.chunks.set(chunk.id, chunk);
         this.addToBM25Index(chunk);
         addedCount++;
@@ -253,7 +248,7 @@ class RAGPipeline {
     if (this.config.hybridSearch) {
       results = await this.hybridSearch(query, topK);
     } else {
-      results = this.semanticSearch(query, topK);
+      results = await this.semanticSearch(query, topK);
     }
 
     // Filter by metadata if specified
@@ -280,8 +275,8 @@ class RAGPipeline {
   /**
    * Semantic search using embeddings
    */
-  private semanticSearch(query: string, topK: number): SearchResult[] {
-    const queryEmbedding = generateEmbedding(query);
+  private async semanticSearch(query: string, topK: number): Promise<SearchResult[]> {
+    const queryEmbedding = await generateEmbedding(query);
     
     const results: SearchResult[] = [];
     
@@ -336,7 +331,7 @@ class RAGPipeline {
    * Hybrid search combining semantic and keyword
    */
   private async hybridSearch(query: string, topK: number): Promise<SearchResult[]> {
-    const semanticResults = this.semanticSearch(query, topK * 2);
+    const semanticResults = await this.semanticSearch(query, topK * 2);
     const keywordResults = this.bm25Search(query, topK * 2);
 
     // Normalize scores

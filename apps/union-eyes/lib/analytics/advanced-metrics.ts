@@ -19,7 +19,8 @@ import {
   caseStudies,
   testimonials,
 } from '@/db/schema/domains/marketing';
-import { gte, lte, eq, and, desc } from 'drizzle-orm';
+import { organizationMembers } from '@/db/schema-organizations';
+import { gte, lte, eq, and, desc, count } from 'drizzle-orm';
 
 // ============================================================================
 // TYPE DEFINITIONS
@@ -533,9 +534,14 @@ export async function getRealTimeDashboard(): Promise<RealTimeDashboard> {
 
   const approvals = recentApplications.filter((a) => a.status === 'approved');
 
+  const [{ value: activeUsersCount }] = await db
+    .select({ value: count() })
+    .from(organizationMembers)
+    .where(eq(organizationMembers.status, 'active'));
+
   return {
     timestamp: now,
-    activeUsers: 0, // Placeholder - would need session tracking
+    activeUsers: activeUsersCount,
     activePilots: activePilots.length,
     pendingApplications: pendingApplications.length,
     recentActivity: [

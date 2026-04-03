@@ -22,6 +22,7 @@
 
 import { db } from '@/db';
 import { grievances } from '@/db/schema/grievance-schema';
+import { organizationMembers } from '@/db/schema-organizations';
 import { getNotificationService } from '@/lib/services/notification-service';
 import { eq, and, gte, desc } from 'drizzle-orm';
 import { logger } from '@/lib/logger';
@@ -291,9 +292,26 @@ export async function sendTestimonialInvitation(
 ): Promise<TestimonialInvitation> {
   const notificationService = getNotificationService();
 
-  // Get recipient details (in production, fetch from database)
-  const recipientEmail = 'example@union.org'; // Placeholder
-  const recipientName = recipientType === 'member' ? 'Member' : 'Organizer'; // Placeholder
+  // Look up recipient contact details from the DB
+  const lookupId = recipientType === 'member' ? candidate.memberId : candidate.organizerId;
+  let recipientEmail = 'noreply@union-eyes.app';
+  let recipientName = recipientType === 'member' ? 'Member' : 'Organizer';
+
+  if (lookupId) {
+    try {
+      const [member] = await db
+        .select({ name: organizationMembers.name, email: organizationMembers.email })
+        .from(organizationMembers)
+        .where(eq(organizationMembers.userId, lookupId))
+        .limit(1);
+      if (member) {
+        recipientEmail = member.email;
+        recipientName = member.name;
+      }
+    } catch (err) {
+      logger.warn('Could not resolve recipient from DB; using defaults', { lookupId, err });
+    }
+  }
 
   const invitation: TestimonialInvitation = {
     candidateId: candidate.caseId,

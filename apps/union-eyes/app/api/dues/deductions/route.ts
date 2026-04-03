@@ -6,6 +6,9 @@
  */
 
 import { withApi } from '@/lib/api/framework';
+import { db } from '@/db';
+import { payrollDeductions } from '@/db/schema/dues-finance-schema';
+import { and, sql } from 'drizzle-orm';
 
 export const dynamic = 'force-dynamic';
 
@@ -24,10 +27,17 @@ export const GET = withApi(
       return { data: [] };
     }
 
-    // Deduction records are populated from employer remittance ingestion.
-    // When no records exist yet, return an empty list so the UI renders
-    // the appropriate empty state ("Deductions will appear here once
-    // your employer submits remittance data.").
-    return { data: [] };
+    // organizationId is a text slug; payrollDeductions.organizationId is uuid — cast for comparison
+    const rows = await db
+      .select()
+      .from(payrollDeductions)
+      .where(
+        and(
+          sql`${payrollDeductions.organizationId}::text = ${organizationId}`,
+          sql`${payrollDeductions.userId}::text = ${userId}`,
+        ),
+      );
+
+    return { data: rows };
   },
 );

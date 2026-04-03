@@ -116,7 +116,7 @@ class ExperimentManager {
 
     const results: ExperimentResult = {
       experimentId,
-      variant: 'A', // Placeholder
+      variant: 'A',
       sampleSize: 0,
       metrics: {},
       recommendation: '',
@@ -173,12 +173,15 @@ class ExperimentManager {
     
     if (bWins > aWins) {
       results.winner = 'B';
+      results.variant = 'B';
       results.recommendation = `Variant B performs better. Consider promoting to production.`;
     } else if (aWins > bWins) {
       results.winner = 'A';
+      results.variant = 'A';
       results.recommendation = `Control (A) performs better. Keep current template.`;
     } else {
       results.winner = 'tie';
+      results.variant = 'A';
       results.recommendation = `No significant difference. Continue testing or pick based on other factors.`;
     }
 

@@ -8,29 +8,16 @@ import { checkRateLimit, RATE_LIMITS } from '@/lib/rate-limiter';
 
 import { NextRequest, NextResponse } from 'next/server';
 import { createSocialMediaService } from '@/lib/social-media/social-media-service';
-import { createClient } from '@supabase/supabase-js';
+import { db } from '@/db';
+import { socialPosts, socialAccounts } from '@/db/schema/social-media-schema';
+import { eq, and, ilike, desc, count, SQL } from 'drizzle-orm';
 import { z } from "zod";
 import { BaseAuthContext, withRoleAuth } from '@/lib/api-auth-guard';
 
- 
 import {
   ErrorCode,
   standardErrorResponse,
 } from '@/lib/api/standardized-responses';
-// Lazy initialization - env vars not available during build
-// eslint-disable-next-line @typescript-eslint/no-explicit-any
-let supabaseClient: any = null;
-function getSupabaseClient() {
-  if (!supabaseClient) {
-    const supabaseUrl = process.env.NEXT_PUBLIC_SUPABASE_URL;
-    const supabaseServiceKey = process.env.SUPABASE_SERVICE_ROLE_KEY;
-    if (!supabaseUrl || !supabaseServiceKey) {
-      throw new Error('Missing required environment variables: NEXT_PUBLIC_SUPABASE_URL, SUPABASE_SERVICE_ROLE_KEY');
-    }
-    supabaseClient = createClient(supabaseUrl, supabaseServiceKey);
-  }
-  return supabaseClient;
-}
 
 export const GET = withRoleAuth('member', async (request: NextRequest, context: BaseAuthContext) => {
   try {
@@ -65,50 +52,37 @@ export const GET = withRoleAuth('member', async (request: NextRequest, context: 
       const limit = parseInt(searchParams.get('limit') || '20');
       const offset = parseInt(searchParams.get('offset') || '0');
 
-      // Build query
-      let query = getSupabaseClient()
-        .from('social_posts')
-        .select(`
-        *,
-        account:social_accounts(id, platform, platform_username, platform_account_name),
-        campaign:social_campaigns(id, name),
-        created_by_profile:profiles!created_by(id, first_name, last_name)
-      `, { count: 'exact' })
-        .eq('organization_id', organizationId)
-        .order('created_at', { ascending: false });
-
-      // Apply filters
-      if (platform) {
-        query = query.eq('platform', platform);
-      }
+      // Build query with dynamic filters
+      const conditions: SQL[] = [eq(socialPosts.organizationId, organizationId)];
 
       if (status) {
-        query = query.eq('status', status);
+        conditions.push(eq(socialPosts.status, status as typeof socialPosts.status._.data));
       }
 
       if (campaignId) {
-        query = query.eq('campaign_id', campaignId);
+        conditions.push(eq(socialPosts.campaignId, campaignId));
       }
 
       if (search) {
-        query = query.ilike('content', `%${search}%`);
+        conditions.push(ilike(socialPosts.content, `%${search}%`));
       }
 
-      // Apply pagination
-      query = query.range(offset, offset + limit - 1);
+      const [{ total }] = await db
+        .select({ total: count() })
+        .from(socialPosts)
+        .where(and(...conditions));
 
-      const { data: posts, error, count } = await query;
-
-      if (error) {
-return standardErrorResponse(
-      ErrorCode.INTERNAL_ERROR,
-      'Failed to fetch posts'
-    );
-      }
+      const posts = await db
+        .select()
+        .from(socialPosts)
+        .where(and(...conditions))
+        .orderBy(desc(socialPosts.createdAt))
+        .limit(limit)
+        .offset(offset);
 
       return NextResponse.json({
-        posts: posts || [],
-        total: count || 0,
+        posts,
+        total,
         limit,
         offset,
       });
@@ -281,20 +255,24 @@ export const DELETE = withRoleAuth('member', async (request: NextRequest, contex
       }
 
       // Verify user has access to this post (belongs to their organization)
-      const { data: post, error: fetchError } = await getSupabaseClient()
-        .from('social_posts')
-        .select('*, account:social_accounts(organization_id)')
-        .eq('id', postId)
-        .single();
+      const [post] = await db
+        .select({
+          id: socialPosts.id,
+          orgId: socialAccounts.organizationId,
+        })
+        .from(socialPosts)
+        .leftJoin(socialAccounts, eq(socialPosts.accountId, socialAccounts.id))
+        .where(eq(socialPosts.id, postId))
+        .limit(1);
 
-      if (fetchError || !post) {
+      if (!post?.id) {
         return standardErrorResponse(
       ErrorCode.RESOURCE_NOT_FOUND,
       'Post not found'
     );
       }
 
-      if (organizationId !== (post.account as Record<string, unknown> | undefined)?.organization_id) {
+      if (organizationId !== post.orgId) {
         return standardErrorResponse(
           ErrorCode.FORBIDDEN,
           'Unauthorized'

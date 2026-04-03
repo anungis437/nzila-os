@@ -17,7 +17,6 @@ import { strikeFundDisbursements } from '@/db/schema/strike-fund-tax-schema';
 import { desc } from 'drizzle-orm';
 import { NextResponse } from 'next/server';
 import { logger } from '@/lib/logger';
-import crypto from 'crypto';
 
 export const dynamic = 'force-dynamic';
 
@@ -66,6 +65,7 @@ export const POST = withApi(
   },
   async ({ request, organizationId, userId }) => {
     if (!organizationId) throw ApiError.badRequest('Organization context required');
+    if (!userId) throw ApiError.badRequest('Authentication required');
 
     const body = await request.json() as {
       strikeId?: string;
@@ -78,9 +78,38 @@ export const POST = withApi(
       throw ApiError.badRequest('requestedAmount is required');
     }
 
-    // Acknowledge the application — persisted as a pending disbursement
-    const fakeId = crypto.randomUUID();
-    logger.info('Strike fund application received', {
+    const now = new Date();
+    const year = now.getFullYear().toString();
+    const month = (now.getMonth() + 1).toString().padStart(2, '0');
+    const dayOfYear = Math.ceil(
+      (now.getTime() - new Date(now.getFullYear(), 0, 0).getTime()) / 86400000,
+    );
+    const weekNumber = `${year}-W${Math.ceil(dayOfYear / 7).toString().padStart(2, '0')}`;
+
+    const [inserted] = await db
+      .insert(strikeFundDisbursements)
+      .values({
+        userId,
+        strikeId: body.strikeId ?? null,
+        strikeName: body.strikeName ?? null,
+        paymentDate: now,
+        paymentAmount: body.requestedAmount.toString(),
+        paymentMethod: 'pending',
+        taxYear: year,
+        taxMonth: month,
+        weekNumber,
+        weeklyTotal: body.requestedAmount.toString(),
+        province: 'ON',
+        exceedsThreshold: false,
+        requiresTaxSlip: false,
+        t4aGenerated: false,
+        rl1Generated: false,
+        isQuebecResident: false,
+      })
+      .returning();
+
+    logger.info('Strike fund application submitted', {
+      id: inserted.id,
       userId,
       organizationId,
       requestedAmount: body.requestedAmount,
@@ -89,12 +118,12 @@ export const POST = withApi(
     return NextResponse.json(
       {
         data: {
-          id: fakeId,
+          id: inserted.id,
           status: 'pending',
           requestedAmount: body.requestedAmount,
           strikeId: body.strikeId ?? null,
           strikeName: body.strikeName ?? null,
-          createdAt: new Date().toISOString(),
+          createdAt: inserted.createdAt.toISOString(),
         },
       },
       { status: 201 },

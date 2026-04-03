@@ -39,14 +39,38 @@ export const POST = withApi(
     const provider = row.provider as string;
     const start = Date.now();
 
-    // Placeholder: in production this would resolve the adapter from the registry
-    // and call adapter.healthCheck(). For now, return structured test result.
+    const metadata = row.metadata as Record<string, unknown> | null;
+    const endpointUrl = (metadata?.endpoint ?? metadata?.url ?? metadata?.base_url) as string | undefined;
+    let ok: boolean;
+    let latencyMs: number;
+    let details: string;
+
+    if (endpointUrl) {
+      try {
+        const probe = await fetch(endpointUrl, {
+          method: 'HEAD',
+          signal: AbortSignal.timeout(5000),
+        });
+        latencyMs = Date.now() - start;
+        ok = probe.ok || probe.status < 500;
+        details = `${provider} responded with HTTP ${probe.status}`;
+      } catch (err) {
+        latencyMs = Date.now() - start;
+        ok = false;
+        details = `${provider} connection failed: ${(err as Error).message}`;
+      }
+    } else {
+      latencyMs = Date.now() - start;
+      ok = (row.status as string) === 'active';
+      details = `${provider} config found (no endpoint to probe)`;
+    }
+
     const testResult = {
       configId: row.id as string,
       provider,
-      ok: true,
-      latencyMs: Date.now() - start,
-      details: `Connection test for ${provider} completed`,
+      ok,
+      latencyMs,
+      details,
       testedAt: new Date().toISOString(),
     };
 

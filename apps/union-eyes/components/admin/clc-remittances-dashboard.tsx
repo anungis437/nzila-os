@@ -409,9 +409,9 @@ toast({
                 <XAxis dataKey="month" />
                 <YAxis />
                 <Tooltip
-                  formatter={(value: number, name: string) => {
-                    if (name === 'amount') return [`$${value.toFixed(2)}`, 'Total Amount'] as [string, string];
-                    return [value, 'Count'] as [number, string];
+                  formatter={(value, name) => {
+                    if (name === 'amount') return [`$${Number(value).toFixed(2)}`, 'Total Amount'] as [string, string];
+                    return [Number(value), 'Count'] as [number, string];
                   }}
                 />
                 <Legend />

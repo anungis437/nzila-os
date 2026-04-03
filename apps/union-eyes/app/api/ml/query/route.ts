@@ -65,7 +65,8 @@ export const POST = withRoleAuth('member', async (request: NextRequest, context:
     const organizationScopeId = organizationId || userId || '';
 
     // Call AI service for natural language query
-    const aiServiceUrl = process.env.AI_SERVICE_URL || 'http://localhost:3005';
+    const aiServiceUrl = process.env.AI_SERVICE_URL;
+    if (!aiServiceUrl) throw new Error('AI_SERVICE_URL is not configured');
     
     const response = await fetch(`${aiServiceUrl}/api/query`, {
       method: 'POST',

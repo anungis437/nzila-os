@@ -14,6 +14,7 @@ import { db } from '@/db';
 import { organizationMembers } from '@/db/schema-organizations';
 import { logger } from '@/lib/logger';
 import crypto from 'crypto';
+import { clerkClient } from '@clerk/nextjs/server';
 
 export const dynamic = 'force-dynamic';
 
@@ -59,6 +60,14 @@ export const POST = withApi(
     let processed = 0;
     let skipped = 0;
 
+    // Resolve Clerk client once for the batch; fall back to provisional UUIDs if unavailable
+    let clerkClientInstance: Awaited<ReturnType<typeof clerkClient>> | null = null;
+    try {
+      clerkClientInstance = await clerkClient();
+    } catch {
+      logger.warn('Clerk client unavailable — member userIds will be provisional UUIDs');
+    }
+
     for (const row of rows) {
       const email = (row['email'] ?? row['Email'] ?? '').trim();
       const name  = (row['name']  ?? row['Name']  ?? row['full_name'] ?? '').trim();
@@ -66,10 +75,21 @@ export const POST = withApi(
 
       if (!email) { skipped++; continue; }
 
+      // Look up the Clerk user by email; fall back to a provisional UUID if not found
+      let resolvedUserId: string = crypto.randomUUID();
+      if (clerkClientInstance) {
+        try {
+          const found = await clerkClientInstance.users.getUserList({ emailAddress: [email] });
+          if (found.data.length > 0) resolvedUserId = found.data[0].id;
+        } catch {
+          // Keep the provisional UUID
+        }
+      }
+
       try {
         await db.insert(organizationMembers).values({
           organizationId,
-          userId: crypto.randomUUID(), // Placeholder — real workflow links to Clerk user
+          userId: resolvedUserId,
           name: name || email,
           email,
           role,

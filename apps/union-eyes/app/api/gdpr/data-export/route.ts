@@ -82,33 +82,35 @@ export const POST = withApiAuth(async (request: NextRequest) => {
       processedBy: "system",
     });
 
-    try {
-      const queue = getReportQueue();
-      if (!queue) {
-        throw new Error("Report queue not available");
-      }
-
-      await (queue as unknown as { add: (...args: unknown[]) => Promise<unknown> }).add(
-        "gdpr-export",
-        {
-          reportType: "gdpr_export",
-          organizationId,
-          userId,
-          parameters: {
-            requestId: gdprRequest.id,
-            format,
-          },
-        },
-        {
-          attempts: 3,
-          backoff: { type: "exponential", delay: 5000 },
-          removeOnComplete: { count: 1000 },
-          removeOnFail: { count: 2000 },
-        }
+    const queue = getReportQueue();
+    if (!queue) {
+      await GdprRequestManager.updateRequestStatus(gdprRequest.id, 'rejected', {
+        rejectionReason: 'Export service unavailable',
+      });
+      return standardErrorResponse(
+        ErrorCode.INTERNAL_ERROR,
+        'Export service temporarily unavailable. Please try again later.',
       );
-    } catch (queueError) {
-      logger.error("Failed to queue GDPR export job", queueError as Error);
     }
+
+    await (queue as unknown as { add: (...args: unknown[]) => Promise<unknown> }).add(
+      "gdpr-export",
+      {
+        reportType: "gdpr_export",
+        organizationId,
+        userId,
+        parameters: {
+          requestId: gdprRequest.id,
+          format,
+        },
+      },
+      {
+        attempts: 3,
+        backoff: { type: "exponential", delay: 5000 },
+        removeOnComplete: { count: 1000 },
+        removeOnFail: { count: 2000 },
+      }
+    );
 
     return NextResponse.json({
       success: true,
@@ -189,7 +191,10 @@ export const GET = withApiAuth(async (request: NextRequest) => {
       );
     }
 
-    const reportsDir = process.env.REPORTS_DIR || "./reports";
+    if (!process.env.REPORTS_DIR) {
+      return standardErrorResponse(ErrorCode.INTERNAL_ERROR, 'REPORTS_DIR is not configured');
+    }
+    const reportsDir = process.env.REPORTS_DIR;
     // Sanitize fileName to prevent path traversal
     const sanitizedFileName = path.basename(fileName);
     const filePath = path.join(reportsDir, sanitizedFileName);
