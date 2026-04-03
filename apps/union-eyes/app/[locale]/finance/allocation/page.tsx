@@ -10,6 +10,8 @@ import { useState, useEffect, useCallback } from 'react';
 import { Card } from '@/components/ui/card';
 import { Badge } from '@/components/ui/badge';
 import { Button } from '@/components/ui/button';
+import { Input } from '@/components/ui/input';
+import { Label } from '@/components/ui/label';
 import { Skeleton } from '@/components/ui/skeleton';
 import {
   Table,
@@ -47,6 +49,7 @@ export default function AllocationPage() {
   const [error, setError] = useState<string | null>(null);
   const [simResult, setSimResult] = useState<SimulationResult | null>(null);
   const [simRunning, setSimRunning] = useState(false);
+  const [simPeriodId, setSimPeriodId] = useState('');
 
   const fetchRules = useCallback(async () => {
     setLoading(true);
@@ -75,8 +78,8 @@ export default function AllocationPage() {
         headers: { 'Content-Type': 'application/json' },
         body: JSON.stringify({
           ruleId,
-          billingPeriodId: '00000000-0000-0000-0000-000000000000', // placeholder
-          localBasisData: [], // would come from real data
+          billingPeriodId: simPeriodId,
+          localBasisData: [],
         }),
       });
       if (!res.ok) throw new Error('Simulation failed');
@@ -122,6 +125,20 @@ export default function AllocationPage() {
       {/* Rules */}
       <Card className="p-4">
         <h2 className="text-lg font-semibold mb-3">Allocation Rules</h2>
+        <div className="mb-4 max-w-sm">
+          <Label htmlFor="sim-period" className="text-sm font-medium mb-1 block">
+            Billing Period ID
+          </Label>
+          <Input
+            id="sim-period"
+            placeholder="Enter billing period UUID to simulate"
+            value={simPeriodId}
+            onChange={(e) => setSimPeriodId(e.target.value.trim())}
+          />
+          <p className="text-xs text-muted-foreground mt-1">
+            Required to run a simulation — no records will be written.
+          </p>
+        </div>
         {rules.length === 0 ? (
           <p className="text-muted-foreground text-sm">No allocation rules configured</p>
         ) : (
@@ -150,7 +167,7 @@ export default function AllocationPage() {
                     <Button
                       variant="outline"
                       size="sm"
-                      disabled={simRunning}
+                      disabled={simRunning || !simPeriodId}
                       onClick={() => runSimulation(rule.id)}
                     >
                       <Play className="h-3 w-3 mr-1" />

@@ -49,7 +49,7 @@ interface DashboardData {
   recentInvoices: Array<{
     id: string;
     invoiceNumber: string;
-    totalCad: string;
+    totalAmount: string;
     status: string;
     issueDate: string;
     dueDate: string;
@@ -57,7 +57,7 @@ interface DashboardData {
   recentChargebacks: Array<{
     id: string;
     localId: string;
-    netAmountCad: string;
+    totalAmount: string;
     status: string;
   }>;
   duesAlignment: {
@@ -248,7 +248,7 @@ export default function FinanceDashboardPage() {
                   onClick={() => router.push(`/finance/invoices/${inv.id}`)}
                 >
                   <TableCell className="font-medium">{inv.invoiceNumber}</TableCell>
-                  <TableCell>{formatCurrency(Number(inv.totalCad))}</TableCell>
+                  <TableCell>{formatCurrency(Number(inv.totalAmount))}</TableCell>
                   <TableCell>
                     <Badge variant={statusColor(inv.status)}>{inv.status}</Badge>
                   </TableCell>
@@ -297,7 +297,7 @@ export default function FinanceDashboardPage() {
               {data.recentChargebacks.map((cb) => (
                 <TableRow key={cb.id}>
                   <TableCell className="font-mono text-xs">{cb.localId}</TableCell>
-                  <TableCell>{formatCurrency(Number(cb.netAmountCad))}</TableCell>
+                  <TableCell>{formatCurrency(Number(cb.totalAmount))}</TableCell>
                   <TableCell>
                     <Badge variant={statusColor(cb.status)}>{cb.status}</Badge>
                   </TableCell>
