@@ -12,9 +12,14 @@ import { requireApiAuth } from '@/lib/api-auth-guard'
 
 export const dynamic = 'force-dynamic'
 
-export async function GET() {
+export async function GET(req: Request) {
   try {
-    await requireApiAuth()
+    // Accept either Clerk JWT (browser) or service key (control-plane s2s)
+    const svcKey = process.env.AI_SERVICE_KEY
+    const isServiceRequest = !!svcKey && req.headers.get('x-service-key') === svcKey
+    if (!isServiceRequest) {
+      await requireApiAuth()
+    }
     const stats = await getAllQueueStats().catch(() => [])
 
     // Aggregate totals

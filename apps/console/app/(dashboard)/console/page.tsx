@@ -11,6 +11,8 @@ import {
   UsersIcon,
   AcademicCapIcon,
   BuildingStorefrontIcon,
+  CommandLineIcon,
+  WrenchScrewdriverIcon,
 } from '@heroicons/react/24/outline'
 
 const tiles = [
@@ -99,6 +101,26 @@ const externalApps = [
     color: 'bg-blue-50 text-blue-600',
     statusColor: 'bg-emerald-100 text-emerald-700',
     status: 'production',
+  },
+  {
+    name: 'Platform Admin',
+    href: process.env.NEXT_PUBLIC_PLATFORM_ADMIN_URL ?? 'http://localhost:3005',
+    icon: WrenchScrewdriverIcon,
+    description: 'Platform ontology, entity graph, AI operations explorer.',
+    port: '3005',
+    color: 'bg-orange-50 text-orange-600',
+    statusColor: 'bg-emerald-100 text-emerald-700',
+    status: 'internal',
+  },
+  {
+    name: 'Control Plane',
+    href: process.env.NEXT_PUBLIC_CONTROL_PLANE_URL ?? 'http://localhost:3010',
+    icon: CommandLineIcon,
+    description: 'Executive visibility — platform health, governance, intelligence.',
+    port: '3010',
+    color: 'bg-gray-50 text-gray-600',
+    statusColor: 'bg-blue-100 text-blue-700',
+    status: 'ops',
   },
 ]
 

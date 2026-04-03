@@ -16,9 +16,14 @@ export const dynamic = 'force-dynamic'
 const EU_BASE_URL =
   process.env.UNION_EYES_URL || 'http://localhost:3003'
 
+// Shared when calling union-eyes internal endpoints (s2s auth)
+const EU_SERVICE_KEY = process.env.AI_SERVICE_KEY ?? ''
+
 async function fetchJson<T>(url: string): Promise<T | null> {
   try {
-    const res = await fetch(url, { cache: 'no-store' })
+    const headers: Record<string, string> = {}
+    if (EU_SERVICE_KEY) headers['x-service-key'] = EU_SERVICE_KEY
+    const res = await fetch(url, { cache: 'no-store', headers })
     if (!res.ok) return null
     return (await res.json()) as T
   } catch {
@@ -27,12 +32,14 @@ async function fetchJson<T>(url: string): Promise<T | null> {
 }
 
 interface HealthPayload {
-  service: string
+  app: string
   status: string
   version: string
   uptime: number
-  db_connection: boolean
-  queue_status: string
+  checks: {
+    db: string       // 'ok' | 'fail'
+    queue: string    // 'ok' | 'degraded' | 'unreachable'
+  }
 }
 
 interface MetricsPayload {
@@ -69,8 +76,8 @@ export async function GET(request: Request) {
           status: health?.status ?? 'unreachable',
           version: health?.version ?? 'unknown',
           uptime: health?.uptime ?? 0,
-          db: health?.db_connection ?? false,
-          queue: health?.queue_status ?? 'unknown',
+          db: health?.checks?.db === 'ok',
+          queue: health?.checks?.queue ?? 'unknown',
         },
         sla: {
           violations: metrics?.sla_violations ?? null,
