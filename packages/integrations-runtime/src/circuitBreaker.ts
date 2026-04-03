@@ -205,7 +205,7 @@ export class CircuitBreaker {
       status: newState === 'open' ? 'down' : newState === 'half_open' ? 'degraded' : 'ok',
       consecutiveFailures,
       circuitState: newState,
-      circuitOpenedAt: newState === 'open' ? this.now().toISOString() : (health?.circuitOpenedAt ?? undefined) ?? undefined,
+      circuitOpenedAt: newState === 'open' ? this.now().toISOString() : health?.circuitOpenedAt,
       circuitNextRetryAt: nextRetryAt,
     })
 
