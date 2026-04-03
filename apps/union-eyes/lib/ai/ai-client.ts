@@ -72,4 +72,8 @@ export const UE_PROFILES = {
   EMPLOYER_RISK: 'ue-employer-risk',
   STEWARD_COPILOT: 'ue-steward-copilot',
   EXECUTIVE_INSIGHTS: 'ue-executive-insights',
+  // Pension intelligence profiles
+  PENSION_FUNDING_ANALYSIS: 'ue-pension-funding-analysis',
+  PENSION_BENEFIT_PROJECTION: 'ue-pension-benefit-projection',
+  PENSION_TRUSTEE_SUMMARY: 'ue-pension-trustee-summary',
 } as const
