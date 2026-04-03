@@ -525,7 +525,7 @@ export const DELETE = withRoleAuth('member', async (request: NextRequest, contex
             .where(
               and(
                 eq(socialAccounts.organizationId, organizationId),
-                eq(socialPosts.status, 'published' as 'published'),
+                eq(socialPosts.status, 'published'),
                 gte(socialPosts.publishedAt, new Date(startDate)),
                 lte(socialPosts.publishedAt, new Date(endDate + 'T23:59:59'))
               )

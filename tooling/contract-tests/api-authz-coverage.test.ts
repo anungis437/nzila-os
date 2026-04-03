@@ -107,7 +107,8 @@ describe('API Authorization Contract (INV-04)', () => {
   it('routes must not import Clerk clerkClient for role checks (use authorize() instead)', () => {
     // Importing clerkClient is allowed for user lookups, but role gating
     // must go through @nzila/os-core/policy/authorize
-    const DIRECT_ROLE_CHECK = /clerkClient.*(?:getUser|getMembership|getRoles)/
+    // Use word boundaries so getUserList (user lookup) is not flagged, only getUser() (role gating)
+    const DIRECT_ROLE_CHECK = /clerkClient.*(?:\bgetUser\b|\bgetMembership\b|\bgetRoles\b)/
     const violations: string[] = []
 
     for (const route of routes) {
