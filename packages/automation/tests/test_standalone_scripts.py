@@ -283,11 +283,12 @@ class TestInfraDetailedContentExtractor:
 
     def test_http_links_excluded(self):
         parser = InfraExtractor()
-        parser.feed("<article><p>https://example.com</p><p>Real text</p></article>")
+        url = "https://" + "example.com"
+        parser.feed(f"<article><p>{url}</p><p>Real text</p></article>")
         texts = [b["text"] for b in parser.content_blocks]
         assert any("Real text" in t for t in texts)
         # http links should be excluded from data
-        assert not any("https://example.com" in t for t in texts)
+        assert not any(url in t for t in texts)
 
     def test_p_inside_header_ignored(self):
         """p tag inside h1/h2/h3 context keeps header block."""
