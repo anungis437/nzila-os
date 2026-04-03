@@ -16,6 +16,7 @@
     "noEmit": false,
     "moduleResolution": "bundler",
     "allowSyntheticDefaultImports": true
+  ,"types": ["node"]
   },
   "include": ["src/**/*"],
   "exclude": ["dist", "node_modules", "**/*.test.ts"]

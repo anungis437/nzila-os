@@ -14,6 +14,7 @@
     "forceConsistentCasingInFileNames": true,
     "resolveJsonModule": true,
     "noUncheckedIndexedAccess": true
+  ,"types": ["node"]
   },
   "include": ["src"],
   "exclude": ["dist", "node_modules"]

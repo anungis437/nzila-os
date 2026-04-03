@@ -15,6 +15,7 @@
     "sourceMap": true,
     "forceConsistentCasingInFileNames": true,
     "outDir": "./dist"
+  ,"types": ["node"]
   },
   "include": ["src"],
   "exclude": ["node_modules", "dist"]
