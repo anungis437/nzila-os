@@ -385,8 +385,8 @@ BEGIN
   INSERT INTO organization_members (user_id, organization_id, role, status, name, email)
   VALUES
     ('user_3BSyEWUb0cnQ56CSS0W0fK8g35a', v_clc_id, 'clc_executive', 'active', 'Hassan Yussuff',      'h.yussuff@clc-ctc.ca'),
-    ('user_3BSyEa51htBN51y0YxG9a9Elp2L', v_clc_id, 'clc_executive', 'active', 'Marie Clarke Walker', 'm.walker@clc-ctc.ca'),
-    ('user_3BSzDRcx41T9Pq06KAhtQkFmi8T', v_clc_id, 'clc_staff',     'active', 'Denis Bolduc',        'd.bolduc@clc-ctc.ca'),
+    ('user_3BSyEa51htBN51y0YxG9a9Elp2L', v_clc_id, 'clc_staff',     'active', 'Marie Clarke Walker', 'm.walker@clc-ctc.ca'),
+    ('user_3BSzDRcx41T9Pq06KAhtQkFmi8T', v_clc_id, 'member',        'active', 'Denis Bolduc',        'd.bolduc@clc-ctc.ca'),
     ('user_3BSzDdNeiCPn9x4M95Deq5vnWkv', v_clc_id, 'member', 'active', 'Sophie Tremblay',     's.tremblay@clc-ctc.ca'),
     ('user_3BSzDYPQ9F0SAJkkkFk2pSisOii', v_clc_id, 'member', 'active', 'James Nguyen',        'j.nguyen@clc-ctc.ca'),
     ('user_3BSzDZezfNN1Nw6YvP9hoYDDuxK', v_clc_id, 'member', 'active', 'Rebecca Martin',      'r.martin@clc-ctc.ca'),
@@ -411,25 +411,22 @@ BEGIN
   VALUES
     ('user_3BSyETlaLS6t8wuol22bVECjPFM', v_cape_id, 'president',     'active', 'Greg Phillips',        'g.phillips@acep-cape.ca'),
     ('user_3BSyEi6TduTzKp2mZigpD6D746h', v_cape_id, 'vice_president', 'active', 'Emmanuelle Tremblay',  'e.tremblay@acep-cape.ca'),
-    ('user_3BSzDo4cpXO7qTM0bY800AuLOd2', v_cape_id, 'admin',         'active', 'Brian Faulkner',       'b.faulkner@acep-cape.ca'),
-    ('user_3BSzDqnxMraAlxaRvhyrTabrTOE', v_cape_id, 'member',        'active', 'Chantal Bertrand',     'c.bertrand@acep-cape.ca'),
-    ('user_3BSzE0qWBvXm6eP75nAukpBbpvk', v_cape_id, 'member',        'active', 'Mike Savard',          'm.savard@acep-cape.ca'),
-    ('user_3BSzDyCmU8iKsYeD1tyBqkDfBFP', v_cape_id, 'member',        'active', 'Nadia Ouellet',        'n.ouellet@acep-cape.ca'),
-    ('user_3BSzEAPted20wutKC5lY8lTn9jZ', v_cape_id, 'member',        'active', 'Daniel Kim',           'd.kim@acep-cape.ca'),
-    ('user_3BSzE9z6NFV3hbYd4Fu2ufoL4rI', v_cape_id, 'chief_steward', 'active', 'Sarah Lefebvre',       's.lefebvre@acep-cape.ca'),
-    ('user_3BSzE5AtIbImjHukqc0yM9EXQdu', v_cape_id, 'member',        'active', 'Alexandre Moreau',     'a.moreau@acep-cape.ca'),
-    ('user_3BSzEIjI6LSWANw6ssfwXcxxnhT', v_cape_id, 'member',        'active', 'Jennifer Walsh',       'j.walsh@acep-cape.ca'),
-    ('user_3BSzEIXiSqVXnNYgymDZ1PY6ZhY', v_cape_id, 'member',        'active', 'Pierre Desmarais',     'p.desmarais@acep-cape.ca'),
-    ('user_3BSzEIf1ARXNRQOs3d5Qju58yNZ', v_cape_id, 'member',        'active', 'Amira Hassan',         'a.hassan@acep-cape.ca'),
+    ('user_3BSzDo4cpXO7qTM0bY800AuLOd2', v_cape_id, 'national_officer',    'active', 'Brian Faulkner',       'b.faulkner@acep-cape.ca'),
+    ('user_3BSzDqnxMraAlxaRvhyrTabrTOE', v_cape_id, 'secretary_treasurer', 'active', 'Chantal Bertrand',     'c.bertrand@acep-cape.ca'),
+    ('user_3BSzE0qWBvXm6eP75nAukpBbpvk', v_cape_id, 'fed_executive',       'active', 'Mike Savard',          'm.savard@acep-cape.ca'),
+    ('user_3BSzDyCmU8iKsYeD1tyBqkDfBFP', v_cape_id, 'fed_staff',           'active', 'Nadia Ouellet',        'n.ouellet@acep-cape.ca'),
+    ('user_3BSzEAPted20wutKC5lY8lTn9jZ', v_cape_id, 'officer',             'active', 'Daniel Kim',           'd.kim@acep-cape.ca'),
+    ('user_3BSzE9z6NFV3hbYd4Fu2ufoL4rI', v_cape_id, 'chief_steward',       'active', 'Sarah Lefebvre',       's.lefebvre@acep-cape.ca'),
+    ('user_3BSzE5AtIbImjHukqc0yM9EXQdu', v_cape_id, 'steward',             'active', 'Alexandre Moreau',     'a.moreau@acep-cape.ca'),
+    ('user_3BSzEIjI6LSWANw6ssfwXcxxnhT', v_cape_id, 'bargaining_committee','active', 'Jennifer Walsh',       'j.walsh@acep-cape.ca'),
+    ('user_3BSzEIXiSqVXnNYgymDZ1PY6ZhY', v_cape_id, 'health_safety_rep',   'active', 'Pierre Desmarais',     'p.desmarais@acep-cape.ca'),
+    ('user_3BSzEIf1ARXNRQOs3d5Qju58yNZ', v_cape_id, 'member',              'active', 'Amira Hassan',         'a.hassan@acep-cape.ca'),
     -- Platform admins
     ('user_35NlrrNcfTv0DMh2kzBHyXZRtpb', v_cape_id, 'admin',         'active', 'Aubert Nungisa',       'aubert@nzila.app'),
     ('user_37Zo7OrvP4jy0J0MU5APfkDtE2V', v_cape_id, 'admin',         'active', 'Platform Admin',       'admin@nzila.io');
 END $$;
 
--- 3d. CUPE National members (6 — national office staff)
--- Real Clerk user IDs — same users as Nzila platform org, cross-org assigned.
--- getUserRole() resolves org-scoped role from organization_members, so each user
--- gets their CUPE-specific role when their org context is the CUPE org.
+-- 3d. CUPE National members (7 — national office staff, real Clerk IDs from staging DB)
 DO $$
 DECLARE v_cupe_id text;
 BEGIN
@@ -437,14 +434,15 @@ BEGIN
 
   DELETE FROM organization_members WHERE organization_id = v_cupe_id;
 
-  INSERT INTO organization_members (user_id, organization_id, role, status, name, email, department, position)
+  INSERT INTO organization_members (user_id, organization_id, role, status, name, email)
   VALUES
-    ('user_3A2c3apBW0oMKPX2CjIMd8b1ujq', v_cupe_id, 'national_officer', 'active', 'Mark Hancock',     'president@cupe.ca',    'Executive',        'National President'),
-    ('user_3A2c6rLMOmF45HEkaU7XdQp05Zk', v_cupe_id, 'admin',           'active', 'Candace Rennick',  'c.rennick@cupe.ca',    'Executive',        'National Secretary-Treasurer'),
-    ('user_3A2c7AO7bbapxh9IdAgW5kXPhHu', v_cupe_id, 'member',          'active', 'Charles Fleury',   'c.fleury@cupe.ca',     'Operations',       'General Vice-President'),
-    ('user_3A2c75rcBNDcTYtkjnNgbYLqsEx', v_cupe_id, 'member',          'active', 'Fred Hahn',        'f.hahn@cupe.ca',       'Ontario Division', 'Ontario President'),
-    ('user_3A2c7IXYOHgNMiIdOte7C5MEwFd', v_cupe_id, 'member',          'active', 'Judy Henley',      'j.henley@cupe.ca',     'Policy',           'National Director of Policy'),
-    ('user_3A2c729gwvVEXyC6vc2ICqzihxp', v_cupe_id, 'member',          'active', 'Patrick Gloutney', 'p.gloutney@cupe.ca',   'Organizing',       'National Director of Organizing');
+    ('user_3BnpKGiePftiVYeaYF24EIplB8S', v_cupe_id, 'president',           'active', 'Mark Hancock',    'm.hancock@cupe.ca'),
+    ('user_3BnpKX2MbXVFmlOSguGMnHX6Riq', v_cupe_id, 'vice_president',      'active', 'Fred Hahn',       'f.hahn@cupe.ca'),
+    ('user_3BnpKMnWNBWdDzVnP56lM1d328P', v_cupe_id, 'national_officer',    'active', 'Sherry Farnell',  's.farnell@cupe.ca'),
+    ('user_3BnpKFTn2rOTLSM2MkUTsD1NU1b', v_cupe_id, 'secretary_treasurer', 'active', 'Candace Rennick', 'c.rennick@cupe.ca'),
+    ('user_3BnpKeS5NZ5H5xquydhJnth0gYs', v_cupe_id, 'admin',               'active', 'Kevin Thompson',  'k.thompson2@cupe.ca'),
+    ('user_3BnpKZ9uQKKBsmqXz2eksrUud6F', v_cupe_id, 'officer',             'active', 'Laura Bentley',   'l.bentley@cupe.ca'),
+    ('user_3BnpKjP8KVVfFGSEozJifxfgJZQ', v_cupe_id, 'member',              'active', 'Diane Bhullar',   'd.bhullar@cupe.ca');
 END $$;
 
 -- 3e. CUPE Local 123 members (10 + 2 platform admins)
@@ -453,24 +451,27 @@ END $$;
 --       Alice Johnson  = beb4a1d7-fa51-4622-b118-2eff94decb45
 --       Bob Smith      = 2f5bdfe0-7d87-47b7-b2c3-36242b256a4f
 --       Marie-Claire   = 8653b21c-9692-49b9-b519-128a7dc52558
-DELETE FROM organization_members
-WHERE organization_id = '9210418f-6a4f-4dab-a7d2-4450d581dc81';
-
+-- Note: uses UPSERT (no DELETE) to preserve FK references from employment_history / member_employment
 INSERT INTO organization_members (id, user_id, organization_id, role, status, name, email)
 VALUES
-  ('0c00e070-1b4d-4c79-bf25-fa4d9a04bdfc', 'user_3BP6IkK6vgBW4XjSTqfd3CsBjjv', '9210418f-6a4f-4dab-a7d2-4450d581dc81', 'admin',   'active', 'Grace Lee',            'grace.lee@city.toronto.ca'),
-  ('beb4a1d7-fa51-4622-b118-2eff94decb45', 'user_3BP6Ienqg55Bk54Q8I3K5hh4Mk8', '9210418f-6a4f-4dab-a7d2-4450d581dc81', 'member',  'active', 'Alice Johnson',        'alice.johnson@city.toronto.ca'),
-  ('2f5bdfe0-7d87-47b7-b2c3-36242b256a4f', 'user_3BP6IlC0zg9MwHJDDNn7KCcR0MV', '9210418f-6a4f-4dab-a7d2-4450d581dc81', 'steward', 'active', 'Bob Smith',            'bob.smith@city.toronto.ca'),
-  ('8653b21c-9692-49b9-b519-128a7dc52558', 'user_3BSzhd4q6moCIlT3PhkWbdiAhtA', '9210418f-6a4f-4dab-a7d2-4450d581dc81', 'bargaining_committee', 'active', 'Marie-Claire Dubois',  'mc.dubois@city.toronto.ca'),
-  (gen_random_uuid(), 'user_3BSzhdQTA7fsGN5kUPfXJpMTK1O', '9210418f-6a4f-4dab-a7d2-4450d581dc81', 'president',            'active', 'Jean-Pierre Tremblay', 'jp.tremblay@city.toronto.ca'),
-  (gen_random_uuid(), 'user_3BSzhpCQGDtA22YfStHM5ksq6pI', '9210418f-6a4f-4dab-a7d2-4450d581dc81', 'chief_steward',        'active', 'David Thompson',       'd.thompson@city.toronto.ca'),
-  (gen_random_uuid(), 'user_3BSzhnlEbmEnazjOxZdVE2eXO64', '9210418f-6a4f-4dab-a7d2-4450d581dc81', 'vice_president',       'active', 'Priya Patel',          'p.patel@city.toronto.ca'),
-  (gen_random_uuid(), 'user_3BSzhk06aD2b1kK5jUuMlmy7vGu', '9210418f-6a4f-4dab-a7d2-4450d581dc81', 'health_safety_rep',    'active', 'Marco Rossi',          'm.rossi@city.toronto.ca'),
-  (gen_random_uuid(), 'user_3BSzhvBJ63gV7BmDQlH6VTLm18g', '9210418f-6a4f-4dab-a7d2-4450d581dc81', 'secretary_treasurer',  'active', 'Nathalie Lafontaine',  'n.lafontaine@city.toronto.ca'),
-  (gen_random_uuid(), 'user_3BSzhpyvCHVWm3o4QSYs87ufGGg', '9210418f-6a4f-4dab-a7d2-4450d581dc81', 'officer',              'active', 'Kevin O''Brien',       'k.obrien@city.toronto.ca'),
+  ('0c00e070-1b4d-4c79-bf25-fa4d9a04bdfc', 'user_3BP6IkK6vgBW4XjSTqfd3CsBjjv', '9210418f-6a4f-4dab-a7d2-4450d581dc81', 'member',               'active', 'Grace Lee',            'grace.lee@city.toronto.ca'),
+  ('beb4a1d7-fa51-4622-b118-2eff94decb45', 'user_3BP6Ienqg55Bk54Q8I3K5hh4Mk8', '9210418f-6a4f-4dab-a7d2-4450d581dc81', 'president',            'active', 'Alice Johnson',        'alice.johnson@city.toronto.ca'),
+  ('2f5bdfe0-7d87-47b7-b2c3-36242b256a4f', 'user_3BP6IlC0zg9MwHJDDNn7KCcR0MV', '9210418f-6a4f-4dab-a7d2-4450d581dc81', 'steward',              'active', 'Bob Smith',            'bob.smith@city.toronto.ca'),
+  ('8653b21c-9692-49b9-b519-128a7dc52558', 'user_3BSzhd4q6moCIlT3PhkWbdiAhtA', '9210418f-6a4f-4dab-a7d2-4450d581dc81', 'vice_president',       'active', 'Marie-Claire Dubois',  'mc.dubois@city.toronto.ca'),
+  (gen_random_uuid(), 'user_3BSzhdQTA7fsGN5kUPfXJpMTK1O', '9210418f-6a4f-4dab-a7d2-4450d581dc81', 'secretary_treasurer',  'active', 'Jean-Pierre Tremblay', 'jp.tremblay@city.toronto.ca'),
+  (gen_random_uuid(), 'user_3BSzhpCQGDtA22YfStHM5ksq6pI', '9210418f-6a4f-4dab-a7d2-4450d581dc81', 'bargaining_committee', 'active', 'David Thompson',       'd.thompson@city.toronto.ca'),
+  (gen_random_uuid(), 'user_3BSzhnlEbmEnazjOxZdVE2eXO64', '9210418f-6a4f-4dab-a7d2-4450d581dc81', 'officer',              'active', 'Priya Patel',          'p.patel@city.toronto.ca'),
+  (gen_random_uuid(), 'user_3BSzhk06aD2b1kK5jUuMlmy7vGu', '9210418f-6a4f-4dab-a7d2-4450d581dc81', 'chief_steward',        'active', 'Marco Rossi',          'm.rossi@city.toronto.ca'),
+  (gen_random_uuid(), 'user_3BSzhvBJ63gV7BmDQlH6VTLm18g', '9210418f-6a4f-4dab-a7d2-4450d581dc81', 'member',               'active', 'Nathalie Lafontaine',  'n.lafontaine@city.toronto.ca'),
+  (gen_random_uuid(), 'user_3BSzhpyvCHVWm3o4QSYs87ufGGg', '9210418f-6a4f-4dab-a7d2-4450d581dc81', 'health_safety_rep',    'active', 'Kevin O''Brien',       'k.obrien@city.toronto.ca'),
   -- Platform admins
   (gen_random_uuid(), 'user_35NlrrNcfTv0DMh2kzBHyXZRtpb', '9210418f-6a4f-4dab-a7d2-4450d581dc81', 'admin',   'active', 'Aubert Nungisa',       'aubert@nzila.app'),
-  (gen_random_uuid(), 'user_37Zo7OrvP4jy0J0MU5APfkDtE2V', '9210418f-6a4f-4dab-a7d2-4450d581dc81', 'admin',   'active', 'Platform Admin',       'admin@nzila.io');
+  (gen_random_uuid(), 'user_37Zo7OrvP4jy0J0MU5APfkDtE2V', '9210418f-6a4f-4dab-a7d2-4450d581dc81', 'admin',   'active', 'Platform Admin',       'admin@nzila.io')
+ON CONFLICT (organization_id, user_id) DO UPDATE SET
+  role   = EXCLUDED.role,
+  name   = EXCLUDED.name,
+  email  = EXCLUDED.email,
+  status = EXCLUDED.status;
 
 
 -- ╔═══════════════════════════════════════════════════════════════════════════╗
@@ -527,6 +528,23 @@ VALUES
   ('user_3BSzhk06aD2b1kK5jUuMlmy7vGu', 'm.rossi@city.toronto.ca',        'Marco',         'Rossi',        'en-CA', 'America/Toronto', true),
   ('user_3BSzhvBJ63gV7BmDQlH6VTLm18g', 'n.lafontaine@city.toronto.ca',   'Nathalie',      'Lafontaine',   'fr-CA', 'America/Toronto', true),
   ('user_3BSzhpyvCHVWm3o4QSYs87ufGGg', 'k.obrien@city.toronto.ca',       'Kevin',         'O''Brien',     'en-CA', 'America/Toronto', true)
+ON CONFLICT (user_id) DO UPDATE SET
+  locale     = EXCLUDED.locale,
+  first_name = EXCLUDED.first_name,
+  last_name  = EXCLUDED.last_name,
+  timezone   = EXCLUDED.timezone,
+  is_active  = EXCLUDED.is_active;
+
+-- CUPE National users (real Clerk IDs — seeded from staging DB, not cross-org Nzila users)
+INSERT INTO user_management.users (user_id, email, first_name, last_name, locale, timezone, is_active)
+VALUES
+  ('user_3BnpKGiePftiVYeaYF24EIplB8S', 'm.hancock@cupe.ca',    'Mark',    'Hancock',   'en-CA', 'America/Toronto', true),
+  ('user_3BnpKX2MbXVFmlOSguGMnHX6Riq', 'f.hahn@cupe.ca',       'Fred',    'Hahn',      'en-CA', 'America/Toronto', true),
+  ('user_3BnpKMnWNBWdDzVnP56lM1d328P', 's.farnell@cupe.ca',    'Sherry',  'Farnell',   'en-CA', 'America/Toronto', true),
+  ('user_3BnpKFTn2rOTLSM2MkUTsD1NU1b', 'c.rennick@cupe.ca',    'Candace', 'Rennick',   'en-CA', 'America/Toronto', true),
+  ('user_3BnpKeS5NZ5H5xquydhJnth0gYs', 'k.thompson2@cupe.ca',  'Kevin',   'Thompson',  'en-CA', 'America/Toronto', true),
+  ('user_3BnpKZ9uQKKBsmqXz2eksrUud6F', 'l.bentley@cupe.ca',    'Laura',   'Bentley',   'en-CA', 'America/Toronto', true),
+  ('user_3BnpKjP8KVVfFGSEozJifxfgJZQ', 'd.bhullar@cupe.ca',    'Diane',   'Bhullar',   'en-CA', 'America/Toronto', true)
 ON CONFLICT (user_id) DO UPDATE SET
   locale     = EXCLUDED.locale,
   first_name = EXCLUDED.first_name,
