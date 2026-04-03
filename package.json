@@ -156,6 +156,6 @@
     }
   },
   "dependencies": {
-    "@clerk/nextjs": "^7.0.4"
+    "@clerk/nextjs": "^7.0.8"
   }
 }

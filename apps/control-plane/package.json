@@ -14,7 +14,7 @@
     "demo:seed": "tsx lib/demoSeed.ts"
   },
   "dependencies": {
-    "@clerk/nextjs": "^6.12.0",
+    "@clerk/nextjs": "^7.0.8",
     "@nzila/os-core": "workspace:*",
     "@nzila/platform-governance": "workspace:*",
     "@nzila/platform-observability": "workspace:*",
