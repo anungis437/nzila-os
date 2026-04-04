@@ -12,10 +12,10 @@
  * The pipeline is designed to be extended with ML/LLM extractors.
  */
 
-// @ts-nocheck
 import { db } from "@/db/db";
 import { cbaIntelDocuments } from "@/db/schema";
 import { eq, and } from "drizzle-orm";
+import { createHash } from "crypto";
 import { logger } from "@/lib/logger";
 import {
   cbaIntelExtractionConfidence,
@@ -410,7 +410,7 @@ export async function extractDocument(
   // Create extraction run
   const run = await createExtractionRun({
     documentId,
-    extractionMethod: "rule_based",
+    extractionMethod: "deterministic",
     status: "running",
     startedAt: new Date(),
   });
@@ -514,8 +514,12 @@ export async function extractDocument(
       value: f.value,
       confidence: f.confidence.toString(),
       clauseFamily: f.clauseFamily as NewFinding["clauseFamily"],
-      sourceSpan: f.sourceSpan,
-      reviewStatus: "pending",
+      citationText: f.sourceSpan,
+      extractionMethod: "deterministic" as const,
+      contentHash: createHash("sha256")
+        .update(`${documentId}:${f.findingType}:${f.label}:${f.value ?? ""}`)
+        .digest("hex"),
+      reviewStatus: "pending_review",
     }));
 
     if (findingRecords.length > 0) {
@@ -602,7 +606,7 @@ export async function runBulkExtraction(): Promise<{
     .where(
       and(
         eq(cbaIntelDocuments.isLatest, true),
-        eq(cbaIntelDocuments.processingStatus, "raw"),
+        eq(cbaIntelDocuments.processingStatus, "fetched"),
       ),
     )
     .limit(100);

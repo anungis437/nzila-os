@@ -10,7 +10,6 @@
  * Designed for both cron-triggered and manual API invocations.
  */
 
-// @ts-nocheck
 import { logger } from "@/lib/logger";
 import {
   cbaIntelIngestionJobsTotal,
@@ -95,6 +94,9 @@ async function ingestSource(source: CbaIntelSource): Promise<IngestionRunResult>
 
   try {
     // Resolve adapter
+    if (!source.adapterKey) {
+      throw new Error(`Source has no adapter key: ${source.id}`);
+    }
     const adapter = getAdapter(source.adapterKey);
     if (!adapter) {
       throw new Error(`No adapter registered for key: ${source.adapterKey}`);
@@ -128,14 +130,14 @@ async function ingestSource(source: CbaIntelSource): Promise<IngestionRunResult>
           sourceId: source.id,
           sourceUrl: doc.sourceUrl,
           title: doc.title ?? null,
-          documentType: (doc.documentType as "collective_agreement") ?? "collective_agreement",
+          documentType: (doc.documentType as "full_agreement") ?? "full_agreement",
           rawContent: fetched.rawContent,
           contentHash,
           language: doc.language ?? "en",
-          jurisdiction: doc.jurisdiction ?? source.jurisdiction ?? null,
+          jurisdiction: doc.jurisdiction ?? source.jurisdictions?.[0] ?? null,
           wordCount: fetched.wordCount ?? null,
           pageCount: fetched.pageCount ?? null,
-          processingStatus: "raw",
+          processingStatus: "fetched",
         });
 
         switch (result.action) {
@@ -229,7 +231,7 @@ export async function runFullIngestion(): Promise<FullIngestionResult> {
   // Filter to sources whose adapter is registered
   const registeredKeys = getRegisteredAdapterKeys();
   const eligibleSources = sources.filter((s) =>
-    registeredKeys.includes(s.adapterKey),
+    s.adapterKey != null && registeredKeys.includes(s.adapterKey),
   );
 
   if (eligibleSources.length === 0) {

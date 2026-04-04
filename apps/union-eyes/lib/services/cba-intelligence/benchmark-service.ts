@@ -1,4 +1,3 @@
-// @ts-nocheck
 import { db } from "@/db/db";
 import {
   cbaIntelBenchmarkSnapshots,
@@ -84,10 +83,10 @@ export async function findComparableAgreements(
       conditions.push(ilike(cbaIntelAgreements.sector, sector));
     }
     if (filters.union) {
-      conditions.push(ilike(cbaIntelAgreements.unionName, `%${filters.union}%`));
+      conditions.push(ilike(cbaIntelAgreements.unionNormalized, `%${filters.union}%`));
     }
     if (filters.employerClass) {
-      conditions.push(ilike(cbaIntelAgreements.employerName, `%${filters.employerClass}%`));
+      conditions.push(ilike(cbaIntelAgreements.employerNormalized, `%${filters.employerClass}%`));
     }
 
     const comparableRows = await db
@@ -132,7 +131,7 @@ export async function findComparableAgreements(
     const comparables: ComparableAgreement[] = comparableRows.map((row) => {
       const wages = wagesByAgreement.get(row.id) ?? [];
       const latestWage = wages.sort((a, b) =>
-        (b.effectiveDate ?? "").localeCompare(a.effectiveDate ?? ""),
+        (b.effectiveDate?.getTime() ?? 0) - (a.effectiveDate?.getTime() ?? 0),
       )[0];
       const clauses = clausesByAgreement.get(row.id) ?? new Set();
 
@@ -141,8 +140,8 @@ export async function findComparableAgreements(
 
       return {
         agreementId: row.id,
-        employer: row.employerName ?? "Unknown",
-        union: row.unionName ?? "Unknown",
+        employer: row.employerNormalized ?? "Unknown",
+        union: row.unionNormalized ?? "Unknown",
         jurisdiction: row.jurisdiction ?? "",
         sector: row.sector ?? "",
         latestWageIncreasePct: latestWage?.adjustmentPercent
@@ -218,7 +217,7 @@ export async function findComparableAgreements(
     // Target's own position
     const targetWages = wagesByAgreement.get(targetAgreementId) ?? [];
     const targetLatestWage = targetWages.sort((a, b) =>
-      (b.effectiveDate ?? "").localeCompare(a.effectiveDate ?? ""),
+      (b.effectiveDate?.getTime() ?? 0) - (a.effectiveDate?.getTime() ?? 0),
     )[0];
     const targetWageIncrease = targetLatestWage?.adjustmentPercent
       ? Number(targetLatestWage.adjustmentPercent)
@@ -268,17 +267,35 @@ export async function saveBenchmarkSnapshot(
       .insert(cbaIntelBenchmarkSnapshots)
       .values({
         targetAgreementId: result.targetAgreementId,
-        jurisdiction: target?.jurisdiction,
-        sector: target?.sector,
-        union: target?.unionName,
+        filterJurisdiction: target?.jurisdiction,
+        filterSector: target?.sector,
+        filterUnion: target?.unionNormalized,
         comparableCount: result.comparableCount,
-        comparables: result.comparables,
+        comparables: result.comparables.map((c) => ({
+          agreementId: c.agreementId,
+          title: `${c.employer} / ${c.union}`,
+          employer: c.employer,
+          union: c.union,
+          jurisdiction: c.jurisdiction,
+          sector: c.sector,
+          comparability: c.comparability,
+          wageIncreasePct: c.latestWageIncreasePct,
+          termMonths: c.termMonths,
+          clauseFamiliesPresent: c.clauseFamilies,
+          reviewCoverage: 0,
+          freshnessStatus: "unknown",
+        })),
         medianWageIncrease: result.medianWageIncrease?.toString() ?? null,
-        avgTermMonths: result.avgTermMonths,
-        clauseFamilyCoverage: result.clauseFamilyCoverage,
+        avgTermMonths: result.avgTermMonths?.toString() ?? null,
+        clauseFamilyCoverage: Object.fromEntries(
+          Object.entries(result.clauseFamilyCoverage).map(([k, v]) => [
+            k,
+            { count: v, total: 100, pct: v },
+          ]),
+        ),
         targetWageIncrease: result.targetWageIncrease?.toString() ?? null,
         targetTermMonths: result.targetTermMonths,
-        targetWagePercentile: result.targetWagePercentile,
+        wagePercentile: result.targetWagePercentile?.toString() ?? null,
         computedBy,
       })
       .returning();

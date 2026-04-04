@@ -16,7 +16,6 @@
  *  4. Freshness log updates
  */
 
-// @ts-nocheck
 import { db } from "@/db/db";
 import { cbaIntelSources, cbaIntelIngestionJobs, cbaIntelFreshnessLog } from "@/db/schema";
 import { eq, and, desc } from "drizzle-orm";
@@ -197,7 +196,7 @@ export async function runScheduledIngestion(
     const ingestionResult = await runFullIngestion();
 
     // Run extraction if configured
-    let extractionResult = null;
+    let extractionResult: { processed: number; succeeded: number; failed: number } | null = null;
     if (mergedConfig.runExtractionAfter && ingestionResult.totalDocumentsIngested > 0) {
       logger.info("Scheduled ingestion: running extraction pipeline");
       const { processed, succeeded, failed } = await runBulkExtraction();
@@ -262,7 +261,10 @@ async function updateFreshnessLogs(): Promise<void> {
     if (!lastJob?.completedAt) continue;
 
     const lastChecked = new Date(lastJob.completedAt);
-    const freshnessStatus = computeFreshnessStatus(lastChecked);
+    const daysSinceLastSuccess = Math.round(
+      (Date.now() - lastChecked.getTime()) / (1000 * 60 * 60 * 24),
+    );
+    const freshnessStatus = computeFreshnessStatus(daysSinceLastSuccess);
 
     // Emit freshness gauge (1=fresh, 2=aging, 3=stale, 4=expired, 0=unknown)
     const freshnessValue =
@@ -277,12 +279,10 @@ async function updateFreshnessLogs(): Promise<void> {
 
     await db.insert(cbaIntelFreshnessLog).values({
       sourceId: source.id,
-      jurisdiction: source.jurisdiction ?? "unknown",
       freshnessStatus,
-      lastCheckedAt: lastChecked,
-      documentsChecked: lastJob.documentsFound ?? 0,
-      documentsStale: 0,
-      documentsFresh: lastJob.documentsNew ?? 0,
+      daysSinceLastSuccess,
+      documentCount: lastJob.documentsFound ?? 0,
+      staleDocumentCount: 0,
     });
   }
 }

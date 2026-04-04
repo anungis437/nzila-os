@@ -10,13 +10,13 @@
  *   npx tsx apps/union-eyes/scripts/seed-cba-intelligence.ts
  */
 
-// @ts-nocheck
 import { db } from "../db/db";
 import {
   cbaIntelSources,
   cbaIntelIngestionJobs,
   cbaIntelDocuments,
   cbaIntelFindings,
+  cbaIntelExtractionRuns,
   cbaIntelReviewDecisions,
 } from "../db/schema";
 import { eq } from "drizzle-orm";
@@ -103,7 +103,7 @@ const SOURCES = [
     isActive: true,
     adapterKey: "csv-stats",
   },
-] as const;
+];
 
 async function main() {
   console.log("🌱 Seeding CBA Intelligence demo data...");
@@ -169,11 +169,10 @@ async function main() {
   const sampleDocs = [
     {
       sourceId: fslrb.id,
-      externalId: "FPSLREB-2026-001",
+      sourceDocId: "FPSLREB-2026-001",
+      sourceUrl: "https://decisions.fpslreb-crtespf.gc.ca/fpslreb/d/2026/001",
       title: "PSAC v. Treasury Board — Wages Group (PA) — 2026 Renewal",
-      titleEn: "PSAC v. Treasury Board — Wages Group (PA) — 2026 Renewal",
-      titleFr: "AFPC c. Conseil du Trésor — Groupe des salaires (PA) — Renouvellement 2026",
-      url: "https://decisions.fpslreb-crtespf.gc.ca/fpslreb/d/2026/001",
+      documentType: "full_agreement" as const,
       rawContent: "Sample raw content for PSAC PA group wage renewal...",
       contentHash: "a1b2c3d4e5f6a1b2c3d4e5f6a1b2c3d4e5f6a1b2c3d4e5f6a1b2c3d4e5f6a1b2",
       isLatest: true,
@@ -181,11 +180,10 @@ async function main() {
     },
     {
       sourceId: fslrb.id,
-      externalId: "FPSLREB-2026-002",
+      sourceDocId: "FPSLREB-2026-002",
+      sourceUrl: "https://decisions.fpslreb-crtespf.gc.ca/fpslreb/d/2026/002",
       title: "CAPE v. Treasury Board — Economics Group (EC) — Arbitration",
-      titleEn: "CAPE v. Treasury Board — Economics Group (EC) — Arbitration",
-      titleFr: "ACEP c. Conseil du Trésor — Groupe économique (EC) — Arbitrage",
-      url: "https://decisions.fpslreb-crtespf.gc.ca/fpslreb/d/2026/002",
+      documentType: "arbitration_decision" as const,
       rawContent: "Sample content for CAPE EC group arbitration decision...",
       contentHash: "b2c3d4e5f6a1b2c3d4e5f6a1b2c3d4e5f6a1b2c3d4e5f6a1b2c3d4e5f6a1b2c3",
       isLatest: true,
@@ -193,11 +191,10 @@ async function main() {
     },
     {
       sourceId: fslrb.id,
-      externalId: "FPSLREB-2026-003",
+      sourceDocId: "FPSLREB-2026-003",
+      sourceUrl: "https://decisions.fpslreb-crtespf.gc.ca/fpslreb/d/2026/003",
       title: "PIPSC v. CRA — Audit Group (AU) — Health & Safety",
-      titleEn: "PIPSC v. CRA — Audit Group (AU) — Health & Safety",
-      titleFr: "IPFPC c. ARC — Groupe de vérification (VF) — Santé et sécurité",
-      url: "https://decisions.fpslreb-crtespf.gc.ca/fpslreb/d/2026/003",
+      documentType: "full_agreement" as const,
       rawContent: "Sample content for PIPSC AU group health safety provisions...",
       contentHash: "c3d4e5f6a1b2c3d4e5f6a1b2c3d4e5f6a1b2c3d4e5f6a1b2c3d4e5f6a1b2c3d4",
       isLatest: true,
@@ -210,11 +207,11 @@ async function main() {
     const existing = await db
       .select({ id: cbaIntelDocuments.id })
       .from(cbaIntelDocuments)
-      .where(eq(cbaIntelDocuments.externalId, doc.externalId));
+      .where(eq(cbaIntelDocuments.sourceDocId, doc.sourceDocId));
 
     if (existing.length > 0) {
       docIds.push(existing[0].id);
-      console.log(`  ✓ Document '${doc.externalId}' already exists`);
+      console.log(`  ✓ Document '${doc.sourceDocId}' already exists`);
       continue;
     }
 
@@ -223,55 +220,80 @@ async function main() {
       .values(doc)
       .returning({ id: cbaIntelDocuments.id });
     docIds.push(inserted.id);
-    console.log(`  + Document '${doc.externalId}' created`);
+    console.log(`  + Document '${doc.sourceDocId}' created`);
   }
 
-  // ── 4. Findings ──────────────────────────────────────────────────────────
+  // ── 4. Extraction runs + Findings ─────────────────────────────────────────
+  // Create a seed extraction run for each document
+  const runIds: string[] = [];
+  for (const docId of docIds) {
+    const existingRun = await db
+      .select({ id: cbaIntelExtractionRuns.id })
+      .from(cbaIntelExtractionRuns)
+      .where(eq(cbaIntelExtractionRuns.documentId, docId))
+      .limit(1);
+
+    if (existingRun.length > 0) {
+      runIds.push(existingRun[0].id);
+      continue;
+    }
+
+    const [run] = await db
+      .insert(cbaIntelExtractionRuns)
+      .values({
+        documentId: docId,
+        extractionMethod: "deterministic",
+        status: "completed",
+        findingsCount: 1,
+        startedAt: new Date("2026-03-15T10:01:00Z"),
+        completedAt: new Date("2026-03-15T10:01:30Z"),
+        durationMs: 30000,
+        triggeredBy: REVIEWER_ID,
+      })
+      .returning({ id: cbaIntelExtractionRuns.id });
+    runIds.push(run.id);
+    console.log(`  + Extraction run created for document ${docId}`);
+  }
+
   const sampleFindings = [
     {
       documentId: docIds[0],
-      sourceId: fslrb.id,
-      category: "wage_adjustment",
-      subcategory: "base_salary_increase",
-      title: "PA Group Annual Wage Increase — 2026",
-      titleEn: "PA Group Annual Wage Increase — 2026",
-      titleFr: "Augmentation salariale annuelle du groupe PA — 2026",
-      summary: "3.5% base salary increase for PA group effective April 1, 2026.",
-      rawSnippet: "The Board awards a 3.5% annual general increase to the PA classification...",
-      confidence: 0.92,
+      extractionRunId: runIds[0],
+      findingType: "wage_adjustment",
+      clauseFamily: "wages" as const,
+      label: "PA Group Annual Wage Increase — 2026",
+      value: "3.5% base salary increase for PA group effective April 1, 2026.",
+      confidence: "0.920",
+      extractionMethod: "deterministic" as const,
       contentHash: "f1a2b3c4d5e6f1a2b3c4d5e6f1a2b3c4d5e6f1a2b3c4d5e6f1a2b3c4d5e6f1a2",
-      jurisdictions: ["CA-FED"],
-      sectors: ["public_sector"],
+      citationText: "The Board awards a 3.5% annual general increase to the PA classification...",
+      reviewStatus: "pending_review",
     },
     {
       documentId: docIds[1],
-      sourceId: fslrb.id,
-      category: "arbitration_outcome",
-      subcategory: "binding_arbitration",
-      title: "EC Group Binding Arbitration — Remote Work",
-      titleEn: "EC Group Binding Arbitration — Remote Work",
-      titleFr: "Arbitrage exécutoire du groupe EC — Travail à distance",
-      summary: "Arbitrator ruled in favour of 3-day per week remote work for EC group.",
-      rawSnippet: "The arbitrator awards that EC employees be permitted to work remotely...",
-      confidence: 0.88,
+      extractionRunId: runIds[1],
+      findingType: "arbitration_outcome",
+      clauseFamily: "remote_hybrid" as const,
+      label: "EC Group Binding Arbitration — Remote Work",
+      value: "Arbitrator ruled in favour of 3-day per week remote work for EC group.",
+      confidence: "0.880",
+      extractionMethod: "deterministic" as const,
       contentHash: "a2b3c4d5e6f1a2b3c4d5e6f1a2b3c4d5e6f1a2b3c4d5e6f1a2b3c4d5e6f1a2b3",
-      jurisdictions: ["CA-FED"],
-      sectors: ["public_sector"],
+      citationText: "The arbitrator awards that EC employees be permitted to work remotely...",
+      reviewStatus: "pending_review",
     },
     {
       documentId: docIds[2],
-      sourceId: fslrb.id,
-      category: "provision_change",
-      subcategory: "health_safety",
-      title: "AU Group — Enhanced Ergonomic Assessment Requirements",
-      titleEn: "AU Group — Enhanced Ergonomic Assessment Requirements",
-      titleFr: "Groupe VF — Exigences renforcées d'évaluation ergonomique",
-      summary: "New provision requiring employer-funded ergonomic assessments every 2 years.",
-      rawSnippet: "The employer shall provide ergonomic workplace assessments at intervals...",
-      confidence: 0.85,
+      extractionRunId: runIds[2],
+      findingType: "provision_change",
+      clauseFamily: "health_safety" as const,
+      label: "AU Group — Enhanced Ergonomic Assessment Requirements",
+      value: "New provision requiring employer-funded ergonomic assessments every 2 years.",
+      confidence: "0.850",
+      extractionMethod: "deterministic" as const,
       contentHash: "b3c4d5e6f1a2b3c4d5e6f1a2b3c4d5e6f1a2b3c4d5e6f1a2b3c4d5e6f1a2b3c4",
-      jurisdictions: ["CA-FED"],
-      sectors: ["public_sector"],
+      citationText: "The employer shall provide ergonomic workplace assessments at intervals...",
+      reviewStatus: "pending_review",
     },
   ];
 
@@ -282,12 +304,12 @@ async function main() {
       .where(eq(cbaIntelFindings.contentHash, finding.contentHash));
 
     if (existing.length > 0) {
-      console.log(`  ✓ Finding '${finding.title}' already exists`);
+      console.log(`  ✓ Finding '${finding.label}' already exists`);
       continue;
     }
 
     await db.insert(cbaIntelFindings).values(finding);
-    console.log(`  + Finding '${finding.title}' created`);
+    console.log(`  + Finding '${finding.label}' created`);
   }
 
   // ── 5. Review decision (approved) ────────────────────────────────────────

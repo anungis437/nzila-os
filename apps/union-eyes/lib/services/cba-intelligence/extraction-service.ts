@@ -1,4 +1,3 @@
-// @ts-nocheck
 import { db } from "@/db/db";
 import {
   cbaIntelExtractionRuns,
@@ -87,7 +86,7 @@ export async function completeExtractionRun(
         durationMs,
         findingsCount: stats.findingsCount,
         errorCount: stats.errorCount ?? 0,
-        errors: stats.errors as Record<string, unknown> | null ?? null,
+        errors: stats.errors as Array<{ field: string; message: string }> | null ?? null,
       })
       .where(eq(cbaIntelExtractionRuns.id, id))
       .returning();
