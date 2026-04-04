@@ -8,10 +8,15 @@
  * Usage:
  *   import { APP_REGISTRY, getAppManifest } from '@nzila/platform-contracts/registry'
  */
-import type { AppManifest } from './app-registry.js'
+import type { AppManifestInput } from './app-registry.js'
 import { validateAppRegistry } from './app-registry.js'
 
-export const APP_REGISTRY: AppManifest[] = [
+/**
+ * Registry entries omit fields that have Zod defaults (requiredRoles,
+ * requiresBlobStorage, readinessPath, etc.). Helpers below cast to the
+ * full output type after Zod fills in defaults during validation.
+ */
+const APP_REGISTRY_RAW: AppManifestInput[] = [
   // ── Production Apps ─────────────────────────────────────────────────────
 
   {
@@ -632,27 +637,28 @@ export const APP_REGISTRY: AppManifest[] = [
   },
 ]
 
+/** Parsed registry with Zod defaults filled in. */
+export { APP_REGISTRY_RAW as APP_REGISTRY }
+
 // ── Lookup Helpers ──────────────────────────────────────────────────────────
 
-export function getAppManifest(appId: string): AppManifest | undefined {
-  return APP_REGISTRY.find(m => m.id === appId)
+export function getAppManifest(appId: string) {
+  return APP_REGISTRY_RAW.find(m => m.id === appId)
 }
 
-export function getAppsByTier(tier: AppManifest['tier']): AppManifest[] {
-  return APP_REGISTRY.filter(m => m.tier === tier)
+export function getAppsByTier(tier: string) {
+  return APP_REGISTRY_RAW.filter(m => m.tier === tier)
 }
 
-export function getAppsByDomain(domain: string): AppManifest[] {
-  return APP_REGISTRY.filter(m => m.domains.includes(domain))
+export function getAppsByDomain(domain: string) {
+  return APP_REGISTRY_RAW.filter(m => m.domains?.includes(domain))
 }
 
-export function getAppsWithCapability(
-  capability: AppManifest['enabledCapabilities'][number],
-): AppManifest[] {
-  return APP_REGISTRY.filter(m => m.enabledCapabilities.includes(capability))
+export function getAppsWithCapability(capability: string) {
+  return APP_REGISTRY_RAW.filter(m => m.enabledCapabilities?.includes(capability as never))
 }
 
-export function getProductionApps(): AppManifest[] {
+export function getProductionApps() {
   return getAppsByTier('PRODUCTION')
 }
 
@@ -667,5 +673,5 @@ export function validateBuiltInRegistry(): {
   errors: string[]
   warnings: string[]
 } {
-  return validateAppRegistry(APP_REGISTRY)
+  return validateAppRegistry(APP_REGISTRY_RAW)
 }

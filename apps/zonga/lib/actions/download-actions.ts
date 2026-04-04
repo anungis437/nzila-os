@@ -71,7 +71,7 @@ export async function requestDownload(assetId: string): Promise<DownloadResult> 
 
     const pack = buildEvidencePackFromAction({
       actionType: 'CONTENT_DOWNLOAD_GRANTED',
-      orgId: ctx.orgId,
+      orgId: ctx.orgId ?? '',
       executedBy: ctx.actorId,
       actionId: crypto.randomUUID(),
     })

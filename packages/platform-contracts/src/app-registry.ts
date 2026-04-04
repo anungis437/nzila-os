@@ -158,6 +158,9 @@ export const appManifestSchema = moduleRegistrationSchema.extend({
 
 export type AppManifest = z.infer<typeof appManifestSchema>
 
+/** Input shape — allows omitting fields that have Zod defaults. */
+export type AppManifestInput = z.input<typeof appManifestSchema>
+
 // ── Validation Helpers ──────────────────────────────────────────────────────
 
 export function validateAppManifest(manifest: unknown): {
@@ -216,7 +219,7 @@ export type AppRegistryEntry = AppManifest & {
 /**
  * Validates an entire registry of app manifests for cross-app consistency.
  */
-export function validateAppRegistry(manifests: AppManifest[]): {
+export function validateAppRegistry(manifests: AppManifestInput[]): {
   valid: boolean
   errors: string[]
   warnings: string[]
@@ -240,7 +243,7 @@ export function validateAppRegistry(manifests: AppManifest[]): {
 
   // Check that all integration dependencies reference known providers
   const knownProviders = new Set(manifests.flatMap(m =>
-    m.integrationDependencies.map(d => d.provider),
+    (m.integrationDependencies ?? []).map(d => d.provider),
   ))
 
   if (knownProviders.size > 0) {

@@ -341,7 +341,7 @@ export async function tipCreator(data: {
 
     const pack = buildEvidencePackFromAction({
       actionType: 'CREATOR_TIP_SENT',
-      orgId: ctx.orgId,
+      orgId: ctx.orgId ?? '',
       executedBy: ctx.actorId,
       actionId: crypto.randomUUID(),
     })

@@ -114,7 +114,7 @@ describe('governance requirements', () => {
     const prod = getProductionApps()
     const financial = prod.filter(a => a.reportingBindings?.emitsFinancialRecords)
     for (const app of financial) {
-      const hasHashChain = app.governanceRequirements.some(
+      const hasHashChain = (app.governanceRequirements ?? []).some(
         g => g.evidenceClass === 'hash-chain',
       )
       expect(hasHashChain, `${app.id} emits financial records but has no hash-chain governance control`).toBe(true)
@@ -123,7 +123,7 @@ describe('governance requirements', () => {
 
   it('every governance requirement has a control ID', () => {
     for (const app of APP_REGISTRY) {
-      for (const req of app.governanceRequirements) {
+      for (const req of app.governanceRequirements ?? []) {
         expect(req.controlId).toBeTruthy()
       }
     }
