@@ -15,19 +15,24 @@ container_apps:
   environment: nzila-prod-env
   revision_mode: Multiple
   min_replicas: 3
-  max_replicas: 20
+  max_replicas: 50              # scaled for 100K+ users (was 20)
 
 apps:
   web:
     image_tag: "${VERSION}"
     port: 3000
-    cpu: 1.0
-    memory: 2Gi
+    cpu: 2.0                    # scaled from 1.0 for production load
+    memory: 4Gi                 # scaled from 2Gi — avoids GC pressure
     scale_rules:
       - name: http-requests
         type: http
         metadata:
           concurrentRequests: "50"
+      - name: cpu-utilization
+        type: cpu
+        metadata:
+          type: Utilization
+          value: "70"
     env:
       - name: NODE_ENV
         value: production
@@ -37,13 +42,18 @@ apps:
   console:
     image_tag: "${VERSION}"
     port: 3001
-    cpu: 1.0
-    memory: 2Gi
+    cpu: 2.0
+    memory: 4Gi
     scale_rules:
       - name: http-requests
         type: http
         metadata:
           concurrentRequests: "30"
+      - name: cpu-utilization
+        type: cpu
+        metadata:
+          type: Utilization
+          value: "70"
     env:
       - name: NODE_ENV
         value: production
@@ -51,15 +61,6 @@ apps:
   partners:
     image_tag: "${VERSION}"
     port: 3002
-    cpu: 0.5
-    memory: 1Gi
-    env:
-      - name: NODE_ENV
-        value: production
-
-  union-eyes:
-    image_tag: "${VERSION}"
-    port: 3003
     cpu: 1.0
     memory: 2Gi
     scale_rules:
@@ -70,6 +71,29 @@ apps:
     env:
       - name: NODE_ENV
         value: production
+
+  union-eyes:
+    image_tag: "${VERSION}"
+    port: 3003
+    cpu: 2.0
+    memory: 4Gi
+    scale_rules:
+      - name: http-requests
+        type: http
+        metadata:
+          concurrentRequests: "40"
+      - name: cpu-utilization
+        type: cpu
+        metadata:
+          type: Utilization
+          value: "70"
+    env:
+      - name: NODE_ENV
+        value: production
+      - name: DB_POOL_MAX
+        value: "100"            # connection pool per replica (fronted by PgBouncer)
+      - name: DATABASE_READ_URL
+        value: "${DATABASE_READ_URL}"  # read replica for analytics/reporting
 
   abr:
     image_tag: "${VERSION}"
@@ -92,13 +116,18 @@ apps:
   orchestrator-api:
     image_tag: "${VERSION}"
     port: 4000
-    cpu: 1.0
-    memory: 2Gi
+    cpu: 2.0
+    memory: 4Gi
     scale_rules:
       - name: http-requests
         type: http
         metadata:
           concurrentRequests: "100"
+      - name: cpu-utilization
+        type: cpu
+        metadata:
+          type: Utilization
+          value: "70"
     env:
       - name: NODE_ENV
         value: production
@@ -118,13 +147,25 @@ apps:
         value: production
 
 database:
-  sku: GP_Standard_D4ds_v5
-  storage_gb: 512
+  sku: GP_Standard_E8ds_v5      # 8 vCores, 64 GiB (upgrade path: E16 → E32)
+  storage_gb: 1024              # 1 TB with auto-grow
   backup_retention_days: 35
   high_availability: true
   geo_redundant_backup: true
-  # DR replica stays within Canada (canadaeast)
   standby_availability_zone: "2"
+
+  # PgBouncer connection pooling (built into Azure Flexible Server)
+  pgbouncer:
+    enabled: true
+    pool_mode: transaction      # transaction pooling (best for serverless)
+    default_pool_size: 100      # real DB connections per user/db pair
+    max_client_connections: 5000 # 5K client connections across all replicas
+    min_pool_size: 10           # keep warm connections
+
+  # Read replicas for horizontal read scaling
+  read_replicas:
+    count: 2                    # 2 replicas for analytics/reporting/dashboards
+    # App reads routed via DATABASE_READ_URL env var
 
 storage:
   replication: GRS

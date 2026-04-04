@@ -1,6 +1,9 @@
 // ──────────────────────────────────────────────────────────────────────────────
 // W1-1: Container Apps Environment with mTLS
 // Enforces mutual TLS between all container apps in the environment.
+//
+// Scaling: HTTP concurrency + CPU utilization triggers.
+// Resources: Parameterized CPU/memory for incremental scale-up.
 // ──────────────────────────────────────────────────────────────────────────────
 
 param envName string
@@ -11,6 +14,18 @@ param logAnalyticsKey string
 param enableMtls bool = true
 param minReplicas int = 1
 param maxReplicas int = 5
+
+@description('CPU cores per container (e.g., "0.5", "1.0", "2.0", "4.0")')
+param containerCpu string = '0.5'
+
+@description('Memory per container (e.g., "1Gi", "2Gi", "4Gi", "8Gi")')
+param containerMemory string = '1Gi'
+
+@description('HTTP concurrent requests per replica before scale-out')
+param httpConcurrency string = '50'
+
+@description('CPU utilization % threshold for scale-out (0 = disabled)')
+param cpuScaleThreshold int = 70
 
 resource containerEnv 'Microsoft.App/managedEnvironments@2024-03-01' = {
   name: envName
@@ -68,8 +83,8 @@ resource containerApps 'Microsoft.App/containerApps@2024-03-01' = [
             name: app.name
             image: '${app.image}:latest'
             resources: {
-              cpu: json('0.5')
-              memory: '1Gi'
+              cpu: json(containerCpu)
+              memory: containerMemory
             }
             probes: [
               {
@@ -94,16 +109,27 @@ resource containerApps 'Microsoft.App/containerApps@2024-03-01' = [
         scale: {
           minReplicas: minReplicas
           maxReplicas: maxReplicas
-          rules: [
+          rules: concat([
             {
               name: 'http-scaling'
               http: {
                 metadata: {
-                  concurrentRequests: '50'
+                  concurrentRequests: httpConcurrency
                 }
               }
             }
-          ]
+          ], cpuScaleThreshold > 0 ? [
+            {
+              name: 'cpu-scaling'
+              custom: {
+                type: 'cpu'
+                metadata: {
+                  type: 'Utilization'
+                  value: string(cpuScaleThreshold)
+                }
+              }
+            }
+          ] : [])
         }
       }
     }
