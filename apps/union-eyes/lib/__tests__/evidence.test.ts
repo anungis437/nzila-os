@@ -42,9 +42,15 @@ describe('evidence', () => {
     mocks.buildEvidencePackFromAction.mockResolvedValue(rawPack);
     mocks.processEvidencePack.mockResolvedValue(processed);
 
-    const result = await buildUnionEvidencePack(action as unknown as Parameters<typeof buildUnionEvidencePack>[0]);
+    const result = await buildUnionEvidencePack(action);
 
-    expect(mocks.buildEvidencePackFromAction).toHaveBeenCalledWith(action);
+    expect(mocks.buildEvidencePackFromAction).toHaveBeenCalledWith(
+      expect.objectContaining({
+        actionType: 'GRIEVANCE_RESOLVED',
+        orgId: 'org-1',
+        executedBy: 'user-1',
+      }),
+    );
     expect(mocks.processEvidencePack).toHaveBeenCalledWith(rawPack);
     expect(result).toEqual(processed);
   });
@@ -53,7 +59,7 @@ describe('evidence', () => {
     mocks.buildEvidencePackFromAction.mockRejectedValue(new Error('build failed'));
 
     await expect(
-      buildUnionEvidencePack({ actionType: 'TEST', orgId: 'o', actorId: 'u', artifacts: [] } as unknown as Parameters<typeof buildUnionEvidencePack>[0]),
+      buildUnionEvidencePack({ actionType: 'TEST', orgId: 'o', actorId: 'u', artifacts: [] }),
     ).rejects.toThrow('build failed');
   });
 });

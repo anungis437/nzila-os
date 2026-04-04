@@ -608,6 +608,9 @@ importers:
       '@nzila/db':
         specifier: workspace:*
         version: link:../../packages/db
+      '@nzila/observability':
+        specifier: workspace:*
+        version: link:../../packages/observability
       '@nzila/os-core':
         specifier: workspace:*
         version: link:../../packages/os-core

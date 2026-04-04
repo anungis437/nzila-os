@@ -15,6 +15,7 @@
   },
   "dependencies": {
     "@clerk/nextjs": "^7.0.8",
+    "@nzila/observability": "workspace:*",
     "@nzila/os-core": "workspace:*",
     "@nzila/platform-governance": "workspace:*",
     "@nzila/platform-observability": "workspace:*",

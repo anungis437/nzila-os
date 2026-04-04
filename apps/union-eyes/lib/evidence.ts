@@ -16,6 +16,14 @@ import {
 export { generateSeal, verifySeal }
 export type { EvidencePackResult }
 
+/** Simplified evidence action used by union-eyes route handlers. */
+interface UnionEvidenceAction {
+  actionType: string
+  orgId: string
+  actorId: string
+  artifacts: Array<{ type: string; data: unknown }>
+}
+
 /**
  * Build and seal an evidence pack for a union governance action.
  *
@@ -30,8 +38,14 @@ export type { EvidencePackResult }
  * ```
  */
 export async function buildUnionEvidencePack(
-  action: GovernanceActionContext,
+  action: UnionEvidenceAction,
 ): Promise<EvidencePackResult> {
-  const pack = await buildEvidencePackFromAction(action)
+  const ctx: GovernanceActionContext = {
+    actionId: `ue-${action.actionType}-${Date.now()}`,
+    actionType: action.actionType,
+    orgId: action.orgId,
+    executedBy: action.actorId,
+  }
+  const pack = await buildEvidencePackFromAction(ctx)
   return processEvidencePack(pack)
 }
