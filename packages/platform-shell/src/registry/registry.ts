@@ -7,7 +7,6 @@
 import type {
   ModuleRegistration,
   ModuleManifest,
-  ModuleTier,
 } from '@nzila/platform-contracts/module-registry';
 import type { PlatformRole } from '@nzila/platform-contracts/role';
 

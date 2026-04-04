@@ -11,13 +11,11 @@
 import type {
   AudioQuality,
   StreamProtocol,
-  TranscodeJobStatus,
   MediaValidationResult,
 } from '../enums'
 
 import type {
   TranscodeJob,
-  TranscodeOutput,
   AssetManifest,
   StreamingToken,
 } from '../types/index'

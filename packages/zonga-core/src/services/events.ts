@@ -12,12 +12,10 @@
 
 import type {
   TicketInventory,
-  TicketOrder,
   TicketHolder,
-  TicketScan,
   PromoCode,
 } from '../types/index'
-import type { ScanResult, PromoCodeType, RefundStatus } from '../enums'
+import type { ScanResult } from '../enums'
 
 // ── Inventory ───────────────────────────────────────────────────────────────
 

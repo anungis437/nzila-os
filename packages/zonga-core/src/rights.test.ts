@@ -7,7 +7,7 @@ import {
   shouldBlockPayout,
   canActivateSplitAgreement,
 } from './services/rights'
-import type { SplitAgreementShare, RightsShare, RightsDispute, SplitAgreement } from './types/index'
+import type { SplitAgreementShare, RightsShare, SplitAgreement } from './types/index'
 import { RightsOwnerRole, SplitAgreementStatus } from './enums'
 
 // ── Helpers ─────────────────────────────────────────────────────────────────

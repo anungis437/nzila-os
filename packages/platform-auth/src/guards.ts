@@ -10,13 +10,11 @@
  * @invariant FAIL_CLOSED_002
  */
 import type { OrgContext } from '@nzila/org'
-import { OrgScopeRequiredError, OrgAccessDeniedError } from '@nzila/org'
 import type { PlatformRole } from '@nzila/platform-contracts'
 import { createPlatformError, type PlatformError } from '@nzila/platform-contracts'
 import type {
   AuthenticatedIdentity,
   OrgMembership,
-  OrgScopedAuthResult,
 } from './identity.js'
 import { meetsOrgRoleRequirement } from './authorization.js'
 

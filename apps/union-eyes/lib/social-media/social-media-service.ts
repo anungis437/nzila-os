@@ -15,7 +15,6 @@ import { db } from '@/db';
 import { socialAccounts, socialPosts, socialAnalytics } from '@/db/schema/social-media-schema';
 import { eq, and, inArray } from 'drizzle-orm';
 import type {
-  SocialAccount,
   SocialPlatform,
   SocialPostType,
 } from '@/db/schema/social-media-schema';

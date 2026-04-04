@@ -45,7 +45,6 @@ export const GET = withRoleAuth('member', async (request: NextRequest, context: 
 
       // Parse query parameters
       const searchParams = request.nextUrl.searchParams;
-      const platform = searchParams.get('platform');
       const status = searchParams.get('status');
       const campaignId = searchParams.get('campaign_id');
       const search = searchParams.get('search');

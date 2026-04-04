@@ -23,8 +23,11 @@ const __dirname = path.dirname(fileURLToPath(import.meta.url));
 
 // ── Config ──────────────────────────────────────────────────────────────
 
-const CLERK_KEY = process.env.CLERK_SECRET_KEY
-  || 'sk_test_Yi5CDjCvGDs3qSQaiwmCuDdexcviUp7FkUaqqdloWc';
+const CLERK_KEY = process.env.CLERK_SECRET_KEY;
+if (!CLERK_KEY) {
+  console.error('ERROR: CLERK_SECRET_KEY env var is required. Set it before running this script.');
+  process.exit(1);
+}
 
 // Existing Nzila platform org
 const NZILA_CLERK_ORG_ID = 'org_3BEaESt8ZIC4XEdJ7hmmB6nu6pp';

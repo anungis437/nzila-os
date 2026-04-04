@@ -9,7 +9,7 @@
  * @module @nzila/zonga-core/services/streaming
  */
 
-import type { StreamEvent, FraudReviewFlag } from '../types/index'
+import type { StreamEvent } from '../types/index'
 import type { FraudSignalType } from '../enums'
 
 // ── Stream Aggregation ──────────────────────────────────────────────────────

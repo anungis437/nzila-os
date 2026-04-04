@@ -162,26 +162,3 @@ function PrincipleCard({ icon, title, description }: PrincipleCardProps) {
     </div>
   );
 }
-
-interface TestimonialCardProps {
-  quote: string;
-  author: string;
-  role: string;
-}
-
-function TestimonialCard({ quote, author, role }: TestimonialCardProps) {
-  return (
-    <div className="bg-slate-50 border-l-4 border-blue-600 p-6 rounded-r-lg">
-      <p className="text-lg text-slate-800 italic mb-4">&ldquo;{quote}&rdquo;</p>
-      <div className="flex items-center gap-3">
-        <div className="w-12 h-12 rounded-full bg-slate-300 flex items-center justify-center text-slate-600 font-semibold">
-          {author.charAt(0)}
-        </div>
-        <div>
-          <p className="font-semibold text-slate-900">{author}</p>
-          <p className="text-sm text-slate-600">{role}</p>
-        </div>
-      </div>
-    </div>
-  );
-}

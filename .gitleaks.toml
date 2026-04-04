@@ -20,14 +20,30 @@ paths = [
   '''\.github/workflows/.*\.yml$''',   # CI files use placeholder env vars
   '''\.env\.example$''',               # Example env files
   '''\.env\.test$''',                  # Test env files
+  '''\.env\.template$''',              # Template env files
   '''pnpm-lock\.yaml$''',             # Lock file hashes
   '''.*\.snap$''',                     # Jest/Vitest snapshots
   '''docs/.*\.md$''',                  # Documentation
   '''content/.*\.md$''',               # Content files
   '''governance/.*\.md$''',            # Governance docs
+  '''ops/runbooks/.*\.md$''',          # Runbook docs with placeholder commands
   '''tmp-.*''',                        # Temporary analysis files (not committed to production)
   '''db/seeds/.*\.sql$''',             # Seed files use env-var placeholders, not real secrets
   '''auth_core/tests_clerk_webhooks\.py$''',  # Test file with synthetic webhook secret
+  '''__tests__/.*\.test\.ts$''',       # Unit tests with mock env values
+  '''\.test\.ts$''',                   # Test files with mock values
+  '''\.spec\.ts$''',                   # Spec files with mock values
+  '''Dockerfile$''',                   # Build-time placeholder ARGs
+  '''docker-compose.*\.yml$''',        # Dev compose files with local credentials
+  '''\.devcontainer/.*\.yml$''',       # Devcontainer configs
+  '''tech-repo-scaffold/''',           # Template/scaffold boilerplate
+  '''infra/.*\.bicep$''',             # Bicep templates with output expressions
+  '''packages/automation/.*\.py$''',   # Migration scripts with placeholder URLs
+  '''packages/automation/.*\.md$''',   # Automation documentation
+  '''.*STRIPE_.*\.md$''',              # Stripe integration docs
+  '''.*CLERK_.*\.md$''',               # Clerk integration docs
+  '''.*AUTH_.*\.md$''',                # Auth implementation docs
+  '''.*DJANGO_.*\.md$''',              # Django settings guides
 ]
 
 commits = [
@@ -40,6 +56,19 @@ regexes = [
   '''pk_test_placeholder''',
   '''postgres(ql)?://[^@]+@localhost''',
   '''NEXT_PUBLIC_.*=pk_test_''',
+  '''sk_test_xxx''',
+  '''pk_test_xxx''',
+  '''sk_test_your_\w+''',             # Placeholder keys like sk_test_your_key_here
+  '''pk_test_your_\w+''',             # Placeholder keys like pk_test_your_key_here
+  '''whsec_configure_this''',         # Placeholder webhook secrets
+  '''whsec_\.\.\.''',                 # Truncated placeholder (whsec_...)
+  '''password@db:5432''',             # Dev docker-compose DB passwords
+  '''devpassword@db''',               # Dev docker-compose passwords
+  '''PASSWORD@.*5432''',              # Migration script placeholders
+  '''user:pass@host''',               # Example connection strings
+  '''user:password@host''',           # Example connection strings
+  '''\.replace\(.*whsec_''',          # Code that strips whsec_ prefix (not a secret)
+  '''\.startswith\(.*whsec_''',       # Code that checks whsec_ prefix (not a secret)
 ]
 
 # ──────────────────────────────────────

@@ -9,7 +9,6 @@ import {
   type ReactNode,
 } from 'react';
 import type { ModuleManifest } from '@nzila/platform-contracts/module-registry';
-import type { PlatformRole } from '@nzila/platform-contracts/role';
 import type {
   ShellContextValue,
   ShellUser,

@@ -9,7 +9,8 @@
  * @module @nzila/zonga-growth/recommendations
  */
 
-import type { RecommendationRequest, RecommendationResponse, RecommendationItem } from '@nzila/zonga-core/types'
+import type { RecommendationItem } from '@nzila/zonga-core/types'
+import type { RegionTag } from '@nzila/zonga-core/enums'
 import type { RecommendationEngine } from '@nzila/zonga-core/services'
 import {
   filterRecommendations,
@@ -273,7 +274,7 @@ export function createRecommendationService(deps: {
       return getOrCompute(params.orgId, params.listenerId, 'city', async () => {
         const request = buildRegionalDiscoveryRequest({
           listenerId: params.listenerId,
-          region: params.region as any,
+          region: params.region as RegionTag,
           limit,
         })
         const response = await engine.getRecommendations(request)

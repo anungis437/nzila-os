@@ -14,7 +14,6 @@ import {
   getPurchaseOrder,
   listPurchaseOrders,
   updatePurchaseOrder,
-  sendPurchaseOrder,
   cancelPurchaseOrder,
   receivePOLine,
   getPOSummary,

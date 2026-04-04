@@ -10,7 +10,7 @@
  * @module @nzila/zonga-core/services/recommendations
  */
 
-import type { RecommendationType, MoodTag, RegionTag } from '../enums'
+import type { MoodTag, RegionTag } from '../enums'
 import type { RecommendationRequest, RecommendationResponse, RecommendationItem } from '../types/index'
 
 // ── Recommendation Port ─────────────────────────────────────────────────────

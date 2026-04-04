@@ -9,7 +9,6 @@ import type {
   TicketTransfer,
   PromoCode,
   TicketTier,
-  TransferStatus,
 } from './types'
 import { TicketStatus } from './types'
 

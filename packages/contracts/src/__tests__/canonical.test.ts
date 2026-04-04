@@ -6,7 +6,6 @@ import {
   canonicalMetricSchema,
   canonicalAuditRecordSchema,
   canonicalWorkflowStateSchema,
-  canonicalIntegrationRecordSchema,
   canonicalFinancialRecordSchema,
   canonicalUserContextSchema,
   canonicalOrgContextSchema,
