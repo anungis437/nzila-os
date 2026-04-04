@@ -58,7 +58,7 @@ describe('createInsight', () => {
       confidenceLevel: 'HIGH',
       modelVersion: 'v1.0',
     })
-    expect(insight.id).toMatch(/^ins_/)
+    expect(insight.id).toMatch(/^insight_/)
     expect(insight.metricValue).toBe(12)
     expect(insight.comparisonPeriod).toBe('2024 vs 2023')
   })
