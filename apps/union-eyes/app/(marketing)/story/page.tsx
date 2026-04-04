@@ -1,11 +1,11 @@
 /**
- * Story Page - Why Union Eyes Exists
+ * Story Page - Our Story
  * 
- * Purpose: Human-centered narrative about the platform's origins
- * Audience: Skeptical union leadership, organizers, member representatives
+ * Purpose: Authentic founder narrative about Union Eyes' origins
+ * Audience: Union leadership, organizers, member representatives
  * 
- * Tone: Authentic, organizer-first, anti-corporate
- * Message: Built with unions, not for unions. By people who understand labor.
+ * Tone: Personal, authentic, founder-driven
+ * Message: Two brothers — one who lived labour, one who builds technology.
  */
 
 
@@ -14,16 +14,13 @@ export const dynamic = 'force-dynamic';
 import * as React from 'react';
 import Link from 'next/link';
 import { Metadata } from 'next';
-import {
-  CalloutPresets,
-} from '@/components/marketing/human-centered-callout';
 import { Heart, Users, Shield, Handshake } from 'lucide-react';
 import { Button } from '@/components/ui/button';
 
 export const metadata: Metadata = {
   title: 'Our Story | Union Eyes',
   description:
-    'Union Eyes was built by people who understand labor, not Silicon Valley. This is why we exist and what we stand for.',
+    'Union Eyes begins with two brothers, two careers, and one shared conviction: unions deserve better tools.',
 };
 
 export default function StoryPage() {
@@ -34,15 +31,15 @@ export default function StoryPage() {
         <div className="max-w-4xl mx-auto px-4 sm:px-6 lg:px-8 py-16 sm:py-24 text-center">
           <div className="inline-flex items-center gap-2 px-4 py-2 bg-red-50 border border-red-200 rounded-full text-sm text-red-700 font-medium mb-6">
             <Heart className="h-4 w-4" />
-            <span>Built with unions, not for unions</span>
+            <span>Our Story</span>
           </div>
           <h1 className="text-4xl sm:text-5xl font-bold text-slate-900 mb-6">
-            Union Eyes exists because workers deserve better than pen and paper
+            Two brothers. Two careers.<br />One shared conviction.
           </h1>
           <p className="text-xl text-slate-600 leading-relaxed max-w-3xl mx-auto">
-            This platform was co-designed with union stewards who spent years managing
-            grievances in spreadsheets, losing documents, and watching cases fall through
-            the cracks while employers had million-dollar HR systems.
+            Union Eyes begins with a Labour Relations Officer turned lawyer
+            and a CIO turned SaaS builder — and the moment their paths
+            converged on an obvious opportunity.
           </p>
         </div>
       </header>
@@ -50,27 +47,42 @@ export default function StoryPage() {
       <main className="max-w-4xl mx-auto px-4 sm:px-6 lg:px-8 py-12">
         {/* Origin Story */}
         <section className="mb-16">
-          <h2 className="text-3xl font-bold text-slate-900 mb-6">How this started</h2>
+          <h2 className="text-3xl font-bold text-slate-900 mb-6">Where it all began</h2>
           <div className="prose prose-slate max-w-none">
             <p className="text-lg text-slate-700 leading-relaxed mb-4">
-              In 2023, a steward from a healthcare union in Ontario was managing 47 open
-              grievances in a shared Excel file. One day, someone accidentally deleted a
-              column. Weeks of documentation—gone. No backup. No audit trail. Just
-              frustration and members waiting for justice.
+              Mike spent years on the inside — first as a Labour Relations Officer for
+              a national union, then as a lawyer conducting workplace investigations
+              and assessments. Moving from working <em>in</em> a union to working <em>with</em> unions
+              gave him an unfiltered view of where the friction lived: the workflows,
+              the gaps, the moments where the right information simply wasn&apos;t in the
+              right hands.
             </p>
             <p className="text-lg text-slate-700 leading-relaxed mb-4">
-              Meanwhile, the employer had a sophisticated HR system that tracked every
-              interaction, every timeline, every deadline. The power imbalance wasn&apos;t just
-              in the boardroom—it was in the tools.
+              Oby took a different path. As CIO of a national sporting association
+              and a seasoned SaaS builder, he made a career out of one idea — that
+              technology should feel human. That the most powerful platforms are the
+              ones people actually use.
             </p>
             <p className="text-lg text-slate-700 leading-relaxed mb-4">
-              That&apos;s when we asked: <strong>What if unions had infrastructure?</strong>
+              When their paths converged, the opportunity was obvious. Mike knew
+              exactly what was broken. Oby knew exactly how to fix it.
             </p>
+            <p className="text-lg text-slate-700 leading-relaxed font-semibold">
+              Union Eyes is what happened next.
+            </p>
+          </div>
+        </section>
+
+        {/* Mission */}
+        <section className="mb-16">
+          <div className="bg-slate-50 border border-slate-200 rounded-lg p-8">
+            <h3 className="text-xl font-semibold text-slate-900 mb-4">
+              Our mission
+            </h3>
             <p className="text-lg text-slate-700 leading-relaxed">
-              Not software that &ldquo;disrupts&rdquo; or &ldquo;scales.&rdquo; Not a SaaS product designed by people
-              who&apos;ve never walked a picket line. <strong>Infrastructure</strong>—the kind that
-              utilities and governments have. The kind that doesn&apos;t break. The kind that
-              respects the seriousness of the work.
+              Put the same clarity, accountability, and operational control that large
+              organizations take for granted into the hands of every union — built by
+              someone who lived it, and someone who knows how to scale it.
             </p>
           </div>
         </section>
@@ -104,133 +116,6 @@ export default function StoryPage() {
           </div>
         </section>
 
-        {/* Co-Design Process */}
-        <section className="mb-16">
-          <h2 className="text-3xl font-bold text-slate-900 mb-6">
-            How we build
-          </h2>
-          <div className="bg-slate-50 border border-slate-200 rounded-lg p-8">
-            <h3 className="text-xl font-semibold text-slate-900 mb-4">
-              Every feature is co-designed with organizers
-            </h3>
-            <ul className="space-y-3 text-slate-700">
-              <li className="flex items-start gap-3">
-                <span className="shrink-0 w-6 h-6 rounded-full bg-blue-100 text-blue-700 flex items-center justify-center text-sm font-semibold">
-                  1
-                </span>
-                <span>
-                  <strong>Listen first:</strong> We sit with stewards and watch them work.
-                  What breaks? What causes stress?
-                </span>
-              </li>
-              <li className="flex items-start gap-3">
-                <span className="shrink-0 w-6 h-6 rounded-full bg-blue-100 text-blue-700 flex items-center justify-center text-sm font-semibold">
-                  2
-                </span>
-                <span>
-                  <strong>Build in the open:</strong> Prototypes go to organizers first, not
-                  investors. Does it feel right? Does it respect the work?
-                </span>
-              </li>
-              <li className="flex items-start gap-3">
-                <span className="shrink-0 w-6 h-6 rounded-full bg-blue-100 text-blue-700 flex items-center justify-center text-sm font-semibold">
-                  3
-                </span>
-                <span>
-                  <strong>Test with real cases:</strong> Pilots run for months. We measure
-                  impact on <em>members</em> and <em>organizers</em>, not conversion rates.
-                </span>
-              </li>
-              <li className="flex items-start gap-3">
-                <span className="shrink-0 w-6 h-6 rounded-full bg-blue-100 text-blue-700 flex items-center justify-center text-sm font-semibold">
-                  4
-                </span>
-                <span>
-                  <strong>Iterate forever:</strong> Labor law changes. Organizing strategies
-                  evolve. We adapt with the movement, not according to a product roadmap.
-                </span>
-              </li>
-            </ul>
-          </div>
-        </section>
-
-        {/* Testimonials Section */}
-        <section className="mb-16">
-          <h2 className="text-3xl font-bold text-slate-900 mb-6">
-            In their own words
-          </h2>
-          <div className="space-y-6">
-            <TestimonialCard
-              quote="For the first time, I can actually see all my cases in one place. I&apos;m not drowning in sticky notes. I&apos;m not afraid of losing documentation. I can focus on fighting for my members."
-              author="Maria R."
-              role="Shop Steward, Healthcare Union"
-            />
-            <TestimonialCard
-              quote="They asked us what would make our jobs easier, not what would make us more 'efficient.' That difference matters. They understand we&apos;re not trying to optimize—we&apos;re trying to win."
-              author="James T."
-              role="Chief Steward, Manufacturing Local"
-            />
-            <TestimonialCard
-              quote="I was skeptical. Another tech startup promising to fix unions? But then I saw they had a golden share for union members. They put democratic control in the shareholder agreement. That changed everything."
-              author="Aisha K."
-              role="Union Executive, Public Service Alliance"
-            />
-          </div>
-        </section>
-
-        {/* What We&apos;re Not */}
-        <section className="mb-16">
-          <h2 className="text-3xl font-bold text-slate-900 mb-6">
-            What we&apos;re <em>not</em>
-          </h2>
-          <div className="bg-red-50 border border-red-200 rounded-lg p-8">
-            <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
-              <div>
-                <h3 className="text-lg font-semibold text-red-900 mb-2">
-                  ❌ We&apos;re not &ldquo;disrupting&rdquo; labor
-                </h3>
-                <p className="text-sm text-red-800">
-                  Unions don&apos;t need disruption. They need support.
-                </p>
-              </div>
-              <div>
-                <h3 className="text-lg font-semibold text-red-900 mb-2">
-                  ❌ We&apos;re not replacing organizers
-                </h3>
-                <p className="text-sm text-red-800">
-                  AI doesn&apos;t organize. People do. We amplify, never replace.
-                </p>
-              </div>
-              <div>
-                <h3 className="text-lg font-semibold text-red-900 mb-2">
-                  ❌ We&apos;re not selling your data
-                </h3>
-                <p className="text-sm text-red-800">
-                  Member data is sacred. No resale, no ads, no monetization.
-                </p>
-              </div>
-              <div>
-                <h3 className="text-lg font-semibold text-red-900 mb-2">
-                  ❌ We&apos;re not venture-backed growth-hackers
-                </h3>
-                <p className="text-sm text-red-800">
-                  We grow with union trust, not by burning capital.
-                </p>
-              </div>
-            </div>
-          </div>
-        </section>
-
-        {/* Governance Transparency */}
-        <section className="mb-16">
-          <CalloutPresets.BuiltWithUnions />
-          <div className="mt-6">
-            <Button variant="outline" asChild>
-              <Link href="/trust">View our trust dashboard →</Link>
-            </Button>
-          </div>
-        </section>
-
         {/* Call to Action */}
         <section className="mb-16 text-center">
           <h2 className="text-3xl font-bold text-slate-900 mb-6">
@@ -238,7 +123,7 @@ export default function StoryPage() {
           </h2>
           <p className="text-lg text-slate-600 mb-8 max-w-2xl mx-auto">
             We don&apos;t do demos. We do conversations. Tell us about your challenges. We&apos;ll
-            be honest about whether Union Eyes can help—or if something else would serve you
+            be honest about whether Union Eyes can help — or if something else would serve you
             better.
           </p>
           <div className="flex flex-col sm:flex-row gap-4 justify-center">

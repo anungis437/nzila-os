@@ -2271,7 +2271,7 @@
     },
     "home": {
       "badge": "A Governed Operating System for Unions",
-      "heroHeading": "Union Operations Under Control",
+      "heroHeading": "Your union. Under control.",
       "heroDescription": "Financial accountability, operational transparency, and controlled digital rollout — one governed platform for Canadian unions.",
       "ctaPrimary": "Start a Controlled Pilot",
       "ctaSecondary": "View Platform Overview",
@@ -2346,13 +2346,13 @@
       "certLabel": "PIPEDA Compliant"
     },
     "story": {
-      "badge": "Built with Unions, Not for Unions",
-      "heroHeading": "Union Eyes exists because workers deserve a governed platform — not another app",
-      "heroDescription": "This platform was co-designed with union stewards, finance officers, and executives who needed more than a tool — they needed a system they could defend to their boards, their auditors, and their members.",
+      "badge": "Our Story",
+      "heroHeading": "Two brothers. Two careers. One shared conviction.",
+      "heroDescription": "A Labour Relations Officer turned lawyer and a CIO turned SaaS builder — together they are building the operating system that unions have never had.",
       "readMore": "Read more",
       "backToHome": "Back to home",
       "pageTitle": "Our Story | Union Eyes",
-      "pageDescription": "Union Eyes was built by people who understand labour governance, not Silicon Valley. This is why we exist."
+      "pageDescription": "Union Eyes was founded by two brothers who lived the gaps in union infrastructure — and decided to close them."
     },
     "pricing": {
       "heroHeading": "Contract-Based Deployment",

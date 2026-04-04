@@ -2273,7 +2273,7 @@
     },
     "home": {
       "badge": "Un système d'exploitation gouverné pour les syndicats",
-      "heroHeading": "Reddition de comptes financière. Transparence opérationnelle. Déploiement contrôlé.",
+      "heroHeading": "Votre syndicat. Sous contrôle.",
       "heroDescription": "Union Eyes est une plateforme gouvernée pour les syndicats canadiens — déployée par contrat, activée par module et conçue pour résister à l'examen des membres, des conseils d'administration et des vérificateurs.",
       "ctaPrimary": "Démarrer un pilote contrôlé",
       "ctaSecondary": "Confiance et conformité",
@@ -2348,13 +2348,13 @@
       "certLabel": "Conforme LPRPDE"
     },
     "story": {
-      "badge": "Construit avec les syndicats, pas pour eux",
-      "heroHeading": "Union Eyes existe parce que les travailleurs méritent une plateforme gouvernée — pas une autre application",
-      "heroDescription": "Cette plateforme a été co-conçue avec des délégués syndicaux, des responsables financiers et des dirigeants qui avaient besoin de plus qu'un outil — ils avaient besoin d'un système défendable devant leurs conseils d'administration, leurs vérificateurs et leurs membres.",
+      "badge": "Notre histoire",
+      "heroHeading": "Deux frères. Deux carrières. Une seule conviction.",
+      "heroDescription": "Un agent de relations de travail devenu avocat et un directeur des systèmes d'information devenu bâtisseur SaaS — ensemble, ils construisent le système d'exploitation que les syndicats n'ont jamais eu.",
       "readMore": "En savoir plus",
       "backToHome": "Retour à l'accueil",
       "pageTitle": "Notre histoire | Union Eyes",
-      "pageDescription": "Union Eyes a été construit par des gens qui comprennent la gouvernance syndicale, pas la Silicon Valley. Voici pourquoi nous existons."
+      "pageDescription": "Union Eyes a été fondé par deux frères qui ont vécu les lacunes de l'infrastructure syndicale — et ont décidé de les combler."
     },
     "pricing": {
       "heroHeading": "Déploiement par contrat",

@@ -27,7 +27,7 @@ const footerLinks = {
     { name: 'AI Workbench',          href: '/features/ai-workbench' },
     { name: 'Analytics & Reporting', href: '/features/analytics' },
     { name: 'Pricing',              href: '/pricing' },
-    { name: 'System Status',        href: '/status' },
+    { name: 'System Status',        href: '/en-CA/trust#system-status' },
   ],
   Resources: [
     { name: 'Case Studies',   href: '/case-studies' },

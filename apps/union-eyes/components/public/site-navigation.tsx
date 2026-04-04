@@ -21,7 +21,6 @@ const navigation = [
   { name: 'Pricing',             href: '/pricing' },
   { name: 'Trust & Compliance',  href: '/en-CA/trust' },
   { name: 'Case Studies',        href: '/case-studies' },
-  { name: 'Status',              href: '/status' },
   { name: 'Contact',             href: '/contact' },
 ];
 

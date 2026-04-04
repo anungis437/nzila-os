@@ -1,6 +1,6 @@
 /**
  * Locale-aware Story page
- * Accessible at /{locale}/story — provides translated header + full story content.
+ * Accessible at /{locale}/story — provides the founding narrative.
  */
 export const dynamic = 'force-dynamic';
 
@@ -9,7 +9,6 @@ import Link from 'next/link';
 import { getTranslations } from 'next-intl/server';
 import { Heart, Users, Shield, Handshake } from 'lucide-react';
 import { Button } from '@/components/ui/button';
-import { CalloutPresets } from '@/components/marketing/human-centered-callout';
 
 export async function generateMetadata({
   params,
@@ -55,56 +54,74 @@ export default async function LocaleStoryPage({
         {/* Origin Story */}
         <section className="mb-16">
           <h2 className="text-3xl font-bold text-slate-900 mb-6">
-            {isFr ? 'Comment tout a commencé' : 'How this started'}
+            {isFr ? 'Comment tout a commencé' : 'Where it all began'}
           </h2>
           <div className="prose prose-slate max-w-none">
             {isFr ? (
               <>
                 <p className="text-lg text-slate-700 leading-relaxed mb-4">
-                  En 2023, une déléguée syndicale d&apos;un syndicat de la santé en Ontario gérait 47 griefs
-                  ouverts dans un fichier Excel partagé. Un jour, quelqu&apos;un a accidentellement supprimé
-                  une colonne. Des semaines de documentation — disparues. Pas de sauvegarde. Pas de piste
-                  d&apos;audit. Juste de la frustration et des membres qui attendent justice.
+                  Mike a passé des années à l&apos;intérieur — d&apos;abord comme agent de relations
+                  de travail pour un syndicat national, puis comme avocat menant des enquêtes
+                  et des évaluations en milieu de travail. Passer de travailler <em>dans</em> un
+                  syndicat à travailler <em>avec</em> des syndicats lui a donné une vue sans filtre
+                  de là où se trouvaient les frictions : les processus, les lacunes, les moments
+                  où la bonne information n&apos;était tout simplement pas entre les bonnes mains.
                 </p>
                 <p className="text-lg text-slate-700 leading-relaxed mb-4">
-                  Pendant ce temps, l&apos;employeur disposait d&apos;un système RH sophistiqué qui suivait
-                  chaque interaction, chaque délai, chaque échéance. Le déséquilibre de pouvoir
-                  n&apos;était pas seulement dans la salle de réunion — il était dans les outils.
+                  Oby a pris un chemin différent. En tant que directeur des systèmes d&apos;information
+                  d&apos;une association sportive nationale et bâtisseur SaaS chevronné, il a fait
+                  carrière autour d&apos;une seule idée — que la technologie devrait être humaine.
+                  Que les plateformes les plus puissantes sont celles que les gens utilisent
+                  vraiment.
                 </p>
                 <p className="text-lg text-slate-700 leading-relaxed mb-4">
-                  C&apos;est alors que nous avons posé la question : <strong>Et si les syndicats avaient une infrastructure?</strong>
+                  Quand leurs chemins se sont croisés, l&apos;opportunité était évidente.
+                  Mike savait exactement ce qui était cassé. Oby savait exactement comment
+                  le réparer.
                 </p>
-                <p className="text-lg text-slate-700 leading-relaxed">
-                  Pas un logiciel qui &laquo;perturbe&raquo; ou &laquo;évolue à grande échelle.&raquo; Pas un produit SaaS
-                  conçu par des gens qui n&apos;ont jamais marché sur une ligne de piquetage.
-                  Une <strong>infrastructure</strong> — celle que les services publics et les gouvernements ont.
-                  Celle qui ne tombe pas en panne. Celle qui respecte le sérieux du travail.
+                <p className="text-lg text-slate-700 leading-relaxed font-semibold">
+                  Union Eyes est ce qui s&apos;est passé ensuite.
                 </p>
               </>
             ) : (
               <>
                 <p className="text-lg text-slate-700 leading-relaxed mb-4">
-                  In 2023, a steward from a healthcare union in Ontario was managing 47 open
-                  grievances in a shared Excel file. One day, someone accidentally deleted a
-                  column. Weeks of documentation—gone. No backup. No audit trail. Just
-                  frustration and members waiting for justice.
+                  Mike spent years on the inside — first as a Labour Relations Officer for
+                  a national union, then as a lawyer conducting workplace investigations
+                  and assessments. Moving from working <em>in</em> a union to working <em>with</em> unions
+                  gave him an unfiltered view of where the friction lived: the workflows,
+                  the gaps, the moments where the right information simply wasn&apos;t in the
+                  right hands.
                 </p>
                 <p className="text-lg text-slate-700 leading-relaxed mb-4">
-                  Meanwhile, the employer had a sophisticated HR system that tracked every
-                  interaction, every timeline, every deadline. The power imbalance wasn&apos;t just
-                  in the boardroom—it was in the tools.
+                  Oby took a different path. As CIO of a national sporting association
+                  and a seasoned SaaS builder, he made a career out of one idea — that
+                  technology should feel human. That the most powerful platforms are the
+                  ones people actually use.
                 </p>
                 <p className="text-lg text-slate-700 leading-relaxed mb-4">
-                  That&apos;s when we asked: <strong>What if unions had infrastructure?</strong>
+                  When their paths converged, the opportunity was obvious. Mike knew
+                  exactly what was broken. Oby knew exactly how to fix it.
                 </p>
-                <p className="text-lg text-slate-700 leading-relaxed">
-                  Not software that &ldquo;disrupts&rdquo; or &ldquo;scales.&rdquo; Not a SaaS product designed by people
-                  who&apos;ve never walked a picket line. <strong>Infrastructure</strong>—the kind that
-                  utilities and governments have. The kind that doesn&apos;t break. The kind that
-                  respects the seriousness of the work.
+                <p className="text-lg text-slate-700 leading-relaxed font-semibold">
+                  Union Eyes is what happened next.
                 </p>
               </>
             )}
+          </div>
+        </section>
+
+        {/* Mission */}
+        <section className="mb-16">
+          <div className="bg-slate-50 border border-slate-200 rounded-lg p-8">
+            <h3 className="text-xl font-semibold text-slate-900 mb-4">
+              {isFr ? 'Notre mission' : 'Our mission'}
+            </h3>
+            <p className="text-lg text-slate-700 leading-relaxed">
+              {isFr
+                ? "Mettre la même clarté, la même responsabilité et le même contrôle opérationnel que les grandes organisations tiennent pour acquis entre les mains de chaque syndicat — construit par quelqu'un qui l'a vécu et quelqu'un qui sait comment le faire grandir."
+                : 'Put the same clarity, accountability, and operational control that large organizations take for granted into the hands of every union — built by someone who lived it, and someone who knows how to scale it.'}
+            </p>
           </div>
         </section>
 
@@ -148,18 +165,6 @@ export default async function LocaleStoryPage({
           </div>
         </section>
 
-        {/* Governance */}
-        <section className="mb-16">
-          <CalloutPresets.BuiltWithUnions />
-          <div className="mt-6">
-            <Button variant="outline" asChild>
-              <Link href={`/${locale}/trust`}>
-                {isFr ? 'Voir notre tableau de confiance →' : 'View our trust dashboard →'}
-              </Link>
-            </Button>
-          </div>
-        </section>
-
         {/* CTA */}
         <section className="mb-16 text-center">
           <h2 className="text-3xl font-bold text-slate-900 mb-6">
@@ -168,7 +173,7 @@ export default async function LocaleStoryPage({
           <p className="text-lg text-slate-600 mb-8 max-w-2xl mx-auto">
             {isFr
               ? "Nous ne faisons pas de démonstrations. Nous avons des conversations. Parlez-nous de vos défis. Nous serons honnêtes quant à savoir si Union Eyes peut vous aider."
-              : "We don't do demos. We do conversations. Tell us about your challenges. We'll be honest about whether Union Eyes can help—or if something else would serve you better."}
+              : "We don't do demos. We do conversations. Tell us about your challenges. We'll be honest about whether Union Eyes can help — or if something else would serve you better."}
           </p>
           <div className="flex flex-col sm:flex-row gap-4 justify-center">
             <Button size="lg" asChild>

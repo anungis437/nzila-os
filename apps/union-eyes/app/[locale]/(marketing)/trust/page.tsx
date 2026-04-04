@@ -20,6 +20,7 @@ import {
   Scale,
   ArrowRight,
 } from 'lucide-react';
+import { StatusPage } from '@/components/monitoring/StatusPage';
 
 export async function generateMetadata({
   params,
@@ -84,6 +85,16 @@ export default async function TrustPage({
             </div>
           ))}
         </div>
+
+        {/* CTA */}
+        {/* System Status */}
+        <section id="system-status" className="mb-20 scroll-mt-24">
+          <h2 className="text-2xl font-bold text-slate-900 mb-6">System Status</h2>
+          <p className="text-slate-600 mb-8">
+            Real-time operational status of Union Eyes platform services.
+          </p>
+          <StatusPage />
+        </section>
 
         {/* CTA */}
         <section className="text-center bg-slate-50 rounded-2xl border border-slate-200 p-10">

@@ -57,8 +57,8 @@ export default function HomePage() {
 
           <ScrollReveal delay={0.1}>
             <h1 className="text-5xl md:text-7xl lg:text-8xl font-bold text-white mb-6 leading-tight">
-              Empower Your Union<br />
-              <span className="gradient-text">With Intelligent Tools</span>
+              Your union.<br />
+              <span className="gradient-text">Under control.</span>
             </h1>
           </ScrollReveal>
 

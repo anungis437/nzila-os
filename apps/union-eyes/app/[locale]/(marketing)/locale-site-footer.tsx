@@ -34,7 +34,7 @@ export default function LocaleSiteFooter() {
       { name: t('aiWorkbench'),        href: `/${locale}/features/ai-workbench` },
       { name: t('analyticsReporting'), href: `/${locale}/features/analytics` },
       { name: t('pricing'),            href: `/${locale}/pricing` },
-      { name: t('systemStatus'),       href: `/${locale}/status` },
+      { name: t('systemStatus'),       href: `/${locale}/trust#system-status` },
     ],
     [t('resources')]: [
       { name: t('caseStudies'),  href: `/${locale}/case-studies` },
