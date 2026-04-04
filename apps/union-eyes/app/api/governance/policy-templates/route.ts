@@ -3,6 +3,7 @@
  * Governance policy templates — replaces Django proxy.
  */
 import { withApi } from '@/lib/api/framework';
+import { withRLSContext } from '@/lib/db/with-rls-context';
 import { db } from '@/db/db';
 import { governancePolicies } from '@/db/schema';
 import { eq, and, desc, count } from 'drizzle-orm';
@@ -48,7 +49,9 @@ export const POST = withApi(
   },
   async ({ body, organizationId }) => {
     const parsed = createPolicyTemplateSchema.parse(body);
-    const [template] = await db.insert(governancePolicies).values({ ...parsed, organizationId: organizationId!, status: 'draft' }).returning();
+    const [template] = await withRLSContext(async () =>
+      db.insert(governancePolicies).values({ ...parsed, organizationId: organizationId!, status: 'draft' }).returning()
+    );
     return template;
   },
 );

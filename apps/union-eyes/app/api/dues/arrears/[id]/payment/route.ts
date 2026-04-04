@@ -8,6 +8,7 @@
  * Creates a payment ledger entry and updates the member's arrears record.
  */
 import { withApi, ApiError, z } from '@/lib/api/framework';
+import { withRLSContext } from '@/lib/db/with-rls-context';
 import { db } from '@/db';
 import { memberArrears, memberDuesLedger } from '@/db/schema/dues-finance-schema';
 import { eq, and } from 'drizzle-orm';
@@ -54,33 +55,37 @@ export const POST = withApi(
     const balanceAfter = Math.max(0, balanceBefore - amount);
     const newStatus = balanceAfter === 0 ? 'current' : arrears.arrearsStatus;
 
-    // Record payment in ledger
-    await db.insert(memberDuesLedger).values({
-      userId: memberId,
-      organizationId,
-      transactionType: 'payment',
-      transactionDate: new Date(),
-      effectiveDate: new Date(),
-      amount: String(amount),
-      balanceBefore: String(balanceBefore),
-      balanceAfter: String(balanceAfter),
-      description: notes ?? 'Arrears payment',
-      notes,
-      paymentMethod: 'manual',
-      createdBy: userId ?? undefined,
-    });
+    // Record payment in ledger and update arrears
+    const updated = await withRLSContext(async () => {
+      await db.insert(memberDuesLedger).values({
+        userId: memberId,
+        organizationId,
+        transactionType: 'payment',
+        transactionDate: new Date(),
+        effectiveDate: new Date(),
+        amount: String(amount),
+        balanceBefore: String(balanceBefore),
+        balanceAfter: String(balanceAfter),
+        description: notes ?? 'Arrears payment',
+        notes,
+        paymentMethod: 'manual',
+        createdBy: userId ?? undefined,
+      });
 
-    // Update arrears record
-    const [updated] = await db
-      .update(memberArrears)
-      .set({
-        totalOwed: String(balanceAfter),
-        lastPaymentDate: new Date(),
-        arrearsStatus: newStatus,
-        updatedAt: new Date(),
-      })
-      .where(eq(memberArrears.id, arrears.id))
-      .returning();
+      // Update arrears record
+      const [u] = await db
+        .update(memberArrears)
+        .set({
+          totalOwed: String(balanceAfter),
+          lastPaymentDate: new Date(),
+          arrearsStatus: newStatus,
+          updatedAt: new Date(),
+        })
+        .where(eq(memberArrears.id, arrears.id))
+        .returning();
+
+      return u;
+    });
 
     logger.info('Arrears payment recorded', { memberId, amount, balanceAfter });
 

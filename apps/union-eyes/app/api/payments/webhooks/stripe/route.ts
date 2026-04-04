@@ -6,6 +6,7 @@
 
 import { NextRequest, NextResponse } from 'next/server';
 import { db } from '@/db';
+import { withSystemContext } from '@/lib/db/with-rls-context';
 import { platformPayments, billingAccounts } from '@/db/schema';
 import { eq } from 'drizzle-orm';
 import { auditLog, AuditEventType, AuditSeverity } from '@/lib/audit-logger';
@@ -91,17 +92,19 @@ export async function POST(request: NextRequest) {
             .limit(1);
 
           if (acct) {
-            await db.insert(platformPayments).values({
-              organizationId: orgId,
-              billingAccountId: acct.id,
-              externalReference: eventId,
-              method: 'stripe',
-              amount: String((pi.amount ?? 0) / 100),
-              currency: pi.currency?.toUpperCase() ?? 'CAD',
-              status: 'completed',
-              paidAt: new Date(),
-              metadata: { stripeEventType: eventType, paymentIntentId: pi.id },
-            });
+            await withSystemContext(async () =>
+              db.insert(platformPayments).values({
+                organizationId: orgId,
+                billingAccountId: acct.id,
+                externalReference: eventId,
+                method: 'stripe',
+                amount: String((pi.amount ?? 0) / 100),
+                currency: pi.currency?.toUpperCase() ?? 'CAD',
+                status: 'completed',
+                paidAt: new Date(),
+                metadata: { stripeEventType: eventType, paymentIntentId: pi.id },
+              })
+            );
 
             // Capture transaction fee if a rule applies
             const grossAmount = String((pi.amount ?? 0) / 100);

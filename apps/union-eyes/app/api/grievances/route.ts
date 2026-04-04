@@ -8,6 +8,7 @@
 import { NextResponse as _NextResponse } from "next/server";
 import { z } from "zod";
 import { db } from "@/db/db";
+import { withRLSContext } from '@/lib/db/with-rls-context';
 import { grievances } from "@/db/schema/domains/claims/grievances";
 import { grievanceEvents } from "@/db/schema/domains/claims/grievance-lifecycle";
 import { withOrganizationAuth } from "@/lib/organization-middleware";
@@ -54,29 +55,33 @@ export const POST = withOrganizationAuth(async (request, context) => {
 
     const data = parsed.data;
 
-    const [grievance] = await db
-      .insert(grievances)
-      .values({
-        grievanceNumber: `GRV-${Date.now()}`,
-        type: data.type,
-        title: data.title,
-        description: data.description,
-        priority: data.priority ?? "medium",
-        status: "filed",
-        employerId: data.employerId ?? null,
-        cbaId: data.contractId ?? null,
-        organizationId,
-        createdBy: userId,
-        filedDate: new Date(),
-      })
-      .returning();
+    const grievance = await withRLSContext(async () => {
+      const [g] = await db
+        .insert(grievances)
+        .values({
+          grievanceNumber: `GRV-${Date.now()}`,
+          type: data.type,
+          title: data.title,
+          description: data.description,
+          priority: data.priority ?? "medium",
+          status: "filed",
+          employerId: data.employerId ?? null,
+          cbaId: data.contractId ?? null,
+          organizationId,
+          createdBy: userId,
+          filedDate: new Date(),
+        })
+        .returning();
 
-    // Emit event
-    await db.insert(grievanceEvents).values({
-      grievanceId: grievance.id,
-      eventType: "created",
-      actorUserId: userId,
-      notes: `Grievance filed: ${data.title}`,
+      // Emit event
+      await db.insert(grievanceEvents).values({
+        grievanceId: g.id,
+        eventType: "created",
+        actorUserId: userId,
+        notes: `Grievance filed: ${data.title}`,
+      });
+
+      return g;
     });
 
     // Audit

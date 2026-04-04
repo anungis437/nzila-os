@@ -3,6 +3,7 @@
  * Voting session management backed by PostgreSQL.
  */
 import { withApi } from '@/lib/api/framework';
+import { withRLSContext } from '@/lib/db/with-rls-context';
 import { db } from '@/db/db';
 import { votingSessions } from '@/db/schema';
 import { desc } from 'drizzle-orm';
@@ -20,7 +21,9 @@ export const GET = withApi(
 export const POST = withApi(
   { auth: { required: true, minRole: 'admin' } },
   async ({ body }) => {
-    const [row] = await db.insert(votingSessions).values(body).returning();
+    const [row] = await withRLSContext(async () =>
+      db.insert(votingSessions).values(body).returning()
+    );
     return row;
   },
 );

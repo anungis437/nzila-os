@@ -76,6 +76,7 @@ const DRIZZLE_MUTATION_PATTERNS = [
  */
 const SAFE_MUTATION_CONTEXTS = [
   'withRLSContext',
+  'withSystemContext',
   'createAuditedScopedDb',
   'createScopedDb',
 ]
@@ -301,6 +302,51 @@ describe('STACK_AUTHORITY_001 — Stack authority enforcement', () => {
         'Add them to DJANGO_AUTHORITATIVE_APPS or TS_AUTHORITATIVE_APPS ' +
         'in stack-authority.test.ts and update docs/architecture/STACK_AUTHORITY.md',
     ).toHaveLength(0)
+  })
+
+  it('union-eyes app-layer mutations must use withRLSContext or withSystemContext', () => {
+    const violations: Violation[] = []
+
+    const APP_LAYER_DIRS = ['app']
+    const appDir = join(ROOT, 'apps', 'union-eyes')
+    if (!existsSync(appDir)) return
+
+    const tsFiles: string[] = []
+    for (const layerDir of APP_LAYER_DIRS) {
+      const dir = join(appDir, layerDir)
+      if (existsSync(dir)) {
+        tsFiles.push(...walkTsFiles(dir))
+      }
+    }
+
+    for (const file of tsFiles) {
+      const rel = relative(ROOT, file).split(sep).join('/')
+
+      if (isExcepted(rel, exceptionFile.entries)) continue
+      if (rel.includes('.test.') || rel.includes('.spec.')) continue
+      if (rel.endsWith('.d.ts') || rel.endsWith('.config.ts')) continue
+      if (rel.includes('/db/') || rel.includes('/queries/')) continue
+
+      const content = readFileSync(file, 'utf-8')
+      const mutationLines = findDirectMutations(content)
+
+      for (const mut of mutationLines) {
+        violations.push({
+          ruleId: 'STACK_AUTHORITY_001',
+          filePath: rel,
+          line: mut.line,
+          snippet: mut.text,
+          offendingValue:
+            'Unaudited Drizzle mutation in union-eyes app layer',
+          remediation:
+            'Wrap mutations in withRLSContext() for user-scoped routes or ' +
+            'withSystemContext() for system routes (webhooks, seeds). ' +
+            'If excepted, add to governance/exceptions/stack-authority.json',
+        })
+      }
+    }
+
+    expect(violations, formatViolations(violations)).toHaveLength(0)
   })
 
   it('no expired exceptions for STACK_AUTHORITY_001', () => {

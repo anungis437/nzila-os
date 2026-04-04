@@ -3,6 +3,7 @@
  * Board packet management — replaces Django proxy.
  */
 import { withApi } from '@/lib/api/framework';
+import { withRLSContext } from '@/lib/db/with-rls-context';
 import { db } from '@/db/db';
 import { boardPackets } from '@/db/schema/board-packet-schema';
 import { desc, count } from 'drizzle-orm';
@@ -63,7 +64,9 @@ export const POST = withApi(
   },
   async ({ body }) => {
     const parsed = createBoardPacketSchema.parse(body);
-    const [packet] = await db.insert(boardPackets).values(parsed).returning();
+    const [packet] = await withRLSContext(async () =>
+      db.insert(boardPackets).values(parsed).returning()
+    );
     return packet;
   },
 );

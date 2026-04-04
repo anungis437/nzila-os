@@ -3,6 +3,7 @@
  * Voting sessions management — replaces Django proxy.
  */
 import { withApi } from '@/lib/api/framework';
+import { withRLSContext } from '@/lib/db/with-rls-context';
 import { db } from '@/db/db';
 import { votingSessions } from '@/db/schema';
 import { desc, count } from 'drizzle-orm';
@@ -55,7 +56,9 @@ export const POST = withApi(
   },
   async ({ body, userId }) => {
     const parsed = createSessionSchema.parse(body);
-    const [session] = await db.insert(votingSessions).values({ ...parsed, createdBy: userId! }).returning();
+    const [session] = await withRLSContext(async () =>
+      db.insert(votingSessions).values({ ...parsed, createdBy: userId! }).returning()
+    );
     return session;
   },
 );

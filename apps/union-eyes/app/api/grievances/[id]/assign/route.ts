@@ -6,6 +6,7 @@
 
 import { z } from "zod";
 import { db } from "@/db/db";
+import { withRLSContext } from '@/lib/db/with-rls-context';
 import { grievances } from "@/db/schema/domains/claims/grievances";
 import { grievanceEvents } from "@/db/schema/domains/claims/grievance-lifecycle";
 import { withOrganizationAuth } from "@/lib/organization-middleware";
@@ -61,17 +62,19 @@ export const PATCH = withOrganizationAuth(async (request, context, params?: { id
     const assignment = await assignSteward(params.id, parsed.data.stewardId);
 
     // Update grievance assigned rep
-    await db
-      .update(grievances)
-      .set({ unionRepId: parsed.data.stewardId, updatedAt: new Date() })
-      .where(eq(grievances.id, params.id));
+    await withRLSContext(async () => {
+      await db
+        .update(grievances)
+        .set({ unionRepId: parsed.data.stewardId, updatedAt: new Date() })
+        .where(eq(grievances.id, params.id));
 
-    // Emit event
-    await db.insert(grievanceEvents).values({
-      grievanceId: params.id,
-      eventType: "assigned",
-      actorUserId: userId,
-      notes: `Steward ${parsed.data.stewardId} assigned`,
+      // Emit event
+      await db.insert(grievanceEvents).values({
+        grievanceId: params.id,
+        eventType: "assigned",
+        actorUserId: userId,
+        notes: `Steward ${parsed.data.stewardId} assigned`,
+      });
     });
 
     // Audit

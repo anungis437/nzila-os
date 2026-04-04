@@ -12,6 +12,7 @@ import { resolve } from 'path';
 import { withApiAuth } from '@/lib/api-auth-guard';
 import { createLogger } from '@nzila/os-core';
 import { db } from '@/db/db';
+import { withSystemContext } from '@/lib/db/with-rls-context';
 import { organizations } from '@/db/schema-organizations';
 import { organizationMembers } from '@/db/schema/organization-members-schema';
 import { grievances } from '@/db/schema/domains/claims/grievances';
@@ -51,90 +52,98 @@ export const POST = withApiAuth(async (request: NextRequest) => {
 
       if (reset) {
         // Delete existing pilot data for this org
-        await db.delete(grievances).where(eq(grievances.organizationId, orgId));
-        await db
-          .delete(organizationMembers)
-          .where(eq(organizationMembers.organizationId, orgId));
+        await withSystemContext(async () => {
+          await db.delete(grievances).where(eq(grievances.organizationId, orgId));
+          await db
+            .delete(organizationMembers)
+            .where(eq(organizationMembers.organizationId, orgId));
+        });
         logger.info('Reset: cleared existing CUPE pilot data', { orgId });
       }
     } else {
       // Insert the organization
-      const [newOrg] = await db
-        .insert(organizations)
-        .values({
-          name: fixture.org.name,
-          slug: fixture.org.slug ?? 'cupe-local-123',
-          organizationType: 'local',
-          hierarchyPath: [],
-        })
-        .returning({ id: organizations.id });
+      const [newOrg] = await withSystemContext(async () =>
+        db
+          .insert(organizations)
+          .values({
+            name: fixture.org.name,
+            slug: fixture.org.slug ?? 'cupe-local-123',
+            organizationType: 'local',
+            hierarchyPath: [],
+          })
+          .returning({ id: organizations.id })
+      );
       orgId = newOrg.id;
       logger.info('Created CUPE pilot organization', { orgId });
     }
 
     // Seed members
     let membersInserted = 0;
-    for (const m of fixture.members) {
-      await db
-        .insert(organizationMembers)
-        .values({
-          userId: m.id,
-          organizationId: orgId,
-          name: `${m.first_name} ${m.last_name}`,
-          email: m.email,
-          role: m.role,
-          status: 'active',
-          membershipNumber: m.member_number,
-        })
-        .onConflictDoNothing();
-      membersInserted++;
-    }
+    await withSystemContext(async () => {
+      for (const m of fixture.members) {
+        await db
+          .insert(organizationMembers)
+          .values({
+            userId: m.id,
+            organizationId: orgId,
+            name: `${m.first_name} ${m.last_name}`,
+            email: m.email,
+            role: m.role,
+            status: 'active',
+            membershipNumber: m.member_number,
+          })
+          .onConflictDoNothing();
+        membersInserted++;
+      }
+    });
 
     // Seed grievance cases
     let casesInserted = 0;
-    for (const c of fixture.cases) {
-      const grievantMember = fixture.members.find(
-        (m: { id: string }) => m.id === c.filed_by,
-      );
-      const _assignedMember = c.assigned_to
-        ? fixture.members.find(
-            (m: { id: string }) => m.id === c.assigned_to,
-          )
-        : null;
+    await withSystemContext(async () => {
+      for (const c of fixture.cases) {
+        const grievantMember = fixture.members.find(
+          (m: { id: string }) => m.id === c.filed_by,
+        );
+        const _assignedMember = c.assigned_to
+          ? fixture.members.find(
+              (m: { id: string }) => m.id === c.assigned_to,
+            )
+          : null;
 
-      await db
-        .insert(grievances)
-        .values({
-          grievanceNumber: c.number,
-          organizationId: orgId,
-          type: c.case_type === 'wage_dispute'
-            ? 'contract'
-            : c.case_type === 'harassment'
-              ? 'harassment'
-              : c.case_type === 'discipline'
-                ? 'discipline'
-                : c.case_type === 'benefits_denial'
-                  ? 'contract'
-                  : 'other',
-          status: c.status === 'settled'
-            ? 'settled'
-            : c.status === 'investigating'
-              ? 'investigating'
-              : c.status === 'acknowledged'
-                ? 'acknowledged'
-                : 'filed',
-          priority: c.priority ?? 'medium',
-          title: c.title,
-          description: c.description,
-          grievantName: grievantMember
-            ? `${grievantMember.first_name} ${grievantMember.last_name}`
-            : undefined,
-          grievantEmail: grievantMember?.email,
-          filedDate: c.filed_at ? new Date(c.filed_at) : undefined,
-        })
-        .onConflictDoNothing();
-      casesInserted++;
-    }
+        await db
+          .insert(grievances)
+          .values({
+            grievanceNumber: c.number,
+            organizationId: orgId,
+            type: c.case_type === 'wage_dispute'
+              ? 'contract'
+              : c.case_type === 'harassment'
+                ? 'harassment'
+                : c.case_type === 'discipline'
+                  ? 'discipline'
+                  : c.case_type === 'benefits_denial'
+                    ? 'contract'
+                    : 'other',
+            status: c.status === 'settled'
+              ? 'settled'
+              : c.status === 'investigating'
+                ? 'investigating'
+                : c.status === 'acknowledged'
+                  ? 'acknowledged'
+                  : 'filed',
+            priority: c.priority ?? 'medium',
+            title: c.title,
+            description: c.description,
+            grievantName: grievantMember
+              ? `${grievantMember.first_name} ${grievantMember.last_name}`
+              : undefined,
+            grievantEmail: grievantMember?.email,
+            filedDate: c.filed_at ? new Date(c.filed_at) : undefined,
+          })
+          .onConflictDoNothing();
+        casesInserted++;
+      }
+    });
 
     logger.info('CUPE pilot data seeded', {
       orgId,

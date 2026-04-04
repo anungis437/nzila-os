@@ -3,6 +3,7 @@
  * Cast and view votes for a voting session — replaces Django proxy.
  */
 import { withApi, ApiError } from '@/lib/api/framework';
+import { withRLSContext } from '@/lib/db/with-rls-context';
 import { db } from '@/db/db';
 import { votes, votingOptions, votingSessions } from '@/db/schema';
 import { eq, desc } from 'drizzle-orm';
@@ -53,7 +54,9 @@ export const POST = withApi(
     if (!id) throw ApiError.badRequest('Missing session ID');
 
     const parsed = castVoteSchema.parse(body);
-    const [vote] = await db.insert(votes).values({ ...parsed, sessionId: id }).returning();
+    const [vote] = await withRLSContext(async () =>
+      db.insert(votes).values({ ...parsed, sessionId: id }).returning()
+    );
     return vote;
   },
 );

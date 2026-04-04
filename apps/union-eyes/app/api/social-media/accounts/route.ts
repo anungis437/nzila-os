@@ -13,6 +13,7 @@ import { createTwitterClient, generatePKCE } from '@/lib/social-media/twitter-ap
 import { createLinkedInClient } from '@/lib/social-media/linkedin-api-client';
 import { cookies } from 'next/headers';
 import { db } from '@/db';
+import { withRLSContext } from '@/lib/db/with-rls-context';
 import { socialAccounts } from '@/db/schema/social-media-schema';
 import { eq, and, desc } from 'drizzle-orm';
 import { z } from "zod";
@@ -293,7 +294,9 @@ export const DELETE = withRoleAuth('steward', async (request: NextRequest, conte
       }
 
       // Delete account from database
-      await db.delete(socialAccounts).where(eq(socialAccounts.id, accountId));
+      await withRLSContext(async () =>
+        db.delete(socialAccounts).where(eq(socialAccounts.id, accountId))
+      );
 
       // Audit log
       await logApiAuditEvent({
@@ -405,13 +408,15 @@ export const PUT = withRoleAuth('member', async (request: NextRequest, context: 
 
         // Update account with new tokens
         const expiresAt = new Date(Date.now() + expiresIn * 1000);
-        await db.update(socialAccounts).set({
-          accessToken: newAccessToken,
-          tokenExpiresAt: expiresAt,
-          status: 'active',
-          updatedAt: new Date(),
-          ...(newRefreshToken ? { refreshToken: newRefreshToken } : {}),
-        }).where(eq(socialAccounts.id, account_id));
+        await withRLSContext(async () =>
+          db.update(socialAccounts).set({
+            accessToken: newAccessToken,
+            tokenExpiresAt: expiresAt,
+            status: 'active',
+            updatedAt: new Date(),
+            ...(newRefreshToken ? { refreshToken: newRefreshToken } : {}),
+          }).where(eq(socialAccounts.id, account_id))
+        );
 
         return NextResponse.json({
           message: 'Token refreshed successfully',
@@ -419,10 +424,12 @@ export const PUT = withRoleAuth('member', async (request: NextRequest, context: 
         });
       } catch (error) {
         // Update account status to error
-        await db.update(socialAccounts).set({
-          status: 'expired',
-          updatedAt: new Date(),
-        }).where(eq(socialAccounts.id, account_id));
+        await withRLSContext(async () =>
+          db.update(socialAccounts).set({
+            status: 'expired',
+            updatedAt: new Date(),
+          }).where(eq(socialAccounts.id, account_id))
+        );
 
         throw error;
       }

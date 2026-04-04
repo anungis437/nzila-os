@@ -18,6 +18,7 @@ import {
   standardSuccessResponse,
 } from "@/lib/api/standardized-responses";
 import { db } from "@/db/db";
+import { withRLSContext } from '@/lib/db/with-rls-context';
 import { pilotChecklistItems } from "@/db/schema/domains/pilot/pilot-onboarding";
 import { eq, and } from "drizzle-orm";
 
@@ -120,30 +121,32 @@ export const PATCH = withOrganizationAuth(async (request, context) => {
         ),
       );
 
-    if (existing.length === 0) {
-      await db.insert(pilotChecklistItems).values({
-        organizationId,
-        itemId,
-        completed,
-        completedAt: completed ? new Date() : null,
-        completedBy: completed ? userId : null,
-      });
-    } else {
-      await db
-        .update(pilotChecklistItems)
-        .set({
+    await withRLSContext(async () => {
+      if (existing.length === 0) {
+        await db.insert(pilotChecklistItems).values({
+          organizationId,
+          itemId,
           completed,
           completedAt: completed ? new Date() : null,
           completedBy: completed ? userId : null,
-          updatedAt: new Date(),
-        })
-        .where(
-          and(
-            eq(pilotChecklistItems.organizationId, organizationId),
-            eq(pilotChecklistItems.itemId, itemId),
-          ),
-        );
-    }
+        });
+      } else {
+        await db
+          .update(pilotChecklistItems)
+          .set({
+            completed,
+            completedAt: completed ? new Date() : null,
+            completedBy: completed ? userId : null,
+            updatedAt: new Date(),
+          })
+          .where(
+            and(
+              eq(pilotChecklistItems.organizationId, organizationId),
+              eq(pilotChecklistItems.itemId, itemId),
+            ),
+          );
+      }
+    });
 
     // Re-read full checklist for response
     const rows = await db

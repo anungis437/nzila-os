@@ -3,6 +3,7 @@
  * Board packet management backed by PostgreSQL.
  */
 import { withApi } from '@/lib/api/framework';
+import { withRLSContext } from '@/lib/db/with-rls-context';
 import { db } from '@/db/db';
 import { boardPackets } from '@/db/schema/board-packet-schema';
 import { desc } from 'drizzle-orm';
@@ -46,7 +47,9 @@ export const POST = withApi(
   { auth: { required: true, minRole: 'admin' } },
   async ({ body }) => {
     const parsed = createBoardPacketSchema.parse(body);
-    const [row] = await db.insert(boardPackets).values(parsed).returning();
+    const [row] = await withRLSContext(async () =>
+      db.insert(boardPackets).values(parsed).returning()
+    );
     return row;
   },
 );

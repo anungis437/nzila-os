@@ -6,6 +6,7 @@
 
 import { z } from "zod";
 import { db } from "@/db/db";
+import { withRLSContext } from '@/lib/db/with-rls-context';
 import { grievances } from "@/db/schema/domains/claims/grievances";
 import { grievanceEvents } from "@/db/schema/domains/claims/grievance-lifecycle";
 import { withOrganizationAuth } from "@/lib/organization-middleware";
@@ -90,23 +91,27 @@ export const PATCH = withOrganizationAuth(async (request, context, params?: { id
     const previousState = { status: grievance.status };
 
     // Apply update
-    const [updated] = await db
-      .update(grievances)
-      .set({
-        status: newStatus,
-        updatedAt: new Date(),
-        ...(newStatus === "settled" ? { resolvedAt: new Date() } : {}),
-        ...(newStatus === "closed" ? { closedAt: new Date() } : {}),
-      })
-      .where(eq(grievances.id, params.id))
-      .returning();
+    const [updated] = await withRLSContext(async () => {
+      const [u] = await db
+        .update(grievances)
+        .set({
+          status: newStatus,
+          updatedAt: new Date(),
+          ...(newStatus === "settled" ? { resolvedAt: new Date() } : {}),
+          ...(newStatus === "closed" ? { closedAt: new Date() } : {}),
+        })
+        .where(eq(grievances.id, params.id))
+        .returning();
 
-    // Emit event
-    await db.insert(grievanceEvents).values({
-      grievanceId: params.id,
-      eventType: "status_changed",
-      actorUserId: userId,
-      notes: notes ?? `Status changed: ${currentStatus} → ${newStatus}`,
+      // Emit event
+      await db.insert(grievanceEvents).values({
+        grievanceId: params.id,
+        eventType: "status_changed",
+        actorUserId: userId,
+        notes: notes ?? `Status changed: ${currentStatus} → ${newStatus}`,
+      });
+
+      return [u];
     });
 
     // Audit

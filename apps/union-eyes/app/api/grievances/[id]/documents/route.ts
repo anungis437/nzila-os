@@ -6,6 +6,7 @@
 
 import { z } from "zod";
 import { db } from "@/db/db";
+import { withRLSContext } from '@/lib/db/with-rls-context';
 import { grievances } from "@/db/schema/domains/claims/grievances";
 import {
   grievanceDocuments,
@@ -65,22 +66,26 @@ export const POST = withOrganizationAuth(async (request, context, params?: { id:
       return standardErrorResponse(ErrorCode.NOT_FOUND, "Grievance not found");
     }
 
-    const [doc] = await db
-      .insert(grievanceDocuments)
-      .values({
-        grievanceId: params.id,
-        fileUrl: parsed.data.fileUrl,
-        documentType: parsed.data.documentType,
-        uploadedBy: userId,
-      })
-      .returning();
+    const [doc] = await withRLSContext(async () => {
+      const [d] = await db
+        .insert(grievanceDocuments)
+        .values({
+          grievanceId: params.id,
+          fileUrl: parsed.data.fileUrl,
+          documentType: parsed.data.documentType,
+          uploadedBy: userId,
+        })
+        .returning();
 
-    // Emit event
-    await db.insert(grievanceEvents).values({
-      grievanceId: params.id,
-      eventType: "document_uploaded",
-      actorUserId: userId,
-      notes: `Document uploaded: ${parsed.data.documentType}`,
+      // Emit event
+      await db.insert(grievanceEvents).values({
+        grievanceId: params.id,
+        eventType: "document_uploaded",
+        actorUserId: userId,
+        notes: `Document uploaded: ${parsed.data.documentType}`,
+      });
+
+      return [d];
     });
 
     // Audit

@@ -8,6 +8,7 @@ import { checkRateLimit, RATE_LIMITS } from '@/lib/rate-limiter';
 
 import { NextRequest, NextResponse } from 'next/server';
 import { db } from '@/db';
+import { withRLSContext } from '@/lib/db/with-rls-context';
 import { socialCampaigns, socialPosts } from '@/db/schema/social-media-schema';
 import { eq, and, ilike, or, gte, lte, desc, count, SQL } from 'drizzle-orm';
 import { z } from "zod";
@@ -238,21 +239,23 @@ export const POST = withRoleAuth('member', async (request: NextRequest, context:
       }
 
       // Create campaign
-      const [campaign] = await db
-        .insert(socialCampaigns)
-        .values({
-          organizationId,
-          name,
-          description,
-          platforms: platforms || [],
-          startDate: start_date ? start_date.split('T')[0] : new Date().toISOString().split('T')[0],
-          endDate: end_date ? end_date.split('T')[0] : null,
-          campaignHashtags: Array.isArray(hashtags) ? hashtags as string[] : [],
-          targetAudience: target_audience as string | undefined,
-          status: 'active',
-          createdBy: userId,
-        })
-        .returning();
+      const [campaign] = await withRLSContext(async () =>
+        db
+          .insert(socialCampaigns)
+          .values({
+            organizationId,
+            name,
+            description,
+            platforms: platforms || [],
+            startDate: start_date ? start_date.split('T')[0] : new Date().toISOString().split('T')[0],
+            endDate: end_date ? end_date.split('T')[0] : null,
+            campaignHashtags: Array.isArray(hashtags) ? hashtags as string[] : [],
+            targetAudience: target_audience as string | undefined,
+            status: 'active',
+            createdBy: userId,
+          })
+          .returning()
+      );
 
       return standardSuccessResponse(
       {  campaign  }
@@ -331,11 +334,13 @@ export const PUT = withRoleAuth('member', async (request: NextRequest, context: 
       if (target_audience !== undefined) updateData.targetAudience = target_audience;
       if (status !== undefined) updateData.status = status;
 
-      const [updatedCampaign] = await db
-        .update(socialCampaigns)
-        .set(updateData)
-        .where(eq(socialCampaigns.id, campaignId))
-        .returning();
+      const [updatedCampaign] = await withRLSContext(async () =>
+        db
+          .update(socialCampaigns)
+          .set(updateData)
+          .where(eq(socialCampaigns.id, campaignId))
+          .returning()
+      );
 
       return NextResponse.json({ campaign: updatedCampaign });
     } catch (_error) {
@@ -402,7 +407,9 @@ export const DELETE = withRoleAuth('member', async (request: NextRequest, contex
       }
 
       // Delete campaign
-      await db.delete(socialCampaigns).where(eq(socialCampaigns.id, campaignId));
+      await withRLSContext(async () =>
+        db.delete(socialCampaigns).where(eq(socialCampaigns.id, campaignId))
+      );
 
       return NextResponse.json({
         message: 'Campaign deleted successfully',

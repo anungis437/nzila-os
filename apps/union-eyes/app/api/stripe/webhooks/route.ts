@@ -8,6 +8,7 @@
 
 import { NextRequest, NextResponse } from 'next/server';
 import { db } from '@/db';
+import { withSystemContext } from '@/lib/db/with-rls-context';
 import { platformPayments, billingAccounts, transactionFeeEvents } from '@/db/schema';
 import { eq } from 'drizzle-orm';
 import { auditLog, AuditEventType, AuditSeverity } from '@/lib/audit-logger';
@@ -97,17 +98,19 @@ export async function POST(request: NextRequest) {
           const orgId = (pi.metadata?.organization_id as string) ?? null;
           const billingAcctId = orgId ? await resolveBillingAccountId(orgId) : null;
           if (orgId && billingAcctId) {
-            await db.insert(platformPayments).values({
-              organizationId: orgId,
-              billingAccountId: billingAcctId,
-              externalReference: eventId,
-              method: 'stripe',
-              amount: String((pi.amount ?? 0) / 100),
-              currency: pi.currency?.toUpperCase() ?? 'CAD',
-              status: 'completed',
-              paidAt: new Date(),
-              metadata: { stripeEventType: eventType, paymentIntentId: pi.id },
-            });
+            await withSystemContext(async () =>
+              db.insert(platformPayments).values({
+                organizationId: orgId,
+                billingAccountId: billingAcctId,
+                externalReference: eventId,
+                method: 'stripe',
+                amount: String((pi.amount ?? 0) / 100),
+                currency: pi.currency?.toUpperCase() ?? 'CAD',
+                status: 'completed',
+                paidAt: new Date(),
+                metadata: { stripeEventType: eventType, paymentIntentId: pi.id },
+              })
+            );
 
             // Capture transaction fee if a rule applies
             const grossAmount = String((pi.amount ?? 0) / 100);
@@ -144,17 +147,19 @@ export async function POST(request: NextRequest) {
           const orgId = (inv.metadata?.organization_id as string) ?? null;
           const billingAcctId = orgId ? await resolveBillingAccountId(orgId) : null;
           if (orgId && billingAcctId) {
-            await db.insert(platformPayments).values({
-              organizationId: orgId,
-              billingAccountId: billingAcctId,
-              externalReference: eventId,
-              method: 'stripe',
-              amount: String((inv.amount_paid ?? 0) / 100),
-              currency: inv.currency?.toUpperCase() ?? 'CAD',
-              status: 'completed',
-              paidAt: new Date(),
-              metadata: { stripeEventType: eventType, invoiceId: inv.id },
-            });
+            await withSystemContext(async () =>
+              db.insert(platformPayments).values({
+                organizationId: orgId,
+                billingAccountId: billingAcctId,
+                externalReference: eventId,
+                method: 'stripe',
+                amount: String((inv.amount_paid ?? 0) / 100),
+                currency: inv.currency?.toUpperCase() ?? 'CAD',
+                status: 'completed',
+                paidAt: new Date(),
+                metadata: { stripeEventType: eventType, invoiceId: inv.id },
+              })
+            );
 
             // Capture transaction fee if a rule applies
             const grossAmount = String((inv.amount_paid ?? 0) / 100);
@@ -191,17 +196,19 @@ export async function POST(request: NextRequest) {
           const orgId = (ch.metadata?.organization_id as string) ?? null;
           const billingAcctId = orgId ? await resolveBillingAccountId(orgId) : null;
           if (orgId && billingAcctId) {
-            await db.insert(platformPayments).values({
-              organizationId: orgId,
-              billingAccountId: billingAcctId,
-              externalReference: eventId,
-              method: 'stripe',
-              amount: String(-((ch.amount_refunded ?? 0) / 100)),
-              currency: ch.currency?.toUpperCase() ?? 'CAD',
-              status: 'refunded',
-              paidAt: new Date(),
-              metadata: { stripeEventType: eventType, chargeId: ch.id },
-            });
+            await withSystemContext(async () =>
+              db.insert(platformPayments).values({
+                organizationId: orgId,
+                billingAccountId: billingAcctId,
+                externalReference: eventId,
+                method: 'stripe',
+                amount: String(-((ch.amount_refunded ?? 0) / 100)),
+                currency: ch.currency?.toUpperCase() ?? 'CAD',
+                status: 'refunded',
+                paidAt: new Date(),
+                metadata: { stripeEventType: eventType, chargeId: ch.id },
+              })
+            );
 
             // Reverse any captured fee for the original payment
             const originalPaymentId = ch.payment_intent as string | undefined;

@@ -3,6 +3,7 @@
  * Single voting session operations — replaces Django proxy.
  */
 import { withApi, ApiError } from '@/lib/api/framework';
+import { withRLSContext } from '@/lib/db/with-rls-context';
 import { db } from '@/db/db';
 import { votingSessions } from '@/db/schema';
 import { eq } from 'drizzle-orm';
@@ -50,7 +51,9 @@ export const PATCH = withApi(
     const id = request.url.split('/sessions/')[1]?.split('?')[0]?.split('/')[0];
     if (!id) throw ApiError.badRequest('Missing session ID');
     const parsed = updateSessionSchema.parse(body);
-    const [session] = await db.update(votingSessions).set({ ...parsed, updatedAt: new Date() }).where(eq(votingSessions.id, id)).returning();
+    const [session] = await withRLSContext(async () =>
+      db.update(votingSessions).set({ ...parsed, updatedAt: new Date() }).where(eq(votingSessions.id, id)).returning()
+    );
     if (!session) throw ApiError.notFound('Voting session not found');
     return session;
   },
@@ -65,7 +68,9 @@ export const DELETE = withApi(
   async ({ request }) => {
     const id = request.url.split('/sessions/')[1]?.split('?')[0]?.split('/')[0];
     if (!id) throw ApiError.badRequest('Missing session ID');
-    const [session] = await db.update(votingSessions).set({ status: 'cancelled', updatedAt: new Date() }).where(eq(votingSessions.id, id)).returning();
+    const [session] = await withRLSContext(async () =>
+      db.update(votingSessions).set({ status: 'cancelled', updatedAt: new Date() }).where(eq(votingSessions.id, id)).returning()
+    );
     if (!session) throw ApiError.notFound('Voting session not found');
     return session;
   },

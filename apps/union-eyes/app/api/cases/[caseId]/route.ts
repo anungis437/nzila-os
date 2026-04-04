@@ -154,9 +154,11 @@ export const PATCH = withApi(
       updates.assignedAt = new Date();
     }
 
-    await db.update(claims)
-      .set(updates)
-      .where(and(eq(claims.claimId, claimId)));
+    await withRLSContext(async () =>
+      db.update(claims)
+        .set(updates)
+        .where(and(eq(claims.claimId, claimId)))
+    );
 
     return { updated: true, claimId };
   },

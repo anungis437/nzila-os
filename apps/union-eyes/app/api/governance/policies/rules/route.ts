@@ -3,6 +3,7 @@
  * Governance policy rules — replaces Django proxy.
  */
 import { withApi } from '@/lib/api/framework';
+import { withRLSContext } from '@/lib/db/with-rls-context';
 import { db } from '@/db/db';
 import { governancePolicies } from '@/db/schema';
 import { eq, desc, count } from 'drizzle-orm';
@@ -47,7 +48,9 @@ export const POST = withApi(
   },
   async ({ body, organizationId }) => {
     const parsed = createPolicySchema.parse(body);
-    const [policy] = await db.insert(governancePolicies).values({ ...parsed, organizationId: organizationId! }).returning();
+    const [policy] = await withRLSContext(async () =>
+      db.insert(governancePolicies).values({ ...parsed, organizationId: organizationId! }).returning()
+    );
     return policy;
   },
 );

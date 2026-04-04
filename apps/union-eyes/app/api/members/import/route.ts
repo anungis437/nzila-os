@@ -10,6 +10,7 @@
  * A job ID is generated so the response shape is compatible with async expectations.
  */
 import { withApi, ApiError } from '@/lib/api/framework';
+import { withRLSContext } from '@/lib/db/with-rls-context';
 import { db } from '@/db';
 import { organizationMembers } from '@/db/schema-organizations';
 import { logger } from '@/lib/logger';
@@ -87,14 +88,16 @@ export const POST = withApi(
       }
 
       try {
-        await db.insert(organizationMembers).values({
-          organizationId,
-          userId: resolvedUserId,
-          name: name || email,
-          email,
-          role,
-          status: 'active',
-        }).onConflictDoNothing();
+        await withRLSContext(async () =>
+          db.insert(organizationMembers).values({
+            organizationId,
+            userId: resolvedUserId,
+            name: name || email,
+            email,
+            role,
+            status: 'active',
+          }).onConflictDoNothing()
+        );
         processed++;
       } catch (err) {
         logger.warn('Member import row skipped', { email, err });

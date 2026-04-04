@@ -3,6 +3,7 @@
  * Single board packet operations — replaces Django proxy.
  */
 import { withApi, ApiError } from '@/lib/api/framework';
+import { withRLSContext } from '@/lib/db/with-rls-context';
 import { db } from '@/db/db';
 import { boardPackets } from '@/db/schema/board-packet-schema';
 import { eq } from 'drizzle-orm';
@@ -52,7 +53,9 @@ export const PATCH = withApi(
     const id = request.url.split('/board-packets/')[1]?.split('?')[0]?.split('/')[0];
     if (!id) throw ApiError.badRequest('Missing packet ID');
     const parsed = updateBoardPacketSchema.parse(body);
-    const [packet] = await db.update(boardPackets).set({ ...parsed, updatedAt: new Date() }).where(eq(boardPackets.id, id)).returning();
+    const [packet] = await withRLSContext(async () =>
+      db.update(boardPackets).set({ ...parsed, updatedAt: new Date() }).where(eq(boardPackets.id, id)).returning()
+    );
     if (!packet) throw ApiError.notFound('Board packet not found');
     return packet;
   },
@@ -67,7 +70,9 @@ export const DELETE = withApi(
   async ({ request }) => {
     const id = request.url.split('/board-packets/')[1]?.split('?')[0]?.split('/')[0];
     if (!id) throw ApiError.badRequest('Missing packet ID');
-    const [packet] = await db.update(boardPackets).set({ status: 'archived', updatedAt: new Date() }).where(eq(boardPackets.id, id)).returning();
+    const [packet] = await withRLSContext(async () =>
+      db.update(boardPackets).set({ status: 'archived', updatedAt: new Date() }).where(eq(boardPackets.id, id)).returning()
+    );
     if (!packet) throw ApiError.notFound('Board packet not found');
     return packet;
   },

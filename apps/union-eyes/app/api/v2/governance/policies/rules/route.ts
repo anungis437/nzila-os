@@ -3,6 +3,7 @@
  * Governance policy rules backed by PostgreSQL.
  */
 import { withApi } from '@/lib/api/framework';
+import { withRLSContext } from '@/lib/db/with-rls-context';
 import { db } from '@/db/db';
 import { governancePolicies } from '@/db/schema';
 import { eq, desc } from 'drizzle-orm';
@@ -35,7 +36,9 @@ export const POST = withApi(
   { auth: { required: true, minRole: 'admin' } },
   async ({ body, organizationId }) => {
     const parsed = createPolicySchema.parse(body);
-    const [row] = await db.insert(governancePolicies).values({ ...parsed, organizationId: organizationId! }).returning();
+    const [row] = await withRLSContext(async () =>
+      db.insert(governancePolicies).values({ ...parsed, organizationId: organizationId! }).returning()
+    );
     return row;
   },
 );
