@@ -1,7 +1,7 @@
 MM|platform|user_35NlrrNcfTv0DMh2kzBHyXZRtpb|Super Admin|aubert@nzila.app|info@nzilaventures.com
 MM|platform|user_37Zo7OrvP4jy0J0MU5APfkDtE2V|Michel Nungisa|admin@nzila.io|michel@nungisalaw.ca
-OK|cape|user_3BSyETlaLS6t8wuol22bVECjPFM|Greg Phillips|g.phillips@acep-cape.ca|g.phillips@acep-cape.ca
-OK|cape|user_3BSyEi6TduTzKp2mZigpD6D746h|Emmanuelle Tremblay|e.tremblay@acep-cape.ca|e.tremblay@acep-cape.ca
+OK|cape|user_3BSyETlaLS6t8wuol22bVECjPFM|Jane Doe|j.doe@acep-cape.ca|j.doe@acep-cape.ca
+OK|cape|user_3BSyEi6TduTzKp2mZigpD6D746h|Marc-André Dubois|ma.dubois@acep-cape.ca|ma.dubois@acep-cape.ca
 OK|cape|user_3BSzDo4cpXO7qTM0bY800AuLOd2|Brian Faulkner|b.faulkner@acep-cape.ca|b.faulkner@acep-cape.ca
 OK|cape|user_3BSzDqnxMraAlxaRvhyrTabrTOE|Chantal Bertrand|c.bertrand@acep-cape.ca|c.bertrand@acep-cape.ca
 OK|cape|user_3BSzE0qWBvXm6eP75nAukpBbpvk|Mike Savard|m.savard@acep-cape.ca|m.savard@acep-cape.ca

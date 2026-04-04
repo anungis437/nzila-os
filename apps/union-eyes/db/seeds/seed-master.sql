@@ -409,8 +409,8 @@ BEGIN
 
   INSERT INTO organization_members (user_id, organization_id, role, status, name, email)
   VALUES
-    ('user_3BSyETlaLS6t8wuol22bVECjPFM', v_cape_id, 'president',     'active', 'Greg Phillips',        'g.phillips@acep-cape.ca'),
-    ('user_3BSyEi6TduTzKp2mZigpD6D746h', v_cape_id, 'vice_president', 'active', 'Emmanuelle Tremblay',  'e.tremblay@acep-cape.ca'),
+    ('user_3BSyETlaLS6t8wuol22bVECjPFM', v_cape_id, 'president',     'active', 'Jane Doe',             'j.doe@acep-cape.ca'),
+    ('user_3BSyEi6TduTzKp2mZigpD6D746h', v_cape_id, 'vice_president', 'active', 'Marc-André Dubois',     'ma.dubois@acep-cape.ca'),
     ('user_3BSzDo4cpXO7qTM0bY800AuLOd2', v_cape_id, 'national_officer',    'active', 'Brian Faulkner',       'b.faulkner@acep-cape.ca'),
     ('user_3BSzDqnxMraAlxaRvhyrTabrTOE', v_cape_id, 'secretary_treasurer', 'active', 'Chantal Bertrand',     'c.bertrand@acep-cape.ca'),
     ('user_3BSzE0qWBvXm6eP75nAukpBbpvk', v_cape_id, 'fed_executive',       'active', 'Mike Savard',          'm.savard@acep-cape.ca'),
@@ -505,8 +505,8 @@ VALUES
   ('user_3BSzDlKgwVGWHOKtHluyRSdJNTb', 'p.oconnor@clc-ctc.ca',    'Patrick',      'O''Connor',    'en-CA', 'America/Toronto', true),
   ('user_3BSzDtwjg8WXJf36fw9wjVTu8yX', 'f.alrashid@clc-ctc.ca',   'Fatima',       'Al-Rashid',    'en-CA', 'America/Toronto', true),
   -- CAPE (bilingual — mix of en-CA and fr-CA)
-  ('user_3BSyETlaLS6t8wuol22bVECjPFM', 'g.phillips@acep-cape.ca',  'Greg',         'Phillips',     'en-CA', 'America/Toronto', true),
-  ('user_3BSyEi6TduTzKp2mZigpD6D746h', 'e.tremblay@acep-cape.ca',  'Emmanuelle',   'Tremblay',     'fr-CA', 'America/Toronto', true),
+  ('user_3BSyETlaLS6t8wuol22bVECjPFM', 'j.doe@acep-cape.ca',       'Jane',         'Doe',          'en-CA', 'America/Toronto', true),
+  ('user_3BSyEi6TduTzKp2mZigpD6D746h', 'ma.dubois@acep-cape.ca',   'Marc-André',   'Dubois',       'fr-CA', 'America/Toronto', true),
   ('user_3BSzDo4cpXO7qTM0bY800AuLOd2', 'b.faulkner@acep-cape.ca',  'Brian',        'Faulkner',     'en-CA', 'America/Toronto', true),
   ('user_3BSzDqnxMraAlxaRvhyrTabrTOE', 'c.bertrand@acep-cape.ca',  'Chantal',      'Bertrand',     'fr-CA', 'America/Toronto', true),
   ('user_3BSzE0qWBvXm6eP75nAukpBbpvk', 'm.savard@acep-cape.ca',    'Mike',         'Savard',       'fr-CA', 'America/Toronto', true),

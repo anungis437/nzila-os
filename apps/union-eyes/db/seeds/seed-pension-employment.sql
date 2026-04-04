@@ -127,9 +127,9 @@ VALUES
 INSERT INTO pension_members (organization_id, plan_id, name, plan_name, enrollment_date, membership_status, years_of_service, vesting_status)
 VALUES
   ('063aa6d5-8b1f-4c6c-bef7-9b74f6d03bc6', '6dda2682-b1be-4501-9c53-405dbfbc9760',
-   'Greg Phillips', 'CAPE Professional Pension Plan', '2018-10-01', 'active', 8.0, 'fully_vested'),
+   'Jane Doe', 'CAPE Professional Pension Plan', '2018-10-01', 'active', 8.0, 'fully_vested'),
   ('063aa6d5-8b1f-4c6c-bef7-9b74f6d03bc6', '6dda2682-b1be-4501-9c53-405dbfbc9760',
-   'Emmanuelle Tremblay', 'CAPE Professional Pension Plan', '2019-12-01', 'active', 6.8, 'fully_vested'),
+   'Marc-André Dubois', 'CAPE Professional Pension Plan', '2019-12-01', 'active', 6.8, 'fully_vested'),
   ('063aa6d5-8b1f-4c6c-bef7-9b74f6d03bc6', '6dda2682-b1be-4501-9c53-405dbfbc9760',
    'Brian Faulkner', 'CAPE Professional Pension Plan', '2015-07-15', 'active', 11.2, 'fully_vested'),
   ('063aa6d5-8b1f-4c6c-bef7-9b74f6d03bc6', '6dda2682-b1be-4501-9c53-405dbfbc9760',
@@ -193,8 +193,8 @@ VALUES
   ('7b02f835-49c9-4125-ae28-cb20ce3c205a', 'user_clc_009', '9588c826-a543-4d43-9c22-2e477e532649', 'Patrick O''Connor', 'p.oconnor@clc-ctc.ca', 'member', 'Education', 'Education Coordinator'),
   ('bcd89ad9-05f6-46e9-987e-31a460425521', 'user_clc_010', '9588c826-a543-4d43-9c22-2e477e532649', 'Fatima Al-Rashid', 'f.alrashid@clc-ctc.ca', 'member', 'Organizing', 'National Organizer'),
   -- CAPE-ACEP
-  ('b45b99ed-fe83-4166-8b98-e4a3246e0131', 'user_cape_001', '063aa6d5-8b1f-4c6c-bef7-9b74f6d03bc6', 'Greg Phillips', 'g.phillips@acep-cape.ca', 'president', 'Executive', 'National President'),
-  ('c3a5bbb6-9d39-42fe-866d-d907135a94d6', 'user_cape_002', '063aa6d5-8b1f-4c6c-bef7-9b74f6d03bc6', 'Emmanuelle Tremblay', 'e.tremblay@acep-cape.ca', 'vice_president', 'Executive', 'Vice-President'),
+  ('b45b99ed-fe83-4166-8b98-e4a3246e0131', 'user_cape_001', '063aa6d5-8b1f-4c6c-bef7-9b74f6d03bc6', 'Jane Doe', 'j.doe@acep-cape.ca', 'president', 'Executive', 'National President'),
+  ('c3a5bbb6-9d39-42fe-866d-d907135a94d6', 'user_cape_002', '063aa6d5-8b1f-4c6c-bef7-9b74f6d03bc6', 'Marc-André Dubois', 'ma.dubois@acep-cape.ca', 'vice_president', 'Executive', 'Vice-President'),
   ('e7d6137b-0b4a-4558-9a85-c61ad5c865ab', 'user_cape_003', '063aa6d5-8b1f-4c6c-bef7-9b74f6d03bc6', 'Brian Faulkner', 'b.faulkner@acep-cape.ca', 'member', 'Bargaining', 'Chief Negotiator'),
   ('cf3c73a8-3424-4c41-8a4e-bf5e6dcfd3a9', 'user_cape_004', '063aa6d5-8b1f-4c6c-bef7-9b74f6d03bc6', 'Chantal Bertrand', 'c.bertrand@acep-cape.ca', 'member', 'Labour Relations', 'Labour Relations Officer'),
   ('3c137d19-7200-4d04-aec7-e85d6cc424c6', 'user_cape_005', '063aa6d5-8b1f-4c6c-bef7-9b74f6d03bc6', 'Mike Savard', 'm.savard@acep-cape.ca', 'member', 'Legal', 'Staff Lawyer'),
@@ -266,11 +266,11 @@ INSERT INTO member_employment (
   pay_frequency, base_salary, hourly_rate, regular_hours_per_week,
   checkoff_authorized
 ) VALUES
-  -- Greg Phillips – National President
+  -- Jane Doe – National President
   ('063aa6d5-8b1f-4c6c-bef7-9b74f6d03bc6', 'b45b99ed-fe83-4166-8b98-e4a3246e0131',
    'active', 'full_time', '2018-04-01', '2018-04-01', 8.0,
    'National President', 'Executive', 'bi_weekly', 142000.00, 68.27, 37.50, true),
-  -- Emmanuelle Tremblay – Vice-President
+  -- Marc-André Dubois – Vice-President
   ('063aa6d5-8b1f-4c6c-bef7-9b74f6d03bc6', 'c3a5bbb6-9d39-42fe-866d-d907135a94d6',
    'active', 'full_time', '2019-06-01', '2019-06-01', 6.8,
    'Vice-President', 'Executive', 'bi_weekly', 132000.00, 63.46, 37.50, true),

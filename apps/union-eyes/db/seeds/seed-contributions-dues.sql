@@ -119,7 +119,7 @@ ON CONFLICT (id) DO NOTHING;
 --   ('dl-clc-003-2026-03', 'clc-user-003', '9588c826-a543-4d43-9c22-2e477e532649', 'charge', '2026-03-01', '2026-03-01', 72.00, now(), now()),
 
 -- ── CAPE members ─────────────────────────────────────────────────────────────
---   -- Greg Phillips (cape-user-001) — paid through Feb, March pending
+--   -- Jane Doe (cape-user-001) — paid through Feb, March pending
 --   ('dl-cape-001-2025-10', 'cape-user-001', '063aa6d5-8b1f-4c6c-bef7-9b74f6d03bc6', 'charge', '2025-10-01', '2025-10-01', 85.50, now(), now()),
 --   ('dl-cape-001-2025-10p', 'cape-user-001', '063aa6d5-8b1f-4c6c-bef7-9b74f6d03bc6', 'payment', '2025-10-15', '2025-10-15', -85.50, now(), now()),
 --   ('dl-cape-001-2025-11', 'cape-user-001', '063aa6d5-8b1f-4c6c-bef7-9b74f6d03bc6', 'charge', '2025-11-01', '2025-11-01', 85.50, now(), now()),

@@ -384,9 +384,9 @@ CREATE TABLE IF NOT EXISTS zonga_listeners (
     [DB_ORGS.clc, 'user_3BSyEa51htBN51y0YxG9a9Elp2L', 'clc_staff'],
 
     // CAPE — Tier 4 + 5 + 6
-    // Greg Phillips → president
+    // Jane Doe → president
     [DB_ORGS.cape, 'user_3BSyETlaLS6t8wuol22bVECjPFM', 'president'],
-    // Emmanuelle Tremblay → vice_president
+    // Marc-André Dubois → vice_president
     [DB_ORGS.cape, 'user_3BSyEi6TduTzKp2mZigpD6D746h', 'vice_president'],
     // Brian Faulkner → national_officer (Tier 5)
     [DB_ORGS.cape, 'user_3BSzDo4cpXO7qTM0bY800AuLOd2', 'national_officer'],

@@ -54,8 +54,8 @@ const USERS_TO_CREATE = [
   ['Patrick', 'O Connor',      'p.oconnor@clc-ctc.ca',    '+16135210009', 'clc',  'org:member'],
   ['Fatima',  'Al-Rashid',     'f.alrashid@clc-ctc.ca',   '+16135210010', 'clc',  'org:member'],
   // CAPE — 12 test users
-  ['Greg',    'Phillips',      'g.phillips@acep-cape.ca', '+16132360001', 'cape', 'org:admin'],
-  ['Emmanuelle','Tremblay',    'e.tremblay@acep-cape.ca', '+16132360002', 'cape', 'org:member'],
+  ['Jane',    'Doe',           'j.doe@acep-cape.ca',      '+16132360001', 'cape', 'org:admin'],
+  ['Marc-André','Dubois',      'ma.dubois@acep-cape.ca',  '+16132360002', 'cape', 'org:member'],
   ['Brian',   'Faulkner',      'b.faulkner@acep-cape.ca', '+16132360003', 'cape', 'org:member'],
   ['Chantal', 'Bertrand',      'c.bertrand@acep-cape.ca', '+16132360004', 'cape', 'org:member'],
   ['Mike',    'Savard',        'm.savard@acep-cape.ca',   '+16132360005', 'cape', 'org:member'],
