@@ -254,7 +254,7 @@ export default async function UsersPage({ params, searchParams }: PageProps) {
                   <SelectContent>
                     <SelectItem value="all">All Roles</SelectItem>
                     <SelectItem value="member">Member</SelectItem>
-                    <SelectItem value="steward">Steward</SelectItem>
+                    <SelectItem value="steward">Representative</SelectItem>
                     <SelectItem value="officer">Officer</SelectItem>
                     <SelectItem value="admin">Admin</SelectItem>
                   </SelectContent>
@@ -338,7 +338,7 @@ async function UserStats() {
 
       <Card>
         <CardHeader className="flex flex-row items-center justify-between space-y-0 pb-2">
-          <CardTitle className="text-sm font-medium">Stewards</CardTitle>
+          <CardTitle className="text-sm font-medium">Representatives</CardTitle>
           <Shield className="h-4 w-4 text-blue-600" />
         </CardHeader>
         <CardContent>

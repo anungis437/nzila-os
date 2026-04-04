@@ -42,7 +42,7 @@ public/images/
 - **Dimensions**: 400x400 (square)
 - **Format**: JPG (quality 90)
 - **Files**:
-  - `avatar-maria.jpg` - Maria T., Union Steward
+  - `avatar-maria.jpg` - Maria T., Union Representative
   - `avatar-james.jpg` - James R., Local President
   - `avatar-lisa.jpg` - Lisa K., Union Member
   - `avatar-david.jpg` - David M., Labor Relations Officer

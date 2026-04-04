@@ -21,7 +21,7 @@ Union Eyes and DiasporaCore serve users who are **not full-time software users**
 
 | Persona | Role | Primary Tasks | Context | Pain Points |
 |---------|------|--------------|---------|-------------|
-| **Maria (Shop Steward)** | Front-line steward, manufacturing plant | File grievances, look up member info, check CBA clauses | Mobile-first; on factory floor; intermittent connectivity | Paper grievance forms lost; can't search CBA on phone; no status tracking |
+| **Maria (Shop Representative)** | Front-line representative, manufacturing plant | File grievances, look up member info, check CBA clauses | Mobile-first; on factory floor; intermittent connectivity | Paper grievance forms lost; can't search CBA on phone; no status tracking |
 | **Kwame (Grievance Officer)** | Full-time union staff | Manage grievance pipeline, prepare arbitration packages, track deadlines | Desktop-primary; manages 40–80 active cases | Spreadsheet tracking; missed deadlines; no outcome analytics |
 | **Sandra (Union Executive / President)** | Elected union president | Review membership trends, approve budgets, monitor grievance health, manage elections | Dashboard consumer; weekly check-ins | No single view of union health; reports are manual and stale |
 | **James (Financial Officer / Treasurer)** | Elected or appointed treasurer | Process dues, manage expenses, generate LM-2/LM-3 reports, track budgets | Desktop; quarterly/annual heavy usage | Excel-based accounting; audit anxiety; manual OLMS filings |

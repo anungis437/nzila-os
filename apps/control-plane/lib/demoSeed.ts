@@ -158,7 +158,7 @@ export function seedAnomalies(): Anomaly[] {
       description:
         "Daily grievance submissions exceeded 2× baseline for 3 consecutive days across local 412.",
       suggestedAction:
-        "Review local 412 CBA amendments and confirm steward availability.",
+        "Review local 412 CBA amendments and confirm representative availability.",
     },
     {
       id: "ano-002",
@@ -201,13 +201,13 @@ export function seedRecommendations(): Recommendation[] {
       id: "rec-001",
       workflowId: "wf-grievance-triage",
       timestamp: NOW,
-      title: "Increase steward allocation for local 412",
+      title: "Increase representative allocation for local 412",
       description:
-        "Grievance spike in local 412 correlates with recent CBA amendment. Recommend adding 2 additional stewards to handle increased filing volume.",
+        "Grievance spike in local 412 correlates with recent CBA amendment. Recommend adding 2 additional representatives to handle increased filing volume.",
       priority: "high",
       actionable: true,
       suggestedAction:
-        "Notify HR to assign additional stewards to local 412.",
+        "Notify HR to assign additional representatives to local 412.",
       evidenceRefs: ["ano-001", "ins-001"],
       humanReviewRequired: true,
     },

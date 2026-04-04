@@ -1,7 +1,7 @@
 /**
  * CUPE Case Workbench
  *
- * Queue-based assignment workbench for stewards, chief stewards, and officers.
+ * Queue-based assignment workbench for representatives, chief representatives, and officers.
  * Sections: My Assigned, Unassigned, Urgent, Overdue, Recently Updated.
  *
  * PR-021: Queue & Assignment Workflow Polish

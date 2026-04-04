@@ -190,7 +190,7 @@ const verticalData: Record<string, {
     ],
     useCases: [
       { scenario: 'A pension fund trustee assessing 20-year liability', outcome: 'Funding-ratio dashboard with benefit projections and trustee-level reporting' },
-      { scenario: 'A union steward managing an active grievance file', outcome: 'Centralised timeline, evidence vault, and deadline alerts' },
+      { scenario: 'A union representative managing an active grievance file', outcome: 'Centralised timeline, evidence vault, and deadline alerts' },
       { scenario: 'A union executive preparing for contract negotiations', outcome: 'AI-powered clause comparison and historical benchmarking' },
     ],
     differentiators: [

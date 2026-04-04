@@ -51,7 +51,7 @@ function getStatusInfo(status: string): { name: string; description: string; col
     },
     assigned: {
       name: 'Assigned',
-      description: 'Your claim has been assigned to a steward.',
+      description: 'Your claim has been assigned to a representative.',
       color: '#8b5cf6',
     },
     investigation: {
@@ -160,7 +160,7 @@ export function ClaimStatusNotificationEmail({
 
               {assignedStewardName && (
                 <>
-                  <Text style={detailLabel}>Assigned Steward:</Text>
+                  <Text style={detailLabel}>Assigned Representative:</Text>
                   <Text style={detailValue}>{assignedStewardName}</Text>
                 </>
               )}
@@ -208,7 +208,7 @@ export function ClaimStatusNotificationEmail({
               <Section style={successBox}>
                 <Text style={successText}>
                   Your claim has been successfully resolved. If you have any questions or concerns about the
-                  resolution, please contact your steward.
+                  resolution, please contact your representative.
                 </Text>
               </Section>
             )}

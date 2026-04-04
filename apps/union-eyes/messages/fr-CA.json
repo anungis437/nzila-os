@@ -129,7 +129,7 @@
     "memberEngagement": "Engagement des membres",
     "activeMembers": "Membres actifs",
     "electionTurnout": "Taux de participation",
-    "stewards": "Délégués",
+    "stewards": "Représentants",
     "viewMemberDirectory": "Voir le répertoire des membres",
     "loading": "Chargement..."
   },
@@ -188,8 +188,8 @@
     "viewFullDetails": "Voir tous les détails",
     "addComment": "Ajouter un commentaire",
     "needHelp": "Besoin d'aide avec un dossier?",
-    "needHelpText": "Contactez votre délégué syndical pour obtenir de l'aide avec n'importe quel dossier. Ils peuvent fournir des conseils, des mises à jour et aider à faire remonter les questions urgentes.",
-    "contactSteward": "Contacter le délégué",
+    "needHelpText": "Contactez votre représentant syndical pour obtenir de l'aide avec n'importe quel dossier. Ils peuvent fournir des conseils, des mises à jour et aider à faire remonter les questions urgentes.",
+    "contactSteward": "Contacter le représentant",
     "submitSuccess": "Dossier soumis avec succès!",
     "submitSuccessMessage": "Votre dossier a été reçu et assigné à un représentant syndical.",
     "redirecting": "Redirection vers vos dossiers...",
@@ -221,7 +221,7 @@
     "directoryDescription": "Coordonnées et répertoire des membres du syndicat",
     "loadingMembers": "Chargement des membres...",
     "errorLoadingMembers": "Erreur lors du chargement des membres",
-    "stewards": "Délégués",
+    "stewards": "Représentants",
     "avgSeniority": "Ancienneté moy.",
     "searchPlaceholder": "Rechercher par nom, courriel, poste ou numéro de membre...",
     "role": "Rôle",
@@ -239,7 +239,7 @@
     "printDirectory": "Imprimer le répertoire",
     "showingResults": "Affichage de {filtered} sur {total} membres",
     "roleMember": "Membre",
-    "roleSteward": "Délégué",
+    "roleSteward": "Représentant",
     "roleOfficer": "Officier",
     "roleAdmin": "Administrateur",
     "statusActive": "Actif",
@@ -279,7 +279,7 @@
       "duesPlaceholder": "Le registre des cotisations sera implémenté ici",
       "memberHistory": "Historique du membre",
       "historyPlaceholder": "La chronologie des événements du membre sera implémentée ici",
-      "stewardBadge": "Délégué",
+      "stewardBadge": "Repr.",
       "officerBadge": "Dirigeant"
     },
     "edit": {
@@ -544,17 +544,17 @@
     "resolved": "Résolus",
     "pending": "En attente",
     "casesByCategory": "Dossiers par catégorie",
-    "topPerformingStewards": "Délégués les plus performants",
+    "topPerformingStewards": "Représentants les plus performants",
     "casesHandled": "{count} dossiers traités",
     "additionalMetrics": "Métriques supplémentaires",
     "openCases": "Dossiers ouverts",
     "ofTotal": "{percentage} du total",
     "avgResponse": "Réponse moyenne",
     "within24hTarget": "Dans l'objectif de 24h",
-    "activeStewards": "Délégués actifs",
+    "activeStewards": "Représentants actifs",
     "ofMembers": "{percentage} des membres",
     "understandingAnalytics": "Comprendre l'analytique",
-    "analyticsDescription": "Utilisez ces métriques pour suivre la performance syndicale, identifier les tendances et prendre des décisions basées sur les données. Surveillez les taux de résolution des dossiers, la satisfaction des membres et la performance des délégués pour assurer une représentation efficace.",
+    "analyticsDescription": "Utilisez ces métriques pour suivre la performance syndicale, identifier les tendances et prendre des décisions basées sur les données. Surveillez les taux de résolution des dossiers, la satisfaction des membres et la performance des représentants pour assurer une représentation efficace.",
     "viewAnalyticsGuide": "Voir le guide d'analytique"
   },
   "grievances": {
@@ -952,7 +952,7 @@
     },
     "roles": {
       "member": "Membre",
-      "steward": "Délégué",
+      "steward": "Représentant",
       "unionAdmin": "Administrateur du syndicat"
     }
   },
@@ -1563,7 +1563,7 @@
     "roles": {
       "admin": "Administrateur",
       "lro": "RSL",
-      "steward": "Délégué",
+      "steward": "Représentant",
       "member": "Membre"
     },
     "overview": {
@@ -2223,7 +2223,7 @@
     "notifications": "Notifications",
     "educationTraining": "Éducation et formation",
     "precedents": "Précédents",
-    "stewardManagement": "Gestion des délégués",
+    "stewardManagement": "Gestion des représentants",
     "crossUnionAnalytics": "Analytique intersyndicale",
     "specializedCommittees": "Comités spécialisés",
     "bargainingDashboard": "Tableau de bord de négociation",
@@ -2273,8 +2273,8 @@
     },
     "home": {
       "badge": "Un système d'exploitation gouverné pour les syndicats",
-      "heroHeading": "Votre syndicat. Sous contrôle.",
-      "heroDescription": "Union Eyes est une plateforme gouvernée pour les syndicats canadiens — déployée par contrat, activée par module et conçue pour résister à l'examen des membres, des conseils d'administration et des vérificateurs.",
+      "heroHeading": "Commandez chaque dimension de votre syndicat.",
+      "heroDescription": "Griefs. Finances. Membres. Conformité. Une plateforme gouvernée — transparence totale, reddition de comptes totale, zéro conjecture.",
       "ctaPrimary": "Démarrer un pilote contrôlé",
       "ctaSecondary": "Confiance et conformité",
       "statsLabel": {
@@ -2487,7 +2487,7 @@
         "member2": "Vérifiez votre solde de cotisations sans appeler le bureau",
         "member3": "Téléversez des documents en toute sécurité depuis n'importe quel appareil",
         "member4": "Recevez des notifications selon vos préférences (courriel ou SMS)",
-        "forStewards": "Pour les délégués et le personnel",
+        "forStewards": "Pour les représentants et le personnel",
         "steward1": "Intégrez les nouveaux membres avec un assistant guidé",
         "steward2": "Import/export en lot des dossiers de membres",
         "steward3": "Suivez l'engagement et identifiez les membres désengagés",
@@ -2501,7 +2501,7 @@
         "pageTitle": "Renseignements et perspectives | Union Eyes",
         "pageDescription": "Triage assisté par IA, recherche de précédents, extraction de convention collective, rapports personnalisés et tableaux de bord pour la direction — toujours gouverné, toujours optionnel, toujours audité.",
         "badge": "Module de la plateforme",
-        "heroHeading": "Des outils d'intelligence que les délégués contrôlent — pas l'inverse",
+        "heroHeading": "Des outils d'intelligence que les représentants contrôlent — pas l'inverse",
         "heroDescription": "Recherchez des précédents en minutes. Obtenez des arguments suggérés basés sur l'historique des cas. Générez des rapports pour votre conseil exécutif. Le tout gouverné par habilitations, journalisé et optionnel.",
         "cap1Title": "Triage de griefs",
         "cap1Desc": "L'IA évalue les griefs entrants par priorité, complexité et catégorie. Suggère les clauses pertinentes de la convention collective et les précédents pour accélérer les décisions initiales.",
@@ -3402,10 +3402,10 @@
   },
   "steward": {
     "recommendations": {
-      "title": "Recommandations de délégués",
+      "title": "Recommandations de représentants",
       "findBestMatch": "Trouver la meilleure correspondance",
       "scoring": "Évaluation…",
-      "emptyState": "Cliquez sur « Trouver la meilleure correspondance » pour classer les délégués disponibles par région, spécialisation et charge de travail actuelle.",
+      "emptyState": "Cliquez sur « Trouver la meilleure correspondance » pour classer les représentants disponibles par région, spécialisation et charge de travail actuelle.",
       "failedToGet": "Échec de l'obtention des recommandations",
       "networkError": "Erreur réseau",
       "assigning": "Attribution…",
