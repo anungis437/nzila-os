@@ -22,12 +22,16 @@ import { db } from '@/db';
 import {
   pricingTemplates,
   pricingTemplateModules,
+  pricingDiscountRules,
+  pricingRegionalDeployments,
   type NewPricingTemplate,
   type PricingTemplate,
   type PricingTemplateModule,
+  type GtmTier,
   subscriptionPlans,
   orgSubscriptions,
 } from '@/db/schema';
+import { GTM_TIERS, GTM_DISCOUNTS, CANADA_REGIONS } from './pricing-calculator';
 import { eq, inArray } from 'drizzle-orm';
 import { auditLog, AuditEventType, AuditSeverity } from '@/lib/audit-logger';
 import { getActiveContract } from './contract-service';
@@ -63,6 +67,15 @@ export interface CreateTemplateInput {
   pilotMode?: boolean;
   modules?: CreateTemplateModuleInput[];
   createdBy?: string;
+  // ── GTM alignment ────────────────────────────────────────────────────
+  gtmTier?: GtmTier;
+  perMemberFeeCad?: string;
+  memberBandMin?: number;
+  memberBandMax?: number | null;
+  annualEscalatorPercent?: string;
+  implementationFeePerRegionCad?: string;
+  variableCostPerMemberCad?: string;
+  featuresIncluded?: string;
 }
 
 export interface CreateTemplateModuleInput {
@@ -118,6 +131,15 @@ export async function createTemplate(
         allocationEnabled: input.allocationEnabled ?? false,
         pilotMode: input.pilotMode ?? false,
         createdBy: input.createdBy,
+        // GTM fields
+        gtmTier: input.gtmTier,
+        perMemberFeeCad: input.perMemberFeeCad,
+        memberBandMin: input.memberBandMin,
+        memberBandMax: input.memberBandMax,
+        annualEscalatorPercent: input.annualEscalatorPercent,
+        implementationFeePerRegionCad: input.implementationFeePerRegionCad,
+        variableCostPerMemberCad: input.variableCostPerMemberCad,
+        featuresIncluded: input.featuresIncluded,
       })
       .returning();
 
@@ -483,6 +505,84 @@ export async function seedDefaultTemplates(createdBy?: string): Promise<string[]
 
     await createTemplate(tmpl);
     seeded.push(tmpl.code);
+  }
+
+  return seeded;
+}
+
+// ============================================================================
+// GTM Template Seeds
+// ============================================================================
+
+/**
+ * Seed GTM-aligned pricing templates matching the commercial pricing model.
+ * Creates 4 templates (Starter/Professional/Premium/Enterprise) with
+ * discount rules and regional deployment costs.
+ *
+ * Idempotent — skips templates whose codes already exist.
+ */
+export async function seedGtmTemplates(createdBy?: string): Promise<string[]> {
+  const seeded: string[] = [];
+
+  for (const tierDef of GTM_TIERS) {
+    const code = `gtm-${tierDef.tier}`;
+    const existing = await getTemplate(code);
+    if (existing) continue;
+
+    const { template } = await createTemplate({
+      code,
+      name: `GTM — ${tierDef.label}`,
+      description: `Go-to-market ${tierDef.label} tier: ${tierDef.memberBandMin.toLocaleString()}${tierDef.memberBandMax ? `–${tierDef.memberBandMax.toLocaleString()}` : '+'} members`,
+      tier: 'custom',
+      gtmTier: tierDef.tier,
+      basePlatformFeeCad: tierDef.baseFeeAnnual.toFixed(2),
+      perMemberFeeCad: tierDef.perMemberMonthly.toFixed(4),
+      memberBandMin: tierDef.memberBandMin,
+      memberBandMax: tierDef.memberBandMax,
+      annualEscalatorPercent: '3.00',
+      implementationFeePerRegionCad: '5000.00',
+      variableCostPerMemberCad: '0.1500',
+      featuresIncluded: tierDef.featuresIncluded,
+      billingCadence: 'annual',
+      contractTermMonths: 12,
+      allocationEnabled: true,
+      modules: [
+        { moduleKey: 'governance_suite', moduleName: 'Governance Suite', included: true },
+        { moduleKey: 'grievance_case_suite', moduleName: 'Grievance & Case Suite', included: true },
+        { moduleKey: 'financial_intelligence_suite', moduleName: 'Financial Intelligence', included: tierDef.tier !== 'starter' },
+        { moduleKey: 'ai_advanced_insights', moduleName: 'AI Advanced Insights', included: tierDef.tier === 'premium' || tierDef.tier === 'enterprise', additionalFeeCad: tierDef.tier === 'professional' ? '500.00' : undefined },
+      ],
+      createdBy,
+    });
+
+    // Seed canonical discount rules for this template
+    for (const discount of GTM_DISCOUNTS) {
+      await db.insert(pricingDiscountRules).values({
+        templateId: template.id,
+        discountType: discount.type,
+        name: discount.name,
+        ratePercent: discount.ratePercent.toFixed(2),
+        appliesTo: discount.appliesTo,
+        memberThreshold: discount.memberThreshold,
+        contractTermMinMonths: discount.contractTermMinMonths,
+        isActive: true,
+      });
+    }
+
+    // Seed regional deployment costs for this template
+    for (const region of CANADA_REGIONS) {
+      await db.insert(pricingRegionalDeployments).values({
+        templateId: template.id,
+        regionCode: region.regionCode,
+        regionName: region.regionName,
+        estimatedLocals: region.estimatedLocals,
+        implementationFeeCad: region.implementationFee.toFixed(2),
+        annualSupportFeeCad: region.annualSupport.toFixed(2),
+        annualHostingAddOnCad: region.annualHostingAddOn.toFixed(2),
+      });
+    }
+
+    seeded.push(code);
   }
 
   return seeded;

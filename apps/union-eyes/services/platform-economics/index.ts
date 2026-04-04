@@ -25,3 +25,4 @@ export * from './transaction-fee-engine';
 export * from './reconciliation-service';
 export * from './entitlement-guard';
 export * from './pricing-template-service';
+export * from './pricing-calculator';
