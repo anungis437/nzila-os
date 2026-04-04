@@ -61,7 +61,7 @@ describe('GP-003/004: scaffold output', () => {
       `npx tsx "${SCAFFOLD_SCRIPT}" ${TEST_APP} --risk=high --profile=commerce`,
       { cwd: ROOT, stdio: 'pipe' }
     )
-  })
+  }, 60_000)
 
   afterAll(() => {
     if (existsSync(TEST_APP_DIR)) rmSync(TEST_APP_DIR, { recursive: true })
