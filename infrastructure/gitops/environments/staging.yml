@@ -2,8 +2,9 @@
 # Nzila OS — GitOps
 
 environment: staging
-region: eastus
+region: canadacentral
 resource_group: nzila-staging-rg
+dr_region: canadaeast
 
 container_apps:
   environment: nzila-staging-env

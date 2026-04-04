@@ -2,8 +2,14 @@
 # Nzila OS — GitOps
 
 environment: production
-region: eastus
+region: canadacentral
 resource_group: nzila-prod-rg
+dr_region: canadaeast
+
+# PIPEDA / Québec Law 25 — all PII must remain in Canada
+# Primary: Canada Central (Toronto)
+# DR: Canada East (Quebec City)
+# Cross-border transfer: disabled
 
 container_apps:
   environment: nzila-prod-env
@@ -117,14 +123,33 @@ database:
   backup_retention_days: 35
   high_availability: true
   geo_redundant_backup: true
+  # DR replica stays within Canada (canadaeast)
+  standby_availability_zone: "2"
+
+storage:
+  replication: GRS
+  # Geo-replication pair: canadacentral ↔ canadaeast (both in Canada)
+  allow_cross_tenant_replication: false
 
 redis:
   sku: Premium
   capacity: 1
+  # Zone redundancy within canadacentral
+  zones: ["1", "2", "3"]
 
 monitoring:
   sampling_percentage: 25
   retention_days: 90
+
+data_residency:
+  enforce: true
+  allowed_regions:
+    - canadacentral
+    - canadaeast
+  cross_border_transfer: disabled
+  regulatory_frameworks:
+    - PIPEDA
+    - "Québec Law 25"
 
 quotas:
   max_orgs: 10000
