@@ -98,19 +98,19 @@ export default function MemberClaimsPage() {
       <Card>
         <CardHeader className="flex flex-row items-center justify-between">
           <div>
-            <CardTitle>My Claims</CardTitle>
-            <CardDescription>View and track your submitted claims</CardDescription>
+            <CardTitle>My Cases</CardTitle>
+            <CardDescription>View and track your submitted cases</CardDescription>
           </div>
           <Button onClick={() => router.push('./claims/new')}>
             <Plus className="mr-2 h-4 w-4" />
-            Submit New Claim
+            Create Case
           </Button>
         </CardHeader>
         <CardContent>
           <div className="flex items-center gap-2">
             <Search className="h-4 w-4 text-gray-500" />
             <Input
-              placeholder="Search claims by number or type..."
+              placeholder="Search cases by number or type..."
               value={searchTerm}
               onChange={(e) => setSearchTerm(e.target.value)}
             />

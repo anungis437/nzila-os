@@ -1,6 +1,26 @@
 # Union Eyes — Pilot Hardening Final Validation
 
-> Generated: 2026-04-04 | Branch: rotating-feet
+> Generated: 2026-04-04 | Updated: 2026-04-05 | Branch: main
+
+## Part 0 — Documentation System Validation (Post-Hardening)
+
+| Deliverable | File | Status |
+|---|---|---|
+| Audience layer hub | `docs/union-eyes/README.md` | ✅ Created |
+| Quick start (audience) | `docs/union-eyes/quick-start.md` | ✅ Created |
+| User guide (audience) | `docs/union-eyes/user-guide.md` | ✅ Created |
+| Pilot overview (audience) | `docs/union-eyes/pilot-overview.md` | ✅ Created |
+| Admin guide (audience) | `docs/union-eyes/admin-guide.md` | ✅ Created |
+| Partner overview | `docs/union-eyes/partner-overview.md` | ✅ Created |
+| FAQ | `docs/union-eyes/faq.md` | ✅ Created |
+| Index hub | `docs/index/README.md` | ✅ Created |
+| Doc map | `docs/index/doc-map.md` | ✅ Created |
+| Glossary | `docs/index/glossary.md` | ✅ Created |
+| Root README role-based rewrite | `docs/README.md` | ✅ Done |
+| Cross-linking (CUPE → audience) | 3 CUPE docs + PILOT_SCOPE | ✅ Done |
+| Developer INDEX improvements | `apps/union-eyes/docs/INDEX.md` | ✅ Done |
+| Terminology fixes (14 UI strings) | 9 source files | ✅ Done |
+| Contract tests | 178 files, 8,264 tests | ✅ Pass |
 
 ## Part 1 — Documentation System
 

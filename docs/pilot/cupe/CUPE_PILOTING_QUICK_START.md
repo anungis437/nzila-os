@@ -1,6 +1,8 @@
 # CUPE Pilot Quick Start Guide
 
 > For pilot administrators — get Union-Eyes running in 5 minutes.
+>
+> **See also:** [Admin Guide](../../union-eyes/admin-guide.md) · [Pilot Overview](../../union-eyes/pilot-overview.md)
 
 ## 5-Minute Setup
 

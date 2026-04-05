@@ -70,8 +70,8 @@ export default function NewClaimPage() {
 
       <Card>
         <CardHeader>
-          <CardTitle>Submit New Claim</CardTitle>
-          <CardDescription>Fill out the form below to submit your grievance or claim</CardDescription>
+          <CardTitle>Create Case</CardTitle>
+          <CardDescription>Fill out the form below to create a new case</CardDescription>
         </CardHeader>
         <CardContent>
           <form onSubmit={handleSubmit} className="space-y-6">
@@ -207,7 +207,7 @@ export default function NewClaimPage() {
 
             <div className="flex gap-4">
               <Button type="submit" disabled={submitting} className="flex-1">
-                {submitting ? 'Submitting...' : 'Submit Claim'}
+                {submitting ? 'Creating...' : 'Create Case'}
               </Button>
               <Button type="button" variant="outline" onClick={() => router.back()}>
                 Cancel

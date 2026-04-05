@@ -1,12 +1,48 @@
 # Nzila OS Documentation
 
-Welcome to the Nzila OS documentation. This documentation follows the
-[Diátaxis framework](https://diataxis.fr/) — four distinct types of documentation,
-each serving a different user need.
+Welcome to the Nzila OS documentation.
 
 ---
 
-## Documentation Map
+## Start Here
+
+| I want to... | Go to |
+|---|---|
+| **Use Union Eyes** (create cases, track issues) | [Union Eyes →](union-eyes/README.md) |
+| **Run the CUPE pilot** | [Pilot Overview →](union-eyes/pilot-overview.md) |
+| **Explain this to a partner / lawyer** | [Partner Overview →](union-eyes/partner-overview.md) |
+| **Build or extend an app** | [Developer Guide →](how-to/GOLDEN_PATH_DEVELOPER_GUIDE.md) |
+| **Understand the architecture** | [Architecture →](../ARCHITECTURE.md) |
+| **Handle an incident** | [Runbooks →](../ops/runbooks/README.md) |
+
+## By Role
+
+### Union Rep / Steward
+- [Quick Start](union-eyes/quick-start.md) — Create a case in 2 minutes
+- [User Guide](union-eyes/user-guide.md) — Full feature walkthrough
+- [FAQ](union-eyes/faq.md) — Common questions
+
+### Pilot Admin
+- [Admin Guide](union-eyes/admin-guide.md) — Day-to-day administration
+- [CUPE Admin Runbook](pilot/cupe/CUPE_PILOT_ADMIN_RUNBOOK.md) — Detailed procedures
+- [CUPE Readiness Checklist](pilot/cupe/CUPE_READINESS_CHECKLIST.md) — Pre-launch validation
+- [CUPE RBAC Matrix](pilot/cupe/CUPE_RBAC_MATRIX.md) — Role permissions
+
+### Partner / Legal
+- [Partner Overview](union-eyes/partner-overview.md) — Plain-language system explanation
+- [Security Policy](../SECURITY.md) — Security controls
+
+### Developer / Platform Engineer
+- [Golden Path](how-to/GOLDEN_PATH_DEVELOPER_GUIDE.md) — Developer onboarding
+- [Package Catalogue](reference/packages.md) — All packages
+- [Architecture](../ARCHITECTURE.md) — System design
+- [Stack Authority](architecture/STACK_AUTHORITY.md) — Technology standards
+
+---
+
+## Documentation Framework
+
+This documentation follows the [Diátaxis framework](https://diataxis.fr/).
 
 ### [Tutorials](tutorials/README.md)
 
@@ -144,6 +180,19 @@ Deployment, incident response, and operational procedures.
 | [Multi-Org Demo Flow](tutorials/MULTI_ORG_DEMO_FLOW.md) | Demo walkthrough |
 | [Union Eyes Current State](reference/UNION_EYES_CURRENT_STATE.md) | UE progress & status |
 | [Repo Operator Runbook](ops/REPO_OPERATOR_RUNBOOK.md) | Repository operations |
+
+## Union Eyes
+
+| Document | Audience |
+|----------|----------|
+| [Union Eyes Hub](union-eyes/README.md) | Everyone |
+| [Quick Start](union-eyes/quick-start.md) | Members & stewards |
+| [User Guide](union-eyes/user-guide.md) | Members & stewards |
+| [Pilot Overview](union-eyes/pilot-overview.md) | Admins |
+| [Admin Guide](union-eyes/admin-guide.md) | Admins |
+| [Partner Overview](union-eyes/partner-overview.md) | Partners & legal |
+| [FAQ](union-eyes/faq.md) | Everyone |
+| [Developer Docs](../apps/union-eyes/docs/INDEX.md) | Developers |
 
 ## CUPE Pilot
 

@@ -3,6 +3,11 @@
 > Navigation hub for all Union Eyes documentation.
 > Find what you need by audience or topic.
 
+## Audience Guides
+
+> **Non-technical?** Start at the [Union Eyes Hub](../../docs/union-eyes/README.md) instead —
+> it has guides written for members, stewards, admins, and partners.
+
 ## Quick Start
 
 | I am a... | Start here |
@@ -82,6 +87,9 @@
 
 ## Cross-References
 
+- Audience-friendly docs: [Union Eyes Hub](../../docs/union-eyes/README.md)
+- Full glossary: [Glossary](../../docs/index/glossary.md)
+- Documentation map: [Doc Map](../../docs/index/doc-map.md)
 - Main repo README: [../../README.md](../../README.md)
 - Platform architecture: [../../ARCHITECTURE.md](../../ARCHITECTURE.md)
 - Contributing guide: [../../CONTRIBUTING.md](../../CONTRIBUTING.md)

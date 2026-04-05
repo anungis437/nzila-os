@@ -303,7 +303,7 @@ export default function MemberPortalDashboard() {
             <Link href="/portal/claims/new">
               <Button className="w-full" size="lg">
                 <FileText className="mr-2 h-5 w-5" />
-                Submit New Claim
+                Create Case
               </Button>
             </Link>
             <Link href="/portal/dues">

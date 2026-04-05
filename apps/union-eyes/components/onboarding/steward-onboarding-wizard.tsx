@@ -333,9 +333,9 @@ function GrievanceBasicsStep() {
             4
           </div>
           <div>
-            <h5 className="font-medium">File Grievance</h5>
+            <h5 className="font-medium">Create Case</h5>
             <p className="text-sm text-gray-600">
-              If unresolved, file the formal grievance with proper documentation.
+              If unresolved, create a formal case with proper documentation.
             </p>
           </div>
         </div>

@@ -2,6 +2,8 @@
 
 > Defines the boundaries of the CUPE pilot deployment.
 > This document is the canonical reference for what is included and excluded.
+>
+> **Audience-friendly version:** [Pilot Overview](../../docs/union-eyes/pilot-overview.md)
 
 ## Pilot Objective
 

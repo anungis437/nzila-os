@@ -80,7 +80,7 @@ const ROLE_PERMISSIONS = {
     count: 18,
     permissions: [
       "View own profile",
-      "Submit claims",
+      "Create cases",
       "View own documents",
       "Update profile",
       "View news",

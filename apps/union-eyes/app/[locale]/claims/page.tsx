@@ -32,21 +32,21 @@ export default function ClaimsPage() {
       {/* Page Header */}
       <div className="flex items-center justify-between">
         <div>
-          <h1 className="text-3xl font-bold">Claims Management</h1>
+          <h1 className="text-3xl font-bold">Cases</h1>
           <p className="text-gray-600 mt-2">
-            Submit, track, and manage your claims and grievances
+            Create, track, and manage your cases
           </p>
         </div>
         <Button onClick={() => setActiveTab("submit")}>
           <Plus className="h-4 w-4 mr-2" />
-          Submit New Claim
+          Create Case
         </Button>
       </div>
 
       <Tabs value={activeTab} onValueChange={(v) => setActiveTab(v as "list" | "submit")}>
         <TabsList>
-          <TabsTrigger value="list">My Claims</TabsTrigger>
-          <TabsTrigger value="submit">Submit Claim</TabsTrigger>
+          <TabsTrigger value="list">My Cases</TabsTrigger>
+          <TabsTrigger value="submit">Create Case</TabsTrigger>
         </TabsList>
 
         <TabsContent value="list" className="space-y-6">
