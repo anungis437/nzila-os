@@ -99,6 +99,7 @@ function createEntraProvider() {
 // ── NextAuth Configuration ──────────────────────────────────────────────────
 
 export const authConfig: NextAuthConfig = {
+  trustHost: true,
   providers: [createEntraProvider()],
 
   pages: {
