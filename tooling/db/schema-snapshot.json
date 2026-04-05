@@ -1,5 +1,5 @@
 {
-  "capturedAt": "2026-04-01T22:28:06.038Z",
+  "capturedAt": "2026-04-05T19:22:20.711Z",
   "schemaDir": "packages/db/src/schema",
   "files": {
     "packages/db/src/schema/agri.ts": {
@@ -115,12 +115,12 @@
       "size": 9523
     },
     "packages/db/src/schema/orgs.ts": {
-      "hash": "7d8f6bb812d44e44a133613d1c51a285104e36f8c4de61b812bc59cb82757b71",
-      "size": 3454
+      "hash": "1ff125a6d59bd9a840c9d4094c9c4a9667a7fbcc8f038e8b6a818e9ee84d9570",
+      "size": 3443
     },
     "packages/db/src/schema/partners.ts": {
-      "hash": "e5543350511497cec07b80c2c8252a3ac90eb7709736adda9ca504ec4233d578",
-      "size": 8641
+      "hash": "5070f531075f36fb2cc37bde4f6564c590bcd8b03f70b5261dbc8c0555fdd223",
+      "size": 8630
     },
     "packages/db/src/schema/payments.ts": {
       "hash": "88a272b16aa5c75c8581370c68c887950002498655a9319835fd29f8d17eb5ef",
@@ -147,5 +147,5 @@
       "size": 37995
     }
   },
-  "compositeHash": "19319d7c78a07ec4a07f57580b1e2a69633f5c1691f2019641287612593054dc"
+  "compositeHash": "515b2a7f0b029011a7c3d3658d41cf12ea41b65bbd6d45cd312d0dbef05ca62f"
 }
