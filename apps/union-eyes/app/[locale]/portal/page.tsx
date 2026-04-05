@@ -154,7 +154,8 @@ export default function MemberPortalDashboard() {
         </CardHeader>
       </Card>
 
-      {/* Stats Grid */}
+      {/* Stats Grid — only shown when user has cases */}
+      {(stats?.totalClaims ?? 0) > 0 && (
       <div className="grid grid-cols-2 gap-4">
         <motion.div
           initial={{ opacity: 0, y: 20 }}
@@ -240,6 +241,7 @@ export default function MemberPortalDashboard() {
           </Card>
         </motion.div>
       </div>
+      )}
 
       {/* Pending Satisfaction Surveys */}
       {pendingSurveys.length > 0 && (
@@ -292,7 +294,8 @@ export default function MemberPortalDashboard() {
         </motion.div>
       )}
 
-      {/* Quick Actions */}
+      {/* Quick Actions — only shown when user has cases */}
+      {(stats?.totalClaims ?? 0) > 0 && (
       <Card>
         <CardHeader>
           <CardTitle>Quick Actions</CardTitle>
@@ -327,6 +330,7 @@ export default function MemberPortalDashboard() {
           </div>
         </CardContent>
       </Card>
+      )}
 
       {/* Recent Claims */}
       <Card>

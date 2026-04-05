@@ -115,117 +115,121 @@ export default function PilotDashboard() {
         <p className="text-gray-600">{t("pilot.dashboard.subtitle")}</p>
       </motion.div>
 
-      {/* Two-card hero: My Cases + Create Case */}
-      <motion.div
-        initial={{ opacity: 0, y: 20 }}
-        animate={{ opacity: 1, y: 0 }}
-        transition={{ duration: 0.5, delay: 0.1 }}
-        className="grid grid-cols-1 md:grid-cols-2 gap-6 mb-8"
-      >
-        {/* My Cases card */}
-        <Link href={`/${locale}/dashboard/claims`}>
-          <Card className="h-full border-blue-200 bg-blue-50/60 hover:shadow-lg transition-all hover:scale-[1.02] cursor-pointer group">
-            <CardContent className="p-6 flex flex-col justify-between h-full">
-              <div>
-                <div className="inline-flex p-3 rounded-xl bg-blue-600 text-white mb-4">
-                  <FileText size={24} />
-                </div>
-                <h3 className="text-xl font-semibold text-gray-900 mb-1 group-hover:text-blue-700 transition-colors">
-                  {t("claims.myCases")}
-                </h3>
-                <p className="text-sm text-gray-600 mb-4">{t("pilot.dashboard.myCasesHint")}</p>
-              </div>
-              <div className="flex items-center justify-between">
-                <span className="text-3xl font-bold text-blue-700">
-                  {isLoading ? "…" : stats.activeClaims}
-                </span>
-                <div className="flex items-center text-blue-600 text-sm font-medium group-hover:translate-x-1 transition-transform">
-                  {t("common.viewAll")} <ArrowRight size={16} className="ml-1" />
-                </div>
-              </div>
-            </CardContent>
-          </Card>
-        </Link>
-
-        {/* Create Case CTA */}
-        <Link href={`/${locale}/dashboard/claims/new`}>
-          <Card className="h-full border-green-200 bg-linear-to-br from-green-50 to-emerald-50 hover:shadow-lg transition-all hover:scale-[1.02] cursor-pointer group">
-            <CardContent className="p-6 flex flex-col justify-between h-full">
-              <div>
-                <div className="inline-flex p-3 rounded-xl bg-green-600 text-white mb-4">
-                  <Plus size={24} />
-                </div>
-                <h3 className="text-xl font-semibold text-gray-900 mb-1 group-hover:text-green-700 transition-colors">
-                  {t("pilot.dashboard.createCase")}
-                </h3>
-                <p className="text-sm text-gray-600">{t("pilot.dashboard.createCaseHint")}</p>
-              </div>
-              <div className="flex items-center text-green-600 text-sm font-medium mt-4 group-hover:translate-x-1 transition-transform">
-                {t("pilot.dashboard.startNow")} <ArrowRight size={16} className="ml-1" />
-              </div>
-            </CardContent>
-          </Card>
-        </Link>
-      </motion.div>
-
-      {/* First-case empty state — visible only when 0 cases AND onboarding is done */}
-      {hasCompletedOnboarding && stats.activeClaims === 0 && !isLoading && (
+      {/* Empty state — single focused CTA when no cases exist */}
+      {hasCompletedOnboarding && stats.activeClaims === 0 && !isLoading ? (
         <motion.div
           initial={{ opacity: 0, y: 20 }}
           animate={{ opacity: 1, y: 0 }}
-          transition={{ duration: 0.5, delay: 0.2 }}
+          transition={{ duration: 0.5, delay: 0.1 }}
           className="mb-8"
         >
-          <Card className="border-amber-200 bg-linear-to-br from-amber-50 to-orange-50">
-            <CardContent className="p-6 text-center">
-              <Sparkles size={32} className="mx-auto text-amber-500 mb-3" />
-              <h3 className="text-lg font-semibold text-gray-900 mb-2">
+          <Card className="border-green-200 bg-linear-to-br from-green-50 to-emerald-50">
+            <CardContent className="p-10 text-center">
+              <div className="inline-flex p-4 rounded-2xl bg-green-600 text-white mb-4">
+                <Plus size={28} />
+              </div>
+              <h3 className="text-xl font-semibold text-gray-900 mb-2">
                 {t("pilot.dashboard.emptyTitle")}
               </h3>
-              <p className="text-sm text-gray-600 mb-4 max-w-md mx-auto">
+              <p className="text-sm text-gray-600 mb-6 max-w-md mx-auto">
                 {t("pilot.dashboard.emptyDescription")}
               </p>
               <Link href={`/${locale}/dashboard/claims/new`}>
-                <Button className="bg-amber-600 hover:bg-amber-700 text-white">
-                  <Plus size={16} className="mr-2" />
+                <Button size="lg" className="bg-green-600 hover:bg-green-700 text-white text-base px-8">
+                  <Plus size={18} className="mr-2" />
                   {t("pilot.dashboard.createFirstCase")}
                 </Button>
               </Link>
             </CardContent>
           </Card>
         </motion.div>
-      )}
+      ) : (
+        <>
+          {/* Two-card hero: My Cases + Create Case */}
+          <motion.div
+            initial={{ opacity: 0, y: 20 }}
+            animate={{ opacity: 1, y: 0 }}
+            transition={{ duration: 0.5, delay: 0.1 }}
+            className="grid grid-cols-1 md:grid-cols-2 gap-6 mb-8"
+          >
+            {/* My Cases card */}
+            <Link href={`/${locale}/dashboard/claims`}>
+              <Card className="h-full border-blue-200 bg-blue-50/60 hover:shadow-lg transition-all hover:scale-[1.02] cursor-pointer group">
+                <CardContent className="p-6 flex flex-col justify-between h-full">
+                  <div>
+                    <div className="inline-flex p-3 rounded-xl bg-blue-600 text-white mb-4">
+                      <FileText size={24} />
+                    </div>
+                    <h3 className="text-xl font-semibold text-gray-900 mb-1 group-hover:text-blue-700 transition-colors">
+                      {t("claims.myCases")}
+                    </h3>
+                    <p className="text-sm text-gray-600 mb-4">{t("pilot.dashboard.myCasesHint")}</p>
+                  </div>
+                  <div className="flex items-center justify-between">
+                    <span className="text-3xl font-bold text-blue-700">
+                      {isLoading ? "…" : stats.activeClaims}
+                    </span>
+                    <div className="flex items-center text-blue-600 text-sm font-medium group-hover:translate-x-1 transition-transform">
+                      {t("common.viewAll")} <ArrowRight size={16} className="ml-1" />
+                    </div>
+                  </div>
+                </CardContent>
+              </Card>
+            </Link>
 
-      {/* Quick Stats Bar */}
-      <motion.div
-        initial={{ opacity: 0, y: 20 }}
-        animate={{ opacity: 1, y: 0 }}
-        transition={{ duration: 0.5, delay: 0.25 }}
-        className="grid grid-cols-2 gap-4 mb-8"
-      >
-        <Card className="bg-white/80 backdrop-blur-sm">
-          <CardContent className="p-4 flex items-center gap-3">
-            <div className="p-2 rounded-lg bg-green-100">
-              <CheckCircle2 size={18} className="text-green-600" />
-            </div>
-            <div>
-              <p className="text-xs text-gray-500">{t("pilot.dashboard.resolvedLabel")}</p>
-              <p className="text-xl font-bold text-gray-900">{isLoading ? "…" : stats.resolvedCases}</p>
-            </div>
-          </CardContent>
-        </Card>
-        <Card className="bg-white/80 backdrop-blur-sm">
-          <CardContent className="p-4 flex items-center gap-3">
-            <div className="p-2 rounded-lg bg-blue-100">
-              <Users size={18} className="text-blue-600" />
-            </div>
-            <div>
-              <p className="text-xs text-gray-500">{t("pilot.dashboard.teamLabel")}</p>
-              <p className="text-xl font-bold text-gray-900">{t("pilot.dashboard.yourTeamReady")}</p>
-            </div>
-          </CardContent>
-        </Card>
-      </motion.div>
+            {/* Create Case CTA */}
+            <Link href={`/${locale}/dashboard/claims/new`}>
+              <Card className="h-full border-green-200 bg-linear-to-br from-green-50 to-emerald-50 hover:shadow-lg transition-all hover:scale-[1.02] cursor-pointer group">
+                <CardContent className="p-6 flex flex-col justify-between h-full">
+                  <div>
+                    <div className="inline-flex p-3 rounded-xl bg-green-600 text-white mb-4">
+                      <Plus size={24} />
+                    </div>
+                    <h3 className="text-xl font-semibold text-gray-900 mb-1 group-hover:text-green-700 transition-colors">
+                      {t("pilot.dashboard.createCase")}
+                    </h3>
+                    <p className="text-sm text-gray-600">{t("pilot.dashboard.createCaseHint")}</p>
+                  </div>
+                  <div className="flex items-center text-green-600 text-sm font-medium mt-4 group-hover:translate-x-1 transition-transform">
+                    {t("pilot.dashboard.startNow")} <ArrowRight size={16} className="ml-1" />
+                  </div>
+                </CardContent>
+              </Card>
+            </Link>
+          </motion.div>
+
+          {/* Quick Stats Bar */}
+          <motion.div
+            initial={{ opacity: 0, y: 20 }}
+            animate={{ opacity: 1, y: 0 }}
+            transition={{ duration: 0.5, delay: 0.25 }}
+            className="grid grid-cols-2 gap-4 mb-8"
+          >
+            <Card className="bg-white/80 backdrop-blur-sm">
+              <CardContent className="p-4 flex items-center gap-3">
+                <div className="p-2 rounded-lg bg-green-100">
+                  <CheckCircle2 size={18} className="text-green-600" />
+                </div>
+                <div>
+                  <p className="text-xs text-gray-500">{t("pilot.dashboard.resolvedLabel")}</p>
+                  <p className="text-xl font-bold text-gray-900">{isLoading ? "…" : stats.resolvedCases}</p>
+                </div>
+              </CardContent>
+            </Card>
+            <Card className="bg-white/80 backdrop-blur-sm">
+              <CardContent className="p-4 flex items-center gap-3">
+                <div className="p-2 rounded-lg bg-blue-100">
+                  <Users size={18} className="text-blue-600" />
+                </div>
+                <div>
+                  <p className="text-xs text-gray-500">{t("pilot.dashboard.teamLabel")}</p>
+                  <p className="text-xl font-bold text-gray-900">{t("pilot.dashboard.yourTeamReady")}</p>
+                </div>
+              </CardContent>
+            </Card>
+          </motion.div>
+        </>
+      )}
 
       {/* Recent Activity */}
       <motion.div

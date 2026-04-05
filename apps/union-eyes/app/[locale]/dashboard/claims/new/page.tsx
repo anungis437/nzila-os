@@ -619,6 +619,7 @@ setIsSubmitting(false);
                     </button>
                   </Link>
                 </div>
+                <p className="text-xs text-gray-400 text-center pt-1">{t('forms.editAnytime')}</p>
               </form>
             </CardContent>
           </Card>

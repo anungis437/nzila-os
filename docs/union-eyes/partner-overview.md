@@ -5,13 +5,10 @@
 
 ## What Is Union Eyes?
 
-Union Eyes is a digital system that helps unions manage workplace issues.
-Think of it as a structured way for union members to report problems at
-work and for stewards to track and resolve those problems.
-
-Before Union Eyes, this process typically happens through phone calls,
-emails, paper forms, and spreadsheets. Union Eyes puts it all in one
-place with a clear timeline of what happened and when.
+Union Eyes is a case management system built for unions. It replaces
+phone calls, emails, paper forms, and spreadsheets with a single
+structured record for every workplace issue — from first report
+through resolution.
 
 ## What Does It Do?
 
@@ -55,10 +52,10 @@ well for real workplace issues before rolling it out more widely.
 
 ## What Does This Mean for the Union?
 
-- **Better tracking** — No more lost emails or forgotten follow-ups
-- **Clear timelines** — Every case has a complete, timestamped history
-- **Accountability** — Stewards and admins can see what needs attention
-- **Evidence** — If a case goes to arbitration, the timeline is already documented
+- **Documentation clarity** — Every case has a structured record: what happened, when it happened, who was involved, and what was done about it. No ambiguity.
+- **Reduced reliance on memory** — Stewards and members don't have to reconstruct events weeks later from memory or scattered emails. The timeline is already there.
+- **Defensibility** — If a case goes to arbitration, the documented history stands on its own. Timestamped, uneditable, complete.
+- **Accountability** — Stewards and admins can see what needs attention at a glance — nothing falls through the cracks.
 
 ## Who Built This?
 
