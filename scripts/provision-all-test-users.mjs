@@ -1,17 +1,21 @@
 #!/usr/bin/env node
 /**
+ * @deprecated This script uses the Clerk API directly and must be rewritten
+ * to use Microsoft Graph API now that auth has migrated to Entra External ID.
+ * See: https://learn.microsoft.com/en-us/graph/api/user-post-users
+ *
  * provision-all-test-users.mjs
  *
  * Master provisioning script for UE + Zonga test users.
- * Handles: Clerk user creation, Clerk org membership, DB role updates,
+ * Handles: user creation, org membership, DB role updates,
  * DB inserts for new members, Zonga table creation, Zonga seeding,
  * and seed placeholder cleanup.
  *
  * Usage: node scripts/provision-all-test-users.mjs
  *
  * Requires:
- *   - CLERK_SECRET_KEY env var or reads from apps/union-eyes/.env.local
- *   - PROVISION_USER_PASSWORD env var (password for new Clerk test users)
+ *   - AUTH_SECRET env var (was: CLERK_SECRET_KEY)
+ *   - PROVISION_USER_PASSWORD env var (password for new test users)
  *   - PGPASSWORD env var (PostgreSQL password, default: reads from env)
  *   - PostgreSQL on localhost:5433
  */

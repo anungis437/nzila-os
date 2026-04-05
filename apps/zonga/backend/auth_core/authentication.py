@@ -1,5 +1,6 @@
 """
-Clerk JWT authentication for Django REST Framework.
+OIDC JWT authentication for Django REST Framework.
+Works with Microsoft Entra External ID, Clerk, or any OIDC provider.
 """
 
 import json
@@ -19,14 +20,14 @@ _jwks_cache = None
 
 
 def _get_jwks():
-    """Fetch and cache Clerk JWKS for token verification."""
+    """Fetch and cache OIDC JWKS for token verification."""
     global _jwks_cache
     if _jwks_cache is not None:
         return _jwks_cache
 
-    jwks_url = getattr(settings, "CLERK_JWKS_URL", "")
+    jwks_url = getattr(settings, "AUTH_JWKS_URL", "") or getattr(settings, "CLERK_JWKS_URL", "")
     if not jwks_url:
-        raise AuthenticationFailed("CLERK_JWKS_URL not configured")
+        raise AuthenticationFailed("AUTH_JWKS_URL not configured")
 
     try:
         with urllib.request.urlopen(jwks_url, timeout=5) as resp:
@@ -38,8 +39,8 @@ def _get_jwks():
         raise AuthenticationFailed("Unable to verify token")
 
 
-class ClerkAuthentication(BaseAuthentication):
-    """Authenticate requests using Clerk JWT in Authorization header."""
+class OIDCAuthentication(BaseAuthentication):
+    """OIDC JWT authentication for DRF. Works with Microsoft Entra ID, Clerk, or any OIDC provider."""
 
     def authenticate(self, request):
         auth_header = request.META.get("HTTP_AUTHORIZATION", "")
@@ -84,3 +85,7 @@ class ClerkAuthentication(BaseAuthentication):
             raise AuthenticationFailed("Token expired")
         except jwt.InvalidTokenError as e:
             raise AuthenticationFailed(f"Invalid token: {e}")
+
+
+# Backward compat alias
+ClerkAuthentication = OIDCAuthentication

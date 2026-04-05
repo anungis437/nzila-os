@@ -100,7 +100,7 @@ describe('ORG_REQUIRED_SERVER_ACTIONS_001 — Server actions must use resolveOrg
 // ── NO_BARE_AUTH_IN_ACTIONS_001 ─────────────────────────────────────────────
 
 describe('NO_BARE_AUTH_IN_ACTIONS_001 — No bare auth() in migrated action files', () => {
-  it('files with resolveOrgContext must not also import bare auth() from @clerk/nextjs', () => {
+  it('files with resolveOrgContext must not also import bare auth() from @nzila/platform-auth', () => {
     const violations: Violation[] = []
 
     for (const root of ACTION_ROOTS) {
@@ -112,13 +112,13 @@ describe('NO_BARE_AUTH_IN_ACTIONS_001 — No bare auth() in migrated action file
         if (!content.includes('resolveOrgContext')) continue
 
         if (
-          content.includes("from '@clerk/nextjs/server'") &&
+          content.includes("from '@nzila/platform-auth/entra/server'") &&
           content.includes('auth()')
         ) {
           violations.push({
             ruleId: 'NO_BARE_AUTH_IN_ACTIONS_001',
             filePath: rel,
-            offendingValue: "Imports auth() from '@clerk/nextjs/server' alongside resolveOrgContext",
+            offendingValue: "Imports auth() from '@nzila/platform-auth/entra/server' alongside resolveOrgContext",
             remediation:
               'Remove bare auth() import; resolveOrgContext already wraps auth() internally',
           })

@@ -14,7 +14,6 @@
     "test:coverage": "jest --coverage"
   },
   "dependencies": {
-    "@clerk/backend": "^1.9.0",
     "@supabase/supabase-js": "^2.39.0",
     "@union-claims/financial": "workspace:*",
     "cors": "^2.8.5",

@@ -1,4 +1,4 @@
-"""Clerk JWT authentication backend for Django REST Framework.
+"""OIDC JWT authentication backend for Django REST Framework.
 
 Production-ready implementation with:
 - JWKS caching for performance
@@ -6,6 +6,8 @@ Production-ready implementation with:
 - User profile synchronization
 - Comprehensive error handling
 - JWT key rotation support
+
+Works with Microsoft Entra External ID, Clerk, or any OIDC provider.
 """
 
 import logging
@@ -23,34 +25,44 @@ logger = logging.getLogger(__name__)
 
 
 def _extract_org(payload: Dict[str, Any]) -> Tuple[Optional[str], Optional[str]]:
-    """Extract organization ID and role from Clerk JWT payload.
+    """Extract organization ID and role from OIDC JWT payload.
 
-    Clerk V2 tokens store org data under ``o`` (shortened keys):
-        {"o": {"id": "org_...", "rol": "admin", "slg": "my-org"}}
-    Clerk V1 tokens used top-level ``org_id`` / ``org_role`` keys.
+    Supports multiple token formats:
+    - Entra External ID: ``org_id`` custom claim or ``tid`` (tenant ID) fallback
+    - Clerk V2: ``o`` dict with ``id`` / ``rol`` keys
+    - Clerk V1: top-level ``org_id`` / ``org_role`` keys
 
     Returns:
         Tuple of (org_id, org_role), either or both may be None.
     """
-    # V2 format (current)
+    # Entra tokens: org context may come from custom claims
+    org_id = payload.get("org_id")
+    if org_id:
+        return org_id, payload.get("org_role")
+
+    # Clerk V2 format
     o = payload.get("o")
     if isinstance(o, dict):
         return o.get("id"), o.get("rol")
-    # V1 fallback
-    return payload.get("org_id"), payload.get("org_role")
+
+    # Entra fallback: use tenant ID as org context
+    tid = payload.get("tid")
+    if tid:
+        return tid, payload.get("org_role")
+
+    return None, None
 
 
-class ClerkAuthentication(authentication.BaseAuthentication):
-    """Authenticates requests using Clerk JWT tokens.
+class OIDCAuthentication(authentication.BaseAuthentication):
+    """OIDC JWT authentication for DRF.
+
+    Works with Microsoft Entra External ID, Clerk, or any OIDC provider.
 
     This backend:
-    1. Validates JWT signature using Clerk's JWKS
+    1. Validates JWT signature using the provider's JWKS
     2. Checks token expiration
-    3. Gets or creates Django User from Clerk user ID
+    3. Gets or creates Django User from the ``sub`` claim
     4. Attaches organization context to request
-
-    Supports both Clerk V1 (org_id / org_role) and V2 (o.id / o.rol) JWT
-    payload formats.
     """
 
     def authenticate_header(self, request):
@@ -58,7 +70,7 @@ class ClerkAuthentication(authentication.BaseAuthentication):
         return "Bearer"
 
     def authenticate(self, request):
-        """Authenticate request using Clerk JWT token.
+        """Authenticate request using OIDC JWT token.
 
         Returns:
             Tuple[User, dict]: (Django User, JWT payload) or None if no token
@@ -116,10 +128,10 @@ class ClerkAuthentication(authentication.BaseAuthentication):
         Raises:
             jwt.InvalidTokenError: If token is invalid
         """
-        jwks_url = getattr(settings, "CLERK_JWKS_URL", None)
+        jwks_url = getattr(settings, "AUTH_JWKS_URL", None) or getattr(settings, "CLERK_JWKS_URL", None)
         if not jwks_url:
             raise exceptions.AuthenticationFailed(
-                "CLERK_JWKS_URL not configured in Django settings"
+                "AUTH_JWKS_URL not configured in Django settings"
             )
 
         # Cache JWKS client for performance (auto-refreshes on key rotation)
@@ -138,18 +150,18 @@ class ClerkAuthentication(authentication.BaseAuthentication):
             token,
             signing_key.key,
             algorithms=["RS256"],
-            options={"verify_aud": False},  # Clerk doesn't set aud claim
+            options={"verify_aud": False},  # OIDC aud claim not enforced
         )
 
         return payload
 
     def _get_or_create_user(self, payload: Dict[str, Any]):
-        """Get or create Django user from Clerk JWT payload.
+        """Get or create Django user from OIDC JWT payload.
 
-        Syncs user metadata from Clerk to Django User/Profile models.
+        Syncs user metadata from the auth provider to Django User/Profile models.
 
         Args:
-            payload: Decoded JWT payload from Clerk
+            payload: Decoded JWT payload
 
         Returns:
             User: Django User instance
@@ -197,7 +209,7 @@ class ClerkAuthentication(authentication.BaseAuthentication):
         return user
 
     def _sync_user_profile(self, user, payload: Dict[str, Any]):
-        """Sync Clerk metadata to Profile model if it exists.
+        """Sync auth provider metadata to Profile model if it exists.
 
         Args:
             user: Django User instance
@@ -225,8 +237,12 @@ class ClerkAuthentication(authentication.BaseAuthentication):
             logger.error(f"Failed to sync user profile: {e}")
 
 
+# Backward compat alias
+ClerkAuthentication = OIDCAuthentication
+
+
 class ClerkAPIKeyAuthentication(authentication.BaseAuthentication):
-    """Authenticates service-to-service requests using Clerk secret key.
+    """Authenticates service-to-service requests using API secret key.
 
     For internal API calls, webhooks, or admin operations.
     Checks for X-Clerk-Secret-Key header matching CLERK_SECRET_KEY.

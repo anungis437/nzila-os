@@ -11,9 +11,11 @@ const VALID_BASE_ENV: Record<string, string> = {
   DATABASE_URL: 'postgres://localhost:5432/nzila',
 }
 
-const CLERK_ENV: Record<string, string> = {
-  CLERK_SECRET_KEY: 'sk_test_abc123',
-  NEXT_PUBLIC_CLERK_PUBLISHABLE_KEY: 'pk_test_abc123',
+const AUTH_ENV: Record<string, string> = {
+  AUTH_SECRET: 'test_auth_secret_32chars_xxxxxxxxxxxx',
+  AZURE_AD_CLIENT_ID: 'test-client-id',
+  AZURE_AD_CLIENT_SECRET: 'test-client-secret',
+  AZURE_AD_TENANT_ID: 'test-tenant-id',
 }
 
 describe('validateEnv', () => {
@@ -39,12 +41,12 @@ describe('validateEnv', () => {
     expect(() => validateEnv('nonexistent-app' as any)).toThrow('Unknown app name')
   })
 
-  it('validates console schema requires Clerk keys', () => {
-    Object.assign(process.env, VALID_BASE_ENV, CLERK_ENV, {
+  it('validates console schema requires auth keys', () => {
+    Object.assign(process.env, VALID_BASE_ENV, AUTH_ENV, {
       NEXT_PUBLIC_APP_URL: 'http://localhost:3001',
     })
     const env = validateEnv('console')
-    expect(env.CLERK_SECRET_KEY).toBe('sk_test_abc123')
+    expect(env.AUTH_SECRET).toBe('test_auth_secret_32chars_xxxxxxxxxxxx')
   })
 
   it('validates web schema (no Clerk required)', () => {
@@ -68,7 +70,7 @@ describe('validateEnv', () => {
 
     // Each should resolve a schema without throwing "Unknown app name"
     for (const app of ALL_APPS) {
-      Object.assign(process.env, VALID_BASE_ENV, CLERK_ENV, {
+      Object.assign(process.env, VALID_BASE_ENV, AUTH_ENV, {
         NEXT_PUBLIC_APP_URL: 'http://localhost:3000',
       })
       expect(() => validateEnv(app)).not.toThrow('Unknown app name')

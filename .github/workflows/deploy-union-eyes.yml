@@ -116,9 +116,10 @@ jobs:
           docker build \
             --target union-eyes \
             --build-arg TURBO_FILTER="--filter=@nzila/union-eyes" \
-            --build-arg NEXT_PUBLIC_CLERK_PUBLISHABLE_KEY=${{ secrets.CLERK_PUBLISHABLE_KEY }} \
+            --build-arg AUTH_SECRET=${{ secrets.AUTH_SECRET }} \
+            --build-arg AZURE_AD_CLIENT_ID=${{ secrets.AZURE_AD_CLIENT_ID }} \
+            --build-arg AZURE_AD_TENANT_ID=${{ secrets.AZURE_AD_TENANT_ID }} \
             --build-arg NEXT_PUBLIC_APP_URL=${{ secrets.UE_APP_URL }} \
-            --build-arg NEXT_PUBLIC_CLERK_IS_SATELLITE=false \
             -t ${{ env.IMAGE }}:${{ github.sha }} \
             -t ${{ env.IMAGE }}:latest \
             .
@@ -141,7 +142,6 @@ jobs:
             --resource-group ${{ secrets.AZURE_RESOURCE_GROUP }} \
             --set-env-vars \
               "DJANGO_API_URL=http://localhost:8000" \
-              "NEXT_PUBLIC_CLERK_IS_SATELLITE=false" \
               "PLATFORM_ADMIN_USER_IDS=${{ secrets.PLATFORM_ADMIN_USER_IDS }}" \
               "SUPER_ADMIN_ORG_ID=${{ secrets.SUPER_ADMIN_ORG_ID }}" \
               "UPSTASH_REDIS_REST_URL=secretref:upstash-redis-url" \
@@ -154,7 +154,7 @@ jobs:
             --resource-group ${{ secrets.AZURE_RESOURCE_GROUP }} \
             --container-name django-backend \
             --set-env-vars \
-              "CLERK_JWKS_URL=https://known-hagfish-67.clerk.accounts.dev/.well-known/jwks.json" \
-              "CLERK_WEBHOOK_SECRET=secretref:clerk-webhook-secret" \
+              "AUTH_JWKS_URL=${{ secrets.AUTH_JWKS_URL }}" \
+              "AUTH_WEBHOOK_SECRET=secretref:auth-webhook-secret" \
               "DJANGO_ALLOWED_HOSTS=${{ secrets.DJANGO_ALLOWED_HOSTS }}" \
             --image ${{ env.BACKEND_IMAGE }}:${{ github.sha }}

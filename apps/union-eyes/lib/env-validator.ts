@@ -27,20 +27,13 @@ const ENV_VARS: EnvVar[] = [
     validate: (val) => val.startsWith('postgresql://') || val.startsWith('postgres://'),
   },
 
-  // Authentication (Clerk)
+  // Authentication (Entra External ID / NextAuth)
   {
-    name: 'NEXT_PUBLIC_CLERK_PUBLISHABLE_KEY',
+    name: 'AUTH_SECRET',
     required: true,
-    description: 'Clerk publishable key for client-side',
-    example: 'pk_test_...',
-    validate: (val) => val.startsWith('pk_'),
-  },
-  {
-    name: 'CLERK_SECRET_KEY',
-    required: true,
-    description: 'Clerk secret key for server-side',
-    example: 'sk_test_...',
-    validate: (val) => val.startsWith('sk_'),
+    description: 'NextAuth session encryption secret (32+ chars)',
+    example: 'dev_secret_placeholder_32chars_xxxxxxxxxx',
+    validate: (val) => val.length >= 10,
   },
 
   // Payment Processing

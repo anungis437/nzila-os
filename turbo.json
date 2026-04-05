@@ -23,7 +23,8 @@
       ],
       "outputs": [".next/**", "!.next/cache/**", "dist/**"],
       "env": [
-        "NEXT_PUBLIC_CLERK_PUBLISHABLE_KEY",
+        "AZURE_AD_CLIENT_ID",
+        "AZURE_AD_TENANT_ID",
         "NEXT_PUBLIC_WEB_URL",
         "NEXT_PUBLIC_CONSOLE_URL",
         "NEXT_PUBLIC_PARTNERS_URL",
@@ -31,7 +32,7 @@
         "NEXT_PUBLIC_ABR_URL",
         "NEXT_PUBLIC_CFO_URL",
         "NEXT_PUBLIC_APP_URL",
-        "CLERK_SECRET_KEY",
+        "AUTH_SECRET",
         "NODE_ENV"
       ]
     },

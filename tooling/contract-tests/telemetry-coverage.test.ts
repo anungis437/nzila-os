@@ -125,7 +125,7 @@ describe('Telemetry Coverage Enforcement', () => {
           // Clerk middleware implicitly propagates auth context which includes
           // session/user identity for downstream request correlation
           content.includes('clerkMiddleware') ||
-          content.includes('@clerk/nextjs')
+          content.includes('@nzila/platform-auth')
 
         expect(
           hasContextSetup,

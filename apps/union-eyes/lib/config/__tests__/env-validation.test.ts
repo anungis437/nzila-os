@@ -19,8 +19,7 @@ const MINIMAL_ENV = {
   NODE_ENV: 'test',
   NEXT_PUBLIC_APP_URL: 'http://localhost:3000',
   DATABASE_URL: 'postgresql://user:pass@localhost:5432/test',
-  CLERK_SECRET_KEY: 'sk_test_1234567890',
-  NEXT_PUBLIC_CLERK_PUBLISHABLE_KEY: 'pk_test_1234567890',
+  AUTH_SECRET: 'test_auth_secret_32chars_xxxxxxxxxxxx',
   VOTING_SECRET: 'a'.repeat(32),
   EMAIL_PROVIDER: 'console',
 };

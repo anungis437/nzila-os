@@ -1,4 +1,4 @@
-"""Clerk JWT middleware for Django.
+"""OIDC JWT middleware for Django.
 
 Production middleware with:
 - Org context attachment
@@ -16,11 +16,11 @@ from django.utils.deprecation import MiddlewareMixin
 logger = logging.getLogger(__name__)
 
 
-class ClerkJWTMiddleware(MiddlewareMixin):
-    """Middleware to attach Clerk user and organization context to requests.
+class OIDCJWTMiddleware(MiddlewareMixin):
+    """Middleware to attach OIDC user and organization context to requests.
 
     This middleware:
-    1. Extracts org_id, org_role from Clerk JWT (set by ClerkAuthentication)
+    1. Extracts org_id, org_role from OIDC JWT (set by OIDCAuthentication)
     2. Enforces organization-scoped querysets
     3. Logs authentication events
     4. Provides organization context to views
@@ -33,14 +33,15 @@ class ClerkJWTMiddleware(MiddlewareMixin):
         "/api/schema/",
         "/api/docs/",
         "/admin/login/",
-        "/api/webhooks/clerk/",  # Clerk webhooks use secret key auth
+        "/api/webhooks/auth/",  # Auth provider webhooks use secret key auth
+        "/api/webhooks/clerk/",  # Backward compat
     ]
 
     def process_request(self, request):
         """Process incoming request to attach org context.
 
-        ClerkAuthentication sets these attributes on request:
-        - clerk_user_id: Clerk user ID (sub claim)
+        OIDCAuthentication sets these attributes on request:
+        - clerk_user_id: Auth provider user ID (sub claim)
         - clerk_org_id: Organization ID (org_id claim)
         - clerk_org_role: User's role in org (org_role claim)
         """
@@ -77,6 +78,10 @@ class ClerkJWTMiddleware(MiddlewareMixin):
             bool: True if path is exempt
         """
         return any(path.startswith(p) for p in self.EXEMPT_PATHS)
+
+
+# Backward compat alias
+ClerkJWTMiddleware = OIDCJWTMiddleware
 
 
 class OrganizationIsolationMiddleware(MiddlewareMixin):

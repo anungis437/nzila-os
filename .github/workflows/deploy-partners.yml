@@ -105,7 +105,9 @@ jobs:
           docker build \
             --target partners \
             --build-arg TURBO_FILTER="--filter=@nzila/partners" \
-            --build-arg NEXT_PUBLIC_CLERK_PUBLISHABLE_KEY=${{ secrets.CLERK_PUBLISHABLE_KEY }} \
+            --build-arg AUTH_SECRET=${{ secrets.AUTH_SECRET }} \
+            --build-arg AZURE_AD_CLIENT_ID=${{ secrets.AZURE_AD_CLIENT_ID }} \
+            --build-arg AZURE_AD_TENANT_ID=${{ secrets.AZURE_AD_TENANT_ID }} \
             -t ${{ env.IMAGE }}:${{ github.sha }} \
             -t ${{ env.IMAGE }}:latest \
             .

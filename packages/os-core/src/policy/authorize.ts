@@ -79,18 +79,21 @@ export async function authorize(
   req: Request | NextRequest,
   options: AuthorizeOptions = {},
 ): Promise<AuthContext> {
-  // Import Clerk dynamically to avoid bundling it in non-Next.js contexts
-  // webpackIgnore prevents webpack from tracing into @clerk/nextjs/server
+  // Import auth dynamically to avoid bundling it in non-Next.js contexts
+  // webpackIgnore prevents webpack from tracing into the auth module
   // which imports 'server-only' and breaks client-side tree-shaking of the barrel export
-  const { auth } = await import(/* webpackIgnore: true */ '@clerk/nextjs/server')
+  const { auth } = await import(/* webpackIgnore: true */ '@nzila/platform-auth/entra/server')
   const session = await auth()
 
   if (!session?.userId) {
     throw new AuthorizationError('Authentication required', 401)
   }
 
-  // Resolve role from Clerk session metadata
-  const role = resolveRole(session)
+  // After the null check, userId is guaranteed to be a string
+  const verifiedSession = { ...session, userId: session.userId }
+
+  // Resolve role from session metadata
+  const role = resolveRole(verifiedSession)
 
   if (!role) {
     throw new AuthorizationError('No role assigned to user', 403)

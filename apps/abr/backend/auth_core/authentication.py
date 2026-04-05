@@ -1,4 +1,4 @@
-"""Clerk JWT authentication backend for Django REST Framework.
+"""OIDC JWT authentication backend for Django REST Framework.
 
 Production-ready implementation with:
 - JWKS caching for performance
@@ -6,10 +6,12 @@ Production-ready implementation with:
 - User profile synchronization
 - Comprehensive error handling
 - JWT key rotation support
+
+Works with Microsoft Entra External ID, Clerk, or any OIDC provider.
 """
 import logging
 from functools import lru_cache
-from typing import Tuple, Optional, Dict, Any
+from typing import Any, Dict, Optional, Tuple
 
 import jwt
 import requests
@@ -21,18 +23,20 @@ from rest_framework import authentication, exceptions
 logger = logging.getLogger(__name__)
 
 
-class ClerkAuthentication(authentication.BaseAuthentication):
-    """Authenticates requests using Clerk JWT tokens.
-    
+class OIDCAuthentication(authentication.BaseAuthentication):
+    """OIDC JWT authentication for DRF.
+
+    Works with Microsoft Entra External ID, Clerk, or any OIDC provider.
+
     This backend:
-    1. Validates JWT signature using Clerk's JWKS
+    1. Validates JWT signature using the provider's JWKS
     2. Checks token expiration
-    3. Gets or creates Django User from Clerk user ID
+    3. Gets or creates Django User from the ``sub`` claim
     4. Attaches organization context to request
     """
 
     def authenticate(self, request):
-        """Authenticate request using Clerk JWT token.
+        """Authenticate request using OIDC JWT token.
         
         Returns:
             Tuple[User, dict]: (Django User, JWT payload) or None if no token
@@ -83,10 +87,10 @@ class ClerkAuthentication(authentication.BaseAuthentication):
         Raises:
             jwt.InvalidTokenError: If token is invalid
         """
-        jwks_url = getattr(settings, "CLERK_JWKS_URL", None)
+        jwks_url = getattr(settings, "AUTH_JWKS_URL", None) or getattr(settings, "CLERK_JWKS_URL", None)
         if not jwks_url:
             raise exceptions.AuthenticationFailed(
-                "CLERK_JWKS_URL not configured in Django settings"
+                "AUTH_JWKS_URL not configured in Django settings"
             )
         
         # Cache JWKS client for performance (auto-refreshes on key rotation)
@@ -105,18 +109,18 @@ class ClerkAuthentication(authentication.BaseAuthentication):
             token,
             signing_key.key,
             algorithms=["RS256"],
-            options={"verify_aud": False},  # Clerk doesn't set aud claim
+            options={"verify_aud": False},  # OIDC aud claim not enforced
         )
         
         return payload
 
     def _get_or_create_user(self, payload: Dict[str, Any]):
-        """Get or create Django user from Clerk JWT payload.
+        """Get or create Django user from OIDC JWT payload.
         
-        Syncs user metadata from Clerk to Django User/Profile models.
+        Syncs user metadata from the auth provider to Django User/Profile models.
         
         Args:
-            payload: Decoded JWT payload from Clerk
+            payload: Decoded JWT payload
             
         Returns:
             User: Django User instance
@@ -164,7 +168,7 @@ class ClerkAuthentication(authentication.BaseAuthentication):
         return user
 
     def _sync_user_profile(self, user, payload: Dict[str, Any]):
-        """Sync Clerk metadata to Profile model if it exists.
+        """Sync auth provider metadata to Profile model if it exists.
         
         Args:
             user: Django User instance
@@ -192,8 +196,12 @@ class ClerkAuthentication(authentication.BaseAuthentication):
             logger.error(f"Failed to sync user profile: {e}")
 
 
+# Backward compat alias
+ClerkAuthentication = OIDCAuthentication
+
+
 class ClerkAPIKeyAuthentication(authentication.BaseAuthentication):
-    """Authenticates service-to-service requests using Clerk secret key.
+    """Authenticates service-to-service requests using API secret key.
     
     For internal API calls, webhooks, or admin operations.
     Checks for X-Clerk-Secret-Key header matching CLERK_SECRET_KEY.

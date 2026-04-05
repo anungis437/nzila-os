@@ -1,8 +1,12 @@
 #!/usr/bin/env node
 /**
+ * @deprecated This script uses the Clerk API directly and must be rewritten
+ * to use Microsoft Graph API now that auth has migrated to Entra External ID.
+ * See: https://learn.microsoft.com/en-us/graph/api/user-post-users
+ *
  * zonga-clerk-provision.mjs
  *
- * Creates all Clerk test data needed for Zonga stakeholder testing:
+ * Creates all test data needed for Zonga stakeholder testing:
  *   - 1 demo label org ("Afrobeats Records")
  *   - 4 test users (admin, manager, creator, viewer) in the label org
  *   - 2 platform-side users (manager, viewer) in the Nzila platform org
@@ -12,7 +16,7 @@
  * Usage:
  *   node scripts/zonga-clerk-provision.mjs
  *
- * Requires CLERK_SECRET_KEY env or uses the hardcoded dev key below.
+ * Requires AUTH_SECRET env var (was: CLERK_SECRET_KEY).
  */
 import https from 'node:https';
 import fs from 'node:fs';

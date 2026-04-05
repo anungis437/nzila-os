@@ -90,8 +90,7 @@ jobs:
         run: pnpm test
         env:
           DATABASE_URL: postgresql://postgres:postgres@localhost:5432/test_db
-          CLERK_SECRET_KEY: sk_test_placeholder
-          NEXT_PUBLIC_CLERK_PUBLISHABLE_KEY: pk_test_placeholder
+          AUTH_SECRET: ci_test_placeholder_secret_32chars_xxxx
 
   build:
     runs-on: ubuntu-latest
@@ -125,8 +124,9 @@ jobs:
         run: pnpm build
         env:
           NEXT_PUBLIC_CONSOLE_URL: https://console.nzila.app
-          NEXT_PUBLIC_CLERK_PUBLISHABLE_KEY: ${{ secrets.CLERK_PUBLISHABLE_KEY }}
-          CLERK_SECRET_KEY: ${{ secrets.CLERK_SECRET_KEY }}
+          AUTH_SECRET: ${{ secrets.AUTH_SECRET }}
+          AZURE_AD_CLIENT_ID: ${{ secrets.AZURE_AD_CLIENT_ID }}
+          AZURE_AD_TENANT_ID: ${{ secrets.AZURE_AD_TENANT_ID }}
           NODE_OPTIONS: "--max-old-space-size=8192"
 
   # ── W1-5: IaC Security Scan (Checkov) ──────────────────────────────────────

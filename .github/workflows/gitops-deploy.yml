@@ -151,12 +151,13 @@ jobs:
         if: steps.check.outputs.should_build == 'true'
         run: az acr login --name ${{ env.ACR_NAME }}
 
-      - name: Resolve Clerk publishable key
+      - name: Resolve Entra auth env vars
         if: steps.check.outputs.should_build == 'true'
-        id: clerk
+        id: auth
         run: |
-          # All apps share the same Clerk instance (known-hagfish-67)
-          echo "pk=${{ secrets.CLERK_PUBLISHABLE_KEY }}" >> "$GITHUB_OUTPUT"
+          echo "auth_secret=${{ secrets.AUTH_SECRET }}" >> "$GITHUB_OUTPUT"
+          echo "client_id=${{ secrets.AZURE_AD_CLIENT_ID }}" >> "$GITHUB_OUTPUT"
+          echo "tenant_id=${{ secrets.AZURE_AD_TENANT_ID }}" >> "$GITHUB_OUTPUT"
 
       - name: Build and push
         if: steps.check.outputs.should_build == 'true'
@@ -167,8 +168,10 @@ jobs:
 
           BUILD_ARGS="--build-arg APP_NAME=${APP}"
           BUILD_ARGS="${BUILD_ARGS} --build-arg TURBO_FILTER=--filter=@nzila/${APP}"
-          if [ -n "${{ steps.clerk.outputs.pk }}" ]; then
-            BUILD_ARGS="${BUILD_ARGS} --build-arg NEXT_PUBLIC_CLERK_PUBLISHABLE_KEY=${{ steps.clerk.outputs.pk }}"
+          if [ -n "${{ steps.auth.outputs.auth_secret }}" ]; then
+            BUILD_ARGS="${BUILD_ARGS} --build-arg AUTH_SECRET=${{ steps.auth.outputs.auth_secret }}"
+            BUILD_ARGS="${BUILD_ARGS} --build-arg AZURE_AD_CLIENT_ID=${{ steps.auth.outputs.client_id }}"
+            BUILD_ARGS="${BUILD_ARGS} --build-arg AZURE_AD_TENANT_ID=${{ steps.auth.outputs.tenant_id }}"
           fi
 
           # Cross-app navigation URLs (baked into Next.js at build time)
@@ -182,13 +185,7 @@ jobs:
           BUILD_ARGS="${BUILD_ARGS} --build-arg NEXT_PUBLIC_CONTROL_PLANE_URL=https://nzila-os-control-plane.${DOMAIN}"
           BUILD_ARGS="${BUILD_ARGS} --build-arg NEXT_PUBLIC_PLATFORM_ADMIN_URL=https://nzila-os-platform-admin.${DOMAIN}"
 
-          # Clerk satellite configuration for apps with their own domain
-          # web is the primary sign-in host; all other apps are satellites
-          if [ "$APP" != "web" ]; then
-            BUILD_ARGS="${BUILD_ARGS} --build-arg NEXT_PUBLIC_CLERK_IS_SATELLITE=true"
-            BUILD_ARGS="${BUILD_ARGS} --build-arg NEXT_PUBLIC_CLERK_DOMAIN=nzila-os-${APP}.${DOMAIN}"
-            BUILD_ARGS="${BUILD_ARGS} --build-arg NEXT_PUBLIC_CLERK_SIGN_IN_URL=https://nzila-os-web.${DOMAIN}/sign-in"
-          fi
+          # Entra External ID handles multi-app auth via NextAuth — no satellite config needed
 
           docker buildx build \
             --target "$APP" \

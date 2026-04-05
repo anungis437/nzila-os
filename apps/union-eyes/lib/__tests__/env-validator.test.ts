@@ -17,8 +17,7 @@ describe('env-validator', () => {
   describe('validateEnv', () => {
     it('returns valid when all required vars are set', async () => {
       process.env.DATABASE_URL = 'postgresql://user:pass@localhost:5432/db';
-      process.env.NEXT_PUBLIC_CLERK_PUBLISHABLE_KEY = 'pk_test_abc';
-      process.env.CLERK_SECRET_KEY = 'sk_test_abc';
+      process.env.AUTH_SECRET = 'dev_secret_placeholder_32chars_xxxxxxxxxx';
       process.env.STRIPE_SECRET_KEY = 'sk_test_stripe';
 
       const { validateEnv } = await import('../env-validator');
@@ -29,8 +28,7 @@ describe('env-validator', () => {
 
     it('reports missing required variables', async () => {
       delete process.env.DATABASE_URL;
-      delete process.env.NEXT_PUBLIC_CLERK_PUBLISHABLE_KEY;
-      delete process.env.CLERK_SECRET_KEY;
+      delete process.env.AUTH_SECRET;
       delete process.env.STRIPE_SECRET_KEY;
 
       const { validateEnv } = await import('../env-validator');
@@ -42,8 +40,7 @@ describe('env-validator', () => {
 
     it('reports invalid format for DATABASE_URL', async () => {
       process.env.DATABASE_URL = 'mysql://invalid';
-      process.env.NEXT_PUBLIC_CLERK_PUBLISHABLE_KEY = 'pk_test_abc';
-      process.env.CLERK_SECRET_KEY = 'sk_test_abc';
+      process.env.AUTH_SECRET = 'dev_secret_placeholder_32chars_xxxxxxxxxx';
       process.env.STRIPE_SECRET_KEY = 'sk_test_stripe';
 
       const { validateEnv } = await import('../env-validator');
@@ -54,8 +51,7 @@ describe('env-validator', () => {
 
     it('throws when throwOnError is true and required vars missing', async () => {
       delete process.env.DATABASE_URL;
-      delete process.env.NEXT_PUBLIC_CLERK_PUBLISHABLE_KEY;
-      delete process.env.CLERK_SECRET_KEY;
+      delete process.env.AUTH_SECRET;
       delete process.env.STRIPE_SECRET_KEY;
 
       const { validateEnv } = await import('../env-validator');
@@ -64,8 +60,7 @@ describe('env-validator', () => {
 
     it('adds warnings for missing optional variables', async () => {
       process.env.DATABASE_URL = 'postgresql://user:pass@localhost:5432/db';
-      process.env.NEXT_PUBLIC_CLERK_PUBLISHABLE_KEY = 'pk_test_abc';
-      process.env.CLERK_SECRET_KEY = 'sk_test_abc';
+      process.env.AUTH_SECRET = 'dev_secret_placeholder_32chars_xxxxxxxxxx';
       process.env.STRIPE_SECRET_KEY = 'sk_test_stripe';
       delete process.env.SENTRY_DSN;
 

@@ -56,11 +56,11 @@ describe('ZNG-ACT-01 — Every action file authenticates', () => {
       if (!existsSync(path)) return
       const content = readFileSync(path, 'utf-8')
       const hasDirectAuth =
-        content.includes('auth()') && content.includes('@clerk/nextjs')
+        content.includes('auth()') && content.includes('@nzila/platform-auth')
       const hasOrgContext = content.includes('resolveOrgContext')
       expect(
         hasDirectAuth || hasOrgContext,
-        `${file} must call auth() (with @clerk/nextjs import) or resolveOrgContext()`,
+        `${file} must call auth() (with @nzila/platform-auth import) or resolveOrgContext()`,
       ).toBe(true)
     })
   }

@@ -1,5 +1,5 @@
 """
-Clerk webhook handler and auth views for Zonga backend.
+Auth webhook handler and views for Zonga backend.
 
 Webhook events handled:
   - user.created / user.updated / user.deleted
@@ -25,12 +25,12 @@ from rest_framework.response import Response
 
 from .models import OrganizationMembers, Organizations, OrgMembers
 
-logger = logging.getLogger("zonga.clerk-webhook")
+logger = logging.getLogger("zonga.auth-webhook")
 User = get_user_model()
 
 
 # =============================================================================
-# Clerk → DB role mapping
+# Auth provider → DB role mapping
 # =============================================================================
 
 CLERK_ROLE_MAP = {
@@ -40,9 +40,9 @@ CLERK_ROLE_MAP = {
 
 
 def _map_clerk_role(clerk_role: str) -> str:
-    """Map Clerk organization role to platform DB role.
+    """Map auth provider organization role to platform DB role.
 
-    Clerk sends roles like 'org:admin', 'org:secretary', 'org:member'.
+    Auth providers send roles like 'org:admin', 'org:secretary', 'org:member'.
     Platform DB uses 'org_admin', 'org_secretary', 'org_viewer'.
     """
     return CLERK_ROLE_MAP.get(clerk_role, "org_viewer")
@@ -53,11 +53,11 @@ def _map_clerk_role(clerk_role: str) -> str:
 # =============================================================================
 
 
-def _verify_clerk_webhook(request) -> bool:
-    """Verify Clerk webhook signature using Svix HMAC-SHA256."""
-    webhook_secret = getattr(settings, "CLERK_WEBHOOK_SECRET", "")
+def _verify_auth_webhook(request) -> bool:
+    """Verify auth webhook signature using Svix HMAC-SHA256."""
+    webhook_secret = getattr(settings, "AUTH_WEBHOOK_SECRET", "") or getattr(settings, "CLERK_WEBHOOK_SECRET", "")
     if not webhook_secret:
-        logger.error("CLERK_WEBHOOK_SECRET not configured")
+        logger.error("AUTH_WEBHOOK_SECRET not configured")
         return False
 
     svix_id = request.META.get("HTTP_SVIX_ID", "")
@@ -94,18 +94,18 @@ def _verify_clerk_webhook(request) -> bool:
 
 @csrf_exempt
 @require_POST
-def clerk_webhook(request):
-    """Handle Clerk webhook events for user/org/membership synchronization."""
+def auth_webhook(request):
+    """Handle auth provider webhook events (Entra / Clerk) for user/org/membership synchronization."""
     try:
-        if not _verify_clerk_webhook(request):
-            logger.warning("Invalid Clerk webhook signature")
+        if not _verify_auth_webhook(request):
+            logger.warning("Invalid auth webhook signature")
             return JsonResponse({"error": "Invalid signature"}, status=401)
 
         payload = json.loads(request.body)
         event_type = payload.get("type")
         data = payload.get("data", {})
 
-        logger.info(f"Received Clerk webhook: {event_type}")
+        logger.info(f"Received auth webhook: {event_type}")
 
         if event_type == "user.created":
             _handle_user_created(data)
@@ -129,8 +129,12 @@ def clerk_webhook(request):
         return JsonResponse({"status": "success"}, status=200)
 
     except Exception as e:
-        logger.exception(f"Clerk webhook error: {e}")
+        logger.exception(f"Auth webhook error: {e}")
         return JsonResponse({"error": str(e)}, status=500)
+
+
+# Backward compat alias
+clerk_webhook = auth_webhook
 
 
 # =============================================================================

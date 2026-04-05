@@ -65,17 +65,13 @@ const envSchema = z.object({
     .describe('Enable SSL for database connection (required for production)'),
   
   // ============== CRITICAL - Authentication ==============
-  CLERK_SECRET_KEY: z.string()
-    .min(10, 'CLERK_SECRET_KEY must be at least 10 characters'),
-  NEXT_PUBLIC_CLERK_PUBLISHABLE_KEY: z.string()
-    .min(10, 'CLERK_PUBLISHABLE_KEY must be at least 10 characters'),
-  NEXT_PUBLIC_CLERK_SIGN_IN_URL: z.string().default('/login').optional(),
-  NEXT_PUBLIC_CLERK_SIGN_UP_URL: z.string().default('/signup').optional(),
-  NEXT_PUBLIC_CLERK_AFTER_SIGN_IN_URL: z.string().default('/dashboard').optional(),
-  NEXT_PUBLIC_CLERK_AFTER_SIGN_UP_URL: z.string().default('/dashboard').optional(),
-  CLERK_COOKIE_DOMAIN: z.string().optional(),
-  CLERK_SESSION_TOKEN_LEEWAY: z.string().optional(),
-  CLERK_ROTATE_SESSION_INTERVAL: z.string().optional(),
+  AUTH_SECRET: z.string()
+    .min(10, 'AUTH_SECRET must be at least 10 characters'),
+  AZURE_AD_CLIENT_ID: z.string()
+    .min(10, 'AZURE_AD_CLIENT_ID must be at least 10 characters')
+    .optional(),
+  AZURE_AD_CLIENT_SECRET: z.string().min(10).optional(),
+  AZURE_AD_TENANT_ID: z.string().min(10).optional(),
 
   // ============== HIGH - Supabase (Alternative Database/Auth) ==============
   NEXT_PUBLIC_SUPABASE_URL: z.string().url('Invalid SUPABASE_URL').optional(),

@@ -123,7 +123,7 @@ function generateFiles(name: string, options: CreateVerticalOptions): GeneratedF
             test: 'vitest run',
           },
           dependencies: {
-            '@clerk/nextjs': '^6.0.0',
+            '@nzila/platform-auth': 'workspace:*',
             '@nzila/db': 'workspace:*',
             '@nzila/os-core': 'workspace:*',
             '@nzila/ai-sdk': 'workspace:*',
@@ -218,10 +218,10 @@ export default eslintConfig
       content: `/**
  * ${pascalName} — Next.js middleware
  *
- * Clerk authentication + rate limiting.
+ * Entra External ID authentication + rate limiting.
  * All API routes must also call authorize() from @nzila/os-core/policy.
  */
-import { clerkMiddleware, createRouteMatcher } from '@clerk/nextjs/server'
+import { clerkMiddleware, createRouteMatcher } from '@nzila/platform-auth/entra/server'
 import { NextResponse } from 'next/server'
 import { checkRateLimit, rateLimitHeaders } from '@nzila/os-core/rateLimit'
 

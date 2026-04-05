@@ -351,10 +351,10 @@ describe('TRADE_STRUCTURAL_CONTRACTS', () => {
     expect(content).toContain('tradeListings.id')
   })
 
-  it('resolve-org.ts exists and uses Clerk auth', () => {
+  it('resolve-org.ts exists and uses platform auth', () => {
     const resolveOrgPath = join(REPO_ROOT, 'apps', 'trade', 'lib', 'resolve-org.ts')
     const content = readFileSync(resolveOrgPath, 'utf-8')
-    expect(content).toContain('@clerk/nextjs/server')
+    expect(content).toContain('@nzila/platform-auth/entra/server')
     expect(content).toContain('resolveOrgContext')
   })
 

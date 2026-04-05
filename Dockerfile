@@ -1,7 +1,6 @@
 # ============================================
 # Base stage - pnpm setup
-# Use Debian slim for glibc-based OpenSSL 3 (Clerk middleware WebCrypto requires working legacy provider)
-# Node.js 20 LTS — OpenSSL 3.0 WebCrypto is stable with Clerk JWT verification
+# Node.js 20 LTS — OpenSSL 3.0 WebCrypto stable for OIDC JWT verification
 # ============================================
 FROM node:20-slim AS base
 
@@ -53,13 +52,11 @@ COPY --from=deps /app/packages ./packages
 # Copy source code
 COPY . .
 
-# Build args for Clerk (with defaults for builds without actual keys)
-# Placeholder must be valid base64 format or Clerk SDK rejects it at SSG prerender time
-ARG NEXT_PUBLIC_CLERK_PUBLISHABLE_KEY=pk_test_cGxhY2Vob2xkZXIuY2xlcmsuYWNjb3VudHMuZGV2JA
-ARG CLERK_SECRET_KEY=sk_test_build_placeholder
-ARG NEXT_PUBLIC_CLERK_IS_SATELLITE=false
-ARG NEXT_PUBLIC_CLERK_DOMAIN=
-ARG NEXT_PUBLIC_CLERK_SIGN_IN_URL=
+# Build args for auth (NextAuth / Entra External ID)
+# AUTH_SECRET must be set for NextAuth session encryption.
+ARG AUTH_SECRET=build_placeholder_secret_min_32_chars_xxxxxxxx
+ARG AZURE_AD_CLIENT_ID=
+ARG AZURE_AD_TENANT_ID=
 
 # Build args for cross-app navigation URLs (baked into Next.js client bundle)
 ARG NEXT_PUBLIC_WEB_URL=https://nzila-os-web.delightfulisland-0d503d3c.eastus.azurecontainerapps.io
@@ -72,12 +69,10 @@ ARG NEXT_PUBLIC_CONTROL_PLANE_URL=https://nzila-os-control-plane.delightfulislan
 ARG NEXT_PUBLIC_PLATFORM_ADMIN_URL=https://nzila-os-platform-admin.delightfulisland-0d503d3c.eastus.azurecontainerapps.io
 
 # Set as env vars for build
-# CLERK_SECRET_KEY is intentionally NOT set as ENV to avoid baking it into an image layer.
+# AUTH_SECRET is intentionally NOT set as ENV to avoid baking it into an image layer.
 # It is passed inline to the RUN command below (available during build, not persisted).
-ENV NEXT_PUBLIC_CLERK_PUBLISHABLE_KEY=$NEXT_PUBLIC_CLERK_PUBLISHABLE_KEY
-ENV NEXT_PUBLIC_CLERK_IS_SATELLITE=$NEXT_PUBLIC_CLERK_IS_SATELLITE
-ENV NEXT_PUBLIC_CLERK_DOMAIN=$NEXT_PUBLIC_CLERK_DOMAIN
-ENV NEXT_PUBLIC_CLERK_SIGN_IN_URL=$NEXT_PUBLIC_CLERK_SIGN_IN_URL
+ENV AZURE_AD_CLIENT_ID=$AZURE_AD_CLIENT_ID
+ENV AZURE_AD_TENANT_ID=$AZURE_AD_TENANT_ID
 ENV NEXT_PUBLIC_WEB_URL=$NEXT_PUBLIC_WEB_URL
 ENV NEXT_PUBLIC_CONSOLE_URL=$NEXT_PUBLIC_CONSOLE_URL
 ENV NEXT_PUBLIC_PARTNERS_URL=$NEXT_PUBLIC_PARTNERS_URL
@@ -91,8 +86,8 @@ ENV NEXT_PUBLIC_PLATFORM_ADMIN_URL=$NEXT_PUBLIC_PLATFORM_ADMIN_URL
 # Default: all apps. Override via --build-arg TURBO_FILTER for single-app builds.
 ARG TURBO_FILTER="--filter=@nzila/web --filter=@nzila/console --filter=@nzila/partners --filter=@nzila/union-eyes --filter=@nzila/abr --filter=@nzila/orchestrator-api --filter=@nzila/cfo --filter=@nzila/zonga --filter=@nzila/flow --filter=@nzila/agrimo --filter=@nzila/cora --filter=@nzila/trade --filter=@nzila/mobility --filter=@nzila/mobility-client-portal --filter=@nzila/control-plane --filter=@nzila/platform-admin --filter=@nzila/nacp-exams"
 ENV NODE_OPTIONS="--max-old-space-size=8192"
-# Pass CLERK_SECRET_KEY inline so it is available during `next build` but NOT baked into a layer.
-RUN CLERK_SECRET_KEY=${CLERK_SECRET_KEY} pnpm turbo build ${TURBO_FILTER} --concurrency=1
+# Pass AUTH_SECRET inline so it is available during `next build` but NOT baked into a layer.
+RUN AUTH_SECRET=${AUTH_SECRET} pnpm turbo build ${TURBO_FILTER} --concurrency=1
 # ============================================
 # Web production stage
 # ============================================

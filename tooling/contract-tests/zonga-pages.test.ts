@@ -46,7 +46,7 @@ describe('ZNG-PAGE-02 — Every page calls auth()', () => {
       if (!existsSync(pagePath)) return
       const content = readFileSync(pagePath, 'utf-8')
       expect(content).toContain('auth()')
-      expect(content).toContain('@clerk/nextjs')
+      expect(content).toContain('@nzila/platform-auth')
     })
   }
 })

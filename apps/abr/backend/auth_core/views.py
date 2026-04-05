@@ -20,24 +20,12 @@ from rest_framework.decorators import api_view, permission_classes
 from rest_framework.permissions import IsAuthenticated
 from rest_framework.response import Response
 
-from .models import (
-    AuditLogs,
-    Organizations,
-    Permissions,
-    Profiles,
-    RolePermissions,
-    Roles,
-    UserRoles,
-)
-from .serializers import (
-    AuditLogsSerializer,
-    OrganizationsSerializer,
-    PermissionsSerializer,
-    ProfilesSerializer,
-    RolePermissionsSerializer,
-    RolesSerializer,
-    UserRolesSerializer,
-)
+from .models import (AuditLogs, Organizations, Permissions, Profiles,
+                     RolePermissions, Roles, UserRoles)
+from .serializers import (AuditLogsSerializer, OrganizationsSerializer,
+                          PermissionsSerializer, ProfilesSerializer,
+                          RolePermissionsSerializer, RolesSerializer,
+                          UserRolesSerializer)
 
 logger = logging.getLogger(__name__)
 User = get_user_model()
@@ -179,28 +167,26 @@ class AuditLogsViewSet(viewsets.ModelViewSet):
 
 
 # =============================================================================
-# Clerk Webhook Handlers
+# Auth Provider Webhook Handlers
 # =============================================================================
 
 
 @csrf_exempt
 @require_POST
-def clerk_webhook(request):
-    """Handle Clerk webhook events for user synchronization.
+def auth_webhook(request):
+    """Handle auth provider webhooks (Entra / Clerk) for user synchronization.
 
-    Clerk sends webhooks for:
+    Supported webhook events:
     - user.created
     - user.updated
     - user.deleted
     - organization.created
     - organizationMembership.created/deleted
-
-    Webhook verification: https://clerk.com/docs/webhooks/overview
     """
     try:
         # Verify webhook signature
-        if not _verify_clerk_webhook(request):
-            logger.warning("Invalid Clerk webhook signature")
+        if not _verify_auth_webhook(request):
+            logger.warning("Invalid auth webhook signature")
             return JsonResponse({"error": "Invalid signature"}, status=401)
 
         # Parse webhook payload
@@ -208,7 +194,7 @@ def clerk_webhook(request):
         event_type = payload.get("type")
         data = payload.get("data", {})
 
-        logger.info(f"Received Clerk webhook: {event_type}")
+        logger.info(f"Received auth webhook: {event_type}")
 
         # Route to appropriate handler
         if event_type == "user.created":
@@ -229,15 +215,19 @@ def clerk_webhook(request):
         return JsonResponse({"status": "success"}, status=200)
 
     except Exception as e:
-        logger.exception(f"Clerk webhook error: {e}")
+        logger.exception(f"Auth webhook error: {e}")
         return JsonResponse({"error": str(e)}, status=500)
 
 
-def _verify_clerk_webhook(request) -> bool:
-    """Verify Clerk webhook signature using webhook secret."""
-    webhook_secret = getattr(settings, "CLERK_WEBHOOK_SECRET", "")
+# Backward compat alias
+clerk_webhook = auth_webhook
+
+
+def _verify_auth_webhook(request) -> bool:
+    """Verify auth webhook signature using webhook secret."""
+    webhook_secret = getattr(settings, "AUTH_WEBHOOK_SECRET", "") or getattr(settings, "CLERK_WEBHOOK_SECRET", "")
     if not webhook_secret:
-        logger.error("CLERK_WEBHOOK_SECRET not configured")
+        logger.error("AUTH_WEBHOOK_SECRET not configured")
         return False
 
     # Get signature from headers

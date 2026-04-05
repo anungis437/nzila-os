@@ -344,13 +344,16 @@ def _notify_report_ready(user_id: str, report_type: str, result_path: str) -> No
 
 def _get_user_email(user_id: str) -> str:
     """
-    Resolve a Clerk user's primary email address.
-    Returns an empty string if Clerk is not configured (build-safe).
+    Resolve a user's primary email address.
+    Returns an empty string if the auth provider API is not configured (build-safe).
+
+    TODO: Replace clerk_backend_api with Microsoft Graph API call once
+    Entra External ID migration is complete.
     """
     try:
-        from clerk_backend_api import Clerk  # type: ignore[import]
+        from clerk_backend_api import Clerk  # type: ignore[import]  # TODO: replace with msgraph
 
-        client = Clerk(bearer_auth=os.environ.get("CLERK_SECRET_KEY", ""))
+        client = Clerk(bearer_auth=os.environ.get(\"CLERK_SECRET_KEY\", \"\"))
         user = client.users.get(user_id=user_id)
         primary_id = user.primary_email_address_id
         for addr in user.email_addresses or []:

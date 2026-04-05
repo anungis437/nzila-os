@@ -149,7 +149,7 @@ DEFAULT_AUTO_FIELD = "django.db.models.BigAutoField"
 
 REST_FRAMEWORK = {
     "DEFAULT_AUTHENTICATION_CLASSES": [
-        "auth_core.authentication.ClerkAuthentication",
+        "auth_core.authentication.OIDCAuthentication",
         "rest_framework.authentication.SessionAuthentication",
     ],
     "DEFAULT_PERMISSION_CLASSES": [
@@ -176,13 +176,18 @@ CORS_ALLOWED_ORIGINS = [
 CORS_ALLOW_CREDENTIALS = True
 
 # =============================================================================
-# Clerk Authentication
+# Authentication — OIDC (Entra External ID / Clerk)
 # =============================================================================
 
-CLERK_JWKS_URL = os.environ.get("CLERK_JWKS_URL", "")
-CLERK_SECRET_KEY = os.environ.get("CLERK_SECRET_KEY", "")
+AUTH_JWKS_URL = os.environ.get("AUTH_JWKS_URL") or os.environ.get("CLERK_JWKS_URL", "")
+AUTH_SECRET = os.environ.get("AUTH_SECRET") or os.environ.get("CLERK_SECRET_KEY", "")
 CLERK_PUBLISHABLE_KEY = os.environ.get("NEXT_PUBLIC_CLERK_PUBLISHABLE_KEY", "")
-CLERK_WEBHOOK_SECRET = os.environ.get("CLERK_WEBHOOK_SECRET", "")
+AUTH_WEBHOOK_SECRET = os.environ.get("AUTH_WEBHOOK_SECRET") or os.environ.get("CLERK_WEBHOOK_SECRET", "")
+
+# Legacy env var names (backward compat)
+CLERK_JWKS_URL = AUTH_JWKS_URL
+CLERK_SECRET_KEY = AUTH_SECRET
+CLERK_WEBHOOK_SECRET = AUTH_WEBHOOK_SECRET
 
 # =============================================================================
 # Celery

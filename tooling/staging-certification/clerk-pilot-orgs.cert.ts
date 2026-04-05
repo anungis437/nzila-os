@@ -118,8 +118,9 @@ describe('CERT — Deploy Workflow Auth Vars', () => {
     expect(deployWf).toContain('SUPER_ADMIN_ORG_ID')
   })
 
-  it('deploy-union-eyes.yml passes CLERK_JWKS_URL for Django sidecar', () => {
-    expect(deployWf).toContain('CLERK_JWKS_URL')
+  it('deploy-union-eyes.yml passes JWKS_URL for Django sidecar', () => {
+    const hasJwksUrl = deployWf.includes('AUTH_JWKS_URL') || deployWf.includes('CLERK_JWKS_URL')
+    expect(hasJwksUrl, 'deploy workflow must set AUTH_JWKS_URL or CLERK_JWKS_URL').toBe(true)
   })
 })
 

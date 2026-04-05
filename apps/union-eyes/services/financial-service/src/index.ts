@@ -184,10 +184,10 @@ const authenticate = async (
     
     const token = authHeader.substring(7);
     
-    if (process.env.CLERK_SECRET_KEY) {
+    if (process.env.AUTH_SECRET || process.env.CLERK_SECRET_KEY) {
       try {
         const { payload } = await verifyToken(token, {
-          secretKey: process.env.CLERK_SECRET_KEY,
+          secretKey: process.env.AUTH_SECRET || process.env.CLERK_SECRET_KEY!,
         });
 
         // Type assertion for JWT payload

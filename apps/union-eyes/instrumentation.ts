@@ -61,7 +61,7 @@ export async function register() {
         // Fail-fast for truly critical variables — without these the app
         // cannot serve any request (no DB, no auth).  Other missing vars
         // only degrade optional features and are handled gracefully.
-        const critical = ['DATABASE_URL', 'CLERK_SECRET_KEY'];
+        const critical = ['DATABASE_URL', 'AUTH_SECRET'];
         const missingCritical = critical.filter(k => !process.env[k]);
         if (missingCritical.length > 0) {
           const msg = `FATAL: missing critical env vars: ${missingCritical.join(', ')}`;

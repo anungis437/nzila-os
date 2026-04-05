@@ -109,7 +109,7 @@ describe('P1-03 — CFO create pages exist', () => {
 
     it(`${label} page is auth-gated`, () => {
       const src = readSafe(fullPath)
-      expect(src).toContain("from '@clerk/nextjs/server'")
+      expect(src).toContain("from '@nzila/platform-auth/entra/server'")
       expect(src).toContain('redirect')
     })
 
@@ -173,7 +173,7 @@ describe('P1-05 — Zonga detail pages exist', () => {
     })
 
     it(`${label} page is auth-gated`, () => {
-      expect(src).toContain("from '@clerk/nextjs/server'")
+      expect(src).toContain("from '@nzila/platform-auth/entra/server'")
     })
 
     it(`${label} page reads params.id`, () => {

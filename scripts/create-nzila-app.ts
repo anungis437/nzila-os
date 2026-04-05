@@ -12,7 +12,7 @@
  *   npx create-nzila-app --list
  *
  * Templates:
- *   nextjs-app          Next.js app with Clerk auth, Tailwind v4, OTel
+ *   nextjs-app          Next.js app with Entra auth, Tailwind v4, OTel
  *   fastify-service     Fastify API service with OTel + rate limiting
  *   django-backend      Django REST Framework backend
  *   integration-package Shared integration package
@@ -41,7 +41,7 @@ const TEMPLATES: TemplateInfo[] = [
   {
     id: 'nextjs-app',
     name: 'Next.js App',
-    description: 'Next.js app with Clerk auth, Tailwind CSS v4, OTel instrumentation, and evidence-first governance',
+    description: 'Next.js app with Entra auth, Tailwind CSS v4, OTel instrumentation, and evidence-first governance',
     targetDir: 'apps',
     port: 3012,
   },
@@ -124,7 +124,7 @@ function scaffoldNextJsApp(name: string, port: number): void {
       clean: 'rm -rf .next .turbo node_modules',
     },
     dependencies: {
-      '@clerk/nextjs': '^6.12.0',
+      '@nzila/platform-auth': 'workspace:*',
       '@nzila/os-core': 'workspace:*',
       '@nzila/ui': 'workspace:*',
       '@nzila/platform-observability': 'workspace:*',
@@ -192,8 +192,10 @@ export default nextConfig
 
   // .env.example
   writeFileSync(join(appDir, '.env.example'), `# ${name} environment variables
-NEXT_PUBLIC_CLERK_PUBLISHABLE_KEY=
-CLERK_SECRET_KEY=
+AUTH_SECRET=
+AZURE_AD_CLIENT_ID=
+AZURE_AD_CLIENT_SECRET=
+AZURE_AD_TENANT_ID=
 `);
 
   // app/layout.tsx

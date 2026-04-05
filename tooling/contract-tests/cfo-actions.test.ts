@@ -59,7 +59,7 @@ describe('CFO-ACT-01 — Every action file calls auth()', () => {
       if (!existsSync(path)) return
       const content = readFileSync(path, 'utf-8')
       expect(content).toContain('auth()')
-      expect(content).toContain('@clerk/nextjs')
+      expect(content).toContain('@nzila/platform-auth')
     })
   }
 })

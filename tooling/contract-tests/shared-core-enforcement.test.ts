@@ -185,16 +185,15 @@ describe('CORE-004: Auth guard modules use platform-auth primitives', () => {
   ]
 
   for (const app of APPS_WITH_GUARDS) {
-    it(`${app}/lib/api-guards.ts imports from @nzila/platform-auth or @clerk/nextjs`, () => {
+    it(`${app}/lib/api-guards.ts imports from @nzila/platform-auth`, () => {
       const guardPath = join(APPS_DIR, app, 'lib', 'api-guards.ts')
       if (!existsSync(guardPath)) return // no guard = no violation
       const src = readSafe(guardPath)
       const usesPlatformAuth =
         src.includes('@nzila/platform-auth') ||
-        src.includes('@clerk/nextjs') ||
         src.includes('currentUser') ||
         src.includes('auth()')
-      expect(usesPlatformAuth, `${app} api-guards must use @nzila/platform-auth or Clerk`).toBe(true)
+      expect(usesPlatformAuth, `${app} api-guards must use @nzila/platform-auth`).toBe(true)
     })
   }
 })

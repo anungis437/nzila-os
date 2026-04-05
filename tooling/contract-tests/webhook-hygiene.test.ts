@@ -97,8 +97,7 @@ describe('WHK-003: api-guards.ts should reference @nzila/platform-auth', () => {
 
       const usesSharedAuth =
         src.includes('@nzila/platform-auth') ||
-        src.includes('@nzila/db') ||
-        src.includes('@clerk/nextjs/server')
+        src.includes('@nzila/db')
 
       // All guard files must at least use platform auth primitives
       // This is a progressive enforcement flag

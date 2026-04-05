@@ -31,13 +31,17 @@ const baseSchema = z.object({
 })
 
 // ---------------------------------------------------------------------------
-// Clerk auth mixin (re-used across authenticated Next.js apps)
+// Auth mixin — Entra External ID (re-used across authenticated Next.js apps)
 // ---------------------------------------------------------------------------
-const clerkMixin = {
-  CLERK_SECRET_KEY: z.string().startsWith('sk_'),
-  NEXT_PUBLIC_CLERK_PUBLISHABLE_KEY: z.string().startsWith('pk_'),
-  CLERK_WEBHOOK_SECRET: z.string().startsWith('whsec_').optional(),
+const authMixin = {
+  AUTH_SECRET: z.string().min(10),
+  AZURE_AD_CLIENT_ID: z.string().min(1).optional(),
+  AZURE_AD_CLIENT_SECRET: z.string().min(1).optional(),
+  AZURE_AD_TENANT_ID: z.string().min(1).optional(),
 }
+
+/** @deprecated Use authMixin — kept for backward compat with env files still using CLERK_ names */
+const clerkMixin = authMixin
 
 // ---------------------------------------------------------------------------
 // App-specific extensions

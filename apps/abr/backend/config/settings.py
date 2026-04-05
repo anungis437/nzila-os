@@ -48,7 +48,7 @@ MIDDLEWARE = [
     'django.middleware.common.CommonMiddleware',
     'django.middleware.csrf.CsrfViewMiddleware',
     'django.contrib.auth.middleware.AuthenticationMiddleware',
-    'auth_core.middleware.ClerkJWTMiddleware',
+    'auth_core.middleware.OIDCJWTMiddleware',
     'auth_core.middleware.OrganizationIsolationMiddleware',
     'auth_core.middleware.AuditLogMiddleware',
     'django.contrib.messages.middleware.MessageMiddleware',
@@ -108,11 +108,16 @@ STATIC_ROOT = BASE_DIR / 'staticfiles'
 # Default primary key field type
 DEFAULT_AUTO_FIELD = 'django.db.models.BigAutoField'
 
-# Clerk Authentication
-CLERK_JWKS_URL = os.environ.get('CLERK_JWKS_URL')
-CLERK_SECRET_KEY = os.environ.get('CLERK_SECRET_KEY')
+# Authentication — OIDC (Entra External ID / Clerk)
+AUTH_JWKS_URL = os.environ.get('AUTH_JWKS_URL') or os.environ.get('CLERK_JWKS_URL')
+AUTH_SECRET = os.environ.get('AUTH_SECRET') or os.environ.get('CLERK_SECRET_KEY')
+AUTH_WEBHOOK_SECRET = os.environ.get('AUTH_WEBHOOK_SECRET') or os.environ.get('CLERK_WEBHOOK_SECRET')
+
+# Legacy env var names (backward compat)
+CLERK_JWKS_URL = AUTH_JWKS_URL
+CLERK_SECRET_KEY = AUTH_SECRET
 CLERK_PUBLISHABLE_KEY = os.environ.get('CLERK_PUBLISHABLE_KEY')
-CLERK_WEBHOOK_SECRET = os.environ.get('CLERK_WEBHOOK_SECRET')
+CLERK_WEBHOOK_SECRET = AUTH_WEBHOOK_SECRET
 
 # Redis Cache (for JWT verification)
 CACHES = {
@@ -130,7 +135,7 @@ CACHES = {
 # REST Framework
 REST_FRAMEWORK = {
     'DEFAULT_AUTHENTICATION_CLASSES': [
-        'auth_core.authentication.ClerkAuthentication',
+        'auth_core.authentication.OIDCAuthentication',
         'auth_core.authentication.ClerkAPIKeyAuthentication',
         'rest_framework.authentication.SessionAuthentication',
     ],
