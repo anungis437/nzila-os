@@ -42,6 +42,7 @@ function detectLocale(request: Request): Locale {
 const RATE_LIMIT_MAX = Number(process.env.RATE_LIMIT_MAX ?? '200')
 const RATE_LIMIT_WINDOW_MS = Number(process.env.RATE_LIMIT_WINDOW_MS ?? '60000')
 
+// eslint-disable-next-line @typescript-eslint/no-explicit-any
 export default auth(async (request: any) => {
   // ── Rate limiting (skip in dev — HMR triggers too many requests) ──────
   if (process.env.NODE_ENV !== 'development') {

@@ -11,6 +11,7 @@ const intlMiddleware = createIntlMiddleware({
 
 const publicPaths = ['/', '/sign-in', '/sign-up', '/api/health', '/api/auth']
 
+// eslint-disable-next-line @typescript-eslint/no-explicit-any
 export default auth((req: any) => {
   const { pathname } = req.nextUrl
 
