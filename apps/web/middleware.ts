@@ -1,15 +1,36 @@
 import { clerkMiddleware } from '@clerk/nextjs/server'
 import { NextResponse } from 'next/server'
 import { checkRateLimit, rateLimitHeaders } from '@nzila/os-core/rateLimit'
-import createIntlMiddleware from 'next-intl/middleware'
-import { locales, defaultLocale } from './lib/locales'
+import { locales, defaultLocale, type Locale } from './lib/locales'
 
-const intlMiddleware = createIntlMiddleware({
-  locales,
-  defaultLocale,
-  localePrefix: 'never',
-  localeDetection: true,
-})
+/**
+ * Detect locale from NEXT_LOCALE cookie or Accept-Language header.
+ * Sets NEXT_LOCALE cookie on the response so next-intl's getRequestConfig
+ * can resolve the locale without URL-based routing (no [locale] segment).
+ */
+function detectLocale(request: Request): Locale {
+  // 1. Explicit cookie
+  const cookieHeader = request.headers.get('cookie') ?? ''
+  const match = cookieHeader.match(/NEXT_LOCALE=([^;]+)/)
+  if (match) {
+    const fromCookie = match[1] as Locale
+    if (locales.includes(fromCookie)) return fromCookie
+  }
+
+  // 2. Accept-Language negotiation (first match wins)
+  const acceptLang = request.headers.get('accept-language') ?? ''
+  for (const part of acceptLang.split(',')) {
+    const tag = part.split(';')[0].trim().toLowerCase()
+    // Exact match (en-ca → en-CA)
+    const exact = locales.find((l) => l.toLowerCase() === tag)
+    if (exact) return exact
+    // Prefix match (fr → fr-CA)
+    const prefix = locales.find((l) => l.toLowerCase().startsWith(tag))
+    if (prefix) return prefix
+  }
+
+  return defaultLocale
+}
 
 /**
  * Public web site — all routes are public.
@@ -72,16 +93,13 @@ export default clerkMiddleware(async (_auth, request) => {
   const requestId =
     request.headers.get('x-request-id') ?? crypto.randomUUID()
 
-  // i18n locale detection (cookie / Accept-Language)
+  // Locale detection — set cookie so getRequestConfig can read it (no URL rewrite)
   if (!request.nextUrl.pathname.startsWith('/api')) {
-    const intlResponse = intlMiddleware(request)
-    if (intlResponse instanceof NextResponse) {
-      intlResponse.headers.set('x-request-id', requestId)
-      return intlResponse
-    }
-    const nr = NextResponse.next({ headers: new Headers((intlResponse as Response).headers) })
-    nr.headers.set('x-request-id', requestId)
-    return nr
+    const locale = detectLocale(request)
+    const response = NextResponse.next()
+    response.headers.set('x-request-id', requestId)
+    response.cookies.set('NEXT_LOCALE', locale, { path: '/', sameSite: 'lax' })
+    return response
   }
 
   const response = NextResponse.next()

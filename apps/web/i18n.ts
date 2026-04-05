@@ -1,4 +1,5 @@
 import { getRequestConfig } from 'next-intl/server';
+import { cookies } from 'next/headers';
 import { locales, defaultLocale, type Locale } from './lib/locales';
 
 export { locales, defaultLocale, type Locale } from './lib/locales';
@@ -33,7 +34,19 @@ function mergeMessages(
 }
 
 export default getRequestConfig(async ({ requestLocale }) => {
-  const requested = await requestLocale;
+  let requested = await requestLocale;
+
+  // Without next-intl middleware routing, requestLocale may be undefined.
+  // Fall back to the NEXT_LOCALE cookie set by our Clerk middleware.
+  if (!requested) {
+    try {
+      const cookieStore = await cookies();
+      requested = cookieStore.get('NEXT_LOCALE')?.value;
+    } catch {
+      // cookies() unavailable during build / static generation — use default
+    }
+  }
+
   const validLocale = requested && locales.includes(requested as Locale) ? requested : defaultLocale;
 
   const localeMessages = (await import(`./messages/${validLocale}.json`)).default;
