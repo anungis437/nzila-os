@@ -60,6 +60,7 @@ const EXEMPT_ROUTES = new Set([
   'ready',          // Readiness probe (k8s/infra)
   'whop/unauthenticated', // Payment-first checkout (no auth by design)
   'proof-center/public-key', // System-wide public key (not org-specific)
+  'contact',        // Public contact/demo-request form (marketing)
 ])
 
 function isExemptRoute(filePath: string): boolean {
