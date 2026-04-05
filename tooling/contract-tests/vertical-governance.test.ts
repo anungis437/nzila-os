@@ -145,6 +145,7 @@ describe('INV-11 — Every API route has authorization', () => {
 
   // Routes that are explicitly public
   const PUBLIC_ROUTE_PATTERNS = [
+    '/api/auth',                // NextAuth.js catch-all (OAuth callbacks, CSRF, session)
     '/api/health',
     '/api/webhooks',
     '/api/public',
