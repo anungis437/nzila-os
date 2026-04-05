@@ -122,6 +122,11 @@ const envSchema = z.object({
   EMAIL_FROM: z.string().email('Invalid EMAIL_FROM').optional(),
   EMAIL_REPLY_TO: z.string().email('Invalid EMAIL_REPLY_TO').optional(),
   RESEND_API_KEY: z.string().optional(),
+  RESEND_FROM_EMAIL: z.string().email('Invalid RESEND_FROM_EMAIL').optional(),
+
+  // ============== MEDIUM - CRM (HubSpot) ==============
+  HUBSPOT_API_KEY: z.string().optional()
+    .describe('HubSpot private app access token for CRM sync'),
   
   // ============== MEDIUM - SMS Notifications (Optional) ==============
   TWILIO_ACCOUNT_SID: z.string()
@@ -197,7 +202,6 @@ const envSchema = z.object({
 
   // ============== MEDIUM - Email Templates ==============
   ORGANIZATION_NAME: z.string().default('Union Eyes').optional(),
-  RESEND_FROM_EMAIL: z.string().optional(),
 
   // ============== MEDIUM - Analytics & Monitoring ==============
   SENTRY_DSN: z.string().optional(),

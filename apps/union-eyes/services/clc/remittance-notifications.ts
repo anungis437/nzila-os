@@ -38,7 +38,7 @@ import {
   organizationContacts 
 } from '@/db/schema';
 import { eq, and, lte, isNull } from 'drizzle-orm';
-import { Resend } from 'resend';
+import { getResendClient as getCanonicalResendClient, getFromEmail } from '@/lib/email-service';
 
 // ============================================================================
 // TYPE DEFINITIONS
@@ -97,14 +97,7 @@ type NotificationType =
 // CONFIGURATION
 // ============================================================================
 
-// Lazy initialize Resend client
-let resend: Resend | null = null;
-function getResendClient() {
-  if (!resend) {
-    resend = new Resend(process.env.RESEND_API_KEY);
-  }
-  return resend;
-}
+const FROM_EMAIL = getFromEmail('CLC Notifications');
 
 const NOTIFICATION_CONFIG = {
   overdue: {
@@ -120,7 +113,6 @@ const NOTIFICATION_CONFIG = {
   }
 };
 
-const FROM_EMAIL = process.env.NOTIFICATION_FROM_EMAIL || 'notifications@clc.ca';
 const _FROM_SMS = process.env.NOTIFICATION_FROM_PHONE || '+15551234567';
 const EXECUTIVE_EMAIL = process.env.EXECUTIVE_EMAIL || 'executive@clc.ca';
 
@@ -844,7 +836,11 @@ async function sendEmail(
   html: string
 ): Promise<{ success: boolean; messageId?: string; error?: string }> {
   try {
-    const result = await getResendClient().emails.send({
+    const client = getCanonicalResendClient();
+    if (!client) {
+      return { success: false, error: 'Resend not configured' };
+    }
+    const result = await client.emails.send({
       from: FROM_EMAIL,
       to,
       subject,

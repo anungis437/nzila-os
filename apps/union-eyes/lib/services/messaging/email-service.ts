@@ -48,6 +48,7 @@ export interface SendResult {
 }
 
 import { logger } from '@/lib/logger';
+import { getResendClient, getFromEmail } from '@/lib/email-service';
 
 export interface EmailProvider {
   name: string;
@@ -137,58 +138,40 @@ export class EmailService {
 
 export class ResendAdapter implements EmailProvider {
   name = 'resend';
-  private apiKey: string;
   private defaultFrom: string;
 
-  constructor(apiKey: string, defaultFrom: string = 'noreply@unioneyes.app') {
-    this.apiKey = apiKey;
-    this.defaultFrom = defaultFrom;
+  constructor(_apiKey?: string, defaultFrom?: string) {
+    this.defaultFrom = defaultFrom || getFromEmail();
   }
 
   async send(message: EmailMessage): Promise<SendResult> {
     try {
-      // Resend API call
-      const response = await fetch('https://api.resend.com/emails', {
-        method: 'POST',
-        headers: {
-          'Authorization': `Bearer ${this.apiKey}`,
-          'Content-Type': 'application/json',
-        },
-        body: JSON.stringify({
-          from: message.from || this.defaultFrom,
-          to: Array.isArray(message.to) ? message.to : [message.to],
-          subject: message.subject,
-          text: message.body,
-          html: message.html,
-          reply_to: message.replyTo,
-          cc: message.cc,
-          bcc: message.bcc,
-          attachments: message.attachments?.map(att => ({
-            filename: att.filename,
-            content: att.content.toString('base64'),
-            content_type: att.contentType,
-          })),
-          headers: message.headers,
-          tags: message.metadata ? [message.metadata] : undefined,
-        }),
-      });
-
-      if (!response.ok) {
-        const error = await response.json();
-        return {
-          success: false,
-          error: error.message || `HTTP ${response.status}`,
-          provider: this.name,
-        };
+      const client = getResendClient();
+      if (!client) {
+        return { success: false, error: 'Resend not configured', provider: this.name };
       }
 
-      const data = await response.json();
-      
-      return {
-        success: true,
-        messageId: data.id,
-        provider: this.name,
-      };
+      const { data, error } = await client.emails.send({
+        from: message.from || this.defaultFrom,
+        to: Array.isArray(message.to) ? message.to : [message.to],
+        subject: message.subject,
+        text: message.body,
+        html: message.html,
+        replyTo: message.replyTo,
+        cc: message.cc ? (Array.isArray(message.cc) ? message.cc : [message.cc]) : undefined,
+        bcc: message.bcc ? (Array.isArray(message.bcc) ? message.bcc : [message.bcc]) : undefined,
+        attachments: message.attachments?.map(att => ({
+          filename: att.filename,
+          content: att.content,
+        })),
+        headers: message.headers,
+      });
+
+      if (error) {
+        return { success: false, error: error.message || 'Resend send error', provider: this.name };
+      }
+
+      return { success: true, messageId: data?.id, provider: this.name };
     } catch (error) {
       return {
         success: false,
@@ -199,30 +182,16 @@ export class ResendAdapter implements EmailProvider {
   }
 
   async sendBatch(messages: EmailMessage[]): Promise<SendResult[]> {
-    // Resend supports batch sending
     const results: SendResult[] = [];
-    
     for (const message of messages) {
       const result = await this.send(message);
       results.push(result);
     }
-    
     return results;
   }
 
   async verifyConnection(): Promise<boolean> {
-    try {
-      const response = await fetch('https://api.resend.com/emails', {
-        method: 'GET',
-        headers: {
-          'Authorization': `Bearer ${this.apiKey}`,
-        },
-      });
-      
-      return response.ok;
-    } catch {
-      return false;
-    }
+    return getResendClient() !== null;
   }
 }
 
@@ -338,28 +307,29 @@ export class SendGridAdapter implements EmailProvider {
  */
 export function createEmailServiceFromEnv(): EmailService {
   const provider = process.env.EMAIL_PROVIDER || 'resend';
-  const apiKey = process.env.EMAIL_API_KEY || '';
-  const defaultFrom = process.env.EMAIL_FROM || 'noreply@unioneyes.app';
+  const defaultFrom = getFromEmail();
 
   let primaryProvider: EmailProvider;
   let fallbackProvider: EmailProvider | undefined;
 
   switch (provider.toLowerCase()) {
     case 'resend':
-      primaryProvider = new ResendAdapter(apiKey, defaultFrom);
+      primaryProvider = new ResendAdapter(undefined, defaultFrom);
       // Optional: Configure SendGrid as fallback
       if (process.env.SENDGRID_API_KEY) {
         fallbackProvider = new SendGridAdapter(process.env.SENDGRID_API_KEY, defaultFrom);
       }
       break;
 
-    case 'sendgrid':
-      primaryProvider = new SendGridAdapter(apiKey, defaultFrom);
+    case 'sendgrid': {
+      const sgKey = process.env.SENDGRID_API_KEY || '';
+      primaryProvider = new SendGridAdapter(sgKey, defaultFrom);
       // Optional: Configure Resend as fallback
       if (process.env.RESEND_API_KEY) {
-        fallbackProvider = new ResendAdapter(process.env.RESEND_API_KEY, defaultFrom);
+        fallbackProvider = new ResendAdapter(undefined, defaultFrom);
       }
       break;
+    }
 
     default:
       throw new Error(`Unsupported email provider: ${provider}`);

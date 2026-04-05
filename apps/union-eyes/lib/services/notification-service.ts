@@ -8,8 +8,8 @@
 
 import { db } from "@/db";
 import { v4 as uuid } from "uuid";
-import { Resend } from "resend";
 import { logger } from "@/lib/logger";
+import { getResendClient, getFromEmail } from "@/lib/email-service";
 import { createAuditLog } from "./audit-service";
 import {
   notificationQueue,
@@ -158,15 +158,9 @@ function stripHtml(html: string): string {
 
 export class ResendEmailProvider implements NotificationProvider {
   name = "resend";
-  private apiKey: string;
-  private client: Resend;
 
-  constructor(apiKey: string = process.env.RESEND_API_KEY || "") {
-    if (!apiKey) {
-      throw new Error("Resend API key not configured");
-    }
-    this.apiKey = apiKey;
-    this.client = new Resend(this.apiKey);
+  constructor() {
+    // Uses canonical getResendClient() — no local Resend instantiation
   }
 
   async send(payload: NotificationPayload): Promise<NotificationResponse> {
@@ -175,12 +169,17 @@ export class ResendEmailProvider implements NotificationProvider {
         throw new Error("Recipient email not provided");
       }
 
-      const fromEmail = process.env.EMAIL_FROM || 'noreply@unioneyes.app';
+      const client = getResendClient();
+      if (!client) {
+        throw new Error("Resend API key not configured");
+      }
+
+      const fromEmail = getFromEmail();
       const replyTo = process.env.EMAIL_REPLY_TO;
       const subject = payload.subject || 'Notification';
       const htmlBody = payload.htmlBody || `<p>${payload.body}</p>`;
 
-      const { data, error } = await this.client.emails.send({
+      const { data, error } = await client.emails.send({
         from: fromEmail,
         to: [payload.recipientEmail],
         subject,
@@ -512,11 +511,7 @@ export class NotificationService {
       const providerType = process.env.EMAIL_PROVIDER || (process.env.RESEND_API_KEY ? 'resend' : 'sendgrid');
 
       if (providerType === 'resend') {
-        const apiKey = process.env.RESEND_API_KEY;
-        if (!apiKey) {
-          throw new Error("RESEND_API_KEY environment variable not set");
-        }
-        this.providers.set("email", new ResendEmailProvider(apiKey));
+        this.providers.set("email", new ResendEmailProvider());
         logger.info("Resend email provider initialized successfully");
       } else if (providerType === 'sendgrid') {
         const apiKey = process.env.SENDGRID_API_KEY;

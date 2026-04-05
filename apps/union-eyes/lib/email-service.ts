@@ -1,7 +1,11 @@
 /**
- * Email Service for Union Claims
- * 
- * Handles sending transactional emails via Resend
+ * Email Service — Canonical Resend Integration
+ *
+ * ALL email sending in Union-Eyes goes through this module.
+ * Other services should import { getResendClient, getFromEmail, sendEmail }
+ * instead of creating their own Resend instances.
+ *
+ * Lazy-initialised — gracefully degrades when RESEND_API_KEY is not set.
  */
 
 import { Resend } from 'resend';
@@ -9,16 +13,29 @@ import { logger } from '@/lib/logger';
 
 // Lazy initialize Resend client to avoid errors during build
 let resend: Resend | null = null;
-function getResendClient() {
+
+/**
+ * Get the shared Resend client. Returns null if RESEND_API_KEY is not set.
+ * All email-sending code should use this instead of creating new Resend instances.
+ */
+export function getResendClient(): Resend | null {
   if (!resend && process.env.RESEND_API_KEY) {
     resend = new Resend(process.env.RESEND_API_KEY);
   }
   return resend;
 }
 
+/**
+ * Get the configured sender address. Reads RESEND_FROM_EMAIL, EMAIL_FROM,
+ * or falls back to a default. Accepts an optional label override.
+ */
+export function getFromEmail(label?: string): string {
+  const address = process.env.RESEND_FROM_EMAIL || process.env.EMAIL_FROM || 'noreply@unioneyes.app';
+  return label ? `${label} <${address}>` : address;
+}
+
 // Email configuration
-const FROM_EMAIL = process.env.EMAIL_FROM || 'noreply@unionclaims.com';
-const REPLY_TO_EMAIL = process.env.EMAIL_REPLY_TO || 'support@unionclaims.com';
+const REPLY_TO_EMAIL = process.env.EMAIL_REPLY_TO || 'support@unioneyes.app';
 
 export interface EmailRecipient {
   email: string;
@@ -58,7 +75,7 @@ export async function sendEmail({
 
     // Send email
     const { data, error } = await client.emails.send({
-      from: FROM_EMAIL,
+      from: getFromEmail(),
       to: to.map(recipient => `${recipient.name} <${recipient.email}>`),
       subject,
       html,

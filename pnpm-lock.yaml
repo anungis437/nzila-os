@@ -1626,6 +1626,9 @@ importers:
       '@nzila/blob':
         specifier: workspace:*
         version: link:../../packages/blob
+      '@nzila/crm-hubspot':
+        specifier: workspace:*
+        version: link:../../packages/crm-hubspot
       '@nzila/cupe-vocabulary':
         specifier: workspace:*
         version: link:../../packages/cupe-vocabulary
@@ -2158,6 +2161,9 @@ importers:
       '@heroicons/react':
         specifier: ^2.2.0
         version: 2.2.0(react@19.2.4)
+      '@nzila/crm-hubspot':
+        specifier: workspace:*
+        version: link:../../packages/crm-hubspot
       '@nzila/os-core':
         specifier: workspace:*
         version: link:../../packages/os-core

@@ -9,11 +9,9 @@
  * - Payment reminders
  */
 
-import { Resend } from 'resend';
 import { Decimal } from 'decimal.js';
 import { logger } from '@/lib/logger';
-
-const resend = new Resend(process.env.RESEND_API_KEY);
+import { getResendClient, getFromEmail } from '@/lib/email-service';
 
 export interface PaymentConfirmationEmail {
   to: string;
@@ -56,8 +54,10 @@ export class FinancialEmailService {
    */
   static async sendPaymentConfirmation(params: PaymentConfirmationEmail): Promise<void> {
     try {
-      await resend.emails.send({
-        from: 'Union Eyes <payments@unioneyes.com>',
+      const client = getResendClient();
+      if (!client) { logger.warn('Resend not configured – payment confirmation email skipped'); return; }
+      await client.emails.send({
+        from: getFromEmail('Union Eyes'),
         to: params.to,
         subject: `Payment Confirmed - ${params.currency} ${params.amount.toFixed(2)}`,
         html: this.generatePaymentConfirmationHTML(params),
@@ -78,8 +78,10 @@ export class FinancialEmailService {
    */
   static async sendPaymentFailure(params: PaymentFailureEmail): Promise<void> {
     try {
-      await resend.emails.send({
-        from: 'Union Eyes <payments@unioneyes.com>',
+      const client = getResendClient();
+      if (!client) { logger.warn('Resend not configured – payment failure email skipped'); return; }
+      await client.emails.send({
+        from: getFromEmail('Union Eyes'),
         to: params.to,
         subject: `Payment Failed - Action Required`,
         html: this.generatePaymentFailureHTML(params),
@@ -97,8 +99,10 @@ export class FinancialEmailService {
    */
   static async sendInvoice(params: InvoiceEmail): Promise<void> {
     try {
-      await resend.emails.send({
-        from: 'Union Eyes <invoices@unioneyes.com>',
+      const client = getResendClient();
+      if (!client) { logger.warn('Resend not configured – invoice email skipped'); return; }
+      await client.emails.send({
+        from: getFromEmail('Union Eyes'),
         to: params.to,
         subject: `Invoice ${params.invoiceNumber} - Due ${params.dueDate.toLocaleDateString()}`,
         html: this.generateInvoiceHTML(params),
@@ -128,8 +132,10 @@ export class FinancialEmailService {
     receiptPdfUrl?: string;
   }): Promise<void> {
     try {
-      await resend.emails.send({
-        from: 'Union Eyes <receipts@unioneyes.com>',
+      const client = getResendClient();
+      if (!client) { logger.warn('Resend not configured – receipt email skipped'); return; }
+      await client.emails.send({
+        from: getFromEmail('Union Eyes'),
         to: params.to,
         subject: `Receipt #${params.receiptNumber}`,
         html: `
@@ -171,8 +177,10 @@ export class FinancialEmailService {
         ? `Payment Overdue: ${params.daysOverdue} days - Action Required`
         : `Payment Reminder - Due in ${Math.abs(params.daysOverdue)} days`;
 
-      await resend.emails.send({
-        from: 'Union Eyes <payments@unioneyes.com>',
+      const client = getResendClient();
+      if (!client) { logger.warn('Resend not configured – payment reminder skipped'); return; }
+      await client.emails.send({
+        from: getFromEmail('Union Eyes'),
         to: params.to,
         subject,
         html: `
@@ -208,8 +216,10 @@ export class FinancialEmailService {
     nextChargeDate: Date;
   }): Promise<void> {
     try {
-      await resend.emails.send({
-        from: 'Union Eyes <payments@unioneyes.com>',
+      const client = getResendClient();
+      if (!client) { logger.warn('Resend not configured – autopay confirmation skipped'); return; }
+      await client.emails.send({
+        from: getFromEmail('Union Eyes'),
         to: params.to,
         subject: 'AutoPay Successfully Set Up',
         html: `
@@ -241,8 +251,10 @@ export class FinancialEmailService {
     updatePaymentUrl: string;
   }): Promise<void> {
     try {
-      await resend.emails.send({
-        from: 'Union Eyes <payments@unioneyes.com>',
+      const client = getResendClient();
+      if (!client) { logger.warn('Resend not configured – autopay disabled email skipped'); return; }
+      await client.emails.send({
+        from: getFromEmail('Union Eyes'),
         to: params.to,
         subject: 'AutoPay Disabled - Action Required',
         html: `

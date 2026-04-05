@@ -38,6 +38,11 @@ vi.mock('resend', () => ({
   },
 }));
 
+vi.mock('@/lib/email-service', () => ({
+  getResendClient: () => ({ emails: { send: mocks.mockResendSend } }),
+  getFromEmail: (label?: string) => label ? `${label} <noreply@unioneyes.app>` : 'noreply@unioneyes.app',
+}));
+
 vi.mock('@/lib/logger', () => ({
   logger: { info: vi.fn(), warn: vi.fn(), error: vi.fn(), debug: vi.fn() },
 }));
@@ -141,13 +146,9 @@ describe('ResendEmailProvider', () => {
     mocks.mockUuid.mockReturnValue('test-uuid-1');
   });
 
-  it('throws if no API key', () => {
-    expect(() => new ResendEmailProvider('')).toThrow('Resend API key not configured');
-  });
-
   it('sends email successfully', async () => {
     mocks.mockResendSend.mockResolvedValue({ data: { id: 'msg-1' }, error: null });
-    const provider = new ResendEmailProvider('test-key');
+    const provider = new ResendEmailProvider();
     const result = await provider.send({ ...emailPayload });
     expect(result.status).toBe('sent');
     expect(result.id).toBe('msg-1');
@@ -156,7 +157,7 @@ describe('ResendEmailProvider', () => {
 
   it('returns failed status on send error', async () => {
     mocks.mockResendSend.mockRejectedValue(new Error('API error'));
-    const provider = new ResendEmailProvider('test-key');
+    const provider = new ResendEmailProvider();
     const result = await provider.send({ ...emailPayload });
     expect(result.status).toBe('failed');
     expect(result.failureReason).toBe('API error');
@@ -164,7 +165,7 @@ describe('ResendEmailProvider', () => {
 
   it('returns failed when Resend returns error object', async () => {
     mocks.mockResendSend.mockResolvedValue({ data: null, error: { message: 'Invalid domain' } });
-    const provider = new ResendEmailProvider('test-key');
+    const provider = new ResendEmailProvider();
     const result = await provider.send({ ...emailPayload });
     expect(result.status).toBe('failed');
     expect(result.failureReason).toContain('Invalid domain');
@@ -172,7 +173,7 @@ describe('ResendEmailProvider', () => {
 
   it('generates uuid when data has no id', async () => {
     mocks.mockResendSend.mockResolvedValue({ data: {}, error: null });
-    const provider = new ResendEmailProvider('test-key');
+    const provider = new ResendEmailProvider();
     const result = await provider.send({ ...emailPayload });
     expect(result.status).toBe('sent');
     // Falls back to rs-{uuid}
@@ -180,7 +181,7 @@ describe('ResendEmailProvider', () => {
   });
 
   it('requires recipient email', async () => {
-    const provider = new ResendEmailProvider('test-key');
+    const provider = new ResendEmailProvider();
     const result = await provider.send({
       organizationId: 'org-1',
       type: 'email',
@@ -192,7 +193,7 @@ describe('ResendEmailProvider', () => {
 
   it('uses htmlBody when provided', async () => {
     mocks.mockResendSend.mockResolvedValue({ data: { id: 'msg-2' }, error: null });
-    const provider = new ResendEmailProvider('test-key');
+    const provider = new ResendEmailProvider();
     await provider.send({
       ...emailPayload,
       htmlBody: '<h1>Hello</h1>',

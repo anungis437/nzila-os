@@ -1,7 +1,14 @@
 import { describe, it, expect, vi, beforeEach } from 'vitest';
 
+const mockResendSend = vi.hoisted(() => vi.fn());
+
 vi.mock('@/lib/logger', () => ({
   logger: { info: vi.fn(), warn: vi.fn(), error: vi.fn(), debug: vi.fn() },
+}));
+
+vi.mock('@/lib/email-service', () => ({
+  getResendClient: () => ({ emails: { send: mockResendSend } }),
+  getFromEmail: (label?: string) => label ? `${label} <noreply@unioneyes.app>` : 'noreply@unioneyes.app',
 }));
 
 import {
@@ -123,48 +130,38 @@ describe('ResendAdapter', () => {
 
   beforeEach(() => {
     vi.clearAllMocks();
-    adapter = new ResendAdapter('re_test_key', 'from@test.com');
-    global.fetch = vi.fn();
+    adapter = new ResendAdapter(undefined, 'from@test.com');
+    mockResendSend.mockResolvedValue({ data: { id: 'resend-msg-1' }, error: null });
   });
 
   it('has name "resend"', () => {
     expect(adapter.name).toBe('resend');
   });
 
-  it('sends email via Resend API', async () => {
-    (global.fetch as ReturnType<typeof vi.fn>).mockResolvedValue({
-      ok: true,
-      json: () => Promise.resolve({ id: 'resend-msg-1' }),
-    });
-
+  it('sends email via Resend SDK', async () => {
     const result = await adapter.send(testMessage);
     expect(result.success).toBe(true);
     expect(result.messageId).toBe('resend-msg-1');
     expect(result.provider).toBe('resend');
   });
 
-  it('returns error on non-ok response', async () => {
-    (global.fetch as ReturnType<typeof vi.fn>).mockResolvedValue({
-      ok: false,
-      status: 422,
-      json: () => Promise.resolve({ message: 'Invalid recipient' }),
-    });
+  it('returns error on SDK error', async () => {
+    mockResendSend.mockResolvedValue({ data: null, error: { message: 'Invalid recipient' } });
 
     const result = await adapter.send(testMessage);
     expect(result.success).toBe(false);
     expect(result.error).toContain('Invalid recipient');
   });
 
-  it('handles fetch exceptions', async () => {
-    (global.fetch as ReturnType<typeof vi.fn>).mockRejectedValue(new Error('Network error'));
+  it('handles send exceptions', async () => {
+    mockResendSend.mockRejectedValue(new Error('Network error'));
 
     const result = await adapter.send(testMessage);
     expect(result.success).toBe(false);
     expect(result.error).toBe('Network error');
   });
 
-  it('verifyConnection returns true on ok', async () => {
-    (global.fetch as ReturnType<typeof vi.fn>).mockResolvedValue({ ok: true });
+  it('verifyConnection returns true when client exists', async () => {
     const ok = await adapter.verifyConnection();
     expect(ok).toBe(true);
   });

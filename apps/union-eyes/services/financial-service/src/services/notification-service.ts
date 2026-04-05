@@ -21,7 +21,7 @@ import {
   inAppNotifications,
 } from '../db/schema';
 import { eq, and, desc } from 'drizzle-orm';
-import { Resend } from 'resend';
+import { getResendClient, getFromEmail } from '@/lib/email-service';
 import twilio from 'twilio';
 // TODO: Fix FCM and email service imports
 // import { FCMService } from '@/services/fcm-service';
@@ -29,8 +29,7 @@ import twilio from 'twilio';
 // import { logger } from '@/lib/logger';
 const logger = console;
 
-// Initialize email and SMS clients
-const resend = new Resend(process.env.RESEND_API_KEY);
+// Initialize SMS client
 const twilioClient = process.env.TWILIO_ACCOUNT_SID && process.env.TWILIO_AUTH_TOKEN
   ? twilio(process.env.TWILIO_ACCOUNT_SID, process.env.TWILIO_AUTH_TOKEN)
   : null;
@@ -319,8 +318,13 @@ async function sendEmail(
     const userEmail = data.email || `user-${userId}@example.com`;
     
     // Use Resend for email delivery
-    await resend.emails.send({
-      from: 'Union Eyes <notifications@unioneyes.com>',
+    const client = getResendClient();
+    if (!client) {
+      logger.warn('[EMAIL] Resend not configured, skipping email send');
+      return;
+    }
+    await client.emails.send({
+      from: getFromEmail('Union Eyes'),
       to: userEmail,
       subject,
       html: body,

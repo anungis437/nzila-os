@@ -8,6 +8,7 @@ import { withApi, ApiError } from '@/lib/api/framework';
 import { sql } from 'drizzle-orm';
 import { withRLSContext } from '@/lib/db/with-rls-context';
 import { logger } from '@/lib/logger';
+import { healthCheck as hubspotHealthCheck } from '@/lib/services/crm-service';
 
 export const dynamic = 'force-dynamic';
 
@@ -39,30 +40,45 @@ export const POST = withApi(
     const provider = row.provider as string;
     const start = Date.now();
 
-    const metadata = row.metadata as Record<string, unknown> | null;
-    const endpointUrl = (metadata?.endpoint ?? metadata?.url ?? metadata?.base_url) as string | undefined;
     let ok: boolean;
     let latencyMs: number;
     let details: string;
 
-    if (endpointUrl) {
-      try {
-        const probe = await fetch(endpointUrl, {
-          method: 'HEAD',
-          signal: AbortSignal.timeout(5000),
-        });
-        latencyMs = Date.now() - start;
-        ok = probe.ok || probe.status < 500;
-        details = `${provider} responded with HTTP ${probe.status}`;
-      } catch (err) {
+    // Use the real HubSpot client for health checks
+    if (provider === 'hubspot') {
+      const hsResult = await hubspotHealthCheck();
+      if (!hsResult) {
         latencyMs = Date.now() - start;
         ok = false;
-        details = `${provider} connection failed: ${(err as Error).message}`;
+        details = 'HUBSPOT_API_KEY not configured';
+      } else {
+        latencyMs = hsResult.latencyMs;
+        ok = hsResult.ok;
+        details = hsResult.error ?? `HubSpot API reachable (${hsResult.latencyMs}ms)`;
       }
     } else {
-      latencyMs = Date.now() - start;
-      ok = (row.status as string) === 'active';
-      details = `${provider} config found (no endpoint to probe)`;
+      const metadata = row.metadata as Record<string, unknown> | null;
+      const endpointUrl = (metadata?.endpoint ?? metadata?.url ?? metadata?.base_url) as string | undefined;
+
+      if (endpointUrl) {
+        try {
+          const probe = await fetch(endpointUrl, {
+            method: 'HEAD',
+            signal: AbortSignal.timeout(5000),
+          });
+          latencyMs = Date.now() - start;
+          ok = probe.ok || probe.status < 500;
+          details = `${provider} responded with HTTP ${probe.status}`;
+        } catch (err) {
+          latencyMs = Date.now() - start;
+          ok = false;
+          details = `${provider} connection failed: ${(err as Error).message}`;
+        }
+      } else {
+        latencyMs = Date.now() - start;
+        ok = (row.status as string) === 'active';
+        details = `${provider} config found (no endpoint to probe)`;
+      }
     }
 
     const testResult = {

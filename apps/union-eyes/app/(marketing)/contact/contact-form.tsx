@@ -46,12 +46,13 @@ export function ContactForm() {
     setSubmitStatus('idle');
 
     try {
-      // In production, this would send to an API endpoint
-      // For now, we&apos;ll simulate a successful submission
-      await new Promise(resolve => setTimeout(resolve, 1000));
-      
-      // Simulate API call
-      logger.info('Contact form submitted:', formData as unknown as Record<string, unknown>);
+      const res = await fetch('/api/contact', {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify(formData),
+      });
+
+      if (!res.ok) throw new Error('Request failed');
       
       setSubmitStatus('success');
       setFormData({

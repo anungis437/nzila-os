@@ -14,11 +14,35 @@ export default function Contact() {
   });
 
   const [submitted, setSubmitted] = useState(false);
+  const [submitting, setSubmitting] = useState(false);
+  const [error, setError] = useState('');
 
-  const handleSubmit = (e: React.FormEvent) => {
+  const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
-setSubmitted(true);
-    setTimeout(() => setSubmitted(false), 5000);
+    setSubmitting(true);
+    setError('');
+
+    try {
+      const res = await fetch('/api/contact', {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify(formData),
+      });
+
+      if (!res.ok) {
+        const data = await res.json();
+        setError(data.error ?? 'Something went wrong');
+        return;
+      }
+
+      setSubmitted(true);
+      setFormData({ name: '', email: '', company: '', vertical: '', message: '' });
+      setTimeout(() => setSubmitted(false), 5000);
+    } catch {
+      setError('Network error — please try again');
+    } finally {
+      setSubmitting(false);
+    }
   };
 
   const handleChange = (
@@ -86,6 +110,12 @@ setSubmitted(true);
                   </div>
                 )}
 
+                {error && (
+                  <div className="mb-6 p-4 bg-red-50 border border-red-200 rounded-xl">
+                    <p className="text-red-600 font-medium">{error}</p>
+                  </div>
+                )}
+
                 <form onSubmit={handleSubmit} className="space-y-5">
                   <div>
                     <label htmlFor="name" className="block text-sm font-semibold text-navy mb-1.5">
@@ -129,9 +159,10 @@ setSubmitted(true);
 
                   <button
                     type="submit"
-                    className="w-full bg-electric text-white font-bold py-4 px-6 rounded-xl hover:bg-blue-700 transition-all text-lg shadow-lg shadow-electric/25 btn-press"
+                    disabled={submitting}
+                    className="w-full bg-electric text-white font-bold py-4 px-6 rounded-xl hover:bg-blue-700 transition-all text-lg shadow-lg shadow-electric/25 btn-press disabled:opacity-60"
                   >
-                    Send Message
+                    {submitting ? 'Sending…' : 'Send Message'}
                   </button>
                 </form>
               </div>

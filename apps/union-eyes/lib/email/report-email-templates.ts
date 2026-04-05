@@ -10,6 +10,7 @@
  
  
 import type { ScheduledReport } from '@/db/queries/scheduled-reports-queries';
+import { getResendClient, getFromEmail } from '@/lib/email-service';
 
 // ============================================================================
 // Types
@@ -54,14 +55,14 @@ async function sendViaResend(params: SendEmailParams): Promise<void> {
   const { schedule, fileUrl, fileBuffer } = params;
 
   try {
-    const { Resend } = await import('resend');
-    const resend = new Resend(process.env.RESEND_API_KEY);
+    const client = getResendClient();
+    if (!client) throw new Error('Resend not configured – RESEND_API_KEY missing');
 
     const reportName = (schedule as unknown as Record<string, unknown>).report_name as string || 'Report';
     const fileName = `${reportName.replace(/\s+/g, '-')}.${schedule.format}`;
 
-    await resend.emails.send({
-      from: process.env.EMAIL_FROM || 'reports@union-claims.com',
+    await client.emails.send({
+      from: getFromEmail('Union Eyes Reports'),
       to: schedule.recipients,
       subject: `Scheduled Report: ${reportName}`,
       html: generateEmailHTML(schedule, fileUrl),
