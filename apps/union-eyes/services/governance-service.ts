@@ -7,7 +7,7 @@
  * Auth: Clerk
  */
 
-import { auth } from '@clerk/nextjs/server';
+import { auth } from '@nzila/platform-auth/entra/server';
 
 // Type imports only - no runtime database access
 import type {

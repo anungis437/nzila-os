@@ -17,7 +17,7 @@ import helmet from 'helmet';
 import rateLimit from 'express-rate-limit';
 import dotenv from 'dotenv';
 import winston from 'winston';
-import { verifyToken } from '@clerk/backend';
+import { verifyToken } from '@nzila/platform-auth/entra/verify';
 
 // Route imports
 import duesRulesRouter from './routes/dues-rules';

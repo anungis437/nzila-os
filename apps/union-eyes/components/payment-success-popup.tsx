@@ -15,7 +15,7 @@ import type { SelectProfile } from "@/db/schema/domains/member";
 import { useRouter, useSearchParams } from "next/navigation";
 import confetti from 'canvas-confetti';
 import { getProfileByUserIdAction } from "@/actions/profiles-actions";
-import { useAuth } from "@clerk/nextjs";
+import { useAuth } from '@nzila/platform-auth/entra/client';
 import { useTranslations } from "next-intl";
 
 interface PaymentSuccessPopupProps {

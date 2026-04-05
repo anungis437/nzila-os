@@ -20,7 +20,7 @@
  */
 
 import { NextResponse } from 'next/server';
-import type { Session } from '@clerk/nextjs/server';
+import type { Session } from '@nzila/platform-auth/entra/server';
 
 // Dynamically import auth to handle different Clerk versions
 let getAuthSession: (() => Promise<Session | null>) | null = null;

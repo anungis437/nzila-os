@@ -13,9 +13,9 @@
     "clean": "rm -rf .next .turbo node_modules"
   },
   "dependencies": {
-    "@clerk/nextjs": "^7.0.8",
     "@heroicons/react": "^2.2.0",
     "@nzila/os-core": "workspace:*",
+    "@nzila/platform-auth": "workspace:*",
     "@nzila/crm-hubspot": "workspace:*",
     "@nzila/platform-policy-engine": "workspace:*",
     "@nzila/ui": "workspace:*",

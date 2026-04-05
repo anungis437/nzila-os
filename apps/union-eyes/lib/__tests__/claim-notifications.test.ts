@@ -55,12 +55,12 @@ vi.mock('drizzle-orm', () => ({
   relations: vi.fn(() => ({})),
 }));
 
-vi.mock('@clerk/nextjs/server', () => ({
-  clerkClient: mocks.mockClerkClient.mockResolvedValue({
+vi.mock('@nzila/platform-auth/entra/server', () => ({
+  clerkClient: {
     users: {
       getUser: mocks.mockGetUser,
     },
-  }),
+  },
 }));
 
 vi.mock('react', async () => {

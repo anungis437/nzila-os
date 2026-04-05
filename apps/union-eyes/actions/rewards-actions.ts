@@ -5,7 +5,7 @@
  * Server-side actions for recognition and reward operations
  */
 
-import { auth } from '@clerk/nextjs/server';
+import { auth } from '@nzila/platform-auth/entra/server';
 import { withRLSContext } from '@/lib/db/with-rls-context';
 import { logger } from '@/lib/logger';
 import * as rewardsService from '@/lib/services/rewards';

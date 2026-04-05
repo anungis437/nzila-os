@@ -12,7 +12,7 @@
  */
 
 import { createAiClient, type AiClient } from '@nzila/ai-sdk'
-import { auth } from '@clerk/nextjs/server'
+import { auth } from '@nzila/platform-auth/entra/server'
 
 const AI_BASE_URL =
   process.env.AI_SDK_BASE_URL ||

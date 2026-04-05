@@ -7,7 +7,7 @@
 
 export const dynamic = 'force-dynamic';
 import { useEffect, useState } from "react";
-import { useUser } from "@clerk/nextjs";
+import { useUser } from '@nzila/platform-auth/entra/client';
 import { useRouter } from "next/navigation";
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "@/components/ui/card";
 import { Button } from "@/components/ui/button";

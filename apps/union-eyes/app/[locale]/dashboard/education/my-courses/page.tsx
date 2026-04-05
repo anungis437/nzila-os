@@ -8,7 +8,7 @@
 export const dynamic = 'force-dynamic';
 import MemberLearningPortal from "@/components/education/MemberLearningPortal";
 import { useOrganizationId } from "@/lib/hooks/use-organization";
-import { useUser } from "@clerk/nextjs";
+import { useUser } from '@nzila/platform-auth/entra/client';
 import { Skeleton } from "@/components/ui/skeleton";
 
 export default function MyCoursesPage() {

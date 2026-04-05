@@ -3,7 +3,7 @@
  * Migrated to withApi() framework
  */
 // eslint-disable-next-line @typescript-eslint/no-unused-vars
-import { auth } from '@clerk/nextjs/server';
+import { auth } from '@nzila/platform-auth/entra/server';
 import { withApi, z } from '@/lib/api/framework';
 
 const _paymentSchema = z.object({

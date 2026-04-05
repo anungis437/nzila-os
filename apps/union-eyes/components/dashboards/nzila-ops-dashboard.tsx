@@ -11,7 +11,7 @@
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "@/components/ui/card";
 import { motion } from "framer-motion";
 import Link from "next/link";
-import { useUser } from "@clerk/nextjs";
+import { useUser } from '@nzila/platform-auth/entra/client';
 import { useEffect, useState } from "react";
 import { useTranslations, useLocale } from "next-intl";
 import {

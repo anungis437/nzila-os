@@ -9,7 +9,7 @@
 
 import React, { createContext, useContext, useState, useEffect, useCallback } from "react";
 
-import { useAuth, useOrganization } from "@clerk/nextjs";
+import { useAuth, useOrganization } from '@nzila/platform-auth/entra/client';
 
 /** Organization information returned from /api/org/current */
 export interface OrgInfo {

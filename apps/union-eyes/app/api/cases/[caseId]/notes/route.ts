@@ -7,7 +7,7 @@
  */
 
 import { NextResponse } from 'next/server';
-import { auth } from '@clerk/nextjs/server';
+import { auth } from '@nzila/platform-auth/entra/server';
 import { z } from 'zod';
 import { eq, desc } from 'drizzle-orm';
 import { withRLSContext } from '@/lib/db/with-rls-context';

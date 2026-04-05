@@ -26,7 +26,7 @@ import {
   CheckCircle2,
   Users,
 } from "lucide-react";
-import { useUser } from "@clerk/nextjs";
+import { useUser } from '@nzila/platform-auth/entra/client';
 import { useEffect, useState } from "react";
 import { useOrganizationId } from "@/lib/hooks/use-organization";
 import { usePilotMode } from "@/contexts/pilot-mode-context";

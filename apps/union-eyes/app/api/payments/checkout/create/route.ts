@@ -16,7 +16,7 @@ import {
 } from '@/lib/api/standardized-responses';
 import { z } from 'zod';
 import { logger } from '@/lib/logger';
-import { auth } from '@clerk/nextjs/server';
+import { auth } from '@nzila/platform-auth/entra/server';
 import { NextResponse } from 'next/server';
 
 export const runtime = 'nodejs';

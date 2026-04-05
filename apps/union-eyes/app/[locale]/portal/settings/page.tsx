@@ -10,7 +10,7 @@
 export const dynamic = "force-dynamic";
 
 import { useCallback, useEffect, useState } from "react";
-import { useUser } from "@clerk/nextjs";
+import { useUser } from '@nzila/platform-auth/entra/client';
 import {
   Card,
   CardContent,

@@ -40,7 +40,7 @@
  * See: docs/security/RLS_AUTH_RBAC_ALIGNMENT.md for complete architecture
  */
 
-import { clerkMiddleware, createRouteMatcher } from "@clerk/nextjs/server";
+import { createRouteMatcher } from '@nzila/platform-auth/entra/server';
 import { NextResponse } from "next/server";
 import type { NextRequest } from "next/server";
 import createIntlMiddleware from 'next-intl/middleware';
@@ -111,12 +111,13 @@ const _isPublicRoute = createRouteMatcher([
   "/:locale/legal(.*)",
 ]);
 
-// Clerk's auth pages live at root (no locale prefix) — skip intl redirect for them
-const isClerkAuthPath = createRouteMatcher([
+// Clerk auth pages renamed to generic auth pages — skip intl redirect for them
+const isAuthPath = createRouteMatcher([
   "/sign-in(.*)",
   "/sign-up(.*)",
   "/login(.*)",
   "/signup(.*)",
+  "/api/auth(.*)",
 ]);
 
 // Marketing / public pages live at root (no locale prefix).
@@ -175,7 +176,7 @@ const isOriginAllowed = (origin: string | null): boolean => {
 };
 
 // This handles both payment provider use cases from whop-setup.md and stripe-setup.md
-const clerkHandler = clerkMiddleware(async (auth, req) => {
+async function authMiddleware(req: NextRequest): Promise<NextResponse> {
   try {
   // os-core: generate / forward a request-id for distributed tracing
   const requestId = ensureRequestId(req);
@@ -331,10 +332,8 @@ const clerkHandler = clerkMiddleware(async (auth, req) => {
   // Edge middleware's crypto.subtle fails with OpenSSL 3 OperationError
   // on Azure Container Apps; server components use Node.js native crypto.
   
-  // Clerk auth paths (/sign-in, /sign-up, etc.) must NOT be locale-redirected.
-  // Clerk's NEXT_PUBLIC_CLERK_SIGN_IN_URL is configured without locale prefix,
-  // so adding it would create a redirect loop (Clerk → /sign-in → intl → /en-CA/sign-in → Clerk → ...).
-  if (isClerkAuthPath(req)) {
+  // Auth paths (/sign-in, /sign-up, /api/auth) must NOT be locale-redirected.
+  if (isAuthPath(req)) {
     return withRequestId(NextResponse.next(), requestId);
   }
 
@@ -362,17 +361,17 @@ const clerkHandler = clerkMiddleware(async (auth, req) => {
       { status: 500, headers: { 'content-type': 'application/json' } }
     );
   }
-});
+}
 
-// Wrap clerkMiddleware to catch errors at the Clerk SDK level (before our callback runs)
-import type { NextFetchEvent } from "next/server";
-export default async function middleware(req: NextRequest, event: NextFetchEvent): Promise<NextResponse> {
+// Export the auth middleware directly
+export default async function middleware(req: NextRequest): Promise<NextResponse> {
   try {
-    return ((await clerkHandler(req, event)) ?? NextResponse.next()) as NextResponse;
+    return await authMiddleware(req);
   } catch (outerError) {
-    logger.error('[middleware] Clerk/outer error:', { error: outerError });
+    const eLogger = createClientLogger('middleware');
+    eLogger.error('[middleware] Outer error:', { error: outerError });
     return new NextResponse(
-      JSON.stringify({ error: 'Clerk middleware error', message: String(outerError) }),
+      JSON.stringify({ error: 'Middleware error', message: String(outerError) }),
       { status: 500, headers: { 'content-type': 'application/json' } }
     );
   }

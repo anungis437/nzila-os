@@ -94,7 +94,7 @@ export async function withRLSContext<T>(
         const pub = user.publicMetadata || {};
         const priv = user.privateMetadata || {};
         orgId = (pub.organizationId as string) || (priv.organizationId as string)
-          || (pub.tenantId as string) || (priv.tenantId as string) || undefined;
+          || (pub.tenantId as string) || (priv.tenantId as string) || null;
       }
     } catch {
       // Clerk currentUser() can fail in edge cases — proceed without org

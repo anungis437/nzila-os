@@ -29,7 +29,7 @@ import {
   Clock,
   AlertCircle
 } from "lucide-react";
-import { useUser } from "@clerk/nextjs";
+import { useUser } from '@nzila/platform-auth/entra/client';
 import { useEffect, useState } from "react";
 import { DeadlineWidget } from "@/components/deadlines";
 import { useRouter } from "next/navigation";

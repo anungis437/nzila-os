@@ -5,7 +5,7 @@
 'use client';
 
 import { useState, useEffect } from 'react';
-import { useUser } from '@clerk/nextjs';
+import { useUser } from '@nzila/platform-auth/entra/client';
 import { Badge } from '@/components/ui/badge';
 import { MessageCircle } from 'lucide-react';
 

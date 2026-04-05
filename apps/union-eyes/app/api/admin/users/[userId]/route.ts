@@ -6,7 +6,7 @@ import { db } from '@/db/db';
 import { organizationMembers } from '@/db/schema';
 import { eq } from 'drizzle-orm';
 import { NextRequest, NextResponse } from 'next/server';
-import { auth } from '@clerk/nextjs/server';
+import { auth } from '@nzila/platform-auth/entra/server';
 
 export const dynamic = 'force-dynamic';
 

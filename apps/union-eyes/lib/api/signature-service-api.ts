@@ -3,7 +3,7 @@
  * Calls Django REST API instead of direct database access
  */
 
-import { auth } from '@clerk/nextjs/server';
+import { auth } from '@nzila/platform-auth/entra/server';
 
 const API_URL = process.env.NEXT_PUBLIC_API_URL || 'http://localhost:8000';
 

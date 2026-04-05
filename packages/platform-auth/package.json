@@ -11,7 +11,19 @@
     "./authorization": "./src/authorization.ts",
     "./guards": "./src/guards.ts",
     "./middleware": "./src/middleware.ts",
-    "./clerk-adapter": "./src/clerk-adapter.ts"
+    "./clerk-adapter": "./src/clerk-adapter.ts",
+    "./entra": "./src/entra/index.ts",
+    "./entra/config": "./src/entra/config.ts",
+    "./entra/adapter": "./src/entra/adapter.ts",
+    "./entra/server": "./src/entra/server.ts",
+    "./entra/client": "./src/entra/client.tsx",
+    "./entra/middleware": "./src/entra/middleware.ts",
+    "./entra/components/user-button": "./src/entra/components/user-button.tsx",
+    "./entra/components/sign-in": "./src/entra/components/sign-in.tsx",
+    "./entra/components/sign-up": "./src/entra/components/sign-up.tsx",
+    "./entra/components/org-switcher": "./src/entra/components/org-switcher.tsx",
+    "./entra/admin": "./src/entra/admin.ts",
+    "./entra/verify": "./src/entra/verify.ts"
   },
   "scripts": {
     "typecheck": "tsc --noEmit",
@@ -19,19 +31,36 @@
     "lint": "eslint src/"
   },
   "dependencies": {
+    "@auth/core": "^0.34.3",
     "@nzila/org": "workspace:*",
     "@nzila/platform-contracts": "workspace:*",
+    "jose": "^6.2.2",
+    "next-auth": "5.0.0-beta.30",
     "zod": "^3.24.0"
   },
   "peerDependencies": {
-    "@clerk/nextjs": ">=6.0.0"
+    "@clerk/nextjs": ">=6.0.0",
+    "next": ">=15.0.0",
+    "react": ">=18.0.0",
+    "react-dom": ">=18.0.0"
   },
   "peerDependenciesMeta": {
-    "@clerk/nextjs": { "optional": true }
+    "@clerk/nextjs": {
+      "optional": true
+    },
+    "next": {
+      "optional": true
+    },
+    "react": {
+      "optional": true
+    },
+    "react-dom": {
+      "optional": true
+    }
   },
   "devDependencies": {
-    "@nzila/config": "workspace:*",
     "@clerk/nextjs": "^7.0.8",
+    "@nzila/config": "workspace:*",
     "next": "^16.2.2",
     "typescript": "^6",
     "vitest": "^4.1.2"

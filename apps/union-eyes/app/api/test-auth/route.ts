@@ -9,7 +9,7 @@
  * request. `passed: true` means the Django auth gate is closed end-to-end.
  */
 import { NextRequest, NextResponse } from 'next/server';
-import { auth } from '@clerk/nextjs/server';
+import { auth } from '@nzila/platform-auth/entra/server';
 
 export const dynamic = 'force-dynamic';
 

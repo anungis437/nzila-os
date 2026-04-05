@@ -8,7 +8,7 @@
  */
 
 import { NextResponse } from 'next/server';
-import { auth } from '@clerk/nextjs/server';
+import { auth } from '@nzila/platform-auth/entra/server';
 import { db } from '@/db';
 import { auditLogs } from '@/db/schema';
 import { eq, and, desc } from 'drizzle-orm';

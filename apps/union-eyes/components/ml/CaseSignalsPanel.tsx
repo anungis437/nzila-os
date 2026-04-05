@@ -8,7 +8,7 @@
  */
 'use client'
 
-import { useAuth } from '@clerk/nextjs'
+import { useAuth } from '@nzila/platform-auth/entra/client'
 import { useCasePrioritySignal, useCaseSlaRiskSignal } from '@/lib/useUEMlSignals'
 import { PriorityBadge } from './PriorityBadge'
 import { SlaRiskBadge } from './SlaRiskBadge'

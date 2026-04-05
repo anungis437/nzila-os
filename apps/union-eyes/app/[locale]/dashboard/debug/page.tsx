@@ -7,7 +7,7 @@
 
 export const dynamic = 'force-dynamic';
 
-import { currentUser } from "@clerk/nextjs/server";
+import { currentUser } from '@nzila/platform-auth/entra/server';
 import { requireUser } from "@/lib/api-auth-guard";
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "@/components/ui/card";
 import { getClaimsAssignedToUser } from "@/db/queries/claims-queries";

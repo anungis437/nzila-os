@@ -11,7 +11,7 @@ export const dynamic = 'force-dynamic';
 import type { Metadata } from 'next';
 import Image from 'next/image';
 import Link from 'next/link';
-import { auth } from '@clerk/nextjs/server';
+import { auth } from '@nzila/platform-auth/entra/server';
 import { redirect } from 'next/navigation';
 import { getTranslations } from 'next-intl/server';
 import ScrollReveal from '@/components/public/scroll-reveal';

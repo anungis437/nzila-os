@@ -14,7 +14,7 @@ export const dynamic = 'force-dynamic';
  *   Union / Local roles   -> UnionDashboard      (original - preserved as-is)
  */
 
-import { useUser } from "@clerk/nextjs";
+import { useUser } from '@nzila/platform-auth/entra/client';
 import { useEffect, useState } from "react";
 import { UserRole } from "@/lib/auth/roles";
 import { useOrganization } from "@/contexts/organization-context";

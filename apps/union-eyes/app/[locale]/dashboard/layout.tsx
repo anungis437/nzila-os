@@ -4,7 +4,7 @@
  * and applies the dashboard-specific styling
  */
 import React, { ReactNode } from "react";
-import { auth, clerkClient, currentUser } from "@clerk/nextjs/server";
+import { auth, currentUser } from '@nzila/platform-auth/entra/server';
 import { redirect } from "next/navigation";
 import Sidebar from "@/components/sidebar";
 import CancellationPopup from "@/components/cancellation-popup";
@@ -85,50 +85,14 @@ export default async function DashboardLayout({ children }: { children: ReactNod
       .limit(1);
 
     if (localMemberships.length === 0) {
-      const clerk = await clerkClient();
-      const clerkOrgs = await clerk.users.getOrganizationMembershipList({ userId, limit: 20 });
-
-      for (const membership of clerkOrgs.data) {
-        const clerkOrgId = membership.organization.id;
-        // Find matching local org by clerk_organization_id
-        const [localOrg] = await db
-          .select({ id: organizations.id })
-          .from(organizations)
-          .where(eq(organizations.clerkOrganizationId, clerkOrgId))
-          .limit(1);
-
-        if (localOrg) {
-          // Check no duplicate
-          const [existing] = await db
-            .select({ id: organizationMembers.id })
-            .from(organizationMembers)
-            .where(
-              and(
-                eq(organizationMembers.userId, userId),
-                eq(organizationMembers.organizationId, localOrg.id),
-              )
-            )
-            .limit(1);
-
-          if (!existing) {
-            const fullName = [user?.firstName, user?.lastName].filter(Boolean).join(' ') || userEmail;
-            await db.insert(organizationMembers).values({
-              userId,
-              organizationId: localOrg.id,
-              name: fullName,
-              email: userEmail,
-              role: membership.role.startsWith('org:') ? membership.role.replace('org:', '') : 'member',
-              status: 'active',
-              isPrimary: clerkOrgs.data.length === 1,
-            });
-            logger.info(`Auto-synced org membership for ${userId} → ${localOrg.id} (Clerk: ${clerkOrgId})`);
-          }
-        }
-      }
+      // Entra org sync: look up user's group memberships via Graph API
+      // Note: In Entra, orgs are mapped to Azure AD groups
+      // TODO: Implement Graph API group membership sync when Entra app is registered
+      logger.info(`Skipping org sync for user ${userId} — Entra groups not yet configured`);
     }
   } catch (syncError) {
     // Non-fatal — user can still access dashboard with fallback org
-    logger.warn('Clerk org membership sync failed', syncError);
+    logger.warn('Org membership sync failed', syncError);
   }
   
   // Get user's organization and role via proper RBAC chain

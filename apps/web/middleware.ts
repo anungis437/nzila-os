@@ -1,5 +1,6 @@
-import { clerkMiddleware } from '@clerk/nextjs/server'
+import { auth } from '@nzila/platform-auth/entra/config'
 import { NextResponse } from 'next/server'
+import type { NextRequest } from 'next/server'
 import { checkRateLimit, rateLimitHeaders } from '@nzila/os-core/rateLimit'
 import { locales, defaultLocale, type Locale } from './lib/locales'
 
@@ -34,15 +35,14 @@ function detectLocale(request: Request): Locale {
 
 /**
  * Public web site — all routes are public.
- * Clerk is present to provide ClerkProvider context in the layout (future
- * conditional UI, signed-in header state, etc.).
+ * Auth provider is present for optional sign-in state in the layout.
  * Rate limiting is enforced at the edge for every request.
  */
 
 const RATE_LIMIT_MAX = Number(process.env.RATE_LIMIT_MAX ?? '200')
 const RATE_LIMIT_WINDOW_MS = Number(process.env.RATE_LIMIT_WINDOW_MS ?? '60000')
 
-export default clerkMiddleware(async (_auth, request) => {
+export default auth(async (request: any) => {
   // ── Rate limiting (skip in dev — HMR triggers too many requests) ──────
   if (process.env.NODE_ENV !== 'development') {
     const ip =
@@ -73,7 +73,8 @@ export default clerkMiddleware(async (_auth, request) => {
       request.nextUrl.pathname.startsWith('/api') &&
       !request.nextUrl.pathname.startsWith('/api/webhooks') &&
       !request.nextUrl.pathname.startsWith('/api/health') &&
-      !request.nextUrl.pathname.startsWith('/api/cron')
+      !request.nextUrl.pathname.startsWith('/api/cron') &&
+      !request.nextUrl.pathname.startsWith('/api/auth')
     ) {
       if (!request.headers.get('idempotency-key')) {
         return NextResponse.json(
@@ -105,7 +106,7 @@ export default clerkMiddleware(async (_auth, request) => {
   const response = NextResponse.next()
   response.headers.set('x-request-id', requestId)
   return response
-})
+}) as (request: NextRequest) => Promise<NextResponse>
 
 export const config = {
   matcher: [

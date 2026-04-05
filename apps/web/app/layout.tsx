@@ -1,5 +1,5 @@
 import type { Metadata } from "next";
-import { ClerkProvider } from "@clerk/nextjs";
+import { AuthProvider } from "@nzila/platform-auth/entra/client";
 import { Poppins } from "next/font/google";
 import { NextIntlClientProvider } from 'next-intl';
 import { getLocale, getMessages } from 'next-intl/server';
@@ -76,7 +76,7 @@ export default async function RootLayout({
   const messages = await getMessages();
 
   return (
-    <ClerkProvider>
+    <AuthProvider>
       <html lang={locale}>
         <head>
           <JsonLd />
@@ -92,6 +92,6 @@ export default async function RootLayout({
           </NextIntlClientProvider>
         </body>
       </html>
-    </ClerkProvider>
+    </AuthProvider>
   );
 }

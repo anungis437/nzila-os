@@ -8,7 +8,7 @@
 
 import { useState } from 'react';
 import { useRouter } from 'next/navigation';
-import { useUser } from '@clerk/nextjs';
+import { useUser } from '@nzila/platform-auth/entra/client';
 import { Button } from '@/components/ui/button';
 import {
   Dialog,

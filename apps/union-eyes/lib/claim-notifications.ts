@@ -14,7 +14,7 @@ import { claims } from '../db/schema/claims-schema';
 import { eq, and } from 'drizzle-orm';
 import { ClaimStatus } from './workflow-engine';
 import * as React from 'react';
-import { clerkClient } from '@clerk/nextjs/server';
+import { clerkClient } from '@nzila/platform-auth/entra/server';
 import { deadlines } from '../db/schema/deadlines-schema';
 
 interface ClaimNotificationData {
@@ -64,7 +64,7 @@ export async function sendClaimStatusNotification(
     }
 
     // Get member details from Clerk
-    const member = await (await clerkClient()).users.getUser(claim.memberId!);
+    const member = await clerkClient.users.getUser(claim.memberId!);
 
     if (!member || !member.emailAddresses?.[0]?.emailAddress) {
       return { success: false, error: 'Member email not found' };
@@ -78,7 +78,7 @@ export async function sendClaimStatusNotification(
     let assignedStewardName: string | undefined;
     if (claim.assignedTo) {
       try {
-        const steward = await (await clerkClient()).users.getUser(claim.assignedTo);
+        const steward = await clerkClient.users.getUser(claim.assignedTo);
         if (steward?.emailAddresses?.[0]?.emailAddress) {
           assignedStewardEmail = steward.emailAddresses[0].emailAddress;
           assignedStewardName = `${steward.firstName || ''} ${steward.lastName || ''}`.trim() || 'Steward';
@@ -272,7 +272,7 @@ export async function sendOverdueClaimNotification(
       return { success: false, error: 'No overdue deadlines found' };
     }
 
-    const member = await (await clerkClient()).users.getUser(claim.memberId!);
+    const member = await clerkClient.users.getUser(claim.memberId!);
     const memberEmail = member?.emailAddresses?.[0]?.emailAddress;
     if (!memberEmail) {
       return { success: false, error: 'Member email not found' };
@@ -283,7 +283,7 @@ export async function sendOverdueClaimNotification(
     let assignedStewardName: string | undefined;
     if (claim.assignedTo) {
       try {
-        const steward = await (await clerkClient()).users.getUser(claim.assignedTo);
+        const steward = await clerkClient.users.getUser(claim.assignedTo);
         if (steward?.emailAddresses?.[0]?.emailAddress) {
           assignedStewardEmail = steward.emailAddresses[0].emailAddress;
           assignedStewardName = `${steward.firstName || ''} ${steward.lastName || ''}`.trim() || 'Steward';

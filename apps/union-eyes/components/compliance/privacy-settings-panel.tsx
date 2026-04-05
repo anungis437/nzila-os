@@ -1,7 +1,7 @@
 "use client";
 
 import * as React from "react";
-import { useUser } from "@clerk/nextjs";
+import { useUser } from '@nzila/platform-auth/entra/client';
 import { PrivacyConsentManager, ConsentPurpose, ConsentRecord } from "@/components/compliance/privacy-consent-manager";
 import { GdprDataExport, ExportJob } from "@/components/compliance/gdpr-data-export";
 import { useOrganizationId } from "@/contexts/organization-context";

@@ -8,7 +8,7 @@ import React from 'react';
 
 import { useState, useEffect } from "react";
 import { motion, AnimatePresence } from "framer-motion";
-import { useUser } from "@clerk/nextjs";
+import { useUser } from '@nzila/platform-auth/entra/client';
 import { useTranslations } from 'next-intl';
 import Link from "next/link";
 import { useOrganization } from "@/lib/hooks/use-organization";

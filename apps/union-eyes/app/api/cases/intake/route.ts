@@ -8,7 +8,7 @@
  */
 
 import { NextResponse } from 'next/server';
-import { auth } from '@clerk/nextjs/server';
+import { auth } from '@nzila/platform-auth/entra/server';
 import { validateIntakeRequest } from '@nzila/cupe-vocabulary';
 import { getCaseTypeById } from '@nzila/cupe-vocabulary';
 import { withRLSContext } from '@/lib/db/with-rls-context';

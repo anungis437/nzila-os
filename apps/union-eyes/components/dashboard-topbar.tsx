@@ -6,7 +6,7 @@
 "use client";
 
 import { Bell, Search, Menu, Shield, ChevronRight } from "lucide-react";
-import { UserButton, useUser } from "@clerk/nextjs";
+import { UserButton, useUser } from '@nzila/platform-auth/entra/client';
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 import { Badge } from "@/components/ui/badge";

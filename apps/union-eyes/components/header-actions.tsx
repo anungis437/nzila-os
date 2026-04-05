@@ -1,7 +1,7 @@
 "use client";
 
 import { Bell, LogOut } from "lucide-react";
-import { useClerk } from "@clerk/nextjs";
+import { useClerk } from '@nzila/platform-auth/entra/client';
 import { Button } from "@/components/ui/button";
 import Link from "next/link";
 import { useLocale } from "next-intl";
@@ -53,7 +53,7 @@ export function HeaderActions() {
       <Button
         variant="ghost"
         size="icon"
-        onClick={() => signOut({ redirectUrl: "/" })}
+        onClick={() => signOut("/")}
         title="Sign out"
       >
         <LogOut className="h-5 w-5" />

@@ -3,7 +3,7 @@
  * Returns aggregate member counts across all organizations (or filtered by org).
  */
 import { NextRequest, NextResponse } from 'next/server';
-import { auth } from '@clerk/nextjs/server';
+import { auth } from '@nzila/platform-auth/entra/server';
 import { db } from '@/db/db';
 import { organizationMembers } from '@/db/schema';
 import { eq, and, isNull, sql, inArray } from 'drizzle-orm';

@@ -4,7 +4,7 @@ import { NextResponse } from 'next/server';
  * Migrated to withApi() framework
  */
 // eslint-disable-next-line @typescript-eslint/no-unused-vars
-import { auth } from '@clerk/nextjs/server';
+import { auth } from '@nzila/platform-auth/entra/server';
 import { db } from '@/db/db';
 import { memberDuesLedger } from '@/db/schema/dues-finance-schema';
 import { eq, and, sql, desc } from 'drizzle-orm';

@@ -8,7 +8,7 @@
  */
 
 import { NextResponse } from 'next/server';
-import { auth } from '@clerk/nextjs/server';
+import { auth } from '@nzila/platform-auth/entra/server';
 import { z } from 'zod';
 import { eq } from 'drizzle-orm';
 import { validateCUPETransition } from '@/lib/case-fsm-enforcement';

@@ -13,7 +13,7 @@
  */
 
 import { createContext, useContext, useState, useEffect, useCallback, ReactNode } from 'react';
-import { useAuth } from '@clerk/nextjs';
+import { useAuth } from '@nzila/platform-auth/entra/client';
 
 // Organization type definitions
 export interface Organization {

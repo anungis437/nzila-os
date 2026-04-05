@@ -6,7 +6,7 @@
 "use client";
 
 import { Button } from "@/components/ui/button";
-import { UserButton, useAuth } from "@clerk/nextjs";
+import { UserButton, useAuth } from '@nzila/platform-auth/entra/client';
 import { Home, LayoutDashboard, Menu, X } from "lucide-react";
 import Link from "next/link";
 import { useState, useEffect } from "react";

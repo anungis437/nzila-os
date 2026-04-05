@@ -3,7 +3,7 @@
  * Simulates cache clearing (no actual external cache in dev).
  */
 import { NextResponse } from 'next/server';
-import { auth } from '@clerk/nextjs/server';
+import { auth } from '@nzila/platform-auth/entra/server';
 
 export const dynamic = 'force-dynamic';
 

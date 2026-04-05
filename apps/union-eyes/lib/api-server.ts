@@ -9,7 +9,7 @@ import 'server-only';
 const logger = createLogger('api-server')
 
 import axios, { AxiosInstance, AxiosError, InternalAxiosRequestConfig } from 'axios';
-import { auth } from '@clerk/nextjs/server';
+import { auth } from '@nzila/platform-auth/entra/server';
 import { createLogger } from '@nzila/os-core'
 
 const API_URL = process.env.NEXT_PUBLIC_API_URL || 'http://localhost:8000';

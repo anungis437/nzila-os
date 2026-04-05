@@ -10,7 +10,7 @@
  * @module actions/member-segments-actions
  */
 
-import { auth, currentUser } from "@clerk/nextjs/server";
+import { auth, currentUser } from '@nzila/platform-auth/entra/server';
 import { db } from "@/db";
 import { organizations } from "@/db/schema-organizations";
 import {

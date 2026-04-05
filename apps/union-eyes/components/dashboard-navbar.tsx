@@ -1,7 +1,7 @@
 "use client";
 
 import { Button } from "@/components/ui/button";
-import { UserButton } from "@clerk/nextjs";
+import { UserButton } from '@nzila/platform-auth/entra/client';
 import Link from "next/link";
 import Image from "next/image";
 import { Menu, X, Bell, Settings, LayoutDashboard, FileText, Vote, BarChart3, Users, Scale, Library, FileBarChart, Shield, GitCompare, Target, Flag, DollarSign } from "lucide-react";

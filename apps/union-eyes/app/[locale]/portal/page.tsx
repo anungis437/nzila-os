@@ -7,7 +7,7 @@
 
 export const dynamic = 'force-dynamic';
 import { useEffect, useState, useCallback } from "react";
-import { useUser } from "@clerk/nextjs";
+import { useUser } from '@nzila/platform-auth/entra/client';
 import { motion } from "framer-motion";
 import { 
   User, 

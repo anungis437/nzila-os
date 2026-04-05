@@ -23,7 +23,7 @@ import {
   type TrendAnalysisResult,
 } from '@/lib/ml/predictive-analytics';
 import { eq, and, gte, lte, desc } from 'drizzle-orm';
-import { auth } from '@clerk/nextjs/server';
+import { auth } from '@nzila/platform-auth/entra/server';
 import { revalidatePath } from 'next/cache';
 import { logger } from '@/lib/logger';
 

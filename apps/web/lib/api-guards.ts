@@ -11,7 +11,7 @@
  */
 import { NextResponse } from 'next/server'
 import type { NextRequest } from 'next/server'
-import { auth } from '@clerk/nextjs/server'
+import { getAuthSession } from '@nzila/platform-auth/entra/server'
 import {
   createRequestContext,
   runWithContext,
@@ -34,7 +34,7 @@ export function withAudit<T>(scopedDb: T, context: { actorId: string; orgId: str
 }
 
 /**
- * Authenticate the current request via Clerk.
+ * Authenticate the current request via Entra ID.
  *
  * @returns userId or a 401 NextResponse error.
  */
@@ -42,14 +42,14 @@ export async function authenticateUser(): Promise<
   | { ok: true; userId: string }
   | { ok: false; response: NextResponse }
 > {
-  const { userId } = await auth()
-  if (!userId) {
+  const result = await getAuthSession()
+  if (!result.ok) {
     return {
       ok: false,
       response: NextResponse.json({ error: 'Unauthorized' }, { status: 401 }),
     }
   }
-  return { ok: true, userId }
+  return { ok: true, userId: result.identity.userId }
 }
 
 // ── Request Context wrapper ─────────────────────────────────────────────────

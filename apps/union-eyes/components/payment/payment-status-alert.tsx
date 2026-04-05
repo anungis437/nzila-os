@@ -6,7 +6,7 @@ import Link from "next/link";
 import { Alert, AlertDescription, AlertTitle } from "@/components/ui/alert";
 import { AlertCircle } from "lucide-react";
 import { Button } from "@/components/ui/button";
-import { useAuth } from "@clerk/nextjs";
+import { useAuth } from '@nzila/platform-auth/entra/client';
 import { checkPaymentFailedAction } from "@/actions/profiles-actions";
 
 /**

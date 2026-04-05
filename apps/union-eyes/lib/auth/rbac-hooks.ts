@@ -12,7 +12,7 @@
 
 "use client";
 
-import { useUser } from "@clerk/nextjs";
+import { useUser } from '@nzila/platform-auth/entra/client';
 import { useEffect, useState } from "react";
 import { UserRole, Permission, hasPermission, hasAnyPermission, hasAllPermissions, canAccessRoute, getAccessibleNavItems } from "./roles";
 import type { NavItem } from "./roles";

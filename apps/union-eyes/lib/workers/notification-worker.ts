@@ -349,13 +349,9 @@ async function processNotification(job: any) {
  */
 async function getUserEmail(userId: string): Promise<string | null> {
   try {
-    const { createClerkClient } = await import('@clerk/backend');
-    
-    const clerkClient = createClerkClient({
-      secretKey: process.env.CLERK_SECRET_KEY,
-    });
+    const { clerkClient } = await import('@nzila/platform-auth/entra/server');
 
-    // Fetch user from Clerk
+    // Fetch user via Graph API adapter
     const user = await clerkClient.users.getUser(userId);
     
     // Get primary email address

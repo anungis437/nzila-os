@@ -22,14 +22,11 @@ const withBundleAnalyzer = bundleAnalyzer({
 //
 // SECURITY IMPROVEMENTS IMPLEMENTED (Feb 2026):
 // ✅ Removed 'unsafe-eval' from script-src (XSS attack vector eliminated)
-// ✅ Added nonce infrastructure for future CSP hardening
-// ⚠️  'unsafe-inline' still required by Clerk SDK - monitoring Clerk updates
+// ✅ Migrated from Clerk to Microsoft Entra ID (Jun 2026)
 //
 // REMAINING SECURITY TRADEOFFS:
-// 1. script-src 'unsafe-inline' - Required by Clerk SDK only
+// 1. script-src 'unsafe-inline' - Required by NextAuth/Entra redirect flows
 //    • Mitigation: Strict domain whitelisting + nonce support prepared
-//    • Action: Will migrate to nonce-only once Clerk SDK supports it
-//    • Tracking: https://github.com/clerk/javascript/issues/xxxx
 //
 // 2. connect-src https: wss: - Permissive to support dynamic integrations
 //    • Required for: User-configured webhooks, third-party APIs, CDN resources
@@ -67,21 +64,20 @@ const ContentSecurityPolicy = [
   // Fonts: Allow data URIs and HTTPS CDNs
   "font-src 'self' data: https:",
   
-  // Styles: Clerk and Radix UI require inline styles
-  "style-src 'self' 'unsafe-inline' https://clerk.accounts.dev https://*.clerk.accounts.dev https://*.clerk.com",
+  // Styles: Radix UI requires inline styles
+  "style-src 'self' 'unsafe-inline' https://login.microsoftonline.com",
   
   // Scripts: SECURITY HARDENED - Removed 'unsafe-eval' (Feb 2026)
-  // 'unsafe-inline' still required by Clerk SDK, monitoring for nonce support
-  // *.clerk.accounts.dev covers per-instance CDN subdomains (e.g. known-hagfish-67.clerk.accounts.dev)
+  // 'unsafe-inline' required for NextAuth/Entra redirect flows
   // js.stripe.com required for Stripe.js payment elements
-  "script-src 'self' 'unsafe-inline' https://clerk.accounts.dev https://*.clerk.accounts.dev https://*.clerk.com https://challenges.cloudflare.com https://js.stripe.com",
+  "script-src 'self' 'unsafe-inline' https://login.microsoftonline.com https://challenges.cloudflare.com https://js.stripe.com",
   
   // Connections: SECURITY TRADEOFF - Permissive for dynamic integrations
   // Core domains whitelisted; https:/wss: required for user-configured webhooks
-  "connect-src 'self' https: wss: https://*.clerk.com https://*.clerk.accounts.dev https://*.sentry.io https://*.supabase.co https://api.stripe.com https://*.upstash.io",
+  "connect-src 'self' https: wss: https://login.microsoftonline.com https://graph.microsoft.com https://*.sentry.io https://*.supabase.co https://api.stripe.com https://*.upstash.io",
   
-  // Iframes: Allow Clerk authentication flows, Cloudflare challenges, and Stripe Elements
-  "frame-src 'self' https://clerk.accounts.dev https://*.clerk.accounts.dev https://*.clerk.com https://challenges.cloudflare.com https://js.stripe.com",
+  // Iframes: Allow Entra login flows, Cloudflare challenges, and Stripe Elements
+  "frame-src 'self' https://login.microsoftonline.com https://challenges.cloudflare.com https://js.stripe.com",
   
   // Web Workers: Allow blob URLs for dynamic worker creation
   "worker-src 'self' blob:",
@@ -207,9 +203,7 @@ const nextConfig: NextConfig = {
     '@azure/msal-node',
     '@azure/cognitiveservices-computervision',
     '@azure/ms-rest-js',
-    // Auth (async_hooks, diagnostics_channel)
-    // Note: @clerk/nextjs and @clerk/backend are NOT externalized
-    // — Turbopack handles them correctly when bundled
+    // Auth — NextAuth/next-auth bundled with Turbopack, no externalization needed
     // Observability (async_hooks, diagnostics_channel, perf_hooks)
     '@sentry/nextjs',
     '@opentelemetry/sdk-node',

@@ -8,7 +8,7 @@ import { NextRequest, NextResponse } from 'next/server';
 import { z } from 'zod';
 import { mambaModel } from '@/lib/ai/mamba-service';
 import { logger } from '@/lib/logger';
-import { getAuth } from '@clerk/nextjs/server';
+import { getAuth } from '@nzila/platform-auth/entra/server';
 
 // Request schemas
 const mambaRequestSchema = z.object({
@@ -33,7 +33,7 @@ const _longDocumentSchema = z.object({
  */
 export async function POST(request: NextRequest) {
   try {
-    const auth = getAuth(request);
+    const auth = await getAuth(request);
     
     if (!auth?.userId) {
       return NextResponse.json(
@@ -102,7 +102,7 @@ export async function POST(request: NextRequest) {
  */
 export async function GET(request: NextRequest) {
   try {
-    const auth = getAuth(request);
+    const auth = await getAuth(request);
     
     if (!auth?.userId) {
       return NextResponse.json(

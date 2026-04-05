@@ -2,7 +2,7 @@ import { PaymentStatusAlert } from "@/components/payment/payment-status-alert";
 import { Toaster } from "@/components/ui/toaster";
 import { Providers } from "@/components/utilities/providers";
 import LayoutWrapper from "@/components/layout-wrapper";
-import { ClerkProvider } from "@clerk/nextjs";
+import { AuthProvider } from '@nzila/platform-auth/entra/client';
 import * as Sentry from '@sentry/nextjs';
 import type { Metadata } from "next";
 import { OrganizationProvider } from "@/contexts/organization-context";
@@ -38,10 +38,7 @@ export default async function RootLayout({ children }: { children: React.ReactNo
   return (
     <html lang={locale} suppressHydrationWarning>
       <body className={poppins.className} suppressHydrationWarning>
-        <ClerkProvider
-          signInFallbackRedirectUrl="/en-CA/dashboard"
-          signUpFallbackRedirectUrl="/en-CA/dashboard"
-        >
+        <AuthProvider>
           <Providers
             attribute="class"
             defaultTheme="light"
@@ -56,7 +53,7 @@ export default async function RootLayout({ children }: { children: React.ReactNo
               <Toaster />
             </OrganizationProvider>
           </Providers>
-        </ClerkProvider>
+        </AuthProvider>
       </body>
     </html>
   );

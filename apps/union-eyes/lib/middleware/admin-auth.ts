@@ -10,7 +10,7 @@
  */
 
 import { NextRequest, NextResponse } from 'next/server';
-import { getAuth } from '@clerk/nextjs/server';
+import { getAuth } from '@nzila/platform-auth/entra/server';
 import { db } from '@/db';
 import { organizationMembers } from '@/db/schema/organization-members-schema';
 import { eq, and } from 'drizzle-orm';
@@ -80,8 +80,8 @@ export async function requireAdmin(
   | { authorized: false; response: NextResponse }
 > {
   try {
-    // Get authentication from Clerk
-    const { userId } = getAuth(request);
+    // Get authentication
+    const { userId } = await getAuth(request);
 
     if (!userId) {
       logger.warn('Unauthenticated admin access attempt', {

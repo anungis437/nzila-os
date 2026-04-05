@@ -8,7 +8,7 @@
  * so they can switch into any org context for support / administration.
  */
 import { NextRequest, NextResponse } from 'next/server';
-import { auth } from '@clerk/nextjs/server';
+import { auth } from '@nzila/platform-auth/entra/server';
 import { db } from '@/db/db';
 import { organizationMembers, organizations } from '@/db/schema-organizations';
 import { eq } from 'drizzle-orm';

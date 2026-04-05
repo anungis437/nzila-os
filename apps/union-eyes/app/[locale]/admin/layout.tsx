@@ -6,7 +6,7 @@
  */
 
 import { ReactNode } from "react";
-import { auth } from "@clerk/nextjs/server";
+import { auth } from '@nzila/platform-auth/entra/server';
 import { redirect } from "next/navigation";
 import Link from "next/link";
 import { requireAdmin } from "@/lib/auth/rbac-server";

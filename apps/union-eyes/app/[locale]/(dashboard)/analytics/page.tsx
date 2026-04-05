@@ -9,7 +9,7 @@
 export const dynamic = 'force-dynamic';
 
 import { Suspense } from 'react';
-import { auth } from '@clerk/nextjs/server';
+import { auth } from '@nzila/platform-auth/entra/server';
 import { redirect } from 'next/navigation';
 import { AnalyticsDashboard } from '@/components/analytics/analytics-dashboard';
 import { RefreshCw } from 'lucide-react';

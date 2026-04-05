@@ -10,7 +10,7 @@ import { useState } from "react";
 import useSWR from "swr";
 import { motion, AnimatePresence } from "framer-motion";
 import { useTranslations, useLocale } from 'next-intl';
-import { useUser } from "@clerk/nextjs";
+import { useUser } from '@nzila/platform-auth/entra/client';
 import { useRouter } from "next/navigation";
 import { useOrganizationId } from "@/lib/hooks/use-organization";
 import {

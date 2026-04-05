@@ -3,7 +3,7 @@
 
 export const dynamic = 'force-dynamic';
 import { useState, useEffect } from "react";
-import { useUser, useClerk } from "@clerk/nextjs";
+import { useUser, useClerk } from '@nzila/platform-auth/entra/client';
 import { useTranslations } from 'next-intl';
 import { useOrganization } from "@/contexts/organization-context";
 import { motion } from "framer-motion";
@@ -148,7 +148,7 @@ export default function ProfilePage() {
   ];
 
   const handleSignOut = async () => {
-    await signOut({ redirectUrl: "/" });
+    await signOut("/");
   };
 
   const handleSaveChanges = () => {

@@ -48,7 +48,7 @@ import {
 } from "lucide-react";
 import Link from "next/link";
 import { usePathname } from "next/navigation";
-import { UserButton } from "@clerk/nextjs";
+import { UserButton } from '@nzila/platform-auth/entra/client';
 import { motion, AnimatePresence } from "framer-motion";
 import type { SelectProfile } from "@/db/schema/domains/member";
 import { useTranslations, useLocale } from "next-intl";

@@ -3,7 +3,7 @@
  * Layout for member self-service portal pages
  */
 import { ReactNode } from "react";
-import { auth } from "@clerk/nextjs/server";
+import { auth } from '@nzila/platform-auth/entra/server';
 import { redirect } from "next/navigation";
 import Link from "next/link";
 import LanguageSwitcher from "@/components/language-switcher";

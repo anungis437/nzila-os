@@ -19,7 +19,7 @@
 
 import { NextRequest, NextResponse } from 'next/server';
 import { createRequestContext, runWithContext, createLogger } from '@nzila/os-core';
-import { auth } from '@clerk/nextjs/server';
+import { auth } from '@nzila/platform-auth/entra/server';
 
 const logger = createLogger('observability');
 
