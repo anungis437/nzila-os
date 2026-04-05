@@ -14,7 +14,7 @@ Before developing within the Nzila monorepo you will need:
 - **pnpm** ≥ 9
 - **Python** ≥ 3.12 (for Django-backed apps)
 - **Docker** (for local PostgreSQL + services)
-- A Clerk development account for authentication keys
+- A Microsoft Entra External ID tenant for authentication keys
 
 ---
 
@@ -49,13 +49,13 @@ Key directories:
 
 ## Authentication
 
-All apps use **Clerk** with the `@clerk/nextjs` adapter. The middleware automatically protects server routes.
+All apps use **`@nzila/platform-auth`** with Microsoft Entra External ID. The middleware automatically protects server routes.
 
 ### Protecting a route (Next.js App Router)
 
 ```typescript
 // middleware.ts
-import { clerkMiddleware, createRouteMatcher } from '@clerk/nextjs/server';
+import { clerkMiddleware, createRouteMatcher } from '@nzila/platform-auth/entra/server';
 
 const isPublicRoute = createRouteMatcher([
   '/',
@@ -73,7 +73,7 @@ export default clerkMiddleware(async (auth, req) => {
 ### Reading the current org in a Server Component
 
 ```typescript
-import { auth } from '@clerk/nextjs/server';
+import { auth } from '@nzila/platform-auth/entra/server';
 
 export default async function DashboardPage() {
   const { orgId, userId } = await auth();
@@ -89,7 +89,7 @@ export default async function DashboardPage() {
 }
 ```
 
-> **Org isolation rule:** `orgId` must always come from the authenticated session (Clerk JWT). Never accept it from query params, request bodies, or cookies.
+> **Org isolation rule:** `orgId` must always come from the authenticated session (auth JWT). Never accept it from query params, request bodies, or cookies.
 
 ---
 

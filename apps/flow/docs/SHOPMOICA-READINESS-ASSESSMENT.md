@@ -69,7 +69,7 @@ Side exits: EXPIRED, CANCELLED (from DRAFT/SENT_TO_CLIENT)
 
 | Control | Implementation |
 |---------|---------------|
-| Authentication | Clerk (@clerk/nextjs) — all dashboard routes |
+| Authentication | @nzila/platform-auth — all dashboard routes |
 | Share Links | SHA-256 hashed tokens, 32-byte random, time-limited |
 | Input Validation | Zod schemas at all boundaries |
 | IP Tracking | Client IP hashed in approval records |

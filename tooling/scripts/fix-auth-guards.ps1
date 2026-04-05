@@ -10,7 +10,7 @@ $PUBLIC_PATTERNS = @('/api/health', '/api/webhooks', '/api/public')
 
 # Auth guard header to inject at top of GET/POST/etc handlers
 $AUTH_HEADER = @'
-import { auth } from '@clerk/nextjs/server';
+import { auth } from '@nzila/platform-auth/entra/server';
 '@
 
 $AUTH_CALL = "  const { userId } = await auth()
@@ -21,8 +21,8 @@ function Add-AuthGuard {
   
   $content = Get-Content -LiteralPath $FilePath -Raw
   
-  # Already has clerk server import?
-  $hasImport = $content.Contains("@clerk/nextjs/server")
+  # Already has platform-auth server import?
+  $hasImport = $content.Contains("@nzila/platform-auth/entra/server")
   
   # Find first exported async function (GET, POST, PUT, PATCH, DELETE)
   $newContent = $content
@@ -36,10 +36,10 @@ function Add-AuthGuard {
       if ($lines[$i] -match "^import ") { $lastImportIdx = $i }
     }
     if ($lastImportIdx -ge 0) {
-      $lines[$lastImportIdx] = $lines[$lastImportIdx] + "`nimport { auth } from '@clerk/nextjs/server';"
+      $lines[$lastImportIdx] = $lines[$lastImportIdx] + "`nimport { auth } from '@nzila/platform-auth/entra/server';"
       $newContent = $lines -join "`n"
     } else {
-      $newContent = "import { auth } from '@clerk/nextjs/server';`n" + $newContent
+      $newContent = "import { auth } from '@nzila/platform-auth/entra/server';`n" + $newContent
     }
   }
   

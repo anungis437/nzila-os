@@ -141,8 +141,8 @@ export async function withRequestContext<T>(
  * High-level wrapper for org-scoped API handlers.
  *
  * 1. Establishes request context (tracing)
- * 2. Authenticates user via Clerk
- * 3. Resolves orgId from Clerk auth
+ * 2. Authenticates user via auth session
+ * 3. Resolves orgId from auth session
  * 4. Returns 403 if no active org is selected
  *
  * This is the API boundary enforcement. The action layer already

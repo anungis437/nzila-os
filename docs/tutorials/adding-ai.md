@@ -31,7 +31,7 @@ Create `app/api/ai/generate/route.ts`:
 
 ```typescript
 import { createAiClient } from '@nzila/ai-sdk';
-import { auth } from '@clerk/nextjs/server';
+import { auth } from '@nzila/platform-auth/entra/server';
 import { NextResponse } from 'next/server';
 
 const ai = createAiClient({

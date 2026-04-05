@@ -43,7 +43,7 @@
 
 | ID | Type | Path | Key Extract |
 |----|------|------|-------------|
-| E04-a | Auth engine | `packages/os-core/src/policy/authorize.ts` | `resolveRole(session)` reads `session.sessionClaims['nzila_role']`; `session.orgId` from Clerk; `auth()` from `@clerk/nextjs/server` |
+| E04-a | Auth engine | `packages/os-core/src/policy/authorize.ts` | `resolveRole(session)` reads `session.sessionClaims['nzila_role']`; `session.orgId` from auth session; `auth()` from `@nzila/platform-auth/entra/server` |
 | E04-b | Entity access check | `packages/os-core/src/policy/authorize.ts` L145 `authorizeOrgAccess()` | `db.select().from(partnerEntities).where(eq(partnerId, ctx.partnerId) AND eq(orgId, orgId))` |
 | E04-c | `org_members` schema | `packages/db/src/schema/orgs.ts` | `pgTable('org_members', { orgId, userId, role, status })` |
 | E04-d | Contract test — auth in routes | `tooling/contract-tests/org-isolation.test.ts` L51 | `every route.ts calls an auth function` — 9/9 PASS |

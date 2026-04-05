@@ -197,9 +197,8 @@ def _generate_claims_report(org_id: str, user_id: str, parameters: dict):
 
 def _generate_members_report(org_id: str, user_id: str, parameters: dict):
     """Generate a CSV report of union members for this org."""
-    from unions.models import (
-        Unions,
-    )  # placeholder — swap for Members model when available
+    from unions.models import \
+        Unions  # placeholder — swap for Members model when available
 
     rows = []  # Member queryset goes here when models are fully populated
     filename = f"members_{org_id}_{uuid.uuid4().hex[:8]}.csv"
@@ -344,21 +343,15 @@ def _notify_report_ready(user_id: str, report_type: str, result_path: str) -> No
 
 def _get_user_email(user_id: str) -> str:
     """
-    Resolve a user's primary email address.
-    Returns an empty string if the auth provider API is not configured (build-safe).
-
-    TODO: Replace clerk_backend_api with Microsoft Graph API call once
-    Entra External ID migration is complete.
+    Resolve a user's primary email address from the local profiles table.
+    Returns an empty string if profile not found (build-safe).
     """
     try:
-        from clerk_backend_api import Clerk  # type: ignore[import]  # TODO: replace with msgraph
+        from auth_core.models import Profiles
 
-        client = Clerk(bearer_auth=os.environ.get(\"CLERK_SECRET_KEY\", \"\"))
-        user = client.users.get(user_id=user_id)
-        primary_id = user.primary_email_address_id
-        for addr in user.email_addresses or []:
-            if addr.id == primary_id:
-                return addr.email_address
+        profile = Profiles.objects.filter(user_id=user_id).first()
+        if profile and profile.email:
+            return str(profile.email)
     except Exception:  # noqa: BLE001
         pass
     return ""

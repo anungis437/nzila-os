@@ -1,7 +1,7 @@
 /**
  * Org context resolution — Cora Insights (read-only).
  *
- * Resolves a fully typed `AgriOrgContext` from Clerk auth state.
+ * Resolves a fully typed `AgriOrgContext` from auth session.
  * Cora is a read-only intelligence platform — the resolved context
  * enforces read-only permissions only.
  *
@@ -11,14 +11,14 @@ import { auth, currentUser } from '@nzila/platform-auth/entra/server'
 import type { AgriOrgContext } from '@nzila/agri-core'
 import type { AgriOrgRole } from '@nzila/agri-core'
 
-/** Emails that always receive admin role, regardless of Clerk metadata. */
+/** Emails that always receive admin role, regardless of auth metadata. */
 const SUPER_ADMIN_EMAILS = new Set([
   'info@nzilaventures.com',
   ...(process.env.SUPER_ADMIN_EMAILS ?? '').split(',').map(s => s.trim()).filter(Boolean),
 ])
 
 /**
- * Resolve org context from Clerk auth (read-only).
+ * Resolve org context from auth session (read-only).
  *
  * @throws Error('Unauthorized') if unauthenticated
  * @throws Error('No active organization') if no org selected

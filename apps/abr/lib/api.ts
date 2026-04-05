@@ -28,7 +28,7 @@ class ApiClient {
     this.client.interceptors.request.use(
       async (config: InternalAxiosRequestConfig) => {
         try {
-          // Get token from Clerk (server-side)
+          // Get auth token (server-side)
           const { getToken } = await auth();
           const token = await getToken();
           
@@ -36,7 +36,7 @@ class ApiClient {
             config.headers.Authorization = `Bearer ${token}`;
           }
         } catch (error) {
-          logger.warn('Failed to get Clerk token:', error instanceof Error ? { message: error.message } : { detail: error });
+          logger.warn('Failed to get auth token:', error instanceof Error ? { message: error.message } : { detail: error });
         }
         
         return config;

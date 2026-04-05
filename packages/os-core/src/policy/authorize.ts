@@ -33,9 +33,9 @@ async function getNextServer() {
 // ── Types ─────────────────────────────────────────────────────────────────
 
 export interface AuthContext {
-  /** Clerk user ID */
+  /** Auth user ID */
   userId: string
-  /** Clerk org ID (if applicable) */
+  /** Auth org ID (if applicable) */
   orgId?: string
   /** The resolved role for this request context */
   role: NzilaRole
@@ -69,7 +69,7 @@ export class AuthorizationError extends Error {
 /**
  * Authorizes the current request. Throws AuthorizationError if not allowed.
  *
- * This function reads the Clerk session from the request headers.
+ * This function reads the auth session from the request headers.
  * In Next.js App Router routes, call this at the top of every handler.
  *
  * @returns AuthContext if authorized

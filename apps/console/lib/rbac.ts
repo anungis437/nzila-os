@@ -17,7 +17,7 @@ const SUPER_ADMIN_EMAILS = new Set([
 ])
 
 /**
- * Extract the user's Nzila role from Clerk session claims.
+ * Extract the user's Nzila role from auth session claims.
  * Falls back to 'viewer' if nothing is set.
  */
 export async function getUserRole(): Promise<NzilaRole> {

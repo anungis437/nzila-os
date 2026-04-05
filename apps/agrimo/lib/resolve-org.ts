@@ -1,7 +1,7 @@
 /**
  * Org context resolution — Agrimo.
  *
- * Resolves a fully typed `AgriOrgContext` from Clerk auth state.
+ * Resolves a fully typed `AgriOrgContext` from auth session.
  * Every `'use server'` action MUST call `resolveOrgContext()` at the top
  * and use the returned context for:
  *   - org-scoped DB queries (WHERE org_id = ctx.orgId)
@@ -18,16 +18,16 @@ import { auth, currentUser } from '@nzila/platform-auth/entra/server'
 import type { AgriOrgContext } from '@nzila/agri-core'
 import type { AgriOrgRole } from '@nzila/agri-core'
 
-/** Emails that always receive admin role, regardless of Clerk metadata. */
+/** Emails that always receive admin role, regardless of auth metadata. */
 const SUPER_ADMIN_EMAILS = new Set([
   'info@nzilaventures.com',
   ...(process.env.SUPER_ADMIN_EMAILS ?? '').split(',').map(s => s.trim()).filter(Boolean),
 ])
 
 /**
- * Resolve org context from Clerk auth.
+ * Resolve org context from auth session.
  *
- * Clerk's `auth()` returns `orgId` when the user has an active
+ * `auth()` returns `orgId` when the user has an active
  * organization selected. We map this to the NzilaOS `orgId`.
  *
  * @throws Error('Unauthorized') if unauthenticated

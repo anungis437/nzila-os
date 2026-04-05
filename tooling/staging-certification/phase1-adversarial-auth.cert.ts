@@ -63,7 +63,7 @@ describe('ADVERSARIAL-1 — Auth Enforcement Proof', () => {
       // Must check userId and return 401
       expect(file).toMatch(/userId/)
       expect(file).toMatch(/40[13]/)
-      // Must call auth() from Clerk
+      // Must call auth() from platform-auth
       expect(file).toMatch(/\bauth\s*\(\s*\)/)
     })
 

@@ -23,7 +23,7 @@ const ABR_ROUTE_PREFIX = 'abr:'
 export interface AbrRequestContext {
   /** The ABR route path (e.g. "/api/decisions", "/dashboard") */
   route: string
-  /** Org ID from Clerk JWT — required, org-scoped */
+  /** Org ID from auth JWT — required, org-scoped */
   orgId: string
   /** Response latency in milliseconds */
   latencyMs: number

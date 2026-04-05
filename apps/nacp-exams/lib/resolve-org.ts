@@ -1,7 +1,7 @@
 /**
  * Org context resolution — NACP Exams.
  *
- * Resolves a fully typed `NacpOrgContext` from Clerk auth state.
+ * Resolves a fully typed `NacpOrgContext` from auth session.
  * Every `'use server'` action MUST call `resolveOrgContext()` at the top
  * and use the returned context for:
  *   - org-scoped DB queries (WHERE org_id = ctx.orgId)
@@ -19,16 +19,16 @@ import { redirect } from 'next/navigation'
 import { NacpRole } from '@nzila/nacp-core/enums'
 import type { NacpOrgContext } from '@nzila/nacp-core/types'
 
-/** Emails that always receive admin role, regardless of Clerk metadata. */
+/** Emails that always receive admin role, regardless of auth metadata. */
 const SUPER_ADMIN_EMAILS = new Set([
   'info@nzilaventures.com',
   ...(process.env.SUPER_ADMIN_EMAILS ?? '').split(',').map(s => s.trim()).filter(Boolean),
 ])
 
 /**
- * Resolve org context from Clerk auth.
+ * Resolve org context from auth session.
  *
- * Clerk's `auth()` returns `orgId` when the user has an active
+ * `auth()` returns `orgId` when the user has an active
  * organization selected. We map this to the NzilaOS `orgId`.
  *
  * @throws Redirects to /sign-in if unauthenticated

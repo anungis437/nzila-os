@@ -40,7 +40,7 @@ Create `package.json`:
   "dependencies": {
     "@nzila/os-core": "workspace:*",
     "@nzila/ui": "workspace:*",
-    "@clerk/nextjs": "^6.0.0",
+    "@nzila/platform-auth": "workspace:*",
     "next": "^16.0.0",
     "react": "^19.0.0",
     "react-dom": "^19.0.0"
@@ -68,7 +68,7 @@ export async function register() {
 Create `middleware.ts`:
 
 ```typescript
-import { clerkMiddleware } from '@clerk/nextjs/server';
+import { clerkMiddleware } from '@nzila/platform-auth/entra/server';
 
 export default clerkMiddleware();
 

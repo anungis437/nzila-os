@@ -420,7 +420,7 @@ export function isFirmRole(role: string): role is FirmRole {
 // ── Server-side auth helpers ────────────────────────────────────────────────
 
 /**
- * Extract the user's platform role from Clerk session claims.
+ * Extract the user's platform role from auth session claims.
  * Falls back to 'viewer' if nothing is set.
  */
 export async function getUserRole(): Promise<PlatformRole> {
@@ -441,7 +441,7 @@ export async function getUserRole(): Promise<PlatformRole> {
 }
 
 /**
- * Extract the user's firm/client role from Clerk org metadata.
+ * Extract the user's firm/client role from auth org metadata.
  * Falls back to 'staff_accountant' for firm users if unset.
  */
 export async function getUserFirmRole(): Promise<FirmRole | ClientRole> {

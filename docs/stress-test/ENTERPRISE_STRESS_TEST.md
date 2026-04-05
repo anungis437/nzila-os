@@ -95,7 +95,7 @@
 
 | Claim | Evidence | Verdict |
 |-------|---------|---------|
-| `apps/console/middleware.ts` uses `clerkMiddleware` | File present; `clerkMiddleware` imported from `@clerk/nextjs/server`, `!isPublicRoute → auth.protect()` | ✅ PASS |
+| `apps/console/middleware.ts` uses `clerkMiddleware` | File present; `clerkMiddleware` imported from `@nzila/platform-auth/entra/server`, `!isPublicRoute → auth.protect()` | ✅ PASS |
 | `apps/partners/middleware.ts` uses `clerkMiddleware` | Same pattern; also covers `/invite(.*)` for onboarding | ✅ PASS |
 | `authz-regression.test.ts` asserts middleware presence for all protected apps | `tooling/contract-tests/authz-regression.test.ts` — 7/7 tests pass | ✅ PASS |
 | Every POST/PUT/PATCH/DELETE route has an auth check | `api-authz-coverage.test.ts` — 4/4 tests pass | ✅ PASS |

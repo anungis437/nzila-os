@@ -1,19 +1,19 @@
-# Django Settings Configuration for Clerk Authentication
+# Django Settings Configuration for Entra Authentication
 
 ## Add to your Django settings.py
 
 ```python
 # ============================================================================
-# CLERK AUTHENTICATION SETTINGS
+# ENTRA AUTHENTICATION SETTINGS
 # ============================================================================
 
-# Clerk API Keys (get from https://dashboard.clerk.com)
-CLERK_JWKS_URL = os.getenv("CLERK_JWKS_URL", "https://YOUR_CLERK_DOMAIN/.well-known/jwks.json")
+# Auth Provider Keys
+CLERK_JWKS_URL = os.getenv("CLERK_JWKS_URL", "https://YOUR_AUTH_DOMAIN/.well-known/jwks.json")
 CLERK_SECRET_KEY = os.getenv("CLERK_SECRET_KEY", "sk_live_...")
 CLERK_PUBLISHABLE_KEY = os.getenv("CLERK_PUBLISHABLE_KEY", "pk_live_...")
 CLERK_WEBHOOK_SECRET = os.getenv("CLERK_WEBHOOK_SECRET", "whsec_...")
 
-# Clerk Frontend Keys (for Next.js)
+# Frontend Auth Keys (for Next.js)
 # Add these to your .env.local in frontend:
 # NEXT_PUBLIC_CLERK_PUBLISHABLE_KEY=pk_live_...
 # CLERK_SECRET_KEY=sk_live_...
@@ -25,7 +25,7 @@ CLERK_WEBHOOK_SECRET = os.getenv("CLERK_WEBHOOK_SECRET", "whsec_...")
 
 REST_FRAMEWORK = {
     "DEFAULT_AUTHENTICATION_CLASSES": [
-        "apps.auth_core.authentication.ClerkAuthentication",         # Primary: Clerk JWT
+        "apps.auth_core.authentication.ClerkAuthentication",         # Primary: Entra JWT
         "apps.auth_core.authentication.ClerkAPIKeyAuthentication",   # Service accounts
         "rest_framework.authentication.SessionAuthentication",       # Admin panel (optional)
     ],
@@ -57,8 +57,8 @@ MIDDLEWARE = [
     "django.contrib.messages.middleware.MessageMiddleware",
     "django.middleware.clickjacking.XFrameOptionsMiddleware",
     
-    # Clerk auth middleware (add these)
-    "apps.auth_core.middleware.ClerkJWTMiddleware",              # Attach Clerk context
+    # Auth middleware (add these)
+    "apps.auth_core.middleware.ClerkJWTMiddleware",              # Attach auth context
     "apps.auth_core.middleware.OrganizationIsolationMiddleware", # Multi-tenant isolation
     "apps.auth_core.middleware.AuditLogMiddleware",              # Auth logging
 ]

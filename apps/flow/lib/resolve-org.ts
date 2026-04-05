@@ -1,7 +1,7 @@
 /**
  * Org context resolution — Flow.
  *
- * Resolves an `OrgContext` from Clerk auth state.
+ * Resolves an `OrgContext` from auth session.
  * Every `'use server'` action MUST call `resolveOrgContext()` at the top
  * and use the returned context for org-scoped DB queries.
  *
