@@ -14,12 +14,14 @@ import {
   getAllowedClaimTransitions,
   type ClaimStatus,
 } from '@/lib/services/claim-workflow-fsm'
-import { claims } from '@/db/schema'
-import { eq, and } from 'drizzle-orm'
+import { claims, claimUpdates } from '@/db/schema'
+import { eq, and, count } from 'drizzle-orm'
 import { logger } from '@/lib/logger'
 import { withRLSContext } from '@/lib/db/with-rls-context'
 import { wrapSchemaQuery } from '@/lib/schema-error'
 import { z } from 'zod'
+import { eventBus, AppEvents } from '@/lib/events'
+import '@/lib/events/pilot-event-listeners'
 
 export const dynamic = 'force-dynamic'
 
@@ -117,6 +119,20 @@ export async function POST(request: NextRequest) {
           { status: 422 },
         )
       }
+
+      // Emit CLAIM_UPDATED for pilot observability
+      const [{ value: priorUpdates }] = await tx
+        .select({ value: count() })
+        .from(claimUpdates)
+        .where(eq(claimUpdates.claimId, claim.claimId));
+
+      eventBus.emit(AppEvents.CLAIM_UPDATED, {
+        claimId: claim.claimId,
+        organizationId: organizationId || claim.organizationId,
+        updatedBy: userId,
+        newStatus: targetStatus,
+        isFirstUpdate: priorUpdates <= 1, // 1 = the update we just created
+      }, { organizationId: organizationId || claim.organizationId, userId });
 
       return NextResponse.json({ success: true, claim: result.claim })
     })

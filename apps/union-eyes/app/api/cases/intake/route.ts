@@ -17,6 +17,9 @@ import { auditDataMutation } from '@/lib/audit-logger';
 import { logger } from '@/lib/logger';
 import { requireEntitlement } from '@/services/platform-economics/entitlement-guard';
 import { buildUnionEvidencePack } from '@/lib/evidence';
+import { eventBus, AppEvents } from '@/lib/events';
+import '@/lib/events/pilot-event-listeners';
+import { getClaimsByMember } from '@/db/queries/claims-queries';
 
 export const dynamic = 'force-dynamic';
 
@@ -124,6 +127,16 @@ export async function POST(request: Request) {
       actorId: userId,
       artifacts: [{ type: 'case_intake', data: { claimId: claim.claimId, claimNumber: claim.claimNumber, caseType: data.caseType, severity } }],
     }).catch((err) => logger.warn('Evidence pack failed', { error: String(err), actionType: 'CASE_INTAKE_SUBMITTED' }))
+
+    // 7. Pilot observability: emit case-created event
+    const memberClaims = await getClaimsByMember(data.memberId).catch(() => []);
+    eventBus.emit(AppEvents.CLAIM_CREATED, {
+      claimId: claim.claimId,
+      organizationId: orgId,
+      createdBy: userId,
+      type: data.caseType,
+      isFirst: memberClaims.length <= 1,
+    }, { organizationId: orgId, userId });
 
     return NextResponse.json(
       {
