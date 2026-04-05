@@ -1,6 +1,6 @@
 /**
- * Submit New Claim Page
- * Form for members to submit new claims
+ * Create New Case Page
+ * Form for members to create new cases
  */
 "use client";
 
@@ -20,7 +20,7 @@ import {
   SelectTrigger,
   SelectValue,
 } from "@/components/ui/select";
-import { ArrowLeft, Upload } from "lucide-react";
+import { ArrowLeft } from "lucide-react";
 
 export default function NewClaimPage() {
   const router = useRouter();
@@ -52,7 +52,7 @@ export default function NewClaimPage() {
         router.push('../claims');
       } else {
         const data = await response.json().catch(() => ({}));
-        setError((data as { message?: string }).message ?? 'Failed to submit claim. Please try again.');
+        setError((data as { message?: string }).message ?? 'Failed to create case. Please try again.');
       }
     } catch (_error) {
       setError('Network error — please check your connection and try again.');
@@ -70,8 +70,8 @@ export default function NewClaimPage() {
 
       <Card>
         <CardHeader>
-          <CardTitle>Submit New Claim</CardTitle>
-          <CardDescription>Fill out the form below to submit your grievance or claim</CardDescription>
+          <CardTitle>Create New Case</CardTitle>
+          <CardDescription>Fill out the form below to create a new case</CardDescription>
         </CardHeader>
         <CardContent>
           <form onSubmit={handleSubmit} className="space-y-6">
@@ -194,20 +194,9 @@ export default function NewClaimPage() {
               )}
             </div>
 
-            <div>
-              <Label>Supporting Documents</Label>
-              <div className="border-2 border-dashed border-gray-300 rounded-lg p-8 text-center">
-                <Upload className="h-8 w-8 text-gray-400 mx-auto mb-2" />
-                <p className="text-sm text-gray-600 mb-2">Upload any supporting documents or evidence</p>
-                <Button type="button" variant="outline" size="sm">
-                  Choose Files
-                </Button>
-              </div>
-            </div>
-
             <div className="flex gap-4">
               <Button type="submit" disabled={submitting} className="flex-1">
-                {submitting ? 'Submitting...' : 'Submit Claim'}
+                {submitting ? 'Creating...' : 'Create Case'}
               </Button>
               <Button type="button" variant="outline" onClick={() => router.back()}>
                 Cancel
