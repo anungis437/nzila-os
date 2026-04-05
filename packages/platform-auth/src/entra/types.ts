@@ -19,6 +19,12 @@ export interface EntraSession extends DefaultSession {
   activeOrgId?: string
   orgRole?: string
   entraObjectId?: string
+  /** Entra tenant ID the user authenticated from. */
+  tenantId?: string
+  /** Identity provider (e.g. 'microsoft', 'google.com', 'mail'). */
+  identityProvider?: string
+  /** True if user is from an external tenant or personal account. */
+  isExternalUser?: boolean
 }
 
 /** Entra token claims relevant to Nzila platform. */
@@ -34,6 +40,7 @@ export interface EntraTokenClaims {
   roles?: string[] // App role assignments
   groups?: string[] // Group memberships (used as org IDs)
   tid?: string // Tenant ID
+  idp?: string // Identity provider (external users)
   wids?: string[] // Directory role template IDs
 }
 

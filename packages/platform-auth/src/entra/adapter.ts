@@ -48,6 +48,9 @@ export function resolveIdentityFromEntra(
     orgRole: entraSession.orgRole ?? deriveOrgRoleFromAppRoles(entraSession.roles),
     sessionClaims: {
       roles: entraSession.roles ?? [],
+      tenantId: entraSession.tenantId,
+      identityProvider: entraSession.identityProvider,
+      isExternalUser: entraSession.isExternalUser,
     },
     isService: false,
   }

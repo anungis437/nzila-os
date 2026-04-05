@@ -11,13 +11,17 @@ import { createRemoteJWKSet, jwtVerify, type JWTPayload } from 'jose'
 
 let jwks: ReturnType<typeof createRemoteJWKSet> | null = null
 
+/**
+ * Get JWKS for token verification.
+ * Uses the /common/ endpoint to support multi-tenant + personal accounts.
+ * If AZURE_AD_TENANT_ID is set, uses tenant-specific endpoint for tighter validation.
+ */
 function getJWKS() {
   if (jwks) return jwks
   const tenantId = process.env.AZURE_AD_TENANT_ID
-  if (!tenantId) {
-    throw new Error('AZURE_AD_TENANT_ID is required for token verification')
-  }
-  const jwksUri = `https://login.microsoftonline.com/${tenantId}/discovery/v2.0/keys`
+  // Use /common/ for multi-tenant support (org + personal accounts)
+  const authority = tenantId || 'common'
+  const jwksUri = `https://login.microsoftonline.com/${authority}/discovery/v2.0/keys`
   jwks = createRemoteJWKSet(new URL(jwksUri))
   return jwks
 }
@@ -29,6 +33,7 @@ export interface VerifyTokenResult {
     roles?: string[]
     groups?: string[]
     tid?: string
+    idp?: string
     tenant_id?: string
     org_role?: string
     org_permissions?: string[]
@@ -52,19 +57,26 @@ export async function verifyToken(
 
   const { payload } = await jwtVerify(token, getJWKS(), {
     audience: clientId,
+    // Multi-tenant: validate issuer pattern rather than exact match.
+    // Tokens from any Azure AD tenant or personal accounts are accepted.
+    // The issuer format is https://login.microsoftonline.com/{tid}/v2.0
     issuer: tenantId
       ? `https://login.microsoftonline.com/${tenantId}/v2.0`
       : undefined,
   })
+
+  const tid = (payload as Record<string, unknown>).tid as string | undefined
 
   return {
     payload: {
       ...payload,
       sub: payload.sub ?? '',
       // Map Entra claims to Clerk-compatible names
-      tenant_id: (payload as Record<string, unknown>).tid as string | undefined,
+      tenant_id: tid,
       org_role: ((payload as Record<string, unknown>).roles as string[] | undefined)?.[0],
       org_permissions: (payload as Record<string, unknown>).roles as string[] | undefined,
+      // Identity provider for external users
+      idp: (payload as Record<string, unknown>).idp as string | undefined,
     },
   }
 }

@@ -41,7 +41,7 @@ export function SignUp({
         Create your account
       </h2>
       <p className="text-sm text-gray-500 dark:text-gray-400">
-        Sign up with your Microsoft account to get started.
+        Use your work, school, or personal account to get started.
       </p>
       <button
         type="button"
@@ -62,8 +62,11 @@ export function SignUp({
           <path fill="#05a6f0" d="M1 12h10v10H1z" />
           <path fill="#ffba08" d="M12 12h10v10H12z" />
         </svg>
-        Sign up with Microsoft
+        Create account with Microsoft
       </button>
+      <p className="mt-2 text-xs text-gray-400 dark:text-gray-500">
+        No Microsoft account? You can sign up with email or a personal account.
+      </p>
     </div>
   )
 }

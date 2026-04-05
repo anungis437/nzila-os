@@ -58,6 +58,10 @@ export interface AuthState {
   orgRole: string | null
   /** App roles from Entra. */
   roles: string[]
+  /** Identity provider (e.g. 'microsoft', 'google.com'). */
+  identityProvider: string | null
+  /** Whether user is from an external tenant or personal account. */
+  isExternalUser: boolean
   /** Get the access token for API calls. */
   getToken: () => Promise<string | null>
   /** Sign the user out. */
@@ -78,6 +82,8 @@ export function useAuth(): AuthState {
     orgId: entra?.activeOrgId ?? null,
     orgRole: entra?.orgRole ?? null,
     roles: entra?.roles ?? [],
+    identityProvider: entra?.identityProvider ?? null,
+    isExternalUser: entra?.isExternalUser ?? false,
     getToken: async () => entra?.accessToken ?? null,
     signOut: async () => {
       await nextAuthSignOut({ redirectTo: '/' })
@@ -156,8 +162,10 @@ export function useUser(): UserState {
       },
       privateMetadata: {
         role: entra?.roles?.[0] ?? undefined,
-        tenantId: entra?.activeOrgId ?? undefined,
+        tenantId: entra?.tenantId ?? entra?.activeOrgId ?? undefined,
         organizationId: entra?.activeOrgId ?? undefined,
+        identityProvider: entra?.identityProvider ?? undefined,
+        isExternalUser: entra?.isExternalUser ?? false,
       },
       organizationMemberships: entra?.activeOrgId
         ? [{ organization: { id: entra.activeOrgId }, role: entra?.orgRole ?? 'member' }]

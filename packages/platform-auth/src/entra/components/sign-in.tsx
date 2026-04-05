@@ -40,7 +40,7 @@ export function SignIn({
         Sign in to your account
       </h2>
       <p className="text-sm text-gray-500 dark:text-gray-400">
-        Sign in with your Microsoft account to continue.
+        Use your work, school, or personal account to continue.
       </p>
       <button
         type="button"
@@ -57,8 +57,11 @@ export function SignIn({
           <path fill="#05a6f0" d="M1 12h10v10H1z" />
           <path fill="#ffba08" d="M12 12h10v10H12z" />
         </svg>
-        Sign in with Microsoft
+        Continue with Microsoft
       </button>
+      <p className="mt-2 text-xs text-gray-400 dark:text-gray-500">
+        Organizational, personal Microsoft, and guest accounts are supported.
+      </p>
     </div>
   )
 }

@@ -12,7 +12,8 @@
  */
 
 // ── Config / NextAuth instance ──────────────────────────────────────────────
-export { handlers, auth, signIn, signOut, authConfig } from './config'
+export { handlers, auth, signIn, signOut, authConfig, setOnSignInHook } from './config'
+export type { OnSignInHookParams } from './config'
 
 // ── Adapter (session → identity) ────────────────────────────────────────────
 export {
