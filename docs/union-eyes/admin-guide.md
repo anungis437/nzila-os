@@ -72,6 +72,8 @@ If a critical issue requires pausing:
 3. Export all case data
 4. Contact the platform support team
 
----
+## Related Documents
 
-**See also:** [Pilot Overview](./pilot-overview.md) · [CUPE Admin Runbook](../pilot/cupe/CUPE_PILOT_ADMIN_RUNBOOK.md) · [Support SOP](../pilot/cupe/CUPE_PILOT_SUPPORT_SOP.md)
+- [Pilot Overview](./pilot-overview.md) — What the pilot includes
+- [CUPE Admin Runbook](../pilot/cupe/CUPE_PILOT_ADMIN_RUNBOOK.md) — Detailed procedures
+- [Support SOP](../pilot/cupe/CUPE_PILOT_SUPPORT_SOP.md) — Issue triage and escalation

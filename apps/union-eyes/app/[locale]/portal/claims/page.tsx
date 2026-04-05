@@ -124,11 +124,11 @@ export default function MemberClaimsPage() {
           <CardContent className="flex flex-col items-center justify-center py-12">
             <FileText className="h-12 w-12 text-gray-400 mb-4" />
             <p className="text-gray-600 mb-4">
-              {searchTerm ? 'No claims match your search' : 'No claims submitted yet'}
+              {searchTerm ? 'No cases match your search' : 'No cases submitted yet'}
             </p>
             {!searchTerm && (
               <Button onClick={() => router.push('./claims/new')}>
-                Submit Your First Claim
+                Create Your First Case
               </Button>
             )}
           </CardContent>

@@ -72,4 +72,8 @@ platform team review feedback to address blockers.
 - [CUPE Go/No-Go Review](../pilot/cupe/CUPE_PILOT_GO_NO_GO_REVIEW.md)
 - [CUPE Rollback Runbook](../pilot/cupe/CUPE_PILOT_ROLLBACK_RUNBOOK.md)
 
-**See also:** [Quick Start](./quick-start.md) · [Admin Guide](./admin-guide.md) · [Pilot Scope (technical)](../../apps/union-eyes/docs/PILOT_SCOPE.md)
+## Related Documents
+
+- [Quick Start](./quick-start.md) — Create your first case in 2 minutes
+- [Admin Guide](./admin-guide.md) — Day-to-day administration
+- [Pilot Scope (technical)](../../apps/union-eyes/docs/PILOT_SCOPE.md) — Technical pilot boundaries

@@ -379,7 +379,7 @@ export default async function AnalyticsAdminDashboard({
                     <span className="text-lg font-bold">{Math.floor(stats.avg_session_sec / 60)}m {stats.avg_session_sec % 60}s</span>
                   </div>
                   <div className="flex items-center justify-between">
-                    <span className="text-sm">Grievances Filed</span>
+                    <span className="text-sm">Cases Filed</span>
                     <span className="text-lg font-bold">{stats.total_grievances}</span>
                   </div>
                   <div className="flex items-center justify-between">

@@ -25,11 +25,11 @@ need attention (overdue cases, SLA risks, required actions).
 
 1. Click **Create Case** on the Dashboard
 2. Fill in the form:
-   - **Case type** — Select from the list (e.g., Workplace Safety, Discrimination)
-   - **Priority** — Low, Medium, High, or Critical
-   - **Title** — Short description (5–300 characters)
-   - **Description** — Full details (10–5,000 characters)
-   - **Incident date** — When it happened (cannot be a future date)
+   - **Title** — Short description of the issue
+   - **Category** — Select from the list (e.g., Safety, Scheduling, Discrimination)
+   - **Priority** — Low, Medium, High, or Urgent (defaults to Medium)
+   - **Description** — Full details of what happened
+   - **Date** — When it happened (cannot be a future date)
 3. Click **Submit**
 4. You'll receive a case number (e.g., `GRV-2025-0001`)
 
@@ -89,6 +89,8 @@ working or what could be better.
 
 For the full glossary, see [Glossary](../index/glossary.md).
 
----
+## Related Documents
 
-**See also:** [Quick Start](./quick-start.md) · [FAQ](./faq.md) · [Pilot Overview](./pilot-overview.md)
+- [Quick Start](./quick-start.md) — 2-minute version of this guide
+- [FAQ](./faq.md) — Common questions and answers
+- [Pilot Overview](./pilot-overview.md) — What the pilot includes

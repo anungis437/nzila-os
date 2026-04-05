@@ -82,18 +82,18 @@ export default function NewClaimPage() {
             )}
 
             <div>
-              <Label htmlFor="claimType">Claim Type *</Label>
+              <Label htmlFor="claimType">Case Type *</Label>
               <Select
                 value={formData.claimType}
                 onValueChange={(value) => setFormData({ ...formData, claimType: value })}
               >
                 <SelectTrigger>
-                  <SelectValue placeholder="Select claim type" />
+                  <SelectValue placeholder="Select case type" />
                 </SelectTrigger>
                 <SelectContent>
-                  <SelectItem value="grievance_discipline">Disciplinary Action (Grievance)</SelectItem>
-                  <SelectItem value="grievance_schedule">Scheduling Dispute (Grievance)</SelectItem>
-                  <SelectItem value="grievance_pay">Pay Dispute (Grievance)</SelectItem>
+                  <SelectItem value="grievance_discipline">Disciplinary Action</SelectItem>
+                  <SelectItem value="grievance_schedule">Scheduling Dispute</SelectItem>
+                  <SelectItem value="grievance_pay">Pay Dispute</SelectItem>
                   <SelectItem value="workplace_safety">Workplace Safety</SelectItem>
                   <SelectItem value="discrimination_age">Discrimination — Age</SelectItem>
                   <SelectItem value="discrimination_gender">Discrimination — Gender</SelectItem>

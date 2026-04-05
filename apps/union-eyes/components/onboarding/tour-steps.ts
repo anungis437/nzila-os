@@ -14,7 +14,7 @@ export const claimsManagementTour: TourStep[] = [
     element: '#claims-nav',
     popover: {
       title: 'Claims Management',
-      description: 'Navigate all member grievances and claims here. Track status, assign cases, and manage resolutions.',
+      description: 'Navigate all member cases here. Track status, assign cases, and manage resolutions.',
       side: 'right',
       align: 'start',
     },
@@ -293,7 +293,7 @@ export const tourMetadata = [
   {
     id: 'claims-management',
     name: 'Claims Management',
-    description: 'Learn how to manage grievances and claims',
+    description: 'Learn how to manage and track cases',
     steps: claimsManagementTour.length,
     estimatedTime: '2 min',
   },

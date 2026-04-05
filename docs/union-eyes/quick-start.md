@@ -9,12 +9,14 @@ time, you'll see a short onboarding wizard — follow the 4 steps to get oriente
 
 ## Step 2: Create a Case
 
-From the Dashboard, click the green **Create Case** card.
+From the Dashboard, click the **Create Case** card.
 
 Fill in:
-- **Issue type** — Select what kind of workplace issue this is
+- **Title** — Short description of the issue
+- **Category** — Select what kind of workplace issue this is (e.g., Safety, Scheduling, Discrimination)
+- **Priority** — How urgent (defaults to Medium)
 - **Description** — Describe what happened in your own words
-- **Priority** — How urgent is this?
+- **Date** — When did this happen?
 
 Click **Submit**. You'll get a case number and be taken to your new case.
 
@@ -37,6 +39,8 @@ that need your attention.
 - Check the [FAQ](./faq.md) if you have questions
 - If you're an admin, see the [Admin Guide](./admin-guide.md)
 
-> **Terminology note:** In the UI, "Case" is the primary term. You may
-> occasionally see "Grievance" when a case follows a formal collective
-> agreement process. Both refer to tracked workplace issues.
+## Related Documents
+
+- [User Guide](./user-guide.md) — Full feature walkthrough
+- [Pilot Overview](./pilot-overview.md) — What the pilot includes
+- [FAQ](./faq.md) — Common questions
