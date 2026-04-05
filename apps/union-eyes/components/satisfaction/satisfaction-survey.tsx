@@ -330,7 +330,7 @@ export function SatisfactionSurvey({
             onChange={(e) => setFeedback(e.target.value)}
             maxLength={2000}
             disabled={submitting}
-            className="min-h-[100px]"
+            className="min-h-25"
           />
           {feedback.length > 0 && (
             <p className="text-xs text-muted-foreground text-right">
@@ -406,7 +406,7 @@ export function SatisfactionSurvey({
           <Button
             onClick={handleSubmit}
             disabled={!allRated || submitting}
-            className="min-w-[140px]"
+            className="min-w-35"
           >
             {submitting ? (
               <span className="animate-pulse">Submitting...</span>

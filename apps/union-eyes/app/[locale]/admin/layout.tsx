@@ -17,7 +17,8 @@ import {
   Shield,
   Bell,
   Settings,
-  Activity
+  Activity,
+  Rocket
 } from "lucide-react";
 import { Button } from "@/components/ui/button";
 
@@ -77,6 +78,12 @@ export default async function AdminLayout({ children, params }: AdminLayoutProps
       label: "Audit Logs", 
       icon: Activity,
       description: "System activity logs" 
+    },
+    { 
+      href: `/${locale}/admin/pilot`, 
+      label: "Pilot", 
+      icon: Rocket,
+      description: "Pilot metrics & readiness" 
     },
     { 
       href: `/${locale}/dashboard/settings`, 
