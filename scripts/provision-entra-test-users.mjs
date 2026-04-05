@@ -37,14 +37,21 @@ if (!PG_PASSWORD) throw new Error('PGPASSWORD env var is required');
 
 const TEST_PASSWORD = process.env.PROVISION_USER_PASSWORD || 'NzilaTest2026!';
 const PSQL = String.raw`C:\Program Files\PostgreSQL\17\bin\psql.exe`;
-const DB_CONN = '-U nzila -d nzila_automation -p 5433 -h localhost';
+
+// Support staging DB via DATABASE_URL or individual vars
+const DB_HOST = process.env.DB_HOST || 'localhost';
+const DB_PORT = process.env.DB_PORT || '5433';
+const DB_NAME = process.env.DB_NAME || 'nzila_automation';
+const DB_USER = process.env.DB_USER || 'nzila';
+const DB_SSLMODE = DB_HOST !== 'localhost' ? 'require' : 'prefer';
+const DB_CONN = `-U ${DB_USER} -d ${DB_NAME} -p ${DB_PORT} -h ${DB_HOST}`;
 
 const DB_ORGS = {
-  nzila: '458a56cb-251a-4c91-a0b5-81bb8ac39087',
-  clc: '9588c826-a543-4d43-9c22-2e477e532649',
-  cape: '063aa6d5-8b1f-4c6c-bef7-9b74f6d03bc6',
-  cupe: '9210418f-6a4f-4dab-a7d2-4450d581dc81',
-  zonga: '33333333-3333-3333-3333-333333333333',
+  nzila: process.env.ORG_NZILA || '458a56cb-251a-4c91-a0b5-81bb8ac39087',
+  clc: process.env.ORG_CLC || '873cf59b-cef5-4d51-9a62-151512810449',
+  cape: process.env.ORG_CAPE || '885aa4e0-5dc1-45bf-ad32-86477868e8ea',
+  cupe: process.env.ORG_CUPE || '4a20966a-2f17-46b5-9b84-b3efea57b50a',
+  zonga: process.env.ORG_ZONGA || '33333333-3333-3333-3333-333333333333',
 };
 
 // ── MS Graph API ────────────────────────────────────────────────────────────
@@ -96,13 +103,17 @@ async function createOrFindUser(first, last, email) {
     return search.body.value[0].id;
   }
 
-  // Create new user
-  const mailNickname = email.split('@')[0].replace(/[^a-zA-Z0-9]/g, '');
+  // Create new user — use tenant's default domain for UPN/issuer
+  const TENANT_DOMAIN = process.env.ENTRA_DOMAIN || 'onelabtech.onmicrosoft.com';
+  // Include email domain in mailNickname to avoid UPN collisions across orgs
+  const emailPrefix = email.split('@')[0].replace(/[^a-zA-Z0-9]/g, '');
+  const emailDomain = email.split('@')[1].split('.')[0].replace(/[^a-zA-Z0-9]/g, '');
+  const mailNickname = `${emailPrefix}.${emailDomain}`;
   const res = await graphRequest('POST', '/users', {
     accountEnabled: true,
     displayName: `${first} ${last}`,
     mailNickname,
-    userPrincipalName: `${mailNickname}@${ENTRA_TENANT_ID}.onmicrosoft.com`,
+    userPrincipalName: `${mailNickname}@${TENANT_DOMAIN}`,
     mail: email,
     givenName: first,
     surname: last,
@@ -110,13 +121,6 @@ async function createOrFindUser(first, last, email) {
       forceChangePasswordNextSignIn: false,
       password: TEST_PASSWORD,
     },
-    identities: [
-      {
-        signInType: 'emailAddress',
-        issuer: `${ENTRA_TENANT_ID}.onmicrosoft.com`,
-        issuerAssignedId: email,
-      },
-    ],
   });
 
   if (res.status === 201 || res.status === 200) return res.body.id;
@@ -137,10 +141,12 @@ async function createOrFindUser(first, last, email) {
 // ── DB helpers ──────────────────────────────────────────────────────────────
 
 function runSQL(sql) {
+  // Collapse to single line to avoid shell escaping issues with -c
+  const oneLine = sql.replace(/\n/g, ' ').replace(/\s+/g, ' ').trim();
   try {
     return execSync(
-      `"${PSQL}" ${DB_CONN} -t -A --pset=pager=off -c "${sql.replace(/"/g, '\\"')}"`,
-      { env: { ...process.env, PGPASSWORD: PG_PASSWORD }, encoding: 'utf-8' },
+      `"${PSQL}" ${DB_CONN} -t -A --pset=pager=off -c "${oneLine.replace(/"/g, '\\"')}"`,
+      { env: { ...process.env, PGPASSWORD: PG_PASSWORD, PGSSLMODE: DB_SSLMODE }, encoding: 'utf-8' },
     ).trim();
   } catch (err) {
     console.error(`  ✗ SQL: ${err.stderr?.trim() || err.message}`);
@@ -227,37 +233,49 @@ async function main() {
 
     results.push({ ...user, entraOid });
 
+    // Map functional role to DB enum (org_member_role: org_admin | org_secretary | org_viewer)
+    const adminRoles = ['app_owner', 'coo', 'cto', 'platform_lead', 'system_admin', 'security_manager', 'admin', 'president', 'clc_executive'];
+    const secretaryRoles = ['secretary_treasurer', 'sectreasurer', 'fed_executive', 'national_officer', 'manager', 'clc_staff'];
+    let dbRole = 'org_viewer';
+    if (adminRoles.includes(user.role)) dbRole = 'org_admin';
+    else if (secretaryRoles.includes(user.role)) dbRole = 'org_secretary';
+
     // Upsert into org_members (uses renamed user_id column)
     const orgDbId = DB_ORGS[user.org];
     if (orgDbId) {
+      // Check if member already exists (no unique constraint on org_id+user_id)
+      const existing = runSQL(
+        `SELECT id FROM org_members WHERE org_id='${orgDbId}' AND user_id='${esc(entraOid)}' LIMIT 1`,
+      );
+      if (!existing) {
+        runSQL(
+          `INSERT INTO org_members (id, org_id, user_id, role, status, created_at, updated_at)
+           VALUES (gen_random_uuid(), '${orgDbId}', '${esc(entraOid)}', '${dbRole}', 'active', now(), now())`,
+        );
+      }
+    }
+
+    // Upsert into user_uuid_mapping (no unique on clerk_user_id — check first)
+    const existingMapping = runSQL(
+      `SELECT user_uuid FROM user_uuid_mapping WHERE clerk_user_id='${esc(entraOid)}' OR entra_oid='${esc(entraOid)}' LIMIT 1`,
+    );
+    if (!existingMapping) {
       runSQL(
-        `INSERT INTO org_members (id, org_id, user_id, role, status, created_at, updated_at)
-         VALUES (gen_random_uuid(), '${orgDbId}', '${esc(entraOid)}', '${esc(user.role)}', 'active', now(), now())
-         ON CONFLICT DO NOTHING`,
+        `INSERT INTO user_uuid_mapping (clerk_user_id, entra_oid, created_at, updated_at) VALUES ('${esc(entraOid)}', '${esc(entraOid)}', now(), now())`,
       );
     }
 
-    // Upsert into user_uuid_mapping
-    runSQL(
-      `INSERT INTO user_uuid_mapping (clerk_user_id, entra_oid, created_at, updated_at)
-       VALUES ('${esc(entraOid)}', '${esc(entraOid)}', now(), now())
-       ON CONFLICT (clerk_user_id) DO UPDATE SET entra_oid = EXCLUDED.entra_oid`,
-    );
-
-    // Upsert into UE user_management.users
-    runSQL(
-      `INSERT INTO user_management.users (user_id, email, first_name, last_name, display_name, is_active, created_at, updated_at)
-       VALUES ('${esc(entraOid)}', '${esc(user.email)}', '${esc(user.first)}', '${esc(user.last)}', '${esc(displayName)}', true, now(), now())
-       ON CONFLICT (user_id) DO UPDATE SET email = EXCLUDED.email, first_name = EXCLUDED.first_name, last_name = EXCLUDED.last_name`,
-    );
-
-    // UE organization_members
+    // UE organization_users (stores functional role)
     if (orgDbId) {
-      runSQL(
-        `INSERT INTO user_management.organization_users (organization_user_id, organization_id, user_id, role, is_active, created_at, updated_at)
-         VALUES (gen_random_uuid(), '${orgDbId}', '${esc(entraOid)}', '${esc(user.role)}', true, now(), now())
-         ON CONFLICT DO NOTHING`,
+      const existingOrgUser = runSQL(
+        `SELECT organization_user_id FROM user_management.organization_users WHERE organization_id='${orgDbId}' AND user_id='${esc(entraOid)}' LIMIT 1`,
       );
+      if (!existingOrgUser) {
+        runSQL(
+          `INSERT INTO user_management.organization_users (organization_user_id, organization_id, user_id, role, is_active, created_at, updated_at)
+           VALUES (gen_random_uuid(), '${orgDbId}', '${esc(entraOid)}', '${esc(user.role)}', true, now(), now())`,
+        );
+      }
     }
   }
 

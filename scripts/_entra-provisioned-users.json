@@ -1,0 +1,314 @@
+[
+  {
+    "first": "Michel",
+    "last": "Ouimet",
+    "email": "test.coo@nzilaventures.com",
+    "org": "nzila",
+    "role": "coo",
+    "entraOid": "1f7fb213-149b-4b90-9ea0-884d4c9e0837"
+  },
+  {
+    "first": "David",
+    "last": "Nkemdirim",
+    "email": "test.cto@nzilaventures.com",
+    "org": "nzila",
+    "role": "cto",
+    "entraOid": "7a4502a9-f926-46ef-8e04-96537bbc495c"
+  },
+  {
+    "first": "Tania",
+    "last": "Da Silva",
+    "email": "test.platformlead@nzilaventures.com",
+    "org": "nzila",
+    "role": "platform_lead",
+    "entraOid": "e3ac74fa-e84d-4473-aea1-8575bcbf6dee"
+  },
+  {
+    "first": "Tim",
+    "last": "Maguire",
+    "email": "test.csdir@nzilaventures.com",
+    "org": "nzila",
+    "role": "customer_success_director",
+    "entraOid": "8c0c0cc1-84ec-43e2-9b55-fa99bd4e61d6"
+  },
+  {
+    "first": "Mark",
+    "last": "Hancock",
+    "email": "test.supportmgr@nzilaventures.com",
+    "org": "nzila",
+    "role": "support_manager",
+    "entraOid": "03248eea-46a3-4282-9c02-7a6ebd1e049f"
+  },
+  {
+    "first": "Patty",
+    "last": "Coates",
+    "email": "test.analyticsmgr@nzilaventures.com",
+    "org": "nzila",
+    "role": "data_analytics_manager",
+    "entraOid": "cff16f9b-f7c2-42e3-9961-c7caecfc5105"
+  },
+  {
+    "first": "Keisha",
+    "last": "Brown",
+    "email": "test.billingmgr@nzilaventures.com",
+    "org": "nzila",
+    "role": "billing_manager",
+    "entraOid": "a562a25e-ea13-46e0-95b4-d6d02271cc09"
+  },
+  {
+    "first": "Carlos",
+    "last": "Rivera",
+    "email": "test.integmgr@nzilaventures.com",
+    "org": "nzila",
+    "role": "integration_manager",
+    "entraOid": "a3209853-114b-4d71-ac53-4c2a62148c4d"
+  },
+  {
+    "first": "Priya",
+    "last": "Sharma",
+    "email": "test.complmgr@nzilaventures.com",
+    "org": "nzila",
+    "role": "compliance_manager",
+    "entraOid": "7b953dbe-8418-4b9a-ae67-719c26e1ce20"
+  },
+  {
+    "first": "Ahmed",
+    "last": "Hassan",
+    "email": "test.secmgr@nzilaventures.com",
+    "org": "nzila",
+    "role": "security_manager",
+    "entraOid": "ff690043-ea1f-434d-b6a1-9a3400c102c9"
+  },
+  {
+    "first": "Sandra",
+    "last": "Weatherby",
+    "email": "test.sysadmin2@nzilaventures.com",
+    "org": "nzila",
+    "role": "system_admin",
+    "entraOid": "76dc9804-ff70-4654-8617-65d6db0ef708"
+  },
+  {
+    "first": "Rachel",
+    "last": "Torres",
+    "email": "rachel.torres@nzilaventures.com",
+    "org": "nzila",
+    "role": "integration_specialist",
+    "entraOid": "4abf6432-8c9c-41e1-9471-ce76458f7d8e"
+  },
+  {
+    "first": "Yuki",
+    "last": "Tanaka",
+    "email": "yuki.tanaka@nzilaventures.com",
+    "org": "nzila",
+    "role": "content_manager",
+    "entraOid": "4b6f8ef6-fe9f-4176-a5d8-477f20c5b849"
+  },
+  {
+    "first": "Omar",
+    "last": "El-Amin",
+    "email": "omar.elamin@nzilaventures.com",
+    "org": "nzila",
+    "role": "training_coordinator",
+    "entraOid": "b0897ebb-70df-4986-a4d4-1264f43f5274"
+  },
+  {
+    "first": "Aubert",
+    "last": "Nungisa",
+    "email": "a_nungisa@yahoo.ca",
+    "org": "nzila",
+    "role": "app_owner",
+    "entraOid": "b856d778-a013-4205-9900-3a5a660352db"
+  },
+  {
+    "first": "Hassan",
+    "last": "Yussuff",
+    "email": "test.clcexec@labourcc.ca",
+    "org": "clc",
+    "role": "clc_executive",
+    "entraOid": "7f0713bd-9cb5-4290-87b0-c872b1dea920"
+  },
+  {
+    "first": "Marie",
+    "last": "Clarke Walker",
+    "email": "test.clcstaff@labourcc.ca",
+    "org": "clc",
+    "role": "clc_staff",
+    "entraOid": "34fdedac-6313-4fef-b3ee-96e94daf52f4"
+  },
+  {
+    "first": "Jane",
+    "last": "Doe",
+    "email": "test.president@capeunion.ca",
+    "org": "cape",
+    "role": "president",
+    "entraOid": "567ff30c-717c-41cc-b3f5-bc2b899a39c1"
+  },
+  {
+    "first": "Marc-André",
+    "last": "Dubois",
+    "email": "test.vp@capeunion.ca",
+    "org": "cape",
+    "role": "vice_president",
+    "entraOid": "e332c499-5056-4e5d-bf8b-304dc836b3e0"
+  },
+  {
+    "first": "Brian",
+    "last": "Faulkner",
+    "email": "test.natofficer@capeunion.ca",
+    "org": "cape",
+    "role": "national_officer",
+    "entraOid": "ce51e1ed-86de-4815-970a-784fd20862d6"
+  },
+  {
+    "first": "Chantal",
+    "last": "Bertrand",
+    "email": "test.sectreasurer@capeunion.ca",
+    "org": "cape",
+    "role": "secretary_treasurer",
+    "entraOid": "f0d46ee5-c829-4ce0-92e3-b76ff362e78c"
+  },
+  {
+    "first": "Mike",
+    "last": "Savard",
+    "email": "test.fedexec@capeunion.ca",
+    "org": "cape",
+    "role": "fed_executive",
+    "entraOid": "c36dbfb9-2b77-4306-a852-5ca8f9004cd8"
+  },
+  {
+    "first": "Nadia",
+    "last": "Ouellet",
+    "email": "test.fedstaff@capeunion.ca",
+    "org": "cape",
+    "role": "fed_staff",
+    "entraOid": "f5cec486-cf33-4fae-a2df-2433eff6fdc7"
+  },
+  {
+    "first": "Daniel",
+    "last": "Kim",
+    "email": "test.officer@capeunion.ca",
+    "org": "cape",
+    "role": "officer",
+    "entraOid": "2a152e06-8298-4cfe-8c25-7b33e406be46"
+  },
+  {
+    "first": "Sarah",
+    "last": "Lefebvre",
+    "email": "test.chiefsteward@capeunion.ca",
+    "org": "cape",
+    "role": "chief_steward",
+    "entraOid": "e041e2c4-77a3-443f-a3ca-50f6e87c436b"
+  },
+  {
+    "first": "Alexandre",
+    "last": "Moreau",
+    "email": "test.steward@capeunion.ca",
+    "org": "cape",
+    "role": "steward",
+    "entraOid": "ac82a705-8c2c-4f78-9daa-2997eff2d641"
+  },
+  {
+    "first": "Jennifer",
+    "last": "Walsh",
+    "email": "test.bargcom@capeunion.ca",
+    "org": "cape",
+    "role": "bargaining_committee",
+    "entraOid": "7aed958f-5ea7-4d4f-824b-d0c1ff1df013"
+  },
+  {
+    "first": "Pierre",
+    "last": "Desmarais",
+    "email": "test.hsr@capeunion.ca",
+    "org": "cape",
+    "role": "health_safety_rep",
+    "entraOid": "bff78444-ab81-435d-bc0e-4c5881cb947f"
+  },
+  {
+    "first": "Alice",
+    "last": "Johnson",
+    "email": "test.president@cupel123.ca",
+    "org": "cupe",
+    "role": "president",
+    "entraOid": "e6160112-d13d-4ce6-9b53-416313e84cdb"
+  },
+  {
+    "first": "Marie-Claire",
+    "last": "Dubois",
+    "email": "test.vp@cupel123.ca",
+    "org": "cupe",
+    "role": "vice_president",
+    "entraOid": "31f582ce-eb6d-4d51-8547-aa15ecf6f2af"
+  },
+  {
+    "first": "Jean-Pierre",
+    "last": "Tremblay",
+    "email": "test.sectreasurer@cupel123.ca",
+    "org": "cupe",
+    "role": "secretary_treasurer",
+    "entraOid": "ec5574ef-0c74-4e3e-8189-b01b156c840f"
+  },
+  {
+    "first": "Marco",
+    "last": "Rossi",
+    "email": "test.chiefsteward@cupel123.ca",
+    "org": "cupe",
+    "role": "chief_steward",
+    "entraOid": "bfc62fda-dd40-44fe-a426-228d4c1b5e04"
+  },
+  {
+    "first": "Priya",
+    "last": "Patel",
+    "email": "test.officer@cupel123.ca",
+    "org": "cupe",
+    "role": "officer",
+    "entraOid": "fa302567-eec7-4dd5-b3e6-01d92e63a67b"
+  },
+  {
+    "first": "David",
+    "last": "Thompson",
+    "email": "test.bargcom@cupel123.ca",
+    "org": "cupe",
+    "role": "bargaining_committee",
+    "entraOid": "8b17189f-461d-480d-a2e7-2c53df6f812d"
+  },
+  {
+    "first": "Kevin",
+    "last": "O'Brien",
+    "email": "test.hsr@cupel123.ca",
+    "org": "cupe",
+    "role": "health_safety_rep",
+    "entraOid": "081c72da-c664-4e51-9d70-60d8cd94a023"
+  },
+  {
+    "first": "Kofi",
+    "last": "Mensah",
+    "email": "kofi@afrobeatsrecords.com",
+    "org": "zonga",
+    "role": "admin",
+    "entraOid": "50b6a38a-f37d-40ae-b2cf-67e0886ebfe4"
+  },
+  {
+    "first": "Ama",
+    "last": "Adjei",
+    "email": "ama@afrobeatsrecords.com",
+    "org": "zonga",
+    "role": "manager",
+    "entraOid": "fc4b6b30-5c39-489e-a0a1-4bf7e00c9fd2"
+  },
+  {
+    "first": "Kwame",
+    "last": "Asante",
+    "email": "kwame@afrobeatsrecords.com",
+    "org": "zonga",
+    "role": "creator",
+    "entraOid": "2f9fbe39-cd27-4647-b70c-749a9b8eb91e"
+  },
+  {
+    "first": "Adwoa",
+    "last": "Boateng",
+    "email": "adwoa@afrobeatsrecords.com",
+    "org": "zonga",
+    "role": "viewer",
+    "entraOid": "4adcdb6d-43aa-4fb0-8583-11c862e387d8"
+  }
+]
