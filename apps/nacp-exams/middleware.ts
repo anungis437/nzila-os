@@ -76,6 +76,7 @@ const RATE_LIMIT_WINDOW_MS = Number(process.env.RATE_LIMIT_WINDOW_MS ?? '60000')
 
 // ── Main middleware ─────────────────────────────────────────────────────────
 
+// eslint-disable-next-line @typescript-eslint/no-explicit-any
 export default auth((req: any) => {
   const requestId = ensureRequestId(req)
   const { pathname } = req.nextUrl

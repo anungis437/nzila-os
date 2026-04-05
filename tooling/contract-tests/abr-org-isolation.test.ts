@@ -68,7 +68,8 @@ function isPublicRoute(routeFile: string): boolean {
   const normalized = routeFile.replace(/\\/g, '/')
   return (
     normalized.includes('/api/health/') ||
-    normalized.endsWith('/api/health/route.ts')
+    normalized.endsWith('/api/health/route.ts') ||
+    normalized.includes('/api/auth/')  // NextAuth handler — auth infrastructure, not a business route
   )
 }
 

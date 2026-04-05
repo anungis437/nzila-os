@@ -50,6 +50,7 @@ const EXEMPT_ROUTES = new Set([
   'webhooks',
   'cron',
   'clerk',
+  'auth',             // NextAuth handler (/api/auth/[...nextauth])
   'stripe',
   'admin',  // platform admin routes are role-scoped, not org-scoped
   'zoho/webhook',   // Zoho webhook uses HMAC verification

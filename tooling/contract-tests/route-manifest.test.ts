@@ -175,8 +175,8 @@ describe('INV-ROUTE-MANIFEST — Centralized Route Manifest', () => {
   });
 
   // ── Phase 6: Auth Guard Verification ───────────────────────────────────
-  it('deployed Next.js apps have Clerk middleware for auth', () => {
-    // Auth is enforced at the middleware level via clerkMiddleware, not per-route
+  it('deployed Next.js apps have auth middleware', () => {
+    // Auth is enforced at the middleware level via NextAuth auth(), not per-route
     const deployedNextApps = ['console', 'partners', 'union-eyes', 'cfo', 'zonga'];
     const missingMiddleware: string[] = [];
 
@@ -187,7 +187,7 @@ describe('INV-ROUTE-MANIFEST — Centralized Route Manifest', () => {
         continue;
       }
       const content = readFileSync(middlewarePath, 'utf-8');
-      if (!content.includes('clerkMiddleware')) {
+      if (!content.includes('@nzila/platform-auth') && !content.includes('clerkMiddleware')) {
         missingMiddleware.push(app);
       }
     }

@@ -59,6 +59,7 @@ function isApiRoute(filePath: string): boolean {
   const rel = filePath.replace(/\\/g, '/')
   return (
     rel.includes('/api/') &&
+    !rel.includes('/api/auth/') && // NextAuth handler — auth infrastructure, not a business route
     (rel.endsWith('route.ts') || rel.endsWith('route.tsx'))
   )
 }
@@ -122,7 +123,7 @@ describe('Telemetry Coverage Enforcement', () => {
           content.includes('x-request-id') ||
           content.includes('createRequestContext') ||
           content.includes('@nzila/os-core') ||
-          // Clerk middleware implicitly propagates auth context which includes
+          // Auth middleware implicitly propagates auth context which includes
           // session/user identity for downstream request correlation
           content.includes('clerkMiddleware') ||
           content.includes('@nzila/platform-auth')

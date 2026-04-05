@@ -26,6 +26,7 @@ const RATE_LIMIT_WINDOW_MS = Number(
   process.env.RATE_LIMIT_WINDOW_MS ?? "60000",
 );
 
+// eslint-disable-next-line @typescript-eslint/no-explicit-any
 export default auth((req: any) => {
   const { pathname } = req.nextUrl
 

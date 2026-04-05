@@ -80,8 +80,12 @@ describe('API Route OTel Instrumentation — STUDIO-OTEL-01 contract', () => {
     const apiDir = resolve(ROOT, 'apps', app, 'app', 'api')
     const routeFiles = findRouteFiles(apiDir)
     // Exclude /api/health — it's a liveness probe, not a business route
+    // Exclude /api/auth — NextAuth handler (auth infrastructure)
     const businessRoutes = routeFiles.filter(
-      (f) => !f.replace(/\\/g, '/').includes('/api/health/'),
+      (f) => {
+        const normalized = f.replace(/\\/g, '/')
+        return !normalized.includes('/api/health/') && !normalized.includes('/api/auth/')
+      },
     )
 
     describe(`apps/${app}`, () => {

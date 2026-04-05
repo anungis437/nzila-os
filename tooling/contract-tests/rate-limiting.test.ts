@@ -48,9 +48,12 @@ function importsRateLimiter(content: string): boolean {
 }
 
 function hasHealthInPublicRoutes(content: string): boolean {
-  // Should have /api/health in the isPublicRoute matcher
-  return /isPublicRoute.*\/api\/health/.test(content.replace(/\s+/g, ' ')) ||
-    /api\/health/.test(content) && /isPublicRoute/.test(content)
+  // Should have /api/health in the public route matcher (isPublicRoute, isPublicPath, or publicPaths)
+  const collapsed = content.replace(/\s+/g, ' ')
+  return /isPublicRoute.*\/api\/health/.test(collapsed) ||
+    (/api\/health/.test(content) && /isPublicRoute/.test(content)) ||
+    (/api\/health/.test(content) && /isPublicPath/.test(content)) ||
+    (/api\/health/.test(content) && /publicPaths/.test(content))
 }
 
 // ── Tests ─────────────────────────────────────────────────────────────────────

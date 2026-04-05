@@ -69,12 +69,12 @@ for (const app of APPS) {
     })
   })
 
-  describe(`AGRI-CFG-05 — ${app} uses ClerkProvider`, () => {
-    it('layout.tsx wraps with ClerkProvider', () => {
+  describe(`AGRI-CFG-05 — ${app} uses AuthProvider`, () => {
+    it('layout.tsx wraps with AuthProvider', () => {
       const path = join(APP_DIR, 'app', 'layout.tsx')
       if (!existsSync(path)) return
       const content = readFileSync(path, 'utf-8')
-      expect(content).toContain('ClerkProvider')
+      expect(content).toContain('AuthProvider')
     })
   })
 }

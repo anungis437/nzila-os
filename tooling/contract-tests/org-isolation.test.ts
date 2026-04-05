@@ -69,6 +69,7 @@ function isPublicRoute(routeFile: string): boolean {
     || normalized.includes('/api/ready/') || normalized.endsWith('/api/ready/route.ts')  // Kubernetes readiness probe
     || normalized.includes('/api/status/') || normalized.endsWith('/api/status/route.ts')  // Service status endpoint
     || normalized.includes('/api/docs/') || normalized.endsWith('/api/docs/route.ts')  // OpenAPI documentation endpoint
+    || normalized.includes('/api/auth/')  // NextAuth handler — auth infrastructure, not a business route
     || normalized.includes('/cron/')  // cron routes use CRON_SECRET bearer auth
     || normalized.includes('/webhook')  // webhook routes use signature verification (Stripe, PayPal, Shopify, Zoho, etc.)
     || normalized.includes('/api/whop/')  // Whop payment routes (intentionally unauthenticated checkout)
