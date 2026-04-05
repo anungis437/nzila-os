@@ -1,5 +1,5 @@
 import type { Metadata } from "next";
-import { ClerkProvider } from "@clerk/nextjs";
+import { AuthProvider } from "@nzila/platform-auth/entra/client";
 import { Poppins } from "next/font/google";
 import { ThemeProvider } from "next-themes";
 import { NextIntlClientProvider } from 'next-intl';
@@ -27,7 +27,7 @@ export default async function RootLayout({
   const messages = await getMessages();
 
   return (
-    <ClerkProvider>
+    <AuthProvider>
       <html lang={locale} suppressHydrationWarning>
         <body className={poppins.className} suppressHydrationWarning>
           <ThemeProvider
@@ -41,6 +41,6 @@ export default async function RootLayout({
           </ThemeProvider>
         </body>
       </html>
-    </ClerkProvider>
+    </AuthProvider>
   );
 }

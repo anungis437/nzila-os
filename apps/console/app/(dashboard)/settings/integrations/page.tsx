@@ -10,7 +10,7 @@
  *   ?qbo=denied      → show cancelled banner
  *   ?qbo=error       → show error banner
  */
-import { auth } from '@clerk/nextjs/server'
+import { auth } from '@nzila/platform-auth/entra/server'
 import { redirect } from 'next/navigation'
 import { platformDb } from '@nzila/db/platform'
 import { orgs, orgMembers, qboConnections } from '@nzila/db/schema'

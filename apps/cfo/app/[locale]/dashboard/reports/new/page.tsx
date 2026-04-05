@@ -5,7 +5,7 @@
  * Client form to select period, optional AI narrative, then calls
  * the generateReport server action.
  */
-import { auth } from '@clerk/nextjs/server'
+import { auth } from '@nzila/platform-auth/entra/server'
 import { redirect } from 'next/navigation'
 import Link from 'next/link'
 import { ArrowLeft, FileText } from 'lucide-react'

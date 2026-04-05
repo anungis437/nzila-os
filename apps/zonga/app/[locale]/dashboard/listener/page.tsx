@@ -5,7 +5,7 @@
  * followed artists, listening history, and account status.
  * Discovery content (trending, new releases, AI recs) lives on the home page.
  */
-import { auth, currentUser } from '@clerk/nextjs/server'
+import { auth, currentUser } from '@nzila/platform-auth/entra/server'
 import { redirect } from 'next/navigation'
 import Link from 'next/link'
 import {

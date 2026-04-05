@@ -4,7 +4,7 @@
  * Executive control plane view across all apps.
  * Platform admins see global numbers; org admins see org-scoped metrics.
  */
-import { currentUser } from '@clerk/nextjs/server'
+import { currentUser } from '@nzila/platform-auth/entra/server'
 import { getUserRole } from '@/lib/rbac'
 import {
   getPlatformOverviewMetrics,

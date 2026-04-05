@@ -38,7 +38,7 @@ function chain(resolveValue: unknown): unknown {
   return new Proxy({}, handler);
 }
 
-vi.mock('@clerk/nextjs/server', () => ({
+vi.mock('@nzila/platform-auth/entra/server', () => ({
   auth: mocks.mockAuth,
   currentUser: mocks.mockClerkCurrentUser,
 }));

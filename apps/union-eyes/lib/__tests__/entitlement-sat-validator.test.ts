@@ -7,7 +7,7 @@ vi.mock('@/db/schema/domains/member', () => ({ users: {} }));
 vi.mock('@/lib/logger', () => ({
   logger: { info: vi.fn(), warn: vi.fn(), error: vi.fn(), debug: vi.fn() },
 }));
-vi.mock('@clerk/nextjs/server', () => ({ auth: vi.fn(), currentUser: vi.fn() }));
+vi.mock('@nzila/platform-auth/entra/server', () => ({ auth: vi.fn(), currentUser: vi.fn() }));
 vi.mock('next/headers', () => ({ cookies: vi.fn(), headers: vi.fn() }));
 vi.mock('next/server', () => ({
   NextRequest: class {},

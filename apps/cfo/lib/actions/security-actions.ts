@@ -10,7 +10,7 @@
  */
 'use server'
 
-import { auth } from '@clerk/nextjs/server'
+import { auth } from '@nzila/platform-auth/entra/server'
 import { requirePermission } from '@/lib/rbac'
 import { platformDb } from '@nzila/db/platform'
 import { sql } from 'drizzle-orm'

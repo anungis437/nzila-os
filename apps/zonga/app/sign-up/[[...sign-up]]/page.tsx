@@ -1,6 +1,6 @@
 export const dynamic = 'force-dynamic';
 
-import { SignUp } from '@clerk/nextjs';
+import { SignUp } from '@nzila/platform-auth/entra/client';
 import type { Metadata } from 'next';
 import AuthPageLayout from '@/components/auth/auth-page-layout';
 

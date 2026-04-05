@@ -1,7 +1,7 @@
 /**
  * CFO — Security Operations Center.
  */
-import { auth } from '@clerk/nextjs/server'
+import { auth } from '@nzila/platform-auth/entra/server'
 import { redirect } from 'next/navigation'
 import { requirePermission } from '@/lib/rbac'
 import { Shield, ShieldAlert, ShieldCheck, Database } from 'lucide-react'

@@ -4,7 +4,7 @@
  * Platform admin view listing all organizations (labels, distributors)
  * with member counts, plan tiers, and status tracking.
  */
-import { auth } from '@clerk/nextjs/server'
+import { auth } from '@nzila/platform-auth/entra/server'
 import { redirect } from 'next/navigation'
 import { Card } from '@nzila/ui'
 import { platformDb } from '@nzila/db/platform'

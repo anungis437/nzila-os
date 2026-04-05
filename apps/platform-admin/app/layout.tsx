@@ -1,5 +1,5 @@
 import type { Metadata } from 'next'
-import { ClerkProvider } from '@clerk/nextjs'
+import { AuthProvider } from '@nzila/platform-auth/entra/client'
 import { NextIntlClientProvider } from 'next-intl'
 import { getLocale, getMessages } from 'next-intl/server'
 import './globals.css'
@@ -29,7 +29,7 @@ export default async function RootLayout({
   const messages = await getMessages()
 
   return (
-    <ClerkProvider>
+    <AuthProvider>
       <html lang={locale}>
         <body className="bg-gray-50 text-gray-900 antialiased">
           <NextIntlClientProvider locale={locale} messages={messages}>
@@ -59,6 +59,6 @@ export default async function RootLayout({
         </NextIntlClientProvider>
       </body>
     </html>
-    </ClerkProvider>
+    </AuthProvider>
   )
 }

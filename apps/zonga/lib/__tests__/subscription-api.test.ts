@@ -22,7 +22,7 @@ vi.mock('@/lib/actions/subscription-actions', () => ({
   createCreatorPortalSession: (id: string) => mockCreateCreatorPortalSession(id),
 }))
 
-vi.mock('@clerk/nextjs/server', () => ({
+vi.mock('@nzila/platform-auth/entra/server', () => ({
   auth: vi.fn().mockResolvedValue({ userId: 'user_test' }),
 }))
 

@@ -14,7 +14,7 @@
  *
  * @module resolve-org
  */
-import { auth, currentUser } from '@clerk/nextjs/server'
+import { auth, currentUser } from '@nzila/platform-auth/entra/server'
 import type { TradeOrgContext } from '@nzila/trade-core/types'
 import type { TradeOrgRole } from '@nzila/trade-core/enums'
 

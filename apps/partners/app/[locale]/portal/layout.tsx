@@ -1,7 +1,7 @@
 import Link from 'next/link'
 import { redirect } from 'next/navigation'
-import { auth } from '@clerk/nextjs/server'
-import { UserButton } from '@clerk/nextjs'
+import { auth } from '@nzila/platform-auth/entra/server'
+import { UserButton } from '@nzila/platform-auth/entra/client'
 import {
   HomeIcon,
   RocketLaunchIcon,

@@ -13,6 +13,8 @@ export interface SignInProps {
   forceRedirectUrl?: string
   /** Alias for forceRedirectUrl (Clerk compat). */
   redirectUrl?: string
+  /** Clerk compat — treated as alias for forceRedirectUrl. */
+  fallbackRedirectUrl?: string
   /** Custom appearance (kept for API compatibility with Clerk). */
   appearance?: Record<string, unknown>
   /** Additional CSS class. */
@@ -28,9 +30,10 @@ export interface SignInProps {
 export function SignIn({
   forceRedirectUrl,
   redirectUrl,
+  fallbackRedirectUrl,
   className = '',
 }: SignInProps) {
-  const callbackUrl = forceRedirectUrl ?? redirectUrl ?? '/dashboard'
+  const callbackUrl = forceRedirectUrl ?? redirectUrl ?? fallbackRedirectUrl ?? '/dashboard'
   return (
     <div className={`flex flex-col items-center gap-4 ${className}`}>
       <h2 className="text-2xl font-bold text-gray-900 dark:text-white">

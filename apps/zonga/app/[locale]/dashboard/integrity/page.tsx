@@ -4,7 +4,7 @@
  * ML-powered content integrity checks: duplicate detection,
  * rights verification, metadata validation, audio fingerprinting.
  */
-import { auth } from '@clerk/nextjs/server'
+import { auth } from '@nzila/platform-auth/entra/server'
 import { redirect } from 'next/navigation'
 import { Card } from '@nzila/ui'
 import { getIntegrityChecks } from '@/lib/actions/release-actions'

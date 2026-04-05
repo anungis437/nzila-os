@@ -11,7 +11,7 @@ import { describe, it, expect, vi, beforeEach } from 'vitest'
 // Mock Clerk auth
 const mockAuth = vi.fn()
 const mockCurrentUser = vi.fn()
-vi.mock('@clerk/nextjs/server', () => ({
+vi.mock('@nzila/platform-auth/entra/server', () => ({
   auth: () => mockAuth(),
   currentUser: () => mockCurrentUser(),
 }))

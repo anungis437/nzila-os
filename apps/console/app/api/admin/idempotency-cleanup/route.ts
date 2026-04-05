@@ -7,7 +7,7 @@
  * Only accessible to platform_admin.
  */
 import { NextRequest, NextResponse } from 'next/server'
-import { auth } from '@clerk/nextjs/server'
+import { auth } from '@nzila/platform-auth/entra/server'
 import { z } from 'zod'
 
 const CleanupSchema = z.object({

@@ -1,6 +1,6 @@
 'use client'
 
-import { OrganizationSwitcher, useOrganization } from '@clerk/nextjs'
+import { OrganizationSwitcher, useOrganization } from '@nzila/platform-auth/entra/client'
 import { BuildingOffice2Icon } from '@heroicons/react/24/outline'
 
 /**

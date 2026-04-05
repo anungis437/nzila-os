@@ -4,7 +4,7 @@
  * Revenue dashboard: totals by source, revenue mix donut, per-creator
  * breakdown with payout rail badges, recent events with type icons.
  */
-import { auth } from '@clerk/nextjs/server'
+import { auth } from '@nzila/platform-auth/entra/server'
 import { redirect } from 'next/navigation'
 import Link from 'next/link'
 import { Card } from '@nzila/ui'

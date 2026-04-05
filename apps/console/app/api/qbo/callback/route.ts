@@ -13,7 +13,7 @@
  *   5. Redirects to /settings/integrations?qbo=connected
  */
 import { NextRequest, NextResponse } from 'next/server'
-import { auth } from '@clerk/nextjs/server'
+import { auth } from '@nzila/platform-auth/entra/server'
 import { platformDb } from '@nzila/db/platform'
 import { qboConnections, qboTokens } from '@nzila/db/schema'
 import { exchangeCodeForTokens } from '@nzila/qbo/oauth'

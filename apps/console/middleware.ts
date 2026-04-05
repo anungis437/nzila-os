@@ -1,4 +1,4 @@
-import { clerkMiddleware, createRouteMatcher } from '@clerk/nextjs/server'
+import { auth } from '@nzila/platform-auth/entra/config'
 import { NextResponse } from 'next/server'
 import { checkRateLimit, rateLimitHeaders } from '@nzila/os-core/rateLimit'
 import { checkOrgRateLimit, orgRateLimitHeaders } from '@nzila/os-core/orgRateLimit'
@@ -12,22 +12,12 @@ const intlMiddleware = createIntlMiddleware({
   localeDetection: true,
 })
 
-/**
- * Public routes — everything else requires authentication.
- * /api/health is intentionally public (probe endpoints must not require auth).
- */
-const _isPublicRoute = createRouteMatcher([
-  '/',
-  '/sign-in(.*)',
-  '/sign-up(.*)',
-  '/api/webhooks(.*)',
-  '/api/health(.*)',
-])
+const publicPaths = ['/', '/sign-in', '/sign-up', '/api/webhooks', '/api/health', '/api/auth']
 
 const RATE_LIMIT_MAX = Number(process.env.RATE_LIMIT_MAX ?? '120')
 const RATE_LIMIT_WINDOW_MS = Number(process.env.RATE_LIMIT_WINDOW_MS ?? '60000')
 
-export default clerkMiddleware(async (auth, request) => {
+export default auth((request: any) => {
   // ── Legacy route redirects (entity → org migration) ──────────────────
   const pathname = request.nextUrl.pathname
   if (pathname.startsWith('/business/orgs')) {

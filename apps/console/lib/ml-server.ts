@@ -9,7 +9,7 @@
  *   import { mlClient, getEntityId } from '@/lib/ml-server'
  *   const models = await mlClient().getActiveModels(getEntityId())
  */
-import { auth } from '@clerk/nextjs/server'
+import { auth } from '@nzila/platform-auth/entra/server'
 import { createMlClient, type MlClient } from '@nzila/ml-sdk'
 
 const BASE_URL =

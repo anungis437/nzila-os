@@ -6,7 +6,7 @@
  * - Salary vs. dividend optimizer
  * - Data freshness monitor
  */
-import { auth } from '@clerk/nextjs/server'
+import { auth } from '@nzila/platform-auth/entra/server'
 import { redirect } from 'next/navigation'
 import { requirePermission } from '@/lib/rbac'
 import { Calculator, BarChart3, ShieldCheck } from 'lucide-react'

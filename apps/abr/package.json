@@ -12,7 +12,7 @@
     "clean": "rm -rf .next .turbo node_modules"
   },
   "dependencies": {
-    "@clerk/nextjs": "^7.0.8",
+    "@nzila/platform-auth": "workspace:*",
     "@nzila/blob": "workspace:*",
     "@nzila/db": "workspace:*",
     "@nzila/os-core": "workspace:*",

@@ -1,7 +1,7 @@
 // ABR Insights - Clerk-Integrated API Client
 
 import axios, { AxiosInstance, AxiosError, InternalAxiosRequestConfig } from 'axios';
-import { auth } from '@clerk/nextjs/server';
+import { auth } from '@nzila/platform-auth/entra/server';
 import { createLogger } from '@nzila/os-core'
 
 const logger = createLogger('api')

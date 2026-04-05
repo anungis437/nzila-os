@@ -4,7 +4,7 @@
  * Real-time general ledger view with journal entries,
  * account balances, and reconciliation trigger.
  */
-import { auth } from '@clerk/nextjs/server'
+import { auth } from '@nzila/platform-auth/entra/server'
 import { redirect } from 'next/navigation'
 import { requirePermission } from '@/lib/rbac'
 import {

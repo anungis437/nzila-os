@@ -3,7 +3,7 @@
  *
  * View playlist tracks, add/remove tracks, manage settings.
  */
-import { auth } from '@clerk/nextjs/server'
+import { auth } from '@nzila/platform-auth/entra/server'
 import { redirect, notFound } from 'next/navigation'
 import Link from 'next/link'
 import { Card } from '@nzila/ui'

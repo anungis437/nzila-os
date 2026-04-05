@@ -1,4 +1,4 @@
-import { ClerkProvider } from "@clerk/nextjs";
+import { AuthProvider } from "@nzila/platform-auth/entra/client";
 import { Poppins } from "next/font/google";
 import type { Metadata } from "next";
 import "./globals.css";
@@ -29,15 +29,10 @@ export default function RootLayout({
   children: React.ReactNode;
 }) {
   return (
-    <ClerkProvider
-      signInUrl="/sign-in"
-      signUpUrl="/sign-up"
-      signInFallbackRedirectUrl="/en-CA/dashboard"
-      signUpFallbackRedirectUrl="/en-CA/dashboard"
-    >
+    <AuthProvider>
       <html lang="en-CA" suppressHydrationWarning className={poppins.variable}>
         <body className="font-poppins antialiased">{children}</body>
       </html>
-    </ClerkProvider>
+    </AuthProvider>
   );
 }

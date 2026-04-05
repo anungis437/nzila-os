@@ -13,7 +13,7 @@ import {
   stripeReports,
 } from '@nzila/db/schema'
 import { eq, desc, and, sql, count } from 'drizzle-orm'
-import { auth } from '@clerk/nextjs/server'
+import { auth } from '@nzila/platform-auth/entra/server'
 import { redirect } from 'next/navigation'
 import { RefundQueue } from './refund-queue'
 import { GenerateReportsButton } from './generate-reports-button'

@@ -3,7 +3,7 @@
  *
  * Shown after a successful Stripe Checkout for premium or label plans.
  */
-import { auth } from '@clerk/nextjs/server'
+import { auth } from '@nzila/platform-auth/entra/server'
 import { redirect } from 'next/navigation'
 import Link from 'next/link'
 import { Card } from '@nzila/ui'

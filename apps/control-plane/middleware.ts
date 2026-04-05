@@ -1,4 +1,4 @@
-import { clerkMiddleware, createRouteMatcher } from '@clerk/nextjs/server'
+import { auth } from '@nzila/platform-auth/entra/config'
 import { NextResponse } from 'next/server'
 import createIntlMiddleware from 'next-intl/middleware'
 import { locales, defaultLocale } from './lib/locales'
@@ -9,24 +9,21 @@ const intlMiddleware = createIntlMiddleware({
   localePrefix: 'never',
 })
 
-const isPublicRoute = createRouteMatcher([
-  '/',
-  '/sign-in(.*)',
-  '/sign-up(.*)',
-  '/api/health(.*)',
-])
+const publicPaths = ['/', '/sign-in', '/sign-up', '/api/health', '/api/auth']
 
-export default clerkMiddleware(async (auth, request) => {
+export default auth((req: any) => {
+  const { pathname } = req.nextUrl
+
   // ── Idempotency-Key enforcement (fail-closed in pilot/prod) ──────────
   if (process.env.NODE_ENV !== 'development') {
     if (
-      ['POST', 'PUT', 'PATCH', 'DELETE'].includes(request.method) &&
-      request.nextUrl.pathname.startsWith('/api') &&
-      !request.nextUrl.pathname.startsWith('/api/webhooks') &&
-      !request.nextUrl.pathname.startsWith('/api/health') &&
-      !request.nextUrl.pathname.startsWith('/api/cron')
+      ['POST', 'PUT', 'PATCH', 'DELETE'].includes(req.method) &&
+      pathname.startsWith('/api') &&
+      !pathname.startsWith('/api/webhooks') &&
+      !pathname.startsWith('/api/health') &&
+      !pathname.startsWith('/api/cron')
     ) {
-      if (!request.headers.get('idempotency-key')) {
+      if (!req.headers.get('idempotency-key')) {
         return NextResponse.json(
           {
             error: 'Missing Idempotency-Key header',
@@ -40,30 +37,27 @@ export default clerkMiddleware(async (auth, request) => {
     }
   }
 
-  // ── Authentication (skip in dev — prevents Clerk handshake loops) ────
-  if (process.env.NODE_ENV !== 'development' && !isPublicRoute(request)) {
-    await auth.protect()
+  // ── Authentication ────────────────────────────────────────────────────
+  const isPublic = publicPaths.some(p => pathname === p || pathname.startsWith(p + '/'))
+  if (!isPublic && !req.auth) {
+    return NextResponse.redirect(new URL('/sign-in', req.url))
   }
 
   // ── Internationalisation ──────────────────────────────────────────────
-  if (!request.nextUrl.pathname.startsWith('/api')) {
-    const intlResponse = intlMiddleware(request)
-    const requestId = request.headers.get('x-request-id') ?? crypto.randomUUID()
+  if (!pathname.startsWith('/api')) {
+    const intlResponse = intlMiddleware(req)
+    const requestId = req.headers.get('x-request-id') ?? crypto.randomUUID()
     intlResponse.headers.set('x-request-id', requestId)
     return intlResponse
   }
 
   // ── Request-ID propagation ────────────────────────────────────────────
-  const requestId =
-    request.headers.get('x-request-id') ?? crypto.randomUUID()
+  const requestId = req.headers.get('x-request-id') ?? crypto.randomUUID()
   const response = NextResponse.next()
   response.headers.set('x-request-id', requestId)
   return response
 })
 
 export const config = {
-  matcher: [
-    '/((?!_next|[^?]*\\.(?:html?|css|js(?!on)|jpe?g|webp|png|gif|svg|ttf|woff2?|ico|csv|docx?|xlsx?|zip|webmanifest)).*)',
-    '/(api|trpc)(.*)',
-  ],
+  matcher: ['/((?!_next/static|_next/image|favicon.ico|.*\\.(?:svg|png|jpg|jpeg|gif|webp)$).*)'],
 }

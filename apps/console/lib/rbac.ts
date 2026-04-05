@@ -1,4 +1,4 @@
-import { auth, currentUser } from '@clerk/nextjs/server'
+import { auth, currentUser } from '@nzila/platform-auth/entra/server'
 
 /**
  * Nzila RBAC roles (stored in Clerk publicMetadata or org membership).

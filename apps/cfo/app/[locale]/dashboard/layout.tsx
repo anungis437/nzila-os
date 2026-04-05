@@ -1,4 +1,4 @@
-import { auth } from '@clerk/nextjs/server'
+import { auth } from '@nzila/platform-auth/entra/server'
 import { redirect } from 'next/navigation'
 import { getUserRoles, getVisiblePages, isClientRole, type FirmRole as _FirmRole, type ClientRole as _ClientRole } from '@/lib/rbac'
 import { DashboardShell } from './dashboard-shell'

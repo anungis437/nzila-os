@@ -4,7 +4,7 @@
  * Creators: full show management with episode list & add-episode form.
  * Listeners: polished show page with published episodes.
  */
-import { auth } from '@clerk/nextjs/server'
+import { auth } from '@nzila/platform-auth/entra/server'
 import { redirect, notFound } from 'next/navigation'
 import Link from 'next/link'
 import Image from 'next/image'

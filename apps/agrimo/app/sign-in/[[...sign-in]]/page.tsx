@@ -1,4 +1,4 @@
-import { SignIn } from '@clerk/nextjs'
+import { SignIn } from '@nzila/platform-auth/entra/client'
 
 export default function SignInPage() {
   return (

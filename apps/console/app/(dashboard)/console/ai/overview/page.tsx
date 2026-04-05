@@ -13,7 +13,7 @@ import {
   aiKnowledgeSources,
 } from '@nzila/db/schema'
 import { eq, desc, count, sum, avg } from 'drizzle-orm'
-import { auth } from '@clerk/nextjs/server'
+import { auth } from '@nzila/platform-auth/entra/server'
 import { redirect } from 'next/navigation'
 import Link from 'next/link'
 

@@ -15,7 +15,7 @@ import { describe, it, expect, vi, beforeEach } from 'vitest'
 // ── Mocks ───────────────────────────────────────────────────────────────────
 
 const mockAuth = vi.fn()
-vi.mock('@clerk/nextjs/server', () => ({
+vi.mock('@nzila/platform-auth/entra/server', () => ({
   auth: () => mockAuth(),
 }))
 

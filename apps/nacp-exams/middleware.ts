@@ -3,12 +3,12 @@
  *
  * 4-layer stack (aligned with console reference + i18n):
  *   Layer 1: Edge  — Rate limiting (skip in dev)
- *   Layer 2: Edge  — Clerk auth (skip in dev)
+ *   Layer 2: Edge  — Entra ID auth (NextAuth.js)
  *   Layer 3: Edge  — i18n routing (next-intl)
  *   Layer 4: Edge  — Request-ID propagation
  */
 
-import { clerkMiddleware, createRouteMatcher } from '@clerk/nextjs/server'
+import { auth } from '@nzila/platform-auth/entra/config'
 import { NextResponse } from 'next/server'
 import type { NextRequest } from 'next/server'
 import createIntlMiddleware from 'next-intl/middleware'
@@ -26,34 +26,39 @@ function withRequestId(response: NextResponse, requestId: string): NextResponse 
   return response
 }
 
-// ── Route matchers ──────────────────────────────────────────────────────────
+// ── Public paths ────────────────────────────────────────────────────────────
 
-const isPublicRoute = createRouteMatcher([
-  "/",
-  "/:locale",
-  "/sign-in(.*)",
-  "/sign-up(.*)",
-  "/:locale/sign-in(.*)",
-  "/:locale/sign-up(.*)",
-  "/about(.*)",
-  "/pricing(.*)",
-  "/contact(.*)",
-  "/demo-request(.*)",
-  "/api/health(.*)",
-]);
+const publicPaths = [
+  '/sign-in',
+  '/sign-up',
+  '/api/auth',
+  '/api/health',
+  '/api/webhooks',
+  '/about',
+  '/pricing',
+  '/contact',
+  '/demo-request',
+]
 
-const isClerkAuthPath = createRouteMatcher([
-  "/sign-in(.*)",
-  "/sign-up(.*)",
-]);
+const authPaths = ['/sign-in', '/sign-up']
 
-const isMarketingPath = createRouteMatcher([
-  "/",
-  "/about(.*)",
-  "/pricing(.*)",
-  "/contact(.*)",
-  "/demo-request(.*)",
-]);
+const marketingPaths = ['/', '/about', '/pricing', '/contact', '/demo-request']
+
+function isPublicPath(pathname: string): boolean {
+  if (pathname === '/') return true
+  return publicPaths.some(p => pathname.startsWith(p))
+    || /^\/[a-z]{2}(-[A-Z]{2})?\/?$/.test(pathname) // /:locale root
+    || /^\/[a-z]{2}(-[A-Z]{2})?\/sign-(in|up)/.test(pathname) // /:locale/sign-in/up
+}
+
+function isAuthPath(pathname: string): boolean {
+  return authPaths.some(p => pathname.startsWith(p))
+}
+
+function isMarketingPath(pathname: string): boolean {
+  if (pathname === '/') return true
+  return marketingPaths.some(p => p !== '/' && pathname.startsWith(p))
+}
 
 // ── i18n middleware ─────────────────────────────────────────────────────────
 
@@ -71,8 +76,9 @@ const RATE_LIMIT_WINDOW_MS = Number(process.env.RATE_LIMIT_WINDOW_MS ?? '60000')
 
 // ── Main middleware ─────────────────────────────────────────────────────────
 
-export default clerkMiddleware(async (auth, req) => {
+export default auth((req: any) => {
   const requestId = ensureRequestId(req)
+  const { pathname } = req.nextUrl
 
   // ── Rate limiting (skip in dev — HMR triggers too many requests) ──────
   if (process.env.NODE_ENV !== 'development') {
@@ -99,10 +105,10 @@ export default clerkMiddleware(async (auth, req) => {
   if (process.env.NODE_ENV !== 'development') {
     if (
       ['POST', 'PUT', 'PATCH', 'DELETE'].includes(req.method) &&
-      req.nextUrl.pathname.startsWith('/api') &&
-      !req.nextUrl.pathname.startsWith('/api/webhooks') &&
-      !req.nextUrl.pathname.startsWith('/api/health') &&
-      !req.nextUrl.pathname.startsWith('/api/cron')
+      pathname.startsWith('/api') &&
+      !pathname.startsWith('/api/webhooks') &&
+      !pathname.startsWith('/api/health') &&
+      !pathname.startsWith('/api/cron')
     ) {
       if (!req.headers.get('idempotency-key')) {
         return NextResponse.json(
@@ -118,46 +124,43 @@ export default clerkMiddleware(async (auth, req) => {
     }
   }
 
-  // API routes — protect unless explicitly public
-  if (req.nextUrl.pathname.startsWith('/api')) {
-    if (!isPublicRoute(req)) {
-      await auth.protect()
-    }
+  // ── Auth protection — redirect unauthenticated users ──────────────────
+  if (!isPublicPath(pathname) && !req.auth) {
+    return NextResponse.redirect(new URL('/sign-in', req.url))
+  }
+
+  // API routes — pass through after auth check
+  if (pathname.startsWith('/api')) {
     return withRequestId(NextResponse.next(), requestId)
   }
 
   // Static files
-  if (req.nextUrl.pathname.startsWith('/_next') || req.nextUrl.pathname.includes('.')) {
-    return withRequestId(NextResponse.next(), requestId);
+  if (pathname.startsWith('/_next') || pathname.includes('.')) {
+    return withRequestId(NextResponse.next(), requestId)
   }
 
-  // Protect non-public routes
-  if (!isPublicRoute(req)) {
-    await auth.protect();
-  }
-
-  // Skip intl for Clerk auth paths (prevent redirect loops)
-  if (isClerkAuthPath(req)) {
-    return withRequestId(NextResponse.next(), requestId);
+  // Skip intl for auth paths (prevent redirect loops)
+  if (isAuthPath(pathname)) {
+    return withRequestId(NextResponse.next(), requestId)
   }
 
   // Skip intl for marketing pages (root paths, no locale prefix)
-  if (isMarketingPath(req)) {
-    return withRequestId(NextResponse.next(), requestId);
+  if (isMarketingPath(pathname)) {
+    return withRequestId(NextResponse.next(), requestId)
   }
 
   // Run i18n middleware for locale-prefixed routes
-  const intlResponse = intlMiddleware(req);
+  const intlResponse = intlMiddleware(req)
   if (intlResponse instanceof NextResponse) {
-    return withRequestId(intlResponse, requestId);
+    return withRequestId(intlResponse, requestId)
   }
-  const nr = NextResponse.next({ headers: new Headers((intlResponse as Response).headers) });
-  nr.headers.set('x-request-id', requestId);
-  return nr;
-});
+  const nr = NextResponse.next({ headers: new Headers((intlResponse as Response).headers) })
+  nr.headers.set('x-request-id', requestId)
+  return nr
+})
 
 export const config = {
   matcher: [
-    '/((?!_next/static|_next/image|_vercel|favicon.ico|.*\\..*).*)' 
+    '/((?!_next/static|_next/image|favicon.ico|.*\\.(?:svg|png|jpg|jpeg|gif|webp)$).*)',
   ],
 };

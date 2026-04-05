@@ -7,7 +7,7 @@
  */
 'use server'
 
-import { auth } from '@clerk/nextjs/server'
+import { auth } from '@nzila/platform-auth/entra/server'
 import { resolveListenerContext, resolveListenerUUID } from '@/lib/resolve-org'
 import { platformDb } from '@nzila/db/platform'
 import { sql } from 'drizzle-orm'

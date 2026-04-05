@@ -11,7 +11,7 @@
  *   - isv:admin, isv:technical, isv:business
  *   - enterprise:admin, enterprise:user
  */
-import { auth, currentUser as _currentUser } from '@clerk/nextjs/server'
+import { auth, currentUser as _currentUser } from '@nzila/platform-auth/entra/server'
 // Partner tables are non-Org-scoped (see NON_ORG_SCOPED_TABLES) — use platformDb
 import { platformDb } from '@nzila/db/platform'
 import { partners, partnerEntities, partnerUsers } from '@nzila/db/schema'

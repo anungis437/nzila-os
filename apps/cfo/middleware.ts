@@ -1,4 +1,4 @@
-import { clerkMiddleware, createRouteMatcher } from '@clerk/nextjs/server'
+import { clerkMiddleware, createRouteMatcher } from '@nzila/platform-auth/entra/server'
 import { NextResponse } from 'next/server'
 import type { NextRequest } from 'next/server'
 import { checkRateLimit, rateLimitHeaders } from '@nzila/os-core/rateLimit'
@@ -19,6 +19,7 @@ const isPublicRoute = createRouteMatcher([
   '/contact(.*)',
   '/sign-in(.*)',
   '/sign-up(.*)',
+  '/api/auth(.*)',
   '/api/health(.*)',
   '/api/webhooks(.*)',
 ])

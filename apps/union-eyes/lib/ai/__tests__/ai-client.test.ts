@@ -11,7 +11,7 @@ vi.mock('@nzila/ai-sdk', () => ({
   createAiClient: mockCreateAiClient,
 }));
 
-vi.mock('@clerk/nextjs/server', () => ({
+vi.mock('@nzila/platform-auth/entra/server', () => ({
   auth: vi.fn(() => ({ getToken: vi.fn(async () => 'test-token') })),
 }));
 

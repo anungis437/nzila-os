@@ -3,7 +3,7 @@
  *
  * Platform admin only — manages firms, subscriptions, MRR metrics.
  */
-import { auth } from '@clerk/nextjs/server'
+import { auth } from '@nzila/platform-auth/entra/server'
 import { redirect } from 'next/navigation'
 import { Building2, DollarSign, Users, TrendingUp } from 'lucide-react'
 import { requirePermission } from '@/lib/rbac'

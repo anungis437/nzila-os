@@ -3,7 +3,7 @@
  *
  * Operator view for moderation cases, integrity signals, and content review.
  */
-import { auth } from '@clerk/nextjs/server'
+import { auth } from '@nzila/platform-auth/entra/server'
 import { redirect } from 'next/navigation'
 import Link from 'next/link'
 import { Card } from '@nzila/ui'

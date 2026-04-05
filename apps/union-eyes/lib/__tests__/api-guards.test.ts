@@ -8,7 +8,7 @@ const mocks = vi.hoisted(() => ({
   mockRunWithContext: vi.fn(),
 }));
 
-vi.mock('@clerk/nextjs/server', () => ({
+vi.mock('@nzila/platform-auth/entra/server', () => ({
   auth: mocks.mockAuth,
 }));
 

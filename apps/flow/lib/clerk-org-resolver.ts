@@ -7,7 +7,7 @@
  *
  * @module clerk-org-resolver
  */
-import { auth } from '@clerk/nextjs/server'
+import { auth } from '@nzila/platform-auth/entra/server'
 import type { CommerceDbContext, CommerceReadContext } from '@nzila/commerce-db'
 
 /** In-process cache (per-instance, cleared on deploy). */

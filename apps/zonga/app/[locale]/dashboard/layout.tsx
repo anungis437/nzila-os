@@ -2,7 +2,7 @@
  * Dashboard Layout — Authenticated shell for Zonga.
  * Role-aware sidebar + header + content with music-platform navigation.
  */
-import { auth, currentUser } from '@clerk/nextjs/server';
+import { auth, currentUser } from '@nzila/platform-auth/entra/server';
 import { redirect } from 'next/navigation';
 import { DashboardShell } from '@/components/dashboard/dashboard-shell';
 import { SidebarOrgSwitcher, SidebarAccountFooter, MobileAccountFooter } from '@/components/dashboard/clerk-widgets';

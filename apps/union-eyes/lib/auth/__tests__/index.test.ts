@@ -1,7 +1,7 @@
 import { describe, it, expect, vi } from 'vitest';
 
 // Mock heavy dependencies that the barrel import chain pulls in
-vi.mock('@clerk/nextjs/server', () => ({
+vi.mock('@nzila/platform-auth/entra/server', () => ({
   auth: vi.fn(() => ({ userId: null, getToken: vi.fn() })),
   currentUser: vi.fn(),
 }));

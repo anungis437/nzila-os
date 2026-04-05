@@ -1,6 +1,6 @@
 'use client'
 
-import { OrganizationSwitcher, useClerk, useUser } from '@clerk/nextjs'
+import { OrganizationSwitcher, useClerk, useUser } from '@nzila/platform-auth/entra/client'
 import { User, Settings, LogOut } from 'lucide-react'
 import Link from 'next/link'
 import Image from 'next/image'
@@ -65,7 +65,7 @@ export function SidebarAccountFooter({ locale }: { locale: string }) {
       {/* Sign Out */}
       <button
         type="button"
-        onClick={() => signOut({ redirectUrl: '/' })}
+        onClick={() => signOut('/')}
         className="w-full flex items-center gap-3 px-3 py-2 rounded-lg text-sm text-gray-400 hover:text-red-400 hover:bg-white/5 transition-colors cursor-pointer"
       >
         <LogOut size={16} />
@@ -110,7 +110,7 @@ export function MobileAccountFooter({ locale }: { locale: string }) {
         </Link>
         <button
           type="button"
-          onClick={() => signOut({ redirectUrl: '/' })}
+          onClick={() => signOut('/')}
           className="p-2 rounded-lg text-gray-400 hover:text-red-400 hover:bg-white/5 transition-colors cursor-pointer"
           aria-label="Sign Out"
         >

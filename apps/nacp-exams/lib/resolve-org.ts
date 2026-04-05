@@ -14,7 +14,7 @@
  *
  * @module resolve-org
  */
-import { auth, currentUser } from '@clerk/nextjs/server'
+import { auth, currentUser } from '@nzila/platform-auth/entra/server'
 import { redirect } from 'next/navigation'
 import { NacpRole } from '@nzila/nacp-core/enums'
 import type { NacpOrgContext } from '@nzila/nacp-core/types'

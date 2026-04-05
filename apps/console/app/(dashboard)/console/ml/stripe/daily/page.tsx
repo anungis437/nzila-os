@@ -6,7 +6,7 @@
  *
  * Dogfoods @nzila/ml-sdk — zero direct DB access.
  */
-import { auth } from '@clerk/nextjs/server'
+import { auth } from '@nzila/platform-auth/entra/server'
 import { redirect } from 'next/navigation'
 import Link from 'next/link'
 import { mlClient, getEntityId } from '@/lib/ml-server'

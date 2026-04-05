@@ -4,7 +4,7 @@
  * Admin view for generating compliance reports, viewing audit trails,
  * and exporting data for regulatory requirements.
  */
-import { auth } from '@clerk/nextjs/server'
+import { auth } from '@nzila/platform-auth/entra/server'
 import { redirect } from 'next/navigation'
 import { Card } from '@nzila/ui'
 

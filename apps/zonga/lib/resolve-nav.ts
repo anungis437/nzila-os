@@ -5,7 +5,7 @@
  * the sidebar needs: role + whether the user is viewing the platform org.
  * Avoids importing heavy action-only code into the layout.
  */
-import { auth, currentUser } from '@clerk/nextjs/server'
+import { auth, currentUser } from '@nzila/platform-auth/entra/server'
 import { platformDb } from '@nzila/db/platform'
 import { sql } from 'drizzle-orm'
 import type { ZongaRole } from '@nzila/zonga-core/types'

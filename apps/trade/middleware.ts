@@ -1,4 +1,4 @@
-import { clerkMiddleware, createRouteMatcher } from '@clerk/nextjs/server'
+import { auth } from '@nzila/platform-auth/entra/config'
 import { NextResponse } from 'next/server'
 import { checkRateLimit, rateLimitHeaders } from '@nzila/os-core/rateLimit'
 import createIntlMiddleware from 'next-intl/middleware'
@@ -10,22 +10,12 @@ const intlMiddleware = createIntlMiddleware({
   localePrefix: 'never',
 })
 
-/**
- * Public routes — everything else requires authentication.
- * /api/health is intentionally public (probe endpoints must not require auth).
- */
-const isPublicRoute = createRouteMatcher([
-  '/',
-  '/sign-in(.*)',
-  '/sign-up(.*)',
-  '/api/webhooks(.*)',
-  '/api/health(.*)',
-])
+const publicPaths = ['/', '/sign-in', '/sign-up', '/api/webhooks', '/api/health', '/api/auth']
 
 const RATE_LIMIT_MAX = Number(process.env.RATE_LIMIT_MAX ?? '120')
 const RATE_LIMIT_WINDOW_MS = Number(process.env.RATE_LIMIT_WINDOW_MS ?? '60000')
 
-export default clerkMiddleware(async (auth, request) => {
+export default auth((request: any) => {
   // ── Rate limiting (skip in dev — HMR triggers too many requests) ──────
   if (process.env.NODE_ENV !== 'development') {
     const ip =
@@ -70,9 +60,10 @@ export default clerkMiddleware(async (auth, request) => {
     }
   }
 
-  // ── Authentication (skip in dev — prevents Clerk handshake loops) ────
-  if (process.env.NODE_ENV !== 'development' && !isPublicRoute(request)) {
-    await auth.protect()
+  // ── Authentication ────────────────────────────────────────────────────────────────────
+  const isPublic = publicPaths.some(p => request.nextUrl.pathname.startsWith(p))
+  if (!isPublic && !request.auth) {
+    return NextResponse.redirect(new URL('/sign-in', request.url))
   }
 
   // ── Internationalisation ──────────────────────────────────────────────

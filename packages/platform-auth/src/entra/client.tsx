@@ -276,3 +276,6 @@ export async function signOutFromEntra(callbackUrl?: string) {
 
 export { SessionProvider }
 export { UserButton } from './components/user-button.js'
+export { SignIn } from './components/sign-in.js'
+export { SignUp } from './components/sign-up.js'
+export { OrgSwitcher, OrgSwitcher as OrganizationSwitcher } from './components/org-switcher.js'

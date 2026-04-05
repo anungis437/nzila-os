@@ -4,7 +4,7 @@
  * Browseable artist roster with region, genre, and search filtering.
  * Links into per-artist detail page at /artists/[id].
  */
-import { auth } from '@clerk/nextjs/server'
+import { auth } from '@nzila/platform-auth/entra/server'
 import { redirect } from 'next/navigation'
 import Link from 'next/link'
 import { Card } from '@nzila/ui'

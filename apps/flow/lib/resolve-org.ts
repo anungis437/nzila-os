@@ -7,7 +7,7 @@
  *
  * @module resolve-org
  */
-import { auth, currentUser } from '@clerk/nextjs/server'
+import { auth, currentUser } from '@nzila/platform-auth/entra/server'
 import type { OrgContext } from '@nzila/commerce-core/types'
 import { OrgRole } from '@nzila/commerce-core/enums'
 import type { OrgCommerceConfig } from '@nzila/platform-commerce-org/types'

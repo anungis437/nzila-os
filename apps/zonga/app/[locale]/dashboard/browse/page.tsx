@@ -5,7 +5,7 @@
  * and upcoming events, then delegates rendering to the client
  * BrowseGrid which integrates with the global player.
  */
-import { auth } from '@clerk/nextjs/server'
+import { auth } from '@nzila/platform-auth/entra/server'
 import { redirect } from 'next/navigation'
 import { Card } from '@nzila/ui'
 import {

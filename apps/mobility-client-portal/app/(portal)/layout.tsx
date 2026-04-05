@@ -1,6 +1,6 @@
-import { auth } from '@clerk/nextjs/server'
+import { auth } from '@nzila/platform-auth/entra/server'
 import { redirect } from 'next/navigation'
-import { UserButton } from '@clerk/nextjs'
+import { UserButton } from '@nzila/platform-auth/entra/client'
 import Link from 'next/link'
 
 export const dynamic = 'force-dynamic'

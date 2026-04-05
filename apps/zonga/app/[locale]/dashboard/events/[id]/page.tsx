@@ -4,7 +4,7 @@
  * Creators see full management view with ticket stats & purchase table.
  * Listeners see a polished read-only event page.
  */
-import { auth } from '@clerk/nextjs/server'
+import { auth } from '@nzila/platform-auth/entra/server'
 import { redirect, notFound } from 'next/navigation'
 import Link from 'next/link'
 import { Card } from '@nzila/ui'

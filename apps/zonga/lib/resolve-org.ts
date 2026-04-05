@@ -14,7 +14,7 @@
  *
  * @module resolve-org
  */
-import { auth, currentUser } from '@clerk/nextjs/server'
+import { auth, currentUser } from '@nzila/platform-auth/entra/server'
 import type { ZongaOrgContext } from '@nzila/zonga-core/types'
 
 /** Zonga roles mirror the core ZongaRole enum. */

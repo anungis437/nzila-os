@@ -5,7 +5,7 @@
  * Shows region, payout rail, and preferred currency for African creators.
  */
 import Link from 'next/link'
-import { auth } from '@clerk/nextjs/server'
+import { auth } from '@nzila/platform-auth/entra/server'
 import { redirect } from 'next/navigation'
 import { Card } from '@nzila/ui'
 import { listCreators } from '@/lib/actions/creator-actions'

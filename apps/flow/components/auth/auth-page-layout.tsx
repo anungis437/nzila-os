@@ -1,6 +1,6 @@
 "use client";
 
-import { SignIn, SignUp } from "@clerk/nextjs";
+import { SignIn, SignUp } from "@nzila/platform-auth/entra/client";
 import Image from "next/image";
 import Link from "next/link";
 import { cn } from "@/lib/utils";

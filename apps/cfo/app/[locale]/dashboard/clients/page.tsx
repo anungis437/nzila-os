@@ -5,7 +5,7 @@
  * Links to individual client detail pages.
  */
 import Link from 'next/link'
-import { auth } from '@clerk/nextjs/server'
+import { auth } from '@nzila/platform-auth/entra/server'
 import { redirect } from 'next/navigation'
 import { requirePermission } from '@/lib/rbac'
 import { Users, Plus, Search, Building2, ArrowRight } from 'lucide-react'

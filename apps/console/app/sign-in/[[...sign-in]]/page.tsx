@@ -1,6 +1,6 @@
-import { auth } from '@clerk/nextjs/server'
+import { auth } from '@nzila/platform-auth/entra/server'
 import { redirect } from 'next/navigation'
-import { SignIn } from '@clerk/nextjs'
+import { SignIn } from '@nzila/platform-auth/entra/client'
 
 export default async function SignInPage() {
   const { userId } = await auth()

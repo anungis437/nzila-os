@@ -8,7 +8,7 @@
  * features and status, plus the listener section below.
  * Listeners see only the listener plan section.
  */
-import { auth, currentUser } from '@clerk/nextjs/server'
+import { auth, currentUser } from '@nzila/platform-auth/entra/server'
 import { redirect } from 'next/navigation'
 import { Card } from '@nzila/ui'
 import {

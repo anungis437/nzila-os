@@ -4,7 +4,7 @@
  * Conversational financial advisor with AI-powered insights,
  * anomaly detection, and cash flow forecasting.
  */
-import { auth } from '@clerk/nextjs/server'
+import { auth } from '@nzila/platform-auth/entra/server'
 import { redirect } from 'next/navigation'
 import { requirePermission } from '@/lib/rbac'
 import {

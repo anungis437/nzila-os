@@ -1,5 +1,5 @@
 import type { Metadata } from 'next'
-import { ClerkProvider } from '@clerk/nextjs'
+import { AuthProvider } from '@nzila/platform-auth/entra/client'
 import { NextIntlClientProvider } from 'next-intl'
 import { getLocale, getMessages } from 'next-intl/server'
 import { Poppins } from 'next/font/google'
@@ -35,7 +35,7 @@ export default async function RootLayout({ children }: { children: React.ReactNo
   const messages = await getMessages()
 
   return (
-    <ClerkProvider>
+    <AuthProvider>
       <html lang={locale} className={poppins.variable}>
         <body>
           <NextIntlClientProvider locale={locale} messages={messages}>
@@ -43,6 +43,6 @@ export default async function RootLayout({ children }: { children: React.ReactNo
           </NextIntlClientProvider>
         </body>
       </html>
-    </ClerkProvider>
+    </AuthProvider>
   )
 }

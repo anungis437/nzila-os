@@ -1,7 +1,7 @@
 'use server'
 
 import { redirect as _redirect } from 'next/navigation'
-import { auth } from '@clerk/nextjs/server'
+import { auth } from '@nzila/platform-auth/entra/server'
 import { platformDb } from '@nzila/db/platform'
 import { partners, partnerUsers } from '@nzila/db/schema'
 import { eq, desc, sql, and as _and } from 'drizzle-orm'

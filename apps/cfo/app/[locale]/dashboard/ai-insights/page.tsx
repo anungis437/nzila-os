@@ -4,7 +4,7 @@
  * Dedicated view for ML-detected anomalies, trend analysis,
  * and proactive financial recommendations.
  */
-import { auth } from '@clerk/nextjs/server'
+import { auth } from '@nzila/platform-auth/entra/server'
 import { redirect } from 'next/navigation'
 import { requirePermission } from '@/lib/rbac'
 import { Sparkles, AlertTriangle, TrendingUp, Lightbulb } from 'lucide-react'

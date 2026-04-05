@@ -7,7 +7,7 @@
 import { platformDb } from '@nzila/db/platform'
 import { aiRequests } from '@nzila/db/schema'
 import { eq, desc, and, count, sum, avg } from 'drizzle-orm'
-import { auth } from '@clerk/nextjs/server'
+import { auth } from '@nzila/platform-auth/entra/server'
 import { redirect } from 'next/navigation'
 
 export const dynamic = 'force-dynamic'

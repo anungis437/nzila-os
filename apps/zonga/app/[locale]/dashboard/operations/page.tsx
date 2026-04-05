@@ -4,7 +4,7 @@
  * Admin-only view of system health, recent deployments, queue depths,
  * and key operational KPIs across the Zonga platform.
  */
-import { auth } from '@clerk/nextjs/server'
+import { auth } from '@nzila/platform-auth/entra/server'
 import { redirect } from 'next/navigation'
 import { Card } from '@nzila/ui'
 

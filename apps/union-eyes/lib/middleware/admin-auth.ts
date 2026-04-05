@@ -158,8 +158,8 @@ export async function requireAdmin(
  * Admin authentication HOC for pages
  * 
  * NOTE: This is a placeholder for future client-side protection.
- * For Server Components, use getAuth() from @clerk/nextjs/server directly.
- * For Client Components, use useAuth() from @clerk/nextjs in client components.
+ * For Server Components, use getAuth() from @nzila/platform-auth/entra/server directly.
+ * For Client Components, use useAuth() from @nzila/platform-auth/entra/client in client components.
  * 
  * Usage concept (not implemented):
  * ```typescript

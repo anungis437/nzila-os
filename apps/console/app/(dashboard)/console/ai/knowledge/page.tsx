@@ -9,7 +9,7 @@ import {
   aiKnowledgeIngestionRuns,
 } from '@nzila/db/schema'
 import { eq, desc } from 'drizzle-orm'
-import { auth } from '@clerk/nextjs/server'
+import { auth } from '@nzila/platform-auth/entra/server'
 import { redirect } from 'next/navigation'
 import { IngestButton } from './ingest-button'
 

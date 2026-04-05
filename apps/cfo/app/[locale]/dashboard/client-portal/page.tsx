@@ -4,7 +4,7 @@
  * Client-facing view with financial health score, cash flow projection,
  * recent documents, and upcoming deadlines.
  */
-import { auth } from '@clerk/nextjs/server'
+import { auth } from '@nzila/platform-auth/entra/server'
 import { redirect } from 'next/navigation'
 import { requirePermission } from '@/lib/rbac'
 import { TrendingUp, FileText, CalendarDays, HeartPulse, DollarSign, Clock } from 'lucide-react'

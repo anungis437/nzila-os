@@ -8,7 +8,7 @@
  * 2. Receiving → Production: Trigger production readiness when all PO items received
  */
 import { executeCommand } from '@/lib/control/control-adapter'
-import { auth } from '@clerk/nextjs/server'
+import { auth } from '@nzila/platform-auth/entra/server'
 import { revalidatePath } from 'next/cache'
 
 // ── Sales → Procurement Trigger ────────────────────────────────────────────

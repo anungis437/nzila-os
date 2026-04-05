@@ -6,7 +6,7 @@
  * so partner-facing API routes use audited, Org-isolated writes.
  */
 import { NextResponse, type NextRequest } from 'next/server'
-import { auth } from '@clerk/nextjs/server'
+import { auth } from '@nzila/platform-auth/entra/server'
 import {
   withAudit,
   createAuditedScopedDb,

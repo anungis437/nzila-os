@@ -4,7 +4,7 @@
  * Shows creator profile, stats, catalog with play buttons, wallet,
  * payout history, and revenue breakdown.
  */
-import { auth } from '@clerk/nextjs/server'
+import { auth } from '@nzila/platform-auth/entra/server'
 import { redirect } from 'next/navigation'
 import Link from 'next/link'
 import { Card } from '@nzila/ui'

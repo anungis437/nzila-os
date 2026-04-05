@@ -4,7 +4,7 @@
  * Full content asset view: metadata, quality tiers, collaborators,
  * streaming URL, integrity status, and revenue breakdown.
  */
-import { auth } from '@clerk/nextjs/server'
+import { auth } from '@nzila/platform-auth/entra/server'
 import { redirect, notFound } from 'next/navigation'
 import Link from 'next/link'
 import { Card } from '@nzila/ui'

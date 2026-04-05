@@ -25,6 +25,12 @@ export interface OrgSwitcherProps {
   className?: string
   /** Hide personal account option. Default: true */
   hidePersonal?: boolean
+  /** Clerk-compat appearance prop (ignored — style via className). */
+  appearance?: Record<string, unknown>
+  /** Clerk-compat URL after creating an org (ignored). */
+  afterCreateOrganizationUrl?: string
+  /** Clerk-compat URL after selecting an org (ignored). */
+  afterSelectOrganizationUrl?: string
 }
 
 /**

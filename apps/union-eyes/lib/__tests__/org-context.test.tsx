@@ -10,7 +10,7 @@ const mocks = vi.hoisted(() => ({
   mockReload: vi.fn(),
 }));
 
-vi.mock('@clerk/nextjs', () => ({
+vi.mock('@nzila/platform-auth/entra/client', () => ({
   useAuth: mocks.mockUseAuth,
   useOrganization: mocks.mockUseOrganization,
 }));

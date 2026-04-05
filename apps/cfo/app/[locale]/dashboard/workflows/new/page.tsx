@@ -1,7 +1,7 @@
 /**
  * CFO — Create Workflow Template Page.
  */
-import { auth } from '@clerk/nextjs/server'
+import { auth } from '@nzila/platform-auth/entra/server'
 import { redirect } from 'next/navigation'
 import { WorkflowBuilderForm } from '@/components/workflow-builder-form'
 

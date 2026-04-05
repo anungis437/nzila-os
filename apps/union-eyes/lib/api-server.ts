@@ -1,6 +1,6 @@
-// Union Eyes - Server-only API Client with Clerk authentication
+// Union Eyes - Server-only API Client with Entra authentication
 //
-// This module uses @clerk/nextjs/server and MUST only be imported
+// This module uses @nzila/platform-auth/entra/server and MUST only be imported
 // from Server Components, API routes, or server actions.
 // For client components, use lib/api.ts instead.
 

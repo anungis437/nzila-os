@@ -11,7 +11,7 @@
  *   2. `runAIExtraction`  → Auto-extract deal details from partner emails
  *   3. `runPrediction`    → Deal conversion prediction + commission forecasting
  */
-import { auth } from '@clerk/nextjs/server'
+import { auth } from '@nzila/platform-auth/entra/server'
 import { platformDb } from '@nzila/db/platform'
 import { sql } from 'drizzle-orm'
 import { logger } from '@/lib/logger'

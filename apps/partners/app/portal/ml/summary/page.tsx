@@ -10,7 +10,7 @@
  *              Resolved and enforced entirely by /portal/api/ml/summary —
  *              this page has zero direct DB access.
  */
-import { auth } from '@clerk/nextjs/server'
+import { auth } from '@nzila/platform-auth/entra/server'
 import { ChartBarIcon, ShieldCheckIcon, ExclamationTriangleIcon } from '@heroicons/react/24/outline'
 
 export const dynamic = 'force-dynamic'

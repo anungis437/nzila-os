@@ -1,5 +1,5 @@
 import Link from 'next/link'
-import { currentUser } from '@clerk/nextjs/server'
+import { currentUser } from '@nzila/platform-auth/entra/server'
 import { getLocale } from 'next-intl/server'
 import { Card } from '@nzila/ui'
 import {

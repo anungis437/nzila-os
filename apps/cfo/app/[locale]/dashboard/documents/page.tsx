@@ -2,7 +2,7 @@
  * CFO — Documents Page.
  */
 import Link from 'next/link'
-import { auth } from '@clerk/nextjs/server'
+import { auth } from '@nzila/platform-auth/entra/server'
 import { redirect } from 'next/navigation'
 import { requirePermission as _requirePermission } from '@/lib/rbac'
 import { FileText, Upload, File, Download } from 'lucide-react'

@@ -7,7 +7,7 @@
  *
  * @module resolve-org
  */
-import { auth, currentUser } from '@clerk/nextjs/server'
+import { auth, currentUser } from '@nzila/platform-auth/entra/server'
 import type { AgriOrgContext } from '@nzila/agri-core'
 import type { AgriOrgRole } from '@nzila/agri-core'
 

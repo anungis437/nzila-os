@@ -4,7 +4,7 @@
  * Platform-wide analytics: streams, downloads, top assets, monthly revenue,
  * geographic breakdown by African region, revenue source mix.
  */
-import { auth } from '@clerk/nextjs/server'
+import { auth } from '@nzila/platform-auth/entra/server'
 import { redirect } from 'next/navigation'
 import Link from 'next/link'
 import { Card } from '@nzila/ui'

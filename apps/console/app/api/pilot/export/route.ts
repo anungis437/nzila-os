@@ -5,7 +5,7 @@
  * Platform admin / ops only.
  */
 import { NextResponse } from 'next/server'
-import { auth } from '@clerk/nextjs/server'
+import { auth } from '@nzila/platform-auth/entra/server'
 import {
   generatePilotPack,
   createDefaultPilotPorts,

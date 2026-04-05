@@ -3,7 +3,7 @@
  *
  * All users see a polished discovery view of published events.
  */
-import { auth } from '@clerk/nextjs/server'
+import { auth } from '@nzila/platform-auth/entra/server'
 import { redirect } from 'next/navigation'
 import Link from 'next/link'
 import { browsePublishedEvents } from '@/lib/actions/browse-actions'

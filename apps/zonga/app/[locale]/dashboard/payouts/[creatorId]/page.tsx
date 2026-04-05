@@ -4,7 +4,7 @@
  * Shows a single creator's wallet balance, payout history,
  * and royalty split earnings across releases.
  */
-import { auth } from '@clerk/nextjs/server'
+import { auth } from '@nzila/platform-auth/entra/server'
 import { redirect, notFound } from 'next/navigation'
 import Link from 'next/link'
 import { Card } from '@nzila/ui'

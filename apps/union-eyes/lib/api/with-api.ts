@@ -276,13 +276,13 @@ export function withApi<
         if (userLevel < minRoleLevel) {
           try {
             const { getUserRole } = await import('@/lib/auth/rbac-server');
-            const { auth } = await import('@clerk/nextjs/server');
+            const { auth } = await import('@nzila/platform-auth/entra/server');
             const { orgId } = await auth();
             const dbRole = await getUserRole(user.id, orgId ?? user.organizationId ?? undefined);
             userRole = normalizeRole(dbRole ?? 'member');
             userLevel = ROLE_HIERARCHY[userRole] ?? 0;
           } catch {
-            // DB role resolution failed — keep Clerk metadata role
+            // DB role resolution failed — keep metadata role
           }
         }
 
@@ -302,12 +302,12 @@ export function withApi<
           // Resolve from DB before rejecting
           try {
             const { getUserRole } = await import('@/lib/auth/rbac-server');
-            const { auth } = await import('@clerk/nextjs/server');
+            const { auth } = await import('@nzila/platform-auth/entra/server');
             const { orgId } = await auth();
             const dbRole = await getUserRole(user.id, orgId ?? user.organizationId ?? undefined);
             userRole = normalizeRole(dbRole ?? 'member');
           } catch {
-            // DB role resolution failed — keep Clerk metadata role
+            // DB role resolution failed — keep metadata role
           }
         }
         if (!allowedRoles.includes(userRole)) {

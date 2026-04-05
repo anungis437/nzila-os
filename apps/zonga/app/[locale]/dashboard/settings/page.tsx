@@ -3,7 +3,7 @@
  *
  * Profile, preferences, appearance, API keys, and notifications.
  */
-import { auth, currentUser } from '@clerk/nextjs/server'
+import { auth, currentUser } from '@nzila/platform-auth/entra/server'
 import { redirect } from 'next/navigation'
 import { Card } from '@nzila/ui'
 import { getListenerProfile, ensureListenerProfile } from '@/lib/actions/listener-actions'

@@ -17,7 +17,7 @@ import {
 import { platformDb } from '@nzila/db/platform'
 import { orgMembers } from '@nzila/db/schema'
 import { eq, and } from 'drizzle-orm'
-import { auth } from '@clerk/nextjs/server'
+import { auth } from '@nzila/platform-auth/entra/server'
 import { getUserRole, type NzilaRole } from '@/lib/rbac'
 import { createRequestContext, runWithContext } from '@nzila/os-core'
 

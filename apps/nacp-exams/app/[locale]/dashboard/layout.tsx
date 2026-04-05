@@ -2,10 +2,10 @@
  * Dashboard Layout — Authenticated shell for NACP Exams.
  * Sidebar navigation + top header + breadcrumbs + content area.
  */
-import { auth } from '@clerk/nextjs/server';
+import { auth } from '@nzila/platform-auth/entra/server';
 import { redirect } from 'next/navigation';
 import Link from 'next/link';
-import { UserButton, OrganizationSwitcher } from '@clerk/nextjs';
+import { UserButton, OrganizationSwitcher } from '@nzila/platform-auth/entra/client';
 
 const sidebarLinks = [
   { href: 'dashboard', label: 'Overview', icon: '📊' },

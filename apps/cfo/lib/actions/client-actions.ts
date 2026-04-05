@@ -6,7 +6,7 @@
  */
 'use server'
 
-import { auth } from '@clerk/nextjs/server'
+import { auth } from '@nzila/platform-auth/entra/server'
 import { requirePermission } from '@/lib/rbac'
 import { revalidatePath } from 'next/cache'
 import { platformDb } from '@nzila/db/platform'

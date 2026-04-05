@@ -5,7 +5,7 @@
  * Layer 3: next-intl locale routing
  * Layer 4: Request-ID propagation (x-request-id header)
  */
-import { clerkMiddleware, createRouteMatcher } from '@clerk/nextjs/server'
+import { clerkMiddleware, createRouteMatcher } from '@nzila/platform-auth/entra/server'
 import createMiddleware from 'next-intl/middleware'
 import { NextResponse, type NextRequest } from 'next/server'
 import { checkRateLimit, rateLimitHeaders } from '@nzila/os-core/rateLimit'
@@ -21,6 +21,7 @@ const isPublicRoute = createRouteMatcher([
   '/artists(.*)',
   '/events(.*)',
   '/for-labels(.*)',
+  '/api/auth(.*)',
   '/api/health(.*)',
 ])
 

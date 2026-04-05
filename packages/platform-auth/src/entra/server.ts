@@ -33,6 +33,8 @@ export interface ClerkCompatAuthResult {
   sessionId: string | null
   sessionClaims: Record<string, unknown> | null
   getToken: (options?: Record<string, unknown>) => Promise<string | null>
+  /** Clerk-compat `has()` — checks role/permission against orgRole. */
+  has: (params: { role?: string; permission?: string }) => boolean
 }
 
 /**
@@ -44,7 +46,7 @@ export async function auth(): Promise<ClerkCompatAuthResult> {
   const entra = session as EntraSession | null
 
   if (!session?.user) {
-    return { userId: null, orgId: null, orgRole: null, sessionId: null, sessionClaims: null, getToken: async () => null }
+    return { userId: null, orgId: null, orgRole: null, sessionId: null, sessionClaims: null, getToken: async () => null, has: () => false }
   }
 
   return {
@@ -58,6 +60,13 @@ export async function auth(): Promise<ClerkCompatAuthResult> {
       name: session.user.name,
     },
     getToken: async () => entra?.accessToken ?? null,
+    has: (params: { role?: string; permission?: string }) => {
+      const currentRole = entra?.orgRole ?? null
+      const roles = entra?.roles ?? []
+      if (params.role) return currentRole === params.role || roles.includes(params.role)
+      if (params.permission) return roles.includes(params.permission)
+      return false
+    },
   }
 }
 
@@ -204,4 +213,57 @@ export function createRouteMatcher(patterns: string[]) {
           new URL((req as { url: string }).url).pathname
     return regexes.some((r) => r.test(pathname))
   }
+}
+
+// ── clerkMiddleware Compat ──────────────────────────────────────────────────
+
+import { NextResponse } from 'next/server'
+
+/**
+ * Drop-in replacement for Clerk's `clerkMiddleware()`.
+ *
+ * Wraps NextAuth's `auth()` middleware. The callback receives a compat `auth`
+ * object with `.protect()` (redirects to /sign-in) and a callable form
+ * that returns `{ userId, orgId, orgRole, sessionClaims }`.
+ */
+
+class AuthProtectRedirect {
+  constructor(public url: string) {}
+}
+
+export function clerkMiddleware(
+  handler: (auth: any, request: any) => Promise<any> | any,
+) {
+  return nextAuth(async (req: any) => {
+    const session = req.auth as any
+    const authCompat = Object.assign(
+      // auth() callable — returns session-like object
+      async () => ({
+        userId: session?.entraObjectId ?? session?.user?.id ?? null,
+        orgId: session?.activeOrgId ?? null,
+        orgRole: session?.orgRole ?? null,
+        sessionClaims: {
+          metadata: { role: session?.roles?.[0] ?? undefined },
+        },
+      }),
+      {
+        // auth.protect() — redirect if unauthenticated (throws like Clerk)
+        protect: async () => {
+          if (!session?.user) {
+            const signInUrl = new URL('/sign-in', req.url)
+            signInUrl.searchParams.set('redirect_url', req.nextUrl.pathname)
+            throw new AuthProtectRedirect(signInUrl.toString())
+          }
+        },
+      },
+    )
+    try {
+      return await handler(authCompat, req)
+    } catch (e) {
+      if (e instanceof AuthProtectRedirect) {
+        return NextResponse.redirect(e.url)
+      }
+      throw e
+    }
+  }) as any
 }

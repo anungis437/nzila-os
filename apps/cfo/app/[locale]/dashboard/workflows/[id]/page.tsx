@@ -1,7 +1,7 @@
 /**
  * CFO — Workflow Instance Execution Page.
  */
-import { auth } from '@clerk/nextjs/server'
+import { auth } from '@nzila/platform-auth/entra/server'
 import { redirect, notFound } from 'next/navigation'
 import { CheckCircle2, XCircle, Circle, Clock, ArrowRight } from 'lucide-react'
 import { getWorkflowInstance } from '@/lib/actions/workflow-actions'

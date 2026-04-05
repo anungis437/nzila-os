@@ -7,7 +7,7 @@
 
 import Link from 'next/link'
 import React from 'react'
-import { currentUser } from '@clerk/nextjs/server'
+import { currentUser } from '@nzila/platform-auth/entra/server'
 import {
   DocumentTextIcon,
   CurrencyDollarIcon,

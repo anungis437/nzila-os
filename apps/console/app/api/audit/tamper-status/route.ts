@@ -11,7 +11,7 @@ import { platformDb } from '@nzila/db/platform'
 import { auditEvents } from '@nzila/db/schema'
 import { asc, sql } from 'drizzle-orm'
 import { verifyChain } from '@nzila/os-core/hash'
-import { auth } from '@clerk/nextjs/server'
+import { auth } from '@nzila/platform-auth/entra/server'
 
 export const dynamic = 'force-dynamic'
 

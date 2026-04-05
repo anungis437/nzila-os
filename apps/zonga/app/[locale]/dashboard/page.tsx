@@ -8,7 +8,7 @@
  * Server component using resolveNavContext() for org detection,
  * plus Clerk publicMetadata for listener identification.
  */
-import { auth, currentUser } from '@clerk/nextjs/server'
+import { auth, currentUser } from '@nzila/platform-auth/entra/server'
 import { redirect } from 'next/navigation'
 import Link from 'next/link'
 import { Card } from '@nzila/ui'

@@ -5,7 +5,7 @@
  * and recent activity from audit_log.
  */
 import Link from 'next/link'
-import { auth } from '@clerk/nextjs/server'
+import { auth } from '@nzila/platform-auth/entra/server'
 import { redirect, notFound } from 'next/navigation'
 import {
   ArrowLeft,

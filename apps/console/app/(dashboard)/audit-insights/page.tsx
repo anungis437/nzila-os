@@ -5,7 +5,7 @@
  * Platform admins see all; org users see only their org.
  * Includes CSV export.
  */
-import { currentUser } from '@clerk/nextjs/server'
+import { currentUser } from '@nzila/platform-auth/entra/server'
 import { getUserRole } from '@/lib/rbac'
 import { platformDb } from '@nzila/db/platform'
 import { auditEvents, orgs } from '@nzila/db/schema'

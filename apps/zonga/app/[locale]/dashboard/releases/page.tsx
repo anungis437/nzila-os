@@ -4,7 +4,7 @@
  * Manage content releases (albums, EPs, singles, compilations).
  */
 import Link from 'next/link'
-import { auth } from '@clerk/nextjs/server'
+import { auth } from '@nzila/platform-auth/entra/server'
 import { redirect } from 'next/navigation'
 import { Card } from '@nzila/ui'
 import { listReleases } from '@/lib/actions/release-actions'

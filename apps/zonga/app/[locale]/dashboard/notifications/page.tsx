@@ -4,7 +4,7 @@
  * In-app notification center: activity feed for the current user.
  * Mark single or all notifications as read.
  */
-import { auth } from '@clerk/nextjs/server'
+import { auth } from '@nzila/platform-auth/entra/server'
 import { redirect } from 'next/navigation'
 import { Card } from '@nzila/ui'
 import { listNotifications } from '@/lib/actions/notification-actions'

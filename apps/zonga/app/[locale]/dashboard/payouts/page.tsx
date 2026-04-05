@@ -4,7 +4,7 @@
  * Payout history, preview, and execution via Stripe Connect
  * or mobile money rails (M-Pesa, MTN MoMo, etc.).
  */
-import { auth } from '@clerk/nextjs/server'
+import { auth } from '@nzila/platform-auth/entra/server'
 import { redirect } from 'next/navigation'
 import { Card } from '@nzila/ui'
 import { listPayouts } from '@/lib/actions/payout-actions'

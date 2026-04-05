@@ -30,9 +30,9 @@ describe('Platform Admin platform integration', () => {
     expect(deps['@nzila/os-core']).toBeDefined()
   })
 
-  it('depends on @clerk/nextjs for auth', () => {
+  it('depends on @nzila/platform-auth for auth', () => {
     const pkg = JSON.parse(readFileSync(resolve(APP, 'package.json'), 'utf-8'))
     const deps = { ...pkg.dependencies, ...pkg.devDependencies }
-    expect(deps['@clerk/nextjs']).toBeDefined()
+    expect(deps['@nzila/platform-auth']).toBeDefined()
   })
 })

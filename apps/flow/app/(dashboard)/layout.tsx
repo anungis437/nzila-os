@@ -1,4 +1,4 @@
-import { UserButton } from '@clerk/nextjs'
+import { UserButton } from '@nzila/platform-auth/entra/client'
 import Link from 'next/link'
 import { OrgPicker } from './components/org-picker'
 import {

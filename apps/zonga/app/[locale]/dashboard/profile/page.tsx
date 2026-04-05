@@ -4,7 +4,7 @@
  * Displays the listener's profile with editable fields and avatar selection.
  * Distinct from the Settings page which handles preferences, appearance, and API keys.
  */
-import { auth, currentUser } from '@clerk/nextjs/server'
+import { auth, currentUser } from '@nzila/platform-auth/entra/server'
 import { redirect } from 'next/navigation'
 import { getListenerProfile, ensureListenerProfile } from '@/lib/actions/listener-actions'
 import { ProfileForm } from '@/components/profile/profile-form'

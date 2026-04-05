@@ -1,4 +1,4 @@
-import { clerkMiddleware, createRouteMatcher } from '@clerk/nextjs/server'
+import { auth } from '@nzila/platform-auth/entra/config'
 import { NextResponse } from 'next/server'
 import { checkRateLimit, rateLimitHeaders } from '@nzila/os-core/rateLimit'
 import createIntlMiddleware from 'next-intl/middleware'
@@ -11,26 +11,33 @@ const intlMiddleware = createIntlMiddleware({
 })
 
 /**
- * Public routes — everything else requires authentication.
+ * Public paths — everything else requires authentication.
  * Cora is read-only analytics — same auth enforcement as Agrimo.
  */
-const isPublicRoute = createRouteMatcher([
-  '/',
-  '/sign-in(.*)',
-  '/sign-up(.*)',
-  '/api/webhooks(.*)',
-  '/api/health(.*)',
-])
+const publicPaths = [
+  '/sign-in',
+  '/sign-up',
+  '/api/auth',
+  '/api/webhooks',
+  '/api/health',
+]
+
+function isPublicPath(pathname: string): boolean {
+  if (pathname === '/') return true
+  return publicPaths.some(p => pathname.startsWith(p))
+}
 
 const RATE_LIMIT_MAX = Number(process.env.RATE_LIMIT_MAX ?? '120')
 const RATE_LIMIT_WINDOW_MS = Number(process.env.RATE_LIMIT_WINDOW_MS ?? '60000')
 
-export default clerkMiddleware(async (auth, request) => {
+export default auth((req: any) => {
+  const { pathname } = req.nextUrl
+
   // ── Rate limiting (skip in dev — HMR triggers too many requests) ──────
   if (process.env.NODE_ENV !== 'development') {
     const ip =
-      request.headers.get('x-forwarded-for')?.split(',')[0]?.trim() ??
-      request.headers.get('x-real-ip') ??
+      req.headers.get('x-forwarded-for')?.split(',')[0]?.trim() ??
+      req.headers.get('x-real-ip') ??
       'unknown'
     const rl = checkRateLimit(ip, {
       max: RATE_LIMIT_MAX,
@@ -47,22 +54,22 @@ export default clerkMiddleware(async (auth, request) => {
     }
   }
 
-  // ── Authentication (skip in dev — prevents Clerk handshake loops) ────
-  if (process.env.NODE_ENV !== 'development' && !isPublicRoute(request)) {
-    await auth.protect()
+  // ── Auth protection — redirect unauthenticated users ──────────────────
+  if (!isPublicPath(pathname) && !req.auth) {
+    return NextResponse.redirect(new URL('/sign-in', req.url))
   }
 
   // ── Internationalisation ──────────────────────────────────────────────
-  if (!request.nextUrl.pathname.startsWith('/api')) {
-    const intlResponse = intlMiddleware(request)
-    const requestId = request.headers.get('x-request-id') ?? crypto.randomUUID()
+  if (!pathname.startsWith('/api')) {
+    const intlResponse = intlMiddleware(req)
+    const requestId = req.headers.get('x-request-id') ?? crypto.randomUUID()
     intlResponse.headers.set('x-request-id', requestId)
     return intlResponse
   }
 
   // ── Request-ID propagation ────────────────────────────────────────────
   const requestId =
-    request.headers.get('x-request-id') ?? crypto.randomUUID()
+    req.headers.get('x-request-id') ?? crypto.randomUUID()
   const response = NextResponse.next()
   response.headers.set('x-request-id', requestId)
   return response

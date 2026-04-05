@@ -1,7 +1,7 @@
 // Observability: @nzila/os-core/telemetry — structured logging and request tracing available via os-core.
 import { NextRequest, NextResponse } from 'next/server'
 import { z } from 'zod'
-import { auth } from '@clerk/nextjs/server'
+import { auth } from '@nzila/platform-auth/entra/server'
 
 const RetentionRunSchema = z.object({
   dryRun: z.boolean().optional(),

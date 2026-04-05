@@ -1,7 +1,7 @@
 /**
  * CFO — Document Upload Page.
  */
-import { auth } from '@clerk/nextjs/server'
+import { auth } from '@nzila/platform-auth/entra/server'
 import { redirect } from 'next/navigation'
 import { DocumentUploadForm } from '@/components/document-upload-form'
 
