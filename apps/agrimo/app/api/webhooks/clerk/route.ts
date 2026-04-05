@@ -133,13 +133,13 @@ async function handleMembershipCreated(data: Record<string, unknown>) {
   const existing = await platformDb
     .select({ id: orgMembers.id })
     .from(orgMembers)
-    .where(and(eq(orgMembers.orgId, orgId), eq(orgMembers.clerkUserId, clerkUserId)))
+    .where(and(eq(orgMembers.orgId, orgId), eq(orgMembers.userId, clerkUserId)))
     .limit(1)
 
   if (existing.length === 0) {
     await platformDb.insert(orgMembers).values({
       orgId,
-      clerkUserId,
+      userId: clerkUserId,
       role: mappedRole,
       status: 'active',
     })
@@ -172,7 +172,7 @@ async function handleMembershipDeleted(data: Record<string, unknown>) {
   await platformDb
     .update(orgMembers)
     .set({ status: 'removed', updatedAt: new Date() })
-    .where(and(eq(orgMembers.orgId, org[0].id), eq(orgMembers.clerkUserId, clerkUserId)))
+    .where(and(eq(orgMembers.orgId, org[0].id), eq(orgMembers.userId, clerkUserId)))
 
   logger.info('[clerk-webhook] Membership removed', { detail: `${clerkUserId} from ${clerkOrgId}` })
 }
@@ -184,7 +184,7 @@ async function handleUserDeleted(data: Record<string, unknown>) {
   await platformDb
     .update(orgMembers)
     .set({ status: 'removed', updatedAt: new Date() })
-    .where(eq(orgMembers.clerkUserId, clerkUserId))
+    .where(eq(orgMembers.userId, clerkUserId))
 
   logger.info('[clerk-webhook] User deleted — memberships removed', { detail: clerkUserId })
 }

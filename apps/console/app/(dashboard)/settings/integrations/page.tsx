@@ -91,7 +91,7 @@ export default async function IntegrationsPage({
   const memberships = await platformDb
     .select({ orgId: orgMembers.orgId })
     .from(orgMembers)
-    .where(eq(orgMembers.clerkUserId, userId))
+    .where(eq(orgMembers.userId, userId))
     .limit(10)
 
   // Load entity names

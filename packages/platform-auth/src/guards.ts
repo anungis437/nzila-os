@@ -102,7 +102,7 @@ export function requireOrgMembership(
         membership: membership ?? {
           id: 'svc',
           orgId: identity.activeOrgId ?? '',
-          clerkUserId: identity.userId,
+          userId: identity.userId,
           role: 'org_admin',
           status: 'active',
         },

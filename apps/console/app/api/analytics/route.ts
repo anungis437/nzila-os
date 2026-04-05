@@ -42,7 +42,7 @@ export async function GET() {
       orgMembers,
       and(
         eq(orgMembers.orgId, orgs.id),
-        eq(orgMembers.clerkUserId, userId),
+        eq(orgMembers.userId, userId),
         eq(orgMembers.status, 'active'),
       ),
     )

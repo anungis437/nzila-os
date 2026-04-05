@@ -109,7 +109,7 @@ export const partners = pgTable('partners', {
 export const partnerUsers = pgTable('partner_users', {
   id: uuid('id').primaryKey().defaultRandom(),
   partnerId: uuid('partner_id').notNull().references(() => partners.id),
-  clerkUserId: varchar('clerk_user_id', { length: 255 }).notNull(),
+  userId: varchar('user_id', { length: 255 }).notNull(),
   role: partnerUserRoleEnum('role').notNull(),
   createdAt: timestamp('created_at', { withTimezone: true }).defaultNow().notNull(),
 })

@@ -30,7 +30,7 @@ export interface AuthContext {
   membership: {
     id: string
     orgId: string
-    clerkUserId: string
+    userId: string
     role: 'org_admin' | 'org_secretary' | 'org_viewer'
     status: 'active' | 'suspended' | 'removed'
   } | null
@@ -85,7 +85,7 @@ export async function getOrgMembership(orgId: string, userId: string) {
     .where(
       and(
         eq(orgMembers.orgId, orgId),
-        eq(orgMembers.clerkUserId, userId),
+        eq(orgMembers.userId, userId),
         eq(orgMembers.status, 'active'),
       ),
     )

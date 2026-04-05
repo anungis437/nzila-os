@@ -37,7 +37,7 @@ export async function GET() {
     .from(orgs)
     .innerJoin(orgMembers, and(
       eq(orgMembers.orgId, orgs.id),
-      eq(orgMembers.clerkUserId, userId),
+      eq(orgMembers.userId, userId),
       eq(orgMembers.status, 'active'),
     ))
 
@@ -69,7 +69,7 @@ export async function POST(req: NextRequest) {
   // Auto-add creator as org_admin
   await platformDb.insert(orgMembers).values({
     orgId: org.id,
-    clerkUserId: userId,
+    userId,
     role: 'org_admin',
   })
 

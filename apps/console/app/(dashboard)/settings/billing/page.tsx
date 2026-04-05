@@ -20,7 +20,7 @@ export default async function BillingPage() {
   const [membership] = await platformDb
     .select({ orgId: orgMembers.orgId })
     .from(orgMembers)
-    .where(eq(orgMembers.clerkUserId, userId))
+    .where(eq(orgMembers.userId, userId))
     .limit(1)
 
   const orgId = membership?.orgId ?? ''

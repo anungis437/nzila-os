@@ -3,16 +3,17 @@ import { userUuidMapping } from "@/db/schema";
 import { eq } from "drizzle-orm";
 
 /**
- * Get or create a UUID for a Clerk userId
- * This function ensures every Clerk user has a corresponding UUID for use in foreign keys
- * 
- * @param clerkUserId - The Clerk text-based user ID (e.g., "user_2abc123...")
- * @returns The UUID associated with this Clerk user ID
+ * Get or create a UUID for an auth provider user ID.
+ * Maps the provider's text-based ID (Entra OID or legacy Clerk ID) to an
+ * internal UUID for use in foreign key relationships.
+ *
+ * @param userId - The auth provider user ID (Entra Object ID or legacy Clerk user_xxx)
+ * @returns The internal UUID associated with this user ID
  */
-export async function getOrCreateUserUuid(clerkUserId: string): Promise<string> {
-  // Try to find existing mapping
+export async function getOrCreateUserUuid(userId: string): Promise<string> {
+  // Try to find existing mapping by clerk_user_id (handles both legacy Clerk and new Entra IDs stored here)
   const existing = await db.query.userUuidMapping.findFirst({
-    where: eq(userUuidMapping.clerkUserId, clerkUserId),
+    where: eq(userUuidMapping.clerkUserId, userId),
   });
 
   if (existing) {
@@ -23,7 +24,7 @@ export async function getOrCreateUserUuid(clerkUserId: string): Promise<string> 
   const [newMapping] = await db
     .insert(userUuidMapping)
     .values({
-      clerkUserId,
+      clerkUserId: userId,
     })
     .returning();
 

@@ -14,7 +14,7 @@ import { orgMembers } from '@nzila/db/schema'
 import { z } from 'zod'
 
 const AddMemberSchema = z.object({
-  clerkUserId: z.string().min(1),
+  userId: z.string().min(1),
   role: z.enum(['org_admin', 'org_secretary', 'org_viewer']),
   email: z.string().email().optional(),
   displayName: z.string().optional(),
@@ -36,13 +36,13 @@ export async function POST(
       return NextResponse.json({ error: 'Invalid input', details: parsed.error.flatten() }, { status: 400 })
     }
 
-    const { clerkUserId, role, email, displayName } = parsed.data
+    const { userId, role, email, displayName } = parsed.data
 
     const [member] = await platformDb
       .insert(orgMembers)
       .values({
         orgId,
-        clerkUserId,
+        userId,
         role,
       })
       .returning()
@@ -54,11 +54,11 @@ export async function POST(
       action: AUDIT_ACTIONS.MEMBER_ADD,
       targetType: 'member',
       targetId: member.id,
-      afterJson: { clerkUserId, role, email, displayName },
+      afterJson: { userId, role, email, displayName },
     })
 
     return NextResponse.json(
-      { id: member.id, clerkUserId, role, email, displayName, orgId, status: member.status },
+      { id: member.id, userId, role, email, displayName, orgId, status: member.status },
       { status: 201 },
     )
   })

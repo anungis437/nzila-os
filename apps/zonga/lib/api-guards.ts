@@ -104,7 +104,7 @@ export async function requireOrgAccess(
     .where(
       and(
         eq(orgMembers.orgId, orgId),
-        eq(orgMembers.clerkUserId, authResult.userId),
+        eq(orgMembers.userId, authResult.userId),
       ),
     )
     .limit(1)

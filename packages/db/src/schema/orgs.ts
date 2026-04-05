@@ -94,7 +94,7 @@ export const orgMembers = pgTable('org_members', {
   orgId: uuid('org_id')
     .notNull()
     .references(() => orgs.id),
-  clerkUserId: text('clerk_user_id').notNull(),
+  userId: text('user_id').notNull(),
   role: orgMemberRoleEnum('role').notNull(),
   status: orgMemberStatusEnum('status').notNull().default('active'),
   createdAt: timestamp('created_at', { withTimezone: true }).notNull().defaultNow(),

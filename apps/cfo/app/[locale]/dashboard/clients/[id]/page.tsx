@@ -142,10 +142,10 @@ export default async function ClientDetailPage({
                 </tr>
               </thead>
               <tbody className="divide-y divide-border">
-                {client.members.map((member: { clerkUserId: string; role: string; createdAt?: Date }) => (
-                  <tr key={member.clerkUserId} className="transition-colors hover:bg-secondary/30">
+                {client.members.map((member: { userId: string; role: string; createdAt?: Date }) => (
+                  <tr key={member.userId} className="transition-colors hover:bg-secondary/30">
                     <td className="px-4 py-3 font-medium text-foreground">
-                      {member.clerkUserId.slice(0, 12)}…
+                      {member.userId.slice(0, 12)}…
                     </td>
                     <td className="px-4 py-3">
                       <span className="inline-flex rounded-full bg-electric/10 px-2 py-0.5 text-xs font-medium text-electric">

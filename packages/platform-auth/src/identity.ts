@@ -40,7 +40,7 @@ export type AuthenticatedIdentity = z.infer<typeof authenticatedIdentitySchema>
 export interface OrgMembership {
   id: string
   orgId: string
-  clerkUserId: string
+  userId: string
   role: 'org_admin' | 'org_secretary' | 'org_viewer'
   status: 'active' | 'suspended' | 'removed'
 }
