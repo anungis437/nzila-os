@@ -215,7 +215,7 @@ export default function Sidebar({ profile: _profile, userEmail, whopMonthlyPlanI
       items: [
         { href: `/${locale}/dashboard`, icon: <Home size={16} />, label: t('navigation.dashboard'), roles: [...unionAll, mgmt] },
         { href: `/${locale}/dashboard/claims`, icon: <FileText size={16} />, label: t('claims.myCases'), roles: unionAll },
-        { href: `/${locale}/dashboard/claims/new`, icon: <Mic size={16} />, label: t('claims.submitNew'), roles: unionAll },
+        { href: `/${locale}/dashboard/claims/new`, icon: <Mic size={16} />, label: t('sidebar.newCase'), roles: unionAll },
         { href: `/${locale}/dashboard/pension`, icon: <Briefcase size={16} />, label: t('sidebar.pensionBenefits'), roles: unionAll },
         { href: `/${locale}/dashboard/dues`, icon: <DollarSign size={16} />, label: t('sidebar.duesDeductions'), roles: unionAll },
         { href: `/${locale}/dashboard/messages`, icon: <Mail size={16} />, label: t('sidebar.messages'), roles: unionAll },
@@ -238,7 +238,7 @@ export default function Sidebar({ profile: _profile, userEmail, whopMonthlyPlanI
       items: [
         { href: `/${locale}/dashboard/workbench`, icon: <FileBarChart size={16} />, label: t('claims.caseQueue'), roles: [...repsAndAbove, mgmt] },
         { href: `/${locale}/dashboard/deadlines`, icon: <Clock size={16} />, label: t('sidebar.deadlines'), roles: [...repsAndAbove, mgmt] },
-        { href: `/${locale}/dashboard/members`, icon: <Users size={16} />, label: t('members.directory'), roles: [...repsAndAbove, mgmt] },
+        { href: `/${locale}/dashboard/members`, icon: <Users size={16} />, label: t('sidebar.members'), roles: [...repsAndAbove, mgmt] },
         { href: `/${locale}/dashboard/clause-library`, icon: <Library size={16} />, label: t('sidebar.clauseLibrary'), roles: [...repsAndAbove, mgmt] },
         ...(['congress', 'federation', 'union'].includes(organization?.type ?? '')
           ? [{ href: `/${locale}/cba-intelligence`, icon: <Database size={16} />, label: t('sidebar.cbaIntelligence'), roles: [...repsAndAbove, mgmt] }]
@@ -326,7 +326,7 @@ export default function Sidebar({ profile: _profile, userEmail, whopMonthlyPlanI
       title: t('sidebar.system'),
       roles: ["admin", "system_admin", mgmt, ...nzilaAll],
       items: [
-        { href: `/${locale}/dashboard/admin`, icon: <Shield size={16} />, label: t('navigation.adminPanel'), roles: ["admin", "system_admin", "app_owner", "coo", "cto", mgmt] },
+        { href: `/${locale}/dashboard/admin`, icon: <Shield size={16} />, label: t('sidebar.admin'), roles: ["admin", "system_admin", "app_owner", "coo", "cto", mgmt] },
         { href: `/${locale}/dashboard/settings`, icon: <Settings size={16} />, label: t('sidebar.preferences'), roles: [...unionAll, "system_admin", "congress_staff", "federation_staff", "clc_staff", "clc_executive", "fed_staff", "fed_executive", mgmt, ...nzilaAll] },
       ],
     },
