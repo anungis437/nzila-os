@@ -5,19 +5,27 @@
  * Upserts the contact in HubSpot and creates a deal for tracking.
  */
 import { NextResponse, type NextRequest } from 'next/server';
+import { z } from 'zod';
 import { logger } from '@/lib/logger';
 import { upsertContact, createDeal } from '@/lib/services/crm-service';
 
 export const dynamic = 'force-dynamic';
 
+const contactSchema = z.object({
+  firstName: z.string().min(1),
+  lastName: z.string().optional(),
+  email: z.string().email(),
+  organization: z.string().optional(),
+  role: z.string().optional(),
+  inquiryType: z.string().optional(),
+  message: z.string().max(2000).optional(),
+});
+
 export async function POST(request: NextRequest) {
   try {
-    const body = await request.json();
+    const raw = await request.json();
+    const body = contactSchema.parse(raw);
     const { firstName, lastName, email, organization, role, inquiryType, message } = body;
-
-    if (!firstName || !email) {
-      return NextResponse.json({ error: 'Name and email are required' }, { status: 400 });
-    }
 
     logger.info('contact_form:submitted', { email, organization, inquiryType });
 
@@ -48,6 +56,9 @@ export async function POST(request: NextRequest) {
 
     return NextResponse.json({ ok: true });
   } catch (err) {
+    if (err instanceof z.ZodError) {
+      return NextResponse.json({ error: 'Invalid input', details: err.flatten().fieldErrors }, { status: 400 });
+    }
     logger.error('contact_form:error', { error: (err as Error).message });
     return NextResponse.json({ error: 'Failed to process contact form' }, { status: 500 });
   }

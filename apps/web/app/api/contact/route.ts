@@ -6,30 +6,34 @@
  */
 
 import { NextResponse, type NextRequest } from 'next/server';
+import { z } from 'zod';
 import { HubSpotClient } from '@nzila/crm-hubspot';
 import { createLogger } from '@nzila/os-core/telemetry';
 
 const logger = createLogger('api:contact');
 const HUBSPOT_API_KEY = process.env.HUBSPOT_API_KEY;
 
+const contactSchema = z.object({
+  name: z.string().min(1),
+  email: z.string().email(),
+  company: z.string().optional(),
+  vertical: z.string().optional(),
+  message: z.string().max(2000).optional(),
+});
+
 export async function POST(request: NextRequest) {
-  let body: { name?: string; email?: string; company?: string; vertical?: string; message?: string };
+  let body: z.infer<typeof contactSchema>;
   try {
-    body = await request.json();
-  } catch {
+    const raw = await request.json();
+    body = contactSchema.parse(raw);
+  } catch (err) {
+    if (err instanceof z.ZodError) {
+      return NextResponse.json({ error: 'Invalid input', details: err.flatten().fieldErrors }, { status: 400 });
+    }
     return NextResponse.json({ error: 'Invalid JSON' }, { status: 400 });
   }
 
   const { name, email, company, vertical, message } = body;
-
-  if (!email || !name) {
-    return NextResponse.json({ error: 'name and email are required' }, { status: 400 });
-  }
-
-  // Basic email format check
-  if (!/^[^\s@]+@[^\s@]+\.[^\s@]+$/.test(email)) {
-    return NextResponse.json({ error: 'Invalid email format' }, { status: 400 });
-  }
 
   // If HubSpot is configured, sync the lead
   if (HUBSPOT_API_KEY) {
