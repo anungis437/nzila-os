@@ -35,15 +35,15 @@ describe('APP_REGISTRY', () => {
     expect(result.valid).toBe(true)
   })
 
-  it('requires Clerk auth for all apps', () => {
-    const appsWithoutClerk = APP_REGISTRY.filter(
+  it('requires Entra auth for all apps', () => {
+    const appsWithoutEntra = APP_REGISTRY.filter(
       a =>
         !a.integrationDependencies?.some(
-          d => d.provider === 'clerk' && d.required,
+          d => d.provider === 'entra' && d.required,
         ),
     )
-    // orchestrator-api is a pure API service — no Clerk dependency expected
-    const nonApiApps = appsWithoutClerk.filter(a => a.appType !== 'api-service')
+    // orchestrator-api is a pure API service — no Entra dependency expected
+    const nonApiApps = appsWithoutEntra.filter(a => a.appType !== 'api-service')
     expect(nonApiApps).toEqual([])
   })
 })

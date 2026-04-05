@@ -136,8 +136,8 @@ CACHES = {
 # REST Framework
 REST_FRAMEWORK = {
     "DEFAULT_AUTHENTICATION_CLASSES": [
-        "auth_core.authentication.ClerkAuthentication",
-        "auth_core.authentication.ClerkAPIKeyAuthentication",
+        "auth_core.authentication.OIDCAuthentication",
+        "auth_core.authentication.APIKeyAuthentication",
         "rest_framework.authentication.SessionAuthentication",
     ],
     "DEFAULT_PERMISSION_CLASSES": [

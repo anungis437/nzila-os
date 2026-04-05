@@ -46,7 +46,7 @@ const APP_REGISTRY_RAW: AppManifestInput[] = [
       { controlId: 'UE-04', name: 'Financial transactions audit', mandatory: true, evidenceClass: 'hash-chain', retentionClass: '7_YEARS' },
     ],
     integrationDependencies: [
-      { provider: 'clerk', required: true, type: 'auth', envVars: ['CLERK_SECRET_KEY', 'NEXT_PUBLIC_CLERK_PUBLISHABLE_KEY'] },
+      { provider: 'entra', required: true, type: 'auth', envVars: ['AUTH_SECRET', 'AZURE_AD_CLIENT_ID', 'AZURE_AD_TENANT_ID'] },
       { provider: 'postgresql', required: true, type: 'storage', envVars: ['DATABASE_URL'] },
       { provider: 'azure-blob', required: false, type: 'storage', envVars: ['BLOB_CONNECTION_STRING'] },
     ],
@@ -60,7 +60,7 @@ const APP_REGISTRY_RAW: AppManifestInput[] = [
     healthBinding: {
       healthPath: '/api/health',
       readinessPath: '/api/health/ready',
-      criticalDeps: ['postgresql', 'clerk'],
+      criticalDeps: ['postgresql', 'entra'],
       slo: { availabilityTarget: 99.9, latencyP99Ms: 2000 },
     },
     deployment: {
@@ -100,7 +100,7 @@ const APP_REGISTRY_RAW: AppManifestInput[] = [
       { controlId: 'COM-05', name: 'Payment processing audit', mandatory: true, evidenceClass: 'hash-chain', retentionClass: '7_YEARS' },
     ],
     integrationDependencies: [
-      { provider: 'clerk', required: true, type: 'auth', envVars: ['CLERK_SECRET_KEY'] },
+      { provider: 'entra', required: true, type: 'auth', envVars: ['AUTH_SECRET', 'AZURE_AD_CLIENT_ID'] },
       { provider: 'postgresql', required: true, type: 'storage', envVars: ['DATABASE_URL'] },
       { provider: 'stripe', required: false, type: 'payment', envVars: ['STRIPE_SECRET_KEY'] },
       { provider: 'shopify', required: false, type: 'erp', envVars: ['SHOPIFY_API_KEY'] },
@@ -116,7 +116,7 @@ const APP_REGISTRY_RAW: AppManifestInput[] = [
     healthBinding: {
       healthPath: '/api/health',
       readinessPath: '/api/health/ready',
-      criticalDeps: ['postgresql', 'clerk'],
+      criticalDeps: ['postgresql', 'entra'],
       slo: { availabilityTarget: 99.9, latencyP99Ms: 1500 },
     },
     deployment: {
@@ -149,7 +149,7 @@ const APP_REGISTRY_RAW: AppManifestInput[] = [
     ],
     governanceRequirements: [],
     integrationDependencies: [
-      { provider: 'clerk', required: true, type: 'auth', envVars: ['CLERK_SECRET_KEY'] },
+      { provider: 'entra', required: true, type: 'auth', envVars: ['AUTH_SECRET', 'AZURE_AD_CLIENT_ID'] },
       { provider: 'postgresql', required: true, type: 'storage', envVars: ['DATABASE_URL'] },
     ],
     reportingBindings: {
@@ -162,7 +162,7 @@ const APP_REGISTRY_RAW: AppManifestInput[] = [
     healthBinding: {
       healthPath: '/api/health',
       readinessPath: '/api/health/ready',
-      criticalDeps: ['postgresql', 'clerk'],
+      criticalDeps: ['postgresql', 'entra'],
     },
     deployment: {
       containerImage: 'nzila/console',
@@ -194,11 +194,11 @@ const APP_REGISTRY_RAW: AppManifestInput[] = [
     enabledCapabilities: ['auth', 'health-check', 'telemetry'],
     governanceRequirements: [],
     integrationDependencies: [
-      { provider: 'clerk', required: true, type: 'auth', envVars: ['CLERK_SECRET_KEY'] },
+      { provider: 'entra', required: true, type: 'auth', envVars: ['AUTH_SECRET', 'AZURE_AD_CLIENT_ID'] },
     ],
     healthBinding: {
       healthPath: '/api/health',
-      criticalDeps: ['clerk'],
+      criticalDeps: ['entra'],
     },
     deployment: {
       containerImage: 'nzila/web',
@@ -234,12 +234,12 @@ const APP_REGISTRY_RAW: AppManifestInput[] = [
     ],
     governanceRequirements: [],
     integrationDependencies: [
-      { provider: 'clerk', required: true, type: 'auth', envVars: ['CLERK_SECRET_KEY'] },
+      { provider: 'entra', required: true, type: 'auth', envVars: ['AUTH_SECRET', 'AZURE_AD_CLIENT_ID'] },
       { provider: 'postgresql', required: true, type: 'storage', envVars: ['DATABASE_URL'] },
     ],
     healthBinding: {
       healthPath: '/api/health',
-      criticalDeps: ['postgresql', 'clerk'],
+      criticalDeps: ['postgresql', 'entra'],
     },
     deployment: {
       containerImage: 'nzila/control-plane',
@@ -268,12 +268,12 @@ const APP_REGISTRY_RAW: AppManifestInput[] = [
     enabledCapabilities: ['auth', 'org-scope', 'health-check', 'telemetry'],
     governanceRequirements: [],
     integrationDependencies: [
-      { provider: 'clerk', required: true, type: 'auth', envVars: ['CLERK_SECRET_KEY'] },
+      { provider: 'entra', required: true, type: 'auth', envVars: ['AUTH_SECRET', 'AZURE_AD_CLIENT_ID'] },
       { provider: 'postgresql', required: true, type: 'storage', envVars: ['DATABASE_URL'] },
     ],
     healthBinding: {
       healthPath: '/api/health',
-      criticalDeps: ['postgresql', 'clerk'],
+      criticalDeps: ['postgresql', 'entra'],
     },
     deployment: {
       containerImage: 'nzila/partners',
@@ -308,7 +308,7 @@ const APP_REGISTRY_RAW: AppManifestInput[] = [
       { controlId: 'FIN-01', name: 'Financial sync audit', mandatory: true, evidenceClass: 'hash-chain', retentionClass: '7_YEARS' },
     ],
     integrationDependencies: [
-      { provider: 'clerk', required: true, type: 'auth', envVars: ['CLERK_SECRET_KEY'] },
+      { provider: 'entra', required: true, type: 'auth', envVars: ['AUTH_SECRET', 'AZURE_AD_CLIENT_ID'] },
       { provider: 'postgresql', required: true, type: 'storage', envVars: ['DATABASE_URL'] },
       { provider: 'xero', required: false, type: 'erp', envVars: ['XERO_CLIENT_ID', 'XERO_CLIENT_SECRET'] },
       { provider: 'quickbooks', required: false, type: 'erp', envVars: ['QBO_CLIENT_ID', 'QBO_CLIENT_SECRET'] },
@@ -322,7 +322,7 @@ const APP_REGISTRY_RAW: AppManifestInput[] = [
     },
     healthBinding: {
       healthPath: '/api/health',
-      criticalDeps: ['postgresql', 'clerk'],
+      criticalDeps: ['postgresql', 'entra'],
     },
     deployment: {
       containerImage: 'nzila/cfo',
@@ -360,7 +360,7 @@ const APP_REGISTRY_RAW: AppManifestInput[] = [
       { controlId: 'ZON-03', name: 'Ticket validation integrity', mandatory: true, evidenceClass: 'audit-trail', retentionClass: '3_YEARS' },
     ],
     integrationDependencies: [
-      { provider: 'clerk', required: true, type: 'auth', envVars: ['CLERK_SECRET_KEY'] },
+      { provider: 'entra', required: true, type: 'auth', envVars: ['AUTH_SECRET', 'AZURE_AD_CLIENT_ID'] },
       { provider: 'postgresql', required: true, type: 'storage', envVars: ['DATABASE_URL'] },
       { provider: 'stripe', required: true, type: 'payment', envVars: ['STRIPE_SECRET_KEY', 'STRIPE_WEBHOOK_SECRET'] },
     ],
@@ -373,7 +373,7 @@ const APP_REGISTRY_RAW: AppManifestInput[] = [
     },
     healthBinding: {
       healthPath: '/api/health',
-      criticalDeps: ['postgresql', 'clerk', 'stripe'],
+      criticalDeps: ['postgresql', 'entra', 'stripe'],
     },
     deployment: {
       containerImage: 'nzila/zonga',
@@ -403,7 +403,7 @@ const APP_REGISTRY_RAW: AppManifestInput[] = [
     enabledCapabilities: ['auth', 'org-scope', 'telemetry', 'canonical-events'],
     governanceRequirements: [],
     integrationDependencies: [
-      { provider: 'clerk', required: true, type: 'auth', envVars: ['CLERK_SECRET_KEY'] },
+      { provider: 'entra', required: true, type: 'auth', envVars: ['AUTH_SECRET', 'AZURE_AD_CLIENT_ID'] },
       { provider: 'postgresql', required: true, type: 'storage', envVars: ['DATABASE_URL'] },
     ],
     reportingBindings: {
@@ -436,7 +436,7 @@ const APP_REGISTRY_RAW: AppManifestInput[] = [
     enabledCapabilities: ['auth', 'org-scope', 'telemetry'],
     governanceRequirements: [],
     integrationDependencies: [
-      { provider: 'clerk', required: true, type: 'auth', envVars: ['CLERK_SECRET_KEY'] },
+      { provider: 'entra', required: true, type: 'auth', envVars: ['AUTH_SECRET', 'AZURE_AD_CLIENT_ID'] },
       { provider: 'postgresql', required: true, type: 'storage', envVars: ['DATABASE_URL'] },
     ],
     deployment: { environments: ['local'], requiresDatabase: true },
@@ -462,7 +462,7 @@ const APP_REGISTRY_RAW: AppManifestInput[] = [
     enabledCapabilities: ['auth', 'org-scope', 'telemetry'],
     governanceRequirements: [],
     integrationDependencies: [
-      { provider: 'clerk', required: true, type: 'auth', envVars: ['CLERK_SECRET_KEY'] },
+      { provider: 'entra', required: true, type: 'auth', envVars: ['AUTH_SECRET', 'AZURE_AD_CLIENT_ID'] },
     ],
     deployment: { environments: ['local'], requiresDatabase: false },
     policyBindings: [],
@@ -489,7 +489,7 @@ const APP_REGISTRY_RAW: AppManifestInput[] = [
       { controlId: 'NACP-01', name: 'Exam integrity audit', mandatory: true, evidenceClass: 'hash-chain', retentionClass: '7_YEARS' },
     ],
     integrationDependencies: [
-      { provider: 'clerk', required: true, type: 'auth', envVars: ['CLERK_SECRET_KEY'] },
+      { provider: 'entra', required: true, type: 'auth', envVars: ['AUTH_SECRET', 'AZURE_AD_CLIENT_ID'] },
       { provider: 'postgresql', required: true, type: 'storage', envVars: ['DATABASE_URL'] },
     ],
     deployment: { environments: ['local'], requiresDatabase: true },
@@ -515,7 +515,7 @@ const APP_REGISTRY_RAW: AppManifestInput[] = [
     enabledCapabilities: ['auth', 'org-scope', 'telemetry'],
     governanceRequirements: [],
     integrationDependencies: [
-      { provider: 'clerk', required: true, type: 'auth', envVars: ['CLERK_SECRET_KEY'] },
+      { provider: 'entra', required: true, type: 'auth', envVars: ['AUTH_SECRET', 'AZURE_AD_CLIENT_ID'] },
       { provider: 'postgresql', required: true, type: 'storage', envVars: ['DATABASE_URL'] },
     ],
     deployment: { environments: ['local'], requiresDatabase: true },
@@ -542,7 +542,7 @@ const APP_REGISTRY_RAW: AppManifestInput[] = [
     enabledCapabilities: ['auth', 'org-scope'],
     governanceRequirements: [],
     integrationDependencies: [
-      { provider: 'clerk', required: true, type: 'auth', envVars: ['CLERK_SECRET_KEY'] },
+      { provider: 'entra', required: true, type: 'auth', envVars: ['AUTH_SECRET', 'AZURE_AD_CLIENT_ID'] },
     ],
     deployment: { environments: ['local'] },
     policyBindings: [],
@@ -571,7 +571,7 @@ const APP_REGISTRY_RAW: AppManifestInput[] = [
       { controlId: 'ABR-01', name: 'Confidential report sealing', mandatory: true, evidenceClass: 'hash-chain', retentionClass: '7_YEARS' },
     ],
     integrationDependencies: [
-      { provider: 'clerk', required: true, type: 'auth', envVars: ['CLERK_SECRET_KEY'] },
+      { provider: 'entra', required: true, type: 'auth', envVars: ['AUTH_SECRET', 'AZURE_AD_CLIENT_ID'] },
       { provider: 'postgresql', required: true, type: 'storage', envVars: ['DATABASE_URL'] },
     ],
     deployment: { environments: ['local'], requiresDatabase: true },
@@ -599,7 +599,7 @@ const APP_REGISTRY_RAW: AppManifestInput[] = [
     enabledCapabilities: ['auth', 'telemetry'],
     governanceRequirements: [],
     integrationDependencies: [
-      { provider: 'clerk', required: true, type: 'auth', envVars: ['CLERK_SECRET_KEY'] },
+      { provider: 'entra', required: true, type: 'auth', envVars: ['AUTH_SECRET', 'AZURE_AD_CLIENT_ID'] },
     ],
     deployment: { environments: ['local'] },
     policyBindings: ['platform-governance'],

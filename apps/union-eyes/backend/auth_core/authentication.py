@@ -241,21 +241,24 @@ class OIDCAuthentication(authentication.BaseAuthentication):
 ClerkAuthentication = OIDCAuthentication
 
 
-class ClerkAPIKeyAuthentication(authentication.BaseAuthentication):
+class APIKeyAuthentication(authentication.BaseAuthentication):
     """Authenticates service-to-service requests using API secret key.
 
     For internal API calls, webhooks, or admin operations.
-    Checks for X-Clerk-Secret-Key header matching CLERK_SECRET_KEY.
+    Checks for X-Auth-Secret or X-Clerk-Secret-Key header matching AUTH_SECRET.
     """
 
     def authenticate(self, request):
-        """Authenticate using Clerk secret key header.
+        """Authenticate using auth secret header.
 
         Returns:
             Tuple[None, dict]: (None, {"is_service_account": True}) or None
         """
-        secret_key_header = request.META.get("HTTP_X_CLERK_SECRET_KEY", "")
-        expected_key = getattr(settings, "CLERK_SECRET_KEY", "")
+        secret_key_header = (
+            request.META.get("HTTP_X_AUTH_SECRET", "")
+            or request.META.get("HTTP_X_CLERK_SECRET_KEY", "")  # backward compat
+        )
+        expected_key = getattr(settings, "AUTH_SECRET", "") or getattr(settings, "CLERK_SECRET_KEY", "")
 
         if not secret_key_header or not expected_key:
             return None
@@ -265,6 +268,10 @@ class ClerkAPIKeyAuthentication(authentication.BaseAuthentication):
 
         # Return None user but authenticated (service account)
         return (None, {"is_service_account": True})
+
+
+# Backward compat alias
+ClerkAPIKeyAuthentication = APIKeyAuthentication
 
 
 # Cache user lookups by Clerk ID for 5 minutes

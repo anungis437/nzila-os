@@ -19,7 +19,9 @@ class ManifestConfig:
     template_version: str = "1.0.0"
     owner_github: str = "anungis437"
     azure_base_region: str = "canadacentral"
-    clerk_enabled: bool = True  # OIDC auth enabled ("clerk" name kept for backward compat)
+    clerk_enabled: bool = (
+        True  # OIDC auth enabled ("clerk" name kept for backward compat)
+    )
     strict_parity: bool = True
     enable_ci: bool = True
     enable_deploy_workflows: bool = True
@@ -151,7 +153,12 @@ class ManifestGenerator:
         ]
 
         # Add monorepo module for Next.js/Node apps with monorepo
-        if stack_profile in ["nextjs-aca-azurepg-oidc", "nextjs-aca-azurepg-clerk", "nodeapi-aca-azurepg-oidc", "nodeapi-aca-azurepg-clerk"]:
+        if stack_profile in [
+            "nextjs-aca-azurepg-oidc",
+            "nextjs-aca-azurepg-clerk",
+            "nodeapi-aca-azurepg-oidc",
+            "nodeapi-aca-azurepg-clerk",
+        ]:
             if profile["tech_stack"]["monorepo"]:
                 modules.insert(2, "monorepo-pnpm-turbo")
 

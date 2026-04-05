@@ -118,7 +118,9 @@ SPECTACULAR_SETTINGS = {
 # Auth — OIDC (Microsoft Entra External ID)
 AUTH_JWKS_URL = os.environ.get("AUTH_JWKS_URL", os.environ.get("CLERK_JWKS_URL", ""))
 AUTH_SECRET = os.environ.get("AUTH_SECRET", "")
-AUTH_WEBHOOK_SECRET = os.environ.get("AUTH_WEBHOOK_SECRET", os.environ.get("CLERK_WEBHOOK_SECRET", ""))
+AUTH_WEBHOOK_SECRET = os.environ.get(
+    "AUTH_WEBHOOK_SECRET", os.environ.get("CLERK_WEBHOOK_SECRET", "")
+)
 # Backward compat aliases
 CLERK_JWKS_URL = AUTH_JWKS_URL
 

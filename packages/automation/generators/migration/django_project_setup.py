@@ -9,32 +9,35 @@ from typing import Dict
 
 try:
     import sys
+
     sys.path.insert(0, str(Path(__file__).parent.parent.parent))
     from logging_config import MigrationLogger
+
     logger = MigrationLogger.get_logger(__name__)
 except ImportError:
     import logging
+
     logging.basicConfig(level=logging.INFO)
     logger = logging.getLogger(__name__)
 
 
 class DjangoProjectSetup:
     """Set up Django project configuration in populated repos"""
-    
+
     def __init__(self, repo_path: Path, platform_id: str, platform_name: str):
         self.repo_path = Path(repo_path)
         self.platform_id = platform_id
         self.platform_name = platform_name
         self.backend_dir = self.repo_path / "backend"
         self.config_dir = self.backend_dir / "config"
-        
+
     def setup(self):
         """Create all Django project files"""
         logger.info(f"Setting up Django project for {self.platform_name}")
-        
+
         # Create config directory
         self.config_dir.mkdir(parents=True, exist_ok=True)
-        
+
         # Create project files
         self._create_manage_py()
         self._create_config_init()
@@ -43,9 +46,9 @@ class DjangoProjectSetup:
         self._create_wsgi()
         self._create_asgi()
         self._create_requirements()
-        
+
         logger.info(f"✅ Django project setup complete: {self.repo_path}")
-    
+
     def _create_manage_py(self):
         """Create manage.py"""
         content = '''#!/usr/bin/env python
@@ -73,22 +76,24 @@ if __name__ == '__main__':
 '''
         (self.backend_dir / "manage.py").write_text(content)
         logger.info("  ✓ manage.py")
-    
+
     def _create_config_init(self):
         """Create config/__init__.py"""
         (self.config_dir / "__init__.py").write_text("")
         logger.info("  ✓ config/__init__.py")
-    
+
     def _create_settings(self):
         """Create config/settings.py"""
-        
+
         # Get list of installed apps
-        apps = [d.name for d in self.backend_dir.iterdir() 
-                if d.is_dir() and not d.name.startswith('.') 
-                and d.name != 'config']
-        
+        apps = [
+            d.name
+            for d in self.backend_dir.iterdir()
+            if d.is_dir() and not d.name.startswith(".") and d.name != "config"
+        ]
+
         installed_apps = '",\n    "'.join(apps)
-        
+
         content = f'''"""
 Django settings for {self.platform_name}
 """
@@ -234,19 +239,21 @@ LOGGING = {{
 '''
         (self.config_dir / "settings.py").write_text(content)
         logger.info("  ✓ config/settings.py")
-    
+
     def _create_urls(self):
         """Create config/urls.py"""
-        
+
         # Get list of apps with urls.py
-        apps = [d.name for d in self.backend_dir.iterdir() 
-                if d.is_dir() and (d / "urls.py").exists()
-                and d.name != 'config']
-        
+        apps = [
+            d.name
+            for d in self.backend_dir.iterdir()
+            if d.is_dir() and (d / "urls.py").exists() and d.name != "config"
+        ]
+
         url_patterns = ""
         for app in apps:
             url_patterns += f'    path("api/{app}/", include("{app}.urls")),\n'
-        
+
         content = f'''"""
 URL configuration for {self.platform_name}
 """
@@ -263,7 +270,7 @@ urlpatterns = [
 '''
         (self.config_dir / "urls.py").write_text(content)
         logger.info("  ✓ config/urls.py")
-    
+
     def _create_wsgi(self):
         """Create config/wsgi.py"""
         content = f'''"""
@@ -280,7 +287,7 @@ application = get_wsgi_application()
 '''
         (self.config_dir / "wsgi.py").write_text(content)
         logger.info("  ✓ config/wsgi.py")
-    
+
     def _create_asgi(self):
         """Create config/asgi.py"""
         content = f'''"""
@@ -297,10 +304,10 @@ application = get_asgi_application()
 '''
         (self.config_dir / "asgi.py").write_text(content)
         logger.info("  ✓ config/asgi.py")
-    
+
     def _create_requirements(self):
         """Create backend/requirements.txt"""
-        content = '''# Django
+        content = """# Django
 Django>=5.1.0,<5.2.0
 djangorestframework>=3.15.0
 django-cors-headers>=4.3.0
@@ -329,23 +336,23 @@ pytest>=7.4.3
 pytest-django>=4.7.0
 black>=23.12.1
 flake8>=7.0.0
-'''
-        
+"""
+
         # Add platform-specific dependencies
         if self.platform_id == "ue":
-            content += '''
+            content += """
 # Union Eyes specific
 scikit-learn>=1.4.0
 pandas>=2.2.0
 numpy>=1.26.3
-'''
+"""
         elif self.platform_id == "abr":
-            content += '''
+            content += """
 # ABR Insights specific
 beautifulsoup4>=4.12.3
 lxml>=5.1.0
-'''
-        
+"""
+
         (self.backend_dir / "requirements.txt").write_text(content)
         logger.info("  ✓ backend/requirements.txt")
 
@@ -353,30 +360,30 @@ lxml>=5.1.0
 def main():
     """CLI entry point"""
     import argparse
-    
+
     parser = argparse.ArgumentParser(description="Django Project Setup")
     parser.add_argument("--platform", choices=["ue", "abr", "all"], default="all")
-    
+
     args = parser.parse_args()
-    
+
     # Repository paths
     repos = {
         "ue": (Path("C:/APPS/nzila-union-eyes"), "Union Eyes"),
         "abr": (Path("D:/APPS/nzila-abr-insights"), "ABR Insights"),
     }
-    
+
     platforms = ["ue", "abr"] if args.platform == "all" else [args.platform]
-    
+
     for platform_id in platforms:
         repo_path, platform_name = repos[platform_id]
-        
+
         if not repo_path.exists():
             logger.warning(f"Repository not found: {repo_path}")
             continue
-        
+
         setup = DjangoProjectSetup(repo_path, platform_id, platform_name)
         setup.setup()
-    
+
     logger.info("=" * 60)
     logger.info("✅ All Django projects configured")
     logger.info("=" * 60)

@@ -11,18 +11,21 @@ Populates:
 """
 
 import json
-from pathlib import Path
-from typing import Dict, List, Optional, Any
 from dataclasses import dataclass
 from datetime import datetime
+from pathlib import Path
+from typing import Any, Dict, List, Optional
 
 try:
     import sys
+
     sys.path.insert(0, str(Path(__file__).parent.parent.parent))
     from logging_config import MigrationLogger
+
     logger = MigrationLogger.get_logger(__name__)
 except ImportError:
     import logging
+
     logging.basicConfig(level=logging.INFO)
     logger = logging.getLogger(__name__)
 
@@ -30,6 +33,7 @@ except ImportError:
 @dataclass
 class ScaffoldConfig:
     """Configuration for scaffold generation"""
+
     product_name: str
     repo_name: str
     owner: str = "anungis437"
@@ -61,7 +65,9 @@ class ScaffoldPopulator:
         files = {}
 
         # manage.py
-        files["manage.py"] = '''#!/usr/bin/env python
+        files[
+            "manage.py"
+        ] = '''#!/usr/bin/env python
 """Django management script."""
 import os
 import sys
@@ -76,7 +82,9 @@ if __name__ == "__main__":
 '''
 
         # pyproject.toml
-        files["pyproject.toml"] = f'''[project]
+        files[
+            "pyproject.toml"
+        ] = f"""[project]
 name = "{config.repo_name}"
 version = "0.1.0"
 description = "Nzila Backbone Platform — Organization-scoped SaaS infrastructure"
@@ -102,13 +110,15 @@ plugins = ["mypy_django_plugin.main"]
 
 [tool.django-stubs]
 django_settings_module = "config.settings.development"
-'''
+"""
 
         # Settings
         files["config/__init__.py"] = ""
         files["config/settings/__init__.py"] = ""
 
-        files["config/settings/base.py"] = f'''"""
+        files[
+            "config/settings/base.py"
+        ] = f'''"""
 Base Django settings for Nzila Backbone Platform.
 Shared across all environments.
 """
@@ -242,7 +252,9 @@ USE_TZ = True
 DEFAULT_AUTO_FIELD = "django.db.models.BigAutoField"
 '''
 
-        files["config/settings/development.py"] = '''"""Development settings."""
+        files[
+            "config/settings/development.py"
+        ] = '''"""Development settings."""
 from .base import *  # noqa: F401, F403
 
 DEBUG = True
@@ -255,7 +267,9 @@ MIDDLEWARE.insert(0, "debug_toolbar.middleware.DebugToolbarMiddleware")  # noqa:
 INTERNAL_IPS = ["127.0.0.1"]
 '''
 
-        files["config/settings/staging.py"] = '''"""Staging settings."""
+        files[
+            "config/settings/staging.py"
+        ] = '''"""Staging settings."""
 from .base import *  # noqa: F401, F403
 import os
 
@@ -270,7 +284,9 @@ SESSION_COOKIE_SECURE = True
 CSRF_COOKIE_SECURE = True
 '''
 
-        files["config/settings/production.py"] = '''"""Production settings."""
+        files[
+            "config/settings/production.py"
+        ] = '''"""Production settings."""
 from .base import *  # noqa: F401, F403
 import os
 import sentry_sdk
@@ -300,7 +316,9 @@ SECURE_CONTENT_TYPE_NOSNIFF = True
 SECURE_BROWSER_XSS_FILTER = True
 '''
 
-        files["config/settings/test.py"] = '''"""Test settings."""
+        files[
+            "config/settings/test.py"
+        ] = '''"""Test settings."""
 from .base import *  # noqa: F401, F403
 
 DEBUG = False
@@ -322,7 +340,9 @@ CACHES = {
 PASSWORD_HASHERS = ["django.contrib.auth.hashers.MD5PasswordHasher"]
 '''
 
-        files["config/urls.py"] = '''"""URL configuration for Nzila Backbone Platform."""
+        files[
+            "config/urls.py"
+        ] = '''"""URL configuration for Nzila Backbone Platform."""
 from django.contrib import admin
 from django.urls import path, include
 from drf_spectacular.views import SpectacularAPIView, SpectacularSwaggerView
@@ -347,14 +367,18 @@ urlpatterns = [
 ]
 '''
 
-        files["config/wsgi.py"] = '''"""WSGI config."""
+        files[
+            "config/wsgi.py"
+        ] = '''"""WSGI config."""
 import os
 from django.core.wsgi import get_wsgi_application
 os.environ.setdefault("DJANGO_SETTINGS_MODULE", "config.settings.production")
 application = get_wsgi_application()
 '''
 
-        files["config/asgi.py"] = '''"""ASGI config."""
+        files[
+            "config/asgi.py"
+        ] = '''"""ASGI config."""
 import os
 from django.core.asgi import get_asgi_application
 os.environ.setdefault("DJANGO_SETTINGS_MODULE", "config.settings.production")
@@ -362,7 +386,9 @@ application = get_asgi_application()
 '''
 
         # Requirements
-        files["requirements/base.txt"] = f"""# Nzila Backbone — Core Dependencies
+        files[
+            "requirements/base.txt"
+        ] = f"""# Nzila Backbone — Core Dependencies
 Django>={config.django_version},<5.2
 djangorestframework>=3.15
 django-cors-headers>=4.3
@@ -397,14 +423,18 @@ celery[redis]>=5.3
 pydantic>=2.7
 """
 
-        files["requirements/development.txt"] = """# Development
+        files[
+            "requirements/development.txt"
+        ] = """# Development
 -r base.txt
 django-debug-toolbar>=4.3
 ipython>=8.24
 django-stubs>=5.0
 """
 
-        files["requirements/test.txt"] = """# Testing
+        files[
+            "requirements/test.txt"
+        ] = """# Testing
 -r base.txt
 pytest>=8.2
 pytest-django>=4.8
@@ -415,43 +445,69 @@ faker>=25.0
 httpx>=0.27
 """
 
-        files["requirements/production.txt"] = """# Production
+        files[
+            "requirements/production.txt"
+        ] = """# Production
 -r base.txt
 whitenoise>=6.6
 """
 
         # Backbone apps — __init__.py and apps.py for each
         backbone_apps = [
-            "auth_core", "billing", "ai_core", "analytics",
-            "compliance", "notifications", "integrations", "content"
+            "auth_core",
+            "billing",
+            "ai_core",
+            "analytics",
+            "compliance",
+            "notifications",
+            "integrations",
+            "content",
         ]
         for app_name in backbone_apps:
             files[f"apps/{app_name}/__init__.py"] = ""
-            files[f"apps/{app_name}/apps.py"] = f'''from django.apps import AppConfig
+            files[
+                f"apps/{app_name}/apps.py"
+            ] = f"""from django.apps import AppConfig
 
 class {app_name.title().replace("_", "")}Config(AppConfig):
     default_auto_field = "django.db.models.BigAutoField"
     name = "apps.{app_name}"
     verbose_name = "{app_name.replace("_", " ").title()}"
-'''
-            files[f"apps/{app_name}/models.py"] = f'"""Models for {app_name} backbone app."""\n'
-            files[f"apps/{app_name}/views.py"] = f'"""Views for {app_name} backbone app."""\n'
-            files[f"apps/{app_name}/serializers.py"] = f'"""Serializers for {app_name} backbone app."""\n'
-            files[f"apps/{app_name}/urls.py"] = f'''from django.urls import path
+"""
+            files[f"apps/{app_name}/models.py"] = (
+                f'"""Models for {app_name} backbone app."""\n'
+            )
+            files[f"apps/{app_name}/views.py"] = (
+                f'"""Views for {app_name} backbone app."""\n'
+            )
+            files[f"apps/{app_name}/serializers.py"] = (
+                f'"""Serializers for {app_name} backbone app."""\n'
+            )
+            files[
+                f"apps/{app_name}/urls.py"
+            ] = f"""from django.urls import path
 
 app_name = "{app_name}"
 
 urlpatterns = [
     # TODO: Add {app_name} API endpoints
 ]
-'''
-            files[f"apps/{app_name}/admin.py"] = f'"""Admin for {app_name}."""\nfrom django.contrib import admin  # noqa: F401\n'
+"""
+            files[f"apps/{app_name}/admin.py"] = (
+                f'"""Admin for {app_name}."""\nfrom django.contrib import admin  # noqa: F401\n'
+            )
             files[f"apps/{app_name}/tests/__init__.py"] = ""
-            files[f"apps/{app_name}/tests/test_models.py"] = f'"""Tests for {app_name} models."""\n'
-            files[f"apps/{app_name}/tests/test_views.py"] = f'"""Tests for {app_name} views."""\n'
+            files[f"apps/{app_name}/tests/test_models.py"] = (
+                f'"""Tests for {app_name} models."""\n'
+            )
+            files[f"apps/{app_name}/tests/test_views.py"] = (
+                f'"""Tests for {app_name} views."""\n'
+            )
 
         # Auth core specifics
-        files["apps/auth_core/authentication.py"] = '''"""OIDC JWT authentication backend for Django REST Framework."""
+        files[
+            "apps/auth_core/authentication.py"
+        ] = '''"""OIDC JWT authentication backend for Django REST Framework."""
 import jwt
 import requests
 from django.conf import settings
@@ -507,7 +563,9 @@ class OIDCAuthentication(authentication.BaseAuthentication):
 ClerkAuthentication = OIDCAuthentication
 '''
 
-        files["apps/auth_core/middleware.py"] = '''"""OIDC JWT middleware for Django."""
+        files[
+            "apps/auth_core/middleware.py"
+        ] = '''"""OIDC JWT middleware for Django."""
 from django.http import JsonResponse
 
 
@@ -532,7 +590,9 @@ ClerkJWTMiddleware = OIDCJWTMiddleware
 '''
 
         # Dockerfile
-        files["Dockerfile"] = f'''FROM python:{config.python_version}-slim AS base
+        files[
+            "Dockerfile"
+        ] = f"""FROM python:{config.python_version}-slim AS base
 
 ENV PYTHONDONTWRITEBYTECODE=1
 ENV PYTHONUNBUFFERED=1
@@ -558,10 +618,12 @@ RUN python manage.py collectstatic --noinput || true
 # Run with gunicorn
 EXPOSE 8000
 CMD ["gunicorn", "config.wsgi:application", "--bind", "0.0.0.0:8000", "--workers", "4", "--timeout", "120"]
-'''
+"""
 
         # docker-compose.yml
-        files["docker-compose.yml"] = '''version: "3.8"
+        files[
+            "docker-compose.yml"
+        ] = """version: "3.8"
 
 services:
   web:
@@ -611,10 +673,12 @@ services:
 
 volumes:
   pgdata:
-'''
+"""
 
         # .env.example
-        files[".env.example"] = """# Django
+        files[
+            ".env.example"
+        ] = """# Django
 DJANGO_SECRET_KEY=change-me-in-production
 DJANGO_SETTINGS_MODULE=config.settings.development
 
@@ -651,7 +715,9 @@ SENTRY_DSN=
 RESEND_API_KEY=
 """
 
-        files["README.md"] = f"""# {config.product_name}
+        files[
+            "README.md"
+        ] = f"""# {config.product_name}
 
 Django Backbone Platform — Organization-scoped SaaS infrastructure for Nzila verticals.
 
@@ -707,7 +773,9 @@ docker compose exec web python manage.py createsuperuser
 
         files = {}
 
-        files["ci-django.yml"] = f'''name: CI — Django Backend
+        files[
+            "ci-django.yml"
+        ] = f"""name: CI — Django Backend
 
 on:
   push:
@@ -775,9 +843,11 @@ jobs:
           scan-type: fs
           scan-ref: backend/
           severity: HIGH,CRITICAL
-'''
+"""
 
-        files["ci-nextjs.yml"] = f'''name: CI — Next.js Frontend
+        files[
+            "ci-nextjs.yml"
+        ] = f"""name: CI — Next.js Frontend
 
 on:
   push:
@@ -844,9 +914,11 @@ jobs:
         working-directory: frontend
       - run: pnpm build
         working-directory: frontend
-'''
+"""
 
-        files["cd-staging.yml"] = '''name: CD — Deploy to Staging
+        files[
+            "cd-staging.yml"
+        ] = """name: CD — Deploy to Staging
 
 on:
   push:
@@ -898,9 +970,11 @@ jobs:
           containerAppName: ${{ vars.CONTAINER_APP_NAME }}-frontend
           resourceGroup: ${{ vars.RESOURCE_GROUP }}
           imageToDeploy: ${{ vars.ACR_LOGIN_SERVER }}/frontend:${{ github.sha }}
-'''
+"""
 
-        files["cd-production.yml"] = '''name: CD — Deploy to Production
+        files[
+            "cd-production.yml"
+        ] = """name: CD — Deploy to Production
 
 on:
   push:
@@ -940,9 +1014,11 @@ jobs:
           containerAppName: ${{ vars.CONTAINER_APP_NAME }}-frontend
           resourceGroup: ${{ vars.RESOURCE_GROUP }}
           imageToDeploy: ${{ vars.ACR_LOGIN_SERVER }}/frontend:${{ github.ref_name }}
-'''
+"""
 
-        files["security-scan.yml"] = '''name: Security Scan
+        files[
+            "security-scan.yml"
+        ] = """name: Security Scan
 
 on:
   schedule:
@@ -971,7 +1047,7 @@ jobs:
       - uses: gitleaks/gitleaks-action@ff98106e4c7b2bc287b24eaf42907196329070c7 # v2.3.9
         env:
           GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
-'''
+"""
 
         for filepath, content in files.items():
             full_path = base / filepath
@@ -993,7 +1069,9 @@ jobs:
 
         files = {}
 
-        files["main.bicep"] = f'''// Nzila Platform — Azure Infrastructure
+        files[
+            "main.bicep"
+        ] = f"""// Nzila Platform — Azure Infrastructure
 // Orchestrates all resource deployments
 
 targetScope = 'resourceGroup'
@@ -1064,9 +1142,11 @@ module monitoring 'modules/monitoring.bicep' = {{
     location: location
   }}
 }}
-'''
+"""
 
-        files["modules/postgres.bicep"] = '''// Azure PostgreSQL Flexible Server with pgvector
+        files[
+            "modules/postgres.bicep"
+        ] = """// Azure PostgreSQL Flexible Server with pgvector
 param name string
 param location string
 param administratorLogin string
@@ -1113,9 +1193,11 @@ resource extensions 'Microsoft.DBforPostgreSQL/flexibleServers/configurations@20
 
 output id string = postgres.id
 output fqdn string = postgres.properties.fullyQualifiedDomainName
-'''
+"""
 
-        files["modules/redis.bicep"] = '''// Azure Redis Cache
+        files[
+            "modules/redis.bicep"
+        ] = """// Azure Redis Cache
 param name string
 param location string
 param skuName string = 'Basic'
@@ -1138,9 +1220,11 @@ resource redis 'Microsoft.Cache/redis@2023-08-01' = {
 output id string = redis.id
 output hostName string = redis.properties.hostName
 output port int = redis.properties.sslPort
-'''
+"""
 
-        files["modules/container-app.bicep"] = '''// Azure Container Apps Environment
+        files[
+            "modules/container-app.bicep"
+        ] = """// Azure Container Apps Environment
 param name string
 param location string
 param acrLoginServer string
@@ -1172,9 +1256,11 @@ resource containerAppEnv 'Microsoft.App/managedEnvironments@2023-05-01' = {
 
 output id string = containerAppEnv.id
 output defaultDomain string = containerAppEnv.properties.defaultDomain
-'''
+"""
 
-        files["modules/container-registry.bicep"] = '''// Azure Container Registry
+        files[
+            "modules/container-registry.bicep"
+        ] = """// Azure Container Registry
 param name string
 param location string
 param sku string = 'Basic'
@@ -1192,9 +1278,11 @@ resource acr 'Microsoft.ContainerRegistry/registries@2023-07-01' = {
 
 output id string = acr.id
 output loginServer string = acr.properties.loginServer
-'''
+"""
 
-        files["modules/key-vault.bicep"] = '''// Azure Key Vault
+        files[
+            "modules/key-vault.bicep"
+        ] = """// Azure Key Vault
 param name string
 param location string
 
@@ -1215,9 +1303,11 @@ resource keyVault 'Microsoft.KeyVault/vaults@2023-07-01' = {
 
 output id string = keyVault.id
 output uri string = keyVault.properties.vaultUri
-'''
+"""
 
-        files["modules/monitoring.bicep"] = '''// Azure Application Insights + Log Analytics
+        files[
+            "modules/monitoring.bicep"
+        ] = """// Azure Application Insights + Log Analytics
 param name string
 param location string
 
@@ -1244,19 +1334,21 @@ resource appInsights 'Microsoft.Insights/components@2020-02-02' = {
 
 output instrumentationKey string = appInsights.properties.InstrumentationKey
 output connectionString string = appInsights.properties.ConnectionString
-'''
+"""
 
         # Parameter files
         params_dir = self.scaffold_root / "infra-as-code" / "bicep" / "parameters"
         params_dir.mkdir(parents=True, exist_ok=True)
 
         for env in ["dev", "staging", "prod"]:
-            files[f"parameters/{env}.bicepparam"] = f'''using '../main.bicep'
+            files[
+                f"parameters/{env}.bicepparam"
+            ] = f"""using '../main.bicep'
 
 param environment = '{env}'
 param location = '{config.azure_region}'
 param productName = 'nzila'
-'''
+"""
 
         for filepath, content in files.items():
             full_path = base / filepath
@@ -1278,7 +1370,9 @@ param productName = 'nzila'
 
         files = {}
 
-        files["README.md"] = f"""# {{{{ product_name }}}} — Vertical App Template
+        files[
+            "README.md"
+        ] = f"""# {{{{ product_name }}}} — Vertical App Template
 
 This template creates a new vertical application repo with:
 - **Frontend:** Next.js {config.next_version} (App Router) with Clerk auth
@@ -1296,7 +1390,9 @@ python scaffold.py \\
 ```
 """
 
-        files["scaffold.py"] = '''#!/usr/bin/env python3
+        files[
+            "scaffold.py"
+        ] = '''#!/usr/bin/env python3
 """Vertical app scaffolding script."""
 import argparse
 import shutil

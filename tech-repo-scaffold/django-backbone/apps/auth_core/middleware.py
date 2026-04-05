@@ -33,8 +33,8 @@ class OIDCJWTMiddleware(MiddlewareMixin):
         "/api/schema/",
         "/api/docs/",
         "/admin/login/",
-        "/api/webhooks/auth/",    # Auth webhooks use secret key auth
-        "/api/webhooks/clerk/",   # Legacy path (backward compat)
+        "/api/webhooks/auth/",  # Auth webhooks use secret key auth
+        "/api/webhooks/clerk/",  # Legacy path (backward compat)
     ]
 
     def process_request(self, request):
@@ -113,12 +113,12 @@ class OrganizationIsolationMiddleware(MiddlewareMixin):
         try:
             from auth_core.models import Organizations
 
-            organization = Organizations.objects.filter(
-                external_organization_id=org_id
-            ).first()
+            organization = Organizations.objects.filter(external_organization_id=org_id).first()
 
             if not organization:
-                logger.warning(f"Unknown organization {org_id} for user {getattr(request, 'auth_user_id', None)}")
+                logger.warning(
+                    f"Unknown organization {org_id} for user {getattr(request, 'auth_user_id', None)}"
+                )
                 return JsonResponse(
                     {"error": "Organization not found. Contact support."}, status=403
                 )
