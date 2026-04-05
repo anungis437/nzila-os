@@ -20,7 +20,7 @@ import {
 } from 'next-auth/react'
 import type { Session } from 'next-auth'
 import type { ReactNode } from 'react'
-import type { EntraSession } from './types.js'
+import type { EntraSession } from './types'
 
 // ── AuthProvider ────────────────────────────────────────────────────────────
 
@@ -275,7 +275,7 @@ export async function signOutFromEntra(callbackUrl?: string) {
 // ── Re-exports ──────────────────────────────────────────────────────────────
 
 export { SessionProvider }
-export { UserButton } from './components/user-button.js'
-export { SignIn } from './components/sign-in.js'
-export { SignUp } from './components/sign-up.js'
-export { OrgSwitcher, OrgSwitcher as OrganizationSwitcher } from './components/org-switcher.js'
+export { UserButton } from './components/user-button'
+export { SignIn } from './components/sign-in'
+export { SignUp } from './components/sign-up'
+export { OrgSwitcher, OrgSwitcher as OrganizationSwitcher } from './components/org-switcher'

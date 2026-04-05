@@ -8,7 +8,7 @@ import {
   isOrgMember,
   meetsOrgRoleRequirement,
   checkPrivilegedAction,
-} from './authorization.js'
+} from './authorization'
 import type { OrgContext } from '@nzila/org'
 
 function makeCtx(overrides?: Partial<OrgContext>): OrgContext {

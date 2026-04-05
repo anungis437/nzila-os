@@ -7,7 +7,7 @@
  *
  * This adapter can be swapped if the auth provider changes.
  */
-import type { AuthenticatedIdentity, AuthResult, OrgMembership } from './identity.js'
+import type { AuthenticatedIdentity, AuthResult, OrgMembership } from './identity'
 
 // ── Types for Clerk Auth Response ───────────────────────────────────────────
 

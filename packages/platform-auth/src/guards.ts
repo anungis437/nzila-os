@@ -15,8 +15,8 @@ import { createPlatformError, type PlatformError } from '@nzila/platform-contrac
 import type {
   AuthenticatedIdentity,
   OrgMembership,
-} from './identity.js'
-import { meetsOrgRoleRequirement } from './authorization.js'
+} from './identity'
+import { meetsOrgRoleRequirement } from './authorization'
 
 // ── Guard Options ───────────────────────────────────────────────────────────
 

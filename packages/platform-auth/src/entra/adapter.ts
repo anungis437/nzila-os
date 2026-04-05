@@ -15,8 +15,8 @@
  *   // result.identity: AuthenticatedIdentity
  */
 import type { Session } from 'next-auth'
-import type { AuthenticatedIdentity, AuthResult, OrgMembership } from '../identity.js'
-import type { EntraSession } from './types.js'
+import type { AuthenticatedIdentity, AuthResult, OrgMembership } from '../identity'
+import type { EntraSession } from './types'
 
 // ── Identity Resolution ─────────────────────────────────────────────────────
 

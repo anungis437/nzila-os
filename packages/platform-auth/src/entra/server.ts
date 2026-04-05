@@ -16,10 +16,10 @@
  *     if (!userId) redirect('/sign-in')
  *   }
  */
-import { auth as nextAuth } from './config.js'
-import { resolveIdentityFromEntra } from './adapter.js'
-import type { AuthResult, AuthenticatedIdentity } from '../identity.js'
-import type { EntraSession } from './types.js'
+import { auth as nextAuth } from './config'
+import { resolveIdentityFromEntra } from './adapter'
+import type { AuthResult, AuthenticatedIdentity } from '../identity'
+import type { EntraSession } from './types'
 
 /** Session type alias for Clerk compatibility */
 export type Session = EntraSession
@@ -181,7 +181,7 @@ export async function getSessionRoles(): Promise<string[]> {
 
 // ── Admin Client Re-export ──────────────────────────────────────────────────
 
-export { clerkClient } from './admin.js'
+export { clerkClient } from './admin'
 
 // ── Route Matching Utility ──────────────────────────────────────────────────
 

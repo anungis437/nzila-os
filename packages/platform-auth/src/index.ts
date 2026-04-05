@@ -20,7 +20,7 @@ export {
   type AuthResult,
   type OrgScopedAuthSuccess,
   type OrgScopedAuthResult,
-} from './identity.js'
+} from './identity'
 
 // ── Authorization ───────────────────────────────────────────────────────────
 export {
@@ -33,7 +33,7 @@ export {
   isOrgMember,
   meetsOrgRoleRequirement,
   checkPrivilegedAction,
-} from './authorization.js'
+} from './authorization'
 
 // ── Guards ──────────────────────────────────────────────────────────────────
 export {
@@ -46,14 +46,14 @@ export {
   type GuardSuccess,
   type GuardFailure,
   type GuardResult,
-} from './guards.js'
+} from './guards'
 
 // ── Clerk Adapter ───────────────────────────────────────────────────────────
 export {
   resolveIdentityFromClerk,
   resolveServiceIdentity,
   mapClerkOrgRole,
-} from './clerk-adapter.js'
+} from './clerk-adapter'
 
 // ── Middleware Helpers ───────────────────────────────────────────────────────
 export {
@@ -62,7 +62,7 @@ export {
   resolveOrgFromHeader,
   resolveCorrelationId,
   createPlatformHeaders,
-} from './middleware.js'
+} from './middleware'
 
 // ── Clerk Webhook Verification ──────────────────────────────────────────────
 export {
@@ -71,4 +71,4 @@ export {
   extractSvixHeaders,
   verifyClerkWebhook,
   type SvixHeaders,
-} from './clerk-webhook.js'
+} from './clerk-webhook'

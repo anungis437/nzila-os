@@ -12,7 +12,7 @@
  */
 
 // ── Config / NextAuth instance ──────────────────────────────────────────────
-export { handlers, auth, signIn, signOut, authConfig } from './config.js'
+export { handlers, auth, signIn, signOut, authConfig } from './config'
 
 // ── Adapter (session → identity) ────────────────────────────────────────────
 export {
@@ -21,7 +21,7 @@ export {
   mapEntraRoleToOrgRole,
   hasEntraRole,
   hasAnyEntraRole,
-} from './adapter.js'
+} from './adapter'
 
 // ── Types ───────────────────────────────────────────────────────────────────
 export type {
@@ -29,4 +29,4 @@ export type {
   EntraSession,
   EntraTokenClaims,
   EntraConfig,
-} from './types.js'
+} from './types'

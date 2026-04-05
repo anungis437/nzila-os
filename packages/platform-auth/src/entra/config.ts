@@ -24,7 +24,7 @@
 import NextAuth from 'next-auth'
 import MicrosoftEntraID from 'next-auth/providers/microsoft-entra-id'
 import type { NextAuthConfig } from 'next-auth'
-import type { EntraTokenClaims, EntraSession } from './types.js'
+import type { EntraTokenClaims, EntraSession } from './types'
 
 // ── Provider Configuration ──────────────────────────────────────────────────
 

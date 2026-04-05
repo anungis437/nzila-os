@@ -9,7 +9,7 @@
  *   export default createAuthMiddleware({ publicRoutes: ['/'] })
  *   export const config = { matcher: [...] }
  */
-import { auth } from './config.js'
+import { auth } from './config'
 import { NextResponse } from 'next/server'
 import type { NextRequest } from 'next/server'
 

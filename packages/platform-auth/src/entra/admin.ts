@@ -14,7 +14,7 @@
  * implemented. Unimplemented methods log a warning and return empty data.
  */
 
-import { logger } from './logger-shim.js'
+import { logger } from './logger-shim'
 
 // ── Graph API Helpers ───────────────────────────────────────────────────────
 
