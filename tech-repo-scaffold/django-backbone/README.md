@@ -26,7 +26,7 @@ docker compose exec web python manage.py createsuperuser
 - **Django 5.1** with DRF for API
 - **Azure PostgreSQL** with pgvector for AI embeddings
 - **Azure Redis** for caching and Celery broker
-- **Clerk** for authentication (JWT verification)
+- **OIDC** for authentication (JWT verification via Microsoft Entra External ID)
 - **Stripe** for billing and subscriptions
 - **Azure OpenAI** for AI features
 - **Sentry** for error tracking

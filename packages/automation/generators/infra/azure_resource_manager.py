@@ -208,8 +208,8 @@ resource containerApp 'Microsoft.App/containerApps@2023-05-01' = {{
               secretRef: 'database-url'
             }}
             {{
-              name: 'CLERK_SECRET_KEY'
-              secretRef: 'clerk-secret'
+              name: 'AUTH_JWKS_URL'
+              secretRef: 'auth-jwks-url'
             }}
             {{
               name: 'NODE_ENV'
@@ -394,11 +394,11 @@ az keyvault secret set \\
   --name postgres-admin-password \\
   --value '<strong-password>'
 
-# Set Clerk secret key
+# Set auth JWKS URL
 az keyvault secret set \\
   --vault-name {resources['key_vault']} \\
-  --name clerk-secret \\
-  --value '${{{{ secrets.CLERK_SECRET_KEY }}}}'
+  --name auth-jwks-url \\
+  --value '${{{{ secrets.AUTH_JWKS_URL }}}}'
 ```
 
 ### GitHub OIDC Setup

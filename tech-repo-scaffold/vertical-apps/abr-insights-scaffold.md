@@ -8,7 +8,7 @@ This scaffold creates the `nzila-abr-insights` repository structure for the ABR 
 
 ## Architecture
 
-- **Frontend:** Next.js 15 (App Router) with Clerk auth
+- **Frontend:** Next.js 15 (App Router) with OIDC auth
 - **Backend:** Django 5.1 with product-specific apps
 - **Database:** Azure PostgreSQL (via Django ORM)
 - **Cache:** Azure Redis
@@ -24,7 +24,7 @@ nzila-abr-insights/
 ├── frontend/                         # Next.js 15 frontend
 │   ├── app/
 │   │   ├── (public)/                # Landing pages
-│   │   ├── (auth)/                  # Clerk auth flows
+│   │   ├── (auth)/                  # OIDC auth flows
 │   │   ├── (dashboard)/             # Learner dashboard
 │   │   └── (admin)/                 # Organization admin
 │   ├── components/
@@ -71,7 +71,7 @@ nzila-abr-insights/
 | Audit Report | ✅ Complete | See packages/automation/data/abr-audit-report.json |
 | Dependency Analysis | ⏳ Pending | Needs legacy codebase access |
 | Scaffold Population | ⏳ In Progress | This file |
-| Auth Migration Plan | 🔜 Next | Supabase → Clerk strategy |
+| Auth Migration Plan | 🔜 Next | Supabase → OIDC strategy |
 | Backend Migration | 🔜 Next | Ingestion CLI → Django mgmt commands |
 | Frontend Refactor | 🔜 Planned | Remove Supabase, add API client |
 | Testing | 🔜 Planned | Unit, integration, E2E, WCAG |
@@ -158,9 +158,10 @@ PGSSLMODE=require
 # Redis
 REDIS_URL=
 
-# Clerk
-CLERK_SECRET_KEY=
-NEXT_PUBLIC_CLERK_PUBLISHABLE_KEY=
+# Auth (OIDC / Microsoft Entra External ID)
+AUTH_JWKS_URL=
+AUTH_SECRET=
+AUTH_WEBHOOK_SECRET=
 
 # Stripe (via Backbone)
 STRIPE_SECRET_KEY=

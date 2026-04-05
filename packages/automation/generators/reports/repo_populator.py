@@ -128,9 +128,9 @@ PGSSLMODE=prefer
 # Redis
 REDIS_URL=redis://localhost:6379/0
 
-# Clerk
-CLERK_SECRET_KEY=
-NEXT_PUBLIC_CLERK_PUBLISHABLE_KEY=
+# Auth (OIDC / Microsoft Entra External ID)
+AUTH_JWKS_URL=
+AUTH_SECRET=
 
 # Stripe (via Backbone)
 STRIPE_SECRET_KEY=

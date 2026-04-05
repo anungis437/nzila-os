@@ -19,7 +19,7 @@ class ManifestConfig:
     template_version: str = "1.0.0"
     owner_github: str = "anungis437"
     azure_base_region: str = "canadacentral"
-    clerk_enabled: bool = True
+    clerk_enabled: bool = True  # OIDC auth enabled ("clerk" name kept for backward compat)
     strict_parity: bool = True
     enable_ci: bool = True
     enable_deploy_workflows: bool = True
@@ -48,7 +48,7 @@ class ManifestGenerator:
             "app_port": self._get_app_port(profile, stack_profile),
             "org_key": self._infer_org_key(profile),
             "image_repo": f"{profile['platform_id']}-app",
-            "auth_provider": "clerk" if self.config.clerk_enabled else "custom",
+            "auth_provider": "oidc" if self.config.clerk_enabled else "custom",
             "db_provider": "azure_postgresql",
             "deploy_provider": "azure_container_apps",
             "environments": self._generate_environments(profile),
@@ -74,17 +74,17 @@ class ManifestGenerator:
         if framework == "Django":
             return "django-aca-azurepg"
         elif framework == "Next.js":
-            return "nextjs-aca-azurepg-clerk"
+            return "nextjs-aca-azurepg-oidc"
         elif framework in ["Express", "Fastify"] or (
             framework is None and language == "TypeScript"
         ):
-            return "nodeapi-aca-azurepg-clerk"
+            return "nodeapi-aca-azurepg-oidc"
         elif framework == "React + Vite":
             # Vite apps usually need backend, default to Next.js pattern for now
-            return "nextjs-aca-azurepg-clerk"
+            return "nextjs-aca-azurepg-oidc"
         else:
             # Default to Node API for unknown
-            return "nodeapi-aca-azurepg-clerk"
+            return "nodeapi-aca-azurepg-oidc"
 
     def _get_app_path(self, profile: Dict[str, Any], stack_profile: str) -> str:
         """Determine primary app path"""
@@ -92,7 +92,7 @@ class ManifestGenerator:
 
         if stack_profile == "django-aca-azurepg":
             return "backend" if monorepo else "src"
-        elif stack_profile == "nextjs-aca-azurepg-clerk":
+        elif stack_profile in ["nextjs-aca-azurepg-oidc", "nextjs-aca-azurepg-clerk"]:
             return "apps/web" if monorepo else "src"
         else:
             return "apps/api" if monorepo else "src"
@@ -151,13 +151,13 @@ class ManifestGenerator:
         ]
 
         # Add monorepo module for Next.js/Node apps with monorepo
-        if stack_profile in ["nextjs-aca-azurepg-clerk", "nodeapi-aca-azurepg-clerk"]:
+        if stack_profile in ["nextjs-aca-azurepg-oidc", "nextjs-aca-azurepg-clerk", "nodeapi-aca-azurepg-oidc", "nodeapi-aca-azurepg-clerk"]:
             if profile["tech_stack"]["monorepo"]:
                 modules.insert(2, "monorepo-pnpm-turbo")
 
-            # Add Clerk auth module
+            # Add OIDC auth module
             if self.config.clerk_enabled:
-                modules.insert(3, "auth-clerk")
+                modules.insert(3, "auth-oidc")
 
         # Add AI ops if platform has AI dependencies
         dependencies = profile.get("dependencies", [])
@@ -245,7 +245,7 @@ class ManifestGenerator:
             "complexity": profile["complexity"],
             "auth_migration": {
                 "from": profile["auth"]["current"],
-                "to": "clerk" if self.config.clerk_enabled else "custom",
+                "to": "oidc" if self.config.clerk_enabled else "custom",
                 "complexity": profile["auth"]["migration_complexity"],
             },
             "priorities": self._generate_migration_priorities(profile),
@@ -259,7 +259,7 @@ class ManifestGenerator:
         ]
 
         if self.config.clerk_enabled:
-            priorities.append("Phase 3: Auth Migration (Clerk integration + user sync)")
+            priorities.append("Phase 3: Auth Migration (OIDC integration + user sync)")
         else:
             priorities.append("Phase 3: Auth Setup (custom auth implementation)")
 

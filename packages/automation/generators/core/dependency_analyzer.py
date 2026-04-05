@@ -64,7 +64,7 @@ class MigrationTarget(Enum):
     REDIS_PY = "redis_py"
     PILLOW = "pillow"
     PSYCOPG = "psycopg"
-    CLERK_BACKEND = "clerk_backend_api"
+    AUTH_BACKEND = "auth_backend_api"  # OIDC auth backend
     STRIPE_PYTHON = "stripe_python"
     SENTRY_SDK = "sentry_sdk"
     NONE = "none"
@@ -128,13 +128,13 @@ PACKAGE_MIGRATION_MAP: Dict[str, Tuple[DependencyCategory, MigrationTarget, str]
     ),
     "@supabase/auth-helpers-nextjs": (
         DependencyCategory.REMOVE,
-        MigrationTarget.CLERK_BACKEND,
-        "clerk-backend-api",
+        MigrationTarget.AUTH_BACKEND,
+        "@nzila/platform-auth",
     ),
     "@supabase/ssr": (
         DependencyCategory.REMOVE,
-        MigrationTarget.CLERK_BACKEND,
-        "clerk-backend-api",
+        MigrationTarget.AUTH_BACKEND,
+        "@nzila/platform-auth",
     ),
     "@supabase/postgrest-js": (
         DependencyCategory.REMOVE,
@@ -152,17 +152,17 @@ PACKAGE_MIGRATION_MAP: Dict[str, Tuple[DependencyCategory, MigrationTarget, str]
     "@clerk/nextjs": (
         DependencyCategory.FRONTEND_ONLY,
         MigrationTarget.NONE,
-        "stays in Next.js",
+        "@nzila/platform-auth (migrated to OIDC)",
     ),
     "@clerk/backend": (
         DependencyCategory.MIGRATE,
-        MigrationTarget.CLERK_BACKEND,
-        "clerk-backend-api",
+        MigrationTarget.AUTH_BACKEND,
+        "@nzila/platform-auth",
     ),
     "@clerk/clerk-sdk-node": (
         DependencyCategory.MIGRATE,
-        MigrationTarget.CLERK_BACKEND,
-        "clerk-backend-api",
+        MigrationTarget.AUTH_BACKEND,
+        "@nzila/platform-auth",
     ),
     # API / REST
     "axios": (

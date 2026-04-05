@@ -71,9 +71,9 @@ REST_FRAMEWORK = {
     "PAGE_SIZE": 25,
 }
 
-# Auth - Clerk
-CLERK_PUBLISHABLE_KEY = os.environ.get("CLERK_PUBLISHABLE_KEY", "")
-CLERK_SECRET_KEY = os.environ.get("CLERK_SECRET_KEY", "")
+# Auth (OIDC / Microsoft Entra External ID)
+AUTH_JWKS_URL = os.environ.get("AUTH_JWKS_URL", os.environ.get("CLERK_JWKS_URL", ""))
+AUTH_SECRET = os.environ.get("AUTH_SECRET", "")
 
 # Static files
 STATIC_URL = "/static/"

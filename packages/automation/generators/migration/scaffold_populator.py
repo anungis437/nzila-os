@@ -34,7 +34,7 @@ class ScaffoldConfig:
     repo_name: str
     owner: str = "anungis437"
     azure_region: str = "canadacentral"
-    auth_provider: str = "clerk"
+    auth_provider: str = "oidc"
     db_provider: str = "azure-postgresql"
     python_version: str = "3.12"
     node_version: str = "20"
@@ -154,7 +154,7 @@ MIDDLEWARE = [
     "django.middleware.common.CommonMiddleware",
     "django.middleware.csrf.CsrfViewMiddleware",
     "django.contrib.auth.middleware.AuthenticationMiddleware",
-    "apps.auth_core.middleware.ClerkJWTMiddleware",
+    "apps.auth_core.middleware.OIDCJWTMiddleware",
     "apps.compliance.middleware.AuditMiddleware",
     "django.contrib.messages.middleware.MessageMiddleware",
     "django.middleware.clickjacking.XFrameOptionsMiddleware",
@@ -193,7 +193,7 @@ CACHES = {{
 # REST Framework
 REST_FRAMEWORK = {{
     "DEFAULT_AUTHENTICATION_CLASSES": [
-        "apps.auth_core.authentication.ClerkAuthentication",
+        "apps.auth_core.authentication.OIDCAuthentication",
     ],
     "DEFAULT_PERMISSION_CLASSES": [
         "rest_framework.permissions.IsAuthenticated",
@@ -224,10 +224,10 @@ SPECTACULAR_SETTINGS = {{
     "SERVE_INCLUDE_SCHEMA": False,
 }}
 
-# Auth — Clerk
-CLERK_SECRET_KEY = os.environ.get("CLERK_SECRET_KEY", "")
-CLERK_PUBLISHABLE_KEY = os.environ.get("CLERK_PUBLISHABLE_KEY", "")
-CLERK_JWKS_URL = os.environ.get("CLERK_JWKS_URL", "")
+# Auth — OIDC (Microsoft Entra External ID)
+AUTH_JWKS_URL = os.environ.get("AUTH_JWKS_URL", os.environ.get("CLERK_JWKS_URL", ""))
+AUTH_SECRET = os.environ.get("AUTH_SECRET", "")
+AUTH_WEBHOOK_SECRET = os.environ.get("AUTH_WEBHOOK_SECRET", os.environ.get("CLERK_WEBHOOK_SECRET", ""))
 
 # Static files
 STATIC_URL = "/static/"
@@ -451,15 +451,15 @@ urlpatterns = [
             files[f"apps/{app_name}/tests/test_views.py"] = f'"""Tests for {app_name} views."""\n'
 
         # Auth core specifics
-        files["apps/auth_core/authentication.py"] = '''"""Clerk JWT authentication backend for Django REST Framework."""
+        files["apps/auth_core/authentication.py"] = '''"""OIDC JWT authentication backend for Django REST Framework."""
 import jwt
 import requests
 from django.conf import settings
 from rest_framework import authentication, exceptions
 
 
-class ClerkAuthentication(authentication.BaseAuthentication):
-    """Authenticates requests using Clerk JWT tokens."""
+class OIDCAuthentication(authentication.BaseAuthentication):
+    """Authenticates requests using OIDC JWT tokens."""
 
     def authenticate(self, request):
         auth_header = request.META.get("HTTP_AUTHORIZATION", "")
@@ -468,8 +468,8 @@ class ClerkAuthentication(authentication.BaseAuthentication):
 
         token = auth_header[7:]
         try:
-            # Fetch JWKS from Clerk
-            jwks_url = settings.CLERK_JWKS_URL
+            # Fetch JWKS from auth provider
+            jwks_url = settings.AUTH_JWKS_URL or getattr(settings, "CLERK_JWKS_URL", "")
             jwks_client = jwt.PyJWKClient(jwks_url)
             signing_key = jwks_client.get_signing_key_from_jwt(token)
 
@@ -489,7 +489,7 @@ class ClerkAuthentication(authentication.BaseAuthentication):
             raise exceptions.AuthenticationFailed(f"Invalid token: {e}")
 
     def _get_or_create_user(self, payload):
-        """Get or create Django user from Clerk JWT payload."""
+        """Get or create Django user from OIDC JWT payload."""
         from django.contrib.auth import get_user_model
         User = get_user_model()
 
@@ -501,14 +501,18 @@ class ClerkAuthentication(authentication.BaseAuthentication):
             defaults={"email": email, "is_active": True},
         )
         return user
+
+
+# Backward-compatible alias
+ClerkAuthentication = OIDCAuthentication
 '''
 
-        files["apps/auth_core/middleware.py"] = '''"""Clerk JWT middleware for Django."""
+        files["apps/auth_core/middleware.py"] = '''"""OIDC JWT middleware for Django."""
 from django.http import JsonResponse
 
 
-class ClerkJWTMiddleware:
-    """Middleware to attach Clerk user context to requests."""
+class OIDCJWTMiddleware:
+    """Middleware to attach OIDC user context to requests."""
 
     EXEMPT_PATHS = ["/healthz/", "/api/schema/", "/api/docs/", "/admin/"]
 
@@ -521,6 +525,10 @@ class ClerkJWTMiddleware:
             return self.get_response(request)
 
         return self.get_response(request)
+
+
+# Backward-compatible alias
+ClerkJWTMiddleware = OIDCJWTMiddleware
 '''
 
         # Dockerfile

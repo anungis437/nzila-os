@@ -329,10 +329,10 @@ class PlatformAnalyzer:
         auth = AuthInfo()
         providers = []
         
-        # Check for Clerk
-        if any(path.glob("**/*clerk*")):
-            providers.append("clerk")
-            auth.current = "clerk"
+        # Check for Clerk / OIDC
+        if any(path.glob("**/*clerk*")) or any(path.glob("**/*oidc*")):
+            providers.append("oidc")
+            auth.current = "oidc"
         
         # Check for NextAuth
         if any(path.glob("**/[...nextauth].ts")) or any(path.glob("**/[...nextauth].js")):
@@ -366,8 +366,8 @@ class PlatformAnalyzer:
         auth.providers = providers
         
         # Estimate migration complexity
-        if auth.current == "clerk":
-            auth.migration_complexity = "LOW"  # Already using Clerk
+        if auth.current == "oidc":
+            auth.migration_complexity = "LOW"  # Already using OIDC/Clerk
         elif auth.current in ["nextauth", "supabase-auth"]:
             auth.migration_complexity = "MEDIUM"  # Similar OAuth patterns
         else:
@@ -448,7 +448,7 @@ class PlatformAnalyzer:
                     # Extract key dependencies
                     key_deps = [
                         "next", "react", "express", "fastify", "drizzle-orm", "prisma",
-                        "@clerk/nextjs", "next-auth", "@supabase/supabase-js",
+                        "@clerk/nextjs", "@nzila/platform-auth", "next-auth", "@supabase/supabase-js",
                         "turbo", "typescript", "tailwindcss"
                     ]
                     dependencies = [dep for dep in key_deps if dep in all_deps]

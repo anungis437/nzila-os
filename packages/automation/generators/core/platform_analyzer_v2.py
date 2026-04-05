@@ -878,13 +878,14 @@ class PlatformAnalyzerV2:
         auth = AuthInfo()
         providers = []
 
-        # Check for Clerk
+        # Check for Clerk / OIDC
         clerk_files = list(path.glob("**/*clerk*"))[
             :5
         ]  # Limit to avoid excessive scanning
-        if clerk_files:
-            providers.append("clerk")
-            auth.current = "clerk"
+        oidc_files = list(path.glob("**/*oidc*"))[:5]
+        if clerk_files or oidc_files:
+            providers.append("oidc")
+            auth.current = "oidc"
             auth.migration_complexity = "LOW"  # Already standardized!
 
         # Check for NextAuth
@@ -948,6 +949,7 @@ class PlatformAnalyzerV2:
                         "drizzle-orm",
                         "prisma",
                         "@clerk/nextjs",
+                        "@nzila/platform-auth",
                         "next-auth",
                         "@supabase/supabase-js",
                         "turbo",
@@ -1061,7 +1063,7 @@ class PlatformAnalyzerV2:
             score += 1
 
         # Auth complexity
-        if profile.auth.current == "clerk":
+        if profile.auth.current == "oidc":
             score -= 1  # Easier migration (already standardized)
         elif profile.auth.migration_complexity == "HIGH":
             score += 2

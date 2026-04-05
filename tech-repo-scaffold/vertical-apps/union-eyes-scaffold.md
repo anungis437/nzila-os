@@ -8,7 +8,7 @@ This scaffold creates the `nzila-union-eyes` repository structure for the Union 
 
 ## Architecture
 
-- **Frontend:** Next.js 15 (App Router) with Clerk auth
+- **Frontend:** Next.js 15 (App Router) with OIDC auth
 - **Backend:** Django 5.1 with product-specific apps
 - **Database:** Azure PostgreSQL (via Django ORM)
 - **Cache:** Azure Redis
@@ -23,7 +23,7 @@ nzila-union-eyes/
 ├── frontend/                         # Next.js 15 frontend
 │   ├── app/
 │   │   ├── (public)/                # Landing pages
-│   │   ├── (auth)/                  # Clerk auth flows
+│   │   ├── (auth)/                  # OIDC auth flows
 │   │   ├── (dashboard)/             # Member dashboard
 │   │   └── (admin)/                 # Union admin panel
 │   ├── components/
@@ -150,9 +150,10 @@ PGSSLMODE=require
 # Redis
 REDIS_URL=
 
-# Clerk
-CLERK_SECRET_KEY=
-NEXT_PUBLIC_CLERK_PUBLISHABLE_KEY=
+# Auth (OIDC / Microsoft Entra External ID)
+AUTH_JWKS_URL=
+AUTH_SECRET=
+AUTH_WEBHOOK_SECRET=
 
 # Stripe (via Backbone)
 STRIPE_SECRET_KEY=

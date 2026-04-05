@@ -1,22 +1,16 @@
-# Django Settings Configuration for Clerk Authentication
+# Django Settings Configuration for OIDC Authentication
 
 ## Add to your Django settings.py
 
 ```python
 # ============================================================================
-# CLERK AUTHENTICATION SETTINGS
+# OIDC AUTHENTICATION SETTINGS (Microsoft Entra External ID)
 # ============================================================================
 
-# Clerk API Keys (get from https://dashboard.clerk.com)
-CLERK_JWKS_URL = os.getenv("CLERK_JWKS_URL", "https://YOUR_CLERK_DOMAIN/.well-known/jwks.json")
-CLERK_SECRET_KEY = os.getenv("CLERK_SECRET_KEY", "sk_live_...")
-CLERK_PUBLISHABLE_KEY = os.getenv("CLERK_PUBLISHABLE_KEY", "pk_live_...")
-CLERK_WEBHOOK_SECRET = os.getenv("CLERK_WEBHOOK_SECRET", "whsec_...")
-
-# Clerk Frontend Keys (for Next.js)
-# Add these to your .env.local in frontend:
-# NEXT_PUBLIC_CLERK_PUBLISHABLE_KEY=pk_live_...
-# CLERK_SECRET_KEY=sk_live_...
+# Auth provider JWKS URL for JWT verification
+AUTH_JWKS_URL = os.getenv("AUTH_JWKS_URL", os.getenv("CLERK_JWKS_URL", "https://YOUR_TENANT.ciamlogin.com/YOUR_TENANT_ID/discovery/v2.0/keys"))
+AUTH_SECRET = os.getenv("AUTH_SECRET", "")
+AUTH_WEBHOOK_SECRET = os.getenv("AUTH_WEBHOOK_SECRET", os.getenv("CLERK_WEBHOOK_SECRET", ""))
 
 
 # ============================================================================
@@ -25,8 +19,8 @@ CLERK_WEBHOOK_SECRET = os.getenv("CLERK_WEBHOOK_SECRET", "whsec_...")
 
 REST_FRAMEWORK = {
     "DEFAULT_AUTHENTICATION_CLASSES": [
-        "apps.auth_core.authentication.ClerkAuthentication",         # Primary: Clerk JWT
-        "apps.auth_core.authentication.ClerkAPIKeyAuthentication",   # Service accounts
+        "apps.auth_core.authentication.OIDCAuthentication",          # Primary: OIDC JWT
+        "apps.auth_core.authentication.APIKeyAuthentication",        # Service accounts
         "rest_framework.authentication.SessionAuthentication",       # Admin panel (optional)
     ],
     "DEFAULT_PERMISSION_CLASSES": [
@@ -57,8 +51,8 @@ MIDDLEWARE = [
     "django.contrib.messages.middleware.MessageMiddleware",
     "django.middleware.clickjacking.XFrameOptionsMiddleware",
     
-    # Clerk auth middleware (add these)
-    "apps.auth_core.middleware.ClerkJWTMiddleware",              # Attach Clerk context
+    # OIDC auth middleware (add these)
+    "apps.auth_core.middleware.OIDCJWTMiddleware",              # Attach auth context
     "apps.auth_core.middleware.OrganizationIsolationMiddleware", # Multi-tenant isolation
     "apps.auth_core.middleware.AuditLogMiddleware",              # Auth logging
 ]
@@ -89,7 +83,7 @@ CORS_ALLOW_HEADERS = [
     "user-agent",
     "x-csrftoken",
     "x-requested-with",
-    "x-clerk-secret-key",  # For service-to-service calls
+    "x-auth-secret-key",  # For service-to-service calls
 ]
 
 
@@ -219,11 +213,10 @@ ALLOWED_HOSTS=localhost,127.0.0.1,your-domain.com
 # Database
 DATABASE_URL=postgresql://user:password@localhost:5432/dbname
 
-# Clerk Authentication
-CLERK_JWKS_URL=https://clerk.your-domain.com/.well-known/jwks.json
-CLERK_SECRET_KEY=sk_live_...
-CLERK_PUBLISHABLE_KEY=pk_live_...
-CLERK_WEBHOOK_SECRET=whsec_...
+# Auth (OIDC / Microsoft Entra External ID)
+AUTH_JWKS_URL=https://YOUR_TENANT.ciamlogin.com/YOUR_TENANT_ID/discovery/v2.0/keys
+AUTH_SECRET=
+AUTH_WEBHOOK_SECRET=
 
 # Redis (for caching)
 REDIS_URL=redis://127.0.0.1:6379/1

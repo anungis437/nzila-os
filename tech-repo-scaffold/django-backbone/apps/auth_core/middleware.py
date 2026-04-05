@@ -1,4 +1,4 @@
-"""Clerk JWT middleware for Django.
+"""OIDC JWT middleware for Django.
 
 Production middleware with:
 - Organization context attachment
@@ -16,11 +16,11 @@ from django.utils.deprecation import MiddlewareMixin
 logger = logging.getLogger(__name__)
 
 
-class ClerkJWTMiddleware(MiddlewareMixin):
-    """Middleware to attach Clerk user and organization context to requests.
+class OIDCJWTMiddleware(MiddlewareMixin):
+    """Middleware to attach OIDC user and organization context to requests.
 
     This middleware:
-    1. Extracts org_id, org_role from Clerk JWT (set by ClerkAuthentication)
+    1. Extracts org_id, org_role from OIDC JWT (set by OIDCAuthentication)
     2. Enforces organization-scoped querysets
     3. Logs authentication events
     4. Provides organization context to views
@@ -33,28 +33,37 @@ class ClerkJWTMiddleware(MiddlewareMixin):
         "/api/schema/",
         "/api/docs/",
         "/admin/login/",
-        "/api/webhooks/clerk/",  # Clerk webhooks use secret key auth
+        "/api/webhooks/auth/",    # Auth webhooks use secret key auth
+        "/api/webhooks/clerk/",   # Legacy path (backward compat)
     ]
 
     def process_request(self, request):
         """Process incoming request to attach org context.
 
-        ClerkAuthentication sets these attributes on request:
-        - clerk_user_id: Clerk user ID (sub claim)
-        - clerk_org_id: Organization ID (org_id claim)
-        - clerk_org_role: User's role in org (org_role claim)
+        OIDCAuthentication sets these attributes on request:
+        - auth_user_id: Auth provider user ID (sub claim)
+        - auth_org_id: Organization ID (org_id claim)
+        - auth_org_role: User's role in org (org_role claim)
+        (Also sets clerk_* aliases for backward compatibility)
         """
         # Skip exempt paths
         if self._is_exempt_path(request.path):
             return None
 
         # Attach default values if not set by auth backend
+        if not hasattr(request, "auth_user_id"):
+            request.auth_user_id = None
+        if not hasattr(request, "auth_org_id"):
+            request.auth_org_id = None
+        if not hasattr(request, "auth_org_role"):
+            request.auth_org_role = None
+        # Backward-compat aliases
         if not hasattr(request, "clerk_user_id"):
-            request.clerk_user_id = None
+            request.clerk_user_id = request.auth_user_id
         if not hasattr(request, "clerk_org_id"):
-            request.clerk_org_id = None
+            request.clerk_org_id = request.auth_org_id
         if not hasattr(request, "clerk_org_role"):
-            request.clerk_org_role = None
+            request.clerk_org_role = request.auth_org_role
 
         return None
 
@@ -79,6 +88,10 @@ class ClerkJWTMiddleware(MiddlewareMixin):
         return any(path.startswith(p) for p in self.EXEMPT_PATHS)
 
 
+# Backward-compatible alias
+ClerkJWTMiddleware = OIDCJWTMiddleware
+
+
 class OrganizationIsolationMiddleware(MiddlewareMixin):
     """Enforces organization-level data isolation for multi-org apps.
 
@@ -91,7 +104,7 @@ class OrganizationIsolationMiddleware(MiddlewareMixin):
     def process_request(self, request):
         """Attach organization object to request for multi-org scoping."""
         # Skip if no org_id (anonymous or service account)
-        org_id = getattr(request, "clerk_org_id", None)
+        org_id = getattr(request, "auth_org_id", None) or getattr(request, "clerk_org_id", None)
         if not org_id:
             request.organization = None
             return None
@@ -101,11 +114,11 @@ class OrganizationIsolationMiddleware(MiddlewareMixin):
             from auth_core.models import Organizations
 
             organization = Organizations.objects.filter(
-                clerk_organization_id=org_id
+                external_organization_id=org_id
             ).first()
 
             if not organization:
-                logger.warning(f"Unknown organization {org_id} for user {request.clerk_user_id}")
+                logger.warning(f"Unknown organization {org_id} for user {getattr(request, 'auth_user_id', None)}")
                 return JsonResponse(
                     {"error": "Organization not found. Contact support."}, status=403
                 )
@@ -165,10 +178,10 @@ class AuditLogMiddleware(MiddlewareMixin):
             duration_ms = int((time.time() - request._audit_start_time) * 1000)
 
         # Log authenticated requests
-        if hasattr(request, "clerk_user_id") and request.clerk_user_id:
+        if hasattr(request, "auth_user_id") and request.auth_user_id:
             logger.info(
-                f"AUTH_REQUEST user={request.clerk_user_id} "
-                f"org={getattr(request, 'clerk_org_id', 'none')} "
+                f"AUTH_REQUEST user={request.auth_user_id} "
+                f"org={getattr(request, 'auth_org_id', 'none')} "
                 f"method={request.method} path={request.path} "
                 f"status={response.status_code} duration_ms={duration_ms} "
                 f"ip={self._get_client_ip(request)}"

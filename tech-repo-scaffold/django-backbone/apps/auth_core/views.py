@@ -1,6 +1,6 @@
 """Views for auth_core backbone app.
 
-Webhook handlers for Clerk user synchronization.
+Webhook handlers for auth provider user synchronization.
 """
 import hashlib
 import hmac
@@ -24,9 +24,9 @@ User = get_user_model()
 @csrf_exempt
 @require_POST
 def clerk_webhook(request):
-    """Handle Clerk webhook events for user synchronization.
+    """Handle auth provider webhook events for user synchronization.
     
-    Clerk sends webhooks for:
+    The auth provider sends webhooks for:
     - user.created
     - user.updated
     - user.deleted
@@ -36,12 +36,12 @@ def clerk_webhook(request):
     - organizationMembership.updated
     - organizationMembership.deleted
     
-    Webhook verification: https://clerk.com/docs/webhooks/overview
+    Webhook verification uses SVIX signature validation.
     """
     try:
         # Verify webhook signature
-        if not _verify_clerk_webhook(request):
-            logger.warning("Invalid Clerk webhook signature")
+        if not _verify_webhook(request):
+            logger.warning("Invalid auth webhook signature")
             return JsonResponse({"error": "Invalid signature"}, status=401)
         
         # Parse webhook payload
@@ -49,7 +49,7 @@ def clerk_webhook(request):
         event_type = payload.get("type")
         data = payload.get("data", {})
         
-        logger.info(f"Received Clerk webhook: {event_type}")
+        logger.info(f"Received auth webhook: {event_type}")
         
         # Route to appropriate handler
         if event_type == "user.created":
@@ -70,12 +70,12 @@ def clerk_webhook(request):
         return JsonResponse({"status": "success"}, status=200)
         
     except Exception as e:
-        logger.exception(f"Clerk webhook error: {e}")
+        logger.exception(f"Auth webhook error: {e}")
         return JsonResponse({"error": str(e)}, status=500)
 
 
-def _verify_clerk_webhook(request) -> bool:
-    """Verify Clerk webhook signature using webhook secret.
+def _verify_webhook(request) -> bool:
+    """Verify auth provider webhook signature using webhook secret.
     
     Args:
         request: Django HttpRequest
@@ -83,9 +83,9 @@ def _verify_clerk_webhook(request) -> bool:
     Returns:
         bool: True if signature is valid
     """
-    webhook_secret = getattr(settings, "CLERK_WEBHOOK_SECRET", "")
+    webhook_secret = getattr(settings, "AUTH_WEBHOOK_SECRET", "") or getattr(settings, "CLERK_WEBHOOK_SECRET", "")
     if not webhook_secret:
-        logger.error("CLERK_WEBHOOK_SECRET not configured")
+        logger.error("AUTH_WEBHOOK_SECRET not configured")
         return False
     
     # Get signature from headers
@@ -116,7 +116,7 @@ def _verify_clerk_webhook(request) -> bool:
 def _handle_user_created(data: Dict[str, Any]):
     """Handle user.created webhook event.
     
-    Creates Django User when new user signs up via Clerk.
+    Creates Django User when new user signs up via auth provider.
     """
     clerk_user_id = data.get("id")
     email = data.get("email_addresses", [{}])[0].get("email_address", "")
@@ -142,7 +142,7 @@ def _handle_user_created(data: Dict[str, Any]):
 def _handle_user_updated(data: Dict[str, Any]):
     """Handle user.updated webhook event.
     
-    Syncs user metadata changes from Clerk to Django.
+    Syncs user metadata changes from auth provider to Django.
     """
     clerk_user_id = data.get("id")
     
@@ -269,10 +269,10 @@ def me(request):
         "email": user.email,
         "first_name": user.first_name,
         "last_name": user.last_name,
-        "clerk_user_id": user.username,  # Username is Clerk user ID
+        "auth_user_id": user.username,  # Username is auth provider user ID
         "organization": {
-            "id": getattr(request, "clerk_org_id", None),
-            "role": getattr(request, "clerk_org_role", None),
+            "id": getattr(request, "auth_org_id", None),
+            "role": getattr(request, "auth_org_role", None),
         },
     })
 

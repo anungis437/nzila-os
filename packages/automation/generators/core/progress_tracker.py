@@ -212,7 +212,7 @@ def _default_quality_gates(phase: MigrationPhase) -> List[QualityGate]:
             QualityGate("schema_parity", "Django schema matches source schema"),
         ],
         MigrationPhase.AUTH_MIGRATION: [
-            QualityGate("clerk_jwt_works", "Clerk JWT verification implemented"),
+            QualityGate("oidc_jwt_works", "OIDC JWT verification implemented"),
             QualityGate("permissions_mapped", "RBAC permissions mapped to Django"),
             QualityGate("auth_tests_pass", "Auth integration tests pass"),
         ],

@@ -316,7 +316,7 @@ azure-identity>=1.15.0
 azure-storage-blob>=12.19.0
 azure-keyvault-secrets>=4.7.0
 
-# Clerk authentication
+# OIDC authentication
 pyjwt>=2.8.0
 cryptography>=41.0.7
 

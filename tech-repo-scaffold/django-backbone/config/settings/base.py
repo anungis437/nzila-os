@@ -45,7 +45,7 @@ MIDDLEWARE = [
     "django.middleware.common.CommonMiddleware",
     "django.middleware.csrf.CsrfViewMiddleware",
     "django.contrib.auth.middleware.AuthenticationMiddleware",
-    "apps.auth_core.middleware.ClerkJWTMiddleware",
+    "apps.auth_core.middleware.OIDCJWTMiddleware",
     "apps.compliance.middleware.AuditMiddleware",
     "django.contrib.messages.middleware.MessageMiddleware",
     "django.middleware.clickjacking.XFrameOptionsMiddleware",
@@ -84,7 +84,7 @@ CACHES = {
 # REST Framework
 REST_FRAMEWORK = {
     "DEFAULT_AUTHENTICATION_CLASSES": [
-        "apps.auth_core.authentication.ClerkAuthentication",
+        "apps.auth_core.authentication.OIDCAuthentication",
     ],
     "DEFAULT_PERMISSION_CLASSES": [
         "rest_framework.permissions.IsAuthenticated",
@@ -110,15 +110,17 @@ REST_FRAMEWORK = {
 # OpenAPI / Swagger
 SPECTACULAR_SETTINGS = {
     "TITLE": "Nzila Backbone API",
-    "DESCRIPTION": "Multi-org SaaS platform API for Nzila verticals",
+    "DESCRIPTION": "Organization-scoped SaaS platform API for Nzila verticals",
     "VERSION": "1.0.0",
     "SERVE_INCLUDE_SCHEMA": False,
 }
 
-# Auth — Clerk
-CLERK_SECRET_KEY = os.environ.get("CLERK_SECRET_KEY", "")
-CLERK_PUBLISHABLE_KEY = os.environ.get("CLERK_PUBLISHABLE_KEY", "")
-CLERK_JWKS_URL = os.environ.get("CLERK_JWKS_URL", "")
+# Auth — OIDC (Microsoft Entra External ID)
+AUTH_JWKS_URL = os.environ.get("AUTH_JWKS_URL", os.environ.get("CLERK_JWKS_URL", ""))
+AUTH_SECRET = os.environ.get("AUTH_SECRET", "")
+AUTH_WEBHOOK_SECRET = os.environ.get("AUTH_WEBHOOK_SECRET", os.environ.get("CLERK_WEBHOOK_SECRET", ""))
+# Backward compat aliases
+CLERK_JWKS_URL = AUTH_JWKS_URL
 
 # Static files
 STATIC_URL = "/static/"

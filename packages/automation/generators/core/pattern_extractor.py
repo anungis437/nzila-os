@@ -152,21 +152,21 @@ class PatternExtractor:
     def _extract_auth_patterns(self, platform_dir: Path, platform_id: str):
         """Extract authentication patterns"""
 
-        # Clerk auth patterns
-        clerk_files = list(platform_dir.glob("**/middleware.ts"))[:5]
-        for file_path in clerk_files:
+        # Auth patterns (OIDC / Clerk)
+        auth_middleware_files = list(platform_dir.glob("**/middleware.ts"))[:5]
+        for file_path in auth_middleware_files:
             if self._is_ignored(file_path):
                 continue
 
             try:
                 content = file_path.read_text(encoding="utf-8", errors="ignore")
 
-                # Clerk middleware pattern
+                # Auth middleware pattern
                 if "clerkMiddleware" in content or "authMiddleware" in content:
                     pattern = self._create_pattern(
                         category="auth",
-                        name="Clerk Middleware",
-                        description="Standard Clerk authentication middleware for Next.js",
+                        name="Auth Middleware",
+                        description="Standard OIDC authentication middleware for Next.js",
                         language="TypeScript",
                         code_snippet=self._extract_function(
                             content, "clerkMiddleware|authMiddleware"

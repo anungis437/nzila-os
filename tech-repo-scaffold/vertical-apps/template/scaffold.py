@@ -141,7 +141,7 @@ cd frontend && pnpm install && pnpm dev
 
 - **Frontend:** Next.js 14 with TypeScript
 - **Backend:** Django 5.1 with DRF
-- **Auth:** Clerk
+- **Auth:** OIDC (Microsoft Entra External ID)
 - **Infrastructure:** Azure
 
 ## CI/CD

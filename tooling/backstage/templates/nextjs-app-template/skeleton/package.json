@@ -11,7 +11,7 @@
     "test": "vitest run"
   },
   "dependencies": {
-    "@clerk/nextjs": "^6.0.0",
+    "@nzila/platform-auth": "workspace:*",
     "@nzila/os-core": "workspace:*",
     "@nzila/ui": "workspace:*",
     "@nzila/observability": "workspace:*",

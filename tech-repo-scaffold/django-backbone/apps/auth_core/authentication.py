@@ -1,4 +1,4 @@
-"""Clerk JWT authentication backend for Django REST Framework.
+"""OIDC JWT authentication backend for Django REST Framework.
 
 Production-ready implementation with:
 - JWKS caching for performance
@@ -21,18 +21,18 @@ from rest_framework import authentication, exceptions
 logger = logging.getLogger(__name__)
 
 
-class ClerkAuthentication(authentication.BaseAuthentication):
-    """Authenticates requests using Clerk JWT tokens.
+class OIDCAuthentication(authentication.BaseAuthentication):
+    """Authenticates requests using OIDC JWT tokens.
     
     This backend:
-    1. Validates JWT signature using Clerk's JWKS
+    1. Validates JWT signature using the IdP's JWKS endpoint
     2. Checks token expiration
-    3. Gets or creates Django User from Clerk user ID
+    3. Gets or creates Django User from user ID (sub claim)
     4. Attaches organization context to request
     """
 
     def authenticate(self, request):
-        """Authenticate request using Clerk JWT token.
+        """Authenticate request using OIDC JWT token.
         
         Returns:
             Tuple[User, dict]: (Django User, JWT payload) or None if no token
@@ -51,9 +51,13 @@ class ClerkAuthentication(authentication.BaseAuthentication):
             user = self._get_or_create_user(payload)
             
             # Attach organization context to request for middleware
-            request.clerk_org_id = payload.get("org_id")
-            request.clerk_org_role = payload.get("org_role")
-            request.clerk_user_id = payload.get("sub")
+            request.auth_org_id = payload.get("org_id")
+            request.auth_org_role = payload.get("org_role")
+            request.auth_user_id = payload.get("sub")
+            # Backward-compat aliases
+            request.clerk_org_id = request.auth_org_id
+            request.clerk_org_role = request.auth_org_role
+            request.clerk_user_id = request.auth_user_id
             
             return (user, payload)
 
@@ -83,10 +87,10 @@ class ClerkAuthentication(authentication.BaseAuthentication):
         Raises:
             jwt.InvalidTokenError: If token is invalid
         """
-        jwks_url = getattr(settings, "CLERK_JWKS_URL", None)
+        jwks_url = getattr(settings, "AUTH_JWKS_URL", None) or getattr(settings, "CLERK_JWKS_URL", None)
         if not jwks_url:
             raise exceptions.AuthenticationFailed(
-                "CLERK_JWKS_URL not configured in Django settings"
+                "AUTH_JWKS_URL not configured in Django settings"
             )
         
         # Cache JWKS client for performance (auto-refreshes on key rotation)
@@ -105,18 +109,18 @@ class ClerkAuthentication(authentication.BaseAuthentication):
             token,
             signing_key.key,
             algorithms=["RS256"],
-            options={"verify_aud": False},  # Clerk doesn't set aud claim
+            options={"verify_aud": False},  # Many OIDC providers omit aud
         )
         
         return payload
 
     def _get_or_create_user(self, payload: Dict[str, Any]):
-        """Get or create Django user from Clerk JWT payload.
+        """Get or create Django user from OIDC JWT payload.
         
-        Syncs user metadata from Clerk to Django User/Profile models.
+        Syncs user metadata from the auth provider to Django User/Profile models.
         
         Args:
-            payload: Decoded JWT payload from Clerk
+            payload: Decoded JWT payload from auth provider
             
         Returns:
             User: Django User instance
@@ -131,7 +135,7 @@ class ClerkAuthentication(authentication.BaseAuthentication):
         first_name = payload.get("given_name", "")
         last_name = payload.get("family_name", "")
         
-        # Get or create user by Clerk user ID
+        # Get or create user by auth provider user ID
         user, created = User.objects.get_or_create(
             username=clerk_user_id,
             defaults={
@@ -164,7 +168,7 @@ class ClerkAuthentication(authentication.BaseAuthentication):
         return user
 
     def _sync_user_profile(self, user, payload: Dict[str, Any]):
-        """Sync Clerk metadata to Profile model if it exists.
+        """Sync auth provider metadata to Profile model if it exists.
         
         Args:
             user: Django User instance
@@ -173,7 +177,7 @@ class ClerkAuthentication(authentication.BaseAuthentication):
         try:
             from apps.profiles.models import Profile
             
-            clerk_user_id = payload.get("sub")
+            auth_user_id = payload.get("sub")
             org_id = payload.get("org_id")
             
             # Update or create profile
@@ -192,12 +196,20 @@ class ClerkAuthentication(authentication.BaseAuthentication):
             logger.error(f"Failed to sync user profile: {e}")
 
 
-class ClerkAPIKeyAuthentication(authentication.BaseAuthentication):
-    """Authenticates service-to-service requests using Clerk secret key.
+# Backward-compatible alias
+ClerkAuthentication = OIDCAuthentication
+
+
+class APIKeyAuthentication(authentication.BaseAuthentication):
+    """Authenticates service-to-service requests using auth secret key.
     
     For internal API calls, webhooks, or admin operations.
-    Checks for X-Clerk-Secret-Key header matching CLERK_SECRET_KEY.
+    Checks for X-Auth-Secret-Key header (with X-Clerk-Secret-Key fallback).
     """
+
+
+# Backward-compatible alias
+ClerkAPIKeyAuthentication = APIKeyAuthentication
     
     def authenticate(self, request):
         """Authenticate using Clerk secret key header.

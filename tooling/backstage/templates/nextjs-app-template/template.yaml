@@ -4,7 +4,7 @@ metadata:
   name: nextjs-app-template
   title: Next.js App (Nzila Golden Path)
   description: >
-    Scaffold a new Next.js application with Clerk auth, Tailwind v4,
+    Scaffold a new Next.js application with OIDC auth (Microsoft Entra External ID), Tailwind v4,
     OpenTelemetry instrumentation, and evidence-first governance.
   tags:
     - nextjs
