@@ -118,7 +118,7 @@ function NavSection({
           }`}
         />
         {/* mobile divider */}
-        <div className="md:hidden h-px w-full bg-linear-to-r from-transparent via-gray-300 to-transparent my-2" />
+        <div className="md:hidden h-px w-full bg-linear-to-r from-transparent via-gray-300/60 to-transparent my-1" />
       </button>
 
       <AnimatePresence initial={false}>
@@ -430,7 +430,7 @@ export default function Sidebar({ profile: _profile, userEmail, whopMonthlyPlanI
   const renderItem = (item: { href: string; icon: React.ReactNode; label: string }) => (
     <Link key={item.href} href={item.href} className="block">
       <motion.div
-        className={`flex items-center py-2 px-3 rounded-lg cursor-pointer transition-all ${
+        className={`flex items-center py-2.5 px-2 md:px-3 rounded-lg cursor-pointer transition-all justify-center md:justify-start ${
           isActive(item.href)
             ? "bg-linear-to-r from-blue-600 to-blue-700 text-white shadow-lg shadow-blue-500/30"
             : "text-gray-800 hover:bg-gray-100 hover:shadow-sm"
@@ -439,14 +439,14 @@ export default function Sidebar({ profile: _profile, userEmail, whopMonthlyPlanI
         whileTap={{ scale: 0.98 }}
         transition={{ duration: 0.2 }}
       >
-        <div className="flex items-center justify-center">{item.icon}</div>
-        <span className="ml-3 hidden md:block text-sm font-medium">{item.label}</span>
+        <div className="flex items-center justify-center w-5 h-5 shrink-0">{item.icon}</div>
+        <span className="ml-3 hidden md:block text-sm font-medium truncate">{item.label}</span>
       </motion.div>
     </Link>
   );
 
   return (
-    <div className="h-screen w-15 md:w-55 bg-white/90 backdrop-blur-xl border-r border-gray-200 flex flex-col justify-between py-5 relative overflow-hidden">
+    <div className="h-screen w-14 md:w-55 bg-white/90 backdrop-blur-xl border-r border-gray-200 flex flex-col justify-between py-4 md:py-5 relative overflow-hidden shrink-0">
       {/* Glassmorphism effects */}
       <motion.div
         className="absolute inset-0 bg-linear-to-b from-primary/5 via-transparent to-primary/5 pointer-events-none"
@@ -468,7 +468,7 @@ export default function Sidebar({ profile: _profile, userEmail, whopMonthlyPlanI
       <div className="absolute inset-y-0 right-0 w-px bg-linear-to-b from-transparent via-white to-transparent opacity-80" />
 
       {/* Logo */}
-      <div className="px-3 mb-6 relative z-10">
+      <div className="px-2 md:px-3 mb-4 md:mb-6 relative z-10">
         <Link href={`/${locale}/dashboard`}>
           <motion.div
             className="flex items-center justify-center md:justify-start gap-2"
@@ -480,7 +480,7 @@ export default function Sidebar({ profile: _profile, userEmail, whopMonthlyPlanI
               alt="Union Eyes"
               width={32}
               height={32}
-              className="w-8 h-8 rounded-lg object-contain"
+              className="w-7 h-7 md:w-8 md:h-8 rounded-lg object-contain"
             />
             <div className="hidden md:block">
               <Image
@@ -506,8 +506,8 @@ export default function Sidebar({ profile: _profile, userEmail, whopMonthlyPlanI
       )}
 
       {/* Navigation Sections — transparent scrollbar */}
-      <nav className="flex-1 px-3 relative z-10 overflow-y-auto sidebar-scroll">
-        <div className="space-y-4">
+      <nav className="flex-1 px-1.5 md:px-3 relative z-10 overflow-y-auto sidebar-scroll">
+        <div className="space-y-3 md:space-y-4">
           {visibleSections.map((section) => (
             <NavSection key={section.title} title={section.title} defaultOpen>
               {section.items.map(renderItem)}
@@ -522,11 +522,11 @@ export default function Sidebar({ profile: _profile, userEmail, whopMonthlyPlanI
 
         <Link href={`/${locale}/dashboard/profile`}>
           <motion.div
-            className="flex items-center px-3 py-3 hover:bg-gray-100 rounded-lg mx-2 cursor-pointer transition-colors"
+            className="flex items-center justify-center md:justify-start px-1.5 md:px-3 py-2.5 md:py-3 hover:bg-gray-100 rounded-lg mx-1 md:mx-2 cursor-pointer transition-colors"
             whileHover={{ scale: 1.02, transition: { duration: 0.2 } }}
             whileTap={{ scale: 0.98 }}
           >
-            <div className="w-8 h-8 rounded-full overflow-hidden border-2 border-white/80 flex items-center justify-center bg-white/80 shadow-sm">
+            <div className="w-7 h-7 md:w-8 md:h-8 rounded-full overflow-hidden border-2 border-white/80 flex items-center justify-center bg-white/80 shadow-sm shrink-0">
               {isMounted ? (
                 <UserButton
                   appearance={{
@@ -537,7 +537,7 @@ export default function Sidebar({ profile: _profile, userEmail, whopMonthlyPlanI
                   }}
                 />
               ) : (
-                <div className="w-8 h-8 rounded-full bg-gray-200 animate-pulse" />
+                <div className="w-7 h-7 md:w-8 md:h-8 rounded-full bg-gray-200 animate-pulse" />
               )}
             </div>
             <div className="hidden md:block ml-3 flex-1 min-w-0">

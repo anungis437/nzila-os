@@ -175,11 +175,11 @@ export default async function DashboardLayout({ children }: { children: ReactNod
         />
         
         {/* Main content area with organization selector */}
-        <div className="flex-1 overflow-auto relative bg-linear-to-br from-slate-50 via-white to-blue-50">
+        <div className="flex-1 min-w-0 overflow-auto relative bg-linear-to-br from-slate-50 via-white to-blue-50">
           {/* Organization selector and breadcrumb in header - sticky at top */}
-          <div className="sticky top-0 z-10 bg-white/80 backdrop-blur-sm border-b border-gray-200/60 px-6 py-4 flex justify-between items-center min-h-15">
+          <div className="sticky top-0 z-10 bg-white/80 backdrop-blur-sm border-b border-gray-200/60 px-3 md:px-6 py-2.5 md:py-4 flex justify-between items-center gap-2 min-h-12 md:min-h-15">
             <OrganizationBreadcrumb />
-            <div className="flex items-center gap-3">
+            <div className="flex items-center gap-1.5 md:gap-3 shrink-0">
               <LanguageSwitcher />
               <OrganizationSelector />
               <HeaderActions />
@@ -187,7 +187,7 @@ export default async function DashboardLayout({ children }: { children: ReactNod
           </div>
           
           {/* Page content */}
-          <div className="dashboard-content p-6 mt-2">
+          <div className="dashboard-content p-3 md:p-6 mt-1 md:mt-2">
             {children}
           </div>
         </div>
