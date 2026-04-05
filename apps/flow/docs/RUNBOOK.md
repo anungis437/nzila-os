@@ -57,12 +57,12 @@
 
 ```bash
 # Build and push
-docker build -t nzilastagingacr.azurecr.io/nzila/flow:latest -f Dockerfile .
-docker push nzilastagingacr.azurecr.io/nzila/flow:latest
+docker build -t nzilacanadaacr.azurecr.io/nzila/flow:latest -f Dockerfile .
+docker push nzilacanadaacr.azurecr.io/nzila/flow:latest
 
 # Update container app
-az containerapp update --name nzila-os-flow -g nzila-staging-rg \
-  --image nzilastagingacr.azurecr.io/nzila/flow:latest
+az containerapp update --name nzila-os-flow -g nzila-canada-staging-rg \
+  --image nzilacanadaacr.azurecr.io/nzila/flow:latest
 ```
 
 ## Monitoring

@@ -16,7 +16,7 @@ data:
   config.yaml: |
     services:
       nzila-policy-bundle:
-        url: https://nzilastagingacr.azurecr.io
+        url: https://nzilacanadaacr.azurecr.io
         type: oci
         credentials:
           bearer:

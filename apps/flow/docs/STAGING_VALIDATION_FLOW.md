@@ -12,33 +12,33 @@
 
 ### 1. Health Check
 ```bash
-curl https://nzila-os-flow.delightfulisland-0d503d3c.eastus.azurecontainerapps.io/api/health
+curl https://nzila-os-flow.jollydune-88c1e97f.canadacentral.azurecontainerapps.io/api/health
 ```
 **Expected:** HTTP 200, `{ "status": "ok", "service": "flow", "dependencies": { "db": "ok", "storage": "ok", ... } }`
 
 ### 2. Metrics Endpoint
 ```bash
-curl https://nzila-os-flow.delightfulisland-0d503d3c.eastus.azurecontainerapps.io/api/metrics
+curl https://nzila-os-flow.jollydune-88c1e97f.canadacentral.azurecontainerapps.io/api/metrics
 ```
 **Expected:** HTTP 200, JSON with `order_count`, `quote_conversion_rate`, `avg_order_value`, `production_cycle_time`, `payment_blocked_orders`, `vendor_delay_count`
 
 ### 3. Governance Telemetry
 ```bash
 curl -H "Authorization: Bearer $TOKEN" \
-  https://nzila-os-flow.delightfulisland-0d503d3c.eastus.azurecontainerapps.io/api/governance/telemetry
+  https://nzila-os-flow.jollydune-88c1e97f.canadacentral.azurecontainerapps.io/api/governance/telemetry
 ```
 **Expected:** HTTP 200 with `policy_denied_count`, `anomaly_count`, `audit_event_volume`, `payment_gate_blocks`
 
 ### 4. Evidence Export
 ```bash
-curl https://nzila-os-flow.delightfulisland-0d503d3c.eastus.azurecontainerapps.io/api/evidence/export
+curl https://nzila-os-flow.jollydune-88c1e97f.canadacentral.azurecontainerapps.io/api/evidence/export
 ```
 **Expected:** HTTP 200, `{ "app": "flow", "version": "..." }`
 
 ### 5. Operational Summary
 ```bash
 curl -H "Authorization: Bearer $TOKEN" \
-  https://nzila-os-flow.delightfulisland-0d503d3c.eastus.azurecontainerapps.io/api/ops/summary
+  https://nzila-os-flow.jollydune-88c1e97f.canadacentral.azurecontainerapps.io/api/ops/summary
 ```
 **Expected:** HTTP 200 with `active_orders`, `blocked_orders`, `production_backlog`, `vendor_delay_flags`
 
@@ -55,6 +55,6 @@ curl -H "Authorization: Bearer $TOKEN" \
 ## Rollback
 
 If validation fails:
-1. Check container logs: `az containerapp logs show --name nzila-os-flow -g nzila-staging-rg`
-2. Verify environment variables: `az containerapp show --name nzila-os-flow -g nzila-staging-rg --query "properties.template.containers[0].env"`
+1. Check container logs: `az containerapp logs show --name nzila-os-flow -g nzila-canada-staging-rg`
+2. Verify environment variables: `az containerapp show --name nzila-os-flow -g nzila-canada-staging-rg --query "properties.template.containers[0].env"`
 3. Redeploy previous image if needed

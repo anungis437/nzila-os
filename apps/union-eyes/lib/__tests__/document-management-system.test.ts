@@ -118,7 +118,7 @@ const baseDoc = {
   organizationId: 'org-1',
   documentName: 'evidence.pdf',
   documentType: 'evidence',
-  filePath: 'https://nzilastagingstore.blob.core.windows.net/docs/evidence.pdf',
+  filePath: 'https://nzilacanadastore.blob.core.windows.net/docs/evidence.pdf',
   fileSize: 1024,
   mimeType: 'application/pdf',
   version: 1,

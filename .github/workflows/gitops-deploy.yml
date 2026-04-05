@@ -40,7 +40,7 @@ permissions:
 env:
   NODE_VERSION: '22'
 
-  ACR_NAME: nzilastagingacr
+  ACR_NAME: nzilacanadaacr
 
 jobs:
   # ── Determine deployment parameters ───────────────────────────────────────
@@ -175,7 +175,7 @@ jobs:
           fi
 
           # Cross-app navigation URLs (baked into Next.js at build time)
-          DOMAIN="delightfulisland-0d503d3c.eastus.azurecontainerapps.io"
+          DOMAIN="jollydune-88c1e97f.canadacentral.azurecontainerapps.io"
           BUILD_ARGS="${BUILD_ARGS} --build-arg NEXT_PUBLIC_WEB_URL=https://nzila-os-web.${DOMAIN}"
           BUILD_ARGS="${BUILD_ARGS} --build-arg NEXT_PUBLIC_CONSOLE_URL=https://nzila-os-console.${DOMAIN}"
           BUILD_ARGS="${BUILD_ARGS} --build-arg NEXT_PUBLIC_PARTNERS_URL=https://nzila-os-partners.${DOMAIN}"
@@ -223,20 +223,20 @@ jobs:
           ENV="${{ needs.plan.outputs.environment }}"
           VERSION="${{ needs.plan.outputs.version }}"
           APPS="${{ needs.plan.outputs.apps }}"
-          RG="nzila-${ENV}-rg"
+          RG="nzila-canada-${ENV}-rg"
           ACR="${{ env.ACR_NAME }}.azurecr.io"
 
           echo "Deploying to $ENV with version $VERSION"
 
           # Resolve the Container Apps Environment default domain
           DOMAIN=$(az containerapp env show \
-            --name "nzila-${ENV}-env" \
+            --name "nzila-canada-${ENV}-env" \
             --resource-group "$RG" \
             --query "properties.defaultDomain" -o tsv 2>/dev/null || echo "")
           if [ -n "$DOMAIN" ]; then
             echo "url=https://nzila-os-web.${DOMAIN}" >> "$GITHUB_OUTPUT"
           else
-            echo "url=https://nzila-os-web.delightfulisland-0d503d3c.eastus.azurecontainerapps.io" >> "$GITHUB_OUTPUT"
+            echo "url=https://nzila-os-web.jollydune-88c1e97f.canadacentral.azurecontainerapps.io" >> "$GITHUB_OUTPUT"
           fi
 
           # Update each Container App with the newly built image
@@ -284,7 +284,7 @@ jobs:
         if: success()
         run: |
           ENV="${{ needs.plan.outputs.environment }}"
-          RG="nzila-${ENV}-rg"
+          RG="nzila-canada-${ENV}-rg"
           DSN="${{ secrets.SENTRY_DSN }}"
           if [ -z "$DSN" ]; then
             echo "::notice::SENTRY_DSN secret not set — skipping Sentry env injection"
@@ -321,9 +321,9 @@ jobs:
 
           # Resolve the Container Apps Environment default domain
           DOMAIN=$(az containerapp env show \
-            --name "nzila-${ENV}-env" \
-            --resource-group "nzila-${ENV}-rg" \
-            --query "properties.defaultDomain" -o tsv 2>/dev/null || echo "delightfulisland-0d503d3c.eastus.azurecontainerapps.io")
+            --name "nzila-canada-${ENV}-env" \
+            --resource-group "nzila-canada-${ENV}-rg" \
+            --query "properties.defaultDomain" -o tsv 2>/dev/null || echo "jollydune-88c1e97f.canadacentral.azurecontainerapps.io")
 
           # Verify all app health endpoints
           APPS=(web console partners union-eyes cfo zonga abr flow agrimo cora trade mobility mobility-client-portal control-plane platform-admin nacp-exams)

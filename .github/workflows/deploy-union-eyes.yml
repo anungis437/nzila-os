@@ -17,8 +17,8 @@ permissions:
 
 env:
   APP_NAME: nzila-os-union-eyes
-  IMAGE: nzilastagingacr.azurecr.io/nzila-os-union-eyes
-  BACKEND_IMAGE: nzilastagingacr.azurecr.io/nzila-os-union-eyes-backend
+  IMAGE: nzilacanadaacr.azurecr.io/nzila-os-union-eyes
+  BACKEND_IMAGE: nzilacanadaacr.azurecr.io/nzila-os-union-eyes-backend
 
 jobs:
   pre-deploy-gates:
@@ -109,7 +109,7 @@ jobs:
           creds: ${{ secrets.AZURE_CREDENTIALS }}
 
       - name: ACR login
-        run: az acr login --name nzilastagingacr
+        run: az acr login --name nzilacanadaacr
 
       - name: Build & push frontend image
         run: |
@@ -129,7 +129,7 @@ jobs:
       - name: Build & push backend image
         run: |
           az acr build \
-            --registry nzilastagingacr \
+            --registry nzilacanadaacr \
             --image nzila-os-union-eyes-backend:${{ github.sha }} \
             --image nzila-os-union-eyes-backend:latest \
             --file apps/union-eyes/backend/Dockerfile \

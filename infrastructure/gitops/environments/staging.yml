@@ -3,11 +3,11 @@
 
 environment: staging
 region: canadacentral
-resource_group: nzila-staging-rg
+resource_group: nzila-canada-staging-rg
 dr_region: canadaeast
 
 container_apps:
-  environment: nzila-staging-env
+  environment: nzila-canada-staging-env
   revision_mode: Multiple
   min_replicas: 2
   max_replicas: 5
@@ -88,7 +88,7 @@ database:
   high_availability: false
 
 acr:
-  name: nzilastagingacr
+  name: nzilacanadaacr
   sku: Basic
 
 key_vault:

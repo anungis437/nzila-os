@@ -59,14 +59,14 @@ ARG AZURE_AD_CLIENT_ID=
 ARG AZURE_AD_TENANT_ID=
 
 # Build args for cross-app navigation URLs (baked into Next.js client bundle)
-ARG NEXT_PUBLIC_WEB_URL=https://nzila-os-web.delightfulisland-0d503d3c.eastus.azurecontainerapps.io
-ARG NEXT_PUBLIC_CONSOLE_URL=https://nzila-os-console.delightfulisland-0d503d3c.eastus.azurecontainerapps.io
-ARG NEXT_PUBLIC_PARTNERS_URL=https://nzila-os-partners.delightfulisland-0d503d3c.eastus.azurecontainerapps.io
-ARG NEXT_PUBLIC_UNION_EYES_URL=https://nzila-os-union-eyes.delightfulisland-0d503d3c.eastus.azurecontainerapps.io
-ARG NEXT_PUBLIC_ABR_URL=https://nzila-os-abr.delightfulisland-0d503d3c.eastus.azurecontainerapps.io
-ARG NEXT_PUBLIC_CFO_URL=https://nzila-os-cfo.delightfulisland-0d503d3c.eastus.azurecontainerapps.io
-ARG NEXT_PUBLIC_CONTROL_PLANE_URL=https://nzila-os-control-plane.delightfulisland-0d503d3c.eastus.azurecontainerapps.io
-ARG NEXT_PUBLIC_PLATFORM_ADMIN_URL=https://nzila-os-platform-admin.delightfulisland-0d503d3c.eastus.azurecontainerapps.io
+ARG NEXT_PUBLIC_WEB_URL=https://nzila-os-web.jollydune-88c1e97f.canadacentral.azurecontainerapps.io
+ARG NEXT_PUBLIC_CONSOLE_URL=https://nzila-os-console.jollydune-88c1e97f.canadacentral.azurecontainerapps.io
+ARG NEXT_PUBLIC_PARTNERS_URL=https://nzila-os-partners.jollydune-88c1e97f.canadacentral.azurecontainerapps.io
+ARG NEXT_PUBLIC_UNION_EYES_URL=https://nzila-os-union-eyes.jollydune-88c1e97f.canadacentral.azurecontainerapps.io
+ARG NEXT_PUBLIC_ABR_URL=https://nzila-os-abr.jollydune-88c1e97f.canadacentral.azurecontainerapps.io
+ARG NEXT_PUBLIC_CFO_URL=https://nzila-os-cfo.jollydune-88c1e97f.canadacentral.azurecontainerapps.io
+ARG NEXT_PUBLIC_CONTROL_PLANE_URL=https://nzila-os-control-plane.jollydune-88c1e97f.canadacentral.azurecontainerapps.io
+ARG NEXT_PUBLIC_PLATFORM_ADMIN_URL=https://nzila-os-platform-admin.jollydune-88c1e97f.canadacentral.azurecontainerapps.io
 
 # Set as env vars for build
 # AUTH_SECRET is intentionally NOT set as ENV to avoid baking it into an image layer.

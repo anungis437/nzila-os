@@ -12,14 +12,14 @@
     {
       "name": "staging",
       "tier": "staging",
-      "url_pattern": "https://nzila-os-{app}.delightfulisland-0d503d3c.eastus.azurecontainerapps.io",
+      "url_pattern": "https://nzila-os-{app}.jollydune-88c1e97f.canadacentral.azurecontainerapps.io",
       "infrastructure": {
         "provider": "azure",
-        "resource_group": "nzila-staging-rg",
-        "region": "eastus",
+        "resource_group": "nzila-canada-staging-rg",
+        "region": "canadacentral",
         "compute": "Azure Container Apps",
-        "registry": "nzilastagingacr.azurecr.io",
-        "storage": "nzilastagingstore"
+        "registry": "nzilacanadaacr.azurecr.io",
+        "storage": "nzilacanadastore"
       },
       "apps_deployed": ["web", "console", "partners", "union-eyes"],
       "notes": "Staging environment on Azure Container Apps"

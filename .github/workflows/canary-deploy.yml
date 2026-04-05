@@ -43,8 +43,8 @@ permissions:
   contents: read
 
 env:
-  REGISTRY: nzilastagingacr.azurecr.io
-  IMAGE_BASE: nzilastagingacr.azurecr.io/${{ inputs.app }}
+  REGISTRY: nzilacanadaacr.azurecr.io
+  IMAGE_BASE: nzilacanadaacr.azurecr.io/${{ inputs.app }}
 
 jobs:
   # ── Gate: pre-deploy checks ────────────────────────────
@@ -83,7 +83,7 @@ jobs:
           creds: ${{ secrets.AZURE_CREDENTIALS }}
 
       - name: ACR login
-        run: az acr login --name nzilastagingacr
+        run: az acr login --name nzilacanadaacr
 
       - name: Get current stable revision
         id: baseline

@@ -35,7 +35,7 @@
       },
       "runbook": "docs/RUNBOOK.md",
       "environments": {
-        "staging": "nzila-os-flow.delightfulisland-0d503d3c.eastus.azurecontainerapps.io",
+        "staging": "nzila-os-flow.jollydune-88c1e97f.canadacentral.azurecontainerapps.io",
         "production": null
       },
       "integrations": ["shopify", "zoho", "canva"]

@@ -26,7 +26,7 @@ const dashboardLatency = new Trend('dashboard_latency', true);
 // Configuration
 // ---------------------------------------------------------------------------
 
-const BASE_URL = __ENV.BASE_URL || 'https://nzila-os-web.delightfulisland-0d503d3c.eastus.azurecontainerapps.io';
+const BASE_URL = __ENV.BASE_URL || 'https://nzila-os-web.jollydune-88c1e97f.canadacentral.azurecontainerapps.io';
 const AUTH_TOKEN = __ENV.AUTH_TOKEN || '';
 
 const profiles = {

@@ -121,7 +121,7 @@ jobs:
           creds: ${{ secrets.AZURE_CREDENTIALS }}
 
       - name: ACR login
-        run: az acr login --name nzilastagingacr
+        run: az acr login --name nzilacanadaacr
 
       - name: Deploy to staging
         run: |

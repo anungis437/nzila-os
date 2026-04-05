@@ -14,7 +14,7 @@ permissions:
 
 env:
   APP_NAME: nzila-os-console
-  IMAGE: nzilastagingacr.azurecr.io/nzila-os-console
+  IMAGE: nzilacanadaacr.azurecr.io/nzila-os-console
 
 jobs:
   pre-deploy-gates:
@@ -105,7 +105,7 @@ jobs:
           creds: ${{ secrets.AZURE_CREDENTIALS }}
 
       - name: ACR login
-        run: az acr login --name nzilastagingacr
+        run: az acr login --name nzilacanadaacr
 
       - name: Build & push image
         run: |

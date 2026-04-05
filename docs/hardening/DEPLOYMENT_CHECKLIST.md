@@ -47,8 +47,8 @@ Pre-deployment verification for the Zonga platform after hardening.
 ```bash
 az containerapp update \
   --name nzila-os-web \
-  --resource-group nzila-staging-rg \
-  --image nzilastagingacr.azurecr.io/nzila/web:latest \
+  --resource-group nzila-canada-staging-rg \
+  --image nzilacanadaacr.azurecr.io/nzila/web:latest \
   --set-env-vars <ALL env vars>
 ```
 

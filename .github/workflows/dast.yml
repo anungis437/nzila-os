@@ -11,7 +11,7 @@ on:
       target:
         description: 'Target URL (staging default)'
         required: false
-        default: 'https://nzila-os-web.delightfulisland-0d503d3c.eastus.azurecontainerapps.io'
+        default: 'https://nzila-os-web.jollydune-88c1e97f.canadacentral.azurecontainerapps.io'
 
 permissions:
   contents: read
@@ -19,10 +19,10 @@ permissions:
   issues: write
 
 env:
-  WEB_URL: https://nzila-os-web.delightfulisland-0d503d3c.eastus.azurecontainerapps.io
-  CONSOLE_URL: https://nzila-os-console.delightfulisland-0d503d3c.eastus.azurecontainerapps.io
-  UNION_EYES_URL: https://nzila-os-union-eyes.delightfulisland-0d503d3c.eastus.azurecontainerapps.io
-  ZONGA_URL: https://nzila-os-zonga.delightfulisland-0d503d3c.eastus.azurecontainerapps.io
+  WEB_URL: https://nzila-os-web.jollydune-88c1e97f.canadacentral.azurecontainerapps.io
+  CONSOLE_URL: https://nzila-os-console.jollydune-88c1e97f.canadacentral.azurecontainerapps.io
+  UNION_EYES_URL: https://nzila-os-union-eyes.jollydune-88c1e97f.canadacentral.azurecontainerapps.io
+  ZONGA_URL: https://nzila-os-zonga.jollydune-88c1e97f.canadacentral.azurecontainerapps.io
 
 jobs:
   zap-baseline:
@@ -33,13 +33,13 @@ jobs:
       matrix:
         target:
           - name: web
-            url: https://nzila-os-web.delightfulisland-0d503d3c.eastus.azurecontainerapps.io
+            url: https://nzila-os-web.jollydune-88c1e97f.canadacentral.azurecontainerapps.io
           - name: console
-            url: https://nzila-os-console.delightfulisland-0d503d3c.eastus.azurecontainerapps.io
+            url: https://nzila-os-console.jollydune-88c1e97f.canadacentral.azurecontainerapps.io
           - name: union-eyes
-            url: https://nzila-os-union-eyes.delightfulisland-0d503d3c.eastus.azurecontainerapps.io
+            url: https://nzila-os-union-eyes.jollydune-88c1e97f.canadacentral.azurecontainerapps.io
           - name: zonga
-            url: https://nzila-os-zonga.delightfulisland-0d503d3c.eastus.azurecontainerapps.io
+            url: https://nzila-os-zonga.jollydune-88c1e97f.canadacentral.azurecontainerapps.io
 
     steps:
       - uses: actions/checkout@v4
@@ -69,7 +69,7 @@ jobs:
       - name: ZAP API Scan — orchestrator-api
         uses: zaproxy/action-api-scan@8a8b3b4db4fe0e1c102e0ccfa49c5e7a2cc1dce0 # v0.9.0
         with:
-          target: https://nzila-os-web.delightfulisland-0d503d3c.eastus.azurecontainerapps.io/api/health
+          target: https://nzila-os-web.jollydune-88c1e97f.canadacentral.azurecontainerapps.io/api/health
           format: openapi
           cmd_options: '-a -j'
           allow_issue_writing: false

@@ -89,7 +89,7 @@ NEW_PASSWORD=$(openssl rand -base64 32)
 # 2. Update PostgreSQL
 az postgres flexible-server execute \
   --name nzila-pg-staging \
-  --resource-group nzila-staging-rg \
+  --resource-group nzila-canada-staging-rg \
   --admin-user nzila_admin \
   --admin-password "$OLD_PASSWORD" \
   --querytext "ALTER USER nzila PASSWORD '$NEW_PASSWORD';"
@@ -103,10 +103,10 @@ az keyvault secret set \
 # 4. Restart Container Apps to pick up new secret
 az containerapp revision restart \
   --name nzila-os-web \
-  --resource-group nzila-staging-rg
+  --resource-group nzila-canada-staging-rg
 
 # 5. Verify
-curl -s https://nzila-os-web.delightfulisland-0d503d3c.eastus.azurecontainerapps.io/api/health
+curl -s https://nzila-os-web.jollydune-88c1e97f.canadacentral.azurecontainerapps.io/api/health
 ```
 
 ---
@@ -116,13 +116,13 @@ curl -s https://nzila-os-web.delightfulisland-0d503d3c.eastus.azurecontainerapps
 ```bash
 # Rotate storage account key
 az storage account keys renew \
-  --account-name nzilastagingstore \
-  --resource-group nzila-staging-rg \
+  --account-name nzilacanadastore \
+  --resource-group nzila-canada-staging-rg \
   --key key1
 
 # Update Key Vault with new key
 NEW_KEY=$(az storage account keys list \
-  --account-name nzilastagingstore \
+  --account-name nzilacanadastore \
   --query '[0].value' -o tsv)
 
 az keyvault secret set \
