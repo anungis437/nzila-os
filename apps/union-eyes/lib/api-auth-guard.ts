@@ -192,6 +192,22 @@ export const LEGACY_ROLE_MAP: Record<string, UserRole> = {
   'federation_staff': 'fed_staff',        // Federation staff in old schema
   'congress_executive': 'clc_executive',  // CLC executives (if used)
   'system_administrator': 'system_admin', // System admin variants
+
+  // Human-readable / Clerk metadata variants (title-case with spaces)
+  'Secretary Treasurer': 'secretary_treasurer',
+  'Secretary-Treasurer': 'secretary_treasurer',
+  'Vice President': 'vice_president',
+  'Chief Steward': 'chief_steward',
+  'National Officer': 'national_officer',
+  'App Owner': 'app_owner',
+  'Platform Lead': 'platform_lead',
+  'System Admin': 'system_admin',
+  'Support Agent': 'support_agent',
+  'Data Analyst': 'data_analyst',
+  'Content Manager': 'content_manager',
+  'Training Coordinator': 'training_coordinator',
+  'Health Safety Rep': 'health_safety_rep',
+  'Bargaining Committee': 'bargaining_committee',
 } as const;
 
 /**
@@ -779,6 +795,12 @@ export function normalizeRole(role: string): UserRole {
   
   if (role in ROLE_HIERARCHY) {
     return role as UserRole;
+  }
+  
+  // Generic normalization: lowercase + replace spaces/hyphens with underscores
+  const normalized = role.toLowerCase().replace(/[\s-]+/g, '_');
+  if (normalized in ROLE_HIERARCHY) {
+    return normalized as UserRole;
   }
   
   return 'member';

@@ -50,6 +50,7 @@ import { ApiError } from './errors';
 import {
   ROLE_HIERARCHY,
   getCurrentUser,
+  normalizeRole,
   type AuthUser,
   type UserRole,
 } from '@/lib/api-auth-guard';
@@ -268,7 +269,7 @@ export function withApi<
 
       // ── 4. Role / permission checks ────────────────────────────────────
       if (user && minRoleLevel !== null) {
-        let userRole = (user.role ?? 'member') as UserRole;
+        let userRole = normalizeRole(user.role ?? 'member');
         let userLevel = ROLE_HIERARCHY[userRole] ?? 0;
 
         // If Clerk metadata role is insufficient, resolve from DB via getUserRole
@@ -278,7 +279,7 @@ export function withApi<
             const { auth } = await import('@clerk/nextjs/server');
             const { orgId } = await auth();
             const dbRole = await getUserRole(user.id, orgId ?? user.organizationId ?? undefined);
-            userRole = (dbRole ?? 'member') as UserRole;
+            userRole = normalizeRole(dbRole ?? 'member');
             userLevel = ROLE_HIERARCHY[userRole] ?? 0;
           } catch {
             // DB role resolution failed — keep Clerk metadata role
@@ -296,7 +297,7 @@ export function withApi<
       }
 
       if (user && allowedRoles) {
-        let userRole = (user.role ?? 'member') as UserRole;
+        let userRole = normalizeRole(user.role ?? 'member');
         if (!allowedRoles.includes(userRole)) {
           // Resolve from DB before rejecting
           try {
@@ -304,7 +305,7 @@ export function withApi<
             const { auth } = await import('@clerk/nextjs/server');
             const { orgId } = await auth();
             const dbRole = await getUserRole(user.id, orgId ?? user.organizationId ?? undefined);
-            userRole = (dbRole ?? 'member') as UserRole;
+            userRole = normalizeRole(dbRole ?? 'member');
           } catch {
             // DB role resolution failed — keep Clerk metadata role
           }
