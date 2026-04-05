@@ -33,11 +33,11 @@ export async function POST(request: NextRequest) {
     const contactId = await upsertContact({
       email,
       firstName,
-      lastName: lastName || undefined,
+      lastName: lastName ?? undefined,
       properties: {
-        company: organization || undefined,
-        jobtitle: role || undefined,
-        ue_inquiry_type: inquiryType || undefined,
+        ...(organization ? { company: organization } : {}),
+        ...(role ? { jobtitle: role } : {}),
+        ...(inquiryType ? { ue_inquiry_type: inquiryType } : {}),
         ue_source: 'union-eyes-contact-form',
       },
     });
@@ -49,7 +49,7 @@ export async function POST(request: NextRequest) {
         contactId,
         properties: {
           ue_inquiry_type: inquiryType || 'general',
-          ue_message: message?.slice(0, 500) || undefined,
+          ...(message ? { ue_message: message.slice(0, 500) } : {}),
         },
       });
     }
