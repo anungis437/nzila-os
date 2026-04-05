@@ -1,4 +1,6 @@
-import { NextRequest, NextResponse } from "next/server";
+import { NextResponse } from "next/server";
+import { withRoleAuth } from "@/lib/api-auth-guard";
+import { logger } from "@/lib/logger";
 import { detectChampions } from "@/lib/services/pilot-signals";
 
 /**
@@ -6,7 +8,7 @@ import { detectChampions } from "@/lib/services/pilot-signals";
  *
  * Returns potential champion users within the org.
  */
-export async function GET(req: NextRequest) {
+export const GET = withRoleAuth('admin', async (req) => {
   try {
     const orgId = req.nextUrl.searchParams.get("organizationId");
     if (!orgId) {
@@ -16,7 +18,7 @@ export async function GET(req: NextRequest) {
     const champions = await detectChampions(orgId);
     return NextResponse.json({ champions });
   } catch (error) {
-    console.error("[pilot/champions] Error:", error);
+    logger.error("[pilot/champions] Error:", error as Error);
     return NextResponse.json({ error: "Failed to detect champions" }, { status: 500 });
   }
-}
+});

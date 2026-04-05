@@ -1,4 +1,6 @@
-import { NextRequest, NextResponse } from "next/server";
+import { NextResponse } from "next/server";
+import { withRoleAuth } from "@/lib/api-auth-guard";
+import { logger } from "@/lib/logger";
 import { assessConversionReadiness } from "@/lib/services/pilot-signals";
 
 /**
@@ -6,7 +8,7 @@ import { assessConversionReadiness } from "@/lib/services/pilot-signals";
  *
  * Assess conversion readiness for the given org.
  */
-export async function GET(req: NextRequest) {
+export const GET = withRoleAuth('admin', async (req) => {
   try {
     const orgId = req.nextUrl.searchParams.get("organizationId");
     if (!orgId) {
@@ -16,7 +18,7 @@ export async function GET(req: NextRequest) {
     const readiness = await assessConversionReadiness(orgId);
     return NextResponse.json(readiness);
   } catch (error) {
-    console.error("[pilot/readiness] Error:", error);
+    logger.error("[pilot/readiness] Error:", error as Error);
     return NextResponse.json({ error: "Failed to assess readiness" }, { status: 500 });
   }
-}
+});

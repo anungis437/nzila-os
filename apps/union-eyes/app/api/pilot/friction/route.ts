@@ -1,4 +1,6 @@
-import { NextRequest, NextResponse } from "next/server";
+import { NextResponse } from "next/server";
+import { withRoleAuth } from "@/lib/api-auth-guard";
+import { logger } from "@/lib/logger";
 import { getFrictionReport, getFrictionSummary } from "@/lib/services/pilot-friction";
 
 /**
@@ -7,7 +9,7 @@ import { getFrictionReport, getFrictionSummary } from "@/lib/services/pilot-fric
  * Returns friction detection report for the given org.
  * Add &summary=true for counts only ; omit for full user lists.
  */
-export async function GET(req: NextRequest) {
+export const GET = withRoleAuth('admin', async (req) => {
   try {
     const orgId = req.nextUrl.searchParams.get("organizationId");
     const summaryOnly = req.nextUrl.searchParams.get("summary") === "true";
@@ -27,7 +29,7 @@ export async function GET(req: NextRequest) {
     const report = await getFrictionReport(orgId);
     return NextResponse.json(report);
   } catch (error) {
-    console.error("[pilot/friction] Error:", error);
+    logger.error("[pilot/friction] Error:", error as Error);
     return NextResponse.json({ error: "Failed to generate friction report" }, { status: 500 });
   }
-}
+});

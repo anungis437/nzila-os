@@ -1,4 +1,6 @@
-import { NextRequest, NextResponse } from "next/server";
+import { NextResponse } from "next/server";
+import { withRoleAuth } from "@/lib/api-auth-guard";
+import { logger } from "@/lib/logger";
 import { getPilotMetrics, getDAUTrend } from "@/lib/services/pilot-metrics";
 
 /**
@@ -7,7 +9,7 @@ import { getPilotMetrics, getDAUTrend } from "@/lib/services/pilot-metrics";
  * Returns pilot engagement metrics for the given org.
  * Add &trend=true to include a 30-day DAU trend.
  */
-export async function GET(req: NextRequest) {
+export const GET = withRoleAuth('admin', async (req) => {
   try {
     const orgId = req.nextUrl.searchParams.get("organizationId");
     const includeTrend = req.nextUrl.searchParams.get("trend") === "true";
@@ -28,7 +30,7 @@ export async function GET(req: NextRequest) {
 
     return NextResponse.json(metrics);
   } catch (error) {
-    console.error("[pilot/metrics] Error:", error);
+    logger.error("[pilot/metrics] Error:", error as Error);
     return NextResponse.json({ error: "Failed to compute metrics" }, { status: 500 });
   }
-}
+});

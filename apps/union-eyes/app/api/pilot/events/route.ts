@@ -1,4 +1,6 @@
-import { NextRequest, NextResponse } from "next/server";
+import { NextResponse } from "next/server";
+import { withRoleAuth } from "@/lib/api-auth-guard";
+import { logger } from "@/lib/logger";
 import { trackPilotEvent, trackCaseCreated, trackUpdateAdded } from "@/lib/services/pilot-tracking";
 import type { PilotEventType } from "@/lib/services/pilot-tracking";
 
@@ -20,7 +22,7 @@ const VALID_EVENT_TYPES: PilotEventType[] = [
  *
  * Special handling for case_created and update_added to auto-detect "first" variants.
  */
-export async function POST(req: NextRequest) {
+export const POST = withRoleAuth('member', async (req) => {
   try {
     const body = await req.json();
     const { eventType, userId, organizationId, sessionId, metadata } = body;
@@ -50,7 +52,7 @@ export async function POST(req: NextRequest) {
 
     return NextResponse.json({ ok: true });
   } catch (error) {
-    console.error("[pilot/events] Error recording event:", error);
+    logger.error("[pilot/events] Error recording event:", error as Error);
     return NextResponse.json({ error: "Failed to record event" }, { status: 500 });
   }
-}
+});
