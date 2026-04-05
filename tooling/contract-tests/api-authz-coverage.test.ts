@@ -65,6 +65,8 @@ describe('API Authorization Contract (INV-04)', () => {
       /\/api\/quote\/\[token\]/,   // Token-gated public quote response
       /\/api\/shopify\/webhook/,   // Shopify webhook (HMAC-verified)
       /\/api\/zoho\/webhook/,      // Zoho webhook (token-verified)
+      /\/api\/contact/,             // Public contact/demo-request forms
+      /\/api\/pilot\/apply/,        // Public pilot application form
     ]
 
     const AUTH_PATTERNS = [

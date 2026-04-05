@@ -133,6 +133,7 @@ const PAGE_ACCESS_MATRIX: PageRule[] = [
 
   // ── Bargaining (requires bargaining_committee, level 40) ───────────────
   { path: 'bargaining/page.tsx',                         minRole: 'bargaining_committee', description: 'Bargaining dashboard' },
+  { path: 'bargaining/new/page.tsx',                     minRole: 'bargaining_committee', description: 'Create new negotiation' },
   { path: 'bargaining/negotiations/[id]/page.tsx',       minRole: 'bargaining_committee', description: 'Negotiation detail' },
 
   // ── Pilot (requires officer, level 60) ─────────────────────────────────
