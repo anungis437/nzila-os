@@ -1978,7 +1978,8 @@
     "howAffected": "How this affected you or others",
     "submitCase": "Create Case",
     "submitting": "Creating...",
-    "privacyNotice": "Your case will be reviewed confidentially by your union representative. You'll receive updates via email at"
+    "privacyNotice": "Your case will be reviewed confidentially by your union representative. You'll receive updates via email at",
+    "editAnytime": "You can update this anytime after creating."
   },
   "sidebar": {
     "yourUnion": "Your Union",

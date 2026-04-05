@@ -1,160 +1,52 @@
 # Nzila OS Documentation
 
-Welcome to the Nzila OS documentation. This documentation follows the
-[Diátaxis framework](https://diataxis.fr/) — four distinct types of documentation,
-each serving a different user need.
+## What do you need?
+
+- **I want to use Union Eyes** → [Quick Start](union-eyes/quick-start.md) · [User Guide](union-eyes/user-guide.md)
+- **I am part of the CUPE pilot** → [Pilot Overview](union-eyes/pilot-overview.md) · [FAQ](union-eyes/faq.md)
+- **I am running the pilot** → [Admin Guide](union-eyes/admin-guide.md) · [Admin Runbook](pilot/cupe/CUPE_PILOT_ADMIN_RUNBOOK.md)
+- **I need to explain this to a partner or lawyer** → [Partner Overview](union-eyes/partner-overview.md)
+- **I need technical details** → [Architecture](../ARCHITECTURE.md) · [Developer Guide](how-to/GOLDEN_PATH_DEVELOPER_GUIDE.md)
+- **Something is broken** → [Runbooks](../ops/runbooks/README.md) · [Support SOP](pilot/cupe/CUPE_PILOT_SUPPORT_SOP.md)
+
+## Union Eyes
+
+All Union Eyes docs for end users live in [union-eyes/](union-eyes/README.md).
+
+| Doc | For | Time |
+|---|---|---|
+| [Quick Start](union-eyes/quick-start.md) | Members & stewards | 2 min |
+| [User Guide](union-eyes/user-guide.md) | Members & stewards | 10 min |
+| [Admin Guide](union-eyes/admin-guide.md) | Pilot admins | 5 min |
+| [Pilot Overview](union-eyes/pilot-overview.md) | Everyone in the pilot | 5 min |
+| [Partner Overview](union-eyes/partner-overview.md) | Partners, lawyers, stakeholders | 10 min |
+| [FAQ](union-eyes/faq.md) | Anyone | 3 min |
+
+## CUPE Pilot Operations
+
+- [Admin Runbook](pilot/cupe/CUPE_PILOT_ADMIN_RUNBOOK.md) — Detailed procedures
+- [Support SOP](pilot/cupe/CUPE_PILOT_SUPPORT_SOP.md) — Issue triage and escalation
+- [Readiness Checklist](pilot/cupe/CUPE_READINESS_CHECKLIST.md) — Pre-launch validation
+- [RBAC Matrix](pilot/cupe/CUPE_RBAC_MATRIX.md) — Role permissions
+
+## Platform (developers)
+
+- [Golden Path](how-to/GOLDEN_PATH_DEVELOPER_GUIDE.md) — Developer onboarding
+- [Architecture](../ARCHITECTURE.md) — System design
+- [Stack Authority](architecture/STACK_AUTHORITY.md) — Technology standards
+- [Package Catalogue](reference/packages.md) — All packages
+- [Tutorials](tutorials/README.md) · [How-To Guides](how-to/README.md) · [Reference](reference/README.md) · [Explanation](explanation/README.md)
+
+## Runbooks
+
+All operational runbooks are in [`ops/runbooks/`](../ops/runbooks/):
+[Platform](../ops/runbooks/platform/) · [Numbered](../ops/runbooks/numbered/) · [Commerce](../ops/runbooks/commerce/) · [Security](../ops/runbooks/security/)
 
 ---
 
-## Documentation Map
+## Full Index
 
-### [Tutorials](tutorials/README.md)
-
-**Learning-oriented** — Walk through practical exercises to get started.
-
-| Tutorial | Audience | Time |
-|----------|----------|------|
-| [Your First App](tutorials/first-app.md) | New developer | 15 min |
-| [Adding AI to an App](tutorials/adding-ai.md) | Developer | 20 min |
-
-### [How-To Guides](how-to/README.md)
-
-**Task-oriented** — Step-by-step instructions for specific goals.
-
-| Guide | Category |
-|-------|----------|
-| [Rotate Secrets](how-to/rotate-secrets.md) | Security |
-| [Create Model Card](how-to/create-model-card.md) | AI Governance |
-
-### [Reference](reference/README.md)
-
-**Information-oriented** — Technical descriptions of the system.
-
-| Reference | Scope |
-|-----------|-------|
-| [Package Catalogue](reference/packages.md) | All packages |
-
-### [Explanation](explanation/README.md)
-
-**Understanding-oriented** — Discuss concepts and design decisions.
-
-| Topic | Domain |
-|-------|--------|
-| [Why Evidence-First](explanation/evidence-first.md) | Architecture |
-| [AI Risk Management](explanation/ai-risk-management.md) | AI Governance |
-
-### [Runbooks](../ops/runbooks/README.md)
-
-**Operational** — Incident response and operational procedures.
-
-All runbooks are consolidated in [`ops/runbooks/`](../ops/runbooks/):
-
-| Category | Location | Contents |
-|----------|----------|----------|
-| Platform incidents | [`ops/runbooks/platform/`](../ops/runbooks/platform/) | Orchestrator, integration, AI, event fabric, observability failures, secret compromise, SLO breach |
-| Numbered procedures | [`ops/runbooks/numbered/`](../ops/runbooks/numbered/) | DB pool exhaustion, DLQ backlog, provider outage, latency regression, error rate, org isolation, deployment failure, cert/secret expiry, hash chain integrity |
-| Commerce | [`ops/runbooks/commerce/`](../ops/runbooks/commerce/) | Audit gap, evidence pack, governance override, org isolation, saga compensation, stuck state |
-| Security | [`ops/runbooks/security/`](../ops/runbooks/security/) | Data breach, key rotation |
-
----
-
-## Architecture
-
-System design, boundaries, and technical strategy.
-
-| Document | Topic |
-|----------|-------|
-| [ARCHITECTURE.md](../ARCHITECTURE.md) | System architecture overview (root) |
-| [Architectural Layers](architecture/ARCHITECTURAL_LAYERS.md) | 4-layer model |
-| [Architectural Boundaries](architecture/ARCHITECTURAL_BOUNDARIES.md) | Layer boundary rules |
-| [Control Plane Architecture](architecture/CONTROL_PLANE_ARCHITECTURE.md) | Control plane design |
-| [Control Plane Principles](architecture/CONTROL_PLANE_PRINCIPLES.md) | Control plane tenets |
-| [Decision Layer Architecture](architecture/DECISION_LAYER_ARCHITECTURE.md) | Decision engine |
-| [AI Intelligence Layer](architecture/AI_INTELLIGENCE_LAYER.md) | AI subsystem design |
-| [AI Platform Contract](architecture/AI_PLATFORM_CONTRACT.md) | AI platform boundaries |
-| [Environment Architecture](architecture/ENVIRONMENT_ARCHITECTURE.md) | Env model |
-| [Domain vs Audit Model](architecture/DOMAIN_VS_AUDIT_MODEL.md) | Separation of concerns |
-| [Policy Engine](architecture/policy-engine.md) | RBAC & zero-trust |
-| [Stack Authority](architecture/STACK_AUTHORITY.md) | Technology authority |
-| [Stack Fragmentation Matrix](architecture/STACK_FRAGMENTATION_MATRIX.md) | Tech debt tracking |
-| [Org Isolation](architecture/ORG_ISOLATION.md) | Multi-org isolation |
-| [Org-Scoped Tables](architecture/ORG_SCOPED_TABLES.md) | Data isolation |
-| [Polyglot Persistence](architecture/POLYGLOT_PERSISTENCE.md) | Data layer strategy |
-| [Evidence Lifecycle](architecture/EVIDENCE_LIFECYCLE.md) | Audit evidence model |
-| [Platform Event Bus](architecture/platform-event-bus.md) | Event-driven architecture |
-| [Observability](architecture/observability.md) | Monitoring & tracing |
-| [Integration Control Plane](architecture/integration-control-plane.md) | Integration layer |
-| [Vertical Scaffolding](architecture/VERTICAL_SCAFFOLDING.md) | Vertical app patterns |
-| [Build Strategy](architecture/build-strategy.md) | Monorepo build approach |
-| [Multi-Product Operating Architecture](architecture/multi-product-operating-architecture.md) | Operating model |
-| [CTO Technical Strategy](architecture/tools-nzila-cto-technical-strategy-summary.md) | Strategy summary |
-| [Innovation & Future Tech](architecture/innovation-future-tech-investments-strategy.md) | R&D investments |
-
-## Governance
-
-Policy, compliance, lifecycle management, and decision frameworks.
-
-| Document | Topic |
-|----------|-------|
-| [Governance Architecture](governance/GOVERNANCE_ARCHITECTURE.md) | Governance overview |
-| [App Gold Standard](governance/APP_GOLD_STANDARD.md) | App quality bar |
-| [App Lifecycle Matrix](governance/APP_LIFECYCLE_MATRIX.md) | Tier classification |
-| [Package Lifecycle Policy](governance/PACKAGE_LIFECYCLE_POLICY.md) | Package management |
-| [Package Ownership](governance/PACKAGE_OWNERSHIP.md) | Ownership model |
-| [Platform Surface Responsibilities](governance/PLATFORM_SURFACE_RESPONSIBILITIES.md) | Surface boundaries |
-| [Platform vs App Decision Rule](governance/PLATFORM_VS_APP_DECISION_RULE.md) | Classification framework |
-| [Change Policy](governance/CHANGE_POLICY.md) | Change management |
-| [Change Calendar Model](governance/CHANGE_CALENDAR_MODEL.md) | Release cadence |
-| [Change Enablement Architecture](governance/CHANGE_ENABLEMENT_ARCHITECTURE.md) | Change enablement |
-| [Decision Policy Model](governance/DECISION_POLICY_MODEL.md) | Decision framework |
-| [Decision Review Workflow](governance/DECISION_REVIEW_WORKFLOW.md) | Review process |
-| [Contracts](governance/contracts.md) | Contract testing |
-| [Assurance Dashboard](governance/assurance-dashboard.md) | Compliance dashboard |
-| [Enterprise Readiness](governance/enterprise-readiness.md) | Enterprise checklist |
-| [Platform Readiness](governance/platform-readiness.md) | Platform GA readiness |
-| [Procurement Evidence System](governance/PROCUREMENT_EVIDENCE_SYSTEM.md) | Evidence generation |
-| [Procurement Pack](governance/procurement-pack.md) | Procurement artifacts |
-| [RFP Generator](governance/rfp-generator.md) | RFP response system |
-| [Architecture Governance Index](architecture/ARCHITECTURE_GOVERNANCE_INDEX.md) | Governance index |
-
-## Operations
-
-Deployment, incident response, and operational procedures.
-
-| Document | Topic |
-|----------|-------|
-| [Deployment Promotion Model](ops/DEPLOYMENT_PROMOTION_MODEL.md) | Promotion pipeline |
-| [Environment Operations](ops/ENVIRONMENT_OPERATIONS.md) | Env management |
-| [Disaster Recovery](ops/disaster-recovery.md) | DR plan |
-| [Incident Response](ops/incident-response.md) | Incident playbook |
-| [On-Call](ops/on-call.md) | On-call procedures |
-| [Deploy Profiles](deploy/profiles.md) | Deployment profiles |
-
-## SaaS & Platform Strategy
-
-| Document | Topic |
-|----------|-------|
-| [SaaS Enablement Architecture](architecture/SAAS_ENABLEMENT_ARCHITECTURE.md) | Multi-tenant SaaS strategy |
-| [Monetization Architecture](architecture/MONETIZATION_ARCHITECTURE.md) | Revenue model design |
-| [Platform Surface Model](platform/PLATFORM_SURFACE_MODEL.md) | Operating shell: Control Plane, Console, Admin |
-| [Org Commerce Configuration](commerce/ORG_COMMERCE_CONFIGURATION.md) | Per-org billing & commerce setup |
-| [Commercial Integration Report](commerce/COMMERCIAL_INTEGRATION_REPORT.md) | Integration status |
-| [App Domain Core Standard](architecture/APP_DOMAIN_CORE_STANDARD.md) | Internal app architecture pattern |
-| [Golden Path Developer Guide](how-to/GOLDEN_PATH_DEVELOPER_GUIDE.md) | Developer onboarding |
-| [Multi-Org Demo Flow](tutorials/MULTI_ORG_DEMO_FLOW.md) | Demo walkthrough |
-| [Union Eyes Current State](reference/UNION_EYES_CURRENT_STATE.md) | UE progress & status |
-| [Repo Operator Runbook](ops/REPO_OPERATOR_RUNBOOK.md) | Repository operations |
-
-## CUPE Pilot
-
-| Document | Topic |
-|----------|-------|
-| [Quick Start](pilot/cupe/CUPE_PILOTING_QUICK_START.md) | Getting started |
-| [Readiness Checklist](pilot/cupe/CUPE_READINESS_CHECKLIST.md) | Pre-launch validation |
-| [RBAC Matrix](pilot/cupe/CUPE_RBAC_MATRIX.md) | Role assignments |
-| [Admin Runbook](pilot/cupe/CUPE_PILOT_ADMIN_RUNBOOK.md) | Admin procedures |
-| [User Guide](pilot/cupe/CUPE_PILOT_USER_GUIDE.md) | End-user guide |
-| [Support SOP](pilot/cupe/CUPE_PILOT_SUPPORT_SOP.md) | Support procedures |
+For architecture, governance, operations, and SaaS strategy docs, see the [Doc Map](index/doc-map.md) and [Glossary](index/glossary.md).
 | [Go/No-Go Review](pilot/cupe/CUPE_PILOT_GO_NO_GO_REVIEW.md) | Launch gate review |
 | [Rollback Runbook](pilot/cupe/CUPE_PILOT_ROLLBACK_RUNBOOK.md) | Rollback procedures |
 | [Malware Control Boundary](pilot/cupe/CUPE_MALWARE_CONTROL_BOUNDARY.md) | Security boundary |

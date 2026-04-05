@@ -6,7 +6,7 @@ import AuthPageLayout from '@/components/auth/auth-page-layout';
 
 export const metadata: Metadata = {
   title: 'Sign In | Union Eyes',
-  description: 'Sign in to your Union Eyes account — AI-powered union management, grievance tracking, and member engagement.',
+  description: 'Sign in to your Union Eyes account — AI-powered union management, case tracking, and member engagement.',
 };
 
 const stats = [
@@ -20,7 +20,7 @@ export default function SignInPage() {
     <AuthPageLayout
       appName="Union Eyes"
       tagline="Empowering Unions with Intelligent Tools"
-      subtitle="AI-powered grievance management, claims processing, and member engagement — built with unions, not for unions."
+      subtitle="AI-powered case management, tracking, and member engagement — built with unions, not for unions."
       stats={stats}
       heroImage="https://images.unsplash.com/photo-1504328345606-18bbc8c9d7d1?w=1920&q=80"
       heroAlt="Workers gathered in a professional labor meeting — representing organized solidarity"

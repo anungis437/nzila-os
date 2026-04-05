@@ -154,7 +154,8 @@ export default function MemberPortalDashboard() {
         </CardHeader>
       </Card>
 
-      {/* Stats Grid */}
+      {/* Stats Grid — only shown when user has cases */}
+      {(stats?.totalClaims ?? 0) > 0 && (
       <div className="grid grid-cols-2 gap-4">
         <motion.div
           initial={{ opacity: 0, y: 20 }}
@@ -240,6 +241,7 @@ export default function MemberPortalDashboard() {
           </Card>
         </motion.div>
       </div>
+      )}
 
       {/* Pending Satisfaction Surveys */}
       {pendingSurveys.length > 0 && (
@@ -292,7 +294,8 @@ export default function MemberPortalDashboard() {
         </motion.div>
       )}
 
-      {/* Quick Actions */}
+      {/* Quick Actions — only shown when user has cases */}
+      {(stats?.totalClaims ?? 0) > 0 && (
       <Card>
         <CardHeader>
           <CardTitle>Quick Actions</CardTitle>
@@ -303,7 +306,7 @@ export default function MemberPortalDashboard() {
             <Link href="/portal/claims/new">
               <Button className="w-full" size="lg">
                 <FileText className="mr-2 h-5 w-5" />
-                Submit New Claim
+                Create Case
               </Button>
             </Link>
             <Link href="/portal/dues">
@@ -327,20 +330,21 @@ export default function MemberPortalDashboard() {
           </div>
         </CardContent>
       </Card>
+      )}
 
       {/* Recent Claims */}
       <Card>
         <CardHeader>
-          <CardTitle>Recent Claims</CardTitle>
-          <CardDescription>Your latest submissions and their status</CardDescription>
+          <CardTitle>Recent Cases</CardTitle>
+          <CardDescription>Your latest cases and their status</CardDescription>
         </CardHeader>
         <CardContent>
           {recentClaims.length === 0 ? (
             <div className="text-center py-12 text-gray-500">
               <FileText className="mx-auto h-12 w-12 mb-4 opacity-50" />
-              <p>No claims submitted yet</p>
+              <p>No cases submitted yet</p>
               <Link href="/portal/claims/new">
-                <Button className="mt-4">Submit Your First Claim</Button>
+                <Button className="mt-4">Create Your First Case</Button>
               </Link>
             </div>
           ) : (

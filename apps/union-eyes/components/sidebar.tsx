@@ -57,6 +57,7 @@ import { useState, useEffect, useCallback } from "react";
  
  
 import { useOrganization } from "@/contexts/organization-context";
+import { usePilotMode } from "@/contexts/pilot-mode-context";
 
 // ── Nzila platform roles (super-org level — no union nav) ────────────────────
 const NZILA_ROLES = [
@@ -145,6 +146,7 @@ export default function Sidebar({ profile: _profile, userEmail, whopMonthlyPlanI
   const t = useTranslations();
   const [isMounted, setIsMounted] = useState(false);
   const { organizationId, organization } = useOrganization();
+  const { isPilotMode } = usePilotMode();
 
   useEffect(() => { setIsMounted(true); }, []);
 
@@ -393,6 +395,25 @@ export default function Sidebar({ profile: _profile, userEmail, whopMonthlyPlanI
     // Always append system section
     sections = [...sections, ...systemSection];
 
+    // ── Pilot-mode whitelist ─────────────────────────────────────────────
+    // When pilot mode is active for a union-level user, reduce the sidebar
+    // to only the essentials: Dashboard, My Cases, Create Case, and Settings.
+    const pilotAllowedPaths = new Set([
+      `/${locale}/dashboard`,
+      `/${locale}/dashboard/claims`,
+      `/${locale}/dashboard/claims/new`,
+      `/${locale}/dashboard/messages`,
+      `/${locale}/dashboard/settings`,
+      `/${locale}/dashboard/profile`,
+    ]);
+
+    if (isPilotMode && !isNzila) {
+      sections = sections.map(section => ({
+        ...section,
+        items: section.items.filter(item => pilotAllowedPaths.has(item.href)),
+      }));
+    }
+
     // Filter by effective role
     return sections
       .map(section => ({
@@ -401,7 +422,7 @@ export default function Sidebar({ profile: _profile, userEmail, whopMonthlyPlanI
       }))
       .filter(section => section.items.length > 0 && section.roles.includes(effectiveRole));
   // eslint-disable-next-line react-hooks/exhaustive-deps
-  }, [userRole, isNzila, isViewingTenantOrg, hasSelectedOrg, locale, organization]);
+  }, [userRole, isNzila, isViewingTenantOrg, hasSelectedOrg, locale, organization, isPilotMode]);
 
   const visibleSections = buildSections();
 

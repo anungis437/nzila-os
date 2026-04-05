@@ -21,6 +21,7 @@
  */
 
 import twilio from 'twilio';
+import { Redis } from '@upstash/redis';
 import { db } from '@/db';
 import { eq, and, sql } from 'drizzle-orm';
 import {
@@ -29,11 +30,18 @@ import {
   smsCampaigns,
   smsConversations,
   smsOptOuts,
-  smsRateLimits,
   type NewSmsConversation,
 } from '@/db/schema/domains/communications';
 import { organizations } from '@/db/schema-organizations';
 import { logger } from '@/lib/logger';
+
+// Redis client for rate limiting (eliminates 3 DB queries per SMS send)
+const redis = process.env.UPSTASH_REDIS_REST_URL && process.env.UPSTASH_REDIS_REST_TOKEN
+  ? new Redis({
+      url: process.env.UPSTASH_REDIS_REST_URL,
+      token: process.env.UPSTASH_REDIS_REST_TOKEN,
+    })
+  : null;
 
 // ============================================================================
 // CONFIGURATION
@@ -174,55 +182,31 @@ export async function isPhoneOptedOut(
 }
 
 /**
- * Check rate limit for org
+ * Check rate limit for org (Redis-backed, O(1) per call)
  */
 async function checkRateLimit(organizationId: string): Promise<boolean> {
-  const now = new Date();
-  const windowStart = new Date(now.getTime() - RATE_LIMIT_WINDOW_MINUTES * 60 * 1000);
-
-  const [rateLimit] = await db
-    .select()
-    .from(smsRateLimits)
-    .where(
-      and(
-        eq(smsRateLimits.organizationId, organizationId),
-        sql`${smsRateLimits.windowStart} >= ${windowStart}`
-      )
-    )
-    .limit(1);
-
-  if (!rateLimit) {
-    // Create new rate limit window
-    await db.insert(smsRateLimits).values({
-      organizationId,
-      messagesSent: 0,
-      windowStart: now,
-      windowEnd: new Date(now.getTime() + RATE_LIMIT_WINDOW_MINUTES * 60 * 1000),
-    });
+  if (!redis) {
+    logger.warn('Redis not configured — SMS rate limiting disabled');
     return true;
   }
 
-  return (rateLimit.messagesSent ?? 0) < RATE_LIMIT_MESSAGES_PER_MINUTE;
+  const key = `sms:rate:${organizationId}`;
+  const count = await redis.get<number>(key);
+  return (count ?? 0) < RATE_LIMIT_MESSAGES_PER_MINUTE;
 }
 
 /**
- * Increment rate limit counter
+ * Increment rate limit counter (Redis INCR with auto-expire)
  */
 async function incrementRateLimit(organizationId: string): Promise<void> {
-  const now = new Date();
-  const windowStart = new Date(now.getTime() - RATE_LIMIT_WINDOW_MINUTES * 60 * 1000);
+  if (!redis) return;
 
-  await db
-    .update(smsRateLimits)
-    .set({
-      messagesSent: sql`${smsRateLimits.messagesSent} + 1`,
-    })
-    .where(
-      and(
-        eq(smsRateLimits.organizationId, organizationId),
-        sql`${smsRateLimits.windowStart} >= ${windowStart}`
-      )
-    );
+  const key = `sms:rate:${organizationId}`;
+  const pipeline = redis.pipeline();
+  pipeline.incr(key);
+  // Set TTL only if this is a new key (avoids resetting the window)
+  pipeline.expire(key, RATE_LIMIT_WINDOW_MINUTES * 60, 'NX');
+  await pipeline.exec();
 }
 
 /**

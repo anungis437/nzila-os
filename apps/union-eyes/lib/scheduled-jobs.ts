@@ -17,7 +17,35 @@ import { warmAnalyticsCache, getAnalyticsCacheStats } from '@/lib/analytics-midd
 import { db } from '@/db';
 import { claims } from '@/db/schema/domains/claims';
 import { sql } from 'drizzle-orm';
+import { Redis } from '@upstash/redis';
 import { logger } from './logger';
+
+// Redis client for distributed locking (ensures only one replica runs each job)
+const redis = process.env.UPSTASH_REDIS_REST_URL && process.env.UPSTASH_REDIS_REST_TOKEN
+  ? new Redis({
+      url: process.env.UPSTASH_REDIS_REST_URL,
+      token: process.env.UPSTASH_REDIS_REST_TOKEN,
+    })
+  : null;
+
+/**
+ * Acquire a distributed lock via Redis SET NX EX.
+ * Returns true if the lock was acquired.
+ */
+async function acquireLock(jobName: string, ttlSeconds: number): Promise<boolean> {
+  if (!redis) return true; // No Redis → single-instance mode, always run
+  const key = `cron:lock:${jobName}`;
+  const result = await redis.set(key, Date.now().toString(), { nx: true, ex: ttlSeconds });
+  return result === 'OK';
+}
+
+/**
+ * Release a distributed lock.
+ */
+async function releaseLock(jobName: string): Promise<void> {
+  if (!redis) return;
+  await redis.del(`cron:lock:${jobName}`);
+}
 interface JobConfig {
   name: string;
   schedule: string; // Cron expression
@@ -169,14 +197,23 @@ export const analyticsJobs: JobConfig[] = [
 ];
 
 /**
- * Execute a scheduled job with consistent start/failure logging.
+ * Execute a scheduled job with distributed locking and consistent logging.
+ * Lock TTL defaults to 10 minutes — prevents stuck locks from blocking next runs.
  */
-export async function runScheduledJob(job: Pick<JobConfig, 'name' | 'handler'>): Promise<void> {
+export async function runScheduledJob(job: Pick<JobConfig, 'name' | 'handler'>, lockTtl = 600): Promise<void> {
+  const acquired = await acquireLock(job.name, lockTtl);
+  if (!acquired) {
+    logger.info('CRON: Skipping job (another replica holds the lock)', { jobName: job.name });
+    return;
+  }
+
   logger.info('CRON: Starting job', { jobName: job.name });
   try {
     await job.handler();
   } catch (error) {
     logger.error('CRON: Job failed', error, { jobName: job.name });
+  } finally {
+    await releaseLock(job.name);
   }
 }
 

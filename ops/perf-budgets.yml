@@ -28,7 +28,7 @@ environments:
     enabled: true
     mode: "enforce"    # hard gate in pilot
   prod:
-    enabled: false     # flip to true when ready for prod gate
+    enabled: true      # enforced — blocks deploy on regression
     mode: "enforce"
 
 # ── Global budgets ─────────────────────────────────────────────────────────

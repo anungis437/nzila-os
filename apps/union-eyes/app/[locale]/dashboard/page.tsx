@@ -18,12 +18,16 @@ import { useUser } from "@clerk/nextjs";
 import { useEffect, useState } from "react";
 import { UserRole } from "@/lib/auth/roles";
 import { useOrganization } from "@/contexts/organization-context";
+import { usePilotMode } from "@/contexts/pilot-mode-context";
 import {
   NzilaOpsDashboard,
   CLCDashboard,
   FederationDashboard,
   UnionDashboard,
 } from "@/components/dashboards";
+import PilotDashboard from "@/components/dashboards/pilot-dashboard";
+import PilotOnboardingWizard from "@/components/onboarding/pilot-onboarding-wizard";
+import { PilotHelpTooltip } from "@/components/pilot/pilot-help-tooltip";
 
 // -- Role-tier classification -------------------------------------------------
 
@@ -87,9 +91,11 @@ function orgTypeToDashboardTier(orgType: string | undefined): DashboardTier {
 export default function DashboardPage() {
   const { user } = useUser();
   const { organizationId, organization, isLoading: orgLoading } = useOrganization();
+  const { isPilotMode, hasCompletedOnboarding } = usePilotMode();
   const [mounted, setMounted] = useState(false);
   const [tier, setTier] = useState<DashboardTier | null>(null);
   const [isPlatformViewer, setIsPlatformViewer] = useState(false);
+  const [showOnboarding, setShowOnboarding] = useState(false);
 
   // eslint-disable-next-line react-hooks/set-state-in-effect
   useEffect(() => { setMounted(true); }, []);
@@ -154,6 +160,9 @@ export default function DashboardPage() {
     );
   }
 
+  // Pilot onboarding wizard — show on first visit for union-tier pilot users
+  const shouldShowOnboarding = isPilotMode && tier === "union" && !isPlatformViewer && !hasCompletedOnboarding;
+
   // Platform admin viewing org — show admin banner + org dashboard
   const adminBanner = isPlatformViewer && organization ? (
     <div className="mx-6 mt-6 mb-0 flex items-center gap-3 rounded-lg border border-blue-200 bg-blue-50 px-4 py-3 text-sm text-blue-800">
@@ -176,14 +185,22 @@ export default function DashboardPage() {
         return <FederationDashboard isPlatformViewer={isPlatformViewer} />;
       case "union":
       default:
-        return <UnionDashboard isPlatformViewer={isPlatformViewer} />;
+        return isPilotMode && !isPlatformViewer
+          ? <PilotDashboard />
+          : <UnionDashboard isPlatformViewer={isPlatformViewer} />;
     }
   })();
 
   return (
     <>
+      {shouldShowOnboarding && (
+        <PilotOnboardingWizard onComplete={() => setShowOnboarding(false)} />
+      )}
       {adminBanner}
       {dashboard}
+      {isPilotMode && tier === "union" && !isPlatformViewer && (
+        <PilotHelpTooltip helpKey="dashboardHelp" />
+      )}
     </>
   );
 }

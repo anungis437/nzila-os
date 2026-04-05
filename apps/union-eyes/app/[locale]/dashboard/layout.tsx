@@ -13,6 +13,7 @@ import { OrganizationSelector } from "@/components/organization/organization-sel
 import { OrganizationBreadcrumb } from "@/components/organization/organization-breadcrumb";
 import LanguageSwitcher from "@/components/language-switcher";
 import { HeaderActions } from "@/components/header-actions";
+import { PilotModeProvider } from "@/contexts/pilot-mode-context";
 import { logger } from "@/lib/logger";
 import { getOrganizationIdForUser, DEFAULT_ORGANIZATION_ID } from "@/lib/organization-utils";
 import { getUserRole } from "@/lib/auth/rbac-server";
@@ -150,6 +151,7 @@ export default async function DashboardLayout({ children }: { children: ReactNod
   });
 
   return (
+    <PilotModeProvider>
     <div className="flex h-screen bg-gray-50 relative overflow-hidden">
       {/* Credits system disabled — no credit checks needed */}
       {/* Welcome popup disabled — users cannot manage plans or credits */}
@@ -190,5 +192,6 @@ export default async function DashboardLayout({ children }: { children: ReactNod
           </div>
         </div>
       </div>
+    </PilotModeProvider>
   );
 } 

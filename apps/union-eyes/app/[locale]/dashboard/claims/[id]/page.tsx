@@ -11,6 +11,7 @@ import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card';
 import { FileUpload } from '@/components/file-upload';
 import { Button } from '@/components/ui/button';
 import { ClaimJurisdictionInfo } from '@/components/claims/claim-jurisdiction-info';
+import { usePilotTracking } from '@/lib/hooks/use-pilot-tracking';
 import Link from 'next/link';
 
 interface Claim {
@@ -76,6 +77,7 @@ export default function ClaimDetailPage() {
   const params = useParams();
   const _router = useRouter();
   const claimId = params.id as string;
+  const { trackCaseViewed } = usePilotTracking();
   
   const [claim, setClaim] = useState<Claim | null>(null);
   const [loading, setLoading] = useState(true);
@@ -98,6 +100,7 @@ export default function ClaimDetailPage() {
         // withApi wraps in { success, data: { data: row }, timestamp }
         const claimData = data?.data?.data ?? data?.data ?? data?.claim ?? data;
         setClaim(claimData);
+        trackCaseViewed(claimData?.claimId ?? claimId);
         
         // Fetch workflow history
         try {

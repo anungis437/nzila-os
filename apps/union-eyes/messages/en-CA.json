@@ -2126,6 +2126,65 @@
     "needHelp": "Need Help?",
     "supportMessage": "Our union representatives are here to support you. Submit a case using voice input, check your agreements, or reach out to your representative for guidance."
   },
+  "pilot": {
+    "dashboard": {
+      "subtitle": "Here's what's happening with your cases today.",
+      "myCasesHint": "View and track all your submitted cases",
+      "createCase": "Create a New Case",
+      "createCaseHint": "Report a workplace issue — we'll guide you step by step",
+      "startNow": "Start now",
+      "emptyTitle": "Track your cases so nothing gets missed",
+      "emptyDescription": "Create a case and your steward will be notified automatically.",
+      "createFirstCase": "Create Your First Case",
+      "resolvedLabel": "Cases Resolved",
+      "teamLabel": "Your Team",
+      "yourTeamReady": "Ready",
+      "activityHint": "Actions taken on your cases will appear here",
+      "noActivityYet": "No activity yet",
+      "activityWillAppear": "Once you create a case, updates will show here.",
+      "companionTitle": "We're here to help",
+      "companionMessage": "This system is built for you. Everything you submit is private between you and your representative. Take your time — there's no rush."
+    },
+    "onboarding": {
+      "welcomeTitle": "Welcome to Union Eyes",
+      "welcomeSubtitle": "Let's get you set up in under 2 minutes.",
+      "step1Title": "Welcome",
+      "step1Description": "Union Eyes helps you track workplace issues, communicate with your representative, and stay informed about your union.",
+      "step2Title": "Your Information",
+      "step2Description": "We'll use this to route your cases to the right representative.",
+      "step3Title": "What You Can Do",
+      "step3Description": "Here's what's available to you:",
+      "step3Feature1": "Create a case about a workplace issue",
+      "step3Feature2": "Track the progress of your cases",
+      "step3Feature3": "Message your representative directly",
+      "step4Title": "You're All Set!",
+      "step4Description": "Your first step: click the green Create Case card on your dashboard.",
+      "skipLabel": "Skip for now",
+      "nextStep": "Next",
+      "prevStep": "Back",
+      "getStarted": "Go to Dashboard",
+      "stepOf": "Step {current} of {total}",
+      "departmentLabel": "Department",
+      "departmentPlaceholder": "e.g. Maintenance, Clerical, Operations",
+      "shiftLabel": "Shift",
+      "shiftPlaceholder": "e.g. Day, Evening, Night",
+      "locationLabel": "Work Location",
+      "locationPlaceholder": "e.g. Downtown Office, Plant A"
+    },
+    "support": {
+      "helpTitle": "Need help?",
+      "helpDescription": "Click here to see what you can do on this page.",
+      "whatIsThis": "What is this page?",
+      "tipPrefix": "Tip:",
+      "dashboardHelp": "This is your home base. You can see your cases and create new ones from here.",
+      "casesHelp": "This is where all your submitted cases live. Click any case to see details and updates.",
+      "newCaseHelp": "Fill out the form to report a workplace issue. Your representative will be notified right away.",
+      "errorRecovery": "Something went wrong. Try refreshing the page, or contact your representative for help.",
+      "feedbackPositive": "Great job! Your case has been submitted successfully.",
+      "feedbackNeutral": "Your changes have been saved.",
+      "nextStepHint": "What would you like to do next?"
+    }
+  },
   "placeholders": {
     "enterText": "Enter text...",
     "selectOption": "Select an option",
@@ -2177,7 +2236,8 @@
     "howAffected": "How this affected you or others",
     "submitCase": "Create Case",
     "submitting": "Creating...",
-    "privacyNotice": "Your case will be reviewed confidentially by your union representative. You'll receive updates via email at"
+    "privacyNotice": "Your case will be reviewed confidentially by your union representative. You'll receive updates via email at",
+    "editAnytime": "You can update this anytime after creating."
   },
   "sidebar": {
     "yourUnion": "Your Union",

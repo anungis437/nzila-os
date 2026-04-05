@@ -97,6 +97,11 @@
   "mssql.linting.enable": false,
   "vitest.disableWorkspaceWarning": true,
 
+  // ── Spell Checker ──────────────────────────────────────
+  "cSpell.words": [
+    "CUPE"
+  ],
+
   // ── YAML / Docker Compose ──────────────────────────────
   // Pin the Compose schema to the correct URL (the extension's default
   // uses a stale /master/ path that fails to resolve).

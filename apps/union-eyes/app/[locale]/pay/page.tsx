@@ -111,7 +111,7 @@ setError('An unexpected error occurred. Please try again.');
   // Benefits list
   const benefits = [
     "1,000 AI credits per billing cycle",
-    "AI-powered grievance triage & drafting",
+    "AI-powered case triage & drafting",
     "Precedent research & CBA extraction",
     "Full claims & arbitration toolkit",
     "Multi-role team collaboration",

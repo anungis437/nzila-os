@@ -1,6 +1,8 @@
 # CUPE Pilot Admin Runbook
 
 > Operational guide for pilot administrators running Union-Eyes.
+>
+> **See also:** [Admin Guide](../../union-eyes/admin-guide.md) · [Pilot Overview](../../union-eyes/pilot-overview.md)
 
 ## Daily Checks
 

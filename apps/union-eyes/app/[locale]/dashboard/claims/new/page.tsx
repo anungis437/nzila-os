@@ -24,6 +24,8 @@ import {
 } from "lucide-react";
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import { useToast } from "@/components/ui/use-toast";
+import { usePilotTracking } from "@/lib/hooks/use-pilot-tracking";
+import { incrementPilotCaseCount } from "@/components/pilot/pilot-feedback-widget";
 import Link from "next/link";
 
 type CasePriority = "low" | "medium" | "high" | "urgent";
@@ -34,6 +36,7 @@ export default function NewClaimPage() {
   const router = useRouter();
   const { user } = useUser();
   const { toast } = useToast();
+  const { trackCaseCreated } = usePilotTracking();
 
   const categories = [
     { key: "wageHour", label: t('categories.wageHour'), original: "Wage & Hour" },
@@ -241,6 +244,10 @@ alert('Unable to access microphone. Please ensure you have granted permission.')
 
       const result = await response.json();
       const claimId = result.data.claimId;
+
+      // Track for pilot observability + feedback widget
+      trackCaseCreated(claimId);
+      incrementPilotCaseCount();
 
       // Upload files if any
       if (formData.documents.length > 0) {
@@ -612,6 +619,7 @@ setIsSubmitting(false);
                     </button>
                   </Link>
                 </div>
+                <p className="text-xs text-gray-400 text-center pt-1">{t('forms.editAnytime')}</p>
               </form>
             </CardContent>
           </Card>

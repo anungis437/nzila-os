@@ -14,7 +14,7 @@ export const claimsManagementTour: TourStep[] = [
     element: '#claims-nav',
     popover: {
       title: 'Claims Management',
-      description: 'Navigate all member grievances and claims here. Track status, assign cases, and manage resolutions.',
+      description: 'Navigate all member cases here. Track status, assign cases, and manage resolutions.',
       side: 'right',
       align: 'start',
     },
@@ -22,8 +22,8 @@ export const claimsManagementTour: TourStep[] = [
   {
     element: '#new-claim-button',
     popover: {
-      title: 'Create New Claim',
-      description: 'Click here to file a new grievance or claim on behalf of a member.',
+      title: 'Create Case',
+      description: 'Click here to create a new case on behalf of a member.',
       side: 'bottom',
     },
   },
@@ -31,15 +31,15 @@ export const claimsManagementTour: TourStep[] = [
     element: '#claims-filters',
     popover: {
       title: 'Filter & Search',
-      description: 'Filter claims by status, priority, type, or assignee. Use the search bar to find specific claims quickly.',
+      description: 'Filter cases by status, priority, type, or assignee. Use the search bar to find specific cases quickly.',
       side: 'left',
     },
   },
   {
     element: '#claims-table',
     popover: {
-      title: 'Claims List',
-      description: 'View all claims with key details. Click any row to see full claim details and take action.',
+      title: 'Cases List',
+      description: 'View all cases with key details. Click any row to see full case details and take action.',
       side: 'top',
     },
   },
@@ -293,7 +293,7 @@ export const tourMetadata = [
   {
     id: 'claims-management',
     name: 'Claims Management',
-    description: 'Learn how to manage grievances and claims',
+    description: 'Learn how to manage and track cases',
     steps: claimsManagementTour.length,
     estimatedTime: '2 min',
   },

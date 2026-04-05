@@ -257,6 +257,11 @@ export const features = {
   // Admin Features
   auditLogExport: new BooleanFlag('audit-log-export', true),
   bulkOperations: new BooleanFlag('bulk-operations', true),
+
+  // Pilot Mode — when enabled, hides advanced features and shows a
+  // simplified UX for new pilot deployments.  Default ON so fresh
+  // tenants start with reduced surface area.
+  pilotMode: new OrgFlag('pilot-mode', true),
 } as const;
 
 /**

@@ -35,7 +35,7 @@ export default async function PortalLayout({
   const navItems = [
     { href: `/${locale}/portal`, label: "Dashboard", icon: Home },
     { href: `/${locale}/portal/profile`, label: "My Profile", icon: User },
-    { href: `/${locale}/portal/claims`, label: "My Claims", icon: FileText },
+    { href: `/${locale}/portal/claims`, label: "My Cases", icon: FileText },
     { href: `/${locale}/portal/documents`, label: "Documents", icon: FolderOpen },
     { href: `/${locale}/portal/dues`, label: "Dues & Payments", icon: DollarSign },
     { href: `/${locale}/portal/messages`, label: "Messages", icon: MessageSquare },

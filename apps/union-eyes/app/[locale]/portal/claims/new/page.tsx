@@ -82,18 +82,18 @@ export default function NewClaimPage() {
             )}
 
             <div>
-              <Label htmlFor="claimType">Claim Type *</Label>
+              <Label htmlFor="claimType">Case Type *</Label>
               <Select
                 value={formData.claimType}
                 onValueChange={(value) => setFormData({ ...formData, claimType: value })}
               >
                 <SelectTrigger>
-                  <SelectValue placeholder="Select claim type" />
+                  <SelectValue placeholder="Select case type" />
                 </SelectTrigger>
                 <SelectContent>
-                  <SelectItem value="grievance_discipline">Disciplinary Action (Grievance)</SelectItem>
-                  <SelectItem value="grievance_schedule">Scheduling Dispute (Grievance)</SelectItem>
-                  <SelectItem value="grievance_pay">Pay Dispute (Grievance)</SelectItem>
+                  <SelectItem value="grievance_discipline">Disciplinary Action</SelectItem>
+                  <SelectItem value="grievance_schedule">Scheduling Dispute</SelectItem>
+                  <SelectItem value="grievance_pay">Pay Dispute</SelectItem>
                   <SelectItem value="workplace_safety">Workplace Safety</SelectItem>
                   <SelectItem value="discrimination_age">Discrimination — Age</SelectItem>
                   <SelectItem value="discrimination_gender">Discrimination — Gender</SelectItem>
@@ -161,12 +161,13 @@ export default function NewClaimPage() {
               <Label htmlFor="desiredOutcome">Desired Outcome *</Label>
               <Textarea
                 id="desiredOutcome"
-                placeholder="What outcome are you seeking?"
+                placeholder="What outcome are you seeking? (e.g., policy change, back pay, reinstatement)"
                 value={formData.desiredOutcome}
                 onChange={(e) => setFormData({ ...formData, desiredOutcome: e.target.value })}
                 rows={3}
                 required
               />
+              <p className="text-xs text-gray-400 mt-1">Don&apos;t worry — you can change this later.</p>
             </div>
 
             <div className="space-y-3">
@@ -202,6 +203,7 @@ export default function NewClaimPage() {
                 Cancel
               </Button>
             </div>
+            <p className="text-xs text-gray-400 text-center mt-2">You can update this anytime after creating.</p>
           </form>
         </CardContent>
       </Card>
