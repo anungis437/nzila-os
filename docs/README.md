@@ -47,17 +47,6 @@ All operational runbooks are in [`ops/runbooks/`](../ops/runbooks/):
 ## Full Index
 
 For architecture, governance, operations, and SaaS strategy docs, see the [Doc Map](index/doc-map.md) and [Glossary](index/glossary.md).
-
-## CUPE Pilot
-
-| Document | Topic |
-|----------|-------|
-| [Quick Start](pilot/cupe/CUPE_PILOTING_QUICK_START.md) | Getting started |
-| [Readiness Checklist](pilot/cupe/CUPE_READINESS_CHECKLIST.md) | Pre-launch validation |
-| [RBAC Matrix](pilot/cupe/CUPE_RBAC_MATRIX.md) | Role assignments |
-| [Admin Runbook](pilot/cupe/CUPE_PILOT_ADMIN_RUNBOOK.md) | Admin procedures |
-| [User Guide](pilot/cupe/CUPE_PILOT_USER_GUIDE.md) | End-user guide |
-| [Support SOP](pilot/cupe/CUPE_PILOT_SUPPORT_SOP.md) | Support procedures |
 | [Go/No-Go Review](pilot/cupe/CUPE_PILOT_GO_NO_GO_REVIEW.md) | Launch gate review |
 | [Rollback Runbook](pilot/cupe/CUPE_PILOT_ROLLBACK_RUNBOOK.md) | Rollback procedures |
 | [Malware Control Boundary](pilot/cupe/CUPE_MALWARE_CONTROL_BOUNDARY.md) | Security boundary |

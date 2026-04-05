@@ -7,6 +7,13 @@
  *
  * Each event captures: userId, orgId, sessionId, timestamp.
  * Used by metrics, friction detection, and champion signal services.
+ *
+ * Event → Business Meaning:
+ *   session_started      → reach        (user opened the app)
+ *   first_case_created   → activation   (user completed the core action for the first time)
+ *   first_update_added   → engagement   (user returned and interacted with their case)
+ *   case_created (≥2)    → adoption     (user treats the system as their default tool)
+ *   case_viewed          → retention    (user checks status without prompting)
  */
 
 import { db } from "@/db";
