@@ -565,7 +565,7 @@ const checkCodeOwners = runGate('CODEOWNERS', 'CODEOWNERS: Governance files have
   }
 })
 
-const checkAuthMiddleware = runGate('AUTH-MIDDLEWARE', 'Auth middleware: All apps have Clerk middleware', 'org-boundary', () => {
+const checkAuthMiddleware = runGate('AUTH-MIDDLEWARE', 'Auth middleware: All apps have auth middleware', 'org-boundary', () => {
   const violations: string[] = []
 
   for (const appDir of APP_DIRS) {
@@ -576,15 +576,16 @@ const checkAuthMiddleware = runGate('AUTH-MIDDLEWARE', 'Auth middleware: All app
     }
 
     const content = readFileSync(mwPath, 'utf-8')
-    if (!content.includes('clerkMiddleware')) {
-      violations.push(`${appDir}: middleware.ts missing clerkMiddleware`)
+    const hasAuth = content.includes('@nzila/platform-auth') || content.includes('clerkMiddleware')
+    if (!hasAuth) {
+      violations.push(`${appDir}: middleware.ts missing auth middleware`)
     }
   }
 
   return {
     status: violations.length === 0 ? 'PASS' : 'FAIL',
     details: violations.length === 0
-      ? `All ${APP_DIRS.length} apps have Clerk auth middleware`
+      ? `All ${APP_DIRS.length} apps have auth middleware`
       : `${violations.length} app(s) missing auth middleware`,
     violations,
   }

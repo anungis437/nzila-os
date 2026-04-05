@@ -1,6 +1,6 @@
 {
-  "timestamp": "2026-04-02T13:15:51.529Z",
-  "commitSha": "e8731ef8",
+  "timestamp": "2026-04-05T16:14:40.861Z",
+  "commitSha": "8f914039",
   "overall": "PASS",
   "summary": {
     "total": 23,
@@ -14,14 +14,14 @@
       "status": "PASS",
       "details": "All 4 apps clean — no raw DB imports",
       "violations": [],
-      "durationMs": 1317
+      "durationMs": 1324
     },
     {
       "id": "ORG-REGISTRY",
       "name": "Org boundary: Org-scoped registry exists and consistent",
       "status": "PASS",
       "details": "Org-scoped registry present with both ORG_SCOPED_TABLES and NON_ORG_SCOPED_TABLES",
-      "durationMs": 0
+      "durationMs": 1
     },
     {
       "id": "HASH-CHAIN",
@@ -35,15 +35,15 @@
       "name": "Governance profiles: Registry exists + validation",
       "status": "PASS",
       "details": "Profile registry with immutable controls + validation",
-      "durationMs": 1
+      "durationMs": 0
     },
     {
       "id": "AUTH-MIDDLEWARE",
-      "name": "Auth middleware: All apps have Clerk middleware",
+      "name": "Auth middleware: All apps have auth middleware",
       "status": "PASS",
-      "details": "All 4 apps have Clerk auth middleware",
+      "details": "All 4 apps have auth middleware",
       "violations": [],
-      "durationMs": 0
+      "durationMs": 1
     },
     {
       "id": "AUDITED-WRITES",
@@ -51,7 +51,7 @@
       "status": "PASS",
       "details": "All apps use withAudit in API guards",
       "violations": [],
-      "durationMs": 1
+      "durationMs": 0
     },
     {
       "id": "AUDIT-MANDATORY",
@@ -72,7 +72,7 @@
       "name": "Evidence: governance workflow includes verifySeal step",
       "status": "PASS",
       "details": "Governance workflow includes evidence seal verification",
-      "durationMs": 0
+      "durationMs": 1
     },
     {
       "id": "EVIDENCE-ARTIFACTS",
@@ -80,7 +80,7 @@
       "status": "PASS",
       "details": "pack.json + seal.json + sbom all uploaded as CI artifacts",
       "violations": [],
-      "durationMs": 1
+      "durationMs": 0
     },
     {
       "id": "VERTICAL-EVIDENCE-WIRED",
@@ -96,7 +96,7 @@
       "status": "PASS",
       "details": "All 5 required CI checks present in workflows",
       "violations": [],
-      "durationMs": 5
+      "durationMs": 6
     },
     {
       "id": "CI-GOVERNANCE-WF",
@@ -111,7 +111,7 @@
       "status": "PASS",
       "details": "Trivy FS blocking scan present (exit-code: 1) in CI workflows",
       "violations": [],
-      "durationMs": 0
+      "durationMs": 1
     },
     {
       "id": "NO-OR-TRUE-GATES",
@@ -127,14 +127,14 @@
       "status": "PASS",
       "details": "All 4 apps enforce 3 boundary rules",
       "violations": [],
-      "durationMs": 1
+      "durationMs": 0
     },
     {
       "id": "CONTRACT-TESTS",
       "name": "Contract tests: ≥20 test files exist",
       "status": "PASS",
-      "details": "165 contract test files (require ≥20)",
-      "durationMs": 3
+      "details": "178 contract test files (require ≥20)",
+      "durationMs": 4
     },
     {
       "id": "CODEOWNERS",
@@ -149,14 +149,14 @@
       "name": "Red-team: Nightly red-team workflow exists",
       "status": "PASS",
       "details": "Red-team nightly workflow with schedule trigger present",
-      "durationMs": 1
+      "durationMs": 0
     },
     {
       "id": "RED-TEAM-EVIDENCE",
       "name": "Red-team: Outputs included as evidence artifacts",
       "status": "PASS",
       "details": "Red-team outputs uploaded as artifacts, test files present",
-      "durationMs": 0
+      "durationMs": 1
     },
     {
       "id": "STUDIO-PLATFORM-SCORE",
@@ -164,7 +164,7 @@
       "status": "PASS",
       "details": "All 17 apps score ≥ 7/10 on platform integration",
       "violations": [],
-      "durationMs": 9
+      "durationMs": 7
     },
     {
       "id": "STUDIO-AI-CLAIMS",
@@ -180,7 +180,7 @@
       "status": "PASS",
       "details": "No in-memory Map stores used as primary persistence in app code",
       "violations": [],
-      "durationMs": 2742
+      "durationMs": 1604
     }
   ],
   "environment": {
@@ -189,5 +189,5 @@
     "ci": false,
     "cwd": "C:\\APPS\\nzila-automation"
   },
-  "totalDurationMs": 4198
+  "totalDurationMs": 3048
 }

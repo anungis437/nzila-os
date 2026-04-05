@@ -414,7 +414,7 @@ gate('VERTICAL-MODULES: UE, ABR, FIN modules exist', () => {
 
 // ── 15. Middleware — All apps have auth middleware ──────────────────────────
 
-gate('AUTH-MIDDLEWARE: All apps have Clerk middleware', () => {
+gate('AUTH-MIDDLEWARE: All apps have auth middleware', () => {
   const violations: string[] = []
 
   for (const appDir of APP_DIRS) {
@@ -425,15 +425,16 @@ gate('AUTH-MIDDLEWARE: All apps have Clerk middleware', () => {
     }
 
     const content = readFileSync(mwPath, 'utf-8')
-    if (!content.includes('clerkMiddleware')) {
-      violations.push(`${appDir}: middleware.ts missing clerkMiddleware`)
+    const hasAuth = content.includes('@nzila/platform-auth') || content.includes('clerkMiddleware')
+    if (!hasAuth) {
+      violations.push(`${appDir}: middleware.ts missing auth middleware`)
     }
   }
 
   return {
     passed: violations.length === 0,
     details: violations.length === 0
-      ? `All ${APP_DIRS.length} apps have Clerk auth middleware`
+      ? `All ${APP_DIRS.length} apps have auth middleware`
       : `Violations: ${violations.join('; ')}`,
   }
 })
