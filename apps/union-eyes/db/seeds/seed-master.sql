@@ -393,7 +393,7 @@ BEGIN
     ('user_3BSzDjuKqbDZAHQmjVJccs9r9mq', v_clc_id, 'member', 'active', 'Louis Picard',        'l.picard@clc-ctc.ca'),
     ('user_3BSzDiXRbv3kAsmbUqzOjvVv7o7', v_clc_id, 'member', 'active', 'Angela Varga',        'a.varga@clc-ctc.ca'),
     ('user_3BSzDlKgwVGWHOKtHluyRSdJNTb', v_clc_id, 'member', 'active', 'Patrick O''Connor',   'p.oconnor@clc-ctc.ca'),
-    ('user_3BSzDtwjg8WXJf36fw9wjVTu8yX', v_clc_id, 'member', 'active', 'Fatima Al-Rashid',    'f.alrashid@clc-ctc.ca'),
+    ('user_3BSzDtwjg8WXJf36fw9wjVTu8yX', v_clc_id, 'secretary_treasurer', 'active', 'Fatima Al-Rashid',    'f.alrashid@clc-ctc.ca'),
     -- Platform admins (cross-org visibility)
     ('user_35NlrrNcfTv0DMh2kzBHyXZRtpb', v_clc_id, 'admin',  'active', 'Aubert Nungisa',      'info@nzilaventures.com'),
     ('user_37Zo7OrvP4jy0J0MU5APfkDtE2V', v_clc_id, 'admin',  'active', 'Platform Admin',      'michel@nungisalaw.ca');

@@ -2,9 +2,10 @@
 
 
 export const dynamic = 'force-dynamic';
-import { useState } from "react";
+import { useState, useEffect } from "react";
 import { useUser, useClerk } from "@clerk/nextjs";
 import { useTranslations } from 'next-intl';
+import { useOrganization } from "@/contexts/organization-context";
 import { motion } from "framer-motion";
 import { Card } from "@/components/ui/card";
 import {
@@ -36,21 +37,30 @@ type SettingsSection =
 
 export default function ProfilePage() {
   const t = useTranslations();
-  const { user } = useUser();
+  const { user, isLoaded } = useUser();
   const { signOut } = useClerk();
+  const { organization, userMemberships } = useOrganization();
   const [activeSection, setActiveSection] = useState<SettingsSection>("profile");
   const [showPassword, setShowPassword] = useState(false);
   const [hasChanges, setHasChanges] = useState(false);
 
+  // Derive role display from org membership
+  const currentMembership = userMemberships.find(
+    m => m.organizationId === organization?.id
+  );
+  const roleDisplay = currentMembership?.role
+    ? currentMembership.role.replace(/_/g, ' ').replace(/\b\w/g, c => c.toUpperCase())
+    : 'Member';
+
   // User settings state
   const [settings, setSettings] = useState({
     profile: {
-      name: user?.fullName || "John Smith",
-      email: user?.primaryEmailAddress?.emailAddress || "john.smith@union.ca",
-      phone: "+1 (416) 555-0123",
-      local: "301 - Toronto Central",
-      memberNumber: "301-12345",
-      role: "Member",
+      name: "",
+      email: "",
+      phone: "",
+      local: organization?.name || "",
+      memberNumber: "",
+      role: roleDisplay,
     },
     notifications: {
       emailNotifications: true,
@@ -81,6 +91,22 @@ export default function ProfilePage() {
       dataSharing: false,
     },
   });
+
+  // Sync Clerk user data + org context into profile settings when loaded
+  useEffect(() => {
+    if (!isLoaded || !user) return;
+    setSettings(prev => ({
+      ...prev,
+      profile: {
+        ...prev.profile,
+        name: user.fullName || `${user.firstName || ''} ${user.lastName || ''}`.trim() || prev.profile.name,
+        email: user.primaryEmailAddress?.emailAddress || prev.profile.email,
+        phone: user.primaryPhoneNumber?.phoneNumber || prev.profile.phone,
+        local: organization?.name || prev.profile.local,
+        role: roleDisplay,
+      },
+    }));
+  }, [isLoaded, user, organization, roleDisplay]);
 
   const settingsSections = [
     {
