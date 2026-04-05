@@ -5,10 +5,9 @@ const mocks = vi.hoisted(() => ({
   mockSend: vi.fn(),
 }));
 
-vi.mock('resend', () => ({
-  Resend: class MockResend {
-    emails = { send: mocks.mockSend };
-  },
+vi.mock('@/lib/email-service', () => ({
+  getResendClient: () => ({ emails: { send: mocks.mockSend } }),
+  getFromEmail: (label?: string) => label ? `${label} <noreply@test.app>` : 'noreply@test.app',
 }));
 
 vi.mock('@/lib/logger', () => ({
