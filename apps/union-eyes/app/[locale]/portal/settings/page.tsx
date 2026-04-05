@@ -372,7 +372,7 @@ export default function PortalSettingsPage() {
             <div>
               <Label>Deadline Alerts</Label>
               <p className="text-sm text-gray-500">
-                Upcoming deadlines for grievances, votes, and submissions
+                Upcoming deadlines for cases, votes, and updates
               </p>
             </div>
             <Switch

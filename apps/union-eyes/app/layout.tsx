@@ -22,7 +22,7 @@ const poppins = Poppins({
 export async function generateMetadata(): Promise<Metadata> {
   return {
     title: "Union Claims Platform",
-    description: "A comprehensive platform for union claims and grievance management.",
+    description: "A comprehensive platform for union case management and tracking.",
     // Next.js will automatically use app/icon.tsx for favicon and icon
     other: {
       ...await Sentry.getTraceData()

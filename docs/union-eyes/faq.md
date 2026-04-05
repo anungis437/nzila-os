@@ -77,6 +77,8 @@ organization can access your cases, and only based on their role.
 Yes. Every action (case creation, status change, note added) is logged
 with a timestamp and the user who performed it.
 
----
+## Related Documents
 
-**See also:** [Quick Start](./quick-start.md) · [User Guide](./user-guide.md) · [Admin Guide](./admin-guide.md)
+- [Quick Start](./quick-start.md) — Create your first case in 2 minutes
+- [User Guide](./user-guide.md) — Full feature walkthrough
+- [Admin Guide](./admin-guide.md) — Day-to-day administration

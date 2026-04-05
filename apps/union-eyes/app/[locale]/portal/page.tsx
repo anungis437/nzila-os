@@ -331,16 +331,16 @@ export default function MemberPortalDashboard() {
       {/* Recent Claims */}
       <Card>
         <CardHeader>
-          <CardTitle>Recent Claims</CardTitle>
-          <CardDescription>Your latest submissions and their status</CardDescription>
+          <CardTitle>Recent Cases</CardTitle>
+          <CardDescription>Your latest cases and their status</CardDescription>
         </CardHeader>
         <CardContent>
           {recentClaims.length === 0 ? (
             <div className="text-center py-12 text-gray-500">
               <FileText className="mx-auto h-12 w-12 mb-4 opacity-50" />
-              <p>No claims submitted yet</p>
+              <p>No cases submitted yet</p>
               <Link href="/portal/claims/new">
-                <Button className="mt-4">Submit Your First Claim</Button>
+                <Button className="mt-4">Create Your First Case</Button>
               </Link>
             </div>
           ) : (
