@@ -277,6 +277,19 @@ async function main() {
         );
       }
     }
+
+    // organization_members — the table getUserRole() in rbac-server.ts actually reads
+    if (orgDbId) {
+      const existingOrgMember = runSQL(
+        `SELECT id FROM organization_members WHERE organization_id='${orgDbId}' AND user_id='${esc(entraOid)}' LIMIT 1`,
+      );
+      if (!existingOrgMember) {
+        runSQL(
+          `INSERT INTO organization_members (id, user_id, organization_id, name, email, role, status, created_at)
+           VALUES (gen_random_uuid(), '${esc(entraOid)}', '${orgDbId}', '${esc(displayName)}', '${esc(user.email)}', '${esc(user.role)}', 'active', now())`,
+        );
+      }
+    }
   }
 
   // Save results
