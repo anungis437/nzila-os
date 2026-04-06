@@ -909,17 +909,17 @@ export async function getUserRole(
  */
 export async function hasMinRole(minRole: string): Promise<boolean> {
   try {
-    const { userId, orgId } = await auth();
+    const { userId } = await auth();
     if (!userId) return false;
 
     const { getUserRole: getRole } = await import('./auth/rbac-server');
     const { getRoleLevel } = await import('./auth/roles');
     const { getOrganizationIdForUser } = await import('./organization-utils');
 
-    // auth().orgId is an Entra AD group GUID, not the app-level organization ID.
-    // Resolve via the same path the dashboard layout uses so role checks are
-    // consistent with the navigation sidebar.
-    const resolvedOrgId = orgId || (await getOrganizationIdForUser(userId));
+    // auth().orgId is an Entra AD security-group GUID (not the app-level
+    // organization UUID), so it must NEVER be used for role resolution.
+    // Always resolve via the same path the dashboard layout uses.
+    const resolvedOrgId = await getOrganizationIdForUser(userId);
 
     const resolvedRole = await getRole(userId, resolvedOrgId);
     // eslint-disable-next-line @typescript-eslint/no-explicit-any
