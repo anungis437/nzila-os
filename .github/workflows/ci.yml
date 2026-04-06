@@ -202,7 +202,7 @@ jobs:
 
       - name: Upload governance gate report
         if: always()
-        uses: actions/upload-artifact@v4
+        uses: actions/upload-artifact@v7
         with:
           name: governance-gate-report
           path: |
@@ -292,7 +292,7 @@ jobs:
 
       - name: Upload eval report
         if: always()
-        uses: actions/upload-artifact@v4
+        uses: actions/upload-artifact@v7
         with:
           name: ai-eval-report
           path: tooling/ai-evals/report.json
@@ -453,7 +453,7 @@ jobs:
 
       - name: Upload attestation artifacts
         if: always()
-        uses: actions/upload-artifact@v4
+        uses: actions/upload-artifact@v7
         with:
           name: enterprise-hardening-artifacts
           path: |

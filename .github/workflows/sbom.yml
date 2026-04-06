@@ -30,7 +30,7 @@ jobs:
           output: sbom.json
 
       - name: Upload SBOM artifact
-        uses: actions/upload-artifact@v4
+        uses: actions/upload-artifact@v7
         with:
           name: sbom-${{ github.run_id }}
           path: sbom.json
@@ -105,7 +105,7 @@ jobs:
           COSIGN_EXPERIMENTAL: "1"
 
       - name: Upload signed SBOM artifacts
-        uses: actions/upload-artifact@v4
+        uses: actions/upload-artifact@v7
         with:
           name: sbom-signed-${{ github.run_id }}
           path: |

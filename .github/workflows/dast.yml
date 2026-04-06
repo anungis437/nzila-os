@@ -54,7 +54,7 @@ jobs:
 
       - name: Upload ZAP report
         if: always()
-        uses: actions/upload-artifact@v4
+        uses: actions/upload-artifact@v7
         with:
           name: zap-report-${{ matrix.target.name }}-${{ github.run_id }}
           path: report_html.html
@@ -77,7 +77,7 @@ jobs:
 
       - name: Upload API scan report
         if: always()
-        uses: actions/upload-artifact@v4
+        uses: actions/upload-artifact@v7
         with:
           name: zap-api-report-${{ github.run_id }}
           path: report_html.html
@@ -104,7 +104,7 @@ jobs:
           }' > artifacts/dast/dast-evidence.json
 
       - name: Upload DAST evidence
-        uses: actions/upload-artifact@v4
+        uses: actions/upload-artifact@v7
         with:
           name: dast-evidence-${{ github.run_id }}
           path: artifacts/dast/

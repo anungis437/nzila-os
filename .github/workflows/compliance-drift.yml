@@ -55,7 +55,7 @@ jobs:
 
       - name: Upload governance report
         if: failure()
-        uses: actions/upload-artifact@v4
+        uses: actions/upload-artifact@v7
         with:
           name: governance-drift-report
           path: governance-report.json

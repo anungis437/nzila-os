@@ -104,7 +104,7 @@ jobs:
           - Timestamp: $(date -u +%Y-%m-%dT%H:%M:%SZ)
           EOF
 
-      - uses: actions/upload-artifact@v4
+      - uses: actions/upload-artifact@v7
         with:
           name: finops-report-${{ github.run_id }}
           path: evidence/finops-report.md
@@ -170,7 +170,7 @@ jobs:
           }
           EOF
 
-      - uses: actions/upload-artifact@v4
+      - uses: actions/upload-artifact@v7
         with:
           name: quota-audit-${{ github.run_id }}
           path: evidence/quota-audit.json
@@ -229,7 +229,7 @@ jobs:
           - Cost tracking: @nzila/platform-cost
           EOF
 
-      - uses: actions/upload-artifact@v4
+      - uses: actions/upload-artifact@v7
         with:
           name: org-health-${{ github.run_id }}
           path: evidence/org-health.md
