@@ -97,7 +97,7 @@ jobs:
       - uses: actions/checkout@v4
 
       - name: Generate SLSA provenance
-        uses: actions/attest-build-provenance@v2
+        uses: actions/attest-build-provenance@v4
         with:
           subject-name: nzila-os
           subject-digest: sha256:${{ github.sha }}
