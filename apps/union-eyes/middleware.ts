@@ -237,6 +237,7 @@ async function authMiddleware(req: NextRequest): Promise<NextResponse> {
     if (process.env.NODE_ENV !== 'development') {
       if (
         ['POST', 'PUT', 'PATCH', 'DELETE'].includes(req.method) &&
+        !req.nextUrl.pathname.startsWith('/api/auth') &&
         !req.nextUrl.pathname.startsWith('/api/webhooks') &&
         !req.nextUrl.pathname.startsWith('/api/health') &&
         !req.nextUrl.pathname.startsWith('/api/cron')

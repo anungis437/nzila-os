@@ -107,6 +107,7 @@ export default auth((req: any) => {
     if (
       ['POST', 'PUT', 'PATCH', 'DELETE'].includes(req.method) &&
       pathname.startsWith('/api') &&
+      !pathname.startsWith('/api/auth') &&
       !pathname.startsWith('/api/webhooks') &&
       !pathname.startsWith('/api/health') &&
       !pathname.startsWith('/api/cron')

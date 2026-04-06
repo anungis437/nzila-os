@@ -84,6 +84,7 @@ export default clerkMiddleware(async (auth, request) => {
     if (
       ['POST', 'PUT', 'PATCH', 'DELETE'].includes(request.method) &&
       request.nextUrl.pathname.startsWith('/api') &&
+      !request.nextUrl.pathname.startsWith('/api/auth') &&
       !request.nextUrl.pathname.startsWith('/api/webhooks') &&
       !request.nextUrl.pathname.startsWith('/api/health') &&
       !request.nextUrl.pathname.startsWith('/api/cron')

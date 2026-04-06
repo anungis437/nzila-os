@@ -214,3 +214,7 @@ packages/automation/generators/checkpoints/
 coverage_html/
 **/.coverage
 **/coverage.xml
+cookies.txt
+zcookies.txt
+zheaders.txt
+email-otp.json
