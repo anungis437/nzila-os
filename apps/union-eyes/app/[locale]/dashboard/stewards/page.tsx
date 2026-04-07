@@ -7,6 +7,7 @@ import { db } from '@/db/db';
 import { stewards, stewardAssignments, grievances, organizationMembers } from '@/db/schema';
 import { sql, eq, and, gte } from 'drizzle-orm';
 import { withSystemContext } from '@/lib/db/with-rls-context';
+import { logger } from '@/lib/logger';
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "@/components/ui/card";
 import { Badge } from "@/components/ui/badge";
 import { Button } from "@/components/ui/button";
@@ -153,7 +154,7 @@ export default async function StewardsDashboardPage() {
   stewardPerformance = result.stewardPerformance;
   pendingEscalationsList = result.pendingEscalationsList;
   } catch (error) {
-    console.error('[StewardsDashboard] DB query failed:', error);
+    logger.error('[StewardsDashboard] DB query failed:', { error });
     // Fall through with empty defaults
   }
 
