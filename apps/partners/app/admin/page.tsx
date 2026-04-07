@@ -5,6 +5,7 @@ import {
   CheckCircleIcon,
   XCircleIcon,
 } from '@heroicons/react/24/outline'
+import Link from 'next/link'
 import { getPartnerStats, getAllPartners } from '@/lib/partner-auth'
 
 export default async function AdminDashboardPage() {
@@ -159,9 +160,9 @@ export default async function AdminDashboardPage() {
         <div className="bg-white rounded-xl border border-slate-200 p-6 lg:col-span-2">
           <div className="flex items-center justify-between mb-4">
             <h3 className="font-semibold text-slate-900">Recent Partners</h3>
-            <a href="/admin/partners" className="text-sm text-blue-600 hover:underline">
+            <Link href="/admin/partners" className="text-sm text-blue-600 hover:underline">
               View all →
-            </a>
+            </Link>
           </div>
           
           {recentPartners.length > 0 ? (
