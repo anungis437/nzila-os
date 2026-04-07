@@ -1,7 +1,7 @@
 import { withApi } from '@/lib/api/framework';
 import { db } from '@/db/db';
 import { pensionTrustees } from '@/db/schema';
-import { eq, desc } from 'drizzle-orm';
+import { eq, and, desc } from 'drizzle-orm';
 import { z } from 'zod';
 
 const createTrusteeSchema = z.object({
@@ -20,11 +20,19 @@ export const GET = withApi(
     auth: { required: true, minRole: 'member' },
     openapi: { tags: ['Pension'], summary: 'List trustees', description: 'List all pension trustees for the organization' },
   },
-  async ({ request: _request, organizationId }) => {
+  async ({ request, organizationId }) => {
+    const url = new URL(request.url);
+    const activeOnly = url.searchParams.get('activeOnly') === 'true';
+
+    const conditions = [eq(pensionTrustees.organizationId, organizationId!)];
+    if (activeOnly) {
+      conditions.push(eq(pensionTrustees.status, 'active'));
+    }
+
     const trustees = await db
       .select()
       .from(pensionTrustees)
-      .where(eq(pensionTrustees.organizationId, organizationId!))
+      .where(and(...conditions))
       .orderBy(desc(pensionTrustees.createdAt));
     return trustees;
   },

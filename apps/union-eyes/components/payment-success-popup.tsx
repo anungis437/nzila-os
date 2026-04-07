@@ -14,7 +14,6 @@ import { motion } from "framer-motion";
 import type { SelectProfile } from "@/db/schema/domains/member";
 import { useRouter, useSearchParams } from "next/navigation";
 import confetti from 'canvas-confetti';
-import { getProfileByUserIdAction } from "@/actions/profiles-actions";
 import { useAuth } from '@nzila/platform-auth/entra/client';
 import { useTranslations } from "next-intl";
 
@@ -53,8 +52,9 @@ export default function PaymentSuccessPopup({ profile: initialProfile }: Payment
       if (!userId) {
 return;
       }
-// Use the server action instead of fetch
-      const result = await getProfileByUserIdAction(userId);
+// Use API route instead of server action to avoid stale action ID 404s after deploys
+      const res = await fetch("/api/profile/me");
+      const result = await res.json();
       
       if (result.isSuccess && result.data) {
 if (result.data.membership === 'pro') {

@@ -83,7 +83,7 @@ export default function CampaignsPage() {
 
       const params = new URLSearchParams({
         page: page.toString(),
-        pageSize: '20',
+        limit: '20',
       });
 
       if (statusFilter !== 'all') {
@@ -94,15 +94,17 @@ export default function CampaignsPage() {
         params.append('channel', channelFilter);
       }
 
-      const response = await fetch(`/api/messaging/campaigns?${params}`);
+      const response = await fetch(`/api/communications/campaigns?${params}`);
       
       if (!response.ok) {
         throw new Error('Failed to fetch campaigns');
       }
 
-      const data = await response.json();
-      setCampaigns(data.campaigns);
-      setTotalPages(data.pagination.totalPages);
+      const json = await response.json();
+      // withApi wraps in { success, data: { data, pagination }, timestamp }
+      const payload = json.data ?? json;
+      setCampaigns(Array.isArray(payload.data) ? payload.data : payload.data ? [payload.data] : []);
+      setTotalPages(payload.pagination?.totalPages ?? 1);
     } catch (err) {
       setError(err instanceof Error ? err.message : 'Failed to fetch campaigns');
     } finally {

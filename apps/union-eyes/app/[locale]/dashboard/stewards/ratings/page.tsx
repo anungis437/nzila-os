@@ -4,8 +4,6 @@
  */
 "use client";
 
-export const dynamic = 'force-dynamic';
-
 import { useEffect, useState } from "react";
 import { RepRatingsDashboard, type LroPerformanceData } from "@/components/satisfaction/rep-ratings-dashboard";
 import { Button } from "@/components/ui/button";
@@ -22,7 +20,9 @@ export default function LroRatingsPage() {
         const res = await fetch('/api/satisfaction/rankings');
         if (res.ok) {
           const json = await res.json();
-          setRankings(json?.data ?? json ?? []);
+          // withApi wraps response as { success, data: { rankings: [...] } }
+          const data = json?.data?.rankings ?? json?.data ?? json?.rankings ?? [];
+          setRankings(Array.isArray(data) ? data : []);
         }
       } catch {
         // API unavailable

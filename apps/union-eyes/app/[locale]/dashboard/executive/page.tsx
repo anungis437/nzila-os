@@ -21,8 +21,8 @@ export default async function ExecutiveDashboardPage({
   const { locale } = await params;
   const user = await requireUser();
   
-  // Require at least vice_president level (85) to access executive dashboard
-  const hasAccess = await hasMinRole("vice_president");
+  // Require at least secretary_treasurer level (110) to access executive dashboard
+  const hasAccess = await hasMinRole("secretary_treasurer");
   
   if (!hasAccess) {
     redirect("/dashboard");

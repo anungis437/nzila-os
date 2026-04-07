@@ -1,6 +1,5 @@
 // Observability: @nzila/os-core/telemetry — structured logging and request tracing available via os-core.
 import { NextResponse } from 'next/server'
-import { getAllQueueStats } from '@/lib/job-queue'
 
 const APP = 'union-eyes'
 const VERSION = process.env.npm_package_version ?? '0.0.0'
@@ -21,10 +20,17 @@ async function checkDb(): Promise<boolean> {
 }
 
 async function checkQueue(): Promise<'ok' | 'degraded' | 'unreachable'> {
+  const djangoUrl = process.env.DJANGO_API_URL || process.env.NEXT_PUBLIC_DJANGO_API_URL || ''
+  if (!djangoUrl) return 'ok' // No Django backend configured
+
   try {
-    const stats = await getAllQueueStats()
-    if (!stats || stats.length === 0) return 'degraded'
-    return 'ok'
+    // Hit the unauthenticated Django health endpoint (auth-exempt in middleware)
+    const base = djangoUrl.replace(/\/$/, '')
+    const res = await fetch(`${base}/api/auth_core/health/`, {
+      cache: 'no-store',
+      signal: AbortSignal.timeout(3000),
+    })
+    return res.ok ? 'ok' : 'degraded'
   } catch {
     return 'unreachable'
   }

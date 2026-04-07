@@ -28,7 +28,11 @@ export const GET = withRoleAuth('officer', async (_request: NextRequest, context
   });
   if (blocked) return blocked;
 
-  await requireEntitlement(context.organizationId!, 'ai_advanced_insights');
+  try {
+    await requireEntitlement(context.organizationId!, 'ai_advanced_insights');
+  } catch (err) {
+    return standardErrorResponse(ErrorCode.FORBIDDEN, err instanceof Error ? err.message : 'Entitlement required');
+  }
 
   try {
     // Fetch latest report for each type

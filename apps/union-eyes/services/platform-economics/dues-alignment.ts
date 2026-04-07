@@ -145,7 +145,7 @@ export async function getLocalDuesSnapshots(
       FROM member_arrears
       WHERE organization_id = o.id AND arrears_status != 'current'
     ) a ON true
-    WHERE o.parent_organization_id = ${organizationId}
+    WHERE o.parent_id = ${organizationId}
       OR o.id = ${organizationId}
   `);
 

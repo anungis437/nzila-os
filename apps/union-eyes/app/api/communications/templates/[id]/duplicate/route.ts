@@ -1,15 +1,15 @@
 /**
- * CRUD item route for campaigns
+ * Duplicate action for message templates
  */
 import { crudRoutes } from '@/lib/api/crud-factory';
-import { campaigns } from '@/db/schema';
+import { messageTemplates } from '@/db/schema';
 
 export const dynamic = 'force-dynamic';
 
 const { GET, PATCH, DELETE } = crudRoutes({
-  table: campaigns,
+  table: messageTemplates,
   pk: 'id',
-  tags: ["Notifications"],
+  tags: ["Communications"],
   orgScoped: true,
   itemRoute: true,
   readRole: 'member',

@@ -74,16 +74,18 @@ export { auth, clerkCurrentUser as currentUser };
  * Includes Nzila Ventures operations roles and cross-organizational hierarchy
  * 
  * Hierarchy Structure:
- * - App Operations (250-300): Nzila Ventures platform operations team
- * - System Administration (200-240): Technical operations across all orgs
+ * - App Operations (205-300): Nzila Ventures platform operations team
+ * - System Administration (200): Technical operations across all orgs
  * - CLC National (180-190): Canadian Labour Congress executives and staff
  * - Federation (160-170): Provincial federation executives and staff
  * - National Union (150): National-level union officers
- * - Local Union Executives (85-100): Presidents, VPs, Treasurers, Admins
- * - Senior Representatives (60-70): Chief Stewards, Officers
+ * - Local Union Executives (110-140): Admins, Presidents, VPs, Treasurers
+ * - Senior Representatives (80-90): Chief Stewards, Officers
  * - Front-line Representatives (40-50): Stewards, Bargaining Committee
  * - Specialized Representatives (30): Health & Safety
- * - Base Membership (10): Regular members
+ * - Base Membership (20): Regular members
+ * 
+ * NOTE: Values are aligned with getRoleLevel() in lib/auth/roles.ts
  */
 export const ROLE_HIERARCHY = {
   // ========================================================
@@ -100,60 +102,62 @@ export const ROLE_HIERARCHY = {
   platform_lead: 270,                // Platform Manager - Day-to-day operations
   customer_success_director: 260,    // Customer Success Director - Retention & growth
   
-  // Department Managers (210-250)
+  // Department Managers (230-250)
   support_manager: 250,              // Support Manager - Help desk operations
   data_analytics_manager: 240,       // Analytics Manager - BI & reporting
-  billing_manager: 230,              // Billing Manager - Subscriptions & payments
-  integration_manager: 220,          // Integration Manager - APIs & partnerships
-  compliance_manager: 210,           // Compliance Manager - Platform compliance
-  security_manager: 200,             // Security Manager - Security operations
+  billing_manager: 235,              // Billing Manager - Subscriptions & payments
+  integration_manager: 230,          // Integration Manager - APIs & partnerships
+  compliance_manager: 225,           // Compliance Manager - Platform compliance
+  security_manager: 220,             // Security Manager - Security operations
   
-  // Operations Staff (150-190)
-  support_agent: 180,                // Support Agent - Customer support
-  data_analyst: 170,                 // Data Analyst - Analytics & reporting
-  billing_specialist: 160,           // Billing Specialist - Billing operations
-  integration_specialist: 150,       // Integration Specialist - API support
+  // Operations Staff (210-218)
+  support_agent: 218,                // Support Agent - Customer support
+  data_analyst: 215,                 // Data Analyst - Analytics & reporting
+  billing_specialist: 212,           // Billing Specialist - Billing operations
+  integration_specialist: 210,       // Integration Specialist - API support
   
-  // Content & Training (140-145)
-  content_manager: 145,              // Content Manager - Resources & training
-  training_coordinator: 140,         // Training Coordinator - User training
+  // Content & Training (205-208)
+  content_manager: 208,              // Content Manager - Resources & training
+  training_coordinator: 205,         // Training Coordinator - User training
   
   // ========================================================
-  // SYSTEM ADMINISTRATION (135)
+  // SYSTEM ADMINISTRATION (200)
   // Technical operations across all union organizations
+  // Aligned with getRoleLevel() in lib/auth/roles.ts
   // ========================================================
-  system_admin: 135,                 // System Admin - Technical operations
+  system_admin: 200,                 // System Admin - Technical operations
   
   // ========================================================
-  // CLC NATIONAL (120-130) - Canadian Labour Congress
+  // CLC NATIONAL (180-190) - Canadian Labour Congress
   // ========================================================
-  clc_executive: 130,                // CLC President, Secretary-Treasurer
-  clc_staff: 120,                    // CLC national staff
+  clc_executive: 190,                // CLC President, Secretary-Treasurer
+  clc_staff: 180,                    // CLC national staff
   
   // ========================================================
-  // FEDERATION LEVEL (105-115) - Provincial Federations
+  // FEDERATION LEVEL (160-170) - Provincial Federations
   // ========================================================
-  fed_executive: 115,                // Federation President, VP
-  fed_staff: 105,                    // Provincial federation staff
+  fed_executive: 170,                // Federation President, VP
+  fed_staff: 160,                    // Provincial federation staff
   
   // ========================================================
-  // UNION NATIONAL LEVEL (100)
+  // UNION NATIONAL LEVEL (150)
   // ========================================================
-  national_officer: 100,             // National union officers
+  national_officer: 150,             // National union officers
   
   // ========================================================
-  // LOCAL UNION EXECUTIVES (85-95)
+  // LOCAL UNION EXECUTIVES (110-140)
+  // Aligned with getRoleLevel() in lib/auth/roles.ts
   // ========================================================
-  admin: 95,                         // Organization Administrator
-  president: 90,                     // Union President
-  vice_president: 85,                // Vice President
-  secretary_treasurer: 85,           // Secretary-Treasurer
+  admin: 140,                        // Organization Administrator
+  president: 130,                    // Union President
+  vice_president: 120,               // Vice President
+  secretary_treasurer: 110,          // Secretary-Treasurer
   
   // ========================================================
-  // SENIOR REPRESENTATIVES (60-70)
+  // SENIOR REPRESENTATIVES (80-90)
   // ========================================================
-  chief_steward: 70,                 // Chief Steward
-  officer: 60,                       // Union Officer
+  chief_steward: 90,                 // Chief Steward
+  officer: 80,                       // Union Officer
   
   // ========================================================
   // FRONT-LINE REPRESENTATIVES (40-50)
@@ -167,9 +171,9 @@ export const ROLE_HIERARCHY = {
   health_safety_rep: 30,             // Health & Safety Representative
   
   // ========================================================
-  // BASE MEMBERSHIP (10)
+  // BASE MEMBERSHIP (20)
   // ========================================================
-  member: 10,                        // Union Member
+  member: 20,                        // Union Member
 } as const;
 
 export type UserRole = keyof typeof ROLE_HIERARCHY;
@@ -408,6 +412,31 @@ export async function getCurrentUser(): Promise<AuthUser | null> {
       }
     }
 
+    // Validate resolvedOrganizationId actually exists in the organizations
+    // table. With Entra auth, publicMetadata.organizationId may be an AD
+    // security-group GUID (not an app org UUID), which would silently filter
+    // out all org-scoped data. Clear it so the fallbacks can resolve correctly.
+    if (resolvedOrganizationId) {
+      try {
+        const [validOrg] = await db
+          .select({ id: organizations.id })
+          .from(organizations)
+          .where(eq(organizations.id, resolvedOrganizationId))
+          .limit(1);
+        if (!validOrg) {
+          logger.warn('Metadata organizationId does not match any DB org — clearing for fallback', {
+            resolvedOrganizationId,
+            userId,
+          });
+          resolvedOrganizationId = null;
+        }
+      } catch {
+        // If the ID isn't even a valid UUID (e.g. Clerk org_xxx format),
+        // the query will throw — clear it so fallbacks can work.
+        resolvedOrganizationId = null;
+      }
+    }
+
     // Cookie fallback: the client-side org picker stores the selected org UUID
     // in the "selected_organization_id" (or "selected_org_id") cookie. If Clerk
     // session has no active org and metadata didn't provide one, honour the
@@ -541,16 +570,20 @@ export async function getUserContext(): Promise<UnifiedUserContext | null> {
 
   let membership: Awaited<ReturnType<typeof db.query.organizationMembers.findFirst>> = undefined;
 
-  if (orgId) {
-    membership = await db.query.organizationMembers.findFirst({
-      where: (om, { eq, and }) => and(eq(om.userId, userId), eq(om.organizationId, orgId)),
-    });
-  }
+  try {
+    if (orgId) {
+      membership = await db.query.organizationMembers.findFirst({
+        where: (om, { eq, and }) => and(eq(om.userId, userId), eq(om.organizationId, orgId)),
+      });
+    }
 
-  if (!membership) {
-    membership = await db.query.organizationMembers.findFirst({
-      where: (om, { eq }) => eq(om.userId, userId),
-    });
+    if (!membership) {
+      membership = await db.query.organizationMembers.findFirst({
+        where: (om, { eq }) => eq(om.userId, userId),
+      });
+    }
+  } catch (dbErr) {
+    logger.warn('[Auth] getUserContext: DB membership lookup failed, trying fallbacks', { userId, error: String(dbErr) });
   }
 
   if (!membership) {
@@ -588,6 +621,26 @@ export async function getUserContext(): Promise<UnifiedUserContext | null> {
       }
     } catch (err) {
       logger.warn('[Auth] getUserContext: failed to read Clerk metadata', { userId, error: String(err) });
+    }
+
+    // ─── Fallback: Entra / generic — resolve org + role via the same
+    //     path that hasMinRole() and dashboard layout use. This ensures
+    //     Entra-authenticated users (whose OID won't match Clerk-format
+    //     user IDs in organization_members) still get a valid context. ──
+    try {
+      const { getOrganizationIdForUser } = await import('./organization-utils');
+      const { getUserRole: getRole } = await import('./auth/rbac-server');
+      const resolvedOrgId = await getOrganizationIdForUser(userId);
+      const resolvedRole = await getRole(userId, resolvedOrgId);
+      logger.info('[Auth] getUserContext: Entra/generic fallback resolved', { userId, resolvedOrgId, resolvedRole });
+      return {
+        userId,
+        organizationId: resolvedOrgId,
+        roles: [resolvedRole],
+        permissions: getPermissionsForRole(resolvedRole),
+      };
+    } catch (err) {
+      logger.warn('[Auth] getUserContext: Entra/generic fallback failed', { userId, error: String(err) });
     }
 
     return null;
@@ -978,6 +1031,19 @@ export function withRoleAuth<TContext extends Record<string, unknown> = BaseAuth
       );
     }
 
+    // Populate context with auth info so route handlers can access it
+    const authCtx = context as unknown as BaseAuthContext;
+    authCtx.userId = user.id;
+
+    // Resolve organization consistently via getOrganizationIdForUser to avoid
+    // Entra security-group GUIDs leaking into route context.
+    try {
+      const { getOrganizationIdForUser } = await import('./organization-utils');
+      authCtx.organizationId = await getOrganizationIdForUser(user.id);
+    } catch {
+      authCtx.organizationId = user.organizationId ?? undefined;
+    }
+
     const hasAccess = await hasRole(requiredRole);
     if (!hasAccess) {
       return NextResponse.json(
@@ -1007,6 +1073,21 @@ export function withMinRole<TContext extends Record<string, unknown> = BaseAuthC
         { error: 'Unauthorized: Authentication required' },
         { status: 401 }
       );
+    }
+
+    // Populate context with auth info so route handlers can access it
+    const authCtx = context as unknown as BaseAuthContext;
+    authCtx.userId = user.id;
+
+    // Resolve organization consistently via getOrganizationIdForUser — the
+    // same path hasMinRole() uses.  getCurrentUser().organizationId can be an
+    // Entra security-group GUID that does not map to a DB organization row,
+    // which causes downstream entitlement / billing lookups to fail with 500.
+    try {
+      const { getOrganizationIdForUser } = await import('./organization-utils');
+      authCtx.organizationId = await getOrganizationIdForUser(user.id);
+    } catch {
+      authCtx.organizationId = user.organizationId ?? undefined;
     }
 
     const hasAccess = await hasMinRole(minRole);
@@ -1043,6 +1124,19 @@ export function withSystemAdminAuth<TContext extends Record<string, unknown> = B
         { error: 'Unauthorized: Authentication required' },
         { status: 401 }
       );
+    }
+
+    // Populate context with auth info so route handlers can access it
+    const authCtx = context as unknown as BaseAuthContext;
+    authCtx.userId = user.id;
+
+    // Resolve organization consistently via getOrganizationIdForUser to avoid
+    // Entra security-group GUIDs leaking into route context.
+    try {
+      const { getOrganizationIdForUser } = await import('./organization-utils');
+      authCtx.organizationId = await getOrganizationIdForUser(user.id);
+    } catch {
+      authCtx.organizationId = user.organizationId ?? undefined;
     }
 
     const isAdmin = await isSystemAdmin(user.id);

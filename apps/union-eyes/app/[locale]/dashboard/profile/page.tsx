@@ -5,6 +5,7 @@ export const dynamic = 'force-dynamic';
 import { useState, useEffect } from "react";
 import { useUser, useClerk } from '@nzila/platform-auth/entra/client';
 import { useTranslations } from 'next-intl';
+import { useToast } from '@/components/ui/use-toast';
 import { useOrganization } from "@/contexts/organization-context";
 import { motion } from "framer-motion";
 import { Card } from "@/components/ui/card";
@@ -37,6 +38,7 @@ type SettingsSection =
 
 export default function ProfilePage() {
   const t = useTranslations();
+  const { toast } = useToast();
   const { user, isLoaded } = useUser();
   const { signOut } = useClerk();
   const { organization, userMemberships } = useOrganization();
@@ -92,21 +94,29 @@ export default function ProfilePage() {
     },
   });
 
-  // Sync Clerk user data + org context into profile settings when loaded
+  // Derive stable primitives for the effect dependency array.
+  // useUser() returns a new object reference every render (Entra adapter),
+  // so depending on `user` directly would cause an infinite re-render loop.
+  const userName = user?.fullName || `${user?.firstName || ''} ${user?.lastName || ''}`.trim() || '';
+  const userEmail = user?.primaryEmailAddress?.emailAddress || '';
+  const userPhone = user?.primaryPhoneNumber?.phoneNumber || '';
+  const orgName = organization?.name || '';
+
+  // Sync user data + org context into profile settings when loaded
   useEffect(() => {
-    if (!isLoaded || !user) return;
+    if (!isLoaded || !userName) return;
     setSettings(prev => ({
       ...prev,
       profile: {
         ...prev.profile,
-        name: user.fullName || `${user.firstName || ''} ${user.lastName || ''}`.trim() || prev.profile.name,
-        email: user.primaryEmailAddress?.emailAddress || prev.profile.email,
-        phone: user.primaryPhoneNumber?.phoneNumber || prev.profile.phone,
-        local: organization?.name || prev.profile.local,
+        name: userName || prev.profile.name,
+        email: userEmail || prev.profile.email,
+        phone: userPhone || prev.profile.phone,
+        local: orgName || prev.profile.local,
         role: roleDisplay,
       },
     }));
-  }, [isLoaded, user, organization, roleDisplay]);
+  }, [isLoaded, userName, userEmail, userPhone, orgName, roleDisplay]);
 
   const settingsSections = [
     {
@@ -153,7 +163,7 @@ export default function ProfilePage() {
 
   const handleSaveChanges = () => {
     setHasChanges(false);
-    alert("Settings saved successfully!");
+    toast({ title: "Settings saved", description: "Your changes have been saved successfully." });
   };
 
   return (

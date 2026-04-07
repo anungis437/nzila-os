@@ -33,7 +33,11 @@ const billingValidationSchema = z.object({
  * Validate billing request for CAD currency compliance and T106 requirements
  */
 export const POST = withRoleAuth('steward', async (request, context) => {
-  await requireEntitlement(context.organizationId as string, 'financial_intelligence_suite', context.userId);
+  try {
+    await requireEntitlement(context.organizationId as string, 'financial_intelligence_suite', context.userId);
+  } catch (err) {
+    return standardErrorResponse(ErrorCode.FORBIDDEN, err instanceof Error ? err.message : 'Entitlement required');
+  }
 
   let rawBody: unknown;
   try {

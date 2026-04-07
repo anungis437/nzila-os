@@ -18,7 +18,11 @@ export const GET = withMinRole('officer', async (request, context: BaseAuthConte
   if (!organizationId) {
     return standardErrorResponse(ErrorCode.AUTH_REQUIRED, 'Unauthorized');
   }
-  await requireEntitlement(organizationId, 'financial_intelligence_suite', userId);
+  try {
+    await requireEntitlement(organizationId, 'financial_intelligence_suite', userId);
+  } catch (err) {
+    return standardErrorResponse(ErrorCode.FORBIDDEN, err instanceof Error ? err.message : 'Entitlement required');
+  }
 
   try {
     const url = new URL(request.url);

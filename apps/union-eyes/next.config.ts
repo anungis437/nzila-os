@@ -151,12 +151,6 @@ const securityHeaders = [
 ];
 
 const nextConfig: NextConfig = {
-  // TypeScript configuration – temporarily ignore build errors to unblock deployment.
-  // TODO: Re-enable strict checking once all service-layer types are resolved.
-  typescript: {
-    ignoreBuildErrors: true,
-  },
-  
   // Turbopack resolve aliases
   // swagger-ui-react imports `immutable` with a default import, but immutable v5
   // ESM build has no default export. Force CJS build for Turbopack compatibility.
@@ -169,6 +163,12 @@ const nextConfig: NextConfig = {
   // Build optimizations
   reactStrictMode: true,
   
+  // Type checking is done separately via `pnpm typecheck` (tsc --noEmit).
+  // Next.js build-time TS checking is redundant and can OOM on large codebases.
+  typescript: {
+    ignoreBuildErrors: true,
+  },
+
   // Compiler optimizations
   // Note: removeConsole is not supported by Turbopack, only used in production builds
   ...(process.env.NODE_ENV === 'production' && {

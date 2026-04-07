@@ -37,7 +37,11 @@ export const POST = withRoleAuth('steward', async (request: NextRequest, context
   if (blocked) return blocked;
 
   // 3. Entitlement (billing gate)
-  await requireEntitlement(context.organizationId!, 'ai_advanced_insights', context.userId);
+  try {
+    await requireEntitlement(context.organizationId!, 'ai_advanced_insights', context.userId);
+  } catch (err) {
+    return standardErrorResponse(ErrorCode.FORBIDDEN, err instanceof Error ? err.message : 'Entitlement required');
+  }
 
   // 4. Validate
   const body = await request.json();

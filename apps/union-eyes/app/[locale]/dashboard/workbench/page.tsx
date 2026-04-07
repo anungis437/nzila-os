@@ -11,7 +11,11 @@ export const metadata: Metadata = {
 };
 
 export default async function WorkbenchPage() {
-  await requireUser();
+  try {
+    await requireUser();
+  } catch {
+    redirect("/login");
+  }
 
   const hasAccess = await hasMinRole("steward");
   if (!hasAccess) {

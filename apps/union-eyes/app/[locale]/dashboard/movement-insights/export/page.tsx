@@ -35,22 +35,22 @@ const MOVEMENT_INSIGHTS_ROLES = [
 ] as const;
 
 interface ExportPageProps {
-  params: {
+  params: Promise<{
     locale: string;
-  };
-  searchParams: {
+  }>;
+  searchParams: Promise<{
     focusArea?: string;
     jurisdiction?: string;
     timeframe?: string;
-  };
+  }>;
 }
 
 export default async function LegislativeBriefExportPage({
   params,
   searchParams,
 }: ExportPageProps) {
-  const { locale } = params;
-  const { focusArea = 'Workplace Dispute Resolution', jurisdiction, timeframe: _timeframe = 'quarter' } = searchParams;
+  const { locale } = await params;
+  const { focusArea = 'Workplace Dispute Resolution', jurisdiction, timeframe: _timeframe = 'quarter' } = await searchParams;
 
   // Role gate — same requirement as the parent movement-insights page.
   const user = await requireUser();

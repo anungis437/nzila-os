@@ -97,7 +97,7 @@ export default function TemplatesPage() {
 
       const params = new URLSearchParams({
         page: page.toString(),
-        pageSize: '20',
+        limit: '20',
       });
 
       if (typeFilter !== 'all') {
@@ -112,15 +112,17 @@ export default function TemplatesPage() {
         params.append('isActive', statusFilter === 'active' ? 'true' : 'false');
       }
 
-      const response = await fetch(`/api/messaging/templates?${params}`);
+      const response = await fetch(`/api/communications/templates?${params}`);
       
       if (!response.ok) {
         throw new Error('Failed to fetch templates');
       }
 
-      const data = await response.json();
-      setTemplates(data.templates);
-      setTotalPages(data.pagination.totalPages);
+      const json = await response.json();
+      // withApi wraps in { success, data: { data, pagination }, timestamp }
+      const payload = json.data ?? json;
+      setTemplates(Array.isArray(payload.data) ? payload.data : payload.data ? [payload.data] : []);
+      setTotalPages(payload.pagination?.totalPages ?? 1);
     } catch (err) {
       setError(err instanceof Error ? err.message : 'Failed to fetch templates');
     } finally {

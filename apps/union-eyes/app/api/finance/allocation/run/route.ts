@@ -31,7 +31,11 @@ export const POST = withMinRole('admin', async (request, context: BaseAuthContex
   if (!organizationId || !userId) {
     return standardErrorResponse(ErrorCode.AUTH_REQUIRED, 'Unauthorized');
   }
-  await requireEntitlement(organizationId, 'allocation_engine', userId);
+  try {
+    await requireEntitlement(organizationId, 'allocation_engine', userId);
+  } catch (err) {
+    return standardErrorResponse(ErrorCode.FORBIDDEN, err instanceof Error ? err.message : 'Entitlement required');
+  }
 
   let rawBody: unknown;
   try {

@@ -12,7 +12,7 @@
 
 export const dynamic = 'force-dynamic';
 import { useState, useEffect } from 'react';
-import { useRouter } from 'next/navigation';
+import { useRouter, useParams } from 'next/navigation';
 import { Button } from '@/components/ui/button';
 import { Input } from '@/components/ui/input';
 import { Label } from '@/components/ui/label';
@@ -101,6 +101,7 @@ const STEPS = [
 
 export default function NewCampaignPage() {
   const router = useRouter();
+  const { locale } = useParams<{ locale: string }>();
   const [currentStep, setCurrentStep] = useState(1);
   const [loading, setLoading] = useState(false);
   const [error, setError] = useState<string | null>(null);
@@ -140,11 +141,11 @@ export default function NewCampaignPage() {
         isActive: 'true',
       });
 
-      const response = await fetch(`/api/messaging/templates?${params}`);
+      const response = await fetch(`/api/communications/templates?${params}`);
       if (!response.ok) throw new Error('Failed to fetch templates');
 
       const data = await response.json();
-      setTemplates(data.templates);
+      setTemplates(data.data ?? []);
     } catch (err) {
       logger.error('Failed to fetch templates:', err);
     }
@@ -179,7 +180,15 @@ export default function NewCampaignPage() {
         },
       };
 
-      const response = await fetch('/api/messaging/campaigns', {
+      // If sendNow, mark campaign status so it can be processed
+      if (formData.sendNow) {
+        Object.assign(campaignData, {
+          sendImmediately: true,
+          status: 'sending',
+        });
+      }
+
+      const response = await fetch('/api/communications/campaigns', {
         method: 'POST',
         headers: { 'Content-Type': 'application/json' },
         body: JSON.stringify(campaignData),
@@ -187,26 +196,14 @@ export default function NewCampaignPage() {
 
       if (!response.ok) {
         const error = await response.json();
-        throw new Error(error.error || 'Failed to create campaign');
+        throw new Error(error.message || 'Failed to create campaign');
       }
 
-      const campaign = await response.json();
+      const result = await response.json();
+      const campaignId = result.data?.id;
 
-      // If sendNow is true, trigger send immediately
-      if (formData.sendNow) {
-        const sendResponse = await fetch(`/api/messaging/campaigns/${campaign.id}/send`, {
-          method: 'POST',
-          headers: { 'Content-Type': 'application/json' },
-          body: JSON.stringify({ dryRun: false }),
-        });
-
-        if (!sendResponse.ok) {
-          throw new Error('Campaign created but failed to send');
-        }
-      }
-
-      // Redirect to campaign detail page
-      router.push(`/dashboard/communications/campaigns/${campaign.id}`);
+      // Redirect to campaigns list (detail page not yet built)
+      router.push(`/${locale}/dashboard/communications/campaigns`);
     } catch (err) {
       setError(err instanceof Error ? err.message : 'Failed to create campaign');
     } finally {
