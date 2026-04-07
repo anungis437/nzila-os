@@ -49,7 +49,7 @@ export const POST = withApi(
           db.execute(
             sql`SELECT user_id FROM organization_members
                 WHERE organization_id = ${organizationId}::uuid
-                  AND employee_number = ${item.employeeNumber}
+                  AND membership_number = ${item.employeeNumber}
                 LIMIT 1`,
           ),
         );

@@ -156,7 +156,7 @@ export default function NewTemplatePage() {
         throw new Error('Email subject is required');
       }
 
-      const response = await fetch('/api/messaging/templates', {
+      const response = await fetch('/api/communications/templates', {
         method: 'POST',
         headers: { 'Content-Type': 'application/json' },
         body: JSON.stringify(formData),
@@ -167,7 +167,8 @@ export default function NewTemplatePage() {
         throw new Error(error.error || 'Failed to create template');
       }
 
-      const template = await response.json();
+      const json = await response.json();
+      const template = json.data ?? json;
       router.push(`/dashboard/communications/templates/${template.id}`);
     } catch (err) {
       setError(err instanceof Error ? err.message : 'Failed to create template');

@@ -1,15 +1,15 @@
 /**
- * CRUD collection route for campaigns
+ * CRUD collection route for SMS messages in a conversation
  */
 import { crudRoutes } from '@/lib/api/crud-factory';
-import { campaigns } from '@/db/schema';
+import { smsMessages } from '@/db/schema';
 
 export const dynamic = 'force-dynamic';
 
 const { GET, POST } = crudRoutes({
-  table: campaigns,
+  table: smsMessages,
   pk: 'id',
-  tags: ["Notifications"],
+  tags: ["Communications"],
   orgScoped: true,
   readRole: 'member',
   writeRole: 'steward',

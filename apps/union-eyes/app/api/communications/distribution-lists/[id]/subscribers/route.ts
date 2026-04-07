@@ -1,15 +1,15 @@
 /**
- * CRUD item route for campaigns
+ * CRUD item route for distribution list subscribers
  */
 import { crudRoutes } from '@/lib/api/crud-factory';
-import { campaigns } from '@/db/schema';
+import { newsletterListSubscribers } from '@/db/schema';
 
 export const dynamic = 'force-dynamic';
 
 const { GET, PATCH, DELETE } = crudRoutes({
-  table: campaigns,
+  table: newsletterListSubscribers,
   pk: 'id',
-  tags: ["Notifications"],
+  tags: ["Communications"],
   orgScoped: true,
   itemRoute: true,
   readRole: 'member',

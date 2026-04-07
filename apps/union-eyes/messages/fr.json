@@ -980,6 +980,7 @@
     "supportCenter": "Support",
     "platformAnalytics": "Analytique",
     "billingSubscriptions": "Facturation",
+    "billingInvoices": "Facturation et factures",
     "integrationsAPIs": "Intégrations",
     "securityCompliance": "Sécurité",
     "contentTraining": "Contenu",
@@ -995,6 +996,14 @@
     "newCase": "Nouveau dossier",
     "members": "Membres",
     "admin": "Admin",
-    "deadlines": "Échéances"
+    "deadlines": "Échéances",
+    "duesAdmin": "Admin cotisations",
+    "dispatch": "Répartition",
+    "aiInsights": "Perspectives IA",
+    "leadershipDashboard": "Direction",
+    "movementInsights": "Mouvement",
+    "profile": "Profil",
+    "rewards": "Récompenses",
+    "orgStructure": "Structure"
   }
 }

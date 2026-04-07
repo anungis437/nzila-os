@@ -113,8 +113,9 @@ export function OrganizingConsole() {
       const res = await fetch('/api/v2/organizing/campaigns');
       if (res.ok) {
         const json = await res.json();
-        const items = Array.isArray(json) ? json : (json?.campaigns ?? json?.data ?? []);
-        setCampaigns(items);
+        // withApi wraps as { success, data: { data: [...], pagination } }
+        const items = Array.isArray(json) ? json : (json?.campaigns ?? json?.data?.data ?? json?.data ?? []);
+        setCampaigns(Array.isArray(items) ? items : []);
       }
     } catch {
       setError('Unable to load organizing campaigns. Please try again later.');

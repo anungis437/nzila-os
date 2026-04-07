@@ -2317,7 +2317,15 @@
     "deadlines": "Deadlines",
     "newCase": "New Case",
     "members": "Members",
-    "admin": "Admin"
+    "admin": "Admin",
+    "duesAdmin": "Dues Admin",
+    "dispatch": "Dispatch",
+    "aiInsights": "AI Insights",
+    "leadershipDashboard": "Leadership",
+    "movementInsights": "Movement",
+    "profile": "Profile",
+    "rewards": "Rewards",
+    "orgStructure": "Structure"
   },
   "marketing": {
     "nav": {

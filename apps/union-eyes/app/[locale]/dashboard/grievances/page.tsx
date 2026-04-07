@@ -5,9 +5,13 @@ import { requireUser, hasMinRole } from '@/lib/api-auth-guard';
 import { GrievancesConsole } from '@/components/grievances/grievances-console';
 
 export default async function GrievancesPage() {
-  const _user = await requireUser();
+  try {
+    await requireUser();
+  } catch {
+    redirect('/login');
+  }
   const allowed = await hasMinRole('steward');
-  if (!allowed) redirect(`/dashboard`);
+  if (!allowed) redirect('/dashboard');
 
   return <GrievancesConsole />;
 }

@@ -44,7 +44,11 @@ export const POST = withRoleAuth('steward', async (request, context: BaseAuthCon
   if (!userId || !organizationId) {
     return standardErrorResponse(ErrorCode.AUTH_REQUIRED, 'Unauthorized');
   }
-  await requireEntitlement(organizationId, 'financial_intelligence_suite', userId);
+  try {
+    await requireEntitlement(organizationId, 'financial_intelligence_suite', userId);
+  } catch (err) {
+    return standardErrorResponse(ErrorCode.FORBIDDEN, err instanceof Error ? err.message : 'Entitlement required');
+  }
 
   // Rate limiting: 100 financial read operations per hour per user
   const rateLimitResult = await checkRateLimit(userId, RATE_LIMITS.FINANCIAL_READ);

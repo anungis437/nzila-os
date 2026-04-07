@@ -37,22 +37,22 @@ const MOVEMENT_INSIGHTS_ROLES = [
 ] as const;
 
 interface MovementInsightsPageProps {
-  params: {
+  params: Promise<{
     locale: string;
-  };
-  searchParams: {
+  }>;
+  searchParams: Promise<{
     timeframe?: 'month' | 'quarter' | 'year';
     sector?: string;
     jurisdiction?: string;
-  };
+  }>;
 }
 
 export default async function MovementInsightsPage({
   params,
   searchParams,
 }: MovementInsightsPageProps) {
-  const { locale } = params;
-  const { timeframe = 'quarter', sector: _sector, jurisdiction: _jurisdiction } = searchParams;
+  const { locale } = await params;
+  const { timeframe = 'quarter', sector: _sector, jurisdiction: _jurisdiction } = await searchParams;
 
   // Require officer-level role to view cross-union analytics.
   const user = await requireUser();
@@ -127,7 +127,7 @@ export default async function MovementInsightsPage({
             opted in. <strong>Minimum 5 unions and 10 cases required for any trend.</strong>{' '}
             No individual organization can be identified. Statistical noise added to prevent
             reverse engineering.{' '}
-            <Link href="/docs/privacy/aggregation" className="underline">
+            <Link href={`/${locale}/legal/privacy`} className="underline">
               Learn more about our privacy guarantees
             </Link>
           </AlertDescription>

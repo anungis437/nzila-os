@@ -3,6 +3,10 @@ export const dynamic = 'force-dynamic';
 import { Metadata } from "next";
 import { requireUser, hasMinRole } from "@/lib/api-auth-guard";
 import { redirect } from "next/navigation";
+import { db } from '@/db/db';
+import { stewards, stewardAssignments, grievances, organizationMembers } from '@/db/schema';
+import { sql, eq, and, gte } from 'drizzle-orm';
+import { withSystemContext } from '@/lib/db/with-rls-context';
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "@/components/ui/card";
 import { Badge } from "@/components/ui/badge";
 import { Button } from "@/components/ui/button";
@@ -24,43 +28,133 @@ export default async function StewardsDashboardPage() {
     redirect("/dashboard");
   }
 
-  // Fetch steward stats from API
-  let stewardStats = {
-    totalStewards: 0,
-    activeCases: 0,
-    pendingEscalations: 0,
-    completedThisMonth: 0,
-    successRate: 0,
-    upcomingTraining: 0
-  };
-  try {
-    const baseUrl = process.env.NEXT_PUBLIC_APP_URL || '';
-    const res = await fetch(`${baseUrl}/api/v2/stewards/stats`, { cache: 'no-store' });
-    if (res.ok) {
-      const json = await res.json();
-      stewardStats = { ...stewardStats, ...json };
-    }
-  } catch {
-    // API not available — empty state
-  }
-
-  // Fetch steward performance and escalations
+  // Direct DB queries — avoids self-fetch auth issues
+  let stewardStats = { totalStewards: 0, activeCases: 0, pendingEscalations: 0, completedThisMonth: 0, successRate: 0, upcomingTraining: 0 };
   let stewardPerformance: { name: string; active: number; completed: number; successRate: number }[] = [];
   let pendingEscalationsList: { id: string; member: string; steward: string; reason: string }[] = [];
+
   try {
-    const baseUrl = process.env.NEXT_PUBLIC_APP_URL || '';
-    const perfRes = await fetch(`${baseUrl}/api/v2/stewards/performance`, { cache: 'no-store' });
-    if (perfRes.ok) {
-      const json = await perfRes.json();
-      stewardPerformance = Array.isArray(json) ? json : json?.data ?? [];
+  const result = await withSystemContext(async () => {
+    const now = new Date();
+    const monthStart = new Date(now.getFullYear(), now.getMonth(), 1);
+
+    // --- Stats ---
+    const [
+      totalStewards,
+      activeCases,
+      pendingEscalations,
+      completedThisMonth,
+      totalCompleted,
+      totalAssignments,
+    ] = await Promise.all([
+      db.select({ count: sql<number>`count(*)::int` })
+        .from(stewards)
+        .where(eq(stewards.active, true))
+        .then(r => r[0]?.count ?? 0),
+      db.select({ count: sql<number>`count(*)::int` })
+        .from(stewardAssignments)
+        .where(eq(stewardAssignments.status, 'active'))
+        .then(r => r[0]?.count ?? 0),
+      db.select({ count: sql<number>`count(*)::int` })
+        .from(grievances)
+        .where(eq(grievances.status, 'escalated'))
+        .then(r => r[0]?.count ?? 0),
+      db.select({ count: sql<number>`count(*)::int` })
+        .from(stewardAssignments)
+        .where(and(
+          eq(stewardAssignments.status, 'completed'),
+          gte(stewardAssignments.completedAt, monthStart),
+        ))
+        .then(r => r[0]?.count ?? 0),
+      db.select({ count: sql<number>`count(*)::int` })
+        .from(stewardAssignments)
+        .where(eq(stewardAssignments.status, 'completed'))
+        .then(r => r[0]?.count ?? 0),
+      db.select({ count: sql<number>`count(*)::int` })
+        .from(stewardAssignments)
+        .where(sql`${stewardAssignments.status} NOT IN ('pending', 'declined')`)
+        .then(r => r[0]?.count ?? 0),
+    ]);
+
+    const successRate = totalAssignments > 0
+      ? Math.round((totalCompleted / totalAssignments) * 100)
+      : 0;
+
+    const stats = { totalStewards, activeCases, pendingEscalations, completedThisMonth, successRate, upcomingTraining: 0 };
+
+    // --- Performance ---
+    const perfRows = await db
+      .select({
+        stewardId: stewards.id,
+        userId: stewards.userId,
+        active: sql<number>`count(*) FILTER (WHERE ${stewardAssignments.status} = 'active')::int`,
+        completed: sql<number>`count(*) FILTER (WHERE ${stewardAssignments.status} = 'completed')::int`,
+        total: sql<number>`count(*) FILTER (WHERE ${stewardAssignments.status} NOT IN ('pending', 'declined'))::int`,
+      })
+      .from(stewards)
+      .leftJoin(stewardAssignments, eq(stewardAssignments.stewardId, sql`${stewards.userId}::text`))
+      .where(eq(stewards.active, true))
+      .groupBy(stewards.id, stewards.userId);
+
+    let performance: { name: string; active: number; completed: number; successRate: number }[] = [];
+    if (perfRows.length > 0) {
+      const userIds = perfRows.map(r => r.userId);
+      const members = await db
+        .select({ userId: organizationMembers.userId, name: organizationMembers.name })
+        .from(organizationMembers)
+        .where(sql`${organizationMembers.userId}::text IN (${sql.join(userIds.map(id => sql`${id}::text`), sql`, `)})`);
+      const nameMap = new Map(members.map(m => [m.userId, m.name ?? 'Unknown']));
+      performance = perfRows.map(r => ({
+        name: nameMap.get(r.userId) ?? 'Unknown',
+        active: r.active,
+        completed: r.completed,
+        successRate: r.total > 0 ? Math.round((r.completed / r.total) * 100) : 0,
+      }));
     }
-    const escRes = await fetch(`${baseUrl}/api/v2/stewards/escalations`, { cache: 'no-store' });
-    if (escRes.ok) {
-      const json = await escRes.json();
-      pendingEscalationsList = Array.isArray(json) ? json : json?.data ?? [];
+
+    // --- Escalations ---
+    const escRows = await db
+      .select({
+        grievanceId: grievances.id,
+        grievanceNumber: grievances.grievanceNumber,
+        grievantName: grievances.grievantName,
+        title: grievances.title,
+        stewardId: stewardAssignments.stewardId,
+      })
+      .from(grievances)
+      .leftJoin(stewardAssignments, eq(stewardAssignments.grievanceId, grievances.id))
+      .where(eq(grievances.status, 'escalated'))
+      .orderBy(grievances.escalatedAt)
+      .limit(50);
+
+    let escalations: { id: string; member: string; steward: string; reason: string }[] = [];
+    if (escRows.length > 0) {
+      const stewardIds = [...new Set(escRows.map(r => r.stewardId).filter(Boolean))] as string[];
+      const stewardNameMap = new Map<string, string>();
+      if (stewardIds.length > 0) {
+        // stewardIds are user IDs (text) — look up names directly from organizationMembers
+        const sMembers = await db
+          .select({ userId: organizationMembers.userId, name: organizationMembers.name })
+          .from(organizationMembers)
+          .where(sql`${organizationMembers.userId}::text IN (${sql.join(stewardIds.map(id => sql`${id}`), sql`, `)})`);
+        sMembers.forEach(m => stewardNameMap.set(m.userId, m.name ?? 'Unknown'));
+      }
+      escalations = escRows.map(r => ({
+        id: r.grievanceNumber ?? r.grievanceId,
+        member: r.grievantName ?? 'Unknown',
+        steward: r.stewardId ? (stewardNameMap.get(r.stewardId) ?? 'Unassigned') : 'Unassigned',
+        reason: r.title ?? '',
+      }));
     }
-  } catch {
-    // API not available — empty state
+
+    return { stewardStats: stats, stewardPerformance: performance, pendingEscalationsList: escalations };
+  });
+  stewardStats = result.stewardStats;
+  stewardPerformance = result.stewardPerformance;
+  pendingEscalationsList = result.pendingEscalationsList;
+  } catch (error) {
+    console.error('[StewardsDashboard] DB query failed:', error);
+    // Fall through with empty defaults
   }
 
   return (

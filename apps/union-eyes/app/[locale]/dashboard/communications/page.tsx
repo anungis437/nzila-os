@@ -12,12 +12,132 @@ import { MessageSquare, Users, FileText, Mail, BarChart3, Send } from "lucide-re
 import Link from "next/link";
 import { redirect } from "next/navigation";
 import { requireUser, hasMinRole } from "@/lib/api-auth-guard";
+import CampaignsPage from "./campaigns/page";
+import DistributionListsPage from "./distribution-lists/page";
+import TemplatesPage from "./templates/page";
+import { SmsConsole } from "@/components/communications/sms-console";
+import { db } from "@/db";
+import { campaigns, messageTemplates, newsletterDistributionLists, smsCampaigns } from "@/db/schema";
+import { eq, and, inArray, count, sum, desc } from "drizzle-orm";
+import { logger } from "@/lib/logger";
 
-export default async function CommunicationsDashboard() {
-  const _user = await requireUser();
-  if (!(await hasMinRole("steward"))) {
-    redirect(`/dashboard`);
+/** Fetch all hub metrics in parallel */
+async function getHubMetrics(orgId: string) {
+  try {
+    const [
+      activeCampaigns,
+      scheduledCampaigns,
+      sentCampaigns,
+      distributionListStats,
+      templateCount,
+      smsCampaignCount,
+      recentCampaigns,
+    ] = await Promise.all([
+      // Active campaigns (scheduled, sending, or sent)
+      db.select({ value: count() })
+        .from(campaigns)
+        .where(and(
+          eq(campaigns.organizationId, orgId),
+          inArray(campaigns.status, ['scheduled', 'sending', 'sent']),
+        )),
+      // Scheduled only
+      db.select({ value: count() })
+        .from(campaigns)
+        .where(and(
+          eq(campaigns.organizationId, orgId),
+          eq(campaigns.status, 'scheduled'),
+        )),
+      // Sent campaigns (completed sends)
+      db.select({ value: count() })
+        .from(campaigns)
+        .where(and(
+          eq(campaigns.organizationId, orgId),
+          eq(campaigns.status, 'sent'),
+        )),
+      // Distribution lists count + total subscribers
+      db.select({ listCount: count(), totalSubscribers: sum(newsletterDistributionLists.subscriberCount) })
+        .from(newsletterDistributionLists)
+        .where(eq(newsletterDistributionLists.organizationId, orgId)),
+      // Templates count
+      db.select({ value: count() })
+        .from(messageTemplates)
+        .where(eq(messageTemplates.organizationId, orgId)),
+      // SMS campaigns count
+      db.select({ value: count() })
+        .from(smsCampaigns)
+        .where(eq(smsCampaigns.organizationId, orgId)),
+      // Recent campaigns for activity feed
+      db.select({
+        id: campaigns.id,
+        name: campaigns.name,
+        status: campaigns.status,
+        channel: campaigns.channel,
+        createdAt: campaigns.createdAt,
+      })
+        .from(campaigns)
+        .where(eq(campaigns.organizationId, orgId))
+        .orderBy(desc(campaigns.createdAt))
+        .limit(5),
+    ]);
+
+    return {
+      activeCampaignCount: activeCampaigns[0]?.value ?? 0,
+      scheduledCount: scheduledCampaigns[0]?.value ?? 0,
+      sentCount: sentCampaigns[0]?.value ?? 0,
+      listCount: distributionListStats[0]?.listCount ?? 0,
+      totalSubscribers: Number(distributionListStats[0]?.totalSubscribers ?? 0),
+      templateCount: templateCount[0]?.value ?? 0,
+      smsCampaignCount: smsCampaignCount[0]?.value ?? 0,
+      recentCampaigns: recentCampaigns,
+    };
+  } catch (err) {
+    logger.error('Failed to fetch hub metrics', err);
+    return {
+      activeCampaignCount: 0, scheduledCount: 0, sentCount: 0,
+      listCount: 0, totalSubscribers: 0, templateCount: 0,
+      smsCampaignCount: 0, recentCampaigns: [],
+    };
   }
+}
+
+function formatTimeAgo(date: Date | null): string {
+  if (!date) return '';
+  const now = new Date();
+  const diffMs = now.getTime() - date.getTime();
+  const diffMin = Math.floor(diffMs / 60000);
+  if (diffMin < 60) return `${diffMin}m ago`;
+  const diffHrs = Math.floor(diffMin / 60);
+  if (diffHrs < 24) return `${diffHrs}h ago`;
+  const diffDays = Math.floor(diffHrs / 24);
+  if (diffDays < 30) return `${diffDays}d ago`;
+  return date.toLocaleDateString();
+}
+
+const channelIcons: Record<string, typeof Mail> = {
+  email: Mail,
+  sms: MessageSquare,
+  push: Send,
+  multi_channel: BarChart3,
+};
+
+export default async function CommunicationsDashboard({
+  params,
+}: {
+  params: Promise<{ locale: string }>;
+}) {
+  const { locale } = await params;
+  let user;
+  try {
+    user = await requireUser();
+  } catch {
+    redirect(`/${locale}/login`);
+  }
+  if (!(await hasMinRole("steward"))) {
+    redirect(`/${locale}/dashboard`);
+  }
+
+  const orgId = user.organizationId;
+  const metrics = orgId ? await getHubMetrics(orgId) : null;
 
   return (
     <div className="p-6 space-y-6">
@@ -39,8 +159,8 @@ export default async function CommunicationsDashboard() {
             <CardTitle className="text-sm font-medium text-muted-foreground">Active Campaigns</CardTitle>
           </CardHeader>
           <CardContent>
-            <div className="text-2xl font-bold">8</div>
-            <p className="text-xs text-muted-foreground mt-1">3 scheduled</p>
+            <div className="text-2xl font-bold">{metrics?.activeCampaignCount ?? 0}</div>
+            <p className="text-xs text-muted-foreground mt-1">{metrics?.scheduledCount ?? 0} scheduled</p>
           </CardContent>
         </Card>
         
@@ -49,8 +169,8 @@ export default async function CommunicationsDashboard() {
             <CardTitle className="text-sm font-medium text-muted-foreground">Distribution Lists</CardTitle>
           </CardHeader>
           <CardContent>
-            <div className="text-2xl font-bold">15</div>
-            <p className="text-xs text-muted-foreground mt-1">2,340 total subscribers</p>
+            <div className="text-2xl font-bold">{metrics?.listCount ?? 0}</div>
+            <p className="text-xs text-muted-foreground mt-1">{(metrics?.totalSubscribers ?? 0).toLocaleString()} total subscribers</p>
           </CardContent>
         </Card>
         
@@ -59,18 +179,18 @@ export default async function CommunicationsDashboard() {
             <CardTitle className="text-sm font-medium text-muted-foreground">Templates</CardTitle>
           </CardHeader>
           <CardContent>
-            <div className="text-2xl font-bold">42</div>
-            <p className="text-xs text-muted-foreground mt-1">12 recently updated</p>
+            <div className="text-2xl font-bold">{metrics?.templateCount ?? 0}</div>
+            <p className="text-xs text-muted-foreground mt-1">Across all channels</p>
           </CardContent>
         </Card>
         
         <Card>
           <CardHeader className="pb-3">
-            <CardTitle className="text-sm font-medium text-muted-foreground">Messages Sent</CardTitle>
+            <CardTitle className="text-sm font-medium text-muted-foreground">Campaigns Sent</CardTitle>
           </CardHeader>
           <CardContent>
-            <div className="text-2xl font-bold">1,247</div>
-            <p className="text-xs text-muted-foreground mt-1">This month</p>
+            <div className="text-2xl font-bold">{metrics?.sentCount ?? 0}</div>
+            <p className="text-xs text-muted-foreground mt-1">{metrics?.smsCampaignCount ?? 0} SMS campaigns</p>
           </CardContent>
         </Card>
       </div>
@@ -91,31 +211,27 @@ export default async function CommunicationsDashboard() {
             <Card>
               <CardHeader>
                 <CardTitle>Recent Activity</CardTitle>
-                <CardDescription>Latest communication actions</CardDescription>
+                <CardDescription>Latest campaigns</CardDescription>
               </CardHeader>
               <CardContent>
                 <div className="space-y-4">
-                  <div className="flex items-start gap-3 p-3 border rounded-lg">
-                    <Mail className="h-5 w-5 text-blue-500 mt-0.5" />
-                    <div className="flex-1">
-                      <p className="font-medium text-sm">Contract Update Sent</p>
-                      <p className="text-xs text-muted-foreground">To: All Members • 2 hours ago</p>
-                    </div>
-                  </div>
-                  <div className="flex items-start gap-3 p-3 border rounded-lg">
-                    <Users className="h-5 w-5 text-green-500 mt-0.5" />
-                    <div className="flex-1">
-                      <p className="font-medium text-sm">New List Created</p>
-                      <p className="text-xs text-muted-foreground">&ldquo;Stewards - Region 3&rdquo; • Yesterday</p>
-                    </div>
-                  </div>
-                  <div className="flex items-start gap-3 p-3 border rounded-lg">
-                    <FileText className="h-5 w-5 text-purple-500 mt-0.5" />
-                    <div className="flex-1">
-                      <p className="font-medium text-sm">Template Updated</p>
-                      <p className="text-xs text-muted-foreground">&ldquo;Meeting Reminder&rdquo; • 2 days ago</p>
-                    </div>
-                  </div>
+                  {(metrics?.recentCampaigns ?? []).length === 0 && (
+                    <p className="text-sm text-muted-foreground">No campaigns yet</p>
+                  )}
+                  {(metrics?.recentCampaigns ?? []).map((c) => {
+                    const Icon = channelIcons[c.channel] ?? Mail;
+                    return (
+                      <div key={c.id} className="flex items-start gap-3 p-3 border rounded-lg">
+                        <Icon className="h-5 w-5 text-blue-500 mt-0.5" />
+                        <div className="flex-1">
+                          <p className="font-medium text-sm">{c.name}</p>
+                          <p className="text-xs text-muted-foreground">
+                            {c.status} &middot; {c.channel} &middot; {formatTimeAgo(c.createdAt)}
+                          </p>
+                        </div>
+                      </div>
+                    );
+                  })}
                 </div>
               </CardContent>
             </Card>
@@ -128,31 +244,31 @@ export default async function CommunicationsDashboard() {
               </CardHeader>
               <CardContent className="space-y-3">
                 <Button className="w-full justify-start" variant="outline" asChild>
-                  <Link href="/dashboard/communications">
+                  <Link href={`/${locale}/dashboard/communications/campaigns/new`}>
                     <Send className="mr-2 h-4 w-4" />
                     Create New Campaign
                   </Link>
                 </Button>
                 <Button className="w-full justify-start" variant="outline" asChild>
-                  <Link href="/dashboard/communications/sms">
+                  <Link href={`/${locale}/dashboard/communications/sms`}>
                     <MessageSquare className="mr-2 h-4 w-4" />
                     Send SMS Message
                   </Link>
                 </Button>
                 <Button className="w-full justify-start" variant="outline" asChild>
-                  <Link href="/dashboard/communications">
+                  <Link href={`/${locale}/dashboard/communications/distribution-lists`}>
                     <Users className="mr-2 h-4 w-4" />
                     Manage Distribution Lists
                   </Link>
                 </Button>
                 <Button className="w-full justify-start" variant="outline" asChild>
-                  <Link href="/dashboard/communications">
+                  <Link href={`/${locale}/dashboard/communications/templates`}>
                     <FileText className="mr-2 h-4 w-4" />
                     Browse Templates
                   </Link>
                 </Button>
                 <Button className="w-full justify-start" variant="outline" asChild>
-                  <Link href="/dashboard/communications">
+                  <Link href={`/${locale}/dashboard/communications/campaigns`}>
                     <BarChart3 className="mr-2 h-4 w-4" />
                     View Analytics
                   </Link>
@@ -163,67 +279,19 @@ export default async function CommunicationsDashboard() {
         </TabsContent>
 
         <TabsContent value="campaigns">
-          <Card>
-            <CardHeader>
-              <CardTitle>Email Campaigns</CardTitle>
-              <CardDescription>Create and manage email campaigns</CardDescription>
-            </CardHeader>
-            <CardContent>
-              <p className="text-sm text-muted-foreground mb-4">
-                Campaign management interface will be available here. API routes exist at /api/communications/campaigns.
-              </p>
-              <Button>Create New Campaign</Button>
-            </CardContent>
-          </Card>
+          <CampaignsPage />
         </TabsContent>
 
         <TabsContent value="lists">
-          <Card>
-            <CardHeader>
-              <CardTitle>Distribution Lists</CardTitle>
-              <CardDescription>Manage member distribution lists</CardDescription>
-            </CardHeader>
-            <CardContent>
-              <p className="text-sm text-muted-foreground mb-4">
-                Distribution list management interface will be available here. API routes exist at /api/communications/distribution-lists.
-              </p>
-              <Button>Create New List</Button>
-            </CardContent>
-          </Card>
+          <DistributionListsPage />
         </TabsContent>
 
         <TabsContent value="templates">
-          <Card>
-            <CardHeader>
-              <CardTitle>Message Templates</CardTitle>
-              <CardDescription>Create and manage reusable templates</CardDescription>
-            </CardHeader>
-            <CardContent>
-              <p className="text-sm text-muted-foreground mb-4">
-                Template library interface will be available here. API routes exist at /api/communications/templates.
-              </p>
-              <Button>Create New Template</Button>
-            </CardContent>
-          </Card>
+          <TemplatesPage />
         </TabsContent>
 
         <TabsContent value="sms">
-          <Card>
-            <CardHeader>
-              <CardTitle>SMS Communications</CardTitle>
-              <CardDescription>Send text messages to members</CardDescription>
-            </CardHeader>
-            <CardContent>
-              <p className="text-sm text-muted-foreground mb-4">
-                SMS functionality is available through the dedicated SMS interface.
-              </p>
-              <Button asChild>
-                <Link href="/dashboard/communications/sms">
-                  Open SMS Dashboard
-                </Link>
-              </Button>
-            </CardContent>
-          </Card>
+          <SmsConsole />
         </TabsContent>
       </Tabs>
     </div>

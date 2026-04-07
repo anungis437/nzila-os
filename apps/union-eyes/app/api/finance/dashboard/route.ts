@@ -6,7 +6,7 @@
  */
 
 import { withMinRole, type BaseAuthContext } from '@/lib/api-auth-guard';
-import { requireEntitlement } from '@/services/platform-economics/entitlement-guard';
+import { requireEntitlement, EntitlementError } from '@/services/platform-economics/entitlement-guard';
 import {
   ErrorCode,
   standardErrorResponse,
@@ -27,9 +27,9 @@ export const GET = withMinRole('officer', async (request, context: BaseAuthConte
   if (!organizationId) {
     return standardErrorResponse(ErrorCode.AUTH_REQUIRED, 'Unauthorized');
   }
-  await requireEntitlement(organizationId, 'financial_intelligence_suite', userId);
 
   try {
+    await requireEntitlement(organizationId, 'financial_intelligence_suite', userId);
     const url = new URL(request.url);
     const periodId = url.searchParams.get('periodId') ?? undefined;
 
@@ -61,6 +61,9 @@ export const GET = withMinRole('officer', async (request, context: BaseAuthConte
       },
     });
   } catch (error) {
+    if (error instanceof EntitlementError) {
+      return standardErrorResponse(ErrorCode.FORBIDDEN, error.message);
+    }
     return standardErrorResponse(ErrorCode.INTERNAL_ERROR, 'Failed to load dashboard', error);
   }
 });

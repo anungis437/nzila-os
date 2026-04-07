@@ -192,7 +192,7 @@ export function GrievancesConsole() {
   useEffect(() => {
     const fetchGrievances = async () => {
       try {
-        const res = await fetch('/api/v2/grievances');
+        const res = await fetch('/api/grievances');
         if (res.ok) {
           const json = await res.json();
           const items = Array.isArray(json) ? json : json?.grievances ?? json?.data ?? [];

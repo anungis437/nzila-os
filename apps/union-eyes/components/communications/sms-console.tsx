@@ -60,8 +60,10 @@ export function SmsConsole() {
       try {
         const response = await fetch('/api/communications/sms/campaigns');
         if (!response.ok) throw new Error('Failed to fetch campaigns');
-        const data = await response.json();
-        setCampaigns(data.campaigns);
+        const json = await response.json();
+        // withApi wraps in { success, data: { data, pagination }, timestamp }
+        const payload = json.data ?? json;
+        setCampaigns(Array.isArray(payload.data) ? payload.data : Array.isArray(payload) ? payload : []);
       } catch (_error) {
       } finally {
         setIsLoadingCampaigns(false);

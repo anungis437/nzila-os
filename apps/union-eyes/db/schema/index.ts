@@ -92,6 +92,9 @@ export * from "./domains/dispatch/dispatch"; // Dispatch-hall automation
 // Board Packets
 export * from "./board-packet-schema";       // Governance meeting packet generation
 
+// Dues & Finance (member dues ledger, arrears, employer remittances)
+export * from "./dues-finance-schema";
+
 // ============================================================================
 // EXTERNAL EXPORTS (Outside Domain Structure)
 // ============================================================================

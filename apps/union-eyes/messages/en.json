@@ -2042,6 +2042,7 @@
     "supportCenter": "Support",
     "platformAnalytics": "Analytics",
     "billingSubscriptions": "Billing",
+    "billingInvoices": "Billing & Invoices",
     "integrationsAPIs": "Integrations",
     "securityCompliance": "Security",
     "contentTraining": "Content",
@@ -2057,7 +2058,15 @@
     "newCase": "New Case",
     "members": "Members",
     "admin": "Admin",
-    "deadlines": "Deadlines"
+    "deadlines": "Deadlines",
+    "duesAdmin": "Dues Admin",
+    "dispatch": "Dispatch",
+    "aiInsights": "AI Insights",
+    "leadershipDashboard": "Leadership",
+    "movementInsights": "Movement",
+    "profile": "Profile",
+    "rewards": "Rewards",
+    "orgStructure": "Structure"
   },
   "steward": {
     "recommendations": {

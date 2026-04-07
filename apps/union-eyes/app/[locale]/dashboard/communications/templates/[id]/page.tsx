@@ -12,7 +12,7 @@
 
 export const dynamic = 'force-dynamic';
 import { useState, useEffect } from 'react';
-import { useRouter } from 'next/navigation';
+import { useRouter, useParams } from 'next/navigation';
 import { useLocale } from 'next-intl';
 import { Button } from '@/components/ui/button';
 import { Input } from '@/components/ui/input';
@@ -88,9 +88,10 @@ interface Template {
   updatedAt: string;
 }
 
-export default function TemplateDetailPage({ params }: { params: { id: string } }) {
+export default function TemplateDetailPage() {
   const router = useRouter();
   const locale = useLocale();
+  const { id: paramId } = useParams<{ id: string }>();
   const [template, setTemplate] = useState<Template | null>(null);
   const [loading, setLoading] = useState(true);
   const [saving, setSaving] = useState(false);
@@ -114,14 +115,14 @@ export default function TemplateDetailPage({ params }: { params: { id: string } 
   useEffect(() => {
     fetchTemplate();
   // eslint-disable-next-line react-hooks/exhaustive-deps
-  }, [params.id]);
+  }, [paramId]);
 
   const fetchTemplate = async () => {
     try {
       setLoading(true);
       setError(null);
 
-      const response = await fetch(`/api/messaging/templates/${params.id}`);
+      const response = await fetch(`/api/communications/templates/${paramId}`);
       
       if (!response.ok) {
         if (response.status === 404) {
@@ -130,7 +131,8 @@ export default function TemplateDetailPage({ params }: { params: { id: string } 
         throw new Error('Failed to fetch template');
       }
 
-      const data = await response.json();
+      const json = await response.json();
+      const data = json.data ?? json;
       setTemplate(data);
       setFormData(data);
     } catch (err) {
@@ -146,7 +148,7 @@ export default function TemplateDetailPage({ params }: { params: { id: string } 
       setError(null);
       setSuccessMessage(null);
 
-      const response = await fetch(`/api/messaging/templates/${params.id}`, {
+      const response = await fetch(`/api/communications/templates/${paramId}`, {
         method: 'PUT',
         headers: { 'Content-Type': 'application/json' },
         body: JSON.stringify(formData),
@@ -157,7 +159,8 @@ export default function TemplateDetailPage({ params }: { params: { id: string } 
         throw new Error(error.error || 'Failed to save template');
       }
 
-      const updated = await response.json();
+      const updatedJson = await response.json();
+      const updated = updatedJson.data ?? updatedJson;
       setTemplate(updated);
       setFormData(updated);
       setSuccessMessage('Template saved successfully');
@@ -175,7 +178,7 @@ export default function TemplateDetailPage({ params }: { params: { id: string } 
       setDeleting(true);
       setError(null);
 
-      const response = await fetch(`/api/messaging/templates/${params.id}`, {
+      const response = await fetch(`/api/communications/templates/${paramId}`, {
         method: 'DELETE',
       });
 

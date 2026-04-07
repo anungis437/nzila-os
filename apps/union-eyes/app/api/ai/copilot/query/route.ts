@@ -37,7 +37,11 @@ export const POST = withRoleAuth('steward', async (request: NextRequest, context
   });
   if (blocked) return blocked;
 
-  await requireEntitlement(context.organizationId!, 'ai_advanced_insights');
+  try {
+    await requireEntitlement(context.organizationId!, 'ai_advanced_insights');
+  } catch (err) {
+    return standardErrorResponse(ErrorCode.FORBIDDEN, err instanceof Error ? err.message : 'Entitlement required');
+  }
 
   const body = await request.json();
   const parsed = copilotSchema.safeParse(body);
@@ -68,7 +72,11 @@ export const GET = withRoleAuth('steward', async (_request: NextRequest, context
   });
   if (blocked) return blocked;
 
-  await requireEntitlement(context.organizationId!, 'ai_advanced_insights');
+  try {
+    await requireEntitlement(context.organizationId!, 'ai_advanced_insights');
+  } catch (err) {
+    return standardErrorResponse(ErrorCode.FORBIDDEN, err instanceof Error ? err.message : 'Entitlement required');
+  }
 
   const history = await getCopilotHistory(context.userId!, context.organizationId!);
   return standardSuccessResponse(history);

@@ -26,7 +26,7 @@ export default function TrusteePortalPage() {
         if (data.data && data.data.length > 0) {
           const userTrustee = data.data[0];
           setIsTrustee(true);
-          setTrustBoardId(userTrustee.trusteeBoardId);
+          setTrustBoardId(userTrustee.id);
           setMemberId(userTrustee.userId);
         } else {
           setIsTrustee(false);

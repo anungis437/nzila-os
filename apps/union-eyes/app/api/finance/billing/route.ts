@@ -41,7 +41,11 @@ export const GET = withMinRole('officer', async (_request, context: BaseAuthCont
   if (!organizationId) {
     return standardErrorResponse(ErrorCode.AUTH_REQUIRED, 'Unauthorized');
   }
-  await requireEntitlement(organizationId, 'financial_intelligence_suite', userId);
+  try {
+    await requireEntitlement(organizationId, 'financial_intelligence_suite', userId);
+  } catch (err) {
+    return standardErrorResponse(ErrorCode.FORBIDDEN, err instanceof Error ? err.message : 'Entitlement required');
+  }
 
   try {
     const account = await getBillingAccount(organizationId);
@@ -59,7 +63,11 @@ export const POST = withMinRole('admin', async (request, context: BaseAuthContex
   if (!organizationId || !userId) {
     return standardErrorResponse(ErrorCode.AUTH_REQUIRED, 'Unauthorized');
   }
-  await requireEntitlement(organizationId, 'financial_intelligence_suite', userId);
+  try {
+    await requireEntitlement(organizationId, 'financial_intelligence_suite', userId);
+  } catch (err) {
+    return standardErrorResponse(ErrorCode.FORBIDDEN, err instanceof Error ? err.message : 'Entitlement required');
+  }
 
   let rawBody: unknown;
   try {
@@ -107,7 +115,11 @@ export const PATCH = withMinRole('admin', async (request, context: BaseAuthConte
   if (!organizationId || !userId) {
     return standardErrorResponse(ErrorCode.AUTH_REQUIRED, 'Unauthorized');
   }
-  await requireEntitlement(organizationId, 'financial_intelligence_suite', userId);
+  try {
+    await requireEntitlement(organizationId, 'financial_intelligence_suite', userId);
+  } catch (err) {
+    return standardErrorResponse(ErrorCode.FORBIDDEN, err instanceof Error ? err.message : 'Entitlement required');
+  }
 
   let rawBody: unknown;
   try {
