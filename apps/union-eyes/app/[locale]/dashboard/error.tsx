@@ -16,8 +16,6 @@ export default function DashboardError({
 }) {
   const locale = useLocale();
   useEffect(() => {
-    // Log error to console for container log visibility
-    console.error('[DashboardError]', error.message, error.digest, error.stack);
     // Log error to Sentry
     Sentry.captureException(error, {
       tags: {
