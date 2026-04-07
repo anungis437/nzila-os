@@ -51,7 +51,7 @@ export default function AuthPageLayout({
   heroImage,
   heroAlt = 'Hero background',
   trustBadges = [],
-  isSignUp = false,
+  isSignUp: _isSignUp = false,
 }: AuthPageLayoutProps) {
   return (
     <div className="flex min-h-screen">
