@@ -196,9 +196,9 @@ describe('ApiAuthGuard', () => {
 
   // ── ROLE_HIERARCHY ───────────────────────────────────────────────
   describe('ROLE_HIERARCHY', () => {
-    it('has app_owner at top (300) and member at bottom (10)', () => {
+    it('has app_owner at top (300) and member at bottom (20)', () => {
       expect(ROLE_HIERARCHY.app_owner).toBe(300);
-      expect(ROLE_HIERARCHY.member).toBe(10);
+      expect(ROLE_HIERARCHY.member).toBe(20);
     });
 
     it('contains all expected tiers', () => {
