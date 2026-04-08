@@ -152,7 +152,9 @@
       "@tootallnate/once": ">=3.0.1",
       "picomatch": ">=4.0.4",
       "@xmldom/xmldom": ">=0.8.12",
-      "lodash": ">=4.18.0"
+      "lodash": ">=4.18.0",
+      "vite": ">=7.3.2",
+      "drizzle-orm": ">=0.45.2"
     }
   },
   "dependencies": {}
