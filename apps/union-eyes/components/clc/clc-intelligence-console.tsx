@@ -56,10 +56,16 @@ import {
 import { StatCard } from "@/components/analytics/StatCard";
 import { TopItemsList } from "@/components/analytics/TopItemsList";
 import { DistributionChart } from "@/components/analytics/DistributionChart";
+import {
+  ExecutiveSummaryBanner,
+  ExecutivePriorityList,
+  WhatChangedPanel,
+  ExecutiveActionBriefCard,
+} from "@/components/clc/executive-intelligence";
 
 // ── Types ───────────────────────────────────────────────────────────────────
 
-type ActiveTab = "overview" | "decisions" | "sectors" | "affiliates" | "knowledge" | "governance";
+type ActiveTab = "overview" | "decisions" | "executive" | "sectors" | "affiliates" | "knowledge" | "governance";
 
 interface SectorSignal {
   sector: string;
@@ -208,6 +214,58 @@ interface IntelligenceBriefing {
   findings: BriefingFinding[];
 }
 
+// ── Executive Brief Types ───────────────────────────────────────────────────
+
+interface ExecutiveBriefMovementSummary {
+  headline: string;
+  summary: string;
+  posture: "steady" | "vigilant" | "heightened";
+  confidence: number;
+  dominantSignals: string[];
+  whyNow: string;
+}
+
+interface ExecutiveBriefPriority {
+  id: string;
+  title: string;
+  watchLevel: "monitor" | "elevated" | "high" | "critical";
+  timeframe: string;
+  confidence: number;
+  whyItMatters: string;
+  sourceTypes: string[];
+  priorityScore: number;
+}
+
+interface ExecutiveBriefDelta {
+  id: string;
+  title: string;
+  direction: "up" | "down" | "new" | "resolved";
+  explanation: string;
+  confidence: number;
+}
+
+interface ExecutiveBriefAction {
+  generatedAt: string;
+  posture: "steady" | "vigilant" | "heightened";
+  headline: string;
+  summary: string;
+  recommendedNextSteps: string[];
+  confidence: number;
+  nilInvoked: boolean;
+  usedTimeSeries: boolean;
+}
+
+interface ExecutiveBriefData {
+  movementSummary: ExecutiveBriefMovementSummary;
+  topExecutivePriorities: ExecutiveBriefPriority[];
+  whatChanged: ExecutiveBriefDelta[];
+  actionBrief: ExecutiveBriefAction;
+  meta: {
+    snapshotId: string;
+    timeSeriesAvailable: boolean;
+  };
+}
+
 // ── Briefing Panel ──────────────────────────────────────────────────────────
 
 function BriefingPanel({ briefing, isLoading }: { briefing: IntelligenceBriefing | null; isLoading: boolean }) {
@@ -302,6 +360,9 @@ export default function CLCIntelligenceConsole() {
   // Decision intelligence state
   const [decisionIntel, setDecisionIntel] = useState<DecisionIntelligenceOutput | null>(null);
 
+  // Executive intelligence state
+  const [executiveBrief, setExecutiveBrief] = useState<ExecutiveBriefData | null>(null);
+
   useEffect(() => {
     setMounted(true);
   }, []);
@@ -314,12 +375,13 @@ export default function CLCIntelligenceConsole() {
       const toDate = new Date().toISOString();
       const params = new URLSearchParams({ fromDate, toDate, briefing: 'true' });
 
-      const [sectorsRes, affiliatesRes, knowledgeRes, govRes, decisionRes] = await Promise.all([
+      const [sectorsRes, affiliatesRes, knowledgeRes, govRes, decisionRes, execBriefRes] = await Promise.all([
         fetch(`/api/v2/analytics/clc/sector-signals?${params}`),
         fetch(`/api/v2/analytics/clc/affiliate-trends?${params}`),
         fetch(`/api/v2/analytics/clc/knowledge-index?briefing=true`),
         fetch(`/api/v2/analytics/clc/governance?briefing=true`),
         fetch(`/api/v2/analytics/clc/decision-intelligence?${params}`),
+        fetch(`/api/v2/analytics/clc/executive-brief?${params}`),
       ]);
 
       // Check for governance failures
@@ -338,6 +400,9 @@ export default function CLCIntelligenceConsole() {
       // Decision intelligence — fetched separately to handle graceful degradation
       const decisionData = decisionRes.ok ? await decisionRes.json() : null;
 
+      // Executive intelligence — graceful degradation
+      const execBriefData = execBriefRes.ok ? await execBriefRes.json() : null;
+
       setSectorSignals(sectorsData?.signals ?? null);
       setAffiliateTrends(affiliatesData?.trends ?? null);
       setKnowledgeIndex(knowledgeData?.index ?? null);
@@ -351,6 +416,9 @@ export default function CLCIntelligenceConsole() {
 
       // Decision intelligence
       setDecisionIntel(decisionData);
+
+      // Executive brief
+      setExecutiveBrief(execBriefData);
     } catch (err) {
       setError(err instanceof Error ? err.message : 'Failed to load intelligence data');
     } finally {
@@ -417,6 +485,7 @@ export default function CLCIntelligenceConsole() {
         <TabsList>
           <TabsTrigger value="overview">Overview</TabsTrigger>
           <TabsTrigger value="decisions">Decision Intelligence</TabsTrigger>
+          <TabsTrigger value="executive">Executive Brief</TabsTrigger>
           <TabsTrigger value="sectors">Sector Signals</TabsTrigger>
           <TabsTrigger value="affiliates">Affiliate Trends</TabsTrigger>
           <TabsTrigger value="knowledge">Shared Knowledge</TabsTrigger>
@@ -836,6 +905,32 @@ export default function CLCIntelligenceConsole() {
           )}
         </TabsContent>
 
+        {/* ── Executive Brief Tab ──────────────────────────────────────── */}
+        <TabsContent value="executive" className="space-y-6">
+          {executiveBrief ? (
+            <>
+              <ExecutiveSummaryBanner summary={executiveBrief.movementSummary} />
+              <div className="grid gap-6 lg:grid-cols-2">
+                <ExecutivePriorityList priorities={executiveBrief.topExecutivePriorities} />
+                <WhatChangedPanel deltas={executiveBrief.whatChanged} />
+              </div>
+              <ExecutiveActionBriefCard brief={executiveBrief.actionBrief} />
+            </>
+          ) : isLoading ? (
+            <Card>
+              <CardContent className="pt-6 text-center text-muted-foreground">
+                Building executive brief...
+              </CardContent>
+            </Card>
+          ) : (
+            <Card>
+              <CardContent className="pt-6 text-center text-muted-foreground">
+                Executive brief unavailable. Ensure you have CLC executive permissions.
+              </CardContent>
+            </Card>
+          )}
+        </TabsContent>
+
         {/* ── Sector Signals Tab ────────────────────────────────────────── */}
         <TabsContent value="sectors" className="space-y-6">
           <BriefingPanel briefing={sectorBriefing} isLoading={isLoading} />
@@ -861,7 +956,7 @@ export default function CLCIntelligenceConsole() {
                   sectorSignals?.flatMap((s) =>
                     Array.from({ length: s.uniqueOrgs }, (_, i) => `${s.sector}-${i}`),
                   ) ?? [],
-                ).size || sectorSignals?.reduce((max, s) => Math.max(max, s.uniqueOrgs), 0) ?? 0
+                ).size || (sectorSignals?.reduce((max, s) => Math.max(max, s.uniqueOrgs), 0) ?? 0)
               }
               icon={Network}
               iconColor="text-green-600"

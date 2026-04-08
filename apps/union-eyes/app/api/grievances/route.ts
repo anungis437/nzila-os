@@ -128,7 +128,7 @@ export const POST = withOrganizationAuth(async (request, context) => {
       userId,
       organizationId,
       resource: "grievances",
-      action: isOfficialCase ? "create_official_case" : "submit_intake",
+      action: 'create',
       resourceId: grievance.id,
       newState: grievance,
     });

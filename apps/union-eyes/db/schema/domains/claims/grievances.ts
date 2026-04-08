@@ -23,6 +23,7 @@ export const grievanceTypeEnum = pgEnum("grievance_type", [
 
 export const grievanceStatusEnum = pgEnum("grievance_status", [
   "draft",
+  "new",
   "filed",
   "acknowledged",
   "investigating",

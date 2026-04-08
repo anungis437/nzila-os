@@ -45,6 +45,9 @@ export const grievanceEventTypeEnum = pgEnum("grievance_event_type", [
   "meeting_scheduled",
   "response_received",
   "closed",
+  "converted_to_case",
+  "priority_overridden",
+  "intake_submitted",
 ]);
 
 export const grievanceDocumentTypeEnum = pgEnum("grievance_document_type", [

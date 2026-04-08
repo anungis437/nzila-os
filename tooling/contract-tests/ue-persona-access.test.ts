@@ -313,6 +313,7 @@ const API_ROUTE_MATRIX: ApiRouteRule[] = [
   { apiPath: 'dues/calculate',       expectedAuthPattern: 'withRoleAuth',         expectedMinRole: 'steward',              backingPage: 'admin/dues' },
   { apiPath: 'analytics/cross-org',  expectedAuthPattern: 'withApi',              expectedMinRole: 'platform_lead',        backingPage: 'cross-org analytics (platform)' },
   { apiPath: 'v2/analytics/clc/decision-intelligence',    expectedAuthPattern: 'withApi',  expectedMinRole: 'clc_staff',            backingPage: 'clc/intelligence/page.tsx' },
+  { apiPath: 'v2/analytics/clc/executive-brief',          expectedAuthPattern: 'withApi',  expectedMinRole: 'clc_executive',        backingPage: 'clc/intelligence/page.tsx' },
 ]
 
 // ── Helpers ─────────────────────────────────────────────────────────────────

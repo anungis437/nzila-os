@@ -21,7 +21,7 @@ import {
   organizations,
   organizationSharingSettings,
 } from '@/db/schema';
-import { sql, desc, and, inArray, ne, gte, lte } from 'drizzle-orm';
+import { sql, desc, and, inArray, ne, gte, lte, type SQL } from 'drizzle-orm';
 
 // ── Types ───────────────────────────────────────────────────────────────────
 
@@ -303,7 +303,7 @@ export async function queryAffiliateTrends(
     .groupBy(organizations.organizationType);
 
   // Access activity aggregated by org type
-  const dateConditions = [];
+  const dateConditions: SQL[] = [];
   if (filters?.fromDate) dateConditions.push(gte(crossOrgAccessLog.createdAt, new Date(filters.fromDate)));
   if (filters?.toDate) dateConditions.push(lte(crossOrgAccessLog.createdAt, new Date(filters.toDate)));
 
@@ -523,4 +523,56 @@ export async function queryGovernanceSummary(
     },
     cohortHealth,
   };
+}
+
+// ── Sector Time-Series ──────────────────────────────────────────────────────
+
+export interface SectorTimeSeriesPoint {
+  period: string;
+  value: number;
+}
+
+export interface SectorTimeSeriesData {
+  sector: string;
+  series: SectorTimeSeriesPoint[];
+}
+
+/**
+ * Query sector-level time-series data — monthly clause creation counts
+ * per sector for the last 12 months. Used by the decision-intelligence
+ * and executive-intelligence layers for temporal correlation.
+ */
+export async function querySectorTimeSeries(
+  consentedOrgIds: string[],
+): Promise<SectorTimeSeriesData[]> {
+  if (consentedOrgIds.length === 0) return [];
+
+  const orgFilter = inArray(sharedClauseLibrary.sourceOrganizationId, consentedOrgIds);
+  const notPrivate = ne(sharedClauseLibrary.sharingLevel, 'private');
+  const recent = gte(
+    sharedClauseLibrary.createdAt,
+    sql`now() - interval '12 months'`,
+  );
+
+  const rows = await db
+    .select({
+      sector: sharedClauseLibrary.sector,
+      period: sql<string>`to_char(${sharedClauseLibrary.createdAt}, 'YYYY-MM')`,
+      count: sql<number>`count(*)::int`,
+    })
+    .from(sharedClauseLibrary)
+    .where(and(orgFilter, notPrivate, recent))
+    .groupBy(sharedClauseLibrary.sector, sql`to_char(${sharedClauseLibrary.createdAt}, 'YYYY-MM')`)
+    .orderBy(sharedClauseLibrary.sector, sql`to_char(${sharedClauseLibrary.createdAt}, 'YYYY-MM')`);
+
+  // Group into SectorTimeSeries[] shape
+  const sectorMap = new Map<string, SectorTimeSeriesPoint[]>();
+  for (const row of rows) {
+    const sector = row.sector ?? 'unknown';
+    const existing = sectorMap.get(sector) ?? [];
+    existing.push({ period: row.period, value: row.count });
+    sectorMap.set(sector, existing);
+  }
+
+  return [...sectorMap.entries()].map(([sector, series]) => ({ sector, series }));
 }

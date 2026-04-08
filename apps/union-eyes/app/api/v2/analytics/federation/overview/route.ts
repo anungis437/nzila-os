@@ -16,7 +16,7 @@ import {
   arbitrationPrecedents,
   crossOrgAccessLog,
 } from '@/db/schema';
-import { sql, and, inArray, ne, gte, lte, eq } from 'drizzle-orm';
+import { sql, and, inArray, ne, gte, lte, eq, type SQL } from 'drizzle-orm';
 import { withSystemContext } from '@/lib/db/with-rls-context';
 import { auditLog, AuditEventType, AuditSeverity } from '@/lib/audit-logger';
 
@@ -48,7 +48,7 @@ export const GET = withApi(
       db
         .select({ id: organizations.id })
         .from(organizations)
-        .where(eq(organizations.parentOrganizationId, organizationId)),
+        .where(eq(organizations.parentId, organizationId)),
     );
 
     const affiliateIds = affiliateOrgs.map((o) => o.id);
@@ -60,7 +60,7 @@ export const GET = withApi(
     const fromDate = url.searchParams.get('fromDate') ?? undefined;
     const toDate = url.searchParams.get('toDate') ?? undefined;
 
-    const dateConditions = [];
+    const dateConditions: SQL[] = [];
     if (fromDate) dateConditions.push(gte(crossOrgAccessLog.createdAt, new Date(fromDate)));
     if (toDate) dateConditions.push(lte(crossOrgAccessLog.createdAt, new Date(toDate)));
 
