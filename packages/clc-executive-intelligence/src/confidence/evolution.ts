@@ -14,6 +14,7 @@ import type {
   EvolvedConfidence,
   DecisionOutcome,
   ConfidenceBreakdown,
+  RecommendationQualityMetrics,
 } from '../contracts/index';
 import type { ConfidenceBand } from '@nzila/clc-decision-intelligence';
 
@@ -161,4 +162,67 @@ export function buildConfidenceBreakdown(
       description: descriptions?.[name] ?? defaultDescriptions[name] ?? name,
     })),
   };
+}
+
+// ── Confidence Adjustment Explanation ────────────────────────────────────────
+
+/** Maximum bounded modifier for quality-based adjustment */
+const MAX_QUALITY_MODIFIER = 0.15;
+
+/**
+ * Build a confidence adjustment explanation based on recommendation quality metrics.
+ *
+ * This integrates historical recommendation quality into the confidence explanation,
+ * providing leadership with transparency about how past performance affects current
+ * confidence levels.
+ */
+export function buildConfidenceAdjustmentExplanation(
+  qualityMetrics: RecommendationQualityMetrics,
+  baseConfidence: number,
+): string {
+  if (!qualityMetrics.isSufficientSample) {
+    return `Confidence at ${(baseConfidence * 100).toFixed(0)}% — insufficient historical data ` +
+      `(${qualityMetrics.totalOutcomes} outcomes, need ${10}) for quality-based adjustment.`;
+  }
+
+  const modifier = computeModifierFromScore(qualityMetrics.accuracy.averageSuccessScore);
+  const direction = modifier > 1.0 ? 'boosted' : modifier < 1.0 ? 'reduced' : 'unchanged';
+  const modifierPercent = ((modifier - 1.0) * 100).toFixed(1);
+
+  const parts: string[] = [];
+  parts.push(
+    `Confidence ${direction} by ${Math.abs(Number(modifierPercent))}% based on ` +
+    `${(qualityMetrics.accuracy.successRate * 100).toFixed(0)}% recommendation success rate ` +
+    `across ${qualityMetrics.totalOutcomes} outcomes.`,
+  );
+
+  if (qualityMetrics.qualityTrend !== 'stable') {
+    parts.push(`Quality trend: ${qualityMetrics.qualityTrend}.`);
+  }
+
+  if (qualityMetrics.performanceFlags.length > 0) {
+    parts.push(
+      `${qualityMetrics.performanceFlags.length} underperforming area(s) flagged for review.`,
+    );
+  }
+
+  return parts.join(' ');
+}
+
+/**
+ * Compute a bounded reliability modifier from quality metrics.
+ * Returns a modifier in the range [1 - MAX_QUALITY_MODIFIER, 1 + MAX_QUALITY_MODIFIER].
+ */
+export function computeReliabilityModifier(
+  qualityMetrics: RecommendationQualityMetrics,
+): number {
+  if (!qualityMetrics.isSufficientSample) return 1.0;
+
+  // Map success rate to bounded modifier
+  // 0.0 success → 1 - MAX_QUALITY_MODIFIER (0.85)
+  // 0.5 success → 1.0
+  // 1.0 success → 1 + MAX_QUALITY_MODIFIER (1.15)
+  const rate = qualityMetrics.accuracy.successRate;
+  const unbounded = 1.0 + (rate - 0.5) * (MAX_QUALITY_MODIFIER * 2);
+  return Math.max(1.0 - MAX_QUALITY_MODIFIER, Math.min(1.0 + MAX_QUALITY_MODIFIER, unbounded));
 }

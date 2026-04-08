@@ -56,6 +56,12 @@ export type {
   // Section 10: Hybrid Control
   DecisionMode,
   HybridControlConfig,
+  // Feedback Operationalization
+  RecommendationQualityMetrics,
+  WeightAdjustmentProposal,
+  RecommendationQualitySummary,
+  AuditEventType,
+  FeedbackAuditEntry,
 } from './contracts/index';
 
 // Re-export upstream types for convenience
@@ -157,6 +163,8 @@ export {
   evolveConfidence,
   computeNilDeterministicVariance,
   buildConfidenceBreakdown,
+  buildConfidenceAdjustmentExplanation,
+  computeReliabilityModifier,
 } from './confidence/evolution';
 
 // ── UI Helpers (Section 9) ──────────────────────────────────────────────────
@@ -165,11 +173,13 @@ export {
   buildSequenceTimeline,
   buildSignalInteractionIndicators,
   buildStrategicOutlookDisplay,
+  buildRecommendationQualityPanel,
 } from './ui/index';
 export type {
   TopOneBanner,
   SequenceTimelineItem,
   StrategicOutlookDisplay,
+  RecommendationQualityPanel,
 } from './ui/index';
 
 // ── Fallbacks ───────────────────────────────────────────────────────────────
@@ -187,3 +197,41 @@ export {
 
 // ── Pipeline ────────────────────────────────────────────────────────────────
 export { runExecutiveIntelligencePipeline } from './pipeline/index';
+
+// ── Outcome Store (Feedback Operationalization) ─────────────────────────────
+export {
+  DecisionOutcomeStore,
+  validateOutcome,
+} from './outcomes/store';
+export type { OutcomeValidationError } from './outcomes/store';
+
+// ── Feedback Workflow ───────────────────────────────────────────────────────
+export {
+  ingestFeedback,
+  ingestFeedbackBatch,
+  resetAuditCounter,
+} from './outcomes/workflow';
+export type {
+  FeedbackIngestionRequest,
+  FeedbackIngestionResult,
+} from './outcomes/workflow';
+
+// ── Quality Metrics ─────────────────────────────────────────────────────────
+export {
+  computeRecommendationQualityMetrics,
+  buildQualitySummary,
+} from './quality/metrics';
+
+// ── Weight Adjustment Proposals ─────────────────────────────────────────────
+export {
+  generateWeightAdjustmentProposal,
+  flagUnderperformingRecommendationRules,
+  reviewProposal,
+  resetProposalCounter,
+} from './quality/proposals';
+
+// ── Audit Logger ────────────────────────────────────────────────────────────
+export {
+  FeedbackAuditLogger,
+  resetAuditLogCounter,
+} from './audit/logger';

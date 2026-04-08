@@ -184,6 +184,14 @@ export interface ExecutiveActionBrief {
   multiSignalAnalysis?: MultiSignalAnalysis;
   /** Decision mode used (Section 10) */
   decisionMode?: DecisionMode;
+  /** Recommendation quality summary */
+  recommendationQualitySummary?: RecommendationQualitySummary;
+  /** Historical reliability note */
+  historicalReliabilityNote?: string;
+  /** Feedback coverage (outcomes / recommendations ratio) */
+  feedbackCoverage?: number;
+  /** Confidence adjustment explanation */
+  confidenceAdjustmentExplanation?: string;
 }
 
 // ── NIL Runtime Interface ───────────────────────────────────────────────────
@@ -347,8 +355,14 @@ export type DecisionOutcomeResult = 'success' | 'partial' | 'failure';
  * Tracks the outcome of a recommended action for feedback learning.
  */
 export interface DecisionOutcome {
+  /** Unique outcome identifier */
+  id?: string;
+  /** Organization scope for multi-tenant isolation */
+  organizationId?: string;
   /** Priority ID this outcome relates to */
   priorityId: string;
+  /** Signal ID that generated the recommendation */
+  signalId?: string;
   /** What was recommended */
   recommendedAction: string;
   /** What was actually done */
@@ -357,10 +371,18 @@ export interface DecisionOutcome {
   outcome: DecisionOutcomeResult;
   /** Success score (0-1) */
   successScore: number;
+  /** User who made the decision */
+  decidedByUserId?: string;
+  /** User who evaluated the outcome */
+  evaluatedByUserId?: string;
+  /** When the outcome was evaluated */
+  evaluatedAt?: string;
   /** Optional notes */
   notes?: string;
   /** When this outcome was recorded */
   createdAt: string;
+  /** Structured metadata */
+  metadata?: Record<string, unknown>;
 }
 
 /**
@@ -598,4 +620,118 @@ export interface ExecutivePipelineOutput {
   strategicNarrative?: StrategicNarrative;
   /** Feedback metrics (if historical data provided) */
   feedbackMetrics?: RecommendationAccuracy;
+  /** Recommendation quality summary for executive brief */
+  qualitySummary?: RecommendationQualitySummary;
+}
+
+// ── Recommendation Quality Metrics (Feedback Operationalization) ─────────────
+
+/**
+ * Aggregated recommendation quality metrics for a time window.
+ * Computed from historical decision outcomes.
+ */
+export interface RecommendationQualityMetrics {
+  /** Time window start (ISO string) */
+  windowStart: string;
+  /** Time window end (ISO string) */
+  windowEnd: string;
+  /** Organization scope */
+  organizationId?: string;
+  /** Total outcomes evaluated */
+  totalOutcomes: number;
+  /** Overall accuracy breakdown */
+  accuracy: RecommendationAccuracy;
+  /** Quality by action type (e.g., 'escalate', 'monitor') */
+  byActionType: Record<string, RecommendationAccuracy>;
+  /** Quality by signal type */
+  bySignalType: Record<string, RecommendationAccuracy>;
+  /** Low-performance flags */
+  performanceFlags: LowPerformanceFlag[];
+  /** Trend direction vs previous window */
+  qualityTrend: 'improving' | 'stable' | 'declining';
+  /** Whether sample size is sufficient for conclusions */
+  isSufficientSample: boolean;
+}
+
+/**
+ * Weight adjustment proposal — governed, NOT auto-applied.
+ * Requires human review and approval before application.
+ */
+export interface WeightAdjustmentProposal {
+  /** Unique proposal identifier */
+  id: string;
+  /** When this proposal was generated */
+  generatedAt: string;
+  /** Organization scope */
+  organizationId?: string;
+  /** Proposed weight adjustments */
+  adjustments: WeightAdjustment[];
+  /** Quality metrics that triggered this proposal */
+  triggeringMetrics: RecommendationAccuracy;
+  /** Minimum sample size that was met */
+  sampleSize: number;
+  /** Human-readable rationale */
+  rationale: string;
+  /** Proposal status — starts proposed, requires human action */
+  status: 'proposed' | 'approved' | 'rejected';
+  /** Who reviewed this proposal (if reviewed) */
+  reviewedBy?: string;
+  /** When reviewed */
+  reviewedAt?: string;
+}
+
+/**
+ * Summary of recommendation quality for the executive brief.
+ */
+export interface RecommendationQualitySummary {
+  /** Overall success rate (0-1) */
+  overallSuccessRate: number;
+  /** Total outcomes analyzed */
+  totalOutcomes: number;
+  /** Whether sample was sufficient */
+  isSufficientSample: boolean;
+  /** Top-performing action types */
+  topPerformers: Array<{ actionType: string; successRate: number }>;
+  /** Underperforming areas (if any) */
+  underperformers: Array<{ actionType: string; successRate: number; issue: string }>;
+  /** Quality trend */
+  qualityTrend: 'improving' | 'stable' | 'declining';
+  /** Human-readable reliability note */
+  historicalReliabilityNote: string;
+  /** Feedback coverage percentage (outcomes / recommendations ratio) */
+  feedbackCoverage: number;
+  /** Active weight adjustment proposals */
+  pendingProposals: number;
+  /** Confidence adjustment explanation (if applied) */
+  confidenceAdjustmentExplanation?: string;
+}
+
+// ── Audit Logging (Feedback Operationalization) ─────────────────────────────
+
+export type AuditEventType =
+  | 'outcome_recorded'
+  | 'quality_metrics_generated'
+  | 'confidence_adjusted'
+  | 'weight_proposal_generated'
+  | 'weight_proposal_reviewed'
+  | 'feedback_ingested';
+
+/**
+ * Audit log entry for feedback loop operations.
+ */
+export interface FeedbackAuditEntry {
+  /** Unique entry identifier */
+  id: string;
+  /** ISO timestamp */
+  timestamp: string;
+  /** Event type */
+  eventType: AuditEventType;
+  /** Organization scope */
+  organizationId?: string;
+  /** User who triggered the event */
+  userId?: string;
+  /** Event-specific payload */
+  payload: Record<string, unknown>;
+  /** Correlation ID for related events */
+  correlationId?: string;
 }

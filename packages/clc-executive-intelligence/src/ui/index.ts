@@ -19,6 +19,7 @@ import type {
   StrategicNarrative,
   StrategicOutlook,
   ActionWindow,
+  RecommendationQualitySummary,
 } from '../contracts/index';
 
 // ── One Thing That Matters Banner ───────────────────────────────────────────
@@ -157,5 +158,79 @@ export function buildStrategicOutlookDisplay(
     severity: config.severity,
     implication: narrative.strategicImplication,
     windowLabel: windowLabels[narrative.nextWindow],
+  };
+}
+
+// ── Recommendation Quality Panel ────────────────────────────────────────────
+
+export interface RecommendationQualityPanel {
+  /** Overall success rate as percentage */
+  successRatePercent: number;
+  /** Quality trend label */
+  trendLabel: string;
+  /** Trend icon hint */
+  trendIcon: 'arrow-up' | 'arrow-down' | 'minus';
+  /** Severity for coloring */
+  severity: 'success' | 'warning' | 'danger';
+  /** Reliability note for display */
+  reliabilityNote: string;
+  /** Feedback coverage as percentage */
+  coveragePercent: number;
+  /** Top performing action types */
+  topPerformers: Array<{ label: string; percent: number }>;
+  /** Underperforming areas */
+  alerts: Array<{ label: string; percent: number; message: string }>;
+  /** Number of pending weight proposals */
+  pendingProposals: number;
+  /** Whether sample is sufficient */
+  hasSufficientData: boolean;
+  /** Confidence adjustment note (if any) */
+  confidenceNote?: string;
+}
+
+/**
+ * Build display data for the recommendation quality panel.
+ */
+export function buildRecommendationQualityPanel(
+  summary: RecommendationQualitySummary | null | undefined,
+): RecommendationQualityPanel | null {
+  if (!summary) return null;
+
+  const trendConfig: Record<string, { label: string; icon: 'arrow-up' | 'arrow-down' | 'minus' }> = {
+    improving: { label: 'Improving', icon: 'arrow-up' },
+    stable: { label: 'Stable', icon: 'minus' },
+    declining: { label: 'Declining', icon: 'arrow-down' },
+  };
+
+  const trend = trendConfig[summary.qualityTrend] ?? trendConfig['stable']!;
+
+  let severity: 'success' | 'warning' | 'danger';
+  if (summary.overallSuccessRate >= 0.7) {
+    severity = 'success';
+  } else if (summary.overallSuccessRate >= 0.4) {
+    severity = 'warning';
+  } else {
+    severity = 'danger';
+  }
+
+  return {
+    successRatePercent: Math.round(summary.overallSuccessRate * 100),
+    trendLabel: trend.label,
+    trendIcon: trend.icon,
+    severity,
+    reliabilityNote: summary.historicalReliabilityNote,
+    coveragePercent: Math.round(summary.feedbackCoverage * 100),
+    topPerformers: summary.topPerformers.map((p) => ({
+      label: p.actionType,
+      percent: Math.round(p.successRate * 100),
+    })),
+    alerts: summary.underperformers.map((u) => ({
+      label: u.actionType,
+      percent: Math.round(u.successRate * 100),
+      message: u.issue,
+    })),
+    pendingProposals: summary.pendingProposals,
+    hasSufficientData: summary.isSufficientSample,
+    confidenceNote: summary.confidenceAdjustmentExplanation,
   };
 }

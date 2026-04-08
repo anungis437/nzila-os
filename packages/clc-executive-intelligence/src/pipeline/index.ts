@@ -20,6 +20,7 @@ import type {
   TopOnePriority,
   StrategicNarrative,
   RecommendationAccuracy,
+  RecommendationQualitySummary,
 } from '../contracts/index';
 
 import { selectTopExecutivePriorities } from '../prioritization/index';
@@ -39,7 +40,9 @@ import { buildActionSequence, deriveTopOnePriority } from '../recommendations/se
 import { buildStrategicNarrative } from '../narrative/strategic';
 import { computeRecommendationAccuracy } from '../learning/feedback-engine';
 import { evolveConfidence } from '../confidence/evolution';
+import { buildConfidenceAdjustmentExplanation } from '../confidence/evolution';
 import { resolveWithHybridControl } from '../nil-authority/index';
+import { computeRecommendationQualityMetrics, buildQualitySummary } from '../quality/metrics';
 
 // ── Pipeline Orchestrator ───────────────────────────────────────────────────
 
@@ -145,6 +148,24 @@ export async function runExecutiveIntelligencePipeline(
       ? computeRecommendationAccuracy(historicalOutcomes)
       : undefined;
 
+  // ── Step 3e: Quality summary for executive brief ──────────────────────
+  let qualitySummary: RecommendationQualitySummary | undefined;
+  let confidenceAdjustmentExplanation: string | undefined;
+  if (historicalOutcomes && historicalOutcomes.length > 0) {
+    const now = new Date().toISOString();
+    const windowStart = historicalOutcomes.reduce(
+      (earliest, o) => (o.createdAt < earliest ? o.createdAt : earliest),
+      historicalOutcomes[0]!.createdAt,
+    );
+    const qualityMetrics = computeRecommendationQualityMetrics(
+      historicalOutcomes, windowStart, now,
+    );
+    qualitySummary = buildQualitySummary(qualityMetrics);
+    confidenceAdjustmentExplanation = buildConfidenceAdjustmentExplanation(
+      qualityMetrics, movementSummary.confidence,
+    );
+  }
+
   // Attempt NIL refinement for changes summary
   const changesContract = getExecutivePromptContract('summarize_changes_since_last_snapshot');
   if (changesContract && whatChanged.length > 0) {
@@ -222,6 +243,10 @@ export async function runExecutiveIntelligencePipeline(
     strategicNarrative,
     multiSignalAnalysis,
     decisionMode,
+    recommendationQualitySummary: qualitySummary,
+    historicalReliabilityNote: qualitySummary?.historicalReliabilityNote,
+    feedbackCoverage: qualitySummary?.feedbackCoverage,
+    confidenceAdjustmentExplanation,
   };
 
   // ── Step 5: Build snapshot for persistence ──────────────────────────────
@@ -252,6 +277,7 @@ export async function runExecutiveIntelligencePipeline(
     topOnePriority: topOnePriority ?? undefined,
     strategicNarrative,
     feedbackMetrics,
+    qualitySummary,
   };
 }
 
