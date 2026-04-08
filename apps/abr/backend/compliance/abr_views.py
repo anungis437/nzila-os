@@ -12,6 +12,7 @@ from __future__ import annotations
 
 import uuid
 from datetime import datetime, timedelta, timezone
+import logging
 
 from django.http import JsonResponse
 from django.utils import timezone as dj_timezone
@@ -20,6 +21,8 @@ from rest_framework.exceptions import NotFound, PermissionDenied, ValidationErro
 from rest_framework.request import Request
 from rest_framework.response import Response
 from rest_framework.views import APIView
+
+logger = logging.getLogger(__name__)
 
 from .abr_serializers import (
     AbrCaseDetailSerializer,
@@ -378,9 +381,10 @@ class AbrCaseEvidenceExportView(APIView):
         try:
             pack = seal_case_evidence_pack(pack)
         except ValueError as exc:
+            logger.exception("Failed to seal case evidence pack")
             return Response(
                 {
-                    "detail": str(exc),
+                    "detail": "Failed to seal evidence pack due to a server configuration error.",
                     "hint": "Set EVIDENCE_SEAL_KEY environment variable.",
                 },
                 status=status.HTTP_503_SERVICE_UNAVAILABLE,

@@ -1,0 +1,38 @@
+{
+  "name": "@nzila/intelligence",
+  "version": "0.1.0",
+  "description": "Nzila Intelligence Layer (NIL) — unified, governed AI and intelligence capabilities",
+  "private": true,
+  "type": "module",
+  "main": "./src/index.ts",
+  "types": "./src/index.ts",
+  "exports": {
+    ".": "./src/index.ts",
+    "./types": "./src/types.ts",
+    "./context": "./src/context.ts",
+    "./explainability": "./src/explainability.ts",
+    "./decision": "./src/decision.ts",
+    "./reasoning": "./src/reasoning.ts",
+    "./registry": "./src/registry.ts"
+  },
+  "scripts": {
+    "typecheck": "tsc --noEmit",
+    "test": "vitest run",
+    "test:watch": "vitest"
+  },
+  "dependencies": {
+    "@nzila/ai-sdk": "workspace:*",
+    "@nzila/ai-core": "workspace:*",
+    "@nzila/ai-control": "workspace:*",
+    "@nzila/platform-reasoning-engine": "workspace:*",
+    "@nzila/platform-decision-engine": "workspace:*",
+    "@nzila/platform-intelligence": "workspace:*",
+    "@nzila/platform-context-orchestrator": "workspace:*",
+    "zod": "^3.25.0"
+  },
+  "devDependencies": {
+    "@types/node": "^25",
+    "typescript": "^6",
+    "vitest": "^4.1.2"
+  }
+}
