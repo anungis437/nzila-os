@@ -15,7 +15,7 @@
     "@nzila/platform-auth": "workspace:*",
     "framer-motion": "^11.0.0",
     "@heroicons/react": "^2.2.0",
-    "lucide-react": "^0.400.0",
+    "lucide-react": "^1.7.0",
     "@nzila/db": "workspace:*",
     "@nzila/mobility-core": "workspace:*",
     "@nzila/mobility-programs": "workspace:*",
