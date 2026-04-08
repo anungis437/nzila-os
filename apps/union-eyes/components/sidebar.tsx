@@ -255,7 +255,7 @@ export default function Sidebar({ profile: _profile, userEmail, whopMonthlyPlanI
         { href: `/${locale}/dashboard/analytics`, icon: <BarChart3 size={16} />, label: t('sidebar.insights'), roles: [...repsAndAbove, mgmt] },
         { href: `/${locale}/dashboard/dispatch`, icon: <Truck size={16} />, label: t('sidebar.dispatch'), roles: [...repsAndAbove, mgmt] },
         { href: `/${locale}/dashboard/stewards`, icon: <Users size={16} />, label: t('sidebar.stewardManagement'), roles: ["chief_steward", "officer", "president", "vice_president", "secretary_treasurer", "national_officer", "admin", mgmt] },
-        { href: `/${locale}/dashboard/cross-union-analytics`, icon: <GitCompare size={16} />, label: t('sidebar.crossUnionAnalytics'), roles: ["chief_steward", "officer", "president", "vice_president", "secretary_treasurer", "national_officer", "admin", mgmt] },
+        { href: `/${locale}/dashboard/cross-union-analytics`, icon: <GitCompare size={16} />, label: t('sidebar.crossUnionAnalytics'), roles: [...clcRoles, "fed_staff", "fed_executive", "system_admin", "admin", mgmt] },
       ],
     },
     {
@@ -320,6 +320,7 @@ export default function Sidebar({ profile: _profile, userEmail, whopMonthlyPlanI
         { href: `/${locale}/dashboard/clc/affiliates`, icon: <Network size={16} />, label: t('sidebar.affiliatesManagement'), roles: ["clc_staff", "clc_executive", "system_admin", "admin", mgmt] },
         { href: `/${locale}/dashboard/clc/staff`, icon: <Users size={16} />, label: t('sidebar.clcStaffOperations'), roles: ["clc_staff", "clc_executive", "system_admin", "admin", mgmt] },
         { href: `/${locale}/dashboard/clc/compliance`, icon: <FileBarChart size={16} />, label: t('sidebar.clcCompliance'), roles: ["clc_staff", "clc_executive", "system_admin", "admin", mgmt] },
+        { href: `/${locale}/dashboard/clc/intelligence`, icon: <TrendingUp size={16} />, label: t('sidebar.clcIntelligence'), roles: ["clc_staff", "clc_executive", "system_admin", "admin", mgmt] },
       ],
     },
     {
