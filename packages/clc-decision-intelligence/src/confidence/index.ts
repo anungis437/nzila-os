@@ -8,7 +8,7 @@
  * @module confidence
  */
 
-import type { ConfidenceInputs, ConfidenceResult } from '../contracts/index.js';
+import type { ConfidenceInputs, ConfidenceResult } from '../contracts/index';
 
 // ── Factor Weights ──────────────────────────────────────────────────────────
 

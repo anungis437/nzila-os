@@ -15,7 +15,7 @@ import type {
   MovementPosture,
   ExecutivePriority,
   DecisionIntelligenceOutput,
-} from '../contracts/index.js';
+} from '../contracts/index';
 import type { CorrelatedPattern, SectorDivergence } from '@nzila/clc-decision-intelligence';
 
 // ── Posture Classification ──────────────────────────────────────────────────

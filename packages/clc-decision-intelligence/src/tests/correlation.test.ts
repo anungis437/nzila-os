@@ -2,14 +2,14 @@
  * Correlation Engine — Unit Tests
  */
 import { describe, it, expect } from 'vitest';
-import type { SectorAggregate, SectorTimeSeries } from '../correlation/index.js';
+import type { SectorAggregate, SectorTimeSeries } from '../correlation/index';
 import {
   detectIssueCluster,
   detectSectorShift,
   detectPrecedentConcentration,
   detectBargainingPressure,
   detectAllPatterns,
-} from '../correlation/index.js';
+} from '../correlation/index';
 
 function makeSectors(count: number): SectorAggregate[] {
   const clauseTypes = ['Wages', 'Working Hours', 'Benefits', 'Safety'];

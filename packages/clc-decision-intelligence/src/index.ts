@@ -28,7 +28,7 @@ export type {
   ExecutiveBriefingCard,
   DecisionPromptContract,
   DecisionAuditContext,
-} from './contracts/index.js';
+} from './contracts/index';
 
 // Confidence model
 export {
@@ -40,7 +40,7 @@ export {
   computePersistenceFactor,
   computeMissingDataFactor,
   confidenceBandFromScore,
-} from './confidence/index.js';
+} from './confidence/index';
 
 // Time-series signals
 export {
@@ -49,42 +49,42 @@ export {
   detectInflectionPoint,
   classifySignalPersistence,
   analyzeTrend,
-} from './signals/index.js';
+} from './signals/index';
 
 // Correlation engine
 export type {
   SectorAggregate,
   AffiliateTypeAggregate,
   SectorTimeSeries,
-} from './correlation/index.js';
+} from './correlation/index';
 export {
   detectIssueCluster,
   detectSectorShift,
   detectPrecedentConcentration,
   detectBargainingPressure,
   detectAllPatterns,
-} from './correlation/index.js';
+} from './correlation/index';
 
 // Recommendation engine
 export {
   recommendForPattern,
   generateRecommendations,
   recommendFromTrend,
-} from './recommendations/index.js';
+} from './recommendations/index';
 
 // Strategic reasoning / data products
-export type { DecisionIntelligenceOutput } from './reasoning/index.js';
+export type { DecisionIntelligenceOutput } from './reasoning/index';
 export {
   deriveMovementRiskPosture,
   analyzeSectorDivergence,
   deriveBargainingWatch,
   generateExecutiveBriefingCards,
   runDecisionIntelligencePipeline,
-} from './reasoning/index.js';
+} from './reasoning/index';
 
 // NIL briefing contracts
 export {
   DECISION_PROMPT_CONTRACTS,
   getDecisionPromptContract,
   listDecisionPromptUseCases,
-} from './briefings/index.js';
+} from './briefings/index';

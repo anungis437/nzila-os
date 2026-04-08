@@ -23,7 +23,7 @@ export type {
   ExecutiveAuditContext,
   ExecutivePipelineInput,
   ExecutivePipelineOutput,
-} from './contracts/index.js';
+} from './contracts/index';
 
 // Re-export upstream types for convenience
 export type {
@@ -38,21 +38,21 @@ export type {
   RecommendedAction,
   ActionTimeframe,
   DecisionPromptContract,
-} from './contracts/index.js';
+} from './contracts/index';
 
 // ── Prioritization ──────────────────────────────────────────────────────────
 export {
   computeExecutivePriorityScore,
   rankExecutivePriorities,
   selectTopExecutivePriorities,
-} from './prioritization/index.js';
+} from './prioritization/index';
 
 // ── Summaries ───────────────────────────────────────────────────────────────
 export {
   classifyMovementPosture,
   explainMovementPosture,
   buildMovementSummary,
-} from './summaries/index.js';
+} from './summaries/index';
 
 // ── Comparisons ─────────────────────────────────────────────────────────────
 export {
@@ -61,7 +61,7 @@ export {
   detectEscalations,
   detectResolutions,
   compareExecutiveSnapshots,
-} from './comparisons/index.js';
+} from './comparisons/index';
 
 // ── Narrative / NIL ─────────────────────────────────────────────────────────
 export {
@@ -69,8 +69,8 @@ export {
   attemptNilRefinement,
   getExecutivePromptContract,
   validateNilOutput,
-} from './narrative/index.js';
-export type { NilAttemptResult } from './narrative/index.js';
+} from './narrative/index';
+export type { NilAttemptResult } from './narrative/index';
 
 // ── Fallbacks ───────────────────────────────────────────────────────────────
 export {
@@ -83,7 +83,7 @@ export {
   fallbackRecommendedNextSteps,
   fallbackActionBriefHeadline,
   fallbackActionBriefSummary,
-} from './fallbacks/index.js';
+} from './fallbacks/index';
 
 // ── Pipeline ────────────────────────────────────────────────────────────────
-export { runExecutiveIntelligencePipeline } from './pipeline/index.js';
+export { runExecutiveIntelligencePipeline } from './pipeline/index';

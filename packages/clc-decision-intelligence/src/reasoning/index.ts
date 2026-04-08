@@ -21,12 +21,12 @@ import type {
   CorrelatedPattern,
   DecisionRecommendation,
   TrendClassification,
-} from '../contracts/index.js';
-import type { SectorAggregate, SectorTimeSeries } from '../correlation/index.js';
-import { computeConfidence, confidenceBandFromScore } from '../confidence/index.js';
-import { analyzeTrend } from '../signals/index.js';
-import { detectAllPatterns } from '../correlation/index.js';
-import { generateRecommendations } from '../recommendations/index.js';
+} from '../contracts/index';
+import type { SectorAggregate, SectorTimeSeries } from '../correlation/index';
+import { computeConfidence, confidenceBandFromScore } from '../confidence/index';
+import { analyzeTrend } from '../signals/index';
+import { detectAllPatterns } from '../correlation/index';
+import { generateRecommendations } from '../recommendations/index';
 
 // ── Movement Risk Posture ───────────────────────────────────────────────────
 

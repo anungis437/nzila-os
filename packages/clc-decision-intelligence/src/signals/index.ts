@@ -10,7 +10,7 @@
  * @module signals
  */
 
-import type { TimeSeriesPoint, TrendAnalysis, TrendDirection, TrendClassification } from '../contracts/index.js';
+import type { TimeSeriesPoint, TrendAnalysis, TrendDirection, TrendClassification } from '../contracts/index';
 
 // ── Trend Velocity ──────────────────────────────────────────────────────────
 

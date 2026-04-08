@@ -9,8 +9,8 @@ import {
   computeExecutivePriorityScore,
   rankExecutivePriorities,
   selectTopExecutivePriorities,
-} from '../prioritization/index.js';
-import { makePattern, makeRecommendation, makeDecisionOutput, makeHeightenedOutput } from './fixtures.js';
+} from '../prioritization/index';
+import { makePattern, makeRecommendation, makeDecisionOutput, makeHeightenedOutput } from './fixtures';
 
 describe('prioritization engine', () => {
   describe('computeExecutivePriorityScore', () => {

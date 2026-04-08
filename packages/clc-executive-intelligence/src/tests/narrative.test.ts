@@ -5,13 +5,13 @@
  * prompt contracts schema-valid, refinement applied correctly.
  */
 import { describe, it, expect, vi } from 'vitest';
-import type { NilReasoningService, NilRefinement, DecisionPromptContract } from '../contracts/index.js';
+import type { NilReasoningService, NilRefinement, DecisionPromptContract } from '../contracts/index';
 import {
   EXECUTIVE_PROMPT_CONTRACTS,
   attemptNilRefinement,
   getExecutivePromptContract,
   validateNilOutput,
-} from '../narrative/index.js';
+} from '../narrative/index';
 import {
   fallbackPostureHeadline,
   fallbackPostureSummary,
@@ -22,9 +22,9 @@ import {
   fallbackRecommendedNextSteps,
   fallbackActionBriefHeadline,
   fallbackActionBriefSummary,
-} from '../fallbacks/index.js';
-import { makePriority } from './fixtures.js';
-import type { MovementSummary, ExecutiveDelta } from '../contracts/index.js';
+} from '../fallbacks/index';
+import { makePriority } from './fixtures';
+import type { MovementSummary, ExecutiveDelta } from '../contracts/index';
 
 function makeSummary(overrides: Partial<MovementSummary> = {}): MovementSummary {
   return {

@@ -8,8 +8,8 @@ import {
   detectInflectionPoint,
   classifySignalPersistence,
   analyzeTrend,
-} from '../signals/index.js';
-import type { TimeSeriesPoint } from '../contracts/index.js';
+} from '../signals/index';
+import type { TimeSeriesPoint } from '../contracts/index';
 
 function makeSeries(values: number[]): TimeSeriesPoint[] {
   return values.map((value, i) => ({ period: `2026-Q${i + 1}`, value }));

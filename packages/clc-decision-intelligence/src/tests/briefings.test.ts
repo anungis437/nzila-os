@@ -6,7 +6,7 @@ import {
   DECISION_PROMPT_CONTRACTS,
   getDecisionPromptContract,
   listDecisionPromptUseCases,
-} from '../briefings/index.js';
+} from '../briefings/index';
 
 describe('briefings / NIL prompt contracts', () => {
   it('defines 6 decision prompt contracts', () => {

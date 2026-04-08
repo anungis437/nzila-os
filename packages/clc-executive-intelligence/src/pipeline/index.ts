@@ -15,20 +15,20 @@ import type {
   MovementSummary,
   ExecutivePriority,
   ExecutiveDelta,
-} from '../contracts/index.js';
+} from '../contracts/index';
 
-import { selectTopExecutivePriorities } from '../prioritization/index.js';
-import { buildMovementSummary } from '../summaries/index.js';
-import { compareExecutiveSnapshots, buildSnapshot } from '../comparisons/index.js';
+import { selectTopExecutivePriorities } from '../prioritization/index';
+import { buildMovementSummary } from '../summaries/index';
+import { compareExecutiveSnapshots, buildSnapshot } from '../comparisons/index';
 import {
   attemptNilRefinement,
   getExecutivePromptContract,
-} from '../narrative/index.js';
+} from '../narrative/index';
 import {
   fallbackActionBriefHeadline,
   fallbackActionBriefSummary,
   fallbackRecommendedNextSteps,
-} from '../fallbacks/index.js';
+} from '../fallbacks/index';
 
 // ── Pipeline Orchestrator ───────────────────────────────────────────────────
 

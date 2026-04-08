@@ -2,15 +2,15 @@
  * Strategic Reasoning / Data Products — Unit Tests
  */
 import { describe, it, expect } from 'vitest';
-import type { CorrelatedPattern, DecisionRecommendation } from '../contracts/index.js';
-import type { SectorAggregate, SectorTimeSeries } from '../correlation/index.js';
+import type { CorrelatedPattern, DecisionRecommendation } from '../contracts/index';
+import type { SectorAggregate, SectorTimeSeries } from '../correlation/index';
 import {
   deriveMovementRiskPosture,
   analyzeSectorDivergence,
   deriveBargainingWatch,
   generateExecutiveBriefingCards,
   runDecisionIntelligencePipeline,
-} from '../reasoning/index.js';
+} from '../reasoning/index';
 
 function makePattern(id: string, overrides: Partial<CorrelatedPattern> = {}): CorrelatedPattern {
   return {

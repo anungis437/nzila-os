@@ -9,8 +9,8 @@ import {
   classifyMovementPosture,
   explainMovementPosture,
   buildMovementSummary,
-} from '../summaries/index.js';
-import { makeDecisionOutput, makeHeightenedOutput, makePriority, makePattern, makeRecommendation } from './fixtures.js';
+} from '../summaries/index';
+import { makeDecisionOutput, makeHeightenedOutput, makePriority, makePattern, makeRecommendation } from './fixtures';
 
 describe('movement summary engine', () => {
   describe('classifyMovementPosture', () => {

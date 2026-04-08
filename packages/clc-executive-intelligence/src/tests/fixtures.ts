@@ -9,8 +9,8 @@ import type {
   SectorDivergence,
   BargainingWatch,
   ExecutiveBriefingCard,
-} from '../contracts/index.js';
-import type { ExecutiveSnapshot, WatchLevel, ExecutivePriority } from '../contracts/index.js';
+} from '../contracts/index';
+import type { ExecutiveSnapshot, WatchLevel, ExecutivePriority } from '../contracts/index';
 
 // ── Pattern Factory ─────────────────────────────────────────────────────────
 

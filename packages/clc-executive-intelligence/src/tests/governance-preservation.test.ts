@@ -6,8 +6,8 @@
  * raw data, consent, cohort, or permission logic touches this layer.
  */
 import { describe, it, expect } from 'vitest';
-import { runExecutiveIntelligencePipeline } from '../pipeline/index.js';
-import { makeDecisionOutput, makeHeightenedOutput, makeSnapshot } from './fixtures.js';
+import { runExecutiveIntelligencePipeline } from '../pipeline/index';
+import { makeDecisionOutput, makeHeightenedOutput, makeSnapshot } from './fixtures';
 
 describe('governance preservation', () => {
   it('pipeline does not expose raw data — only governed outputs', async () => {
@@ -60,7 +60,7 @@ describe('governance preservation', () => {
   });
 
   it('all prompt contracts include anonymization rules', async () => {
-    const { EXECUTIVE_PROMPT_CONTRACTS } = await import('../narrative/index.js');
+    const { EXECUTIVE_PROMPT_CONTRACTS } = await import('../narrative/index');
 
     for (const contract of EXECUTIVE_PROMPT_CONTRACTS) {
       expect(contract.anonymizationRules.length).toBeGreaterThan(0);

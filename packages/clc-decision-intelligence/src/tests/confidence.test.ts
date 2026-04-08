@@ -11,7 +11,7 @@ import {
   computeMissingDataFactor,
   computeConfidence,
   confidenceBandFromScore,
-} from '../confidence/index.js';
+} from '../confidence/index';
 
 describe('confidence model', () => {
   describe('computeCohortFactor', () => {

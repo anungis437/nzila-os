@@ -14,7 +14,7 @@ import type {
   ExecutiveSnapshot,
   WatchLevel,
   DecisionIntelligenceOutput,
-} from '../contracts/index.js';
+} from '../contracts/index';
 
 // ── Watch level ordering ────────────────────────────────────────────────────
 

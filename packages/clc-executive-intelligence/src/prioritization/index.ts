@@ -20,7 +20,7 @@ import type {
   ExecutivePriority,
   WatchLevel,
   DecisionIntelligenceOutput,
-} from '../contracts/index.js';
+} from '../contracts/index';
 import type { RecommendedAction, ActionTimeframe } from '@nzila/clc-decision-intelligence';
 
 // ── Scoring Constants ───────────────────────────────────────────────────────

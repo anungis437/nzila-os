@@ -12,8 +12,8 @@ import {
   generateRecommendations,
   computeConfidence,
   confidenceBandFromScore,
-} from '../index.js';
-import type { SectorAggregate, SectorTimeSeries } from '../correlation/index.js';
+} from '../index';
+import type { SectorAggregate, SectorTimeSeries } from '../correlation/index';
 
 describe('governance preservation', () => {
   describe('aggregate safety', () => {

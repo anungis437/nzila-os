@@ -15,7 +15,7 @@ import type {
   ExecutivePriority,
   MovementSummary,
   ExecutiveDelta,
-} from '../contracts/index.js';
+} from '../contracts/index';
 
 // ── Anonymization Rules (shared) ────────────────────────────────────────────
 

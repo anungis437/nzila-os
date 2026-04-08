@@ -19,7 +19,7 @@ import type {
   SectorDivergence,
   ExecutiveBriefingCard,
   DecisionRecommendation,
-} from '../contracts/index.js';
+} from '../contracts/index';
 
 // ── Anonymization Rules (shared) ────────────────────────────────────────────
 

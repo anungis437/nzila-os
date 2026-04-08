@@ -16,7 +16,7 @@ import type {
   TargetAudience,
   ConfidenceResult,
   TrendAnalysis,
-} from '../contracts/index.js';
+} from '../contracts/index';
 
 // ── Rules ───────────────────────────────────────────────────────────────────
 

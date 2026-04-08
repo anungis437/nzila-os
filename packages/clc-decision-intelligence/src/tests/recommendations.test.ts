@@ -2,12 +2,12 @@
  * Recommendation Engine — Unit Tests
  */
 import { describe, it, expect } from 'vitest';
-import type { CorrelatedPattern, TrendAnalysis, ConfidenceResult } from '../contracts/index.js';
+import type { CorrelatedPattern, TrendAnalysis, ConfidenceResult } from '../contracts/index';
 import {
   recommendForPattern,
   generateRecommendations,
   recommendFromTrend,
-} from '../recommendations/index.js';
+} from '../recommendations/index';
 
 function makePattern(overrides: Partial<CorrelatedPattern> = {}): CorrelatedPattern {
   return {

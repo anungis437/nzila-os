@@ -12,9 +12,9 @@ import type {
   CorrelatedPattern,
   PatternType,
   TimeSeriesPoint,
-} from '../contracts/index.js';
-import { computeConfidence, confidenceBandFromScore } from '../confidence/index.js';
-import { computeTrendVelocity, classifySignalPersistence } from '../signals/index.js';
+} from '../contracts/index';
+import { computeConfidence, confidenceBandFromScore } from '../confidence/index';
+import { computeTrendVelocity, classifySignalPersistence } from '../signals/index';
 
 // ── Input Types (from governed aggregates) ──────────────────────────────────
 

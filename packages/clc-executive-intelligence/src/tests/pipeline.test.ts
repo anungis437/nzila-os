@@ -5,9 +5,9 @@
  * audit context, snapshot generation.
  */
 import { describe, it, expect, vi } from 'vitest';
-import type { NilReasoningService } from '../contracts/index.js';
-import { runExecutiveIntelligencePipeline } from '../pipeline/index.js';
-import { makeDecisionOutput, makeHeightenedOutput, makeSnapshot } from './fixtures.js';
+import type { NilReasoningService } from '../contracts/index';
+import { runExecutiveIntelligencePipeline } from '../pipeline/index';
+import { makeDecisionOutput, makeHeightenedOutput, makeSnapshot } from './fixtures';
 
 describe('pipeline orchestrator', () => {
   it('runs full pipeline with no previous snapshot and no NIL', async () => {

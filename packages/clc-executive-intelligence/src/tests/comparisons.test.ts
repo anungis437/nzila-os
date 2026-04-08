@@ -11,8 +11,8 @@ import {
   detectEscalations,
   detectResolutions,
   compareExecutiveSnapshots,
-} from '../comparisons/index.js';
-import { makeDecisionOutput, makeHeightenedOutput, makeSnapshot, makePattern, makeRecommendation } from './fixtures.js';
+} from '../comparisons/index';
+import { makeDecisionOutput, makeHeightenedOutput, makeSnapshot, makePattern, makeRecommendation } from './fixtures';
 
 describe('comparisons / delta engine', () => {
   describe('buildSnapshot', () => {

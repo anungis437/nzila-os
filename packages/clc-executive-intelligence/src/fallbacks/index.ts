@@ -12,7 +12,7 @@ import type {
   MovementSummary,
   ExecutivePriority,
   ExecutiveDelta,
-} from '../contracts/index.js';
+} from '../contracts/index';
 
 // ── Movement Posture Fallback ───────────────────────────────────────────────
 
