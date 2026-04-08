@@ -35,7 +35,7 @@
     "@nzila/db": "workspace:*",
     "@nzila/ui": "workspace:*",
     "class-variance-authority": "^0.7.0",
-    "drizzle-orm": "^0.39.0",
+    "drizzle-orm": "^0.45.2",
     "clsx": "^2.1.1",
     "lucide-react": "^0.576.0",
     "next": "16.2.2",
