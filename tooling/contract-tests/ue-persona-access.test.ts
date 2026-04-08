@@ -264,6 +264,7 @@ const PAGE_ACCESS_MATRIX: PageRule[] = [
   { path: 'clc/affiliates/page.tsx',                     minRole: 'clc_staff',            description: 'CLC affiliates management' },
   { path: 'clc/compliance/page.tsx',                     minRole: 'clc_staff',            description: 'CLC compliance tracking' },
   { path: 'clc/staff/page.tsx',                          minRole: 'clc_staff',            description: 'CLC staff operations' },
+  { path: 'clc/intelligence/page.tsx',                    minRole: 'clc_staff',            description: 'CLC decision intelligence console' },
 
   // ── Federation pages (fed_staff access) ────────────────────────────────
   { path: 'federation/page.tsx',                         minRole: 'fed_staff',            description: 'Federation executive dashboard' },
@@ -311,6 +312,7 @@ const API_ROUTE_MATRIX: ApiRouteRule[] = [
   { apiPath: 'activities',           expectedAuthPattern: 'withApi',              expectedMinRole: 'member',               backingPage: 'admin (audit log)' },
   { apiPath: 'dues/calculate',       expectedAuthPattern: 'withRoleAuth',         expectedMinRole: 'steward',              backingPage: 'admin/dues' },
   { apiPath: 'analytics/cross-org',  expectedAuthPattern: 'withApi',              expectedMinRole: 'platform_lead',        backingPage: 'cross-org analytics (platform)' },
+  { apiPath: 'v2/analytics/clc/decision-intelligence',    expectedAuthPattern: 'withApi',  expectedMinRole: 'clc_staff',            backingPage: 'clc/intelligence/page.tsx' },
 ]
 
 // ── Helpers ─────────────────────────────────────────────────────────────────
@@ -510,7 +512,8 @@ describe('PERSONA_ACCESS_001 — API routes backing dashboard have auth and DB s
           content.includes('@nzila/db') ||
           content.includes('@/lib/dues-calculation-engine') || // DuesCalculationEngine wraps DB queries
           content.includes('@/lib/database') ||
-          content.includes('@/lib/db/') // RLS context wrappers are DB-connected
+          content.includes('@/lib/db/') || // RLS context wrappers are DB-connected
+          content.includes('@/lib/clc/') // CLC governance & data-products wrap governed DB queries
         expect(
           hasSchemaImport,
           `API route ${rule.apiPath} does not import from DB schema — may not be DB-connected`,
