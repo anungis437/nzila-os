@@ -179,6 +179,8 @@ export default defineConfig({
       'packages/platform-shell',
       'packages/platform-notifications',
       'packages/platform-billing',
+      // Intelligence layer
+      'packages/intelligence',
     ],
   },
 })

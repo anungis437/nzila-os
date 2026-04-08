@@ -50,7 +50,10 @@ type MemberRole = "member" | "steward" | "officer" | "admin" | "super_admin";
 type MemberStatus = "active" | "inactive" | "on-leave";
 type Department = "Manufacturing" | "Logistics" | "Administration" | "Maintenance" | "Customer Service" | "IT";
 
-const fetcher = (url: string) => fetch(url).then(res => res.json());
+const fetcher = (url: string) => fetch(url).then(res => {
+  if (!res.ok) throw new Error(`Failed to load members (${res.status})`);
+  return res.json();
+});
 
 interface Member {
   id: string;

@@ -64,142 +64,29 @@ export function GrievancesConsole() {
   const [selectedPriority, setSelectedPriority] = useState<GrievancePriority | "all">("all");
   const [expandedGrievance, setExpandedGrievance] = useState<string | null>(null);
 
-  // Grievances data (defaults overridden by API fetch)
-  const [grievances, setGrievances] = useState<Grievance[]>([
-    {
-      id: "grv-001",
-      number: "GRV-2025-001",
-      title: "Unjust Termination - Safety Complaint Retaliation",
-      description: "Member terminated 3 days after filing safety complaint regarding damaged equipment. Clear violation of whistleblower protections and just cause provisions.",
-      status: "step-2",
-      priority: "urgent",
-      category: "Discipline & Discharge",
-      filedDate: "2025-01-08",
-      deadline: "2025-01-22",
-      currentStep: "Step 2 - Division Manager Review",
-      daysUntilDeadline: 9,
-      grievant: "Robert Martinez",
-      steward: "Sarah Johnson",
-      management: "Division Manager - Operations",
-      violatedArticle: "Article 7 (Just Cause), Article 22 (Safety)",
-      remedy: "Full reinstatement with back pay and benefits, expungement of termination from record, formal apology",
-      timeline: [
-        { date: "2025-01-08", event: "Grievance Filed", description: "Formal grievance submitted at Step 1", type: "filed" },
-        { date: "2025-01-10", event: "Step 1 Meeting", description: "Meeting with immediate supervisor - denied", type: "meeting" },
-        { date: "2025-01-12", event: "Escalated to Step 2", description: "Advanced to Division Manager level", type: "escalation" },
-        { date: "2025-01-15", event: "Step 2 Meeting Scheduled", description: "Meeting set for January 20, 2025", type: "meeting" },
-      ],
-    },
-    {
-      id: "grv-002",
-      number: "GRV-2025-002",
-      title: "Denial of Overtime - Discriminatory Assignment",
-      description: "Systematic pattern of denying overtime opportunities to senior employees while assigning to less senior staff. Violates seniority provisions.",
-      status: "step-1",
-      priority: "high",
-      category: "Seniority & Bidding",
-      filedDate: "2025-01-10",
-      deadline: "2025-01-24",
-      currentStep: "Step 1 - Supervisor Review",
-      daysUntilDeadline: 11,
-      grievant: "Jennifer Lee",
-      steward: "Mike Chen",
-      management: "Warehouse Supervisor",
-      violatedArticle: "Article 9 (Seniority), Article 12 (Overtime)",
-      remedy: "Back pay for denied overtime hours (estimated 32 hours), priority consideration for future OT",
-      timeline: [
-        { date: "2025-01-10", event: "Grievance Filed", description: "Formal grievance submitted at Step 1", type: "filed" },
-        { date: "2025-01-12", event: "Documentation Submitted", description: "Provided 8 weeks of OT assignment records", type: "response" },
-        { date: "2025-01-17", event: "Step 1 Meeting", description: "Meeting scheduled with supervisor", type: "meeting" },
-      ],
-    },
-    {
-      id: "grv-003",
-      number: "GRV-2024-089",
-      title: "Suspension Without Pay - Excessive Discipline",
-      description: "3-day suspension for attendance issue without prior progressive discipline. First offense, violates disciplinary procedure.",
-      status: "arbitration",
-      priority: "high",
-      category: "Discipline & Discharge",
-      filedDate: "2024-11-15",
-      deadline: "2025-02-15",
-      currentStep: "Arbitration - Hearing Scheduled",
-      daysUntilDeadline: 33,
-      grievant: "David Chen",
-      steward: "Sarah Johnson",
-      management: "HR Director",
-      violatedArticle: "Article 7 (Just Cause), Article 8 (Progressive Discipline)",
-      remedy: "Removal of suspension from record, back pay for 3 days, disciplinary action reduced to verbal warning",
-      timeline: [
-        { date: "2024-11-15", event: "Grievance Filed", description: "Step 1 filed", type: "filed" },
-        { date: "2024-11-20", event: "Step 1 Denied", description: "Supervisor denied grievance", type: "response" },
-        { date: "2024-11-25", event: "Step 2 Denied", description: "Division Manager upheld decision", type: "response" },
-        { date: "2024-12-01", event: "Step 3 Denied", description: "Plant Manager final denial", type: "response" },
-        { date: "2024-12-10", event: "Arbitration Requested", description: "Union requested binding arbitration", type: "escalation" },
-        { date: "2025-01-05", event: "Arbitrator Selected", description: "Mutual agreement on arbitrator", type: "meeting" },
-      ],
-    },
-    {
-      id: "grv-004",
-      number: "GRV-2025-003",
-      title: "Unsafe Working Conditions - Ventilation System",
-      description: "Inadequate ventilation in paint booth area causing health issues. Management aware but failed to address for 6 months.",
-      status: "step-1",
-      priority: "urgent",
-      category: "Health & Safety",
-      filedDate: "2025-01-11",
-      deadline: "2025-01-25",
-      currentStep: "Step 1 - Supervisor Review",
-      daysUntilDeadline: 12,
-      grievant: "Maria Rodriguez",
-      steward: "Sarah Johnson",
-      management: "Production Supervisor",
-      violatedArticle: "Article 22 (Health and Safety), Article 23 (Working Conditions)",
-      remedy: "Immediate repair/upgrade of ventilation system, medical evaluation for affected workers, hazard pay for period",
-      timeline: [
-        { date: "2025-01-11", event: "Grievance Filed", description: "Emergency grievance filed", type: "filed" },
-        { date: "2025-01-12", event: "OSHA Notified", description: "Union filed complaint with OSHA", type: "response" },
-        { date: "2025-01-14", event: "Work Stoppage", description: "Section 7-12 employees refused unsafe work", type: "meeting" },
-      ],
-    },
-    {
-      id: "grv-005",
-      number: "GRV-2024-087",
-      title: "Wage Calculation Error - Shift Differential",
-      description: "Incorrect calculation of shift differential for night crew (10pm-6am). Affects 15 members, 6-month period.",
-      status: "resolved",
-      priority: "medium",
-      category: "Wages & Benefits",
-      filedDate: "2024-12-01",
-      deadline: "2025-01-15",
-      currentStep: "Resolved - Settlement Reached",
-      daysUntilDeadline: 2,
-      grievant: "Class Action (15 members)",
-      steward: "Mike Chen",
-      management: "HR Manager",
-      violatedArticle: "Article 11 (Wages), Article 13 (Shift Differential)",
-      remedy: "Back pay for all affected members (approved), corrected payroll system going forward",
-      timeline: [
-        { date: "2024-12-01", event: "Grievance Filed", description: "Class action grievance submitted", type: "filed" },
-        { date: "2024-12-05", event: "Payroll Audit", description: "Union conducted independent audit", type: "response" },
-        { date: "2024-12-10", event: "Step 1 Meeting", description: "Presented audit findings", type: "meeting" },
-        { date: "2024-12-15", event: "Management Agreement", description: "Company acknowledged error", type: "response" },
-        { date: "2025-01-10", event: "Settlement Finalized", description: "Back pay processed, system corrected", type: "resolved" },
-      ],
-    },
-  ]);
+  // Grievances data from API
+  const [grievances, setGrievances] = useState<Grievance[]>([]);
+  const [loading, setLoading] = useState(true);
+  const [fetchError, setFetchError] = useState<string | null>(null);
 
   useEffect(() => {
     const fetchGrievances = async () => {
       try {
+        setLoading(true);
+        setFetchError(null);
         const res = await fetch('/api/grievances');
         if (res.ok) {
           const json = await res.json();
           const items = Array.isArray(json) ? json : json?.grievances ?? json?.data ?? [];
-          if (items.length > 0) setGrievances(items);
+          setGrievances(items);
+        } else {
+          const body = await res.json().catch(() => ({}));
+          setFetchError(body?.error || `Failed to load grievances (${res.status})`);
         }
       } catch {
-        // API not available — use fallback data
+        setFetchError('Unable to load grievances. Please try again later.');
+      } finally {
+        setLoading(false);
       }
     };
     fetchGrievances();
@@ -264,6 +151,20 @@ export function GrievancesConsole() {
   return (
     <div>
       <div className="p-6 md:p-10 max-w-7xl mx-auto">
+        {loading && (
+          <div className="flex items-center justify-center min-h-64">
+            <div className="text-center text-muted-foreground">Loading grievances…</div>
+          </div>
+        )}
+        {fetchError && (
+          <div className="rounded-lg border border-red-200 bg-red-50 p-6 mb-6 text-center">
+            <AlertTriangle className="w-8 h-8 text-red-500 mx-auto mb-2" />
+            <h3 className="text-lg font-semibold text-red-900 mb-1">Error Loading Grievances</h3>
+            <p className="text-red-800 text-sm">{fetchError}</p>
+          </div>
+        )}
+        {!loading && !fetchError && (
+        <>
         {/* Header */}
         <motion.div
           initial={{ opacity: 0, y: -20 }}
@@ -679,6 +580,8 @@ export function GrievancesConsole() {
             </CardContent>
           </Card>
         </motion.div>
+        </>
+        )}
       </div>
     </div>
   );

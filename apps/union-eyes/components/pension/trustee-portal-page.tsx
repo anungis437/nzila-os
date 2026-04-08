@@ -31,6 +31,9 @@ export default function TrusteePortalPage() {
         } else {
           setIsTrustee(false);
         }
+      } else {
+        const text = await response.text().catch(() => '');
+        setError(`Failed to verify trustee status (${response.status}). ${text ? (JSON.parse(text)?.error ?? '') : ''}`);
       }
     } catch {
       setError('Unable to verify trustee status. Please try again later.');

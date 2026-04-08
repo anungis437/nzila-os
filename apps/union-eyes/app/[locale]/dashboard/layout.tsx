@@ -14,6 +14,7 @@ import { OrganizationBreadcrumb } from "@/components/organization/organization-b
 import LanguageSwitcher from "@/components/language-switcher";
 import { HeaderActions } from "@/components/header-actions";
 import { PilotModeProvider } from "@/contexts/pilot-mode-context";
+import { FeatureFlagProvider } from "@/lib/hooks/use-feature-flags";
 import { logger } from "@/lib/logger";
 import { getOrganizationIdForUser, DEFAULT_ORGANIZATION_ID } from "@/lib/organization-utils";
 import { getUserRole } from "@/lib/auth/rbac-server";
@@ -152,7 +153,9 @@ export default async function DashboardLayout({ children }: { children: ReactNod
           
           {/* Page content */}
           <div className="dashboard-content p-3 md:p-6 mt-1 md:mt-2">
-            {children}
+            <FeatureFlagProvider>
+              {children}
+            </FeatureFlagProvider>
           </div>
         </div>
       </div>

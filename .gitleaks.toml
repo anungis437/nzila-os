@@ -33,6 +33,7 @@ paths = [
   '''__tests__/.*\.test\.ts$''',       # Unit tests with mock env values
   '''\.test\.ts$''',                   # Test files with mock values
   '''\.spec\.ts$''',                   # Spec files with mock values
+  '''tests/test_.*\.py$''',            # Python test files with mock values
   '''Dockerfile$''',                   # Build-time placeholder ARGs
   '''docker-compose.*\.yml$''',        # Dev compose files with local credentials
   '''\.devcontainer/.*\.yml$''',       # Devcontainer configs
