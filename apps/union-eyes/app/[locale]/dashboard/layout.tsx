@@ -77,7 +77,9 @@ export default async function DashboardLayout({ children }: { children: ReactNod
   const user = await currentUser();
   const userEmail = user?.emailAddresses?.[0]?.emailAddress || "";
 
-  // Auto-sync Clerk org memberships to local DB if missing
+  // Auto-provision org membership if user has none.
+  // With Entra auth, new users get a profile but no organization_members row.
+  // Without a membership, all org-scoped API routes reject with 403.
   try {
     const localMemberships = await db
       .select({ id: organizationMembers.id })
@@ -86,10 +88,23 @@ export default async function DashboardLayout({ children }: { children: ReactNod
       .limit(1);
 
     if (localMemberships.length === 0) {
-      // Entra org sync: look up user's group memberships via Graph API
-      // Note: In Entra, orgs are mapped to Azure AD groups
-      // TODO: Implement Graph API group membership sync when Entra app is registered
-      logger.info(`Skipping org sync for user ${userId} — Entra groups not yet configured`);
+      const userName = user?.fullName ?? user?.firstName ?? userEmail.split('@')[0] ?? 'Member';
+      logger.info(`Auto-provisioning org membership for user ${userId} in default org`);
+      try {
+        await db.insert(organizationMembers).values({
+          userId,
+          organizationId: DEFAULT_ORGANIZATION_ID,
+          name: userName,
+          email: userEmail,
+          role: 'member',
+          status: 'active',
+          isPrimary: true,
+        });
+        logger.info(`Created org membership for ${userId} in ${DEFAULT_ORGANIZATION_ID}`);
+      } catch (insertErr) {
+        // Unique constraint race — another request may have created it
+        logger.warn('Org membership insert failed (may already exist)', insertErr);
+      }
     }
   } catch (syncError) {
     // Non-fatal — user can still access dashboard with fallback org
