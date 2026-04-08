@@ -484,18 +484,13 @@ export async function getCurrentUser(): Promise<AuthUser | null> {
       }
     }
 
-    // Final fallback: if all methods failed, try looking up the user's
-    // organization membership. For single-org users this is unambiguous.
+    // Final fallback: use getOrganizationIdForUser() which checks membership,
+    // cookie (by slug), and ultimately falls back to DEFAULT_ORGANIZATION_ID.
+    // This ensures org-scoped API routes always have an org context.
     if (!resolvedOrganizationId && userId) {
       try {
-        const memberships = await db
-          .select({ organizationId: organizationMembers.organizationId })
-          .from(organizationMembers)
-          .where(eq(organizationMembers.userId, userId))
-          .limit(1);
-        if (memberships[0]) {
-          resolvedOrganizationId = memberships[0].organizationId;
-        }
+        const { getOrganizationIdForUser } = await import('@/lib/organization-utils');
+        resolvedOrganizationId = await getOrganizationIdForUser(userId);
       } catch {
         // Ignore — non-critical fallback
       }
