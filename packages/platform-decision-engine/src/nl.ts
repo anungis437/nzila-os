@@ -77,9 +77,10 @@ export function executeDecisionQuery(
         const records = loadAllDecisions().filter(
           (d) => d.decision_id === idMatch[0].toUpperCase(),
         )
+        const first = records[0]
         return {
-          answer: records.length > 0
-            ? `Found decision ${records[0].decision_id}: ${records[0].title}`
+          answer: first
+            ? `Found decision ${first.decision_id}: ${first.title}`
             : `No decision found with ID ${idMatch[0]}.`,
           records,
         }

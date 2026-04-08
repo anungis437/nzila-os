@@ -81,6 +81,19 @@ export enum AuditEventType {
   API_KEY_REVOKED = 'api.key_revoked',
   API_WEBHOOK_RECEIVED = 'api.webhook_received',
   API_WEBHOOK_FAILED = 'api.webhook_failed',
+
+  // Intake & Case Lifecycle
+  INTAKE_SUBMITTED = 'intake.submitted',
+  INTAKE_REVIEWED = 'intake.reviewed',
+  INTAKE_CONVERTED = 'intake.converted',
+  INTAKE_CLOSED = 'intake.closed_no_case',
+  CASE_CREATED = 'case.created',
+  CASE_PRIORITY_SET = 'case.priority_set',
+  CASE_PRIORITY_OVERRIDDEN = 'case.priority_overridden',
+  CASE_ASSIGNED = 'case.assigned',
+
+  // Authority Violations
+  AUTHORITY_VIOLATION = 'authority.violation',
 }
 
 /**

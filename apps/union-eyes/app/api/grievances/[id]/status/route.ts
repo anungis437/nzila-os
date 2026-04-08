@@ -11,7 +11,7 @@ import { grievances } from "@/db/schema/domains/claims/grievances";
 import { grievanceEvents } from "@/db/schema/domains/claims/grievance-lifecycle";
 import { withOrganizationAuth } from "@/lib/organization-middleware";
 import { hasMinRole } from "@/lib/api-auth-guard";
-import { auditDataMutation } from "@/lib/audit-logger";
+import { auditDataMutation, auditLog, AuditEventType, AuditSeverity } from "@/lib/audit-logger";
 import { buildUnionEvidencePack } from '@/lib/evidence';
 import { logger } from '@/lib/logger';
 import {
@@ -36,7 +36,8 @@ function mapToActorRole(hasAdmin: boolean, hasStaff: boolean): ActorRole {
 
 const statusSchema = z.object({
   status: z.enum([
-    "draft", "filed", "acknowledged", "investigating",
+    "draft", "converted", "closed_no_case",
+    "new", "filed", "acknowledged", "investigating",
     "response_due", "response_received", "escalated",
     "mediation", "arbitration", "settled", "withdrawn", "denied", "closed",
   ]),
@@ -124,6 +125,33 @@ export const PATCH = withOrganizationAuth(async (request, context, params?: { id
       previousState,
       newState: { status: newStatus },
     });
+
+    // Emit specific audit events for intake/case lifecycle transitions
+    if (newStatus === 'closed_no_case') {
+      await auditLog({
+        eventType: AuditEventType.INTAKE_CLOSED,
+        severity: AuditSeverity.MEDIUM,
+        userId,
+        organizationId,
+        resource: 'grievances',
+        action: 'close_intake_no_case',
+        resourceId: params.id,
+        details: { previousStatus: currentStatus },
+        outcome: 'success',
+      });
+    } else if (currentStatus === 'draft' && newStatus !== 'draft') {
+      await auditLog({
+        eventType: AuditEventType.INTAKE_REVIEWED,
+        severity: AuditSeverity.MEDIUM,
+        userId,
+        organizationId,
+        resource: 'grievances',
+        action: 'review_intake',
+        resourceId: params.id,
+        details: { newStatus },
+        outcome: 'success',
+      });
+    }
 
     buildUnionEvidencePack({
       actionType: 'GRIEVANCE_STATUS_CHANGED',

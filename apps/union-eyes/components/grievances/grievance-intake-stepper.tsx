@@ -2,7 +2,7 @@
  * Grievance Intake Stepper
  *
  * Visual step indicator for the grievance intake wizard.
- * Shows progress through the 6-step filing flow with
+ * Shows progress through the 6-step intake submission flow with
  * completion states, active highlighting, and keyboard nav.
  *
  * @module components/grievances/grievance-intake-stepper
@@ -38,7 +38,7 @@ export function GrievanceIntakeStepper({
 }: GrievanceIntakeStepperProps) {
   return (
     <nav
-      aria-label="Grievance filing progress"
+      aria-label="Grievance intake progress"
       className={cn("w-full", className)}
     >
       {/* Desktop horizontal stepper */}

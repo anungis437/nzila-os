@@ -376,7 +376,7 @@ export default async function SupportDashboard({
                 <CardHeader className="pb-2">
                   <CardTitle className="text-sm font-medium flex items-center gap-2">
                     <Headphones className="h-4 w-4" />
-                    Open Grievances
+                    Active Cases
                   </CardTitle>
                 </CardHeader>
                 <CardContent>
@@ -654,7 +654,7 @@ export default async function SupportDashboard({
                     <th className="pb-2 font-medium text-right">Open Tickets</th>
                     <th className="pb-2 font-medium text-right">Resolved Tickets</th>
                     <th className="pb-2 font-medium text-right">Satisfaction</th>
-                    <th className="pb-2 font-medium text-right">Open Grievances</th>
+                    <th className="pb-2 font-medium text-right">Active Cases</th>
                     <th className="pb-2 font-medium text-right">Resolved Grievances</th>
                   </tr>
                 </thead>

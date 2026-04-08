@@ -2,8 +2,8 @@
  * Cases collection route — list and create cases (claims).
  * "Cases" are claims viewed from the steward workbench perspective.
  *
- * GET  /api/cases
- * POST /api/cases
+ * GET  /api/cases   — List cases (member+ to see own, steward+ to see org)
+ * POST /api/cases   — Create a case (steward+ only — members must submit intakes)
  */
 import { withApi, ApiError } from '@/lib/api/framework';
 import { db } from '@/db/db';
@@ -12,6 +12,7 @@ import { withRLSContext } from '@/lib/db/with-rls-context';
 import { NextResponse } from 'next/server';
 import { buildUnionEvidencePack } from '@/lib/evidence';
 import { logger } from '@/lib/logger';
+import { auditLog, AuditEventType, AuditSeverity } from '@/lib/audit-logger';
 
 export const dynamic = 'force-dynamic';
 
@@ -99,11 +100,13 @@ export const GET = withApi(
 
 export const POST = withApi(
   {
-    auth: { required: true, minRole: 'member' },
+    auth: { required: true, minRole: 'steward' },
     openapi: {
       tags: ['Cases'],
-      summary: 'Create a new case',
-      description: 'Creates a new claim/case record.',
+      summary: 'Create a new case (steward+ only)',
+      description:
+        'Creates a new claim/case record. Requires steward role or above. ' +
+        'Members must submit intakes via POST /api/grievances instead.',
     },
   },
   async ({ request, organizationId, userId }) => {
@@ -121,6 +124,7 @@ export const POST = withApi(
       priority = 'medium',
       isAnonymous = false,
       claimAmount,
+      sourceIntakeId,
     } = body as Record<string, unknown>;
 
     if (!claimType || !description) {
@@ -160,6 +164,23 @@ export const POST = withApi(
 
     const inserted = rows[0];
 
+    // Audit: log case creation with intake provenance
+    await auditLog({
+      eventType: AuditEventType.CASE_CREATED,
+      severity: AuditSeverity.MEDIUM,
+      userId: userId ?? 'unknown',
+      organizationId,
+      resource: 'cases',
+      action: 'create_official_case',
+      resourceId: (inserted as Record<string, unknown>)?.claimId as string,
+      details: {
+        claimType,
+        priority,
+        sourceIntakeId: sourceIntakeId ?? null,
+      },
+      outcome: 'success',
+    });
+
     // Evidence: tamper-proof audit trail for case creation
     buildUnionEvidencePack({
       actionType: 'CASE_CREATED',
@@ -167,6 +188,21 @@ export const POST = withApi(
       actorId: userId ?? 'unknown',
       artifacts: [{ type: 'case', data: { claimId: (inserted as Record<string, unknown>)?.claimId, claimType, priority } }],
     }).catch((err) => logger.warn('Evidence pack failed', { error: String(err), actionType: 'CASE_CREATED' }))
+
+    // Audit: initial priority set on case creation
+    if (priority) {
+      await auditLog({
+        eventType: AuditEventType.CASE_PRIORITY_SET,
+        severity: AuditSeverity.LOW,
+        userId: userId ?? 'unknown',
+        organizationId,
+        resource: 'cases',
+        action: 'set_initial_priority',
+        resourceId: (inserted as Record<string, unknown>)?.claimId as string,
+        details: { priority },
+        outcome: 'success',
+      });
+    }
 
     return NextResponse.json({ data: inserted }, { status: 201 });
   },

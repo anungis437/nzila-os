@@ -11,7 +11,7 @@ import { grievances } from "@/db/schema/domains/claims/grievances";
 import { grievanceEvents } from "@/db/schema/domains/claims/grievance-lifecycle";
 import { withOrganizationAuth } from "@/lib/organization-middleware";
 import { hasMinRole } from "@/lib/api-auth-guard";
-import { auditDataMutation } from "@/lib/audit-logger";
+import { auditDataMutation, auditLog, AuditEventType, AuditSeverity } from "@/lib/audit-logger";
 import { buildUnionEvidencePack } from '@/lib/evidence';
 import { logger } from '@/lib/logger';
 import { assignSteward } from "@/lib/services/steward-assignment";
@@ -85,6 +85,18 @@ export const PATCH = withOrganizationAuth(async (request, context, params?: { id
       action: "update",
       resourceId: params.id,
       newState: { assignedStewardId: parsed.data.stewardId },
+    });
+
+    await auditLog({
+      eventType: AuditEventType.CASE_ASSIGNED,
+      severity: AuditSeverity.MEDIUM,
+      userId,
+      organizationId,
+      resource: 'grievances',
+      action: 'assign_steward',
+      resourceId: params.id,
+      details: { stewardId: parsed.data.stewardId },
+      outcome: 'success',
     });
 
     buildUnionEvidencePack({

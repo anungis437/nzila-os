@@ -58,7 +58,7 @@ export function AIChatbot() {
   
   // Sample suggestions
   const suggestions = [
-    { category: "Grievance", title: "How do I file a grievance?", icon: <ClipboardList size={24} className="text-blue-600" /> },
+    { category: "Grievance", title: "How do I submit an intake?", icon: <ClipboardList size={24} className="text-blue-600" /> },
     { category: "Rights", title: "What are my workplace rights?", icon: <Scale size={24} className="text-blue-600" /> },
     { category: "Contract", title: "Explain my collective agreement", icon: <FileSignature size={24} className="text-blue-600" /> },
     { category: "Safety", title: "Report a safety concern", icon: <ShieldAlert size={24} className="text-amber-600" /> },

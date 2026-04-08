@@ -52,7 +52,7 @@ export default function NewClaimPage() {
         router.push('../claims');
       } else {
         const data = await response.json().catch(() => ({}));
-        setError((data as { message?: string }).message ?? 'Failed to create case. Please try again.');
+        setError((data as { message?: string }).message ?? 'Failed to submit intake. Please try again.');
       }
     } catch (_error) {
       setError('Network error — please check your connection and try again.');
@@ -70,8 +70,8 @@ export default function NewClaimPage() {
 
       <Card>
         <CardHeader>
-          <CardTitle>Create New Case</CardTitle>
-          <CardDescription>Fill out the form below to create a new case</CardDescription>
+          <CardTitle>Submit New Intake</CardTitle>
+          <CardDescription>Fill out the form below to submit a new intake</CardDescription>
         </CardHeader>
         <CardContent>
           <form onSubmit={handleSubmit} className="space-y-6">
@@ -197,7 +197,7 @@ export default function NewClaimPage() {
 
             <div className="flex gap-4">
               <Button type="submit" disabled={submitting} className="flex-1">
-                {submitting ? 'Creating...' : 'Create Case'}
+                {submitting ? 'Submitting...' : 'Submit Intake'}
               </Button>
               <Button type="button" variant="outline" onClick={() => router.back()}>
                 Cancel

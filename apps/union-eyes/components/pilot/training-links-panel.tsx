@@ -47,7 +47,7 @@ const DEFAULT_LINKS: TrainingLink[] = [
   {
     id: "member-filing",
     title: "Member Grievance Filing Guide",
-    description: "Step-by-step walkthrough of how members file a grievance through Union Eyes.",
+    description: "Step-by-step walkthrough of how members submit an intake through Union Eyes.",
     icon: FileText,
     href: "/docs/guides/member-filing",
     audience: "Members",

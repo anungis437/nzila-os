@@ -310,7 +310,7 @@ export default async function SectorAnalyticsPage(props: {
 
             <Card>
               <CardHeader className="pb-2">
-                <CardTitle className="text-sm font-medium">Open Grievances</CardTitle>
+                <CardTitle className="text-sm font-medium">Active Cases</CardTitle>
               </CardHeader>
               <CardContent>
                 <div className="text-2xl font-bold text-orange-600">{grievances.open}</div>
@@ -392,7 +392,7 @@ export default async function SectorAnalyticsPage(props: {
                   <span className="font-semibold text-green-600">{grievances.resolved}</span>
                 </div>
                 <div className="flex justify-between p-2 bg-muted rounded text-sm">
-                  <span>Open Grievances</span>
+                  <span>Active Cases</span>
                   <span className="font-semibold text-orange-600">{grievances.open}</span>
                 </div>
               </CardContent>

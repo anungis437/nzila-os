@@ -36,9 +36,9 @@ export function summariseDecisions(decisions: readonly DecisionRecord[]): Decisi
   let critical_open = 0
 
   for (const d of decisions) {
-    by_severity[d.severity]++
-    by_category[d.category]++
-    by_status[d.status]++
+    by_severity[d.severity] = (by_severity[d.severity] ?? 0) + 1
+    by_category[d.category] = (by_category[d.category] ?? 0) + 1
+    by_status[d.status] = (by_status[d.status] ?? 0) + 1
     if (d.status === 'PENDING_REVIEW' || d.status === 'GENERATED') pending_review++
     if (d.severity === 'CRITICAL' && d.status !== 'CLOSED' && d.status !== 'EXPIRED') critical_open++
   }

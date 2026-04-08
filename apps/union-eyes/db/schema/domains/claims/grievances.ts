@@ -35,6 +35,8 @@ export const grievanceStatusEnum = pgEnum("grievance_status", [
   "withdrawn",
   "denied",
   "closed",
+  "converted",
+  "closed_no_case",
 ]);
 
 export const grievancePriorityEnum = pgEnum("grievance_priority", [

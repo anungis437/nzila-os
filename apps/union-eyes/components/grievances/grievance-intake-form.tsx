@@ -1,7 +1,7 @@
 /**
  * Grievance Intake Form
  *
- * Full multi-step grievance filing wizard with:
+ * Full multi-step grievance intake wizard with:
  * - 6 steps: Member → Employer → Issue → Description → Documents → Review
  * - Zod validation per step
  * - Draft auto-save & recovery via sessionStorage
@@ -290,12 +290,12 @@ export function GrievanceIntakeForm({
       sessionStorage.removeItem(DRAFT_KEY);
 
       toast({
-        title: "Grievance filed successfully",
-        description: `Case ${result.grievanceNumber} has been created.`,
+        title: "Intake submitted successfully",
+        description: `Intake ${result.grievanceNumber} has been submitted for review.`,
       });
     } catch (error) {
       toast({
-        title: "Filing failed",
+        title: "Submission failed",
         description: error instanceof Error ? error.message : "An unexpected error occurred. Please try again.",
         variant: "destructive",
       });
@@ -369,7 +369,7 @@ export function GrievanceIntakeForm({
           </span>
           {isLastStep ? (
             <Button onClick={handleSubmit} disabled={isSubmitting}>
-              {isSubmitting ? "Filing…" : "Submit Grievance"}
+              {isSubmitting ? "Submitting…" : "Submit Intake"}
             </Button>
           ) : (
             <Button onClick={handleNext}>
@@ -391,7 +391,7 @@ function MemberStep({ form }: { form: UseFormReturn<GrievanceFormData, undefined
       <StepHeader
         icon={User}
         title="Member Details"
-        description="Identify the grievant. If you are filing on behalf of a member, enter their information below."
+        description="Identify the member. If you are collecting information on behalf of a member, enter their details below."
       />
 
       <div className="grid grid-cols-1 sm:grid-cols-2 gap-4">
@@ -607,7 +607,7 @@ function DocumentStep({ form: _form }: { form: UseFormReturn<GrievanceFormData, 
       <StepHeader
         icon={Upload}
         title="Supporting Documents"
-        description="Attach any supporting evidence — emails, letters, photos, or other records. You can also add documents after filing."
+        description="Attach any supporting evidence — emails, letters, photos, or other records. You can also add documents after submitting the intake."
       />
 
       <div className="border-2 border-dashed border-muted-foreground/25 rounded-lg p-8 text-center">
@@ -646,9 +646,9 @@ function SubmissionOutcome({
       </div>
 
       <div>
-        <h2 className="text-2xl font-bold text-foreground">Grievance Filed Successfully</h2>
+        <h2 className="text-2xl font-bold text-foreground">Intake Submitted Successfully</h2>
         <p className="text-muted-foreground mt-2">
-          Your case has been created and a steward will review it shortly.
+          Your intake has been submitted. A steward will review it and create a formal case shortly.
         </p>
       </div>
 

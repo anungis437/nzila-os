@@ -135,7 +135,7 @@
   },
   "claims": {
     "title": "Cases",
-    "createClaim": "Create Case",
+    "createClaim": "Submit Intake",
     "viewClaim": "View Case",
     "editClaim": "Edit Case",
     "deleteClaim": "Delete Case",
@@ -539,7 +539,7 @@
     "activeMembers": "Active Members",
     "avgResolutionTime": "Avg. Resolution Time",
     "memberSatisfaction": "Member Satisfaction",
-    "grievancesFiled": "Grievances Filed",
+    "grievancesFiled": "Intakes Submitted",
     "changeFromLastPeriod": "{change} from last period",
     "casesTrend": "Cases Trend",
     "resolved": "Resolved",
@@ -2154,11 +2154,11 @@
       "step2Description": "We'll use this to route your cases to the right representative.",
       "step3Title": "What You Can Do",
       "step3Description": "Here's what's available to you:",
-      "step3Feature1": "Create a case about a workplace issue",
+      "step3Feature1": "Submit an intake about a workplace issue",
       "step3Feature2": "Track the progress of your cases",
       "step3Feature3": "Message your representative directly",
       "step4Title": "You're All Set!",
-      "step4Description": "Your first step: click the green Create Case card on your dashboard.",
+      "step4Description": "Your first step: click the green Submit Intake card on your dashboard.",
       "skipLabel": "Skip for now",
       "nextStep": "Next",
       "prevStep": "Back",
@@ -2234,7 +2234,7 @@
     "whereTookPlace": "Where it took place",
     "anyWitnessesDocumentation": "Any witnesses or supporting documentation",
     "howAffected": "How this affected you or others",
-    "submitCase": "Create Case",
+    "submitCase": "Submit Intake",
     "submitting": "Creating...",
     "privacyNotice": "Your case will be reviewed confidentially by your union representative. You'll receive updates via email at",
     "editAnytime": "You can update this anytime after creating."
@@ -3422,7 +3422,7 @@
       "desiredOutcomeLabel": "Desired Outcome",
       "desiredOutcomePlaceholder": "What resolution is the member seeking?",
       "cancelButton": "Cancel",
-      "createButton": "Create Case"
+      "createButton": "Submit Intake"
     },
     "edit": {
       "heading": "Edit Case",
@@ -3655,7 +3655,7 @@
     "operator": "Operator",
     "organizations": "Organizations",
     "totalMembers": "Total Members",
-    "openGrievances": "Open Grievances",
+    "openGrievances": "Active Cases",
     "activeCBAs": "Active CBAs",
     "settlements": "Settlements",
     "clcAffiliated": "CLC Affiliated",

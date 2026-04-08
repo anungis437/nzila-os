@@ -538,7 +538,7 @@
     "activeMembers": "Membres actifs",
     "avgResolutionTime": "Temps de résolution moyen",
     "memberSatisfaction": "Satisfaction des membres",
-    "grievancesFiled": "Griefs déposés",
+    "grievancesFiled": "Soumissions reçues",
     "changeFromLastPeriod": "{change} par rapport à la période précédente",
     "casesTrend": "Tendance des dossiers",
     "resolved": "Résolus",
@@ -567,7 +567,7 @@
     "avgResolution": "Résolution moyenne",
     "days": "jours",
     "searchPlaceholder": "Rechercher par numéro, titre, plaignant ou catégorie...",
-    "fileNewGrievance": "Déposer un nouveau grief",
+    "fileNewGrievance": "Soumettre une nouvelle demande",
     "filterByStatus": "Filtrer par statut",
     "filterByStep": "Filtrer par étape",
     "allStatuses": "Tous les statuts",
@@ -597,7 +597,7 @@
     "escalated": "Escaladé",
     "settled": "Réglé",
     "description": "Gérer les griefs formels et les dossiers d'arbitrage",
-    "fileNew": "Déposer un nouveau grief",
+    "fileNew": "Soumettre une nouvelle demande",
     "filterStatus": "Statut",
     "filterPriority": "Priorité",
     "allPriorities": "Toutes les priorités",
@@ -615,8 +615,8 @@
     "priorityMedium": "Moyen",
     "priorityLow": "Faible",
     "stewardName": "Utilisateur actuel",
-    "noGrievancesDescription": "Ajustez vos filtres ou déposez un nouveau grief pour commencer.",
-    "fileNewGrievanceAction": "Déposer un nouveau grief"
+    "noGrievancesDescription": "Ajustez vos filtres ou soumettez une nouvelle demande pour commencer.",
+    "fileNewGrievanceAction": "Soumettre une nouvelle demande"
   },
   "workflow": {
     "title": "Flux de travail",

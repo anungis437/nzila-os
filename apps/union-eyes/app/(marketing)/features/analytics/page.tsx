@@ -37,7 +37,7 @@ const features = [
     icon: TrendingUp,
     title: 'Leadership Dashboard',
     description:
-      'KPIs at a glance: open grievances, average resolution time, win rate, member satisfaction, evidence seal rate, and pilot health indicators.',
+      'KPIs at a glance: active cases, average resolution time, win rate, member satisfaction, evidence seal rate, and pilot health indicators.',
   },
   {
     icon: DollarSign,

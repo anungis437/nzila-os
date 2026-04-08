@@ -18,7 +18,7 @@ const handlers = crudRoutes({
   orgScoped: true,
   ownerColumn: 'memberId',
   readRole: 'member',
-  writeRole: 'member',
+  writeRole: 'steward',
 });
 
 export const GET = handlers.GET;
@@ -29,7 +29,7 @@ export const GET = handlers.GET;
  */
 export const POST = withApi(
   {
-    auth: { required: true, minRole: 'member' },
+    auth: { required: true, minRole: 'steward' },
     openapi: {
       tags: ['Claims'],
       summary: 'Create claim',

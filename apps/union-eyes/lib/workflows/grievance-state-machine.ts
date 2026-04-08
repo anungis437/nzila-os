@@ -5,13 +5,18 @@
  * Every status transition must pass through this validator — the API
  * layer MUST call `validateTransition` before writing a status change.
  *
- * States:
- *   NEW → TRIAGE → INVESTIGATION → NEGOTIATION → ARBITRATION → RESOLVED → CLOSED
+ * Intake path:  DRAFT → CONVERTED → NEW (official case)
+ *              DRAFT → CLOSED_NO_CASE (terminal — no case created)
+ *
+ * Case path:   NEW → TRIAGE → INVESTIGATION → NEGOTIATION → ARBITRATION → RESOLVED → CLOSED
  */
 
 // ─── Types ───────────────────────────────────────────────────────────────────
 
 export type GrievanceLifecycleStatus =
+  | "draft"
+  | "converted"
+  | "closed_no_case"
   | "new"
   | "triage"
   | "investigation"
@@ -59,6 +64,23 @@ const ROLE_LEVEL: Record<ActorRole, number> = {
  * Key = current status, value = allowed transitions with guards.
  */
 const TRANSITIONS: Record<GrievanceLifecycleStatus, TransitionRule> = {
+  // ── Intake statuses ──────────────────────────────────────────
+  draft: {
+    to: ["converted", "closed_no_case"],
+    minRole: "union_staff",
+  },
+  converted: {
+    // Terminal intake state — the conversion endpoint creates the official
+    // case as a NEW grievance. No further transitions from 'converted'.
+    to: [],
+    minRole: "platform_admin",
+  },
+  closed_no_case: {
+    // Terminal intake state — intake was reviewed and no case warranted.
+    to: [],
+    minRole: "platform_admin",
+  },
+  // ── Official case statuses ──────────────────────────────────
   new: {
     to: ["triage", "closed"],
     minRole: "union_staff",
@@ -151,7 +173,7 @@ export function allowedNextStatuses(
  * Check if a status is terminal (no outgoing transitions for non-admins).
  */
 export function isTerminal(status: GrievanceLifecycleStatus): boolean {
-  return status === "closed";
+  return status === "closed" || status === "converted" || status === "closed_no_case";
 }
 
 /**

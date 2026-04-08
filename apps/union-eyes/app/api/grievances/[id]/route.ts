@@ -20,7 +20,7 @@ import { eq, and, desc } from "drizzle-orm";
 import { requireEntitlement } from '@/services/platform-economics/entitlement-guard';
 
 export const GET = withOrganizationAuth(async (request, context, params?: { id: string }) => {
-  const { organizationId } = context;
+  const { organizationId, userId } = context;
   await requireEntitlement(organizationId, 'grievance_case_suite');
 
   try {
@@ -42,6 +42,13 @@ export const GET = withOrganizationAuth(async (request, context, params?: { id: 
 
     if (!grievance) {
       return standardErrorResponse(ErrorCode.NOT_FOUND, "Grievance not found");
+    }
+
+    // Row-level ownership check: members can only view their own intakes/cases.
+    // Steward+ can view any grievance in the org.
+    const isStewardPlus = await hasMinRole("steward");
+    if (!isStewardPlus && grievance.createdBy !== userId) {
+      return standardErrorResponse(ErrorCode.FORBIDDEN, "You can only view your own submissions.");
     }
 
     // Fetch related events

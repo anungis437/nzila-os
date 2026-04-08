@@ -131,10 +131,10 @@ export function GrievanceIntakeReview({ data, onEdit }: GrievanceIntakeReviewPro
       <div className="bg-blue-50 dark:bg-blue-950/30 border border-blue-200 dark:border-blue-800 rounded-lg p-4 flex items-start gap-3">
         <AlertCircle className="h-5 w-5 text-blue-600 mt-0.5 flex-shrink-0" />
         <div className="text-sm text-blue-900 dark:text-blue-200">
-          <p className="font-medium mb-1">Please review your grievance carefully</p>
+          <p className="font-medium mb-1">Please review your intake carefully</p>
           <p>
-            Once submitted, your case will be assigned a grievance number and a steward
-            will begin processing it. You can still add documents and notes after filing.
+            Once submitted, your intake will be reviewed by a steward. If approved,
+            a formal case will be created with a case number. You can add documents and notes after submission.
           </p>
         </div>
       </div>

@@ -280,7 +280,7 @@ setIsSubmitting(false);
       toast({
         variant: "destructive",
         title: "Error",
-        description: error instanceof Error ? error.message : "Failed to create case",
+        description: error instanceof Error ? error.message : "Failed to submit intake",
       });
     }
   };

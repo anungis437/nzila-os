@@ -103,7 +103,7 @@ export default function MemberClaimsPage() {
           </div>
           <Button onClick={() => router.push('./claims/new')}>
             <Plus className="mr-2 h-4 w-4" />
-            Create Case
+            Submit Intake
           </Button>
         </CardHeader>
         <CardContent>

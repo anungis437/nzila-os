@@ -112,7 +112,7 @@ export default function GrievanceTrackingPage() {
           <div className="flex flex-col md:flex-row items-start gap-4">
             {[
               { step: '1', label: 'File', desc: 'Steward fills guided intake form' },
-              { step: '2', label: 'Triage', desc: 'Assign priority and responsible steward' },
+              { step: '2', label: 'Triage', desc: 'Review intake and assign steward' },
               { step: '3', label: 'Investigate', desc: 'Gather evidence, research precedents' },
               { step: '4', label: 'Negotiate', desc: 'Mediation with employer' },
               { step: '5', label: 'Resolve', desc: 'Settlement, arbitration, or withdrawal' },

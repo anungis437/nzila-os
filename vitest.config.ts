@@ -181,6 +181,8 @@ export default defineConfig({
       'packages/platform-billing',
       // Intelligence layer
       'packages/intelligence',
+      // Workload Intelligence Layer
+      'packages/workload-intelligence',
     ],
   },
 })
