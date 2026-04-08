@@ -3,12 +3,13 @@
 /**
  * CLC Labour Intelligence Console
  *
- * Five-tab client component for CLC national staff and executives:
+ * Six-tab client component for CLC national staff and executives:
  * 1. Overview — key metrics + cohort confidence badge
- * 2. Sector Signals — cross-sector clause/precedent trends
- * 3. Affiliate Trends — per-affiliate sharing and engagement
- * 4. Shared Knowledge — clause library + precedent database health
- * 5. Governance — consent, participation, and cohort health
+ * 2. Decision Intelligence — risk posture, patterns, recommendations, briefing cards
+ * 3. Sector Signals — cross-sector clause/precedent trends
+ * 4. Affiliate Trends — per-affiliate sharing and engagement
+ * 5. Shared Knowledge — clause library + precedent database health
+ * 6. Governance — consent, participation, and cohort health
  */
 
 import { useState, useEffect, useCallback } from "react";
@@ -47,6 +48,10 @@ import {
   AlertTriangle,
   CheckCircle2,
   XCircle,
+  Brain,
+  Zap,
+  Target,
+  Activity,
 } from "lucide-react";
 import { StatCard } from "@/components/analytics/StatCard";
 import { TopItemsList } from "@/components/analytics/TopItemsList";
@@ -54,7 +59,7 @@ import { DistributionChart } from "@/components/analytics/DistributionChart";
 
 // ── Types ───────────────────────────────────────────────────────────────────
 
-type ActiveTab = "overview" | "sectors" | "affiliates" | "knowledge" | "governance";
+type ActiveTab = "overview" | "decisions" | "sectors" | "affiliates" | "knowledge" | "governance";
 
 interface SectorSignal {
   sector: string;
@@ -108,6 +113,86 @@ interface GovernanceSummary {
 }
 
 // ── NIL Briefing Types ──────────────────────────────────────────────────────
+
+// ── Decision Intelligence Types ─────────────────────────────────────────────
+
+interface DecisionPattern {
+  id: string;
+  patternType: string;
+  title: string;
+  summary: string;
+  affectedSectors: string[];
+  affectedAffiliateTypes: string[];
+  confidence: number;
+  watchLevel: "normal" | "elevated" | "high" | "critical";
+}
+
+interface DecisionRecommendation {
+  id: string;
+  signalId: string;
+  recommendedAction: "monitor" | "prepare" | "escalate" | "intervene";
+  rationale: string;
+  timeframe: string;
+  targetAudience: string;
+  confidence: number;
+}
+
+interface ExecutiveBriefingCard {
+  id: string;
+  category: "risk" | "opportunity" | "trend";
+  headline: string;
+  significance: string;
+  confidence: number;
+  confidenceBand: "low" | "medium" | "high";
+  recommendedAction: string;
+  timeframe: string;
+  watchLevel: "normal" | "elevated" | "high" | "critical";
+  evidenceRefs: string[];
+}
+
+interface MovementRiskPosture {
+  posture: "steady" | "vigilant" | "heightened";
+  watchAreas: string[];
+  risingSectors: string[];
+  issueClusters: string[];
+  summary: string;
+  confidence: number;
+}
+
+interface BargainingWatch {
+  sectors: string[];
+  headline: string;
+  preparationIndicators: string[];
+  signalStrength: number;
+  recommendedAction: string;
+  confidence: number;
+  evidenceRefs: string[];
+}
+
+interface SectorDivergence {
+  sector: string;
+  divergenceScore: number;
+  uniqueFactors: string[];
+  commonFactors: string[];
+  velocity: number;
+  classification: string;
+}
+
+interface DecisionIntelligenceOutput {
+  riskPosture: MovementRiskPosture;
+  sectorDivergence: SectorDivergence[];
+  bargainingWatch: BargainingWatch | null;
+  patterns: DecisionPattern[];
+  recommendations: DecisionRecommendation[];
+  briefingCards: ExecutiveBriefingCard[];
+  meta: {
+    fromDate: string | null;
+    toDate: string | null;
+    sectorCount: number;
+    affiliateTypeCount: number;
+    timeSeriesAvailable: boolean;
+  };
+}
 
 interface BriefingFinding {
   title: string;
@@ -214,6 +299,9 @@ export default function CLCIntelligenceConsole() {
   const [knowledgeBriefing, setKnowledgeBriefing] = useState<IntelligenceBriefing | null>(null);
   const [governanceBriefing, setGovernanceBriefing] = useState<IntelligenceBriefing | null>(null);
 
+  // Decision intelligence state
+  const [decisionIntel, setDecisionIntel] = useState<DecisionIntelligenceOutput | null>(null);
+
   useEffect(() => {
     setMounted(true);
   }, []);
@@ -226,11 +314,12 @@ export default function CLCIntelligenceConsole() {
       const toDate = new Date().toISOString();
       const params = new URLSearchParams({ fromDate, toDate, briefing: 'true' });
 
-      const [sectorsRes, affiliatesRes, knowledgeRes, govRes] = await Promise.all([
+      const [sectorsRes, affiliatesRes, knowledgeRes, govRes, decisionRes] = await Promise.all([
         fetch(`/api/v2/analytics/clc/sector-signals?${params}`),
         fetch(`/api/v2/analytics/clc/affiliate-trends?${params}`),
         fetch(`/api/v2/analytics/clc/knowledge-index?briefing=true`),
         fetch(`/api/v2/analytics/clc/governance?briefing=true`),
+        fetch(`/api/v2/analytics/clc/decision-intelligence?${params}`),
       ]);
 
       // Check for governance failures
@@ -246,6 +335,9 @@ export default function CLCIntelligenceConsole() {
         govRes.json(),
       ]);
 
+      // Decision intelligence — fetched separately to handle graceful degradation
+      const decisionData = decisionRes.ok ? await decisionRes.json() : null;
+
       setSectorSignals(sectorsData?.signals ?? null);
       setAffiliateTrends(affiliatesData?.trends ?? null);
       setKnowledgeIndex(knowledgeData?.index ?? null);
@@ -256,6 +348,9 @@ export default function CLCIntelligenceConsole() {
       setAffiliateBriefing(affiliatesData?.briefing ?? null);
       setKnowledgeBriefing(knowledgeData?.briefing ?? null);
       setGovernanceBriefing(govData?.briefing ?? null);
+
+      // Decision intelligence
+      setDecisionIntel(decisionData);
     } catch (err) {
       setError(err instanceof Error ? err.message : 'Failed to load intelligence data');
     } finally {
@@ -321,6 +416,7 @@ export default function CLCIntelligenceConsole() {
       <Tabs value={activeTab} onValueChange={(v) => setActiveTab(v as ActiveTab)}>
         <TabsList>
           <TabsTrigger value="overview">Overview</TabsTrigger>
+          <TabsTrigger value="decisions">Decision Intelligence</TabsTrigger>
           <TabsTrigger value="sectors">Sector Signals</TabsTrigger>
           <TabsTrigger value="affiliates">Affiliate Trends</TabsTrigger>
           <TabsTrigger value="knowledge">Shared Knowledge</TabsTrigger>
@@ -401,6 +497,340 @@ export default function CLCIntelligenceConsole() {
                     </div>
                   ))}
                 </div>
+              </CardContent>
+            </Card>
+          )}
+        </TabsContent>
+
+        {/* ── Decision Intelligence Tab ─────────────────────────────────── */}
+        <TabsContent value="decisions" className="space-y-6">
+          {/* Risk Posture Banner */}
+          {decisionIntel?.riskPosture && (
+            <Card className={
+              decisionIntel.riskPosture.posture === 'heightened'
+                ? 'border-red-200 bg-red-50/30'
+                : decisionIntel.riskPosture.posture === 'vigilant'
+                  ? 'border-yellow-200 bg-yellow-50/30'
+                  : 'border-green-200 bg-green-50/30'
+            }>
+              <CardHeader className="pb-3">
+                <CardTitle className="flex items-center gap-2">
+                  <Activity className={`h-5 w-5 ${
+                    decisionIntel.riskPosture.posture === 'heightened' ? 'text-red-600'
+                    : decisionIntel.riskPosture.posture === 'vigilant' ? 'text-yellow-600'
+                    : 'text-green-600'
+                  }`} />
+                  Movement Risk Posture
+                  <Badge variant={
+                    decisionIntel.riskPosture.posture === 'heightened' ? 'destructive'
+                    : decisionIntel.riskPosture.posture === 'vigilant' ? 'secondary'
+                    : 'default'
+                  } className="ml-2 capitalize">
+                    {decisionIntel.riskPosture.posture}
+                  </Badge>
+                  <Badge variant="outline" className="ml-auto text-xs">
+                    Confidence: {(decisionIntel.riskPosture.confidence * 100).toFixed(0)}%
+                  </Badge>
+                </CardTitle>
+              </CardHeader>
+              <CardContent>
+                <p className="text-sm mb-3">{decisionIntel.riskPosture.summary}</p>
+                {decisionIntel.riskPosture.watchAreas.length > 0 && (
+                  <div className="flex flex-wrap gap-1.5">
+                    {decisionIntel.riskPosture.watchAreas.map((area) => (
+                      <Badge key={area} variant="outline" className="text-xs">
+                        {area}
+                      </Badge>
+                    ))}
+                  </div>
+                )}
+              </CardContent>
+            </Card>
+          )}
+
+          {/* Summary Stats */}
+          <div className="grid gap-4 md:grid-cols-2 lg:grid-cols-4">
+            <StatCard
+              title="Correlated Patterns"
+              value={decisionIntel?.patterns.length ?? 0}
+              icon={Brain}
+              description={`${decisionIntel?.patterns.filter(p => p.watchLevel === 'high' || p.watchLevel === 'critical').length ?? 0} high/critical`}
+              iconColor="text-indigo-600"
+              isLoading={isLoading}
+            />
+            <StatCard
+              title="Recommendations"
+              value={decisionIntel?.recommendations.length ?? 0}
+              icon={Target}
+              description={`${decisionIntel?.recommendations.filter(r => r.recommendedAction === 'intervene' || r.recommendedAction === 'escalate').length ?? 0} urgent`}
+              iconColor="text-purple-600"
+              isLoading={isLoading}
+            />
+            <StatCard
+              title="Briefing Cards"
+              value={decisionIntel?.briefingCards.length ?? 0}
+              icon={FileText}
+              description="Executive-ready insights"
+              iconColor="text-blue-600"
+              isLoading={isLoading}
+            />
+            <StatCard
+              title="Sectors Diverging"
+              value={decisionIntel?.sectorDivergence.filter(d => d.divergenceScore > 0.3).length ?? 0}
+              icon={TrendingUp}
+              description={`of ${decisionIntel?.sectorDivergence.length ?? 0} analyzed`}
+              iconColor="text-orange-600"
+              isLoading={isLoading}
+            />
+          </div>
+
+          {/* Bargaining Watch Alert */}
+          {decisionIntel?.bargainingWatch && (
+            <Card className="border-amber-200 bg-amber-50/30">
+              <CardHeader className="pb-3">
+                <CardTitle className="flex items-center gap-2 text-base">
+                  <Zap className="h-5 w-5 text-amber-600" />
+                  Bargaining Watch
+                  <Badge variant="secondary" className="ml-auto text-xs">
+                    Signal: {(decisionIntel.bargainingWatch.signalStrength * 100).toFixed(0)}%
+                  </Badge>
+                </CardTitle>
+              </CardHeader>
+              <CardContent className="space-y-3">
+                <p className="text-sm font-medium">{decisionIntel.bargainingWatch.headline}</p>
+                <div className="flex flex-wrap gap-1.5">
+                  {decisionIntel.bargainingWatch.sectors.map((s) => (
+                    <Badge key={s} variant="outline" className="text-xs capitalize">{s}</Badge>
+                  ))}
+                </div>
+                {decisionIntel.bargainingWatch.preparationIndicators.length > 0 && (
+                  <div className="space-y-1">
+                    <p className="text-xs font-medium text-muted-foreground">Preparation Indicators</p>
+                    <ul className="text-xs space-y-0.5">
+                      {decisionIntel.bargainingWatch.preparationIndicators.map((ind, i) => (
+                        <li key={i} className="flex items-center gap-1.5">
+                          <span className="w-1 h-1 bg-amber-500 rounded-full shrink-0" />
+                          {ind}
+                        </li>
+                      ))}
+                    </ul>
+                  </div>
+                )}
+              </CardContent>
+            </Card>
+          )}
+
+          {/* Executive Briefing Cards */}
+          {decisionIntel?.briefingCards && decisionIntel.briefingCards.length > 0 && (
+            <Card>
+              <CardHeader>
+                <CardTitle className="flex items-center gap-2">
+                  <Brain className="h-5 w-5 text-indigo-600" />
+                  Executive Briefing Cards
+                </CardTitle>
+                <CardDescription>
+                  Decision-ready intelligence insights for CLC leadership
+                </CardDescription>
+              </CardHeader>
+              <CardContent className="space-y-3">
+                {decisionIntel.briefingCards.map((card) => (
+                  <div
+                    key={card.id}
+                    className={`p-4 rounded-lg border ${
+                      card.watchLevel === 'critical' ? 'border-red-200 bg-red-50/50'
+                      : card.watchLevel === 'high' ? 'border-orange-200 bg-orange-50/50'
+                      : card.watchLevel === 'elevated' ? 'border-yellow-200 bg-yellow-50/50'
+                      : 'border-gray-200 bg-gray-50/50'
+                    }`}
+                  >
+                    <div className="flex items-start justify-between gap-3">
+                      <div className="flex-1 min-w-0">
+                        <div className="flex items-center gap-2 mb-1">
+                          <Badge variant={
+                            card.category === 'risk' ? 'destructive'
+                            : card.category === 'opportunity' ? 'default'
+                            : 'secondary'
+                          } className="text-[10px] px-1.5 py-0 h-4 capitalize">
+                            {card.category}
+                          </Badge>
+                          <Badge variant="outline" className={`text-[10px] px-1.5 py-0 h-4 capitalize ${
+                            card.watchLevel === 'critical' || card.watchLevel === 'high'
+                              ? 'border-red-300 text-red-700'
+                              : card.watchLevel === 'elevated'
+                                ? 'border-yellow-300 text-yellow-700'
+                                : ''
+                          }`}>
+                            {card.watchLevel}
+                          </Badge>
+                          <Badge variant="outline" className="text-[10px] px-1.5 py-0 h-4">
+                            {card.confidenceBand}
+                          </Badge>
+                        </div>
+                        <p className="font-medium text-sm">{card.headline}</p>
+                        <p className="text-xs text-muted-foreground mt-1">{card.significance}</p>
+                      </div>
+                      <div className="text-right shrink-0">
+                        <p className="text-xs text-muted-foreground">{card.timeframe.replace(/_/g, ' ')}</p>
+                        <p className="text-xs font-medium capitalize mt-0.5">{card.recommendedAction}</p>
+                      </div>
+                    </div>
+                  </div>
+                ))}
+              </CardContent>
+            </Card>
+          )}
+
+          {/* Correlated Patterns */}
+          {decisionIntel?.patterns && decisionIntel.patterns.length > 0 && (
+            <Card>
+              <CardHeader>
+                <CardTitle className="flex items-center gap-2">
+                  <Network className="h-5 w-5 text-purple-600" />
+                  Correlated Patterns
+                </CardTitle>
+                <CardDescription>
+                  Cross-affiliate patterns detected from governed aggregate data
+                </CardDescription>
+              </CardHeader>
+              <CardContent className="space-y-3">
+                {decisionIntel.patterns.map((pattern) => (
+                  <div
+                    key={pattern.id}
+                    className="p-3 rounded-lg border bg-card"
+                  >
+                    <div className="flex items-start justify-between gap-2">
+                      <div className="flex-1 min-w-0">
+                        <div className="flex items-center gap-2 mb-1">
+                          <p className="font-medium text-sm">{pattern.title}</p>
+                          <Badge variant="outline" className={`text-[10px] px-1.5 py-0 h-4 capitalize ${
+                            pattern.watchLevel === 'critical' || pattern.watchLevel === 'high'
+                              ? 'border-red-300 text-red-700'
+                              : pattern.watchLevel === 'elevated'
+                                ? 'border-yellow-300 text-yellow-700'
+                                : ''
+                          }`}>
+                            {pattern.watchLevel}
+                          </Badge>
+                        </div>
+                        <p className="text-xs text-muted-foreground">{pattern.summary}</p>
+                        <div className="flex flex-wrap gap-1 mt-2">
+                          {pattern.affectedSectors.map((s) => (
+                            <Badge key={s} variant="secondary" className="text-[10px] capitalize">{s}</Badge>
+                          ))}
+                        </div>
+                      </div>
+                      <Badge variant="outline" className="text-xs shrink-0">
+                        {(pattern.confidence * 100).toFixed(0)}%
+                      </Badge>
+                    </div>
+                  </div>
+                ))}
+              </CardContent>
+            </Card>
+          )}
+
+          {/* Recommendations */}
+          {decisionIntel?.recommendations && decisionIntel.recommendations.length > 0 && (
+            <Card>
+              <CardHeader>
+                <CardTitle className="flex items-center gap-2">
+                  <Target className="h-5 w-5 text-green-600" />
+                  Recommendations
+                </CardTitle>
+                <CardDescription>
+                  Prioritized actions based on detected patterns
+                </CardDescription>
+              </CardHeader>
+              <CardContent className="space-y-3">
+                {decisionIntel.recommendations.map((rec) => (
+                  <div
+                    key={rec.id}
+                    className="flex items-start gap-3 p-3 rounded-lg border bg-card"
+                  >
+                    <Badge variant={
+                      rec.recommendedAction === 'intervene' ? 'destructive'
+                      : rec.recommendedAction === 'escalate' ? 'secondary'
+                      : rec.recommendedAction === 'prepare' ? 'default'
+                      : 'outline'
+                    } className="capitalize shrink-0 mt-0.5">
+                      {rec.recommendedAction}
+                    </Badge>
+                    <div className="flex-1 min-w-0">
+                      <p className="text-sm">{rec.rationale}</p>
+                      <div className="flex items-center gap-3 mt-1.5 text-xs text-muted-foreground">
+                        <span>Timeframe: {rec.timeframe.replace(/_/g, ' ')}</span>
+                        <span>Audience: {rec.targetAudience.replace(/_/g, ' ')}</span>
+                        <span>Confidence: {(rec.confidence * 100).toFixed(0)}%</span>
+                      </div>
+                    </div>
+                  </div>
+                ))}
+              </CardContent>
+            </Card>
+          )}
+
+          {/* Sector Divergence */}
+          {decisionIntel?.sectorDivergence && decisionIntel.sectorDivergence.filter(d => d.divergenceScore > 0.1).length > 0 && (
+            <Card>
+              <CardHeader>
+                <CardTitle className="flex items-center gap-2">
+                  <BarChart3 className="h-5 w-5 text-orange-600" />
+                  Sector Divergence
+                </CardTitle>
+                <CardDescription>
+                  How sectors differ from movement-wide baselines
+                </CardDescription>
+              </CardHeader>
+              <CardContent className="space-y-3">
+                {decisionIntel.sectorDivergence
+                  .filter(d => d.divergenceScore > 0.1)
+                  .sort((a, b) => b.divergenceScore - a.divergenceScore)
+                  .map((div) => (
+                  <div
+                    key={div.sector}
+                    className="p-3 rounded-lg border bg-card"
+                  >
+                    <div className="flex items-center justify-between mb-2">
+                      <h4 className="font-medium capitalize">{div.sector}</h4>
+                      <div className="flex items-center gap-2">
+                        <Badge variant="outline" className="text-xs capitalize">
+                          {div.classification.replace(/_/g, ' ')}
+                        </Badge>
+                        <span className="text-xs text-muted-foreground">
+                          Divergence: {(div.divergenceScore * 100).toFixed(0)}%
+                        </span>
+                      </div>
+                    </div>
+                    {div.uniqueFactors.length > 0 && (
+                      <div className="flex flex-wrap gap-1">
+                        {div.uniqueFactors.map((f) => (
+                          <Badge key={f} variant="secondary" className="text-[10px]">{f}</Badge>
+                        ))}
+                      </div>
+                    )}
+                  </div>
+                ))}
+              </CardContent>
+            </Card>
+          )}
+
+          {/* No patterns state */}
+          {decisionIntel && decisionIntel.patterns.length === 0 && decisionIntel.briefingCards.length === 0 && (
+            <Card className="border-green-200 bg-green-50/30">
+              <CardContent className="pt-6 flex items-center gap-2 text-green-800">
+                <CheckCircle2 className="h-5 w-5" />
+                <span className="font-medium">
+                  No actionable patterns detected. The movement posture is steady.
+                </span>
+              </CardContent>
+            </Card>
+          )}
+
+          {/* Loading state */}
+          {isLoading && !decisionIntel && (
+            <Card>
+              <CardContent className="pt-6 text-center text-muted-foreground">
+                Analyzing governed aggregates...
               </CardContent>
             </Card>
           )}

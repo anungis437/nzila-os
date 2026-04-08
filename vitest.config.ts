@@ -183,6 +183,8 @@ export default defineConfig({
       'packages/intelligence',
       // Workload Intelligence Layer
       'packages/workload-intelligence',
+      // CLC Decision Intelligence Layer
+      'packages/clc-decision-intelligence',
     ],
   },
 })

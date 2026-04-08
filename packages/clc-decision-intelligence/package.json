@@ -1,0 +1,28 @@
+{
+  "name": "@nzila/clc-decision-intelligence",
+  "version": "0.1.0",
+  "description": "CLC Decision Intelligence Layer — strategic reasoning, correlation, and recommended actions for CLC leadership",
+  "private": true,
+  "type": "module",
+  "main": "./src/index.ts",
+  "types": "./src/index.ts",
+  "exports": {
+    ".": "./src/index.ts",
+    "./contracts": "./src/contracts/index.ts",
+    "./signals": "./src/signals/index.ts",
+    "./correlation": "./src/correlation/index.ts",
+    "./confidence": "./src/confidence/index.ts",
+    "./recommendations": "./src/recommendations/index.ts",
+    "./reasoning": "./src/reasoning/index.ts",
+    "./briefings": "./src/briefings/index.ts"
+  },
+  "scripts": {
+    "typecheck": "tsc --noEmit",
+    "test": "vitest run",
+    "test:watch": "vitest"
+  },
+  "devDependencies": {
+    "typescript": "^6.0.2",
+    "vitest": "^4.1.2"
+  }
+}

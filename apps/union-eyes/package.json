@@ -49,6 +49,7 @@
     "@nzila/platform-auth": "workspace:*",
     "@nzila/payments-stripe": "workspace:*",
     "@nzila/ui": "workspace:*",
+    "@nzila/clc-decision-intelligence": "workspace:*",
     "@nzila/workload-intelligence": "workspace:*",
     "@paralleldrive/cuid2": "^3.3.0",
     "@radix-ui/react-accordion": "^1.2.0",
