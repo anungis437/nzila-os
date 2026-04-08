@@ -8,7 +8,7 @@
 
 import { NextRequest, NextResponse } from 'next/server';
 import { withApiAuth, BaseAuthContext } from '@/lib/api-auth-guard';
-import { evaluateFeatures, LRO_FEATURES } from '@/lib/services/feature-flags';
+import { evaluateFeatures, LRO_FEATURES, AI_FEATURES } from '@/lib/services/feature-flags';
 import {
   ErrorCode,
   standardErrorResponse,
@@ -20,8 +20,8 @@ export const GET = withApiAuth(async (request: NextRequest, context: BaseAuthCon
     const userId = context.userId;
     const orgId = context.organizationId;
     
-    // Evaluate all LRO features for this user
-    const featureNames = Object.values(LRO_FEATURES);
+    // Evaluate all feature flags (LRO + AI) for this user
+    const featureNames = [...Object.values(LRO_FEATURES), ...Object.values(AI_FEATURES)];
     
     const flags = await evaluateFeatures(featureNames, {
       userId,
