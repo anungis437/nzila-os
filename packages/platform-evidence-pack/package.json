@@ -19,7 +19,7 @@
     "@nzila/db": "workspace:*",
     "@nzila/os-core": "workspace:*",
     "@nzila/platform-events": "workspace:*",
-    "drizzle-orm": "^0.39.0",
+    "drizzle-orm": "^0.45.2",
     "zod": "^3.25.0"
   },
   "devDependencies": {
