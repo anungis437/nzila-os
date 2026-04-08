@@ -15,6 +15,11 @@ import type {
   MovementSummary,
   ExecutivePriority,
   ExecutiveDelta,
+  MultiSignalAnalysis,
+  ActionSequence,
+  TopOnePriority,
+  StrategicNarrative,
+  RecommendationAccuracy,
 } from '../contracts/index';
 
 import { selectTopExecutivePriorities } from '../prioritization/index';
@@ -29,6 +34,12 @@ import {
   fallbackActionBriefSummary,
   fallbackRecommendedNextSteps,
 } from '../fallbacks/index';
+import { analyzeMultipleSignals } from '../reasoning/multi-signal-engine';
+import { buildActionSequence, deriveTopOnePriority } from '../recommendations/sequence-engine';
+import { buildStrategicNarrative } from '../narrative/strategic';
+import { computeRecommendationAccuracy } from '../learning/feedback-engine';
+import { evolveConfidence } from '../confidence/evolution';
+import { resolveWithHybridControl } from '../nil-authority/index';
 
 // ── Pipeline Orchestrator ───────────────────────────────────────────────────
 
@@ -50,6 +61,9 @@ export async function runExecutiveIntelligencePipeline(
     nilService,
     maxPriorities = 5,
     timeSeriesAvailable = false,
+    decisionMode = 'hybrid',
+    historicalOutcomes,
+    historicalPerformanceScore,
   } = input;
 
   let nilInvoked = false;
@@ -64,6 +78,36 @@ export async function runExecutiveIntelligencePipeline(
     maxPriorities,
     previousPatternIds,
   );
+
+  // ── Step 1b: Multi-signal analysis (Section 2) ──────────────────────────
+  const multiSignalAnalysis: MultiSignalAnalysis | undefined =
+    topPriorities.length >= 2
+      ? analyzeMultipleSignals(topPriorities)
+      : undefined;
+
+  // ── Step 1c: Confidence evolution (Section 7) ───────────────────────────
+  // Apply historical performance modifier to priority confidences
+  if (historicalPerformanceScore !== undefined || (historicalOutcomes && historicalOutcomes.length > 0)) {
+    for (const priority of topPriorities) {
+      const evolved = evolveConfidence(
+        priority.confidence,
+        historicalPerformanceScore,
+        historicalOutcomes,
+        priority.recommendedAction,
+      );
+      priority.confidence = evolved.evolvedConfidence;
+    }
+  }
+
+  // ── Step 1d: NIL conflict resolution (Section 1 + 10) ──────────────────
+  const nilResolution = await resolveWithHybridControl(
+    topPriorities,
+    nilService,
+    decisionMode,
+  );
+  if (nilService?.isAvailable() && decisionMode !== 'deterministic_only') {
+    nilInvoked = true;
+  }
 
   // ── Step 2: Build movement summary ──────────────────────────────────────
   let movementSummary = buildMovementSummary(decisionOutput, topPriorities);
@@ -81,6 +125,25 @@ export async function runExecutiveIntelligencePipeline(
 
   // ── Step 3: Compute deltas ──────────────────────────────────────────────
   const whatChanged = compareExecutiveSnapshots(decisionOutput, previousSnapshot);
+
+  // ── Step 3b: Strategic narrative (Section 8) ────────────────────────────
+  const hasBargainingWatch = decisionOutput.bargainingWatch !== null;
+  const strategicNarrative: StrategicNarrative = buildStrategicNarrative(
+    movementSummary,
+    topPriorities,
+    whatChanged,
+    hasBargainingWatch,
+  );
+
+  // ── Step 3c: Decision sequencing (Section 4 + 5) ───────────────────────
+  const actionSequence: ActionSequence = buildActionSequence(topPriorities);
+  const topOnePriority: TopOnePriority | null = deriveTopOnePriority(topPriorities);
+
+  // ── Step 3d: Feedback metrics (Section 6) ──────────────────────────────
+  const feedbackMetrics: RecommendationAccuracy | undefined =
+    historicalOutcomes && historicalOutcomes.length > 0
+      ? computeRecommendationAccuracy(historicalOutcomes)
+      : undefined;
 
   // Attempt NIL refinement for changes summary
   const changesContract = getExecutivePromptContract('summarize_changes_since_last_snapshot');
@@ -154,6 +217,11 @@ export async function runExecutiveIntelligencePipeline(
     evidenceRefs,
     nilInvoked,
     usedTimeSeries: timeSeriesAvailable,
+    actionSequence,
+    topOnePriority: topOnePriority ?? undefined,
+    strategicNarrative,
+    multiSignalAnalysis,
+    decisionMode,
   };
 
   // ── Step 5: Build snapshot for persistence ──────────────────────────────
@@ -179,6 +247,11 @@ export async function runExecutiveIntelligencePipeline(
     actionBrief,
     currentSnapshot,
     auditContext,
+    multiSignalAnalysis,
+    actionSequence,
+    topOnePriority: topOnePriority ?? undefined,
+    strategicNarrative,
+    feedbackMetrics,
   };
 }
 
