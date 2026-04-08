@@ -85,7 +85,7 @@ describe('briefings / NIL prompt contracts', () => {
           summary: 'Movement vigilant',
           confidence: 0.7,
         },
-      });
+      }) as { riskPosture: { posture: string } };
       expect(input.riskPosture).toBeDefined();
       expect(input.riskPosture.posture).toBe('vigilant');
     });
@@ -97,9 +97,9 @@ describe('briefings / NIL prompt contracts', () => {
           { id: 'P1', patternType: 'cross_affiliate_issue_cluster', title: 'T', summary: 'S', affectedSectors: [], affectedAffiliateTypes: [], confidence: 0.7, watchLevel: 'elevated', evidenceRefs: [] },
           { id: 'P2', patternType: 'bargaining_pressure_signal', title: 'T2', summary: 'S2', affectedSectors: [], affectedAffiliateTypes: [], confidence: 0.6, watchLevel: 'monitor', evidenceRefs: [] },
         ],
-      });
+      }) as { patterns: { id: string }[] };
       expect(input.patterns.length).toBe(1);
-      expect(input.patterns[0].id).toBe('P1');
+      expect(input.patterns[0]!.id).toBe('P1');
     });
 
     it('executive briefing contract limits to 10 cards', () => {
@@ -116,7 +116,7 @@ describe('briefings / NIL prompt contracts', () => {
         watchLevel: 'elevated' as const,
         evidenceRefs: [],
       }));
-      const input = contract.buildInput({ cards });
+      const input = contract.buildInput({ cards }) as { briefingCards: unknown[] };
       expect(input.briefingCards.length).toBe(10);
     });
   });

@@ -26,7 +26,7 @@ export interface DecisionInsight {
   /** Composite confidence (0-1) from the confidence model */
   confidence: number;
   /** Confidence band derived from confidence score */
-  confidenceBand: 'low' | 'medium' | 'high';
+  confidenceBand: ConfidenceBand;
   /** Watch level for leadership prioritization */
   watchLevel: 'monitor' | 'elevated' | 'high' | 'critical';
   /** Recommended action */
@@ -40,6 +40,11 @@ export interface DecisionInsight {
   /** When this insight was generated */
   generatedAt: string;
 }
+
+// ── Confidence Band ──────────────────────────────────────────────────────────
+
+/** Named type for confidence score bands */
+export type ConfidenceBand = 'low' | 'medium' | 'high';
 
 // ── Confidence Model ────────────────────────────────────────────────────────
 
@@ -62,7 +67,7 @@ export interface ConfidenceResult {
   /** Overall confidence score (0-1) */
   confidence: number;
   /** Human-readable band */
-  confidenceBand: 'low' | 'medium' | 'high';
+  confidenceBand: ConfidenceBand;
   /** Explanation of confidence calculation */
   confidenceExplanation: string;
   /** Breakdown by factor */
@@ -181,13 +186,13 @@ export interface DecisionRecommendation {
 
 export interface MovementRiskPosture {
   /** Overall posture level */
-  posture: 'stable' | 'watchful' | 'elevated' | 'high_alert';
-  /** Top current watch areas */
-  watchAreas: DecisionInsight[];
-  /** Rising sectors by velocity */
-  risingSectors: { sector: string; velocity: number; classification: TrendClassification }[];
-  /** Active issue clusters */
-  issueClusters: CorrelatedPattern[];
+  posture: 'steady' | 'vigilant' | 'heightened';
+  /** Top current watch areas (pattern titles) */
+  watchAreas: string[];
+  /** Rising sectors (sector names from bargaining/shift patterns) */
+  risingSectors: string[];
+  /** Active issue clusters (pattern titles) */
+  issueClusters: string[];
   /** Confidence-weighted posture summary */
   summary: string;
   /** Overall confidence */
@@ -238,7 +243,7 @@ export interface ExecutiveBriefingCard {
   /** Confidence score */
   confidence: number;
   /** Confidence band */
-  confidenceBand: 'low' | 'medium' | 'high';
+  confidenceBand: ConfidenceBand;
   /** Recommended action */
   recommendedAction: RecommendedAction;
   /** Timeframe */
@@ -265,7 +270,8 @@ export interface DecisionPromptContract {
   /** Anonymization rules */
   anonymizationRules: string[];
   /** Build input payload from governed aggregates */
-  buildInput: (...args: unknown[]) => Record<string, unknown>;
+  // eslint-disable-next-line @typescript-eslint/no-explicit-any
+  buildInput: (data: any) => Record<string, unknown>;
 }
 
 // ── Audit Extensions ────────────────────────────────────────────────────────

@@ -79,8 +79,8 @@ describe('correlation engine', () => {
       ];
       const patterns = detectPrecedentConcentration(sectors);
       expect(patterns.length).toBeGreaterThanOrEqual(1);
-      expect(patterns[0].affectedSectors).toContain('HighDispute');
-      expect(patterns[0].patternType).toBe('precedent_concentration');
+      expect(patterns[0]!.affectedSectors).toContain('HighDispute');
+      expect(patterns[0]!.patternType).toBe('precedent_concentration');
     });
   });
 
@@ -108,7 +108,7 @@ describe('correlation engine', () => {
       const sectors = [{ sector: 'Mining', clauseCount: 40, precedentCount: 10, totalCitations: 50, totalViews: 200, uniqueOrgs: 12, topClauseTypes: [] }];
       const patterns = detectBargainingPressure(sts, sectors);
       expect(patterns.length).toBeGreaterThanOrEqual(1);
-      expect(patterns[0].patternType).toBe('bargaining_pressure_signal');
+      expect(patterns[0]!.patternType).toBe('bargaining_pressure_signal');
     });
   });
 
@@ -129,10 +129,10 @@ describe('correlation engine', () => {
       if (patterns.length >= 2) {
         const watchOrder: Record<string, number> = { critical: 0, high: 1, elevated: 2, monitor: 3 };
         for (let i = 1; i < patterns.length; i++) {
-          const prev = watchOrder[patterns[i - 1].watchLevel];
-          const curr = watchOrder[patterns[i].watchLevel];
+          const prev = watchOrder[patterns[i - 1]!.watchLevel]!;
+          const curr = watchOrder[patterns[i]!.watchLevel]!;
           if (prev === curr) {
-            expect(patterns[i - 1].confidence).toBeGreaterThanOrEqual(patterns[i].confidence);
+            expect(patterns[i - 1]!.confidence).toBeGreaterThanOrEqual(patterns[i]!.confidence);
           } else {
             expect(prev).toBeLessThanOrEqual(curr);
           }

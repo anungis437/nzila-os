@@ -163,7 +163,7 @@ interface BargainingWatch {
   sectors: string[];
   headline: string;
   preparationIndicators: string[];
-  signalStrength: number;
+  signalStrength: 'weak' | 'moderate' | 'strong';
   recommendedAction: string;
   confidence: number;
   evidenceRefs: string[];
@@ -592,7 +592,7 @@ export default function CLCIntelligenceConsole() {
                   <Zap className="h-5 w-5 text-amber-600" />
                   Bargaining Watch
                   <Badge variant="secondary" className="ml-auto text-xs">
-                    Signal: {(decisionIntel.bargainingWatch.signalStrength * 100).toFixed(0)}%
+                    Signal: {decisionIntel.bargainingWatch.signalStrength}
                   </Badge>
                 </CardTitle>
               </CardHeader>

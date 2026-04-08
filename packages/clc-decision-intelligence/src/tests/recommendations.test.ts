@@ -112,9 +112,9 @@ describe('recommendation engine', () => {
       ];
       const recs = generateRecommendations(patterns);
       expect(recs.length).toBe(3);
-      expect(recs[0].recommendedAction).toBe('intervene');
-      expect(recs[1].recommendedAction).toBe('escalate');
-      expect(recs[2].recommendedAction).toBe('monitor');
+      expect(recs[0]!.recommendedAction).toBe('intervene');
+      expect(recs[1]!.recommendedAction).toBe('escalate');
+      expect(recs[2]!.recommendedAction).toBe('monitor');
     });
 
     it('returns empty for no patterns', () => {

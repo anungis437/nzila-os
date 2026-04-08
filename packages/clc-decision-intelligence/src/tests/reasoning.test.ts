@@ -80,7 +80,7 @@ describe('reasoning / data products', () => {
 
   describe('analyzeSectorDivergence', () => {
     it('returns empty for fewer than 2 sectors', () => {
-      expect(analyzeSectorDivergence([makeSectors()[0]], [])).toEqual([]);
+      expect(analyzeSectorDivergence([makeSectors()[0]!], [])).toEqual([]);
     });
 
     it('returns a divergence entry per sector', () => {
@@ -174,8 +174,8 @@ describe('reasoning / data products', () => {
       ];
       const cards = generateExecutiveBriefingCards(patterns, recs);
       expect(cards.length).toBe(2);
-      expect(cards[0].category).toBe('risk');
-      expect(cards[1].category).toBe('trend');
+      expect(cards[0]!.category).toBe('risk');
+      expect(cards[1]!.category).toBe('trend');
     });
 
     it('links recommendations to cards', () => {
@@ -184,13 +184,13 @@ describe('reasoning / data products', () => {
         { id: 'REC-P1', signalId: 'P1', recommendedAction: 'escalate', rationale: 'Test', timeframe: 'now', targetAudience: 'clc_executive', confidence: 0.8 },
       ];
       const cards = generateExecutiveBriefingCards(patterns, recs);
-      expect(cards[0].recommendedAction).toBe('escalate');
-      expect(cards[0].timeframe).toBe('now');
+      expect(cards[0]!.recommendedAction).toBe('escalate');
+      expect(cards[0]!.timeframe).toBe('now');
     });
 
     it('includes confidence band', () => {
       const cards = generateExecutiveBriefingCards([makePattern('P1', { confidence: 0.8 })], []);
-      expect(cards[0].confidenceBand).toBe('high');
+      expect(cards[0]!.confidenceBand).toBe('high');
     });
   });
 
