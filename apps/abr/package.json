@@ -22,7 +22,7 @@
     "@nzila/ui": "workspace:*",
     "@nzila/ai-sdk": "workspace:*",
     "@nzila/ml-sdk": "workspace:*",
-    "axios": "^1.6.7",
+    "axios": "^1.15.0",
     "clsx": "^2.1.0",
     "drizzle-orm": "^0.39.0",
     "framer-motion": "^11.3.30",
