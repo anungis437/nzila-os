@@ -11,6 +11,9 @@
  * Philosophy: "This is how it MUST be done"
  * 
  * Integration: Imported by workflow-engine.ts to replace basic validation
+ *
+ * @deprecated Use `lib/workflow/case-lifecycle.ts` (unified CaseLifecycle FSM) for new code.
+ * Legacy state mapping available via `lib/workflow/state-bridge.ts`.
  */
 
 export type ClaimStatus = 

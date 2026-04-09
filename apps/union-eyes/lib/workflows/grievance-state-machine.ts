@@ -9,6 +9,9 @@
  *              DRAFT → CLOSED_NO_CASE (terminal — no case created)
  *
  * Case path:   NEW → TRIAGE → INVESTIGATION → NEGOTIATION → ARBITRATION → RESOLVED → CLOSED
+ *
+ * @deprecated Use `lib/workflow/case-lifecycle.ts` (unified CaseLifecycle FSM) for new code.
+ * Legacy state mapping available via `lib/workflow/state-bridge.ts`.
  */
 
 // ─── Types ───────────────────────────────────────────────────────────────────

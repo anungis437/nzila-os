@@ -6,6 +6,9 @@
  * This FSM ensures cases follow proper workflow progression and prevents invalid state transitions.
  * 
  * States represent the lifecycle of a grievance/case from initial filing to final resolution.
+ *
+ * @deprecated Use `lib/workflow/case-lifecycle.ts` (unified CaseLifecycle FSM) for new code.
+ * Legacy state mapping available via `lib/workflow/state-bridge.ts`.
  */
 
 // ============================================================================

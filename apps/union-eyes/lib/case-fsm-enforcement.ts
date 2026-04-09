@@ -6,6 +6,9 @@
  * the union-eyes FSM layer.
  *
  * PR-022: FSM Enforcement + Transition Tests
+ *
+ * @deprecated Use `lib/workflow/case-lifecycle.ts` (unified CaseLifecycle FSM) for new code.
+ * For CUPE vocabulary bridging, use `lib/workflow/state-bridge.ts` with fsm='cupe'.
  */
 
 import {
