@@ -5,7 +5,7 @@
 import { NextRequest, NextResponse } from 'next/server';
 import { z } from 'zod';
 import { listCBAs, createCBA, type CBAFilters } from '@/lib/services/cba-service';
-import { getCurrentUser } from '@/lib/api-auth-guard';
+import { getCurrentUser, requireUserForOrganization, ROLE_HIERARCHY } from '@/lib/api-auth-guard';
 
 export const dynamic = 'force-dynamic';
 
@@ -75,6 +75,18 @@ export async function POST(req: NextRequest) {
   }
 
   try {
+    // Validate caller belongs to the target organization with steward+ role
+    let userCtx;
+    try {
+      userCtx = await requireUserForOrganization(validation.data.organizationId);
+    } catch {
+      return NextResponse.json({ error: 'Forbidden: not a member of target organization' }, { status: 403 });
+    }
+    const userRole = userCtx.roles[0] || 'member';
+    if ((ROLE_HIERARCHY[userRole as keyof typeof ROLE_HIERARCHY] ?? 0) < ROLE_HIERARCHY.steward) {
+      return NextResponse.json({ error: 'Forbidden: requires steward role' }, { status: 403 });
+    }
+
     const cba = await createCBA(validation.data);
     return NextResponse.json(cba, { status: 201 });
   } catch {

@@ -1,5 +1,6 @@
 /**
- * CRUD collection route for organizationMembers
+ * CRUD collection route for organizationMembers — super-admin role fix
+ * Restricted to system_admin+ role only.
  */
 import { crudRoutes } from '@/lib/api/crud-factory';
 import { organizationMembers } from '@/db/schema';
@@ -11,7 +12,7 @@ const { GET, POST } = crudRoutes({
   pk: 'id',
   tags: ["Members"],
   orgScoped: true,
-  readRole: 'member',
-  writeRole: 'steward',
+  readRole: 'admin',
+  writeRole: 'system_admin',
 });
 export { GET, POST };

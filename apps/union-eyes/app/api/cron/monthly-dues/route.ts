@@ -1,20 +1,24 @@
 /**
- * Health check endpoint
+ * Monthly Dues Cron Job (stub — not yet implemented)
+ * Protected by CRON_SECRET to prevent unauthorized invocation.
  */
-import { withApi } from '@/lib/api/framework';
+import { NextRequest, NextResponse } from 'next/server';
+import { timingSafeEqual } from 'crypto';
 
 export const dynamic = 'force-dynamic';
 
-export const GET = withApi(
-  {
-    auth: { required: false },
-    openapi: {
-      tags: ["System"],
-      summary: 'Health check',
-      description: 'Returns service health status.',
-    },
-  },
-  async () => {
-    return { status: 'healthy', timestamp: new Date().toISOString() };
-  },
-);
+export async function GET(request: NextRequest) {
+  const authHeader = request.headers.get('authorization');
+  const secret = authHeader?.replace('Bearer ', '') ?? '';
+  const expected = process.env.CRON_SECRET ?? '';
+  if (!expected) {
+    return NextResponse.json({ error: 'CRON_SECRET not configured' }, { status: 401 });
+  }
+  const secretBuf = Buffer.from(secret);
+  const expectedBuf = Buffer.from(expected);
+  if (secretBuf.length !== expectedBuf.length || !timingSafeEqual(secretBuf, expectedBuf)) {
+    return NextResponse.json({ error: 'Unauthorized' }, { status: 401 });
+  }
+
+  return NextResponse.json({ status: 'not_implemented', message: 'Monthly dues cron not yet implemented', timestamp: new Date().toISOString() });
+}

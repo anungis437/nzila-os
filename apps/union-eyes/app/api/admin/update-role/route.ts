@@ -1,5 +1,6 @@
 /**
- * CRUD collection route for organizationMembers
+ * CRUD collection route for organizationMembers — role management
+ * Requires admin+ role (not steward) for writes since this controls role assignment.
  */
 import { crudRoutes } from '@/lib/api/crud-factory';
 import { organizationMembers } from '@/db/schema';
@@ -11,7 +12,7 @@ const { GET, POST } = crudRoutes({
   pk: 'id',
   tags: ["Members"],
   orgScoped: true,
-  readRole: 'member',
-  writeRole: 'steward',
+  readRole: 'steward',
+  writeRole: 'admin',
 });
 export { GET, POST };

@@ -5,6 +5,7 @@ import { organizationMembers } from '@/db/schema';
 import { eq } from 'drizzle-orm';
 import { withRLSContext } from '@/lib/db/with-rls-context';
 import { z } from 'zod';
+import { requireUserForOrganization, ROLE_HIERARCHY } from '@/lib/api-auth-guard';
 
 export const dynamic = 'force-dynamic';
 
@@ -50,10 +51,19 @@ export async function GET(_req: NextRequest, { params }: Params) {
 }
 
 export async function POST(req: NextRequest, { params }: Params) {
-  const { userId } = await auth();
-  if (!userId) return NextResponse.json({ error: 'Unauthorized' }, { status: 401 });
-
   const { id } = await params;
+
+  // Require caller to be a member of THIS org with steward+ role
+  let userCtx;
+  try {
+    userCtx = await requireUserForOrganization(id);
+  } catch {
+    return NextResponse.json({ error: 'Forbidden' }, { status: 403 });
+  }
+  const userRole = userCtx.roles[0] || 'member';
+  if ((ROLE_HIERARCHY[userRole as keyof typeof ROLE_HIERARCHY] ?? 0) < ROLE_HIERARCHY.steward) {
+    return NextResponse.json({ error: 'Forbidden: requires steward role' }, { status: 403 });
+  }
 
   let body: unknown;
   try {

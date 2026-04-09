@@ -4,6 +4,7 @@ import { db } from '@/db/db';
 import { organizations } from '@/db/schema-organizations';
 import { eq, sql } from 'drizzle-orm';
 import { withRLSContext } from '@/lib/db/with-rls-context';
+import { requireUserForOrganization, ROLE_HIERARCHY } from '@/lib/api-auth-guard';
 
 export const dynamic = 'force-dynamic';
 
@@ -82,10 +83,20 @@ export async function GET(_req: NextRequest, { params }: Params) {
 }
 
 export async function PATCH(req: NextRequest, { params }: Params) {
-  const { userId } = await auth();
-  if (!userId) return NextResponse.json({ error: 'Unauthorized' }, { status: 401 });
-
   const { id } = await params;
+
+  // Require caller to be a member of THIS org with admin+ role
+  let userCtx;
+  try {
+    userCtx = await requireUserForOrganization(id);
+  } catch {
+    return NextResponse.json({ error: 'Forbidden' }, { status: 403 });
+  }
+  const userRole = userCtx.roles[0] || 'member';
+  if ((ROLE_HIERARCHY[userRole as keyof typeof ROLE_HIERARCHY] ?? 0) < ROLE_HIERARCHY.admin) {
+    return NextResponse.json({ error: 'Forbidden: requires admin role' }, { status: 403 });
+  }
+
   const body = await req.json();
   const updates: Record<string, unknown> = {};
   if (body.name !== undefined) updates.name = body.name;
@@ -108,10 +119,20 @@ export async function PATCH(req: NextRequest, { params }: Params) {
 }
 
 export async function DELETE(_req: NextRequest, { params }: Params) {
-  const { userId } = await auth();
-  if (!userId) return NextResponse.json({ error: 'Unauthorized' }, { status: 401 });
-
   const { id } = await params;
+
+  // Require caller to be a member of THIS org with admin+ role
+  let userCtx;
+  try {
+    userCtx = await requireUserForOrganization(id);
+  } catch {
+    return NextResponse.json({ error: 'Forbidden' }, { status: 403 });
+  }
+  const userRole = userCtx.roles[0] || 'member';
+  if ((ROLE_HIERARCHY[userRole as keyof typeof ROLE_HIERARCHY] ?? 0) < ROLE_HIERARCHY.admin) {
+    return NextResponse.json({ error: 'Forbidden: requires admin role' }, { status: 403 });
+  }
+
   const [archived] = await withRLSContext(async () =>
     db.update(organizations)
       .set({ status: 'archived', updatedAt: new Date() })

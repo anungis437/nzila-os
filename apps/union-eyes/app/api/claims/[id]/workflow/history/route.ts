@@ -6,7 +6,7 @@
 import { NextRequest, NextResponse } from 'next/server';
 import { db } from '@/db/db';
 import { grievanceTransitions } from '@/db/schema';
-import { eq, desc } from 'drizzle-orm';
+import { eq, and, desc } from 'drizzle-orm';
 import { getCurrentUser } from '@/lib/api-auth-guard';
 
 export const dynamic = 'force-dynamic';
@@ -19,11 +19,20 @@ export async function GET(_req: NextRequest, { params }: Params) {
     return NextResponse.json({ error: 'Unauthorized' }, { status: 401 });
   }
 
+  if (!user.organizationId) {
+    return NextResponse.json({ error: 'Organization context required' }, { status: 403 });
+  }
+
   const { id } = await params;
   const history = await db
     .select()
     .from(grievanceTransitions)
-    .where(eq(grievanceTransitions.claimId, id))
+    .where(
+      and(
+        eq(grievanceTransitions.claimId, id),
+        eq(grievanceTransitions.organizationId, user.organizationId),
+      )
+    )
     .orderBy(desc(grievanceTransitions.transitionedAt));
   return NextResponse.json(history);
 }

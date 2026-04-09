@@ -42,9 +42,10 @@ function slaDeadline(
 }
 
 export async function POST(request: NextRequest) {
-  // Authenticate via shared secret
-  const secret = request.headers.get('x-cron-secret') ?? ''
-  const expected = process.env.CRON_SECRET ?? ''
+  // Authenticate via shared secret (standardized Bearer token pattern)
+  const authHeader = request.headers.get('authorization') ?? request.headers.get('x-cron-secret') ?? '';
+  const secret = authHeader.replace('Bearer ', '');
+  const expected = process.env.CRON_SECRET ?? '';
   if (!expected) {
     return NextResponse.json({ error: 'CRON_SECRET not configured' }, { status: 401 })
   }
