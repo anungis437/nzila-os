@@ -20,6 +20,7 @@ import {
   jsonb,
   index,
   uniqueIndex,
+  real,
 } from 'drizzle-orm/pg-core';
 import { organizations } from '../schema-organizations';
 import { grievances } from './grievance-schema';
@@ -104,6 +105,70 @@ export const grievanceTimelineEvents = pgTable('grievance_timeline_events', {
   index('idx_timeline_events_date').on(table.eventDate),
 ]);
 
+// ─── Duplicate Groups ────────────────────────────────────────────────────────
+
+export const duplicateGroups = pgTable('duplicate_groups', {
+  id: uuid('id').primaryKey().defaultRandom(),
+  organizationId: uuid('organization_id')
+    .notNull()
+    .references(() => organizations.id),
+  groupType: varchar('group_type', { length: 30 }).notNull(), // 'case' | 'document' | 'timeline_event'
+  status: varchar('status', { length: 20 }).notNull().default('pending'), // pending | confirmed | dismissed | merged
+  autoScore: real('auto_score'),
+  matchReasons: jsonb('match_reasons').notNull().default([]),
+  reviewedBy: varchar('reviewed_by', { length: 255 }),
+  reviewedAt: timestamp('reviewed_at', { withTimezone: true }),
+  createdAt: timestamp('created_at', { withTimezone: true }).notNull().defaultNow(),
+  metadata: jsonb('metadata').default({}),
+}, (table) => [
+  index('idx_duplicate_groups_org').on(table.organizationId),
+  index('idx_duplicate_groups_status').on(table.status),
+  index('idx_duplicate_groups_type').on(table.groupType),
+]);
+
+// ─── Duplicate Group Members ─────────────────────────────────────────────────
+
+export const duplicateGroupMembers = pgTable('duplicate_group_members', {
+  id: uuid('id').primaryKey().defaultRandom(),
+  groupId: uuid('group_id')
+    .notNull()
+    .references(() => duplicateGroups.id, { onDelete: 'cascade' }),
+  recordType: varchar('record_type', { length: 30 }).notNull(), // 'grievance' | 'document' | 'timeline_event'
+  recordId: uuid('record_id').notNull(),
+  similarityScore: real('similarity_score'),
+  isAnchor: boolean('is_anchor').notNull().default(false),
+  createdAt: timestamp('created_at', { withTimezone: true }).notNull().defaultNow(),
+}, (table) => [
+  index('idx_dup_members_group').on(table.groupId),
+  index('idx_dup_members_record').on(table.recordType, table.recordId),
+  uniqueIndex('idx_dup_members_unique').on(table.groupId, table.recordType, table.recordId),
+]);
+
+// ─── Data Quality Warnings ──────────────────────────────────────────────────
+
+export const dataQualityWarnings = pgTable('data_quality_warnings', {
+  id: uuid('id').primaryKey().defaultRandom(),
+  organizationId: uuid('organization_id')
+    .notNull()
+    .references(() => organizations.id),
+  recordType: varchar('record_type', { length: 30 }).notNull(),
+  recordId: uuid('record_id').notNull(),
+  batchId: uuid('batch_id').references(() => ingestionBatches.id),
+  severity: varchar('severity', { length: 10 }).notNull().default('warning'), // info | warning | error
+  category: varchar('category', { length: 50 }).notNull(),
+  fieldName: varchar('field_name', { length: 100 }),
+  message: text('message').notNull(),
+  resolved: boolean('resolved').notNull().default(false),
+  resolvedBy: varchar('resolved_by', { length: 255 }),
+  resolvedAt: timestamp('resolved_at', { withTimezone: true }),
+  createdAt: timestamp('created_at', { withTimezone: true }).notNull().defaultNow(),
+}, (table) => [
+  index('idx_quality_warnings_org').on(table.organizationId),
+  index('idx_quality_warnings_record').on(table.recordType, table.recordId),
+  index('idx_quality_warnings_batch').on(table.batchId),
+  index('idx_quality_warnings_resolved').on(table.resolved),
+]);
+
 // ─── Type Exports ────────────────────────────────────────────────────────────
 
 export type IngestionBatch = typeof ingestionBatches.$inferSelect;
@@ -112,3 +177,9 @@ export type IngestionRecord = typeof ingestionRecords.$inferSelect;
 export type NewIngestionRecord = typeof ingestionRecords.$inferInsert;
 export type GrievanceTimelineEvent = typeof grievanceTimelineEvents.$inferSelect;
 export type NewGrievanceTimelineEvent = typeof grievanceTimelineEvents.$inferInsert;
+export type DuplicateGroup = typeof duplicateGroups.$inferSelect;
+export type NewDuplicateGroup = typeof duplicateGroups.$inferInsert;
+export type DuplicateGroupMember = typeof duplicateGroupMembers.$inferSelect;
+export type NewDuplicateGroupMember = typeof duplicateGroupMembers.$inferInsert;
+export type DataQualityWarning = typeof dataQualityWarnings.$inferSelect;
+export type NewDataQualityWarning = typeof dataQualityWarnings.$inferInsert;
