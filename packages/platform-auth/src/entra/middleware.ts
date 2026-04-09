@@ -3,6 +3,7 @@
  *
  * Drop-in replacement for Clerk's `clerkMiddleware()`.
  * Uses NextAuth v5 `auth()` for JWT session validation at the edge.
+ * Also recognises PG-backed password auth sessions (`nzila_session` cookie).
  *
  * Usage in app middleware.ts:
  *   import { createAuthMiddleware } from '@nzila/platform-auth/entra/middleware'
@@ -12,6 +13,18 @@
 import { auth } from './config'
 import { NextResponse } from 'next/server'
 import type { NextRequest } from 'next/server'
+
+/** Cookie name for PG-backed password auth sessions */
+const PG_SESSION_COOKIE = 'nzila_session'
+
+/**
+ * Check if the request has a PG-backed session cookie.
+ * Edge-safe: only checks cookie presence, no DB lookup.
+ * Full validation happens server-side in auth().
+ */
+export function hasPgSessionCookie(request: NextRequest): boolean {
+  return !!request.cookies.get(PG_SESSION_COOKIE)?.value
+}
 
 export interface AuthMiddlewareOptions {
   /**
@@ -83,6 +96,10 @@ export function createAuthMiddleware(options: AuthMiddlewareOptions = {}): any {
 
     // Protect remaining routes
     if (!userId) {
+      // Check for PG-backed password auth session cookie
+      if (hasPgSessionCookie(req)) {
+        return NextResponse.next()
+      }
       const url = new URL(signInUrl, req.url)
       url.searchParams.set('callbackUrl', req.nextUrl.pathname)
       return NextResponse.redirect(url)
@@ -101,6 +118,10 @@ export const defaultAuthMiddleware = createAuthMiddleware({
     '/',
     '/sign-in(.*)',
     '/sign-up(.*)',
+    '/login(.*)',
+    '/signup(.*)',
+    '/forgot-password(.*)',
+    '/reset-password(.*)',
     '/api/health',
     '/api/webhooks(.*)',
     '/api/auth(.*)',

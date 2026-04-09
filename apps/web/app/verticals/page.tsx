@@ -42,7 +42,7 @@ const verticals = [
     photo: 'https://images.unsplash.com/photo-1529070538774-1795d8de2dff?w=800',
     alt: 'Labor union workers raising hands together in solidarity',
     platforms: ['Union Eyes'],
-    description: 'Union management, pension forecasting, grievance tracking, and labour organising.',
+    description: 'Union management, pension forecasting, grievance tracking, and CBA intelligence.',
     tam: '$50B', orgs: '4,773', status: 'Flagship',
   },
   {

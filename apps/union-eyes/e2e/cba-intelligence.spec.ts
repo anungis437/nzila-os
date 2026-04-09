@@ -15,7 +15,7 @@ const isTestAuth = process.env.PLAYWRIGHT_TEST_AUTH === "true";
 test.describe("CBA Intelligence page", () => {
   test.skip(!isTestAuth, "Requires PLAYWRIGHT_TEST_AUTH=true");
 
-  const PAGE_URL = "/en-CA/cba-intelligence";
+  const PAGE_URL = "/en-CA/dashboard/cba-intelligence";
   const TABS = ["Sources", "Ingestion", "Agreements", "Review", "Benchmark", "Freshness"];
 
   test("page loads with heading", async ({ page }) => {

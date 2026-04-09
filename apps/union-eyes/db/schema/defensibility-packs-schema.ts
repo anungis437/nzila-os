@@ -1,5 +1,6 @@
 import { pgTable, uuid, varchar, text, timestamp, jsonb, integer, boolean } from "drizzle-orm/pg-core";
 import { sql } from "drizzle-orm";
+import { claims } from "./claims-schema";
 
 /**
  * Defensibility Packs - System of Record Exports
@@ -16,7 +17,7 @@ export const defensibilityPacks = pgTable("defensibility_packs", {
   packId: uuid("pack_id").primaryKey().defaultRandom(),
   
   // Case association
-  caseId: uuid("case_id").notNull(), // References claims.claimId
+  caseId: uuid("case_id").notNull().references(() => claims.claimId),
   caseNumber: varchar("case_number", { length: 50 }).notNull(),
   organizationId: uuid("organization_id").notNull(),
   
@@ -69,7 +70,7 @@ export const defensibilityPacks = pgTable("defensibility_packs", {
 export const packDownloadLog = pgTable("pack_download_log", {
   logId: uuid("log_id").primaryKey().defaultRandom(),
   
-  packId: uuid("pack_id").notNull(), // References defensibilityPacks.packId
+  packId: uuid("pack_id").notNull().references(() => defensibilityPacks.packId),
   caseNumber: varchar("case_number", { length: 50 }).notNull(),
   organizationId: uuid("organization_id").notNull(),
   

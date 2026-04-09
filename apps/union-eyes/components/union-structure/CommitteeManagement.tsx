@@ -111,11 +111,13 @@ interface Worksite {
 interface CommitteeManagementProps {
   organizationId: string;
   onUpdate?: () => void;
+  readOnly?: boolean;
 }
 
 export function CommitteeManagement({
   organizationId,
   onUpdate,
+  readOnly = false,
 }: CommitteeManagementProps) {
   const [committees, setCommittees] = useState<Committee[]>([]);
   const [units, setUnits] = useState<BargainingUnit[]>([]);
@@ -165,8 +167,10 @@ export function CommitteeManagement({
         `/api/committees?organizationId=${organizationId}`
       );
       if (!response.ok) throw new Error("Failed to fetch committees");
-      const data = await response.json();
-      setCommittees(data.data || []);
+      const json = await response.json();
+      // withApi wraps in { success, data: { data: rows, pagination } }
+      const items = json?.data?.data ?? json?.data ?? json ?? [];
+      setCommittees(Array.isArray(items) ? items : []);
     } catch (_error) {
       toast({
         title: "Error",
@@ -391,10 +395,12 @@ export function CommitteeManagement({
               Manage union committees and their memberships
             </CardDescription>
           </div>
-          <Button onClick={handleCreate}>
-            <Plus className="mr-2 h-4 w-4" />
-            Add Committee
-          </Button>
+          {!readOnly && (
+            <Button onClick={handleCreate}>
+              <Plus className="mr-2 h-4 w-4" />
+              Add Committee
+            </Button>
+          )}
         </CardHeader>
         <CardContent>
           <div className="mb-4">
@@ -431,7 +437,7 @@ export function CommitteeManagement({
                   <TableHead>Meeting</TableHead>
                   <TableHead>Contact</TableHead>
                   <TableHead>Status</TableHead>
-                  <TableHead className="w-[70px]">Actions</TableHead>
+                  {!readOnly && <TableHead className="w-[70px]">Actions</TableHead>}
                 </TableRow>
               </TableHeader>
               <TableBody>
@@ -464,30 +470,32 @@ export function CommitteeManagement({
                         {committee.status}
                       </Badge>
                     </TableCell>
-                    <TableCell>
-                      <DropdownMenu>
-                        <DropdownMenuTrigger asChild>
-                          <Button variant="ghost" size="icon">
-                            <MoreHorizontal className="h-4 w-4" />
-                          </Button>
-                        </DropdownMenuTrigger>
-                        <DropdownMenuContent align="end">
-                          <DropdownMenuItem
-                            onClick={() => handleEdit(committee)}
-                          >
-                            <Pencil className="mr-2 h-4 w-4" />
-                            Edit
-                          </DropdownMenuItem>
-                          <DropdownMenuItem
-                            onClick={() => handleDelete(committee.id)}
-                            className="text-destructive"
-                          >
-                            <Trash2 className="mr-2 h-4 w-4" />
-                            Delete
-                          </DropdownMenuItem>
-                        </DropdownMenuContent>
-                      </DropdownMenu>
-                    </TableCell>
+                    {!readOnly && (
+                      <TableCell>
+                        <DropdownMenu>
+                          <DropdownMenuTrigger asChild>
+                            <Button variant="ghost" size="icon">
+                              <MoreHorizontal className="h-4 w-4" />
+                            </Button>
+                          </DropdownMenuTrigger>
+                          <DropdownMenuContent align="end">
+                            <DropdownMenuItem
+                              onClick={() => handleEdit(committee)}
+                            >
+                              <Pencil className="mr-2 h-4 w-4" />
+                              Edit
+                            </DropdownMenuItem>
+                            <DropdownMenuItem
+                              onClick={() => handleDelete(committee.id)}
+                              className="text-destructive"
+                            >
+                              <Trash2 className="mr-2 h-4 w-4" />
+                              Delete
+                            </DropdownMenuItem>
+                          </DropdownMenuContent>
+                        </DropdownMenu>
+                      </TableCell>
+                    )}
                   </TableRow>
                 ))}
               </TableBody>

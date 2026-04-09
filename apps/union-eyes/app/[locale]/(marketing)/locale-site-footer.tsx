@@ -28,13 +28,21 @@ export default function LocaleSiteFooter() {
   const locale = (params?.locale as string) || 'en-CA';
 
   const footerLinks = {
-    [t('platform')]: [
+    System: [
+      { name: t('governance'),          href: `/${locale}/trust` },
       { name: t('grievanceTracking'),  href: `/${locale}/features/grievance-tracking` },
       { name: t('memberPortal'),       href: `/${locale}/features/member-portal` },
       { name: t('aiWorkbench'),        href: `/${locale}/features/ai-workbench` },
       { name: t('analyticsReporting'), href: `/${locale}/features/analytics` },
       { name: t('pricing'),            href: `/${locale}/pricing` },
       { name: t('systemStatus'),       href: `/${locale}/trust#system-status` },
+    ],
+    'Who It\'s For': [
+      { name: 'Representatives',  href: `/${locale}/for-representatives` },
+      { name: 'Leadership',       href: `/${locale}/for-leadership` },
+      { name: 'Federations',      href: `/${locale}/for-federations` },
+      { name: 'CLC',              href: `/${locale}/for-clc` },
+      { name: 'Members',          href: `/${locale}/for-members` },
     ],
     [t('resources')]: [
       { name: t('caseStudies'),  href: `/${locale}/case-studies` },
@@ -57,9 +65,13 @@ export default function LocaleSiteFooter() {
         <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-14 flex flex-col lg:flex-row items-center justify-between gap-8">
           <div className="text-center lg:text-left max-w-xl">
             <h3 className="text-2xl md:text-3xl font-bold text-white mb-2">
-              {t('tagline')}
+              {locale === 'fr-CA' ? 'Prêt à diriger avec clarté?' : 'Ready to lead with clarity?'}
             </h3>
-            <p className="text-gray-200 text-lg">{t('description')}</p>
+            <p className="text-gray-200 text-lg">
+              {locale === 'fr-CA'
+                ? 'Découvrez comment Union Eyes transforme le travail syndical en décisions éclairées.'
+                : 'See how Union Eyes turns casework into confident, data-backed decisions. Request a demo — no commitment.'}
+            </p>
           </div>
           <div className="flex flex-col sm:flex-row gap-3">
             <Link
@@ -80,7 +92,7 @@ export default function LocaleSiteFooter() {
 
       {/* Main Footer */}
       <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-16">
-        <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-5 gap-12 lg:gap-8">
+        <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-6 gap-12 lg:gap-8">
           {/* Brand Column */}
           <div className="lg:col-span-2 space-y-6">
             <Link href={`/${locale}`} className="flex items-center gap-3 group">

@@ -3,12 +3,21 @@
  *
  * Produces a self-contained evidence pack (JSON) for a given case.
  * Includes: case record, notes, status transitions, audit trail, and
- * a SHA-256 seal for tamper detection.
+ * an HMAC-SHA256 seal for tamper detection and origin authentication.
  *
  * PR-032: Evidence Export + Seal Verification
  */
 
-import { createHash } from 'crypto';
+import { createHmac } from 'crypto';
+
+/** Seal key — must be set in production; falls back for dev/test only. */
+function getSealKey(): string {
+  const key = process.env.EVIDENCE_SEAL_KEY;
+  if (!key && process.env.NODE_ENV === 'production') {
+    throw new Error('EVIDENCE_SEAL_KEY environment variable is required in production');
+  }
+  return key || 'dev-seal-key-not-for-production';
+}
 
 // ---------------------------------------------------------------------------
 // Evidence pack shape
@@ -23,7 +32,7 @@ export interface EvidencePack {
   caseRecord: Record<string, unknown>;
   notes: Record<string, unknown>[];
   auditTrail: Record<string, unknown>[];
-  /** SHA-256 hex digest of the canonical JSON (everything except `seal`) */
+  /** HMAC-SHA256 hex digest of the canonical JSON (everything except `seal`) */
   seal: string;
 }
 
@@ -60,18 +69,19 @@ export function buildEvidencePack(input: {
 // ---------------------------------------------------------------------------
 
 /**
- * Compute a SHA-256 hex digest over a canonical JSON representation.
+ * Compute an HMAC-SHA256 hex digest over a canonical JSON representation.
+ * Uses EVIDENCE_SEAL_KEY for authentication — prevents seal forgery.
  * Stable ordering is guaranteed by `JSON.stringify` on objects with
  * consistent property insertion order (we control the shape).
  */
 export function computeSeal(data: Omit<EvidencePack, 'seal'>): string {
   const canonical = JSON.stringify(data);
-  return createHash('sha256').update(canonical).digest('hex');
+  return createHmac('sha256', getSealKey()).update(canonical).digest('hex');
 }
 
 /**
  * Verify that a pack has not been tampered with.
- * Returns `true` when the computed seal matches the embedded seal.
+ * Returns `true` when the computed HMAC seal matches the embedded seal.
  */
 export function verifySeal(pack: EvidencePack): boolean {
   const { seal, ...rest } = pack;

@@ -24,6 +24,7 @@ import { eq, desc } from "drizzle-orm";
 import { requireEntitlement } from '@/services/platform-economics/entitlement-guard';
 import { buildUnionEvidencePack } from '@/lib/evidence';
 import { logger } from '@/lib/logger';
+import { randomBytes } from 'crypto';
 
 // ── Validation ──────────────────────────────────────────────────────────────
 
@@ -87,10 +88,12 @@ export const POST = withOrganizationAuth(async (request, context) => {
     const initialStatus = isOfficialCase ? "filed" : "draft";
 
     const grievance = await withRLSContext(async () => {
+      // Collision-safe grievance number: timestamp + 6-char random hex
+      const grievanceNumber = `GRV-${Date.now()}-${randomBytes(3).toString('hex')}`;
       const [g] = await db
         .insert(grievances)
         .values({
-          grievanceNumber: `GRV-${Date.now()}`,
+          grievanceNumber,
           type: data.type,
           title: data.title,
           description: data.description,

@@ -19,6 +19,7 @@ export * from './zonga'
 export * from './platform'
 export * from './trade'
 export * from './agri'
+export * from './auth'
 export * from './mobility'
 export * from './flow'
 

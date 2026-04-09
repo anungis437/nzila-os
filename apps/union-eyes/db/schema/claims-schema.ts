@@ -1,5 +1,6 @@
-import { pgTable, uuid, varchar, text, timestamp, integer, boolean, jsonb, pgEnum, decimal } from "drizzle-orm/pg-core";
+import { pgTable, uuid, varchar, text, timestamp, integer, boolean, jsonb, pgEnum, decimal, index } from "drizzle-orm/pg-core";
 import { sql } from "drizzle-orm";
+import { organizations } from '../schema-organizations';
 
 // Enums for claims
 export const claimStatusEnum = pgEnum("claim_status", [
@@ -56,7 +57,7 @@ export const claims = pgTable("claims", {
   id: uuid("id").primaryKey().defaultRandom(),
   claimId: uuid("claim_id").notNull().unique().defaultRandom(),
   claimNumber: varchar("claim_number", { length: 50 }).unique(),
-  organizationId: uuid("organization_id"),
+  organizationId: uuid("organization_id").notNull().references(() => organizations.id),
   memberId: varchar("member_id", { length: 255 }),
   isAnonymous: boolean("is_anonymous").default(true),
   
@@ -111,11 +112,21 @@ export const claims = pgTable("claims", {
   // Metadata
   metadata: jsonb("metadata").default(sql`'{}'::jsonb`),
   
+  // Idempotency
+  idempotencyHash: varchar("idempotency_hash", { length: 64 }).unique(),
+  
   // Timestamps
   createdAt: timestamp("created_at", { withTimezone: true }).defaultNow(),
   updatedAt: timestamp("updated_at", { withTimezone: true }).defaultNow(),
   closedAt: timestamp("closed_at", { withTimezone: true }),
-});
+}, (table) => [
+  index("idx_claims_org").on(table.organizationId),
+  index("idx_claims_status").on(table.status),
+  index("idx_claims_member").on(table.memberId),
+  index("idx_claims_created").on(table.createdAt),
+  index("idx_claims_type").on(table.claimType),
+  index("idx_claims_priority").on(table.priority),
+]);
 
 // Claim updates/notes table
 export const claimUpdates = pgTable("claim_updates", {

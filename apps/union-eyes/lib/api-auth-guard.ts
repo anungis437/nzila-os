@@ -57,6 +57,7 @@ import {
   type MemberRoleWithDetails,
 } from '@/db/queries/enhanced-rbac-queries';
 import { logger } from '@/lib/logger';
+import { ROLE_PERMISSIONS } from '@/lib/auth/roles';
 
 // =============================================================================
 // CLERK RE-EXPORTS
@@ -369,10 +370,64 @@ function verifyCronAuth(request: NextRequest): boolean {
 // =============================================================================
 
 /**
- * Get current authenticated user from Clerk
- * Primary auth function - returns full user profile
+ * Get current authenticated user.
+ *
+ * Resolution order:
+ *   1. PG session cookie (`nzila_session`) — email/password auth
+ *   2. Entra / NextAuth (auth() + currentUser()) — SSO
+ *
+ * This allows both auth systems to coexist during migration.
  */
 export async function getCurrentUser(): Promise<AuthUser | null> {
+  // ── 1. Try PG session-based auth first ──────────────────────────────────
+  try {
+    const { getAuthUser } = await import('@/lib/auth/auth-service');
+    const pgUser = await getAuthUser();
+    if (pgUser) {
+      // Resolve role from DB membership
+      let role = 'member';
+      const platformAdminIds = (process.env.PLATFORM_ADMIN_USER_IDS || '')
+        .split(',').map(id => id.trim()).filter(Boolean);
+      if (platformAdminIds.includes(pgUser.id)) {
+        role = 'app_owner';
+      } else if (pgUser.organizationId) {
+        try {
+          const [membership] = await db
+            .select({ role: organizationMembers.role })
+            .from(organizationMembers)
+            .where(
+              and(
+                eq(organizationMembers.userId, pgUser.id),
+                eq(organizationMembers.organizationId, pgUser.organizationId),
+              ),
+            )
+            .limit(1);
+          if (membership?.role) {
+            role = membership.role;
+          }
+        } catch {
+          // DB lookup failed — fall through with default role
+        }
+      }
+
+      return {
+        id: pgUser.id,
+        email: pgUser.email,
+        name: [pgUser.firstName, pgUser.lastName].filter(Boolean).join(' ') || null,
+        firstName: pgUser.firstName,
+        lastName: pgUser.lastName,
+        imageUrl: null,
+        legacyTenantId: null,
+        role,
+        organizationId: pgUser.organizationId,
+        metadata: {},
+      };
+    }
+  } catch {
+    // PG session resolution failed — fall through to Entra
+  }
+
+  // ── 2. Fall back to Entra / NextAuth ────────────────────────────────────
   try {
     const { userId, orgId } = await auth();
     
@@ -544,13 +599,12 @@ export async function getUserFromRequest(_request: NextRequest): Promise<AuthUse
  * Get permissions for a role
  */
 function getPermissionsForRole(role: string): string[] {
-  const permissions: Record<string, string[]> = {
-    admin: ['*'],
-    member: ['read:organization', 'submit:claims'],
-    officer: ['manage:members', 'create:voting'],
-    treasurer: ['view:finances', 'approve:payments'],
-  };
-  return permissions[role] || [];
+  const enumRole = role as UserRole;
+  if (ROLE_PERMISSIONS[enumRole]) {
+    return ROLE_PERMISSIONS[enumRole] as string[];
+  }
+  // Fallback for unknown roles
+  return [];
 }
 
 /**

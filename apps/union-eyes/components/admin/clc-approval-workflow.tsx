@@ -69,6 +69,10 @@ export function CLCApprovalWorkflow({
   const [error, setError] = useState<string | null>(null);
 
   const loadWorkflowState = useCallback(async () => {
+    if (!remittanceId || !userId) {
+      setLoading(false);
+      return;
+    }
     try {
       setLoading(true);
       const response = await fetch(

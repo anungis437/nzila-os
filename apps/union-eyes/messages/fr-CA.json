@@ -1835,6 +1835,427 @@
     "workingConditions": "Conditions de travail",
     "other": "Autre"
   },
+  "clc": {
+    "title": "Congrès du travail du Canada",
+    "executive": {
+      "title": "Tableau de bord exécutif du CTC",
+      "overview": "Aperçu national",
+      "statistics": "Statistiques nationales",
+      "affiliates": "Organisations affiliées",
+      "remittances": "État des remises"
+    },
+    "staff": {
+      "title": "Opérations du personnel CTC",
+      "workflow": "Gestion du flux de travail",
+      "approvals": "Approbations en attente",
+      "communications": "Communications",
+      "dashboard": {
+        "title": "Tableau de bord du personnel CTC",
+        "description": "Opérations nationales, synchronisation des affiliés et traitement des cotisations",
+        "executiveDashboard": "Tableau de bord exécutif"
+      },
+      "metrics": {
+        "pendingSyncs": "Synchronisations en attente",
+        "lastSync": "Dernière synchronisation",
+        "syncStatus": "Synchronisation quotidienne automatisée",
+        "pendingApprovals": "Approbations en attente",
+        "remittancesAwaitingReview": "Cotisations en attente de révision",
+        "overdueRemittances": "Cotisations en retard",
+        "requiresFollowUp": "Nécessite un suivi",
+        "allOnTrack": "Tout est en ordre"
+      },
+      "sync": {
+        "title": "Synchronisation des affiliés",
+        "description": "Gérer la synchronisation des données entre le CTC et les systèmes affiliés",
+        "manualSync": "Synchronisation manuelle",
+        "manualSyncDesc": "Déclencher une synchronisation immédiate des données affiliées",
+        "syncNow": "Synchroniser maintenant",
+        "syncLogs": "Voir les journaux de synchronisation",
+        "syncLogsDesc": "Consulter l'historique et les erreurs de synchronisation",
+        "viewLogs": "Voir les journaux",
+        "syncSettings": "Paramètres de synchronisation",
+        "syncSettingsDesc": "Configurer les calendriers et les mappages de synchronisation",
+        "configure": "Configurer"
+      },
+      "remittances": {
+        "title": "Traitement des cotisations",
+        "description": "Réviser et traiter les cotisations par tête",
+        "reviewQueue": "File d'attente de révision",
+        "pending": "en attente de révision",
+        "review": "Réviser",
+        "overdueFollowUp": "Suivi des retards",
+        "overdueItems": "éléments en retard",
+        "followUp": "Faire le suivi",
+        "bulkImport": "Importation en lot",
+        "bulkImportDesc": "Importer les données de cotisations depuis un CSV",
+        "import": "Importer"
+      },
+      "workflow": {
+        "title": "Flux d'approbation",
+        "description": "Réviser et approuver les cotisations en attente"
+      },
+      "activity": {
+        "title": "Activité récente",
+        "description": "Dernières opérations de synchronisation et traitement des cotisations",
+        "noActivity": "Aucune activité récente"
+      },
+      "quickLinks": {
+        "title": "Liens rapides",
+        "description": "Opérations courantes et ressources du personnel",
+        "manageAffiliates": "Gérer les affiliés",
+        "compliance": "Rapports de conformité",
+        "analytics": "Voir les analyses",
+        "organizations": "Administration des organisations",
+        "settings": "Paramètres du système",
+        "crossUnion": "Données inter-syndicales"
+      }
+    },
+    "affiliates": {
+      "title": "Affiliés du CTC",
+      "description": "Gérer les syndicats à charte directe et les fédérations provinciales",
+      "backToDashboard": "Retour au tableau de bord",
+      "addAffiliate": "Ajouter un affilié",
+      "export": "Exporter",
+      "viewDetails": "Voir les détails",
+      "federations": "Fédérations provinciales",
+      "unions": "Syndicats nationaux",
+      "locals": "Sections locales",
+      "membership": "Effectifs",
+      "summary": {
+        "totalAffiliates": "Total des affiliés",
+        "acrossCLC": "À travers le CTC",
+        "directChartered": "Charte directe",
+        "nationalUnions": "Syndicats nationaux",
+        "federations": "Fédérations",
+        "provincial": "Provincial/territorial",
+        "locals": "Sections locales et chapitres",
+        "localUnits": "Unités locales"
+      },
+      "search": {
+        "placeholder": "Rechercher par nom, numéro ou région..."
+      },
+      "filter": {
+        "type": "Type d'organisation",
+        "all": "Tous les types",
+        "unions": "Charte directe",
+        "federations": "Fédérations",
+        "locals": "Sections locales",
+        "chapters": "Chapitres",
+        "status": "Statut",
+        "allStatuses": "Tous les statuts",
+        "current": "À jour",
+        "overdue": "En retard",
+        "atRisk": "À risque"
+      },
+      "tabs": {
+        "all": "Tous les affiliés",
+        "unions": "Charte directe",
+        "federations": "Fédérations",
+        "locals": "Sections locales et chapitres",
+        "unionsFilter": "Vue filtrée affichant uniquement les syndicats à charte directe",
+        "localsFilter": "Vue filtrée affichant uniquement les sections locales et chapitres"
+      },
+      "table": {
+        "name": "Nom",
+        "type": "Type",
+        "location": "Emplacement",
+        "members": "Membres",
+        "remittance": "Remise",
+        "compliance": "Conformité",
+        "actions": "Actions",
+        "noAffiliates": "Aucun affilié trouvé"
+      },
+      "bulkActions": {
+        "title": "Actions groupées",
+        "description": "Effectuer des actions sur plusieurs affiliés",
+        "exportReport": "Exporter le rapport",
+        "sendReminder": "Envoyer des rappels",
+        "downloadData": "Télécharger les données"
+      }
+    },
+    "compliance": {
+      "title": "Suivi de la conformité du CTC",
+      "description": "Surveillance nationale de la conformité, suivi des remises par tête et supervision des affiliés",
+      "backToDashboard": "Retour au tableau de bord",
+      "manageRemittances": "Gérer les remises",
+      "overallStatus": "Conformité nationale globale",
+      "statusDescription": "Conformité agrégée de tous les affiliés du CTC",
+      "complianceRate": "Taux de conformité",
+      "compliant": "Conforme",
+      "atRisk": "À risque",
+      "nonCompliant": "Non conforme",
+      "totalAffiliates": "Total des affiliés",
+      "export": "Exporter",
+      "viewDetails": "Voir les détails",
+      "remittances": {
+        "due": "Remises dues",
+        "submitted": "soumises",
+        "overdue": "En retard",
+        "requiresAction": "Nécessite un suivi",
+        "amountDue": "Montant dû",
+        "received": "reçues",
+        "collectionRate": "Taux de perception",
+        "thirtyDayAverage": "Moyenne sur 30 jours"
+      },
+      "provincial": {
+        "title": "Conformité provinciale/territoriale",
+        "description": "Répartition de la conformité par province et territoire",
+        "filter": "Filtrer par province",
+        "allProvinces": "Toutes les provinces",
+        "noData": "Aucune donnée de conformité provinciale disponible",
+        "noDataHint": "Les données apparaîtront une fois les remises soumises",
+        "affiliates": "affiliés",
+        "compliant": "conformes"
+      },
+      "issues": {
+        "title": "Problèmes de conformité récents",
+        "description": "Affiliés nécessitant une attention ou un suivi",
+        "noIssues": "Aucun problème de conformité",
+        "allCompliant": "Tous les affiliés sont en règle",
+        "organization": "Organisation",
+        "issue": "Problème",
+        "severity": "Gravité",
+        "daysOverdue": "Jours de retard",
+        "actions": "Actions",
+        "followUp": "Suivi"
+      },
+      "actions": {
+        "title": "Actions de conformité",
+        "description": "Tâches courantes de gestion de la conformité",
+        "reviewRemittances": "Examiner les remises",
+        "reviewDesc": "Traiter les soumissions en attente",
+        "generateReport": "Générer un rapport",
+        "reportDesc": "Rapport de conformité trimestriel",
+        "viewAffiliates": "Voir les affiliés",
+        "affiliatesDesc": "Gérer le statut des affiliés",
+        "analytics": "Voir les analyses",
+        "analyticsDesc": "Tendances et prévisions"
+      },
+      "reporting": "Exigences de rapport",
+      "audits": "État des audits"
+    },
+    "dashboard": {
+      "title": "Tableau de bord exécutif du CTC",
+      "description": "Supervision nationale du CTC, coordination des affiliés et gestion des remises par tête",
+      "compliance": "Conformité",
+      "manageAffiliates": "Gérer les affiliés"
+    },
+    "metrics": {
+      "totalAffiliates": "Total des affiliés",
+      "totalMembers": "Total des membres",
+      "acrossAllAffiliates": "Dans tous les affiliés",
+      "pendingRemittances": "Remises en attente",
+      "complianceRate": "Taux de conformité",
+      "thirtyDayAverage": "Moyenne sur 30 jours"
+    },
+    "quickActions": {
+      "title": "Actions rapides",
+      "description": "Tâches exécutives courantes et fonctions de supervision"
+    },
+    "actions": {
+      "staffDashboard": "Tableau de bord du personnel CTC",
+      "staffDesc": "Opérations nationales et synchronisation",
+      "reviewRemittances": "Examiner les remises",
+      "remittancesDesc": "Approuver les paiements en attente",
+      "manageAffiliates": "Gérer les affiliés",
+      "affiliatesDesc": "Voir les syndicats et fédérations",
+      "compliance": "Rapports de conformité",
+      "complianceDesc": "Suivi national",
+      "analytics": "Analytique CTC",
+      "analyticsDesc": "Tendances et prévisions",
+      "crossUnion": "Analytique intersyndicale",
+      "crossUnionDesc": "Comparaisons nationales"
+    },
+    "analytics": {
+      "title": "Analytique nationale",
+      "description": "Tendances pluriannuelles, comparaisons d'organisations et prévisions"
+    },
+    "remittances": {
+      "title": "Remises par tête",
+      "description": "Soumissions récentes et flux d'approbation"
+    },
+    "federations": {
+      "title": "État des fédérations provinciales",
+      "description": "Aperçu des fédérations provinciales/territoriales",
+      "noData": "Aucune fédération provinciale configurée"
+    }
+  },
+  "federation": {
+    "title": "Fédération provinciale",
+    "dashboard": {
+      "title": "Tableau de bord de la fédération",
+      "description": "Supervision de la fédération provinciale, gestion des affiliés et suivi des remises",
+      "overview": "Aperçu provincial",
+      "affiliates": "Syndicats membres",
+      "campaigns": "Campagnes actives",
+      "viewRemittances": "Remises",
+      "manageAffiliates": "Gérer les affiliés"
+    },
+    "affiliates": {
+      "title": "Gérer les affiliés",
+      "onboarding": "Intégration des affiliés",
+      "status": "État d'affiliation",
+      "membershipCount": "Nombre de membres",
+      "breadcrumb": {
+        "federation": "Fédération",
+        "affiliates": "Affiliés"
+      },
+      "description": "Voir et gérer les syndicats membres, sections locales et leurs détails",
+      "actions": {
+        "export": "Exporter"
+      },
+      "summary": {
+        "total": "Total des affiliés",
+        "locals": "Sections locales",
+        "unions": "Syndicats",
+        "chapters": "Chapitres"
+      },
+      "filters": {
+        "title": "Filtres",
+        "search": "Rechercher des affiliés...",
+        "type": "Type d'organisation",
+        "allTypes": "Tous les types",
+        "locals": "Sections locales",
+        "unions": "Syndicats",
+        "chapters": "Chapitres",
+        "status": "État",
+        "allStatuses": "Tous les états",
+        "active": "Actif",
+        "inactive": "Inactif",
+        "apply": "Appliquer les filtres"
+      },
+      "list": {
+        "title": "Organisations affiliées",
+        "description": "{count} organisations",
+        "empty": {
+          "title": "Aucun affilié trouvé",
+          "description": "Aucune organisation affiliée ne correspond aux filtres actuels"
+        },
+        "viewDetails": "Voir"
+      },
+      "quickLinks": {
+        "title": "Opérations connexes",
+        "remittances": "Voir les remises",
+        "analytics": "Analytique intersyndicale",
+        "compliance": "Rapports de conformité"
+      }
+    },
+    "remittances": {
+      "title": "Remises provinciales",
+      "compliance": "État de conformité",
+      "history": "Historique des paiements",
+      "dueDate": "Date d'échéance",
+      "amount": "Montant",
+      "breadcrumb": {
+        "federation": "Fédération",
+        "remittances": "Remises"
+      },
+      "description": "Suivre les remises par tête des syndicats membres et sections locales",
+      "actions": {
+        "export": "Exporter"
+      },
+      "summary": {
+        "totalDue": "Total dû",
+        "currentPeriod": "{year}-{month}",
+        "totalPaid": "Total payé",
+        "collectionRate": "{rate} % de perception",
+        "pending": "En attente",
+        "awaitingSubmission": "En attente de soumission",
+        "overdue": "En retard",
+        "pastDue": "Passé la date d'échéance"
+      },
+      "alerts": {
+        "overdue": {
+          "title": "Remises en retard nécessitant une attention",
+          "description": "{count} remise(s) en retard. Contactez les sections concernées pour résoudre."
+        }
+      },
+      "filters": {
+        "title": "Filtres",
+        "status": "État",
+        "allStatuses": "Tous",
+        "pending": "En attente",
+        "submitted": "Soumis",
+        "paid": "Payé",
+        "overdue": "En retard",
+        "year": "Année",
+        "month": "Mois",
+        "search": "Rechercher...",
+        "apply": "Appliquer"
+      },
+      "table": {
+        "title": "Registres des remises",
+        "description": "{count} remises",
+        "empty": {
+          "title": "Aucune remise trouvée",
+          "description": "Aucun registre de remise ne correspond aux filtres actuels",
+          "hint": "Les remises sont générées automatiquement au début de chaque mois selon le nombre de membres."
+        },
+        "columns": {
+          "period": "Période",
+          "organization": "Organisation",
+          "members": "Membres",
+          "rate": "Taux",
+          "amount": "Montant",
+          "dueDate": "Date d'échéance",
+          "status": "État",
+          "actions": "Actions"
+        },
+        "viewDetails": "Voir"
+      },
+      "quickLinks": {
+        "title": "Opérations connexes",
+        "affiliates": "Voir les affiliés",
+        "analytics": "Analytique",
+        "compliance": "Conformité"
+      }
+    },
+    "meetings": {
+      "title": "Réunions de la fédération",
+      "schedule": "Calendrier des réunions",
+      "minutes": "Procès-verbaux",
+      "attendance": "Présence"
+    },
+    "metrics": {
+      "memberUnions": "Syndicats membres",
+      "affiliateSubtext": "Sections locales et syndicats affiliés",
+      "totalMembers": "Total des membres",
+      "memberSubtext": "Dans tous les affiliés",
+      "pendingRemittances": "Remises en attente",
+      "remittanceSubtext": "En attente de soumission",
+      "overdueRemittances": "En retard",
+      "overdueSubtext": "Passé la date d'échéance"
+    },
+    "alerts": {
+      "overdue": {
+        "title": "Action requise : remises en retard",
+        "description": "{count} remise(s) en retard. Veuillez faire un suivi avec les sections concernées.",
+        "action": "Voir les remises en retard"
+      }
+    },
+    "quickActions": {
+      "affiliates": {
+        "title": "Gestion des affiliés",
+        "description": "Voir et gérer les syndicats membres, sections locales et campagnes",
+        "viewAll": "Voir tous les affiliés",
+        "analytics": "Analytique intersyndicale"
+      },
+      "remittances": {
+        "title": "Suivi des remises",
+        "description": "Suivre les remises par tête des syndicats membres",
+        "viewAll": "Voir toutes les remises",
+        "pending": "En attente ce mois"
+      }
+    },
+    "recentAffiliates": {
+      "title": "Syndicats membres",
+      "description": "Aperçu des sections locales et syndicats affiliés",
+      "empty": "Aucun syndicat affilié trouvé",
+      "manageAction": "Gérer les affiliés",
+      "viewDetails": "Voir",
+      "viewAll": "Voir les {count} affiliés"
+    }
+  },
   "ui": {
     "loading": "Chargement...",
     "loadingData": "Chargement des données...",
@@ -2310,7 +2731,7 @@
     "clcStaffOperations": "Personnel",
     "clcCompliance": "Conformité",
     "clcIntelligence": "Intelligence syndicale",
-    "provincialFederation": "Fédération",
+    "provincialFederation": "Féd. provinciale",
     "federationDashboard": "Aperçu",
     "affiliateUnions": "Affiliés",
     "remittanceTracking": "Remises",
@@ -2479,6 +2900,7 @@
       "resources": "Ressources",
       "company": "Entreprise",
       "legal": "Légal",
+      "governance": "Gouvernance et surveillance",
       "grievanceTracking": "Gestion des dossiers et griefs",
       "memberPortal": "Portail des membres et engagement",
       "aiWorkbench": "Renseignements et perspectives",

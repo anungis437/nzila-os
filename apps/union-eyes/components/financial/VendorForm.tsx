@@ -10,6 +10,7 @@ import { Textarea } from '@/components/ui/textarea';
 import { useToast } from '@/lib/hooks/use-toast';
 import { useLocale } from 'next-intl';
 import { useRouter } from 'next/navigation';
+import { vendorSchema, formatZodErrors } from '@/lib/validations/financial';
 
 interface VendorFormProps {
   // eslint-disable-next-line @typescript-eslint/no-explicit-any
@@ -19,6 +20,7 @@ interface VendorFormProps {
 
 export default function VendorForm({ vendor, mode }: VendorFormProps) {
   const [loading, setLoading] = useState(false);
+  const [fieldErrors, setFieldErrors] = useState<Record<string, string>>({});
   const locale = useLocale();
   const { toast } = useToast();
   const router = useRouter();
@@ -44,14 +46,19 @@ export default function VendorForm({ vendor, mode }: VendorFormProps) {
   });
 
   const handleSubmit = async () => {
-    if (!formData.vendorName) {
+    const result = vendorSchema.safeParse(formData);
+    if (!result.success) {
+      const errors = formatZodErrors(result.error);
+      setFieldErrors(errors);
+      const firstError = result.error.issues[0]?.message ?? 'Please fix the highlighted fields';
       toast({
         title: 'Validation Error',
-        description: 'Vendor name is required',
+        description: firstError,
         variant: 'destructive',
       });
       return;
     }
+    setFieldErrors({});
 
     try {
       setLoading(true);
@@ -111,7 +118,9 @@ export default function VendorForm({ vendor, mode }: VendorFormProps) {
                 value={formData.vendorName}
                 onChange={(e) => setFormData({ ...formData, vendorName: e.target.value })}
                 placeholder="ABC Corporation"
+                className={fieldErrors.vendorName ? 'border-destructive' : ''}
               />
+              {fieldErrors.vendorName && <p className="text-xs text-destructive">{fieldErrors.vendorName}</p>}
             </div>
             <div className="grid gap-2">
               <Label htmlFor="legalName">Legal Name</Label>
@@ -185,7 +194,9 @@ export default function VendorForm({ vendor, mode }: VendorFormProps) {
                 value={formData.email}
                 onChange={(e) => setFormData({ ...formData, email: e.target.value })}
                 placeholder="vendor@example.com"
+                className={fieldErrors.email ? 'border-destructive' : ''}
               />
+              {fieldErrors.email && <p className="text-xs text-destructive">{fieldErrors.email}</p>}
             </div>
             <div className="grid gap-2">
               <Label htmlFor="website">Website</Label>
@@ -195,7 +206,9 @@ export default function VendorForm({ vendor, mode }: VendorFormProps) {
                 value={formData.website}
                 onChange={(e) => setFormData({ ...formData, website: e.target.value })}
                 placeholder="https://example.com"
+                className={fieldErrors.website ? 'border-destructive' : ''}
               />
+              {fieldErrors.website && <p className="text-xs text-destructive">{fieldErrors.website}</p>}
             </div>
           </div>
           <div className="grid grid-cols-2 gap-4">
@@ -236,7 +249,9 @@ export default function VendorForm({ vendor, mode }: VendorFormProps) {
                 value={formData.primaryContactEmail}
                 onChange={(e) => setFormData({ ...formData, primaryContactEmail: e.target.value })}
                 placeholder="john@example.com"
+                className={fieldErrors.primaryContactEmail ? 'border-destructive' : ''}
               />
+              {fieldErrors.primaryContactEmail && <p className="text-xs text-destructive">{fieldErrors.primaryContactEmail}</p>}
             </div>
             <div className="grid gap-2">
               <Label htmlFor="primaryContactPhone">Contact Phone</Label>
@@ -292,7 +307,9 @@ export default function VendorForm({ vendor, mode }: VendorFormProps) {
                 value={formData.creditLimit}
                 onChange={(e) => setFormData({ ...formData, creditLimit: e.target.value })}
                 placeholder="0.00"
+                className={fieldErrors.creditLimit ? 'border-destructive' : ''}
               />
+              {fieldErrors.creditLimit && <p className="text-xs text-destructive">{fieldErrors.creditLimit}</p>}
             </div>
           </div>
         </div>

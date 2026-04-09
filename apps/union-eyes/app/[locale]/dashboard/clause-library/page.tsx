@@ -9,11 +9,17 @@ import { ClauseLibraryConsole } from "@/components/clause-library/clause-library
 
 export const dynamic = "force-dynamic";
 
-export default async function ClauseLibraryPage() {
+interface Props {
+  searchParams: Promise<Record<string, string | string[] | undefined>>;
+}
+
+export default async function ClauseLibraryPage({ searchParams }: Props) {
   await requireUser();
   const hasAccess = await hasMinRole("steward");
   if (!hasAccess) {
     redirect("/dashboard");
   }
-  return <ClauseLibraryConsole />;
+  const params = await searchParams;
+  const initialQuery = typeof params.q === "string" ? params.q : "";
+  return <ClauseLibraryConsole initialQuery={initialQuery} />;
 }

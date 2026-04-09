@@ -1,12 +1,12 @@
 export const dynamic = 'force-dynamic'
 
-import { SignIn } from '@nzila/platform-auth/entra/client'
 import type { Metadata } from 'next'
 import AuthPageLayout from '@/components/auth/auth-page-layout'
+import { LoginForm } from '@/components/auth/login-form'
 
 export const metadata: Metadata = {
   title: 'Sign In | Union Eyes',
-  description: 'Sign in to Union Eyes — the intelligent labour relations platform for unions, locals, and federations.',
+  description: 'Sign in to Union Eyes — a decision system for labour leadership.',
 }
 
 const stats = [
@@ -19,27 +19,11 @@ export default function SignInPage() {
   return (
     <AuthPageLayout
       appName="Union Eyes"
-      tagline="Labour Intelligence Made Simple"
-      subtitle="Grievance tracking, arbitration management, collective bargaining analytics, and member services — purpose-built for unions."
+      tagline="A Decision System for Labour Leadership"
+      subtitle="From intake to outcome — casework, intelligence, and member services in one system."
       stats={stats}
     >
-      <SignIn
-        forceRedirectUrl="/en-CA/dashboard"
-        appearance={{
-          elements: {
-            rootBox: 'w-full',
-            card: 'shadow-none border-0 w-full',
-            headerTitle: 'text-2xl font-bold text-navy',
-            headerSubtitle: 'text-gray-500',
-            socialButtonsBlockButton: 'border border-gray-200 hover:bg-gray-50 transition-colors rounded-xl',
-            formFieldInput: 'rounded-xl border-gray-200 focus:border-electric focus:ring-electric/20',
-            formButtonPrimary: 'bg-electric hover:bg-blue-700 rounded-xl shadow-lg shadow-electric/25 transition-all',
-            footerActionLink: 'text-electric hover:text-blue-700',
-            dividerLine: 'bg-gray-200',
-            dividerText: 'text-gray-400',
-          },
-        }}
-      />
+      <LoginForm />
     </AuthPageLayout>
   )
 }

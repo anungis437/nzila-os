@@ -15,6 +15,7 @@ import { Progress } from '@/components/ui/progress';
 import { Plus, Edit, Trash2 } from 'lucide-react';
  
 import { useToast } from '@/lib/hooks/use-toast';
+import { budgetSchema, formatZodErrors } from '@/lib/validations/financial';
 
 interface Budget {
   id: string;
@@ -45,6 +46,7 @@ export default function BudgetManager({ organizationId: _organizationId }: Budge
   const [loading, setLoading] = useState(true);
   const [isCreateDialogOpen, setIsCreateDialogOpen] = useState(false);
   const [_selectedBudget, _setSelectedBudget] = useState<Budget | null>(null);
+  const [fieldErrors, setFieldErrors] = useState<Record<string, string>>({});
   const [fiscalYearFilter, setFiscalYearFilter] = useState<string>('');
   const { toast } = useToast();
 
@@ -86,6 +88,20 @@ export default function BudgetManager({ organizationId: _organizationId }: Budge
   };
 
   const handleCreateBudget = async () => {
+    const result = budgetSchema.safeParse(formData);
+    if (!result.success) {
+      const errors = formatZodErrors(result.error);
+      setFieldErrors(errors);
+      const firstError = result.error.issues[0]?.message ?? 'Please fix the highlighted fields';
+      toast({
+        title: t('error'),
+        description: firstError,
+        variant: 'destructive',
+      });
+      return;
+    }
+    setFieldErrors({});
+
     try {
       const response = await fetch('/api/financial/budgets', {
         method: 'POST',
@@ -104,6 +120,7 @@ export default function BudgetManager({ organizationId: _organizationId }: Budge
       });
 
       setIsCreateDialogOpen(false);
+      setFieldErrors({});
       resetForm();
       fetchBudgets();
     } catch (_error) {
@@ -343,7 +360,9 @@ export default function BudgetManager({ organizationId: _organizationId }: Budge
                 value={formData.budgetName}
                 onChange={(e) => setFormData({ ...formData, budgetName: e.target.value })}
                 placeholder={t('budgetNamePlaceholder')}
+                className={fieldErrors.budgetName ? 'border-destructive' : ''}
               />
+              {fieldErrors.budgetName && <p className="text-xs text-destructive">{fieldErrors.budgetName}</p>}
             </div>
             <div className="grid grid-cols-2 gap-4">
               <div className="grid gap-2">
@@ -353,7 +372,9 @@ export default function BudgetManager({ organizationId: _organizationId }: Budge
                   type="number"
                   value={formData.fiscalYear}
                   onChange={(e) => setFormData({ ...formData, fiscalYear: parseInt(e.target.value) })}
+                  className={fieldErrors.fiscalYear ? 'border-destructive' : ''}
                 />
+                {fieldErrors.fiscalYear && <p className="text-xs text-destructive">{fieldErrors.fiscalYear}</p>}
               </div>
               <div className="grid gap-2">
                 <Label htmlFor="periodType">{t('periodTypeRequired')}</Label>
@@ -381,7 +402,9 @@ export default function BudgetManager({ organizationId: _organizationId }: Budge
                   type="date"
                   value={formData.startDate}
                   onChange={(e) => setFormData({ ...formData, startDate: e.target.value })}
+                  className={fieldErrors.startDate ? 'border-destructive' : ''}
                 />
+                {fieldErrors.startDate && <p className="text-xs text-destructive">{fieldErrors.startDate}</p>}
               </div>
               <div className="grid gap-2">
                 <Label htmlFor="endDate">{t('endDateRequired')}</Label>
@@ -390,7 +413,9 @@ export default function BudgetManager({ organizationId: _organizationId }: Budge
                   type="date"
                   value={formData.endDate}
                   onChange={(e) => setFormData({ ...formData, endDate: e.target.value })}
+                  className={fieldErrors.endDate ? 'border-destructive' : ''}
                 />
+                {fieldErrors.endDate && <p className="text-xs text-destructive">{fieldErrors.endDate}</p>}
               </div>
             </div>
             <div className="grid gap-2">
@@ -402,7 +427,9 @@ export default function BudgetManager({ organizationId: _organizationId }: Budge
                 value={formData.totalBudget}
                 onChange={(e) => setFormData({ ...formData, totalBudget: e.target.value })}
                 placeholder={t('amountPlaceholder')}
+                className={fieldErrors.totalBudget ? 'border-destructive' : ''}
               />
+              {fieldErrors.totalBudget && <p className="text-xs text-destructive">{fieldErrors.totalBudget}</p>}
             </div>
             <div className="grid gap-2">
               <Label htmlFor="notes">{t('notes')}</Label>

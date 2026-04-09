@@ -24,8 +24,8 @@ const flagships = [
     orgs: '4,773',
     image: 'https://images.unsplash.com/photo-1504328345606-18bbc8c9d7d1?w=800',
     alt: 'Union Eyes — comprehensive union management platform for pension forecasting and labor analytics',
-    description: 'The most comprehensive union management platform — pension forecasting, grievance tracking, member analytics, and labor organizing tools for 4,773 orgs.',
-    features: ['Pension Forecasting', 'Grievance Tracking', 'CBA Intelligence (Unions & Federations)', 'Member Analytics'],
+    description: 'The most comprehensive union management platform — pension forecasting, grievance tracking, CBA intelligence, and arbitration precedents for 4,773 orgs.',
+    features: ['Pension Forecasting', 'Grievance Tracking', 'CBA Intelligence (Unions & Federations)', 'Arbitration Precedents'],
   },
   {
     name: '3CUO / DiasporaCore',

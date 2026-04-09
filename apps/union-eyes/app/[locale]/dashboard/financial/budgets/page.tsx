@@ -2,7 +2,7 @@ export const dynamic = 'force-dynamic';
 
 import { Suspense } from 'react';
 import BudgetManager from '@/components/financial/BudgetManager';
-import { requireUser, hasMinRole } from '@/lib/api-auth-guard';
+import { requireUser, hasMinRole, ROLE_HIERARCHY } from '@/lib/api-auth-guard';
 import { redirect } from 'next/navigation';
 
 export const metadata = {
@@ -18,8 +18,7 @@ export default async function BudgetsPage() {
   }
 
   // Check minimum role level (85 = Financial Officer)
-  // eslint-disable-next-line @typescript-eslint/no-explicit-any
-  const userLevel = (user as any).roleLevel || 0;
+  const userLevel = Math.max(0, ...user.roles.map(r => ROLE_HIERARCHY[r as keyof typeof ROLE_HIERARCHY] ?? 0));
   if (userLevel < 85) {
     return (
       <div className="container mx-auto py-10">
@@ -33,8 +32,7 @@ export default async function BudgetsPage() {
     );
   }
 
-  // eslint-disable-next-line @typescript-eslint/no-explicit-any
-  const organizationId = (user as any).organizationId;
+  const organizationId = user.organizationId;
 
   return (
     <div className="container mx-auto py-10">

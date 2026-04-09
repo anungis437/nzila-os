@@ -42,7 +42,7 @@ export const GET = withApi(
         FROM member_arrears ma
         LEFT JOIN organization_members om
           ON om.user_id = ma.user_id
-         AND om.organization_id = ma.organization_id
+         AND om.organization_id = ma.organization_id::text
         WHERE ma.organization_id = ${organizationId}::uuid
           AND ma.arrears_status <> 'current'
         ORDER BY ma.total_owed DESC

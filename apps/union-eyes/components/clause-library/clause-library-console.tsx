@@ -28,12 +28,12 @@ interface SearchFilters {
   includeExpired: boolean;
 }
 
-export function ClauseLibraryConsole() {
+export function ClauseLibraryConsole({ initialQuery = "" }: { initialQuery?: string }) {
   const { toast } = useToast();
   const [mounted, setMounted] = useState(false);
   const [activeTab, setActiveTab] = useState<"browse" | "view" | "compare">("browse");
   const [searchFilters, setSearchFilters] = useState<SearchFilters>({
-    query: "",
+    query: initialQuery,
     clauseTypes: [],
     sectors: [],
     provinces: [],
@@ -311,7 +311,7 @@ export function ClauseLibraryConsole() {
       </div>
 
       {/* Search */}
-      <ClauseLibrarySearch onSearch={handleSearch} isLoading={isLoadingClauses} />
+      <ClauseLibrarySearch onSearch={handleSearch} isLoading={isLoadingClauses} initialQuery={initialQuery} />
 
       {/* Comparison Bar */}
       {selectedClauseIds.length > 0 && (

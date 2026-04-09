@@ -11,6 +11,8 @@
  *   - <OrganizationSwitcher /> → <OrgSwitcher />
  *
  * All components use NextAuth's SessionProvider under the hood.
+ * Falls back to PG session (/api/auth/me) for password-based auth
+ * when no NextAuth session exists.
  */
 import {
   SessionProvider,
@@ -19,8 +21,67 @@ import {
   signOut as nextAuthSignOut,
 } from 'next-auth/react'
 import type { Session } from 'next-auth'
-import type { ReactNode } from 'react'
+import { type ReactNode, useState, useEffect, useRef } from 'react'
 import type { EntraSession } from './types'
+
+// ── PG-session fallback for password-based auth ─────────────────────────────
+
+interface PgAuthUser {
+  id: string
+  email: string
+  firstName: string | null
+  lastName: string | null
+  organizationId: string | null
+  sessionId: string | null
+}
+
+/**
+ * Fetches the current user from the PG session cookie (/api/auth/me).
+ * Returns null if not authenticated or the endpoint doesn't exist.
+ */
+async function fetchPgUser(signal?: AbortSignal): Promise<PgAuthUser | null> {
+  try {
+    const res = await fetch('/api/auth/me', {
+      credentials: 'include',
+      signal,
+    })
+    if (!res.ok) return null
+    const data = await res.json()
+    return data.user ?? null
+  } catch {
+    return null
+  }
+}
+
+/**
+ * Hook that resolves the PG-session user when NextAuth has no session.
+ * Only fires the fetch once per mount; caches the result.
+ */
+function usePgSession(nextAuthStatus: string) {
+  const [pgUser, setPgUser] = useState<PgAuthUser | null>(null)
+  const [pgLoaded, setPgLoaded] = useState(false)
+  const fetched = useRef(false)
+
+  useEffect(() => {
+    // Only check PG session if NextAuth definitely has no session
+    if (nextAuthStatus === 'loading') return
+    if (nextAuthStatus === 'authenticated') {
+      setPgLoaded(true)
+      return
+    }
+    if (fetched.current) return
+    fetched.current = true
+
+    const controller = new AbortController()
+    fetchPgUser(controller.signal).then(user => {
+      setPgUser(user)
+      setPgLoaded(true)
+    })
+    return () => controller.abort()
+  }, [nextAuthStatus])
+
+  return { pgUser, pgLoaded }
+}
 
 // ── AuthProvider ────────────────────────────────────────────────────────────
 
@@ -70,21 +131,64 @@ export interface AuthState {
 
 /**
  * Client-side auth state hook — replaces Clerk's `useAuth()`.
+ * Falls back to PG session cookie for password-based auth.
  */
 export function useAuth(): AuthState {
   const { data: session, status } = useSession()
   const entra = session as EntraSession | null
+  const { pgUser, pgLoaded } = usePgSession(status)
 
+  // NextAuth session takes priority
+  if (status === 'authenticated') {
+    return {
+      isLoaded: true,
+      isSignedIn: true,
+      userId: entra?.entraObjectId ?? session?.user?.id ?? null,
+      orgId: entra?.activeOrgId ?? null,
+      orgRole: entra?.orgRole ?? null,
+      roles: entra?.roles ?? [],
+      identityProvider: entra?.identityProvider ?? null,
+      isExternalUser: entra?.isExternalUser ?? false,
+      getToken: async () => entra?.accessToken ?? null,
+      signOut: async () => {
+        await nextAuthSignOut({ redirectTo: '/' })
+      },
+    }
+  }
+
+  // PG session fallback (password-based auth)
+  if (pgUser) {
+    return {
+      isLoaded: true,
+      isSignedIn: true,
+      userId: pgUser.id,
+      orgId: pgUser.organizationId,
+      orgRole: null,
+      roles: [],
+      identityProvider: null,
+      isExternalUser: false,
+      getToken: async () => null,
+      signOut: async () => {
+        // Call PG logout endpoint, then redirect
+        try {
+          await fetch('/api/auth/logout', { method: 'POST', credentials: 'include' })
+        } catch { /* ignore */ }
+        window.location.href = '/'
+      },
+    }
+  }
+
+  // Still loading
   return {
-    isLoaded: status !== 'loading',
-    isSignedIn: status === 'authenticated',
-    userId: entra?.entraObjectId ?? session?.user?.id ?? null,
-    orgId: entra?.activeOrgId ?? null,
-    orgRole: entra?.orgRole ?? null,
-    roles: entra?.roles ?? [],
-    identityProvider: entra?.identityProvider ?? null,
-    isExternalUser: entra?.isExternalUser ?? false,
-    getToken: async () => entra?.accessToken ?? null,
+    isLoaded: status !== 'loading' && pgLoaded,
+    isSignedIn: false,
+    userId: null,
+    orgId: null,
+    orgRole: null,
+    roles: [],
+    identityProvider: null,
+    isExternalUser: false,
+    getToken: async () => null,
     signOut: async () => {
       await nextAuthSignOut({ redirectTo: '/' })
     },
@@ -120,57 +224,88 @@ export interface UserState {
 /**
  * Client-side user data hook — replaces Clerk's `useUser()`.
  * Provides the same shape so app code doesn't need to change.
+ * Falls back to PG session for password-based auth.
  */
 export function useUser(): UserState {
   const { data: session, status } = useSession()
   const entra = session as EntraSession | null
+  const { pgUser, pgLoaded } = usePgSession(status)
 
-  if (status === 'loading' || !session?.user) {
+  // NextAuth session
+  if (status === 'authenticated' && session?.user) {
+    const nameParts = session.user.name?.split(' ') ?? []
     return {
-      isLoaded: status !== 'loading',
-      isSignedIn: false,
-      user: null,
+      isLoaded: true,
+      isSignedIn: true,
+      user: {
+        id: entra?.entraObjectId ?? session.user.id ?? '',
+        fullName: session.user.name ?? null,
+        primaryEmailAddress: session.user.email
+          ? { emailAddress: session.user.email }
+          : null,
+        primaryPhoneNumber: null,
+        emailAddresses: session.user.email
+          ? [{ emailAddress: session.user.email }]
+          : [],
+        username: session.user.name ?? null,
+        imageUrl: session.user.image ?? null,
+        firstName: nameParts[0] ?? null,
+        lastName: nameParts.slice(1).join(' ') || null,
+        createdAt: null,
+        publicMetadata: {
+          roles: entra?.roles ?? [],
+          role: entra?.roles?.[0] ?? undefined,
+          nzilaRole: entra?.roles?.find(r => r.startsWith('nzila.')) ?? undefined,
+          zongaRole: entra?.roles?.find(r => r.startsWith('zonga.')) ?? undefined,
+          agriRole: entra?.roles?.find(r => r.startsWith('agri.')) ?? undefined,
+        },
+        privateMetadata: {
+          role: entra?.roles?.[0] ?? undefined,
+          tenantId: entra?.tenantId ?? entra?.activeOrgId ?? undefined,
+          organizationId: entra?.activeOrgId ?? undefined,
+          identityProvider: entra?.identityProvider ?? undefined,
+          isExternalUser: entra?.isExternalUser ?? false,
+        },
+        organizationMemberships: entra?.activeOrgId
+          ? [{ organization: { id: entra.activeOrgId }, role: entra?.orgRole ?? 'member' }]
+          : [],
+      },
     }
   }
 
-  const nameParts = session.user.name?.split(' ') ?? []
+  // PG session fallback
+  if (pgUser) {
+    const fullName = [pgUser.firstName, pgUser.lastName].filter(Boolean).join(' ') || null
+    return {
+      isLoaded: true,
+      isSignedIn: true,
+      user: {
+        id: pgUser.id,
+        fullName,
+        primaryEmailAddress: pgUser.email ? { emailAddress: pgUser.email } : null,
+        primaryPhoneNumber: null,
+        emailAddresses: pgUser.email ? [{ emailAddress: pgUser.email }] : [],
+        username: fullName,
+        imageUrl: null,
+        firstName: pgUser.firstName,
+        lastName: pgUser.lastName,
+        createdAt: null,
+        publicMetadata: {},
+        privateMetadata: {
+          organizationId: pgUser.organizationId ?? undefined,
+        },
+        organizationMemberships: pgUser.organizationId
+          ? [{ organization: { id: pgUser.organizationId }, role: 'member' }]
+          : [],
+      },
+    }
+  }
 
+  // Still loading
   return {
-    isLoaded: true,
-    isSignedIn: true,
-    user: {
-      id: entra?.entraObjectId ?? session.user.id ?? '',
-      fullName: session.user.name ?? null,
-      primaryEmailAddress: session.user.email
-        ? { emailAddress: session.user.email }
-        : null,
-      primaryPhoneNumber: null,
-      emailAddresses: session.user.email
-        ? [{ emailAddress: session.user.email }]
-        : [],
-      username: session.user.name ?? null,
-      imageUrl: session.user.image ?? null,
-      firstName: nameParts[0] ?? null,
-      lastName: nameParts.slice(1).join(' ') || null,
-      createdAt: null,
-      publicMetadata: {
-        roles: entra?.roles ?? [],
-        role: entra?.roles?.[0] ?? undefined,
-        nzilaRole: entra?.roles?.find(r => r.startsWith('nzila.')) ?? undefined,
-        zongaRole: entra?.roles?.find(r => r.startsWith('zonga.')) ?? undefined,
-        agriRole: entra?.roles?.find(r => r.startsWith('agri.')) ?? undefined,
-      },
-      privateMetadata: {
-        role: entra?.roles?.[0] ?? undefined,
-        tenantId: entra?.tenantId ?? entra?.activeOrgId ?? undefined,
-        organizationId: entra?.activeOrgId ?? undefined,
-        identityProvider: entra?.identityProvider ?? undefined,
-        isExternalUser: entra?.isExternalUser ?? false,
-      },
-      organizationMemberships: entra?.activeOrgId
-        ? [{ organization: { id: entra.activeOrgId }, role: entra?.orgRole ?? 'member' }]
-        : [],
-    },
+    isLoaded: status !== 'loading' && pgLoaded,
+    isSignedIn: false,
+    user: null,
   }
 }
 
@@ -193,30 +328,43 @@ export interface OrgState {
 
 /**
  * Client-side organization hook — replaces Clerk's `useOrganization()`.
- *
- * Note: In Entra, "organizations" map to Azure AD groups/tenants.
- * The org details come from the session (populated by JWT callback).
+ * Falls back to PG session for password-based auth.
  */
 export function useOrganization(): OrgState {
   const { data: session, status } = useSession()
   const entra = session as EntraSession | null
+  const { pgUser, pgLoaded } = usePgSession(status)
 
-  if (status === 'loading' || !entra?.activeOrgId) {
+  // NextAuth/Entra session
+  if (status === 'authenticated' && entra?.activeOrgId) {
     return {
-      isLoaded: status !== 'loading',
-      organization: null,
+      isLoaded: true,
+      organization: {
+        id: entra.activeOrgId,
+        name: '', // Populated from DB lookup in org context provider
+        slug: '',
+      },
+      membership: entra.orgRole ? { role: entra.orgRole } : null,
+    }
+  }
+
+  // PG session fallback
+  if (pgUser?.organizationId) {
+    return {
+      isLoaded: true,
+      organization: {
+        id: pgUser.organizationId,
+        name: '',
+        slug: '',
+      },
       membership: null,
     }
   }
 
   return {
-    isLoaded: true,
-    organization: {
-      id: entra.activeOrgId,
-      name: '', // Populated from DB lookup in org context provider
-      slug: '',
-    },
-    membership: entra.orgRole ? { role: entra.orgRole } : null,
+    isLoaded: status !== 'loading' && pgLoaded,
+    organization: null,
+    membership: null,
   }
 }
 

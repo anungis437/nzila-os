@@ -19,11 +19,11 @@ export default function AnimatedCTA() {
       className="glass-card rounded-2xl p-8 md:p-12 text-center max-w-3xl mx-auto"
     >
       <h3 className="text-2xl md:text-3xl font-bold text-white mb-3">
-        Join Our Pilot Program
+        Ready to lead with clarity?
       </h3>
       <p className="text-white text-lg mb-8 max-w-xl mx-auto">
-        We&apos;re partnering with leading Canadian unions to shape Union Eyes
-        before general availability. Apply for early access.
+        See how Union Eyes turns day-to-day casework into
+        confident, data-backed decisions. Request a demo or start a pilot.
       </p>
 
       <div className="flex flex-col sm:flex-row items-center justify-center gap-4">
@@ -33,7 +33,7 @@ export default function AnimatedCTA() {
             className="rounded-xl bg-electric hover:bg-electric/90 text-white px-8 shadow-lg shadow-electric/25"
             asChild
           >
-            <Link href="/pilot-request">Apply for Pilot</Link>
+            <Link href="/pilot-request">Request a Demo</Link>
           </Button>
         </motion.div>
 
@@ -44,7 +44,7 @@ export default function AnimatedCTA() {
             className="rounded-xl border-white/30 text-white hover:bg-white/10 px-8"
             asChild
           >
-            <Link href="/contact">Contact Sales</Link>
+            <Link href="/contact">Start a Pilot</Link>
           </Button>
         </motion.div>
       </div>

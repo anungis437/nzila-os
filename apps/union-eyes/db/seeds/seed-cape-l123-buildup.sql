@@ -383,7 +383,7 @@ VALUES
    'Chemical splash from cleaning solution due to container failure.',
    'While transferring industrial cleaning concentrate, container cracked and splashed onto employee forearms. First aid administered. No lasting effects. Batch of containers quarantined for inspection.',
    false, now(), now())
-ON CONFLICT (id) DO NOTHING;
+ON CONFLICT (incident_number) DO NOTHING;
 
 -- ─────────────────────────────────────────────────────────────────────────────
 -- 9. Documents

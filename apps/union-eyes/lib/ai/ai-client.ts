@@ -78,4 +78,6 @@ export const UE_PROFILES = {
   PENSION_FUNDING_ANALYSIS: 'ue-pension-funding-analysis',
   PENSION_BENEFIT_PROJECTION: 'ue-pension-benefit-projection',
   PENSION_TRUSTEE_SUMMARY: 'ue-pension-trustee-summary',
+  // Financial intelligence profile
+  FINANCIAL_ANALYSIS: 'ue-financial-analysis',
 } as const

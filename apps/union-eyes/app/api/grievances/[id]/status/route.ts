@@ -16,9 +16,10 @@ import { buildUnionEvidencePack } from '@/lib/evidence';
 import { logger } from '@/lib/logger';
 import {
   validateTransition,
-  type GrievanceLifecycleStatus,
+  type LifecycleState,
   type ActorRole,
-} from "@/lib/workflows/grievance-state-machine";
+} from "@/lib/workflow/case-lifecycle";
+import { toLifecycleState } from "@/lib/workflow/state-bridge";
 import {
   ErrorCode,
   standardErrorResponse,
@@ -27,10 +28,10 @@ import {
 import { eq, and } from "drizzle-orm";
 import { requireEntitlement } from '@/services/platform-economics/entitlement-guard';
 
-// Map UE roles to FSM actor roles
+// Map UE roles to unified FSM actor roles
 function mapToActorRole(hasAdmin: boolean, hasStaff: boolean): ActorRole {
-  if (hasAdmin) return "union_admin";
-  if (hasStaff) return "union_staff";
+  if (hasAdmin) return "admin";
+  if (hasStaff) return "steward";
   return "member";
 }
 
@@ -73,20 +74,36 @@ export const PATCH = withOrganizationAuth(async (request, context, params?: { id
       return standardErrorResponse(ErrorCode.NOT_FOUND, "Grievance not found");
     }
 
-    // Map existing status to FSM status
-    const currentStatus = grievance.status as GrievanceLifecycleStatus;
+    // Map existing status to unified FSM status via state bridge
+    const currentStatus = grievance.status as string;
     const isAdmin = await hasMinRole("admin");
     const isStaff = await hasMinRole("steward");
     const actorRole = mapToActorRole(isAdmin, isStaff);
 
-    // Validate FSM transition
-    const result = validateTransition(currentStatus, newStatus as GrievanceLifecycleStatus, {
+    // Translate both statuses through the state bridge
+    const unifiedCurrent = toLifecycleState('grievance', currentStatus)
+      ?? toLifecycleState('cupe', currentStatus);
+    const unifiedTarget = toLifecycleState('grievance', newStatus)
+      ?? toLifecycleState('cupe', newStatus);
+
+    if (!unifiedCurrent || !unifiedTarget) {
+      return standardErrorResponse(
+        ErrorCode.VALIDATION_ERROR,
+        `Unrecognized status: ${!unifiedCurrent ? currentStatus : newStatus}`,
+      );
+    }
+
+    // Validate FSM transition via unified case-lifecycle
+    const result = validateTransition({
       actorRole,
-      assignedStaffId: grievance.unionRepId,
+      caseId: params.id,
+      currentState: unifiedCurrent,
+      targetState: unifiedTarget,
+      assignedTo: grievance.unionRepId,
     });
 
-    if (!result.valid) {
-      return standardErrorResponse(ErrorCode.VALIDATION_ERROR, result.error ?? "Invalid transition");
+    if (!result.allowed) {
+      return standardErrorResponse(ErrorCode.VALIDATION_ERROR, result.reason ?? "Invalid transition");
     }
 
     const previousState = { status: grievance.status };

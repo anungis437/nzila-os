@@ -32,17 +32,29 @@ export default function LocaleSiteNavigation() {
   ];
 
   const platformLinks = [
+    { name: tf('governance'),          href: `/${locale}/trust` },
     { name: tf('grievanceTracking'),  href: `/${locale}/features/grievance-tracking` },
     { name: tf('memberPortal'),       href: `/${locale}/features/member-portal` },
     { name: tf('aiWorkbench'),        href: `/${locale}/features/ai-workbench` },
     { name: tf('analyticsReporting'), href: `/${locale}/features/analytics` },
   ];
 
+  const roleLinks = [
+    { name: 'For Representatives',  href: `/${locale}/for-representatives` },
+    { name: 'For Leadership',       href: `/${locale}/for-leadership` },
+    { name: 'For Federations',      href: `/${locale}/for-federations` },
+    { name: 'For CLC',              href: `/${locale}/for-clc` },
+    { name: 'For Members',          href: `/${locale}/for-members` },
+  ];
+
   const [mobileMenuOpen, setMobileMenuOpen] = useState(false);
   const [scrolled, setScrolled] = useState(false);
   const [platformOpen, setPlatformOpen] = useState(false);
+  const [rolesOpen, setRolesOpen] = useState(false);
   const [mobilePlatformOpen, setMobilePlatformOpen] = useState(false);
+  const [mobileRolesOpen, setMobileRolesOpen] = useState(false);
   const platformTimeout = useRef<ReturnType<typeof setTimeout> | undefined>(undefined);
+  const rolesTimeout = useRef<ReturnType<typeof setTimeout> | undefined>(undefined);
 
   useEffect(() => {
     const handleScroll = () => setScrolled(window.scrollY > 20);
@@ -80,7 +92,7 @@ export default function LocaleSiteNavigation() {
       role="navigation"
       aria-label="Main navigation"
     >
-      <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
+      <div className="max-w-[1440px] mx-auto px-4 sm:px-6 lg:px-8">
         <div className="flex justify-between h-16 md:h-20">
           {/* Logo */}
           <div className="flex items-center">
@@ -99,7 +111,7 @@ export default function LocaleSiteNavigation() {
           </div>
 
           {/* Desktop Navigation */}
-          <div className="hidden lg:flex items-center space-x-8">
+          <div className="hidden xl:flex items-center space-x-5 whitespace-nowrap">
             {navigation.map((item) => {
               const isActive =
                 pathname === item.href ||
@@ -154,13 +166,62 @@ export default function LocaleSiteNavigation() {
                     animate={{ opacity: 1, y: 0 }}
                     exit={{ opacity: 0, y: 8 }}
                     transition={{ duration: 0.15 }}
-                    className="absolute top-full left-1/2 -translate-x-1/2 mt-2 w-56 bg-white rounded-xl shadow-xl border border-gray-100 py-2 z-50"
+                    className="absolute top-full left-1/2 -translate-x-1/2 mt-2 w-72 bg-white rounded-xl shadow-xl border border-gray-100 py-2 z-50"
                   >
                     {platformLinks.map((link) => (
                       <Link
                         key={link.href}
                         href={link.href}
-                        className={`block px-4 py-2.5 text-sm transition-colors ${
+                        className={`block px-4 py-2.5 text-sm truncate transition-colors ${
+                          pathname === link.href
+                            ? 'text-electric bg-electric/5 font-medium'
+                            : 'text-gray-700 hover:bg-gray-50 hover:text-navy'
+                        }`}
+                      >
+                        {link.name}
+                      </Link>
+                    ))}
+                  </motion.div>
+                )}
+              </AnimatePresence>
+            </div>
+
+            {/* Who It's For dropdown */}
+            <div
+              className="relative"
+              onMouseEnter={() => { clearTimeout(rolesTimeout.current); setRolesOpen(true); }}
+              onMouseLeave={() => { rolesTimeout.current = setTimeout(() => setRolesOpen(false), 150); }}
+            >
+              <button
+                className={`text-sm font-medium transition-colors relative py-1 inline-flex items-center gap-1 ${
+                  pathname?.startsWith(`/${locale}/for-`)
+                    ? scrolled ? 'text-electric' : 'text-white'
+                    : scrolled ? 'text-gray-600 hover:text-navy' : 'text-white/80 hover:text-white'
+                }`}
+              >
+                Who It&apos;s For
+                <ChevronDown className={`h-3.5 w-3.5 transition-transform ${rolesOpen ? 'rotate-180' : ''}`} />
+                {pathname?.startsWith(`/${locale}/for-`) && (
+                  <motion.div
+                    layoutId="ue-locale-nav-roles-indicator"
+                    className="absolute -bottom-0.5 left-0 right-0 h-0.5 bg-electric rounded-full"
+                  />
+                )}
+              </button>
+              <AnimatePresence>
+                {rolesOpen && (
+                  <motion.div
+                    initial={{ opacity: 0, y: 8 }}
+                    animate={{ opacity: 1, y: 0 }}
+                    exit={{ opacity: 0, y: 8 }}
+                    transition={{ duration: 0.15 }}
+                    className="absolute top-full left-1/2 -translate-x-1/2 mt-2 w-72 bg-white rounded-xl shadow-xl border border-gray-100 py-2 z-50"
+                  >
+                    {roleLinks.map((link) => (
+                      <Link
+                        key={link.href}
+                        href={link.href}
+                        className={`block px-4 py-2.5 text-sm truncate transition-colors ${
                           pathname === link.href
                             ? 'text-electric bg-electric/5 font-medium'
                             : 'text-gray-700 hover:bg-gray-50 hover:text-navy'
@@ -182,12 +243,12 @@ export default function LocaleSiteNavigation() {
               href={`/${locale}/pilot-request`}
               className="px-5 py-2.5 bg-electric text-white text-sm font-semibold rounded-xl hover:bg-blue-700 transition-colors shadow-lg shadow-electric/25 btn-press"
             >
-              {t('requestPilot')}
+              Request a Demo
             </Link>
 
             <Link
               href="/sign-in"
-              className={`inline-flex items-center gap-1.5 text-sm font-medium transition-colors ${
+              className={`inline-flex items-center gap-1.5 text-sm font-medium transition-colors whitespace-nowrap ${
                 scrolled ? 'text-gray-600 hover:text-navy' : 'text-white/80 hover:text-white'
               }`}
             >
@@ -197,7 +258,7 @@ export default function LocaleSiteNavigation() {
           </div>
 
           {/* Mobile menu button */}
-          <div className="lg:hidden flex items-center gap-3">
+          <div className="xl:hidden flex items-center gap-3">
             <LanguageSwitcher />
             <button
               onClick={() => setMobileMenuOpen(!mobileMenuOpen)}
@@ -217,7 +278,7 @@ export default function LocaleSiteNavigation() {
             initial={{ opacity: 0, height: 0 }}
             animate={{ opacity: 1, height: 'auto' }}
             exit={{ opacity: 0, height: 0 }}
-            className="lg:hidden bg-white border-t border-gray-100 shadow-xl"
+            className="xl:hidden bg-white border-t border-gray-100 shadow-xl"
           >
             <div className="px-4 py-4 space-y-1">
               {navigation.map((item) => (
@@ -245,6 +306,36 @@ export default function LocaleSiteNavigation() {
               {mobilePlatformOpen && (
                 <div className="pl-4 space-y-1">
                   {platformLinks.map((link) => (
+                    <Link
+                      key={link.href}
+                      href={link.href}
+                      className={`block px-4 py-2.5 rounded-lg text-sm transition-colors ${
+                        pathname === link.href
+                          ? 'text-electric bg-electric/5 font-medium'
+                          : 'text-gray-600 hover:bg-gray-50'
+                      }`}
+                    >
+                      {link.name}
+                    </Link>
+                  ))}
+                </div>
+              )}
+
+              {/* Who It's For section (mobile) */}
+              <button
+                onClick={() => setMobileRolesOpen(!mobileRolesOpen)}
+                className={`flex w-full items-center justify-between px-4 py-3 rounded-lg text-sm font-medium transition-colors ${
+                  pathname?.startsWith(`/${locale}/for-`)
+                    ? 'bg-electric/10 text-electric'
+                    : 'text-gray-700 hover:bg-gray-50'
+                }`}
+              >
+                Who It&apos;s For
+                <ChevronDown className={`h-4 w-4 transition-transform ${mobileRolesOpen ? 'rotate-180' : ''}`} />
+              </button>
+              {mobileRolesOpen && (
+                <div className="pl-4 space-y-1">
+                  {roleLinks.map((link) => (
                     <Link
                       key={link.href}
                       href={link.href}

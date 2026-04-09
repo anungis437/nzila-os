@@ -86,10 +86,11 @@ interface SearchFilters {
 interface ClauseLibrarySearchProps {
   onSearch: (filters: SearchFilters) => void;
   isLoading?: boolean;
+  initialQuery?: string;
 }
 
-export function ClauseLibrarySearch({ onSearch, isLoading }: ClauseLibrarySearchProps) {
-  const [query, setQuery] = useState("");
+export function ClauseLibrarySearch({ onSearch, isLoading, initialQuery = "" }: ClauseLibrarySearchProps) {
+  const [query, setQuery] = useState(initialQuery);
   const [selectedClauseTypes, setSelectedClauseTypes] = useState<string[]>([]);
   const [selectedSectors, setSelectedSectors] = useState<string[]>([]);
   const [selectedProvinces, setSelectedProvinces] = useState<string[]>([]);

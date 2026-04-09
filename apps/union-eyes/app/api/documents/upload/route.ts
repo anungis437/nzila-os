@@ -5,6 +5,7 @@
 
 import { NextResponse } from "next/server";
 import { z } from "zod";
+import { createHash } from "crypto";
 import { logApiAuditEvent } from "@/lib/middleware/api-security";
 import { createDocument } from "@/lib/services/document-service";
 import { withRoleAuth } from '@/lib/api-auth-guard';
@@ -227,6 +228,8 @@ export const POST = withRoleAuth('member', async (request, context) => {
     }
 
     // Upload to Vercel Blob Storage
+    const fileBuffer = Buffer.from(await file.arrayBuffer());
+    const checksum = createHash('sha256').update(fileBuffer).digest('hex');
     const blob = await putBlob(
       `documents/${organizationId}/${Date.now()}-${file.name}`,
       file,
@@ -251,6 +254,7 @@ export const POST = withRoleAuth('member', async (request, context) => {
       isConfidential,
       accessLevel: accessLevel as "standard" | "restricted" | "confidential",
       uploadedBy: userId,
+      checksum,
       metadata: {
         originalFileName: file.name,
         uploadedAt: new Date().toISOString(),

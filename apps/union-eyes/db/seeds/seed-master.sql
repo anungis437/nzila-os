@@ -356,9 +356,6 @@ END $$;
 -- ╚═══════════════════════════════════════════════════════════════════════════╝
 
 -- 3a. NZILA Ventures members (12)
-DELETE FROM organization_members
-WHERE organization_id = '458a56cb-251a-4c91-a0b5-81bb8ac39087';
-
 INSERT INTO organization_members (user_id, organization_id, role, status, name, email)
 VALUES
   ('user_35NlrrNcfTv0DMh2kzBHyXZRtpb', '458a56cb-251a-4c91-a0b5-81bb8ac39087', 'app_owner',        'active', 'Aubert Nungisa',    'info@nzilaventures.com'),
@@ -372,15 +369,18 @@ VALUES
   ('user_3A2c3apBW0oMKPX2CjIMd8b1ujq', '458a56cb-251a-4c91-a0b5-81bb8ac39087', 'national_officer', 'active', 'Mark Hancock',      'test.nationaloff@nzilaventures.com'),
   ('user_3A2c3SaKc0xFearcu0NbUL2lhDF', '458a56cb-251a-4c91-a0b5-81bb8ac39087', 'platform_admin',   'active', 'David Nkemdirim',   'test.platformlead@nzilaventures.com'),
   ('user_3A2c6rLMOmF45HEkaU7XdQp05Zk', '458a56cb-251a-4c91-a0b5-81bb8ac39087', 'president',        'active', 'Tim Maguire',       'test.president@nzilaventures.com'),
-  ('user_3A2c729gwvVEXyC6vc2ICqzihxp', '458a56cb-251a-4c91-a0b5-81bb8ac39087', 'steward',          'active', 'Keisha Brown',      'test.steward@nzilaventures.com');
+  ('user_3A2c729gwvVEXyC6vc2ICqzihxp', '458a56cb-251a-4c91-a0b5-81bb8ac39087', 'steward',          'active', 'Keisha Brown',      'test.steward@nzilaventures.com')
+ON CONFLICT (organization_id, user_id) DO UPDATE SET
+  role   = EXCLUDED.role,
+  name   = EXCLUDED.name,
+  email  = EXCLUDED.email,
+  status = EXCLUDED.status;
 
 -- 3b. CLC members (10 + 2 platform admins)
 DO $$
 DECLARE v_clc_id text;
 BEGIN
   SELECT id::text INTO v_clc_id FROM organizations WHERE slug = 'clc';
-
-  DELETE FROM organization_members WHERE organization_id = v_clc_id;
 
   INSERT INTO organization_members (user_id, organization_id, role, status, name, email)
   VALUES
@@ -396,7 +396,12 @@ BEGIN
     ('user_3BSzDtwjg8WXJf36fw9wjVTu8yX', v_clc_id, 'secretary_treasurer', 'active', 'Fatima Al-Rashid',    'f.alrashid@clc-ctc.ca'),
     -- Platform admins (cross-org visibility)
     ('user_35NlrrNcfTv0DMh2kzBHyXZRtpb', v_clc_id, 'admin',  'active', 'Aubert Nungisa',      'info@nzilaventures.com'),
-    ('user_37Zo7OrvP4jy0J0MU5APfkDtE2V', v_clc_id, 'admin',  'active', 'Platform Admin',      'michel@nungisalaw.ca');
+    ('user_37Zo7OrvP4jy0J0MU5APfkDtE2V', v_clc_id, 'admin',  'active', 'Platform Admin',      'michel@nungisalaw.ca')
+  ON CONFLICT (organization_id, user_id) DO UPDATE SET
+    role   = EXCLUDED.role,
+    name   = EXCLUDED.name,
+    email  = EXCLUDED.email,
+    status = EXCLUDED.status;
 END $$;
 
 -- 3c. CAPE-ACEP members (12 + 2 platform admins)
@@ -405,11 +410,9 @@ DECLARE v_cape_id text;
 BEGIN
   SELECT id::text INTO v_cape_id FROM organizations WHERE slug = 'cape-acep';
 
-  DELETE FROM organization_members WHERE organization_id = v_cape_id;
-
   INSERT INTO organization_members (user_id, organization_id, role, status, name, email)
   VALUES
-    ('user_3BSyETlaLS6t8wuol22bVECjPFM', v_cape_id, 'president',     'active', 'Jane Doe',             'j.doe@acep-cape.ca'),
+    ('user_3BSyETlaLS6t8wuol22bVECjPFM', v_cape_id, 'president',     'active', 'Greg Phillips',        'g.phillips@acep-cape.ca'),
     ('user_3BSyEi6TduTzKp2mZigpD6D746h', v_cape_id, 'vice_president', 'active', 'Marc-André Dubois',     'ma.dubois@acep-cape.ca'),
     ('user_3BSzDo4cpXO7qTM0bY800AuLOd2', v_cape_id, 'national_officer',    'active', 'Brian Faulkner',       'b.faulkner@acep-cape.ca'),
     ('user_3BSzDqnxMraAlxaRvhyrTabrTOE', v_cape_id, 'secretary_treasurer', 'active', 'Chantal Bertrand',     'c.bertrand@acep-cape.ca'),
@@ -423,7 +426,12 @@ BEGIN
     ('user_3BSzEIf1ARXNRQOs3d5Qju58yNZ', v_cape_id, 'member',              'active', 'Amira Hassan',         'a.hassan@acep-cape.ca'),
     -- Platform admins
     ('user_35NlrrNcfTv0DMh2kzBHyXZRtpb', v_cape_id, 'admin',         'active', 'Aubert Nungisa',       'info@nzilaventures.com'),
-    ('user_37Zo7OrvP4jy0J0MU5APfkDtE2V', v_cape_id, 'admin',         'active', 'Platform Admin',       'michel@nungisalaw.ca');
+    ('user_37Zo7OrvP4jy0J0MU5APfkDtE2V', v_cape_id, 'admin',         'active', 'Platform Admin',       'michel@nungisalaw.ca')
+  ON CONFLICT (organization_id, user_id) DO UPDATE SET
+    role   = EXCLUDED.role,
+    name   = EXCLUDED.name,
+    email  = EXCLUDED.email,
+    status = EXCLUDED.status;
 END $$;
 
 -- 3d. CUPE National members (7 — national office staff, real Clerk IDs from staging DB)
@@ -431,8 +439,6 @@ DO $$
 DECLARE v_cupe_id text;
 BEGIN
   SELECT id::text INTO v_cupe_id FROM organizations WHERE slug = 'cupe';
-
-  DELETE FROM organization_members WHERE organization_id = v_cupe_id;
 
   INSERT INTO organization_members (user_id, organization_id, role, status, name, email)
   VALUES
@@ -442,7 +448,12 @@ BEGIN
     ('user_3BnpKFTn2rOTLSM2MkUTsD1NU1b', v_cupe_id, 'secretary_treasurer', 'active', 'Candace Rennick', 'c.rennick@cupe.ca'),
     ('user_3BnpKeS5NZ5H5xquydhJnth0gYs', v_cupe_id, 'admin',               'active', 'Kevin Thompson',  'k.thompson2@cupe.ca'),
     ('user_3BnpKZ9uQKKBsmqXz2eksrUud6F', v_cupe_id, 'officer',             'active', 'Laura Bentley',   'l.bentley@cupe.ca'),
-    ('user_3BnpKjP8KVVfFGSEozJifxfgJZQ', v_cupe_id, 'member',              'active', 'Diane Bhullar',   'd.bhullar@cupe.ca');
+    ('user_3BnpKjP8KVVfFGSEozJifxfgJZQ', v_cupe_id, 'member',              'active', 'Diane Bhullar',   'd.bhullar@cupe.ca')
+  ON CONFLICT (organization_id, user_id) DO UPDATE SET
+    role   = EXCLUDED.role,
+    name   = EXCLUDED.name,
+    email  = EXCLUDED.email,
+    status = EXCLUDED.status;
 END $$;
 
 -- 3e. CUPE Local 123 members (10 + 2 platform admins)
@@ -505,7 +516,7 @@ VALUES
   ('user_3BSzDlKgwVGWHOKtHluyRSdJNTb', 'p.oconnor@clc-ctc.ca',    'Patrick',      'O''Connor',    'en-CA', 'America/Toronto', true),
   ('user_3BSzDtwjg8WXJf36fw9wjVTu8yX', 'f.alrashid@clc-ctc.ca',   'Fatima',       'Al-Rashid',    'en-CA', 'America/Toronto', true),
   -- CAPE (bilingual — mix of en-CA and fr-CA)
-  ('user_3BSyETlaLS6t8wuol22bVECjPFM', 'j.doe@acep-cape.ca',       'Jane',         'Doe',          'en-CA', 'America/Toronto', true),
+  ('user_3BSyETlaLS6t8wuol22bVECjPFM', 'g.phillips@acep-cape.ca',  'Greg',         'Phillips',     'en-CA', 'America/Toronto', true),
   ('user_3BSyEi6TduTzKp2mZigpD6D746h', 'ma.dubois@acep-cape.ca',   'Marc-André',   'Dubois',       'fr-CA', 'America/Toronto', true),
   ('user_3BSzDo4cpXO7qTM0bY800AuLOd2', 'b.faulkner@acep-cape.ca',  'Brian',        'Faulkner',     'en-CA', 'America/Toronto', true),
   ('user_3BSzDqnxMraAlxaRvhyrTabrTOE', 'c.bertrand@acep-cape.ca',  'Chantal',      'Bertrand',     'fr-CA', 'America/Toronto', true),

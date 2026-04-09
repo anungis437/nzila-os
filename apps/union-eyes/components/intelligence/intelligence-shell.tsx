@@ -46,9 +46,11 @@ export function IntelligenceShell({ userRole }: IntelligenceShellProps) {
   const t = useTranslations();
   const locale = useLocale();
   const params = useSearchParams();
-  const { organizationId } = useOrganization();
+  const { organizationId, organization } = useOrganization();
 
-  const canSeeAI = AI_INSIGHT_ROLES.has(userRole);
+  // Federation tab only for congress/federation/union org types
+  const isFederationOrg = ['congress', 'federation', 'union'].includes(organization?.type ?? '');
+  const canSeeAI = AI_INSIGHT_ROLES.has(userRole) && isFederationOrg;
   const canSeeExec = EXEC_ROLES.has(userRole);
 
   // Resolve default tab from ?scope= query param

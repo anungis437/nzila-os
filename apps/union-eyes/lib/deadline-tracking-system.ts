@@ -10,7 +10,7 @@ import { db } from "@/db/db";
 import { eq, and, asc, lte } from "drizzle-orm";
 import {
   grievanceDeadlines,
-  claims,
+  grievances,
   notifications,
   type GrievanceDeadline,
 } from "@/db/schema";
@@ -48,7 +48,7 @@ export type DeadlineStatus = "upcoming" | "warning" | "overdue" | "completed" | 
 
 export type DeadlineAlert = {
   deadlineId: string;
-  claimId: string;
+  grievanceId: string;
   deadlineType: DeadlineType;
   dueDate: Date;
   daysRemaining: number;
@@ -145,8 +145,7 @@ export const DEFAULT_DEADLINE_RULES: DeadlineCalculationRule[] = [
  * Create deadline with automatic date calculation
  */
 export async function createDeadline(
-  claimId: string,
-  organizationId: string,
+  grievanceId: string,
   deadlineType: DeadlineType,
   options: {
     referenceDate?: Date;
@@ -158,13 +157,13 @@ export async function createDeadline(
   } = {}
 ): Promise<{ success: boolean; deadlineId?: string; dueDate?: Date; error?: string }> {
   try {
-    // Get claim details
-    const claim = await db.query.claims.findFirst({
-      where: and(eq(claims.claimId, claimId), eq(claims.organizationId, organizationId)),
+    // Validate grievance exists
+    const grievance = await db.query.grievances.findFirst({
+      where: eq(grievances.id, grievanceId),
     });
 
-    if (!claim) {
-      return { success: false, error: "Claim not found" };
+    if (!grievance) {
+      return { success: false, error: "Grievance not found" };
     }
 
     // Get deadline rule
@@ -192,8 +191,7 @@ export async function createDeadline(
     const [deadline] = await db
       .insert(grievanceDeadlines)
       .values({
-        claimId,
-        organizationId,
+        grievanceId,
         deadlineType,
         dueDate,
         description: options.description || rule?.description || `${deadlineType} deadline`,
@@ -222,22 +220,21 @@ return {
  * Create deadlines for all grievance steps automatically
  */
 export async function createGrievanceStepDeadlines(
-  claimId: string,
-  organizationId: string,
+  grievanceId: string,
   filingDate: Date,
   _incidentDate: Date
 ): Promise<{ success: boolean; deadlineIds: string[]; error?: string }> {
     const deadlineIds: string[] = [];
 
     // Step 1 Response deadline (from filing date)
-    const step1Result = await createDeadline(claimId, organizationId, "step_1_response", {
+    const step1Result = await createDeadline(grievanceId, "step_1_response", {
       referenceDate: filingDate,
     });
     if (step1Result.deadlineId) deadlineIds.push(step1Result.deadlineId);
 
     // Appeal deadline (10 days after Step 1 expected response)
     if (step1Result.dueDate) {
-      const appealResult = await createDeadline(claimId, organizationId, "appeal_deadline", {
+      const appealResult = await createDeadline(grievanceId, "appeal_deadline", {
         referenceDate: step1Result.dueDate,
       });
       if (appealResult.deadlineId) deadlineIds.push(appealResult.deadlineId);
@@ -245,8 +242,7 @@ export async function createGrievanceStepDeadlines(
 
     // Investigation completion deadline
     const investigationResult = await createDeadline(
-      claimId,
-      organizationId,
+      grievanceId,
       "investigation_completion",
       {
         referenceDate: filingDate,
@@ -262,8 +258,8 @@ export async function createGrievanceStepDeadlines(
  */
 export async function completeDeadline(
   deadlineId: string,
-  organizationId: string,
-  completedBy: string,
+  _organizationId: string,
+  _completedBy: string,
   notes?: string
 ): Promise<{ success: boolean; error?: string }> {
   try {
@@ -310,9 +306,8 @@ export async function requestDeadlineExtension(
       await db
         .update(grievanceDeadlines)
         .set({
-          extendedTo: request.newDate.toISOString().split('T')[0],
-          isExtended: true,
-          extensionReason: request.reason,
+          newDeadline: request.newDate,
+          extensionGranted: true,
           status: "extended",
           notes: `Extended: ${request.reason}`,
         })
@@ -364,14 +359,14 @@ export async function approveDeadlineExtension(
       return { success: false, error: "No pending extension request found" };
     }
 
-    // Apply extension using extendedTo field
-    const newDate = deadline.extendedTo ? new Date(deadline.extendedTo) : new Date();
+    // Apply extension using newDeadline field
+    const newDate = deadline.newDeadline ? new Date(deadline.newDeadline) : new Date();
 
     await db
       .update(grievanceDeadlines)
       .set({
         dueDate: newDate,
-        isExtended: true,
+        extensionGranted: true,
         status: "extended",
         notes: `${deadline.notes}\n\nExtension approved by ${approvedBy} on ${new Date().toISOString()}`,
       })
@@ -443,12 +438,11 @@ return [];
  * Get all deadlines for a specific grievance
  */
 export async function getGrievanceDeadlines(
-  claimId: string,
-  _organizationId: string
+  grievanceId: string
 ): Promise<GrievanceDeadline[]> {
   try {
     const deadlines = await db.query.grievanceDeadlines.findMany({
-      where: eq(grievanceDeadlines.claimId, claimId),
+      where: eq(grievanceDeadlines.grievanceId, grievanceId),
       orderBy: [asc(grievanceDeadlines.dueDate)],
     });
 
@@ -506,13 +500,12 @@ function createDeadlineAlert(deadline: GrievanceDeadline): DeadlineAlert {
 
   return {
     deadlineId: deadline.id,
-    claimId: deadline.claimId,
+    grievanceId: deadline.grievanceId,
     deadlineType: deadline.deadlineType as DeadlineType,
     dueDate,
     daysRemaining,
     status,
-    priority: deadline.priority || "medium",
-    assignedTo: deadline.assignedTo || undefined,
+    priority: "medium",
     description: deadline.description || "",
   };
 }

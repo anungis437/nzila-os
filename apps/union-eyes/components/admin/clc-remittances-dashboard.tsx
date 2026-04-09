@@ -138,11 +138,13 @@ export function ClcRemittancesDashboard() {
       if (!response.ok) throw new Error('Failed to fetch remittances');
 
       const data: RemittancesResponse = await response.json();
-      setRemittances(data.remittances);
-      setPagination(data.pagination);
+      setRemittances(data.remittances ?? []);
+      if (data.pagination) {
+        setPagination(data.pagination);
+      }
       
       // Calculate summary
-      calculateSummary(data.remittances);
+      calculateSummary(data.remittances ?? []);
     } catch (_error) {
 toast({
         title: 'Error',
@@ -433,14 +435,14 @@ toast({
         <CardContent className="space-y-4">
           <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-4">
             <Select
-              value={filters.status}
-              onValueChange={(value) => setFilters(prev => ({ ...prev, status: value }))}
+              value={filters.status || 'all'}
+              onValueChange={(value) => setFilters(prev => ({ ...prev, status: value === 'all' ? '' : value }))}
             >
               <SelectTrigger>
                 <SelectValue placeholder="All statuses" />
               </SelectTrigger>
               <SelectContent>
-                <SelectItem value="">All statuses</SelectItem>
+                <SelectItem value="all">All statuses</SelectItem>
                 <SelectItem value="pending">Pending</SelectItem>
                 <SelectItem value="submitted">Submitted</SelectItem>
                 <SelectItem value="paid">Paid</SelectItem>
@@ -449,14 +451,14 @@ toast({
             </Select>
 
             <Select
-              value={filters.month}
-              onValueChange={(value) => setFilters(prev => ({ ...prev, month: value }))}
+              value={filters.month || 'all'}
+              onValueChange={(value) => setFilters(prev => ({ ...prev, month: value === 'all' ? '' : value }))}
             >
               <SelectTrigger>
                 <SelectValue placeholder="All months" />
               </SelectTrigger>
               <SelectContent>
-                <SelectItem value="">All months</SelectItem>
+                <SelectItem value="all">All months</SelectItem>
                 {Array.from({ length: 12 }, (_, i) => (
                   <SelectItem key={i + 1} value={(i + 1).toString()}>
                     {format(new Date(2024, i, 1), 'MMMM')}

@@ -8,7 +8,7 @@ import { describe, it, expect, vi, beforeEach } from "vitest";
 /* ── hoisted ────────────────────────────────────────────────────────── */
 
 const mocks = vi.hoisted(() => ({
-  mockFindFirstClaims: vi.fn(),
+  mockFindFirstGrievances: vi.fn(),
   mockFindFirstDeadlines: vi.fn(),
   mockFindManyDeadlines: vi.fn(),
   mockInsertReturning: vi.fn(),
@@ -18,7 +18,7 @@ const mocks = vi.hoisted(() => ({
 vi.mock("@/db/db", () => ({
   db: {
     query: {
-      claims: { findFirst: mocks.mockFindFirstClaims },
+      grievances: { findFirst: mocks.mockFindFirstGrievances },
       grievanceDeadlines: {
         findFirst: mocks.mockFindFirstDeadlines,
         findMany: mocks.mockFindManyDeadlines,
@@ -46,7 +46,7 @@ vi.mock("@/db/schema", () => ({
     status: "status",
     notes: "notes",
   },
-  claims: { claimId: "claimId", organizationId: "organizationId" },
+  grievances: { id: "id" },
   notifications: {
     relatedEntityId: "relatedEntityId",
     type: "type",
@@ -89,7 +89,7 @@ import { differenceInDays } from "date-fns";
 describe("deadline-tracking-system", () => {
   beforeEach(() => {
     vi.clearAllMocks();
-    mocks.mockFindFirstClaims.mockResolvedValue(undefined);
+    mocks.mockFindFirstGrievances.mockResolvedValue(undefined);
     mocks.mockFindFirstDeadlines.mockResolvedValue(undefined);
     mocks.mockFindManyDeadlines.mockResolvedValue([]);
     mocks.mockInsertReturning.mockResolvedValue([{ id: "dl-1" }]);
@@ -124,36 +124,36 @@ describe("deadline-tracking-system", () => {
 
   // ── createDeadline ────────────────────────────────────────────────
   describe("createDeadline", () => {
-    it("returns error if claim not found", async () => {
-      const r = await createDeadline("c-1", "org-1", "filing_deadline");
+    it("returns error if grievance not found", async () => {
+      const r = await createDeadline("g-1", "filing_deadline");
       expect(r.success).toBe(false);
-      expect(r.error).toContain("Claim not found");
+      expect(r.error).toContain("Grievance not found");
     });
 
     it("returns error if no rule and no customDays", async () => {
-      mocks.mockFindFirstClaims.mockResolvedValueOnce({ claimId: "c-1" });
-      const r = await createDeadline("c-1", "org-1", "custom");
+      mocks.mockFindFirstGrievances.mockResolvedValueOnce({ id: "g-1" });
+      const r = await createDeadline("g-1", "custom");
       expect(r.success).toBe(false);
       expect(r.error).toContain("No rule found");
     });
 
     it("creates deadline with matching rule (business days)", async () => {
-      mocks.mockFindFirstClaims.mockResolvedValueOnce({ claimId: "c-1" });
+      mocks.mockFindFirstGrievances.mockResolvedValueOnce({ id: "g-1" });
       mocks.mockInsertReturning.mockResolvedValueOnce([{ id: "dl-1" }]);
       mocks.mockFindFirstDeadlines.mockResolvedValueOnce({ id: "dl-1" }); // scheduleReminders
 
-      const r = await createDeadline("c-1", "org-1", "filing_deadline");
+      const r = await createDeadline("g-1", "filing_deadline");
       expect(r.success).toBe(true);
       expect(r.deadlineId).toBe("dl-1");
       expect(r.dueDate).toBeInstanceOf(Date);
     });
 
     it("creates deadline with customDays and calendar mode", async () => {
-      mocks.mockFindFirstClaims.mockResolvedValueOnce({ claimId: "c-1" });
+      mocks.mockFindFirstGrievances.mockResolvedValueOnce({ id: "g-1" });
       mocks.mockInsertReturning.mockResolvedValueOnce([{ id: "dl-2" }]);
       mocks.mockFindFirstDeadlines.mockResolvedValueOnce({ id: "dl-2" });
 
-      const r = await createDeadline("c-1", "org-1", "custom", {
+      const r = await createDeadline("g-1", "custom", {
         customDays: 14,
         useBusinessDays: false,
       });
@@ -162,8 +162,8 @@ describe("deadline-tracking-system", () => {
     });
 
     it("handles db error gracefully", async () => {
-      mocks.mockFindFirstClaims.mockRejectedValueOnce(new Error("DB error"));
-      const r = await createDeadline("c-1", "org-1", "filing_deadline");
+      mocks.mockFindFirstGrievances.mockRejectedValueOnce(new Error("DB error"));
+      const r = await createDeadline("g-1", "filing_deadline");
       expect(r.success).toBe(false);
       expect(r.error).toBe("DB error");
     });
@@ -171,12 +171,12 @@ describe("deadline-tracking-system", () => {
 
   // ── createGrievanceStepDeadlines ──────────────────────────────────
   describe("createGrievanceStepDeadlines", () => {
-    it("creates step deadlines when claim exists", async () => {
-      mocks.mockFindFirstClaims.mockResolvedValue({ claimId: "c-1" });
+    it("creates step deadlines when grievance exists", async () => {
+      mocks.mockFindFirstGrievances.mockResolvedValue({ id: "g-1" });
       mocks.mockInsertReturning.mockResolvedValue([{ id: "dl-new" }]);
       mocks.mockFindFirstDeadlines.mockResolvedValue({ id: "dl-new" });
 
-      const r = await createGrievanceStepDeadlines("c-1", "org-1", new Date(), new Date());
+      const r = await createGrievanceStepDeadlines("g-1", new Date(), new Date());
       expect(r.success).toBe(true);
       expect(r.deadlineIds.length).toBeGreaterThanOrEqual(1);
     });
@@ -184,8 +184,8 @@ describe("deadline-tracking-system", () => {
     it("returns success with empty IDs when createDeadline fails internally", async () => {
       // createDeadline catches errors internally, so createGrievanceStepDeadlines
       // still returns success: true but with empty deadlineIds
-      mocks.mockFindFirstClaims.mockResolvedValue(undefined);
-      const r = await createGrievanceStepDeadlines("c-1", "org-1", new Date(), new Date());
+      mocks.mockFindFirstGrievances.mockResolvedValue(undefined);
+      const r = await createGrievanceStepDeadlines("g-1", new Date(), new Date());
       expect(r.success).toBe(true);
       expect(r.deadlineIds).toEqual([]);
     });
@@ -326,15 +326,15 @@ describe("deadline-tracking-system", () => {
 
   // ── getGrievanceDeadlines ─────────────────────────────────────────
   describe("getGrievanceDeadlines", () => {
-    it("returns deadlines for claim", async () => {
-      mocks.mockFindManyDeadlines.mockResolvedValueOnce([{ id: "dl-1", grievanceId: "c-1" }]);
-      const deadlines = await getGrievanceDeadlines("c-1", "org-1");
+    it("returns deadlines for grievance", async () => {
+      mocks.mockFindManyDeadlines.mockResolvedValueOnce([{ id: "dl-1", grievanceId: "g-1" }]);
+      const deadlines = await getGrievanceDeadlines("g-1");
       expect(deadlines).toHaveLength(1);
     });
 
     it("returns empty on error", async () => {
       mocks.mockFindManyDeadlines.mockRejectedValueOnce(new Error("fail"));
-      expect(await getGrievanceDeadlines("c-1", "org-1")).toEqual([]);
+      expect(await getGrievanceDeadlines("g-1")).toEqual([]);
     });
   });
 
@@ -417,8 +417,8 @@ describe("deadline-tracking-system", () => {
     it("returns success: true even when deadlineIds is empty", async () => {
       // When all createDeadline calls fail, deadlineIds remains []
       // but we still return success: true (as per implementation)
-      mocks.mockFindFirstClaims.mockResolvedValue(undefined);
-      const r = await createGrievanceStepDeadlines("c-1", "org-1", new Date(), new Date());
+      mocks.mockFindFirstGrievances.mockResolvedValue(undefined);
+      const r = await createGrievanceStepDeadlines("g-1", new Date(), new Date());
       expect(r.success).toBe(true);
       expect(Array.isArray(r.deadlineIds)).toBe(true);
     });
@@ -532,11 +532,11 @@ describe("deadline-tracking-system", () => {
   // ── Branch Coverage: createGrievanceStepDeadlines ────────────────
   describe("createGrievanceStepDeadlines — dueDate branch", () => {
     it("creates appeal deadline when step1 returns dueDate", async () => {
-      mocks.mockFindFirstClaims.mockResolvedValue({ claimId: "c-1" });
+      mocks.mockFindFirstGrievances.mockResolvedValue({ id: "g-1" });
       mocks.mockInsertReturning.mockResolvedValue([{ id: "dl-step" }]);
       mocks.mockFindFirstDeadlines.mockResolvedValue({ id: "dl-step" });
 
-      const r = await createGrievanceStepDeadlines("c-1", "org-1", new Date(), new Date());
+      const r = await createGrievanceStepDeadlines("g-1", new Date(), new Date());
       expect(r.success).toBe(true);
       // Step1 + appeal + investigation = 3 deadlines
       expect(r.deadlineIds.length).toBe(3);
@@ -545,15 +545,15 @@ describe("deadline-tracking-system", () => {
     it("skips appeal deadline when step1 fails (no dueDate)", async () => {
       // First call (step1): claim not found → no dueDate
       // But we need claim found for step1 to succeed... let's make it fail differently
-      mocks.mockFindFirstClaims
-        .mockResolvedValueOnce({ claimId: "c-1" }) // step1 claim lookup
-        .mockResolvedValueOnce({ claimId: "c-1" }); // investigation claim lookup
+      mocks.mockFindFirstGrievances
+        .mockResolvedValueOnce({ id: "g-1" }) // step1 grievance lookup
+        .mockResolvedValueOnce({ id: "g-1" }); // investigation grievance lookup
       mocks.mockInsertReturning
         .mockRejectedValueOnce(new Error("insert fail")) // step1 insert fails
         .mockResolvedValueOnce([{ id: "dl-inv" }]); // investigation succeeds
       mocks.mockFindFirstDeadlines.mockResolvedValue({ id: "dl-inv" });
 
-      const r = await createGrievanceStepDeadlines("c-1", "org-1", new Date(), new Date());
+      const r = await createGrievanceStepDeadlines("g-1", new Date(), new Date());
       expect(r.success).toBe(true);
       // Only investigation succeeded, step1 failed (no dueDate) so no appeal
       expect(r.deadlineIds.length).toBe(1);
@@ -609,10 +609,10 @@ describe("deadline-tracking-system", () => {
   // ── Branch Coverage: useBusinessDays=false ────────────────────────
   describe("createDeadline — useBusinessDays false branch", () => {
     it("uses addDays when useBusinessDays is false", async () => {
-      mocks.mockFindFirstClaims.mockResolvedValueOnce({ claimId: "c-1" });
+      mocks.mockFindFirstGrievances.mockResolvedValueOnce({ id: "g-1" });
       mocks.mockInsertReturning.mockResolvedValueOnce([{ id: "dl-bd" }]);
 
-      const r = await createDeadline("c-1", "org-1", "filing_deadline", {
+      const r = await createDeadline("g-1", "filing_deadline", {
         useBusinessDays: false,
       });
       expect(r.success).toBe(true);
@@ -623,19 +623,19 @@ describe("deadline-tracking-system", () => {
   // ── Branch Coverage: non-Error throws in catch blocks ─────────────
   describe("catch blocks — non-Error throws", () => {
     it("createDeadline wraps non-Error throw", async () => {
-      mocks.mockFindFirstClaims.mockResolvedValueOnce({ claimId: "c-1" });
+      mocks.mockFindFirstGrievances.mockResolvedValueOnce({ id: "g-1" });
       mocks.mockInsertReturning.mockRejectedValueOnce("string error");
 
-      const r = await createDeadline("c-1", "org-1", "filing_deadline");
+      const r = await createDeadline("g-1", "filing_deadline");
       expect(r.success).toBe(false);
       expect(r.error).toBe("Failed to create deadline");
     });
 
     it("createGrievanceStepDeadlines returns success with empty IDs when all createDeadline fail", async () => {
       // All createDeadline calls fail internally (return success:false)
-      mocks.mockFindFirstClaims.mockResolvedValue(undefined);
+      mocks.mockFindFirstGrievances.mockResolvedValue(undefined);
 
-      const r = await createGrievanceStepDeadlines("c-1", "org-1", new Date(), new Date());
+      const r = await createGrievanceStepDeadlines("g-1", new Date(), new Date());
       // Individual failures are swallowed; outer function returns success with no IDs
       expect(r.success).toBe(true);
       expect(r.deadlineIds).toEqual([]);

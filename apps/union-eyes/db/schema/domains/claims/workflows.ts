@@ -24,6 +24,7 @@ import {
 } from "drizzle-orm/pg-core";
 import { relations } from "drizzle-orm";
 import { claims, visibilityScopeEnum } from "./claims";
+import { grievances } from "./grievances";
 
 // ============================================================================
 // ENUMS
@@ -229,7 +230,7 @@ export const grievanceStages = pgTable("grievance_stages", {
 export const grievanceTransitions = pgTable("grievance_transitions", {
   id: uuid("id").primaryKey().defaultRandom(),
   organizationId: uuid("organization_id").notNull(),
-  claimId: uuid("claim_id").notNull().references(() => claims.claimId),
+  claimId: uuid("claim_id").notNull().references(() => claims.claimId, { onDelete: "cascade" }),
   
   // Transition details
   fromStageId: uuid("from_stage_id").references(() => grievanceStages.id),
@@ -275,7 +276,7 @@ export const grievanceTransitions = pgTable("grievance_transitions", {
 export const grievanceAssignments = pgTable("grievance_assignments", {
   id: uuid("id").primaryKey().defaultRandom(),
   organizationId: uuid("organization_id").notNull(),
-  claimId: uuid("claim_id").notNull().references(() => claims.claimId),
+  claimId: uuid("claim_id").notNull().references(() => claims.claimId, { onDelete: "cascade" }),
   
   // Assignment details
   assignedTo: varchar("assigned_to", { length: 255 }).notNull(),
@@ -314,7 +315,7 @@ export const grievanceAssignments = pgTable("grievance_assignments", {
 export const grievanceDocuments = pgTable("grievance_documents", {
   id: uuid("id").primaryKey().defaultRandom(),
   organizationId: uuid("organization_id").notNull(),
-  claimId: uuid("claim_id").notNull().references(() => claims.claimId),
+  claimId: uuid("claim_id").notNull().references(() => claims.claimId, { onDelete: "cascade" }),
   
   // Document details
   documentName: varchar("document_name", { length: 255 }).notNull(),
@@ -377,62 +378,36 @@ export const grievanceDocuments = pgTable("grievance_documents", {
 
 export const grievanceDeadlines = pgTable("grievance_deadlines", {
   id: uuid("id").primaryKey().defaultRandom(),
-  organizationId: uuid("organization_id").notNull(),
-  claimId: uuid("claim_id").notNull().references(() => claims.claimId),
-  stageId: uuid("stage_id").references(() => grievanceStages.id),
-  
+  grievanceId: uuid("grievance_id").references(() => grievances.id).notNull(),
+
   // Deadline details
   deadlineType: varchar("deadline_type", { length: 100 }).notNull(),
-  deadlineDate: date("deadline_date"),
-  dueDate: timestamp("due_date", { withTimezone: true }),
-  deadlineTime: time("deadline_time"),
-  timezone: varchar("timezone", { length: 50 }).default("America/Toronto"),
-  description: text("description"),
-  priority: varchar("priority", { length: 20 }).default("medium"),
-  status: varchar("status", { length: 50 }).default("pending"),
-  
-  // Assignment
-  assignedTo: text("assigned_to"),
-  createdBy: text("created_by"),
-  
-  // Completion tracking
+  description: varchar("description", { length: 500 }),
+  dueDate: timestamp("due_date", { withTimezone: true }).notNull(),
+
+  // Status
+  status: varchar("status", { length: 50 }).notNull().default("pending"), // pending, met, extended, missed
   completedAt: timestamp("completed_at", { withTimezone: true }),
-  completedBy: text("completed_by"),
-  
-  // Calculation source
-  calculatedFrom: varchar("calculated_from", { length: 100 }),
-  contractClauseReference: varchar("contract_clause_reference", { length: 255 }),
-  daysFromSource: integer("days_from_source"),
-  
-  // Status tracking
-  isMet: boolean("is_met"),
-  metAt: timestamp("met_at", { withTimezone: true }),
-  isExtended: boolean("is_extended").default(false),
-  extensionReason: text("extension_reason"),
-  extendedTo: date("extended_to"),
-  
-  // Reminder configuration
-  reminderDays: integer("reminder_days").array().default([7, 3, 1]),
-  reminderSchedule: integer("reminder_schedule").array().default([7, 3, 1]),
-  lastReminderSentAt: timestamp("last_reminder_sent_at", { withTimezone: true }),
-  
-  // Escalation
-  escalateOnMiss: boolean("escalate_on_miss").default(true),
-  escalateTo: uuid("escalate_to"),
-  escalatedAt: timestamp("escalated_at", { withTimezone: true }),
-  
-  // Metadata
+  extensionGranted: boolean("extension_granted").default(false),
+  newDeadline: timestamp("new_deadline", { withTimezone: true }),
+
+  // Reminders
+  reminderDays: integer("reminder_days").array(), // days before deadline to send reminders
+  remindersSent: jsonb("reminders_sent").$type<Array<{
+    sentAt: string;
+    recipient: string;
+    method: string;
+  }>>(),
+
+  // Notes
   notes: text("notes"),
-  // eslint-disable-next-line @typescript-eslint/no-explicit-any
-  metadata: jsonb("metadata").$type<Record<string, any>>().default({}),
-  createdAt: timestamp("created_at", { withTimezone: true }).defaultNow(),
-  updatedAt: timestamp("updated_at", { withTimezone: true }).defaultNow(),
+
+  createdAt: timestamp("created_at", { withTimezone: true }).notNull().defaultNow(),
+  updatedAt: timestamp("updated_at", { withTimezone: true }).notNull().defaultNow(),
 }, (table) => ({
-  organizationIdx: index("idx_grievance_deadlines_organization").on(table.organizationId),
-  claimIdx: index("idx_grievance_deadlines_claim").on(table.claimId),
-  stageIdx: index("idx_grievance_deadlines_stage").on(table.stageId),
-  dateIdx: index("idx_grievance_deadlines_date").on(table.deadlineDate),
-  typeIdx: index("idx_grievance_deadlines_type").on(table.deadlineType),
+  grievanceIdx: index("idx_grievance_deadlines_grievance").on(table.grievanceId),
+  dueIdx: index("idx_grievance_deadlines_due").on(table.dueDate),
+  statusIdx: index("idx_grievance_deadlines_status").on(table.status),
 }));
 
 // ============================================================================
@@ -442,7 +417,7 @@ export const grievanceDeadlines = pgTable("grievance_deadlines", {
 export const grievanceSettlements = pgTable("grievance_settlements", {
   id: uuid("id").primaryKey().defaultRandom(),
   organizationId: uuid("organization_id").notNull(),
-  claimId: uuid("claim_id").notNull().references(() => claims.claimId),
+  claimId: uuid("claim_id").notNull().references(() => claims.claimId, { onDelete: "cascade" }),
   
   // Settlement details
   settlementType: varchar("settlement_type", { length: 100 }).notNull(),
@@ -516,7 +491,7 @@ export const grievanceSettlements = pgTable("grievance_settlements", {
 export const grievanceCommunications = pgTable("grievance_communications", {
   id: uuid("id").primaryKey().defaultRandom(),
   organizationId: uuid("organization_id").notNull(),
-  claimId: uuid("claim_id").notNull().references(() => claims.claimId),
+  claimId: uuid("claim_id").notNull().references(() => claims.claimId, { onDelete: "cascade" }),
   
   // Communication details
   communicationType: varchar("communication_type", { length: 100 }).notNull(),
@@ -579,7 +554,6 @@ export const grievanceStagesRelations = relations(grievanceStages, ({ one, many 
   }),
   transitionsFrom: many(grievanceTransitions, { relationName: "fromStage" }),
   transitionsTo: many(grievanceTransitions, { relationName: "toStage" }),
-  deadlines: many(grievanceDeadlines),
 }));
 
 export const grievanceTransitionsRelations = relations(grievanceTransitions, ({ one }) => ({
@@ -620,13 +594,9 @@ export const grievanceDocumentsRelations = relations(grievanceDocuments, ({ one,
 }));
 
 export const grievanceDeadlinesRelations = relations(grievanceDeadlines, ({ one }) => ({
-  claim: one(claims, {
-    fields: [grievanceDeadlines.claimId],
-    references: [claims.claimId],
-  }),
-  stage: one(grievanceStages, {
-    fields: [grievanceDeadlines.stageId],
-    references: [grievanceStages.id],
+  grievance: one(grievances, {
+    fields: [grievanceDeadlines.grievanceId],
+    references: [grievances.id],
   }),
 }));
 

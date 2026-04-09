@@ -146,7 +146,7 @@ const verticalData: Record<string, {
   uniontech: {
     name: 'Uniontech',
     tagline: 'Modernising Labour Rights Through Intelligent Infrastructure',
-    description: 'Union management, pension forecasting, grievance tracking, and labour organising.',
+    description: 'Union management, pension forecasting, grievance tracking, and CBA intelligence.',
     hero: 'https://images.unsplash.com/photo-1529070538774-1795d8de2dff?w=1920',
     heroAlt: 'Labour union workers raising hands together in solidarity',
     tam: '$50B',
@@ -155,7 +155,7 @@ const verticalData: Record<string, {
     status: 'Flagship',
     color: 'from-gold to-gold-light',
     overview:
-      'Union Eyes is Nzila\'s flagship platform — the most comprehensive union management system available. Covering 4,773 orgs, it digitises every dimension of union operations from grievance tracking to pension forecasting, delivering decisive intelligence to labour leaders.',
+      'Union Eyes is Nzila\'s flagship platform — the most comprehensive union management system available. Covering 4,773 orgs, it digitises every dimension of union operations from grievance tracking to pension forecasting, with CBA intelligence and arbitration precedent research delivering decisive intelligence to labour leaders.',
     capabilities: [
       {
         title: 'Pension Forecasting Engine',
@@ -182,10 +182,10 @@ const verticalData: Record<string, {
           'Membership demographics, participation trends, dues collection tracking, and communication suite — all in one secure dashboard.',
       },
       {
-        title: 'Labour Organising Tools',
-        icon: '📣',
+        title: 'Arbitration Precedents & Research',
+        icon: '📚',
         description:
-          'Campaign coordination, card-check management, outreach scheduling, and compliance documentation for organising drives.',
+          'Searchable precedent database, jurisdiction preferences, citation tracking, and outcome analytics to strengthen grievance and arbitration positions.',
       },
     ],
     useCases: [
@@ -195,7 +195,7 @@ const verticalData: Record<string, {
     ],
     differentiators: [
       '4,773 orgs already in the data ecosystem',
-      'Only platform combining pension, grievance, and organising in one product',
+      'Only platform combining pension, grievance, CBA intelligence, and precedents in one product',
       'AI clause analysis built specifically for collective agreements',
       'Supports labour rights — a core B Corp social impact pillar',
     ],

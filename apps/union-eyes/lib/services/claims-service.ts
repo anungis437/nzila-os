@@ -57,7 +57,12 @@ export async function listClaims(
   return { claims: rows, total: count, page, limit };
 }
 
-export async function getClaimById(id: string) {
+export async function getClaimById(id: string, organizationId?: string) {
+  if (organizationId) {
+    return db.query.claims.findFirst({
+      where: and(eq(claims.claimId, id), eq(claims.organizationId, organizationId)),
+    });
+  }
   return db.query.claims.findFirst({
     where: eq(claims.claimId, id),
   });

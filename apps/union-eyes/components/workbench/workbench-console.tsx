@@ -31,10 +31,11 @@ import {
   Mail,
   ChevronDown,
   Eye,
-  Edit,
   UserCheck,
   TrendingUp,
   AlertTriangle,
+  Gavel,
+  Loader2,
 } from "lucide-react";
 import { Card, CardContent } from "@/components/ui/card";
 
@@ -76,6 +77,7 @@ interface DbClaim {
 
 interface Case {
   id: string;
+  claimId: string;
   title: string;
   description: string;
   status: CaseStatus;
@@ -90,6 +92,7 @@ interface Case {
   assignedTo: string | null;
   notes: string[];
   daysOpen: number;
+  claimType: string;
 }
 
 // Map database claim types to UI-friendly labels
@@ -147,11 +150,12 @@ const calculateDaysOpen = (createdAt: Date): number => {
 // Convert database claim to UI case (now with member details from API)
 const mapDbClaimToCase = (claim: DbClaim & { memberName?: string; memberEmail?: string; memberPhone?: string }): Case => ({
   id: claim.claimNumber,
-  title: claimTypeLabels[claim.claimType] || claim.claimType,
+  claimId: claim.claimId,
+  title: claimTypeLabels[claim.claimType] || claim.claimType || "Untitled Case",
   description: claim.description,
   status: mapDbStatusToUi(claim.status),
   priority: mapDbPriorityToUi(claim.priority),
-  category: claimTypeLabels[claim.claimType] || claim.claimType,
+  category: claimTypeLabels[claim.claimType] || claim.claimType || "General",
   submittedDate: new Date(claim.createdAt).toISOString().split('T')[0],
   lastUpdate: new Date(claim.updatedAt).toISOString().split('T')[0],
   memberId: claim.memberId,
@@ -161,6 +165,7 @@ const mapDbClaimToCase = (claim: DbClaim & { memberName?: string; memberEmail?: 
   assignedTo: claim.assignedTo || null,
   notes: claim.resolutionNotes ? [claim.resolutionNotes] : [],
   daysOpen: calculateDaysOpen(claim.createdAt),
+  claimType: claim.claimType || '',
 });
 
 const statusConfig: Record<CaseStatus, { label: string; icon: React.ReactElement; color: string; dotColor: string }> = {
@@ -211,6 +216,8 @@ export default function WorkbenchConsole() {
   const [sortField, setSortField] = useState<SortField>("submittedDate");
   const [sortOrder, setSortOrder] = useState<SortOrder>("desc");
   const [newNote, setNewNote] = useState<Record<string, string>>({});
+  const [actionLoading, setActionLoading] = useState<string | null>(null);
+  const [escalatingId, setEscalatingId] = useState<string | null>(null);
 
   const priorityConfig: Record<CasePriority, { label: string; color: string; icon: React.ReactElement }> = {
     low: { label: t('workbench.priorities.low'), color: "text-gray-600 bg-gray-100", icon: <Flag className="w-3 h-3" /> },
@@ -256,11 +263,12 @@ export default function WorkbenchConsole() {
     .filter(c => {
       const matchesStatus = selectedStatus === "all" || c.status === selectedStatus;
       const matchesPriority = selectedPriority === "all" || c.priority === selectedPriority;
+      const q = searchQuery.toLowerCase();
       const matchesSearch = 
-        c.title.toLowerCase().includes(searchQuery.toLowerCase()) ||
-        c.memberName.toLowerCase().includes(searchQuery.toLowerCase()) ||
-        c.id.toLowerCase().includes(searchQuery.toLowerCase()) ||
-        c.category.toLowerCase().includes(searchQuery.toLowerCase());
+        (c.title ?? "").toLowerCase().includes(q) ||
+        (c.memberName ?? "").toLowerCase().includes(q) ||
+        (c.id ?? "").toLowerCase().includes(q) ||
+        (c.category ?? "").toLowerCase().includes(q);
       
       return matchesStatus && matchesPriority && matchesSearch;
     })
@@ -292,24 +300,88 @@ export default function WorkbenchConsole() {
   const urgentCount = cases.filter(c => c.priority === "urgent").length;
   const avgDaysOpen = cases.length > 0 ? Math.round(cases.reduce((sum, c) => sum + c.daysOpen, 0) / cases.length) : 0;
 
-  const handleAssignToMe = (caseId: string) => {
-    setCases(cases.map(c => 
-      c.id === caseId 
-        ? { ...c, status: "in-review", assignedTo: user?.firstName || "You", lastUpdate: new Date().toISOString().split('T')[0] }
-        : c
-    ));
+  // Refetch cases after mutation
+  const refetchCases = async () => {
+    const url = organizationId && !isPlatformOrg
+      ? `/api/workbench/assigned?organizationId=${organizationId}`
+      : '/api/workbench/assigned';
+    const response = await fetch(url);
+    if (response.ok) {
+      const data = await response.json();
+      const claims = data.data?.claims ?? data.claims ?? [];
+      setCases(claims.map(mapDbClaimToCase));
+    }
   };
 
-  const handleAddNote = (caseId: string) => {
-    const note = newNote[caseId];
-    if (!note || !note.trim()) return;
+  const handleAssignToMe = async (caseItem: Case) => {
+    setActionLoading(caseItem.id);
+    try {
+      const res = await fetch(`/api/cases/${caseItem.claimId}/assign`, {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({ assigneeId: user?.id ?? '', reason: 'Self-assigned from case queue' }),
+      });
+      if (res.ok) {
+        await refetchCases();
+      }
+    } finally {
+      setActionLoading(null);
+    }
+  };
 
-    setCases(cases.map(c => 
-      c.id === caseId 
-        ? { ...c, notes: [...c.notes, note], lastUpdate: new Date().toISOString().split('T')[0] }
-        : c
-    ));
-    setNewNote({ ...newNote, [caseId]: "" });
+  const handleAddNote = async (caseItem: Case) => {
+    const note = newNote[caseItem.id];
+    if (!note || !note.trim()) return;
+    setActionLoading(caseItem.id);
+    try {
+      const res = await fetch(`/api/cases/${caseItem.claimId}/notes`, {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({ text: note }),
+      });
+      if (res.ok) {
+        setCases(cases.map(c =>
+          c.id === caseItem.id
+            ? { ...c, notes: [...c.notes, note], lastUpdate: new Date().toISOString().split('T')[0] }
+            : c
+        ));
+        setNewNote({ ...newNote, [caseItem.id]: '' });
+      }
+    } finally {
+      setActionLoading(null);
+    }
+  };
+
+  const handleUpdateStatus = async (caseItem: Case, targetStatus: string) => {
+    setActionLoading(caseItem.id);
+    try {
+      const res = await fetch(`/api/cases/${caseItem.claimId}/transition`, {
+        method: 'PATCH',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({ targetStatus }),
+      });
+      if (res.ok) {
+        await refetchCases();
+      }
+    } finally {
+      setActionLoading(null);
+    }
+  };
+
+  const handleEscalateToGrievance = async (caseItem: Case) => {
+    setEscalatingId(caseItem.id);
+    try {
+      const res = await fetch(`/api/cases/${caseItem.claimId}/escalate`, {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({ notes: 'Escalated from case queue' }),
+      });
+      if (res.ok) {
+        await refetchCases();
+      }
+    } finally {
+      setEscalatingId(null);
+    }
   };
 
   const handleSort = (field: SortField) => {
@@ -794,17 +866,17 @@ export default function WorkbenchConsole() {
                                     onChange={(e) => setNewNote({ ...newNote, [caseItem.id]: e.target.value })}
                                     onKeyDown={(e) => {
                                       if (e.key === "Enter") {
-                                        handleAddNote(caseItem.id);
+                                        handleAddNote(caseItem);
                                       }
                                     }}
                                     className="flex-1 px-4 py-2 border border-gray-200 rounded-lg focus:ring-2 focus:ring-orange-500 focus:border-transparent"
                                   />
                                   <button
-                                    onClick={() => handleAddNote(caseItem.id)}
-                                    disabled={!newNote[caseItem.id]?.trim()}
+                                    onClick={() => handleAddNote(caseItem)}
+                                    disabled={!newNote[caseItem.id]?.trim() || actionLoading === caseItem.id}
                                     className="px-6 py-2 bg-orange-600 text-white rounded-lg hover:bg-orange-700 transition-colors disabled:opacity-50 disabled:cursor-not-allowed flex items-center gap-2"
                                   >
-                                    <Send className="w-4 h-4" />
+                                    {actionLoading === caseItem.id ? <Loader2 className="w-4 h-4 animate-spin" /> : <Send className="w-4 h-4" />}
                                     Add Note
                                   </button>
                                 </div>
@@ -814,27 +886,48 @@ export default function WorkbenchConsole() {
                               <div className="flex flex-wrap gap-3">
                                 {!caseItem.assignedTo && caseItem.memberId !== user?.id && (
                                   <button
-                                    onClick={() => handleAssignToMe(caseItem.id)}
-                                    className="flex items-center gap-2 px-6 py-3 bg-orange-600 text-white rounded-lg hover:bg-orange-700 transition-colors"
+                                    onClick={() => handleAssignToMe(caseItem)}
+                                    disabled={actionLoading === caseItem.id}
+                                    className="flex items-center gap-2 px-6 py-3 bg-orange-600 text-white rounded-lg hover:bg-orange-700 transition-colors disabled:opacity-50"
                                   >
-                                    <UserCheck className="w-5 h-5" />
+                                    {actionLoading === caseItem.id ? <Loader2 className="w-5 h-5 animate-spin" /> : <UserCheck className="w-5 h-5" />}
                                     Assign to Me
                                   </button>
                                 )}
-                                <Link href={`/dashboard/cases/${caseItem.id}`} className="flex items-center gap-2 px-6 py-3 bg-blue-600 text-white rounded-lg hover:bg-blue-700 transition-colors">
+                                <Link href={`/dashboard/cases/${caseItem.claimId}`} className="flex items-center gap-2 px-6 py-3 bg-blue-600 text-white rounded-lg hover:bg-blue-700 transition-colors">
                                   <Eye className="w-5 h-5" />
                                   View Full Details
                                 </Link>
-                                {caseItem.memberId !== user?.id && (
-                                  <button className="flex items-center gap-2 px-6 py-3 bg-green-600 text-white rounded-lg hover:bg-green-700 transition-colors">
-                                    <Phone className="w-5 h-5" />
-                                    Contact Member
+                                {caseItem.status !== "resolved" && caseItem.status !== "rejected" && (
+                                  <select
+                                    onChange={(e) => {
+                                      if (e.target.value) handleUpdateStatus(caseItem, e.target.value);
+                                    }}
+                                    disabled={actionLoading === caseItem.id}
+                                    value=""
+                                    className="flex items-center gap-2 px-4 py-3 bg-gray-100 text-gray-700 rounded-lg hover:bg-gray-200 transition-colors border border-gray-200 cursor-pointer"
+                                  >
+                                    <option value="">Update Status…</option>
+                                    <option value="under_review">Under Review</option>
+                                    <option value="assigned">Assigned</option>
+                                    <option value="investigation">Investigation</option>
+                                    <option value="pending_documentation">Pending Documentation</option>
+                                    <option value="resolved">Resolved</option>
+                                    <option value="rejected">Rejected</option>
+                                    <option value="closed">Closed</option>
+                                  </select>
+                                )}
+                                {/* Escalate to formal grievance — only for active grievance-type claims */}
+                                {caseItem.status !== "resolved" && caseItem.status !== "rejected" && (
+                                  <button
+                                    onClick={() => handleEscalateToGrievance(caseItem)}
+                                    disabled={escalatingId === caseItem.id}
+                                    className="flex items-center gap-2 px-6 py-3 bg-red-600 text-white rounded-lg hover:bg-red-700 transition-colors disabled:opacity-50"
+                                  >
+                                    {escalatingId === caseItem.id ? <Loader2 className="w-5 h-5 animate-spin" /> : <Gavel className="w-5 h-5" />}
+                                    Escalate to Grievance
                                   </button>
                                 )}
-                                <button className="flex items-center gap-2 px-6 py-3 bg-gray-100 text-gray-700 rounded-lg hover:bg-gray-200 transition-colors">
-                                  <Edit className="w-5 h-5" />
-                                  Update Status
-                                </button>
                               </div>
                             </motion.div>
                           )}

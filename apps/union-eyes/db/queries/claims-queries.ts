@@ -154,10 +154,11 @@ export const getClaimsByOrganization = async (
 };
 
 /**
- * Get a single claim by ID
+ * Get a single claim by ID — requires organizationId to prevent cross-org data leaks.
  */
 export const getClaimById = async (
   claimId: string,
+  organizationId: string,
   // eslint-disable-next-line @typescript-eslint/no-explicit-any
   tx?: NodePgDatabase<any>
 ) => {
@@ -167,7 +168,12 @@ export const getClaimById = async (
       const [claim] = await dbOrTx
         .select()
         .from(claims)
-        .where(eq(claims.claimId, claimId));
+        .where(
+          and(
+            eq(claims.claimId, claimId),
+            eq(claims.organizationId, organizationId),
+          )
+        );
       
       return claim;
     } catch (error) {

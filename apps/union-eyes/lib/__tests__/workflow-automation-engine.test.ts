@@ -22,13 +22,15 @@ const mocks = vi.hoisted(() => {
   };
   const dbSelectChain = {
     from: vi.fn().mockReturnThis(),
+    innerJoin: vi.fn().mockReturnThis(),
     where: vi.fn().mockReturnThis(),
     orderBy: vi.fn().mockReturnThis(),
     limit: selectLimit,
   };
   const dbUpdateChain = {
     set: vi.fn().mockReturnThis(),
-    where: updateWhere,
+    where: vi.fn().mockReturnThis(),
+    returning: vi.fn().mockResolvedValue([{ id: 'updated' }]),
   };
   const mockDb = {
     query: {
@@ -52,7 +54,6 @@ const mocks = vi.hoisted(() => {
     grievanceAssignmentsFindMany,
     insertReturning,
     selectLimit,
-    updateWhere,
     notificationSend,
     getNotificationService,
     validateClaimTransition: vi.fn(),
@@ -74,6 +75,7 @@ const mocks = vi.hoisted(() => {
 vi.mock("@/db/db", () => ({ db: mocks.mockDb }));
 
 vi.mock("drizzle-orm", () => ({
+  ne: vi.fn((...args: unknown[]) => ({ _tag: "ne", args })),
   eq: vi.fn((...args: unknown[]) => ({ _tag: "eq", args })),
   and: vi.fn((...args: unknown[]) => ({ _tag: "and", args })),
   or: vi.fn((...args: unknown[]) => ({ _tag: "or", args })),
@@ -111,6 +113,7 @@ vi.mock("@/db/schema", () => ({
     approvedBy: "approvedBy",
     metadata: "metadata",
     notes: "notes",
+    version: "version",
   },
   grievanceApprovals: {},
   grievanceAssignments: {
@@ -121,12 +124,23 @@ vi.mock("@/db/schema", () => ({
 
 vi.mock("@/db/schema/domains/claims", () => ({
   grievanceDeadlines: {
-    claimId: "claimId",
-    isMet: "isMet",
-    deadlineDate: "deadlineDate",
+    status: "status",
+    dueDate: "dueDate",
     id: "id",
-    escalateOnMiss: "escalateOnMiss",
-    escalatedAt: "escalatedAt",
+    grievanceId: "grievanceId",
+    deadlineType: "deadlineType",
+    reminderDays: "reminderDays",
+    remindersSent: "remindersSent",
+    updatedAt: "updatedAt",
+  },
+}));
+
+vi.mock("@/db/schema/domains/claims/grievances", () => ({
+  grievances: {
+    id: "id",
+    organizationId: "organizationId",
+    grievantId: "grievantId",
+    grievanceNumber: "grievanceNumber",
   },
 }));
 
@@ -203,12 +217,14 @@ function resetAllMocks() {
   // Default builder chain returns
   mocks.insertReturning.mockResolvedValue([{ id: "trans-1" }]);
   mocks.selectLimit.mockResolvedValue([]);
-  mocks.updateWhere.mockResolvedValue(undefined);
   mocks.dbSelectChain.from.mockReturnValue(mocks.dbSelectChain);
+  mocks.dbSelectChain.innerJoin.mockReturnValue(mocks.dbSelectChain);
   mocks.dbSelectChain.where.mockReturnValue(mocks.dbSelectChain);
   mocks.dbSelectChain.orderBy.mockReturnValue(mocks.dbSelectChain);
   mocks.dbInsertChain.values.mockReturnValue(mocks.dbInsertChain);
   mocks.dbUpdateChain.set.mockReturnValue(mocks.dbUpdateChain);
+  mocks.dbUpdateChain.where.mockReturnValue(mocks.dbUpdateChain);
+  mocks.dbUpdateChain.returning.mockResolvedValue([{ id: 'updated' }]);
 }
 
 const STAGE_FILED: Record<string, unknown> = {
@@ -442,6 +458,7 @@ describe("workflow-automation-engine", () => {
         reason: "Escalation",
         notes: null,
         transitionedBy: "user-1",
+        version: 1,
       });
 
       // After approval insert + update, transitionToStage is called internally.
@@ -456,13 +473,36 @@ describe("workflow-automation-engine", () => {
         .mockResolvedValueOnce(STAGE_FILED)
         .mockResolvedValueOnce(STAGE_INVESTIGATION);
       mocks.claimsFindFirst.mockResolvedValue(CLAIM);
-      mocks.selectLimit.mockResolvedValue([]);
+      // First selectLimit call: getUserRole for approver → admin
+      // Subsequent calls: getUserRole inside transitionToStage → member (default)
+      mocks.selectLimit
+        .mockResolvedValueOnce([{ role: 'admin' }])
+        .mockResolvedValue([]);
       mocks.insertReturning.mockResolvedValue([{ id: "trans-approved" }]);
 
       const result = await approveTransition("trans-pending", "org-1", "admin-1");
 
       expect(result.success).toBe(true);
       expect(mocks.mockDb.insert).toHaveBeenCalled();
+    });
+
+    it("rejects non-admin approvers", async () => {
+      mocks.grievanceTransitionsFindFirst.mockResolvedValueOnce({
+        id: "trans-pending",
+        claimId: "claim-1",
+        toStageId: "stage-2",
+        reason: "Escalation",
+        notes: null,
+        transitionedBy: "user-1",
+        version: 1,
+      });
+      // getUserRole returns 'member' — insufficient permission
+      mocks.selectLimit.mockResolvedValue([{ role: 'member' }]);
+
+      const result = await approveTransition("trans-pending", "org-1", "member-user");
+
+      expect(result.success).toBe(false);
+      expect(result.error).toMatch(/Insufficient permission/);
     });
   });
 
@@ -558,20 +598,19 @@ describe("workflow-automation-engine", () => {
       expect(mocks.mockDb.update).not.toHaveBeenCalled();
     });
 
-    it("escalates overdue deadlines and sends notifications", async () => {
+    it("escalates overdue deadlines and updates status", async () => {
       const deadline = {
         id: "dl-1",
-        claimId: "claim-1",
-        organizationId: "org-1",
+        grievanceId: "g-1",
         deadlineType: "stage_completion",
-        escalateTo: "manager-1",
+        status: "pending",
+        dueDate: new Date(Date.now() - 86400000),
       };
       mocks.dbSelectChain.where.mockReturnValue([deadline]);
 
       await processOverdueDeadlines();
 
       expect(mocks.mockDb.update).toHaveBeenCalled();
-      expect(mocks.notificationSend).toHaveBeenCalled();
     });
   });
 
@@ -590,17 +629,24 @@ describe("workflow-automation-engine", () => {
     it("sends reminders for matching reminder days", async () => {
       const tomorrow = new Date();
       tomorrow.setDate(tomorrow.getDate() + 1);
-      const deadline = {
-        id: "dl-2",
-        claimId: "claim-1",
-        organizationId: "org-1",
-        deadlineType: "response",
-        deadlineDate: tomorrow.toISOString().split("T")[0],
-        reminderDays: [1],
-        assignedTo: "officer-1",
+      const row = {
+        deadline: {
+          id: "dl-2",
+          grievanceId: "g-1",
+          deadlineType: "response",
+          dueDate: tomorrow,
+          status: "pending",
+          reminderDays: [1],
+          remindersSent: null,
+        },
+        grievance: {
+          id: "g-1",
+          organizationId: "org-1",
+          grievantId: "officer-1",
+          grievanceNumber: "GR-001",
+        },
       };
-      mocks.dbSelectChain.where.mockReturnValue([deadline]);
-      mocks.claimsFindFirst.mockResolvedValue(CLAIM);
+      mocks.dbSelectChain.where.mockReturnValue([row]);
 
       await sendDeadlineReminders();
 

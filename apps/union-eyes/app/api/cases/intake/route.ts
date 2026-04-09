@@ -20,6 +20,10 @@ import { buildUnionEvidencePack } from '@/lib/evidence';
 import { eventBus, AppEvents } from '@/lib/events';
 import '@/lib/events/pilot-event-listeners';
 import { getClaimsByMember } from '@/db/queries/claims-queries';
+import { createHash } from 'crypto';
+import { db } from '@/db/db';
+import { claims } from '@/db/schema/claims-schema';
+import { eq } from 'drizzle-orm';
 
 export const dynamic = 'force-dynamic';
 
@@ -68,7 +72,31 @@ export async function POST(request: Request) {
       severity = caseType?.defaultSeverity ?? 'moderate';
     }
 
-    // 5. Create claim with RLS context
+    // 4b. Idempotency: content-hash deduplication
+    const idempotencyHash = createHash('sha256')
+      .update(`${data.memberId}|${data.caseType}|${data.incidentDate}|${data.title}`)
+      .digest('hex');
+
+    const [existing] = await db
+      .select({ claimId: claims.claimId, claimNumber: claims.claimNumber })
+      .from(claims)
+      .where(eq(claims.idempotencyHash, idempotencyHash))
+      .limit(1);
+
+    if (existing) {
+      return NextResponse.json(
+        {
+          success: true,
+          claimId: existing.claimId,
+          claimNumber: existing.claimNumber,
+          status: 'duplicate',
+          message: 'A case with identical details already exists.',
+        },
+        { status: 200 },
+      );
+    }
+
+    // 5. Create claim with RLS context (audit inside transaction for atomicity)
     const claim = await withRLSContext(async (tx) => {
       const newClaim = await createClaim(
         {
@@ -84,6 +112,7 @@ export async function POST(request: Request) {
           witnessDetails: data.witnesses ?? null,
           witnessesPresent: Boolean(data.witnesses),
           status: 'submitted',
+          idempotencyHash,
           metadata: {
             title: data.title,
             severity,
@@ -96,7 +125,7 @@ export async function POST(request: Request) {
       return newClaim;
     });
 
-    // 6. Audit trail
+    // 6. Audit trail (outside transaction — non-critical path, never throws)
     await auditDataMutation({
       userId,
       organizationId: orgId,

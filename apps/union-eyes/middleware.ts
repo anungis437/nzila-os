@@ -86,10 +86,14 @@ const _isPublicRoute = createRouteMatcher([
   "/signup(.*)",
   "/sign-in(.*)",
   "/sign-up(.*)",
+  "/forgot-password(.*)",
+  "/reset-password(.*)",
   "/:locale/login(.*)",
   "/:locale/signup(.*)",
   "/:locale/sign-in(.*)",
   "/:locale/sign-up(.*)",
+  "/:locale/forgot-password(.*)",
+  "/:locale/reset-password(.*)",
   // Marketing pages (no locale prefix)
   "/story(.*)",
   "/pricing(.*)",
@@ -117,6 +121,8 @@ const isAuthPath = createRouteMatcher([
   "/sign-up(.*)",
   "/login(.*)",
   "/signup(.*)",
+  "/forgot-password(.*)",
+  "/reset-password(.*)",
   "/api/auth(.*)",
 ]);
 

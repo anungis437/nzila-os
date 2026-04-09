@@ -23,7 +23,9 @@
     "./entra/components/sign-up": "./src/entra/components/sign-up.tsx",
     "./entra/components/org-switcher": "./src/entra/components/org-switcher.tsx",
     "./entra/admin": "./src/entra/admin.ts",
-    "./entra/verify": "./src/entra/verify.ts"
+    "./entra/verify": "./src/entra/verify.ts",
+    "./password": "./src/password/index.ts",
+    "./password/handlers": "./src/password/handlers.ts"
   },
   "scripts": {
     "typecheck": "tsc --noEmit",
@@ -32,8 +34,10 @@
   },
   "dependencies": {
     "@auth/core": "^0.34.3",
+    "@nzila/db": "workspace:*",
     "@nzila/org": "workspace:*",
     "@nzila/platform-contracts": "workspace:*",
+    "argon2": "^0.41.1",
     "jose": "^6.2.2",
     "next-auth": "5.0.0-beta.30",
     "zod": "^3.24.0"

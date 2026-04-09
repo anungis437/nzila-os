@@ -527,15 +527,29 @@ class EncryptionService {
    * Supports multiple key versions for backward compatibility
    * 
    * @param encrypted - Encrypted data object or JSON string
+   * @param auditContext - Optional audit context for PII decryption logging (PIPEDA compliance)
    * @returns Decrypted plaintext
    * 
    * @example
    * ```typescript
-   * const decrypted = await encryptionService.decrypt(encryptedData);
-   * // Use decrypted value carefully - never log it!
+   * const decrypted = await encryptionService.decrypt(encryptedData, {
+   *   userId: 'user-123',
+   *   organizationId: 'org-456',
+   *   resource: 'members',
+   *   resourceId: 'member-789',
+   *   fields: ['sin', 'date_of_birth'],
+   *   reason: 'Case investigation review',
+   * });
    * ```
    */
-  async decrypt(encrypted: EncryptedData | string): Promise<string> {
+  async decrypt(encrypted: EncryptedData | string, auditContext?: {
+    userId: string;
+    organizationId: string;
+    resource: string;
+    resourceId: string;
+    fields: string[];
+    reason?: string;
+  }): Promise<string> {
     await this.ensureInitialized();
 
     try {
@@ -583,6 +597,21 @@ class EncryptionService {
         });
       }
 
+      // PIPEDA compliance: audit PII decryption when context is provided
+      if (auditContext) {
+        // Fire-and-forget — never block decryption on audit logging
+        import('./audit-logger').then(({ auditPIIAccess }) =>
+          auditPIIAccess({
+            userId: auditContext.userId,
+            organizationId: auditContext.organizationId,
+            resource: auditContext.resource,
+            resourceId: auditContext.resourceId,
+            fields: auditContext.fields,
+            reason: auditContext.reason,
+          })
+        ).catch((err) => logger.warn('PII audit log failed', { error: String(err) }));
+      }
+
       return plaintext;
 
     } catch (error) {
@@ -611,13 +640,21 @@ class EncryptionService {
    * Decrypt base64 string
    * 
    * @param encryptedString - Base64 encoded encrypted data
+   * @param auditContext - Optional audit context for PII decryption logging
    * @returns Decrypted plaintext
    */
-  async decryptFromString(encryptedString: string): Promise<string> {
+  async decryptFromString(encryptedString: string, auditContext?: {
+    userId: string;
+    organizationId: string;
+    resource: string;
+    resourceId: string;
+    fields: string[];
+    reason?: string;
+  }): Promise<string> {
     const encrypted = JSON.parse(
       Buffer.from(encryptedString, 'base64').toString('utf8')
     );
-    return this.decrypt(encrypted);
+    return this.decrypt(encrypted, auditContext);
   }
 
   /**
