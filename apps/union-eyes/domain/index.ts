@@ -8,6 +8,21 @@
  * as files are touched. New entity types must be defined here.
  */
 
-// Re-export from existing locations during migration
-// TODO: Extract Claim, Member, Organization types here
-export {}
+// ── Claim ───────────────────────────────────────────────────────────────────
+export type {
+  Claim,
+  NewClaim,
+  ClaimUpdate,
+  NewClaimUpdate,
+} from '@/db/schema/domains/claims/claims';
+
+// ── Organization Member ─────────────────────────────────────────────────────
+export type {
+  SelectOrganizationMember as Member,
+  InsertOrganizationMember as NewMember,
+} from '@/db/schema/organization-members-schema';
+
+// ── Organization ────────────────────────────────────────────────────────────
+export type {
+  Organization,
+} from '@/db/schema/organizations-schema';

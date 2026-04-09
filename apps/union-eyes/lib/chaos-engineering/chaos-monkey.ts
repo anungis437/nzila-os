@@ -172,7 +172,7 @@ export class ChaosMonkey {
         this.exhaustCpu(duration);
         break;
       case 'disk':
-        logger.warn('Disk exhaustion not implemented');
+        this.exhaustDisk(duration);
         break;
     }
   }
@@ -204,6 +204,36 @@ export class ChaosMonkey {
 
     while (Date.now() - startTime < durationMs) {
       _sum += Math.random() * Math.random();
+    }
+  }
+
+  /**
+   * Simulate disk pressure by writing temp files
+   */
+  private exhaustDisk(durationMs: number): void {
+    const os = require('os');
+    const fs = require('fs');
+    const path = require('path');
+
+    const tmpDir = path.join(os.tmpdir(), 'chaos-monkey-disk');
+    fs.mkdirSync(tmpDir, { recursive: true });
+
+    const files: string[] = [];
+    const chunk = Buffer.alloc(1024 * 1024, 0x41); // 1 MB
+    const startTime = Date.now();
+
+    try {
+      while (Date.now() - startTime < durationMs && files.length < 100) {
+        const filePath = path.join(tmpDir, `chaos-${files.length}.tmp`);
+        fs.writeFileSync(filePath, chunk);
+        files.push(filePath);
+      }
+    } finally {
+      // Clean up temp files
+      for (const f of files) {
+        try { fs.unlinkSync(f); } catch { /* ignore */ }
+      }
+      try { fs.rmdirSync(tmpDir); } catch { /* ignore */ }
     }
   }
 

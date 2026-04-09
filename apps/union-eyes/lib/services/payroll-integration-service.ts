@@ -33,7 +33,10 @@ import {
   employerRemittances,
   remittanceLineItems,
   remittanceExceptions,
+  memberDuesLedger,
 } from '@/db/schema/dues-finance-schema';
+import { organizationMembers } from '@/db/schema/organization-members-schema';
+import { eq, and, ilike } from 'drizzle-orm';
 import { logger } from '@/lib/logger';
 import { moneyToNumber, toCents } from '@/lib/decimal-safe';
 
@@ -325,8 +328,81 @@ export class PayrollIntegrationService {
     // Process each deduction row
     for (const row of parsed.rows) {
       try {
-        // TODO: Match row.employeeId to our members table
-        // For now, record the line item and flag for manual matching
+        // ── Member matching ─────────────────────────────────────────────
+        // 1. Try exact match on membershipNumber (most reliable)
+        // 2. Fall back to fuzzy name match
+        // organizationMembers has no employeeNumber — use membershipNumber
+        let matchedMember: { userId: string; name: string | null } | undefined;
+        let matchMethod: 'auto' | 'fuzzy' | 'manual' = 'manual';
+        let matchConfidence = 0;
+
+        // Exact match by membershipNumber
+        const [byMembershipNumber] = await db
+          .select({ userId: organizationMembers.userId, name: organizationMembers.name })
+          .from(organizationMembers)
+          .where(
+            and(
+              eq(organizationMembers.organizationId, organizationId),
+              eq(organizationMembers.membershipNumber, row.employeeId),
+            ),
+          )
+          .limit(1);
+
+        if (byMembershipNumber) {
+          matchedMember = byMembershipNumber;
+          matchMethod = 'auto';
+          matchConfidence = 100;
+        } else if (row.employeeName) {
+          // Fuzzy name match (case-insensitive)
+          const [byName] = await db
+            .select({ userId: organizationMembers.userId, name: organizationMembers.name })
+            .from(organizationMembers)
+            .where(
+              and(
+                eq(organizationMembers.organizationId, organizationId),
+                ilike(organizationMembers.name, row.employeeName),
+              ),
+            )
+            .limit(1);
+
+          if (byName) {
+            matchedMember = byName;
+            matchMethod = 'fuzzy';
+            matchConfidence = 70;
+          }
+        }
+
+        // ── Insert line item ────────────────────────────────────────────
+        const lineStatus = matchedMember ? 'matched' : 'pending';
+        let ledgerTransactionId: string | undefined;
+
+        // If matched, post to memberDuesLedger
+        if (matchedMember) {
+          const [ledgerEntry] = await db
+            .insert(memberDuesLedger)
+            .values({
+              userId: matchedMember.userId,
+              organizationId,
+              transactionType: 'payment',
+              effectiveDate: row.periodEnd,
+              amount: row.duesAmount.toFixed(2),
+              balanceBefore: '0.00', // Accurate balance computed by a separate reconciliation pass
+              balanceAfter: '0.00',
+              periodStart: row.periodStart,
+              periodEnd: row.periodEnd,
+              fiscalYear: row.periodStart.getFullYear(),
+              fiscalMonth: row.periodStart.getMonth() + 1,
+              referenceType: 'remittance',
+              referenceId: remittance.id,
+              paymentMethod: 'employer_remittance',
+              description: `Employer remittance — ${parsed.employerName}`,
+            })
+            .returning({ id: memberDuesLedger.id });
+
+          ledgerTransactionId = ledgerEntry.id;
+        }
+
+        // Record the line item
         await db
           .insert(remittanceLineItems)
           .values({
@@ -334,23 +410,38 @@ export class PayrollIntegrationService {
             organizationId,
             employeeNumber: row.employeeId,
             employeeName: row.employeeName,
+            userId: matchedMember?.userId ?? null,
+            matchConfidence,
+            matchMethod: matchedMember ? matchMethod : null,
             amount: row.duesAmount.toFixed(2),
             periodStart: row.periodStart,
             periodEnd: row.periodEnd,
-            lineStatus: 'pending',
+            lineStatus,
+            ledgerTransactionId: ledgerTransactionId ?? null,
             metadata: {
               copeAmount: (row.copeAmount ?? 0).toFixed(2),
               grossWages: row.grossWages?.toFixed(2) ?? null,
             },
           });
 
-        // TODO: When member matching is implemented, post to ledger:
-        // - Lookup member by employeeId / payroll mapping
-        // - Calculate balance before
-        // - Insert into memberDuesLedger with type='payment', method='employer_remittance'
-        // - Mark line item as 'matched'
-
-        matched++; // Will be accurate once matching is implemented
+        if (matchedMember) {
+          matched++;
+        } else {
+          unmatched++;
+          // Flag as exception for manual review
+          await db
+            .insert(remittanceExceptions)
+            .values({
+              remittanceId: remittance.id,
+              organizationId,
+              employeeNumber: row.employeeId,
+              employeeName: row.employeeName,
+              exceptionType: 'member_not_found',
+              description: `No matching member for employee "${row.employeeId}" (${row.employeeName})`,
+              amount: row.duesAmount.toFixed(2),
+              status: 'open',
+            });
+        }
         totalPosted += row.duesAmount;
       } catch (error) {
         unmatched++;
@@ -371,10 +462,10 @@ export class PayrollIntegrationService {
     }
 
     // Update remittance status
-    // Note: Using raw SQL for the update since we just need to set status
-    await db.execute(
-      `UPDATE employer_remittances SET status = 'completed', processed_at = NOW() WHERE id = '${remittance.id}'`
-    );
+    await db
+      .update(employerRemittances)
+      .set({ processingStatus: 'completed' })
+      .where(eq(employerRemittances.id, remittance.id));
 
     logger.info('[PayrollIntegration] Remittance processed', {
       remittanceId: remittance.id,

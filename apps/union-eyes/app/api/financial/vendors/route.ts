@@ -1,24 +1,30 @@
 /**
- * STUB: vendors table does not exist yet.
- * Returns empty results until proper vendors schema is created.
- * @deprecated Needs migration to create vendors table.
+ * @deprecated Vendor routes removed — vendors table never created.
+ * Use /api/billing/reports for financial reporting.
+ *
+ * Phase 9 — Deprecation System
  */
-import { NextResponse } from 'next/server';
-import { withApi } from '@/lib/api/framework';
+import { withApi } from '@/lib/api/with-api';
+import { logDeprecatedAccess, deprecatedResponse } from '@/lib/api/deprecation';
 
 export const dynamic = 'force-dynamic';
 
-export const GET = withApi({
-  auth: { required: true },
-}, async () => {
-  return NextResponse.json({ data: [], total: 0, _stub: 'vendors_table_pending' });
-});
+const CANONICAL = '/api/billing/reports';
 
-export const POST = withApi({
-  auth: { required: true, minRole: 'steward' },
-}, async () => {
-  return NextResponse.json(
-    { error: 'Vendor creation not yet available — vendors table pending migration' },
-    { status: 501 }
-  );
-});
+const handler = withApi(
+  {
+    auth: { required: true, minRole: 'member' },
+    openapi: {
+      tags: ['Deprecated'],
+      summary: 'Deprecated — use /api/billing/reports',
+      deprecated: true,
+    },
+  },
+  async ({ request }) => {
+    logDeprecatedAccess('/api/financial/vendors', request.method, CANONICAL);
+    return deprecatedResponse('/api/financial/vendors', CANONICAL);
+  },
+);
+
+export const GET = handler;
+export const POST = handler;

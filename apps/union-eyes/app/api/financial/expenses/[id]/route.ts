@@ -1,35 +1,31 @@
 /**
- * STUB: expenses table does not exist yet.
- * @deprecated Needs migration to create expenses table.
+ * @deprecated Expense routes removed — expenses table never created.
+ * Use /api/billing/reports for financial reporting.
+ *
+ * Phase 9 — Deprecation System
  */
-import { NextResponse } from 'next/server';
-import { withApi } from '@/lib/api/framework';
+import { withApi } from '@/lib/api/with-api';
+import { logDeprecatedAccess, deprecatedResponse } from '@/lib/api/deprecation';
 
 export const dynamic = 'force-dynamic';
 
-export const GET = withApi({
-  auth: { required: true },
-}, async () => {
-  return NextResponse.json(
-    { error: 'Expense not found — expenses table pending migration' },
-    { status: 404 }
-  );
-});
+const CANONICAL = '/api/billing/reports';
 
-export const PATCH = withApi({
-  auth: { required: true, minRole: 'steward' },
-}, async () => {
-  return NextResponse.json(
-    { error: 'Expense updates not yet available — expenses table pending migration' },
-    { status: 501 }
-  );
-});
+const handler = withApi(
+  {
+    auth: { required: true, minRole: 'member' },
+    openapi: {
+      tags: ['Deprecated'],
+      summary: 'Deprecated — use /api/billing/reports',
+      deprecated: true,
+    },
+  },
+  async ({ request }) => {
+    logDeprecatedAccess('/api/financial/expenses/:id', request.method, CANONICAL);
+    return deprecatedResponse('/api/financial/expenses/:id', CANONICAL);
+  },
+);
 
-export const DELETE = withApi({
-  auth: { required: true, minRole: 'admin' },
-}, async () => {
-  return NextResponse.json(
-    { error: 'Expense deletion not yet available — expenses table pending migration' },
-    { status: 501 }
-  );
-});
+export const GET = handler;
+export const PATCH = handler;
+export const DELETE = handler;

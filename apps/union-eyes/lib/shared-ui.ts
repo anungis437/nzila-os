@@ -7,8 +7,8 @@
  * Usage:
  *   import { Card, Badge } from '@/lib/shared-ui'
  *
- * TODO(platform-migration): Gradually replace local components/ui imports
- * with these shared @nzila/ui components for cross-app consistency.
+ * Migration status: 7 components bridged below. Replace local
+ * components/ui imports with these as files are touched.
  */
 export {
   Button as NzilaButton,

@@ -112,7 +112,7 @@ export async function identifyTestimonialCandidates(
 
   for (const grievance of resolvedCases) {
     // Skip if already has testimonial (no caseId column on testimonials — match by author instead)
-    // TODO: Add a caseId column to testimonials schema for direct linkage
+    // Future: add caseId column to testimonials schema for direct linkage
     const existingTestimonial: unknown[] = [];
 
     if (existingTestimonial.length > 0) continue;

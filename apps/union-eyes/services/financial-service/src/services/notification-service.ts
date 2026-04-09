@@ -23,11 +23,7 @@ import {
 import { eq, and, desc } from 'drizzle-orm';
 import { getResendClient, getFromEmail } from '@/lib/email-service';
 import twilio from 'twilio';
-// TODO: Fix FCM and email service imports
-// import { FCMService } from '@/services/fcm-service';
-// import { FinancialEmailService } from '@/lib/services/financial-email-service';
-// import { logger } from '@/lib/logger';
-const logger = console;
+import { logger } from '@/lib/logger';
 
 // Initialize SMS client
 const twilioClient = process.env.TWILIO_ACCOUNT_SID && process.env.TWILIO_AUTH_TOKEN

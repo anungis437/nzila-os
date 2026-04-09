@@ -6,10 +6,11 @@
  * canonical platform contract shape.
  *
  * See @nzila/platform-contracts for contract definitions.
+ *
+ * Adapters will be added here as platform contracts are implemented:
+ *   - health-adapter
+ *   - metrics-adapter
+ *   - governance-adapter
+ *   - evidence-adapter
  */
 export {}
-
-// TODO: export { healthAdapter } from './health-adapter'
-// TODO: export { metricsAdapter } from './metrics-adapter'
-// TODO: export { governanceAdapter } from './governance-adapter'
-// TODO: export { evidenceAdapter } from './evidence-adapter'

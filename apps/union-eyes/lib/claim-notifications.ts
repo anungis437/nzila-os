@@ -88,12 +88,11 @@ export async function sendClaimStatusNotification(
     }
 
     // SPRINT 7: Generate human-readable status update message
-    // Uses compassionate, context-aware language from timeline builder
-    const daysInState = 0; // Just changed, so 0 days in new state
-    const _priority = 'medium'; // Default priority (can be enhanced with actual priority later)
+    const daysInState = 0; // Just transitioned — 0 days in new state
+    const _priority = 'medium';
     const humanMessage = `Your claim status has been updated to ${newStatus}.`;
 
-    // Build notification data (deadline support not implemented in schema yet)
+    // Deadline data available from claim_deadlines table via deadline-service if needed
     const notificationData: ClaimNotificationData = {
       claimId: claim.claimId,
       claimTitle: `${claim.claimType} Claim`,

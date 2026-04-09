@@ -379,17 +379,28 @@ export async function cleanCompletedJobs(
 export async function closeQueues(): Promise<void> {}
 
 // ============================================================
-// Legacy queue accessors � stubs to avoid import errors
+// Legacy queue accessors — deprecated, retained for import compat
+// Jobs are processed by the Django/Celery sidecar, not Node.
 // ============================================================
+/** @deprecated Queue processing moved to Django Celery sidecar */
 export const getEmailQueue              = () => null;
+/** @deprecated Queue processing moved to Django Celery sidecar */
 export const getSmsQueue                = () => null;
+/** @deprecated Queue processing moved to Django Celery sidecar */
 export const getNotificationQueue       = () => null;
+/** @deprecated Queue processing moved to Django Celery sidecar */
 export const getReportQueue             = () => null;
+/** @deprecated Queue processing moved to Django Celery sidecar */
 export const getCleanupQueue            = () => null;
+/** @deprecated Queue processing moved to Django Celery sidecar */
 export const getEmailQueueEvents        = () => null;
+/** @deprecated Queue processing moved to Django Celery sidecar */
 export const getSmsQueueEvents          = () => null;
+/** @deprecated Queue processing moved to Django Celery sidecar */
 export const getNotificationQueueEvents = () => null;
+/** @deprecated Queue processing moved to Django Celery sidecar */
 export const getReportQueueEvents       = () => null;
+/** @deprecated Queue processing moved to Django Celery sidecar */
 export const getCleanupQueueEvents      = () => null;
 
 

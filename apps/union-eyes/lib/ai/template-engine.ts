@@ -1718,17 +1718,11 @@ export class UnionEyesAIController {
   /**
    * Get AI provider from pool
    */
-  private getProvider(_preferredProvider: string): AIProvider {
-    // Simplified - would use actual provider from chatbot-service
-    return {
-      async generateResponse(messages, options) {
-        return {
-          content: 'Response generation not implemented in template engine demo',
-          tokensUsed: 0,
-          model: options?.model || 'gpt-4'
-        };
-      }
-    } as AIProvider;
+  private getProvider(preferredProvider: string): AIProvider {
+    throw new Error(
+      `AI provider "${preferredProvider}" is not configured. ` +
+      'Connect an AI provider via chatbot-service to enable template engine responses.'
+    );
   }
 
   /**

@@ -12,6 +12,7 @@
 
 import {
   autoCreateClaimDeadlines,
+  createClaimDeadline,
   getClaimDeadlines,
   getPendingClaimDeadlines,
   getCriticalDeadlines,
@@ -79,16 +80,29 @@ export async function addClaimDeadline(
   organizationId: string,
   deadlineName: string,
   daysFromNow: number,
-  _priority: 'low' | 'medium' | 'high' | 'critical',
-  _createdBy: string
+  priority: 'low' | 'medium' | 'high' | 'critical',
+  createdBy: string
 ): Promise<ClaimDeadline> {
-  const now = new Date();
-  const deadline = new Date(now);
-  deadline.setDate(deadline.getDate() + daysFromNow);
-  
-  // This would call the createClaimDeadline function
-  // Implementation depends on your DB structure
-  throw new Error('Not implemented - add custom deadline logic');
+  logger.info('Adding custom claim deadline', { claimId, deadlineName, daysFromNow });
+
+  try {
+    const deadline = await createClaimDeadline(
+      claimId,
+      organizationId,
+      deadlineName,
+      'custom',
+      new Date(),
+      daysFromNow,
+      createdBy,
+      { priority, businessDaysOnly: false },
+    );
+
+    logger.info('Custom deadline created', { claimId, deadlineId: deadline.id });
+    return deadline;
+  } catch (error) {
+    logger.error('Failed to add claim deadline', error instanceof Error ? error : new Error(String(error)), { claimId });
+    throw error;
+  }
 }
 
 // ============================================================================
