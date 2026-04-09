@@ -202,6 +202,16 @@ const handler = withApi(
     });
 
     return results;
+  } catch (error) {
+    logger.error('[CRON] External data sync failed', error);
+    return {
+      timestamp: new Date().toISOString(),
+      syncType: 'scheduled',
+      dataSources: {},
+      summary: { totalProcessed: 0, totalInserted: 0, totalUpdated: 0, totalFailed: 0, success: false, duration: Date.now() - startTime },
+      errors: [String(error)],
+    };
+  }
   },
 );
 

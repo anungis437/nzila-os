@@ -7,7 +7,7 @@
 
 import { useTranslations } from "next-intl";
 import { Tabs, TabsList, TabsTrigger, TabsContent } from "@/components/ui/tabs";
-import { WorkbenchConsole } from "@/components/workbench/workbench-console";
+import WorkbenchConsole from "@/components/workbench/workbench-console";
 import { GrievancesConsole } from "@/components/grievances/grievances-console";
 import { NegotiationDashboard } from "@/components/bargaining/NegotiationDashboard";
 import { useOrganization } from "@/contexts/organization-context";

@@ -75,7 +75,7 @@ export const PUBLIC_API_ROUTES: PublicRouteConfig[] = [
   },
   {
     pattern: '/api/payments/webhooks/stripe',
-    reason: 'Stripe webhook endpoint (authenticates via signature header),
+    reason: 'Stripe webhook endpoint (authenticates via signature header)',
     category: 'webhook',
   },
   {
