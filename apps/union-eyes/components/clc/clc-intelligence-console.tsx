@@ -621,23 +621,23 @@ export default function CLCIntelligenceConsole() {
           <div className="grid gap-4 md:grid-cols-2 lg:grid-cols-4">
             <StatCard
               title="Correlated Patterns"
-              value={decisionIntel?.patterns.length ?? 0}
+              value={decisionIntel?.patterns?.length ?? 0}
               icon={Brain}
-              description={`${decisionIntel?.patterns.filter(p => p.watchLevel === 'high' || p.watchLevel === 'critical').length ?? 0} high/critical`}
+              description={`${decisionIntel?.patterns?.filter(p => p.watchLevel === 'high' || p.watchLevel === 'critical').length ?? 0} high/critical`}
               iconColor="text-indigo-600"
               isLoading={isLoading}
             />
             <StatCard
               title="Recommendations"
-              value={decisionIntel?.recommendations.length ?? 0}
+              value={decisionIntel?.recommendations?.length ?? 0}
               icon={Target}
-              description={`${decisionIntel?.recommendations.filter(r => r.recommendedAction === 'intervene' || r.recommendedAction === 'escalate').length ?? 0} urgent`}
+              description={`${decisionIntel?.recommendations?.filter(r => r.recommendedAction === 'intervene' || r.recommendedAction === 'escalate').length ?? 0} urgent`}
               iconColor="text-purple-600"
               isLoading={isLoading}
             />
             <StatCard
               title="Briefing Cards"
-              value={decisionIntel?.briefingCards.length ?? 0}
+              value={decisionIntel?.briefingCards?.length ?? 0}
               icon={FileText}
               description="Executive-ready insights"
               iconColor="text-blue-600"
@@ -645,9 +645,9 @@ export default function CLCIntelligenceConsole() {
             />
             <StatCard
               title="Sectors Diverging"
-              value={decisionIntel?.sectorDivergence.filter(d => d.divergenceScore > 0.3).length ?? 0}
+              value={decisionIntel?.sectorDivergence?.filter(d => d.divergenceScore > 0.3).length ?? 0}
               icon={TrendingUp}
-              description={`of ${decisionIntel?.sectorDivergence.length ?? 0} analyzed`}
+              description={`of ${decisionIntel?.sectorDivergence?.length ?? 0} analyzed`}
               iconColor="text-orange-600"
               isLoading={isLoading}
             />
@@ -884,7 +884,7 @@ export default function CLCIntelligenceConsole() {
           )}
 
           {/* No patterns state */}
-          {decisionIntel && decisionIntel.patterns.length === 0 && decisionIntel.briefingCards.length === 0 && (
+          {decisionIntel && (decisionIntel.patterns?.length ?? 0) === 0 && (decisionIntel.briefingCards?.length ?? 0) === 0 && (
             <Card className="border-green-200 bg-green-50/30">
               <CardContent className="pt-6 flex items-center gap-2 text-green-800">
                 <CheckCircle2 className="h-5 w-5" />

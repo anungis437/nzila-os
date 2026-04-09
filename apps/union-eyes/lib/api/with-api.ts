@@ -392,6 +392,14 @@ export function withApi<
           );
         }
         body = result.data;
+      } else if (['POST', 'PUT', 'PATCH', 'DELETE'].includes(request.method)) {
+        // No Zod schema provided — still parse JSON body so handlers can
+        // access it via ctx.body without calling request.json() themselves.
+        try {
+          body = await request.json();
+        } catch {
+          // Body may be empty or non-JSON — leave as undefined
+        }
       }
 
       // ── 7. Parse & validate query params ───────────────────────────────

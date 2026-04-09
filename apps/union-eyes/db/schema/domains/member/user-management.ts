@@ -77,12 +77,37 @@ export const userSessions = userManagementSchema.table("user_sessions", {
   userAgent: text("user_agent"),
   expiresAt: timestamp("expires_at", { withTimezone: true }).notNull(),
   isActive: boolean("is_active").default(true),
+  sessionTokenHash: text("session_token_hash"),
   createdAt: timestamp("created_at", { withTimezone: true }).defaultNow(),
   lastUsedAt: timestamp("last_used_at", { withTimezone: true }).defaultNow(),
 }, (table) => ({
   checkExpiry: check("valid_expiry", 
     sql`${table.expiresAt} > ${table.createdAt}`),
 }));
+
+// Password reset tokens - secure token-based password recovery
+export const passwordResetTokens = userManagementSchema.table("password_reset_tokens", {
+  id: uuid("id").primaryKey().defaultRandom(),
+  userId: varchar("user_id", { length: 255 }).notNull().references(() => users.userId, { onDelete: "cascade" }),
+  tokenHash: text("token_hash").notNull().unique(),
+  expiresAt: timestamp("expires_at", { withTimezone: true }).notNull(),
+  usedAt: timestamp("used_at", { withTimezone: true }),
+  createdAt: timestamp("created_at", { withTimezone: true }).defaultNow(),
+}, (table) => ({
+  checkTokenExpiry: check("valid_token_expiry",
+    sql`${table.expiresAt} > ${table.createdAt}`),
+}));
+
+// Auth audit log - tracks authentication events for security monitoring
+export const authAuditLog = userManagementSchema.table("auth_audit_log", {
+  id: uuid("id").primaryKey().defaultRandom(),
+  userId: varchar("user_id", { length: 255 }).references(() => users.userId, { onDelete: "set null" }),
+  eventType: varchar("event_type", { length: 50 }).notNull(),
+  ipAddress: varchar("ip_address", { length: 45 }),
+  userAgent: text("user_agent"),
+  metadata: jsonb("metadata").default(sql`'{}'::jsonb`),
+  createdAt: timestamp("created_at", { withTimezone: true }).defaultNow(),
+});
 
 // OAuth providers table - external authentication integration
 export const oauthProviders = userManagementSchema.table("oauth_providers", {
@@ -115,4 +140,8 @@ export type UserSession = typeof userSessions.$inferSelect;
 export type NewUserSession = typeof userSessions.$inferInsert;
 export type OAuthProvider = typeof oauthProviders.$inferSelect;
 export type NewOAuthProvider = typeof oauthProviders.$inferInsert;
+export type PasswordResetToken = typeof passwordResetTokens.$inferSelect;
+export type NewPasswordResetToken = typeof passwordResetTokens.$inferInsert;
+export type AuthAuditLogEntry = typeof authAuditLog.$inferSelect;
+export type NewAuthAuditLogEntry = typeof authAuditLog.$inferInsert;
 

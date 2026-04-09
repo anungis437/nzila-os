@@ -99,12 +99,16 @@ vi.mock('../auth/rbac-server', () => ({
   getUserRole: vi.fn().mockResolvedValue('member'),
 }));
 
-vi.mock('../auth/roles', () => ({
-  getRoleLevel: vi.fn((role: string) => {
-    const levels: Record<string, number> = { app_owner: 300, admin: 95, officer: 60, steward: 50, member: 10 };
-    return levels[role] || 0;
-  }),
-}));
+vi.mock('../auth/roles', async (importOriginal) => {
+  const actual = await importOriginal<typeof import('../auth/roles')>();
+  return {
+    ...actual,
+    getRoleLevel: vi.fn((role: string) => {
+      const levels: Record<string, number> = { app_owner: 300, admin: 95, officer: 60, steward: 50, member: 10 };
+      return levels[role] || 0;
+    }),
+  };
+});
 
 /* ── imports ────────────────────────────────────────────────────────── */
 

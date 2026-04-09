@@ -1,9 +1,10 @@
 import { redirect } from 'next/navigation';
 import { requireUser, hasMinRole } from '@/lib/api-auth-guard';
+import FinancialOverview from '@/components/financial/FinancialOverview';
 
 /**
- * Financial Management index — redirects to the Expenses sub-page which is the
- * most common entry-point for leadership users.
+ * Financial Management — executive dashboard with KPI cards, arrears tracking,
+ * and payment history connected to real dues/remittance data.
  */
 export default async function FinancialIndexPage({
   _params,
@@ -11,9 +12,9 @@ export default async function FinancialIndexPage({
   _params: { locale: string };
 }) {
   await requireUser();
-  const authorized = await hasMinRole('member');
+  const authorized = await hasMinRole('officer');
   if (!authorized) {
     redirect('/login');
   }
-  redirect('/dashboard/financial/expenses');
+  return <FinancialOverview />;
 }

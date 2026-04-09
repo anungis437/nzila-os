@@ -8,7 +8,7 @@
 // ============================================================================
 
 import { db } from "@/db/db";
-import { eq, and, or, desc, asc, isNull, lte, gte, sql } from "drizzle-orm";
+import { eq, and, or, desc, asc, isNull, ne, lte, gte, sql } from "drizzle-orm";
 
 /** Actor ID used for system-initiated actions (not a credential). */
 const SYSTEM_USER_ID = "system";
@@ -32,6 +32,7 @@ import {
   type StageAction,
 } from "@/db/schema";
 import { grievanceDeadlines } from "@/db/schema/domains/claims";
+import { grievances } from "@/db/schema/domains/claims/grievances";
 import { organizationMembers } from "@/db/schema/organization-members-schema";
 import { getNotificationService } from "@/lib/services/notification-service";
 import { logger } from "@/lib/logger";
@@ -192,29 +193,28 @@ async function checkForUnresolvedCriticalSignals(claimId: string): Promise<boole
 }
 
 /**
- * Check if a claim is overdue based on SLA deadlines
+ * Check if a claim is overdue based on SLA deadlines.
+ * NOTE: grievance_deadlines references grievances (not claims directly).
+ * This function is a no-op until a claim→grievance FK is established.
  */
 async function checkClaimOverdue(claimId: string): Promise<boolean> {
   try {
-    const now = new Date();
-    
-    // Query unmet deadlines for this claim
-    const overdueDeadlines = await db
-      .select({ id: grievanceDeadlines.id })
-      .from(grievanceDeadlines)
-      .where(
-        and(
-          eq(grievanceDeadlines.claimId, claimId),
-          isNull(grievanceDeadlines.isMet),
-          lte(grievanceDeadlines.deadlineDate, now.toISOString().split('T')[0])
-        )
-      )
-      .limit(1);
-    
-    return overdueDeadlines.length > 0;
+    // Claims link to grievances via grievance_documents or the claims.grievance_id FK.
+    // Check grievance_deadlines for any overdue entries associated with this claim.
+    const overdueResult = await db.execute(
+      sql`SELECT gd.id FROM grievance_deadlines gd
+          INNER JOIN grievances g ON gd.grievance_id = g.id
+          INNER JOIN claims c ON c.organization_id = g.organization_id
+            AND c.member_id = g.grievant_id::text
+          WHERE c.claim_id = ${claimId}::uuid
+            AND gd.status = 'pending'
+            AND gd.due_date <= NOW()
+          LIMIT 1`
+    );
+    return Array.from(overdueResult).length > 0;
   } catch (error) {
-    logger.error("Error checking claim overdue status", { error });
-    return false;
+    logger.error(`Error checking overdue status for claim ${claimId}:`, { error });
+    return false; // Overdue check is advisory, don't block on error
   }
 }
 
@@ -584,6 +584,12 @@ export async function approveTransition(
       return { success: false, error: "Pending transition not found" };
     }
 
+    // Verify approver has admin or system role
+    const approverRole = await getUserRole(approverId, organizationId);
+    if (!['admin', 'super_admin', 'app_owner', 'system'].includes(approverRole)) {
+      return { success: false, error: 'Insufficient permission to approve transitions. Requires admin role.' };
+    }
+
     // PR #10: Create append-only approval record (immutable transition history)
     await db.insert(grievanceApprovals).values({
       organizationId,
@@ -594,11 +600,19 @@ export async function approveTransition(
       metadata: { originalTransition: transition },
     });
 
-    // Mark transition as no longer requiring approval
-    await db
+    // Mark transition as no longer requiring approval (with optimistic locking)
+    const updateResult = await db
       .update(grievanceTransitions)
-      .set({ requiresApproval: false })
-      .where(eq(grievanceTransitions.id, transitionId));
+      .set({ requiresApproval: false, version: sql`${grievanceTransitions.version} + 1` })
+      .where(and(
+        eq(grievanceTransitions.id, transitionId),
+        eq(grievanceTransitions.version, transition.version ?? 1),
+      ))
+      .returning({ id: grievanceTransitions.id });
+
+    if (!updateResult.length) {
+      return { success: false, error: 'Concurrent modification detected. Please retry.' };
+    }
 
     // Execute the transition
     return await transitionToStage(
@@ -739,30 +753,10 @@ export async function getWorkflowStatus(
     // Calculate progress percentage
     const progress = Math.round((completedStages / allStages.length) * 100);
 
-    // Get upcoming deadlines
-    const deadlines = await db
-      .select()
-      .from(grievanceDeadlines)
-      .where(
-        and(
-          eq(grievanceDeadlines.claimId, claimId),
-          isNull(grievanceDeadlines.isMet)
-        )
-      )
-      .orderBy(asc(grievanceDeadlines.deadlineDate));
-
-    const upcomingDeadlines = deadlines.map((deadline) => {
-      const deadlineDate = deadline.deadlineDate || new Date();
-      const daysRemaining = Math.ceil(
-        (new Date(deadlineDate).getTime() - new Date().getTime()) /
-          (1000 * 60 * 60 * 24)
-      );
-      return {
-        type: deadline.deadlineType,
-        date: new Date(deadlineDate),
-        daysRemaining,
-      };
-    });
+    // Get upcoming deadlines for this grievance (if linked)
+    // NOTE: grievance_deadlines references grievances, not claims.
+    // Until a claim→grievance FK is established, deadline tracking is unavailable.
+    const upcomingDeadlines: Array<{ type: string; date: Date; daysRemaining: number }> = [];
 
     // Check if any deadlines are overdue
     const isOverdue = upcomingDeadlines.some((d) => d.daysRemaining < 0);
@@ -970,20 +964,14 @@ async function evaluateConditions(
 // ============================================================================
 
 async function createStageDeadline(
-  claimId: string,
-  stageId: string,
+  _claimId: string,
+  _stageId: string,
   days: number,
-  organizationId: string
+  _organizationId: string
 ): Promise<void> {
-  await db.insert(grievanceDeadlines).values({
-    organizationId,
-    claimId,
-    stageId,
-    deadlineType: "stage_completion",
-    deadlineDate: new Date(Date.now() + days * 24 * 60 * 60 * 1000).toISOString().split("T")[0],
-    calculatedFrom: "stage_entry",
-    daysFromSource: days,
-  });
+  // TODO: Once claims table has a grievance_id FK, resolve the grievance
+  // and insert a deadline row. For now, log a warning.
+  logger.warn(`createStageDeadline: skipped — no claim→grievance FK (days=${days})`);
 }
 
 async function sendStageNotification(
@@ -1133,19 +1121,14 @@ async function autoAssignOfficer(
 }
 
 async function createActionDeadline(
-  claimId: string,
+  _claimId: string,
   type: string,
   days: number,
-  organizationId: string
+  _organizationId: string
 ): Promise<void> {
-  await db.insert(grievanceDeadlines).values({
-    organizationId,
-    claimId,
-    deadlineType: type,
-    deadlineDate: new Date(Date.now() + days * 24 * 60 * 60 * 1000).toISOString().split("T")[0],
-    calculatedFrom: "action_triggered",
-    daysFromSource: days,
-  });
+  // TODO: Once claims table has a grievance_id FK, resolve the grievance
+  // and insert a deadline row. For now, log a warning.
+  logger.warn(`createActionDeadline: skipped — no claim→grievance FK (type=${type}, days=${days})`);
 }
 
 async function sendActionEmail(
@@ -1288,8 +1271,8 @@ async function sendTransitionRejectedNotification(
 // ============================================================================
 
 /**
- * Process overdue deadlines and trigger escalations
- * Should be run as a cron job every hour
+ * Process overdue deadlines and mark them as missed.
+ * Should be run as a cron job every hour.
  */
 export async function processOverdueDeadlines(): Promise<void> {
   try {
@@ -1298,45 +1281,20 @@ export async function processOverdueDeadlines(): Promise<void> {
       .from(grievanceDeadlines)
       .where(
         and(
-          isNull(grievanceDeadlines.isMet),
-          lte(grievanceDeadlines.deadlineDate, new Date().toISOString().split("T")[0]),
-          eq(grievanceDeadlines.escalateOnMiss, true),
-          isNull(grievanceDeadlines.escalatedAt)
+          ne(grievanceDeadlines.status, "met"),
+          ne(grievanceDeadlines.status, "missed"),
+          lte(grievanceDeadlines.dueDate, new Date())
         )
       );
 
     for (const deadline of overdueDeadlines) {
-      // Mark as escalated
+      // Mark as missed
       await db
         .update(grievanceDeadlines)
-        .set({ escalatedAt: new Date() })
+        .set({ status: "missed", updatedAt: new Date() })
         .where(eq(grievanceDeadlines.id, deadline.id));
 
-      // Send escalation notification
-      if (deadline.escalateTo) {
-        try {
-          const notificationService = getNotificationService();
-          await notificationService.send({
-            organizationId: deadline.organizationId,
-            recipientId: deadline.escalateTo,
-            type: 'email',
-            priority: 'urgent',
-            title: 'ESCALATION: Overdue Deadline',
-            body: `Deadline "${deadline.deadlineType}" for claim ${deadline.claimId} is overdue and has been escalated to you.`,
-            actionUrl: `/grievances/${deadline.claimId}`,
-            actionLabel: 'Review Claim',
-            metadata: {
-              type: 'grievance_deadline_escalation',
-              deadlineId: deadline.id,
-              claimId: deadline.claimId,
-            },
-            userId: SYSTEM_USER_ID,
-          });
-          logger.info(`Escalation notification sent for overdue deadline ${deadline.id}`);
-        } catch (error) {
-          logger.error(`Failed to send escalation notification for deadline ${deadline.id}`, { error });
-        }
-      }
+      logger.info(`Deadline ${deadline.id} for grievance ${deadline.grievanceId} marked as missed`);
     }
   } catch (error) {
     logger.error("Error processing overdue deadlines", { error });
@@ -1344,71 +1302,70 @@ export async function processOverdueDeadlines(): Promise<void> {
 }
 
 /**
- * Send deadline reminders
- * Should be run as a cron job daily
+ * Send deadline reminders for upcoming deadlines.
+ * Should be run as a cron job daily.
  */
 export async function sendDeadlineReminders(): Promise<void> {
   try {
-    const allDeadlines = await db
-      .select()
+    const pendingDeadlines = await db
+      .select({
+        deadline: grievanceDeadlines,
+        grievance: grievances,
+      })
       .from(grievanceDeadlines)
+      .innerJoin(grievances, eq(grievanceDeadlines.grievanceId, grievances.id))
       .where(
         and(
-          isNull(grievanceDeadlines.isMet),
-          gte(grievanceDeadlines.deadlineDate, new Date().toISOString().split("T")[0])
+          eq(grievanceDeadlines.status, "pending"),
+          gte(grievanceDeadlines.dueDate, new Date())
         )
       );
 
-    for (const deadline of allDeadlines) {
-      const deadlineDate = deadline.deadlineDate || new Date();
+    for (const { deadline, grievance } of pendingDeadlines) {
       const daysUntilDeadline = Math.ceil(
-        (new Date(deadlineDate).getTime() - new Date().getTime()) /
+        (new Date(deadline.dueDate).getTime() - new Date().getTime()) /
           (1000 * 60 * 60 * 24)
       );
 
-      // Check if reminder should be sent
+      // Check if reminder should be sent based on reminderDays config
       if (deadline.reminderDays?.includes(daysUntilDeadline)) {
         try {
-          // Get claim details for notification context
-          const claim = await db.query.claims.findFirst({
-            where: eq(claims.claimId, deadline.claimId),
-          });
-
-          if (claim && deadline.assignedTo) {
-            const assignees = Array.isArray(deadline.assignedTo) 
-              ? deadline.assignedTo 
-              : [deadline.assignedTo];
-
-            const notificationService = getNotificationService();
-            for (const assignee of assignees) {
-              await notificationService.send({
-                organizationId: deadline.organizationId,
-                recipientEmail: assignee,
-                type: 'email',
-                priority: daysUntilDeadline <= 1 ? 'urgent' : 'high',
-                title: `Deadline Reminder: ${daysUntilDeadline} Day(s) Remaining`,
-                body: `Reminder: Deadline "${deadline.deadlineType}" for claim ${claim.claimNumber} is due in ${daysUntilDeadline} day(s).`,
-                actionUrl: `/grievances/${deadline.claimId}`,
-                actionLabel: 'View Claim',
-                metadata: {
-                  type: 'grievance_deadline_reminder',
-                  deadlineId: deadline.id,
-                  claimId: deadline.claimId,
-                  daysRemaining: daysUntilDeadline,
-                },
-                userId: SYSTEM_USER_ID,
-              });
-            }
-            logger.info(`Reminder sent for deadline ${deadline.id}, ${daysUntilDeadline} days remaining`);
+          const notificationService = getNotificationService();
+          // Notify the grievant if available
+          if (grievance.grievantId) {
+            await notificationService.send({
+              organizationId: grievance.organizationId,
+              recipientId: grievance.grievantId,
+              type: 'email',
+              priority: daysUntilDeadline <= 1 ? 'urgent' : 'high',
+              title: `Deadline Reminder: ${daysUntilDeadline} Day(s) Remaining`,
+              body: `Reminder: Deadline "${deadline.deadlineType}" for grievance ${grievance.grievanceNumber} is due in ${daysUntilDeadline} day(s).`,
+              actionUrl: `/grievances/${grievance.id}`,
+              actionLabel: 'View Grievance',
+              metadata: {
+                type: 'grievance_deadline_reminder',
+                deadlineId: deadline.id,
+                grievanceId: deadline.grievanceId,
+                daysRemaining: daysUntilDeadline,
+              },
+              userId: SYSTEM_USER_ID,
+            });
           }
+          logger.info(`Reminder sent for deadline ${deadline.id}, ${daysUntilDeadline} days remaining`);
         } catch (error) {
           logger.error(`Failed to send reminder for deadline ${deadline.id}`, { error });
         }
 
-        // Update last reminder sent timestamp
+        // Track reminder in remindersSent jsonb
+        const sentRecord = {
+          sentAt: new Date().toISOString(),
+          recipient: grievance.grievantId ?? 'unknown',
+          method: 'email',
+        };
+        const existingSent = Array.isArray(deadline.remindersSent) ? deadline.remindersSent : [];
         await db
           .update(grievanceDeadlines)
-          .set({ lastReminderSentAt: new Date() })
+          .set({ remindersSent: [...existingSent, sentRecord] as typeof deadline.remindersSent })
           .where(eq(grievanceDeadlines.id, deadline.id));
       }
     }

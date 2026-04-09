@@ -40,13 +40,9 @@ import {
   Target,
   Building2,
   Network,
-  Briefcase,
-  Flag,
   Calendar,
   DollarSign,
   GraduationCap,
-  MessageSquare,
-  Mail,
   AlertTriangle,
   Handshake,
   Receipt,
@@ -58,7 +54,6 @@ import {
   Gift,
   TrendingUp,
   User,
-  Truck,
 } from "lucide-react";
 import Link from "next/link";
 import { usePathname } from "next/navigation";
@@ -247,10 +242,8 @@ export default function Sidebar({ profile: _profile, userEmail, whopMonthlyPlanI
       defaultOpen: true,
       items: [
         { href: `/${locale}/dashboard/inbox`, icon: <Home size={16} />, label: t('sidebar.inbox'), roles: [...unionAll, mgmt] },
-        { href: `/${locale}/dashboard/inbox?type=intake`, icon: <FileText size={16} />, label: t('claims.myCases'), roles: unionAll },
-        { href: `/${locale}/dashboard/claims/new`, icon: <Mic size={16} />, label: t('sidebar.newCase'), roles: unionAll },
-        { href: `/${locale}/dashboard/inbox?type=message`, icon: <Mail size={16} />, label: t('sidebar.messages'), roles: unionAll },
-        { href: `/${locale}/dashboard/ai-assistant`, icon: <MessageSquare size={16} />, label: t('sidebar.aiAssistant'), roles: unionAll },
+        { href: `/${locale}/dashboard/inbox?type=intake`, icon: <FileText size={16} />, label: t('claims.myCases'), roles: ["member", "steward", "chief_steward", "officer", "bargaining_committee", "health_safety_rep"] },
+        { href: `/${locale}/dashboard/claims/new`, icon: <Mic size={16} />, label: t('sidebar.newCase'), roles: ["member", "steward", "chief_steward", "officer", "bargaining_committee", "health_safety_rep"] },
       ],
     },
     // ── 2. Work — "Active casework and operations" ────────────────────────
@@ -261,7 +254,7 @@ export default function Sidebar({ profile: _profile, userEmail, whopMonthlyPlanI
       items: [
         { href: `/${locale}/dashboard/work`, icon: <FileBarChart size={16} />, label: t('sidebar.work'), roles: [...repsAndAbove, mgmt] },
         { href: `/${locale}/dashboard/health-safety`, icon: <Shield size={16} />, label: t('sidebar.healthSafety'), roles: [...repsAndAbove, "health_safety_rep", mgmt] },
-        { href: `/${locale}/dashboard/dispatch`, icon: <Truck size={16} />, label: t('sidebar.dispatch'), roles: [...repsAndAbove, mgmt] },
+        { href: `/${locale}/dashboard/calendar`, icon: <Calendar size={16} />, label: t('calendar.title'), roles: [...unionAll, mgmt] },
       ],
     },
     // ── 3. Priorities — "What's urgent or time-sensitive" ─────────────────
@@ -273,8 +266,6 @@ export default function Sidebar({ profile: _profile, userEmail, whopMonthlyPlanI
         { href: `/${locale}/dashboard/priorities`, icon: <Clock size={16} />, label: t('sidebar.priorities'), roles: [...repsAndAbove, mgmt] },
         { href: `/${locale}/dashboard/notifications`, icon: <Bell size={16} />, label: t('sidebar.alerts'), roles: [...leadershipRoles, mgmt] },
         { href: `/${locale}/dashboard/targets`, icon: <Target size={16} />, label: t('sidebar.performanceTargets'), roles: [...leadershipRoles, mgmt] },
-        { href: `/${locale}/dashboard/organizing`, icon: <Flag size={16} />, label: t('sidebar.organizingCampaigns'), roles: [...leadershipRoles, mgmt] },
-        { href: `/${locale}/dashboard/communications`, icon: <MessageSquare size={16} />, label: t('sidebar.communications'), roles: [...leadershipRoles, mgmt] },
       ],
     },
     // ── 4. Intelligence — "Research, analysis, and insights" ──────────────
@@ -283,12 +274,12 @@ export default function Sidebar({ profile: _profile, userEmail, whopMonthlyPlanI
       roles: [...repsAndAbove, mgmt],
       defaultOpen: false,
       items: [
-        { href: `/${locale}/dashboard/intelligence`, icon: <BarChart3 size={16} />, label: t('sidebar.intelligence'), roles: [...repsAndAbove, mgmt] },
+        { href: `/${locale}/dashboard/intelligence?scope=executive`, icon: <BarChart3 size={16} />, label: t('sidebar.intelligence'), roles: [...repsAndAbove, mgmt] },
         ...(['congress', 'federation', 'union'].includes(organization?.type ?? '')
-          ? [{ href: `/${locale}/cba-intelligence`, icon: <Database size={16} />, label: t('sidebar.cbaIntelligence'), roles: [...repsAndAbove, mgmt] }]
+          ? [
+              { href: `/${locale}/dashboard/cba-intelligence`, icon: <Database size={16} />, label: t('sidebar.cbaIntelligence'), roles: [...repsAndAbove, mgmt] },
+            ]
           : []),
-        { href: `/${locale}/dashboard/intelligence?scope=federation`, icon: <TrendingUp size={16} />, label: t('sidebar.federation'), roles: [...leadershipRoles, ...clcRoles, mgmt] },
-        { href: `/${locale}/dashboard/intelligence?scope=executive`, icon: <BarChart3 size={16} />, label: t('sidebar.leadershipDashboard'), roles: [...execRoles, "admin", mgmt] },
       ],
     },
     // ── 5. Outcomes — "Results, finances, and voting" ─────────────────────
@@ -299,8 +290,6 @@ export default function Sidebar({ profile: _profile, userEmail, whopMonthlyPlanI
       items: [
         { href: `/${locale}/dashboard/outcomes`, icon: <BarChart3 size={16} />, label: t('sidebar.outcomes'), roles: [...unionAll, mgmt] },
         { href: `/${locale}/dashboard/voting`, icon: <Vote size={16} />, label: t('navigation.vote'), roles: unionAll },
-        { href: `/${locale}/dashboard/dues`, icon: <DollarSign size={16} />, label: t('sidebar.duesDeductions'), roles: unionAll },
-        { href: `/${locale}/dashboard/pension`, icon: <Briefcase size={16} />, label: t('sidebar.pensionBenefits'), roles: unionAll },
         { href: `/${locale}/dashboard/financial`, icon: <Receipt size={16} />, label: t('sidebar.financialManagement'), roles: [...leadershipRoles, mgmt] },
       ],
     },
@@ -314,7 +303,6 @@ export default function Sidebar({ profile: _profile, userEmail, whopMonthlyPlanI
         { href: `/${locale}/dashboard/education`, icon: <GraduationCap size={16} />, label: t('sidebar.educationTraining'), roles: unionAll },
         { href: `/${locale}/dashboard/clause-library`, icon: <Library size={16} />, label: t('sidebar.clauseLibrary'), roles: [...repsAndAbove, mgmt] },
         { href: `/${locale}/dashboard/precedents`, icon: <Scale size={16} />, label: t('sidebar.precedents'), roles: [...repsAndAbove, mgmt] },
-        { href: `/${locale}/dashboard/calendar`, icon: <Calendar size={16} />, label: t('calendar.title'), roles: [...unionAll, mgmt] },
       ],
     },
     // ── 7. Admin — "People, governance, and administration" ───────────────
@@ -328,6 +316,7 @@ export default function Sidebar({ profile: _profile, userEmail, whopMonthlyPlanI
         { href: `/${locale}/dashboard/governance`, icon: <FileText size={16} />, label: t('sidebar.governance'), roles: [...execRoles, mgmt] },
         { href: `/${locale}/dashboard/audits`, icon: <FileBarChart size={16} />, label: t('sidebar.auditsCompliance'), roles: [...execRoles, "admin", mgmt] },
         { href: `/${locale}/dashboard/structure`, icon: <Network size={16} />, label: t('sidebar.orgStructure'), roles: ["admin", "system_admin", "app_owner", mgmt] },
+        { href: `/${locale}/dashboard/committees`, icon: <Users size={16} />, label: "Committees", roles: [...repsAndAbove, mgmt] },
       ],
     },
   ];
@@ -451,7 +440,6 @@ export default function Sidebar({ profile: _profile, userEmail, whopMonthlyPlanI
       `/${locale}/dashboard`,
       `/${locale}/dashboard/claims`,
       `/${locale}/dashboard/claims/new`,
-      `/${locale}/dashboard/messages`,
       `/${locale}/dashboard/settings`,
       `/${locale}/dashboard/profile`,
     ]);

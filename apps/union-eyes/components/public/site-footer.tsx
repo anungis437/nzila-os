@@ -21,18 +21,26 @@ const NZILA_URL = process.env.NEXT_PUBLIC_NZILA_URL ?? 'https://nzilaventures.co
 /* ────────────────── Link Data ────────────────── */
 
 const footerLinks = {
-  Platform: [
-    { name: 'Grievance Tracking',    href: '/features/grievance-tracking' },
+  System: [
+    { name: 'Governance & Oversight', href: '/en-CA/trust' },
+    { name: 'Case Management',       href: '/features/grievance-tracking' },
     { name: 'Member Portal',         href: '/features/member-portal' },
-    { name: 'AI Workbench',          href: '/features/ai-workbench' },
-    { name: 'Analytics & Reporting', href: '/features/analytics' },
+    { name: 'Intelligence',          href: '/features/ai-workbench' },
+    { name: 'Financial Allocation',  href: '/features/analytics' },
     { name: 'Pricing',              href: '/pricing' },
     { name: 'System Status',        href: '/en-CA/trust#system-status' },
+  ],
+  'Who It\'s For': [
+    { name: 'Representatives',  href: '/en-CA/for-representatives' },
+    { name: 'Leadership',       href: '/en-CA/for-leadership' },
+    { name: 'Federations',      href: '/en-CA/for-federations' },
+    { name: 'CLC',              href: '/en-CA/for-clc' },
+    { name: 'Members',          href: '/en-CA/for-members' },
   ],
   Resources: [
     { name: 'Case Studies',   href: '/case-studies' },
     { name: 'Our Story',      href: '/story' },
-    { name: 'Pilot Program',  href: '/pilot-request' },
+    { name: 'Request a Demo', href: '/pilot-request' },
     { name: 'Contact Us',     href: '/contact' },
   ],
   Legal: [
@@ -60,11 +68,11 @@ export default function SiteFooter() {
         <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-14 flex flex-col lg:flex-row items-center justify-between gap-8">
           <div className="text-center lg:text-left max-w-xl">
             <h3 className="text-2xl md:text-3xl font-bold text-white mb-2">
-              Interested in piloting Union Eyes?
+              Ready to lead with clarity?
             </h3>
             <p className="text-gray-200 text-lg">
-              We&apos;re working with unions like CUPE and CAPE to shape the platform.
-              Apply for early access — no commitment, no credit card.
+              See how Union Eyes turns casework into confident, data-backed decisions.
+              Request a demo — no commitment.
             </p>
           </div>
           <div className="flex flex-col sm:flex-row gap-3">
@@ -72,7 +80,7 @@ export default function SiteFooter() {
               href="/pilot-request"
               className="inline-flex items-center justify-center gap-2 px-7 py-3.5 bg-electric text-white font-semibold rounded-xl hover:bg-blue-700 transition-all shadow-lg shadow-electric/25 btn-press text-sm"
             >
-              Request a Pilot <ArrowRight className="h-4 w-4" />
+              Request a Demo <ArrowRight className="h-4 w-4" />
             </Link>
             <Link
               href="/contact"
@@ -86,7 +94,7 @@ export default function SiteFooter() {
 
       {/* ─── Main Footer ─── */}
       <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-16">
-        <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-5 gap-12 lg:gap-8">
+        <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-6 gap-12 lg:gap-8">
           {/* Brand Column (spans 2) */}
           <div className="lg:col-span-2 space-y-6">
             <Link href="/" className="flex items-center gap-3 group">
@@ -101,9 +109,8 @@ export default function SiteFooter() {
             </Link>
 
             <p className="text-gray-200 max-w-sm leading-relaxed">
-              AI-powered union management co-designed with organizers, not for them.
-              Grievance tracking, member engagement, and operational excellence
-              — now in pilot with leading Canadian unions.
+              A decision system for labour leadership. From intake to outcome,
+              all in one system — co-designed with Canadian unions.
             </p>
 
             {/* Trust Badges */}

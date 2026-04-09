@@ -34,9 +34,11 @@ export async function GET() {
       );
     }
 
-    // Only NZILA Ventures (platform owner) can see the overview
+    // Only NZILA Ventures (platform owner) or platform admins can see the overview
     const userOrgId = await getOrganizationIdForUser(user.userId);
-    if (userOrgId !== DEFAULT_ORGANIZATION_ID) {
+    const platformAdminIds = (process.env.PLATFORM_ADMIN_USER_IDS || '')
+      .split(',').map(id => id.trim()).filter(Boolean);
+    if (userOrgId !== DEFAULT_ORGANIZATION_ID && !platformAdminIds.includes(user.userId)) {
       return standardErrorResponse(
         ErrorCode.FORBIDDEN,
         "Only the platform organization can view the pilot overview"

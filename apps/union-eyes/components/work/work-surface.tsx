@@ -10,8 +10,10 @@ import { Tabs, TabsList, TabsTrigger, TabsContent } from "@/components/ui/tabs";
 import WorkbenchConsole from "@/components/workbench/workbench-console";
 import { GrievancesConsole } from "@/components/grievances/grievances-console";
 import { NegotiationDashboard } from "@/components/bargaining/NegotiationDashboard";
+import { MyCommittees } from "@/components/work/my-committees";
+import { ArbitrationConsole } from "@/components/arbitration/arbitration-console";
 import { useOrganization } from "@/contexts/organization-context";
-import { Scale, Users, BookOpen } from "lucide-react";
+import { BookOpen } from "lucide-react";
 import { useLocale } from "next-intl";
 import Link from "next/link";
 
@@ -63,32 +65,23 @@ export function WorkSurface() {
         </TabsContent>
 
         <TabsContent value="arbitration" className="mt-4">
-          <div className="rounded-lg border p-8 text-center">
-            <Scale size={32} className="mx-auto text-gray-300 mb-3" />
-            <p className="font-medium text-gray-700 mb-1">Arbitration</p>
-            <p className="text-sm text-gray-400">
-              No arbitration cases at this time. When grievances are escalated to
-              arbitration, hearing schedules and case details will appear here.
+          {organizationId ? (
+            <ArbitrationConsole />
+          ) : (
+            <p className="text-sm text-gray-400 py-8 text-center">
+              Select an organization to view arbitrations.
             </p>
-            <Link
-              href={`/${locale}/dashboard/knowledge`}
-              className="inline-flex items-center gap-1 text-xs text-blue-600 hover:underline mt-3"
-            >
-              <BookOpen size={12} /> Review precedents in Knowledge
-            </Link>
-          </div>
+          )}
         </TabsContent>
 
         <TabsContent value="committees" className="mt-4">
-          <div className="rounded-lg border p-8 text-center">
-            <Users size={32} className="mx-auto text-gray-300 mb-3" />
-            <p className="font-medium text-gray-700 mb-1">Committees</p>
-            <p className="text-sm text-gray-400">
-              No active committees yet. Once bargaining, health &amp; safety, or
-              workplace committees are created, membership, meetings, and action
-              items will be managed here.
+          {organizationId ? (
+            <MyCommittees organizationId={organizationId} />
+          ) : (
+            <p className="text-sm text-gray-400 py-8 text-center">
+              Select an organization to view your committees.
             </p>
-          </div>
+          )}
         </TabsContent>
       </Tabs>
     </div>

@@ -24,6 +24,9 @@ import type { EntraSession } from './types'
 /** Session type alias for Clerk compatibility */
 export type Session = EntraSession
 
+/** Cookie name for PG-backed password auth sessions */
+const PG_SESSION_COOKIE = 'nzila_session'
+
 // ── Clerk-Compatible Server Auth ────────────────────────────────────────────
 
 export interface ClerkCompatAuthResult {
@@ -40,8 +43,67 @@ export interface ClerkCompatAuthResult {
 /**
  * Clerk-compatible `auth()` — returns `{ userId, orgId, orgRole }`.
  * Direct drop-in for `import { auth } from '@clerk/nextjs/server'`.
+ *
+ * Resolution order:
+ *   1. PG session cookie (`nzila_session`) — email/password auth
+ *   2. Entra / NextAuth JWT — SSO
  */
 export async function auth(): Promise<ClerkCompatAuthResult> {
+  // ── 1. Try PG session-based auth ────────────────────────────────────────
+  try {
+    const { cookies } = await import('next/headers')
+    const cookieStore = await cookies()
+    const pgToken = cookieStore.get(PG_SESSION_COOKIE)?.value
+    if (pgToken) {
+      const { getAuthUser } = await import('../password/auth-service')
+      const pgUser = await getAuthUser()
+      if (pgUser) {
+        // Resolve org role from DB
+        let orgRole: string | null = null
+        try {
+          const { db } = await import('@nzila/db/client')
+          const { authOrganizationUsers } = await import('@nzila/db/schema')
+          const { eq, and } = await import('drizzle-orm')
+          if (pgUser.organizationId) {
+            const [membership] = await db
+              .select({ role: authOrganizationUsers.role })
+              .from(authOrganizationUsers)
+              .where(
+                and(
+                  eq(authOrganizationUsers.userId, pgUser.id),
+                  eq(authOrganizationUsers.organizationId, pgUser.organizationId),
+                ),
+              )
+              .limit(1)
+            orgRole = membership?.role ?? null
+          }
+        } catch {
+          // DB lookup failed — continue without role
+        }
+
+        return {
+          userId: pgUser.id,
+          orgId: pgUser.organizationId,
+          orgRole,
+          sessionId: pgUser.sessionId,
+          sessionClaims: {
+            email: pgUser.email,
+            name: [pgUser.firstName, pgUser.lastName].filter(Boolean).join(' '),
+            authMethod: 'password',
+          },
+          getToken: async () => null,
+          has: (params: { role?: string; permission?: string }) => {
+            if (params.role) return orgRole === params.role
+            return false
+          },
+        }
+      }
+    }
+  } catch {
+    // PG session check failed — fall through to Entra
+  }
+
+  // ── 2. Fall back to Entra / NextAuth ────────────────────────────────────
   const session = await nextAuth()
   const entra = session as EntraSession | null
 
@@ -73,8 +135,45 @@ export async function auth(): Promise<ClerkCompatAuthResult> {
 /**
  * Clerk-compatible `currentUser()` — returns a user-like object.
  * Direct drop-in for `import { currentUser } from '@clerk/nextjs/server'`.
+ *
+ * Checks PG session first, then falls back to Entra/NextAuth.
  */
 export async function currentUser() {
+  // ── 1. Try PG session ───────────────────────────────────────────────────
+  try {
+    const { cookies } = await import('next/headers')
+    const cookieStore = await cookies()
+    const pgToken = cookieStore.get(PG_SESSION_COOKIE)?.value
+    if (pgToken) {
+      const { getAuthUser } = await import('../password/auth-service')
+      const pgUser = await getAuthUser()
+      if (pgUser) {
+        return {
+          id: pgUser.id,
+          firstName: pgUser.firstName,
+          lastName: pgUser.lastName,
+          fullName: [pgUser.firstName, pgUser.lastName].filter(Boolean).join(' ') || null,
+          emailAddresses: [{ emailAddress: pgUser.email }],
+          primaryEmailAddress: { emailAddress: pgUser.email },
+          username: pgUser.email,
+          primaryPhoneNumber: null as { phoneNumber: string } | null,
+          createdAt: null as Date | null,
+          imageUrl: null as string | null,
+          publicMetadata: {
+            authMethod: 'password',
+          },
+          privateMetadata: {},
+          organizationMemberships: pgUser.organizationId
+            ? [{ organization: { id: pgUser.organizationId }, role: 'member' }]
+            : [],
+        }
+      }
+    }
+  } catch {
+    // PG session check failed — fall through to Entra
+  }
+
+  // ── 2. Fall back to Entra / NextAuth ────────────────────────────────────
   const session = await nextAuth()
   const entra = session as EntraSession | null
 

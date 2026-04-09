@@ -16,8 +16,9 @@ import { logger } from '@/lib/logger';
 import { buildUnionEvidencePack } from '@/lib/evidence';
 import {
   validateTransition,
-  type GrievanceLifecycleStatus,
-} from "@/lib/workflows/grievance-state-machine";
+  type LifecycleState,
+} from "@/lib/workflow/case-lifecycle";
+import { toLifecycleState } from "@/lib/workflow/state-bridge";
 import {
   ErrorCode,
   standardErrorResponse,
@@ -25,6 +26,7 @@ import {
 } from "@/lib/api/standardized-responses";
 import { eq, and } from "drizzle-orm";
 import { requireEntitlement } from '@/services/platform-economics/entitlement-guard';
+import { randomBytes } from 'crypto';
 
 const convertSchema = z.object({
   priority: z.enum(["low", "medium", "high", "urgent"]).optional(),
@@ -77,15 +79,29 @@ export const POST = withOrganizationAuth(async (request, context, params?: { id:
     }
 
     // Validate FSM transition: must be in 'draft' status
-    const currentStatus = intake.status as GrievanceLifecycleStatus;
-    const transitionResult = validateTransition(currentStatus, 'converted', {
-      actorRole: 'union_staff',
-    });
+    const currentStatus = intake.status as string;
+    const unifiedCurrent = toLifecycleState('grievance', currentStatus);
+    // 'converted' maps to 'submitted' in unified FSM
+    const unifiedTarget = toLifecycleState('grievance', 'converted') ?? 'submitted' as LifecycleState;
 
-    if (!transitionResult.valid) {
+    if (!unifiedCurrent) {
       return standardErrorResponse(
         ErrorCode.VALIDATION_ERROR,
-        transitionResult.error ?? "Intake cannot be converted from its current status",
+        `Unrecognized intake status: ${currentStatus}`,
+      );
+    }
+
+    const transitionResult = validateTransition({
+      actorRole: 'steward',
+      caseId: params.id,
+      currentState: unifiedCurrent,
+      targetState: unifiedTarget,
+    });
+
+    if (!transitionResult.allowed) {
+      return standardErrorResponse(
+        ErrorCode.VALIDATION_ERROR,
+        transitionResult.reason ?? "Intake cannot be converted from its current status",
       );
     }
 
@@ -102,7 +118,7 @@ export const POST = withOrganizationAuth(async (request, context, params?: { id:
       const [officialCase] = await db
         .insert(grievances)
         .values({
-          grievanceNumber: `GRV-${Date.now()}`,
+          grievanceNumber: `GRV-${Date.now()}-${randomBytes(3).toString('hex')}`,
           type: intake.type,
           title: intake.title,
           description: intake.description,

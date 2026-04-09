@@ -26,7 +26,7 @@ export * from './satisfaction';
 
 // Explicit re-exports to resolve ambiguities
 // grievanceDeadlines and GrievanceDeadline exist in both grievances.ts and workflows.ts
-// Use the extended definitions from workflows.ts (has escalation, assignment, isMet etc.)
+// Both now match the actual DB schema (grievance_id FK to grievances, 14 columns)
 export { grievanceDeadlines, type GrievanceDeadline } from './workflows';
 
 // grievanceDocuments and GrievanceDocument exist in both workflows.ts and grievance-lifecycle.ts

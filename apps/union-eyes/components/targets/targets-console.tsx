@@ -1,6 +1,6 @@
 'use client';
 
-import { useCallback, useEffect, useState } from 'react';
+import { useCallback, useEffect, useRef, useState } from 'react';
 import { ColumnDef } from '@tanstack/react-table';
 import {
   BarChart3,
@@ -155,7 +155,7 @@ function CreateTargetDialog({ onCreated }: { onCreated: () => void }) {
     }
     setLoading(true);
     try {
-      const res = await fetch('/api/v2/targets', {
+      const res = await fetch('/api/targets', {
         method: 'POST',
         headers: { 'Content-Type': 'application/json' },
         body: JSON.stringify({
@@ -363,21 +363,23 @@ export function TargetsConsole() {
   const [targets, setTargets] = useState<KPITarget[]>([]);
   const [loading, setLoading] = useState(true);
   const { toast } = useToast();
+  const toastRef = useRef(toast);
+  toastRef.current = toast;
 
   const loadData = useCallback(async () => {
     setLoading(true);
     try {
-      const res = await fetch('/api/v2/targets/summary');
+      const res = await fetch('/api/targets/summary');
       if (!res.ok) throw new Error('Failed to load targets');
       const json = await res.json();
       setSummary(json.data?.summary ?? null);
       setTargets(json.data?.targets ?? []);
     } catch {
-      toast({ title: 'Error', description: 'Failed to load targets.', variant: 'destructive' });
+      toastRef.current({ title: 'Error', description: 'Failed to load targets.', variant: 'destructive' });
     } finally {
       setLoading(false);
     }
-  }, [toast]);
+  }, []);
 
   useEffect(() => {
     loadData();
@@ -385,7 +387,7 @@ export function TargetsConsole() {
 
   const handleToggle = async (id: string, isActive: boolean) => {
     try {
-      const res = await fetch(`/api/v2/targets/${encodeURIComponent(id)}`, {
+      const res = await fetch(`/api/targets/${encodeURIComponent(id)}`, {
         method: 'PATCH',
         headers: { 'Content-Type': 'application/json' },
         body: JSON.stringify({ isActive }),
@@ -497,9 +499,9 @@ export function TargetsConsole() {
                 <CardTitle>Health Distribution</CardTitle>
                 <CardDescription>Target health across all active KPIs</CardDescription>
               </CardHeader>
-              <CardContent className="h-65">
+              <CardContent>
                 {gaugeData.length > 0 ? (
-                  <ResponsiveContainer width="100%" height="100%">
+                  <ResponsiveContainer width="100%" height={240}>
                     <RadialBarChart
                       innerRadius="30%"
                       outerRadius="90%"
@@ -512,7 +514,7 @@ export function TargetsConsole() {
                     </RadialBarChart>
                   </ResponsiveContainer>
                 ) : (
-                  <div className="flex items-center justify-center h-full text-muted-foreground">
+                  <div className="flex items-center justify-center h-60 text-muted-foreground">
                     No target data available
                   </div>
                 )}
@@ -525,9 +527,9 @@ export function TargetsConsole() {
                 <CardTitle>Targets by Source</CardTitle>
                 <CardDescription>Distribution across data domains</CardDescription>
               </CardHeader>
-              <CardContent className="h-65">
+              <CardContent>
                 {sourceData.length > 0 ? (
-                  <ResponsiveContainer width="100%" height="100%">
+                  <ResponsiveContainer width="100%" height={240}>
                     <BarChart data={sourceData} layout="vertical" margin={{ left: 20 }}>
                       <CartesianGrid strokeDasharray="3 3" horizontal={false} />
                       <XAxis type="number" />
@@ -541,7 +543,7 @@ export function TargetsConsole() {
                     </BarChart>
                   </ResponsiveContainer>
                 ) : (
-                  <div className="flex items-center justify-center h-full text-muted-foreground">
+                  <div className="flex items-center justify-center h-60 text-muted-foreground">
                     No targets configured yet
                   </div>
                 )}

@@ -62,7 +62,7 @@ export const memberDuesLedger = pgTable('member_dues_ledger', {
   id: uuid('id').primaryKey().defaultRandom(),
   
   // Member
-  userId: uuid('user_id').notNull(),
+  userId: text('user_id').notNull(),
   organizationId: uuid('organization_id').notNull(),
   
   // Transaction Details
@@ -120,7 +120,7 @@ export const memberArrears = pgTable('member_arrears', {
   id: uuid('id').primaryKey().defaultRandom(),
   
   // Member
-  userId: uuid('user_id').notNull().unique(), // One arrears record per member
+  userId: text('user_id').notNull().unique(), // One arrears record per member
   organizationId: uuid('organization_id').notNull(),
   
   // Arrears Summary
@@ -235,7 +235,7 @@ export const remittanceLineItems = pgTable('remittance_line_items', {
   employmentType: text('employment_type'),
   
   // Matched Member
-  userId: uuid('user_id'), // Matched member, null if not matched
+  userId: text('user_id'), // Matched member, null if not matched
   matchConfidence: integer('match_confidence'), // 0-100
   matchMethod: text('match_method'), // auto, manual, fuzzy
   
@@ -322,7 +322,7 @@ export const paymentPlans = pgTable('payment_plans', {
   id: uuid('id').primaryKey().defaultRandom(),
   
   // Member
-  userId: uuid('user_id').notNull(),
+  userId: text('user_id').notNull(),
   organizationId: uuid('organization_id').notNull(),
   
   // Plan Details
@@ -411,7 +411,7 @@ export const payrollDeductions = pgTable('payroll_deductions', {
 
   // Scope
   organizationId: uuid('organization_id').notNull(),
-  userId: uuid('user_id').notNull(),
+  userId: text('user_id').notNull(),
   employerId: uuid('employer_id').notNull(),
 
   // Pay Period
@@ -454,7 +454,7 @@ export const memberDuesIssues = pgTable('member_dues_issues', {
 
   // Scope
   organizationId: uuid('organization_id').notNull(),
-  userId: uuid('user_id').notNull(),
+  userId: text('user_id').notNull(),
 
   // Issue Details
   issueType: text('issue_type').notNull(), // missing_deduction, incorrect_amount, duplicate_deduction, unrecognized_deduction, other

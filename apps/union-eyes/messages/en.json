@@ -956,49 +956,412 @@
       "title": "CLC Staff Operations",
       "workflow": "Workflow Management",
       "approvals": "Pending Approvals",
-      "communications": "Communications"
+      "communications": "Communications",
+      "dashboard": {
+        "title": "CLC Staff Dashboard",
+        "description": "National operations, affiliate synchronization, and remittance processing",
+        "executiveDashboard": "Executive Dashboard"
+      },
+      "metrics": {
+        "pendingSyncs": "Pending Syncs",
+        "lastSync": "Last Sync",
+        "syncStatus": "Automated daily sync",
+        "pendingApprovals": "Pending Approvals",
+        "remittancesAwaitingReview": "Remittances awaiting review",
+        "overdueRemittances": "Overdue Remittances",
+        "requiresFollowUp": "Requires follow-up",
+        "allOnTrack": "All on track"
+      },
+      "sync": {
+        "title": "Affiliate Synchronization",
+        "description": "Manage data sync between CLC and affiliate systems",
+        "manualSync": "Manual Sync",
+        "manualSyncDesc": "Trigger immediate affiliate data sync",
+        "syncNow": "Sync Now",
+        "syncLogs": "View Sync Logs",
+        "syncLogsDesc": "Review sync history and errors",
+        "viewLogs": "View Logs",
+        "syncSettings": "Sync Settings",
+        "syncSettingsDesc": "Configure sync schedules and mappings",
+        "configure": "Configure"
+      },
+      "remittances": {
+        "title": "Remittance Processing",
+        "description": "Review and process per-capita remittances",
+        "reviewQueue": "Review Queue",
+        "pending": "pending review",
+        "review": "Review",
+        "overdueFollowUp": "Overdue Follow-up",
+        "overdueItems": "overdue items",
+        "followUp": "Follow Up",
+        "bulkImport": "Bulk Import",
+        "bulkImportDesc": "Import remittance data from CSV",
+        "import": "Import"
+      },
+      "workflow": {
+        "title": "Approval Workflow",
+        "description": "Review and approve pending remittances"
+      },
+      "activity": {
+        "title": "Recent Activity",
+        "description": "Latest sync operations and remittance processing",
+        "noActivity": "No recent activity"
+      },
+      "quickLinks": {
+        "title": "Quick Links",
+        "description": "Common staff operations and resources",
+        "manageAffiliates": "Manage Affiliates",
+        "compliance": "Compliance Reports",
+        "analytics": "View Analytics",
+        "organizations": "Organization Admin",
+        "settings": "System Settings",
+        "crossUnion": "Cross-Union Data"
+      }
     },
     "affiliates": {
-      "title": "Affiliates Management",
+      "title": "CLC Affiliates",
+      "description": "Manage direct-chartered unions and provincial federations",
+      "backToDashboard": "Back to Dashboard",
+      "addAffiliate": "Add Affiliate",
+      "export": "Export",
+      "viewDetails": "View Details",
       "federations": "Provincial Federations",
       "unions": "National Unions",
       "locals": "Local Unions",
-      "membership": "Membership Numbers"
+      "membership": "Membership Numbers",
+      "summary": {
+        "totalAffiliates": "Total Affiliates",
+        "acrossCLC": "Across CLC",
+        "directChartered": "Direct-Chartered",
+        "nationalUnions": "National unions",
+        "federations": "Federations",
+        "provincial": "Provincial/territorial",
+        "locals": "Locals & Chapters",
+        "localUnits": "Local units"
+      },
+      "search": {
+        "placeholder": "Search by name, number, or region..."
+      },
+      "filter": {
+        "type": "Organization Type",
+        "all": "All Types",
+        "unions": "Direct-Chartered",
+        "federations": "Federations",
+        "locals": "Locals",
+        "chapters": "Chapters",
+        "status": "Status",
+        "allStatuses": "All Statuses",
+        "current": "Current",
+        "overdue": "Overdue",
+        "atRisk": "At Risk"
+      },
+      "tabs": {
+        "all": "All Affiliates",
+        "unions": "Direct-Chartered",
+        "federations": "Federations",
+        "locals": "Locals & Chapters",
+        "unionsFilter": "Filtered view showing only direct-chartered unions",
+        "localsFilter": "Filtered view showing only locals and chapters"
+      },
+      "table": {
+        "name": "Name",
+        "type": "Type",
+        "location": "Location",
+        "members": "Members",
+        "remittance": "Remittance",
+        "compliance": "Compliance",
+        "actions": "Actions",
+        "noAffiliates": "No affiliates found"
+      },
+      "bulkActions": {
+        "title": "Bulk Actions",
+        "description": "Perform actions across multiple affiliates",
+        "exportReport": "Export Report",
+        "sendReminder": "Send Reminders",
+        "downloadData": "Download Data"
+      }
     },
     "compliance": {
-      "title": "Compliance Tracking",
-      "remittances": "Remittance Compliance",
+      "title": "CLC Compliance Tracking",
+      "description": "National compliance monitoring, per-capita remittance tracking, and affiliate oversight",
+      "backToDashboard": "Back to Dashboard",
+      "manageRemittances": "Manage Remittances",
+      "overallStatus": "Overall National Compliance",
+      "statusDescription": "Aggregated compliance across all CLC affiliates",
+      "complianceRate": "Compliance Rate",
+      "compliant": "Compliant",
+      "atRisk": "At Risk",
+      "nonCompliant": "Non-Compliant",
+      "totalAffiliates": "Total Affiliates",
+      "export": "Export",
+      "viewDetails": "View Details",
+      "remittances": {
+        "due": "Remittances Due",
+        "submitted": "submitted",
+        "overdue": "Overdue",
+        "requiresAction": "Requires follow-up",
+        "amountDue": "Amount Due",
+        "received": "received",
+        "collectionRate": "Collection Rate",
+        "thirtyDayAverage": "30-day average"
+      },
+      "provincial": {
+        "title": "Provincial/Territorial Compliance",
+        "description": "Compliance breakdown by province and territory",
+        "filter": "Filter by province",
+        "allProvinces": "All Provinces",
+        "noData": "No provincial compliance data available",
+        "noDataHint": "Data will appear once remittances are submitted",
+        "affiliates": "affiliates",
+        "compliant": "compliant"
+      },
+      "issues": {
+        "title": "Recent Compliance Issues",
+        "description": "Affiliates requiring attention or follow-up action",
+        "noIssues": "No compliance issues",
+        "allCompliant": "All affiliates are in good standing",
+        "organization": "Organization",
+        "issue": "Issue",
+        "severity": "Severity",
+        "daysOverdue": "Days Overdue",
+        "actions": "Actions",
+        "followUp": "Follow Up"
+      },
+      "actions": {
+        "title": "Compliance Actions",
+        "description": "Common compliance management tasks",
+        "reviewRemittances": "Review Remittances",
+        "reviewDesc": "Process pending submissions",
+        "generateReport": "Generate Report",
+        "reportDesc": "Quarterly compliance report",
+        "viewAffiliates": "View Affiliates",
+        "affiliatesDesc": "Manage affiliate status",
+        "analytics": "View Analytics",
+        "analyticsDesc": "Trends and forecasts"
+      },
       "reporting": "Reporting Requirements",
       "audits": "Audit Status"
+    },
+    "dashboard": {
+      "title": "CLC Executive Dashboard",
+      "description": "Canadian Labour Congress national oversight, affiliate coordination, and per-capita remittance management",
+      "compliance": "Compliance",
+      "manageAffiliates": "Manage Affiliates"
+    },
+    "metrics": {
+      "totalAffiliates": "Total Affiliates",
+      "totalMembers": "Total Members",
+      "acrossAllAffiliates": "Across all affiliates",
+      "pendingRemittances": "Pending Remittances",
+      "complianceRate": "Compliance Rate",
+      "thirtyDayAverage": "30-day average"
+    },
+    "quickActions": {
+      "title": "Quick Actions",
+      "description": "Common executive tasks and oversight functions"
+    },
+    "actions": {
+      "staffDashboard": "CLC Staff Dashboard",
+      "staffDesc": "National operations and sync",
+      "reviewRemittances": "Review Remittances",
+      "remittancesDesc": "Approve pending payments",
+      "manageAffiliates": "Manage Affiliates",
+      "affiliatesDesc": "View unions and federations",
+      "compliance": "Compliance Reports",
+      "complianceDesc": "National tracking",
+      "analytics": "CLC Analytics",
+      "analyticsDesc": "Trends and forecasts",
+      "crossUnion": "Cross-Union Analytics",
+      "crossUnionDesc": "National comparisons"
+    },
+    "analytics": {
+      "title": "National Analytics",
+      "description": "Multi-year trends, organization comparisons, and forecasting"
+    },
+    "remittances": {
+      "title": "Per-Capita Remittances",
+      "description": "Recent submissions and approval workflows"
+    },
+    "federations": {
+      "title": "Provincial Federation Status",
+      "description": "Overview of provincial/territorial federations",
+      "noData": "No provincial federations configured"
     }
   },
   "federation": {
     "title": "Provincial Federation",
     "dashboard": {
       "title": "Federation Dashboard",
+      "description": "Provincial federation oversight, affiliate management, and remittance tracking",
       "overview": "Provincial Overview",
       "affiliates": "Member Unions",
-      "campaigns": "Active Campaigns"
+      "campaigns": "Active Campaigns",
+      "viewRemittances": "Remittances",
+      "manageAffiliates": "Manage Affiliates"
     },
     "affiliates": {
-      "title": "Affiliate Unions",
-      "list": "All Affiliates",
+      "title": "Manage Affiliates",
       "onboarding": "Affiliate Onboarding",
       "status": "Affiliation Status",
-      "membershipCount": "Membership Count"
+      "membershipCount": "Membership Count",
+      "breadcrumb": {
+        "federation": "Federation",
+        "affiliates": "Affiliates"
+      },
+      "description": "View and manage member unions, locals, and their details",
+      "actions": {
+        "export": "Export"
+      },
+      "summary": {
+        "total": "Total Affiliates",
+        "locals": "Locals",
+        "unions": "Unions",
+        "chapters": "Chapters"
+      },
+      "filters": {
+        "title": "Filters",
+        "search": "Search affiliates...",
+        "type": "Organization Type",
+        "allTypes": "All Types",
+        "locals": "Locals",
+        "unions": "Unions",
+        "chapters": "Chapters",
+        "status": "Status",
+        "allStatuses": "All Statuses",
+        "active": "Active",
+        "inactive": "Inactive",
+        "apply": "Apply Filters"
+      },
+      "list": {
+        "title": "Affiliated Organizations",
+        "description": "{count} organizations",
+        "empty": {
+          "title": "No Affiliates Found",
+          "description": "No affiliated organizations match the current filters"
+        },
+        "viewDetails": "View"
+      },
+      "quickLinks": {
+        "title": "Related Operations",
+        "remittances": "View Remittances",
+        "analytics": "Cross-Union Analytics",
+        "compliance": "Compliance Reports"
+      }
     },
     "remittances": {
-      "title": "Remittance Tracking",
+      "title": "Provincial Remittances",
       "compliance": "Compliance Status",
       "history": "Payment History",
       "dueDate": "Due Date",
-      "amount": "Amount"
+      "amount": "Amount",
+      "breadcrumb": {
+        "federation": "Federation",
+        "remittances": "Remittances"
+      },
+      "description": "Track per-capita dues remittances from member unions and locals",
+      "actions": {
+        "export": "Export"
+      },
+      "summary": {
+        "totalDue": "Total Due",
+        "currentPeriod": "{year}-{month}",
+        "totalPaid": "Total Paid",
+        "collectionRate": "{rate}% collection",
+        "pending": "Pending",
+        "awaitingSubmission": "Awaiting submission",
+        "overdue": "Overdue",
+        "pastDue": "Past due date"
+      },
+      "alerts": {
+        "overdue": {
+          "title": "Overdue Remittances Require Attention",
+          "description": "{count} remittance(s) are past due. Contact the affected locals to resolve."
+        }
+      },
+      "filters": {
+        "title": "Filters",
+        "status": "Status",
+        "allStatuses": "All",
+        "pending": "Pending",
+        "submitted": "Submitted",
+        "paid": "Paid",
+        "overdue": "Overdue",
+        "year": "Year",
+        "month": "Month",
+        "search": "Search...",
+        "apply": "Apply"
+      },
+      "table": {
+        "title": "Remittance Records",
+        "description": "{count} remittances",
+        "empty": {
+          "title": "No Remittances Found",
+          "description": "No remittance records match the current filters",
+          "hint": "Remittances are generated automatically at the start of each month based on member counts."
+        },
+        "columns": {
+          "period": "Period",
+          "organization": "Organization",
+          "members": "Members",
+          "rate": "Rate",
+          "amount": "Amount",
+          "dueDate": "Due Date",
+          "status": "Status",
+          "actions": "Actions"
+        },
+        "viewDetails": "View"
+      },
+      "quickLinks": {
+        "title": "Related Operations",
+        "affiliates": "View Affiliates",
+        "analytics": "Analytics",
+        "compliance": "Compliance"
+      }
     },
     "meetings": {
       "title": "Federation Meetings",
       "schedule": "Meeting Schedule",
       "minutes": "Meeting Minutes",
       "attendance": "Attendance"
+    },
+    "metrics": {
+      "memberUnions": "Member Unions",
+      "affiliateSubtext": "Affiliated locals and unions",
+      "totalMembers": "Total Members",
+      "memberSubtext": "Across all affiliates",
+      "pendingRemittances": "Pending Remittances",
+      "remittanceSubtext": "Awaiting submission",
+      "overdueRemittances": "Overdue",
+      "overdueSubtext": "Past due date"
+    },
+    "alerts": {
+      "overdue": {
+        "title": "Action Required: Overdue Remittances",
+        "description": "{count} remittance(s) are past due. Please follow up with affected locals.",
+        "action": "View Overdue Remittances"
+      }
+    },
+    "quickActions": {
+      "affiliates": {
+        "title": "Affiliate Management",
+        "description": "View and manage member unions, locals, and organizing campaigns",
+        "viewAll": "View All Affiliates",
+        "analytics": "Cross-Union Analytics"
+      },
+      "remittances": {
+        "title": "Remittance Tracking",
+        "description": "Monitor per-capita dues remittances from member unions",
+        "viewAll": "View All Remittances",
+        "pending": "Pending This Month"
+      }
+    },
+    "recentAffiliates": {
+      "title": "Member Unions",
+      "description": "Overview of affiliated locals and unions",
+      "empty": "No affiliated unions found",
+      "manageAction": "Manage Affiliates",
+      "viewDetails": "View",
+      "viewAll": "View All {count} Affiliates"
     }
   },
   "categories": {
@@ -2032,7 +2395,7 @@
     "clcStaffOperations": "Staff",
     "clcCompliance": "Compliance",
     "clcIntelligence": "Labour Intelligence",
-    "provincialFederation": "Federation",
+    "provincialFederation": "Provincial Fed",
     "federationDashboard": "Overview",
     "affiliateUnions": "Affiliates",
     "remittanceTracking": "Remittances",

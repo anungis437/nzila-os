@@ -7,7 +7,9 @@
  * precedents, and calendar with a unified search prompt.
  */
 
+import { useState } from "react";
 import { useLocale, useTranslations } from "next-intl";
+import { useRouter } from "next/navigation";
 import Link from "next/link";
 import {
   BookOpen,
@@ -30,6 +32,8 @@ interface KnowledgeLink {
 export function KnowledgeConsole() {
   const t = useTranslations();
   const locale = useLocale();
+  const router = useRouter();
+  const [searchQuery, setSearchQuery] = useState("");
 
   const sections: KnowledgeLink[] = [
     {
@@ -74,12 +78,33 @@ export function KnowledgeConsole() {
       </div>
 
       {/* Search prompt */}
-      <div className="flex items-center gap-2 px-4 py-3 rounded-lg border bg-gray-50/50">
+      <form
+        onSubmit={(e) => {
+          e.preventDefault();
+          const q = searchQuery.trim();
+          if (!q) return;
+          // Route to the clause library with the search query pre-filled
+          router.push(`/${locale}/dashboard/clause-library?q=${encodeURIComponent(q)}`);
+        }}
+        className="flex items-center gap-2 px-4 py-3 rounded-lg border bg-gray-50/50 focus-within:border-blue-300 focus-within:ring-1 focus-within:ring-blue-200 transition-all"
+      >
         <Search size={16} className="text-gray-400 shrink-0" />
-        <span className="text-sm text-gray-400">
-          Search agreements, clauses, precedents, and training…
-        </span>
-      </div>
+        <input
+          type="text"
+          value={searchQuery}
+          onChange={(e) => setSearchQuery(e.target.value)}
+          placeholder="Search agreements, clauses, precedents, and training…"
+          className="flex-1 bg-transparent text-sm text-gray-900 placeholder:text-gray-400 outline-none"
+        />
+        {searchQuery.trim() && (
+          <button
+            type="submit"
+            className="text-xs font-medium text-blue-600 hover:text-blue-700 shrink-0"
+          >
+            Search
+          </button>
+        )}
+      </form>
 
       <div className="grid gap-3 sm:grid-cols-2">
         {sections.map((item) => (

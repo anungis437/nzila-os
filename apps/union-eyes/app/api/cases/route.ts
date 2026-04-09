@@ -13,6 +13,28 @@ import { NextResponse } from 'next/server';
 import { buildUnionEvidencePack } from '@/lib/evidence';
 import { logger } from '@/lib/logger';
 import { auditLog, AuditEventType, AuditSeverity } from '@/lib/audit-logger';
+import { z } from 'zod';
+
+const caseCreateSchema = z.object({
+  claimType: z.enum([
+    "grievance_discipline", "grievance_schedule", "grievance_pay",
+    "workplace_safety", "discrimination_age", "discrimination_gender",
+    "discrimination_race", "discrimination_disability", "discrimination_other",
+    "harassment_sexual", "harassment_workplace", "wage_dispute",
+    "contract_dispute", "retaliation", "wrongful_termination", "other",
+    "harassment_verbal", "harassment_physical",
+  ]),
+  description: z.string().min(10, 'Description must be at least 10 characters').max(10000),
+  incidentDate: z.string().datetime({ offset: true }).optional().nullable(),
+  location: z.string().max(500).optional().nullable(),
+  desiredOutcome: z.string().max(5000).optional().nullable(),
+  witnessesPresent: z.boolean().optional().default(false),
+  witnessDetails: z.string().max(5000).optional().nullable(),
+  priority: z.enum(["low", "medium", "high", "critical"]).optional().default("medium"),
+  isAnonymous: z.boolean().optional().default(false),
+  claimAmount: z.union([z.string(), z.number()]).optional().nullable(),
+  sourceIntakeId: z.string().uuid().optional().nullable(),
+});
 
 export const dynamic = 'force-dynamic';
 
@@ -113,6 +135,10 @@ export const POST = withApi(
     if (!organizationId) throw ApiError.badRequest('Organization context required');
 
     const body = await request.json();
+    const parsed = caseCreateSchema.safeParse(body);
+    if (!parsed.success) {
+      throw ApiError.badRequest(parsed.error.errors.map(e => e.message).join('; '));
+    }
     const {
       claimType,
       description,
@@ -121,15 +147,11 @@ export const POST = withApi(
       desiredOutcome,
       witnessesPresent,
       witnessDetails,
-      priority = 'medium',
-      isAnonymous = false,
+      priority,
+      isAnonymous,
       claimAmount,
       sourceIntakeId,
-    } = body as Record<string, unknown>;
-
-    if (!claimType || !description) {
-      throw ApiError.badRequest('claimType and description are required');
-    }
+    } = parsed.data;
 
     const rows = await withRLSContext(async () =>
       db.execute(sql`

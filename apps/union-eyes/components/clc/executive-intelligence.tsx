@@ -133,7 +133,8 @@ interface ExecutiveSummaryBannerProps {
 }
 
 export function ExecutiveSummaryBanner({ summary }: ExecutiveSummaryBannerProps) {
-  const posture = POSTURE_CONFIG[summary.posture];
+  if (!summary) return null;
+  const posture = POSTURE_CONFIG[summary.posture] ?? POSTURE_CONFIG.steady;
   const PostureIcon = posture.icon;
 
   return (
@@ -149,7 +150,7 @@ export function ExecutiveSummaryBanner({ summary }: ExecutiveSummaryBannerProps)
                 {posture.label} Posture
               </h2>
               <Badge variant="outline" className={posture.color}>
-                {Math.round(summary.confidence * 100)}% confidence
+                {Math.round((summary?.confidence ?? 0) * 100)}% confidence
               </Badge>
             </div>
             <p className="text-base font-medium text-foreground mb-1">
@@ -166,7 +167,7 @@ export function ExecutiveSummaryBanner({ summary }: ExecutiveSummaryBannerProps)
                 </p>
               </div>
             )}
-            {summary.dominantSignals.length > 0 && (
+            {(summary?.dominantSignals?.length ?? 0) > 0 && (
               <div className="flex flex-wrap gap-1.5 mt-3">
                 {summary.dominantSignals.map((signal, i) => (
                   <Badge key={i} variant="secondary" className="text-xs">
@@ -189,7 +190,7 @@ interface ExecutivePriorityListProps {
 }
 
 export function ExecutivePriorityList({ priorities }: ExecutivePriorityListProps) {
-  if (priorities.length === 0) {
+  if (!priorities || priorities.length === 0) {
     return (
       <Card>
         <CardHeader>
@@ -259,7 +260,7 @@ interface WhatChangedPanelProps {
 }
 
 export function WhatChangedPanel({ deltas }: WhatChangedPanelProps) {
-  if (deltas.length === 0) {
+  if (!deltas || deltas.length === 0) {
     return (
       <Card>
         <CardHeader>
@@ -320,7 +321,8 @@ interface ExecutiveActionBriefCardProps {
 }
 
 export function ExecutiveActionBriefCard({ brief }: ExecutiveActionBriefCardProps) {
-  const posture = POSTURE_CONFIG[brief.posture];
+  if (!brief) return null;
+  const posture = POSTURE_CONFIG[brief.posture] ?? POSTURE_CONFIG.steady;
   const PostureIcon = posture.icon;
 
   return (

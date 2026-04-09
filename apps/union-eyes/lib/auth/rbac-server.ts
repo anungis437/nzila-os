@@ -71,6 +71,17 @@ export async function getUserRole(
   organizationId?: string | null,
 ): Promise<UserRole> {
   try {
+    // DEV ONLY: DEV_ROLE_OVERRIDE forces any role for local testing.
+    //   Set DEV_ROLE_OVERRIDE=steward in .env.local to simulate that role.
+    //   Ignored in production (NODE_ENV !== 'development').
+    if (process.env.NODE_ENV === 'development' && process.env.DEV_ROLE_OVERRIDE) {
+      const override = process.env.DEV_ROLE_OVERRIDE as UserRole;
+      if (Object.values(UserRole).includes(override)) {
+        logger.info('[getUserRole] DEV_ROLE_OVERRIDE active', { detail: override });
+        return override;
+      }
+    }
+
     // 0. PLATFORM_ADMIN_USER_IDS — explicit override, highest priority.
     //    Set PLATFORM_ADMIN_USER_IDS=user_abc,user_xyz in .env.local to
     //    grant app_owner rights regardless of DB or Clerk metadata state.
@@ -86,6 +97,7 @@ export async function getUserRole(
     // 0b. SUPER_ADMIN_EMAILS — email-based override.
     const superAdminEmails = new Set([
       'info@nzilaventures.com',
+      'support@onelabtech.com',
       ...(process.env.SUPER_ADMIN_EMAILS ?? '').split(',').map(s => s.trim()).filter(Boolean),
     ]);
     try {

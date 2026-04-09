@@ -13,6 +13,28 @@ import { db } from '@/db/db';
 import { claims } from '@/db/schema';
 import { sql } from 'drizzle-orm';
 import { withSystemContext } from '@/lib/db/with-rls-context';
+import { z } from 'zod';
+
+const claimCreateSchema = z.object({
+  claimType: z.enum([
+    "grievance_discipline", "grievance_schedule", "grievance_pay",
+    "workplace_safety", "discrimination_age", "discrimination_gender",
+    "discrimination_race", "discrimination_disability", "discrimination_other",
+    "harassment_sexual", "harassment_workplace", "wage_dispute",
+    "contract_dispute", "retaliation", "wrongful_termination", "other",
+    "harassment_verbal", "harassment_physical",
+  ]).optional(),
+  description: z.string().min(10, 'Description must be at least 10 characters').max(10000).optional(),
+  incidentDate: z.string().optional().nullable(),
+  location: z.string().max(500).optional().nullable(),
+  desiredOutcome: z.string().max(5000).optional().nullable(),
+  witnessesPresent: z.boolean().optional(),
+  witnessDetails: z.string().max(5000).optional().nullable(),
+  priority: z.enum(["low", "medium", "high", "critical"]).optional(),
+  isAnonymous: z.boolean().optional(),
+  claimAmount: z.union([z.string(), z.number()]).optional().nullable(),
+  status: z.enum(["submitted", "under_review", "assigned", "investigation", "pending_documentation", "resolved", "rejected", "closed"]).optional(),
+}).passthrough();
 
 export const dynamic = 'force-dynamic';
 
@@ -42,7 +64,12 @@ export const POST = withApi(
     },
   },
   async ({ request, organizationId, userId }) => {
-    const body = await request.json() as Record<string, unknown>;
+    const body = await request.json();
+    const parsed = claimCreateSchema.safeParse(body);
+    if (!parsed.success) {
+      throw ApiError.badRequest(parsed.error.errors.map(e => e.message).join('; '));
+    }
+    const validatedBody = parsed.data;
 
     if (!organizationId) {
       throw ApiError.badRequest('No active organization. Please select an organization and try again.');
@@ -68,7 +95,7 @@ export const POST = withApi(
 
       // Extract incidentDate separately — Drizzle's PgTimestamp.mapToDriverValue
       // calls .toISOString() and requires a Date object, not a raw date string.
-      const { incidentDate: rawIncidentDate, ...restBody } = body;
+      const { incidentDate: rawIncidentDate, ...restBody } = validatedBody;
       const values = {
         ...restBody,
         incidentDate: rawIncidentDate ? new Date(String(rawIncidentDate)) : undefined,

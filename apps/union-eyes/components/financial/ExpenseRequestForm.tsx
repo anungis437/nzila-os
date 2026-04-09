@@ -8,6 +8,7 @@ import { Label } from '@/components/ui/label';
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from '@/components/ui/select';
 import { Textarea } from '@/components/ui/textarea';
 import { useToast } from '@/lib/hooks/use-toast';
+import { expenseRequestSchema, formatZodErrors } from '@/lib/validations/financial';
 
 interface ExpenseRequestFormProps {
   budgetId?: string;
@@ -16,6 +17,7 @@ interface ExpenseRequestFormProps {
 
 export default function ExpenseRequestForm({ budgetId, onSuccess }: ExpenseRequestFormProps) {
   const [loading, setLoading] = useState(false);
+  const [fieldErrors, setFieldErrors] = useState<Record<string, string>>({});
   const { toast } = useToast();
 
   const [formData, setFormData] = useState({
@@ -34,14 +36,19 @@ export default function ExpenseRequestForm({ budgetId, onSuccess }: ExpenseReque
   });
 
   const handleSubmit = async () => {
-    if (!formData.accountCode || !formData.description || !formData.amount) {
+    const result = expenseRequestSchema.safeParse(formData);
+    if (!result.success) {
+      const errors = formatZodErrors(result.error);
+      setFieldErrors(errors);
+      const firstError = result.error.issues[0]?.message ?? 'Please fix the highlighted fields';
       toast({
         title: 'Validation Error',
-        description: 'Please fill in all required fields',
+        description: firstError,
         variant: 'destructive',
       });
       return;
     }
+    setFieldErrors({});
 
     try {
       setLoading(true);
@@ -110,7 +117,9 @@ export default function ExpenseRequestForm({ budgetId, onSuccess }: ExpenseReque
               type="date"
               value={formData.expenseDate}
               onChange={(e) => setFormData({ ...formData, expenseDate: e.target.value })}
+              className={fieldErrors.expenseDate ? 'border-destructive' : ''}
             />
+            {fieldErrors.expenseDate && <p className="text-xs text-destructive">{fieldErrors.expenseDate}</p>}
           </div>
           <div className="grid gap-2">
             <Label htmlFor="accountCode">Account Code *</Label>
@@ -119,7 +128,9 @@ export default function ExpenseRequestForm({ budgetId, onSuccess }: ExpenseReque
               value={formData.accountCode}
               onChange={(e) => setFormData({ ...formData, accountCode: e.target.value })}
               placeholder="e.g., 5000-100"
+              className={fieldErrors.accountCode ? 'border-destructive' : ''}
             />
+            {fieldErrors.accountCode && <p className="text-xs text-destructive">{fieldErrors.accountCode}</p>}
           </div>
         </div>
 
@@ -131,7 +142,9 @@ export default function ExpenseRequestForm({ budgetId, onSuccess }: ExpenseReque
             onChange={(e) => setFormData({ ...formData, description: e.target.value })}
             placeholder="Please provide a detailed description of the expense..."
             rows={3}
+            className={fieldErrors.description ? 'border-destructive' : ''}
           />
+          {fieldErrors.description && <p className="text-xs text-destructive">{fieldErrors.description}</p>}
         </div>
 
         <div className="grid grid-cols-2 gap-4">
@@ -178,7 +191,9 @@ export default function ExpenseRequestForm({ budgetId, onSuccess }: ExpenseReque
               value={formData.amount}
               onChange={(e) => setFormData({ ...formData, amount: e.target.value })}
               placeholder="0.00"
+              className={fieldErrors.amount ? 'border-destructive' : ''}
             />
+            {fieldErrors.amount && <p className="text-xs text-destructive">{fieldErrors.amount}</p>}
           </div>
           <div className="grid gap-2">
             <Label htmlFor="taxAmount">Tax Amount</Label>
@@ -189,7 +204,9 @@ export default function ExpenseRequestForm({ budgetId, onSuccess }: ExpenseReque
               value={formData.taxAmount}
               onChange={(e) => setFormData({ ...formData, taxAmount: e.target.value })}
               placeholder="0.00"
+              className={fieldErrors.taxAmount ? 'border-destructive' : ''}
             />
+            {fieldErrors.taxAmount && <p className="text-xs text-destructive">{fieldErrors.taxAmount}</p>}
           </div>
           <div className="grid gap-2">
             <Label>Total</Label>
@@ -227,7 +244,9 @@ export default function ExpenseRequestForm({ budgetId, onSuccess }: ExpenseReque
             value={formData.receiptUrl}
             onChange={(e) => setFormData({ ...formData, receiptUrl: e.target.value })}
             placeholder="https://..."
+            className={fieldErrors.receiptUrl ? 'border-destructive' : ''}
           />
+          {fieldErrors.receiptUrl && <p className="text-xs text-destructive">{fieldErrors.receiptUrl}</p>}
           <p className="text-xs text-muted-foreground">
             Upload receipt to storage and paste URL here
           </p>

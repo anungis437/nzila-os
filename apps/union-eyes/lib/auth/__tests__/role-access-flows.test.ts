@@ -51,6 +51,8 @@ const CLIENT_FACING_ROLES = [
   UserRole.CLC_STAFF,
   UserRole.CLC_EXECUTIVE,
   UserRole.SYSTEM_ADMIN,
+  // Strategic leadership (cross-domain access incl. admin panel)
+  UserRole.APP_OWNER,
 ] as const;
 
 const PLATFORM_OPS_ROLES = [
@@ -70,7 +72,6 @@ const PLATFORM_OPS_ROLES = [
   UserRole.PLATFORM_LEAD,
   UserRole.CTO,
   UserRole.COO,
-  UserRole.APP_OWNER,
 ] as const;
 
 const LEGACY_ROLE_MAP: [UserRole, UserRole][] = [
@@ -863,12 +864,14 @@ describe('Feature flow — Financial governance', () => {
 
 describe('Feature flow — Voting', () => {
   // Cross-org oversight roles (CLC/Federation) are view-only — no voting
+  // APP_OWNER is a platform leadership role, not a union voter
   const OVERSIGHT_ROLES: UserRole[] = [
     UserRole.CLC_EXECUTIVE,
     UserRole.CLC_STAFF,
     UserRole.FED_EXECUTIVE,
     UserRole.FED_STAFF,
     UserRole.SYSTEM_ADMIN,
+    UserRole.APP_OWNER,
   ];
 
   it('all local/national union roles can cast votes', () => {
@@ -942,11 +945,13 @@ describe('Feature flow — Cross-org analytics (CLC / Federation)', () => {
 
 describe('Feature flow — Claim lifecycle', () => {
   // Cross-org oversight roles (CLC/Federation) don't create claims — they review
+  // APP_OWNER is a platform leadership role, not a union claimant
   const CLAIM_OVERSIGHT_ROLES: UserRole[] = [
     UserRole.CLC_EXECUTIVE,
     UserRole.CLC_STAFF,
     UserRole.FED_EXECUTIVE,
     UserRole.FED_STAFF,
+    UserRole.APP_OWNER,
   ];
 
   it('local/national union roles can create claims', () => {
@@ -987,8 +992,9 @@ describe('Feature flow — Admin panel access', () => {
     expect(adminRoles).toContain(UserRole.ADMIN);
     expect(adminRoles).toContain(UserRole.PRESIDENT);
     expect(adminRoles).toContain(UserRole.SYSTEM_ADMIN);
+    expect(adminRoles).toContain(UserRole.APP_OWNER);
     // Nobody else
-    expect(adminRoles).toHaveLength(3);
+    expect(adminRoles).toHaveLength(4);
   });
 
   it('admin route blocked for all non-admin roles', () => {

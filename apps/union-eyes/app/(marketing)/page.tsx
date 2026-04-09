@@ -1,8 +1,8 @@
 /**
  * Union Eyes — Marketing Landing Page
  * ────────────────────────────────────
- * Premium, Nzila-quality public site with scroll-triggered reveals,
- * rich imagery, animated stats, and consistent section patterns.
+ * Workflow-first, decision-system positioning.
+ * Minimal sections, strong spacing, clear narrative.
  */
 
 export const dynamic = 'force-dynamic';
@@ -11,26 +11,21 @@ import type { Metadata } from 'next';
 import Image from 'next/image';
 import Link from 'next/link';
 import ScrollReveal from '@/components/public/scroll-reveal';
-import AnimatedFeatures from './components/animated-features';
+import WorkflowSection from './components/workflow-section';
+import RolesSection from './components/roles-section';
 import AnimatedCTA from './components/animated-cta';
 
 export const metadata: Metadata = {
-  title: 'Union Eyes — AI-Powered Union Management',
-  description: 'Grievance management, claims processing, member engagement, and operational excellence — built with unions, not for unions. Powered by Nzila.',
+  title: 'Union Eyes — A Decision System for Labour Leadership',
+  description: 'Union Eyes is a decision system for labour leadership. From intake to outcome, all in one system.',
   openGraph: {
-    title: 'Union Eyes — AI-Powered Union Management',
-    description: 'AI-powered grievance management, member engagement, and operational tools — co-designed with Canadian unions. Now piloting with CUPE, CAPE, and more.',
-    images: [{ url: 'https://images.unsplash.com/photo-1504328345606-18bbc8c9d7d1?w=1200&h=630&fit=crop&q=80', width: 1200, height: 630, alt: 'Workers in a professional labor meeting — Union Eyes platform' }],
+    title: 'Union Eyes — A Decision System for Labour Leadership',
+    description: 'Know what matters. Act with confidence. From intake to outcome, all in one system.',
+    images: [{ url: 'https://images.unsplash.com/photo-1504328345606-18bbc8c9d7d1?w=1200&h=630&fit=crop&q=80', width: 1200, height: 630, alt: 'Workers in a professional labor meeting — Union Eyes' }],
   },
 };
 
-const pilotPartners = [
-  'CUPE',
-  'CAPE',
-  'PSAC',
-  'UNIFOR',
-  'USW',
-];
+const pilotPartners = ['CUPE', 'CAPE', 'PSAC', 'UNIFOR', 'USW'];
 
 export default function HomePage() {
   return (
@@ -39,7 +34,7 @@ export default function HomePage() {
       <section className="relative min-h-[85vh] flex items-center overflow-hidden -mt-16 md:-mt-20">
         <Image
           src="https://images.unsplash.com/photo-1504328345606-18bbc8c9d7d1?w=1920"
-          alt="Workers gathered in a professional labor meeting — representing the solidarity Union Eyes supports"
+          alt="Workers gathered in a professional labor meeting"
           fill
           priority
           className="object-cover"
@@ -51,21 +46,21 @@ export default function HomePage() {
         <div className="relative z-10 max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-32">
           <ScrollReveal>
             <span className="inline-block px-4 py-1.5 text-xs font-semibold tracking-widest uppercase rounded-full bg-white/20 text-white mb-6">
-              Built with Unions, Not for Unions
+              A Decision System for Labour Leadership
             </span>
           </ScrollReveal>
 
           <ScrollReveal delay={0.1}>
             <h1 className="text-5xl md:text-7xl lg:text-8xl font-bold text-white mb-6 leading-tight">
-              Your union.<br />
-              <span className="gradient-text">Under control.</span>
+              Know what to do.<br />
+              <span className="gradient-text">Not just what&apos;s happening.</span>
             </h1>
           </ScrollReveal>
 
           <ScrollReveal delay={0.2}>
             <p className="text-xl md:text-2xl text-white mb-10 max-w-3xl">
-              AI-powered grievance management, claims processing, and member
-              engagement — co-designed with Canadian unions, now entering pilot.
+              Union Eyes brings intake, casework, intelligence, and outcomes
+              into one decision system — built with Canadian unions, now entering pilot.
             </p>
           </ScrollReveal>
 
@@ -75,19 +70,18 @@ export default function HomePage() {
                 href="/pilot-request"
                 className="inline-flex items-center justify-center px-8 py-4 bg-electric text-white font-bold rounded-xl hover:bg-blue-700 transition-all text-lg shadow-lg shadow-electric/30 btn-press"
               >
-                Request a Pilot
+                Request a Demo
               </Link>
               <Link
                 href="/story"
                 className="inline-flex items-center justify-center px-8 py-4 bg-white/15 backdrop-blur text-white font-bold rounded-xl border border-white/30 hover:bg-white/25 transition-all text-lg btn-press"
               >
-                Our Story
+                See How It Works
               </Link>
             </div>
           </ScrollReveal>
         </div>
 
-        {/* Scroll indicator */}
         <div className="absolute bottom-8 left-1/2 -translate-x-1/2 z-10">
           <div className="w-6 h-10 rounded-full border-2 border-white/30 flex items-start justify-center p-1.5">
             <div className="w-1.5 h-3 rounded-full bg-white/60 animate-bounce" />
@@ -95,24 +89,38 @@ export default function HomePage() {
         </div>
       </section>
 
-      {/* ═══════════════════════ STATS BAR ═══════════════════════ */}
-      <section className="relative bg-navy-light py-16 overflow-hidden">
-        <div className="absolute inset-0 bg-mesh opacity-40" />
-        <div className="relative z-10 max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
-          <div className="grid grid-cols-2 md:grid-cols-4 gap-8">
+      {/* ═══════════════════════ WORKFLOW ═══════════════════════ */}
+      <section className="py-24 px-4 md:px-6 bg-white">
+        <div className="max-w-5xl mx-auto">
+          <WorkflowSection />
+        </div>
+      </section>
+
+      {/* ═══════════════════════ DIFFERENTIATION ═══════════════════════ */}
+      <section className="py-24 bg-gray-50">
+        <div className="max-w-4xl mx-auto px-4 sm:px-6 lg:px-8">
+          <ScrollReveal>
+            <div className="text-center mb-14">
+              <h2 className="text-3xl md:text-4xl font-bold text-navy mb-4">
+                Why Union Eyes is different
+              </h2>
+            </div>
+          </ScrollReveal>
+          <div className="grid sm:grid-cols-2 gap-8">
             {[
-              { value: '35+', label: 'Organizational Roles' },
-              { value: '2', label: 'Languages' },
-              { value: 'PIPEDA', label: 'Compliant' },
-              { value: '5', label: 'Pilot Partners' },
-            ].map((stat) => (
-              <ScrollReveal key={stat.label}>
-                <div className="text-center">
-                  <div className="text-4xl md:text-5xl font-bold text-white mb-2">
-                    {stat.value}
+              { before: 'Not a dashboard', after: 'A decision system' },
+              { before: 'Not fragmented tools', after: 'One workflow' },
+              { before: 'Not static analytics', after: 'Live intelligence' },
+              { before: 'Not guesswork', after: 'Guided action' },
+            ].map((item) => (
+              <ScrollReveal key={item.before}>
+                <div className="flex items-start gap-4 p-6 rounded-2xl bg-white border border-gray-100">
+                  <div className="shrink-0 mt-0.5">
+                    <div className="w-2 h-2 rounded-full bg-electric" />
                   </div>
-                  <div className="text-white font-medium text-sm tracking-wider uppercase">
-                    {stat.label}
+                  <div>
+                    <p className="text-gray-400 line-through text-sm mb-1">{item.before}</p>
+                    <p className="text-navy font-bold text-lg">{item.after}</p>
                   </div>
                 </div>
               </ScrollReveal>
@@ -121,36 +129,39 @@ export default function HomePage() {
         </div>
       </section>
 
-      {/* ═══════════════════════ FEATURES ═══════════════════════ */}
+      {/* ═══════════════════════ ROLES ═══════════════════════ */}
       <section className="py-24 px-4 md:px-6 bg-white">
-        <div className="max-w-7xl mx-auto">
-          <AnimatedFeatures />
+        <div className="max-w-6xl mx-auto">
+          <RolesSection />
         </div>
       </section>
 
-      {/* ═══════════════════════ MISSION ═══════════════════════ */}
+      {/* ═══════════════════════ TRUST ═══════════════════════ */}
       <section className="py-24 bg-gray-50">
         <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
           <div className="grid lg:grid-cols-2 gap-16 items-center">
             <ScrollReveal direction="left">
               <span className="inline-block px-4 py-1.5 text-xs font-semibold tracking-widest uppercase rounded-full bg-electric/10 text-electric mb-4">
-                Our Mission
+                Governed &amp; Secure
               </span>
-              <h2 className="text-3xl md:text-5xl font-bold text-navy mb-6">
-                Technology That Serves <span className="text-electric">Workers First</span>
+              <h2 className="text-3xl md:text-4xl font-bold text-navy mb-6">
+                Built on trust, <span className="text-electric">not surveillance</span>
               </h2>
               <p className="text-lg text-gray-800 mb-6 leading-relaxed">
                 Union Eyes was born when a healthcare steward lost a winnable
                 grievance because her notes were trapped in a spreadsheet. The employer
-                had a million-dollar HR system. She had a notebook. We&apos;re building this
-                platform to level the playing field — and we&apos;re piloting it now with
-                unions like CUPE and CAPE to get it right.
+                had a million-dollar HR system. She had a notebook. We built a system
+                that levels the playing field — governed by the people who use it.
               </p>
-              <div className="grid grid-cols-2 gap-4">
-                {['Human-Centered', 'No Surveillance', 'Democratic Governance', 'Worker Owned Data'].map((item) => (
-                  <div key={item} className="flex items-center gap-2">
-                    <div className="w-2 h-2 rounded-full bg-electric" />
-                    <span className="text-sm font-medium text-gray-800">{item}</span>
+              <div className="grid grid-cols-1 sm:grid-cols-3 gap-4">
+                {[
+                  { label: 'System effectiveness', detail: 'Outcome-driven' },
+                  { label: 'Role-based access', detail: '35+ roles' },
+                  { label: 'Audit-ready', detail: 'PIPEDA compliant' },
+                ].map((item) => (
+                  <div key={item.label} className="p-4 rounded-xl bg-white border border-gray-100">
+                    <div className="text-sm font-bold text-navy">{item.label}</div>
+                    <div className="text-xs text-gray-500 mt-1">{item.detail}</div>
                   </div>
                 ))}
               </div>
@@ -160,30 +171,12 @@ export default function HomePage() {
               <div className="relative rounded-2xl overflow-hidden aspect-4/3">
                 <Image
                   src="https://images.unsplash.com/photo-1522071820081-009f0129c71c?w=800"
-                  alt="Diverse team collaborating around laptops — representing the people behind Union Eyes"
+                  alt="Diverse team collaborating — representing the people behind Union Eyes"
                   fill
                   className="object-cover"
                   sizes="(max-width: 1024px) 100vw, 50vw"
                 />
                 <div className="absolute inset-0 bg-linear-to-t from-navy/40 to-transparent" />
-                <div className="absolute bottom-6 left-6 right-6 glass-card rounded-xl p-4">
-                  <div className="flex items-center gap-6 text-white">
-                    <div>
-                      <div className="text-2xl font-bold">35+</div>
-                      <div className="text-xs text-gray-100">Union Roles</div>
-                    </div>
-                    <div className="w-px h-10 bg-white/30" />
-                    <div>
-                      <div className="text-2xl font-bold">2</div>
-                      <div className="text-xs text-gray-100">Languages</div>
-                    </div>
-                    <div className="w-px h-10 bg-white/30" />
-                    <div>
-                      <div className="text-2xl font-bold">PIPEDA</div>
-                      <div className="text-xs text-gray-100">Compliant</div>
-                    </div>
-                  </div>
-                </div>
               </div>
             </ScrollReveal>
           </div>
@@ -191,18 +184,11 @@ export default function HomePage() {
       </section>
 
       {/* ═══════════════════════ PILOT PARTNERS ═══════════════════════ */}
-      <section className="py-24 px-4 md:px-6 bg-white">
-        <div className="max-w-7xl mx-auto text-center">
+      <section className="py-20 px-4 md:px-6 bg-white">
+        <div className="max-w-5xl mx-auto text-center">
           <ScrollReveal>
-            <span className="inline-block px-4 py-1.5 text-xs font-semibold tracking-widest uppercase rounded-full bg-electric/10 text-electric mb-4">
-              Pilot Program
-            </span>
-            <h2 className="text-3xl md:text-5xl font-bold text-navy mb-4">
-              Trusted by Leading Canadian Unions
-            </h2>
-            <p className="text-lg text-gray-800 mb-12 max-w-2xl mx-auto">
-              We&apos;re working directly with union leadership to shape Union Eyes
-              through real-world pilots before general availability.
+            <p className="text-sm font-semibold tracking-widest uppercase text-gray-400 mb-8">
+              Piloting with leading Canadian unions
             </p>
           </ScrollReveal>
           <div className="flex flex-wrap items-center justify-center gap-8 md:gap-12">

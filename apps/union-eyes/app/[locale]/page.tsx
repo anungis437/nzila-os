@@ -40,7 +40,7 @@ export default async function LocaleRootPage({
   const { userId } = await auth();
 
   if (userId) {
-    redirect(`/${locale}/dashboard`);
+    redirect(`/${locale}/dashboard/priorities`);
   }
 
   const t = await getTranslations({ locale, namespace: 'marketing.home' });

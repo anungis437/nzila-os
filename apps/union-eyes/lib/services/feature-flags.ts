@@ -99,6 +99,8 @@ export const AI_FEATURES = {
   PENSION_BENEFIT_PROJECTION: 'ai_pension_benefit_projection',
   /** Pension trustee summary: plain-language summary of actuarial valuations */
   PENSION_TRUSTEE_SUMMARY: 'ai_pension_trustee_summary',
+  /** Financial analysis: collection anomalies, arrears risk, budget variance, NL summaries */
+  FINANCIAL_ANALYSIS: 'ai_financial_analysis',
 } as const;
 
 /**

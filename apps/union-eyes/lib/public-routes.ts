@@ -48,6 +48,16 @@ export const PUBLIC_API_ROUTES = new Set([
   '/api/whop/create-checkout',          // Whop checkout creation (redirects to Whop auth)
   
   // ========================================================================
+  // AUTH ENDPOINTS (email/password)
+  // Justification: Users must be able to authenticate without an existing session
+  // ========================================================================
+  '/api/auth/signup',            // Create new account
+  '/api/auth/login',             // Email/password login
+  '/api/auth/logout',            // Session logout (no-op if unauthenticated)
+  '/api/auth/forgot-password',   // Request password reset (rate-limited)
+  '/api/auth/reset-password',    // Reset password with emailed token
+  
+  // ========================================================================
   // PUBLIC TRACKING/ANALYTICS
   // Justification: Email opens/clicks tracking, must work without auth
   // Note: These use path prefixes - handler validates token in URL

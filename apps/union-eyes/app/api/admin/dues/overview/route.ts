@@ -5,19 +5,20 @@
  * comparisons from the member_dues_ledger, member_arrears, and
  * employer_remittances tables.
  */
-import { NextResponse } from 'next/server';
-import { withMinRole } from '@/lib/api-auth-guard';
+import { withApi, ApiError } from '@/lib/api/framework';
 import { db } from '@/db/db';
 import { memberDuesLedger, memberArrears } from '@/db/schema';
-import { eq, and, gte, lt, sql, desc } from 'drizzle-orm';
+import { eq, and, gte, lt, sql } from 'drizzle-orm';
 
 export const dynamic = 'force-dynamic';
 
-export const GET = withMinRole('steward', async (_request, context) => {
-  const organizationId = (context as { organizationId?: string }).organizationId;
-  if (!organizationId) {
-    return NextResponse.json({ error: 'Organization context required' }, { status: 400 });
-  }
+export const GET = withApi(
+  {
+    auth: { minRole: 'steward' },
+    openapi: { tags: ['Admin', 'Dues'], summary: 'Admin dues overview' },
+  },
+  async ({ organizationId }) => {
+    if (!organizationId) throw ApiError.badRequest('Organization context required');
 
   const now = new Date();
   const thisMonthStart = new Date(now.getFullYear(), now.getMonth(), 1);
@@ -64,25 +65,25 @@ export const GET = withMinRole('steward', async (_request, context) => {
   }
 
   // ── Recent payments ──────────────────────────────────────────────────
-  const recentPayments = await db
-    .select({
-      id: memberDuesLedger.id,
-      amount: memberDuesLedger.amount,
-      status: memberDuesLedger.status,
-      transactionDate: memberDuesLedger.transactionDate,
-      periodStart: memberDuesLedger.periodStart,
-      description: memberDuesLedger.description,
-      userId: memberDuesLedger.userId,
-    })
-    .from(memberDuesLedger)
-    .where(
-      and(
-        eq(memberDuesLedger.organizationId, organizationId),
-        eq(memberDuesLedger.transactionType, 'payment'),
-      ),
-    )
-    .orderBy(desc(memberDuesLedger.transactionDate))
-    .limit(10);
+  const recentPayments = await db.execute(sql`
+    SELECT
+      mdl.id,
+      mdl.amount,
+      mdl.status,
+      mdl.transaction_date AS "transactionDate",
+      mdl.period_start     AS "periodStart",
+      mdl.description,
+      mdl.user_id          AS "userId",
+      om.name              AS "memberName"
+    FROM member_dues_ledger mdl
+    LEFT JOIN organization_members om
+      ON om.user_id = mdl.user_id
+     AND om.organization_id = mdl.organization_id::text
+    WHERE mdl.organization_id = ${organizationId}::uuid
+      AND mdl.transaction_type = 'payment'
+    ORDER BY mdl.transaction_date DESC
+    LIMIT 10
+  `);
 
   // ── Period comparison ────────────────────────────────────────────────
   const [thisMonthRow] = await db
@@ -127,13 +128,13 @@ export const GET = withMinRole('steward', async (_request, context) => {
       overdue: parseInt(arrearsRow?.overdueCount ?? '0', 10),
       total: Object.values(statMap).reduce((a, b) => a + b, 0),
     },
-    recentPayments: recentPayments.map((p) => ({
+    recentPayments: recentPayments.map((p: Record<string, unknown>) => ({
       id: p.id,
-      memberName: p.userId ?? 'Unknown',
+      memberName: (p.memberName as string) ?? (p.userId as string) ?? 'Unknown',
       amount: parseFloat(String(p.amount)),
       status: p.status,
-      paidDate: p.transactionDate?.toISOString() ?? null,
-      dueDate: p.periodStart?.toISOString() ?? '',
+      paidDate: p.transactionDate ? String(p.transactionDate) : null,
+      dueDate: p.periodStart ? String(p.periodStart) : '',
     })),
     periodStats: {
       thisMonth: {
@@ -149,5 +150,6 @@ export const GET = withMinRole('steward', async (_request, context) => {
     },
   };
 
-  return NextResponse.json(overview);
-});
+    return overview;
+  },
+);

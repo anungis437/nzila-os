@@ -453,8 +453,8 @@ export default function MembersConsole() {
             ) : (
               filteredMembers.map((member, index) => {
                 const isExpanded = expandedMember === member.id;
-                const roleInfo = roleConfig[member.role];
-                const statusInfo = statusConfig[member.status];
+                const roleInfo = roleConfig[member.role] || { label: member.role.replace(/_/g, ' ').replace(/\b\w/g, c => c.toUpperCase()), color: "text-gray-700 bg-gray-100 border-gray-200", icon: <Users className="w-3 h-3" /> };
+                const statusInfo = statusConfig[member.status] || { label: member.status, color: "text-gray-700 bg-gray-100 border-gray-200", dotColor: "bg-gray-500" };
 
                 return (
                   <motion.div
