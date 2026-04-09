@@ -1,28 +1,9 @@
 /**
- * Messages Page
- * Main page for member messaging system
+ * @deprecated Portal consolidated into dashboard (Phase 6 — Workflow Realignment).
  */
-'use client';
+import { redirect } from "next/navigation";
 
-
-export const dynamic = 'force-dynamic';
-import { useState } from 'react';
-import { MessagesDashboard } from '@/components/messages/MessagesDashboard';
-import { MessageThreadView } from '@/components/messages/MessageThreadView';
-
-export default function MessagesPage() {
-  const [selectedThreadId, setSelectedThreadId] = useState<string | null>(null);
-
-  return (
-    <div className="container mx-auto py-8">
-      {selectedThreadId ? (
-        <MessageThreadView
-          threadId={selectedThreadId}
-          onBack={() => setSelectedThreadId(null)}
-        />
-      ) : (
-        <MessagesDashboard onSelectThread={setSelectedThreadId} />
-      )}
-    </div>
-  );
+export default async function PortalMessagesPage({ params }: { params: Promise<{ locale: string }> }) {
+  const { locale } = await params;
+  redirect(`/${locale}/dashboard/messages`);
 }

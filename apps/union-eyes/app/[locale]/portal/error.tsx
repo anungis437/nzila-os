@@ -48,7 +48,7 @@ export default function PortalError({
             Try again
           </Button>
           <Button
-            onClick={() => window.location.href = '/portal'}
+            onClick={() => window.location.href = '/dashboard'}
             variant="outline"
           >
             Return to dashboard
