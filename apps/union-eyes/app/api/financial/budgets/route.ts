@@ -1,28 +1,20 @@
 /**
- * STUB: budgets table does not exist yet.
- * Returns empty results until proper budgets schema is created.
- * @deprecated Needs migration to create budgets table.
+ * @deprecated Budget routes removed — budgets table never created.
+ * Use /api/billing/reports for financial reporting.
+ *
+ * Phase 9 — Deprecation System
  */
-import { NextResponse } from 'next/server';
-import { withApi } from '@/lib/api/framework';
+import { NextRequest } from 'next/server';
+import { logDeprecatedAccess, deprecatedResponse } from '@/lib/api/deprecation';
 
 export const dynamic = 'force-dynamic';
 
-export const GET = withApi({
-  tags: ['Billing'],
-  auth: { required: true },
-  handler: async () => {
-    return NextResponse.json({ data: [], total: 0, _stub: 'budgets_table_pending' });
-  },
-});
+const CANONICAL = '/api/billing/reports';
 
-export const POST = withApi({
-  tags: ['Billing'],
-  auth: { required: true, minRole: 'steward' },
-  handler: async () => {
-    return NextResponse.json(
-      { error: 'Budget creation not yet available — budgets table pending migration' },
-      { status: 501 }
-    );
-  },
-});
+async function handler(request: NextRequest) {
+  logDeprecatedAccess('/api/financial/budgets', request.method, CANONICAL);
+  return deprecatedResponse('/api/financial/budgets', CANONICAL);
+}
+
+export const GET = handler;
+export const POST = handler;
