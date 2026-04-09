@@ -15,6 +15,7 @@ import LanguageSwitcher from "@/components/language-switcher";
 import { HeaderActions } from "@/components/header-actions";
 import { PilotModeProvider } from "@/contexts/pilot-mode-context";
 import { FeatureFlagProvider } from "@/lib/hooks/use-feature-flags";
+import { OnboardingProvider } from "@/components/onboarding/onboarding-provider";
 import { logger } from "@/lib/logger";
 import { getOrganizationIdForUser, DEFAULT_ORGANIZATION_ID } from "@/lib/organization-utils";
 import { getUserRole } from "@/lib/auth/rbac-server";
@@ -172,6 +173,9 @@ export default async function DashboardLayout({ children }: { children: ReactNod
               {children}
             </FeatureFlagProvider>
           </div>
+
+          {/* First-visit onboarding overlay */}
+          <OnboardingProvider userRole={userRole} />
         </div>
       </div>
     </PilotModeProvider>

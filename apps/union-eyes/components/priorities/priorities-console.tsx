@@ -19,6 +19,7 @@ import {
 import { Card, CardContent } from "@/components/ui/card";
 import { Badge } from "@/components/ui/badge";
 import { Button } from "@/components/ui/button";
+import { ActionHint } from "@/components/onboarding/action-hint";
 
 interface PriorityItem {
   id: string;
@@ -117,6 +118,10 @@ export function PrioritiesConsole() {
               ? "Team-level priorities — items your team should address next."
               : "What should you do next? Items ranked by urgency and deadline."}
           </p>
+          <ActionHint
+            hintKey={isTeamView ? "priorities-team-first" : "priorities-first"}
+            text="Top priority — start here"
+          />
         </div>
         <Button
           variant="outline"

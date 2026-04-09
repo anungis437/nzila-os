@@ -26,6 +26,7 @@ import { Card, CardContent } from "@/components/ui/card";
 import { Button } from "@/components/ui/button";
 import { Badge } from "@/components/ui/badge";
 import type { Signal, SignalType, SignalUrgency } from "@/lib/types/signal";
+import { ActionHint } from "@/components/onboarding/action-hint";
 
 // ── Type → icon mapping ─────────────────────────────────────────────────────
 const TYPE_ICONS: Record<SignalType, React.ReactNode> = {
@@ -157,6 +158,7 @@ export function InboxConsole() {
         <p className="text-sm text-gray-500 mt-1">
           Everything that needs your attention — intake, messages, alerts, and system signals in one place.
         </p>
+        <ActionHint hintKey="inbox-first" text="Start here — review or action the first item below" />
       </div>
 
       {/* Filter chips */}

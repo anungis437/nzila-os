@@ -24,6 +24,7 @@ import { useOrganization } from "@/contexts/organization-context";
 import { Briefcase, TrendingUp, AlertCircle, BookOpen } from "lucide-react";
 import { useLocale } from "next-intl";
 import Link from "next/link";
+import { ActionHint } from "@/components/onboarding/action-hint";
 
 // Roles that can see officer-level federation insights tab
 const AI_INSIGHT_ROLES = new Set([
@@ -69,6 +70,7 @@ export function IntelligenceShell({ userRole }: IntelligenceShellProps) {
         >
           <BookOpen size={12} /> Supporting references in Knowledge
         </Link>
+        <ActionHint hintKey="intelligence-first" text="Focus on the top signals and recommended actions" />
       </div>
 
       <Tabs defaultValue={defaultTab} className="w-full">
