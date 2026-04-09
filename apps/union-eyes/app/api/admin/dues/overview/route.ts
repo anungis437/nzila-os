@@ -9,6 +9,7 @@ import { withApi, ApiError } from '@/lib/api/framework';
 import { db } from '@/db/db';
 import { memberDuesLedger, memberArrears } from '@/db/schema';
 import { eq, and, gte, lt, sql } from 'drizzle-orm';
+import { withRLSContext } from '@/lib/db/with-rls-context';
 
 export const dynamic = 'force-dynamic';
 
@@ -65,7 +66,7 @@ export const GET = withApi(
   }
 
   // ── Recent payments ──────────────────────────────────────────────────
-  const recentPayments = await db.execute(sql`
+  const recentPayments = await withRLSContext(async () => db.execute(sql`
     SELECT
       mdl.id,
       mdl.amount,
@@ -83,7 +84,7 @@ export const GET = withApi(
       AND mdl.transaction_type = 'payment'
     ORDER BY mdl.transaction_date DESC
     LIMIT 10
-  `);
+  `));
 
   // ── Period comparison ────────────────────────────────────────────────
   const [thisMonthRow] = await db

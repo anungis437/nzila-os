@@ -14,6 +14,7 @@ import { withApi, ApiError, z } from '@/lib/api/framework';
 import { db } from '@/db';
 import { sql } from 'drizzle-orm';
 import { getRemittanceStatusForParent } from '@/services/clc/per-capita-calculator';
+import { withRLSContext } from '@/lib/db/with-rls-context';
 
 export const dynamic = 'force-dynamic';
 
@@ -35,12 +36,12 @@ export const GET = withApi(
     if (!organizationId) throw ApiError.badRequest('Organization context required');
 
     // Verify the org is a parent (has child organizations)
-    const [childCheck] = await db.execute(sql`
+    const [childCheck] = await withRLSContext(async () => db.execute(sql`
       SELECT COUNT(*)::int AS "childCount"
       FROM organizations
       WHERE parent_id = ${organizationId}
         AND status = 'active'
-    `);
+    `));
 
     const childCount = Number((childCheck as Record<string, unknown>)?.childCount ?? 0);
     if (childCount === 0) {

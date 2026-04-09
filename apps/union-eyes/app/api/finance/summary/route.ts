@@ -8,6 +8,7 @@
 import { withApi, ApiError } from '@/lib/api/framework';
 import { db } from '@/db';
 import { sql } from 'drizzle-orm';
+import { withRLSContext } from '@/lib/db/with-rls-context';
 
 export const dynamic = 'force-dynamic';
 
@@ -20,6 +21,7 @@ export const GET = withApi(
   async ({ organizationId }) => {
     if (!organizationId) throw ApiError.badRequest('Organization context required');
 
+    return withRLSContext(async () => {
     const orgIdCast = sql`${organizationId}::uuid`;
 
     // ── Remittance trend (monthly, last 12) ───────────────────────────
@@ -401,5 +403,6 @@ export const GET = withApi(
           : 0,
       })),
     };
+    });
   },
 );

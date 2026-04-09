@@ -413,7 +413,6 @@ export default function FinancialOverview() {
       }
     } catch (e) {
       setError('Failed to load financial data');
-      console.error('Financial overview fetch error:', e);
     } finally {
       setLoading(false);
     }

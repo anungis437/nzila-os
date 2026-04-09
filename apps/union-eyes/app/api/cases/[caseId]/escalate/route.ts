@@ -14,6 +14,7 @@ import { grievances } from '@/db/schema/domains/claims/grievances';
 import { grievanceEvents } from '@/db/schema/domains/claims/grievance-lifecycle';
 import { eq } from 'drizzle-orm';
 import { auditLog, AuditEventType, AuditSeverity } from '@/lib/audit-logger';
+import { withRLSContext } from '@/lib/db/with-rls-context';
 
 export const dynamic = 'force-dynamic';
 
@@ -101,50 +102,54 @@ export const POST = withApi(
     const orgId = claim.organizationId ?? ctx.organizationId ?? '';
 
     // Create the grievance
-    const [grievance] = await db
-      .insert(grievances)
-      .values({
-        grievanceNumber: `GRV-${Date.now()}`,
-        type: grievanceType as 'individual',
-        title: claim.description?.substring(0, 500) ?? 'Escalated from case queue',
-        description: claim.description ?? '',
-        priority: (priority ?? claim.priority ?? 'medium') as 'medium',
-        status: 'filed',
-        grievantId: claim.memberId ? undefined : undefined,
-        grievantName: claim.memberId ?? undefined,
-        incidentDate: claim.incidentDate,
-        filedDate: new Date(),
-        cbaArticle: cbaArticle ?? undefined,
-        organizationId: orgId,
-        createdBy: ctx.userId ?? undefined,
-        relatedGrievanceIds: undefined,
-      })
-      .returning();
+    const grievance = await withRLSContext(async () => {
+      const [g] = await db
+        .insert(grievances)
+        .values({
+          grievanceNumber: `GRV-${Date.now()}`,
+          type: grievanceType as 'individual',
+          title: claim.description?.substring(0, 500) ?? 'Escalated from case queue',
+          description: claim.description ?? '',
+          priority: (priority ?? claim.priority ?? 'medium') as 'medium',
+          status: 'filed',
+          grievantId: claim.memberId ? undefined : undefined,
+          grievantName: claim.memberId ?? undefined,
+          incidentDate: claim.incidentDate,
+          filedDate: new Date(),
+          cbaArticle: cbaArticle ?? undefined,
+          organizationId: orgId,
+          createdBy: ctx.userId ?? undefined,
+          relatedGrievanceIds: undefined,
+        })
+        .returning();
 
-    // Insert lifecycle event
-    await db.insert(grievanceEvents).values({
-      grievanceId: grievance.id,
-      eventType: 'created',
-      actorUserId: ctx.userId ?? '',
-      notes: `Escalated from case ${claim.claimNumber ?? caseId}. ${notes ?? ''}`.trim(),
+      // Insert lifecycle event
+      await db.insert(grievanceEvents).values({
+        grievanceId: g.id,
+        eventType: 'created',
+        actorUserId: ctx.userId ?? '',
+        notes: `Escalated from case ${claim.claimNumber ?? caseId}. ${notes ?? ''}`.trim(),
+      });
+
+      // Store the link in the claim's metadata
+      const existingMeta = (claim.metadata as Record<string, unknown>) ?? {};
+      await db
+        .update(claims)
+        .set({
+          status: 'resolved',
+          resolutionOutcome: 'escalated_to_grievance',
+          resolvedAt: new Date(),
+          updatedAt: new Date(),
+          metadata: {
+            ...existingMeta,
+            escalatedGrievanceId: g.id,
+            escalatedGrievanceNumber: g.grievanceNumber,
+          },
+        })
+        .where(eq(claims.claimId, caseId));
+
+      return g;
     });
-
-    // Store the link in the claim's metadata
-    const existingMeta = (claim.metadata as Record<string, unknown>) ?? {};
-    await db
-      .update(claims)
-      .set({
-        status: 'resolved',
-        resolutionOutcome: 'escalated_to_grievance',
-        resolvedAt: new Date(),
-        updatedAt: new Date(),
-        metadata: {
-          ...existingMeta,
-          escalatedGrievanceId: grievance.id,
-          escalatedGrievanceNumber: grievance.grievanceNumber,
-        },
-      })
-      .where(eq(claims.claimId, caseId));
 
     // Audit
     await auditLog({

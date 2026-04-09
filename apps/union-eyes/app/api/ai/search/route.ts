@@ -18,6 +18,7 @@ import { sql } from 'drizzle-orm';
 import { generateEmbedding } from '@/lib/services/ai/vector-search-service';
 import { getAiClient, UE_APP_KEY, UE_SYSTEM_ORG_ID, UE_PROFILES } from '@/lib/ai/ai-client';
 import { logger } from '@/lib/logger';
+import { withRLSContext } from '@/lib/db/with-rls-context';
 
 export const dynamic = 'force-dynamic';
 
@@ -78,7 +79,7 @@ export const POST = withRoleAuth('member', async (request: NextRequest, context:
       : sql``;
 
     // Semantic search with org-scoping + visibility rules
-    const results = await db.execute(sql`
+    const results = await withRLSContext(async () => db.execute(sql`
       SELECT
         id,
         title,
@@ -103,7 +104,7 @@ export const POST = withRoleAuth('member', async (request: NextRequest, context:
         ${typeFilter}
       ORDER BY similarity DESC
       LIMIT ${max_results}
-    `);
+    `));
 
     const hits = (results as unknown as Array<Record<string, unknown>>)
       .filter((r) => (r.similarity as number) >= threshold)
@@ -162,7 +163,7 @@ export const POST = withRoleAuth('member', async (request: NextRequest, context:
 
 export const GET = withRoleAuth('member', async (_request: NextRequest, _context: BaseAuthContext) => {
   try {
-    const rows = await db.execute(sql`
+    const rows = await withRLSContext(async () => db.execute(sql`
       SELECT
         count(*)::int AS total,
         count(*) FILTER (WHERE embedding IS NOT NULL)::int AS with_embeddings,
@@ -170,7 +171,7 @@ export const GET = withRoleAuth('member', async (_request: NextRequest, _context
         count(DISTINCT document_type)::int AS document_types
       FROM knowledge_base
       WHERE is_active = true
-    `);
+    `));
 
     const stats = (rows as unknown as Array<Record<string, unknown>>)[0] || {};
     const total = (stats.total as number) || 0;

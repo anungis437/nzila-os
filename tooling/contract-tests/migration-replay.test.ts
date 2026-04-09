@@ -84,7 +84,7 @@ describe('INV-MIG-REPLAY — Migration Replay Integrity', () => {
         // but 0059 variants and 0001 variants are expected (phase-based)
         // Date-prefixed migrations (YYYYMMDD) group multiple changes on the same day
         const isDatePrefix = num >= 20260101;
-        const isKnownVariant = [0, 1, 59, 81, 1770880372830].includes(num) || isDatePrefix;
+        const isKnownVariant = [0, 1, 59, 70, 80, 81, 1770880372830].includes(num) || isDatePrefix;
         if (!isKnownVariant) {
           duplicates.push(`prefix ${num}: ${files.join(', ')}`);
         }

@@ -18,6 +18,7 @@ import { db } from '@/db/db';
 import { aiUsageMetrics } from '@/db/schema';
 import { eq, and, sql } from 'drizzle-orm';
 import { logger } from '@/lib/logger';
+import { withRLSContext } from '@/lib/db/with-rls-context';
 
 export const dynamic = 'force-dynamic';
 
@@ -69,7 +70,7 @@ export const POST = withRoleAuth('member', async (request: NextRequest, context:
 
     if (existing.length > 0) {
       // Update existing feedback
-      await db.execute(sql`
+      await withRLSContext(async () => db.execute(sql`
         UPDATE ai_usage_metrics
         SET metadata = jsonb_set(
           jsonb_set(metadata, '{rating}', ${JSON.stringify(rating)}::jsonb),
@@ -77,7 +78,7 @@ export const POST = withRoleAuth('member', async (request: NextRequest, context:
         ),
         created_at = now()
         WHERE id = ${existing[0].id}
-      `);
+      `));
 
       return NextResponse.json({
         id: existing[0].id,
