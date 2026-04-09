@@ -3,19 +3,22 @@
 
 export const dynamic = 'force-dynamic';
 /**
- * Dashboard Page - Role-Based Switcher
+ * Dashboard Page — Role-Based Entry Router
  *
- * Detects the authenticated user's RBAC role and renders the appropriate
- * dashboard variant:
+ * Redirects users to their workflow-appropriate landing page based on RBAC role:
  *
- *   Nzila Ventures roles  -> NzilaOpsDashboard  (platform operations)
- *   CLC national roles    -> CLCDashboard       (congress-level)
- *   Federation roles      -> FederationDashboard (provincial federation)
- *   Union / Local roles   -> UnionDashboard      (original - preserved as-is)
+ *   member          → /inbox        (what needs attention)
+ *   steward+        → /priorities   (what should I do next)
+ *   officer+        → /priorities   (team-scoped)
+ *   federation/clc  → /intelligence (scoped to their tier)
+ *   nzila/admin     → /admin        (platform operations)
+ *
+ * Falls back to the tier-specific dashboard when role resolution fails.
  */
 
 import { useUser } from '@nzila/platform-auth/entra/client';
 import { useEffect, useState } from "react";
+import { useRouter } from "next/navigation";
 import { UserRole } from "@/lib/auth/roles";
 import { useOrganization } from "@/contexts/organization-context";
 import { usePilotMode } from "@/contexts/pilot-mode-context";
@@ -76,6 +79,29 @@ function classifyRole(role: string): DashboardTier {
   return "union";
 }
 
+// -- Role → landing page mapping -----------------------------------------------
+const STEWARD_PLUS = new Set([
+  UserRole.STEWARD, UserRole.CHIEF_STEWARD, UserRole.OFFICER,
+  UserRole.BARGAINING_COMMITTEE, UserRole.HEALTH_SAFETY_REP,
+]);
+const LEADERSHIP_PLUS = new Set([
+  UserRole.PRESIDENT, UserRole.VICE_PRESIDENT,
+  UserRole.SECRETARY_TREASURER, UserRole.NATIONAL_OFFICER,
+]);
+
+function getDefaultLanding(role: string, tier: DashboardTier): string | null {
+  // Platform admins stay on their ops dashboard
+  if (tier === "nzila") return null;
+  if (tier === "clc") return "/dashboard/intelligence?scope=executive";
+  if (tier === "federation") return "/dashboard/intelligence?scope=federation";
+  // Union roles
+  if (role === UserRole.ADMIN || role === UserRole.SYSTEM_ADMIN) return null; // stay on dashboard
+  if (LEADERSHIP_PLUS.has(role as UserRole)) return "/dashboard/priorities?view=team";
+  if (STEWARD_PLUS.has(role as UserRole)) return "/dashboard/priorities";
+  // member / guest
+  return "/dashboard/inbox";
+}
+
 // -- Main Page Component ------------------------------------------------------
 
 /** Map organization type to dashboard tier */
@@ -90,11 +116,14 @@ function orgTypeToDashboardTier(orgType: string | undefined): DashboardTier {
 
 export default function DashboardPage() {
   const { user } = useUser();
+  const router = useRouter();
   const { organizationId, organization, isLoading: orgLoading } = useOrganization();
   const { isPilotMode, hasCompletedOnboarding } = usePilotMode();
   const [mounted, setMounted] = useState(false);
   const [tier, setTier] = useState<DashboardTier | null>(null);
+  const [resolvedRole, setResolvedRole] = useState<string | null>(null);
   const [isPlatformViewer, setIsPlatformViewer] = useState(false);
+  const [redirectAttempted, setRedirectAttempted] = useState(false);
   const [showOnboarding, setShowOnboarding] = useState(false);
 
   // eslint-disable-next-line react-hooks/set-state-in-effect
@@ -121,6 +150,7 @@ export default function DashboardPage() {
               const { platformOrgId } = await platformRes.json();
               if (organizationId !== platformOrgId) {
                 setIsPlatformViewer(true);
+                setResolvedRole(role);
                 setTier(orgTypeToDashboardTier(organization.type));
                 return;
               }
@@ -128,17 +158,35 @@ export default function DashboardPage() {
           }
 
           setIsPlatformViewer(false);
+          setResolvedRole(role);
           setTier(roleTier);
         } else {
+          setResolvedRole("member");
           setTier("union"); // fallback
         }
       } catch {
+        setResolvedRole("member");
         setTier("union"); // fallback
       }
     };
 
     fetchRole();
   }, [user?.id, organizationId, organization, orgLoading]);
+
+  // ── Role-based redirect to workflow landing page ───────────────────────
+  // Redirect once after tier + role are resolved. If the landing page is the
+  // dashboard itself (null), or the user is a platform viewer, skip the redirect.
+  useEffect(() => {
+    if (!tier || !resolvedRole || redirectAttempted || isPlatformViewer) return;
+    // Pilot-mode users stay on their pilot dashboard
+    if (isPilotMode) return;
+
+    const landing = getDefaultLanding(resolvedRole, tier);
+    if (landing) {
+      setRedirectAttempted(true);
+      router.replace(landing);
+    }
+  }, [tier, resolvedRole, redirectAttempted, isPlatformViewer, isPilotMode, router]);
 
   // Loading skeleton while we resolve the user and their tier
   if (!mounted || !user || tier === null || orgLoading) {

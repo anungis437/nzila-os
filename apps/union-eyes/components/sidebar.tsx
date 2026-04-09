@@ -246,7 +246,7 @@ export default function Sidebar({ profile: _profile, userEmail, whopMonthlyPlanI
       roles: [...unionAll, mgmt],
       defaultOpen: true,
       items: [
-        { href: `/${locale}/dashboard`, icon: <Home size={16} />, label: t('navigation.dashboard'), roles: [...unionAll, mgmt] },
+        { href: `/${locale}/dashboard/inbox`, icon: <Home size={16} />, label: t('sidebar.inbox'), roles: [...unionAll, mgmt] },
         { href: `/${locale}/dashboard/claims`, icon: <FileText size={16} />, label: t('claims.myCases'), roles: unionAll },
         { href: `/${locale}/dashboard/claims/new`, icon: <Mic size={16} />, label: t('sidebar.newCase'), roles: unionAll },
         { href: `/${locale}/dashboard/messages`, icon: <Mail size={16} />, label: t('sidebar.messages'), roles: unionAll },
