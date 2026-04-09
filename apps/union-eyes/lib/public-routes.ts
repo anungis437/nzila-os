@@ -37,7 +37,7 @@ export const PUBLIC_API_ROUTES = new Set([
   '/api/webhooks/whop',        // Whop membership events (verified via webhook signature)
   '/api/signatures/webhooks/docusign', // Legacy DocuSign webhook endpoint
   '/api/integrations/shopify/webhooks', // Shopify order events (verified via HMAC)
-  '/api/stripe/webhooks',      // Alternative Stripe webhook endpoint
+  '/api/payments/webhooks/stripe', // Stripe webhook endpoint (consolidated)
   '/api/whop/webhooks',        // Alternative Whop webhook endpoint
   
   // ========================================================================

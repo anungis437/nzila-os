@@ -1,5 +1,5 @@
 /**
- * POST /api/stripe/webhooks — Stripe Connect webhook handler (union-eyes)
+ * POST /api/payments/webhooks/stripe — Stripe Connect webhook handler (union-eyes)
  *
  * Receives Stripe webhook events, verifies the signature, and
  * processes payment-related events (payment_intent.succeeded,

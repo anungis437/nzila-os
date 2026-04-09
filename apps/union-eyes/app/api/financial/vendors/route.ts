@@ -1,17 +1,28 @@
 /**
- * CRUD collection route for perCapitaRemittances
+ * STUB: vendors table does not exist yet.
+ * Returns empty results until proper vendors schema is created.
+ * @deprecated Needs migration to create vendors table.
  */
-import { crudRoutes } from '@/lib/api/crud-factory';
-import { perCapitaRemittances } from '@/db/schema';
+import { NextResponse } from 'next/server';
+import { withApi } from '@/lib/api/framework';
 
 export const dynamic = 'force-dynamic';
 
-const { GET, POST } = crudRoutes({
-  table: perCapitaRemittances,
-  pk: 'id',
-  tags: ["Billing"],
-  orgScoped: true,
-  readRole: 'member',
-  writeRole: 'steward',
+export const GET = withApi({
+  tags: ['Billing'],
+  auth: { required: true },
+  handler: async () => {
+    return NextResponse.json({ data: [], total: 0, _stub: 'vendors_table_pending' });
+  },
 });
-export { GET, POST };
+
+export const POST = withApi({
+  tags: ['Billing'],
+  auth: { required: true, minRole: 'steward' },
+  handler: async () => {
+    return NextResponse.json(
+      { error: 'Vendor creation not yet available — vendors table pending migration' },
+      { status: 501 }
+    );
+  },
+});
