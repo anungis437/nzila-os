@@ -11,6 +11,7 @@ const { GET, POST } = crudRoutes({
   pk: 'id',
   tags: ["Billing"],
   orgScoped: true,
+  entitlement: 'financial_intelligence_suite',
   readRole: 'member',
   writeRole: 'steward',
 });

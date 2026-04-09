@@ -8,6 +8,7 @@ import { db } from '@/db/db';
 import { boardPackets } from '@/db/schema/board-packet-schema';
 import { desc, count } from 'drizzle-orm';
 import { z } from 'zod';
+import { auditDataMutation } from '@/lib/audit-logger';
 
 const createBoardPacketSchema = z.object({
   title: z.string().min(1).max(255),
@@ -62,11 +63,19 @@ export const POST = withApi(
     entitlement: 'governance_suite',
     openapi: { tags: ['Governance'], summary: 'Create board packet' },
   },
-  async ({ body }) => {
+  async ({ body, userId, organizationId }) => {
     const parsed = createBoardPacketSchema.parse(body);
     const [packet] = await withRLSContext(async () =>
       db.insert(boardPackets).values(parsed).returning()
     );
+    await auditDataMutation({
+      userId: userId!,
+      organizationId: organizationId || parsed.organizationId,
+      resource: 'board_packets',
+      resourceId: packet.id,
+      action: 'create',
+      details: { title: parsed.title, packetType: parsed.packetType, status: parsed.status },
+    });
     return packet;
   },
 );

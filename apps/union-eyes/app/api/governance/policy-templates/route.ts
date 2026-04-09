@@ -8,6 +8,7 @@ import { db } from '@/db/db';
 import { governancePolicies } from '@/db/schema';
 import { eq, and, desc, count } from 'drizzle-orm';
 import { z } from 'zod';
+import { auditDataMutation } from '@/lib/audit-logger';
 
 const createPolicyTemplateSchema = z.object({
   title: z.string().min(1).max(1000),
@@ -47,11 +48,19 @@ export const POST = withApi(
     entitlement: 'governance_suite',
     openapi: { tags: ['Governance'], summary: 'Create policy template' },
   },
-  async ({ body, organizationId }) => {
+  async ({ body, organizationId, userId }) => {
     const parsed = createPolicyTemplateSchema.parse(body);
     const [template] = await withRLSContext(async () =>
       db.insert(governancePolicies).values({ ...parsed, organizationId: organizationId!, status: 'draft' }).returning()
     );
+    await auditDataMutation({
+      userId: userId!,
+      organizationId: organizationId!,
+      resource: 'governance_policies',
+      resourceId: template.id,
+      action: 'create',
+      details: { title: parsed.title, category: parsed.category },
+    });
     return template;
   },
 );

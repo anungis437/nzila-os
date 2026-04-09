@@ -6,6 +6,7 @@ import { withApi, z } from '@/lib/api/framework';
 import { db } from '@/db/db';
 import { sql } from 'drizzle-orm';
 import { withSystemContext } from '@/lib/db/with-rls-context';
+import { auditDataMutation } from '@/lib/audit-logger';
 
 export const dynamic = 'force-dynamic';
 
@@ -38,24 +39,33 @@ export const POST = withApi(
       matterDetails: z.record(z.unknown()).optional(),
     }),
   },
-  async ({ body }) => {
-    return withSystemContext(async () => {
-    const id = crypto.randomUUID();
-    await db.execute(sql`
-      INSERT INTO reserved_matter_votes (
-        id, created_at, updated_at, matter_type, title, description,
-        proposed_by, voting_deadline, class_a_total_votes, matter_details, status
-      ) VALUES (
-        ${id}::uuid, NOW(), NOW(), ${body.matterType}, ${body.title},
-        ${body.description}, ${body.proposedBy},
-        ${body.votingDeadline ? body.votingDeadline : null}::timestamptz,
-        ${body.classATotalVotes ?? 0},
-        ${JSON.stringify(body.matterDetails ?? {})}::jsonb,
-        'pending'
-      )
-    `);
-    return { id };
+  async ({ body, userId, organizationId }) => {
+    const id = await withSystemContext(async () => {
+      const id = crypto.randomUUID();
+      await db.execute(sql`
+        INSERT INTO reserved_matter_votes (
+          id, created_at, updated_at, matter_type, title, description,
+          proposed_by, voting_deadline, class_a_total_votes, matter_details, status
+        ) VALUES (
+          ${id}::uuid, NOW(), NOW(), ${body.matterType}, ${body.title},
+          ${body.description}, ${body.proposedBy},
+          ${body.votingDeadline ? body.votingDeadline : null}::timestamptz,
+          ${body.classATotalVotes ?? 0},
+          ${JSON.stringify(body.matterDetails ?? {})}::jsonb,
+          'pending'
+        )
+      `);
+      return id;
     });
+    await auditDataMutation({
+      userId: userId!,
+      organizationId: organizationId!,
+      resource: 'reserved_matter_votes',
+      resourceId: id,
+      action: 'create',
+      details: { matterType: body.matterType, title: body.title, proposedBy: body.proposedBy },
+    });
+    return { id };
   },
 );
 

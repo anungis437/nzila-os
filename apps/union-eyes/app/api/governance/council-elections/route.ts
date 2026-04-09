@@ -6,6 +6,7 @@ import { withApi, z } from '@/lib/api/framework';
 import { db } from '@/db/db';
 import { sql } from 'drizzle-orm';
 import { withSystemContext } from '@/lib/db/with-rls-context';
+import { auditDataMutation } from '@/lib/audit-logger';
 
 export const dynamic = 'force-dynamic';
 
@@ -38,24 +39,33 @@ export const POST = withApi(
       participationRate: z.number().int().optional(),
     }),
   },
-  async ({ body }) => {
-    return withSystemContext(async () => {
-    const id = crypto.randomUUID();
-    await db.execute(sql`
-      INSERT INTO council_elections (
-        id, created_at, updated_at, election_year, election_date,
-        positions_available, candidates, winners,
-        total_votes, participation_rate, contested_results
-      ) VALUES (
-        ${id}::uuid, NOW(), NOW(), ${body.electionYear},
-        ${body.electionDate}::date, ${body.positionsAvailable},
-        ${JSON.stringify(body.candidates)}::jsonb,
-        ${JSON.stringify(body.winners)}::jsonb,
-        ${body.totalVotes}, ${body.participationRate ?? 0}, false
-      )
-    `);
-    return { id };
+  async ({ body, userId, organizationId }) => {
+    const id = await withSystemContext(async () => {
+      const id = crypto.randomUUID();
+      await db.execute(sql`
+        INSERT INTO council_elections (
+          id, created_at, updated_at, election_year, election_date,
+          positions_available, candidates, winners,
+          total_votes, participation_rate, contested_results
+        ) VALUES (
+          ${id}::uuid, NOW(), NOW(), ${body.electionYear},
+          ${body.electionDate}::date, ${body.positionsAvailable},
+          ${JSON.stringify(body.candidates)}::jsonb,
+          ${JSON.stringify(body.winners)}::jsonb,
+          ${body.totalVotes}, ${body.participationRate ?? 0}, false
+        )
+      `);
+      return id;
     });
+    await auditDataMutation({
+      userId: userId!,
+      organizationId: organizationId!,
+      resource: 'council_elections',
+      resourceId: id,
+      action: 'create',
+      details: { electionYear: body.electionYear, positionsAvailable: body.positionsAvailable, totalVotes: body.totalVotes },
+    });
+    return { id };
   },
 );
 

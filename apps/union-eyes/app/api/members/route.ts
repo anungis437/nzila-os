@@ -7,6 +7,7 @@ import { withApi } from '@/lib/api/framework';
 import { db } from '@/db/db';
 import { organizationMembers } from '@/db/schema-organizations';
 import { eq, and, isNull, ilike, or } from 'drizzle-orm';
+import { auditDataAccess } from '@/lib/audit-logger';
 
 export const dynamic = 'force-dynamic';
 
@@ -19,7 +20,7 @@ export const GET = withApi(
       description: 'Returns paginated members for the organization.',
     },
   },
-  async ({ request, organizationId }) => {
+  async ({ request, organizationId, userId }) => {
     const url = new URL(request.url);
     const orgId = url.searchParams.get('organizationId') || organizationId;
     const search = url.searchParams.get('search') || '';
@@ -78,6 +79,14 @@ export const GET = withApi(
         createdAt: m.createdAt?.toISOString() ?? null,
         metadata,
       };
+    });
+
+    await auditDataAccess({
+      userId: userId!,
+      organizationId: orgId!,
+      resource: 'organization_members',
+      action: 'list',
+      details: { count: members.length, search: search || undefined, status: statusFilter || undefined },
     });
 
     return { members, total: members.length };

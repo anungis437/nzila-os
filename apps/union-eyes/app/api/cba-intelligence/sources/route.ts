@@ -4,6 +4,7 @@ import {
   createSource,
   type NewCbaIntelSource,
 } from "@/lib/services/cba-intelligence/source-registry-service";
+import { auditDataMutation } from "@/lib/audit-logger";
 
 // ---------------------------------------------------------------------------
 // GET /api/cba-intelligence/sources — List CBA intelligence sources
@@ -76,7 +77,15 @@ export const POST = withApi(
       summary: "Register a new CBA intelligence source",
     },
   },
-  async ({ body }) => {
-    return { data: await createSource(body as unknown as NewCbaIntelSource) };
+  async ({ body, userId, organizationId }) => {
+    const source = await createSource(body as unknown as NewCbaIntelSource);
+    await auditDataMutation({
+      userId: userId!,
+      organizationId: organizationId!,
+      resource: 'cba_intel_sources',
+      action: 'create',
+      details: { slug: body.slug, nameEn: body.nameEn, sourceType: body.sourceType },
+    });
+    return { data: source };
   },
 );
