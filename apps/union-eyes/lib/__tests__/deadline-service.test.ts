@@ -2,6 +2,7 @@ import { describe, it, expect, vi, beforeEach } from 'vitest';
 
 const mocks = vi.hoisted(() => ({
   mockAutoCreate: vi.fn(),
+  mockCreateClaimDeadline: vi.fn(),
   mockGetClaimDeadlines: vi.fn(),
   mockGetPending: vi.fn(),
   mockGetCritical: vi.fn(),
@@ -24,6 +25,7 @@ const mocks = vi.hoisted(() => ({
 
 vi.mock('@/db/queries/deadline-queries', () => ({
   autoCreateClaimDeadlines: mocks.mockAutoCreate,
+  createClaimDeadline: mocks.mockCreateClaimDeadline,
   getClaimDeadlines: mocks.mockGetClaimDeadlines,
   getPendingClaimDeadlines: mocks.mockGetPending,
   getCriticalDeadlines: mocks.mockGetCritical,
@@ -97,8 +99,20 @@ describe('deadline-service', () => {
 
   // ── addClaimDeadline ───────────────────────────────────────────────────────
   describe('addClaimDeadline', () => {
-    it('throws not implemented', async () => {
-      await expect(addClaimDeadline('c1', 'o1', 'Follow-up', 5, 'medium', 'u1')).rejects.toThrow('Not implemented');
+    it('creates a custom deadline via createClaimDeadline', async () => {
+      mocks.mockCreateClaimDeadline.mockResolvedValue({ id: 'dl1', claimId: 'c1' });
+      const result = await addClaimDeadline('c1', 'o1', 'Follow-up', 5, 'medium', 'u1');
+      expect(result).toEqual({ id: 'dl1', claimId: 'c1' });
+      expect(mocks.mockCreateClaimDeadline).toHaveBeenCalledWith(
+        'c1', 'o1', 'Follow-up', 'custom',
+        expect.any(Date), 5, 'u1',
+        { priority: 'medium', businessDaysOnly: false },
+      );
+    });
+
+    it('throws on error', async () => {
+      mocks.mockCreateClaimDeadline.mockRejectedValue(new Error('DB error'));
+      await expect(addClaimDeadline('c1', 'o1', 'Follow-up', 5, 'medium', 'u1')).rejects.toThrow('DB error');
     });
   });
 
