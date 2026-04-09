@@ -296,31 +296,6 @@ export const casesAPI = {
 
 export const strikeFundAPI = {
   dashboard: () => fetchAPI<unknown>('/api/strike-fund/dashboard'),
-
-  applications: {
-    list: (params?: { status?: string }) =>
-      fetchAPI<unknown[]>(buildURL('/api/strike-fund/applications', params)),
-
-    get: (id: string) =>
-      fetchAPI<unknown>(`/api/strike-fund/applications/${id}`),
-
-    create: (data: unknown) =>
-      fetchAPI<unknown>('/api/strike-fund/applications', {
-        method: 'POST',
-        body: JSON.stringify(data),
-      }),
-
-    approve: (id: string) =>
-      fetchAPI<void>(`/api/strike-fund/applications/${id}/approve`, {
-        method: 'POST',
-      }),
-
-    reject: (id: string, reason: string) =>
-      fetchAPI<void>(`/api/strike-fund/applications/${id}/reject`, {
-        method: 'POST',
-        body: JSON.stringify({ reason }),
-      }),
-  },
 };
 
 // ============================================================================

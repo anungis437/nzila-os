@@ -107,7 +107,7 @@ export default function CampaignDetailPage({ params }: { params: { id: string } 
       setLoading(true);
       setError(null);
 
-      const response = await fetch(`/api/messaging/campaigns/${params.id}`);
+      const response = await fetch(`/api/messages/threads/${params.id}`);
       
       if (!response.ok) {
         if (response.status === 404) {
@@ -130,7 +130,7 @@ export default function CampaignDetailPage({ params }: { params: { id: string } 
       setActionLoading(true);
       setError(null);
 
-      const response = await fetch(`/api/messaging/campaigns/${params.id}/send`, {
+      const response = await fetch(`/api/messages/threads/${params.id}/send`, {
         method: 'POST',
         headers: { 'Content-Type': 'application/json' },
         body: JSON.stringify({ dryRun }),
@@ -161,7 +161,7 @@ export default function CampaignDetailPage({ params }: { params: { id: string } 
       setActionLoading(true);
       setError(null);
 
-      const response = await fetch(`/api/messaging/campaigns/${params.id}`, {
+      const response = await fetch(`/api/messages/threads/${params.id}`, {
         method: 'DELETE',
       });
 

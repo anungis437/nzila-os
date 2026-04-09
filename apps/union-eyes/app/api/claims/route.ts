@@ -1,5 +1,10 @@
 /**
  * CRUD collection route for claims
+ *
+ * @deprecated Prefer `/api/cases` for new consumers. `/api/cases` has
+ * full audit logging, evidence packs, and richer sub-routes (assign,
+ * timeline, transition, notes, export). This endpoint remains for
+ * portal and mobile backward compatibility.
  */
 import { crudRoutes } from '@/lib/api/crud-factory';
 import { withApi } from '@/lib/api/with-api';
