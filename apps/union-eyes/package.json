@@ -49,7 +49,6 @@
     "@nzila/platform-auth": "workspace:*",
     "@nzila/payments-stripe": "workspace:*",
     "@nzila/ui": "workspace:*",
-    "@nzila/clc-decision-intelligence": "workspace:*",
     "@nzila/clc-executive-intelligence": "workspace:*",
     "@nzila/workload-intelligence": "workspace:*",
     "@paralleldrive/cuid2": "^3.3.0",
