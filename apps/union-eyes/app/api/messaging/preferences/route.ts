@@ -1,17 +1,17 @@
 /**
- * CRUD collection route for messageTemplates
+ * CRUD collection route for notification preferences
  */
 import { crudRoutes } from '@/lib/api/crud-factory';
-import { messageTemplates } from '@/db/schema';
+import { userNotificationPreferences } from '@/db/schema';
 
 export const dynamic = 'force-dynamic';
 
 const { GET, POST } = crudRoutes({
-  table: messageTemplates,
+  table: userNotificationPreferences,
   pk: 'id',
-  tags: ["Communications"],
+  tags: ['Communications'],
   orgScoped: true,
   readRole: 'member',
-  writeRole: 'steward',
+  writeRole: 'member',
 });
 export { GET, POST };

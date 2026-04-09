@@ -8,7 +8,7 @@
  *
  * Phase 9 — Deprecation System
  */
-import { NextRequest } from 'next/server';
+import { withApi } from '@/lib/api/with-api';
 import {
   logDeprecatedAccess,
   deprecatedResponse,
@@ -17,22 +17,30 @@ import {
 
 export const dynamic = 'force-dynamic';
 
-async function handleDeprecated(
-  request: NextRequest,
-  { params }: { params: Promise<{ path: string[] }> },
-) {
-  const { path } = await params;
-  const v2Path = `/api/v2/${path.join('/')}`;
-  const canonical = resolveV2Canonical(v2Path);
+const handler = withApi(
+  {
+    auth: { required: true, minRole: 'member' },
+    openapi: {
+      tags: ['Deprecated'],
+      summary: 'Deprecated — v2 routes removed',
+      deprecated: true,
+    },
+  },
+  async ({ request, params }) => {
+    const pathSegments = (params as Record<string, string | string[]>).path;
+    const pathArray = Array.isArray(pathSegments) ? pathSegments : [pathSegments];
+    const v2Path = `/api/v2/${pathArray.join('/')}`;
+    const canonical = resolveV2Canonical(v2Path);
 
-  // Fire-and-forget usage logging
-  logDeprecatedAccess(v2Path, request.method, canonical);
+    // Fire-and-forget usage logging
+    logDeprecatedAccess(v2Path, request.method, canonical);
 
-  return deprecatedResponse(v2Path, canonical);
-}
+    return deprecatedResponse(v2Path, canonical);
+  },
+);
 
-export const GET = handleDeprecated;
-export const POST = handleDeprecated;
-export const PUT = handleDeprecated;
-export const PATCH = handleDeprecated;
-export const DELETE = handleDeprecated;
+export const GET = handler;
+export const POST = handler;
+export const PUT = handler;
+export const PATCH = handler;
+export const DELETE = handler;

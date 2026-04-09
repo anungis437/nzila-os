@@ -4,17 +4,27 @@
  *
  * Phase 9 — Deprecation System
  */
-import { NextRequest } from 'next/server';
+import { withApi } from '@/lib/api/with-api';
 import { logDeprecatedAccess, deprecatedResponse } from '@/lib/api/deprecation';
 
 export const dynamic = 'force-dynamic';
 
 const CANONICAL = '/api/billing/reports';
 
-async function handler(request: NextRequest) {
-  logDeprecatedAccess('/api/financial/budgets', request.method, CANONICAL);
-  return deprecatedResponse('/api/financial/budgets', CANONICAL);
-}
+const handler = withApi(
+  {
+    auth: { required: true, minRole: 'member' },
+    openapi: {
+      tags: ['Deprecated'],
+      summary: 'Deprecated — use /api/billing/reports',
+      deprecated: true,
+    },
+  },
+  async ({ request }) => {
+    logDeprecatedAccess('/api/financial/budgets', request.method, CANONICAL);
+    return deprecatedResponse('/api/financial/budgets', CANONICAL);
+  },
+);
 
 export const GET = handler;
 export const POST = handler;

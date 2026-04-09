@@ -2,7 +2,7 @@
  * CRUD item route for messageTemplates
  */
 import { crudRoutes } from '@/lib/api/crud-factory';
-import { messageTemplates } from '@/db/schema/domains/communications/campaigns';
+import { messageTemplates } from '@/db/schema';
 
 export const dynamic = 'force-dynamic';
 

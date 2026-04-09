@@ -103,6 +103,12 @@ interface PageRule {
 const PAGE_ACCESS_MATRIX: PageRule[] = [
   // ── Base pages (any authenticated user) ────────────────────────────────
   { path: 'page.tsx',                                    minRole: 'member',               description: 'Main dashboard' },
+  { path: 'inbox/page.tsx',                              minRole: 'member',               description: 'Unified inbox' },
+  { path: 'work/page.tsx',                               minRole: 'member',               description: 'Work surface' },
+  { path: 'priorities/page.tsx',                         minRole: 'member',               description: 'Priorities console' },
+  { path: 'intelligence/page.tsx',                       minRole: 'member',               description: 'Intelligence shell' },
+  { path: 'outcomes/page.tsx',                           minRole: 'member',               description: 'Outcomes console' },
+  { path: 'knowledge/page.tsx',                          minRole: 'member',               description: 'Knowledge console' },
   { path: 'structure/page.tsx',                          minRole: 'member',               description: 'Structure management' },
   { path: 'leadership/page.tsx',                         minRole: 'member',               description: 'Leadership view (API gates officer)' },
   { path: 'settings/communications/page.tsx',            minRole: 'member',               description: 'Notification preferences' },
@@ -312,8 +318,6 @@ const API_ROUTE_MATRIX: ApiRouteRule[] = [
   { apiPath: 'activities',           expectedAuthPattern: 'withApi',              expectedMinRole: 'member',               backingPage: 'admin (audit log)' },
   { apiPath: 'dues/calculate',       expectedAuthPattern: 'withRoleAuth',         expectedMinRole: 'steward',              backingPage: 'admin/dues' },
   { apiPath: 'analytics/cross-org',  expectedAuthPattern: 'withApi',              expectedMinRole: 'platform_lead',        backingPage: 'cross-org analytics (platform)' },
-  { apiPath: 'v2/analytics/clc/decision-intelligence',    expectedAuthPattern: 'withApi',  expectedMinRole: 'clc_staff',            backingPage: 'clc/intelligence/page.tsx' },
-  { apiPath: 'v2/analytics/clc/executive-brief',          expectedAuthPattern: 'withApi',  expectedMinRole: 'clc_executive',        backingPage: 'clc/intelligence/page.tsx' },
 ]
 
 // ── Helpers ─────────────────────────────────────────────────────────────────
