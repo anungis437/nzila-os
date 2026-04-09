@@ -144,7 +144,8 @@ export function PrioritiesConsole() {
             <CheckCircle2 size={40} className="mx-auto text-green-400 mb-3" />
             <p className="text-gray-500 font-medium">Nothing urgent right now</p>
             <p className="text-gray-400 text-sm mt-1">
-              All items are on track. Check back later or review your work queue.
+              All items are on track. Check <span className="text-blue-600">Inbox</span> for
+              new signals or <span className="text-blue-600">Work</span> for active casework.
             </p>
           </CardContent>
         </Card>
@@ -185,7 +186,7 @@ export function PrioritiesConsole() {
                   className="text-xs h-7 shrink-0"
                   onClick={() => router.push(item.href)}
                 >
-                  Open <ArrowRight size={12} className="ml-1" />
+                  Handle now <ArrowRight size={12} className="ml-1" />
                 </Button>
               </CardContent>
             </Card>

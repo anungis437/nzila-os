@@ -1,9 +1,17 @@
+"use client";
+
 /**
- * /dashboard/claims — DEPRECATED: redirects to Inbox with intake filter.
+ * /dashboard/claims — DEPRECATED: soft-redirects to Inbox with intake filter.
  * Canonical location: /dashboard/inbox?type=intake
  */
-import { redirect } from "next/navigation";
+import { LegacyRedirect } from "@/components/legacy-redirect";
 
 export default function ClaimsPage() {
-  redirect("/dashboard/inbox?type=intake");
+  return (
+    <LegacyRedirect
+      oldName="Claims"
+      newName="Inbox"
+      href="/dashboard/inbox?type=intake"
+    />
+  );
 }

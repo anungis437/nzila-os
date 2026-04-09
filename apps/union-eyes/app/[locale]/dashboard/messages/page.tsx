@@ -1,9 +1,17 @@
+"use client";
+
 /**
- * /dashboard/messages — DEPRECATED: redirects to Inbox with message filter.
+ * /dashboard/messages — DEPRECATED: soft-redirects to Inbox with message filter.
  * Canonical location: /dashboard/inbox?type=message
  */
-import { redirect } from "next/navigation";
+import { LegacyRedirect } from "@/components/legacy-redirect";
 
 export default function MessagesDashboardPage() {
-  redirect("/dashboard/inbox?type=message");
+  return (
+    <LegacyRedirect
+      oldName="Messages"
+      newName="Inbox"
+      href="/dashboard/inbox?type=message"
+    />
+  );
 }

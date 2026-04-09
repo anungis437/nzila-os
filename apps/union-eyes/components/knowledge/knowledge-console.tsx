@@ -69,7 +69,7 @@ export function KnowledgeConsole() {
       <div>
         <h1 className="text-2xl font-bold text-gray-900">{t("sidebar.knowledge")}</h1>
         <p className="text-sm text-gray-500 mt-1">
-          Reference materials, learning resources, and agreements — find what you need.
+          Your authoritative reference — agreements, clauses, precedents, and training materials.
         </p>
       </div>
 

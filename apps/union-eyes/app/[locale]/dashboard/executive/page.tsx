@@ -1,9 +1,17 @@
+"use client";
+
 /**
- * /dashboard/executive — DEPRECATED: redirects to Intelligence shell (executive tab).
+ * /dashboard/executive — DEPRECATED: soft-redirects to Intelligence (executive tab).
  * Canonical location: /dashboard/intelligence?scope=executive
  */
-import { redirect } from "next/navigation";
+import { LegacyRedirect } from "@/components/legacy-redirect";
 
 export default function ExecutiveDashboardPage() {
-  redirect("/dashboard/intelligence?scope=executive");
+  return (
+    <LegacyRedirect
+      oldName="Executive"
+      newName="Intelligence"
+      href="/dashboard/intelligence?scope=executive"
+    />
+  );
 }

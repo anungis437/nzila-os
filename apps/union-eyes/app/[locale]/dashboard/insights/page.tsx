@@ -1,9 +1,17 @@
+"use client";
+
 /**
- * /dashboard/insights — DEPRECATED: redirects to Intelligence shell (federation tab).
+ * /dashboard/insights — DEPRECATED: soft-redirects to Intelligence (federation tab).
  * Canonical location: /dashboard/intelligence?scope=federation
  */
-import { redirect } from "next/navigation";
+import { LegacyRedirect } from "@/components/legacy-redirect";
 
 export default function InsightsPage() {
-  redirect("/dashboard/intelligence?scope=federation");
+  return (
+    <LegacyRedirect
+      oldName="Insights"
+      newName="Intelligence"
+      href="/dashboard/intelligence?scope=federation"
+    />
+  );
 }

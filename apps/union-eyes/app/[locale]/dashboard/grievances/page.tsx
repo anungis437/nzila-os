@@ -1,9 +1,17 @@
+"use client";
+
 /**
- * /dashboard/grievances — DEPRECATED: redirects to Work surface (grievances tab).
+ * /dashboard/grievances — DEPRECATED: soft-redirects to Work surface.
  * Canonical location: /dashboard/work
  */
-import { redirect } from "next/navigation";
+import { LegacyRedirect } from "@/components/legacy-redirect";
 
 export default function GrievancesPage() {
-  redirect("/dashboard/work");
+  return (
+    <LegacyRedirect
+      oldName="Grievances"
+      newName="Work"
+      href="/dashboard/work"
+    />
+  );
 }

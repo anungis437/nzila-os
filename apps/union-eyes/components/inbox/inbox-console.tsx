@@ -142,7 +142,7 @@ export function InboxConsole() {
       if (signal.relatedEntityType === "case") {
         router.push(`/${locale}/dashboard/claims/${signal.relatedEntityId}`);
       } else {
-        router.push(`/${locale}/dashboard/messages`);
+        router.push(`/${locale}/dashboard/inbox?type=message`);
       }
     } else if (action === "convert_to_case") {
       router.push(`/${locale}/dashboard/claims/new`);
@@ -202,8 +202,21 @@ export function InboxConsole() {
         <Card>
           <CardContent className="py-16 text-center">
             <MessageSquare size={40} className="mx-auto text-gray-300 mb-3" />
-            <p className="text-gray-500 font-medium">You&apos;re all caught up</p>
-            <p className="text-gray-400 text-sm mt-1">No items match your current filters.</p>
+            {signals.length === 0 ? (
+              <>
+                <p className="text-gray-500 font-medium">No signals yet</p>
+                <p className="text-gray-400 text-sm mt-1">
+                  New intake submissions, messages, and alerts will appear here automatically.
+                </p>
+              </>
+            ) : (
+              <>
+                <p className="text-gray-500 font-medium">No items match your filters</p>
+                <p className="text-gray-400 text-sm mt-1">
+                  Try adjusting your type or urgency filter to see more items.
+                </p>
+              </>
+            )}
           </CardContent>
         </Card>
       ) : (
@@ -220,6 +233,9 @@ export function InboxConsole() {
                 <div className="flex-1 min-w-0">
                   <div className="flex items-center gap-2 mb-0.5">
                     <span className="font-medium text-sm text-gray-900 truncate">{signal.title}</span>
+                    <Badge variant="outline" className="text-[10px] shrink-0 text-gray-500 border-gray-200">
+                      {TYPE_LABELS[signal.type]}
+                    </Badge>
                     <Badge variant="outline" className={`text-[10px] shrink-0 ${URGENCY_COLORS[signal.urgency]}`}>
                       {signal.urgency}
                     </Badge>
@@ -241,7 +257,7 @@ export function InboxConsole() {
                       className="text-xs h-7"
                       onClick={() => handleAction(signal, "review")}
                     >
-                      Review <ArrowRight size={12} className="ml-1" />
+                      {signal.type === "intake" ? "Review case" : "Open"} <ArrowRight size={12} className="ml-1" />
                     </Button>
                   )}
                   {signal.type === "intake" && (

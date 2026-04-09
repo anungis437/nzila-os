@@ -19,6 +19,9 @@ import {
   CheckCircle2,
   TrendingUp,
   Clock,
+  ShieldCheck,
+  Activity,
+  MessageCircle,
 } from "lucide-react";
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 
@@ -71,7 +74,7 @@ export function OutcomesConsole() {
       <div>
         <h1 className="text-2xl font-bold text-gray-900">{t("sidebar.outcomes")}</h1>
         <p className="text-sm text-gray-500 mt-1">
-          Results and accomplishments — closures, resolutions, and financial health.
+          Track results, measure impact, and verify the system is working for members.
         </p>
       </div>
 
@@ -117,9 +120,45 @@ export function OutcomesConsole() {
         </Card>
       </div>
 
-      {/* Secondary: detailed navigations */}
+      {/* System Effectiveness — trust signal block */}
+      <Card className="border-l-4 border-l-green-600">
+        <CardContent className="py-5 px-5">
+          <div className="flex items-center gap-2 mb-3">
+            <ShieldCheck size={18} className="text-green-600" />
+            <h2 className="text-sm font-bold text-gray-900">System Effectiveness</h2>
+          </div>
+          <div className="grid gap-4 sm:grid-cols-3">
+            <div className="flex items-start gap-2">
+              <Activity size={14} className="text-green-500 mt-0.5 shrink-0" />
+              <div>
+                <p className="text-lg font-bold text-gray-900">—</p>
+                <p className="text-xs text-gray-500">Recommendation success rate</p>
+                <p className="text-[11px] text-gray-400 mt-0.5">% of system recommendations that led to favorable outcomes</p>
+              </div>
+            </div>
+            <div className="flex items-start gap-2">
+              <TrendingUp size={14} className="text-blue-500 mt-0.5 shrink-0" />
+              <div>
+                <p className="text-lg font-bold text-gray-900">—</p>
+                <p className="text-xs text-gray-500">Action taken rate</p>
+                <p className="text-[11px] text-gray-400 mt-0.5">% of flagged items where action was taken within SLA</p>
+              </div>
+            </div>
+            <div className="flex items-start gap-2">
+              <MessageCircle size={14} className="text-purple-500 mt-0.5 shrink-0" />
+              <div>
+                <p className="text-lg font-bold text-gray-900">—</p>
+                <p className="text-xs text-gray-500">Feedback coverage</p>
+                <p className="text-[11px] text-gray-400 mt-0.5">% of resolved cases with member feedback recorded</p>
+              </div>
+            </div>
+          </div>
+        </CardContent>
+      </Card>
+
+      {/* Secondary: outcome detail navigations */}
       <div>
-        <h2 className="text-sm font-medium text-gray-600 mb-3">Detailed Views</h2>
+        <h2 className="text-sm font-medium text-gray-600 mb-3">Explore &amp; Manage</h2>
         <div className="grid gap-3 sm:grid-cols-2">
           {outcomes.map((item) => (
             <Link key={item.href} href={item.href} className="block group">

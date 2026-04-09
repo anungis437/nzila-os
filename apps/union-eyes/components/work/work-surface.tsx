@@ -11,10 +11,13 @@ import WorkbenchConsole from "@/components/workbench/workbench-console";
 import { GrievancesConsole } from "@/components/grievances/grievances-console";
 import { NegotiationDashboard } from "@/components/bargaining/NegotiationDashboard";
 import { useOrganization } from "@/contexts/organization-context";
-import { Scale, Users } from "lucide-react";
+import { Scale, Users, BookOpen } from "lucide-react";
+import { useLocale } from "next-intl";
+import Link from "next/link";
 
 export function WorkSurface() {
   const t = useTranslations();
+  const locale = useLocale();
   const { organizationId } = useOrganization();
 
   return (
@@ -22,8 +25,14 @@ export function WorkSurface() {
       <div>
         <h1 className="text-2xl font-bold text-gray-900">{t("sidebar.work")}</h1>
         <p className="text-sm text-gray-500 mt-1">
-          Active casework and operations — cases, grievances, bargaining, arbitration, and committees.
+          Active casework and operations — manage cases, grievances, bargaining, arbitration, and committees.
         </p>
+        <Link
+          href={`/${locale}/dashboard/knowledge`}
+          className="inline-flex items-center gap-1 text-xs text-blue-600 hover:underline mt-1"
+        >
+          <BookOpen size={12} /> Reference clauses &amp; precedents in Knowledge
+        </Link>
       </div>
 
       <Tabs defaultValue="cases" className="w-full">
@@ -58,9 +67,15 @@ export function WorkSurface() {
             <Scale size={32} className="mx-auto text-gray-300 mb-3" />
             <p className="font-medium text-gray-700 mb-1">Arbitration</p>
             <p className="text-sm text-gray-400">
-              Arbitration cases and hearing schedules will appear here.
-              Cases escalated from grievances are tracked through this surface.
+              No arbitration cases at this time. When grievances are escalated to
+              arbitration, hearing schedules and case details will appear here.
             </p>
+            <Link
+              href={`/${locale}/dashboard/knowledge`}
+              className="inline-flex items-center gap-1 text-xs text-blue-600 hover:underline mt-3"
+            >
+              <BookOpen size={12} /> Review precedents in Knowledge
+            </Link>
           </div>
         </TabsContent>
 
@@ -69,8 +84,9 @@ export function WorkSurface() {
             <Users size={32} className="mx-auto text-gray-300 mb-3" />
             <p className="font-medium text-gray-700 mb-1">Committees</p>
             <p className="text-sm text-gray-400">
-              Committee membership, meetings, and action items will appear here.
-              Manage bargaining, health &amp; safety, and workplace committees.
+              No active committees yet. Once bargaining, health &amp; safety, or
+              workplace committees are created, membership, meetings, and action
+              items will be managed here.
             </p>
           </div>
         </TabsContent>

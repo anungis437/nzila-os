@@ -1,9 +1,17 @@
+"use client";
+
 /**
- * /dashboard/deadlines — DEPRECATED: redirects to Priorities shell.
+ * /dashboard/deadlines — DEPRECATED: soft-redirects to Priorities.
  * Canonical location: /dashboard/priorities
  */
-import { redirect } from "next/navigation";
+import { LegacyRedirect } from "@/components/legacy-redirect";
 
 export default function DeadlinesPage() {
-  redirect("/dashboard/priorities");
+  return (
+    <LegacyRedirect
+      oldName="Deadlines"
+      newName="Priorities"
+      href="/dashboard/priorities"
+    />
+  );
 }
