@@ -2320,7 +2320,11 @@
     "deadlines": "Échéances",
     "newCase": "Nouveau dossier",
     "members": "Membres",
-    "admin": "Admin"
+    "admin": "Admin",
+    "casework": "Dossiers",
+    "intelligence": "Intelligence",
+    "finance": "Finances",
+    "manage": "Gestion"
   },
   "marketing": {
     "nav": {

@@ -1005,6 +1005,10 @@
     "movementInsights": "Mouvement",
     "profile": "Profil",
     "rewards": "Récompenses",
-    "orgStructure": "Structure"
+    "orgStructure": "Structure",
+    "casework": "Dossiers",
+    "intelligence": "Intelligence",
+    "finance": "Finances",
+    "manage": "Gestion"
   }
 }

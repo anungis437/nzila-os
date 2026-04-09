@@ -2067,7 +2067,11 @@
     "movementInsights": "Movement",
     "profile": "Profile",
     "rewards": "Rewards",
-    "orgStructure": "Structure"
+    "orgStructure": "Structure",
+    "casework": "Casework",
+    "intelligence": "Intelligence",
+    "finance": "Finance",
+    "manage": "Manage"
   },
   "steward": {
     "recommendations": {

@@ -213,84 +213,96 @@ export default function Sidebar({ profile: _profile, userEmail, whopMonthlyPlanI
   // but NOT to personal member features (My Cases, Pension, Dues, Voting…).
   const mgmt = "platform_viewer";
 
+  // ── Workflow-first navigation ──────────────────────────────────────────────
+  // Reorganized from legacy role-tier sections (Your Union / Rep Tools /
+  // Leadership / Executive) into workflow-first groups so that items are
+  // clustered by *what you do*, not *who you are*.  Every item keeps its
+  // original role array — access control is unchanged.
+  //
+  // Sections with defaultOpen:false start collapsed to reduce cognitive load
+  // for high-privilege users who would otherwise see 40+ items.
   const orgSections = [
     {
       title: organization?.name ? `${organization.name}` : t('sidebar.yourUnion'),
       roles: [...unionAll, mgmt],
+      defaultOpen: true,
       items: [
         { href: `/${locale}/dashboard`, icon: <Home size={16} />, label: t('navigation.dashboard'), roles: [...unionAll, mgmt] },
         { href: `/${locale}/dashboard/claims`, icon: <FileText size={16} />, label: t('claims.myCases'), roles: unionAll },
         { href: `/${locale}/dashboard/claims/new`, icon: <Mic size={16} />, label: t('sidebar.newCase'), roles: unionAll },
-        { href: `/${locale}/dashboard/pension`, icon: <Briefcase size={16} />, label: t('sidebar.pensionBenefits'), roles: unionAll },
-        { href: `/${locale}/dashboard/dues`, icon: <DollarSign size={16} />, label: t('sidebar.duesDeductions'), roles: unionAll },
-        { href: `/${locale}/dashboard/rewards`, icon: <Gift size={16} />, label: t('sidebar.rewards'), roles: unionAll },
         { href: `/${locale}/dashboard/messages`, icon: <Mail size={16} />, label: t('sidebar.messages'), roles: unionAll },
+        { href: `/${locale}/dashboard/rewards`, icon: <Gift size={16} />, label: t('sidebar.rewards'), roles: unionAll },
+        { href: `/${locale}/dashboard/ai-assistant`, icon: <MessageSquare size={16} />, label: t('sidebar.aiAssistant'), roles: [...unionAll] },
       ],
     },
     {
       title: t('sidebar.participation'),
       roles: [...unionAll, ...leadershipRoles, mgmt],
+      defaultOpen: true,
       items: [
         { href: `/${locale}/dashboard/communications`, icon: <MessageSquare size={16} />, label: t('sidebar.communications'), roles: [...leadershipRoles, mgmt] },
         { href: `/${locale}/dashboard/education`, icon: <GraduationCap size={16} />, label: t('sidebar.educationTraining'), roles: [...unionAll] },
         { href: `/${locale}/dashboard/voting`, icon: <Vote size={16} />, label: t('navigation.vote'), roles: [...unionAll] },
         { href: `/${locale}/dashboard/agreements`, icon: <BookOpen size={16} />, label: t('sidebar.ourAgreements'), roles: [...unionAll, mgmt] },
         { href: `/${locale}/dashboard/calendar`, icon: <Calendar size={16} />, label: t('calendar.title'), roles: [...unionAll, mgmt] },
-        { href: `/${locale}/dashboard/ai-assistant`, icon: <MessageSquare size={16} />, label: t('sidebar.aiAssistant'), roles: [...unionAll] },
       ],
     },
     {
-      title: t('sidebar.representativeTools'),
-      roles: [...repsAndAbove, mgmt],
+      title: t('sidebar.casework'),
+      roles: [...repsAndAbove, "bargaining_committee", "health_safety_rep", mgmt],
+      defaultOpen: true,
       items: [
         { href: `/${locale}/dashboard/workbench`, icon: <FileBarChart size={16} />, label: t('claims.caseQueue'), roles: [...repsAndAbove, mgmt] },
         { href: `/${locale}/dashboard/deadlines`, icon: <Clock size={16} />, label: t('sidebar.deadlines'), roles: [...repsAndAbove, mgmt] },
-        { href: `/${locale}/dashboard/members`, icon: <Users size={16} />, label: t('sidebar.members'), roles: [...repsAndAbove, mgmt] },
-        { href: `/${locale}/dashboard/clause-library`, icon: <Library size={16} />, label: t('sidebar.clauseLibrary'), roles: [...repsAndAbove, mgmt] },
+        { href: `/${locale}/dashboard/grievances`, icon: <Scale size={16} />, label: t('grievance.title'), roles: [...leadershipRoles, mgmt] },
+        { href: `/${locale}/dashboard/bargaining`, icon: <Handshake size={16} />, label: t('sidebar.bargainingNegotiations'), roles: [...leadershipRoles, "bargaining_committee", mgmt] },
+        { href: `/${locale}/dashboard/health-safety`, icon: <Shield size={16} />, label: t('sidebar.healthSafety'), roles: [...repsAndAbove, "health_safety_rep", mgmt] },
+        { href: `/${locale}/dashboard/dispatch`, icon: <Truck size={16} />, label: t('sidebar.dispatch'), roles: [...repsAndAbove, mgmt] },
+        { href: `/${locale}/dashboard/organizing`, icon: <Flag size={16} />, label: t('sidebar.organizingCampaigns'), roles: ["officer", "president", "vice_president", "secretary_treasurer", "national_officer", "admin", mgmt] },
+        { href: `/${locale}/dashboard/targets`, icon: <Target size={16} />, label: t('sidebar.performanceTargets'), roles: ["officer", "president", "vice_president", "secretary_treasurer", "national_officer", "admin", mgmt] },
+        { href: `/${locale}/dashboard/notifications`, icon: <Bell size={16} />, label: t('sidebar.alerts'), roles: [...leadershipRoles, mgmt] },
+      ],
+    },
+    {
+      title: t('sidebar.intelligence'),
+      roles: [...repsAndAbove, mgmt],
+      defaultOpen: false,
+      items: [
+        { href: `/${locale}/dashboard/analytics`, icon: <BarChart3 size={16} />, label: t('sidebar.insights'), roles: [...repsAndAbove, mgmt] },
         ...(['congress', 'federation', 'union'].includes(organization?.type ?? '')
           ? [{ href: `/${locale}/cba-intelligence`, icon: <Database size={16} />, label: t('sidebar.cbaIntelligence'), roles: [...repsAndAbove, mgmt] }]
           : []),
         { href: `/${locale}/dashboard/precedents`, icon: <Scale size={16} />, label: t('sidebar.precedents'), roles: [...repsAndAbove, mgmt] },
-        { href: `/${locale}/dashboard/health-safety`, icon: <Shield size={16} />, label: t('sidebar.healthSafety'), roles: [...repsAndAbove, "health_safety_rep", mgmt] },
-        { href: `/${locale}/dashboard/analytics`, icon: <BarChart3 size={16} />, label: t('sidebar.insights'), roles: [...repsAndAbove, mgmt] },
-        { href: `/${locale}/dashboard/dispatch`, icon: <Truck size={16} />, label: t('sidebar.dispatch'), roles: [...repsAndAbove, mgmt] },
-        { href: `/${locale}/dashboard/stewards`, icon: <Users size={16} />, label: t('sidebar.stewardManagement'), roles: ["chief_steward", "officer", "president", "vice_president", "secretary_treasurer", "national_officer", "admin", mgmt] },
-        { href: `/${locale}/dashboard/cross-union-analytics`, icon: <GitCompare size={16} />, label: t('sidebar.crossUnionAnalytics'), roles: [...clcRoles, "fed_staff", "fed_executive", "system_admin", "admin", mgmt] },
-      ],
-    },
-    {
-      title: t('sidebar.specializedCommittees'),
-      roles: ["bargaining_committee", "health_safety_rep"],
-      items: [
-        { href: `/${locale}/dashboard/bargaining`, icon: <Handshake size={16} />, label: t('sidebar.bargainingDashboard'), roles: ["bargaining_committee"] },
-        { href: `/${locale}/dashboard/health-safety`, icon: <Shield size={16} />, label: t('sidebar.hsDashboard'), roles: ["health_safety_rep"] },
-      ],
-    },
-    {
-      title: t('sidebar.leadership'),
-      roles: [...leadershipRoles, mgmt],
-      items: [
-        { href: `/${locale}/dashboard/grievances`, icon: <Scale size={16} />, label: t('grievance.title'), roles: [...leadershipRoles, mgmt] },
-        { href: `/${locale}/dashboard/bargaining`, icon: <Handshake size={16} />, label: t('sidebar.bargainingNegotiations'), roles: [...leadershipRoles, "bargaining_committee", mgmt] },
-        { href: `/${locale}/dashboard/financial`, icon: <Receipt size={16} />, label: t('sidebar.financialManagement'), roles: [...leadershipRoles, mgmt] },
-        { href: `/${locale}/dashboard/targets`, icon: <Target size={16} />, label: t('sidebar.performanceTargets'), roles: ["officer", "president", "vice_president", "secretary_treasurer", "national_officer", "admin", mgmt] },
-        { href: `/${locale}/dashboard/organizing`, icon: <Flag size={16} />, label: t('sidebar.organizingCampaigns'), roles: ["officer", "president", "vice_president", "secretary_treasurer", "national_officer", "admin", mgmt] },
-        { href: `/${locale}/dashboard/strike-fund`, icon: <DollarSign size={16} />, label: t('sidebar.strikeFund'), roles: [...leadershipRoles, mgmt] },
-        { href: `/${locale}/dashboard/notifications`, icon: <Bell size={16} />, label: t('sidebar.alerts'), roles: [...leadershipRoles, mgmt] },
-        { href: `/${locale}/dashboard/pension/admin`, icon: <Briefcase size={16} />, label: t('sidebar.pensionAdmin'), roles: ["officer", "president", "vice_president", "secretary_treasurer", "national_officer", "admin", mgmt] },
-        { href: `/${locale}/dashboard/pension/trustee`, icon: <Shield size={16} />, label: t('sidebar.trusteePortal'), roles: ["officer", "president", "vice_president", "secretary_treasurer", "national_officer", "admin", mgmt] },
-        { href: `/${locale}/dashboard/admin/dues`, icon: <DollarSign size={16} />, label: t('sidebar.duesAdmin'), roles: ["officer", "president", "vice_president", "secretary_treasurer", "national_officer", "admin", mgmt] },
-        { href: `/${locale}/dashboard/leadership`, icon: <BarChart3 size={16} />, label: t('sidebar.leadershipDashboard'), roles: [...execRoles, "admin", mgmt] },
+        { href: `/${locale}/dashboard/clause-library`, icon: <Library size={16} />, label: t('sidebar.clauseLibrary'), roles: [...repsAndAbove, mgmt] },
         { href: `/${locale}/dashboard/insights`, icon: <TrendingUp size={16} />, label: t('sidebar.aiInsights'), roles: [...leadershipRoles, mgmt] },
         { href: `/${locale}/dashboard/movement-insights`, icon: <TrendingUp size={16} />, label: t('sidebar.movementInsights'), roles: [...leadershipRoles, ...clcRoles, mgmt] },
-        { href: `/${locale}/dashboard/finance`, icon: <CreditCard size={16} />, label: t('sidebar.billingInvoices'), roles: [...leadershipRoles, mgmt] },
+        { href: `/${locale}/dashboard/cross-union-analytics`, icon: <GitCompare size={16} />, label: t('sidebar.crossUnionAnalytics'), roles: [...clcRoles, "fed_staff", "fed_executive", "system_admin", "admin", mgmt] },
+        { href: `/${locale}/dashboard/leadership`, icon: <BarChart3 size={16} />, label: t('sidebar.leadershipDashboard'), roles: [...execRoles, "admin", mgmt] },
+        { href: `/${locale}/dashboard/executive`, icon: <Building2 size={16} />, label: t('sidebar.executiveDashboard'), roles: [...execRoles, mgmt] },
       ],
     },
     {
-      title: t('sidebar.executiveLeadership'),
-      roles: [...execRoles, mgmt],
+      title: t('sidebar.finance'),
+      roles: [...unionAll, mgmt],
+      defaultOpen: false,
       items: [
-        { href: `/${locale}/dashboard/executive`, icon: <Building2 size={16} />, label: t('sidebar.executiveDashboard'), roles: [...execRoles, mgmt] },
+        { href: `/${locale}/dashboard/dues`, icon: <DollarSign size={16} />, label: t('sidebar.duesDeductions'), roles: unionAll },
+        { href: `/${locale}/dashboard/pension`, icon: <Briefcase size={16} />, label: t('sidebar.pensionBenefits'), roles: unionAll },
+        { href: `/${locale}/dashboard/financial`, icon: <Receipt size={16} />, label: t('sidebar.financialManagement'), roles: [...leadershipRoles, mgmt] },
+        { href: `/${locale}/dashboard/finance`, icon: <CreditCard size={16} />, label: t('sidebar.billingInvoices'), roles: [...leadershipRoles, mgmt] },
+        { href: `/${locale}/dashboard/strike-fund`, icon: <DollarSign size={16} />, label: t('sidebar.strikeFund'), roles: [...leadershipRoles, mgmt] },
+        { href: `/${locale}/dashboard/admin/dues`, icon: <DollarSign size={16} />, label: t('sidebar.duesAdmin'), roles: ["officer", "president", "vice_president", "secretary_treasurer", "national_officer", "admin", mgmt] },
+        { href: `/${locale}/dashboard/pension/admin`, icon: <Briefcase size={16} />, label: t('sidebar.pensionAdmin'), roles: ["officer", "president", "vice_president", "secretary_treasurer", "national_officer", "admin", mgmt] },
+        { href: `/${locale}/dashboard/pension/trustee`, icon: <Shield size={16} />, label: t('sidebar.trusteePortal'), roles: ["officer", "president", "vice_president", "secretary_treasurer", "national_officer", "admin", mgmt] },
+      ],
+    },
+    {
+      title: t('sidebar.manage'),
+      roles: [...repsAndAbove, mgmt],
+      defaultOpen: false,
+      items: [
+        { href: `/${locale}/dashboard/members`, icon: <Users size={16} />, label: t('sidebar.members'), roles: [...repsAndAbove, mgmt] },
+        { href: `/${locale}/dashboard/stewards`, icon: <Users size={16} />, label: t('sidebar.stewardManagement'), roles: ["chief_steward", "officer", "president", "vice_president", "secretary_treasurer", "national_officer", "admin", mgmt] },
         { href: `/${locale}/dashboard/governance`, icon: <FileText size={16} />, label: t('sidebar.governance'), roles: [...execRoles, mgmt] },
         { href: `/${locale}/dashboard/audits`, icon: <FileBarChart size={16} />, label: t('sidebar.auditsCompliance'), roles: [...execRoles, "admin", mgmt] },
         { href: `/${locale}/dashboard/structure`, icon: <Network size={16} />, label: t('sidebar.orgStructure'), roles: ["admin", "system_admin", "app_owner", mgmt] },
@@ -350,6 +362,7 @@ export default function Sidebar({ profile: _profile, userEmail, whopMonthlyPlanI
   type SidebarSection = {
     title: string;
     roles: string[];
+    defaultOpen?: boolean;
     items: { href: string; icon: React.ReactNode; label: string; roles: string[] }[];
   };
 
@@ -523,7 +536,7 @@ export default function Sidebar({ profile: _profile, userEmail, whopMonthlyPlanI
       <nav className="flex-1 px-1.5 md:px-3 relative z-10 overflow-y-auto sidebar-scroll">
         <div className="space-y-3 md:space-y-4">
           {visibleSections.map((section) => (
-            <NavSection key={section.title} title={section.title} defaultOpen>
+            <NavSection key={section.title} title={section.title} defaultOpen={section.defaultOpen !== false}>
               {section.items.map(renderItem)}
             </NavSection>
           ))}
