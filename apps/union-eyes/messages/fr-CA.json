@@ -2324,7 +2324,12 @@
     "casework": "Dossiers",
     "intelligence": "Intelligence",
     "finance": "Finances",
-    "manage": "Gestion"
+    "manage": "Gestion",
+    "inbox": "Boîte de réception",
+    "work": "Travail",
+    "priorities": "Priorités",
+    "outcomes": "Résultats",
+    "knowledge": "Savoirs"
   },
   "marketing": {
     "nav": {

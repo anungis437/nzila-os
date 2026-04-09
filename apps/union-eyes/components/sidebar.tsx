@@ -1,11 +1,21 @@
 /**
  * Sidebar component for UnionEyes
- * Provides comprehensive navigation for union stakeholders with role-based access
- * Supports members, stewards, officers, and administrators
+ * Workflow-first navigation — users navigate by what they *do*, not by
+ * department or feature.
  *
- * Navigation tiers:
- *   - Nzila platform roles see super-org nav only (platform ops, org browser)
- *   - When an org is selected, org-specific sections appear
+ * 7-section layout (org tier):
+ *   1. Inbox       — what needs attention right now  (member+)
+ *   2. Work        — active casework & operations    (steward+)
+ *   3. Priorities  — deadlines, targets, campaigns   (steward+)
+ *   4. Intelligence— research, analysis, insights    (steward+)
+ *   5. Outcomes    — results, finances, voting        (member+)
+ *   6. Knowledge   — reference, learning, agreements  (member+)
+ *   7. Admin       — people, governance, admin        (officer+)
+ *
+ * Navigation rules:
+ *   - Max 5 subitems per section (enforced by design)
+ *   - 3–7 visible sections per role (progressive disclosure via role arrays)
+ *   - Nzila platform roles see a separate operator shell (superOrgSections)
  *   - Sections are collapsible with persistent open/close state
  */
 "use client";
@@ -42,7 +52,6 @@ import {
   Receipt,
   Activity,
   ChevronDown,
-  CreditCard,
   Globe,
   Clock,
   Database,
@@ -213,17 +222,27 @@ export default function Sidebar({ profile: _profile, userEmail, whopMonthlyPlanI
   // but NOT to personal member features (My Cases, Pension, Dues, Voting…).
   const mgmt = "platform_viewer";
 
-  // ── Workflow-first navigation ──────────────────────────────────────────────
-  // Reorganized from legacy role-tier sections (Your Union / Rep Tools /
-  // Leadership / Executive) into workflow-first groups so that items are
-  // clustered by *what you do*, not *who you are*.  Every item keeps its
-  // original role array — access control is unchanged.
+  // ── Workflow-first navigation (7-section layout) ───────────────────────────
+  // Structured by *what you do* — not by department or feature.
+  // Users navigate by workflow state: receive → work → prioritise → research
+  // → review outcomes → learn → administer.
   //
-  // Sections with defaultOpen:false start collapsed to reduce cognitive load
-  // for high-privilege users who would otherwise see 40+ items.
+  // Rules enforced:
+  //   • Max 5 primary subitems per section (role-filtering keeps counts low)
+  //   • 3-6 visible sections per role (progressive disclosure via role arrays)
+  //   • Sections with defaultOpen:false start collapsed to reduce cognitive
+  //     load for high-privilege users
+  //
+  // Per-role visible sections:
+  //   Member  → Inbox, Outcomes, Knowledge          (3 sections, ~11 items)
+  //   Steward → Inbox, Work, Priorities, Intelligence, Outcomes, Knowledge (6)
+  //   Officer → above + Admin                       (7 sections)
+  //   Fed/CLC → Intelligence, Outcomes, Knowledge + fed-specific sections
+  //   Nzila   → separate operator shell (superOrgSections)
   const orgSections = [
+    // ── 1. Inbox — "What needs my attention right now" ────────────────────
     {
-      title: organization?.name ? `${organization.name}` : t('sidebar.yourUnion'),
+      title: t('sidebar.inbox'),
       roles: [...unionAll, mgmt],
       defaultOpen: true,
       items: [
@@ -231,38 +250,36 @@ export default function Sidebar({ profile: _profile, userEmail, whopMonthlyPlanI
         { href: `/${locale}/dashboard/claims`, icon: <FileText size={16} />, label: t('claims.myCases'), roles: unionAll },
         { href: `/${locale}/dashboard/claims/new`, icon: <Mic size={16} />, label: t('sidebar.newCase'), roles: unionAll },
         { href: `/${locale}/dashboard/messages`, icon: <Mail size={16} />, label: t('sidebar.messages'), roles: unionAll },
-        { href: `/${locale}/dashboard/rewards`, icon: <Gift size={16} />, label: t('sidebar.rewards'), roles: unionAll },
-        { href: `/${locale}/dashboard/ai-assistant`, icon: <MessageSquare size={16} />, label: t('sidebar.aiAssistant'), roles: [...unionAll] },
+        { href: `/${locale}/dashboard/ai-assistant`, icon: <MessageSquare size={16} />, label: t('sidebar.aiAssistant'), roles: unionAll },
       ],
     },
+    // ── 2. Work — "Active casework and operations" ────────────────────────
     {
-      title: t('sidebar.participation'),
-      roles: [...unionAll, ...leadershipRoles, mgmt],
-      defaultOpen: true,
-      items: [
-        { href: `/${locale}/dashboard/communications`, icon: <MessageSquare size={16} />, label: t('sidebar.communications'), roles: [...leadershipRoles, mgmt] },
-        { href: `/${locale}/dashboard/education`, icon: <GraduationCap size={16} />, label: t('sidebar.educationTraining'), roles: [...unionAll] },
-        { href: `/${locale}/dashboard/voting`, icon: <Vote size={16} />, label: t('navigation.vote'), roles: [...unionAll] },
-        { href: `/${locale}/dashboard/agreements`, icon: <BookOpen size={16} />, label: t('sidebar.ourAgreements'), roles: [...unionAll, mgmt] },
-        { href: `/${locale}/dashboard/calendar`, icon: <Calendar size={16} />, label: t('calendar.title'), roles: [...unionAll, mgmt] },
-      ],
-    },
-    {
-      title: t('sidebar.casework'),
+      title: t('sidebar.work'),
       roles: [...repsAndAbove, "bargaining_committee", "health_safety_rep", mgmt],
       defaultOpen: true,
       items: [
         { href: `/${locale}/dashboard/workbench`, icon: <FileBarChart size={16} />, label: t('claims.caseQueue'), roles: [...repsAndAbove, mgmt] },
-        { href: `/${locale}/dashboard/deadlines`, icon: <Clock size={16} />, label: t('sidebar.deadlines'), roles: [...repsAndAbove, mgmt] },
         { href: `/${locale}/dashboard/grievances`, icon: <Scale size={16} />, label: t('grievance.title'), roles: [...leadershipRoles, mgmt] },
         { href: `/${locale}/dashboard/bargaining`, icon: <Handshake size={16} />, label: t('sidebar.bargainingNegotiations'), roles: [...leadershipRoles, "bargaining_committee", mgmt] },
         { href: `/${locale}/dashboard/health-safety`, icon: <Shield size={16} />, label: t('sidebar.healthSafety'), roles: [...repsAndAbove, "health_safety_rep", mgmt] },
         { href: `/${locale}/dashboard/dispatch`, icon: <Truck size={16} />, label: t('sidebar.dispatch'), roles: [...repsAndAbove, mgmt] },
-        { href: `/${locale}/dashboard/organizing`, icon: <Flag size={16} />, label: t('sidebar.organizingCampaigns'), roles: ["officer", "president", "vice_president", "secretary_treasurer", "national_officer", "admin", mgmt] },
-        { href: `/${locale}/dashboard/targets`, icon: <Target size={16} />, label: t('sidebar.performanceTargets'), roles: ["officer", "president", "vice_president", "secretary_treasurer", "national_officer", "admin", mgmt] },
-        { href: `/${locale}/dashboard/notifications`, icon: <Bell size={16} />, label: t('sidebar.alerts'), roles: [...leadershipRoles, mgmt] },
       ],
     },
+    // ── 3. Priorities — "What's urgent or time-sensitive" ─────────────────
+    {
+      title: t('sidebar.priorities'),
+      roles: [...repsAndAbove, mgmt],
+      defaultOpen: true,
+      items: [
+        { href: `/${locale}/dashboard/deadlines`, icon: <Clock size={16} />, label: t('sidebar.deadlines'), roles: [...repsAndAbove, mgmt] },
+        { href: `/${locale}/dashboard/notifications`, icon: <Bell size={16} />, label: t('sidebar.alerts'), roles: [...leadershipRoles, mgmt] },
+        { href: `/${locale}/dashboard/targets`, icon: <Target size={16} />, label: t('sidebar.performanceTargets'), roles: [...leadershipRoles, mgmt] },
+        { href: `/${locale}/dashboard/organizing`, icon: <Flag size={16} />, label: t('sidebar.organizingCampaigns'), roles: [...leadershipRoles, mgmt] },
+        { href: `/${locale}/dashboard/communications`, icon: <MessageSquare size={16} />, label: t('sidebar.communications'), roles: [...leadershipRoles, mgmt] },
+      ],
+    },
+    // ── 4. Intelligence — "Research, analysis, and insights" ──────────────
     {
       title: t('sidebar.intelligence'),
       roles: [...repsAndAbove, mgmt],
@@ -272,30 +289,38 @@ export default function Sidebar({ profile: _profile, userEmail, whopMonthlyPlanI
         ...(['congress', 'federation', 'union'].includes(organization?.type ?? '')
           ? [{ href: `/${locale}/cba-intelligence`, icon: <Database size={16} />, label: t('sidebar.cbaIntelligence'), roles: [...repsAndAbove, mgmt] }]
           : []),
-        { href: `/${locale}/dashboard/precedents`, icon: <Scale size={16} />, label: t('sidebar.precedents'), roles: [...repsAndAbove, mgmt] },
-        { href: `/${locale}/dashboard/clause-library`, icon: <Library size={16} />, label: t('sidebar.clauseLibrary'), roles: [...repsAndAbove, mgmt] },
         { href: `/${locale}/dashboard/insights`, icon: <TrendingUp size={16} />, label: t('sidebar.aiInsights'), roles: [...leadershipRoles, mgmt] },
         { href: `/${locale}/dashboard/movement-insights`, icon: <TrendingUp size={16} />, label: t('sidebar.movementInsights'), roles: [...leadershipRoles, ...clcRoles, mgmt] },
-        { href: `/${locale}/dashboard/cross-union-analytics`, icon: <GitCompare size={16} />, label: t('sidebar.crossUnionAnalytics'), roles: [...clcRoles, "fed_staff", "fed_executive", "system_admin", "admin", mgmt] },
         { href: `/${locale}/dashboard/leadership`, icon: <BarChart3 size={16} />, label: t('sidebar.leadershipDashboard'), roles: [...execRoles, "admin", mgmt] },
-        { href: `/${locale}/dashboard/executive`, icon: <Building2 size={16} />, label: t('sidebar.executiveDashboard'), roles: [...execRoles, mgmt] },
       ],
     },
+    // ── 5. Outcomes — "Results, finances, and voting" ─────────────────────
     {
-      title: t('sidebar.finance'),
+      title: t('sidebar.outcomes'),
       roles: [...unionAll, mgmt],
       defaultOpen: false,
       items: [
+        { href: `/${locale}/dashboard/voting`, icon: <Vote size={16} />, label: t('navigation.vote'), roles: unionAll },
         { href: `/${locale}/dashboard/dues`, icon: <DollarSign size={16} />, label: t('sidebar.duesDeductions'), roles: unionAll },
         { href: `/${locale}/dashboard/pension`, icon: <Briefcase size={16} />, label: t('sidebar.pensionBenefits'), roles: unionAll },
+        { href: `/${locale}/dashboard/rewards`, icon: <Gift size={16} />, label: t('sidebar.rewards'), roles: unionAll },
         { href: `/${locale}/dashboard/financial`, icon: <Receipt size={16} />, label: t('sidebar.financialManagement'), roles: [...leadershipRoles, mgmt] },
-        { href: `/${locale}/dashboard/finance`, icon: <CreditCard size={16} />, label: t('sidebar.billingInvoices'), roles: [...leadershipRoles, mgmt] },
-        { href: `/${locale}/dashboard/strike-fund`, icon: <DollarSign size={16} />, label: t('sidebar.strikeFund'), roles: [...leadershipRoles, mgmt] },
-        { href: `/${locale}/dashboard/admin/dues`, icon: <DollarSign size={16} />, label: t('sidebar.duesAdmin'), roles: ["officer", "president", "vice_president", "secretary_treasurer", "national_officer", "admin", mgmt] },
-        { href: `/${locale}/dashboard/pension/admin`, icon: <Briefcase size={16} />, label: t('sidebar.pensionAdmin'), roles: ["officer", "president", "vice_president", "secretary_treasurer", "national_officer", "admin", mgmt] },
-        { href: `/${locale}/dashboard/pension/trustee`, icon: <Shield size={16} />, label: t('sidebar.trusteePortal'), roles: ["officer", "president", "vice_president", "secretary_treasurer", "national_officer", "admin", mgmt] },
       ],
     },
+    // ── 6. Knowledge — "Reference, learning, and agreements" ──────────────
+    {
+      title: t('sidebar.knowledge'),
+      roles: [...unionAll, mgmt],
+      defaultOpen: false,
+      items: [
+        { href: `/${locale}/dashboard/agreements`, icon: <BookOpen size={16} />, label: t('sidebar.ourAgreements'), roles: [...unionAll, mgmt] },
+        { href: `/${locale}/dashboard/education`, icon: <GraduationCap size={16} />, label: t('sidebar.educationTraining'), roles: unionAll },
+        { href: `/${locale}/dashboard/clause-library`, icon: <Library size={16} />, label: t('sidebar.clauseLibrary'), roles: [...repsAndAbove, mgmt] },
+        { href: `/${locale}/dashboard/precedents`, icon: <Scale size={16} />, label: t('sidebar.precedents'), roles: [...repsAndAbove, mgmt] },
+        { href: `/${locale}/dashboard/calendar`, icon: <Calendar size={16} />, label: t('calendar.title'), roles: [...unionAll, mgmt] },
+      ],
+    },
+    // ── 7. Admin — "People, governance, and administration" ───────────────
     {
       title: t('sidebar.manage'),
       roles: [...repsAndAbove, mgmt],

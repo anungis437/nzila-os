@@ -2071,7 +2071,12 @@
     "casework": "Casework",
     "intelligence": "Intelligence",
     "finance": "Finance",
-    "manage": "Manage"
+    "manage": "Manage",
+    "inbox": "Inbox",
+    "work": "Work",
+    "priorities": "Priorities",
+    "outcomes": "Outcomes",
+    "knowledge": "Knowledge"
   },
   "steward": {
     "recommendations": {
