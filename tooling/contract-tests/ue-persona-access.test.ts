@@ -251,6 +251,8 @@ const PAGE_ACCESS_MATRIX: PageRule[] = [
   { path: 'reports/page.tsx',                            minRole: 'steward',              description: 'Reports dashboard (client-side)' },
   { path: 'workbench/page.tsx',                          minRole: 'steward',              description: 'LRO workbench — case queue' },
   { path: 'cases/[id]/page.tsx',                         minRole: 'steward',              description: 'Case detail view' },
+  { path: 'cba-intelligence/page.tsx',                    minRole: 'health_safety_rep',    description: 'CBA intelligence (entitlement-gated, min H&S rep)' },
+  { path: 'committees/page.tsx',                          minRole: 'steward',              description: 'Committee management' },
 
   // ── Officer-level pages (level 60) ─────────────────────────────────────
   { path: 'audits/page.tsx',                             minRole: 'officer',              description: 'Audits & compliance' },
@@ -324,7 +326,10 @@ const API_ROUTE_MATRIX: ApiRouteRule[] = [
 
 function findPageFiles(): string[] {
   if (!existsSync(DASHBOARD_DIR)) return []
-  return walkSync(DASHBOARD_DIR, ['.tsx']).filter(f => f.endsWith('page.tsx'))
+  return walkSync(DASHBOARD_DIR, ['.tsx']).filter(f => {
+    const base = f.replace(/\\/g, '/').split('/').pop()
+    return base === 'page.tsx'
+  })
 }
 
 function findApiRoute(apiPath: string): string | null {
