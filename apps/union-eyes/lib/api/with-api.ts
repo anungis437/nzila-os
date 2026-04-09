@@ -244,9 +244,13 @@ export function withApi<
       }
 
       // ── 2. Cron authentication ─────────────────────────────────────────
+      // Accepts both x-cron-secret and Authorization: Bearer headers.
+      // Checks CRON_SECRET_KEY first, falls back to CRON_SECRET for compat.
       if (requireCron) {
-        const cronSecret = request.headers.get('x-cron-secret');
-        const expected = process.env.CRON_SECRET_KEY;
+        const xCronHeader = request.headers.get('x-cron-secret');
+        const authBearer = request.headers.get('authorization')?.replace('Bearer ', '');
+        const cronSecret = xCronHeader || authBearer || '';
+        const expected = process.env.CRON_SECRET_KEY ?? process.env.CRON_SECRET ?? '';
         if (!expected || cronSecret !== expected) {
           return standardErrorResponse(ErrorCode.AUTH_REQUIRED, 'Invalid cron secret', undefined, traceId);
         }

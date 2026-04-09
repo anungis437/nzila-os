@@ -1004,6 +1004,8 @@ export async function hasMinRole(minRole: string): Promise<boolean> {
  *   return NextResponse.json({ data });
  * });
  * ```
+ *
+ * @deprecated Use `withApi({ auth: { minRole: 'role' } })` from `@/lib/api/framework` instead.
  */
 export function withRoleAuth<TContext extends Record<string, unknown> = BaseAuthContext>(
   requiredRole: string,
@@ -1056,6 +1058,8 @@ export function withRoleAuth<TContext extends Record<string, unknown> = BaseAuth
  * 
  * Hierarchy: admin > officer > steward > member
  * A user with 'officer' role can access routes requiring 'steward' or 'member'
+ *
+ * @deprecated Use `withApi({ auth: { minRole: 'role' } })` from `@/lib/api/framework` instead.
  */
 export function withMinRole<TContext extends Record<string, unknown> = BaseAuthContext>(
   minRole: string,
@@ -1099,6 +1103,8 @@ export function withMinRole<TContext extends Record<string, unknown> = BaseAuthC
 
 /**
  * API Guard Wrapper for admin-only routes
+ *
+ * @deprecated Use `withApi({ auth: { minRole: 'admin' } })` from `@/lib/api/framework` instead.
  */
 export function withAdminAuth<TContext extends Record<string, unknown> = BaseAuthContext>(
   handler: ApiRouteHandler<TContext>
@@ -1571,6 +1577,8 @@ export function withScopedRoleAuth<T = any>(
  *   // Your handler logic
  * }, { requireAuth: false });
  * ```
+ *
+ * @deprecated Use `withApi({})` from `@/lib/api/framework` instead.
  */
 export function withApiAuth<TContext extends Record<string, unknown> = BaseAuthContext>(
   handler: ApiRouteHandler<TContext>,

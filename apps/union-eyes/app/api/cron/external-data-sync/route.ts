@@ -1,27 +1,20 @@
 /**
  * External Data Sync Cron Job
  * 
+ * Protected by withApi cron auth (Phase 7 — Workflow Realignment).
  * Purpose: Sync external data (Statistics Canada, LRB, CLC) on scheduled basis
  * Schedule: 
  *   - Wages: Monthly (1st of month at midnight UTC)
  *   - Union Density: Weekly (Sunday at midnight UTC)
  *   - COLA: Monthly (1st of month at midnight UTC)
  *   - Contributions: Weekly (Sunday at midnight UTC)
- * 
- * Vercel Cron Expressions:
- *   - Monthly: "0 0 1 * *" (Midnight UTC on 1st of every month)
- *   - Weekly: "0 0 * * 0" (Midnight UTC on Sunday)
  */
 
-import { NextRequest, NextResponse } from 'next/server';
-import { timingSafeEqual } from 'crypto';
+import { NextResponse } from 'next/server';
 import { wageEnrichmentService, type SyncResult } from '@/lib/services/external-data/wage-enrichment-service';
 import { logger } from '@/lib/logger';
+import { withApi } from '@/lib/api/framework';
 
-import {
-  ErrorCode,
-  standardErrorResponse,
-} from '@/lib/api/standardized-responses';
 // Common NOC codes for unionized occupations
 const COMMON_NOC_CODES = [
   '6513', // Food and beverage servers
@@ -49,25 +42,13 @@ const COMMON_NOC_CODES = [
 // CRON JOB
 // =============================================================================
 
-export async function GET(request: NextRequest) {
+const handler = withApi(
+  {
+    auth: { cron: true },
+    openapi: { tags: ['Cron'], summary: 'Sync external data (StatsCanada, LRB, CLC)' },
+  },
+  async () => {
   const startTime = Date.now();
-  
-  // Verify cron authorization (timing-safe comparison)
-  const authHeader = request.headers.get('authorization');
-  const secret = authHeader?.replace('Bearer ', '') ?? '';
-  const expected = process.env.CRON_SECRET ?? '';
-  if (!expected) {
-    return standardErrorResponse(ErrorCode.AUTH_REQUIRED, 'CRON_SECRET not configured');
-  }
-  const secretBuf = Buffer.from(secret);
-  const expectedBuf = Buffer.from(expected);
-  if (secretBuf.length !== expectedBuf.length || !timingSafeEqual(secretBuf, expectedBuf)) {
-    logger.warn('[CRON] Unauthorized external data sync attempt');
-    return standardErrorResponse(
-      ErrorCode.AUTH_REQUIRED,
-      'Unauthorized'
-    );
-  }
 
   logger.info('[CRON] Starting external data sync...');
 
@@ -220,23 +201,11 @@ export async function GET(request: NextRequest) {
       duration: results.summary.duration,
     });
 
-    return NextResponse.json(results);
-  } catch (error) {
-    logger.error('[CRON] Fatal error in external data sync:', error);
+    return results;
+  },
+);
 
-    return NextResponse.json(
-      {
-        success: false,
-        error: 'Cron job failed',
-        duration: Date.now() - startTime,
-      },
-      { status: 500 }
-    );
-  }
-}
-
+export const GET = handler;
 // POST for manual triggering
-export async function POST(request: NextRequest) {
-  return GET(request);
-}
+export const POST = handler;
 

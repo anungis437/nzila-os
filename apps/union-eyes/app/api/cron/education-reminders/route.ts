@@ -1,21 +1,17 @@
 /**
  * Education Reminders Cron Job
  * 
- * MIGRATION STATUS: ✅ Migrated to use withSystemContext()
+ * Protected by withApi cron auth (Phase 7 — Workflow Realignment).
  * - System-wide cron job uses withSystemContext() for unrestricted access
  * - Runs daily to send session reminders and certification expiry warnings
  */
 
-import { NextRequest, NextResponse } from "next/server";
-import { timingSafeEqual } from 'crypto';
+import { NextResponse } from "next/server";
 import { sql } from 'drizzle-orm';
 import { withSystemContext } from '@/lib/db/with-rls-context';
 import { db } from '@/db';
 import { logger } from "@/lib/logger";
-import {
-  ErrorCode,
-  standardErrorResponse,
-} from '@/lib/api/standardized-responses';
+import { withApi } from '@/lib/api/framework';
 import {
   batchSendSessionReminders,
   batchSendExpiryWarnings,
@@ -31,29 +27,13 @@ export const runtime = "nodejs";
  * - Certification expiry warnings (90, 30 days before)
  * 
  * Runs daily at 6 AM via Vercel Cron
- * Verify with: Authorization: Bearer <CRON_SECRET>
  */
-export async function GET(request: NextRequest) {
-  try {
-    // Verify cron secret for security (timing-safe comparison)
-    const authHeader = request.headers.get("authorization");
-    const secret = authHeader?.replace('Bearer ', '') ?? '';
-    const cronSecret = process.env.CRON_SECRET ?? '';
-    if (!cronSecret) {
-      return standardErrorResponse(ErrorCode.AUTH_REQUIRED, 'CRON_SECRET not configured');
-    }
-    const secretBuf = Buffer.from(secret);
-    const expectedBuf = Buffer.from(cronSecret);
-
-    if (secretBuf.length !== expectedBuf.length || !timingSafeEqual(secretBuf, expectedBuf)) {
-      logger.warn("Unauthorized cron job attempt", {
-        authHeader: authHeader?.substring(0, 20),
-      });
-      return standardErrorResponse(
-      ErrorCode.AUTH_REQUIRED,
-      'Unauthorized'
-    );
-    }
+export const GET = withApi(
+  {
+    auth: { cron: true },
+    openapi: { tags: ['Cron'], summary: 'Send education reminders and certification expiry warnings' },
+  },
+  async () => {
 
     const results = {
       sessionReminders: { sent: 0, failed: 0, errors: [] as string[] },
@@ -192,19 +172,11 @@ export async function GET(request: NextRequest) {
     }
 
     // Return summary
-    return NextResponse.json({
+    return {
       success: true,
       results,
       message: "Education reminders processed successfully",
-    });
-  } catch (error) {
-    logger.error("Error processing education reminders", error as Error);
-    return NextResponse.json(
-      {
-        error: "Failed to process reminders",
-      },
-      { status: 500 }
-    );
-  }
-}
+    };
+  },
+);
 

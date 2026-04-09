@@ -5,15 +5,14 @@
  * scheduler or Vercel / Azure cron). Scans all non-terminal claims, checks
  * SLA compliance, and emits alert events for claims nearing or past breach.
  *
- * Security: Guarded by CRON_SECRET header so only the scheduler can invoke.
+ * Protected by withApi cron auth (Phase 7 — Workflow Realignment).
  */
-import { NextRequest, NextResponse } from 'next/server'
 import { db } from '@/db/db'
 import { claims } from '@/db/schema'
 import { sql } from 'drizzle-orm'
 import { eventBus } from '@/lib/events/event-bus'
 import { logger } from '@/lib/logger'
-import { timingSafeEqual } from 'crypto'
+import { withApi } from '@/lib/api/framework'
 import {
   CLAIM_SLA_STANDARDS,
   type ClaimStatus,
@@ -41,22 +40,12 @@ function slaDeadline(
   return d
 }
 
-export async function POST(request: NextRequest) {
-  // Authenticate via shared secret (standardized Bearer token pattern)
-  const authHeader = request.headers.get('authorization') ?? request.headers.get('x-cron-secret') ?? '';
-  const secret = authHeader.replace('Bearer ', '');
-  const expected = process.env.CRON_SECRET ?? '';
-  if (!expected) {
-    return NextResponse.json({ error: 'CRON_SECRET not configured' }, { status: 401 })
-  }
-  const secretsMatch =
-    secret.length === expected.length &&
-    timingSafeEqual(Buffer.from(secret), Buffer.from(expected))
-  if (!secretsMatch) {
-    return NextResponse.json({ error: 'Unauthorized' }, { status: 401 })
-  }
-
-  try {
+export const POST = withApi(
+  {
+    auth: { cron: true },
+    openapi: { tags: ['Cron'], summary: 'SLA watchdog — scan claims for SLA compliance' },
+  },
+  async () => {
     // Fetch all active (non-terminal) claims
     const activeClaims = await db
       .select({
@@ -139,14 +128,11 @@ export async function POST(request: NextRequest) {
       breached: breachedCount,
     })
 
-    return NextResponse.json({
+    return {
       scanned: activeClaims.length,
       at_risk: atRiskCount,
       breached: breachedCount,
       timestamp: now.toISOString(),
-    })
-  } catch (err) {
-    logger.error('SLA watchdog failed', { error: String(err) })
-    return NextResponse.json({ error: 'Watchdog failed' }, { status: 500 })
-  }
-}
+    }
+  },
+)

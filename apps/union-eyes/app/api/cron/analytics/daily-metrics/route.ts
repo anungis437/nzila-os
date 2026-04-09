@@ -1,5 +1,6 @@
 /**
- * Health check endpoint
+ * Daily Analytics Metrics Cron Job
+ * Protected by withApi cron auth (Phase 7 — Workflow Realignment).
  */
 import { withApi } from '@/lib/api/framework';
 
@@ -7,11 +8,10 @@ export const dynamic = 'force-dynamic';
 
 export const GET = withApi(
   {
-    auth: { required: false },
+    auth: { cron: true },
     openapi: {
-      tags: ["System"],
-      summary: 'Health check',
-      description: 'Returns service health status.',
+      tags: ['Cron'],
+      summary: 'Daily analytics metrics collection',
     },
   },
   async () => {
