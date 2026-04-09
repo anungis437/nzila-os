@@ -13,6 +13,6 @@ const { GET, POST } = crudRoutes({
   tags: ["Members"],
   orgScoped: true,
   readRole: 'admin',
-  writeRole: 'system_admin',
+  writeRole: 'admin',
 });
 export { GET, POST };
