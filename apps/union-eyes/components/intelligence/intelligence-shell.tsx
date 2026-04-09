@@ -5,8 +5,8 @@
  *
  * Tabs:
  *   Local        → AnalyticsOverviewConsole (local union analytics)
- *   AI Insights  → AI forecasts (officer+)
- *   Executive    → Executive dashboard (secretary_treasurer+)
+ *   Federation   → AI forecasts & insights (officer+)
+ *   Executive    → Executive dashboard + strategic planning (secretary_treasurer+)
  *
  * Tab visibility is driven by userRole so lower-tier users only see tabs
  * they can access.  The ?scope= query param pre-selects a tab.
@@ -16,8 +16,12 @@ import { useSearchParams } from "next/navigation";
 import { useTranslations } from "next-intl";
 import { Tabs, TabsList, TabsTrigger, TabsContent } from "@/components/ui/tabs";
 import { AnalyticsOverviewConsole } from "@/components/analytics/analytics-overview-console";
+import { InsightsPanel } from "@/components/analytics/insights-panel";
+import ExecutiveDashboard from "@/components/executive/ExecutiveDashboard";
+import StrategicPlanningBoard from "@/components/executive/StrategicPlanningBoard";
+import { useOrganization } from "@/contexts/organization-context";
 
-// Roles that can see officer-level AI insights tab
+// Roles that can see officer-level federation insights tab
 const AI_INSIGHT_ROLES = new Set([
   "officer", "president", "vice_president", "secretary_treasurer",
   "national_officer", "admin", "system_admin", "app_owner",
@@ -36,6 +40,7 @@ interface IntelligenceShellProps {
 export function IntelligenceShell({ userRole }: IntelligenceShellProps) {
   const t = useTranslations();
   const params = useSearchParams();
+  const { organizationId } = useOrganization();
 
   const canSeeAI = AI_INSIGHT_ROLES.has(userRole);
   const canSeeExec = EXEC_ROLES.has(userRole);
@@ -43,7 +48,7 @@ export function IntelligenceShell({ userRole }: IntelligenceShellProps) {
   // Resolve default tab from ?scope= query param
   const scope = params.get("scope");
   let defaultTab = "local";
-  if (scope === "federation" && canSeeAI) defaultTab = "ai";
+  if (scope === "federation" && canSeeAI) defaultTab = "federation";
   if (scope === "executive" && canSeeExec) defaultTab = "executive";
 
   return (
@@ -59,7 +64,7 @@ export function IntelligenceShell({ userRole }: IntelligenceShellProps) {
         <TabsList>
           <TabsTrigger value="local">{t("sidebar.insights")}</TabsTrigger>
           {canSeeAI && (
-            <TabsTrigger value="ai">{t("sidebar.aiInsights")}</TabsTrigger>
+            <TabsTrigger value="federation">{t("sidebar.federation")}</TabsTrigger>
           )}
           {canSeeExec && (
             <TabsTrigger value="executive">Executive</TabsTrigger>
@@ -71,31 +76,19 @@ export function IntelligenceShell({ userRole }: IntelligenceShellProps) {
         </TabsContent>
 
         {canSeeAI && (
-          <TabsContent value="ai" className="mt-4">
-            <div className="rounded-lg border p-6 text-center text-gray-500">
-              <p className="font-medium mb-1">AI-powered insights</p>
-              <p className="text-sm text-gray-400">
-                Navigate to{" "}
-                <a href="insights" className="text-blue-600 underline">
-                  AI Insights
-                </a>{" "}
-                for detailed forecasts and analysis.
-              </p>
-            </div>
+          <TabsContent value="federation" className="mt-4">
+            <InsightsPanel insights={[]} />
           </TabsContent>
         )}
 
         {canSeeExec && (
           <TabsContent value="executive" className="mt-4">
-            <div className="rounded-lg border p-6 text-center text-gray-500">
-              <p className="font-medium mb-1">Executive overview</p>
-              <p className="text-sm text-gray-400">
-                Navigate to{" "}
-                <a href="executive" className="text-blue-600 underline">
-                  Executive Dashboard
-                </a>{" "}
-                for strategic planning and KPIs.
-              </p>
+            <div className="space-y-8">
+              <ExecutiveDashboard
+                organizationId={organizationId ?? "default"}
+                userRole={userRole}
+              />
+              <StrategicPlanningBoard />
             </div>
           </TabsContent>
         )}

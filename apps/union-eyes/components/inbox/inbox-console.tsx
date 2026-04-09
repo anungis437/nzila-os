@@ -9,7 +9,7 @@
  */
 
 import { useState, useEffect, useCallback } from "react";
-import { useRouter } from "next/navigation";
+import { useRouter, useSearchParams } from "next/navigation";
 import { useLocale, useTranslations } from "next-intl";
 import {
   FileText,
@@ -82,10 +82,19 @@ export function InboxConsole() {
   const t = useTranslations();
   const locale = useLocale();
   const router = useRouter();
+  const searchParams = useSearchParams();
   const [signals, setSignals] = useState<Signal[]>([]);
   const [loading, setLoading] = useState(true);
-  const [typeFilter, setTypeFilter] = useState<SignalType | "all">("all");
-  const [urgencyFilter, setUrgencyFilter] = useState<SignalUrgency | "all">("all");
+
+  // Initialise filters from URL query params (?type=message&urgency=high)
+  const initialType = (searchParams.get("type") as SignalType) || "all";
+  const initialUrgency = (searchParams.get("urgency") as SignalUrgency) || "all";
+  const [typeFilter, setTypeFilter] = useState<SignalType | "all">(
+    ["intake", "message", "alert", "system"].includes(initialType) ? initialType : "all"
+  );
+  const [urgencyFilter, setUrgencyFilter] = useState<SignalUrgency | "all">(
+    ["critical", "high", "normal", "low"].includes(initialUrgency) ? initialUrgency : "all"
+  );
 
   const fetchSignals = useCallback(async () => {
     setLoading(true);
