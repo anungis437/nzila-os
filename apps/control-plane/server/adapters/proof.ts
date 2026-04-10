@@ -41,7 +41,8 @@ async function getEvidencePackCountsByOrg(): Promise<Map<string, EvidencePackSum
       });
     }
     return map;
-  } catch {
+  } catch (err) {
+    console.error("[ADAPTER:proof] getEvidencePackCountsByOrg failed", err);
     return new Map();
   }
 }

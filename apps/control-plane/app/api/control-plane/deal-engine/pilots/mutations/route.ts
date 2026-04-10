@@ -67,9 +67,16 @@ export async function POST(request: Request) {
         }, { actorId: data.actor, tenantId: "system" });
         recordDealAudit({
           action: "pilot_checklist_update", actor: data.actor, orgId: "system",
-          details: { pilotId: data.pilotId, checklistKey: data.checklistKey, checklistValue: data.checklistValue },
+          details: {
+            pilotId: data.pilotId,
+            checklistKey: data.checklistKey,
+            before: { [data.checklistKey]: !data.checklistValue },
+            after: { [data.checklistKey]: data.checklistValue },
+          },
         });
-      } catch { /* best-effort */ }
+      } catch (err) {
+        console.error("[ROUTE:pilots] checklist event/audit failed", err);
+      }
 
       return NextResponse.json({ ok: true, data: { pilot } });
     }
@@ -89,9 +96,15 @@ export async function POST(request: Request) {
         }, { actorId: data.actor, tenantId: "system" });
         recordDealAudit({
           action: "pilot_status_change", actor: data.actor, orgId: "system",
-          details: { pilotId: data.pilotId, newStatus: data.status },
+          details: {
+            pilotId: data.pilotId,
+            before: { status: body.previousStatus ?? "unknown" },
+            after: { status: data.status },
+          },
         });
-      } catch { /* best-effort */ }
+      } catch (err) {
+        console.error("[ROUTE:pilots] status event/audit failed", err);
+      }
 
       return NextResponse.json({ ok: true, data: { pilot } });
     }

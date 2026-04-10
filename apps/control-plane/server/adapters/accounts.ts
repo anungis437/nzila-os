@@ -8,30 +8,10 @@ import "server-only";
 import { db } from "@nzila/db";
 import { commerceCustomers, commerceOpportunities, tradeParties, tradeDeals } from "@nzila/db";
 import { desc, eq, sql } from "drizzle-orm";
+import { COMMERCE_STAGE_MAP, TRADE_STAGE_MAP } from "@nzila/deal-engine/lifecycle";
 import { dealEnginePilots } from "./schemas";
 import type { Account, AccountHealth } from "@nzila/deal-engine/types";
-import type { DealStage } from "@nzila/deal-engine/lifecycle";
 import type { AccountAdapter as IAccountAdapter, AccountFilters } from "@nzila/deal-engine/adapters";
-
-const COMMERCE_STAGE_MAP: Record<string, DealStage> = {
-  lead: "lead",
-  qualified: "qualified",
-  proposal: "pilot_proposed",
-  negotiation: "demo_completed",
-  closed_won: "converted",
-};
-
-const TRADE_STAGE_MAP: Record<string, DealStage> = {
-  lead: "lead",
-  qualified: "qualified",
-  quoted: "pilot_proposed",
-  accepted: "demo_completed",
-  funded: "converted",
-  shipped: "expanding",
-  delivered: "expanding",
-  closed: "converted",
-  cancelled: "lost",
-};
 
 async function fetchCommerceAccounts(): Promise<Account[]> {
   const rows = await db
@@ -65,8 +45,8 @@ async function fetchCommerceAccounts(): Promise<Account[]> {
       for (const o of opps) {
         if (!oppMap.has(o.customerId)) oppMap.set(o.customerId, o.status);
       }
-    } catch {
-      // table may not have data
+    } catch (err) {
+      console.error("[ADAPTER:accounts] fetchCommerceAccounts opportunity enrichment failed", err);
     }
   }
 
@@ -121,8 +101,8 @@ async function fetchTradeAccounts(): Promise<Account[]> {
       for (const d of deals) {
         if (!dealMap.has(d.buyerPartyId)) dealMap.set(d.buyerPartyId, d.stage);
       }
-    } catch {
-      // table may not have data
+    } catch (err) {
+      console.error("[ADAPTER:accounts] fetchTradeAccounts deal stage enrichment failed", err);
     }
   }
 
@@ -148,8 +128,14 @@ async function fetchTradeAccounts(): Promise<Account[]> {
 export class DbAccountAdapter implements IAccountAdapter {
   async getAccounts(filters?: AccountFilters): Promise<Account[]> {
     const [commerce, trade] = await Promise.all([
-      fetchCommerceAccounts().catch(() => []),
-      fetchTradeAccounts().catch(() => []),
+      fetchCommerceAccounts().catch((err) => {
+        console.error("[ADAPTER:accounts] fetchCommerceAccounts failed", err);
+        return [] as Account[];
+      }),
+      fetchTradeAccounts().catch((err) => {
+        console.error("[ADAPTER:accounts] fetchTradeAccounts failed", err);
+        return [] as Account[];
+      }),
     ]);
 
     let accounts = [...commerce, ...trade];
@@ -184,7 +170,9 @@ export class DbAccountAdapter implements IAccountAdapter {
           healthScore: null, nextAction: null, currentBlocker: null,
         };
       }
-    } catch { /* table may not exist */ }
+    } catch (err) {
+      console.error("[ADAPTER:accounts] getAccountById commerce lookup failed", err);
+    }
     try {
       const tradeRows = await db
         .select({ id: tradeParties.id, name: tradeParties.name, companyName: tradeParties.companyName, updatedAt: tradeParties.updatedAt })
@@ -200,7 +188,9 @@ export class DbAccountAdapter implements IAccountAdapter {
           healthScore: null, nextAction: null, currentBlocker: null,
         };
       }
-    } catch { /* table may not exist */ }
+    } catch (err) {
+      console.error("[ADAPTER:accounts] getAccountById trade lookup failed", err);
+    }
     return null;
   }
 
@@ -262,6 +252,69 @@ export class DbAccountAdapter implements IAccountAdapter {
       };
     } catch {
       return null;
+    }
+  }
+
+  /** Batch health computation — fetches all pilots in one query instead of N+1. */
+  async getBulkAccountHealth(): Promise<AccountHealth[]> {
+    try {
+      const allPilots = await db.select().from(dealEnginePilots);
+      if (allPilots.length === 0) return [];
+
+      // Group by accountId, use first pilot per account
+      const byAccount = new Map<string, typeof allPilots[0]>();
+      for (const p of allPilots) {
+        if (!byAccount.has(p.accountId)) byAccount.set(p.accountId, p);
+      }
+
+      const results: AccountHealth[] = [];
+      for (const [accountId, pilot] of byAccount) {
+        const checklist = (pilot.checklist ?? {}) as Record<string, boolean>;
+        const checklistKeys = ["dataReceived", "ingestionComplete", "demoDatasetReady", "userOnboardingComplete", "reviewMeetingScheduled", "conversionTriggered"];
+        const completedChecks = checklistKeys.filter((k) => checklist[k]).length;
+        const checklistProgress = completedChecks / checklistKeys.length;
+
+        const statusScores: Record<string, number> = {
+          proposed: 10, setup: 20, active: 40, data_collection: 50,
+          ingestion: 60, review: 75, converted: 100, cancelled: 0,
+        };
+        const statusScore = statusScores[pilot.pilotStatus] ?? 10;
+        const readinessScore = Math.min(100, Math.round(statusScore * 0.6 + checklistProgress * 100 * 0.4));
+
+        const migrationHealth = pilot.pilotStatus === "cancelled" ? "failed" as const
+          : pilot.pilotStatus === "converted" ? "healthy" as const
+          : checklist["ingestionComplete"] ? "healthy" as const
+          : pilot.pilotStatus === "ingestion" || pilot.pilotStatus === "data_collection" ? "degraded" as const
+          : "not_started" as const;
+
+        const governancePosture = readinessScore >= 70 ? "compliant" as const
+          : readinessScore >= 40 ? "partial" as const
+          : "non_compliant" as const;
+
+        const proofStatus = pilot.pilotStatus === "converted" ? "ready" as const
+          : pilot.pilotStatus === "review" ? "in_progress" as const
+          : "not_started" as const;
+
+        results.push({
+          id: `health-${accountId}`,
+          accountId,
+          accountName: pilot.accountName,
+          pilotId: pilot.id,
+          readinessScore,
+          migrationHealth,
+          ingestionSuccess: checklist["ingestionComplete"] ?? null,
+          productUsageSummary: pilot.pilotStatus === "active" ? "Active pilot usage" : null,
+          recommendationTrust: readinessScore >= 70 ? "high" : readinessScore >= 40 ? "medium" : "low",
+          evidencePacksAvailable: completedChecks,
+          governancePosture,
+          proofStatus,
+          lastActivityAt: pilot.updatedAt.toISOString(),
+        });
+      }
+      return results;
+    } catch (err) {
+      console.error("[ADAPTER:accounts] getBulkAccountHealth failed", err);
+      return [];
     }
   }
 }

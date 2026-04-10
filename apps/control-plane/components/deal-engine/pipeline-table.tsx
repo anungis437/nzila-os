@@ -7,20 +7,25 @@ import { STAGE_METADATA_LIST } from "./stage-metadata";
 import type { Deal } from "@nzila/deal-engine/types";
 import { ChevronRight } from "lucide-react";
 
-/** Client-safe copy of allowed transitions (mirrors deal-engine lifecycle). */
+/**
+ * Client-safe copy of allowed transitions.
+ * CANONICAL SOURCE: packages/deal-engine/src/lifecycle.ts ALLOWED_TRANSITIONS
+ * Keep in sync with that file.
+ */
 const NEXT_STAGES: Record<string, string[]> = {
-  lead: ["qualified", "lost"],
-  qualified: ["demo_scheduled", "lost"],
-  demo_scheduled: ["demo_completed", "lost"],
-  demo_completed: ["pilot_proposed", "lost"],
-  pilot_proposed: ["pilot_active", "lost"],
-  pilot_active: ["data_received", "lost"],
-  data_received: ["ingestion_running"],
-  ingestion_running: ["pilot_review"],
-  pilot_review: ["converted", "pilot_active", "lost"],
-  converted: ["expanding", "dormant"],
+  lead: ["qualified", "dormant", "lost"],
+  qualified: ["demo_scheduled", "pilot_proposed", "dormant", "lost"],
+  demo_scheduled: ["demo_completed", "dormant", "lost"],
+  demo_completed: ["pilot_proposed", "qualified", "dormant", "lost"],
+  pilot_proposed: ["pilot_active", "demo_scheduled", "dormant", "lost"],
+  pilot_active: ["data_received", "pilot_review", "dormant", "lost"],
+  data_received: ["ingestion_running", "pilot_active", "dormant", "lost"],
+  ingestion_running: ["pilot_review", "data_received", "dormant", "lost"],
+  pilot_review: ["converted", "pilot_active", "dormant", "lost"],
+  converted: ["expanding"],
   expanding: ["dormant"],
-  dormant: ["qualified"],
+  dormant: ["lead", "qualified"],
+  lost: ["lead"],
 };
 
 interface PipelineTableProps {
@@ -29,7 +34,7 @@ interface PipelineTableProps {
 
 export function PipelineTable({ deals }: PipelineTableProps) {
   const router = useRouter();
-  const [isPending, startTransition] = useTransition();
+  const [, startTransition] = useTransition();
   const [activeId, setActiveId] = useState<string | null>(null);
   const [openMenu, setOpenMenu] = useState<string | null>(null);
   const [error, setError] = useState<string | null>(null);

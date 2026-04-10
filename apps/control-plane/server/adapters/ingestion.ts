@@ -83,8 +83,8 @@ export class DbIngestionAdapter implements IIngestionAdapter {
         for (const w of warnings) {
           if (w.batchId) warningCounts.set(w.batchId, w.count);
         }
-      } catch {
-        // data_quality_warnings table may not exist
+      } catch (err) {
+        console.error("[ADAPTER:ingestion] warning counts fetch failed", err);
       }
     }
 
@@ -107,8 +107,8 @@ export class DbIngestionAdapter implements IIngestionAdapter {
         .from(dataQualityWarnings)
         .where(eq(dataQualityWarnings.batchId, id));
       warningCount = wc?.count ?? 0;
-    } catch {
-      // table may not exist
+    } catch (err) {
+      console.error("[ADAPTER:ingestion] getIngestionRunById warning count failed", { id }, err);
     }
 
     return mapBatchToIngestionRun(batch, warningCount);

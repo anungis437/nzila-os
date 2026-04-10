@@ -64,9 +64,16 @@ export async function POST(request: Request) {
         }, { actorId: data.actor, tenantId: "system" });
         recordDealAudit({
           action: "followup_completed", actor: data.actor, orgId: "system",
-          details: { followUpId: data.followUpId, title: followUp.title },
+          details: {
+            followUpId: data.followUpId,
+            title: followUp.title,
+            before: { completedAt: null },
+            after: { completedAt: followUp.completedAt },
+          },
         });
-      } catch { /* best-effort */ }
+      } catch (err) {
+        console.error("[ROUTE:follow-ups] complete event/audit failed", err);
+      }
 
       return NextResponse.json({ ok: true, data: { followUp } });
     }
@@ -83,9 +90,15 @@ export async function POST(request: Request) {
       try {
         recordDealAudit({
           action: "followup_snoozed", actor: data.actor, orgId: "system",
-          details: { followUpId: data.followUpId, newDueDate: data.newDueDate },
+          details: {
+            followUpId: data.followUpId,
+            before: { dueDate: body.previousDueDate ?? "unknown" },
+            after: { dueDate: data.newDueDate },
+          },
         });
-      } catch { /* best-effort */ }
+      } catch (err) {
+        console.error("[ROUTE:follow-ups] snooze audit failed", err);
+      }
 
       return NextResponse.json({ ok: true, data: { followUp } });
     }
@@ -102,9 +115,15 @@ export async function POST(request: Request) {
       try {
         recordDealAudit({
           action: "followup_reassigned", actor: data.actor, orgId: "system",
-          details: { followUpId: data.followUpId, newOwner: data.newOwner },
+          details: {
+            followUpId: data.followUpId,
+            before: { owner: body.previousOwner ?? "unknown" },
+            after: { owner: data.newOwner },
+          },
         });
-      } catch { /* best-effort */ }
+      } catch (err) {
+        console.error("[ROUTE:follow-ups] reassign audit failed", err);
+      }
 
       return NextResponse.json({ ok: true, data: { followUp } });
     }

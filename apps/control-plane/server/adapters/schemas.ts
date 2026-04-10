@@ -119,3 +119,16 @@ export const dealEngineFollowUps = pgTable("deal_engine_follow_ups", {
   index("idx_de_followups_owner").on(table.owner),
   index("idx_de_followups_due").on(table.dueDate),
 ]);
+
+// ── Deal Engine event store (durability) ────────────────
+
+export const dealEngineEvents = pgTable("deal_engine_events", {
+  id: uuid("id").primaryKey(),
+  type: varchar("type", { length: 255 }).notNull(),
+  payload: jsonb("payload").notNull(),
+  metadata: jsonb("metadata").notNull(),
+  createdAt: timestamp("created_at", { withTimezone: true }).notNull(),
+}, (table) => [
+  index("idx_de_events_type").on(table.type),
+  index("idx_de_events_created").on(table.createdAt),
+]);

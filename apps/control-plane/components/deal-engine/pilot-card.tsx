@@ -24,7 +24,7 @@ const PILOT_STATUSES = ["proposed", "setup", "active", "data_collection", "inges
 
 export function PilotCard({ pilot }: PilotCardProps) {
   const router = useRouter();
-  const [isPending, startTransition] = useTransition();
+  const [, startTransition] = useTransition();
   const [busy, setBusy] = useState(false);
   const [error, setError] = useState<string | null>(null);
   const [showStatusMenu, setShowStatusMenu] = useState(false);

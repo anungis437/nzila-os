@@ -111,8 +111,14 @@ async function fetchTradeProposals(): Promise<Proposal[]> {
 export class DbProposalAdapter implements IProposalAdapter {
   async getProposals(filters?: ProposalFilters): Promise<Proposal[]> {
     const [commerce, trade] = await Promise.all([
-      fetchCommerceProposals().catch(() => []),
-      fetchTradeProposals().catch(() => []),
+      fetchCommerceProposals().catch((err) => {
+        console.error("[ADAPTER:proposals] fetchCommerceProposals failed", err);
+        return [] as Proposal[];
+      }),
+      fetchTradeProposals().catch((err) => {
+        console.error("[ADAPTER:proposals] fetchTradeProposals failed", err);
+        return [] as Proposal[];
+      }),
     ]);
 
     let proposals = [...commerce, ...trade];

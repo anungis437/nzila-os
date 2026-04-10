@@ -58,10 +58,15 @@ export async function POST(request: Request) {
         action: "deal_stage_transition",
         actor,
         orgId: "system",
-        details: { dealId: deal.id, toStage: deal.stage, reason },
+        details: {
+          dealId: deal.id,
+          before: { stage: body.fromStage },
+          after: { stage: deal.stage },
+          reason,
+        },
       });
-    } catch {
-      /* event/audit emission is best-effort */
+    } catch (err) {
+      console.error("[ROUTE:pipeline] event/audit emission failed", err);
     }
 
     return NextResponse.json({ ok: true, data: { deal } });

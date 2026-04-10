@@ -46,85 +46,108 @@ async function ensureSeeded(): Promise<void> {
     const existing = await db.select({ id: dealEngineFollowUps.id }).from(dealEngineFollowUps).limit(1);
     if (existing.length > 0) return;
     const parsed = z.array(followUpSchema).parse(seedFollowUps) as FollowUp[];
-    for (const f of parsed) {
-      await db.insert(dealEngineFollowUps).values({
-        id: f.id,
-        dealId: f.dealId,
-        pilotId: f.pilotId,
-        accountName: f.accountName,
-        title: f.title,
-        description: f.description,
-        owner: f.owner,
-        priority: f.priority,
-        dueDate: new Date(f.dueDate),
-        isOverdue: f.isOverdue,
-        completedAt: f.completedAt ? new Date(f.completedAt) : null,
-        trigger: f.trigger,
-        createdAt: new Date(f.createdAt),
-      });
+    if (parsed.length > 0) {
+      await db.insert(dealEngineFollowUps).values(
+        parsed.map((f) => ({
+          id: f.id,
+          dealId: f.dealId,
+          pilotId: f.pilotId,
+          accountName: f.accountName,
+          title: f.title,
+          description: f.description,
+          owner: f.owner,
+          priority: f.priority,
+          dueDate: new Date(f.dueDate),
+          isOverdue: f.isOverdue,
+          completedAt: f.completedAt ? new Date(f.completedAt) : null,
+          trigger: f.trigger,
+          createdAt: new Date(f.createdAt),
+        })),
+      );
     }
-  } catch {
+  } catch (err) {
+    console.error("[ADAPTER:follow-ups] seed failed", err);
     _seeded = false;
   }
 }
 
 export class DbFollowUpAdapter implements IFollowUpAdapter {
   async getFollowUps(filters?: FollowUpFilters): Promise<FollowUp[]> {
-    await ensureSeeded();
-    const rows = await db.select().from(dealEngineFollowUps);
-    let followUps = rows.map(rowToFollowUp);
+    try {
+      await ensureSeeded();
+      const rows = await db.select().from(dealEngineFollowUps);
+      let followUps = rows.map(rowToFollowUp);
 
-    if (filters?.owner) followUps = followUps.filter((f) => f.owner === filters.owner);
-    if (filters?.priority) followUps = followUps.filter((f) => f.priority === filters.priority);
-    if (filters?.overdueOnly) followUps = followUps.filter((f) => f.isOverdue);
-    if (filters?.dealId) followUps = followUps.filter((f) => f.dealId === filters.dealId);
-    if (filters?.pilotId) followUps = followUps.filter((f) => f.pilotId === filters.pilotId);
+      if (filters?.owner) followUps = followUps.filter((f) => f.owner === filters.owner);
+      if (filters?.priority) followUps = followUps.filter((f) => f.priority === filters.priority);
+      if (filters?.overdueOnly) followUps = followUps.filter((f) => f.isOverdue);
+      if (filters?.dealId) followUps = followUps.filter((f) => f.dealId === filters.dealId);
+      if (filters?.pilotId) followUps = followUps.filter((f) => f.pilotId === filters.pilotId);
 
-    return followUps;
+      return followUps;
+    } catch (err) {
+      console.error("[ADAPTER:follow-ups] getFollowUps failed", err);
+      return [];
+    }
   }
 
   async complete(id: string, _actor: string): Promise<FollowUp | null> {
-    await ensureSeeded();
-    const rows = await db.select().from(dealEngineFollowUps).where(eq(dealEngineFollowUps.id, id));
-    if (rows.length === 0) return null;
+    try {
+      await ensureSeeded();
+      const rows = await db.select().from(dealEngineFollowUps).where(eq(dealEngineFollowUps.id, id));
+      if (rows.length === 0) return null;
 
-    const now = new Date();
-    await db
-      .update(dealEngineFollowUps)
-      .set({ completedAt: now, isOverdue: false })
-      .where(eq(dealEngineFollowUps.id, id));
+      const now = new Date();
+      await db
+        .update(dealEngineFollowUps)
+        .set({ completedAt: now, isOverdue: false })
+        .where(eq(dealEngineFollowUps.id, id));
 
-    const followUp = rowToFollowUp(rows[0]);
-    return { ...followUp, completedAt: now.toISOString(), isOverdue: false };
+      const followUp = rowToFollowUp(rows[0]);
+      return { ...followUp, completedAt: now.toISOString(), isOverdue: false };
+    } catch (err) {
+      console.error("[ADAPTER:follow-ups] complete failed", { id }, err);
+      return null;
+    }
   }
 
   async snooze(id: string, newDueDate: string, _actor: string): Promise<FollowUp | null> {
-    await ensureSeeded();
-    const rows = await db.select().from(dealEngineFollowUps).where(eq(dealEngineFollowUps.id, id));
-    if (rows.length === 0) return null;
+    try {
+      await ensureSeeded();
+      const rows = await db.select().from(dealEngineFollowUps).where(eq(dealEngineFollowUps.id, id));
+      if (rows.length === 0) return null;
 
-    const due = new Date(newDueDate);
-    const overdue = due < new Date();
-    await db
-      .update(dealEngineFollowUps)
-      .set({ dueDate: due, isOverdue: overdue })
-      .where(eq(dealEngineFollowUps.id, id));
+      const due = new Date(newDueDate);
+      const overdue = due < new Date();
+      await db
+        .update(dealEngineFollowUps)
+        .set({ dueDate: due, isOverdue: overdue })
+        .where(eq(dealEngineFollowUps.id, id));
 
-    const followUp = rowToFollowUp(rows[0]);
-    return { ...followUp, dueDate: due.toISOString(), isOverdue: overdue };
+      const followUp = rowToFollowUp(rows[0]);
+      return { ...followUp, dueDate: due.toISOString(), isOverdue: overdue };
+    } catch (err) {
+      console.error("[ADAPTER:follow-ups] snooze failed", { id }, err);
+      return null;
+    }
   }
 
   async reassign(id: string, newOwner: string, _actor: string): Promise<FollowUp | null> {
-    await ensureSeeded();
-    const rows = await db.select().from(dealEngineFollowUps).where(eq(dealEngineFollowUps.id, id));
-    if (rows.length === 0) return null;
+    try {
+      await ensureSeeded();
+      const rows = await db.select().from(dealEngineFollowUps).where(eq(dealEngineFollowUps.id, id));
+      if (rows.length === 0) return null;
 
-    await db
-      .update(dealEngineFollowUps)
-      .set({ owner: newOwner })
-      .where(eq(dealEngineFollowUps.id, id));
+      await db
+        .update(dealEngineFollowUps)
+        .set({ owner: newOwner })
+        .where(eq(dealEngineFollowUps.id, id));
 
-    const followUp = rowToFollowUp(rows[0]);
-    return { ...followUp, owner: newOwner };
+      const followUp = rowToFollowUp(rows[0]);
+      return { ...followUp, owner: newOwner };
+    } catch (err) {
+      console.error("[ADAPTER:follow-ups] reassign failed", { id }, err);
+      return null;
+    }
   }
 }
