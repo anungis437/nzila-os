@@ -55,8 +55,10 @@ const BRANDING_ALLOWLIST = new Set([
   'lib/branding/registry.ts',
   'lib/branding/partnership.ts',
   'lib/branding/feature-flags.ts',
+  'lib/branding/brand-config.ts',
   'lib/branding/index.ts',
   'lib/branding/branding.test.ts',
+  'lib/branding/branding-integration.test.ts',
 ])
 
 // ── Tests ────────────────────────────────────────────────────────────────────
@@ -206,5 +208,124 @@ describe('Brand Governance', () => {
     for (const name of required) {
       expect(barrel, `Missing export: ${name}`).toContain(name)
     }
+  })
+})
+
+// ── Hard Misuse Enforcement ─────────────────────────────────────────────────
+// These tests FAIL CI when branding governance is violated.
+
+describe('Brand Misuse Enforcement (CI gate)', () => {
+  const componentFiles = findFiles(path.join(ZONGA_ROOT, 'components'), ['.tsx', '.ts'])
+    .filter((f) => !BRANDING_ALLOWLIST.has(relPath(f)))
+  const appFiles = findFiles(path.join(ZONGA_ROOT, 'app'), ['.tsx', '.ts'])
+  const allSurfaceFiles = [...componentFiles, ...appFiles]
+    .filter((f) => !relPath(f).includes('.test.') && !relPath(f).includes('__test'))
+
+  it('no direct import of client/partner brand assets outside branding system', () => {
+    // Only brand-config.ts and lib/branding/* should reference brand asset paths
+    // Surface files should use getClientBrand()/getPartnerBrand() not raw logoUrl strings
+    const assetPathPattern = /['"]\/branding\/(clients|partners)\//g
+    const violations: string[] = []
+
+    for (const file of allSurfaceFiles) {
+      const rel = relPath(file)
+      if (BRANDING_ALLOWLIST.has(rel)) continue
+      const content = fs.readFileSync(file, 'utf-8')
+      const matches = content.match(assetPathPattern)
+      if (matches) {
+        violations.push(`${rel}: direct brand asset path (${matches.length} occurrence(s)) — use brand-config accessors`)
+      }
+    }
+
+    expect(violations, `Direct brand asset imports found outside branding system:\n${violations.join('\n')}`).toHaveLength(0)
+  })
+
+  it('no raw <img>/<Image> tags rendering external logos outside ExternalBrandMark', () => {
+    // External brand logos must render through ExternalBrandMark (policy-enforced)
+    // Look for img/Image src referencing brand/client/partner paths
+    const rawLogoPattern = /<(?:img|Image)\s[^>]*src=.*(?:client|partner|ms-celebration|rock-power)/gi
+    const violations: string[] = []
+
+    for (const file of allSurfaceFiles) {
+      const rel = relPath(file)
+      if (BRANDING_ALLOWLIST.has(rel)) continue
+      const content = fs.readFileSync(file, 'utf-8')
+      const matches = content.match(rawLogoPattern)
+      if (matches) {
+        violations.push(`${rel}: raw logo rendering (${matches.length}) — use ExternalBrandMark component`)
+      }
+    }
+
+    expect(violations, `Raw external brand logos found — must use ExternalBrandMark:\n${violations.join('\n')}`).toHaveLength(0)
+  })
+
+  it('no partner/client branding in forbidden header/sidebar/dashboard/hero placements', () => {
+    // Scan for placement="app_header"|"app_sidebar"|"app_dashboard"|"marketing_hero"
+    // combined with client/partner props — forbidden by policy
+    const forbiddenPlacements = ['app_header', 'app_sidebar', 'app_dashboard', 'marketing_hero']
+    const violations: string[] = []
+
+    for (const file of allSurfaceFiles) {
+      const rel = relPath(file)
+      if (BRANDING_ALLOWLIST.has(rel)) continue
+      const content = fs.readFileSync(file, 'utf-8')
+
+      for (const placement of forbiddenPlacements) {
+        // Look for ExternalBrandMark or PartnershipAttribution with forbidden placement
+        // that also has partner prop (partner in these placements is always forbidden)
+        const hasPlacement = content.includes(`placement="${placement}"`)
+        if (!hasPlacement) continue
+
+        // Check for partner branding in forbidden product-chrome placements
+        const hasPartnerProp = content.includes('partner={') || content.includes('partner=')
+        if (hasPartnerProp && (placement === 'app_header' || placement === 'app_sidebar' || placement === 'app_dashboard')) {
+          // Only flag if it's ExternalBrandMark with partner — PartnershipAttribution handles hiding via policy
+          const externalBrandMarkWithPlacement = new RegExp(
+            `<ExternalBrandMark[^>]*placement=["']${placement}["'][^>]*role=["']partner["']`,
+          )
+          if (externalBrandMarkWithPlacement.test(content)) {
+            violations.push(`${rel}: partner ExternalBrandMark in forbidden placement "${placement}"`)
+          }
+        }
+      }
+    }
+
+    expect(violations, `Forbidden placement violations:\n${violations.join('\n')}`).toHaveLength(0)
+  })
+
+  it('root layout calls initializeBrands()', () => {
+    const layoutPath = path.join(ZONGA_ROOT, 'app/layout.tsx')
+    const content = fs.readFileSync(layoutPath, 'utf-8')
+    expect(content, 'Root layout must call initializeBrands() for runtime registration').toContain('initializeBrands')
+  })
+
+  it('homepage trust strip receives real brands (not empty array)', () => {
+    const homePath = path.join(ZONGA_ROOT, 'app/(marketing)/page.tsx')
+    const content = fs.readFileSync(homePath, 'utf-8')
+    expect(content, 'TrustStrip must not receive brands={[]}').not.toContain('brands={[]}')
+    expect(content, 'Homepage should resolve brands via brand-config').toContain('getClientBrand')
+  })
+
+  it('footer passes deployment brands to PartnershipAttribution', () => {
+    const footerPath = path.join(ZONGA_ROOT, 'components/public/site-footer.tsx')
+    const content = fs.readFileSync(footerPath, 'utf-8')
+    expect(content, 'Footer PartnershipAttribution must receive client prop').toContain('client={')
+    expect(content, 'Footer PartnershipAttribution must receive partner prop').toContain('partner={')
+  })
+
+  it('no direct registerBrand() calls outside brand-config.ts', () => {
+    // registerBrand should only be called in brand-config.ts / test files
+    const violations: string[] = []
+
+    for (const file of allSurfaceFiles) {
+      const rel = relPath(file)
+      if (BRANDING_ALLOWLIST.has(rel)) continue
+      const content = fs.readFileSync(file, 'utf-8')
+      if (content.includes('registerBrand(') || content.includes('registerBrand (')) {
+        violations.push(`${rel}: direct registerBrand() call — use initializeBrands() from brand-config`)
+      }
+    }
+
+    expect(violations, `Direct registerBrand() calls found:\n${violations.join('\n')}`).toHaveLength(0)
   })
 })

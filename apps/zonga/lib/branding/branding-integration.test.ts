@@ -332,3 +332,85 @@ describe('Surface integration — Case study page', () => {
     expect(canRenderBrand('partner', 'marketing_case_study', 'logo', ALL_ON)).toBe(true)
   })
 })
+
+// ── Homepage Trust Strip Integration ────────────────────────────────────────
+
+describe('Surface integration — Homepage trust strip', () => {
+  it('client muted_logo is allowed in marketing_trust with flag on', () => {
+    expect(canRenderBrand('client', 'marketing_trust', 'muted_logo', ALL_ON)).toBe(true)
+  })
+
+  it('client muted_logo is blocked when ENABLE_CLIENT_LOGO_TRUST is off', () => {
+    expect(canRenderBrand('client', 'marketing_trust', 'muted_logo', DEFAULT_BRANDING_FLAGS)).toBe(false)
+  })
+
+  it('partner is hidden in marketing_trust (trust strip is client-only)', () => {
+    expect(canRenderBrand('partner', 'marketing_trust', 'muted_logo', ALL_ON)).toBe(false)
+    expect(canRenderBrand('partner', 'marketing_trust', 'text_only', ALL_ON)).toBe(false)
+  })
+
+  it('trust strip with governed brands only renders policy-allowed brands', () => {
+    // Even if both client and partner are passed, partner is hidden by policy
+    const clientVisible = canRenderBrand('client', 'marketing_trust', 'logo', ALL_ON)
+    const partnerVisible = canRenderBrand('partner', 'marketing_trust', 'logo', ALL_ON)
+    expect(clientVisible).toBe(false) // logo mode not in allowedModes for client trust
+    expect(partnerVisible).toBe(false) // partner hidden in trust
+  })
+
+  it('trust strip client renders as muted_logo or grayscale_logo', () => {
+    expect(getSafeBrandMode('client', 'marketing_trust', ALL_ON)).toBe('muted_logo')
+  })
+})
+
+// ── Footer Attribution Integration ──────────────────────────────────────────
+
+describe('Surface integration — Footer attribution', () => {
+  it('footer attribution includes all three tiers when brands provided', () => {
+    const attr = buildAttribution('footer', ZONGA_BRAND, CLIENT, PARTNER, ALL_ON)
+    expect(attr.platform.name).toBe('Zonga')
+    expect(attr.client).toBeDefined()
+    expect(attr.client!.name).toBe('MS Célébration Canada')
+    expect(attr.partner).toBeDefined()
+    expect(attr.partner!.name).toBe('The Rock Power Group Inc.')
+  })
+
+  it('footer renders client and partner as text_only (no logos)', () => {
+    expect(canRenderBrand('client', 'footer', 'text_only', DEFAULT_BRANDING_FLAGS)).toBe(true)
+    expect(canRenderBrand('partner', 'footer', 'text_only', DEFAULT_BRANDING_FLAGS)).toBe(true)
+    expect(canRenderBrand('client', 'footer', 'logo', DEFAULT_BRANDING_FLAGS)).toBe(false)
+    expect(canRenderBrand('partner', 'footer', 'logo', DEFAULT_BRANDING_FLAGS)).toBe(false)
+  })
+})
+
+// ── Hero Zonga-Only Enforcement ─────────────────────────────────────────────
+
+describe('Surface integration — Hero remains Zonga-only', () => {
+  it('platform logo is allowed in hero', () => {
+    expect(canRenderBrand('platform', 'marketing_hero', 'logo', ALL_ON)).toBe(true)
+  })
+
+  it('client is strictly forbidden in hero', () => {
+    expect(canRenderBrand('client', 'marketing_hero', 'logo', ALL_ON)).toBe(false)
+    expect(canRenderBrand('client', 'marketing_hero', 'text_only', ALL_ON)).toBe(false)
+    expect(canRenderBrand('client', 'marketing_hero', 'muted_logo', ALL_ON)).toBe(false)
+  })
+
+  it('partner is strictly forbidden in hero', () => {
+    expect(canRenderBrand('partner', 'marketing_hero', 'logo', ALL_ON)).toBe(false)
+    expect(canRenderBrand('partner', 'marketing_hero', 'text_only', ALL_ON)).toBe(false)
+    expect(canRenderBrand('partner', 'marketing_hero', 'muted_logo', ALL_ON)).toBe(false)
+  })
+})
+
+// ── Partner Never in App Shell ──────────────────────────────────────────────
+
+describe('Surface integration — Partner never in app shell', () => {
+  const appShellPlacements = ['app_header', 'app_sidebar', 'app_dashboard', 'login', 'onboarding'] as const
+
+  for (const placement of appShellPlacements) {
+    it(`partner is hidden in ${placement} (even with all flags on)`, () => {
+      expect(canRenderBrand('partner', placement, 'logo', ALL_ON)).toBe(false)
+      expect(canRenderBrand('partner', placement, 'text_only', ALL_ON)).toBe(false)
+    })
+  }
+})

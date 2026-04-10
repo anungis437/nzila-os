@@ -1,7 +1,11 @@
 import { AuthProvider } from "@nzila/platform-auth/entra/client";
 import type { Metadata } from "next";
 import { Poppins } from 'next/font/google';
+import { initializeBrands } from '@/lib/branding/brand-config';
 import './globals.css';
+
+// Register deployment brands (idempotent — safe across concurrent requests)
+initializeBrands();
 
 const poppins = Poppins({
   subsets: ['latin'],

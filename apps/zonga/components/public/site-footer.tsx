@@ -3,6 +3,7 @@
  */
 import Link from 'next/link';
 import { ZongaBrandMark, PartnershipAttribution } from '@/components/branding';
+import { getClientBrand, getPartnerBrand } from '@/lib/branding/brand-config';
 
 const footerLinks = {
   platform: {
@@ -45,6 +46,9 @@ const footerLinks = {
 };
 
 export default function SiteFooter() {
+  const client = getClientBrand();
+  const partner = getPartnerBrand();
+
   return (
     <footer className="bg-navy text-gray-300 relative overflow-hidden">
       {/* Pre-footer CTA */}
@@ -82,7 +86,7 @@ export default function SiteFooter() {
               instant payouts, and full creative ownership for African
               artists and creators.
             </p>
-            <PartnershipAttribution placement="footer" variant="inline" className="mb-6" />
+            <PartnershipAttribution placement="footer" client={client} partner={partner} variant="inline" className="mb-6" />
             <div className="flex gap-3">
               {['LinkedIn', 'GitHub', 'X'].map((social) => (
                 <a

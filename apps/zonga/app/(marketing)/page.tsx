@@ -13,6 +13,7 @@ import Link from 'next/link';
 import ScrollReveal from '@/components/public/scroll-reveal';
 import { PartnershipAttribution, TrustStrip } from '@/components/branding';
 import { loadBrandingFlags } from '@/lib/branding/feature-flags';
+import { getClientBrand, getPartnerBrand } from '@/lib/branding/brand-config';
 
 export const metadata: Metadata = {
   title: 'Zonga — Music Without Borders',
@@ -103,6 +104,8 @@ const regions = [
 
 export default function HomePage() {
   const flags = loadBrandingFlags();
+  const client = getClientBrand();
+  const partner = getPartnerBrand();
 
   return (
     <main className="min-h-screen">
@@ -318,7 +321,7 @@ export default function HomePage() {
             </ScrollReveal>
             <ScrollReveal delay={0.2}>
               <div className="glass-card rounded-2xl p-8 md:p-12 text-center">
-                <PartnershipAttribution placement="marketing_partnership" variant="stacked" className="items-center" />
+                <PartnershipAttribution placement="marketing_partnership" client={client} partner={partner} variant="stacked" className="items-center" />
               </div>
             </ScrollReveal>
           </div>
@@ -329,7 +332,7 @@ export default function HomePage() {
       {flags.ENABLE_CLIENT_LOGO_TRUST && (
         <section className="py-12 bg-gray-50 border-y border-gray-100">
           <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
-            <TrustStrip placement="marketing_trust" brands={[]} flags={flags} title="Trusted By" />
+            <TrustStrip placement="marketing_trust" brands={[client, partner]} flags={flags} title="Trusted By" />
           </div>
         </section>
       )}
