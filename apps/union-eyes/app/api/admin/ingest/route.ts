@@ -20,7 +20,7 @@ import {
   ingestGrievanceBatch,
   type IngestionGrievanceRecord,
 } from '@/lib/ingestion';
-import { verifyImportBatch } from '@/lib/ingestion/post-import-verification';
+import { verifyImportBatch, type VerificationResult } from '@/lib/ingestion/post-import-verification';
 
 const timelineEventSchema = z.object({
   date: z.string().optional(),
@@ -103,7 +103,7 @@ export const POST = withApi(
     );
 
     // Post-import verification for non-dry-run completed batches
-    let verification = null;
+    let verification: VerificationResult | null = null;
     if (!body.dry_run && result.batchId && result.batchId !== 'dry-run') {
       verification = await withSystemContext(async () =>
         verifyImportBatch(result.batchId),

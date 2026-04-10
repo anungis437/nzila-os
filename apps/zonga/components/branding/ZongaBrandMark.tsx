@@ -4,7 +4,6 @@
 'use client'
 
 import Link from 'next/link'
-import Image from 'next/image'
 import type { BrandPlacement } from '@/lib/branding/types'
 import { getSafeBrandMode } from '@/lib/branding/policy'
 
@@ -31,7 +30,7 @@ export function ZongaBrandMark({
   const mode = getSafeBrandMode('platform', placement)
   if (mode === 'hidden') return null
 
-  const { logo, text } = sizeMap[size]
+  const { text } = sizeMap[size]
 
   const content = (
     <span className={`inline-flex items-center gap-2 ${className}`}>

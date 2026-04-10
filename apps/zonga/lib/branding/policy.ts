@@ -15,7 +15,6 @@ import type {
   BrandRenderDirective,
   BrandingFeatureFlags,
 } from './types'
-import { DEFAULT_BRANDING_FLAGS } from './types'
 import { getPolicyRule } from './placements'
 import { loadBrandingFlags } from './feature-flags'
 

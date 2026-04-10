@@ -131,8 +131,8 @@ export function computeCaseSimilarity(a: CaseRecord, b: CaseRecord): FuzzyMatch 
   }
 
   // Timestamp proximity (incident_date or filed_date)
-  const dateA = a.incidentDate ?? a.filedDate;
-  const dateB = b.incidentDate ?? b.filedDate;
+  const dateA = a.incidentDate ?? a.filedDate ?? null;
+  const dateB = b.incidentDate ?? b.filedDate ?? null;
   const timeScore = timestampProximity(dateA, dateB);
   if (timeScore > 0) {
     reasons.push({ reason: 'timestamp_proximity', score: timeScore, detail: `${dateA} vs ${dateB}` });

@@ -8,38 +8,41 @@
  * that we generated — used as the correlation key.
  */
 import { NextResponse } from 'next/server'
+import { z } from 'zod'
 import { logger } from '@/lib/logger'
 import { isVodacomMpesaEnabled } from '@/lib/vodacom-mpesa'
 
-interface MpesaCallbackPayload {
-  output_ResponseCode: string
-  output_ResponseDesc: string
-  output_TransactionID: string
-  output_ConversationID: string
-  output_ThirdPartyConversationID: string
-  output_ResultCode?: string
-  output_ResultDesc?: string
-}
+const MpesaCallbackSchema = z.object({
+  output_ResponseCode: z.string(),
+  output_ResponseDesc: z.string(),
+  output_TransactionID: z.string(),
+  output_ConversationID: z.string(),
+  output_ThirdPartyConversationID: z.string(),
+  output_ResultCode: z.string().optional(),
+  output_ResultDesc: z.string().optional(),
+})
 
 export async function POST(request: Request) {
   if (!isVodacomMpesaEnabled()) {
     return NextResponse.json({ error: 'M-Pesa integration disabled' }, { status: 404 })
   }
 
-  let payload: MpesaCallbackPayload
+  let body: unknown
 
   try {
-    payload = (await request.json()) as MpesaCallbackPayload
+    body = await request.json()
   } catch {
     logger.warn('M-Pesa callback: invalid JSON body')
     return NextResponse.json({ error: 'Invalid JSON' }, { status: 400 })
   }
 
-  // Basic validation — reject payloads missing the correlation ID
-  if (!payload.output_ThirdPartyConversationID) {
-    logger.warn('M-Pesa callback: missing ThirdPartyConversationID')
-    return NextResponse.json({ error: 'Missing conversation ID' }, { status: 400 })
+  const parsed = MpesaCallbackSchema.safeParse(body)
+  if (!parsed.success) {
+    logger.warn('M-Pesa callback: schema validation failed', { errors: parsed.error.flatten() })
+    return NextResponse.json({ error: 'Invalid payload' }, { status: 400 })
   }
+
+  const payload = parsed.data
 
   logger.info('M-Pesa callback received', {
     conversationId: payload.output_ConversationID,

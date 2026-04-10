@@ -7,7 +7,6 @@
 
 import { platformDb } from '@nzila/db/platform'
 import { sql } from 'drizzle-orm'
-import { logger } from '@/lib/logger'
 import type {
   CreatorProfile,
   CreatorDashboardData,
@@ -248,7 +247,7 @@ async function getCreatorEarnings(
 
 async function getCreatorEvents(
   creatorId: string,
-  orgId: string,
+  _orgId: string,
 ): Promise<CreatorEventSummary[]> {
   const rows = await platformDb.execute(sql`
     SELECT

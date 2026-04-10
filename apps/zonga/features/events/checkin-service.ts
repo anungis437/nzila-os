@@ -6,7 +6,6 @@
 
 import { platformDb } from '@nzila/db/platform'
 import { sql } from 'drizzle-orm'
-import { createHash } from 'node:crypto'
 import { logger } from '@/lib/logger'
 import type { CheckInResult } from './types'
 

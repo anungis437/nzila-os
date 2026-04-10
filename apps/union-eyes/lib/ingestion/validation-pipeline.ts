@@ -12,7 +12,8 @@
  */
 
 import { createHash } from 'crypto';
-import { toLifecycleState, type LifecycleState } from '@/lib/workflow/state-bridge';
+import { toLifecycleState } from '@/lib/workflow/state-bridge';
+import type { LifecycleState } from '@/lib/workflow/case-lifecycle';
 
 // ─── Types ───────────────────────────────────────────────────────────────────
 

@@ -8,7 +8,7 @@
 import { platformDb } from '@nzila/db/platform'
 import { sql } from 'drizzle-orm'
 import { logger } from '@/lib/logger'
-import type { EarningsEntry, EarningsSource, EarningsBalance } from './types'
+import type { EarningsSource, EarningsBalance } from './types'
 import { PLATFORM_FEE_PCT } from './types'
 
 export interface RecordEarningsParams {

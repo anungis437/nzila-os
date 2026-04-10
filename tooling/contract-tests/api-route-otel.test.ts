@@ -67,6 +67,7 @@ const OTEL_EXEMPT_ROUTE_PATTERNS = [
   '/api/shopify/webhook/',     // Shopify webhook (HMAC-verified)
   '/api/zoho/webhook/',        // Zoho webhook (token-verified)
   '/api/webhooks/stripe/',     // Stripe webhook (signature-verified)
+  '/api/webhooks/mpesa/',      // M-Pesa webhook (Vodacom callback)
   '/api/contact/',             // Public contact/demo-request forms
 ]
 

@@ -16,7 +16,6 @@ import type {
   JobStatus,
   JobType,
   QualityTier,
-  ProcessedVariant,
 } from './types'
 import { PROCESSING_PROFILES } from './types'
 

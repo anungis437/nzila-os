@@ -9,7 +9,7 @@
  * @module @zonga/branding/placements
  */
 
-import type { BrandRole, BrandPlacement, BrandVisibilityMode, BrandPolicyRule } from './types'
+import type { BrandRole, BrandPlacement, BrandPolicyRule } from './types'
 
 // ── Policy Matrix ───────────────────────────────────────────────────────────
 

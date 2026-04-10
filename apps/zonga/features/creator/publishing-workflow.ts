@@ -96,7 +96,7 @@ export async function transitionPublishingState(params: {
 export async function validateForPublishing(
   assetId: string,
   orgId: string,
-  creatorId: string,
+  _creatorId: string,
 ): Promise<PublishValidation> {
   const errors: PublishError[] = []
   const warnings: PublishWarning[] = []
