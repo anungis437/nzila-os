@@ -21,6 +21,12 @@ const isPublicRoute = createRouteMatcher([
   '/artists(.*)',
   '/events(.*)',
   '/for-labels(.*)',
+  '/login(.*)',
+  '/signup(.*)',
+  '/sign-in(.*)',
+  '/sign-up(.*)',
+  '/forgot-password(.*)',
+  '/reset-password(.*)',
   '/api/auth(.*)',
   '/api/health(.*)',
 ])
@@ -31,7 +37,9 @@ const isMarketingPath = (pathname: string) =>
   );
 
 const isClerkAuthPath = (pathname: string) =>
-  pathname.startsWith('/sign-in') || pathname.startsWith('/sign-up');
+  pathname.startsWith('/sign-in') || pathname.startsWith('/sign-up') ||
+  pathname.startsWith('/login') || pathname.startsWith('/signup') ||
+  pathname.startsWith('/forgot-password') || pathname.startsWith('/reset-password');
 
 /* ── Intl middleware ── */
 const intlMiddleware = createMiddleware({

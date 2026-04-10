@@ -15,7 +15,7 @@ const stats = [
   { value: '85%', label: 'Revenue Share' },
 ];
 
-export default function SignUpPage() {
+export default function SignupPage() {
   return (
     <AuthPageLayout
       appName="Zonga"

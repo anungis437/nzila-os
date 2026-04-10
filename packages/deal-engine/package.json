@@ -1,0 +1,21 @@
+{
+  "name": "@nzila/deal-engine",
+  "version": "1.0.0",
+  "private": true,
+  "type": "module",
+  "exports": {
+    ".": "./src/index.ts",
+    "./lifecycle": "./src/lifecycle.ts",
+    "./types": "./src/types.ts",
+    "./adapters": "./src/adapters/index.ts",
+    "./events": "./src/events.ts",
+    "./seed": "./src/seed.ts"
+  },
+  "dependencies": {
+    "zod": "^3.23.8"
+  },
+  "devDependencies": {
+    "@nzila/config": "workspace:*",
+    "typescript": "^5.8.0"
+  }
+}
