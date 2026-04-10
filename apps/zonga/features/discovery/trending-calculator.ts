@@ -63,7 +63,7 @@ export async function recomputeTrendingScores(): Promise<{
     // Group by entity and compute scores
     const scores = new Map<string, number>()
     for (const row of rows as unknown as Array<Record<string, unknown>>) {
-      const entityId = row.entity_id as string
+      const resourceId = row.entity_id as string
       const signalType = row.signal_type as string
       const count = row.count as number
       const period = new Date(row.period as string)
@@ -73,14 +73,14 @@ export async function recomputeTrendingScores(): Promise<{
       const decay = Math.pow(DECAY_RATE, daysAgo)
       const contribution = weight * count * decay
 
-      scores.set(entityId, (scores.get(entityId) ?? 0) + contribution)
+      scores.set(resourceId, (scores.get(resourceId) ?? 0) + contribution)
     }
 
     // Upsert scores
-    for (const [entityId, score] of scores) {
+    for (const [resourceId, score] of scores) {
       await platformDb.execute(sql`
         INSERT INTO zonga_trending_scores (entity_type, entity_id, score, computed_at)
-        VALUES (${entityType}, ${entityId}, ${score}, now())
+        VALUES (${entityType}, ${resourceId}, ${score}, now())
         ON CONFLICT (entity_type, entity_id)
         DO UPDATE SET score = ${score}, computed_at = now()
       `)
@@ -104,7 +104,7 @@ export async function recomputeTrendingScores(): Promise<{
 // ── Trending Queries ────────────────────────────────────────────────────────
 
 export interface TrendingResult {
-  entityId: string
+  resourceId: string
   entityType: string
   score: number
   rank: number
@@ -135,7 +135,7 @@ export async function getTrending(params: {
   `)
 
   return (rows as unknown as Array<Record<string, unknown>>).map((r) => ({
-    entityId: r.entity_id as string,
+    resourceId: r.entity_id as string,
     entityType: r.entity_type as string,
     score: Number(r.score),
     rank: Number(r.rank),
@@ -147,13 +147,13 @@ export async function getTrending(params: {
  */
 export async function recordDiscoverySignal(params: {
   entityType: 'track' | 'artist' | 'event' | 'release' | 'playlist'
-  entityId: string
+  resourceId: string
   signalType: string
   count?: number
 }): Promise<void> {
   await platformDb.execute(sql`
     INSERT INTO zonga_discovery_signals (entity_type, entity_id, signal_type, count, period)
-    VALUES (${params.entityType}, ${params.entityId}, ${params.signalType}, ${params.count ?? 1}, CURRENT_DATE)
+    VALUES (${params.entityType}, ${params.resourceId}, ${params.signalType}, ${params.count ?? 1}, CURRENT_DATE)
     ON CONFLICT (entity_type, entity_id, signal_type, period)
     DO UPDATE SET count = zonga_discovery_signals.count + ${params.count ?? 1}, updated_at = now()
   `)

@@ -139,7 +139,7 @@ async function getTrendingItems(
 
   return (rows as unknown as Array<Record<string, unknown>>).map((r) => ({
     entityType: r.entity_type as HomeFeedItem['entityType'],
-    entityId: r.entity_id as string,
+    resourceId: r.entity_id as string,
     title: (r.title as string) ?? 'Unknown',
     subtitle: r.subtitle as string | undefined,
   }))
@@ -158,7 +158,7 @@ async function getNewReleases(limit: number): Promise<HomeFeedItem[]> {
 
   return (rows as unknown as Array<Record<string, unknown>>).map((r) => ({
     entityType: 'release' as const,
-    entityId: r.id as string,
+    resourceId: r.id as string,
     title: r.title as string,
     subtitle: r.artist_name as string | undefined,
     metadata: { type: r.type },
@@ -183,7 +183,7 @@ async function getUpcomingEvents(
 
   return (rows as unknown as Array<Record<string, unknown>>).map((r) => ({
     entityType: 'event' as const,
-    entityId: r.id as string,
+    resourceId: r.id as string,
     title: r.title as string,
     subtitle: `${r.city}, ${r.country}`,
     imageUrl: r.image_url as string | undefined,

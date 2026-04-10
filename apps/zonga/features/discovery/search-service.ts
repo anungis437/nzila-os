@@ -12,7 +12,7 @@ import type { BrowseFilters, PaginatedResult } from '@/features/catalog/types'
 
 export interface SearchResult {
   entityType: 'track' | 'artist' | 'event' | 'release'
-  entityId: string
+  resourceId: string
   title: string
   subtitle?: string
   imageUrl?: string
@@ -50,7 +50,7 @@ export async function globalSearch(
     for (const r of trackRows as unknown as Array<Record<string, unknown>>) {
       results.push({
         entityType: 'track',
-        entityId: r.id as string,
+        resourceId: r.id as string,
         title: r.title as string,
         relevanceScore: Number(r.score),
       })
@@ -72,7 +72,7 @@ export async function globalSearch(
     for (const r of artistRows as unknown as Array<Record<string, unknown>>) {
       results.push({
         entityType: 'artist',
-        entityId: r.id as string,
+        resourceId: r.id as string,
         title: r.title as string,
         imageUrl: r.avatar_url as string | undefined,
         relevanceScore: Number(r.score),
@@ -96,7 +96,7 @@ export async function globalSearch(
     for (const r of eventRows as unknown as Array<Record<string, unknown>>) {
       results.push({
         entityType: 'event',
-        entityId: r.id as string,
+        resourceId: r.id as string,
         title: r.title as string,
         subtitle: r.city as string | undefined,
         imageUrl: r.image_url as string | undefined,

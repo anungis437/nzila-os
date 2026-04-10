@@ -129,7 +129,7 @@ export default async function OperationsPage() {
                     <p className="text-sm font-medium text-gray-900">
                       {evt.action} <span className="text-muted-foreground">({evt.entityType})</span>
                     </p>
-                    <p className="text-xs text-muted-foreground">{evt.entityId.slice(0, 8)}... → {evt.direction}</p>
+                    <p className="text-xs text-muted-foreground">{evt.resourceId.slice(0, 8)}... → {evt.direction}</p>
                   </div>
                   <span className="text-xs text-muted-foreground/70 whitespace-nowrap">
                     {evt.syncedAt.toLocaleString()}

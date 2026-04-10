@@ -3,6 +3,7 @@
  */
 import "server-only";
 
+import { logger } from "@/lib/telemetry";
 import { db } from "@nzila/db";
 import {
   commerceQuotes,
@@ -112,11 +113,11 @@ export class DbProposalAdapter implements IProposalAdapter {
   async getProposals(filters?: ProposalFilters): Promise<Proposal[]> {
     const [commerce, trade] = await Promise.all([
       fetchCommerceProposals().catch((err) => {
-        console.error("[ADAPTER:proposals] fetchCommerceProposals failed", err);
+        logger.error("[ADAPTER:proposals] fetchCommerceProposals failed", { error: err });
         return [] as Proposal[];
       }),
       fetchTradeProposals().catch((err) => {
-        console.error("[ADAPTER:proposals] fetchTradeProposals failed", err);
+        logger.error("[ADAPTER:proposals] fetchTradeProposals failed", { error: err });
         return [] as Proposal[];
       }),
     ]);

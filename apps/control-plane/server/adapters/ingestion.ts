@@ -6,6 +6,7 @@
  */
 import "server-only";
 
+import { logger } from "@/lib/telemetry";
 import { db } from "@nzila/db";
 import { auditLog } from "@nzila/db";
 import { desc, eq, count, sql } from "drizzle-orm";
@@ -84,7 +85,7 @@ export class DbIngestionAdapter implements IIngestionAdapter {
           if (w.batchId) warningCounts.set(w.batchId, w.count);
         }
       } catch (err) {
-        console.error("[ADAPTER:ingestion] warning counts fetch failed", err);
+        logger.error("[ADAPTER:ingestion] warning counts fetch failed", { error: err });
       }
     }
 
@@ -108,7 +109,7 @@ export class DbIngestionAdapter implements IIngestionAdapter {
         .where(eq(dataQualityWarnings.batchId, id));
       warningCount = wc?.count ?? 0;
     } catch (err) {
-      console.error("[ADAPTER:ingestion] getIngestionRunById warning count failed", { id }, err);
+      logger.error("[ADAPTER:ingestion] getIngestionRunById warning count failed", { id, error: err });
     }
 
     return mapBatchToIngestionRun(batch, warningCount);

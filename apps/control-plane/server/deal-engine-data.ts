@@ -7,6 +7,7 @@
  */
 import "server-only";
 
+import { logger } from "@/lib/telemetry";
 import {
   seedDeals,
   seedPilots,
@@ -82,9 +83,9 @@ export async function getDeals(): Promise<Deal[]> {
     const live = await getDealAdapter().getDeals();
     if (live.length > 0) return live;
   } catch (err) {
-    console.error("[DATA] deal adapter unavailable", err);
+    logger.error("[DATA] deal adapter unavailable", { error: err });
   }
-  console.info("[DEV FALLBACK] Using seed data for deals");
+  logger.info("[DEV FALLBACK] Using seed data for deals");
   return parseSeedDeals();
 }
 
@@ -119,9 +120,9 @@ export async function getPilots(): Promise<Pilot[]> {
     const live = await getPilotAdapter().getPilots();
     if (live.length > 0) return live;
   } catch (err) {
-    console.error("[DATA] pilot adapter unavailable", err);
+    logger.error("[DATA] pilot adapter unavailable", { error: err });
   }
-  console.info("[DEV FALLBACK] Using seed data for pilots");
+  logger.info("[DEV FALLBACK] Using seed data for pilots");
   return parseSeedPilots();
 }
 
@@ -132,9 +133,9 @@ export async function getIngestionRuns(): Promise<IngestionRun[]> {
     const live = await getIngestionAdapter().getIngestionRuns();
     if (live.length > 0) return live;
   } catch (err) {
-    console.error("[DATA] ingestion adapter unavailable", err);
+    logger.error("[DATA] ingestion adapter unavailable", { error: err });
   }
-  console.info("[DEV FALLBACK] Using seed data for ingestion runs");
+  logger.info("[DEV FALLBACK] Using seed data for ingestion runs");
   return parseSeedIngestion();
 }
 
@@ -145,9 +146,9 @@ export async function getProposals(): Promise<Proposal[]> {
     const live = await getProposalAdapter().getProposals();
     if (live.length > 0) return live;
   } catch (err) {
-    console.error("[DATA] proposal adapter unavailable", err);
+    logger.error("[DATA] proposal adapter unavailable", { error: err });
   }
-  console.info("[DEV FALLBACK] Using seed data for proposals");
+  logger.info("[DEV FALLBACK] Using seed data for proposals");
   return parseSeedProposals();
 }
 
@@ -158,9 +159,9 @@ export async function getReferrals(): Promise<PartnerReferral[]> {
     const live = await getPartnerAdapter().getReferrals();
     if (live.length > 0) return live;
   } catch (err) {
-    console.error("[DATA] referral adapter unavailable", err);
+    logger.error("[DATA] referral adapter unavailable", { error: err });
   }
-  console.info("[DEV FALLBACK] Using seed data for referrals");
+  logger.info("[DEV FALLBACK] Using seed data for referrals");
   return parseSeedReferrals();
 }
 
@@ -169,9 +170,9 @@ export async function getPartnerStats(): Promise<PartnerStats> {
     const stats = await getPartnerAdapter().getPartnerStats();
     if (stats.totalReferrals > 0) return stats;
   } catch (err) {
-    console.error("[DATA] partner stats adapter unavailable", err);
+    logger.error("[DATA] partner stats adapter unavailable", { error: err });
   }
-  console.info("[DEV FALLBACK] Using seed data for partner stats");
+  logger.info("[DEV FALLBACK] Using seed data for partner stats");
   const refs = parseSeedReferrals();
   const converted = refs.filter((r) => r.referralStatus === "converted").length;
   const earnedComm = refs
@@ -213,9 +214,9 @@ export async function getAccountHealthRecords(): Promise<AccountHealth[]> {
       if (bulk.length > 0) return enrichWithProofData(bulk);
     }
   } catch (err) {
-    console.error("[DATA] account health adapter unavailable", err);
+    logger.error("[DATA] account health adapter unavailable", { error: err });
   }
-  console.info("[DEV FALLBACK] Using seed data for account health");
+  logger.info("[DEV FALLBACK] Using seed data for account health");
   const records = z.array(accountHealthSchema).parse(seedAccountHealth) as AccountHealth[];
   return enrichWithProofData(records);
 }
@@ -227,9 +228,9 @@ export async function getFollowUps(): Promise<FollowUp[]> {
     const live = await getFollowUpAdapter().getFollowUps();
     if (live.length > 0) return live;
   } catch (err) {
-    console.error("[DATA] follow-up adapter unavailable", err);
+    logger.error("[DATA] follow-up adapter unavailable", { error: err });
   }
-  console.info("[DEV FALLBACK] Using seed data for follow-ups");
+  logger.info("[DEV FALLBACK] Using seed data for follow-ups");
   return parseSeedFollowUps();
 }
 
@@ -240,9 +241,9 @@ export async function getAccounts(): Promise<Account[]> {
     const live = await getAccountAdapter().getAccounts();
     if (live.length > 0) return live;
   } catch (err) {
-    console.error("[DATA] account adapter unavailable", err);
+    logger.error("[DATA] account adapter unavailable", { error: err });
   }
-  console.info("[DEV FALLBACK] Using seed data for accounts");
+  logger.info("[DEV FALLBACK] Using seed data for accounts");
   return parseSeedAccounts();
 }
 

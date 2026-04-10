@@ -31,19 +31,19 @@ export type SyncStatus = 'pending' | 'synced' | 'failed' | 'skipped'
  */
 export async function recordSyncEvent(params: {
   entityType: SyncEntityType
-  entityId: string
+  resourceId: string
   direction: SyncDirection
   action: string
   payload?: Record<string, unknown>
   orgId: string
 }): Promise<{ ok: boolean; syncId?: string }> {
-  const { entityType, entityId, direction, action, payload, orgId } = params
+  const { entityType, resourceId, direction, action, payload, orgId } = params
 
   const rows = await platformDb.execute(sql`
     INSERT INTO zonga_nzila_sync_log (
       entity_type, entity_id, direction, action, payload, status, org_id
     ) VALUES (
-      ${entityType}, ${entityId}, ${direction}, ${action},
+      ${entityType}, ${resourceId}, ${direction}, ${action},
       ${payload ? JSON.stringify(payload) : null}::jsonb,
       'synced', ${orgId}
     )
@@ -60,24 +60,24 @@ export async function recordSyncEvent(params: {
 export async function publishPlatformEvent(params: {
   eventType: string
   entityType: SyncEntityType
-  entityId: string
+  resourceId: string
   orgId: string
   actorId: string
   data?: Record<string, unknown>
 }): Promise<void> {
-  const { eventType, entityType, entityId, orgId, actorId, data } = params
+  const { eventType, entityType, resourceId, orgId, actorId, data } = params
 
   // Record in sync log
   await recordSyncEvent({
     entityType,
-    entityId,
+    resourceId,
     direction: 'zonga_to_os',
     action: eventType,
     payload: { actorId, ...data },
     orgId,
   })
 
-  logger.info('Platform event published', { eventType, entityType, entityId, actorId })
+  logger.info('Platform event published', { eventType, entityType, resourceId, actorId })
 }
 
 /**
@@ -89,7 +89,7 @@ export async function getRecentSyncEvents(
 ): Promise<Array<{
   id: string
   entityType: SyncEntityType
-  entityId: string
+  resourceId: string
   direction: SyncDirection
   action: string
   status: SyncStatus
@@ -106,7 +106,7 @@ export async function getRecentSyncEvents(
   return (rows as unknown as Array<Record<string, unknown>>).map((r) => ({
     id: r.id as string,
     entityType: r.entity_type as SyncEntityType,
-    entityId: r.entity_id as string,
+    resourceId: r.entity_id as string,
     direction: r.direction as SyncDirection,
     action: r.action as string,
     status: r.status as SyncStatus,
@@ -122,7 +122,7 @@ export async function getSyncFailures(
 ): Promise<Array<{
   id: string
   entityType: string
-  entityId: string
+  resourceId: string
   action: string
   error: string
   failedAt: Date
@@ -138,7 +138,7 @@ export async function getSyncFailures(
   return (rows as unknown as Array<Record<string, unknown>>).map((r) => ({
     id: r.id as string,
     entityType: r.entity_type as string,
-    entityId: r.entity_id as string,
+    resourceId: r.entity_id as string,
     action: r.action as string,
     error: (r.payload as Record<string, unknown>)?.error as string ?? 'Unknown error',
     failedAt: new Date(r.synced_at as string),

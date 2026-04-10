@@ -6,6 +6,7 @@
  */
 import "server-only";
 
+import { logger } from "@/lib/telemetry";
 import { db } from "@nzila/db";
 import { eq } from "drizzle-orm";
 import { dealEnginePilots } from "./schemas";
@@ -96,7 +97,7 @@ async function ensureSeeded(): Promise<void> {
       );
     }
   } catch (err) {
-    console.error("[ADAPTER:pilots] seed failed", err);
+    logger.error("[ADAPTER:pilots] seed failed", { error: err });
     _seeded = false;
   }
 }
@@ -115,7 +116,7 @@ export class DbPilotAdapter implements IPilotAdapter {
 
       return pilots;
     } catch (err) {
-      console.error("[ADAPTER:pilots] getPilots failed", err);
+      logger.error("[ADAPTER:pilots] getPilots failed", { error: err });
       return [];
     }
   }
@@ -127,7 +128,7 @@ export class DbPilotAdapter implements IPilotAdapter {
       if (rows.length === 0) return null;
       return rowToPilot(rows[0]);
     } catch (err) {
-      console.error("[ADAPTER:pilots] getPilotById failed", { id }, err);
+      logger.error("[ADAPTER:pilots] getPilotById failed", { id, error: err });
       return null;
     }
   }
@@ -152,7 +153,7 @@ export class DbPilotAdapter implements IPilotAdapter {
 
       return { ...pilot, checklist: newChecklist as PilotChecklist, updatedAt: now.toISOString() };
     } catch (err) {
-      console.error("[ADAPTER:pilots] updateChecklist failed", { id, key }, err);
+      logger.error("[ADAPTER:pilots] updateChecklist failed", { id, key, error: err });
       return null;
     }
   }
@@ -181,7 +182,7 @@ export class DbPilotAdapter implements IPilotAdapter {
 
       return { ...pilot, pilotStatus: status as Pilot["pilotStatus"], updatedAt: now.toISOString() };
     } catch (err) {
-      console.error("[ADAPTER:pilots] updateStatus failed", { id, status }, err);
+      logger.error("[ADAPTER:pilots] updateStatus failed", { id, status, error: err });
       return null;
     }
   }

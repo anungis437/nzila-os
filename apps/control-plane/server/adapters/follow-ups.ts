@@ -6,6 +6,7 @@
  */
 import "server-only";
 
+import { logger } from "@/lib/telemetry";
 import { db } from "@nzila/db";
 import { eq } from "drizzle-orm";
 import { dealEngineFollowUps } from "./schemas";
@@ -66,7 +67,7 @@ async function ensureSeeded(): Promise<void> {
       );
     }
   } catch (err) {
-    console.error("[ADAPTER:follow-ups] seed failed", err);
+    logger.error("[ADAPTER:follow-ups] seed failed", { error: err });
     _seeded = false;
   }
 }
@@ -86,7 +87,7 @@ export class DbFollowUpAdapter implements IFollowUpAdapter {
 
       return followUps;
     } catch (err) {
-      console.error("[ADAPTER:follow-ups] getFollowUps failed", err);
+      logger.error("[ADAPTER:follow-ups] getFollowUps failed", { error: err });
       return [];
     }
   }
@@ -106,7 +107,7 @@ export class DbFollowUpAdapter implements IFollowUpAdapter {
       const followUp = rowToFollowUp(rows[0]);
       return { ...followUp, completedAt: now.toISOString(), isOverdue: false };
     } catch (err) {
-      console.error("[ADAPTER:follow-ups] complete failed", { id }, err);
+      logger.error("[ADAPTER:follow-ups] complete failed", { id, error: err });
       return null;
     }
   }
@@ -127,7 +128,7 @@ export class DbFollowUpAdapter implements IFollowUpAdapter {
       const followUp = rowToFollowUp(rows[0]);
       return { ...followUp, dueDate: due.toISOString(), isOverdue: overdue };
     } catch (err) {
-      console.error("[ADAPTER:follow-ups] snooze failed", { id }, err);
+      logger.error("[ADAPTER:follow-ups] snooze failed", { id, error: err });
       return null;
     }
   }
@@ -146,7 +147,7 @@ export class DbFollowUpAdapter implements IFollowUpAdapter {
       const followUp = rowToFollowUp(rows[0]);
       return { ...followUp, owner: newOwner };
     } catch (err) {
-      console.error("[ADAPTER:follow-ups] reassign failed", { id }, err);
+      logger.error("[ADAPTER:follow-ups] reassign failed", { id, error: err });
       return null;
     }
   }

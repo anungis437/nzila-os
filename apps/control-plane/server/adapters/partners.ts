@@ -3,6 +3,7 @@
  */
 import "server-only";
 
+import { logger } from "@/lib/telemetry";
 import { db } from "@nzila/db";
 import { auditLog, tradeCommissions, tradeDeals, tradeParties } from "@nzila/db";
 import { desc, eq, sql } from "drizzle-orm";
@@ -92,11 +93,11 @@ export class DbPartnerReferralAdapter implements IPartnerReferralAdapter {
   async getReferrals(filters?: PartnerFilters): Promise<PartnerReferral[]> {
     const [partnerDeals, tradeRefs] = await Promise.all([
       fetchPartnerReferrals().catch((err) => {
-        console.error("[ADAPTER:partners] fetchPartnerReferrals failed", err);
+        logger.error("[ADAPTER:partners] fetchPartnerReferrals failed", { error: err });
         return [] as PartnerReferral[];
       }),
       fetchTradeCommissionReferrals().catch((err) => {
-        console.error("[ADAPTER:partners] fetchTradeCommissionReferrals failed", err);
+        logger.error("[ADAPTER:partners] fetchTradeCommissionReferrals failed", { error: err });
         return [] as PartnerReferral[];
       }),
     ]);
