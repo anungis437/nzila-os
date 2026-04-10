@@ -2,11 +2,11 @@ export const dynamic = 'force-dynamic';
 
 import type { Metadata } from 'next';
 import AuthPageLayout from '@/components/auth/auth-page-layout';
-import { SignupForm } from '@/components/auth/signup-form';
+import { ForgotPasswordForm } from '@/components/auth/forgot-password-form';
 
 export const metadata: Metadata = {
-  title: 'Sign Up | Zonga',
-  description: 'Create your Zonga account — join the fair-share music platform for African creators.',
+  title: 'Forgot Password | Zonga',
+  description: 'Reset your Zonga password.',
 };
 
 const stats = [
@@ -15,24 +15,23 @@ const stats = [
   { value: '85%', label: 'Revenue Share' },
 ];
 
-export default function SignUpPage() {
+export default function ForgotPasswordPage() {
   return (
     <AuthPageLayout
       appName="Zonga"
       appAbbrev="Z"
       tagline="Your Music, Your Revenue"
-      subtitle="The fair-share music platform — transparent royalties, instant payouts, and full creative ownership for African artists and creators."
+      subtitle="Don't worry — we'll send you a link to reset your password."
       stats={stats}
       heroImage="https://images.unsplash.com/photo-1493225457124-a3eb161ffa5f?w=1920&q=80"
       heroAlt="African musician performing — representing the creative spirit Zonga empowers"
-      isSignUp
       trustBadges={[
         { label: '85% Revenue Share', color: 'emerald' },
         { label: 'Instant Payouts', color: 'gold' },
         { label: 'Own Your Masters', color: 'muted' },
       ]}
     >
-      <SignupForm />
+      <ForgotPasswordForm />
     </AuthPageLayout>
   );
 }

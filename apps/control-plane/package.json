@@ -14,6 +14,7 @@
     "demo:seed": "tsx lib/demoSeed.ts"
   },
   "dependencies": {
+    "@nzila/deal-engine": "workspace:*",
     "@nzila/platform-auth": "workspace:*",
     "@nzila/observability": "workspace:*",
     "@nzila/os-core": "workspace:*",
@@ -26,6 +27,7 @@
     "@nzila/platform-ai-governance": "workspace:*",
     "@nzila/platform-procurement-proof": "workspace:*",
     "@nzila/platform-evidence-pack": "workspace:*",
+    "@nzila/platform-event-fabric": "workspace:*",
     "@nzila/platform-compliance-snapshots": "workspace:*",
     "@nzila/platform-policy-engine": "workspace:*",
     "@nzila/platform-change-management": "workspace:*",

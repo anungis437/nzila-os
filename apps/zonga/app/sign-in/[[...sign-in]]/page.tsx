@@ -1,8 +1,8 @@
 export const dynamic = 'force-dynamic';
 
-import { SignIn } from '@nzila/platform-auth/entra/client';
 import type { Metadata } from 'next';
 import AuthPageLayout from '@/components/auth/auth-page-layout';
+import { LoginForm } from '@/components/auth/login-form';
 
 export const metadata: Metadata = {
   title: 'Sign In | Zonga',
@@ -31,23 +31,7 @@ export default function SignInPage() {
         { label: 'Own Your Masters', color: 'muted' },
       ]}
     >
-      <SignIn
-        forceRedirectUrl="/en-CA/dashboard"
-        appearance={{
-          elements: {
-            rootBox: 'w-full',
-            card: 'shadow-none border-0 w-full',
-            headerTitle: 'text-2xl font-bold text-navy',
-            headerSubtitle: 'text-gray-500',
-            socialButtonsBlockButton: 'border border-gray-200 hover:bg-gray-50 transition-colors rounded-xl',
-            formFieldInput: 'rounded-xl border-gray-200 focus:border-electric focus:ring-electric/20',
-            formButtonPrimary: 'bg-electric hover:bg-blue-700 rounded-xl shadow-lg shadow-electric/25 transition-all',
-            footerActionLink: 'text-electric hover:text-blue-700',
-            dividerLine: 'bg-gray-200',
-            dividerText: 'text-gray-400',
-          },
-        }}
-      />
+      <LoginForm />
     </AuthPageLayout>
   );
 }
