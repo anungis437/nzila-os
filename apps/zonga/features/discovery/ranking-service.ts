@@ -115,7 +115,7 @@ async function getFeaturedContent(
 
   return (rows as unknown as Array<Record<string, unknown>>).map((r) => ({
     entityType: r.entity_type as HomeFeedItem['entityType'],
-    entityId: r.entity_id as string,
+    resourceId: r.entity_id as string,
     title: r.title as string,
     subtitle: r.subtitle as string | undefined,
     imageUrl: r.image_url as string | undefined,

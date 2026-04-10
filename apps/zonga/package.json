@@ -27,6 +27,7 @@
     "@nzila/commerce-state": "workspace:*",
     "@nzila/payments-stripe": "workspace:*",
     "@nzila/zonga-intelligence": "workspace:*",
+    "@nzila/zonga-payments": "workspace:*",
     "clsx": "^2.1.1",
     "framer-motion": "^11.3.30",
     "next": "^16.2.2",
