@@ -9,6 +9,7 @@
  */
 import "server-only";
 
+import { logger } from "@/lib/telemetry";
 import { db } from "@nzila/db";
 import { onDealEvent, DEAL_ENGINE_EVENTS } from "./events";
 import { recordDealAudit } from "./audit";
@@ -50,7 +51,7 @@ async function createAutomatedFollowUp(params: {
       createdAt: now,
     });
   } catch (err) {
-    console.error("[AUTOMATION] createAutomatedFollowUp failed", params.trigger, err);
+    logger.error("[AUTOMATION] createAutomatedFollowUp failed", { trigger: params.trigger, error: err });
   }
 }
 

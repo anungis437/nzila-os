@@ -7,6 +7,7 @@
  */
 import "server-only";
 
+import { logger } from "@/lib/telemetry";
 import { db } from "@nzila/db";
 import {
   commerceOpportunities,
@@ -205,7 +206,7 @@ function deduplicateDeals(deals: Deal[]): Deal[] {
       return { deal: d, score };
     });
     scored.sort((a, b) => b.score - a.score);
-    console.info("[ADAPTER:deals] dedup merged %d deals for key=%s", group.length, key);
+    logger.info("[ADAPTER:deals] dedup merged deals", { count: group.length, key });
     result.push(scored[0].deal);
   }
   return result;
@@ -227,15 +228,15 @@ export class DbDealAdapter implements IDealAdapter {
   async getDeals(filters?: DealFilters): Promise<Deal[]> {
     const [commerce, trade, partner] = await Promise.all([
       fetchCommerceDeals().catch((err) => {
-        console.error("[ADAPTER:deals] fetchCommerceDeals failed", err);
+        logger.error("[ADAPTER:deals] fetchCommerceDeals failed", { error: err });
         return [] as Deal[];
       }),
       fetchTradeDeals().catch((err) => {
-        console.error("[ADAPTER:deals] fetchTradeDeals failed", err);
+        logger.error("[ADAPTER:deals] fetchTradeDeals failed", { error: err });
         return [] as Deal[];
       }),
       fetchPartnerDeals().catch((err) => {
-        console.error("[ADAPTER:deals] fetchPartnerDeals failed", err);
+        logger.error("[ADAPTER:deals] fetchPartnerDeals failed", { error: err });
         return [] as Deal[];
       }),
     ]);
@@ -355,7 +356,7 @@ export class DbDealAdapter implements IDealAdapter {
 
       return null;
     } catch (err) {
-      console.error("[ADAPTER:deals] getDealById failed", { id }, err);
+      logger.error("[ADAPTER:deals] getDealById failed", { id, error: err });
       return null;
     }
   }
@@ -395,7 +396,7 @@ export class DbDealAdapter implements IDealAdapter {
 
       return { ...deal, stage: toStage, updatedAt: now.toISOString() };
     } catch (err) {
-      console.error("[ADAPTER:deals] transitionStage failed", { id, toStage }, err);
+      logger.error("[ADAPTER:deals] transitionStage failed", { id, toStage, error: err });
       return null;
     }
   }

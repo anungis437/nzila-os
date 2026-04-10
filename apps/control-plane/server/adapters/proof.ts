@@ -4,6 +4,7 @@
  */
 import "server-only";
 
+import { logger } from "@/lib/telemetry";
 import { db } from "@nzila/db";
 import { evidencePacks } from "@nzila/db";
 import { eq, sql, count } from "drizzle-orm";
@@ -42,7 +43,7 @@ async function getEvidencePackCountsByOrg(): Promise<Map<string, EvidencePackSum
     }
     return map;
   } catch (err) {
-    console.error("[ADAPTER:proof] getEvidencePackCountsByOrg failed", err);
+    logger.error("[ADAPTER:proof] getEvidencePackCountsByOrg failed", { error: err });
     return new Map();
   }
 }

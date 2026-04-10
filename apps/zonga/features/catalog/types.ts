@@ -97,7 +97,7 @@ export interface HomeFeedSection {
 
 export interface HomeFeedItem {
   entityType: 'track' | 'artist' | 'release' | 'event'
-  entityId: string
+  resourceId: string
   title: string
   subtitle?: string
   imageUrl?: string

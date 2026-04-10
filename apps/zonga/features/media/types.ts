@@ -52,7 +52,7 @@ export type AudioFormat = 'aac' | 'mp3' | 'flac' | 'opus' | 'ogg'
 export interface ArtworkAsset {
   id: string
   entityType: 'track' | 'release' | 'event' | 'artist' | 'playlist'
-  entityId: string
+  resourceId: string
   orgId: string
   storageKey: string
   mimeType: string

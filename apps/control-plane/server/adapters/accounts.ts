@@ -5,6 +5,7 @@
  */
 import "server-only";
 
+import { logger } from "@/lib/telemetry";
 import { db } from "@nzila/db";
 import { commerceCustomers, commerceOpportunities, tradeParties, tradeDeals } from "@nzila/db";
 import { desc, eq, sql } from "drizzle-orm";
@@ -46,7 +47,7 @@ async function fetchCommerceAccounts(): Promise<Account[]> {
         if (!oppMap.has(o.customerId)) oppMap.set(o.customerId, o.status);
       }
     } catch (err) {
-      console.error("[ADAPTER:accounts] fetchCommerceAccounts opportunity enrichment failed", err);
+      logger.error("[ADAPTER:accounts] fetchCommerceAccounts opportunity enrichment failed", { error: err });
     }
   }
 
@@ -102,7 +103,7 @@ async function fetchTradeAccounts(): Promise<Account[]> {
         if (!dealMap.has(d.buyerPartyId)) dealMap.set(d.buyerPartyId, d.stage);
       }
     } catch (err) {
-      console.error("[ADAPTER:accounts] fetchTradeAccounts deal stage enrichment failed", err);
+      logger.error("[ADAPTER:accounts] fetchTradeAccounts deal stage enrichment failed", { error: err });
     }
   }
 
@@ -129,11 +130,11 @@ export class DbAccountAdapter implements IAccountAdapter {
   async getAccounts(filters?: AccountFilters): Promise<Account[]> {
     const [commerce, trade] = await Promise.all([
       fetchCommerceAccounts().catch((err) => {
-        console.error("[ADAPTER:accounts] fetchCommerceAccounts failed", err);
+        logger.error("[ADAPTER:accounts] fetchCommerceAccounts failed", { error: err });
         return [] as Account[];
       }),
       fetchTradeAccounts().catch((err) => {
-        console.error("[ADAPTER:accounts] fetchTradeAccounts failed", err);
+        logger.error("[ADAPTER:accounts] fetchTradeAccounts failed", { error: err });
         return [] as Account[];
       }),
     ]);
@@ -171,7 +172,7 @@ export class DbAccountAdapter implements IAccountAdapter {
         };
       }
     } catch (err) {
-      console.error("[ADAPTER:accounts] getAccountById commerce lookup failed", err);
+      logger.error("[ADAPTER:accounts] getAccountById commerce lookup failed", { error: err });
     }
     try {
       const tradeRows = await db
@@ -189,7 +190,7 @@ export class DbAccountAdapter implements IAccountAdapter {
         };
       }
     } catch (err) {
-      console.error("[ADAPTER:accounts] getAccountById trade lookup failed", err);
+      logger.error("[ADAPTER:accounts] getAccountById trade lookup failed", { error: err });
     }
     return null;
   }
@@ -313,7 +314,7 @@ export class DbAccountAdapter implements IAccountAdapter {
       }
       return results;
     } catch (err) {
-      console.error("[ADAPTER:accounts] getBulkAccountHealth failed", err);
+      logger.error("[ADAPTER:accounts] getBulkAccountHealth failed", { error: err });
       return [];
     }
   }

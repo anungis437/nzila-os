@@ -4,6 +4,7 @@ import { requireApiAuth, handleAuthError } from "@/lib/api-auth";
 import { getPilotAdapter } from "@/server/adapters";
 import { emitDealEvent, DEAL_ENGINE_EVENTS } from "@/server/adapters";
 import { recordDealAudit } from "@/server/adapters";
+import { logger } from "@/lib/telemetry";
 import { pilotStatusSchema } from "@nzila/deal-engine/types";
 
 export const dynamic = "force-dynamic";
@@ -75,7 +76,7 @@ export async function POST(request: Request) {
           },
         });
       } catch (err) {
-        console.error("[ROUTE:pilots] checklist event/audit failed", err);
+        logger.error("[ROUTE:pilots] checklist event/audit failed", { error: err });
       }
 
       return NextResponse.json({ ok: true, data: { pilot } });
@@ -103,7 +104,7 @@ export async function POST(request: Request) {
           },
         });
       } catch (err) {
-        console.error("[ROUTE:pilots] status event/audit failed", err);
+        logger.error("[ROUTE:pilots] status event/audit failed", { error: err });
       }
 
       return NextResponse.json({ ok: true, data: { pilot } });

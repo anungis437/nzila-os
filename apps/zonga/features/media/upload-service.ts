@@ -131,12 +131,12 @@ export interface UploadArtworkResult {
 
 export async function uploadArtwork(params: {
   entityType: ArtworkAsset['entityType']
-  entityId: string
+  resourceId: string
   orgId: string
   file: File
   isPrimary?: boolean
 }): Promise<UploadArtworkResult> {
-  const { entityType, entityId, orgId, file, isPrimary = true } = params
+  const { entityType, resourceId, orgId, file, isPrimary = true } = params
 
   if (!ALLOWED_IMAGE_TYPES.has(file.type)) {
     return { ok: false, error: `Unsupported image format: ${file.type}` }
@@ -148,7 +148,7 @@ export async function uploadArtwork(params: {
 
   const buffer = Buffer.from(await file.arrayBuffer())
   const ext = file.name.split('.').pop() ?? 'jpg'
-  const storageKey = `artwork/${entityType}/${entityId}/${Date.now()}.${ext}`
+  const storageKey = `artwork/${entityType}/${resourceId}/${Date.now()}.${ext}`
 
   try {
     await uploadBuffer({
@@ -164,7 +164,7 @@ export async function uploadArtwork(params: {
         UPDATE zonga_artwork_assets
         SET is_primary = false
         WHERE entity_type = ${entityType}
-          AND entity_id = ${entityId}
+          AND entity_id = ${resourceId}
           AND is_primary = true
       `)
     }
@@ -174,7 +174,7 @@ export async function uploadArtwork(params: {
         entity_type, entity_id, org_id,
         storage_key, mime_type, file_size_bytes, is_primary
       ) VALUES (
-        ${entityType}, ${entityId}, ${orgId},
+        ${entityType}, ${resourceId}, ${orgId},
         ${storageKey}, ${file.type}, ${file.size}, ${isPrimary}
       )
       RETURNING id
@@ -183,7 +183,7 @@ export async function uploadArtwork(params: {
 
     return { ok: true, artworkId, storageKey }
   } catch (error) {
-    logger.error('Artwork upload failed', { error, entityType, entityId })
+    logger.error('Artwork upload failed', { error, entityType, resourceId })
     return { ok: false, error: 'Artwork upload failed' }
   }
 }

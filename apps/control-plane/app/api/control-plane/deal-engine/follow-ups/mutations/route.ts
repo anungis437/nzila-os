@@ -4,6 +4,7 @@ import { requireApiAuth, handleAuthError } from "@/lib/api-auth";
 import { getFollowUpAdapter } from "@/server/adapters";
 import { emitDealEvent, DEAL_ENGINE_EVENTS } from "@/server/adapters";
 import { recordDealAudit } from "@/server/adapters";
+import { logger } from "@/lib/telemetry";
 import { followUpPrioritySchema } from "@nzila/deal-engine/types";
 
 export const dynamic = "force-dynamic";
@@ -72,7 +73,7 @@ export async function POST(request: Request) {
           },
         });
       } catch (err) {
-        console.error("[ROUTE:follow-ups] complete event/audit failed", err);
+        logger.error("[ROUTE:follow-ups] complete event/audit failed", { error: err });
       }
 
       return NextResponse.json({ ok: true, data: { followUp } });
@@ -97,7 +98,7 @@ export async function POST(request: Request) {
           },
         });
       } catch (err) {
-        console.error("[ROUTE:follow-ups] snooze audit failed", err);
+        logger.error("[ROUTE:follow-ups] snooze audit failed", { error: err });
       }
 
       return NextResponse.json({ ok: true, data: { followUp } });
@@ -122,7 +123,7 @@ export async function POST(request: Request) {
           },
         });
       } catch (err) {
-        console.error("[ROUTE:follow-ups] reassign audit failed", err);
+        logger.error("[ROUTE:follow-ups] reassign audit failed", { error: err });
       }
 
       return NextResponse.json({ ok: true, data: { followUp } });

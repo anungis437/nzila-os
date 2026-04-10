@@ -10,6 +10,7 @@
  */
 import "server-only";
 
+import { logger } from "@/lib/telemetry";
 import { db } from "@nzila/db";
 import { sql } from "drizzle-orm";
 import { dealEngineEvents } from "./schemas";
@@ -36,7 +37,7 @@ function createDbEventStore(): PlatformEventStore {
           createdAt: new Date(event.createdAt),
         });
       } catch (err) {
-        console.error("[EVENT-STORE] persist failed", { id: event.id, type: event.type }, err);
+        logger.error("[EVENT-STORE] persist failed", { id: event.id, type: event.type, error: err });
       }
     },
 
@@ -60,7 +61,7 @@ function createDbEventStore(): PlatformEventStore {
           }))
           .filter((e) => !tenantId || e.metadata.tenantId === tenantId);
       } catch (err) {
-        console.error("[EVENT-STORE] query failed", { eventType, since }, err);
+        logger.error("[EVENT-STORE] query failed", { eventType, since, error: err });
         return [];
       }
     },
@@ -113,7 +114,7 @@ export async function emitDealEvent(
   opts: EmitOptions,
 ): Promise<void> {
   if (isDuplicate(opts.correlationId)) {
-    console.info("[EVENT] duplicate event dropped", { eventType, correlationId: opts.correlationId });
+    logger.info("[EVENT] duplicate event dropped", { eventType, correlationId: opts.correlationId });
     return;
   }
 
@@ -128,7 +129,7 @@ export async function emitDealEvent(
     });
     await bus.publish(event);
   } catch (err) {
-    console.error("[EVENT] emitDealEvent failed", { eventType }, err);
+    logger.error("[EVENT] emitDealEvent failed", { eventType, error: err });
   }
 }
 

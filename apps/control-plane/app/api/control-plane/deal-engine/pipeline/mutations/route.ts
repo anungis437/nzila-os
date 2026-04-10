@@ -4,6 +4,7 @@ import { requireApiAuth, handleAuthError } from "@/lib/api-auth";
 import { getDealAdapter } from "@/server/adapters";
 import { emitDealEvent, DEAL_ENGINE_EVENTS } from "@/server/adapters";
 import { recordDealAudit } from "@/server/adapters";
+import { logger } from "@/lib/telemetry";
 import { dealStageSchema } from "@nzila/deal-engine/lifecycle";
 
 export const dynamic = "force-dynamic";
@@ -66,7 +67,7 @@ export async function POST(request: Request) {
         },
       });
     } catch (err) {
-      console.error("[ROUTE:pipeline] event/audit emission failed", err);
+      logger.error("[ROUTE:pipeline] event/audit emission failed", { error: err });
     }
 
     return NextResponse.json({ ok: true, data: { deal } });
