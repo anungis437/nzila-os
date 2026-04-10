@@ -7,6 +7,7 @@ import Link from 'next/link';
 import { usePathname } from 'next/navigation';
 import { useState, useEffect, useCallback } from 'react';
 import { motion, AnimatePresence } from 'framer-motion';
+import { ZongaBrandMark } from '@/components/branding';
 
 const navLinks = [
   { href: '/', label: 'Home' },
@@ -65,14 +66,7 @@ export default function SiteNavigation() {
       >
         <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
           <div className="flex items-center justify-between h-16 md:h-20">
-            <Link href="/" className="flex items-center gap-3 group">
-              <div className="w-9 h-9 rounded-lg bg-electric flex items-center justify-center shadow-lg shadow-electric/30 group-hover:shadow-electric/50 transition-shadow">
-                <span className="text-white font-bold text-xs">Z</span>
-              </div>
-              <span className={`font-bold text-lg tracking-tight transition-colors ${scrolled ? 'text-navy' : 'text-white'}`}>
-                Zonga
-              </span>
-            </Link>
+            <ZongaBrandMark placement="app_header" size="md" theme={scrolled ? 'light' : 'dark'} />
 
             <nav className="hidden md:flex items-center gap-1">
               {navLinks.map((link) => (

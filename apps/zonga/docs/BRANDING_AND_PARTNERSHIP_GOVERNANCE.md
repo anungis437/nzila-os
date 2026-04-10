@@ -89,6 +89,67 @@ components/branding/
 
 ## Usage
 
+### Dashboard shell (sidebar + mobile header)
+
+```tsx
+import { WorkspaceIdentity } from '@/components/branding'
+
+<WorkspaceIdentity placement="app_sidebar" size="sm" />
+// Renders: "Z Zonga" (and optionally "| Client Workspace" when client is registered)
+```
+
+### Site navigation (scroll-aware)
+
+```tsx
+import { ZongaBrandMark } from '@/components/branding'
+
+<ZongaBrandMark placement="app_header" size="md" theme={scrolled ? 'light' : 'dark'} />
+// theme="dark" → white text (dark background)
+// theme="light" → navy text (light background)
+```
+
+### Auth pages (login, sign-up, etc.)
+
+`AuthPageLayout` defaults `appName` and `appAbbrev` from `ZONGA_BRAND` registry:
+
+```tsx
+<AuthPageLayout
+  tagline="Your Music, Your Revenue"
+  subtitle="..."
+  stats={stats}
+  heroImage="..."
+/>
+// appName defaults to ZONGA_BRAND.name ("Zonga")
+// appAbbrev defaults to ZONGA_BRAND.shortName ("Z")
+```
+
+### Footer with attribution
+
+```tsx
+import { ZongaBrandMark, PartnershipAttribution } from '@/components/branding'
+
+<ZongaBrandMark placement="footer" size="md" />
+<PartnershipAttribution placement="footer" variant="inline" />
+// Renders: "Powered by Zonga · Deployed for {Client} · In partnership with {Partner}"
+```
+
+### Marketing page (flag-gated sections)
+
+```tsx
+import { PartnershipAttribution, TrustStrip } from '@/components/branding'
+import { loadBrandingFlags } from '@/lib/branding/feature-flags'
+
+const flags = loadBrandingFlags()
+
+{flags.ENABLE_PARTNERSHIP_SECTION && (
+  <PartnershipAttribution placement="marketing_partnership" variant="stacked" />
+)}
+
+{flags.ENABLE_CLIENT_LOGO_TRUST && (
+  <TrustStrip placement="marketing_trust" brands={registeredBrands} flags={flags} />
+)}
+```
+
 ### Rendering a workspace header
 
 ```tsx
@@ -148,14 +209,28 @@ registerBrand({
 ## Tests
 
 ```bash
+# Unit + policy tests
 pnpm vitest apps/zonga/lib/branding/branding.test.ts
+
+# Integration tests (surface wiring)
+pnpm vitest apps/zonga/lib/branding/branding-integration.test.ts
+
+# CI contract test (brand governance enforcement)
+pnpm vitest tooling/contract-tests/zonga-brand-governance.test.ts
 ```
 
-54 tests covering:
-- Policy matrix completeness (39 rules, 13 per role, no duplicates)
-- Enforcement functions (evaluate, can, assert, safe mode)
-- Feature flag gating (all four flags)
-- Anti-white-label safeguards (5 invariants)
-- Partnership attribution (build, format, count)
-- Brand registry (register, unregister, immutable platform, clear)
-- Comprehensive policy invariants (platform never hidden, partner never in product)
+### Test coverage:
+- **54 unit tests:** Policy matrix, enforcement, feature flags, anti-white-label, attribution, registry
+- **~20 integration tests:** Surface wiring for dashboard, auth, footer, nav, marketing
+- **~10 contract tests:** CI enforcement — no hardcoded brands, barrel exports, governed surfaces
+
+## Adopted Surfaces
+
+| Surface | Component Used | Placement |
+|---------|---------------|-----------|
+| Dashboard sidebar | `WorkspaceIdentity` | `app_sidebar` |
+| Dashboard mobile header | `WorkspaceIdentity` | `app_sidebar` |
+| Site navigation | `ZongaBrandMark` | `app_header` |
+| Site footer | `ZongaBrandMark` + `PartnershipAttribution` | `footer` |
+| Auth pages (6) | `AuthPageLayout` → `ZONGA_BRAND` | `login` |
+| Marketing page | `PartnershipAttribution` + `TrustStrip` | `marketing_partnership` / `marketing_trust` |

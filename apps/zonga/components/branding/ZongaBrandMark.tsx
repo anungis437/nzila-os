@@ -12,6 +12,8 @@ interface ZongaBrandMarkProps {
   size?: 'sm' | 'md' | 'lg'
   /** Link destination (defaults to /) */
   href?: string
+  /** Color theme — 'dark' renders white text (dark bg), 'light' renders dark text (light bg) */
+  theme?: 'dark' | 'light'
   className?: string
 }
 
@@ -25,12 +27,14 @@ export function ZongaBrandMark({
   placement,
   size = 'md',
   href = '/',
+  theme = 'dark',
   className = '',
 }: ZongaBrandMarkProps) {
   const mode = getSafeBrandMode('platform', placement)
   if (mode === 'hidden') return null
 
   const { text } = sizeMap[size]
+  const textColor = theme === 'light' ? 'text-navy' : 'text-white'
 
   const content = (
     <span className={`inline-flex items-center gap-2 ${className}`}>
@@ -43,7 +47,7 @@ export function ZongaBrandMark({
           Z
         </span>
       )}
-      <span className={`font-bold tracking-tight text-white ${text}`}>Zonga</span>
+      <span className={`font-bold tracking-tight ${textColor} ${text}`}>Zonga</span>
     </span>
   )
 

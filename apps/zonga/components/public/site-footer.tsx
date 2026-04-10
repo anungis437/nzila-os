@@ -2,6 +2,7 @@
  * SiteFooter — Six-column footer (Zonga / Music Platform)
  */
 import Link from 'next/link';
+import { ZongaBrandMark, PartnershipAttribution } from '@/components/branding';
 
 const footerLinks = {
   platform: {
@@ -73,17 +74,15 @@ export default function SiteFooter() {
       <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-16">
         <div className="grid grid-cols-2 md:grid-cols-6 gap-8">
           <div className="col-span-2">
-            <div className="flex items-center gap-3 mb-6">
-              <div className="w-9 h-9 rounded-lg bg-electric flex items-center justify-center shadow-lg shadow-electric/30">
-                <span className="text-white font-bold text-xs">Z</span>
-              </div>
-              <span className="text-white font-bold text-lg">Zonga</span>
+            <div className="mb-6">
+              <ZongaBrandMark placement="footer" size="md" />
             </div>
-            <p className="text-sm text-gray-400 leading-relaxed mb-6 max-w-xs">
+            <p className="text-sm text-gray-400 leading-relaxed mb-4 max-w-xs">
               The fair-share music platform — transparent royalties,
               instant payouts, and full creative ownership for African
               artists and creators.
             </p>
+            <PartnershipAttribution placement="footer" variant="inline" className="mb-6" />
             <div className="flex gap-3">
               {['LinkedIn', 'GitHub', 'X'].map((social) => (
                 <a

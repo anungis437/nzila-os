@@ -8,6 +8,7 @@ import { DashboardShell } from '@/components/dashboard/dashboard-shell';
 import { SidebarOrgSwitcher, SidebarAccountFooter, MobileAccountFooter } from '@/components/dashboard/clerk-widgets';
 import { Sidebar } from '@/components/dashboard/sidebar';
 import { resolveNavContext } from '@/lib/resolve-nav';
+import { WorkspaceIdentity } from '@/components/branding';
 
 /**
  * Sidebar navigation configuration — canonical route registry.
@@ -60,10 +61,7 @@ export default async function DashboardLayout({
       <aside className="hidden md:flex md:w-64 md:flex-col bg-navy text-white h-screen sticky top-0">
         <div className="flex flex-col h-full overflow-hidden">
           <div className="flex items-center gap-3 px-6 py-5 border-b border-white/10">
-            <div className="w-8 h-8 rounded-lg bg-electric flex items-center justify-center shadow-md shadow-electric/25">
-              <span className="text-white font-bold text-xs">Z</span>
-            </div>
-            <span className="font-bold text-lg tracking-tight">Zonga</span>
+            <WorkspaceIdentity placement="app_sidebar" size="sm" />
           </div>
 
           <div className="px-4 py-4 border-b border-white/10">

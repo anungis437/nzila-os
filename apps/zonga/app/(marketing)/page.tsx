@@ -11,6 +11,8 @@ import type { Metadata } from 'next';
 import Image from 'next/image';
 import Link from 'next/link';
 import ScrollReveal from '@/components/public/scroll-reveal';
+import { PartnershipAttribution, TrustStrip } from '@/components/branding';
+import { loadBrandingFlags } from '@/lib/branding/feature-flags';
 
 export const metadata: Metadata = {
   title: 'Zonga — Music Without Borders',
@@ -100,6 +102,8 @@ const regions = [
 ];
 
 export default function HomePage() {
+  const flags = loadBrandingFlags();
+
   return (
     <main className="min-h-screen">
       {/* ═══════════════════════ HERO ═══════════════════════ */}
@@ -293,6 +297,42 @@ export default function HomePage() {
           </div>
         </div>
       </section>
+
+      {/* ═══════════════════════ PARTNERSHIP (flag-gated) ═══════════════════════ */}
+      {flags.ENABLE_PARTNERSHIP_SECTION && (
+        <section className="py-24 bg-navy-light relative overflow-hidden">
+          <div className="absolute inset-0 bg-mesh opacity-20" />
+          <div className="relative z-10 max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
+            <ScrollReveal>
+              <div className="text-center mb-16">
+                <span className="inline-block px-4 py-1.5 text-xs font-semibold tracking-widest uppercase rounded-full bg-electric/20 text-electric-light mb-4">
+                  Partnership
+                </span>
+                <h2 className="text-3xl md:text-5xl font-bold text-white mb-4">
+                  Built With <span className="gradient-text">Partners Who Care</span>
+                </h2>
+                <p className="text-lg text-gray-400 max-w-2xl mx-auto">
+                  Zonga partners with organizations that share our commitment to fair music — from distribution to community impact.
+                </p>
+              </div>
+            </ScrollReveal>
+            <ScrollReveal delay={0.2}>
+              <div className="glass-card rounded-2xl p-8 md:p-12 text-center">
+                <PartnershipAttribution placement="marketing_partnership" variant="stacked" className="items-center" />
+              </div>
+            </ScrollReveal>
+          </div>
+        </section>
+      )}
+
+      {/* ═══════════════════════ TRUST STRIP (flag-gated) ═══════════════════════ */}
+      {flags.ENABLE_CLIENT_LOGO_TRUST && (
+        <section className="py-12 bg-gray-50 border-y border-gray-100">
+          <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
+            <TrustStrip placement="marketing_trust" brands={[]} flags={flags} title="Trusted By" />
+          </div>
+        </section>
+      )}
 
       {/* ═══════════════════════ MISSION ═══════════════════════ */}
       <section className="py-24 bg-gray-50">

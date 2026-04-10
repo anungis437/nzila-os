@@ -18,8 +18,6 @@ const stats = [
 export default function ForgotPasswordPage() {
   return (
     <AuthPageLayout
-      appName="Zonga"
-      appAbbrev="Z"
       tagline="Your Music, Your Revenue"
       subtitle="Don't worry — we'll send you a link to reset your password."
       stats={stats}

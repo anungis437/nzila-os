@@ -10,6 +10,7 @@ import { ReactNode } from 'react';
 import Image from 'next/image';
 import Link from 'next/link';
 import { motion } from 'framer-motion';
+import { ZONGA_BRAND } from '@/lib/branding/registry';
 
 export interface AuthStat {
   value: string;
@@ -23,8 +24,10 @@ export interface TrustBadge {
 
 interface AuthPageLayoutProps {
   children: ReactNode;
-  appName: string;
-  appAbbrev: string;
+  /** @default ZONGA_BRAND.name */
+  appName?: string;
+  /** @default ZONGA_BRAND.shortName */
+  appAbbrev?: string;
   tagline: string;
   subtitle: string;
   stats: AuthStat[];
@@ -43,8 +46,8 @@ const badgeColorMap: Record<TrustBadge['color'], string> = {
 
 export default function AuthPageLayout({
   children,
-  appName,
-  appAbbrev,
+  appName = ZONGA_BRAND.name,
+  appAbbrev = ZONGA_BRAND.shortName ?? 'Z',
   tagline,
   subtitle,
   stats,

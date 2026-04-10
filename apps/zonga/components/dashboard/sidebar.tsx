@@ -46,6 +46,7 @@ import { useState } from 'react'
 import { motion, AnimatePresence } from 'framer-motion'
 import type { ZongaRole } from '@nzila/zonga-core/types'
 import { MobileAccountFooter } from './clerk-widgets'
+import { WorkspaceIdentity } from '@/components/branding'
 
 // ── Types ────────────────────────────────────────────────────────────────────
 
@@ -331,12 +332,7 @@ export function Sidebar({ role, locale, isPlatformOrg, hasCreatorProfile }: Side
               className="fixed left-0 top-0 bottom-0 w-72 z-50 bg-navy text-white flex flex-col md:hidden"
             >
               <div className="flex items-center justify-between px-4 py-4 border-b border-white/10">
-                <div className="flex items-center gap-3">
-                  <div className="w-8 h-8 rounded-lg bg-electric flex items-center justify-center">
-                    <span className="text-white font-bold text-xs">Z</span>
-                  </div>
-                  <span className="font-bold text-lg tracking-tight">Zonga</span>
-                </div>
+                <WorkspaceIdentity placement="app_sidebar" size="sm" />
                 <button
                   type="button"
                   onClick={() => setMobileOpen(false)}

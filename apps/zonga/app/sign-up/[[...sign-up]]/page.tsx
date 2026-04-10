@@ -18,8 +18,6 @@ const stats = [
 export default function SignUpPage() {
   return (
     <AuthPageLayout
-      appName="Zonga"
-      appAbbrev="Z"
       tagline="Your Music, Your Revenue"
       subtitle="The fair-share music platform — transparent royalties, instant payouts, and full creative ownership for African artists and creators."
       stats={stats}
