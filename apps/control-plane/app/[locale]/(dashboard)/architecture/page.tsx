@@ -102,7 +102,7 @@ async function getArchitectureData(): Promise<ArchSummary> {
           { app: "control-plane", tier: "PILOT", owner: "platform", domain: "ops", checks: 12, passed: 9, level: "PARTIAL" },
           { app: "flow", tier: "PILOT", owner: "platform", domain: "workflow", checks: 12, passed: 8, level: "PARTIAL" },
           { app: "cora", tier: "INCUBATING", owner: "ai", domain: "assistant", checks: 12, passed: 7, level: "PARTIAL" },
-          { app: "mobility", tier: "INCUBATING", owner: "transport", domain: "fleet", checks: 12, passed: 6, level: "MINIMAL" },
+          { app: "mobility", tier: "INCUBATING", owner: "mobility", domain: "migration", checks: 12, passed: 6, level: "MINIMAL" },
           { app: "agrimo", tier: "EXPERIMENTAL", owner: "agriculture", domain: "farm-management", checks: 12, passed: 5, level: "MINIMAL" },
           { app: "zonga", tier: "EXPERIMENTAL", owner: "commerce", domain: "marketplace", checks: 12, passed: 4, level: "MINIMAL" },
         ],

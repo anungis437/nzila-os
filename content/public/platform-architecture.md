@@ -20,7 +20,7 @@ The Backbone philosophy: **build it once, secure it once, audit it once, and sha
 
 | Service | Technology | Purpose |
 |---------|------------|---------|
-| Authentication | Clerk | SSO, RBAC, session management, MFA |
+| Authentication | Email/password + Entra SSO | Identity, RBAC, session management, MFA |
 | Web Framework | Next.js 16 (App Router) | Server-rendered React applications |
 | Styling | Tailwind CSS v4 | Consistent design system |
 | ORM / DB | Drizzle ORM + PostgreSQL | Type-safe queries with RLS enforcement |
@@ -69,7 +69,7 @@ All CI runs produce a cryptographically sealed evidence pack (SHA-256 Merkle roo
 
 ```
 ┌────────────────────────────────────────┐
-│           Clerk Auth Layer             │
+│       Auth Layer (platform-auth)       │
 │  JWT contains: userId, orgId, roles    │
 └───────────────┬────────────────────────┘
                 │ orgId extracted server-side

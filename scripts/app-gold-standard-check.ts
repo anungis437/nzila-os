@@ -15,7 +15,7 @@ const ROOT = path.resolve(__dirname, '..')
 
 const TARGET_APPS = [
   'union-eyes',
-  'shop-quoter',
+  'flow',
   'zonga',
   'cfo',
   'partners',

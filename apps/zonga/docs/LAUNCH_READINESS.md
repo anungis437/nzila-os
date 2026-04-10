@@ -24,7 +24,7 @@ Last updated: 2025-07-24
 | Component | Status | Notes |
 |-----------|--------|-------|
 | Next.js app | ✅ Live | 18+ server action files, internationalised routing |
-| Auth (Clerk) | ✅ Live | Multi-role guards, creator/listener/admin separation |
+| Auth (email/password + Entra SSO) | ✅ Live | Multi-role guards, creator/listener/admin separation |
 | Payments (Stripe) | ✅ Live | Subscription + one-off payments |
 | Observability | ✅ Live | Custom instrumentation, error tracking |
 | AI Client | ✅ Live | ML inference integration |

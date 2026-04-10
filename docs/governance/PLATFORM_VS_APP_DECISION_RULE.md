@@ -70,7 +70,7 @@
 | Grievance intake form | `apps/union-eyes` | Domain-specific to union case management |
 | Quote approval portal | `apps/flow` | Domain-specific to commerce quoting |
 | Release moderation queue | `apps/zonga` | Domain-specific to media/creator moderation |
-| Ticket purchase UX | `apps/mobility` | Domain-specific to transport operations |
+| Program eligibility UX | `apps/mobility` | Domain-specific to investment migration |
 | Supplier operations board | `apps/flow` | Domain-specific to commerce suppliers |
 | Vehicle deal management | `apps/trade` | Domain-specific to vehicle trade |
 | Financial reconciliation views | `apps/cfo` | Domain-specific to finance operations |

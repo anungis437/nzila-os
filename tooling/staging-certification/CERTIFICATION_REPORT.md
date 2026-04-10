@@ -57,8 +57,8 @@ Validates auth middleware, secret hygiene, and runtime config.
 
 | Test | What It Proves |
 |------|---------------|
-| Clerk middleware present | All deployed Next.js apps have `middleware.ts` with Clerk |
-| No hardcoded Clerk keys | Zero `sk_live_` / `sk_test_` literals in source |
+| Auth middleware present | All deployed Next.js apps have `middleware.ts` with platform auth |
+| No hardcoded auth keys | Zero `sk_live_` / `sk_test_` literals in source |
 | No hardcoded Stripe live keys | Zero `sk_live_` Stripe keys in source |
 | Stripe config uses env vars | `process.env.STRIPE_SECRET_KEY` pattern (not literals) |
 | DATABASE_URL uses env vars | `process.env.DATABASE_URL` (no connection strings in code) |
@@ -218,17 +218,17 @@ Validates CI workflow hardening, enforcement tool availability, execution, skip-
 |-----|-----------|-------|---------------|
 | union-eyes | 200+ | 30+ | withApi, withRoleAuth, withMinRole, crudRoutes, withAdminAuth, auth() |
 | console | 72+ | 15+ | requireOrgAccess, authenticateUser, auth() |
-| partners | — | — | Clerk middleware |
-| cfo | — | — | Clerk middleware |
+| partners | — | — | Platform auth middleware |
+| cfo | — | — | Platform auth middleware |
 | zonga | webhooks | — | verifyWebhookSignature |
-| web | — | — | Clerk middleware (primary instance) |
+| web | — | — | Platform auth middleware (primary instance) |
 
 ---
 
 ## Infrastructure Verified
 
 - **Database**: PostgreSQL 16, Drizzle ORM, 84+ migrations
-- **Auth**: Clerk (4 auth patterns + 2 webhook verification patterns)
+- **Auth**: @nzila/platform-auth (email/password + optional Entra SSO, 4 auth patterns + 2 webhook verification patterns)
 - **Payments**: Stripe + PayPal (webhook signature verification)
 - **CI**: GitHub Actions, 12+ jobs, zero `continue-on-error`, enforced dependency chains
 - **Schema Control**: 5 enforcement tools (schema-snapshot, canonical-schema, preflight-check, parity-check, SchemaError)

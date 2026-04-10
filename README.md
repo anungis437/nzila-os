@@ -1,6 +1,6 @@
 # Nzila OS
 
-> The operating system for Nzila Digital Ventures — 13 apps, 58+ packages, polyglot (TypeScript + Python/Django), with evidence-first governance, contract-enforced invariants, and org-scoped multi-tenancy.
+> The operating system for Nzila Digital Ventures — 17 apps, 150+ packages, polyglot (TypeScript + Python/Django), with evidence-first governance, contract-enforced invariants, and org-scoped multi-tenancy.
 
 [![CI](https://github.com/anungis437/nzila-os/actions/workflows/ci.yml/badge.svg)](https://github.com/anungis437/nzila-os/actions/workflows/ci.yml)
 [![Tests](https://img.shields.io/badge/tests-7%2C669%20passing-brightgreen)](#testing)
@@ -19,14 +19,17 @@ Nzila OS is the digital backbone that powers every Nzila venture. It is not a st
 | Domain | Apps | What It Does |
 |--------|------|-------------|
 | **Agriculture** | Agrimo, Cora | Smallholder supply chains — producer profiles, harvest tracking, warehouse ops, payment disbursement, yield intelligence, traceability |
-| **Commerce** | Shop Quoter | Multi-vertical quoting engine, order lifecycle, pricing rules |
+| **Commerce** | Flow | Multi-vertical commerce engine, order lifecycle, pricing rules |
 | **Trade** | Trade | Cross-border trade management, vehicle commerce |
 | **Finance** | CFO | Stripe payments, QuickBooks sync, tax calendar, FX, financial reporting |
-| **Union Management** | Union-Eyes | Grievance lifecycle, collective bargaining, elections, strike funds, evidence packs, federation management |
+| **Union Management** | Union-Eyes, ABR | Grievance lifecycle, collective bargaining, elections, strike funds, evidence packs, federation management |
 | **Compliance & Exams** | NACP Exams | Examination administration, integrity proofs |
-| **Operations** | Console | Governance, finance oversight, ML/AI management, NACP integrity |
+| **Mobility** | Mobility, Mobility Client Portal | Investment migration advisory (CBI/RBI), client-facing portal |
+| **Music & Media** | Zonga | Artist management, royalties, content distribution |
+| **Operations** | Console, Control Plane, Platform Admin | Governance, finance oversight, ML/AI management, platform administration |
 | **Public** | Web | Marketing site, resource library |
 | **Partners** | Partners | Entitlement-gated partner portal |
+| **APIs** | Orchestrator API | Cross-app orchestration and integration layer |
 
 For a full non-technical overview, see [README.business.md](README.business.md).
 
@@ -36,7 +39,7 @@ For a full non-technical overview, see [README.business.md](README.business.md).
 
 ```
 ┌──────────────────────────────────────────────────────────────────────────┐
-│                          13 APPS (Next.js + Django)                      │
+│                          17 APPS (Next.js + Django)                      │
 │  web │ console │ partners │ union-eyes │ abr │ cora │ agrimo │ trade │…  │
 └───────┬──────────────────────┬───────────────────────┬───────────────────┘
         │                      │                       │
@@ -124,7 +127,7 @@ security/                  Red-team profiles, security tooling
 | **Package manager** | pnpm 10 with workspaces |
 | **Build orchestration** | Turborepo |
 | **Styling** | Tailwind CSS v4 |
-| **Auth** | Clerk |
+| **Auth** | Email/password (Argon2id + PG sessions) · Entra SSO (optional) via `@nzila/platform-auth` |
 | **Database** | PostgreSQL 15 + Drizzle ORM |
 | **CI** | GitHub Actions (15 workflows) |
 
@@ -137,7 +140,7 @@ security/                  Red-team profiles, security tooling
 - **Node.js** ≥ 20
 - **pnpm** ≥ 10 — `npm i -g pnpm`
 - **Python** ≥ 3.11 (for ABR/UE Django backends and `packages/automation`)
-- **Clerk account** — [clerk.com](https://clerk.com)
+- **Auth credentials** — see `.env.example` in each app (`AUTH_SECRET` required; `AZURE_AD_*` vars for optional Entra SSO)
 
 ### 1. Install & run
 
@@ -174,7 +177,7 @@ pnpm contract-tests    # invariant enforcement tests
 
 ### Next.js Apps (11)
 
-All Next.js apps use Clerk auth, Tailwind CSS v4, and the `@nzila/ui` component library.
+All Next.js apps use `@nzila/platform-auth` (email/password by default, Entra SSO optional), Tailwind CSS v4, and the `@nzila/ui` component library.
 
 | App | Port | Purpose |
 |-----|------|---------|
@@ -328,7 +331,7 @@ See [ARCHITECTURE.md](ARCHITECTURE.md) for the full architectural overview.
 | **Ports-and-adapters** | Domain logic depends on port interfaces, not concrete implementations |
 | **Polyglot persistence** | TypeScript/Drizzle for platform core, Python/Django for domain verticals (ABR, UE) |
 | **Stack authority** | Each app has a formally designated authoritative data layer — enforced by contract tests |
-| **RBAC** | Clerk session claims (`publicMetadata.nzilaRole`) — `platform_admin`, `studio_admin`, `ops`, `analyst`, `viewer` |
+| **RBAC** | `@nzila/platform-auth` session claims — roles: `platform_admin`, `studio_admin`, `ops`, `analyst`, `viewer` |
 | **Governance separation** | Raw strategy docs in `governance/` are never imported by app code; curated → `content/` |
 | **Contract-enforced invariants** | `tooling/contract-tests/` runs 5,000+ tests verifying architectural rules at CI time |
 | **SLO gating** | Deploy to pilot/prod blocked if real SLO metrics fail thresholds |
@@ -386,8 +389,10 @@ All tests run on every PR via `ci.yml`. Contract tests also run on a nightly sch
 |--------|---------|
 | `AZURE_SWA_TOKEN_WEB` | SWA deploy token — public website |
 | `AZURE_SWA_TOKEN_CONSOLE` | SWA deploy token — console |
-| `CLERK_PUBLISHABLE_KEY` | Clerk publishable key |
-| `CLERK_SECRET_KEY` | Clerk secret key |
+| `AUTH_SECRET` | Session encryption secret (required) |
+| `AZURE_AD_CLIENT_ID` | Entra app registration client ID (optional — for SSO) |
+| `AZURE_AD_CLIENT_SECRET` | Entra app registration client secret (optional — for SSO) |
+| `AZURE_AD_TENANT_ID` | Entra tenant ID (optional — for SSO) |
 
 ---
 
@@ -410,7 +415,7 @@ Your content here…
 
 ### Internal (`content/internal/`)
 
-Rendered at `console.nzila.app/docs/{slug}` (requires Clerk auth). Same frontmatter format.
+Rendered at `console.nzila.app/docs/{slug}` (requires sign-in). Same frontmatter format.
 
 ---
 

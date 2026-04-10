@@ -5,7 +5,7 @@ Step-by-step guide for piloting the CFO Dashboard with a finance team. Target: v
 
 ## Prerequisites
 - [ ] Nzila OS platform running (Docker or staging)
-- [ ] Clerk auth configured with CFO-specific roles (cfo, finance_manager, analyst)
+- [ ] Platform auth configured (email/password + optional Entra SSO) with CFO-specific roles (cfo, finance_manager, analyst)
 - [ ] PostgreSQL database seeded with demo data
 - [ ] Platform policy-engine enabled for financial operations
 
@@ -52,5 +52,5 @@ Verify policy enforcement is active:
 
 ## Rollback Plan
 1. Remove demo data via database rollback
-2. Disable CFO-specific Clerk roles
+2. Disable CFO-specific platform-auth roles
 3. Revert policy engine configuration

@@ -18,13 +18,13 @@ const securityHeaders = [
     key: 'Content-Security-Policy',
     value: [
       "default-src 'self'",
-      "script-src 'self' 'unsafe-inline' 'unsafe-eval' https://clerk.accounts.dev https://*.clerk.accounts.dev https://*.clerk.com https://challenges.cloudflare.com", // Clerk + Next.js RSC hydration
+      "script-src 'self' 'unsafe-inline' 'unsafe-eval' https://challenges.cloudflare.com",
       "worker-src 'self' blob:",
-      "style-src 'self' 'unsafe-inline' https://clerk.accounts.dev https://*.clerk.accounts.dev https://*.clerk.com",
-      "img-src 'self' data: blob: https://images.unsplash.com https://images.pexels.com https://cdn.jsdelivr.net https://img.clerk.com",
+      "style-src 'self' 'unsafe-inline'",
+      "img-src 'self' data: blob: https://images.unsplash.com https://images.pexels.com https://cdn.jsdelivr.net",
       "font-src 'self'",
-      "connect-src 'self' https: wss: https://*.clerk.com https://*.clerk.accounts.dev",
-      "frame-src https://clerk.accounts.dev https://*.clerk.accounts.dev https://*.clerk.com https://challenges.cloudflare.com",
+      "connect-src 'self' https: wss:",
+      "frame-src 'self' https://challenges.cloudflare.com",
       "frame-ancestors 'none'",
       "base-uri 'self'",
       "form-action 'self'",

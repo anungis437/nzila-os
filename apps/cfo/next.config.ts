@@ -21,7 +21,6 @@ const nextConfig: NextConfig = {
   images: {
     formats: ["image/avif", "image/webp"],
     remotePatterns: [
-      { protocol: "https", hostname: "img.clerk.com" },
       { protocol: "https", hostname: "**.blob.core.windows.net" },
       { protocol: "https", hostname: "images.unsplash.com" },
       { protocol: "https", hostname: "images.pexels.com" },
@@ -49,12 +48,12 @@ const nextConfig: NextConfig = {
             key: "Content-Security-Policy",
             value: [
               "default-src 'self'",
-              "script-src 'self' 'unsafe-inline' 'unsafe-eval' https://challenges.cloudflare.com https://*.clerk.accounts.dev",
+              "script-src 'self' 'unsafe-inline' 'unsafe-eval' https://challenges.cloudflare.com",
               "style-src 'self' 'unsafe-inline' https://fonts.googleapis.com",
               "font-src 'self' https://fonts.gstatic.com data:",
-              "img-src 'self' data: blob: https://img.clerk.com https://images.unsplash.com https://images.pexels.com https://*.blob.core.windows.net",
-              "connect-src 'self' https://*.clerk.accounts.dev https://api.clerk.com wss://*.clerk.accounts.dev",
-              "frame-src 'self' https://challenges.cloudflare.com https://*.clerk.accounts.dev",
+              "img-src 'self' data: blob: https://images.unsplash.com https://images.pexels.com https://*.blob.core.windows.net",
+              "connect-src 'self'",
+              "frame-src 'self' https://challenges.cloudflare.com",
               "worker-src 'self' blob:",
               "object-src 'none'",
               "base-uri 'self'",

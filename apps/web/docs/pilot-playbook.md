@@ -5,7 +5,7 @@ Step-by-step guide for piloting the Nzila OS marketing website. Target: validate
 
 ## Prerequisites
 - [ ] Nzila OS platform running (Docker or staging)
-- [ ] Clerk auth configured with content roles (admin, editor, viewer)
+- [ ] Platform auth configured with content roles (admin, editor, viewer)
 - [ ] PostgreSQL database seeded with demo data
 - [ ] Platform policy-engine enabled for content operations
 
@@ -52,5 +52,5 @@ Verify policy enforcement is active:
 
 ## Rollback Plan
 1. Remove demo content and leads from database
-2. Disable content-specific Clerk roles
+2. Disable content-specific platform roles
 3. Revert policy engine configuration

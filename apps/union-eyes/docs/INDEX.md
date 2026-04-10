@@ -49,6 +49,16 @@
 | [Pilot Playbook](./CAPE-PILOT-PLAYBOOK.md) | Adoption and rollout strategy |
 | [Pilot Audit Report](./CAPE-PILOT-AUDIT-REPORT.md) | Compliance and security findings |
 
+### Archive
+
+Historical snapshots retained for traceability.
+
+| Document | Purpose |
+|----------|---------|
+| [TS Error Inventory](./archive/TS_ERROR_INVENTORY.md) | Historical snapshot of 2,795 TS errors after removing `@ts-nocheck` |
+| [World Class Plan](./archive/WORLD_CLASS_PLAN.md) | Original hardening plan (2026-03-05), superseded by PILOT_VALIDATION |
+| [WhatsApp PTT Transcript](./archive/) | Voice note transcript — union representation protocol discussion |
+
 ### Platform Operations
 
 | Document | Purpose |

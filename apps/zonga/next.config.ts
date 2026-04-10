@@ -18,7 +18,6 @@ const nextConfig: NextConfig = {
   images: {
     remotePatterns: [
       { protocol: 'https', hostname: 'images.unsplash.com' },
-      { protocol: 'https', hostname: 'img.clerk.com' },
     ],
   },
   async headers() {
@@ -44,12 +43,12 @@ const nextConfig: NextConfig = {
             key: 'Content-Security-Policy',
             value: [
               "default-src 'self'",
-              "script-src 'self' 'unsafe-inline' https://challenges.cloudflare.com https://clerk.accounts.dev https://*.clerk.accounts.dev https://*.clerk.com https://js.stripe.com",
-              "style-src 'self' 'unsafe-inline' https://fonts.googleapis.com https://clerk.accounts.dev https://*.clerk.accounts.dev https://*.clerk.com",
+              "script-src 'self' 'unsafe-inline' https://challenges.cloudflare.com https://js.stripe.com",
+              "style-src 'self' 'unsafe-inline' https://fonts.googleapis.com",
               "font-src 'self' https://fonts.gstatic.com data: https:",
-              "img-src 'self' https://images.unsplash.com https://img.clerk.com data: blob: https:",
-              "connect-src 'self' https: wss: https://*.clerk.com https://*.clerk.accounts.dev https://*.sentry.io https://api.stripe.com",
-              "frame-src 'self' https://challenges.cloudflare.com https://clerk.accounts.dev https://*.clerk.accounts.dev https://*.clerk.com https://js.stripe.com",
+              "img-src 'self' https://images.unsplash.com data: blob: https:",
+              "connect-src 'self' https: wss: https://*.sentry.io https://api.stripe.com",
+              "frame-src 'self' https://challenges.cloudflare.com https://js.stripe.com",
               "worker-src 'self' blob:",
               "media-src 'self' https:",
               "manifest-src 'self'",

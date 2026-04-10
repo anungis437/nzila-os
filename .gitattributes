@@ -29,6 +29,9 @@
 *.ttf binary
 *.eot binary
 *.pdf binary
+*.xlsx binary
+*.pptx binary
+*.docx binary
 *.zip binary
 *.gz binary
 *.tar binary

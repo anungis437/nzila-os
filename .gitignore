@@ -17,6 +17,16 @@ temp-staging-*.sql
 /audit-*.sql
 /audit-*.json
 
+# ----- Ad-hoc debug / output files at root (never commit) ------
+/ue-*.txt
+/pytest-*.txt
+/vitest-output.txt
+/test-output.txt
+/test-failures.txt
+/ci-failure-log.txt
+/email-otp.json
+/coverage.xml
+
 # ----- Scratch / temp / exploratory files at repo root ------
 /*.tmp
 /*.log

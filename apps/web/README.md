@@ -1,13 +1,29 @@
-This is a [Next.js](https://nextjs.org) project bootstrapped with [`create-next-app`](https://nextjs.org/docs/app/api-reference/cli/create-next-app).
+# Nzila Web
 
-## Getting Started
+> Public marketing site for the Nzila platform — landing pages, resource library, and public content.
 
-First, run the development server:
+## Stack
+
+- **Framework:** Next.js (App Router)
+- **Auth:** `@nzila/platform-auth` (email/password + optional Entra SSO)
+- **UI:** `@nzila/ui` + Tailwind CSS v4
+- **Port:** 3000
+
+## Quick Start
 
 ```bash
-npm run dev
-# or
-yarn dev
+pnpm dev:web            # → http://localhost:3000
+```
+
+Copy `.env.example` → `.env.local` and fill required values.
+
+## Content
+
+Public content is served from `content/public/` and rendered at `nzila.app/resources/{slug}`.
+
+## Domain
+
+The primary public-facing site for Nzila Digital Ventures. Serves marketing pages, documentation, and curated resources.
 # or
 pnpm dev
 # or

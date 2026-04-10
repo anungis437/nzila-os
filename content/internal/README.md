@@ -1,6 +1,6 @@
 # Internal Content
 
-Curated markdown documents rendered inside the **Clerk-gated console** at `/docs/{slug}`.
+Curated markdown documents rendered inside the **authenticated console** at `/docs/{slug}`.
 
 ## Frontmatter Schema
 

@@ -7,11 +7,11 @@ order: 2
 
 # RBAC & Permissions
 
-The console uses Clerk session claims to enforce role-based access.
+The console uses `@nzila/platform-auth` session data to enforce role-based access.
 
 ## How Roles Work
 
-Each user has a `nzilaRole` property in their Clerk `publicMetadata`. The console reads this at request time via `auth().sessionClaims`.
+Each user has a `nzilaRole` resolved from their account profile. For email/password users, the role is stored in the database. For Entra SSO users, the role is derived from security group membership. The console reads this at request time via `auth()` from `@nzila/platform-auth`.
 
 ## Available Roles
 
@@ -25,11 +25,13 @@ Each user has a `nzilaRole` property in their Clerk `publicMetadata`. The consol
 
 ## Assigning Roles
 
-Roles are assigned via the Clerk Dashboard:
+For email/password users, roles are assigned via the platform admin console or directly in the database.
 
-1. Navigate to **Users** in your Clerk dashboard.
-2. Select a user → **Public Metadata**.
-3. Set: `{ "nzilaRole": "analyst" }`.
+For Entra SSO users, roles are managed via security groups in the Azure Portal:
+
+1. Navigate to **Microsoft Entra ID** → **Groups**.
+2. Add the user to the appropriate security group (e.g., `nzila-ops`, `nzila-analyst`).
+3. The role is resolved automatically at sign-in via group claims.
 
 ## Code Reference
 

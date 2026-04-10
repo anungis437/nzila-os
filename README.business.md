@@ -40,7 +40,7 @@ Unified commerce engine supporting multiple product verticals.
 | **Governance** | Automated compliance checks on commerce actions |
 | **Audit** | Full audit trail on all commerce mutations |
 
-**Apps**: Shop Quoter
+**Apps**: Flow
 
 ### Trade
 
@@ -139,7 +139,7 @@ All AI and machine learning capabilities are centrally managed with:
 | **Web applications** | Next.js (React) | Fast, modern web framework used by most large platforms |
 | **Domain backends** | Django (Python) | Mature framework for complex business logic (agriculture, case management) |
 | **Database** | PostgreSQL via Drizzle ORM / Django ORM | Industry-standard relational database |
-| **Authentication** | Clerk | Enterprise-grade identity and access management |
+| **Authentication** | Email/password + optional Microsoft Entra SSO | Enterprise-grade identity and access management |
 | **Cloud hosting** | Microsoft Azure | Enterprise cloud — Static Web Apps, Blob Storage, Key Vault |
 | **Payments** | Stripe | Industry-standard payment processing |
 | **Accounting** | QuickBooks Online | Automated bookkeeping sync |

@@ -48,14 +48,12 @@ data_residency:
 
 ## 4. Third-Party Data Processors
 
-### 4.1 Clerk (Authentication)
-- **Data location:** Google Cloud (US) + Cloudflare (global edge)
-- **Canadian data centre:** Not available
-- **PII processed:** Name, email, phone, IP, device identifiers, session tokens
-- **PII NOT sent to Clerk:** SIN, banking info, pension records, grievance details, health data — all stored exclusively in Azure Canada Central PostgreSQL
-- **PIPEDA compliance:** Transfer permitted under Principle 4.1.3 (comparable protection) — Clerk holds SOC 2 Type II, DPA, AES-256 encryption
-- **Law 25 compliance:** PIA required before processing Quebec union member authentication data (s. 17)
-- **Mitigation:** Self-hosted auth (Keycloak) is the long-term option if zero cross-border PII is required
+### 4.1 Authentication (`@nzila/platform-auth`)
+- **Primary auth:** Email/password — all data stays in Azure Canada Central PostgreSQL
+- **Optional SSO:** Microsoft Entra External ID — data subject to Microsoft DPA + Azure data residency commitments (Canada Central)
+- **Legacy note:** Clerk was previously used for auth. The migration to `@nzila/platform-auth` (email/password + Entra SSO) is complete. Clerk CSP references may remain in some `next.config.ts` files but are non-functional.
+- **PII NOT sent externally:** SIN, banking info, pension records, grievance details, health data — all stored exclusively in Azure Canada Central PostgreSQL
+- **PIPEDA / Law 25 compliance:** With email/password auth, all PII stays in Canada. Entra SSO data is covered by Microsoft's Canadian data residency commitments.
 
 See `governance/business/verticals/uniontech/strategy/compliance-privacy.md` §8 for full assessment.
 
@@ -72,17 +70,15 @@ See `governance/business/verticals/uniontech/strategy/compliance-privacy.md` §8
 | 2 | GitOps configs migrated from `eastus` → `canadacentral` | ✅ Complete |
 | 3 | Production data residency enforcement block added | ✅ Complete |
 | 4 | Bicep verified region-agnostic (inherits from RG) | ✅ Complete |
-| 5 | Clerk DPA reviewed; PII minimization confirmed | ✅ Complete |
-| 6 | **Privacy Impact Assessment for Clerk (Law 25 s. 17)** | ⚠️ Pending |
-| 7 | **Provision production RG in `canadacentral`** | ⏳ Not started |
-| 8 | **Update GitHub workflow URLs** after new Container Apps domain assigned | ⏳ Blocked by #7 |
-| 9 | **Existing staging RG** (`nzila-staging-rg` in `eastus`) — migrate or recreate in `canadacentral` | ⏳ Decision pending |
+| 5 | Auth migration to `@nzila/platform-auth` (email/pwd + Entra SSO) | ✅ Complete |
+| 6 | **Provision production RG in `canadacentral`** | ⏳ Not started |
+| 7 | **Update GitHub workflow URLs** after new Container Apps domain assigned | ⏳ Blocked by #6 |
+| 8 | **Existing staging RG** (`nzila-staging-rg` in `eastus`) — migrate or recreate in `canadacentral` | ⏳ Decision pending |
 
 ## 6. Notes
 
 - **Existing staging environment** is in `eastus` (`nzila-staging-rg`). The GitOps config now targets `canadacentral`, but the actual Azure resources remain in `eastus`. A new staging RG in `canadacentral` will need to be provisioned (or the existing one migrated).
 - **GitHub workflow URLs** (`delightfulisland-0d503d3c.eastus.azurecontainerapps.io`) will need updating once the new Canada Central Container Apps environment is provisioned — Azure assigns a new domain.
-- **Clerk Enterprise tier** may offer custom data residency via negotiation. Evaluate if union client contracts mandate zero cross-border PII transfer.
 
 ---
 

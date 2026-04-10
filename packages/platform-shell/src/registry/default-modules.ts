@@ -164,7 +164,7 @@ export const DEFAULT_MODULES: ModuleRegistration[] = [
   {
     id: 'mobility',
     name: 'Mobility',
-    description: 'Transport and mobility management',
+    description: 'Investment migration advisory (CBI/RBI)',
     basePath: '/mobility',
     iconToken: 'car',
     tier: 'INCUBATING',

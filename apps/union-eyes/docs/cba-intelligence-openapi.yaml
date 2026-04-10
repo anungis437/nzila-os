@@ -7,8 +7,8 @@ info:
     document management, review workflows, freshness monitoring,
     agreement exploration, and benchmark computation.
 
-    All endpoints require Clerk authentication and the `commercial_reporting`
-    entitlement.
+    All endpoints require platform authentication (email/password or Entra SSO)
+    and the `commercial_reporting` entitlement.
   version: "1.0.0"
   contact:
     name: Nzila Platform Team
@@ -560,11 +560,11 @@ components:
         data: { type: object }
 
   securitySchemes:
-    clerk:
+    platformAuth:
       type: http
       scheme: bearer
       bearerFormat: JWT
-      description: Clerk session JWT
+      description: Platform session JWT (email/password or Entra SSO)
 
 security:
-  - clerk: []
+  - platformAuth: []

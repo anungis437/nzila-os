@@ -1,3 +1,7 @@
+> **⚠️ ARCHIVED — LEGACY DOCUMENT**
+> This document describes the original Clerk auth setup. The platform has since migrated to Microsoft Entra External ID.
+> Retained for historical reference only. See `@nzila/platform-auth` for the current auth implementation.
+
 # Union Eyes Clerk Authentication - Configuration Complete ✓
 
 **Status**: Django backend fully configured for Clerk authentication  

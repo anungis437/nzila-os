@@ -5,7 +5,7 @@ Step-by-step guide for piloting the Partners Portal. Target: validate partner on
 
 ## Prerequisites
 - [ ] Nzila OS platform running (Docker or staging)
-- [ ] Clerk auth configured with partner roles (partner_admin, partner_manager, partner)
+- [ ] Platform auth configured (email/password + optional Entra SSO) with partner roles (partner_admin, partner_manager, partner)
 - [ ] PostgreSQL database seeded with demo data
 - [ ] Azure Blob Storage configured for contract uploads
 - [ ] Platform policy-engine enabled for partner operations
@@ -54,5 +54,5 @@ Verify policy enforcement is active:
 ## Rollback Plan
 1. Remove demo partner data from database
 2. Clear demo contracts from blob storage
-3. Disable partner-specific Clerk roles
+3. Disable partner-specific platform-auth roles
 4. Revert policy engine configuration

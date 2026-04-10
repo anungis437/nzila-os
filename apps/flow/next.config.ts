@@ -34,13 +34,13 @@ const securityHeaders = [
     key: "Content-Security-Policy",
     value: [
       "default-src 'self'",
-      "script-src 'self' 'unsafe-inline' 'unsafe-eval' https://clerk.nzila.app https://clerk.accounts.dev https://*.clerk.accounts.dev https://*.clerk.com https://challenges.cloudflare.com",
+      "script-src 'self' 'unsafe-inline' 'unsafe-eval' https://challenges.cloudflare.com",
       "worker-src 'self' blob:",
-      "style-src 'self' 'unsafe-inline' https://clerk.accounts.dev https://*.clerk.accounts.dev https://*.clerk.com https://fonts.googleapis.com",
-      "img-src 'self' data: blob: https://img.clerk.com https://images.unsplash.com",
+      "style-src 'self' 'unsafe-inline' https://fonts.googleapis.com",
+      "img-src 'self' data: blob: https://images.unsplash.com",
       "font-src 'self' https://fonts.gstatic.com",
-      "connect-src 'self' https: wss: https://clerk.nzila.app https://api.clerk.dev https://*.clerk.com https://*.clerk.accounts.dev",
-      "frame-src https://clerk.nzila.app https://accounts.clerk.dev https://clerk.accounts.dev https://*.clerk.accounts.dev https://*.clerk.com https://challenges.cloudflare.com",
+      "connect-src 'self' https: wss:",
+      "frame-src 'self' https://challenges.cloudflare.com",
       "frame-ancestors 'none'",
       "base-uri 'self'",
       "form-action 'self'",
@@ -62,7 +62,6 @@ const nextConfig: NextConfig = {
     formats: ["image/avif", "image/webp"],
     remotePatterns: [
       { protocol: "https", hostname: "images.unsplash.com" },
-      { protocol: "https", hostname: "img.clerk.com" },
     ],
   },
   headers: async () => [
