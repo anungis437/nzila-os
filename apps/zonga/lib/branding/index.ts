@@ -58,3 +58,12 @@ export {
   unregisterBrand,
   clearExternalBrands,
 } from './registry'
+
+// Brand Configuration
+export {
+  CLIENT_BRAND,
+  PARTNER_BRAND,
+  initializeBrands,
+  getClientBrand,
+  getPartnerBrand,
+} from './brand-config'

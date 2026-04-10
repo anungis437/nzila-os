@@ -166,4 +166,45 @@ describe('Brand Governance', () => {
     const content = fs.readFileSync(navPath, 'utf-8')
     expect(content, 'Navigation should use ZongaBrandMark').toContain('ZongaBrandMark')
   })
+
+  it('about page uses PartnershipAttribution', () => {
+    const aboutPath = path.join(ZONGA_ROOT, 'app/(marketing)/about/page.tsx')
+    const content = fs.readFileSync(aboutPath, 'utf-8')
+    expect(content, 'About page should import PartnershipAttribution').toContain('PartnershipAttribution')
+    expect(content, 'About page should use about placement').toContain("placement=\"about\"")
+  })
+
+  it('contact page uses PartnershipAttribution with support placement', () => {
+    const contactPath = path.join(ZONGA_ROOT, 'app/(marketing)/contact/page.tsx')
+    const content = fs.readFileSync(contactPath, 'utf-8')
+    expect(content, 'Contact page should import PartnershipAttribution').toContain('PartnershipAttribution')
+    expect(content, 'Contact page should use support placement').toContain("placement=\"support\"")
+  })
+
+  it('case study page exists and uses governance', () => {
+    const casePath = path.join(ZONGA_ROOT, 'app/(marketing)/case-studies/page.tsx')
+    expect(fs.existsSync(casePath), 'Case study page should exist').toBe(true)
+    const content = fs.readFileSync(casePath, 'utf-8')
+    expect(content, 'Case study should use PartnershipAttribution').toContain('PartnershipAttribution')
+    expect(content, 'Case study should use marketing_case_study placement').toContain("placement=\"marketing_case_study\"")
+  })
+
+  it('brand-config module registers real client and partner brands', () => {
+    const configPath = path.join(ZONGA_ROOT, 'lib/branding/brand-config.ts')
+    expect(fs.existsSync(configPath), 'Brand config should exist').toBe(true)
+    const content = fs.readFileSync(configPath, 'utf-8')
+    expect(content, 'Should define CLIENT_BRAND').toContain('CLIENT_BRAND')
+    expect(content, 'Should define PARTNER_BRAND').toContain('PARTNER_BRAND')
+    expect(content, 'Client should have role client').toContain("role: 'client'")
+    expect(content, 'Partner should have role partner').toContain("role: 'partner'")
+  })
+
+  it('branding lib barrel exports brand-config symbols', () => {
+    const barrelPath = path.join(ZONGA_ROOT, 'lib/branding/index.ts')
+    const barrel = fs.readFileSync(barrelPath, 'utf-8')
+    const required = ['CLIENT_BRAND', 'PARTNER_BRAND', 'initializeBrands', 'getClientBrand', 'getPartnerBrand']
+    for (const name of required) {
+      expect(barrel, `Missing export: ${name}`).toContain(name)
+    }
+  })
 })

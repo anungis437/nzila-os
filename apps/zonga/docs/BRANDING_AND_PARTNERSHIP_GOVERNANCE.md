@@ -76,6 +76,7 @@ lib/branding/
 ├── feature-flags.ts  # Conservative feature flag loading
 ├── partnership.ts    # Three-tier attribution builder
 ├── registry.ts       # Brand asset registry (Zonga immutable)
+├── brand-config.ts   # Deployment brands (client + partner registration)
 └── index.ts          # Barrel export
 
 components/branding/
@@ -221,8 +222,8 @@ pnpm vitest tooling/contract-tests/zonga-brand-governance.test.ts
 
 ### Test coverage:
 - **54 unit tests:** Policy matrix, enforcement, feature flags, anti-white-label, attribution, registry
-- **~20 integration tests:** Surface wiring for dashboard, auth, footer, nav, marketing
-- **~10 contract tests:** CI enforcement — no hardcoded brands, barrel exports, governed surfaces
+- **~42 integration tests:** Surface wiring for dashboard, auth, footer, nav, marketing, about, support/contact, case study, brand config
+- **~15 contract tests:** CI enforcement — no hardcoded brands, barrel exports, governed surfaces, about/contact/case-study placement verification
 
 ## Adopted Surfaces
 
@@ -234,3 +235,6 @@ pnpm vitest tooling/contract-tests/zonga-brand-governance.test.ts
 | Site footer | `ZongaBrandMark` + `PartnershipAttribution` | `footer` |
 | Auth pages (6) | `AuthPageLayout` → `ZONGA_BRAND` | `login` |
 | Marketing page | `PartnershipAttribution` + `TrustStrip` | `marketing_partnership` / `marketing_trust` |
+| About page | `PartnershipAttribution` | `about` |
+| Contact page | `PartnershipAttribution` | `support` |
+| Case studies page | `PartnershipAttribution` | `marketing_case_study` |

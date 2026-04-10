@@ -19,6 +19,13 @@ import {
   clearExternalBrands,
 } from '@/lib/branding/registry'
 import {
+  CLIENT_BRAND,
+  PARTNER_BRAND,
+  initializeBrands,
+  getClientBrand,
+  getPartnerBrand,
+} from '@/lib/branding/brand-config'
+import {
   buildAttribution,
   formatAttributionText,
   countVisibleExternalBrands,
@@ -210,5 +217,118 @@ describe('Surface integration — Registry + Attribution E2E', () => {
     expect(countVisibleExternalBrands('footer', true, true, DEFAULT_BRANDING_FLAGS)).toBe(2) // both client + partner text_only
     expect(countVisibleExternalBrands('app_header', true, true, ALL_ON)).toBe(1) // only client text
     expect(countVisibleExternalBrands('app_dashboard', true, true, ALL_ON)).toBe(0) // none
+  })
+})
+
+// ── Brand Config Tests ──────────────────────────────────────────────────────
+
+describe('Brand config — deployment brands', () => {
+  beforeEach(() => {
+    clearExternalBrands()
+  })
+
+  it('CLIENT_BRAND has correct role and metadata', () => {
+    expect(CLIENT_BRAND.role).toBe('client')
+    expect(CLIENT_BRAND.id).toBe('ms-celebration')
+    expect(CLIENT_BRAND.name).toBe('MS Célébration Canada')
+    expect(CLIENT_BRAND.logoUrl).toBeDefined()
+  })
+
+  it('PARTNER_BRAND has correct role and metadata', () => {
+    expect(PARTNER_BRAND.role).toBe('partner')
+    expect(PARTNER_BRAND.id).toBe('rock-power')
+    expect(PARTNER_BRAND.name).toBe('The Rock Power Group Inc.')
+    expect(PARTNER_BRAND.relationshipLabel).toBeDefined()
+  })
+
+  it('initializeBrands registers both brands in registry', () => {
+    initializeBrands()
+    expect(getBrandsByRole('client')).toHaveLength(1)
+    expect(getBrandsByRole('partner')).toHaveLength(1)
+    expect(getBrandsByRole('client')[0].asset.id).toBe('ms-celebration')
+    expect(getBrandsByRole('partner')[0].asset.id).toBe('rock-power')
+  })
+
+  it('getClientBrand and getPartnerBrand return assets', () => {
+    expect(getClientBrand()).toBe(CLIENT_BRAND)
+    expect(getPartnerBrand()).toBe(PARTNER_BRAND)
+  })
+})
+
+// ── About Page Integration ──────────────────────────────────────────────────
+
+describe('Surface integration — About page', () => {
+  it('platform logo is allowed in about placement', () => {
+    expect(getSafeBrandMode('platform', 'about', DEFAULT_BRANDING_FLAGS)).toBe('logo')
+  })
+
+  it('client text_only is allowed in about placement', () => {
+    expect(canRenderBrand('client', 'about', 'text_only', DEFAULT_BRANDING_FLAGS)).toBe(true)
+  })
+
+  it('partner text_only is allowed in about placement (not flag-gated)', () => {
+    expect(canRenderBrand('partner', 'about', 'text_only', DEFAULT_BRANDING_FLAGS)).toBe(true)
+  })
+
+  it('attribution builds correctly for about with all tiers', () => {
+    const attr = buildAttribution('about', ZONGA_BRAND, CLIENT_BRAND, PARTNER_BRAND, ALL_ON)
+    expect(attr.platform.name).toBe('Zonga')
+    expect(attr.client).toBeDefined()
+    expect(attr.client!.name).toBe('MS Célébration Canada')
+    expect(attr.partner).toBeDefined()
+    expect(attr.partner!.name).toBe('The Rock Power Group Inc.')
+  })
+})
+
+// ── Support/Contact Page Integration ────────────────────────────────────────
+
+describe('Surface integration — Support/Contact page', () => {
+  it('platform text_only is the default in support placement', () => {
+    expect(getSafeBrandMode('platform', 'support', DEFAULT_BRANDING_FLAGS)).toBe('text_only')
+  })
+
+  it('client text_only is allowed in support placement', () => {
+    expect(canRenderBrand('client', 'support', 'text_only', DEFAULT_BRANDING_FLAGS)).toBe(true)
+  })
+
+  it('partner text_only is allowed in support placement', () => {
+    expect(canRenderBrand('partner', 'support', 'text_only', DEFAULT_BRANDING_FLAGS)).toBe(true)
+  })
+})
+
+// ── Case Study Page Integration ─────────────────────────────────────────────
+
+describe('Surface integration — Case study page', () => {
+  it('platform logo is allowed in case study placement', () => {
+    expect(getSafeBrandMode('platform', 'marketing_case_study', ALL_ON)).toBe('logo')
+  })
+
+  it('client gets logo mode in case study (strongest visibility)', () => {
+    expect(canRenderBrand('client', 'marketing_case_study', 'logo', ALL_ON)).toBe(true)
+  })
+
+  it('partner gets logo mode in case study (strongest visibility)', () => {
+    expect(canRenderBrand('partner', 'marketing_case_study', 'logo', ALL_ON)).toBe(true)
+  })
+
+  it('case study attribution includes all three tiers', () => {
+    const attr = buildAttribution('marketing_case_study', ZONGA_BRAND, CLIENT_BRAND, PARTNER_BRAND, ALL_ON)
+    expect(attr.platform.name).toBe('Zonga')
+    expect(attr.platform.showLogo).toBe(true)
+    expect(attr.client).toBeDefined()
+    expect(attr.client!.showLogo).toBe(true)
+    expect(attr.partner).toBeDefined()
+    expect(attr.partner!.showLogo).toBe(true)
+  })
+
+  it('case study shows client brand with conservative flags', () => {
+    // Client logo in case study is NOT flag-gated
+    expect(canRenderBrand('client', 'marketing_case_study', 'logo', DEFAULT_BRANDING_FLAGS)).toBe(true)
+  })
+
+  it('case study partner logo requires ENABLE_PARTNER_BRANDING flag', () => {
+    // Partner in marketing_case_study is gated by ENABLE_PARTNER_BRANDING
+    expect(canRenderBrand('partner', 'marketing_case_study', 'logo', DEFAULT_BRANDING_FLAGS)).toBe(false)
+    expect(canRenderBrand('partner', 'marketing_case_study', 'logo', ALL_ON)).toBe(true)
   })
 })
