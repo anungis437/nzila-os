@@ -1,0 +1,189 @@
+/**
+ * Zonga — Upload Service
+ *
+ * Handles the complete upload lifecycle:
+ * validate → persist metadata → store raw file → enqueue processing
+ */
+
+import { platformDb } from '@nzila/db/platform'
+import { sql } from 'drizzle-orm'
+import { logger } from '@/lib/logger'
+import { uploadBuffer, computeSha256 } from '@nzila/blob'
+import { ALLOWED_AUDIO_TYPES, ALLOWED_IMAGE_TYPES, MAX_AUDIO_BYTES, MAX_IMAGE_BYTES } from './types'
+import type { TrackAsset, ArtworkAsset } from './types'
+import { enqueueProcessingJobs } from './processing-pipeline'
+import { checkForDuplicate } from '@/features/safety/duplicate-detection'
+
+// ── Audio Upload ────────────────────────────────────────────────────────────
+
+export interface UploadAudioResult {
+  ok: boolean
+  trackAssetId?: string
+  processingJobIds?: string[]
+  error?: string
+  isDuplicate?: boolean
+}
+
+export async function uploadTrackAudio(params: {
+  contentAssetId: string
+  orgId: string
+  creatorId: string
+  file: File
+}): Promise<UploadAudioResult> {
+  const { contentAssetId, orgId, creatorId, file } = params
+
+  // Validate file type
+  if (!ALLOWED_AUDIO_TYPES.has(file.type)) {
+    return { ok: false, error: `Unsupported audio format: ${file.type}` }
+  }
+
+  // Validate file size
+  if (file.size > MAX_AUDIO_BYTES) {
+    return { ok: false, error: `File too large. Maximum: ${MAX_AUDIO_BYTES / 1024 / 1024}MB` }
+  }
+
+  const buffer = Buffer.from(await file.arrayBuffer())
+  const sha256 = await computeSha256(buffer)
+
+  // Check for duplicate fingerprint
+  const dupCheck = await checkForDuplicate({
+    sha256,
+    title: file.name,
+    artistName: '',
+    orgId,
+  })
+  if (dupCheck.isDuplicate) {
+    logger.warn('Duplicate upload detected', {
+      sha256,
+      existingAssetId: dupCheck.matchedAssetId,
+    })
+    return {
+      ok: false,
+      error: 'This audio file has already been uploaded',
+      isDuplicate: true,
+    }
+  }
+
+  // Build storage key
+  const ext = file.name.split('.').pop() ?? 'bin'
+  const storageKey = `raw/${creatorId}/${contentAssetId}/${Date.now()}.${ext}`
+
+  try {
+    // Upload raw file to blob storage
+    await uploadBuffer({
+      container: 'zonga-audio',
+      blobPath: storageKey,
+      buffer,
+      contentType: file.type,
+    })
+
+    // Create track asset record
+    const rows = await platformDb.execute(sql`
+      INSERT INTO zonga_track_assets (
+        content_asset_id, org_id, creator_id,
+        storage_bucket, storage_key,
+        original_filename, mime_type, file_size_bytes,
+        sha256_fingerprint, upload_status
+      ) VALUES (
+        ${contentAssetId}, ${orgId}, ${creatorId},
+        'raw-uploads', ${storageKey},
+        ${file.name}, ${file.type}, ${file.size},
+        ${sha256}, 'completed'
+      )
+      RETURNING id
+    `)
+    const trackAssetId = (rows as unknown as Array<{ id: string }>)[0].id
+
+    // Enqueue processing jobs
+    const jobIds = await enqueueProcessingJobs({
+      trackAssetId,
+      orgId,
+      creatorId,
+      inputKey: storageKey,
+    })
+
+    logger.info('Track audio uploaded', {
+      trackAssetId,
+      contentAssetId,
+      size: file.size,
+      jobCount: jobIds.length,
+    })
+
+    return {
+      ok: true,
+      trackAssetId,
+      processingJobIds: jobIds,
+    }
+  } catch (error) {
+    logger.error('Audio upload failed', { error, contentAssetId })
+    return { ok: false, error: 'Upload failed. Please try again.' }
+  }
+}
+
+// ── Artwork Upload ──────────────────────────────────────────────────────────
+
+export interface UploadArtworkResult {
+  ok: boolean
+  artworkId?: string
+  storageKey?: string
+  error?: string
+}
+
+export async function uploadArtwork(params: {
+  entityType: ArtworkAsset['entityType']
+  entityId: string
+  orgId: string
+  file: File
+  isPrimary?: boolean
+}): Promise<UploadArtworkResult> {
+  const { entityType, entityId, orgId, file, isPrimary = true } = params
+
+  if (!ALLOWED_IMAGE_TYPES.has(file.type)) {
+    return { ok: false, error: `Unsupported image format: ${file.type}` }
+  }
+
+  if (file.size > MAX_IMAGE_BYTES) {
+    return { ok: false, error: `Image too large. Maximum: ${MAX_IMAGE_BYTES / 1024 / 1024}MB` }
+  }
+
+  const buffer = Buffer.from(await file.arrayBuffer())
+  const ext = file.name.split('.').pop() ?? 'jpg'
+  const storageKey = `artwork/${entityType}/${entityId}/${Date.now()}.${ext}`
+
+  try {
+    await uploadBuffer({
+      container: 'zonga-covers',
+      blobPath: storageKey,
+      buffer,
+      contentType: file.type,
+    })
+
+    // Unset existing primary if setting new primary
+    if (isPrimary) {
+      await platformDb.execute(sql`
+        UPDATE zonga_artwork_assets
+        SET is_primary = false
+        WHERE entity_type = ${entityType}
+          AND entity_id = ${entityId}
+          AND is_primary = true
+      `)
+    }
+
+    const rows = await platformDb.execute(sql`
+      INSERT INTO zonga_artwork_assets (
+        entity_type, entity_id, org_id,
+        storage_key, mime_type, file_size_bytes, is_primary
+      ) VALUES (
+        ${entityType}, ${entityId}, ${orgId},
+        ${storageKey}, ${file.type}, ${file.size}, ${isPrimary}
+      )
+      RETURNING id
+    `)
+    const artworkId = (rows as unknown as Array<{ id: string }>)[0].id
+
+    return { ok: true, artworkId, storageKey }
+  } catch (error) {
+    logger.error('Artwork upload failed', { error, entityType, entityId })
+    return { ok: false, error: 'Artwork upload failed' }
+  }
+}
