@@ -9,7 +9,6 @@ import { SidebarOrgSwitcher, SidebarAccountFooter, MobileAccountFooter } from '@
 import { Sidebar } from '@/components/dashboard/sidebar';
 import { resolveNavContext } from '@/lib/resolve-nav';
 import { WorkspaceIdentity } from '@/components/branding';
-import { getClientBrand } from '@/lib/branding/brand-config';
 
 /**
  * Sidebar navigation configuration — canonical route registry.
