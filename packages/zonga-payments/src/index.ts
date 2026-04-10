@@ -62,10 +62,14 @@ export {
   createMoMoAdapter,
   createOrangeMoneyAdapter,
   createAirtelAdapter,
+  createVodacomMpesaAdapter,
+  VodacomMpesaError,
+  MpesaResponseCode,
   type StripeConfig,
   type MoMoConfig,
   type OrangeMoneyConfig,
   type AirtelConfig,
+  type VodacomMpesaConfig,
 } from './adapters/index'
 
 // ── Wallet Service ────────────────────────────────────────────────────────
