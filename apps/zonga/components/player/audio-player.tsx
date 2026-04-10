@@ -8,6 +8,7 @@
  */
 
 import { useState, useRef, useCallback, useEffect } from 'react'
+import Image from 'next/image'
 import { Play, Pause, SkipBack, SkipForward, Volume2, VolumeX } from 'lucide-react'
 
 interface AudioPlayerProps {
@@ -113,7 +114,7 @@ export function AudioPlayer({
     return `${m}:${s.toString().padStart(2, '0')}`
   }
 
-  const progress = duration > 0 ? (currentTime / duration) * 100 : 0
+  const _progress = duration > 0 ? (currentTime / duration) * 100 : 0
 
   return (
     <div className="flex items-center gap-4 rounded-xl border border-border bg-card p-4 shadow-sm">
@@ -121,9 +122,11 @@ export function AudioPlayer({
 
       {/* Cover Art */}
       {coverUrl ? (
-        <img
+        <Image
           src={coverUrl}
           alt={title}
+          width={56}
+          height={56}
           className="h-14 w-14 rounded-lg object-cover"
         />
       ) : (

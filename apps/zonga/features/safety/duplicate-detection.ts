@@ -53,7 +53,7 @@ export async function checkForDuplicate(params: {
   // Tier 2: Audio fingerprint (if fingerprints are stored)
   // Acoustic fingerprint matching requires a specialized service;
   // for now, we check stored fingerprints with exact match
-  const fpRows = await platformDb.execute(sql`
+  const _fpRows = await platformDb.execute(sql`
     SELECT ta.id, ca.title, ta.audio_fingerprint
     FROM zonga_track_assets ta
     JOIN zonga_content_assets ca ON ca.id = ta.content_asset_id

@@ -10,7 +10,7 @@ import { sql } from 'drizzle-orm'
 import { logger } from '@/lib/logger'
 import { uploadBuffer, computeSha256 } from '@nzila/blob'
 import { ALLOWED_AUDIO_TYPES, ALLOWED_IMAGE_TYPES, MAX_AUDIO_BYTES, MAX_IMAGE_BYTES } from './types'
-import type { TrackAsset, ArtworkAsset } from './types'
+import type { ArtworkAsset } from './types'
 import { enqueueProcessingJobs } from './processing-pipeline'
 import { checkForDuplicate } from '@/features/safety/duplicate-detection'
 
