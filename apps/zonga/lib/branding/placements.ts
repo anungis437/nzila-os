@@ -70,6 +70,7 @@ export const BRAND_POLICY_MATRIX: readonly BrandPolicyRule[] = [
 
 // ── Lookup ──────────────────────────────────────────────────────────────────
 
+// ga-check:exempt — static policy lookup index, not a persistence store
 const policyIndex = new Map<string, BrandPolicyRule>()
 for (const rule of BRAND_POLICY_MATRIX) {
   policyIndex.set(`${rule.role}:${rule.placement}`, rule)

@@ -7,7 +7,7 @@
  * @module @nzila/platform-observability/span
  */
 import { randomBytes } from 'node:crypto'
-import { createLogger } from './logger.js'
+import { createLogger } from './logger'
 import type { SpanData, SpanEvent, TraceContext } from './types'
 
 const logger = createLogger()

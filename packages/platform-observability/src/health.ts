@@ -6,7 +6,7 @@
  *
  * @module @nzila/platform-observability/health
  */
-import { createLogger } from './logger.js'
+import { createLogger } from './logger'
 import type { HealthCheckResult, HealthReport, HealthStatus } from './types'
 
 const logger = createLogger()

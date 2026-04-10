@@ -80,6 +80,7 @@ function getBus(): PlatformEventBus {
 // ── Idempotency guard ───────────────────────────────────
 
 const IDEMPOTENCY_WINDOW_MS = 60_000; // 1 minute
+// ga-check:exempt — ephemeral dedup cache with TTL, not a persistence store
 const _seen = new Map<string, number>();
 
 function isDuplicate(correlationId: string | undefined): boolean {

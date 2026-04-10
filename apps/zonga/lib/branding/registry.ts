@@ -28,6 +28,7 @@ export const ZONGA_BRAND: BrandAsset = {
 
 // ── Registry ────────────────────────────────────────────────────────────────
 
+// ga-check:exempt — static brand config registry, not a persistence store
 const brandRegistry = new Map<string, BrandRegistryEntry>()
 
 // Platform is always registered
