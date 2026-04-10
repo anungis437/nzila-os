@@ -20,7 +20,10 @@ on:
       - 'ops/policies/**'
       - '**/middleware.ts'
       - '**/auth/**'
-      - '**/api/admin/**'
+      # Scoped admin routes — only security-sensitive endpoints, not data/ops admin
+      - '**/api/admin/break-glass/**'
+      - '**/api/admin/users/**'
+      - '**/api/admin/ai-actions/**'
 
 permissions:
   contents: read
@@ -54,7 +57,8 @@ jobs:
                 '  - packages/db/src/schema/ai*, scoped*\n' +
                 '  - tooling/security, security/\n' +
                 '  - governance/security, governance/ai\n' +
-                '  - ops/policies, middleware.ts, auth/, api/admin/\n\n' +
+                '  - ops/policies, middleware.ts, auth/\n' +
+                '  - api/admin/break-glass, users, ai-actions\n\n' +
                 'To proceed: request review from a security team member who will add the label after review.'
               );
             } else {
