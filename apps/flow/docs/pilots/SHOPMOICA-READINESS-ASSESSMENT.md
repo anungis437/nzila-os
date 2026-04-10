@@ -1,6 +1,6 @@
 # ShopMoiCa Readiness Assessment
 
-> Production readiness evaluation for Shop Quoter as the end-to-end operational system for ShopMoiCa.ca.
+> Production readiness evaluation for Flow as the end-to-end operational system for ShopMoiCa.ca.
 
 ## Assessment Summary
 
@@ -23,7 +23,7 @@
 
 ```text
 ┌─────────────────────────────────────────────────────────────┐
-│                    Shop Quoter (Next.js)                     │
+│                       Flow (Next.js)                         │
 ├──────────┬──────────┬──────────┬──────────┬─────────────────┤
 │ Schemas  │ State    │ Services │ Actions  │ UI              │
 │ (Zod)    │ Machine  │          │ (server) │ (React)         │

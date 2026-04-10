@@ -22,7 +22,7 @@ const APPS_DIR = path.join(ROOT, 'apps')
 
 const TARGET_APPS = [
   'union-eyes',
-  'shop-quoter',
+  'flow',
   'zonga',
   'cfo',
   'partners',

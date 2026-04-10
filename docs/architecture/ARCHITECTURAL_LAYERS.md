@@ -30,7 +30,7 @@ Examples:
 - `cora` — compliance and regulatory assurance
 - `agrimo` — data intelligence and analytics
 - `trade` — trade and vehicle commerce
-- `mobility` — mobility and transport operations
+- `mobility` — investment migration advisory (CBI/RBI)
 - `mobility-client-portal` — mobility customer self-service
 - `nacp-exams` — examination and certification workflows
 - `orchestrator-api` — API orchestration layer

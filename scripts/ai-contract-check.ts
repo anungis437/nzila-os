@@ -14,7 +14,7 @@ const __filename = fileURLToPath(import.meta.url)
 const __dirname = path.dirname(__filename)
 const ROOT = path.resolve(__dirname, '..')
 
-const TARGET_APPS = ['union-eyes', 'shop-quoter', 'zonga', 'cfo', 'partners', 'web']
+const TARGET_APPS = ['union-eyes', 'flow', 'zonga', 'cfo', 'partners', 'web']
 
 // Suspicious file names for app-local AI
 const SUSPICIOUS_FILES = [

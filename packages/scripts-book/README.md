@@ -1,8 +1,12 @@
 # Nzila Scripts Book Template Kit
 
 A production-grade, auditable template kit that standardizes governance, CI/CD,
-Azure Postgres, Azure Container Apps, Clerk auth, security, observability, and
+Azure Postgres, Azure Container Apps, platform authentication, security, observability, and
 Bash + PowerShell + Python parity across all Nzila repositories.
+
+> **Auth note:** Profiles and modules referencing "clerk" are **LEGACY**.
+> The platform now uses `@nzila/platform-auth` (email/password default + optional Entra SSO).
+> New repos should use the `django-aca-azurepg` profile or a future `auth-platform` module.
 
 ## Overview
 
@@ -80,11 +84,11 @@ Every target repo needs a `scripts-book.manifest.json` at its root. Example:
 
 ## Stack Profiles
 
-| Profile | Stack | Default Modules |
-|---|---|---|
-| `nextjs-aca-azurepg-clerk` | Next.js + Azure Container Apps + Azure PG + Clerk | All core modules |
-| `nodeapi-aca-azurepg-clerk` | Node API + Azure Container Apps + Azure PG + Clerk | API-focused modules |
-| `django-aca-azurepg` | Django + Azure Container Apps + Azure PG | Python-focused modules |
+| Profile | Stack | Default Modules | Status |
+|---|---|---|---|
+| `nextjs-aca-azurepg-clerk` | Next.js + Azure Container Apps + Azure PG + Clerk | All core modules | **LEGACY** |
+| `nodeapi-aca-azurepg-clerk` | Node API + Azure Container Apps + Azure PG + Clerk | API-focused modules | **LEGACY** |
+| `django-aca-azurepg` | Django + Azure Container Apps + Azure PG | Python-focused modules | Current |
 
 ## Overrides
 

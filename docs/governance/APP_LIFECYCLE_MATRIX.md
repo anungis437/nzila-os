@@ -59,7 +59,7 @@
 | platform-admin | INCUBATING | platform | platform | Platform configuration and governance admin. Health endpoint live. Functionality expanding. |
 | orchestrator-api | INCUBATING | platform | platform | API orchestration layer. 4+ tests. Health endpoint in progress. |
 | nacp-exams | EXPERIMENTAL | education | education | Examination and certification workflows. Health endpoint live. Early-stage vertical. |
-| mobility | EXPERIMENTAL | mobility | mobility | Mobility and transport operations. Health endpoint live. Domain packages under development. |
+| mobility | EXPERIMENTAL | mobility | mobility | Investment migration advisory (CBI/RBI). Health endpoint live. Domain packages under development. |
 | mobility-client-portal | EXPERIMENTAL | mobility | mobility | Mobility customer self-service portal. Health endpoint live. Early-stage. |
 
 ---

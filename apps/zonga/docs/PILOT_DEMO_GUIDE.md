@@ -12,7 +12,7 @@
 | Node.js 20+ | ✅ | With pnpm |
 | Azure Blob Storage | ✅ | `AZURE_STORAGE_ACCOUNT_NAME` + key for uploads |
 | Stripe keys | ✅ | `STRIPE_SECRET_KEY` + `STRIPE_WEBHOOK_SECRET` for ticketing |
-| Clerk keys | ✅ | `NEXT_PUBLIC_CLERK_PUBLISHABLE_KEY` + `CLERK_SECRET_KEY` |
+| Platform auth | ✅ | Email/password default; Entra SSO optional (`AZURE_AD_CLIENT_ID` + `AZURE_AD_CLIENT_SECRET` + `AZURE_AD_TENANT_ID` + `AUTH_SECRET`) |
 
 ---
 
@@ -51,7 +51,7 @@ Get-Content scripts/zonga-seed-output.sql | docker exec -i nzila-postgres psql -
 psql -U nzila -d nzila_automation -p 5433 -f scripts/zonga-seed-output.sql
 ```
 
-> **Note**: Seed uses org UUID `22222222-2222-2222-2222-222222222222` mapped to Clerk org `org_3BEaESt8ZIC4XEdJ7hmmB6nu6pp`. The `orgs` row is created automatically by the seed SQL with `ON CONFLICT` upsert.
+> **Note**: Seed uses org UUID `22222222-2222-2222-2222-222222222222` mapped to an Entra security group. The `orgs` row is created automatically by the seed SQL with `ON CONFLICT` upsert.
 
 ---
 
@@ -161,7 +161,7 @@ These invariants are verified by contract tests and must hold:
 4. **Upload storage**: `zonga_content_assets.storage_url` and `.cover_art_url` store blob paths
 5. **State machine**: Release transitions via `transitionReleaseStatus()` → `attemptTransition()` → validated by `@nzila/commerce-state`
 6. **Org-scoped**: Every table has `org_id` column; every query filters by org
-7. **Auth boundary**: Public marketing routes bypass auth via middleware; dashboard routes require Clerk auth via `resolveOrgContext()`
+7. **Auth boundary**: Public marketing routes bypass auth via middleware; dashboard routes require Entra auth via `resolveOrgContext()`
 8. **Evidence packs**: Governance-critical actions generate evidence via `buildEvidencePackFromAction()`
 
 ---

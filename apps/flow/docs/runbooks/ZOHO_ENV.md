@@ -1,6 +1,6 @@
 # Zoho Integration — Environment Variables
 
-All Zoho-related env vars required for the Shop Quoter integration.
+All Zoho-related env vars required for the Flow integration.
 
 ## Required
 

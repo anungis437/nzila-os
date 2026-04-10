@@ -1,4 +1,4 @@
-# Shop Quoter — Demo Flow
+# Flow — Demo Flow
 
 ## Demo Scenario: End-to-End Quote Lifecycle
 

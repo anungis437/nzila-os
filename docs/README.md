@@ -33,6 +33,7 @@ All Union Eyes docs for end users live in [union-eyes/](union-eyes/README.md).
 
 - [Golden Path](how-to/GOLDEN_PATH_DEVELOPER_GUIDE.md) — Developer onboarding
 - [Architecture](../ARCHITECTURE.md) — System design
+- [Auth Architecture](architecture/AUTH_ARCHITECTURE.md) — Email/password + Entra SSO dual auth model
 - [Stack Authority](architecture/STACK_AUTHORITY.md) — Technology standards
 - [Package Catalogue](reference/packages.md) — All packages
 - [Tutorials](tutorials/README.md) · [How-To Guides](how-to/README.md) · [Reference](reference/README.md) · [Explanation](explanation/README.md)

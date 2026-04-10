@@ -4,7 +4,7 @@
 
 ## Prerequisites
 
-- Shop Quoter running at `http://localhost:3007`
+- Flow running at `http://localhost:3007`
 - Demo seed loaded (`seedDemo()` from `lib/demoSeed.ts`)
 - Clerk auth configured with demo users
 
