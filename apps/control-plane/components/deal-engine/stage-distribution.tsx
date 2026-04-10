@@ -14,6 +14,8 @@ const DOT_COLORS: Record<string, string> = {
   cyan: "bg-cyan-500",
   teal: "bg-teal-500",
   indigo: "bg-indigo-500",
+  violet: "bg-violet-500",
+  slate: "bg-slate-500",
   green: "bg-emerald-500",
   red: "bg-red-500",
   gray: "bg-gray-400",

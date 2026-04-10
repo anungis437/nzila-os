@@ -19,6 +19,7 @@ export type DealAuditAction =
   | "followup_completed"
   | "followup_snoozed"
   | "followup_reassigned"
+  | "followup_overdue"
   | "ingestion_retry"
   | "proof_enriched";
 

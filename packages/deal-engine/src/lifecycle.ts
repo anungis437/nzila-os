@@ -98,7 +98,7 @@ export function stageOrdinal(stage: DealStage): number {
   return DEAL_STAGES.indexOf(stage);
 }
 
-// ── Source mapping from partner/CRM stages to canonical ─
+// ── Source mapping from partner/CRM/commerce/trade stages to canonical ─
 
 export const PARTNER_STAGE_MAP: Record<string, DealStage> = {
   registered: 'lead',
@@ -116,6 +116,26 @@ export const HUBSPOT_STAGE_MAP: Record<string, DealStage> = {
   contractsent:          'pilot_proposed',
   closedwon:             'converted',
   closedlost:            'lost',
+};
+
+export const COMMERCE_STAGE_MAP: Record<string, DealStage> = {
+  lead: 'lead',
+  qualified: 'qualified',
+  proposal: 'pilot_proposed',
+  negotiation: 'demo_completed',
+  closed_won: 'converted',
+};
+
+export const TRADE_STAGE_MAP: Record<string, DealStage> = {
+  lead: 'lead',
+  qualified: 'qualified',
+  quoted: 'pilot_proposed',
+  accepted: 'demo_completed',
+  funded: 'converted',
+  shipped: 'expanding',
+  delivered: 'expanding',
+  closed: 'converted',
+  cancelled: 'lost',
 };
 
 export function mapPartnerStage(stage: string): DealStage {

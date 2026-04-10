@@ -91,8 +91,14 @@ async function fetchTradeCommissionReferrals(): Promise<PartnerReferral[]> {
 export class DbPartnerReferralAdapter implements IPartnerReferralAdapter {
   async getReferrals(filters?: PartnerFilters): Promise<PartnerReferral[]> {
     const [partnerDeals, tradeRefs] = await Promise.all([
-      fetchPartnerReferrals().catch(() => []),
-      fetchTradeCommissionReferrals().catch(() => []),
+      fetchPartnerReferrals().catch((err) => {
+        console.error("[ADAPTER:partners] fetchPartnerReferrals failed", err);
+        return [] as PartnerReferral[];
+      }),
+      fetchTradeCommissionReferrals().catch((err) => {
+        console.error("[ADAPTER:partners] fetchTradeCommissionReferrals failed", err);
+        return [] as PartnerReferral[];
+      }),
     ]);
 
     let referrals = [...partnerDeals, ...tradeRefs];

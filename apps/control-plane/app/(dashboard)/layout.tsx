@@ -42,9 +42,10 @@ const navItems = [
   { href: "/architecture", label: "Architecture", icon: Landmark },
 ] as const;
 
+type NavItem = { href: string; label: string; icon: React.ComponentType<{ className?: string }> };
 type NavSection = {
   title?: string;
-  items: typeof navItems;
+  items: readonly NavItem[];
 };
 
 const navSections: NavSection[] = [
@@ -60,7 +61,7 @@ const navSections: NavSection[] = [
       { href: "/proposals", label: "Proposals", icon: FileText },
       { href: "/accounts", label: "Accounts", icon: Building2 },
       { href: "/proof", label: "Proof", icon: ShieldCheck },
-    ] as unknown as typeof navItems,
+    ],
   },
 ];
 

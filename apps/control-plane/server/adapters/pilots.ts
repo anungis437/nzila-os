@@ -73,50 +73,63 @@ async function ensureSeeded(): Promise<void> {
     const existing = await db.select({ id: dealEnginePilots.id }).from(dealEnginePilots).limit(1);
     if (existing.length > 0) return;
     const parsed = z.array(pilotSchema).parse(seedPilots) as Pilot[];
-    for (const p of parsed) {
-      await db.insert(dealEnginePilots).values({
-        id: p.id,
-        dealId: p.dealId,
-        accountId: p.accountId,
-        accountName: p.accountName,
-        product: p.product,
-        pilotStatus: p.pilotStatus,
-        successCriteria: p.successCriteria,
-        startDate: p.startDate ? new Date(p.startDate) : null,
-        targetReviewDate: p.targetReviewDate ? new Date(p.targetReviewDate) : null,
-        owner: p.owner,
-        ingestionStatus: p.ingestionStatus,
-        checklist: p.checklist,
-        currentBlockers: p.currentBlockers,
-        daysActive: p.daysActive,
-        createdAt: new Date(p.createdAt),
-        updatedAt: new Date(p.updatedAt),
-      });
+    if (parsed.length > 0) {
+      await db.insert(dealEnginePilots).values(
+        parsed.map((p) => ({
+          id: p.id,
+          dealId: p.dealId,
+          accountId: p.accountId,
+          accountName: p.accountName,
+          product: p.product,
+          pilotStatus: p.pilotStatus,
+          successCriteria: p.successCriteria,
+          startDate: p.startDate ? new Date(p.startDate) : null,
+          targetReviewDate: p.targetReviewDate ? new Date(p.targetReviewDate) : null,
+          owner: p.owner,
+          ingestionStatus: p.ingestionStatus,
+          checklist: p.checklist,
+          currentBlockers: p.currentBlockers,
+          daysActive: p.daysActive,
+          createdAt: new Date(p.createdAt),
+          updatedAt: new Date(p.updatedAt),
+        })),
+      );
     }
-  } catch {
+  } catch (err) {
+    console.error("[ADAPTER:pilots] seed failed", err);
     _seeded = false;
   }
 }
 
 export class DbPilotAdapter implements IPilotAdapter {
   async getPilots(filters?: PilotFilters): Promise<Pilot[]> {
-    await ensureSeeded();
-    const rows = await db.select().from(dealEnginePilots);
-    let pilots = rows.map(rowToPilot);
+    try {
+      await ensureSeeded();
+      const rows = await db.select().from(dealEnginePilots);
+      let pilots = rows.map(rowToPilot);
 
-    if (filters?.status) pilots = pilots.filter((p) => p.pilotStatus === filters.status);
-    if (filters?.product) pilots = pilots.filter((p) => p.product === filters.product);
-    if (filters?.owner) pilots = pilots.filter((p) => p.owner === filters.owner);
-    if (filters?.stalledOnly) pilots = pilots.filter((p) => p.daysActive > 14 && p.currentBlockers.length > 0);
+      if (filters?.status) pilots = pilots.filter((p) => p.pilotStatus === filters.status);
+      if (filters?.product) pilots = pilots.filter((p) => p.product === filters.product);
+      if (filters?.owner) pilots = pilots.filter((p) => p.owner === filters.owner);
+      if (filters?.stalledOnly) pilots = pilots.filter((p) => p.daysActive > 14 && p.currentBlockers.length > 0);
 
-    return pilots;
+      return pilots;
+    } catch (err) {
+      console.error("[ADAPTER:pilots] getPilots failed", err);
+      return [];
+    }
   }
 
   async getPilotById(id: string): Promise<Pilot | null> {
-    await ensureSeeded();
-    const rows = await db.select().from(dealEnginePilots).where(eq(dealEnginePilots.id, id));
-    if (rows.length === 0) return null;
-    return rowToPilot(rows[0]);
+    try {
+      await ensureSeeded();
+      const rows = await db.select().from(dealEnginePilots).where(eq(dealEnginePilots.id, id));
+      if (rows.length === 0) return null;
+      return rowToPilot(rows[0]);
+    } catch (err) {
+      console.error("[ADAPTER:pilots] getPilotById failed", { id }, err);
+      return null;
+    }
   }
 
   async updateChecklist(
@@ -125,18 +138,23 @@ export class DbPilotAdapter implements IPilotAdapter {
     value: boolean,
     _actor: string,
   ): Promise<Pilot | null> {
-    const pilot = await this.getPilotById(id);
-    if (!pilot) return null;
-    if (!(key in pilot.checklist)) return null;
+    try {
+      const pilot = await this.getPilotById(id);
+      if (!pilot) return null;
+      if (!(key in pilot.checklist)) return null;
 
-    const newChecklist = { ...pilot.checklist, [key]: value };
-    const now = new Date();
-    await db
-      .update(dealEnginePilots)
-      .set({ checklist: newChecklist, updatedAt: now })
-      .where(eq(dealEnginePilots.id, id));
+      const newChecklist = { ...pilot.checklist, [key]: value };
+      const now = new Date();
+      await db
+        .update(dealEnginePilots)
+        .set({ checklist: newChecklist, updatedAt: now })
+        .where(eq(dealEnginePilots.id, id));
 
-    return { ...pilot, checklist: newChecklist as PilotChecklist, updatedAt: now.toISOString() };
+      return { ...pilot, checklist: newChecklist as PilotChecklist, updatedAt: now.toISOString() };
+    } catch (err) {
+      console.error("[ADAPTER:pilots] updateChecklist failed", { id, key }, err);
+      return null;
+    }
   }
 
   async updateStatus(
@@ -144,22 +162,27 @@ export class DbPilotAdapter implements IPilotAdapter {
     status: string,
     _actor: string,
   ): Promise<Pilot | null> {
-    const pilot = await this.getPilotById(id);
-    if (!pilot) return null;
+    try {
+      const pilot = await this.getPilotById(id);
+      if (!pilot) return null;
 
-    // Validate target status
-    const parsed = pilotStatusSchema.safeParse(status);
-    if (!parsed.success) return null;
+      // Validate target status
+      const parsed = pilotStatusSchema.safeParse(status);
+      if (!parsed.success) return null;
 
-    // Enforce lifecycle guard
-    if (!canTransitionPilotStatus(pilot.pilotStatus, status)) return null;
+      // Enforce lifecycle guard
+      if (!canTransitionPilotStatus(pilot.pilotStatus, status)) return null;
 
-    const now = new Date();
-    await db
-      .update(dealEnginePilots)
-      .set({ pilotStatus: status, updatedAt: now })
-      .where(eq(dealEnginePilots.id, id));
+      const now = new Date();
+      await db
+        .update(dealEnginePilots)
+        .set({ pilotStatus: status, updatedAt: now })
+        .where(eq(dealEnginePilots.id, id));
 
-    return { ...pilot, pilotStatus: status as Pilot["pilotStatus"], updatedAt: now.toISOString() };
+      return { ...pilot, pilotStatus: status as Pilot["pilotStatus"], updatedAt: now.toISOString() };
+    } catch (err) {
+      console.error("[ADAPTER:pilots] updateStatus failed", { id, status }, err);
+      return null;
+    }
   }
 }
