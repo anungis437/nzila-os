@@ -1,5 +1,5 @@
 import { z } from 'zod'
-import { getTraceContext, type TraceContext } from './context.js'
+import { getTraceContext, type TraceContext } from './context'
 
 // ─── Span Types ─────────────────────────────────────────────────────────────
 

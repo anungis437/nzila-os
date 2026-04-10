@@ -1,4 +1,4 @@
-import { getTraceContext } from './context.js'
+import { getTraceContext } from './context'
 
 // ─── Log Levels ─────────────────────────────────────────────────────────────
 

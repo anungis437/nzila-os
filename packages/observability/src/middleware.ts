@@ -4,9 +4,9 @@ import {
   withTraceContextAsync,
   buildTraceHeaders,
   type TraceContext,
-} from './context.js'
-import { createSpan, endSpan, addSpanEvent } from './spans.js'
-import { getObservabilityLogger } from './sdk.js'
+} from './context'
+import { createSpan, endSpan, addSpanEvent } from './spans'
+import { getObservabilityLogger } from './sdk'
 
 // ─── Middleware for Next.js API Routes ──────────────────────────────────────
 

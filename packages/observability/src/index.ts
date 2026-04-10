@@ -15,7 +15,7 @@ export {
   buildTraceparent,
   extractTraceFromHeaders,
   buildTraceHeaders,
-} from './context.js'
+} from './context'
 
 export {
   type Span,
@@ -26,7 +26,7 @@ export {
   endSpan,
   withSpan,
   setSpanExporter,
-} from './spans.js'
+} from './spans'
 
 export {
   type LogLevel,
@@ -34,7 +34,7 @@ export {
   type LoggerConfig,
   TracedLogger,
   createLogger,
-} from './logger.js'
+} from './logger'
 
 export {
   type TelemetryExporter,
@@ -42,7 +42,7 @@ export {
   OtlpHttpExporter,
   MultiExporter,
   type OtlpExporterConfig,
-} from './exporter.js'
+} from './exporter'
 
 export {
   type ObservabilityConfig,
@@ -50,17 +50,17 @@ export {
   getObservabilityLogger,
   shutdownObservability,
   isObservabilityInitialized,
-} from './sdk.js'
+} from './sdk'
 
 export {
   withTraceContext,
   createTraceMiddleware,
   type TraceMiddlewareOptions,
   type GenericRequest,
-} from './middleware.js'
+} from './middleware'
 
 export {
   createAppTelemetry,
   type AppTelemetry,
   type AppTelemetryConfig,
-} from './app-telemetry.js'
+} from './app-telemetry'

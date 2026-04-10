@@ -28,7 +28,9 @@ function collectFiles(dir: string, ext: string[]): string[] {
   const stack = [dir]
   while (stack.length > 0) {
     const d = stack.pop()!
-    for (const e of readdirSync(d, { withFileTypes: true })) {
+    let entries: import('node:fs').Dirent[]
+    try { entries = readdirSync(d, { withFileTypes: true }) } catch { continue }
+    for (const e of entries) {
       const full = join(d, e.name)
       if (e.isDirectory()) {
         // Skip irrelevant directories

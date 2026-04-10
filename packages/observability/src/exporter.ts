@@ -1,4 +1,4 @@
-import type { Span } from './spans.js'
+import type { Span } from './spans'
 
 // ─── Exporter Interface ─────────────────────────────────────────────────────
 

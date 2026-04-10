@@ -1,7 +1,7 @@
-import type { TelemetryExporter } from './exporter.js'
-import { ConsoleExporter } from './exporter.js'
-import { setSpanExporter } from './spans.js'
-import { createLogger, type TracedLogger } from './logger.js'
+import type { TelemetryExporter } from './exporter'
+import { ConsoleExporter } from './exporter'
+import { setSpanExporter } from './spans'
+import { createLogger, type TracedLogger } from './logger'
 
 // ─── SDK Configuration ──────────────────────────────────────────────────────
 

@@ -18,8 +18,8 @@
  *
  * @module @nzila/observability/app-telemetry
  */
-import { TracedLogger, type LogLevel } from './logger.js'
-import { generateRequestId } from './context.js'
+import { TracedLogger, type LogLevel } from './logger'
+import { generateRequestId } from './context'
 
 // ── Types ───────────────────────────────────────────────────────────────────
 
