@@ -1,4 +1,5 @@
 import { LotStatus, ShipmentStatus } from '../enums'
+import { machine, transition, type MachineDefinition } from '@nzila/fsm-core'
 
 // ─── Lot Quality FSM ───
 // pending → inspected → graded → certified | rejected
@@ -87,3 +88,46 @@ export const ShipmentFSM = {
   available: getShipmentTransitions,
   isTerminal: isTerminalShipmentStatus,
 } as const
+
+// ─── fsm-core machine definitions ───
+
+/**
+ * Lot quality lifecycle as an @nzila/fsm-core MachineDefinition.
+ *
+ * Metadata: `evidenceRequired` is encoded in each transition's `meta` field
+ * so consumers can inspect it after a successful transition attempt.
+ */
+export const LotQualityMachine: MachineDefinition<LotStatus> = (() => {
+  const builder = machine<LotStatus>('lot-quality', '1.0.0')
+    .states([LotStatus.PENDING, LotStatus.INSPECTED, LotStatus.GRADED, LotStatus.CERTIFIED, LotStatus.REJECTED])
+    .initial(LotStatus.PENDING)
+    .terminal(LotStatus.CERTIFIED, LotStatus.REJECTED)
+
+  for (const t of LOT_TRANSITIONS) {
+    builder.addTransition(
+      transition<LotStatus>(t.from, t.to, `${t.from} → ${t.to}`)
+        .emits(`lot.${t.to}`, { evidenceRequired: t.evidenceRequired }),
+    )
+  }
+
+  return builder.build()
+})()
+
+/**
+ * Shipment lifecycle as an @nzila/fsm-core MachineDefinition.
+ */
+export const ShipmentMachine: MachineDefinition<ShipmentStatus> = (() => {
+  const builder = machine<ShipmentStatus>('shipment-lifecycle', '1.0.0')
+    .states([ShipmentStatus.PLANNED, ShipmentStatus.PACKED, ShipmentStatus.DISPATCHED, ShipmentStatus.ARRIVED, ShipmentStatus.CLOSED])
+    .initial(ShipmentStatus.PLANNED)
+    .terminal(ShipmentStatus.CLOSED)
+
+  for (const t of SHIPMENT_TRANSITIONS) {
+    builder.addTransition(
+      transition<ShipmentStatus>(t.from, t.to, `${t.from} → ${t.to}`)
+        .emits(`shipment.${t.to}`, { evidenceRequired: t.evidenceRequired }),
+    )
+  }
+
+  return builder.build()
+})()

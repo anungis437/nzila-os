@@ -8,6 +8,7 @@
  */
 
 import type { CaseStatus, CaseStage, TaskType } from '@nzila/mobility-core'
+import { machine, transition, type MachineDefinition } from '@nzila/fsm-core'
 
 /* ── Lifecycle States ─────────────────────────────────────── */
 
@@ -48,6 +49,35 @@ const TRANSITION_RULES: TransitionRule[] = [
   { from: 'approved', to: 'citizenship_granted', guard: 'oath_completed' },
   { from: 'citizenship_granted', to: 'renewal_monitoring' },
 ]
+
+// ── fsm-core machine definition ─────────────────────────────
+
+/**
+ * Case lifecycle as an @nzila/fsm-core MachineDefinition.
+ *
+ * Guards are expressed as named references — the consuming app
+ * supplies a GuardResolver that maps guard names to predicates.
+ */
+export const CaseLifecycleMachine: MachineDefinition<CaseLifecycleState> = (() => {
+  const builder = machine<CaseLifecycleState>('case-lifecycle', '1.0.0')
+    .states([...CASE_LIFECYCLE])
+    .initial('lead')
+    .terminal('renewal_monitoring')
+
+  for (const rule of TRANSITION_RULES) {
+    const t = transition<CaseLifecycleState>(
+      rule.from,
+      rule.to,
+      `${rule.from.replace(/_/g, ' ')} → ${rule.to.replace(/_/g, ' ')}`,
+    )
+    if (rule.guard) {
+      t.guard('named', rule.guard)
+    }
+    builder.addTransition(t)
+  }
+
+  return builder.build()
+})()
 
 /* ── Case State ───────────────────────────────────────────── */
 

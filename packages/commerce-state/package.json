@@ -11,6 +11,10 @@
     "./machines": {
       "types": "./src/machines/index.ts",
       "import": "./src/machines/index.ts"
+    },
+    "./compat": {
+      "types": "./src/compat.ts",
+      "import": "./src/compat.ts"
     }
   },
   "scripts": {
@@ -19,7 +23,8 @@
     "lint": "eslint src/"
   },
   "dependencies": {
-    "@nzila/commerce-core": "workspace:*"
+    "@nzila/commerce-core": "workspace:*",
+    "@nzila/fsm-core": "workspace:*"
   },
   "devDependencies": {
     "typescript": "^6",

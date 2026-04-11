@@ -18,13 +18,13 @@ import type {
 
 /**
  * Simple deterministic hash for percentage-based rollout.
- * Returns a number 0–99 based on flagName + entityId.
+ * Returns a number 0–99 based on flagName + subjectId.
  *
  * Uses djb2 hash — fast, deterministic, no crypto needed.
- * Same flag + entity always produces the same bucket.
+ * Same flag + subject always produces the same bucket.
  */
-export function hashBucket(flagName: string, entityId: string): number {
-  const input = `${flagName}:${entityId}`
+export function hashBucket(flagName: string, subjectId: string): number {
+  const input = `${flagName}:${subjectId}`
   let hash = 5381
   for (let i = 0; i < input.length; i++) {
     hash = ((hash << 5) + hash + input.charCodeAt(i)) | 0

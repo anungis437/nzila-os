@@ -32,6 +32,7 @@
     "@nzila/db": "workspace:*",
     "@nzila/os-core": "workspace:*",
     "@nzila/payments-stripe": "workspace:*",
+    "@nzila/pilot-mode": "workspace:*",
     "@nzila/tools-runtime": "workspace:*",
     "openai": "^6.22.0",
     "zod": "^3.24.0"
