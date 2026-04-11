@@ -12,9 +12,8 @@
     "clean": "rm -rf .next .turbo node_modules"
   },
   "dependencies": {
-    "@nzila/platform-auth": "workspace:*",
     "@heroicons/react": "^2.2.0",
-    "@nzila/os-core": "workspace:*",
+    "@nzila/agri-adapters": "workspace:*",
     "@nzila/agri-core": "workspace:*",
     "@nzila/agri-db": "workspace:*",
     "@nzila/agri-forecasting": "workspace:*",
@@ -23,15 +22,16 @@
     "@nzila/agri-reporting": "workspace:*",
     "@nzila/agri-supply-chain": "workspace:*",
     "@nzila/agri-traceability": "workspace:*",
-    "@nzila/agri-adapters": "workspace:*",
-    "@nzila/evidence": "workspace:*",
-    "@nzila/ui": "workspace:*",
     "@nzila/db": "workspace:*",
-    "next": "16.2.2",
+    "@nzila/evidence": "workspace:*",
+    "@nzila/os-core": "workspace:*",
+    "@nzila/platform-auth": "workspace:*",
+    "@nzila/ui": "workspace:*",
+    "framer-motion": "^11.3.30",
+    "next": "16.2.3",
     "next-intl": "^4.8.3",
     "react": "19.2.4",
     "react-dom": "19.2.4",
-    "framer-motion": "^11.3.30",
     "zod": "^3.24.0"
   },
   "devDependencies": {
