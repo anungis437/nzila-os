@@ -188,7 +188,7 @@ export async function signup(input: SignupInput): Promise<AuthResult> {
       email: authUsers.email,
       firstName: authUsers.firstName,
       lastName: authUsers.lastName,
-    })
+    }) as [{ id: string; email: string; firstName: string | null; lastName: string | null }]
 
   // 5. Create session
   const { token, session } = await createSession({

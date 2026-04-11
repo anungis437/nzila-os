@@ -155,7 +155,7 @@ Exit codes:
     process.exit(args.length === 0 ? 2 : 0)
   }
 
-  const indexPath = args[0]
+  const indexPath = args[0]!
   const hmacKeyIdx = args.indexOf('--hmac-key')
   const hmacKey =
     hmacKeyIdx !== -1 ? args[hmacKeyIdx + 1] : process.env.EVIDENCE_SEAL_KEY

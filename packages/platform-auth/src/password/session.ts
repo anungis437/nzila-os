@@ -77,7 +77,7 @@ export async function createSession(
       userId: authUserSessions.userId,
       organizationId: authUserSessions.organizationId,
       expiresAt: authUserSessions.expiresAt,
-    })
+    }) as [{ sessionId: string; userId: string; organizationId: string | null; expiresAt: Date }]
 
   return {
     token,
