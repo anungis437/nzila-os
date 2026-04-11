@@ -3946,6 +3946,34 @@ importers:
         specifier: ^4.1.2
         version: 4.1.2(@opentelemetry/api@1.9.1)(@types/node@25.5.2)(jsdom@29.0.1(@noble/hashes@2.0.1))(vite@7.3.2(@types/node@25.5.2)(jiti@2.6.1)(lightningcss@1.32.0)(terser@5.46.1)(tsx@4.21.0)(yaml@2.8.3))
 
+  packages/onboarding-core:
+    dependencies:
+      '@nzila/contracts':
+        specifier: workspace:*
+        version: link:../contracts
+      '@nzila/os-core':
+        specifier: workspace:*
+        version: link:../os-core
+      '@nzila/platform-events':
+        specifier: workspace:*
+        version: link:../platform-events
+    devDependencies:
+      '@typescript-eslint/eslint-plugin':
+        specifier: ^8.0.0
+        version: 8.58.0(@typescript-eslint/parser@8.58.0(eslint@9.39.4(jiti@2.6.1))(typescript@6.0.2))(eslint@9.39.4(jiti@2.6.1))(typescript@6.0.2)
+      '@typescript-eslint/parser':
+        specifier: ^8.0.0
+        version: 8.58.0(eslint@9.39.4(jiti@2.6.1))(typescript@6.0.2)
+      eslint:
+        specifier: ^9.39.0
+        version: 9.39.4(jiti@2.6.1)
+      typescript:
+        specifier: ^6
+        version: 6.0.2
+      vitest:
+        specifier: ^4.1.2
+        version: 4.1.2(@opentelemetry/api@1.9.1)(@types/node@25.5.2)(jsdom@29.0.1(@noble/hashes@2.0.1))(vite@7.3.2(@types/node@25.5.2)(jiti@2.6.1)(lightningcss@1.32.0)(terser@5.46.1)(tsx@4.21.0)(yaml@2.8.3))
+
   packages/org:
     dependencies:
       zod:
@@ -4074,6 +4102,34 @@ importers:
         specifier: ^3.24.0
         version: 3.25.76
     devDependencies:
+      typescript:
+        specifier: ^6
+        version: 6.0.2
+      vitest:
+        specifier: ^4.1.2
+        version: 4.1.2(@opentelemetry/api@1.9.1)(@types/node@25.5.2)(jsdom@29.0.1(@noble/hashes@2.0.1))(vite@7.3.2(@types/node@25.5.2)(jiti@2.6.1)(lightningcss@1.32.0)(terser@5.46.1)(tsx@4.21.0)(yaml@2.8.3))
+
+  packages/pilot-mode:
+    dependencies:
+      '@nzila/contracts':
+        specifier: workspace:*
+        version: link:../contracts
+      '@nzila/os-core':
+        specifier: workspace:*
+        version: link:../os-core
+      '@nzila/platform-events':
+        specifier: workspace:*
+        version: link:../platform-events
+    devDependencies:
+      '@typescript-eslint/eslint-plugin':
+        specifier: ^8.0.0
+        version: 8.58.0(@typescript-eslint/parser@8.58.0(eslint@9.39.4(jiti@2.6.1))(typescript@6.0.2))(eslint@9.39.4(jiti@2.6.1))(typescript@6.0.2)
+      '@typescript-eslint/parser':
+        specifier: ^8.0.0
+        version: 8.58.0(eslint@9.39.4(jiti@2.6.1))(typescript@6.0.2)
+      eslint:
+        specifier: ^9.39.0
+        version: 9.39.4(jiti@2.6.1)
       typescript:
         specifier: ^6
         version: 6.0.2

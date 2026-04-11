@@ -190,6 +190,9 @@ export default defineConfig({
       // FSM & Ingestion core
       'packages/fsm-core',
       'packages/ingestion-core',
+      // Onboarding & Pilot mode
+      'packages/onboarding-core',
+      'packages/pilot-mode',
     ],
   },
 })
