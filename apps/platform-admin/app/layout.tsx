@@ -1,5 +1,6 @@
 import type { Metadata } from 'next'
 import { AuthProvider } from '@nzila/platform-auth/entra/client'
+import { NzilaAppShell } from '@nzila/platform-shell'
 import { NextIntlClientProvider } from 'next-intl'
 import { getLocale, getMessages } from 'next-intl/server'
 import './globals.css'
@@ -32,6 +33,7 @@ export default async function RootLayout({
     <AuthProvider>
       <html lang={locale}>
         <body className="bg-gray-50 text-gray-900 antialiased">
+          <NzilaAppShell moduleId="platform-admin">
           <NextIntlClientProvider locale={locale} messages={messages}>
           <div className="flex min-h-screen">
             {/* Sidebar */}
@@ -57,6 +59,7 @@ export default async function RootLayout({
             <main className="flex-1 overflow-y-auto p-8">{children}</main>
           </div>
         </NextIntlClientProvider>
+        </NzilaAppShell>
       </body>
     </html>
     </AuthProvider>

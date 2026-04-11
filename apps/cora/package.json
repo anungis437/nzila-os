@@ -26,6 +26,7 @@
     "@nzila/evidence": "workspace:*",
     "@nzila/os-core": "workspace:*",
     "@nzila/platform-auth": "workspace:*",
+    "@nzila/platform-shell": "workspace:*",
     "@nzila/ui": "workspace:*",
     "framer-motion": "^11.3.30",
     "next": "16.2.3",

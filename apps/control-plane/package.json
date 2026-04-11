@@ -23,6 +23,7 @@
     "@nzila/platform-ai-query": "workspace:*",
     "@nzila/platform-anomaly-engine": "workspace:*",
     "@nzila/platform-auth": "workspace:*",
+    "@nzila/platform-shell": "workspace:*",
     "@nzila/platform-change-management": "workspace:*",
     "@nzila/platform-compliance-snapshots": "workspace:*",
     "@nzila/platform-decision-engine": "workspace:*",

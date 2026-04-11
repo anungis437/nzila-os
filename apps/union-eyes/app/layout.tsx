@@ -3,6 +3,7 @@ import { Toaster } from "@/components/ui/toaster";
 import { Providers } from "@/components/utilities/providers";
 import LayoutWrapper from "@/components/layout-wrapper";
 import { AuthProvider } from '@nzila/platform-auth/entra/client';
+import { NzilaAppShell } from '@nzila/platform-shell';
 import * as Sentry from '@sentry/nextjs';
 import type { Metadata } from "next";
 import { OrganizationProvider } from "@/contexts/organization-context";
@@ -39,7 +40,8 @@ export default async function RootLayout({ children }: { children: React.ReactNo
     <html lang={locale} suppressHydrationWarning>
       <body className={poppins.className} suppressHydrationWarning>
         <AuthProvider>
-          <Providers
+          <NzilaAppShell moduleId="union-eyes">
+            <Providers
             attribute="class"
             defaultTheme="light"
             disableTransitionOnChange
@@ -52,7 +54,8 @@ export default async function RootLayout({ children }: { children: React.ReactNo
               <CookieConsentProvider />
               <Toaster />
             </OrganizationProvider>
-          </Providers>
+            </Providers>
+          </NzilaAppShell>
         </AuthProvider>
       </body>
     </html>

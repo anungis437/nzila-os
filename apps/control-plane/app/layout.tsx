@@ -1,5 +1,6 @@
 import type { Metadata } from "next";
 import { AuthProvider } from "@nzila/platform-auth/entra/client";
+import { NzilaAppShell } from "@nzila/platform-shell";
 import { Poppins } from "next/font/google";
 import { ThemeProvider } from "next-themes";
 import { NextIntlClientProvider } from 'next-intl';
@@ -30,15 +31,17 @@ export default async function RootLayout({
     <AuthProvider>
       <html lang={locale} suppressHydrationWarning>
         <body className={poppins.className} suppressHydrationWarning>
-          <ThemeProvider
-            attribute="class"
-            defaultTheme="light"
-            disableTransitionOnChange
-          >
-            <NextIntlClientProvider locale={locale} messages={messages}>
-              {children}
-            </NextIntlClientProvider>
-          </ThemeProvider>
+          <NzilaAppShell moduleId="control-plane">
+            <ThemeProvider
+              attribute="class"
+              defaultTheme="light"
+              disableTransitionOnChange
+            >
+              <NextIntlClientProvider locale={locale} messages={messages}>
+                {children}
+              </NextIntlClientProvider>
+            </ThemeProvider>
+          </NzilaAppShell>
         </body>
       </html>
     </AuthProvider>

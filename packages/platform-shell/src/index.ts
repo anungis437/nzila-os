@@ -18,6 +18,8 @@ export { ShellProvider, useShell } from './context/provider.js';
 export type { ShellProviderProps } from './context/provider.js';
 
 // Components
+export { NzilaAppShell } from './components/NzilaAppShell.js';
+export type { NzilaAppShellProps } from './components/NzilaAppShell.js';
 export { ShellLayout } from './components/ShellLayout.js';
 export { GlobalNav } from './components/GlobalNav.js';
 export { OrgSelector } from './components/OrgSelector.js';

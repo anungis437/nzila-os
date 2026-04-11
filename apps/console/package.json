@@ -21,6 +21,7 @@
     "@nzila/payments-stripe": "workspace:*",
     "@nzila/platform-assurance": "workspace:*",
     "@nzila/platform-auth": "workspace:*",
+    "@nzila/platform-shell": "workspace:*",
     "@nzila/platform-compliance-snapshots": "workspace:*",
     "@nzila/platform-events": "workspace:*",
     "@nzila/platform-evidence-pack": "workspace:*",

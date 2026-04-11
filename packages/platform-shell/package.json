@@ -23,6 +23,7 @@
     "zod": "^3.24.0"
   },
   "peerDependencies": {
+    "@nzila/platform-auth": "workspace:*",
     "react": ">=18"
   },
   "devDependencies": {

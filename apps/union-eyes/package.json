@@ -49,6 +49,7 @@
     "@nzila/os-core": "workspace:*",
     "@nzila/payments-stripe": "workspace:*",
     "@nzila/platform-auth": "workspace:*",
+    "@nzila/platform-shell": "workspace:*",
     "@nzila/ui": "workspace:*",
     "@nzila/workload-intelligence": "workspace:*",
     "@paralleldrive/cuid2": "^3.3.0",

@@ -23,6 +23,7 @@
     "@nzila/mobility-programs": "workspace:*",
     "@nzila/os-core": "workspace:*",
     "@nzila/platform-auth": "workspace:*",
+    "@nzila/platform-shell": "workspace:*",
     "@nzila/ui": "workspace:*",
     "framer-motion": "^11.0.0",
     "lucide-react": "^0.400.0",

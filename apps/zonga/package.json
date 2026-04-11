@@ -22,6 +22,7 @@
     "@nzila/os-core": "workspace:*",
     "@nzila/payments-stripe": "workspace:*",
     "@nzila/platform-auth": "workspace:*",
+    "@nzila/platform-shell": "workspace:*",
     "@nzila/ui": "workspace:*",
     "@nzila/zonga-control-plane": "workspace:*",
     "@nzila/zonga-core": "workspace:*",

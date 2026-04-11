@@ -16,6 +16,7 @@
     "@nzila/integrations-runtime": "workspace:*",
     "@nzila/os-core": "workspace:*",
     "@nzila/platform-auth": "workspace:*",
+    "@nzila/platform-shell": "workspace:*",
     "@nzila/platform-context-orchestrator": "workspace:*",
     "@nzila/platform-data-fabric": "workspace:*",
     "@nzila/platform-decision-graph": "workspace:*",
