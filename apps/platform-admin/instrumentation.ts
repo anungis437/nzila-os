@@ -1,5 +1,5 @@
 /**
- * Next.js Instrumentation Hook — Agrimo app.
+ * Next.js Instrumentation Hook — Platform Admin.
  *
  * Runs the canonical Nzila boot sequence: OTel tracing, SLO/RED metrics,
  * env validation, and boot invariant assertions.
@@ -8,4 +8,4 @@
  */
 import { createAppBoot } from '@nzila/os-core/telemetry'
 
-export const register = createAppBoot('agrimo')
+export const register = createAppBoot('platform-admin')

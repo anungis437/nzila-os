@@ -144,6 +144,11 @@ const platformAdminSchema = baseSchema.extend({
   ...clerkMixin,
 })
 
+const controlPlaneSchema = baseSchema.extend({
+  NEXT_PUBLIC_APP_URL: z.string().url().optional(),
+  ...clerkMixin,
+})
+
 // ---------------------------------------------------------------------------
 // Validation helper
 // ---------------------------------------------------------------------------
@@ -164,6 +169,7 @@ type AppName =
   | 'cora'
   | 'trade'
   | 'platform-admin'
+  | 'control-plane'
   | 'base'
 
 const SCHEMAS: Record<AppName, ZodTypeAny> = {
@@ -184,6 +190,7 @@ const SCHEMAS: Record<AppName, ZodTypeAny> = {
   cora: coraSchema,
   trade: tradeSchema,
   'platform-admin': platformAdminSchema,
+  'control-plane': controlPlaneSchema,
 }
 
 export type ValidatedEnv<T extends AppName = 'base'> = T extends 'console'
@@ -218,7 +225,9 @@ export type ValidatedEnv<T extends AppName = 'base'> = T extends 'console'
                               ? z.infer<typeof tradeSchema>
                               : T extends 'platform-admin'
                                 ? z.infer<typeof platformAdminSchema>
-                                : z.infer<typeof baseSchema>
+                                : T extends 'control-plane'
+                                  ? z.infer<typeof controlPlaneSchema>
+                                  : z.infer<typeof baseSchema>
 
 /**
  * Validate environment variables for the given app.
@@ -266,4 +275,5 @@ export {
   coraSchema,
   tradeSchema,
   platformAdminSchema,
+  controlPlaneSchema,
 }
