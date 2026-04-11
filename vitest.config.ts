@@ -187,6 +187,9 @@ export default defineConfig({
       'packages/clc-decision-intelligence',
       // CLC Executive Intelligence Layer
       'packages/clc-executive-intelligence',
+      // FSM & Ingestion core
+      'packages/fsm-core',
+      'packages/ingestion-core',
     ],
   },
 })
