@@ -45,6 +45,7 @@ paths = [
   '''.*CLERK_.*\.md$''',               # Clerk integration docs
   '''.*AUTH_.*\.md$''',                # Auth implementation docs
   '''.*DJANGO_.*\.md$''',              # Django settings guides
+  '''content/internal/cupe3906-bylaws-raw\.html$''',  # Scraped HTML with third-party New Relic tracking keys
 ]
 
 commits = [

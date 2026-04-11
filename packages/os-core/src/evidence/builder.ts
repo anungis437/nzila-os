@@ -29,7 +29,7 @@ export interface GovernanceActionContext {
   actionType: string
   /** governance_actions.org_id */
   orgId: string
-  /** Clerk user who executed the action */
+  /** Auth user who executed the action */
   executedBy: string
   /** The resolution document (PDF/Markdown) buffer, if available */
   resolutionDocument?: {

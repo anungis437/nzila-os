@@ -70,7 +70,7 @@
   ],
   "platform_compliance": [
     {
-      "platform": "Union Eyes",
+      "platform": "UnionEyes",
       "frameworks": ["SOC 2", "PIPEDA"],
       "data_sensitivity": "HIGH",
       "pii_categories": ["SIN", "Pension Data", "Member Info"],

@@ -271,7 +271,7 @@ export default function ConsentForm({ organizationId }: ConsentFormProps) {
       </Button>
 
       <p className="text-xs text-muted-foreground text-center">
-        By granting consent, you authorize Union Eyes to aggregate anonymized data from your
+        By granting consent, you authorize UnionEyes to aggregate anonymized data from your
         organization. You can revoke consent at any time.
       </p>
     </form>

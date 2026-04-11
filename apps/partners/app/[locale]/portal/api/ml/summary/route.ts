@@ -7,7 +7,7 @@
  * no raw feature vectors, no model internals.
  *
  * RBAC:
- *   - Clerk session required (via partner portal)
+ *   - Auth session required (via partner portal)
  *   - partnerEntities row with `ml:summary` in allowedViews
  *   - ml:summary feature gate (tier ≥ registered)
  *

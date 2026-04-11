@@ -47,7 +47,7 @@ class OrganizationModel(BaseModel):
 class Organizations(BaseModel):
     """
     Hierarchical Organizations table for multi-tenancy.
-    Merged schema from Union Eyes (CLC features) + ABR Insights (subscription features).
+    Merged schema from UnionEyes (CLC features) + ABR Insights (subscription features).
 
     Source: schema-organizations.ts (UE) + 001_initial_schema.sql (ABR)
     """

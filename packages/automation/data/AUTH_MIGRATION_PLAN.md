@@ -11,12 +11,12 @@ Both platforms need auth migration to Django + Clerk:
 
 | Platform | Current Auth | Target Auth | Complexity | User Count |
 |----------|-------------|-------------|------------|------------|
-| **Union Eyes** | ✅ Clerk (already) | Clerk + Django | **LOW** | ~23 (profiles table) |
+| **UnionEyes** | ✅ Clerk (already) | Clerk + Django | **LOW** | ~23 (profiles table) |
 | **ABR Insights** | Supabase Auth | Clerk + Django | **MEDIUM-HIGH** | ~11 (profiles table) |
 
 ---
 
-## Phase 1: Union Eyes Auth Integration (PRIORITY: HIGH)
+## Phase 1: UnionEyes Auth Integration (PRIORITY: HIGH)
 
 ### Current State
 - ✅ UE already uses Clerk in frontend (`@clerk/nextjs`)

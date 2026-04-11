@@ -13,14 +13,14 @@
  * Context required for all commerce database operations.
  *
  * - `orgId` → org scope (org_id FK). Cannot be omitted.
- * - `actorId`  → Clerk user ID for audit trails. Cannot be omitted.
+ * - `actorId`  → Auth user ID for audit trails. Cannot be omitted.
  * - `correlationId` → optional request-level trace ID.
  * - `actorRole` → optional role for audit enrichment.
  */
 export interface CommerceDbContext {
   /** Organisation UUID — canonical field. */
   readonly orgId: string
-  /** Clerk user ID — recorded in every audit event. */
+  /** Auth user ID — recorded in every audit event. */
   readonly actorId: string
   /** Optional correlation/request ID for distributed tracing. */
   readonly correlationId?: string

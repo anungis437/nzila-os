@@ -8,16 +8,16 @@ import { updateListenerProfile, type ListenerProfile } from '@/lib/actions/liste
 
 interface ProfileFormProps {
   profile: ListenerProfile
-  clerkName: string
-  clerkEmail: string
+  authName: string
+  authEmail: string
 }
 
-export function ProfileForm({ profile, clerkName, clerkEmail }: ProfileFormProps) {
+export function ProfileForm({ profile, authName, authEmail }: ProfileFormProps) {
   const [isPending, startTransition] = useTransition()
   const [message, setMessage] = useState<{ type: 'success' | 'error'; text: string } | null>(null)
 
-  const [displayName, setDisplayName] = useState(profile.displayName || clerkName)
-  const [email, setEmail] = useState(profile.email || clerkEmail)
+  const [displayName, setDisplayName] = useState(profile.displayName || authName)
+  const [email, setEmail] = useState(profile.email || authEmail)
   const [bio, setBio] = useState(profile.bio || '')
   const [city, setCity] = useState(profile.city || '')
   const [country, setCountry] = useState(profile.country || '')

@@ -8,7 +8,7 @@ describe('moduleRegistrationSchema', () => {
   it('validates a well-formed registration', () => {
     const mod = {
       id: 'union-eyes',
-      name: 'Union Eyes',
+      name: 'UnionEyes',
       basePath: '/union-eyes',
       tier: 'PRODUCTION',
     }

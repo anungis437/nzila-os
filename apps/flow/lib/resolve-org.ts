@@ -12,7 +12,7 @@ import type { OrgContext } from '@nzila/commerce-core/types'
 import { OrgRole } from '@nzila/commerce-core/enums'
 import type { OrgCommerceConfig } from '@nzila/platform-commerce-org/types'
 import { getOrgCommerceConfig } from '@nzila/platform-commerce-org/service'
-import { resolveInternalOrgId } from './clerk-org-resolver'
+import { resolveInternalOrgId } from './org-resolver'
 
 /** Emails that always receive admin role, regardless of Clerk metadata. */
 const SUPER_ADMIN_EMAILS = new Set([

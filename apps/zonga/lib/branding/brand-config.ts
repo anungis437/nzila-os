@@ -23,7 +23,7 @@ export const CLIENT_BRAND: BrandAsset = {
   role: 'client',
   name: 'MS Célébration Canada',
   shortName: 'MSC',
-  logoUrl: '/branding/clients/ms-celebration.svg',
+  logoUrl: '/ms-celebrations-logo.jpg',
   tagline: 'La musique qui rassemble',
 }
 
@@ -34,7 +34,7 @@ export const PARTNER_BRAND: BrandAsset = {
   role: 'partner',
   name: 'The Rock Power Group Inc.',
   shortName: 'RPG',
-  logoUrl: '/branding/partners/rock-power.svg',
+  logoUrl: '/rock-power-group-logo.png',
   relationshipLabel: 'National Distribution Partner',
 }
 
@@ -43,9 +43,8 @@ export const PARTNER_BRAND: BrandAsset = {
 const CLIENT_ENTRY: BrandRegistryEntry = {
   asset: CLIENT_BRAND,
   placementOverrides: {
-    // Client is visible as workspace context — never in product chrome
+    // Client workspace name is visible in sidebar; never in product header/marketing
     app_header: 'hidden',
-    app_sidebar: 'hidden',
     marketing_hero: 'hidden',
   },
 }

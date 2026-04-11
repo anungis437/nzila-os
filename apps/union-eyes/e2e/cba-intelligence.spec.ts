@@ -5,7 +5,7 @@
  * present, and tab navigation works.
  *
  * Requires test auth mode (PLAYWRIGHT_TEST_AUTH=true) since the
- * page is behind Clerk authentication and commercial_reporting
+ * page is behind platform authentication and commercial_reporting
  * entitlement.
  */
 import { test, expect } from "@playwright/test";

@@ -88,7 +88,7 @@ class DashboardGenerator:
         """Get risk summary."""
         return [
             {
-                "platform": "Union Eyes",
+                "platform": "UnionEyes",
                 "complexity": "EXTREME",
                 "risk": "HIGH",
                 "weeks": "10-12",
@@ -134,7 +134,7 @@ class DashboardGenerator:
                 "owner": "CTO",
             },
             {
-                "text": "Launch Union Eyes MVP",
+                "text": "Launch UnionEyes MVP",
                 "status": "in_progress",
                 "owner": "Product Lead",
             },
@@ -172,7 +172,7 @@ class DashboardGenerator:
     def _get_entity_analysis(self) -> List[Dict[str, Any]]:
         """Get entity analysis."""
         return [
-            {"label": "Union Eyes", "value": 4773},
+            {"label": "UnionEyes", "value": 4773},
             {"label": "C3UO", "value": 485},
             {"label": "Court Lens", "value": 682},
             {"label": "Trade OS", "value": 337},
@@ -227,7 +227,7 @@ class DashboardGenerator:
         platforms = [
             {
                 "id": "union_eyes",
-                "name": "Union Eyes",
+                "name": "UnionEyes",
                 "vertical": "Uniontech",
                 "entity_count": 4773,
                 "complexity": "EXTREME",

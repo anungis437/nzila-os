@@ -88,7 +88,7 @@ export const EvidencePackRequest = z.object({
   summary: z.string().default(''),
   /** Control IDs covered (e.g. ["IR-01","IR-02"]) */
   controlsCovered: z.array(z.string()).default([]),
-  /** Clerk user ID or "system" */
+  /** Auth user ID or "system" */
   createdBy: z.string().min(1),
   /** Artifact descriptors to include in the pack */
   artifacts: z.array(ArtifactDescriptor).min(1),

@@ -5,7 +5,7 @@ from legacy source schemas (Supabase SQL and Drizzle ORM TypeScript).
 
 Supports:
 - Supabase SQL → Django models (ABR Insights)
-- Drizzle ORM TypeScript → Django models (Union Eyes)
+- Drizzle ORM TypeScript → Django models (UnionEyes)
 - Auto-generated DRF serializers from models
 - Auto-generated DRF viewsets from models
 - Auto-generated URL patterns from viewsets
@@ -1920,9 +1920,9 @@ def run_abr_generation(workspace_root: Path) -> List[GenerationResult]:
 
 
 def run_ue_generation(workspace_root: Path) -> List[GenerationResult]:
-    """Generate Django code from Union Eyes Drizzle schemas"""
+    """Generate Django code from UnionEyes Drizzle schemas"""
     logger.info("=" * 60)
-    logger.info("Union Eyes → Django Code Generation")
+    logger.info("UnionEyes → Django Code Generation")
     logger.info("=" * 60)
 
     schema_dir = (

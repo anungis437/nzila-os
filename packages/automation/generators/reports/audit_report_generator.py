@@ -3,7 +3,7 @@
 Audit Report Generator — Creates comprehensive platform audit reports
 combining schema analysis, dependency mapping, and migration planning.
 
-Generates detailed JSON audit reports for Union Eyes and ABR Insights.
+Generates detailed JSON audit reports for UnionEyes and ABR Insights.
 """
 
 import json

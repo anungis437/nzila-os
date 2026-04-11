@@ -1,5 +1,5 @@
 /**
- * Contract Test — Union Eyes: Component Boundary Enforcement
+ * Contract Test — UnionEyes: Component Boundary Enforcement
  *
  * INVARIANT: UI components (components/, app/) must NOT directly import from:
  * - db/ (database layer)

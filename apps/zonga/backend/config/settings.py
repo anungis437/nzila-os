@@ -176,17 +176,25 @@ CORS_ALLOWED_ORIGINS = [
 CORS_ALLOW_CREDENTIALS = True
 
 # =============================================================================
-# Authentication — OIDC (Entra External ID / Clerk)
+# Authentication — OIDC (Entra External ID)
 # =============================================================================
 
-AUTH_JWKS_URL = os.environ.get("AUTH_JWKS_URL") or os.environ.get("CLERK_JWKS_URL", "")
-AUTH_SECRET = os.environ.get("AUTH_SECRET") or os.environ.get("CLERK_SECRET_KEY", "")
-CLERK_PUBLISHABLE_KEY = os.environ.get("NEXT_PUBLIC_CLERK_PUBLISHABLE_KEY", "")
-AUTH_WEBHOOK_SECRET = os.environ.get("AUTH_WEBHOOK_SECRET") or os.environ.get("CLERK_WEBHOOK_SECRET", "")
+AUTH_JWKS_URL = os.environ.get("AUTH_JWKS_URL") or os.environ.get(
+    "CLERK_JWKS_URL", ""
+)  # legacy fallback
+AUTH_SECRET = os.environ.get("AUTH_SECRET") or os.environ.get(
+    "CLERK_SECRET_KEY", ""
+)  # legacy fallback
+AUTH_WEBHOOK_SECRET = os.environ.get("AUTH_WEBHOOK_SECRET") or os.environ.get(
+    "CLERK_WEBHOOK_SECRET", ""
+)  # legacy fallback
 
-# Legacy env var names (backward compat)
+# Legacy env var aliases (deprecated — remove after full migration)
 CLERK_JWKS_URL = AUTH_JWKS_URL
 CLERK_SECRET_KEY = AUTH_SECRET
+CLERK_PUBLISHABLE_KEY = os.environ.get(
+    "NEXT_PUBLIC_CLERK_PUBLISHABLE_KEY", ""
+)  # deprecated
 CLERK_WEBHOOK_SECRET = AUTH_WEBHOOK_SECRET
 
 # =============================================================================

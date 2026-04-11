@@ -2,7 +2,7 @@
  * Tests for case timeline audit response shape
  *
  * PR-031: Validates the timeline response contract.
- * The actual API hits Clerk + Drizzle, so these are
+ * The actual API hits platform auth + Drizzle, so these are
  * pure shape/contract tests.
  */
 

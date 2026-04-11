@@ -47,7 +47,7 @@ const DEFAULT_LINKS: TrainingLink[] = [
   {
     id: "member-filing",
     title: "Member Grievance Filing Guide",
-    description: "Step-by-step walkthrough of how members submit an intake through Union Eyes.",
+    description: "Step-by-step walkthrough of how members submit an intake through UnionEyes.",
     icon: FileText,
     href: "/docs/guides/member-filing",
     audience: "Members",
@@ -100,7 +100,7 @@ export function TrainingLinksPanel({
       </div>
 
       <p className="text-xs text-muted-foreground">
-        Access training material to help your team get the most out of Union Eyes.
+        Access training material to help your team get the most out of UnionEyes.
       </p>
 
       <div className="grid grid-cols-1 md:grid-cols-2 gap-3">

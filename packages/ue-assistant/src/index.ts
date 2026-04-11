@@ -1,7 +1,7 @@
 /**
  * @nzila/ue-assistant — barrel exports
  *
- * Union Eyes AI Assistant: a governed, role-aware, auditable AI
+ * UnionEyes AI Assistant: a governed, role-aware, auditable AI
  * interface for members, stewards, and admins.
  */
 

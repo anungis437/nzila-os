@@ -204,7 +204,7 @@ The `strategy/` directory contains the original comprehensive strategy files exp
 
 ### Nzila Synergies
 - **Shared Django/PostgreSQL stack** with entertainment (CongoWave) and agrotech (CORA)
-- **Diaspora community network** from uniontech (Union Eyes, DiasporaCore)
+- **Diaspora community network** from uniontech (UnionEyes, DiasporaCore)
 - **Financial health tools** from virtual-cfo (Insight CFO) for clinic business management
 - **Compliance frameworks** from fintech and insurancetech verticals
 - **AI/ML capabilities** from centralized Nzila AI infrastructure

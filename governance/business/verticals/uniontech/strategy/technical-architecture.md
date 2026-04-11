@@ -10,14 +10,14 @@ Uniontech operates two production platforms under a shared infrastructure backbo
 
 | Platform | Stack | DB Entities | RLS Policies | Migration Complexity |
 |----------|-------|-------------|-------------|---------------------|
-| **Union Eyes** | Django 5.x, Azure PostgreSQL Flexible Server | 4,773 | 238 | EXTREME |
+| **UnionEyes** | Django 5.x, Azure PostgreSQL Flexible Server | 4,773 | 238 | EXTREME |
 | **DiasporaCore (C3UO)** | Node.js 20, Next.js 14, Drizzle ORM | 485 | 42 | EXTREME |
 
 **Deployment target:** Azure Container Apps (ACA) with Azure Front Door CDN, Redis Cache, and Azure Blob Storage.
 
 ---
 
-## 2. Union Eyes — Django 5 Architecture
+## 2. UnionEyes — Django 5 Architecture
 
 ### 2.1 Application Layer
 
@@ -143,7 +143,7 @@ CREATE POLICY federation_read ON members.member
 | Frontend | Next.js 14 (App Router) | SSR for SEO, client components for banking UI |
 | API | Node.js 20, Express 5 | REST + WebSocket for real-time balance updates |
 | ORM | Drizzle ORM | Type-safe schema; migration-first approach; 485 entity definitions |
-| Database | Azure PostgreSQL Flexible Server | Separate instance from Union Eyes; FINTRAC audit requirements |
+| Database | Azure PostgreSQL Flexible Server | Separate instance from UnionEyes; FINTRAC audit requirements |
 | Payments | Nuvei / Flutterwave | CAD origination, multi-corridor payout |
 | KYC | Onfido / Jumio | Document verification, biometric matching, PEP/sanctions screening |
 
@@ -173,7 +173,7 @@ export const wallets = pgTable('wallets', {
 
 | Platform | Entities | Estimated Duration | Migration Type |
 |----------|---------|-------------------|---------------|
-| Union Eyes | 4,773 entities, 238 RLS policies | 12–16 weeks | Automated (Backbone orchestrator) |
+| UnionEyes | 4,773 entities, 238 RLS policies | 12–16 weeks | Automated (Backbone orchestrator) |
 | DiasporaCore | 485 entities | 4–6 weeks | Automated (Backbone orchestrator) |
 
 ### 6.2 Migration Phases

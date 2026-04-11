@@ -105,6 +105,9 @@ export * from "../schema-organizations";
 // Union Structure (Organizational hierarchy and operational structure)
 export * from "./union-structure-schema";
 
+// Committee Workspace (Meetings, minutes, action items, intelligence)
+export * from "./committee-workspace-schema";
+
 // ============================================================================
 // EXPLICIT RE-EXPORTS (Resolve cross-domain ambiguities)
 // ============================================================================

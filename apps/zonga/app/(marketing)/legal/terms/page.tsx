@@ -29,7 +29,7 @@ export default function TermsPage() {
 
             <h2>2. Account Registration</h2>
             <p>
-              You must provide accurate information when creating an account. You are responsible for maintaining the security of your credentials and for all activity under your account. Accounts are managed through Clerk authentication.
+              You must provide accurate information when creating an account. You are responsible for maintaining the security of your credentials and for all activity under your account.
             </p>
 
             <h2>3. Content Ownership</h2>

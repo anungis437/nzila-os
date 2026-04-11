@@ -114,14 +114,14 @@ class BoardReporter:
 
 | Status | Count | Platforms |
 |--------|-------|-----------|
-| Production | {portfolio.get('platforms_production', 4)} | CongoWave, ABR Insights, Union Eyes, Lexora |
+| Production | {portfolio.get('platforms_production', 4)} | CongoWave, ABR Insights, UnionEyes, Lexora |
 | Beta | {portfolio.get('platforms_beta', 3)} | CORA, DiasporaCore, Insight CFO |
 | Development | {portfolio.get('platforms_development', 8)} | Remaining platforms |
 
 ### Top Performing Platforms
 
 1. **CongoWave** - Entertainment - 10.0/10 production readiness
-2. **Union Eyes** - Uniontech - 9.5/10 production readiness  
+2. **UnionEyes** - Uniontech - 9.5/10 production readiness  
 3. **ABR Insights** - EdTech/Legaltech - 9.1/10 production readiness
 4. **Lexora** - Legaltech - 8.5/10 production readiness
 5. **DiasporaCore** - Fintech - 8.0/10 production readiness

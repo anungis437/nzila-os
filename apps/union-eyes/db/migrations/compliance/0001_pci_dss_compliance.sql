@@ -2,7 +2,7 @@
 -- PCI-DSS Compliance Schema Migration
 -- File: 0001_pci_dss_compliance.sql
 -- 
--- This migration implements PCI-DSS SAQ-A compliance tracking for Union Eyes.
+-- This migration implements PCI-DSS SAQ-A compliance tracking for UnionEyes.
 -- SAQ-A applies because:
 --   - Card data entry via Stripe Elements (off-server)
 --   - No card data stored (tokens only)
@@ -55,7 +55,7 @@ CREATE INDEX IF NOT EXISTS idx_pci_saq_status ON pci_dss_saq_assessments(status)
 CREATE INDEX IF NOT EXISTS idx_pci_saq_next_due ON pci_dss_saq_assessments(next_assessment_due);
 
 COMMENT ON TABLE pci_dss_saq_assessments IS 'PCI-DSS Self-Assessment Questionnaire tracking';
-COMMENT ON COLUMN pci_dss_saq_assessments.saq_type IS 'SAQ-A: E-commerce using redirect/iframe (Union Eyes qualifies)';
+COMMENT ON COLUMN pci_dss_saq_assessments.saq_type IS 'SAQ-A: E-commerce using redirect/iframe (UnionEyes qualifies)';
 
 -- ============================================================================
 -- REQUIREMENTS TRACKING
@@ -174,7 +174,7 @@ CREATE TABLE IF NOT EXISTS pci_dss_cardholder_data_flow (
 CREATE INDEX IF NOT EXISTS idx_pci_flow_org ON pci_dss_cardholder_data_flow(organization_id);
 
 COMMENT ON TABLE pci_dss_cardholder_data_flow IS 'Documents how cardholder data flows through systems';
-COMMENT ON COLUMN pci_dss_cardholder_data_flow.tokenization_provider IS 'Stripe handles all card data - Union Eyes never sees it';
+COMMENT ON COLUMN pci_dss_cardholder_data_flow.tokenization_provider IS 'Stripe handles all card data - UnionEyes never sees it';
 
 -- ============================================================================
 -- ENCRYPTION KEY MANAGEMENT

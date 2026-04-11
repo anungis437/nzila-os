@@ -1,5 +1,5 @@
 """
-URL configuration for Union Eyes
+URL configuration for UnionEyes
 """
 
 from django.contrib import admin

@@ -1,6 +1,8 @@
 "use client";
 
 import { useState, useEffect } from "react";
+import { useRouter } from "next/navigation";
+import { useLocale } from "next-intl";
 import { zodResolver } from "@hookform/resolvers/zod";
 import { useForm } from "react-hook-form";
 import { z } from "zod";
@@ -11,6 +13,7 @@ import {
   Trash2,
   Search,
   Users,
+  Eye,
 } from "lucide-react";
 import {
   Card,
@@ -129,6 +132,8 @@ export function CommitteeManagement({
   );
   const [searchQuery, setSearchQuery] = useState("");
   const { toast } = useToast();
+  const router = useRouter();
+  const locale = useLocale();
 
   // eslint-disable-next-line @typescript-eslint/no-explicit-any
   const form = useForm<FormData, any, FormData>({
@@ -442,7 +447,11 @@ export function CommitteeManagement({
               </TableHeader>
               <TableBody>
                 {filteredCommittees.map((committee) => (
-                  <TableRow key={committee.id}>
+                  <TableRow
+                    key={committee.id}
+                    className="cursor-pointer hover:bg-muted/50"
+                    onClick={() => router.push(`/${locale}/dashboard/committees/${committee.id}`)}
+                  >
                     <TableCell className="font-medium">
                       {committee.name}
                     </TableCell>
@@ -471,7 +480,7 @@ export function CommitteeManagement({
                       </Badge>
                     </TableCell>
                     {!readOnly && (
-                      <TableCell>
+                      <TableCell onClick={(e) => e.stopPropagation()}>
                         <DropdownMenu>
                           <DropdownMenuTrigger asChild>
                             <Button variant="ghost" size="icon">
@@ -479,6 +488,12 @@ export function CommitteeManagement({
                             </Button>
                           </DropdownMenuTrigger>
                           <DropdownMenuContent align="end">
+                            <DropdownMenuItem
+                              onClick={() => router.push(`/${locale}/dashboard/committees/${committee.id}`)}
+                            >
+                              <Eye className="mr-2 h-4 w-4" />
+                              View Workspace
+                            </DropdownMenuItem>
                             <DropdownMenuItem
                               onClick={() => handleEdit(committee)}
                             >

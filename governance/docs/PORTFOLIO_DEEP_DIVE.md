@@ -39,14 +39,14 @@ Nzila Ventures operates a **far more sophisticated multi-vertical portfolio** th
 
 ---
 
-### 1. **UNION EYES** — Flagship Uniontech Platform
+### 1. **UnionEyes** — Flagship Uniontech Platform
 **Size**: 332.81 MB | **Entities**: 4,773 | **Complexity**: EXTREME
 
 **v1 Assessment**: Mostly accurate
 **v2 Correction**: **SIGNIFICANTLY UNDERREPORTED** — Security posture, RLS depth, and infrastructure maturity were not captured.
 
 #### Business Purpose (CONFIRMED)
-Union Eyes is **the crown jewel** — a comprehensive union management system:
+UnionEyes is **the crown jewel** — a comprehensive union management system:
 - **Member Management**: 4,773 entities with sophisticated data models
 - **Pension Fund Management**: Actuarial calculations, forecasting, seasonal trends
 - **Insurance Administration**: Claims processing, payment plans
@@ -89,7 +89,7 @@ Schema: Drift detection, blind spot validation
 ### 2. **C3UO / DiasporaCore V2** — Enterprise Banking Platform
 **Size**: 9.18 MB | **Entities**: 485 | **Complexity**: EXTREME
 
-**v1 Assessment**: "Union operations, 512 entities, MEDIUM, merge with Union Eyes"
+**v1 Assessment**: "Union operations, 512 entities, MEDIUM, merge with UnionEyes"
 **v2 Correction**: **COMPLETELY WRONG VERTICAL** — This is an enterprise banking platform, NOT union operations.
 
 #### Business Purpose (CORRECTED)
@@ -118,7 +118,7 @@ Security: PCI-DSS aligned
 | Vertical | Uniontech | **Fintech/Banking** |
 | Purpose | Union operations | **Diaspora banking platform** |
 | Complexity | MEDIUM | **EXTREME** |
-| Strategy | Merge with Union Eyes | **Standalone fintech product** |
+| Strategy | Merge with UnionEyes | **Standalone fintech product** |
 | Migration | 6 weeks | **12-14 weeks** |
 
 ---
@@ -699,7 +699,7 @@ Real-time: Supabase Realtime
 #### Frontend Frameworks (CORRECTED)
 ```
 Next.js 14-15:        6 platforms (40%)
-  - Union Eyes (14.2), SentryIQ (14.2.5), CongoWave (14.2.21),
+  - UnionEyes (14.2), SentryIQ (14.2.5), CongoWave (14.2.21),
     CyberLearn (14), ABR Insights (15), C3UO (15)
 
 NzilaOS (Next.js 16):  4 platforms (27%) — migrated from Base44
@@ -724,7 +724,7 @@ NzilaOS (Drizzle ORM): 4 platforms — migrated from Base44
   - AgrimoOps, STSA, CORA, Insight CFO
 
 Turborepo Monorepo:   4 platforms
-  - Union Eyes, C3UO, SentryIQ, Trade OS
+  - UnionEyes, C3UO, SentryIQ, Trade OS
 
 Supabase (BaaS):      3 platforms
   - ABR Insights, CyberLearn, Shop Quoter
@@ -732,7 +732,7 @@ Supabase (BaaS):      3 platforms
 
 #### Database Tier (CORRECTED)
 ```
-PostgreSQL Direct:    Union Eyes (Drizzle), CongoWave (Django ORM + PostGIS), eExports
+PostgreSQL Direct:    UnionEyes (Drizzle), CongoWave (Django ORM + PostGIS), eExports
 Supabase/PostgreSQL:  ABR Insights (132 tables), Shop Quoter (93 tables), CyberLearn (30+ tables)
 NzilaOS (Drizzle/PG): AgrimoOps, STSA, CORA, Insight CFO — migrated from Base44
 Unknown:              Court Lens, Trade OS, C3UO
@@ -751,7 +751,7 @@ AGROTECH (2 platforms):
   - CORA: Comprehensive farm management
 
 UNIONTECH (1 platform):
-  - Union Eyes: Enterprise union management (crown jewel)
+  - UnionEyes: Enterprise union management (crown jewel)
 
 TRADE & COMMERCE (3 platforms):
   - eExports: Export documentation
@@ -777,7 +777,7 @@ ENTERTAINMENT (1 platform):
 
 ```
 EXTREME (4 platforms):
-  🔴 Union Eyes: 4,773 entities, 238 RLS, ML pipeline
+  🔴 UnionEyes: 4,773 entities, 238 RLS, ML pipeline
   🔴 C3UO: 485 entities, banking compliance (KYC/AML, PCI-DSS)
   🔴 ABR Insights: 132 tables, AI, 9.1/10 production readiness
   🔴 CongoWave: 83+ models, streaming, royalties, ML, real-time
@@ -809,13 +809,13 @@ EMPTY (1):
 Stripe:     ABR Insights, CyberLearn, CongoWave, Shop Quoter
 Mobile Money: CongoWave (M-Pesa, Orange Money)
 Zoho:       Shop Quoter (17 CRM tables)
-Custom:     Union Eyes (pension, insurance payments)
+Custom:     UnionEyes (pension, insurance payments)
 ```
 
 #### AI/ML Capabilities (5+ platforms):
 ```
 Azure OpenAI:   ABR Insights (GPT-4, embeddings, predictions)
-ML Pipeline:    Union Eyes (churn, workload forecasting)
+ML Pipeline:    UnionEyes (churn, workload forecasting)
 ML Engine:      CongoWave (recommendations, fraud detection)
 Legal AI:       Court Lens (argument builder, precedent search)
 Lab AI:         CyberLearn (automated validation)
@@ -827,7 +827,7 @@ Document AI:    eExports (classification, extraction)
 #### Communication Services:
 ```
 Email: Resend (ABR, CyberLearn), SendGrid (SentryIQ)
-SMS: Twilio (SentryIQ, Union Eyes)
+SMS: Twilio (SentryIQ, UnionEyes)
 Push: CongoWave, CyberLearn
 WhatsApp: Shop Quoter (AI bot)
 Slack: SentryIQ, Shop Quoter
@@ -838,14 +838,14 @@ Microsoft Teams: CyberLearn
 
 ```
 User/Member Management:  ALL platforms (15/15)
-Financial Transactions:  Union Eyes, CongoWave, Shop Quoter, ABR, SentryIQ, C3UO (6/15)
+Financial Transactions:  UnionEyes, CongoWave, Shop Quoter, ABR, SentryIQ, C3UO (6/15)
 Document Management:     Court Lens, Trade OS, eExports, Shop Quoter (4/15)
-Case/Matter Tracking:    Court Lens, Union Eyes, ABR Insights (3/15)
+Case/Matter Tracking:    Court Lens, UnionEyes, ABR Insights (3/15)
 Analytics/Reporting:     ALL platforms (15/15)
-Notification System:     CongoWave, ABR, CyberLearn, Union Eyes, SentryIQ (5/15)
+Notification System:     CongoWave, ABR, CyberLearn, UnionEyes, SentryIQ (5/15)
 Subscription/Billing:    ABR, CyberLearn, CongoWave, Shop Quoter (4/15)
 Gamification:            ABR Insights, CyberLearn (2/15)
-Audit Logging:           CongoWave, ABR, CyberLearn, Union Eyes (4/15)
+Audit Logging:           CongoWave, ABR, CyberLearn, UnionEyes (4/15)
 RBAC/Permissions:        ALL enterprise platforms (10+/15)
 ```
 
@@ -857,7 +857,7 @@ RBAC/Permissions:        ALL enterprise platforms (10+/15)
 
 ```
 Uniontech (1 platform):                    4,773 entities (major)
-  - Union Eyes: 4,773
+  - UnionEyes: 4,773
 
 Fintech/Banking (3 platforms):               544+ entities
   - C3UO/DiasporaCore: 485
@@ -895,7 +895,7 @@ WORLD-CLASS (Production-ready, battle-tested):
   🏆 CongoWave: 100% complete, production-ready, 4 Docker configs
 
 ENTERPRISE-GRADE (Sophisticated, production-capable):
-  ✅ Union Eyes: ML pipeline, 238 RLS, OpenTelemetry, 10/10 security
+  ✅ UnionEyes: ML pipeline, 238 RLS, OpenTelemetry, 10/10 security
   ✅ C3UO: Banking compliance, Turborepo, enterprise architecture
   ✅ SentryIQ: Turborepo, Fastify, Snyk, PWA, enterprise integrations
 
@@ -939,7 +939,7 @@ PHASE 2 — DJANGO PROOF OF CONCEPT (7-8 weeks)
   - Establishes Django conventions
 
 PHASE 3 — FLAGSHIP (10-12 weeks)
-  Migrate Union Eyes:
+  Migrate UnionEyes:
   - Most sophisticated platform (4,773 entities)
   - ML pipeline integration (churn, workload)
   - 238 RLS policies → Django permissions
@@ -1021,7 +1021,7 @@ PHASE 8 — AGROTECH + CONSOLIDATION (16-19 weeks)
 |-------|-----------|----------|------------|
 | 1. Foundation | Backbone | 16 weeks | 16 weeks |
 | 2. PoC | eExports | 7-8 weeks | 24 weeks |
-| 3. Flagship | Union Eyes | 10-12 weeks | 36 weeks |
+| 3. Flagship | UnionEyes | 10-12 weeks | 36 weeks |
 | 4. EdTech+Legal | ABR + Court Lens | 22-28 weeks | 64 weeks |
 | 5. Fintech | C3UO + STSA + Insight CFO | 28-32 weeks | 96 weeks |
 | 6. Commerce+Insur | SentryIQ + Shop Quoter + Trade OS | 30-36 weeks | 132 weeks |
@@ -1062,7 +1062,7 @@ ENGINEERING INVESTMENT VALUE (corrected):
 ```
 EXTREME RISK (financial data, compliance, encryption):
   🔴 C3UO/DiasporaCore: Banking compliance (KYC/AML, PCI-DSS)
-  🔴 Union Eyes: 4,773 entities, SIN encryption, pension fund data
+  🔴 UnionEyes: 4,773 entities, SIN encryption, pension fund data
   🔴 ABR Insights: Tribunal cases, SAML SSO, AI cost controls
   🔴 STSA/Lexora: Regulatory stress test calculations (Basel III/IV)
 
@@ -1100,7 +1100,7 @@ The Nzila portfolio represents **$4M+ in engineering investment** across **15 pl
 1. **Backbone-first approach** remains valid (56% time savings)
 2. **eExports Django PoC** validates Django choice (already Django)
 3. **CongoWave is already Django 5.1** — second migration template
-4. **Union Eyes as architecture North Star** (ML, security, observability)
+4. **UnionEyes as architecture North Star** (ML, security, observability)
 5. **ABR Insights gamification patterns** reusable for CyberLearn
 6. **Shared Legal AI service** (Court Lens + ABR Insights tribunal data)
 7. **Fintech cluster** (C3UO + STSA + Insight CFO) shares compliance patterns
@@ -1110,7 +1110,7 @@ The Nzila portfolio represents **$4M+ in engineering investment** across **15 pl
 
 **Timeline**: **15 months** with 3 parallel teams (vs. 7+ years standalone).
 
-**Recommendation**: Proceed with backbone build → eExports PoC → Union Eyes migration → parallel phase execution.
+**Recommendation**: Proceed with backbone build → eExports PoC → UnionEyes migration → parallel phase execution.
 
 ---
 

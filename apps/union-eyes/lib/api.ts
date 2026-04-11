@@ -2,7 +2,7 @@
 //
 // This module is imported by both server and client components.
 // For server-side auth token injection, use lib/api-server.ts instead.
-// Client-side auth relies on Clerk session cookies (withCredentials: true).
+// Client-side auth relies on session cookies (withCredentials: true).
 
 import axios, { AxiosInstance, AxiosError, InternalAxiosRequestConfig } from 'axios';
 import { createClientLogger } from '@/lib/client-logger';
@@ -14,7 +14,7 @@ const API_URL = process.env.NEXT_PUBLIC_API_URL || 'http://localhost:8000';
 /**
  * API client for Union Eyes backend.
  * 
- * On the client side, authentication works via Clerk session cookies
+ * On the client side, authentication works via session cookies
  * (withCredentials: true sends cookies automatically).
  * 
  * For server-side usage with Bearer token auth, use the server-only
@@ -29,7 +29,7 @@ class ApiClient {
       headers: {
         'Content-Type': 'application/json',
       },
-      withCredentials: true, // Include cookies for Clerk session auth
+      withCredentials: true, // Include cookies for session auth
     });
 
     // Request interceptor - log requests in development

@@ -21,7 +21,7 @@ export interface StripeEvidencePackInput {
   startDate: string // YYYY-MM-DD
   endDate: string // YYYY-MM-DD
   periodLabel: string // e.g. "2025-03"
-  createdBy: string // Clerk userId or "system"
+  createdBy: string // auth userId or "system"
 }
 
 export interface StripeEvidenceArtifact {

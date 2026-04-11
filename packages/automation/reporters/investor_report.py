@@ -46,7 +46,7 @@ class InvestorReporter:
         platforms = data.get("platforms", [
             {"name": "CongoWave", "status": "production", "vertical": "Entertainment"},
             {"name": "ABR Insights", "status": "production", "vertical": "EdTech/Legaltech"},
-            {"name": "Union Eyes", "status": "development", "vertical": "Uniontech"},
+            {"name": "UnionEyes", "status": "development", "vertical": "Uniontech"},
             {"name": "Lexora", "status": "production", "vertical": "Legaltech"},
             {"name": "CORA", "status": "beta", "vertical": "Agrotech"}
         ])

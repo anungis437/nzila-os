@@ -31,7 +31,7 @@ We operate as a **multi-vertical platform company**, sharing a common technology
 
 | Platform | Vertical | Stage |
 |----------|----------|-------|
-| **Union Eyes** | Labour / Fintech | Live |
+| **UnionEyes** | Labour / Fintech | Live |
 | **ABR Insights** | Compliance / Legal-tech | Live |
 | **Cora** | AI Automation | Beta |
 | And 12 more | Various | Roadmap |

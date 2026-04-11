@@ -228,3 +228,6 @@ cookies.txt
 zcookies.txt
 zheaders.txt
 email-otp.json
+
+# CodeSpring local config
+.codespring/

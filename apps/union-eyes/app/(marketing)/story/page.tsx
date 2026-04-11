@@ -1,7 +1,7 @@
 /**
  * Story Page - Our Story
  * 
- * Purpose: Authentic founder narrative about Union Eyes' origins
+ * Purpose: Authentic founder narrative about UnionEyes' origins
  * Audience: Union leadership, organizers, member representatives
  * 
  * Tone: Personal, authentic, founder-driven
@@ -18,9 +18,9 @@ import { Heart, Users, Shield, Handshake } from 'lucide-react';
 import { Button } from '@/components/ui/button';
 
 export const metadata: Metadata = {
-  title: 'Our Story | Union Eyes',
+  title: 'Our Story | UnionEyes',
   description:
-    'Union Eyes begins with two brothers, two careers, and one shared conviction: unions deserve better tools.',
+    'UnionEyes begins with two brothers, two careers, and one shared conviction: unions deserve better tools.',
 };
 
 export default function StoryPage() {
@@ -37,7 +37,7 @@ export default function StoryPage() {
             Two brothers. Two careers.<br />One shared conviction.
           </h1>
           <p className="text-xl text-slate-600 leading-relaxed max-w-3xl mx-auto">
-            Union Eyes begins with a Labour Relations Officer turned lawyer
+            UnionEyes begins with a Labour Relations Officer turned lawyer
             and a CIO turned SaaS builder — and the moment their paths
             converged on an obvious opportunity.
           </p>
@@ -68,7 +68,7 @@ export default function StoryPage() {
               exactly what was broken. Oby knew exactly how to fix it.
             </p>
             <p className="text-lg text-slate-700 leading-relaxed font-semibold">
-              Union Eyes is what happened next.
+              UnionEyes is what happened next.
             </p>
           </div>
         </section>
@@ -111,7 +111,7 @@ export default function StoryPage() {
             <PrincipleCard
               icon={<Handshake className="h-6 w-6" />}
               title="Democratic governance baked in"
-              description="Union Eyes has a golden share structure. Union members elect representatives who can veto any sale or mission change. This isn&apos;t marketing—it&apos;s in our shareholder agreement."
+              description="UnionEyes has a golden share structure. Union members elect representatives who can veto any sale or mission change. This isn&apos;t marketing—it&apos;s in our shareholder agreement."
             />
           </div>
         </section>
@@ -123,7 +123,7 @@ export default function StoryPage() {
           </h2>
           <p className="text-lg text-slate-600 mb-8 max-w-2xl mx-auto">
             We don&apos;t do demos. We do conversations. Tell us about your challenges. We&apos;ll
-            be honest about whether Union Eyes can help — or if something else would serve you
+            be honest about whether UnionEyes can help — or if something else would serve you
             better.
           </p>
           <div className="flex flex-col sm:flex-row gap-4 justify-center">

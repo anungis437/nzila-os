@@ -2,7 +2,7 @@
 
 **Report ID:** NZILAOS-ALIGNMENT-2026-02-21-R1  
 **Updated:** 2026-02-21 (after PRs ABR-01, UE-01..05, OS-ALIGN-01)  
-**Scope:** ABR Insights + Union Eyes — full NzilaOS governance alignment  
+**Scope:** ABR Insights + UnionEyes — full NzilaOS governance alignment  
 **Terminology Rule:** "Org" everywhere. "tenant" = terminology debt.
 
 ---
@@ -12,7 +12,7 @@
 | App | Verdict | Pass | Fail | Blockers Remaining |
 |-----|---------|------|------|-------------------|
 | **ABR Insights** | **GO** | 20 | 0 | 0 |
-| **Union Eyes** | **GO** | 19 | 0 | 0 (3 remediated) |
+| **UnionEyes** | **GO** | 19 | 0 | 0 (3 remediated) |
 
 **Terminology Debt:** 173 refs in governance/docs classified as POST-GA. Not blocking.
 
@@ -36,7 +36,7 @@
 | App | Root | Type | Markers |
 |-----|------|------|---------|
 | ABR Insights | `apps/abr/` | Hybrid (Next.js + Django) | `backend/manage.py`, `backend/requirements.txt`, `package.json`, `backend/config/settings.py` |
-| Union Eyes | `apps/union-eyes/` | Hybrid (Next.js + Django + financial-service) | `backend/manage.py`, `backend/requirements.txt`, `package.json`, `drizzle.config.ts` |
+| UnionEyes | `apps/union-eyes/` | Hybrid (Next.js + Django + financial-service) | `backend/manage.py`, `backend/requirements.txt`, `package.json`, `drizzle.config.ts` |
 
 No `apps/abr-insights/`, `verticals/`, or `cloned/` directories exist.
 
@@ -95,7 +95,7 @@ No `apps/abr-insights/`, `verticals/`, or `cloned/` directories exist.
 | Org context server-side | **PASS** | `_get_org_id()` now derives org exclusively from `user.organization_id` (Clerk JWT). Query-param fallback removed. PermissionDenied on missing org. | PR-ABR-01 |
 | Org-scoped registry | **PASS** | `packages/db/src/org-registry.ts` — 48 tables with `org_id`. Contract test enforced. | — |
 
-### Union Eyes — ALL PASS
+### UnionEyes — ALL PASS
 
 | Check | Status | Evidence | PR |
 |-------|--------|----------|----|
@@ -159,7 +159,7 @@ UE archive migration (`0063_add_audit_log_archive_support.sql`) adds archive col
 | Seal | `apps/abr/scripts/evidence/seal.ts` | Merkle root + HMAC-SHA256 seal. Updates pack to "sealed". Writes `evidence/seal.json`. |
 | Verify | `apps/abr/scripts/evidence/verify.ts` | Recomputes Merkle root, verifies HMAC. **CI blocking gate** (exit 1 on failure). |
 
-### Union Eyes Evidence Scripts — **PASS**
+### UnionEyes Evidence Scripts — **PASS**
 
 | Script | Path | Function |
 |--------|------|----------|
@@ -314,7 +314,7 @@ UE archive migration (`0063_add_audit_log_archive_support.sql`) adds archive col
 
 All 20 checks pass. Blocker B2 (query-param org bypass) remediated in PR-ABR-01.
 
-### Union Eyes: **GO** ✅
+### UnionEyes: **GO** ✅
 
 All 19 checks pass. 3 blockers remediated:
 1. ~~B1: Raw DB access~~ → Wrapped in `withRLSContext()`, ESLint enforced (PR-UE-01)

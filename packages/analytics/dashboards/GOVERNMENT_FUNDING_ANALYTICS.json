@@ -120,7 +120,7 @@
             "credit_amount": 380000,
             "filing_status": "To File (Q2 2027)",
             "disbursement_date": "2027-09-15",
-            "notes": "Backbone architecture (35%) + Union Eyes migration (25%) + AI Companion (20%) + Patent filings (20%)"
+            "notes": "Backbone architecture (35%) + UnionEyes migration (25%) + AI Companion (20%) + Patent filings (20%)"
           },
           {
             "year": "2027",
@@ -172,7 +172,7 @@
             "notes": "Synergy with SDTC climate application"
           },
           {
-            "platform": "Union Eyes",
+            "platform": "UnionEyes",
             "project": "Pension Forecasting AI",
             "funding_requested": 180000,
             "status": "Planned (Q3 2026)",
@@ -245,7 +245,7 @@
           "total_funding": 60000,
           "projects": [
             {"intern": "AI/ML Researcher (Memora)", "university": "UBC", "focus": "Conversational AI for health reminders", "duration": "12 months"},
-            {"intern": "Data Scientist (Union Eyes)", "university": "University of Toronto", "focus": "Pension forecasting algorithms", "duration": "12 months"}
+            {"intern": "Data Scientist (UnionEyes)", "university": "University of Toronto", "focus": "Pension forecasting algorithms", "duration": "12 months"}
           ],
           "application_status": "Planned (Q2 2026)",
           "probability": 0.80
@@ -290,7 +290,7 @@
           ],
           "probability": 0.30,
           "expected_value": 600000,
-          "notes": "Requires Union Eyes + ABR + Memora operational, strong AI IP portfolio"
+          "notes": "Requires UnionEyes + ABR + Memora operational, strong AI IP portfolio"
         },
         {
           "program": "Canada-Africa Partnership Platform",

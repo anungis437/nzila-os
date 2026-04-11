@@ -2,7 +2,7 @@
  * @nzila/ai-registry — Unified AI/ML Model Registry
  *
  * Provides:
- * - Standardized Model Cards (extending Union Eyes pattern platform-wide)
+ * - Standardized Model Cards (extending UnionEyes pattern platform-wide)
  * - NIST AI RMF risk classification
  * - Governance lifecycle (draft → review → approved → deployed → retired)
  * - Unified registry across LLM (ai-core) and ML (ml-core) systems

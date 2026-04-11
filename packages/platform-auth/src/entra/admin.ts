@@ -1,17 +1,13 @@
 /**
  * @nzila/platform-auth — Entra Admin Client
  *
- * Drop-in replacement for Clerk's `clerkClient` admin SDK.
- * Routes admin operations through Microsoft Graph API.
+ * Admin SDK for user and organization operations via Microsoft Graph API.
  *
  * For full compatibility, set:
  *   AZURE_AD_CLIENT_ID, AZURE_AD_CLIENT_SECRET, AZURE_AD_TENANT_ID
  *
  * Usage:
- *   import { clerkClient } from '@nzila/platform-auth/entra/server'
- *
- * NOTE: This is a minimal compat layer. Not all Clerk admin methods are
- * implemented. Unimplemented methods log a warning and return empty data.
+ *   import { adminClient } from '@nzila/platform-auth/entra/server'
  */
 
 import { logger } from './logger-shim'
@@ -93,9 +89,9 @@ function mapGraphUser(u: GraphUser) {
   }
 }
 
-// ── Clerk-Compatible Admin Client ───────────────────────────────────────────
+// ── Admin Client ───────────────────────────────────────────────────────────────
 
-export const clerkClient = {
+export const adminClient = {
   users: {
     async getUser(userId: string) {
       const user = await graphRequest(`/users/${userId}`) as GraphUser
@@ -134,3 +130,6 @@ export const clerkClient = {
     },
   },
 }
+
+/** @deprecated Use `adminClient` instead */
+export const clerkClient = adminClient

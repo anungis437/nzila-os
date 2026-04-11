@@ -4,13 +4,13 @@
 > **Status:** Accepted  
 > **Date:** 2026-03-25  
 > **Decision Makers:** NzilaOS Engineering  
-> **Domain:** Platform Economics (Union Eyes)  
+> **Domain:** Platform Economics (UnionEyes)  
 
 ---
 
 ## Context
 
-Union Eyes operates as a multi-tenant, multi-local union management platform.
+UnionEyes operates as a multi-tenant, multi-local union management platform.
 Until now, billing, cost allocation, and financial reporting were handled through
 ad-hoc queries, manual spreadsheets, and disconnected domain tables. This
 created three critical gaps:
@@ -82,7 +82,7 @@ Different union structures need different fairness models:
 
 ### Why CAD-only?
 
-All current and anticipated Union Eyes customers operate in Canada. Adding
+All current and anticipated UnionEyes customers operate in Canada. Adding
 multi-currency would introduce exchange rate complexity, hedging concerns,
 and regulatory requirements with no current customer demand. If multicurrency
 is needed later, the `_cad` suffix on all columns makes migration paths

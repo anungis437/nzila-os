@@ -12,7 +12,7 @@
  *  4. Payment config references proper env vars
  *  5. Storage config references proper env vars
  *  6. Feature flag usage is consistent (no dead flags)
- *  7. middleware.ts exists and uses clerkMiddleware on all deployed apps
+ *  7. middleware.ts exists and uses authMiddleware on all deployed apps
  *  8. instrumentation.ts/next.config patterns are consistent
  */
 import { describe, it, expect } from 'vitest'
@@ -50,8 +50,8 @@ describe('CERT-PHASE-2 — Startup and Runtime Certification', () => {
         continue
       }
       const content = readFileSync(mwPath, 'utf-8')
-      if (!content.includes('clerkMiddleware')) {
-        missing.push(`${app}: middleware.ts missing clerkMiddleware`)
+      if (!content.includes('authMiddleware')) {
+        missing.push(`${app}: middleware.ts missing authMiddleware`)
       }
     }
     expect(missing).toEqual([])

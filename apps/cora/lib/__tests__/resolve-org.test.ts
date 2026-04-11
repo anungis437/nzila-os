@@ -1,14 +1,14 @@
 /**
  * Cora — Org Context Resolution Tests
  *
- * Tests the mapClerkRoleToAgriRole logic (through resolveOrgContext)
+ * Tests the mapAuthRoleToAgriRole logic (through resolveOrgContext)
  * and error handling for unauthenticated / no-org states.
  *
  * @see lib/resolve-org.ts
  */
 import { describe, it, expect, vi, beforeEach } from 'vitest'
 
-// Mock Clerk auth
+// Mock platform auth
 const mockAuth = vi.fn()
 const mockCurrentUser = vi.fn()
 vi.mock('@nzila/platform-auth/entra/server', () => ({

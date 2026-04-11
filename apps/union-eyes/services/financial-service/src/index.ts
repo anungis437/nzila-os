@@ -184,10 +184,10 @@ const authenticate = async (
     
     const token = authHeader.substring(7);
     
-    if (process.env.AUTH_SECRET || process.env.CLERK_SECRET_KEY) {
+    if (process.env.AUTH_SECRET) {
       try {
         const { payload } = await verifyToken(token, {
-          secretKey: process.env.AUTH_SECRET || process.env.CLERK_SECRET_KEY!,
+          secretKey: process.env.AUTH_SECRET,
         });
 
         // Type assertion for JWT payload
@@ -203,7 +203,7 @@ const authenticate = async (
 
         return next();
       } catch (error) {
-        logger.warn('Clerk token verification failed', { error });
+        logger.warn('Auth token verification failed', { error });
         return res.status(401).json({
           success: false,
           error: 'Invalid or expired token',

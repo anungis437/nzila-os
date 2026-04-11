@@ -2,7 +2,7 @@
 /**
  * GET /api/ml/scores/ue/cases/sla-risk
  *
- * Returns Union Eyes case SLA breach risk scores for a date range.
+ * Returns UnionEyes case SLA breach risk scores for a date range.
  * Cursor-paginated; sorted by (occurredAt DESC, id DESC).
  * Cursor is base64("<iso-timestamp>|<uuid>") — composite key prevents
  * duplicate/skipped rows when multiple records share the same timestamp.

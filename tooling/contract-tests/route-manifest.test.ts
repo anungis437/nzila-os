@@ -187,7 +187,7 @@ describe('INV-ROUTE-MANIFEST — Centralized Route Manifest', () => {
         continue;
       }
       const content = readFileSync(middlewarePath, 'utf-8');
-      if (!content.includes('@nzila/platform-auth') && !content.includes('clerkMiddleware')) {
+      if (!content.includes('@nzila/platform-auth') && !content.includes('authMiddleware')) {
         missingMiddleware.push(app);
       }
     }

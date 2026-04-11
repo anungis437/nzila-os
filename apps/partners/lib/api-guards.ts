@@ -23,7 +23,7 @@ export { withAudit, createAuditedScopedDb }
 export type { AuditedScopedDb }
 
 /**
- * Authenticate the current request via Clerk.
+ * Authenticate the current request via platform auth.
  *
  * @returns userId or a 401 NextResponse error.
  */
@@ -44,7 +44,7 @@ export async function authenticateUser(): Promise<
 /**
  * Create an audited, Org-scoped database for the given entity.
  *
- * Combines Clerk auth with createAuditedScopedDb so routes get a
+ * Combines platform auth with createAuditedScopedDb so routes get a
  * write-enabled, auto-auditing DB in one call.
  */
 export async function getAuditedDb(orgId: string): Promise<

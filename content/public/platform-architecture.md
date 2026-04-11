@@ -125,7 +125,7 @@ Every pull request must pass these eight gates before merge:
 3. **Trivy** — Container + filesystem CVE scan, CRITICAL = fail
 4. **SBOM generation** — CycloneDX, licence policy validation
 5. **Contract tests** — Cross-stack invariant enforcement
-6. **UE evidence** — Union Eyes collect → seal → verify
+6. **UE evidence** — UnionEyes collect → seal → verify
 7. **ABR evidence** — ABR collect → seal → verify
 8. **Red-team** — Adversarial test suite (daily + on PR)
 

@@ -1,7 +1,7 @@
 /**
  * tooling/ml/lib/ueFeatureEngineering.ts
  *
- * Pure feature-engineering functions for Union Eyes case-level ML datasets.
+ * Pure feature-engineering functions for UnionEyes case-level ML datasets.
  * No PII fields (member names, contact info) are included in the output.
  *
  * Exported helpers:

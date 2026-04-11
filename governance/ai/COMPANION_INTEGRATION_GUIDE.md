@@ -32,12 +32,12 @@ This guide provides a **step-by-step integration workflow** for adding the **Com
 1. **What is Companion's primary use case?**
    - Memora: Cognitive wellness companion (daily check-ins, game nudges)
    - ABR: Anti-racism learning coach (personalized coaching, case analysis)
-   - Union Eyes: Grievance guidance (contract interpretation, outcome prediction)
+   - UnionEyes: Grievance guidance (contract interpretation, outcome prediction)
    - CORA: Farm advisory (crop planning, market pricing, sustainability)
 
 2. **What tone profile fits your platform?**
    - **Warm** (Memora): Caring, gentle, encouraging (dementia care, caregiver support)
-   - **Professional** (Union Eyes): Respectful, knowledgeable, clear (labor relations)
+   - **Professional** (UnionEyes): Respectful, knowledgeable, clear (labor relations)
    - **Motivational** (ABR): Inspiring, growth-oriented, affirmative (learning, DEI)
    - **Practical** (CORA): Direct, helpful, data-driven (agriculture, business decisions)
 

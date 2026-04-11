@@ -1,5 +1,5 @@
 /**
- * Partner auth helpers — role & org utilities on top of Clerk.
+ * Partner auth helpers — role & org utilities on top of platform auth.
  *
  * Platform Owner (Admin) Roles:
  *   - platform:admin    — Full platform access
@@ -20,7 +20,7 @@ import { eq, and, sql, desc } from 'drizzle-orm'
 export type PlatformRole = 'platform:admin' | 'platform:ops' | 'platform:finance'
 export type PartnerType = 'channel' | 'isv' | 'enterprise'
 
-/** Emails that always receive platform:admin, regardless of Clerk metadata. */
+/** Emails that always receive platform:admin, regardless of session metadata. */
 const SUPER_ADMIN_EMAILS = new Set([
   'info@nzilaventures.com',
   ...(process.env.SUPER_ADMIN_EMAILS ?? '').split(',').map(s => s.trim()).filter(Boolean),
@@ -32,7 +32,7 @@ export type PartnerRole =
   | 'enterprise:admin' | 'enterprise:user'
 
 /**
- * Extract the partner type and sub-role from a Clerk custom role string.
+ * Extract the partner type and sub-role from a custom role string.
  */
 export function parsePartnerRole(role: string): { type: PartnerType; sub: string } | null {
   const parts = role.split(':')
@@ -43,7 +43,7 @@ export function parsePartnerRole(role: string): { type: PartnerType; sub: string
 }
 
 /**
- * Returns the current user's Clerk session claims.
+ * Returns the current user's auth session claims.
  * Throws redirect to /sign-in if unauthenticated.
  */
 export async function requireAuth() {
@@ -75,7 +75,7 @@ export async function hasAnyRole(roles: PartnerRole[]): Promise<boolean> {
 }
 
 /**
- * Look up the partner record for the current Clerk org, then verify the
+ * Look up the partner record for the current auth org, then verify the
  * partner has an entitlement row granting access to `orgId + view`.
  *
  * Returns the partner row + orgId on success.
@@ -93,7 +93,7 @@ export async function requirePartnerEntityAccess(
     return { ok: false, error: 'Unauthenticated', status: 401 }
   }
 
-  // Resolve partner from Clerk org
+  // Resolve partner from auth org
   const [partner] = await platformDb
     .select({ id: partners.id, tier: partners.tier })
     .from(partners)
@@ -130,7 +130,7 @@ export async function requirePartnerEntityAccess(
 }
 
 /**
- * Resolve the first orgId the current Clerk org is entitled to access
+ * Resolve the first orgId the current auth org is entitled to access
  * for the given view permission. Returns null if not entitled.
  *
  * Used by API routes that self-resolve orgId so that pages do not need

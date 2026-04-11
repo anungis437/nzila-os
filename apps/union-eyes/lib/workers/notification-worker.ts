@@ -345,14 +345,14 @@ async function processNotification(job: any) {
 }
 
 /**
- * Get user email from Clerk
+ * Get user email from auth admin client
  */
 async function getUserEmail(userId: string): Promise<string | null> {
   try {
-    const { clerkClient } = await import('@nzila/platform-auth/entra/server');
+    const { adminClient } = await import('@nzila/platform-auth/entra/server');
 
     // Fetch user via Graph API adapter
-    const user = await clerkClient.users.getUser(userId);
+    const user = await adminClient.users.getUser(userId);
     
     // Get primary email address
     // eslint-disable-next-line @typescript-eslint/no-explicit-any

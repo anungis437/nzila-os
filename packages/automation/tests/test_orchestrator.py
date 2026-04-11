@@ -157,7 +157,7 @@ class TestOrchestrator:
                     },
                     {
                         "platform_id": "ue",
-                        "name": "Union Eyes",
+                        "name": "UnionEyes",
                         "complexity": "MEDIUM",
                         "entity_count": 20,
                         "migration_estimate_weeks": 4,
@@ -328,7 +328,7 @@ class TestOrchestrator:
                 [
                     {
                         "platform_id": "union-eyes",
-                        "name": "Union Eyes",
+                        "name": "UnionEyes",
                         "complexity": "HIGH",
                         "entity_count": 50,
                         "migration_estimate_weeks": 8,

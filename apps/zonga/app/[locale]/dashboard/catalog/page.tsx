@@ -9,6 +9,7 @@ import Link from 'next/link'
 import { auth } from '@nzila/platform-auth/entra/server'
 import { redirect } from 'next/navigation'
 import { Card } from '@nzila/ui'
+import { getTranslations } from 'next-intl/server'
 import { listCatalogAssets } from '@/lib/actions/catalog-actions'
 import { AfricanGenre } from '@/lib/zonga-services'
 import { CatalogCard } from '@/components/dashboard/catalog-card'
@@ -53,20 +54,21 @@ export default async function CatalogPage({
   const displayTotal = params.genre ? filteredAssets.length : total
   const withCollaborators = filteredAssets.filter((a) => a.collaborators?.length).length
   const languages = new Set(filteredAssets.map((asset) => asset.language).filter(Boolean))
+  const t = await getTranslations('catalog')
 
   return (
     <div className="space-y-6">
       {/* Header */}
       <div className="flex items-center justify-between">
         <div>
-          <h1 className="text-2xl font-bold text-navy">Catalog</h1>
+          <h1 className="text-2xl font-bold text-navy">{t('title')}</h1>
           <p className="text-muted-foreground mt-1">{displayTotal} asset{displayTotal !== 1 ? 's' : ''} in your library{withCollaborators > 0 && ` · ${withCollaborators} with collaborators`}{languages.size > 0 && ` · ${languages.size} language${languages.size !== 1 ? 's' : ''}`}</p>
         </div>
         <Link
           href="catalog/upload"
           className="inline-flex items-center gap-2 rounded-lg bg-electric px-4 py-2 text-sm font-medium text-white hover:bg-electric/90"
         >
-          🎵 Upload
+          🎵 {t('upload')}
         </Link>
       </div>
 

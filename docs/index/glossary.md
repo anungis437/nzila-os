@@ -1,12 +1,12 @@
 # Glossary
 
-> Plain-language definitions of terms used in Union Eyes and the Nzila platform.
+> Plain-language definitions of terms used in UnionEyes and the Nzila platform.
 
-## Union Eyes Terms
+## UnionEyes Terms
 
 | Term | Definition | Where You'll See It |
 |---|---|---|
-| **Case** | A tracked workplace issue — the primary unit of work in Union Eyes | Dashboard, My Cases, Create Case |
+| **Case** | A tracked workplace issue — the primary unit of work in UnionEyes | Dashboard, My Cases, Create Case |
 | **Grievance** | A formal dispute initiated under a collective bargaining agreement (CBA) with structured steps and deadlines | Grievance Queue, Workbench (not used in pilot) |
 | **Claim** | The internal/API term for a member-submitted issue — displayed as "Case" in the UI | API routes, database |
 | **Update** | A timestamped note, response, or status change added to a case | Case Timeline |

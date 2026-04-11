@@ -45,7 +45,7 @@ export function SignupForm() {
       <div>
         <h2 className="text-2xl font-bold text-gray-900">Create your account</h2>
         <p className="mt-1 text-sm text-gray-500">
-          Start managing your union with Union Eyes
+          Start managing your union with UnionEyes
         </p>
       </div>
 

@@ -3,7 +3,7 @@
  * ──────────────────────────────────────────────────
  * Left panel:  Hero image + navy overlay + mesh gradient + logo
  *              + animated gradient tagline + stats row + trust badges
- * Right panel: Clerk auth component
+ * Right panel: Auth component
  * Mobile:      Single-column fallback (right panel only)
  *
  * Fully parameterized: appName, tagline, stats, heroImage, trustBadges.
@@ -147,7 +147,7 @@ export default function AuthPageLayout({
             </p>
           </div>
 
-          {/* Clerk component slot */}
+          {/* Auth component slot */}
           {children}
         </div>
       </div>

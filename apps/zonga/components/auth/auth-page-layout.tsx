@@ -10,6 +10,7 @@ import { ReactNode } from 'react';
 import Image from 'next/image';
 import Link from 'next/link';
 import { motion } from 'framer-motion';
+import { useTranslations } from 'next-intl';
 import { ZONGA_BRAND } from '@/lib/branding/registry';
 
 export interface AuthStat {
@@ -56,6 +57,8 @@ export default function AuthPageLayout({
   trustBadges = [],
   isSignUp: _isSignUp = false,
 }: AuthPageLayoutProps) {
+  const t = useTranslations('signIn');
+
   return (
     <div className="flex min-h-screen">
       {/* ───── Left Panel: Brand ───── */}
@@ -96,7 +99,7 @@ export default function AuthPageLayout({
               transition={{ duration: 0.6, delay: 0.1 }}
             >
               <span className="inline-block px-4 py-1.5 text-xs font-semibold tracking-widest uppercase rounded-full bg-electric/20 text-electric-light mb-6">
-                Powered by Nzila
+                {t('poweredBy')}
               </span>
             </motion.div>
 
@@ -193,7 +196,7 @@ export default function AuthPageLayout({
         {/* Footer */}
         <div className="px-6 py-6 text-center border-t border-gray-100">
           <div className="flex items-center justify-center gap-2 text-sm text-gray-400">
-            <span>Part of</span>
+            <span>{t('partOf')}</span>
             <Link
               href="https://nzilaventures.com"
               target="_blank"
@@ -204,11 +207,11 @@ export default function AuthPageLayout({
             </Link>
             <span className="text-gray-300">|</span>
             <Link href="/legal/privacy" className="hover:text-gray-600 transition-colors">
-              Privacy
+              {t('privacy')}
             </Link>
             <span className="text-gray-300">|</span>
             <Link href="/legal/terms" className="hover:text-gray-600 transition-colors">
-              Terms
+              {t('terms')}
             </Link>
           </div>
         </div>

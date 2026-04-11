@@ -225,11 +225,11 @@ export function generateOpenAPISpec(): OpenAPISpec {
   return {
     openapi: '3.0.3',
     info: {
-      title: 'Union Eyes API',
+      title: 'UnionEyes API',
       version: '1.0.0',
       description: `
 ## Overview
-Union Eyes is a comprehensive union management platform providing:
+UnionEyes is a comprehensive union management platform providing:
 
 - Member management and tracking
 - Claim processing and workflow
@@ -248,7 +248,7 @@ Most endpoints require authentication via Clerk. Include the session token in th
 - Authenticated: 1000 requests/minute
       `,
       contact: {
-        name: 'Union Eyes Team',
+        name: 'UnionEyes Team',
         email: 'support@unioneyes.app',
       },
       license: {
@@ -459,7 +459,7 @@ function getSwaggerUIHTML(spec: OpenAPISpec): string {
 <head>
   <meta charset="UTF-8">
   <meta name="viewport" content="width=device-width, initial-scale=1.0">
-  <title>Union Eyes API Documentation</title>
+  <title>UnionEyes API Documentation</title>
   <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/swagger-ui-dist@5/swagger-ui.css">
   <style>
     body { margin: 0; }

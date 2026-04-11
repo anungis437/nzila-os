@@ -74,7 +74,7 @@ function recordThrottle(event: ThrottleEvent): void {
  * Classify a request path into a route group for rate limiting.
  */
 export function classifyRoute(pathname: string, method: string): RouteGroup {
-  if (pathname.startsWith('/api/auth') || pathname.startsWith('/api/webhooks/clerk')) {
+  if (pathname.startsWith('/api/auth') || pathname.startsWith('/api/webhooks/auth')) {
     return 'auth'
   }
   if (pathname.startsWith('/api/export') || pathname.startsWith('/api/proof')) {

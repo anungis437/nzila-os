@@ -1,5 +1,5 @@
 /**
- * Union Eyes — Marketing Landing Page
+ * UnionEyes — Marketing Landing Page
  * ────────────────────────────────────
  * Workflow-first, decision-system positioning.
  * Minimal sections, strong spacing, clear narrative.
@@ -16,12 +16,12 @@ import RolesSection from './components/roles-section';
 import AnimatedCTA from './components/animated-cta';
 
 export const metadata: Metadata = {
-  title: 'Union Eyes — A Decision System for Labour Leadership',
-  description: 'Union Eyes is a decision system for labour leadership. From intake to outcome, all in one system.',
+  title: 'UnionEyes — A Decision System for Labour Leadership',
+  description: 'UnionEyes is a decision system for labour leadership. From intake to outcome, all in one system.',
   openGraph: {
-    title: 'Union Eyes — A Decision System for Labour Leadership',
+    title: 'UnionEyes — A Decision System for Labour Leadership',
     description: 'Know what matters. Act with confidence. From intake to outcome, all in one system.',
-    images: [{ url: 'https://images.unsplash.com/photo-1504328345606-18bbc8c9d7d1?w=1200&h=630&fit=crop&q=80', width: 1200, height: 630, alt: 'Workers in a professional labor meeting — Union Eyes' }],
+    images: [{ url: 'https://images.unsplash.com/photo-1504328345606-18bbc8c9d7d1?w=1200&h=630&fit=crop&q=80', width: 1200, height: 630, alt: 'Workers in a professional labor meeting — UnionEyes' }],
   },
 };
 
@@ -59,7 +59,7 @@ export default function HomePage() {
 
           <ScrollReveal delay={0.2}>
             <p className="text-xl md:text-2xl text-white mb-10 max-w-3xl">
-              Union Eyes brings intake, casework, intelligence, and outcomes
+              UnionEyes brings intake, casework, intelligence, and outcomes
               into one decision system — built with Canadian unions, now entering pilot.
             </p>
           </ScrollReveal>
@@ -102,7 +102,7 @@ export default function HomePage() {
           <ScrollReveal>
             <div className="text-center mb-14">
               <h2 className="text-3xl md:text-4xl font-bold text-navy mb-4">
-                Why Union Eyes is different
+                Why UnionEyes is different
               </h2>
             </div>
           </ScrollReveal>
@@ -148,7 +148,7 @@ export default function HomePage() {
                 Built on trust, <span className="text-electric">not surveillance</span>
               </h2>
               <p className="text-lg text-gray-800 mb-6 leading-relaxed">
-                Union Eyes was born when a healthcare steward lost a winnable
+                UnionEyes was born when a healthcare steward lost a winnable
                 grievance because her notes were trapped in a spreadsheet. The employer
                 had a million-dollar HR system. She had a notebook. We built a system
                 that levels the playing field — governed by the people who use it.
@@ -171,7 +171,7 @@ export default function HomePage() {
               <div className="relative rounded-2xl overflow-hidden aspect-4/3">
                 <Image
                   src="https://images.unsplash.com/photo-1522071820081-009f0129c71c?w=800"
-                  alt="Diverse team collaborating — representing the people behind Union Eyes"
+                  alt="Diverse team collaborating — representing the people behind UnionEyes"
                   fill
                   className="object-cover"
                   sizes="(max-width: 1024px) 100vw, 50vw"

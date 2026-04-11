@@ -2,7 +2,7 @@
 
 **Date:** 2026-04-01 (original audit); 2026-04-02 (remediation update); 2026-04-02 (hardening update)  
 **Auditor:** Automated Deep Validation  
-**Scope:** Full codebase audit of `nzila-os` / Union Eyes Canadian CBA Intelligence capability  
+**Scope:** Full codebase audit of `nzila-os` / UnionEyes Canadian CBA Intelligence capability  
 **Method:** Code-level trace of every claim against schema, service, API, UI, test, and governance layer
 
 ---

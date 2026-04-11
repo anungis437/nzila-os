@@ -10,7 +10,7 @@ const stats = [
 export default function LoginPage() {
   return (
     <AuthPageLayout
-      appName="Union Eyes"
+      appName="UnionEyes"
       tagline="A Decision System for Labour Leadership"
       subtitle="From intake to outcome — casework, intelligence, and member services in one system."
       stats={stats}

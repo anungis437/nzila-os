@@ -154,7 +154,7 @@ export default function PilotApplicationActions({
 
             {/* Goals */}
             <div>
-              <h3 className="font-semibold mb-2">Goals with Union Eyes</h3>
+              <h3 className="font-semibold mb-2">Goals with UnionEyes</h3>
               <p className="text-sm">{application.goals || 'Not provided'}</p>
             </div>
 

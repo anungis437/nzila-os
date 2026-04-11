@@ -129,9 +129,9 @@ Key documents:
    - Legacy platform: 298 files (2.26 MB)
    - [Strategy →](../business/verticals/healthtech/)
 
-2. **Uniontech** (Union Eyes, C3UO)
+2. **Uniontech** (UnionEyes, C3UO)
    - Platforms: 2 (5,285 entities)
-   - Flagship: Union Eyes (332 MB, 10 subsystems)
+   - Flagship: UnionEyes (332 MB, 10 subsystems)
    - Migration: 8 weeks (architecture template)
 
 3. **Insurancetech** (SentryIQ)
@@ -203,7 +203,7 @@ Key documents:
 
 1. **Phase 1**: Backbone Foundation (16 weeks) - READY TO START
 2. **Phase 2**: eExports Pilot (4 weeks) - Django proof of concept
-3. **Phase 3**: Union Eyes (8 weeks) - Architecture template  
+3. **Phase 3**: UnionEyes (8 weeks) - Architecture template  
 4. **Phase 4**: CourtLens + ABR Insights (13 weeks) - Legal AI + privacy
 5. **Phase 5**: Revenue Platforms (21 weeks) - SentryIQ, Shop Quoter, Trade OS
 6. **Phase 6**: Consolidation (19 weeks) - C3UO merge, niche platforms

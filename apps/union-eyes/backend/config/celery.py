@@ -1,4 +1,4 @@
-"""Celery application entry-point for Union Eyes.
+"""Celery application entry-point for UnionEyes.
 
 Workers are started with:
     celery -A config worker -l info

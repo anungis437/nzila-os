@@ -320,7 +320,7 @@ async function sendEmail(
       return;
     }
     await client.emails.send({
-      from: getFromEmail('Union Eyes'),
+      from: getFromEmail('UnionEyes'),
       to: userEmail,
       subject,
       html: body,

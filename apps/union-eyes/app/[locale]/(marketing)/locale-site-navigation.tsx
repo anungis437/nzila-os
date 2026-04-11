@@ -1,7 +1,7 @@
 'use client';
 
 /**
- * LocaleSiteNavigation — Locale-aware marketing navigation for Union Eyes
+ * LocaleSiteNavigation — Locale-aware marketing navigation for UnionEyes
  * Used inside app/[locale]/(marketing)/ where NextIntlClientProvider is active.
  * Translates nav labels and uses locale-prefixed hrefs.
  */
@@ -99,13 +99,13 @@ export default function LocaleSiteNavigation() {
             <Link href={`/${locale}`} className="flex items-center gap-3 group">
               <Image
                 src="/images/brand/icon.png"
-                alt="Union Eyes"
+                alt="UnionEyes"
                 width={36}
                 height={36}
                 className="w-9 h-9 rounded-lg shadow-lg shadow-electric/20 group-hover:shadow-electric/40 transition-shadow"
               />
               <span className={`text-xl font-bold transition-colors ${scrolled ? 'text-navy' : 'text-white'}`}>
-                Union Eyes
+                UnionEyes
               </span>
             </Link>
           </div>

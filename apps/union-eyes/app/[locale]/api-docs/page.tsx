@@ -1,7 +1,7 @@
 /**
  * API Documentation Page
  * 
- * Interactive Swagger UI for exploring the Union Eyes API
+ * Interactive Swagger UI for exploring the UnionEyes API
  * 
  * Route: /api-docs
  */

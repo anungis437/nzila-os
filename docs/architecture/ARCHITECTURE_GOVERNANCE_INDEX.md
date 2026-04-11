@@ -20,7 +20,7 @@
 | [APP_DOMAIN_CORE_STANDARD.md](APP_DOMAIN_CORE_STANDARD.md) | Internal app architecture: domain/services/workflows/queries/events/ui |
 | [CONTROL_PLANE_PRINCIPLES.md](CONTROL_PLANE_PRINCIPLES.md) | Control Plane route buckets (HEALTH/ATTENTION/ACTION) |
 | [ARCHITECTURAL_BOUNDARIES.md](ARCHITECTURAL_BOUNDARIES.md) | Dependency direction rules and vertical isolation |
-| [DAPL_PLATFORM_LEDGER.md](DAPL_PLATFORM_LEDGER.md) | Dues-Aware Platform Ledger: 5-layer financial architecture for Union Eyes |
+| [DAPL_PLATFORM_LEDGER.md](DAPL_PLATFORM_LEDGER.md) | Dues-Aware Platform Ledger: 5-layer financial architecture for UnionEyes |
 | [APP_GOLD_STANDARD.md](../governance/APP_GOLD_STANDARD.md) | Structural requirements for production-ready apps |
 
 ## Platform Registry (Machine-Readable)

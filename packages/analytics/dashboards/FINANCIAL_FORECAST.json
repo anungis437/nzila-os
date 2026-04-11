@@ -74,7 +74,7 @@
           "title": "2030 Revenue by Platform",
           "columns": ["Platform", "Vertical", "ARR Target", "Customers", "ACV"],
           "data": [
-            {"platform": "Union Eyes", "vertical": "Uniontech", "arr": 1800000, "customers": 120, "acv": "$15K"},
+            {"platform": "UnionEyes", "vertical": "Uniontech", "arr": 1800000, "customers": 120, "acv": "$15K"},
             {"platform": "ABR Insights", "vertical": "Justice-Equity", "arr": 1200000, "customers": 100, "acv": "$12K"},
             {"platform": "CORA", "vertical": "AgTech", "arr": 900000, "customers": 90, "acv": "$10K"},
             {"platform": "DiasporaCore", "vertical": "Fintech", "arr": 600000, "customers": 40, "acv": "$15K"},
@@ -98,7 +98,7 @@
           "title": "Unit Economics by Flagship",
           "data": [
             {
-              "platform": "Union Eyes",
+              "platform": "UnionEyes",
               "cac": 10000,
               "ltv": 70000,
               "ltv_cac": 7.0,

@@ -299,7 +299,7 @@ export async function exportTrustMetricsPDF(_metrics: TrustMetrics): Promise<Blo
  */
 export function generateTrustSummary(metrics: TrustMetrics): string {
   const sections = [
-    '# Union Eyes Trust Infrastructure Report',
+    '# UnionEyes Trust Infrastructure Report',
     `Generated: ${metrics.lastUpdated.toISOString()}`,
     '',
     '## Immutability Enforcement',

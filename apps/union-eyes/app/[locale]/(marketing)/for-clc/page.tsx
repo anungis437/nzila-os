@@ -9,9 +9,9 @@ import RolePageContent from '@/app/(marketing)/components/role-page-content';
 
 export async function generateMetadata(): Promise<Metadata> {
   return {
-    title: 'For CLC & Labour Councils | Union Eyes',
+    title: 'For CLC & Labour Councils | UnionEyes',
     description:
-      'Union Eyes gives the Canadian Labour Congress and labour councils movement-wide visibility — aggregate casework trends, campaign coordination, and impact reporting.',
+      'UnionEyes gives the Canadian Labour Congress and labour councils movement-wide visibility — aggregate casework trends, campaign coordination, and impact reporting.',
   };
 }
 

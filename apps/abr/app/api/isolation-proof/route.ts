@@ -19,7 +19,7 @@ interface IsolationProof {
   version: string
   timestamp: string
   isolation: {
-    authEnforcement: 'clerk_jwt'
+    authEnforcement: 'entra_jwt'
     orgContextSource: 'auth_session'
     dataLayerIsolation: 'django_backend_rbac'
     crossOrgDenied: true
@@ -43,7 +43,7 @@ export async function GET(request: Request): Promise<NextResponse> {
       version: '0.1.0',
       timestamp: new Date().toISOString(),
       isolation: {
-        authEnforcement: 'clerk_jwt' as const,
+        authEnforcement: 'entra_jwt' as const,
         orgContextSource: 'auth_session' as const,
         dataLayerIsolation: 'django_backend_rbac' as const,
         crossOrgDenied: true as const,

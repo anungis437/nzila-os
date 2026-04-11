@@ -1,7 +1,7 @@
 #!/usr/bin/env python3
 """
 Repo Populator — Creates production-ready repository structures for
-Union Eyes and ABR Insights by combining scaffolds with generated code.
+UnionEyes and ABR Insights by combining scaffolds with generated code.
 
 Populates complete repos ready for development and deployment.
 """
@@ -255,7 +255,7 @@ def main():
 
     if args.platform in ("ue", "all"):
         logger.info("=" * 60)
-        logger.info("Populating Union Eyes Repository")
+        logger.info("Populating UnionEyes Repository")
         logger.info("=" * 60)
         populator.create_repo_structure("ue", "nzila-union-eyes")
 

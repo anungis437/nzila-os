@@ -21,7 +21,7 @@
           "value": 5,
           "target": 8,
           "status": "on-track",
-          "platforms": ["Memora", "ABR Insights", "Union Eyes", "CourtLens", "CORA"]
+          "platforms": ["Memora", "ABR Insights", "UnionEyes", "CourtLens", "CORA"]
         },
         {
           "widget_id": "total_interactions",
@@ -112,7 +112,7 @@
             "top_use_cases": ["personalized learning paths", "bias detection in assessments", "skill gap analysis"]
           },
           {
-            "platform": "Union Eyes",
+            "platform": "UnionEyes",
             "interactions_30d": 8600,
             "active_users": 950,
             "prompts_count": 45,
@@ -159,7 +159,7 @@
         "title": "Interactions by Platform (30-day trend)",
         "x_axis": "date",
         "y_axis": "interactions",
-        "series": ["Memora", "ABR Insights", "Union Eyes", "CourtLens", "CORA"]
+        "series": ["Memora", "ABR Insights", "UnionEyes", "CourtLens", "CORA"]
       }
     },
     
@@ -182,7 +182,7 @@
         },
         {
           "prompt_id": "union_eyes_pension_forecast_v3",
-          "platform": "Union Eyes",
+          "platform": "UnionEyes",
           "use_case": "Pension Forecasting",
           "interactions": 2180,
           "quality_rating": 4.78,
@@ -250,7 +250,7 @@
         },
         {
           "prompt_id": "union_eyes_grievance_resolution_v1",
-          "platform": "Union Eyes",
+          "platform": "UnionEyes",
           "use_case": "Grievance Resolution Prediction",
           "interactions": 290,
           "quality_rating": 3.88,
@@ -320,7 +320,7 @@
             "optimization": "Fine-Tuned Model (Grievance Resolution)",
             "implementation_date": "Planned Q2 2026",
             "cost_savings_monthly": 150,
-            "impact": "-40% Union Eyes AI cost",
+            "impact": "-40% UnionEyes AI cost",
             "status": "Planned",
             "notes": "Fine-tune on 2,000+ grievance outcomes"
           }
@@ -344,7 +344,7 @@
         "rows": [
           {
             "model": "Pension Forecasting Model",
-            "platform": "Union Eyes",
+            "platform": "UnionEyes",
             "use_case": "Predict pension amounts +/- 10%",
             "accuracy": 0.88,
             "precision": 0.92,
@@ -356,7 +356,7 @@
           },
           {
             "model": "Grievance Resolution Prediction",
-            "platform": "Union Eyes",
+            "platform": "UnionEyes",
             "use_case": "Predict grievance outcome (Win/Loss/Settlement)",
             "accuracy": 0.65,
             "precision": 0.70,
@@ -495,7 +495,7 @@
         "platforms": [
           {"name": "Memora", "scores": [90, 20, 15, 95, 30]},
           {"name": "ABR Insights", "scores": [70, 40, 60, 65, 70]},
-          {"name": "Union Eyes", "scores": [50, 80, 10, 70, 85]},
+          {"name": "UnionEyes", "scores": [50, 80, 10, 70, 85]},
           {"name": "CourtLens", "scores": [30, 95, 5, 40, 95]},
           {"name": "CORA", "scores": [75, 30, 50, 60, 60]}
         ]
@@ -524,7 +524,7 @@
             "notes": "Balanced profile, highest humor (gamified learning context)"
           },
           {
-            "platform": "Union Eyes",
+            "platform": "UnionEyes",
             "warmth": 50,
             "formality": 80,
             "humor": 10,
@@ -582,7 +582,7 @@
         },
         {
           "experiment_id": "union_eyes_grievance_disclaimer",
-          "platform": "Union Eyes",
+          "platform": "UnionEyes",
           "hypothesis": "Adding legal disclaimer will reduce compliance violations without harming quality",
           "variant_a": "No disclaimer",
           "variant_b": "Legal disclaimer",
@@ -660,7 +660,7 @@
             "notes": "Training module embeddings, 512-dim vectors"
           },
           {
-            "platform": "Union Eyes",
+            "platform": "UnionEyes",
             "vector_index_size": 15000,
             "avg_query_latency_ms": 95,
             "p95_query_latency_ms": 210,
@@ -682,7 +682,7 @@
   "filters": {
     "platform": {
       "type": "multi-select",
-      "options": ["Memora", "ABR Insights", "Union Eyes", "CourtLens", "CORA", "All"],
+      "options": ["Memora", "ABR Insights", "UnionEyes", "CourtLens", "CORA", "All"],
       "default": "All"
     },
     "time_range": {

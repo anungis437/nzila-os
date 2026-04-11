@@ -120,13 +120,13 @@ python -m analytics.generators.export_manager --template board_report --format m
 
 ### Platform Metrics
 - **Production Readiness**: 9.1/10 (ABR Insights - highest)
-- **Security Score**: 10/10 (Union Eyes)
+- **Security Score**: 10/10 (UnionEyes)
 - **Migration Complexity**: EXTREME (4), HIGH-EXTREME (2), HIGH (6)
-- **Database Entities**: 4,773 (Union Eyes - most)
+- **Database Entities**: 4,773 (UnionEyes - most)
 
 ### AI/ML Metrics
 - **Companion Prompts**: 200+ (trade secret)
-- **AI Platforms**: 5+ (ABR, Court Lens, Union Eyes, CongoWave, Insight CFO)
+- **AI Platforms**: 5+ (ABR, Court Lens, UnionEyes, CongoWave, Insight CFO)
 - **Vector Search**: pgVector enabled
 - **Model Providers**: Azure OpenAI
 

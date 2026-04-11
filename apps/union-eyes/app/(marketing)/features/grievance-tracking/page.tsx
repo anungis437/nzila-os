@@ -20,7 +20,7 @@ import {
 } from 'lucide-react';
 
 export const metadata: Metadata = {
-  title: 'Grievance Tracking | Union Eyes',
+  title: 'Grievance Tracking | UnionEyes',
   description:
     'End-to-end grievance management — from intake to arbitration. Smart case queues, AI triage, evidence packs, and precedent research built for stewards.',
 };

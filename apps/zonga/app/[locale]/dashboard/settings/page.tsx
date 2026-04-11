@@ -14,10 +14,10 @@ export default async function SettingsPage() {
   if (!userId) redirect('/sign-in')
 
   const user = await currentUser()
-  const clerkName = user?.fullName ?? user?.firstName ?? 'User'
-  const clerkEmail = user?.emailAddresses?.[0]?.emailAddress ?? ''
+  const authName = user?.fullName ?? user?.firstName ?? 'User'
+  const authEmail = user?.emailAddresses?.[0]?.emailAddress ?? ''
 
-  await ensureListenerProfile({ displayName: clerkName, email: clerkEmail })
+  await ensureListenerProfile({ displayName: authName, email: authEmail })
   const profile = await getListenerProfile()
 
   return (
@@ -31,7 +31,7 @@ export default async function SettingsPage() {
 
       {/* Profile */}
       {profile ? (
-        <ProfileForm profile={profile} clerkName={clerkName} clerkEmail={clerkEmail} />
+        <ProfileForm profile={profile} authName={authName} authEmail={authEmail} />
       ) : (
         <Card>
           <div className="p-6">

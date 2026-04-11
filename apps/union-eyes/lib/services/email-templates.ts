@@ -469,7 +469,7 @@ export function renderEmailTemplate(
     // Add default context
     const fullContext = {
       year: new Date().getFullYear(),
-      organizationName: process.env.ORGANIZATION_NAME || "Union Eyes",
+      organizationName: process.env.ORGANIZATION_NAME || "UnionEyes",
       ...context,
     };
 

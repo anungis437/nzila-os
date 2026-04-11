@@ -252,7 +252,7 @@ export function registerDeepLinkHandlers(): void {
       (navigator as any).registerProtocolHandler(
         'unioneyes',
         `${window.location.origin}/deep-link?url=%s`,
-        'Union Eyes'
+        'UnionEyes'
       );
     } catch (error) {
       logger.warn('Failed to register protocol handler', error);

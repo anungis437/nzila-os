@@ -11,6 +11,7 @@
     "./authorization": "./src/authorization.ts",
     "./guards": "./src/guards.ts",
     "./middleware": "./src/middleware.ts",
+    "./adapter": "./src/clerk-adapter.ts",
     "./clerk-adapter": "./src/clerk-adapter.ts",
     "./entra": "./src/entra/index.ts",
     "./entra/config": "./src/entra/config.ts",
@@ -43,15 +44,11 @@
     "zod": "^3.24.0"
   },
   "peerDependencies": {
-    "@clerk/nextjs": ">=6.0.0",
     "next": ">=15.0.0",
     "react": ">=18.0.0",
     "react-dom": ">=18.0.0"
   },
   "peerDependenciesMeta": {
-    "@clerk/nextjs": {
-      "optional": true
-    },
     "next": {
       "optional": true
     },
@@ -63,7 +60,6 @@
     }
   },
   "devDependencies": {
-    "@clerk/nextjs": "^7.0.8",
     "@nzila/config": "workspace:*",
     "next": "^16.2.2",
     "typescript": "^6",

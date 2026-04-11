@@ -39,7 +39,7 @@ Key directories:
 |------|----------|
 | `apps/web` | Public-facing marketing site (Next.js) |
 | `apps/abr` | ABR Insights app — hybrid Next.js + Django |
-| `apps/union-eyes` | Union Eyes platform — hybrid Next.js + Django |
+| `apps/union-eyes` | UnionEyes platform — hybrid Next.js + Django |
 | `packages/db` | Shared Drizzle ORM schema + migrations |
 | `packages/os-core` | Core utilities: evidence sealing, hash chains, audit helpers |
 | `packages/ui` | Shared React component library |

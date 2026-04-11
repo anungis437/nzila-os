@@ -48,10 +48,12 @@ export {
   type GuardResult,
 } from './guards'
 
-// ── Clerk Adapter ───────────────────────────────────────────────────────────
+// ── Auth Adapter ─────────────────────────────────────────────────────────────
 export {
+  resolveIdentity,
   resolveIdentityFromClerk,
   resolveServiceIdentity,
+  mapOrgRole,
   mapClerkOrgRole,
 } from './clerk-adapter'
 
@@ -64,11 +66,12 @@ export {
   createPlatformHeaders,
 } from './middleware'
 
-// ── Clerk Webhook Verification ──────────────────────────────────────────────
+// ── Webhook Verification ────────────────────────────────────────────────────
 export {
   verifySvixSignature,
   isSvixTimestampValid,
   extractSvixHeaders,
+  verifyWebhook,
   verifyClerkWebhook,
   type SvixHeaders,
 } from './clerk-webhook'

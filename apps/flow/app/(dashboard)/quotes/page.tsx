@@ -8,7 +8,7 @@ import {
   CurrencyDollarIcon,
 } from '@heroicons/react/24/outline'
 import { quoteRepo, customerRepo } from '@/lib/db'
-import { getReadContext } from '@/lib/clerk-org-resolver'
+import { getReadContext } from '@/lib/org-resolver'
 import { ConversionBadge } from './conversion-badge'
 import { QuotesToolbar } from './quotes-toolbar'
 

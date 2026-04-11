@@ -1,7 +1,7 @@
 {
   "Union_Eyes_app_v1-main": {
     "template_version": "1.0.0",
-    "product_name": "Union Eyes App V1 Main",
+    "product_name": "UnionEyes App V1 Main",
     "repo_name": "Union_Eyes_app_v1-main-platform",
     "owner_github": "anungis437",
     "primary_app_path": "src",

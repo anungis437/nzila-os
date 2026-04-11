@@ -353,7 +353,7 @@ curl -H "Authorization: Bearer $TOKEN" http://localhost:8000/api/auth/me/
 
 ## Next Steps
 
-1. **Union Eyes**: Copy these files to UE backend, configure settings, test locally
+1. **UnionEyes**: Copy these files to UE backend, configure settings, test locally
 2. **ABR Insights**: After UE works, set up Clerk account, configure SSO, migrate users
 3. **Frontend Integration**: Update Next.js API client to send Clerk JWT
 4. **Testing**: Write integration tests for auth flows

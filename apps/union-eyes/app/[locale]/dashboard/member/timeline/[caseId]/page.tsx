@@ -264,7 +264,7 @@ export default async function CaseTimelinePage({ params }: TimelinePageProps) {
 
 export async function generateMetadata({ params: _params }: TimelinePageProps) {
   return {
-    title: `Case Timeline | Union Eyes`,
+    title: `Case Timeline | UnionEyes`,
     description: 'Track the progress of your case with clear, human-centered explanations.',
   };
 }

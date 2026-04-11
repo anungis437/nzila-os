@@ -61,7 +61,7 @@ python automation/orchestrator.py analyze --all
 
 **Example output:**
 ```
-✓ Analyzed: Union Eyes (EXTREME)
+✓ Analyzed: UnionEyes (EXTREME)
 ✓ Analyzed: C3uo (EXTREME)
 ✓ Analyzed: Abr Insights (HIGH)
 ...
@@ -110,7 +110,7 @@ python automation/orchestrator.py plan --strategy parallel
 - Calculates time savings
 
 **Example plan:**
-- **Batch 1**: Foundation (Union Eyes, C3UO) — 12 weeks sequential
+- **Batch 1**: Foundation (UnionEyes, C3UO) — 12 weeks sequential
 - **Batch 2**: Next.js platforms (ABR Insights, CongoWave, etc.) — 10 weeks **parallel**
 - **Batch 3**: Django platforms — 10 weeks **parallel**
 - **Total**: ~40 weeks (77% time savings!)
@@ -272,7 +272,7 @@ python automation/orchestrator.py plan --strategy sequential
 ```
 PLATFORM ANALYSIS
 ============================================================
-✓ Analyzed: Union Eyes (EXTREME)
+✓ Analyzed: UnionEyes (EXTREME)
   - Entities: 4,773
   - Framework: Next.js 14.2
   - Database: Drizzle (238 RLS policies)
@@ -418,7 +418,7 @@ pnpm build
 2. ✅ **Review generated manifests**: Check `automation/data/manifests/`
 3. ✅ **Review migration plan**: Read `MIGRATION_PLAN.md`
 4. ✅ **Provision shared resources**: Azure Container Registry, Log Analytics
-5. ✅ **Start with foundation platforms**: Union Eyes, C3UO
+5. ✅ **Start with foundation platforms**: UnionEyes, C3UO
 6. ✅ **Iterate and optimize**: Learn from first migrations
 7. ✅ **Execute parallel batches**: Maximize efficiency
 
@@ -426,7 +426,7 @@ pnpm build
 
 ## 💡 Pro Tips
 
-- **Start with one platform**: Test the full workflow with Union Eyes first
+- **Start with one platform**: Test the full workflow with UnionEyes first
 - **Use dry-run**: Preview template application before executing
 - **Review generated code**: Customize scripts-book overrides as needed
 - **Track progress**: Use the status command regularly

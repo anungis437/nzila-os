@@ -1,4 +1,4 @@
-import { clerkMiddleware, createRouteMatcher } from '@nzila/platform-auth/entra/server'
+import { authMiddleware, createRouteMatcher } from '@nzila/platform-auth/entra/server'
 import { NextResponse } from 'next/server'
 import { checkRateLimit, rateLimitHeaders } from '@nzila/os-core/rateLimit'
 import createIntlMiddleware from 'next-intl/middleware'
@@ -14,7 +14,7 @@ const intlMiddleware = createIntlMiddleware({
  * Platform Admin Edge Middleware — Three-layer protection.
  *
  * Layer 1: Rate limiting (skip in dev — HMR triggers too many requests)
- * Layer 2: Clerk authentication (skip in dev — prevents handshake loops)
+ * Layer 2: Authentication (skip in dev — prevents handshake loops)
  * Layer 3: Request-ID propagation (x-request-id header)
  */
 
@@ -29,7 +29,7 @@ const isPublicRoute = createRouteMatcher([
 const RATE_LIMIT_MAX = Number(process.env.RATE_LIMIT_MAX ?? '120')
 const RATE_LIMIT_WINDOW_MS = Number(process.env.RATE_LIMIT_WINDOW_MS ?? '60000')
 
-export default clerkMiddleware(async (auth, request) => {
+export default authMiddleware(async (auth, request) => {
   // ── Rate limiting (skip in dev — HMR triggers too many requests) ──────
   if (process.env.NODE_ENV !== 'development') {
     const ip =
@@ -51,7 +51,7 @@ export default clerkMiddleware(async (auth, request) => {
     }
   }
 
-  // ── Authentication (skip in dev — prevents Clerk handshake loops) ────
+  // ── Authentication (skip in dev — prevents auth handshake loops) ────
   if (process.env.NODE_ENV !== 'development' && !isPublicRoute(request)) {
     await auth.protect()
   }

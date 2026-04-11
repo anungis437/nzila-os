@@ -1,4 +1,4 @@
-# Union Eyes — Pilot Hardening Final Validation
+# UnionEyes — Pilot Hardening Final Validation
 
 > Generated: 2026-04-04 | Updated: 2026-04-05 | Branch: main
 

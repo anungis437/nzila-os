@@ -10,7 +10,7 @@
 |--------|-------|-------------|
 | **TAM** | $50B+ | Global labor union operations, diaspora banking, pension management software |
 | **SAM** | $195M | North American union management SaaS + diaspora fintech (Canada/US corridors) |
-| **SOM (2026)** | $150K | 10–15 early-adopter unions on Union Eyes; DiasporaCore pilot cohort |
+| **SOM (2026)** | $150K | 10–15 early-adopter unions on UnionEyes; DiasporaCore pilot cohort |
 | **SOM (2028)** | $1.2M | 80+ unions, 3 remittance corridors live |
 | **SOM (2030)** | $4.1M | 250+ unions, white-label DiasporaCore partnerships |
 
@@ -36,7 +36,7 @@
 | **Workday** | Enterprise-grade HCM; strong analytics | Prohibitive cost for unions; no grievance/CBA modules; management-side positioning |
 | **BambooHR / Paylocity** | SMB-friendly UX; modern stack | No labor relations features; perceived as anti-union tooling |
 
-### 2.3 Union Eyes Competitive Moat
+### 2.3 UnionEyes Competitive Moat
 
 - **4,773 DB entities** modeled for union-specific workflows — no competitor approaches this depth
 - **238 RLS policies** enabling multi-tenant security at the row level — critical for inter-local data isolation
@@ -74,7 +74,7 @@
 
 1. **Discovery (Week 1–2):** Identify pain points — grievance backlog, pension data fragmentation, election compliance gaps
 2. **Technical Assessment (Week 3–4):** Map existing systems (spreadsheets, UnionWare, paper-based); scope data migration
-3. **Proof of Value (Week 5–8):** Deploy Union Eyes sandbox with anonymized union data; demonstrate CBA intelligence on their agreements
+3. **Proof of Value (Week 5–8):** Deploy UnionEyes sandbox with anonymized union data; demonstrate CBA intelligence on their agreements
 4. **Procurement & Security Review (Week 9–12):** SOC 2 documentation; Azure Canada Central data residency confirmation; union executive sign-off
 5. **Implementation (Week 1–12 post-close):** 90-day structured onboarding; parallel run with legacy systems
 

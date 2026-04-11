@@ -1,7 +1,7 @@
 /**
- * @nzila/platform-auth — Clerk Webhook Verification
+ * @nzila/platform-auth — Webhook Verification
  *
- * Centralised Svix HMAC-SHA256 signature verification for Clerk webhooks.
+ * Centralised Svix HMAC-SHA256 signature verification for webhooks.
  * ALL apps must use this instead of inline verification to ensure
  * consistent timing-safe signature checks and timestamp validation.
  *
@@ -33,11 +33,11 @@ export function extractSvixHeaders(
 }
 
 /**
- * Verify a Clerk/Svix webhook signature (HMAC-SHA256, timing-safe).
+ * Verify a Svix webhook signature (HMAC-SHA256, timing-safe).
  *
  * @param payload    — raw request body as string
  * @param headers    — Svix headers (id, timestamp, signature)
- * @param secret     — Clerk webhook secret (starts with `whsec_`)
+ * @param secret     — Webhook secret (starts with `whsec_`)
  * @returns true if signature is valid
  */
 export function verifySvixSignature(
@@ -92,7 +92,7 @@ export function isSvixTimestampValid(
  * Full webhook verification: headers + timestamp + signature.
  * Returns an error message string on failure, or null on success.
  */
-export function verifyClerkWebhook(
+export function verifyWebhook(
   payload: string,
   requestHeaders: Pick<Headers, 'get'>,
   secret: string,
@@ -112,3 +112,6 @@ export function verifyClerkWebhook(
 
   return { verified: true }
 }
+
+/** @deprecated Use `verifyWebhook` instead */
+export const verifyClerkWebhook = verifyWebhook

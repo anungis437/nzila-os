@@ -50,7 +50,7 @@ For the full RBAC matrix, see [CUPE RBAC Matrix](../pilot/cupe/CUPE_RBAC_MATRIX.
 
 | Issue | Likely Cause | Fix |
 |---|---|---|
-| Cases not appearing | User in wrong org | Verify org membership in Clerk |
+| Cases not appearing | User in wrong org | Verify org membership in Azure AD |
 | Can't assign case | Insufficient role | Only chief_steward+ can assign |
 | Attachment upload fails | File blocked or too large | Check allowed types, max 10 MB |
 | Dashboard shows wrong counts | Stale cache | Refresh page; cache refreshes every 5 min |

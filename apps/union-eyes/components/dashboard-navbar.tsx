@@ -140,14 +140,14 @@ export default function DashboardNavbar({ profile, onMenuClick: _onMenuClick }: 
           <Link href={`/${locale}/dashboard`} className="flex items-center space-x-2">
             <Image
               src="/images/brand/icon.png"
-              alt="Union Eyes"
+              alt="UnionEyes"
               width={32}
               height={32}
               className="h-8 w-8 object-contain"
             />
             <Image
               src="/images/brand/logo.png"
-              alt="Union Eyes"
+              alt="UnionEyes"
               width={96}
               height={24}
               className="h-6 object-contain hidden sm:block"

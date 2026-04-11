@@ -15,7 +15,7 @@ import { db } from '@/db';
 import { organizationMembers } from '@/db/schema-organizations';
 import { logger } from '@/lib/logger';
 import crypto from 'crypto';
-import { clerkClient } from '@nzila/platform-auth/entra/server';
+import { adminClient } from '@nzila/platform-auth/entra/server';
 
 export const dynamic = 'force-dynamic';
 
@@ -62,7 +62,7 @@ export const POST = withApi(
     let skipped = 0;
 
     // Resolve auth client for user lookups; fall back to provisional UUIDs if unavailable
-    const authClient = clerkClient;
+    const authClient = adminClient;
 
     for (const row of rows) {
       const email = (row['email'] ?? row['Email'] ?? '').trim();

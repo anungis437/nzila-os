@@ -1,6 +1,6 @@
 {
   "version": "0.1.0",
-  "description": "CUPE Taxonomy Pack - Hardcoded vocabulary for Union Eyes pilot",
+  "description": "CUPE Taxonomy Pack - Hardcoded vocabulary for UnionEyes pilot",
   "caseTypes": [
     {
       "id": "discipline",

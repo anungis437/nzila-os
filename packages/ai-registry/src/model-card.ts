@@ -1,7 +1,7 @@
 /**
  * Standardized Model Cards
  *
- * Extends the Union Eyes ModelCard pattern to be a platform-wide standard.
+ * Extends the UnionEyes ModelCard pattern to be a platform-wide standard.
  * Every AI/ML model in Nzila must have a model card before deployment.
  *
  * References:

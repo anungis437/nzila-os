@@ -18,7 +18,7 @@ class MarketExpansionAnalyzer:
                 "name": "Uniontech",
                 "tam": 50_000_000_000,  # $50B (global union management software)
                 "sam": 2_500_000_000,  # $2.5B (North America focus)
-                "som_2026": 350_000,  # $350K (Union Eyes initial capture)
+                "som_2026": 350_000,  # $350K (UnionEyes initial capture)
                 "som_2030": 10_000_000,  # $10M (aggressive growth)
                 "geographic_focus": ["Canada", "USA"],
                 "competitive_intensity": "MEDIUM",

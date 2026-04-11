@@ -2,7 +2,7 @@
 > This document describes the original Clerk auth setup. The platform has since migrated to Microsoft Entra External ID.
 > Retained for historical reference only. See `@nzila/platform-auth` for the current auth implementation.
 
-# Union Eyes Clerk Authentication - Configuration Complete ✓
+# UnionEyes Clerk Authentication - Configuration Complete ✓
 
 **Status**: Django backend fully configured for Clerk authentication  
 **Date**: 2026-02-17  
@@ -136,7 +136,7 @@ CORS_ALLOWED_ORIGINS=http://localhost:3000,http://localhost:3001
 
 ### Step 1: Get Clerk Credentials (10 minutes)
 1. Go to https://dashboard.clerk.com
-2. Select your Union Eyes application (or create one)
+2. Select your UnionEyes application (or create one)
 3. Copy the following from the dashboard:
    - **API Keys** → `CLERK_SECRET_KEY` (starts with `sk_test_` or `sk_live_`)
    - **API Keys** → `CLERK_PUBLISHABLE_KEY` (starts with `pk_test_` or `pk_live_`)
@@ -190,7 +190,7 @@ curl http://localhost:8000/api/auth_core/health/
 Expected: `{"status":"healthy"}`
 
 **User Profile** (requires Clerk JWT):
-1. Get a JWT token from your Union Eyes frontend (check browser DevTools → Application → Local Storage)
+1. Get a JWT token from your UnionEyes frontend (check browser DevTools → Application → Local Storage)
 2. Test the endpoint:
 ```powershell
 $token = "YOUR_CLERK_JWT_HERE"

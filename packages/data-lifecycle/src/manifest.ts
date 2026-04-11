@@ -194,10 +194,10 @@ export const APP_MANIFESTS: DataLifecycleManifest[] = [
     backup: { frequency: 'daily', provider: 'Azure Backup', location: 'Same region', encryptedAtRest: true, backupRetention: '30 days', rtoHours: 4, rpoHours: 1 },
   },
 
-  // ── Union Eyes ────────────────────────────────────────────────────
+  // ── UnionEyes ────────────────────────────────────────────────────
   {
     appId: 'union-eyes',
-    appName: 'Union Eyes Governance',
+    appName: 'UnionEyes Governance',
     version: '1.0.0',
     lastUpdated: '2026-02-28',
     dataCategories: [

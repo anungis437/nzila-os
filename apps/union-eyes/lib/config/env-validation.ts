@@ -197,7 +197,7 @@ const envSchema = z.object({
   TEMP_DIR: z.string().default('./temp').optional(),
 
   // ============== MEDIUM - Email Templates ==============
-  ORGANIZATION_NAME: z.string().default('Union Eyes').optional(),
+  ORGANIZATION_NAME: z.string().default('UnionEyes').optional(),
 
   // ============== MEDIUM - Analytics & Monitoring ==============
   SENTRY_DSN: z.string().optional(),

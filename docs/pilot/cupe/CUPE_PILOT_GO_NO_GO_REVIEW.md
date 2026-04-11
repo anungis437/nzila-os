@@ -1,6 +1,6 @@
 # CUPE Pilot Go / No-Go Review
 
-**Pilot Program:** CUPE Local 1234 Grievance Management (Union Eyes) v0.1  
+**Pilot Program:** CUPE Local 1234 Grievance Management (UnionEyes) v0.1  
 **Review Date:** 2026-03-24  
 **Decision:** [x] GO | [ ] NO-GO
 
@@ -8,7 +8,7 @@
 
 ## Executive Summary
 
-Union Eyes is being prepared for CUPE Local 1234 pilot deployment, enabling a single local union (1–5 worksites, ~100–200 members) to manage grievance intake, triage, assignment, and closure with enterprise-grade auditing.
+UnionEyes is being prepared for CUPE Local 1234 pilot deployment, enabling a single local union (1–5 worksites, ~100–200 members) to manage grievance intake, triage, assignment, and closure with enterprise-grade auditing.
 
 **Scope IN:**
 

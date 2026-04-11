@@ -52,7 +52,7 @@ const values = [
 const timeline = [
   { year: '2019–2022', title: 'Foundation', description: 'Built core IP, engineered 12,000+ data orgs, created 200+ AI prompts, and pioneered union and diaspora banking technology.' },
   { year: '2023', title: 'Portfolio Consolidation', description: 'Analyzed $2M+ in legacy investments. Designed unified Backbone architecture. Expanded to 15 platforms across 10 verticals.' },
-  { year: '2024', title: 'Migration & Scale', description: 'Legacy-to-cloud migration underway. Union Eyes 83% migrated. Production deployments on Azure. Django + Next.js stack.' },
+  { year: '2024', title: 'Migration & Scale', description: 'Legacy-to-cloud migration underway. UnionEyes 83% migrated. Production deployments on Azure. Django + Next.js stack.' },
   { year: '2025', title: 'Revenue Activation', description: 'Series A readiness. Revenue activation across flagships. $6M ARR target. Strategic partnerships pipeline.' },
 ];
 

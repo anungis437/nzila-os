@@ -1,0 +1,10 @@
+{
+  "version": 1,
+  "skills": {
+    "codespring": {
+      "source": "CodeSpringApp/codespring-skills",
+      "sourceType": "github",
+      "computedHash": "8db4cad67068e0733407b67f31f900e967c6bb77a117566910e0566d53e6d8c9"
+    }
+  }
+}

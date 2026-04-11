@@ -1,4 +1,4 @@
-# 🏆 Union Eyes — Crown Jewel Flagship
+# 🏆 UnionEyes — Crown Jewel Flagship
 ## Enterprise Union Management Platform
 
 **Last Updated:** February 17, 2026  
@@ -10,7 +10,7 @@
 
 The **$50B global labor management market** is fragmented, outdated, and ripe for disruption. Unions manage billions in pension funds, insurance claims, member benefits, and political campaigns using spreadsheets, legacy systems, and manual processes.
 
-**Union Eyes** is the **first comprehensive, modern union management platform** — combining member management, pension forecasting, insurance administration, grievance processing, collective bargaining intelligence, and campaign tools in one unified system.
+**UnionEyes** is the **first comprehensive, modern union management platform** — combining member management, pension forecasting, insurance administration, grievance processing, collective bargaining intelligence, and campaign tools in one unified system.
 
 ---
 
@@ -168,7 +168,7 @@ Security:         238 RLS policies, encryption at rest
 
 ## 🚀 USE OF FUNDS
 
-**Target Investment**: $1.5M-2M for Union Eyes expansion
+**Target Investment**: $1.5M-2M for UnionEyes expansion
 
 | Category | Allocation | Purpose |
 |----------|-----------|---------|
@@ -190,7 +190,7 @@ Security:         238 RLS policies, encryption at rest
 
 ---
 
-## 🎖️ WHY INVEST IN UNION EYES?
+## 🎖️ WHY INVEST IN UnionEyes?
 
 ✅ **Proven execution**: 4,773 entities, production-ready platform  
 ✅ **Massive market**: $50B TAM, 10,000+ unions underserved  
@@ -212,5 +212,5 @@ Security:         238 RLS policies, encryption at rest
 
 ---
 
-*Union Eyes — Modernizing the labor movement, one union at a time.*  
+*UnionEyes — Modernizing the labor movement, one union at a time.*  
 **© 2026 Nzila Ventures. Confidential & Proprietary.**

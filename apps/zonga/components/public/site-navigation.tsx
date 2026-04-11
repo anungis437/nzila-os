@@ -7,18 +7,21 @@ import Link from 'next/link';
 import { usePathname } from 'next/navigation';
 import { useState, useEffect, useCallback } from 'react';
 import { motion, AnimatePresence } from 'framer-motion';
+import { useTranslations } from 'next-intl';
 import { ZongaBrandMark } from '@/components/branding';
+import { LanguageSwitcher } from '@/components/language-switcher';
 
-const navLinks = [
-  { href: '/', label: 'Home' },
-  { href: '/about', label: 'About' },
-  { href: '/artists', label: 'Artists' },
-  { href: '/events', label: 'Events' },
-  { href: '/pricing', label: 'Pricing' },
-  { href: '/contact', label: 'Contact' },
-];
+const navLinkKeys = [
+  { href: '/', key: 'home' },
+  { href: '/about', key: 'about' },
+  { href: '/artists', key: 'artists' },
+  { href: '/events', key: 'events' },
+  { href: '/pricing', key: 'pricing' },
+  { href: '/contact', key: 'contact' },
+] as const;
 
 export default function SiteNavigation() {
+  const t = useTranslations('nav');
   const pathname = usePathname();
   const [scrolled, setScrolled] = useState(false);
   const [mobileOpen, setMobileOpen] = useState(false);
@@ -69,7 +72,7 @@ export default function SiteNavigation() {
             <ZongaBrandMark placement="app_header" size="md" theme={scrolled ? 'light' : 'dark'} />
 
             <nav className="hidden md:flex items-center gap-1">
-              {navLinks.map((link) => (
+              {navLinkKeys.map((link) => (
                 <Link
                   key={link.href}
                   href={link.href}
@@ -79,7 +82,7 @@ export default function SiteNavigation() {
                       : scrolled ? 'text-gray-600 hover:text-navy' : 'text-gray-300 hover:text-white'
                   }`}
                 >
-                  {link.label}
+                  {t(link.key)}
                   {isActive(link.href) && (
                     <motion.div
                       layoutId="nav-active"
@@ -92,6 +95,9 @@ export default function SiteNavigation() {
             </nav>
 
             <div className="flex items-center gap-4">
+              <div className="hidden md:block">
+                <LanguageSwitcher variant={scrolled ? 'light' : 'dark'} dropDirection="down" />
+              </div>
               <Link
                 href="/sign-in"
                 className={`hidden md:inline-flex items-center px-5 py-2.5 rounded-xl text-sm font-semibold transition-all btn-press ${
@@ -100,7 +106,7 @@ export default function SiteNavigation() {
                     : 'bg-white/10 text-white border border-white/20 hover:bg-white/20'
                 }`}
               >
-                Sign In
+                {t('signIn')}
               </Link>
 
               <button
@@ -137,7 +143,7 @@ export default function SiteNavigation() {
               className="fixed right-0 top-0 bottom-0 w-80 z-50 bg-white shadow-2xl md:hidden"
             >
               <div className="p-6 pt-20 space-y-2">
-                {navLinks.map((link) => (
+                {navLinkKeys.map((link) => (
                   <Link
                     key={link.href}
                     href={link.href}
@@ -147,15 +153,18 @@ export default function SiteNavigation() {
                         : 'text-gray-700 hover:bg-gray-50'
                     }`}
                   >
-                    {link.label}
+                    {t(link.key)}
                   </Link>
                 ))}
                 <hr className="my-4 border-gray-100" />
+                <div className="px-4 py-2">
+                  <LanguageSwitcher variant="light" dropDirection="down" />
+                </div>
                 <Link
                   href="/sign-in"
                   className="block w-full px-4 py-3 text-center bg-electric text-white font-semibold rounded-xl shadow-md shadow-electric/25 hover:bg-blue-700 transition-all btn-press"
                 >
-                  Sign In
+                  {t('signIn')}
                 </Link>
               </div>
             </motion.div>

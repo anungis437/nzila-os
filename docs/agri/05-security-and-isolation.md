@@ -19,7 +19,7 @@ CREATE POLICY agri_platform_read ON agri_producers
 
 ### Application-Level Enforcement
 
-1. **`resolveOrgContext()`** — every server action resolves org from Clerk auth
+1. **`resolveOrgContext()`** — every server action resolves org from platform auth
 2. **Scoped DB** — `createScopedDb({ orgId })` wraps all queries with org filter
 3. **Audited writes** — `createAuditedScopedDb()` logs all mutations
 4. **Contract tests** — CI enforces that all actions call `resolveOrgContext()`
@@ -35,7 +35,7 @@ it('batch allocation across orgs is rejected', ...)
 
 ## Authentication
 
-- **Clerk** for user authentication and org membership
+- **Platform Auth (Entra ID)** for user authentication and org membership
 - **Org roles**: admin, manager, operator, viewer
 - **Session claims** carry org context + custom agri roles
 

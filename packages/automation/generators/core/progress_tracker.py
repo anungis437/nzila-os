@@ -692,7 +692,7 @@ def init_tracking(workspace_root: Path) -> ProgressTracker:
     tracker = ProgressTracker(checkpoint_dir=checkpoint_dir)
 
     tracker.init_platform("abr", "ABR Insights")
-    tracker.init_platform("ue", "Union Eyes")
+    tracker.init_platform("ue", "UnionEyes")
 
     # Auto-detect existing progress
     tracker.auto_detect_progress("abr", workspace_root)

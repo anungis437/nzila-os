@@ -40,7 +40,7 @@ const authMixin = {
   AZURE_AD_TENANT_ID: z.string().min(1).optional(),
 }
 
-/** @deprecated Use authMixin — kept for backward compat with env files still using CLERK_ names */
+/** @deprecated Use authMixin directly */
 const clerkMixin = authMixin
 
 // ---------------------------------------------------------------------------
@@ -65,8 +65,10 @@ const webSchema = baseSchema.extend({
 
 const unionEyesSchema = baseSchema.extend({
   NEXT_PUBLIC_APP_URL: z.string().url().optional(),
-  CLERK_SECRET_KEY: z.string().startsWith('sk_').optional(),
-  NEXT_PUBLIC_CLERK_PUBLISHABLE_KEY: z.string().startsWith('pk_').optional(),
+  AUTH_SECRET: z.string().min(10).optional(),
+  AZURE_AD_CLIENT_ID: z.string().min(1).optional(),
+  AZURE_AD_CLIENT_SECRET: z.string().min(1).optional(),
+  AZURE_AD_TENANT_ID: z.string().min(1).optional(),
 })
 
 const cfoSchema = baseSchema.extend({

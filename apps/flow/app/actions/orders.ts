@@ -11,7 +11,7 @@ import {
   updateOrderLine,
   deleteOrderLine,
 } from '@nzila/commerce-db'
-import { getDbContext, getReadContext } from '@/lib/clerk-org-resolver'
+import { getDbContext, getReadContext } from '@/lib/org-resolver'
 import { executeCommand } from '@/lib/control/control-adapter'
 import { buildEvidencePackFromAction, processEvidencePack } from '@/lib/evidence'
 

@@ -115,7 +115,7 @@ export async function ensureListenerProfile(data: {
 
   try {
     // Atomic upsert — unique index on user_id prevents duplicates
-    // org_id is a UUID FK — Clerk orgId is a string, so always pass null here
+    // org_id is a UUID FK — auth orgId is a string, so always pass null here
     const [row] = (await platformDb.execute(
       sql`INSERT INTO zonga_listeners (user_id, org_id, display_name, email)
       VALUES (${ctx.actorId}, ${null}, ${data.displayName}, ${data.email ?? null})

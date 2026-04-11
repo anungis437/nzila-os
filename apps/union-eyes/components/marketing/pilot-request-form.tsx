@@ -191,7 +191,7 @@ export function PilotRequestForm() {
             Application Received!
           </h2>
           <p className="text-green-700 mb-6 max-w-md mx-auto">
-            Thank you for applying to the Union Eyes pilot program. 
+            Thank you for applying to the UnionEyes pilot program. 
             Our team will review your application and get back to you within 2-3 business days.
           </p>
           <div className="flex flex-col sm:flex-row gap-4 justify-center">

@@ -112,7 +112,7 @@
 - Portal claims page: "Submit Intake" — [claims/page.tsx](apps/union-eyes/app/%5Blocale%5D/portal/claims/page.tsx) ✅
 - Claims new page: "Submit New Intake", "Submit Intake" button — [new/page.tsx](apps/union-eyes/app/%5Blocale%5D/portal/claims/new/page.tsx) ✅
 - Chatbot FAQ: "How do I submit an intake?" — [ai-chatbot.tsx](apps/union-eyes/components/ai/ai-chatbot.tsx) ✅
-- Training panel: "submit an intake through Union Eyes" — [training-links-panel.tsx](apps/union-eyes/components/pilot/training-links-panel.tsx) ✅
+- Training panel: "submit an intake through UnionEyes" — [training-links-panel.tsx](apps/union-eyes/components/pilot/training-links-panel.tsx) ✅
 - en.json: `submitClaim`, `submitButton`, `createClaim`, `submitCase` → "Submit Intake"; `submitError` → "Failed to submit intake" ✅
 - en-CA.json: `grievancesFiled` → "Intakes Submitted"; `createClaim`, `submitCase`, `createButton` → "Submit Intake"; onboarding → "Submit Intake card"; `openGrievances` → "Active Cases" ✅
 - fr-CA.json: `grievancesFiled` → "Soumissions reçues" ✅

@@ -59,10 +59,10 @@ database with full configuration, customers, and example quotes.
 
 ## Switching Orgs in Development
 
-The active org is determined by Clerk's `auth().orgId`. To test a specific org:
+The active org is determined by `auth().orgId`. To test a specific org:
 
-1. In Clerk Dashboard, create two test organizations matching the seeded org IDs.
-2. Switch organizations in the Clerk-managed org switcher to change context.
+1. In Azure AD, assign users to test security groups matching the seeded org IDs.
+2. Switch organizations via the org switcher to change context.
 3. All data reads, settings, and operations will resolve via the active org's config.
 
 ## Verifying the Seed

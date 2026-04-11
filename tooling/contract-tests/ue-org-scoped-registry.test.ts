@@ -1,5 +1,5 @@
 /**
- * Contract Test — Union Eyes: Org-Scoped Table Registry Consistency
+ * Contract Test — UnionEyes: Org-Scoped Table Registry Consistency
  *
  * Mirrors INV-20 (packages/db) for UE's local schema which uses `org_id`
  * instead of `org_id`.

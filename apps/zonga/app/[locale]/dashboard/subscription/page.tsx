@@ -17,6 +17,8 @@ import {
 } from '@/lib/actions/subscription-actions'
 import { LISTENER_PLANS, CREATOR_PLANS } from '@/lib/plans'
 import { UpgradeButton, ManageSubscriptionButton } from '@/components/dashboard/subscription-buttons'
+import { platformDb } from '@nzila/db/platform'
+import { sql } from 'drizzle-orm'
 import type { ListenerPlan, CreatorPlan } from '@/lib/plans'
 
 function formatPrice(cents: number | null): string {
@@ -60,25 +62,36 @@ export default async function SubscriptionPage() {
   const { userId, orgId, orgRole, sessionClaims } = await auth()
   if (!userId) redirect('/sign-in')
 
-  const [listenerSub, creatorSub] = await Promise.all([
+  const [listenerSub, creatorSub, orgTierRows] = await Promise.all([
     getListenerSubscription(),
     getMyCreatorSubscription(),
+    platformDb.execute(
+      sql`SELECT o.subscription_tier
+          FROM organizations o
+          JOIN organization_members om ON om.organization_id = o.id
+          WHERE om.user_id = ${userId}
+          LIMIT 1`,
+    ).then((r) => r as unknown as { subscription_tier: string | null }[]).catch(() => []),
   ])
 
-  // Detect creator role: DB profile, Clerk metadata, or active org membership
+  // Org-level entitlement: enterprise/business orgs grant premium to all members
+  const orgTier = orgTierRows[0]?.subscription_tier ?? null
+  const orgEntitled = orgTier === 'enterprise' || orgTier === 'business'
+
+  // Detect creator role: DB profile, session metadata, or active org membership
   const user = (!listenerSub || !creatorSub) ? await currentUser() : null
-  const clerkRole = (user?.publicMetadata as { zongaRole?: string } | undefined)?.zongaRole
+  const sessionRole = (user?.publicMetadata as { zongaRole?: string } | undefined)?.zongaRole
     ?? (sessionClaims as { publicMetadata?: { zongaRole?: string } } | undefined)?.publicMetadata?.zongaRole
-  const isCreator = !!creatorSub || !!orgId || clerkRole === 'creator' || orgRole === 'org:creator'
+  const isCreator = !!creatorSub || !!orgId || sessionRole === 'creator' || orgRole === 'org:creator'
 
   // ── Listener plan resolution
-  const clerkPlan = (user?.publicMetadata as { listenerPlan?: string } | undefined)?.listenerPlan as ListenerPlan | undefined
-  const listenerPlan = listenerSub?.plan ?? clerkPlan ?? 'free'
-  const listenerStatus = listenerSub?.subscriptionStatus ?? (clerkPlan === 'premium' ? 'active' : null)
+  const sessionPlan = (user?.publicMetadata as { listenerPlan?: string } | undefined)?.listenerPlan as ListenerPlan | undefined
+  const listenerPlan: ListenerPlan = orgEntitled || listenerSub?.plan === 'premium' || sessionPlan === 'premium' ? 'premium' : 'free'
+  const listenerStatus = orgEntitled ? 'active' : (listenerSub?.subscriptionStatus ?? (sessionPlan === 'premium' ? 'active' : null))
   const listenerStatusInfo = statusLabel(listenerStatus)
   const currentListenerPlanDef = LISTENER_PLANS[listenerPlan]
-  const isPremium = listenerPlan === 'premium' && (listenerStatus === 'active' || listenerStatus === 'trialing' || !listenerSub)
-  const hasStripeBilling = isPremium && !!listenerSub
+  const isPremium = orgEntitled || (listenerPlan === 'premium' && (listenerStatus === 'active' || listenerStatus === 'trialing' || !listenerSub))
+  const hasStripeBilling = isPremium && !!listenerSub && !orgEntitled
 
   // ── Creator plan resolution
   const creatorPlanKey = mapDbCreatorPlan(creatorSub?.plan ?? null)
@@ -215,9 +228,14 @@ export default async function SubscriptionPage() {
                 <p className="text-2xl font-bold text-electric mt-1">
                   {formatPrice(currentListenerPlanDef.priceMonthlyMinor)}
                 </p>
-                {listenerSub?.currentPeriodEnd && (
+                {listenerSub?.currentPeriodEnd && !orgEntitled && (
                   <p className="text-xs text-muted-foreground/70 mt-1">
                     Renews {new Date(listenerSub.currentPeriodEnd).toLocaleDateString('en-CA')}
+                  </p>
+                )}
+                {orgEntitled && (
+                  <p className="text-xs text-emerald-600 mt-1">
+                    Included with your organization&apos;s {orgTier} plan
                   </p>
                 )}
               </div>

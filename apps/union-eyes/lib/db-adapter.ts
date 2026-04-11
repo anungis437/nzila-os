@@ -1,7 +1,7 @@
 /**
- * Union Eyes — Org Boundary Database Adapter
+ * UnionEyes — Org Boundary Database Adapter
  *
- * Provides Org-scoped database access wrappers. Union Eyes uses
+ * Provides Org-scoped database access wrappers. UnionEyes uses
  * Supabase + internal packages for DB, so this adapter wraps
  * the existing DB layer to enforce Org isolation at the application
  * boundary.
@@ -54,7 +54,7 @@ export class OrgBoundaryError extends Error {
 /**
  * Wraps a Supabase query builder to inject organization_id filter.
  *
- * This is a lightweight adapter — in Union Eyes the actual Org filtering
+ * This is a lightweight adapter — in UnionEyes the actual Org filtering
  * happens via Supabase RLS policies + this application-layer guard.
  */
 export function createOrgScopedQuery(orgId: string) {

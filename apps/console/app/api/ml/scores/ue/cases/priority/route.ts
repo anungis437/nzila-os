@@ -2,7 +2,7 @@
 /**
  * GET /api/ml/scores/ue/cases/priority
  *
- * Returns Union Eyes case priority predictions for a date range.
+ * Returns UnionEyes case priority predictions for a date range.
  * Cursor-paginated; sorted newest-first by (occurredAt DESC, id DESC).
  * Cursor is base64("<iso-timestamp>|<uuid>") — composite key prevents
  * duplicate/skipped rows when multiple records share the same occurredAt.

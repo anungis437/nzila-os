@@ -24,7 +24,7 @@ The **Companion Engine** is Nzila's proprietary AI personalization layer, provid
 ```
 ┌─────────────────────────────────────────────────────────────────────────┐
 │                          CLIENT APPLICATIONS                             │
-│  (Memora, ABR Insights, CareAI, Union Eyes, CORA, FamilySync, etc.)    │
+│  (Memora, ABR Insights, CareAI, UnionEyes, CORA, FamilySync, etc.)    │
 └─────────────────────────────────────────────────────────────────────────┘
                                     │
                                     │ HTTPS (Next.js 14 Client SDK)

@@ -1,5 +1,5 @@
 /**
- * Union Eyes — Org-Scoped Table Registry
+ * UnionEyes — Org-Scoped Table Registry
  *
  * NzilaOS PR-UE-03: Mirrors packages/db/src/org-registry.ts for UE's local schema.
  *

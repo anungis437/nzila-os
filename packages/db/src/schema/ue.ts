@@ -1,8 +1,8 @@
 /**
- * Nzila OS — Union Eyes vertical schema
+ * Nzila OS — UnionEyes vertical schema
  *
  * Tables:
- *   ueCases — Union Eyes case records (source of truth for ML training + inference)
+ *   ueCases — UnionEyes case records (source of truth for ML training + inference)
  *
  * Column names match the canonical UE data layer. ML scripts (dataset builders,
  * inference runners) MUST import this table rather than raw-SQL guessing column

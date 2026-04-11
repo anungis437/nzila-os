@@ -92,7 +92,7 @@
             {
               "risk_id": "TECH-001",
               "category": "Technical",
-              "description": "Union Eyes migration failure (4,773 entities, 238 RLS policies)",
+              "description": "UnionEyes migration failure (4,773 entities, 238 RLS policies)",
               "impact": "CRITICAL",
               "probability": "MEDIUM",
               "owner": "CTO",
@@ -153,7 +153,7 @@
             {
               "risk_id": "MKT-001",
               "category": "Market",
-              "description": "Union Eyes pilot customer churn (if MVP underdelivers)",
+              "description": "UnionEyes pilot customer churn (if MVP underdelivers)",
               "impact": "HIGH",
               "probability": "MEDIUM",
               "mitigation": "Customer success program, NPS tracking, rapid iteration"
@@ -231,7 +231,7 @@
             {"date": "2026-03", "milestone": "File DiasporaCore trademark (LEGAL-001)", "status": "pending"},
             {"date": "2026-04", "milestone": "Initiate bridge financing (FIN-001)", "status": "pending"},
             {"date": "2026-05", "milestone": "File 3 patent applications (LEGAL-001)", "status": "pending"},
-            {"date": "2026-06", "milestone": "Union Eyes pilot launch (MKT-001)", "status": "pending"},
+            {"date": "2026-06", "milestone": "UnionEyes pilot launch (MKT-001)", "status": "pending"},
             {"date": "2026-07", "milestone": "Series A close target (FIN-001)", "status": "pending"}
           ]
         }
@@ -268,7 +268,7 @@
           "type": "checklist",
           "title": "Compliance Risk Monitoring",
           "items": [
-            {"text": "PIPEDA compliance (Union Eyes PII encryption)", "status": "compliant", "owner": "Legal"},
+            {"text": "PIPEDA compliance (UnionEyes PII encryption)", "status": "compliant", "owner": "Legal"},
             {"text": "GDPR compliance (DiasporaCore EU transfers)", "status": "compliant", "owner": "Legal + CTO"},
             {"text": "HIPAA compliance (Memora healthcare data)", "status": "in_progress", "owner": "Product Lead"},
             {"text": "SOC 2 Type II certification", "status": "pending", "owner": "CTO + Security"},

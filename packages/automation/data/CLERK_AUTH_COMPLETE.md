@@ -1,14 +1,14 @@
 # ✅ Clerk Authentication - Configuration Complete
 
 **Date**: February 17, 2026  
-**Status**: Both Union Eyes and ABR Insights backends fully configured for Clerk authentication
+**Status**: Both UnionEyes and ABR Insights backends fully configured for Clerk authentication
 
 ---
 
 ## 🎯 Summary
 
 Both Django backends are now configured with production-ready Clerk authentication:
-- ✅ **Union Eyes** - Clerk domain: `known-hagfish-67.clerk.accounts.dev`
+- ✅ **UnionEyes** - Clerk domain: `known-hagfish-67.clerk.accounts.dev`
 - ✅ **ABR Insights** - Clerk domain: `endless-fowl-82.clerk.accounts.dev`
 
 All required files, configurations, and credentials are in place. Both backends are ready for local testing.
@@ -17,7 +17,7 @@ All required files, configurations, and credentials are in place. Both backends 
 
 ## 📁 Configuration Files Updated
 
-### Union Eyes Backend (`C:\APPS\nzila-union-eyes\backend\`)
+### UnionEyes Backend (`C:\APPS\nzila-union-eyes\backend\`)
 
 | File | Status | Changes |
 |------|--------|---------|
@@ -46,7 +46,7 @@ All required files, configurations, and credentials are in place. Both backends 
 
 ## 🔑 Clerk Credentials Configured
 
-### Union Eyes
+### UnionEyes
 ```bash
 CLERK_JWKS_URL=https://known-hagfish-67.clerk.accounts.dev/.well-known/jwks.json
 CLERK_SECRET_KEY=sk_test_TXaFWyZlUH0OYQaS0jeAm7VDbk39famDIN8l2myD1Y
@@ -71,7 +71,7 @@ CLERK_WEBHOOK_SECRET=whsec_configure_this_after_webhook_setup
 2. **PostgreSQL** must be running with migrated databases
 3. **Python dependencies** must be installed
 
-### Test Union Eyes (10 minutes)
+### Test UnionEyes (10 minutes)
 
 ```powershell
 # 1. Start Redis (if not running)
@@ -92,7 +92,7 @@ curl http://localhost:8000/api/auth_core/health/
 # Expected: {"status":"healthy"}
 
 # 6. Test authenticated endpoint (requires JWT from frontend)
-# Get JWT token from Union Eyes frontend (DevTools → Application → Local Storage)
+# Get JWT token from UnionEyes frontend (DevTools → Application → Local Storage)
 $token = "YOUR_JWT_TOKEN_HERE"
 curl -H "Authorization: Bearer $token" http://localhost:8000/api/auth_core/me/
 # Expected: User profile JSON
@@ -126,7 +126,7 @@ curl -H "Authorization: Bearer $token" http://localhost:8001/api/auth_core/me/
 
 ## 🔧 Configure Clerk Webhooks
 
-### Union Eyes Webhook Setup (15 minutes)
+### UnionEyes Webhook Setup (15 minutes)
 
 1. **Expose local server** (for testing):
    ```powershell
@@ -137,7 +137,7 @@ curl -H "Authorization: Bearer $token" http://localhost:8001/api/auth_core/me/
 
 2. **Configure in Clerk Dashboard**:
    - Go to https://dashboard.clerk.com
-   - Select Union Eyes application
+   - Select UnionEyes application
    - Navigate to **Webhooks** → **Add Endpoint**
    - **Endpoint URL**: `https://abc123.ngrok.io/api/auth_core/webhooks/clerk/`
    - **Subscribe to events**:
@@ -162,7 +162,7 @@ curl -H "Authorization: Bearer $token" http://localhost:8001/api/auth_core/me/
 
 ### ABR Insights Webhook Setup (15 minutes)
 
-Repeat the same process as Union Eyes, but:
+Repeat the same process as UnionEyes, but:
 - Use port 8001: `ngrok http 8001`
 - Configure in ABR's Clerk application
 - Update ABR `.env` with webhook secret
@@ -171,7 +171,7 @@ Repeat the same process as Union Eyes, but:
 
 ## 📋 API Endpoints Available
 
-### Union Eyes
+### UnionEyes
 - `GET /api/auth_core/health/` - Health check (public)
 - `GET /api/auth_core/me/` - Current user profile (authenticated)
 - `POST /api/auth_core/webhooks/clerk/` - Clerk webhook handler (public, signature verified)
@@ -192,7 +192,7 @@ Repeat the same process as Union Eyes, but:
 
 ## 🔍 Verification Checklist
 
-### Union Eyes
+### UnionEyes
 - [x] Clerk credentials added to `.env`
 - [x] Django settings updated with auth classes
 - [x] Middleware stack configured (3 middleware classes)
@@ -253,7 +253,7 @@ Repeat the same process as Union Eyes, but:
 
 ## 📊 Configuration Comparison
 
-| Feature | Union Eyes | ABR Insights |
+| Feature | UnionEyes | ABR Insights |
 |---------|-----------|--------------|
 | Clerk Domain | `known-hagfish-67` | `endless-fowl-82` |
 | Redis DB | 1 | 2 (separate from UE) |
@@ -305,7 +305,7 @@ Access-Control-Allow-Origin error in browser console
 
 ## 📚 Documentation
 
-- **Union Eyes Setup Guide**: [CLERK_SETUP_COMPLETE.md](c:/APPS/nzila-union-eyes/backend/CLERK_SETUP_COMPLETE.md)
+- **UnionEyes Setup Guide**: [CLERK_SETUP_COMPLETE.md](c:/APPS/nzila-union-eyes/backend/CLERK_SETUP_COMPLETE.md)
 - **Auth Migration Plan**: [AUTH_MIGRATION_PLAN.md](c:/APPS/nzila-automation/packages/automation/data/AUTH_MIGRATION_PLAN.md)
 - **Implementation Summary**: [AUTH_IMPLEMENTATION_SUMMARY.md](c:/APPS/nzila-automation/packages/automation/data/AUTH_IMPLEMENTATION_SUMMARY.md)
 - **Clerk Django Guide**: https://clerk.com/docs/quickstarts/django
@@ -320,7 +320,7 @@ Access-Control-Allow-Origin error in browser console
 **Next Actions**:
 1. Start Redis: `redis-server`
 2. Install dependencies in both backends: `pip install -r requirements.txt`
-3. Test Union Eyes: `python manage.py runserver` (port 8000)
+3. Test UnionEyes: `python manage.py runserver` (port 8000)
 4. Test ABR Insights: `python manage.py runserver 8001` (port 8001)
 5. Configure webhooks in Clerk dashboard (use ngrok for local testing)
 6. Test end-to-end authentication from frontends

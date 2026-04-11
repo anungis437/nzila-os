@@ -1,17 +1,17 @@
-# 🏭 Uniontech Vertical — Union Eyes & DiasporaCore
+# 🏭 Uniontech Vertical — UnionEyes & DiasporaCore
 
 **Market:** Labor unions, union service organizations, member engagement platforms  
 **TAM:** $50B+ (13,000+ North American unions × $3.8M avg budget)  
 **SAM:** $195M (1,300 large unions × $150K software spend)  
-**Platforms:** Union Eyes (flagship), DiasporaCore/C3UO (hybrid fintech/uniontech)
+**Platforms:** UnionEyes (flagship), DiasporaCore/C3UO (hybrid fintech/uniontech)
 
 ---
 
-## 🏆 FLAGSHIP: UNION EYES
+## 🏆 FLAGSHIP: UnionEyes
 
 ### **Product Overview**
 
-**Union Eyes** is the modern operating system for labor unions — an integrated platform managing membership, grievances, collective bargaining agreements (CBA), pension forecasting, elections, campaigns, and financial operations (public data integration in development).
+**UnionEyes** is the modern operating system for labor unions — an integrated platform managing membership, grievances, collective bargaining agreements (CBA), pension forecasting, elections, campaigns, and financial operations (public data integration in development).
 
 ### **Technical Specifications**
 
@@ -76,7 +76,7 @@
   * **Unifor:** 315K members, Canada's 2nd largest private-sector union → strategic partnership Q2 2026
   * **AFL-CIO (U.S.):** 12.5M members, 60+ affiliate unions → U.S. channel partner 2028
 - **Union Service Organizations:**
-  * **Union Pension Consultants:** Actuarial firms (Eckler, Aon, Mercer) refer Union Eyes for fiduciary compliance
+  * **Union Pension Consultants:** Actuarial firms (Eckler, Aon, Mercer) refer UnionEyes for fiduciary compliance
   * **Labor Law Firms:** Employment lawyers (Cavalluzzo LLP, Goldblatt Partners) refer for grievance tracking, arbitration management
 - **Union Conferences & Events:**
   * **CLC Canada Convention** (biennial, 3,000+ attendees): Booth sponsorship, thought leadership sessions
@@ -95,17 +95,17 @@
 
 | Competitor | Product | Strengths | Weaknesses | Nzila Advantage |
 |------------|---------|-----------|------------|-----------------|
-| **BargainingPower** (BargainingPower.com) | Grievance tracking | Established (10+ years), 200+ customers | Grievance-only (no pension, no campaigns), legacy UI, no AI/ML | Union Eyes: 10 modules (comprehensive), ML pipeline, modern UX, 4,773 entities |
-| **UnionWare** (UnionWare Suite) | Desktop software (membership, financials) | 1,000+ customers (small unions), Windows integration | Legacy desktop app (Windows 95 era), no cloud, no mobile, no AI | Union Eyes: Cloud-native, mobile-first, AI/ML, multi-org security (238 RLS policies) |
-| **iMIS** (by ASI) | Association Management Software | Generic AMS (20,000+ customers), strong financials module | Not union-specific (no CBA, no grievances, no ML churn), expensive ($50K+ per year) | Union Eyes: Union-tailored workflows, CBA intelligence, ML forecasting, $15K-$25K ACV (50% cheaper) |
+| **BargainingPower** (BargainingPower.com) | Grievance tracking | Established (10+ years), 200+ customers | Grievance-only (no pension, no campaigns), legacy UI, no AI/ML | UnionEyes: 10 modules (comprehensive), ML pipeline, modern UX, 4,773 entities |
+| **UnionWare** (UnionWare Suite) | Desktop software (membership, financials) | 1,000+ customers (small unions), Windows integration | Legacy desktop app (Windows 95 era), no cloud, no mobile, no AI | UnionEyes: Cloud-native, mobile-first, AI/ML, multi-org security (238 RLS policies) |
+| **iMIS** (by ASI) | Association Management Software | Generic AMS (20,000+ customers), strong financials module | Not union-specific (no CBA, no grievances, no ML churn), expensive ($50K+ per year) | UnionEyes: Union-tailored workflows, CBA intelligence, ML forecasting, $15K-$25K ACV (50% cheaper) |
 
 **Horizontal Competitors (Generic HR Tech):**
 
 | Competitor | Product | Weaknesses | Nzila Advantage |
 |------------|---------|------------|-----------------|
-| **ADP Workforce Now** | HR suite | Not union-specific (no CBA, no grievances, no fiduciary compliance) | Union Eyes: CBA intelligence (contract parsing, expiration alerts, bargaining analytics) |
-| **Workday HCM** | Enterprise HR platform | Expensive ($100K-$500K per year), not union workflows | Union Eyes: Union-specific modules (elections, campaigns, strike funds, pension forecasting) |
-| **BambooHR** | SMB HR software | Generic HR (no union context, no grievance arbitration tracking) | Union Eyes: Grievance outcome prediction (ML model, 87% precision), arbitration cost estimation |
+| **ADP Workforce Now** | HR suite | Not union-specific (no CBA, no grievances, no fiduciary compliance) | UnionEyes: CBA intelligence (contract parsing, expiration alerts, bargaining analytics) |
+| **Workday HCM** | Enterprise HR platform | Expensive ($100K-$500K per year), not union workflows | UnionEyes: Union-specific modules (elections, campaigns, strike funds, pension forecasting) |
+| **BambooHR** | SMB HR software | Generic HR (no union context, no grievance arbitration tracking) | UnionEyes: Grievance outcome prediction (ML model, 87% precision), arbitration cost estimation |
 
 **Our Competitive Moats:**
 
@@ -161,7 +161,7 @@
 
 **2028 — National Dominance:**
 - 🚧 100 customers (80 Canada, 20 U.S.)
-- 🚧 $1.5M-$2M ARR (Union Eyes only)
+- 🚧 $1.5M-$2M ARR (UnionEyes only)
 - 🚧 Top-3 union software platform in North America
 
 ### **Regulatory & Compliance Considerations**
@@ -249,7 +249,7 @@
 
 ## 📈 UNIONTECH VERTICAL STRATEGY (2026-2030)
 
-### **Phase 1: Union Eyes Launch (2026-2027) — $150K → $1M ARR**
+### **Phase 1: UnionEyes Launch (2026-2027) — $150K → $1M ARR**
 
 **Focus:** Flagship product-market fit, Canadian market dominance
 - **Customers:** 10 (2026) → 40 (2027)
@@ -268,7 +268,7 @@
 **Focus:** Top-3 platform in North America, M&A consideration
 - **Customers:** 150+ unions (100 Canada, 50 U.S.)
 - **Expansion:** DiasporaCore credit union partnerships ($600K ARR)
-- **Total Uniontech ARR:** $4.1M ($3.5M Union Eyes + $600K DiasporaCore)
+- **Total Uniontech ARR:** $4.1M ($3.5M UnionEyes + $600K DiasporaCore)
 
 ---
 
@@ -277,10 +277,10 @@
 | Metric | 2026 Target | 2027 Target | 2028 Target | 2030 Target |
 |--------|-------------|-------------|-------------|-------------|
 | **ARR (Uniontech Vertical)** | $150K | $600K | $1.5M | $4.1M |
-| **Customers (Union Eyes)** | 10 | 40 | 80 | 150 |
-| **ACV (Union Eyes)** | $15K | $15K | $18K | $22K |
+| **Customers (UnionEyes)** | 10 | 40 | 80 | 150 |
+| **ACV (UnionEyes)** | $15K | $15K | $18K | $22K |
 | **NRR (Net Revenue Retention)** | 100% (pilots) | 115% | 120% | 125% |
-| **CAC Payback (Union Eyes)** | 18 months | 16 months | 14 months | 12 months |
+| **CAC Payback (UnionEyes)** | 18 months | 16 months | 14 months | 12 months |
 | **Customer Churn** | 15% (pilot churn) | 10% | 8% | 5% |
 
 ---
@@ -292,18 +292,18 @@
 - **Union Renaissance**: Membership growth for first time in decades (Gen Z labor activism, teacher strikes, Amazon/Starbucks unionization)
 - **Regulatory Drivers**: Pension fiduciary compliance (PBSA, ERISA), financial disclosure mandates (LMRDA, CRA reporting)
 
-**Union Eyes Competitive Advantages:**
+**UnionEyes Competitive Advantages:**
 - **4,773 entities** (10x larger than competitors)
 - **ML pipeline** (only union platform with pension forecasting, churn prediction, outcome prediction)
 - **10+ years domain expertise** (CBA negotiation, fiduciary compliance, grievance arbitration)
 - **IP moats** (2 patents pending: Pension Forecasting, Grievance Prediction)
 
 **Exit Opportunities:**
-- **Strategic M&A:** ADP acquires Union Eyes for Workforce Now integration ($80M-$120M valuation at $2.5M ARR, 30-50x ARR multiple)
+- **Strategic M&A:** ADP acquires UnionEyes for Workforce Now integration ($80M-$120M valuation at $2.5M ARR, 30-50x ARR multiple)
 - **Private Equity:** Thoma Bravo, Vista Equity Partners (labor tech roll-up acquisitions)
 - **IPO Track (2032+)**: If $10M+ ARR, horizontal expansion (associations, nonprofits, cooperatives)
 
 ---
 
 **Last Updated:** February 2026  
-**Status:** Active — Union Eyes commercial launch Q2 2026, DiasporaCore production-ready, GTM execution in progress
+**Status:** Active — UnionEyes commercial launch Q2 2026, DiasporaCore production-ready, GTM execution in progress

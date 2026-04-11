@@ -1,7 +1,7 @@
 #!/usr/bin/env python3
 """
 Django REST API Endpoint Generator
-Generates Django views, serializers, and URLs for Union Eyes service migration
+Generates Django views, serializers, and URLs for UnionEyes service migration
 """
 
 import json
@@ -454,7 +454,7 @@ export async function {func_name}(data: any) {{
         # Generate consolidated URL configuration
         urls_code = f'''"""
 API URL Configuration
-Generated for Union Eyes service migration
+Generated for UnionEyes service migration
 """
 
 from django.urls import path, include
@@ -490,7 +490,7 @@ urlpatterns = [
     def generate_migration_guide(self, services: List[Dict]):
         """Generate step-by-step migration guide"""
 
-        guide = f"""# Union Eyes Service Migration Guide
+        guide = f"""# UnionEyes Service Migration Guide
 
 ## Phase 1: Critical Services (50+ database operations)
 

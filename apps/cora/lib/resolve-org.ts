@@ -11,7 +11,7 @@ import { auth, currentUser } from '@nzila/platform-auth/entra/server'
 import type { AgriOrgContext } from '@nzila/agri-core'
 import type { AgriOrgRole } from '@nzila/agri-core'
 
-/** Emails that always receive admin role, regardless of auth metadata. */
+/** Emails that always receive admin role, regardless of session metadata. */
 const SUPER_ADMIN_EMAILS = new Set([
   'info@nzilaventures.com',
   ...(process.env.SUPER_ADMIN_EMAILS ?? '').split(',').map(s => s.trim()).filter(Boolean),
@@ -34,7 +34,7 @@ export async function resolveOrgContext(): Promise<AgriOrgContext> {
     throw new Error('No active organization — select an org before accessing Cora Insights.')
   }
 
-  let role = mapClerkRoleToAgriRole(orgRole, sessionClaims)
+  let role = mapAuthRoleToAgriRole(orgRole, sessionClaims)
 
   // Super-admin email override
   if (role !== 'admin') {
@@ -56,7 +56,7 @@ export async function resolveOrgContext(): Promise<AgriOrgContext> {
   }
 }
 
-function mapClerkRoleToAgriRole(
+function mapAuthRoleToAgriRole(
   orgRole: string | undefined | null,
   sessionClaims: Record<string, unknown> | undefined | null,
 ): AgriOrgRole {

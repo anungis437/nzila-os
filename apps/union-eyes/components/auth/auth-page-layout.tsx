@@ -6,7 +6,7 @@
  * the layout, effects, and animation are shared for portfolio cohesion.
  *
  * Usage:
- *   <AuthPageLayout appName="Union Eyes" tagline="..." stats={[...]}>
+ *   <AuthPageLayout appName="UnionEyes" tagline="..." stats={[...]}>
  *     <SignIn />
  *   </AuthPageLayout>
  */
@@ -79,7 +79,7 @@ export default function AuthPageLayout({
             <Link href="/" className="inline-flex items-center gap-3 group">
               <Image
                 src="/images/brand/icon.png"
-                alt="Union Eyes"
+                alt="UnionEyes"
                 width={40}
                 height={40}
                 className="w-10 h-10 rounded-xl shadow-lg shadow-electric/25"

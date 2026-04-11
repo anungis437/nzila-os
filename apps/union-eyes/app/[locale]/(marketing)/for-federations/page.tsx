@@ -9,9 +9,9 @@ import RolePageContent from '@/app/(marketing)/components/role-page-content';
 
 export async function generateMetadata(): Promise<Metadata> {
   return {
-    title: 'For Federations | Union Eyes',
+    title: 'For Federations | UnionEyes',
     description:
-      'Union Eyes gives federations and national unions cross-local visibility into casework, resources, and outcomes — coordinate effectively and support locals that need it most.',
+      'UnionEyes gives federations and national unions cross-local visibility into casework, resources, and outcomes — coordinate effectively and support locals that need it most.',
   };
 }
 

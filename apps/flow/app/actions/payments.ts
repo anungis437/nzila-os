@@ -1,6 +1,6 @@
 'use server'
 
-import { getReadContext } from '@/lib/clerk-org-resolver'
+import { getReadContext } from '@/lib/org-resolver'
 import { db, commercePayments, commerceInvoices, commerceCustomers } from '@nzila/db'
 import { eq, desc, and } from 'drizzle-orm'
 import { executeCommand } from '@/lib/control/control-adapter'

@@ -84,6 +84,8 @@ const issueSchema = z.object({
   grievanceType: z.string().min(1, "Grievance type is required"),
   issueDate: z.date({ required_error: "Issue date is required" }),
   urgency: z.string().min(1, "Urgency level is required"),
+  cbaArticle: z.string().optional().default(""),
+  cbaSection: z.string().optional().default(""),
   workplaceSafetyFlag: z.boolean().default(false),
   harassmentFlag: z.boolean().default(false),
   discriminationFlag: z.boolean().default(false),
@@ -125,7 +127,7 @@ const INTAKE_STEPS: IntakeStep[] = [
 const STEP_FIELDS: string[][] = [
   ["memberName", "memberEmail", "memberPhone", "memberNumber", "localChapter"],
   ["employerName", "workplaceName", "department", "branch", "supervisorName"],
-  ["grievanceType", "issueDate", "urgency", "workplaceSafetyFlag", "harassmentFlag", "discriminationFlag", "accommodationFlag"],
+  ["grievanceType", "issueDate", "urgency", "cbaArticle", "cbaSection", "workplaceSafetyFlag", "harassmentFlag", "discriminationFlag", "accommodationFlag"],
   ["title", "description", "location", "desiredResolution"],
   ["attachments"],
   [], // review step — no validation
@@ -203,6 +205,8 @@ export function GrievanceIntakeForm({
     grievanceType: "",
     issueDate: undefined as unknown as Date,
     urgency: "medium",
+    cbaArticle: "",
+    cbaSection: "",
     workplaceSafetyFlag: false,
     harassmentFlag: false,
     discriminationFlag: false,
@@ -526,6 +530,22 @@ function IssueStep({ form }: { form: UseFormReturn<GrievanceFormData, undefined,
           </Select>
           <FieldError form={form} name="urgency" />
         </div>
+      </div>
+
+      {/* CBA Article / Section */}
+      <div className="space-y-3 pt-2">
+        <p className="text-sm font-medium text-muted-foreground flex items-center gap-1.5">
+          <FileText className="h-4 w-4" />
+          Collective Agreement Reference (if known)
+        </p>
+        <div className="grid grid-cols-1 sm:grid-cols-2 gap-4">
+          <FormField form={form} name="cbaArticle" label="CBA Article" placeholder="e.g., Article 14 — Telework" />
+          <FormField form={form} name="cbaSection" label="Section / Clause" placeholder="e.g., 14.3(b)" />
+        </div>
+        <HelpTip>
+          Citing the specific collective agreement article strengthens the grievance.
+          If you&apos;re unsure, your steward can help identify the relevant provision.
+        </HelpTip>
       </div>
 
       {/* Flags */}

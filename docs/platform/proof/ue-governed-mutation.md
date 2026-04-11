@@ -7,7 +7,7 @@ enforcement pipeline: trace context → actor resolution → tenant resolution �
 governance evaluation → rate limit check → mutation execution → audit event
 recording → audit hash chain verification.
 
-This scenario uses the Union Eyes–style enforcement surface: a financial record
+This scenario uses the UnionEyes–style enforcement surface: a financial record
 mutation that must be fully governed before any state change occurs.
 
 ## Entrypoint

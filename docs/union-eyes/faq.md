@@ -1,16 +1,16 @@
-# FAQ — Union Eyes
+# FAQ — UnionEyes
 
 > Common questions from members, stewards, and administrators.
 
 ## General
 
-### What is Union Eyes?
+### What is UnionEyes?
 A digital case-tracking system for unions. Members report workplace issues,
 stewards manage them, and administrators monitor progress. See the
 [Partner Overview](./partner-overview.md) for a plain-language explanation.
 
 ### What is a "case"?
-A tracked workplace issue — the primary unit of work in Union Eyes. You may
+A tracked workplace issue — the primary unit of work in UnionEyes. You may
 also see the word "grievance" when a case follows a formal collective
 agreement (CBA) process. Both refer to tracked workplace issues.
 

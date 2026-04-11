@@ -81,7 +81,7 @@ class MetricCollector:
             "backbone_completion": 25,
             "migration_priority": [
                 {"platform": "eExports", "weeks": "7-8", "status": "pending"},
-                {"platform": "Union Eyes", "weeks": "10-12", "status": "pending"},
+                {"platform": "UnionEyes", "weeks": "10-12", "status": "pending"},
                 {"platform": "ABR Insights", "weeks": "12-14", "status": "pending"},
                 {"platform": "C3UO", "weeks": "12-14", "status": "pending"},
                 {"platform": "CongoWave", "weeks": "12-14", "status": "pending"},
@@ -145,7 +145,7 @@ class MetricCollector:
                 "platforms": ["ABR Insights", "Court Lens", "Insight CFO"]
             },
             "supabase": {"platforms": ["ABR Insights", "CyberLearn", "Shop Quoter"]},
-            "postgresql": {"platforms": ["Union Eyes", "C3UO", "eExports", "Trade OS"]},
+            "postgresql": {"platforms": ["UnionEyes", "C3UO", "eExports", "Trade OS"]},
         }
 
     def _identify_reuse_opportunities(self) -> List[Dict[str, Any]]:

@@ -166,7 +166,6 @@ describe('ORGP-004: Org-scoped apps have middleware with auth enforcement', () =
 
       const src = readSafe(mwPath)
       const hasAuthEnforcement =
-        src.includes('clerkMiddleware') ||
         src.includes('authMiddleware') ||
         src.includes('NextResponse.redirect') ||
         src.includes('auth()') ||

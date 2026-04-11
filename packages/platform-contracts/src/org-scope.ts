@@ -36,7 +36,7 @@ export type OrgScopeStatus = (typeof orgScopeStatusValues)[number]
 // ── Org Scope ───────────────────────────────────────────────────────────────
 
 export const orgScopeSchema = z.object({
-  /** Unique org identifier (Clerk org ID or internal UUID). */
+  /** Unique org identifier (auth org ID or internal UUID). */
   id: z.string().min(1),
   /** Human-readable org name. */
   name: z.string().min(1),

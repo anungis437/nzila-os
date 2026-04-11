@@ -1,11 +1,11 @@
 /**
  * Edge Middleware — Four-layer protection for Zonga.
  * Layer 1: Rate limiting (skip in dev — HMR triggers too many requests)
- * Layer 2: Clerk authentication (skip for public + auth routes)
+ * Layer 2: Authentication (skip for public + auth routes)
  * Layer 3: next-intl locale routing
  * Layer 4: Request-ID propagation (x-request-id header)
  */
-import { clerkMiddleware, createRouteMatcher } from '@nzila/platform-auth/entra/server'
+import { authMiddleware, createRouteMatcher } from '@nzila/platform-auth/entra/server'
 import createMiddleware from 'next-intl/middleware'
 import { NextResponse, type NextRequest } from 'next/server'
 import { checkRateLimit, rateLimitHeaders } from '@nzila/os-core/rateLimit'
@@ -36,7 +36,7 @@ const isMarketingPath = (pathname: string) =>
     (p) => pathname === p || pathname.startsWith(`${p}/`),
   );
 
-const isClerkAuthPath = (pathname: string) =>
+const isAuthPath = (pathname: string) =>
   pathname.startsWith('/sign-in') || pathname.startsWith('/sign-up') ||
   pathname.startsWith('/login') || pathname.startsWith('/signup') ||
   pathname.startsWith('/forgot-password') || pathname.startsWith('/reset-password');
@@ -53,7 +53,7 @@ const RATE_LIMIT_MAX = Number(process.env.RATE_LIMIT_MAX ?? '120')
 const RATE_LIMIT_WINDOW_MS = Number(process.env.RATE_LIMIT_WINDOW_MS ?? '60000')
 
 /* ── Main middleware ── */
-export default clerkMiddleware(async (auth, request: NextRequest) => {
+export default authMiddleware(async (auth, request: NextRequest) => {
   // ── Rate limiting (skip in dev — HMR triggers too many requests) ──────
   if (process.env.NODE_ENV !== 'development') {
     const ip =
@@ -101,7 +101,7 @@ export default clerkMiddleware(async (auth, request: NextRequest) => {
   }
 
   /* Skip locale redirect for pure marketing & auth pages */
-  if (isMarketingPath(request.nextUrl.pathname) || isClerkAuthPath(request.nextUrl.pathname)) {
+  if (isMarketingPath(request.nextUrl.pathname) || isAuthPath(request.nextUrl.pathname)) {
     const response = NextResponse.next();
     response.headers.set('x-request-id', crypto.randomUUID());
     return response;

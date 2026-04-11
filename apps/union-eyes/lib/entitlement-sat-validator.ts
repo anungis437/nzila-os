@@ -207,7 +207,7 @@ export class SATSolver {
 }
 
 /**
- * Entitlement constraint definitions for Union Eyes
+ * Entitlement constraint definitions for UnionEyes
  */
 interface EntitlementConstraint {
   entitlement: GatedFeature;
@@ -392,7 +392,7 @@ export class EntitlementValidator {
 }
 
 /**
- * Create default Union Eyes entitlement constraints
+ * Create default UnionEyes entitlement constraints
  */
 export function createUnionEyesEntitlements(): {
   constraints: EntitlementConstraint[];
@@ -453,7 +453,7 @@ export function createUnionEyesEntitlements(): {
 }
 
 /**
- * Validate the Union Eyes entitlement system
+ * Validate the UnionEyes entitlement system
  */
 export function validateUnionEyesEntitlements(): {
   isValid: boolean;

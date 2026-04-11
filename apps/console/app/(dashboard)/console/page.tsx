@@ -83,7 +83,7 @@ const externalApps = [
     status: 'live',
   },
   {
-    name: 'Union Eyes',
+    name: 'UnionEyes',
     href: process.env.NEXT_PUBLIC_UNION_EYES_URL ?? 'http://localhost:3003',
     icon: UsersIcon,
     description: 'Union management — pension, grievances, member analytics.',

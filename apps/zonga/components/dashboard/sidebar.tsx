@@ -34,6 +34,7 @@ import {
   Activity,
   FileBarChart,
   Building2,
+  CreditCard,
   ChevronDown,
   Menu,
   X,
@@ -44,9 +45,11 @@ import Link from 'next/link'
 import { usePathname } from 'next/navigation'
 import { useState } from 'react'
 import { motion, AnimatePresence } from 'framer-motion'
+import { useTranslations } from 'next-intl'
 import type { ZongaRole } from '@nzila/zonga-core/types'
-import { MobileAccountFooter } from './clerk-widgets'
+import { MobileAccountFooter } from './account-widgets'
 import { WorkspaceIdentity } from '@/components/branding'
+import { LanguageSwitcher } from '@/components/language-switcher'
 
 // ── Types ────────────────────────────────────────────────────────────────────
 
@@ -128,21 +131,21 @@ function NavSectionGroup({
 
 // ── Build sections ───────────────────────────────────────────────────────────
 
-function buildPlatformSections(locale: string): NavSection[] {
+function buildPlatformSections(locale: string, t: (key: string) => string): NavSection[] {
   const p = `/${locale}/dashboard`
   return [
     {
       title: 'Platform',
       items: [
-        { href: p, icon: <Home size={16} />, label: 'Platform Home', roles: allRoles },
+        { href: p, icon: <Home size={16} />, label: t('home'), roles: allRoles },
         { href: `${p}/operations`, icon: <Activity size={16} />, label: 'Operations', roles: ['admin'] },
         { href: `${p}/admin/organizations`, icon: <Building2 size={16} />, label: 'Organizations', roles: allRoles },
-        { href: `${p}/analytics`, icon: <BarChart3 size={16} />, label: 'Platform Analytics', roles: adminManager },
-        { href: `${p}/moderation`, icon: <Shield size={16} />, label: 'Content Moderation', roles: adminManager },
-        { href: `${p}/integrity`, icon: <Lock size={16} />, label: 'Integrity & Rights', roles: adminManager },
-        { href: `${p}/creators`, icon: <Users size={16} />, label: 'Creator Management', roles: adminManager },
-        { href: `${p}/revenue`, icon: <DollarSign size={16} />, label: 'Revenue Overview', roles: ['admin'] },
-        { href: `${p}/payouts`, icon: <Zap size={16} />, label: 'Payout Administration', roles: ['admin'] },
+        { href: `${p}/analytics`, icon: <BarChart3 size={16} />, label: t('analytics'), roles: adminManager },
+        { href: `${p}/moderation`, icon: <Shield size={16} />, label: t('moderation'), roles: adminManager },
+        { href: `${p}/integrity`, icon: <Lock size={16} />, label: t('integrity'), roles: adminManager },
+        { href: `${p}/creators`, icon: <Users size={16} />, label: t('creators'), roles: adminManager },
+        { href: `${p}/revenue`, icon: <DollarSign size={16} />, label: t('revenue'), roles: ['admin'] },
+        { href: `${p}/payouts`, icon: <Zap size={16} />, label: t('payouts'), roles: ['admin'] },
       ],
     },
     {
@@ -156,29 +159,29 @@ function buildPlatformSections(locale: string): NavSection[] {
   ]
 }
 
-function buildLabelSections(locale: string): NavSection[] {
+function buildLabelSections(locale: string, t: (key: string) => string): NavSection[] {
   const p = `/${locale}/dashboard`
   return [
     {
       title: 'Discover',
       items: [
-        { href: p, icon: <Home size={16} />, label: 'Home', roles: allRoles },
-        { href: `${p}/browse`, icon: <Globe size={16} />, label: 'Browse', roles: allRoles },
-        { href: `${p}/search`, icon: <Search size={16} />, label: 'Search', roles: allRoles },
+        { href: p, icon: <Home size={16} />, label: t('home'), roles: allRoles },
+        { href: `${p}/browse`, icon: <Globe size={16} />, label: t('browse'), roles: allRoles },
+        { href: `${p}/search`, icon: <Search size={16} />, label: t('search'), roles: allRoles },
       ],
     },
     {
       title: 'Your Library',
       items: [
-        { href: `${p}/playlists`, icon: <ListMusic size={16} />, label: 'Playlists', roles: allRoles },
-        { href: `${p}/listener`, icon: <Headphones size={16} />, label: 'My Music', roles: allRoles },
+        { href: `${p}/playlists`, icon: <ListMusic size={16} />, label: t('playlists'), roles: allRoles },
+        { href: `${p}/listener`, icon: <Headphones size={16} />, label: t('myMusic'), roles: allRoles },
         { href: `${p}/subscription`, icon: <Gem size={16} />, label: 'Subscription', roles: allRoles },
       ],
     },
     {
       title: 'Events',
       items: [
-        { href: `${p}/events`, icon: <CalendarDays size={16} />, label: 'Events', roles: allRoles },
+        { href: `${p}/events`, icon: <CalendarDays size={16} />, label: t('events'), roles: allRoles },
       ],
     },
     {
@@ -190,28 +193,29 @@ function buildLabelSections(locale: string): NavSection[] {
     {
       title: 'Business',
       items: [
-        { href: `${p}/revenue`, icon: <DollarSign size={16} />, label: 'Revenue', roles: adminManager },
-        { href: `${p}/payouts`, icon: <Zap size={16} />, label: 'Payouts', roles: adminOnly },
-        { href: `${p}/analytics`, icon: <BarChart3 size={16} />, label: 'Analytics', roles: adminManager },
-        { href: `${p}/creators`, icon: <Users size={16} />, label: 'Creators', roles: adminManager },
+        { href: `${p}/revenue`, icon: <DollarSign size={16} />, label: t('revenue'), roles: adminManager },
+        { href: `${p}/payouts`, icon: <Zap size={16} />, label: t('payouts'), roles: adminOnly },
+        { href: `${p}/analytics`, icon: <BarChart3 size={16} />, label: t('analytics'), roles: adminManager },
+        { href: `${p}/creators`, icon: <Users size={16} />, label: t('creators'), roles: adminManager },
+        { href: `${p}/admin/billing`, icon: <CreditCard size={16} />, label: 'Billing', roles: adminManager },
       ],
     },
     {
       title: 'Creator Studio',
       items: [
-        { href: `${p}/catalog`, icon: <Music size={16} />, label: 'Catalog', roles: creatorAndAbove },
-        { href: `${p}/releases`, icon: <Disc3 size={16} />, label: 'Releases', roles: creatorAndAbove },
-        { href: `${p}/artists`, icon: <Mic2 size={16} />, label: 'Artists', roles: adminManager },
-        { href: `${p}/tracks`, icon: <Music size={16} />, label: 'Tracks', roles: creatorAndAbove },
-        { href: `${p}/rights`, icon: <Lock size={16} />, label: 'Rights', roles: adminOnly },
-        { href: `${p}/events/new`, icon: <PlusCircle size={16} />, label: 'Create Event', roles: creatorAndAbove },
-        { href: `${p}/podcasts/new`, icon: <PlusCircle size={16} />, label: 'New Podcast', roles: creatorAndAbove },
+        { href: `${p}/catalog`, icon: <Music size={16} />, label: t('catalog'), roles: creatorAndAbove },
+        { href: `${p}/releases`, icon: <Disc3 size={16} />, label: t('releases'), roles: creatorAndAbove },
+        { href: `${p}/artists`, icon: <Mic2 size={16} />, label: t('creators'), roles: adminManager },
+        { href: `${p}/tracks`, icon: <Music size={16} />, label: t('catalog'), roles: creatorAndAbove },
+        { href: `${p}/rights`, icon: <Lock size={16} />, label: t('integrity'), roles: adminOnly },
+        { href: `${p}/events/new`, icon: <PlusCircle size={16} />, label: t('events'), roles: creatorAndAbove },
+        { href: `${p}/podcasts/new`, icon: <PlusCircle size={16} />, label: 'Podcast', roles: creatorAndAbove },
       ],
     },
     {
       title: 'Admin',
       items: [
-        { href: `${p}/notifications`, icon: <Bell size={16} />, label: 'Notifications', roles: allRoles },
+        { href: `${p}/notifications`, icon: <Bell size={16} />, label: t('notifications'), roles: allRoles },
         { href: `${p}/settings`, icon: <Settings size={16} />, label: 'Settings', roles: allRoles },
       ],
     },
@@ -223,6 +227,7 @@ function buildLabelSections(locale: string): NavSection[] {
 export function Sidebar({ role, locale, isPlatformOrg, hasCreatorProfile }: SidebarProps) {
   const pathname = usePathname()
   const [mobileOpen, setMobileOpen] = useState(false)
+  const t = useTranslations('nav')
 
   const isActive = (href: string) => {
     // Exact match for dashboard home, startsWith for sub-pages
@@ -232,8 +237,8 @@ export function Sidebar({ role, locale, isPlatformOrg, hasCreatorProfile }: Side
 
   // Build sections based on org type
   const rawSections = isPlatformOrg
-    ? buildPlatformSections(locale)
-    : buildLabelSections(locale)
+    ? buildPlatformSections(locale, t)
+    : buildLabelSections(locale, t)
 
   // Filter items by role
   const sections = rawSections
@@ -344,6 +349,9 @@ export function Sidebar({ role, locale, isPlatformOrg, hasCreatorProfile }: Side
               <nav className="flex-1 px-3 py-4 space-y-3 overflow-y-auto sidebar-scrollbar">
                 {navContent}
               </nav>
+              <div className="px-4 py-3 border-t border-white/10">
+                <LanguageSwitcher currentLocale={locale} variant="dark" dropDirection="up" />
+              </div>
               <div className="px-4 py-4 border-t border-white/10">
                 <MobileAccountFooter locale={locale} />
               </div>

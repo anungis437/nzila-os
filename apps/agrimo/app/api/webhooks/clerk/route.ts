@@ -1,7 +1,7 @@
 /**
- * Clerk Webhook Handler — Agrimo
+ * Auth Webhook Handler — Agrimo
  *
- * Receives Clerk webhook events and syncs user/org/membership data
+ * Receives auth provider webhook events and syncs user/org/membership data
  * to the platform database. Uses Svix HMAC-SHA256 signature verification.
  *
  * Events handled:
@@ -16,7 +16,7 @@ import { orgs, orgMembers } from '@nzila/db'
 import { eq, and } from 'drizzle-orm'
 import { createLogger } from '@nzila/os-core'
 
-const logger = createLogger('agrimo:clerk-webhook')
+const logger = createLogger('agrimo:auth-webhook')
 
 /* ── Svix signature verification ─────────────────────────────────────────── */
 
@@ -58,10 +58,10 @@ function isTimestampValid(timestamp: string): boolean {
   return Math.abs(now - ts) < 300
 }
 
-/* ── Clerk → DB role mapping ──────────────────────────────────────────── */
+/* ── Auth → DB role mapping ──────────────────────────────────────────── */
 
-function mapClerkRole(clerkRole: string): 'org_admin' | 'org_secretary' | 'org_viewer' {
-  switch (clerkRole) {
+function mapAuthRole(authRole: string): 'org_admin' | 'org_secretary' | 'org_viewer' {
+  switch (authRole) {
     case 'org:admin': return 'org_admin'
     case 'org:secretary': return 'org_secretary'
     default: return 'org_viewer'
@@ -87,7 +87,7 @@ async function handleOrganizationCreated(data: Record<string, unknown>) {
       jurisdiction: 'CA-ON',
       status: 'active',
     })
-    logger.info('[clerk-webhook] Organization created', { detail: clerkOrgId })
+    logger.info('[auth-webhook] Organization created', { detail: clerkOrgId })
   }
 }
 
@@ -100,7 +100,7 @@ async function handleOrganizationUpdated(data: Record<string, unknown>) {
       .update(orgs)
       .set({ legalName: name, updatedAt: new Date() })
       .where(eq(orgs.clerkOrgId, clerkOrgId))
-    logger.info('[clerk-webhook] Organization updated', { detail: clerkOrgId })
+    logger.info('[auth-webhook] Organization updated', { detail: clerkOrgId })
   }
 }
 
@@ -112,7 +112,7 @@ async function handleMembershipCreated(data: Record<string, unknown>) {
   const role = (data.role as string) ?? 'org:member'
 
   if (!clerkOrgId || !clerkUserId) {
-    logger.warn('[clerk-webhook] Membership created missing org/user data')
+    logger.warn('[auth-webhook] Membership created missing org/user data')
     return
   }
 
@@ -123,12 +123,12 @@ async function handleMembershipCreated(data: Record<string, unknown>) {
     .limit(1)
 
   if (org.length === 0) {
-    logger.warn('[clerk-webhook] Membership created for unknown org', { detail: clerkOrgId })
+    logger.warn('[auth-webhook] Membership created for unknown org', { detail: clerkOrgId })
     return
   }
 
   const orgId = org[0].id
-  const mappedRole = mapClerkRole(role)
+  const mappedRole = mapAuthRole(role)
 
   const existing = await platformDb
     .select({ id: orgMembers.id })
@@ -150,7 +150,7 @@ async function handleMembershipCreated(data: Record<string, unknown>) {
       .where(eq(orgMembers.id, existing[0].id))
   }
 
-  logger.info('[clerk-webhook] Membership created/updated', { detail: `${clerkUserId} → ${clerkOrgId}` })
+  logger.info('[auth-webhook] Membership created/updated', { detail: `${clerkUserId} → ${clerkOrgId}` })
 }
 
 async function handleMembershipDeleted(data: Record<string, unknown>) {
@@ -174,7 +174,7 @@ async function handleMembershipDeleted(data: Record<string, unknown>) {
     .set({ status: 'removed', updatedAt: new Date() })
     .where(and(eq(orgMembers.orgId, org[0].id), eq(orgMembers.userId, clerkUserId)))
 
-  logger.info('[clerk-webhook] Membership removed', { detail: `${clerkUserId} from ${clerkOrgId}` })
+  logger.info('[auth-webhook] Membership removed', { detail: `${clerkUserId} from ${clerkOrgId}` })
 }
 
 async function handleUserDeleted(data: Record<string, unknown>) {
@@ -186,15 +186,15 @@ async function handleUserDeleted(data: Record<string, unknown>) {
     .set({ status: 'removed', updatedAt: new Date() })
     .where(eq(orgMembers.userId, clerkUserId))
 
-  logger.info('[clerk-webhook] User deleted — memberships removed', { detail: clerkUserId })
+  logger.info('[auth-webhook] User deleted — memberships removed', { detail: clerkUserId })
 }
 
 /* ── POST handler ────────────────────────────────────────────────────────── */
 
 export async function POST(request: Request) {
-  const secret = process.env.CLERK_WEBHOOK_SECRET
+  const secret = process.env.AUTH_WEBHOOK_SECRET ?? process.env.CLERK_WEBHOOK_SECRET
   if (!secret) {
-    logger.error('[clerk-webhook] CLERK_WEBHOOK_SECRET not configured')
+    logger.error('[auth-webhook] AUTH_WEBHOOK_SECRET not configured')
     return NextResponse.json({ error: 'Webhook secret not configured' }, { status: 500 })
   }
 
@@ -213,7 +213,7 @@ export async function POST(request: Request) {
   const body = await request.text()
 
   if (!verifyWebhookSignature(body, { svixId, svixTimestamp, svixSignature }, secret)) {
-    logger.warn('[clerk-webhook] Invalid signature')
+    logger.warn('[auth-webhook] Invalid signature')
     return NextResponse.json({ error: 'Invalid signature' }, { status: 401 })
   }
 
@@ -239,13 +239,13 @@ export async function POST(request: Request) {
         break
       case 'user.created':
       case 'user.updated':
-        logger.info(`[clerk-webhook] ${event.type}`, { detail: event.data.id })
+        logger.info(`[auth-webhook] ${event.type}`, { detail: event.data.id })
         break
       default:
-        logger.info(`[clerk-webhook] Unhandled event: ${event.type}`)
+        logger.info(`[auth-webhook] Unhandled event: ${event.type}`)
     }
   } catch (err) {
-    logger.error('[clerk-webhook] Handler error', { detail: err instanceof Error ? err.message : err })
+    logger.error('[auth-webhook] Handler error', { detail: err instanceof Error ? err.message : err })
     return NextResponse.json({ error: 'Internal handler error' }, { status: 500 })
   }
 

@@ -1,5 +1,5 @@
 /**
- * Contract Test — Union Eyes: Layer Boundary Enforcement
+ * Contract Test — UnionEyes: Layer Boundary Enforcement
  *
  * Enforces the layered architecture:
  * - db/ layer cannot import from actions/, services/, app/, components/

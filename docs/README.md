@@ -2,16 +2,16 @@
 
 ## What do you need?
 
-- **I want to use Union Eyes** → [Quick Start](union-eyes/quick-start.md) · [User Guide](union-eyes/user-guide.md)
+- **I want to use UnionEyes** → [Quick Start](union-eyes/quick-start.md) · [User Guide](union-eyes/user-guide.md)
 - **I am part of the CUPE pilot** → [Pilot Overview](union-eyes/pilot-overview.md) · [FAQ](union-eyes/faq.md)
 - **I am running the pilot** → [Admin Guide](union-eyes/admin-guide.md) · [Admin Runbook](pilot/cupe/CUPE_PILOT_ADMIN_RUNBOOK.md)
 - **I need to explain this to a partner or lawyer** → [Partner Overview](union-eyes/partner-overview.md)
 - **I need technical details** → [Architecture](../ARCHITECTURE.md) · [Developer Guide](how-to/GOLDEN_PATH_DEVELOPER_GUIDE.md)
 - **Something is broken** → [Runbooks](../ops/runbooks/README.md) · [Support SOP](pilot/cupe/CUPE_PILOT_SUPPORT_SOP.md)
 
-## Union Eyes
+## UnionEyes
 
-All Union Eyes docs for end users live in [union-eyes/](union-eyes/README.md).
+All UnionEyes docs for end users live in [union-eyes/](union-eyes/README.md).
 
 | Doc | For | Time |
 |---|---|---|

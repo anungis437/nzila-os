@@ -1,4 +1,4 @@
-# Union Eyes Current State Validation (Baseline for CUPE Pilot)
+# UnionEyes Current State Validation (Baseline for CUPE Pilot)
 
 **Date:** 2026-03-24  
 **Scope:** Single-local CUPE pilot (1–5 worksites, ~100–200 members)  
@@ -9,7 +9,7 @@
 
 ## Executive Summary
 
-Union Eyes has **70% readiness** for CUPE pilot launch. Core infrastructure exists (auth, case model, RLS, audit schema). Key gaps (FSM enforcement, evidence export, ClamAV, observable ops) require targeted build-out across phases 2–7.
+UnionEyes has **70% readiness** for CUPE pilot launch. Core infrastructure exists (auth, case model, RLS, audit schema). Key gaps (FSM enforcement, evidence export, ClamAV, observable ops) require targeted build-out across phases 2–7.
 
 ---
 

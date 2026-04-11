@@ -4,10 +4,10 @@
  * 
  * Transformation Date: 2026-02-18
  * Backend: Django REST Framework
- * Auth: Clerk
+ * Auth: Platform Auth (Entra ID)
  */
 
-import { auth } from '@clerk/nextjs/server';
+import { auth } from '@nzila/platform-auth';
 
 // Inline type definitions — avoids dependency on the frontend schema package.
 // When deployed in the UE frontend, replace with:

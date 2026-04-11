@@ -557,10 +557,6 @@ class OIDCAuthentication(authentication.BaseAuthentication):
             defaults={"email": email, "is_active": True},
         )
         return user
-
-
-# Backward-compatible alias
-ClerkAuthentication = OIDCAuthentication
 '''
 
         files[

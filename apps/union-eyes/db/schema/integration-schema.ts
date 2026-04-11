@@ -143,7 +143,7 @@ export const apiIntegrations = pgTable("api_integrations", {
   
   // Data mapping
   fieldMapping: jsonb("field_mapping").notNull(),
-  // Map between Union Eyes fields and external system fields
+  // Map between UnionEyes fields and external system fields
   
   // Sync configuration
   syncDirection: varchar("sync_direction", { length: 50 }).default('inbound'),
@@ -216,7 +216,7 @@ export const integrationSyncLogs = pgTable("integration_sync_logs", {
 
 /**
  * API Access Tokens
- * Tokens for external systems to access Union Eyes API
+ * Tokens for external systems to access UnionEyes API
  */
 export const apiAccessTokens = pgTable("api_access_tokens", {
   id: uuid("id").primaryKey().defaultRandom(),

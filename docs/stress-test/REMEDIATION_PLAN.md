@@ -64,7 +64,7 @@ export const aj = arcjet({
 ```
 
 ```ts
-// In middleware.ts (wraps clerkMiddleware)
+// In middleware.ts (wraps authMiddleware)
 import { aj } from '@/lib/arcjet'
 const decision = await aj.protect(request)
 if (decision.isDenied()) return NextResponse.json({ error: 'Too Many Requests' }, { status: 429 })
@@ -78,8 +78,8 @@ if (decision.isDenied()) return NextResponse.json({ error: 'Too Many Requests' }
 | `apps/partners/package.json` | Add `@arcjet/next` |
 | `apps/console/lib/arcjet.ts` | New — rate limit config |
 | `apps/partners/lib/arcjet.ts` | New — rate limit config |
-| `apps/console/middleware.ts` | Wrap `clerkMiddleware` with Arcjet check |
-| `apps/partners/middleware.ts` | Wrap `clerkMiddleware` with Arcjet check |
+| `apps/console/middleware.ts` | Wrap `authMiddleware` with Arcjet check |
+| `apps/partners/middleware.ts` | Wrap `authMiddleware` with Arcjet check |
 
 ### Tests to Add
 

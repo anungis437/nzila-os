@@ -1,13 +1,20 @@
 import { getRequestConfig } from 'next-intl/server';
-import { locales, type Locale, defaultLocale } from './config';
 
-export default getRequestConfig(async ({ locale }) => {
-  // eslint-disable-next-line @typescript-eslint/no-explicit-any
-  const validLocale = (locales.includes(locale as any) ? locale : defaultLocale) as Locale;
+export default getRequestConfig(async ({ requestLocale }) => {
+  let locale = (await requestLocale) ?? 'en-CA';
 
-  return {
-    locale: validLocale,
-    messages: (await import(`../messages/${validLocale}.json`)).default,
-    timeZone: 'America/Toronto',
-  };
+  // Bare language codes without region fall back to the regional variant
+  if (locale === 'en') locale = 'en-CA';
+  if (locale === 'fr') locale = 'fr-CA';
+
+  let messages;
+  try {
+    messages = (await import(`../messages/${locale}.json`)).default;
+  } catch {
+    // Locale file not yet available — fall back to en-CA
+    messages = (await import('../messages/en-CA.json')).default;
+    locale = 'en-CA';
+  }
+
+  return { locale, messages };
 });

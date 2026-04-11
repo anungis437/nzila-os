@@ -3,7 +3,7 @@
 
 export const dynamic = 'force-dynamic';
 import { useState, useEffect } from "react";
-import { useUser, useClerk } from '@nzila/platform-auth/entra/client';
+import { useUser, useAuthActions } from '@nzila/platform-auth/entra/client';
 import { useTranslations } from 'next-intl';
 import { useToast } from '@/components/ui/use-toast';
 import { useOrganization } from "@/contexts/organization-context";
@@ -40,7 +40,7 @@ export default function ProfilePage() {
   const t = useTranslations();
   const { toast } = useToast();
   const { user, isLoaded } = useUser();
-  const { signOut } = useClerk();
+  const { signOut } = useAuthActions();
   const { organization, userMemberships } = useOrganization();
   const [activeSection, setActiveSection] = useState<SettingsSection>("profile");
   const [showPassword, setShowPassword] = useState(false);

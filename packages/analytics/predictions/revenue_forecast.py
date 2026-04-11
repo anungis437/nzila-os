@@ -87,7 +87,7 @@ class RevenueForecast:
         
         platform_forecasts = [
             {
-                "platform": "Union Eyes",
+                "platform": "UnionEyes",
                 "vertical": "Uniontech",
                 "arr_2026": 105000,
                 "arr_2027": 420000,

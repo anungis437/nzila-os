@@ -256,6 +256,9 @@ const PAGE_ACCESS_MATRIX: PageRule[] = [
   { path: 'cases/[id]/page.tsx',                         minRole: 'steward',              description: 'Case detail view' },
   { path: 'cba-intelligence/page.tsx',                    minRole: 'health_safety_rep',    description: 'CBA intelligence (entitlement-gated, min H&S rep)' },
   { path: 'committees/page.tsx',                          minRole: 'steward',              description: 'Committee management' },
+  { path: 'committees/[id]/page.tsx',                     minRole: 'steward',              description: 'Committee workspace detail' },
+  { path: 'correspondence/page.tsx',                      minRole: 'steward',              description: 'Correspondence pipeline' },
+  { path: 'knowledge-base/page.tsx',                      minRole: 'member',               description: 'Union documents library' },
 
   // ── Officer-level pages (level 60) ─────────────────────────────────────
   { path: 'audits/page.tsx',                             minRole: 'officer',              description: 'Audits & compliance' },

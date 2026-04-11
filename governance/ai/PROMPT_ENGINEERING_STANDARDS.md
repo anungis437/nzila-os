@@ -64,7 +64,7 @@ Companion tone adapts by **platform** and **user context**. Choose one primary t
 
 ---
 
-### **2. PROFESSIONAL** (Union Eyes, Court Lens, Trade OS)
+### **2. PROFESSIONAL** (UnionEyes, Court Lens, Trade OS)
 
 **Use Case**: UnionTech, LegalTech, B2B platforms (labor relations, legal analysis, business operations)
 
@@ -233,7 +233,7 @@ Companion prompts use **{{variables}}** for personalization:
 | `{{xp_earned}}` | Integer | ABR | "You just earned {{xp_earned}} XP!" |
 | `{{price_per_bushel}}` | Decimal | CORA | "Canola is now ${{price_per_bushel}}/bu" |
 | `{{acres}}` | Integer | CORA | "Based on your {{acres}} acres..." |
-| `{{grievance_success_rate}}` | Decimal | Union Eyes | "This case has a {{grievance_success_rate}}% success rate" |
+| `{{grievance_success_rate}}` | Decimal | UnionEyes | "This case has a {{grievance_success_rate}}% success rate" |
 
 ---
 
@@ -363,7 +363,7 @@ All new prompts undergo **A/B testing** before full deployment.
 
 ---
 
-### **Union Eyes** (UnionTech, Professional Tone)
+### **UnionEyes** (UnionTech, Professional Tone)
 
 ```
 1. Grievance Guidance (Active Union Rep)

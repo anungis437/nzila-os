@@ -13,7 +13,7 @@ Probabilistic cardinality estimates the number of distinct elements in a dataset
 
 ### Current Analytics Gaps
 From examining [`packages/analytics/portfolio/entity_consolidation.py`](packages/analytics/portfolio/entity_consolidation.py:1), your portfolio tracks:
-- 4,773 entities in Union Eyes
+- 4,773 entities in UnionEyes
 - 132 entities in ABR Insights
 - Cross-platform entity type mapping
 

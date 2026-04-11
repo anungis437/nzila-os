@@ -49,13 +49,13 @@ describe('validateEnv', () => {
     expect(env.AUTH_SECRET).toBe('test_auth_secret_32chars_xxxxxxxxxxxx')
   })
 
-  it('validates web schema (no Clerk required)', () => {
+  it('validates web schema (no auth keys required)', () => {
     Object.assign(process.env, VALID_BASE_ENV)
     const env = validateEnv('web')
     expect(env.NODE_ENV).toBe('test')
   })
 
-  it('validates union-eyes schema (Clerk optional)', () => {
+  it('validates union-eyes schema (auth keys optional)', () => {
     Object.assign(process.env, VALID_BASE_ENV)
     const env = validateEnv('union-eyes')
     expect(env.NODE_ENV).toBe('test')

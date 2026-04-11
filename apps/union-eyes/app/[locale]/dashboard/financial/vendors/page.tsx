@@ -6,7 +6,7 @@ import { requireUser, hasMinRole, ROLE_HIERARCHY } from '@/lib/api-auth-guard';
 import { redirect } from 'next/navigation';
 
 export const metadata = {
-  title: 'Vendor Management | Union Eyes',
+  title: 'Vendor Management | UnionEyes',
   description: 'Manage vendor and supplier information',
 };
 

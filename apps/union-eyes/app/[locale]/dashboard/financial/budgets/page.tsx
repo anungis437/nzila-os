@@ -6,7 +6,7 @@ import { requireUser, hasMinRole, ROLE_HIERARCHY } from '@/lib/api-auth-guard';
 import { redirect } from 'next/navigation';
 
 export const metadata = {
-  title: 'Budget Management | Union Eyes',
+  title: 'Budget Management | UnionEyes',
   description: 'Manage organizational budgets and financial planning',
 };
 

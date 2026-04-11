@@ -6,7 +6,7 @@ import InvestorCTA from '@/components/public/InvestorCTA';
 
 export const metadata: Metadata = {
   title: 'Products',
-  description: 'Our portfolio of 15 AI-powered platforms across 10+ verticals — from Union Eyes in labor rights to DiasporaCore in fintech.',
+  description: 'Our portfolio of 15 AI-powered platforms across 10+ verticals — from UnionEyes in labor rights to DiasporaCore in fintech.',
   openGraph: {
     title: 'Nzila Ventures Products',
     description: '15 AI-powered platforms. 4 flagships. One unified Backbone.',
@@ -17,13 +17,13 @@ export const metadata: Metadata = {
 
 const flagships = [
   {
-    name: 'Union Eyes',
+    name: 'UnionEyes',
     vertical: 'Uniontech',
     status: 'Flagship',
     tam: '$50B',
     orgs: '4,773',
     image: 'https://images.unsplash.com/photo-1504328345606-18bbc8c9d7d1?w=800',
-    alt: 'Union Eyes — comprehensive union management platform for pension forecasting and labor analytics',
+    alt: 'UnionEyes — comprehensive union management platform for pension forecasting and labor analytics',
     description: 'The most comprehensive union management platform — pension forecasting, grievance tracking, CBA intelligence, and arbitration precedents for 4,773 orgs.',
     features: ['Pension Forecasting', 'Grievance Tracking', 'CBA Intelligence (Unions & Federations)', 'Arbitration Precedents'],
   },

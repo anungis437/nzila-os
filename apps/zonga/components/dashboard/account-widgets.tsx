@@ -1,6 +1,6 @@
 'use client'
 
-import { OrganizationSwitcher, useClerk, useUser } from '@nzila/platform-auth/entra/client'
+import { OrganizationSwitcher, useAuthActions, useUser } from '@nzila/platform-auth/entra/client'
 import { User, Settings, LogOut } from 'lucide-react'
 import Link from 'next/link'
 import Image from 'next/image'
@@ -24,7 +24,7 @@ export function SidebarOrgSwitcher() {
 
 export function SidebarAccountFooter({ locale }: { locale: string }) {
   const { user } = useUser()
-  const { signOut } = useClerk()
+  const { signOut } = useAuthActions()
 
   const displayName = user?.fullName ?? user?.firstName ?? 'Account'
   const email = user?.primaryEmailAddress?.emailAddress ?? ''
@@ -77,7 +77,7 @@ export function SidebarAccountFooter({ locale }: { locale: string }) {
 
 export function MobileAccountFooter({ locale }: { locale: string }) {
   const { user } = useUser()
-  const { signOut } = useClerk()
+  const { signOut } = useAuthActions()
 
   const displayName = user?.fullName ?? user?.firstName ?? 'Account'
   const avatarUrl = user?.imageUrl

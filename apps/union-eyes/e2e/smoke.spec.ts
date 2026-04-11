@@ -15,7 +15,7 @@ test.describe('Public pages smoke tests', () => {
 
   test('sign-in page renders', async ({ page }) => {
     await page.goto('/sign-in');
-    // Should show Clerk sign-in widget or redirect to auth
+    // Should show sign-in widget or redirect to auth
     await expect(page.locator('body')).toBeVisible();
   });
 

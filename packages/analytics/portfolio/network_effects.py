@@ -19,7 +19,7 @@ class NetworkEffectsTracker:
         """Load network effect data for each platform."""
         return {
             "union_eyes": {
-                "name": "Union Eyes",
+                "name": "UnionEyes",
                 "network_type": "two_sided",  # unions + members
                 "supply_side": "unions",
                 "demand_side": "members",

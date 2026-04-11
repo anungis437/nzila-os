@@ -1,5 +1,5 @@
 """
-WSGI config for Union Eyes
+WSGI config for UnionEyes
 """
 
 import os

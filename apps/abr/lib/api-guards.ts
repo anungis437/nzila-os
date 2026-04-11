@@ -2,7 +2,7 @@
  * Shared API route guards — authentication + request context
  *
  * Centralises the auth boilerplate for all API routes,
- * combining Clerk authentication with os-core request context
+ * combining platform authentication with os-core request context
  * (AsyncLocalStorage-based tracing + automatic log enrichment).
  *
  * Usage in API routes:

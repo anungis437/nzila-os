@@ -27,7 +27,7 @@ import type {
 export interface AiSdkConfig {
   /** Base URL of the Nzila OS console (e.g., https://console.nzila.io or http://localhost:3001) */
   baseUrl: string
-  /** Clerk session token or API key getter */
+  /** Auth session token or API key getter */
   getToken: () => string | Promise<string>
 }
 

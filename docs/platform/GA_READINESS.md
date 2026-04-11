@@ -1,8 +1,8 @@
-# GA Readiness Report — Union Eyes & ABR Insights
+# GA Readiness Report — UnionEyes & ABR Insights
 
 > **NzilaOS GA Gate v2 — PHASE 3 FINAL VALIDATION (Studio Go/No-Go)**
 >
-> This document is the authoritative GO/NO-GO record for both Union Eyes (`apps/union-eyes`)
+> This document is the authoritative GO/NO-GO record for both UnionEyes (`apps/union-eyes`)
 > and ABR Insights (`tech-repo-scaffold/django-backbone`) against the NzilaOS GA Gate v2
 > criteria. Each row maps to a CI gate ID, an evidence artifact, and a pass/fail signal.
 >
@@ -18,7 +18,7 @@
 | Vertical | Gate v2 Result | Open Hard-Blockers | Studio Decision |
 |----------|---------------|-------------------|-----------------|
 | **NzilaOS Monorepo** | ✅ 20/20 PASS | 0 | **GO** |
-| **Union Eyes** | ✅ All UE gates PASS | 0 (UE-OPEN-01 docs-only, non-blocking) | **GO** |
+| **UnionEyes** | ✅ All UE gates PASS | 0 (UE-OPEN-01 docs-only, non-blocking) | **GO** |
 | **ABR Insights** | ✅ All ABR security + evidence gates PASS | 0 blocking (ABR-OPEN-01–04 are feature work, deferred Sprint +1) | **CONDITIONAL GO** |
 
 **Overall Studio Decision: GO** — all security and governance hard gates pass across all three verticals.
@@ -77,9 +77,9 @@ All 20 checks run via `pnpm ga-check` against commit `5979ae7` on 2026-02-22.
 
 ---
 
-## Section 2 — Union Eyes (`apps/union-eyes`)
+## Section 2 — UnionEyes (`apps/union-eyes`)
 
-Union Eyes is a Next.js 16 companion app consuming `@nzila/os-core` for evidence sealing.
+UnionEyes is a Next.js 16 companion app consuming `@nzila/os-core` for evidence sealing.
 
 ### 2.1 Evidence Pipeline
 
@@ -208,7 +208,7 @@ All artifacts retained for **365 days** in GitHub Actions (`actions/upload-artif
 | Vertical | Artifact Name Pattern | Contents | CI Job |
 |----------|----------------------|----------|--------|
 | Monorepo | `governance-evidence-<run_id>` | `evidence-output/pack.json`, `evidence-output/seal.json` | `nzila-governance.yml` |
-| Union Eyes | `ue-evidence-<run_id>` | `apps/union-eyes/evidence-output/pack.json`, `apps/union-eyes/evidence-output/seal.json` | `ue-evidence` (in `nzila-governance.yml`) |
+| UnionEyes | `ue-evidence-<run_id>` | `apps/union-eyes/evidence-output/pack.json`, `apps/union-eyes/evidence-output/seal.json` | `ue-evidence` (in `nzila-governance.yml`) |
 | ABR Insights | `abr-evidence-<run_id>` | `evidence-output/pack.json`, `evidence-output/seal.json`, `ci-outputs/audit-report.json`, `ci-outputs/trivy-results.sarif` | `abr-evidence` (in `nzila-governance.yml`) |
 
 CI secret required: `EVIDENCE_SEAL_KEY` (≥ 32 bytes, stored as GitHub Actions secret, not committed to repo).
@@ -226,7 +226,7 @@ CI secret required: `EVIDENCE_SEAL_KEY` (≥ 32 bytes, stored as GitHub Actions 
 
 ## Section 5 — Gating Bar Parity: UE + ABR vs NzilaOS
 
-Both Union Eyes and ABR Insights are held to the **same NzilaOS GA Gate v2 bar**. The table below maps each NzilaOS gate ID to its UE/ABR equivalent or explains the shared enforcement mechanism.
+Both UnionEyes and ABR Insights are held to the **same NzilaOS GA Gate v2 bar**. The table below maps each NzilaOS gate ID to its UE/ABR equivalent or explains the shared enforcement mechanism.
 
 | NzilaOS Gate | UE Equivalent | ABR Equivalent |
 |-------------|--------------|----------------|
@@ -250,7 +250,7 @@ Both Union Eyes and ABR Insights are held to the **same NzilaOS GA Gate v2 bar**
 | Vertical | GA Gate v2 | Hard-Blockers | Studio Decision |
 |----------|-----------|---------------|-----------------|
 | **NzilaOS Monorepo** | ✅ 20/20 PASS (`5979ae7`) | 0 | ✅ **GO** |
-| **Union Eyes** | ✅ All UE gates PASS | 0 blocking | ✅ **GO** |
+| **UnionEyes** | ✅ All UE gates PASS | 0 blocking | ✅ **GO** |
 | **ABR Insights** | ✅ All ABR security + evidence gates PASS | 0 blocking (4 feature work items deferred) | 🟡 **CONDITIONAL GO** — evidence pipeline and all security gates wired; business-logic views deferred to Sprint +1 |
 
 > **Phase 3 Final Decision: GO** — all NzilaOS GA Gate v2 hard gates pass for all three verticals as of commit `5979ae7` (2026-02-22).  

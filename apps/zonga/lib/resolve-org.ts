@@ -46,7 +46,7 @@ export async function resolveOrgContext(): Promise<ZongaOrgContext> {
     throw new Error('No active organization — select an org before accessing Zonga.')
   }
 
-  let role = mapClerkRoleToZongaRole(orgRole, sessionClaims)
+  let role = mapAuthRoleToZongaRole(orgRole, sessionClaims)
 
   // Super-admin email override
   if (role !== 'admin') {
@@ -103,7 +103,7 @@ export async function resolveListenerContext(): Promise<ListenerContext> {
  *
  * Child tables (activity, follows, favorites, playlist_saves) use
  * `listener_id` (UUID) as a FK → `zonga_listeners.id`.
- * Clerk userId is stored in `zonga_listeners.user_id` (text).
+ * Auth user ID is stored in `zonga_listeners.user_id` (text).
  *
  * This helper returns the UUID `id`, creating the listener row on the
  * fly via ensureListenerProfile when it doesn't exist yet.
@@ -119,7 +119,7 @@ export async function resolveListenerUUID(ctx: ListenerContext): Promise<string>
   if (row) return row.id
 
   // Auto-create a minimal listener profile (atomic upsert)
-  // org_id is a UUID FK — Clerk orgId is NOT a UUID, so always pass null here.
+  // org_id is a UUID FK — auth orgId is NOT a UUID, so always pass null here.
   // The org_id can be linked later via org resolution if needed.
   const [created] = (await platformDb.execute(
     sql`INSERT INTO zonga_listeners (user_id, org_id, display_name)
@@ -132,9 +132,9 @@ export async function resolveListenerUUID(ctx: ListenerContext): Promise<string>
 }
 
 /**
- * Map Clerk organization role to ZongaRole.
+ * Map auth provider organization role to ZongaRole.
  */
-function mapClerkRoleToZongaRole(
+function mapAuthRoleToZongaRole(
   orgRole: string | undefined | null,
   sessionClaims: Record<string, unknown> | undefined | null,
 ): ZongaRole {

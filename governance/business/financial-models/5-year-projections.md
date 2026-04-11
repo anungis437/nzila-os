@@ -9,13 +9,13 @@
 
 ## 🎯 EXECUTIVE SUMMARY
 
-Nzila Ventures is a **multi-vertical platform company** with **3 flagship B2B SaaS products** (Union Eyes, ABR Insights, CORA) and **12 additional platforms** across 10+ business verticals. Our 5-year projections model growth from **$0 ARR (2025) → $6M ARR (2030)** with profitability by Y4.
+Nzila Ventures is a **multi-vertical platform company** with **3 flagship B2B SaaS products** (UnionEyes, ABR Insights, CORA) and **12 additional platforms** across 10+ business verticals. Our 5-year projections model growth from **$0 ARR (2025) → $6M ARR (2030)** with profitability by Y4.
 
 **Key Financial Highlights**:
 - **ARR Target (2030)**: $6M ($500K MRR), 50% gross margin, 25% EBITDA margin
 - **Total Addressable Market (TAM)**: $100B+ across 10 verticals ($50B uniontech, $1.5B DEI, $8.6B AgTech)
 - **Customer Target (2030)**: 500 enterprise customers ($12K avg ACV)
-- **Flagship Focus**: Union Eyes ($50B TAM), ABR Insights ($1.5B TAM), CORA ($8.6B TAM)
+- **Flagship Focus**: UnionEyes ($50B TAM), ABR Insights ($1.5B TAM), CORA ($8.6B TAM)
 - **IP Value**: $5.7M-$7.5M technical IP portfolio (12,000+ entities, proprietary algorithms)
 - **Funding Requirement**: $3M-$5M Series A (Q2 2026) for 18-24 month runway
 
@@ -27,7 +27,7 @@ Nzila Ventures is a **multi-vertical platform company** with **3 flagship B2B Sa
 
 | Revenue Stream | Description | % of Total (2030) | Gross Margin |
 |----------------|-------------|-------------------|--------------|
-| **1. B2B SaaS Subscriptions** | Annual contracts (Union Eyes, ABR, CORA, 12 others) | 75% ($4.5M ARR) | 80% |
+| **1. B2B SaaS Subscriptions** | Annual contracts (UnionEyes, ABR, CORA, 12 others) | 75% ($4.5M ARR) | 80% |
 | **2. Transaction Fees** | 1-5% commission (CORA agricultural txns, DiasporaCore remittances, Trade OS shipments) | 15% ($900K ARR) | 60% |
 | **3. IP Licensing & Royalties** | White-label licensing (Gamification Engine, Pension Forecasting), post-spinout royalties (2-10%) | 10% ($600K ARR) | 95% |
 
@@ -42,7 +42,7 @@ Nzila Ventures is a **multi-vertical platform company** with **3 flagship B2B Sa
 | Year | ARR | MRR | Customers | Avg ACV | YoY Growth | Notes |
 |------|-----|-----|-----------|---------|------------|-------|
 | **2025 (Actual)** | $0 | $0 | 0 | $0 | — | Pre-revenue (product development, pilots) |
-| **2026 (Q2 Launch)** | $350K | $29K | 25 | $14K | — | Flagship launch (Union Eyes, ABR, CORA), early customers |
+| **2026 (Q2 Launch)** | $350K | $29K | 25 | $14K | — | Flagship launch (UnionEyes, ABR, CORA), early customers |
 | **2027 (Scale)** | $1.2M | $100K | 80 | $15K | 243% | Product-market fit, initial sales team (2 AEs), marketing ramp |
 | **2028 (Expand)** | $2.8M | $233K | 180 | $15.6K | 133% | Multi-vertical expansion, 12 platforms active, 5 AEs |
 | **2029 (Mature)** | $4.5M | $375K | 350 | $12.9K | 61% | Enterprise deals ($50K+ ACV), channel partnerships |
@@ -57,7 +57,7 @@ Nzila Ventures is a **multi-vertical platform company** with **3 flagship B2B Sa
 
 | Platform | Vertical | ARR (2030) | % of Total | Customers | Avg ACV | Maturity |
 |----------|----------|-----------|------------|-----------|---------|----------|
-| **Union Eyes** | Uniontech | $1.8M | 30% | 120 unions | $15K | Series A flagship |
+| **UnionEyes** | Uniontech | $1.8M | 30% | 120 unions | $15K | Series A flagship |
 | **ABR Insights** | Justice-Equity | $1.2M | 20% | 100 orgs | $12K | Series A flagship |
 | **CORA** | AgTech | $900K | 15% | 90 cooperatives | $10K | Series A flagship |
 | **DiasporaCore V2** | Fintech (Banking) | $600K | 10% | 40 enterprises | $15K | High-growth, EXTREME complexity |
@@ -67,13 +67,13 @@ Nzila Ventures is a **multi-vertical platform company** with **3 flagship B2B Sa
 | **Shop Quoter** | eCommerce | $180K | 3% | 40 corporate clients | $4.5K | Gift box customization |
 | **Others (7 platforms)** | Various | $220K | 3.7% | 70 customers | $3.1K avg | AgrimoOps, CongoWave, eEXPORTS, Memora, ClinicConnect, CyberLearn, Insight CFO |
 
-**Note**: Flagship concentration (65% from Union Eyes/ABR/CORA) de-risks via established product-market fit, enterprise sales motion proven.
+**Note**: Flagship concentration (65% from UnionEyes/ABR/CORA) de-risks via established product-market fit, enterprise sales motion proven.
 
 ---
 
 ## 💵 CUSTOMER ECONOMICS BY FLAGSHIP
 
-### **Union Eyes** (Uniontech)
+### **UnionEyes** (Uniontech)
 
 | Metric | Value | Calculation/Rationale |
 |--------|-------|----------------------|
@@ -221,7 +221,7 @@ Nzila Ventures is a **multi-vertical platform company** with **3 flagship B2B Sa
 - **Sales & Marketing** (40%): $2M — 5 AEs (2026), 10 AEs (2027), national expansion (U.S. entry 2028)
 - **Engineering** (25%): $1.25M — 5 engineers (aggressive feature velocity, ML/AI investment)
 - **Operations** (20%): $1M — VP Sales, VP Marketing, CFO, expanded Customer Success (10 CSMs)
-- **Product** (10%): $500K — 2 Product Managers (Union Eyes, ABR, CORA dedicated PMs)
+- **Product** (10%): $500K — 2 Product Managers (UnionEyes, ABR, CORA dedicated PMs)
 - **Legal & IP** (5%): $250K — USPTO filings (U.S. trademarks), patent prosecution (3 utility patents)
 
 **Outcome**: 24-month runway, $10M ARR by 2030, Series B raise ($15M-$25M) or M&A ($50M-$100M exit).
@@ -255,17 +255,17 @@ Nzila Ventures is a **multi-vertical platform company** with **3 flagship B2B Sa
 
 | Assumption | Baseline | Upside | Downside | Impact on ARR (2030) |
 |------------|----------|--------|----------|----------------------|
-| **Flagship Win Rate** | 15% (Union Eyes), 20% (ABR), 25% (CORA) | 20%/25%/30% | 10%/15%/20% | ±$1.5M ARR |
-| **Avg Contract Value** | $15K (Union Eyes), $12K (ABR), $10K (CORA) | $20K/$15K/$15K | $12K/$10K/$8K | ±$800K ARR |
-| **Churn Rate** | 10% (Union Eyes), 15% (ABR), 5% (CORA) | 5%/10%/3% | 15%/20%/10% | ±$600K ARR |
-| **Net Revenue Retention** | 120% (Union Eyes), 130% (ABR), 140% (CORA) | 130%/140%/150% | 110%/120%/130% | ±$500K ARR |
-| **Sales Cycle** | 6-9 months (Union Eyes), 3-6 months (ABR/CORA) | 3-6 months / 2-4 months | 9-12 months / 6-9 months | ±6 months to target ARR |
+| **Flagship Win Rate** | 15% (UnionEyes), 20% (ABR), 25% (CORA) | 20%/25%/30% | 10%/15%/20% | ±$1.5M ARR |
+| **Avg Contract Value** | $15K (UnionEyes), $12K (ABR), $10K (CORA) | $20K/$15K/$15K | $12K/$10K/$8K | ±$800K ARR |
+| **Churn Rate** | 10% (UnionEyes), 15% (ABR), 5% (CORA) | 5%/10%/3% | 15%/20%/10% | ±$600K ARR |
+| **Net Revenue Retention** | 120% (UnionEyes), 130% (ABR), 140% (CORA) | 130%/140%/150% | 110%/120%/130% | ±$500K ARR |
+| **Sales Cycle** | 6-9 months (UnionEyes), 3-6 months (ABR/CORA) | 3-6 months / 2-4 months | 9-12 months / 6-9 months | ±6 months to target ARR |
 
 ### **Cost Assumptions**
 
 | Assumption | Baseline | Upside | Downside | Impact on EBITDA (2030) |
 |------------|----------|--------|----------|-------------------------|
-| **CAC** | $10K (Union Eyes), $7K (ABR), $650 (CORA) | $7K/$5K/$500 | $15K/$10K/$1K | ±$200K EBITDA |
+| **CAC** | $10K (UnionEyes), $7K (ABR), $650 (CORA) | $7K/$5K/$500 | $15K/$10K/$1K | ±$200K EBITDA |
 | **Cloud Infrastructure Unit Cost** | $30/MAU/year | $20/MAU (Azure discounts) | $40/MAU (scaling inefficiency) | ±$150K EBITDA |
 | **Engineering Salary Inflation** | 5% CAGR | 3% (market slowdown) | 8% (talent war) | ±$100K EBITDA |
 | **SR&ED Credit Rate** | 35% of R&D spend | 40% (optimized claims) | 25% (audit challenges) | ±$100K EBITDA |
@@ -280,7 +280,7 @@ Nzila Ventures is a **multi-vertical platform company** with **3 flagship B2B Sa
 | **$18M** (Aggressive $8M raise) | 12x (unicorn trajectory, >100% YoY) | $216M | $75M-$120M |
 
 **Exit Multiples Context**:
-- **Union Eyes comps**: BambooHR ($500M ARR, acquired $4B = 8x), Gusto ($200M ARR, $12B valuation = 60x private)
+- **UnionEyes comps**: BambooHR ($500M ARR, acquired $4B = 8x), Gusto ($200M ARR, $12B valuation = 60x private)
 - **ABR comps**: Cornerstone OnDemand ($700M ARR, acquired $5.2B = 7.4x), Docebo ($100M ARR, $2B market cap = 20x)
 - **CORA comps**: Granular (acquired $300M by DuPont, early-stage ARR $10M-$20M = 15-30x), FarmLogs (acquired by Nutrien, undisclosed)
 
@@ -310,7 +310,7 @@ Nzila Ventures is a **multi-vertical platform company** with **3 flagship B2B Sa
 
 **Key IP Monetization Opportunities**:
 - **ABR Gamification Engine** → LMS platforms (Cornerstone, Docebo, Absorb LMS): $120K+ potential
-- **Union Eyes Pension Forecasting** → HR tech vendors (ADP, Workday, Ceridian): $150K+ potential
+- **UnionEyes Pension Forecasting** → HR tech vendors (ADP, Workday, Ceridian): $150K+ potential
 - **Trade OS Rate Optimizer** → Freight brokers (C.H. Robinson, XPO Logistics): $70K+ potential
 - **Post-Spinout Royalties**: Memora (2027 spinout), OptivaCare (2028), CareAI (2029) pay 2-10% royalties on Companion Library, brand licensing
 
@@ -322,10 +322,10 @@ Nzila Ventures is a **multi-vertical platform company** with **3 flagship B2B Sa
 
 | Risk | Likelihood | Impact | Mitigation Strategy |
 |------|-----------|--------|---------------------|
-| **Flagship Sales Slower Than Expected** | MEDIUM | HIGH ($1M-$2M ARR miss) | Diversify across 3 flagships (Union Eyes, ABR, CORA), pilot acceleration (free trials, POCs), channel partnerships |
+| **Flagship Sales Slower Than Expected** | MEDIUM | HIGH ($1M-$2M ARR miss) | Diversify across 3 flagships (UnionEyes, ABR, CORA), pilot acceleration (free trials, POCs), channel partnerships |
 | **Churn Higher Than Projected** | LOW | MEDIUM ($500K-$800K ARR loss) | Product-market fit validation (NPS >40), customer success team (1:50 CSM ratio), usage monitoring (engagement alerts) |
-| **Market Saturation (Vertical Competition)** | LOW | MEDIUM (growth rate 60% → 30%) | Multi-vertical strategy (10+ verticals), first-mover advantage (Union Eyes 4,773 entities barrier), IP moats (patents, algorithms) |
-| **Economic Recession (Budget Cuts)** | MEDIUM | MEDIUM ($500K-$1M ARR impact) | Essential use cases (Union Eyes pension = fiduciary duty, ABR = compliance mandate), pricing flexibility (tiered plans) |
+| **Market Saturation (Vertical Competition)** | LOW | MEDIUM (growth rate 60% → 30%) | Multi-vertical strategy (10+ verticals), first-mover advantage (UnionEyes 4,773 entities barrier), IP moats (patents, algorithms) |
+| **Economic Recession (Budget Cuts)** | MEDIUM | MEDIUM ($500K-$1M ARR impact) | Essential use cases (UnionEyes pension = fiduciary duty, ABR = compliance mandate), pricing flexibility (tiered plans) |
 
 ### **Cost Risks**
 
@@ -340,8 +340,8 @@ Nzila Ventures is a **multi-vertical platform company** with **3 flagship B2B Sa
 
 | Risk | Likelihood | Impact | Mitigation Strategy |
 |------|-----------|--------|---------------------|
-| **Migration Delays (15 Platforms)** | MEDIUM | MEDIUM (product launch delays 3-6 months) | Backbone-first strategy (build once, reuse 60-75%), automated migration (Scripts-Book template, 85% time savings), prioritize flagships (Union Eyes, ABR, CORA) |
-| **Product-Market Fit Failure** | LOW | HIGH (pivot required, 12-18 month delay) | Early pilots (Union Eyes 5 unions, ABR 3 school boards, CORA 2 cooperatives), MVP validation (NPS, retention, usage metrics), customer co-development (design partners) |
+| **Migration Delays (15 Platforms)** | MEDIUM | MEDIUM (product launch delays 3-6 months) | Backbone-first strategy (build once, reuse 60-75%), automated migration (Scripts-Book template, 85% time savings), prioritize flagships (UnionEyes, ABR, CORA) |
+| **Product-Market Fit Failure** | LOW | HIGH (pivot required, 12-18 month delay) | Early pilots (UnionEyes 5 unions, ABR 3 school boards, CORA 2 cooperatives), MVP validation (NPS, retention, usage metrics), customer co-development (design partners) |
 | **Key Talent Departure** | MEDIUM | MEDIUM (hiring delay 3-6 months) | Documentation (code, architecture, runbooks), cross-training (no single points of failure), equity vesting (4-year vests, 1-year cliff), succession planning (VP Engineering by 2027) |
 | **Regulatory Compliance Failure** | LOW | HIGH (legal penalties, contract terminations) | Legal counsel (Privacy Officer, external IP lawyer), compliance audits (quarterly PIPEDA/Law 25), proactive filings (trademarks, patents), insurance (E&O, cyber liability) |
 
@@ -366,7 +366,7 @@ Nzila Ventures is a **multi-vertical platform company** with **3 flagship B2B Sa
 - **Operating Leverage**: Headcount 29 (revenue per employee $97K), infrastructure automation (Container Apps auto-scaling)
 
 **Path to $10M ARR** (2030 with $5M raise):
-- **2026**: Flagship launches (Union Eyes 10 unions, ABR 8 orgs, CORA 7 cooperatives) = $350K ARR
+- **2026**: Flagship launches (UnionEyes 10 unions, ABR 8 orgs, CORA 7 cooperatives) = $350K ARR
 - **2027**: Sales team ramp (4 AEs, 50 new logos) = $1.2M ARR → $1.8M ARR
 - **2028**: Product expansion (12 platforms active, enterprise deals) = $1.8M → $4.2M ARR
 - **2029**: National scale (U.S. entry, channel partners) = $4.2M → $7M ARR

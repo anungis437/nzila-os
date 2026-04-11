@@ -139,7 +139,7 @@ export const integrationSyncSchedules = pgTable('integration_sync_schedules', {
 });
 
 /**
- * API Keys - for programmatic access to Union Eyes APIs
+ * API Keys - for programmatic access to UnionEyes APIs
  */
 export const integrationApiKeys = pgTable(
   'integration_api_keys',

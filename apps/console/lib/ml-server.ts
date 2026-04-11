@@ -2,7 +2,7 @@
  * Server-side ML client for Console pages (RSC).
  *
  * Dogfoods @nzila/ml-sdk by calling the Console's own /api/ml/* routes.
- * Auth is forwarded via Clerk's getToken() so RBAC is enforced
+ * Auth is forwarded via getToken() so RBAC is enforced
  * identically to external callers.
  *
  * Usage in any RSC page:
@@ -19,7 +19,7 @@ const BASE_URL =
 
 /**
  * Create an MlClient backed by this Console's own API routes.
- * Inherits the current user's Clerk session.
+ * Inherits the current user's auth session.
  */
 export function mlClient(): MlClient {
   return createMlClient({
@@ -35,7 +35,7 @@ export function mlClient(): MlClient {
 /**
  * Default entity resolution — same as pages used to do with
  * DEFAULT_ENTITY_ID. Centralised here so it can be evolved
- * (e.g., read from user's active org in Clerk metadata).
+ * (e.g., read from user's active org in auth metadata).
  */
 export function getEntityId(): string {
   return process.env.NZILA_DEFAULT_ENTITY_ID ?? ''

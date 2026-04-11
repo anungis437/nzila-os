@@ -145,7 +145,7 @@
 ### Known Issues
 
 - **No database-level RLS** — all isolation is application-layer
-- Union Eyes passes `orgId` as URL parameter — code comment says "in production, derive from session instead" ⚠️
+- UnionEyes passes `orgId` as URL parameter — code comment says "in production, derive from session instead" ⚠️
 - No dedicated cross-org boundary tests (only auth coverage tests)
 - Error messages not audited for org enumeration leakage
 
@@ -163,7 +163,7 @@
 | R-06 | No Dependabot/Renovate | Stale dependencies, unpatched CVEs | Medium | No automated dependency update PRs | PR 2 |
 | R-07 | No Trivy container scanning | Vulnerable base images ship to prod | Medium | Only CycloneDX SBOM, no container scan | PR 3 |
 | R-08 | No cross-org boundary tests | Org data leakage | **Critical** | No explicit cross-org read/write failure tests | PR 9 |
-| R-09 | Union Eyes `orgId` from URL | Org enumeration / spoofing | High | Should derive from session | PR 9 |
+| R-09 | UnionEyes `orgId` from URL | Org enumeration / spoofing | High | Should derive from session | PR 9 |
 | R-10 | No orchestrator security headers | Clickjacking, MIME sniffing on API | Low | Missing `@fastify/helmet` | PR 6 |
 | R-11 | No structured logging standard | PII in logs, no correlation | Medium | Logger exists but no redaction/correlation enforcement | PR 11 |
 | R-12 | No E2E tests | Critical flows untested end-to-end | Medium | No Playwright setup | PR 15 |

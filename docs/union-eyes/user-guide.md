@@ -1,10 +1,10 @@
-# User Guide — Union Eyes
+# User Guide — UnionEyes
 
-> Complete guide for members and stewards using Union Eyes.
+> Complete guide for members and stewards using UnionEyes.
 
 ## 1. Logging In
 
-Navigate to your Union Eyes URL and sign in with your email address. First-time
+Navigate to your UnionEyes URL and sign in with your email address. First-time
 users will see a 4-step onboarding wizard that explains the Dashboard, how to
 create a case, how to add updates, and where to find help.
 

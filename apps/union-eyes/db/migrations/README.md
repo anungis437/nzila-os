@@ -2,7 +2,7 @@
 
 ## Overview
 
-This directory contains all database migrations for the Union Eyes application. Migrations are split into two categories:
+This directory contains all database migrations for the UnionEyes application. Migrations are split into two categories:
 
 ### 1. Core Drizzle Migrations (Root Directory)
 

@@ -1,5 +1,5 @@
 /**
- * Contract test · INV-16 — Union Eyes Role Graph Acyclic Invariant
+ * Contract test · INV-16 — UnionEyes Role Graph Acyclic Invariant
  *
  * The role inheritance graph MUST be a directed acyclic graph (DAG).
  * Cycles would allow circular privilege escalation.

@@ -1,6 +1,6 @@
 # TypeScript Error Inventory
 
-Generated after removing `// @ts-nocheck` from **431 files** across the Union Eyes codebase.
+Generated after removing `// @ts-nocheck` from **431 files** across the UnionEyes codebase.
 
 ## Summary
 

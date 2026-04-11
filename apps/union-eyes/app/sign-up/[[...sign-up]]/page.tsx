@@ -5,8 +5,8 @@ import AuthPageLayout from '@/components/auth/auth-page-layout'
 import { SignupForm } from '@/components/auth/signup-form'
 
 export const metadata: Metadata = {
-  title: 'Sign Up | Union Eyes',
-  description: 'Create your Union Eyes account — a decision system for labour leadership.',
+  title: 'Sign Up | UnionEyes',
+  description: 'Create your UnionEyes account — a decision system for labour leadership.',
 }
 
 const stats = [
@@ -18,7 +18,7 @@ const stats = [
 export default function SignUpPage() {
   return (
     <AuthPageLayout
-      appName="Union Eyes"
+      appName="UnionEyes"
       tagline="A Decision System for Labour Leadership"
       subtitle="From intake to outcome — casework, intelligence, and member services in one system."
       stats={stats}

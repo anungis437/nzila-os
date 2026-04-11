@@ -91,10 +91,10 @@ class OrgMembers(BaseModel):
 
 
 class OrganizationMembers(BaseModel):
-    """Zonga organization membership — links Clerk users to local orgs.
+    """Zonga organization membership — links auth users to local orgs.
 
     This is the Django-owned membership table for the Zonga backend.
-    It syncs from Clerk webhooks with mapped roles.
+    It syncs from auth webhooks with mapped roles.
     """
 
     ROLE_CHOICES = [
@@ -115,7 +115,7 @@ class OrganizationMembers(BaseModel):
         on_delete=models.CASCADE,
         related_name="members",
     )
-    user_id = models.TextField(help_text="Clerk user ID")
+    user_id = models.TextField(help_text="Auth provider user ID")
     role = models.CharField(max_length=20, choices=ROLE_CHOICES, default="org_viewer")
     status = models.CharField(max_length=20, choices=STATUS_CHOICES, default="active")
     is_primary = models.BooleanField(default=True)

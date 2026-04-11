@@ -1,7 +1,7 @@
 #!/usr/bin/env tsx
 // cSpell:ignore nzila merkle
 /**
- * Union Eyes — Evidence Pack Sealer
+ * UnionEyes — Evidence Pack Sealer
  *
  * Loads the artifact manifest from collect.mjs, builds a canonical evidence
  * pack (pack.json), seals it with @nzila/os-core generateSeal, and writes

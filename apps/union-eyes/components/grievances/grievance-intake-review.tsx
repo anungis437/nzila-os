@@ -35,6 +35,8 @@ export interface GrievanceIntakeData {
   grievanceType: string;
   issueDate: Date | null;
   urgency: string;
+  cbaArticle: string;
+  cbaSection: string;
   workplaceSafetyFlag: boolean;
   harassmentFlag: boolean;
   discriminationFlag: boolean;
@@ -187,6 +189,8 @@ export function GrievanceIntakeReview({ data, onEdit }: GrievanceIntakeReviewPro
           <ReviewField label="Grievance Type" value={GRIEVANCE_TYPE_LABELS[data.grievanceType] ?? data.grievanceType} />
           <ReviewField label="Issue Date" value={data.issueDate ? format(data.issueDate, "PPP") : undefined} />
           <ReviewField label="Urgency" value={URGENCY_LABELS[data.urgency] ?? data.urgency} />
+          <ReviewField label="CBA Article" value={data.cbaArticle} />
+          <ReviewField label="CBA Section / Clause" value={data.cbaSection} />
         </dl>
       </ReviewSection>
 

@@ -248,7 +248,7 @@ export default async function CaseStudyPage({ params }: CaseStudyPageProps) {
             Ready to create your own success story?
           </h2>
           <p className="text-lg mb-6 text-blue-100">
-            Join our pilot program and see how Union Eyes can transform member advocacy
+            Join our pilot program and see how UnionEyes can transform member advocacy
             at your local.
           </p>
           <Link href="/pilot-request"
@@ -287,7 +287,7 @@ export async function generateMetadata({ params }: CaseStudyPageProps) {
   }
 
   return {
-    title: `${caseStudy.title} | Union Eyes Case Studies`,
+    title: `${caseStudy.title} | UnionEyes Case Studies`,
     description: caseStudy.summary,
   };
 }

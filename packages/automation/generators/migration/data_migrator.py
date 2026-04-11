@@ -149,10 +149,10 @@ _ALWAYS_SKIP_COLUMNS = {
 # Platform configurations
 # ---------------------------------------------------------------------------
 def get_ue_config() -> Dict:
-    """Union Eyes platform configuration."""
+    """UnionEyes platform configuration."""
     return {
         "platform_id": "ue",
-        "platform_name": "Union Eyes",
+        "platform_name": "UnionEyes",
         "target_db_name": "nzila_union_eyes",
         "target_db_defaults": {
             "host": "localhost",
@@ -1025,7 +1025,7 @@ def main():
         formatter_class=argparse.RawDescriptionHelpFormatter,
         epilog="""
 Examples:
-  # Dry run for Union Eyes
+  # Dry run for UnionEyes
   python data_migrator.py --platform ue --dry-run \\
     --source-url "postgresql://user:pass@host:5432/unioneyes"
 
@@ -1050,7 +1050,7 @@ Examples:
         "--platform", "-p",
         required=True,
         choices=["ue", "abr"],
-        help="Platform to migrate: 'ue' (Union Eyes) or 'abr' (ABR Insights)",
+        help="Platform to migrate: 'ue' (UnionEyes) or 'abr' (ABR Insights)",
     )
     parser.add_argument(
         "--source-url", "-s",

@@ -10,7 +10,7 @@ export const DEFAULT_MODULES: ModuleRegistration[] = [
   // ── Core products ────────────────────────────────────────────────────────
   {
     id: 'union-eyes',
-    name: 'Union Eyes',
+    name: 'UnionEyes',
     description: 'Labor union management — grievances, collective bargaining, pension',
     basePath: '/union-eyes',
     iconToken: 'shield',

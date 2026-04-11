@@ -2,7 +2,7 @@
  * Alert Rules Management
  * 
  * Core functionality for defining, validating, and managing alert rules
- * for Union Eyes monitoring and observability system.
+ * for UnionEyes monitoring and observability system.
  */
 
 import {

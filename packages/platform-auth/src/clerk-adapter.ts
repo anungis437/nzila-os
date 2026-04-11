@@ -1,24 +1,21 @@
 /**
- * @nzila/platform-auth — Clerk Adapter
+ * @nzila/platform-auth — Auth Adapter
  *
- * Wraps Clerk-specific auth calls behind platform types.
- * All apps should use this adapter instead of importing
- * @clerk/nextjs directly for auth resolution.
- *
- * This adapter can be swapped if the auth provider changes.
+ * Maps auth provider responses behind platform types.
+ * All apps should use this adapter for auth resolution.
  */
 import type { AuthenticatedIdentity, AuthResult, OrgMembership } from './identity'
 
-// ── Types for Clerk Auth Response ───────────────────────────────────────────
+// ── Types for Auth Response ─────────────────────────────────────────────
 
-interface ClerkAuthResult {
+interface LegacyAuthResult {
   userId: string | null
   orgId?: string | null
   orgRole?: string | null
   sessionClaims?: Record<string, unknown> | null
 }
 
-interface ClerkUser {
+interface LegacyAuthUser {
   primaryEmailAddress?: { emailAddress: string } | null
   emailAddresses?: Array<{ emailAddress: string }> | null
   firstName?: string | null
@@ -29,16 +26,16 @@ interface ClerkUser {
 // ── Adapter Functions ───────────────────────────────────────────────────────
 
 /**
- * Resolve an AuthenticatedIdentity from Clerk auth state.
+ * Resolve an AuthenticatedIdentity from auth state.
  *
- * @param clerkAuth — Result of `await auth()` from @clerk/nextjs/server
- * @param clerkUser — Result of `await currentUser()` (optional, for profile data)
+ * @param authResult — Result of `await auth()`
+ * @param user — Result of `await currentUser()` (optional, for profile data)
  */
-export function resolveIdentityFromClerk(
-  clerkAuth: ClerkAuthResult,
-  clerkUser?: ClerkUser | null,
+export function resolveIdentity(
+  authResult: LegacyAuthResult,
+  user?: LegacyAuthUser | null,
 ): AuthResult {
-  if (!clerkAuth.userId) {
+  if (!authResult.userId) {
     return {
       ok: false,
       code: 'AUTH_REQUIRED',
@@ -48,22 +45,22 @@ export function resolveIdentityFromClerk(
   }
 
   const email =
-    clerkUser?.primaryEmailAddress?.emailAddress ??
-    clerkUser?.emailAddresses?.[0]?.emailAddress ??
+    user?.primaryEmailAddress?.emailAddress ??
+    user?.emailAddresses?.[0]?.emailAddress ??
     undefined
 
-  const displayName = [clerkUser?.firstName, clerkUser?.lastName]
+  const displayName = [user?.firstName, user?.lastName]
     .filter(Boolean)
-    .join(' ') || email || clerkAuth.userId
+    .join(' ') || email || authResult.userId
 
   const identity: AuthenticatedIdentity = {
-    userId: clerkAuth.userId,
+    userId: authResult.userId,
     email,
     displayName,
-    avatarUrl: clerkUser?.imageUrl ?? undefined,
-    activeOrgId: clerkAuth.orgId ?? undefined,
-    orgRole: clerkAuth.orgRole ?? undefined,
-    sessionClaims: clerkAuth.sessionClaims ?? undefined,
+    avatarUrl: user?.imageUrl ?? undefined,
+    activeOrgId: authResult.orgId ?? undefined,
+    orgRole: authResult.orgRole ?? undefined,
+    sessionClaims: authResult.sessionClaims ?? undefined,
     isService: false,
   }
 
@@ -96,12 +93,12 @@ export function resolveServiceIdentity(
 }
 
 /**
- * Map a Clerk org role string to canonical role.
+ * Map an org role string to canonical role.
  */
-export function mapClerkOrgRole(
-  clerkOrgRole: string | undefined | null,
+export function mapOrgRole(
+  orgRole: string | undefined | null,
 ): OrgMembership['role'] {
-  switch (clerkOrgRole) {
+  switch (orgRole) {
     case 'org:admin':
       return 'org_admin'
     case 'org:secretary':
@@ -111,3 +108,9 @@ export function mapClerkOrgRole(
       return 'org_viewer'
   }
 }
+
+/** @deprecated Use `resolveIdentity` instead */
+export const resolveIdentityFromClerk = resolveIdentity
+
+/** @deprecated Use `mapOrgRole` instead */
+export const mapClerkOrgRole = mapOrgRole

@@ -68,11 +68,11 @@ Financial control and reporting across all ventures.
 
 **App**: CFO
 
-### Case Management (Union-Eyes)
+### Case Management (UnionEyes)
 
 Investigations, compliance cases, and regulatory interactions.
 
-**App**: Union-Eyes
+**App**: UnionEyes
 
 ### Professional Exams (NACP)
 

@@ -39,6 +39,39 @@ const createGrievanceSchema = z.object({
   employerId: z.string().uuid().optional(),
   contractId: z.string().uuid().optional(),
   category: z.string().optional(),
+
+  // Member details (from intake form)
+  grievantName: z.string().max(255).optional(),
+  grievantEmail: z.string().email().max(255).optional(),
+  memberPhone: z.string().max(50).optional(),
+  memberNumber: z.string().max(100).optional(),
+  localChapter: z.string().max(255).optional(),
+
+  // Employer / workplace details
+  employerName: z.string().max(255).optional(),
+  workplaceName: z.string().max(255).optional(),
+  department: z.string().max(255).optional(),
+  branch: z.string().max(255).optional(),
+  supervisorName: z.string().max(255).optional(),
+  incidentLocation: z.string().max(500).optional(),
+
+  // CBA reference
+  cbaArticle: z.string().max(100).optional(),
+  cbaSection: z.string().max(100).optional(),
+
+  // Dates
+  incidentDate: z.string().datetime({ offset: true }).optional()
+    .or(z.string().date().optional()),
+
+  // Desired outcome
+  desiredOutcome: z.string().optional(),
+
+  // Sensitivity flags
+  workplaceSafetyFlag: z.boolean().optional(),
+  harassmentFlag: z.boolean().optional(),
+  discriminationFlag: z.boolean().optional(),
+  accommodationFlag: z.boolean().optional(),
+
   /**
    * If true, the caller is a steward+ creating an official case directly.
    * If false/absent, this is a member intake submission — no official case
@@ -90,6 +123,11 @@ export const POST = withOrganizationAuth(async (request, context) => {
     const grievance = await withRLSContext(async () => {
       // Collision-safe grievance number: timestamp + 6-char random hex
       const grievanceNumber = `GRV-${Date.now()}-${randomBytes(3).toString('hex')}`;
+
+      // Derive boolean flags from the grievance type / sensitivity flags
+      const isGroupGrievance = data.type === "group";
+      const isConfidential = !!(data.harassmentFlag || data.discriminationFlag);
+
       const [g] = await db
         .insert(grievances)
         .values({
@@ -104,6 +142,28 @@ export const POST = withOrganizationAuth(async (request, context) => {
           organizationId,
           createdBy: userId,
           filedDate: isOfficialCase ? new Date() : null,
+
+          // Member details
+          grievantName: data.grievantName ?? null,
+          grievantEmail: data.grievantEmail ?? null,
+
+          // Employer / workplace details
+          employerName: data.employerName ?? null,
+          workplaceName: data.workplaceName ?? null,
+
+          // CBA reference
+          cbaArticle: data.cbaArticle ?? null,
+          cbaSection: data.cbaSection ?? null,
+
+          // Dates
+          incidentDate: data.incidentDate ? new Date(data.incidentDate) : null,
+
+          // Outcome
+          desiredOutcome: data.desiredOutcome ?? null,
+
+          // Derived flags
+          isGroupGrievance,
+          isConfidential,
         })
         .returning();
 

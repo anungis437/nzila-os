@@ -2,7 +2,7 @@
   "flagships": {
     "union-eyes": {
       "platform_id": "union-eyes",
-      "product_name": "Union Eyes",
+      "product_name": "UnionEyes",
       "repo_name": "nzila-union-eyes",
       "vertical": "uniontech",
       "gtm_driver": "CLC real movement — active union organizing",

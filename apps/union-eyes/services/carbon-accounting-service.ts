@@ -1,12 +1,12 @@
 // Carbon Accounting Service
-// Calculate and track Union Eyes' carbon emissions (Scope 1, 2, 3)
+// Calculate and track UnionEyes' carbon emissions (Scope 1, 2, 3)
 // Monitor renewable energy commitments and SBTi targets
 
 
 /**
  * Carbon Accounting Service
  * 
- * Tracks Union Eyes' carbon footprint:
+ * Tracks UnionEyes' carbon footprint:
  * - Scope 1: Direct emissions (currently 0 - no owned infrastructure)
  * - Scope 2: Indirect electricity emissions (cloud data centers)
  * - Scope 3: Supply chain emissions (remote work, SaaS vendors, travel, hardware)
@@ -119,7 +119,7 @@ export class CarbonAccountingService {
   async calculateMonthlyEmissions(year: number, month: number): Promise<MonthlyEmissions> {
     const monthStr = `${year}-${month.toString().padStart(2, '0')}`;
     
-    // Scope 1: Direct emissions (always 0 for Union Eyes - no owned infrastructure)
+    // Scope 1: Direct emissions (always 0 for UnionEyes - no owned infrastructure)
     const scope1 = 0;
     
     // Scope 2: Indirect electricity (cloud infrastructure)
@@ -212,7 +212,7 @@ export class CarbonAccountingService {
    * % of electricity from renewable sources (weighted by usage)
    */
   async calculateRenewablePercent(_year: number, _month: number): Promise<number> {
-    // Union Eyes deploys 100% to Canada Central (99% renewable)
+    // UnionEyes deploys 100% to Canada Central (99% renewable)
     // In production, this would query actual deployment regions
     return 99;
   }

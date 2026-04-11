@@ -17,11 +17,11 @@ Nzila Ventures operates a **sophisticated multi-vertical portfolio** spanning 8 
 
 ## 📊 PLATFORM-BY-PLATFORM ANALYSIS
 
-### 1. **UNION EYES** - Flagship Uniontech Platform
+### 1. **UnionEyes** - Flagship Uniontech Platform
 **Size**: 332.81 MB | **Entities**: 4,773 | **Complexity**: EXTREME
 
 #### Business Purpose
-Union Eyes is **the crown jewel** — a comprehensive union management system handling:
+UnionEyes is **the crown jewel** — a comprehensive union management system handling:
 - **Member Management**: 4,773 entities suggest sophisticated member data models
 - **Pension Fund Management**: Actuarial calculations, forecasting, seasonal trends
 - **Insurance Administration**: Claims processing, payment plans, donor tracking
@@ -215,7 +215,7 @@ Focus: Data collection, experiment tracking
 3. **Bulk Upload** - Document batch processing
 4. **Business Law** - Corporate legal matters
 5. **Case Analysis** - AI-powered case review
-6. **CBA Intelligence** - Labor law (union overlap with Union Eyes!)
+6. **CBA Intelligence** - Labor law (union overlap with UnionEyes!)
 7. **Dashboard** - Practice management overview
 8. **Document Compare** - Version control, redlining
 9. **Document Manager** - DMS with legal holds
@@ -246,9 +246,9 @@ Entities: 682 (complex legal data models)
 #### Key Strategic Insights
 
 **Cross-Platform Synergy**:
-- **CBA Intelligence** overlaps with Union Eyes
-- **Grievance Management** overlaps with Union Eyes
-- **Union Claims** overlaps with Union Eyes
+- **CBA Intelligence** overlaps with UnionEyes
+- **Grievance Management** overlaps with UnionEyes
+- **Union Claims** overlaps with UnionEyes
 - **Opportunity**: Shared legal AI engine across platforms
 
 **Legal Tech Sophistication**:
@@ -395,7 +395,7 @@ API: Django REST Framework (73 endpoints)
 Union operations and member services:
 - **Member Services**: 512 entities (likely member data)
 - **Operational Tools**: Union-specific workflows
-- **Complement to Union Eyes**: Lighter operational focus
+- **Complement to UnionEyes**: Lighter operational focus
 
 #### Technical Architecture
 ```
@@ -405,12 +405,12 @@ Focus: Day-to-day union operations
 ```
 
 #### Strategic Insight
-- **Overlaps with Union Eyes**: Consolidation opportunity
+- **Overlaps with UnionEyes**: Consolidation opportunity
 - **Simpler UX**: Operational users vs. administrative users
-- **Shared Data**: Member entities likely duplicate Union Eyes
+- **Shared Data**: Member entities likely duplicate UnionEyes
 
 #### Migration: **6 weeks** (MEDIUM)
-**Strategy**: Merge with Union Eyes uniontech apps, create operational UI layer
+**Strategy**: Merge with UnionEyes uniontech apps, create operational UI layer
 
 ---
 
@@ -540,7 +540,7 @@ React: 3/13 platforms (23.1%)
   - Rich ecosystem
   - Migration path: React → Django templates + HTMX
 
-Next.js: 2/13 platforms (Union Eyes, SentryIQ)
+Next.js: 2/13 platforms (UnionEyes, SentryIQ)
   - SSR, SEO optimization
   - API routes (backend proxy)
   - Migration: Next.js API → Django REST
@@ -584,7 +584,7 @@ Hybrid Approach (Supabase + Azure): 2+ platforms
 
 #### Discovered Across 3+ Platforms:
 ```typescript
-// Member/User Management (Union Eyes, C3UO, ABR Insights)
+// Member/User Management (UnionEyes, C3UO, ABR Insights)
 interface Member {
   id: string;
   profile: UserProfile;
@@ -602,7 +602,7 @@ interface Document {
   signatures: DigitalSignature[];
 }
 
-// Financial Transactions (Union Eyes, Shop Quoter, SentryIQ)
+// Financial Transactions (UnionEyes, Shop Quoter, SentryIQ)
 interface Transaction {
   id: string;
   amount: Decimal;
@@ -611,7 +611,7 @@ interface Transaction {
   audit_trail: AuditEntry[];
 }
 
-// Case/Matter Management (CourtLens, Union Eyes grievances, ABR Insights)
+// Case/Matter Management (CourtLens, UnionEyes grievances, ABR Insights)
 interface Case {
   id: string;
   case_number: string;
@@ -626,7 +626,7 @@ interface Case {
 
 #### Data Protection Requirements:
 ```
-Union Eyes:
+UnionEyes:
   - SIN encryption (Canadian PII)
   - Financial data encryption
   - Audit logging (financial compliance)
@@ -656,7 +656,7 @@ eExports:
 
 ### 4. **AI/ML Capabilities Discovery**
 
-#### Union Eyes ML Pipeline:
+#### UnionEyes ML Pipeline:
 ```bash
 "ml:retrain": "npx tsx scripts/ml-retraining-pipeline.ts"
 "ml:train:churn": "npx tsx scripts/train-churn-model.ts"
@@ -704,9 +704,9 @@ eExports:
 
 ## 💡 STRATEGIC MIGRATION INSIGHTS
 
-### 1. **Union Eyes as North Star**
+### 1. **UnionEyes as North Star**
 
-**Why Union Eyes should guide architecture**:
+**Why UnionEyes should guide architecture**:
 - **Most sophisticated**: 4,773 entities, 99 API endpoints
 - **Modern stack**: Next.js 14, Turbo, Vitest, Playwright
 - **Enterprise-ready**: OpenTelemetry, Sentry, security hardening
@@ -715,7 +715,7 @@ eExports:
 
 **Architectural patterns to replicate**:
 ```python
-# Union Eyes patterns → Backbone implementation
+# UnionEyes patterns → Backbone implementation
 Monorepo (Turbo) → Django apps with shared libs
 Drizzle ORM → Django ORM with migrations
 OpenTelemetry → Django + OpenTelemetry Python
@@ -740,7 +740,7 @@ Video generation → Django + ffmpeg/Remotion equivalent
 
 **Legal intelligence across platforms**:
 - CourtLens: 24 legal apps
-- Union Eyes: CBA intelligence, grievance management
+- UnionEyes: CBA intelligence, grievance management
 - ABR Insights: Policy tracking, advocacy
 
 **Shared legal AI services**:
@@ -751,7 +751,7 @@ backbone/
 │   │   ├── argument_builder/    # CourtLens feature
 │   │   ├── case_analysis/        # CourtLens feature
 │   │   ├── precedent_search/     # CourtLens feature
-│   │   ├── cba_intelligence/     # Union Eyes + CourtLens
+│   │   ├── cba_intelligence/     # UnionEyes + CourtLens
 │   │   └── policy_tracking/      # ABR Insights
 ```
 
@@ -805,7 +805,7 @@ Gallery → Social auth (public users)
 
 ```
 Uniontech (2 platforms):              5,285 entities (66.0%)
-  - Union Eyes: 4,773
+  - UnionEyes: 4,773
   - C3UO: 512
 
 Trade & Commerce (3 platforms):         914 entities (11.4%)
@@ -839,7 +839,7 @@ Agrotech (1 platform):                   18 entities (0.2%)
 
 ```
 HIGH MATURITY (Ready for production):
-  ✅ Union Eyes: Enterprise-grade, ML pipeline, observability
+  ✅ UnionEyes: Enterprise-grade, ML pipeline, observability
   ✅ SentryIQ: Modern Next.js, Fastify, security scanning
   ✅ eExports: Mature Django, 73 API endpoints
 
@@ -850,7 +850,7 @@ MEDIUM MATURITY (Production-ready with gaps):
 
 LOW MATURITY (Requires significant refactoring):
   🔴 CORA: 18 entities, minimal API
-  🔴 C3UO: Overlaps with Union Eyes
+  🔴 C3UO: Overlaps with UnionEyes
   🔴 CyberLearn: 70 entities, needs content
 ```
 
@@ -859,7 +859,7 @@ LOW MATURITY (Requires significant refactoring):
 ```
 HIGH PRIORITY (Foundation for others):
   1. eExports (4 weeks) - Django proof of concept
-  2. Union Eyes (8 weeks) - Architecture template
+  2. UnionEyes (8 weeks) - Architecture template
   3. ABR Insights (6 weeks) - Privacy patterns
 
 MEDIUM PRIORITY (Business value):
@@ -868,7 +868,7 @@ MEDIUM PRIORITY (Business value):
   6. Shop Quoter (7 weeks) - Trade commerce revenue
 
 LOW PRIORITY (Consolidation candidates):
-  7. C3UO (6 weeks) - Merge with Union Eyes
+  7. C3UO (6 weeks) - Merge with UnionEyes
   8. CongoWave (7 weeks) - Arts & culture niche
   9. Trade OS (7 weeks) - Overlap with eExports
   10. CyberLearn (6 weeks) - Training platform
@@ -902,7 +902,7 @@ SAVINGS:
 
 ```
 HIGH RISK:
-  ⚠️ Union Eyes migration (4,773 entities, financial data)
+  ⚠️ UnionEyes migration (4,773 entities, financial data)
   ⚠️ ABR Insights (anonymous reporting, trauma-informed UX)
   ⚠️ CourtLens (attorney-client privilege, legal holds)
 
@@ -937,7 +937,7 @@ LOW RISK:
 - Tests deployment pipeline
 
 ### Phase 3: Template Platform (8 weeks)
-**Migrate Union Eyes**
+**Migrate UnionEyes**
 - Most sophisticated platform
 - ML pipeline integration
 - Defines architecture patterns
@@ -957,7 +957,7 @@ LOW RISK:
 
 ### Phase 6: Consolidation (19 weeks)
 **Migrate C3UO + CongoWave + CyberLearn + CORA**
-- C3UO merged into Union Eyes
+- C3UO merged into UnionEyes
 - Niche platforms (arts, training, agrotech)
 
 ### Phase 7: Infrastructure (6 weeks)
@@ -985,7 +985,7 @@ LOW RISK:
 8. ⏭️ **Legal AI extraction** (CourtLens → shared service)
 
 ### Medium-term (Month 3-6):
-9. ⏭️ **Union Eyes migration** (flagship platform)
+9. ⏭️ **UnionEyes migration** (flagship platform)
 10. ⏭️ **ABR Insights migration** (privacy framework)
 11. ⏭️ **SentryIQ migration** (insurancetech revenue)
 
@@ -1003,7 +1003,7 @@ The Nzila portfolio represents **years of domain expertise** encoded in 13 platf
 **Key Success Factors**:
 1. **Backbone-first approach** (68.6% time savings validated)
 2. **eExports Django PoC** (de-risk Django choice)
-3. **Union Eyes as template** (replicate sophistication)
+3. **UnionEyes as template** (replicate sophistication)
 4. **Legal AI as shared service** (3+ platform ROI)
 5. **Radix UI standardization** (consistent UX)
 6. **Privacy framework** (ABR Insights → reusable patterns)
@@ -1013,7 +1013,7 @@ The Nzila portfolio represents **years of domain expertise** encoded in 13 platf
 
 **Timeline**: **20 months** to unified platform (vs. 6 years standalone).
 
-**Recommendation**: **Proceed with backbone build** → eExports PoC → Union Eyes migration.
+**Recommendation**: **Proceed with backbone build** → eExports PoC → UnionEyes migration.
 
 ---
 

@@ -24,6 +24,7 @@ import {
   MessageCircle,
 } from "lucide-react";
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
+import { useOrganization } from "@/contexts/organization-context";
 
 interface OutcomeLink {
   href: string;
@@ -32,9 +33,14 @@ interface OutcomeLink {
   description: string;
 }
 
+/** Link keys that congress-type orgs should not see. */
+const CONGRESS_HIDDEN_KEYS = new Set(["sidebar.duesDeductions", "sidebar.financialManagement"]);
+
 export function OutcomesConsole() {
   const t = useTranslations();
   const locale = useLocale();
+  const { organization } = useOrganization();
+  const isCongress = organization?.type === "congress";
 
   const outcomes: OutcomeLink[] = [
     {
@@ -68,6 +74,11 @@ export function OutcomesConsole() {
       description: "Financial reports, budgets, and expense tracking.",
     },
   ];
+
+  // Congress orgs (CLC) should not see dues or financial links
+  const visibleOutcomes = isCongress
+    ? outcomes.filter((o) => !CONGRESS_HIDDEN_KEYS.has(o.titleKey))
+    : outcomes;
 
   return (
     <div className="max-w-4xl mx-auto space-y-6">
@@ -160,7 +171,7 @@ export function OutcomesConsole() {
       <div>
         <h2 className="text-sm font-medium text-gray-600 mb-3">Explore &amp; Manage</h2>
         <div className="grid gap-3 sm:grid-cols-2">
-          {outcomes.map((item) => (
+          {visibleOutcomes.map((item) => (
             <Link key={item.href} href={item.href} className="block group">
               <Card className="h-full transition-all hover:shadow-md hover:border-blue-200 group-hover:bg-gray-50/50">
                 <CardContent className="py-4 px-4 flex items-start gap-3">

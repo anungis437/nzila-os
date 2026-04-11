@@ -1,7 +1,7 @@
 'use client';
 
 /**
- * LocaleSiteFooter — Locale-aware marketing footer for Union Eyes
+ * LocaleSiteFooter — Locale-aware marketing footer for UnionEyes
  * Used inside app/[locale]/(marketing)/ where NextIntlClientProvider is active.
  */
 
@@ -69,8 +69,8 @@ export default function LocaleSiteFooter() {
             </h3>
             <p className="text-gray-200 text-lg">
               {locale === 'fr-CA'
-                ? 'Découvrez comment Union Eyes transforme le travail syndical en décisions éclairées.'
-                : 'See how Union Eyes turns casework into confident, data-backed decisions. Request a demo — no commitment.'}
+                ? 'Découvrez comment UnionEyes transforme le travail syndical en décisions éclairées.'
+                : 'See how UnionEyes turns casework into confident, data-backed decisions. Request a demo — no commitment.'}
             </p>
           </div>
           <div className="flex flex-col sm:flex-row gap-3">
@@ -98,12 +98,12 @@ export default function LocaleSiteFooter() {
             <Link href={`/${locale}`} className="flex items-center gap-3 group">
               <Image
                 src="/images/brand/icon.png"
-                alt="Union Eyes"
+                alt="UnionEyes"
                 width={40}
                 height={40}
                 className="w-10 h-10 rounded-lg shadow-lg shadow-electric/20 group-hover:shadow-electric/40 transition-shadow"
               />
-              <span className="text-2xl font-bold text-white">Union Eyes</span>
+              <span className="text-2xl font-bold text-white">UnionEyes</span>
             </Link>
 
             <p className="text-gray-200 max-w-sm leading-relaxed">{t('description')}</p>
@@ -154,7 +154,7 @@ export default function LocaleSiteFooter() {
       <div className="border-t border-white/10">
         <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-6 flex flex-col md:flex-row justify-between items-center gap-4">
           <p className="text-sm text-gray-400">
-            &copy; {new Date().getFullYear()} Union Eyes. {t('rights')}
+            &copy; {new Date().getFullYear()} UnionEyes. {t('rights')}
           </p>
           <div className="flex items-center gap-4 text-sm text-gray-400 flex-wrap justify-center">
             <a href={NZILA_URL} target="_blank" rel="noopener noreferrer"

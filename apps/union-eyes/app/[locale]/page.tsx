@@ -26,7 +26,7 @@ export async function generateMetadata({
   const { locale } = await params;
   const t = await getTranslations({ locale, namespace: 'marketing.home' });
   return {
-    title: 'Union Eyes — A Governed Operating System for Unions',
+    title: 'UnionEyes — A Governed Operating System for Unions',
     description: t('heroDescription'),
   };
 }

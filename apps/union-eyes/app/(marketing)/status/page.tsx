@@ -11,8 +11,8 @@ import { StatusPage } from '@/components/monitoring/StatusPage';
 import type { Metadata } from 'next';
 
 export const metadata: Metadata = {
-  title: 'System Status | Union Eyes',
-  description: 'Real-time status of Union Eyes services and infrastructure',
+  title: 'System Status | UnionEyes',
+  description: 'Real-time status of UnionEyes services and infrastructure',
 };
 
 export default function StatusPageRoute() {

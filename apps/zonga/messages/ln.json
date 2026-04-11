@@ -1,0 +1,309 @@
+{
+  "app": {
+    "name": "Zonga",
+    "tagline": "Miziki na ndelo te"
+  },
+  "dashboard": {
+    "title": "Tableau ya mosala",
+    "welcome": "Boyei malamu na Zonga",
+    "description": "Bókamba catalogue na bino, bólanda mbongo, bótala mafuta, mpe bóbakisa bato oyo bayokaka bino — nyonso na esika moko."
+  },
+  "catalog": {
+    "title": "Catalogue",
+    "tracks": "Banzembo",
+    "albums": "Ba-albums",
+    "podcasts": "Ba-podcasts",
+    "videos": "Ba-clips ya miziki",
+    "upload": "Kotia nzembo",
+    "publish": "Kobimisa",
+    "noAssets": "Nzembo moko te",
+    "noAssetsDescription": "Tia nzembo ya liboso mpo na kobanda."
+  },
+  "releases": {
+    "title": "Babimiseli",
+    "create": "Kosala ebimiseli",
+    "draft": "Ebongiseli",
+    "scheduled": "Ebongisami",
+    "live": "Ezali na ligne",
+    "archived": "Ebombami"
+  },
+  "revenue": {
+    "title": "Mbongo",
+    "totalRevenue": "Mbongo nyonso",
+    "streamingRevenue": "Mbongo ya boyoki",
+    "downloadRevenue": "Mbongo ya botélementi",
+    "licensingRevenue": "Mbongo ya ndingisa",
+    "streams": "Boyoki",
+    "downloads": "Botélementi",
+    "licensing": "Bandingisa",
+    "sync": "Ndingisa ya synchronisation",
+    "merchandise": "Biloko ya kotéka",
+    "tips": "Makabo",
+    "subscriptions": "Ba-abonnements",
+    "radioBroadcast": "Diffusion ya radio",
+    "livePerformance": "Spectacle en direct",
+    "publishingPerformance": "Édition na droits",
+    "samplingLicense": "Ndingisa ya sampling",
+    "remixLicense": "Ndingisa ya remix",
+    "podcastLicense": "Ndingisa ya podcast",
+    "sponsorship": "Sponsoring",
+    "adRevenue": "Mbongo ya pub",
+    "serviceFee": "Frais ya service",
+    "processingFee": "Frais ya traitement",
+    "taxAmount": "Mpako",
+    "totalFees": "Frais nyonso",
+    "netPayout": "Mafuta ya peto",
+    "revenueByArtist": "Mbongo na artiste",
+    "recentActivity": "Makambo ya sika",
+    "supportedPayoutRails": "Banzela ya kofuta",
+    "noArtistRevenue": "Mbongo ya artiste ezali naino te. Mbongo ekobima awa ntango bato bakobanda koyoka miziki na bino.",
+    "noRevenueEvents": "Makambo ya mbongo ezali naino te. Ekobima awa ntango catalogue na bino ekobanda kobimisa mbongo."
+  },
+  "payouts": {
+    "title": "Mafuta",
+    "description": "Mbongo ya ba-artistes na boyebi ya mafuta",
+    "pending": "Ezali kozela",
+    "processing": "Ezali kosalema",
+    "completed": "Esilaki",
+    "failed": "Elongaki te",
+    "requestPayout": "Kosenga mafuta",
+    "newPayout": "Mafuta ya sika",
+    "walletBalance": "Mbongo na portefeuille",
+    "totalPayouts": "Mafuta nyonso",
+    "totalPaidOut": "Nyonso oyo efutamaki",
+    "averagePayout": "Mafuta ya moyenne",
+    "noPayoutsYet": "Mafuta moko te naino",
+    "noPayoutsDescription": "Mafuta ya ba-artistes ekobima awa nsima ya kokabola mbongo.",
+    "selectArtist": "Kopona artiste",
+    "chooseArtist": "Poná artiste…",
+    "payoutRail": "Nzela ya kofuta",
+    "previewPayout": "Kotala mafuta liboso",
+    "executePayout": "Kokómisa mafuta",
+    "payoutPreview": "Botali ya mafuta",
+    "grossAmount": "Montant mobimba",
+    "confirmPayout": "Nandimi mafuta oyo",
+    "noPendingBalance": "Mbongo moko te ezali kozela mpo na artiste oyo.",
+    "payoutFailed": "Mafuta ekokaki te kosalema. Vérifiá configuration ya nzela ya kofuta ya artiste mpe meká lisusu, to benga support."
+  },
+  "splits": {
+    "title": "Bokaboli ya mbongo",
+    "description": "Bongisá ndenge mbongo ekokabolama na kati ya basali-elongo. Bokaboli esengeli kozala exactement 100%. Mosali-elongo mokomoko akozwa ndambo na ye nsima ya kolongola frais.",
+    "splitConfiguration": "Configuration ya bokaboli",
+    "distributeEvenly": "Kokabola ndenge moko",
+    "addCollaborator": "Kobakisa mosali-elongo",
+    "total": "Nyonso",
+    "overAllocated": "Eleki na {amount}%",
+    "underAllocated": "Ezali na nse na {amount}%. Nyonso esengeli kozala 100%.",
+    "preview": "Botali",
+    "saveSplits": "Kobomba bokaboli",
+    "splitsSaved": "Bokaboli ebombami malamu",
+    "backToRelease": "Kozonga na ebimiseli"
+  },
+  "creators": {
+    "title": "Ba-artistes na ba-créateurs",
+    "artists": "Ba-artistes",
+    "labels": "Ba-labels",
+    "producers": "Ba-producteurs",
+    "register": "Kokomisa artiste"
+  },
+  "integrity": {
+    "title": "Bosembo",
+    "fingerprints": "Empreintes ya son",
+    "copyrightChecks": "Vérifications ya droits",
+    "auditTrail": "Piste ya audit"
+  },
+  "analytics": {
+    "title": "Ba-statistiques",
+    "listeners": "Bayoki",
+    "geography": "Géographie",
+    "demographics": "Démographie",
+    "trends": "Ba-tendances"
+  },
+  "marketing": {
+    "hero": {
+      "badge": "Miziki ya Afrika, scène ya mokili",
+      "title": "Miziki na",
+      "titleAccent": "bandelo te",
+      "description": "Yoká malamu ya miziki ya Afrika — Afrobeats, Amapiano, Highlife, mpe ba-genres 40+. Ba-artistes bazwi 85% ya écoute nyonso. Ba-labels bakoli na continent mobimba.",
+      "ctaListen": "Banda koyoka",
+      "ctaDistribute": "Kabola miziki na yo"
+    },
+    "stats": {
+      "genres": "Ba-genres ya Afrika",
+      "streaming": "Koyokela",
+      "streamingValue": "Ofele",
+      "revenueShare": "Eteni ya mbongo artiste",
+      "currencies": "Mbongo ya Afrika"
+    },
+    "stakeholders": {
+      "badge": "Mpo na bato nyonso ya miziki",
+      "title": "Plateforme moko,",
+      "titleAccent": "mosala nyonso",
+      "description": "Soki ozali kosala miziki, koyoka, kokamba to kobongisa — Zonga esalami mpo na yo.",
+      "listeners": {
+        "title": "Mpo na bayoki",
+        "description": "Kumisa malamu ya miziki ya Afrika — Afrobeats, Amapiano, Highlife, Bongo, mpe mingi koleka. Landa ba-artistes, salá ba-playlists, mpe yoká ofele.",
+        "cta": "Banda koyoka",
+        "highlights": ["Koyokela ofele", "Ba-playlists ya kitoko", "Kokɔta na ba-événements"]
+      },
+      "artists": {
+        "title": "Mpo na ba-artistes",
+        "description": "Kabola miziki na yo, zwá 85% ya mbongo, mpe batelá masters na yo — na mafuta ya mbala moko na mobile money, banque to crypto.",
+        "cta": "Banda kokabola",
+        "highlights": ["85% ya mbongo", "Mafuta ya mbala moko mobile money", "Batelá masters na yo"]
+      },
+      "labels": {
+        "title": "Mpo na ba-labels",
+        "description": "Bongisa ba-artistes na yo, automatiser ba-splits ya royalties, mpe kokola distribution na continent mobimba — na conformité mobimba.",
+        "cta": "Yebá mingi",
+        "highlights": ["Tableau de bord multi-artistes", "Ba-splits ya royalties automatiques", "Conformité + ba-rapports"]
+      },
+      "events": {
+        "title": "Mpo na ba-organisateurs",
+        "description": "Tékisa ba-billets, bongisa ba-événements, mpe kangana na ba-fans — na plateforme ndenge moko oyo ba-artistes batii motema.",
+        "cta": "Talá ba-événements",
+        "highlights": ["Billetterie intégrée", "Ba-prix ya niveaux mingi", "Ba-outils ya engagement fans"]
+      }
+    },
+    "features": {
+      "badge": "Fonctionnalités ya plateforme",
+      "title": "Yoká, salá,",
+      "titleAccent": "kolonga",
+      "description": "Fonctionnalités mpo na bayoki oyo balingi miziki ya kitoko mpe ba-créateurs oyo baméritaka mafuta ya bosembo — nyonso na plateforme moko.",
+      "items": [
+        { "title": "Yoká mpe kumisa", "description": "Luká ba-titres ebele na ba-genres 40+ ya Afrika — banda Afrobeats na Amapiano tii na Highlife na Soukous. Ofele, tango nyonso." },
+        { "title": "Ba-playlists ya kitoko", "description": "Ba-playlists ya genre, ba-ambiances mpe ba-collections ya régions — mises à jour pɔsɔ na pɔsɔ." },
+        { "title": "Ba-événements en direct", "description": "Kumisa concerts, festivals mpe ba-sessions live pene na yo. Somba ba-billets mpe landa ba-artistes." },
+        { "title": "Bokaboli ya bosembo", "description": "Ba-calculs ya royalties transparentes na ventilation ya tango ya solo — par écoute, téléchargement, licence mpe sync." },
+        { "title": "Mafuta ya mbala moko", "description": "Sɛngá mafuta tango nyonso via Orange Money, M-Pesa, MTN MoMo, Flutterwave to virement. Kozela mikolo 90 te." },
+        { "title": "Contrôle créatif mobimba", "description": "Ba-artistes babatelaka masters na bango. Téléchargez, distribuer mpe bongisa catalogue na yo na bonsomi mobimba." }
+      ]
+    },
+    "regions": {
+      "badge": "Couverture ya continent",
+      "title": "Mongongo nyonso,",
+      "titleAccent": "région nyonso",
+      "description": "Banda Lagos tii Nairobi, Johannesburg tii Dakar — Zonga ekómisaka makasi miziki nyonso ya Afrika."
+    },
+    "mission": {
+      "badge": "Mokano na biso",
+      "title": "Miziki oyo",
+      "titleAccent": "epesaka nguya",
+      "description": "Zonga ebotamaki na bondimi ya pétéé: miziki ya Afrika eméritaka plateforme oyo etiaka bayoki na ba-créateurs liboso. Bayoki bazwi accès ofele na catalogue ya kitoko koleka ya miziki ya Afrika. Ba-créateurs bazwi 85% ya écoute nyonso. Ba-labels bakoli sans effort. Moto nyonso azwi.",
+      "highlights": ["Ofele mpo na bayoki", "85% ya mbongo", "Batelá masters na yo", "Portée panafricaine"]
+    },
+    "regions": {
+      "badge": "Etaleli ya kontiná",
+      "title": "Mongongo nyonso,",
+      "titleAccent": "etúká nyonso",
+      "description": "Banda Lagos tii Nairobi, Johannesburg tii Dakar — Zonga ezali kopesa nguya na miziki nyonso ya Afrika.",
+      "items": [
+        { "name": "Afrika ya Wɛsti", "genres": "Afrobeats · Highlife · Jùjú" },
+        { "name": "Afrika ya Ɛsti", "genres": "Bongo Flava · Benga · Taarab" },
+        { "name": "Afrika ya Sudi", "genres": "Amapiano · Kwaito · Maskandi" },
+        { "name": "Afrika ya Katí", "genres": "Soukous · Ndombolo · Rumba" },
+        { "name": "Afrika ya Nɔrdi", "genres": "Raï · Gnawa · Chaabi" },
+        { "name": "Diaspora", "genres": "Afro-House · Afro-R&B · Afrofusion" }
+      ]
+    },
+    "partnership": {
+      "badge": "Boyokani",
+      "title": "Etongami na",
+      "titleAccent": "baninga oyo balingaka",
+      "description": "Zonga esalaka na ba-organisations oyo bazali na mokano moko mpo na miziki ya bosembo — banda distribution tii na lisalisi ya communauté."
+    },
+    "missionCard": {
+      "revenueShare": "Kabola ya mbongo",
+      "payouts": "Mafuta",
+      "instant": "Na mbala moko",
+      "ownership": "Bozwi"
+    },
+    "cta": {
+      "title": "Obongani mpo na kosangana na",
+      "titleAccent": "mouvement ?",
+      "description": "Soki oyoki, osali, okambi to obongisi — Zonga ezali esika miziki ya Afrika ezali kolonga. Yoká ofele. Panzá miziki na yo. Sangana na mouvement.",
+      "ctaListen": "Bandá koyoka",
+      "ctaDistribute": "Panzá miziki na yo"
+    }
+  },
+  "footer": {
+    "ctaTitle": "Obongani mpo na kopanza miziki na yo?",
+    "ctaDescription": "Sangana na bankóto ya ba-créateurs ya Afrika na Zonga.",
+    "ctaButton": "Bandá ofele",
+    "tagline": "Plateforme ya miziki ya bosembo — redevances ya polele, mafuta ya mbala moko, mpe bozwi mobimba ya mosala mpo na ba-artistes mpe ba-créateurs ya Afrika.",
+    "platform": "Plateforme",
+    "platformCatalog": "Catalogue",
+    "platformDistribution": "Distribution",
+    "platformAnalytics": "Ba-statistiques",
+    "platformPayouts": "Mafuta",
+    "platformFingerprinting": "Empreinte ya mongongo",
+    "resources": "Ba-ressources",
+    "resourcesDocs": "Mikanda",
+    "resourcesApi": "Référence API",
+    "resourcesStatus": "Statut",
+    "resourcesSupport": "Lisalisi",
+    "legal": "Mibeko",
+    "legalPrivacy": "Politiki ya confidentialité",
+    "legalTerms": "Masɛngami ya kosalela",
+    "legalCookies": "Politiki ya cookies",
+    "legalRoyalties": "Politiki ya redevances",
+    "ecosystem": "Écosystème",
+    "badgeFairRevenue": "Mbongo ya bosembo",
+    "badgeAudioVerified": "Mongongo evérifiaki",
+    "badgeGdpr": "RGPD ebongisami",
+    "copyright": "© {year} Zonga — Application ya NzilaOS. Makoki nyonso ebatelami."
+  },
+  "signIn": {
+    "pageTitle": "Kokɔta | Zonga",
+    "pageDescription": "Kɔtá na compte na yo ya Zonga — plateforme ya miziki ya bosembo mpo na ba-créateurs ya Afrika.",
+    "tagline": "Miziki na yo, mbongo na yo",
+    "subtitle": "Plateforme ya miziki ya bosembo — ba-redevances ya polele, mafuta ya mbala moko mpe bozwi mobimba ya misala ya ba-artistes mpe ba-créateurs ya Afrika.",
+    "poweredBy": "Esalemi na Nzila",
+    "partOf": "Eteni ya",
+    "privacy": "Bosɛkrɛ",
+    "terms": "Mibeko",
+    "stats": [
+      { "value": "85%", "label": "Kabola ya mbongo ya ba-créateurs" },
+      { "value": "$1", "label": "Mafuta ya minimum" },
+      { "value": "40+", "label": "Ba-genres ya Afrika" }
+    ],
+    "badges": [
+      { "label": "85% ya kabola ya mbongo" },
+      { "label": "Mafuta ya mokolo na mokolo banda $1" },
+      { "label": "Bómba makoki na bino" }
+    ],
+    "welcomeBack": "Boyei malamu",
+    "signInToContinue": "Kɔtá na compte na yo mpo na kokoba",
+    "email": "Email",
+    "password": "Mot de passe",
+    "forgotPassword": "Obosani mot de passe?",
+    "signInButton": "Kokɔta",
+    "signingIn": "Kokɔta ezali…",
+    "noAccount": "Ozali na compte te?",
+    "signUp": "Komikɔmisa",
+    "genericError": "Likambo esalemi. Meka lisusu."
+  },
+  "nav": {
+    "home": "Ndako",
+    "about": "Mpo na biso",
+    "artists": "Ba-artistes",
+    "events": "Ba-événements",
+    "pricing": "Ntalo",
+    "contact": "Kokutana",
+    "signIn": "Kokɔta",
+    "browse": "Koluka",
+    "search": "Boluki",
+    "catalog": "Catalogue",
+    "releases": "Babimiseli",
+    "playlists": "Ba-playlists",
+    "events": "Ba-événements",
+    "revenue": "Mbongo",
+    "payouts": "Mafuta",
+    "creators": "Ba-artistes",
+    "analytics": "Ba-statistiques",
+    "notifications": "Basakoli",
+    "integrity": "Bosembo",
+    "myMusic": "Miziki na ngai",
+    "moderation": "Bokɛngɛli"
+  }
+}

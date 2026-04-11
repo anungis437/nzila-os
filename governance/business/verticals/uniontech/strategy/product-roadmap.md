@@ -8,14 +8,14 @@
 
 Two parallel product tracks with shared infrastructure milestones:
 
-- **Union Eyes** — Labor union operating system (Django 5 + Azure PostgreSQL, 4,773 DB entities, 238 RLS policies)
+- **UnionEyes** — Labor union operating system (Django 5 + Azure PostgreSQL, 4,773 DB entities, 238 RLS policies)
 - **DiasporaCore (C3UO)** — Diaspora banking platform (Node.js + Next.js, 485 DB entities)
 
 Both undergo **Backbone migration** (EXTREME complexity, 12–16 weeks automated) as a prerequisite to roadmap execution.
 
 ---
 
-## 2. Union Eyes — Quarterly Roadmap
+## 2. UnionEyes — Quarterly Roadmap
 
 ### Phase 1: Foundation (Q1–Q2 2026)
 
@@ -89,7 +89,7 @@ Both undergo **Backbone migration** (EXTREME complexity, 12–16 weeks automated
 
 | Timeline | Milestone | Scope |
 |----------|-----------|-------|
-| **Q1 2026** | Backbone Migration (Union Eyes) | 4,773 entities, 238 RLS policies; 12–16 week automated migration; Django 5 + Drizzle ORM patterns |
+| **Q1 2026** | Backbone Migration (UnionEyes) | 4,773 entities, 238 RLS policies; 12–16 week automated migration; Django 5 + Drizzle ORM patterns |
 | **Q1 2026** | Backbone Migration (DiasporaCore) | 485 entities; Node.js + Next.js; API contract generation |
 | **Q2 2026** | CI/CD Pipeline v2 | Azure DevOps pipelines; staging/prod parity; automated RLS regression tests |
 | **Q3 2026** | Observability Stack | Azure Monitor, Application Insights, custom union KPI dashboards, SLA alerting |

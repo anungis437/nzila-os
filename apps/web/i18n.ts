@@ -37,7 +37,7 @@ export default getRequestConfig(async ({ requestLocale }) => {
   let requested = await requestLocale;
 
   // Without next-intl middleware routing, requestLocale may be undefined.
-  // Fall back to the NEXT_LOCALE cookie set by our Clerk middleware.
+  // Fall back to the NEXT_LOCALE cookie set by our auth middleware.
   if (!requested) {
     try {
       const cookieStore = await cookies();

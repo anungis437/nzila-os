@@ -1,7 +1,7 @@
-﻿/**
+/**
  * Pilot Readiness Assessment Service
  * 
- * Purpose: Evaluate organization readiness for Union Eyes pilot program
+ * Purpose: Evaluate organization readiness for UnionEyes pilot program
  * Helps determine success likelihood and resource requirements
  */
 
@@ -152,7 +152,7 @@ function evaluateCurrentSystem(
     };
   }
 
-  if (currentSystem && !/union eyes|digital/i.test(currentSystem)) {
+  if (currentSystem && !/UnionEyes|digital/i.test(currentSystem)) {
     return {
       points: 15,
       concern: 'Existing system in place. May require change management and data migration.',

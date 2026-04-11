@@ -14,11 +14,11 @@ export default async function ProfilePage() {
   if (!userId) redirect('/sign-in')
 
   const user = await currentUser()
-  const clerkName = user?.fullName ?? user?.firstName ?? 'User'
-  const clerkEmail = user?.emailAddresses?.[0]?.emailAddress ?? ''
+  const authName = user?.fullName ?? user?.firstName ?? 'User'
+  const authEmail = user?.emailAddresses?.[0]?.emailAddress ?? ''
 
   // Ensure the listener row exists
-  await ensureListenerProfile({ displayName: clerkName, email: clerkEmail })
+  await ensureListenerProfile({ displayName: authName, email: authEmail })
 
   // Fetch the full profile
   const profile = await getListenerProfile()
@@ -43,7 +43,7 @@ export default async function ProfilePage() {
         </p>
       </div>
 
-      <ProfileForm profile={profile} clerkName={clerkName} clerkEmail={clerkEmail} />
+      <ProfileForm profile={profile} authName={authName} authEmail={authEmail} />
     </div>
   )
 }

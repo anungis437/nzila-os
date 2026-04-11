@@ -56,7 +56,7 @@ export interface GovernanceProfile {
 export const PROFILES: Record<string, GovernanceProfile> = {
   'union-eyes': {
     id: 'union-eyes',
-    name: 'Union Eyes',
+    name: 'UnionEyes',
     category: 'governance',
     extraContractTests: [
       'role-graph-acyclic',

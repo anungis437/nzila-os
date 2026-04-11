@@ -1,6 +1,6 @@
 #!/usr/bin/env python3
 """
-Union Eyes Service Analyzer
+UnionEyes Service Analyzer
 Analyzes all service files to identify database operations and map them to Django API endpoints
 """
 
@@ -159,7 +159,7 @@ class ServiceAnalyzer:
         """Generate analysis report"""
         
         print("\n" + "="*80)
-        print("🔍 UNION EYES SERVICE ANALYSIS REPORT")
+        print("🔍 UnionEyes SERVICE ANALYSIS REPORT")
         print("="*80)
         
         print(f"\n📊 Overview:")
@@ -261,7 +261,7 @@ class ServiceAnalyzer:
 
 def main():
     """Main execution"""
-    print("🚀 Union Eyes Service Analyzer")
+    print("🚀 UnionEyes Service Analyzer")
     print("="*80)
     
     analyzer = ServiceAnalyzer()

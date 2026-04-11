@@ -125,7 +125,7 @@ describe('Telemetry Coverage Enforcement', () => {
           content.includes('@nzila/os-core') ||
           // Auth middleware implicitly propagates auth context which includes
           // session/user identity for downstream request correlation
-          content.includes('clerkMiddleware') ||
+          content.includes('authMiddleware') ||
           content.includes('@nzila/platform-auth')
 
         expect(

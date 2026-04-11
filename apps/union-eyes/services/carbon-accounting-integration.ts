@@ -329,7 +329,7 @@ export class CarbonAccountingIntegration {
 
   /**
    * Validate Carbon Neutral Claim
-   * Verify if Union Eyes can claim carbon neutrality
+   * Verify if UnionEyes can claim carbon neutrality
    */
   async validateCarbonNeutralClaim(): Promise<{
     canClaim: boolean;
@@ -375,7 +375,7 @@ export class CarbonAccountingIntegration {
     return {
       canClaim: allRequirementsMet,
       reason: allRequirementsMet
-        ? 'All carbon neutral requirements met. Union Eyes is officially carbon neutral.'
+        ? 'All carbon neutral requirements met. UnionEyes is officially carbon neutral.'
         : 'Some carbon neutral requirements not met. Additional offsets or infrastructure migration required.',
       requirements,
     };

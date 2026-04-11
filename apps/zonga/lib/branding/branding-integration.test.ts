@@ -67,8 +67,8 @@ describe('Surface integration — Dashboard shell', () => {
     expect(mode).toBe('logo')
   })
 
-  it('client is hidden in sidebar (product surface)', () => {
-    expect(canRenderBrand('client', 'app_sidebar', 'text_only', ALL_ON)).toBe(false)
+  it('client logo is allowed in sidebar (workspace context)', () => {
+    expect(canRenderBrand('client', 'app_sidebar', 'logo', ALL_ON)).toBe(true)
   })
 
   it('partner is hidden in sidebar', () => {

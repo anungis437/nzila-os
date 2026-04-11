@@ -17,7 +17,7 @@
  * - withMinRole(minRole, handler)      - Wrapper for minimum role hierarchy
  * 
  * User Utilities (get authenticated user data):
- * - getCurrentUser()     - Full user profile from Clerk
+ * - getCurrentUser()     - Full user profile from auth session
  * - getUserContext()     - User + org + roles + permissions from database
  * - getUserFromRequest() - Extract user from request context
  * 
@@ -35,15 +35,15 @@
  * - normalizeRole()             - Normalize legacy roles
  * - isSystemAdmin()             - Check system admin status
  * 
- * Clerk Re-exports:
- * - auth()                      - Clerk's auth() function
- * - currentUser()               - Clerk's currentUser() function
+ * Auth Re-exports:
+ * - auth()                      - Platform auth() function
+ * - currentUser()               - Platform currentUser() function
  * 
  * =============================================================================
  */
 
 import { NextRequest, NextResponse } from 'next/server';
-import { auth, currentUser as clerkCurrentUser } from '@nzila/platform-auth/entra/server';
+import { auth, currentUser as platformCurrentUser } from '@nzila/platform-auth/entra/server';
 import { cookies } from 'next/headers';
 import { eq, and } from 'drizzle-orm';
 import { db } from '@/db/db';
@@ -60,10 +60,10 @@ import { logger } from '@/lib/logger';
 import { ROLE_PERMISSIONS } from '@/lib/auth/roles';
 
 // =============================================================================
-// CLERK RE-EXPORTS
+// AUTH RE-EXPORTS
 // =============================================================================
 
-export { auth, clerkCurrentUser as currentUser };
+export { auth, platformCurrentUser as currentUser };
 
 // =============================================================================
 // TYPES
@@ -198,7 +198,7 @@ export const LEGACY_ROLE_MAP: Record<string, UserRole> = {
   'congress_executive': 'clc_executive',  // CLC executives (if used)
   'system_administrator': 'system_admin', // System admin variants
 
-  // Human-readable / Clerk metadata variants (title-case with spaces)
+  // Human-readable / auth metadata variants (title-case with spaces)
   'Secretary Treasurer': 'secretary_treasurer',
   'Secretary-Treasurer': 'secretary_treasurer',
   'Vice President': 'vice_president',
@@ -216,7 +216,7 @@ export const LEGACY_ROLE_MAP: Record<string, UserRole> = {
 } as const;
 
 /**
- * Full user profile from Clerk
+ * Full user profile from auth session
  */
 export interface AuthUser {
   id: string;
@@ -225,7 +225,7 @@ export interface AuthUser {
   firstName: string | null;
   lastName: string | null;
   imageUrl: string | null;
-  legacyTenantId: string | null; // Legacy tenant ID from Clerk user metadata (publicMetadata.tenantId / privateMetadata.tenantId)
+  legacyTenantId: string | null; // Legacy tenant ID from auth user metadata (publicMetadata.tenantId / privateMetadata.tenantId)
   role: string | null;
   organizationId: string | null;
   metadata: Record<string, unknown>;
@@ -435,7 +435,7 @@ export async function getCurrentUser(): Promise<AuthUser | null> {
       return null;
     }
 
-    const user = await clerkCurrentUser();
+    const user = await platformCurrentUser();
     
     if (!user) {
       return null;
@@ -448,10 +448,10 @@ export async function getCurrentUser(): Promise<AuthUser | null> {
     const metadataOrgId =
       (publicMetadata.organizationId as string) || (privateMetadata.organizationId as string) || null;
 
-    // Resolve organizationId: Clerk orgId (org_xxx format) must be mapped to
+    // Resolve organizationId: auth orgId (org_xxx format) must be mapped to
     // the database UUID via organizations.clerk_organization_id. DB columns are
     // uuid type and will throw "invalid input syntax for type uuid" if given a
-    // Clerk-format string directly.
+    // non-UUID string directly.
     let resolvedOrganizationId = metadataOrgId || legacyTenantId || null;
     if (orgId) {
       try {
@@ -463,7 +463,7 @@ export async function getCurrentUser(): Promise<AuthUser | null> {
         resolvedOrganizationId = org?.id ?? resolvedOrganizationId;
       } catch {
         // Fallback to metadata if the lookup fails
-        logger.warn('Failed to resolve Clerk orgId to DB UUID', { orgId });
+        logger.warn('Failed to resolve auth orgId to DB UUID', { orgId });
       }
     }
 
@@ -486,14 +486,14 @@ export async function getCurrentUser(): Promise<AuthUser | null> {
           resolvedOrganizationId = null;
         }
       } catch {
-        // If the ID isn't even a valid UUID (e.g. Clerk org_xxx format),
+        // If the ID isn't even a valid UUID (e.g. org_xxx format),
         // the query will throw — clear it so fallbacks can work.
         resolvedOrganizationId = null;
       }
     }
 
     // Cookie fallback: the client-side org picker stores the selected org UUID
-    // in the "selected_organization_id" (or "selected_org_id") cookie. If Clerk
+    // in the "selected_organization_id" (or "selected_org_id") cookie. If the
     // session has no active org and metadata didn't provide one, honour the
     // cookie so that org-scoped API routes work correctly.
     if (!resolvedOrganizationId) {
@@ -551,7 +551,7 @@ export async function getCurrentUser(): Promise<AuthUser | null> {
       }
     }
 
-    // Resolve role: PLATFORM_ADMIN_USER_IDS override → Clerk metadata → default
+    // Resolve role: PLATFORM_ADMIN_USER_IDS override → auth metadata → default
     let role = (publicMetadata.role as string) || (privateMetadata.role as string) || 'member';
     const platformAdminIds = (process.env.PLATFORM_ADMIN_USER_IDS || '')
       .split(',')
@@ -652,15 +652,15 @@ export async function getUserContext(): Promise<UnifiedUserContext | null> {
       };
     }
 
-    // ─── Fallback: Clerk publicMetadata ──────────────────────────────
+    // ─── Fallback: Auth publicMetadata ──────────────────────────────
     try {
-      const clerkUser = await clerkCurrentUser();
-      const metadata = clerkUser?.publicMetadata as Record<string, unknown> | undefined;
-      const clerkRole = (metadata?.role || metadata?.nzilaRole) as string | undefined;
+      const authUser = await platformCurrentUser();
+      const metadata = authUser?.publicMetadata as Record<string, unknown> | undefined;
+      const authRole = (metadata?.role || metadata?.nzilaRole) as string | undefined;
 
-      if (clerkRole) {
-        const normalized = normalizeRole(clerkRole);
-        logger.info('[Auth] getUserContext: no DB membership, using Clerk metadata role', { userId, clerkRole, normalized });
+      if (authRole) {
+        const normalized = normalizeRole(authRole);
+        logger.info('[Auth] getUserContext: no DB membership, using auth metadata role', { userId, authRole, normalized });
         return {
           userId,
           organizationId: orgId || 'platform',
@@ -669,12 +669,12 @@ export async function getUserContext(): Promise<UnifiedUserContext | null> {
         };
       }
     } catch (err) {
-      logger.warn('[Auth] getUserContext: failed to read Clerk metadata', { userId, error: String(err) });
+      logger.warn('[Auth] getUserContext: failed to read auth metadata', { userId, error: String(err) });
     }
 
     // ─── Fallback: Entra / generic — resolve org + role via the same
     //     path that hasMinRole() and dashboard layout use. This ensures
-    //     Entra-authenticated users (whose OID won't match Clerk-format
+    //     Entra-authenticated users (whose OID won't match legacy
     //     user IDs in organization_members) still get a valid context. ──
     try {
       const { getOrganizationIdForUser } = await import('./organization-utils');
@@ -753,6 +753,36 @@ export async function getUserContextForOrganization(
     permissions: getPermissionsForRole(role),
     memberId: membership.id,
   };
+}
+
+// =============================================================================
+// ORGANIZATION TYPE HELPERS
+// =============================================================================
+
+/**
+ * Look up the organization type for a given organization ID.
+ * Returns null if the organization is not found.
+ */
+export async function getOrgType(organizationId: string): Promise<string | null> {
+  try {
+    const [org] = await db
+      .select({ type: organizations.organizationType })
+      .from(organizations)
+      .where(eq(organizations.id, organizationId))
+      .limit(1);
+    return org?.type ?? null;
+  } catch {
+    return null;
+  }
+}
+
+/**
+ * Check whether the current user belongs to a congress-type organization.
+ * Requires an authenticated user context (call after requireUser).
+ */
+export async function isCongressOrg(organizationId: string): Promise<boolean> {
+  const orgType = await getOrgType(organizationId);
+  return orgType === 'congress';
 }
 
 // =============================================================================
@@ -981,7 +1011,7 @@ export async function getUserRole(
   userId: string,
   organizationId: string
 ): Promise<UserRole | null> {
-  // With Clerk, org IDs are Clerk UUIDs directly — no legacy tenants table needed.
+  // With the auth provider, org IDs are UUIDs directly — no legacy tenants table needed.
   // Delegate to hasRoleInOrganization which queries organizationMembers correctly.
   try {
     const membership = await db.query.organizationMembers.findFirst({
@@ -1007,7 +1037,7 @@ export async function getUserRole(
  * Check if user meets minimum role in hierarchy.
  * Uses the canonical getUserRole() from rbac-server — the same resolution the
  * dashboard root uses via /api/auth/user-role:
- *   PLATFORM_ADMIN_USER_IDS → organization_users → organization_members → Clerk metadata
+ *   PLATFORM_ADMIN_USER_IDS → organization_users → organization_members → auth metadata
  */
 export async function hasMinRole(minRole: string): Promise<boolean> {
   try {

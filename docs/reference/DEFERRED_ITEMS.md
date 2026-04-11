@@ -1,4 +1,4 @@
-# Union Eyes CUPE Pilot — Deferred Items Log
+# UnionEyes CUPE Pilot — Deferred Items Log
 
 **Purpose:** Track intentional post-pilot features to keep scope airtight.  
 **Status:** LIVE (updated each phase)  

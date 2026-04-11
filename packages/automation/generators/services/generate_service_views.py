@@ -1,6 +1,6 @@
 #!/usr/bin/env python3
 """
-Union Eyes — Service View Generator
+UnionEyes — Service View Generator
 ====================================
 Reads frontend TypeScript service files, extracts function signatures,
 maps to Django models, and generates production-grade DRF ViewSets.
@@ -33,7 +33,7 @@ from config import get_config
 # ──────────────────────────────────────────────────────────────────
 
 def _get_ue_dirs():
-    """Get Union Eyes directory paths from environment or defaults."""
+    """Get UnionEyes directory paths from environment or defaults."""
     cfg = get_config()
     ue_frontend = cfg.ue_frontend_dir or Path(r"C:\APPS\nzila-union-eyes\frontend")
     ue_backend = cfg.ue_backend_dir or Path(r"C:\APPS\nzila-union-eyes\backend")
@@ -591,7 +591,7 @@ def generate_urls_file(all_services: Dict[str, dict], existing_views: set) -> st
     lines = [
         '"""',
         'API URL Configuration',
-        'Generated for Union Eyes service migration',
+        'Generated for UnionEyes service migration',
         f'Auto-generated: {datetime.now().strftime("%Y-%m-%d %H:%M")}',
         '"""',
         '',
@@ -651,7 +651,7 @@ def generate_urls_file(all_services: Dict[str, dict], existing_views: set) -> st
 # ──────────────────────────────────────────────────────────────────
 
 def main():
-    parser = argparse.ArgumentParser(description="Generate Union Eyes Django service views")
+    parser = argparse.ArgumentParser(description="Generate UnionEyes Django service views")
     parser.add_argument("--dry-run", action="store_true", help="Preview without writing files")
     parser.add_argument("--target", default=SERVICES_API_DIR, help="Target directory for output")
     args = parser.parse_args()
@@ -668,7 +668,7 @@ def main():
     }
 
     print(f"{'='*60}")
-    print(f"Union Eyes — Service View Generator")
+    print(f"UnionEyes — Service View Generator")
     print(f"{'='*60}")
     print(f"Target: {target_dir}")
     print(f"Dry run: {args.dry_run}")

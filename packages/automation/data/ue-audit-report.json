@@ -1,6 +1,6 @@
 {
   "platform_id": "union_eyes",
-  "platform_name": "Union Eyes",
+  "platform_name": "UnionEyes",
   "audit_date": "2026-02-17",
   "auditor": "Nzila Platform Analyzer V2",
   "version": "1.0.0",
@@ -316,7 +316,7 @@
   ],
   
   "next_steps": [
-    "Access legacy Union Eyes codebase to analyze API routes in detail",
+    "Access legacy UnionEyes codebase to analyze API routes in detail",
     "Run dependency analyzer on actual codebase",
     "Map all BullMQ jobs to Celery tasks",
     "Create ML model migration plan (TF.js → Python)",

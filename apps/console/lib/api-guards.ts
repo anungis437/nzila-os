@@ -2,7 +2,7 @@
  * Shared API route guards — org membership + platform RBAC
  *
  * Centralises the auth boilerplate for all org-scoped API routes,
- * combining Clerk authentication, org membership verification,
+ * combining platform authentication, org membership verification,
  * and platform-level role checks from lib/rbac.
  */
 import { NextResponse, type NextRequest } from 'next/server'

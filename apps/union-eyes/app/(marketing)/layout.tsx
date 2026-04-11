@@ -1,5 +1,5 @@
 /**
- * Marketing Layout — Shell for all public-facing Union Eyes pages
+ * Marketing Layout — Shell for all public-facing UnionEyes pages
  * Provides consistent SiteNavigation + SiteFooter + page transition.
  */
 import SiteNavigation from '@/components/public/site-navigation';

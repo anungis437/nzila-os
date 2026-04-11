@@ -1,5 +1,5 @@
 """
-Core services — audit hash chain for Union Eyes.
+Core services — audit hash chain for UnionEyes.
 
 Aligned with NzilaOS audit invariants:
   Every mutation emits a SHA-256 hash-chained AuditLogs record.

@@ -13,8 +13,8 @@ import { ContactForm } from './contact-form';
 import { Mail, Phone, MapPin, Clock } from 'lucide-react';
 
 export const metadata: Metadata = {
-  title: 'Contact Us | Union Eyes',
-  description: 'Get in touch with the Union Eyes team. We\'re here to answer questions about our platform and how it can help your union.',
+  title: 'Contact Us | UnionEyes',
+  description: 'Get in touch with the UnionEyes team. We\'re here to answer questions about our platform and how it can help your union.',
 };
 
 export default function ContactPage() {

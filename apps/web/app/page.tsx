@@ -34,7 +34,7 @@ const verticals = [
 ];
 
 const flagships = [
-  { name: 'Union Eyes', vertical: 'Uniontech', image: 'https://images.unsplash.com/photo-1504328345606-18bbc8c9d7d1?w=800', alt: 'Union Eyes — comprehensive union management platform for 4,773 orgs', orgs: '4,773', tam: '$50B', description: 'Union management, pension forecasting, grievance tracking' },
+  { name: 'UnionEyes', vertical: 'Uniontech', image: 'https://images.unsplash.com/photo-1504328345606-18bbc8c9d7d1?w=800', alt: 'UnionEyes — comprehensive union management platform for 4,773 orgs', orgs: '4,773', tam: '$50B', description: 'Union management, pension forecasting, grievance tracking' },
   { name: 'ABR Insights', vertical: 'EdTech', image: 'https://images.unsplash.com/photo-1523240795612-9a054b0db644?w=800', alt: 'ABR Insights — anti-racism learning management and AI coaching platform', orgs: '132', tam: '$1.5B', description: 'Anti-racism LMS, tribunal case database, AI coach' },
   { name: 'CORA', vertical: 'Agrotech', image: 'https://images.unsplash.com/photo-1625246333195-78d9c38ad449?w=800', alt: 'CORA — Canadian agricultural data platform with farm management and supply chain intelligence', orgs: '80+', tam: '$8.6B', description: 'Farm management and supply-chain intelligence built on Canadian agricultural data — crop management, IoT integration, and market intelligence.' },
   { name: '3CUO / DiasporaCore', vertical: 'Fintech', image: 'https://images.unsplash.com/photo-1611974789855-9c2a0a7236a3?w=800', alt: 'DiasporaCore — diaspora banking and international transfer infrastructure', orgs: '485', tam: '$100B', description: 'Diaspora banking, KYC/AML, international transfers' },

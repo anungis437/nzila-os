@@ -12,7 +12,7 @@ import { redirect } from 'next/navigation';
 import OnboardingConsole from './onboarding-console';
 
 export const metadata: Metadata = {
-  title: 'Pilot Onboarding | Union Eyes',
+  title: 'Pilot Onboarding | UnionEyes',
   description: 'Readiness checklist, demo data controls, training resources',
 };
 

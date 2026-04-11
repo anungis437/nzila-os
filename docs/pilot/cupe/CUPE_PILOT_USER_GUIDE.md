@@ -2,7 +2,7 @@
 
 > Quick-start for stewards and members using Union-Eyes.
 >
-> **See also:** [Union Eyes User Guide](../../union-eyes/user-guide.md) · [Quick Start](../../union-eyes/quick-start.md) · [FAQ](../../union-eyes/faq.md)
+> **See also:** [UnionEyes User Guide](../../union-eyes/user-guide.md) · [Quick Start](../../union-eyes/quick-start.md) · [FAQ](../../union-eyes/faq.md)
 
 ## Your Role
 

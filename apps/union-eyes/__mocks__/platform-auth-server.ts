@@ -15,9 +15,12 @@ export async function currentUser() {
 
 export const getAuth = auth
 
-export function clerkMiddleware() {
+export function authMiddleware() {
   return async () => {}
 }
+
+/** @deprecated Use authMiddleware instead */
+export const clerkMiddleware = authMiddleware
 
 export function createRouteMatcher() {
   return () => false

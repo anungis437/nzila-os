@@ -576,7 +576,7 @@ const checkAuthMiddleware = runGate('AUTH-MIDDLEWARE', 'Auth middleware: All app
     }
 
     const content = readFileSync(mwPath, 'utf-8')
-    const hasAuth = content.includes('@nzila/platform-auth') || content.includes('clerkMiddleware')
+    const hasAuth = content.includes('@nzila/platform-auth') || content.includes('authMiddleware')
     if (!hasAuth) {
       violations.push(`${appDir}: middleware.ts missing auth middleware`)
     }

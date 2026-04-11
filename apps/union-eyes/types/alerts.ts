@@ -2,7 +2,7 @@
  * Alert Types and Schemas
  * 
  * Defines the structure for alerts, notifications, and monitoring rules
- * for Union Eyes comprehensive observability system.
+ * for UnionEyes comprehensive observability system.
  */
 
 import { z } from 'zod';

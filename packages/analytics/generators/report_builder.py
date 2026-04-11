@@ -54,7 +54,7 @@ class ReportBuilder:
 ### Platform Status
 | Platform | Vertical | Complexity | Production Readiness | Status |
 |----------|----------|------------|---------------------|--------|
-| Union Eyes | Uniontech | EXTREME | 9.5/10 | In Development |
+| UnionEyes | Uniontech | EXTREME | 9.5/10 | In Development |
 | ABR Insights | EdTech/Legaltech | EXTREME | 9.1/10 | Production Ready |
 | CORA | Agrotech | HIGH | 7.0/10 | Beta |
 | CongoWave | Entertainment | HIGH-EXTREME | 10.0/10 | Production Ready |
@@ -110,7 +110,7 @@ class ReportBuilder:
 
 ### AI Infrastructure
 - **Companion Prompts:** 200+ (trade secret)
-- **AI-Powered Platforms:** 5 (ABR, Court Lens, Union Eyes, CongoWave, Insight CFO)
+- **AI-Powered Platforms:** 5 (ABR, Court Lens, UnionEyes, CongoWave, Insight CFO)
 - **Vector Search:** pgVector enabled
 
 ---
@@ -120,7 +120,7 @@ class ReportBuilder:
 ### High-Priority Risks
 | Risk | Platform | Impact | Mitigation |
 |------|----------|--------|------------|
-| Migration Complexity | Union Eyes | HIGH | Phased migration, 10-12 weeks |
+| Migration Complexity | UnionEyes | HIGH | Phased migration, 10-12 weeks |
 | Financial Compliance | C3UO | HIGH | Banking-grade security |
 | Data Migration | Shop Quoter | MEDIUM | $885K historical data |
 | NzilaOS Migration | CORA, AgrimoOps | COMPLETED | Migrated from Base44 to NzilaOS |
@@ -131,7 +131,7 @@ class ReportBuilder:
 
 ### Q1 2026 Priorities
 1. 🔄 Complete Backbone Phase 1 (Foundation)
-2. 🔄 Launch Union Eyes MVP
+2. 🔄 Launch UnionEyes MVP
 3. 🔄 Launch ABR Insights to production
 4. ⏳ Close Series A ($3-5M)
 5. ⏳ Establish 25 pilot customers
@@ -145,7 +145,7 @@ class ReportBuilder:
 |------|-----------|
 | Feb 2026 | Backbone Phase 1 Complete |
 | Apr 2026 | eExports Migration PoC |
-| Jun 2026 | Union Eyes Launch |
+| Jun 2026 | UnionEyes Launch |
 | Sep 2026 | ABR Insights Launch |
 | Dec 2026 | Series A Close |
 
@@ -176,7 +176,7 @@ class ReportBuilder:
             },
             "flagship_products": [
                 {
-                    "name": "Union Eyes",
+                    "name": "UnionEyes",
                     "vertical": "Uniontech",
                     "tam": "$50B",
                     "status": "In Development",

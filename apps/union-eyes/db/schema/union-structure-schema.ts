@@ -25,6 +25,12 @@ import {
 import { relations } from 'drizzle-orm';
 import { organizations } from '../schema-organizations';
 import { profiles } from './domains/member/profiles';
+import {
+  committeeMeetings,
+  committeeActionItems,
+  committeeDocuments,
+  committeeIntelligenceSnapshots,
+} from './committee-workspace-schema';
 
 // =====================================================================================
 // ENUMS
@@ -664,6 +670,10 @@ export const committeesRelations = relations(committees, ({ one, many }) => ({
     relationName: 'committeeSecretary',
   }),
   memberships: many(committeeMemberships),
+  meetings: many(committeeMeetings),
+  actionItems: many(committeeActionItems),
+  documents: many(committeeDocuments),
+  intelligenceSnapshots: many(committeeIntelligenceSnapshots),
 }));
 
 export const committeeMembershipsRelations = relations(committeeMemberships, ({ one }) => ({

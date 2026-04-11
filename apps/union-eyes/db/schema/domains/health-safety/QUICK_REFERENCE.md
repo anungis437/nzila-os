@@ -275,7 +275,7 @@ const expiring = await db.select()
 For questions or issues:
 - Review the detailed [README.md](./README.md)
 - Check Drizzle ORM documentation
-- Consult Union Eyes development team
+- Consult UnionEyes development team
 
 **Schema Version:** 1.0.0  
 **Created:** February 11, 2026

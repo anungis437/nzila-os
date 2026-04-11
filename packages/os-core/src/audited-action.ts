@@ -37,7 +37,7 @@ export interface AuditedActionInput {
   actionType: string
   /** Organization scope */
   orgId: string
-  /** Clerk user ID or 'system' */
+  /** Auth user ID or 'system' */
   userId: string
   /** Arbitrary metadata attached to the audit record */
   metadata?: Record<string, unknown>

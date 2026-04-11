@@ -114,7 +114,7 @@
 ```python
 {
     "platform_id": "union-eyes",
-    "name": "Union Eyes",
+    "name": "UnionEyes",
     "business_vertical": "Uniontech",
     "size_mb": 332.81,
     "entity_count": 4773,
@@ -357,6 +357,6 @@ The system is designed for extensibility:
 3. ✅ Create manifest generator
 4. ✅ Build Azure resource manager
 5. ✅ Develop migration executor
-6. ✅ Test with pilot platform (Union Eyes)
+6. ✅ Test with pilot platform (UnionEyes)
 7. ✅ Iterate and optimize
 8. ✅ Execute full portfolio migration

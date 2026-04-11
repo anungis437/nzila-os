@@ -9,9 +9,9 @@ import RolePageContent from '@/app/(marketing)/components/role-page-content';
 
 export async function generateMetadata(): Promise<Metadata> {
   return {
-    title: 'For Members | Union Eyes',
+    title: 'For Members | UnionEyes',
     description:
-      'Union Eyes gives union members direct visibility into their cases, secure document sharing, and clear communication with their representative.',
+      'UnionEyes gives union members direct visibility into their cases, secure document sharing, and clear communication with their representative.',
   };
 }
 

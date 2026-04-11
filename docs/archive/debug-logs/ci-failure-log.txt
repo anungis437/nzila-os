@@ -1523,7 +1523,7 @@ Governance Gate	Check all governance jobs passed	2026-04-09T22:19:16.8794513Z [
 Governance Gate	Check all governance jobs passed	2026-04-09T22:19:16.8795016Z [36;1m  exit 1[0m
 Governance Gate	Check all governance jobs passed	2026-04-09T22:19:16.8795375Z [36;1mfi[0m
 Governance Gate	Check all governance jobs passed	2026-04-09T22:19:16.8795830Z [36;1mif [[ "success" == "failure" ]]; then[0m
-Governance Gate	Check all governance jobs passed	2026-04-09T22:19:16.8796371Z [36;1m  echo "Γ¥î Union Eyes evidence seal failed"[0m
+Governance Gate	Check all governance jobs passed	2026-04-09T22:19:16.8796371Z [36;1m  echo "Γ¥î UnionEyes evidence seal failed"[0m
 Governance Gate	Check all governance jobs passed	2026-04-09T22:19:16.8796928Z [36;1m  exit 1[0m
 Governance Gate	Check all governance jobs passed	2026-04-09T22:19:16.8797306Z [36;1mfi[0m
 Governance Gate	Check all governance jobs passed	2026-04-09T22:19:16.8797743Z [36;1mif [[ "success" == "failure" ]]; then[0m

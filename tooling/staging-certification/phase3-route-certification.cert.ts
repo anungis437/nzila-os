@@ -56,7 +56,7 @@ function findRouteFiles(dir: string, pattern: RegExp): string[] {
 }
 
 describe('CERT-PHASE-3 — Browser-Level Route Certification', () => {
-  // ── Union-Eyes Critical Routes ────────────────────────────────────────
+  // ── UnionEyes Critical Routes ────────────────────────────────────────
   describe('union-eyes critical pages', () => {
     const ueRoutes = findRouteFiles(UE_APP, /^(page|route|layout)\.(tsx?|jsx?)$/)
 

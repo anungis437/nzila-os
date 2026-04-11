@@ -1,19 +1,19 @@
 /**
  * OpenAPI / Swagger Configuration
  * 
- * Customer-facing API documentation for Union Eyes Platform
+ * Customer-facing API documentation for UnionEyes Platform
  * Accessible at /api/docs
  */
 
 export const openApiConfig = {
   openapi: '3.0.0',
   info: {
-    title: 'Union Eyes API',
+    title: 'UnionEyes API',
     version: '1.0.0',
     description: `
-# Union Eyes Platform API
+# UnionEyes Platform API
 
-The Union Eyes API provides programmatic access to union management features including:
+The UnionEyes API provides programmatic access to union management features including:
 
 - **Claims Management** - Create and manage grievances
 - **Member Management** - Access member profiles and data
@@ -45,7 +45,7 @@ Get your API key from the [Admin Dashboard](/admin/api-keys).
 - Status Page: https://status.unioneyes.com
     `.trim(),
     contact: {
-      name: 'Union Eyes API Support',
+      name: 'UnionEyes API Support',
       email: 'api@unioneyes.com',
       url: 'https://unioneyes.com/support',
     },

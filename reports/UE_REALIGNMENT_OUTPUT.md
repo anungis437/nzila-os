@@ -1,4 +1,4 @@
-# Union Eyes — Workflow Realignment Report
+# UnionEyes — Workflow Realignment Report
 
 > **Phases 0–9 Complete** | Generated 2026-04-08
 >
@@ -320,4 +320,4 @@ cc1278f9  Phase 8 — Governance Audit Logging & Entitlement Gates
 
 ---
 
-*Union Eyes is now a workflow system.*
+*UnionEyes is now a workflow system.*

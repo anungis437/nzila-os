@@ -129,7 +129,7 @@ jobs:
       - name: Build workspace dependencies
         run: pnpm --filter @nzila/union-eyes... build
 
-      - name: Union Eyes Unit Tests
+      - name: UnionEyes Unit Tests
         run: pnpm --filter @nzila/union-eyes test
         env:
           DATABASE_URL: postgresql://postgres:postgres@localhost:5432/test_db

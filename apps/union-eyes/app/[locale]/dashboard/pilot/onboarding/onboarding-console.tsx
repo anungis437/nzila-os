@@ -127,7 +127,7 @@ export default function OnboardingConsole() {
             <Rocket className="h-6 w-6 text-primary" />
           </div>
           <div>
-            <h1 className="text-2xl font-bold">Welcome to Union Eyes</h1>
+            <h1 className="text-2xl font-bold">Welcome to UnionEyes</h1>
             <p className="text-sm text-muted-foreground">
               Complete the steps below to get your organization up and running.
             </p>

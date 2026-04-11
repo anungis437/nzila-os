@@ -3,7 +3,14 @@
 import { CommitteeManagement } from "@/components/union-structure/CommitteeManagement";
 import { useOrganization } from "@/contexts/organization-context";
 
-export function CommitteesPage() {
+const WRITE_ROLES = [
+  "steward", "chief_steward", "officer",
+  "president", "vice_president", "secretary_treasurer",
+  "national_officer", "admin", "system_admin", "app_owner",
+  "platform_ops", "clerk",
+];
+
+export function CommitteesPage({ userRole }: { userRole: string }) {
   const { organizationId } = useOrganization();
 
   if (!organizationId) {
@@ -14,5 +21,7 @@ export function CommitteesPage() {
     );
   }
 
-  return <CommitteeManagement organizationId={organizationId} />;
+  const readOnly = !WRITE_ROLES.includes(userRole);
+
+  return <CommitteeManagement organizationId={organizationId} readOnly={readOnly} />;
 }

@@ -27,7 +27,7 @@ import { sql, and, eq, lt } from 'drizzle-orm';
 import { logger } from '@/lib/logger';
 
 export const metadata: Metadata = {
-  title: 'CLC Executive Dashboard | Union Eyes',
+  title: 'CLC Executive Dashboard | UnionEyes',
   description: 'Canadian Labour Congress executive dashboard and national analytics',
 };
 

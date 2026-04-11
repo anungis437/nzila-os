@@ -6,7 +6,7 @@
 
 ## 1. Revenue Model
 
-### 1.1 Union Eyes — Revenue Streams
+### 1.1 UnionEyes — Revenue Streams
 
 | Stream | Description | % of Revenue (Steady State) |
 |--------|-------------|---------------------------|
@@ -28,7 +28,7 @@
 
 ---
 
-## 2. Pricing Tiers — Union Eyes
+## 2. Pricing Tiers — UnionEyes
 
 | Tier | Target | Monthly Price | Annual Contract | Base Seats | Included Modules |
 |------|--------|--------------|----------------|-----------|-----------------|
@@ -108,7 +108,7 @@ Key cohort metrics:
 
 ## 4. Financial Projections 2026–2030
 
-### 4.1 Union Eyes — ARR Projections
+### 4.1 UnionEyes — ARR Projections
 
 | Year | Customers | Avg ACV | ARR | YoY Growth |
 |------|-----------|---------|-----|-----------|

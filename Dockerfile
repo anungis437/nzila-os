@@ -177,7 +177,7 @@ EXPOSE 3002
 CMD ["node", "apps/partners/server.js"]
 
 # ============================================
-# Union Eyes production stage
+# UnionEyes production stage
 # ============================================
 FROM base AS union-eyes
 WORKDIR /app

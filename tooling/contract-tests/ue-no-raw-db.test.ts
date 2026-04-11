@@ -1,5 +1,5 @@
 /**
- * Contract Test — Union Eyes: No Raw DB Access in App Layer
+ * Contract Test — UnionEyes: No Raw DB Access in App Layer
  *
  * BLOCKER: App-layer code (pages, API routes) must NOT use db.execute()
  * or raw SQL without wrapping in withRLSContext(). This contract test

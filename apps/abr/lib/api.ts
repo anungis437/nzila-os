@@ -1,4 +1,4 @@
-// ABR Insights - Clerk-Integrated API Client
+// ABR Insights - Platform Auth-Integrated API Client
 
 import axios, { AxiosInstance, AxiosError, InternalAxiosRequestConfig } from 'axios';
 import { auth } from '@nzila/platform-auth/entra/server';
@@ -10,7 +10,7 @@ const API_URL = process.env.NEXT_PUBLIC_API_URL || 'http://localhost:8001';
 
 /**
  * API client for ABR Insights backend
- * Automatically includes Clerk JWT token in all requests
+ * Automatically includes auth JWT token in all requests
  */
 class ApiClient {
   private client: AxiosInstance;
@@ -24,7 +24,7 @@ class ApiClient {
       withCredentials: true, // Include credentials for CORS
     });
 
-    // Request interceptor - add Clerk token
+    // Request interceptor - add auth token
     this.client.interceptors.request.use(
       async (config: InternalAxiosRequestConfig) => {
         try {

@@ -18,7 +18,7 @@ Nzila's **Companion Engine** processes sensitive user data across healthtech (de
 
 | Level | Definition | Examples | Regulations | Storage |
 |-------|------------|----------|-------------|---------|
-| **🔴 CRITICAL** | Health data, financial records, identifiable user content | Memora health journal entries, Union Eyes grievance details, CORA farm revenue | HIPAA, PIPEDA, Law 25 | PostgreSQL encrypted at rest + in transit, RLS policies, 7-year retention |
+| **🔴 CRITICAL** | Health data, financial records, identifiable user content | Memora health journal entries, UnionEyes grievance details, CORA farm revenue | HIPAA, PIPEDA, Law 25 | PostgreSQL encrypted at rest + in transit, RLS policies, 7-year retention |
 | **🟠 SENSITIVE** | Personal identifiers, demographics, behavioral data | User names, emails, IP addresses, interaction logs, prompt history | PIPEDA, GDPR | PostgreSQL encrypted, anonymized after 12 months |
 | **🟡 INTERNAL** | Aggregate analytics, de-identified metrics | Platform usage stats, A/B test results, prompt performance | Internal policy only | PostgreSQL, exportable for analysis |
 | **🟢 PUBLIC** | Published content, public datasets | CanLII case law, public farm regulations, anonymized research data | Open data policies | Cached in Azure Blob Storage |

@@ -96,7 +96,7 @@ export function AuthPageLayout({
         </div>
       </div>
 
-      {/* Right — Clerk form */}
+      {/* Right — Auth form */}
       <div className="flex w-full items-center justify-center bg-slate-50 px-6 lg:w-1/2">
         <div className="w-full max-w-md space-y-8">
           {/* Mobile logo */}
@@ -111,7 +111,7 @@ export function AuthPageLayout({
             </Link>
           </div>
 
-          {/* Clerk component */}
+          {/* Auth component */}
           <div className="flex justify-center">
             {mode === "sign-in" ? (
               <SignIn
