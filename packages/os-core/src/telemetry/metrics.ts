@@ -201,8 +201,8 @@ class MetricsRegistry {
       existing.sum += value
       existing.count += 1
       for (let i = 0; i < existing.buckets.length; i++) {
-        if (value <= existing.buckets[i]) {
-          existing.counts[i] += 1
+        if (value <= existing.buckets[i]!) {
+          existing.counts[i] = existing.counts[i]! + 1
         }
       }
       existing.timestamp = Date.now()
