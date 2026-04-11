@@ -40,3 +40,10 @@ export {
   MachineBuilder,
   machine,
 } from './builders'
+
+// Event bridge
+export {
+  platformEventsFromTransition,
+  platformEventFromRecord,
+} from './events'
+export type { TransitionEventMeta, FsmTransitionPayload } from './events'

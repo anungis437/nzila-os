@@ -38,4 +38,11 @@ export {
 } from './registry';
 
 // Builders
-export { stage, pipeline, StageBuilder, PipelineBuilder } from './builders';
+export { stage, pipeline, StageBuilder, PipelineBuilder } from './builders'
+
+// Event bridge
+export {
+  pipelineStartedEvent,
+  pipelineCompletedEvent,
+  pipelineEventsFromResult,
+} from './events';
