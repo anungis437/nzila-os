@@ -12,6 +12,7 @@
     "./seed": "./src/seed.ts"
   },
   "dependencies": {
+    "@nzila/fsm-core": "workspace:*",
     "zod": "^3.23.8"
   },
   "devDependencies": {

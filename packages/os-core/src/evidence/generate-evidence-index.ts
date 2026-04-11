@@ -221,7 +221,7 @@ export async function processEvidencePack(
         actorClerkUserId: request.createdBy,
         action: 'document.upload',
         targetType: 'document',
-        targetId: doc.id,
+        targetId: doc!.id,
         afterJson: { blobPath, sha256, packId: request.packId },
         timestamp: new Date().toISOString(),
       }
@@ -234,12 +234,12 @@ export async function processEvidencePack(
           actorClerkUserId: request.createdBy,
           action: 'document.upload',
           targetType: 'document',
-          targetId: doc.id,
+          targetId: doc!.id,
           afterJson: { blobPath, sha256, packId: request.packId },
           hash,
           previousHash,
         })
-        .returning({ id: auditEvents.id })
+        .returning({ id: auditEvents.id }) as [{ id: string }]
 
       uploadedArtifacts.push({
         artifactId: artifact.artifactId,
@@ -251,7 +251,7 @@ export async function processEvidencePack(
         sizeBytes: artifact.buffer.length,
         retentionClass: artifact.retentionClass,
         classification: artifact.classification ?? 'INTERNAL',
-        documentId: doc.id,
+        documentId: doc!.id,
         auditEventId: auditRow.id,
       })
     } else {
@@ -335,7 +335,7 @@ export async function processEvidencePack(
         classification: 'internal',
         linkedType: 'evidence_pack',
       })
-      .returning({ id: documents.id })
+      .returning({ id: documents.id }) as [{ id: string }]
 
     indexDocumentId = indexDoc.id
 
@@ -359,7 +359,7 @@ export async function processEvidencePack(
         indexDocumentId,
         createdBy: request.createdBy,
       })
-      .returning({ id: evidencePacks.id })
+      .returning({ id: evidencePacks.id }) as [{ id: string }]
 
     evidencePackDbId = pack.id
 
@@ -426,7 +426,7 @@ async function main() {
     process.exit(1)
   }
 
-  const requestPath = args[requestIdx + 1]
+  const requestPath = args[requestIdx + 1]!
   const raw = readFileSync(requestPath, 'utf-8')
   const request = JSON.parse(raw) as EvidencePackRequest
 

@@ -83,7 +83,7 @@ export function checkRateLimit(
 
   if (hits.length >= max) {
     // Oldest hit determines when the window opens again
-    const resetAt = hits[0] + windowMs
+    const resetAt = hits[0]! + windowMs
     store.set(key, hits)
     return { allowed: false, remaining: 0, resetAt }
   }

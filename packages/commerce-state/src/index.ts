@@ -25,3 +25,5 @@ export { quoteMachine } from './machines/quote'
 export { orderMachine } from './machines/order'
 export { invoiceMachine } from './machines/invoice'
 export { fulfillmentMachine } from './machines/fulfillment'
+
+export { toFsmCoreMachine } from './compat'

@@ -55,8 +55,8 @@ export function computeMerkleRoot(hashes: string[]): string {
   while (layer.length > 1) {
     const next: Buffer<ArrayBufferLike>[] = []
     for (let i = 0; i < layer.length; i += 2) {
-      const left = layer[i]
-      const right = i + 1 < layer.length ? layer[i + 1] : layer[i] // duplicate last if odd
+      const left = layer[i]!
+      const right = i + 1 < layer.length ? layer[i + 1]! : layer[i]! // duplicate last if odd
       const combined = createHash('sha256')
         .update(Buffer.concat([left, right]))
         .digest()
@@ -65,7 +65,7 @@ export function computeMerkleRoot(hashes: string[]): string {
     layer = next
   }
 
-  return layer[0].toString('hex')
+  return layer[0]!.toString('hex')
 }
 
 // ── Canonical JSON ────────────────────────────────────────────────────────

@@ -144,7 +144,7 @@ export class PostgresIdempotencyCache implements IdempotencyCache {
 
     if (rows.length === 0) return null
 
-    const row = rows[0]
+    const row = rows[0]!
     return {
       payloadHash: row.payloadHash,
       status: row.status,

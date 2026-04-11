@@ -6,6 +6,7 @@
  * but the Deal Engine always projects into these canonical stages.
  */
 import { z } from 'zod';
+import { machine, transition, type MachineDefinition } from '@nzila/fsm-core';
 
 // ── Canonical stages ────────────────────────────────────
 
@@ -79,6 +80,34 @@ export function canTransition(from: DealStage, to: DealStage): boolean {
 export function getNextStages(current: DealStage): readonly DealStage[] {
   return ALLOWED_TRANSITIONS[current];
 }
+
+// ── fsm-core machine definition ─────────────────────────
+
+/**
+ * Canonical deal lifecycle expressed as an @nzila/fsm-core machine.
+ *
+ * This is the authoritative machine definition. The helper functions
+ * above (canTransition, getNextStages, etc.) remain for backward
+ * compatibility.
+ */
+function buildDealMachine(): MachineDefinition<DealStage> {
+  const builder = machine<DealStage>('deal-lifecycle', '1.0.0')
+    .states([...DEAL_STAGES])
+    .initial('lead')
+    .terminal('dormant', 'lost');
+
+  for (const [from, targets] of Object.entries(ALLOWED_TRANSITIONS) as [DealStage, readonly DealStage[]][]) {
+    for (const to of targets) {
+      builder.addTransition(
+        transition<DealStage>(from, to, `${STAGE_METADATA[from].label} → ${STAGE_METADATA[to].label}`),
+      );
+    }
+  }
+
+  return builder.build();
+}
+
+export const DealMachine: MachineDefinition<DealStage> = buildDealMachine();
 
 // ── Stage classification helpers ────────────────────────
 

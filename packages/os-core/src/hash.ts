@@ -28,8 +28,8 @@ export function verifyChain<T extends Hashable>(
   payloadExtractor: (e: T) => unknown,
 ): { valid: boolean; brokenAtIndex?: number } {
   for (let i = 0; i < entries.length; i++) {
-    const entry = entries[i]
-    const expectedPrev = i === 0 ? null : entries[i - 1].hash
+    const entry = entries[i]!
+    const expectedPrev = i === 0 ? null : entries[i - 1]!.hash
     if (entry.previousHash !== expectedPrev) {
       return { valid: false, brokenAtIndex: i }
     }

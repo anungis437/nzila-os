@@ -12,12 +12,14 @@ import { appendAiAuditEvent } from '../logging'
 import { ACTION_TYPES } from '../schemas'
 import type { ActionType } from '../schemas'
 import { checkKillSwitch } from './killSwitch'
+import { checkPilotGate } from './pilotGate'
 
 // ── Types ───────────────────────────────────────────────────────────────────
 
 export interface PolicyCheckInput {
   actionType: string
   orgId: string
+  userId?: string
   appKey: string
   profileKey: string
   proposalJson: Record<string, unknown>
@@ -77,6 +79,33 @@ export async function checkActionPolicy(
       allowed: false,
       reasons: [`Kill-switch active: ${killSwitchResult.reason}`],
       riskTier: 'high',
+      approvalsRequired: null,
+      autoApproved: false,
+    }
+  }
+
+  // 0.5. Pilot-mode gate — gradual rollout check (after kill-switch, before capability)
+  const pilotResult = checkPilotGate(input.actionType, {
+    orgId: input.orgId,
+    userId: input.userId ?? input.actor,
+  })
+  if (pilotResult.gated) {
+    await appendAiAuditEvent({
+      orgId: input.orgId,
+      actorClerkUserId: 'system:pilot-gate',
+      action: 'ai.action_pilot_gated',
+      targetType: 'ai_action',
+      afterJson: {
+        appKey: input.appKey,
+        actionType: input.actionType,
+        reason: pilotResult.reason,
+        flagName: pilotResult.flagName,
+      },
+    })
+    return {
+      allowed: false,
+      reasons: [`Pilot gate: ${pilotResult.reason}`],
+      riskTier: 'low',
       approvalsRequired: null,
       autoApproved: false,
     }
